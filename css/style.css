@@ -1,0 +1,539 @@
+/* ============================================
+   ABC予想 解説プロジェクト - 共通スタイルシート
+   ============================================ */
+
+/* --- リセット & 基本設定 --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-primary: #1a365d;
+  --color-primary-light: #2c5282;
+  --color-accent: #dd6b20;
+  --color-bg: #f7fafc;
+  --color-surface: #ffffff;
+  --color-text: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-border: #e2e8f0;
+  --color-beginner: #ebf8ff;
+  --color-beginner-border: #3182ce;
+  --color-example: #f0fff4;
+  --color-example-border: #38a169;
+  --color-theorem: #faf5ff;
+  --color-theorem-border: #805ad5;
+  --color-warning: #fffaf0;
+  --color-warning-border: #dd6b20;
+  --color-definition: #fffff0;
+  --color-definition-border: #d69e2e;
+  --max-width: 900px;
+  --sidebar-width: 240px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/* --- レイアウト --- */
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 1.5rem 1rem;
+  z-index: 100;
+}
+
+.sidebar h2 {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.sidebar nav a {
+  display: block;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  transition: background 0.2s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.sidebar nav a.section-link {
+  padding-left: 1.2rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.65);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  padding: 2rem 3rem;
+  max-width: calc(var(--max-width) + 6rem);
+}
+
+/* --- ヘッダー --- */
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  margin-bottom: 0.3rem;
+}
+
+.page-header .subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.breadcrumb {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.breadcrumb a {
+  color: var(--color-primary-light);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* --- 本文 --- */
+h2 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+h3 {
+  font-size: 1.2rem;
+  color: var(--color-primary-light);
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+}
+
+h4 {
+  font-size: 1.05rem;
+  color: var(--color-text);
+  margin-top: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--color-primary-light);
+}
+
+ul, ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.3rem;
+}
+
+/* --- 数式 (MathJax) --- */
+.math-block {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  overflow-x: auto;
+  text-align: center;
+}
+
+mjx-container[display="true"] {
+  margin: 0.5rem 0 !important;
+}
+
+/* --- 特殊ボックス --- */
+.box {
+  margin: 1.5rem 0;
+  padding: 1.2rem 1.5rem;
+  border-left: 4px solid;
+  border-radius: 0 6px 6px 0;
+  position: relative;
+}
+
+.box-title {
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* 初学者向け補足 */
+.box-beginner {
+  background: var(--color-beginner);
+  border-color: var(--color-beginner-border);
+}
+
+.box-beginner .box-title {
+  color: var(--color-beginner-border);
+}
+
+/* 具体例 */
+.box-example {
+  background: var(--color-example);
+  border-color: var(--color-example-border);
+}
+
+.box-example .box-title {
+  color: var(--color-example-border);
+}
+
+/* 定理・証明の補間 */
+.box-theorem {
+  background: var(--color-theorem);
+  border-color: var(--color-theorem-border);
+}
+
+.box-theorem .box-title {
+  color: var(--color-theorem-border);
+}
+
+/* 定義 */
+.box-definition {
+  background: var(--color-definition);
+  border-color: var(--color-definition-border);
+}
+
+.box-definition .box-title {
+  color: var(--color-definition-border);
+}
+
+/* 注意・警告 */
+.box-warning {
+  background: var(--color-warning);
+  border-color: var(--color-warning-border);
+}
+
+.box-warning .box-title {
+  color: var(--color-warning-border);
+}
+
+/* --- テーブル --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background: var(--color-surface);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+th {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+}
+
+td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:nth-child(even) {
+  background: #f7fafc;
+}
+
+/* --- フッターナビゲーション --- */
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--color-border);
+}
+
+.page-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.page-nav a:hover {
+  background: var(--color-primary-light);
+}
+
+.page-nav .prev::before {
+  content: "\2190";
+}
+
+.page-nav .next::after {
+  content: "\2192";
+}
+
+/* --- インデックスページ用カード --- */
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+  margin: 1.5rem 0;
+}
+
+.chapter-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: block;
+}
+
+.chapter-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.chapter-card .chapter-num {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chapter-card h3 {
+  margin: 0.3rem 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+}
+
+.chapter-card p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* --- 証明の折りたたみ --- */
+details {
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+summary {
+  padding: 0.8rem 1rem;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  user-select: none;
+}
+
+summary:hover {
+  background: #e2e8f0;
+}
+
+details[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+details .proof-content {
+  padding: 1rem 1.5rem;
+}
+
+/* --- コード --- */
+code {
+  background: #edf2f7;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: "Consolas", "Source Code Pro", monospace;
+}
+
+pre {
+  background: #1a202c;
+  color: #e2e8f0;
+  padding: 1.2rem 1.5rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* --- SVG図解 --- */
+.figure {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.figure svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.figure-caption {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* --- インタラクティブ検証 --- */
+.interactive {
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.interactive h3 {
+  color: var(--color-primary);
+  margin-top: 0;
+}
+
+.interactive input[type="number"] {
+  width: 120px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 1rem;
+  margin: 0.3rem;
+}
+
+.interactive button {
+  padding: 0.5rem 1.2rem;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.interactive button:hover {
+  background: var(--color-primary-light);
+}
+
+.interactive .result {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 4px;
+  font-family: "Consolas", monospace;
+  white-space: pre-wrap;
+  min-height: 2rem;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 900px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem 1rem;
+  }
+
+  .page-wrapper {
+    flex-direction: column;
+  }
+
+  .chapter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  .page-nav {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .page-nav a {
+    width: 100%;
+    justify-content: center;
+  }
+}

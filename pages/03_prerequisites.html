@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: 代数と整数論の基礎</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#groups" class="section-link">群の基礎</a>
+        <a href="#rings" class="section-link">環と体</a>
+        <a href="#number-theory" class="section-link">整数論の基礎</a>
+        <a href="#p-adic" class="section-link">p進数</a>
+        <a href="#category" class="section-link">圏論の基礎</a>
+        <a href="#galois" class="section-link">ガロア理論の概要</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 3: 代数と整数論の基礎
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 3: 代数と整数論の基礎</h1>
+        <p class="subtitle">IUT理論を理解するために必要な数学的基盤</p>
+      </header>
+
+      <p>この章では、IUT理論の解説に進む前に必要となる数学的概念を、具体例を交えながら解説します。
+      既にこれらの概念を学んでいる読者は、必要な箇所だけを確認して先に進んでください。</p>
+
+      <!-- ====== 群の基礎 ====== -->
+      <h2 id="groups">群の基礎</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 群（group）</div>
+        <p>集合 $G$ と二項演算 $\cdot : G \times G \to G$ の組 $(G, \cdot)$ が<strong>群</strong>であるとは、次の3条件を満たすことをいう：</p>
+        <ol>
+          <li><strong>結合律:</strong> すべての $a, b, c \in G$ に対して $(a \cdot b) \cdot c = a \cdot (b \cdot c)$</li>
+          <li><strong>単位元の存在:</strong> ある $e \in G$ が存在して、すべての $a \in G$ に対して $e \cdot a = a \cdot e = a$</li>
+          <li><strong>逆元の存在:</strong> すべての $a \in G$ に対して、$a \cdot a^{-1} = a^{-1} \cdot a = e$ なる $a^{-1} \in G$ が存在する</li>
+        </ol>
+        <p>さらに $a \cdot b = b \cdot a$ が常に成り立つとき、<strong>可換群</strong>（アーベル群）という。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 群の例</div>
+        <table>
+          <tr><th>群</th><th>集合</th><th>演算</th><th>単位元</th><th>可換？</th></tr>
+          <tr><td>$(\mathbb{Z}, +)$</td><td>整数全体</td><td>加法</td><td>$0$</td><td>はい</td></tr>
+          <tr><td>$(\mathbb{Q}^{\times}, \times)$</td><td>$0$ でない有理数</td><td>乗法</td><td>$1$</td><td>はい</td></tr>
+          <tr><td>$(\mathbb{Z}/n\mathbb{Z}, +)$</td><td>$\{0, 1, \ldots, n-1\}$</td><td>$\bmod n$ 加法</td><td>$0$</td><td>はい</td></tr>
+          <tr><td>$S_n$</td><td>$n$ 個の文字の置換</td><td>合成</td><td>恒等置換</td><td>$n \geq 3$ で非可換</td></tr>
+          <tr><td>$GL_n(\mathbb{R})$</td><td>$n$ 次正則行列</td><td>行列積</td><td>$I_n$</td><td>$n \geq 2$ で非可換</td></tr>
+        </table>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: $\mathbb{Z}/n\mathbb{Z}$ とは</div>
+        <p>$\mathbb{Z}/n\mathbb{Z}$（「$n$ を法とする整数」）は、整数を $n$ で割った余りの集合 $\{0, 1, \ldots, n-1\}$ に、
+        「足して $n$ で割った余りを取る」という演算を入れたものです。</p>
+        <p>例: $\mathbb{Z}/5\mathbb{Z}$ では $3 + 4 = 7 \equiv 2 \pmod{5}$ なので $3 + 4 = 2$。</p>
+        <p>時計の算術（12時間制なら $\mathbb{Z}/12\mathbb{Z}$）と同じ考え方です。</p>
+      </div>
+
+      <h3>準同型と同型</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 群準同型</div>
+        <p>群 $(G, \cdot)$ から群 $(H, *)$ への写像 $\varphi: G \to H$ が<strong>群準同型</strong>（homomorphism）であるとは、
+        すべての $a, b \in G$ に対して $\varphi(a \cdot b) = \varphi(a) * \varphi(b)$ が成り立つことをいう。</p>
+        <p>$\varphi$ が全単射のとき、<strong>同型</strong>（isomorphism）といい、$G \cong H$ と書く。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 準同型の意味</div>
+        <p>準同型とは「演算の構造を保つ写像」です。$G$ の中での計算結果を $H$ に移しても、
+        $H$ の中で直接計算した結果と同じになります。同型 $G \cong H$ は「$G$ と $H$ は群として本質的に同じ」ということです。</p>
+      </div>
+
+      <!-- ====== 環と体 ====== -->
+      <h2 id="rings">環と体</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 環（ring）</div>
+        <p>集合 $R$ に加法 $+$ と乗法 $\times$ の2つの演算が定義され、以下を満たすとき $R$ を<strong>環</strong>という：</p>
+        <ol>
+          <li>$(R, +)$ は可換群（加法単位元を $0$ とする）</li>
+          <li>乗法は結合的: $(a \times b) \times c = a \times (b \times c)$</li>
+          <li>分配律: $a \times (b + c) = a \times b + a \times c$ および $(a + b) \times c = a \times c + b \times c$</li>
+        </ol>
+        <p>乗法の単位元 $1$ が存在するとき<strong>単位的環</strong>、乗法が可換のとき<strong>可換環</strong>という。</p>
+      </div>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 体（field）</div>
+        <p>可換環 $F$ で、$0 \neq 1$ かつ $0$ 以外のすべての元が乗法の逆元を持つとき、$F$ を<strong>体</strong>という。</p>
+        <p>つまり、体とは四則演算（加減乗除）がすべて可能な代数系です（$0$ での除算を除く）。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 環と体の例</div>
+        <table>
+          <tr><th>名前</th><th>記号</th><th>環？</th><th>体？</th><th>説明</th></tr>
+          <tr><td>整数</td><td>$\mathbb{Z}$</td><td>はい</td><td>いいえ</td><td>$2$ の逆元 $1/2 \notin \mathbb{Z}$</td></tr>
+          <tr><td>有理数</td><td>$\mathbb{Q}$</td><td>はい</td><td>はい</td><td>すべての非零元に逆元あり</td></tr>
+          <tr><td>実数</td><td>$\mathbb{R}$</td><td>はい</td><td>はい</td><td></td></tr>
+          <tr><td>複素数</td><td>$\mathbb{C}$</td><td>はい</td><td>はい</td><td>代数閉体</td></tr>
+          <tr><td>$\bmod p$ の整数</td><td>$\mathbb{F}_p$</td><td>はい</td><td>はい</td><td>$p$ が素数のとき体になる</td></tr>
+          <tr><td>$\bmod 6$ の整数</td><td>$\mathbb{Z}/6\mathbb{Z}$</td><td>はい</td><td>いいえ</td><td>$2 \times 3 = 0$（零因子あり）</td></tr>
+          <tr><td>多項式環</td><td>$\mathbb{Q}[x]$</td><td>はい</td><td>いいえ</td><td>$x$ の逆元が存在しない</td></tr>
+        </table>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 有限体 $\mathbb{F}_p$</div>
+        <p>素数 $p$ に対して、$\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z} = \{0, 1, 2, \ldots, p-1\}$ は体になります。
+        これは<strong>有限体</strong>と呼ばれ、IUT理論で非常に重要な役割を果たします。</p>
+        <p>例: $\mathbb{F}_5 = \{0, 1, 2, 3, 4\}$ での計算：</p>
+        <ul>
+          <li>$3 + 4 = 7 \equiv 2 \pmod{5}$</li>
+          <li>$3 \times 4 = 12 \equiv 2 \pmod{5}$</li>
+          <li>$3$ の逆元: $3 \times 2 = 6 \equiv 1 \pmod{5}$ なので $3^{-1} = 2$</li>
+        </ul>
+        <p>IUT理論では、楕円曲線の $\ell$ 等分点に関連して $\mathbb{F}_\ell$ やその乗法群 $\mathbb{F}_\ell^{\times}$ が登場します。</p>
+      </div>
+
+      <h3>イデアルと商環</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: イデアル</div>
+        <p>環 $R$ の部分集合 $I \subseteq R$ が<strong>イデアル</strong>であるとは：</p>
+        <ol>
+          <li>$(I, +)$ は $(R, +)$ の部分群</li>
+          <li>すべての $r \in R$ と $a \in I$ に対して $ra \in I$ かつ $ar \in I$</li>
+        </ol>
+        <p>$R$ が可換環のとき、元 $a \in R$ で生成される<strong>単項イデアル</strong>を $(a) = aR = \{ar \mid r \in R\}$ と書く。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: $\mathbb{Z}$ のイデアル</div>
+        <p>$\mathbb{Z}$ のイデアルはすべて単項イデアルです（$\mathbb{Z}$ は単項イデアル整域）：</p>
+        <ul>
+          <li>$(0) = \{0\}$: 零イデアル</li>
+          <li>$(1) = \mathbb{Z}$: 全体（任意の整数は $1$ の倍数）</li>
+          <li>$(2) = 2\mathbb{Z} = \{\ldots, -4, -2, 0, 2, 4, \ldots\}$: 偶数全体</li>
+          <li>$(n) = n\mathbb{Z}$: $n$ の倍数全体</li>
+        </ul>
+        <p>商環 $\mathbb{Z}/(n) = \mathbb{Z}/n\mathbb{Z}$ は $\bmod n$ の整数です。</p>
+      </div>
+
+      <!-- ====== 整数論の基礎 ====== -->
+      <h2 id="number-theory">整数論の基礎</h2>
+
+      <h3>素因数分解の一意性</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: 算術の基本定理</div>
+        <p>任意の正整数 $n \geq 2$ は、素数の積として一意に（順序を除いて）表される：</p>
+        <div class="math-block">
+          $$n = p_1^{e_1} p_2^{e_2} \cdots p_k^{e_k} \quad (p_1 < p_2 < \cdots < p_k, \; e_i \geq 1)$$
+        </div>
+      </div>
+
+      <p>この定理は当たり前に見えますが、整数論の最も基本的な事実です。
+      実は、素因数分解の一意性が成り立たない「整数に似た世界」も存在します。</p>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 一意分解が成り立たない環</div>
+        <p>$\mathbb{Z}[\sqrt{-5}] = \{a + b\sqrt{-5} \mid a, b \in \mathbb{Z}\}$ を考えます。この環では：</p>
+        <div class="math-block">
+          $$6 = 2 \times 3 = (1 + \sqrt{-5})(1 - \sqrt{-5})$$
+        </div>
+        <p>$2$, $3$, $1 + \sqrt{-5}$, $1 - \sqrt{-5}$ はすべて「既約」（これ以上分解できない）ですが、
+        $6$ は2通りの異なる方法で分解されます。素因数分解の一意性が壊れています！</p>
+        <p>このような問題を解決するために<strong>イデアル</strong>の概念が導入されました（Kummer, Dedekind）。
+        イデアルの分解では一意性が回復します。これが代数的整数論の出発点です。</p>
+      </div>
+
+      <h3>代数体と整数環</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 代数体</div>
+        <p>有理数体 $\mathbb{Q}$ の有限次拡大体 $K$ を<strong>代数体</strong>（number field）という。</p>
+        <p>$K$ の<strong>整数環</strong> $\mathcal{O}_K$ は、$K$ の中で整数のように振る舞う元の全体です。
+        正確には、$\mathcal{O}_K = \{\alpha \in K \mid \alpha \text{ はモニック整数係数多項式の根}\}$。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 代数体の例</div>
+        <ul>
+          <li>$K = \mathbb{Q}$: 有理数体。$\mathcal{O}_K = \mathbb{Z}$（通常の整数）</li>
+          <li>$K = \mathbb{Q}(\sqrt{2}) = \{a + b\sqrt{2} \mid a, b \in \mathbb{Q}\}$: 2次体。$\mathcal{O}_K = \mathbb{Z}[\sqrt{2}]$</li>
+          <li>$K = \mathbb{Q}(\sqrt{-1}) = \{a + bi \mid a, b \in \mathbb{Q}\}$: ガウスの体。$\mathcal{O}_K = \mathbb{Z}[i]$（ガウス整数）</li>
+          <li>$K = \mathbb{Q}(\zeta_n)$: $\zeta_n = e^{2\pi i/n}$ を添加した円分体</li>
+        </ul>
+      </div>
+
+      <h3>付値とノルム</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 付値（valuation）</div>
+        <p>体 $K$ 上の<strong>付値</strong> $v$ とは、関数 $v: K^{\times} \to \mathbb{R}$（ただし $v(0) = +\infty$ と規約）で以下を満たすもの：</p>
+        <ol>
+          <li>$v(ab) = v(a) + v(b)$（乗法を加法に変換）</li>
+          <li>$v(a + b) \geq \min(v(a), v(b))$（非アルキメデス性、超距離不等式）</li>
+        </ol>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: $p$ 進付値</div>
+        <p>素数 $p$ を固定し、$0$ でない有理数 $x$ を $x = p^n \cdot \frac{a}{b}$（$p \nmid a$, $p \nmid b$）と書くとき、
+        $p$ <strong>進付値</strong>を $v_p(x) = n$ と定義します。</p>
+        <ul>
+          <li>$v_2(12) = v_2(2^2 \times 3) = 2$</li>
+          <li>$v_3(12) = v_3(2^2 \times 3) = 1$</li>
+          <li>$v_5(12) = 0$</li>
+          <li>$v_2(1/8) = v_2(2^{-3}) = -3$</li>
+        </ul>
+        <p>直感: $v_p(x)$ は「$x$ が $p$ で何回割れるか」を測ります。</p>
+      </div>
+
+      <!-- ====== p進数 ====== -->
+      <h2 id="p-adic">p進数</h2>
+
+      <p>$p$ 進数はIUT理論の中核をなす概念です。通常の実数とは全く異なる「距離」の感覚を持つ数の体系です。</p>
+
+      <h3>p進距離の直感</h3>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: p進距離とは</div>
+        <p>通常の距離では、$1$ と $1000001$ は「遠い」、$1$ と $1.001$ は「近い」です。</p>
+        <p>$p$ 進距離では、考え方が逆転します。2つの数の差が $p$ の高い冪で割り切れるほど「近い」のです。</p>
+        <p>$p = 5$ の場合：</p>
+        <ul>
+          <li>$1$ と $26$ の差は $25 = 5^2$。$5^2$ で割れるので、$5$ 進的にはかなり「近い」</li>
+          <li>$1$ と $2$ の差は $1$。$5$ で割り切れないので、$5$ 進的には「遠い」</li>
+          <li>$0$ と $625$ の差は $625 = 5^4$。$5$ 進的には非常に「近い」</li>
+        </ul>
+      </div>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: $p$ 進絶対値と $p$ 進数体</div>
+        <p>有理数 $x \neq 0$ に対して、$p$ <strong>進絶対値</strong>を次で定義する：</p>
+        <div class="math-block">
+          $$|x|_p = p^{-v_p(x)}$$
+        </div>
+        <p>$|0|_p = 0$ とする。この絶対値は<strong>超距離不等式</strong>（三角不等式の強い形）を満たす：</p>
+        <div class="math-block">
+          $$|x + y|_p \leq \max(|x|_p, |y|_p)$$
+        </div>
+        <p>$\mathbb{Q}$ をこの絶対値で完備化した体を <strong>$p$ 進数体</strong> $\mathbb{Q}_p$ という。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: $p$ 進絶対値の計算</div>
+        <p>$p = 3$ の場合：</p>
+        <table>
+          <tr><th>$x$</th><th>$v_3(x)$</th><th>$|x|_3 = 3^{-v_3(x)}$</th></tr>
+          <tr><td>$1$</td><td>$0$</td><td>$1$</td></tr>
+          <tr><td>$3$</td><td>$1$</td><td>$1/3$</td></tr>
+          <tr><td>$9$</td><td>$2$</td><td>$1/9$</td></tr>
+          <tr><td>$81$</td><td>$4$</td><td>$1/81$</td></tr>
+          <tr><td>$7$</td><td>$0$</td><td>$1$</td></tr>
+          <tr><td>$12 = 2^2 \times 3$</td><td>$1$</td><td>$1/3$</td></tr>
+          <tr><td>$1/27$</td><td>$-3$</td><td>$27$</td></tr>
+        </table>
+        <p>$3$ の冪が高いほど $p$ 進絶対値は<strong>小さく</strong>なる（$3$ 進的に $0$ に「近い」）。</p>
+      </div>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: Ostrowskiの定理</div>
+        <p>$\mathbb{Q}$ 上の非自明な絶対値は、通常の絶対値 $|\cdot|_\infty$ か、
+        いずれかの素数 $p$ に対する $p$ 進絶対値 $|\cdot|_p$ のいずれかに同値である。</p>
+      </div>
+
+      <p>この定理は「有理数の世界を見る方法は、通常の実数的な見方（$|\cdot|_\infty$）と、
+      各素数 $p$ に対する $p$ 進的な見方（$|\cdot|_p$）しかない」ことを意味します。
+      これらすべての見方を統合することが数論の本質です。</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: 積公式</div>
+        <p>任意の $0$ でない有理数 $x \in \mathbb{Q}^{\times}$ に対して：</p>
+        <div class="math-block">
+          $$|x|_\infty \cdot \prod_{p: \text{素数}} |x|_p = 1$$
+        </div>
+        <p>これは「実数的な大きさ」と「すべての $p$ 進的な大きさ」が互いにバランスしていることを示します。</p>
+      </div>
+
+      <h3>$p$ 進整数環 $\mathbb{Z}_p$</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: $p$ 進整数環</div>
+        <p>$\mathbb{Q}_p$ の中で $p$ 進絶対値が $1$ 以下の元の全体を <strong>$p$ 進整数環</strong> $\mathbb{Z}_p$ という：</p>
+        <div class="math-block">
+          $$\mathbb{Z}_p = \{x \in \mathbb{Q}_p \mid |x|_p \leq 1\} = \{x \in \mathbb{Q}_p \mid v_p(x) \geq 0\}$$
+        </div>
+        <p>$\mathbb{Z}_p$ の元は $p$ 進展開 $x = a_0 + a_1 p + a_2 p^2 + \cdots$（$0 \leq a_i < p$）で表される。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: $\mathbb{Z}_5$ での $-1$ の表現</div>
+        <p>$5$ 進整数環 $\mathbb{Z}_5$ の中で $-1$ はどう表されるか？</p>
+        <p>$-1 = 4 + 4 \cdot 5 + 4 \cdot 5^2 + 4 \cdot 5^3 + \cdots = \sum_{i=0}^{\infty} 4 \cdot 5^i$</p>
+        <p>検証: $1 + (-1) = (1) + (4 + 4 \cdot 5 + 4 \cdot 5^2 + \cdots) = 5 + 4 \cdot 5 + 4 \cdot 5^2 + \cdots$
+        $= 5(1 + 4 + 4 \cdot 5 + \cdots) = 5 \cdot 5(1 + 4 + \cdots) = \cdots = 0$（繰り上がりが無限に続く）。</p>
+        <p>これは10進法での $\ldots 9999 + 1 = \ldots 0000$ に似ています。$p$ 進数では「無限の桁」が許されるため、
+        $-1$ が正の係数だけで表現できます。</p>
+      </div>
+
+      <!-- ====== 圏論の基礎 ====== -->
+      <h2 id="category">圏論の基礎</h2>
+
+      <p>IUT理論は圏論の言語を多用します。圏論は「数学的対象の関係性」を抽象的に扱う枠組みです。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 圏（category）</div>
+        <p><strong>圏</strong> $\mathcal{C}$ は以下からなる：</p>
+        <ol>
+          <li><strong>対象</strong>（objects）の集まり $\operatorname{Ob}(\mathcal{C})$</li>
+          <li>各対象の組 $(A, B)$ に対して<strong>射</strong>（morphisms）の集合 $\operatorname{Hom}(A, B)$</li>
+          <li>射の<strong>合成</strong>: $f: A \to B$ と $g: B \to C$ に対して $g \circ f: A \to C$</li>
+        </ol>
+        <p>以下の条件を満たす：</p>
+        <ul>
+          <li>結合律: $(h \circ g) \circ f = h \circ (g \circ f)$</li>
+          <li>恒等射: 各対象 $A$ に恒等射 $\mathrm{id}_A: A \to A$ が存在し、$f \circ \mathrm{id}_A = f$, $\mathrm{id}_B \circ f = f$</li>
+        </ul>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 圏の例</div>
+        <table>
+          <tr><th>圏</th><th>対象</th><th>射</th></tr>
+          <tr><td>$\mathbf{Set}$</td><td>集合</td><td>写像</td></tr>
+          <tr><td>$\mathbf{Grp}$</td><td>群</td><td>群準同型</td></tr>
+          <tr><td>$\mathbf{Ring}$</td><td>環</td><td>環準同型</td></tr>
+          <tr><td>$\mathbf{Top}$</td><td>位相空間</td><td>連続写像</td></tr>
+          <tr><td>$\mathbf{Vect}_K$</td><td>$K$ 上のベクトル空間</td><td>線形写像</td></tr>
+        </table>
+        <p>いずれも「対象」は何らかの構造を持った集合で、「射」はその構造を保つ写像です。</p>
+      </div>
+
+      <h3>関手</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 関手（functor）</div>
+        <p>圏 $\mathcal{C}$ から圏 $\mathcal{D}$ への<strong>（共変）関手</strong> $F: \mathcal{C} \to \mathcal{D}$ とは：</p>
+        <ul>
+          <li>各対象 $A \in \mathcal{C}$ に対象 $F(A) \in \mathcal{D}$ を対応させる</li>
+          <li>各射 $f: A \to B$ に射 $F(f): F(A) \to F(B)$ を対応させる</li>
+          <li>$F(\mathrm{id}_A) = \mathrm{id}_{F(A)}$ かつ $F(g \circ f) = F(g) \circ F(f)$</li>
+        </ul>
+        <p>射の向きを逆転させるもの（$F(f): F(B) \to F(A)$）を<strong>反変関手</strong>という。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 関手の直感</div>
+        <p>関手は「圏と圏の間の準同型」です。群準同型が群の構造を保つように、
+        関手は圏の構造（対象、射、合成）を保ちます。</p>
+        <p>例: 忘却関手 $U: \mathbf{Grp} \to \mathbf{Set}$ は各群 $G$ にその台集合 $U(G)$ を、
+        各群準同型 $\varphi$ にその台写像 $U(\varphi)$ を対応させます。「群の構造を忘れて集合だけ取り出す」関手です。</p>
+      </div>
+
+      <h3>自然変換</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 自然変換（natural transformation）</div>
+        <p>関手 $F, G: \mathcal{C} \to \mathcal{D}$ に対して、<strong>自然変換</strong> $\eta: F \Rightarrow G$ とは、
+        各対象 $A \in \mathcal{C}$ に射 $\eta_A: F(A) \to G(A)$ を対応させ、
+        任意の射 $f: A \to B$ に対して次の図式が可換になるもの：</p>
+        <div class="math-block">
+          $$G(f) \circ \eta_A = \eta_B \circ F(f)$$
+        </div>
+      </div>
+
+      <p>圏論では「関手は対象の間の射、自然変換は関手の間の射」と考えます。
+      このように抽象化のレベルを上げていくのが圏論の特徴で、
+      IUT理論はこの抽象化を極限まで推し進めた理論です。</p>
+
+      <!-- ====== ガロア理論の概要 ====== -->
+      <h2 id="galois">ガロア理論の概要</h2>
+
+      <p>ガロア理論はIUT理論の背骨とも言える理論です。体の拡大と群の対応を与えます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 体の拡大とガロア群</div>
+        <p>体 $K$ が体 $F$ を含むとき（$F \subseteq K$）、$K/F$ を<strong>体の拡大</strong>という。</p>
+        <p>$K/F$ が有限次ガロア拡大のとき、$K$ の $F$ 上の自己同型全体のなす群を
+        <strong>ガロア群</strong> $\operatorname{Gal}(K/F)$ という：</p>
+        <div class="math-block">
+          $$\operatorname{Gal}(K/F) = \{\sigma: K \xrightarrow{\sim} K \mid \sigma(a) = a \; \forall a \in F\}$$
+        </div>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: ガロア群の例</div>
+        <p><strong>例1:</strong> $\mathbb{Q}(\sqrt{2})/\mathbb{Q}$</p>
+        <p>$\sigma(\sqrt{2}) = -\sqrt{2}$ とする写像が唯一の非自明な自己同型。
+        $\operatorname{Gal}(\mathbb{Q}(\sqrt{2})/\mathbb{Q}) = \{e, \sigma\} \cong \mathbb{Z}/2\mathbb{Z}$。</p>
+
+        <p><strong>例2:</strong> $\mathbb{Q}(\zeta_p)/\mathbb{Q}$（$\zeta_p = e^{2\pi i/p}$, $p$ は素数）</p>
+        <p>$\sigma_a(\zeta_p) = \zeta_p^a$（$a \in (\mathbb{Z}/p\mathbb{Z})^{\times}$）で定まる自己同型たち。
+        $\operatorname{Gal}(\mathbb{Q}(\zeta_p)/\mathbb{Q}) \cong (\mathbb{Z}/p\mathbb{Z})^{\times} \cong \mathbb{Z}/(p-1)\mathbb{Z}$。</p>
+      </div>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: ガロアの基本定理</div>
+        <p>$K/F$ が有限次ガロア拡大のとき、以下の1対1対応がある：</p>
+        <div class="math-block">
+          $$\left\{\begin{array}{c} K/F \text{ の中間体} \\ F \subseteq L \subseteq K \end{array}\right\}
+          \longleftrightarrow
+          \left\{\begin{array}{c} \operatorname{Gal}(K/F) \text{ の部分群} \\ H \leq \operatorname{Gal}(K/F) \end{array}\right\}$$
+        </div>
+        <p>対応: $L \mapsto \operatorname{Gal}(K/L)$, $H \mapsto K^H$（$H$ で固定される元の体）。
+        この対応は包含関係を<strong>逆転</strong>させます。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: ガロア理論の意味</div>
+        <p>ガロア理論は「体の構造」と「群の構造」を翻訳する辞書です。
+        体の問題（方程式が解けるか？）を群の問題（群が可解か？）に帰着させます。</p>
+        <p>IUT理論ではこの考え方をさらに発展させ、<strong>絶対ガロア群</strong>
+        $\operatorname{Gal}(\overline{K}/K)$（$K$ の代数閉包によるガロア群）の構造から
+        体そのものを復元する「遠アーベル幾何学」が中心的な役割を果たします。</p>
+      </div>
+
+      <h3>絶対ガロア群と副有限群</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 絶対ガロア群</div>
+        <p>体 $K$ の<strong>絶対ガロア群</strong>は $G_K = \operatorname{Gal}(\overline{K}/K)$ と定義される。
+        ここで $\overline{K}$ は $K$ の代数閉包。</p>
+        <p>$G_K$ は<strong>副有限群</strong>（profinite group）の構造を持つ。これは有限群の射影極限として得られるコンパクト位相群である。</p>
+      </div>
+
+      <p>$G_{\mathbb{Q}}$（有理数体の絶対ガロア群）は数論の中心的な研究対象です。
+      この群は途方もなく複雑な構造を持ち、その完全な理解はまだ達成されていませんが、
+      IUT理論は $G_K$（代数体のガロア群）の構造を徹底的に活用します。</p>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="02_examples.html" class="prev">具体例と数値検証</a>
+        <a href="04_elliptic_curves.html" class="next">楕円曲線と関連予想</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

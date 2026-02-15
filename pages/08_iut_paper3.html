@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 8: 論文III — 対数テータ格子</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#log-link" class="section-link">対数リンク</a>
+        <a href="#lattice" class="section-link">対数テータ格子</a>
+        <a href="#multiradial" class="section-link">多輻的アルゴリズム</a>
+        <a href="#indeterminacies" class="section-link">3つの不定性</a>
+        <a href="#log-shells" class="section-link">対数殻</a>
+        <a href="#corollary" class="section-link">系3.12</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 8: 論文III — 対数テータ格子
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 8: 論文III — 対数テータ格子</h1>
+        <p class="subtitle">Inter-universal Teichmuller Theory III: Canonical Splittings of the Log-theta-lattice</p>
+      </header>
+
+      <p>論文IIIはIUT理論の技術的な頂点です。対数リンクを導入して対数テータ格子を構成し、
+      多輻的アルゴリズムを開発して、最終的に核心的な不等式（系3.12）を導出します。
+      Scholze-Stixの指摘もこの論文の結果に関するものです。</p>
+
+      <!-- 対数リンク -->
+      <h2 id="log-link">対数リンク</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 対数リンク</div>
+        <p>$p$ 進体 $K_v$（数体 $F$ の素点 $v$ での完備化）に対して、
+        <strong>対数リンク</strong>は $p$ 進対数写像に基づく操作です：</p>
+        <div class="math-block">
+          $$\log_v: \mathcal{O}_{K_v}^{\times} \to K_v$$
+        </div>
+        <p>$p$ 進整数環の単数群 $\mathcal{O}_{K_v}^{\times}$ から $K_v$ への $p$ 進対数。</p>
+        <p>対数リンクは<strong>乗法構造を加法構造に変換</strong>する操作です。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: $p$ 進対数とは</div>
+        <p>実数の対数 $\log(x)$ は $\exp$ の逆関数ですが、$p$ 進の対数も同様に定義されます：</p>
+        <div class="math-block">
+          $$\log_p(1 + x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots \quad (|x|_p < 1)$$
+        </div>
+        <p>この級数は $p$ 進的に収束します。重要な性質として $\log_p(ab) = \log_p(a) + \log_p(b)$、
+        つまり「乗法を加法に変える」機能があります。</p>
+      </div>
+
+      <h3>テータリンクとの相互補完</h3>
+
+      <p>テータリンクと対数リンクは相互に補完的な役割を持ちます：</p>
+
+      <table>
+        <tr><th></th><th>テータリンク</th><th>対数リンク</th></tr>
+        <tr><td>方向</td><td>横方向</td><td>縦方向</td></tr>
+        <tr><td>保存する構造</td><td>乗法構造</td><td>ガロア群の作用</td></tr>
+        <tr><td>壊す構造</td><td>加法構造</td><td>乗法と加法の関係</td></tr>
+        <tr><td>数学的基盤</td><td>クンマー理論</td><td>$p$ 進対数</td></tr>
+        <tr><td>効果</td><td>$q \leftrightarrow q^{j^2}$ の対応</td><td>乗法 $\to$ 加法の変換</td></tr>
+      </table>
+
+      <!-- 対数テータ格子 -->
+      <h2 id="lattice">対数テータ格子</h2>
+
+      <p>テータリンク（横）と対数リンク（縦）を組み合わせると、
+      ホッジシアターの<strong>2次元格子</strong>が得られます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 対数テータ格子</div>
+        <p><strong>対数テータ格子</strong>（log-theta-lattice）は、次の構造を持つ2次元格子：</p>
+        <ul>
+          <li><strong>格子点</strong>: ホッジシアター ${}^{m,n}\mathcal{HT}$（$m, n \in \mathbb{Z}$）</li>
+          <li><strong>横矢印</strong>: テータリンク ${}^{m,n}\mathcal{HT} \xrightarrow{\Theta} {}^{m,n+1}\mathcal{HT}$</li>
+          <li><strong>縦矢印</strong>: 対数リンク ${}^{m,n}\mathcal{HT} \xrightarrow{\log} {}^{m+1,n}\mathcal{HT}$</li>
+        </ul>
+      </div>
+
+      <div class="figure">
+        <svg width="550" height="400" viewBox="0 0 550 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="550" height="400" fill="#f7fafc" rx="8"/>
+
+          <!-- タイトル -->
+          <text x="275" y="25" text-anchor="middle" font-size="14" fill="#1a365d" font-weight="bold">対数テータ格子</text>
+
+          <!-- 軸ラベル -->
+          <text x="275" y="385" text-anchor="middle" font-size="12" fill="#dd6b20">テータリンク方向 (n) →</text>
+          <text x="18" y="200" text-anchor="middle" font-size="12" fill="#805ad5" transform="rotate(-90, 18, 200)">対数リンク方向 (m) →</text>
+
+          <!-- 格子点: 3x4 -->
+          <!-- m=0 行 -->
+          <circle cx="120" cy="320" r="22" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="120" y="324" text-anchor="middle" font-size="9" fill="#1a365d">HT⁰·⁰</text>
+          <circle cx="240" cy="320" r="22" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="240" y="324" text-anchor="middle" font-size="9" fill="#1a365d">HT⁰·¹</text>
+          <circle cx="360" cy="320" r="22" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="360" y="324" text-anchor="middle" font-size="9" fill="#1a365d">HT⁰·²</text>
+          <circle cx="480" cy="320" r="22" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="480" y="324" text-anchor="middle" font-size="9" fill="#1a365d">HT⁰·³</text>
+
+          <!-- m=1 行 -->
+          <circle cx="120" cy="210" r="22" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="120" y="214" text-anchor="middle" font-size="9" fill="#1a365d">HT¹·⁰</text>
+          <circle cx="240" cy="210" r="22" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="240" y="214" text-anchor="middle" font-size="9" fill="#1a365d">HT¹·¹</text>
+          <circle cx="360" cy="210" r="22" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="360" y="214" text-anchor="middle" font-size="9" fill="#1a365d">HT¹·²</text>
+          <circle cx="480" cy="210" r="22" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="480" y="214" text-anchor="middle" font-size="9" fill="#1a365d">HT¹·³</text>
+
+          <!-- m=2 行 -->
+          <circle cx="120" cy="100" r="22" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="120" y="104" text-anchor="middle" font-size="9" fill="#1a365d">HT²·⁰</text>
+          <circle cx="240" cy="100" r="22" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="240" y="104" text-anchor="middle" font-size="9" fill="#1a365d">HT²·¹</text>
+          <circle cx="360" cy="100" r="22" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="360" y="104" text-anchor="middle" font-size="9" fill="#1a365d">HT²·²</text>
+          <circle cx="480" cy="100" r="22" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="480" y="104" text-anchor="middle" font-size="9" fill="#1a365d">HT²·³</text>
+
+          <!-- 横矢印: テータリンク -->
+          <line x1="142" y1="320" x2="218" y2="320" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="262" y1="320" x2="338" y2="320" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="382" y1="320" x2="458" y2="320" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="142" y1="210" x2="218" y2="210" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="262" y1="210" x2="338" y2="210" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="382" y1="210" x2="458" y2="210" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="142" y1="100" x2="218" y2="100" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="262" y1="100" x2="338" y2="100" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+          <line x1="382" y1="100" x2="458" y2="100" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr3o)"/>
+
+          <!-- 縦矢印: 対数リンク -->
+          <line x1="120" y1="298" x2="120" y2="232" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="240" y1="298" x2="240" y2="232" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="360" y1="298" x2="360" y2="232" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="480" y1="298" x2="480" y2="232" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="120" y1="188" x2="120" y2="122" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="240" y1="188" x2="240" y2="122" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="360" y1="188" x2="360" y2="122" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+          <line x1="480" y1="188" x2="480" y2="122" stroke="#805ad5" stroke-width="2" marker-end="url(#arr3p)"/>
+
+          <!-- ラベル -->
+          <text x="180" y="340" text-anchor="middle" font-size="10" fill="#dd6b20">Θ</text>
+          <text x="95" y="265" text-anchor="middle" font-size="10" fill="#805ad5">log</text>
+
+          <!-- 省略記号 -->
+          <text x="510" y="324" font-size="16" fill="#999">...</text>
+          <text x="510" y="214" font-size="16" fill="#999">...</text>
+          <text x="120" y="65" font-size="14" fill="#999">:</text>
+          <text x="240" y="65" font-size="14" fill="#999">:</text>
+          <text x="120" y="360" font-size="14" fill="#999">:</text>
+
+          <defs>
+            <marker id="arr3o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#dd6b20"/>
+            </marker>
+            <marker id="arr3p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#805ad5"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="figure-caption">対数テータ格子: 横方向がテータリンク（Θ）、縦方向が対数リンク（log）。各ノードはホッジシアター</div>
+      </div>
+
+      <p>この格子は理論上は無限に広がりますが、証明には有限個のホッジシアターだけが関与します。
+      重要なのは、この格子の中で $q$-パイロットオブジェクトとテータパイロットオブジェクトを
+      比較することです。</p>
+
+      <!-- 多輻的アルゴリズム -->
+      <h2 id="multiradial">多輻的アルゴリズム</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 多輻的 vs 単輻的</div>
+        <p>対数テータ格子の中で、あるアルゴリズムや表現が：</p>
+        <ul>
+          <li><strong>単輻的</strong>（uniradial）: 特定のホッジシアターの環構造に依存する</li>
+          <li><strong>多輻的</strong>（multiradial）: テータリンクによる環構造の変形に対して不変</li>
+        </ul>
+        <p>多輻的アルゴリズムは、テータリンクの両側で「同じ」結果を与えるため、
+        異なるホッジシアター間の比較が可能になります。</p>
+      </div>
+
+      <p>IUT理論の技術的な核心は、テータパイロットオブジェクトの<strong>多輻的表現</strong>を構成することです。
+      この表現は、3つの不定性（後述）を許容しつつも、最終的な不等式を導くのに十分な情報を保持します。</p>
+
+      <!-- 3つの不定性 -->
+      <h2 id="indeterminacies">3つの不定性</h2>
+
+      <p>多輻的表現を構成する際に、3つの<strong>不定性</strong>（indeterminacy）が避けられません。
+      これらは多輻的アルゴリズムの「コスト」であり、
+      最終的な不等式の「緩み」として現れます。</p>
+
+      <h3>不定性1 (Ind1): ガロア自己同型</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">Ind1: ガロア自己同型による不定性</div>
+        <p>局所ガロア群 $G_{K_v}$ の<strong>内部自己同型</strong>による不定性。
+        テータリンクの両側で、ガロア群の同一視に内部自己同型分の曖昧さがあります。</p>
+        <p>直感: 基本群を「座標変換」する自由度。</p>
+      </div>
+
+      <h3>不定性2 (Ind2): 単数群自己同型</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">Ind2: 単数群による不定性</div>
+        <p>$p$ 進整数環の単数群 $\mathcal{O}_{K_v}^{\times}$ の自己同型による不定性。
+        対数リンクを通じて、単数群の作用分の曖昧さが導入されます。</p>
+        <p>直感: 「スケーリング」の自由度。</p>
+      </div>
+
+      <h3>不定性3 (Ind3): 加法構造の変化</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">Ind3: 加法構造の不定性</div>
+        <p>対数リンクによって加法構造が変化することに由来する不定性。
+        $p$ 進対数によって乗法データを加法データに変換する際に、
+        元の加法構造の情報が失われます。</p>
+        <p>直感: 「翻訳ロス」。乗法 $\to$ 加法の変換で情報が失われる。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 不定性の意味</div>
+        <p>3つの不定性は、テータリンクと対数リンクを通じて情報を輸送する際の「損失」です。</p>
+        <p>例えると、外国語に翻訳して元の言語に戻す（二重翻訳）のようなものです：</p>
+        <ul>
+          <li><strong>Ind1</strong>: 翻訳者の個性による表現の違い</li>
+          <li><strong>Ind2</strong>: 単位系の違い（メートル vs フィート）</li>
+          <li><strong>Ind3</strong>: 翻訳不可能なニュアンスの損失</li>
+        </ul>
+        <p>IUT理論は、これらの損失が<strong>十分に小さい</strong>（定量的に制御可能）ことを示します。
+        その制御された損失が、Szpiro不等式の「$\varepsilon$」として現れるのです。</p>
+      </div>
+
+      <!-- 対数殻 -->
+      <h2 id="log-shells">対数殻（log-shell）</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 対数殻</div>
+        <p>素点 $v$ における<strong>対数殻</strong>（log-shell）$\mathcal{I}_v$ は次で定義される：</p>
+        <div class="math-block">
+          $$\mathcal{I}_v = p_v^{-1} \cdot \log_v(\mathcal{O}_{K_v}^{\times}) \subseteq K_v$$
+        </div>
+        <p>ここで $p_v$ は $v$ の下の有理素数。対数殻はテータパイロットオブジェクトの「容器」です。</p>
+      </div>
+
+      <p>対数殻は、3つの不定性を「吸収」する役割を持ちます。
+      テータパイロットオブジェクトは、不定性を考慮すると正確な値としては決まりませんが、
+      対数殻 $\mathcal{I}_v$ の中に含まれることが保証されます。
+      これにより、テータパイロットの「大きさ」の上界が得られます。</p>
+
+      <!-- 系3.12 -->
+      <h2 id="corollary">系3.12: 核心的不等式</h2>
+
+      <p>論文IIIの最も重要な結果が系3.12（Corollary 3.12）です。
+      これはIUT理論全体の技術的な頂点であり、ABC予想への橋渡しとなる抽象的不等式を与えます。</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">系3.12（概略、非厳密）</div>
+        <p>対数テータ格子の中で、$q$-パイロットオブジェクトの対数体積は、
+        テータパイロットオブジェクトの多輻的表現（対数殻に収まる部分）の対数体積で上から押さえられる：</p>
+        <div class="math-block">
+          $$-\deg_{\mathrm{arith}}(q\text{-pilot}) \leq -\deg_{\mathrm{arith}}(\Theta\text{-pilot}) + (\text{不定性からの寄与})$$
+        </div>
+        <p>ここで $\deg_{\mathrm{arith}}$ は算術的次数（対数体積の一般化）。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 系3.12の直感</div>
+        <p>系3.12は、大まかに以下のことを言っています：</p>
+        <div class="math-block">
+          $$\log|q| \leq \log|q^{j^2}| + \text{（誤差項）}$$
+        </div>
+        <p>左辺は $q$-パラメータの「大きさ」、右辺はテータ関数値の「大きさ」＋損失。
+        $q$-パラメータは楕円曲線の判別式と関係し（$\sim |\Delta|$）、
+        テータ関数値は導手と関係するため（$\sim N^{6}$）、
+        これから $|\Delta| \lesssim N^{6+\varepsilon}$（Szpiro不等式）が導かれます。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">Scholze-Stixの指摘</div>
+        <p>系3.12はIUT理論で最も議論を呼んでいる部分です。
+        2018年、Peter ScholzeとJakob Stixは、系3.12の証明に<strong>ギャップ</strong>があると指摘しました。
+        彼らの主張の詳細はChapter 10で解説します。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">論文IIIのまとめ</div>
+        <p>論文IIIで達成されたこと：</p>
+        <ol>
+          <li>対数リンクの導入と<strong>対数テータ格子</strong>の構成</li>
+          <li><strong>多輻的アルゴリズム</strong>の開発</li>
+          <li>テータパイロットオブジェクトの多輻的表現</li>
+          <li>3つの不定性（Ind1, Ind2, Ind3）の識別と制御</li>
+          <li><strong>系3.12</strong>: $q$-パイロットとテータパイロットの比較不等式</li>
+        </ol>
+        <p>論文IVでは、この抽象的不等式を具体的な数値計算に落とし込みます。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="07_iut_paper2.html" class="prev">論文II: テータリンクの構成</a>
+        <a href="09_iut_paper4.html" class="next">論文IV: 対数体積計算</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

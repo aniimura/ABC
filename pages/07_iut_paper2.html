@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 7: 論文II — テータリンクの構成</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#theta-function" class="section-link">エタールテータ関数</a>
+        <a href="#theta-link" class="section-link">テータリンク</a>
+        <a href="#kummer" class="section-link">クンマー理論</a>
+        <a href="#rigidities" class="section-link">3つの剛性</a>
+        <a href="#summary" class="section-link">まとめ</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 7: 論文II — テータリンクの構成
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 7: 論文II — テータリンクの構成</h1>
+        <p class="subtitle">Inter-universal Teichmuller Theory II: Hodge-Arakelov-theoretic Evaluation</p>
+      </header>
+
+      <p>論文IIは、IUT理論の最も革新的な構成である<strong>テータリンク</strong>を導入します。
+      テータリンクは異なるホッジシアターを接続し、$q$-パラメータとテータ関数値を結びつけます。
+      この接続は環構造を「変形する」操作であり、IUT理論全体の核心です。</p>
+
+      <!-- エタールテータ関数 -->
+      <h2 id="theta-function">エタールテータ関数</h2>
+
+      <h3>古典的テータ関数の復習</h3>
+
+      <p>まず、古典的なヤコビのテータ関数を復習しましょう。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">古典的テータ関数</div>
+        <p>ヤコビのテータ関数は以下で定義される：</p>
+        <div class="math-block">
+          $$\theta(z, \tau) = \sum_{n=-\infty}^{\infty} e^{\pi i n^2 \tau + 2\pi i n z} = \sum_{n=-\infty}^{\infty} q^{n^2} e^{2\pi i n z}$$
+        </div>
+        <p>ここで $q = e^{\pi i \tau}$, $\operatorname{Im}(\tau) > 0$。</p>
+      </div>
+
+      <p>テータ関数を $z = j/\ell$（$\ell$ 等分点）で評価すると：</p>
+      <div class="math-block">
+        $$\theta(j/\ell, \tau) = \sum_{n} q^{n^2} e^{2\pi i n j/\ell}$$
+      </div>
+      <p>Tate曲線の一様化 $E_q \cong \mathbb{C}^{\times}/q^{2\mathbb{Z}}$ の文脈では、
+      テータ関数は楕円曲線上の重要な関数を与えます。</p>
+
+      <h3>$p$ 進エタールテータ関数</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">エタールテータ関数（概略）</div>
+        <p>$p$ 進体 $\mathbb{Q}_p$ 上のTate曲線 $E_q$（$|q|_p < 1$）に対して、
+        <strong>エタールテータ関数</strong> $\underline{\underline{\Theta}}$ は、
+        古典的テータ関数の $p$ 進的・エタール的なバージョンです。</p>
+        <p>重要な性質：エタールテータ関数を $\ell$ 等分点で評価すると、
+        その値は $q$-パラメータの冪 $\{q^{j^2}\}_{j=1,\ldots,\lfloor \ell/2 \rfloor}$ に
+        密接に関連します。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: テータ関数値の意味</div>
+        <p>テータ関数値 $\Theta_j \sim q^{j^2}$ のパターンを見てください：</p>
+        <table>
+          <tr><th>$j$</th><th>$j^2$</th><th>テータ関数値 $\sim$</th></tr>
+          <tr><td>$1$</td><td>$1$</td><td>$q^1$</td></tr>
+          <tr><td>$2$</td><td>$4$</td><td>$q^4$</td></tr>
+          <tr><td>$3$</td><td>$9$</td><td>$q^9$</td></tr>
+          <tr><td>$\vdots$</td><td>$\vdots$</td><td>$\vdots$</td></tr>
+          <tr><td>$\lfloor\ell/2\rfloor$</td><td>$\lfloor\ell/2\rfloor^2$</td><td>$q^{\lfloor\ell/2\rfloor^2}$</td></tr>
+        </table>
+        <p>$q$ のべき指数が $1, 4, 9, \ldots$ と<strong>二次的に増加</strong>していくのが特徴です。
+        これがSzpiro予想の指数 $6$ （$= 2 \times 3$）の由来の一部です。</p>
+      </div>
+
+      <!-- テータリンク -->
+      <h2 id="theta-link">テータリンク</h2>
+
+      <p>テータリンクはIUT理論の中核的構成です。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">テータリンクの直感的定義</div>
+        <p>2つのホッジシアター ${}^{n}\mathcal{HT}$ と ${}^{n+1}\mathcal{HT}$ の間の
+        <strong>テータリンク</strong> ${}^{n}\mathcal{HT} \xrightarrow{\Theta} {}^{n+1}\mathcal{HT}$ は、
+        以下の対応を与える：</p>
+        <div class="math-block">
+          $$\underbrace{q^{j^2}}_{\text{テータパイロット}({}^{n}\mathcal{HT})} \longleftrightarrow \underbrace{q}_{\text{$q$-パイロット}({}^{n+1}\mathcal{HT})}$$
+        </div>
+        <p>つまり、一方のホッジシアターでのテータ関数値 $q^{j^2}$ が、
+        他方のホッジシアターでの $q$-パラメータ自体に対応します。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">重要: テータリンクの非環構造的性質</div>
+        <p>テータリンクは<strong>環の同型ではありません</strong>。乗法的な対応を与えますが、
+        加法的な関係は保存されません。</p>
+        <p>もしテータリンクが環の同型であれば、$q^{j^2} = q$ となって $q^{j^2-1} = 1$、
+        すなわち $q$ は1の冪根になり、非自明な楕円曲線は存在しないことになります。
+        テータリンクが環構造を「壊す」ことは、理論が非自明であるための本質的な要件です。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">アナロジー: テータリンクの直感</div>
+        <p>テータリンクを「為替レート」に例えることができます：</p>
+        <ul>
+          <li>ホッジシアターA（国A）では、通貨の価値が $q^{j^2}$ で測られる</li>
+          <li>ホッジシアターB（国B）では、通貨の価値が $q$ で測られる</li>
+          <li>テータリンクは「$q^{j^2}$ ドル = $q$ ユーロ」という為替レート</li>
+        </ul>
+        <p>しかし、この「為替」は通常の数学的な同型ではなく、加法的な関係を壊します。
+        $q^{j^2}$ を $q$ に「変換」すると、「$1 + 1 = 2$」のような加法的事実が
+        変換先では成り立たなくなる可能性があります。</p>
+      </div>
+
+      <!-- クンマー理論 -->
+      <h2 id="kummer">クンマー理論</h2>
+
+      <p>テータリンクを正確に構成するために、<strong>クンマー理論</strong>が用いられます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">クンマー理論の役割</div>
+        <p>クンマー理論は、体の元を群論的データ（ガロア群の作用）として表現する方法です。</p>
+        <p>古典的には: 体 $K$ が $n$ 乗根 $\zeta_n$ を含むとき、
+        $K^{\times}/(K^{\times})^n \hookrightarrow H^1(G_K, \mu_n)$（クンマー写像）。</p>
+        <p>IUTでの役割: フロベニオイドの「算術的データ」を、
+        ガロア群の「群論的データ」に翻訳する橋渡しをします。
+        テータリンクはこの群論的データのレベルで構成されます。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: クンマー理論の直感</div>
+        <p>体 $K$ の元 $a \in K^{\times}$ を考えます。$a$ の $n$ 乗根 $\alpha = a^{1/n}$ は $\overline{K}$ に住んでいます。
+        ガロア群 $G_K$ は $\alpha$ に作用して $\sigma(\alpha) = \zeta_n^{c(\sigma)} \alpha$ としますが、
+        この作用 $\sigma \mapsto \zeta_n^{c(\sigma)}$ がクンマー類と呼ばれます。</p>
+        <p>つまり、$a$ という「環の元」が、$G_K \to \mu_n$ という「群論的データ」に変換されます。
+        逆に、この群論的データから $a$ を（ある程度）復元できます。</p>
+      </div>
+
+      <!-- 3つの剛性 -->
+      <h2 id="rigidities">3つの剛性</h2>
+
+      <p>テータリンクを通じてテータ関数値を正しく「輸送」するために、
+      エタールテータ関数の3つの<strong>剛性</strong>（rigidity）が証明されます。
+      これらはテータリンクの正当性を保証する核心的な技術的結果です。</p>
+
+      <h3>1. 円分的剛性（Cyclotomic Rigidity）</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">円分的剛性</div>
+        <p>エタールテータ関数に関連する円分群（$1$ の冪根の群 $\mu_n$）は、
+        クンマー理論を通じて<strong>一意的に</strong>決定される。</p>
+        <p>意味: テータ関数値を群論的データに翻訳する際に、
+        $\mu_n$ の選択に関する曖昧さが生じないことを保証します。</p>
+      </div>
+
+      <h3>2. 離散的剛性（Discrete Rigidity）</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">離散的剛性</div>
+        <p>テータ関数値の「離散的な」（$\mathbb{Z}$-構造に関する）情報が、
+        テータリンクを通じて保存される。</p>
+        <p>意味: 連続的な変形（$\widehat{\mathbb{Z}}$-構造）の中から
+        正しい離散的な部分（$\mathbb{Z}$-構造）を選び出すことができます。</p>
+      </div>
+
+      <h3>3. 定数倍剛性（Constant Multiple Rigidity）</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">定数倍剛性</div>
+        <p>テータ関数値は定数倍の曖昧さなしに一意的に決定される。</p>
+        <p>意味: テータ関数が定数倍の不定性なく特定されるため、
+        テータリンクで輸送される値が「正しい」値であることが保証されます。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 剛性の直感</div>
+        <p>3つの剛性は、テータリンクという「翻訳」が情報を失わないことを保証する定理です。</p>
+        <p>例えて言えば：</p>
+        <ol>
+          <li><strong>円分的剛性</strong>: 翻訳に使う「辞書」が一意的に決まる</li>
+          <li><strong>離散的剛性</strong>: 翻訳が整数値の情報を正しく伝える（丸め誤差がない）</li>
+          <li><strong>定数倍剛性</strong>: 翻訳の「スケール」が一意的に決まる（拡大率が正しい）</li>
+        </ol>
+        <p>これらの剛性により、テータリンクを通じたテータ関数値の輸送が well-defined になります。</p>
+      </div>
+
+      <!-- まとめ -->
+      <h2 id="summary">論文IIのまとめ</h2>
+
+      <div class="box box-warning">
+        <div class="box-title">論文IIの成果</div>
+        <p>論文IIで達成されたこと：</p>
+        <ol>
+          <li>エタールテータ関数の $\ell$ 等分点での<strong>ホッジ・アラケロフ的評価</strong></li>
+          <li>2つのホッジシアターを接続する<strong>テータリンク</strong>の構成</li>
+          <li>テータリンクの正当性を保証する<strong>3つの剛性定理</strong>の証明</li>
+          <li>テータパイロットオブジェクト $\{q^{j^2}\}$ と $q$-パイロットオブジェクト $\{q\}$ の定義</li>
+        </ol>
+        <p>次の論文IIIでは、テータリンクと対数リンクを組み合わせた<strong>対数テータ格子</strong>を構成し、
+        その上で多輻的表現を用いて核心的な不等式を導出します。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="06_iut_paper1.html" class="prev">論文I: ホッジシアターの構成</a>
+        <a href="08_iut_paper3.html" class="next">論文III: 対数テータ格子</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

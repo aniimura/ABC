@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: 楕円曲線と関連予想</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#definition" class="section-link">楕円曲線の定義</a>
+        <a href="#group-law" class="section-link">群構造</a>
+        <a href="#reduction" class="section-link">還元と導手</a>
+        <a href="#discriminant" class="section-link">判別式</a>
+        <a href="#szpiro" class="section-link">Szpiro予想</a>
+        <a href="#equivalence" class="section-link">ABCとの等価性</a>
+        <a href="#tate" class="section-link">Tate曲線</a>
+        <a href="#torsion" class="section-link">等分点</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 4: 楕円曲線と関連予想
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 4: 楕円曲線と関連予想</h1>
+        <p class="subtitle">IUT理論の入力データとなる楕円曲線</p>
+      </header>
+
+      <p>楕円曲線はIUT理論の出発点です。IUT理論は特定の楕円曲線のデータから始まり、
+      その楕円曲線に関するSzpiro予想（ABCと等価）を証明することを目指します。
+      この章では楕円曲線の基礎と、ABC予想との関連を解説します。</p>
+
+      <!-- 楕円曲線の定義 -->
+      <h2 id="definition">楕円曲線の定義</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 楕円曲線</div>
+        <p>体 $K$ 上の<strong>楕円曲線</strong> $E$ とは、次の形のワイエルシュトラス方程式で定義される、
+        特異点を持たない射影的代数曲線のことである：</p>
+        <div class="math-block">
+          $$E: y^2 + a_1 xy + a_3 y = x^3 + a_2 x^2 + a_4 x + a_6 \quad (a_i \in K)$$
+        </div>
+        <p>$K$ の標数が $2, 3$ でないとき、変数変換により<strong>短いワイエルシュトラス形</strong>に変換できる：</p>
+        <div class="math-block">
+          $$E: y^2 = x^3 + Ax + B \quad (A, B \in K)$$
+        </div>
+        <p>特異点を持たない条件は <strong>判別式</strong> $\Delta = -16(4A^3 + 27B^2) \neq 0$ で表される。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 楕円曲線とは何か</div>
+        <p>楕円曲線は「3次方程式が定める曲線」です。名前に「楕円」とありますが、楕円の形はしていません。
+        この名前は楕円の弧長を計算する積分（楕円積分）の研究に由来します。</p>
+        <p>楕円曲線が特別なのは、その上の点が<strong>群をなす</strong>からです。
+        2つの点を「足す」演算が定義でき、曲線上の点全体が可換群になります。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 楕円曲線の例</div>
+        <ul>
+          <li>$y^2 = x^3 - x$: $A = -1, B = 0$。$\Delta = -16 \cdot 4(-1)^3 = 64 \neq 0$ ✓</li>
+          <li>$y^2 = x^3 + 1$: $A = 0, B = 1$。$\Delta = -16 \cdot 27 = -432 \neq 0$ ✓</li>
+          <li>$y^2 = x^3 - x + 1$: $A = -1, B = 1$。$\Delta = -16(4(-1)^3 + 27) = -16 \cdot 23 \neq 0$ ✓</li>
+          <li>$y^2 = x^3$: $A = 0, B = 0$。$\Delta = 0$: 特異点 $(0,0)$ を持ち楕円曲線<strong>ではない</strong></li>
+        </ul>
+      </div>
+
+      <!-- 群構造 -->
+      <h2 id="group-law">楕円曲線の群構造</h2>
+
+      <p>楕円曲線 $E$ の最も重要な性質は、その上の点が可換群をなすことです。</p>
+
+      <h3>加法の幾何学的定義</h3>
+      <p>楕円曲線 $E$ 上の2点 $P, Q$ の和 $P + Q$ は次のように定義されます：</p>
+      <ol>
+        <li>$P$ と $Q$ を通る直線を引く</li>
+        <li>この直線と $E$ の3つ目の交点 $R$ を求める（Bezoutの定理より必ず存在）</li>
+        <li>$R$ を $x$ 軸に関して対称に移した点を $P + Q$ とする</li>
+      </ol>
+
+      <div class="figure">
+        <svg width="400" height="320" viewBox="-5 -8 14 16" xmlns="http://www.w3.org/2000/svg">
+          <!-- 座標軸 -->
+          <line x1="-4" y1="0" x2="8" y2="0" stroke="#ccc" stroke-width="0.03"/>
+          <line x1="0" y1="-7" x2="0" y2="7" stroke="#ccc" stroke-width="0.03"/>
+          <!-- 楕円曲線 y^2 = x^3 - 3x + 3 の概形 -->
+          <path d="M -1.7 0 C -1.7 0.5, -1.5 1.8, -0.5 2.8 C 0.5 3.8, 1.5 3.5, 2 3.2 C 3 2.5, 4 3, 5 4.5 C 5.5 5.2, 6 6, 7 7"
+                stroke="#1a365d" stroke-width="0.06" fill="none"/>
+          <path d="M -1.7 0 C -1.7 -0.5, -1.5 -1.8, -0.5 -2.8 C 0.5 -3.8, 1.5 -3.5, 2 -3.2 C 3 -2.5, 4 -3, 5 -4.5 C 5.5 -5.2, 6 -6, 7 -7"
+                stroke="#1a365d" stroke-width="0.06" fill="none"/>
+          <!-- 点 P -->
+          <circle cx="1" cy="1.5" r="0.15" fill="#dd6b20"/>
+          <text x="0.5" y="1.2" font-size="0.7" fill="#dd6b20" font-weight="bold">P</text>
+          <!-- 点 Q -->
+          <circle cx="3" cy="2.8" r="0.15" fill="#38a169"/>
+          <text x="3.3" y="2.6" font-size="0.7" fill="#38a169" font-weight="bold">Q</text>
+          <!-- 直線 PQ -->
+          <line x1="-0.5" y1="0.53" x2="5.5" y2="4.4" stroke="#805ad5" stroke-width="0.04" stroke-dasharray="0.15,0.1"/>
+          <!-- 交点 R -->
+          <circle cx="4.8" cy="4.2" r="0.15" fill="#805ad5"/>
+          <text x="5.1" y="4.0" font-size="0.7" fill="#805ad5" font-weight="bold">R</text>
+          <!-- R の対称点 P+Q -->
+          <line x1="4.8" y1="4.2" x2="4.8" y2="-4.2" stroke="#999" stroke-width="0.03" stroke-dasharray="0.1,0.08"/>
+          <circle cx="4.8" cy="-4.2" r="0.15" fill="#e53e3e"/>
+          <text x="5.1" y="-4.0" font-size="0.7" fill="#e53e3e" font-weight="bold">P+Q</text>
+        </svg>
+        <div class="figure-caption">楕円曲線上の加法: $P$ と $Q$ を結ぶ直線の第3交点 $R$ を $x$ 軸で反転して $P + Q$ を得る</div>
+      </div>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: Mordellの定理</div>
+        <p>$\mathbb{Q}$ 上の楕円曲線 $E$ に対して、有理点の群 $E(\mathbb{Q})$ は有限生成アーベル群である：</p>
+        <div class="math-block">
+          $$E(\mathbb{Q}) \cong \mathbb{Z}^r \oplus E(\mathbb{Q})_{\mathrm{tors}}$$
+        </div>
+        <p>ここで $r \geq 0$ は<strong>階数</strong>（rank）、$E(\mathbb{Q})_{\mathrm{tors}}$ は<strong>捩れ部分群</strong>（有限群）。</p>
+      </div>
+
+      <!-- 還元と導手 -->
+      <h2 id="reduction">楕円曲線の還元と導手</h2>
+
+      <p>$\mathbb{Q}$ 上の楕円曲線 $E$ を各素数 $p$ で「$\bmod p$ で見る」ことを<strong>還元</strong>（reduction）といいます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 還元の型</div>
+        <p>楕円曲線 $E/\mathbb{Q}$ の素数 $p$ での還元：</p>
+        <ul>
+          <li><strong>良い還元</strong>（good reduction）: $\bmod p$ で見ても楕円曲線のまま（$p \nmid \Delta_{\min}$）</li>
+          <li><strong>悪い還元</strong>（bad reduction）: $\bmod p$ で見ると特異点が現れる（$p \mid \Delta_{\min}$）
+            <ul>
+              <li><strong>乗法的還元</strong>: 特異点が節点（node）</li>
+              <li><strong>加法的還元</strong>: 特異点が尖点（cusp）</li>
+            </ul>
+          </li>
+        </ul>
+        <p>$\Delta_{\min}$ は<strong>最小判別式</strong>（最も「小さい」ワイエルシュトラスモデルの判別式）。</p>
+      </div>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 導手（conductor）</div>
+        <p>楕円曲線 $E/\mathbb{Q}$ の<strong>導手</strong> $N_E$ は、$E$ が悪い還元を持つ素数の情報をまとめた正整数：</p>
+        <div class="math-block">
+          $$N_E = \prod_{p: \text{悪い還元}} p^{f_p}$$
+        </div>
+        <p>ここで $f_p = 1$（乗法的還元）、$f_p \geq 2$（加法的還元）。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 還元の直感</div>
+        <p>楕円曲線 $y^2 = x^3 + Ax + B$（$A, B \in \mathbb{Z}$）を素数 $p$ で還元するとは、
+        係数を $\bmod p$ で見ることです。例えば $y^2 = x^3 - x + 1$ を $\bmod 5$ で見ると
+        $y^2 = x^3 - x + 1$（$\bmod 5$）。</p>
+        <p>ほとんどの素数 $p$ では良い還元（楕円曲線のまま）ですが、
+        判別式を割る有限個の素数では特異点が現れます。
+        IUT理論はこの悪い還元の情報を重要視します。</p>
+      </div>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 半安定楕円曲線</div>
+        <p>楕円曲線 $E/\mathbb{Q}$ がすべての素数 $p$ で良い還元または乗法的還元を持つとき、
+        $E$ を<strong>半安定</strong>（semistable）という。</p>
+        <p>半安定のとき、導手は $N_E = \prod_{p \mid \Delta_{\min}} p$（squarefree）となる。
+        つまり $N_E = \operatorname{rad}(\Delta_{\min})$。</p>
+      </div>
+
+      <p>IUT理論は半安定楕円曲線に対してSzpiro不等式を証明します。
+      一般の楕円曲線は変数変換で半安定の場合に帰着できることが知られています。</p>
+
+      <!-- 判別式 -->
+      <h2 id="discriminant">判別式</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 最小判別式</div>
+        <p>楕円曲線 $E/\mathbb{Q}$ の<strong>最小判別式</strong> $\Delta_{\min}$ とは、
+        $E$ のすべてのワイエルシュトラスモデルの中で、判別式の絶対値が最小になるものの判別式。</p>
+        <p>短いワイエルシュトラス形 $y^2 = x^3 + Ax + B$ の判別式は：</p>
+        <div class="math-block">
+          $$\Delta = -16(4A^3 + 27B^2)$$
+        </div>
+      </div>
+
+      <p>最小判別式は楕円曲線の「複雑さ」を測る量で、
+      ABC予想との関連においてSzpiro予想の核心的な対象です。</p>
+
+      <!-- Szpiro予想 -->
+      <h2 id="szpiro">Szpiro予想</h2>
+
+      <div class="box box-theorem">
+        <div class="box-title">予想: Szpiro予想（修正版）</div>
+        <p>任意の $\varepsilon > 0$ に対して、定数 $C(\varepsilon) > 0$ が存在して、
+        $\mathbb{Q}$ 上のすべての楕円曲線 $E$ に対して：</p>
+        <div class="math-block">
+          $$|\Delta_{\min}| \leq C(\varepsilon) \cdot N_E^{6 + \varepsilon}$$
+        </div>
+        <p>ここで $\Delta_{\min}$ は最小判別式、$N_E$ は導手。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: Szpiro予想の意味</div>
+        <p>Szpiro予想は「楕円曲線の判別式（複雑さの指標）は、
+        導手（悪い還元を持つ素数の集まり）によって制御される」と主張しています。</p>
+        <p>指数 $6$ は自然な境界です。具体的には：</p>
+        <ul>
+          <li>$|\Delta_{\min}| \leq C \cdot N_E^{6+\varepsilon}$: Szpiro予想（未解決）</li>
+          <li>$|\Delta_{\min}| \leq C \cdot N_E^{6}$: これは偽（反例が存在）</li>
+          <li>$|\Delta_{\min}| \leq C \cdot N_E^{12}$: これは証明済み</li>
+        </ul>
+      </div>
+
+      <!-- ABCとの等価性 -->
+      <h2 id="equivalence">ABC予想とSzpiro予想の等価性</h2>
+
+      <p>ABC予想とSzpiro予想は<strong>等価</strong>です。一方が正しければ他方も正しい。
+      これがIUT理論がABC予想を証明できる（と主張する）理由です。</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理: ABC予想 $\iff$ 修正Szpiro予想</div>
+        <p>以下の2つの主張は等価である：</p>
+        <ol>
+          <li><strong>ABC予想:</strong> $\forall \varepsilon > 0$, $c > \operatorname{rad}(abc)^{1+\varepsilon}$ なるABC tripleは有限個</li>
+          <li><strong>修正Szpiro予想:</strong> $\forall \varepsilon > 0$, $\exists C(\varepsilon)$, $\forall E/\mathbb{Q}$: $|\Delta_{\min}| \leq C(\varepsilon) \cdot N_E^{6+\varepsilon}$</li>
+        </ol>
+      </div>
+
+      <details>
+        <summary>等価性の証明の概略</summary>
+        <div class="proof-content">
+          <h4>ABC $\Rightarrow$ Szpiro:</h4>
+          <p>ABC triple $(a, b, c)$ からフレイ曲線（Frey curve）$E_{a,b}: y^2 = x(x-a)(x+b)$ を構成すると：</p>
+          <ul>
+            <li>判別式: $\Delta = 16 a^2 b^2 c^2$</li>
+            <li>導手: $N = \operatorname{rad}(abc)$（半安定の場合）</li>
+          </ul>
+          <p>ABC予想を $|\Delta| \leq C \cdot N^{6+\varepsilon}$ の形に翻訳すると Szpiro予想が得られます。</p>
+
+          <h4>Szpiro $\Rightarrow$ ABC:</h4>
+          <p>逆に、任意の楕円曲線 $E/\mathbb{Q}$ に対して、
+          適切な変換により ABC triple を構成でき、Szpiro予想からABC予想が従います。</p>
+        </div>
+      </details>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: フレイ曲線</div>
+        <p>ABC triple $(1, 8, 9)$ からフレイ曲線を構成：</p>
+        <div class="math-block">
+          $$E: y^2 = x(x - 1)(x + 8) = x^3 + 7x^2 - 8x$$
+        </div>
+        <ul>
+          <li>$\Delta = 16 \cdot 1^2 \cdot 8^2 \cdot 9^2 = 16 \cdot 5184 = 82944 = 2^{10} \cdot 3^4$</li>
+          <li>$N = \operatorname{rad}(1 \cdot 8 \cdot 9) = 6$</li>
+          <li>Szpiro比: $\log|\Delta|/\log N = \log(82944)/\log(6) \approx 6.33$</li>
+        </ul>
+        <p>Szpiro予想は「この比が $6 + \varepsilon$ 以下であるべき」と主張（定数 $C$ を許せば成立）。</p>
+      </div>
+
+      <!-- Tate曲線 -->
+      <h2 id="tate">Tate曲線</h2>
+
+      <p>Tate曲線はIUT理論で極めて重要な対象です。楕円曲線の $p$ 進解析的な姿を与えます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: Tate曲線</div>
+        <p>$p$ 進体 $\mathbb{Q}_p$ 上で $|q|_p < 1$ なる $q \in \mathbb{Q}_p^{\times}$ に対して、
+        <strong>Tate曲線</strong> $E_q$ は次の解析的な一様化で定義される楕円曲線：</p>
+        <div class="math-block">
+          $$E_q(\overline{\mathbb{Q}_p}) \cong \overline{\mathbb{Q}_p}^{\times} / q^{\mathbb{Z}}$$
+        </div>
+        <p>ここで $q^{\mathbb{Z}} = \{q^n \mid n \in \mathbb{Z}\}$ は $q$ の冪で生成される部分群。</p>
+        <p>パラメータ $q$ を<strong>Tateパラメータ</strong>（または $q$-パラメータ）という。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: Tate曲線の直感</div>
+        <p>複素数体 $\mathbb{C}$ 上では、楕円曲線はトーラス $\mathbb{C}/\Lambda$（$\Lambda$ は格子）で表されます。
+        $p$ 進の世界では、これに対応するのが $\mathbb{Q}_p^{\times}/q^{\mathbb{Z}}$ です。</p>
+        <p>乗法群 $\mathbb{Q}_p^{\times}$ を $q$ の冪で割ることで、$p$ 進的なトーラスが得られます。
+        パラメータ $q$ は楕円曲線の判別式と関係しています：$\Delta \sim q$（$q$ が小さいほど判別式が小さい）。</p>
+        <p>IUT理論では、この $q$ パラメータの大きさを制御することがABC予想の証明に繋がります。</p>
+      </div>
+
+      <p>楕円曲線 $E/\mathbb{Q}$ が素数 $p$ で<strong>乗法的（分裂型）還元</strong>を持つとき、
+      $E$ は $\mathbb{Q}_p$ 上でTate曲線 $E_q$ と同型になります。
+      このとき $q = q_E$ はTateパラメータと呼ばれ、$v_p(q_E) = -v_p(\Delta_{\min}) > 0$ を満たします。</p>
+
+      <!-- 等分点 -->
+      <h2 id="torsion">$\ell$ 等分点</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: $\ell$ 等分点</div>
+        <p>楕円曲線 $E$ と正整数 $\ell$ に対して、<strong>$\ell$ 等分点</strong>（$\ell$-torsion points）とは：</p>
+        <div class="math-block">
+          $$E[\ell] = \{P \in E(\overline{K}) \mid \ell \cdot P = O\}$$
+        </div>
+        <p>ここで $O$ は楕円曲線の無限遠点（単位元）、$\ell \cdot P = P + P + \cdots + P$（$\ell$ 回）。</p>
+        <p>$E[\ell] \cong (\mathbb{Z}/\ell\mathbb{Z})^2$（$\ell$ が $K$ の標数と互いに素のとき）。</p>
+      </div>
+
+      <p>IUT理論では、素数 $\ell \geq 5$ を固定し、楕円曲線 $E$ の $\ell$ 等分点 $E[\ell]$ が重要な役割を果たします。
+      ガロア群 $G_K$ の $E[\ell]$ への作用から得られるガロア表現</p>
+      <div class="math-block">
+        $$\bar{\rho}_{E,\ell}: G_K \to \operatorname{Aut}(E[\ell]) \cong GL_2(\mathbb{F}_\ell)$$
+      </div>
+      <p>が、IUT理論の「初期テータデータ」の一部となります。</p>
+
+      <div class="box box-warning">
+        <div class="box-title">IUT理論への橋渡し</div>
+        <p>IUT理論は以下のデータから始まります（Chapter 6で詳述）：</p>
+        <ul>
+          <li>代数体 $F$ 上の楕円曲線 $E$</li>
+          <li>素数 $\ell \geq 5$</li>
+          <li>$E$ の悪い還元の場所（Tateパラメータ $q$ が存在する場所）</li>
+          <li>$\ell$ 等分点 $E[\ell]$ のガロア表現</li>
+        </ul>
+        <p>これらを「初期テータデータ」として、Szpiro不等式 $|\Delta| \leq C \cdot N^{6+\varepsilon}$ を導くのがIUT理論の目標です。
+        Szpiro不等式はABC予想と等価なので、これによりABC予想が証明される（と主張される）のです。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="03_prerequisites.html" class="prev">代数と整数論の基礎</a>
+        <a href="05_iut_overview.html" class="next">IUT理論の全体像</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

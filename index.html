@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC予想 — 初学者のための解説</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <style>
+    /* インデックス専用スタイル */
+    .index-main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 2rem;
+    }
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      color: #fff;
+      border-radius: 12px;
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .hero .formula {
+      font-size: 1.3rem;
+      margin: 1rem 0;
+      opacity: 0.95;
+    }
+    .hero p {
+      font-size: 1rem;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0.5rem auto;
+    }
+    .section-label {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .index-footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <div class="index-main">
+
+    <!-- ヒーローセクション -->
+    <div class="hero">
+      <h1>ABC予想</h1>
+      <p class="formula">互いに素な正整数 $a + b = c$ に対して、$c$ は $\operatorname{rad}(abc)^{1+\varepsilon}$ を超えない</p>
+      <p>数論における最も深遠な予想の一つを、初学者にも分かるように丁寧に解説します。<br>
+      望月新一教授の宇宙際タイヒミュラー（IUT）理論による証明アプローチまで、段階的に学べます。</p>
+    </div>
+
+    <!-- 第I部: ABC予想の基礎 -->
+    <div class="section-label">第I部 — ABC予想の基礎</div>
+    <div class="chapter-grid">
+      <a href="pages/01_abc_conjecture.html" class="chapter-card">
+        <span class="chapter-num">Chapter 1</span>
+        <h3>ABC予想とは何か</h3>
+        <p>根基（rad）の定義、ABC予想の正確なステートメント、3つの等価な定式化、歴史的背景を解説します。</p>
+      </a>
+      <a href="pages/02_examples.html" class="chapter-card">
+        <span class="chapter-num">Chapter 2</span>
+        <h3>具体例と数値検証</h3>
+        <p>有名なABC tripleを実際に計算し、予想の意味を体感します。インタラクティブな検証ツール付き。</p>
+      </a>
+    </div>
+
+    <!-- 第II部: 前提知識 -->
+    <div class="section-label">第II部 — 前提知識</div>
+    <div class="chapter-grid">
+      <a href="pages/03_prerequisites.html" class="chapter-card">
+        <span class="chapter-num">Chapter 3</span>
+        <h3>代数と整数論の基礎</h3>
+        <p>群・環・体、素因数分解、p進数、圏論の基礎を具体例とともに学びます。</p>
+      </a>
+      <a href="pages/04_elliptic_curves.html" class="chapter-card">
+        <span class="chapter-num">Chapter 4</span>
+        <h3>楕円曲線と関連予想</h3>
+        <p>楕円曲線の基礎、判別式と導手、Szpiro予想とABC予想の等価性を解説します。</p>
+      </a>
+    </div>
+
+    <!-- 第III部: IUT理論 -->
+    <div class="section-label">第III部 — 宇宙際タイヒミュラー理論</div>
+    <div class="chapter-grid">
+      <a href="pages/05_iut_overview.html" class="chapter-card">
+        <span class="chapter-num">Chapter 5</span>
+        <h3>IUT理論の全体像</h3>
+        <p>「宇宙際」の意味、証明の論理的フロー、主要な数学的対象の鳥瞰図。</p>
+      </a>
+      <a href="pages/06_iut_paper1.html" class="chapter-card">
+        <span class="chapter-num">Chapter 6</span>
+        <h3>論文I: ホッジシアターの構成</h3>
+        <p>初期テータデータ、フロベニオイド、遠アーベル幾何学、ホッジシアターの構造。</p>
+      </a>
+      <a href="pages/07_iut_paper2.html" class="chapter-card">
+        <span class="chapter-num">Chapter 7</span>
+        <h3>論文II: ホッジ・アラケロフ的評価</h3>
+        <p>テータリンクの構成、エタールテータ関数、3つの剛性定理。</p>
+      </a>
+      <a href="pages/08_iut_paper3.html" class="chapter-card">
+        <span class="chapter-num">Chapter 8</span>
+        <h3>論文III: 対数テータ格子</h3>
+        <p>対数リンク、対数テータ格子の2次元構造、多輻的アルゴリズム、核心的不等式。</p>
+      </a>
+      <a href="pages/09_iut_paper4.html" class="chapter-card">
+        <span class="chapter-num">Chapter 9</span>
+        <h3>論文IV: 対数体積計算</h3>
+        <p>対数体積の具体的計算、Szpiro不等式の導出、ABC予想への帰結。</p>
+      </a>
+    </div>
+
+    <!-- 第IV部: 論争と展望 -->
+    <div class="section-label">第IV部 — 論争と展望</div>
+    <div class="chapter-grid">
+      <a href="pages/10_controversy.html" class="chapter-card">
+        <span class="chapter-num">Chapter 10</span>
+        <h3>論争と現状</h3>
+        <p>Scholze-Stixの指摘、望月の反論、Joshiのアプローチ、数学コミュニティの評価。</p>
+      </a>
+    </div>
+
+    <!-- 研究セクション -->
+    <div class="section-label">研究 — 数学的探求</div>
+    <div class="chapter-grid">
+      <a href="research/findings.html" class="chapter-card">
+        <span class="chapter-num">Research</span>
+        <h3>計算実験の結果</h3>
+        <p>大規模ABC triple探索、フレイ曲線解析、Zhou不等式検証の統合報告。</p>
+      </a>
+      <a href="research/controversy_analysis.html" class="chapter-card">
+        <span class="chapter-num">Research</span>
+        <h3>論争の精密分析</h3>
+        <p>Scholze-Stix vs 望月の数学的論点を厳密に分析。系3.12のギャップの定式化。</p>
+      </a>
+      <a href="research/mason_stothers_obstruction.html" class="chapter-card">
+        <span class="chapter-num">Research</span>
+        <h3>Mason-Stothers障壁</h3>
+        <p>多項式ABCの証明が整数に持ち上がらない理由の精密分析。算術微分、ロンスキアン。</p>
+      </a>
+      <a href="research/novel_approaches.html" class="chapter-card">
+        <span class="chapter-num">Research</span>
+        <h3>新しいアプローチ (2024-2025)</h3>
+        <p>Pasten、Browning-Lichtman-Teravainen、Zhou等の最新研究動向と展望。</p>
+      </a>
+    </div>
+
+    <div class="index-footer">
+      <p>本プロジェクトは、ABC予想とIUT理論を初学者にも理解できるように解説することを目的としています。</p>
+      <p>対象読者: 大学学部1-2年程度の数学的素養がある方</p>
+    </div>
+  </div>
+</body>
+</html>

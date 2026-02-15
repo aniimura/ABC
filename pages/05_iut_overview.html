@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: IUT理論の全体像</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#name" class="section-link">「宇宙際」の意味</a>
+        <a href="#analogy" class="section-link">理論のアナロジー</a>
+        <a href="#flow" class="section-link">証明の論理的フロー</a>
+        <a href="#objects" class="section-link">主要な数学的対象</a>
+        <a href="#key-ideas" class="section-link">中核的アイデア</a>
+        <a href="#prerequisites-iut" class="section-link">IUTの前提理論</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 5: IUT理論の全体像
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 5: IUT理論の全体像</h1>
+        <p class="subtitle">宇宙際タイヒミュラー理論のロードマップ</p>
+      </header>
+
+      <p>この章では、IUT理論の全体的な構造を鳥瞰します。
+      個々の技術的詳細に入る前に、理論が「何をしているのか」「なぜそのような構成が必要なのか」を
+      大きな絵として理解することを目指します。</p>
+
+      <!-- 「宇宙際」の意味 -->
+      <h2 id="name">「宇宙際」の意味</h2>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: なぜ「宇宙際」なのか</div>
+        <p>数学における「宇宙」（universe）とは、数学的対象が住む「世界」のことです。
+        集合論では、すべての集合を含む「グロタンディーク宇宙」と呼ばれる枠組みがあります。</p>
+        <p>通常の数学では1つの宇宙の中で議論しますが、IUT理論では<strong>複数の宇宙</strong>
+        （＝異なる環構造の「コピー」）を用いて、それらの間を行き来します。
+        「宇宙<strong>際</strong>」（inter-universal）とは、「宇宙の間」という意味です。</p>
+      </div>
+
+      <p>具体的には、IUT理論で「異なる宇宙」とは、同じ楕円曲線のデータの<strong>異なるコピー</strong>で、
+      それぞれの環構造（加法と乗法の関係）が<strong>テータリンク</strong>によって変形されたものです。</p>
+
+      <p>通常の数学では、$1 + 1 = 2$ や $2 \times 3 = 6$ のような加法と乗法の関係は固定されています。
+      IUT理論の革新的な点は、この「固定された」関係を一時的に切断し、
+      変形した後に再び接続する（そしてその過程で不等式を得る）ことです。</p>
+
+      <!-- アナロジー -->
+      <h2 id="analogy">理論のアナロジー</h2>
+
+      <h3>タイヒミュラー理論との類似</h3>
+
+      <p>名前にある「タイヒミュラー理論」は、リーマン面（複素1次元の曲面）の変形を扱う古典的理論です。</p>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: タイヒミュラー変形の直感</div>
+        <p>ドーナツの表面（トーラス）を考えてください。このドーナツを引き伸ばして変形すると、
+        細長いドーナツになります。形は変わりましたが、トポロジー的には同じトーラスです。</p>
+        <p>タイヒミュラー理論は、この「変形の度合い」を測る理論です。
+        変形の量を<strong>タイヒミュラー距離</strong>で定量化します。</p>
+        <p>IUT理論のアナロジー：</p>
+        <table>
+          <tr><th>タイヒミュラー理論</th><th>IUT理論</th></tr>
+          <tr><td>リーマン面の複素構造</td><td>数体上の環構造</td></tr>
+          <tr><td>準等角写像（変形）</td><td>テータリンク（環構造の変形）</td></tr>
+          <tr><td>タイヒミュラー距離</td><td>対数体積の差（不等式）</td></tr>
+          <tr><td>変形の有界性</td><td>Szpiro不等式</td></tr>
+        </table>
+      </div>
+
+      <h3>数体と関数体のアナロジー</h3>
+
+      <p>数論の基本的な指導原理の一つに、<strong>数体と関数体のアナロジー</strong>があります：</p>
+
+      <table>
+        <tr><th>関数体の世界</th><th>数体の世界</th></tr>
+        <tr><td>曲線 $C$ 上の関数体 $k(C)$</td><td>代数体 $K$</td></tr>
+        <tr><td>曲線の点 $P \in C$</td><td>素数 $p$（の素イデアル）</td></tr>
+        <tr><td>$P$ での付値 $v_P$</td><td>$p$ 進付値 $v_p$</td></tr>
+        <tr><td>次数 $\deg$</td><td>対数 $\log$</td></tr>
+        <tr><td>Riemann-Rochの定理</td><td>アデールの理論</td></tr>
+      </table>
+
+      <p>Mason-Stothers定理（多項式版ABC）は関数体の世界で成り立つ結果です。
+      ABC予想は、この結果を数体の世界に移すことを目指しています。
+      しかし、数体の世界には関数体にはない困難（特に微分の不在）があり、
+      IUT理論はこの困難を克服するための理論です。</p>
+
+      <!-- 証明の論理的フロー -->
+      <h2 id="flow">証明の論理的フロー</h2>
+
+      <div class="figure">
+        <svg width="700" height="620" viewBox="0 0 700 620" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="700" height="620" fill="#f7fafc" rx="8"/>
+
+          <!-- Step 0: 入力 -->
+          <rect x="200" y="15" width="300" height="50" rx="8" fill="#1a365d" stroke="#1a365d"/>
+          <text x="350" y="45" text-anchor="middle" fill="white" font-size="14" font-weight="bold">初期テータデータ (E, F, ℓ)</text>
+
+          <line x1="350" y1="65" x2="350" y2="95" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 1: Paper I -->
+          <rect x="150" y="95" width="400" height="70" rx="8" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="350" y="118" text-anchor="middle" fill="#1a365d" font-size="13" font-weight="bold">論文 I: ホッジシアターの構成</text>
+          <text x="350" y="138" text-anchor="middle" fill="#4a5568" font-size="11">フロベニオイド + 遠アーベル幾何 → ホッジシアター</text>
+          <text x="350" y="155" text-anchor="middle" fill="#4a5568" font-size="11">乗法的対称性 (F_ℓ*) + 加法的対称性 (F_ℓ)</text>
+
+          <line x1="350" y1="165" x2="350" y2="195" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 2: Paper II -->
+          <rect x="150" y="195" width="400" height="70" rx="8" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="350" y="218" text-anchor="middle" fill="#1a365d" font-size="13" font-weight="bold">論文 II: テータリンクの構成</text>
+          <text x="350" y="238" text-anchor="middle" fill="#4a5568" font-size="11">テータリンク: q ↔ Θ (環構造の変形)</text>
+          <text x="350" y="255" text-anchor="middle" fill="#4a5568" font-size="11">3つの剛性: 円分的 + 離散的 + 定数倍</text>
+
+          <line x1="350" y1="265" x2="350" y2="295" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 3: Paper III -->
+          <rect x="150" y="295" width="400" height="90" rx="8" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="350" y="318" text-anchor="middle" fill="#1a365d" font-size="13" font-weight="bold">論文 III: 対数テータ格子</text>
+          <text x="350" y="338" text-anchor="middle" fill="#4a5568" font-size="11">対数リンク + テータリンク → 2次元格子</text>
+          <text x="350" y="355" text-anchor="middle" fill="#4a5568" font-size="11">多輻的アルゴリズム (環構造変形に不変な手続き)</text>
+          <text x="350" y="375" text-anchor="middle" fill="#e53e3e" font-size="11" font-weight="bold">★ 系3.12: 核心的不等式</text>
+
+          <line x1="350" y1="385" x2="350" y2="415" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 4: Paper IV -->
+          <rect x="150" y="415" width="400" height="70" rx="8" fill="#fffaf0" stroke="#dd6b20" stroke-width="2"/>
+          <text x="350" y="438" text-anchor="middle" fill="#1a365d" font-size="13" font-weight="bold">論文 IV: 対数体積計算</text>
+          <text x="350" y="458" text-anchor="middle" fill="#4a5568" font-size="11">系3.12 → 具体的な数値不等式</text>
+          <text x="350" y="475" text-anchor="middle" fill="#4a5568" font-size="11">対数体積の明示的計算</text>
+
+          <line x1="350" y1="485" x2="350" y2="515" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- 結論 -->
+          <rect x="175" y="515" width="350" height="45" rx="8" fill="#dd6b20" stroke="#dd6b20"/>
+          <text x="350" y="535" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Szpiro不等式: |Δ| ≤ C · N^{6+ε}</text>
+          <text x="350" y="552" text-anchor="middle" fill="white" font-size="12">⟺ ABC予想</text>
+
+          <!-- 矢印マーカー -->
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+            </marker>
+          </defs>
+
+          <!-- 右側の注釈 -->
+          <text x="580" y="135" text-anchor="start" fill="#3182ce" font-size="10">Ch.6</text>
+          <text x="580" y="235" text-anchor="start" fill="#38a169" font-size="10">Ch.7</text>
+          <text x="580" y="345" text-anchor="start" fill="#805ad5" font-size="10">Ch.8</text>
+          <text x="580" y="445" text-anchor="start" fill="#dd6b20" font-size="10">Ch.9</text>
+
+          <!-- 左側：3つの不定性 -->
+          <rect x="15" y="310" width="120" height="60" rx="4" fill="#fff5f5" stroke="#e53e3e" stroke-width="1"/>
+          <text x="75" y="328" text-anchor="middle" fill="#e53e3e" font-size="10" font-weight="bold">3つの不定性</text>
+          <text x="75" y="343" text-anchor="middle" fill="#4a5568" font-size="9">Ind1: ガロア自己同型</text>
+          <text x="75" y="356" text-anchor="middle" fill="#4a5568" font-size="9">Ind2: 単数群自己同型</text>
+          <text x="75" y="369" text-anchor="middle" fill="#4a5568" font-size="9">Ind3: 加法構造の変化</text>
+          <line x1="135" y1="340" x2="150" y2="340" stroke="#e53e3e" stroke-width="1" stroke-dasharray="3,2"/>
+
+        </svg>
+        <div class="figure-caption">IUT理論の論理的フロー: 4本の論文が順にABC予想の証明を構築する</div>
+      </div>
+
+      <!-- 主要な数学的対象 -->
+      <h2 id="objects">主要な数学的対象</h2>
+
+      <p>IUT理論に登場する主要な概念を、その役割とともに概観します。</p>
+
+      <h3>フロベニオイド（Frobenioid）</h3>
+      <div class="box box-definition">
+        <div class="box-title">直感的説明: フロベニオイド</div>
+        <p><strong>フロベニオイド</strong>は、数体の算術的データ（因子、直線束、フロベニウス写像）を
+        圏論的に抽象化したものです。</p>
+        <p>通常、因子やイデアルは環の上で定義されますが、
+        フロベニオイドは<strong>環の構造を忘れても保持される</strong>情報を圏の言語で記述します。
+        これは、テータリンクで環構造が変形される場面で本質的に重要になります。</p>
+      </div>
+
+      <h3>遠アーベル幾何学（Anabelian Geometry）</h3>
+      <div class="box box-definition">
+        <div class="box-title">直感的説明: 遠アーベル幾何学</div>
+        <p><strong>遠アーベル幾何学</strong>は「基本群から幾何を復元する」理論です。</p>
+        <p>グロタンディークの予想に基づき、「遠アーベル的」な多様体（双曲曲線など）は、
+        そのエタール基本群によって完全に決定されるという主張です。</p>
+        <p>望月はさらに進んで、基本群の<strong>群としての構造だけから</strong>
+        （他の情報なしに）元の多様体をアルゴリズム的に復元する
+        <strong>単遠アーベル幾何学</strong>（mono-anabelian geometry）を発展させました。</p>
+        <p>IUT理論での役割: テータリンクで環構造が壊れた後、
+        基本群の情報から環構造を「復元」するために使われます。</p>
+      </div>
+
+      <h3>ホッジシアター（Hodge Theater）</h3>
+      <div class="box box-definition">
+        <div class="box-title">直感的説明: ホッジシアター</div>
+        <p><strong>ホッジシアター</strong>は、楕円曲線の算術データを
+        圏論的に組織化した巨大な構造体です。
+        各素数でのローカルデータ（フロベニオイド）を「プライムストリップ」にまとめ、
+        $\ell$ 等分点に関する対称性（乗法的・加法的）で装飾したものです。</p>
+        <p>ホッジシアターはIUT理論の「舞台」であり、
+        テータリンクや対数リンクで接続される「ノード」です。</p>
+      </div>
+
+      <h3>テータリンク（Theta-link）</h3>
+      <div class="box box-definition">
+        <div class="box-title">直感的説明: テータリンク</div>
+        <p><strong>テータリンク</strong>は、2つのホッジシアターを横方向に接続する写像です。
+        これがIUT理論の最も革新的かつ論争の的となる部分です。</p>
+        <p>テータリンクは：</p>
+        <ul>
+          <li>一方のホッジシアターの $q$-パラメータ（Tateパラメータ）を</li>
+          <li>他方のホッジシアターのテータ関数値に対応させる</li>
+        </ul>
+        <p>重要な点: テータリンクは<strong>乗法構造を保つが、加法構造を保たない</strong>。
+        つまり、環構造を「壊す」操作です。</p>
+      </div>
+
+      <h3>対数リンク（Log-link）</h3>
+      <div class="box box-definition">
+        <div class="box-title">直感的説明: 対数リンク</div>
+        <p><strong>対数リンク</strong>は $p$ 進対数写像 $\log_p$ に基づく操作で、
+        ホッジシアターを縦方向に接続します。
+        テータリンクで壊れた加法構造の情報を回復させる役割を持ちます。</p>
+      </div>
+
+      <!-- 中核的アイデア -->
+      <h2 id="key-ideas">IUT理論の中核的アイデア</h2>
+
+      <h3>アイデア1: 環構造の解体と再構成</h3>
+
+      <p>通常の数学では、整数の加法と乗法は不可分に結びついています。
+      例えば $2 + 3 = 5$ と $2 \times 3 = 6$ は同じ整数環 $\mathbb{Z}$ の中の関係です。</p>
+
+      <p>IUT理論の核心的アイデアは、この加法と乗法の関係を一度<strong>切断</strong>し、
+      テータリンクを通して変形した後、遠アーベル幾何学を使って<strong>再構成</strong>することです。
+      この切断と再構成の過程で情報の「損失」が起こり、それが不等式として現れます。</p>
+
+      <div class="box box-example">
+        <div class="box-title">アナロジー: 通信理論との類似</div>
+        <p>このプロセスは通信理論に似ています：</p>
+        <ol>
+          <li><strong>エンコード</strong>: 算術データをフロベニオイド（圏論的データ）に変換</li>
+          <li><strong>通信路</strong>: テータリンクで送信（環構造が壊れる = ノイズ）</li>
+          <li><strong>デコード</strong>: 遠アーベル幾何学で再構成（情報の一部が失われる）</li>
+          <li><strong>情報量の損失</strong>: これが不等式（Szpiro不等式）として定量化される</li>
+        </ol>
+      </div>
+
+      <h3>アイデア2: 対数テータ格子</h3>
+
+      <p>テータリンク（横方向）と対数リンク（縦方向）を組み合わせると、
+      ホッジシアターの<strong>2次元格子</strong>が得られます。</p>
+
+      <div class="figure">
+        <svg width="500" height="320" viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="320" fill="#f7fafc" rx="8"/>
+
+          <!-- 格子のノード -->
+          <!-- 行0 -->
+          <circle cx="100" cy="60" r="20" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="100" y="64" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="250" cy="60" r="20" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="250" y="64" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="400" cy="60" r="20" fill="#ebf8ff" stroke="#3182ce" stroke-width="2"/>
+          <text x="400" y="64" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+
+          <!-- 行1 -->
+          <circle cx="100" cy="160" r="20" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="100" y="164" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="250" cy="160" r="20" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="250" y="164" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="400" cy="160" r="20" fill="#f0fff4" stroke="#38a169" stroke-width="2"/>
+          <text x="400" y="164" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+
+          <!-- 行2 -->
+          <circle cx="100" cy="260" r="20" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="100" y="264" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="250" cy="260" r="20" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="250" y="264" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+          <circle cx="400" cy="260" r="20" fill="#faf5ff" stroke="#805ad5" stroke-width="2"/>
+          <text x="400" y="264" text-anchor="middle" font-size="10" fill="#1a365d">HT</text>
+
+          <!-- 横矢印: テータリンク -->
+          <line x1="120" y1="60" x2="230" y2="60" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+          <line x1="270" y1="60" x2="380" y2="60" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+          <line x1="120" y1="160" x2="230" y2="160" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+          <line x1="270" y1="160" x2="380" y2="160" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+          <line x1="120" y1="260" x2="230" y2="260" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+          <line x1="270" y1="260" x2="380" y2="260" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-o)"/>
+
+          <!-- 縦矢印: 対数リンク -->
+          <line x1="100" y1="80" x2="100" y2="140" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+          <line x1="250" y1="80" x2="250" y2="140" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+          <line x1="400" y1="80" x2="400" y2="140" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+          <line x1="100" y1="180" x2="100" y2="240" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+          <line x1="250" y1="180" x2="250" y2="240" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+          <line x1="400" y1="180" x2="400" y2="240" stroke="#805ad5" stroke-width="2" marker-end="url(#arr-p)"/>
+
+          <!-- ラベル -->
+          <text x="175" y="50" text-anchor="middle" font-size="11" fill="#dd6b20" font-weight="bold">Θ-link</text>
+          <text x="70" y="115" text-anchor="middle" font-size="11" fill="#805ad5" font-weight="bold" transform="rotate(-90, 70, 115)">log</text>
+
+          <!-- 省略 -->
+          <text x="450" y="64" font-size="14" fill="#999">...</text>
+          <text x="450" y="164" font-size="14" fill="#999">...</text>
+          <text x="450" y="264" font-size="14" fill="#999">...</text>
+          <text x="100" y="295" text-anchor="middle" font-size="14" fill="#999">:</text>
+          <text x="250" y="295" text-anchor="middle" font-size="14" fill="#999">:</text>
+
+          <defs>
+            <marker id="arr-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#dd6b20"/>
+            </marker>
+            <marker id="arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#805ad5"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="figure-caption">対数テータ格子: HT = ホッジシアター。横方向がテータリンク、縦方向が対数リンク</div>
+      </div>
+
+      <h3>アイデア3: 多輻的表現</h3>
+
+      <p>テータリンクは環構造を壊すため、リンクの両側で「同じ」対象が異なる姿で見えます。
+      <strong>多輻的</strong>（multiradial）とは、このような環構造の変形に対して不変な
+      アルゴリズムや表現を指します。</p>
+
+      <div class="box box-example">
+        <div class="box-title">アナロジー: 座標系と不変量</div>
+        <p>物理学での例えが分かりやすいでしょう：</p>
+        <ul>
+          <li><strong>単輻的</strong>（uniradial）: 座標系に依存する量（速度の各成分 $v_x, v_y, v_z$）</li>
+          <li><strong>多輻的</strong>（multiradial）: 座標系に依存しない量（速さ $|v| = \sqrt{v_x^2 + v_y^2 + v_z^2}$）</li>
+        </ul>
+        <p>IUT理論では「環構造」が「座標系」に対応します。
+        テータリンクは座標系を変える操作で、多輻的アルゴリズムは座標系によらない手続きです。</p>
+      </div>
+
+      <!-- IUTの前提理論 -->
+      <h2 id="prerequisites-iut">IUT理論の前提となる望月の先行研究</h2>
+
+      <p>IUT理論は望月が20年以上かけて発展させた一連の理論の集大成です。
+      以下の先行研究がIUTの基盤となっています：</p>
+
+      <table>
+        <tr><th>論文/理論</th><th>年</th><th>内容</th><th>IUTでの役割</th></tr>
+        <tr>
+          <td>$p$ 進タイヒミュラー理論</td>
+          <td>1996-1999</td>
+          <td>双曲曲線の $p$ 進的一様化</td>
+          <td>理論の着想源</td>
+        </tr>
+        <tr>
+          <td>ホッジ・アラケロフ理論</td>
+          <td>1999-2002</td>
+          <td>楕円曲線の比較同型</td>
+          <td>テータ関数の評価</td>
+        </tr>
+        <tr>
+          <td>フロベニオイドの幾何学 I, II</td>
+          <td>2008</td>
+          <td>圏論的算術の抽象化</td>
+          <td>ホッジシアターの構成要素</td>
+        </tr>
+        <tr>
+          <td>エタールテータ関数</td>
+          <td>2009</td>
+          <td>テータ関数のフロベニオイド的解釈</td>
+          <td>テータリンクの構成</td>
+        </tr>
+        <tr>
+          <td>絶対遠アーベル幾何学 I-III</td>
+          <td>2012-2015</td>
+          <td>単遠アーベル復元アルゴリズム</td>
+          <td>環構造の復元</td>
+        </tr>
+      </table>
+
+      <div class="box box-warning">
+        <div class="box-title">理解の指針</div>
+        <p>以降の各章（Ch.6-9）では、各論文の内容を詳しく解説します。
+        数学的な厳密さと直感的な理解のバランスを意識してください。</p>
+        <p>完全な理解には上記の前提理論のすべてを習得する必要がありますが、
+        本解説では「何をしているか」「なぜそうするのか」の大きな流れを追うことを優先します。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="04_elliptic_curves.html" class="prev">楕円曲線と関連予想</a>
+        <a href="06_iut_paper1.html" class="next">論文I: ホッジシアターの構成</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 9: 論文IV — 対数体積計算</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#goal" class="section-link">論文IVの目標</a>
+        <a href="#log-volume" class="section-link">対数体積計算</a>
+        <a href="#szpiro" class="section-link">Szpiro不等式の導出</a>
+        <a href="#abc-proof" class="section-link">ABC予想への帰結</a>
+        <a href="#species" class="section-link">集合論的基礎</a>
+        <a href="#summary" class="section-link">IUT理論の全体まとめ</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 9: 論文IV — 対数体積計算
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 9: 論文IV — 対数体積計算</h1>
+        <p class="subtitle">Inter-universal Teichmuller Theory IV: Log-volume Computations and Set-theoretic Foundations</p>
+      </header>
+
+      <p>論文IVはIUT理論の最終段階です。論文IIIの系3.12で得られた抽象的な不等式を、
+      明示的な対数体積計算によって具体的な数値不等式（Szpiro不等式）に翻訳します。</p>
+
+      <!-- 論文IVの目標 -->
+      <h2 id="goal">論文IVの目標</h2>
+
+      <p>論文IVの目標を一言で言えば：</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">目標</div>
+        <p>系3.12の抽象的不等式</p>
+        <div class="math-block">
+          $$-\deg_{\mathrm{arith}}(q\text{-pilot}) \leq -\deg_{\mathrm{arith}}(\Theta\text{-pilot}) + (\text{不定性})$$
+        </div>
+        <p>を、以下の形の具体的な不等式に変換する：</p>
+        <div class="math-block">
+          $$\log|\Delta_E| \leq (6 + \varepsilon) \cdot \log N_E + C(\varepsilon)$$
+        </div>
+        <p>これがSzpiro不等式であり、ABC予想と等価。</p>
+      </div>
+
+      <!-- 対数体積計算 -->
+      <h2 id="log-volume">対数体積計算</h2>
+
+      <h3>$q$-パイロットの対数体積</h3>
+
+      <p>$q$-パイロットオブジェクトは楕円曲線 $E$ のTateパラメータ $q_E$ から構成されます。
+      その算術的次数（対数体積）は：</p>
+
+      <div class="math-block">
+        $$-\deg_{\mathrm{arith}}(q\text{-pilot}) \sim \frac{1}{[F:\mathbb{Q}]} \sum_{v \mid \Delta} v_p(q_{E,v}) \cdot \log p$$
+      </div>
+
+      <p>ここで和は $E$ が悪い（乗法的）還元を持つ素点 $v$ にわたります。
+      $v_p(q_{E,v})$ は $v$ でのTateパラメータの $p$ 進付値で、
+      $v_p(q_{E,v}) = -v_p(\Delta_{\min,v})$ です。したがって：</p>
+
+      <div class="math-block">
+        $$-\deg_{\mathrm{arith}}(q\text{-pilot}) \sim \frac{1}{[F:\mathbb{Q}]} \log|\Delta_{\min}|$$
+      </div>
+
+      <h3>テータパイロットの対数体積</h3>
+
+      <p>テータパイロットオブジェクトは、テータ関数値 $q^{j^2}$（$j = 1, \ldots, \lfloor\ell/2\rfloor$）から構成されます。
+      3つの不定性を考慮すると、テータパイロットは対数殻 $\mathcal{I}_v$ に収まり、
+      その対数体積の評価には、対数殻の体積と不定性からの寄与の計算が必要です。</p>
+
+      <h3>不定性からの寄与の計算</h3>
+
+      <p>各不定性からの寄与を明示的に計算します：</p>
+
+      <table>
+        <tr><th>不定性</th><th>寄与の概算</th><th>物理的意味</th></tr>
+        <tr>
+          <td>Ind1 (ガロア自己同型)</td>
+          <td>$O(\log(\text{導手}))$</td>
+          <td>ガロア群の自己同型の数</td>
+        </tr>
+        <tr>
+          <td>Ind2 (単数群)</td>
+          <td>$O(\log(\text{判別式}))$</td>
+          <td>単数群のサイズ</td>
+        </tr>
+        <tr>
+          <td>Ind3 (加法構造)</td>
+          <td>$\ell$ に依存する項</td>
+          <td>対数リンクによる情報損失</td>
+        </tr>
+      </table>
+
+      <!-- Szpiro不等式の導出 -->
+      <h2 id="szpiro">Szpiro不等式の導出</h2>
+
+      <p>系3.12と上記の対数体積計算を組み合わせると、以下の形の不等式が得られます：</p>
+
+      <div class="math-block">
+        $$\frac{1}{6} \log|\Delta_E| \leq (1 + \varepsilon') \cdot \log N_E + C'$$
+      </div>
+
+      <p>ここで $\varepsilon'$ と $C'$ は $\ell$（テータ関数の評価に使う素数）に依存します。
+      $\ell$ を適切に選ぶことで $\varepsilon'$ を任意に小さくできます（ただし $C'$ は大きくなる）。</p>
+
+      <p>上式の両辺を $6$ 倍すると：</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">Szpiro不等式（IUT理論による）</div>
+        <div class="math-block">
+          $$\log|\Delta_E| \leq (6 + \varepsilon) \cdot \log N_E + C(\varepsilon)$$
+        </div>
+        <p>任意の $\varepsilon > 0$ に対して定数 $C(\varepsilon)$ が存在して、
+        すべての半安定楕円曲線 $E/F$ に対してこの不等式が成立する。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 指数 $6$ の由来</div>
+        <p>Szpiro不等式の指数 $6$ はどこから来るのでしょうか？</p>
+        <p>テータ関数値 $q^{j^2}$ の指数 $j^2$ が鍵です。
+        $j$ は $1$ から $\lfloor\ell/2\rfloor$ まで走り、
+        $j^2$ の「平均」は大まかに $\ell^2/12$ 程度です。</p>
+        <p>一方、$q$-パイロットは $q^1$ に対応し、これらの比較から
+        $1 : \ell^2/12$ の比が生じます。$\ell$ 等分点に関する正規化と
+        楕円曲線の次元（$2$）や自由度（$3$）を考慮すると、
+        最終的に指数 $6 = 2 \times 3$ が自然に現れます。</p>
+      </div>
+
+      <!-- ABC予想への帰結 -->
+      <h2 id="abc-proof">ABC予想への帰結</h2>
+
+      <p>Chapter 4で示した通り、Szpiro予想とABC予想は等価です。
+      したがって、IUT理論によるSzpiro不等式から直ちにABC予想が従います。</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">ABC予想（IUT理論による主張）</div>
+        <p>任意の $\varepsilon > 0$ に対して、定数 $K(\varepsilon)$ が存在して、
+        すべてのABC triple $(a, b, c)$（$a + b = c$, $\gcd(a,b) = 1$）に対して：</p>
+        <div class="math-block">
+          $$c < K(\varepsilon) \cdot \operatorname{rad}(abc)^{1+\varepsilon}$$
+        </div>
+      </div>
+
+      <p>より正確には、IUT理論はABC予想だけでなく、以下のより強い結果も主張しています：</p>
+
+      <ul>
+        <li><strong>双曲曲線に対するVojta予想</strong></li>
+        <li><strong>強いSzpiro予想</strong>（すべての数体上で成立）</li>
+      </ul>
+
+      <!-- 集合論的基礎 -->
+      <h2 id="species">集合論的基礎: 種（species）</h2>
+
+      <p>論文IVの後半では、IUT理論の<strong>集合論的基礎</strong>が議論されます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">種（species）の概念</div>
+        <p>望月は<strong>種</strong>（species）と呼ばれる概念を導入しました。
+        これは、集合論的な宇宙（グロタンディーク宇宙）の選択に依存しない
+        数学的概念の定式化です。</p>
+        <p>通常の数学では、集合論の基礎（ZFC公理系）の上で議論しますが、
+        IUT理論では「異なる宇宙」（＝異なる環構造のコピー）を扱うため、
+        宇宙の選択に依存しない枠組みが必要になります。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: なぜ集合論が問題になるか</div>
+        <p>通常の数学では、一つの集合論的宇宙の中で議論すれば十分です。
+        しかし、IUT理論では「ホッジシアターのコピー」を考え、
+        それらの間のテータリンクは環構造を壊します。</p>
+        <p>これは、異なるコピーが「同じ宇宙に住んでいない」可能性を意味し、
+        集合論的な基礎の再検討が必要になります。
+        「種」の概念は、この問題に対する望月の解答です。</p>
+        <p>ただし、多くの数学者はこの集合論的な議論が
+        本質的に必要かどうかについて懐疑的です。</p>
+      </div>
+
+      <!-- IUT理論の全体まとめ -->
+      <h2 id="summary">IUT理論の全体まとめ</h2>
+
+      <div class="box box-warning">
+        <div class="box-title">IUT理論による ABC予想の証明の流れ（全体まとめ）</div>
+        <ol>
+          <li><strong>入力</strong>: 楕円曲線 $E/F$、素数 $\ell \geq 5$（初期テータデータ）</li>
+          <li><strong>論文I</strong>: 初期データからホッジシアターを構成。乗法的・加法的対称性を確立</li>
+          <li><strong>論文II</strong>: テータリンクを構成。$q \leftrightarrow q^{j^2}$ の対応を確立。3つの剛性を証明</li>
+          <li><strong>論文III</strong>: 対数リンクと合わせて対数テータ格子を構成。多輻的アルゴリズムを開発。
+          3つの不定性を識別・制御し、系3.12（核心的不等式）を導出</li>
+          <li><strong>論文IV</strong>: 対数体積の明示的計算により、系3.12をSzpiro不等式に変換</li>
+          <li><strong>結論</strong>: Szpiro不等式 $\Leftrightarrow$ ABC予想</li>
+        </ol>
+      </div>
+
+      <div class="figure">
+        <svg width="650" height="140" viewBox="0 0 650 140" xmlns="http://www.w3.org/2000/svg">
+          <rect width="650" height="140" fill="#f7fafc" rx="8"/>
+
+          <!-- フロー図 -->
+          <rect x="10" y="45" width="100" height="50" rx="6" fill="#1a365d"/>
+          <text x="60" y="67" text-anchor="middle" fill="white" font-size="10">初期テータ</text>
+          <text x="60" y="82" text-anchor="middle" fill="white" font-size="10">データ</text>
+
+          <line x1="110" y1="70" x2="135" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arr4)"/>
+
+          <rect x="135" y="45" width="100" height="50" rx="6" fill="#3182ce"/>
+          <text x="185" y="67" text-anchor="middle" fill="white" font-size="10">ホッジシアター</text>
+          <text x="185" y="82" text-anchor="middle" fill="white" font-size="9">(論文I)</text>
+
+          <line x1="235" y1="70" x2="260" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arr4)"/>
+
+          <rect x="260" y="45" width="100" height="50" rx="6" fill="#38a169"/>
+          <text x="310" y="67" text-anchor="middle" fill="white" font-size="10">テータリンク</text>
+          <text x="310" y="82" text-anchor="middle" fill="white" font-size="9">(論文II)</text>
+
+          <line x1="360" y1="70" x2="385" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arr4)"/>
+
+          <rect x="385" y="45" width="100" height="50" rx="6" fill="#805ad5"/>
+          <text x="435" y="67" text-anchor="middle" fill="white" font-size="10">系3.12</text>
+          <text x="435" y="82" text-anchor="middle" fill="white" font-size="9">(論文III)</text>
+
+          <line x1="485" y1="70" x2="510" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arr4)"/>
+
+          <rect x="510" y="45" width="125" height="50" rx="6" fill="#dd6b20"/>
+          <text x="572" y="67" text-anchor="middle" fill="white" font-size="10">Szpiro ⟺ ABC</text>
+          <text x="572" y="82" text-anchor="middle" fill="white" font-size="9">(論文IV)</text>
+
+          <!-- 下部注釈 -->
+          <text x="325" y="125" text-anchor="middle" font-size="11" fill="#4a5568">500ページ以上の論文が、この1つの不等式を目指して構築されている</text>
+
+          <defs>
+            <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="figure-caption">IUT理論の全体フロー</div>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="08_iut_paper3.html" class="prev">論文III: 対数テータ格子</a>
+        <a href="10_controversy.html" class="next">論争と現状</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 6: 論文I — ホッジシアターの構成</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#initial-data" class="section-link">初期テータデータ</a>
+        <a href="#frobenioid" class="section-link">フロベニオイド</a>
+        <a href="#anabelian" class="section-link">遠アーベル幾何学</a>
+        <a href="#prime-strips" class="section-link">プライムストリップ</a>
+        <a href="#symmetries" class="section-link">2つの対称性</a>
+        <a href="#hodge-theater" class="section-link">ホッジシアター</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 6: 論文I — ホッジシアターの構成
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 6: 論文I — ホッジシアターの構成</h1>
+        <p class="subtitle">Inter-universal Teichmuller Theory I: Construction of Hodge Theaters</p>
+      </header>
+
+      <p>IUT理論の最初の論文は、理論全体の舞台となる<strong>ホッジシアター</strong>を構成します。
+      ここでは、楕円曲線の算術データを圏論的に組織化し、
+      後続の論文で行われるテータリンクの構成に備えます。</p>
+
+      <!-- 初期テータデータ -->
+      <h2 id="initial-data">初期テータデータ</h2>
+
+      <p>IUT理論の出発点は、以下のデータの組です：</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: 初期テータデータ</div>
+        <p>以下のデータの組 $(F/F_{\mathrm{mod}}, \overline{F}, E, \ell, \underline{\mathbb{V}}, \underline{\epsilon})$ を
+        <strong>初期テータデータ</strong>（initial theta data）と呼ぶ：</p>
+        <ol>
+          <li>$F$: 代数体（数体）。$F_{\mathrm{mod}} \subseteq F$ は特定の部分体</li>
+          <li>$\overline{F}$: $F$ の代数閉包の選択</li>
+          <li>$E$: $F$ 上の楕円曲線（半安定還元を持つ）</li>
+          <li>$\ell \geq 5$: 素数（十分大きくとる）</li>
+          <li>$\underline{\mathbb{V}}$: $F$ の素点の集合に関する選択</li>
+          <li>$\underline{\epsilon}$: $E[\ell]$ の $\ell$ 等分点に関する選択</li>
+        </ol>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 初期データの直感</div>
+        <p>IUT理論を「機械」とするなら、初期テータデータはその「入力」です：</p>
+        <ul>
+          <li><strong>楕円曲線 $E$</strong>: ABC予想を証明したい対象。ABC triple $(a,b,c)$ からフレイ曲線として構成される</li>
+          <li><strong>素数 $\ell$</strong>: 理論の「解像度」を決めるパラメータ。最終的に $\ell \to \infty$ として最良の不等式を得る</li>
+          <li><strong>素点の集合</strong>: $E$ が悪い還元を持つ素数たちの情報</li>
+        </ul>
+        <p>出力は Szpiro不等式（= ABC予想）です。</p>
+      </div>
+
+      <!-- フロベニオイド -->
+      <h2 id="frobenioid">フロベニオイド</h2>
+
+      <h3>動機: なぜ圏論的抽象化が必要か</h3>
+
+      <p>通常、数体 $F$ の算術（イデアル、因子、直線束など）は $F$ の環構造の上で定義されます。
+      しかし、IUT理論ではテータリンクによって環構造が変形されます。
+      環構造に依存する概念は、テータリンクの先では意味を失ってしまいます。</p>
+
+      <p>そこで必要になるのが、環構造を直接使わず、
+      <strong>圏論的に</strong>算術データを記述する方法です。これがフロベニオイドの役割です。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: フロベニオイドの直感的定義</div>
+        <p><strong>フロベニオイド</strong>は、以下の算術的情報を圏論的に抽象化したもの：</p>
+        <ul>
+          <li><strong>対象</strong>: 直線束（line bundles）に対応</li>
+          <li><strong>射</strong>: 直線束の間の写像に対応</li>
+          <li><strong>次数</strong>（degree）: 射に付随する非負整数で、直線束の「大きさ」を測る</li>
+          <li><strong>フロベニウス射</strong>: $d$ 倍写像に対応する特別な射（$d \geq 1$）</li>
+        </ul>
+        <p>名前は "Frobenius" と "monoid" の合成語。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: 数体のフロベニオイド</div>
+        <p>数体 $F$ に対して、<strong>モデルフロベニオイド</strong> $\mathcal{F}$ が構成されます：</p>
+        <ul>
+          <li>対象: $F$ の分数イデアルのクラス</li>
+          <li>射: イデアルの包含と「$d$ 乗」操作</li>
+          <li>次数: $\deg(\mathfrak{a}) = \log(\mathcal{O}_F / \mathfrak{a})$（イデアルのノルムの対数）</li>
+        </ul>
+        <p>重要な点: フロベニオイドの圏論的構造から、
+        元の数体の情報（ある程度）を復元できます。つまり、情報の損失は最小限です。</p>
+      </div>
+
+      <!-- 遠アーベル幾何学 -->
+      <h2 id="anabelian">遠アーベル幾何学の役割</h2>
+
+      <h3>グロタンディークの予想</h3>
+
+      <p>1983年、グロタンディークは以下のような大胆な予想を立てました：</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">グロタンディークの遠アーベル予想（簡略版）</div>
+        <p>数体 $K$ 上の双曲曲線 $X$ は、そのエタール基本群 $\pi_1(X)$ によって
+        $K$ 上の同型を除いて一意に決定される。</p>
+        <p>すなわち、$\pi_1(X) \cong \pi_1(Y)$（位相群として）ならば $X \cong Y$（$K$ 上）。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 基本群とは</div>
+        <p><strong>基本群</strong>は、空間の「穴」の構造を記述する群です。</p>
+        <p>トポロジーでは、基本群 $\pi_1(X, x_0)$ は点 $x_0$ を始点・終点とするループの同値類の群です。
+        例えば、円 $S^1$ の基本群は $\mathbb{Z}$（ループの巻き数を数える）。</p>
+        <p>代数幾何では、<strong>エタール基本群</strong>が代わりに使われます。
+        これは、$X$ の有限エタール被覆全体を分類する副有限群です。
+        数体 $K$ 上では、ガロア群 $G_K$ も基本群の一種です。</p>
+        <p>遠アーベル予想は「基本群から幾何が完全に復元できる」という驚くべき主張です。</p>
+      </div>
+
+      <h3>望月の単遠アーベル復元</h3>
+
+      <p>遠アーベル予想（中島-望月、ポップらにより証明）を超えて、
+      望月は<strong>単遠アーベル復元</strong>（mono-anabelian reconstruction）を確立しました：</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">単遠アーベル復元（望月）</div>
+        <p>数体 $K$ 上の双曲曲線 $X$ に対して、$\pi_1(X)$（位相群としての構造のみ）から、
+        以下を<strong>アルゴリズム的に</strong>復元できる：</p>
+        <ul>
+          <li>基礎体 $K$ とその代数閉包 $\overline{K}$</li>
+          <li>曲線 $X$ 自体</li>
+          <li>$X$ の関数体 $K(X)$</li>
+          <li>$K$ のすべての付値（アルキメデス・非アルキメデス）</li>
+        </ul>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">IUTでの重要性</div>
+        <p>単遠アーベル復元は、テータリンクで環構造が壊れた後に<strong>環構造を再構成</strong>する
+        ために使われます。基本群のデータはテータリンクを通じても保存されるため、
+        基本群から環構造を復元するアルゴリズムが不可欠なのです。</p>
+      </div>
+
+      <!-- プライムストリップ -->
+      <h2 id="prime-strips">プライムストリップ</h2>
+
+      <div class="box box-definition">
+        <div class="box-title">定義: プライムストリップ</div>
+        <p><strong>プライムストリップ</strong>は、数体 $F$ の各素点 $v$（有限素点と無限素点）での
+        ローカルデータ（フロベニオイド、ガロア群など）を束ねた構造です。</p>
+        <p>IUT理論では複数の種類のプライムストリップが使われます：</p>
+        <ul>
+          <li><strong>$\mathcal{F}$-prime strip</strong>: フロベニオイドデータを含む（算術的情報）</li>
+          <li><strong>$\mathcal{D}$-prime strip</strong>: ガロア群データを含む（群論的情報）</li>
+          <li><strong>$\mathcal{D}\text{-}\Theta$-prime strip</strong>: テータ関数のデータも含む</li>
+        </ul>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: プライムストリップの直感</div>
+        <p>数体 $F$ の各素数 $p$（と無限素点）で、楕円曲線 $E$ はそれぞれ異なる「姿」を見せます
+        （良い還元、悪い還元など）。</p>
+        <p>プライムストリップは、これらすべての素点でのローカルな情報を
+        一つの「帯」（strip）としてまとめたものです。
+        各素点での情報が独立にパッケージ化されているため、
+        テータリンクで各素点の情報を個別に変形することが可能になります。</p>
+      </div>
+
+      <!-- 2つの対称性 -->
+      <h2 id="symmetries">2つの対称性</h2>
+
+      <p>ホッジシアターの構成には、$\ell$ 等分点 $E[\ell]$ に関連する2つの対称性が本質的です。</p>
+
+      <h3>乗法的対称性: $\mathbb{F}_\ell^{\times}$</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">乗法的対称性</div>
+        <p>$\mathbb{F}_\ell^{\times} = (\mathbb{Z}/\ell\mathbb{Z})^{\times}$ の作用。
+        ラベル集合 $\{1, 2, \ldots, \lfloor \ell/2 \rfloor\}$
+        （テータ関数の評価点を指定するラベル）に作用します。</p>
+        <p>これはガロア群の作用と互換的で、「グローバルな」対称性を提供します。</p>
+      </div>
+
+      <h3>加法的対称性: $\mathbb{F}_\ell$</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">加法的対称性</div>
+        <p>$\mathbb{F}_\ell = \mathbb{Z}/\ell\mathbb{Z}$ の加法群の作用。
+        $\ell$ 等分点全体 $E[\ell]$ に作用します。</p>
+        <p>これはテータ関数の値の「加法的な」関係を反映し、「ローカルな」対称性を提供します。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">具体例: $\ell = 5$ の場合</div>
+        <p>$\ell = 5$ とすると：</p>
+        <ul>
+          <li><strong>乗法的対称性</strong>: $\mathbb{F}_5^{\times} = \{1, 2, 3, 4\} \cong \mathbb{Z}/4\mathbb{Z}$。
+          ラベル集合 $\{1, 2\}$（$= \{1, \ldots, \lfloor 5/2 \rfloor\}$）に作用</li>
+          <li><strong>加法的対称性</strong>: $\mathbb{F}_5 = \{0, 1, 2, 3, 4\}$。
+          $E[5] \cong (\mathbb{Z}/5\mathbb{Z})^2$ に作用</li>
+        </ul>
+        <p>乗法的対称性は「テータ関数をどの点で評価するか」の選択に関わり、
+        加法的対称性は「テータ関数値の和・差の関係」に関わります。</p>
+      </div>
+
+      <!-- ホッジシアター -->
+      <h2 id="hodge-theater">ホッジシアターの構造</h2>
+
+      <p>これらすべての構成要素を組み合わせて、ホッジシアターが構築されます。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">ホッジシアター（概略）</div>
+        <p>ホッジシアター $\mathcal{HT}^{\Theta}$ は以下の要素から構成される：</p>
+        <ol>
+          <li><strong>$\Theta$-ホッジシアター</strong> $\mathcal{HT}^{\Theta}$:
+          テータ関数データを持つプライムストリップの集まり。乗法的対称性 $\mathbb{F}_\ell^{\times}$ で装飾</li>
+          <li><strong>$\mathcal{D}\text{-}\Theta^{\pm\mathrm{ell}}$-ホッジシアター</strong>:
+          $\ell$ 等分点の加法的対称性 $\mathbb{F}_\ell$ で装飾されたプライムストリップの集まり</li>
+          <li>これらを結ぶ各種の<strong>同型</strong>と<strong>制約</strong></li>
+        </ol>
+      </div>
+
+      <div class="figure">
+        <svg width="600" height="350" viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg">
+          <rect width="600" height="350" fill="#f7fafc" rx="8"/>
+
+          <!-- ホッジシアター外枠 -->
+          <rect x="30" y="30" width="540" height="290" rx="12" fill="none" stroke="#1a365d" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="300" y="22" text-anchor="middle" font-size="14" fill="#1a365d" font-weight="bold">ホッジシアター HT</text>
+
+          <!-- 乗法側 -->
+          <rect x="50" y="50" width="230" height="250" rx="8" fill="#ebf8ff" stroke="#3182ce" stroke-width="1.5"/>
+          <text x="165" y="75" text-anchor="middle" font-size="12" fill="#3182ce" font-weight="bold">乗法的対称性 F_ℓ*</text>
+
+          <!-- ラベル -->
+          <rect x="70" y="90" width="50" height="35" rx="4" fill="white" stroke="#3182ce"/>
+          <text x="95" y="112" text-anchor="middle" font-size="11" fill="#1a365d">j=1</text>
+          <rect x="130" y="90" width="50" height="35" rx="4" fill="white" stroke="#3182ce"/>
+          <text x="155" y="112" text-anchor="middle" font-size="11" fill="#1a365d">j=2</text>
+          <rect x="190" y="90" width="70" height="35" rx="4" fill="white" stroke="#3182ce"/>
+          <text x="225" y="112" text-anchor="middle" font-size="11" fill="#1a365d">j=⌊ℓ/2⌋</text>
+
+          <text x="178" y="108" font-size="14" fill="#999">...</text>
+
+          <!-- プライムストリップ -->
+          <rect x="70" y="140" width="190" height="35" rx="4" fill="#e6fffa" stroke="#38a169"/>
+          <text x="165" y="162" text-anchor="middle" font-size="10" fill="#1a365d">F-prime strip (各ラベル j ごと)</text>
+
+          <!-- テータ関数 -->
+          <rect x="70" y="190" width="190" height="45" rx="4" fill="#fefcbf" stroke="#d69e2e"/>
+          <text x="165" y="210" text-anchor="middle" font-size="10" fill="#1a365d">テータ関数値</text>
+          <text x="165" y="227" text-anchor="middle" font-size="10" fill="#805ad5">Θ(j) = q^{j²}</text>
+
+          <!-- q-パラメータ -->
+          <rect x="70" y="250" width="190" height="35" rx="4" fill="#fff5f5" stroke="#e53e3e"/>
+          <text x="165" y="272" text-anchor="middle" font-size="10" fill="#e53e3e" font-weight="bold">q-パラメータ (Tate)</text>
+
+          <!-- 加法側 -->
+          <rect x="320" y="50" width="230" height="250" rx="8" fill="#f0fff4" stroke="#38a169" stroke-width="1.5"/>
+          <text x="435" y="75" text-anchor="middle" font-size="12" fill="#38a169" font-weight="bold">加法的対称性 F_ℓ</text>
+
+          <!-- ℓ等分点 -->
+          <rect x="340" y="95" width="190" height="55" rx="4" fill="white" stroke="#38a169"/>
+          <text x="435" y="118" text-anchor="middle" font-size="10" fill="#1a365d">E[ℓ] ≅ (Z/ℓZ)²</text>
+          <text x="435" y="140" text-anchor="middle" font-size="10" fill="#4a5568">ℓ等分点のガロア表現</text>
+
+          <!-- D-prime strip -->
+          <rect x="340" y="165" width="190" height="35" rx="4" fill="#e6fffa" stroke="#38a169"/>
+          <text x="435" y="187" text-anchor="middle" font-size="10" fill="#1a365d">D-prime strip</text>
+
+          <!-- ガロア群 -->
+          <rect x="340" y="215" width="190" height="55" rx="4" fill="#faf5ff" stroke="#805ad5"/>
+          <text x="435" y="238" text-anchor="middle" font-size="10" fill="#1a365d">ガロア群 G_K</text>
+          <text x="435" y="258" text-anchor="middle" font-size="10" fill="#4a5568">遠アーベル復元データ</text>
+
+          <!-- 接続矢印 -->
+          <line x1="280" y1="175" x2="320" y2="175" stroke="#dd6b20" stroke-width="2" marker-end="url(#arr-conn)"/>
+          <text x="300" y="168" text-anchor="middle" font-size="9" fill="#dd6b20">接続</text>
+
+          <defs>
+            <marker id="arr-conn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#dd6b20"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="figure-caption">ホッジシアターの概略構造: 乗法的対称性と加法的対称性が2つの「翼」を構成する</div>
+      </div>
+
+      <h3>ラベルの役割</h3>
+
+      <p>ラベル $j \in \{1, 2, \ldots, \lfloor \ell/2 \rfloor\}$ は、テータ関数を<strong>どの等分点で評価するか</strong>を指定します。
+      テータ関数 $\Theta$ の $j$ での評価値は $q^{j^2}$（Tateパラメータ $q$ の $j^2$ 乗）に関係します。</p>
+
+      <p>この $q^{j^2}$ という値が、後にテータリンク（Ch.7）を通じて
+      $q$-パイロットオブジェクト（$q$ パラメータ自体）と比較されます。
+      $j$ が複数の値を取ることで、$q^{1}, q^{4}, q^{9}, \ldots, q^{\lfloor \ell/2 \rfloor^2}$ の
+      「テータパイロットオブジェクト」が得られ、これと $q$ を比較することでSzpiro不等式が導かれます。</p>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: なぜ $q^{j^2}$ が現れるか</div>
+        <p>ヤコビのテータ関数 $\theta(z, \tau) = \sum_{n=-\infty}^{\infty} q^{n^2} e^{2\pi i n z}$
+        （$q = e^{\pi i \tau}$）を思い出してください。
+        $z$ を $\ell$ 等分点 $j/\ell$ に特殊化すると、$q^{j^2}$ の項が支配的になります。</p>
+        <p>IUT理論ではこのテータ関数の $p$ 進的なバージョン（エタールテータ関数）を使いますが、
+        基本的な構造は同じです。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">論文Iのまとめ</div>
+        <p>論文Iでは、具体的な不等式はまだ得られません。
+        ここでの成果は、後続の論文で使われる<strong>舞台装置</strong>の構築です：</p>
+        <ul>
+          <li>初期テータデータからホッジシアターを構成する手順の確立</li>
+          <li>ホッジシアターの複数のコピーを作れること</li>
+          <li>乗法的・加法的対称性が正しく機能すること</li>
+          <li>プライムストリップ間の各種同型の確認</li>
+        </ul>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="05_iut_overview.html" class="prev">IUT理論の全体像</a>
+        <a href="07_iut_paper2.html" class="next">論文II: テータリンクの構成</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

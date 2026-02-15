@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: 具体例と数値検証</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#famous" class="section-link">有名なABC triple</a>
+        <a href="#high-quality" class="section-link">高quality triple一覧</a>
+        <a href="#patterns" class="section-link">パターンの観察</a>
+        <a href="#interactive" class="section-link">インタラクティブ検証</a>
+        <a href="#search" class="section-link">ABC triple探索</a>
+        <a href="#python" class="section-link">Python検証</a>
+        <a href="#numerical" class="section-link">数値的証拠</a>
+      </nav>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 2: 具体例と数値検証
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 2: 具体例と数値検証</h1>
+        <p class="subtitle">ABC予想を具体的な数で体感する</p>
+      </header>
+
+      <!-- 有名なABC triple -->
+      <h2 id="famous">有名なABC triple</h2>
+
+      <p>ABC予想の意味を理解するために、具体的な数値で計算してみましょう。
+      特に quality $q > 1$ となる「例外的な」ABC triple が重要です。</p>
+
+      <h3>例1: $(1, 8, 9)$ — 最も有名なABC triple</h3>
+
+      <div class="box box-example">
+        <div class="box-title">詳細計算: $(1, 8, 9)$</div>
+        <table>
+          <tr><th>項目</th><th>値</th><th>計算過程</th></tr>
+          <tr><td>$a$</td><td>$1$</td><td>素因数なし</td></tr>
+          <tr><td>$b$</td><td>$8 = 2^3$</td><td>素因数: $\{2\}$</td></tr>
+          <tr><td>$c$</td><td>$9 = 3^2$</td><td>素因数: $\{3\}$</td></tr>
+          <tr><td>$a + b = c$</td><td>$1 + 8 = 9$ ✓</td><td></td></tr>
+          <tr><td>$\gcd(a, b)$</td><td>$1$ ✓</td><td></td></tr>
+          <tr><td>$abc$</td><td>$72 = 2^3 \times 3^2$</td><td></td></tr>
+          <tr><td>$\operatorname{rad}(abc)$</td><td>$6 = 2 \times 3$</td><td></td></tr>
+          <tr><td>$q$</td><td>$\frac{\log 9}{\log 6} \approx 1.2263$</td><td>$q > 1$ ★</td></tr>
+        </table>
+        <p>このtripleでは $c = 9 > 6 = \operatorname{rad}(abc)$ です。
+        $b = 2^3$ と $c = 3^2$ が大きな累乗であるため、$\operatorname{rad}$ が小さくなり、quality が $1$ を超えます。</p>
+      </div>
+
+      <h3>例2: $(5, 27, 32)$</h3>
+
+      <div class="box box-example">
+        <div class="box-title">詳細計算: $(5, 27, 32)$</div>
+        <table>
+          <tr><th>項目</th><th>値</th><th>計算過程</th></tr>
+          <tr><td>$a$</td><td>$5$</td><td>素数</td></tr>
+          <tr><td>$b$</td><td>$27 = 3^3$</td><td>素因数: $\{3\}$</td></tr>
+          <tr><td>$c$</td><td>$32 = 2^5$</td><td>素因数: $\{2\}$</td></tr>
+          <tr><td>$abc$</td><td>$4320 = 2^5 \times 3^3 \times 5$</td><td></td></tr>
+          <tr><td>$\operatorname{rad}(abc)$</td><td>$30 = 2 \times 3 \times 5$</td><td></td></tr>
+          <tr><td>$q$</td><td>$\frac{\log 32}{\log 30} = \frac{5\log 2}{\log 30} \approx 1.0195$</td><td>$q > 1$ ★</td></tr>
+        </table>
+        <p>質素因数が $2, 3, 5$ のみですが、$b = 3^3$ と $c = 2^5$ が高い累乗のため quality が $1$ をわずかに超えます。</p>
+      </div>
+
+      <h3>例3: $(1, 80, 81)$</h3>
+
+      <div class="box box-example">
+        <div class="box-title">詳細計算: $(1, 80, 81)$</div>
+        <table>
+          <tr><th>項目</th><th>値</th><th>計算過程</th></tr>
+          <tr><td>$a$</td><td>$1$</td><td></td></tr>
+          <tr><td>$b$</td><td>$80 = 2^4 \times 5$</td><td>素因数: $\{2, 5\}$</td></tr>
+          <tr><td>$c$</td><td>$81 = 3^4$</td><td>素因数: $\{3\}$</td></tr>
+          <tr><td>$abc$</td><td>$6480 = 2^4 \times 3^4 \times 5$</td><td></td></tr>
+          <tr><td>$\operatorname{rad}(abc)$</td><td>$30 = 2 \times 3 \times 5$</td><td></td></tr>
+          <tr><td>$q$</td><td>$\frac{\log 81}{\log 30} = \frac{4\log 3}{\log 30} \approx 1.2920$</td><td>$q > 1$ ★</td></tr>
+        </table>
+        <p>$c = 81 = 3^4$ が4乗であり、$\operatorname{rad}$ に比べてかなり大きいため、高い quality を持ちます。</p>
+      </div>
+
+      <h3>例4: 「普通の」ABC triple $(3, 7, 10)$</h3>
+
+      <div class="box box-example">
+        <div class="box-title">詳細計算: $(3, 7, 10)$</div>
+        <table>
+          <tr><th>項目</th><th>値</th><th>計算過程</th></tr>
+          <tr><td>$a$</td><td>$3$</td><td>素数</td></tr>
+          <tr><td>$b$</td><td>$7$</td><td>素数</td></tr>
+          <tr><td>$c$</td><td>$10 = 2 \times 5$</td><td></td></tr>
+          <tr><td>$abc$</td><td>$210 = 2 \times 3 \times 5 \times 7$</td><td></td></tr>
+          <tr><td>$\operatorname{rad}(abc)$</td><td>$210$</td><td>squarefreeなので $\operatorname{rad} = abc$</td></tr>
+          <tr><td>$q$</td><td>$\frac{\log 10}{\log 210} \approx 0.4307$</td><td>$q < 1$</td></tr>
+        </table>
+        <p>$a, b, c$ がすべて squarefree（平方因子を持たない）の場合、$\operatorname{rad}(abc) = abc$ となり、
+        quality は常に $1$ 未満になります。累乗がないと例外的なtriple にはなりません。</p>
+      </div>
+
+      <!-- 高quality triple一覧 -->
+      <h2 id="high-quality">quality が高い ABC triple 一覧</h2>
+
+      <p>$c \leq 10{,}000$ の範囲で、特に quality が高い ABC triple を一覧にしました。</p>
+
+      <table>
+        <tr>
+          <th>順位</th><th>$a$</th><th>$b$</th><th>$c$</th>
+          <th>$\operatorname{rad}(abc)$</th><th>$q$</th><th>特徴</th>
+        </tr>
+        <tr><td>1</td><td>$2$</td><td>$6436341$</td><td>$6436343$</td><td>$15042$</td><td>$1.6299$</td><td>$b = 3^{10} \times 109$</td></tr>
+        <tr><td>2</td><td>$11$</td><td>$3125$</td><td>$3136$</td><td>$110$</td><td>$1.7112$</td><td>$b = 5^5$, $c = 56^2$</td></tr>
+        <tr><td>3</td><td>$1$</td><td>$8$</td><td>$9$</td><td>$6$</td><td>$1.2263$</td><td>$b = 2^3$, $c = 3^2$</td></tr>
+        <tr><td>4</td><td>$1$</td><td>$80$</td><td>$81$</td><td>$30$</td><td>$1.2920$</td><td>$c = 3^4$</td></tr>
+        <tr><td>5</td><td>$32$</td><td>$49$</td><td>$81$</td><td>$42$</td><td>$1.1757$</td><td>$a = 2^5$, $b = 7^2$, $c = 3^4$</td></tr>
+        <tr><td>6</td><td>$1$</td><td>$48$</td><td>$49$</td><td>$42$</td><td>$1.0404$</td><td>$c = 7^2$</td></tr>
+        <tr><td>7</td><td>$1$</td><td>$63$</td><td>$64$</td><td>$42$</td><td>$1.1130$</td><td>$c = 2^6$, $b = 7 \times 3^2$</td></tr>
+        <tr><td>8</td><td>$1$</td><td>$624$</td><td>$625$</td><td>$390$</td><td>$1.0790$</td><td>$c = 5^4$</td></tr>
+        <tr><td>9</td><td>$1$</td><td>$2400$</td><td>$2401$</td><td>$1470$</td><td>$1.0677$</td><td>$c = 7^4$</td></tr>
+        <tr><td>10</td><td>$5$</td><td>$27$</td><td>$32$</td><td>$30$</td><td>$1.0195$</td><td>$b = 3^3$, $c = 2^5$</td></tr>
+      </table>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: パターンを読み取る</div>
+        <p>上の表から見えてくるパターン：</p>
+        <ul>
+          <li>quality が高い triple では、$a, b, c$ の少なくとも1つが<strong>大きな累乗数</strong>（$2^5$, $3^4$, $5^5$ など）</li>
+          <li>$a = 1$ のケースが多い（$1$ は根基に寄与しないため）</li>
+          <li>累乗が大きいほど $\operatorname{rad}$ が小さくなり、quality が上がる</li>
+        </ul>
+        <p>ABC予想は「このような例外は $\varepsilon > 0$ を固定すれば有限個」と主張しています。</p>
+      </div>
+
+      <!-- パターンの観察 -->
+      <h2 id="patterns">パターンの観察</h2>
+
+      <h3>なぜ累乗数が関わるのか</h3>
+      <p>quality が $1$ を超えるためには、$c > \operatorname{rad}(abc)$ でなければなりません。
+      これは $abc$ が大きな累乗因子を含む場合にのみ起こります。なぜなら：</p>
+
+      <div class="math-block">
+        $$\operatorname{rad}(abc) = \operatorname{rad}(abc) \text{ は } abc \text{ の「種類」のみ見る}$$
+      </div>
+
+      <p>例えば $c = p^k$（素数の $k$ 乗）のとき：</p>
+      <ul>
+        <li>$c$ への寄与: $c = p^k$（指数的に大きい）</li>
+        <li>$\operatorname{rad}$ への寄与: $p$（定数）</li>
+        <li>$k$ が大きいほど、$c$ と $\operatorname{rad}$ の差が開く</li>
+      </ul>
+
+      <h3>$a = 1$ のケース：$1 + b = c$ </h3>
+      <p>$a = 1$ のとき、$\operatorname{rad}(1 \cdot b \cdot c) = \operatorname{rad}(bc)$ です。
+      $1$ は根基に寄与しないため、quality を上げる方向に働きます。
+      歴史的に発見された多くの高 quality triple は $a = 1$ です。</p>
+
+      <h3>ABC hits の分布</h3>
+      <p>$c > \operatorname{rad}(abc)$（すなわち $q > 1$）を満たすABC tripleを <strong>ABC hit</strong> と呼びます。
+      計算機実験によると：</p>
+      <ul>
+        <li>$c \leq 10^2$: ABC hit は 6 個</li>
+        <li>$c \leq 10^3$: ABC hit は 31 個</li>
+        <li>$c \leq 10^4$: ABC hit は 120 個</li>
+        <li>$c \leq 10^5$: ABC hit は 418 個</li>
+        <li>$c \leq 10^8$: ABC hit は 約 14,482 個</li>
+      </ul>
+      <p>ABC hit の数は増えていきますが（無限個存在すると予想される）、
+      $q > 1 + \varepsilon$ を満たすものは $\varepsilon$ を固定すると有限個に留まる、というのがABC予想の主張です。</p>
+
+      <!-- インタラクティブ検証 -->
+      <h2 id="interactive">インタラクティブ検証ツール</h2>
+
+      <div class="interactive">
+        <h3>ABC Triple 検証器</h3>
+        <p>$a$ と $b$ を入力して、ABC tripleかどうかを検証し、quality を計算します。</p>
+        <div>
+          <label>$a$ = <input type="number" id="input-a" value="1" min="1"></label>
+          <label>$b$ = <input type="number" id="input-b" value="8" min="1"></label>
+          <button onclick="verifyTriple()">検証する</button>
+        </div>
+        <div class="result" id="verify-result"></div>
+      </div>
+
+      <div class="interactive" id="search">
+        <h3>ABC Triple 探索器</h3>
+        <p>指定した範囲で quality が高い ABC triple を探索します。</p>
+        <div>
+          <label>$c$ の上限: <input type="number" id="search-max" value="200" min="3" max="5000"></label>
+          <label>最小 quality: <input type="number" id="search-min-q" value="1.0" min="0.5" max="2.0" step="0.1"></label>
+          <button onclick="searchTriples()">探索する</button>
+        </div>
+        <div class="result" id="search-result"></div>
+      </div>
+
+      <!-- Python検証 -->
+      <h2 id="python">Python検証スクリプト</h2>
+
+      <p>より大規模な数値検証を行うためのPythonスクリプトも用意しています
+      （<code>scripts/abc_verify.py</code>）。</p>
+
+      <pre><code>from scripts.abc_verify import rad, quality, analyze_triple
+
+# 根基の計算
+print(rad(72))     # => 6
+print(rad(1024))   # => 2
+
+# ABC tripleの分析
+analyze_triple(1, 8, 9)
+
+# 高quality tripleの探索
+from scripts.abc_verify import find_abc_triples
+results = find_abc_triples(1000, min_quality=1.0)
+for a, b, c, q in results:
+    print(f"({a}, {b}, {c}): q = {q:.4f}")</code></pre>
+
+      <!-- 数値的証拠 -->
+      <h2 id="numerical">ABC予想の数値的証拠</h2>
+
+      <p>ABC予想が正しいことを示す数値的証拠は非常に強力です。</p>
+
+      <h3>最高のquality</h3>
+      <p>2025年時点で知られている最も高い quality を持つ ABC triple は：</p>
+
+      <div class="box box-example">
+        <div class="box-title">記録: 最高quality ABC triple</div>
+        <p><strong>$(a, b, c) = (2, 3^{10} \times 109, 23^5)$</strong></p>
+        <p>$2 + 6436341 = 6436343 = 23^5$</p>
+        <p>$\operatorname{rad}(2 \times 3^{10} \times 109 \times 23^5) = 2 \times 3 \times 23 \times 109 = 15042$</p>
+        <p>$q = \frac{\log 6436343}{\log 15042} \approx 1.6299$</p>
+        <p>これは $c \leq 10^{18}$ の範囲で発見されたものですが、$q < 2$ に留まっています。</p>
+      </div>
+
+      <h3>quality の上界</h3>
+      <p>大規模な計算機探索の結果、以下のことが観測されています：</p>
+      <ul>
+        <li>$c \leq 10^{18}$ の範囲で、$q > 1.63$ のABC tripleは発見されていない</li>
+        <li>$q$ の値は $c$ が大きくなると、$1$ に近づいていく傾向がある</li>
+        <li>これはABC予想と整合的（$\limsup q \leq 1$）</li>
+      </ul>
+
+      <div class="box box-warning">
+        <div class="box-title">注意: 数値的証拠の限界</div>
+        <p>数値計算はABC予想を「もっともらしい」と思わせますが、<strong>証明ではありません</strong>。
+        数論では、非常に大きな数で初めて反例が現れる予想もあるため、有限の計算だけでは確定できません。
+        有名な例として、Mertens予想は $10^{12}$ まで正しいことが確認されていましたが、反例が存在することが証明されています。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="01_abc_conjecture.html" class="prev">ABC予想とは何か</a>
+        <a href="03_prerequisites.html" class="next">代数と整数論の基礎</a>
+      </nav>
+
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // 素因数分解
+    function primeFactors(n) {
+      const factors = {};
+      let d = 2;
+      while (d * d <= n) {
+        while (n % d === 0) {
+          factors[d] = (factors[d] || 0) + 1;
+          n = Math.floor(n / d);
+        }
+        d++;
+      }
+      if (n > 1) factors[n] = (factors[n] || 0) + 1;
+      return factors;
+    }
+
+    // 素因数分解の文字列表示
+    function factorStr(n) {
+      if (n === 1) return "1";
+      const f = primeFactors(n);
+      return Object.entries(f)
+        .sort((a, b) => a[0] - b[0])
+        .map(([p, e]) => e === 1 ? p : `${p}^${e}`)
+        .join(" × ");
+    }
+
+    // 根基
+    function rad(n) {
+      if (n <= 1) return 1;
+      const factors = primeFactors(n);
+      let result = 1;
+      for (const p of Object.keys(factors)) {
+        result *= parseInt(p);
+      }
+      return result;
+    }
+
+    // 最大公約数
+    function gcd(a, b) {
+      while (b) { [a, b] = [b, a % b]; }
+      return a;
+    }
+
+    // quality
+    function calcQuality(a, b, c) {
+      const r = rad(a * b * c);
+      if (r <= 1) return Infinity;
+      return Math.log(c) / Math.log(r);
+    }
+
+    // 検証
+    function verifyTriple() {
+      const a = parseInt(document.getElementById('input-a').value);
+      const b = parseInt(document.getElementById('input-b').value);
+      const el = document.getElementById('verify-result');
+
+      if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+        el.textContent = "正の整数を入力してください。";
+        return;
+      }
+
+      const c = a + b;
+      const g = gcd(a, b);
+      const r = rad(a * b * c);
+      const q = calcQuality(a, b, c);
+
+      let text = "";
+      text += `a = ${a} = ${factorStr(a)}\n`;
+      text += `b = ${b} = ${factorStr(b)}\n`;
+      text += `c = a + b = ${c} = ${factorStr(c)}\n`;
+      text += `gcd(a, b) = ${g}\n`;
+
+      if (g !== 1) {
+        text += `\n⚠ gcd(a, b) ≠ 1 のため、正式なABC tripleではありません。\n`;
+        text += `ヒント: a/${g} = ${a/g}, b/${g} = ${b/g} で (${a/g}, ${b/g}, ${c/g}) を試してみてください。`;
+      } else {
+        text += `\nabc = ${a * b * c} = ${factorStr(a * b * c)}\n`;
+        text += `rad(abc) = ${r}\n`;
+        text += `quality q = log(${c}) / log(${r}) = ${q.toFixed(6)}\n`;
+        text += `\n`;
+        if (q > 1) {
+          text += `★ quality > 1: 例外的なABC triple!\n`;
+          text += `  c = ${c} > rad(abc) = ${r}`;
+        } else {
+          text += `quality ≤ 1: 通常のABC triple\n`;
+          text += `  c = ${c} ≤ rad(abc) = ${r}`;
+        }
+      }
+
+      el.textContent = text;
+    }
+
+    // 探索
+    function searchTriples() {
+      const maxC = Math.min(parseInt(document.getElementById('search-max').value), 5000);
+      const minQ = parseFloat(document.getElementById('search-min-q').value);
+      const el = document.getElementById('search-result');
+
+      if (isNaN(maxC) || isNaN(minQ)) {
+        el.textContent = "有効な値を入力してください。";
+        return;
+      }
+
+      el.textContent = "探索中...";
+
+      // 少し遅延させてUIを更新
+      setTimeout(() => {
+        const results = [];
+        for (let c = 3; c <= maxC; c++) {
+          for (let a = 1; a <= Math.floor(c / 2); a++) {
+            const b = c - a;
+            if (gcd(a, b) === 1) {
+              const q = calcQuality(a, b, c);
+              if (q >= minQ) {
+                results.push({ a, b, c, q, rad: rad(a * b * c) });
+              }
+            }
+          }
+        }
+
+        results.sort((x, y) => y.q - x.q);
+
+        let text = `c ≤ ${maxC} で quality ≥ ${minQ} のABC triple: ${results.length}個\n\n`;
+        text += `${"a".padStart(8)} ${"b".padStart(8)} ${"c".padStart(8)} ${"rad(abc)".padStart(10)} ${"quality".padStart(10)}\n`;
+        text += `${"-".repeat(8)} ${"-".repeat(8)} ${"-".repeat(8)} ${"-".repeat(10)} ${"-".repeat(10)}\n`;
+
+        const show = results.slice(0, 50);
+        for (const r of show) {
+          text += `${String(r.a).padStart(8)} ${String(r.b).padStart(8)} ${String(r.c).padStart(8)} ${String(r.rad).padStart(10)} ${r.q.toFixed(4).padStart(10)}\n`;
+        }
+
+        if (results.length > 50) {
+          text += `\n... 他 ${results.length - 50} 個`;
+        }
+
+        el.textContent = text;
+      }, 50);
+    }
+
+    // ページ読み込み時にデフォルト検証を実行
+    window.addEventListener('load', verifyTriple);
+  </script>
+
+</body>
+</html>

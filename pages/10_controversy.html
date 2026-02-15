@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 10: 論争と現状</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>ABC予想 解説</h2>
+      <nav>
+        <a href="../index.html">目次に戻る</a>
+        <a href="#timeline" class="section-link">年表</a>
+        <a href="#scholze-stix" class="section-link">Scholze-Stixの指摘</a>
+        <a href="#mochizuki-response" class="section-link">望月の反論</a>
+        <a href="#publication" class="section-link">PRIMS掲載</a>
+        <a href="#joshi" class="section-link">Joshiのアプローチ</a>
+        <a href="#community" class="section-link">数学コミュニティ</a>
+        <a href="#outlook" class="section-link">今後の展望</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Chapter 10: 論争と現状
+      </div>
+
+      <header class="page-header">
+        <h1>Chapter 10: 論争と現状</h1>
+        <p class="subtitle">IUT理論をめぐる議論と数学コミュニティの評価</p>
+      </header>
+
+      <p>IUT理論は2012年の公開以来、数学史上でも稀に見る論争を引き起こしています。
+      この章では、論争の経緯と現在の状況を客観的に記述します。</p>
+
+      <!-- 年表 -->
+      <h2 id="timeline">年表</h2>
+
+      <table>
+        <tr><th>年月</th><th>出来事</th></tr>
+        <tr><td>2012年8月</td><td>望月新一がIUT論文I〜IVをプレプリントとして公開（RIMS）</td></tr>
+        <tr><td>2012-2014年</td><td>少数の数学者が論文の検討を開始。大半の専門家は理解が困難と報告</td></tr>
+        <tr><td>2015年12月</td><td>望月が論文をPRIMS（京都大学数理解析研究所紀要）に投稿</td></tr>
+        <tr><td>2017年</td><td>複数のワークショップ開催（オックスフォード、京都など）</td></tr>
+        <tr><td>2018年3月</td><td>Peter ScholzeとJakob Stixが京都で望月と議論。その後「Why abc is still a conjecture」を公開</td></tr>
+        <tr><td>2018年</td><td>望月がScholze-Stixへの反論を公開</td></tr>
+        <tr><td>2020年4月</td><td>PRIMSがIUT論文の掲載を決定（望月はPRIMS編集長だが審査過程から外れたと説明）</td></tr>
+        <tr><td>2021年3月</td><td>IUT論文I〜IVがPRIMSに正式掲載</td></tr>
+        <tr><td>2023-2025年</td><td>Kirti Joshiが代替的アプローチを発展。論争に関する最終報告を公開</td></tr>
+        <tr><td>2025年3月</td><td>IUT Summit 2025（京都大学）開催</td></tr>
+        <tr><td>2025年</td><td>ABC予想の解決（肯定または否定）に100万ドルの懸賞金が提示される</td></tr>
+      </table>
+
+      <!-- Scholze-Stixの指摘 -->
+      <h2 id="scholze-stix">Scholze-Stixの指摘</h2>
+
+      <p>2018年、フィールズ賞受賞者のPeter Scholze（ボン大学）とJakob Stix（フランクフルト大学）は、
+      IUT理論の系3.12の証明に<strong>致命的なギャップ</strong>があると主張しました。</p>
+
+      <h3>指摘の核心</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">Scholze-Stixの主要な指摘</div>
+        <p>Scholze-Stixの批判は、以下の点に集約されます：</p>
+        <ol>
+          <li><strong>テータリンクの両側での同一視の問題</strong>:
+          テータリンクの「ソース側」と「ターゲット側」のデータを同一視する際に、
+          本質的な情報が失われるにもかかわらず、
+          望月は非自明な不等式を導出していると主張している</li>
+          <li><strong>「単純化」による矛盾</strong>:
+          Scholze-Stixは、IUT理論のある種の「単純化された」バージョンでは
+          テータリンクが自明（すべてが等号になる）になることを示し、
+          望月の議論がこの単純化と本質的に異ならないと主張した</li>
+          <li><strong>系3.12の証明のギャップ</strong>:
+          多輻的表現を用いた比較において、不等式が得られるメカニズムが
+          不明確であると指摘</li>
+        </ol>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 何が問題なのか</div>
+        <p>Scholze-Stixの指摘を簡単に言うと：</p>
+        <p>「テータリンクで情報を送ると環構造が壊れる。壊れた情報から非自明な不等式を取り出すことは
+        本当にできるのか？ 我々が確認した限りでは、送られた情報からは自明な結果しか得られない」</p>
+        <p>つまり、IUT理論の「テータリンクで環構造を壊して再構成する」というプロセスが、
+        本当に新しい情報（不等式）を生み出すのかどうかが争点です。</p>
+      </div>
+
+      <h3>Scholze-Stixの主張の詳細</h3>
+
+      <p>彼らの論文 "Why abc is still a conjecture" では、IUT理論を以下のように要約しています：</p>
+
+      <div class="box box-example">
+        <div class="box-title">Scholze-Stixによる要約</div>
+        <p>IUT理論は、楕円曲線 $E$ のデータの2つの「コピー」を考え、
+        一方のコピーの $q$-パラメータを他方のテータ関数値と結びつけます。</p>
+        <p>Scholze-Stixは、この結びつけの過程を注意深く分析すると、
+        結局のところ自明な同一視（$q = q$）に帰着し、
+        非自明な不等式 $q \neq q^{j^2}$ を導くことはできないと主張しました。</p>
+        <p>彼らの表現: 「論文には多くの定義と定理があるが、
+        系3.12の証明の肝心な箇所では、上述の問題が回避されていないように見える」</p>
+      </div>
+
+      <!-- 望月の反論 -->
+      <h2 id="mochizuki-response">望月の反論</h2>
+
+      <p>望月は Scholze-Stix の指摘に対して詳細な反論を公開しました。</p>
+
+      <div class="box box-theorem">
+        <div class="box-title">望月の主要な反論</div>
+        <ol>
+          <li><strong>単純化が不正当</strong>:
+          Scholze-Stixの「単純化」は、IUT理論の本質的な構造
+          （特に対数テータ格子の2次元的構造と多輻的アルゴリズム）を
+          破壊するため、正当な単純化ではない</li>
+          <li><strong>異なる宇宙の混同</strong>:
+          Scholze-Stixはテータリンクの両側のデータを
+          「同じ宇宙」の中で考えているが、IUT理論では
+          これらは「異なる宇宙」に属しており、安易に同一視してはならない</li>
+          <li><strong>歴史（history）の重要性</strong>:
+          対数テータ格子を縦方向（対数リンク方向）に何度も通過する
+          「歴史」（繰り返しの過程）を考慮に入れなければ、
+          非自明な不等式は得られない</li>
+        </ol>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: 論争の本質</div>
+        <p>この論争の核心は、IUT理論の<strong>基本的なアイデア</strong>に関するものです：</p>
+        <ul>
+          <li><strong>望月の立場</strong>: テータリンクで環構造を壊し、対数リンクで部分的に復元する過程で、
+          対数殻による「容量制限」が働き、それが不等式として現れる</li>
+          <li><strong>Scholze-Stixの立場</strong>: テータリンクで壊した情報を復元しようとしても、
+          得られるのは自明な結果だけであり、非自明な不等式は導出できない</li>
+        </ul>
+        <p>この食い違いは、IUT理論の数学的内容に関する根本的な理解の差異に起因しており、
+        2025年現在も解消されていません。</p>
+      </div>
+
+      <!-- PRIMS掲載 -->
+      <h2 id="publication">PRIMSへの掲載</h2>
+
+      <p>2020年4月、IUT論文I〜IVがPRIMS（Publications of the Research Institute for Mathematical Sciences）に
+      掲載されることが決定し、2021年3月に正式に出版されました。</p>
+
+      <div class="box box-warning">
+        <div class="box-title">掲載をめぐる議論</div>
+        <p>PRIMSへの掲載は数学コミュニティで大きな議論を呼びました：</p>
+        <ul>
+          <li><strong>利益相反の懸念</strong>: 望月新一はPRIMSの編集長。掲載決定の審査過程から
+          外れたと説明されているが、利益相反を完全に排除できないとの批判</li>
+          <li><strong>査読の妥当性</strong>: 査読者が誰であるかは非公開。
+          Scholze-Stixの指摘に対する十分な検証がなされたかどうか疑問視する声</li>
+          <li><strong>掲載 ≠ 正しさの証明</strong>: 論文が掲載されたからといって、
+          証明が正しいことを意味するわけではない（数学の歴史上、掲載後に誤りが発見された例は多数）</li>
+        </ul>
+      </div>
+
+      <!-- Joshiのアプローチ -->
+      <h2 id="joshi">Kirti Joshiのアプローチ</h2>
+
+      <p>アリゾナ大学のKirti Joshiは、IUT理論に関する独自のアプローチを2023年から発展させています。</p>
+
+      <div class="box box-definition">
+        <div class="box-title">Joshiのアプローチの概要</div>
+        <p>Joshiは<strong>算術的タイヒミュラー空間</strong>（arithmetic Teichmuller spaces）を用いた
+        代替的な理論的枠組みを構築しています。この枠組みは：</p>
+        <ul>
+          <li>$p$ 進ホッジ理論（Fargues-Fontaine曲線、Scholzeのプリズムなど）の技術を活用</li>
+          <li>望月のIUT理論と一部重なるが、異なる数学的基盤に立つ</li>
+          <li>望月の理論の一部を「翻訳」し、より広いコミュニティが検証可能な形で再定式化することを試みる</li>
+        </ul>
+      </div>
+
+      <h3>Joshiの評価</h3>
+
+      <p>Joshiの2025年の最終報告およびFAQでは、以下のような評価が示されています：</p>
+
+      <div class="box box-example">
+        <div class="box-title">Joshiの主な見解</div>
+        <ul>
+          <li><strong>Scholze-Stixの特定の主張は数学的に不正確</strong>:
+          Scholze-Stixが行った「単純化」は、IUT理論の重要な構造を壊しており、
+          その単純化に基づく批判は的を射ていない部分がある</li>
+          <li><strong>しかし、望月の証明も不完全</strong>:
+          IUT理論の全体的な証明には、まだ埋められていないギャップがある可能性がある</li>
+          <li><strong>第三の道の可能性</strong>:
+          IUT理論のアイデアの一部は有効だが、それを完全な証明にするためには
+          追加的な議論や異なるアプローチが必要かもしれない</li>
+        </ul>
+      </div>
+
+      <!-- 数学コミュニティの評価 -->
+      <h2 id="community">数学コミュニティの現在の評価</h2>
+
+      <p>2025年現在、数学コミュニティの大勢は以下のような認識を持っています：</p>
+
+      <div class="box box-warning">
+        <div class="box-title">現在のコンセンサス（2025年時点）</div>
+        <ul>
+          <li><strong>多数派の見解</strong>:
+          IUT理論をABC予想の完全な証明として受け入れている数学者は<strong>少数</strong>。
+          大多数の数論の専門家は、証明の正当性を確認できていない</li>
+          <li><strong>理論の検証状況</strong>:
+          IUT理論を十分に理解していると公言する数学者は、
+          望月の周辺の少数のグループに限られる</li>
+          <li><strong>構造的な問題</strong>:
+          論文が非常に長く（500ページ以上）、多数の前提論文への依存があり、
+          独立した検証が極めて困難</li>
+          <li><strong>Scholze-Stixの指摘の影響</strong>:
+          フィールズ賞受賞者であるScholzeの批判は大きな影響力を持ち、
+          多くの数学者がこの指摘を深刻に受け止めている</li>
+        </ul>
+      </div>
+
+      <h3>支持派と懐疑派</h3>
+
+      <table>
+        <tr><th></th><th>支持派</th><th>懐疑派</th></tr>
+        <tr>
+          <td><strong>主な人物</strong></td>
+          <td>望月新一、星裕一郎、加藤文元、Ivan Fesenko ら</td>
+          <td>Peter Scholze, Jakob Stix, 多くの数論の専門家</td>
+        </tr>
+        <tr>
+          <td><strong>主張</strong></td>
+          <td>IUT理論は正しく、Scholze-Stixの批判は誤解に基づく</td>
+          <td>系3.12の証明にギャップがあり、ABC予想はまだ未解決</td>
+        </tr>
+        <tr>
+          <td><strong>活動</strong></td>
+          <td>ワークショップ開催、解説論文の執筆</td>
+          <td>具体的なギャップの指摘、代替アプローチの模索</td>
+        </tr>
+      </table>
+
+      <!-- 今後の展望 -->
+      <h2 id="outlook">今後の展望</h2>
+
+      <h3>論争の解決に向けて</h3>
+
+      <p>この論争が解決されるシナリオとしては、以下が考えられます：</p>
+
+      <ol>
+        <li><strong>IUT理論の正当性が広く認められる</strong>:
+        望月またはその協力者が、Scholze-Stixの指摘に対するより明確な回答を提供し、
+        広いコミュニティが証明を受け入れる</li>
+        <li><strong>ギャップの明確化と修正</strong>:
+        ギャップが特定され、修正版の証明が提供される</li>
+        <li><strong>代替的な証明</strong>:
+        IUT理論とは異なるアプローチでABC予想が証明される（Joshiの試みなど）</li>
+        <li><strong>反例の発見</strong>:
+        ABC予想自体の反例が見つかる（可能性は低いが論理的にはあり得る）</li>
+      </ol>
+
+      <h3>100万ドル懸賞金</h3>
+
+      <p>2025年、ABC予想に関連する論争の解決に対して
+      <strong>100万ドル</strong>の懸賞金が提示されました。
+      IUT理論の正当性の確認、または反証のいずれに対しても支払われる可能性があります。</p>
+
+      <h3>数学における「証明」とは何か</h3>
+
+      <div class="box box-beginner">
+        <div class="box-title">初学者向け補足: この論争が教えること</div>
+        <p>IUT論争は、数学における「証明」の意味について深い問いを投げかけています：</p>
+        <ul>
+          <li><strong>証明は社会的行為</strong>:
+          数学の証明は、論理的に正しいだけでなく、
+          他の数学者が検証し、理解し、受け入れることで初めて「証明」として機能します</li>
+          <li><strong>理解可能性の重要性</strong>:
+          いくら論理的に正しくても、他の専門家が理解できなければ
+          証明としての役割を果たしません。数学のコミュニケーション機能の重要性</li>
+          <li><strong>専門化のリスク</strong>:
+          数学の高度な専門化が進むと、一人の数学者の成果を
+          他の数学者が検証すること自体が困難になるという構造的問題</li>
+        </ul>
+        <p>ABC予想の解決が確定するまでには、まだ時間がかかる可能性がありますが、
+        この過程自体が数学の進歩に貢献するものと期待されます。</p>
+      </div>
+
+      <!-- ページナビゲーション -->
+      <nav class="page-nav">
+        <a href="09_iut_paper4.html" class="prev">論文IV: 対数体積計算</a>
+        <a href="../index.html" class="next">目次に戻る</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>
