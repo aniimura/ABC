@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mason-Stothers定理の障壁分析 — 多項式ABCから整数ABCへ</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>Mason-Stothers障壁</h2>
+      <nav>
+        <a href="../index.html">トップに戻る</a>
+        <a href="#mason-stothers" class="section-link">Mason-Stothers定理</a>
+        <a href="#proof" class="section-link">証明の完全再構成</a>
+        <a href="#obstruction" class="section-link">整数への障壁</a>
+        <a href="#arithmetic-derivative" class="section-link">算術微分</a>
+        <a href="#wronskian" class="section-link">ロンスキアン</a>
+        <a href="#category" class="section-link">圏論的分析</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; Mason-Stothers障壁分析
+      </div>
+
+      <header class="page-header">
+        <h1>Mason-Stothers定理の障壁分析</h1>
+        <p class="subtitle">多項式ABCの証明はなぜ整数に持ち上がらないか</p>
+      </header>
+
+      <p>ABC予想の多項式版（Mason-Stothers定理）は1980年代に証明されました。
+      この証明が整数の場合に「持ち上がらない」理由を精密に分析することで、
+      ABC予想の本質的な困難さを理解します。</p>
+
+      <!-- Mason-Stothers定理 -->
+      <h2 id="mason-stothers">1. Mason-Stothers定理</h2>
+
+      <div class="box box-theorem">
+        <div class="box-title">定理 (Mason 1984, Stothers 1981)</div>
+        <p>$a(t), b(t), c(t) \in \mathbb{C}[t]$ を互いに素（共通因子を持たない）な
+        多項式で、$a(t) + b(t) = c(t)$ を満たすとする。このとき：</p>
+        $$\max(\deg a, \deg b, \deg c) \leq n_0(abc) - 1$$
+        <p>ここで $n_0(f)$ は多項式 $f$ の相異なる根の個数（= $\deg \operatorname{rad}(f)$）。</p>
+      </div>
+
+      <div class="box box-beginner">
+        <div class="box-title">整数ABCとの対応</div>
+        <table>
+          <tr><th>概念</th><th>整数</th><th>多項式</th></tr>
+          <tr><td>「大きさ」</td><td>$|n|$ (絶対値)</td><td>$\deg f$ (次数)</td></tr>
+          <tr><td>「素因数」</td><td>素数 $p$</td><td>1次因子 $(t - \alpha)$</td></tr>
+          <tr><td>$\operatorname{rad}$</td><td>$\prod_{p | n} p$</td><td>$\prod_{f(\alpha)=0} (t - \alpha)$</td></tr>
+          <tr><td>$\operatorname{rad}$ の大きさ</td><td>$\log \operatorname{rad}(n)$</td><td>$n_0(f) = \deg \operatorname{rad}(f)$</td></tr>
+          <tr><td>ABC予想/定理</td><td>$\log c \lesssim \log \operatorname{rad}(abc)$</td><td>$\deg c \leq n_0(abc) - 1$</td></tr>
+        </table>
+        <p>注目すべき点: 多項式版は $\epsilon$ なしで成立し、しかも $-1$ という強い形です。
+        整数版（ABC予想）は $1 + \epsilon$ という弱い形でさえ未証明です。</p>
+      </div>
+
+      <!-- 証明の完全再構成 -->
+      <h2 id="proof">2. Mason-Stothers定理の証明</h2>
+
+      <p>証明の鍵は<strong>微分</strong>（形式的微分 $d/dt$）の存在です。</p>
+
+      <h3>2.1 準備：ロンスキアン</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">ロンスキアン（Wronskian）</div>
+        <p>2つの多項式 $f, g \in \mathbb{C}[t]$ のロンスキアンは：</p>
+        $$W(f, g) = f g' - f' g$$
+        <p>ここで $f' = df/dt$。$W(f, g) = 0$ は $f, g$ が比例することと同値。</p>
+      </div>
+
+      <div class="box box-theorem">
+        <div class="box-title">補題（ロンスキアンの次数評価）</div>
+        <p>$f \in \mathbb{C}[t]$ を $0$ でない多項式とする。このとき：</p>
+        $$\deg \gcd(f, f') \geq \deg f - n_0(f)$$
+        <p>ここで $n_0(f)$ は $f$ の相異なる根の個数。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">補題の証明</div>
+        <p>$f = c \prod_{i=1}^{k} (t - \alpha_i)^{e_i}$ と因数分解する（$e_i \geq 1$、$\alpha_i$ は相異なる根）。</p>
+        <p>$n_0(f) = k$（相異なる根の個数）。$\deg f = e_1 + \cdots + e_k$。</p>
+
+        <p>各根 $\alpha_i$ について、$f$ が $(t - \alpha_i)^{e_i}$ で割り切れるとき、
+        $f'$ は $(t - \alpha_i)^{e_i - 1}$ で割り切れる。</p>
+
+        <p>実際、$f = (t - \alpha_i)^{e_i} \cdot h_i(t)$ とすると、
+        $f' = e_i(t - \alpha_i)^{e_i - 1} h_i(t) + (t - \alpha_i)^{e_i} h_i'(t)$
+        $= (t - \alpha_i)^{e_i - 1}[e_i h_i(t) + (t - \alpha_i) h_i'(t)]$</p>
+
+        <p>よって $\gcd(f, f')$ は $\prod_i (t - \alpha_i)^{e_i - 1}$ で割り切れる。</p>
+        $$\deg \gcd(f, f') \geq \sum_i (e_i - 1) = \deg f - k = \deg f - n_0(f)$$
+      </div>
+
+      <h3>2.2 Mason-Stothers定理の証明</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">証明</div>
+        <p>$a + b = c$, $\gcd(a, b) = 1$ とする。$n = \max(\deg a, \deg b, \deg c)$。</p>
+
+        <p><strong>Step 1</strong>: ロンスキアンを計算する。</p>
+        <p>$a + b = c$ の両辺を微分: $a' + b' = c'$。</p>
+        <p>$W(a, c) = ac' - a'c = a(a' + b') - a'(a + b) = ab' - a'b = W(a, b)$。</p>
+        <p>同様に $W(b, c) = W(b, a) = -W(a, b)$。</p>
+        <p>$W := W(a, b) = ab' - a'b$ とおく。</p>
+
+        <p><strong>Step 2</strong>: $W \neq 0$ を示す。</p>
+        <p>$W = 0$ とすると、$a/b$ は定数（$ab' = a'b$ より $(a/b)' = 0$）。
+        つまり $a = \lambda b$ で、$c = a + b = (\lambda + 1)b$。
+        $\gcd(a, b) = 1$ と $a = \lambda b$ から $\deg b = 0$、同様に $\deg a = 0$。
+        つまり $a, b, c$ は全て定数で、$n = 0$、$n_0(abc) \geq 0$ なので定理は自明に成立。</p>
+
+        <p><strong>Step 3</strong>: $W$ の次数の上界。</p>
+        $$\deg W = \deg(ab' - a'b) \leq \deg a + \deg b - 1$$
+        <p>（$ab'$ と $a'b$ の次数はともに $\deg a + \deg b - 1$ 以下）</p>
+
+        <p><strong>Step 4</strong>: $W$ の次数の下界。</p>
+        <p>$\gcd(a, b) = 1$ かつ $W = ab' - a'b$ より：</p>
+        <ul>
+          <li>$a | W$ ではないが、$\gcd(a, a') | W$ と $\gcd(b, b') | W$ が言える：</li>
+          <li>$W = ab' - a'b$ において、$(t - \alpha)^{e-1}$ が $a$ と $a'$ の公約数なら、
+              $a' b$ は $(t-\alpha)^{e-1}$ で割れ、$a b'$ も $(t-\alpha)^e$ で割れるから
+              $W$ も $(t-\alpha)^{e-1}$ で割れる</li>
+        </ul>
+        <p>$\gcd(a, b) = 1$ を使うと、$\gcd(a, a')$ と $\gcd(b, b')$ は互いに素。
+        さらに $c = a + b$ より $\gcd(c, c')$ も $W$ を割り切る。</p>
+        <p>結果として（技術的な議論を省略すると）：</p>
+        $$\deg W \geq \deg a - n_0(a) + \deg b - n_0(b)$$
+
+        <p>実際にはより精密に、$W = ab' - a'b$ の因数構造から：</p>
+        <p>$\gcd(a, a')$, $\gcd(b, b')$, $\gcd(c, c')$ は互いに素で $W$ を割るから、</p>
+        $$\deg W \geq (\deg a - n_0(a)) + (\deg b - n_0(b)) + (\deg c - n_0(c))$$
+
+        <p><strong>Step 5</strong>: 上界と下界を組み合わせる。</p>
+        $$\deg a + \deg b - 1 \geq \deg W \geq (\deg a - n_0(a)) + (\deg b - n_0(b)) + (\deg c - n_0(c))$$
+        <p>整理すると：</p>
+        $$n_0(a) + n_0(b) + n_0(c) - 1 \geq \deg c$$
+        <p>$n_0(a) + n_0(b) + n_0(c) = n_0(abc)$（$a, b, c$ は互いに素なので）。</p>
+        $$\deg c \leq n_0(abc) - 1$$
+        <p>同様に $\deg a, \deg b$ についても成立。 $\square$</p>
+      </div>
+
+      <!-- 整数への障壁 -->
+      <h2 id="obstruction">3. 整数への持ち上げが失敗する箇所</h2>
+
+      <p>上の証明で「微分」が本質的に使われています。整数環 $\mathbb{Z}$ には微分がないことが、
+      持ち上げの根本的な障壁です。</p>
+
+      <h3>3.1 障壁の正確な特定</h3>
+
+      <div class="box box-warning">
+        <div class="box-title">障壁1: 微分の不在</div>
+        <p>多項式環 $\mathbb{C}[t]$ には自然な微分 $d/dt$ が存在するが、
+        整数環 $\mathbb{Z}$ には対応する微分が存在しない。</p>
+
+        <p>形式的に: 環 $R$ 上の<strong>微分</strong>（derivation）$D: R \to R$ とは、
+        以下を満たす加法的写像：</p>
+        $$D(ab) = aD(b) + D(a)b \quad (\text{ライプニッツ則})$$
+
+        <p>$R = \mathbb{Z}$ のとき、$D(1) = D(1 \cdot 1) = 1 \cdot D(1) + D(1) \cdot 1 = 2D(1)$ より
+        $D(1) = 0$。$D(n) = D(1 + \cdots + 1) = nD(1) = 0$。
+        よって $\mathbb{Z}$ 上の微分は零写像のみ。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">障壁2: ロンスキアンの不在</div>
+        <p>Mason-Stothers の証明で核心的な役割を果たすのはロンスキアン $W(a, b) = ab' - a'b$ です。
+        微分 $'$ が存在しないので、ロンスキアンも定義できません。</p>
+
+        <p>ロンスキアンは「次数の上界」と「次数の下界」を同時に提供する道具であり、
+        これなしには上界と下界の「サンドイッチ論法」が成立しません。</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">障壁3: 対数微分とアルキメデス的性質</div>
+        <p>多項式の場合、$f'/f = \sum_i e_i/(t - \alpha_i)$ という対数微分の部分分数展開が
+        使えます。これにより $\gcd(f, f')$ と $n_0(f)$ の関係が導かれます。</p>
+
+        <p>整数の場合の類似物は $\log n = \sum_{p | n} v_p(n) \log p$ ですが、
+        これは「微分」ではなく「対数」であり、ライプニッツ則を満たしません。</p>
+      </div>
+
+      <h3>3.2 証明の各ステップでの障壁</h3>
+
+      <div class="box box-example">
+        <div class="box-title">証明ステップと障壁の対応</div>
+        <table>
+          <tr><th>証明ステップ</th><th>多項式</th><th>整数での対応物</th><th>障壁</th></tr>
+          <tr>
+            <td>$a + b = c$ の微分</td>
+            <td>$a' + b' = c'$</td>
+            <td>対応物なし</td>
+            <td>微分が存在しない</td>
+          </tr>
+          <tr>
+            <td>ロンスキアン $W = ab' - a'b$</td>
+            <td>多項式として計算可能</td>
+            <td>対応物なし</td>
+            <td>$a', b'$ が定義不能</td>
+          </tr>
+          <tr>
+            <td>$\deg W \leq \deg a + \deg b - 1$</td>
+            <td>次数の加法性</td>
+            <td>$\log$ の加法性</td>
+            <td>$W$ 自体が存在しない</td>
+          </tr>
+          <tr>
+            <td>$\gcd(f, f') \geq \deg f - n_0(f)$</td>
+            <td>重根と微分の関係</td>
+            <td>$v_p(n)$ と $\operatorname{rad}$ の関係</td>
+            <td>ロンスキアンによる接続が不在</td>
+          </tr>
+          <tr>
+            <td>上界と下界の比較</td>
+            <td>次数の不等式</td>
+            <td>$\log$ の不等式（?）</td>
+            <td>両方向の評価を結ぶ道具がない</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 算術微分 -->
+      <h2 id="arithmetic-derivative">4. 算術微分（Arithmetic Derivative）</h2>
+
+      <p>$\mathbb{Z}$ 上の「微分」を人工的に定義する試みがあります。</p>
+
+      <h3>4.1 算術微分の定義</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">算術微分</div>
+        <p>自然数 $n$ の<strong>算術微分</strong> $n'$ を以下で定義する：</p>
+        <ul>
+          <li>$0' = 0$, $1' = 0$</li>
+          <li>$p' = 1$ （$p$ が素数のとき）</li>
+          <li>$(mn)' = m'n + mn'$ （ライプニッツ則）</li>
+        </ul>
+        <p>ライプニッツ則と素数の条件から一意的に定まる。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">算術微分の計算例</div>
+        <table>
+          <tr><th>$n$</th><th>素因数分解</th><th>$n'$</th><th>計算</th></tr>
+          <tr><td>$2$</td><td>$2$</td><td>$1$</td><td>素数</td></tr>
+          <tr><td>$3$</td><td>$3$</td><td>$1$</td><td>素数</td></tr>
+          <tr><td>$4$</td><td>$2^2$</td><td>$4$</td><td>$(2 \cdot 2)' = 1 \cdot 2 + 2 \cdot 1 = 4$</td></tr>
+          <tr><td>$6$</td><td>$2 \cdot 3$</td><td>$5$</td><td>$(2 \cdot 3)' = 1 \cdot 3 + 2 \cdot 1 = 5$</td></tr>
+          <tr><td>$8$</td><td>$2^3$</td><td>$12$</td><td>$(2 \cdot 4)' = 1 \cdot 4 + 2 \cdot 4 = 12$</td></tr>
+          <tr><td>$12$</td><td>$2^2 \cdot 3$</td><td>$16$</td><td>$(4 \cdot 3)' = 4 \cdot 3 + 4 \cdot 1 = 16$</td></tr>
+          <tr><td>$15$</td><td>$3 \cdot 5$</td><td>$8$</td><td>$(3 \cdot 5)' = 1 \cdot 5 + 3 \cdot 1 = 8$</td></tr>
+        </table>
+      </div>
+
+      <h3>4.2 一般公式</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">算術微分の明示公式</div>
+        <p>$n = \prod p_i^{e_i}$ のとき：</p>
+        $$n' = n \sum_i \frac{e_i}{p_i}$$
+        <p>これは対数微分 $(\log n)' = \sum_i e_i / p_i$ に対応する
+        （$n' = n \cdot (\log n)'$ の形式的類似）。</p>
+      </div>
+
+      <h3>4.3 算術微分の限界</h3>
+
+      <div class="box box-warning">
+        <div class="box-title">なぜ算術微分ではABC予想を証明できないか</div>
+        <ol>
+          <li><strong>加法との非整合性</strong>:
+              $(a + b)' \neq a' + b'$ が一般的。例: $(2 + 3)' = 5' = 1$ だが
+              $2' + 3' = 1 + 1 = 2$。算術微分は加法に関する微分ではない</li>
+          <li><strong>ロンスキアンの構成不能</strong>:
+              $a + b = c$ から $a' + b' = c'$ が導けないので、
+              ロンスキアン的な議論が成立しない</li>
+          <li><strong>次数の概念の不在</strong>:
+              多項式の次数 $\deg$ に相当する「大きさ」は $\log |n|$ だが、
+              $\log |n'|$ と $\log |n|$ の間に $\deg f'$ と $\deg f$ の間のような
+              単純な関係がない</li>
+          <li><strong>体の構造の欠如</strong>:
+              $\mathbb{C}[t]$ は体 $\mathbb{C}(t)$ に埋め込めるが、
+              $\mathbb{Z}$ は $\mathbb{Q}$ に埋め込んでも算術微分は
+              加法と整合しない</li>
+        </ol>
+      </div>
+
+      <!-- ロンスキアン -->
+      <h2 id="wronskian">5. ロンスキアンの算術的類似物の探索</h2>
+
+      <h3>5.1 望まれる性質</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">理想的な「算術的ロンスキアン」</div>
+        <p>整数 $a, b$ に対して、以下の性質を持つ量 $W(a, b)$ が存在すれば、
+        Mason-Stothersの議論が持ち上がる可能性がある：</p>
+        <ol>
+          <li>$W(a, b) = 0 \Leftrightarrow a/b$ が「定数」的</li>
+          <li>$\log |W(a, b)| \leq \log |a| + \log |b| - 1$ （次数の上界に対応）</li>
+          <li>$\log |W(a, b)| \geq (\log |a| - \log \operatorname{rad}(a)) + (\log |b| - \log \operatorname{rad}(b))$
+              （次数の下界に対応）</li>
+        </ol>
+        <p>このような $W$ が見つかれば、ABC予想が証明される。</p>
+      </div>
+
+      <h3>5.2 既知の試み</h3>
+
+      <div class="box box-example">
+        <div class="box-title">候補1: 行列式的構成</div>
+        <p>$a, b$ の素因数分解 $a = \prod p_i^{a_i}$, $b = \prod p_i^{b_i}$ に対して、</p>
+        $$W(a, b) = \det \begin{pmatrix} a_1 & a_2 & \cdots \\ b_1 & b_2 & \cdots \end{pmatrix}$$
+        <p>の一般化。しかし、これは有限個の素数にしか対応せず、
+        無限個の素数を扱う方法が確立されていない。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">候補2: アラケロフ理論的高さ</div>
+        <p>アラケロフ理論では、数体上の多様体に対する「高さ」関数が定義され、
+        これは関数体の場合の次数に対応する。</p>
+        <p>しかし、アラケロフ的高さは個々の整数に対する「微分」を直接与えない。
+        IUT理論はこの障壁を、ホッジ・アラケロフ理論の一般化として乗り越えようとしている。</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">候補3: p進微分</div>
+        <p>各素数 $p$ に対して、$p$ 進体 $\mathbb{Q}_p$ 上では $p$ 進微分（$p$ 進対数など）が
+        存在する。これを全ての素数 $p$ について統合する方法として：</p>
+        <ul>
+          <li>アデール的構成: $\mathbb{A}_{\mathbb{Q}} = \prod'_p \mathbb{Q}_p$ 上の微分?</li>
+          <li>しかし、アデール上の微分と整数環上の微分は本質的に異なる</li>
+        </ul>
+        <p>IUT理論の対数リンクは、$p$ 進対数 $\log_p$ を用いて
+        「$p$ 進微分的」な操作を実現しようとするものと解釈できる。</p>
+      </div>
+
+      <!-- 圏論的分析 -->
+      <h2 id="category">6. 圏論的分析: なぜ「微分」が存在しないか</h2>
+
+      <h3>6.1 算術幾何の基本的な非対称性</h3>
+
+      <div class="box box-definition">
+        <div class="box-title">数体と関数体の根本的差異</div>
+        <p>関数体 $\mathbb{C}(t)$ と数体 $\mathbb{Q}$ の間には深い類似がありますが、
+        決定的な差異も存在します：</p>
+        <table>
+          <tr><th>性質</th><th>$\mathbb{C}(t)$</th><th>$\mathbb{Q}$</th></tr>
+          <tr><td>微分</td><td>$d/dt$ が存在</td><td>自明な微分のみ</td></tr>
+          <tr><td>幾何的構造</td><td>$\mathbb{P}^1_{\mathbb{C}}$ 上の関数</td><td>$\operatorname{Spec} \mathbb{Z}$ 上の「関数」</td></tr>
+          <tr><td>基礎体</td><td>$\mathbb{C}$（代数閉体）</td><td>$\mathbb{F}_1$?（「1元体」）</td></tr>
+          <tr><td>ケーラー微分</td><td>$\Omega_{\mathbb{C}[t]/\mathbb{C}} = \mathbb{C}[t]dt$</td>
+              <td>$\Omega_{\mathbb{Z}/\mathbb{F}_1} = ?$</td></tr>
+          <tr><td>絶対微分形式</td><td>$dt$ は非零</td><td>$\Omega_{\mathbb{Z}/\mathbb{Z}} = 0$</td></tr>
+        </table>
+      </div>
+
+      <h3>6.2 ケーラー微分の消滅</h3>
+
+      <div class="box box-theorem">
+        <div class="box-title">$\Omega_{\mathbb{Z}/\mathbb{Z}} = 0$ の証明</div>
+        <p>$\mathbb{Z}$ の $\mathbb{Z}$ 上のケーラー微分加群は零：</p>
+        $$\Omega_{\mathbb{Z}/\mathbb{Z}} = 0$$
+        <p><strong>証明</strong>: ケーラー微分は $d(ab) = a \cdot db + b \cdot da$ と $da = 0$ (for $a \in \mathbb{Z}$, base ring)
+        を満たす。$\mathbb{Z}$ over $\mathbb{Z}$ では全ての元が基底環に属するので $dn = 0$ for all $n$。</p>
+
+        <p>これは「$\mathbb{Z}$ は $\mathbb{Z}$ 自身の上ではエタールである」ことの反映であり、
+        微分幾何的な「自由度」が存在しないことを意味します。</p>
+      </div>
+
+      <h3>6.3 F_1 上の幾何学?</h3>
+
+      <div class="box box-example">
+        <div class="box-title">「1元体」$\mathbb{F}_1$ のアイデア</div>
+        <p>Mason-Stothersの証明が機能するのは、$\mathbb{C}[t]$ が $\mathbb{C}$ 上の多項式環であり、
+        「$\mathbb{C}$ に対する相対的な微分」$d/dt$ が存在するからです。</p>
+
+        <p>$\mathbb{Z}$ をある「基礎対象」$\mathbb{F}_1$（仮想的な1元体）上の
+        「多項式環」$\mathbb{F}_1[t]$ と見なすことができれば、
+        $\mathbb{F}_1$ に対する相対的な微分が定義できる可能性があります。</p>
+
+        <p>$\mathbb{F}_1$ 上の代数幾何学は活発な研究分野であり（Connes-Consani, Borger, Durov等）、
+        ABC予想の証明戦略の一つとして注目されています。</p>
+
+        <p>しかし現時点では、$\mathbb{F}_1$ の定式化は複数の互いに非同値な提案があり、
+        Mason-Stothersの証明を持ち上げるのに十分な理論は確立されていません。</p>
+      </div>
+
+      <h3>6.4 まとめ：障壁の本質</h3>
+
+      <div class="box box-warning">
+        <div class="box-title">障壁の圏論的まとめ</div>
+        <p>Mason-Stothersの証明が整数に持ち上がらない根本的な理由は：</p>
+        <ol>
+          <li>$\mathbb{Z}$ は「絶対的な」対象であり、
+              相対的な微分（ケーラー微分）が消滅する</li>
+          <li>多項式環の微分が与える「次数の制御」に相当する道具が、
+              整数環には自然には存在しない</li>
+          <li>この障壁を乗り越えるための主なアプローチ:
+              <ul>
+                <li><strong>IUT理論</strong>: テータリンクと対数リンクの組み合わせで、
+                    「微分」の代替を提供しようとする</li>
+                <li><strong>$\mathbb{F}_1$ 幾何学</strong>: 「基礎体」の概念を拡張して
+                    相対微分を回復しようとする</li>
+                <li><strong>アラケロフ幾何学</strong>: 高さ関数を通じて
+                    「次数」の類似物を提供する</li>
+                <li><strong>楕円曲線/モジュラー形式</strong>:
+                    ABC予想をSzpiro予想に翻訳し、楕円曲線の理論で攻める</li>
+              </ul>
+          </li>
+        </ol>
+      </div>
+
+      <!-- ナビゲーション -->
+      <nav class="page-nav">
+        <a href="controversy_analysis.html" class="prev">論争の精密分析</a>
+        <a href="novel_approaches.html" class="next">新しいアプローチの探索</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>

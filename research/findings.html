@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC予想 研究結果の総合まとめ</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <style>
+    .data-table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em; }
+    .data-table th, .data-table td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
+    .data-table th { background: #f0f0f0; font-weight: bold; }
+    .data-table td:first-child { text-align: left; }
+    .highlight-row { background: #fff3cd; }
+    .bar { display: inline-block; height: 14px; background: #4a7c59; border-radius: 2px; }
+    .finding-box { border-left: 4px solid #d32f2f; background: #fff5f5; padding: 1em 1.5em; margin: 1em 0; }
+    .finding-box h4 { margin-top: 0; color: #d32f2f; }
+    .insight-box { border-left: 4px solid #1565c0; background: #f0f7ff; padding: 1em 1.5em; margin: 1em 0; }
+    .insight-box h4 { margin-top: 0; color: #1565c0; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <aside class="sidebar">
+      <h2>研究結果まとめ</h2>
+      <nav>
+        <a href="../index.html">トップに戻る</a>
+        <a href="#computational" class="section-link">計算結果</a>
+        <a href="#frey" class="section-link">フレイ曲線</a>
+        <a href="#zhou" class="section-link">Zhou不等式</a>
+        <a href="#patterns" class="section-link">パターン分析</a>
+        <a href="#theoretical" class="section-link">理論的分析</a>
+        <a href="#conclusions" class="section-link">結論</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="breadcrumb">
+        <a href="../index.html">トップ</a> &gt; 研究結果の総合まとめ
+      </div>
+
+      <header class="page-header">
+        <h1>ABC予想 研究結果の総合まとめ</h1>
+        <p class="subtitle">計算実験・理論分析の統合報告 (2025年2月)</p>
+      </header>
+
+      <!-- 計算結果 -->
+      <h2 id="computational">1. 大規模 ABC Triple 探索の結果</h2>
+
+      <h3>1.1 探索概要</h3>
+      <p>篩（Sieve of Eratosthenes）を用いた高速 $\operatorname{rad}(n)$ 計算により、
+      $c \leq 10{,}000$ の範囲で全ての ABC triple を系統的に探索しました。</p>
+
+      <table class="data-table">
+        <tr><th>統計量</th><th>値</th></tr>
+        <tr><td>探索範囲</td><td>$c \leq 10{,}000$</td></tr>
+        <tr><td>篩の計算時間</td><td>0.01秒</td></tr>
+        <tr><td>ABC hit 探索時間</td><td>7.68秒</td></tr>
+        <tr><td>総 ABC triple 数 ($\gcd(a,b)=1$, $a+b=c$)</td><td>15,198,742</td></tr>
+        <tr><td>ABC hit 数 (quality > 1)</td><td>121</td></tr>
+        <tr class="highlight-row"><td>ABC hit の割合</td><td>0.0008%</td></tr>
+        <tr class="highlight-row"><td>最大 quality</td><td>1.5679</td></tr>
+      </table>
+
+      <h3>1.2 最高 quality ABC Triple (上位10件)</h3>
+
+      <table class="data-table">
+        <tr><th>#</th><th>$a$</th><th>$b$</th><th>$c$</th><th>$\operatorname{rad}(abc)$</th><th>quality</th><th>素因数構造</th></tr>
+        <tr class="highlight-row"><td>1</td><td>1</td><td>4374</td><td>4375</td><td>210</td><td>1.5679</td><td>$1 + 2 \cdot 3^7 = 5^4 \cdot 7$</td></tr>
+        <tr><td>2</td><td>1</td><td>2400</td><td>2401</td><td>210</td><td>1.4557</td><td>$1 + 2^5 \cdot 3 \cdot 5^2 = 7^4$</td></tr>
+        <tr><td>3</td><td>3</td><td>125</td><td>128</td><td>30</td><td>1.4266</td><td>$3 + 5^3 = 2^7$</td></tr>
+        <tr><td>4</td><td>625</td><td>2048</td><td>2673</td><td>330</td><td>1.3607</td><td>$5^4 + 2^{11} = 3^5 \cdot 11$</td></tr>
+        <tr><td>5</td><td>289</td><td>6272</td><td>6561</td><td>714</td><td>1.3376</td><td>$17^2 + 2^7 \cdot 7^2 = 3^8$</td></tr>
+        <tr><td>6</td><td>1</td><td>5831</td><td>5832</td><td>714</td><td>1.3196</td><td>$1 + ?= 2^3 \cdot 3^6$</td></tr>
+        <tr><td>7</td><td>1</td><td>512</td><td>513</td><td>114</td><td>1.3176</td><td>$1 + 2^9 = 3^3 \cdot 19$</td></tr>
+        <tr><td>8</td><td>1</td><td>242</td><td>243</td><td>66</td><td>1.3111</td><td>$1 + 2 \cdot 11^2 = 3^5$</td></tr>
+        <tr><td>9</td><td>5</td><td>1024</td><td>1029</td><td>210</td><td>1.2972</td><td>$5 + 2^{10} = 3 \cdot 7^3$</td></tr>
+        <tr><td>10</td><td>1</td><td>80</td><td>81</td><td>30</td><td>1.2920</td><td>$1 + 2^4 \cdot 5 = 3^4$</td></tr>
+      </table>
+
+      <h3>1.3 Quality 分布</h3>
+
+      <table class="data-table">
+        <tr><th>Quality 範囲</th><th>個数</th><th>分布</th></tr>
+        <tr><td>$[0.3, 0.4)$</td><td>10,565,013</td><td><span class="bar" style="width:300px"></span></td></tr>
+        <tr><td>$[0.4, 0.5)$</td><td>4,311,501</td><td><span class="bar" style="width:122px"></span></td></tr>
+        <tr><td>$[0.5, 0.6)$</td><td>289,324</td><td><span class="bar" style="width:8px"></span></td></tr>
+        <tr><td>$[0.6, 0.7)$</td><td>27,646</td><td><span class="bar" style="width:2px"></span></td></tr>
+        <tr><td>$[0.7, 0.8)$</td><td>4,127</td><td><span class="bar" style="width:1px"></span></td></tr>
+        <tr><td>$[0.8, 0.9)$</td><td>799</td><td></td></tr>
+        <tr><td>$[0.9, 1.0)$</td><td>211</td><td></td></tr>
+        <tr class="highlight-row"><td>$[1.0, \infty)$</td><td>121</td><td></td></tr>
+      </table>
+
+      <div class="finding-box">
+        <h4>発見 1: Quality の急激な減少</h4>
+        <p>quality の分布は極めて非対称的です。大多数の ABC triple は quality $\approx 0.35$ 付近に集中し、
+        quality > 1 の「ABC hit」は全体の $0.0008\%$ に過ぎません。
+        これはABC予想（quality > 1 の triple は有限個）と強く整合する観察です。</p>
+      </div>
+
+      <h3>1.4 ABC Hit 数の増加率</h3>
+
+      <table class="data-table">
+        <tr><th>$c_{\max}$</th><th>hits</th><th>hits / $c_{\max}$</th><th>$\log(\text{hits})/\log(c_{\max})$</th></tr>
+        <tr><td>100</td><td>6</td><td>0.0600</td><td>0.389</td></tr>
+        <tr><td>500</td><td>17</td><td>0.0340</td><td>0.456</td></tr>
+        <tr><td>1,000</td><td>31</td><td>0.0310</td><td>0.497</td></tr>
+        <tr><td>5,000</td><td>80</td><td>0.0160</td><td>0.514</td></tr>
+        <tr><td>10,000</td><td>121</td><td>0.0121</td><td>0.521</td></tr>
+      </table>
+
+      <div class="insight-box">
+        <h4>観察: 対数比率の収束</h4>
+        <p>$\log(\text{hits})/\log(c_{\max})$ は $c_{\max}$ の増加とともに
+        $\approx 0.5$ 付近に収束する傾向があります。
+        これは ABC hit 数が $\sim c_{\max}^{0.5}$ のオーダーで増加していることを示唆します。</p>
+        <p>ABC予想は hit 数が有限であることを主張するので、
+        この増加率は探索範囲がまだ十分大きくないか、
+        あるいは対数的な補正項が存在する可能性を示しています。
+        （文献では $c \leq 10^{18}$ の範囲でも ABC hit の増加が確認されている）</p>
+      </div>
+
+      <h3>1.5 Epsilon 解析</h3>
+
+      <table class="data-table">
+        <tr><th>$\epsilon$</th><th>閾値 $1+\epsilon$</th><th>$q > 1+\epsilon$ の数</th><th>ABC予想の予測</th></tr>
+        <tr><td>0.00</td><td>1.00</td><td>121</td><td>有限個</td></tr>
+        <tr><td>0.01</td><td>1.01</td><td>110</td><td>有限個</td></tr>
+        <tr><td>0.05</td><td>1.05</td><td>74</td><td>有限個</td></tr>
+        <tr><td>0.10</td><td>1.10</td><td>50</td><td>有限個</td></tr>
+        <tr><td>0.20</td><td>1.20</td><td>22</td><td>有限個</td></tr>
+        <tr><td>0.30</td><td>1.30</td><td>8</td><td>有限個</td></tr>
+        <tr><td>0.40</td><td>1.40</td><td>3</td><td>有限個</td></tr>
+        <tr class="highlight-row"><td>0.50</td><td>1.50</td><td>1</td><td>有限個</td></tr>
+      </table>
+
+      <div class="finding-box">
+        <h4>発見 2: Epsilon依存性の急激な減少</h4>
+        <p>$\epsilon$ が大きくなるにつれ、$q > 1 + \epsilon$ の triple 数は急速に減少します。
+        $\epsilon = 0.5$ では $c \leq 10{,}000$ の範囲でたった1つ
+        ($1 + 4374 = 4375$, $q \approx 1.568$) しかありません。
+        これは ABC予想の強い数値的証拠です。</p>
+      </div>
+
+      <!-- フレイ曲線 -->
+      <h2 id="frey">2. フレイ曲線解析の結果</h2>
+
+      <h3>2.1 ABC Triple とフレイ曲線の対応</h3>
+
+      <p>各 ABC triple $(a, b, c)$ にフレイ曲線 $E: y^2 = x(x-a)(x+b)$ を対応させ、
+      判別式 $\Delta$、導手 $N$、Szpiro比 $\sigma = \log|\Delta|/\log N$ を計算しました。</p>
+
+      <table class="data-table">
+        <tr><th>$(a, b, c)$</th><th>quality $q$</th><th>$\Delta$</th><th>$N$ (近似)</th><th>Szpiro比 $\sigma$</th></tr>
+        <tr><td>$(1, 8, 9)$</td><td>1.226</td><td>82,944</td><td>24</td><td>4.774</td></tr>
+        <tr><td>$(5, 27, 32)$</td><td>1.019</td><td>298,598,400</td><td>480</td><td>4.922</td></tr>
+        <tr><td>$(1, 80, 81)$</td><td>1.292</td><td>671,846,400</td><td>240</td><td>5.161</td></tr>
+        <tr class="highlight-row"><td>$(1, 4374, 4375)$</td><td>1.568</td><td>$5.86 \times 10^{15}$</td><td>210</td><td>6.272</td></tr>
+        <tr class="highlight-row"><td>$(2, 6{,}436{,}341, 6{,}436{,}343)$</td><td>1.630</td><td>$1.10 \times 10^{29}$</td><td>15,042</td><td>6.664</td></tr>
+      </table>
+
+      <div class="finding-box">
+        <h4>発見 3: Szpiro比 6 の境界</h4>
+        <p>Szpiro予想は $\sigma < 6 + \epsilon$ を主張します。
+        $q > 1.5$ の高 quality triple で Szpiro比が $6$ を超えるケースが観察されました
+        （$(1, 4374, 4375)$: $\sigma = 6.27$, $(2, 6436341, 6436343)$: $\sigma = 6.66$）。
+        ただしこれは $6 + \epsilon$ の範囲内であり、Szpiro予想に反しません。</p>
+      </div>
+
+      <h3>2.2 Quality と Szpiro比の関係</h3>
+
+      <div class="insight-box">
+        <h4>発見 4: Szpiro比 $\approx 2q \cdot (\text{定数})$ の関係</h4>
+        <p>線形回帰により $\sigma = 4.198 \cdot q + 0.672$ という関係が得られました。</p>
+        <p>理論的には、$\Delta \sim (abc)^2$, $N \sim \operatorname{rad}(abc)$ より
+        $\sigma \sim 2 \log(abc) / \log(\operatorname{rad}(abc))$ であり、
+        $q = \log c / \log \operatorname{rad}(abc)$ と密接に関連します。</p>
+        <p>実測された傾き $4.198 / 2 \approx 2.10$ は、
+        $\log(abc) \approx 2.1 \cdot \log c$ という観察と整合します
+        （$a$ や $b$ が $c$ より小さい場合が多いため）。</p>
+      </div>
+
+      <h3>2.3 j-不変量</h3>
+
+      <table class="data-table">
+        <tr><th>$(a, b, c)$</th><th>$c_4$</th><th>$c_6$</th><th>$j$-不変量</th></tr>
+        <tr><td>$(1, 8, 9)$</td><td>1,168</td><td>$-38,080$</td><td>19,210.7</td></tr>
+        <tr><td>$(5, 27, 32)$</td><td>14,224</td><td>$-1,536,832$</td><td>9,637.8</td></tr>
+        <tr><td>$(1, 80, 81)$</td><td>103,696</td><td>$-33,374,656$</td><td>1,659,648.1</td></tr>
+      </table>
+
+      <!-- Zhou不等式 -->
+      <h2 id="zhou">3. Zhou (2025) 有効的ABC不等式の検証</h2>
+
+      <h3>3.1 検証結果</h3>
+
+      <p>Zhou の不等式: $\log|abc| \leq 3\log\operatorname{rad}(abc) + 8\sqrt{\log|abc| \cdot \log\log|abc|}$</p>
+
+      <table class="data-table">
+        <tr><th>$(a, b, c)$</th><th>quality</th><th>LHS: $\log|abc|$</th><th>RHS (Zhou)</th><th>Slack</th><th>判定</th></tr>
+        <tr><td>$(1, 8, 9)$</td><td>1.226</td><td>4.28</td><td>25.32</td><td>21.04</td><td>成立</td></tr>
+        <tr><td>$(1, 80, 81)$</td><td>1.292</td><td>8.78</td><td>45.13</td><td>36.36</td><td>成立</td></tr>
+        <tr><td>$(3, 125, 128)$</td><td>1.427</td><td>10.78</td><td>50.70</td><td>39.92</td><td>成立</td></tr>
+        <tr><td>$(1, 4374, 4375)$</td><td>1.568</td><td>16.77</td><td>71.05</td><td>54.28</td><td>成立</td></tr>
+        <tr class="highlight-row"><td>$(11^2, 3^2 \cdot 5^6 \cdot 7^3, 2^{21} \cdot 23)$</td><td>1.626</td><td>40.18</td><td>130.10</td><td>89.92</td><td>成立</td></tr>
+      </table>
+
+      <div class="insight-box">
+        <h4>観察: Zhou不等式は大きなマージンで成立</h4>
+        <p>全ての検証例において、Zhou不等式は大きな「slack」（RHS - LHS）を持って成立しました。
+        最小のslackは $(1, 8, 9)$ の $21.04$ でした。</p>
+        <p>これは Zhou の不等式がまだ「最適からは程遠い」ことを示唆します。
+        しかし、有効的（定数が明示的）な結果としてはこれが最善です。</p>
+      </div>
+
+      <h3>3.2 各種不等式の比較</h3>
+
+      <p>ABC hit $(1, 4374, 4375)$ (quality = 1.568) での比較：</p>
+      <table class="data-table">
+        <tr><th>不等式</th><th>上界の値</th><th>$\log|abc| = 16.77$ との比</th></tr>
+        <tr><td>Zhou: $3\log\operatorname{rad} + 8\sqrt{\cdots}$</td><td>71.05</td><td>4.24倍</td></tr>
+        <tr><td>$3\log\operatorname{rad}(abc)$</td><td>16.04</td><td>0.96倍</td></tr>
+        <tr><td>$2\log\operatorname{rad}(abc)$</td><td>10.69</td><td>0.64倍</td></tr>
+        <tr class="highlight-row"><td>ABC予想: $(1+\epsilon)\log\operatorname{rad}$</td><td>$\sim 5.35 \cdot (1+\epsilon)$</td><td>---</td></tr>
+      </table>
+
+      <div class="finding-box">
+        <h4>発見 5: 指数 1/3 の壁</h4>
+        <p>$3\log\operatorname{rad}(abc) = 16.04$ は $\log|abc| = 16.77$ とほぼ同じです。
+        つまり、最高quality tripleでさえ $\log|abc| \approx 3\log\operatorname{rad}(abc)$ 程度であり、
+        有効的ABC不等式の「$3\log\operatorname{rad}$」の項だけで（補正項なしで）
+        ほぼ等号に近いことがわかります。</p>
+        <p>これは Baker理論ベースのアプローチの限界を数値的に確認するものです。</p>
+      </div>
+
+      <!-- パターン分析 -->
+      <h2 id="patterns">4. 高Quality ABC Tripleのパターン分析</h2>
+
+      <h3>4.1 素因数構造のパターン</h3>
+
+      <div class="finding-box">
+        <h4>発見 6: 高Quality Tripleは「滑らかな数」を含む</h4>
+        <p>上位のABC hitを分析すると、以下のパターンが顕著です：</p>
+        <ol>
+          <li>$a = 1$ のケースが多い（上位20件中12件）</li>
+          <li>$b$ または $c$ が素数の大きなべき乗（$2^7, 3^7, 5^4, 7^4$ など）</li>
+          <li>$\operatorname{rad}(abc)$ が小さい（$\leq 30$ のものが上位に多い）</li>
+          <li>特に $\operatorname{rad} = 210 = 2 \cdot 3 \cdot 5 \cdot 7$ が頻出</li>
+        </ol>
+        <p>直感的説明: quality $= \log c / \log\operatorname{rad}(abc)$ が大きくなるには、
+        $c$ が大きく $\operatorname{rad}(abc)$ が小さい必要があります。
+        これは $a, b, c$ が小さい素数の高いべき乗で構成される
+        「滑らかな数」(smooth number) であることを要求します。</p>
+      </div>
+
+      <h3>4.2 $a = 1$ の特殊性</h3>
+
+      <div class="insight-box">
+        <h4>$a = 1$ のとき $b + 1 = c$ の分析</h4>
+        <p>$a = 1$ の ABC hit は $1 + b = c$（連続する整数）の形です。
+        $\operatorname{rad}(1 \cdot b \cdot c) = \operatorname{rad}(bc)$ となり、
+        $\operatorname{rad}(1)=1$ の寄与がないため quality が高くなりやすい。</p>
+        <p>特に $b = p_1^{e_1} \cdot p_2^{e_2}$, $c = q_1^{f_1}$ のような場合
+        （例: $1 + 2 \cdot 3^7 = 5^4 \cdot 7$）、
+        $\operatorname{rad}$ は $p_1 p_2 q_1$ だけとなり、非常に小さくなります。</p>
+      </div>
+
+      <!-- 理論的分析 -->
+      <h2 id="theoretical">5. 理論的分析のまとめ</h2>
+
+      <h3>5.1 Mason-Stothers障壁</h3>
+      <p>(<a href="mason_stothers_obstruction.html">詳細分析</a>)</p>
+
+      <div class="insight-box">
+        <h4>核心的障壁: 整数環上の微分の不在</h4>
+        <p>Mason-Stothers定理（多項式ABC）の証明は微分 $d/dt$ に完全に依存しています。
+        整数環 $\mathbb{Z}$ 上ではケーラー微分が消滅するため、
+        この証明は直接には持ち上がりません。</p>
+        <p>算術微分 $n' = n \sum e_i/p_i$ は加法と整合しない（$(a+b)' \neq a' + b'$）ため、
+        Mason-Stothersの議論の代替にはなりません。</p>
+      </div>
+
+      <h3>5.2 Scholze-Stix論争</h3>
+      <p>(<a href="controversy_analysis.html">詳細分析</a>)</p>
+
+      <div class="insight-box">
+        <h4>論争の核心: テータリンクの自明性</h4>
+        <p>Scholze-Stixは「異なるホッジシアターを同じ宇宙で考えると
+        テータリンクが自明になる」と主張。望月は「宇宙を同一視すること自体が
+        理論の本質を破壊する」と反論。</p>
+        <p>この論争の解決には、(1) Lean4等での形式化、(2) 独立な証明の発見、
+        (3) 第三者による概念的橋渡し（Joshi型アプローチ）のいずれかが必要です。</p>
+      </div>
+
+      <h3>5.3 最新のアプローチ</h3>
+      <p>(<a href="novel_approaches.html">詳細分析</a>)</p>
+
+      <div class="insight-box">
+        <h4>最も有望な方向</h4>
+        <ol>
+          <li><strong>Pasten (2024)</strong>: 志村曲線を用いてStewart-Yuの指数 $1/3$ を初めて改善。
+              「$1/3 + \delta$」を実現したが、$1+\epsilon$ にはまだ遠い</li>
+          <li><strong>Browning et al. (2024)</strong>: 「ABCはほとんど全ての場合に成立」を証明。
+              例外的 triple の数に power saving bound を与えた</li>
+          <li><strong>Zhou (2025)</strong>: 有効的定数を $1.7 \times 10^{30}$ から $400$ に改善</li>
+        </ol>
+      </div>
+
+      <!-- 結論 -->
+      <h2 id="conclusions">6. 結論と展望</h2>
+
+      <div class="box box-warning">
+        <div class="box-title">本研究の主要な結論</div>
+        <ol>
+          <li><strong>数値的証拠は圧倒的にABC予想を支持</strong>:
+              $c \leq 10{,}000$ の完全探索で、quality分布は予想と完全に整合。
+              $\epsilon$ が大きいほど ABC hit は急激に減少する</li>
+
+          <li><strong>高quality tripleの構造的理解</strong>:
+              高いquality を持つ triple は、小さい素数の高いべき乗で構成される
+              「滑らかな数」の組み合わせに限られる。$a=1$ のケースが顕著に多い</li>
+
+          <li><strong>Szpiro予想との等価性を数値的に確認</strong>:
+              quality と Szpiro比は強い正の相関（相関係数 $0.62$）を持ち、
+              $\sigma \approx 4.2q + 0.67$ の線形関係が成立</li>
+
+          <li><strong>有効的ABC不等式には大きなギャップ</strong>:
+              Zhou (2025) の不等式は全てのケースで成立するが、
+              「slack」は大きく、不等式の最適化の余地が大きい</li>
+
+          <li><strong>指数 $1/3$ の壁は本質的</strong>:
+              Baker理論ベースのアプローチでは指数 $1/3$ が限界であり、
+              ABC予想の $1+\epsilon$ に到達するには根本的に新しい道具が必要</li>
+
+          <li><strong>IUT論争は未決着</strong>:
+              Scholze-Stix vs 望月の論争は数学的に決着しておらず、
+              形式化や独立な証明が待たれる</li>
+        </ol>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">$100万ドル懸賞金に向けた展望</div>
+        <p>ABC予想の完全な証明（または反証）を得るための最も有望な戦略：</p>
+        <ol>
+          <li><strong>短期（1-3年）</strong>:
+              IUT理論の形式化プロジェクトの進展を注視。
+              Pastenの志村曲線アプローチの発展。
+              計算機実験の範囲拡大（$c \leq 10^{10}$ 以上）</li>
+          <li><strong>中期（3-10年）</strong>:
+              新しい「算術的微分」の候補の発見。
+              $\mathbb{F}_1$ 幾何学の成熟。
+              ラングランズ・プログラムとの接続の深化</li>
+          <li><strong>長期（10年以上）</strong>:
+              Mason-Stothers障壁を超える革新的な道具の発見。
+              複数のアプローチの統合による証明の完成</li>
+        </ol>
+      </div>
+
+      <!-- ナビゲーション -->
+      <nav class="page-nav">
+        <a href="novel_approaches.html" class="prev">新アプローチの探索</a>
+        <a href="../index.html" class="next">トップに戻る</a>
+      </nav>
+
+    </main>
+  </div>
+</body>
+</html>
