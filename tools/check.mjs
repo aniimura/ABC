@@ -16,6 +16,39 @@
  *
  * ★原則: 器具は自分の欠陥を報告できなければならない。
  *   非ゲート指標(件数等)も必ず数値を印字し、「緑1語」で隠さない。
+ *
+ * ════════════════════════════════════════════════════════════════
+ * ★★ この器具が検査して **いない** こと(必読)
+ * ════════════════════════════════════════════════════════════════
+ *
+ * 「selftest が全部 PASS」は「欠陥が無い」ではない。**用意した項目を通る**
+ * というだけで、用意していない失敗形については何も言っていない。
+ * 2026-08-14 の監査で、20/20 PASS の状態で以下の2件が素通りしていた:
+ *   - `.needs` が存在しない物理ページを指す(`.src` では検査していたのに)
+ *   - `Found/` に `sorry` が残る(bucket の規則に明記してあるのに)
+ * どちらも fixture を書いていなかったから見えなかった。
+ *
+ * ── A. 原理的に検査できない(自己申告に依存する)
+ *   A1. `data-notation-checked` の日付 — **実際に PDF を目視したかは検査不能**。
+ *       形式(YYYY-MM-DD か "none")しか見ていない。
+ *   A2. `LeanStatus` の `inMathlib` / `absent` — 実測したかは検査不能。
+ *   A3. `.needs` の内容が原文の証明文を反映しているか — 件数と形式しか見ない。
+ *       原文が言っていない依存を書いても通る。
+ *   A4. `.reading` に原文が混ざっていないか — `.verbatim` しか照合していない。
+ *   A5. ★**statement が原典を忠実に表しているか** — Lean も check.mjs も判定しない。
+ *       これが「事実1」の核心であり、この器具の存在理由でもある。器具が肩代わり
+ *       できるのは**材料を揃えさせること**までで、判断そのものは残る。
+ *
+ * ── B. 規則はあるが機械検査が無い
+ *   B1. **G5(弱化禁止)** — 完全に規律のみ。証明できないときに原典の主張を
+ *       導ける形へ弱めても、何も落ちない。
+ *   B2. `waiting` に期限が無い — `Interface` は永久に waiting でいられる。
+ *   B3. `*.legacy.*` は検査対象外のまま。再作成の期限が無い。
+ *   B4. `loadBearing` の印は自己申告 — 付け忘れれば G3 は発火しない。
+ *
+ * ── 運用規律
+ *   **新しい失敗形を見つけたら、直すと同時に fixture を足す。**
+ *   直すだけでは、次に同じ穴が開いたとき気づけない。
  */
 
 import {
@@ -196,6 +229,21 @@ function pdfPageTexts(pdfPath, page) {
 // ────────────────────────────────────────────────────────────────
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** `sorry` の検出。識別子の一部や `.sorry` は拾わない。 */
+const SORRY_RE = /(^|[^\w.])sorry([^\w]|$)/;
+
+/**
+ * コメント(`/- ... -/` と `--` 行末)を、改行を保ったまま空白へ潰す。
+ * docstring 内で "sorry" に言及しただけのものを数えると台帳が信用できなくなる。
+ */
+const stripLeanComments = (src) => src
+  .replace(/\/-[\s\S]*?-\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length));
+
+/** `X.src : Source` の中身を読む正準形パターン(1行で書くこと)。 */
+const SRC_RE =
+  /\.src\b[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?pdfPage\s*:=\s*(\d+)[\s\S]{0,300}?sectionId\s*:=\s*"([^"]*)"/;
 
 function checkStructured({ files = null, papersPath = PAPERS_JSON, quiet = false } = {}) {
   const before = NG;
@@ -413,6 +461,21 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     }
   }
 
+  // ── Found/ と Interface/ は sorry を残さない(各 bucket の docstring の規則)
+  //    Skeleton/ の sorry は設計どおりなのでゲートしない。
+  //    2026-08-14 の監査で、この規則が機械化されていないことが発覚したので追加。
+  const SORRY_FREE_BUCKETS = ['Found', 'Interface'];
+  for (const [f, src] of texts) {
+    const bucket = relative(dir, f).replace(/\\/g, '/').split('/')[0];
+    if (!SORRY_FREE_BUCKETS.includes(bucket)) continue;
+    stripLeanComments(src).split('\n').forEach((line, i) => {
+      if (SORRY_RE.test(line)) {
+        ng(`${relative(ROOT, f)}:${i + 1}`,
+          `${bucket}/ に sorry を残してはならない(規則は ABC3/${bucket}.lean の docstring)`);
+      }
+    });
+  }
+
   // ── 主語の分離: Skeleton(原典の主張)は Check(我々のモデルの検査)に依存できない
   for (const [f, src] of texts) {
     const relf = relative(dir, f).replace(/\\/g, '/');
@@ -494,6 +557,22 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       else if (src[i] === ']') { depth--; if (depth === 0) { end = i; break; } }
     }
     const body = src.slice(open, end + 1);
+
+    // 各 obligation の末尾の数値は物理ページ。範囲外なら NG
+    // (`.src` では検査していたのに `.needs` では見ていなかった——2026-08-14 の監査で発覚)
+    const srcIdx = src.indexOf(`${d.name}.src`);
+    const srcM = srcIdx >= 0 ? SRC_RE.exec(src.slice(srcIdx)) : null;
+    const paperTag = srcM ? srcM[1] : null;
+    const maxPage = paperTag && reg[paperTag] ? reg[paperTag].pdfPages : null;
+    if (maxPage !== null) {
+      for (const m of body.matchAll(/\s(\d+)\s*(?:,|\])/g)) {
+        const pg = Number(m[1]);
+        if (pg < 1 || pg > maxPage) {
+          ng(at(d), `G6 \`${d.name}.needs\` が物理 p.${pg} を指しているが範囲外(1..${maxPage}, ${paperTag})`);
+        }
+      }
+    }
+
     for (const k of OBLIGATION_KINDS) {
       tally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
     }
@@ -503,7 +582,6 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   }
 
   // ── G1-Lean: Skeleton の宣言は Source を伴い、その locator が実在する
-  const SRC_RE = /\.src\b[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?pdfPage\s*:=\s*(\d+)[\s\S]{0,300}?sectionId\s*:=\s*"([^"]*)"/;
   let nSrcOk = 0;
   for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
     // 台帳の付随宣言そのものには出典を要求しない
@@ -582,20 +660,17 @@ function checkLean() {
 
   const leanFiles = walk(LEAN_SRC).filter((p) => p.endsWith('.lean'));
 
-  // sorry 台帳(ゲートではない。件数を必ず印字する)
-  // コメント(/- ... -/ と -- 行末)は改行を保ったまま空白に潰してから走査する。
-  // ——docstring 内で "sorry" に言及しただけのものを数えると台帳が信用できなくなる。
-  const stripComments = (src) => src
-    .replace(/\/-[\s\S]*?-\//g, (m) => m.replace(/[^\n]/g, ' '))
-    .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length));
-
+  // sorry 台帳(件数はゲートではない。必ず印字する)
+  // bucket 別のゲート(Found/ Interface/ は sorry 禁止)は checkLeanLedger にある
+  // ——そちらは fixture で較正できる場所だから。
   const sorries = [];
   for (const f of leanFiles) {
-    stripComments(readFileSync(f, 'utf8')).split('\n').forEach((line, i) => {
-      if (/(^|[^\w.])sorry([^\w]|$)/.test(line)) sorries.push(`${relative(ROOT, f)}:${i + 1}`);
+    stripLeanComments(readFileSync(f, 'utf8')).split('\n').forEach((line, i) => {
+      if (SORRY_RE.test(line)) sorries.push(`${relative(ROOT, f)}:${i + 1}`);
     });
   }
   console.log(`  -- sorry: ${sorries.length} 件${sorries.length ? `\n     ${sorries.join('\n     ')}` : ''}`);
+
 
   // G1-Lean / G2 / G4 / Gap の台帳検査
   checkLeanLedger({ dir: LEAN_SRC, axiomExempt: AXIOM_EXEMPT });
@@ -672,6 +747,10 @@ function selftest() {
     ['D16 .needs があれば通る(空リストも主張)', 'Skeleton', 'd16-needs-ok.lean', false],
     ['D17 コメント内の引用が該当ページに無い', 'Skeleton', 'd17-bad-quote.lean', true],
     ['D18 装飾記法つきの正しい引用は通る', 'Skeleton', 'd18-good-quote.lean', false],
+    ['D19 .needs が範囲外のページを指す', 'Skeleton', 'd19-needs-bad-page.lean', true],
+    ['D20 .needs のページが範囲内なら通る', 'Skeleton', 'd20-needs-good-page.lean', false],
+    ['D21 Found/ に sorry が残っている', 'Found', 'd21-found-sorry.lean', true],
+    ['D22 Found/ が sorry 無し(docstring の言及は誤検出しない)', 'Found', 'd22-found-clean.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
