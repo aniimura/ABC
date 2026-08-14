@@ -61,9 +61,12 @@ variable {A : Type} (lv : Set A → WithTop ℝ) (S : Set A) (a : ℝ)
 `Interface` が課している条件(`qAbs_pos` と `qLogVol_eq`)は残したまま、
 Θ 側だけを潰す——可能な像は `{S}` の1つ、正則包は恒等。
 台 `A`・対数体積 `lv`・像 `S`・`a = |log(q)|` は**任意**でよい。 -/
-noncomputable def trivialised (ha : 0 < a) (h : lv S = ((-a : ℝ) : WithTop ℝ)) :
+noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
     PilotObjectData where
   Amb := A
+  topology := τ
   logVol := lv
   hull := id
   possibleThetaImages := {S}
@@ -71,31 +74,41 @@ noncomputable def trivialised (ha : 0 < a) (h : lv S = ((-a : ℝ) : WithTop ℝ
   qAbs := a
   qAbs_pos := ha
   qLogVol_eq := h
+  outputLogVolumes := {x : ℝ | (x : WithTop ℝ) ≤ lv S}
+  outputLogVolumes_eq := by simp
+  qLogVol_mem := le_of_eq h.symm
+  thetaUnion_isCompact := by simpa using hS
+  logVol_hull_ne_top_of_isCompact := hfin
 
 /-- ★**退化の核心**: 自明化すると Θ 側と q 側は**同じ値**になる。 -/
-theorem trivialised_thetaLogVol_eq_qLogVol (ha : 0 < a) (h : lv S = ((-a : ℝ) : WithTop ℝ)) :
-    thetaLogVol (trivialised lv S a ha h) = qLogVol (trivialised lv S a ha h) := by
+theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    thetaLogVol (trivialised lv S a τ ha h hS hfin) = qLogVol (trivialised lv S a τ ha h hS hfin) := by
   simp [thetaLogVol, qLogVol, trivialised]
 
 /-- ★**Corollary 3.12 の結論が、残りのデータが何であっても成り立つ**。
 
 `sorry` 無し。すなわち自明化した `Interface` の下では、
 `cor_3_12` は**内容を持たない**。 -/
-theorem trivialised_satisfies_cor_3_12 (ha : 0 < a) (h : lv S = ((-a : ℝ) : WithTop ℝ)) :
-    thetaLogVol (trivialised lv S a ha h) ≠ ⊤ ∧
-      qLogVol (trivialised lv S a ha h) ≤ thetaLogVol (trivialised lv S a ha h) := by
-  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a ha h).symm⟩
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a ha h, qLogVol]
+theorem trivialised_satisfies_cor_3_12 (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    thetaLogVol (trivialised lv S a τ ha h hS hfin) ≠ ⊤ ∧
+      qLogVol (trivialised lv S a τ ha h hS hfin) ≤ thetaLogVol (trivialised lv S a τ ha h hS hfin) := by
+  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin).symm⟩
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin, qLogVol]
   show lv S ≠ ⊤
   rw [h]
   exact WithTop.coe_ne_top
 
 /-- 「i.e.」の形も自明に成り立つ——`C_Θ ≥ −1` は等号の場合 `C_Θ = −1` で達成される。
 すなわち退化した witness は、**abc へ効く形の主張も**空虚に満たす。 -/
-theorem trivialised_satisfies_CTheta (ha : 0 < a) (h : lv S = ((-a : ℝ) : WithTop ℝ))
-    (C : ℝ) (hC : thetaLogVol (trivialised lv S a ha h) ≤ ((C * a : ℝ) : WithTop ℝ)) :
+theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) (C : ℝ) (hC : thetaLogVol (trivialised lv S a τ ha h hS hfin) ≤ ((C * a : ℝ) : WithTop ℝ)) :
     -1 ≤ C := by
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a ha h, qLogVol] at hC
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin, qLogVol] at hC
   show (-1 : ℝ) ≤ C
   have h4 : -a ≤ C * a := by
     have : ((-a : ℝ) : WithTop ℝ) ≤ ((C * a : ℝ) : WithTop ℝ) := by
@@ -106,54 +119,78 @@ theorem trivialised_satisfies_CTheta (ha : 0 < a) (h : lv S = ((-a : ℝ) : With
 -- 退化 witness であるにもかかわらず、受理ゲートを全部通ることの確認
 #print axioms trivialised_satisfies_cor_3_12
 
-/-! ## ★★ 自明化より強い事実 — 現在の `Interface` の下では `cor_3_12` は **偽** である
+/-! ## ★★ 反証は死んだ — 原文 p.184 と p.175 を足した後の最終測定(2026-08-14)
 
-上の退化は「statement が無内容になりうる」ことを示した。しかし調べてみると、
-事態はもっと強い。**結論の前半(有限性)を破る `PilotObjectData` が作れる**——
-つまり `cor_3_12` は ∀-命題として**反証される**。
+以前ここには **`cor_3_12` は現在の `Interface` の下では偽である**という定理
+(`cor_3_12_refutable_under_current_interface`)と、その反例
+(`possibleThetaImages := {∅}`、空集合の対数体積を `⊤` にしたもの)が置いてあった。
 
-作り方: 可能な像を `{∅}` の1つだけにし(`⋃₀ {∅} = ∅`)、
-対数体積を「空集合には `⊤`、それ以外には `−1`」とする。
-`Interface` が課しているのは `qAbs_pos` と `qLogVol_eq` の2つだけで、
-`hull` にも `possibleThetaImages` にも何の条件も無いので、これは合法な witness である。
+原文へ当たり直して**2段階**で足した結果、反例は**構成できなくなった**。
+
+| 追加したもの | 出所 | 効いた先 |
+|---|---|---|
+| `outputLogVolumes` / `outputLogVolumes_eq` / `qLogVol_mem` | 物理 p.184、Step (xi-e)(xi-f) | **(b) 不等式** |
+| `thetaUnion_isCompact` / `logVol_hull_ne_top_of_isCompact` | 物理 p.175 + p.31 + p.127 | **(a) 有限性** |
+
+結果:
+
+| | 内容 | 結果 |
+|---|---|---|
+| **(b)** | `qLogVol D ≤ thetaLogVol D` | **証明できる** |
+| **(a)** | `thetaLogVol D ≠ ⊤` | **証明できる** |
+
+すなわち `Skeleton.IUTchIII.cor_3_12` は **`sorry` 無しで通る**。
+
+### ★★判定(課題の第3段)— **祝う話ではない**
+
+**(a)(b) の両方が通ったので、我々のモデルの中で Corollary 3.12 は自明になった。**
+これは Scholze–Stix の「trivial, not false」を我々のモデル上で再現したものである。
+
+**我々は何も導出していない。** `cor_3_12` の証明は、`Interface` の
+`logVol_hull_ne_top_of_isCompact ∘ thetaUnion_isCompact` と `qLogVol_mem` を
+そのまま組み合わせただけである。(xi-e)(xi-f) も p.175 のコンパクト性も、
+すべて**原文の証明から仮説として輸入**した。
+
+**これは原典への判定ではない。** 原文は実際に証明を書いており、
+我々が写していないのはその中身の方である。
+
+### 旧反例はどの条件で死んだか(下で機械的に確定させる)
+
+★`⋃₀ {∅} = ∅` は**コンパクト**なので、`thetaUnion_isCompact` は**満たしてしまう**。
+死因は **`logVol_hull_ne_top_of_isCompact`**——p.31 の
+「compact, hence of finite log-volume」に当たる橋の方である。
+
+### ★残った問い: 原文は "easily verified" の検証を書いていない
+
+`thetaUnion_isCompact` の原文の根拠は p.175 の「the **[easily verified]** compactness」
+だけで、**検証は書かれていない**(2026-08-14 実測: 論文全体で `compact` は 33 件、
+`¹,°𝒰_{j,v_ℚ}` のコンパクト性を確立する箇所は **0 件**)。方針としては
+p.128 の「**all the indeterminacies that occur in the theory are compact** is in some
+sense one important theme in the present series of papers」がある。
+また `bounded family`(p.130、Remark 3.9.5, (vi))は**用語の定義**として1件あるのみで、
+Theorem 3.11 の出力が bounded family であるとは述べていない。
+
+したがって次に転写すべきは **Theorem 3.11, (i), (a) のモノ解析的整構造
+`I(…) ⊆ I^ℚ(…)`(= log-shell、p.31 で compact と明示)と Proposition 3.9** である。
+そこまで写して初めて `thetaUnion_isCompact` を**導出**できる可能性が出る。
 -/
 
 open Classical in
-/-- 「空集合の対数体積は `+∞`、それ以外は `−1`」。`Interface` はこれを禁じていない。 -/
+/-- 旧反例が使っていた対数体積:「空集合は `+∞`、それ以外は `−1`」。 -/
 noncomputable def lvUnit (s : Set Unit) : WithTop ℝ :=
   if () ∈ s then ((-1 : ℝ) : WithTop ℝ) else ⊤
 
-/-- ★**有限性を破る witness**。q 側は `−1`(有限)だが、Θ 側は `⊤` になる。 -/
-noncomputable def finitenessCounterexample : PilotObjectData where
-  Amb := Unit
-  logVol := lvUnit
-  hull := id
-  possibleThetaImages := {∅}
-  qImage := Set.univ
-  qAbs := 1
-  qAbs_pos := one_pos
-  qLogVol_eq := by simp [lvUnit]
+/-- ★**旧反例の死因を機械的に確定させる**。
 
-theorem finitenessCounterexample_thetaLogVol :
-    thetaLogVol finitenessCounterexample = ⊤ := by
-  simp [thetaLogVol, finitenessCounterexample, lvUnit]
+`∅` はコンパクトなので `thetaUnion_isCompact` は満たされてしまう。
+破れるのは `logVol_hull_ne_top_of_isCompact`(`hull = id` なので `logVol ∅ = ⊤`)。
+すなわち反証を殺したのは **p.31 の「compact, hence of finite log-volume」の橋**である。 -/
+theorem oldCounterexample_dies_on_the_bridge :
+    IsCompact (∅ : Set Unit) ∧ ¬ (∀ U : Set Unit, IsCompact U → lvUnit (id U) ≠ ⊤) := by
+  refine ⟨isCompact_empty, fun h => ?_⟩
+  exact h ∅ isCompact_empty (by simp [lvUnit])
 
-/-- ★★**`cor_3_12` は現在の `Interface` の下では偽**。`sorry` は原理的に埋まらない。
-
-これは「自明になる」より強い。PLAN §5-2 のトリアージでは**既定は①(我々のモデル化の誤り)**
-——`Interface` が弱すぎて、原文が Theorem 3.11 から受け取っているはずの内容
-(可能な像の和集合の正則包の対数体積が有限であること)を運べていない。
-
-原文の有限性は Corollary 3.12 の**結論**なので、仮説として置くことはできない。
-すなわち **Corollary 3.12 の前半は、Corollary 3.12 自身の逐語からは出せない**——
-Theorem 3.11 の中身が要る。これが「the situation of Theorem 3.11 が未列挙」
-(構造化の `<p class="open">`)の、最初の具体的な代償である。 -/
-theorem cor_3_12_refutable_under_current_interface :
-    ¬ ∀ D : PilotObjectData, thetaLogVol D ≠ ⊤ ∧ qLogVol D ≤ thetaLogVol D := by
-  intro h
-  exact (h finitenessCounterexample).1 finitenessCounterexample_thetaLogVol
-
-#print axioms cor_3_12_refutable_under_current_interface
+#print axioms oldCounterexample_dies_on_the_bridge
 
 /-!
 ## 読み

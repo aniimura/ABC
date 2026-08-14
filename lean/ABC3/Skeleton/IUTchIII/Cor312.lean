@@ -99,29 +99,64 @@ def qLogVol.src : Source :=
 Scholze–Stix の「偽ではなく自明になる」を我々のモデル上で再現したもので、
 **原典への判定ではない**——我々の `Interface` が弱いだけかもしれない。
 
-## ★★この `sorry` は埋まらない(2026-08-14 実測)
+## ★★2026-08-14: `sorry` は消えた。**しかしそれは成果ではない。**
 
-さらに調べたところ、**現在の `Interface` の下でこの命題は偽である**——
-結論の前半(有限性 `thetaLogVol ≠ ⊤`)を破る `PilotObjectData` が構成できる
-(`Check.IUTchIII.cor_3_12_refutable_under_current_interface`、`sorry` 無し)。
-したがって**この `sorry` は原理的に埋まらない**。埋めようとしないこと。
+一度は「現在の `Interface` の下でこの命題は偽であり `sorry` は埋まらない」と記録した。
+その後、原文へ当たり直して**2段階**で条件を輸入した結果、反例は構成できなくなり、
+`cor_3_12` は `sorry` 無しで通るようになった:
 
-トリアージ(PLAN §5-2、**既定は①**):
+| 輸入したもの | 出所(物理ページ) | 効いた先 |
+|---|---|---|
+| `outputLogVolumes` / `outputLogVolumes_eq` / `qLogVol_mem` | p.184、証明 Step (xi-e)(xi-f) | 不等式 |
+| `thetaUnion_isCompact` / `logVol_hull_ne_top_of_isCompact` | p.175 + p.31 + p.127 | 有限性 |
 
-- **① 我々のモデル化の誤り** ← 現時点の分類。`PilotObjectData` は `hull` にも
-  `possibleThetaImages` にも条件を課していないので、原文が Theorem 3.11 から
-  受け取っているはずの内容を運べていない。
-- ② 必要な数学が未構築(mono-theta 環境・log-shell・Frobenioid 等、mathlib に 0 件)。
-- ③ 原典側の飛躍 —— **名乗らない**。§5-2 の要件(複数の独立な型設計・falsifier)を
-  満たしていない。
+★**我々は1つも導出していない。** 下の証明は輸入した仮説を組み合わせただけである。
+**我々のモデルの中で Corollary 3.12 は自明になった**——Scholze–Stix の
+「trivial, not false」の、我々のモデル上での再現。判定と経緯は
+`Check/IUTchIII/Cor312Degenerate.lean`。
 
-**意味すること**: 原文の有限性は Corollary 3.12 の**結論**なので仮説には置けない。
-すなわち **Corollary 3.12 の前半は Corollary 3.12 自身の逐語からは出せず、
-Theorem 3.11 の中身が要る**。構造化で `<p class="open">` に記録した
-「the situation of Theorem 3.11 が未列挙」の、最初の具体的な代償である。 -/
+**これは原典への判定ではない。** 原文は実際に証明を書いており(p.174–186 の
+Step (i)–(xii))、写していないのはその中身の方である。
+
+★**残る不足**: `thetaUnion_isCompact` の原文の根拠は p.175 の
+「the **[easily verified]** compactness」だけで、**検証は書かれていない**
+(実測: 論文全体で `compact` 33 件、`¹,°𝒰_{j,v_ℚ}` のコンパクト性を確立する箇所は 0 件)。
+次に転写すべきは Theorem 3.11, (i), (a) のモノ解析的整構造 `I(…) ⊆ I^ℚ(…)`
+(= log-shell。p.31 に「compact, hence of finite log-volume」と明示)と Proposition 3.9。 -/
 theorem cor_3_12 (D : PilotObjectData) :
     thetaLogVol D ≠ ⊤ ∧ qLogVol D ≤ thetaLogVol D := by
-  sorry
+  refine ⟨D.logVol_hull_ne_top_of_isCompact _ D.thetaUnion_isCompact, ?_⟩
+  have hm := D.qLogVol_mem
+  rw [D.outputLogVolumes_eq] at hm
+  rw [qLogVol, D.qLogVol_eq]
+  exact hm
+
+/-- **結論の後半(不等式)だけは証明できる**(2026-08-14)。
+
+原文の証明 Step (xi-e)(xi-f)(物理 p.184)を `Interface` の
+`outputLogVolumes_eq` / `qLogVol_mem` として受けた結果、
+不等式は原文が言うとおり「then follows formally」——`sorry` 無しで出る。
+
+★**これは成功ではない。** 内容を作ったのではなく、原文の証明の該当段を
+仮説として**輸入した**だけである。詳細と判定は
+`Check/IUTchIII/Cor312Degenerate.lean`。 -/
+theorem cor_3_12_inequality (D : PilotObjectData) : qLogVol D ≤ thetaLogVol D := by
+  have hm := D.qLogVol_mem
+  rw [D.outputLogVolumes_eq] at hm
+  rw [qLogVol, D.qLogVol_eq]
+  exact hm
+
+def cor_3_12_inequality.src : Source :=
+  { paper := "IUTchIII", pdfPage := 174, item := "Corollary 3.12 (conclusion)",
+    sectionId := "cor-3-12-conclusion" }
+
+/-- 原文 Step (xi-e)(xi-f) を `Interface` の仮説として受けているので、
+我々の側に残る依存は無い。**「依存が無い」ではなく「輸入済み」**であることに注意。 -/
+def cor_3_12_inequality.needs : List ProofObligation :=
+  [ .implicitStep
+      "Step (xi-e)(xi-f) を Interface の仮説として輸入した(我々は証明していない)" 184,
+    .implicitStep
+      "原文 p.184 の直前の文にある限定『subject to the condition』と『perhaps only up to some sort of approximation, as a result of various indeterminacies』を写していない。approximation は原文のどこにも量化されていないため、写せば強さを我々が決めることになる。仮説の強化にあたりうる意図的な単純化" 184 ]
 
 def cor_3_12.src : Source :=
   { paper := "IUTchIII", pdfPage := 174, item := "Corollary 3.12 (conclusion)",
@@ -139,7 +174,9 @@ def cor_3_12.needs : List ProofObligation :=
     .otherPaper "[IUTchII]" "Corollary 4.10, (i)(ラベル 0 と ⟨F_l⟩ の同定、記号 △)" 174,
     .otherPaper "[IUTchI]" "Definition 3.1, (b)(楕円曲線 E_F の q-パラメータ)" 174,
     .implicitStep "「the situation of Theorem 3.11」が何を含むかは列挙されていない(物理 p.153-159 の7ページ)" 173,
-    .derivation "Step (i)-(xii)——原文は「relatively concrete consequence」と述べるが、実際の導出は p.174-182 にわたる" 174 ]
+    .derivation "Step (i)-(xii)——原文は「relatively concrete consequence」と述べるが、実際の導出は p.174-182 にわたる" 174,
+    .implicitStep
+      "有限性 −|log(Θ)| ∈ R の出所。正則包は、領域が relatively compact なら λ·O 型の有界集合、そうでなければ I^Q 全体(= 対数体積 +∞)と場合分けで定義される(Remark 3.9.5, (i))。したがって有限性には『可能な像の和集合が relatively compact』が要るが、原文はそれを Corollary 3.12 の文脈で確立していない(2026-08-14 実測: relatively compact は定義の箇所にしか現れない)" 127 ]
 
 /-- 原文が「i.e.」で言い換える形。**abc へ効くのはこの形**。
 

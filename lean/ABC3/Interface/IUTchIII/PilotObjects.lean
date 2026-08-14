@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Set.Lattice
 import Mathlib.Order.WithBot
+import Mathlib.Topology.Compactness.Compact
 
 /-!
 # [IUTchIII] Corollary 3.12 — まだ構築できていない基礎
@@ -90,6 +91,8 @@ structure PilotObjectData where
   > 3.11, (i), which we do not regard as subject to the indeterminacies (Ind1), (Ind2),
   -/
   Amb : Type
+  /-- `Amb` の位相。コンパクト性(下記 `thetaUnion_isCompact`)を述べるために要る。 -/
+  topology : TopologicalSpace Amb
   /-- **手続き正規化モノ解析的対数体積**。Θ 側・q 側の**両方**をこれで測る
   (同じ多輻的表現の中で比較するのだから、`logVol` は1つでなければならない)。
 
@@ -158,6 +161,94 @@ structure PilotObjectData where
   > q-pilot object [cf. Definition 3.8, (i)],
   -/
   qLogVol_eq : logVol qImage = ((-qAbs : ℝ) : WithTop ℝ)
+  /-- **可能な出力対数体積の集まり**(原文の `ℝ_{≤−|log(Θ̲̲)|}`)。
+
+  ★2026-08-14 追加。反証(`cor_3_12_refutable_under_current_interface`)を殺すために
+  原文へ当たり直して見つけたもの。**Corollary 3.12 の statement にはなく、
+  その証明の Step (xi-e) にある**(物理 p.184)。
+
+  原文 (IUTchIII p.184):
+  > The multiradial construction algorithm of Theorem 3.11, followed by for-
+  > mation of the holomorphic hull and application of the log-volume, yields a
+  > collection of possible log-volumes of pilot-object output data
+  -/
+  outputLogVolumes : Set ℝ
+  /-- **(xi-e)**: その集まりは「Θ 側の対数体積以下の**実数**」全体である。
+
+  原文が `⊆ ℝ` と書いていることに注意——可能な出力対数体積は実数である。
+  ただしこれは `−|log(Θ̲̲)|` 自身が実数であることを**含意しない**
+  (`−|log(Θ̲̲)| = +∞` でも `ℝ_{≤+∞} = ℝ ⊆ ℝ` は成り立つ)。
+
+  原文 (IUTchIII p.184):
+  > R[bb]_≤−|log(Θ[ul2])| ⊆ R[bb]
+  -/
+  outputLogVolumes_eq :
+    outputLogVolumes = {x : ℝ | (x : WithTop ℝ) ≤ logVol (hull (⋃₀ possibleThetaImages))}
+  /-- **(xi-f)**: q 側の対数体積はその集まりに**属する**。
+
+  原文はこれを「the inclusion」と呼び、ここから不等式が
+  「then follows formally」だと述べている。
+
+  原文 (IUTchIII p.184):
+  > The inclusion − |log(q[ul2])| ∈ R[bb]_≤−|log(Θ[ul2])|, hence also the inequality
+
+  ★★**落とした限定(意図的な単純化。2026-08-14)**
+
+  直前の文は、この帰属を導く段を**条件つき**で、しかも**濁して**述べている:
+
+  原文 (IUTchIII p.184):
+  > log-volumes of output data is subject to the condition that this con-
+  > struction of output data possibilities constitutes, in particular, a construc-
+  > tion [perhaps only up to some sort of “approximation”, as a result of vari-
+  > ous indeterminacies] of the pilot-object log-volume of the input data
+
+  我々が上のフィールドに置いたのは**無条件の**帰属である。すなわち
+  「subject to the condition」と「perhaps only up to some sort of *approximation*」を
+  **写していない**。これは**仮説の強化**にあたりうる。
+
+  **なぜ写さなかったか**: 原文は次の文で「The inclusion …」と**無条件に**述べており、
+  我々が引用したのはその文である。他方 “approximation” は**どこにも量化されていない**
+  ——`ε` に相当するものが原文に無い。量化されていない濁しを型に写せば、
+  その濁しの強さを**我々が決める**ことになり、発明になる。
+  よって (ii)「反映せず、明示する」を選んだ。`cor_3_12.needs` に
+  `.implicitStep` として記録してある。
+
+  ★この判断は**機械では検査されない**。仮説を原文より強く置いても
+  `check.mjs` は何も言わない(`tools/check.mjs` 冒頭 A6)。 -/
+  qLogVol_mem : (-qAbs) ∈ outputLogVolumes
+  /-- **可能な像の和集合はコンパクト**。
+
+  ★2026-08-14 追加。有限性 `−|log(Θ̲̲)| ∈ ℝ` の出所。物理 p.175。
+
+  ★★**バーの有無に注意**(400 dpi 目視、2026-08-14): 原文がコンパクトだと言っているのは
+  `¹,°𝒰_{j,v_ℚ}`(**オーバーバー無し**)であり、p.174 の定義により
+  これは「the various **unions** … of the **possible images**」——すなわち
+  **可能な像の和集合**である。正則包の方は `¹,°𝒰̄`(バー有り)で別物。
+  `pdftotext` はオーバーバーを落とすので `.txt` では区別できない。
+
+  原文 (IUTchIII p.175):
+  > pactness of the 1,◦U_j,v_Q [where j ∈ |F_l|, v_Q ∈ V[bb]_Q], together with the definition of the
+  > log-volume, that the quantity − |log(Θ[ul2])| is finite, hence negative
+
+  ★原文は「[easily verified]」と書くだけで**検証を書いていない**(2026-08-14 実測:
+  論文全体で `compact` は 33 件、`¹,°𝒰` のコンパクト性を確立する箇所は 0 件)。 -/
+  thetaUnion_isCompact : @IsCompact Amb topology (⋃₀ possibleThetaImages)
+  /-- **コンパクトな領域の正則包は対数体積が有限**。
+
+  p.175 が「together with the definition of the log-volume」と呼んでいる橋。
+  原文は log-shell について同じ形を明示している:
+
+  原文 (IUTchIII p.31):
+  > satisfies the following properties: (anon) I†Fv is compact, hence of finite log-
+
+  Remark 3.9.5, (i)(物理 p.127)の場合分けと対応する——relatively compact なら
+  正則包は `λ·𝒪` 型の有界集合、そうでなければ `I^ℚ` 全体(= 対数体積 `+∞`)。
+
+  ★**モデル化の限定**: Remark 3.9.5, (i) は「a relatively compact subset whose
+  log-volume is finite [i.e., > −∞] を含む」ことも前提しているが、我々の値域
+  `WithTop ℝ` には `−∞` が無いのでその側は写していない。 -/
+  logVol_hull_ne_top_of_isCompact :
+    ∀ U : Set Amb, @IsCompact Amb topology U → logVol (hull U) ≠ ⊤
 
 /-- Track B は何を作らねばならないか。
 
