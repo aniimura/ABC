@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<title>IUT 依存の層 — 左から着手する</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#eef0f3;overflow:hidden;font-family:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;color:#1c1e21}
+canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
+#sb{position:fixed;top:0;left:0;width:330px;height:100vh;background:#fff;box-shadow:2px 0 14px rgba(0,0,0,.13);z-index:50;display:flex;flex-direction:column;transition:transform .22s}
+#sb.hid{transform:translateX(-330px)}
+#tg{position:fixed;top:10px;left:10px;z-index:60;width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;color:#555;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:left .22s}
+#tg.op{left:340px}
+.hd{padding:12px 16px;border-bottom:1px solid #e6e6e6;flex-shrink:0}
+.hd h1{font-size:14px;margin-bottom:3px}
+.hd p{font-size:11px;color:#777;line-height:1.55}
+.bd{overflow-y:auto;padding:12px 16px;flex:1}
+.sec{margin-bottom:15px}
+.sec h2{font-size:11px;color:#888;letter-spacing:.06em;margin-bottom:7px;text-transform:uppercase}
+.st{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dotted #eee}
+.st b{font-variant-numeric:tabular-nums}
+.warn{background:#fff8e1;border-left:3px solid #f0b429;padding:8px 10px;font-size:11px;line-height:1.6;color:#5a4300;margin-bottom:13px}
+.key{background:#eaf3ff;border-left:3px solid #2f6fd0;padding:8px 10px;font-size:11px;line-height:1.65;color:#183a63;margin-bottom:13px}
+.lr{display:flex;align-items:center;gap:6px;font-size:11.5px;padding:2.5px 0;cursor:pointer;border-bottom:1px dotted #f0f0f0}
+.lr:hover{background:#f7f9fc}
+.lr .n{font-variant-numeric:tabular-nums;color:#666;min-width:34px;text-align:right}
+.bar{height:7px;background:#2f6fd0;border-radius:2px;opacity:.75}
+#det{position:fixed;right:12px;top:12px;width:360px;max-height:calc(100vh - 24px);overflow-y:auto;background:#fff;border-radius:8px;box-shadow:0 3px 18px rgba(0,0,0,.17);padding:13px 15px;font-size:12px;z-index:55;display:none;line-height:1.6}
+#det h3{font-size:13px;margin-bottom:2px}
+#det .sub{color:#888;font-size:11px;margin-bottom:8px}
+#det .row{display:flex;gap:8px;padding:2px 0}
+#det .row span:first-child{color:#888;min-width:88px;flex-shrink:0}
+#det ul{margin:7px 0 0 0;padding:0;list-style:none;font-size:11px;line-height:1.75}
+#det li{border-bottom:1px dotted #f0f0f0;padding:1px 0}
+#det .cl{position:absolute;right:9px;top:7px;cursor:pointer;color:#aaa;font-size:15px}
+#hint{position:fixed;bottom:10px;right:12px;font-size:11px;color:#8a8a8a;background:rgba(255,255,255,.88);padding:5px 9px;border-radius:5px;z-index:40}
+</style></head><body>
+<button id="tg" class="op">☰</button>
+<div id="sb">
+  <div class="hd"><h1>IUT 依存の層 — 左から着手する</h1>
+    <p>右端 = <b>[IUTchIII] Corollary 3.12</b>。左へ行くほど「先に要るもの」。<br>
+       <b>層 0(最左)は依存を持たない</b>ので、そこから始められる。</p></div>
+  <div class="bd">
+    <div class="key" id="key"></div>
+    <div class="warn"><b>★分母は下界でも上界でもない。</b>
+      <code>pdftotext</code> 由来で目視していない。番号の無い依存を数え落とし、
+      「the discussion of …」型の<b>案内</b>を依存として数え過ぎる。<b>桁を見るためだけに使うこと。</b></div>
+    <div class="sec"><h2>規模</h2><div id="stats"></div></div>
+    <div class="sec"><h2>層ごとの節点数(クリックで移動)</h2><div id="layers"></div></div>
+    <div class="sec"><h2>凡例</h2>
+      <div style="font-size:11.5px;line-height:1.9;color:#555">
+        <b>ボックス</b> = 中期ゴールの単位。<br>
+        <span style="display:inline-block;width:11px;height:11px;background:#fff;border:2px solid #c0392b;border-radius:3px;vertical-align:-1px"></span>
+        赤枠 = <b>循環している塊(SCC)</b>。分割できないのでまとめて扱うしかない。<br>
+        <span style="display:inline-block;width:11px;height:11px;background:#2f6fd0;border-radius:3px;vertical-align:-1px"></span>
+        塗り = 我々が触れている割合。<br>
+        太い線 = 依存が多い辺。
+      </div></div>
+  </div>
+</div>
+<canvas id="cv"></canvas>
+<div id="det"><span class="cl">×</span><div id="detb"></div></div>
+<div id="hint">ドラッグ=移動 / ホイール=拡大 / ボックスクリック=中身</div>
+<script>
+const D = /*__DATA__*/;
+const B=D.B, BE=D.BE, S=D.stats;
+const PAL=['#2f6fd0','#d0492f','#2f9e6b','#a05fd0','#d09a2f','#2fa8c0','#c02f7a','#6b8f2f','#8f5a2f','#5a2f8f','#2f8f7a','#8f2f5a'];
+const color=t=>{let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))>>>0;return PAL[h%PAL.length];};
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let vx=60,vy=40,sc=.5,drag=false,lx=0,ly=0,sel=null,hov=null;
+function fit(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);draw();}
+addEventListener('resize',fit);
+
+function draw(){
+  ctx.save();ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  ctx.fillStyle='#eef0f3';ctx.fillRect(0,0,innerWidth,innerHeight);
+  ctx.translate(vx,vy);ctx.scale(sc,sc);
+  // 層の帯
+  ctx.font='13px -apple-system,Segoe UI,sans-serif';ctx.textAlign='center';
+  const byL=new Map();for(const b of B){if(!byL.has(b.layer))byL.set(b.layer,b.x);}
+  for(const [L,x] of byL){
+    ctx.fillStyle=L===D.maxL?'rgba(192,57,43,.06)':(L===0?'rgba(47,158,107,.08)':'rgba(0,0,0,.017)');
+    ctx.fillRect(x-14,10,196,D.height);
+    ctx.fillStyle=L===0?'#1e7a52':(L===D.maxL?'#a5311f':'#98a0aa');
+    ctx.fillText(L===0?`層 0(依存なし・ここから)`:(L===D.maxL?`層 ${L}(根)`:`層 ${L}`),x+84,34);
+  }
+  // 辺
+  for(const [a,b,w] of BE){
+    const A=B[a],Bb=B[b];
+    const on=sel!==null&&(a===sel||b===sel);
+    ctx.strokeStyle=on?'rgba(20,20,20,.6)':`rgba(120,128,140,${Math.min(.28,.05+w*.012)})`;
+    ctx.lineWidth=on?2.2:Math.min(4,.5+w*.09);
+    // A(依存元/右) ← Bb(依存先/左)。左から右へ流れる線を描く
+    const x1=Bb.x+Bb.w, y1=Bb.y+Bb.h/2, x2=A.x, y2=A.y+A.h/2;
+    ctx.beginPath();ctx.moveTo(x1,y1);
+    ctx.bezierCurveTo(x1+45,y1,x2-45,y2,x2,y2);ctx.stroke();
+  }
+  // ボックス
+  ctx.textAlign='left';
+  for(let i=0;i<B.length;i++){
+    const b=B[i],c=color(b.tags[0][0]);
+    ctx.fillStyle='#fff';ctx.strokeStyle=b.scc?'#c0392b':'#c8ccd2';ctx.lineWidth=b.scc?2.4:1.1;
+    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();
+    // 触れている割合
+    if(b.ours>0){ctx.fillStyle=c;ctx.globalAlpha=.2;
+      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w*Math.min(1,b.ours/b.n),b.h,7);ctx.fill();ctx.globalAlpha=1;}
+    // 上端の色帯
+    ctx.fillStyle=c;ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
+    if(i===sel||i===hov){ctx.strokeStyle='#111';ctx.lineWidth=2.4;ctx.beginPath();ctx.roundRect(b.x-3,b.y-3,b.w+6,b.h+6,9);ctx.stroke();}
+    ctx.fillStyle='#1c1e21';ctx.font='bold 12px -apple-system,Segoe UI,sans-serif';
+    const ttl=b.tags.map(([t,n])=>b.scc?`${t}:${n}`:t).join(' ');
+    ctx.fillText(ttl.length>21?ttl.slice(0,20)+'…':ttl,b.x+9,b.y+21);
+    ctx.font='11px -apple-system,Segoe UI,sans-serif';ctx.fillStyle='#6b7280';
+    ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}`,b.x+9,b.y+36);
+    if(b.scc){ctx.fillStyle='#c0392b';ctx.fillText('循環(分割不可)',b.x+9,b.y+50);}
+    if(b.root){ctx.fillStyle='#a5311f';ctx.font='bold 11px -apple-system,Segoe UI,sans-serif';ctx.fillText('★ Corollary 3.12',b.x+9,b.y+(b.scc?64:50));}
+  }
+  ctx.restore();
+}
+function pick(mx,my){
+  const x=(mx-vx)/sc,y=(my-vy)/sc;
+  for(let i=B.length-1;i>=0;i--){const b=B[i];if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return i;}
+  return null;
+}
+cv.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.classList.add('dragging');});
+addEventListener('mouseup',()=>{drag=false;cv.classList.remove('dragging');});
+cv.addEventListener('mousemove',e=>{if(drag){vx+=e.clientX-lx;vy+=e.clientY-ly;lx=e.clientX;ly=e.clientY;draw();return;}
+  const h=pick(e.clientX,e.clientY);if(h!==hov){hov=h;cv.style.cursor=h===null?'grab':'pointer';draw();}});
+cv.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.12:1/1.12;
+  vx-=(e.clientX-vx)*(f-1);vy-=(e.clientY-vy)*(f-1);sc=Math.max(.08,Math.min(3,sc*f));draw();},{passive:false});
+cv.addEventListener('click',e=>{
+  const h=pick(e.clientX,e.clientY);sel=h;const d=document.getElementById('det');
+  if(h===null){d.style.display='none';draw();return;}
+  const b=B[h];
+  const deps=BE.filter(([a])=>a===h).map(([,x])=>B[x]);
+  const used=BE.filter(([,x])=>x===h).map(([a])=>B[a]);
+  document.getElementById('detb').innerHTML=
+    `<h3>${b.tags.map(([t,n])=>`${t}${b.scc?` (${n})`:''}`).join(' + ')}</h3>`+
+    `<div class="sub">層 ${b.layer}${b.scc?' ・ <b style="color:#c0392b">循環している塊(分割不可)</b>':''}${b.root?' ・ <b>根を含む</b>':''}</div>`+
+    `<div class="row"><span>項目数</span><span><b>${b.n}</b></span></div>`+
+    `<div class="row"><span>我々が触れた</span><span>${b.ours}${b.landed?`(うち着地 ${b.landed})`:''}</span></div>`+
+    `<div class="row"><span>これが要るもの</span><span>${deps.length} ボックス</span></div>`+
+    `<div class="row"><span>これを使うもの</span><span>${used.length} ボックス</span></div>`+
+    `<ul>${b.items.map(it=>`<li>${it.o?`<b style="color:#1e7a52">●</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`).join('')}</ul>`;
+  d.style.display='block';draw();
+});
+document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').style.display='none';sel=null;draw();};
+document.getElementById('tg').onclick=function(){document.getElementById('sb').classList.toggle('hid');this.classList.toggle('op');};
+
+document.getElementById('key').innerHTML=
+  `<b>★この図が言っていること</b><br>
+   IUT の4本(IUTchI/II/III/IV)は <b>1つの循環</b>を成す——右端の赤枠 262 項目がそれ。
+   <b>「IUTchI から順に」という順序付けは存在しない。</b><br>
+   しかし<b>その左の ${S.nodes-262} 項目は順序付けられる</b>。左の層から着手できる。`;
+document.getElementById('stats').innerHTML=
+  `<div class="st"><span>節点</span><b>${S.nodes}</b></div>`+
+  `<div class="st"><span>強連結成分</span><b>${S.sccs}</b></div>`+
+  `<div class="st"><span>うち循環(サイズ&gt;1)</span><b>${S.bigSccs}</b></div>`+
+  `<div class="st"><span>ボックス(中期ゴール)</span><b>${S.boxes}</b></div>`+
+  `<div class="st"><span>層</span><b>${S.layers}</b></div>`+
+  `<div class="st"><span>我々が触れた節点</span><b>${S.ours}</b></div>`;
+const mx=Math.max(...D.layerStats.map(l=>l.nodes));
+document.getElementById('layers').innerHTML=D.layerStats.map(l=>
+  `<div class="lr" data-l="${l.L}"><span style="min-width:44px">層 ${l.L}</span>
+   <span class="bar" style="width:${Math.max(3,l.nodes/mx*135)}px;${l.L===0?'background:#1e7a52':''}${l.L===D.maxL?'background:#c0392b':''}"></span>
+   <span class="n">${l.nodes}</span><span style="color:#1e7a52;min-width:26px">${l.ours?'●'+l.ours:''}</span></div>`).join('');
+document.querySelectorAll('.lr').forEach(el=>el.onclick=()=>{
+  const L=+el.dataset.l;const b=B.find(x=>x.layer===L);if(!b)return;
+  vx=innerWidth/2-(b.x+b.w/2)*sc;vy=80;draw();});
+fit();
+</script></body></html>
