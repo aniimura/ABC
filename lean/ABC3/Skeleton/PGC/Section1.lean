@@ -94,11 +94,11 @@ variable {p}
 
 /-- **「Γ_K から group-theoretically に回復できる」** — [pGC] §1 冒頭の暗黙の定義。
 
-原典 [pGC] 物理 p.2(逐語):
-「when we say that an object associated to K can be recovered "group-theoretically" from Γ_K,
-we mean that given another local p-adic field K′, together with an isomorphism of topological
-groups α : Γ_K ≅ Γ′_K, the object associated to K is necessarily taken by α to the
-corresponding object associated to K′.」
+原文 (pGC p.2):
+> when we say that an object associated to K can be recovered "group-theoretically" from
+> Γ_K, we mean that given another local p-adic field K[prime], together with an isomorphism
+> of topological groups α : Γ_K ≅ Γ[prime]_K, the object associated to K is necessarily
+> taken by α to the corresponding object associated to K[prime].
 
 注意すべき形: これは**単称の構成手続きの存在**ではなく、**すべての同型に対する両立性**である。
 「Γ_K から χ を作るアルゴリズムがある」ではなく「どの同型で写しても対応が保たれる」。 -/
@@ -131,9 +131,11 @@ noncomputable def cyclotomicCharacterObject : AssociatedObject p where
 def cyclotomicCharacterObject.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
 
-/-- **[pGC] Proposition 1.1** (物理 p.3、逐語):
-「The cyclotomic character χ : Γ_K → **Z**_p^× can be recovered entirely group-theoretically
-from Γ_K.」
+/-- **[pGC] Proposition 1.1**
+
+原文 (pGC p.3):
+> The cyclotomic character χ : Γ_K → Z[bb]_p^× can be recovered entirely
+> group-theoretically from Γ_K.
 
 ## 未解決(1_Structured の `<p class="open">` と対応)
 
@@ -156,5 +158,14 @@ theorem cyclotomicCharacter_recoverable :
 
 def cyclotomicCharacter_recoverable.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
+
+/-- 原文の証明文から抽出した、証明が要求するもの(G6)。
+
+★これは **下界** である——原文が挙げていない依存は写らない。 -/
+def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
+  [ .citation "[2] Bloch-Kato, Grothendieck Festschrift I (1990)"
+      "Proposition 3.8(局所 Tate 双対性)" .absent 2,
+    .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
+    .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
 
 end ABC3.Skeleton.PGC

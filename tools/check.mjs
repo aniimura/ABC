@@ -80,8 +80,26 @@ function normalize(s) {
     .replace(/[‐-―]/g, '-')
     .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
     .replace(/∼=|=∼/g, '≅')
+    .replace(/≝/g, 'd=ef')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Lean のコメント内で装飾を表す平文記法 `X[cls]` の照合射影。
+ *
+ * `1_Structured` の HTML クラスと **同じ語彙**を使う(1つの体系・2つの表現)。
+ * 実測により、装飾は `pdftotext` で一律に脱落し **基底文字だけが残る**——
+ * K̄→"K" / Ẑ→"Z" / 𝒪→"O" / **Z**→"Z" / Y̲̲→"Y" / K′→"K"。
+ * ゆえに射影は「角括弧を落とす」だけでよい。
+ *
+ * `_`(下付き)・`^`(上付き)も落とす: 原文 "Γ_K" は pdftotext で "ΓK"。
+ */
+const DECOR_CLASSES = 'ul1|ul2|bar|hat|tilde|dot1|dot2|bb|scr|prime';
+function leanQuoteProjection(text) {
+  return squash(text
+    .replace(new RegExp(`\\[(?:${DECOR_CLASSES})\\]`, 'g'), '')
+    .replace(/[_^]/g, ''));
 }
 
 /**
@@ -407,12 +425,89 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     });
   }
 
+  // ── Lean コメント内の引用も PDF に対して照合する
+  //    形式:  原文 (<タグ> p.<物理ページ>):
+  //           > ...
+  //           > ...
+  //    引用を2箇所に持つ以上、ズレたら落ちるようにしておく。
+  const QUOTE_RE = /原文\s*\(([A-Za-z][\w-]*)\s+p\.(\d+)\)\s*[:：]\s*\n((?:[^\n]*>[^\n]*\n)+)/g;
+  let nQuote = 0;
+  for (const [f, src] of texts) {
+    QUOTE_RE.lastIndex = 0;
+    let q;
+    while ((q = QUOTE_RE.exec(src)) !== null) {
+      nQuote++;
+      const line = src.slice(0, q.index).split('\n').length;
+      const where = `${relative(ROOT, f)}:${line}`;
+      const [, tag, pageStr, body] = q;
+      const page = Number(pageStr);
+      const paper = reg[tag];
+      if (!paper) { ng(where, `引用照合: タグ "${tag}" が papers.json に無い`); continue; }
+      if (page < 1 || page > paper.pdfPages) {
+        ng(where, `引用照合: p.${page} が範囲外(1..${paper.pdfPages})`); continue;
+      }
+      const quoted = body.split('\n')
+        .map((l) => l.replace(/^[^>]*>\s?/, ''))
+        .join(' ');
+      const proj = leanQuoteProjection(quoted);
+      const pdfPath = join(SOURCE_DIR, `${paper.file}.pdf`);
+      const pages = existsSync(pdfPath) ? pdfPageTexts(pdfPath, page) : null;
+      if (!pages) { ng(where, `引用照合: PDF を読めない(${paper.file})`); continue; }
+      if (!pages.some(([, t]) => t.includes(proj))) {
+        let best = { mode: '', lo: -1 };
+        for (const [mode, t] of pages) {
+          let lo = 0; let hi = proj.length;
+          while (lo < hi) {
+            const mid = Math.ceil((lo + hi) / 2);
+            if (t.includes(proj.slice(0, mid))) lo = mid; else hi = mid - 1;
+          }
+          if (lo > best.lo) best = { mode, lo };
+        }
+        ng(where,
+          `引用照合: 逐語が ${tag} 物理 p.${page} に見つからない(${best.mode} で ${best.lo}/${proj.length} 文字まで一致)\n` +
+          `      次に来るはず: ${JSON.stringify(proj.slice(best.lo, best.lo + 60))}`);
+      }
+    }
+  }
+
+  // ── G6: Skeleton の theorem/lemma は「証明が要求するもの」を持つ
+  //    空リストは省略ではなく **主張**(原文の証明は外部依存を持たない)。
+  const OBLIGATION_KINDS = ['citation', 'folklore', 'implicitStep', 'otherPaper', 'derivation'];
+  const tally = Object.fromEntries(OBLIGATION_KINDS.map((k) => [k, 0]));
+  const mathlibTally = { present: 0, absent: 0, unmeasured: 0 };
+  let nNeeds = 0;
+  for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
+    if (!['theorem', 'lemma'].includes(d.kind)) continue;
+    if (!names.has(`${d.name}.needs`)) {
+      ng(at(d), `G6 「証明が要求するもの」が無い: \`${d.name}.needs : List ABC3.Meta.ProofObligation\` を書く` +
+                '(依存が無いと考えるなら `[]` と明記する——空欄は不可)');
+      continue;
+    }
+    nNeeds++;
+    const src = texts.get(d.file) ?? '';
+    const i0 = src.indexOf(`${d.name}.needs`);
+    const open = src.indexOf('[', i0);
+    if (i0 < 0 || open < 0) continue;
+    let depth = 0; let end = open;
+    for (let i = open; i < src.length; i++) {
+      if (src[i] === '[') depth++;
+      else if (src[i] === ']') { depth--; if (depth === 0) { end = i; break; } }
+    }
+    const body = src.slice(open, end + 1);
+    for (const k of OBLIGATION_KINDS) {
+      tally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
+    }
+    for (const k of Object.keys(mathlibTally)) {
+      mathlibTally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
+    }
+  }
+
   // ── G1-Lean: Skeleton の宣言は Source を伴い、その locator が実在する
   const SRC_RE = /\.src\b[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?pdfPage\s*:=\s*(\d+)[\s\S]{0,300}?sectionId\s*:=\s*"([^"]*)"/;
   let nSrcOk = 0;
   for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
     // 台帳の付随宣言そのものには出典を要求しない
-    if (/\.(src|nonvacuous|waiting|record|loadBearing|negControl)$/.test(d.name)) continue;
+    if (/\.(src|needs|nonvacuous|waiting|record|loadBearing|negControl)$/.test(d.name)) continue;
     if (!['theorem', 'lemma', 'def', 'abbrev', 'structure'].includes(d.kind)) continue;
     if (!names.has(`${d.name}.src`)) {
       ng(at(d), `G1 出典が無い: \`${d.name}.src : ABC3.Meta.Source\` を書く`);
@@ -445,7 +540,21 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     for (const w of waiting) console.log(`     ${w}`);
     console.log(`  -- Gap(飛躍): ${gaps.length} 件`);
     for (const g of gaps) console.log(`     ${g}`);
+    console.log(`  -- 引用照合(Lean コメント内): ${nQuote} 件`);
+    const total = Object.values(tally).reduce((a, b) => a + b, 0);
+    console.log(`  -- 規模(原文の証明文からの抽出、${nNeeds} 定理ぶん、★下界):`);
+    console.log(`     引用 ${tally.citation} 件 — mathlib present ${mathlibTally.present} / ` +
+                `absent ${mathlibTally.absent} / unmeasured ${mathlibTally.unmeasured}`);
+    console.log(`     典拠なし(well-known 等) ${tally.folklore} 件 ← 大きさ未知`);
+    console.log(`     暗黙の段(Gap 候補)      ${tally.implicitStep} 件`);
+    console.log(`     別論文への枝            ${tally.otherPaper} 件`);
+    console.log(`     原文内の導出            ${tally.derivation} 件`);
+    console.log(`     合計 ${total} 件`);
+    if (mathlibTally.unmeasured > 0) {
+      console.log(`     ★ unmeasured が ${mathlibTally.unmeasured} 件ある——集計は未確定`);
+    }
     console.log('  -- 注意: ここは宣言の**存在**しか見ていない。型の正しさは lake build が保証する');
+    console.log('  -- 注意: 規模は原文が挙げた依存のみ。証明を書いて初めて要ると分かるものは写らない');
   }
   return NG - before;
 }
@@ -554,6 +663,10 @@ function selftest() {
     ['D12 load-bearing なのに負の対照が無い', 'Skeleton', 'd12-loadbearing-no-negcontrol.lean', true],
     ['D13 load-bearing + 負の対照ありは通る', 'Skeleton', 'd13-loadbearing-ok.lean', false],
     ['D14 Skeleton が Check を import している', 'Skeleton', 'd14-skeleton-imports-check.lean', true],
+    ['D15 Skeleton の theorem に .needs が無い', 'Skeleton', 'd15-no-needs.lean', true],
+    ['D16 .needs があれば通る(空リストも主張)', 'Skeleton', 'd16-needs-ok.lean', false],
+    ['D17 コメント内の引用が該当ページに無い', 'Skeleton', 'd17-bad-quote.lean', true],
+    ['D18 装飾記法つきの正しい引用は通る', 'Skeleton', 'd18-good-quote.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

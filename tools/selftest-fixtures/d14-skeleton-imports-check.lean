@@ -4,4 +4,5 @@ namespace Fixture
 theorem laundered : True := trivial
 def laundered.src : ABC3.Meta.Source :=
   { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
+def laundered.needs : List ABC3.Meta.ProofObligation := []
 end Fixture

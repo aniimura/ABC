@@ -61,6 +61,33 @@ Theorem 4.2 本体の逐語は &sect;4 の構造化時に <code>section-4.html</
 </ul>
 <p>目視確認済みの物理ページ: <b>2・3・4(冒頭)</b>。&sect;0 および &sect;2 以降は未確認。</p>
 
+<h2>&sect;1 の規模(原文の証明文から抽出、★下界)</h2>
+<p>
+statement だけを見ると mathlib 不足は<b>0件</b>に見える(Proposition 1.1 が言及する対象——絶対 Galois 群・Krull 位相・円分指標・<b>Q</b><sub>p</sub>——は全て mathlib にある)。
+しかし<b>証明</b>が要求するものを原文から拾うと以下になる。これらは全て構造化の時点で原文に書いてあり、証明を試みる必要はない。
+</p>
+<table>
+<tr><th>#</th><th>種別</th><th>内容</th><th>物理ページ</th><th>mathlib(v4.31.0-rc2 実測)</th></tr>
+<tr><td>1</td><td>引用</td><td>[2] Bloch&ndash;Kato Prop 3.8(局所 Tate 双対性)</td><td>2</td><td class="legacy">不在</td></tr>
+<tr><td>2</td><td>導出</td><td>H<sup>2</sup>(K,M)&cong;<b>Z</b>/p<sup>n</sup><b>Z</b> &hArr; M&cong;<b>Z</b>/p<sup>n</sup><b>Z</b>(1)</td><td>3</td><td>&mdash;</td></tr>
+<tr><td>3</td><td>暗黙の段</td><td><b>Z</b><sub>p</sub>(1) の同型類 &rarr; <b>指標</b> &chi;</td><td>3</td><td>&mdash;</td></tr>
+<tr><td>4</td><td>引用</td><td>[3] Serre 局所類体論 &Gamma;<sub>K</sub><sup>ab</sup>&cong;(K<sup>&times;</sup>)<sup>&and;</sup></td><td>3</td><td class="legacy">不在</td></tr>
+<tr><td>5</td><td>典拠なし</td><td>&ldquo;it is <b>well-known</b> that&rdquo; 0&rarr;U<sub>K</sub>&rarr;(K<sup>&times;</sup>)<sup>&and;</sup>&rarr;<b>Ẑ</b>&rarr;0</td><td>3</td><td>&mdash;(大きさ未知)</td></tr>
+<tr><td>6</td><td>引用</td><td>p進対数で U<sub>K</sub> の開部分群 &cong; K の開部分群</td><td>3</td><td class="legacy">不在(0件)</td></tr>
+<tr><td>7</td><td>暗黙の段</td><td>不分岐判定 &rarr; I<sub>K</sub> <b>そのもの</b>の構成</td><td>3</td><td>&mdash;</td></tr>
+</table>
+<p>
+<b>7件</b>(mathlib 不在の外部結果 3・典拠なし 1・暗黙の段 2・導出 1)。8ページの論文の1節でこの数。
+</p>
+<p class="open">
+これは<b>下界</b>である——原文が挙げていない依存は写らない。また <code>典拠なし</code> と <code>暗黙の段</code> は<b>数えられるが大きさは分からない</b>。件数であって時間ではない。
+</p>
+<p>
+Lean 側の対応: 各 skeleton の <code>X.needs : List ProofObligation</code>(ゲート G6)。
+現在 Proposition 1.1 の3件(#1・#2・#3)が載っており、<code>node tools/check.mjs</code> が集計を印字する。
+#4&ndash;#7 は Proposition 1.2・Corollary 1.3 の skeleton 作成時に載る。
+</p>
+
 <h2>&sect;1 が依拠する外部文献(mathlib 実測つき)</h2>
 <p>詳細は <a href="section-1.html#prop-1-1">section-1.html</a> の末尾表を参照。要点:</p>
 <ul>

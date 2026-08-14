@@ -6,4 +6,5 @@ def central.src : ABC3.Meta.Source :=
 def central.loadBearing : ABC3.Meta.LoadBearing := { consumer := "Theorem 4.2" }
 def central.negControl : ABC3.Meta.NegControl :=
   { dropped := "フィルトレーションの保存", witness := "Fixture.central_fails_without_filt" }
+def central.needs : List ABC3.Meta.ProofObligation := []
 end Fixture

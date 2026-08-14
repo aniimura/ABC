@@ -27,6 +27,36 @@ structure Source where
   sectionId : String
   deriving Repr, DecidableEq
 
+/-- ある結果が mathlib にあるか。**実測値のみ**を書く(推測を書かない)。 -/
+inductive MathlibStatus
+  /-- 実測で見つけた。宣言名かファイル名を書く -/
+  | present (decl : String)
+  /-- 実測して 0 件だった -/
+  | absent
+  /-- まだ測っていない。**暫定であり放置しない**——`check.mjs` が件数を印字する -/
+  | unmeasured
+  deriving Repr, DecidableEq
+
+/-- **原典の証明が要求するもの**。原文の証明文から抽出する(推測で足さない)。
+
+これを skeleton の時点で書くのは、規模を statement だけから見積もると
+**下界にしかならない**ため——statement は、それが言及する対象しか表面化させない。
+原文の証明文は「何に依拠するか」を既に書いているので、そこを拾う。
+
+`page` は物理ページ番号(`pdftoppm -f N` が指すページ)。 -/
+inductive ProofObligation
+  /-- 原文が明示的に引用している外部文献の結果 -/
+  | citation (ref item : String) (status : MathlibStatus) (page : Nat)
+  /-- 原文が典拠なしに「well-known」等として使っている事実。**大きさは未知** -/
+  | folklore (what : String) (page : Nat)
+  /-- 原文が段を飛ばしている箇所。`Gap` の候補 -/
+  | implicitStep (what : String) (page : Nat)
+  /-- 望月氏の別論文への依拠。後ろ向き追跡の枝 -/
+  | otherPaper (paper item : String) (page : Nat)
+  /-- 原文の中で導出されている段(外部依存ではないが作業は要る) -/
+  | derivation (what : String) (page : Nat)
+  deriving Repr
+
 /-- **load-bearing** の印——主定理へ実際に消費される系列であること。
 
 `Skeleton` の宣言 `foo` に `foo.loadBearing` を付けると、`tools/check.mjs` は
