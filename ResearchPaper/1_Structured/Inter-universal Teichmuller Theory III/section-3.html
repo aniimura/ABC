@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>[IUTchIII] §3 — Theorem 3.11 / Corollary 3.12</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ .ul1 { text-decoration: underline; }
+ .ul2 { text-decoration: underline; text-decoration-style: double; }
+ .bar { text-decoration: overline; }
+ .bb { font-weight: bold; }
+ .scr, .frak { font-style: italic; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[IUTchIII] §3 — Theorem 3.11(主定理)と Corollary 3.12</h1>
+
+<p>原典: S. Mochizuki, <em>Inter-universal Teichmüller Theory III: Canonical Splittings of the
+Log-theta-lattice</em> (May 2020)。物理ページ = 印刷ページ(<code>pageOffset = 0</code>、
+物理 p.2 / p.153 / p.199 で確認)。</p>
+
+<p><strong>記法の目視確認</strong>: 物理 p.153・154・156・173・174 を <code>pdftoppm -r 150</code>
+および要所を <code>-r 400</code> で拡大して確認(2026-08-14)。判定と実測の詳細は
+<code>ResearchPaper/papers.json</code> の <code>IUTchIII.notationNotes</code>。
+<strong>本論文は <code>notationRisk: high</code></strong>——しかも [EtTh] で見つけた
+「同じ文字列が別の対象」が<strong>主定理の結論式そのもの</strong>で起きている(下記 <code>#cor-3-12-conclusion</code> の読み)。</p>
+
+<p><strong>範囲</strong>: Theorem 3.11 は物理 p.153–159 にわたる。ここでは全文を写さず、
+<strong>Corollary 3.12 が実際に参照している部分</strong>——設定、(i) の冒頭、
+不定性 (Ind1)(Ind2)(Ind3)、(iii) の冒頭——を構造単位として切り出す。
+Scholze–Stix の争点が 3.11 → 3.12 の接続にある以上、この4つが最小の被覆である。</p>
+
+<h2>Theorem 3.11(主定理)</h2>
+
+<section class="statement theorem"
+         id="thm-3-11"
+         data-paper="IUTchIII"
+         data-pdf-page="153"
+         data-item="Theorem 3.11"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">Theorem 3.11. (Multiradial Algorithms via LGP-Monoids/Frobenioids) Fix a collection of initial Θ-data <em class="formula" data-txt="(F /F, XF , l, CK , V, Vbmaodd, )">(<span class="bar">F</span>/F, X<sub>F</sub>, l, <span class="ul1">C</span><sub>K</sub>, <span class="ul1 bb">V</span>, <span class="ul1 bb">V</span><sup>bad</sup><sub>mod</sub>, <span class="ul1">ε</span>)</em> as in [IUTchI], Definition 3.1.</div>
+<div class="reading">主定理の入口。仮説は「initial Θ-data を1つ固定する」——その中身は [IUTchI], Definition 3.1 への参照で与えられ、本論文では展開されない。
+7 個組のうち <span class="ul1">C</span><sub>K</sub>・<span class="ul1 bb">V</span>・<span class="ul1 bb">V</span><sup>bad</sup><sub>mod</sub>・<span class="ul1">ε</span> は下線つき、<span class="bar">F</span> は上線つきで、いずれも装飾が対象の同定に効いている。</div>
+<p class="open"><code>pdftotext -layout</code> はこの 7 個組を <code>(F /F, XF , l, CK , V, Vbmaodd, )</code> と出力する。<span class="ul1">ε</span> は<strong>何も残らず</strong>(既定モードでは <code>ϵ</code>)、<span class="ul1 bb">V</span><sup>bad</sup><sub>mod</sub> は上下付きが交互に潰れて <code>Vbmaodd</code> になる。ゆえに 7 個組の各成分を <code>.txt</code> から復元することはできない。</p>
+</section>
+
+<section class="statement theorem"
+         id="thm-3-11-i"
+         data-paper="IUTchIII"
+         data-pdf-page="153"
+         data-item="Theorem 3.11, (i)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">(i) (Multiradial Representation) Consider the procession of <em data-txt="D "><span class="scr">D</span><sup>⊢</sup></em>-prime-strips <em class="formula" data-txt="Prc(n,◦DT )">Prc(<sup>n,◦</sup><span class="frak">D</span><sup>⊢</sup><sub>T</sub>)</em></div>
+<div class="reading">(i) は「多輻的表現」を与える部分。Corollary 3.12 は <strong>(i), (a)</strong>(手続き正規化モノ解析的対数体積)と <strong>(i)</strong> 全体(多輻的表現)を名指しで使う。</div>
+<p class="open">プライムストリップの記号は 2 種類の <code>D</code> を使い分けている——script体 <span class="scr">𝒟</span>(圏)と fraktur 体 <span class="frak">𝔇</span>(プライムストリップ)。<code>pdftotext</code> は<strong>どちらも <code>D</code></strong> にする。さらに肩の <code>⊢</code> も落ちるので、<code>.txt</code> 上では <span class="scr">𝒟</span>・<span class="scr">𝒟</span><sup>⊢</sup>・<span class="frak">𝔇</span>・<span class="frak">𝔇</span><sup>⊢</sup> の 4 つが同一文字列 <code>D</code> になる。</p>
+</section>
+
+<section class="statement definition"
+         id="thm-3-11-ind1"
+         data-paper="IUTchIII"
+         data-pdf-page="154"
+         data-item="Theorem 3.11, (i), (Ind1)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">(Ind1) the indeterminacies induced by the automorphisms of the procession of <em data-txt="D "><span class="scr">D</span><sup>⊢</sup></em>-prime-strips <em class="formula" data-txt="Prc(n,◦DT )">Prc(<sup>n,◦</sup><span class="frak">D</span><sup>⊢</sup><sub>T</sub>)</em>;</div>
+<div class="reading">第1の不定性。プライムストリップの行列(procession)の自己同型が誘導する不定性——すなわち<strong>ラベルの取り替え</strong>に由来する。Corollary 3.12 では Θ 側だけがこの不定性を受け、q 側は受けない(<code>#cor-3-12-q</code>)。</div>
+</section>
+
+<section class="statement definition"
+         id="thm-3-11-ind2"
+         data-paper="IUTchIII"
+         data-pdf-page="154"
+         data-item="Theorem 3.11, (i), (Ind2)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">(Ind2) for each <em data-txt="vQ ∈ VnQon">v<sub>ℚ</sub> ∈ <span class="bb">V</span><sup>non</sup><sub>ℚ</sub></em> (respectively, <em data-txt="vQ ∈ VaQrc">v<sub>ℚ</sub> ∈ <span class="bb">V</span><sup>arc</sup><sub>ℚ</sub></em>), the indeterminacies induced by the action of independent copies of Ism [cf. Proposition 1.2, (vi)] (respectively, copies of each of the automorphisms of order 2 whose orbit constitutes the poly-automorphism discussed in Proposition 1.2, (vii)) on each of the direct summands of the j + 1 factors appearing in the tensor product used to define <em class="formula" data-txt="IQ(Sj±+1;n,◦DvQ )"><span class="scr">I</span><sup>ℚ</sup>(<sup>S<sup>±</sup><sub>j+1</sub></sup>;<sup>n,◦</sup><span class="scr">D</span><sup>⊢</sup><sub>v<sub>ℚ</sub></sub>)</em> [cf. (a) above; Proposition 3.2, (ii)] — where we recall that the cardinality of the collection of direct summands is equal to the cardinality of the set of <em data-txt="v ∈ V"><span class="ul1">v</span> ∈ <span class="ul1 bb">V</span></em> that lie over <em data-txt="vQ">v<sub>ℚ</sub></em>.</div>
+<div class="reading">第2の不定性。各素点で <code>Ism</code>(非アルキメデス的な場合)あるいは位数 2 の自己同型(アルキメデス的な場合)の<strong>独立な</strong>コピーが、テンソル積の各直和成分に作用する。「独立な」が効いており、これが「不定性が積み上がる」源になる。</div>
+<p class="open">下線つきの <span class="ul1">v</span>・<span class="ul1 bb">V</span> と、下線なしの <code>v</code><sub>ℚ</sub>・<span class="bb">V</span><sub>ℚ</sub> が<strong>同じ文にある</strong>。前者は数体 F の素点、後者は ℚ の素点で、別の対象である。<code>pdftotext</code> はどちらも <code>v</code>/<code>V</code> にするので、この文だけを <code>.txt</code> から読むと 2 種類の素点が区別できない。</p>
+</section>
+
+<section class="statement definition"
+         id="thm-3-11-ind3"
+         data-paper="IUTchIII"
+         data-pdf-page="156"
+         data-item="Theorem 3.11, (ii), (Ind3)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">(Ind3) as one varies m ∈ <span class="bb">Z</span>, the isomorphisms of (a) are “upper semi-compatible”, relative to the <span class="frak" data-txt="log">log</span>-links of the n-th column of the LGP-Gaussian log-theta-lattice under consideration, in a sense that involves certain natural inclusions “⊆” at <em data-txt="vQ ∈ VQnon">v<sub>ℚ</sub> ∈ <span class="bb">V</span><sub>ℚ</sub><sup>non</sup></em> and certain natural <span data-txt="sur-jections">surjections</span> “<span data-txt="">↠</span>” at <em data-txt="vQ ∈ VQarc">v<sub>ℚ</sub> ∈ <span class="bb">V</span><sub>ℚ</sub><sup>arc</sup></em> — cf. Proposition 3.5, (ii), (a), (b), for more details.</div>
+<div class="reading">第3の不定性。Corollary 3.12 の不等式が<strong>不等式である</strong>理由がここにある——「upper semi-compatible」は等号ではなく片側の包含/全射しか主張しない。Θ 側の対数体積が上からしか押さえられないので、結論は等式でなく <code>≥</code> になる。</div>
+<p class="open">「in a sense that involves ...」——<strong>「どういう意味で」は Proposition 3.5, (ii), (a), (b) へ委ねられ、ここでは定義されていない</strong>。(Ind1)(Ind2) が「〜が誘導する不定性」と自己完結しているのに対し、(Ind3) だけが外部参照で閉じている。形式化ではここが最初に展開を要求される。</p>
+<p class="open">全射記号 “↠” は <code>pdftotext</code> の出力に<strong>何も残らない</strong>(空の引用符 <code>“ ”</code> になる)。包含 “⊆” は残る。したがって <code>.txt</code> だけを読むと「非アルキメデス側は包含、アルキメデス側は<em>何か</em>」という非対称な読みになる。</p>
+</section>
+
+<section class="statement theorem"
+         id="thm-3-11-iii"
+         data-paper="IUTchIII"
+         data-pdf-page="156"
+         data-item="Theorem 3.11, (iii)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">(iii) (<em data-txt="ΘL×GμP">Θ<sup>×μ</sup><sub>LGP</sub></em>-Link Compatibility) The various Kummer isomorphisms of (ii) satisfy compatibility properties with the various horizontal arrows — i.e., <em data-txt="Θ×LGμP">Θ<sup>×μ</sup><sub>LGP</sub></em>-links — of the LGP-Gaussian log-theta-lattice under consideration as follows:</div>
+<div class="reading">(iii) は Θ-リンク(log-theta-lattice の横矢印)との両立性。Corollary 3.12 は (ii) の Kummer 同型を経由して Θ 側と q 側を同じ「多輻的表現」の中で比較するので、この両立性が比較の土台になる。</div>
+<p class="open">同一ページの<strong>同じ記号</strong> Θ<sup>×μ</sup><sub>LGP</sub> が、<code>pdftotext -layout</code> では 1 度目 <code>ΘL×GμP</code>、2 度目 <code>Θ×LGμP</code> と<strong>別の文字列</strong>に潰れる。上下付きの潰し方が出現ごとに変わるため、<code>.txt</code> 上での文字列一致は記号の同一性を意味しない。</p>
+</section>
+
+<h2>Corollary 3.12</h2>
+
+<section class="statement corollary"
+         id="cor-3-12-theta"
+         data-paper="IUTchIII"
+         data-pdf-page="173"
+         data-item="Corollary 3.12 (Θ-pilot side)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">Corollary 3.12. (Log-volume Estimates for Θ-Pilot Objects) Suppose that we are in the situation of Theorem 3.11. Write <em class="formula" data-txt="− |log(Θ)| ∈ R {+∞}">− |log(<span class="ul2">Θ</span>)| ∈ <span class="bb">R</span> ⋃ {+∞}</em> for the procession-normalized mono-analytic log-volume [i.e., where the <span data-txt="av-erage">average</span> is taken over <em data-txt="j ∈ Fl">j ∈ <span class="bb">F</span><sup>⋇</sup><sub>l</sub></em> — cf. Remark 3.1.1, (ii), (iii), (iv); Proposition 3.9, (i), (ii); Theorem 3.11, (i), (a)] of the holomorphic hull [cf. Remark 3.9.5, (i)] of the union of the possible images of a Θ-pilot object [cf. Definition 3.8, (i)],</div>
+<div class="reading">Θ 側の量の定義。値域が <span class="bb">R</span> ⋃ {+∞} である——すなわち<strong>この段階では +∞ を排除していない</strong>。有限性は結論の側で主張される(<code>#cor-3-12-conclusion</code>)。</div>
+<p class="open">仮説は「Suppose that we are in the situation of Theorem 3.11」の一文だけで、<strong>何が「the situation」に含まれるかは列挙されていない</strong>。Theorem 3.11 は物理 p.153–159 の 7 ページにわたるので、形式化では「the situation」を我々が列挙し直す必要があり、その列挙自体が原典にない我々の構成物になる。</p>
+<p class="open">大合併記号 ⋃ は <code>pdftotext</code> 出力に<strong>残らない</strong>(<code>∈ R {+∞}</code> となる)。<code>.txt</code> だけを読むと「<span class="bb">R</span> と {+∞} の合併」なのか別の構成なのかが決まらない。</p>
+</section>
+
+<section class="statement corollary"
+         id="cor-3-12-q"
+         data-paper="IUTchIII"
+         data-pdf-page="174"
+         data-item="Corollary 3.12 (q-pilot side)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">Write <em class="formula" data-txt="− |log(q)| ∈ R">− |log(<span class="ul2">q</span>)| ∈ <span class="bb">R</span></em> for the procession-normalized mono-analytic log-volume of the image of a q-pilot object [cf. Definition 3.8, (i)], relative to the relevant Kummer <span data-txt="isomor-phisms">isomorphisms</span> [cf. Theorem 3.11, (ii)], in the multiradial representation of Theorem 3.11, (i), which we do not regard as subject to the indeterminacies (Ind1), (Ind2), (Ind3) described in Theorem 3.11, (i), (ii).</div>
+<div class="reading">q 側の量の定義。★<strong>非対称性がここにある</strong>——q 側は「<em>do not</em> regard as subject to the indeterminacies」、Θ 側は「regard as subject to」(<code>#cor-3-12-theta</code> の続き、物理 p.174 冒頭)。同じ多輻的表現の中で、<strong>片方だけが不定性を被る</strong>。この非対称性が消えると不等式は内容を失う。</div>
+<p class="open">値域が <span class="bb">R</span>(+∞ を含まない)。Θ 側と違って有限性が定義に組み込まれている。両者の値域の違いは原文が明示していないが、後段の「Then it holds that −|log(<span class="ul2">Θ</span>)| ∈ <span class="bb">R</span>」がその差を埋める役割を持つ。</p>
+</section>
+
+<section class="statement corollary"
+         id="cor-3-12-conclusion"
+         data-paper="IUTchIII"
+         data-pdf-page="174"
+         data-item="Corollary 3.12 (conclusion)"
+         data-notation-checked="2026-08-14">
+<div class="verbatim">[cf. [IUTchII], Corollary 4.10, (i)]. In particular, |log(<span class="ul2">q</span>)| &gt; 0 is easily computed in terms of the various q-parameters of the elliptic curve E<sub>F</sub> [cf. [IUTchI], Definition 3.1, (b)] at <em data-txt="v ∈ Vbad (= ∅)"><span class="ul1">v</span> ∈ <span class="ul1 bb">V</span><sup>bad</sup> (≠ ∅)</em>. Then it holds that − |log(<span class="ul2" data-txt="Θ">Θ</span>)| ∈ <span class="bb">R</span>, and <em class="formula" data-txt="− |log(Θ)| ≥ − |log(q)|">− |log(<span class="ul2">Θ</span>)| ≥ − |log(<span class="ul2">q</span>)|</em></div>
+<div class="reading">★<strong>本プロジェクトの北極星の到達点</strong>。結論は 2 つある: (1) −|log(<span class="ul2">Θ</span>)| は<strong>有限</strong>(<span class="bb">R</span> に属する、+∞ ではない)、(2) 不等式 −|log(<span class="ul2">Θ</span>)| ≥ −|log(<span class="ul2">q</span>)|。(1) は (2) の前提ではなく<strong>結論の一部</strong>である点に注意——形式化では 2 つの主張として扱う必要がある。</div>
+<p class="open">★<strong>[EtTh] の罠が、この 1 ページの中で起きている</strong>。物理 p.174 には
+<strong>下線 2 本の <span class="ul2">q</span></strong>(q-パイロット対象の対数体積の引数)と、
+<strong>下線なし太字の q</strong>(「q-pilot object」「q-parameters」という語の中)が同居する。
+Θ も同じで、<span class="ul2">Θ</span>(下線 2 本)と Θ(「Θ-Pilot Objects」「Θ-pilot object」)が同居する。
+<code>pdftotext</code> はどちらも <code>q</code>/<code>Θ</code> にするので、
+<strong>結論式に現れる対象を <code>.txt</code> から同定することは原理的にできない</strong>。
+400 dpi 拡大で二重下線を確認済み(2026-08-14)。</p>
+<p class="open">★<strong>抽出が意味を反転させる箇所</strong>: 原文の <span class="ul1">v</span> ∈ <span class="ul1 bb">V</span><sup>bad</sup> <strong>(≠ ∅)</strong> は <code>pdftotext -layout</code> で <code>(= ∅)</code> になる(否定の斜線が落ちる)。既定モードでは結合文字 U+0338 として残るが、正規化次第で消える。<strong>「空でない」が「空である」に化ける</strong>——装飾の脱落が曖昧化ではなく<em>反転</em>を起こす実例。</p>
+<p class="open">Corollary 3.12 の主張は「Theorem 3.11 の相対的に具体的な帰結(a relatively concrete consequence)」とされるが、その証明は物理 p.174–182 の Step (i)–(xii) にわたる。<strong>「直ちに従う」型の接続ではない</strong>。Scholze–Stix と Joshi が争点にしているのはまさにこの接続であり、我々の側では 3.11 の「the situation」の列挙(<code>#cor-3-12-theta</code> の未解決)と、Θ 側だけが (Ind1)(Ind2)(Ind3) を被るという非対称性(<code>#cor-3-12-q</code> の読み)の 2 点が、その接続の荷重を担っている。</p>
+</section>
+
+<h2>この構造化が確立していないこと</h2>
+
+<ul>
+<li>Theorem 3.11 の <strong>(i) の (a)(b)(c)・(ii) の全体</strong>は写していない(物理 p.153–159)。Corollary 3.12 が名指しする最小限に絞った。</li>
+<li>Corollary 3.12 の<strong>証明</strong>(物理 p.174–182)は写していない。</li>
+<li>「initial Θ-data」「Θ-pilot object」「q-pilot object」「holomorphic hull」「procession-normalized mono-analytic log-volume」はいずれも本論文または [IUTchI]/[IUTchII] の定義への参照で、ここでは展開していない。</li>
+</ul>
+
+</body>
+</html>

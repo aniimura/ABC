@@ -25,6 +25,16 @@
       "notationRisk": "high",
       "notationNotes": "★点(0/1/2個)×下線(0/1/2本)の合成記法で、同じ基底文字から複数の対象を区別している。p.11 の Gal(Y/X)(≅Z) は下線なし、p.43 Def 2.13(i) の Gal(Y̲̲/X̲̲)(≅l·Z) は下線2本——.txt ではどちらも 'Gal(Y /X)' で、矛盾しているように見える。下線はベクター図形として描画されており抽出不能。全 locator で PDF 目視必須。",
       "verifiedPages": [11, 43]
+    },
+    "IUTchIII": {
+      "title": "Inter-universal Teichmuller Theory III: Canonical Splittings of the Log-theta-lattice",
+      "file": "Inter-universal Teichmuller Theory III",
+      "year": 2020,
+      "pdfPages": 199,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "★2026-08-14 実測(pdftoppm -r 150/400 で p.153・154・156・173・174 を目視、pdftotext -layout/既定と1文字ずつ突き合わせ)。EtTh と同型の危険が、しかも**主定理の結論式の中**にある。(1) 二重下線: Corollary 3.12 の結論 −|log(Θ̲̲)| ≥ −|log(q̲̲)| は Θ・q とも**下線2本**(400dpi 拡大で確認)。pdftotext は '− |log(Θ)| ≥ − |log(q)|' を返し下線は消える。(2) ★同一ページで同じ基底文字が別の対象: 物理 p.174 には下線2本の q̲̲(q-パイロット対象の対数体積)と、下線なし太字の q(『q-パラメータ』『q-パイロット対象』の語)が**同居**する。Θ も同様に Θ̲̲(下線2本)と Θ(『Θ-パイロット対象』『Θ-データ』『Θ-リンク』)が同居。.txt ではどちらも 'q' 'Θ' で、EtTh p.11 対 p.43 の罠が**1ページ内**で起きる。(3) 記号の完全脱落: ⋃(大合併)・△(ラベル同定記号)・↠(全射)は pdftotext 出力に**何も残らない**。ε̲ も -layout では空文字になる。(4) 意味反転: p.174 の '(≠ ∅)' は -layout で '(= ∅)' になる(否定の斜線が落ちる)。既定モードでは結合文字 U+0338 として残るが不安定。(5) フォントだけで区別する対: 添字 MOD(ローマン)と 𝔪𝔬𝔡(フラクトゥール)、LGP と 𝔩𝔤𝔭、log-volume の log(ローマン)と 𝔩𝔬𝔤-link の 𝔩𝔬𝔤。原文 p.156 は『MOD の方は両立するが 𝔪𝔬𝔡 の方は両立しない』と明示的に区別しており、この対比が消えると命題が別物になる。(6) 上下付きの混線: -layout は 𝕍̲^bad_mod を 'Vbmaodd'、𝕍^non_ℚ を 'VnQon' と交互に潰す。全 locator で PDF 目視必須。",
+      "verifiedPages": [153, 154, 156, 173, 174]
     }
   }
 }

@@ -143,7 +143,12 @@ function normalize(s) {
  *
  * `_`(下付き)・`^`(上付き)も落とす: 原文 "Γ_K" は pdftotext で "ΓK"。
  */
-const DECOR_CLASSES = 'ul1|ul2|bar|hat|tilde|dot1|dot2|bb|scr|prime';
+// `frak` は 2026-08-14 追加。IUTchIII は**書体だけで別対象を区別する**——
+// 添字 MOD(ローマン)対 𝔪𝔬𝔡(フラクトゥール)、LGP 対 𝔩𝔤𝔭、log-volume の log 対
+// 𝔩𝔬𝔤-link の 𝔩𝔬𝔤。原文 物理 p.156 は「MOD の方は両立するが 𝔪𝔬𝔡 の方は両立しない」と
+// 明示的に対比しているので、この区別は装飾と同じ資格で対象の同定に効く。
+// HTML 側のクラス表(1_Structured/README.md §3)と**同じ語彙**でなければならない。
+const DECOR_CLASSES = 'ul1|ul2|bar|hat|tilde|dot1|dot2|bb|scr|frak|prime';
 function leanQuoteProjection(text) {
   return squash(text
     .replace(new RegExp(`\\[(?:${DECOR_CLASSES})\\]`, 'g'), '')
@@ -790,6 +795,7 @@ function selftest() {
     ['D22 Found/ が sorry 無し(docstring の言及は誤検出しない)', 'Found', 'd22-found-clean.lean', false],
     ['D23 Interface が Found を import している', 'Interface', 'd23-interface-imports-found.lean', true],
     ['D24 Interface が Found を import していない', 'Interface', 'd24-interface-no-found-import.lean', false],
+    ['D25 フラクトゥール記法つきの正しい引用は通る', 'Skeleton', 'd25-frak-quote.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

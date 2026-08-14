@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[IUTchIII] 構造化の目次</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ th, td { border: 1px solid #bbb; padding: .35em .7em; text-align: left; font-size: .95em; }
+ code { background: #eee; }
+ .warn { color: #8a2f00; }
+</style>
+</head>
+<body>
+
+<h1>[IUTchIII] Inter-universal Teichmüller Theory III — 構造化の目次</h1>
+
+<p>S. Mochizuki, <em>Inter-universal Teichmüller Theory III: Canonical Splittings of the
+Log-theta-lattice</em>, May 2020。全 199 ページ、<code>pageOffset = 0</code>
+(物理 p.2 / p.153 / p.199 の印刷ページ番号で確認)。
+登記は <code>ResearchPaper/papers.json</code> の <code>IUTchIII</code>。</p>
+
+<p class="warn"><strong>notationRisk: high</strong>——記法の目視確認なしにこの論文の
+<code>.txt</code> を使ってはならない。判定の根拠(実測)は <code>papers.json</code> の
+<code>notationNotes</code>、実例は <code>section-3.html</code> の各
+<code>&lt;p class="open"&gt;</code>。</p>
+
+<h2>ファイル</h2>
+
+<table>
+<tr><th>ファイル</th><th>範囲</th><th>構造単位</th><th>目視確認</th></tr>
+<tr>
+  <td><a href="section-3.html">section-3.html</a></td>
+  <td>§3 — Theorem 3.11(主定理)/ Corollary 3.12</td>
+  <td>9 件</td>
+  <td>物理 p.153・154・156・173・174(2026-08-14)</td>
+</tr>
+</table>
+
+<h2>なぜ §3 から着手したか</h2>
+
+<p><code>PLAN.md</code> §0 の北極星が [IUTchIII] Corollary 3.12 であり、
+§5-3 のとおり公開されている争点(Scholze–Stix「偽ではなく<em>自明</em>になる」/
+Joshi「witness が足りない」)が <strong>Theorem 3.11 → Corollary 3.12 の接続</strong>に
+集中しているため。</p>
+
+<h2 class="warn">二次文献の locator は我々の版で解決しない(2026-08-14 実測)</h2>
+
+<p>Scholze–Stix は Corollary 3.12 を
+<strong>「[IUTT-3, page 16, Corollary 3.12]」</strong>と引いている
+(<code>0_Source/Scholze-Stix - Why abc is still a conjecture.txt</code> l.207)。
+しかし我々が持つ 2020 年 5 月版では:</p>
+
+<ul>
+<li>Corollary 3.12 は<strong>物理 p.173–174</strong>(印刷ページも 173–174)</li>
+<li>§3 の始まりは<strong>物理 p.102</strong>。ゆえに節相対でも 72 ページ目であって 16 ではない</li>
+</ul>
+
+<p>したがって「page 16」は<strong>別の版</strong>を指している。二次文献の locator を
+そのまま引き継ぐと、存在しないページを指す記録になる。
+<code>PLAN.md</code> §5-3 の「二次文献の結論を自分の結論として引用しない」は、
+結論だけでなく <strong>locator にも及ぶ</strong>——ここでは実際に解決しなかった。
+本フォルダの locator はすべて、上記 PDF の物理ページに対して
+<code>tools/check.mjs</code> が逐語照合したものである。</p>
+
+<h2>未着手</h2>
+
+<ul>
+<li>Theorem 3.11 の (i)(a)(b)(c)・(ii) 全体(物理 p.153–159)</li>
+<li>Corollary 3.12 の証明 Step (i)–(xii)(物理 p.174–182)</li>
+<li>§1・§2、および Corollary 3.12 が参照する [IUTchI]/[IUTchII] の定義群</li>
+</ul>
+
+</body>
+</html>
