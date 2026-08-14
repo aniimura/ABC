@@ -186,49 +186,22 @@ structure PilotObjectData where
   > collection of possible log-volumes of pilot-object output data
   -/
   outputLogVolumes : Set ℝ
-  /-- **(xi-e)**: その集まりは「Θ 側の対数体積以下の**実数**」全体である。
+  /-- ★2026-08-15: ここにあった **原典の主張** は `Skeleton/IUTchIII/Cor312Claims.lean` へ出した。
 
-  原文が `⊆ ℝ` と書いていることに注意——可能な出力対数体積は実数である。
-  ただしこれは `−|log(Θ̲̲)|` 自身が実数であることを**含意しない**
-  (`−|log(Θ̲̲)| = +∞` でも `ℝ_{≤+∞} = ℝ ⊆ ℝ` は成り立つ)。
+  出した理由: 主張を `Interface` のフィールドにすると**仮説**になるので、
+  依存グラフの辺の先が**展開不能**になる(掘るべき対象が goal ではなく hypothesis になる)。
+  出したのは次の5つ:
+  `PossibleImagesContained`(Ob1, p.131) / `LogShellPacketCompact`(p.153, p.31, p.146) /
+  `HullCompactOfRelCompact`(Remark 3.9.5, (i), p.127) /
+  `OutputLogVolumesEq`(Step (xi-e), p.184) / `QLogVolMem`(Step (xi-f), p.184)。
 
-  原文 (IUTchIII p.184):
-  > R[bb]_≤−|log(Θ[ul2])| ⊆ R[bb]
-  -/
-  outputLogVolumes_eq :
-    outputLogVolumes = {x : ℝ | (x : WithTop ℝ) ≤ logVol (hull (⋃₀ possibleThetaImages))}
-  /-- **(xi-f)**: q 側の対数体積はその集まりに**属する**。
+  ★出した先は `theorem ... := sorry` **ではなく** 名前付きの `Prop` である。
+  `PilotObjectData` はデータの袋であって原典の対象を同定する条件を持たないので、
+  これらは任意の `D` については**偽**であり、`sorry` で置けば嘘になる。
+  反証は `Check/IUTchIII/Cor312Degenerate.lean` で実際に構成した。
 
-  原文はこれを「the inclusion」と呼び、ここから不等式が
-  「then follows formally」だと述べている。
-
-  原文 (IUTchIII p.184):
-  > The inclusion − |log(q[ul2])| ∈ R[bb]_≤−|log(Θ[ul2])|, hence also the inequality
-
-  ★★**落とした限定(意図的な単純化。2026-08-14)**
-
-  直前の文は、この帰属を導く段を**条件つき**で、しかも**濁して**述べている:
-
-  原文 (IUTchIII p.184):
-  > log-volumes of output data is subject to the condition that this con-
-  > struction of output data possibilities constitutes, in particular, a construc-
-  > tion [perhaps only up to some sort of “approximation”, as a result of vari-
-  > ous indeterminacies] of the pilot-object log-volume of the input data
-
-  我々が上のフィールドに置いたのは**無条件の**帰属である。すなわち
-  「subject to the condition」と「perhaps only up to some sort of *approximation*」を
-  **写していない**。これは**仮説の強化**にあたりうる。
-
-  **なぜ写さなかったか**: 原文は次の文で「The inclusion …」と**無条件に**述べており、
-  我々が引用したのはその文である。他方 “approximation” は**どこにも量化されていない**
-  ——`ε` に相当するものが原文に無い。量化されていない濁しを型に写せば、
-  その濁しの強さを**我々が決める**ことになり、発明になる。
-  よって (ii)「反映せず、明示する」を選んだ。`cor_3_12.needs` に
-  `.implicitStep` として記録してある。
-
-  ★この判断は**機械では検査されない**。仮説を原文より強く置いても
-  `check.mjs` は何も言わない(`tools/check.mjs` 冒頭 A6)。 -/
-  qLogVol_mem : (-qAbs) ∈ outputLogVolumes
+  以下このフィールドは、その事実の記録としてのみ置く(データではない)。 -/
+  claimsMovedToSkeleton : True
   /-- **log-shell(モノ解析的整構造)** `I(…)`。Theorem 3.11, (i), (a) が
   多輻的表現のデータとして挙げるもの。
 
@@ -259,49 +232,6 @@ structure PilotObjectData where
   `logVol_ne_top_of_isCompact` に置き換え、有限性は `Skeleton` で**導出**する。
   測定結果は `Check/IUTchIII/Cor312Degenerate.lean`。 -/
   logShellPacket : Set Amb
-  /-- **log-shell のテンソルパケットはコンパクト**。
-
-  単一の log-shell がコンパクトであることは明示されている:
-
-  原文 (IUTchIII p.31):
-  > satisfies the following properties: (anon) I†Fv is compact, hence of finite log-
-
-  パケットの段でも、`ℐ((−))` が対数体積を持つ(= `𝔐(−)` に属する = コンパクト)ことが
-  次から読める:
-
-  原文 (IUTchIII p.146):
-  > O(−) = I((−)) ⊆IQ((−))
-  -/
-  logShellPacket_isCompact : @IsCompact Amb topology logShellPacket
-  /-- **可能な像は log-shell のテンソルパケットに含まれる**。
-
-  ★2026-08-14 訂正: 一度これを「原文に無い(γ)」と報告したが**誤り**だった。
-  原文は Remark 3.9.5, (vii), (Ob1)(物理 p.131、400dpi 目視)で、
-  **「possible images」を主語にして**まさにこれを述べている:
-
-  原文 (IUTchIII p.131):
-  > various “possible images” that occur as the output of the multiradial al-
-  > gorithms under consideration are regions — i.e., in essence, elements ∈P
-  > — contained in tensor packets of log-shells I[scr]_k
-
-  しかも (vii) の冒頭は「The operation of forming the hull will play a crucial role
-  in the context of Corollary 3.12 below」であり、まさに Corollary 3.12 のための箇所。
-
-  ★**誤った探索の記録**: 我々は Lean 側の名前(`subset` / `contains`)で grep して
-  「0 件」と報告した。原文は**原文側の語「possible images」**を主語にしていた。
-  同種の失敗が2回目(1回目は `relatively compact` で探して `compactness` を見落とした)。
-  探索手順の規則は `tools/check.mjs` 冒頭 A2 に明文化した。 -/
-  possibleThetaImages_subset_logShellPacket :
-    ∀ U ∈ possibleThetaImages, U ⊆ logShellPacket
-  /-- **相対コンパクトな領域の正則包はコンパクト**。
-
-  原文 (IUTchIII p.127):
-  > If αU (respectively, AU; A,αU) is relatively compact, then we define
-  > the holomorphic hull of αU (respectively, AU; A,αU) to be the smallest subset of
-
-  この枝の正則包は `λ·𝒪` 型の有界集合になる(そうでない枝は `I^ℚ` 全体)。 -/
-  hull_isCompact_of_subset_isCompact : ∀ U K : Set Amb,
-    @IsCompact Amb topology K → U ⊆ K → @IsCompact Amb topology (hull U)
   /-- `logVol` はコンパクト領域上で `logVolCompact` と一致する
   ——すなわち `logVol` は Proposition 3.9, (i) の対数体積の**拡張**である。
 

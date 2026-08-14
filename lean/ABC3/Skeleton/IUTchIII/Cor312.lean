@@ -1,4 +1,5 @@
 import ABC3.Interface.IUTchIII.PilotObjects
+import ABC3.Skeleton.IUTchIII.Cor312Claims
 import Mathlib.Tactic.Linarith
 
 /-!
@@ -125,16 +126,20 @@ Step (i)–(xii))、写していないのはその中身の方である。
 (Remark 3.9.5, (i)、p.127)、対数体積がコンパクト領域上で `ℝ` 値であること
 (Proposition 3.9, (i)、p.115)に置き換え、有限性は**導出**する。
 測定は `Check/IUTchIII/Cor312Degenerate.lean`。 -/
-theorem cor_3_12 (D : PilotObjectData) :
+theorem cor_3_12 (D : PilotObjectData)
+    (hOb1 : PossibleImagesContained D) (hPacket : LogShellPacketCompact D)
+    (hHull : HullCompactOfRelCompact D) (hOut : OutputLogVolumesEq D)
+    (hMem : QLogVolMem D) :
     thetaLogVol D ≠ ⊤ ∧ qLogVol D ≤ thetaLogVol D := by
-  have hcpt := D.hull_isCompact_of_subset_isCompact _ _ D.logShellPacket_isCompact
-    (Set.sUnion_subset D.possibleThetaImages_subset_logShellPacket)
+  have hcpt := hHull _ _ hPacket (Set.sUnion_subset hOb1)
   refine ⟨?_, ?_⟩
   · -- 有限性は **導出**: `logVol` はコンパクト領域上で `logVolCompact` (ℝ 値) に一致する
     rw [thetaLogVol, D.logVol_eq_of_isCompact _ hcpt]
     exact WithTop.coe_ne_top
-  have hm := D.qLogVol_mem
-  rw [D.outputLogVolumes_eq] at hm
+  have hm : (-D.qAbs) ∈ D.outputLogVolumes := hMem
+  have hEq : D.outputLogVolumes
+      = {x : ℝ | (x : WithTop ℝ) ≤ D.logVol (D.hull (⋃₀ D.possibleThetaImages))} := hOut
+  rw [hEq] at hm
   rw [qLogVol, D.qLogVol_eq]
   exact hm
 
@@ -147,9 +152,13 @@ theorem cor_3_12 (D : PilotObjectData) :
 ★**これは成功ではない。** 内容を作ったのではなく、原文の証明の該当段を
 仮説として**輸入した**だけである。詳細と判定は
 `Check/IUTchIII/Cor312Degenerate.lean`。 -/
-theorem cor_3_12_inequality (D : PilotObjectData) : qLogVol D ≤ thetaLogVol D := by
-  have hm := D.qLogVol_mem
-  rw [D.outputLogVolumes_eq] at hm
+theorem cor_3_12_inequality (D : PilotObjectData)
+    (hOut : OutputLogVolumesEq D) (hMem : QLogVolMem D) :
+    qLogVol D ≤ thetaLogVol D := by
+  have hm : (-D.qAbs) ∈ D.outputLogVolumes := hMem
+  have hEq : D.outputLogVolumes
+      = {x : ℝ | (x : WithTop ℝ) ≤ D.logVol (D.hull (⋃₀ D.possibleThetaImages))} := hOut
+  rw [hEq] at hm
   rw [qLogVol, D.qLogVol_eq]
   exact hm
 
@@ -194,9 +203,10 @@ def cor_3_12.needs : List ProofObligation :=
 
 原文が「i.e.」と書いているとおり、これは `cor_3_12` から**実際に直ちに従う**
 (下の証明が `sorry` 無しであることが、その「i.e.」に隠れた段が無いことの確認になる)。 -/
-theorem cor_3_12_CTheta (D : PilotObjectData) (C : ℝ)
+theorem cor_3_12_CTheta (D : PilotObjectData)
+    (hOut : OutputLogVolumesEq D) (hMem : QLogVolMem D) (C : ℝ)
     (h : thetaLogVol D ≤ ((C * D.qAbs : ℝ) : WithTop ℝ)) : -1 ≤ C := by
-  have h2 := (cor_3_12 D).2
+  have h2 := cor_3_12_inequality D hOut hMem
   rw [qLogVol, D.qLogVol_eq] at h2
   have h3 : ((-D.qAbs : ℝ) : WithTop ℝ) ≤ ((C * D.qAbs : ℝ) : WithTop ℝ) := le_trans h2 h
   have h4 : -D.qAbs ≤ C * D.qAbs := by exact_mod_cast h3

@@ -1,3 +1,4 @@
+import Mathlib.Analysis.Normed.Order.Lattice
 import ABC3.Skeleton.IUTchIII.Cor312
 
 /-!
@@ -77,13 +78,52 @@ noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
   qAbs_pos := ha
   qLogVol_eq := h
   outputLogVolumes := {x : ℝ | (x : WithTop ℝ) ≤ lv S}
-  outputLogVolumes_eq := by simp
-  qLogVol_mem := le_of_eq h.symm
+  claimsMovedToSkeleton := trivial
   logShellPacket := S
-  logShellPacket_isCompact := hS
-  possibleThetaImages_subset_logShellPacket := by rintro U rfl; exact subset_rfl
-  hull_isCompact_of_subset_isCompact := fun U K hK hUK => hsub U K hK hUK
   logVol_eq_of_isCompact := fun U h => (WithTop.coe_untop _ (hfin U h)).symm
+
+/-! ### ★2026-08-15: `Interface` から出した5つの主張を、退化 witness は**全部満たす**
+
+`Skeleton/IUTchIII/Cor312Claims.lean` へ出した主張は、`trivialised` については
+すべて成り立つ。すなわち**主張を外に出しても退化 witness は死なない**——
+退化を殺すのは主張の置き場所ではなく、`Interface` が対象を同定できているかである。 -/
+
+theorem trivialised_PossibleImagesContained (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    PossibleImagesContained (trivialised lv S a τ ha h hS hsub hfin) := by
+  intro U hU
+  have hUS : U = S := hU
+  exact hUS.subset
+
+theorem trivialised_LogShellPacketCompact (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    LogShellPacketCompact (trivialised lv S a τ ha h hS hsub hfin) := hS
+
+theorem trivialised_HullCompactOfRelCompact (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    HullCompactOfRelCompact (trivialised lv S a τ ha h hS hsub hfin) :=
+  fun U K hK hUK => hsub U K hK hUK
+
+theorem trivialised_OutputLogVolumesEq (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    OutputLogVolumesEq (trivialised lv S a τ ha h hS hsub hfin) := by
+  show {x : ℝ | (x : WithTop ℝ) ≤ lv S} = _
+  simp [trivialised]
+
+theorem trivialised_QLogVolMem (τ : TopologicalSpace A) (ha : 0 < a)
+    (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
+    QLogVolMem (trivialised lv S a τ ha h hS hsub hfin) :=
+  le_of_eq h.symm
 
 /-- ★**退化の核心**: 自明化すると Θ 側と q 側は**同じ値**になる。 -/
 theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a)
@@ -270,5 +310,91 @@ theorem oldCounterexample_dies_on_the_bridge :
 無ければ、それは「原文がこの段で条件を与えていない」ことの実測になり、
 `Gap/` の候補として §5-2 のトリアージにかける(既定は①、我々のモデル化の誤り)。
 -/
+
+
+/-! ## ★★2026-08-15: 主張を `Interface` から出したとき `sorry` で置いてよいか
+
+「`Interface` にはデータだけを置き、原典が証明している主張は `Skeleton` に
+`sorry` で置く」という設計原則を検証する。
+
+結論: **素朴な形は採れない。** `PilotObjectData` はデータの袋であって、
+それが原典の対象であることを同定する条件を持っていない。したがって
+出した主張は**任意の `D` については偽**であり、`sorry` で置けば
+「いつか埋まる借金」ではなく**永久に埋まらない偽の言明**になる。
+
+以下、5つすべてについて**実際に反証を構成する**。意見ではなく測定である。 -/
+
+/-- 反証用の最小 `PilotObjectData`。**データ部分だけ**を埋めてある
+(`Interface` に残した整合条件 `qAbs_pos` / `qLogVol_eq` / `logVol_eq_of_isCompact`
+はすべて満たす)。台は `ℝ`、対数体積は定数 `−1`。 -/
+noncomputable def bareData (imgs : Set (Set ℝ)) (packet : Set ℝ)
+    (hl : Set ℝ → Set ℝ) : PilotObjectData where
+  Amb := ℝ
+  topology := inferInstance
+  logVolCompact := fun _ _ => -1
+  logVol := fun _ => ((-1 : ℝ) : WithTop ℝ)
+  hull := hl
+  possibleThetaImages := imgs
+  qImage := Set.univ
+  qAbs := 1
+  qAbs_pos := one_pos
+  qLogVol_eq := rfl
+  outputLogVolumes := ∅
+  claimsMovedToSkeleton := trivial
+  logShellPacket := packet
+  logVol_eq_of_isCompact := fun _ _ => rfl
+
+/-- ★(Ob1) は反証できる —— 可能な像がパケットに含まれない `D` が作れる。 -/
+theorem ob1_is_refutable :
+    ¬ PossibleImagesContained (bareData {Set.univ} ∅ id) := by
+  intro h
+  exact (h Set.univ rfl) (Set.mem_univ (0 : ℝ))
+
+/-- ★パケットのコンパクト性は反証できる —— `ℝ` 全体をパケットに取ればよい。 -/
+theorem packetCompact_is_refutable :
+    ¬ LogShellPacketCompact (bareData {Set.univ} Set.univ id) := by
+  intro h
+  exact (NoncompactSpace.noncompact_univ (X := ℝ)) h
+
+/-- ★正則包のコンパクト性は反証できる。 -/
+theorem hullCompact_is_refutable :
+    ¬ HullCompactOfRelCompact (bareData {Set.univ} ∅ (fun _ => Set.univ)) := by
+  intro h
+  have he : @IsCompact (bareData {Set.univ} ∅ (fun _ => Set.univ)).Amb
+      (bareData {Set.univ} ∅ (fun _ => Set.univ)).topology ∅ := @isCompact_empty ℝ _
+  exact (NoncompactSpace.noncompact_univ (X := ℝ)) (h ∅ ∅ he subset_rfl)
+
+/-- ★(xi-e) は反証できる。 -/
+theorem outputEq_is_refutable :
+    ¬ OutputLogVolumesEq (bareData {Set.univ} ∅ id) := by
+  intro h
+  have h' : (∅ : Set ℝ)
+      = {x : ℝ | (x : WithTop ℝ) ≤ ((-1 : ℝ) : WithTop ℝ)} := h
+  have hmem : (-1 : ℝ) ∈ {x : ℝ | (x : WithTop ℝ) ≤ ((-1 : ℝ) : WithTop ℝ)} := by
+    simp only [Set.mem_setOf_eq]
+    exact le_refl _
+  rw [← h'] at hmem
+  exact hmem
+
+/-- ★(xi-f) は反証できる。 -/
+theorem qMem_is_refutable :
+    ¬ QLogVolMem (bareData {Set.univ} ∅ id) := fun h => h
+
+/-! ### 測定結果
+
+出した5つの主張は**すべて反証可能**である。ゆえに:
+
+- `theorem ... := sorry` として置けば、それは**偽の言明**になる。
+  posit は「仮定する」と正直に言っているが、偽の `sorry` は嘘である。
+- 採った形は**名前付きの `Prop`** + `cor_3_12` の**明示的な仮説**。
+  これなら偽を主張せずに、辺の先を**節点**にできる。
+
+★同時に、`trivialised` はこの5つを**全部満たす**
+(`trivialised_PossibleImagesContained` 以下)。すなわち
+**主張を外に出しても退化 witness は死なない**。退化を殺すのは主張の置き場所ではなく、
+`Interface` が対象を同定できているかである。 -/
+
+#print axioms ob1_is_refutable
+#print axioms qMem_is_refutable
 
 end ABC3.Check.IUTchIII

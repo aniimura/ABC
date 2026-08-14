@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>[IUTchIII] §3 — Corollary 3.12 が依拠する主張(辺の先)</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ .ul1 { text-decoration: underline; }
+ .ul2 { text-decoration: underline; text-decoration-style: double; }
+ .bar { text-decoration: overline; }
+ .bb { font-weight: bold; }
+ .scr, .frak { font-style: italic; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[IUTchIII] Corollary 3.12 が依拠する主張(依存グラフの辺の先)</h1>
+
+<p>原典: S. Mochizuki, <em>Inter-universal Teichmüller Theory III</em> (May 2020)。
+<code>pageOffset = 0</code>。<strong>notationRisk: high</strong>。</p>
+
+<p><strong>なぜこのファイルがあるか</strong>: これらの主張は 2026-08-14 まで
+<code>Interface</code> の <code>PilotObjectData</code> の<strong>フィールド</strong>だった。
+フィールドは仮説なので、依存グラフの辺の先が<strong>展開不能</strong>になる
+(goal ではなく hypothesis になるため、掘る足場が消える)。
+2026-08-15 に主張側を <code>Skeleton</code> へ出したので、その出典単位をここに切り出す。</p>
+
+<section class="statement definition"
+         id="remark-3-9-5-i-hull"
+         data-paper="IUTchIII"
+         data-pdf-page="127"
+         data-item="Remark 3.9.5, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">If <em data-txt="αU"><sup>α</sup><span class="scr">U</span></em> (respectively, <em data-txt="AU"><sup>A</sup><span class="scr">U</span></em>; <em data-txt="A,αU"><sup>A,α</sup><span class="scr">U</span></em>) is relatively compact, then we define the holomorphic hull of <em data-txt="αU"><sup>α</sup><span class="scr">U</span></em> (respectively, <em data-txt="AU"><sup>A</sup><span class="scr">U</span></em>; <em data-txt="A,αU"><sup>A,α</sup><span class="scr">U</span></em>) to be the smallest subset of</div>
+<div class="reading">正則包の定義。★<strong>「相対コンパクトなら」が条件になっている</strong>——そうでない枝では正則包は <code>I<sup>ℚ</sup></code> 全体になり、対数体積は <code>+∞</code>。Corollary 3.12 の有限性はこの場合分けの一方に乗っている。</div>
+</section>
+
+<section class="statement definition"
+         id="remark-3-9-5-vii-ob1"
+         data-paper="IUTchIII"
+         data-pdf-page="131"
+         data-item="Remark 3.9.5, (vii), (Ob1)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">various “possible images” that occur as the output of the multiradial algorithms under consideration are regions — i.e., in essence, elements <em data-txt="∈P">∈ <span class="scr">P</span></em> — contained in tensor packets of log-shells <em data-txt="Ik"><span class="scr">I</span><sub>k</sub></em></div>
+<div class="reading">★<strong>Corollary 3.12 の有限性を支える包含関係</strong>。原文は「possible images」を主語にして、それが log-shell のテンソルパケットに<strong>含まれる</strong>と述べている。</div>
+<p class="open">2026-08-14 に我々はこれを「原文に無い」と誤報告した。Lean 側で付けた名前の語(<code>subset</code> / <code>contains</code>)で grep していたためで、原文は原文側の語(<code>possible images</code>)を主語にしていた。探索手順は <code>tools/check.mjs</code> 冒頭 A2 に明文化した。</p>
+</section>
+
+<section class="statement definition"
+         id="thm-3-11-i-a"
+         data-paper="IUTchIII"
+         data-pdf-page="153"
+         data-item="Theorem 3.11, (i), (a)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">the topological modules and mono-analytic integral structures</div>
+<div class="reading">多輻的表現のデータ (a)。ここで <strong>log-shell のテンソルパケット</strong>(モノ解析的整構造)が入る。Corollary 3.12 が使うのはその<strong>コンパクト性</strong>だが、コンパクト性そのものはここではなく物理 p.31 / p.146 で述べられる。</div>
+<p class="open">この単位は Theorem 3.11 (i) (a) の<strong>1行だけ</strong>である。Theorem 3.11 は物理 p.153–159 の7ページにわたり、p.153 だけで名指しの依存が 10 件ある。ここで切り出したのは Corollary 3.12 が消費する部分の入口である。</p>
+</section>
+
+<section class="statement definition"
+         id="cor-3-12-step-xi"
+         data-paper="IUTchIII"
+         data-pdf-page="184"
+         data-item="Corollary 3.12 (proof, Step (xi-e), (xi-f))"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">The inclusion <em data-txt="−|log(q)| ∈R≤−|log(Θ)|">−|log(<span class="ul2">q</span>)| ∈ <span class="bb">R</span><sub>≤−|log(<span class="ul2">Θ</span>)|</sub></em>, hence also the inequality</div>
+<div class="reading">Step (xi-f)。★原文はここから不等式が「formally 従う」と述べる。すなわち <strong>Corollary 3.12 の不等式の実質は、この帰属関係にある</strong>。</div>
+<p class="open">直前の (xi-f) 冒頭は、この帰属を <code>subject to the condition</code> かつ <code>perhaps only up to some sort of “approximation”</code> と<strong>濁して</strong>述べている。我々が Lean に写したのは<strong>無条件の</strong>帰属で、限定は写していない(<code>check.mjs</code> 冒頭 A6 = 仮説の強化)。</p>
+</section>
+
+</body>
+</html>
