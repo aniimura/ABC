@@ -297,34 +297,62 @@ D:\Math_ABC3\
 
 ## 7. フェーズ
 
-### Phase 0 — 器具を先に作り、器具自体を較正する ★2026-08-14 完了
+### Phase 0 — 器具を先に作り、器具自体を較正する ★2026-08-14 完了(selftest 13/13)
+
+> **経緯(残す)**: 一度「Phase 0 完了」と記録したが**過大な申告だった**——完了していたのは 1_Structured 側のゲートだけで、Lean 側(G2・G3・Claim構造・Gap)は未実装だった。器具を作り切る前に Phase 1 の内容作業へ進んだのが原因で、**計画自身が警告していた順序の誤り**。ユーザーの確認(「Phase 0 は完了ですか？」)で発覚し、残りを実装して達成した。この経緯を消さずに残す——受理条件を自分で緩める失敗の実例として。
 
 | | 内容 | 状態 |
 |---|---|---|
 | 1 | `git init` | 完了 |
-| 2 | `lean/` 初期化、mathlib v4.31.0-rc2(cache 取得済み) | 完了・`lake build` 成功 |
+| 2 | `lean/` 初期化、mathlib v4.31.0-rc2 | 完了・`lake build` 成功 |
 | 3 | `Meta/Calibration.lean` — 事実1の実演を常設の証拠として配置 | 完了 |
-| 4 | `ResearchPaper/papers.json` — 論文の登記簿 | 完了(pGC・EtTh) |
-| 5 | `1_Structured/README.md` — 構造化の規約 | 完了(初版) |
-| 6 | `tools/check.mjs` — 唯一のゲート | 完了 |
-| 7 | **★器具の較正**(下記) | 完了・6/6 PASS |
+| 4 | `Meta/Claim.lean` — `Source`/`LoadBearing`/`NegControl`/`WaitingFor`/`GapRecord` | 完了 |
+| 5 | `Interface/` `Skeleton/` `Found/` `Gap/` — 各 bucket の規則を module docstring に | 完了 |
+| 6 | `ResearchPaper/papers.json` — 論文の登記簿 | 完了(pGC・EtTh) |
+| 7 | `1_Structured/README.md` — 構造化の規約 | 完了(初版) |
+| 8 | `tools/check.mjs` — 唯一のゲート(下記の全項目) | 完了 |
+| 9 | **器具の較正**(下記 D1–D13) | 完了・13/13 PASS |
 
-**器具の較正(`node tools/check.mjs --selftest`)**: 意図的に壊した入力を落とせるか。
+**`check.mjs` が実装している検査**
 
-| | ダミー | 結果 |
-|---|---|---|
-| D1 | 存在しないPDFページを指す locator | 落とせた |
-| D2 | 逐語が該当ページに無い | 落とせた |
-| D3 | 必須属性の欠落 | 落とせた |
-| D4 | 未登記の論文タグ | 落とせた |
-| D5 | 目視確認日が日付でない | 落とせた |
-| D6 | **正しい入力(pGC §1)は通る**(偽陽性の検査) | 通った |
+| 対象 | 検査 |
+|---|---|
+| 1_Structured | S1 必須属性 / S2 論文の登記 / S3 ページ範囲 / S4 逐語の PDF 照合 / S5 目視確認日 / S6 id の一意性 |
+| Lean | `lake build` / `sorry` 台帳(件数を必ず印字) |
+| Lean | **G1** `Skeleton` の各宣言に `X.src : Source`。その paper・pdfPage・sectionId が `papers.json` と `1_Structured` に実在するか照合 |
+| Lean | **G2** `Interface` の各 `structure` に `X.nonvacuous : Nonempty X` か `X.waiting : WaitingFor` |
+| Lean | **G3** `X.loadBearing` を付けた宣言に `X.negControl : NegControl` |
+| Lean | **G4** プロジェクト内の `axiom` 宣言を禁止(較正デモのみ免除) |
+| Lean | `Gap` の各 `structure` に `X.record : GapRecord`(`falsifier` は型が必須にしている) |
+| 出力 | `Interface` 実装待ち一覧(= Track B の作業キュー)/ `Gap` 一覧(分類・falsifier) |
 
-D6 を入れているのは、**「全部落とす」器具は「全部通す」器具と同じくらい無情報**だから。両方向を検査して初めて識別力があると言える。
+**分業の原則**: check.mjs が見るのは**宣言の存在**だけ。`X.nonvacuous` が本当に `Nonempty X` を証明しているかは `lake build` が保証する。この境界を出力に明記させている。
 
-**較正が実際に効いた実例**: 初回実行で pGC §1 の逐語8件中8件が落ちた。原因は器具の欠陥2つ——(a) `pdftotext` は下付き文字の直後に空白を挿入する(`Γ_K.` → `ΓK .`)、(b) 既定モードは行の順序を入れ替えることがある(pGC p.3 の Corollary 1.3)。空白を無視した照合と `-layout` モードの併用で解消した。**器具を先に作らず Lean を書き始めていたら、この2つは「原文と合わない」という誤った結論として現れていた。**
+**器具の較正(`node tools/check.mjs --selftest`)** — 意図的に壊した入力を落とし、正しい入力は通すか。
 
-なお `Gap` の falsifier 検査は、`Gap/` が空である現状では較正できない(検査すべき対象がまだ無い)。Phase 3 で `Gap` が立った時点で追加し、そこで較正する。
+| | ダミー | 期待 | 結果 |
+|---|---|---|---|
+| D1 | 存在しないPDFページを指す locator | 落ちる | ok |
+| D2 | 逐語が該当ページに無い | 落ちる | ok |
+| D3 | 必須属性の欠落 | 落ちる | ok |
+| D4 | 未登記の論文タグ | 落ちる | ok |
+| D5 | 目視確認日が日付でない | 落ちる | ok |
+| **D6** | **正しい入力(pGC §1)** | **通る** | ok |
+| D7 | `Interface` に witness も waiting も無い | 落ちる | ok |
+| D8 | プロジェクト内の `axiom` 宣言 | 落ちる | ok |
+| D9 | `Gap` に `GapRecord` が無い | 落ちる | ok |
+| **D10** | **非空虚 witness を持つ `Interface`** | **通る** | ok |
+| **D11** | **waiting を書いた `Interface`** | **通る** | ok |
+| D12 | load-bearing なのに負の対照が無い | 落ちる | ok |
+| **D13** | **load-bearing + 負の対照あり** | **通る** | ok |
+
+D6・D10・D11・D13(通るべきもの)を入れているのは、**「全部落とす」器具は「全部通す」器具と同じくらい無情報**だから。両方向を検査して初めて識別力があると言える。
+
+**較正が実際に欠陥を捕まえた実例(3件)**
+
+1. 初回実行で pGC §1 の逐語 **8件中8件が落ちた**。原因は原文でなく器具側——(a) `pdftotext` は下付き文字の直後に空白を挿入する(`Γ_K.` → `ΓK .`)、(b) 既定モードは行の順序を入れ替えることがある(pGC p.3 の Corollary 1.3)。空白を無視した照合と `-layout` 併用で解消。**器具を先に作らず Lean を書き始めていたら、この2つは「原文と合わない」という誤った結論として現れていた。**
+2. `axiom` 免除パスの相対パス基準が食い違っており、較正デモ自身が G4 で落ちた。
+3. **D13(通るべき fixture)が落ちた**——台帳の付随宣言(`X.loadBearing` 等)自身に出典を要求してしまう偽陽性。**落とす側の検査だけを並べていたら発見できなかった。**
 
 ### Phase 1 — 1本を完走させる
 
