@@ -33,10 +33,13 @@ log_{k[bar]}(O[scr]^×_k)  ⊆  k
 原文 (AbsTopIII p.5):
 > (L1) a log-shell is compact and hence of finite “log-volume” [cf. Corollary
 
-## ★★結論 — **log-shell は構成できなかった。理由は1点に絞れる。**
+## ★★測定(2026-08-14 の第1回)— **当時は構成できなかった。理由は1点に絞れた。**
 
-**p進対数が mathlib に無い。** 探索範囲は下記(`LeanStatus.absent (searched)` の規律、
-`tools/check.mjs` 冒頭 A2 の手順 S1–S4)。
+★**その後 `Found/IUTchIII/PadicLog.lean` で構成した**(下記「追記」)。
+以下は**当時の測定の記録**として残す——`absent` の探索範囲は
+再現できる形で残さなければならないため(`tools/check.mjs` 冒頭 A2 の手順 S1–S4)。
+
+当時の結論: **p進対数が mathlib に無い。** 探索範囲:
 
 - **(S1) 原文側の呼称**: 「the **p-adic logarithm** `log_{k̄}`」——
   単数群 `𝒪_k^×`(あるいは `k^×`)から加法群 `k` への写像。
@@ -59,9 +62,9 @@ log_{k[bar]}(O[scr]^×_k)  ⊆  k
   `ResearchPaper/lean-ecosystem.json` の `pGC#6 p進対数` = `absent` と同じ穴である**
   ——pGC Proposition 1.2 と IUT の log-shell を**同一の欠落**が塞いでいる。
 
-## 到達点 — ここまでは `sorry` 無しで作れた
+## 到達点(第1回)— ここまでは `sorry` 無しで作れた
 
-log-shell そのものは作れないが、**その定義域**は作れる。しかも
+当時 log-shell そのものは作れなかったが、**その定義域**は作れた。しかも
 コンパクト性の証明は「コンパクト集合の連続像はコンパクト」だけなので、
 **p進対数さえあれば log-shell のコンパクト性は1行で出る**。それを下で確定させる:
 
@@ -72,10 +75,19 @@ log-shell そのものは作れないが、**その定義域**は作れる。し
    `f '' (単数球面)` はコンパクト**。`f` に p進対数を入れれば、これが log-shell の
    コンパクト性そのものになる。
 
-**3 は log-shell の構成ではない。** `f` は仮引数であって、我々は p進対数を作っていない。
-ここを取り違えないこと——`f := id` と置けば「log-shell」は単数球面になってしまう
-(退化)。退化と本物を分けるのは `f` が**本当に p進対数であること**だけで、
-それが今まさに作れないものである。
+**3 は log-shell の構成ではない。** `f` は仮引数であって、ここでは p進対数を作っていない。
+`f := id` と置けば「log-shell」は単数球面になってしまう(退化)。
+
+## ★2026-08-14 追記: `f` は埋まった
+
+`Found/IUTchIII/PadicLog.lean` で p進対数 `logOneAdd` を実際に構成した
+(`sorry` 無し、非退化性 `logOneAdd_ne_zero` つき)。`ℚ_[p]` の log-shell は
+そこの `logShell` / `isCompact_logShell'` にある。
+
+★ただし**この一般ファイルの `f` に直接は代入できない**——`logOneAdd` は
+`Continuous`(大域)ではなく `ContinuousOn`(半径 `r < 1` の閉球上)だからである。
+`PadicLog.lean` 側は `IsCompact.image_of_continuousOn` を使っており、
+本ファイルの `isCompact_logShell_of_continuous` はその**大域版の雛形**として残す。
 -/
 
 namespace ABC3.Found.IUTchIII

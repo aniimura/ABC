@@ -4,6 +4,7 @@ import ABC3.Found.PGC.LocalFieldNorm
 import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Found.IUTchIII.LogShell
+import ABC3.Found.IUTchIII.PadicLog
 /-!
 # Found — 実装済みの基礎
 
