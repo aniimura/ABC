@@ -44,7 +44,9 @@
       "verifiedPages": [
         31,
         104,
+        112,
         115,
+        126,
         127,
         131,
         146,
@@ -67,7 +69,8 @@
       "verifiedPagesNote": "★目視(pdftoppm)したページのみ。log-shell の定義(p.3)と性質 (L1)(p.5)のみ確認。",
       "verifiedPages": [
         3,
-        5
+        5,
+        113
       ]
     },
     "SemiAnbd": {
@@ -80,6 +83,30 @@
       "notationNotes": "400dpi 目視(物理 p.33)と pdftotext を突き合わせて実測。(1) 花文字が落ちる: 𝓑^temp(Π) → 'Btemp(Π)'、𝒯₁,𝒯₂ → 'T1, T2'、Aut_𝒯(T) → 'AutT (T)'。(2) ★上下付きが平坦化されたうえ改行で分断される: π₁^temp(G) が 'πtemp' / '1' / '(G)' の3行になる(物理 p.38 で実測)。1つの記号が3行に割れるので、grep でも目視でも取り違えうる。(3) アクセントが壊れる: 'André' → 'Andr´e'。(4) 添字つき射 G_∞,i → 'G∞,i'。IUTchIII と同種だが、(2) は本論文で初めて観測した壊れ方であり、より重い。",
       "verifiedPages": [
         33
+      ]
+    },
+    "IUTchI": {
+      "title": "Inter-universal Teichmuller Theory I: Construction of Hodge Theaters",
+      "file": "Inter-universal Teichmuller Theory I",
+      "year": 2020,
+      "pdfPages": 186,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "400dpi 目視(物理 p.61)と pdftotext を突き合わせて実測。★最も重いのは**オーバーバーの脱落**: `F̄/F` → `F/F`、`Gal(F̄/F)` → `Gal(F/F)`。後者は**自明群と読める**——IUTchIII で観測した `(≠ ∅)` → `(= ∅)` と同種の、装飾の脱落が意味を反転させる形である。ほかに (1) 下線の脱落: `C̲_K` → `CK`、`ε̲` → `ϵ`、`v̲` → `v`。(2) 黒板太字の平坦化: `𝕍` → `V`。(3) 上下付きの平坦化＋改行分断: `𝕍^bad_mod` → `Vbad` / 改行 / `mod`。`def=` も2行に割れる。(4) 添字の連結: `X_F` → `XF`。(5) 空白の脱落: `∈ F` → `∈F`。",
+      "verifiedPages": [
+        61
+      ]
+    },
+    "IUTchII": {
+      "title": "Inter-universal Teichmuller Theory II: Hodge-Arakelov-theoretic Evaluation",
+      "file": "Inter-universal Teichmuller Theory II",
+      "year": 2020,
+      "pdfPages": 174,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "400dpi 目視(物理 p.158)と pdftotext を突き合わせて実測。★最も重いのは**2つの異なる字体が同じ文字に潰れること**: フラクトゥール `𝔉`(prime-strip)とスクリプト `ℱ`(prime-strip の型)が**どちらも `F`** になる。同一ページに両方が現れるので、pdftotext だけでは区別できない。ほかに (1) IUTchI と同じオーバーバー脱落: `F̄/F` → `F/F`。(2) `𝒞` → `C`、`𝒟` → `D`、`𝓗𝓣` → `HT`。(3) 上付きの記号列 `⊩▶×μ` は残るが上付きであることは失われ、`F⊩▶×μ` と地の文に並ぶ。(4) `∗C⊩of` のように直後の語と癒着する。(5) `Θ^±ell NF` → `Θ±ellNF`。",
+      "verifiedPages": [
+        158
       ]
     }
   }

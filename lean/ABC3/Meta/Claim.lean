@@ -78,7 +78,16 @@ inductive ProofObligation
   | folklore (what : String) (page : Nat)
   /-- 原文が段を飛ばしている箇所。`Gap` の候補 -/
   | implicitStep (what : String) (page : Nat)
-  /-- 望月氏の別論文への依拠。後ろ向き追跡の枝 -/
+  /-- 望月氏の別論文への依拠。後ろ向き追跡の枝。
+
+  ★★`page` は **辺の先の論文における、その item の物理ページ**である
+  (引用している側のページではない)。2026-08-15 の監査で、この2つが
+  混在していたことが判明した——`cor_3_12.needs` の 6 本のうち
+  `Theorem 3.11` だけが辺の先のページ(153)で、他の 5 本は
+  引用している側のページ(173/174)を書いていた。
+  三つ組 `(paper, item, page)` が自己完結して初めて
+  `tools/check.mjs` が **辺の先を検査**できる(登記の有無・ページ範囲)。
+  混在していると、検査は所有論文の範囲と比べるしかなく、事実上何も見ていない。 -/
   | otherPaper (paper item : String) (page : Nat)
   /-- 原文の中で導出されている段(外部依存ではないが作業は要る) -/
   | derivation (what : String) (page : Nat)

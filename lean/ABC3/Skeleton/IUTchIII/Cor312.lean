@@ -175,11 +175,11 @@ def cor_3_12.src : Source :=
 Corollary 3.12 の**本文と証明冒頭が名指ししているもの**だけを拾った。 -/
 def cor_3_12.needs : List ProofObligation :=
   [ .otherPaper "[IUTchIII]" "Theorem 3.11(multiradial representation・(Ind1)(Ind2)(Ind3))" 153,
-    .otherPaper "[IUTchIII]" "Definition 3.8, (i)(Θ-pilot object / q-pilot object)" 173,
-    .otherPaper "[IUTchIII]" "Remark 3.9.5, (i)(holomorphic hull)" 173,
-    .otherPaper "[IUTchIII]" "Proposition 3.9, (i), (ii)(手続き正規化モノ解析的対数体積)" 173,
-    .otherPaper "[IUTchII]" "Corollary 4.10, (i)(ラベル 0 と ⟨F_l⟩ の同定、記号 △)" 174,
-    .otherPaper "[IUTchI]" "Definition 3.1, (b)(楕円曲線 E_F の q-パラメータ)" 174,
+    .otherPaper "[IUTchIII]" "Definition 3.8, (i)(Θ-pilot object / q-pilot object)" 112,
+    .otherPaper "[IUTchIII]" "Remark 3.9.5, (i)(holomorphic hull)" 127,
+    .otherPaper "[IUTchIII]" "Proposition 3.9, (i), (ii)(手続き正規化モノ解析的対数体積)" 115,
+    .otherPaper "[IUTchII]" "Corollary 4.10, (i)(ラベル 0 と ⟨F_l⟩ の同定、記号 △)" 158,
+    .otherPaper "[IUTchI]" "Definition 3.1, (b)(楕円曲線 E_F の q-パラメータ)" 61,
     .implicitStep "「the situation of Theorem 3.11」が何を含むかは列挙されていない(物理 p.153-159 の7ページ)" 173,
     .derivation "Step (i)-(xii)——原文は「relatively concrete consequence」と述べるが、実際の導出は p.174-182 にわたる" 174,
     .implicitStep

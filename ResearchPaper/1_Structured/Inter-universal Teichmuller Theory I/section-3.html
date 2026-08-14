@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>[IUTchI] §3 — Definition 3.1(initial Θ-data)</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ .ul1 { text-decoration: underline; }
+ .bar { text-decoration: overline; }
+ .bb { font-weight: bold; }
+ .scr, .frak { font-style: italic; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[IUTchI] §3 — Definition 3.1(initial Θ-data)</h1>
+
+<p>原典: S. Mochizuki, <em>Inter-universal Teichmüller Theory I: Construction of Hodge
+Theaters</em> (May 2020)。全 186 ページ、<code>pageOffset = 0</code>(物理 p.61 のヘッダ
+「INTER-UNIVERSAL TEICHMÜLLER THEORY I &nbsp; 61」で確認)。</p>
+
+<p><strong>記法の目視確認</strong>: 物理 p.61 を <code>pdftoppm -r 400</code> で確認
+(2026-08-15)。判定と実測は <code>ResearchPaper/papers.json</code> の
+<code>IUTchI.notationNotes</code>。<strong>本論文は <code>notationRisk: high</code></strong>。</p>
+
+<p><strong>なぜここを切り出すか</strong>: [IUTchIII] Corollary 3.12 の
+<code>.needs</code> が <code>[IUTchI] Definition 3.1, (b)</code> を辺として指しており、
+その辺の先にスケルトンが無かった(= 依存グラフの<strong>未展開の葉</strong>)。
+ここは初期 Θ-データの定義であり、IUT 全体の<strong>入口</strong>にあたる。</p>
+
+<section class="statement definition"
+         id="def-3-1-a"
+         data-paper="IUTchI"
+         data-pdf-page="61"
+         data-item="Definition 3.1, (a)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(a) <em data-txt="F">F</em> is a number field such that √−1 ∈<em data-txt="F">F</em>; <em class="bar" data-txt="F">F</em> is an algebraic closure of <em data-txt="F">F</em>. Write <em data-txt="GF">G<sub>F</sub></em> <em data-txt="def =">def=</em> Gal(<em data-txt="F/F"><span class="bar">F</span>/F</em>).</div>
+<div class="reading">初期 Θ-データの第1条件。数体 <code>F</code> は √−1 を含む(= 総虚を強いる方向)。<code>F̄</code> は <code>F</code> の代数閉包で、<code>G_F</code> はその絶対 Galois 群。</div>
+<p class="open">★<strong>この単位が本論文の記法リスクの実例である。</strong><code>F̄</code>(オーバーバー)を <code>pdftotext</code> は <code>F</code> にする。すると <code>Gal(F̄/F)</code> が <code>Gal(F/F)</code> と出力され、<strong>自明群と読める</strong>。同じ文に装飾ありの <code>F̄</code> と装飾なしの <code>F</code> が両方あるので、<code>.txt</code> だけでは復元できない。IUTchIII で観測した <code>(≠ ∅)</code> → <code>(= ∅)</code> と同種の、<strong>装飾の脱落が意味を反転させる</strong>形。</p>
+</section>
+
+<section class="statement definition"
+         id="def-3-1-b"
+         data-paper="IUTchI"
+         data-pdf-page="61"
+         data-item="Definition 3.1, (b)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(b) <em data-txt="XF">X<sub>F</sub></em> is a once-punctured elliptic curve [i.e., a hyperbolic curve of type (1, 1)] over <em data-txt="F">F</em> that admits stable reduction over all <em data-txt="v ∈V(F)non">v ∈ <span class="bb">V</span>(F)<sup>non</sup></em>. Write <em data-txt="EF">E<sub>F</sub></em> for the elliptic curve over <em data-txt="F">F</em> determined by <em data-txt="XF">X<sub>F</sub></em></div>
+<div class="reading">第2条件。<code>X_F</code> は1点抜き楕円曲線(型 (1,1) の双曲的曲線)で、<code>F</code> のすべての非アルキメデス素点で安定還元を持つ。<code>E_F</code> は <code>X_F</code> が定める楕円曲線。</div>
+<p class="open">この (b) は続けて <code>[AbsTopIII], Definition 5.1, (ii)</code>(field of moduli)を引用する。その辺は Lean 側の <code>InitialThetaData.needs</code> に書いた(物理 p.113、目視確認済み)。</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[IUTchI] 構造化の目次</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ th, td { border: 1px solid #bbb; padding: .35em .7em; text-align: left; font-size: .95em; }
+ code { background: #eee; }
+ .warn { color: #8a2f00; }
+</style>
+</head>
+<body>
+
+<h1>[IUTchI] Inter-universal Teichmüller Theory I — 構造化の目次</h1>
+
+<p>S. Mochizuki, <em>Inter-universal Teichmüller Theory I: Construction of Hodge
+Theaters</em>, May 2020。全 186 ページ、<code>pageOffset = 0</code>
+(物理 p.61 のヘッダで確認)。登記は <code>ResearchPaper/papers.json</code> の
+<code>IUTchI</code>。</p>
+
+<p class="warn"><strong>notationRisk: high</strong>——★最も重いのは
+<strong>オーバーバーの脱落</strong>。<code>Gal(F̄/F)</code> が <code>pdftotext</code> で
+<code>Gal(F/F)</code> になり、<strong>自明群と読める</strong>。
+実測の詳細は <code>papers.json</code> の <code>notationNotes</code>、
+実例は <code>section-3.html</code> の <code>#def-3-1-a</code>。</p>
+
+<h2>ファイル</h2>
+
+<table>
+<tr><th>ファイル</th><th>範囲</th><th>構造単位</th></tr>
+<tr><td><code>section-3.html</code></td><td>物理 p.61(§3 冒頭、Definition 3.1)</td>
+    <td><code>#def-3-1-a</code> / <code>#def-3-1-b</code></td></tr>
+</table>
+
+<h2>なぜこの範囲か</h2>
+
+<p>[IUTchIII] Corollary 3.12 の <code>.needs</code> が
+<code>[IUTchI] Definition 3.1, (b)</code> を<strong>辺</strong>として指しており、
+その先にスケルトンが無かった(<code>tools/check.mjs</code> の依存グラフ印字で
+<strong>未展開の葉</strong>)。ここはその葉を1つ展開したもので、
+初期 Θ-データ = IUT 全体の入口にあたる。</p>
+
+<p><strong>★全文は写していない</strong>。Definition 3.1 は (a)〜(f) からなるが、
+ここに切り出したのは (a) と (b) の冒頭だけである。
+Lean 側 <code>ABC3.Skeleton.IUTchI.InitialThetaDataFieldPart</code> が転写したのは
+さらに (a) だけで、<strong>それは initial Θ-data ではない</strong>。</p>
+
+<h2>legacy</h2>
+
+<p><code>example5.1-def5.2.legacy.html</code> と
+<code>proposition6.7-layerB-object.legacy.md</code> は旧形式で、ゲートの検査対象外
+(<code>check.mjs</code> の B3)。</p>
+
+</body>
+</html>

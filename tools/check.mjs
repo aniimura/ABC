@@ -34,6 +34,22 @@
  * 規則がどこにも書かれておらず(暗黙の前提だった)、当然 fixture も無かった。
  * D23/D24 として機械化した。**「図に描いてあるから守られる」は成り立たない。**
  *
+ * 2026-08-15、依存グラフを作る過程でさらに 3 件(いずれも 28/28 PASS の状態で素通り):
+ *   - `.needs` の `otherPaper` は **別の論文**を指すのに、ページを **所有論文**の
+ *     `pdfPages` と比べていた。つまり辺の先は事実上検査していなかった。
+ *     現に `[IUTchI]` `[IUTchII]` が `papers.json` **未登記のまま**通っていた。
+ *     → D26/D27/D28 として機械化(D28 が「所有論文では範囲内・辺の先では範囲外」の形)。
+ *   - `.needs` の `page` の**意味が混在**していた。`cor_3_12.needs` の 6 本のうち
+ *     `Theorem 3.11` だけが辺の先のページで、他 5 本は引用している側のページだった。
+ *     三つ組が自己完結しないと辺の先は検査できない。`Meta/Claim.lean` に明記した。
+ *   - `.needs` の本体抽出が `src.indexOf("foo.needs")` だったため、**docstring 中の
+ *     散文の言及**を先に拾い、そこから最初の `[` までを本体と誤認していた。
+ *     件数には数えられるのに中身は 1 件も集計されない、という壊れ方をする。
+ *     → D29 として機械化。`.src` 側にも同じ脆さがあったので同時に直した。
+ *
+ * ★このうち 2 件目は「器具の穴」ではなく **データの穴**である。器具を足しても、
+ *   書く側の規約が曖昧なままなら検査は空回りする。
+ *
  * ── A. 原理的に検査できない(自己申告に依存する)
  *   A1. `data-notation-checked` の日付 — **実際に PDF を目視したかは検査不能**。
  *       形式(YYYY-MM-DD か "none")しか見ていない。
@@ -651,16 +667,29 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   const tally = Object.fromEntries(OBLIGATION_KINDS.map((k) => [k, 0]));
   const statusTally = { inMathlib: 0, inProject: 0, inProgress: 0, absent: 0, unmeasured: 0 };
   let nNeeds = 0;
+  /** 依存グラフの辺(otherPaper)。`.needs` を辺として読む */
+  const edges = [];
   for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
-    if (!['theorem', 'lemma'].includes(d.kind)) continue;
+    // 台帳の付随宣言そのものは対象外
+    if (/\.(src|needs|nonvacuous|waiting|record|loadBearing|negControl)$/.test(d.name)) continue;
+    // `.needs` を **要求** するのは theorem/lemma だけ。ただし def/structure が
+    // 書いている場合は読む——定義も別論文に依拠しうるので、辺はそこからも出る。
+    const requiresNeeds = ['theorem', 'lemma'].includes(d.kind);
     if (!names.has(`${d.name}.needs`)) {
-      ng(at(d), `G6 「証明が要求するもの」が無い: \`${d.name}.needs : List ABC3.Meta.ProofObligation\` を書く` +
-                '(依存が無いと考えるなら `[]` と明記する——空欄は不可)');
+      if (requiresNeeds) {
+        ng(at(d), `G6 「証明が要求するもの」が無い: \`${d.name}.needs : List ABC3.Meta.ProofObligation\` を書く` +
+                  '(依存が無いと考えるなら `[]` と明記する——空欄は不可)');
+      }
       continue;
     }
     nNeeds++;
     const src = texts.get(d.file) ?? '';
-    const i0 = src.indexOf(`${d.name}.needs`);
+    // ★`def ` を付けて探す。付けないと docstring 中の言及(``foo.needs`` と書いた散文)を
+    //   拾ってしまい、そこから最初の `[` までを本体と誤認する
+    //   (2026-08-15 実測: `InitialThetaDataFieldPart` で実際に起きた——
+    //    `.needs` は 7 件と数えられたのに中身は 1 件も集計されなかった)。
+    let i0 = src.indexOf(`def ${d.name}.needs`);
+    if (i0 < 0) i0 = src.indexOf(`${d.name}.needs`);
     const open = src.indexOf('[', i0);
     if (i0 < 0 || open < 0) continue;
     let depth = 0; let end = open;
@@ -676,12 +705,51 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     const srcM = srcIdx >= 0 ? SRC_RE.exec(src.slice(srcIdx)) : null;
     const paperTag = srcM ? srcM[1] : null;
     const maxPage = paperTag && reg[paperTag] ? reg[paperTag].pdfPages : null;
-    if (maxPage !== null) {
-      for (const m of body.matchAll(/\s(\d+)\s*(?:,|\])/g)) {
-        const pg = Number(m[1]);
-        if (pg < 1 || pg > maxPage) {
-          ng(at(d), `G6 \`${d.name}.needs\` が物理 p.${pg} を指しているが範囲外(1..${maxPage}, ${paperTag})`);
+
+    // ── obligation を1件ずつ切り出す(先頭の `.kind` で区切る)。
+    //    ★以前は body 全体から数値を拾って **所有論文** の範囲と比べていた。
+    //    `otherPaper` は **別の論文** を指すのだから、それでは辺の先を検査していない
+    //    (実際 [IUTchI] [IUTchII] が未登記のまま素通りしていた——2026-08-15 の監査)。
+    const obs = [];
+    {
+      const marks = [];
+      const kre = /\.(citation|folklore|implicitStep|otherPaper|derivation)\b/g;
+      let km;
+      while ((km = kre.exec(body))) marks.push({ kind: km[1], at: km.index });
+      for (let i = 0; i < marks.length; i++) {
+        obs.push({
+          kind: marks[i].kind,
+          text: body.slice(marks[i].at, i + 1 < marks.length ? marks[i + 1].at : body.length),
+        });
+      }
+    }
+    const stripStr = (t) => t.replace(/"[^"]*"/g, '""');
+    const lastNum = (t) => {
+      const ns = stripStr(t).match(/\d+/g);
+      return ns ? Number(ns[ns.length - 1]) : null;
+    };
+
+    for (const ob of obs) {
+      const pg = lastNum(ob.text);
+      if (ob.kind === 'otherPaper') {
+        // 辺は三つ組 (paper, item, page) なので papers.json と照合できる
+        const strs = [...ob.text.matchAll(/"([^"]*)"/g)].map((x) => x[1]);
+        const tag = (strs[0] ?? '').replace(/^\[|\]$/g, '');
+        const item = strs[1] ?? '';
+        const tp = reg[tag];
+        if (!tp) {
+          ng(at(d), `G6 \`${d.name}.needs\` の otherPaper が指す "[${tag}]" が papers.json に無い` +
+                    '——辺の先を検査できないので、先に登記すること');
+          continue;
         }
+        if (pg === null || pg < 1 || pg > tp.pdfPages) {
+          ng(at(d), `G6 \`${d.name}.needs\` の otherPaper "[${tag}] ${item}" が` +
+                    `物理 p.${pg} を指すが [${tag}] の範囲外(1..${tp.pdfPages})`);
+          continue;
+        }
+        edges.push({ from: d.name, tag, item, page: pg });
+      } else if (maxPage !== null && pg !== null && (pg < 1 || pg > maxPage)) {
+        ng(at(d), `G6 \`${d.name}.needs\` が物理 p.${pg} を指しているが範囲外(1..${maxPage}, ${paperTag})`);
       }
     }
 
@@ -704,7 +772,8 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       continue;
     }
     const src = texts.get(d.file) ?? '';
-    const idx = src.indexOf(`${d.name}.src`);
+    let idx = src.indexOf(`def ${d.name}.src`);
+    if (idx < 0) idx = src.indexOf(`${d.name}.src`);
     const m = SRC_RE.exec(idx >= 0 ? src.slice(idx) : src);
     if (!m) { ng(at(d), `G1 \`${d.name}.src\` の中身を読めなかった(1行の正準形で書くこと)`); continue; }
     const [, paper, pageStr, sectionId] = m;
@@ -721,6 +790,57 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     nSrcOk++;
   }
 
+  // ── 依存グラフ(指標。★ゲートではない)
+  //    `.needs` の otherPaper を辺として推移閉包を取り、
+  //    (a) 着地した葉 (b) 未展開の葉 (c) 循環 (d) 深さ を分けて印字する。
+  const ITEM_RE = /^\s*(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example)\s+([0-9]+(?:\.[0-9]+)*)/;
+  const nodeKey = (tag, item) => {
+    const m = ITEM_RE.exec(item);
+    return m ? `[${tag}] ${m[1]} ${m[2]}` : `[${tag}] ${item.trim().slice(0, 30)}`;
+  };
+  const SRC_ITEM_RE =
+    /\.src[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?item\s*:=\s*"([^"]*)"/;
+  /** 節点キー → それを張っている宣言名(スケルトンがある = 展開済み) */
+  const expanded = new Map();
+  const declKey = new Map();
+  for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
+    if (/\.(src|needs|nonvacuous|waiting|record|loadBearing|negControl)$/.test(d.name)) continue;
+    const s2 = texts.get(d.file) ?? '';
+    const i2 = s2.indexOf(`${d.name}.src`);
+    if (i2 < 0) continue;
+    const m2 = SRC_ITEM_RE.exec(s2.slice(i2));
+    if (!m2) continue;
+    const k = nodeKey(m2[1], m2[2]);
+    if (!expanded.has(k)) expanded.set(k, d.name);
+    declKey.set(d.name, k);
+  }
+  const adj = new Map();
+  const unexpanded = new Map();
+  for (const e of edges) {
+    const from = declKey.get(e.from);
+    if (!from) continue;
+    const to = nodeKey(e.tag, e.item);
+    if (!adj.has(from)) adj.set(from, new Set());
+    adj.get(from).add(to);
+    if (!expanded.has(to) && !unexpanded.has(to)) unexpanded.set(to, e);
+  }
+  const incoming = new Set();
+  for (const st of adj.values()) for (const tt of st) incoming.add(tt);
+  const roots = [...expanded.keys()].filter((k) => !incoming.has(k));
+  let maxDepth = 0;
+  const cycles = [];
+  for (const r of roots) {
+    const stack = [[r, 0, new Set([r])]];
+    while (stack.length) {
+      const [node, dep, path] = stack.pop();
+      if (dep > maxDepth) maxDepth = dep;
+      for (const tt of adj.get(node) ?? []) {
+        if (path.has(tt)) { cycles.push(`${node} → ${tt}`); continue; }
+        stack.push([tt, dep + 1, new Set([...path, tt])]);
+      }
+    }
+  }
+
   if (!quiet) {
     console.log(`  -- Lean 宣言 ${decls.length} / structure ${structures.length} / axiom ${axioms.length} 件` +
                 `(免除 ${axiomExempt.length} ファイル)`);
@@ -731,6 +851,17 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     console.log(`  -- Gap(飛躍): ${gaps.length} 件`);
     for (const g of gaps) console.log(`     ${g}`);
     console.log(`  -- 引用照合(Lean コメント内): ${nQuote} 件`);
+    console.log('  -- 依存グラフ(`.needs` の otherPaper を辺として推移閉包。★指標であってゲートではない):');
+    console.log(`     スケルトンのある節点  ${expanded.size} 件(うち根 ${roots.length})`);
+    console.log(`     辺(otherPaper)        ${edges.length} 本 / 最大深さ ${maxDepth} / 循環 ${cycles.length} 件`);
+    for (const c of cycles) console.log(`       循環: ${c}`);
+    console.log(`     着地した葉            ${statusTally.inMathlib + statusTally.inProject} 件` +
+                `(mathlib ${statusTally.inMathlib} / 公開プロジェクト ${statusTally.inProject})`);
+    console.log(`     ★未展開の葉          ${unexpanded.size} 件 ← 次に張るべきもの`);
+    for (const [k, e] of unexpanded) console.log(`       ${k} — 物理 p.${e.page}(${e.from} から)`);
+    console.log('     ★★この数は**張れば増える**——辺の先を張ると、その先の辺が新たに現れる。');
+    console.log('        減ったことを進捗と読まないこと(辿るのをやめても減る)。');
+    console.log('        進捗として読むなら「スケルトンのある節点」と「最大深さ」の側である。');
     const total = Object.values(tally).reduce((a, b) => a + b, 0);
     console.log(`  -- 規模(原文の証明文からの抽出、${nNeeds} 定理ぶん、★下界):`);
     console.log(`     引用 ${tally.citation} 件 — mathlib ${statusTally.inMathlib} / ` +
@@ -870,6 +1001,12 @@ function selftest() {
     ['D23 Interface が Found を import している', 'Interface', 'd23-interface-imports-found.lean', true],
     ['D24 Interface が Found を import していない', 'Interface', 'd24-interface-no-found-import.lean', false],
     ['D25 フラクトゥール記法つきの正しい引用は通る', 'Skeleton', 'd25-frak-quote.lean', false],
+    ['D26 otherPaper の辺が未登記の論文を指す', 'Skeleton', 'd26-edge-unregistered.lean', true],
+    ['D27 otherPaper の辺が登記済み・範囲内なら通る', 'Skeleton', 'd27-edge-ok.lean', false],
+    ['D28 辺のページが引用元では範囲内・辺の先では範囲外', 'Skeleton',
+      'd28-edge-page-of-wrong-paper.lean', true],
+    ['D29 docstring の言及を .needs 本体と取り違えない', 'Skeleton',
+      'd29-needs-mentioned-in-docstring.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
