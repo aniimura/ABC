@@ -5,6 +5,7 @@ import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
+import ABC3.Found.IUTchIII.PowerSeriesLog
 /-!
 # Found — 実装済みの基礎
 

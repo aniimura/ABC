@@ -135,6 +135,30 @@ mathlib v4.31.0-rc2(8,176ファイル)を実測:
 > 作業は質の違う2種類に分かれる。**(a) 古典的だがmathlibに無い数学の構築**(難しいが既知、確実に完成する)と、**(b) 望月氏独自の機構の転写**((a)が揃うまで型が付かない)。
 > **(b)から始められない。しかし(a)を全部揃えてから(b)に入ると、何が本当に必要かが何年も分からない。** これを解くのが §3。
 
+### ★事実3補2 — (a) の1個目を実際に作った(2026-08-14 実測)
+
+上の表は「何が無いか」の一覧だが、**無いものを作れるかは別問題**である。IUT 方向で1本測った。
+
+**測定**: [IUTchIII] Cor 3.12 の `Interface` を下へ押すと `logShellPacket_isCompact` に至り、その log-shell は [AbsTopIII] 物理 p.3(目視)で `log_{k̄}(𝒪_k^×) ⊆ k` と定義される。ここで止まった理由は**IUT の難しさではなく、p進対数が mathlib に無いこと**だった。
+
+> ★**この欠落は `pGC#6` と同一である**(`ResearchPaper/lean-ecosystem.json`)。**Phase 1 と北極星が、1つの部品で同時に律速されていた。**
+
+**結果**: p進対数を実際に構成した(`Found/IUTchIII/PadicLog.lean`、`sorry` 無し・標準3公理)。`log(1+𝔪)` の定義・総和可能性・連続性・像のコンパクト性・**非退化性**まで到達し、**本物の log-shell が1つ完成**した。
+
+| | |
+|---|---|
+| 出来たこと | `log(1+𝔪)` は完成。`logShell ≠ {0}` も証明済み |
+| 出来ていないこと | **乗法性**。したがって `log(𝒪^×)` への延長はまだ。一般の有限次拡大 K も未着手 |
+| mathlib の穴の縮み方 | 「p進対数が丸ごと無い」→「**形式的対数の加法公式が無い**」→ **その加法公式は作った**(`logOf_mul`)。残りは形式的等式を ℚ_p の `tsum` に移す**評価の橋**2本 |
+
+**★訂正の記録(2026-08-15)**: 上の行は当初「**形式的べき級数の `log` が無い**」と書いていた。**誤りである。** `Mathlib/RingTheory/PowerSeries/Log.lean` は実在し、`log`/`logOf`/`deriv_log`/`HasSubst.log` が揃っている。無かったのは**加法公式 `logOf (f*g) = logOf f + logOf g` だけ**だった(実測: `Log.lean` 全宣言を列挙して確認)。誤測定の原因は探索手順で、`WellKnown.lean` の**中**しか見ず、`ls Mathlib/RingTheory/PowerSeries/` で**ディレクトリを列挙しなかった**こと。→ **A2 の (S2)「全出現を列挙する」は、宣言だけでなく<ins>ファイル名の列挙</ins>にも適用する。** 同種の探索失敗はこれで**4回目**である(`relatively compact` / `contains the image` / `PowerSeries.log` / 本件の原因分析)。**「無い」は主張であり、この計画で最も間違えている種類の主張である。**
+
+**この測定から言えること・言えないこと**:
+
+- **言える**: (a) の入口は開いている。止めていたのは古典的部品1個で、それは実際に作れた。既存資産(`Found/PGC/LocalFieldNorm.lean` の `ProperSpace`・`IsUltrametricDist`)が効いた——**Track A と Track B が同じ土台を共有している**ことの実例。
+- **言える**: 「mathlib に無い」の報告は**探索範囲を書かないと誤解を生む**。p進対数が無いと報告した時点で、周辺の道具(`NonarchimedeanAddGroup.summable_of_tendsto_cofinite_zero`)は揃っていた。→ `check.mjs` A2 の S1–S4。
+- **★言えない**: 「(a) は全部作れる」。**これは下界の1個目にすぎない。** log-shell の先には mono-theta 環境・Frobenioid・tempered 基本群があり、いずれも上の表のとおり 0 件である。1件から一般化しない。
+
 ---
 
 ## 2. `idea.md` の評価
