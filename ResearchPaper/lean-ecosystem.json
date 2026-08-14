@@ -133,7 +133,9 @@
       "done": "【完了 2026-08-14】isPrimePow(q = p^f, f>0)まで到達し、ResidueCardinality を discharge した(sorry無し、axiom は mathlib 標準の3つのみ)。要ったのは ‖(p:K)‖ = 1/p < 1 ただ一つ——p は 𝒪[K] の単元でない → 極大イデアルに入る → (p : 𝓀[K]) = 0 → CharP.charP_iff_prime_eq_zero → FiniteField.card。一般部分は lean/ABC3/Found/ResidueFieldFinite.lean、実装は Found/PGC/ResidueCardinality.lean。",
       "correctedClaim": "★上記 nextStep には当初「mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行」と書いてあったが、これは誤りだった。CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 に存在する(同 100 行に CharP.ringChar_of_prime_eq_zero も)。見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけだった。この失敗が上の _absentPolicy の根拠。",
       "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。",
-      "lesson2": "「無い」は探索範囲とセットでしか記録してはならない。範囲の無い absent は再現も反証もできない——LeanStatus.absent を searched 付きに変えたのはこのため。"
+      "lesson2": "「無い」は探索範囲とセットでしか記録してはならない。範囲の無い absent は再現も反証もできない——LeanStatus.absent を searched 付きに変えたのはこのため。",
+      "valueComputed": "【2026-08-14】residueCard の値を初めて計算した: residueCard (selfField p) = p(= ℚ_[p] の剰余体は p 元体)。lean/ABC3/Found/PGC/QpResidueField.lean、sorry 無し。これで realResidueCardinality は「型が付くだけ」の対象ではなくなった。ただし Check/PGC/DischargeFiresNothing.lean の real_eq_degenerate_at_base が示すとおり、我々が名指しできる唯一の実例 base の上では本物と退化版は同じ値を返すので、両者の区別には依然 f ≥ 2 の実例が要る。",
+      "lesson3": "★打ち切り時に『障害』と呼んだものが迂回可能な配線だった、が **3件目**(1: round-trip 補題、2: charP_iff_prime_eq_zero の探索範囲、3: 今回の『障害A ノルムのダイヤモンド / 障害B IsLocalRing ↥(PadicInt.subring p)』)。3件とも、正面から解く必要は無く別経路があった。今回の迂回は (a) ノルム構造の一致を示さず algebraMap 経由の等式だけ使う (b) 付値環の集合としての一致まで来たらノルムを置き去りにする (c) 中間型 ↥(PadicInt.subring p) を型として書かず ℤ_[p] へ直接繋ぐ。PLAN §8-3 の『無いと判断した実例が既に2件』は 3件に更新できる。"
     }
   }
 }

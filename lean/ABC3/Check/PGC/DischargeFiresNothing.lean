@@ -1,4 +1,5 @@
 import ABC3.Check.PGC.InertiaDegeneracyMoved
+import ABC3.Check.PGC.Section1Discriminating
 import ABC3.Found.PGC.ResidueCardinality
 
 /-!
@@ -150,6 +151,27 @@ check.mjs の G2 は宣言名で witness を探すので、その名前を付け
 theorem subgroupCorrespondence_nonempty_by_degenerate : Nonempty (SubgroupCorrespondence p) :=
   ⟨degenerateSC⟩
 
+/-! ## (i-c) 唯一の実例の上では、本物と偽物は同じ値を返す
+
+`residueCard base = p`(= `Found/PGC/QpResidueField.lean` の `residueCard_selfField`)
+が証明できたので、次が言える。 -/
+
+/-- `Check.PGC.base` は `Found.PGC.selfField p` と同じもの。 -/
+theorem base_eq_selfField : (base : PAdicLocalField p) = selfField p := rfl
+
+/-- ★**ℚ_[p] の剰余体は p 元体**——`residueCard` の値を計算した最初の例。 -/
+theorem residueCard_base : residueCard (base : PAdicLocalField p) = p :=
+  residueCard_selfField p
+
+/-- ★**本物と偽物は、我々が名指しできる唯一の点で一致する。**
+
+`real_ne_degenerate_iff` の右辺(`∃ K, residueCard K ≠ p`)を示すには
+`base` **以外**の実例が要る、ということでもある。 -/
+theorem real_eq_degenerate_at_base :
+    (realResidueCardinality p).card base = (degenerateRD (p := p)).card base := by
+  rw [realResidueCardinality_card, residueCard_base]
+  rfl
+
 /-!
 ## 未解決 — `real_ne_degenerate_iff` の右辺は示せていない
 
@@ -173,26 +195,24 @@ theorem subgroupCorrespondence_nonempty_by_degenerate : Nonempty (SubgroupCorres
    `Found/PGC/LocalFieldNorm.lean` の**スペクトルノルム由来の** `Valued` 構造に対する
    `Nat.card 𝓀[·]` なので、`Ideal.inertiaDeg` 等の代数的な剰余次数と繋ぐ必要がある。
 
-### 一番簡単な場合(`base` = ℚ_p、f = 1)ですら未完了
+### ★訂正: 「一番簡単な場合ですら未完了」は解消した(2026-08-14)
 
-`residueCard base = p`(= 我々の唯一の実例の上で本物と偽物が一致すること)を
-証明しようとして、2つの具体的な障害に当たった(2026-08-14、時間を区切って中断):
+ここには以前、`residueCard base = p` を証明しようとして
+「障害A(ノルムのダイヤモンド)/ 障害B(`IsLocalRing ↥(PadicInt.subring p)` が無い)」で
+中断した、と書いてあった。**その後証明できた**(`residueCard_base`、上記)。
 
-- **障害A(ノルムのダイヤモンド、再来)**: `ℚ_[p]` 上に `NormedField` が2つある——
-  標準のものと、`(selfField p).carrier` に付くスペクトルノルム由来のもの。
-  `x : (selfField p).carrier` に対する `‖x‖` は後者に解決されるため、
-  `PadicInt.mem_subring_iff`(`x ∈ subring p ↔ ‖x‖ ≤ 1`、標準ノルム)と
-  **定義的に一致しない**。型注釈 `(x : ℚ_[p])` ではインスタンス選択は変わらない。
-  両者が値として等しいことは `norm_algebraMap` から出るが、`show`/`rw` の
-  段階で syntactic に噛み合わせる作業が要る。
-- **障害B**: `IsLocalRing ↥(PadicInt.subring p)` がインスタンス探索で見つからない。
-  mathlib が持つのは `IsLocalRing ℤ_[p]` で、`↥(PadicInt.subring p)` とは
-  定義的に等しいが構文的に別。`PadicInt.residueField`
-  (`IsLocalRing.ResidueField ℤ_[p] ≃+* ZMod p`)へ繋ぐには明示的な転送が要る。
+**どちらの障害も正面から解く必要は無かった**——
+ノルム構造の一致は示さず(`algebraMap` 経由の等式だけ使う)、
+付値環の**集合としての一致**まで来たらノルムを置き去りにし、
+中間型 `↥(PadicInt.subring p)` は型として書かずに `ℤ_[p]` へ直接繋いだ。
+詳細は `Found/PGC/QpResidueField.lean` の module docstring。
 
-材料は揃っている(`PadicInt.subring` / `PadicInt.residueField` /
-`IsLocalRing.ResidueField.mapEquiv` / `RingEquiv.subringCongr`)。
-足りないのは上記2つの噛み合わせだけで、**数学ではなく配線の問題**である。
+**記録として残す**: 打ち切り時に「障害」と呼んだものは、実際には
+**迂回可能な配線**だった。`Found/ResidueFieldFinite.lean` の
+「ダイヤモンドは触れずに済ませる方が安い」と同じ形の失敗を、
+同じプロジェクト内で2度繰り返している。
+
+したがって残る不足は **f ≥ 2 の実例だけ**(上記1・2)。
 -/
 
 end ABC3.Check.PGC

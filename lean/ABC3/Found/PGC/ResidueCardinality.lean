@@ -1,5 +1,6 @@
 import ABC3.Interface.PGC.LocalFieldData
 import ABC3.Found.PGC.LocalFieldNorm
+import ABC3.Found.PGC.QpResidueField
 
 /-!
 # Track B — `Interface.PGC.ResidueCardinality` の実装
@@ -38,6 +39,14 @@ noncomputable def realResidueCardinality : ResidueCardinality p where
 
 @[simp] theorem realResidueCardinality_card (K : PAdicLocalField p) :
     (realResidueCardinality p).card K = residueCard K := rfl
+
+/-- ★**値が出る最初の点**: `ℚ_[p]` において `card = p`。
+
+`Found/PGC/QpResidueField.lean` の計算。これで `realResidueCardinality` は
+「型が付くだけ」の対象ではなくなった。 -/
+@[simp] theorem realResidueCardinality_card_selfField :
+    (realResidueCardinality p).card (selfField p) = p :=
+  residueCard_selfField p
 
 end ABC3.Found.PGC
 

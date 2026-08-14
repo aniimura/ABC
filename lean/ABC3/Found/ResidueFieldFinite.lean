@@ -94,6 +94,19 @@ omit [ProperSpace K] in
 theorem charP_residueField {n : ℕ} (hn : n.Prime) (h : ‖(n : K)‖ < 1) : CharP 𝓀[K] n :=
   (CharP.charP_iff_prime_eq_zero hn).mpr (natCast_residueField_eq_zero h)
 
+omit [ProperSpace K] in
+/-- **剰余体を別の局所環へ移す橋**。付値環が局所環 `A` と環同型なら、剰余体の位数は等しい。
+
+付値環を「ノルムが 1 以下の元の集合」として同定できたとき、そこから先はこれ 1 本で済む
+——`A` 側で剰余体が既知なら(例: `A = ℤ_[p]` に対する `PadicInt.residueField`)、
+`𝓀[K]` の位数がそのまま出る。
+
+★**ノルムの一致そのものは要らない**。要るのは「付値環が集合として一致すること」だけ。
+`Found/PGC/QpResidueField.lean` はこれを使って `ℚ_[p]` の場合を片付けている。 -/
+theorem card_residueField_eq_of_ringEquiv {A : Type*} [CommRing A] [IsLocalRing A]
+    (e : 𝒪[K] ≃+* A) : Nat.card 𝓀[K] = Nat.card (IsLocalRing.ResidueField A) :=
+  Nat.card_congr (IsLocalRing.ResidueField.mapEquiv e).toEquiv
+
 /-- **剰余体の位数は `n` の正の冪**(原文 [pGC] p.3 の「k is the field of q = p^f elements」)。
 
 `0 < f` を落とすと `q = 1`(自明体)を許してしまうので、ここは主張の一部。 -/

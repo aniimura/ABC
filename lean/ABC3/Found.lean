@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import ABC3.Found.ResidueFieldFinite
 import ABC3.Found.PGC.LocalFieldNorm
+import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
 /-!
 # Found — 実装済みの基礎
