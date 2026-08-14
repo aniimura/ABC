@@ -77,14 +77,14 @@ statement だけを見ると mathlib 不足は<b>0件</b>に見える(Propositio
 <tr><td>7</td><td>暗黙の段</td><td>不分岐判定 &rarr; I<sub>K</sub> <b>そのもの</b>の構成</td><td>3</td><td>&mdash;</td></tr>
 </table>
 <p>
-<b>7件</b>(mathlib 不在の外部結果 3・典拠なし 1・暗黙の段 2・導出 1)。8ページの論文の1節でこの数。
+<b>8件</b>(引用 3・典拠なし 1・暗黙の段 2・原文内の導出 2)。8ページの論文の1節でこの数。<br>Lean 側に <b>3命題すべて</b>(Prop 1.1・Prop 1.2・Cor 1.3)を搭載済みで、<code>check.mjs</code> の集計と一致する。
 </p>
 <p class="open">
 これは<b>下界</b>である——原文が挙げていない依存は写らない。また <code>典拠なし</code> と <code>暗黙の段</code> は<b>数えられるが大きさは分からない</b>。件数であって時間ではない。
 </p>
 <p>
 Lean 側の対応: 各 skeleton の <code>X.needs : List ProofObligation</code>(ゲート G6)。
-現在 <b>6/7 件</b>が載っている(Proposition 1.1 → #1・#2・#3、Proposition 1.2 → #4・#5・#6)。<code>node tools/check.mjs</code> が集計を印字する。残る #7 は Corollary 1.3 の skeleton 作成時に載る。
+<b>8/8 件</b>が載っている。<code>node tools/check.mjs</code> が集計を印字する。あわせて <code>Interface</code> の実装待ちが <b>2件</b>(<code>ResidueCardinality</code>・<code>SubgroupCorrespondence</code>)——これが Track B の作業キュー。
 </p>
 
 <h2>&sect;1 が依拠する外部文献(mathlib 実測つき)</h2>
