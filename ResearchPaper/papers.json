@@ -56,6 +56,19 @@
         175,
         184
       ]
+    },
+    "AbsTopIII": {
+      "title": "Topics in Absolute Anabelian Geometry III: Global Reconstruction Algorithms",
+      "file": "Topics in Absolute Anabelian Geometry III",
+      "pdfPages": 164,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "★2026-08-14 実測(400dpi 目視 p.3・p.5)。log-shell の定義式 log_{k̄}(𝒪^×_k) ⊆ k において、**log の添字 k にオーバーバーが付く**が pdftotext は 'logk(Ok×)' と出力し落とす。IUTchIII で繰り返し踏んだのと同じ罠(𝒰 対 𝒰̄)がこの論文の**中心概念の定義式**で起きている。また 𝒪(script O)→'O'、上付き × は残る。目視したのは p.3・p.5 のみで、他ページの記法については何も言えない。",
+      "verifiedPagesNote": "★目視(pdftoppm)したページのみ。log-shell の定義(p.3)と性質 (L1)(p.5)のみ確認。",
+      "verifiedPages": [
+        3,
+        5
+      ]
     }
   }
 }
