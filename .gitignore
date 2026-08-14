@@ -10,3 +10,6 @@ Donburi*.exe
 # 一時ファイル
 *.tmp
 scratch/
+
+# 個人の権限設定(共有しない)
+.claude/settings.local.json
