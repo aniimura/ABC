@@ -165,6 +165,10 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SOURCE_DIR = join(ROOT, 'ResearchPaper', '0_Source');
 const STRUCT_DIR = join(ROOT, 'ResearchPaper', '1_Structured');
 const PAPERS_JSON = join(ROOT, 'ResearchPaper', 'papers.json');
+/** 原文からの機械概算(規模の分母)。無くても動く。 */
+const SCALE_JSON = join(ROOT, 'ResearchPaper', 'dependency-scale.json');
+/** 葉の仕分け(自己申告)。無くても動く。 */
+const BLOCKED_JSON = join(ROOT, 'ResearchPaper', 'blocked-leaves.json');
 const LEAN_DIR = join(ROOT, 'lean');
 const LEAN_SRC = join(LEAN_DIR, 'ABC3');
 
@@ -340,12 +344,19 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SORRY_RE = /(^|[^\w.])sorry([^\w]|$)/;
 
 /**
- * コメント(`/- ... -/` と `--` 行末)を、改行を保ったまま空白へ潰す。
+ * コメント(`/- ... -/` と `--` 行末)**と文字列リテラル**を、
+ * 改行を保ったまま空白へ潰す。
+ *
  * docstring 内で "sorry" に言及しただけのものを数えると台帳が信用できなくなる。
+ * ★2026-08-15 追加: **文字列リテラルも潰す**。`.needs` の `LeanStatus.inProject` は
+ * 「あちらの宣言は `sorry` 無しである」と**文字列で**書く場所なので、
+ * 潰さないと台帳が誤って +1 される(実際 `Skeleton/AbsTopIII/LogShell.lean` で起きた)。
+ * 文字列の中の `sorry` が本物の `sorry` であることは無いので、潰して安全。
  */
 const stripLeanComments = (src) => src
   .replace(/\/-[\s\S]*?-\//g, (m) => m.replace(/[^\n]/g, ' '))
-  .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length));
+  .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length))
+  .replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => m.replace(/[^\n]/g, ' '));
 
 /** `X.src : Source` の中身を読む正準形パターン(1行で書くこと)。 */
 const SRC_RE =
@@ -747,7 +758,9 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
                     `物理 p.${pg} を指すが [${tag}] の範囲外(1..${tp.pdfPages})`);
           continue;
         }
-        edges.push({ from: d.name, tag, item, page: pg });
+        // fromPaper を持たせるのは、同一論文内の辺と論文をまたぐ辺を分けて数えるため。
+        // ★`otherPaper` という名前に反して、tag は **同じ論文** でよい(そう使われている)。
+        edges.push({ from: d.name, fromPaper: paperTag, tag, item, page: pg });
       } else if (maxPage !== null && pg !== null && (pg < 1 || pg > maxPage)) {
         ng(at(d), `G6 \`${d.name}.needs\` が物理 p.${pg} を指しているが範囲外(1..${maxPage}, ${paperTag})`);
       }
@@ -794,9 +807,16 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   //    `.needs` の otherPaper を辺として推移閉包を取り、
   //    (a) 着地した葉 (b) 未展開の葉 (c) 循環 (d) 深さ を分けて印字する。
   const ITEM_RE = /^\s*(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example)\s+([0-9]+(?:\.[0-9]+)*)/;
+  // ★番号付き項目でない「(L1)」「(Ob1)」型のラベルも節点キーにする。
+  //   これが無いと、辺は説明つきの長い文字列、`.src` は `(L1)` だけ、で
+  //   **同じものが別節点に見え**、張ったのに未展開の葉のまま残る(2026-08-15 実測)。
+  const LABEL_RE = /^\s*\(([A-Za-z]+[0-9]*)\)/;
   const nodeKey = (tag, item) => {
     const m = ITEM_RE.exec(item);
-    return m ? `[${tag}] ${m[1]} ${m[2]}` : `[${tag}] ${item.trim().slice(0, 30)}`;
+    if (m) return `[${tag}] ${m[1]} ${m[2]}`;
+    const l = LABEL_RE.exec(item);
+    if (l) return `[${tag}] (${l[1]})`;
+    return `[${tag}] ${item.trim().slice(0, 30)}`;
   };
   const SRC_ITEM_RE =
     /\.src[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?item\s*:=\s*"([^"]*)"/;
@@ -853,15 +873,59 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     console.log(`  -- 引用照合(Lean コメント内): ${nQuote} 件`);
     console.log('  -- 依存グラフ(`.needs` の otherPaper を辺として推移閉包。★指標であってゲートではない):');
     console.log(`     スケルトンのある節点  ${expanded.size} 件(うち根 ${roots.length})`);
-    console.log(`     辺(otherPaper)        ${edges.length} 本 / 最大深さ ${maxDepth} / 循環 ${cycles.length} 件`);
+    const sameEdges = edges.filter((e) => e.fromPaper === e.tag).length;
+    console.log(`     辺(otherPaper)        ${edges.length} 本` +
+                `(同一論文内 ${sameEdges} / 論文をまたぐ ${edges.length - sameEdges})` +
+                ` / 最大深さ ${maxDepth} / 循環 ${cycles.length} 件`);
     for (const c of cycles) console.log(`       循環: ${c}`);
     console.log(`     着地した葉            ${statusTally.inMathlib + statusTally.inProject} 件` +
                 `(mathlib ${statusTally.inMathlib} / 公開プロジェクト ${statusTally.inProject})`);
-    console.log(`     ★未展開の葉          ${unexpanded.size} 件 ← 次に張るべきもの`);
-    for (const [k, e] of unexpanded) console.log(`       ${k} — 物理 p.${e.page}(${e.from} から)`);
+    // ★葉を仕分ける。「次に張れる」と「中層が無いので今は張れない」は別物である。
+    //   ここは**自己申告**の読み込みであって機械判定ではない(A 群と同じ性質)。
+    let blockedMap = new Map(); let workMap = new Map();
+    if (existsSync(BLOCKED_JSON)) {
+      try {
+        const bl = JSON.parse(readFileSync(BLOCKED_JSON, 'utf8'));
+        for (const b of bl.blocked ?? []) blockedMap.set(b.key, b);
+        for (const b of bl.expandableWithWork ?? []) workMap.set(b.key, b);
+      } catch { /* 読めなければ仕分けなしで印字する */ }
+    }
+    const unsorted = [...unexpanded.keys()].filter((k) => !blockedMap.has(k) && !workMap.has(k));
+    console.log(`     ★未展開の葉          ${unexpanded.size} 件` +
+                `(中層待ち ${[...unexpanded.keys()].filter((k) => blockedMap.has(k)).length}` +
+                ` / 手間だけ ${[...unexpanded.keys()].filter((k) => workMap.has(k)).length}` +
+                ` / 未仕分け ${unsorted.length})`);
+    for (const [k, e] of unexpanded) {
+      const tagStr = blockedMap.has(k) ? '中層待ち' : workMap.has(k) ? '手間だけ' : '★未仕分け';
+      console.log(`       [${tagStr}] ${k} — 物理 p.${e.page}(${e.from} から)`);
+      const b = blockedMap.get(k);
+      if (b) console.log(`                 解消条件: ${b.unblockedBy}`);
+    }
+    if (unsorted.length) {
+      console.log(`     ★未仕分けの葉が ${unsorted.length} 件ある` +
+                  `——${relative(ROOT, BLOCKED_JSON)} に「なぜ張れないか」を書くこと`);
+    }
     console.log('     ★★この数は**張れば増える**——辺の先を張ると、その先の辺が新たに現れる。');
     console.log('        減ったことを進捗と読まないこと(辿るのをやめても減る)。');
     console.log('        進捗として読むなら「スケルトンのある節点」と「最大深さ」の側である。');
+    // ── ★被覆率: 我々が **書けている** 量 対 原文の機械概算
+    //    器具は自分の欠陥を報告できなければならない(冒頭の原則)。ここは
+    //    「グラフがどれだけ足りていないか」を毎回目に入れるための行である。
+    if (existsSync(SCALE_JSON)) {
+      try {
+        const sc = JSON.parse(readFileSync(SCALE_JSON, 'utf8'));
+        const tr = sc.trustedTotals ?? {};
+        const pct = (a, b) => (b ? `${((100 * a) / b).toFixed(1)}%` : '—');
+        console.log(`     ★被覆率(対 原文の機械概算、${sc.measuredAt}、${sc.tool}):`);
+        console.log(`        節点 ${expanded.size} / ${tr.reachable} = ${pct(expanded.size, tr.reachable)}` +
+                    `   辺 ${edges.length} / ${tr.edges} = ${pct(edges.length, tr.edges)}`);
+        console.log('        ★★分母は**下界でも上界でもない**——番号の無い依存を数え落とし、');
+        console.log('           「cf.」の案内を依存として数え過ぎる。桁を見るためだけに使うこと。');
+        console.log(`           限界の全文は ${relative(ROOT, SCALE_JSON)} の "★limits"。`);
+      } catch {
+        console.log('     ★被覆率: dependency-scale.json を読めなかった');
+      }
+    }
     const total = Object.values(tally).reduce((a, b) => a + b, 0);
     console.log(`  -- 規模(原文の証明文からの抽出、${nNeeds} 定理ぶん、★下界):`);
     console.log(`     引用 ${tally.citation} 件 — mathlib ${statusTally.inMathlib} / ` +
@@ -1007,6 +1071,9 @@ function selftest() {
       'd28-edge-page-of-wrong-paper.lean', true],
     ['D29 docstring の言及を .needs 本体と取り違えない', 'Skeleton',
       'd29-needs-mentioned-in-docstring.lean', true],
+    ['D30 同一論文内の辺も範囲検査される', 'Skeleton', 'd30-edge-same-paper.lean', true],
+    ['D31 文字列内の sorry を台帳に数えない', 'Skeleton', 'd31-sorry-in-string.lean', false],
+    ['D32 文字列を潰しても本物の sorry は落とせる', 'Found', 'd32-real-sorry-in-found.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

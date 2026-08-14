@@ -1,0 +1,29 @@
+{
+  "measuredAt": "2026-08-15",
+  "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
+  "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
+  "blocked": [
+    {
+      "key": "[IUTchIII] Definition 3.8",
+      "reason": "Θ-パイロット対象 / q-パイロット対象は『大域実現 Frobenioid の対象で、ある monoid の生成元(捩れを除いて)により定まるもの』として定義される(物理 p.112、目視確認済み)。Frobenioid を我々は持っていない。名前だけの structure を置けば節点は増えるが、それは**被覆率を上げるためだけの空の節点**であり、指標を壊す。",
+      "unblockedBy": "Frobenioid([FrdI])の転写。2026-08-15 の機械概算で [FrdI] は根 Theorem 6.4 から到達 45 項目・辺 184 本・平均出次数 4.1 で、測った4論文の中で最も密。"
+    },
+    {
+      "key": "[IUTchIII] Proposition 3.9",
+      "reason": "手続き正規化モノ解析的対数体積そのものの構成(物理 p.115、目視確認済み)。対数体積は 𝔐(−)(空でないコンパクト開集合の集まり)の上の ℝ 値関数として定まるが、その構成には [AbsTopIII] Proposition 5.7 の radial/angular 対数体積が要る。我々は対数体積を1つも作っていない。",
+      "unblockedBy": "[AbsTopIII] Proposition 5.7 の転写と、log-shell の対数体積の構成。★log-shell 自体は ℚ_p について Found/ にあるので、ここは中層の中では最も近い。"
+    }
+  ],
+  "expandableWithWork": [
+    {
+      "key": "[IUTchII] Corollary 4.10",
+      "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
+      "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
+    },
+    {
+      "key": "[AbsTopIII] Definition 5.1",
+      "reason": "同上。[AbsTopIII] の 1_Structured は (L1) のぶんだけ作った。物理 p.113 は目視確認済み(field of moduli)。",
+      "cost": "既存の 1_Structured/Topics in Absolute Anabelian Geometry III/ に単位を1つ追加"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "measuredAt": "2026-08-15",
+  "tool": "tools/intra-graph.mjs",
+  "whatThisIs": "原文の .txt から機械的に構築した『同一論文内の依存グラフ』の規模。tools/check.mjs が、我々が .needs に手で書けている量と対比して被覆率を印字するために読む。",
+  "★limits": [
+    "pdftotext 経由であり目視していない。逐語には使えない。桁を見るためだけのもの。",
+    "★下界でも上界でもない。番号の無い依存(prime-strip 等)を数え落とす一方、『cf.』の案内を依存として数え過ぎる。実測(2026-08-15): IUTchIII Corollary 3.12 の深さ1の28件のうち Remark が6件あり、その多くは解説への案内であって論理的依存ではない。",
+    "根の選び方に依存する。下表は各論文で1つの根から辿れる範囲であって論文全体ではない。",
+    "IUTchI / SemiAnbd / EtTh の行は抽出の失敗を疑うべき値(他が45〜83なのに1〜6)。合計には入れていない。"
+  ],
+  "roots": [
+    { "paper": "IUTchIII", "root": "Corollary 3.12", "items": 76, "reachable": 60, "depth": 3, "edges": 301, "trusted": true },
+    { "paper": "IUTchII", "root": "Corollary 4.10", "items": 117, "reachable": 83, "depth": 6, "edges": 332, "trusted": true },
+    { "paper": "AbsTopIII", "root": "Proposition 5.7", "items": 128, "reachable": 56, "depth": 7, "edges": 148, "trusted": true },
+    { "paper": "FrdI", "root": "Theorem 6.4", "items": 83, "reachable": 45, "depth": 4, "edges": 184, "trusted": true },
+    { "paper": "EtTh", "root": "Theorem 1.6", "items": 122, "reachable": 6, "depth": 2, "edges": 9, "trusted": false },
+    { "paper": "IUTchI", "root": "Definition 3.1", "items": 122, "reachable": 4, "depth": 1, "edges": 4, "trusted": false },
+    { "paper": "SemiAnbd", "root": "Definition 3.1", "items": 106, "reachable": 1, "depth": 0, "edges": 0, "trusted": false }
+  ],
+  "trustedTotals": { "reachable": 244, "edges": 965 }
+}
