@@ -108,7 +108,7 @@ Scholze–Stix の「偽ではなく自明になる」を我々のモデル上�
 | 輸入したもの | 出所(物理ページ) | 効いた先 |
 |---|---|---|
 | `outputLogVolumes` / `outputLogVolumes_eq` / `qLogVol_mem` | p.184、証明 Step (xi-e)(xi-f) | 不等式 |
-| `thetaUnion_isCompact` / `logVol_hull_ne_top_of_isCompact` | p.175 + p.31 + p.127 | 有限性 |
+| `logShellPacket` / `logShellPacket_isCompact` / `possibleThetaImages_subset_logShellPacket` / `hull_isCompact_of_subset_isCompact` / `logVolCompact` + `logVol_eq_of_isCompact` | p.31 + p.115 + p.127 + p.131 + p.146 | 有限性 |
 
 ★**我々は1つも導出していない。** 下の証明は輸入した仮説を組み合わせただけである。
 **我々のモデルの中で Corollary 3.12 は自明になった**——Scholze–Stix の
@@ -118,14 +118,21 @@ Scholze–Stix の「偽ではなく自明になる」を我々のモデル上�
 **これは原典への判定ではない。** 原文は実際に証明を書いており(p.174–186 の
 Step (i)–(xii))、写していないのはその中身の方である。
 
-★**残る不足**: `thetaUnion_isCompact` の原文の根拠は p.175 の
-「the **[easily verified]** compactness」だけで、**検証は書かれていない**
-(実測: 論文全体で `compact` 33 件、`¹,°𝒰_{j,v_ℚ}` のコンパクト性を確立する箇所は 0 件)。
-次に転写すべきは Theorem 3.11, (i), (a) のモノ解析的整構造 `I(…) ⊆ I^ℚ(…)`
-(= log-shell。p.31 に「compact, hence of finite log-volume」と明示)と Proposition 3.9。 -/
+★**2026-08-14 追記**: 有限性の側は1段深く分解し、`thetaUnion_isCompact`
+(p.175 の「[easily verified] compactness」)という posit を**廃止**した。
+可能な像が log-shell のテンソルパケットに含まれること(Remark 3.9.5, (vii), (Ob1)、p.131)、
+パケットがコンパクトであること(p.31 / p.146)、正則包がコンパクトであること
+(Remark 3.9.5, (i)、p.127)、対数体積がコンパクト領域上で `ℝ` 値であること
+(Proposition 3.9, (i)、p.115)に置き換え、有限性は**導出**する。
+測定は `Check/IUTchIII/Cor312Degenerate.lean`。 -/
 theorem cor_3_12 (D : PilotObjectData) :
     thetaLogVol D ≠ ⊤ ∧ qLogVol D ≤ thetaLogVol D := by
-  refine ⟨D.logVol_hull_ne_top_of_isCompact _ D.thetaUnion_isCompact, ?_⟩
+  have hcpt := D.hull_isCompact_of_subset_isCompact _ _ D.logShellPacket_isCompact
+    (Set.sUnion_subset D.possibleThetaImages_subset_logShellPacket)
+  refine ⟨?_, ?_⟩
+  · -- 有限性は **導出**: `logVol` はコンパクト領域上で `logVolCompact` (ℝ 値) に一致する
+    rw [thetaLogVol, D.logVol_eq_of_isCompact _ hcpt]
+    exact WithTop.coe_ne_top
   have hm := D.qLogVol_mem
   rw [D.outputLogVolumes_eq] at hm
   rw [qLogVol, D.qLogVol_eq]
@@ -176,7 +183,9 @@ def cor_3_12.needs : List ProofObligation :=
     .implicitStep "「the situation of Theorem 3.11」が何を含むかは列挙されていない(物理 p.153-159 の7ページ)" 173,
     .derivation "Step (i)-(xii)——原文は「relatively concrete consequence」と述べるが、実際の導出は p.174-182 にわたる" 174,
     .implicitStep
-      "有限性 −|log(Θ)| ∈ R の出所。正則包は、領域が relatively compact なら λ·O 型の有界集合、そうでなければ I^Q 全体(= 対数体積 +∞)と場合分けで定義される(Remark 3.9.5, (i))。したがって有限性には『可能な像の和集合が relatively compact』が要るが、原文はそれを Corollary 3.12 の文脈で確立していない(2026-08-14 実測: relatively compact は定義の箇所にしか現れない)" 127 ]
+      "有限性 −|log(Θ)| ∈ R の出所。正則包は、領域が relatively compact なら λ·O 型の有界集合、そうでなければ I^Q 全体(= 対数体積 +∞)と場合分けで定義される(Remark 3.9.5, (i))" 127,
+    .implicitStep
+      "log-shell の **テンソルパケット** (Remark 3.9.5, (vii), (Ob1) が言う tensor packets of log-shells) を、我々は Amb の単一の部分集合 logShellPacket として写している。パケットが j 上のテンソル積であるという構造は写していない" 131 ]
 
 /-- 原文が「i.e.」で言い換える形。**abc へ効くのはこの形**。
 

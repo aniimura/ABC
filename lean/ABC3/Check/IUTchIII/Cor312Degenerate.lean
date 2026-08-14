@@ -63,10 +63,12 @@ variable {A : Type} (lv : Set A → WithTop ℝ) (S : Set A) (a : ℝ)
 台 `A`・対数体積 `lv`・像 `S`・`a = |log(q)|` は**任意**でよい。 -/
 noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
     PilotObjectData where
   Amb := A
   topology := τ
+  logVolCompact := fun U h => (lv U).untop (hfin U h)
   logVol := lv
   hull := id
   possibleThetaImages := {S}
@@ -77,14 +79,18 @@ noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
   outputLogVolumes := {x : ℝ | (x : WithTop ℝ) ≤ lv S}
   outputLogVolumes_eq := by simp
   qLogVol_mem := le_of_eq h.symm
-  thetaUnion_isCompact := by simpa using hS
-  logVol_hull_ne_top_of_isCompact := hfin
+  logShellPacket := S
+  logShellPacket_isCompact := hS
+  possibleThetaImages_subset_logShellPacket := by rintro U rfl; exact subset_rfl
+  hull_isCompact_of_subset_isCompact := fun U K hK hUK => hsub U K hK hUK
+  logVol_eq_of_isCompact := fun U h => (WithTop.coe_untop _ (hfin U h)).symm
 
 /-- ★**退化の核心**: 自明化すると Θ 側と q 側は**同じ値**になる。 -/
 theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    thetaLogVol (trivialised lv S a τ ha h hS hfin) = qLogVol (trivialised lv S a τ ha h hS hfin) := by
+    thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) = qLogVol (trivialised lv S a τ ha h hS hsub hfin) := by
   simp [thetaLogVol, qLogVol, trivialised]
 
 /-- ★**Corollary 3.12 の結論が、残りのデータが何であっても成り立つ**。
@@ -93,11 +99,12 @@ theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a
 `cor_3_12` は**内容を持たない**。 -/
 theorem trivialised_satisfies_cor_3_12 (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    thetaLogVol (trivialised lv S a τ ha h hS hfin) ≠ ⊤ ∧
-      qLogVol (trivialised lv S a τ ha h hS hfin) ≤ thetaLogVol (trivialised lv S a τ ha h hS hfin) := by
-  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin).symm⟩
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin, qLogVol]
+    thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) ≠ ⊤ ∧
+      qLogVol (trivialised lv S a τ ha h hS hsub hfin) ≤ thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) := by
+  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin).symm⟩
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin, qLogVol]
   show lv S ≠ ⊤
   rw [h]
   exact WithTop.coe_ne_top
@@ -106,9 +113,10 @@ theorem trivialised_satisfies_cor_3_12 (τ : TopologicalSpace A) (ha : 0 < a)
 すなわち退化した witness は、**abc へ効く形の主張も**空虚に満たす。 -/
 theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) (C : ℝ) (hC : thetaLogVol (trivialised lv S a τ ha h hS hfin) ≤ ((C * a : ℝ) : WithTop ℝ)) :
+    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) (C : ℝ) (hC : thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) ≤ ((C * a : ℝ) : WithTop ℝ)) :
     -1 ≤ C := by
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hfin, qLogVol] at hC
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin, qLogVol] at hC
   show (-1 : ℝ) ≤ C
   have h4 : -a ≤ C * a := by
     have : ((-a : ℝ) : WithTop ℝ) ≤ ((C * a : ℝ) : WithTop ℝ) := by
@@ -130,7 +138,7 @@ theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
 | 追加したもの | 出所 | 効いた先 |
 |---|---|---|
 | `outputLogVolumes` / `outputLogVolumes_eq` / `qLogVol_mem` | 物理 p.184、Step (xi-e)(xi-f) | **(b) 不等式** |
-| `thetaUnion_isCompact` / `logVol_hull_ne_top_of_isCompact` | 物理 p.175 + p.31 + p.127 | **(a) 有限性** |
+| `logShellPacket` / `logShellPacket_isCompact` / `possibleThetaImages_subset_logShellPacket` / `hull_isCompact_of_subset_isCompact` / `logVolCompact` + `logVol_eq_of_isCompact` | 物理 p.31 + p.115 + p.127 + p.131 + p.146 | **(a) 有限性** |
 
 結果:
 
@@ -147,7 +155,7 @@ theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
 これは Scholze–Stix の「trivial, not false」を我々のモデル上で再現したものである。
 
 **我々は何も導出していない。** `cor_3_12` の証明は、`Interface` の
-`logVol_hull_ne_top_of_isCompact ∘ thetaUnion_isCompact` と `qLogVol_mem` を
+`Interface` のフィールドを
 そのまま組み合わせただけである。(xi-e)(xi-f) も p.175 のコンパクト性も、
 すべて**原文の証明から仮説として輸入**した。
 
@@ -156,23 +164,75 @@ theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
 
 ### 旧反例はどの条件で死んだか(下で機械的に確定させる)
 
-★`⋃₀ {∅} = ∅` は**コンパクト**なので、`thetaUnion_isCompact` は**満たしてしまう**。
-死因は **`logVol_hull_ne_top_of_isCompact`**——p.31 の
-「compact, hence of finite log-volume」に当たる橋の方である。
+★`⋃₀ {∅} = ∅` は**コンパクト**なので、コンパクト性の側は**満たしてしまう**。
+死因は p.31 の「compact, hence of finite log-volume」に当たる橋
+(現在は `logVolCompact` + `logVol_eq_of_isCompact` として型に入っている)の方である。
 
-### ★残った問い: 原文は "easily verified" の検証を書いていない
+## ★★★ 1段深い転写の測定(2026-08-14、訂正版)— posit は減ったか
 
-`thetaUnion_isCompact` の原文の根拠は p.175 の「the **[easily verified]** compactness」
-だけで、**検証は書かれていない**(2026-08-14 実測: 論文全体で `compact` は 33 件、
-`¹,°𝒰_{j,v_ℚ}` のコンパクト性を確立する箇所は **0 件**)。方針としては
-p.128 の「**all the indeterminacies that occur in the theory are compact** is in some
-sense one important theme in the present series of papers」がある。
-また `bounded family`(p.130、Remark 3.9.5, (vi))は**用語の定義**として1件あるのみで、
-Theorem 3.11 の出力が bounded family であるとは述べていない。
+`thetaUnion_isCompact`(= p.175 の「[easily verified] compactness」)は
+**原文が検証を書いていない** posit だった。これを1段深く分解し、増減と性質を測った。
 
-したがって次に転写すべきは **Theorem 3.11, (i), (a) のモノ解析的整構造
-`I(…) ⊆ I^ℚ(…)`(= log-shell、p.31 で compact と明示)と Proposition 3.9** である。
-そこまで写して初めて `thetaUnion_isCompact` を**導出**できる可能性が出る。
+### 分解前(2 posit)
+
+| posit | 分類 | 出所 |
+|---|---|---|
+| `thetaUnion_isCompact` | (β) | p.175。ただし「[easily verified]」で**検証なし** |
+| `logVol_hull_ne_top_of_isCompact` | (β) 融合 | p.31 + p.127 を1本に潰したもの |
+
+### 分解後(2 データ + 3 posit)
+
+| posit / データ | 分類 | 出所(すべて 400dpi 目視) |
+|---|---|---|
+| `logShellPacket : Set Amb` | (β) データ | Rmk 3.9.5, (vii), (Ob1)(p.131)の「tensor packets of log-shells」 |
+| `logVolCompact : ∀ U, IsCompact U → ℝ` | (α) データ | **Prop 3.9, (i)(p.115)**: 対数体積は `𝔐(−) → ℝ` |
+| `logShellPacket_isCompact` | **(α)** | **p.31 (v) `(a_non)`「I†Fv is compact」** / p.146 |
+| `possibleThetaImages_subset_logShellPacket` | **(β)** | **Rmk 3.9.5, (vii), (Ob1)(p.131)** |
+| `hull_isCompact_of_subset_isCompact` | **(α)** | **Rmk 3.9.5, (i)(p.127)** の場合分け |
+| `logVol_eq_of_isCompact` | (α) 定義的 | `logVol` が `logVolCompact` の拡張であること |
+
+### ★★訂正(2026-08-14)— 一度 (γ) と報告したが誤りだった
+
+`possibleThetaImages_subset_logShellPacket` を「原文に無い(γ)」と報告したが、
+**原文にある**。Remark 3.9.5, (vii), (Ob1)(物理 p.131、400dpi 目視):
+
+原文 (IUTchIII p.131):
+> various “possible images” that occur as the output of the multiradial al-
+> gorithms under consideration are regions — i.e., in essence, elements ∈P
+> — contained in tensor packets of log-shells I[scr]_k
+
+しかも (vii) の冒頭は「The operation of forming the hull will play a crucial role
+in the context of Corollary 3.12 below」であり、まさに Corollary 3.12 のための箇所である。
+
+**誤りの原因は探索手順**: 我々は Lean 側の名前(`subset` / `contains`)で grep した。
+原文は**原文側の語「possible images」**を主語にしていた。
+同種の失敗が2回目(1回目は `relatively compact` で探して `compactness` を見落とした)。
+規則を `tools/check.mjs` 冒頭 A2 に明文化した。
+
+### 増減のまとめ(訂正後)
+
+- **(α) 0 → 4**(`logVolCompact` / `logShellPacket_isCompact` /
+  `hull_isCompact_of_subset_isCompact` / `logVol_eq_of_isCompact`。
+  すべて mathlib 語彙で書け、かつ実質的な典拠つき)
+- **(β) 2 → 2**(`logShellPacket` データ + `possibleThetaImages_subset_logShellPacket`)
+- **★(γ) 0 → 0**
+
+自分で置いた基準「(α) が増えて (γ) が増えないなら収束方向」に照らすと、
+**この1段は収束方向**である。
+
+### 副作用: 退化 witness が狭まった
+
+`hull := id` を使う `trivialised` は、新しい `hull_isCompact_of_subset_isCompact` の
+ために「コンパクト集合の部分集合はコンパクト」という仮定(`hsub`)を要求するように
+なった。分解は**退化の自由度も削った**。
+
+### 有限性は posit ではなく **導出** になった
+
+`logVol_ne_top_of_isCompact` という posit は**廃止**した。Proposition 3.9, (i) が
+対数体積を `𝔐(−) → ℝ`(`𝔐(−)` はコンパクト集合)と定めている以上、それは
+仮定ではなく**定義域と値域**である。型に写した(`logVolCompact` + `logVol_eq_of_isCompact`)
+ので、`Skeleton.IUTchIII.cor_3_12` の有限性の側は
+`logVol_eq_of_isCompact` を書き換えて `WithTop.coe_ne_top` で閉じる——**導出**である。
 -/
 
 open Classical in

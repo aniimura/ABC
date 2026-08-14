@@ -91,8 +91,21 @@ structure PilotObjectData where
   > 3.11, (i), which we do not regard as subject to the indeterminacies (Ind1), (Ind2),
   -/
   Amb : Type
-  /-- `Amb` の位相。コンパクト性(下記 `thetaUnion_isCompact`)を述べるために要る。 -/
+  /-- `Amb` の位相。コンパクト性を述べるために要る。 -/
   topology : TopologicalSpace Amb
+  /-- **対数体積の本体**。Proposition 3.9, (i) は対数体積を `𝔐(−) → ℝ` として定める
+  ——`𝔐(−)` は**コンパクト**集合の集まりであり、値域は `ℝ` である。
+
+  原文 (IUTchIII p.115):
+  > — where we write “M[frak](−)” for the set of nonempty compact open subsets of
+
+  (アルキメデス側は「compact closures of nonempty open subsets」。値域はどちらも `ℝ`。)
+
+  ★2026-08-14: 以前は `logVol_ne_top_of_isCompact` という**posit**でこれを表していたが、
+  それは仮定ではなく**定義域と値域**である。ここで型に写したので、
+  「コンパクトなら `+∞` でない」は `Skeleton` 側の**定理**になった
+  (`Skeleton.IUTchIII.logVol_ne_top_of_isCompact`)。 -/
+  logVolCompact : ∀ U : Set Amb, @IsCompact Amb topology U → ℝ
   /-- **手続き正規化モノ解析的対数体積**。Θ 側・q 側の**両方**をこれで測る
   (同じ多輻的表現の中で比較するのだから、`logVol` は1つでなければならない)。
 
@@ -216,39 +229,89 @@ structure PilotObjectData where
   ★この判断は**機械では検査されない**。仮説を原文より強く置いても
   `check.mjs` は何も言わない(`tools/check.mjs` 冒頭 A6)。 -/
   qLogVol_mem : (-qAbs) ∈ outputLogVolumes
-  /-- **可能な像の和集合はコンパクト**。
+  /-- **log-shell(モノ解析的整構造)** `I(…)`。Theorem 3.11, (i), (a) が
+  多輻的表現のデータとして挙げるもの。
 
-  ★2026-08-14 追加。有限性 `−|log(Θ̲̲)| ∈ ℝ` の出所。物理 p.175。
+  原文 (IUTchIII p.153):
+  > analytic integral structures
 
-  ★★**バーの有無に注意**(400 dpi 目視、2026-08-14): 原文がコンパクトだと言っているのは
-  `¹,°𝒰_{j,v_ℚ}`(**オーバーバー無し**)であり、p.174 の定義により
-  これは「the various **unions** … of the **possible images**」——すなわち
-  **可能な像の和集合**である。正則包の方は `¹,°𝒰̄`(バー有り)で別物。
-  `pdftotext` はオーバーバーを落とすので `.txt` では区別できない。
+  ## ★このフィールド群の由来 — 1段深い転写(2026-08-14)
+
+  一度ここには **`thetaUnion_isCompact`**(可能な像の和集合はコンパクト)という
+  posit が1本あった。出所は物理 p.175:
 
   原文 (IUTchIII p.175):
   > pactness of the 1,◦U_j,v_Q [where j ∈ |F_l|, v_Q ∈ V[bb]_Q], together with the definition of the
   > log-volume, that the quantity − |log(Θ[ul2])| is finite, hence negative
 
-  ★原文は「[easily verified]」と書くだけで**検証を書いていない**(2026-08-14 実測:
-  論文全体で `compact` は 33 件、`¹,°𝒰` のコンパクト性を確立する箇所は 0 件)。 -/
-  thetaUnion_isCompact : @IsCompact Amb topology (⋃₀ possibleThetaImages)
-  /-- **コンパクトな領域の正則包は対数体積が有限**。
+  ★★**バーの有無に注意**(400 dpi 目視): 原文がコンパクトだと言っているのは
+  `¹,°𝒰_{j,v_ℚ}`(**オーバーバー無し**)であり、p.174 の定義により
+  これは「the various **unions** … of the **possible images**」——すなわち
+  **可能な像の和集合**である。正則包の方は `¹,°𝒰̄`(バー有り)で別物。
+  `pdftotext` はオーバーバーを落とすので `.txt` では区別できない。
 
-  p.175 が「together with the definition of the log-volume」と呼んでいる橋。
-  原文は log-shell について同じ形を明示している:
+  ★原文は「[easily verified]」と書くだけで**検証を書いていない**(実測:
+  論文全体で `compact` は 33 件、`¹,°𝒰` のコンパクト性を確立する箇所は 0 件)。
+
+  そこで1段深く分解した——`thetaUnion_isCompact` を posit するのをやめ、
+  下の4つ(`logShellPacket` / `logShellPacket_isCompact` /
+  `possibleThetaImages_subset_logShellPacket` / `hull_isCompact_of_subset_isCompact`)と
+  `logVol_ne_top_of_isCompact` に置き換え、有限性は `Skeleton` で**導出**する。
+  測定結果は `Check/IUTchIII/Cor312Degenerate.lean`。 -/
+  logShellPacket : Set Amb
+  /-- **log-shell のテンソルパケットはコンパクト**。
+
+  単一の log-shell がコンパクトであることは明示されている:
 
   原文 (IUTchIII p.31):
   > satisfies the following properties: (anon) I†Fv is compact, hence of finite log-
 
-  Remark 3.9.5, (i)(物理 p.127)の場合分けと対応する——relatively compact なら
-  正則包は `λ·𝒪` 型の有界集合、そうでなければ `I^ℚ` 全体(= 対数体積 `+∞`)。
+  パケットの段でも、`ℐ((−))` が対数体積を持つ(= `𝔐(−)` に属する = コンパクト)ことが
+  次から読める:
 
-  ★**モデル化の限定**: Remark 3.9.5, (i) は「a relatively compact subset whose
-  log-volume is finite [i.e., > −∞] を含む」ことも前提しているが、我々の値域
-  `WithTop ℝ` には `−∞` が無いのでその側は写していない。 -/
-  logVol_hull_ne_top_of_isCompact :
-    ∀ U : Set Amb, @IsCompact Amb topology U → logVol (hull U) ≠ ⊤
+  原文 (IUTchIII p.146):
+  > O(−) = I((−)) ⊆IQ((−))
+  -/
+  logShellPacket_isCompact : @IsCompact Amb topology logShellPacket
+  /-- **可能な像は log-shell のテンソルパケットに含まれる**。
+
+  ★2026-08-14 訂正: 一度これを「原文に無い(γ)」と報告したが**誤り**だった。
+  原文は Remark 3.9.5, (vii), (Ob1)(物理 p.131、400dpi 目視)で、
+  **「possible images」を主語にして**まさにこれを述べている:
+
+  原文 (IUTchIII p.131):
+  > various “possible images” that occur as the output of the multiradial al-
+  > gorithms under consideration are regions — i.e., in essence, elements ∈P
+  > — contained in tensor packets of log-shells I[scr]_k
+
+  しかも (vii) の冒頭は「The operation of forming the hull will play a crucial role
+  in the context of Corollary 3.12 below」であり、まさに Corollary 3.12 のための箇所。
+
+  ★**誤った探索の記録**: 我々は Lean 側の名前(`subset` / `contains`)で grep して
+  「0 件」と報告した。原文は**原文側の語「possible images」**を主語にしていた。
+  同種の失敗が2回目(1回目は `relatively compact` で探して `compactness` を見落とした)。
+  探索手順の規則は `tools/check.mjs` 冒頭 A2 に明文化した。 -/
+  possibleThetaImages_subset_logShellPacket :
+    ∀ U ∈ possibleThetaImages, U ⊆ logShellPacket
+  /-- **相対コンパクトな領域の正則包はコンパクト**。
+
+  原文 (IUTchIII p.127):
+  > If αU (respectively, AU; A,αU) is relatively compact, then we define
+  > the holomorphic hull of αU (respectively, AU; A,αU) to be the smallest subset of
+
+  この枝の正則包は `λ·𝒪` 型の有界集合になる(そうでない枝は `I^ℚ` 全体)。 -/
+  hull_isCompact_of_subset_isCompact : ∀ U K : Set Amb,
+    @IsCompact Amb topology K → U ⊆ K → @IsCompact Amb topology (hull U)
+  /-- `logVol` はコンパクト領域上で `logVolCompact` と一致する
+  ——すなわち `logVol` は Proposition 3.9, (i) の対数体積の**拡張**である。
+
+  Corollary 3.12 が `−|log(Θ̲̲)| ∈ ℝ ⋃ {+∞}` と書く以上、拡張は要る。
+  拡張が非コンパクト側でどう振る舞うかは、`Interface` では**指定しない**
+  (Remark 3.9.5, (i) は「相対コンパクトでなければ正則包は `I^ℚ` 全体」と述べ、
+  Remark 3.9.7, (ii) は相対コンパクト側の拡張が `−∞` を許すと述べる。
+  我々はどちらも写していない)。 -/
+  logVol_eq_of_isCompact : ∀ (U : Set Amb) (h : @IsCompact Amb topology U),
+    logVol U = ((logVolCompact U h : ℝ) : WithTop ℝ)
 
 /-- Track B は何を作らねばならないか。
 
