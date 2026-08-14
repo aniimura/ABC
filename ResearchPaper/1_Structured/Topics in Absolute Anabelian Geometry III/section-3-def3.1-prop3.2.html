@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§3 Definition3.1・Proposition3.2(M1対象: MLF-Galois T-pair・Monoid Cyclotomes and Kummer Maps)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+<h1 id="def-3-1-prop-3-2">Section 3(冒頭): Definition 3.1・Proposition 3.2 — M1(kummer-local-unit-monoids)の出典</h1>
+
+<p class="note milestone">【マイルストーンM1のための構造化】この節は`IUT_DependencyMap/milestones.md`のM1(IUT特有対象の最初の非自明なLean形式化)の直接の出典。相談役challengerの指摘により、Definition3.1(抽象化: MLF-Galois T-pair)とProposition3.2(具体例: O▷kのKummer理論)を**同一の構造化単位**として扱う——原文自体もこの2つを連続して(Definition3.1で抽象+複数の具体型T、Proposition3.2でT=TMの場合のKummer写像)提示しており、分離しない方が原文に忠実。</p>
+
+<div class="setup" id="sec3-intro" data-locator="p.66, l.3744-3753">
+<span class="locator">原文 p.66</span>
+<p>
+In the present &sect;3, we give an interpretation of the nonarchimedean local portion of the theory of &sect;1 in terms of a
+certain compatibility with the &ldquo;log-Frobenius functor&rdquo; [in essence, a version of the usual &ldquo;logarithm&rdquo; at the
+various nonarchimedean primes of a number field].
+</p>
+</div>
+
+<section class="statement definition" id="def-3-1" data-locator="p.66-68, l.3754-3883">
+<span class="locator">原文 p.66-68</span>
+<p><span class="label">Definition 3.1 (i):</span>
+Let <i>k</i> be an MLF(mixed-characteristic local field), <i>k&#772;</i> an algebraic closure, <i>G<sub>k</sub></i> := Gal(<i>k&#772;</i>/<i>k</i>).
+Write <i>O<sub>k</sub></i>&sube;<i>k</i>(ring of integers), <i>O<sub>k</sub><sup>&times;</sup></i>(units), <b><i>O<sub>k</sub><sup>&#9657;</sup></i>&sube;<i>O<sub>k</sub></i>(the multiplicative monoid of nonzero elements)</b>
+[cf. <a href="../../2_LocatorMap/Topics in Absolute Anabelian Geometry III/refs.html">[Mzk17], Example 1.1, (i)</a>]. Let &Pi;<sub>k</sub> be a topological group with a continuous surjection
+&epsilon;<sub>k</sub>: &Pi;<sub>k</sub>&#8608;<i>G<sub>k</sub></i>. The p-adic logarithm determines a &Pi;<sub>k</sub>-equivariant isomorphism
+log<sub>k</sub>: <i>k</i>&#8764; := (<i>O<sub>k</sub><sup>&times;</sup></i>)<sup>pf</sup> &cong; <i>k</i>(additive topological group).
+</p>
+<p>
+Let <i>T</i> range over 6 categories(下表)——<b>abstract data types</b> that the &ldquo;arithmetic data&rdquo; <i>M<sub>k</sub></i> can be:
+</p>
+<table class="types">
+<tr><th>T</th><th>圏の内容</th><th>k・O_kから決まる対象M_k</th></tr>
+<tr><td>TF</td><td>ind-topological fields</td><td><i>k</i>そのもの</td></tr>
+<tr><td>TCG</td><td>torsion-cyclotomic ind-compact abelian topological groups</td><td><i>O<sub>k</sub><sup>&times;</sup></i></td></tr>
+<tr><td>TLG</td><td>torsion-cyclotomic ind-locally compact abelian topological groups</td><td><i>k<sup>&times;</sup></i></td></tr>
+<tr><td><b>TM</b></td><td>torsion-cyclotomic ind-topological abelian monoids</td><td><b><i>O<sub>k</sub><sup>&#9657;</sup></i></b>(★M1の主対象)</td></tr>
+<tr><td>TS</td><td>ind-locally compact topological spaces</td><td>faithful continuous <i>G<sub>k</sub></i>-action付き任意の対象</td></tr>
+<tr><td>TS&#8862;</td><td>ind-locally compact abelian topological groups</td><td>同上</td></tr>
+</table>
+<p>
+<span class="label">(i続き)</span> <b>model MLF-Galois T-pair</b> := データの組(a)位相群&Pi;<sub>k</sub>、(b)対象<i>M<sub>k</sub></i>&isin;Ob(T)、(c)&Pi;<sub>k</sub>の<i>M<sub>k</sub></i>への作用——記法(&Pi;<sub>k</sub>&#8623;<i>M<sub>k</sub></i>)。
+</p>
+<p><span class="label">(ii):</span>
+一般の<b>MLF-Galois T-pair</b> (&Pi;&#8623;<i>M</i>) := あるmodel (&Pi;<sub>k</sub>&#8623;<i>M<sub>k</sub></i>)と同型な組。<i>&Pi;</i>を<b>Galois group</b>、<i>&Pi;</i>&#8608;<i>G</i>(作用から決まる)を<b>Galois augmentation</b>、<i>G</i>を<b>arithmetic Galois group</b>、<i>M</i>を<b>arithmetic data</b>と呼ぶ。<i>&Pi;<sub>k</sub></i>&#8608;<i>G<sub>k</sub></i>が双曲的orbicurveの&eacute;tale基本群から来る場合は"of hyperbolic orbicurve type"、strictly Belyi型の場合は"of strictly Belyi type"、同型の場合は"of mono-analytic type"と呼ぶ。射の定義(T-isomorphism・Galois-isomorphism)も併せて与えられる。
+</p>
+<p><span class="label">(iii):</span>
+圏<b>C<sup>MLF</sup><sub>T</sub></b> := MLF-Galois T-pairsとその射からなる圏(各種部分圏C&#8242;・C&#772;・C&#775;、部分圏MLF-hyp・MLF-sB・MLF&#8869;も定義)。O<sub>k</sub><sup>&#9657;</sup>→k<sup>&times;</sup>→O<sub>k</sub><sup>&times;</sup>等の関手(自然な構成、intrinsically defined)により<b>C<sup>MLF</sup><sub>TF</sub>→C<sup>MLF</sup><sub>TM</sub>→C<sup>MLF</sup><sub>TLG</sub>→C<sup>MLF</sup><sub>TCG</sub></b>という関手の鎖が得られる。
+</p>
+<p class="note">【構造化メモ、①多重性チェック(重要)】この定義は**6種類の抽象型T**にわたる普遍的な構成であり、単一の対象(O_k^▷)の定義ではない——「MLF-Galois T-pair」という抽象圏論的概念が主役で、T=TMの場合(O_k^▷)はその**1つの具体例**に過ぎない。Lean化の際、この普遍性(∀T)を素朴に全て形式化しようとすると、6種類の型クラス/構造の同時管理という大きな作業になる——M1では**T=TMのみ**に絞り込み、他のT(TF・TCG・TLG・TS・TS⊞)は抽象化の存在を認識した上で構築対象から外す、という範囲限定の判断を4_CalibrationPlanで確定する必要がある。</p>
+<p class="note milestone">【構造化メモ、相談役の指摘②反映】この定義自体(モノイドO_k^▷の存在)は空虚——数行で書ける自明な構成。**非自明な内容はProposition3.2にある**(下記)。M1の受理条件はProposition3.2の主張に置くこと。</p>
+</section>
+
+<section class="statement proposition" id="prop-3-2" data-locator="p.71-72, l.4086-4177">
+<span class="locator">原文 p.71-72</span>
+<p><span class="label">Proposition 3.2 (Monoid Cyclotomes and Kummer Maps):</span>
+<i>T</i>&isin;{TM,TF}とし、(&Pi;&#8623;<i>M<sub>T</sub></i>)&isin;Ob(C<sup>MLF</sup><sub>T</sub>)、arithmetic Galois群&Pi;&#8608;<i>G</i>。(&Pi;&#8623;<i>M<sub>TM</sub></i>)を(&Pi;&#8623;<i>M<sub>T</sub></i>)からDefinition3.1(iii)の関手で得る(T=TFなら経由、T=TMなら恒等)。
+</p>
+<p><span class="label">(i):</span>
+自然な同型 <b>H&sup2;(G,&mu;<sub>Z&#772;</sub>(M<sub>TM</sub>)) &cong; Z&#772;</b>(Brauer群の同型を経由する構成——古典的な局所類体論の**不変写像**[invariant map]と構造的に一致する可能性が高い、要検証)。
+</p>
+<p><span class="label">(ii):</span>
+開部分群<i>H</i>&sube;&Pi;の作用を考え、<b>Kummer写像</b>
+$$M_{TM}^H \to H^1(H, \mu_{\hat{Z}}(M_{TM})); \qquad M_{TM} \to \varinjlim_J H^1(J, \mu_{\hat{Z}}(M_{TM}))$$
+(<i>J</i>は&Pi;の開部分群にわたる)を構成する関手的アルゴリズムを得る。
+</p>
+<p><span class="label">(iii):</span>
+(&Pi;&#8623;<i>M<sub>T</sub></i>)がstrictly Belyi typeなら、Corollary1.10(h)の構成により、Kummer写像の像が生成する群の{0}との和集合に加法構造(ひいては位相体構造)が入る。
+</p>
+<p class="note milestone">【構造化メモ、★M1の中核、相談役の指摘①②反映】
+(a) <b>Kummer写像の行き先H&sup1;(H,&mu;<sub>Z&#772;</sub>(M<sub>TM</sub>))は連続(profinite)Galois cohomology</b>——mathlib実測により、離散(有限)群のコホモロジーのみ存在し連続版は不在と判明(`IUT_DependencyMap/vocabulary_inventory.md`参照)。境界外公理として扱う(パイロット2の既存境界外公理①②と同系列)。
+(b) <b>(i)のH&sup2;同型は局所類体論の不変写像そのものである可能性</b>——パイロット2の境界外公理②(Serre、局所類体論)と同一の内容かどうかは未検証、次段の最初の作業。同一なら既存の境界外公理をそのまま再利用でき、M1のスコープが大きく縮小する。
+(c) M1の非自明な受理条件はこの命題の**(ii)のKummer写像の性質**(単射性等)、または**(i)と既存境界外公理②の同一性確認**のいずれかに置く——4_CalibrationPlanで1つに絞り込む。
+</p>
+</section>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+</body>
+</html>

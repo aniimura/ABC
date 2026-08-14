@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>&sect;2 Corollary 2.18(M4a対象: mono-theta環境の群論的構成)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+  td.unresolved { background: #ffe9e9; }
+  td.partial { background: #fff3d6; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+<h1 id="cor-2-18">Section 2: Corollary 2.18(Group-theoretic Construction of Mono-theta Environments) — M4a(mono-theta環境)の再形式化・出典</h1>
+
+<p class="note milestone">【M4a再形式化のための構造化、方針転換の記録】この文書は、前期(第2期)の既存Lean資産(<code>OpaqueMonoThetaAxiomatization.lean</code>)を<b>一切参照せず</b>、[EtTh]原文(Corollary 2.18、assertion (i)&ndash;(iv)、証明は除く)のみから独立に構造化したものである。前期資産との一致・不一致の比較は、この工程では意図的に行わない——4_CalibrationPlan(方法0)で改めて実施する。</p>
+
+<p class="note" style="background:#fdecea;border-left-color:#b03030;">【2026-08-12追記、要再検証(部分着手)】MAP-9〜12の調査で、[EtTh]§2が
+点(0/1個)&times;下線(0/1/2本)の体系的な合成記法(同じX・Y・Π・Δが複数の
+異なる対象を指す)を用いていると判明した(詳細は
+<code>dy-construction.html</code>・<code>1_Structured/README.md</code>参照)。
+本文書はこの発見<b>以前</b>に作成されており、下記の数式表記(&Pi;<sup>tp</sup><sub>X</sub>等)は
+下線・点を全て省略した(pdftotextの記法非対応による)プレースホルダーである——
+下記notation表(20項目以上)は個別に再確認していない。引用駆動型再監査
+(2026-08-12)でCorollary2.18本体の<b>前文(p.54)・(i)&ndash;(iv)の主張本体
+(p.55&ndash;56)・assertion(i)(iii)(iv)の証明(p.57)・Corollary2.19,(i)冒頭
+(p.58)を600&ndash;3600dpiで目視確認済み</b>(詳細は下の「★確認済み」note・
+graph.json <code>reaudit-etth-corollary218-219-full-correction</code>参照)——
+確認範囲全体を通じて内部矛盾は見つからなかった。ただし
+assertion(ii)の証明の細部(p.56末尾)・Corollary2.19,(ii)以降・下記
+notation表の個別行(20項目以上)は<b>未確認のまま残る</b>。それらについては
+本文書の記法を無条件に信頼しないこと。</p>
+
+<p class="note milestone" style="background:#eafbea;border-left-color:#0a7d1e;">
+【★確認済み(2026-08-12、引用駆動型再監査・p.54-55を1800&ndash;3600dpiで目視確認、
+600dpi初読からの自己訂正あり)】Corollary 2.18前文の実際の記法(PDF目視、
+pdftotextでは再現不能な下線を含む)は以下の通り: 「Let <i>N</i>&ge;1...;
+<b>X&#772;&#772;<sup>log</sup></b>(<i>X</i>に<b>下線2本</b>)a smooth log curve of type
+(1,(Z/<i>l</i>Z)<sup>&Theta;</sup>)...; <i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>
+(<i>&eta;</i>自身の点2つ+<b>下線2本</b>)an associated orbit...; <b>Y&#772;&#772;<sup>log</sup>
+&rarr;X&#772;&#772;<sup>log</sup>, Y&#776;&#772;&#772;<sup>log</sup>&rarr;Y&#772;&#772;<sup>log</sup></b>
+the corresponding coverings」——<i>X</i>・<i>Y</i>(下線2本、点なし)・<i>Y&#776;</i>
+(下線2本、点あり)は<b>すべて同一の下線2本レベル</b>にあり、点の有無のみで
+区別される(§1 Definition1.7の「multiplication by 2」写像による被覆——
+MAP-9の&Pi;<sup>tp</sup><sub>Y&#776;&#772;&#772;</sub>と正確に同じ対象)。続く本文では
+<b><i>D<sub>Y&#772;&#772;</sub></i> &sube; Out(&Pi;<sup>tp</sup><sub>Y&#772;&#772;</sub>[&mu;<sub>N</sub>])</b>
+がK<sup>&times;</sup>とGal(<i>Y&#772;&#772;</i>/<i>X&#772;&#772;</i>)(&cong;<i>l&middot;</i>Z)の像で生成される、と
+<b>[cf. Definition 2.13,(i)]を明示的に引用</b>——これはMAP-9-12がこれまで分析してきた
+Definition2.13(i)のM<sub>N</sub>構造(<code>OpaqueEtaThetaLZAmbientSubgroup</code>修正の根拠)
+と完全に整合しており、新たな矛盾は見つからなかった(良い知らせ)。
+Corollary2.18,(i)本体(p.55)で使われる&Pi;&#8226;<sub>X&#772;&#772;</sub>&#8776;&Pi;<sup>tp</sup><sub>X&#772;&#772;</sub>も
+同じ下線2本の<i>X</i>で一貫している——前文と(i)本体の間に不整合はない。
+<br><b>★自己訂正(重要)</b>: 本noteの初版(600dpiでの読み取り)では前文の
+<i>X</i>を「下線1本」と誤記していた——1800&ndash;3600dpiでの再確認により
+<b>下線2本が正しい</b>と判明(下線1本 vs 2本の視覚的判別は600dpiでも
+誤りうる、という教訓——MAP-9修正時に一度経験した「700dpi再確認で1回目の
+訂正記述にも誤りがあった」パターンの再発)。旧版の「Definition1.9の無印
+<i>X</i>とは異なる新しい出発点か」という未解決の問いは、本訂正により
+解消された——前文全体が一貫して下線2本レベルで書かれているだけであり、
+Definition1.9(無印<i>X</i>、&sect;1)とCorollary2.18前文(下線2本の<i>X</i>、&sect;2)は
+単に異なる被覆レベルを指しているに過ぎず、矛盾ではない。
+★下記notation表(20項目以上)の個別行(特に<i>X<sup>log</sup></i>・<i>Y<sup>log</sup></i>の行)は
+依然pdftotext由来のプレースホルダー表記のままで、未確認。
+</p>
+
+<div class="setup" id="cor218-preamble" data-locator="p.54-55, l.3610-3662">
+<span class="locator">原文 p.54-55</span>
+<p>
+Corollary 2.18の本文(i)&ndash;(iv)に入る前に、原文は以下の記法をまとめて導入する(すべて下記「前提として扱う記法」表で出典を特定済み):
+</p>
+<p>
+<i>N</i>&ge;1を整数とする。<i>X<sup>log</sup></i>を型(1,(Z/<i>l</i>Z)<sup>&Theta;</sup>)のsmooth log curve(<i>K</i>&#772;上、<i>K</i>は<i>l</i>・<i>p</i>が奇数となる有限次拡大、<i>K</i>=<i>K</i>&#776;)とし、<b><i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub></b>をl乗根&eacute;tale theta functionsの付随するorbitとする。<i>Y<sup>log</sup>&rarr;X<sup>log</sup></i>、<i>Y</i>&#776;<sup>log</sup>&rarr;<i>Y<sup>log</sup></i>を対応する被覆、(<i>l&middot;&Delta;<sub>&Theta;</sub></i>)・(&Delta;<sup>tp</sup><sub>X</sub>)<sub>&Theta;</sub>・(&Pi;<sup>tp</sup><sub>X</sub>)<sub>&Theta;</sub>・(&Delta;<sup>tp</sup><sub>Y</sub>)<sub>&Theta;</sub>・(&Pi;<sup>tp</sup><sub>Y</sub>)<sub>&Theta;</sub>を&Pi;<sup>tp</sup><sub>X</sub>の対応するsubquotientsとする。
+</p>
+<p>
+<b>&Delta;[&mu;<sub>N</sub>]</b> := Ker((<i>l&middot;&Delta;<sub>&Theta;</sub></i>)[&mu;<sub>N</sub>] &rarr; (<i>l&middot;&Delta;<sub>&Theta;</sub></i>))(「[&mu;<sub>N</sub>]」の「&mu;<sub>N</sub>」部分)。<b><i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>[&mu;<sub>N</sub>]</b>を、自然な全射(<i>l&middot;&Delta;<sub>&Theta;</sub></i>)&#8608;&Delta;[&mu;<sub>N</sub>]を<i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>に適用して得られるH&sup1;(&Pi;<sup>tp</sup><sub>Y&#776;</sub>,&Delta;[&mu;<sub>N</sub>])の類の集合とする。
+</p>
+<p>
+<b><i>D<sub>Y</sub></i> &sube; Out(&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>])</b>を、<i>K</i><sup>&times;</sup>とGal(<i>Y</i>/<i>X</i>)(&cong;<i>l&middot;</i>Z)の像が生成するOut(&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>])の部分群とする[cf. Definition 2.13,(i)]。<b><i>s</i><sup>alg</sup><sub>Y&#776;</sub>,<i>s</i><sup>&Theta;</sup><sub>Y&#776;</sub>: &Pi;<sup>tp</sup><sub>Y&#776;</sub> &rarr; &Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>]</b>を、(<i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>の元を代表するcocycleが定める)mod N algebraic section・theta sectionとする。
+</p>
+<p>
+<b><i>M<sub>N</sub></i></b> := (&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>], <i>D<sub>Y</sub></i>, <i>s</i><sup>&Theta;</sup><sub>Y&#776;</sub>)——mod N model mono-theta environment(Proposition 2.14,(ii)により、<i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>の[2l乗根倍を除く]選択に依らず&Pi;<sup>tp</sup><sub>Y</sub>上の恒等射を法として同型を除き一意)。
+</p>
+</div>
+
+<section class="statement proposition" id="cor-2-18-i" data-locator="p.55, l.3663-3719">
+<span class="locator">原文 p.55</span>
+<p><span class="label">Corollary 2.18, (i)(Theta-related Subquotients):</span>
+&Pi;&#8226;<sub>X</sub>を&Pi;<sup>tp</sup><sub>X</sub>と同型な位相群とする。このとき、&Pi;&#8226;<sub>X</sub>を抽象的な位相群としての構造のみを援用し、位相群の同型に関して関手的であり、&Pi;&#8226;<sub>X</sub>と&Pi;<sup>tp</sup><sub>X</sub>との間の同型への一切の言及を持たない、という意味での「<b>functorial group-theoretic algorithm</b>」が存在し、&Pi;&#8226;<sub>X</sub>のsubquotients
+</p>
+<p style="text-align:center">
+&Pi;&#8226;<sub>Y</sub>; &Pi;&#8226;<sub>Y&#776;</sub>; (&Pi;&#8226;<sub>X</sub>&#8608;) <i>G</i>&#8226;<sub>K</sub>; (<i>l&middot;&Delta;</i>&#8226;<sub>&Theta;</sub>); (&Delta;&#8226;<sub>X</sub>)<sub>&Theta;</sub>; (&Pi;&#8226;<sub>X</sub>)<sub>&Theta;</sub>; (&Delta;&#8226;<sub>Y</sub>)<sub>&Theta;</sub>; (&Pi;&#8226;<sub>Y</sub>)<sub>&Theta;</sub>
+</p>
+<p>
+と、(Z/<i>l</i>Z)<sup>&plusmn;</sup>の各元に対応する&Pi;&#8226;<sub>X</sub>の部分群の集まりを構成する。これらは、任意の同型&Pi;&#8226;<sub>X</sub>&#8776;&Pi;<sup>tp</sup><sub>X</sub>によって、それぞれ&Pi;<sup>tp</sup><sub>X</sub>側の対応するsubquotients(&Pi;<sup>tp</sup><sub>Y</sub>; &Pi;<sup>tp</sup><sub>Y&#776;</sub>; (&Pi;<sup>tp</sup><sub>X</sub>&#8608;)<i>G<sub>K</sub></i>; (<i>l&middot;&Delta;<sub>&Theta;</sub></i>); (&Delta;<sup>tp</sup><sub>X</sub>)<sub>&Theta;</sub>; (&Pi;<sup>tp</sup><sub>X</sub>)<sub>&Theta;</sub>; (&Delta;<sup>tp</sup><sub>Y</sub>)<sub>&Theta;</sub>; (&Pi;<sup>tp</sup><sub>Y</sub>)<sub>&Theta;</sub>)へ、また上記の部分群の集まりを、ラベル&isin;(Z/<i>l</i>Z)<sup>&plusmn;</sup>によって定まる&Pi;<sup>tp</sup><sub>X</sub>のcuspidal decomposition groupsの集まりへ写す、という性質を持つ[cf. Corollary 2.9]。
+</p>
+</section>
+
+<section class="statement proposition" id="cor-2-18-ii" data-locator="p.55, l.3720-3747">
+<span class="locator">原文 p.55</span>
+<p><span class="label">Corollary 2.18, (ii)(From Topological Groups to Mono-theta Environments、★★★核心)</span>: (i)の状況において、mod N mono-theta environment
+</p>
+<p style="text-align:center">
+<b><i>M</i>&#8226; := (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)</b>、ただし &Pi;&#8226; := &Pi;&#8226;<sub>Y</sub> &times;<sub><i>G</i>&#8226;<sub>K</sub></sub> ({(<i>l&middot;&Delta;<sub>&Theta;</sub></i>)&otimes;(Z/NZ)} &#8909; <i>G</i>&#8226;<sub>K</sub>)&nbsp;[cf. Definition 2.10]
+</p>
+<p>
+を構成する「functorial group-theoretic algorithm」が「同型を除いて」存在する。より precise には、mod N mono-theta environmentsの集まり {<i>M</i>&#8226;<sub>&iota;</sub>}<sub>&iota;&isin;I</sub>(<i>M</i>&#8226;<sub>&iota;</sub> = (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, (<i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)<sub>&iota;</sub>))を構成する「functorial group-theoretic algorithm」が存在し、&iota;<sub>1</sub>,&iota;<sub>2</sub>&isin;I について、商&Pi;&#8226;&#8608;&Pi;&#8226;<sub>Y</sub>上恒等を誘導する同型<i>M</i>&#8226;<sub>&iota;<sub>1</sub></sub>&#8776;<i>M</i>&#8226;<sub>&iota;<sub>2</sub></sub>が存在する。
+</p>
+<p class="note milestone">
+【M4aの定義そのもの】<b><i>M</i>&#8226; := (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)</b>という3つ組——位相群&Pi;&#8226;・部分群<i>D</i><sub>&Pi;&#8226;</sub>&sube;Out(&Pi;&#8226;)・&Pi;&#8226;の部分群の(&mu;<sub>N</sub>-共役類としての)collection <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>——が、「mono-theta environment」の定義そのものである[cf. Definition 2.13,(ii)、下記notation表で出典特定済み]。前期資産の<code>MonoThetaAssignment</code>構造体との一致・不一致はここでは判断しない(4_CalibrationPlanへ持ち越し)。
+</p>
+</section>
+
+<section class="statement proposition" id="cor-2-18-iii" data-locator="p.55-56, l.3748-3797">
+<span class="locator">原文 p.55-56</span>
+<p><span class="label">Corollary 2.18, (iii)(From Mono-theta Environments to Topological Groups):</span>
+<i>M</i>&#8226; := (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)を<i>M<sub>N</sub></i>と同型なmod N mono-theta environmentとする。このとき、<i>M</i>&#8226;を抽象的なmono-theta environmentとしての構造のみを援用し、mono-theta environmentsの同型に関して関手的であり、<i>M</i>&#8226;と<i>M<sub>N</sub></i>との間の同型への一切の言及を持たない、という意味での「functorial group-theoretic algorithm」が存在し、&Pi;&#8226;の商
+</p>
+<p style="text-align:center">&Pi;&#8226;<sub>Y</sub></p>
+<p>
+を構成する。これは、任意の同型<i>M</i>&#8226;&#8776;<i>M<sub>N</sub></i>が、この商を&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>]の商&Pi;<sup>tp</sup><sub>Y</sub>へ写す、という性質を持つ。さらに、このような任意の同型<i>M</i>&#8226;&#8776;<i>M<sub>N</sub></i>は、
+</p>
+<p style="text-align:center">
+&Pi;&#8226;<sub>X</sub> := Aut(&Pi;&#8226;<sub>Y</sub>) &times;<sub>Out(&Pi;&#8226;<sub>Y</sub>)</sub> Im(<i>D</i><sub>&Pi;&#8226;</sub>)
+</p>
+<p>
+(「Im(&minus;)」はOut(&Pi;&#8226;<sub>Y</sub>)への像[cf. Proposition 2.11,(ii)])の同型も誘導する——&Pi;&#8226;<sub>X</sub>の位相は、&Pi;&#8226;<sub>Y</sub>&#8776;Aut(&Pi;&#8226;<sub>Y</sub>)&times;<sub>Out(&Pi;&#8226;<sub>Y</sub>)</sub>{1}&sube;&Pi;&#8226;<sub>X</sub>を開部分群とすることで&Pi;<sup>tp</sup><sub>X</sub>と両立するように定まる位相とする。最後に、<i>M</i>&#8226;は、&Pi;&#8226;<sub>Y</sub>上恒等を誘導する同型を通じて、(ii)のアルゴリズムを&Pi;&#8226;<sub>X</sub>に適用して得られるmono-theta environmentと同型である。
+</p>
+</section>
+
+<section class="statement proposition" id="cor-2-18-iv" data-locator="p.56, l.3798-3817">
+<span class="locator">原文 p.56</span>
+<p><span class="label">Corollary 2.18, (iv)(Lifting Isomorphisms):</span>
+&#9633;=&alpha;,&beta;について、<i>M</i><sup>&#9633;</sup> := (&Pi;<sup>&#9633;</sup>, <i>D</i><sub>&Pi;<sup>&#9633;</sup></sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;<sup>&#9633;</sup></sub>)をmod N mono-theta environmentとし、&Pi;<sup>&#9633;</sup><sub>X</sub>を(iii)の「&Pi;&#8226;<sub>X</sub>」(「<i>M</i>&#8226;」を<i>M</i><sup>&#9633;</sup>とした場合)とする。このとき、自然な写像[cf. (iii)]
+</p>
+<p style="text-align:center">
+Isom<sup>&mu;</sup>(<i>M</i><sup>&alpha;</sup>, <i>M</i><sup>&beta;</sup>) &rarr; Isom(&Pi;<sup>&alpha;</sup><sub>X</sub>, &Pi;<sup>&beta;</sup><sub>X</sub>)
+</p>
+<p>
+(上付き添字「&mu;」は同型の&mu;<sub>N</sub>-共役類の集合を表す)は全射であり、そのfiberの濃度は、Nが奇数(偶数)のとき1(2)である。特に、<i>M</i>|Nを満たす任意の正整数Mについて、<i>M</i><sup>&#9633;</sup>が定めるmod M mono-theta environment <i>M</i><sup>&#9633;</sup><sub>M</sub>は、自然な準同型Aut<sup>&mu;</sup>(<i>M</i><sup>&#9633;</sup>)&rarr;Aut<sup>&mu;</sup>(<i>M</i><sup>&#9633;</sup><sub>M</sub>)(像は正規)を誘導し、その核・余核の濃度[&le;2]は、それぞれ自然な全射Z/NZ&#8608;Z/MZが誘導する準同型Hom(Z/2Z,Z/NZ)&rarr;Hom(Z/2Z,Z/MZ)の核・余核の濃度と一致する[ゆえにN/Mが奇数なら全単射]。
+</p>
+</section>
+
+<hr>
+
+<h2 id="notation-table">前提として扱う記法(受理条件に基づく出典特定)</h2>
+<p class="note">[EtTh]&sect;1&ndash;2の範囲内で、以下の記法すべてについて出典を特定できた——**他の論文([Semi-graphs of Anabelioids]等)まで遡る必要は生じなかった**(stop-lossは発動せず)。ただし1件(<i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>そのものの導入箇所)は明示的な「Definition」番号を持たず、地の文の議論のみで導入されているため「半解決」とし、原文の該当箇所を直接引用する形で扱う。</p>
+
+<table class="types">
+<tr><th>記法</th><th>意味(簡潔)</th><th>出典([EtTh]内)</th><th>判定</th></tr>
+<tr><td><i>G<sub>K</sub></i></td><td>Gal(<i>K</i>&#772;/<i>K</i>)</td><td>&sect;1冒頭 l.479-481; &sect;2冒頭 l.2033-2035(同一定義の再掲)</td><td>前提</td></tr>
+<tr><td>&Pi;<sup>tp</sup><sub>X</sub></td><td><i>X<sup>log</sup></i>のtempered fundamental group</td><td>&sect;1冒頭 l.448-471(定義はcf. [Andr&eacute;] &sect;4, [Mzk14] Examples 3.10,5.6&mdash;群論的正当化のみ外部参照、記法自体は[EtTh]内で導入)</td><td>前提</td></tr>
+<tr><td>&Delta;<sup>tp</sup><sub>X</sub></td><td>Ker(&Pi;<sup>tp</sup><sub>X</sub>&#8608;<i>G<sub>K</sub></i>)(幾何的tempered基本群)</td><td>&sect;1冒頭 l.472-481</td><td>前提</td></tr>
+<tr><td><i>X<sup>log</sup></i></td><td>型(1,1)のstable log curve(出発点となる基礎対象)</td><td>&sect;1冒頭 l.435-447</td><td>前提</td></tr>
+<tr><td><i>Y<sup>log</sup></i></td><td>Π<sup>tp</sup><sub>X</sub>&#8608;Zの核Π<sup>tp</sup><sub>Y</sub>が定める<i>X<sup>log</sup></i>の無限&eacute;tale被覆</td><td>&sect;1冒頭 l.487-500</td><td>前提</td></tr>
+<tr><td><i>X</i>&#776;<sup>log</sup>(二重ドット)</td><td>「multiplication by 2」写像が定める<i>X<sup>log</sup></i>の次数4のGalois被覆(Galois群&cong;(Z/2Z)&sup3;)</td><td>&sect;1 l.1585-1598(Definition 1.7直前の議論)</td><td>前提</td></tr>
+<tr><td><i>Y</i>&#776;<sup>log</sup>(二重ドット)</td><td><i>X</i>&#776;<sup>log</sup>に対する<i>Y<sup>log</sup></i>と同じ構成原理の被覆(Π<sup>tp</sup><sub>X&#776;</sub>&#8608;Zの核)</td><td>&sect;1 l.1599-1617(可換図式)</td><td>前提</td></tr>
+<tr><td><i>K</i>&#776;(二重ドット)</td><td><i>K</i>&#776; := <i>K</i>&#776;<sub>1</sub> = <i>J</i>&#776;<sub>1</sub> = <i>K</i><sub>2</sub>(<i>K</i>&#776;<sub>N</sub>:=<i>K</i><sub>2N</sub>による、mod N構成のN=1,2特殊化)</td><td>&sect;1 l.883-913(定義)。「<i>K</i>=<i>K</i>&#776;」という前提はl.1579条件(I)・Definition 2.5(i)前提 l.2346-2348</td><td>前提</td></tr>
+<tr><td><i>K<sub>N</sub></i></td><td><i>K</i>(&zeta;<sub>N</sub>, <i>q<sub>X</sub></i><sup>1/N</sup>)</td><td>&sect;1 l.574-580</td><td>前提</td></tr>
+<tr><td><i>J<sub>N</sub></i></td><td><i>K<sub>N</sub></i>(<i>a</i><sup>1/N</sup>)<sub>a&isin;K<sub>N</sub></sub></td><td>&sect;1 l.648-653</td><td>前提</td></tr>
+<tr><td><i>Y<sub>N</sub></i>, <i>Z<sub>N</sub></i></td><td>K<sub>N</sub>/J<sub>N</sub>係数のmod N捩れによる被覆</td><td>&sect;1 l.575-680程度</td><td>前提</td></tr>
+<tr><td><i>&eta;</i>&#776;<sub>&Theta;</sub></td><td><i>X</i>&#776;上の&eacute;tale theta classのcohomology類</td><td>&sect;1 Proposition 1.3&ndash;1.4(l.1079以降、特にProposition 1.4,(iii))</td><td>前提</td></tr>
+<tr><td><i>&eta;</i>&#776;<sub>&Theta;,Z</sub></td><td><i>&eta;</i>&#776;<sub>&Theta;</sub>のΠ<sup>tp</sup><sub>X&#776;</sub>/Π<sup>tp</sup><sub>Y&#776;</sub>&cong;Z-orbit、「standard type」概念も併せ定義</td><td>&sect;1 Definition 1.9 l.1760-1771</td><td>前提</td></tr>
+<tr class="partial"><td><i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub></td><td><i>&eta;</i>&#776;<sub>&Theta,Z</sub>の&sect;2版((<i>l&middot;Z</i>)&times;&mu;<sub>2</sub>-orbitへの拡張)</td><td>&sect;2、Proposition 2.14直前の議論(l.2832-2910付近)で使用・言及されるが、<b>単独の「Definition」番号は原文に存在しない</b>——Definition 1.9のZ-orbit構成の直接の類似物として地の文でのみ導入される</td><td class="partial">半解決</td></tr>
+<tr><td><i>l&middot;&Delta;<sub>&Theta;</sub></i></td><td>Ker(&Delta;<sup>&Theta;</sup><sub>*</sub>&#8608;&Delta;<sup>ell</sup><sub>*</sub>)(*は&Delta;<sup>tp</sup><sub>X</sub>等の一覧から)</td><td>&sect;2 Proposition 2.12,(i) l.2741-2769</td><td>前提</td></tr>
+<tr><td>&Pi;[&mu;<sub>N</sub>], &Delta;[&mu;<sub>N</sub>]</td><td>&Pi;の"cyclotomic envelope"(&Pi;&times;<sub>G<sub>K</sub></sub>&Pi;<sub>&mu;N,K</sub>)</td><td>&sect;2 Definition 2.10 l.2665-2691</td><td>前提</td></tr>
+<tr><td>&mu;<sub>N</sub>-conjugacy class</td><td>&Pi;[&mu;<sub>N</sub>]に付随する対象の、&mu;<sub>N</sub>の共役作用によるorbit</td><td>&sect;2 Definition 2.10末尾 l.2683-2691</td><td>前提</td></tr>
+<tr><td><i>D<sub>Y</sub></i></td><td>Out(&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>])内、<i>K</i><sup>&times;</sup>とGal(Y/X)(&cong;<i>l&middot;</i>Z)の像が生成する部分群</td><td>&sect;2 Definition 2.13,(i) l.2910-2916(構成の議論はl.2856-2909)</td><td>前提</td></tr>
+<tr><td><i>s</i><sup>alg</sup><sub>Y&#776;</sub>, <i>s</i><sup>&Theta;</sup><sub>Y&#776;</sub></td><td>mod N algebraic section・theta section</td><td>&sect;2 Definition 2.13,(i) l.2916-2925(構成はl.2832-2853)</td><td>前提</td></tr>
+<tr><td><i>M<sub>N</sub></i></td><td>(&Pi;<sup>tp</sup><sub>Y</sub>[&mu;<sub>N</sub>], <i>D<sub>Y</sub></i>, <i>s</i><sup>&Theta;</sup><sub>Y&#776;</sub>)、mod N model mono-theta environment</td><td>Corollary 2.18直前の議論 l.3648-3662(「model」という型自体の一般定義はDefinition 2.13,(ii))</td><td>前提</td></tr>
+<tr><td><b><i>M</i>&#8226; := (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)</b></td><td><b>mod N mono-theta environment(一般形、★M4aの定義そのもの)</b></td><td><b>&sect;2 Definition 2.13,(ii) l.2941-2952</b></td><td>前提(確定)</td></tr>
+<tr><td>(Z/<i>l</i>Z)<sup>&plusmn;</sup></td><td>Corollary 2.9の"cusp label"集合(Zラベル付けの&epsilon;<sub>&plusmn;</sub>による商)</td><td>&sect;2 Corollary 2.9 l.2603-2625、Zラベル付け自体は&sect;1 l.628-630、&epsilon;<sub>&plusmn;</sub>の導入は&sect;1 l.1594-1598</td><td>前提</td></tr>
+<tr><td>型(1,(Z/<i>l</i>Z)<sup>&Theta;</sup>)</td><td>Definition 2.3の型(1,<i>l</i>-tors<sup>&Theta;</sup>)に、Definition 2.5,(i)の2条件(&Pi;<sup>ell</sup><sub>X</sub>&#8608;Zとの両立性・Theorem 1.10,(iii)の{&plusmn;1}-構造との両立性)を課したもの</td><td>&sect;2 Definition 2.3 l.2231-2235 + Definition 2.5,(i) l.2346-2358</td><td>前提</td></tr>
+<tr><td>Out(&Pi;)</td><td>標準的記法(外部自己同型群 = Aut(&Pi;)/Inn(&Pi;))</td><td>標準的な群論の記法、[EtTh]固有の定義は不要</td><td>前提(標準)</td></tr>
+<tr><td>Isom<sup>&mu;</sup>(<i>M</i><sup>&alpha;</sup>,<i>M</i><sup>&beta;</sup>), Aut<sup>&mu;</sup>(<i>M</i>)</td><td>&mu;<sub>N</sub>-共役類を法とする同型/自己同型の集合</td><td>Corollary 2.18,(iv)本文が直接定義(l.3804-3809)、&mu;<sub>N</sub>-conjugacy classの一般定義はDefinition 2.10</td><td>前提</td></tr>
+</table>
+
+<p class="note milestone">
+【問いへの回答、受理条件】<b>構造化「できる」</b>——Corollary 2.18の(i)&ndash;(iv)は全て命題文として構造化済み(上記section要素)、特に(ii)の<i>M</i>&#8226; := (&Pi;&#8226;, <i>D</i><sub>&Pi;&#8226;</sub>, <i>s</i><sup>&Theta;</sup><sub>&Pi;&#8226;</sub>)というmono-theta環境の定義そのものを正確に書き出した。使用される記法(20項目以上)は全て[EtTh]&sect;1&ndash;2の範囲内で出典を特定でき(表参照)、他の論文への遡及は不要だった(stop-loss未発動)。
+</p>
+<p class="note milestone">
+【★★★sizeの再評価、次工程(2_LocatorMap)への申し送り】ただし、この構造化は<b>AbsTopIII Definition3.1/Prop3.2よりも著しく深い依存の塔</b>を経由することが判明した——AbsTopIII側は数個の外部定義([Mzk17]の1例)への参照で完結したのに対し、Corollary 2.18は[EtTh]&sect;1の理論(&eta;&#776;<sub>&Theta;</sub>の構成・Definition1.9の軌道概念・Definition1.7の二重ドット被覆・&sect;1末尾のK<sub>N</sub>/J<sub>N</sub>のmod N構成)と&sect;2前半(Corollary2.9のラベル・Definition2.10の巡回包絡・Proposition2.12のl&middot;&Delta;<sub>&Theta;</sub>・Definition2.13のmono-theta環境本体)という、<b>&sect;1&ndash;2のほぼ全体(3600行超)を前提とする</b>。これは前期の「M4a: mono-theta環境(位相的データD&sub;&Pi;&sub;・s&Theta;&sub;&Pi;&sub;含む具体構造は構築不能と判断、既存Lean資産はabstract structureのみ)」という評価の根拠(sizeの大きさ)を、原文再読によって独立に裏付ける具体的な発見である——4_CalibrationPlanでのsize評価は、少なくとも「L」より大きい区分を検討すべきという申し送りとして記録する。
+</p>
+<p class="note">
+【<i>&eta;</i>&#776;<sub>&Theta;,l&middot;Z&times;&mu;2</sub>の半解決について、補足】この記法は概念としては明確(&eta;&#776;<sub>&Theta;,Z</sub>の直接の一般化)であり、その使用箇所・役割も文脈から特定できたが、原文には対応する単独の「Definitionタグ」が存在しない——Mochizukiの記法導入スタイルとして、地の文の議論のみで新しい記法を導入する箇所が他にも複数存在する可能性がある(今回はこの1件のみ確認)。次工程で必要になった場合は、&sect;2 l.2832-2910の該当パラグラフをそのまま引用する形で扱う。
+</p>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+</body>
+</html>

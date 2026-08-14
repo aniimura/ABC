@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Πtp_Ÿ⊆Πtp_Yのbridge精密特定(MAP-15対象、dotted/undotted塔の接続)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.resolved { border-left-color: #0a7d1e; background: #eaf7ea; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+</style>
+</head>
+<body>
+<p><a href="dy-construction.html">← D_Y構成(MAP-12)へ</a></p>
+<h1>Πtp_Ÿ⊆Πtp_Yのbridge精密特定 — MAP-15(dotted/undotted塔の接続)</h1>
+
+<p class="note milestone">【MAP-15の位置づけ、必須】MAP-14の発見(`OpaqueEtaThetaAmbientGroup`
+[dotted、Πtp_Ÿ]と`tateFullGroupWithZSurjection.piY`[undotted、Πtp_Y]を
+結ぶ公理が不在)を受けた正式な新マイルストーン。M5-relの非退化性主張とは
+無関係(下記負の対照参照)。</p>
+
+<section class="statement" id="y-original" data-locator="p.10-11, l.487-500">
+<span class="locator">原文 p.10-11(既確認)</span>
+<p><span class="label">Yの原初の定義:</span> $\Pi^{tp}_X\twoheadrightarrow
+\mathbf Z$の核として$\Pi^{tp}_Y$を定義——MAP-5-E/MAP-11の土台。
+</p>
+</section>
+
+<section class="statement proposition" id="prop-1-3" data-locator="p.18-19, l.1079-1198、★★★決定的">
+<span class="locator">原文 p.18-19、★★★核心</span>
+<p><span class="label">Proposition 1.3(The Étale Theta Class)の精密な
+読み:</span> $\eta_\Theta\in H^1(\Pi^{tp}_Y,\frac12\Delta_\Theta)$
+(**無点のY**、l.1079-1082「$\eta^\Theta_N\in H^1(\Pi^{tp}_Y,...)$」)が
+まず構成される。その後(l.1168-1187):
+</p>
+<blockquote>
+「the restricted classes $O_K^\times/\ddot K\cdot\eta_\Theta|_{\ddot Y}
+\in H^1(\Pi^{tp}_{\ddot Y},\frac12\Delta_\Theta)$ arise naturally from
+classes $O_{\ddot K}^\times\cdot\ddot\eta_\Theta\in H^1(\Pi^{tp}_{\ddot
+Y},\Delta_\Theta)$ — where $O_{\ddot K}^\times$ acts via the composite
+of the Kummer map... 'without denominators'.」
+</blockquote>
+<p class="note resolved">★★★<b>決定的な発見</b>: η_Θ(無点)は
+$\Pi^{tp}_Y$上のコホモロジー類——これを$\Pi^{tp}_{\ddot Y}$へ
+**制限**(restriction)することで、η̈_Θ(η with denominators removed、
+両点)が得られる。制限操作は**部分群への制限**を意味する——すなわち
+<b>$\Pi^{tp}_{\ddot Y}\subseteq\Pi^{tp}_Y$(部分群)</b>。これはMAP-9の
+`OpaqueEtaThetaLZAmbientSubgroup`(Ÿ̲̲⊆Ÿ)・MAP-13の`piYLZUnderline`
+(Y̲̲⊆Y)と**完全に同型のパターン**。</p>
+</section>
+
+<section class="statement" id="kdot-mechanism" data-locator="p.18, l.1163-1167">
+<span class="locator">原文 p.18</span>
+<p><span class="label">K̈/Kの機構("1/2"の由来):</span>
+$O_K^\times/{\ddot K}:=\{a\in O_{\ddot K}^\times\mid a^2\in K\}$——
+"$\frac12\mathbf Z/N\mathbf Z$"という分母は、$K$から$\ddot K$への
+**次数2程度の(平方根を添加する)体拡大**に由来すると推定される
+(Theorem1.6の"$O_{\ddot K}^\times$-indeterminacy"[既読]とも整合)。
+$\Pi^{tp}_{\ddot Y}\subseteq\Pi^{tp}_Y$は、この体拡大$K\to\ddot K$に
+対応する$\Pi^{tp}_Y\twoheadrightarrow G_K\twoheadrightarrow
+\mathrm{Gal}(\ddot K/K)$という合成の核として特徴づけられる可能性が
+高い——★正確な次数・機構の完全な確定には未読の周辺箇所(Theorem1.6
+本体、l.1385以降)の精読が必要、本ディスパッチでは「小さい・自己完結的
+（$G_K$の有限商）」という定性的性質のみを確定する。</p>
+</section>
+
+<section class="statement" id="def-1-7-alt" data-locator="p.25, l.1585-1600(親確認済み)、別経路">
+<span class="locator">原文 p.25(参考、別経路)</span>
+<p><span class="label">Definition1.7直前(参考、別の構成経路):</span>
+Ẍ^log→X^logという楕円曲線の"multiplication by 2"による次数4のGalois
+被覆(Gal(Ẍ/C)≅(Z/2Z)³)、ε_μ・ε_Z・ε_±という3つのinvolutionが定める
+可換図式「Ÿ^log→Ẍ^log→Ẋ^log→X^log」も存在する——★★★この経路は
+Prop1.3のη̈_Θ本体の構成には**直接使われていない**(η̈_Θはl.1168-1187の
+体拡大機構のみで完結、Definition1.7はTheorem1.6以降の別の話題
+[Πtp_Ẍへの言及]で使われる、と推定)。本ディスパッチのbridge設計は
+Prop1.3の経路(部分群、K̈/K体拡大)を優先する——より直接的でaxiom数が
+少ない。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.487-500, l.1079-1200, l.1585-1600)を
+"kappa"・"IUTch"・"non-degenerate"・"M5"でgrep、<b>0件</b>を確認した。
+</p>
+</section>
+
+</body>
+</html>

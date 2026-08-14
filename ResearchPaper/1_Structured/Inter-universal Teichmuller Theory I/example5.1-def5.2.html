@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>&sect;5 Example 5.1,(v)&middot;Definition 5.2,(vi)(viii)(M5対象: &kappa;-coric&eacute;function pseudo-monoid)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+<h1 id="ex-5-1-v-def-5-2">Section 5: Example 5.1,(v)&middot;Definition 5.2,(vi)(viii) — M5(&kappa;-coric函数のpseudo-monoid)の出典</h1>
+
+<p class="note milestone">【M5のための構造化】この節は`IUT_DependencyMap/graph.json`の<code>kummer-kappa-coric</code>ノードが参照する出典。前期資産・既存Lean資産は本工程では参照していない(<code>lean/ABC2/Instrument/</code>を"kappa"・"coric"で検索したが、Belyi cuspidalization・pseudo-monoid・Example5.1・Definition5.2を対象とする実装は存在しないことを確認済み——方法0の前倒し確認)。</p>
+
+<div class="setup" id="pseudo-monoid-def" data-locator="&sect;0, p.33, l.1977-1995">
+<span class="locator">原文 &sect;0, p.33</span>
+<p><span class="label">§0(記法・約束事、pseudo-monoidの定義、前提):</span>
+位相空間$P$と連続写像$P\times P\supseteq S\to P$の組が、ある位相アーベル群$M$(演算を乗法的に書く)と位相空間の埋め込み$\iota:P\to M$であって$S=\{(a,b)\in P\times P\mid\iota(a)\cdot\iota(b)\in\iota(P)\subseteq M\}$を満たし、$S\to P$が$M\times M\to M$の$\iota$による制限として得られるようなものが存在するとき、<b>topological pseudo-monoid</b>と呼ぶ。$M$が離散位相を持つ場合、結果として得られる$P$を単に<b>pseudo-monoid</b>と呼ぶ。pseudo-monoid $P$が<b>divisible</b>であるとは、$M$・$\iota$を、任意の正整数$n$について$M$の任意の元が$M$内に$n$乗根を持ち、かつ$a\in M$が$\iota(P)$に属するのは$a^n$が$\iota(P)$に属するとき、かつそのときに限る、という形に取れることをいう。pseudo-monoid $P$が<b>cyclotomic</b>であるとは、$M$・$\iota$を、$M$のtorsion部分群$\mu_M\subseteq M$が$\mathbf Q/\mathbf Z$に同型であり、$\mu_M\subseteq\iota(P)$かつ$\mu_M\cdot\iota(P)\subseteq\iota(P)$という形に取れることをいう。
+</p>
+</div>
+
+<div class="setup" id="ex-5-1-i-context" data-locator="p.123-124, l.8359-8420">
+<span class="locator">原文 p.123-124</span>
+<p><span class="label">Example 5.1, (i)(先行context、pseudo-monoidの初出):</span>
+$[$AbsTopIII$]$Theorem1.9を、Remark3.1.2の"$\Theta$-approach"を経由して$\pi_1({}^\dagger D_\circledcirc)$に適用することにより、$\pi_1({}^\dagger D_\circledcirc)$から群論的に$F^\times$の同型物$M_\circledast({}^\dagger D_\circledcirc)$を構成できる(自然な$\pi_1({}^\dagger D_\circledcirc)$作用つき、体構造の再構成も込み)。さらに$[$AbsTopIII$]$Theorem1.9(特にBelyi cuspidalizationの構成[(a)]・体"$K^\times_{\mathrm{ZNF}}\cup\{0\}$"の構成[(d)(e)])を適用することで、$\pi_1({}^\dagger D_\circledcirc)$から群論的に、関手的な仕方で、$C_{F_{\mathrm{mod}}}$の函数体の絶対Galois群の同型物$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$(&#8608;$\pi_1({}^\dagger D_\circledast)$)、および$C_{F_{\mathrm{mod}}}$に付随する<b>&kappa;-, $\infty\kappa$-, $\infty\kappa^\times$-coric有理函数のpseudo-monoid</b>の同型物
+$$M^\circledast_\kappa({}^\dagger D_\circledcirc),\quad M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc),\quad M^\circledast_{\infty\kappa^\times}({}^\dagger D_\circledcirc)$$
+(それぞれ自然な$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$作用つき)を構成できる。$M^\circledast_\kappa({}^\dagger D_\circledcirc)$は$M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc)$の$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$-不変元の部分集合と同一視でき、$M_\circledast({}^\dagger D_\circledcirc)$は$M^\circledast_{\infty\kappa^\times}({}^\dagger D_\circledcirc)$のある部分集合(実は"sub-pseudo-monoid")と同一視できる。
+</p>
+</div>
+
+<section class="statement definition" id="ex-5-1-v" data-locator="p.125-127, l.8645-8845">
+<span class="locator">原文 p.125-127</span>
+<p><span class="label">Example 5.1, (v)(★核心、$\infty\kappa$-coric構造の定義):</span>
+(iv)の記法を引き続き用いる。組$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)\curvearrowright{}^\dagger M^\circledast_{\infty\kappa}$(resp. $\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)\curvearrowright{}^\dagger M^\circledast_{\infty\kappa^\times}$、いずれも連続作用つきpseudo-monoidの組)が、${}^\dagger F_\circledast$上の<b>$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造</b>であるとは、これが(i)の組$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)\curvearrowright M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc)$(resp. $M^\circledast_{\infty\kappa^\times}({}^\dagger D_\circledcirc)$)と(連続作用つきpseudo-monoidの組として)同型であることをいう。$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造の$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$作用は、自然な全射$\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)\twoheadrightarrow\pi_1^{\kappa\text{-sol}}({}^\dagger D_\circledast)$を経由する(resp. 経由しない)。
+</p>
+<p>
+<b>cyclotome記法</b>: 可換モノイド$(-)$について$\mu_{\hat{\mathbf Z}}((-)):=\mathrm{Hom}(\mathbf Q/\mathbf Z,(-))$と書く(cf. $[$AbsTopIII$]$Definition3.1,(v);Definition5.1,(v)、この記法慣習はcyclotomic pseudo-monoidにも意味を持つ)。$\mu^\Theta_{\hat{\mathbf Z}}(\pi_1({}^\dagger D_\circledcirc)):=$"$\mu_{\hat{\mathbf Z}}(\Pi(-))$"($[$AbsTopIII$]$Theorem1.9のcyclotome、$\Theta$-approach経由で$\pi_1({}^\dagger D_\circledcirc)$へ適用)。
+</p>
+<p>
+<b>★★★核心の構成事実</b>: $M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc)$(resp. $M^\circledast_{\infty\kappa^\times}({}^\dagger D_\circledcirc)$)は、実質的に$[$AbsTopIII$]$Theorem1.9,(d)により、
+$$\varinjlim_H H^1(H,\mu^\Theta_{\hat{\mathbf Z}}(\pi_1({}^\dagger D_\circledcirc)))$$
+($H$は$\pi_1^{\kappa\text{-sol}}({}^\dagger D_\circledast)$(resp. $\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$)の開部分群を渡る)の部分集合として構成される。一方、Kummer類(正整数$N$についてのN乗根への$\pi_1^{\kappa\text{-sol}}({}^\dagger D_\circledast)$(resp. $\pi_1^{\mathrm{rat}}({}^\dagger D_\circledast)$)作用)を考えることで、${}^\dagger M^\circledast_{\infty\kappa}$(resp. ${}^\dagger M^\circledast_{\infty\kappa^\times}$)から$\varinjlim_H H^1(H,\mu_{\hat{\mathbf Z}}({}^\dagger M^\circledast_{\infty\kappa}))$(resp. 対応する式)への自然な単射が得られる(単射性は$M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc)$側の対応する単射性から直ちに従う)。零点・極の因子を考慮する議論(Remark3.1.7,(i)の"&kappa;-coric函数"の定義、$[$AbsTopIII$]$Proposition1.6,(iii)のKummer類、および初等的な事実$\mathbf Q_{>0}\cap\hat{\mathbf Z}^\times=\{1\}$、を経由)により、cyclotomeの一意な同型
+$$\mu^\Theta_{\hat{\mathbf Z}}(\pi_1({}^\dagger D_\circledcirc))\xrightarrow{\ \sim\ }\mu_{\hat{\mathbf Z}}({}^\dagger M^\circledast_{\infty\kappa})\quad(\text{resp. }\mu^\Theta_{\hat{\mathbf Z}}(\pi_1({}^\dagger D_\circledcirc))\xrightarrow{\ \sim\ }\mu_{\hat{\mathbf Z}}({}^\dagger M^\circledast_{\infty\kappa^\times}))
+$$
+であって、対応するコホモロジー加群の直極限間の同型が$M^\circledast_{\infty\kappa}({}^\dagger D_\circledcirc)\xrightarrow{\sim}{}^\dagger M^\circledast_{\infty\kappa}$(resp. 対応する同型)を誘導するようなものが一意に存在する。
+</p>
+<p>
+<b>★★★結論(一意性)</b>: 以上より、${}^\dagger F_\circledast$は常に$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造を持ち、しかもそれは一意に定まる同型を除いて一意である。
+</p>
+</section>
+
+<section class="statement definition" id="def-5-2-v-vi" data-locator="p.135-137, l.9363-9625">
+<span class="locator">原文 p.135-137</span>
+<p><span class="label">Definition 5.2, (v)(局所版、$v\in V^{\mathrm{non}}$の場合、setup):</span>
+${}^\ddagger D=\{{}^\ddagger D_w\}_{w\in V}$をD-prime-strip、$v\in V^{\mathrm{non}}$とする。$\pi_1({}^\ddagger D_v)$から群論的に"$C_v$"に対応する副有限群を構成でき($[$AbsTopII$]$Corollary3.3,(i)+$[$AbsTopI$]$Example4.8+$[$AbsTopIII$]$Theorem1.9)、これが$\pi_1({}^\ddagger D_v)$を開部分群として含む——${}^\ddagger \overline D_v$と書く。$[$AbsTopIII$]$Theorem1.9(特にBelyi cuspidalization[(a)]・体"$K^\times_{\mathrm{ZNF}}$"[(d)(e)])により、$\pi_1({}^\ddagger D_v)$から群論的に、関手的に、$\acute{e}$tale基本群の同型物$\pi_1^{\mathrm{rat}}({}^\ddagger D_v)$(&#8608;$\pi_1({}^\ddagger \overline D_v)$)を構成でき、さらに$[$AbsTopIII$]$Corollary1.10,(b)(c)(d)(d$'$)により、ind-topological monoid $M_v({}^\ddagger D_v)$($O_{F_v}^\rhd$に自然に同型)、および$C_v$に付随する&kappa;-, $\infty\kappa$-, $\infty\kappa^\times$-coric有理函数のpseudo-monoidの同型物
+$$M_{\kappa v}({}^\ddagger D_v),\quad M_{\infty\kappa v}({}^\ddagger D_v),\quad M_{\infty\kappa^\times v}({}^\ddagger D_v)$$
+(自然な$\pi_1^{\mathrm{rat}}({}^\ddagger D_v)$作用つき)を構成できる——Example5.1,(i)の局所版。
+</p>
+<p><span class="label">Definition 5.2, (vi)(★核心、局所版$\infty\kappa$-coric構造の定義):</span>
+(v)の記法を引き続き用いる。${}^\ddagger F=\{{}^\ddagger F_w\}_{w\in V}$をF-prime-strip(付随するD-prime-strip$={}^\ddagger D$)とする。組$\pi_1({}^\ddagger D_v)\curvearrowright{}^\ddagger M_v$(ind-topological monoid、連続作用つき、(v)で構成した$\pi_1({}^\ddagger D_v)\curvearrowright M_v({}^\ddagger D_v)$と同型)を考え、これを${}^\ddagger F_v$と、${}^\ddagger D$の恒等自己同型に対応する一意な同型を通じて関係づける。組$\pi_1^{\mathrm{rat}}({}^\ddagger D_v)\curvearrowright{}^\ddagger M_{\infty\kappa v}$(resp. $\pi_1^{\mathrm{rat}}({}^\ddagger D_v)\curvearrowright{}^\ddagger M_{\infty\kappa^\times v}$)が${}^\ddagger F_v$上の<b>$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造</b>であるとは、(v)の組$\pi_1^{\mathrm{rat}}({}^\ddagger D_v)\curvearrowright M_{\infty\kappa v}({}^\ddagger D_v)$(resp. 対応する組)と同型であることをいう。Example5.1,(v)と全く同型の構成(cyclotome $\mu^\Theta_{\hat{\mathbf Z}}(\pi_1({}^\ddagger D_v))$・$[$AbsTopIII$]$Theorem1.9,(d)による$\varinjlim_H H^1(H,-)$の部分集合としての構成・cyclotomeの一意な同型による誘導同型)により、${}^\ddagger F_v$は常に$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造を持ち、一意に定まる同型を除いて一意である。
+</p>
+</section>
+
+<section class="statement definition" id="def-5-2-vii-viii" data-locator="p.138-141, l.9626-10014" >
+<span class="locator">原文 p.138-141</span>
+<p><span class="label">Definition 5.2, (vii)(局所版、$v\in V^{\mathrm{arc}}$の場合、setup):</span>
+${}^\ddagger D_v$(Aut-holomorphic space)から算法的に"$C_v$"に対応するAut-holomorphic orbispace ${}^\ddagger\overline D_v$を構成できる($[$AbsTopIII$]$Corollary2.7,(a))。$\mathbf A_{{}^\ddagger D_v}$(複素archimedean位相体、Example3.4,(i)&middot;Definition3.6,(b)参照)を用い、$M_v({}^\ddagger D_v)\subseteq\mathbf A_{{}^\ddagger D_v}$をノルム$\le1$の非零元からなる位相部分モノイド("$O_{\mathbf C}^\rhd$")とする。&kappa;-, $\infty\kappa$-, $\infty\kappa^\times$-coric有理函数のpseudo-monoidは、算法的構成($[$AbsTopIII$]$Corollary2.7,(b))により「Aut-holomorphic orbispaceの射${}^\ddagger D_v^{\mathrm{rat}}\to M_v({}^\ddagger D_v)^{\mathrm{gp}}$の集合」としての"meromorphic function"のpseudo-monoid
+$$M_{\kappa v}({}^\ddagger D_v),\quad M_{\infty\kappa v}({}^\ddagger D_v),\quad M_{\infty\kappa^\times v}({}^\ddagger D_v)$$
+として表現できる。
+</p>
+<p><span class="label">Definition 5.2, (viii)(★核心、局所archimedean版$\infty\kappa$-coric構造の定義):</span>
+(vii)の記法を引き続き用いる。${}^\ddagger F_v$のKummer構造部分から誘導される同型$M_v({}^\ddagger D_v)\xrightarrow{\sim}{}^\ddagger M_v$(いずれも$O_{\mathbf C}^\rhd$に抽象的に同型)を通じ、$\infty\kappa$-(resp. $\infty\kappa^\times$-)coric有理函数のpseudo-monoidを、算法的構成($[$AbsTopIII$]$Corollary2.7,(b))により「${}^\ddagger D_v^{\mathrm{rat}}\to{}^\ddagger M_v^{\mathrm{gp}}$の写像で(vii)の$M_{\infty\kappa v}({}^\ddagger D_v)$(resp. $M_{\infty\kappa^\times v}({}^\ddagger D_v)$)の元を定める」という条件を満たすもの、として表現する——${}^\ddagger M_{\infty\kappa v}$(resp. ${}^\ddagger M_{\infty\kappa^\times v}$)と書き、${}^\ddagger F_v$上の(一意に定まる)$\infty\kappa$-coric(resp. $\infty\kappa^\times$-coric)構造と呼ぶ。cyclotome $\mu^\Theta_{\hat{\mathbf Z}}({}^\ddagger D_v):=\mathrm{Hom}(\mathbf Q/\mathbf Z,M_v({}^\ddagger D_v)^{\mathrm{gp}})$、Kummer構造誘導同型$\mu^\Theta_{\hat{\mathbf Z}}({}^\ddagger D_v)\xrightarrow{\sim}\mu_{\hat{\mathbf Z}}({}^\ddagger M_v)$も、非archimedean版(v)(vi)と並行する構造として与えられる。
+</p>
+</section>
+
+<hr>
+
+<h2 id="notation-table">前提として扱う記法(他論文由来、受理条件に基づく出典特定)</h2>
+<p class="note">[IUTchI]自身の範囲内で出典を特定できるもの(pseudo-monoidの定義[§0]・cyclotome記法・Example5.1(i)等)はそのまま構造化した。以下は[IUTchI]自身では出典が完結せず、他論文([AbsTopIII]・[AbsTopII]・[AbsTopI]・[FrdI])を前提として扱わざるを得ない記法——受理条件どおり、これらの論文自体の内容は本工程では検証せず、[IUTchI]がその存在をどう引用しているかのみを記録する(stop-loss未発動、5回以内の検索で全て[IUTchI]内の引用箇所を特定できた)。</p>
+
+<table class="types">
+<tr><th>記法・構成</th><th>意味(簡潔)</th><th>[IUTchI]内の引用箇所</th><th>判定</th></tr>
+<tr><td>$[$AbsTopIII$]$, Theorem 1.9(★核心)</td><td>Belyi cuspidalization——(a)Belyi cuspidalizationの構成、(d)体"$K^\times_{\mathrm{ZNF}}$"の構成・$\varinjlim_H H^1(H,\mu_{\hat{\mathbf Z}})$による部分集合としてのpseudo-monoid構成、(e)環構造の構成</td><td>Example5.1,(i) l.8388-8392、(v) l.8716・8801、Definition5.2,(v) l.9376-9378・9394、(vi) l.9460、他多数</td><td>前提(他論文、内容未検証)</td></tr>
+<tr><td>$[$AbsTopIII$]$, Corollary 1.10,(b)(c)(d)(d$'$)</td><td>$M_v({}^\ddagger D_v)$(ind-topological monoid、$O_{F_v}^\rhd$相当)の構成</td><td>Definition5.2,(v) l.9386-9389・9395</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopIII$]$, Corollary 2.3</td><td>$C_K$がK-coreであることの帰結</td><td>Definition5.2,(vii) l.9638</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopIII$]$, Corollary 2.7,(a)(b)(e)</td><td>(a)Aut-holomorphic orbispace ${}^\ddagger\overline D_v$の算法的構成、(b)pseudo-monoidの"meromorphic function"表現、(e)$\mathbf A_{{}^\ddagger D_v}$の構成</td><td>Definition5.2,(vii) l.9630・9671・9682、(viii) l.9731</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopIII$]$, Proposition 1.6,(iii)</td><td>Kummer類(rational functionのdivisor経由)</td><td>Example5.1,(v) l.8756-8757、Definition5.2,(viii) l.9817</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopIII$]$, Definition 3.1,(v); 5.1,(v)</td><td>$\mu_{\hat{\mathbf Z}}((-))$記法の慣習</td><td>Example5.1,(v) l.8706</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopII$]$, Corollary 3.3,(i)(iii)</td><td>(i)"$C_{F_{\mathrm{mod}}}$"に対応する副有限群の構成、(iii)&kappa;-, $\infty\kappa$-, $\infty\kappa^\times$-coric pseudo-monoidの構成([AbsTopI]Example4.8の下で適用可能)</td><td>Example5.1,(i) l.8371-8372・8406、Definition5.2,(v) l.9366-9368</td><td>前提(他論文)</td></tr>
+<tr><td>$[$AbsTopI$]$, Example 4.8</td><td>上記$[$AbsTopII$]$の算法が適用可能となる条件</td><td>同上</td><td>前提(他論文)</td></tr>
+<tr><td>$[$FrdI$]$, §0</td><td>モノイド・圏に関する記法・用語の約束</td><td>[IUTchI] §0 l.1980</td><td>前提(他論文)</td></tr>
+<tr><td>pseudo-monoid(定義そのもの)</td><td>位相アーベル群$M$への埋め込み$\iota:P\to M$を通じて定まる部分演算構造</td><td>[IUTchI] §0 l.1977-1995</td><td>前提(確定、[IUTchI]自身の§0内)</td></tr>
+<tr><td>Remark 3.1.2("$\Theta$-approach")</td><td>$[$AbsTopIII$]$Theorem1.9を$\pi_1({}^\dagger D_\circledcirc)$へ適用する際の解釈の枠組み</td><td>Example5.1,(i) l.8360、(v) l.8712、Definition5.2,(vi) l.9458</td><td>前提([IUTchI]内、本工程では内容未確認)</td></tr>
+<tr><td>Remark 3.1.7,(i)(ii)(iv)</td><td>(i)&kappa;-coric函数の定義・F-coreの一意モデル$C_{F_{\mathrm{mod}}}$、(ii)pseudo-monoidの構成の詳細、(iv)"$\mathrm{Gal}(L_C/L_C)\twoheadrightarrow\mathrm{Gal}(L_C^{(\kappa\text{-sol})}/L_C)$"</td><td>Example5.1,(i) l.8369・8406、(v) l.8756、Definition5.2,(v) l.9364・9392-9393</td><td>前提([IUTchI]内、本工程では内容未確認)</td></tr>
+<tr><td>Remark 3.4.3,(i)(ii)</td><td>(i)cuspidal inertia群の$\Theta$-approach的解釈、(ii)NF-pointの定義</td><td>Definition5.2,(vii) l.9659-9660、(viii) l.9783-9784</td><td>前提([IUTchI]内、本工程では内容未確認)</td></tr>
+<tr><td>Corollary 5.3,(ii)</td><td>${}^\ddagger D$の恒等自己同型に対応する一意な同型の存在</td><td>Definition5.2,(vi) l.9423</td><td>前提([IUTchI]内、後続節——循環ではない、参照は前方[未出]だが本Definition自体を再帰的に使わない)</td></tr>
+<tr><td>Remark 5.2.1,(i)</td><td>F-prime-strip↦付随するD-prime-strip</td><td>Definition5.2,(vi) l.9412、(viii) l.9702</td><td>前提([IUTchI]内、後続節)</td></tr>
+</table>
+
+<p class="note milestone">
+【問いへの回答、受理条件】<b>構造化「できる」</b>——Example5.1,(v)・Definition5.2,(vi)(viii)を命題(定義)文として構造化した。pseudo-monoidの構成が$[$AbsTopIII$]$Theorem1.9(特にBelyi cuspidalizationを与える(a)・(d)(e))を直接適用して構成される、という記述、および基点$\pi_1({}^\dagger D_\circledcirc)$(global版)&middot;$\pi_1({}^\ddagger D_v)$(local非archimedean版)&middot;${}^\ddagger D_v$(local archimedean版、Aut-holomorphic orbispace)を正確に書き出した。M4aと同様、記法の依存は[IUTchI]自身の範囲内では収束せず$[$AbsTopIII$]$&middot;$[$AbsTopII$]$&middot;$[$AbsTopI$]$&middot;$[$FrdI$]$という複数の外部論文に行き着くが、stop-lossは発動しなかった——[IUTchI]自身がこれらをどこでどう引用しているかは、全て5回以内の検索で特定できた(他論文の内容自体は前提として扱い、本工程では検証しない)。
+</p>
+<p class="note milestone">
+【★size評価の初期メモ、次工程への申し送り】$\infty\kappa$-coric構造の定義自体(「(i)/(v)の組と同型であること」という同型類の指定)は原文への依存が比較的軽い——しかし<b>その一意性の証明</b>(cyclotomeの一意な同型の存在、$[$AbsTopIII$]$Theorem1.9,(d)による$\varinjlim_H H^1(H,-)$構成、Kummer類・零点極の因子論法)はM4aのtheta cohomology類と同型の深さを持つ可能性がある——2_LocatorMapでのmathlib調査(continuous group cohomology $H^1$の不在は既にM1で確認済み)を踏まえた慎重な評価が必要。
+</p>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+</body>
+</html>

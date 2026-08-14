@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Definition2.10(cyclotomic envelope Π[μ_N])の精密転写(MAP-11対象)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .ul1 { text-decoration: underline; }
+  .ul2 { text-decoration: underline; text-decoration-style: double; }
+</style>
+</head>
+<body>
+<p><a href="theta-section-construction.html">← theta section構成(MAP-10)へ</a></p>
+<h1>Definition2.10(cyclotomic envelope Π[μ_N])の精密転写 — MAP-11(未着手経路a)</h1>
+
+<p class="note milestone">【MAP-11の位置づけ、必須】theta section出力インターフェース(MAP-10まで)は
+「弱い定義」で達成済み。旧2_LocatorMapが挙げた未着手3経路(a: cyclotomic
+envelope構築、b: D_Yの具体的生成元、c: theta section候補B)のうち(a)に
+着手する。M5-relの非退化性主張とは無関係(下記負の対照参照)。</p>
+
+<section class="statement" id="setup" data-locator="p.40, l.2657-2664">
+<span class="locator">原文 p.40</span>
+<p><span class="label">準備(l.2657-2664):</span> 整数$N\geq1$を固定し、
+$$\Delta_{\mu_N}:=(\mathbf Z/N\mathbf Z(1)),\qquad
+\Pi_{\mu_N,K}:=\Delta_{\mu_N}\rtimes G_K$$
+とおく——自然な完全列$1\to\Delta_{\mu_N}\to\Pi_{\mu_N,K}\to G_K\to1$を持つ。
+$\Delta_{\mu_N}$は$\mu_N$への(コホモロジー論的な)$\mathbf Z/N\mathbf Z$の
+Tate捻り、$G_K$は$K$の絶対Galois群。
+</p>
+</section>
+
+<section class="statement definition" id="def-2-10" data-locator="p.40, l.2665-2691">
+<span class="locator">原文 p.40</span>
+<p><span class="label">Definition 2.10:</span> $\Pi\twoheadrightarrow G_K$
+(添加を備えた位相群)が与えられたとき、
+$$\Pi[\mu_N]:=\Pi\times_{G_K}\Pi_{\mu_N,K}$$
+とおき、$\Pi[\mu_N]$を$\Pi\twoheadrightarrow G_K$(略して$\Pi$)の
+**cyclotomic envelope**と呼ぶ。$\Delta:=\mathrm{Ker}(\Pi\twoheadrightarrow
+G_K)$とおくと、$\Delta[\mu_N]:=\mathrm{Ker}(\Pi[\mu_N]\to G_K)=
+\Delta\times\Delta_{\mu_N}$——自然な完全列
+$1\to\Delta[\mu_N]\to\Pi[\mu_N]\to G_K\to1$を持つ。$\Pi_{\mu_N,K}\to G_K$の
+tautological section $G_K\to\Pi_{\mu_N,K}$(半直積の標準分裂)から、
+$\Pi[\mu_N]\to\Pi$の**section**
+$$s^{alg}_\Pi:\Pi\to\Pi[\mu_N]$$
+が定まる(これも"tautological"と呼ぶ)。
+</p>
+<p class="note">★構成要素の列挙(受理条件(a)): $\Pi[\mu_N]$の構成に必要な
+入力は(i)$\Pi$自体(位相群)、(ii)$\Pi\twoheadrightarrow G_K$という
+**添加**(全射準同型)、(iii)$G_K$自体(位相群)、(iv)$\Delta_{\mu_N}$
+($=\mathbf Z/N\mathbf Z(1)$、$G_K$の作用[サイクロトミック指標]付き)、
+(v)半直積$\Pi_{\mu_N,K}=\Delta_{\mu_N}\rtimes G_K$、の5点——(i)以外は
+[EtTh]のこれまでの読解範囲では初出。証明・議論に外部citation
+([Mzk]等)は一切なし(初等的な半直積+ファイバー積の構成のみ)。</p>
+</section>
+
+<section class="statement resolved" id="genericity-confirmed" data-locator="p.40(PDF)、2026-08-12目視確認">
+<span class="locator">★確認済み(PDF目視確認、2026-08-12)</span>
+<p><span class="label">Definition2.10自体の記法(確定):</span>
+`pdftoppm`でp.40を画像化し目視確認した結果、Definition2.10の「$\Pi$」は
+<b>完全に抽象的・一般的な記号</b>(下線・点等の装飾一切なし)であり、
+特定のY・X系列の具体的対象を指すものではないと確認した——Definition2.10は
+「$\Pi\twoheadrightarrow G_K$を満たす**任意の**位相群」に適用できる
+一般公式であり、記法上の曖昧さは無い。</p>
+<p class="note warning">★★★<b>MAP-11の具体的インスタンス化について(要再監査)</b>:
+問題はDefinition2.10自体でなく、<b>MAP-11がどの具体的Πを代入したか</b>
+にある。MAP-11の`piYMuN`はMAP-5-Eの`tateFullGroupWithZSurjection.piY`
+(下線0本のY由来、`dy-construction.html`参照)を「Π」として使用した。
+一方Definition2.13,(i)が実際に必要とするD_Yは<b>下線2本のY</b>
+(<span class="ul2">Y</span>)に付随する$\Pi^{tp}_{\underline{\underline Y}}
+[\mu_N]$である——MAP-11の`piYMuN`が実際にこの対象と一致するか
+(すなわちMAP-5-Eの下線0本Yと、Definition2.13が要求する下線2本Yが、
+何らかの自然な同型で結びつくのか、それとも別対象のままなのか)は
+<b>未検証</b>。ユーザー指示によるM1からの全既存資産の再監査
+(2026-08-12、HTML化完了後に実施)で扱う。</p>
+</section>
+
+<section class="statement" id="prop-2-11-ref" data-locator="p.40, l.2692-2711">
+<span class="locator">原文 p.40(参考、本節では詳細読解の対象外)</span>
+<p><span class="label">Proposition 2.11(General Properties of the Cyclotomic
+Envelope、参考):</span> $\Delta_\square[\mu_N]\twoheadrightarrow
+\Delta_\square$の核が$\Delta_\square[\mu_N]$の中心と一致する、等の一般
+性質——本節ではこれ以上立ち入らない(MAP-5-Eが既に温度スリム性の文脈で
+一部関連箇所をクリア済み、既存記録参照)。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.2657-2711)を"kappa"・"IUTch"・
+"non-degenerate"でgrep、<b>0件</b>を確認した。
+</p>
+</section>
+
+</body>
+</html>

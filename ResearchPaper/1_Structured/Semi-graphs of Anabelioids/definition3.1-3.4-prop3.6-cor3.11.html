@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§3 Definition3.1・3.4・Proposition3.6・Corollary3.11(MAP-5対象: tempered群・temp-slimness・cuspidal decomposition群の絶対性)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.corollary { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.remark { border-left-color: #666; background: #f5f5f5; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .proof { border-left: 4px solid #999; padding: 0.4em 1em; margin: 0.5em 0 1.5em 0; background: #fbfbfb; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<p><a href="../../IUT_DependencyMap/MAP5_tempered_fundamental_groups.md">&larr; MAP-5非公式マッピングノートへ</a> ｜ <a href="../../../lean/ABC2/Instrument/TemperedGroup.lean">&rarr; Lean形式化(TemperedGroup.lean)</a></p>
+<h1 id="def-3-1-3-4-prop-3-6-cor-3-11">&sect;3: Definition 3.1・3.4・Proposition 3.6・Corollary 3.11 &mdash; MAP-5(層A・層B)の出典</h1>
+
+<p class="note milestone">【MAP-5層A・層Bのための構造化(事後、手順回避の是正)】MAP-5層A・層B(`lean/ABC2/Instrument/TemperedGroup.lean`)は、非公式マッピングノート(`IUT_DependencyMap/MAP5_tempered_fundamental_groups.md`)とLean docstring引用のみで進め、正式な1_Structured化を経ていなかった&mdash;&mdash;M1〜M3の8_Consolidation漏れと同種の手順回避。本文書はその是正であり、既に確定済みの発見を正式フォーマットへ移す作業(新規の精読は行っていない)。3_Purified・4_CalibrationPlanは今回作らない(境界外公理は既にLeanで確定済みのため)&mdash;&mdash;1_Structured・2_LocatorMapの正式化のみで手順回避を解消する現実的な範囲に留める。</p>
+
+<div class="setup" id="sec3-intro" data-locator="p.33, l.1545-1555">
+<span class="locator">原文 p.33</span>
+<p>
+Section 3: The Tempered Fundamental Group. &ldquo;The notion of the tempered fundamental
+group is introduced in [Andr&#233;], &sect;4. In the present manuscript, however, we wish to
+study this notion from a more categorical point of view.&rdquo; &Pi;を位相群として、
+B<sup>temp</sup>(&Pi;) := 可算[自然数の集合の濃度以下]な離散集合で連続&Pi;-作用付き、を対象とする圏。
+</p>
+<p class="note">【★決定的な確認、MAP-5マッピングの核】&ldquo;tempered fundamental group&rdquo;という語り口の**出典**は[Andr&#233;]だが、[Mzk14]自身がここで与える**Definition3.1,(i)の定義そのもの**(下記)は[Andr&#233;]を一切参照せず自己完結する&mdash;&mdash;「Πtp_X(具体的構成)は[Andr&#233;]由来」と「temperedという抽象クラス(Definition3.1,(i))は[Mzk14]自己完結」の区別が本節の構造化の核心。</p>
+</div>
+
+<section class="statement definition" id="def-3-1" data-locator="p.33, l.1556-1569">
+<span class="locator">原文 p.33</span>
+<p><span class="label">Definition 3.1, (i):</span>
+&ldquo;If &Pi; may be written as an inverse limit of an inverse system of surjections
+of countable discrete topological groups, then we shall say that &Pi; is <b>tempered</b>.&rdquo;
+</p>
+<p><span class="label">(ii):</span>
+B<sup>temp</sup>(&Pi;)の形の圏に同値な圏を<b>connected temperoid</b>、その可算個の直積に同値な圏を<b>temperoid</b>と呼ぶ。
+</p>
+<p><span class="label">(iii)(iv):</span>
+temperoid間の射(有限極限・可算余極限を保つ関手)、Galois対象の定義(圏論的な標準的定義)。
+</p>
+<p class="note milestone">【★MAP-5層Aの出典、`IsTempered`(TemperedGroup.lean)】(i)が層Aの核心対象。原文の「an inverse system」(一般の前順序で添字づけられた図式)を、Lean形式化では$\mathbb N$添字の列(sequential inverse system)に限定した&mdash;&mdash;簡略化として明記済み(TemperedGroup.leanの冒頭docstring参照)。</p>
+</section>
+
+<section class="statement remark" id="remark-3-1-1" data-locator="p.33, l.1570-1575">
+<span class="locator">原文 p.33</span>
+<p><span class="label">Remark 3.1.1:</span>
+&ldquo;Observe that every profinite group is tempered.&rdquo; さらに、可算集合で添字づけられた逆系の逆極限として書ける場合、その群は可算生成(countably generated)。
+</p>
+<p class="note milestone">【★MAP-5層Aの非退化性(投資前3問)の直接の出典】`IsTempered`が空虚でないことの検査(層A)は、この一文が要求する最小限の性質&mdash;&mdash;「profinite群がtemperedの特殊ケースであるべき」&mdash;&mdash;を機械確認する形で実施した(`TemperedSystem.ofFiniteTower`: 有限離散群の全射系は`Finite&rarr;Countable`により無条件に`TemperedSystem`の入力となる、という群論的核心を証明)。ただし`ProfiniteGrp`型そのもの(コンパクト+完全不連結で定義)の任意のインスタンスが「有限離散群の全射系の極限として書ける」という pro-有限群の構造定理そのものは形式化していない&mdash;&mdash;スコープ外として明記済み。</p>
+</section>
+
+<section class="statement remark" id="remark-3-1-2" data-locator="p.33-34, l.1576-1591">
+<span class="locator">原文 p.33-34</span>
+<p><span class="label">Remark 3.1.2:</span>
+&ldquo;Suppose that &Pi; is tempered. Then every open subgroup of &Pi; is closed and of
+<b>countable</b> index in &Pi;.&rdquo; さらに、$H\subseteq\Pi$が「開」であることは、$\Pi/H$がB<sup>temp</sup>(&Pi;)の対象になること(すなわち$\Pi/H$が可算であること)と同値。
+</p>
+<p class="note milestone">【★★★MAP-5層C(位相構築)・層Bの溝の直接の裏付け、極めて重要な発見】本節の再確認により、[Mzk14]自身が「開部分群 &hArr; **可算指数**」(有限指数ではない)と明記していることが判明した&mdash;&mdash;これは、層B→M4a-rel-iii接続検査ディスパッチで機械的に発見した「Π^tp_Y(=Ker(Π^tp_X&#8608;Z)、無限指数だが層Cの位相のもとで開)」という否定的結果と**完全に整合する**、原文レベルでの直接の裏付けである。層Bが「開部分群」を「有限指数部分群」で近似したことが、[Mzk14]自身の記述(「可算指数」)から見て**忠実な転写ではなかった**ことが、この再確認によって原文レベルでも確定した&mdash;&mdash;層Bのsize見積りの訂正材料として記録する。</p>
+</section>
+
+<section class="statement definition" id="def-3-4" data-locator="p.36, l.1699-1710">
+<span class="locator">原文 p.36</span>
+<p><span class="label">Definition 3.4, (ii):</span>
+&ldquo;A continuous homomorphism of tempered groups &Pi;<sub>1</sub> &rarr; &Pi;<sub>2</sub> will be called
+<b>relatively temp-slim</b> if, for every open subgroup H &sube; &Pi;<sub>1</sub>, the centralizer
+Z<sub>&Pi;2</sub>(Im(H)) is trivial. A tempered group will be called <b>temp-slim</b> if its identity
+morphism is relatively temp-slim.&rdquo;
+</p>
+<p class="note milestone">【★MAP-5層Bの出典、`temperedCurveGroup_temp_slim`(TemperedGroup.lean)】恒等射の場合、「$\Pi$の任意の開部分群$H$について$Z_\Pi(H)=1$」という条件に帰着する。Lean形式化では「開部分群」を「有限指数部分群」(`Subgroup.FiniteIndex`)で近似した&mdash;&mdash;Remark3.1.2の再確認(上記)により、この近似が[Mzk14]原文の「可算指数」より**狭い**(忠実でない)ことが確定した。近似自体は投資前3問(空虚化回避、H≠&bot;での近似が恒偽だった過去の発見)による正当な訂正だったが、原文の完全な転写ではない&mdash;&mdash;層Cで「開」を位相的に忠実に定義し直した。</p>
+</section>
+
+<section class="statement proposition" id="prop-3-6" data-locator="p.37-40, l.1821-1922">
+<span class="locator">原文 p.37-40</span>
+<p><span class="label">Proposition 3.6 (The Tempered Fundamental Group of a Semi-graph of Anabelioids):</span>
+G, G&#8242;を連結・可算・quasi-coherent・totally elevated・totally aloof・verticially slimな
+semi-graph of anabelioidsとする。
+</p>
+<p><span class="label">(i):</span> &pi;<sup>temp</sup><sub>1</sub>(G)はtempered。
+<span class="label">(ii):</span> B<sup>temp</sup>(&pi;<sup>temp</sup><sub>1</sub>(G))&cong;B<sup>temp</sup>(G)(圏同値)。
+<span class="label">(iii):</span> B(G)&rarr;B<sup>temp</sup>(G)の全充満埋め込みが&pi;<sup>temp</sup><sub>1</sub>(G)&#8618;&pi;<sub>1</sub>(G)(位相群の単射)を誘導する。
+<span class="label">(iv):</span> semi-graph of anabelioidsの射G&#8242;&rarr;Gがtemperoidの射B<sup>temp</sup>(G&#8242;)&rarr;B<sup>temp</sup>(G)を誘導し、locally openならこの射は<b>relatively temp-slim</b>。特に、B<sup>temp</sup>(G)は<b>temp-slim</b>。
+<span class="label">(v):</span> 省略(coherentな場合のtempered coveringに関する&eacute;tale性)。
+</p>
+<div class="proof" id="proof-prop-3-6" data-proves="prop-3-6" data-locator="p.39-40, l.1858-1922">
+<span class="locator">原文 p.39-40(証明)</span>
+<p>(iv)の証明(l.1912-1913): 「The first sentence of assertion (iv) follows from the definitions;
+the remainder of assertion (iv) follows, in light of the injection of assertion (iii),
+formally from <b>Corollary 2.7, (ii)</b>.」</p>
+<p class="note milestone">【★★★依拠先の系譜(A3仮説削除検査、MAP-5層B条件2で確認済み)】Corollary2.7,(ii)(l.1406-1408)&larr;Proposition2.6(l.1262-1398)&larr;Proposition2.5(l.1207-1239)&mdash;&mdash;<b>純粋に有限グラフの被覆・貼り合わせの組合せ論</b>、[Mzk14]内で完全に閉じる。外部依存ゼロ(詳細は<a href="../../2_LocatorMap/Semi-graphs of Anabelioids/refs.html">2_LocatorMap</a>参照)。</p>
+</div>
+</section>
+
+<section class="statement proposition" id="prop-2-5" data-locator="p.27-28, l.1207-1239">
+<span class="locator">原文 p.27-28(補助命題)</span>
+<p><span class="label">Proposition 2.5 (Injectivity):</span>
+連結・quasi-coherentなgraph of anabelioids G、その連結部分graph Hについて、自然な射
+&Pi;<sub>b</sub>&rarr;&Pi;<sub>G</sub>, &Pi;<sub>v</sub>&rarr;&Pi;<sub>G</sub>, &Pi;<sub>H</sub>&rarr;&Pi;<sub>G</sub>は単射(i)。Gが有界位数なら、これらの射が単射になる正規開部分群が存在する(ii)。
+</p>
+<p class="note">証明は有限&eacute;tale被覆の「貼り合わせ」構成のみ(l.1217-1239)&mdash;&mdash;外部依存なし。</p>
+</section>
+
+<section class="statement proposition" id="prop-2-6" data-locator="p.28-29, l.1262-1398">
+<span class="locator">原文 p.28-29(補助命題)</span>
+<p><span class="label">Proposition 2.6 (Commensurability):</span>
+連結・quasi-coherentなgraph of anabelioids Gの連結部分graph H, Kについて、HがKに属さないelevated vertexまたはsub-coverticial edgeを含むなら、&Pi;<sub>H</sub>とKの任意の共役の交わりは&Pi;<sub>H</sub>で無限指数。
+</p>
+<p class="note">証明(l.1270-1398)は有限&eacute;tale被覆の構成(&pi;1-epimorphic approximator等)のみ&mdash;&mdash;Proposition2.5,(ii)を使うが、それ以外は外部依存なし。</p>
+</section>
+
+<section class="statement corollary" id="cor-2-7" data-locator="p.30, l.1399-1427">
+<span class="locator">原文 p.30(補助命題)</span>
+<p><span class="label">Corollary 2.7 (Slimness and Commensurators), (i)(ii):</span>
+elevated vertex vについてC<sub>&Pi;G</sub>(&Pi;<sub>v</sub>)=&Pi;<sub>v</sub>(commensurator=自身、(i))。HがGvがslimな頂点vを含むなら、B(G<sub>H</sub>)&rarr;B(G)はrelatively slim(ii)。
+</p>
+<p class="note">証明はProposition2.6の「formal consequence」(l.1420, l.1427)&mdash;&mdash;外部依存なし。</p>
+</section>
+
+<section class="statement corollary" id="cor-3-9" data-locator="p.42-43, l.2041-2089">
+<span class="locator">原文 p.42-43(Corollary3.11が依拠)</span>
+<p><span class="label">Corollary 3.9 (Reconstruction of the Underlying Semi-graph of Anabelioids):</span>
+連結・可算・quasi-coherent・totally elevated・totally estranged・verticially slimなgraph of anabelioids G, Hについて、B<sup>temp</sup>(&minus;)がsemi-graph of anabelioidsのlocally open射とtemperoidのquasi-geometric射の間の自然な全単射対応を与える。
+</p>
+<p class="note">証明はProposition3.6,(iv)・Theorem3.7・Definition3.8に依拠(すべて[Mzk14]内部)。</p>
+</section>
+
+<section class="statement" id="example-3-10" data-locator="p.43-45, l.2097-2235">
+<span class="locator">原文 p.43-45(参考、境界の実例)</span>
+<p><span class="label">Example 3.10 (Pointed Stable Curves over p-adic Local Fields I):</span>
+K=&Qopf;<sub>p</sub>の有限拡大、X<sup>log</sup><sub>K</sub>を滑らかなlog curveとする。
+&Pi;<sup>tp</sup><sub>X</sub> := &ldquo;the tempered fundamental group of [Andr&#233;], &sect;4&rdquo;(l.2111)。
+1&rarr;&Delta;<sup>tp</sup><sub>X</sub>&rarr;&Pi;<sup>tp</sup><sub>X</sub>&rarr;G<sub>K</sub>&rarr;1(幾何的部分&Delta;<sup>tp</sup><sub>X</sub>、算術的な商G<sub>K</sub>)。&Pi;<sup>tp</sup><sub>X</sub>はDefinition3.1,(i)の意味でtempered。
+</p>
+<p class="note milestone">【★決定的な確認(MAP-5マッピング済み、再確認)】&Pi;<sup>tp</sup><sub>X</sub>という**具体的対象**の構成は[Andr&#233;]&sect;4由来&mdash;&mdash;temperedという**抽象クラス**(Definition3.1,(i))には[Andr&#233;]は不要、という区別がここで再確認できる。</p>
+<p><span class="label">temp-slimnessの帰結(l.2231-2235)</span>: 「Note that each &Delta;[i] is temp-slim. [Indeed, this follows from...the temp-slimness portion of Proposition 3.6, (iv).] Since &Delta; is the inverse limit of the &Delta;[i], and G<sub>K</sub> is <b>slim</b> [cf. e.g., <b>[Mzk3], Theorem 1.1.1</b>], we thus conclude that both &Delta; and &Pi; are temp-slim.」</p>
+<p class="note">Π<sup>tp</sup><sub>X</sub>自身の(具体的な)temp-slimnessは、Proposition3.6,(iv)(抽象枠組み、外部依存ゼロ)に加え、G<sub>K</sub>のslimness([Mzk3]Theorem1.1.1、下記2_LocatorMap参照)を要する。</p>
+</section>
+
+<section class="statement corollary" id="cor-3-11" data-locator="p.45-48, l.2271-2477">
+<span class="locator">原文 p.45-48</span>
+<p><span class="label">Corollary 3.11 (Reconstruction of Semi-graphs of Anabelioids Associated to Pointed Stable Curves):</span>
+&#9633;=&alpha;,&beta;について、K<sub>&#9633;</sub>を&Qopf;<sub>p&#9633;</sub>の有限拡大、(X<sup>log</sup><sub>&#9633;</sub>)<sub>K&#9633;</sub>を滑らかなlog curve、&Delta;[&#9633;]:=&pi;<sup>temp</sup><sub>1</sub>((X<sup>log</sup><sub>&#9633;</sub>)<sub>K&#9633;</sub>)、G[&#9633;]・G<sup>c</sup>[&#9633;]をExample3.10の記法とする。任意の位相群の同型
+&gamma;: &Delta;[&alpha;] &cong; &Delta;[&beta;]は、&gamma;に関して函手的な semi-graph of anabelioidsの同型 G<sup>c</sup>[&alpha;] &cong; G<sup>c</sup>[&beta;]を誘導する。さらにそのようなγが存在すれば、p<sub>&alpha;</sub>=p<sub>&beta;</sub>。
+</p>
+<div class="proof" id="proof-cor-3-11" data-proves="cor-3-11" data-locator="p.46-48, l.2307-2477">
+<span class="locator">原文 p.46-48(証明)</span>
+<p>依拠先(l.2313, l.2327, l.2333, l.2351, l.2358-2359, l.2382-2384, l.2438-2441): Corollary3.9(内部)・
+Remark1.7.1(内部、離散自由群の準有限完備化への単射)・<b>[Mzk1]</b>&sect;3(admissibility)・
+<b>[Mzk3]</b>Lemma1.3.7(カスプ分解群の可換終端性)+&sect;2(admissible quotient)・
+<b>[Tama2]</b>(A.玉川、"cf. also"/"cf., e.g."型の例示的参照、2箇所)・
+「well-known 'purity of the branch locus' results」(古典代数幾何)。</p>
+<p class="note milestone">【★★★新規発見(MAP-5層Bで確認済み、正直な記録)】[Tama2](A.玉川、2004、望月氏以外の著者)は<b>0_Sourceに不在</b>&mdash;&mdash;ただし引用箇所は共に「well-known」と明記された古典的事実(分岐点の純性・安定曲線の局所基本群の構造)への例示的参照であり、[Andr&#233;]のような**新規・専用の唯一の定義源**とは性質が異なる。[Andr&#233;]自体はこの証明連鎖に**一度も出現しない**(全文検索で確認済み)。詳細は<a href="../../2_LocatorMap/Semi-graphs of Anabelioids/refs.html">2_LocatorMap</a>参照。</p>
+</div>
+<p class="note milestone">【★MAP-5層B、`temperedCurveGroup_cuspidal_absolute`(TemperedGroup.lean)の出典】このCorollary3.11の内容([EtTh]Theorem6.5,(iii)が直接引用する実質)を、「2つの`TemperedCurveGroup`インスタンス間の任意の同型はカスプ分解部分群をカスプ分解部分群に写す」という境界外公理として転写した。</p>
+</section>
+
+<h2>前提として扱う記法</h2>
+<table class="types">
+<tr><th>記法</th><th>意味</th><th>Lean形式化での扱い</th></tr>
+<tr><td>&Pi;</td><td>tempered群(Definition3.1,(i))</td><td>`IsTempered`(層A)</td></tr>
+<tr><td>B<sup>temp</sup>(&Pi;)</td><td>可算離散&Pi;-集合の圏(temperoid)</td><td>形式化しない(圏論的構造は捨象、群のみ扱う)</td></tr>
+<tr><td>開部分群</td><td>Remark3.1.2: 開&hArr;可算指数</td><td>層B: 有限指数で近似(忠実でない、上記note参照)/層C: 実際の位相で開を定義</td></tr>
+<tr><td>temp-slim</td><td>任意の開部分群の中心化群が自明(Definition3.4,(ii))</td><td>`temperedCurveGroup_temp_slim`(層B、有限指数近似)</td></tr>
+<tr><td>&Pi;<sup>tp</sup><sub>X</sub>・&Delta;<sup>tp</sup><sub>X</sub></td><td>Example3.10の具体的対象([Andr&#233;]由来)</td><td>`TemperedCurveGroup`(層B、opaque構造として抽象化)</td></tr>
+<tr><td>カスプ分解群</td><td>Corollary3.11の絶対性の対象(semi-graph構造由来)</td><td>`isCuspidalDecompositionGroup`(層B、opaqueな述語)</td></tr>
+</table>
+
+<h2>関連</h2>
+<ul>
+<li><code>IUT_DependencyMap/MAP5_tempered_fundamental_groups.md</code>: MAP-5の非公式マッピングノート(本文書の元になった発見)。</li>
+<li><code>lean/ABC2/Instrument/TemperedGroup.lean</code>: 層A(`IsTempered`)・層B(`TemperedCurveGroup`+境界外公理3件)・層C(位相構築)のLean形式化本体。</li>
+<li><code>2_LocatorMap/Semi-graphs of Anabelioids/refs.html</code>: 外部依存(引用文献)の解決マップ。</li>
+</ul>
+
+<hr>
+<p><a href="../../IUT_DependencyMap/MAP5_tempered_fundamental_groups.md">&larr; MAP-5非公式マッピングノートへ</a></p>
+</body>
+</html>

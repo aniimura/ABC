@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>η̈_{Θ,l·Z×μ2}の構成箇所の精密特定(MAP-9対象、旧「半解決」の解消)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .ul1 { text-decoration: underline; }
+  .ul2 { text-decoration: underline; text-decoration-style: double; }
+</style>
+</head>
+<body>
+<p><a href="definition1.9-eta-theta-Z.html">← Definition1.9(η̈_Θ,Z、MAP-8)へ</a></p>
+<h1>η̈_{Θ,l·Z×μ2}の構成箇所の精密特定 — MAP-9(§2版拡張)の出典</h1>
+
+<p class="note milestone">【MAP-9の位置づけ、必須】η̈_Θ・η̈_Θ,Zは既にMAP-6・MAP-8で「弱い定義」
+として達成済み。本文書は旧4_CalibrationPlan文書
+(`section2-cor2.18-plan.md`)が「§2、Prop2.14直前の議論 l.2832-2910付近
+——単独のDefinition番号なし、半解決」と記した対象を**精密に再特定**する。
+M5-relのκ-Recon非退化性主張とは無関係(下記負の対照参照)。</p>
+
+<p class="note resolved">【2026-08-12追記、PDF目視確認による重要な訂正(2回目、700dpiでの再確認)】
+`pdftoppm`でp.37をさらに高解像度(700dpi)で再確認した結果、<b>最初の訂正
+記述にも誤りがあった</b>と判明し、再度訂正する——原初の
+$\ddot\eta^\Theta\in H^1(\Pi^{tp}_{\ddot Y},\Delta_\Theta)$
+(§1、MAP-6/8の対象、Definition1.9のp.27と同一の式)は<b>Πに下線<u>1本</u></b>
+(<span class="ul1">Π</span>、p.27のDefinition1.9と一貫)——「下線なし」
+という最初の訂正記述は誤りだった。一方、本文書のl-th root化した最終形
+($\ddot{\ddot\eta}^\Theta\in H^1(\Pi^{tp}_{\ddot Y},l\cdot\Delta_\Theta)$、
+η̈自体にも下線2本が付く)は<b>Πに下線<u>2本</u></b>
+(<span class="ul2">Π</span>)——**下線1本→下線2本という段階的な変化**
+であり、「なし→2本」ではなかった。この精密化はMAP-9の判定そのもの
+(Πのアンビエント群がMAP-6/8と異なる)を<b>変えない</b>——下線1本と下線2本は
+依然として区別された記号である。★★★さらに子の再監査(2026-08-12)で、
+`OpaqueEtaThetaAmbientGroup`のMAP-6由来docstringが出典を「Theorem1.6、
+Πtp_Ẍ(二重ドットX)相当」としていたが、該当箇所(l.1385-1407)にはẌ自体は
+出現せず、実際に使われるのは無印X・二重ドットY(Ÿ)のみという追加の
+citation不正確さも発見された——**Πのアンビエント群自体が§1とは異なる
+可能性がある**(MAP-6/8の
+`OpaqueEtaThetaAmbientGroup`をそのまま再利用してよいかは未検証、
+下記★★★重要な訂正節参照)。さらに次数lの新しい被覆
+$\underline{\underline Y}^{\log}_{\phantom .}\to Y^{\log}$
+(下線2本のYが、無印Yを覆う)・
+$\ddot{\underline{\underline Y}}^{\log}\to\ddot Y^{\log}$
+(二点+下線2本のYが、二点のみのYを覆う)が明示的に導入されている
+——これが「degree l」の由来。</p>
+
+<section class="statement" id="setup-l-root" data-locator="p.37-38, l.2440-2465">
+<span class="locator">原文 p.37-38</span>
+<p><span class="label">構成の第1段階(l-th root化):</span>
+$D_x\to G_K$の分裂の選択(Proposition2.2,(ii))——$X^{\log}\to X^{\log}$
+という被覆を定めた選択——は、$D_x\to\Pi^{tp}_{\ddot Y}\to(\Pi^{tp}_{\ddot Y})_\Theta$
+(Proposition1.5,(ii))という自然な写像を考慮することで、精密化された類
+$$\in H^1(\Pi^{tp}_{\ddot Y},\Delta_\Theta\otimes\mathbf Z/l\mathbf Z)$$
+——$\ddot\eta_\Theta$の$(O_K^\times)^l$-倍を除く選択とみなせる——を定める。
+さらに、この類をより深い被覆$\ddot{\ddot Y}^{\log}\to\ddot Y^{\log}$へ
+制限すると、$\ddot\eta_\Theta\in H^1(\Pi^{tp}_{\ddot{\ddot Y}},l\cdot
+\Delta_\Theta)$が得られる(「トートロジー」と原文が明記、l.2459-2465)。
+</p>
+<p class="note">★★★<b>新規入力データの特定</b>: この段階は、MAP-6/MAP-8の
+$\ddot\eta_{\Theta,\mathbf Z}$資産に**存在しない新規の入力**
+(Proposition2.2,(ii)の分裂の選択)を要する——ただしProposition2.2自体の
+証明(l.2198-2209、既読・確認済み)は「定義から直ちに」+初等的な群論
+のみで完結し、<b>外部依存はゼロ</b>。</p>
+</section>
+
+<section class="statement" id="setup-lZmu2-orbit" data-locator="p.38, l.2470-2496">
+<span class="locator">原文 p.38</span>
+<p><span class="label">構成の第2段階(orbit化、★★★η̈_{Θ,l·Z×μ2}の実際の構成箇所):</span>
+$\Pi^{tp}_{\ddot X}/\Pi^{tp}_{\ddot{\ddot Y}}\cong l\cdot\mathbf Z$-orbit
+$\ddot\eta_{\Theta,l\cdot\mathbf Z}$(l.2470-2474)を取り、さらに
+$\Pi^{tp}_X/\Pi^{tp}_{\ddot{\ddot Y}}\cong\{(l\cdot\mathbf Z)\times\mu_2\}$-orbits
+$$\ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2},\quad \ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2}$$
+(それぞれ$\ddot\eta_\Theta$・$\ddot\eta_{\ddot\Theta}$のorbit)を取る
+——**これが本文書の主対象、η̈_{Θ,l·Z×μ2}の実際の構成箇所**である
+(l.2491-2493)。同様に$\Pi^{tp}_X/\Pi^{tp}_{\ddot Y}\cong(\mathbf Z\times
+\mu_2)$-orbit $\ddot\eta_{\Theta,\mathbf Z\times\mu_2}$も定義される
+(l.2494-2496)。
+</p>
+<p class="note milestone">★★★<b>「単独のDefinition番号なし」の確認(受理条件(c))</b>:
+この段落(l.2440-2496)は**地の文(running text)**であり、見出し語
+"Definition N.M"を一切持たない——旧4_CalibrationPlan文書の「単独の
+Definition番号なし」という判定は<b>正確</b>と確認した。ただし構成箇所
+自体は**この約57行の連続した一段落に集中しており**、§2全体に本質的に
+分散しているわけでは<b>ない</b>——旧文書が示唆したl.2832-2910という
+locator(実際にはtheta section $s^\Theta_{\ddot Y}$の構成箇所、MAP-6の
+`sectionImageOf`層で既に扱い済み)は、η̈_{Θ,l·Z×μ2}<b>自体</b>の構成
+箇所としては<b>不正確</b>だったと判定する——正しい構成箇所は
+<b>l.2440-2496</b>である。</p>
+
+<p class="note warning">★★★<b>重要な訂正(PDF目視確認、2026-08-12、
+要再監査)</b>: 本節のη̈Θ̈・l·Z-orbit等は<b>下線2本のΠ・Y</b>
+($\Pi^{tp}_{\ddot{\underline{\underline Y}}}$等)に付随する対象である
+と確認した。一方MAP-9のLean実装(`etaThetaDoubleDot`・`lZTranslation`)は
+MAP-6/8の`OpaqueEtaThetaAmbientGroup`(§1の**下線なし**η̈_Θ用に導入された
+アンビエント群)を<b>そのまま再利用</b>している。この再利用が実際に
+妥当か(下線なしのΠと下線2本のΠが、何らかの自然な同型・埋め込みで
+結びつくのか、それとも本来は別のアンビエント群を新設すべきだったか)は
+<b>未検証</b>——ユーザー指示によるM1からの全既存資産の再監査
+(2026-08-12、HTML化完了後に実施)の優先確認項目とする。</p>
+</section>
+
+<section class="statement definition" id="def-2-7" data-locator="p.39, l.2497-2499">
+<span class="locator">原文 p.39</span>
+<p><span class="label">Definition 2.7(standard typeラベルの伝播のみ):</span>
+$\ddot\eta_{\Theta,\mathbf Z}$がstandard typeならば、
+$\ddot\eta_{\Theta,l\cdot\mathbf Z}$・$\ddot\eta_{\Theta,l\cdot\mathbf Z}$・
+$\ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2}$・
+$\ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2}$・
+$\ddot\eta_{\Theta,\mathbf Z\times\mu_2}$も standard typeと呼ぶ。
+</p>
+<p class="note">Definition2.7自体は**呼称の伝播のみ**——η̈_{Θ,l·Z×μ2}の
+**構成**には無関係(構成は上記l.2440-2496で既に完了している)。
+MAP-8で確立済みの`IsStandardType`(候補A、opaque述語)をそのまま
+延長すればよく、新規の数学的内容はない。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.2198-2499)を"kappa"・"IUTch"・
+"non-degenerate"でgrep、<b>0件</b>を確認した。`KappaCoricConditional.lean`
+への参照は本文書中に一切出現しない。
+</p>
+</section>
+
+</body>
+</html>

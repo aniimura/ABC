@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>D_Y̲̲⊆Out(Π^tp_Y̲̲[μ_N])の精密転写+下線本数によるY/Y̲̲識別(MAP-12対象、PDF目視確認済み)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.warning { border-left-color: #b03030; background: #fdecea; }
+  section.statement.resolved { border-left-color: #0a7d1e; background: #eaf7ea; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.warning { background: #fdecea; border-left-color: #b03030; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .ul1 { text-decoration: underline; }
+  .ul2 { text-decoration: underline; text-decoration-style: double; }
+</style>
+</head>
+<body>
+<p><a href="cyclotomic-envelope-construction.html">← cyclotomic envelope構成(MAP-11)へ</a></p>
+<h1>D_<span class="ul2">Y</span>⊆Out(Π^tp_<span class="ul2">Y</span>[μ_N])の精密転写 — MAP-12(D_Yの具体的生成元)</h1>
+
+<p class="note milestone">【MAP-12の位置づけ、必須】cyclotomic envelope Πtp_Y[μN](MAP-11、
+`piYMuN`)は「弱い定義」で達成済み。本文書はDefinition2.13,(i)のD_Y
+(K×の像+Gal(Y/X)の像で生成)を対象とする。M5-relの非退化性主張とは
+無関係(下記負の対照参照)。</p>
+
+<p class="note resolved">【2026-08-12追記、PDF目視確認により全面改訂】本文書は当初、
+0_Sourceのプレーンテキスト抽出のみに基づいて作成され、「Gal(Y/X)」の
+見かけ上の矛盾を「上線付きȲ・X̄」という<b>未確認の推定</b>で説明していた。
+その後PDF原本を`pdftoppm`で画像化し目視確認した結果、実際には
+<b>上線でなく下線の本数(0本 vs 2本)による区別</b>であったと判明した——
+下記「★★★確定(PDF目視確認済み)」節に置き換える。旧「推定」節は
+誤りを含んでいたため、正確な記録のため本注記で明示的に訂正する
+(記法規約は`1_Structured/README.md`参照)。</p>
+
+<section class="statement definition" id="def-2-13-i" data-locator="p.43(PDF), l.2910-2919(0_Source)">
+<span class="locator">原文 p.43(PDF目視確認済み)</span>
+<p><span class="label">Definition 2.13,(i):</span>
+$$D_{\underline{\underline Y}}\subseteq\mathrm{Out}(\Pi^{tp}_{\underline{\underline Y}}[\mu_N])$$
+を、$K^\times$の像・$\mathrm{Gal}(\underline{\underline Y}/\underline{\underline X})
+(\cong l\cdot\mathbf{\underline{\underline Z}})$の像で
+生成される$\mathrm{Out}(\Pi^{tp}_{\underline{\underline Y}}[\mu_N])$の部分群として定義する
+——<b>Y・X・Zは全て下線2本(<span class="ul2">Y</span>・<span class="ul2">X</span>・<span class="ul2">Z</span>)</b>。
+theta section $s^\Theta_{\ddot{\underline{\underline Y}}}$
+(二点+下線2本の複合)・algebraic section $s^{alg}_{\ddot{\underline{\underline Y}}}$も同節で定義される。
+</p>
+</section>
+
+<section class="statement" id="kummer-map" data-locator="p.43(PDF), l.2876-2887(0_Source)">
+<span class="locator">原文 p.43(PDF目視確認済み)</span>
+<p><span class="label">Kummer写像によるK×の像(l.2876-2887):</span>
+$$K^\times\twoheadrightarrow(K^\times)/(K^\times)^N\xrightarrow{\sim}
+H^1(G_K,\mu_N)\hookrightarrow H^1(\Pi^{tp}_{\underline{\underline Y}},\mu_N)\to
+\mathrm{Out}(\Pi^{tp}_{\underline{\underline Y}}[\mu_N])$$
+——「$\xrightarrow{\sim}$」がKummer写像。この節も一貫して
+<span class="ul2">Y</span>(下線2本)を対象とする。$K^\times$の
+$\Pi^{tp}_{\underline{\underline Y}}[\mu_N]$へのこの自然な外部作用は、
+商$\Pi^{tp}_{\underline{\underline Y}}[\mu_N]\twoheadrightarrow\Pi^{tp}_{\underline{\underline Y}}$
+とその核の両方に**自明な**外部作用を誘導する。
+</p>
+<p class="note">外部citationなし——標準的なKummer理論(古典的、既にMAP-8の
+2_LocatorMapで`Valuation`・`rootsOfUnity`をmathlib既存として確認済み)の
+直接の応用。</p>
+</section>
+
+<section class="statement resolved" id="diacritic-discovery-resolved" data-locator="p.11 vs p.43(PDF)、★★★確定(PDF目視確認済み)">
+<span class="locator">★★★確定(PDF目視確認済み、2026-08-12)</span>
+<p><span class="label">下線本数による識別(受理条件、確定):</span>
+[EtTh] p.11(§1冒頭、l.487-500)を`pdftoppm`で画像化・目視確認した結果、
+「write $Y^{\log}\overset{\mathrm{def}}=\mathfrak Y^{\log}\times_{O_K}K;\
+\underline{\underline{\mathbf Z}}\overset{\mathrm{def}}=\mathrm{Gal}(Y/X)
+(\cong\underline{\underline{\mathbf Z}})$」——<b>YとXは無印(下線0本)</b>、
+結果の$\mathbf Z$のみ<b>下線2本</b>(<span class="ul2">Z</span>)。
+</p>
+<p>一方p.43(Definition2.13,(i)直前・直後、上記参照)は「$\mathrm{Gal}(
+\underline{\underline Y}/\underline{\underline X})(\cong l\cdot
+\underline{\underline{\mathbf Z}})$」——<b>YとXがともに下線2本</b>。
+</p>
+<p class="note resolved">★★★<b>結論(確定)</b>: p.11の「Gal(Y/X)」
+(Y・X無印)とp.43 Definition2.13,(i)の「Gal(<span class="ul2">Y</span>/<span class="ul2">X</span>)」
+(Y・X下線2本)は<b>異なる記号であり矛盾ではない</b>。この下線の本数は、
+[EtTh] p.41(Proposition2.11直後の地の文)が明記する体系的な合成記法
+——「点(0/1個)×下線(0/1/2本)」で、X一文字だけでも
+Ẋ̲・Ẋ̲̲・Ẋ・X̲・X̲̲・Xの6種の異なる対象を区別する——の一部である。
+Y・X・Πについても同様の体系が適用されていると推定される(全種の
+系譜追跡は未実施、下記「残された課題」参照)。</p>
+<p class="note warning">★★★<b>MAP-11・MAP-5-Eへの影響(要再監査)</b>:
+MAP-5-Eの`tateFullGroupWithZSurjection.piY`は`TemperedGroup.lean`の
+docstringが「l.492」を引用しており、<b>p.11の無印Y</b>(下線0本)を
+モデル化していると考えられる。一方MAP-12のD_Y・Kummer写像は
+<b>p.43の下線2本Y</b>を対象とする——MAP-11の`piYMuN`(MAP-5-Eの
+`.piY`を「Π」として`SemidirectProduct`+`MonoidHom.eqLocus`で
+cyclotomic envelope化したもの)が実際にDefinition2.13,(i)の
+下線2本の対象と一致するかは<b>未検証</b>。Definition2.10自体は
+「Π↠GK」という完全に一般的・抽象的な言明(下線本数の指定なし、
+p.40で確認済み)であり定義自体に問題はないが、<b>MAP-11でどの具体的
+Πを代入したか</b>(下線0本のY由来か、下線2本のY由来か)の確認は
+再監査(ユーザー指示、2026-08-12)で扱う。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.492-500, l.2405-2447, l.2876-2919)を
+"kappa"・"IUTch"・"non-degenerate"でgrep、<b>0件</b>を確認した。
+</p>
+</section>
+
+</body>
+</html>

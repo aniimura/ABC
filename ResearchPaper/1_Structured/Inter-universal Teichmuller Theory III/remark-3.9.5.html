@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>&sect;3 Remark 3.9.5(M6&middot;M7再形式化対象: holomorphic hull&middot;閉包作用素の公理)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+<h1 id="remark-3-9-5">Section 3: Remark 3.9.5(Holomorphic Hulls) — M6&middot;M7(CLAIM_HULL_CLOSURE_OPERATOR)の再形式化・出典</h1>
+
+<p class="note milestone">【M6&middot;M7再形式化のための構造化、方針転換の記録】この文書は、前期(第2期)の既存Lean資産(<code>HullVsSupDivergence.lean</code>・<code>HullUnionCancellation.lean</code>)を<b>一切参照せず</b>、[IUTchIII]原文(Remark3.9.5、(i)(ii)(iii)、証明は原文自体に別掲されていない[地の文で直接主張・"tautology"と明記]ためそのまま含める)のみから独立に構造化したものである。前期資産は「器具(hull形とsup形の比較witness)についての検査」であり、CLAIM_HULL_CLOSURE_OPERATOR(原典claim)の直接形式化ではなかった——本文書はこの区別を踏まえ、Remark3.9.5自体の構造化からやり直す。</p>
+
+<div class="setup" id="remark-3-9-5-intro" data-locator="p.126-127, l.8828-8837">
+<span class="locator">原文 p.126-127</span>
+<p>
+In situations that involve consideration of various sorts of regions [cf. the discussion of Remarks 3.1.1,(iii),(iv); 3.9.4] to which the log-volume may be applied, it is often of use to consider the notion of the <b>holomorphic hull</b> of a region.
+</p>
+</div>
+
+<section class="statement definition" id="remark-3-9-5-i" data-locator="p.127, l.8838-8862">
+<span class="locator">原文 p.127</span>
+<p><span class="label">Remark 3.9.5, (i)(holomorphic hullの定義):</span>
+Proposition3.9,(i)の状況にあるとする。$\alpha U\subseteq I_Q({}_\alpha F_{v_Q})$(または$AU\subseteq I_Q(AF_{v_Q})$、$A,\alpha U\subseteq I_Q(A,\alpha F_v)$)を、有限log-volume(すなわち$>-\infty$)を持つrelatively compactな部分集合を含む部分集合とする。
+</p>
+<p>
+<span class="label">(場合分け1、relatively compactな場合):</span> $\alpha U$(resp. $AU$; $A,\alpha U$)がrelatively compactならば、$\alpha U$(resp. $AU$; $A,\alpha U$)の<b>holomorphic hull</b>を、
+$$\alpha H := \lambda\cdot O_{\alpha F_{v_Q}}\quad(\text{resp. } AH:=\lambda\cdot O_{AF_{v_Q}};\ A,\alpha H:=\lambda\cdot O_{A,\alpha F_v})$$
+という形の部分集合のうち$\alpha U$(resp. $AU$; $A,\alpha U$)を含む**最小のもの**として定義する——ここで$\lambda\in I_Q((-))$は、$I_Q((-))$の体の直和分解(Proposition3.9,(i)の議論)に関して、各成分が非零であるような元。
+</p>
+<p>
+<span class="label">(場合分け2、relatively compactでない場合):</span> $\alpha U$(resp. $AU$; $A,\alpha U$)がrelatively compactでないならば、そのholomorphic hullを$I_Q({}_\alpha F_{v_Q})$(resp. $I_Q(AF_{v_Q})$; $I_Q(A,\alpha F_v)$)自身として定義する。
+</p>
+<p>
+holomorphic hullは(上記の条件のもとで)well-definedであることが直ちに確かめられる。
+</p>
+</section>
+
+<section class="statement proposition" id="remark-3-9-5-ii" data-locator="p.127-128, l.8863-8900">
+<span class="locator">原文 p.127-128</span>
+<p><span class="label">Remark 3.9.5, (ii)(★★★核心、$\varphi:\mathcal P\to\mathcal H$の3性質(P1)(P2)(P3)、閉包作用素の公理):</span>
+以下、簡単のため「holomorphic hull」を単に「hull」と呼ぶ。
+$$\mathcal P := \{P\subseteq I_Q((-)) \mid P\text{ is a direct product region [cf. Remark 3.1.1,(iii)]}\};$$
+$$\mathcal H := \{H\subsetneq I_Q((-)) \mid H\text{ is a hull [cf. (i)]}\}$$
+とする(引数"$(-)$"は"${}_\alpha F_{v_Q}$"・"$AF_{v_Q}$"・"$A,\alpha F_v$"のいずれか[cf. (i)])。$\mathcal H\subseteq\mathcal P$であることに注意する。このとき、(i)で論じたhullを形成する操作
+$$\square U \to \square H\qquad(\text{"}\square\text{"は"}\alpha\text{"・"}A\text{"・"}A,\alpha\text{"のいずれか})$$
+は、写像
+$$\varphi:\mathcal P\to\mathcal H$$
+を定める——これは、以下の性質によって一意に特徴づけられる、という点が(ほとんど自明な事実として)成り立つ:
+</p>
+<p style="text-align:center">
+<b>(P1)</b> $\varphi(H)=H$、任意の$H\in\mathcal H$について。<br>
+<b>(P2)</b> $P\subseteq\varphi(P)$、任意の$P\in\mathcal P$について。<br>
+<b>(P3)</b> $\varphi(P_1)\subseteq\varphi(P_2)$、$P_1\subseteq P_2$を満たす任意の$P_1,P_2\in\mathcal P$について。
+</p>
+<p>
+実際、$\mathcal H$の元の(有限log-volumeを持つ)任意の共通部分は必ず$\mathcal H$の元を定めることが容易に確かめられるので、(P1)(P2)(P3)から形式的に
+$$\varphi(P) = \bigcap_{H\in\mathcal H, H\supseteq P} H$$
+が任意の$P\in\mathcal P$について従う。言い換えれば、この写像$\varphi$は、包含$\mathcal H\subseteq\mathcal P$の「反対方向のpush forward」ないし一種のadjointと考えることができる。あるいは、$\varphi$は包含$\mathcal H\subseteq\mathcal P$の一種の標準的な分裂(canonical splitting)、またはRemark3.9.4の精神における一種の積分操作と考えることもできる。包含によって定まる$\mathcal P$上のpre-order構造との$\varphi$の両立性[cf. (P2),(P3)]は、領域の様々なlog-volume評価の文脈で重要な役割を果たす。
+</p>
+<p class="note milestone">
+【M6&middot;M7の核心、CLAIM_HULL_CLOSURE_OPERATORの中身】(P1)(P2)(P3)は、$\varphi$が**閉包作用素(closure operator)の公理**そのものであることを直接示す——(P1)は冪等性(idempotence、$\mathcal H$上では恒等)、(P2)は拡大性(extensivity、$P\subseteq\varphi(P)$)、(P3)は単調性(monotonicity)に対応する標準的な数学的パターン。前期資産(HullVsSupDivergence.lean等)はこの(P1)(P2)(P3)自体を直接形式化したものではなく、「hull形の構成」と「sup形の構成」という**2つの異なる具体的な構成法**を比較するtoyだった——本milestoneの再形式化は、この(P1)(P2)(P3)という**公理そのもの**を出発点に据える点で、前期の切り口と異なる。
+</p>
+</section>
+
+<section class="statement definition" id="remark-3-9-5-iii" data-locator="p.128, l.8901-8937">
+<span class="locator">原文 p.128</span>
+<p><span class="label">Remark 3.9.5, (iii)($\Phi(P)$・$\Xi(P)$・$H_{\Phi(P)}$・$H_{\Xi(P)}$の定義):</span>
+Proposition3.9,(i)[cf. also Remark3.1.1,(iii)]の各log-volume$\mu^{\log}_{(-)}$(以下簡単のため$\mu^{\log}$と書く、引数"$(-)$"は"$\alpha,v_Q$"・"$A,v_Q$"・"$A,\alpha,v$"のいずれか[cf. (ii)])を、(ii)の議論の文脈で考える。$P\in\mathcal P$について、
+$$\Phi(P) := \{H\in\mathcal H \mid \varphi(P)\supseteq H,\ (\mu^{\log}(\varphi(P))\geq)\ \mu^{\log}(H)\geq\mu^{\log}(P)\} \subseteq\mathcal H;$$
+$$\Xi(P) := \{H\in\mathcal H \mid \varphi(P)\supseteq H,\ (\mu^{\log}(\varphi(P))\geq)\ \mu^{\log}(H)=\mu^{\log}(P)\} \subseteq\Phi(P);$$
+$$H_{\Phi(P)} := \bigcup_{H\in\Phi(P)} H \subseteq\varphi(P);$$
+$$H_{\Xi(P)} := \bigcup_{H\in\Xi(P)} H \subseteq H_{\Phi(P)} \subseteq\varphi(P)$$
+と書く。したがって、$\Phi(P)$または$\Xi(P)$の元は、hull($\in\mathcal H$)による$P$の「log-volume近似」と考えることができる。
+</p>
+<p>
+$\Phi(P)$または$\Xi(P)$の相異なる元——すなわち$P$の「log-volume hull-approximant」を構成するという問題——を一種の不定性(すなわち$P$への$\mathcal H$の特定の元の割り当てにおける不定性)とみなすならば、<b>この不定性はコンパクトである</b>——すなわち、$\Phi(P)$または$\Xi(P)$の元のあらゆる可能な選択が、コンパクト集合$\varphi(P)\in\mathcal H$に含まれる、という意味において。実際、理論に現れるあらゆる不定性がコンパクトであるように理論を展開することは、本シリーズ論文群における1つの重要なテーマである。$\Phi(-)$または$\Xi(-)$の定義において「$H\subseteq\varphi(P)$」という条件を省略すれば、このコンパクト性は成り立たなくなることに注意する。
+</p>
+</section>
+
+<hr>
+
+<h2 id="notation-table">前提として扱う記法(受理条件に基づく出典特定)</h2>
+<p class="note">Remark3.9.5(i)(ii)(iii)の範囲内で使用される記法について、[IUTchIII]自身の§1&ndash;3(Proposition3.9(i)・Remark3.1.1(iii)(iv)を中心に)を遡って出典を特定した。M4a(section2-cor2.18.html)と同様、依存の連鎖は深い(Proposition3.9&rarr;Proposition3.1/3.2&rarr;Proposition1.2、という3段)が、[IUTchIII]自身の範囲内で全て出典を確認でき、他の論文本文まで遡って内容を確認する必要は生じなかった(stop-loss未発動)——ただし、この連鎖の**末端**([IUTchI]・[IUTchII]・[AbsTopIII]の各所)は[IUTchIII]自身が外部参照として明示するのみであり、それらの論文自体の内容確認はこの工程の範囲外とする(M1の[Mzk17]参照と同じ扱い)。</p>
+
+<table class="types">
+<tr><th>記法</th><th>意味(簡潔)</th><th>出典([IUTchIII]内)</th><th>判定</th></tr>
+<tr><td>$I_Q((-))$</td><td>整構造$I((-))$のQ-span(mono-analytic log-shellから構成される位相加群)</td><td>Proposition3.2,(ii)議論 l.6706-6710(定義そのもの)、$I((-))$自体はProposition1.2,(vi),(vii)のmono-analytic log-shell&ldquo;$I^\dagger D^\vdash_v$&rdquo;から構成(l.6660-6705)</td><td>前提(3段の連鎖、末端はProposition1.2)</td></tr>
+<tr><td>${}_\alpha F_{v_Q}$、$AF_{v_Q}$、$A,\alpha F_v$</td><td>F-prime-strip(のcapsule)由来のtensor packet、Proposition3.1の構成対象</td><td>Proposition3.1 l.6158-6241(tensor packetの定義)、"F-prime-strip"自体は[IUTchI] Definition5.2,(i)(外部参照、Proposition3.1自身が明記)</td><td>前提(末端は[IUTchI]、内容未確認)</td></tr>
+<tr><td>direct product region</td><td>各直和成分において正測度のコンパクト部分集合の直積として生じる領域</td><td>Remark3.1.1,(iii) l.6378-6383(★依頼指定どおりの出典で確認済み)</td><td>前提(確定)</td></tr>
+<tr><td>direct product pre-region</td><td>各直和成分においてrelatively compactな部分集合の直積として生じる領域</td><td>Remark3.1.1,(iii) l.6381-6383(direct product regionと同じ箇所で対で定義)</td><td>前提(確定)</td></tr>
+<tr><td>relatively compact</td><td>標準的な位相空間論の概念(閉包がコンパクト)</td><td>標準的な位相の用語、[IUTchIII]固有の定義は不要——ただしRemark3.1.1,(iii)の"measure space"(局所コンパクトHausdorff、可算基底、完備Borel測度、[Royden]引用)という文脈設定の中で使われる</td><td>前提(標準+文脈)</td></tr>
+<tr><td>$\mu^{\log}_{(-)}$(log-volume)</td><td>$I_Q((-))$上のコンパクト開集合(または非空開集合の閉包)全体の集合$M(-)$上の実数値関数、$O_{(-)}$の値が0となるよう正規化(packet-normalization)</td><td>Proposition3.9,(i) l.7911-7973(定義そのもの、構成の存在自体は[AbsTopIII] Proposition5.7,(i),(ii)を外部引用)</td><td>前提(末端は[AbsTopIII]、内容未確認)</td></tr>
+<tr><td>$O_{\alpha F_{v_Q}}$等(local holomorphic整構造)</td><td>Proposition3.1,(ii)で論じられる"local holomorphic"整構造</td><td>Proposition3.1,(ii) l.6209-6241、Proposition3.9,(i)議論内 l.7928-7934</td><td>前提</td></tr>
+<tr><td>$V$、$V_Q$、$V_{\mathrm{mod}}$、$V^{\mathrm{non}}_Q$、$V^{\mathrm{arc}}_Q$</td><td>付値の集合(V=Kの付値の部分集合、$V_{\mathrm{mod}}$との自然な全単射を持つ、非archimedean/archimedean分岐)</td><td>Remark3.1.1,(ii) l.6287-6301、根本定義は[IUTchI] Definition3.1,(e)(外部参照、明記)</td><td>前提(末端は[IUTchI]、内容未確認)</td></tr>
+<tr><td>$(V_{\mathrm{mod}})_{v_Q}$</td><td>$V_{\mathrm{mod}}$のうち$v_Q\in V_Q$の上にある元の集合(fiber)</td><td>Remark3.1.1,(iii) l.6396-6422(★依頼指定の出典で確認済み——Remark3.9.5自身がl.8968で「[cf. the notational conventions of Remark3.1.1,(iii)]」と明示的にこの箇所を引用している)</td><td>前提(確定)</td></tr>
+<tr><td>$K$、$K^{\mathrm{cl}}$(Galois closure)</td><td>初期&Theta;-dataの数体、その上のGalois閉包</td><td>$K$は[IUTchI]初期&Theta;-data(外部参照)、$K^{\mathrm{cl}}$はRemark3.9.5,(iv)本文中で直接導入(本文書の範囲[(i)(ii)(iii)]の外だが、(iii)の直前の文脈理解に有用なため記録)</td><td>前提(一部は範囲外(iv)由来)</td></tr>
+<tr><td>$\mathcal P$、$\mathcal H$</td><td>direct product regionの全体・hullの全体(Remark3.9.5,(ii)自身が定義)</td><td>Remark3.9.5,(ii) l.8864-8872(本Remark自身が定義、外部参照不要)</td><td>前提(確定、本文内で自己完結)</td></tr>
+<tr><td>$\varphi:\mathcal P\to\mathcal H$</td><td>hull形成写像(Remark3.9.5,(ii)自身が定義)</td><td>Remark3.9.5,(ii) l.8873-8881</td><td>前提(確定、本文内で自己完結)</td></tr>
+</table>
+
+<p class="note milestone">
+【問いへの回答、受理条件】<b>構造化「できる」</b>——Remark3.9.5の(i)(ii)(iii)は全て命題文として構造化済み(上記section要素)、特に(ii)の(P1)(P2)(P3)という3性質——閉包作用素の公理そのもの——を正確に書き出した。使用される記法は[IUTchIII]自身の範囲内(&sect;1&ndash;3、Proposition1.2&middot;3.1&middot;3.2&middot;3.9、Remark3.1.1)で出典を特定でき、他の論文の**本文内容**まで遡って確認する必要は生じなかった(stop-loss未発動)——ただし、依存の連鎖の**末端**(F-prime-strip自体・$V/V_{\mathrm{mod}}$の根本定義・log-volumeの存在証明)は、[IUTchIII]自身が[IUTchI]・[AbsTopIII]への外部参照として明示するのみであり、これらの論文自体の内容は本工程では確認していない(M1が[Mzk17]の引用をそのまま外部参照として扱ったのと同じ扱い)。
+</p>
+<p class="note milestone">
+【★★★sizeの評価、次工程(2_LocatorMap)への申し送り】M4aと類似する構造(Proposition3.9&rarr;Proposition3.1/3.2&rarr;Proposition1.2という3段の依存)が見られるが、**質的な違いがある**——M4aの依存先(tempered基本群・&eacute;tale theta cohomology類)は[EtTh]自身が初めて構成する内容だったのに対し、Remark3.9.5(ii)の核心(P1)(P2)(P3)**自体**は、$\mathcal P$・$\mathcal H$・$\varphi$という**本Remark自身が完結して定義するデータ**(表の最後2行、外部参照なし)についての、**標準的な閉包作用素の公理**という一般的な数学的パターンである——これは非常に有望な兆候であり、(P1)(P2)(P3)というM6&middot;M7の核心部分は、$\mathcal P$・$\mathcal H$・$\varphi$の**内部構成**(F-prime-strip・log-volume等、深い依存を持つ)を境界外公理として切り離せば、**それ自体は閉包作用素という既存の一般理論(mathlibに存在する可能性が高い)に接地できる**可能性がある——M4aのような「単一名指し対象への転写がブロックされる」パターンとは異なる構図になりうることを、次工程(2_LocatorMap)でのmathlibスキャンで検証する価値がある。
+</p>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ(未作成、次段)</a></p>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§3 Corollary3.7(MAP-7対象: Profinite Belyi Cuspidalization)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.example { border-left-color: #4a4a90; background: #f4f3fa; }
+  section.statement.corollary { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.remark { border-left-color: #666; background: #f5f5f5; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .proof { border-left: 4px solid #999; padding: 0.4em 1em; margin: 0.5em 0 1.5em 0; background: #fbfbfb; }
+</style>
+</head>
+<body>
+<p><a href="../Topics in Absolute Anabelian Geometry I/section4-chain-formalism.html">&larr; §4 chain形式論(AbsTopI、本節が利用する土台)へ</a></p>
+<h1 id="sec3-cor3-7">&sect;3: Corollary 3.7 &mdash; MAP-7(Belyi cuspidalization本体)の出典</h1>
+
+<p class="note milestone">【MAP-7の位置づけ、必須】本文書はM5-relの&kappa;-Recon非退化性主張とは<b>完全に独立</b>である——[AbsTopIII]Theorem1.9が引用する[Mzk21]Corollary3.7(=本節)を、独立したLean資産として構造化する。M5-relの救済目的ではない(受理条件(c)・負の対照、本文書末尾で確認)。</p>
+
+<div class="setup" id="sec3-intro" data-locator="p.70-71, l.4681-4688">
+<span class="locator">原文 p.70-71</span>
+<p>
+§3冒頭: X:標数0の体k上の双曲的軌道曲線、k&#772;:代数閉包、拡張列1&rarr;&pi;<sub>1</sub>(X&times;<sub>k</sub>k&#772;)&rarr;&pi;<sub>1</sub>(X)&rarr;Gal(k&#772;/k)&rarr;1。
+</p>
+</div>
+
+<section class="statement definition" id="def-3-5" data-locator="p.71, l.4685-4688">
+<span class="locator">原文 p.71</span>
+<p><span class="label">Definition 3.5 (strictly Belyi type):</span>
+Xが数体上定義され、種数0の双曲的曲線とisogenous([Mzk14]Definition2.3,(i)の一般化)であるとき、Xは<b>strictly Belyi type</b>であるという。
+</p>
+</section>
+
+<section class="statement example" id="ex-3-6" data-locator="p.71-72, l.4689-4767">
+<span class="locator">原文 p.71-72</span>
+<p><span class="label">Example 3.6, (i) — Scheme-theoretic Belyi Cuspidalizations:</span>
+P:射影直線から3点除いたもの(k&prime;上、kの有限Galois拡大)、V:任意の双曲的曲線(k&prime;上)、U&sube;V:非空開部分スキーム(数体上定義)。<b>古典的Belyi写像の存在</b>([Belyi]・[Mzk7])により、非空開部分スキームW&sube;Uが存在し、W&rarr;U&rarr;V&larr;&beta;&mdash;P(&beta;:有限&eacute;tale"Belyi map")という図式が得られる。k&prime;を有限次拡大し、Wのcuspが全てk&prime;上定義・Gal(k&#772;/k)がslimと仮定すると、[Mzk15]&sect;4([=AbsTopI&sect;4]の理論)の言葉で、この図式は型パターン&#9481;,&bull;,...,&bull;という&Pi;-chainに翻訳される——「Belyi mapの存在」が「Uのcuspidalization(閉点除去)の構成」に読み替えられる、というのが本節の核心アイデア。
+</p>
+<p><span class="label">(ii):</span>
+Xがstrictly Belyi type、V&rarr;X(Galois有限&eacute;tale)・V&rarr;Q(有限&eacute;tale商、Qは種数0)+Q&rarr;P(開埋め込み)が与えられる状況で、(i)のchainの両側に「V&rarr;X」(&#9497;)・「V&rarr;X」(&#9481;)を付加した、型パターン&#9481;,&#9497;,&bull;,...,&bull;,&#9481;,&bull;,...,&bull;,&#9497;を持つchainが得られ、Xの"cuspidalization"U<sub>X</sub>&rarr;Xの構成に相当する。
+</p>
+</section>
+
+<section class="statement corollary" id="cor-3-7" data-locator="p.72-73, l.4770-4848">
+<span class="locator">原文 p.72-73</span>
+<p><span class="label">Corollary 3.7 (Profinite Belyi Cuspidalization I: Algorithms):</span>
+Dをchain-fullかつrel-isom-DGC充足([Mzk15]=AbsTopI&sect;4 Definition4.6,(i)(ii))とする。Gをslim副有限群、1&rarr;&Delta;&rarr;&Pi;&rarr;G&rarr;1をGSAFG-type拡張(base-prime partial construction data(k,X,&Sigma;)、kは標数0、Xはstrictly Belyi type[Definition3.5]、&Sigma;=全素数、([X],[k],&Sigma;)&isin;D)、&alpha;:&pi;<sub>1</sub>(X)&cong;&Pi;([Mzk15]Definition2.1,(iii)のscheme-theoretic envelope、副有限群の同型)、X&#770;&rarr;Xを&alpha;が定める副有限&eacute;tale被覆、k&#772;を対応する代数閉包とする。さらに、ある素数l&isin;&Sigma;で巡回指標G&rarr;<b>Z</b><sub>l</sub><sup>&times;</sup>が開像を持つとする。このとき<b>任意の</b>数体上定義された非空開部分スキームU<sub>X</sub>&sube;Xに対し、自然な全射
+<br>&Pi;<sub>UX</sub>:=&pi;<sub>1</sub>(U<sub>X</sub>) &#8608; &pi;<sub>1</sub>(X)&cong;&Pi;
+<br>(「cuspidalization」)が、以下の群論的操作のみで構成できる:
+</p>
+<p><span class="label">(a):</span> ある正規開部分群&Pi;<sub>V</sub>&sube;&Pi;(有限被覆V&rarr;Xに対応)が存在し、型パターン&#9481;,&#9497;,&bull;,...,&bull;,&#9481;,&bull;,...,&bull;,&#9497;を持つ&Pi;-chain(群論的記述のみで構成可能、terminal同型が自明&Pi;-chainへ至る)が存在する——U:=V&times;<sub>X</sub>U<sub>X</sub>、&Pi;<sub>U</sub>:=&Pi;<sub>V</sub>&times;<sub>&Pi;</sub>&Pi;<sub>UX</sub>とすると、全射&Pi;<sub>U</sub>&#8608;&Pi;<sub>V</sub>が上記chainの末尾から2番目の"&bull;"の連鎖から復元できる。
+</p>
+<p><span class="label">(b):</span> 全射&Pi;<sub>UX</sub>&#8608;&Pi;は、&Pi;<sub>U</sub>&#8608;&Pi;<sub>V</sub>から、有限群&Pi;/&Pi;<sub>V</sub>の&Pi;<sub>V</sub>への外部作用の(&Pi;<sub>U</sub>&#8608;&Pi;<sub>V</sub>に相対的な)一意なlifting を使い"out&#8905;"(半直積の外部版)を形成することで復元される。
+</p>
+<p><span class="label">(c):</span> Xの補集合の閉点の分解群は、&Pi;<sub>UX</sub>のcuspidal decomposition群(<a href="../../../1_Structured/Topics in Absolute Anabelian Geometry I/section4-chain-formalism.html#lem-4-5">AbsTopI Lemma4.5,(v)</a>)の、&Pi;<sub>UX</sub>&#8608;&Pi;による像として得られる。
+</p>
+</section>
+
+<div class="proof" data-proves="cor-3-7" data-locator="p.73, l.4844-4848">
+<span class="locator">原文 p.73</span>
+<p><span class="label">証明:</span>
+「定義から+本文中で引用した各種参照+[Mzk15]Theorem4.7,(i)(=<a href="../../../1_Structured/Topics in Absolute Anabelian Geometry I/section4-chain-formalism.html#thm-4-7">AbsTopI Theorem4.7</a>)の同値性から直ちに従う」——組み立て型の証明(それ自体に独立した数学的実質は無い、依拠先の実質は[Mzk15]=AbsTopI&sect;4本体に存在)。
+</p>
+</div>
+
+<section class="statement remark" id="rem-3-7-2" data-locator="p.73-74, l.4852-4867">
+<span class="locator">原文 p.73-74</span>
+<p><span class="label">Remark 3.7.2:</span>
+kがMLFのとき、Corollary3.7,(c)([数体上定義された]閉点の分解群の構成)+[Mzk8]Lemma3.1("p-adic approximation lemma")を組み合わせると、Xの<b>任意の</b>閉点の分解群を構成するアルゴリズムが得られる——数体上定義という制約を外せる拡張。
+</p>
+<p class="note">本文書のスコープ外(MAP-7の第一段階では未使用と判定、[Mzk8]="Galois Sections.txt"、既に0_Source内に存在確認済み[別文脈で既出])。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(受理条件(c)、必須確認):</span>
+本文書が構造化した全要素(Definition3.5・Example3.6・Corollary3.7・Remark3.7.2)について、`lean/ABC2/Instrument/KappaCoricConditional.lean`・M5-relの非退化性関連の定義への参照は<b>本文書中に一切出現しない</b>。確認方法: 本文書の原文引用範囲(0_Source "Topics in Absolute Anabelian Geometry II.txt" l.4681-4867)全体をgrep済み、"&kappa;-Recon"・"IUTchI"・"Example 5.1"・"non-degenerate"の文字列は<b>0件</b>。AbsTopII自体、[IUTchI]を一切引用しない(AbsTopII&rarr;AbsTopIII&rarr;IUTchIという依存の向きが正しく、逆向きの依存は原理的に存在しない)。
+</p>
+</section>
+
+</body>
+</html>

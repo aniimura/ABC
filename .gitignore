@@ -1,0 +1,12 @@
+# ビルド成果物
+lean/.lake/
+lean/**/*.olean
+lean/**/*.ilean
+lean/**/*.trace
+
+# 本プロジェクトと無関係なバイナリ
+Donburi*.exe
+
+# 一時ファイル
+*.tmp
+scratch/

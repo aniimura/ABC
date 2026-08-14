@@ -1,0 +1,1 @@
+Pythonは'C:\\Users\\Aruta\\miniforge3\\envs\\py311env\\python.exe'

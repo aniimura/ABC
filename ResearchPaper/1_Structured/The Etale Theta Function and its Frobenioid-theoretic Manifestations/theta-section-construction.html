@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>theta section s^Θ_Ÿの構成箇所の精密特定(MAP-10対象、7段階連鎖の最上段)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .ul1 { text-decoration: underline; }
+  .ul2 { text-decoration: underline; text-decoration-style: double; }
+</style>
+</head>
+<body>
+<p><a href="eta-theta-lZmu2-construction.html">← η̈_{Θ,l·Z×μ2}構成(MAP-9)へ</a></p>
+<h1>theta section s^Θ_<span class="ul2">Ÿ</span>の構成箇所の精密特定 — MAP-10(7段階連鎖の最上段)</h1>
+
+<p class="note milestone">【MAP-10の位置づけ、必須】η̈_Θ・η̈_Θ,Z・η̈_{Θ,l·Z×μ2}の3段階は
+MAP-6・8・9で「弱い定義」として達成済み。本文書は7段階依存連鎖の最上段
+(θ-section ← η̈_{Θ,l·Z×μ2})を対象とする。M5-relの非退化性主張とは無関係
+(下記負の対照参照)。</p>
+
+<p class="note resolved">【2026-08-12追記、PDF目視確認により訂正】`pdftoppm`でp.42-43を
+画像化し目視確認した結果、本節のY(theta section・algebraic sectionの
+両方)は一貫して<b>下線2本</b>(<span class="ul2">Y</span>・
+<span class="ul2">Ÿ</span>)であると確認した——0_Sourceのテキスト抽出は
+この下線情報を保持していなかった。下記本文を訂正する(詳細は
+`dy-construction.html`の★★★確定節、および`1_Structured/README.md`の
+記法規約を参照)。</p>
+
+<section class="statement proposition" id="prop-2-12" data-locator="p.41-42, l.2741-2813">
+<span class="locator">原文 p.41-42</span>
+<p><span class="label">Proposition 2.12(The Cyclotomic Envelope of the Theta
+Quotient):</span> (i) $\mathrm{Ker}(\Delta_*^\Theta\twoheadrightarrow
+\Delta_*^{\mathrm{ell}})=l\cdot\Delta_\Theta\subseteq(\Delta_*^\Theta,
+\Delta_*^\Theta)$という部分群の包含を、複数の位相群$\Delta_*$
+($\Delta_X^{tp}$等6種)について確立する。(ii) $\Delta_*^\Theta[\mu_N]$の
+交叉が、tautological sectionの制限の像と一致する。証明(l.2755-2813)は
+「theta-group」の既知の構造+Remark2.2.1(既読・確認済み、内部構造)に
+基づく初等的議論——外部引用なし。
+</p>
+<p class="note">Remark2.12.1(l.2814-2831)は失敗する場合の技術的注記
+——本文書の主対象(θ-section構成)には不要、スキップした。</p>
+</section>
+
+<section class="statement" id="theta-section-construction" data-locator="p.42-43(PDF目視確認済み), l.2832-2850(0_Source)">
+<span class="locator">原文 p.42-43、★★★核心(PDF目視確認済み)</span>
+<p><span class="label">theta sectionの実際の構成(l.2832-2850):</span>
+「$\ddot\eta^{\Theta,l\cdot\mathbf Z\times\mu_2}_{\underline{\underline{\phantom Y}}}$
+のコホモロジー類の集合[のcocycleの集合]のいずれかのmod N還元を、
+tautological section $s^{alg}_{\ddot{\underline{\underline Y}}}
+\overset{\mathrm{def}}=s^{alg}_{\Pi^{tp}_{\ddot{\underline{\underline Y}}}}:
+\Pi^{tp}_{\ddot{\underline{\underline Y}}}\to\Pi^{tp}_{\underline{\underline Y}}[\mu_N]
+\hookrightarrow\Pi^{tp}_Y[\mu_N]$から**引く**(加法的にコホモロジー類を扱う場合)
+ことにより、新しい準同型
+$$s^\Theta_{\ddot{\underline{\underline Y}}}:\Pi^{tp}_{\ddot{\underline{\underline Y}}}\to\Pi^{tp}_{\underline{\underline Y}}[\mu_N]$$
+が得られる」——**これがtheta section自体の実際の構成**。η̈_{Θ,l·Z×μ2}
+(MAP-9で達成済み)を直接の入力とする。<b>下線2本の
+<span class="ul2">Y</span>・<span class="ul2">Ÿ</span>を一貫して使用</b>
+(唯一、埋め込み先の直前に現れる「$\Pi^{tp}_Y[\mu_N]$」1箇所のみ下線が
+1本に見える箇所があり——原文組版上の省略[前出のフルネームを繰り返さない
+記法]の可能性があるが未確定、要再確認)。
+</p>
+<p class="note milestone">★★★<b>MAP-9の入力としての位置づけ</b>:
+「$\mu_N\cong(l\cdot\Delta_\Theta)\otimes(\mathbf Z/N\mathbf Z)$」という
+自然な同一視のもと、η̈_{Θ,l·Z×μ2}の**cocycle表示**を減算するという
+操作——η̈_{Θ,l·Z×μ2}という**集合**(orbit)からの「任意の代表元の選択」
++「$s^{alg}_{\ddot Y}$との差」という2段階の構成であり、MAP-9資産
+(`etaThetaLZMu2Orbit`)を直接消費する構造になっている。</p>
+</section>
+
+<section class="statement" id="theta-section-properties" data-locator="p.43, l.2850-2909">
+<span class="locator">原文 p.43</span>
+<p><span class="label">theta sectionの性質(l.2850-2909):</span>
+(a) $s^{alg}_{\ddot Y}$が$s^{alg}_{\Pi^{tp}_C}$へ拡張することから、
+$\mathrm{Gal}(Y/C)$の自然な外部作用が$s^{alg}_{\ddot Y}$の像を
+$\mu_N$による共役を除いて固定する(l.2859-2867)。(b) 異なる
+$\ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2}$の元(cocycle)から生じる
+様々な$s^\Theta_{\ddot Y}$は、$\Pi^{tp}_X[\mu_N]$-共役として得られる
+(l.2868-2874、$(\Pi^{tp}_X\twoheadrightarrow)\mathrm{Gal}(\ddot Y/X)
+\cong(l\cdot\mathbf Z)\times\mu_2$という既存の同型を利用)。(c) $K^\times$の
+自然な外部作用(Kummer写像経由、l.2876-2887)のもと、
+$\ddot\eta_{\Theta,l\cdot\mathbf Z\times\mu_2}$を$O_K^\times$-倍で
+置き換えることは、$s^\Theta_{\ddot Y}$を$O_K^\times$-共役で置き換える
+ことに対応する(Proposition1.3の引用、内部)。
+</p>
+<p class="note">外部引用なし——[EtTh]内部のProposition1.3・2.11(既に
+MAP-5-Eで温度スリム性の文脈でクリア済み)への参照のみ。</p>
+</section>
+
+<section class="statement definition" id="def-2-13" data-locator="p.43-45, l.2910-3037">
+<span class="locator">原文 p.43-45</span>
+<p><span class="label">Definition 2.13:</span></p>
+<p>(i) l.2910-2919(PDF目視確認済み、下線2本): $D_{\underline{\underline Y}}
+\subseteq\mathrm{Out}(\Pi^{tp}_{\underline{\underline Y}}[\mu_N])$を
+$K^\times$・$\mathrm{Gal}(\underline{\underline Y}/\underline{\underline X})
+(\cong l\cdot\mathbf{\underline{\underline Z}})$の像で生成される
+部分群として定義。$s^\Theta_{\ddot{\underline{\underline Y}}}$を
+「[mod N] theta section」、$s^{alg}_{\ddot{\underline{\underline Y}}}$を
+「[mod N] algebraic section」と**命名**——
+★★★これが「theta section」という呼称の**正式な定義箇所**(構成自体は
+上記l.2832-2850)。詳細な下線根拠は`dy-construction.html`参照。</p>
+<p>(ii) l.2920-2946: 「[mod N] model mono-theta environment」
+(データ組$(\Pi^{tp}_Y[\mu_N], D_Y, s^\Theta_{\ddot Y}$の$\mu_N$-共役類$)$)
++抽象的な「mono-theta environment」(同型類、上記データと同型な任意の
+組)を定義。<b>★既存資産との一致</b>: この(ii)(c)の「$s^\Theta_{\ddot Y}$の
+$\mu_N$-共役類」は、既にMAP-6/M4a-rel-ivの
+`OpaqueModelMonoThetaEnv.thetaConjClass`として**既に導入済み**
+(下記2_LocatorMap参照)。</p>
+<p>(iii) l.2947-2983: 「[mod N] model bi-theta environment」
+(theta section+algebraic sectionの両方の共役類を含むデータ組)+抽象的
+「bi-theta environment」。(iv) l.3034-3037: 上記(iii)の状況で、
+η̈_{Θ,l·Z×μ2}がstandard typeならば、対応するmodel bi-theta environmentも
+standard typeと呼ぶ——★MAP-9の`IsStandardType`をそのまま利用する構造。
+</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.2741-3037)を"kappa"・"IUTch"・
+"non-degenerate"でgrep、<b>0件</b>を確認した(0_Source全文でも既に
+0件を確認済み、MAP-9段階)。`KappaCoricConditional.lean`への参照は
+本文書中に一切出現しない。
+</p>
+</section>
+
+</body>
+</html>

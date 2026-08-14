@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§1. The Cyclotomic Character and Inertia</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.corollary { border-left-color: #6b1554; background: #f9f2f7; }
+  div.proof { border-left: 4px dashed #888; padding: 0.5em 1em; margin: 0.5em 0 1.5em 1em; color: #333; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .qed { text-align: right; font-weight: bold; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ</a></p>
+<h1 id="section-1">Section 1: The Cyclotomic Character and Inertia</h1>
+
+<div class="setup" id="section-1-setup" data-locator="p.2, l.62-78">
+<span class="locator">原文 p.2</span>
+<p>
+Fix a prime number <i>p</i>. Let <i>K</i> be a <b>p-adic local field</b>, meaning a finite extension of
+<b>Q</b><sub><i>p</i></sub>. Fix an algebraic closure <i>K&#772;</i> of <i>K</i>. Let
+&Gamma;<sub><i>K</i></sub> := Gal(<i>K&#772;</i>/<i>K</i>).
+The purpose of this paper is to examine to what extent <i>K</i> can be recovered <b>&ldquo;group-theoretically&rdquo;</b>
+from &Gamma;<sub><i>K</i></sub> — meaning: given another p-adic local field <i>K</i>&prime; and an isomorphism of
+topological groups &alpha; : &Gamma;<sub><i>K</i></sub> &cong; &Gamma;<sub><i>K</i>&prime;</sub>, the object associated
+to <i>K</i> is necessarily taken by &alpha; to the corresponding object associated to <i>K</i>&prime;.
+</p>
+<p class="note">【構造化メモ】この節の結果は既知(著者自身がSection末尾のRemarkで明記)——本論文の新規性は§4(主定理)にあり、§1は準備。ただし「group-theoretically」という中心概念の**定義**(本段落)自体は精密な形式化を要する: 「∀K′, ∀α:Γ_K≅Γ_K′(位相群として), α(Xの対象)=X′の対応する対象」という**普遍的な**(全てのK′・αについての)条件——これをLean化する際は`∀`の範囲(K′は同じpの局所体全体を渡る)を正確に書く必要がある。</p>
+</div>
+
+<div class="setup" id="section-1-duality-review" data-locator="p.2-3, l.79-93">
+<span class="locator">原文 p.2-3</span>
+<p>
+We begin by reviewing duality. Suppose <i>M</i> is a <b>Z</b><sub><i>p</i></sub>-module of finite length equipped with
+a continuous &Gamma;<sub><i>K</i></sub>-action. Then (see <a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-2">[2]</a>, Proposition 3.8) one has a natural isomorphism of
+Galois cohomology modules
+$$H^i(K, M) \cong H^{2-i}(K, M^\vee(1))^\vee \quad (i \geq 0)$$
+where &ldquo;(1)&rdquo; is a Tate twist and &ldquo;&vee;&rdquo; denotes the Pontrjagin dual (Hom(&minus;, <b>Q</b><sub><i>p</i></sub>/<b>Z</b><sub><i>p</i></sub>)).
+Suppose <i>M</i> &cong; <b>Z</b>/<i>p<sup>n</sup></i><b>Z</b> as a <b>Z</b><sub><i>p</i></sub>-module. Then <i>M</i> &cong;
+<b>Z</b>/<i>p<sup>n</sup></i><b>Z</b>(1) as a &Gamma;<sub><i>K</i></sub>-module if and only if <i>H</i><sup>2</sup>(<i>K</i>, <i>M</i>) &cong; <b>Z</b>/<i>p<sup>n</sup></i><b>Z</b>.
+This is a group-theoretic condition on <i>M</i>. Thus the isomorphism class of the &Gamma;<sub><i>K</i></sub>-module
+<b>Z</b><sub><i>p</i></sub>(1) can be recovered group-theoretically from &Gamma;<sub><i>K</i></sub>.
+</p>
+<p class="note">【構造化メモ、境界外候補①】ここで引用される「local Tate duality」(<a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-2">[2]</a>, Bloch-Kato Prop.3.8)がProposition1.1の**証明の核心的な入力**——mathlib実測調査でGalois cohomology・local duality系は不在と確認済み。境界外公理化の第一候補。</p>
+</div>
+
+<section class="statement proposition" id="prop-1-1" data-locator="p.3, l.94-97">
+<span class="locator">原文 p.3</span>
+<p><span class="label">Proposition 1.1:</span>
+The cyclotomic character &chi; : &Gamma;<sub><i>K</i></sub> &rarr; <b>Z</b><sub><i>p</i></sub><sup>&times;</sup> can be
+recovered entirely group-theoretically from &Gamma;<sub><i>K</i></sub>.</p>
+<p class="note">証明: 直前のduality review段落そのものが証明の全内容(円分指標のグラフ = Z_p(1)の同型類のデータそのもの、という直接的な帰結)。</p>
+</section>
+
+<div class="setup" id="section-1-lcft-review" data-locator="p.3, l.98-114">
+<span class="locator">原文 p.3</span>
+<p>
+Now recall from local class field theory (see, e.g.,
+<a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-3">[3]</a>) that we
+have a natural isomorphism &Gamma;<sub><i>K</i></sub><sup>ab</sup> &cong; (<i>K</i><sup>&times;</sup>)<sup>&and;</sup>
+(profinite completion). Let <i>k</i> be the residue field of <i>O<sub>K</sub></i>, so <i>k</i> has <i>q</i> = <i>p<sup>f</sup></i>
+elements. It is well-known that (<i>K</i><sup>&times;</sup>)<sup>&and;</sup> fits into an exact sequence of topological groups
+$$0 \to U_K \to (K^\times)^\wedge \to \mathbf{Z} \to 0$$
+where <i>U<sub>K</sub></i> := <i>O<sub>K</sub></i><sup>&times;</sup>. In particular, the prime-to-<i>p</i> part of the torsion
+subgroup of (<i>K</i><sup>&times;</sup>)<sup>&and;</sup> has precisely <i>q</i>&minus;1 elements, and the pro-<i>p</i>
+quotient of (<i>K</i><sup>&times;</sup>)<sup>&and;</sup> is the direct sum of a torsion group and a free
+<b>Z</b><sub><i>p</i></sub>-module of rank [<i>K</i>:<b>Q</b><sub><i>p</i></sub>]+1.
+</p>
+<p class="note">【構造化メモ、境界外候補②】この段落の「local class field theory」(<a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-3">[3]</a>, Serre)への言及は、mathlib実測調査で不在と確認済み(局所類体論の相互写像そのもの)。Proposition1.2の証明の核心的な入力——境界外公理化の第二候補。「exact sequence 0→U_K→(K×)^→Z→0」自体は(局所CFTを経由せず)直接K×の構造から従う初等的事実である可能性があり、この部分は境界内で構築できるか要検討。</p>
+</div>
+
+<section class="statement proposition" id="prop-1-2" data-locator="p.3, l.115-117">
+<span class="locator">原文 p.3</span>
+<p><span class="label">Proposition 1.2:</span>
+The number <i>q</i> of elements in the residue field of <i>O<sub>K</sub></i>, as well as the absolute degree
+[<i>K</i>:<b>Q</b><sub><i>p</i></sub>] of <i>K</i>, can be recovered entirely group-theoretically from
+&Gamma;<sub><i>K</i></sub>.</p>
+</section>
+
+<div class="setup" id="section-1-cor-setup" data-locator="p.3, l.118-123">
+<span class="locator">原文 p.3</span>
+<p>
+Now let <i>H</i> &sube; &Gamma;<sub><i>K</i></sub> be an open subgroup, and let <i>L</i> &supe; <i>K</i> be the
+corresponding extension field. Applying Proposition 1.2 to <i>L</i> and <i>H</i>, the number <i>q<sub>L</sub></i> of
+elements in the residue field of <i>O<sub>L</sub></i> can be recovered group-theoretically from <i>H</i> &sube;
+&Gamma;<sub><i>K</i></sub>. Note that <i>L</i> is unramified over <i>K</i> if and only if
+<i>q<sub>L</sub></i> = <i>q</i><sup>[&Gamma;<sub><i>K</i></sub>:<i>H</i>]</sup>.
+</p>
+</div>
+
+<section class="statement corollary" id="cor-1-3" data-locator="p.3, l.124-126">
+<span class="locator">原文 p.3</span>
+<p><span class="label">Corollary 1.3:</span>
+The inertia subgroup <i>I<sub>K</sub></i> &sube; &Gamma;<sub><i>K</i></sub> can be determined group-theoretically
+from &Gamma;<sub><i>K</i></sub>.</p>
+<p class="note">【構造化メモ】"determined group-theoretically"の内実: I_K = {開部分群Hの共通部分 | Hに対応する拡大体Lが不分岐} という**特徴づけ**として読める——「不分岐⟺q_L=q^[Γ_K:H]」という判定条件(Prop1.2から従う)を使い、I_Kを「全ての不分岐拡大に対応する開部分群の共通部分」として復元する、という構成的な議論だと解釈できる。原文はこの最終ステップ(共通部分を取る)を明示的には書いていない——①省略補完の対象。</p>
+</section>
+
+<div class="setup" id="section-1-remark" data-locator="p.3-4, l.131-137">
+<span class="locator">原文 p.3-4</span>
+<p>
+<b>Remark:</b> It follows, in particular, that (i) [<i>K</i>:<b>Q</b><sub><i>p</i></sub>] and (ii) the maximal abelian
+(over <b>Q</b><sub><i>p</i></sub>) subfield of <i>K</i> are determined group-theoretically by &Gamma;<sub><i>K</i></sub>.
+The content of Propositions 1.1 and 1.2 is essentially contained in
+<a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-8">[8]</a>, and
+Corollary 1.3 is explicitly stated in &sect;1 of
+<a href="../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html#ref-9">[9]</a>.
+</p>
+<p class="note">【構造化メモ】著者自身が「本節の結果は既知」と明記(§1冒頭のRemarkでも既述)——本節はTheorem4.2(主定理)の準備であり、独自性は§4にある。パイロットとしての意義は「望月氏独自の新規性」でなく「望月氏が採用した形式化のスタイル(group-theoretically recoverable、という中心概念)」の検証にある。</p>
+</div>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ</a></p>
+</body>
+</html>

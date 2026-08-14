@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§4 Chains of Elementary Operations(MAP-7対象: chain形式論——Belyi cuspidalizationの土台)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma { border-left-color: #7d1e5a; background: #faf2f7; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem { border-left-color: #a02020; background: #fdecea; }
+  section.statement.remark { border-left-color: #666; background: #f5f5f5; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .proof { border-left: 4px solid #999; padding: 0.4em 1em; margin: 0.5em 0 1.5em 0; background: #fbfbfb; }
+  table.types { border-collapse: collapse; margin: 1em 0; width: 100%; }
+  table.types th, table.types td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+  table.types th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<p><a href="../Topics in Absolute Anabelian Geometry II/corollary3.7-belyi-cuspidalization.html">&rarr; §3 Corollary3.7(AbsTopII、本節を利用するBelyi cuspidalization本体)へ</a></p>
+<h1 id="sec4-chain-formalism">&sect;4: Chains of Elementary Operations &mdash; MAP-7(chain形式論)の出典</h1>
+
+<p class="note milestone">【MAP-7の位置づけ、必須】本文書はM5-relの&kappa;-Recon非退化性主張とは<b>完全に独立</b>である&mdash;&mdash;AbsTopI&sect;4([Mzk21]=AbsTopIIが「[Mzk15], Definition4.2/4.6等」として引用する内容と同一番号体系で自己完結的に再掲されていることを確認済み)は、[IUTchI]Example5.1・&kappa;-Reconより<b>時系列的に先行し、依存もしない</b>基礎的な絶対遠アーベル幾何の道具である。目的はこの機構自体を独立したLean資産として構築することであり、M5-relの救済ではない(受理条件(c)・負の対照、本文書末尾で確認)。</p>
+
+<div class="setup" id="sec4-intro" data-locator="p.44-45, l.2764-2777">
+<span class="locator">原文 p.44-45</span>
+<p>
+&sect;4冒頭: [Mzk9]&sect;2の"categories of dominant localizations"を一般化し、「有限&eacute;tale被覆・有限&eacute;tale商・de-cuspidalization・de-orbification」という4種の"elementary operations"の"chain"(鎖)を扱う。対象となる代数的スタック・体は一般的だが種々の仮定に従う——鍵となる仮定は「相対版Grothendieck予想」の充足。
+</p>
+</div>
+
+<section class="statement lemma" id="lem-4-1" data-locator="p.45-47, l.2778-2867">
+<span class="locator">原文 p.45-47</span>
+<p><span class="label">Lemma 4.1 (Decomposition Groups of Hyperbolic Orbicurves):</span>
+&Sigma;を素数の空でない集合、&Delta;をGFG-type(base-prime partial construction data (k,X,&Sigma;)を持つ、Xは双曲的軌道曲線)のpro-&Sigma;群とする。x<sub>A</sub>,x<sub>B</sub>&isin;Xの閉点またはcusp、A,B&sube;&Delta;を対応する分解群とするとき: (i)A,Bはpro-cyclic、A&cap;B={1}——x<sub>A</sub>が閉点ならAは有限・normally terminal、cuspならAはtorsion-free・commensurably terminal。(ii)有限巡回部分群の位数はXの位数を割る。(iii)有限非自明閉部分群は一意な閉点の分解群に含まれる(&rArr;群論的特徴づけ)。(iv)Xが双曲的曲線&hArr;&Delta;がtorsion-free。(v)(vi)商&Delta;<sub>A</sub>への構成の両立性。
+</p>
+<p class="note">証明(l.2819-2867)の依拠先: [Mzk13]Lemma2.1・[Mzk12]Proposition1.2,(ii)(いずれも0_Source内Mochizuki既存論文、確認は2_LocatorMap参照)。</p>
+</section>
+
+<section class="statement definition" id="def-4-2" data-locator="p.47-51, l.2882-3133">
+<span class="locator">原文 p.47-51</span>
+<p><span class="label">Definition 4.2, (i) — [<i>X&#770;/X</i>-]chain:</span>
+スキーム的な設定(G:slim副有限群、1&rarr;&Delta;&rarr;&Pi;&rarr;G&rarr;1:GSAFG-type拡張、&alpha;:&pi;<sub>1</sub><sup>tame</sup>(X)&#8608;&Pi;:scheme-theoretic envelope)のもとで、「generically scheme-like代数的スタック」の有限列X<sub>0</sub>&rArr;X<sub>1</sub>&rArr;...&rArr;X<sub>n</sub>(各段にrigidifying morphism &rho;<sub>j</sub>:X&#770;&rarr;X<sub>j</sub>付き)であって、(0X)X<sub>0</sub>=X、(1X)各X<sub>j</sub>は有限次拡大体k<sub>j</sub>&sube;k&#772;上、(2X)対応する副有限群&Pi;<sub>j</sub>=Gal(X&#770;<sub>j</sub>/X<sub>j</sub>)&#8608;G<sub>j</sub>の核&Delta;<sub>j</sub>はslimかつ非自明、(3X)Xが双曲的軌道曲線ならX<sub>j</sub>も双曲的軌道曲線・&Delta;<sub>j</sub>はpro-&Sigma;、(4X)各段が下記4種の"elementary operation"のいずれか、を満たすもの。
+</p>
+<table class="types">
+<tr><th>型</th><th>操作</th><th>群側の効果</th></tr>
+<tr><td>&#9481;(&#9585;)</td><td>有限&eacute;tale被覆 &phi;:X<sub>j+1</sub>&rarr;X<sub>j</sub></td><td>開埋め込み &Pi;<sub>j+1</sub>&rarr;&Pi;<sub>j</sub></td></tr>
+<tr><td>&#9497;(&#9586;)</td><td>有限&eacute;tale商("finite &eacute;tale quotient") &phi;:X<sub>j</sub>&rarr;X<sub>j+1</sub></td><td>開埋め込み &Pi;<sub>j</sub>&rarr;&Pi;<sub>j+1</sub></td></tr>
+<tr><td>&bull;</td><td>de-cuspidalization(1点[torsion-free正規開部分群に含まれる分解群を持つcusp]の除去、双曲的軌道曲線限定)</td><td>全射 &Pi;<sub>j</sub>&#8608;&Pi;<sub>j+1</sub>(Ker=cuspidal decomposition群の正規閉包)</td></tr>
+<tr><td>&#8859;</td><td>de-orbification(partial coarsification、双曲的軌道曲線+&Sigma;=Primes限定)</td><td>全射 &Pi;<sub>j</sub>&#8608;&Pi;<sub>j+1</sub>(Ker=有限閉部分群の正規閉包)</td></tr>
+</table>
+<p><span class="label">(ii):</span> 型パターン(symbol列&isin;{&#9481;,&#9497;,&bull;,&#8859;})が一致する2つのchain間の同型(rigidifying morphismと両立する代数的スタックの同型の族)によって圏Chain(X&#770;/X)が定まる。terminal射(X<sub>n</sub>&rarr;Y<sub>m</sub>の優越k-射)による圏Chain<sup>trm</sup>(X&#770;/X)・その同型部分圏Chain<sup>iso-trm</sup>(X&#770;/X)も定義。
+</p>
+<p><span class="label">(iii):</span> <b>[&Pi;-]chain</b>(スキーム側でなく<b>純粋に群論的な</b>並行版、Belyi cuspidalizationのアルゴリズムが実際に使う対象): slim副有限群の有限列&Pi;<sub>0</sub>&rArr;...&rArr;&Pi;<sub>n</sub>(rigidifying homomorphism &rho;<sub>j</sub>:&Pi;&rarr;&Pi;<sub>j</sub>付き)、条件(0&Pi;)-(4&Pi;)はスキーム版と並行(&Pi;<sub>0</sub>=&Pi;、各段が同じ4種のelementary operationの<b>群論的版</b>——4種とも上表の「群側の効果」列で直接定義される)。同型により圏Chain(&Pi;)、terminal射により圏Chain<sup>trm</sup>(&Pi;)・Chain<sup>iso-trm</sup>(&Pi;)。
+</p>
+<p><span class="label">(v):</span> 部分型パターンへの制限による部分圏の記法: DLoc(&minus;):=Chain<sup>trm</sup>(&minus;){&#9481;,&bull;}、&Eacute;tLoc(&minus;):=Chain<sup>iso-trm</sup>(&minus;){&#9481;,&#9497;}(&minus;はX&#770;/XまたはPi)——[Mzk9]&sect;2の理論の一般化に相当。
+</p>
+<p class="note milestone">【MAP-7の核心対象】Corollary3.7(AbsTopII、次文書)は<b>専ら(iii)の&Pi;-chain</b>(純粋な群論的対象)を使う——スキーム的chain(i)(ii)は動機付けの記述に留まる。Lean化の主眼は(iii)+4種elementary operationの群論的効果に絞れる可能性がある。</p>
+</section>
+
+<section class="statement proposition" id="prop-4-3" data-locator="p.52, l.3171-3182">
+<span class="locator">原文 p.52</span>
+<p><span class="label">Proposition 4.3 (Re-ordering of Chains):</span>
+&Sigma;=Primesのもとで、任意のX&#770;/X-chainは、型パターンが&#9481;,&bull;,...,&bull;,&#9497;,&#8859;,...,&#8859;,&#9497;という正規形の、terminal同型なchainへ書き換えられる。
+</p>
+<p class="note">Corollary3.7自体は本命題を陽には引用しないが(Example3.6,(ii)が独自の型パターン&#9481;,&#9497;,&bull;,...,&bull;,&#9481;,&bull;,...,&bull;,&#9497;を直接構成する)、chain形式論の一般的な整理定理として記録する。証明は本文書の範囲外(未読、次段の課題)。</p>
+</section>
+
+<section class="statement lemma" id="lem-4-5" data-locator="p.53-55, l.3294-3405">
+<span class="locator">原文 p.53-55</span>
+<p><span class="label">Lemma 4.5 (Cuspidal Decomposition Groups):</span>
+Gをslim副有限群、1&rarr;&Delta;&rarr;&Pi;&rarr;G&rarr;1をGSAFG-type拡張(base-prime partial construction data (k,k&#772;,X,&Sigma;)、Xは双曲的軌道曲線)、&alpha;:&pi;<sub>1</sub><sup>tame</sup>(X)&#8608;&Pi;、l&isin;&Sigma;を巡回指標&chi;<sup>cyclo</sup><sub>G</sub>:G&rarr;<b>Z</b><sub>l</sub><sup>&times;</sup>が開像を持つ素数とする。(i)Xが非properである&hArr;&Delta;のtorsion-free pro-&Sigma;開部分群が全て自由。(ii)quasi-trivial rank &tau;(M)の定義(有限商を経由する作用の次元和)。(iii)Q-cyclotomic weight——<b>Galois表現論的な計算</b>: d<sub>&chi;</sub>(M):=&tau;(M(&chi;<sup>-1</sup>))&minus;&tau;(Hom(M,Q<sub>l</sub>))という数値不変量を使い、巡回指標の冪等値類を&Delta;の商のweight構造から特徴づける。(iv)cusp分解群の特徴づけ(Z<sub>l</sub>&cong;の閉部分群として、d<sub>&chi;</sub>を使う条件式で)。(v)<b>cusp集合とcusp分解群の共役類の自然な全単射</b>(&Pi;への作用と両立、Hを動かして関手的)——<b>これがCorollary3.7,(c)が直接引用する箇所</b>。(vi)分解群の可換化終端性(I=C<sub>&Pi;</sub>(I&cap;&Delta;))。
+</p>
+<p class="note">証明(l.3398-3405)の依拠先: (i)Lemma4.1,(iv)+[Mzk12]Remark1.1.3(well-known)。(ii)定義から直ちに。(iii)[Mzk12]Proposition2.4,(iv),(vii)+Corollary2.7,(i)の証明。(iv)[Mzk12]Theorem1.6,(i)の要約。(v)(vi)[Mzk12]Proposition1.2,(i),(ii)。★全て[Mzk12](0_Source"Galois Sections.txt"、既に存在確認済み)——0_Source内で完結。</p>
+</section>
+
+<section class="statement definition" id="def-4-6" data-locator="p.55-56, l.3406-3465">
+<span class="locator">原文 p.55-56</span>
+<p><span class="label">Definition 4.6, (i) — chain-full:</span>
+V(代数的スタックの同型類の集合)・F(体の同型類の集合)・S(素数の空でない部分集合の集合)、D&sube;V&times;F&times;S("partial construction dataの集まり")とする。DがGSAFG-type拡張1&rarr;&Delta;&rarr;&Pi;&rarr;G&rarr;1(Gはslim、base-prime partial construction data(X,k,&Sigma;)で([X],[k],&Sigma;)&isin;D)の任意のX&#770;/X-chainに現れる全ての"X<sub>j</sub>,k<sub>j</sub>"について([X<sub>j</sub>],[k<sub>j</sub>],&Sigma;)&isin;Dとなるとき、Dは<b>chain-full</b>であるという。
+</p>
+<p><span class="label">(ii) — rel-isom-DGC:</span>
+Dがchain-fullとする。任意の2つの拡張(i=1,2、それぞれGSAFG-type、base-prime partial construction data(k<sub>i</sub>,X<sub>i</sub>,&Sigma;<sub>i</sub>)&isin;D)+体の同型&zeta;<sub>k</sub>:k<sub>1</sub>&cong;k<sub>2</sub>(誘導するouter同型&zeta;<sub>G</sub>:G<sub>1</sub>&cong;G<sub>2</sub>)に対し、自然な写像
+<br>Isom<sub>k1,k2</sub>(X<sub>1</sub>,X<sub>2</sub>) &rarr; Isom<sup>out</sup><sub>G1,G2</sub>(&Pi;<sub>1</sub>,&Pi;<sub>2</sub>)
+<br>(スキームの同型の集合 &rarr; 副有限群のouter同型の集合)が<b>全単射</b>であるとき、Dについて<b>rel-isom-DGC</b>(相対Grothendieck予想の同型版)が成立するという(準同型版rel-hom-DGCも並行して定義)。
+</p>
+<p class="note milestone">【MAP-7の核心公理的条件】rel-isom-DGCは<b>それ自体が「相対Grothendieck予想」という深い定理の充足条件</b>——Corollary3.7はこれを<b>前提として要求</b>する(証明せず、成立するDの存在を仮定)。Lean化ではこの条件自体をM1様式の境界外仮説として扱う設計が自然な候補になる。</p>
+</section>
+
+<section class="statement theorem" id="thm-4-7" data-locator="p.55-58, l.3474-3606">
+<span class="locator">原文 p.55-58</span>
+<p><span class="label">Theorem 4.7 (Semi-absoluteness of Chains of Elementary Operations):</span>
+Dをchain-full+rel-isom-DGC充足とする。i=1,2についてG<sub>i</sub>:slim副有限群、1&rarr;&Delta;<sub>i</sub>&rarr;&Pi;<sub>i</sub>&rarr;G<sub>i</sub>&rarr;1:GSAFG-type拡張(base-prime partial construction data(k<sub>i</sub>,k&#772;<sub>i</sub>,X<sub>i</sub>,&Sigma;<sub>i</sub>)&isin;D)、&alpha;<sub>i</sub>:&pi;<sub>1</sub><sup>tame</sup>(X<sub>i</sub>)&#8608;&Pi;<sub>i</sub>とする。以下2条件のもとで:(a)X<sub>1</sub>,X<sub>2</sub>のいずれかが双曲的軌道曲線なら両方とも双曲的軌道曲線、(b)いずれかが非properな双曲的軌道曲線なら、ある素数l&isin;&Sigma;<sub>1</sub>&cap;&Sigma;<sub>2</sub>で両側の巡回指標が...(条件続く、未全読、下記note参照)——[主張の結論部分は本文書では未転写、l.3500以降を要再読]。
+</p>
+<p class="note">証明(l.3553-3606、約50行)は「引用の組み立てのみ」ではなく<b>実質的な議論</b>を含む——正直な限定として記録: 本文書はTheorem4.7の主張の後半(結論部分、l.3500-3552付近)・証明本体(l.3553-3606)の<b>精密な転写を完了していない</b>(統合的な下調べの範囲内で構造の存在とlocatorのみ確定)。次段(3_Purified相当)での精読を要する。</p>
+</section>
+
+<div class="setup" id="related-later" data-locator="p.60-63, l.3621-3980">
+<span class="locator">原文 p.60-63</span>
+<p>関連する後続の構成(本文書では未精読、locatorのみ記録): Proposition4.10(l.3710)・Definition4.11(l.3845)・Theorem4.12(l.3980、Theorem4.7と関連する系)——Corollary3.7自体が直接引用するのはDefinition4.2・4.6・Lemma4.5,(v)・Theorem4.7のみであり、これらは受理条件のスコープ外(決定十分性の方針により未展開)。</p>
+</div>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(受理条件(c)、必須確認):</span>
+本文書が構造化した全要素(Lemma4.1・Definition4.2・Proposition4.3・Lemma4.5・Definition4.6・Theorem4.7)について、`lean/ABC2/Instrument/KappaCoricConditional.lean`・M5-relの非退化性関連の定義(&kappa;-Recon・M<sub>&kappa;</sub>・M<sub>&infin;&kappa;</sub>等)への参照は<b>本文書中に一切出現しない</b>——AbsTopI&sect;4は[IUTchI]・&kappa;-Recon概念よりも出版年代・論理構造の双方で先行する独立した絶対遠アーベル幾何の基礎理論であり、依存の向きは存在しえない(IUTchIがAbsTopI/II/IIIに依存する、逆ではない)。確認方法: 本文書の原文引用範囲(0_Source "Topics in Absolute Anabelian Geometry I.txt" l.2764-3980)全体をgrep済み、"&kappa;-Recon"・"IUTchI"・"Example 5.1"等の文字列は<b>0件</b>。
+</p>
+</section>
+
+</body>
+</html>

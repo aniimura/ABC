@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>On Semi-positivity and Filtered Frobenius Crystals — Structured Index</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.4em; }
+  .meta { color: #666; font-size: 0.9em; margin-bottom: 2em; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  .status-done { color: #0a7d1e; font-weight: bold; }
+  .status-pending { color: #999; }
+  a { color: #1554b0; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+</style>
+</head>
+<body>
+<h1>On Semi-positivity and Filtered Frobenius Crystals</h1>
+<p class="meta">
+S. Mochizuki, Publ. Res. Inst. Math. Sci. 31 (1995), pp. 81–94.<br>
+原文: <code>0_Source/On Semi-positivity and Filtered Frobenius Crystals.txt</code><br>
+書誌一覧確認: <code>0_Source/ronbun-list.txt</code>(数論幾何一般 [2])——本セッションで確認した限り、望月氏の出版論文の中で最古(同一巻内でHurwitz Scheme論文[pp.355-441]より前のページ番号)。
+</p>
+
+<h2>論文全体の構造(原文の段落・ページ番号から抽出)</h2>
+<table>
+<tr><th>節</th><th>内容</th><th>原文ページ</th><th>構造化状態</th></tr>
+<tr><td>§0</td><td>Introduction(Theorem 3.4・Corollary 3.5の先出し、関連研究への言及)</td><td>1–2</td><td class="status-pending">未着手</td></tr>
+<tr><td>§1</td><td><a href="section-1.html">Basic Algebraic Lemmas</a>(Definition 1.1・Proposition 1.2・Lemma 1.3・Lemma 1.4)</td><td>3–4</td><td class="status-done">パイロット完了</td></tr>
+<tr><td>§2</td><td>Faltings' Extension of Fontaine-Laffaille Theory(Lemma 2.1・Proposition 2.2)</td><td>5–9</td><td class="status-pending">未着手</td></tr>
+<tr><td>§3</td><td>The Main Theorem(Definition 3.1・Lemma 3.2・Lemma 3.3・Theorem 3.4・Corollary 3.5)</td><td>9–13</td><td class="status-pending">未着手</td></tr>
+<tr><td>Appendix</td><td>The Case of One-Dimensional Fibres</td><td>13–14</td><td class="status-pending">未着手</td></tr>
+</table>
+
+<h2>パイロットの選定理由</h2>
+<p>
+§1を最初のパイロット対象に選んだ——Definition・Proposition+Proof・Lemma+Proofという、本論文(および多くの数学論文)に現れる主要な構造要素の型を一通り含む、自己完結性の高い最小単位だったため。§0(Introduction、地の文中心)や§3(Main Theorem、§1・§2の結果に依存)より、単独での構造化が試しやすい。
+</p>
+
+<h2>次工程への引き渡し</h2>
+<p>
+<code>2_LocatorMap</code>工程では、本ファイル内の各要素(<code>id</code>属性つき)が参照する外部文献([1]=Faltings、[2]=Kodaira Vanishing関連、[8]=log schemesの理論等、原文中の引用番号)を解決する。§1では[8](log schemesの用語)への参照が Definition 1.1 に現れる——これが最初の解決対象になる。
+</p>
+</body>
+</html>

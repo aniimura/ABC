@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>§1. Basic Algebraic Lemmas — On Semi-positivity and Filtered Frobenius Crystals</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #a0470c; background: #fdf6ef; }
+  section.statement.lemma { border-left-color: #1554b0; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  div.proof { border-left: 4px dashed #888; padding: 0.5em 1em; margin: 0.5em 0 1.5em 1em; color: #333; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .qed { text-align: right; font-weight: bold; }
+  .setup { margin: 1em 0; }
+  a.backlink { font-size: 0.8em; }
+  sup, sub { line-height: 0; }
+</style>
+</head>
+<body>
+<p><a href="index.html">&larr; 論文全体の目次へ</a></p>
+<h1 id="section-1">§1. Basic Algebraic Lemmas</h1>
+
+<div class="setup" id="section-1-setup" data-locator="p.3, l.80-86">
+<span class="locator">原文 p.3</span>
+<p>
+Let <i>A</i> be a regular noetherian ring. Let <i>X</i>, <i>S</i> be smooth, proper schemes over <i>A</i>,
+and let <i>D</i> &sube; <i>S</i>, <i>E</i> &sube; <i>X</i> be relative divisors with normal crossings over <i>A</i>.
+Let <i>f</i> : <i>X</i> &rarr; <i>S</i> be a morphism which is smooth over <i>S</i> &minus; <i>D</i>,
+and such that (schematically) <i>E</i> = <i>f</i><sup>&minus;1</sup>(<i>D</i>).
+Note that these assumptions together imply that <i>f</i> is, in fact, smooth in codimension one.
+To simplify things, we also assume that <i>f</i> has geometrically connected fibres and constant
+relative dimension. Then, using the terminology of log schemes as given in
+<a href="../../2_LocatorMap/On Semi-positivity and Filtered Frobenius Crystals/refs.html#ref-8">[8]</a>, we make the following
+</p>
+</div>
+
+<section class="statement definition" id="def-1-1" data-locator="p.3, l.87-97">
+<span class="locator">原文 p.3</span>
+<p><span class="label">Definition 1.1:</span>
+We say that (<i>f</i> : <i>X</i> &rarr; <i>S</i>; <i>E</i>; <i>D</i>) (or just <i>f</i> : <i>X</i> &rarr; <i>S</i>, for short) is a
+<b>semistable family of varieties</b> (or just <b>semistable</b> for short) if, when we give <i>X</i> (respectively,
+<i>S</i>) the log structure arising from the divisor with normal crossings <i>E</i> (respectively, <i>D</i>), the
+morphism of log schemes induced by <i>f</i> is log-smooth.</p>
+<p>
+If <i>f</i> : <i>X</i> &rarr; <i>S</i> is semistable, then we denote the relative sheaf of logarithmic differentials by
+&Omega;<sup>log</sup><sub><i>X/S</i></sub>. If the relative dimension of <i>f</i> is <i>d</i>, then we denote the
+<i>d</i>th exterior power of &Omega;<sup>log</sup><sub><i>X/S</i></sub> by &omega;<sub><i>X/S</i></sub>.
+Note that &omega;<sub><i>X/S</i></sub> is the relative canonical sheaf of <i>X</i> over <i>S</i> in the sense of duality
+theory.
+</p>
+<p class="note"><i>【構造化メモ】本Definitionは2つの独立した定義を含む: (a) 「semistable」の定義(log-smooth性による)、
+(b) 記法の導入(&Omega;<sup>log</sup>・&omega;<sub><i>X/S</i></sub>)——後者は定義でなく記法宣言であり、
+Lean化の際は別の宣言単位として扱うべきである。</i></p>
+</section>
+
+<section class="statement proposition" id="prop-1-2" data-locator="p.3, l.98-113">
+<span class="locator">原文 p.3</span>
+<p><span class="label">Proposition 1.2:</span>
+Suppose that <i>A</i> is an algebraically closed field, that <i>S</i> is one-dimensional (i.e., a curve),
+and that <i>L</i> is an ample line bundle on <i>S</i>. Then for any <i>N</i> &isin; <b>N</b>, there exists a finite,
+flat morphism &pi; : <i>T</i> &rarr; <i>S</i> which has the following properties:</p>
+<ol>
+<li>(1) <i>T</i> is a smooth, proper, connected <i>A</i>-scheme;</li>
+<li>(2) the ramification divisor <i>R</i> &sube; <i>S</i> of &pi; avoids <i>D</i></li>
+<li>(3) dim<sub><i>A</i></sub><i>H</i><sup>0</sup>(<i>T</i>, <i>L<sub>T</sub></i>) &ge; <i>N</i>.</li>
+</ol>
+<div class="proof" id="proof-1-2" data-locator="p.3, l.105-113">
+<p><span class="label">Proof:</span>
+This is the standard technique of passing to a ramified cyclic covering, used, for instance,
+in algebraic proofs of the Kodaira Vanishing Theorem (see
+<a href="../../2_LocatorMap/On Semi-positivity and Filtered Frobenius Crystals/refs.html#ref-2">[2]</a>).
+Namely, one takes a very high tensor power of <i>L</i>, say <i>M</i> = <i>L</i><sup>&otimes;<i>M</i></sup>
+(where we take <i>M</i> to be very large, and invertible in <i>A</i>), such that <i>M</i> is very ample.
+Then there exists a section &sigma; of <i>M</i> over <i>S</i> whose zero divisor is &eacute;tale over <i>A</i> and
+avoids <i>D</i>. Then taking the cyclic covering of <i>S</i>&prime; given by extracting an <i>M</i>th root of &sigma;
+gives us a scheme <i>T</i> as above such that the dimension of the space of sections over <i>T</i> of
+<i>L</i> is one greater than it was before. Repeating this process gives the inequality desired.</p>
+<p class="qed">&#9711;</p>
+</div>
+</section>
+
+<div class="setup" id="section-1-blowup-setup" data-locator="p.3-4, l.114-125">
+<span class="locator">原文 p.3-4</span>
+<p>
+Let us go back to assuming that <i>A</i> is arbitrary regular noetherian ring. We now review
+some basic well-known facts about blow-ups. Suppose that we are given a <i>A</i>-flat subscheme
+<i>F</i> &sube; <i>S</i>. Let us say that <i>F</i> is <b>flatly positioned</b> (respectively, <b>transversely positioned</b>)
+with respect to the divisor with normal crossings <i>D</i> if for any &eacute;tale morphism <i>U</i> &rarr; <i>S</i>
+such that <i>D</i>|<sub><i>U</i></sub> splits into a union of smooth components, the schematic intersection of
+<i>F</i>|<sub><i>U</i></sub> with any irreducible component of <i>D</i>|<sub><i>U</i></sub> is flat over <i>A</i>
+(respectively, and the restriction to any connected component <i>I</i> &sube; <i>F</i>|<sub><i>U</i></sub> of
+<i>F</i>|<sub><i>U</i></sub> of the union of irreducible components of <i>D</i>|<sub><i>U</i></sub> that do not
+contain <i>I</i> is a relative divisor with normal crossings on <i>I</i>).
+</p>
+<p class="note"><i>【構造化メモ】これは名前付きの定義(「flatly positioned」「transversely positioned」)だが、
+原文では見出し語(Definition N.N)を持たない——地の文に埋め込まれた定義。3_Purifiedエ程では
+独立したDefinitionとして抽出する必要がある(暗黙の省略の一種、ユーザーの指摘した①省略補完に該当)。</i></p>
+</div>
+
+<section class="statement lemma" id="lemma-1-3" data-locator="p.4, l.126-135">
+<span class="locator">原文 p.4</span>
+<p><span class="label">Lemma 1.3:</span>
+Let us suppose that <i>A</i> is a domain, and that we are given a section
+&sigma; : Spec(<i>A</i>) &rarr; <i>S</i> whose image is flatly positioned with respect to <i>D</i>.
+Let &pi; : <i>S&#771;</i> &rarr; <i>S</i> be the blow-up of <i>S</i> at the image of &sigma;.
+Then <i>S&#771;</i> is smooth over <i>A</i>, and <i>D&#771;</i> = &pi;<sup>&minus;1</sup>(<i>D</i>)<sub>red</sub> &sube; <i>S&#771;</i>
+is a relative divisor with normal crossings over <i>A</i>.</p>
+<div class="proof" id="proof-1-3" data-locator="p.4, l.131-135">
+<p><span class="label">Proof:</span>
+Indeed, it suffices to take local coordinates <i>x</i><sub>0</sub>, <i>x</i><sub>1</sub>, &hellip;, <i>x<sub>n</sub></i>
+for <i>S</i> over <i>A</i> at some point in the image of &sigma; such that the image of &sigma; is defined by the
+ideal generated by the <i>x</i>&prime;s, and <i>D</i> is defined by some product of the <i>x</i>&prime;s.
+The result follows by direct computation.</p>
+<p class="qed">&#9711;</p>
+</div>
+</section>
+
+<section class="statement lemma" id="lemma-1-4" data-locator="p.4, l.136-160">
+<span class="locator">原文 p.4</span>
+<p><span class="label">Lemma 1.4:</span>
+Suppose that <i>A</i> is an algebraically closed field, and that we are given an <i>A</i>-smooth curve
+(i.e., an <i>A</i>-smooth, closed subscheme of dimension one) <i>C</i> &sube; <i>S</i>. Then, after applying a
+series of blow-ups of <i>S</i> at closed points, we can obtain a birational morphism
+&pi; : <i>S&#771;</i> &rarr; <i>S</i> such that if <i>C&#771;</i> is the strict transform of <i>C</i> in <i>S&#771;</i>,
+and <i>D&#771;</i> = &pi;<sup>&minus;1</sup>(<i>D</i>)<sub>red</sub>, then <i>C&#771;</i> is transversely positioned with
+respect to <i>D&#771;</i>.</p>
+<div class="proof" id="proof-1-4" data-locator="p.4, l.142-156">
+<p><span class="label">Proof:</span>
+Clearly we can assume (by using &eacute;tale localization) that <i>D</i> splits into a union of smooth
+divisors: <i>D</i> = &sum;<i>D<sub>i</sub></i>. Now we claim that after a series of blow-ups, we may assume that
+each <i>D<sub>i</sub></i> either contains <i>C</i> or intersects <i>C</i> transversely. Indeed, if <i>D<sub>i</sub></i>
+intersects <i>C</i> at a point with multiplicity <i>r</i>, then a simple calculation reveals that after
+blowing up at that point, the strict transform of <i>D<sub>i</sub></i> intersects the strict transform of
+<i>C</i> with multiplicity &le; <i>r</i>&minus;1, while the exceptional divisor intersects <i>C</i> transversely.
+Thus, repeating this process proves the claim.</p>
+<p>
+Thus, we assume that each <i>D<sub>i</sub></i> either contains <i>C</i> or intersects <i>C</i> transversely. For
+simplicity, by localizing, we can also assume that <i>C</i> fails to be transversely positioned with
+respect to <i>D</i> at only one point. With these assumptions, the only thing that could keep <i>C</i>
+from being transversely positioned is if two or more distinct <i>D<sub>i</sub></i>&prime;s intersect <i>C</i>
+transversely at the same point. If this happens, then let us blow up the point. It is then easy
+to see that the strict transforms of those <i>D<sub>i</sub></i>&prime;s do not meet the strict transform of
+<i>C</i>. This completes the proof.</p>
+<p class="qed">&#9711;</p>
+</div>
+<p class="note"><i>【構造化メモ】この証明は3段の帰納的な議論(①各<i>D<sub>i</sub></i>を横断的にする、
+②横断的でない点を1点に限定する、③その1点も解消する)——3_Purifiedエ程で、この暗黙の
+帰納構造を明示的なステップとして書き出す必要がある(②省略補完+精製の典型例)。</i></p>
+</section>
+
+<div class="setup" id="section-1-tail" data-locator="p.4, l.157-161">
+<span class="locator">原文 p.4</span>
+<p>
+Now let us go back to assuming that <i>A</i> is a regular noetherian ring. Let us suppose that
+<i>C</i> is a smooth, geometrically connected curve over <i>A</i> which is embedded as a transversely
+positioned closed subscheme <i>C</i> &sube; <i>S</i> with respect to the divisor <i>D</i>. Let us denote by
+<i>S</i><sup>log</sup> the log scheme (see
+<a href="../../2_LocatorMap/On Semi-positivity and Filtered Frobenius Crystals/refs.html#ref-8">[8]</a> for details)
+obtained by putting on <i>S</i> the log structure associated&hellip;
+</p>
+<p class="note"><i>【構造化メモ】ここで§1の抜粋は途切れる(§2への継続文)——原文p.4末尾からp.5(§2冒頭)へ続く。
+パイロットの範囲(§1)としてはここまで。</i></p>
+</div>
+
+<hr>
+<p><a href="index.html">&larr; 論文全体の目次へ</a></p>
+</body>
+</html>

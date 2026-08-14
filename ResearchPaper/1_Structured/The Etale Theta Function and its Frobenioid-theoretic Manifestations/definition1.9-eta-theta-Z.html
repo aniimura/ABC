@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Definition1.9(MAP-8対象: η̈_{Θ,Z}のZ-orbit構成・standard type非退化条件)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.6; color: #222; }
+  h1 { font-size: 1.3em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: 0.5em 1em; margin: 1.5em 0; background: #f7f9fc; }
+  section.statement.definition { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.theorem { border-left-color: #a02020; background: #fdecea; }
+  section.statement.remark { border-left-color: #666; background: #f5f5f5; }
+  .label { font-weight: bold; }
+  .locator { color: #999; font-size: 0.8em; float: right; }
+  .setup { margin: 1em 0; }
+  .note { background: #fff8e1; border-left: 4px solid #c9a227; padding: 0.4em 1em; }
+  .note.milestone { background: #eaf3ff; border-left-color: #1554b0; }
+  .note.negcontrol { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .note.resolved { background: #eaf7ea; border-left-color: #0a7d1e; }
+  .ul1 { text-decoration: underline; }
+  .ul2 { text-decoration: underline; text-decoration-style: double; }
+</style>
+</head>
+<body>
+<p><a href="../../../lean/ABC2/Instrument/MonoThetaEnvironmentConditional.lean">→ MAP-6既存資産(MonoThetaEnvironmentConditional.lean、η̈_Θ関連部分)へ</a></p>
+<h1 id="def-1-9">Definition 1.9 &mdash; MAP-8(η̈_{Θ,Z}のZ-orbit構成・standard type非退化条件)の出典</h1>
+
+<p class="note milestone">【MAP-8の位置づけ、必須】η̈_Θ自体はMAP-6で「弱い定義」として達成済み
+(`MonoThetaEnvironmentConditional.lean` l.452-591)——本文書はその
+**次の連鎖ステップ**(η̈_{Θ,Z}、Z-orbit構成+standard type非退化条件)を
+対象とする。M5-relのκ-Recon非退化性主張とは無関係(下記負の対照参照)。</p>
+
+<p class="note resolved">【2026-08-12追記、PDF目視確認により確認(良い知らせ)】`pdftoppm`でp.27を
+画像化し目視確認した結果、Definition1.9で使われる<span class="ul1">Π</span>
+(<span class="ul1">Π</span>^tp_Ẋ・<span class="ul1">Π</span>^tp_Ÿ等)は
+一貫して<b>下線1本</b>(§1全体で使われる基準の下線本数、後の§2で導入される
+下線2本の対象[MAP-9以降で問題となった対象]とは無関係)——本文書・MAP-6/8の
+Lean資産(`etaTheta`等)には、この点に関する記法上のリスクは<b>無いと
+確認</b>した。詳細な記法体系は`dy-construction.html`・
+`1_Structured/README.md`参照。以下の本文は元のまま(下線表記は未追記だが
+曖昧さのリスクが無いため優先度を下げた)。</p>
+
+<div class="setup" id="setup-4torsion" data-locator="p.26-27, l.1742-1759">
+<span class="locator">原文 p.26-27</span>
+<p>
+√&minus;1&isin;Kと仮定する——「√&minus;1」は[Ẍの下部楕円曲線の]4-torsion点τ
+(特殊ファイバーへの制限が、特殊ファイバーの一意な既約成分の**内部**
+[=節点を避ける]に位置する)を定める。「&minus;√&minus;1」が定める4-torsion点
+「τ<sup>&minus;1</sup>」も同様。¨η<sub>Θ</sub>&isin;H<sup>1</sup>(Π<sup>tp</sup><sub>Ÿ</sub>,Δ<sub>Θ</sub>)
+をProposition1.3の類とし(<b>★MAP-6の`etaTheta`はこの類の性質
+[Remark1.9.1]を実装済み</b>、下記参照)、<b>η̈<sub>Θ,Z</sub>を
+Π<sup>tp</sup><sub>Ẋ</sub>/Π<sup>tp</sup><sub>Ÿ</sub>&cong;Zの
+η̈<sub>Θ</sub>のorbitとして定義する</b>——これがMAP-8の主対象。
+</p>
+<p class="note">★★★構成の精密な区別(重要): η̈<sub>Θ</sub>(Prop1.3の基底の類、単一のコホモロジー類)
+と η̈<sub>Θ,Z</sub>(そのΠ<sup>tp</sup><sub>Ẋ</sub>/Π<sup>tp</sup><sub>Ÿ</sub>≅Z
+による軌道、**集合**)は原文上明確に異なる対象——Z-orbitは「デック変換群Z」
+(MAP-5-EのΔ_∞・`deckTranslation`と同種の対象)による η̈<sub>Θ</sub>の平行移動の
+全体である。</p>
+</div>
+
+<section class="statement definition" id="def-1-9-full" data-locator="p.27, l.1760-1771">
+<span class="locator">原文 p.27</span>
+<p><span class="label">Definition 1.9(√&minus;1&isin;Kのもとで):</span></p>
+<p><span class="label">(i) standard set of values:</span>
+η̈<sub>Θ,Z</sub>の(Proposition1.4,(iii)の意味での)以下2つの値の集合
+のいずれかを、η̈<sub>Θ,Z</sub>の<b>standard set of values</b>と呼ぶ:
+$$\ddot\eta_{\Theta,\mathbf Z}|_\tau,\quad \ddot\eta_{\Theta,\mathbf Z}|_{\tau^{-1}} \subseteq K^\times$$
+</p>
+<p><span class="label">(ii) standard type:</span>
+η̈<sub>Θ,Z</sub>のあるstandard set of valuesのうち、(Kの付値に関して)
+**最大位数**を持つ$O_K^\times$内の値(Proposition1.4の¨Θの級数表示での
+√&minus;1における値、Proposition1.4,(ii)参照)がちょうど$\pm1$に等しい
+という性質を満たすとき、η̈<sub>Θ,Z</sub>は<b>standard type</b>であるという。
+</p>
+</section>
+
+<section class="statement remark" id="rem-1-9-1" data-locator="p.27, l.1772-1780">
+<span class="locator">原文 p.27</span>
+<p><span class="label">Remark 1.9.1:</span>
+Π<sup>tp</sup><sub>Ẍ</sub>由来のΠ<sup>tp</sup><sub>Ẋ</sub>の内部自己同型は
+η̈<sub>Θ,Z</sub>を固定し、ϵ<sub>μ</sub>・ϵ<sub>±</sub>はη̈<sub>Θ,Z</sub>を
+&minus;η̈<sub>Θ,Z</sub>へ写す。特に、Π<sup>tp</sup><sub>Ċ</sub>の内部自己同型は
+η̈<sub>Θ,Z</sub>&rarr;η̈<sub>Θ,Z</sub>を保つ。
+</p>
+<p class="note milestone">★★★<b>MAP-6での既実装を確認</b>: 本Remarkの内容は
+`MonoThetaEnvironmentConditional.lean`の`inn_fixes_etaTheta`
+(内部自己同型による固定)・`epsilonMu_flips_etaTheta`・
+`epsilonPm_flips_etaTheta`(符号反転)として**既に実装・証明済み**
+(l.500-591)。ただし該当ファイルの`etaTheta`のdocstringは出典を
+「Proposition1.3、l.1079-1197」とのみ記すが、その実装内容
+(Remark1.9.1の性質そのもの)から見て、実質的には**η̈<sub>Θ,Z</sub>
+(l.1757-1759のZ-orbit定義)を指している**——locator引用にわずかな
+不精密さがあったと判定する(数学的な誤りではなく、引用箇所の precision の
+問題、次段で訂正候補として記録)。</p>
+</section>
+
+<section class="statement theorem" id="thm-1-10-excerpt" data-locator="p.27-28, l.1781-1829">
+<span class="locator">原文 p.27-28</span>
+<p><span class="label">Theorem 1.10,(i)(抜粋、Constant Multiple Rigidity):</span>
+γ:Π<sup>tp</sup><sub>Ċα</sub>≅Π<sup>tp</sup><sub>Ċβ</sub>がη̈<sub>Θ,Z</sub><sup>α</sup>を
+η̈<sub>Θ,Z</sub><sup>β</sup>へ写すとき、γは「standard typeであること」という
+性質を保存する——<b>この性質は(η̈<sub>Θ,Z</sub>という)collectionを$\pm1$倍を
+除いて決定する</b>。
+</p>
+<p><span class="label">(ii)(iii):</span> standard sets of valuesの保存(ii)、
+標数が奇のとき{±1}-構造を決定(iii、本文書の範囲外・未読了)。
+</p>
+<p class="note milestone">★★★<b>standard typeの性質判定への決定的な手がかり</b>:
+(i)の「$\pm1$倍を除いて決定する」という言い回しは、standard typeが
+「η̈<sub>Θ</sub>の様々な$O_K^\times$-倍の中から、符号を除いて一意な代表元を
+選び出す**正規化条件**」であることを強く示唆する——M5-relのκ-Recon
+非退化性(証明にTheorem1.9の実質を要した抽象的な「豊かさ」の主張)とは
+**性質が異なる**、具体的な体の値についての正規化条件である。次段の判定
+(2_LocatorMap文書)で詳述する。</p>
+</section>
+
+<section class="statement remark negcontrol" id="negative-control">
+<p class="note negcontrol"><span class="label">★★★負の対照(必須確認):</span>
+本文書が構造化した範囲(0_Source l.1742-1829)を"kappa"・"IUTch"・
+"non-degenerate"・"M5-rel"でgrep、<b>0件</b>を確認した。
+`KappaCoricConditional.lean`への参照は本文書中に一切出現しない。
+</p>
+</section>
+
+</body>
+</html>
