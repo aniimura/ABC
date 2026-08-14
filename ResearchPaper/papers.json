@@ -69,6 +69,18 @@
         3,
         5
       ]
+    },
+    "SemiAnbd": {
+      "title": "Semi-graphs of Anabelioids",
+      "file": "Semi-graphs of Anabelioids",
+      "year": 2005,
+      "pdfPages": 92,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "400dpi 目視(物理 p.33)と pdftotext を突き合わせて実測。(1) 花文字が落ちる: 𝓑^temp(Π) → 'Btemp(Π)'、𝒯₁,𝒯₂ → 'T1, T2'、Aut_𝒯(T) → 'AutT (T)'。(2) ★上下付きが平坦化されたうえ改行で分断される: π₁^temp(G) が 'πtemp' / '1' / '(G)' の3行になる(物理 p.38 で実測)。1つの記号が3行に割れるので、grep でも目視でも取り違えうる。(3) アクセントが壊れる: 'André' → 'Andr´e'。(4) 添字つき射 G_∞,i → 'G∞,i'。IUTchIII と同種だが、(2) は本論文で初めて観測した壊れ方であり、より重い。",
+      "verifiedPages": [
+        33
+      ]
     }
   }
 }
