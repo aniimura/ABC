@@ -4,6 +4,7 @@ import ABC3.Check.PGC.InertiaDegeneracy
 import ABC3.Check.PGC.InertiaDegeneracyMoved
 import ABC3.Check.PGC.DischargeFiresNothing
 import ABC3.Check.PGC.ResidueCardinalityNondegenerate
+import ABC3.Check.IUTchIII.Cor312Degenerate
 /-!
 # Check — 我々のモデルについての検査
 
