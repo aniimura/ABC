@@ -6,6 +6,7 @@ import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
+import ABC3.Found.IUTchIII.PadicLogMul
 /-!
 # Found — 実装済みの基礎
 
