@@ -1,59 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>A Version of the Grothendieck Conjecture for p-adic Local Fields — Structured Index</title>
+<title>[pGC] A Version of the Grothendieck Conjecture for p-adic Local Fields — 目次</title>
 <style>
-  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.5; color: #222; }
-  h1 { font-size: 1.4em; }
-  .meta { color: #666; font-size: 0.9em; margin-bottom: 2em; }
-  table { border-collapse: collapse; width: 100%; }
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.3em; } h2 { font-size: 1.05em; margin-top: 2em; }
+  .meta { color: #666; font-size: .9em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
   th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #f0f0f0; }
-  .status-done { color: #0a7d1e; font-weight: bold; }
-  .status-pending { color: #999; }
-  a { color: #1554b0; text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  .done { color: #0a7d1e; font-weight: bold; }
+  .todo { color: #999; }
+  .legacy { color: #b00; }
   code { background: #f5f5f5; padding: 1px 4px; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .5em .9em; }
 </style>
 </head>
 <body>
+
 <h1>A Version of the Grothendieck Conjecture for p-adic Local Fields</h1>
 <p class="meta">
-S. Mochizuki, The International Journal of Math. 8 (1997), pp. 499–506.<br>
-原文: <code>0_Source/A Version of the Grothendieck Conjecture for p-adic Local Fields.txt</code><br>
-選定経緯: 「On Semi-positivity and Filtered Frobenius Crystals」(crystalline cohomology系、mathlib適合度が低いと判明)の引用網を遡っても改善しないと判明したため、望月氏の別系列(遠アーベル幾何)へパイロット対象を切り替えた。
+S. Mochizuki, 1997(<i>The International Journal of Math.</i> 8, pp.499&ndash;506)。本フォルダが扱うのは
+<code>0_Source</code> にある著者公開プレプリント版 PDF(<b>全9物理ページ</b>、印刷ページ番号 1&ndash;9、<code>pageOffset = 0</code>)。<br>
+登記: <code>ResearchPaper/papers.json</code> のタグ <b>pGC</b>&nbsp;/&nbsp;構造化の規約: <a href="../README.md">1_Structured/README.md</a>
 </p>
 
-<h2>論文全体の構造</h2>
+<h2>主定理(Theorem 4.2、物理 p.1 の &sect;0 で先出し)</h2>
+<p>
+K・K&prime; を <b>Q</b><sub>p</sub> の有限次拡大とする。Isom<sub><b>Q</b><sub>p</sub></sub>(K, K&prime;) を <b>Q</b><sub>p</sub>-代数としての同型の集合、
+OutFilt(&Gamma;<sub>K</sub>, &Gamma;<sub>K&prime;</sub>) を、<b>上付き番号付けの高次(添字 &gt; 0)分岐群が定めるフィルトレーション</b>を備えた絶対 Galois 群の間の、
+フィルトレーション付き群としての外部同型の集合とする。このとき自然な射
+Isom<sub><b>Q</b><sub>p</sub></sub>(K, K&prime;) &rarr; OutFilt(&Gamma;<sub>K</sub>, &Gamma;<sub>K&prime;</sub>) は全単射である。
+</p>
+<p class="open">
+上記は物理 p.1 の記述にもとづく<b>要約</b>であり、逐語ではない。&sect;0 は未構造化(記法の目視確認も未実施)。
+Theorem 4.2 本体の逐語は &sect;4 の構造化時に <code>section-4.html</code> へ収める。
+</p>
+
+<h2>節構成</h2>
 <table>
-<tr><th>節</th><th>内容</th><th>原文ページ</th><th>構造化状態</th></tr>
-<tr><td>§0</td><td>Introduction(主定理Theorem4.2の先出し、歴史的経緯)</td><td>1–2</td><td class="status-pending">未着手</td></tr>
-<tr><td>§1</td><td><a href="section-1.html">The Cyclotomic Character and Inertia</a>(Proposition1.1・1.2・Corollary1.3)</td><td>2–4</td><td class="status-done">パイロット対象</td></tr>
-<tr><td>§2</td><td><a href="section-2.html">Higher Ramification Groups</a>(Proposition2.1・2.2、Definition2.3)</td><td>4–6</td><td class="status-done">「少し難しめ」パイロット対象(§1の続き)</td></tr>
-<tr><td>§3</td><td>Hodge-Tate Representations(Corollary3.1・3.3、Definition3.2)</td><td>6</td><td class="status-pending">未着手(Hodge-Tate分類理論を要する)</td></tr>
-<tr><td>§4</td><td>The Main Theorem(Lemma4.1・Theorem4.2)</td><td>6–8</td><td class="status-pending">未着手(§1-§3全ての結果に依存)</td></tr>
+<tr><th>節</th><th>内容</th><th>物理ページ</th><th>状態</th></tr>
+<tr><td>&sect;0</td><td>Introduction(主定理 Theorem 4.2 の先出し、経緯)</td><td>1&ndash;2</td><td class="todo">未着手</td></tr>
+<tr><td><b>&sect;1</b></td><td><b>The Cyclotomic Character and Inertia</b>(Prop 1.1・Prop 1.2・Cor 1.3・末尾 Remark)</td><td>2&ndash;4</td><td class="done"><a href="section-1.html">構造化済み</a>(2026-08-14)</td></tr>
+<tr><td>&sect;2</td><td>Higher Ramification Groups</td><td>4&ndash;</td><td class="todo">未着手(<span class="legacy">旧構成ファイル <code>section-2.legacy.html</code> あり&mdash;参照しない</span>)</td></tr>
+<tr><td>&sect;3</td><td>Hodge-Tate Representations</td><td>—</td><td class="todo">未着手</td></tr>
+<tr><td>&sect;4</td><td>The Main Theorem(Lemma 4.1・Theorem 4.2)</td><td>—</td><td class="todo">未着手</td></tr>
 </table>
 
-<h2>§1選定理由と、mathlib調査で判明した重要な訂正</h2>
+<h2>記法の状況(<code>papers.json</code>: <code>notationRisk = medium</code>)</h2>
 <p>
-当初(4_CalibrationPlan着手前)の見立てでは、§1(円分指標・惰性群のGalois群からの回復)は既存mathlib部品(円分指標API・分解群/惰性群・分岐/剰余次数理論)の組み合わせでほぼ構築できると評価した。
-<b>しかしさらに調査したところ、§1内部でも2つの深い定理への依存が見つかった</b>——Proposition 1.1の証明はlocal Tate双対性(引用[2]、Bloch-Kato Prop.3.8)に、Proposition 1.2の証明は局所類体論の相互法則(引用[3]、Serre)に、それぞれ本質的に依存している。いずれもmathlibに不在(実測確認済み、<code>4_CalibrationPlan</code>参照)。
+本論文は「1つの基底文字に高々1種類の装飾」であり、[EtTh] のような多値の合成記法は持たない。ただし
+<code>pdftotext</code> での脱落は実際に起きる&mdash;&mdash;目視確認済みの例:
 </p>
+<ul>
+<li><b><span style="text-decoration:overline">K</span></b>(代数閉包)&rarr; <code>K</code> と出力(上線が消える)</li>
+<li><b>K&prime;</b>(もう一つの局所体)&rarr; <code>K </code> と出力(<b>プライムが完全に脱落</b>)</li>
+<li><b>&#7824;</b>(ハット付き太字 Z、副有限完備化)&rarr; <code>Z</code> と出力(直前の <b>Z</b><sub>p</sub> と区別が付かない)</li>
+<li><b>&#119978;</b><sub>K</sub>(script体)&rarr; <code>OK</code> と出力</li>
+</ul>
+<p>目視確認済みの物理ページ: <b>2・3・4(冒頭)</b>。&sect;0 および &sect;2 以降は未確認。</p>
+
+<h2>&sect;1 が依拠する外部文献(mathlib 実測つき)</h2>
+<p>詳細は <a href="section-1.html#prop-1-1">section-1.html</a> の末尾表を参照。要点:</p>
+<ul>
+<li>[2] Bloch&ndash;Kato, Prop 3.8(局所 Tate 双対性)&mdash;&mdash; <b>mathlib 不在</b></li>
+<li>[3] Serre, Local Class Field Theory &mdash;&mdash; <b>mathlib 実質不在</b></li>
+<li>&sect;2 以降で必要になる<b>高次分岐群</b>(上付き/下付き番号付け・Herbrand)&mdash;&mdash; <b>mathlib 不在</b>
+(<code>Mathlib/RingTheory/Valuation/RamificationGroup.lean</code> に <code>TODO: Define higher ramification groups in lower numbering</code> と明記)</li>
+</ul>
+
+<h2>本論文を Phase 1 の対象に選んだ理由</h2>
 <p>
-訂正後の評価: **対象(Galois群・円分指標・惰性群という「物」)はmathlibに既存だが、これらを結びつける「深い定理」(local Tate双対性・局所類体論)は不在**——ゆえに§1は「ほぼ組み立てだけ」ではなく、「2つの境界外公理(要出典明記)+その上に立つ望月氏独自の群論的議論」という構成になる。この区別自体が、CLAUDE.mdのboundary ruleを素直に適用できる、比較的クリーンな状況である。
+IUT の臨界パス上にあるからではなく、<b>手法の較正が Phase 1 の目的だから</b>。論文が短く(9物理ページ)、対象(Galois 群・円分指標・惰性群)は
+mathlib に既存で型が付く入口があり、不足分は古典的で確実に構築できる。副産物(高次分岐群)は mathlib 側でも明示的に求められている。
+詳細は <a href="../../../PLAN.md">PLAN.md</a> &sect;8-1。
 </p>
 
-<h2>§2を「少し難しめの論文」パイロットに選定した理由(2026-08-10)</h2>
-<p>
-パイプラインレビュー(<code>../../PIPELINE_REVIEW.md</code>)完了後、ユーザーから「少し難しめの論文で前処理とLean形式化を行い、パイプラインの改善を」との指示を受け、次の候補を比較検討した:
-</p>
-<ol>
-<li><b>同一論文の§2(採用)</b>——§1で確立した境界外公理・トイ検査の枠組みを再利用しつつ、新たな境界外入力(高次分岐群のHerbrandの定理・p進対数の定量評価)を1〜2件追加する、という<b>漸進的な難易度上昇</b>。主題の連続性が高く、パイプライン改善の効果を「同じ土台で比較する」ことができる。</li>
-<li><b>The Local Pro-p Anabelian Geometry of Curves(検討したが不採用)</b>——望月氏の遠アーベル幾何系列の後続論文だが、双曲的曲線の基本群Π_X・安定還元・semi-graph of anabelioidsという全く新しい主題群を要し、「少し難しめ」ではなく「大きく難しい」飛躍になると判断した。将来、§2・§3・§4を終えた後の次段候補として記録する。</li>
-</ol>
-<p>
-§2の軽量mathlibスキャン(工程2、パイプラインレビューで追加した新手順)の結果は<code>../../2_LocatorMap/A Version of the Grothendieck Conjecture for p-adic Local Fields/refs.html</code>を参照——高次分岐群・p進対数はmathlibに不在、Verlagerung/transfer mapは<b>存在確認</b>(このパイロットで初めて「境界外公理化が不要」と判明した引用)。
-</p>
 </body>
 </html>

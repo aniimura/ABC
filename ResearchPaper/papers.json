@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "0_Source の論文の登記簿。1_Structured の data-paper タグと 0_Source のファイル名を結ぶ。",
+    "0_Source が増えたら、ここに1件追加してから 1_Structured を作る。",
+    "pageOffset: 印刷ページ番号 = 物理ページ番号 + pageOffset。",
+    "  locator は常に物理ページ(pdftoppm -f N / pdftotext -f N が指すページ)を使う。",
+    "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
+  ],
+  "papers": {
+    "pGC": {
+      "title": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
+      "file": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
+      "year": 1997,
+      "pdfPages": 9,
+      "pageOffset": 0,
+      "notationRisk": "medium",
+      "notationNotes": "pdftotext で脱落を確認した記法: Ẑ(ハット、profinite completion) → 'Z'、K′(プライム) → 'K '、𝒪_K(script O) → 'OK'、太字 Z・Q(\\mathbf) → 'Z'・'Q'。いずれも『1つの基底文字に高々1種類の装飾』であり、装飾の有無という二値の取り違えに留まる。",
+      "verifiedPages": [1, 3]
+    },
+    "EtTh": {
+      "title": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
+      "file": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
+      "pdfPages": 112,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "★点(0/1/2個)×下線(0/1/2本)の合成記法で、同じ基底文字から複数の対象を区別している。p.11 の Gal(Y/X)(≅Z) は下線なし、p.43 Def 2.13(i) の Gal(Y̲̲/X̲̲)(≅l·Z) は下線2本——.txt ではどちらも 'Gal(Y /X)' で、矛盾しているように見える。下線はベクター図形として描画されており抽出不能。全 locator で PDF 目視必須。",
+      "verifiedPages": [11, 43]
+    }
+  }
+}

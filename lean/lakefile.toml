@@ -1,0 +1,16 @@
+name = "ABC3"
+version = "0.1.0"
+defaultTargets = ["ABC3"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.31.0-rc2"
+
+[[lean_lib]]
+name = "ABC3"
