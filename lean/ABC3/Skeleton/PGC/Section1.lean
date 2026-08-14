@@ -49,7 +49,15 @@ def cyclotomicCharacterObject.src : Source :=
 ## 依拠する境界外の結果(Track B のキュー候補)
 
 - [2] Bloch–Kato, Grothendieck Festschrift I (1990), Proposition 3.8 — 局所 Tate 双対性。
-  mathlib 不在(実測 v4.31.0-rc2)。 -/
+  mathlib 不在(実測 v4.31.0-rc2)。
+
+## 反証可能性(2026-08-14 監査)
+
+Corollary 3.12 が現在の `Interface` の下で偽だったこと(`Check/IUTchIII/Cor312Degenerate.lean`)を
+受けて横断監査した。**この定理は反証できなかった。** 本定理は `Interface` を取らないうえ、
+共役による経路は `Check.PGC.cyclotomicCharacter_conj_invariant` で
+**閉じていることが証明済み**(円分指標は可換群への準同型なので内部自己同型で動かない)。
+探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
 theorem cyclotomicCharacter_recoverable :
     (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal := by
   sorry
@@ -113,7 +121,17 @@ def residueCardAndDegreeObject.src : Source :=
 
 原典の論拠は局所類体論の同型 Γ_K^ab ≅ (K^×)^∧ と、そこからの計数
 (捩れの prime-to-p 部分が q−1 個、pro-p 商の階数が [K:ℚ_p]+1)。
-後者は p進対数を使う——**mathlib にも公開プロジェクトにも無い**(実測)。 -/
+後者は p進対数を使う——**mathlib にも公開プロジェクトにも無い**(実測)。
+
+## 反証可能性(2026-08-14 監査)
+
+**反証できなかった。** `RD : ResidueCardinality p` が自由なデータであることは
+**この定理を反証する役に立たない**——K′ = K の経路は `transport` が恒等なので
+自明に閉じ(`Check.PGC.residueCardAndDegree_self_route_closed`)、
+残るのは「異なる2体の間の連続同型 α」の構成だけ。しかも
+`Check.PGC.refutation_reduces_to_alpha` が示すとおり、その α が1つでも作れれば
+`RD` に関係なく次数成分だけで落ちる——すなわち**反証するには本命題自身を偽にするしかない**。
+探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
 theorem residueCard_and_degree_recoverable (RD : ResidueCardinality p) :
     (residueCardAndDegreeObject RD).RecoverableFromAbsGal := by
   sorry

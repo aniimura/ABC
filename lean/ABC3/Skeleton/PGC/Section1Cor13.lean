@@ -92,7 +92,17 @@ def inertiaObject.src : Source :=
 ## 未解決
 
 原文の論拠は Proposition 1.2 を (L, H) に適用することだが、
-そこから `I_K` そのものを得る段は書かれていない(上記の設計の経緯を参照)。 -/
+そこから `I_K` そのものを得る段は書かれていない(上記の設計の経緯を参照)。
+
+## 反証可能性(2026-08-14 監査)
+
+**反証できなかった。** それどころか、我々が構成できる唯一の `SC`(`degenerateSC`)の下では
+**この定理は証明できる**(`Check.PGC.inertia_recoverable_degenerateSC`、`sorry` 無し)——
+`inertia = ⊤` は任意の全射で `⊤` に移るため。Corollary 3.12 では退化 witness が
+反例を与えたが、ここでは逆に定理を与える。
+反証には**非正規な** `inertia` が要り(`Check.PGC.map_conj_of_normal`)、
+それには `Γ_K` の非 Galois な3次以上の拡大を構成する必要がある。
+探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
 theorem inertia_recoverable (RD : ResidueCardinality p) (SC : SubgroupCorrespondence p) :
     (inertiaObject RD SC).RecoverableFromAbsGal := by
   sorry
