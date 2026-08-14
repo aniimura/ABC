@@ -28,7 +28,10 @@
         "Instances.lean(有限次拡大に付値構造を与えるインスタンス群)に **sorry が 11 件**——我々が必要とする箇所がちょうど未完成",
         "Valuation.lean の 1 → 𝒪[K]ˣ → Kˣ → ℤ → 0 は、我々の義務#5(0 → U_K → (K^×)^∧ → Ẑ → 0)の**副有限完備化前の版**。重なりはあるが同一ではない"
       ],
-      "notFound": ["局所 Tate 双対性", "高次分岐群(下付き/上付き番号付け)"]
+      "notFound": [
+        "局所 Tate 双対性",
+        "高次分岐群(下付き/上付き番号付け)"
+      ]
     },
     "LocalClassFieldTheory": {
       "url": "https://github.com/mariainesdff/LocalClassFieldTheory",
@@ -52,7 +55,10 @@
       "findings": [
         "論文の要旨は「ℚ_p の有限次拡大が局所体であることを示す応用」を謳うが、リポジトリ全体で sorry が 114 件あり、そのまま使える状態ではない"
       ],
-      "notFound": ["局所 Tate 双対性", "高次分岐群"]
+      "notFound": [
+        "局所 Tate 双対性",
+        "高次分岐群"
+      ]
     }
   },
   "conclusionForUs": {
@@ -61,10 +67,17 @@
       "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": "absent。両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
       "pGC#4 局所類体論の相互律 Γ_K^ab ≅ (K^×)^∧": "inProgress(ClassFieldTheory)。抽象的な相互律はあるが具体形は未完成",
       "pGC#5 0 → U_K → (K^×)^∧ → Ẑ → 0": "inProgress(ClassFieldTheory Valuation.lean に完備化前の版)",
-      "pGC#6 p進対数": "unmeasured。'log' のヒットは多いが valuation の log 等の可能性が高く、未精査",
+      "pGC#6 p進対数": "absent(2026-08-14 実測)。mathlib の NumberTheory/Padics/ に該当ファイル無し、ClassFieldTheory・LocalClassFieldTheory とも 0 件。expSeries 系のヒットは全て実/複素の解析。",
       "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": "absent。mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
       "ℚ_p の有限次拡大 → IsNonarchimedeanLocalField のインスタンス": "inProgress(ClassFieldTheory Instances.lean、sorry 11件)"
     },
-    "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。"
+    "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。",
+    "trackBReconnaissance": {
+      "measuredAt": "2026-08-14",
+      "target": "Interface ResidueCardinality の実装(Track B)",
+      "verified": "PAdicLocalField p(= ℚ_p の有限次拡大)に対し、mathlib の道具だけで NormedField / IsUltrametricDist / NormedAlgebra / NontriviallyNormedField / Valued(NNReal) / RankOne / ProperSpace が全て構成できることを確認(lean/ABC3/Found/PGC/LocalFieldNorm.lean、sorry無し)。鍵は spectralNorm.normedField。",
+      "blocked": "剰余体の有限性。mathlib の properSpace_iff_..._finite_residueField は Valued.toNormedField(付値から作ったノルム)を前提に述べられており、こちらの ProperSpace はスペクトルノルムに関するもの——命題としては等しいが定義的に等しくない(ノルムのダイヤモンド)。",
+      "nextStep": "round-trip 補題 Valued.toNormedField (NormedField.toValued) ≍ 元の NormedField(あるいはノルムの一致)を書く。mathlib に見当たらない(実測)。有限でよく定義された作業。"
+    }
   }
 }
