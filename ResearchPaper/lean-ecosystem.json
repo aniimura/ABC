@@ -76,8 +76,9 @@
       "measuredAt": "2026-08-14",
       "target": "Interface ResidueCardinality の実装(Track B)",
       "verified": "PAdicLocalField p(= ℚ_p の有限次拡大)に対し、mathlib の道具だけで NormedField / IsUltrametricDist / NormedAlgebra / NontriviallyNormedField / Valued(NNReal) / RankOne / ProperSpace が全て構成できることを確認(lean/ABC3/Found/PGC/LocalFieldNorm.lean、sorry無し)。鍵は spectralNorm.normedField。",
-      "blocked": "剰余体の有限性。mathlib の properSpace_iff_..._finite_residueField は Valued.toNormedField(付値から作ったノルム)を前提に述べられており、こちらの ProperSpace はスペクトルノルムに関するもの——命題としては等しいが定義的に等しくない(ノルムのダイヤモンド)。",
-      "nextStep": "round-trip 補題 Valued.toNormedField (NormedField.toValued) ≍ 元の NormedField(あるいはノルムの一致)を書く。mathlib に見当たらない(実測)。有限でよく定義された作業。"
+      "blocked": "【解消済み 2026-08-14】ノルムのダイヤモンドは round-trip 補題を書かずに回避できた——CompactSpace 𝒪[K] を経由すれば、問題はノルムでなく位相の一致に落ち、NormedField.toValued は toUniformSpace に元のノルムのものをそのまま使うので位相は定義的に一致する。剰余体の有限性 finite_residueField を証明済み(sorry無し、一般の完備 proper 非アルキメデスノルム体について)。",
+      "nextStep": "ResidueCardinality の discharge にはあと isPrimePow(q = p^f, f>0)が要る。そのためには CharP 𝓀[K] p を示す必要がある——(p : 𝓀[K]) = 0(‖p‖ < 1 なので p は 𝒪[K] の単元でない)→ ringChar が p を割る → ringChar = p → FiniteField.card。mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行。",
+      "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。"
     }
   }
 }

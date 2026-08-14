@@ -3,6 +3,7 @@ import Mathlib.Analysis.Normed.Unbundled.SpectralNorm
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Valued.NormedValued
+import ABC3.Found.ResidueFieldFinite
 
 /-!
 # Track B — p進局所体の付値構造(スペクトルノルム経由)
@@ -23,19 +24,24 @@ NormedField の RankOne インスタンス → (Valued.v).RankOne
 FiniteDimensional.proper        → ProperSpace K      (ℚ_[p] が proper なので)
 ```
 
-## ★残っている一歩(2026-08-14 時点)
+## 到達点(2026-08-14)
 
-剰余体の有限性は mathlib の
-`Valued.integer.properSpace_iff_completeSpace_and_isDiscreteValuationRing_integer_and_finite_residueField`
-から出るはずだが、**ノルムのダイヤモンド**で止まっている——
-この補題は `Valued.toNormedField`(付値から作ったノルム)を前提に述べられているのに対し、
-こちらの `ProperSpace` はスペクトルノルムに関するもので、両者は
-**命題としては等しいが定義的には等しくない**。
+剰余体の有限性まで到達した(`residueField_finite`)。当初はノルムのダイヤモンドで
+止まっていたが、**round-trip 補題は不要だった**——`CompactSpace 𝒪[K]` を経由すれば
+問題はノルムでなく**位相**の一致に落ち、そこは定義的に一致する。
+詳細は `ABC3/Found/ResidueFieldFinite.lean` の docstring。
 
-必要なのは round-trip 補題
-`Valued.toNormedField (NormedField.toValued (K := K)) = ‹NormedField K›`
-(あるいはノルムが一致することの補題)で、**mathlib に見当たらない**(実測)。
-これを書くのが次の一歩。有限の・よく定義された作業である。
+## ★残っている一歩
+
+`Interface` の `ResidueCardinality` を discharge するには、あと
+`isPrimePow`(q = p^f, f > 0)が要る。そのためには `CharP 𝓀[K] p` が必要:
+
+- `(p : 𝓀[K]) = 0` — p は極大イデアルに入る(‖p‖ = 1/p < 1 なので `𝒪[K]` の単元でない)
+- そこから `ringChar` が p を割り、p が素数かつ体が非自明なので `ringChar = p`
+- 続いて `FiniteField.card` が `Nat.card = p ^ n` を与える
+
+mathlib に `charP_of_prime_eq_zero` に相当する直接の補題は見当たらず(実測)、
+`ringChar` 経由で数行書く必要がある。
 
 ## 使い方
 
@@ -95,5 +101,14 @@ theorem norm_algebraMap (K : PAdicLocalField p) (x : ℚ_[p]) :
 noncomputable scoped instance properSpace (K : PAdicLocalField p) :
     ProperSpace K.carrier :=
   FiniteDimensional.proper ℚ_[p] K.carrier
+
+open scoped NormedField Valued in
+/-- **p進局所体の剰余体は有限**。`Found/ResidueFieldFinite.lean` の一般結果を適用。 -/
+theorem residueField_finite (K : PAdicLocalField p) : Finite 𝓀[K.carrier] :=
+  finite_residueField (K := K.carrier)
+
+open scoped NormedField Valued in
+/-- 剰余体の元の個数 `q`。`Interface` の `ResidueCardinality.card` の実体。 -/
+noncomputable def residueCard (K : PAdicLocalField p) : ℕ := Nat.card 𝓀[K.carrier]
 
 end ABC3.Found.PGC
