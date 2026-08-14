@@ -1,120 +1,18 @@
-import ABC3.Meta.Claim
-import Mathlib.FieldTheory.KrullTopology
-import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
-import Mathlib.NumberTheory.Padics.PadicNumbers
-import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-import Mathlib.Topology.Algebra.ContinuousMonoidHom
+import ABC3.Skeleton.PGC.Setup
+import ABC3.Interface.PGC.LocalFieldData
 
 /-!
-# [pGC] §1 — The Cyclotomic Character and Inertia
+# [pGC] §1 — 命題
 
-原典: S. Mochizuki, *A Version of the Grothendieck Conjecture for p-adic Local Fields* (1997)。
-構造化: `ResearchPaper/1_Structured/A Version of the Grothendieck Conjecture for p-adic Local Fields/section-1.html`
-(PDF 目視確認済み: 物理 p.2・p.3・p.4冒頭)。
-
-## この段階で確定していること / していないこと
-
-- 型は付く。**証明は付けていない**(`sorry`)。
-- §1 冒頭の「group-theoretically に回復できる」は、原典が**見出し語を持たない地の文**で
-  与えている定義。ここで明示的に切り出した(`RecoverableFromAbsGal`)。
-- ★**原典が暗黙にしていて、我々が明示にしたもの**: 対象を α に沿って移す規則(`transport`)。
-  原典は「the object associated to K is necessarily taken by α to the corresponding object
-  associated to K′」と述べるだけで、移送の規則自体は文脈から自明として与えていない。
-  これをデータとして持たせたのは**我々の設計判断**であり、原典の転写ではない。
-  移送の選び方によって主張の強さが変わるため、下記の識別力検査を併置する。
+設定・記号・§1冒頭の暗黙の定義は `ABC3/Skeleton/PGC/Setup.lean`。
+未構築の基礎は `ABC3/Interface/PGC/LocalFieldData.lean`。
 -/
 
 namespace ABC3.Skeleton.PGC
 
-open ABC3.Meta
+open ABC3.Meta ABC3.Interface.PGC
 
-variable (p : ℕ) [Fact p.Prime]
-
-/-! ## 設定 -/
-
-/-- 本論文でいう **p進局所体** — `ℚ_[p]` の有限次拡大。
-
-原典 [pGC] 物理 p.2:
-「Let p be a prime number. Let K be a p-adic local field. By this, we shall mean in this
-paper that K is a finite extension of **Q**_p.」 -/
-structure PAdicLocalField where
-  carrier : Type
-  [isField : Field carrier]
-  [isAlgebra : Algebra ℚ_[p] carrier]
-  [isFinite : FiniteDimensional ℚ_[p] carrier]
-
-def PAdicLocalField.src : Source :=
-  { paper := "pGC", pdfPage := 2, item := "Section 1 (opening)", sectionId := "setup-1-intro" }
-
-attribute [instance] PAdicLocalField.isField PAdicLocalField.isAlgebra PAdicLocalField.isFinite
-
-namespace PAdicLocalField
-
-variable {p}
-
-/-- 原典の `K̄` — K の代数閉包(原典は「Fix an algebraic closure K̄ of K」)。 -/
-abbrev closure (K : PAdicLocalField p) : Type := AlgebraicClosure K.carrier
-
-def closure.src : Source :=
-  { paper := "pGC", pdfPage := 2, item := "Section 1 (opening)", sectionId := "setup-1-intro" }
-
-/-- 原典の `Γ_K ≝ Gal(K̄/K)` — 絶対 Galois 群。
-
-位相は mathlib の `krullTopology` が与える(`Mathlib/FieldTheory/KrullTopology.lean`)。
-原典は「isomorphism of topological groups」と言うので、位相込みで扱う必要がある。 -/
-abbrev absGal (K : PAdicLocalField p) : Type := K.closure ≃ₐ[K.carrier] K.closure
-
-def absGal.src : Source :=
-  { paper := "pGC", pdfPage := 2, item := "Section 1 (opening)", sectionId := "setup-1-intro" }
-
-end PAdicLocalField
-
-/-! ## §1 冒頭の暗黙の定義 -/
-
-/-- **K に付随する対象**の族と、Γ_K の同型に沿った移送の規則。
-
-原典は「an object associated to K」という言い方をするだけで、対象の種類を限定していない
-——実際 §1 では3種類が現れる: 指標 χ(Γ_K 上の関数)・数 q や [K:ℚ_p](Γ_K に依存しない値)・
-惰性群 I_K(Γ_K の部分群)。ゆえに対象の**型そのもの**が K ごとに変わりうる形にしてある。
-
-★`transport` は原典が明示していない(上記モジュール docstring 参照)。 -/
-structure AssociatedObject where
-  /-- K に付随する対象の型 -/
-  Obj : PAdicLocalField p → Type
-  /-- K に付随する対象そのもの -/
-  obj : (K : PAdicLocalField p) → Obj K
-  /-- 位相群の同型 α : Γ_K ≅ Γ_K′ に沿った移送 -/
-  transport : {K K' : PAdicLocalField p} →
-    ContinuousMulEquiv K.absGal K'.absGal → Obj K → Obj K'
-
-def AssociatedObject.src : Source :=
-  { paper := "pGC", pdfPage := 2, item := "Section 1 (opening)", sectionId := "setup-1-intro" }
-
-variable {p}
-
-/-- **「Γ_K から group-theoretically に回復できる」** — [pGC] §1 冒頭の暗黙の定義。
-
-原文 (pGC p.2):
-> when we say that an object associated to K can be recovered "group-theoretically" from
-> Γ_K, we mean that given another local p-adic field K[prime], together with an isomorphism
-> of topological groups α : Γ_K ≅ Γ[prime]_K, the object associated to K is necessarily
-> taken by α to the corresponding object associated to K[prime].
-
-注意すべき形: これは**単称の構成手続きの存在**ではなく、**すべての同型に対する両立性**である。
-「Γ_K から χ を作るアルゴリズムがある」ではなく「どの同型で写しても対応が保たれる」。 -/
-def AssociatedObject.RecoverableFromAbsGal (A : AssociatedObject p) : Prop :=
-  ∀ {K K' : PAdicLocalField p} (α : ContinuousMulEquiv K.absGal K'.absGal),
-    A.transport α (A.obj K) = A.obj K'
-
-def AssociatedObject.RecoverableFromAbsGal.src : Source :=
-  { paper := "pGC", pdfPage := 2, item := "Section 1 (opening)", sectionId := "setup-1-intro" }
-
-/-!  ## 識別力の検査
-
-`RecoverableFromAbsGal` が常に真でも常に偽でもないことの検査は、主語が違う
-(原典の主張ではなく**我々のモデル**についての事実)ため `ABC3/Check/PGC/Section1Discriminating.lean`
-に置いた。`Skeleton/` から `Check/` を import してはならない。
--/
+variable {p : ℕ} [Fact p.Prime]
 
 /-! ## Proposition 1.1 -/
 
@@ -168,5 +66,60 @@ def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
       .absent 2,
     .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
     .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
+
+
+/-! ## Proposition 1.2 -/
+
+/-- Proposition 1.2 が回復されると主張する2つの量を「K に付随する対象」として束ねたもの:
+剰余体の元の個数 q と、絶対次数 [K : ℚ_p]。
+
+いずれも**数**なので、移送は恒等——原典の「α によって対応物へ移る」は、数については
+「等しい」を意味する。
+
+`q` は `Interface` の `ResidueCardinality` から取る(まだ構築できていないため)。
+`[K : ℚ_p]` は mathlib の `Module.finrank` で書ける。 -/
+noncomputable def residueCardAndDegreeObject (RD : ResidueCardinality p) :
+    AssociatedObject p where
+  Obj := fun _ => ℕ × ℕ
+  obj := fun K => (RD.card K, Module.finrank ℚ_[p] K.carrier)
+  transport := fun _ x => x
+
+def residueCardAndDegreeObject.src : Source :=
+  { paper := "pGC", pdfPage := 3, item := "Proposition 1.2", sectionId := "prop-1-2" }
+
+/-- **[pGC] Proposition 1.2**
+
+原文 (pGC p.3):
+> The number q of elements in the residue field of O[scr]_K, and well as the absolute
+> degree [K : Q[bb]_p] of K, can be recovered entirely group-theoretically from Γ_K.
+
+原文の "and well as" は "as well as" の誤植と読めるが、逐語欄では原文どおりに保つ。
+
+## 条件付き形式化
+
+`RD : ResidueCardinality p` を仮説として取る——q を与える構成そのものが未構築だから
+(`Interface/PGC/LocalFieldData.lean`)。`RD` が本物になれば、この定理は無条件になる。
+
+## 未解決
+
+原典の論拠は局所類体論の同型 Γ_K^ab ≅ (K^×)^∧ と、そこからの計数
+(捩れの prime-to-p 部分が q−1 個、pro-p 商の階数が [K:ℚ_p]+1)。
+後者は p進対数を使う——**mathlib にも公開プロジェクトにも無い**(実測)。 -/
+theorem residueCard_and_degree_recoverable (RD : ResidueCardinality p) :
+    (residueCardAndDegreeObject RD).RecoverableFromAbsGal := by
+  sorry
+
+def residueCard_and_degree_recoverable.src : Source :=
+  { paper := "pGC", pdfPage := 3, item := "Proposition 1.2", sectionId := "prop-1-2" }
+
+/-- 原文の証明文から抽出した、証明が要求するもの(G6)。★下界。 -/
+def residueCard_and_degree_recoverable.needs : List ProofObligation :=
+  [ .citation "[3] Serre, Local Class Field Theory (Cassels-Frohlich, 1967)"
+      "相互律による Γ_K^ab ≅ (K^×)^∧"
+      (.inProgress "kbuzzard/ClassFieldTheory"
+        "抽象的な reciprocityIso はあるが具体形は未完成。LocalCFT/ は2ファイルのみ") 3,
+    .folklore "「it is well-known that」0 → U_K → (K^×)^∧ → Ẑ → 0(典拠なし)" 3,
+    .citation "p進対数" "U_K の開部分群を(捩れを除いて)K の開部分群と同一視する"
+      .absent 3 ]
 
 end ABC3.Skeleton.PGC
