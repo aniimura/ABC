@@ -474,7 +474,7 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   //    空リストは省略ではなく **主張**(原文の証明は外部依存を持たない)。
   const OBLIGATION_KINDS = ['citation', 'folklore', 'implicitStep', 'otherPaper', 'derivation'];
   const tally = Object.fromEntries(OBLIGATION_KINDS.map((k) => [k, 0]));
-  const mathlibTally = { present: 0, absent: 0, unmeasured: 0 };
+  const statusTally = { inMathlib: 0, inProject: 0, inProgress: 0, absent: 0, unmeasured: 0 };
   let nNeeds = 0;
   for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
     if (!['theorem', 'lemma'].includes(d.kind)) continue;
@@ -497,8 +497,8 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     for (const k of OBLIGATION_KINDS) {
       tally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
     }
-    for (const k of Object.keys(mathlibTally)) {
-      mathlibTally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
+    for (const k of Object.keys(statusTally)) {
+      statusTally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
     }
   }
 
@@ -543,15 +543,20 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     console.log(`  -- 引用照合(Lean コメント内): ${nQuote} 件`);
     const total = Object.values(tally).reduce((a, b) => a + b, 0);
     console.log(`  -- 規模(原文の証明文からの抽出、${nNeeds} 定理ぶん、★下界):`);
-    console.log(`     引用 ${tally.citation} 件 — mathlib present ${mathlibTally.present} / ` +
-                `absent ${mathlibTally.absent} / unmeasured ${mathlibTally.unmeasured}`);
+    console.log(`     引用 ${tally.citation} 件 — mathlib ${statusTally.inMathlib} / ` +
+                `公開プロジェクト(完成) ${statusTally.inProject} / 同(作業中) ${statusTally.inProgress} / ` +
+                `不在 ${statusTally.absent} / 未測定 ${statusTally.unmeasured}`);
     console.log(`     典拠なし(well-known 等) ${tally.folklore} 件 ← 大きさ未知`);
     console.log(`     暗黙の段(Gap 候補)      ${tally.implicitStep} 件`);
     console.log(`     別論文への枝            ${tally.otherPaper} 件`);
     console.log(`     原文内の導出            ${tally.derivation} 件`);
     console.log(`     合計 ${total} 件`);
-    if (mathlibTally.unmeasured > 0) {
-      console.log(`     ★ unmeasured が ${mathlibTally.unmeasured} 件ある——集計は未確定`);
+    if (statusTally.unmeasured > 0) {
+      console.log(`     ★ 未測定が ${statusTally.unmeasured} 件ある——集計は未確定`);
+    }
+    if (statusTally.inProgress > 0) {
+      console.log(`     ★ 作業中の公開プロジェクトに依る項目が ${statusTally.inProgress} 件` +
+                  `——独立に作ると重複投資(ResearchPaper/lean-ecosystem.json 参照)`);
     }
     console.log('  -- 注意: ここは宣言の**存在**しか見ていない。型の正しさは lake build が保証する');
     console.log('  -- 注意: 規模は原文が挙げた依存のみ。証明を書いて初めて要ると分かるものは写らない');

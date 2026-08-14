@@ -27,15 +27,26 @@ structure Source where
   sectionId : String
   deriving Repr, DecidableEq
 
-/-- ある結果が mathlib にあるか。**実測値のみ**を書く(推測を書かない)。 -/
-inductive MathlibStatus
-  /-- 実測で見つけた。宣言名かファイル名を書く -/
-  | present (decl : String)
-  /-- 実測して 0 件だった -/
+/-- ある結果が Lean のエコシステムに存在するか。**実測値のみ**を書く(推測を書かない)。
+
+mathlib だけを見るのは不十分だった(2026-08-14 実測)——mathlib に無いものが、
+進行中の公開プロジェクトにはあることがある。逆に「公開プロジェクトにある」と
+聞いて安心するのも危険で、`sorry` が残っていれば使えない。両者を型で分ける。
+
+**測定は時とともに古くなる**。何をいつ測ったかは
+`ResearchPaper/lean-ecosystem.json` に記録する。 -/
+inductive LeanStatus
+  /-- mathlib にある。宣言名を書く -/
+  | inMathlib (decl : String)
+  /-- mathlib 外の公開プロジェクトに **sorry 無しで**ある。移植/依存の判断が要る -/
+  | inProject (repo item : String)
+  /-- 公開プロジェクトで**作業中**(sorry が残る)。★独立に作ると重複投資になる -/
+  | inProgress (repo note : String)
+  /-- 実測して見つからなかった -/
   | absent
   /-- まだ測っていない。**暫定であり放置しない**——`check.mjs` が件数を印字する -/
   | unmeasured
-  deriving Repr, DecidableEq
+  deriving Repr
 
 /-- **原典の証明が要求するもの**。原文の証明文から抽出する(推測で足さない)。
 
@@ -46,7 +57,7 @@ inductive MathlibStatus
 `page` は物理ページ番号(`pdftoppm -f N` が指すページ)。 -/
 inductive ProofObligation
   /-- 原文が明示的に引用している外部文献の結果 -/
-  | citation (ref item : String) (status : MathlibStatus) (page : Nat)
+  | citation (ref item : String) (status : LeanStatus) (page : Nat)
   /-- 原文が典拠なしに「well-known」等として使っている事実。**大きさは未知** -/
   | folklore (what : String) (page : Nat)
   /-- 原文が段を飛ばしている箇所。`Gap` の候補 -/

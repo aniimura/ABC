@@ -164,7 +164,8 @@ def cyclotomicCharacter_recoverable.src : Source :=
 ★これは **下界** である——原文が挙げていない依存は写らない。 -/
 def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
   [ .citation "[2] Bloch-Kato, Grothendieck Festschrift I (1990)"
-      "Proposition 3.8(局所 Tate 双対性)" .absent 2,
+      "Proposition 3.8(局所 Tate 双対性)"
+      .absent 2,
     .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
     .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
 

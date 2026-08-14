@@ -1,0 +1,70 @@
+{
+  "_comment": [
+    "mathlib 以外の公開 Lean プロジェクトの調査記録。",
+    "「mathlib に無い」は Lean エコシステム全体では偽でありうる——2026-08-14 の調査で確認した。",
+    "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
+    "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。"
+  ],
+  "measuredAt": "2026-08-14",
+  "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
+  "projects": {
+    "ClassFieldTheory": {
+      "url": "https://github.com/kbuzzard/ClassFieldTheory",
+      "what": "局所・大域類体論の主定理。2025年 Clay 夏の学校のリポジトリ",
+      "toolchain": "leanprover/lean4:v4.33.0-rc1",
+      "toolchainGap": "我々より新しい(v4.31.0-rc2 → v4.33.0-rc1)",
+      "leanFiles": 108,
+      "theorems": 483,
+      "sorries": 25,
+      "lastCommit": "2026-07-31",
+      "status": "進行中",
+      "structure": {
+        "Cohomology/": "群コホモロジー・Tate コホモロジー・dimension shifting・inflation-restriction・Herbrand 商・reciprocityIso(抽象的な類形成の相互律)",
+        "IsNonarchimedeanLocalField/": "13ファイル。Qp.lean(ℚ_p が非アルキメデス局所体)・Tower.lean(拡大の塔)・RamificationInertia.lean・Unramified.lean・HerbrandQuotient.lean・Valuation.lean(1 → 𝒪[K]ˣ → Kˣ → ℤ → 0)",
+        "LocalCFT/": "2ファイルのみ(Continuity.lean・Teichmuller.lean)——局所類体論の本体はまだ薄い"
+      },
+      "findings": [
+        "reciprocityIso は **抽象的な類形成**の相互律(tateCohomology N 0 ≅ Abelianization G)であって、具体的な Γ_K^ab ≅ (K^×)^∧ ではない",
+        "Instances.lean(有限次拡大に付値構造を与えるインスタンス群)に **sorry が 11 件**——我々が必要とする箇所がちょうど未完成",
+        "Valuation.lean の 1 → 𝒪[K]ˣ → Kˣ → ℤ → 0 は、我々の義務#5(0 → U_K → (K^×)^∧ → Ẑ → 0)の**副有限完備化前の版**。重なりはあるが同一ではない"
+      ],
+      "notFound": ["局所 Tate 双対性", "高次分岐群(下付き/上付き番号付け)"]
+    },
+    "LocalClassFieldTheory": {
+      "url": "https://github.com/mariainesdff/LocalClassFieldTheory",
+      "what": "完備離散付値環と局所体(de Frutos-Fernández・Nuccio、CPP 2024)",
+      "paper": "https://arxiv.org/pdf/2310.01998",
+      "toolchain": "leanprover/lean4:v4.22.0-rc2",
+      "toolchainGap": "我々より古い(v4.22.0-rc2)。差が大きい",
+      "leanFiles": 66,
+      "theorems": 234,
+      "sorries": 114,
+      "lastCommit": "2025-07-02",
+      "status": "1年以上更新なし・sorry 多数",
+      "structure": {
+        "DiscreteValuationRing/": "離散付値環・剰余体・拡大",
+        "LocalField/": "局所体の抽象的定義",
+        "MixedCharacteristic/": "混標数(ℚ_p 系)",
+        "EqCharacteristic/": "等標数(F_p((X)) 系)",
+        "ClassFormation/": "類形成",
+        "FromMathlib/CpDef.lean": "ℂ_p の定義"
+      },
+      "findings": [
+        "論文の要旨は「ℚ_p の有限次拡大が局所体であることを示す応用」を謳うが、リポジトリ全体で sorry が 114 件あり、そのまま使える状態ではない"
+      ],
+      "notFound": ["局所 Tate 双対性", "高次分岐群"]
+    }
+  },
+  "conclusionForUs": {
+    "summary": "どちらも drop-in で使える状態ではない。ただし「ゼロから作る」でもない——特に局所類体論はコミュニティの進行中作業があり、独立に作ると重複投資になる。",
+    "byObligation": {
+      "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": "absent。両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
+      "pGC#4 局所類体論の相互律 Γ_K^ab ≅ (K^×)^∧": "inProgress(ClassFieldTheory)。抽象的な相互律はあるが具体形は未完成",
+      "pGC#5 0 → U_K → (K^×)^∧ → Ẑ → 0": "inProgress(ClassFieldTheory Valuation.lean に完備化前の版)",
+      "pGC#6 p進対数": "unmeasured。'log' のヒットは多いが valuation の log 等の可能性が高く、未精査",
+      "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": "absent。mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
+      "ℚ_p の有限次拡大 → IsNonarchimedeanLocalField のインスタンス": "inProgress(ClassFieldTheory Instances.lean、sorry 11件)"
+    },
+    "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。"
+  }
+}
