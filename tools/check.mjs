@@ -395,6 +395,18 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     }
   }
 
+  // ── 主語の分離: Skeleton(原典の主張)は Check(我々のモデルの検査)に依存できない
+  for (const [f, src] of texts) {
+    const relf = relative(dir, f).replace(/\\/g, '/');
+    if (relf.split('/')[0] !== 'Skeleton') continue;
+    src.split('\n').forEach((line, i) => {
+      if (/^\s*import\s+ABC3\.Check\b/.test(line)) {
+        ng(`${relative(ROOT, f)}:${i + 1}`,
+          '主語の分離: Skeleton(原典の主張)から Check(我々のモデルの検査)を import してはならない');
+      }
+    });
+  }
+
   // ── G1-Lean: Skeleton の宣言は Source を伴い、その locator が実在する
   const SRC_RE = /\.src\b[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?pdfPage\s*:=\s*(\d+)[\s\S]{0,300}?sectionId\s*:=\s*"([^"]*)"/;
   let nSrcOk = 0;
@@ -427,7 +439,8 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   if (!quiet) {
     console.log(`  -- Lean 宣言 ${decls.length} / structure ${structures.length} / axiom ${axioms.length} 件` +
                 `(免除 ${axiomExempt.length} ファイル)`);
-    console.log(`  -- Skeleton の出典照合: ${nSrcOk} 件 OK`);
+    const nCheck = decls.filter((x) => x.bucket === 'Check').length;
+    console.log(`  -- Skeleton の出典照合: ${nSrcOk} 件 OK / Check(我々のモデルの検査): ${nCheck} 宣言`);
     console.log(`  -- Interface 実装待ち: ${waiting.length} 件(= Track B の作業キュー)`);
     for (const w of waiting) console.log(`     ${w}`);
     console.log(`  -- Gap(飛躍): ${gaps.length} 件`);
@@ -540,6 +553,7 @@ function selftest() {
     ['D11 waiting を書いた Interface は通る', 'Interface', 'd11-waiting.lean', false],
     ['D12 load-bearing なのに負の対照が無い', 'Skeleton', 'd12-loadbearing-no-negcontrol.lean', true],
     ['D13 load-bearing + 負の対照ありは通る', 'Skeleton', 'd13-loadbearing-ok.lean', false],
+    ['D14 Skeleton が Check を import している', 'Skeleton', 'd14-skeleton-imports-check.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

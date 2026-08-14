@@ -1,4 +1,5 @@
 import ABC3.Meta.Claim
+import ABC3.Skeleton.PGC.Section1
 /-!
 # Skeleton — 論文の主張(証明しない)
 

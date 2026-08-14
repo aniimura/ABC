@@ -275,12 +275,17 @@ D:\Math_ABC3\
 └─ lean\
     ├─ lakefile.toml        ← mathlib v4.31.0-rc2
     └─ ABC3\
-        ├─ Meta\            ← Claim構造・非空虚witness補助・★較正デモ(事実1の実演)
+        ├─ Meta\            ← 台帳の型(Source/LoadBearing/NegControl/…)・★較正デモ
         ├─ Interface\       ← 「まだ無い基礎」の型(structure のみ、axiom 禁止)
-        ├─ Skeleton\        ← Track A: 論文の主張(sorry)
+        ├─ Skeleton\        ← Track A: 論文の主張(sorry)。**原典の主張だけ**
+        ├─ Check\           ← ★我々のモデルについての検査(識別力・負の対照の witness)
         ├─ Found\           ← Track B: 実装済みの基礎(sorry無し)
         └─ Gap\             ← §5 の追加仮説(飛躍)。falsifier 必須
 ```
+
+**`Check/` を分けた理由(2026-08-14、最初の skeleton を書いて判明)**: 識別力の検査や負の対照は「**我々のモデル**についての事実」であり、「**原典**が何を主張しているか」ではない。同じ場所に置くと主語が混ざる——本計画が最も警戒している失敗の形。`Skeleton/` の全宣言に出典(G1)を要求するゲートが、この混在を実際に検出した。
+
+`Skeleton/` から `Check/` を import することは禁止(`check.mjs` が検査)。原典についての主張が、我々のモデルの検査に依存する形を構造的に塞ぐ。
 
 **唯一のゲート** `tools/check.mjs`:
 
@@ -369,6 +374,12 @@ Cor 3.12 から後ろ向きに `Skeleton/` を展開。**この段階では G1�
 - 成果物: import グラフ = 依存DAG、`Interface/` 一覧 = 基礎の目録。
 - ここで初めて、IUT形式化の規模が**推測でなく計数で**言える。
 - §5-3 より、**Thm 3.11 / Cor 3.12 への到達を優先**する。
+
+> **★2026-08-14 訂正(Phase 1 の最初の skeleton から判明)**: 「Track A の成果物 = `Interface` 一覧 = 基礎の目録」は**言い過ぎだった**。
+>
+> pGC Proposition 1.1 の skeleton を書いたところ、`Interface` が **1件も立たなかった**。statement が言及する対象(絶対 Galois 群・Krull 位相・円分指標・`ℚ_[p]`)は全て mathlib にあり、不在なのは**証明に要る**もの(局所 Tate 双対性)だったため。
+>
+> **statement は、それが言及する対象しか表面化させない。** 証明に要るだけの数学は skeleton 段階では見えない。したがって Phase 2 が生む目録は「基礎の全目録」ではなく「**statement を書くために要る対象の目録**」であり、規模の下界にしかならない。IUT 方向では statement 自体が Frobenioid・log-shell を名指しするので状況は変わるが、それでも**証明側の不足は Phase 4 まで見えない**。規模の見積りを Phase 2 の出力だけで出さないこと。
 
 ### Phase 3 — 下から埋める
 
