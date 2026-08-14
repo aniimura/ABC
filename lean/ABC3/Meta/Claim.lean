@@ -34,7 +34,19 @@ mathlib だけを見るのは不十分だった(2026-08-14 実測)——mathlib 
 聞いて安心するのも危険で、`sorry` が残っていれば使えない。両者を型で分ける。
 
 **測定は時とともに古くなる**。何をいつ測ったかは
-`ResearchPaper/lean-ecosystem.json` に記録する。 -/
+`ResearchPaper/lean-ecosystem.json` に記録する。
+
+## ★`absent` は探索範囲を伴う(2026-08-14 の実失敗から)
+
+`Found/PGC/LocalFieldNorm.lean` に「mathlib に `charP_of_prime_eq_zero` 相当の補題は
+**無い**(実測)」と書いたが、**誤りだった**——`CharP.charP_iff_prime_eq_zero` が
+`Mathlib/Algebra/CharP/Basic.lean:103` に存在する。実際に見ていたのは
+`Mathlib/Algebra/CharP/Defs.lean` の `ringChar` 名前空間だけで、`Basic.lean` は
+見ていなかった。
+
+**探索範囲を書かない「無い」は、再現も反証もできない。** それは測定ではなく印象である。
+ゆえに `absent` は `searched` を要求する形にした——「どこを・どのパターンで探して
+0 件だったか」を書けないなら、それはまだ `unmeasured` である。 -/
 inductive LeanStatus
   /-- mathlib にある。宣言名を書く -/
   | inMathlib (decl : String)
@@ -42,8 +54,12 @@ inductive LeanStatus
   | inProject (repo item : String)
   /-- 公開プロジェクトで**作業中**(sorry が残る)。★独立に作ると重複投資になる -/
   | inProgress (repo note : String)
-  /-- 実測して見つからなかった -/
-  | absent
+  /-- 実測して見つからなかった。
+
+  `searched` には**探索範囲**を書く——どのリポジトリ/ディレクトリを、
+  どのパターンで探して 0 件だったか。書けないなら `unmeasured` を使うこと。
+  この引数が無かったために誤った「無い」が1件通っている(上記 docstring)。 -/
+  | absent (searched : String)
   /-- まだ測っていない。**暫定であり放置しない**——`check.mjs` が件数を印字する -/
   | unmeasured
   deriving Repr

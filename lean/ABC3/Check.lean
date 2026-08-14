@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import ABC3.Check.PGC.Section1Discriminating
 import ABC3.Check.PGC.InertiaDegeneracy
 import ABC3.Check.PGC.InertiaDegeneracyMoved
+import ABC3.Check.PGC.ResidueCardinalityNondegenerate
 /-!
 # Check — 我々のモデルについての検査
 

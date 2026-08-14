@@ -31,17 +31,23 @@ FiniteDimensional.proper        → ProperSpace K      (ℚ_[p] が proper な�
 問題はノルムでなく**位相**の一致に落ち、そこは定義的に一致する。
 詳細は `ABC3/Found/ResidueFieldFinite.lean` の docstring。
 
-## ★残っている一歩
+## 到達点(2026-08-14、続き)
 
-`Interface` の `ResidueCardinality` を discharge するには、あと
-`isPrimePow`(q = p^f, f > 0)が要る。そのためには `CharP 𝓀[K] p` が必要:
+`isPrimePow`(q = p^f, f > 0)まで到達し、`Interface` の `ResidueCardinality` を
+discharge した(`Found/PGC/ResidueCardinality.lean`)。要ったのは
+**`‖(p : K)‖ = 1/p < 1`** ただ一つ——そこから
 
-- `(p : 𝓀[K]) = 0` — p は極大イデアルに入る(‖p‖ = 1/p < 1 なので `𝒪[K]` の単元でない)
-- そこから `ringChar` が p を割り、p が素数かつ体が非自明なので `ringChar = p`
-- 続いて `FiniteField.card` が `Nat.card = p ^ n` を与える
+- p は `𝒪[K]` の単元でない → 極大イデアルに入る → `(p : 𝓀[K]) = 0`
+- `CharP.charP_iff_prime_eq_zero` で `CharP 𝓀[K] p`
+- `FiniteField.card` で `Nat.card 𝓀[K] = p ^ f`(`f > 0`)
 
-mathlib に `charP_of_prime_eq_zero` に相当する直接の補題は見当たらず(実測)、
-`ringChar` 経由で数行書く必要がある。
+と繋がる。一般部分は `Found/ResidueFieldFinite.lean` に置いた。
+
+★**先行する記述の訂正**: ここには以前
+「mathlib に `charP_of_prime_eq_zero` に相当する直接の補題は見当たらず(実測)」
+と書いてあったが**誤り**だった。`CharP.charP_iff_prime_eq_zero`
+(`Mathlib/Algebra/CharP/Basic.lean:103`)が存在する。経緯は
+`Found/ResidueFieldFinite.lean` の docstring に記録した。
 
 ## 使い方
 
@@ -110,5 +116,23 @@ theorem residueField_finite (K : PAdicLocalField p) : Finite 𝓀[K.carrier] :=
 open scoped NormedField Valued in
 /-- 剰余体の元の個数 `q`。`Interface` の `ResidueCardinality.card` の実体。 -/
 noncomputable def residueCard (K : PAdicLocalField p) : ℕ := Nat.card 𝓀[K.carrier]
+
+/-- `‖p‖ = 1/p < 1`。剰余体の標数が `p` であることの唯一の入力。
+
+`p` の像は `algebraMap ℚ_[p] K` を通るので、スペクトルノルムが `ℚ_[p]` の
+ノルムを延長すること(`norm_algebraMap`)から直ちに従う。 -/
+theorem norm_natCast_p_lt_one (K : PAdicLocalField p) : ‖((p : ℕ) : K.carrier)‖ < 1 := by
+  rw [show ((p : ℕ) : K.carrier) = algebraMap ℚ_[p] K.carrier ((p : ℕ) : ℚ_[p]) from
+        (map_natCast _ p).symm,
+      norm_algebraMap, Padic.norm_p]
+  exact inv_lt_one_of_one_lt₀ (by exact_mod_cast (Fact.out : p.Prime).one_lt)
+
+open scoped NormedField Valued in
+/-- **原文 [pGC] p.3「k is the field of q = p^f elements」**。
+
+`Interface` の `ResidueCardinality.isPrimePow` の実体。`0 < f` 込み。 -/
+theorem residueCard_isPrimePow (K : PAdicLocalField p) :
+    ∃ f : ℕ, 0 < f ∧ residueCard K = p ^ f :=
+  card_residueField_eq_prime_pow (K := K.carrier) Fact.out (norm_natCast_p_lt_one K)
 
 end ABC3.Found.PGC

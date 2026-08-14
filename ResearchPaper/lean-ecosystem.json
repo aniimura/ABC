@@ -63,12 +63,65 @@
   },
   "conclusionForUs": {
     "summary": "どちらも drop-in で使える状態ではない。ただし「ゼロから作る」でもない——特に局所類体論はコミュニティの進行中作業があり、独立に作ると重複投資になる。",
+    "_absentPolicy": [
+      "★2026-08-14 追加: `absent` は **探索範囲** を伴わなければならない。",
+      "根拠(実失敗): Found/PGC/LocalFieldNorm.lean に「mathlib に charP_of_prime_eq_zero 相当は無い(実測)」と",
+      "書いたが誤りだった——CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 にある。",
+      "見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけで、Basic.lean を見ていなかった。",
+      "探索範囲を書かない「無い」は再現も反証もできず、測定ではなく印象である。",
+      "Lean 側も `LeanStatus.absent (searched : String)` に変更し、型が範囲を要求するようにした",
+      "(lean/ABC3/Meta/Claim.lean)。範囲を書けないなら `unmeasured` を使うこと。",
+      "以下の searchedIn は、mathlib については 2026-08-14 に本リポジトリ内で再実行した実際の grep。",
+      "公開プロジェクトは本リポジトリに clone されていないため、2026-08-14 の測定の記録であって当日の再現ではない。"
+    ],
     "byObligation": {
-      "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": "absent。両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
+      "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": {
+        "status": "absent",
+        "note": "両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
+        "searchedIn": {
+          "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
+            "grep -rlE 'localTateDuality|local Tate|TateDuality|tateDuality' Mathlib/ → 0 件",
+            "grep -rlE '\\bTate\\b' Mathlib/ → 4 件、全て別物(EllipticCurve/Weierstrass.lean・RingTheory/Adjoin/Tower.lean・RingTheory/Perfectoid/BDeRham.lean・RingTheory/Perfectoid/FontaineTheta.lean)",
+            "grep -rlE 'tateCohomology|TateCohomology|GaloisCohomology|galoisCohomology' Mathlib/ → 0 件",
+            "grep -rli 'duality' Mathlib/NumberTheory/ Mathlib/RepresentationTheory/ → DirichletCharacter/Orthogonality.lean・MulChar/Duality.lean・NumberField/Cyclotomic/Galois.lean・Tannaka.lean のみ(いずれも局所 Tate 双対性ではない)"
+          ],
+          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定、当日は clone 済み)": [
+            "各リポジトリの notFound に「局所 Tate 双対性」を記録済み(本ファイル projects.*.notFound)",
+            "★現在は clone されていないため再現していない。再測定時は clone してから grep すること"
+          ]
+        }
+      },
       "pGC#4 局所類体論の相互律 Γ_K^ab ≅ (K^×)^∧": "inProgress(ClassFieldTheory)。抽象的な相互律はあるが具体形は未完成",
       "pGC#5 0 → U_K → (K^×)^∧ → Ẑ → 0": "inProgress(ClassFieldTheory Valuation.lean に完備化前の版)",
-      "pGC#6 p進対数": "absent(2026-08-14 実測)。mathlib の NumberTheory/Padics/ に該当ファイル無し、ClassFieldTheory・LocalClassFieldTheory とも 0 件。expSeries 系のヒットは全て実/複素の解析。",
-      "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": "absent。mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
+      "pGC#6 p進対数": {
+        "status": "absent",
+        "note": "U_K の開部分群を(捩れを除いて)K の開部分群と同一視するために要る",
+        "searchedIn": {
+          "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
+            "grep -rliE 'padicLog|Padic.log|padic_log|logOneAdd|log_one_add' Mathlib/ → 6 件、全て実/複素の解析(Analysis/Normed/Module/MultipliableUniformlyOn.lean・Analysis/SpecialFunctions/Complex/Analytic.lean・Complex/LogBounds.lean・Log/Deriv.lean・Log/Summable.lean・Stirling.lean)",
+            "ls Mathlib/NumberTheory/Padics/ → 13 項目、log 系のファイルは無い",
+            "Padics 配下の 'log' の出現は全て Nat.log / Real.log(付値やファクトリアルの評価)で、p進対数ではない",
+            "grep -rlniE 'padicExp|expPadic' Mathlib/ → 0 件(対になる p進指数関数も無い)"
+          ],
+          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
+            "0 件。★現在は clone されていないため再現していない"
+          ]
+        }
+      },
+      "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": {
+        "status": "absent",
+        "note": "mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
+        "searchedIn": {
+          "mathlib v4.31.0-rc2 (2026-08-14 の測定)": [
+            "RingTheory/Valuation/RamificationGroup.lean に分解群・惰性群はあるが、同ファイルに 'TODO: Define higher ramification groups in lower numbering' が残る",
+            "上付き番号付け・Herbrand の定理は 0 件(PLAN.md 事実3)",
+            "★この項目は今回の再測定の対象外——上の2件と違い、当日の grep コマンドを再実行していない"
+          ],
+          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
+            "両リポジトリの notFound に「高次分岐群」を記録済み"
+          ]
+        }
+      },
       "ℚ_p の有限次拡大 → IsNonarchimedeanLocalField のインスタンス": "inProgress(ClassFieldTheory Instances.lean、sorry 11件)"
     },
     "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。",
@@ -77,8 +130,10 @@
       "target": "Interface ResidueCardinality の実装(Track B)",
       "verified": "PAdicLocalField p(= ℚ_p の有限次拡大)に対し、mathlib の道具だけで NormedField / IsUltrametricDist / NormedAlgebra / NontriviallyNormedField / Valued(NNReal) / RankOne / ProperSpace が全て構成できることを確認(lean/ABC3/Found/PGC/LocalFieldNorm.lean、sorry無し)。鍵は spectralNorm.normedField。",
       "blocked": "【解消済み 2026-08-14】ノルムのダイヤモンドは round-trip 補題を書かずに回避できた——CompactSpace 𝒪[K] を経由すれば、問題はノルムでなく位相の一致に落ち、NormedField.toValued は toUniformSpace に元のノルムのものをそのまま使うので位相は定義的に一致する。剰余体の有限性 finite_residueField を証明済み(sorry無し、一般の完備 proper 非アルキメデスノルム体について)。",
-      "nextStep": "ResidueCardinality の discharge にはあと isPrimePow(q = p^f, f>0)が要る。そのためには CharP 𝓀[K] p を示す必要がある——(p : 𝓀[K]) = 0(‖p‖ < 1 なので p は 𝒪[K] の単元でない)→ ringChar が p を割る → ringChar = p → FiniteField.card。mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行。",
-      "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。"
+      "done": "【完了 2026-08-14】isPrimePow(q = p^f, f>0)まで到達し、ResidueCardinality を discharge した(sorry無し、axiom は mathlib 標準の3つのみ)。要ったのは ‖(p:K)‖ = 1/p < 1 ただ一つ——p は 𝒪[K] の単元でない → 極大イデアルに入る → (p : 𝓀[K]) = 0 → CharP.charP_iff_prime_eq_zero → FiniteField.card。一般部分は lean/ABC3/Found/ResidueFieldFinite.lean、実装は Found/PGC/ResidueCardinality.lean。",
+      "correctedClaim": "★上記 nextStep には当初「mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行」と書いてあったが、これは誤りだった。CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 に存在する(同 100 行に CharP.ringChar_of_prime_eq_zero も)。見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけだった。この失敗が上の _absentPolicy の根拠。",
+      "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。",
+      "lesson2": "「無い」は探索範囲とセットでしか記録してはならない。範囲の無い absent は再現も反証もできない——LeanStatus.absent を searched 付きに変えたのはこのため。"
     }
   }
 }

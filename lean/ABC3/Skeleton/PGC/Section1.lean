@@ -63,7 +63,16 @@ def cyclotomicCharacter_recoverable.src : Source :=
 def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
   [ .citation "[2] Bloch-Kato, Grothendieck Festschrift I (1990)"
       "Proposition 3.8(局所 Tate 双対性)"
-      .absent 2,
+      (.absent <|
+        "mathlib v4.31.0-rc2 全体を再測定(2026-08-14): " ++
+        "grep -rlE 'localTateDuality|local Tate|TateDuality|tateDuality' → 0 件、" ++
+        "grep -rlE '\\bTate\\b' → 4 件だが全て別物" ++
+        "(EllipticCurve/Weierstrass・RingTheory/Adjoin/Tower・Perfectoid/BDeRham・Perfectoid/FontaineTheta)、" ++
+        "grep -rlE 'tateCohomology|TateCohomology|GaloisCohomology' → 0 件、" ++
+        "grep -rli 'duality' Mathlib/NumberTheory Mathlib/RepresentationTheory → " ++
+        "DirichletCharacter/Orthogonality・MulChar/Duality・Cyclotomic/Galois・Tannaka のみ。" ++
+        "公開プロジェクト(ClassFieldTheory・LocalClassFieldTheory)は 2026-08-14 に測定して 0 ヒット" ++
+        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)") 2,
     .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
     .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
 
@@ -120,6 +129,14 @@ def residueCard_and_degree_recoverable.needs : List ProofObligation :=
         "抽象的な reciprocityIso はあるが具体形は未完成。LocalCFT/ は2ファイルのみ") 3,
     .folklore "「it is well-known that」0 → U_K → (K^×)^∧ → Ẑ → 0(典拠なし)" 3,
     .citation "p進対数" "U_K の開部分群を(捩れを除いて)K の開部分群と同一視する"
-      .absent 3 ]
+      (.absent <|
+        "mathlib v4.31.0-rc2 全体を再測定(2026-08-14): " ++
+        "grep -rliE 'padicLog|Padic.log|padic_log|logOneAdd|log_one_add' → " ++
+        "6 件すべて実/複素の解析(Analysis/SpecialFunctions/*・Normed/Module/MultipliableUniformlyOn)。" ++
+        "Mathlib/NumberTheory/Padics/ 直下 13 ファイルに log 系の定義は無く、" ++
+        "'log' の出現は全て Nat.log / Real.log(付値の対数)。" ++
+        "'padicExp|expPadic' → 0 件。" ++
+        "公開プロジェクト(ClassFieldTheory・LocalClassFieldTheory)は 2026-08-14 に測定して 0 件" ++
+        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)") 3 ]
 
 end ABC3.Skeleton.PGC

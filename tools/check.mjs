@@ -28,6 +28,12 @@
  *   - `Found/` に `sorry` が残る(bucket の規則に明記してあるのに)
  * どちらも fixture を書いていなかったから見えなかった。
  *
+ * 2026-08-14(同日、`ResidueCardinality` の discharge 時)にもう1件:
+ *   - `Interface/` が `Found/` を import する(= Skeleton が実装に推移的に依存する)
+ * これは 22/22 PASS の状態で素通りした。PLAN §3 の2トラック構成そのものを壊す向きなのに、
+ * 規則がどこにも書かれておらず(暗黙の前提だった)、当然 fixture も無かった。
+ * D23/D24 として機械化した。**「図に描いてあるから守られる」は成り立たない。**
+ *
  * ── A. 原理的に検査できない(自己申告に依存する)
  *   A1. `data-notation-checked` の日付 — **実際に PDF を目視したかは検査不能**。
  *       形式(YYYY-MM-DD か "none")しか見ていない。
@@ -488,6 +494,28 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     });
   }
 
+  // ── 条件付き形式化の向き: Interface(まだ無い基礎の型)は Found(実装)に依存できない
+  //
+  //    Skeleton は Interface を import する。したがって Interface が Found を import すると
+  //    **Skeleton が Found を推移的に import する**ことになり、
+  //    「実装が無くても statement を書ける」という2トラック構成の要点(PLAN §3)が壊れる。
+  //    実装が無い間 Skeleton がビルドできなくなり、Interface で受ける意味が消える。
+  //
+  //    2026-08-14 追加。G2 witness を structure と同じファイルに置こうとして実際に
+  //    この向きを作ってしまったのが発端(witness は Found 側から Interface 名前空間へ足す)。
+  for (const [f, src] of texts) {
+    const relf = relative(dir, f).replace(/\\/g, '/');
+    if (relf.split('/')[0] !== 'Interface') continue;
+    src.split('\n').forEach((line, i) => {
+      if (/^\s*import\s+ABC3\.Found\b/.test(line)) {
+        ng(`${relative(ROOT, f)}:${i + 1}`,
+          '条件付き形式化の向き: Interface(まだ無い基礎の型)から Found(実装)を import してはならない' +
+          '(Skeleton が Found を推移的に引くことになる)。' +
+          '非空虚 witness が実装を要するなら、Found 側のファイルで Interface 名前空間へ足す');
+      }
+    });
+  }
+
   // ── Lean コメント内の引用も PDF に対して照合する
   //    形式:  原文 (<タグ> p.<物理ページ>):
   //           > ...
@@ -751,6 +779,8 @@ function selftest() {
     ['D20 .needs のページが範囲内なら通る', 'Skeleton', 'd20-needs-good-page.lean', false],
     ['D21 Found/ に sorry が残っている', 'Found', 'd21-found-sorry.lean', true],
     ['D22 Found/ が sorry 無し(docstring の言及は誤検出しない)', 'Found', 'd22-found-clean.lean', false],
+    ['D23 Interface が Found を import している', 'Interface', 'd23-interface-imports-found.lean', true],
+    ['D24 Interface が Found を import していない', 'Interface', 'd24-interface-no-found-import.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

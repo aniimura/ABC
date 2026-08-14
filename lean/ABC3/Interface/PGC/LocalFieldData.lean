@@ -7,6 +7,24 @@ import ABC3.Skeleton.PGC.Setup
 
 `axiom` ではなく `structure` で受ける(`ABC3/Meta/Calibration.lean` の実演を参照)。
 各 `structure` は非空虚 witness を持つか、何を待っているかを書く(G2)。
+
+## ★import の向き — `Interface` は `Found` を import しない(2026-08-14 に確定)
+
+一度、G2 の witness を `structure` と同じファイルに置くために
+本ファイルから `Found/PGC/LocalFieldNorm` を import した。**これは誤りだった**。
+
+`Skeleton/PGC/Section1.lean` は本ファイルを import するので、その向きだと
+**`Skeleton` が `Found` を推移的に import する**ことになる。`Skeleton` が
+`(RD : ResidueCardinality p)` を仮説に取るのは「実装が無くても statement を書ける」
+ためであり、実装に依存しないことが要点(PLAN §3 の2トラック構成そのもの)。
+その向きでは実装が無いと `Skeleton` がビルドできず、条件付き形式化の設計が壊れる。
+
+**規則**: `Interface/` から `Found/` を import してはならない。
+`check.mjs` が検査する(fixture D23/D24)。
+
+したがって非空虚 witness は実装側に置く——
+`ResidueCardinality.nonvacuous` は `Found/PGC/ResidueCardinality.lean` にある。
+check.mjs の G2 は宣言名を木全体から探すので、この配置で通る。
 -/
 
 namespace ABC3.Interface.PGC
@@ -33,19 +51,25 @@ mathlib は `IsNonarchimedeanLocalField`(剰余体の有限性込み)を持つ�
 が同じ穴を埋めようとしているが、**`sorry` が 11 件残る**(測定日 2026-08-14、
 記録は `ResearchPaper/lean-ecosystem.json`)。
 
-**非空虚性について**: この `structure` は実際には充足可能である(K は局所体なので
-剰余体は有限で位数は p の冪)。ただし**その事実を我々はまだ証明できない**ので、
-非空虚 witness ではなく `waiting` を置く。 -/
+**★2026-08-14: discharge 済み**。上の「なぜ Interface なのか」は
+`IsNonarchimedeanLocalField` へ繋ぐ経路についての測定としては今も正しいが、
+**この `structure` を埋めるのにその経路は要らなかった**——`ℚ_[p]` 上の
+スペクトルノルムで直接 `NormedField`/`Valued` を入れれば、剰余体の有限性
+(`Found/ResidueFieldFinite.lean`)と標数(`CharP.charP_iff_prime_eq_zero`)が
+そのまま出る。`waiting` に書いていた
+「`IsNonarchimedeanLocalField` へ繋ぐ」は**必要条件ではなかった**。
+実装は `Found/PGC/LocalFieldNorm.lean` と `Found/PGC/ResidueCardinality.lean`。
+
+**G2 の非空虚 witness `ResidueCardinality.nonvacuous` は
+`Found/PGC/ResidueCardinality.lean` にある**(上記「import の向き」参照)。
+ここに置くと `Skeleton` が `Found` を推移的に import してしまう。 -/
 structure ResidueCardinality where
   /-- 剰余体の元の個数 q -/
   card : PAdicLocalField p → ℕ
   /-- 原文「k is the field of q = p^f elements」——q は p の正の冪。
-      この条件が無いと `card := fun _ => 0` でも通ってしまい、内容が消える。 -/
+      この条件が無いと `card := fun _ => 0` でも通ってしまい、内容が消える。
+      この主張自体の検査は `Check/PGC/ResidueCardinalityNondegenerate.lean`。 -/
   isPrimePow : ∀ K, ∃ f : ℕ, 0 < f ∧ card K = p ^ f
-
-def ResidueCardinality.waiting : WaitingFor :=
-  { what := "ℚ_p の有限次拡大 K の整数環 𝒪_K と、その剰余体が位数 p^f の有限体であること"
-    trackB := "Found/LocalField — 有限次拡大に付値構造を与え IsNonarchimedeanLocalField へ繋ぐ" }
 
 /-- 開部分群 H ⊆ Γ_K に対応する中間体 L もまた p進局所体である、という対応。
 
