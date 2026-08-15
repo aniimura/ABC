@@ -1158,4 +1158,29 @@ Frobenius 型射を与えるものではない。
 **そしてその余剰は、後の命題で使われるかもしれない**(未確認)。
 -/
 
+include P in
+/-- ★★**(vii) の Frobenius 型の場合: `α` の次数は強制される**。
+
+★四角形 `γ ≫ ε = α ≫ φ` の次数を取ると:
+- `degFr (γ ≫ ε) = degFr ε * degFr γ = degFr ε`(`γ` は pre-step)
+- `degFr (α ≫ φ) = degFr φ * degFr α = degFr α`(`φ` は pre-step)
+
+★★**したがって `degFr α = degFr ε`。**
+
+★**これが「原文がなぜ Frobenius 型の `α` を作るか」の説明である**:
+(vii) の主張は `α` の型を要求しないが、★**次数は強制される**ので、
+**次数 `degFr ε` の射を作るしかなく、その自然な供給源が `Definition 1.3, (ii)` の
+Frobenius 型射**である。
+
+★★**「主張が要求しない」ことと「自由に選べる」ことは違う。**
+★**余剰に見えた情報(`α` が Frobenius 型)の半分(次数)は、実は強制されていた。** -/
+theorem prop_1_11_vii_degFr_forced {A B Cc Dd : C}
+    (ε : Cc ⟶ B) (φ : A ⟶ B) (γ : Dd ⟶ Cc) (α : Dd ⟶ A)
+    (hγs : IsPreStep P γ) (hφs : IsPreStep P φ)
+    (hsq : γ ≫ ε = α ≫ φ) : P.degFr α = P.degFr ε := by
+  have h := congrArg P.degFr hsq
+  rw [P.degFr_comp, P.degFr_comp, show P.degFr γ = 1 from hγs.1,
+    show P.degFr φ = 1 from hφs.1] at h
+  simpa using h.symm
+
 end ABC3.Found.FrdI
