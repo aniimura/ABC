@@ -1071,6 +1071,25 @@ theorem mChar_divisorial_hypotheses_are_load_bearing :
       ¬ IsIntegralMonoid (MChar ℕ∞) :=
   ⟨⟨isSharp_mChar ℕ∞, isOfCharacteristicType_mChar ℕ∞⟩, not_isIntegralMonoid_mChar_enat⟩
 
+/-- ★**`toChar a = 0` ⟺ `a` が可逆**。
+
+`𝔽_Φ → 𝔽_{Φ^char}` の下では `Div φ = toChar φ.div` なので、
+**isometric であることは「零因子が可逆」を意味する**——`0` であることではない。
+★この差が `Proposition 1.5` と我々の模型 `wP` を分ける。 -/
+theorem toChar_eq_zero_iff {A : Type*} [AddCommMonoid A] {a : A} :
+    (toChar a : MChar A) = 0 ↔ IsAddUnit a := by
+  constructor
+  · intro h
+    have h0 : (toChar a : MChar A) = toChar 0 := by rw [h, map_zero]
+    obtain ⟨u, v, hu, hv, huv⟩ := toChar_eq_iff.mp h0
+    obtain ⟨V, rfl⟩ := hv
+    refine ⟨⟨a, u + V.neg, ?_, ?_⟩, rfl⟩
+    · rw [← add_assoc, huv, zero_add, V.val_neg]
+    · rw [add_comm, ← add_assoc, huv, zero_add, V.val_neg]
+  · rintro ⟨A0, rfl⟩
+    show (toChar (A0 : A) : MChar A) = toChar 0
+    exact toChar_eq_iff.mpr ⟨A0.neg, 0, ⟨-A0, rfl⟩, isAddUnit_zero, by simp⟩
+
 /-! #### ★`charMap` の単射性・全射性 —— `Φ^char` を `MonoidOn` にするための部品 -/
 
 /-- `charMap` は全射性を保つ。 -/

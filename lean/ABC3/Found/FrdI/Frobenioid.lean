@@ -65,9 +65,9 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory Opposite
 
-universe v u w
+universe v u w u2 v2
 
-variable {D : Type u} [Category.{v} D] {C : Type u} [Category.{v} C]
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
 
 /-! ### ★`Order(M)` —— §0 の `≤` が定める圏
@@ -145,7 +145,7 @@ instance : (pullBackProp P).IsStableUnderComposition :=
 instance : MorphismProperty.IsMultiplicative (pullBackProp P) where
 
 /-- **`𝒞^pl-bk`** —— pull-back morphism が定める広い部分圏。 -/
-abbrev PlBk : Type u := WideSubcategory (pullBackProp P)
+abbrev PlBk : Type u2 := WideSubcategory (pullBackProp P)
 
 /-! ### ★`𝟙` は co-angular
 
@@ -502,14 +502,14 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w
+universe v u w u2 v2
 
 /-- ★**(vi) の一意性は条件ではなく帰結である** —— `𝒞` が totally epimorphic なので
 `ψ` は epi、よって `ψ ≫ α = ψ ≫ α'` から `α = α'`。
 
 ★原文の `[necessarily unique]` を `∃!` として構造に書き込むのではなく、
 **ここで証明する**のが正しい扱いである((ii) と同じ扱い)。 -/
-theorem faithfulUpToUnits_unique {D : Type u} [Category.{v} D] {C : Type u} [Category.{v} C]
+theorem faithfulUpToUnits_unique {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
     {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) {A B : C} (ψ : A ⟶ B)
     (α α' : End B) (h : (ψ ≫ (α : B ⟶ B)) = ψ ≫ (α' : B ⟶ B)) : α = α' := by
   haveI : Epi ψ := P.totEpiC _ _ _

@@ -60,9 +60,9 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory Opposite
 
-universe v u w
+universe v u w u2 v2
 
-variable {D : Type u} [Category.{v} D] {C : Type u} [Category.{v} C]
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
 
 /-! ### (i) —— `linear` / `isometric` / `metrically equivalent`

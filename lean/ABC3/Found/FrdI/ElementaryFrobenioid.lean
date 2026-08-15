@@ -48,7 +48,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory Opposite
 
-universe v u w
+universe v u w u2 v2
 
 /-! ### ★`𝔽_M` —— モノイドに付随する elementary Frobenioid
 
@@ -492,7 +492,7 @@ theorem isTotallyEpimorphic_elemFrobCat {Φ : MonoidOn.{v, u, w} D}
 
 ★`connected`(**圏**について)は §0 が**対象**についてしか定めていないため、
 ここには入れていない。原文の曖昧さであり、測定結果として報告に残す。 -/
-structure PreFrobenioid (C : Type u) [Category.{v} C] (Φ : MonoidOn.{v, u, w} D) where
+structure PreFrobenioid (C : Type u2) [Category.{v2} C] (Φ : MonoidOn.{v, u, w} D) where
   /-- 原文の `𝒞 → 𝔽_Φ` -/
   toElem : C ⥤ ElemFrobCat Φ
   /-- `Φ` は divisorial -/
@@ -504,7 +504,7 @@ structure PreFrobenioid (C : Type u) [Category.{v} C] (Φ : MonoidOn.{v, u, w} D
 
 namespace PreFrobenioid
 
-variable {C : Type u} [Category.{v} C] {Φ : MonoidOn.{v, u, w} D}
+variable {C : Type u2} [Category.{v2} C] {Φ : MonoidOn.{v, u, w} D}
 
 /-- **自然な射影関手 `𝒞 → 𝒟`**。
 
