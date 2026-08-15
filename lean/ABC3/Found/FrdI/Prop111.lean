@@ -164,4 +164,49 @@ theorem prop_1_11_ii {A B : C} (hut : IsUnitTrivial P A)
   have hone : α = 𝟙 A := hmem
   rw [← hαφ, hone, Category.id_comp]
 
+/-! ## ★(iv) —— `𝒪^▷(A) ↪ 𝒪^▷(B)`
+
+原文 (FrdI p.36):
+> (iv) Every co-angular linear morphism φ : B →A determines an injection
+
+★★**逐語の注意(事故 #5 の再確認)**: PDF は `𝒪^▷(A) ↪ 𝒪^▷(B)`(**単射の矢印**)だが
+`pdftotext` は `→` に変える。★**400 dpi 目視で確認した。**
+散文に「an injection」とあるので意味は復元できるが、**矢印だけを見ると単射性が消える。**
+
+★**原文の証明**(p.37、目視)は 3 つに分かれる:
+> the existence of the map … follows immediately from assertion (iii) and Definition 1.3, (iii), (c);
+> **the asserted injectivity of this map follows from the total epimorphicity of C**;
+> the fact that this map is uniquely determined … follows from the fact that
+> **pre-steps are monomorphisms** … and the definition of a "pull-back morphism"
+
+★★**存在・単射性・一意性が 3 つの別々の理由から来る。**
+★**そして単射性の理由は `𝒞` の totally epimorphicity である** ——
+★`Proposition 1.10, (iii)` で我々が見つけた **epi による消去**が、ここでも要点になっている。
+-/
+
+include P in
+/-- ★**(iv) の単射性** —— 対応 `α ↦ β` は単射。
+
+★**理由は `𝒞` の totally epimorphicity**(原文どおり)。
+`φ ≫ α₁ = β ≫ φ = φ ≫ α₂` から `φ` が epi で `α₁ = α₂`。 -/
+theorem prop_1_11_iv_injective {A B : C} (φ : B ⟶ A)
+    {α₁ α₂ : End A} {β : End B}
+    (h₁ : φ ≫ (α₁ : A ⟶ A) = (β : B ⟶ B) ≫ φ)
+    (h₂ : φ ≫ (α₂ : A ⟶ A) = (β : B ⟶ B) ≫ φ) : α₁ = α₂ := by
+  haveI : Epi φ := P.totEpiC _ _ _
+  exact (cancel_epi φ).mp (h₁.trans h₂.symm)
+
+include P in
+/-- ★**(iv) の一意性** —— `α` に対応する `β` は高々 1 つ。
+
+★**理由は pre-step が mono であること**(原文どおり、`Definition 1.3, (v), (a)`)。
+★**単射性とは違う理由から来る** —— 単射性は epi、一意性は mono。
+★★**同じ命題の中で、消去の向きが 2 回とも別々に要る。** -/
+theorem prop_1_11_iv_unique (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφs : IsPreStep P φ) {α : End A} {β₁ β₂ : End B}
+    (h₁ : φ ≫ (α : A ⟶ A) = (β₁ : B ⟶ B) ≫ φ)
+    (h₂ : φ ≫ (α : A ⟶ A) = (β₂ : B ⟶ B) ≫ φ) : β₁ = β₂ := by
+  haveI : Mono φ := F.preStepMono φ hφs
+  exact (cancel_mono φ).mp (h₁.symm.trans h₂)
+
 end ABC3.Found.FrdI
