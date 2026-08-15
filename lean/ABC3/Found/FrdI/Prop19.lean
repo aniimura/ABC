@@ -599,6 +599,279 @@ theorem pushHom_spec (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
       IsPreStep P (pushHom P F φ hφ ε hεi hεs) :=
   (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose_spec.choose_spec.2.2
 
+/-! ## ★第3段 —— (v) の機械: `𝒞^istr` と isotropification
+
+原文 (FrdI p.32):
+> (v) Cistr [equipped with the restriction to C of the given functor C →FΦ] is a
+
+## ★★測定: 部分圏の形が第2段と違う
+
+* `𝒞^imtr-pre` は**射**の条件 → `WideSubcategory`(`InducedWideCategory`)
+* `𝒞^istr` は**対象**の条件 → `ObjectProperty.FullSubcategory`(`InducedCategory`)
+
+★**第2段で作った部分圏の機械はここでは使えない。** 見込みどおりだった。
+★ただし `InducedCategory.homEquiv` があるので、射の扱いは `WideSubcategory` より**軽い**
+(性質のフィールドが無い)。
+
+## ★mathlib の実測(S1–S4、2026-08-15)
+
+| 要るもの | mathlib | 判定 |
+|---|---|---|
+| 対象の条件による充満部分圏 | `ObjectProperty.FullSubcategory` / `.ι` | ★**使う** |
+| induced category の射 | `InducedCategory.homEquiv` / `homMk` | ★**使う** |
+| hom 同値から左随伴を作る | `Adjunction.leftAdjointOfEquiv` / `adjunctionOfEquivLeft` | ★★**使う** |
+
+★★**`leftAdjointOfEquiv` は関手と随伴を一度に作る。** isotropic hull の普遍性(`∃!`)が
+そのまま hom 同値になるので、**関手を手で組み立てる必要がない**。
+-/
+
+section Istr
+
+/-- **`𝒞^istr`** —— isotropic な対象の充満部分圏の述語。 -/
+def isotropicProp : ObjectProperty C := fun A => IsIsotropic P A
+
+/-- **`𝒞^istr`**。 -/
+abbrev Istr : Type u2 := (isotropicProp P).FullSubcategory
+
+variable (F : FrobenioidCore P)
+
+/-- `A` の isotropic hull の終域(選択)。★`isotropicHullExists` は `∃` なので選択が要る。 -/
+noncomputable def hullObj (A : C) : C := (F.isotropicHullExists A).choose
+
+/-- `A` から選んだ isotropic hull への射。 -/
+noncomputable def hullMap (A : C) : A ⟶ hullObj P F A :=
+  (F.isotropicHullExists A).choose_spec.choose
+
+theorem hullMap_spec (A : C) : IsIsotropicHull P (hullMap P F A) :=
+  (F.isotropicHullExists A).choose_spec.choose_spec
+
+/-- `𝒞^istr` の対象としての `A^istr`。 -/
+noncomputable def hullIstr (A : C) : Istr P :=
+  ⟨hullObj P F A, (hullMap_spec P F A).2.2.1⟩
+
+/-- ★★**isotropic hull の普遍性が、そのまま随伴の hom 同値になる**。
+
+`Hom_{𝒞^istr}(A^istr, Y) ≃ Hom_𝒞(A, Y)`(`Y` は isotropic)。
+★`∃!` の存在部分が `right_inv`、一意性部分が `left_inv` になる。 -/
+noncomputable def hullHomEquiv (A : C) (Y : Istr P) :
+    (hullIstr P F A ⟶ Y) ≃ (A ⟶ (isotropicProp P).ι.obj Y) :=
+  InducedCategory.homEquiv.trans
+    { toFun := fun g => hullMap P F A ≫ g
+      invFun := fun h => ((hullMap_spec P F A).2.2.2 Y.obj Y.property h).choose
+      left_inv := fun g =>
+        (((hullMap_spec P F A).2.2.2 Y.obj Y.property
+          (hullMap P F A ≫ g)).choose_spec.2 g rfl).symm
+      right_inv := fun h =>
+        (((hullMap_spec P F A).2.2.2 Y.obj Y.property h).choose_spec.1).symm }
+
+/-- ★★**isotropification 関手** —— `leftAdjointOfEquiv` が
+**hom 同値から関手そのものを作る**。手で組み立てる必要がない。 -/
+noncomputable def isotropification : C ⥤ Istr P :=
+  Adjunction.leftAdjointOfEquiv (F_obj := hullIstr P F) (G := (isotropicProp P).ι)
+    (e := hullHomEquiv P F)
+    (fun X _ _ g h => (Category.assoc (hullMap P F X) h.hom g.hom).symm)
+
+/-- ★★**isotropification は包含関手の左随伴**。
+
+原文 (FrdI p.32):
+> Bistr forms a left adjoint to the inclusion functor Cistr →C, through which
+
+★**記録(2026-08-15)**: この行の包含記号は、**PDF の描画では `↪`** だが
+**`pdftotext` の抽出では `→`** になる。私は一度 PDF 画像で見たとおり `↪` と写して
+ゲートに落とされた。★**「PDF 目視」と「抽出テキスト」が食い違う文字がある**という
+測定であり、`▷` / `′` / `≠` が**抽出側で拾えない**のとは別の種類である
+(あちらは照合不能、こちらは**別の文字に化ける**)。
+★照合できる側(抽出)に合わせ、食い違いを事実として書き残す。 -/
+noncomputable def isotropificationAdj : isotropification P F ⊣ (isotropicProp P).ι :=
+  Adjunction.adjunctionOfEquivLeft _ _
+
+/-- ★**`𝒞^istr` は totally epimorphic** —— 充満部分圏なので `𝒞` からそのまま移る。
+
+★★これが「移送」の**最初の実例**である: `𝒞` の性質を1行で運ぶ。 -/
+theorem istr_totEpi : IsTotallyEpimorphic (Istr P) := by
+  intro A B f
+  refine ⟨fun {Z} g h hgh => ?_⟩
+  haveI : Epi f.hom := P.totEpiC _ _ f.hom
+  refine InducedCategory.hom_ext ?_
+  exact (cancel_epi f.hom).mp (congrArg InducedCategory.Hom.hom hgh)
+
+/-- ★★**`𝒞^istr` の pre-Frobenioid 構造** —— 原文の
+「equipped with the **restriction** to `𝒞` of the given functor `𝒞 → 𝔽_Φ`」。
+
+★★**4フィールドのうち3つが `P` のものそのまま**である。
+`totEpiC` だけが1行の議論を要した。**これが「移送」の意味である。** -/
+def istrPre : PreFrobenioid (Istr P) Φ where
+  toElem := (isotropicProp P).ι ⋙ P.toElem
+  divisorial := P.divisorial
+  totEpiC := istr_totEpi P
+  totEpiD := P.totEpiD
+
+/-- ★`isotropification` の射を、`𝒞` の素の射として取り出したもの。
+
+★`FullSubcategory` の射は `InducedCategory.Hom` に包まれており、
+その型が簡約されないので、**素の型に落としてから使う**(第2段と同じ定型)。 -/
+noncomputable def istrMap {A B : C} (f : A ⟶ B) : hullObj P F A ⟶ hullObj P F B :=
+  ((isotropification P F).map f).hom
+
+/-- ★★**`𝒞^istr` の射の性質は `𝒞` のそれと一致する**(充満部分圏だから)。
+
+原文 (FrdI p.32):
+> Cistr satisfies one of these properties with respect to Cistr if and only if it does with
+
+★原文が「compatible with the inclusion functor」と言うのはこれで、
+**`rfl` である**(`istrPre` の `toElem` が `ι ⋙ P.toElem` だから)。 -/
+theorem istr_compat_degFr {X Y : Istr P} (g : X ⟶ Y) :
+    (istrPre P).degFr g = P.degFr g.hom := rfl
+
+theorem istr_compat_Base {X Y : Istr P} (g : X ⟶ Y) :
+    (istrPre P).Base g = P.Base g.hom := rfl
+
+theorem istr_compat_Div {X Y : Istr P} (g : X ⟶ Y) :
+    (istrPre P).Div g = P.Div g.hom := rfl
+
+/-- ★★**isotropification の定義四角形**。
+
+`leftAdjointOfEquiv` の作る `map f` は、**`hullMap A ≫ istrMap f = f ≫ hullMap B`
+を満たす唯一の射**である。原文の「the induced [i.e., by the definition of an
+"isotropic hull"!] morphism `A^istr → B^istr`」がこれ。 -/
+theorem isotropification_square {A B : C} (f : A ⟶ B) :
+    hullMap P F A ≫ istrMap P F f = f ≫ hullMap P F B := by
+  have h := (hullHomEquiv P F A (hullIstr P F B)).apply_symm_apply
+    (f ≫ hullHomEquiv P F B (hullIstr P F B) (𝟙 _))
+  show hullHomEquiv P F A (hullIstr P F B) ((isotropification P F).map f) = _
+  rw [show (isotropification P F).map f
+      = (hullHomEquiv P F A (hullIstr P F B)).symm
+        (f ≫ hullHomEquiv P F B (hullIstr P F B) (𝟙 _)) from rfl, h]
+  show f ≫ (hullMap P F B ≫ 𝟙 _) = f ≫ hullMap P F B
+  rw [Category.comp_id]
+
+/-! ### ★保存される 11 クラスのうち、まず 3 つの成分
+
+★`Base` / `Div` / `deg_Fr` の保存は、上の四角形と **`Remark 1.1.1`**
+(合成公式)だけから出る。原文が「[cf. Remark 1.1.1]」と書くのはこれ。 -/
+
+/-- ★**Frobenius 次数を保つ**。四角形の `deg_Fr` 成分と、
+`hullMap` が pre-step(次数 1)であることから。 -/
+theorem isotropification_degFr {A B : C} (f : A ⟶ B) :
+    P.degFr (istrMap P F f) = P.degFr f := by
+  have h := congrArg P.degFr (isotropification_square P F f)
+  rw [P.degFr_comp, P.degFr_comp, (hullMap_spec P F A).2.1.1,
+    (hullMap_spec P F B).2.1.1, mul_one, one_mul] at h
+  exact h
+
+/-- ★**base-isomorphism を(両向きに)保つ**。 -/
+theorem isotropification_baseIso_iff {A B : C} (f : A ⟶ B) :
+    IsIso (P.Base (istrMap P F f)) ↔ IsIso (P.Base f) := by
+  haveI hA : IsIso (P.Base (hullMap P F A)) := (hullMap_spec P F A).2.1.2
+  haveI hB : IsIso (P.Base (hullMap P F B)) := (hullMap_spec P F B).2.1.2
+  have h := congrArg P.Base (isotropification_square P F f)
+  rw [P.Base_comp, P.Base_comp] at h
+  constructor
+  · intro hi
+    haveI := hi
+    have hf : P.Base f = P.Base (hullMap P F A) ≫ P.Base (istrMap P F f)
+        ≫ inv (P.Base (hullMap P F B)) := by
+      rw [← Category.assoc, h, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+    rw [hf]
+    infer_instance
+  · intro hi
+    haveI := hi
+    have hf : P.Base (istrMap P F f) = inv (P.Base (hullMap P F A)) ≫ P.Base f
+        ≫ P.Base (hullMap P F B) := by
+      rw [← h, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    rw [hf]
+    infer_instance
+
+/-- ★**isometry を(両向きに)保つ**。四角形の `Div` 成分で、
+`hullMap` が isometric なので両端の寄与が消え、`Φ.map` の単射性が残る。 -/
+theorem isotropification_isometric_iff {A B : C} (f : A ⟶ B) :
+    IsIsometric P (istrMap P F f) ↔ IsIsometric P f := by
+  have h := congrArg P.Div (isotropification_square P F f)
+  rw [P.Div_comp, P.Div_comp, (hullMap_spec P F A).1, (hullMap_spec P F B).1,
+    (hullMap_spec P F B).2.1.1] at h
+  simp only [smul_zero, add_zero, PNat.one_coe, one_smul, map_zero, zero_add] at h
+  constructor
+  · intro hi
+    show P.Div f = 0
+    rw [← h, show P.Div (istrMap P F f) = 0 from hi, map_zero]
+  · intro hi
+    show P.Div (istrMap P F f) = 0
+    refine Φ.map_injective (P.Base (hullMap P F A)) ?_
+    rw [h, show P.Div f = 0 from hi, map_zero]
+
+/-- ★★**`𝒞^istr` のすべての射は co-angular**(`Proposition 1.4, (i)`)。
+
+★原文が保存リストで「co-angular morphisms [cf. Proposition 1.4, (i)]」と
+括弧書きするのはこれ —— **`𝒞^istr` では co-angular 性が自明になる**ので、
+「保存する」は言うまでもない。 -/
+/-- ★★**isotropic な対象の isotropic hull は同型**。
+
+`hullMap` は isometric pre-step で、`A` が isotropic ならそれは定義から同型。
+
+★原文の「The restriction of the isotropification functor to `𝒞^istr` is
+**isomorphic to the identity functor**」の核であり、**1行**である。 -/
+theorem hullMap_isIso (A : C) (hA : IsIsotropic P A) : IsIso (hullMap P F A) :=
+  hA _ (hullMap P F A) (hullMap_spec P F A).1 (hullMap_spec P F A).2.1
+
+/-- ★**isotropic な対象から出る `𝒞` の射はすべて co-angular**。
+
+`Definition 1.3, (vii), (b)` で isotropy が伝わるので、`Proposition 1.4, (i)` が使える。
+★これが「`𝒞^istr` の射が `𝒞` の意味でも co-angular」を与える —— (v) の
+pull-back の保存で要る（原文の「pull-back morphisms **relative to `𝒞`**」）。 -/
+theorem isCoAngular_of_isotropic_dom {A B : C} (hA : IsIsotropic P A) (f : A ⟶ B) :
+    IsCoAngular P f :=
+  prop_1_4_i P f (fun X g => F.isotropicClosed g hA)
+
+/-- ★**pre-step を(両向きに)保つ** —— 次数と底の同型性の合わせ技。 -/
+theorem isotropification_preStep_iff {A B : C} (f : A ⟶ B) :
+    IsPreStep P (istrMap P F f) ↔ IsPreStep P f := by
+  constructor
+  · intro h
+    exact ⟨by rw [← isotropification_degFr P F f]; exact h.1,
+      (isotropification_baseIso_iff P F f).mp h.2⟩
+  · intro h
+    exact ⟨by rw [isotropification_degFr P F f]; exact h.1,
+      (isotropification_baseIso_iff P F f).mpr h.2⟩
+
+/-- ★**pull-back を保つ**（`𝒞` の意味で）。
+
+原文 (FrdI p.33):
+> pull-back morphisms to morphisms which are pull-back morphisms relative to C,
+
+★`Proposition 1.4, (ii)` で pull-back = co-angular ∧ isometric ∧ linear に分解し、
+* co-angular は `A^istr` が isotropic だから自動（上の補題）
+* isometric は保存（`isotropification_isometric_iff`）
+* linear は次数の保存
+
+の3つを合わせる。★**`Proposition 1.7` の合成補題は要らない。** -/
+theorem isotropification_pullBack {A B : C} (f : A ⟶ B) (h : IsPullBack P f) :
+    IsPullBack P (istrMap P F f) := by
+  obtain ⟨hlb, hlin⟩ := (prop_1_4_ii P F f).mp h
+  refine (prop_1_4_ii P F _).mpr ⟨⟨?_, ?_⟩, ?_⟩
+  · exact isCoAngular_of_isotropic_dom P F (hullMap_spec P F A).2.2.1 _
+  · exact (isotropification_isometric_iff P F f).mpr hlb.2
+  · show P.degFr (istrMap P F f) = 1
+    rw [isotropification_degFr P F f]
+    exact hlin
+
+/-- ★**Frobenius 型を保つ** —— co-angular（自動）＋ isometric ＋ base-isomorphism。 -/
+theorem isotropification_frobType {A B : C} (f : A ⟶ B) (h : IsFrobeniusType P f) :
+    IsFrobeniusType P (istrMap P F f) :=
+  ⟨⟨isCoAngular_of_isotropic_dom P F (hullMap_spec P F A).2.2.1 _,
+    (isotropification_isometric_iff P F f).mpr h.1.2⟩,
+   (isotropification_baseIso_iff P F f).mpr h.2⟩
+
+theorem istr_isotropic (X : Istr P) : IsIsotropic (istrPre P) X := by
+  intro Dd φ hi hs
+  haveI : IsIso φ.hom := X.property Dd.obj φ.hom hi hs
+  exact ⟨InducedCategory.homMk (inv φ.hom), InducedCategory.hom_ext (by simp),
+    InducedCategory.hom_ext (by simp)⟩
+
+theorem istr_coAngular {X Y : Istr P} (g : X ⟶ Y) : IsCoAngular (istrPre P) g :=
+  prop_1_4_i (istrPre P) g (fun Z _ => istr_isotropic P Z)
+
+end Istr
+
 /-! ## ★負の対照 —— (iv) の `co-angular` は落とせない
 
 ★(iv) は「co-angular **かつ** linear なら isotropic 性が両向きに移る」と言う。
