@@ -493,4 +493,92 @@ theorem prop_1_11_i (F : FrobenioidCore P) {A B : C}
   obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F B φD
   exact prop_1_11_i_lift P F hbt haa φD ψ hψpb θ hθ
 
+include P in
+/-- ★★**(vi) の mono の `⟹` 向き** —— pull-back 射が mono なら底も mono。
+
+★★**`plBk_realize`(圏同値)と `Definition 1.2, (ii)` の両方が要る**:
+1. `u : Y ⟶ A_𝒟` を pull-back 射 `ψ : X ⟶ A` の底として実現する(`plBk_realize`)
+2. `v` については、★**`Definition 1.2, (ii)` の全射性**で `f : X ⟶ A`
+   (底が `θ ≫ v`、`f ≫ φ = ψ ≫ φ`)を作る
+   ——★**「`ψ ≫ φ` を第1成分に取る」のが要点**である
+3. `Mono φ` から `f = ψ`、よって底が一致し、`θ` が同型なので `u = v`
+
+★**原文が「together with」で並べた 2 つの道具が、ここでは 2 と 1 に対応する。** -/
+theorem prop_1_11_vi_baseMono_of_mono (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) (hm : Mono φ) : Mono (P.Base φ) := by
+  refine ⟨fun {Y} u v h => ?_⟩
+  -- 手1: `u` を pull-back 射の底として実現
+  obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F A u
+  -- 手2: `v` 側の持ち上げを `Definition 1.2, (ii)` の全射性で作る
+  obtain ⟨_, hsurj⟩ := hφ X
+  obtain ⟨f, hf⟩ := hsurj ⟨(ψ ≫ φ, θ.hom ≫ v), by
+    rw [P.Base_comp, hθ, Category.assoc, Category.assoc, h]⟩
+  have hf' := congrArg Subtype.val hf
+  -- 手3: `Mono φ` から `f = ψ`
+  have hfψ : f = ψ := hm.right_cancellation _ _ (congrArg Prod.fst hf')
+  have hbv : P.Base f = θ.hom ≫ v := congrArg Prod.snd hf'
+  have hbase : θ.hom ≫ u = θ.hom ≫ v := by
+    rw [← hθ, ← hbv, hfψ]
+  haveI : IsIso θ.hom := inferInstance
+  exact (cancel_epi θ.hom).mp hbase
+
+include P in
+/-- ★**(vi) の mono の完成形**(iff)。 -/
+theorem prop_1_11_vi_mono (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) : Mono φ ↔ Mono (P.Base φ) :=
+  ⟨prop_1_11_vi_baseMono_of_mono P F φ hφ, prop_1_11_vi_mono_of_baseMono P φ hφ⟩
+
+include P in
+/-- ★★**(vi) の fiberwise-surjective の `⟸` 向き**。
+
+★**手順**: 底で得た `δZ_𝒟` を `plBk_realize` で `𝒞` へ持ち上げ、
+★**`Definition 1.2, (ii)` の全射性で `δA` を作る**(第1成分に `ψ ≫ γ` を取る)。 -/
+theorem prop_1_11_vi_fs_of_baseFs (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) (hbfs : IsFiberwiseSurjective (P.Base φ)) :
+    IsFiberwiseSurjective φ := by
+  intro Z γ
+  obtain ⟨DD, δAD, δZD, hsq⟩ := hbfs (P.Base γ)
+  obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F Z δZD
+  obtain ⟨_, hsurj⟩ := hφ X
+  obtain ⟨δA, hδA⟩ := hsurj ⟨(ψ ≫ γ, θ.hom ≫ δAD), by
+    rw [P.Base_comp, hθ, Category.assoc, Category.assoc, hsq]⟩
+  exact ⟨X, δA, ψ, congrArg Prod.fst (congrArg Subtype.val hδA)⟩
+
+include P in
+/-- ★★**(vi) の fiberwise-surjective の `⟹` 向き**。
+
+★**手順**: 底の射 `γ_𝒟` を `plBk_realize` で `𝒞` へ持ち上げ、
+`𝒞` 側の fiberwise-surjectivity を当てて、底を取る。 -/
+theorem prop_1_11_vi_baseFs_of_fs (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hfs : IsFiberwiseSurjective φ) :
+    IsFiberwiseSurjective (P.Base φ) := by
+  intro ZD γD
+  obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F B γD
+  obtain ⟨Dd, δA, δX, hsq⟩ := hfs ψ
+  refine ⟨(P.toElem.obj Dd).base, P.Base δA, P.Base δX ≫ θ.hom, ?_⟩
+  have h := congrArg P.Base hsq
+  rw [P.Base_comp, P.Base_comp, hθ] at h
+  rw [h, Category.assoc]
+
+include P in
+/-- ★★**(vi) の fiberwise-surjective の完成形**(iff)。 -/
+theorem prop_1_11_vi_fs (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) :
+    IsFiberwiseSurjective φ ↔ IsFiberwiseSurjective (P.Base φ) :=
+  ⟨prop_1_11_vi_baseFs_of_fs P F φ, prop_1_11_vi_fs_of_baseFs P F φ hφ⟩
+
+include P in
+/-- ★★**(vi) の FSM の完成形**(iff)。
+
+★**`IsFSMMorphism = IsFiberwiseSurjective ∧ Mono`** なので、
+上の 2 つの iff を組むだけ。★**4 つのうち 3 つがこれで揃った。** -/
+theorem prop_1_11_vi_fsm (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) :
+    IsFSMMorphism φ ↔ IsFSMMorphism (P.Base φ) := by
+  constructor
+  · rintro ⟨hfs, hm⟩
+    exact ⟨(prop_1_11_vi_fs P F φ hφ).mp hfs, (prop_1_11_vi_mono P F φ hφ).mp hm⟩
+  · rintro ⟨hfs, hm⟩
+    exact ⟨(prop_1_11_vi_fs P F φ hφ).mpr hfs, (prop_1_11_vi_mono P F φ hφ).mpr hm⟩
+
 end ABC3.Found.FrdI
