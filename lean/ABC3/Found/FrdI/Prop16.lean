@@ -372,6 +372,96 @@ theorem cfp_isIso_fst {X Y : CfpCat P G} (f : X ⟶ Y) (h : IsIso f) : IsIso (Cf
   · exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) h1
   · exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) h2
 
+/-! ### ★**手順6**(2つの綴り問題への対処、3つ目)
+
+★**射影が簡約されない `def` を作らず、構造リテラルを直接書く**。
+`cfpMk` のような補助定義を挟むと `(cfpMk …).obj.right` が `Y.obj.right` に
+**簡約されず**、`rw` も インスタンス合成も落ちる。
+★手順5(部分型の成分)では届かない、3つ目の出方である。 -/
+
+/-- **(iii)** —— **co-angular** は `𝒞'` から `𝒞` へ上がる(★**難しい向き**)。
+
+★★**要点**: `co-angular` の定義に入っている**選言**
+「`α` か `γ` が base-isomorphism」が、**中間対象を `𝒞'` へ持ち上げる橋**になる。
+`β` は pre-step なので必ず base-isomorphism であり、
+選言の側からもう一方の端まで **base-isomorphism の鎖**が繋がるので、
+`Base Z₀` も `Base W₀` も `G` の像と同型になる。
+
+★**`G` の本質的全射性は要らない** —— 使うのは「与えられた分解の中の base-isomorphism」だけ。
+★★**これが CFP 版の仕分け基準**である: **定義の中に base-isomorphism の鎖があるか**。 -/
+theorem cfp_coAngular_to {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (h : IsCoAngular (cfpPreFrobenioid P G hG hD') φ) : IsCoAngular P (CfpCat.fst φ) := by
+  haveI hX : IsIso X.obj.hom := X.property
+  haveI hY : IsIso Y.obj.hom := Y.property
+  intro Z₀ W₀ γ₀ β₀ α₀ hfac hα₀l hβ₀i hβ₀s hdisj
+  haveI hβb : IsIso (P.proj.map β₀) := hβ₀s.2
+  have hbf : P.proj.map (CfpCat.fst φ) ≫ Y.obj.hom = X.obj.hom ≫ G.map (CfpCat.snd φ) :=
+    cfp_square φ
+  have hfacp : P.proj.map (CfpCat.fst φ)
+      = P.proj.map γ₀ ≫ P.proj.map β₀ ≫ P.proj.map α₀ := by
+    rw [hfac, P.proj.map_comp, P.proj.map_comp]
+  rcases hdisj with hα | hγ
+  · -- ★`α₀` が base-isomorphism: `Y` の側から鎖を辿る
+    haveI hαb : IsIso (P.proj.map α₀) := hα
+    have hz : IsIso (P.proj.map β₀ ≫ P.proj.map α₀ ≫ Y.obj.hom) := inferInstance
+    have hw : IsIso (P.proj.map α₀ ≫ Y.obj.hom) := inferInstance
+    refine cfp_isIso_fst P G
+      (X := ⟨⟨Z₀, Y.obj.right, P.proj.map β₀ ≫ P.proj.map α₀ ≫ Y.obj.hom⟩, hz⟩)
+      (Y := ⟨⟨W₀, Y.obj.right, P.proj.map α₀ ≫ Y.obj.hom⟩, hw⟩)
+      (InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩) ?_
+    refine h ⟨⟨Z₀, Y.obj.right, P.proj.map β₀ ≫ P.proj.map α₀ ≫ Y.obj.hom⟩, hz⟩
+      ⟨⟨W₀, Y.obj.right, P.proj.map α₀ ≫ Y.obj.hom⟩, hw⟩
+      (InducedCategory.homMk ⟨γ₀, (CfpCat.snd φ : X.obj.right ⟶ Y.obj.right), ?_⟩)
+      (InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩)
+      (InducedCategory.homMk ⟨α₀, 𝟙 _, by simp⟩) ?_
+      hα₀l ((cfp_isometric_iff P G hG hD' _).mpr hβ₀i) ⟨hβ₀s.1, by show IsIso (𝟙 _); infer_instance⟩
+      (Or.inl (by show IsIso (𝟙 _); infer_instance))
+    · show P.proj.map γ₀ ≫ P.proj.map β₀ ≫ P.proj.map α₀ ≫ Y.obj.hom
+        = X.obj.hom ≫ G.map (CfpCat.snd φ)
+      rw [← hbf, hfacp]
+      simp only [Category.assoc]
+    · refine InducedCategory.hom_ext (CommaMorphism.ext hfac ?_)
+      show CfpCat.snd φ = CfpCat.snd φ ≫ 𝟙 _ ≫ 𝟙 _
+      simp
+  · -- ★`γ₀` が base-isomorphism: `X` の側から鎖を辿る
+    haveI hγb : IsIso (P.proj.map γ₀) := hγ
+    have hz : IsIso (inv (P.proj.map γ₀) ≫ X.obj.hom) := inferInstance
+    have hw : IsIso (inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ X.obj.hom) := inferInstance
+    refine cfp_isIso_fst P G
+      (X := ⟨⟨Z₀, X.obj.right, inv (P.proj.map γ₀) ≫ X.obj.hom⟩, hz⟩)
+      (Y := ⟨⟨W₀, X.obj.right,
+        inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ X.obj.hom⟩, hw⟩)
+      (InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩) ?_
+    refine h ⟨⟨Z₀, X.obj.right, inv (P.proj.map γ₀) ≫ X.obj.hom⟩, hz⟩
+      ⟨⟨W₀, X.obj.right,
+        inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ X.obj.hom⟩, hw⟩
+      (InducedCategory.homMk ⟨γ₀, 𝟙 _, by simp⟩)
+      (InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩)
+      (InducedCategory.homMk ⟨α₀, (CfpCat.snd φ : X.obj.right ⟶ Y.obj.right), ?_⟩) ?_
+      hα₀l ((cfp_isometric_iff P G hG hD' _).mpr hβ₀i) ⟨hβ₀s.1, by show IsIso (𝟙 _); infer_instance⟩
+      (Or.inr (by show IsIso (𝟙 _); infer_instance))
+    · show P.proj.map α₀ ≫ Y.obj.hom
+        = (inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ X.obj.hom) ≫ G.map (CfpCat.snd φ)
+      rw [Category.assoc, Category.assoc, ← hbf, hfacp]
+      simp only [Category.assoc]
+      rw [← Category.assoc (inv (P.proj.map γ₀)), IsIso.inv_hom_id, Category.id_comp,
+        ← Category.assoc (inv (P.proj.map β₀)), IsIso.inv_hom_id, Category.id_comp]
+    · refine InducedCategory.hom_ext (CommaMorphism.ext hfac ?_)
+      show CfpCat.snd φ = 𝟙 _ ≫ 𝟙 _ ≫ CfpCat.snd φ
+      simp
+
+/-- **(iii)** —— co-angular は射影で決まる(両向き)。 -/
+theorem cfp_coAngular_iff {X Y : CfpCat P G} (φ : X ⟶ Y) :
+    IsCoAngular (cfpPreFrobenioid P G hG hD') φ ↔ IsCoAngular P (CfpCat.fst φ) :=
+  ⟨cfp_coAngular_to P G hG hD' φ, cfp_coAngular_of P G hG hD' φ⟩
+
+/-- **(iii)** —— **LB-invertible** は射影で決まる。
+
+★`LB-invertible = co-angular ∧ isometric` なので、上の2つの合成。 -/
+theorem cfp_lbInvertible_iff {X Y : CfpCat P G} (φ : X ⟶ Y) :
+    IsLBInvertible (cfpPreFrobenioid P G hG hD') φ ↔ IsLBInvertible P (CfpCat.fst φ) :=
+  and_congr (cfp_coAngular_iff P G hG hD' φ) (cfp_isometric_iff P G hG hD' φ)
+
 end Dict
 
 end ABC3.Found.FrdI
