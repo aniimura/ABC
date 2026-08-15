@@ -851,4 +851,32 @@ theorem prop_1_11_v_exists_nonresp (G : Frobenioid P) {A B Cc Dd : C}
   rw [hinv]
   exact ⟨Φ.map (inv (P.Base φ)) (P.Div φ), by rw [add_comm]⟩
 
+include P in
+/-- ★**(v) の「pull-back ⟺」の還元** —— 両方が linear なら、
+「pull-back ⟺」は「**LB-invertible ⟺**」に落ちる。
+
+★**根拠は `Proposition 1.4, (ii)`**: `IsPullBack φ ⟺ IsLBInvertible φ ∧ IsLinear φ`。
+`𝒞^lin` の射は定義から linear なので、**linear の部分は自動**であり、
+★**残るのは LB-invertible の部分だけ**である。
+
+★★**原文は「Moreover, φ is a pull-back morphism if and only if ψ is」と
+1 文で書くが、`𝒞^lin` の中で言っている以上、実際に比べているのは
+LB-invertible 性だけである。** ★**この還元は原文に書かれていない。** -/
+theorem prop_1_11_v_pullBack_iff_reduce (F : FrobenioidCore P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (ψ : Cc ⟶ Dd) (hφl : IsLinear P φ) (hψl : IsLinear P ψ) :
+    (IsPullBack P φ ↔ IsPullBack P ψ) ↔ (IsLBInvertible P φ ↔ IsLBInvertible P ψ) := by
+  constructor
+  · intro h
+    constructor
+    · intro hlb
+      exact ((prop_1_4_ii P F ψ).mp (h.mp ((prop_1_4_ii P F φ).mpr ⟨hlb, hφl⟩))).1
+    · intro hlb
+      exact ((prop_1_4_ii P F φ).mp (h.mpr ((prop_1_4_ii P F ψ).mpr ⟨hlb, hψl⟩))).1
+  · intro h
+    constructor
+    · intro hpb
+      exact (prop_1_4_ii P F ψ).mpr ⟨h.mp ((prop_1_4_ii P F φ).mp hpb).1, hψl⟩
+    · intro hpb
+      exact (prop_1_4_ii P F φ).mpr ⟨h.mpr ((prop_1_4_ii P F ψ).mp hpb).1, hφl⟩
+
 end ABC3.Found.FrdI
