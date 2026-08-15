@@ -1106,4 +1106,37 @@ theorem liftsCoaPre_precomp {B Cc A A' : C} (ε : Cc ⟶ B) (φ : A ⟶ B) (ρ :
     (α' ≫ ρ) ≫ φ = γ ≫ ε := by
   rw [Category.assoc, ← h]
 
+/-! ### ★★(vii) の Frobenius 型の場合 —— 向きの制約が見えた
+
+★**原文**(p.38、目視)は、この場合の結論を
+> there exist **a morphism of Frobenius type α : D →A** and a co-angular pre-step γ : D →C
+と書く。★**`α` は `A` へ**入る**Frobenius 型射である。**
+
+★★**ところが `Definition 1.3, (ii)`(`frobDegSurj`)は
+「対象から**出る**Frobenius 型射」しか与えない**:
+```
+frobDegSurj : ∀ (A : C) (n : ℕ+), ∃ (B : C) (φ : A ⟶ B), IsFrobeniusType φ ∧ degFr φ = n
+```
+★**`A` へ入る Frobenius 型射の存在は、`Definition 1.3` の公理には無い。**
+
+★**`Definition 1.2, (iv)` の `perfect object` の条件 (a) はそれを与える**:
+> every B ∈Ob(C) base-isomorphic to C appears as **the codomain of** a morphism of
+> Frobenius type of Frobenius degree n
+
+★★**しかし (vii) は perfect 型を仮定していない。**
+
+★**したがって `α` の出どころは、原文が「by applying again the second equivalence
+of categories of Definition 1.3, (iii), (d)」と書いている部分にあるはず**だが、
+第2の圏同値は **co-angular pre-step** を与えるものであって
+Frobenius 型射を与えるものではない。
+
+★★**ここは「試して、道具の向きが合わないことが分かった」段階である**
+(3 分類の第 2 カテゴリ)。★**穴の位置は「`A` へ入る Frobenius 型射をどこから得るか」
+の 1 点に確定した。**
+
+★**これは `Proposition 1.10, (iii)` の moreover で我々が経験した
+「探していた向きが逆だった」と同じ形の可能性がある** ——
+★**あのときも、必要な道具は別の向きで手元にあった。**
+-/
+
 end ABC3.Found.FrdI
