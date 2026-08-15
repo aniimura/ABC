@@ -234,6 +234,90 @@ theorem prop_1_10_i_exists_frobType (F : FrobenioidCore P) {A B A' : C}
 theorem degFr_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] : P.degFr φ = 1 :=
   isLinear_of_isIso P φ
 
+/-! ### ★★(i) の「7 タイプの保存」—— **4 つは独立な主張ではない**
+
+原文 (FrdI p.34):
+> pre-step; pull-back morphism; co-angular morphism; base-isomorphism;
+
+★原文は 7 タイプを並べる: Frobenius type / pre-step / pull-back morphism /
+co-angular morphism / base-isomorphism / isometry / LB-invertible morphism。
+
+★★**ところが第1の場合(`φ` が Frobenius 型)では、後ろの 4 つは
+「`φ′` が Frobenius 型である」ことから自動で従う。** 定義の入れ子:
+```
+IsFrobeniusType φ := IsLBInvertible φ ∧ IsBaseIsomorphism φ
+IsLBInvertible  φ := IsCoAngular φ ∧ IsIsometric φ
+```
+★**つまり Frobenius 型 ⟹ LB-invertible ∧ base-isomorphism ∧ co-angular ∧ isometry。**
+
+★**測定**: 原文の「7 タイプ」は**場合によって独立な主張の数が違う**。
+第1の場合では **7 のうち 4 は自動**で、実質は 3 である。
+★**列挙の長さは主張の数ではない** —— `Proposition 1.7` で我々が学んだことの再現。
+-/
+
+/-- **(i) の 4 タイプ** —— Frobenius 型から自動で従うぶん。
+
+★**この宣言の値は「短いこと」にある。** 原文が「follows immediately from the
+definitions」と書いた箇所が、本当に定義の射影だけであることを示している。 -/
+theorem prop_1_10_i_four_types {A B : C} {φ : A ⟶ B} (h : IsFrobeniusType P φ) :
+    IsLBInvertible P φ ∧ IsBaseIsomorphism P φ ∧ IsCoAngular P φ ∧ IsIsometric P φ :=
+  ⟨h.1, h.2, h.1.1, h.1.2⟩
+
+/-! ### ★★(i) の `Div` の公式 —— 原文が言っていない材料が要る
+
+原文 (FrdI p.34):
+> isomorphism α]. Finally, if φ is a morphism of Frobenius type (respectively,
+
+★**引用を選び直した記録(事故 #3 の 4 度目)**: 公式そのものの行
+(「In this situation, degFr(φ) = degFr(φ′); Div(φ′) = d · α∗(Div(φ)) …」)を引こうとしたが、
+★**ゲートが落とした**(`′` が layout モードで消え、32/68 文字で停止)。
+★**同じページの `′` でも、`α]. Finally,` の行には無いので通る。**
+★**公式そのものは引用できない** —— だから**読みとして日本語で書き、
+機械照合には隣接する行を使う**。★これは我々の器具の制約であって、
+**「引用できない ＝ 原文に無い」ではない**(400 dpi 目視では読める)。
+
+★原文の証明(p.35、目視)は
+> The portion of assertion (i) concerning “degFr(−)”, “Div(−)” then follows
+> immediately from Remark 1.1.1.
+とだけ書く。
+
+★★**実際に計算すると、`Remark 1.1.1`(＝ `Div_comp`)だけでは足りない。**
+`Div_comp` を四角形の両辺に当てると
+```
+Div(α ≫ φ′) = Φ.map (Base α) (Div φ′) + (degFr φ′) • Div α
+Div(φ ≫ β)  = Φ.map (Base φ) (Div β)  + (degFr β)  • Div φ
+```
+★**ここで `Div α = 0` と `Div β = 0` が要る** —— つまり
+**`α` と `β` が isometry であること**。それは「Frobenius 型 ⟹ LB-invertible ⟹ isometry」
+から出るが、★**原文はこの一歩を書いていない。**「Remark 1.1.1 から」だけでは
+両辺の第2項・第1項が消える理由が出ない。
+
+★結果は
+```
+Φ.map (Base α) (Div φ′) = (degFr β) • Div φ
+```
+であり、`Φ.map (Base α) : Φ(A′) → Φ(A)` の逆が原文の `α∗ : Φ(A) ⥲ Φ(A′)` なので、
+これは `Div(φ′) = d · α∗(Div φ)` と同じことである
+(★**我々は `α∗` を作らずに、`Φ.map (Base α)` を当てた形で述べる** ——
+逆写像の構成は base-isomorphism の同型性から別に出るもので、
+**公式そのものはこの形で完結している**)。
+-/
+
+include P in
+/-- **(i) の `Div` の公式**(`Φ.map (Base α)` を当てた形)。
+
+★**`α` と `β` が isometry であることを仮定に明示している** ——
+原文は「Remark 1.1.1 から」と書くが、**実際にはこれが要る**。
+★仮定を文に出したので、**何が効いているかが宣言の型から読める。** -/
+theorem prop_1_10_i_Div_formula {A B A' B' : C}
+    (φ : A ⟶ B) (α : A ⟶ A') (β : B ⟶ B') (φ' : A' ⟶ B')
+    (hα : IsIsometric P α) (hβ : IsIsometric P β)
+    (hsq : φ ≫ β = α ≫ φ') :
+    Φ.map (P.Base α) (P.Div φ') = (P.degFr β : ℕ) • P.Div φ := by
+  have h := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp, hα, hβ] at h
+  simpa using h.symm
+
 /-- **(i) の `degFr` の等式**(第1の場合の構成に対して)。
 
 ★上の `prop_1_10_i_exists_frobType` が返す `φ′` は `ψ ≫ γ` の形で、
