@@ -164,4 +164,87 @@ def Prop110iGoal {A B A' : C}
   ∃ (B' : C) (β : B ⟶ B') (φ' : A' ⟶ B'),
     IsFrobeniusType P β ∧ P.degFr β = P.degFr α ∧ φ ≫ β = α ≫ φ'
 
+/-! ### ★(i) の存在 —— **第1の場合(`φ` が Frobenius 型)**
+
+原文 (FrdI p.35):
+> Frobenius type are closed under composition, with multiplying Frobenius degrees [cf.
+
+★**原文が名指す 3 つの材料と、我々の持ち物の対応**:
+
+| 原文 | 我々 |
+|---|---|
+| closed under composition | `IsFrobeniusType.comp`(`Prop17.lean`) |
+| multiplying Frobenius degrees [Remark 1.1.1] | `PreFrobenioid.degFr_comp` |
+| existence … of a given Frobenius degree [Def 1.3, (ii)] | `F.frobDegSurj` |
+| (essential) uniqueness [Def 1.3, (ii)] | `F.frobDegUniq` |
+
+★**原文は「follows immediately」と書くが、構成は 3 手である**:
+1. `B` から次数 `degFr α` の Frobenius 型射 `β` を取る
+2. `A'` から次数 `degFr φ` の Frobenius 型射 `ψ` を取る
+3. `α ≫ ψ` と `φ ≫ β` は **`A` から出る同次数の Frobenius 型射**なので
+   `frobDegUniq` が同型 `γ` を与える。★**`φ′ := ψ ≫ γ`。**
+
+★★**次数が一致する理由が `mul_comm` である** —— `degFr ψ * degFr α` と
+`degFr β * degFr φ` がそれぞれ `degFr φ * degFr α`、`degFr α * degFr φ` になる。
+★**原文の「multiplying Frobenius degrees」の一言が、ここでは可換性として効く。**
+-/
+
+/-- **(i) の存在(第1の場合: `φ` が Frobenius 型)**。
+
+★`φ′` も Frobenius 型として得られる —— これは (i) の後半「7 タイプの保存」の
+**Frobenius 型の行**にあたる。 -/
+theorem prop_1_10_i_exists_frobType (F : FrobenioidCore P) {A B A' : C}
+    (φ : A ⟶ B) (hφ : IsFrobeniusType P φ)
+    (α : A ⟶ A') (hα : IsFrobeniusType P α) :
+    ∃ (B' : C) (β : B ⟶ B') (φ' : A' ⟶ B'),
+      IsFrobeniusType P β ∧ P.degFr β = P.degFr α ∧
+      IsFrobeniusType P φ' ∧ φ ≫ β = α ≫ φ' := by
+  obtain ⟨B', β, hβ, hdβ⟩ := F.frobDegSurj B (P.degFr α)
+  obtain ⟨Z, ψ, hψ, hdψ⟩ := F.frobDegSurj A' (P.degFr φ)
+  have h1 : IsFrobeniusType P (α ≫ ψ) := IsFrobeniusType.comp P F hα hψ
+  have h2 : IsFrobeniusType P (φ ≫ β) := IsFrobeniusType.comp P F hφ hβ
+  have hdeg : P.degFr (α ≫ ψ) = P.degFr (φ ≫ β) := by
+    rw [P.degFr_comp, P.degFr_comp, hdβ, hdψ, mul_comm]
+  obtain ⟨γ, hγiso, hγ⟩ := F.frobDegUniq A Z B' (α ≫ ψ) (φ ≫ β) h1 h2 hdeg
+  haveI : IsIso γ := hγiso
+  refine ⟨B', β, ψ ≫ γ, hβ, hdβ,
+    IsFrobeniusType.comp P F hψ (isFrobeniusType_of_isIso P γ), ?_⟩
+  rw [← Category.assoc]
+  exact hγ.symm
+
+/-! ### ★(i) の `degFr` の等式
+
+原文 (FrdI p.34):
+> isometry; LB-invertible morphism), then the same is true of φ
+
+★原文は `deg_Fr(φ) = deg_Fr(φ′)` と述べ、証明では
+> The portion of assertion (i) concerning “degFr(−)”, “Div(−)” then follows immediately from
+> Remark 1.1.1.
+とだけ書く(p.35、目視)。
+
+★**我々の側では、上の構成で `φ′ = ψ ≫ γ`(`γ` は同型)なので**
+`degFr φ′ = degFr γ * degFr ψ = 1 * degFr φ = degFr φ` となる。
+★**「同型の Frobenius 次数は 1」が要る** —— それは `isLinear_of_isIso`
+(`IsLinear φ := degFr φ = 1`)である。
+-/
+
+/-- ★**同型の Frobenius 次数は 1**(`isLinear_of_isIso` の言い換え)。
+★**名前が `IsLinear` なので `degFr` を探しても見つからない** ——
+前段の教訓「推測せず `grep`」がここでも効いた。 -/
+theorem degFr_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] : P.degFr φ = 1 :=
+  isLinear_of_isIso P φ
+
+/-- **(i) の `degFr` の等式**(第1の場合の構成に対して)。
+
+★上の `prop_1_10_i_exists_frobType` が返す `φ′` は `ψ ≫ γ` の形で、
+`degFr ψ = degFr φ`、`γ` は同型。★**だから次数は保たれる。**
+
+★**`FrobenioidCore` は要らない** —— `degFr` の関手性と同型の次数だけで出る。
+★**「原文が (i) の材料として `Definition 1.3, (ii)` を挙げている」のは
+存在のためであって、次数の等式のためではない。** -/
+theorem prop_1_10_i_degFr_eq {A' Z B' : C}
+    (ψ : A' ⟶ Z) (γ : Z ⟶ B') [IsIso γ] {n : ℕ+} (hψ : P.degFr ψ = n) :
+    P.degFr (ψ ≫ γ) = n := by
+  rw [P.degFr_comp, degFr_of_isIso, one_mul, hψ]
+
 end ABC3.Found.FrdI
