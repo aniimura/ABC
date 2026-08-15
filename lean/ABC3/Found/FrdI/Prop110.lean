@@ -667,17 +667,29 @@ theorem prop_1_10_iii_div_nsmul' {B₁ B₁' B₂ B₂' : C}
 原文 (FrdI p.35):
 > composite of prime-Frobenius morphisms.
 
-★**「合成」を帰納的に定義する** —— 原文は「a composite of prime-Frobenius
-morphisms」と書くだけで、**空の合成(恒等射)を含むかを言っていない**。
-★我々は**含める**(そうしないと同型が Frobenius 型なのに合成で書けない)。
-★**これは原文の曖昧さであり、測定として記録する。**
+★★**「合成」を帰納的に定義するとき、原文の曖昧さが 2 段階で出る。**
+
+**第1段**: 原文は「a composite of prime-Frobenius morphisms」と書くだけで、
+**空の合成を含むかを言っていない**。含めないと、次数 1 の Frobenius 型射が
+合成として書けない。
+
+**第2段(こちらが本質)**: ★**空の合成を「恒等射」に取るだけでは足りない。**
+`Proposition 1.4, (iii)` により **次数 1 の Frobenius 型射は同型**であり、
+同型は一般に **`𝟙 A` そのものではない**。(v) が iff である以上、
+★**基底の場合は「同型」でなければならない。**
+
+★★**これが原文の 3 つ目の曖昧さである。**
+「composite of prime-Frobenius morphisms」は **同型を法として読む**しかない。
+★**形式化しなければ「恒等射」と「同型」の差は見えない** ——
+自然言語では「合成が無い場合」で済んでしまう。
 -/
 
 /-- **prime-Frobenius 射の合成**(帰納的)。
 
-★空の合成 = 恒等射を含む。★**原文はそこを言っていない。** -/
+★**基底は同型**(恒等射ではない)。理由は上の docstring を見よ ——
+次数 1 の Frobenius 型射は同型であって、`𝟙` とは限らない。 -/
 inductive IsPrimeFrobComposite : ∀ {A B : C}, (A ⟶ B) → Prop
-  | id (A : C) : IsPrimeFrobComposite (𝟙 A)
+  | iso {A B : C} (φ : A ⟶ B) : IsIso φ → IsPrimeFrobComposite φ
   | cons {A B E : C} {φ : A ⟶ B} {ψ : B ⟶ E} :
       IsPrimeFrobenius P φ → IsPrimeFrobComposite ψ → IsPrimeFrobComposite (φ ≫ ψ)
 
@@ -689,7 +701,7 @@ include P in
 theorem isFrobeniusType_of_isPrimeFrobComposite (F : FrobenioidCore P)
     {A B : C} {φ : A ⟶ B} (h : IsPrimeFrobComposite P φ) : IsFrobeniusType P φ := by
   induction h with
-  | id A => exact isFrobeniusType_of_isIso P (𝟙 A)
+  | iso ψ hψ => exact @isFrobeniusType_of_isIso _ _ _ _ _ P _ _ ψ hψ
   | cons hφ _ ih => exact IsFrobeniusType.comp P F hφ.1 ih
 
 include P in
@@ -697,7 +709,83 @@ include P in
 ★**「合成の集合が空でない」を押さえる。** -/
 theorem isPrimeFrobComposite_of_isPrimeFrobenius {A B : C} {φ : A ⟶ B}
     (h : IsPrimeFrobenius P φ) : IsPrimeFrobComposite P φ := by
-  have := IsPrimeFrobComposite.cons h (IsPrimeFrobComposite.id (P := P) B)
+  have := IsPrimeFrobComposite.cons h
+    (IsPrimeFrobComposite.iso (P := P) (𝟙 B) inferInstance)
   simpa using this
+
+/-! ### ★(v) の逆向き —— Frobenius 型 ⟹ prime-Frobenius の合成
+
+★**原文は証明を書いていない**((v) の証明は本文に無い)。
+★**構成は次数についての強帰納法**である:
+- `degFr φ = 1` のとき: ★**`Proposition 1.4, (iii)` により `φ` は同型**。基底の場合。
+- `degFr φ = n > 1` のとき: `n` の素因数 `p` を取り `n = m * p` と書く。
+  次数 `p` の Frobenius 型射 `φ₁` と次数 `m` の `φ₂` を `frobDegSurj` で取ると
+  `φ₁ ≫ φ₂` の次数は `m * p = n` なので、`frobDegUniq` が同型 `δ` を与え
+  ★**`φ = φ₁ ≫ (φ₂ ≫ δ)`**。`φ₂ ≫ δ` の次数は `m < n` なので帰納法が回る。
+
+★★**「素因数を 1 つ剥がす」が帰納のステップである。** 原文の (v) は
+「Frobenius 型 ⟺ prime-Frobenius の合成」と書くだけだが、
+★**その中身は「次数の素因数分解」そのもの**である。
+-/
+
+include P in
+/-- **(v) の逆向き** —— Frobenius 型射は prime-Frobenius 射の合成。
+
+★次数についての強帰納法。基底は **同型**(次数 1)。 -/
+theorem isPrimeFrobComposite_of_isFrobeniusType (F : FrobenioidCore P) :
+    ∀ (n : ℕ) {A B : C} (φ : A ⟶ B), IsFrobeniusType P φ →
+      ((P.degFr φ : ℕ+) : ℕ) = n → IsPrimeFrobComposite P φ := by
+  intro n
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    intro A B φ hφ hn
+    rcases eq_or_ne n 1 with h1 | h1
+    · -- 次数 1 ⟹ 同型
+      have hlin : IsLinear P φ := by
+        show P.degFr φ = 1
+        exact PNat.coe_injective (by rw [hn, h1]; rfl)
+      exact IsPrimeFrobComposite.iso φ (prop_1_4_iii P F φ hφ.1 ⟨hlin, hφ.2⟩)
+    · -- 素因数を 1 つ剥がす
+      obtain ⟨p, hp, k, hk⟩ := Nat.exists_prime_and_dvd h1
+      have hnpos : 0 < n := by rw [← hn]; exact (P.degFr φ).pos
+      have hppos : 0 < p := hp.pos
+      have hkpos : 0 < k := Nat.pos_of_ne_zero (by rintro rfl; omega)
+      set pp : ℕ+ := ⟨p, hppos⟩ with hpp
+      set kk : ℕ+ := ⟨k, hkpos⟩ with hkk
+      obtain ⟨Z, φ₁, hφ₁, hd₁⟩ := F.frobDegSurj A pp
+      obtain ⟨W, φ₂, hφ₂, hd₂⟩ := F.frobDegSurj Z kk
+      have hcomp : IsFrobeniusType P (φ₁ ≫ φ₂) := IsFrobeniusType.comp P F hφ₁ hφ₂
+      have hdc : P.degFr (φ₁ ≫ φ₂) = P.degFr φ := by
+        rw [P.degFr_comp, hd₁, hd₂]
+        refine PNat.coe_injective ?_
+        simp only [PNat.mul_coe, hpp, hkk, hn, hk]
+        exact Nat.mul_comm k p
+      obtain ⟨δ, hδiso, hδ⟩ := F.frobDegUniq A W B (φ₁ ≫ φ₂) φ hcomp hφ hdc
+      haveI : IsIso δ := hδiso
+      have hdk : ((P.degFr (φ₂ ≫ δ) : ℕ+) : ℕ) = k := by
+        rw [P.degFr_comp, degFr_of_isIso P δ, one_mul, hd₂, hkk]
+        rfl
+      have hklt : k < n := by
+        rw [hk]
+        calc k = 1 * k := (Nat.one_mul k).symm
+          _ < p * k := Nat.mul_lt_mul_of_lt_of_le hp.one_lt (le_refl k) hkpos
+      have hrec := ih k hklt (φ₂ ≫ δ)
+        (IsFrobeniusType.comp P F hφ₂ (isFrobeniusType_of_isIso P δ)) hdk
+      have hprime : IsPrimeFrobenius P φ₁ := ⟨hφ₁, by rw [hd₁]; simpa [hpp] using hp⟩
+      have : φ = φ₁ ≫ φ₂ ≫ δ := by rw [← hδ, Category.assoc]
+      rw [this]
+      exact IsPrimeFrobComposite.cons hprime hrec
+
+include P in
+/-- ★★**`Proposition 1.10, (v)` の完成形** —— Frobenius 型 ⟺ prime-Frobenius の合成。
+
+★**原文はこの iff を証明なしで述べる。** 我々の側では
+- `⟸` は `Proposition 1.7, (i)` の合成閉性の帰納法
+- `⟹` は **次数の素因数分解による強帰納法**(基底は `Proposition 1.4, (iii)` で同型)
+であり、★**「合成」の基底を同型に取らないと iff にならない**ことが分かった。 -/
+theorem prop_1_10_v (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B) :
+    IsFrobeniusType P φ ↔ IsPrimeFrobComposite P φ :=
+  ⟨fun h => isPrimeFrobComposite_of_isFrobeniusType P F _ φ h rfl,
+   isFrobeniusType_of_isPrimeFrobComposite P F⟩
 
 end ABC3.Found.FrdI
