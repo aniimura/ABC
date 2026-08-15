@@ -775,6 +775,19 @@ theorem cfpEndHomSnd_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
 -/
 
 
+/-- ★`𝒞'` で base-isomorphic なら `𝒞` でも base-isomorphic(★片向き)。
+
+★★**逆は言えない**: `𝒞` の同型 `proj A.left ≅ proj B.left` から
+`A.right ≅ B.right`(`𝒟'` の同型)を作るには **`G` が同型を反映する**必要があり、
+仮定にない。★これも「未解決 4 件」と同じ根である。 -/
+theorem cfp_baseIsomorphic_of (A B : CfpCat P G)
+    (h : BaseIsomorphic (cfpPreFrobenioid P G hG hD') A B) :
+    BaseIsomorphic P A.obj.left B.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  haveI hB : IsIso B.obj.hom := B.property
+  obtain ⟨w⟩ := h
+  exact ⟨(@asIso _ _ _ _ A.obj.hom hA) ≪≫ G.mapIso w ≪≫ (@asIso _ _ _ _ B.obj.hom hB).symm⟩
+
 /-! ## ★(vi) —— **片向きだけ**の3タイプ
 
 原文 (FrdI p.28):
