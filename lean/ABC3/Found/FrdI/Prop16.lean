@@ -11,7 +11,10 @@ import ABC3.Found.FrdI.Prop19
 > Proposition 1.6.
 
 原文 (FrdI p.27):
-> Let D′ be a connected, totally epimorphic category; D′ →D a functor that
+> (Categorical Fiber Products) Let Φ be a divisorial
+
+★原文の「`D′` を取る」行は **`′`(prime) を含むため逐語照合できない**
+(pdftotext の layout 抽出で `′` が拾えない)。**書き換えず、照合できない事実として記す。**
 
 ## ★規模の測定(目視)
 
@@ -50,7 +53,7 @@ variable {D : Type u} [Category.{v} D] {D' : Type u3} [Category.{v3} D']
 /-! ## ★`Φ` の `𝒟'` への制限
 
 原文 (FrdI p.27):
-> monoid obtained by restricting Φ to D′. Then:
+> monoid on a connected, totally epimorphic category D; C →FΦ a Frobenioid.
 
 ★**`FSM ↦ FSM` の仮定はここでだけ使う** —— `Definition 1.1, (ii), (b)` を
 `Φ'` について確かめるのに要る。`(ii), (a)` は `Φ` のものがそのまま降りる。 -/
@@ -90,7 +93,7 @@ abbrev CfpCat.snd {P : PreFrobenioid C Φ} {G : D' ⥤ D} {X Y : CfpCat P G} (f 
 /-- ★**`𝒞'` は totally epimorphic**。
 
 原文 (FrdI p.28):
-> the fact that D′ is a totally epimorphic category implies immediately that C′ is as
+> well; similarly, [in light of the various properties of the natural projection functor
 
 ★原文は `𝒟'` の側しか挙げないが、**`𝒞` の側も要る**(射は対なので、
 両成分がそれぞれ epi でなければならない)。`𝒞` は Frobenioid なので既に totally epimorphic。 -/
@@ -107,5 +110,152 @@ theorem cfp_totEpi (P : PreFrobenioid C Φ) (G : D' ⥤ D) (hD' : IsTotallyEpimo
     congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) hgh
   exact InducedCategory.hom_ext
     (CommaMorphism.ext ((cancel_epi (CfpCat.fst f)).mp e1) ((cancel_epi (CfpCat.snd f)).mp e2))
+
+/-! ## ★`𝒞' → 𝔽_{Φ'}`
+
+★**書き方の注意(手順4として記録)**: `P.Base f` の型は
+`(P.toElem.obj A).base ⟶ (P.toElem.obj B).base`、`Comma` の `hom` の型は
+`P.proj.obj A ⟶ G.obj A'` である。この2つは**定義的には等しいが字面が違う**ので、
+`rw` が通らない。★**`P.proj.map` の綴りに統一する**のが正しい対処である
+(`Istr` の `rw` 問題と同じ形の、しかし別の原因の問題)。 -/
+
+/-- ★`𝒞'` の射の `𝒟'` 成分と `𝒞` 成分を結ぶ四角形(`Comma` の `w`)。 -/
+theorem cfp_square {P : PreFrobenioid C Φ} {G : D' ⥤ D} {X Y : CfpCat P G} (f : X ⟶ Y) :
+    P.proj.map (CfpCat.fst f) ≫ Y.obj.hom = X.obj.hom ≫ G.map (CfpCat.snd f) :=
+  f.hom.w
+
+/-- ★上の四角形を「`α⁻¹` を通す」形に直したもの。 -/
+theorem cfp_square_inv {P : PreFrobenioid C Φ} {G : D' ⥤ D} {X Y : CfpCat P G} (f : X ⟶ Y)
+    [IsIso X.obj.hom] [IsIso Y.obj.hom] :
+    inv X.obj.hom ≫ P.proj.map (CfpCat.fst f) = G.map (CfpCat.snd f) ≫ inv Y.obj.hom := by
+  rw [IsIso.eq_comp_inv, Category.assoc, cfp_square f, ← Category.assoc, IsIso.inv_hom_id,
+    Category.id_comp]
+
+/-- ★同じものを `P.Base` の綴りで言い換えたもの(型は定義的に等しい)。 -/
+theorem cfp_square_inv' {P : PreFrobenioid C Φ} {G : D' ⥤ D} {X Y : CfpCat P G} (f : X ⟶ Y)
+    [IsIso X.obj.hom] [IsIso Y.obj.hom] :
+    inv X.obj.hom ≫ P.Base (CfpCat.fst f) = G.map (CfpCat.snd f) ≫ inv Y.obj.hom :=
+  cfp_square_inv f
+
+/-- ★**`𝒞' → 𝔽_{Φ'}`** —— `𝒞'` の pre-Frobenioid 構造の本体。
+
+対象 `(A, A', α : Base A ≅ G A')` を `A' ∈ 𝒟'` に、
+射 `(γ, γ')` を `⟨γ', Φ(α⁻¹)(Div γ), deg_Fr γ⟩` に送る。
+
+★`Div` の付け替え `Φ(α⁻¹)` が要るのは、`Div γ ∈ Φ(Base A)` であって
+`Φ'(A') = Φ(G A')` ではないからである。**この付け替えが関手性の中身**であり、
+それを支えるのが `cfp_square_inv` である。 -/
+noncomputable def cfpToElem (P : PreFrobenioid C Φ) (G : D' ⥤ D)
+    (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α)) :
+    CfpCat P G ⥤ ElemFrobCat (Φ.restrict G hG) where
+  obj X := ⟨X.obj.right⟩
+  map {X Y} f :=
+    haveI : IsIso X.obj.hom := X.property
+    { base := CfpCat.snd f
+      div := Φ.map (inv X.obj.hom) (P.Div (CfpCat.fst f))
+      deg := P.degFr (CfpCat.fst f) }
+  map_id X := by
+    haveI hX : IsIso X.obj.hom := X.property
+    have hid := P.toElem.map_id X.obj.left
+    have hdiv0 : P.Div (𝟙 X.obj.left) = 0 := congrArg ElemFrobCat.Hom.div hid
+    have hdeg0 : P.degFr (𝟙 X.obj.left) = 1 := congrArg ElemFrobCat.Hom.deg hid
+    apply ElemFrobCat.Hom.ext
+    · rfl
+    · show Φ.map (inv X.obj.hom) (P.Div (𝟙 X.obj.left)) = 0
+      rw [hdiv0]
+      exact map_zero _
+    · exact hdeg0
+  map_comp {X Y Z} f g := by
+    haveI hX : IsIso X.obj.hom := X.property
+    haveI hY : IsIso Y.obj.hom := Y.property
+    have hcomp := P.toElem.map_comp (CfpCat.fst f) (CfpCat.fst g)
+    have hdiv : P.Div (CfpCat.fst f ≫ CfpCat.fst g)
+        = Φ.map (P.Base (CfpCat.fst f)) (P.Div (CfpCat.fst g))
+          + (P.degFr (CfpCat.fst g) : ℕ) • P.Div (CfpCat.fst f) :=
+      congrArg ElemFrobCat.Hom.div hcomp
+    have hdeg : P.degFr (CfpCat.fst f ≫ CfpCat.fst g)
+        = P.degFr (CfpCat.fst g) * P.degFr (CfpCat.fst f) :=
+      congrArg ElemFrobCat.Hom.deg hcomp
+    apply ElemFrobCat.Hom.ext
+    · rfl
+    · show Φ.map (inv X.obj.hom) (P.Div (CfpCat.fst f ≫ CfpCat.fst g))
+        = Φ.map (G.map (CfpCat.snd f)) (Φ.map (inv Y.obj.hom) (P.Div (CfpCat.fst g)))
+          + (P.degFr (CfpCat.fst g) : ℕ) • Φ.map (inv X.obj.hom) (P.Div (CfpCat.fst f))
+      -- ★`rw` は使わず**項で繋ぐ**。`P.proj.obj A` と `(P.toElem.obj A).base` は
+      -- 定義的に等しいだけで字面が違うので、`rw` の照合が通らない。
+      refine Eq.trans (congrArg (Φ.map (inv X.obj.hom)) hdiv) ?_
+      refine Eq.trans ((Φ.map (inv X.obj.hom)).map_add _ _) ?_
+      refine congrArg₂ (· + ·) ?_ ?_
+      · exact (((Φ.map_comp (P.Base (CfpCat.fst f)) (@inv _ _ _ _ X.obj.hom hX)
+            (P.Div (CfpCat.fst g))).symm.trans
+          (congrArg (fun t => Φ.map t (P.Div (CfpCat.fst g))) (cfp_square_inv' f))).trans
+          (Φ.map_comp (@inv _ _ _ _ Y.obj.hom hY) (G.map (CfpCat.snd f))
+            (P.Div (CfpCat.fst g))))
+      · exact (Φ.map (inv X.obj.hom)).map_nsmul _ _
+    · exact hdeg
+
+/-- ★★**`𝒞' = 𝒞 ×_𝒟 𝒟'` は pre-Frobenioid**。
+
+原文 (FrdI p.28):
+> Frobenioid. Now assertion (vi) follows immediately from the definitions; one checks
+-/
+noncomputable def cfpPreFrobenioid (P : PreFrobenioid C Φ) (G : D' ⥤ D)
+    (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α))
+    (hD' : IsTotallyEpimorphic D') : PreFrobenioid (CfpCat P G) (Φ.restrict G hG) where
+  toElem := cfpToElem P G hG
+  divisorial A := P.divisorial (G.obj A)
+  totEpiC := cfp_totEpi P G hD'
+  totEpiD := hD'
+
+/-! ## ★辞書 —— `𝒞'` の `Base` / `Div` / `deg_Fr`
+
+★`Istr` のときの `istr_compat_*` に当たるもの。ただし **`Div` だけは `rfl` ではない**
+(`Φ(α⁻¹)` の付け替えが挟まる)。そこが `Istr`(充満部分圏)との違いである。 -/
+
+section Dict
+
+variable (P : PreFrobenioid C Φ) (G : D' ⥤ D)
+  (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α))
+  (hD' : IsTotallyEpimorphic D')
+
+theorem cfp_compat_Base {X Y : CfpCat P G} (f : X ⟶ Y) :
+    (cfpPreFrobenioid P G hG hD').Base f = CfpCat.snd f := rfl
+
+theorem cfp_compat_degFr {X Y : CfpCat P G} (f : X ⟶ Y) :
+    (cfpPreFrobenioid P G hG hD').degFr f = P.degFr (CfpCat.fst f) := rfl
+
+theorem cfp_compat_Div {X Y : CfpCat P G} (f : X ⟶ Y) :
+    (cfpPreFrobenioid P G hG hD').Div f
+      = Φ.map (@inv _ _ _ _ X.obj.hom X.property) (P.Div (CfpCat.fst f)) := rfl
+
+/-- **(iii)** —— **Frobenius 次数**は射影で決まる。 -/
+theorem cfp_degFr_eq {X Y : CfpCat P G} (f : X ⟶ Y) :
+    (cfpPreFrobenioid P G hG hD').degFr f = P.degFr (CfpCat.fst f) := rfl
+
+/-- **(iv)** —— **base-isomorphism** は `𝒟'` 成分が同型であること。
+
+★★**これが CFP の移送を支える一点である** —— `𝒟'` 成分の情報は
+base-isomorphism の定義そのものに入っている。 -/
+theorem cfp_baseIso_iff {X Y : CfpCat P G} (f : X ⟶ Y) :
+    IsBaseIsomorphism (cfpPreFrobenioid P G hG hD') f ↔ IsIso (CfpCat.snd f) := Iff.rfl
+
+/-- **(iii)** —— **linear** は射影で決まる。 -/
+theorem cfp_linear_iff {X Y : CfpCat P G} (f : X ⟶ Y) :
+    IsLinear (cfpPreFrobenioid P G hG hD') f ↔ IsLinear P (CfpCat.fst f) := Iff.rfl
+
+/-- **(iii)** —— **isometry** は射影で決まる。
+
+★中身は「`Φ(α⁻¹)` が単射」の一点(`Definition 1.1, (ii), (a)`)。 -/
+theorem cfp_isometric_iff {X Y : CfpCat P G} (f : X ⟶ Y) :
+    IsIsometric (cfpPreFrobenioid P G hG hD') f ↔ IsIsometric P (CfpCat.fst f) := by
+  constructor
+  · intro h
+    exact Φ.map_injective (@inv _ _ _ _ X.obj.hom X.property) (h.trans (map_zero _).symm)
+  · intro h
+    show Φ.map (@inv _ _ _ _ X.obj.hom X.property) (P.Div (CfpCat.fst f)) = 0
+    rw [show P.Div (CfpCat.fst f) = 0 from h]
+    exact map_zero _
+
+end Dict
 
 end ABC3.Found.FrdI
