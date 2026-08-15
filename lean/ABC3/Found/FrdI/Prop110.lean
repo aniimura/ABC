@@ -1644,4 +1644,57 @@ theorem prop_1_10_iii_otri_upToUnit (F : FrobenioidCore P) {A : C}
 ★**原典が序文で「non-commutative」と宣言している当のものに触れている。**
 -/
 
+/-! ### ★★選択肢 (a) を試した —— `𝒪^▷(A)` は**単元を法として**可換
+
+前段で 3 通りの「まだ試していない」を挙げた。★**(a) を試した。**
+
+★**結果**: `𝒪^▷(A)` は**単元を法として可換**である。**完全な可換性は出ない。**
+
+★**証明**: `α, β ∈ 𝒪^▷(A)` に対し `α ≫ β` と `β ≫ α` は
+- **base-equivalent**: どちらも `Base = 𝟙`
+- **metrically equivalent**: `Div_comp` で
+  `Div (α ≫ β) = Φ.map 𝟙 (Div β) + 1 • Div α = Div β + Div α`、
+  `Div (β ≫ α) = Div α + Div β`。★**`Φ(A)` が可換なので一致する。**
+
+したがって `faithfulUpToUnits` から ★**`α ≫ β = (β ≫ α) ≫ u`(`u ∈ 𝒪^×(A)`)**。
+
+★★**これは「試して、部分的に出た」である**(3 分類の第 2 カテゴリへ移った)。
+★**単元の吸収に必要な完全な可換性は、ここからは出ない。**
+
+★★**測定: 可換性の破れは `Φ(A)` ではなく `𝒪^×(A)` に局在している。**
+`Div` は可換に振る舞い、ずれはすべて**単元**に吸い込まれる。
+★**原典が序文で「non-commutative」と言うのは半直積の `ℕ≥1` 側の話だが、
+`𝒪^▷(A)` の非可換性は `𝒪^×(A)` に由来する** —— **別の出どころ**である。
+-/
+
+include P in
+/-- ★★**`𝒪^▷(A)` は単元を法として可換**。
+
+★`Div` は可換に振る舞う(`Φ(A)` が可換だから)ので、
+ずれはすべて `faithfulUpToUnits` の単元に吸い込まれる。 -/
+theorem otri_comm_upToUnit (F : FrobenioidCore P) {A : C}
+    (hiso : ∀ X : C, IsIsotropic P X) (α β : OTri P A) :
+    ∃ u : End A, u ∈ OTimes P A ∧
+      ((α : End A) ≫ (β : End A)) = ((β : End A) ≫ (α : End A)) ≫ (u : A ⟶ A) := by
+  have hpre : ∀ γ : OTri P A, IsPreStep P (γ : End A) := by
+    intro γ
+    refine ⟨γ.2.2, ?_⟩
+    show IsIso (P.Base (γ : End A))
+    rw [show P.Base (γ : End A) = P.Base (𝟙 A) from γ.2.1, P.Base_id]
+    infer_instance
+  have hcoa : ∀ f : A ⟶ A, IsCoAngular P f := fun f => prop_1_4_i P f (fun X _ => hiso X)
+  have hbase : ∀ γ : OTri P A, P.Base (γ : End A) = 𝟙 _ := by
+    intro γ
+    rw [show P.Base (γ : End A) = P.Base (𝟙 A) from γ.2.1, P.Base_id]
+  -- `Div` が一致する
+  have hd : P.Div ((α : End A) ≫ (β : End A)) = P.Div ((β : End A) ≫ (α : End A)) := by
+    rw [P.Div_comp, P.Div_comp, hbase α, hbase β, Φ.map_id, Φ.map_id,
+      show P.degFr (β : End A) = 1 from β.2.2, show P.degFr (α : End A) = 1 from α.2.2]
+    simp [add_comm]
+  -- base が一致する
+  have hb : P.Base ((α : End A) ≫ (β : End A)) = P.Base ((β : End A) ≫ (α : End A)) := by
+    rw [P.Base_comp, P.Base_comp, hbase α, hbase β]
+  exact F.faithfulUpToUnits _ _ hb hd (hcoa _)
+    (IsPreStep.comp P (hpre α) (hpre β)) (hcoa _) (IsPreStep.comp P (hpre β) (hpre α))
+
 end ABC3.Found.FrdI
