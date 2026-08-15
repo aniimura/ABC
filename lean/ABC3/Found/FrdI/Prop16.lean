@@ -313,6 +313,65 @@ theorem cfp_isPullBack_of {X Y : CfpCat P G} (φ : X ⟶ Y)
     refine ⟨InducedCategory.homMk ⟨f₁, hh, hw⟩, Subtype.ext (Prod.ext ?_ rfl)⟩
     exact InducedCategory.hom_ext (CommaMorphism.ext h1 hcond'.symm)
 
+/-- ★`𝒞'` の射は、両成分が同型なら同型。 -/
+theorem cfp_isIso_of {X Y : CfpCat P G} (f : X ⟶ Y) (h1 : IsIso (CfpCat.fst f))
+    (h2 : IsIso (CfpCat.snd f)) : IsIso f := by
+  haveI hX : IsIso X.obj.hom := X.property
+  haveI hY : IsIso Y.obj.hom := Y.property
+  haveI := h1
+  haveI := h2
+  have hw : P.proj.map (inv (CfpCat.fst f)) ≫ X.obj.hom
+      = Y.obj.hom ≫ G.map (inv (CfpCat.snd f)) := by
+    rw [P.proj.map_inv, G.map_inv, IsIso.inv_comp_eq, ← Category.assoc, IsIso.eq_comp_inv]
+    exact (cfp_square f).symm
+  refine ⟨InducedCategory.homMk ⟨inv (CfpCat.fst f), inv (CfpCat.snd f), hw⟩, ?_, ?_⟩
+  · exact InducedCategory.hom_ext (CommaMorphism.ext (IsIso.hom_inv_id _) (IsIso.hom_inv_id _))
+  · exact InducedCategory.hom_ext (CommaMorphism.ext (IsIso.inv_hom_id _) (IsIso.inv_hom_id _))
+
+/-- ★`𝒞'` の base-isomorphism は `𝒞` の base-isomorphism。
+
+★`cfp_base_fst` により `𝒞` 成分の底射は同型3つの合成になる。 -/
+theorem cfp_baseIso_fst {X Y : CfpCat P G} (f : X ⟶ Y)
+    (h : IsBaseIsomorphism (cfpPreFrobenioid P G hG hD') f) :
+    IsBaseIsomorphism P (CfpCat.fst f) := by
+  haveI hX : IsIso X.obj.hom := X.property
+  haveI hY : IsIso Y.obj.hom := Y.property
+  haveI : IsIso (CfpCat.snd f) := h
+  show IsIso (P.proj.map (CfpCat.fst f))
+  rw [cfp_base_fst P G f]
+  infer_instance
+
+/-- **(iii)** —— **co-angular** は `𝒞` から `𝒞'` へ降りる(★構成の向き)。 -/
+theorem cfp_coAngular_of {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (h : IsCoAngular P (CfpCat.fst φ)) :
+    IsCoAngular (cfpPreFrobenioid P G hG hD') φ := by
+  intro Z W γ β α hfac hαl hβi hβs hdisj
+  have hfac' : CfpCat.fst φ = CfpCat.fst γ ≫ CfpCat.fst β ≫ CfpCat.fst α :=
+    congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hfac
+  have hβsC : IsPreStep P (CfpCat.fst β) :=
+    ⟨hβs.1, cfp_baseIso_fst P G hG hD' β hβs.2⟩
+  have hdisjC : IsBaseIsomorphism P (CfpCat.fst α) ∨ IsBaseIsomorphism P (CfpCat.fst γ) :=
+    hdisj.imp (cfp_baseIso_fst P G hG hD' α) (cfp_baseIso_fst P G hG hD' γ)
+  have := h _ _ (CfpCat.fst γ) (CfpCat.fst β) (CfpCat.fst α) hfac' hαl
+    ((cfp_isometric_iff P G hG hD' β).mp hβi) hβsC hdisjC
+  exact cfp_isIso_of P G β this hβs.2
+
+/-- ★`𝒞` の対象を、底が `G` の像と同型であるときに `𝒞'` へ持ち上げる。 -/
+def cfpMk (A : C) (W : D') (e : P.proj.obj A ⟶ G.obj W) [IsIso e] : CfpCat P G :=
+  ⟨⟨A, W, e⟩, inferInstanceAs (IsIso e)⟩
+
+/-- ★`𝒞'` の射を両成分と四角形から作る。 -/
+def cfpHom {X Y : CfpCat P G} (u : X.obj.left ⟶ Y.obj.left) (v : X.obj.right ⟶ Y.obj.right)
+    (w : P.proj.map u ≫ Y.obj.hom = X.obj.hom ≫ G.map v) : X ⟶ Y :=
+  InducedCategory.homMk ⟨u, v, w⟩
+
+/-- ★`𝒞'` の同型の `𝒞` 成分は同型。 -/
+theorem cfp_isIso_fst {X Y : CfpCat P G} (f : X ⟶ Y) (h : IsIso f) : IsIso (CfpCat.fst f) := by
+  obtain ⟨g, h1, h2⟩ := h.out
+  refine ⟨CfpCat.fst g, ?_, ?_⟩
+  · exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) h1
+  · exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) h2
+
 end Dict
 
 end ABC3.Found.FrdI
