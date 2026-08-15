@@ -1935,4 +1935,178 @@ theorem prop_1_10_iii_otimes_perfect (F : FrobenioidCore P) {A : C}
   rintro γ ⟨hγm, hγp⟩
   exact huniq γ ⟨hγm.1, hγp⟩
 
+/-! ### ★(iv) の「In particular」—— 無限個の同型類
+
+原文 (FrdI p.34):
+> that arise from irreducible arrows with domain A.
+
+★**構成**: 各素数 `p` に対し `frobDegSurj` が次数 `p` の Frobenius 型射 `φ_p : A ⟶ B_p` を与え、
+(iv) によりそれは **irreducible**。
+★**異なる素数は非同型な対象を与える**: `_A𝒞` の同型 `θ : B_p ⟶ B_q`(`φ_p ≫ θ = φ_q`)が
+あれば `degFr φ_q = degFr θ * degFr φ_p = 1 * p = p`。★**`p ≠ q` に矛盾。**
+
+★**素数が無限にあることは `Nat.exists_infinite_primes`(mathlib)から。**
+★**「無限個の同型類」は「素数から同型類への単射がある」として書く** ——
+原文の "infinitely many isomorphism classes" の忠実な形である。
+-/
+
+include P in
+/-- ★**異なる次数の Frobenius 型射は `_A𝒞` で非同型**。
+
+★これが「無限個の同型類」の核心。次数が同型類の不変量になっている。 -/
+theorem frobType_not_iso_of_degFr_ne {A Bp Bq : C}
+    (φp : A ⟶ Bp) (φq : A ⟶ Bq) (hne : P.degFr φp ≠ P.degFr φq)
+    (θ : Bp ⟶ Bq) [IsIso θ] : φp ≫ θ ≠ φq := by
+  intro h
+  apply hne
+  have : P.degFr (φp ≫ θ) = P.degFr φq := by rw [h]
+  rwa [P.degFr_comp, degFr_of_isIso P θ, one_mul] at this
+
+include P in
+/-- ★★**(iv) の「In particular」** —— isotropic な `A` について、
+**各素数ごとに irreducible な射があり、異なる素数のものは非同型**。
+
+★**これが「無限個の同型類」の内容である**(素数は無限にあるので)。 -/
+theorem prop_1_10_iv_infinitely_many (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (A : C) :
+    (∀ p : ℕ+, Nat.Prime (p : ℕ) →
+       ∃ (B : C) (φ : A ⟶ B), IsIrreducibleMor φ ∧ P.degFr φ = p) ∧
+    (∀ (Bp Bq : C) (φp : A ⟶ Bp) (φq : A ⟶ Bq), P.degFr φp ≠ P.degFr φq →
+       ∀ θ : Bp ≅ Bq, φp ≫ θ.hom ≠ φq) := by
+  constructor
+  · intro p hp
+    obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A p
+    refine ⟨B, φ, ?_, hd⟩
+    exact prop_1_10_iv_mp P F hiso φ ⟨hφ, by rw [hd]; exact hp⟩
+  · intro Bp Bq φp φq hne θ
+    haveI : IsIso θ.hom := inferInstance
+    exact frobType_not_iso_of_degFr_ne P φp φq hne θ.hom
+
+/-! ### ★(vi) 後半の最終段 —— `IsFrobeniusTrivial` を同型に沿って移す
+
+★**原文(p.36)の最後の 1 文**:
+> But by Proposition 1.4, (iii), these pre-steps are isomorphisms, so A is Frobenius-trivial.
+
+★**「so A is Frobenius-trivial」の中身**は「同型に沿った移送」である。
+★**mathlib に `End` の共役の準同型が無い**ので自作する
+(`grep` で確認: `Mathlib/CategoryTheory/Endomorphism.lean` に `conj` は無い)。
+
+★**`End` の乗法が `x * y = y ≫ x`** なので、共役 `f ↦ θ⁻¹ ≫ f ≫ θ` が
+準同型であることの計算も**その向きで**行う。
+-/
+
+/-- ★**同型による `End` の共役**(`End A →* End B`)。
+
+★mathlib に無いので置いた。★`End` の乗法は `x * y = y ≫ x` である。 -/
+@[simps] def endConj {A B : C} (θ : A ≅ B) : End A →* End B where
+  toFun f := θ.inv ≫ f ≫ θ.hom
+  map_one' := by simp
+  map_mul' x y := by
+    simp only [End.mul_def]
+    simp
+
+include P in
+/-- ★★**`IsFrobeniusTrivial` は同型に沿って移る**。
+
+★原文の「so A is Frobenius-trivial」の中身。 -/
+theorem isFrobeniusTrivial_of_iso (F : FrobenioidCore P) {A B : C} (θ : A ≅ B)
+    (h : IsFrobeniusTrivial P A) : IsFrobeniusTrivial P B := by
+  obtain ⟨ζ, hd, hp⟩ := h
+  refine ⟨(endConj θ).comp ζ, ?_, ?_⟩
+  · intro n
+    show P.degFr (θ.inv ≫ (ζ n : A ⟶ A) ≫ θ.hom) = n
+    rw [P.degFr_comp, P.degFr_comp, degFr_of_isIso P θ.hom, degFr_of_isIso P θ.inv,
+      hd n, one_mul, mul_one]
+  · intro n
+    constructor
+    · show P.Base (θ.inv ≫ (ζ n : A ⟶ A) ≫ θ.hom) = P.Base (𝟙 B)
+      rw [P.Base_comp, P.Base_comp, show P.Base (ζ n : A ⟶ A) = P.Base (𝟙 A) from (hp n).1,
+        P.Base_id, Category.id_comp, ← P.Base_comp, θ.inv_hom_id, P.Base_id]
+    · exact IsFrobeniusType.comp P F (isFrobeniusType_of_isIso P θ.inv)
+        (IsFrobeniusType.comp P F (hp n).2 (isFrobeniusType_of_isIso P θ.hom))
+
+include P in
+/-- ★**group-like は base-isomorphism に沿って移る**。
+
+★`Φ.map (Base α)` は `Base α` が同型なので全単射(`Φ.map (inv (Base α))` が逆)。
+`Φ(A)` の元がすべて 0 なら `Φ(A′)` の元もすべて 0。 -/
+theorem isGroupLikeObj_of_baseIso {A A' : C} (α : A' ⟶ A) (hbi : IsBaseIsomorphism P α)
+    (hA : IsGroupLikeObj P A) : IsGroupLikeObj P A' := by
+  haveI : IsIso (P.Base α) := hbi
+  show IsGroupLike (Φ.val (P.toElem.obj A').base)
+  rw [isGroupLike_iff]
+  intro y
+  have hy : y = Φ.map (P.Base α) (Φ.map (inv (P.Base α)) y) := by
+    rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]
+  have h0 : Φ.map (inv (P.Base α)) y = 0 :=
+    eq_zero_of_isGroupLike_of_isSharp hA (P.divisorial _).2 _
+  rw [hy, h0, map_zero]
+  exact isAddUnit_zero
+
+include P in
+/-- ★★★**`Proposition 1.10, (vi)` 後半 完成** ——
+isotropic 型で group-like な対象は Frobenius-trivial。
+
+★原文(p.36)の最後の 3 文:
+「`Definition 1.3, (i), (a), (b)` から co-angular pre-step `A′ → A`、`A′ → A″`
+(`A″` は Frobenius-trivial)がある。`Proposition 1.4, (iii)` によりこれらは同型。
+よって `A` は Frobenius-trivial。」
+
+★**`A′` が group-like であること**(`isGroupLikeObj_of_baseIso`)が
+★**原文が書いていない一歩**である —— pre-step が同型であることに要る isometry は
+`A′` の group-like 性から来るのであって、`A` のそれからではない。 -/
+theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A A' A'' : C} (hA : IsGroupLikeObj P A)
+    (α : A' ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (γ : A' ⟶ A'') (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (hA'' : IsFrobeniusTrivial P A'') : IsFrobeniusTrivial P A := by
+  -- `A′` も group-like
+  have hA' : IsGroupLikeObj P A' := isGroupLikeObj_of_baseIso P α hαs.2 hA
+  -- `α`・`γ` は同型
+  haveI hαi : IsIso α := isIso_of_preStep_of_isGroupLikeObj' P F hiso hA' α hαs
+  haveI hγi : IsIso γ := isIso_of_preStep_of_isGroupLikeObj' P F hiso hA' γ hγs
+  -- `A″ ≅ A′ ≅ A`
+  exact isFrobeniusTrivial_of_iso P F ((asIso γ).symm ≪≫ asIso α) hA''
+
+/-! ## ★★★出典の紐付け(`.src`) —— `Proposition 1.10` は **21 主張すべて完成**
+
+★**`.src` は「その原典項目を完全に実装した」という主張である**(2026-08-15 に明文化した規則)。
+`Proposition 1.10` は 6 条 21 主張:
+
+| 条 | 主張 | 実装 |
+|---|---|---|
+| (i) | 10 | 一意性 / 存在(3 場合＋任意) / `degFr` / `Div` / 7 タイプ |
+| (ii) | 3 | 組み替え / `degFr` / `Div` |
+| (iii) | 3 | 像のモノイド / `𝒪^▷(A)` / `𝒪^×(A)` |
+| (iv) | 2 | iff / 無限個の同型類 |
+| (v) | 1 | iff |
+| (vi) | 2 | sub-quasi-Frobenius-trivial / group-like ⟹ Frobenius-trivial |
+
+★★**21 / 21。したがって `.src` を付ける。**
+-/
+
+def prop_1_10_i_exists.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (i)",
+    sectionId := "frdi-prop-1-10-i" }
+
+def prop_1_10_ii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (ii)",
+    sectionId := "frdi-prop-1-10-ii" }
+
+def prop_1_10_iii_perfect.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (iii)",
+    sectionId := "frdi-prop-1-10-iii" }
+
+def prop_1_10_iv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (iv)",
+    sectionId := "frdi-prop-1-10-iv" }
+
+def prop_1_10_v.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 35, item := "Proposition 1.10, (v)",
+    sectionId := "frdi-prop-1-10-v" }
+
+def prop_1_10_vi_first.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 35, item := "Proposition 1.10, (vi)",
+    sectionId := "frdi-prop-1-10-vi" }
+
 end ABC3.Found.FrdI
