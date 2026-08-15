@@ -1,4 +1,4 @@
-import ABC3.Found.FrdI.Prop17
+import ABC3.Found.FrdI.Prop19
 
 /-!
 # [FrdI] Proposition 1.10 —— Morphisms of Frobenius Type
@@ -302,6 +302,71 @@ Div(φ ≫ β)  = Φ.map (Base φ) (Div β)  + (degFr β)  • Div φ
 逆写像の構成は base-isomorphism の同型性から別に出るもので、
 **公式そのものはこの形で完結している**)。
 -/
+
+/-! ### ★(i) の存在 —— **第2の場合(`φ` が pre-step)**
+
+原文 (FrdI p.35):
+> In the case where φ is a pre-step, the existence of a pre-step φ
+
+★**原文が名指す材料**(p.35、目視): `Definition 1.3, (iv), (a)` の分解
+[cf. also `Proposition 1.4, (iv)`]、`Definition 1.3, (ii)` の本質的一意性、
+`Proposition 1.7, (i)` の co-angular の合成閉性。
+
+★★**構成(4 手)**:
+1. `B` から次数 `degFr α` の Frobenius 型射 `β` を取る
+2. `φ ≫ β` に **`F.arbFactor`** を当てて `γ ≫ β₀ ≫ α₀` を得る
+   (`γ` Frobenius 型 / `β₀` pre-step / `α₀` pull-back)
+3. ★**`α₀` は同型である** —— `φ ≫ β` は base-isomorphism(`φ` も `β` も base-iso)で、
+   `γ`・`β₀` も base-iso だから `Base α₀` は同型。
+   **底が同型な pull-back は同型**(`isIso_of_isPullBack_of_isBaseIso`、`Prop19.lean`)。
+4. 次数を数えると `degFr γ = degFr α` になるので `F.frobDegUniq` が同型 `δ` を与え、
+   ★**`φ′ := inv δ ≫ β₀ ≫ α₀`。**
+
+★★**原文が書いていないもの**: 手順 3 の「`α₀` が同型である」。
+原文は分解を持ち出すだけで、**pull-back の因子が消える理由**を書いていない。
+★我々の側では `Proposition 1.9` で作った `isIso_of_isPullBack_of_isBaseIso` が要る
+——★**`Proposition 1.10` が `Proposition 1.9` に依存する**、という依存が 1 本増えた
+(原文の引用リストには `1.9` は無い)。
+-/
+
+include P in
+/-- **(i) の存在(第2の場合: `φ` が pre-step)**。
+
+★`φ′` も pre-step として得られる。 -/
+theorem prop_1_10_i_exists_preStep (F : FrobenioidCore P) {A B A' : C}
+    (φ : A ⟶ B) (hφ : IsPreStep P φ)
+    (α : A ⟶ A') (hα : IsFrobeniusType P α) :
+    ∃ (B' : C) (β : B ⟶ B') (φ' : A' ⟶ B'),
+      IsFrobeniusType P β ∧ P.degFr β = P.degFr α ∧
+      IsPreStep P φ' ∧ φ ≫ β = α ≫ φ' := by
+  obtain ⟨B', β, hβ, hdβ⟩ := F.frobDegSurj B (P.degFr α)
+  obtain ⟨X, Y, γ, β₀, α₀, hfac, hγ, hβ₀, hα₀⟩ := F.arbFactor (φ ≫ β)
+  -- `φ ≫ β` は base-isomorphism
+  have hcomp_bi : IsBaseIsomorphism P (φ ≫ β) := isBaseIsomorphism_comp P hφ.2 hβ.2
+  -- したがって `Base α₀` は同型 ⟹ `α₀` は同型
+  have hα₀bi : IsBaseIsomorphism P α₀ := by
+    -- ★`𝒟` が totally epimorphic であることを使って、底で左から簡約する
+    have h1 : IsIso (P.Base (γ ≫ β₀ ≫ α₀)) := hfac ▸ hcomp_bi
+    rw [P.Base_comp, P.Base_comp] at h1
+    haveI := h1
+    have h2 := (isIso_of_isIso_comp P.totEpiD (P.Base γ) (P.Base β₀ ≫ P.Base α₀)).2
+    haveI := h2
+    exact (isIso_of_isIso_comp P.totEpiD (P.Base β₀) (P.Base α₀)).2
+  haveI : IsIso α₀ := isIso_of_isPullBack_of_isBaseIso P F α₀ hα₀ hα₀bi
+  -- 次数を数える(★`α₀` が同型なので次数 1、`β₀` は pre-step なので次数 1)
+  have hdγ : P.degFr γ = P.degFr α := by
+    have h : P.degFr (φ ≫ β) = P.degFr (γ ≫ β₀ ≫ α₀) := by rw [hfac]
+    rw [P.degFr_comp, P.degFr_comp, P.degFr_comp, hφ.1, hβ₀.1,
+      degFr_of_isIso P α₀, hdβ] at h
+    simpa using h.symm
+  obtain ⟨δ, hδiso, hδ⟩ := F.frobDegUniq A X A' γ α hγ hα hdγ
+  haveI : IsIso δ := hδiso
+  refine ⟨B', β, inv δ ≫ β₀ ≫ α₀, hβ, hdβ, ?_, ?_⟩
+  · exact IsPreStep.comp P (isPreStep_of_isIso P (inv δ))
+      (IsPreStep.comp P hβ₀ (isPreStep_of_isIso P α₀))
+  · rw [← hδ, Category.assoc, ← Category.assoc δ, IsIso.hom_inv_id,
+      Category.id_comp]
+    exact hfac
 
 include P in
 /-- **(i) の `Div` の公式**(`Φ.map (Base α)` を当てた形)。
