@@ -101,15 +101,28 @@ def LogShellPacketCompact.needs : List ProofObligation :=
     .implicitStep
       "★単一の log-shell のコンパクト性(p.31)から**テンソルパケット**のコンパクト性への段を写していない。有限テンソル積であることが要るが、原文はここを明示していない" 146 ]
 
-/-- **相対コンパクトな領域の正則包はコンパクト**。
+/-- **相対コンパクトな領域の正則包はコンパクト開で空でない**。
 
 原文 (IUTchIII p.127):
 > If αU (respectively, AU; A,αU) is relatively compact, then we define
 > the holomorphic hull of αU (respectively, AU; A,αU) to be the smallest subset of
--/
+
+★2026-08-15 に**強めた**。原文は正則包を `λ · 𝒪`(整数環のスカラー倍)として定義する:
+
+原文 (IUTchIII p.127):
+> the form
+
+原文 (IUTchIII p.127):
+> that contains αU (respectively, AU; A,αU). If αU (respectively, AU;
+
+非アルキメデス局所体では `𝒪` は**コンパクトかつ開**であり、`λ` の各成分は
+**非零**(原文の要求)なので `λ · 𝒪` も**コンパクトかつ開**、そして `0` を含むので
+**空でない**。対数体積の定義域が「空でないコンパクト開集合」である以上、
+原文の議論が成り立つにはこの3つが要る。 -/
 def HullCompactOfRelCompact (D : PilotObjectData) : Prop :=
   ∀ U K : Set D.Amb, @IsCompact D.Amb D.topology K → U ⊆ K →
-    @IsCompact D.Amb D.topology (D.hull U)
+    @IsCompact D.Amb D.topology (D.hull U) ∧ @IsOpen D.Amb D.topology (D.hull U) ∧
+      (D.hull U).Nonempty
 
 def HullCompactOfRelCompact.src : Source :=
   { paper := "IUTchIII", pdfPage := 127, item := "Remark 3.9.5, (i)",
@@ -117,6 +130,8 @@ def HullCompactOfRelCompact.src : Source :=
 
 def HullCompactOfRelCompact.needs : List ProofObligation :=
   [ .implicitStep
+      "★原文は正則包を `λ · 𝒪` と定義するが、それが**開**であること(= 対数体積の定義域 `𝔐(−)` に入ること)を明示していない。非アルキメデス局所体で `𝒪` が開であることを使う暗黙の段である。★これは 2026-08-15 に Track B(ℚ_p の対数体積の構成)から見つかった——対数体積は空でないコンパクト**開**集合の上でしか実数値を取らないので、正則包が開でなければ `thetaLogVol` は書けない" 127,
+    .implicitStep
       "原文は正則包を「the smallest subset of …」と**最小性**で定義する。その最小集合の**存在**を我々は写していない(`hull : Set Amb → Set Amb` という演算として受けている)" 127,
     .implicitStep
       "相対コンパクトでない枝(正則包が `I^ℚ` 全体になり対数体積が `+∞` になる場合)を写していない。Corollary 3.12 の有限性はコンパクトな枝の側だけに乗っている" 127 ]

@@ -43,8 +43,9 @@ variable {p : ℕ} [Fact p.Prime]
 
 /-- ★**`PilotObjectData.logVolCompact` の型が ℚ_p の実物で埋まる**。 -/
 noncomputable def padicLogVolCompact (p : ℕ) [Fact p.Prime] :
-    ∀ U : Set ℚ_[p], @IsCompact ℚ_[p] inferInstance U → ℝ :=
-  fun U _ => padicLogVol U
+    ∀ U : Set ℚ_[p], @IsCompact ℚ_[p] inferInstance U →
+      @IsOpen ℚ_[p] inferInstance U → U.Nonempty → ℝ :=
+  fun U _ _ _ => padicLogVol U
 
 /-- 埋めたものは**原文の正規化**を満たす —— `𝒪_k` の対数体積は 0
 (体積が 1 だから)。
@@ -53,28 +54,38 @@ noncomputable def padicLogVolCompact (p : ℕ) [Fact p.Prime] :
 > ization, i.e., μk(Ok) = 1. We shall refer to μk(−) as the volume on k.
 -/
 theorem padicLogVolCompact_integerBall :
-    padicLogVolCompact p (closedBall (0 : ℚ_[p]) 1) (isCompact_closedBall 0 1) = 0 :=
+    padicLogVolCompact p (closedBall (0 : ℚ_[p]) 1) (isCompact_closedBall 0 1)
+      (IsUltrametricDist.isOpen_closedBall _ one_ne_zero) ⟨0, mem_closedBall_self zero_le_one⟩
+      = 0 :=
   padicLogVol_integerBall
 
 /-- ★**埋めたものは非退化である** —— 単位球と `1/p` 球で値が異なる。
 
 これが無ければ「実物で埋めた」とは言えない(`fun _ _ => 0` でも型は付く)。 -/
-theorem padicLogVolCompact_nondegenerate :
-    padicLogVolCompact p (closedBall (0 : ℚ_[p]) ((p : ℝ)⁻¹))
-        (isCompact_closedBall 0 _)
-      ≠ padicLogVolCompact p (closedBall (0 : ℚ_[p]) 1) (isCompact_closedBall 0 1) :=
+theorem padicLogVolCompact_nondegenerate
+    (ho₁ : IsOpen (closedBall (0 : ℚ_[p]) ((p : ℝ)⁻¹))) (hn₁ : (closedBall (0 : ℚ_[p]) ((p : ℝ)⁻¹)).Nonempty)
+    (ho₂ : IsOpen (closedBall (0 : ℚ_[p]) 1)) (hn₂ : (closedBall (0 : ℚ_[p]) 1).Nonempty) :
+    padicLogVolCompact p (closedBall (0 : ℚ_[p]) ((p : ℝ)⁻¹)) (isCompact_closedBall 0 _) ho₁ hn₁
+      ≠ padicLogVolCompact p (closedBall (0 : ℚ_[p]) 1) (isCompact_closedBall 0 1) ho₂ hn₂ :=
   padicLogVol_smallBall_ne_integerBall
 
-/-- ★★**`Interface` のフィールドは原文より広い定義域を要求している**。
+/-- ★★**訂正の記録(2026-08-15)**。
 
-`∅` はコンパクトだが開ではなく、体積 0、対数体積は本来 `−∞`。
-Lean の `Real.log 0` は 0 なので型は付くが、それは原文の値ではない
-——原文の `μ_k` は `ℝ_{>0}` に値を取る。
+以前この位置には `padicLogVolCompact_empty_is_junk` があった——
+`Interface` のフィールドが `∀ U, IsCompact U → ℝ` だった頃、`∅` に対して
+`Real.log 0 = 0` というゴミ値を返すことを証明したものである。
 
-**これは「型が付くが何も言っていない」の実例であり、我々の `Interface` の側の欠陥である。** -/
-theorem padicLogVolCompact_empty_is_junk :
-    padicLogVolCompact p (∅ : Set ℚ_[p]) isCompact_empty = 0 := by
-  simp [padicLogVolCompact, padicLogVol]
+**その欠陥は直した**(`Interface/IUTchIII/PilotObjects.lean` の `logVolCompact` の
+定義域を「空でないコンパクト開」に狭めた)ので、`∅` はもう定義域に入らず、
+あの定理は**述べられなくなった**。代わりに置くのが下の
+`padicLogVol_no_junk_on_domain` である——**新しい定義域ではゴミ値が出ない**。
+
+★元の欠陥は Track B(ℚ_p の対数体積の構成)から見つかった。posit のままなら
+見つからなかった。 -/
+theorem padicLogVol_no_junk_on_domain {U : Set ℚ_[p]}
+    (hc : IsCompact U) (ho : IsOpen U) (hne : U.Nonempty) :
+    Real.exp (padicLogVol U) = (padicVolume p U).toReal :=
+  Real.exp_log (padicLogVol_wellDefined_of_isCompact_isOpen hc ho hne)
 
 /-- 原文の定義域(コンパクト**開**かつ空でない)では、体積は正で有限であり、
 対数体積は本物の実数である。 -/

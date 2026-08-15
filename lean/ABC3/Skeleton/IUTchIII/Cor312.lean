@@ -134,7 +134,7 @@ theorem cor_3_12 (D : PilotObjectData)
   have hcpt := hHull _ _ hPacket (Set.sUnion_subset hOb1)
   refine ⟨?_, ?_⟩
   · -- 有限性は **導出**: `logVol` はコンパクト領域上で `logVolCompact` (ℝ 値) に一致する
-    rw [thetaLogVol, D.logVol_eq_of_isCompact _ hcpt]
+    rw [thetaLogVol, D.logVol_eq_of_isCompactOpen _ hcpt.1 hcpt.2.1 hcpt.2.2]
     exact WithTop.coe_ne_top
   have hm : (-D.qAbs) ∈ D.outputLogVolumes := hMem
   have hEq : D.outputLogVolumes

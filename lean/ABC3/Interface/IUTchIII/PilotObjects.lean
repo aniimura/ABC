@@ -82,7 +82,38 @@ open ABC3.Meta
 
 像を `Set Amb`(部分集合)としたのは、原文の証明(物理 p.174)が
 `n,◦U_{j,vQ} ⊆ n,◦U^Q_{j,vQ}` と部分集合を扱い、
-「the **union** of the possible images」が集合の和として書かれているため。 -/
+「the **union** of the possible images」が集合の和として書かれているため。
+
+## ★★2026-08-15 の通し監査 —— 「実装側への要求の強化」は他にもあるか
+
+`logVolCompact` の欠陥(定義域が原文より広い)は A6 の**鏡像**という新しい失敗形なので、
+他のフィールドを通しで見た。**結果: 同種のものが 3 件あった。**
+
+1. **`logVol : Set Amb → WithTop ℝ`** —— ★**値域に `−∞` が無い**。
+   原文は正則包の定義で「log-volume … is **finite** [i.e., **> −∞**]」と書いており
+   (物理 p.127、目視確認済み)、`−∞` を取りうることを前提にしている。
+   `WithTop ℝ = ℝ ∪ {+∞}` には `−∞` が無いので、測度 0 の領域の対数体積を表せない。
+   **直していない**。忠実にするなら `EReal` だが、Corollary 3.12 の結論が
+   `−|log(Θ)| ∈ ℝ` と `+∞` の場合分けで書かれているため、変更の影響が広い。
+
+2. **`hull : Set Amb → Set Amb`** —— ★**定義域が原文より広い**。
+   原文 (IUTchIII p.127) は正則包を、
+   「a subset that **contains a relatively compact subset whose log-volume … is finite**」
+   に対してのみ定義する。我々は**すべての部分集合**に対して値を要求している。
+   **直していない**(この条件を型に入れると `⋃₀ possibleThetaImages` 側にも
+   同じ条件が要り、`Interface` に posit が増える)。
+
+3. **`qImage : Set Amb` + `qLogVol_eq`** —— ★**潜在的**。
+   `qLogVol_eq : logVol qImage = ((-qAbs : ℝ) : WithTop ℝ)` は `qImage` の対数体積が
+   **実数**であることを主張しており、これは暗に `qImage ∈ 𝔐(−)`
+   (空でないコンパクト開)を要求している。しかし `qImage` にはその条件が付いていない。
+   **直していない**(条件を付けると posit が1つ増えるため)。
+
+★**この3件はいずれも「型は付くが原文と違う」の同じ顔**である。1 は値域が狭すぎ、
+2・3 は定義域が広すぎる。**どれも Track B を積まない限り見つからなかった**——
+実物を作ろうとして初めて「その値を返せない」ことが分かる。
+ -/
+
 structure PilotObjectData where
   /-- 多輻的表現の台。パイロット対象の像が住む場所。
 
@@ -101,11 +132,36 @@ structure PilotObjectData where
 
   (アルキメデス側は「compact closures of nonempty open subsets」。値域はどちらも `ℝ`。)
 
+  ## ★★2026-08-15: 定義域を訂正した(Track B が見つけた欠陥)
+
+  以前このフィールドは `∀ U, IsCompact U → ℝ` だった。**それは原文より広い**。
+
+  原文 (IUTchIII p.115):
+  > — where we write “M[frak](−)” for the set of nonempty compact open subsets of
+
+  原文 (AbsTopIII p.137, Proposition 5.7, (i)):
+  > for the maximal ideal of Ok and M(k) for the set of compact open subsets
+
+  すなわち原文の `μ_k` は **空でないコンパクト開**集合の上でしか定義されておらず、
+  値域は**正の実数**である。コンパクトだが開でない集合(例: `∅`)は体積 0 で、
+  対数体積は本来 `−∞` になる。Lean の `Real.log 0` は 0(ゴミ値)なので型は付くが、
+  それは原文の値ではない——`Check/IUTchIII/LogVolumeFillsInterface.lean` で
+  実際にゴミ値になることを証明したうえで、ここを直した。
+
+  ★これは `tools/check.mjs` 冒頭 A6(仮説の強化)の**鏡像**である。A6 は
+  「原文より強い仮説を `Interface` に置く」を見るが、こちらは
+  **「原文より強い要求を実装側に課す」**。どちらも「型は付くが原文と違う」を作る。
+
+  ★★**この欠陥は Track B を積んで初めて見つかった。** ℚ_p の対数体積を実際に
+  構成しようとしたときに、`∅` に実数を返せないことが分かった。
+  **posit のままなら見つからなかった。**
+
   ★2026-08-14: 以前は `logVol_ne_top_of_isCompact` という**posit**でこれを表していたが、
   それは仮定ではなく**定義域と値域**である。ここで型に写したので、
   「コンパクトなら `+∞` でない」は `Skeleton` 側の**定理**になった
   (`Skeleton.IUTchIII.logVol_ne_top_of_isCompact`)。 -/
-  logVolCompact : ∀ U : Set Amb, @IsCompact Amb topology U → ℝ
+  logVolCompact : ∀ U : Set Amb, @IsCompact Amb topology U → @IsOpen Amb topology U →
+    U.Nonempty → ℝ
   /-- **手続き正規化モノ解析的対数体積**。Θ 側・q 側の**両方**をこれで測る
   (同じ多輻的表現の中で比較するのだから、`logVol` は1つでなければならない)。
 
@@ -240,8 +296,9 @@ structure PilotObjectData where
   (Remark 3.9.5, (i) は「相対コンパクトでなければ正則包は `I^ℚ` 全体」と述べ、
   Remark 3.9.7, (ii) は相対コンパクト側の拡張が `−∞` を許すと述べる。
   我々はどちらも写していない)。 -/
-  logVol_eq_of_isCompact : ∀ (U : Set Amb) (h : @IsCompact Amb topology U),
-    logVol U = ((logVolCompact U h : ℝ) : WithTop ℝ)
+  logVol_eq_of_isCompactOpen : ∀ (U : Set Amb) (hc : @IsCompact Amb topology U)
+    (ho : @IsOpen Amb topology U) (hne : U.Nonempty),
+    logVol U = ((logVolCompact U hc ho hne : ℝ) : WithTop ℝ)
 
 /-- Track B は何を作らねばならないか。
 

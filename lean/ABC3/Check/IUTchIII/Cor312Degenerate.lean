@@ -64,14 +64,14 @@ variable {A : Type} (lv : Set A → WithTop ℝ) (S : Set A) (a : ℝ)
 台 `A`・対数体積 `lv`・像 `S`・`a = |log(q)|` は**任意**でよい。 -/
 noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
     PilotObjectData where
   Amb := A
   topology := τ
-  logVolCompact := fun U h => (lv U).untop (hfin U h)
+  logVolCompact := fun U hc _ _ => (lv U).untop (hfin U hc)
   logVol := lv
-  hull := id
+  hull := fun _ => S
   possibleThetaImages := {S}
   qImage := S
   qAbs := a
@@ -80,7 +80,7 @@ noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
   outputLogVolumes := {x : ℝ | (x : WithTop ℝ) ≤ lv S}
   claimsMovedToSkeleton := trivial
   logShellPacket := S
-  logVol_eq_of_isCompact := fun U h => (WithTop.coe_untop _ (hfin U h)).symm
+  logVol_eq_of_isCompactOpen := fun U hc _ _ => (WithTop.coe_untop _ (hfin U hc)).symm
 
 /-! ### ★2026-08-15: `Interface` から出した5つの主張を、退化 witness は**全部満たす**
 
@@ -90,47 +90,47 @@ noncomputable def trivialised (τ : TopologicalSpace A) (ha : 0 < a)
 
 theorem trivialised_PossibleImagesContained (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    PossibleImagesContained (trivialised lv S a τ ha h hS hsub hfin) := by
+    PossibleImagesContained (trivialised lv S a τ ha h hS hSopen hSne hfin) := by
   intro U hU
   have hUS : U = S := hU
   exact hUS.subset
 
 theorem trivialised_LogShellPacketCompact (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    LogShellPacketCompact (trivialised lv S a τ ha h hS hsub hfin) := hS
+    LogShellPacketCompact (trivialised lv S a τ ha h hS hSopen hSne hfin) := hS
 
 theorem trivialised_HullCompactOfRelCompact (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    HullCompactOfRelCompact (trivialised lv S a τ ha h hS hsub hfin) :=
-  fun U K hK hUK => hsub U K hK hUK
+    HullCompactOfRelCompact (trivialised lv S a τ ha h hS hSopen hSne hfin) :=
+  fun _ _ _ _ => ⟨hS, hSopen, hSne⟩
 
 theorem trivialised_OutputLogVolumesEq (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    OutputLogVolumesEq (trivialised lv S a τ ha h hS hsub hfin) := by
+    OutputLogVolumesEq (trivialised lv S a τ ha h hS hSopen hSne hfin) := by
   show {x : ℝ | (x : WithTop ℝ) ≤ lv S} = _
   simp [trivialised]
 
 theorem trivialised_QLogVolMem (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    QLogVolMem (trivialised lv S a τ ha h hS hsub hfin) :=
+    QLogVolMem (trivialised lv S a τ ha h hS hSopen hSne hfin) :=
   le_of_eq h.symm
 
 /-- ★**退化の核心**: 自明化すると Θ 側と q 側は**同じ値**になる。 -/
 theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) = qLogVol (trivialised lv S a τ ha h hS hsub hfin) := by
+    thetaLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) = qLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) := by
   simp [thetaLogVol, qLogVol, trivialised]
 
 /-- ★**Corollary 3.12 の結論が、残りのデータが何であっても成り立つ**。
@@ -139,12 +139,12 @@ theorem trivialised_thetaLogVol_eq_qLogVol (τ : TopologicalSpace A) (ha : 0 < a
 `cor_3_12` は**内容を持たない**。 -/
 theorem trivialised_satisfies_cor_3_12 (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
     (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) :
-    thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) ≠ ⊤ ∧
-      qLogVol (trivialised lv S a τ ha h hS hsub hfin) ≤ thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) := by
-  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin).symm⟩
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin, qLogVol]
+    thetaLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) ≠ ⊤ ∧
+      qLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) ≤ thetaLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) := by
+  refine ⟨?_, le_of_eq (trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hSopen hSne hfin).symm⟩
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hSopen hSne hfin, qLogVol]
   show lv S ≠ ⊤
   rw [h]
   exact WithTop.coe_ne_top
@@ -153,10 +153,10 @@ theorem trivialised_satisfies_cor_3_12 (τ : TopologicalSpace A) (ha : 0 < a)
 すなわち退化した witness は、**abc へ効く形の主張も**空虚に満たす。 -/
 theorem trivialised_satisfies_CTheta (τ : TopologicalSpace A) (ha : 0 < a)
     (h : lv S = ((-a : ℝ) : WithTop ℝ)) (hS : @IsCompact A τ S)
-    (hsub : ∀ U K : Set A, @IsCompact A τ K → U ⊆ K → @IsCompact A τ U)
-    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) (C : ℝ) (hC : thetaLogVol (trivialised lv S a τ ha h hS hsub hfin) ≤ ((C * a : ℝ) : WithTop ℝ)) :
+    (hSopen : @IsOpen A τ S) (hSne : S.Nonempty)
+    (hfin : ∀ U : Set A, @IsCompact A τ U → lv U ≠ ⊤) (C : ℝ) (hC : thetaLogVol (trivialised lv S a τ ha h hS hSopen hSne hfin) ≤ ((C * a : ℝ) : WithTop ℝ)) :
     -1 ≤ C := by
-  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hsub hfin, qLogVol] at hC
+  rw [trivialised_thetaLogVol_eq_qLogVol lv S a τ ha h hS hSopen hSne hfin, qLogVol] at hC
   show (-1 : ℝ) ≤ C
   have h4 : -a ≤ C * a := by
     have : ((-a : ℝ) : WithTop ℝ) ≤ ((C * a : ℝ) : WithTop ℝ) := by
@@ -331,7 +331,7 @@ noncomputable def bareData (imgs : Set (Set ℝ)) (packet : Set ℝ)
     (hl : Set ℝ → Set ℝ) : PilotObjectData where
   Amb := ℝ
   topology := inferInstance
-  logVolCompact := fun _ _ => -1
+  logVolCompact := fun _ _ _ _ => -1
   logVol := fun _ => ((-1 : ℝ) : WithTop ℝ)
   hull := hl
   possibleThetaImages := imgs
@@ -342,7 +342,7 @@ noncomputable def bareData (imgs : Set (Set ℝ)) (packet : Set ℝ)
   outputLogVolumes := ∅
   claimsMovedToSkeleton := trivial
   logShellPacket := packet
-  logVol_eq_of_isCompact := fun _ _ => rfl
+  logVol_eq_of_isCompactOpen := fun _ _ _ _ => rfl
 
 /-- ★(Ob1) は反証できる —— 可能な像がパケットに含まれない `D` が作れる。 -/
 theorem ob1_is_refutable :
@@ -362,7 +362,7 @@ theorem hullCompact_is_refutable :
   intro h
   have he : @IsCompact (bareData {Set.univ} ∅ (fun _ => Set.univ)).Amb
       (bareData {Set.univ} ∅ (fun _ => Set.univ)).topology ∅ := @isCompact_empty ℝ _
-  exact (NoncompactSpace.noncompact_univ (X := ℝ)) (h ∅ ∅ he subset_rfl)
+  exact (NoncompactSpace.noncompact_univ (X := ℝ)) (h ∅ ∅ he subset_rfl).1
 
 /-- ★(xi-e) は反証できる。 -/
 theorem outputEq_is_refutable :
