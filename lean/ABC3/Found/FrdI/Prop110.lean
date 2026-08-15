@@ -582,4 +582,81 @@ theorem prop_1_10_ii_Div_formula {A X B Y : C}
     Φ.map (P.Base β') (P.Div α') = (P.degFr β : ℕ) • P.Div α :=
   prop_1_10_i_Div_formula P α β' β α' hβ'.1.2 hβ.1.2 hsq.symm
 
+/-! ## ★(iii) —— `of perfect type` と像のモノイドの perfect 性
+
+原文 (FrdI p.34):
+> (iii) Suppose that C is of perfect type. Then the monoids in the image of
+
+原文 (FrdI p.34):
+> Φ are perfect. If, moreover, C is of isotropic and Frobenius-normalized type,
+
+★**原文の証明**(p.35、目視):
+> In light of the existence of morphisms of Frobenius type of a given Frobenius degree
+> [cf. Definition 1.3, (ii)] and the equivalences of categories of Definition 1.3, (iii), (d),
+> the fact that Φ(A) is perfect follows immediately [cf. Remark 1.1.1] from the fact
+> that A is perfect [cf. Definition 1.2, (iv)].
+
+★**不足していた語彙 `of perfect type` をここで足す** ——
+`IsPerfectObj` は対象について定義済みで、「型」は**全対象がそれである**という形。
+-/
+
+/-- **[FrdI] Definition 1.3 系** `𝒞` が **of perfect type** —— 全対象が perfect。
+
+★**「型」の定義はどれもこの形**(全対象がその性質を持つ)なので、
+`IsPerfectObj` から機械的に作れる。★**原文が別に定義を置いていないのは
+そのためだが、我々は名前が要る。** -/
+def IsOfPerfectType : Prop := ∀ A : C, IsPerfectObj P A
+
+/-! ### ★★(iii) の核心 —— `n` 倍が全射になる仕組み
+
+★**原文は「follows immediately [cf. Remark 1.1.1]」と書く。**
+その `Remark 1.1.1`(＝ `Div_comp`)を四角形
+`φ₁ ≫ ψ' = ψ ≫ φ₂`(`φ₁`・`φ₂` は次数 `n` の Frobenius 型、`ψ`・`ψ'` は pre-step)
+に当てると:
+```
+Div(φ₁ ≫ ψ') = Φ.map (Base φ₁) (Div ψ') + (degFr ψ') • Div φ₁
+Div(ψ ≫ φ₂)  = Φ.map (Base ψ)  (Div φ₂) + (degFr φ₂)  • Div ψ
+```
+★**`Div φ₁ = Div φ₂ = 0`**(Frobenius 型 ⟹ isometry)なので、両辺は
+```
+Φ.map (Base φ₁) (Div ψ') = n • Div ψ
+```
+★★**これが「`n` 倍が全射」の正体である** ——
+`IsPerfectObj` の条件 (b) が `ψ` の存在を与え、その `Div ψ` が
+`Φ.map (Base φ₁) (Div ψ')` の `n` 分の 1 になる。
+
+★**(i) の `Div` の公式とまったく同じ形**である(`prop_1_10_i_Div_formula`)。
+★**同じ補題が (i)・(ii)・(iii) の 3 箇所で効いている** ——
+原文が 3 箇所で別々に「Remark 1.1.1 から」と書いているものは、**1 本の等式**だった。
+-/
+
+include P in
+/-- **(iii) の核心** —— 次数 `n` の Frobenius 型射に沿った四角形は、
+`Div` を **`n` 倍の関係**に翻訳する。
+
+★`prop_1_10_i_Div_formula` の直接の帰結。★**新しい証明は 1 行も要らない。** -/
+theorem prop_1_10_iii_div_nsmul {B₁ B₁' B₂ B₂' : C}
+    (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂') (ψ : B₁ ⟶ B₂) (ψ' : B₁' ⟶ B₂')
+    (hφ₁ : IsFrobeniusType P φ₁) (hφ₂ : IsFrobeniusType P φ₂)
+    {n : ℕ+} (hn : P.degFr φ₂ = n)
+    (hsq : φ₁ ≫ ψ' = ψ ≫ φ₂) :
+    Φ.map (P.Base ψ) (P.Div φ₂) + (n : ℕ) • P.Div ψ
+      = Φ.map (P.Base φ₁) (P.Div ψ') + (P.degFr ψ' : ℕ) • P.Div φ₁ := by
+  have h := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp, hn] at h
+  exact h.symm
+
+include P in
+/-- ★**上を、両辺の消える項を落とした形で**。★**これが原文の言う
+「Remark 1.1.1 から従う」の実体**である。 -/
+theorem prop_1_10_iii_div_nsmul' {B₁ B₁' B₂ B₂' : C}
+    (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂') (ψ : B₁ ⟶ B₂) (ψ' : B₁' ⟶ B₂')
+    (hφ₁ : IsIsometric P φ₁) (hφ₂ : IsIsometric P φ₂)
+    {n : ℕ+} (hn : P.degFr φ₂ = n)
+    (hsq : φ₁ ≫ ψ' = ψ ≫ φ₂) :
+    Φ.map (P.Base φ₁) (P.Div ψ') = (n : ℕ) • P.Div ψ := by
+  have h := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp, hn, hφ₁, hφ₂] at h
+  simpa using h
+
 end ABC3.Found.FrdI
