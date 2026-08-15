@@ -344,6 +344,10 @@ theorem base_comp {A B E : ElemFrobCat Φ} (ψ : A ⟶ B) (φ : B ⟶ E) :
 theorem div_comp {A B E : ElemFrobCat Φ} (ψ : A ⟶ B) (φ : B ⟶ E) :
     (ψ ≫ φ).div = Φ.map ψ.base φ.div + (φ.deg : ℕ) • ψ.div := rfl
 
+def div_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Remark 1.1.1",
+    sectionId := "frdi-remark-1-1-1" }
+
 /-- `deg_Fr(φ ∘ ψ) = deg_Fr(φ) · deg_Fr(ψ)`。 -/
 theorem degFr_comp {A B E : ElemFrobCat Φ} (ψ : A ⟶ B) (φ : B ⟶ E) :
     (ψ ≫ φ).deg = φ.deg * ψ.deg := rfl

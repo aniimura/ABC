@@ -496,6 +496,10 @@ theorem IsIsometric.comp {A B E : C} {ψ : A ⟶ B} {φ : B ⟶ E}
 
 /-! ### ★出典の紐付け(`.src`) -/
 
+def isDivIdentity_of_isBaseIdentity.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 24, item := "Remark 1.2.1",
+    sectionId := "frdi-remark-1-2-1" }
+
 def IsLinear.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (i) — linear",
     sectionId := "frdi-def-1-2-i" }

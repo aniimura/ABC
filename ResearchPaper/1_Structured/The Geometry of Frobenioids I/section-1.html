@@ -88,6 +88,22 @@ Lean 側は <code>Dᵒᵖ ⥤ AddCommMonCat</code> として書いた(<code>𝔐
 (<code>section-0.html#frdi-s0-connected-cat</code> 参照)。</p>
 </section>
 
+<section class="statement remark"
+         id="frdi-remark-1-1-1"
+         data-paper="FrdI"
+         data-pdf-page="21"
+         data-item="Remark 1.1.1"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">Indeed, this follows immediately from the definition of an elementary Frobenioid in</div>
+<div class="reading"><code>Base(−)</code>、<code>Div(−)</code>、<code>deg<sub>Fr</sub>(−)</code> の合成則3式:
+<code>Base(φ∘ψ) = Base(φ)∘Base(ψ)</code>、
+<code>Div(φ∘ψ) = (Base(ψ))*(Div(φ)) + deg<sub>Fr</sub>(φ)·Div(ψ)</code>、
+<code>deg<sub>Fr</sub>(φ∘ψ) = deg<sub>Fr</sub>(φ)·deg<sub>Fr</sub>(ψ)</code>。</div>
+<p class="open">★原文は「follows immediately」と書くだけで証明を置かない。
+Lean 側は <code>ElemFrobCat</code> の <code>base_comp</code> / <code>div_comp</code> / <code>degFr_comp</code>
+と、<code>PreFrobenioid</code> 側の同名3つで<strong>実際に証明した</strong>。</p>
+</section>
+
 <h2>Definition 1.2 — 射と対象の類型</h2>
 
 <section class="statement definition"
@@ -151,6 +167,22 @@ Lean 側は <code>Dᵒᵖ ⥤ AddCommMonCat</code> として書いた(<code>𝔐
 <code>Frobenius-normalized</code> / <code>Frobenius-isotropic</code>、および (v)。
 <code>Frobenius-compact</code> は <code>𝒪<sup>×</sup>(C)<sup>pf</sup></code>(perfection)を要求する。
 いずれも <code>Definition 1.3</code> は引かない。</p>
+</section>
+
+<section class="statement remark"
+         id="frdi-remark-1-2-1"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Remark 1.2.1"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">The following implications follow formally from the definitions:</div>
+<div class="reading">★<strong>含意は4本</strong>: pull-back かつ base-isomorphism ⟺ 同型 /
+<strong>base-trivial ⟹ metrically trivial</strong> / base-identity ⟹ Div-identity /
+universally Div-Frobenius-trivial ⟹ Div-Frobenius-trivial。</div>
+<p class="open">★原文は「follow formally」と書くだけで証明を置かない。Lean 側は
+<code>isPullBack_of_isIso</code> / <code>isMetricallyTrivial_of_isBaseTrivial</code> /
+<code>isDivIdentity_of_isBaseIdentity</code> / <code>isDivFrobeniusTrivial_of_univ</code> で
+<strong>4本とも証明した</strong>。★2本目は一度写し落としており、親の指摘で足した。</p>
 </section>
 
 </body>

@@ -708,6 +708,66 @@ theorem charRel_iff_eq (h : IsSharp M) {a b : M} : CharRel a b ↔ a = b := by
   · rintro rfl
     exact charRel_refl a
 
+/-! ### ★★`M` が pre-divisorial なら `M^char` は divisorial
+
+原文 (FrdI p.19):
+> M is divisorial if M is sharp [cf. §0]. [Thus, if M is pre-divisorial, then M char is
+
+★原文は「Thus」と書くだけで証明を置かない。**これは原文の主張であって我々の証明ではない**ので、
+1条ずつ測る。`sharp` は上の `isSharp_mChar` で済んだ。残りは
+**integral / saturated / of characteristic type** の3つである。 -/
+
+/-- ★**簡約性は `M^char` に遺伝する**。
+
+`[a+c] = [b+c]` は `∃u v 可逆, a+c+u = b+c+v` を意味し、`M` の簡約性で `c` を消せば
+`a+u = b+v`、すなわち `[a] = [b]`。 -/
+theorem isCancelAdd_mChar (h : IsCancelAdd M) : IsCancelAdd (MChar M) where
+  add_left_cancel x y z hyz := by
+    obtain ⟨a, rfl⟩ := toChar_surjective M x
+    obtain ⟨b, rfl⟩ := toChar_surjective M y
+    obtain ⟨c, rfl⟩ := toChar_surjective M z
+    have hyz2 : (toChar (a + b) : MChar M) = toChar (a + c) := by rw [map_add, map_add]; exact hyz
+    obtain ⟨u, v, hu, hv, huv⟩ := toChar_eq_iff.mp hyz2
+    refine toChar_eq_iff.mpr ⟨u, v, hu, hv, ?_⟩
+    have e1 : a + b + u = (b + u) + a := by simp [add_comm, add_left_comm, add_assoc]
+    have e2 : a + c + v = (c + v) + a := by simp [add_comm, add_left_comm, add_assoc]
+    rw [e1, e2] at huv
+    letI := h
+    exact add_right_cancel huv
+  add_right_cancel x y z hyz := by
+    obtain ⟨a, rfl⟩ := toChar_surjective M x
+    obtain ⟨b, rfl⟩ := toChar_surjective M y
+    obtain ⟨c, rfl⟩ := toChar_surjective M z
+    have hyz2 : (toChar (b + a) : MChar M) = toChar (c + a) := by rw [map_add, map_add]; exact hyz
+    obtain ⟨u, v, hu, hv, huv⟩ := toChar_eq_iff.mp hyz2
+    refine toChar_eq_iff.mpr ⟨u, v, hu, hv, ?_⟩
+    have e1 : b + a + u = (b + u) + a := by simp [add_comm, add_left_comm, add_assoc]
+    have e2 : c + a + v = (c + v) + a := by simp [add_comm, add_left_comm, add_assoc]
+    rw [e1, e2] at huv
+    letI := h
+    exact add_right_cancel huv
+
+/-- ★**1. `M` が integral なら `M^char` も integral**。 -/
+theorem isIntegralMonoid_mChar (h : IsIntegralMonoid M) : IsIntegralMonoid (MChar M) :=
+  letI := isCancelAdd_mChar M (isCancelAdd_of_isIntegralMonoid M h)
+  isIntegralMonoid_of_isCancelAdd (MChar M)
+
+/-- ★**3. sharp なら of characteristic type**(一般の事実)。
+
+sharp では可逆元が `0` だけなので `CharRel` は等号(`charRel_iff_eq`)、
+したがってファイバーは1点で、トーサー条件は `u = 0` の一意性に帰着する。 -/
+theorem isOfCharacteristicType_of_isSharp (h : IsSharp M) : IsOfCharacteristicType M := by
+  intro a b hab
+  rw [charRel_iff_eq M h] at hab
+  subst hab
+  refine ⟨0, ⟨isAddUnit_zero, (add_zero a).symm⟩, ?_⟩
+  rintro u ⟨hu, -⟩
+  exact h u hu
+
+/-- ★**3'. `M^char` は of characteristic type**(`isSharp_mChar` の系)。 -/
+theorem isOfCharacteristicType_mChar : IsOfCharacteristicType (MChar M) :=
+  isOfCharacteristicType_of_isSharp (MChar M) (isSharp_mChar M)
+
 /-! ### ★§0 `characteristically injective`
 
 `Definition 1.1, (ii)` (a) が引く語。**`M^char` を作ったので初めて書ける。**
@@ -871,5 +931,176 @@ theorem not_isPrimaryElt_nat_prod : ¬ IsPrimaryElt ((1, 1) : ℕ × ℕ) := by
   obtain ⟨n, -, c, hc⟩ := h (1, 0) (by simp) ⟨1, one_pos, (0, 1), by simp⟩
   have := congrArg Prod.snd hc
   simp at this
+
+variable (M)
+
+/-! #### 2. saturated —— ★簡約的なモノイドでは初等的な形に落ちる -/
+
+/-- 簡約的なモノイドでは `mk x y` が `M` の像に入る ⟺ `y ≤ x`。 -/
+theorem mem_range_toGp_iff (hc : IsCancelAdd M) (x : M) (y : (⊤ : AddSubmonoid M)) :
+    AddLocalization.mk x y ∈ Set.range (toGp M) ↔ MLe (y : M) x := by
+  letI := hc
+  constructor
+  · rintro ⟨m, hm⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists] at hm
+    obtain ⟨c, hc'⟩ := hm
+    simp only [AddSubmonoid.coe_zero, zero_add] at hc'
+    refine ⟨m, ?_⟩
+    exact add_left_cancel hc'
+  · rintro ⟨w, hw⟩
+    refine ⟨w, ?_⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists]
+    refine ⟨0, ?_⟩
+    simp only [AddSubmonoid.coe_zero, zero_add]
+    rw [add_comm ((y : M)) w] at hw ⊢
+    exact hw
+
+/-- ★**簡約的なら `saturated` は初等的な形と同値**。
+
+`∀ a b n>0, n•b ≤ n•a → b ≤ a`。★`Gp` を経由しないので扱いやすい。 -/
+theorem isSaturatedMonoid_iff_mle (hc : IsCancelAdd M) :
+    IsSaturatedMonoid M ↔ ∀ (a b : M) (n : ℕ), 0 < n → MLe (n • b) (n • a) → MLe b a := by
+  constructor
+  · intro hsat a b n hn hle
+    have hmem : n • (AddLocalization.mk a (⟨b, trivial⟩ : (⊤ : AddSubmonoid M)))
+        ∈ Set.range (toGp M) := by
+      rw [AddLocalization.mk_nsmul]
+      refine (mem_range_toGp_iff M hc _ _).mpr ?_
+      simpa [AddSubmonoidClass.coe_nsmul] using hle
+    exact (mem_range_toGp_iff M hc _ _).mp (hsat _ n hn hmem)
+  · intro h X n hn
+    induction X using AddLocalization.ind with
+    | _ y =>
+      obtain ⟨p, q⟩ := y
+      intro hmem
+      rw [AddLocalization.mk_nsmul] at hmem
+      have h1 := (mem_range_toGp_iff M hc _ _).mp hmem
+      rw [AddSubmonoidClass.coe_nsmul] at h1
+      exact (mem_range_toGp_iff M hc _ _).mpr (h p (q : M) n hn h1)
+
+/-- ★**2. `M` が integral かつ saturated なら `M^char` も saturated**。
+
+初等形に落としてから移す: `n•[b] ≤ n•[a]` は `∃u v 可逆, n•b+z+u = n•a+v` を意味し、
+`v` が可逆なので `n•b ≤ n•a` が `M` の中で成り立つ。`M` の saturated から `b ≤ a`、
+それを `toChar` で送れば `[b] ≤ [a]`。 -/
+theorem isSaturatedMonoid_mChar (hint : IsIntegralMonoid M) (hsat : IsSaturatedMonoid M) :
+    IsSaturatedMonoid (MChar M) := by
+  letI hcM := isCancelAdd_of_isIntegralMonoid M hint
+  letI hcC := isCancelAdd_mChar M hcM
+  rw [isSaturatedMonoid_iff_mle (MChar M) hcC]
+  have hM := (isSaturatedMonoid_iff_mle M hcM).mp hsat
+  intro X Y n hn hle
+  obtain ⟨a, rfl⟩ := toChar_surjective M X
+  obtain ⟨b, rfl⟩ := toChar_surjective M Y
+  obtain ⟨Z, hZ⟩ := hle
+  obtain ⟨z, rfl⟩ := toChar_surjective M Z
+  -- `[n•b + z] = [n•a]` なので `CharRel (n•b + z) (n•a)`
+  have hcr : CharRel (n • b + z) (n • a) := by
+    refine toChar_eq_iff.mp ?_
+    rw [map_add, map_nsmul, map_nsmul]
+    exact hZ
+  obtain ⟨u, v, hu, hv, huv⟩ := hcr
+  obtain ⟨V, rfl⟩ := hv
+  -- `v` が可逆なので `n•b ≤ n•a`
+  have hle' : MLe (n • b) (n • a) := by
+    refine ⟨z + u + V.neg, ?_⟩
+    have e : n • b + (z + u + V.neg) = (n • b + z + u) + V.neg := by
+      simp only [add_assoc]
+    rw [e, huv, add_assoc, V.val_neg, add_zero]
+  obtain ⟨w, hw⟩ := hM a b n hn hle'
+  exact ⟨toChar w, by rw [← map_add, hw]⟩
+
+/-- ★★**原文の「Thus」を証明した** —— `M` が pre-divisorial なら `M^char` は divisorial。
+
+原文 (FrdI p.19):
+> M is divisorial if M is sharp [cf. §0]. [Thus, if M is pre-divisorial, then M char is
+
+★これが `Proposition 1.5` で `𝔽_Φ → 𝔽_{Φ^char}` を使う理由である ——
+`PreFrobenioid` は `Φ` が **divisorial**(= pre-divisorial + sharp)を要求するが、
+`Φ` は pre-divisorial なだけかもしれない。`Φ^char` なら**無条件に**要求を満たす。 -/
+theorem isDivisorial_mChar (h : IsPreDivisorial M) : IsDivisorial (MChar M) :=
+  ⟨⟨isIntegralMonoid_mChar M h.1, isSaturatedMonoid_mChar M h.1 h.2.1,
+    isOfCharacteristicType_mChar M⟩, isSharp_mChar M⟩
+
+
+/-! #### ★負の対照 —— `M^char` の integral / saturated は仮定が効いている
+
+★`isSharp_mChar` と `isOfCharacteristicType_mChar` は**仮定なし**で成り立つが、
+`isIntegralMonoid_mChar` と `isSaturatedMonoid_mChar` は `M` の側の仮定を使う。
+**その仮定が効いていること**を実物で示す。 -/
+
+variable {M}
+
+/-- sharp なモノイドでは `toChar` は単射(`charRel_iff_eq` の言い換え)。 -/
+theorem toChar_injective_of_isSharp (h : IsSharp M) :
+    Function.Injective (toChar : M → MChar M) :=
+  fun _ _ hab => (charRel_iff_eq M h).mp (toChar_eq_iff.mp hab)
+
+variable (M)
+
+/-- ★**`M^char` が integral であるには `M` が integral である必要がある。**
+
+`ℕ∞` は sharp なので `toChar` は単射、しかも全射なので `ℕ∞^char` は `ℕ∞` と
+「同じ」である。`ℕ∞` は integral でない(`1 + ⊤ = 2 + ⊤`)ので、
+`ℕ∞^char` も integral でない。
+
+★したがって `isIntegralMonoid_mChar` の仮定は**落とせない**。 -/
+private theorem isCancelAdd_enat_of_mChar (h : IsCancelAdd (MChar ℕ∞)) :
+    IsCancelAdd ℕ∞ where
+  add_left_cancel a b c hbc := by
+    refine toChar_injective_of_isSharp isSharp_enat ?_
+    have e : (toChar (a + b) : MChar ℕ∞) = toChar (a + c) := congrArg (⇑toChar) hbc
+    rw [map_add, map_add] at e
+    letI := h
+    exact add_left_cancel e
+  add_right_cancel a b c hac := by
+    refine toChar_injective_of_isSharp isSharp_enat ?_
+    have e : (toChar (b + a) : MChar ℕ∞) = toChar (c + a) := congrArg (⇑toChar) hac
+    rw [map_add, map_add] at e
+    letI := h
+    exact add_right_cancel e
+
+theorem not_isIntegralMonoid_mChar_enat : ¬ IsIntegralMonoid (MChar ℕ∞) := fun h =>
+  letI := isCancelAdd_enat_of_mChar (isCancelAdd_of_isIntegralMonoid (MChar ℕ∞) h)
+  not_isIntegralMonoid_enat (isIntegralMonoid_of_isCancelAdd ℕ∞)
+
+/-- ★**まとめ** —— `M^char` の4条件のうち、
+**2つは無条件、2つは `M` の仮定が効いている**。 -/
+theorem mChar_divisorial_hypotheses_are_load_bearing :
+    (IsSharp (MChar ℕ∞) ∧ IsOfCharacteristicType (MChar ℕ∞)) ∧
+      ¬ IsIntegralMonoid (MChar ℕ∞) :=
+  ⟨⟨isSharp_mChar ℕ∞, isOfCharacteristicType_mChar ℕ∞⟩, not_isIntegralMonoid_mChar_enat⟩
+
+/-! #### ★`charMap` の単射性・全射性 —— `Φ^char` を `MonoidOn` にするための部品 -/
+
+/-- `charMap` は全射性を保つ。 -/
+theorem charMap_surjective {A B : Type*} [AddCommMonoid A] [AddCommMonoid B]
+    {g : A →+ B} (hg : Function.Surjective g) : Function.Surjective (charMap g) := by
+  intro y
+  obtain ⟨b, rfl⟩ := toChar_surjective B y
+  obtain ⟨a, rfl⟩ := hg b
+  exact ⟨toChar a, charMap_toChar g a⟩
+
+/-- ★**行き先が sharp なら、`charMap` は単射性を保つ**。
+
+`M^char` はつねに sharp(`isSharp_mChar`)なので、これは
+`(M^char)^char` の段でそのまま使える。 -/
+theorem charMap_injective_of_sharp {A B : Type*} [AddCommMonoid A] [AddCommMonoid B]
+    (hB : IsSharp B) {g : A →+ B} (hg : Function.Injective g) :
+    Function.Injective (charMap g) := by
+  intro x y hxy
+  obtain ⟨a, rfl⟩ := toChar_surjective A x
+  obtain ⟨b, rfl⟩ := toChar_surjective A y
+  rw [charMap_toChar, charMap_toChar] at hxy
+  exact congrArg (⇑toChar) (hg (toChar_injective_of_isSharp hB hxy))
+
+/-- ★**`M^char` の間の射は、単射なら characteristically injective**。
+
+`Definition 1.1, (ii), (a)` を `Φ^char` について確かめるのに使う。 -/
+theorem isCharacteristicallyInjective_of_injective_mChar
+    {A B : Type*} [AddCommMonoid A] [AddCommMonoid B]
+    {g : MChar A →+ MChar B} (hg : Function.Injective g) :
+    IsCharacteristicallyInjective g :=
+  ⟨hg, charMap_injective_of_sharp (isSharp_mChar B) hg⟩
 
 end ABC3.Found.FrdI
