@@ -659,4 +659,45 @@ theorem prop_1_10_iii_div_nsmul' {B₁ B₁' B₂ B₂' : C}
   rw [P.Div_comp, P.Div_comp, hn, hφ₁, hφ₂] at h
   simpa using h
 
+/-! ## ★(v) —— Frobenius 型 ⟺ prime-Frobenius の合成
+
+原文 (FrdI p.35):
+> (v) A morphism of C is a morphism of Frobenius type if and only if it is a
+
+原文 (FrdI p.35):
+> composite of prime-Frobenius morphisms.
+
+★**「合成」を帰納的に定義する** —— 原文は「a composite of prime-Frobenius
+morphisms」と書くだけで、**空の合成(恒等射)を含むかを言っていない**。
+★我々は**含める**(そうしないと同型が Frobenius 型なのに合成で書けない)。
+★**これは原文の曖昧さであり、測定として記録する。**
+-/
+
+/-- **prime-Frobenius 射の合成**(帰納的)。
+
+★空の合成 = 恒等射を含む。★**原文はそこを言っていない。** -/
+inductive IsPrimeFrobComposite : ∀ {A B : C}, (A ⟶ B) → Prop
+  | id (A : C) : IsPrimeFrobComposite (𝟙 A)
+  | cons {A B E : C} {φ : A ⟶ B} {ψ : B ⟶ E} :
+      IsPrimeFrobenius P φ → IsPrimeFrobComposite ψ → IsPrimeFrobComposite (φ ≫ ψ)
+
+include P in
+/-- **(v) の片向き** —— prime-Frobenius の合成は Frobenius 型。
+
+★**`Proposition 1.7, (i)` の閉性だけで出る。** 原文が (v) の証明で
+何を使うかは書いていないが、★**この向きは合成閉性の帰納法である。** -/
+theorem isFrobeniusType_of_isPrimeFrobComposite (F : FrobenioidCore P)
+    {A B : C} {φ : A ⟶ B} (h : IsPrimeFrobComposite P φ) : IsFrobeniusType P φ := by
+  induction h with
+  | id A => exact isFrobeniusType_of_isIso P (𝟙 A)
+  | cons hφ _ ih => exact IsFrobeniusType.comp P F hφ.1 ih
+
+include P in
+/-- ★**非退化**: prime-Frobenius 自身は(恒等射との合成として)合成である。
+★**「合成の集合が空でない」を押さえる。** -/
+theorem isPrimeFrobComposite_of_isPrimeFrobenius {A B : C} {φ : A ⟶ B}
+    (h : IsPrimeFrobenius P φ) : IsPrimeFrobComposite P φ := by
+  have := IsPrimeFrobComposite.cons h (IsPrimeFrobComposite.id (P := P) B)
+  simpa using this
+
 end ABC3.Found.FrdI
