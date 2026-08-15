@@ -504,7 +504,132 @@ theorem isMinimalAdjoint_isomorphisms {A B : C} (φ : A ⟶ B) :
     IsMinimalAdjoint (MorphismProperty.isomorphisms C) φ :=
   fun _ _ _ _ hs => hs
 
+/-! ### §0 —— `of Aut-type` / `End-equivalence` / `abstractly equivalent`
+
+`Proposition 1.8, (i)(ii)` がこの3語で述べられている。
+
+原文 (FrdI p.14):
+> that A is Aut-saturated (respectively, Autsub-saturated; of Aut-type) if AutC(A) =
+
+原文 (FrdI p.14):
+> object of C is Aut-saturated (respectively, Autsub-saturated; of Aut-type), then we
+
+原文 (FrdI p.14):
+> shall say that an arrow A →B of C is an End-equivalence if there exists an arrow
+
+原文 (FrdI p.14):
+> B →A in C.
+-/
+
+/-- **§0** 対象 `A` が `Aut-saturated` —— `Aut_𝒞(A) = Aut^sub_𝒞(A)`。
+
+★`Aut ⊆ Aut^sub` はつねに成り立つ(`isSubAutomorphism_of_isIso`)ので、
+条件は「sub-automorphism がすべて同型」に尽きる。 -/
+def IsAutSaturatedObj (A : C) : Prop := ∀ α : End A, IsSubAutomorphism α → IsIso α
+
+/-- **§0** 対象 `A` が `Aut^sub-saturated` —— `Aut^sub_𝒞(A) = End_𝒞(A)`。 -/
+def IsAutSubSaturatedObj (A : C) : Prop := ∀ α : End A, IsSubAutomorphism α
+
+/-- **§0** 対象 `A` が `of Aut-type` —— `Aut_𝒞(A) = End_𝒞(A)`、
+すなわち**自己射がすべて同型**。 -/
+def IsOfAutTypeObj (A : C) : Prop := ∀ α : End A, IsIso α
+
+variable (C) in
+/-- **§0** 圏 `𝒞` が `of Aut-type` —— すべての対象が `of Aut-type`。 -/
+def IsOfAutType : Prop := ∀ A : C, IsOfAutTypeObj A
+
+/-- **§0** `End-equivalence`。
+
+★★**測定**: 原文は「an arrow `A → B` … is an End-equivalence if there exists an
+arrow `B → A`」と**射について**述べるが、条件に現れるのは**始域と終域だけ**で、
+その射自身は一切現れない。**射の性質ではなく対象の対の性質である。**
+写す側でこれを勝手に直さず、原文どおり射を引数に取る形で写す。 -/
+def IsEndEquivalence {A B : C} (_φ : A ⟶ B) : Prop := Nonempty (B ⟶ A)
+
+/-! ### §0 —— `abstractly equivalent`(原文 p.17)
+
+原文 (FrdI p.17):
+> — where the horizontal arrows are isomorphisms in C — as an abstract equivalence
+
+原文 (FrdI p.17):
+> from f1 to f2. If there exists an abstract equivalence from f1 to f2, then we shall
+
+原文 (FrdI p.17):
+> say that f1, f2 are abstractly equivalent.
+-/
+
+/-- **§0** `abstractly equivalent` —— 横向きが同型である可換四角形で結ばれること。 -/
+def AbstractlyEquivalent {A₁ B₁ A₂ B₂ : C} (f₁ : A₁ ⟶ B₁) (f₂ : A₂ ⟶ B₂) : Prop :=
+  ∃ (a : A₁ ≅ A₂) (b : B₁ ≅ B₂), f₁ ≫ b.hom = a.hom ≫ f₂
+
+theorem AbstractlyEquivalent.refl {A B : C} (f : A ⟶ B) : AbstractlyEquivalent f f :=
+  ⟨Iso.refl A, Iso.refl B, by simp⟩
+
+theorem AbstractlyEquivalent.symm {A₁ B₁ A₂ B₂ : C} {f₁ : A₁ ⟶ B₁} {f₂ : A₂ ⟶ B₂}
+    (h : AbstractlyEquivalent f₁ f₂) : AbstractlyEquivalent f₂ f₁ := by
+  obtain ⟨a, b, hab⟩ := h
+  refine ⟨a.symm, b.symm, ?_⟩
+  show f₂ ≫ b.inv = a.inv ≫ f₁
+  rw [Iso.eq_inv_comp, ← Category.assoc, ← hab]
+  simp
+
+/-- ★`f ≫ g` と `g ≫ f` がともに同型なら `f` は同型。
+
+`f ≫ g` から `f` が split mono、`g ≫ f` から `f` が split epi になり、
+mathlib の `isIso_of_mono_of_isSplitEpi` で閉じる。
+
+★`Proposition 1.8, (i)` の逆向き(`𝒟` が `of Aut-type` なら linear End-equivalence は
+pre-step)で使う。 -/
+theorem isIso_of_comp_isIso_both {X Y : C} (f : X ⟶ Y) (g : Y ⟶ X)
+    [IsIso (f ≫ g)] [IsIso (g ≫ f)] : IsIso f := by
+  haveI : IsSplitMono f := ⟨⟨g ≫ inv (f ≫ g), by rw [← Category.assoc, IsIso.hom_inv_id]⟩⟩
+  haveI : IsSplitEpi f := ⟨⟨inv (g ≫ f) ≫ g, by rw [Category.assoc, IsIso.inv_hom_id]⟩⟩
+  exact isIso_of_mono_of_isSplitEpi f
+
+/-! ### 非退化(`of Aut-type` / `End-equivalence`) -/
+
+/-- ★前順序の圏は `of Aut-type` —— 自己射は `𝟙` しかない。 -/
+theorem isOfAutType_of_subsingleton_hom (hs : ∀ X Y : C, Subsingleton (X ⟶ Y)) :
+    IsOfAutType C := by
+  intro A α
+  refine ⟨𝟙 A, ?_, ?_⟩ <;> exact (hs A A).elim _ _
+
+/-- `Vee` は `of Aut-type`。 -/
+theorem isOfAutType_vee : IsOfAutType Vee :=
+  isOfAutType_of_subsingleton_hom fun X Y => Preorder.subsingleton_hom X Y
+
+/-- ★`Type` は **`of Aut-type` でない** —— `Bool` の定数写像は同型でない。 -/
+theorem not_isOfAutType_type : ¬ IsOfAutType (Type) := fun h =>
+  not_isIso_constTrue (h Bool constTrue)
+
+/-- ★**同型は End-equivalence**(逆射を取ればよい)。 -/
+theorem isEndEquivalence_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] :
+    IsEndEquivalence φ := ⟨inv φ⟩
+
+/-- ★`Vee` の `left ⟶ top` は **End-equivalence でない** —— `top ⟶ left` が無い。
+
+★これが「射の性質ではなく対象の対の性質」であることの実例でもある。 -/
+theorem not_isEndEquivalence_vee (β : Vee.left ⟶ Vee.top) : ¬ IsEndEquivalence β := by
+  rintro ⟨g⟩
+  rcases leOfHom g with h | h <;> exact Vee.noConfusion h
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def IsOfAutTypeObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — of Aut-type",
+    sectionId := "frdi-s0-aut-type" }
+
+def IsAutSaturatedObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — Aut-saturated",
+    sectionId := "frdi-s0-aut-type" }
+
+def IsEndEquivalence.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — End-equivalence",
+    sectionId := "frdi-s0-end-equivalence" }
+
+def AbstractlyEquivalent.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — abstractly equivalent",
+    sectionId := "frdi-s0-abstract-equiv" }
 
 def IsMinimalAdjoint.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 17, item := "§0 Categories — minimal-adjoint",

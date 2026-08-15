@@ -212,5 +212,51 @@ minimal-adjoint は<strong>最初</strong>、minimal-coadjoint は<strong>最後
 <strong>両端を押さえたので、定義が空でも全体でもないことが分かる。</strong></p>
 </section>
 
+<h2>★2026-08-15 追加 —— `Proposition 1.8` が要求した §0 の語彙</h2>
+
+<section class="statement definition"
+         id="frdi-s0-aut-type"
+         data-paper="FrdI"
+         data-pdf-page="14"
+         data-item="§0 Categories — Aut-saturated / Aut^sub-saturated / of Aut-type"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">that A is Aut-saturated (respectively, Autsub-saturated; of Aut-type) if AutC(A) =</div>
+<div class="verbatim">object of C is Aut-saturated (respectively, Autsub-saturated; of Aut-type), then we</div>
+<div class="reading"><code>Aut-saturated</code>: <code>Aut = Aut^sub</code>。<code>Aut^sub-saturated</code>: <code>Aut^sub = End</code>。
+<code>of Aut-type</code>: <code>Aut = End</code>、すなわち<strong>自己射がすべて同型</strong>。</div>
+<p class="open">★<code>Aut ⊆ Aut^sub</code> はつねに成り立つ(<code>isSubAutomorphism_of_isIso</code>)ので、
+<code>Aut-saturated</code> の条件は「sub-automorphism がすべて同型」に尽きる。
+★非退化: 前順序圏は <code>of Aut-type</code>、<code>Type</code> は<strong>そうでない</strong>(定数写像)。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-end-equivalence"
+         data-paper="FrdI"
+         data-pdf-page="14"
+         data-item="§0 Categories — End-equivalence"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">shall say that an arrow A →B of C is an End-equivalence if there exists an arrow</div>
+<div class="verbatim">B →A in C.</div>
+<div class="reading"><code>A ⟶ B</code> が End-equivalence ⟺ <code>B ⟶ A</code> が存在する。</div>
+<p class="open">★★<strong>測定</strong>: 原文は<strong>射について</strong>述べるが、条件に現れるのは
+<strong>始域と終域だけ</strong>で、その射自身は一切現れない。
+<strong>実質は「対象の対」の性質である。</strong>写す側で勝手に直さず、原文どおり射を引数に取る形で写した。
+★非退化: 同型は End-equivalence、<code>Vee</code> の <code>left ⟶ top</code> は<strong>そうでない</strong>。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-abstract-equiv"
+         data-paper="FrdI"
+         data-pdf-page="17"
+         data-item="§0 Categories — abstractly equivalent"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">— where the horizontal arrows are isomorphisms in C — as an abstract equivalence</div>
+<div class="verbatim">from f1 to f2. If there exists an abstract equivalence from f1 to f2, then we shall</div>
+<div class="verbatim">say that f1, f2 are abstractly equivalent.</div>
+<div class="reading">2つの射が、横向きが同型である可換四角形で結ばれること。</div>
+<p class="open">★反射律と対称律を証明した(推移律は使わないので書いていない ——
+<strong>示していないことを書かない</strong>)。</p>
+</section>
+
 </body>
 </html>

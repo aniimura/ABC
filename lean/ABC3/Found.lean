@@ -14,6 +14,7 @@ import ABC3.Found.FrdI.NegControl
 import ABC3.Found.FrdI.Prop14
 import ABC3.Found.FrdI.Prop15
 import ABC3.Found.FrdI.Prop17
+import ABC3.Found.FrdI.Prop18
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog

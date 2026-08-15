@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.8 — Pre-steps</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.8 — Pre-steps</h1>
+
+<p>物理 p.30。<strong>400 dpi 目視確認 2026-08-15</strong>。</p>
+
+<h2>★規模の測定</h2>
+
+<table>
+<tr><th>条</th><th>主張</th><th>追加の仮定</th></tr>
+<tr><td>(i)</td><td>2</td><td><code>𝒞 → 𝒟</code> が <strong>full</strong> / <code>𝒟</code> が <strong>of Aut-type</strong></td></tr>
+<tr><td>(ii)</td><td>1</td><td><code>𝒞</code> が <strong>metrically trivial</strong> かつ <strong>Aut-ample</strong> type</td></tr>
+<tr><td>(iii)</td><td>3</td><td>なし</td></tr>
+</table>
+
+<p>★<strong>証明は 2 段落</strong>。着手前の測定で私は「3段落」と言ったが、
+目視すると (iii) は第2段落の<strong>最後の1文</strong>である。</p>
+
+<h2>★★<code>Definition 1.3, (iii), (d)</code> の初使用</h2>
+
+<p>我々は <code>Definition 1.3, (iii), (d)</code> の 2 本の圏同値を <code>Frobenioid</code> の
+フィールドとして持っていたが、<strong>下流で一度も使っていなかった</strong>。
+(iii) がその<strong>初使用</strong>である。</p>
+
+<p>★<strong>結果: 使えた。</strong> 転写は正しかった。ただし
+<strong>実際に効くのは「充満性」と「本質的全射性」の 2 つだけ</strong>で、
+<strong>忠実性は使わない</strong>。原文は「the equivalences of categories」と一括で言う。</p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-8-i"
+         data-paper="FrdI"
+         data-pdf-page="30"
+         data-item="Proposition 1.8, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) If the natural projection functor C →D is full, then every pre-step of</div>
+<div class="verbatim">C is a linear End-equivalence. If D is of Aut-type [cf. §0], then every linear</div>
+<div class="verbatim">End-equivalence of C is a pre-step.</div>
+<div class="reading">投影関手が full なら pre-step は linear End-equivalence。
+<code>𝒟</code> が of Aut-type なら逆。</div>
+<p class="open">★<strong>前半は本当に formally</strong> —— 2 行。
+<code>Base φ</code> の逆射を fullness で <code>𝒞</code> へ持ち上げるだけ。</p>
+<p class="open">★<strong>後半も formally だが、補題を1つ要した</strong> ——
+「<code>f ≫ g</code> と <code>g ≫ f</code> がともに同型なら <code>f</code> は同型」。
+mathlib の <code>isIso_of_mono_of_isSplitEpi</code> を経由して書いた。
+原文は「it follows formally that φ is a base-isomorphism」としか書かない。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-8-ii"
+         data-paper="FrdI"
+         data-pdf-page="30"
+         data-item="Proposition 1.8, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) Suppose further that C is of metrically trivial and Aut-ample type.</div>
+<div class="verbatim">Then a morphism of C is a co-angular pre-step if and only if it is abstractly</div>
+<div class="verbatim">equivalent [cf. §0] to a base-identity pre-step endomorphism of C.</div>
+<div class="reading">co-angular pre-step ⟺ base-identity pre-step 自己射に abstractly equivalent。</div>
+<p class="open">★★<strong>2つの仮定が別々の役割を持つ</strong>と特定できた:
+<strong>metrically trivial</strong> は <code>B ≅ A</code> を与えて <code>φ</code> を<strong>自己射に変える</strong>、
+<strong>Aut-ample</strong> は <code>Base</code> を打ち消す自己同型を与えて<strong>base-identity にする</strong>。
+片方だけでは届かない。</p>
+<p class="open">★★<strong>逆向きは追加仮定を一切使わない。</strong>
+<code>Definition 1.3, (iii), (b)</code> を <code>𝟙</code> に当てると
+<strong>すべての自己射が co-angular</strong> になり、あとは「同型は co-angular pre-step」だけ。
+★<strong>原文は「follows formally」と一括で書き、この非対称性を述べていない。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-8-iii"
+         data-paper="FrdI"
+         data-pdf-page="30"
+         data-item="Proposition 1.8, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) An object A ∈Ob(C) is non-group-like if and only if there exists a</div>
+<div class="verbatim">co-angular step A →B; alternatively, an object A ∈Ob(C) is non-group-like</div>
+<div class="verbatim">if and only if there exists a co-angular step B →A. Also, if A, B ∈Ob(C) are</div>
+<div class="verbatim">base-isomorphic objects, then A is group-like if and only if B is.</div>
+<div class="reading">non-group-like ⟺ 出る co-angular step がある ⟺ 入る co-angular step がある。
+base-isomorphic なら group-like 性が一致。</div>
+<p class="open">★★<strong><code>Definition 1.3, (iii), (d)</code> をどう使ったか</strong>:
+<code>⟸</code> は<strong>充満性</strong>(<code>Div φ</code> が可逆なら <code>MLe (Div φ) 0</code> なので
+<code>Z ⟶ Z₀</code> が持ち上がり、<code>φ ≫ (その射) = 𝟙</code> から <code>φ</code> が同型)。
+<code>⟹</code> は<strong>本質的全射性</strong>(可逆でない <code>d ∈ Φ(A)</code> に対応する
+co-angular pre-step を取る)。<strong>忠実性は使わない。</strong></p>
+<p class="open">★<strong>第3主張(base-isomorphic なら group-like 性が一致)は
+圏同値を使わない</strong> —— <code>Φ</code> の関手性だけで出る。
+原文は3主張を一括で「the equivalences of categories of Definition 1.3, (iii), (d)」に
+帰しているが、<strong>3番目はそれに依らない</strong>。</p>
+<p class="open">★<strong>負の対照(両側)</strong>: <code>𝔽_ℕ</code>(= <code>wP</code>)では
+<code>wTop</code> は group-like でなく、co-angular step <code>wDiv1</code> が実在する(両側成立)。
+<code>𝔽_ℤ</code> ではすべての対象が group-like で、<strong>step が1つも無い</strong>
+(<code>ℤ</code> では零因子がつねに可逆なので pre-step はすべて同型)(両側不成立)。
+<code>ℤ</code> は pre-divisorial なので <code>𝔽_ℤ</code> は <code>Proposition 1.5</code> により
+<strong>本当に Frobenioid</strong> である。</p>
+</section>
+
+</body>
+</html>
