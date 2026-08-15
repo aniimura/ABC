@@ -64,7 +64,8 @@ function resolveTag(fromTag, key) {
   return FILE_OF[key] ? key : null;                   // 記号的キーがそのまま我々のタグなら採る
 }
 // `@題名` 形式のタグも読めるようにする
-const fileOfTag = (tag) => (tag.startsWith('@') ? tag.slice(1) : FILE_OF[tag]);
+// ★§0: 接頭辞の節点は**出辺を持たない**(真の葉)。load が null を返せばそうなる。
+const fileOfTag = (tag) => (tag.startsWith('§0:') ? null : (tag.startsWith('@') ? tag.slice(1) : FILE_OF[tag]));
 
 // ── 原文側の抽出 ──────────────────────────────────────────
 const loaded = new Map();
@@ -135,6 +136,38 @@ const adj = new Map(), page = new Map();
     for (const e of (r ? r.edges : [])) if (!seen.has(e)) q.push(e);
   }
   for (const k of seen) if (!adj.has(k)) { adj.set(k, []); page.set(k, 0); }
+}
+
+// ── ★§0(Notations and Conventions)を節点として合流させる ────────────
+//   層 0 に中層の語彙が並ぶのは「引用が無い」からで「語彙が要らない」からではなかった。
+//   実測: [FrdI] Definition 1.1 は integral / saturated / characteristic type を
+//   すべて `[cf. §0]` で指している。§0 は番号付き項目でないのでグラフに無かった。
+//   詳細は tools/section0.mjs。★§0 語は出辺を持たない = **真の葉**になる。
+{
+  const S0 = await import('./section0.mjs');
+  const terms = new Map();     // tag -> Map(term -> {page})
+  for (const tag of Object.keys(FILE_OF)) {
+    const P = load(tag); if (!P) continue;
+    const pageOf = [];
+    { let pg = 0; for (let i = 0; i < P.lines.length; i++) {
+        const m = P.lines[i].match(/^===== \[page (\d+)\]/); if (m) pg = Number(m[1]); pageOf[i] = pg; } }
+    const t = S0.section0Terms(P.lines, pageOf);
+    if (t.size) terms.set(tag, t);
+  }
+  let added = 0, edged = 0;
+  for (const k of [...adj.keys()]) {
+    const [tag, name] = k.split(' / ');
+    const t = terms.get(tag); if (!t) continue;
+    const P = load(tag); if (!P) continue;
+    const d = P.decls.get(name); if (!d) continue;
+    const body = P.lines.slice(d.line, d.end).join('\n');
+    for (const term of S0.section0Refs(body, t)) {
+      const nk = `§0:${tag} / ${term}`;
+      if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, t.get(term)?.page ?? 0); added++; }
+      if (!adj.get(k).includes(nk)) { adj.get(k).push(nk); edged++; }
+    }
+  }
+  console.log(`  §0 を合流: ${added} 節点(${terms.size} 論文)/ 項目→§0 の辺 ${edged}`);
 }
 
 // ── ★概念(番号を持たない語彙)を節点として合流させる ─────────────
