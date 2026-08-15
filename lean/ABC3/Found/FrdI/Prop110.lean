@@ -1,3 +1,4 @@
+import Mathlib.GroupTheory.MonoidLocalization.GrothendieckGroup
 import ABC3.Found.FrdI.Prop19
 
 /-!
@@ -1399,5 +1400,90 @@ theorem prop_1_10_iii_nsmul_surjective (G : Frobenioid P) {A : C}
 「試していない」と「試して駄目だった」の区別も要る。**
 ★今回の親の発言は **3 つ目のカテゴリ(試していない)**だった。
 -/
+
+/-! ### ★★壁は import 1 行だった —— `Gp M` の群構造
+
+前段で親は「`Gp M` に群構造が無いので単射性は書けない」と記録した。
+★**確かめたら、mathlib に**あった**。**
+
+`Mathlib/GroupTheory/MonoidLocalization/GrothendieckGroup.lean`:
+```
+abbrev AddGrothendieckGroup : Type _ := AddLocalization (⊤ : AddSubmonoid M)
+instance instAddCommGroup : AddCommGroup (AddGrothendieckGroup M)
+```
+★★**我々の `Gp M := AddLocalization (⊤ : AddSubmonoid M)` と同じもの**である。
+**import していなかっただけ。**
+
+★**これは `comp_div` と同じ形の壁である**(第24段): 症状は「難しい」に見えたが、
+原因は★**「1 行足りない」**だった。
+★**前回は `@[simp]` 補題が 1 本、今回は `import` が 1 行。**
+★★**「壁の高さ」と「原因の大きさ」は関係がない。**
+
+★**そして 2 回とも、原因は「揃っているはずのものを並べて見る」で見つかった** ——
+前回は `@[simp]` 補題の一覧、今回は mathlib のファイル一覧
+(`ls` して `GrothendieckGroup.lean` が目に入った)。
+-/
+
+/-- ★★**divisorial なモノイドでは `n` 倍が単射**(`n ≥ 1`)。
+
+★`Gp M` が**捻れなし**であることの帰結。saturated / integral / sharp の 3 つが要る。 -/
+theorem nsmul_injective_of_isDivisorial {M : Type w} [AddCommMonoid M]
+    (hd : IsDivisorial M) {n : ℕ} (hn : 0 < n) :
+    Function.Injective (fun a : M => n • a) := by
+  obtain ⟨⟨hint, hsat, _⟩, hsh⟩ := hd
+  -- ★`AddLocalization.mk_add`(mathlib、`mk_mul` の `to_additive` 版)で足し算を開く
+  have htoGp_add : ∀ x y : M, toGp M (x + y) = toGp M x + toGp M y := by
+    intro x y
+    rw [toGp, toGp, toGp, AddLocalization.mk_add]
+    congr 1
+    exact (add_zero (0 : (⊤ : AddSubmonoid M))).symm
+  have htoGp_nsmul : ∀ (k : ℕ) (x : M), toGp M (k • x) = k • toGp M x := by
+    intro k x
+    induction k with
+    | zero => simp [toGp, AddLocalization.mk_zero]
+    | succ m ih => rw [succ_nsmul, succ_nsmul, htoGp_add, ih]
+  intro a b hab
+  set x : Gp M := toGp M a - toGp M b with hx
+  have hnx : n • x = 0 := by
+    rw [hx, smul_sub, ← htoGp_nsmul, ← htoGp_nsmul, sub_eq_zero]
+    exact congrArg (toGp M) hab
+  have hmem : ∀ y : Gp M, n • y = 0 → y ∈ Set.range (toGp M) := by
+    intro y hy
+    refine hsat y n hn ?_
+    rw [hy]
+    exact ⟨0, by simp [toGp, AddLocalization.mk_zero]⟩
+  obtain ⟨m, hm⟩ := hmem x hnx
+  obtain ⟨m', hm'⟩ := hmem (-x) (by rw [smul_neg, hnx, neg_zero])
+  have hsum : m + m' = 0 := by
+    refine hint ?_
+    rw [htoGp_add, hm, hm', add_neg_cancel]
+    simp [toGp, AddLocalization.mk_zero]
+  have hm0 : m = 0 := hsh m ⟨⟨m, m', hsum, by rw [add_comm]; exact hsum⟩, rfl⟩
+  have hx0 : x = 0 := by rw [← hm, hm0]; simp [toGp, AddLocalization.mk_zero]
+  refine hint ?_
+  rwa [hx, sub_eq_zero] at hx0
+
+include P in
+/-- ★★**`Proposition 1.10, (iii)` の第1主張 完成** ——
+`𝒞` の対象 `A` が perfect なら、`Φ(A)` は perfect なモノイド。
+
+★**全射性**は `IsPerfectObj`(原文が名指す `Definition 1.2, (iv)`)から、
+★**単射性**は `divisorial`(saturated ＋ integral ＋ sharp)から。
+
+★★**原文は「the fact that Φ(A) is perfect follows immediately … from the fact that
+A is perfect」と書くが、実際には 2 つの別々の源から来ている** ——
+全射性だけが `A` の perfect 性から来て、**単射性は `Φ` が divisorial であることから来る**。
+★**原文の「from the fact that A is perfect」は半分しか説明していない。** -/
+theorem prop_1_10_iii_perfect (G : Frobenioid P) {A : C} (hperf : IsPerfectObj P A) :
+    IsPerfectMonoid (Φ.val (P.toElem.obj A).base) := fun n =>
+  ⟨nsmul_injective_of_isDivisorial (P.divisorial _) n.pos,
+   prop_1_10_iii_nsmul_surjective P G hperf n⟩
+
+include P in
+/-- ★**(iii) 第1主張の「型」版** —— `𝒞` が of perfect type なら
+`Φ` の像のモノイドはすべて perfect。★**原文の言い回しそのもの。** -/
+theorem prop_1_10_iii_image_perfect (G : Frobenioid P) (hpt : IsOfPerfectType P) (A : C) :
+    IsPerfectMonoid (Φ.val (P.toElem.obj A).base) :=
+  prop_1_10_iii_perfect P G (hpt A)
 
 end ABC3.Found.FrdI
