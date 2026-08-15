@@ -33,7 +33,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w v2 u2
+universe v u w v2 u2 v3 u3
 
 /-! ## ★§0 の語彙 —— `rigid` と `slim`
 
@@ -87,6 +87,23 @@ theorem isRigidFunctor_to_punit {C₁ : Type u} [Category.{v} C₁]
 theorem not_isRigidFunctor_of_ne {C₁ : Type u} [Category.{v} C₁]
     {C₂ : Type u2} [Category.{v2} C₂] {F : C₁ ⥤ C₂}
     (η : F ≅ F) (h : η ≠ Iso.refl F) : ¬ IsRigidFunctor F := fun hr => h (hr η)
+
+/-- ★★**「Since A is arbitrary」の中身** —— すべてのスライスで rigid なら全体で rigid。
+
+★原文 (FrdI p.40) は (i)(ii) の各条を
+> we thus conclude that both CA →D and C →D are rigid. This completes the proof
+
+で締める。★**この一歩は `Over.mk (𝟙 X)` を取れば閉じる**(`X` 自身をスライスの底に使う)。
+★**原文はこの選び方を書いていない**(本項目で 3 例目)。 -/
+theorem isRigidFunctor_of_forall_over {C₁ : Type u} [Category.{v} C₁]
+    {C₂ : Type u2} [Category.{v2} C₂] (G : C₁ ⥤ C₂)
+    (h : ∀ A : C₁, IsRigidFunctor (Over.forget A ⋙ G)) : IsRigidFunctor G := by
+  intro η
+  apply Iso.ext
+  apply NatTrans.ext
+  funext X
+  exact congrArg (fun t => t.hom.app (Over.mk (𝟙 X)))
+    (h X (Functor.isoWhiskerLeft (Over.forget X) η))
 
 /-! ### ★具体的な非退化(上)は切った —— 記録
 
@@ -199,6 +216,92 @@ theorem eq_id_of_comp_eq_of_isIso {E : Type u} [Category.{v} E] {X Y : E}
   have h2 : a ≫ u = 𝟙 X ≫ u := by rw [Category.id_comp]; exact h
   exact (cancel_mono u).mp h2
 
+/-- ★`eq_id_of_comp_eq_of_isIso` の**鏡像** —— `u ≫ a = u` で `u` が同型なら `a = 𝟙`。
+
+★**分類表 #5 を避けるため `hu` は明示引数**(インスタンスにしない)。 -/
+theorem eq_id_of_eq_comp_of_isIso {E : Type u} [Category.{v} E] {X Y : E}
+    (a : Y ⟶ Y) (u : X ⟶ Y) (hu : IsIso u)
+    (h : u ≫ a = u) : a = 𝟙 Y := by
+  haveI := hu
+  have h2 : u ≫ a = u ≫ 𝟙 Y := by rw [Category.comp_id]; exact h
+  exact (cancel_epi u).mp h2
+
+/-! ### ★★原文の「the first functor is an equivalence of categories」の一歩
+
+★原文 (FrdI p.40) は
+> factors as a composite C^pl-bk_A →D_{A_D} →D, where the first functor is
+> [by Definition 1.3, (i), (c)] an equivalence of categories. Thus, we conclude that α
+> determines an automorphism of the natural functor D_{A_D} →D
+
+と書く。★★**「圏同値だから自己同型が移る」を、実際に移すのがこの補題である。**
+
+★**向きに注意**: 欲しいのは「`G` が rigid ⟹ `F ⋙ G` が rigid」(`F` は圏同値)。
+原文の言い回しは逆向き(「`α` が `D_{A_D}→D` の自己同型を**定める**」)だが、
+★**使うのは対偶側の含意**である —— slim から来るのは `G` の rigid 性で、
+結論したいのは合成の rigid 性。
+
+★**証明の骨**: `η : F ⋙ G ≅ F ⋙ G` を `e := F.asEquivalence` で
+`G ≅ G` に共役し、`hG` で潰す。戻すとき **`e.inverse.obj b` の上でしか成分が取れない**ので、
+最後に **`e.unit` に沿った自然性**で任意の対象へ運ぶ。
+★**この最後の運搬も、原文には書かれていない**(本項目で 2 例目)。 -/
+theorem isRigidFunctor_comp_of_equivalence {A₁ : Type u} [Category.{v} A₁]
+    {B₁ : Type u2} [Category.{v2} B₁] {E₁ : Type u3} [Category.{v3} E₁]
+    (e : A₁ ≌ B₁) {G : B₁ ⥤ E₁} (hG : IsRigidFunctor G) :
+    IsRigidFunctor (e.functor ⋙ G) := by
+  intro η
+  set X : e.inverse ⋙ e.functor ⋙ G ≅ G := e.invFunIdAssoc G with hX
+  -- 共役して `G ≅ G` にし、`hG` で潰す
+  have hθ : (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse η ≪≫ X) = Iso.refl G :=
+    hG (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse η ≪≫ X)
+  -- `e.inverse` の像の上で `η` は自明
+  have key : ∀ b : B₁,
+      η.hom.app (e.inverse.obj b) = 𝟙 ((e.functor ⋙ G).obj (e.inverse.obj b)) := by
+    intro b
+    have h : X.inv.app b ≫ η.hom.app (e.inverse.obj b) ≫ X.hom.app b = 𝟙 (G.obj b) :=
+      congrArg (fun t : G ≅ G => t.hom.app b) hθ
+    -- ★**左から `X.hom.app b` を掛け戻す。`𝟙` を作らない `_assoc` 版が要点** ——
+    -- ★`𝟙` を経由すると「対象の 2 つの綴り」(表 #1)で `Category.comp_id` が発火しない。
+    have h2 : η.hom.app (e.inverse.obj b) ≫ X.hom.app b = X.hom.app b := by
+      have h3 := congrArg (fun t => X.hom.app b ≫ t) h
+      simp only [Iso.hom_inv_id_app_assoc, Category.comp_id] at h3
+      -- ★`simpa` ではなく `exact` —— **既定透明度でないと 2 つの綴りが同一視されない**(表 #1)
+      exact h3
+    -- ★**可逆性はインスタンス探索に任せず逆射を手で書く**(表 #5)。
+    have hXi : IsIso (X.hom.app b) :=
+      ⟨⟨X.inv.app b, X.hom_inv_id_app b, X.inv_hom_id_app b⟩⟩
+    exact eq_id_of_comp_eq_of_isIso _ (X.hom.app b) hXi h2
+  -- ★`e.unit` に沿って任意の対象へ運ぶ(原文が書いていない段)
+  apply Iso.ext
+  apply NatTrans.ext
+  funext a
+  show η.hom.app a = 𝟙 ((e.functor ⋙ G).obj a)
+  set u : (e.functor ⋙ G).obj (e.inverse.obj (e.functor.obj a)) ⟶ (e.functor ⋙ G).obj a :=
+    (e.functor ⋙ G).map (e.unitInv.app a) with hu
+  set w : (e.functor ⋙ G).obj a ⟶ (e.functor ⋙ G).obj (e.inverse.obj (e.functor.obj a)) :=
+    (e.functor ⋙ G).map (e.unit.app a) with hw
+  have hwu : w ≫ u = 𝟙 ((e.functor ⋙ G).obj a) := by
+    rw [hw, hu, ← Functor.map_comp]
+    -- ★最後に残るのは `𝟙 (G.obj (e.functor.obj a)) = 𝟙 ((e.functor ⋙ G).obj a)`、
+    -- ★すなわち**同じ対象の 2 つの綴り**。`simp` は届かないので `rfl` で閉じる。
+    simp
+    rfl
+  have hnat : u ≫ η.hom.app a = η.hom.app (e.inverse.obj (e.functor.obj a)) ≫ u :=
+    η.hom.naturality (e.unitInv.app a)
+  rw [key (e.functor.obj a), Category.id_comp] at hnat
+  calc η.hom.app a = (w ≫ u) ≫ η.hom.app a := by rw [hwu, Category.id_comp]
+    _ = w ≫ u ≫ η.hom.app a := by rw [Category.assoc]
+    _ = w ≫ u := by rw [hnat]
+    _ = 𝟙 _ := hwu
+
+/-- ★`isRigidFunctor_comp_of_equivalence` の `[F.IsEquivalence]` 版。
+
+★`F.asEquivalence.functor` は `F` に**定義的に等しい**ので、そのまま渡せる。 -/
+theorem isRigidFunctor_of_isEquivalence_comp {A₁ : Type u} [Category.{v} A₁]
+    {B₁ : Type u2} [Category.{v2} B₁] {E₁ : Type u3} [Category.{v3} E₁]
+    (F : A₁ ⥤ B₁) [F.IsEquivalence] {G : B₁ ⥤ E₁} (hG : IsRigidFunctor G) :
+    IsRigidFunctor (F ⋙ G) :=
+  isRigidFunctor_comp_of_equivalence F.asEquivalence hG
+
 section PropI
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
@@ -237,6 +340,105 @@ theorem prop_1_13_i_from_pullBack (F : FrobenioidCore P) (A : C)
   rw [hmap] at hnat
   show η.hom.app X = 𝟙 _
   exact eq_id_of_comp_eq_of_isIso (η.hom.app X) (P.Base (γ ≫ β)) hbi hnat.symm
+
+/-! ### ★原文の合成 `C^pl-bk_A → C_A → D` を Lean に置く -/
+
+/-- ★**`(𝒞^pl-bk)_A → 𝒞_A` の包含関手** —— 原文の合成の最初の矢。 -/
+def plBkToOver (A : C) : Over (⟨A⟩ : PlBk P) ⥤ Over A :=
+  Over.post (X := (⟨A⟩ : PlBk P)) (wideSubcategoryInclusion (pullBackProp P))
+
+/-- ★★**原文の「factors as a composite」は Lean では `rfl` である。**
+
+原文 (FrdI p.40):
+> the other hand, this composite functor factors as a composite Cpl-bk
+
+★**2 通りの合成が定義的に等しい** —— `P.proj = P.toElem ⋙ ElemFrobCat.proj` と
+`P.Base φ = (P.toElem.map φ).base` が同じものを指しているため。 -/
+theorem plBkToOver_comp (A : C) :
+    plBkToOver P A ⋙ Over.forget A ⋙ P.proj
+      = plBkOverFunctor P A ⋙ Over.forget ((P.toElem.obj A).base) := rfl
+
+include P in
+/-- ★★**原文が示した部分** —— `𝒟` が slim なら `α` は pull-back 対象の上で自明。
+
+★**圏同値**(`Definition 1.3, (i), (c)`)と **slim 性**の合わせ技。
+`isRigidFunctor_comp_of_equivalence` がその「合わせ」を担う。 -/
+theorem prop_1_13_i_pullBack_trivial (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
+    (η : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj))
+    (Y : Over A) (hpb : IsPullBack P Y.hom) :
+    η.hom.app Y = 𝟙 ((Over.forget A ⋙ P.proj).obj Y) := by
+  haveI := F.plBkEquiv A
+  -- `α` を `(𝒞^pl-bk)_A` に制限する
+  have hrig : IsRigidFunctor (plBkOverFunctor P A ⋙ Over.forget ((P.toElem.obj A).base)) :=
+    isRigidFunctor_of_isEquivalence_comp (plBkOverFunctor P A) (hslim _)
+  have hη : (Functor.isoWhiskerLeft (plBkToOver P A) η :
+      (plBkOverFunctor P A ⋙ Over.forget ((P.toElem.obj A).base)) ≅ _) = Iso.refl _ :=
+    hrig _
+  -- `Y` を `(𝒞^pl-bk)_A` の対象として持ち上げる(`Y.hom` が pull-back だから可能)
+  exact congrArg (fun t => t.hom.app (Over.mk (⟨Y.hom, hpb⟩ : (⟨Y.left⟩ : PlBk P) ⟶ ⟨A⟩))) hη
+
+include P in
+/-- ★★**`Proposition 1.13, (i)`** —— `𝒟` が slim なら `𝒞_A → 𝒟` は rigid。
+
+原文 (FrdI p.40):
+> (i) The composite CA →D of the natural functor CA →C with the natural
+-/
+theorem prop_1_13_i (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C) :
+    IsRigidFunctor (Over.forget A ⋙ P.proj) := fun η =>
+  prop_1_13_i_from_pullBack P F A η
+    (fun Y hpb => prop_1_13_i_pullBack_trivial P F hslim A η Y hpb)
+
+include P in
+/-- ★**`Proposition 1.13, (i)` の「In particular」**。
+
+原文 (FrdI p.40):
+> projection functor C →D is rigid [cf. §0]. In particular, the functor C →D is
+-/
+theorem prop_1_13_i_global (F : FrobenioidCore P) (hslim : IsSlimCat D) :
+    IsRigidFunctor P.proj :=
+  isRigidFunctor_of_forall_over P.proj fun A => prop_1_13_i P F hslim A
+
+/-! ## ★(ii) —— `𝒞_A → 𝔽_Φ`
+
+★**組み立ては 2 段**:
+1. `ElemFrobCat.proj` と合成すれば (i) が使えて、**成分は base-identity**。
+2. `elemFrob_baseIdentity_aut_eq_id`(sharp から)で**恒等射**。
+
+★**原文の順序どおりだが、1 段目の「合成すれば (i)」は原文が
+「By assertion (i), it follows that …」と一言で済ませている部分**である。 -/
+
+include P in
+/-- ★★**`Proposition 1.13, (ii)`** —— `𝒞_A → 𝔽_Φ` は rigid。
+
+原文 (FrdI p.40):
+> (ii) The composite CA →FΦ of the natural functor CA →C with the functor
+-/
+theorem prop_1_13_ii (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C) :
+    IsRigidFunctor (Over.forget A ⋙ P.toElem) := by
+  intro η
+  apply Iso.ext
+  apply NatTrans.ext
+  funext Y
+  -- 1 段目: `ElemFrobCat.proj` と合成して (i) を当てる ⟹ base-identity
+  have hbase : (Functor.isoWhiskerRight η ElemFrobCat.proj :
+      (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj)) = Iso.refl _ :=
+    prop_1_13_i P F hslim A _
+  have hb : ElemFrobCat.Hom.base (η.hom.app Y) = 𝟙 (P.toElem.obj Y.left).base :=
+    congrArg (fun t => t.hom.app Y) hbase
+  -- 2 段目: sharp から恒等射
+  haveI : IsIso (η.hom.app Y) := ⟨⟨η.inv.app Y, η.hom_inv_id_app Y, η.inv_hom_id_app Y⟩⟩
+  show η.hom.app Y = 𝟙 _
+  exact elemFrob_baseIdentity_aut_eq_id (fun X => (P.divisorial X).2) _ hb
+
+include P in
+/-- ★**`Proposition 1.13, (ii)` の「In particular」**。
+
+原文 (FrdI p.40):
+> C →FΦ is rigid. In particular, the functor C →FΦ is rigid.
+-/
+theorem prop_1_13_ii_global (F : FrobenioidCore P) (hslim : IsSlimCat D) :
+    IsRigidFunctor P.toElem :=
+  isRigidFunctor_of_forall_over P.toElem fun A => prop_1_13_ii P F hslim A
 
 end PropI
 
