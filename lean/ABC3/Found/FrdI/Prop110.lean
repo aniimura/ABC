@@ -2082,31 +2082,37 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 | (v) | 1 | iff |
 | (vi) | 2 | sub-quasi-Frobenius-trivial / group-like ⟹ Frobenius-trivial |
 
-★★**21 / 21。したがって `.src` を付ける。**
+★★**この数え方が誤っていた**(下の取り下げ記録を見よ)。
 -/
 
-def prop_1_10_i_exists.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (i)",
-    sectionId := "frdi-prop-1-10-i" }
+/-! ## ★★`.src` を**取り下げた**記録(2026-08-16)
 
-def prop_1_10_ii.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (ii)",
-    sectionId := "frdi-prop-1-10-ii" }
+★私の文脈を持たない検証役(Challenger)に監査を依頼し、
+★★**6 個すべてが規則(「`.src` は完全実装の主張」)を満たしていない**ことが判明した。
+★指摘はすべて**原文 (p.34–35) と Lean を私自身が直接読んで確認済み**である。
 
-def prop_1_10_iii_perfect.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (iii)",
-    sectionId := "frdi-prop-1-10-iii" }
+| 条 | 欠けているもの | 該当宣言 |
+|---|---|---|
+| (i) | ★`β` の量化子が逆——原文「Suppose that α, β **are** morphisms of Frobenius type」は ∀、実装は ∃ | `prop_1_10_i_exists` |
+| (i) | ★★原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない** | — |
+| (i) | ★★原文「then the same is true of **φ′**」の **7 タイプのうち 4 つが未実装**。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない | `prop_1_10_i_four_types` |
+| (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
+| (iii) | ★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている | `prop_1_10_iii_otri_perfect`, `prop_1_10_iii_otimes_perfect` |
+| (iii) | 「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ | `prop_1_10_iii_image_perfect` |
+| (iv) | ★原文は「**域が** isotropic」だけを要求するが、実装は `∀ X : C, IsIsotropic P X`(**圏全体**)を仮定 | `prop_1_10_iv`, `prop_1_10_iv_mp` |
+| (iv) | 「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで) | `prop_1_10_iv_infinitely_many` |
+| (v) | `IsPrimeFrobComposite` の基底を「任意の同型」に取った——**意図的な修復**だが、原文項目そのものの実装ではない | `IsPrimeFrobComposite` |
+| (vi) | ★★**`𝒞^istr` がコメント外に一度も現れない**。(vi) の主語が不在 | `prop_1_10_vi_first` |
+| (vi) | ★`α`,`γ`,`Cc` の存在を**仮定に置いている**が、原文は `Definition 1.3, (i), (a), (b)` から**導いている** | `prop_1_10_vi_first` |
+| (vi) | 「Moreover, every group-like object … is Frobenius-trivial.」が別宣言で、そちらも `𝒞^istr` への具体化がない | `prop_1_10_vi_groupLike` |
 
-def prop_1_10_iv.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10, (iv)",
-    sectionId := "frdi-prop-1-10-iv" }
+★★**ここにある定理はどれも真であり、`sorry` も無い。**
+★失われたのは「完全である」という**主張**だけである。
+★**上の表がそのまま次の作業のチェックリストになる。**
 
-def prop_1_10_v.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 35, item := "Proposition 1.10, (v)",
-    sectionId := "frdi-prop-1-10-v" }
-
-def prop_1_10_vi_first.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 35, item := "Proposition 1.10, (vi)",
-    sectionId := "frdi-prop-1-10-vi" }
+★★**教訓**: 自分の文脈を継いだ検証は、自分の誤読も継ぐ。
+「21/21」と数えたのは私であり、その数え方は「**実装したものを数えた**」ものであって、
+★**「原文が述べたものを数えた」ものではなかった。**
+-/
 
 end ABC3.Found.FrdI
