@@ -1039,4 +1039,50 @@ theorem prop_1_10_iv (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
     IsPrimeFrobenius P φ ↔ IsIrreducibleMor φ :=
   ⟨prop_1_10_iv_mp P F hiso φ, prop_1_10_iv_mpr P F (fun X _ => hiso X) φ hφ⟩
 
+/-! ### ★(vi) の前半の核心 —— base-identity 自己射を pre-step に沿って降ろす
+
+原文 (FrdI p.36、目視):
+> since φC is a base-identity endomorphism of Frobenius degree d, and γ is a pre-
+> step, it follows [cf. Remark 1.1.1] that φB is also a base-identity endomorphism of
+> Frobenius degree d.
+
+★**この一段だけを取り出す**。四角形 `γ ≫ φ_B = φ_C ≫ γ` があり、
+`φ_C` が base-identity で次数 `d`、`γ` が pre-step のとき、
+★**`φ_B` も base-identity で次数 `d`**。
+
+★**証明の中身**:
+- **次数**: `degFr (γ ≫ φ_B) = degFr φ_B * degFr γ = degFr φ_B`(`γ` は pre-step ⟹ 次数 1)、
+  `degFr (φ_C ≫ γ) = degFr γ * degFr φ_C = d`。よって `degFr φ_B = d`。
+- **base-identity**: `Base γ ≫ Base φ_B = Base φ_C ≫ Base γ = Base γ`(`φ_C` が base-identity)。
+  ★**`𝒟` が totally epimorphic なので `Base γ` は epi**、よって `Base φ_B = 𝟙`。
+
+★★**原文の「[cf. Remark 1.1.1]」は次数の部分だけを指している。**
+base-identity の部分は **`𝒟` の totally epimorphic 性**から出るもので、
+`Remark 1.1.1`(合成則)ではない。★**1 つの括弧が 2 つの理由を覆っていた。**
+-/
+
+include P in
+/-- **(vi) の前半の核心** —— base-identity 自己射を pre-step に沿って降ろす。
+
+★次数は `Remark 1.1.1`(合成則)から、base-identity は **`𝒟` の totally epimorphic 性**から。
+★**原文の括弧 `[cf. Remark 1.1.1]` は前者だけを指している。** -/
+theorem prop_1_10_vi_descend {B Cc : C} (γ : B ⟶ Cc) (hγ : IsPreStep P γ)
+    (φC : Cc ⟶ Cc) (φB : B ⟶ B) (hbC : IsBaseIdentity P φC)
+    {d : ℕ+} (hdC : P.degFr φC = d)
+    (hsq : φB ≫ γ = γ ≫ φC) :
+    IsBaseIdentity P φB ∧ P.degFr φB = d := by
+  haveI : IsIso (P.Base γ) := hγ.2
+  constructor
+  · -- base-identity: ★`γ` が pre-step ⟹ `Base γ` は**同型**なので右から消せる
+    have h := congrArg P.Base hsq
+    rw [P.Base_comp, P.Base_comp, show P.Base φC = P.Base (𝟙 Cc) from hbC,
+      P.Base_id, Category.comp_id] at h
+    show P.Base φB = P.Base (𝟙 B)
+    rw [P.Base_id]
+    exact (cancel_mono (P.Base γ)).mp (by rw [h, Category.id_comp])
+  · -- 次数: 合成則から
+    have h := congrArg P.degFr hsq
+    rw [P.degFr_comp, P.degFr_comp, hγ.1, hdC, one_mul, mul_one] at h
+    exact h
+
 end ABC3.Found.FrdI
