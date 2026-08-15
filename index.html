@@ -33,16 +33,16 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-15 ・ コミット 69 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-15 ・ コミット 71 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">35/35</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">673</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">262</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">61</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">752</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">287</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">68</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">4</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
@@ -118,6 +118,8 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>3fdadfa</code></td><td>2026-08-15</td><td>Proposition 1.5 を証明した——Elementary Frobenioids are Frobenioids。進捗 6 → 7/54</td></tr>
+<tr><td><code>46fd027</code></td><td>2026-08-15</td><td>index.html を再生成した——Proposition 1.5 の土台、進捗 6/54</td></tr>
 <tr><td><code>376401d</code></td><td>2026-08-15</td><td>Proposition 1.5 の土台まで——模型固有だった性質を3つ洗い出した。項目は増えていない</td></tr>
 <tr><td><code>76fd162</code></td><td>2026-08-15</td><td>index.html を再生成した——ゴール進捗 6/54、ゲート PASS</td></tr>
 <tr><td><code>3851188</code></td><td>2026-08-15</td><td>Φ^char を MonoidOn として組んだ——Proposition 1.5 の材料が揃った</td></tr>
@@ -128,15 +130,13 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <tr><td><code>7ba2b5f</code></td><td>2026-08-15</td><td>index.html を再生成した——Proposition 1.4 を Found/ で証明</td></tr>
 <tr><td><code>c74efd2</code></td><td>2026-08-15</td><td>Proposition 1.4 を Found/ で証明した——(i)–(v) 全5条・全14段、止まった段は無い</td></tr>
 <tr><td><code>e8af7cc</code></td><td>2026-08-15</td><td>index.html を再生成した——Frobenioid の両方向の非退化が揃った</td></tr>
-<tr><td><code>fa19a5f</code></td><td>2026-08-15</td><td>負の対照を作った——Frobenioid は空でなく、かつ PreFrobenioid の真の制限である</td></tr>
-<tr><td><code>a7874a1</code></td><td>2026-08-15</td><td>自己監査で転写の緩さを2件見つけて直した——「20/20」は正しくは「20/22」だった</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(262 件)。</div>
+<b>すべて PDF と機械照合している</b>(287 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
