@@ -1,0 +1,355 @@
+import ABC3.Found.FrdI.Prop18
+
+/-!
+# [FrdI] Proposition 1.9 —— Isotropic Objects and Isometries
+
+原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、
+物理 p.30–p.34(**400 dpi 目視確認 2026-08-15**)。
+
+原文 (FrdI p.30):
+> Proposition 1.9. (Isotropic Objects and Isometries) Let Φ be a divisorial
+
+## ★この命題の規模(測定)
+
+**7条 (i)–(vii)、主張は約 31**。これまでで最大。
+
+★**3段階に分けて進める**:
+* **第1段: (i)(iv)(vi)(vii)** —— 既存の道具だけで届く。★`Proposition 1.7, (i)(v)` が直接効く
+* **第2段: (ii)(iii)** —— (iii) が `Definition 1.3, (i), (c)`(`plBkEquiv`)の初使用
+* **第3段: (v)** —— 部分圏 `𝒞^istr` / isotropification 関手 / 随伴
+
+★このファイルは**第1段**である。`.src` は (i)–(vii) が全部揃ってから付ける。
+
+## ★★(v) は「再検証」ではなく「移送」
+
+原文 (FrdI p.33):
+> tion 1.4, (i); assertion (iv) [cf. also Definition 1.3, (vii), (b)], it follows immediately
+
+★原文は `𝒞^istr` が `Definition 1.3` を満たすことを
+「**`𝒞` が Frobenioid であることから**」導く。**21 条を書き直すのではない。**
+(この点は着手前の測定で一度取り違え、原文の証明を読んで訂正した。)
+-/
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory Opposite
+
+universe v u w u2 v2
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+
+/-! ### ★準備 —— 原文が「easily verified」と呼ぶ2つ
+
+原文 (FrdI p.32):
+> Proof. Since pull-backs which are base-isomorphisms are easily verified to be
+-/
+
+/-- ★**base-isomorphism である pull-back は同型**。
+
+`Proposition 1.4, (ii)` で pull-back = LB-invertible ∧ linear、
+そこに base-isomorphism を足すと **LB-invertible な pre-step** になり、
+`Proposition 1.4, (iii)` で同型。
+
+★原文は「easily verified [cf. Remark 1.2.1]」と書くが、
+我々の道では `Proposition 1.4` の (ii)(iii) を経由する。 -/
+theorem isIso_of_isPullBack_of_isBaseIso (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hpb : IsPullBack P φ) (hbi : IsBaseIsomorphism P φ) : IsIso φ :=
+  prop_1_4_iii P F φ ((prop_1_4_ii P F φ).mp hpb).1
+    ⟨((prop_1_4_ii P F φ).mp hpb).2, hbi⟩
+
+/-- ★**co-angular な射を「base-isomorphism ≫ 何か」に分解すると、後半も co-angular**。
+
+`β₁` の3分解を `γ ≫ β₁` の3分解に埋め込むだけ ——
+`γ` が base-isomorphism なので、co-angular の条件に現れる
+「`α` か `γ'` が base-isomorphism」が**そのまま保たれる**。
+
+★(i) の一意性で、`β = γ ≫ β₁` の `β₁` の co-angular 性を出すのに要る。
+`Proposition 1.7, (v)` の co-angular pre-step 版は `β` が pre-step のときしか使えず、
+ここでは `β` は base-isomorphism でしかない。 -/
+theorem isCoAngular_of_comp_left {A Y X : C} (γ : A ⟶ Y) (β₁ : Y ⟶ X)
+    (hco : IsCoAngular P (γ ≫ β₁)) (hγ : IsBaseIsomorphism P γ) : IsCoAngular P β₁ := by
+  rintro X' Y' γ' β' α' rfl hα'lin hβ'i hβ's hor
+  refine hco X' Y' (γ ≫ γ') β' α' (by simp) hα'lin hβ'i hβ's ?_
+  rcases hor with h | h
+  · exact Or.inl h
+  · exact Or.inr (isBaseIsomorphism_comp P hγ h)
+
+/-- ★**isotropic 性は同型で移る**。
+
+`A ≅ A'` で `A'` が isotropic なら `A` も isotropic ——
+`A` から出る isometric pre-step `f` に対し `inv(e) ≫ f` を `A'` の isotropy に当てる。 -/
+theorem isIsotropic_of_iso {A A' : C} (e : A ≅ A') (h : IsIsotropic P A') :
+    IsIsotropic P A := by
+  intro Dd f hfi hfs
+  haveI : IsIso (e.inv ≫ f) :=
+    h Dd (e.inv ≫ f) (IsIsometric.comp P (isIsometric_of_isIso P e.inv) hfi)
+      (IsPreStep.comp P (isPreStep_of_isIso P e.inv) hfs)
+  have : f = e.hom ≫ (e.inv ≫ f) := by rw [← Category.assoc, e.hom_inv_id, Category.id_comp]
+  rw [this]
+  infer_instance
+
+/-! ## ★(i) —— base-isomorphism の「co-angular ≫ isometric pre-step」分解
+
+原文 (FrdI p.31):
+> (i) Any base-isomorphism φ : A →B of C admits a factorization
+
+原文 (FrdI p.31):
+> where α is an isometric pre-step, and β is a co-angular base-isomorphism; this
+
+★原文の `φ = α ◦ β` は「先に `β`」なので、Lean では `φ = β ≫ α`。
+-/
+
+/-- **(i) 存在** —— `Proposition 1.7, (ii)` の分解と
+`Definition 1.3, (v), (b)` の分解を**繋ぐだけ**。
+
+1. `Proposition 1.7, (ii)`: `φ = γ ≫ β₀`(`γ` Frobenius 型、`β₀` pre-step)
+2. `Definition 1.3, (v), (b)`: `β₀ = β₁ ≫ α₁`(`β₁` co-angular pre-step、`α₁` isometric pre-step)
+3. `Proposition 1.7, (i)`: `γ ≫ β₁` は co-angular(合成で閉じる)かつ base-isomorphism -/
+theorem prop_1_9_i_factor (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hbi : IsBaseIsomorphism P φ) :
+    ∃ (X : C) (β : A ⟶ X) (α : X ⟶ B),
+      φ = β ≫ α ∧ (IsCoAngular P β ∧ IsBaseIsomorphism P β) ∧
+        (IsIsometric P α ∧ IsPreStep P α) := by
+  obtain ⟨X, γ, β₀, rfl, hγ, hβ₀⟩ := (prop_1_7_ii_baseIso_factor P F φ).mp hbi
+  obtain ⟨Y, β₁, α₁, rfl, hβ₁c, hβ₁s, hα₁i, hα₁s⟩ := F.preStepFactor β₀ hβ₀
+  exact ⟨Y, γ ≫ β₁, α₁, by rw [Category.assoc],
+    ⟨F.coAngularComp γ β₁ hγ.1.1 hβ₁c, isBaseIsomorphism_comp P hγ.2 hβ₁s.2⟩, hα₁i, hα₁s⟩
+
+/-- **(i) 一意性** —— 同型 `δ` を除いて一意。
+
+原文 (FrdI p.31):
+> factorization is unique, up to replacing the pair (α, β) by a pair of the form (α ◦
+
+★段取り:
+1. `β`, `β'` をそれぞれ `Proposition 1.7, (ii)` で `γ ≫ β₁`、`γ' ≫ β₁'` に分解
+2. 次数から `deg_Fr γ = deg_Fr γ'` なので、`Definition 1.3, (ii)` の**本質的一意性**で
+   同型 `ε` が取れて `γ ≫ ε = γ'`
+3. `𝒞` が totally epimorphic なので `γ` を**消去**して
+   `β₁ ≫ α = (ε ≫ β₁') ≫ α'`
+4. これは `Definition 1.3, (v), (b)` の**分解の一意性**そのもの -/
+theorem prop_1_9_i_uniq (F : FrobenioidCore P) {A B : C} (X X' : C)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
+    (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
+    (hβc : IsCoAngular P β) (hβb : IsBaseIsomorphism P β)
+    (hαi : IsIsometric P α) (hαs : IsPreStep P α)
+    (hβc' : IsCoAngular P β') (hβb' : IsBaseIsomorphism P β')
+    (hαi' : IsIsometric P α') (hαs' : IsPreStep P α') :
+    ∃ δ : X ≅ X', α' = δ.inv ≫ α ∧ β' = β ≫ δ.hom := by
+  obtain ⟨Y, γ, β₁, hβeq, hγ, hβ₁⟩ := (prop_1_7_ii_baseIso_factor P F β).mp hβb
+  obtain ⟨Y', γ', β₁', hβeq', hγ', hβ₁'⟩ := (prop_1_7_ii_baseIso_factor P F β').mp hβb'
+  -- 2. 次数が一致する
+  have hdeg : P.degFr γ = P.degFr γ' := by
+    have h1 : P.degFr (β ≫ α) = P.degFr γ := by
+      rw [hβeq, P.degFr_comp, P.degFr_comp, hβ₁.1, hαs.1]
+      rw [one_mul, one_mul]
+    have h2 : P.degFr (β' ≫ α') = P.degFr γ' := by
+      rw [hβeq', P.degFr_comp, P.degFr_comp, hβ₁'.1, hαs'.1]
+      rw [one_mul, one_mul]
+    rw [← h1, heq, h2]
+  obtain ⟨ε, hεiso, hγε⟩ := F.frobDegUniq A Y Y' γ γ' hγ hγ' hdeg
+  haveI := hεiso
+  -- 3. `γ` を消去
+  haveI : Epi γ := P.totEpiC _ _ γ
+  have hcancel : (β₁ ≫ α : Y ⟶ B) = (ε ≫ β₁') ≫ α' := by
+    refine (cancel_epi γ).mp ?_
+    rw [← Category.assoc, ← hβeq, heq, hβeq', ← hγε]
+    simp
+  -- 4. `Definition 1.3, (v), (b)` の一意性
+  obtain ⟨δ, hδ1, hδ2⟩ := F.preStepFactorUniq X X' β₁ α (ε ≫ β₁') α' hcancel
+    (isCoAngular_of_comp_left P γ β₁ (hβeq ▸ hβc) hγ.2) hβ₁ hαi hαs
+    (F.coAngularComp ε β₁' (isCoAngular_of_isIso P ε)
+      (isCoAngular_of_comp_left P γ' β₁' (hβeq' ▸ hβc') hγ'.2))
+    (IsPreStep.comp P (isPreStep_of_isIso P ε) hβ₁') hαi' hαs'
+  refine ⟨δ, hδ1, ?_⟩
+  rw [hβeq', ← hγε, Category.assoc, hδ2, hβeq, Category.assoc]
+
+/-- **(i) の3つの ⟺** その1 —— `φ` が isometric ⟺ `β` が Frobenius 型。 -/
+theorem prop_1_9_i_isometric_iff {A B X : C} (β : A ⟶ X) (α : X ⟶ B)
+    (hβc : IsCoAngular P β) (hβb : IsBaseIsomorphism P β)
+    (hαi : IsIsometric P α) (hαs : IsPreStep P α) :
+    IsIsometric P (β ≫ α) ↔ IsFrobeniusType P β := by
+  constructor
+  · intro h
+    exact ⟨⟨hβc, (prop_1_7_v_isometric P β α h).1⟩, hβb⟩
+  · intro h
+    exact IsIsometric.comp P h.1.2 hαi
+
+/-- **(i) の3つの ⟺** その2 —— `φ` が co-angular ⟺ `α` が同型。
+
+★`⇒` は **co-angularity を `α := 𝟙` に当てる技**(`Proposition 1.7` で作ったもの)。 -/
+theorem prop_1_9_i_coAngular_iff (F : FrobenioidCore P) {A B X : C} (β : A ⟶ X) (α : X ⟶ B)
+    (hβc : IsCoAngular P β) (hβb : IsBaseIsomorphism P β)
+    (hαi : IsIsometric P α) (hαs : IsPreStep P α) :
+    IsCoAngular P (β ≫ α) ↔ IsIso α := by
+  constructor
+  · intro h
+    exact isIso_of_isCoAngular_right P β α h hαi hαs
+  · intro h
+    haveI := h
+    exact F.coAngularComp β α hβc (isCoAngular_of_isIso P α)
+
+/-- **(i) の3つの ⟺** その3 —— `φ` が pull-back ⟺ `φ` が同型。
+
+★`⇒` が「base-isomorphism である pull-back は同型」そのもの。 -/
+theorem prop_1_9_i_pullBack_iff (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hbi : IsBaseIsomorphism P φ) : IsPullBack P φ ↔ IsIso φ := by
+  refine ⟨fun h => isIso_of_isPullBack_of_isBaseIso P F φ h hbi, fun h => ?_⟩
+  haveI := h
+  exact isPullBack_of_isIso P φ
+
+/-! ## ★(iv) —— co-angular linear 射は isotropic 性を両向きに移す
+
+原文 (FrdI p.31):
+> (iv) Let φ : A →B be a co-angular linear morphism [e.g., a pull-back
+-/
+
+/-- **(iv)** —— `φ` が co-angular linear なら、`A` が isotropic ⟺ `B` が isotropic。
+
+★`⇐` が中身。`A` の isotropic hull `α : A ⟶ A'` を取り、`B` が isotropic なので
+普遍性で `φ = α ≫ β` と分解する。`α` は isometric pre-step、`β` は linear
+(`Proposition 1.7, (v)`)なので、**co-angularity を `γ := 𝟙` に当てる技**で `α` が同型。 -/
+theorem prop_1_9_iv (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hco : IsCoAngular P φ) (hlin : IsLinear P φ) :
+    IsIsotropic P A ↔ IsIsotropic P B := by
+  refine ⟨fun hA => F.isotropicClosed φ hA, fun hB => ?_⟩
+  obtain ⟨A', α, hαi, hαs, hA'iso, huniv⟩ := F.isotropicHullExists A
+  obtain ⟨β, hβ, -⟩ := huniv B hB φ
+  have hβlin : IsLinear P β := (prop_1_7_v_linear P α β (hβ ▸ hlin)).2
+  haveI : IsIso α := isIso_of_isCoAngular_left P α β (hβ ▸ hco) hαi hαs hβlin
+  exact isIsotropic_of_iso P (asIso α) hA'iso
+
+/-! ## ★(vi)(vii) —— isotropic hull の2つの特徴づけ
+
+原文 (FrdI p.32):
+> (vi) A morphism of C is an isotropic hull if and only if its codomain is
+
+原文 (FrdI p.32):
+> isotropic, and, moreover, it is minimal-coadjoint to the morphisms with isotropic
+
+原文 (FrdI p.32):
+> (vii) A morphism A →B of C is an isometric pre-step if and only if the com-
+-/
+
+/-- `𝒞` の射のうち**始域が isotropic** なもののクラス。 -/
+def isotropicDomainProp : MorphismProperty C := fun X _ _ => IsIsotropic P X
+
+/-- ★**isotropic hull に同型を後置しても isotropic hull**。 -/
+theorem isIsotropicHull_comp_iso {A A' B : C} (α : A ⟶ A') (β : A' ⟶ B)
+    (hα : IsIsotropicHull P α) [IsIso β] : IsIsotropicHull P (α ≫ β) := by
+  obtain ⟨hαi, hαs, hA'iso, huniv⟩ := hα
+  refine ⟨IsIsometric.comp P hαi (isIsometric_of_isIso P β),
+    IsPreStep.comp P hαs (isPreStep_of_isIso P β),
+    isIsotropic_of_iso P (asIso β).symm hA'iso, ?_⟩
+  intro Cc hCc γ
+  obtain ⟨δ', hδ', huq⟩ := huniv Cc hCc γ
+  refine ⟨inv β ≫ δ', ?_, ?_⟩
+  · show γ = (α ≫ β) ≫ (inv β ≫ δ')
+    rw [Category.assoc, ← Category.assoc β, IsIso.hom_inv_id, Category.id_comp]
+    exact hδ'
+  · intro δ'' hδ''
+    have hd0 : γ = (α ≫ β) ≫ δ'' := hδ''
+    have hd : γ = α ≫ (β ≫ δ'') := by rw [hd0, Category.assoc]
+    have hq : β ≫ δ'' = δ' := huq (β ≫ δ'') hd
+    rw [← hq, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+
+/-- **(vi)** —— isotropic hull ⟺ 終域が isotropic かつ
+「始域が isotropic な射」に minimal-coadjoint。
+
+★`⇒` は普遍性で作った `δ` が `β` の**両側逆射**になることを、
+`𝒞` が totally epimorphic であること(`φ` と `α` が epi)から出す。
+★`⇐` は isotropic hull の存在から `φ = α ≫ β` を作り、
+minimal-coadjoint で `β` を同型にする。 -/
+theorem prop_1_9_vi (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B) :
+    IsIsotropicHull P φ ↔
+      (IsIsotropic P B ∧ IsMinimalCoadjoint (isotropicDomainProp P) φ) := by
+  constructor
+  · rintro ⟨hφi, hφs, hBiso, huniv⟩
+    refine ⟨hBiso, ?_⟩
+    rintro X α β rfl hX
+    obtain ⟨δ, hδ, -⟩ := huniv X hX α
+    haveI : Epi (α ≫ β) := P.totEpiC _ _ _
+    haveI : Epi α := P.totEpiC _ _ _
+    have h1 : δ ≫ β = 𝟙 B := by
+      refine (cancel_epi (α ≫ β)).mp ?_
+      rw [Category.comp_id, ← Category.assoc, ← hδ]
+    have h2 : β ≫ δ = 𝟙 X := by
+      refine (cancel_epi α).mp ?_
+      rw [Category.comp_id, ← Category.assoc, ← hδ]
+    exact ⟨δ, h2, h1⟩
+  · rintro ⟨hBiso, hmc⟩
+    obtain ⟨A', α, hα⟩ := F.isotropicHullExists A
+    obtain ⟨β, hβ, -⟩ := hα.2.2.2 B hBiso φ
+    haveI : IsIso β := hmc A' α β hβ hα.2.2.1
+    rw [hβ]
+    exact isIsotropicHull_comp_iso P α β hα
+
+/-- ★原文が (vii) の証明の最後に置く観察 ——
+`γ = α ◦ β` で3射のうち2つが isometric pre-step なら、残りもそう。
+
+★★**測定: 原文の「any two of the three」は必要より強い。**
+`γ = β ≫ α` で **`γ` が isometric pre-step なら、`Proposition 1.7, (v)` により
+`α` と `β` の両方が同時に出る**。したがって非自明なのは
+「`α`, `β` から `γ`」(= 合成で閉じること)だけである。 -/
+theorem isometricPreStep_of_comp {A X B : C} (β : A ⟶ X) (α : X ⟶ B)
+    (hi : IsIsometric P (β ≫ α)) (hs : IsPreStep P (β ≫ α)) :
+    (IsIsometric P β ∧ IsPreStep P β) ∧ (IsIsometric P α ∧ IsPreStep P α) :=
+  ⟨⟨(prop_1_7_v_isometric P β α hi).1, (prop_1_7_v_preStep P β α hs).1⟩,
+   (prop_1_7_v_isometric P β α hi).2, (prop_1_7_v_preStep P β α hs).2⟩
+
+/-- **(vii)** —— `φ : A ⟶ B` が isometric pre-step ⟺
+isotropic hull `ψ : B ⟶ C` との合成 `φ ≫ ψ` が `A` の isotropic hull。
+
+★`⇐` は**上の観察1本**で終わる(`φ ≫ ψ` が isometric pre-step なら `φ` もそう)。
+★`⇒` は `A` の isotropic hull `α` を取り、普遍性で `φ ≫ ψ = α ≫ β` と書いて
+`β` が isometric pre-step であることから(`A'` が isotropic なので)`β` を同型にする。 -/
+theorem prop_1_9_vii (F : FrobenioidCore P) {A B Cc : C} (φ : A ⟶ B) (ψ : B ⟶ Cc)
+    (hψ : IsIsotropicHull P ψ) :
+    (IsIsometric P φ ∧ IsPreStep P φ) ↔ IsIsotropicHull P (φ ≫ ψ) := by
+  constructor
+  · rintro ⟨hφi, hφs⟩
+    obtain ⟨A', α, hα⟩ := F.isotropicHullExists A
+    obtain ⟨β, hβ, -⟩ := hα.2.2.2 Cc hψ.2.2.1 (φ ≫ ψ)
+    have hcomp : IsIsometric P (φ ≫ ψ) ∧ IsPreStep P (φ ≫ ψ) :=
+      ⟨IsIsometric.comp P hφi hψ.1, IsPreStep.comp P hφs hψ.2.1⟩
+    have hβis := (isometricPreStep_of_comp P α β (hβ ▸ hcomp.1) (hβ ▸ hcomp.2)).2
+    haveI : IsIso β := hα.2.2.1 Cc β hβis.1 hβis.2
+    rw [hβ]
+    exact isIsotropicHull_comp_iso P α β hα
+  · intro h
+    exact (isometricPreStep_of_comp P φ ψ h.1 h.2.1).1
+
+/-! ## ★負の対照 —— (iv) の `co-angular` は落とせない
+
+★(iv) は「co-angular **かつ** linear なら isotropic 性が両向きに移る」と言う。
+`linear` だけでは `⇐` が壊れることを、`Proposition 1.4` で作った模型 `cP` で示す。
+
+★`cP` は `Vee` 上の定数関手による pre-Frobenioid で、
+**`vLeftTop : left ⟶ top` は linear だが co-angular でなく**、
+**`top` は isotropic だが `left` は isotropic でない**。 -/
+
+/-- `cP` の `vLeftTop` は **linear**。 -/
+theorem cP_linear_vLeftTop : IsLinear cP vLeftTop := rfl
+
+/-- `cP` の `top` は **isotropic** —— `top` から出る射は `𝟙` しかない。 -/
+theorem cP_isotropic_top : IsIsotropic cP Vee.top := by
+  intro Dd f _ _
+  have hd : Dd = Vee.top := by
+    rcases leOfHom f with h | h
+    · exact h.symm
+    · exact h
+  subst hd
+  haveI := Preorder.subsingleton_hom Vee.top Vee.top
+  exact ⟨𝟙 _, Subsingleton.elim _ _, Subsingleton.elim _ _⟩
+
+/-- ★★**(iv) の `co-angular` は落とせない** —— `vLeftTop` は linear で
+終域 `top` は isotropic だが、始域 `left` は **isotropic でない**。
+
+★`Proposition 1.4, (i)` の負の対照(`cP_not_coAngular`)がそのまま
+`Proposition 1.9, (iv)` の負の対照になる。**同じ模型が2つの命題で効いた。** -/
+theorem cP_prop_1_9_iv_coAngular_is_load_bearing :
+    IsLinear cP vLeftTop ∧ IsIsotropic cP Vee.top ∧
+      ¬ IsCoAngular cP vLeftTop ∧ ¬ IsIsotropic cP Vee.left :=
+  ⟨cP_linear_vLeftTop, cP_isotropic_top, cP_not_coAngular, cP_not_isotropic_left⟩
+
+end ABC3.Found.FrdI
