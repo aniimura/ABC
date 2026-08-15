@@ -40,6 +40,9 @@ const now = sh('git log -1 --date=short --format=%ad').trim();
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const graphExists = existsSync(join(ROOT, 'dependency-graph.html'));
+// 層0の仕分け(手で数字を書かないため JSON から読む)
+const L0P = join(ROOT, 'ResearchPaper', 'layer0-startable.json');
+const L0 = existsSync(L0P) ? JSON.parse(readFileSync(L0P, 'utf8')) : null;
 
 const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
@@ -119,12 +122,29 @@ ${graphExists ? `<a class="big" href="dependency-graph.html"><b>依存の層 —
 <span>答えは <b>否</b>。辺の定義の副作用だった。前方参照と解説案内を落とすと
 最大の循環は 262 → 17 節点に縮み、<b>論文をまたぐ大循環は消える</b>。</span></a>
 
+${L0 ? `<h2>層0 —— いま着手できるもの</h2>
+<div class="grid">
+  <div class="card"><div class="k">層0 の節点</div><div class="v">${L0.layer0.total}</div></div>
+  <div class="card"><div class="k">§0 語</div><div class="v">${L0.layer0.section0Terms}</div></div>
+  <div class="card"><div class="k">語彙(概念)</div><div class="v">${L0.layer0.concepts}</div></div>
+  <div class="card"><div class="k">番号付き項目</div><div class="v">${L0.layer0.numberedItems}</div></div>
+  <div class="card ok"><div class="k">★着手できる(名指し)</div><div class="v">${L0.startable.length}</div></div>
+  <div class="card ok"><div class="k">うち完了</div><div class="v">${L0.startable.filter((s) => s.state === 'done').length}</div></div>
+</div>
+<table><tr><th style="width:38%">項目</th><th style="width:54px">壁</th><th style="width:58px">状態</th><th>根拠</th></tr>
+${L0.startable.map((s) => {
+  const badge = s.state === 'done' ? '<b style="color:#1e7a52">完了</b>'
+    : s.state === 'building' ? '<b style="color:#2f6fd0">作業中</b>' : '未着手';
+  return `<tr><td><b>${esc(s.item)}</b></td><td>種類 ${s.kind}</td><td>${badge}</td><td style="font-size:12px">${esc(s.basis)}</td></tr>`;
+}).join('\n')}
+</table>
+<div class="note"><b>★層0は「完成」ではない。${esc(L0.notComplete.reason)}</b><br>
+${esc(L0.notComplete.detail)}<br><br>
+<b>次:</b> ${esc(L0.notComplete.next)}</div>` : ''}
+
 <h2>いま分かっていること</h2>
 <table><tr><th>詰まる壁の種類</th><th>実例</th><th>重さ</th></tr>
-<tr><td>mathlib の不在</td><td>p進対数(評価 API がノルム体に原理的に不適用)</td><td>作業量</td></tr>
-<tr><td>Lean の透明度</td><td>tempered 群、packet-normalization</td><td>作業量</td></tr>
-<tr><td>どれでもない(安い)</td><td>対数体積、型の訂正</td><td>★原文が「elementary」と書く箇所は実際に安い</td></tr>
-<tr><td><b>語彙の不在</b></td><td>procession-normalization</td><td><b>★最も重い。中層を作るまで手が付かない</b></td></tr>
+${(L0 ? L0.wallKinds : []).map((w) => `<tr><td><b>${w.n}. ${esc(w.name)}</b></td><td>${esc(w.example)}</td><td>${esc(w.weight)}</td></tr>`).join('\n')}
 </table>
 <ul>
 <li><b>Corollary 3.12 から実物まで届く鎖が1本ある</b> — <code>cor_3_12 → Thm 3.11 → [AbsTopIII] Cor 5.10 → Prop 5.7 → Found/LogVolume.lean</code></li>

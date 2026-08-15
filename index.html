@@ -33,7 +33,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-15 ・ コミット 44 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-15 ・ コミット 45 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
@@ -76,12 +76,36 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <span>答えは <b>否</b>。辺の定義の副作用だった。前方参照と解説案内を落とすと
 最大の循環は 262 → 17 節点に縮み、<b>論文をまたぐ大循環は消える</b>。</span></a>
 
+<h2>層0 —— いま着手できるもの</h2>
+<div class="grid">
+  <div class="card"><div class="k">層0 の節点</div><div class="v">129</div></div>
+  <div class="card"><div class="k">§0 語</div><div class="v">47</div></div>
+  <div class="card"><div class="k">語彙(概念)</div><div class="v">18</div></div>
+  <div class="card"><div class="k">番号付き項目</div><div class="v">64</div></div>
+  <div class="card ok"><div class="k">★着手できる(名指し)</div><div class="v">8</div></div>
+  <div class="card ok"><div class="k">うち完了</div><div class="v">2</div></div>
+</div>
+<table><tr><th style="width:38%">項目</th><th style="width:54px">壁</th><th style="width:58px">状態</th><th>根拠</th></tr>
+<tr><td><b>[FrdI] §0 integral(モノイド)</b></td><td>種類 5</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">原文『M → M^gp が単射』を GrothendieckGroup.of + of_injective [IsCancelMul M] と突き合わせ済み</td></tr>
+<tr><td><b>[FrdI] §0 saturated(モノイド)</b></td><td>種類 5</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">原文『n·a が像に入れば a も像に入る』を Submonoid.PowSaturated と突き合わせ済み</td></tr>
+<tr><td><b>[FrdI] §0 sharp(モノイド)</b></td><td>種類 3</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">∀ a, IsUnit a → a = 1 の1行。★grep の 17 件は全部『sharp bound』で別物だった</td></tr>
+<tr><td><b>[EtTh] §0 essential image</b></td><td>種類 5</td><td>未着手</td><td style="font-size:12px">CategoryTheory.Functor.essImage そのもの</td></tr>
+<tr><td><b>[GenEll] Lemma 3.1(SL_2 の構造)</b></td><td>種類 3</td><td>未着手</td><td style="font-size:12px">純古典。IUT 語彙ゼロ。標本6件のうち唯一の着手可能</td></tr>
+<tr><td><b>[IUTchIII] Remark 3.9.5 (i) holomorphic hull</b></td><td>種類 3</td><td>未着手</td><td style="font-size:12px">原文 p.127 で λ·𝒪(整数環のスカラー倍)と確定、400dpi 目視済み</td></tr>
+<tr><td><b>[AbsTopIII] (L1) log-shell はコンパクト</b></td><td>種類 3</td><td><b style="color:#1e7a52">完了</b></td><td style="font-size:12px">Found/IUTchIII/PadicLog.lean に ℚ_p について構成済み(非退化性つき、sorry 無し)</td></tr>
+<tr><td><b>[AbsTopIII] Proposition 5.7 局所体積</b></td><td>種類 3</td><td><b style="color:#1e7a52">完了</b></td><td style="font-size:12px">Found/IUTchIII/LogVolume.lean。★Interface の posit が初めて実物に置き換わった</td></tr>
+</table>
+<div class="note"><b>★層0は「完成」ではない。★層0であることは、易しいことを意味しない。</b><br>
+[EtTh] Proposition 2.2 は層0にありながら Δ_X(幾何的基本群)を要る。Δ_X は §0 でも番号付き項目でもないので辺にならない——それだけの理由で層0にいる。層0は『どこから始められるか』の下界であって、難易度の順位ではない。<br><br>
+<b>次:</b> Δ_X・GFG-type のような論文固有の記号定義をグラフに入れる(§0 を入れて [FrdI] Definition 1.1 が層0→層1に移ったのと同じ操作)</div>
+
 <h2>いま分かっていること</h2>
 <table><tr><th>詰まる壁の種類</th><th>実例</th><th>重さ</th></tr>
-<tr><td>mathlib の不在</td><td>p進対数(評価 API がノルム体に原理的に不適用)</td><td>作業量</td></tr>
-<tr><td>Lean の透明度</td><td>tempered 群、packet-normalization</td><td>作業量</td></tr>
-<tr><td>どれでもない(安い)</td><td>対数体積、型の訂正</td><td>★原文が「elementary」と書く箇所は実際に安い</td></tr>
-<tr><td><b>語彙の不在</b></td><td>procession-normalization</td><td><b>★最も重い。中層を作るまで手が付かない</b></td></tr>
+<tr><td><b>1. mathlib の不在</b></td><td>p進対数(評価 API がノルム体に原理的に不適用)</td><td>作業量</td></tr>
+<tr><td><b>2. Lean の透明度</b></td><td>tempered 群、packet-normalization</td><td>作業量</td></tr>
+<tr><td><b>3. どれでもない(安い)</b></td><td>対数体積、型の訂正</td><td>小。見分け方: 原文が elementary と書く / 原文に当たれば決まる</td></tr>
+<tr><td><b>4. 語彙の不在</b></td><td>procession-normalization</td><td>★最も重い。中層を作るまで手が付かない</td></tr>
+<tr><td><b>5. mathlib にそのものがある</b></td><td>integral / saturated / essential image</td><td>★最小</td></tr>
 </table>
 <ul>
 <li><b>Corollary 3.12 から実物まで届く鎖が1本ある</b> — <code>cor_3_12 → Thm 3.11 → [AbsTopIII] Cor 5.10 → Prop 5.7 → Found/LogVolume.lean</code></li>
@@ -92,6 +116,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>b918be5</code></td><td>2026-08-15</td><td>層0を仕分けた——壁の種類は5つになり、着手できるものを6件名指しできた</td></tr>
 <tr><td><code>5a4f24a</code></td><td>2026-08-15</td><td>§0 の抽出を強化した——行末ハイフン分割と冠詞なしの定義文型が主因だった</td></tr>
 <tr><td><code>fcf1842</code></td><td>2026-08-15</td><td>§0(Notations and Conventions)をグラフに入れた——層0から中層が動き始めた</td></tr>
 <tr><td><code>6d342ce</code></td><td>2026-08-15</td><td>公開の準備: 第三者の著作物を除外し、状況を確認できる index.html を用意した</td></tr>
@@ -103,7 +128,6 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <tr><td><code>1ad7957</code></td><td>2026-08-15</td><td>引用キーを論文ごとに解決した——そしてグラフが中層を過小表示していると判明した</td></tr>
 <tr><td><code>5f41b2f</code></td><td>2026-08-15</td><td>左右が反転していたのを直し、クリックで依存をハイライトするようにした</td></tr>
 <tr><td><code>a94e670</code></td><td>2026-08-15</td><td>辺を「証明が依拠しているもの」に定め直して図を再生成——大循環は消え、55 層に展開した</td></tr>
-<tr><td><code>de064f8</code></td><td>2026-08-15</td><td>循環は理論の循環ではなかった——辺の定義の副作用で、論文をまたぐ循環は完全に消える</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
