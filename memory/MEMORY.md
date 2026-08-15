@@ -1,4 +1,5 @@
 - [メモリはプロジェクト内に置く](memory-lives-in-project-dir.md) — D:\Math_ABC3\memory\ が本体。既定の隠しフォルダにはポインタ1行のみ。
 - [ABC3は過去世代と無関係](abc3-independent-of-prior-generations.md) — D:\Math_ABC / Math_ABC2 を根拠に使わない。残存ファイルが参照していても辿らない。
 - [ABC3の計画の骨子](abc3-plan-two-track.md) — 北極星はIUT全体+abc。2トラック・statementゲート・axiom禁止・飛躍は追加仮説として型に出す。
+- [充満部分圏を Lean で扱う3手順](lean-fullsubcat-procedures.md) — rw禁止・inv禁止・include F。★手順2の例外条件つき(主張に inv が現れるときだけ)。
 - [争点はCor 3.12に集中](abc3-disputed-locus-cor312.md) — Scholze–Stix「自明化」とJoshi「witness不足」が、G3/G2ゲートとそのまま対応する。

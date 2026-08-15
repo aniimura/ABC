@@ -1260,7 +1260,582 @@ theorem istr_otriBase {A B : Istr P} (φ φ' : A ⟶ B)
       (isCoAngular_of_isotropic_dom P F A.property _) hst' hbase α.hom hα β.hom hβ
       (congrArg InducedCategory.Hom.hom h))
 
+include F in
+/-- ★**base-identity 自己射を保つ**。四角形の `Base` 成分で `Base (hullMap)` を消す。 -/
+theorem isotropification_baseIdentity {A : C} (e : A ⟶ A) (h : IsBaseIdentity P e) :
+    IsBaseIdentity P (istrMap P F e) := by
+  haveI hb : IsIso (P.Base (hullMap P F A)) := (hullMap_spec P F A).2.1.2
+  have hsq := congrArg P.Base (isotropification_square P F e)
+  rw [P.Base_comp, P.Base_comp] at hsq
+  have he : P.Base e = 𝟙 _ := h.trans (P.Base_id A)
+  show P.Base (istrMap P F e) = P.Base (𝟙 _)
+  rw [P.Base_id]
+  refine (cancel_epi (P.Base (hullMap P F A))).mp ?_
+  rw [hsq, he, Category.id_comp, Category.comp_id]
+
+include F in
+/-- **(i)(a)** の移送(★**後ろ向き** —— isotropification が要る)。
+
+`𝒞` で得た Frobenius-trivial な対象 `A₀` の isotropic hull を取る。
+* Frobenius-trivial の `ζ` は **isotropification が関手であること**でそのまま運べる
+* 底の同型は `Base (hullMap)` が同型であることで繋ぐ -/
+theorem istr_baseSurj (Y : D) :
+    ∃ A : Istr P, IsFrobeniusTrivial (istrPre P) A ∧
+      Nonempty (((istrPre P).toElem.obj A).base ≅ Y) := by
+  obtain ⟨A₀, ⟨ζ, hdeg, hprop⟩, ⟨e⟩⟩ := F.baseSurj Y
+  haveI hb : IsIso (P.Base (hullMap P F A₀)) := (hullMap_spec P F A₀).2.1.2
+  refine ⟨hullIstr P F A₀, ⟨⟨⟨fun n => (isotropification P F).map (ζ n), ?_⟩, ?_⟩, ?_, ?_⟩,
+    ⟨(asIso (P.Base (hullMap P F A₀))).symm ≪≫ e⟩⟩
+  · show (isotropification P F).map (ζ 1) = 𝟙 _
+    rw [show ζ 1 = 𝟙 A₀ from ζ.map_one]
+    exact (isotropification P F).map_id _
+  · intro m n
+    show (isotropification P F).map (ζ (m * n))
+      = (isotropification P F).map (ζ n) ≫ (isotropification P F).map (ζ m)
+    rw [ζ.map_mul]
+    exact (isotropification P F).map_comp (ζ n) (ζ m)
+  · intro n
+    show P.degFr (istrMap P F (ζ n)) = n
+    rw [isotropification_degFr]
+    exact hdeg n
+  · intro n
+    exact ⟨isotropification_baseIdentity P F (ζ n) (hprop n).1,
+      (istr_frobType_iff P F _).mpr (isotropification_frobType P F (ζ n) (hprop n).2)⟩
+
+include F in
+/-- **(i)(b)** の移送(★**後ろ向き** —— isotropification が要る)。
+
+`𝒞` で得た span `X₀ ⟶ A.obj`, `X₀ ⟶ B.obj` を isotropification で運び、
+`A`, `B` が既に isotropic なので `hullMap` の逆で戻す。
+
+★★**手順2(`inv` を書かない)の例外条件**: **主張そのものが
+`@inv _ _ _ _ (Base φ) hφ.2` を含む**ので避けられない。
+`IsIso.eq_inv_comp` を**インスタンスを明示して**当てる形で扱う。
+★一方、証明の中で使う逆射はすべて `IsIso.out` から明示的に取り、`inv` は書かない。
+★**手順は固定するものではなく、反例が出たら条件を精密化するもの** という形の一例。 -/
+theorem istr_preStepSpan (A B : Istr P)
+    (α : ((istrPre P).toElem.obj A).base ⟶ ((istrPre P).toElem.obj B).base) (hα : IsIso α) :
+    ∃ (X : Istr P) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep (istrPre P) φ),
+      IsPreStep (istrPre P) ψ ∧
+        α = @inv _ _ _ _ ((istrPre P).Base φ) hφ.2 ≫ (istrPre P).Base ψ := by
+  obtain ⟨X₀, φ₀, ψ₀, hφ₀, hψ₀, heq⟩ := F.preStepSpan A.obj B.obj α hα
+  haveI hmA : IsIso (hullMap P F A.obj) := hullMap_isIso P F A.obj A.property
+  haveI hmB : IsIso (hullMap P F B.obj) := hullMap_isIso P F B.obj B.property
+  obtain ⟨wA, hwA1, -⟩ := hmA.out
+  obtain ⟨wB, hwB1, -⟩ := hmB.out
+  haveI hiA : IsIso wA := ⟨hullMap P F A.obj, by
+      refine (cancel_epi (hullMap P F A.obj)).mp ?_
+      rw [← Category.assoc, hwA1, Category.id_comp, Category.comp_id], hwA1⟩
+  haveI hiB : IsIso wB := ⟨hullMap P F B.obj, by
+      refine (cancel_epi (hullMap P F B.obj)).mp ?_
+      rw [← Category.assoc, hwB1, Category.id_comp, Category.comp_id], hwB1⟩
+  haveI hXb : IsIso (P.Base (hullMap P F X₀)) := (hullMap_spec P F X₀).2.1.2
+  obtain ⟨v, hv1, hv2⟩ := hXb.out
+  -- ★`Base` の計算: hull を通しても `v` を挟むだけ
+  have key : ∀ (Z : C) (f : X₀ ⟶ Z) (w : hullObj P F Z ⟶ Z),
+      hullMap P F Z ≫ w = 𝟙 Z → P.Base (istrMap P F f ≫ w) = v ≫ P.Base f := by
+    intro Z f w hw
+    refine (cancel_epi (P.Base (hullMap P F X₀))).mp ?_
+    have hsq := congrArg P.Base (isotropification_square P F f)
+    rw [P.Base_comp, P.Base_comp] at hsq
+    calc P.Base (hullMap P F X₀) ≫ P.Base (istrMap P F f ≫ w)
+        = P.Base (hullMap P F X₀) ≫ (P.Base (istrMap P F f) ≫ P.Base w) := by
+          rw [P.Base_comp]
+      _ = (P.Base (hullMap P F X₀) ≫ P.Base (istrMap P F f)) ≫ P.Base w :=
+          (Category.assoc _ _ _).symm
+      _ = (P.Base f ≫ P.Base (hullMap P F Z)) ≫ P.Base w := by rw [hsq]
+      _ = P.Base f ≫ (P.Base (hullMap P F Z) ≫ P.Base w) := Category.assoc _ _ _
+      _ = P.Base f ≫ P.Base (hullMap P F Z ≫ w) := by rw [P.Base_comp]
+      _ = P.Base f ≫ P.Base (𝟙 Z) := by rw [hw]
+      _ = P.Base f := by rw [P.Base_id, Category.comp_id]
+      _ = (P.Base (hullMap P F X₀) ≫ v) ≫ P.Base f := by rw [hv1, Category.id_comp]
+      _ = P.Base (hullMap P F X₀) ≫ (v ≫ P.Base f) := Category.assoc _ _ _
+  have hpsA : IsPreStep P (istrMap P F φ₀ ≫ wA) :=
+    IsPreStep.comp P ((isotropification_preStep_iff P F φ₀).mpr hφ₀)
+      (isPreStep_of_isIso P wA)
+  have hpsB : IsPreStep P (istrMap P F ψ₀ ≫ wB) :=
+    IsPreStep.comp P ((isotropification_preStep_iff P F ψ₀).mpr hψ₀)
+      (isPreStep_of_isIso P wB)
+  refine ⟨hullIstr P F X₀, InducedCategory.homMk (istrMap P F φ₀ ≫ wA),
+    InducedCategory.homMk (istrMap P F ψ₀ ≫ wB), hpsA, hpsB, ?_⟩
+  -- `heq` を `Base φ₀ ≫ α = Base ψ₀` に直す
+  have heq' : P.Base φ₀ ≫ α = P.Base ψ₀ :=
+    (@IsIso.eq_inv_comp _ _ _ _ _ (P.Base φ₀) hφ₀.2 _ _).mp heq
+  refine (@IsIso.eq_inv_comp _ _ _ _ _ ((istrPre P).Base
+    (InducedCategory.homMk (istrMap P F φ₀ ≫ wA) : hullIstr P F X₀ ⟶ A)) hpsA.2 _ _).mpr ?_
+  show P.Base (istrMap P F φ₀ ≫ wA) ≫ α = P.Base (istrMap P F ψ₀ ≫ wB)
+  rw [key A.obj φ₀ wA hwA1, key B.obj ψ₀ wB hwB1, Category.assoc, heq']
+  rfl
+
+/-! ### ★**(i)(c) の圏同値の移送** —— 21 条の最後 -/
+
+include F in
+/-- 補助: `(𝒞^istr)^pl-bk` の `A` 上の対象を `𝒞^pl-bk` の `A.obj` 上へ運ぶ。
+
+★ここで **`istr_isPullBack_to`(難しい向き)** を使う。 -/
+def istrPlBkToC (A : Istr P) (Z : Over (⟨A⟩ : PlBk (istrPre P))) :
+    Over (⟨A.obj⟩ : PlBk P) :=
+  Over.mk (⟨Z.hom.hom.hom, istr_isPullBack_to P F Z.hom.hom Z.hom.property⟩ :
+    (⟨Z.left.obj.obj⟩ : PlBk P) ⟶ (⟨A.obj⟩ : PlBk P))
+
+include F in
+/-- 補助: 射のほうの運搬。 -/
+def istrPlBkToCMap {A : Istr P} {Z W : Over (⟨A⟩ : PlBk (istrPre P))} (h : Z ⟶ W) :
+    istrPlBkToC P F A Z ⟶ istrPlBkToC P F A W :=
+  Over.homMk (⟨h.left.hom.hom, istr_isPullBack_to P F h.left.hom h.left.property⟩ :
+      (⟨Z.left.obj.obj⟩ : PlBk P) ⟶ (⟨W.left.obj.obj⟩ : PlBk P))
+    (by
+      have hw : h.left.hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w h)
+      have hw2 : h.left.hom.hom ≫ W.hom.hom.hom = Z.hom.hom.hom :=
+        congrArg InducedCategory.Hom.hom hw
+      exact InducedWideCategory.Hom.ext hw2)
+
+include F in
+/-- **(i)(c)** の移送。★`𝒞^istr` は `𝒞` の**充満**部分圏なので、
+`(𝒞^istr)^pl-bk` の `A` 上のスライスは `𝒞^pl-bk` の `A.obj` 上のスライスと
+**圏として一致する** —— 対象が一致するのは
+`isotropic_dom_of_pullBack`(isotropic への pull-back の始域は isotropic)による。
+
+★充満性・忠実性・本質的全射性の**3つとも** `F.plBkEquiv A.obj` から来る。 -/
+theorem istr_plBkEquiv (A : Istr P) :
+    (plBkOverFunctor (istrPre P) A).IsEquivalence := by
+  haveI := F.plBkEquiv A.obj
+  haveI hfaith : (plBkOverFunctor (istrPre P) A).Faithful := by
+    constructor
+    intro Z W f g hfg
+    have hb : (istrPre P).Base f.left.hom = (istrPre P).Base g.left.hom :=
+      congrArg CommaMorphism.left hfg
+    have hmap : (plBkOverFunctor P A.obj).map (istrPlBkToCMap P F f)
+        = (plBkOverFunctor P A.obj).map (istrPlBkToCMap P F g) :=
+      Over.OverMorphism.ext hb
+    have h2 := (plBkOverFunctor P A.obj).map_injective hmap
+    have h3 : f.left.hom.hom = g.left.hom.hom :=
+      congrArg (fun x => InducedWideCategory.Hom.hom (CommaMorphism.left x)) h2
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext (InducedCategory.hom_ext h3))
+  haveI hfull : (plBkOverFunctor (istrPre P) A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨f', hf'⟩ := (plBkOverFunctor P A.obj).map_surjective
+      (show (plBkOverFunctor P A.obj).obj (istrPlBkToC P F A Z) ⟶
+          (plBkOverFunctor P A.obj).obj (istrPlBkToC P F A W) from h)
+    have hw : f'.left.hom ≫ W.hom.hom.hom = Z.hom.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f')
+    refine ⟨Over.homMk (⟨InducedCategory.homMk f'.left.hom,
+        istr_isPullBack_of P (InducedCategory.homMk f'.left.hom) f'.left.property⟩ :
+        Z.left ⟶ W.left)
+      (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), ?_⟩
+    exact Over.OverMorphism.ext (congrArg CommaMorphism.left hf')
+  haveI hess : (plBkOverFunctor (istrPre P) A).EssSurj := by
+    constructor
+    intro Y
+    obtain ⟨Z', hZ'⟩ : ∃ Z' : Over (⟨A.obj⟩ : PlBk P),
+        Z' = (plBkOverFunctor P A.obj).objPreimage Y := ⟨_, rfl⟩
+    have hiZ : (plBkOverFunctor P A.obj).obj Z' ≅ Y := by
+      rw [hZ']; exact (plBkOverFunctor P A.obj).objObjPreimageIso Y
+    have hiso : IsIsotropic P Z'.left.obj :=
+      isotropic_dom_of_pullBack P F Z'.hom.hom Z'.hom.property A.property
+    refine ⟨Over.mk (⟨(InducedCategory.homMk Z'.hom.hom :
+          (⟨Z'.left.obj, hiso⟩ : Istr P) ⟶ A),
+        istr_isPullBack_of P _ Z'.hom.property⟩ :
+      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : PlBk (istrPre P)) ⟶ (⟨A⟩ : PlBk (istrPre P))), ?_⟩
+    exact ⟨hiZ⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+include F in
+/-- ★★★**`𝒞^istr` は `Definition 1.3` の core 21 条をすべて満たす**。
+
+原文 (FrdI p.32):
+> (v) Cistr [equipped with the restriction to C of the given functor C →FΦ] is a
+
+★**21 条のうち 19 条は「前向き」で自動**((vii)(b) が `𝒞^istr` を閉じるから)、
+**2 条だけが「後ろ向き」**で isotropification を要した(`baseSurj` / `preStepSpan`)。
+`plBkEquiv` は両向きが要った(`istr_isPullBack_to` が随伴を使う)。 -/
+theorem istr_frobenioidCore : FrobenioidCore (istrPre P) where
+  baseSurj := istr_baseSurj P F
+  preStepSpan := istr_preStepSpan P F
+  plBkEquiv := istr_plBkEquiv P F
+  frobDegSurj := istr_frobDegSurj P F
+  frobDegUniq := istr_frobDegUniq P F
+  coAngularComp := istr_coAngularComp P F
+  coAngularOfPreStep := fun α hca hst φ => istr_coAngularOfPreStep P F α hca hst φ
+  otriFwd := fun φ _ hst α hα => istr_otriFwd P F φ hst α hα
+  otriBwd := fun φ _ hst β hβ => istr_otriBwd P F φ hst β hβ
+  otriBase := fun φ φ' _ hst _ hst' hbase α hα β hβ h =>
+    istr_otriBase P F φ φ' hst hst' hbase α hα β hβ h
+  arbFactor := istr_arbFactor P F
+  arbFactorUniq := istr_arbFactorUniq P F
+  pullBackLB := fun α h => istr_pullBackLB P F α h
+  preStepMono := istr_preStepMono P F
+  preStepFactor := istr_preStepFactor P F
+  preStepFactorUniq := istr_preStepFactorUniq P F
+  preStepFactor' := istr_preStepFactor' P F
+  preStepFactorUniq' := istr_preStepFactorUniq' P F
+  faithfulUpToUnits := istr_faithfulUpToUnits P F
+  isotropicHullExists := istr_isotropicHullExists P F
+  isotropicClosed := istr_isotropicClosed P F
+
+/-! ### ★**(iii)(d) の圏同値2本の移送**
+
+★`plBkEquiv` と**同じ形**である: 忠実性だけは `𝒞^istr` の中で直接出て
+(全射性/単射性 —— `𝒞^istr` も totally epimorphic、pre-step も mono)、
+**充満性と本質的全射性は `𝒞` 側の同値から引く**。
+違うのは「対象が `𝒞^istr` に残ること」を言う補題だけ:
+
+* コスライス側は **`isotropicClosed`**(前向き、自明)、
+* スライス側は **`Proposition 1.9, (iv)`**(co-angular pre-step は co-angular linear)。
+-/
+
+section CoaPre
+
+variable [(coaPreProp P).IsMultiplicative] [(coaPreProp (istrPre P)).IsMultiplicative]
+
+include F in
+/-- 補助: `_A(𝒞^istr,coa-pre)` の対象を `_{A.obj}(𝒞^coa-pre)` へ。 -/
+def istrCoaPreUnder (A : Istr P)
+    (Z : Under (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))) :
+    Under (⟨A.obj⟩ : WideSubcategory (coaPreProp P)) :=
+  Under.mk (⟨Z.hom.hom.hom,
+      isCoAngular_of_isotropic_dom P F A.property _, Z.hom.property.2⟩ :
+    (⟨A.obj⟩ : WideSubcategory (coaPreProp P)) ⟶
+      (⟨Z.right.obj.obj⟩ : WideSubcategory (coaPreProp P)))
+
+include F in
+/-- 補助: `(𝒞^istr,coa-pre)_A` の対象を `(𝒞^coa-pre)_{A.obj}` へ。 -/
+def istrCoaPreOver (A : Istr P)
+    (Z : Over (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))) :
+    Over (⟨A.obj⟩ : WideSubcategory (coaPreProp P)) :=
+  Over.mk (⟨Z.hom.hom.hom,
+      isCoAngular_of_isotropic_dom P F Z.left.obj.property _, Z.hom.property.2⟩ :
+    (⟨Z.left.obj.obj⟩ : WideSubcategory (coaPreProp P)) ⟶
+      (⟨A.obj⟩ : WideSubcategory (coaPreProp P)))
+
+include F in
+/-- **(iii)(d)** コスライス側の移送。 -/
+theorem istr_coaPreUnderEquiv
+    (hC : ∀ A : C, (coaPreUnderFunctor P A).IsEquivalence) (A : Istr P) :
+    (coaPreUnderFunctor (istrPre P) A).IsEquivalence := by
+  haveI := hC A.obj
+  haveI hfaith : (coaPreUnderFunctor (istrPre P) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : Z.hom.hom ≫ f.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w f)
+    have h2 : Z.hom.hom ≫ g.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w g)
+    haveI : Epi Z.hom.hom := (istrPre P).totEpiC _ _ _
+    exact Under.UnderMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_epi Z.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreUnderFunctor (istrPre P) A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨f', -⟩ := (coaPreUnderFunctor P A.obj).map_surjective
+      (show (coaPreUnderFunctor P A.obj).obj (istrCoaPreUnder P F A Z) ⟶
+          (coaPreUnderFunctor P A.obj).obj (istrCoaPreUnder P F A W) from h)
+    have hw : Z.hom.hom.hom ≫ f'.right.hom = W.hom.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w f')
+    refine ⟨Under.homMk (⟨(InducedCategory.homMk f'.right.hom :
+          Z.right.obj ⟶ W.right.obj),
+        ⟨istr_coAngular P _, f'.right.property.2⟩⟩ : Z.right ⟶ W.right)
+      (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), Subsingleton.elim _ _⟩
+  haveI hess : (coaPreUnderFunctor (istrPre P) A).EssSurj := by
+    constructor
+    intro Y
+    obtain ⟨Z', hZ'⟩ : ∃ Z' : Under (⟨A.obj⟩ : WideSubcategory (coaPreProp P)),
+        Z' = (coaPreUnderFunctor P A.obj).objPreimage Y := ⟨_, rfl⟩
+    have hiZ : (coaPreUnderFunctor P A.obj).obj Z' ≅ Y := by
+      rw [hZ']; exact (coaPreUnderFunctor P A.obj).objObjPreimageIso Y
+    have hiso : IsIsotropic P Z'.right.obj := F.isotropicClosed Z'.hom.hom A.property
+    exact ⟨Under.mk (⟨(InducedCategory.homMk Z'.hom.hom :
+          A ⟶ (⟨Z'.right.obj, hiso⟩ : Istr P)),
+        ⟨istr_coAngular P _, Z'.hom.property.2⟩⟩ :
+      (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P))) ⟶
+        (⟨(⟨Z'.right.obj, hiso⟩ : Istr P)⟩ :
+          WideSubcategory (coaPreProp (istrPre P)))), ⟨hiZ⟩⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+include F in
+/-- **(iii)(d)** スライス側の移送。★対象が `𝒞^istr` に残ることに
+**`Proposition 1.9, (iv)` を使う** —— co-angular pre-step は co-angular linear なので、
+終域が isotropic なら始域も isotropic。 -/
+theorem istr_coaPreOverEquiv
+    (hC : ∀ A : C, (coaPreOverFunctor P A).IsEquivalence) (A : Istr P) :
+    (coaPreOverFunctor (istrPre P) A).IsEquivalence := by
+  haveI := hC A.obj
+  haveI hfaith : (coaPreOverFunctor (istrPre P) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have h2 : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    haveI : Mono W.hom.hom := istr_preStepMono P F _ W.hom.property.2
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_mono W.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreOverFunctor (istrPre P) A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨f', -⟩ := (coaPreOverFunctor P A.obj).map_surjective
+      (show (coaPreOverFunctor P A.obj).obj (istrCoaPreOver P F A Z) ⟶
+          (coaPreOverFunctor P A.obj).obj (istrCoaPreOver P F A W) from h)
+    have hw : f'.left.hom ≫ W.hom.hom.hom = Z.hom.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f')
+    refine ⟨Over.homMk (⟨(InducedCategory.homMk f'.left.hom :
+          Z.left.obj ⟶ W.left.obj),
+        ⟨istr_coAngular P _, f'.left.property.2⟩⟩ : Z.left ⟶ W.left)
+      (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), Subsingleton.elim _ _⟩
+  haveI hess : (coaPreOverFunctor (istrPre P) A).EssSurj := by
+    constructor
+    intro Y
+    obtain ⟨Z', hZ'⟩ : ∃ Z' : Over (⟨A.obj⟩ : WideSubcategory (coaPreProp P)),
+        Z' = (coaPreOverFunctor P A.obj).objPreimage Y := ⟨_, rfl⟩
+    have hiZ : (coaPreOverFunctor P A.obj).obj Z' ≅ Y := by
+      rw [hZ']; exact (coaPreOverFunctor P A.obj).objObjPreimageIso Y
+    have hiso : IsIsotropic P Z'.left.obj :=
+      (prop_1_9_iv P F Z'.hom.hom Z'.hom.property.1 Z'.hom.property.2.1).mpr A.property
+    exact ⟨Over.mk (⟨(InducedCategory.homMk Z'.hom.hom :
+          (⟨Z'.left.obj, hiso⟩ : Istr P) ⟶ A),
+        ⟨istr_coAngular P _, Z'.hom.property.2⟩⟩ :
+      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : WideSubcategory (coaPreProp (istrPre P))) ⟶
+        (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))), ⟨hiZ⟩⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+end CoaPre
+
+/-- ★★★**`Proposition 1.9, (v)`** —— `𝒞^istr` は Frobenioid である。 -/
+theorem istr_frobenioid (G : Frobenioid P) : Frobenioid (istrPre P) := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := coaPreProp_isMultiplicative (istrPre P)
+    (istr_frobenioidCore P G.core).coAngularComp
+  exact ⟨istr_frobenioidCore P G.core,
+    istr_coaPreUnderEquiv P G.core G.coaPreUnderEquiv,
+    istr_coaPreOverEquiv P G.core G.coaPreOverEquiv⟩
+
 end Istr
+
+/-! ## ★第4段 —— (ii)(iii) の梱包: `φ_*` と `φ^*` を `Functor` にする
+
+原文 (FrdI p.31):
+> (ii) Any base-isomorphism φ : A →B of C induces a functor [well-defined
+
+原文 (FrdI p.31):
+> (iii) Any pull-back morphism φ : A →B of C induces a functor [well-
+
+★★**測定**: 関手の**対象の割り当てにだけ選択が要り**、
+**射の割り当ては一意**(`imtrPre_hom_uniq`)、
+**関手則(`map_id` / `map_comp`)は無料**である ——
+`𝒞^imtr-pre_A` の hom 集合が**高々1元**だからである。
+★原文の「[well-defined up to isomorphism]」という但し書きは
+**対象の割り当てだけに掛かる**。
+-/
+
+section ImtrPreFunctor
+
+variable (F : FrobenioidCore P)
+
+include F in
+/-- ★★**`𝒞^imtr-pre_A` は thin**(hom 集合が高々1元)。
+
+★`Definition 1.3, (v), (a)`(pre-step は mono)だけから出る。
+これにより `φ_*` / `φ^*` の**忠実性と関手則が無料**になる。
+
+★**手順3**(移送・補助補題を書くときは最初に `include F in`)—— ここでも同じ。 -/
+theorem imtrPreOver_hom_subsingleton {A : C} {Z W : Over (⟨A⟩ : ImtrPre P)} (f g : Z ⟶ W) :
+    f = g :=
+  Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+    (imtrPre_hom_uniq P F Z.hom.hom W.hom.hom W.hom.property.2 _ _
+      (congrArg InducedWideCategory.Hom.hom (Over.w f))
+      (congrArg InducedWideCategory.Hom.hom (Over.w g))))
+
+/-! ### `φ_*`(base-isomorphism から) -/
+
+/-- ★分解の左因子(co-angular base-isomorphism)。 -/
+noncomputable def pushMid {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    {Cc : C} (ε : Cc ⟶ A) (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    Cc ⟶ pushObj P F φ hφ ε hεi hεs :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose
+
+theorem pushFac {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    {Cc : C} (ε : Cc ⟶ A) (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    ε ≫ φ = pushMid P F φ hφ ε hεi hεs ≫ pushHom P F φ hφ ε hεi hεs :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose_spec.choose_spec.1
+
+theorem pushMid_spec {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    {Cc : C} (ε : Cc ⟶ A) (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    IsCoAngular P (pushMid P F φ hφ ε hεi hεs) ∧
+      IsBaseIsomorphism P (pushMid P F φ hφ ε hεi hεs) :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose_spec.choose_spec.2.1
+
+/-- ★`φ_*` の射への割り当て。★**選択は要らない**が、`∃` から取るので
+`.choose` を使う —— 一意性は `imtrPre_hom_uniq` にある。 -/
+noncomputable def pushMap {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    {Z W : Over (⟨A⟩ : ImtrPre P)} (f : Z ⟶ W) :
+    pushObj P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2 ⟶
+      pushObj P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2 :=
+  (prop_1_9_ii_hom P F φ
+    Z.hom.hom (pushMid P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+      (pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    W.hom.hom (pushMid P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+      (pushHom P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pushFac P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    (pushMid_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushMid_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushFac P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pushMid_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).2
+    (pushHom_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).1
+    (pushHom_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).2
+    f.left.hom f.left.property.2
+    (congrArg InducedWideCategory.Hom.hom (Over.w f))).choose
+
+theorem pushMap_spec {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    {Z W : Over (⟨A⟩ : ImtrPre P)} (f : Z ⟶ W) :
+    (IsIsometric P (pushMap P F φ hφ f) ∧ IsPreStep P (pushMap P F φ hφ f)) ∧
+      pushMap P F φ hφ f ≫
+          pushHom P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2 =
+        pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2 :=
+  (prop_1_9_ii_hom P F φ
+    Z.hom.hom (pushMid P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+      (pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    W.hom.hom (pushMid P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+      (pushHom P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pushFac P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    (pushMid_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushMid_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushFac P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pushMid_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).2
+    (pushHom_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).1
+    (pushHom_spec P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2).2
+    f.left.hom f.left.property.2
+    (congrArg InducedWideCategory.Hom.hom (Over.w f))).choose_spec
+
+/-- ★★**`φ_* : 𝒞^imtr-pre_A ⥤ 𝒞^imtr-pre_B`**(`φ` は base-isomorphism)。 -/
+noncomputable def pushFunctor {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ) :
+    Over (⟨A⟩ : ImtrPre P) ⥤ Over (⟨B⟩ : ImtrPre P) where
+  obj Z := Over.mk (⟨pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2,
+      pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ :
+    (⟨pushObj P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ : ImtrPre P) ⟶
+      (⟨B⟩ : ImtrPre P))
+  map {Z W} f := Over.homMk (⟨pushMap P F φ hφ f, (pushMap_spec P F φ hφ f).1⟩ :
+      (⟨pushObj P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ : ImtrPre P) ⟶
+        (⟨pushObj P F φ hφ W.hom.hom W.hom.property.1 W.hom.property.2⟩ : ImtrPre P))
+    (InducedWideCategory.Hom.ext (pushMap_spec P F φ hφ f).2)
+  map_id _ := imtrPreOver_hom_subsingleton P F _ _
+  map_comp _ _ := imtrPreOver_hom_subsingleton P F _ _
+
+/-! ### `φ^*`(pull-back morphism から) -/
+
+noncomputable def pullObj {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) : C :=
+  (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose
+
+noncomputable def pullHom {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    pullObj P F φ hpb δ hδi hδs ⟶ A :=
+  (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose
+
+/-- ★四角形の下辺(pull-back)。 -/
+noncomputable def pullPsi {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    pullObj P F φ hpb δ hδi hδs ⟶ Dd :=
+  (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose_spec.choose
+
+theorem pullFac {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    pullHom P F φ hpb δ hδi hδs ≫ φ = pullPsi P F φ hpb δ hδi hδs ≫ δ :=
+  (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose_spec.choose_spec.1
+
+theorem pullPsi_spec {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    IsPullBack P (pullPsi P F φ hpb δ hδi hδs) :=
+  (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose_spec.choose_spec.2.1
+
+theorem pullHom_spec {A B Dd : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    IsIsometric P (pullHom P F φ hpb δ hδi hδs) ∧
+      IsPreStep P (pullHom P F φ hpb δ hδi hδs) :=
+  ⟨(prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose_spec.choose_spec.2.2.1,
+   (prop_1_9_iii_lift P F φ hpb δ hδi hδs).choose_spec.choose_spec.choose_spec.2.2.2⟩
+
+/-- ★`φ^*` の射への割り当て。 -/
+noncomputable def pullMap {A B : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    {Z W : Over (⟨B⟩ : ImtrPre P)} (f : Z ⟶ W) :
+    pullObj P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ⟶
+      pullObj P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2 :=
+  (prop_1_9_iii_hom P φ hpb W.hom.hom W.hom.property.2
+    (pullHom P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    (pullPsi P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≫ f.left.hom)
+    (pullHom P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pullPsi P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (by
+      have hw : (Over.Hom.left f).hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w f)
+      rw [pullFac P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2, Category.assoc, hw])
+    (pullFac P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pullHom_spec P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2).2
+    (pullPsi_spec P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)).choose
+
+theorem pullMap_tri {A B : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    {Z W : Over (⟨B⟩ : ImtrPre P)} (f : Z ⟶ W) :
+    pullMap P F φ hpb f ≫
+        pullHom P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2 =
+      pullHom P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2 :=
+  (prop_1_9_iii_hom P φ hpb W.hom.hom W.hom.property.2
+    (pullHom P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+    (pullPsi P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≫ f.left.hom)
+    (pullHom P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pullPsi P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (by
+      have hw : (Over.Hom.left f).hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w f)
+      rw [pullFac P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2, Category.assoc, hw])
+    (pullFac P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)
+    (pullHom_spec P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2).2
+    (pullPsi_spec P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2)).choose_spec.1
+
+/-- ★`pullMap` が本当に isometric pre-step であることは
+**`Proposition 1.7, (v)`**(合成が属せば因子も属する)から出る ——
+`prop_1_9_iii_hom` はそこまでは言わない。 -/
+theorem pullMap_spec {A B : C} (φ : A ⟶ B) (hpb : IsPullBack P φ)
+    {Z W : Over (⟨B⟩ : ImtrPre P)} (f : Z ⟶ W) :
+    IsIsometric P (pullMap P F φ hpb f) ∧ IsPreStep P (pullMap P F φ hpb f) := by
+  have ht := pullMap_tri P F φ hpb f
+  have h1 := (pullHom_spec P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+  have h2 := (pullHom_spec P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+  rw [← ht] at h1 h2
+  exact ⟨(prop_1_7_v_isometric P _ _ h1).1, (prop_1_7_v_preStep P _ _ h2).1⟩
+
+/-- ★★**`φ^* : 𝒞^imtr-pre_B ⥤ 𝒞^imtr-pre_A`**(`φ` は pull-back morphism)。 -/
+noncomputable def pullFunctor {A B : C} (φ : A ⟶ B) (hpb : IsPullBack P φ) :
+    Over (⟨B⟩ : ImtrPre P) ⥤ Over (⟨A⟩ : ImtrPre P) where
+  obj Z := Over.mk (⟨pullHom P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2,
+      pullHom_spec P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ :
+    (⟨pullObj P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ : ImtrPre P) ⟶
+      (⟨A⟩ : ImtrPre P))
+  map {Z W} f := Over.homMk (⟨pullMap P F φ hpb f, pullMap_spec P F φ hpb f⟩ :
+      (⟨pullObj P F φ hpb Z.hom.hom Z.hom.property.1 Z.hom.property.2⟩ : ImtrPre P) ⟶
+        (⟨pullObj P F φ hpb W.hom.hom W.hom.property.1 W.hom.property.2⟩ : ImtrPre P))
+    (InducedWideCategory.Hom.ext (pullMap_tri P F φ hpb f))
+  map_id _ := imtrPreOver_hom_subsingleton P F _ _
+  map_comp _ _ := imtrPreOver_hom_subsingleton P F _ _
+
+/-- **`𝒪^×(A)^imtr-pre ⊆ 𝒪^×(A)`** —— `u_*` が恒等関手と同型になる `u` の全体。
+
+原文 (FrdI p.31):
+> the subgroup of v ∈O×(A) for which vimtr-pre is the identity.
+
+★`u ∈ 𝒪^×(A)` は同型なので base-isomorphism、したがって `u_*` が定義できる。 -/
+def OTimesImtrPre (A : C) : Set (End A) :=
+  {u | u ∈ OTimes P A ∧ ∃ hb : IsBaseIsomorphism P (u : A ⟶ A),
+    Nonempty (pushFunctor P F (u : A ⟶ A) hb ≅ 𝟭 (Over (⟨A⟩ : ImtrPre P)))}
+
+theorem otimesImtrPre_subset (A : C) : OTimesImtrPre P F A ⊆ OTimes P A :=
+  fun _ h => h.1
+
+end ImtrPreFunctor
 
 /-! ## ★負の対照 —— (iv) の `co-angular` は落とせない
 
