@@ -1555,4 +1555,58 @@ theorem not_isPerfectMulMonoid_nat : ¬ IsPerfectMulMonoid (Multiplicative ℕ) 
 **残りは上の 1 点だけ**である。
 -/
 
+/-! ### ★★穴が 1 段浅くなった —— mono ではなく `faithfulUpToUnits` だった
+
+前段で親は「残る穴は `ζ n` が mono かどうか」と書いた。★**それは違った。**
+
+★**`Definition 1.3, (vi)`(`faithfulUpToUnits`)が使える**:
+`α` と `β^n` はどちらも `𝒪^▷(A)` の元(base-identity ＋ linear)であり、
+- **base-equivalent**: どちらも `Base = 𝟙`
+- **metrically equivalent**: `ζ n ≫ α = ζ n ≫ β^n` に `Div_comp` を当てると、
+  ★**`ζ n` が Frobenius 型(`Div = 0`)かつ base-identity(`Φ.map 𝟙 = id`)**なので
+  両辺が `Div α`・`Div (β^n)` に潰れる ⟹ **`Div α = Div (β^n)`**
+
+★したがって `faithfulUpToUnits` から ★**`α = β^n ≫ u`(`u ∈ 𝒪^×(A)`)**が出る。
+
+★★**穴は「mono か」から「単元 `u` を吸収できるか」に変わった。**
+★**これは前進である**: mono は**公理に無い**が、単元の吸収は
+**`𝒪^×(A)` が perfect であること**(＝ (iii) の moreover のもう半分)から出るはずで、
+★**同じ条の中で閉じる可能性がある。**
+
+★**測定**: 「残る穴」を型で書いておいたおかげで、★**穴の位置が動いたことがすぐ分かった。**
+散文で「あとは mono が要る」と書いていたら、`faithfulUpToUnits` を試すきっかけが無かった。
+-/
+
+include P in
+/-- ★★**`α` と `β^n` は単元の違いしかない** —— `faithfulUpToUnits` の帰結。
+
+★前段で「mono が要る」と書いた穴が、ここまで浅くなった。 -/
+theorem prop_1_10_iii_otri_upToUnit (F : FrobenioidCore P) {A : C}
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (ζn : End A) (hζb : IsBaseIdentity P ζn) (hζf : IsFrobeniusType P ζn)
+    (α β : End A) (hαb : IsBaseIdentity P α) (hαl : IsLinear P α)
+    (hβb : IsBaseIdentity P β) (hβl : IsLinear P β)
+    (heq : (ζn : A ⟶ A) ≫ (α : A ⟶ A) = (ζn : A ⟶ A) ≫ (β : A ⟶ A)) :
+    ∃ u : End A, u ∈ OTimes P A ∧ (α : A ⟶ A) = (β : A ⟶ A) ≫ (u : A ⟶ A) := by
+  -- `Div α = Div β`
+  have hd : P.Div (α : A ⟶ A) = P.Div (β : A ⟶ A) := by
+    have h := congrArg P.Div heq
+    rw [P.Div_comp, P.Div_comp, show P.Div (ζn : A ⟶ A) = 0 from hζf.1.2,
+      show P.Base (ζn : A ⟶ A) = P.Base (𝟙 A) from hζb, P.Base_id] at h
+    simpa using h
+  -- `α`・`β` は co-angular pre-step
+  have hpre : ∀ γ : End A, IsBaseIdentity P γ → IsLinear P γ → IsPreStep P (γ : A ⟶ A) := by
+    intro γ hb hl
+    refine ⟨hl, ?_⟩
+    show IsIso (P.Base (γ : A ⟶ A))
+    rw [show P.Base (γ : A ⟶ A) = P.Base (𝟙 A) from hb, P.Base_id]
+    infer_instance
+  have hcoa : ∀ γ : End A, IsCoAngular P (γ : A ⟶ A) :=
+    fun γ => prop_1_4_i P (γ : A ⟶ A) (fun X _ => hiso X)
+  exact F.faithfulUpToUnits (α : A ⟶ A) (β : A ⟶ A)
+    (show P.Base (α : A ⟶ A) = P.Base (β : A ⟶ A) by
+      rw [show P.Base (α : A ⟶ A) = P.Base (𝟙 A) from hαb,
+        show P.Base (β : A ⟶ A) = P.Base (𝟙 A) from hβb])
+    hd (hcoa α) (hpre α hαb hαl) (hcoa β) (hpre β hβb hβl)
+
 end ABC3.Found.FrdI
