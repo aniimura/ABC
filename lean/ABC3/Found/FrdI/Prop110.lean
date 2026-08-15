@@ -1287,4 +1287,33 @@ theorem prop_1_10_vi_first (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X
       (fun n φC hbC hftC hdC =>
         prop_1_10_vi_step P G hiso γ hγc hγs n φC hbC hftC hdC))
 
+/-! ## ★★(iii) —— 第1の圏同値も消費する
+
+★**前段では第2(スライス)の圏同値を消費した**(`coaPre_factor_of_mle`)。
+(iii) では **第1(コスライス)の圏同値**を使う。
+関手は `_A(𝒞^coa-pre) ⥤ Order(Φ(A))`、`Z ↦ Div (Z.hom)`。
+
+★**本質的全射性**は「任意の `c ∈ Φ(A)` は、ある co-angular pre-step の `Div` に**同型**」
+を与える。★**`Order` は前順序圏なので、同型 = 両向きの `MLe`。**
+★**そこに `mle_antisymm`(integral ＋ sharp)を当てると等号になる。**
+★★**`divisorial` の 2 つの条件(integral と sharp)が、ここで一緒に効く。**
+-/
+
+include P in
+/-- ★★**第1の圏同値の初の消費** —— `Φ(A)` の任意の元は
+co-angular pre-step の `Div` として実現できる。
+
+★**前順序圏の同型は両向きの `MLe`** なので、`mle_antisymm` で等号に直す。 -/
+theorem coaPre_realize (G : Frobenioid P) (A : C)
+    (c : Φ.val (P.toElem.obj A).base) :
+    ∃ (X : C) (ψ : A ⟶ X), IsCoAngular P ψ ∧ IsPreStep P ψ ∧ P.Div ψ = c := by
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv A
+  obtain ⟨Z, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := coaPreUnderFunctor P A)
+    (toOrderCat c)
+  refine ⟨Z.right.obj, Z.hom.hom, Z.hom.property.1, Z.hom.property.2, ?_⟩
+  refine mle_antisymm (P.divisorial _).1.1 (P.divisorial _).2 ?_ ?_
+  · exact leOfHom e.hom
+  · exact leOfHom e.inv
+
 end ABC3.Found.FrdI
