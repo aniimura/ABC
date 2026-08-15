@@ -463,6 +463,84 @@ theorem prop_1_10_i_exists (F : FrobenioidCore P) {A B A' : C}
     _ = (α ≫ γ') ≫ β₀' ≫ α₀' := by rw [hsq₁]
     _ = α ≫ γ' ≫ β₀' ≫ α₀' := by simp
 
+/-! ## ★★(ii) —— **pre-step と Frobenius 型は順序を入れ替えられる**
+
+原文 (FrdI p.34):
+> (ii) Any composite morphism β ◦α of C, where α is a pre-step, and β is of
+
+原文 (FrdI p.34):
+> Frobenius type, may be written as a composite
+
+★**3 本目の行(「where α′ is a pre-step, and β′ is of Frobenius type such that:」)は
+引用できない**(事故 #3 の 5 度目。`′` が layout モードで消え 6/50 文字で停止)。
+400 dpi 目視では読める。読みは下に日本語で書く。
+
+★**合成の向き**: 原文の `β ◦ α` は「先に `α`、次に `β`」＝ Lean の `α ≫ β`。
+`α′ ◦ β′` は「先に `β′`、次に `α′`」＝ `β′ ≫ α′`。
+★**つまり「pre-step のあと Frobenius 型」を「Frobenius 型のあと pre-step」に組み替える。**
+
+★原文の証明(p.35、目視)は
+> assertion (ii) follows **formally** from assertion (i).
+(直前に「in light of the existence of morphisms of Frobenius type of a given
+Frobenius degree — cf. Definition 1.3, (ii)」と断ってある)。
+
+★★**「formally」の中身は 3 手**:
+1. `A` から次数 `degFr β` の Frobenius 型射 `β′` を取る(`frobDegSurj`)
+2. **(i) の第2の場合**を `φ := α`(pre-step)と縦 `β′` に当てて、
+   `α ≫ β'' = β′ ≫ α''`(`β''` は `X` から出る次数 `degFr β` の Frobenius 型)を得る
+3. `β''` と `β` は **`X` から出る同次数の Frobenius 型射**なので `frobDegUniq` が同型 `ε` を与え、
+   ★**`α′ := α'' ≫ ε`。**
+
+★**原文が「formally」と言うのは正しい** —— 新しい材料は 1 つも要らず、
+**(i) と `Definition 1.3, (ii)` だけで閉じる。**
+★**ただし手数は 3 手ある。**「formally」は「短い」ではなく「新しい材料が要らない」の意味である。
+-/
+
+include P in
+/-- **(ii)** —— `pre-step ≫ Frobenius 型` を `Frobenius 型 ≫ pre-step` に組み替える。
+
+★次数は保たれる(`degFr β′ = degFr β`)。 -/
+theorem prop_1_10_ii (F : FrobenioidCore P) {A X B : C}
+    (α : A ⟶ X) (hα : IsPreStep P α) (β : X ⟶ B) (hβ : IsFrobeniusType P β) :
+    ∃ (Y : C) (β' : A ⟶ Y) (α' : Y ⟶ B),
+      IsFrobeniusType P β' ∧ P.degFr β' = P.degFr β ∧
+      IsPreStep P α' ∧ β' ≫ α' = α ≫ β := by
+  obtain ⟨Y, β', hβ', hdβ'⟩ := F.frobDegSurj A (P.degFr β)
+  obtain ⟨X'', β'', α'', hβ'', hd'', hpre'', hsq⟩ :=
+    prop_1_10_i_exists_preStep P F α hα β' hβ'
+  -- `β''` と `β` は `X` から出る同次数の Frobenius 型射
+  have hdeg : P.degFr β'' = P.degFr β := by rw [hd'', hdβ']
+  obtain ⟨ε, hεiso, hε⟩ := F.frobDegUniq X X'' B β'' β hβ'' hβ hdeg
+  haveI : IsIso ε := hεiso
+  refine ⟨Y, β', α'' ≫ ε, hβ', hdβ',
+    IsPreStep.comp P hpre'' (isPreStep_of_isIso P ε), ?_⟩
+  rw [← Category.assoc, ← hsq, Category.assoc, hε]
+
+/-! ### ★(ii) の `Div` の公式 —— **(i) のものがそのまま使える**
+
+原文 (FrdI p.34):
+> ∗for the bijection induced by applying the functor Φ to the base-
+
+★**公式そのものの行(「Div(α′) = degFr(β) · β′∗(Div(α))」)は引用できない**
+(事故 #3 の 6 度目、5/19 文字で停止)。隣接する `β′∗` の説明行を引く。
+
+★★**(i) で作った `prop_1_10_i_Div_formula` が、四角形の向きを合わせるだけで
+そのまま (ii) に効く。** 対応は
+```
+(i):  φ ≫ β_上 = α_左 ≫ φ′
+(ii): α ≫ β    = β′   ≫ α′
+```
+で、`φ := α`(pre-step)、`β_上 := β`、`α_左 := β′`、`φ′ := α′`。
+
+★**要る仮定は「`β′` と `β` が isometry」**で、どちらも Frobenius 型だから出る。
+★**(i) で「原文が書いていない材料」として明示した isometry が、
+(ii) でも同じ位置に要る** —— つまりあれは (i) 固有の抜けではなく、
+**この形の公式に共通して要るもの**だった。
+
+★**実体は下(`prop_1_10_ii_Div_formula`)に置く** —— (i) の公式を使うので、
+**宣言の順序でそちらが先に要る**。★これは Lean の制約であって数学の順序ではない。
+-/
+
 include P in
 /-- **(i) の `Div` の公式**(`Φ.map (Base α)` を当てた形)。
 
@@ -490,5 +568,18 @@ theorem prop_1_10_i_degFr_eq {A' Z B' : C}
     (ψ : A' ⟶ Z) (γ : Z ⟶ B') [IsIso γ] {n : ℕ+} (hψ : P.degFr ψ = n) :
     P.degFr (ψ ≫ γ) = n := by
   rw [P.degFr_comp, degFr_of_isIso, one_mul, hψ]
+
+include P in
+/-- **(ii) の `Div` の公式**。★(i) のものを向きを合わせて使うだけ。
+
+★★**(i) で「原文が書いていない材料」として明示した isometry が、
+(ii) でも同じ位置に要る** —— つまりあれは (i) 固有の抜けではなく、
+**この形の公式に共通して要るもの**だった。 -/
+theorem prop_1_10_ii_Div_formula {A X B Y : C}
+    (α : A ⟶ X) (β : X ⟶ B) (β' : A ⟶ Y) (α' : Y ⟶ B)
+    (hβ' : IsFrobeniusType P β') (hβ : IsFrobeniusType P β)
+    (hsq : β' ≫ α' = α ≫ β) :
+    Φ.map (P.Base β') (P.Div α') = (P.degFr β : ℕ) • P.Div α :=
+  prop_1_10_i_Div_formula P α β' β α' hβ'.1.2 hβ.1.2 hsq.symm
 
 end ABC3.Found.FrdI
