@@ -581,4 +581,80 @@ theorem prop_1_11_vi_fsm (F : FrobenioidCore P) {A B : C}
   · rintro ⟨hfs, hm⟩
     exact ⟨(prop_1_11_vi_fs P F φ hφ).mpr hfs, (prop_1_11_vi_mono P F φ hφ).mpr hm⟩
 
+include P in
+/-- ★★**(vi) の irreducible の `⟹` 向き** —— pull-back 射が irreducible なら底も。
+
+★**手順**(mono・fiberwise-surjective と同じ骨格):
+1. 底の分解 `Base φ = v ≫ u` の `u` を `plBk_realize` で `𝒞` へ持ち上げ `ψ` を得る
+2. ★**`Definition 1.2, (ii)` の全射性**で `β : A ⟶ X`(`β ≫ ψ = φ`)を作る
+   ——★**第1成分に `φ` 自身を取る**のが今回の工夫
+3. `𝒞` 側の irreducibility を使い、どちらが同型かで場合分けして底へ落とす -/
+theorem prop_1_11_vi_baseIrred_of_irred (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) (hirr : IsIrreducibleMor φ) :
+    IsIrreducibleMor (P.Base φ) := by
+  constructor
+  · intro hiso
+    exact hirr.1 (isIso_of_isPullBack_of_isBaseIso P F φ hφ hiso)
+  · intro Y v u hfac
+    obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F B u
+    haveI : IsIso θ.hom := inferInstance
+    haveI : IsIso θ.inv := inferInstance
+    obtain ⟨_, hsurj⟩ := hψpb A
+    obtain ⟨β, hβ⟩ := hsurj ⟨(φ, v ≫ θ.inv), by
+      rw [hfac, hθ, Category.assoc, ← Category.assoc θ.inv, θ.inv_hom_id,
+        Category.id_comp]⟩
+    have hβ' := congrArg Subtype.val hβ
+    have hβψ : β ≫ ψ = φ := congrArg Prod.fst hβ'
+    have hβb : P.Base β = v ≫ θ.inv := congrArg Prod.snd hβ'
+    rcases hirr.2 X β ψ hβψ.symm with h | h
+    · left
+      haveI := h
+      haveI : IsIso (P.Base β) := by
+        refine ⟨P.Base (inv β), ?_, ?_⟩
+        · rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+        · rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+      rw [hβb] at this
+      exact IsIso.of_isIso_comp_right v θ.inv
+    · right
+      haveI := h
+      haveI : IsIso (P.Base ψ) := by
+        refine ⟨P.Base (inv ψ), ?_, ?_⟩
+        · rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+        · rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+      rw [hθ] at this
+      exact IsIso.of_isIso_comp_left θ.hom u
+
+include P in
+/-- ★★**(vi) の irreducible の `⟸` 向き** —— 底が irreducible なら pull-back 射も。
+
+★★**要点は `Proposition 1.7, (v)`**: **pull-back 射の両因子は pull-back 射である。**
+だから底で同型が出た側を `isIso_of_isPullBack_of_isBaseIso` で `𝒞` へ上げられる。
+
+★**`⟹` 向きと違い、圏同値は要らない** —— `Proposition 1.7, (v)` と
+`Proposition 1.9` の「底が同型な pull-back は同型」だけで出る。
+★**同じ iff の 2 つの向きが、まったく違う道具を使う。** -/
+theorem prop_1_11_vi_irred_of_baseIrred (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) (hbirr : IsIrreducibleMor (P.Base φ)) :
+    IsIrreducibleMor φ := by
+  constructor
+  · intro hiso
+    haveI := hiso
+    refine hbirr.1 ⟨P.Base (inv φ), ?_, ?_⟩
+    · rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+    · rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+  · intro X β α hfac
+    -- ★両因子が pull-back(`Proposition 1.7, (v)`)
+    obtain ⟨hβpb, hαpb⟩ := prop_1_7_v_pullBack P F β α (hfac ▸ hφ)
+    have hb : P.Base φ = P.Base β ≫ P.Base α := by rw [hfac, P.Base_comp]
+    rcases hbirr.2 _ (P.Base β) (P.Base α) hb with h | h
+    · exact Or.inl (isIso_of_isPullBack_of_isBaseIso P F β hβpb h)
+    · exact Or.inr (isIso_of_isPullBack_of_isBaseIso P F α hαpb h)
+
+include P in
+/-- ★★★**(vi) の irreducible の完成形**(iff)。★**これで (vi) の 4 性質がすべて揃った。** -/
+theorem prop_1_11_vi_irred (F : FrobenioidCore P) {A B : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ) :
+    IsIrreducibleMor φ ↔ IsIrreducibleMor (P.Base φ) :=
+  ⟨prop_1_11_vi_baseIrred_of_irred P F φ hφ, prop_1_11_vi_irred_of_baseIrred P F φ hφ⟩
+
 end ABC3.Found.FrdI
