@@ -33,7 +33,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u v2 u2
+universe v u w v2 u2
 
 /-! ## ★§0 の語彙 —— `rigid` と `slim`
 
@@ -109,5 +109,54 @@ but is expected to have type constBool.obj x ⟶ constBool.obj x
 `not_isRigidFunctor_of_ne` で「何を見つければよいか」は明示されており、
 ★**具体例は `Proposition 1.13` の主張には要らない。**
 -/
+
+/-! ## ★(ii) の核心 —— `𝔽_Φ` では base-identity な自己同型は恒等射
+
+★**原文**(p.40、目視):
+> By assertion (i), it follows that the automorphisms of objects of FΦ … induced by α
+> are **base-identity automorphisms**. Since Φ is divisorial, hence, in particular,
+> **sharp** [cf. Definition 1.1, (i), (ii)], it thus follows that all of these automorphisms
+> are **trivial**, hence that α is trivial.
+
+★★**「sharp だから自明」の中身**:
+`𝔽_Φ` の射は `⟨base, div, deg⟩` の三つ組で、恒等射は `⟨𝟙, 0, 1⟩`。
+base-identity な自己同型 `f` について
+- `f ≫ inv f = 𝟙` の `deg` 成分から **`deg f = 1`**(`ℕ+` の消去)
+- 同じ式の `div` 成分から **`(inv f).div + f.div = 0`**、すなわち `f.div` は可逆
+- ★**sharp から `f.div = 0`**
+
+したがって `f = ⟨𝟙, 0, 1⟩ = 𝟙`。
+
+★**`divisorial` の `sharp` の部分が、ここでも単独で効いている**
+(`Proposition 1.10` で 4 箇所、`1.11` で 0 箇所、ここで 1 箇所)。
+-/
+
+/-- ★★**`𝔽_Φ` では base-identity な自己同型は恒等射**。
+
+★**`Φ` が sharp であることだけが効く。** -/
+theorem elemFrob_baseIdentity_aut_eq_id {D : Type u} [Category.{v} D]
+    {Φ : MonoidOn.{v, u, w} D} (hsh : ∀ A : D, IsSharp (Φ.val A))
+    {A : ElemFrobCat Φ} (f : A ⟶ A) [hiso : IsIso f]
+    (hb : ElemFrobCat.Hom.base f = 𝟙 A.base) : f = 𝟙 A := by
+  -- `deg f = 1`
+  have hcomp : f ≫ inv f = 𝟙 A := IsIso.hom_inv_id f
+  have hdegs : ElemFrobCat.Hom.deg f = 1 ∧ ElemFrobCat.Hom.deg (inv f) = 1 := by
+    have h := congrArg ElemFrobCat.Hom.deg hcomp
+    rw [ElemFrobCat.comp_deg] at h
+    have h1 : ElemFrobCat.Hom.deg (inv f) * ElemFrobCat.Hom.deg f = 1 := by simpa using h
+    exact ⟨pnat_right_eq_one h1, pnat_left_eq_one h1⟩
+  have hdeg := hdegs.1
+  -- `div f` は可逆 ⟹ sharp から 0
+  have hdiv : ElemFrobCat.Hom.div f = 0 := by
+    have h := congrArg ElemFrobCat.Hom.div hcomp
+    rw [ElemFrobCat.comp_div, hb, Φ.map_id, hdegs.2] at h
+    refine hsh A.base _ ?_
+    refine ⟨⟨ElemFrobCat.Hom.div f, ElemFrobCat.Hom.div (inv f), ?_, ?_⟩, rfl⟩
+    · simpa [add_comm] using h
+    · simpa using h
+  refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+  · simpa using hb
+  · simpa using hdiv
+  · simpa using hdeg
 
 end ABC3.Found.FrdI
