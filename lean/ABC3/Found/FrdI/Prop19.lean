@@ -404,6 +404,38 @@ theorem prop_1_9_iii_lift (F : FrobenioidCore P) {A B Dd : C} (φ : A ⟶ B)
     rw [h2]
     exact hei
 
+/-- **(ii) の射レベル** —— `φ_*` が射に対して何をするか。
+
+`f : C₁ ⟶ C₂`(isometric pre-step、`f ≫ ε₂ = ε₁`)に対し、
+`g : X₁ ⟶ X₂`(isometric pre-step、`g ≫ α₂ = α₁`)を作る。
+
+★段取り: `f ≫ β₂` を **(i) でもう一度分解**して `β' ≫ α'` とすると、
+`ε₁ ≫ φ = β' ≫ (α' ≫ α₂)` も (i) の形の分解になる。
+**(i) の一意性**で同型 `δ` が取れ、`g := δ.hom ≫ α'` が求めるもの。
+
+★`g` の一意性は `imtrPre_hom_uniq`(`α₂` が mono)から出るので、
+**これで `φ_*` の射の割り当ては完全に決まる**。 -/
+theorem prop_1_9_ii_hom (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    {C₁ C₂ X₁ X₂ : C} (ε₁ : C₁ ⟶ A) (β₁ : C₁ ⟶ X₁) (α₁ : X₁ ⟶ B)
+    (ε₂ : C₂ ⟶ A) (β₂ : C₂ ⟶ X₂) (α₂ : X₂ ⟶ B)
+    (he₁ : (ε₁ ≫ φ : C₁ ⟶ B) = β₁ ≫ α₁)
+    (hβ₁c : IsCoAngular P β₁) (hβ₁b : IsBaseIsomorphism P β₁)
+    (hα₁i : IsIsometric P α₁) (hα₁s : IsPreStep P α₁)
+    (he₂ : (ε₂ ≫ φ : C₂ ⟶ B) = β₂ ≫ α₂) (hβ₂b : IsBaseIsomorphism P β₂)
+    (hα₂i : IsIsometric P α₂) (hα₂s : IsPreStep P α₂)
+    (f : C₁ ⟶ C₂) (hfs : IsPreStep P f) (hf : f ≫ ε₂ = ε₁) :
+    ∃ g : X₁ ⟶ X₂, (IsIsometric P g ∧ IsPreStep P g) ∧ g ≫ α₂ = α₁ := by
+  obtain ⟨Y', β', α', hfac, ⟨hβ'c, hβ'b⟩, hα'i, hα's⟩ :=
+    prop_1_9_i_factor P F (f ≫ β₂) (isBaseIsomorphism_comp P hfs.2 hβ₂b)
+  have hkey : (β₁ ≫ α₁ : C₁ ⟶ B) = β' ≫ (α' ≫ α₂) := by
+    rw [← he₁, ← hf, Category.assoc, he₂, ← Category.assoc, hfac, Category.assoc]
+  obtain ⟨δ, hδ1, -⟩ := prop_1_9_i_uniq P F X₁ Y' β₁ α₁ β' (α' ≫ α₂) hkey
+    hβ₁c hβ₁b hα₁i hα₁s hβ'c hβ'b
+    (IsIsometric.comp P hα'i hα₂i) (IsPreStep.comp P hα's hα₂s)
+  refine ⟨δ.hom ≫ α', ⟨IsIsometric.comp P (isIsometric_of_isIso P δ.hom) hα'i,
+    IsPreStep.comp P (isPreStep_of_isIso P δ.hom) hα's⟩, ?_⟩
+  rw [Category.assoc, hδ1, ← Category.assoc, δ.hom_inv_id, Category.id_comp]
+
 /-- ★(iii) の四角形を2つ与えると、その間の射が**一意に**作れる。
 
 ★使うのは **`ψ'` が pull-back であること**(射を作る)と
@@ -478,6 +510,94 @@ theorem imtrPre_hom_uniq (F : FrobenioidCore P) {A C₁ C₂ : C}
     (h h' : C₁ ⟶ C₂) (hh : h ≫ γ₂ = γ₁) (hh' : h' ≫ γ₂ = γ₁) : h = h' := by
   haveI : Mono γ₂ := F.preStepMono γ₂ hγ₂
   exact (cancel_mono γ₂).mp (hh.trans hh'.symm)
+
+/-! ## ★★(ii) の圏同値の要 —— **ここで忠実性を使う**
+
+原文 (FrdI p.32):
+> [cf. the second equivalence of categories of Definition 1.3, (iii), (d)]. Thus, by
+
+★原文は `φ_*` が本質的全射であることを言うために、
+「同じ不変量 `(Φ(φ))⁻¹(Div(φ))` を持つ2つの co-angular pre-step は
+**同型で移り合う**」を `Definition 1.3, (iii), (d)` から取り出す。
+
+★★**それが下の補題であり、`Definition 1.3, (iii), (d)` の忠実性を使う唯一の箇所である。**
+充満性で射を両向きに作り、**忠実性**で合成が恒等になることを言う。 -/
+
+section CoaPreIso
+
+variable [MorphismProperty.IsMultiplicative (coaPreProp P)]
+
+/-- ★★**同じ `Div` を持つ2つの co-angular pre-step は同型で移り合う**。
+
+★使う成分は **充満性と忠実性**。★1.8 では (iii)(d) の忠実性を使わなかったが、
+**ここでは使う** —— 「1.8 で使わなかっただけ」であって、
+`Definition 1.3, (iii), (d)` の忠実性は**不要な条件ではない**。 -/
+theorem coaPre_iso_of_div_eq (hequiv : ∀ X : C, (coaPreUnderFunctor P X).IsEquivalence)
+    {A : C} (Z W : Under (⟨A⟩ : WideSubcategory (coaPreProp P)))
+    (h : P.Div Z.hom.hom = P.Div W.hom.hom) : Nonempty (Z ≅ W) := by
+  haveI := (hequiv A).full
+  haveI := (hequiv A).faithful
+  have hobj : (coaPreUnderFunctor P A).obj Z = (coaPreUnderFunctor P A).obj W :=
+    congrArg toOrderCat h
+  obtain ⟨f, -⟩ := (coaPreUnderFunctor P A).map_surjective (eqToHom hobj)
+  obtain ⟨g, -⟩ := (coaPreUnderFunctor P A).map_surjective (eqToHom hobj.symm)
+  haveI := Preorder.subsingleton_hom ((coaPreUnderFunctor P A).obj Z)
+    ((coaPreUnderFunctor P A).obj Z)
+  haveI := Preorder.subsingleton_hom ((coaPreUnderFunctor P A).obj W)
+    ((coaPreUnderFunctor P A).obj W)
+  exact ⟨⟨f, g, (coaPreUnderFunctor P A).map_injective (Subsingleton.elim _ _),
+    (coaPreUnderFunctor P A).map_injective (Subsingleton.elim _ _)⟩⟩
+
+end CoaPreIso
+
+/-! ## ★`𝒞^imtr-pre` —— isometric pre-step が定める部分圏
+
+原文 (FrdI p.31):
+> Write Cimtr-pre ⊆C for the subcategory determined by the isometric pre-steps
+-/
+
+instance : (isometricPreStepProp P).ContainsIdentities :=
+  ⟨fun A => ⟨isIsometric_id P A, isPreStep_id P A⟩⟩
+
+instance : (isometricPreStepProp P).IsStableUnderComposition :=
+  ⟨fun _ _ hf hg => ⟨IsIsometric.comp P hf.1 hg.1, IsPreStep.comp P hf.2 hg.2⟩⟩
+
+instance : (isometricPreStepProp P).IsMultiplicative where
+
+/-- **`𝒞^imtr-pre`** —— isometric pre-step が定める広い部分圏。
+
+★`𝒞^coa-pre`(`Definition 1.3, (iii), (d)`)と同じ形で作れる ——
+`ContainsIdentities` と `IsStableUnderComposition` が
+`isIsometric_id` / `isPreStep_id` / `IsIsometric.comp` / `IsPreStep.comp` から
+**そのまま出る**(co-angular と違って `Definition 1.3` の条項を引かない)。 -/
+abbrev ImtrPre : Type u2 := WideSubcategory (isometricPreStepProp P)
+
+/-- ★**`φ_*` の対象への割り当て** —— `Proposition 1.9, (i)` の分解の
+「isometric pre-step 側」を取る。
+
+★★**ここで選択が要る。** `prop_1_9_ii_obj` は **`∃` であって `∃!` ではない** ——
+終域は `prop_1_9_i_uniq` により**同型を除いてしか決まらない**。
+★対照的に**射の割り当てには選択が要らない**(`imtrPre_hom_uniq`)。
+`#print axioms` で `Classical.choice` が入るのはこの定義である。 -/
+noncomputable def pushObj (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hφ : IsBaseIsomorphism P φ) {Cc : C} (ε : Cc ⟶ A)
+    (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) : C :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose
+
+/-- ★上で選んだ対象への isometric pre-step。 -/
+noncomputable def pushHom (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hφ : IsBaseIsomorphism P φ) {Cc : C} (ε : Cc ⟶ A)
+    (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    pushObj P F φ hφ ε hεi hεs ⟶ B :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose_spec.choose
+
+/-- ★`pushHom` は本当に isometric pre-step。 -/
+theorem pushHom_spec (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hφ : IsBaseIsomorphism P φ) {Cc : C} (ε : Cc ⟶ A)
+    (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    IsIsometric P (pushHom P F φ hφ ε hεi hεs) ∧
+      IsPreStep P (pushHom P F φ hφ ε hεi hεs) :=
+  (prop_1_9_ii_obj P F φ hφ ε hεi hεs).choose_spec.choose_spec.choose_spec.2.2
 
 /-! ## ★負の対照 —— (iv) の `co-angular` は落とせない
 
