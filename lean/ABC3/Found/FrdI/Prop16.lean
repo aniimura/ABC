@@ -1444,69 +1444,6 @@ theorem isPullBack_of_comp_left {Cc : Type u2} [Category.{v2} Cc] {Ψ : MonoidOn
     · show Q.Base (h ≫ f) = Q.Base g
       rw [Q.Base_comp, h2, hcond]
 
-include F in
-/-- **(i)(c)** の移送 —— `(𝒞'^pl-bk)_A → 𝒟'_{A_𝒟'}` は圏同値。
-
-★★**`𝒞` へ運ばない**のが要点である(`Istr` のときとの違い) ——
-忠実性と充満性は **`𝒞'` の pull-back 性(対象の定義そのもの)を直接使い**、
-本質的全射性だけ `𝒞` 側から引く(構成の向き `cfp_isPullBack_of` のみ)。
-★**pull-back の「`𝒞'` ⟹ `𝒞`」向きは要らない。**
-★充満性で要る「pull-back の左簡約」は `isPullBack_of_comp_left`(仮定なし)で、**循環しない**。 -/
-theorem cfp_plBkEquiv (A : CfpCat P G) :
-    (plBkOverFunctor (cfpPreFrobenioid P G hG hD') A).IsEquivalence := by
-  haveI hA : IsIso A.obj.hom := A.property
-  haveI hfaith : (plBkOverFunctor (cfpPreFrobenioid P G hG hD') A).Faithful := by
-    constructor
-    intro Z W f g hfg
-    have hb : (cfpPreFrobenioid P G hG hD').Base f.left.hom
-        = (cfpPreFrobenioid P G hG hD').Base g.left.hom := congrArg CommaMorphism.left hfg
-    have hwf : (f.left.hom ≫ W.hom.hom) = Z.hom.hom :=
-      congrArg InducedWideCategory.Hom.hom (Over.w f)
-    have hwg : (g.left.hom ≫ W.hom.hom) = Z.hom.hom :=
-      congrArg InducedWideCategory.Hom.hom (Over.w g)
-    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
-      ((W.hom.property Z.left.obj).1 (Subtype.ext (Prod.ext (hwf.trans hwg.symm) hb))))
-  haveI hfull : (plBkOverFunctor (cfpPreFrobenioid P G hG hD') A).Full := by
-    constructor
-    intro Z W h
-    have hcond : (cfpPreFrobenioid P G hG hD').Base Z.hom.hom
-        = h.left ≫ (cfpPreFrobenioid P G hG hD').Base W.hom.hom := (Over.w h).symm
-    obtain ⟨f₀, hf₀⟩ := (W.hom.property Z.left.obj).2 ⟨(Z.hom.hom, h.left), hcond⟩
-    have hp := Subtype.ext_iff.mp hf₀
-    have h1 : (f₀ ≫ W.hom.hom) = Z.hom.hom := congrArg Prod.fst hp
-    have h2 : (cfpPreFrobenioid P G hG hD').Base f₀ = h.left := congrArg Prod.snd hp
-    refine ⟨Over.homMk (⟨f₀, ?_⟩ : Z.left ⟶ W.left)
-      (InducedWideCategory.Hom.ext h1), Over.OverMorphism.ext h2⟩
-    refine isPullBack_of_comp_left (cfpPreFrobenioid P G hG hD') f₀ W.hom.hom
-      W.hom.property ?_
-    rw [h1]
-    exact Z.hom.property
-  haveI hess : (plBkOverFunctor (cfpPreFrobenioid P G hG hD') A).EssSurj := by
-    constructor
-    intro Y
-    haveI := (F.plBkEquiv A.obj.left).essSurj
-    obtain ⟨wA, hwA1, hwA2⟩ := hA.out
-    obtain ⟨Z', hZ'⟩ : ∃ Z' : Over (⟨A.obj.left⟩ : PlBk P),
-        Z' = (plBkOverFunctor P A.obj.left).objPreimage
-          (Over.mk (G.map Y.hom ≫ wA)) := ⟨_, rfl⟩
-    have hiZ : (plBkOverFunctor P A.obj.left).obj Z' ≅ Over.mk (G.map Y.hom ≫ wA) := by
-      rw [hZ']; exact (plBkOverFunctor P A.obj.left).objObjPreimageIso _
-    obtain ⟨e, he⟩ : ∃ e : P.proj.obj Z'.left.obj ⟶ G.obj Y.left,
-        e = Over.Hom.left hiZ.hom := ⟨_, rfl⟩
-    haveI hei : IsIso e := by
-      rw [he]
-      exact inferInstanceAs (IsIso (((Over.forget _).mapIso hiZ).hom))
-    have hw : e ≫ (G.map Y.hom ≫ wA) = P.proj.map Z'.hom.hom := by
-      rw [he]; exact Over.w hiZ.hom
-    have hsq : P.proj.map Z'.hom.hom ≫ A.obj.hom = e ≫ G.map Y.hom := by
-      rw [← hw]
-      simp only [Category.assoc, hwA2, Category.comp_id]
-    refine ⟨Over.mk (⟨InducedCategory.homMk ⟨Z'.hom.hom, Y.hom, hsq⟩,
-      cfp_isPullBack_of P G hG hD' _ Z'.hom.property⟩ :
-      (⟨(⟨⟨Z'.left.obj, Y.left, e⟩, hei⟩ : CfpCat P G)⟩ : PlBk (cfpPreFrobenioid P G hG hD')) ⟶
-        (⟨A⟩ : PlBk (cfpPreFrobenioid P G hG hD'))), ⟨Iso.refl _⟩⟩
-  exact ⟨hfaith, hfull, hess⟩
-
 /-! ### ★(参考) `plBkEquiv` の構造
 
 ★★**数学は片付きました**: 忠実性と充満性は **`𝒞'` の pull-back 性を直接使う**だけでよく、
