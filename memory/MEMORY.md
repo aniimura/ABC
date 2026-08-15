@@ -3,3 +3,5 @@
 - [ABC3の計画の骨子](abc3-plan-two-track.md) — 北極星はIUT全体+abc。2トラック・statementゲート・axiom禁止・飛躍は追加仮説として型に出す。
 - [充満部分圏を Lean で扱う3手順](lean-fullsubcat-procedures.md) — rw禁止・inv禁止・include F。★手順2の例外条件つき(主張に inv が現れるときだけ)。
 - [争点はCor 3.12に集中](abc3-disputed-locus-cor312.md) — Scholze–Stix「自明化」とJoshi「witness不足」が、G3/G2ゲートとそのまま対応する。
+- [完成宣言は文脈を持たない子に監査させる](challenger-audit-without-context.md) — 自分の文脈を継いだ検証は自分の誤読も継ぐ。Prop 1.10 の .src 6 個が全滅した実例。
+- [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
