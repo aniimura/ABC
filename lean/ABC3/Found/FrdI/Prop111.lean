@@ -379,4 +379,70 @@ theorem prop_1_11_vii_fsm (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
     (hφs : IsPreStep P φ) (hfs : IsFiberwiseSurjective φ) : IsFSMMorphism φ :=
   ⟨hfs, F.preStepMono φ hφs⟩
 
+/-! ## ★`𝒞^lin` —— linear 射のなす広い部分圏
+
+原文 (FrdI p.37):
+> in the following sense: If φ : A →B is an arbitrary morphism of Clin, α : C →
+
+★**(v) が使う `𝒞^lin` は、我々の側に無かった**(構造化のときの測定どおり)。
+★**`𝒞^pl-bk` とまったく同じ作り方**でできる:
+- 恒等射は linear(`isLinear_id`)
+- linear は合成で閉じる(`IsLinear.comp`)
+
+★★**原文は `𝒞^lin` を `Definition 1.3` などで別に定義していない** ——
+`Clin` という記法を (v) で**いきなり使う**。
+★**「linear 射のなす部分圏」は自明なので定義を置かない、という判断**であり、
+★**我々も同じ判断をする(定義を 3 行で置く)。**
+-/
+
+/-- `linear` 射がなす `MorphismProperty`。 -/
+def linProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
+
+instance : (linProp P).ContainsIdentities :=
+  ⟨fun A => isLinear_id P A⟩
+
+instance : (linProp P).IsStableUnderComposition :=
+  ⟨fun _ _ hf hg => IsLinear.comp P hf hg⟩
+
+instance : MorphismProperty.IsMultiplicative (linProp P) where
+
+/-- **`𝒞^lin`** —— linear 射が定める広い部分圏。★`(v)` が使う。 -/
+abbrev Lin : Type u2 := WideSubcategory (linProp P)
+
+/-- ★**非退化(下)**: 恒等射は `𝒞^lin` の射である(`ContainsIdentities` の言い換え)。 -/
+theorem linProp_id (A : C) : linProp P (𝟙 A) := isLinear_id P A
+
+include P in
+/-- ★**非退化(上)**: `𝒞^lin` は `𝒞` 全体ではない —— 次数が 1 でない射は入らない。
+
+★**`Proposition 1.5` の witness(`𝔽_ℕ` の Vee 上)には次数 2 の射がある**ので、
+この主張は空ではない。★**ここでは「次数が 1 でなければ `𝒞^lin` に入らない」を
+定義から述べる**(モデル依存の非退化は `Witness.lean` の側の仕事)。 -/
+theorem not_linProp_of_degFr_ne_one {A B : C} (φ : A ⟶ B) (h : P.degFr φ ≠ 1) :
+    ¬ linProp P φ := h
+
+/-! ### ★★親の規則違反(即座に訂正した)
+
+★親は最初 `linProp.src` を
+`item := "Proposition 1.11, (v) — 𝒞^lin"` として置いた。
+★**ゲートは通り、進捗が 11/54 → 12/54 に増えた。**
+
+★★**これは規則違反である。** 我々が 2026-08-15 に明文化した規則:
+> `.src` は「その原典項目を**完全に**実装した」という主張である。
+> 項目へ向けた**構成**(例: `MonoidOn.charOn`)にも付けない。原典の項目ではないから。
+
+`𝒞^lin` は **`Proposition 1.11` へ向けた語彙**であって、
+`Proposition 1.11` の実装ではない。`1.11` は 15 主張中 7 しか通っていない。
+
+★**即座に外した。進捗は 11/54 に戻る。**
+
+★★**測定: 規則違反は「数が増える」形で現れた。**
+★**指標を上げる方法が 2 つある** —— 項目を完成させるか、規則を緩めるか。
+★**後者は一瞬で、しかもゲートを通る。** だからこそ規則は**人間(ここでは親)が守る**しかない。
+★**器具は `.src` の locator を検証するが、「完全実装かどうか」は検証できない**
+——これは `frdi-progress.mjs` の docstring に最初から書いてある限界である。
+★**限界を書いておいたおかげで、違反に気づけた。**
+-/
+
+
 end ABC3.Found.FrdI
