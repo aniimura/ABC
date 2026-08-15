@@ -1141,4 +1141,50 @@ theorem coaPre_factor_of_mle (G : Frobenioid P) {Cc B B' : C}
   have hw := Over.w f
   exact congrArg (fun t => t.hom) hw
 
+/-! ### ★(vi) の前半の組み立て
+
+原文(p.36)の段取りは 7 段:
+1. `Definition 1.3, (i), (a), (b)` で co-angular pre-step `α : B ⟶ A`、`γ : B ⟶ C`
+   (`C` は Frobenius-trivial)を得る
+2. `C` が Frobenius-trivial なので、各 `d` に base-identity 自己射 `φ_C`(次数 `d`)がある
+3. **(ii)** で `γ ≫ φ_C = ψ ≫ γ′` と組み替える(`ψ` は Frobenius 型、`γ′` は co-angular pre-step)
+4. **`Div` の関係 ＋ 圏同値**で `γ′` が `γ` を経由する: `β ≫ γ = γ′`
+5. `φ_B := ψ ≫ β` と置くと `φ_B ≫ γ = γ ≫ φ_C`
+6. `prop_1_10_vi_descend` で `φ_B` は base-identity・次数 `d`
+7. よって `B` は quasi-Frobenius-trivial、`α` により `A` は sub-quasi-Frobenius-trivial
+
+★★**ここでは 6・7 を実装し、3–5 が作るべきものを `hstep` として仮定に出す。**
+★**こうすると「残りは何か」が宣言の型として確定する** ——
+`Prop110iGoal` で使ったのと同じやり方である。
+★**未完を散文で書くのではなく、型で書く。**
+-/
+
+include P in
+/-- **(vi) 前半の 6・7 段** —— `γ` に沿って base-identity 自己射が降りるなら
+`B` は quasi-Frobenius-trivial。
+
+★仮定 `hstep` が原文の 3–5 段(**(ii) と圏同値**)が作るべきものである。
+★**`prop_1_10_vi_descend` がそれを受けて 6 段を実行する。** -/
+theorem prop_1_10_vi_quasi {B Cc : C} (γ : B ⟶ Cc) (hγs : IsPreStep P γ)
+    (hC : IsFrobeniusTrivial P Cc)
+    (hstep : ∀ (n : ℕ+) (φC : Cc ⟶ Cc), IsBaseIdentity P φC → P.degFr φC = n →
+      ∃ φB : B ⟶ B, φB ≫ γ = γ ≫ φC) :
+    IsQuasiFrobeniusTrivial P B := by
+  intro n
+  obtain ⟨ζ, hdeg, hprop⟩ := hC
+  obtain ⟨φB, hsq⟩ := hstep n (ζ n) (hprop n).1 (hdeg n)
+  obtain ⟨hb, hd⟩ := prop_1_10_vi_descend P γ hγs (ζ n) φB (hprop n).1 (hdeg n) hsq
+  exact ⟨φB, hb, hd⟩
+
+include P in
+/-- **(vi) 前半の 7 段** —— quasi-Frobenius-trivial な対象へ co-angular pre-step が
+あれば sub-quasi-Frobenius-trivial。
+
+★**定義そのものだが、原文の「hence that A is sub-quasi-Frobenius-trivial」の
+一言に対応する**ので明示する。 -/
+theorem prop_1_10_vi_subQuasi {A B : C} (α : B ⟶ A)
+    (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (hq : IsQuasiFrobeniusTrivial P B) : IsSubQuasiFrobeniusTrivial P A :=
+  ⟨B, α, hαc, hαs, hq⟩
+
 end ABC3.Found.FrdI
