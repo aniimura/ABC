@@ -368,6 +368,101 @@ theorem prop_1_10_i_exists_preStep (F : FrobenioidCore P) {A B A' : C}
       Category.id_comp]
     exact hfac
 
+/-! ### ★(i) の存在 —— **第3の場合(`φ` が pull-back)**
+
+原文 (FrdI p.35):
+> sition [cf. Proposition 1.7, (i)], the existence of a pull-back morphism φ
+
+★**原文が名指す材料**(p.35、目視): pull-back は LB-invertible [`Prop 1.4, (ii)`]、
+LB-invertible は合成で閉じる [`Prop 1.7, (i)`]、**`Proposition 1.4, (v)` の分解**、
+`Definition 1.3, (ii)` の本質的一意性。
+
+★★**第2の場合と違い、ここでは分解が 2 項**(`Proposition 1.4, (v)`:
+LB-invertible ⟹ `Frobenius 型 ≫ pull-back`)。だから **pull-back の因子が
+残ってよい** —— `φ′` 自身が pull-back であってほしいのだから当然である。
+★**第2の場合で `α₀` を消す必要があったのは、`φ′` を pre-step にしたかったから。**
+★**同じ「分解して比べる」でも、目標のタイプによって因子の扱いが変わる。**
+-/
+
+include P in
+/-- **(i) の存在(第3の場合: `φ` が pull-back)**。
+
+★`φ′` も pull-back として得られる。 -/
+theorem prop_1_10_i_exists_pullBack (F : FrobenioidCore P) {A B A' : C}
+    (φ : A ⟶ B) (hφ : IsPullBack P φ)
+    (α : A ⟶ A') (hα : IsFrobeniusType P α) :
+    ∃ (B' : C) (β : B ⟶ B') (φ' : A' ⟶ B'),
+      IsFrobeniusType P β ∧ P.degFr β = P.degFr α ∧
+      IsPullBack P φ' ∧ φ ≫ β = α ≫ φ' := by
+  obtain ⟨B', β, hβ, hdβ⟩ := F.frobDegSurj B (P.degFr α)
+  obtain ⟨hφlb, hφlin⟩ := F.pullBackLB φ hφ
+  -- `φ ≫ β` は LB-invertible
+  have hlb : IsLBInvertible P (φ ≫ β) := IsLBInvertible.comp P F hφlb hβ.1
+  -- `Proposition 1.4, (v)` の分解(2 項)
+  obtain ⟨X, γ, α₀, hfac, hγ, hα₀⟩ := prop_1_4_v_mpr P F (φ ≫ β) hlb
+  obtain ⟨_, hα₀lin⟩ := F.pullBackLB α₀ hα₀
+  -- 次数を数える
+  have hdγ : P.degFr γ = P.degFr α := by
+    have h : P.degFr (φ ≫ β) = P.degFr (γ ≫ α₀) := by rw [hfac]
+    rw [P.degFr_comp, P.degFr_comp, hφlin, hα₀lin, hdβ] at h
+    simpa using h.symm
+  obtain ⟨δ, hδiso, hδ⟩ := F.frobDegUniq A X A' γ α hγ hα hdγ
+  haveI : IsIso δ := hδiso
+  refine ⟨B', β, inv δ ≫ α₀, hβ, hdβ, ?_, ?_⟩
+  · exact IsPullBack.comp P (isPullBack_of_isIso P (inv δ)) hα₀
+  · rw [← hδ, Category.assoc, ← Category.assoc δ, IsIso.hom_inv_id,
+      Category.id_comp]
+    exact hfac
+
+/-! ### ★★(i) の存在 —— **任意の `φ`**(3 場合を繋ぐ)
+
+原文 (FrdI p.35):
+> desired, first in the case where φ is a morphism of Frobenius type, then in the case
+
+★**原文の構造**: 「it suffices to prove the existence of `φ′` as desired,
+first in the case where `φ` is a morphism of Frobenius type, then in the case
+where `φ` is a pre-step, and finally in the case where `φ` is a pull-back morphism
+[cf. **the factorization of Definition 1.3, (iv), (a)**]」。
+
+★★**「it suffices」の中身**: 任意の `φ` を `arbFactor` で `γ ≫ β₀ ≫ α₀` に分解し、
+**3 つの場合を順に当てて、出てきた `β` を次の入力にする**。
+```
+γ  と α  → 第1の場合 → β₁, γ′    (γ  ≫ β₁ = α  ≫ γ′)
+β₀ と β₁ → 第2の場合 → β₂, β₀′   (β₀ ≫ β₂ = β₁ ≫ β₀′)
+α₀ と β₂ → 第3の場合 → β₃, α₀′   (α₀ ≫ β₃ = β₂ ≫ α₀′)
+```
+★**`φ′ := γ′ ≫ β₀′ ≫ α₀′`、`β := β₃`。**
+
+★★**次数が全部 `degFr α` に揃う**のが要点である ——
+第1の場合が `degFr β₁ = degFr α` を返し、それが第2の場合の入力になり……と
+**バケツリレーで `d` が運ばれる**。★原文の「of Frobenius degree `d ∈ ℕ≥1`」という
+一言が、ここでは**3 段の受け渡し**として現れる。
+-/
+
+include P in
+/-- **(i) の存在(任意の `φ`)** —— ★**`Proposition 1.10, (i)` の存在部分の完成形**。
+
+★3 つの場合を `F.arbFactor` の分解に沿って順に当てる。 -/
+theorem prop_1_10_i_exists (F : FrobenioidCore P) {A B A' : C}
+    (φ : A ⟶ B) (α : A ⟶ A') (hα : IsFrobeniusType P α) :
+    ∃ (B' : C) (β : B ⟶ B') (φ' : A' ⟶ B'),
+      IsFrobeniusType P β ∧ P.degFr β = P.degFr α ∧ φ ≫ β = α ≫ φ' := by
+  obtain ⟨X, Y, γ, β₀, α₀, hfac, hγ, hβ₀, hα₀⟩ := F.arbFactor φ
+  obtain ⟨X', β₁, γ', hβ₁, hd₁, _, hsq₁⟩ :=
+    prop_1_10_i_exists_frobType P F γ hγ α hα
+  obtain ⟨Y', β₂, β₀', hβ₂, hd₂, _, hsq₂⟩ :=
+    prop_1_10_i_exists_preStep P F β₀ hβ₀ β₁ hβ₁
+  obtain ⟨B', β₃, α₀', hβ₃, hd₃, _, hsq₃⟩ :=
+    prop_1_10_i_exists_pullBack P F α₀ hα₀ β₂ hβ₂
+  refine ⟨B', β₃, γ' ≫ β₀' ≫ α₀', hβ₃, by rw [hd₃, hd₂, hd₁], ?_⟩
+  calc φ ≫ β₃ = γ ≫ β₀ ≫ α₀ ≫ β₃ := by rw [hfac]; simp
+    _ = γ ≫ β₀ ≫ β₂ ≫ α₀' := by rw [hsq₃]
+    _ = γ ≫ (β₀ ≫ β₂) ≫ α₀' := by simp
+    _ = γ ≫ (β₁ ≫ β₀') ≫ α₀' := by rw [hsq₂]
+    _ = (γ ≫ β₁) ≫ β₀' ≫ α₀' := by simp
+    _ = (α ≫ γ') ≫ β₀' ≫ α₀' := by rw [hsq₁]
+    _ = α ≫ γ' ≫ β₀' ≫ α₀' := by simp
+
 include P in
 /-- **(i) の `Div` の公式**(`Φ.map (Base α)` を当てた形)。
 
