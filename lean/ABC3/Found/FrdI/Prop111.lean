@@ -805,4 +805,50 @@ theorem prop_1_11_v_unique_resp {A B Cc Dd : C}
   haveI : Epi α := P.totEpiC _ _ _
   exact (cancel_epi α).mp (h₁.trans h₂.symm)
 
+include P in
+/-- ★★**(v) の存在(non-resp'd、`φ` が co-angular pre-step の場合)**。
+
+原文 (FrdI p.38):
+> When φ is a co-angular pre-step, the existence of a co-angular pre-step ψ as desired
+> follows formally from the equivalences of categories of Definition 1.3, (iii), (d).
+
+★★**「formally」の中身は不変量の計算である**:
+`α ≫ φ` の不変量を計算すると ★**`x_φ + x_β`** になる
+(仮定 `x_α = Φ.map (Base φ) x_β` を使う)。
+したがって `MLe x_β (x_φ + x_β)` が成り立ち、橋(`coaPre_factor_of_mle`)が `ψ` を与える。
+
+★**「和が上界」がここでも効く** —— (vii) の co-angular pre-step の場合と同じ形。 -/
+theorem prop_1_11_v_exists_nonresp (G : Frobenioid P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ)
+    (α : Cc ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (β : Dd ⟶ B) (hβc : IsCoAngular P β) (hβs : IsPreStep P β)
+    (hcond : haveI : IsIso (P.Base α) := hαs.2
+             haveI : IsIso (P.Base β) := hβs.2
+             Φ.map (inv (P.Base α)) (P.Div α)
+               = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) :
+    ∃ ψ : Cc ⟶ Dd, IsCoAngular P ψ ∧ IsPreStep P ψ ∧ ψ ≫ β = α ≫ φ := by
+  haveI hbα : IsIso (P.Base α) := hαs.2
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  haveI hbφ : IsIso (P.Base φ) := hφs.2
+  have hcomp_c : IsCoAngular P (α ≫ φ) := G.core.coAngularComp α φ hαc hφc
+  have hcomp_s : IsPreStep P (α ≫ φ) := IsPreStep.comp P hαs hφs
+  haveI hbc : IsIso (P.Base (α ≫ φ)) := hcomp_s.2
+  -- ★不変量の計算: `inv (α ≫ φ)` の不変量 = `x_φ + x_β`
+  have hinv : Φ.map (inv (P.Base (α ≫ φ))) (P.Div (α ≫ φ))
+      = Φ.map (inv (P.Base φ)) (P.Div φ) + Φ.map (inv (P.Base β)) (P.Div β) := by
+    have hbase : P.Base (α ≫ φ) = P.Base α ≫ P.Base φ := P.Base_comp _ _
+    have hdiv : P.Div (α ≫ φ)
+        = Φ.map (P.Base α) (P.Div φ) + P.Div α := by
+      rw [P.Div_comp, show P.degFr φ = 1 from hφs.1]
+      simp
+    have hi : inv (P.Base (α ≫ φ)) = inv (P.Base φ) ≫ inv (P.Base α) := by
+      refine CategoryTheory.IsIso.inv_eq_of_hom_inv_id ?_
+      rw [hbase, Category.assoc, ← Category.assoc (P.Base φ), IsIso.hom_inv_id,
+        Category.id_comp, IsIso.hom_inv_id]
+    rw [hi, hdiv, Φ.map_comp, map_add, ← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id,
+      map_add, hcond, ← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+  refine coaPre_factor_of_mle P G β hβc hβs (α ≫ φ) hcomp_c hcomp_s ?_
+  rw [hinv]
+  exact ⟨Φ.map (inv (P.Base φ)) (P.Div φ), by rw [add_comm]⟩
+
 end ABC3.Found.FrdI
