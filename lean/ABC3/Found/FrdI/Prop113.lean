@@ -159,4 +159,43 @@ theorem elemFrob_baseIdentity_aut_eq_id {D : Type u} [Category.{v} D]
   · simpa using hdiv
   · simpa using hdeg
 
+/-! ## ★(i) —— 原文が最後の一歩を書いていない
+
+★**原文の証明**(p.40、目視):
+> Any automorphism α of the functor CA →D determines an automorphism of the
+> composite functor C^pl-bk_A →CA →D. On the other hand, this composite functor
+> factors as a composite C^pl-bk_A →D_{A_D} →D, where the first functor is
+> [by Definition 1.3, (i), (c)] an equivalence of categories. Thus, we conclude that α
+> determines an automorphism of the natural functor D_{A_D} →D, which is
+> **necessarily trivial, since D is slim**.
+
+★★**ここで原文は終わっている。しかし示したのは
+「`α` が `𝒞^pl-bk_A` の上で自明」だけである。**
+★**`𝒞_A` 全体で自明であることは、まだ言えていない。**
+
+★**残りの一歩**(原文が書いていない):
+`𝒞_A` の任意の対象 `(X, f : X ⟶ A)` は、`Definition 1.3, (iv), (a)` の分解で
+`f = γ ≫ β ≫ α₀`(`α₀` は pull-back)と書ける。
+`(X, f) ⟶ (Y, α₀)` は `𝒞_A` の射なので、★**`α` の自然性**が
+```
+α_{(X,f)} ≫ Base(γ ≫ β) = Base(γ ≫ β) ≫ α_{(Y,α₀)} = Base(γ ≫ β)
+```
+を与える。★**`Base(γ ≫ β)` は同型**(`γ` は Frobenius 型、`β` は pre-step、
+どちらも base-isomorphism)なので **`α_{(X,f)} = 𝟙`**。
+
+★★**「pull-back の部分で自明 ⟹ 全体で自明」は、自然性と分解の合わせ技である。**
+★**原文はこの一歩を書いていない** —— 我々が数えてきた
+「原文が書かない一歩」の、この項目での 1 例目。
+-/
+
+/-- ★**(i) の残りの一歩** —— 自然変換の成分が、同型に沿って自明性を伝える。
+
+★`h : a ≫ u = u` で `u` が同型なら `a = 𝟙`。
+★**自然性が与える式がこの形になる**(上の docstring を見よ)。 -/
+theorem eq_id_of_comp_eq_of_isIso {E : Type u} [Category.{v} E] {X Y : E}
+    (a : X ⟶ X) (u : X ⟶ Y) [IsIso u]
+    (h : a ≫ u = u) : a = 𝟙 X := by
+  have : a ≫ u = 𝟙 X ≫ u := by rw [Category.id_comp]; exact h
+  exact (cancel_mono u).mp this
+
 end ABC3.Found.FrdI
