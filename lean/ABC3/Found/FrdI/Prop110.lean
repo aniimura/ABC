@@ -1316,4 +1316,88 @@ theorem coaPre_realize (G : Frobenioid P) (A : C)
   · exact leOfHom e.hom
   · exact leOfHom e.inv
 
+/-! ### ★(iii) の全射性 —— `n` 倍が全射であること
+
+★**組み立て**:
+1. `c ∈ Φ(A)` を `coaPre_realize` で co-angular pre-step `ψ : A ⟶ X`(`Div ψ = c`)に実現
+2. `IsPerfectObj A` の (a) で、`A` と `X` の上に**次数 `n` の Frobenius 型射**
+   `φ₁ : B₀ ⟶ A`、`φ₂ : B₂ ⟶ X` を取る(`ψ` が pre-step なので `X` は `A` と base-isomorphic)
+3. `IsPerfectObj A` の (b) で `ψ` を降ろし、pre-step `ψ₀ : B₀ ⟶ B₂` と
+   四角形 `φ₁ ≫ ψ = ψ₀ ≫ φ₂` を得る
+4. ★**核心の等式**(`prop_1_10_iii_div_nsmul'`)から `Φ.map (Base φ₁) (Div ψ) = n • Div ψ₀`
+5. `Φ.map (inv (Base φ₁))` を当てて ★**`c = n • Φ.map (inv (Base φ₁)) (Div ψ₀)`**
+
+★**「A は perfect」から「Φ(A) は perfect」への橋が、これで渡り切る。**
+-/
+
+include P in
+/-- ★★**(iii) の全射性** —— `𝒞` の対象が perfect なら、`Φ(A)` で `n` 倍は全射。 -/
+theorem prop_1_10_iii_nsmul_surjective (G : Frobenioid P) {A : C}
+    (hperf : IsPerfectObj P A) (n : ℕ+) :
+    Function.Surjective (fun a : Φ.val (P.toElem.obj A).base => (n : ℕ) • a) := by
+  intro c
+  obtain ⟨X, ψ, hψc, hψs, hψd⟩ := coaPre_realize P G A c
+  haveI hbψ : IsIso (P.Base ψ) := hψs.2
+  have hAX : BaseIsomorphic P A X := ⟨asIso (P.Base ψ)⟩
+  have hAA : BaseIsomorphic P A A := ⟨Iso.refl _⟩
+  obtain ⟨B₀, φ₁, hφ₁, hd₁⟩ := (hperf n).1 A hAA
+  obtain ⟨B₂, φ₂, hφ₂, hd₂⟩ := (hperf n).1 X hAX
+  haveI hbφ₁ : IsIso (P.Base φ₁) := hφ₁.2
+  -- `B₀`・`B₂` は `A` と base-isomorphic
+  have hB₀A : BaseIsomorphic P B₀ A := ⟨asIso (P.Base φ₁)⟩
+  have hB₂A : BaseIsomorphic P B₂ A := by
+    haveI : IsIso (P.Base φ₂) := hφ₂.2
+    exact ⟨asIso (P.Base φ₂) ≪≫ (asIso (P.Base ψ)).symm⟩
+  obtain ⟨ψ₀, ⟨hψ₀s, hsq⟩, _⟩ :=
+    (hperf n).2 B₀ A B₂ X φ₁ φ₂ hφ₁ hd₁ hφ₂ hd₂ hB₀A hB₂A ψ hψs
+  -- 核心の等式
+  have hcore : Φ.map (P.Base φ₁) (P.Div ψ) = (n : ℕ) • P.Div ψ₀ :=
+    prop_1_10_iii_div_nsmul' P φ₁ φ₂ ψ₀ ψ hφ₁.1.2 hφ₂.1.2 hd₂ hsq
+  refine ⟨Φ.map (inv (P.Base φ₁)) (P.Div ψ₀), ?_⟩
+  have h := congrArg (Φ.map (inv (P.Base φ₁))) hcore
+  rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id, map_nsmul] at h
+  show (n : ℕ) • Φ.map (inv (P.Base φ₁)) (P.Div ψ₀) = c
+  rw [← h, hψd]
+
+/-! ### ★★(iii) の単射性 —— **親の前段の見立ては誤っていた。そして次の壁が見えた**
+
+前段で親はこう書いた:
+> 単射性は `IsPerfectObj` の `∃!` から出るはずで、`divisorial` からは出ない
+> (`Gp M` の捻れを排除する条件が無い)。
+
+★★**誤りである。紙の上では `divisorial` から出る。** `Gp M` は**捻れなし**である:
+
+`x ∈ Gp M` が `n • x = 0`(`n ≥ 1`)を満たすとする。
+- `n • x = 0 = toGp 0` は `M` の像に入るので、★**saturated** から `x = toGp m` と書ける
+- 同様に `n • (-x) = 0` も像に入るので `-x = toGp m′`
+- `toGp (m + m′) = x + (-x) = 0 = toGp 0` で、★**integral**(`toGp` が単射)から `m + m′ = 0`
+- よって `m` は可逆、★**sharp** から `m = 0`、したがって `x = 0`
+
+★★**`divisorial` の 3 条件(saturated / integral / sharp)が、この 1 つの主張で
+一度に効いている。**
+
+## ★★しかし Lean では書けなかった —— 次の壁
+
+★**`Gp M := AddLocalization (⊤ : AddSubmonoid M)` に群構造が無い。**
+上の議論は `x - y` と `-x` を使うが、我々の `Gp M` は
+**`AddCommMonoid` としてしか実装されていない**(`HSub`・`Neg` のインスタンスが無い)。
+★**`saturated` の定義自体が `Gp M` の元を量化しているのに、
+`Gp M` を群として使う準備ができていない。**
+
+★**したがって単射性はここで止まる。** `sorry` は置かない(`Found/` の規律)。
+★**次に当たるときの仕事は明確**: `Gp M` に `AddCommGroup` インスタンスを付ける
+(`neg (mk a s) := mk s a`、`S = ⊤` なので常に定義できる)。
+
+## ★★記録: 否定的な予測は検証が甘くなる
+
+親は前段で「`divisorial` からは出ない」と書いた。★**1 本も試さずに書いた。**
+実際に試したら**紙の上では出た**(そして Lean では別の理由で止まった)。
+
+★★**否定的な予測(「〜からは出ない」)は、肯定的な予測より検証が甘くなる。**
+「出る」は 1 本示せば済むが、「出ない」は**全ての道を塞いだこと**を要する。
+★**我々は「証明できなかった」と「反例がある」を区別してきたが、
+「試していない」と「試して駄目だった」の区別も要る。**
+★今回の親の発言は **3 つ目のカテゴリ(試していない)**だった。
+-/
+
 end ABC3.Found.FrdI
