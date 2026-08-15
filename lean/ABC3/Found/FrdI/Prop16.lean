@@ -706,6 +706,41 @@ theorem cfp_unitTrivial_iff (A : CfpCat P G) :
     have h1 : CfpCat.fst (x : End A) = 𝟙 _ := (Submonoid.eq_bot_iff_forall _).mp h _ hfst
     exact InducedCategory.hom_ext (CommaMorphism.ext h1 hx.1.1)
 
+/-! ### ★★**第3の基準** —— モノイドの性質として定義された型
+
+★(a) 鎖 / (b) `𝒟'` 成分固定 は「**射が絡む定義**」用の基準である。
+`group-like` のように **`Φ(A_𝒟)` というモノイドの性質**として定義された型には効かない。
+そこに効くのは:
+
+★**底の同型 `α : Base A ≅ G A'` が誘導する加法モノイド同型 `Φ(α)` に沿って移す**。
+
+★**基準が3つに増えた理由**は「定義の形が3種類ある」ことにある:
+射の存在/全称(→鎖)、自己射の条件(→`𝒟'` 成分固定)、底のモノイドの条件(→`Φ(α)`)。 -/
+
+/-- **(v)** —— **group-like** は射影で決まる(★第3の基準)。 -/
+theorem cfp_groupLike_iff (A : CfpCat P G) :
+    IsGroupLikeObj (cfpPreFrobenioid P G hG hD') A ↔ IsGroupLikeObj P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  show IsGroupLike (Φ.val (G.obj A.obj.right)) ↔ IsGroupLike (Φ.val (P.proj.obj A.obj.left))
+  rw [isGroupLike_iff, isGroupLike_iff]
+  constructor
+  · intro h a
+    have := (h (Φ.map (inv A.obj.hom) a)).map (Φ.map A.obj.hom)
+    rwa [← Φ.map_comp (inv A.obj.hom) A.obj.hom, IsIso.hom_inv_id, Φ.map_id] at this
+  · intro h a
+    have := (h (Φ.map A.obj.hom a)).map (Φ.map (inv A.obj.hom))
+    rwa [← Φ.map_comp A.obj.hom (inv A.obj.hom), IsIso.inv_hom_id, Φ.map_id] at this
+
+/-- ★`𝒞'` の自己射モノイドから `𝒞` のそれへのモノイド準同型(★`End` の積は `x * y = y ≫ x`)。 -/
+def cfpEndHom (A : CfpCat P G) : End A →* End A.obj.left where
+  toFun f := CfpCat.fst f
+  map_one' := rfl
+  map_mul' _ _ := rfl
+
+theorem cfpEndHom_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
+    cfpEndHom P G A (x ^ k) = (cfpEndHom P G A x) ^ k :=
+  map_pow (cfpEndHom P G A) x k
+
 end Dict
 
 end ABC3.Found.FrdI
