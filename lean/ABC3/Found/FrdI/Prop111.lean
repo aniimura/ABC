@@ -1066,4 +1066,44 @@ theorem isIso_of_isometric_coAngular_preStep (F : FrobenioidCore P) {A B : C}
     IsIso ε :=
   prop_1_4_iii P F ε ⟨hc, hi⟩ hs
 
+/-! ### ★★(vii) の Frobenius 型の場合 —— **2 種類目の「we may assume」**
+
+★**原文**(p.38、目視):
+> Finally, we consider the case where ϵ is a morphism of Frobenius type.
+> By applying the second equivalence of categories of Definition 1.3, (iii), (d),
+> it follows that **we may assume [by replacing φ by the composite of φ with an
+> appropriate pre-step A′ →A]** that Div(φ) = degFr(ϵ) · x, for some x ∈Φ(A).
+> Thus, … there exist a morphism of Frobenius type α : D →A and a co-angular
+> pre-step γ : D →C such that ϵ ◦γ = φ ◦α [**cf. also Proposition 1.10, (i)**].
+
+★★**この証明には「we may assume」が 2 回出る。しかも種類が違う。**
+
+| どこ | 何を仮定してよいとするか | 正当化 |
+|---|---|---|
+| 場合分けの前 | `ϵ` が 4 種類のどれか | ★**合成閉性**(`liftsCoaPre_comp`) |
+| Frobenius 型の中 | `Div(φ) = degFr(ϵ) · x` | ★**`φ` を `ρ ≫ φ` に置き換える** |
+
+★★**1 つ目は `ϵ` を分解する。2 つ目は `φ` を置き換える。**
+★**同じ語(「we may assume」)が、反対側の射に作用している。**
+
+★**2 つ目の正当化**: `γ ≫ ε = α′ ≫ (ρ ≫ φ)` が得られれば
+`α := α′ ≫ ρ` として `γ ≫ ε = α ≫ φ` になる。★**結合則だけ。**
+
+★**そして原文は `Proposition 1.10, (i)` を引く** ——
+★★**我々がこのセッションで完成させた項目**である。
+★**1.10 の投資が 1.11 の最後の場合でも回収される。**
+-/
+
+include P in
+/-- ★★**(vii) の 2 種類目の「we may assume」の正当化** ——
+`φ` を `ρ ≫ φ` に置き換えて解けたなら、元の `φ` でも解ける。
+
+★**結合則だけ**だが、★**「we may assume」を型にすると
+何が保証されているかが明示される。** -/
+theorem liftsCoaPre_precomp {B Cc A A' : C} (ε : Cc ⟶ B) (φ : A ⟶ B) (ρ : A' ⟶ A)
+    {Dd : C} (γ : Dd ⟶ Cc) (α' : Dd ⟶ A')
+    (h : γ ≫ ε = α' ≫ (ρ ≫ φ)) :
+    (α' ≫ ρ) ≫ φ = γ ≫ ε := by
+  rw [Category.assoc, ← h]
+
 end ABC3.Found.FrdI
