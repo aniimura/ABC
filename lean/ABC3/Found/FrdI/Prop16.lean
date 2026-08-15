@@ -256,6 +256,63 @@ theorem cfp_isometric_iff {X Y : CfpCat P G} (f : X ⟶ Y) :
     rw [show P.Div (CfpCat.fst f) = 0 from h]
     exact map_zero _
 
+/-! ### ★**手順5**(2つの綴り問題への対処、確定版)
+
+★`rw` を項で置き換えるだけでは足りない。**部分型の成分や `congrArg` の射影**は
+綴りが食い違ったままなので、
+**「綴りの決まった変数を `obtain ⟨h', rfl⟩ : ∃ h' : 正しい型, h' = h` で先に導入する」**
+のが正しい対処である(`Prop19` の `Over.Hom.left` に使った定型と同じもの)。 -/
+
+/-- ★`𝒞'` の射の `𝒞` 成分の底射は、`𝒟'` 成分と両端の同型で**完全に決まる**。
+
+★★**これが CFP の移送を支える一点**である —— `𝒞` 成分の底射は自由ではない。 -/
+theorem cfp_base_fst {X Y : CfpCat P G} (f : X ⟶ Y) [IsIso Y.obj.hom] :
+    P.proj.map (CfpCat.fst f) = X.obj.hom ≫ G.map (CfpCat.snd f) ≫ inv Y.obj.hom := by
+  rw [← Category.assoc, ← cfp_square f, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+
+/-- **(iii)** —— `𝒞` の pull-back は `𝒞'` の pull-back(★**構成の向き**)。
+
+★中身は「`𝒟'` 成分 `h` を与えると、`𝒞` 側で使うべき底射
+`u = α_Z ≫ G(h) ≫ α_X⁻¹` が**一意に決まる**」の一点。 -/
+theorem cfp_isPullBack_of {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (h : IsPullBack P (CfpCat.fst φ)) : IsPullBack (cfpPreFrobenioid P G hG hD') φ := by
+  haveI hX : IsIso X.obj.hom := X.property
+  haveI hY : IsIso Y.obj.hom := Y.property
+  intro Z
+  haveI hZ : IsIso Z.obj.hom := Z.property
+  constructor
+  · intro f₁ f₂ hf
+    have hp := Subtype.ext_iff.mp hf
+    have hs : CfpCat.snd f₁ = CfpCat.snd f₂ := congrArg Prod.snd hp
+    have hcomp : (f₁ ≫ φ : Z ⟶ Y) = f₂ ≫ φ := congrArg Prod.fst hp
+    have hc : CfpCat.fst f₁ ≫ CfpCat.fst φ = CfpCat.fst f₂ ≫ CfpCat.fst φ :=
+      congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hcomp
+    have hb : P.Base (CfpCat.fst f₁) = P.Base (CfpCat.fst f₂) := by
+      show P.proj.map (CfpCat.fst f₁) = P.proj.map (CfpCat.fst f₂)
+      rw [cfp_base_fst P G f₁, cfp_base_fst P G f₂, hs]
+    exact InducedCategory.hom_ext
+      (CommaMorphism.ext ((h Z.obj.left).1 (Subtype.ext (Prod.ext hc hb))) hs)
+  · rintro ⟨⟨g, hh0⟩, hcond⟩
+    -- ★手順5: 綴りの決まった変数を先に導入する
+    obtain ⟨hh, rfl⟩ : ∃ hh : Z.obj.right ⟶ X.obj.right, hh = hh0 := ⟨hh0, rfl⟩
+    have hcond' : CfpCat.snd g = hh ≫ CfpCat.snd φ := hcond
+    obtain ⟨u, hu⟩ : ∃ u : P.proj.obj Z.obj.left ⟶ P.proj.obj X.obj.left,
+        u = Z.obj.hom ≫ G.map hh ≫ inv X.obj.hom := ⟨_, rfl⟩
+    have hbase : P.proj.map (CfpCat.fst g) = u ≫ P.proj.map (CfpCat.fst φ) := by
+      rw [hu, cfp_base_fst P G g, cfp_base_fst P G φ, hcond', G.map_comp]
+      simp only [Category.assoc]
+      rw [← Category.assoc (inv X.obj.hom) X.obj.hom, IsIso.inv_hom_id, Category.id_comp]
+    obtain ⟨f₁, hf₁⟩ := (h Z.obj.left).2 ⟨(CfpCat.fst g, u), hbase⟩
+    have hp := Subtype.ext_iff.mp hf₁
+    have h1 : (f₁ ≫ CfpCat.fst φ) = CfpCat.fst g := congrArg Prod.fst hp
+    have h2 : P.proj.map f₁ = u := congrArg Prod.snd hp
+    have hw : P.proj.map f₁ ≫ X.obj.hom = Z.obj.hom ≫ G.map hh := by
+      rw [h2, hu]
+      simp only [Category.assoc]
+      rw [IsIso.inv_hom_id, Category.comp_id]
+    refine ⟨InducedCategory.homMk ⟨f₁, hh, hw⟩, Subtype.ext (Prod.ext ?_ rfl)⟩
+    exact InducedCategory.hom_ext (CommaMorphism.ext h1 hcond'.symm)
+
 end Dict
 
 end ABC3.Found.FrdI
