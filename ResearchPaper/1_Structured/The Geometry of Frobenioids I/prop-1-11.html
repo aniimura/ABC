@@ -216,5 +216,55 @@ co-angular pre-step <code>γ : D ⟶ C</code> と <code>α : D ⟶ A</code> が
 <code>Proposition 1.10</code> では着手前の依存照合が効いて多くが一発で通った。
 ★<strong>同じ手順が 2 項目目でも効くかどうかが、この項目の裏のテーマである。</strong></p>
 
+<h2>★★実測（2026-08-16、実装後に追記）</h2>
+
+<table>
+<tr><th>条</th><th>予測</th><th>実測</th><th>判定</th></tr>
+<tr><td>(iii)</td><td>いちばん先に通る（<code>plBkEquiv</code> の言い換え）</td>
+    <td>いちばん先に通った。ただし使ったのは <code>plBkEquiv</code> ではなく
+        <strong><code>IsPullBack</code> の定義そのもの</strong></td>
+    <td>★<strong>順番は当たり、理由は外れ</strong></td></tr>
+<tr><td>(vii)</td><td>通る（定義の直接の帰結）</td>
+    <td>「In particular」は定義の分解で通ったが、<strong>本体は 4 場合分け</strong>で
+        2 場合のみ完成</td>
+    <td>★<strong>外れ（過小評価）</strong></td></tr>
+<tr><td>(iv)</td><td>通る</td><td>完成（存在・単射性・一意性）</td><td>★当たり</td></tr>
+<tr><td>(i)(ii)</td><td>通る</td><td>両方完成</td><td>★当たり</td></tr>
+<tr><td>(vi)</td><td>★要注意（向きの問題が出るかも）</td>
+    <td>★<strong>4 性質のうち公理だけで出るのは 1 つだけ</strong>。
+        <code>plBk_realize</code>（圏同値の消費）を架けて全部開いた</td>
+    <td>★★<strong>当たり</strong></td></tr>
+<tr><td>(v)</td><td>最後。<code>𝒞<sup>lin</sup></code> を作る必要</td>
+    <td><code>𝒞<sup>lin</sup></code> を作った。一意性は両向き、存在は 2 場合完成</td>
+    <td>★当たり</td></tr>
+</table>
+
+<p class="open">★<strong>6 件中 5 件が当たった。</strong>外れたのは (vii) で、
+<strong>「定義の直接の帰結」と見たが、実際には本体が 4 場合分けだった</strong>
+——★<strong>「In particular」だけを見て条全体を見積もった</strong>のが原因である。</p>
+
+<p class="open">★★<strong><code>Proposition 1.10</code> で確立した手順
+（着手前に構造化・依存照合・予測を書き、実装後に突き合わせる）は、
+2 項目目でも機能した。</strong>
+★とくに<strong>依存照合で「不足は <code>𝒞<sup>lin</sup></code> だけ」と分かっていた</strong>ので、
+実装中に材料を探す時間がほぼ無かった。</p>
+
+<h2>★★この項目で見つけたもの</h2>
+
+<ul>
+<li>★★★<strong>原典の誤植</strong>（(iii) の <code>β ◦ φ</code> は型が通らない。600 dpi 目視確認）
+    ——<strong>7 種類目のギャップ</strong>であり、<strong>形式化が最初に見つけた「原文の誤り」</strong></li>
+<li><strong>原文が書かない一歩</strong>：<code>γ<sub>X</sub></code> の linearity、「和を取る」（2 箇所）</li>
+<li><strong>原文が挙げていない依存</strong>：<code>Proposition 1.7, (v)</code></li>
+<li>★<strong>原文が書かない<em>理由</em></strong>：なぜ isometric pre-step の場合だけ別の道具が要るか
+    ——<code>Proposition 1.4, (iii)</code> により<strong>co-angular な isometric pre-step は同型</strong>だから</li>
+<li>★<strong>2 種類の「we may assume」</strong>：<code>ϵ</code> を分解するものと <code>φ</code> を置き換えるもの
+    ——<strong>同じ語が四角形の反対側の射に作用している</strong></li>
+<li>★<strong>原文は「向き」に一貫して自覚的</strong>（mono と epi を別々の理由として明示）
+    ——<code>Proposition 1.10</code> では書いていなかったのに</li>
+<li>★<strong>引用符付きの語が補題の名前になった</strong>：
+    「pulling back the zero divisor of φ via ϵ」＝ <code>coaPre_realize_over</code></li>
+</ul>
+
 </body>
 </html>
