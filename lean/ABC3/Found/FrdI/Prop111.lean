@@ -1008,4 +1008,27 @@ theorem prop_1_11_v_exists_pullBack (G : Frobenioid P) {A B Cc Dd : C}
     coaPre_factor_of_mle P G β' hβ'co hβ's α hαc hαs (hinvb ▸ ⟨0, add_zero _⟩)
   exact ⟨κ ≫ φ', by rw [Category.assoc, ← hsq, ← Category.assoc, hκ]⟩
 
+include P in
+/-- ★★★**(vii) の pull-back の場合** —— 原文の
+「by "pulling back the zero divisor of φ via ϵ" — cf. assertion (v)」の実体。
+
+★★**2 手**:
+1. ★**`φ` の不変量を `Φ.map (Base ε)` で引き戻し、それを不変量とする
+   co-angular pre-step `γ : Dd ⟶ Cc` を `coaPre_realize_over` で実現する**
+   ——★**これが「pulling back the zero divisor of φ via ϵ」である**
+2. ★**(v) の pull-back の場合**を `φ_{(v)} := ε`、`α_{(v)} := γ`、`β_{(v)} := φ` に当てる
+
+★**原文の引用符付きの語が、そのまま我々の補題の名前になった。** -/
+theorem prop_1_11_vii_pullBack (G : Frobenioid P) {B Cc : C}
+    (ε : Cc ⟶ B) (hεpb : IsPullBack P ε) : LiftsCoaPre P ε := by
+  intro A φ hφc hφs
+  haveI hbφ : IsIso (P.Base φ) := hφs.2
+  -- 手1: `φ` の zero divisor を `ε` で引き戻す
+  obtain ⟨Dd, γ, hγc, hγs, hγinv⟩ :=
+    coaPre_realize_over P G Cc (Φ.map (P.Base ε) (Φ.map (inv (P.Base φ)) (P.Div φ)))
+  -- 手2: (v) の pull-back の場合
+  obtain ⟨ψ, hψ⟩ :=
+    prop_1_11_v_exists_pullBack P G ε hεpb γ hγc hγs φ hφc hφs hγinv
+  exact ⟨Dd, γ, ψ, hγc, hγs, hψ.symm⟩
+
 end ABC3.Found.FrdI
