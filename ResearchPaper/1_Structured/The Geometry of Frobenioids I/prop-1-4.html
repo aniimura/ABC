@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.4 — co-angular と LB-invertible な射</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.4 — co-angular と LB-invertible な射</h1>
+
+<p>物理 p.25–p.26。<strong>400 dpi 目視確認 2026-08-15</strong>。
+★<strong>証明本文まで読んだのは今回が初めて</strong>。</p>
+
+<h2>★主張は5つ。仮定の強さが条ごとに違う</h2>
+
+<table>
+<tr><th>条</th><th>仮定</th><th>原文の証明の段</th></tr>
+<tr><td>(i)</td><td><strong>pre-Frobenioid</strong> + 「A から出る射の終域がすべて isotropic」</td><td>1</td></tr>
+<tr><td>(ii)</td><td><strong>Frobenioid</strong></td><td>3</td></tr>
+<tr><td>(iii)</td><td><strong>Frobenioid</strong></td><td>1</td></tr>
+<tr><td>(iv)</td><td><strong>Frobenioid</strong></td><td>4</td></tr>
+<tr><td>(v)</td><td><strong>Frobenioid</strong></td><td>5</td></tr>
+</table>
+
+<p>★<strong>合計 14 段</strong>。依存の向きは <code>(i) → (ii) → (iii) → (iv) → (v)</code> で、
+<strong>(v) は (ii)(iii)(iv) を使う</strong>。</p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-4-i"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Proposition 1.4, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) Suppose that the codomain of any arrow of C whose domain is equal to A is</div>
+<div class="reading"><code>A</code> から出る射の終域がすべて <strong>isotropic</strong> なら、
+<code>A</code> を始域とする射は <strong>co-angular</strong>。
+さらに「<code>φ</code> が Frobenius 型 ⟺ isometric な base-isomorphism」。</div>
+<p class="open">★<strong>これだけが pre-Frobenioid のまま成り立つ。</strong>
+原文は「follows <strong>formally</strong> from the definitions」としか書かないが、
+実際に書いてみると <strong>1 行</strong>だった —— co-angular の条件に現れる
+<code>β</code> は「<code>A</code> から出る射 <code>γ</code> の終域」から出る isometric pre-step なので、
+isotropy から直ちに同型。★<strong>「formally」は何も隠していなかった。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-4-ii"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Proposition 1.4, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) Suppose that C is a Frobenioid. Then φ is a pull-back morphism if</div>
+<div class="reading"><code>φ</code> が <strong>pull-back morphism</strong> ⟺ <strong>LB-invertible な linear 射</strong>
+（= co-angular な linear isometry）。</div>
+<p class="open">順方向は <code>Definition 1.3, (iv), (b)</code> そのもの。
+逆方向は <code>Definition 1.3, (iv), (a)</code> の分解を取り、linear 性から <code>γ</code> が同型、
+isometry 性から <code>γ ≫ β</code> が isometric pre-step、co-angular 性からそれが同型、
+よって <code>φ</code> は pull-back morphism。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-4-iii"
+         data-paper="FrdI"
+         data-pdf-page="26"
+         data-item="Proposition 1.4, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) Suppose that C is a Frobenioid. Then every LB-invertible pre-step</div>
+<div class="reading">LB-invertible な <strong>pre-step は同型</strong>。</div>
+<p class="open">★原文は<strong>2つの道</strong>を示す ——
+<code>Definition 1.3, (v), (b)</code> の<strong>分解の一意性</strong>、
+<strong>または</strong> <code>Definition 1.3, (ii)</code> の Frobenius 型射の本質的一意性。
+Lean 側は<strong>後者</strong>を採った。
+★前者の道は、自己監査で足した <code>preStepFactorUniq</code>（一意性節）が無ければ通らなかった ——
+<strong>緩い転写が下流で効かなくなる実例</strong>である。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-4-iv"
+         data-paper="FrdI"
+         data-pdf-page="26"
+         data-item="Proposition 1.4, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iv) Suppose that C is a Frobenioid. Then a morphism φ of C is co-angular</div>
+<div class="reading"><code>φ</code> が co-angular ⟺ <code>Definition 1.3, (iv), (a)</code> の分解
+<code>φ = α ∘ β ∘ γ</code> における pre-step <code>β</code> が co-angular。</div>
+<p class="open">★逆方向が本命で、<strong><code>𝒟</code> が totally epimorphic であること</strong>を使う ——
+<code>β</code> の3分解に対し、<code>Base β</code> が同型であることから各因子の <code>Base</code> も同型
+（原文 p.16 の「in passing」の観察 = Lean 側の <code>isIso_of_isIso_comp</code>）。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-4-v"
+         data-paper="FrdI"
+         data-pdf-page="26"
+         data-item="Proposition 1.4, (v)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(v) Suppose that C is a Frobenioid. Then a morphism φ of C is LB-invertible</div>
+<div class="reading"><code>φ</code> が LB-invertible ⟺ <code>φ = α ∘ β</code>（<code>α</code> は pull-back morphism、
+<code>β</code> は Frobenius 型射）の形。</div>
+<p class="open">★<strong>(ii)(iii)(iv) をすべて使う</strong>ので、順序は最後。
+逆方向で <code>β</code> が isometric であることを出すのに、
+<code>Φ.map</code> の<strong>単射性</strong>（<code>Definition 1.1, (ii), (a)</code> の
+characteristically injective）が効く。</p>
+</section>
+
+<h2>★負の対照</h2>
+
+<p>(i) の isotropy 仮定が<strong>効いている</strong>ことを実物で示した。
+<code>𝒞 = Vee</code>、<code>𝒞 → 𝔽_Φ</code> を<strong>定数関手</strong>に取ると、
+<code>Base</code> はつねに <code>𝟙</code>、<code>Div</code> はつねに <code>0</code>、<code>deg_Fr</code> はつねに <code>1</code> になり、
+<strong><code>Vee</code> のすべての射が isometric pre-step になる</strong>。
+すると <code>left</code> は isotropic でなく、<code>left ⟶ top</code> は co-angular でない。</p>
+
+<p>★<code>𝔽_Φ</code> とその広い部分圏では<strong>どの対象も isotropic</strong> である
+（isometric pre-step は <code>(b, 0, 1)</code> で <code>b</code> が同型、したがって既に同型）ので、
+<strong>定数関手に取り替えることが必要だった</strong>。</p>
+
+</body>
+</html>
