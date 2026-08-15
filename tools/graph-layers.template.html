@@ -53,7 +53,13 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
         赤枠 = <b>循環している塊(SCC)</b>。分割できないのでまとめて扱うしかない。<br>
         <span style="display:inline-block;width:11px;height:11px;background:#2f6fd0;border-radius:3px;vertical-align:-1px"></span>
         塗り = 我々が触れている割合。<br>
-        太い線 = 依存が多い辺。
+        太い線 = 依存が多い辺。<br><br>
+        <b>ボックスをクリックすると:</b><br>
+        <span style="display:inline-block;width:11px;height:11px;background:#1e7a52;border-radius:3px;vertical-align:-1px"></span>
+        <b style="color:#1e7a52">緑</b> = <b>これに要るもの</b>(左へ、推移的に全部)<br>
+        <span style="display:inline-block;width:11px;height:11px;background:#a05fd0;border-radius:3px;vertical-align:-1px"></span>
+        <b style="color:#a05fd0">紫</b> = <b>これを使うもの</b>(右へ、推移的に全部)<br>
+        それ以外は薄くなる。
       </div></div>
   </div>
 </div>
@@ -67,6 +73,24 @@ const PAL=['#2f6fd0','#d0492f','#2f9e6b','#a05fd0','#d09a2f','#2fa8c0','#c02f7a'
 const color=t=>{let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))>>>0;return PAL[h%PAL.length];};
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 let vx=60,vy=40,sc=.5,drag=false,lx=0,ly=0,sel=null,hov=null,fitted=false;
+
+// ── 依存のハイライト用: 前向き(これが要るもの=左)と後ろ向き(これを使うもの=右) ──
+const fwd=new Map(), bwd=new Map();
+for(const [a,b] of BE){
+  if(!fwd.has(a))fwd.set(a,[]); fwd.get(a).push(b);   // a は b に依拠する
+  if(!bwd.has(b))bwd.set(b,[]); bwd.get(b).push(a);
+}
+const closure=(start,adj)=>{const s=new Set(),q=[start];
+  while(q.length){const v=q.shift();for(const w of (adj.get(v)||[])){if(!s.has(w)){s.add(w);q.push(w);}}}
+  return s;};
+let hlDeps=null, hlUsers=null, hlDirect=null;
+function setHighlight(i){
+  if(i===null){hlDeps=hlUsers=hlDirect=null;return;}
+  hlDeps=closure(i,fwd);          // これを作るのに要るもの(左へ)
+  hlUsers=closure(i,bwd);         // これを使うもの(右へ)
+  hlDirect=new Set([...(fwd.get(i)||[]),...(bwd.get(i)||[])]);
+}
+const C_DEP='#1e7a52', C_USE='#a05fd0';
 function fitAll(){sc=Math.min((innerWidth-360)/D.width,(innerHeight-80)/D.height,1);vx=340-0*sc;vy=30;}
 function fit(){if(!fitted){fitted=true;fitAll();}cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);draw();}
 addEventListener('resize',fit);
@@ -84,23 +108,41 @@ function draw(){
     ctx.fillStyle=L===0?'#1e7a52':(L===D.maxL?'#a5311f':'#98a0aa');
     ctx.fillText(L===0?`層 0(依存なし・ここから)`:(L===D.maxL?`層 ${L}(根)`:`層 ${L}`),x+84,34);
   }
-  // 辺
-  for(const [a,b,w] of BE){
+  // 辺(ハイライト対象は後で描き直すので、先に淡いものから)
+  const edgeKind=(a,b)=>{
+    if(sel===null)return 0;
+    const dep=(a===sel||hlDeps.has(a))&&(hlDeps.has(b)||b===sel);
+    const use=(b===sel||hlUsers.has(b))&&(hlUsers.has(a)||a===sel);
+    return dep?1:(use?2:0);
+  };
+  const drawEdge=(a,b,w,kind)=>{
     const A=B[a],Bb=B[b];
-    const on=sel!==null&&(a===sel||b===sel);
-    ctx.strokeStyle=on?'rgba(20,20,20,.6)':`rgba(120,128,140,${Math.min(.28,.05+w*.012)})`;
-    ctx.lineWidth=on?2.2:Math.min(4,.5+w*.09);
+    if(kind===1){ctx.strokeStyle=C_DEP;ctx.lineWidth=Math.min(5,1.4+w*.1);ctx.globalAlpha=.85;}
+    else if(kind===2){ctx.strokeStyle=C_USE;ctx.lineWidth=Math.min(5,1.4+w*.1);ctx.globalAlpha=.8;}
+    else{ctx.strokeStyle=`rgba(120,128,140,${Math.min(.28,.05+w*.012)})`;ctx.lineWidth=Math.min(4,.5+w*.09);
+         ctx.globalAlpha=sel===null?1:.22;}
     // A(依存元/右) ← Bb(依存先/左)。左から右へ流れる線を描く
     const x1=Bb.x+Bb.w, y1=Bb.y+Bb.h/2, x2=A.x, y2=A.y+A.h/2;
     ctx.beginPath();ctx.moveTo(x1,y1);
-    ctx.bezierCurveTo(x1+45,y1,x2-45,y2,x2,y2);ctx.stroke();
-  }
+    ctx.bezierCurveTo(x1+45,y1,x2-45,y2,x2,y2);ctx.stroke();ctx.globalAlpha=1;
+  };
+  const hi=[];
+  for(const [a,b,w] of BE){const k=edgeKind(a,b);if(k)hi.push([a,b,w,k]);else drawEdge(a,b,w,0);}
+  for(const [a,b,w,k] of hi) drawEdge(a,b,w,k);
   // ボックス
   ctx.textAlign='left';
   for(let i=0;i<B.length;i++){
     const b=B[i],c=color(b.tags[0][0]);
-    ctx.fillStyle='#fff';ctx.strokeStyle=b.scc?'#c0392b':'#c8ccd2';ctx.lineWidth=b.scc?2.4:1.1;
+    // ハイライト状態
+    const isDep=sel!==null&&hlDeps.has(i), isUse=sel!==null&&hlUsers.has(i);
+    const dim=sel!==null&&i!==sel&&!isDep&&!isUse;
+    ctx.globalAlpha=dim?.2:1;
+    ctx.fillStyle='#fff';
+    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(b.scc?'#c0392b':'#c8ccd2'));
+    ctx.lineWidth=(isDep||isUse)?2.2:(b.scc?2.4:1.1);
     ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();
+    if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.2:.09;
+      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.globalAlpha=1;}
     // 触れている割合
     if(b.ours>0){ctx.fillStyle=c;ctx.globalAlpha=.2;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w*Math.min(1,b.ours/b.n),b.h,7);ctx.fill();ctx.globalAlpha=1;}
@@ -114,6 +156,7 @@ function draw(){
     ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}`,b.x+9,b.y+36);
     if(b.scc){ctx.fillStyle='#c0392b';ctx.fillText('循環(分割不可)',b.x+9,b.y+50);}
     if(b.root){ctx.fillStyle='#a5311f';ctx.font='bold 11px -apple-system,Segoe UI,sans-serif';ctx.fillText('★ Corollary 3.12',b.x+9,b.y+(b.scc?64:50));}
+    ctx.globalAlpha=1;
   }
   ctx.restore();
 }
@@ -129,22 +172,28 @@ cv.addEventListener('mousemove',e=>{if(drag){vx+=e.clientX-lx;vy+=e.clientY-ly;l
 cv.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.12:1/1.12;
   vx-=(e.clientX-vx)*(f-1);vy-=(e.clientY-vy)*(f-1);sc=Math.max(.08,Math.min(3,sc*f));draw();},{passive:false});
 cv.addEventListener('click',e=>{
-  const h=pick(e.clientX,e.clientY);sel=h;const d=document.getElementById('det');
+  const h=pick(e.clientX,e.clientY);sel=h;setHighlight(h);
+  const d=document.getElementById('det');
   if(h===null){d.style.display='none';draw();return;}
   const b=B[h];
   const deps=BE.filter(([a])=>a===h).map(([,x])=>B[x]);
   const used=BE.filter(([,x])=>x===h).map(([a])=>B[a]);
+  const depN=[...hlDeps].reduce((s,i)=>s+B[i].n,0), useN=[...hlUsers].reduce((s,i)=>s+B[i].n,0);
+  const minL=hlDeps.size?Math.min(...[...hlDeps].map(i=>B[i].layer)):b.layer;
   document.getElementById('detb').innerHTML=
     `<h3>${b.tags.map(([t,n])=>`${t}${b.scc?` (${n})`:''}`).join(' + ')}</h3>`+
     `<div class="sub">層 ${b.layer}${b.scc?' ・ <b style="color:#c0392b">循環している塊(分割不可)</b>':''}${b.root?' ・ <b>根を含む</b>':''}</div>`+
     `<div class="row"><span>項目数</span><span><b>${b.n}</b></span></div>`+
     `<div class="row"><span>我々が触れた</span><span>${b.ours}${b.landed?`(うち着地 ${b.landed})`:''}</span></div>`+
-    `<div class="row"><span>これが要るもの</span><span>${deps.length} ボックス</span></div>`+
-    `<div class="row"><span>これを使うもの</span><span>${used.length} ボックス</span></div>`+
+    `<hr style="border:0;border-top:1px solid #eee;margin:7px 0">`+
+    `<div class="row"><span style="color:${C_DEP}">← これに要る</span><span><b style="color:${C_DEP}">${hlDeps.size} ボックス / ${depN} 項目</b>(直接 ${deps.length})</span></div>`+
+    `<div class="row"><span style="color:${C_USE}">→ これを使う</span><span><b style="color:${C_USE}">${hlUsers.size} ボックス / ${useN} 項目</b>(直接 ${used.length})</span></div>`+
+    (hlDeps.size?`<div class="row"><span>最も左の層</span><span>層 ${minL}(ここから積み上げる)</span></div>`:
+                 `<div class="row"><span>依存</span><span><b style="color:${C_DEP}">無し —— 今すぐ着手できる</b></span></div>`)+
     `<ul>${b.items.map(it=>`<li>${it.o?`<b style="color:#1e7a52">●</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`).join('')}</ul>`;
   d.style.display='block';draw();
 });
-document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').style.display='none';sel=null;draw();};
+document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').style.display='none';sel=null;setHighlight(null);draw();};
 document.getElementById('tg').onclick=function(){document.getElementById('sb').classList.toggle('hid');this.classList.toggle('op');};
 
 document.getElementById('key').innerHTML=

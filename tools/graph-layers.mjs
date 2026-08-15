@@ -200,7 +200,9 @@ for (const [L, ids] of byLayer) {
     const b = boxes.get(id);
     b.h = Math.max(28, Math.min(170, 24 + b.items.length * 1.9));
     b.w = BW;
-    b.x = (maxL - b.layer) * (BW + GAPX);   // ★層 0 が最も左、根(最大層)が最も右
+    // ★層 0(依存なし)が最も左、根(最大層)が最も右。
+    //   以前 (maxL - b.layer) と書いており **左右が反転していた**(2026-08-15 訂正)。
+    b.x = b.layer * (BW + GAPX);
     b.y = y; y += b.h + GAPY;
   }
   maxH = Math.max(maxH, y);
