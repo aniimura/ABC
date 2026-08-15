@@ -212,6 +212,39 @@ minimal-adjoint は<strong>最初</strong>、minimal-coadjoint は<strong>最後
 <strong>両端を押さえたので、定義が空でも全体でもないことが分かる。</strong></p>
 </section>
 
+<h2>★2026-08-15 追加 —— `Proposition 1.10` が要求した §0 の語彙</h2>
+
+<section class="statement definition"
+         id="frdi-s0-irreducible"
+         data-paper="FrdI"
+         data-pdf-page="17"
+         data-item="§0 Categories — subordinate / irreducible / FSMI-morphism"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">admits a factorization φ = α ◦β ◦γ in C, then we shall say that β is subordinate to</div>
+<div class="verbatim">φ. If φ is not an isomorphism, but, for every factorization φ = α ◦β in C, it holds</div>
+<div class="verbatim">that either α or β is an isomorphism, then we shall say that φ is irreducible. We</div>
+<div class="verbatim">shall refer to an FSM-morphism which is irreducible as an FSMI-morphism. Thus,</div>
+<div class="verbatim">a category of FSM-type does not contain any FSMI-morphisms.</div>
+<div class="reading"><strong>irreducible</strong> ＝「同型ではないが、どう2つに分解しても
+片方は同型になってしまう」。★<strong>分解できない、ではなく「自明にしか分解できない」。</strong>
+<strong>subordinate</strong> は3分解の真ん中に現れうること。
+<strong>FSMI-morphism</strong> ＝ FSM かつ irreducible。</div>
+<p class="open">★<strong>合成の向きに注意</strong>：原文の <code>φ = α ◦ β</code> は
+「先に <code>β</code>、次に <code>α</code>」であり、Lean では <code>φ = β ≫ α</code> と書く。
+★<strong>ここを逆に写すと定義は同じものにならない</strong>
+（<code>α</code> と <code>β</code> の役割が非対称だから ——
+minimal-adjoint と minimal-coadjoint の違いがまさにそれである）。</p>
+<p class="open">★<strong>原文はこの直後に「a category of FSM-type does not contain any
+FSMI-morphisms」と述べている</strong>。これは<strong>非退化の裏返し</strong>で、
+「FSM-type の圏では irreducible な FSM 射が存在しない」＝
+<strong>この定義が空になる状況が明示されている</strong>。
+★<strong>我々が毎回自分で作っている「反例側」を、原文がここでは自分で書いている。</strong></p>
+<p class="open">★<strong><code>Proposition 1.10, (iv)</code> がこの語彙を使う</strong>：
+「isotropic な域を持つ Frobenius 型射が prime-Frobenius ⟺ irreducible」。
+★<code>(v)</code> は「Frobenius 型 ⟺ prime-Frobenius の合成」なので、
+<strong>(iv)+(v) で「Frobenius 型射の全体は irreducible なものから生成される」</strong>ことになる。</p>
+</section>
+
 <h2>★2026-08-15 追加 —— `Proposition 1.8` が要求した §0 の語彙</h2>
 
 <section class="statement definition"

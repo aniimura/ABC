@@ -103,23 +103,71 @@ def cfpElemFunctor (Φ : MonoidOn.{v, u, w} D) (G : D' ⥤ D)
     show G.map (f.base ≫ g.base) = G.map f.base ≫ G.map g.base
     rw [G.map_comp]
 
-/-! ### ★(i) の圏同値 —— 数学は片付いた。Lean は 2 箇所で止まっている(記録)
+/-- **(i)** —— ★**`𝔽_{Φ'} ⥤ 𝔽_Φ ×_𝒟 𝒟'` は圏同値**。
 
-★**数学**（原文の「follows formally from the definitions」は**正しい**）:
+★原文の「follows formally from the definitions」は**正しい**。測ると:
 * **忠実性**: 像の 2 成分から `base` / `div` / `deg` がそのまま読める
 * **充満性**: 四角形が `h₁.base = G h₂` を強制するので `h₂` が原像を与える
 * **本質的全射性**: `(Y, W, α)` に対し `W` を取り、同型を **`⟨α⁻¹, 0, 1⟩`** で作る
-★3 成分とも「**四角形が第2成分を第1成分から決める**」ことに帰着する。
+★**3 成分とも「四角形が第2成分を第1成分から決める」ことに帰着する。** -/
+theorem cfpElemFunctor_isEquivalence (Φ : MonoidOn.{v, u, w} D) (G : D' ⥤ D)
+    (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α)) :
+    (cfpElemFunctor Φ G hG).IsEquivalence := by
+  haveI hfaith : (cfpElemFunctor Φ G hG).Faithful := by
+    constructor
+    intro W₁ W₂ f g hfg
+    refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+    · exact congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) hfg
+    · exact congrArg
+        (fun t => ElemFrobCat.Hom.div (CommaMorphism.left (InducedCategory.Hom.hom t))) hfg
+    · exact congrArg
+        (fun t => ElemFrobCat.Hom.deg (CommaMorphism.left (InducedCategory.Hom.hom t))) hfg
+  haveI hfull : (cfpElemFunctor Φ G hG).Full := by
+    constructor
+    intro W₁ W₂ h
+    have hw := (InducedCategory.Hom.hom h).w
+    have hb := (Category.comp_id (InducedCategory.Hom.hom h).left.base).symm.trans
+      (hw.trans (Category.id_comp _))
+    refine ⟨⟨(InducedCategory.Hom.hom h).right, (InducedCategory.Hom.hom h).left.div,
+      (InducedCategory.Hom.hom h).left.deg⟩, ?_⟩
+    refine InducedCategory.hom_ext (CommaMorphism.ext ?_ rfl)
+    exact ElemFrobCat.Hom.ext hb.symm rfl rfl
+  haveI hess : (cfpElemFunctor Φ G hG).EssSurj := by
+    constructor
+    intro X
+    haveI hXi : IsIso X.obj.hom := X.property
+    obtain ⟨v, hv1, hv2⟩ := hXi.out
+    refine ⟨⟨X.obj.right⟩, ⟨?_⟩⟩
+    refine ⟨InducedCategory.homMk ⟨⟨v, 0, 1⟩, 𝟙 _, ?_⟩,
+      InducedCategory.homMk ⟨⟨X.obj.hom, 0, 1⟩, 𝟙 _, ?_⟩, ?_, ?_⟩
+    · show v ≫ X.obj.hom = 𝟙 _ ≫ G.map (𝟙 X.obj.right)
+      rw [hv2, G.map_id, Category.comp_id]
+    · show X.obj.hom ≫ 𝟙 _ = X.obj.hom ≫ G.map (𝟙 X.obj.right)
+      rw [G.map_id]
+    · refine InducedCategory.hom_ext (CommaMorphism.ext ?_ (Category.comp_id _))
+      refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+      · show v ≫ X.obj.hom = 𝟙 _
+        exact hv2
+      · simp [ElemFrobCat.comp_div]
+      · simp [ElemFrobCat.comp_deg]
+    · refine InducedCategory.hom_ext (CommaMorphism.ext ?_ (Category.comp_id _))
+      refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+      · show X.obj.hom ≫ v = 𝟙 _
+        exact hv1
+      · simp [ElemFrobCat.comp_div]
+      · simp [ElemFrobCat.comp_deg]
+  exact ⟨hfaith, hfull, hess⟩
 
-★**Lean で止まった箇所**（2 つとも `ElemFrobCat` の合成の `div` 成分）:
-```
-⊢ ({ base := v, div := 0, deg := 1 } ≫ { base := X.obj.hom, div := 0, deg := 1 }).div = 0
-```
-`simp` / `simp [ElemFrobCat.Hom.comp]` / 型注釈つき `show` のいずれでも閉じない。
-★**原因未特定。** 合成の `div` は `Φ.map v 0 + deg • 0` なので数学的には自明。
+/-! ### ★★教訓 —— **「補題が無い」ではなく「名前を間違えていた」**
 
-★**関手 `cfpElemFunctor` 自体は通っている**（上）。次に当たる人はここから再開できる。
--/
+(i) の圏同値は一度「`ElemFrobCat` の合成の `div` 成分が `simp` で閉じない、原因未特定」
+として切った。★**原因は単純で、`simp [ElemFrobCat.Hom.comp]` と
+存在しない名前を指定していた**だけだった。正しくは
+**`ElemFrobCat.comp_div` / `comp_deg`(どちらも既に `@[simp]`)**である。
+
+★**「無い」と言う前に S1–S4(ファイル名の列挙を含む)** —— この規律は
+**補題の名前にも当てはまる**。★**推測した名前が通らないことを「原因未特定」と書いてはいけない。**
+まず `grep` する。 -/
 
 /-! ## ★`𝒞' = 𝒞 ×_𝒟 𝒟'` -/
 
