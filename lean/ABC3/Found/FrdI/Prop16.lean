@@ -741,6 +741,36 @@ theorem cfpEndHom_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
     cfpEndHom P G A (x ^ k) = (cfpEndHom P G A x) ^ k :=
   map_pow (cfpEndHom P G A) x k
 
+/-- ★`𝒟'` 成分の方のモノイド準同型。 -/
+def cfpEndHomSnd (A : CfpCat P G) : End A →* End A.obj.right where
+  toFun f := CfpCat.snd f
+  map_one' := rfl
+  map_mul' _ _ := rfl
+
+theorem cfpEndHomSnd_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
+    cfpEndHomSnd P G A (x ^ k) = (cfpEndHomSnd P G A x) ^ k :=
+  map_pow (cfpEndHomSnd P G A) x k
+
+/-! ## ★(vi) —— **片向きだけ**の3タイプ
+
+原文 (FrdI p.28):
+> (vi) A object of C is Aut-ample (respectively, Autsub-ample; End-ample) if
+
+★★**なぜ片向きなのか**が基準で説明できる:
+`Aut-ample` 等は「**`𝒟` の自己射が `𝒞` から来る**」という**全射性**の条件である。
+`𝒞'` について言うには `𝒟'` の自己射 `g` を `𝒟` へ送って(`G g`)`𝒞` の全射性を使えばよい ——
+**`G` は関手なので送れる**。
+★逆向きは「`𝒟` の自己射 `g₀` に対応する `𝒟'` の自己射」を要求するので
+**`G` の充満性**が要り、仮定にない。★**原文が片向きでしか述べていないのは正しい。** -/
+
+/-! ### ★(vi) の実装は未完(切った)
+
+★**数学は上の説明で完成している**が、Lean では
+`IsIso (A.obj.hom ≫ G.map g ≫ w)` のインスタンス合成が
+(文脈に各因子の `IsIso` があるのに)通らず、分類表 #5 の対処でも抜けなかった。
+**無理に通さず切る**という方針に従う。
+-/
+
 end Dict
 
 end ABC3.Found.FrdI
