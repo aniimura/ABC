@@ -911,4 +911,35 @@ theorem prop_1_11_v_pullBack_iff_reduce (F : FrobenioidCore P) {A B Cc Dd : C}
 ★**ただし穴の位置は型で確定している**: (v) の存在を `φ` が pull-back の場合に拡張すること。
 -/
 
+/-! ### ★★(v) の pull-back の場合を試した —— なぜ co-angular の手が移らないか
+
+前段で「材料は全部あるが組み方が分からない」と書いた。★**試した。** 結果:
+
+★★**co-angular pre-step の場合の手は、そのままでは移らない。理由が特定できた。**
+
+co-angular の場合、我々は
+> `α ≫ φ` の不変量を計算し、`coaPre_factor_of_mle`(スライスの圏同値)を当てる
+という手を使った。★**これには `α ≫ φ` が co-angular pre-step であることが要る。**
+
+★**`φ` が pull-back のときは、`α ≫ φ` は pre-step ではない**:
+- `α` は co-angular pre-step(linear ＋ base-isomorphism)
+- `φ` は pull-back(co-angular ＋ linear だが、★**base-isomorphism とは限らない**)
+- よって `α ≫ φ` は **co-angular ＋ linear** だが **base-isomorphism ではない**
+
+★★**`(𝒞^coa-pre)_B` の対象になれないので、スライスの圏同値が使えない。**
+
+★**これが「co-angular の場合」と「pull-back の場合」で
+原文が別々の道具を挙げている理由**である:
+- co-angular pre-step の場合 → `Definition 1.3, (iii), (d)` の圏同値**だけ**
+- pull-back の場合 → ★**4 つの道具**(`Def 1.3, (i), (c)` の圏同値 / `Def 1.2, (ii)` /
+  `Prop 1.7, (i), (v)` / `Def 1.3, (iii), (d)` の圏同値)
+
+★**原文は 4 つを並べるだけだが、なぜ 4 つ要るかは
+「`α ≫ φ` が pre-step でなくなる」という一点に帰着する。**
+
+★★**「試していない」から「試して、なぜ難しいかが分かった」へ移った**
+(3 分類の第 3 → 第 2 カテゴリ)。★**この移動は 3 回目である**
+(`Proposition 1.10, (iii)` の moreover で 2 回、ここで 1 回)。
+-/
+
 end ABC3.Found.FrdI
