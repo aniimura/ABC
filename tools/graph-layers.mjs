@@ -5,13 +5,19 @@
 //   **左端の層は依存を持たない**ので、そこから始められる。
 //
 // ★循環の扱い(ここが設計の核心)
-//   原文の参照グラフには循環がある(IUTchIII が IUTchIV を前方参照する等)。
 //   循環があると層に並べられないので、**強連結成分(SCC)に潰す**。
 //   潰した結果が凝縮 DAG で、これは必ず層に並ぶ。
 //   ★そして SCC は「まとめてしか扱えない塊」なので、**そのままグルーピングの単位**になる。
-//   実測: 824 節点 → 414 SCC。最大の SCC は **262 節点**で
-//   IUTchI/II/III/IV の4本にまたがる——**IUT 本体は1つの循環であり、
-//   「IUTchI から順に」という順序付けは存在しない。**
+//
+//   ★★訂正の記録(2026-08-15): 当初この欄には
+//   「824 節点 → 最大 SCC 262 節点(IUTchI/II/III/IV にまたがる)。
+//    IUT 本体は1つの循環であり、『IUTchI から順に』という順序付けは存在しない」
+//   と書いていた。**誤りである。**
+//   その 262 節点の循環は、辺の定義が「本文が名指しした」だったことの副作用だった。
+//   辺を「証明が依拠している」に定め直した実測(ResearchPaper/cycle-analysis.md):
+//     節点 824 → 653 / 最大 SCC 262 → **17** / 循環する成分 30 → 12 / 層 19 → **55**
+//   ★残る最大 SCC 17 は IUTchIII + IUTchIV のみで、**IUTchI・IUTchII は循環から外れる。**
+//   すなわち **IUTchI → II → III → IV の順序付けは存在する。**
 //
 // ★ボックスの決め方
 //   ・サイズ>1 の SCC は、それ自体で1ボックス(分割できないので)
@@ -51,20 +57,36 @@ function load(tag) {
   const decls = new Map(); for (const d of list) if (!decls.has(d.name)) decls.set(d.name, d);
   const o = { decls, lines }; loaded.set(tag, o); return o;
 }
+// ★辺の意味(2026-08-15 に定めた): 「原文の証明が実際に依拠しているもの」。
+//   次は辺ではない —— 前方参照(cf. …, below)/ 解説への案内(the discussion of …)。
+//   実測(ResearchPaper/cycle-analysis.md): この2つを落とすだけで
+//   最大 SCC が 262 → 16 になり、**論文をまたぐ循環が消える**。
+//   ★Remark を種別で落とすことはしない。[IUTchIII] Remark 3.9.5, (i) は
+//    正則包を**定義**しており、我々は実際にそれに依拠している。
+const NOT_A_DEP = /\bbelow\b|the discussion of|the discussion surrounding|\bsee also\b/i;
+
 function outs(tag, name) {
   const P = load(tag); if (!P) return null;
   const d = P.decls.get(name); if (!d) return null;
   const body = P.lines.slice(d.line, d.end).join('\n');
-  const es = []; const spans = [];
+  const ctx = (i, len) => body.slice(Math.max(0, i - 90), i + len + 60).replace(/\s+/g, ' ');
+  const es = new Map(); const spans = [];
+  const keep = (to, c) => {
+    const soft = NOT_A_DEP.test(c);
+    const cur = es.get(to);
+    // 同じ先が複数回出るなら、1回でも「依拠」の文脈があれば辺として残す
+    if (cur === undefined || (cur && !soft)) es.set(to, soft);
+  };
   const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
-  for (const m of body.matchAll(xre)) { es.push(`${m[1]} / ${m[2]} ${m[3]}`); spans.push([m.index, m.index + m[0].length]); }
+  for (const m of body.matchAll(xre)) { keep(`${m[1]} / ${m[2]} ${m[3]}`, ctx(m.index, m[0].length)); spans.push([m.index, m.index + m[0].length]); }
   const ire = new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(ire)) {
     if (spans.some(([a, b]) => m.index >= a && m.index < b)) continue;
     const to = `${m[1]} ${m[2]}`;
-    if (to !== name && P.decls.has(to)) es.push(`${tag} / ${to}`);
+    if (to !== name && P.decls.has(to)) keep(`${tag} / ${to}`, ctx(m.index, m[0].length));
   }
-  return { edges: [...new Set(es)], page: d.page };
+  return { edges: [...es].filter(([, soft]) => !soft).map(([k]) => k), page: d.page,
+           dropped: [...es].filter(([, soft]) => soft).length };
 }
 
 const ROOTK = 'IUTchIII / Corollary 3.12';
@@ -166,7 +188,7 @@ for (const [v, es] of adj) {
 }
 
 // ── 配置 ─────────────────────────────────────────────────
-const BW = 168, GAPX = 92, GAPY = 12, PADT = 60;
+const BW = 150, GAPX = 58, GAPY = 10, PADT = 62;
 const maxL = Math.max(...[...boxes.values()].map((b) => b.layer));
 const byLayer = new Map();
 for (const [id, b] of boxes) { if (!byLayer.has(b.layer)) byLayer.set(b.layer, []); byLayer.get(b.layer).push(id); }
@@ -176,7 +198,7 @@ for (const [L, ids] of byLayer) {
   let y = PADT;
   for (const id of ids) {
     const b = boxes.get(id);
-    b.h = Math.max(30, Math.min(190, 26 + b.items.length * 1.7));
+    b.h = Math.max(28, Math.min(170, 24 + b.items.length * 1.9));
     b.w = BW;
     b.x = (maxL - b.layer) * (BW + GAPX);   // ★層 0 が最も左、根(最大層)が最も右
     b.y = y; y += b.h + GAPY;

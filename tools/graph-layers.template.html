@@ -42,7 +42,8 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
     <div class="key" id="key"></div>
     <div class="warn"><b>★分母は下界でも上界でもない。</b>
       <code>pdftotext</code> 由来で目視していない。番号の無い依存を数え落とし、
-      「the discussion of …」型の<b>案内</b>を依存として数え過ぎる。<b>桁を見るためだけに使うこと。</b></div>
+      ★「the discussion of …」型の<b>案内</b>と前方参照(<code>below</code>)は<b>辺から除いた</b>が、
+      <code>cf.</code>(元の 36%)は両義的なので残っている。<b>桁を見るためだけに使うこと。</b></div>
     <div class="sec"><h2>規模</h2><div id="stats"></div></div>
     <div class="sec"><h2>層ごとの節点数(クリックで移動)</h2><div id="layers"></div></div>
     <div class="sec"><h2>凡例</h2>
@@ -58,15 +59,16 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
 </div>
 <canvas id="cv"></canvas>
 <div id="det"><span class="cl">×</span><div id="detb"></div></div>
-<div id="hint">ドラッグ=移動 / ホイール=拡大 / ボックスクリック=中身</div>
+<div id="hint">ドラッグ=移動 / ホイール=拡大 / ボックスクリック=中身 &nbsp;·&nbsp; <a href="#" id="rf" style="color:#2f6fd0">全体表示</a></div>
 <script>
 const D = /*__DATA__*/;
 const B=D.B, BE=D.BE, S=D.stats;
 const PAL=['#2f6fd0','#d0492f','#2f9e6b','#a05fd0','#d09a2f','#2fa8c0','#c02f7a','#6b8f2f','#8f5a2f','#5a2f8f','#2f8f7a','#8f2f5a'];
 const color=t=>{let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))>>>0;return PAL[h%PAL.length];};
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-let vx=60,vy=40,sc=.5,drag=false,lx=0,ly=0,sel=null,hov=null;
-function fit(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);draw();}
+let vx=60,vy=40,sc=.5,drag=false,lx=0,ly=0,sel=null,hov=null,fitted=false;
+function fitAll(){sc=Math.min((innerWidth-360)/D.width,(innerHeight-80)/D.height,1);vx=340-0*sc;vy=30;}
+function fit(){if(!fitted){fitted=true;fitAll();}cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);draw();}
 addEventListener('resize',fit);
 
 function draw(){
@@ -78,7 +80,7 @@ function draw(){
   const byL=new Map();for(const b of B){if(!byL.has(b.layer))byL.set(b.layer,b.x);}
   for(const [L,x] of byL){
     ctx.fillStyle=L===D.maxL?'rgba(192,57,43,.06)':(L===0?'rgba(47,158,107,.08)':'rgba(0,0,0,.017)');
-    ctx.fillRect(x-14,10,196,D.height);
+    ctx.fillRect(x-10,10,170,D.height);
     ctx.fillStyle=L===0?'#1e7a52':(L===D.maxL?'#a5311f':'#98a0aa');
     ctx.fillText(L===0?`層 0(依存なし・ここから)`:(L===D.maxL?`層 ${L}(根)`:`層 ${L}`),x+84,34);
   }
@@ -146,10 +148,12 @@ document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').s
 document.getElementById('tg').onclick=function(){document.getElementById('sb').classList.toggle('hid');this.classList.toggle('op');};
 
 document.getElementById('key').innerHTML=
-  `<b>★この図が言っていること</b><br>
-   IUT の4本(IUTchI/II/III/IV)は <b>1つの循環</b>を成す——右端の赤枠 262 項目がそれ。
-   <b>「IUTchI から順に」という順序付けは存在しない。</b><br>
-   しかし<b>その左の ${S.nodes-262} 項目は順序付けられる</b>。左の層から着手できる。`;
+  `<b>★辺の意味</b> = <b>原文の証明が実際に依拠しているもの</b>。
+   前方参照(<code>cf. …, below</code>)と解説への案内(<code>the discussion of …</code>)は辺にしない。<br><br>
+   <b>★これを定めた効果(実測)</b>: 最大の循環が <b>262 → ${Math.max(...B.map(b=>b.scc?b.n:0))} 節点</b>に縮み、
+   <b>論文をまたぐ大循環が消えた</b>。残る最大の循環は IUTchIII+IUTchIV だけで、
+   <b>IUTchI → II → III → IV の順序付けは存在する</b>。<br><br>
+   したがって<b>左の層から順に着手してよい</b>。`;
 document.getElementById('stats').innerHTML=
   `<div class="st"><span>節点</span><b>${S.nodes}</b></div>`+
   `<div class="st"><span>強連結成分</span><b>${S.sccs}</b></div>`+
@@ -165,5 +169,6 @@ document.getElementById('layers').innerHTML=D.layerStats.map(l=>
 document.querySelectorAll('.lr').forEach(el=>el.onclick=()=>{
   const L=+el.dataset.l;const b=B.find(x=>x.layer===L);if(!b)return;
   vx=innerWidth/2-(b.x+b.w/2)*sc;vy=80;draw();});
+document.getElementById("rf").onclick=e=>{e.preventDefault();fitAll();draw();};
 fit();
 </script></body></html>
