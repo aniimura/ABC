@@ -879,4 +879,36 @@ theorem prop_1_11_v_pullBack_iff_reduce (F : FrobenioidCore P) {A B Cc Dd : C}
     · intro hpb
       exact (prop_1_4_ii P F φ).mpr ⟨h.mpr ((prop_1_4_ii P F ψ).mp hpb).1, hφl⟩
 
+/-! ### ★★残りを型で書く —— (vii) の pull-back の場合は (v) を経由する
+
+★**原文**(p.38、目視):
+> If ϵ is a pull-back morphism, then it follows immediately
+> [**by "pulling back the zero divisor of φ via ϵ"** — cf. assertion (v)]
+> that there exist a pull-back morphism α : D →A and a co-angular pre-step γ : D →C
+> such that ϵ ◦γ = φ ◦α.
+
+★★**「pulling back the zero divisor of φ via ϵ」の意味が特定できた**:
+`φ` の不変量 `x_φ ∈ Φ(B_𝒟)` を `Φ.map (Base ε)` で `Φ(Cc_𝒟)` へ引き戻し、
+★**それを不変量とする co-angular pre-step `γ : Dd ⟶ Cc` を実現する**
+(`coaPre_realize_over` —— 我々が作った道具)。
+
+★**そのうえで (v) を `φ_{(v)} := ε`、`α_{(v)} := γ`、`β_{(v)} := φ` に当てる**と
+`ψ : Dd ⟶ A` が出て、それが求める `α` である。
+
+★★**したがって (vii) の pull-back の場合は、(v) の存在を
+「`φ` が pull-back の場合」について要求する。**
+我々が実装した (v) の存在は「`φ` が co-angular pre-step の場合」だけなので、
+★**そこが穴である。**
+
+★**原文が (v) の pull-back の場合に挙げる道具は 4 つ**:
+`Definition 1.3, (i), (c)` の圏同値 / `Definition 1.2, (ii)` /
+`Proposition 1.7, (i), (v)` / `Definition 1.3, (iii), (d)` の圏同値。
+★**4 つとも我々は持っている**(`plBk_realize` / `IsPullBack` /
+`prop_1_7_v_pullBack` / `coaPre_factor_of_mle`)。
+★**足りないのは組み方であって、材料ではない。**
+
+★**「試していない」と明記する**(3 分類の第 3 カテゴリ)。
+★**ただし穴の位置は型で確定している**: (v) の存在を `φ` が pull-back の場合に拡張すること。
+-/
+
 end ABC3.Found.FrdI
