@@ -5,6 +5,7 @@ import Mathlib.Algebra.Order.Group.Nat
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.NormNum
 import Mathlib.Algebra.Group.Submonoid.Membership
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # [FrdI] §0 のモノイド語彙 —— `sharp` / `integral` / `saturated`
@@ -312,5 +313,194 @@ theorem independence_saturated :
     refine one_not_mem_twoThree ?_
     have hm1 : ((m : TwoThree) : ℕ) = 1 := by omega
     simp [← hm1]
+
+/-! ### `torsion-free` と、原文が主張する含意
+
+原文 (FrdI p.11):
+> inductive system I∗determines a natural morphism
+
+原文 (FrdI p.11):
+> which is injective if M is torsion-free, integral, and saturated, hence, in particular, if
+
+★**「which」の正体**: 直前の `M → M^pf`(**perfection** への自然な射)である。
+`M^gp` ではない。原文は `M^pf` を「乗法 `n·` による帰納極限」として定める:
+
+原文 (FrdI p.11):
+> the perfection of M, that is to say, the inductive limit of the inductive system I∗of
+
+★★**原文は「torsion element」を定義していない**(2026-08-15 実測: [FrdI] 全体で
+`torsion` は 3 箇所——上の 2 箇所と、無関係な `torsion subgroup` の言及 1 箇所のみ)。
+したがって `torsion-free` の意味は**原文からは決まらない**。標準的な読みを採り、
+その旨をここに明記する。
+
+★mathlib の `IsAddTorsionFree` は **「`n • ·` が単射」**であり、素朴な読み
+(「`n • a = 0` なら `a = 0`」)とは**別の条件**である。群では一致するが、
+モノイドでは一般に別物なので、両方を置いて関係を証明する。 -/
+
+/-- **[FrdI] §0 `torsion-free`**(素朴な読み) —— torsion 元を持たない。
+
+★原文はこの語を定義していない。ここは標準的な読み
+「`n ≥ 1` かつ `n • a = 0` なら `a = 0`」を採る。 -/
+def IsTorsionFreeNaive : Prop := ∀ (a : M) (n : ℕ), 0 < n → n • a = 0 → a = 0
+
+variable {M}
+
+/-- ★★**原文の「hence, in particular」の中身** —— **sharp なら torsion-free**。
+
+原文 (FrdI p.11):
+> which is injective if M is torsion-free, integral, and saturated, hence, in particular, if
+
+原文 (FrdI p.11):
+> M is sharp, integral, and saturated. We shall say that M is perfect if multiplication
+
+★証明は1行で、**`sharp` だけで足りる**(`integral` も `saturated` も要らない):
+`n • a = 0` かつ `n ≥ 1` なら `a + (n-1) • a = 0` なので `a` は可逆、
+`sharp` より `a = 0`。 -/
+theorem isTorsionFreeNaive_of_isSharp (h : IsSharp M) : IsTorsionFreeNaive M := by
+  intro a n hn hna
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  refine h a ⟨⟨a, m • a, ?_, ?_⟩, rfl⟩
+  · calc a + m • a = m • a + a := add_comm _ _
+      _ = (m + 1) • a := (succ_nsmul a m).symm
+      _ = 0 := hna
+  · calc m • a + a = (m + 1) • a := (succ_nsmul a m).symm
+      _ = 0 := hna
+
+/-- mathlib の `IsAddTorsionFree`(`n • ·` が単射)なら、素朴な読みも成り立つ。
+
+★逆は一般には成り立たない。**同じ語で別の条件**である。 -/
+theorem isTorsionFreeNaive_of_isAddTorsionFree [IsAddTorsionFree M] :
+    IsTorsionFreeNaive M := by
+  intro a n hn hna
+  have h0 : n • a = n • (0 : M) := by simpa using hna
+  exact IsAddTorsionFree.nsmul_right_injective (by omega) h0
+
+/-! ### `M^±` と `of characteristic type`
+
+原文 (FrdI p.11):
+> the submonoid [which, in fact, forms a group] of invertible elements of M, by
+
+原文 (FrdI p.11):
+> the quotient monoid of M by M ±, which we shall refer to as the characteristic of
+
+原文 (FrdI p.11):
+> characteristic type if the fibers of the natural map M →M char are torsors over M ±.
+
+★**`M^char` そのもの(商モノイド)は作っていない。** 作るにはモノイドの合同関係
+(`AddCon`)が要る。ここで要るのは「**同じファイバーに属する**」という関係だけなので、
+それを直接書く——`M^± ` で生成される合同関係は
+「`∃ u v ∈ M^±, a + u = b + v`」である。**この選択は原文の言い換えであって、
+原文が書いていないことを足してはいない。** -/
+
+variable (M)
+
+/-- **`M^±`** —— 可逆元のなす部分モノイド。 -/
+def unitsSubmonoid : AddSubmonoid M where
+  carrier := {a : M | IsAddUnit a}
+  zero_mem' := isAddUnit_zero
+  add_mem' := IsAddUnit.add
+
+variable {M}
+
+/-- `M → M^char` の**同じファイバー**に属する関係
+(= `M^±` が生成する合同関係)。 -/
+def CharRel (a b : M) : Prop := ∃ u v : M, IsAddUnit u ∧ IsAddUnit v ∧ a + u = b + v
+
+theorem charRel_refl (a : M) : CharRel a a := ⟨0, 0, isAddUnit_zero, isAddUnit_zero, rfl⟩
+
+variable (M)
+
+/-- **[FrdI] §0 `of characteristic type`** —— `M → M^char` のファイバーが
+`M^±` 上の**トーサー**(単純推移的)であること。
+
+原文 (FrdI p.11):
+> characteristic type if the fibers of the natural map M →M char are torsors over M ±.
+
+★「トーサー」を「推移的かつ自由」に開いて書く。 -/
+def IsOfCharacteristicType : Prop :=
+  ∀ a b : M, CharRel a b → ∃! u : M, IsAddUnit u ∧ b = a + u
+
+/-! ### 非退化 -/
+
+/-- `ℕ` は **of characteristic type** —— 可逆元が `0` だけなのでファイバーは1点。 -/
+theorem isOfCharacteristicType_nat : IsOfCharacteristicType ℕ := by
+  intro a b hab
+  obtain ⟨u, v, hu, hv, huv⟩ := hab
+  obtain ⟨w, rfl⟩ := hu
+  obtain ⟨w', rfl⟩ := hv
+  have hw : ((w : ℕ)) = 0 := by have := w.val_neg; omega
+  have hw' : ((w' : ℕ)) = 0 := by have := w'.val_neg; omega
+  refine ⟨0, ⟨isAddUnit_zero, by omega⟩, ?_⟩
+  rintro y ⟨hy, hy2⟩
+  obtain ⟨z, rfl⟩ := hy
+  have := z.val_neg
+  omega
+
+/-- ★`WithTop (ZMod 2)` は **of characteristic type でない** ——
+`⊤` のファイバー上で `M^±` の作用が**自由でない**(`⊤ + 0 = ⊤ + 1 = ⊤`)。 -/
+theorem not_isOfCharacteristicType_withTop_zmod2 :
+    ¬ IsOfCharacteristicType (WithTop (ZMod 2)) := by
+  intro h
+  have h1 : IsAddUnit ((1 : ZMod 2) : WithTop (ZMod 2)) :=
+    ⟨⟨((1 : ZMod 2) : WithTop (ZMod 2)), ((1 : ZMod 2) : WithTop (ZMod 2)), by decide, by decide⟩, rfl⟩
+  obtain ⟨u, hu, huniq⟩ := h ⊤ ⊤ (charRel_refl ⊤)
+  have e0 : (0 : WithTop (ZMod 2)) = u := huniq 0 ⟨isAddUnit_zero, by simp⟩
+  have e1 : ((1 : ZMod 2) : WithTop (ZMod 2)) = u := huniq _ ⟨h1, by simp⟩
+  rw [← e0] at e1
+  exact absurd e1 (by decide)
+
+/-! ### ★[FrdI] Definition 1.1, (i) —— `pre-divisorial` / `divisorial`
+
+原典: [FrdI] 物理 p.19(**400 dpi 目視確認 2026-08-15**)。
+
+原文 (FrdI p.19):
+> (i) We shall say that M ∈Ob(Mon) is pre-divisorial if it is integral [cf. §0],
+
+原文 (FrdI p.19):
+> saturated [cf. §0], and of characteristic type [cf. §0]. Suppose that M is pre-
+
+原文 (FrdI p.19):
+> M is divisorial if M is sharp [cf. §0]. [Thus, if M is pre-divisorial, then M char is
+
+★**Definition 1.1 (i) が §0 から引く語は `integral` / `saturated` /
+`of characteristic type` の3つで、いま全部揃った。**
+
+★ただし同じ (i) が定める `group-like`(「`M^char` が零」)は**書けていない**——
+`M^char` を商モノイドとして作っていないため。 -/
+
+/-- **[FrdI] Definition 1.1, (i)** —— `pre-divisorial`。
+
+原文 (FrdI p.19):
+> (i) We shall say that M ∈Ob(Mon) is pre-divisorial if it is integral [cf. §0],
+-/
+def IsPreDivisorial : Prop :=
+  IsIntegralMonoid M ∧ IsSaturatedMonoid M ∧ IsOfCharacteristicType M
+
+/-- **[FrdI] Definition 1.1, (i)** —— `divisorial` = pre-divisorial かつ sharp。
+
+原文 (FrdI p.19):
+> M is divisorial if M is sharp [cf. §0]. [Thus, if M is pre-divisorial, then M char is
+-/
+def IsDivisorial : Prop := IsPreDivisorial M ∧ IsSharp M
+
+variable {M}
+
+/-- 群は **of characteristic type** —— `M^± = M` なのでファイバーは全体、
+`u = b - a` が一意。 -/
+theorem isOfCharacteristicType_int : IsOfCharacteristicType ℤ := by
+  intro a b _
+  refine ⟨b - a, ⟨⟨⟨b - a, a - b, by omega, by omega⟩, rfl⟩, by omega⟩, ?_⟩
+  rintro y ⟨-, hy⟩
+  omega
+
+/-- ★`ℤ` は **pre-divisorial**(Definition 1.1 (i) を満たす実例)。 -/
+theorem isPreDivisorial_int : IsPreDivisorial ℤ :=
+  ⟨isIntegralMonoid_of_isCancelAdd ℤ,
+   isSaturatedMonoid_of_range_eq_univ ℤ range_toGp_int,
+   isOfCharacteristicType_int⟩
+
+/-- ★`ℤ` は **divisorial ではない** —— sharp でないから。
+`pre-divisorial` と `divisorial` が別物であることの確認。 -/
+theorem not_isDivisorial_int : ¬ IsDivisorial ℤ := fun h => not_isSharp_int h.2
 
 end ABC3.Found.FrdI

@@ -92,6 +92,18 @@
       "kind": 3,
       "state": "done",
       "basis": "Found/IUTchIII/LogVolume.lean。★Interface の posit が初めて実物に置き換わった"
+    },
+    {
+      "item": "[FrdI] §0 torsion-free / of characteristic type",
+      "kind": 5,
+      "state": "done",
+      "basis": "★原文は torsion element を定義していない(全論文で3箇所、定義0)ので標準的な読みを採り明記。mathlib の IsAddTorsionFree とは別条件(群では一致、モノイドでは別物)であることも証明"
+    },
+    {
+      "item": "[FrdI] Definition 1.1 (i) pre-divisorial",
+      "kind": 3,
+      "state": "done",
+      "basis": "★§0 の3語(integral/saturated/characteristic type)の合成として Found/ に実装。実例 ℤ は pre-divisorial だが divisorial でない"
     }
   ],
   "notComplete": {
