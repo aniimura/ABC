@@ -657,4 +657,55 @@ theorem prop_1_11_vi_irred (F : FrobenioidCore P) {A B : C}
     IsIrreducibleMor φ ↔ IsIrreducibleMor (P.Base φ) :=
   ⟨prop_1_11_vi_baseIrred_of_irred P F φ hφ, prop_1_11_vi_irred_of_baseIrred P F φ hφ⟩
 
+/-! ## ★(vii) の本体 —— 「WLOG」を合成閉性として明示する
+
+★**原文**(p.38、目視):
+> By applying the factorizations of Definition 1.3, (iv), (a); Definition 1.3, (v), (b),
+> it follows **immediately** that we may assume **without loss of generality** …
+> that ϵ is a pull-back morphism, an isometric pre-step, a co-angular pre-step,
+> or a morphism of Frobenius type.
+
+★★**「without loss of generality」の中身は合成閉性である。**
+任意の `ϵ` は 4 種類の合成に分解される(`Definition 1.3, (iv), (a)` と `(v), (b)`)ので、
+★**「各種類で成り立つ」＋「合成で閉じる」⟹「任意の `ϵ` で成り立つ」。**
+
+★**原文は「immediately」と書くが、合成閉性は 2 回の適用を要し、
+しかも 2 回目は 1 回目が返した `γ` を入力にする。**
+★**`Proposition 1.10, (i)` の「バケツリレー」と同じ形**である。
+-/
+
+/-- ★(vii) が主張する性質。★**「WLOG」を扱うには名前が要る。**
+
+`ε : Cc ⟶ B` について、**`B` へ入る任意の co-angular pre-step `φ` を、
+`ε` に沿って引き戻せる**こと。 -/
+def LiftsCoaPre {B Cc : C} (ε : Cc ⟶ B) : Prop :=
+  ∀ {A : C} (φ : A ⟶ B), IsCoAngular P φ → IsPreStep P φ →
+    ∃ (Dd : C) (γ : Dd ⟶ Cc) (α : Dd ⟶ A),
+      IsCoAngular P γ ∧ IsPreStep P γ ∧ γ ≫ ε = α ≫ φ
+
+include P in
+/-- ★★**(vii) の「WLOG」の実体** —— 性質は合成で閉じる。
+
+★**2 回目の適用が 1 回目の出力 `γ₂` を入力にする**のが要点。
+★**原文の「immediately」は、この受け渡しを含んでいる。** -/
+theorem liftsCoaPre_comp {B E Cc : C} {ε₁ : Cc ⟶ E} {ε₂ : E ⟶ B}
+    (h₁ : LiftsCoaPre P ε₁) (h₂ : LiftsCoaPre P ε₂) : LiftsCoaPre P (ε₁ ≫ ε₂) := by
+  intro A φ hφc hφs
+  obtain ⟨D₂, γ₂, α₂, hγ₂c, hγ₂s, hsq₂⟩ := h₂ φ hφc hφs
+  obtain ⟨D₁, γ₁, α₁, hγ₁c, hγ₁s, hsq₁⟩ := h₁ γ₂ hγ₂c hγ₂s
+  refine ⟨D₁, γ₁, α₁ ≫ α₂, hγ₁c, hγ₁s, ?_⟩
+  rw [← Category.assoc, hsq₁, Category.assoc, hsq₂, ← Category.assoc]
+
+include P in
+/-- ★**同型については自明に成り立つ**(基底の場合)。
+
+★`γ := φ ≫ inv ε`、`α := 𝟙` に取ればよい。 -/
+theorem liftsCoaPre_of_isIso (F : FrobenioidCore P) {B Cc : C} (ε : Cc ⟶ B) [IsIso ε] :
+    LiftsCoaPre P ε := by
+  intro A φ hφc hφs
+  refine ⟨A, φ ≫ inv ε, 𝟙 A, ?_, ?_, ?_⟩
+  · exact F.coAngularComp φ (inv ε) hφc (isCoAngular_of_isIso P (inv ε))
+  · exact IsPreStep.comp P hφs (isPreStep_of_isIso P (inv ε))
+  · rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id, Category.id_comp]
+
 end ABC3.Found.FrdI
