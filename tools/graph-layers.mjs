@@ -137,6 +137,28 @@ const adj = new Map(), page = new Map();
   for (const k of seen) if (!adj.has(k)) { adj.set(k, []); page.set(k, 0); }
 }
 
+// ── ★概念(番号を持たない語彙)を節点として合流させる ─────────────
+//   目的は工数の把握。番号付き項目だけでは中層が出ないので、tools/concepts.json の
+//   語彙を節点にし、定義箇所から辺を張る。詳細は tools/concept-graph.mjs。
+{
+  const CG = await import('./concept-graph.mjs');
+  const tags = Object.keys(FILE_OF);
+  const { nodes: cn, edges: ce, droppedByOrder, concepts, key: ckey } =
+    CG.conceptNodes({ load, tags, NOT_A_DEP, conceptsPath: join(ROOT, 'tools', 'concepts.json'),
+                      resolveTag, KIND });
+  // 概念を節点として登録(定義が見つからなかったものも「未特定」として置く)
+  for (const [k, v] of cn) { if (!adj.has(k)) adj.set(k, []); page.set(k, v.page ?? 0); }
+  const ie = CG.itemToConceptEdges({ load, itemKeys: [...adj.keys()].filter((k) => !k.startsWith('CONCEPT / ')),
+                                     concepts, key: ckey });
+  for (const [a, b] of [...ce, ...ie]) {
+    if (!adj.has(a)) continue;
+    if (!adj.has(b)) continue;                 // 到達していない項目へは張らない
+    if (!adj.get(a).includes(b)) adj.get(a).push(b);
+  }
+  console.log(`  概念を合流: ${cn.size} 節点(定義未特定 ${[...cn.values()].filter((v) => v.missing).length}、近似 ${[...cn.values()].filter((v) => v.approx).length})`);
+  console.log(`    概念どうしの辺 ${ce.length}(導入順に反するとして落とした ${droppedByOrder.length})/ 項目→概念の辺 ${ie.length}`);
+}
+
 // ── Tarjan SCC(反復版) ────────────────────────────────────
 const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
 let idx = 0, nc = 0;

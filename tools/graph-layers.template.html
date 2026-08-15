@@ -53,7 +53,9 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
         赤枠 = <b>循環している塊(SCC)</b>。分割できないのでまとめて扱うしかない。<br>
         <span style="display:inline-block;width:11px;height:11px;background:#2f6fd0;border-radius:3px;vertical-align:-1px"></span>
         塗り = 我々が触れている割合。<br>
-        太い線 = 依存が多い辺。<br><br>
+        太い線 = 依存が多い辺。<br>
+        <span style="display:inline-block;width:11px;height:11px;background:#fffdf5;border:2px dashed #c99a2e;border-radius:3px;vertical-align:-1px"></span>
+        黄の破線 = <b>語彙(番号を持たない概念)</b>。番号付き項目とは別に拾ったもの。<br><br>
         <b>ボックスをクリックすると:</b><br>
         <span style="display:inline-block;width:11px;height:11px;background:#1e7a52;border-radius:3px;vertical-align:-1px"></span>
         <b style="color:#1e7a52">緑</b> = <b>これに要るもの</b>(左へ、推移的に全部)<br>
@@ -137,10 +139,12 @@ function draw(){
     const isDep=sel!==null&&hlDeps.has(i), isUse=sel!==null&&hlUsers.has(i);
     const dim=sel!==null&&i!==sel&&!isDep&&!isUse;
     ctx.globalAlpha=dim?.2:1;
-    ctx.fillStyle='#fff';
-    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(b.scc?'#c0392b':'#c8ccd2'));
-    ctx.lineWidth=(isDep||isUse)?2.2:(b.scc?2.4:1.1);
-    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();
+    const isC=b.tags[0][0]==='CONCEPT';
+    ctx.fillStyle=isC?'#fffdf5':'#fff';
+    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(b.scc?'#c0392b':(isC?'#c99a2e':'#c8ccd2')));
+    ctx.lineWidth=(isDep||isUse)?2.2:(b.scc?2.4:(isC?2:1.1));
+    if(isC){ctx.setLineDash([5,3]);}
+    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();ctx.setLineDash([]);
     if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.2:.09;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.globalAlpha=1;}
     // 触れている割合
@@ -150,7 +154,7 @@ function draw(){
     ctx.fillStyle=c;ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
     if(i===sel||i===hov){ctx.strokeStyle='#111';ctx.lineWidth=2.4;ctx.beginPath();ctx.roundRect(b.x-3,b.y-3,b.w+6,b.h+6,9);ctx.stroke();}
     ctx.fillStyle='#1c1e21';ctx.font='bold 12px -apple-system,Segoe UI,sans-serif';
-    const ttl=b.tags.map(([t,n])=>b.scc?`${t}:${n}`:t).join(' ');
+    const ttl=isC?'語彙(概念)':b.tags.map(([t,n])=>b.scc?`${t}:${n}`:t).join(' ');
     ctx.fillText(ttl.length>21?ttl.slice(0,20)+'…':ttl,b.x+9,b.y+21);
     ctx.font='11px -apple-system,Segoe UI,sans-serif';ctx.fillStyle='#6b7280';
     ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}`,b.x+9,b.y+36);
