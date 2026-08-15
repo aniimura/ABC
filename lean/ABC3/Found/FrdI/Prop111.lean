@@ -104,4 +104,64 @@ theorem prop_1_11_iii {A B : C} (φ : B ⟶ A) (hφ : IsPullBack P φ)
       exact (congrArg Prod.snd hβ').symm
     exact hinj (Subtype.ext (Prod.ext hf hb))
 
+/-! ## ★(ii) —— `𝒞^pl-bk → 𝒟` の faithful 性
+
+原文 (FrdI p.36):
+> (ii) Suppose further that C is of unit-trivial type. Then the natural projection
+
+★**原文の証明**(p.36–37、目視)は 4 段:
+1. `φ, ψ : A ⟶ B` が同じ底へ落ちる pull-back 射なら、
+   **pull-back の定義から** base-identity 自己射 `α, β ∈ End(A)` が
+   `ψ = φ ∘ α`、`φ = ψ ∘ β` を満たす
+2. すると `ψ = ψ ∘ β ∘ α`、`φ = φ ∘ α ∘ β` なので、
+   **再び pull-back の定義(の一意性)から** `α ∘ β = β ∘ α = 𝟙`
+3. よって `α, β ∈ Aut_𝒞(A)`、したがって `α, β ∈ 𝒪^×(A)`
+4. **unit-trivial 型**なので `𝒪^×(A) = {1}`、よって `φ = ψ`
+
+★★**`Definition 1.2, (ii)` を 2 回使う**(存在と一意性)のが要点である。
+★**原文は「it thus follows formally」と書くが、2 回使うことは書いていない。**
+-/
+
+include P in
+/-- **(ii)** —— unit-trivial 型なら、同じ底へ落ちる pull-back 射は一致する
+(＝ `𝒞^pl-bk → 𝒟` が faithful)。 -/
+theorem prop_1_11_ii {A B : C} (hut : IsUnitTrivial P A)
+    (φ ψ : A ⟶ B) (hφ : IsPullBack P φ) (hψ : IsPullBack P ψ)
+    (hbase : P.Base φ = P.Base ψ) : φ = ψ := by
+  -- 段1: `α` と `β` を取る
+  obtain ⟨hφinj, hφsurj⟩ := hφ A
+  obtain ⟨hψinj, hψsurj⟩ := hψ A
+  obtain ⟨α, hα⟩ := hφsurj ⟨(ψ, 𝟙 _), by rw [hbase, Category.id_comp]⟩
+  obtain ⟨β, hβ⟩ := hψsurj ⟨(φ, 𝟙 _), by rw [← hbase, Category.id_comp]⟩
+  have hα' := congrArg Subtype.val hα
+  have hβ' := congrArg Subtype.val hβ
+  have hαφ : α ≫ φ = ψ := congrArg Prod.fst hα'
+  have hαb : P.Base α = 𝟙 _ := congrArg Prod.snd hα'
+  have hβψ : β ≫ ψ = φ := congrArg Prod.fst hβ'
+  have hβb : P.Base β = 𝟙 _ := congrArg Prod.snd hβ'
+  -- 段2: `α ≫ β = 𝟙`(★pull-back の**一意性**を使う)
+  have hcomp : β ≫ α = 𝟙 A := by
+    refine hφinj (Subtype.ext (Prod.ext ?_ ?_))
+    · show (β ≫ α) ≫ φ = 𝟙 A ≫ φ
+      rw [Category.assoc, hαφ, hβψ, Category.id_comp]
+    · show P.Base (β ≫ α) = P.Base (𝟙 A)
+      rw [P.Base_comp, hαb, hβb, Category.id_comp, P.Base_id]
+  have hcomp' : α ≫ β = 𝟙 A := by
+    refine hψinj (Subtype.ext (Prod.ext ?_ ?_))
+    · show (α ≫ β) ≫ ψ = 𝟙 A ≫ ψ
+      rw [Category.assoc, hβψ, hαφ, Category.id_comp]
+    · show P.Base (α ≫ β) = P.Base (𝟙 A)
+      rw [P.Base_comp, hβb, hαb, Category.id_comp, P.Base_id]
+  -- 段3: `α ∈ 𝒪^×(A)`
+  haveI : IsIso α := ⟨β, hcomp', hcomp⟩
+  have hmem : (α : End A) ∈ OTimes P A := by
+    refine ⟨⟨?_, ?_⟩, (CategoryTheory.isUnit_iff_isIso (α : End A)).mpr inferInstance⟩
+    · show P.Base α = P.Base (𝟙 A)
+      rw [hαb, P.Base_id]
+    · exact degFr_of_isIso P α
+  -- 段4: unit-trivial から `α = 𝟙`
+  rw [hut] at hmem
+  have hone : α = 𝟙 A := hmem
+  rw [← hαφ, hone, Category.id_comp]
+
 end ABC3.Found.FrdI
