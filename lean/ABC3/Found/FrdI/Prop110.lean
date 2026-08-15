@@ -854,4 +854,57 @@ theorem isIso_of_preStep_of_isGroupLikeObj' (F : FrobenioidCore P)
     (φ : A ⟶ B) (hφ : IsPreStep P φ) : IsIso φ :=
   isIso_of_preStep_of_isGroupLikeObj P F (fun X _ => hiso X) hA φ hφ
 
+/-! ## ★(iv) —— prime-Frobenius ⟺ irreducible
+
+原文 (FrdI p.34):
+> nius morphism if and only if it is irreducible [cf. §0]. In particular, if A ∈Ob(C)
+
+★**原文の証明**(p.36、目視):
+> assertion (iv) follows immediately from Proposition 1.7, (v), and
+> **the well-known structure of the multiplicative monoid N≥1**
+> [cf. also Definition 1.3, (ii)]
+
+★★**「the well-known structure of the multiplicative monoid ℕ≥1」とは何か。**
+原文はこの一句で (iv) を片づける。★**その中身は「乗法モノイド `(ℕ≥1, ×)` において
+既約な元とは素数のことである」**である。
+
+★**mathlib には `PNat.Prime`(＝ `(p : ℕ).Prime`)はあるが、
+「乗法モノイド `ℕ+` の既約元」という形の補題は無い**(`Mathlib/Data/PNat/Prime.lean` を確認)。
+★**だからここで書く。** ——★**原文が「well-known」と呼ぶものが、
+我々の道具立てには存在しなかった、という測定でもある。**
+
+★**そしてこれが (iv) の骨格である**: 射 `φ` の既約性は
+「`φ = β ≫ α` の分解で片方が同型」であり、Frobenius 型射に限れば
+**次数の分解 `degFr φ = degFr α * degFr β`** に写る。同型は次数 1 なので、
+★**射の既約性は次数の既約性に、そのまま翻訳される。**
+-/
+
+/-- ★★**乗法モノイド `ℕ≥1` の既約元は素数**(原文の「well-known structure」)。
+
+★`n : ℕ+` について「1 でなく、どう 2 つに分けても片方が 1」⟺「素数」。
+★**mathlib に無いので書いた。** -/
+theorem pnat_irreducible_iff_prime (n : ℕ+) :
+    (n ≠ 1 ∧ ∀ a b : ℕ+, n = a * b → a = 1 ∨ b = 1) ↔ Nat.Prime (n : ℕ) := by
+  have hn0 : (n : ℕ) ≠ 0 := n.pos.ne'
+  constructor
+  · rintro ⟨hne, hsplit⟩
+    rw [← Nat.irreducible_iff_nat_prime]
+    refine ⟨fun h => hne (PNat.coe_injective ?_), fun a b hab => ?_⟩
+    · rw [Nat.isUnit_iff] at h; rw [h]; rfl
+    · have ha0 : a ≠ 0 := by rintro rfl; rw [Nat.zero_mul] at hab; exact hn0 hab
+      have hb0 : b ≠ 0 := by rintro rfl; rw [Nat.mul_zero] at hab; exact hn0 hab
+      have hsp := hsplit ⟨a, Nat.pos_of_ne_zero ha0⟩ ⟨b, Nat.pos_of_ne_zero hb0⟩
+        (PNat.coe_injective (by simpa using hab))
+      rcases hsp with h | h
+      · exact Or.inl (Nat.isUnit_iff.mpr (congrArg PNat.val h))
+      · exact Or.inr (Nat.isUnit_iff.mpr (congrArg PNat.val h))
+  · intro hp
+    have hirr : Irreducible (n : ℕ) := (Nat.irreducible_iff_nat_prime _).mpr hp
+    refine ⟨fun h => ?_, fun a b hab => ?_⟩
+    · rw [h] at hp; exact Nat.not_prime_one (by simpa using hp)
+    · have hab' : (n : ℕ) = (a : ℕ) * (b : ℕ) := by rw [hab]; rfl
+      rcases hirr.isUnit_or_isUnit hab' with h | h
+      · exact Or.inl (PNat.coe_injective (by simpa using Nat.isUnit_iff.mp h))
+      · exact Or.inr (PNat.coe_injective (by simpa using Nat.isUnit_iff.mp h))
+
 end ABC3.Found.FrdI
