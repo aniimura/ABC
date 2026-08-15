@@ -14,3 +14,11 @@ scratch/
 # 個人の権限設定(共有しない)
 .claude/settings.local.json
 .claude/settings.local.json.bak
+
+# ★第三者の著作物は再配布しない(2026-08-15)
+#   望月氏の論文は RIMS で公開されている原本を各自が取得すること。
+#   本リポジトリは「それをどう形式化するか」だけを持つ。
+ResearchPaper/0_Source/
+
+# 別プロジェクトのファイル(誤って追跡されていた)
+rpr_acc_dth_rec_downstream.html

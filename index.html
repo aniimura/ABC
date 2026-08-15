@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Math_ABC3 — IUT の Lean 形式化</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+  background:#f4f5f7;color:#1c1e21;line-height:1.7;padding:28px 20px 60px}
+.wrap{max-width:940px;margin:0 auto}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:#6b7280;font-size:13px;margin-bottom:22px}
+h2{font-size:15px;margin:26px 0 10px;padding-bottom:5px;border-bottom:1px solid #e2e4e8}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;margin-bottom:6px}
+.card{background:#fff;border:1px solid #e2e4e8;border-radius:8px;padding:11px 13px}
+.card .k{font-size:11px;color:#6b7280}
+.card .v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.card.ok .v{color:#1e7a52}.card.warn .v{color:#c0392b}
+a.big{display:block;background:#fff;border:1px solid #d6dae0;border-radius:10px;padding:16px 18px;
+  text-decoration:none;color:inherit;margin-bottom:10px;transition:.15s}
+a.big:hover{border-color:#2f6fd0;box-shadow:0 2px 10px rgba(47,111,208,.12)}
+a.big b{color:#2f6fd0;font-size:15px}
+a.big span{display:block;color:#6b7280;font-size:12.5px;margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #e2e4e8;border-radius:8px;overflow:hidden}
+th,td{padding:7px 11px;text-align:left;border-bottom:1px solid #f0f1f3}
+th{background:#fafbfc;font-size:11.5px;color:#6b7280;font-weight:600}
+tr:last-child td{border-bottom:0}
+code{background:#eef0f3;padding:1px 5px;border-radius:4px;font-size:12px}
+.note{background:#fff8e1;border-left:3px solid #f0b429;padding:11px 13px;font-size:12.5px;
+  color:#5a4300;border-radius:0 6px 6px 0;margin:10px 0}
+.note b{color:#3d2e00}
+ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
+.foot{margin-top:32px;padding-top:14px;border-top:1px solid #e2e4e8;color:#8a8f98;font-size:11.5px}
+</style></head><body><div class="wrap">
+
+<h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
+<p class="sub">最終更新 2026-08-15 ・ コミット 41 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
+
+<h2>器具の状態</h2>
+<div class="grid">
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card ok"><div class="k">selftest</div><div class="v">32/32</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">257</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">75</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">26</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">4</div></div>
+</div>
+<div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
+<code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
+進捗として読むべきは<b>「着地した葉」と「暗黙の段」</b>の側。
+<code>Found/</code> と <code>Interface/</code> の <code>sorry</code> は 0 件、<code>axiom</code> は較正用の1ファイルを除き 0 件。</div>
+
+<h2>依存グラフ(我々が写した範囲)</h2>
+<div class="grid">
+  <div class="card"><div class="k">節点</div><div class="v">11</div></div>
+  <div class="card"><div class="k">辺</div><div class="v">9</div></div>
+  <div class="card"><div class="k">最大深さ</div><div class="v">3</div></div>
+  <div class="card ok"><div class="k">循環</div><div class="v">0</div></div>
+  <div class="card ok"><div class="k">着地した葉</div><div class="v">2</div></div>
+  <div class="card"><div class="k">未展開の葉</div><div class="v">3</div></div>
+  <div class="card"><div class="k">暗黙の段</div><div class="v">25</div></div>
+  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">2</div></div>
+</div>
+
+<h2>見る</h2>
+<a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
+<span>原文の参照から機械抽出した 664 節点を、強連結成分で潰して 55 層に並べたもの。
+右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
+ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。</span></a>
+<a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
+<span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
+<a class="big" href="ResearchPaper/dependency-scale.md"><b>規模の実測 →</b>
+<span>Corollary 3.12 から到達する原文の項目は ~800 のオーダー。<b>ただし下界でも上界でもない</b>——
+番号の無い依存を数え落とし、解説への案内を数え過ぎる。その限界も書いてある。</span></a>
+<a class="big" href="ResearchPaper/cycle-analysis.md"><b>循環は理論の循環か →</b>
+<span>答えは <b>否</b>。辺の定義の副作用だった。前方参照と解説案内を落とすと
+最大の循環は 262 → 17 節点に縮み、<b>論文をまたぐ大循環は消える</b>。</span></a>
+
+<h2>いま分かっていること</h2>
+<table><tr><th>詰まる壁の種類</th><th>実例</th><th>重さ</th></tr>
+<tr><td>mathlib の不在</td><td>p進対数(評価 API がノルム体に原理的に不適用)</td><td>作業量</td></tr>
+<tr><td>Lean の透明度</td><td>tempered 群、packet-normalization</td><td>作業量</td></tr>
+<tr><td>どれでもない(安い)</td><td>対数体積、型の訂正</td><td>★原文が「elementary」と書く箇所は実際に安い</td></tr>
+<tr><td><b>語彙の不在</b></td><td>procession-normalization</td><td><b>★最も重い。中層を作るまで手が付かない</b></td></tr>
+</table>
+<ul>
+<li><b>Corollary 3.12 から実物まで届く鎖が1本ある</b> — <code>cor_3_12 → Thm 3.11 → [AbsTopIII] Cor 5.10 → Prop 5.7 → Found/LogVolume.lean</code></li>
+<li><b>IUTchI → II → III → IV の順序付けは存在する</b>(当初「存在しない」と書いたが、辺の定義の副作用だった)</li>
+<li><code>Interface</code> の posit が1つ <code>Found/</code> の実物に置き換わった(対数体積)</li>
+<li><b>1つの命題の中に複数の種類の壁が同居する</b> — Prop 3.9 は「Lean の透明度」と「語彙の不在」の両方</li>
+</ul>
+
+<h2>直近のコミット</h2>
+<table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>9ddd5df</code></td><td>2026-08-15</td><td>Proposition 3.9 は「残り半分」ではなく「残り2つ」だった——4つ目の壁「語彙の不在」を確定した</td></tr>
+<tr><td><code>bd6fa9c</code></td><td>2026-08-15</td><td>Interface の型を原文に合わせた——壊れたのは退化 witness だけで、同種の欠陥が他に3件見つかった</td></tr>
+<tr><td><code>8d490a9</code></td><td>2026-08-15</td><td>対数体積を構成した——Interface の posit が初めて Found/ の実物に置き換わり、Cor 3.12 から実物まで鎖が通った</td></tr>
+<tr><td><code>6c78791</code></td><td>2026-08-15</td><td>辺の意味を定めて 11 本を仕分け直した——深さ 3 は前方参照の上に建っていた</td></tr>
+<tr><td><code>a4714c2</code></td><td>2026-08-15</td><td>番号を持たない概念を節点として拾った——語彙は非循環で、左から着手できる</td></tr>
+<tr><td><code>f3bf411</code></td><td>2026-08-15</td><td>引用キーを論文ごとに解決した——そしてグラフが中層を過小表示していると判明した</td></tr>
+<tr><td><code>a23f1c1</code></td><td>2026-08-15</td><td>左右が反転していたのを直し、クリックで依存をハイライトするようにした</td></tr>
+<tr><td><code>67788e7</code></td><td>2026-08-15</td><td>辺を「証明が依拠しているもの」に定め直して図を再生成——大循環は消え、55 層に展開した</td></tr>
+<tr><td><code>ead8a34</code></td><td>2026-08-15</td><td>循環は理論の循環ではなかった——辺の定義の副作用で、論文をまたぐ循環は完全に消える</td></tr>
+<tr><td><code>120c324</code></td><td>2026-08-15</td><td>依存を層に並べ直した——そして IUT の4本は1つの循環で、順序付けが存在しないと判明した</td></tr>
+<tr><td><code>60dfa31</code></td><td>2026-08-15</td><td>依存グラフを可視化した——自己完結の HTML で、原文の地形に我々の位置を重ねる</td></tr>
+<tr><td><code>270b048</code></td><td>2026-08-15</td><td>グラフが「使える」状態になった——初めての着地が1件。ただし親の前提が2つとも誤っていた</td></tr>
+</table>
+
+<div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
+(<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
+原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
+原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
+<b>すべて PDF と機械照合している</b>(75 件)。</div>
+
+<p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
+このページは <code>node tools/index-html.mjs</code> で再生成する</p>
+</div></body></html>
