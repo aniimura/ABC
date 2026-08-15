@@ -799,11 +799,6 @@ theorem isotropification_isometric_iff {A B : C} (f : A ⟶ B) :
     refine Φ.map_injective (P.Base (hullMap P F A)) ?_
     rw [h, show P.Div f = 0 from hi, map_zero]
 
-/-- ★★**`𝒞^istr` のすべての射は co-angular**(`Proposition 1.4, (i)`)。
-
-★原文が保存リストで「co-angular morphisms [cf. Proposition 1.4, (i)]」と
-括弧書きするのはこれ —— **`𝒞^istr` では co-angular 性が自明になる**ので、
-「保存する」は言うまでもない。 -/
 /-- ★★**isotropic な対象の isotropic hull は同型**。
 
 `hullMap` は isometric pre-step で、`A` が isotropic ならそれは定義から同型。
@@ -813,6 +808,7 @@ theorem isotropification_isometric_iff {A B : C} (f : A ⟶ B) :
 theorem hullMap_isIso (A : C) (hA : IsIsotropic P A) : IsIso (hullMap P F A) :=
   hA _ (hullMap P F A) (hullMap_spec P F A).1 (hullMap_spec P F A).2.1
 
+include F in
 /-- ★**isotropic な対象から出る `𝒞` の射はすべて co-angular**。
 
 `Definition 1.3, (vii), (b)` で isotropy が伝わるので、`Proposition 1.4, (i)` が使える。
@@ -827,11 +823,15 @@ theorem isotropification_preStep_iff {A B : C} (f : A ⟶ B) :
     IsPreStep P (istrMap P F f) ↔ IsPreStep P f := by
   constructor
   · intro h
-    exact ⟨by rw [← isotropification_degFr P F f]; exact h.1,
-      (isotropification_baseIso_iff P F f).mp h.2⟩
+    refine ⟨?_, (isotropification_baseIso_iff P F f).mp h.2⟩
+    show P.degFr f = 1
+    rw [← isotropification_degFr P F f]
+    exact h.1
   · intro h
-    exact ⟨by rw [isotropification_degFr P F f]; exact h.1,
-      (isotropification_baseIso_iff P F f).mpr h.2⟩
+    refine ⟨?_, (isotropification_baseIso_iff P F f).mpr h.2⟩
+    show P.degFr (istrMap P F f) = 1
+    rw [isotropification_degFr P F f]
+    exact h.1
 
 /-- ★**pull-back を保つ**（`𝒞` の意味で）。
 
@@ -867,8 +867,80 @@ theorem istr_isotropic (X : Istr P) : IsIsotropic (istrPre P) X := by
   exact ⟨InducedCategory.homMk (inv φ.hom), InducedCategory.hom_ext (by simp),
     InducedCategory.hom_ext (by simp)⟩
 
+/-- ★★**`𝒞^istr` のすべての射は co-angular**(`Proposition 1.4, (i)`)。
+
+★原文が保存リストで「co-angular morphisms [cf. Proposition 1.4, (i)]」と
+括弧書きするのはこれ —— **`𝒞^istr` では co-angular 性が自明になる**ので、
+「保存する」は言うまでもない。 -/
 theorem istr_coAngular {X Y : Istr P} (g : X ⟶ Y) : IsCoAngular (istrPre P) g :=
   prop_1_4_i (istrPre P) g (fun Z _ => istr_isotropic P Z)
+
+/-! ### ★★21 条の「移送」—— まず辞書と、移送しやすい条から
+
+★`Definition 1.3` の各条を `istrPre P` について示す。原文は
+「[from the fact that `𝒞` is a Frobenioid!]」の一言だが、
+**Lean では `Istr P` と `C` の間の辞書を1本ずつ引く**必要がある。
+どこまでが本当に「移送」かを条ごとに測る。 -/
+
+include F in
+/-- ★辞書: `Istr P` の Frobenius 型は `C` のそれ。
+
+★co-angular は**両側で自動**なので、実質は isometric と base-isomorphism の移送。 -/
+theorem istr_frobType_iff {X Y : Istr P} (g : X ⟶ Y) :
+    IsFrobeniusType (istrPre P) g ↔ IsFrobeniusType P g.hom :=
+  ⟨fun h => ⟨⟨isCoAngular_of_isotropic_dom P F X.property g.hom, h.1.2⟩, h.2⟩,
+   fun h => ⟨⟨istr_coAngular P g, h.1.2⟩, h.2⟩⟩
+
+include F in
+/-- **(iii)(a)** の移送 —— `𝒞^istr` では co-angular が自動なので**自明**。 -/
+theorem istr_coAngularComp {X Y Z : Istr P} (ψ : X ⟶ Y) (φ : Y ⟶ Z) :
+    IsCoAngular (istrPre P) ψ → IsCoAngular (istrPre P) φ →
+      IsCoAngular (istrPre P) (ψ ≫ φ) :=
+  fun _ _ => istr_coAngular P _
+
+include F in
+/-- **(iii)(b)** の移送 —— 同上。 -/
+theorem istr_coAngularOfPreStep {X Y : Istr P} (α : X ⟶ Y) :
+    IsCoAngular (istrPre P) α → IsPreStep (istrPre P) α →
+      ∀ φ : X ⟶ Y, IsCoAngular (istrPre P) φ :=
+  fun _ _ φ => istr_coAngular P φ
+
+include F in
+/-- **(vii)(b)** の移送 —— `𝒞^istr` の対象はすべて isotropic なので**自明**。 -/
+theorem istr_isotropicClosed {X Y : Istr P} (_φ : X ⟶ Y) :
+    IsIsotropic (istrPre P) X → IsIsotropic (istrPre P) Y :=
+  fun _ => istr_isotropic P Y
+
+include F in
+/-- **(vii)(a)** の移送 —— `X` 自身が isotropic なので `𝟙_X` が isotropic hull。 -/
+theorem istr_isotropicHullExists (X : Istr P) :
+    ∃ (Y : Istr P) (φ : X ⟶ Y), IsIsotropicHull (istrPre P) φ :=
+  ⟨X, 𝟙 X, (istrPre P).Div_id X, isPreStep_id _ X, istr_isotropic P X,
+    fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm, fun β hβ => by
+      have hg : γ = β := by simpa using hβ
+      exact hg.symm⟩⟩
+
+include F in
+/-- **(v)(a)** の移送 —— `C` の mono 性が充満部分圏へそのまま降りる。 -/
+theorem istr_preStepMono {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P) φ) :
+    Mono φ := by
+  haveI : Mono φ.hom := F.preStepMono φ.hom hφ
+  refine ⟨fun {Z} g h hgh => ?_⟩
+  refine InducedCategory.hom_ext ?_
+  exact (cancel_mono φ.hom).mp (congrArg InducedCategory.Hom.hom hgh)
+
+include F in
+/-- **(ii)** の本質的一意性の移送 —— `C` で得た同型を充満部分圏へ持ち上げるだけ。 -/
+theorem istr_frobDegUniq (X Y Z : Istr P) (φ : X ⟶ Y) (ψ : X ⟶ Z)
+    (hφ : IsFrobeniusType (istrPre P) φ) (hψ : IsFrobeniusType (istrPre P) ψ)
+    (hd : (istrPre P).degFr φ = (istrPre P).degFr ψ) :
+    ∃ β : Y ⟶ Z, IsIso β ∧ φ ≫ β = ψ := by
+  obtain ⟨β₀, hβiso, hβ⟩ := F.frobDegUniq X.obj Y.obj Z.obj φ.hom ψ.hom
+    ((istr_frobType_iff P F φ).mp hφ) ((istr_frobType_iff P F ψ).mp hψ) hd
+  haveI := hβiso
+  refine ⟨InducedCategory.homMk β₀, ?_, InducedCategory.hom_ext hβ⟩
+  exact ⟨InducedCategory.homMk (inv β₀), InducedCategory.hom_ext (by simp),
+    InducedCategory.hom_ext (by simp)⟩
 
 end Istr
 
