@@ -1,6 +1,7 @@
 import Mathlib.CategoryTheory.Category.Preorder
 import Mathlib.CategoryTheory.Types.Basic
 import Mathlib.CategoryTheory.Endomorphism
+import Mathlib.CategoryTheory.MorphismProperty.Basic
 import ABC3.Meta.Claim
 
 /-!
@@ -418,7 +419,104 @@ theorem not_isIso_constTrue : ¬ IsIso constTrue := by
   obtain ⟨_, hx⟩ := h.2 false
   exact Bool.noConfusion hx
 
+/-! ### §0 —— `minimal-adjoint` / `minimal-coadjoint` / `mid-adjoint`(原文 p.17)
+
+`Proposition 1.7, (ii)(iii)(iv)` がこの3語で述べられている。
+
+原文 (FrdI p.17):
+> Let C be a category; S a collection of arrows in C; φ ∈Arr(C). Then we shall say
+
+原文 (FrdI p.17):
+> that φ is minimal-adjoint to S (respectively, minimal-coadjoint to S; mid-adjoint
+
+原文 (FrdI p.17):
+> to S) if every factorization φ = α ◦β (respectively, φ = β ◦α; φ = α ◦β ◦γ) of φ in
+
+原文 (FrdI p.17):
+> C such that β lies in S satisfies the property that β is, in fact, an isomorphism. If φ
+
+★原文の「a collection of arrows in `C`」は mathlib の `MorphismProperty C` である。
+★合成の向き: `α ◦ β` は「先に `β`」なので `φ = β ≫ α`。
+したがって **minimal-adjoint では `S` の元が最初の因子**、
+**minimal-coadjoint では最後の因子**、**mid-adjoint では真ん中**である。 -/
+
+/-- **§0** `minimal-adjoint to S` —— `φ = β ≫ α`(`β ∈ S`)なる分解では `β` が同型。 -/
+def IsMinimalAdjoint (S : MorphismProperty C) {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ (X : C) (β : A ⟶ X) (α : X ⟶ B), φ = β ≫ α → S β → IsIso β
+
+/-- **§0** `minimal-coadjoint to S` —— `φ = α ≫ β`(`β ∈ S`)なる分解では `β` が同型。 -/
+def IsMinimalCoadjoint (S : MorphismProperty C) {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ (X : C) (α : A ⟶ X) (β : X ⟶ B), φ = α ≫ β → S β → IsIso β
+
+/-- **§0** `mid-adjoint to S` —— `φ = γ ≫ β ≫ α`(`β ∈ S`)なる分解では `β` が同型。 -/
+def IsMidAdjoint (S : MorphismProperty C) {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ (X Y : C) (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B), φ = γ ≫ β ≫ α → S β → IsIso β
+
+/-! ### 非退化(3語)
+
+★**満たす例**と**満たさない例**を、`S = ⊤`(すべての射)について両方与える。
+★この2つを合わせると **totally epimorphic な圏では
+「`⊤` に minimal-adjoint」⟺「同型」**が出る —— 定義が空でも全体でもないことの証拠。 -/
+
+/-- ★**同型でない射は `⊤` に minimal-adjoint でない** —— `φ = φ ≫ 𝟙` を取ればよい。
+
+★coadjoint / mid-adjoint も同じ分解で落ちる。 -/
+theorem not_isMinimalAdjoint_top_of_not_isIso {A B : C} (φ : A ⟶ B) (h : ¬ IsIso φ) :
+    ¬ IsMinimalAdjoint (⊤ : MorphismProperty C) φ :=
+  fun hm => h (hm B φ (𝟙 B) (by simp) trivial)
+
+theorem not_isMinimalCoadjoint_top_of_not_isIso {A B : C} (φ : A ⟶ B) (h : ¬ IsIso φ) :
+    ¬ IsMinimalCoadjoint (⊤ : MorphismProperty C) φ :=
+  fun hm => h (hm A (𝟙 A) φ (by simp) trivial)
+
+theorem not_isMidAdjoint_top_of_not_isIso {A B : C} (φ : A ⟶ B) (h : ¬ IsIso φ) :
+    ¬ IsMidAdjoint (⊤ : MorphismProperty C) φ :=
+  fun hm => h (hm A B (𝟙 A) φ (𝟙 B) (by simp) trivial)
+
+/-- ★**totally epimorphic な圏では、同型は `⊤` に minimal-adjoint** ——
+`isIso_of_isIso_comp`(原文 p.16 の「in passing」)の直接の帰結。 -/
+theorem isMinimalAdjoint_top_of_isIso (h : IsTotallyEpimorphic C) {A B : C} (φ : A ⟶ B)
+    [IsIso φ] : IsMinimalAdjoint (⊤ : MorphismProperty C) φ := by
+  rintro X β α rfl -
+  exact (isIso_of_isIso_comp h β α).1
+
+/-- ★同上(coadjoint 側)。 -/
+theorem isMinimalCoadjoint_top_of_isIso (h : IsTotallyEpimorphic C) {A B : C} (φ : A ⟶ B)
+    [IsIso φ] : IsMinimalCoadjoint (⊤ : MorphismProperty C) φ := by
+  rintro X α β rfl -
+  exact (isIso_of_isIso_comp h α β).2
+
+/-- ★★**したがって、totally epimorphic な圏では
+「`⊤` に minimal-adjoint」は「同型」とちょうど一致する。**
+
+★定義が退化していない(空でも全体でもない)ことの証拠であり、
+同時に **`Proposition 1.7, (ii)(iii)` が「`S` を小さく取ると条件が弱まる」形の主張**
+であることを示している。 -/
+theorem isMinimalAdjoint_top_iff (h : IsTotallyEpimorphic C) {A B : C} (φ : A ⟶ B) :
+    IsMinimalAdjoint (⊤ : MorphismProperty C) φ ↔ IsIso φ := by
+  refine ⟨fun hm => ?_, fun hi => by haveI := hi; exact isMinimalAdjoint_top_of_isIso h φ⟩
+  by_contra hc
+  exact not_isMinimalAdjoint_top_of_not_isIso φ hc hm
+
+/-- ★任意の射は `isomorphisms` に minimal-adjoint(定義から)。
+`S` を小さく取ると条件が空になる、という**もう一方の端**。 -/
+theorem isMinimalAdjoint_isomorphisms {A B : C} (φ : A ⟶ B) :
+    IsMinimalAdjoint (MorphismProperty.isomorphisms C) φ :=
+  fun _ _ _ _ hs => hs
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def IsMinimalAdjoint.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — minimal-adjoint",
+    sectionId := "frdi-s0-minimal-adjoint" }
+
+def IsMinimalCoadjoint.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — minimal-coadjoint",
+    sectionId := "frdi-s0-minimal-adjoint" }
+
+def IsMidAdjoint.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — mid-adjoint",
+    sectionId := "frdi-s0-minimal-adjoint" }
 
 def IsSubAutomorphism.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 14, item := "§0 Categories — sub-automorphism",

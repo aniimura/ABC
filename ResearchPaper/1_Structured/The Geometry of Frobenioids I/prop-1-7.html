@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.7 — Composites of Morphisms</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.7 — Composites of Morphisms</h1>
+
+<p>物理 p.28–p.30。<strong>400 dpi 目視確認 2026-08-15</strong>。</p>
+
+<h2>★規模の測定</h2>
+
+<table>
+<tr><th>条</th><th>主張の数</th><th>内容</th></tr>
+<tr><td>(i)</td><td>9</td><td>合成で閉じる射のクラス</td></tr>
+<tr><td>(ii)</td><td>3</td><td>pull-back / base-iso の adjoint 特徴づけと分解</td></tr>
+<tr><td>(iii)</td><td>3</td><td>Frobenius 型 / linear の adjoint 特徴づけと分解</td></tr>
+<tr><td>(iv)</td><td>1</td><td>pre-step が co-angular ⟺ mid-adjoint</td></tr>
+<tr><td>(v)</td><td>9</td><td>合成が属せば両因子も属する</td></tr>
+</table>
+
+<p>★<strong>合計 25 主張</strong>。原文の証明は <strong>3 段落</strong>で、依存は
+<code>(i) → (ii)(iii) の十分性 → (ii)(iii) の必要性 → (v) の前半 → (iv) → (v) の後半</code>。
+★<strong>(iv) は (v) を使い、(v) の後半は (iv) を使う</strong>ので、順序を守る必要がある。</p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-7-i"
+         data-paper="FrdI"
+         data-pdf-page="28"
+         data-item="Proposition 1.7, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) The following classes of morphisms are closed under composition: isome-</div>
+<div class="verbatim">tries, base-isomorphisms, base-FSM-morphisms, pull-back morphisms,</div>
+<div class="verbatim">linear morphisms, pre-steps, co-angular morphisms, LB-invertible mor-</div>
+<div class="reading">9 クラスが合成で閉じる。</div>
+<p class="open">★<strong>9 クラスのうち 5 つは既に持っていた</strong>
+(<code>IsIsometric.comp</code> / <code>isBaseIsomorphism_comp</code> / <code>IsPullBack.comp</code> /
+<code>IsLinear.comp</code> / <code>IsPreStep.comp</code>)。新規は 4 つで、
+うち <code>base-FSM</code> は §0 の <code>IsFSMMorphism.comp</code> を <code>Base</code> に沿って運ぶだけ、
+残り 3 つは <code>Definition 1.3, (iii), (a)</code>(co-angular の合成)から組み立てるだけ。
+★<strong>(i) は本当に「immediate」だった。</strong></p>
+<p class="open">★<strong>負の対照</strong>: 原文の列挙に無い <code>step</code>(同型でない pre-step)は
+<strong>実際には閉じる</strong>(列挙は「閉じるもの全部」ではない)。
+一方 <code>prime-Frobenius morphism</code> は <strong>閉じない</strong> ——
+模型 <code>wP</code> で次数 2 の Frobenius 型射を合成すると次数 4 になる。
+<strong>原文が prime-Frobenius を外しているのは正しく、外した理由は「素数」の部分にある。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-7-ii"
+         data-paper="FrdI"
+         data-pdf-page="28"
+         data-item="Proposition 1.7, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) A morphism of C is a pull-back morphism if and only if it is minimal-</div>
+<div class="verbatim">adjoint to the base-isomorphisms of C. A morphism of C is a base-isomorphism</div>
+<div class="verbatim">if and only if it is minimal-coadjoint to the pull-back morphisms of C; alter-</div>
+<div class="reading">pull-back ⟺ base-iso に minimal-adjoint。base-iso ⟺ pull-back に minimal-coadjoint。
+さらに base-iso ⟺「Frobenius 型 ≫ pre-step」と書ける。</div>
+<p class="open">★★<strong>原文より短い道が見つかった。</strong> 原文は必要性を
+「the essential uniqueness of this factorization」で説明するが、
+<strong>分解の一意性は要らない</strong> —— <code>γ := 𝟙</code>(または <code>α := 𝟙</code>)に取って
+<strong>co-angularity をそのまま当てる</strong>だけで出る
+(Lean 側 <code>isIso_of_isCoAngular_left</code> / <code>_right</code>)。
+使うのは <code>Definition 1.3, (iv), (a)</code> の<strong>分解の存在</strong>だけである。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-7-iii"
+         data-paper="FrdI"
+         data-pdf-page="29"
+         data-item="Proposition 1.7, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) A morphism of C is of Frobenius type if and only if it is minimal-</div>
+<div class="verbatim">coadjoint to the linear morphisms of C. A morphism of C is linear if and only if</div>
+<div class="verbatim">it is minimal-adjoint to the morphisms of Frobenius type of C; alternatively,</div>
+<div class="verbatim">a morphism of C is linear if and only if it is may be written as a composite α◦β,</div>
+<div class="verbatim">where α is a pull-back morphism, and β is a pre-step.</div>
+<div class="reading">Frobenius 型 ⟺ linear に minimal-coadjoint。linear ⟺ Frobenius 型に minimal-adjoint。
+さらに linear ⟺「pre-step ≫ pull-back」と書ける。</div>
+<p class="open">★<code>linear</code> の必要性について、原文は
+「the well-known structure of the multiplicative monoid <code>N≥1</code> and the essential
+uniqueness of morphisms of Frobenius type of a given Frobenius degree」を挙げるが、
+<strong><code>Proposition 1.4, (iii)</code>(LB-invertible な pre-step は同型)だけで済む</strong>。
+★<code>ℕ≥1</code> の構造(単元が <code>1</code> だけ)を実際に使うのは <strong>(v) の linear</strong> のほうである。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-7-iv"
+         data-paper="FrdI"
+         data-pdf-page="29"
+         data-item="Proposition 1.7, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iv) A pre-step of C is co-angular if and only if it is mid-adjoint [cf. §0] to</div>
+<div class="verbatim">the isometric pre-steps.</div>
+<div class="reading">pre-step については、co-angular と「isometric pre-step に mid-adjoint」が一致する。</div>
+<p class="open">★中身は <strong><code>⇒</code> の側</strong>である。<code>co-angular</code> の定義には
+「<code>α</code> が linear」「<code>α</code> か <code>γ</code> が base-iso」という<strong>余分な仮定</strong>が付いているが、
+<code>φ</code> が pre-step ならこの 2 つは <strong>(v) から自動で従う</strong>。
+★原文が「cf. the argument applied in the proof of Proposition 1.4, (iv)<strong>!</strong>」と
+感嘆符つきで指す議論はこれである。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-7-v"
+         data-paper="FrdI"
+         data-pdf-page="29"
+         data-item="Proposition 1.7, (v)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(v) If a composite morphism φ = α◦β of C is a(n) isomorphism (respectively,</div>
+<div class="verbatim">base-isomorphism; linear morphism; pre-step; isometry; co-angular pre-</div>
+<div class="verbatim">step; co-angular linear morphism; pull-back morphism), then so are α, β.</div>
+<div class="verbatim">If, moreover, the domain of φ is isotropic, then a similar statement holds for</div>
+<div class="verbatim">morphisms of Frobenius type.</div>
+<div class="reading">合成が 8 クラスのいずれかに属せば、両因子も属する。始域が isotropic なら
+Frobenius 型についても同じ。</div>
+<p class="open">★<strong>使う入力が条ごとに違う</strong>のが要点:
+<code>isomorphism</code> は <code>𝒞</code> が totally epimorphic、
+<code>base-isomorphism</code> は <code>𝒟</code> が totally epimorphic、
+<code>linear</code> は <code>ℕ≥1</code> の単元が <code>1</code> だけ、
+<code>isometry</code> は <strong><code>Φ</code> が sharp</strong> ＋ <code>Definition 1.1, (ii), (a)</code> の単射性。
+★<strong><code>isometry</code> の段だけが <code>Φ</code> の sharp 性を使う</strong> ——
+<code>Proposition 1.5</code> が <code>pre-divisorial</code> でよかったのに
+1.7 が <code>divisorial</code> を仮定する理由がここにある。</p>
+<p class="open">★<code>co-angular linear</code> の段が原文でいちばん長い(1 段落まるごと)。
+<code>α</code>, <code>β</code> をそれぞれ「isometric pre-step ≫ co-angular linear」に分解し、
+真ん中に現れる <code>β₁ ≫ α₂</code> をもう一度同じ形に分解して、
+<code>φ</code> の co-angularity を 2 回当てる。
+★<strong>ここは短くならなかった</strong> —— (ii)(iii) で効いた「<code>𝟙</code> を置く技」が使えず、
+原文の段取りをそのまま辿る必要があった。</p>
+</section>
+
+</body>
+</html>

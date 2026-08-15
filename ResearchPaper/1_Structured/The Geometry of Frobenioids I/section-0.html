@@ -191,5 +191,26 @@ Lean 側の <code>isIso_of_isIso_comp</code> で<strong>実際に証明した</s
 <code>𝔽_Φ</code> の Frobenius 次数 <code>≥ 2</code> の自己射を要した。</p>
 </section>
 
+<h2>★2026-08-15 追加 —— `Proposition 1.7` が要求した §0 の語彙</h2>
+
+<section class="statement definition"
+         id="frdi-s0-minimal-adjoint"
+         data-paper="FrdI"
+         data-pdf-page="17"
+         data-item="§0 Categories — minimal-adjoint / minimal-coadjoint / mid-adjoint"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">Let C be a category; S a collection of arrows in C; φ ∈Arr(C). Then we shall say</div>
+<div class="verbatim">that φ is minimal-adjoint to S (respectively, minimal-coadjoint to S; mid-adjoint</div>
+<div class="verbatim">to S) if every factorization φ = α ◦β (respectively, φ = β ◦α; φ = α ◦β ◦γ) of φ in</div>
+<div class="verbatim">C such that β lies in S satisfies the property that β is, in fact, an isomorphism. If φ</div>
+<div class="reading">3語とも「`S` の元が因子に現れたら、その因子は同型」という形。
+**`S` の元がどの位置に来るか**だけが違う ——
+minimal-adjoint は<strong>最初</strong>、minimal-coadjoint は<strong>最後</strong>、mid-adjoint は<strong>真ん中</strong>。</div>
+<p class="open">★「a collection of arrows in <code>C</code>」は mathlib の <code>MorphismProperty C</code> として写した。
+★非退化: <strong>totally epimorphic な圏では「<code>⊤</code> に minimal-adjoint」⟺「同型」</strong>
+(Lean 側 <code>isMinimalAdjoint_top_iff</code>)。一方 <code>S = isomorphisms</code> に取ると条件は空になる。
+<strong>両端を押さえたので、定義が空でも全体でもないことが分かる。</strong></p>
+</section>
+
 </body>
 </html>

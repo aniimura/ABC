@@ -314,11 +314,6 @@ theorem otriOf_natural {A B : ElemFrobCat Φ} (φ : A ⟶ B)
 ★原文は「one verifies immediately」と書く。**測る。**
 -/
 
-private theorem pnat_left_eq_one {a b : ℕ+} (h : a * b = 1) : a = 1 := by
-  have h' : ((a : ℕ+) : ℕ) * ((b : ℕ+) : ℕ) = 1 := by
-    exact_mod_cast congrArg (fun n : ℕ+ => (n : ℕ)) h
-  exact PNat.coe_eq_one_iff.mp (Nat.dvd_one.mp ⟨_, h'.symm⟩)
-
 /-- ★★**`𝔽_Φ` の pull-back morphism の完全な特徴づけ** ——
 `φ` が pull-back ⟺ `deg_Fr(φ) = 1` かつ `Div(φ) = 0`(= 零因子が**可逆**)。
 

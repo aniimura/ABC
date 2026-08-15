@@ -661,6 +661,21 @@ theorem not_isGroupLike_nat : ¬ IsGroupLike ℕ := by
   have := A.val_neg
   omega
 
+/-! ### `ℕ≥1` の乗法モノイドの構造
+
+★原文が `Proposition 1.7` の証明で「the well-known structure of the multiplicative
+monoid `N≥1`」と呼ぶもの。使うのは**単元が 1 だけ**という一点である。 -/
+
+/-- `ℕ+` で `a * b = 1` なら `a = 1`。 -/
+theorem pnat_left_eq_one {a b : ℕ+} (h : a * b = 1) : a = 1 := by
+  have h' : ((a : ℕ+) : ℕ) * ((b : ℕ+) : ℕ) = 1 := by
+    exact_mod_cast congrArg (fun n : ℕ+ => (n : ℕ)) h
+  exact PNat.coe_eq_one_iff.mp (Nat.dvd_one.mp ⟨_, h'.symm⟩)
+
+/-- `ℕ+` で `a * b = 1` なら `b = 1`。 -/
+theorem pnat_right_eq_one {a b : ℕ+} (h : a * b = 1) : b = 1 :=
+  pnat_left_eq_one (by rw [mul_comm]; exact h)
+
 /-! ### `perfect` モノイド
 
 原文 (FrdI p.11):
