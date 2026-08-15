@@ -108,6 +108,52 @@ Neukirch–Schmidt–Wingberg、Rapoport–Zink、Fried–Jarden など古典的
    Corollary のものばかりで、根が Definition のものは 1〜4 に留まる。
    これは「低い値＝測定ミス」ではなく**構造**である。
 
+## ★★系統的な盲点(2026-08-15 実測)——中層の語彙がグラフに出ない
+
+グラフの節点は**番号付き項目**(`Definition 3.1` など)であり、辺は**番号付きの引用**である。
+したがって **「名前で呼ばれる概念」はグラフに出ない。** 子が「中層」として挙げた4語で確認した:
+
+| 概念 | グラフ | 理由 |
+|---|---|---|
+| **temperoid** | ○ | `[SemiAnbd] Definition 3.1`、**層 0(依存を持たない)** |
+| **π₁^temp** | ○ | `[SemiAnbd] Proposition 3.6`、層 3 |
+| **Frobenioid** | ○ | `[FrdI] Definition 1.3`、層 2 |
+| **anabelioid** | **×** | 定義元は `[Mzk4]` = *The Geometry of Anabelioids*。到達範囲に**番号つきで依拠する辺が無い** |
+| **半グラフ(semi-graph)** | **×** | ★**番号なしの地の文**で定義されている(「we recall that a semi-graph G consists of …」、`[Mzk3]` Appendix 参照)。**原理的に節点にならない** |
+| 半グラフ的アナベリオイド | **×** | `[SemiAnbd] Definition 2.1` は**存在する**が、★**論文中で番号で参照されている箇所が1つも無い**(名前で呼ばれる) |
+
+> **★したがってこのグラフは中層を過小に表示している。**
+> 「左の層から着手する」という読み方は正しいが、**層の中身は番号付き項目に限られる**。
+> 名前で運ばれる概念(半グラフ、anabelioid)は別途拾う必要がある。
+
+## ★引用キーは論文ごとに独立である(2026-08-15 実測、`tools/bibmap.mjs` で解決)
+
+IUT の4本は `[IUTchI]` のような記号的キーだが、古い論文は `[Mzk3]` のような数字型で、
+**キーは論文ごとに独立**である。当初これを解決しておらず、古い論文からの辺を落としていた:
+
+| 論文 | `[MzkN]` 型の引用回数 |
+|---|---:|
+| AbsTopIII | 318 |
+| EtTh | 254 |
+| SemiAnbd | 92 |
+| FrdI | 58 |
+| IUTchIII | **0**(記号的キーのみ) |
+
+各論文の参考文献欄を解いて解決するようにした。**節点 653 → 633**(誤った辺が減り、
+正しい辺が増えた差し引き)。
+
+**★誤マッピングを2件見つけて潰した**(部分文字列一致が弱すぎた):
+- `[Mzk3]` = *The Absolute Anabelian Geometry of **Hyperbolic Curves***(0_Source に無い)が
+  *Absolute Anabelian Geometry* に誤マッチしていた
+- `[Mzk8]` = ***Galois Sections in** Absolute Anabelian Geometry* も同じ題名に誤マッチ
+
+→ 題名は**接頭辞であること**と**60% 以上を覆うこと**を要求し、満たさないものは解決しない。
+**誤った辺は欠けた辺より悪い。**
+
+**★★衝突に注意**: `[IUTchI]` の `[pGC]` は *The Local Pro-p Anabelian Geometry of Curves* であり、
+我々がタグ `pGC` に割り当てた *A Version of the Grothendieck Conjecture for p-adic Local Fields*
+とは**別の論文**である。論文ごとの解決はこれも正す。
+
 ## 測定値
 
 | 論文 | 根 | 番号付き項目 | 到達 | 最大深さ | 辺 | 平均出次数 |

@@ -40,11 +40,37 @@ const OUT = process.argv[2] ?? join(ROOT, 'dependency-graph.html');
 const KIND = 'Definition|Proposition|Theorem|Corollary|Remark|Lemma|Example';
 const FILE_OF = JSON.parse(readFileSync(join(ROOT, 'tools', '_fileof.json'), 'utf8'));
 
+// ★引用キーは論文ごとに独立である(2026-08-15 実測)。
+//   IUT の4本は [IUTchI] のような記号的キーだが、古い論文は [Mzk3] のような数字型で、
+//   しかも SemiAnbd の [Mzk4] と EtTh の [Mzk4] は別物でありうる。
+//   各論文の参考文献欄を解いて解決する。tools/bibmap.mjs を参照。
+//   ★実害だったもの: anabelioid の定義元([Mzk4] = The Geometry of Anabelioids)が
+//    グラフに1度も現れていなかった。
+//   ★★衝突に注意: IUTchI の [pGC] は "The Local Pro-p Anabelian Geometry of Curves" で、
+//    我々がタグ pGC に割り当てた "A Version of the Grothendieck Conjecture for
+//    p-adic Local Fields" とは**別の論文**である。論文ごとの解決はこれも正す。
+const { buildBibs } = await import('./bibmap.mjs');
+const BIBS = buildBibs(SRC, FILE_OF);
+const FILE_TO_TAG = new Map(Object.entries(FILE_OF).map(([t, f]) => [f, t]));
+/** 引用キーを、引用している論文の参考文献欄で解決する。 */
+function resolveTag(fromTag, key) {
+  const b = BIBS.get(fromTag);
+  const v = b?.get(key);
+  if (v && !v.startsWith('FILE:')) return v;          // 我々のタグに解決
+  if (v) {                                            // 0_Source にあるがタグ未登録 → 題名をタグ代わりに
+    const file = v.slice(5);
+    return FILE_TO_TAG.get(file) ?? `@${file}`;
+  }
+  return FILE_OF[key] ? key : null;                   // 記号的キーがそのまま我々のタグなら採る
+}
+// `@題名` 形式のタグも読めるようにする
+const fileOfTag = (tag) => (tag.startsWith('@') ? tag.slice(1) : FILE_OF[tag]);
+
 // ── 原文側の抽出 ──────────────────────────────────────────
 const loaded = new Map();
 function load(tag) {
   if (loaded.has(tag)) return loaded.get(tag);
-  const f = FILE_OF[tag]; const p = f ? join(SRC, `${f}.txt`) : null;
+  const f = fileOfTag(tag); const p = f ? join(SRC, `${f}.txt`) : null;
   if (!p || !existsSync(p)) { loaded.set(tag, null); return null; }
   const lines = readFileSync(p, 'utf8').split(/\r?\n/);
   const pageOf = new Array(lines.length).fill(0);
@@ -78,7 +104,15 @@ function outs(tag, name) {
     if (cur === undefined || (cur && !soft)) es.set(to, soft);
   };
   const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
-  for (const m of body.matchAll(xre)) { keep(`${m[1]} / ${m[2]} ${m[3]}`, ctx(m.index, m[0].length)); spans.push([m.index, m.index + m[0].length]); }
+  for (const m of body.matchAll(xre)) {
+    spans.push([m.index, m.index + m[0].length]);
+    // ★引用キーは引用元の参考文献欄で解決する。解決できないものは辺にしない
+    //   (0_Source に無い外部文献、および題名照合が 60% を満たさなかったもの)。
+    //   ★誤った辺は欠けた辺より悪い、という判断による。
+    const rt = resolveTag(tag, m[1]);
+    if (!rt) continue;
+    keep(`${rt} / ${m[2]} ${m[3]}`, ctx(m.index, m[0].length));
+  }
   const ire = new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(ire)) {
     if (spans.some(([a, b]) => m.index >= a && m.index < b)) continue;
