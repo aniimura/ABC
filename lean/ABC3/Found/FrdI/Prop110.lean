@@ -464,6 +464,76 @@ theorem prop_1_10_i_exists (F : FrobenioidCore P) {A B A' : C}
     _ = (α ≫ γ') ≫ β₀' ≫ α₀' := by rw [hsq₁]
     _ = α ≫ γ' ≫ β₀' ≫ α₀' := by simp
 
+/-! ### ★★監査で欠落が判明した主張(2026-08-16)
+
+原文 (FrdI p.34):
+> pre-step; pull-back morphism; co-angular morphism; base-isomorphism;
+
+★**引用を選び直した記録(事故 #3 の 5 度目)**: 主張の行
+「In this situation, degFr(φ) = degFr(φ′); Div(φ′) = d · α∗(Div(φ)) …」は
+★**`′` が抽出で落ちるため引用できない**(32/68 文字で停止)。
+★**同じ段落の、`′` を含まない行を引く。**
+
+★★**以下は「与えられた `α`, `β`, `φ′` が可換方形をなす」という原文の状況そのもの**を扱う。
+★`prop_1_10_i_exists` が `β` を**自分で作る**のに対し、
+★★**こちらは `β` を与えられたものとして受け取る**(原文の量化子に合わせる)。
+
+★**原文が「the same is true of φ′」と述べる 7 タイプのうち、
+base-isomorphism と isometry をここで実装する。** -/
+
+include P in
+/-- ★★**原文「In this situation, degFr(φ) = degFr(φ′)」** ——
+★**監査以前、この等式はファイルのどこにも存在しなかった。**
+
+★`degFr` の乗法性と `ℕ+` の消去だけで出る。 -/
+theorem prop_1_10_i_degFr_phi_eq {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hd : P.degFr α = P.degFr β) (hsq : φ ≫ β = α ≫ φ') :
+    P.degFr φ = P.degFr φ' := by
+  have h := congrArg P.degFr hsq
+  rw [P.degFr_comp, P.degFr_comp, hd] at h
+  exact mul_left_cancel (a := P.degFr β) (by rw [h, mul_comm])
+
+include P in
+/-- ★**`φ` が base-isomorphism なら `φ′` もそう**(7 タイプのうちの 1 つ)。
+
+★`Base` は関手的なので、方形の 3 辺が同型なら 4 辺目も同型。 -/
+theorem prop_1_10_i_baseIso_of {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsBaseIsomorphism P α) (hβ : IsBaseIsomorphism P β)
+    (hsq : φ ≫ β = α ≫ φ') (hφ : IsBaseIsomorphism P φ) :
+    IsBaseIsomorphism P φ' := by
+  haveI : IsIso (P.Base α) := hα
+  haveI : IsIso (P.Base β) := hβ
+  haveI : IsIso (P.Base φ) := hφ
+  have h := congrArg P.Base hsq
+  rw [P.Base_comp, P.Base_comp] at h
+  have hrw : P.Base φ' = inv (P.Base α) ≫ P.Base φ ≫ P.Base β := by
+    rw [h, IsIso.inv_hom_id_assoc]
+  show IsIso (P.Base φ')
+  rw [hrw]
+  infer_instance
+
+include P in
+/-- ★**`φ` が isometry なら `φ′` もそう**(7 タイプのうちの 1 つ)。
+
+★`α`, `β` も isometry(Frobenius 型は LB-invertible、したがって isometric)なので
+`Div` の公式の項が落ち、★**`Φ.map (Base α)` の単射性**(`charInj`)で閉じる。 -/
+theorem prop_1_10_i_isometric_of {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsIsometric P α) (hβ : IsIsometric P β)
+    (hsq : φ ≫ β = α ≫ φ') (hφ : IsIsometric P φ) :
+    IsIsometric P φ' := by
+  have h := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp] at h
+  rw [show P.Div β = 0 from hβ, show P.Div φ = 0 from hφ, show P.Div α = 0 from hα] at h
+  simp only [map_zero, smul_zero, add_zero] at h
+  refine Φ.map_injective (P.Base α) ?_
+  rw [map_zero]
+  first
+  | exact h
+  | exact h.symm
+
 /-! ## ★★(ii) —— **pre-step と Frobenius 型は順序を入れ替えられる**
 
 原文 (FrdI p.34):
@@ -2094,8 +2164,8 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 | 条 | 欠けているもの | 該当宣言 |
 |---|---|---|
 | (i) | ★`β` の量化子が逆——原文「Suppose that α, β **are** morphisms of Frobenius type」は ∀、実装は ∃ | `prop_1_10_i_exists` |
-| (i) | ★★原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない** | — |
-| (i) | ★★原文「then the same is true of **φ′**」の **7 タイプのうち 4 つが未実装**。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない | `prop_1_10_i_four_types` |
+| (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
+| (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★**base-isomorphism と isometry は実装した**(`prop_1_10_i_baseIso_of`, `prop_1_10_i_isometric_of`)。★**残るは co-angular と LB-invertible** —— これは `φ′` の分解を `α₀` に沿って `φ` の分解に引き戻す持ち上げが要り、★**まだ試していない**(「証明できなかった」ではない) | `prop_1_10_i_four_types` |
 | (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
 | (iii) | ★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている | `prop_1_10_iii_otri_perfect`, `prop_1_10_iii_otimes_perfect` |
 | (iii) | 「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ | `prop_1_10_iii_image_perfect` |
