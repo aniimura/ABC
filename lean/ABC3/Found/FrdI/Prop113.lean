@@ -193,9 +193,51 @@ theorem elemFrob_baseIdentity_aut_eq_id {D : Type u} [Category.{v} D]
 ★`h : a ≫ u = u` で `u` が同型なら `a = 𝟙`。
 ★**自然性が与える式がこの形になる**(上の docstring を見よ)。 -/
 theorem eq_id_of_comp_eq_of_isIso {E : Type u} [Category.{v} E] {X Y : E}
-    (a : X ⟶ X) (u : X ⟶ Y) [IsIso u]
+    (a : X ⟶ X) (u : X ⟶ Y) (hu : IsIso u)
     (h : a ≫ u = u) : a = 𝟙 X := by
-  have : a ≫ u = 𝟙 X ≫ u := by rw [Category.id_comp]; exact h
-  exact (cancel_mono u).mp this
+  haveI := hu
+  have h2 : a ≫ u = 𝟙 X ≫ u := by rw [Category.id_comp]; exact h
+  exact (cancel_mono u).mp h2
+
+section PropI
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+
+include P in
+/-- ★★**`Proposition 1.13, (i)` の本体** ——
+「pull-back の対象で自明」から「`𝒞_A` 全体で自明」へ。
+
+★★**原文はこの段を書いていない**(上の docstring を見よ)。
+仮定 `htriv` が原文の示した部分(圏同値 ＋ `𝒟` の slim 性)であり、
+★**ここで実装するのはそこから先である。**
+
+★**構成**: `𝒞_A` の対象 `X` の構造射を `F.arbFactor` で `γ ≫ β ≫ α₀` に分解し、
+`X ⟶ Over.mk α₀` を作って**自然性**を当てる。
+`Base (γ ≫ β)` が同型なので消せる。 -/
+theorem prop_1_13_i_from_pullBack (F : FrobenioidCore P) (A : C)
+    (η : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj))
+    (htriv : ∀ Y : Over A, IsPullBack P Y.hom →
+      η.hom.app Y = 𝟙 ((Over.forget A ⋙ P.proj).obj Y)) :
+    η = Iso.refl _ := by
+  apply Iso.ext
+  apply NatTrans.ext
+  funext X
+  obtain ⟨Y₀, Z₀, γ, β, α₀, hfac, hγ, hβ, hα₀⟩ := F.arbFactor X.hom
+  -- `X ⟶ Over.mk α₀`
+  set Y : Over A := Over.mk α₀ with hY
+  have hw : (γ ≫ β) ≫ α₀ = X.hom := by rw [Category.assoc, ← hfac]
+  set f : X ⟶ Y := Over.homMk (γ ≫ β) hw with hf
+  -- 自然性
+  have hnat := η.hom.naturality f
+  rw [htriv Y hα₀, Category.comp_id] at hnat
+  -- `Base (γ ≫ β)` は同型
+  have hbi : IsBaseIsomorphism P (γ ≫ β) := isBaseIsomorphism_comp P hγ.2 hβ.2
+  have hmap : (Over.forget A ⋙ P.proj).map f = P.Base (γ ≫ β) := rfl
+  rw [hmap] at hnat
+  show η.hom.app X = 𝟙 _
+  exact eq_id_of_comp_eq_of_isIso (η.hom.app X) (P.Base (γ ≫ β)) hbi hnat.symm
+
+end PropI
 
 end ABC3.Found.FrdI
