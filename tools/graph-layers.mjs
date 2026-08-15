@@ -104,7 +104,10 @@ function outs(tag, name) {
     // 同じ先が複数回出るなら、1回でも「依拠」の文脈があれば辺として残す
     if (cur === undefined || (cur && !soft)) es.set(to, soft);
   };
-  const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
+  // ★タグに数字を許すこと(2026-08-15 修正)。FrdI は [Mzk15] の形で引用するので、
+  //   [A-Za-z]+ だと masking し損ね、直後の同一論文内スキャンが偽の辺を作る。
+  //   実測: FrdI に偽の辺 Definition 1.2 → Definition 3.1 が生まれ、偽の循環に見えていた。
+  const xre = new RegExp(`\\[([A-Za-z][A-Za-z0-9]*)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(xre)) {
     spans.push([m.index, m.index + m[0].length]);
     // ★引用キーは引用元の参考文献欄で解決する。解決できないものは辺にしない

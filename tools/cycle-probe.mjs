@@ -40,7 +40,9 @@ function edgesOf(tag, name) {
   const body = P.lines.slice(d.line, d.end).join('\n');
   const es = []; const spans = [];
   const ctx = (i, len) => body.slice(Math.max(0, i - 90), i + len + 60).replace(/\s+/g, ' ');
-  const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
+  // ★タグに数字を許すこと(2026-08-15 修正)。詳細は full-graph.mjs の同じ箇所。
+  //   `[Mzk15], Definition 3.1` を masking し損ねると、同一論文内の偽の辺になる。
+  const xre = new RegExp(`\\[([A-Za-z][A-Za-z0-9]*)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(xre)) {
     es.push({ to: `${m[1]} / ${m[2]} ${m[3]}`, ctx: ctx(m.index, m[0].length), cross: true });
     spans.push([m.index, m.index + m[0].length]);

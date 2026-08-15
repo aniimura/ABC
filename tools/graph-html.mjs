@@ -74,7 +74,10 @@ function outEdges(tag, name) {
   const d = P.decls.get(name); if (!d) return null;
   const body = P.lines.slice(d.line, d.end).join('\n');
   const es = []; const spans = [];
-  const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
+  // ★タグに数字を許すこと(2026-08-15 修正)。FrdI は [Mzk15] の形で引用するので、
+  //   [A-Za-z]+ だと masking し損ね、直後の同一論文内スキャンが偽の辺を作る。
+  //   実測: FrdI に偽の辺 Definition 1.2 → Definition 3.1 が生まれ、偽の循環に見えていた。
+  const xre = new RegExp(`\\[([A-Za-z][A-Za-z0-9]*)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(xre)) { es.push([m[1], `${m[2]} ${m[3]}`]); spans.push([m.index, m.index + m[0].length]); }
   const ire = new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   for (const m of body.matchAll(ire)) {

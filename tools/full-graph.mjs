@@ -87,7 +87,12 @@ function outEdges(tag, name) {
 
   const edges = [];
   // ① 論文をまたぐ辺: "[Tag], Kind N.M" / "[Tag] Kind N.M"
-  const xre = new RegExp(`\\[([A-Za-z]+)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
+  // ★タグに数字を許すこと(2026-08-15 修正)。IUT 系は `[IUTchIII]` の形だが、
+  //   **FrdI は `[Mzk15]` の形で引用する**。`[A-Za-z]+` だとこの引用が masking されず、
+  //   直後の ② が `Definition 3.1` を**同一論文内の参照として拾ってしまう**。
+  //   実測: FrdI に偽の辺 `Definition 1.2 → Definition 3.1` が生まれ、
+  //   §1 の 8 項目 + §3 の 3 項目が **11 節点の偽の循環**に見えていた。
+  const xre = new RegExp(`\\[([A-Za-z][A-Za-z0-9]*)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
   const spans = [];
   for (const m of body.matchAll(xre)) {
     edges.push({ tag: m[1], name: `${m[2]} ${m[3]}` });
