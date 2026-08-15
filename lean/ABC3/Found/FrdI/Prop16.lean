@@ -757,6 +757,23 @@ def cfpEndHomSnd (A : CfpCat P G) : End A →* End A.obj.right where
 theorem cfpEndHomSnd_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
     cfpEndHomSnd P G A (x ^ k) = (cfpEndHomSnd P G A x) ^ k :=
   map_pow (cfpEndHomSnd P G A) x k
+/-! ### ★`Frobenius-normalized` —— 3 回試して打ち切り(再現手順つき)
+
+★**数学は自明に近い**: `𝒪^▷` の元も base-identity 自己射も `𝒟'` 成分が `𝟙` に固定されるので、
+`𝒞` の等式がそのまま両成分に降りる。
+
+★**Lean で止まる理由(特定済み)**: 原文の条件は `α ^ deg_Fr(φ)` を含み、
+**`End A` と `A ⟶ A` は同じ型の2つの綴りで、`Monoid`(したがって `^`)は
+`End A` の綴りにしか付かない**。`CfpCat.fst` の引数型は `X ⟶ Y` なので、
+`CfpCat.fst (α ^ k)` と書くと `α ^ k` が `A ⟶ A` として推論され
+`HPow (A ⟶ A) ℕ` が合成できない。
+
+★試して駄目だったもの: 型注釈 `(… : End A)` / `cfpEndHom`(返り値型 `End A.obj.left`)経由 /
+`show` で目標を書き換え / `map_mul`(`≫` は `*` ではないので不適) / `one_pow`(`𝟙` と `1` の綴り)。
+★**`cfpEndHom` / `cfpEndHom_pow` / `cfpEndHomSnd` / `cfpEndHomSnd_pow` は残してある。**
+次に当たる人が同じ道を繰り返さずに済む形で記録する。
+-/
+
 
 /-! ## ★(vi) —— **片向きだけ**の3タイプ
 
