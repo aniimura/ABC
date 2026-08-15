@@ -1167,12 +1167,12 @@ include P in
 ★**`prop_1_10_vi_descend` がそれを受けて 6 段を実行する。** -/
 theorem prop_1_10_vi_quasi {B Cc : C} (γ : B ⟶ Cc) (hγs : IsPreStep P γ)
     (hC : IsFrobeniusTrivial P Cc)
-    (hstep : ∀ (n : ℕ+) (φC : Cc ⟶ Cc), IsBaseIdentity P φC → P.degFr φC = n →
-      ∃ φB : B ⟶ B, φB ≫ γ = γ ≫ φC) :
+    (hstep : ∀ (n : ℕ+) (φC : Cc ⟶ Cc), IsBaseIdentity P φC → IsFrobeniusType P φC →
+      P.degFr φC = n → ∃ φB : B ⟶ B, φB ≫ γ = γ ≫ φC) :
     IsQuasiFrobeniusTrivial P B := by
   intro n
   obtain ⟨ζ, hdeg, hprop⟩ := hC
-  obtain ⟨φB, hsq⟩ := hstep n (ζ n) (hprop n).1 (hdeg n)
+  obtain ⟨φB, hsq⟩ := hstep n (ζ n) (hprop n).1 (hprop n).2 (hdeg n)
   obtain ⟨hb, hd⟩ := prop_1_10_vi_descend P γ hγs (ζ n) φB (hprop n).1 (hdeg n) hsq
   exact ⟨φB, hb, hd⟩
 
@@ -1186,5 +1186,105 @@ theorem prop_1_10_vi_subQuasi {A B : C} (α : B ⟶ A)
     (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
     (hq : IsQuasiFrobeniusTrivial P B) : IsSubQuasiFrobeniusTrivial P A :=
   ⟨B, α, hαc, hαs, hq⟩
+
+/-! ### ★MLe の 2 つの補助 —— 穴を塞ぐのに要る
+
+★どちらも `MLe a b := ∃ c, a + c = b` の定義から直に出るが、
+**使う形が違う**ので別々に置く。
+-/
+
+/-- ★**`x ≤ n • x`**(`n ≥ 1`)。★`n • x = x + (n-1) • x` から。 -/
+theorem mle_nsmul_self {M : Type w} [AddCommMonoid M] {n : ℕ} (hn : 0 < n) (x : M) :
+    MLe x (n • x) := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  exact ⟨m • x, by rw [succ_nsmul, add_comm]⟩
+
+/-- ★**加法準同型は `MLe` を保つ**。 -/
+theorem MLe.map {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
+    {a b : M} (h : MLe a b) : MLe (f a) (f b) := by
+  obtain ⟨c, hc⟩ := h
+  exact ⟨f c, by rw [← map_add, hc]⟩
+
+/-! ### ★★(vi) の最後の穴を塞ぐ —— 3–5 段
+
+★**道具は全部そろっている**: (ii)(`prop_1_10_ii`)、`Div` の公式
+(`prop_1_10_ii_Div_formula`)、橋(`coaPre_factor_of_mle`)。
+★**残っていたのは `Φ.map` の記帳だけ**だった。
+
+★**記帳の中身**:
+- 四角形 `β′ ≫ α′ = γ ≫ φ_C` から `Base γ = Base β′ ≫ Base α′`(`φ_C` は base-identity)
+- `Div` の公式から `Φ.map (Base β′) (Div α′) = d • Div γ`
+- 両辺に `Φ.map (inv (Base β′))` を当てて ★**`Div α′ = d • Φ.map (inv (Base β′)) (Div γ)`**
+- `x ≤ d • x` なので `MLe (Φ.map (inv (Base β′)) (Div γ)) (Div α′)`
+- `Φ.map (inv (Base α′))` で押し出すと、★**橋が要求する形**になる
+-/
+
+include P in
+/-- ★★**(vi) 前半の 3–5 段** —— `prop_1_10_vi_quasi` が要求する `hstep` を作る。
+
+★これで `Proposition 1.10, (vi)` の前半の穴が塞がる。 -/
+theorem prop_1_10_vi_step (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {B Cc : C} (γ : B ⟶ Cc) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (n : ℕ+) (φC : Cc ⟶ Cc) (hbC : IsBaseIdentity P φC) (hftC : IsFrobeniusType P φC)
+    (hdC : P.degFr φC = n) :
+    ∃ φB : B ⟶ B, φB ≫ γ = γ ≫ φC := by
+  -- 3 段: (ii) で組み替える
+  obtain ⟨Y, β', α', hβ', hdβ', hα's, hsq⟩ := prop_1_10_ii P G.core γ hγs φC hftC
+  haveI hbβ' : IsIso (P.Base β') := hβ'.2
+  haveI hbα' : IsIso (P.Base α') := hα's.2
+  haveI hbγ : IsIso (P.Base γ) := hγs.2
+  -- `Div` の公式
+  have hdiv : Φ.map (P.Base β') (P.Div α') = (P.degFr φC : ℕ) • P.Div γ :=
+    prop_1_10_ii_Div_formula P γ φC β' α' hβ' hftC hsq
+  -- `Div α′ = d • Φ.map (inv (Base β′)) (Div γ)`
+  have hdiv' : P.Div α' = (P.degFr φC : ℕ) • Φ.map (inv (P.Base β')) (P.Div γ) := by
+    have := congrArg (Φ.map (inv (P.Base β'))) hdiv
+    rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id, map_nsmul] at this
+    exact this
+  -- `MLe` を作る
+  have hmle0 : MLe (Φ.map (inv (P.Base β')) (P.Div γ)) (P.Div α') := by
+    rw [hdiv']
+    exact mle_nsmul_self (P.degFr φC).pos _
+  -- 橋が要求する形へ押し出す
+  -- ★`inv` の下を書き換えると motive エラー(分類表 #2)になるので、
+  --   `inv_eq_of_hom_inv_id` で**外から**特徴づける
+  have hb : P.Base β' ≫ P.Base α' = P.Base γ := by
+    have h := congrArg P.Base hsq
+    rw [P.Base_comp, P.Base_comp, show P.Base φC = P.Base (𝟙 Cc) from hbC,
+      P.Base_id, Category.comp_id] at h
+    exact h
+  have hbase : inv (P.Base γ) = inv (P.Base α') ≫ inv (P.Base β') := by
+    refine CategoryTheory.IsIso.inv_eq_of_hom_inv_id ?_
+    rw [← hb, Category.assoc, ← Category.assoc (P.Base α'), IsIso.hom_inv_id,
+      Category.id_comp, IsIso.hom_inv_id]
+  have hmle : MLe (Φ.map (inv (P.Base γ)) (P.Div γ))
+      (Φ.map (inv (P.Base α')) (P.Div α')) := by
+    rw [hbase, Φ.map_comp]
+    exact MLe.map _ hmle0
+  -- 4 段: 橋で因子分解を得る
+  obtain ⟨β, _, _, hβγ⟩ :=
+    coaPre_factor_of_mle P G γ hγc hγs α' (prop_1_4_i P α' (fun Y' _ => hiso Y')) hα's hmle
+  -- 5 段: `φ_B := β′ ≫ β`
+  exact ⟨β' ≫ β, by rw [Category.assoc, hβγ, hsq]⟩
+
+include P in
+/-- ★★**`Proposition 1.10, (vi)` 前半の完成形** ——
+isotropic 型の Frobenioid において、Frobenius-trivial な対象へ co-angular pre-step で
+つながる対象は quasi-Frobenius-trivial であり、そこへ co-angular pre-step で
+つながる対象は sub-quasi-Frobenius-trivial。
+
+★原文(p.36)の 7 段をすべて実装した形である。
+★**`Definition 1.3, (i), (a), (b)` から `α`・`γ`・`C` を得る 1・2 段は仮定に出している**
+——それは `𝒞^istr` が Frobenioid であること(`Proposition 1.9, (v)`)から供給されるもので、
+**この定理の内容ではない**。 -/
+theorem prop_1_10_vi_first (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B Cc : C} (α : B ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (γ : B ⟶ Cc) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (hC : IsFrobeniusTrivial P Cc) :
+    IsSubQuasiFrobeniusTrivial P A :=
+  prop_1_10_vi_subQuasi P α hαc hαs
+    (prop_1_10_vi_quasi P γ hγs hC
+      (fun n φC hbC hftC hdC =>
+        prop_1_10_vi_step P G hiso γ hγc hγs n φC hbC hftC hdC))
 
 end ABC3.Found.FrdI
