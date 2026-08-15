@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.9 — Isotropic Objects and Isometries</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.9 — Isotropic Objects and Isometries</h1>
+
+<p>物理 p.30–p.33。<strong>400 dpi 目視確認 2026-08-15</strong>。
+逐語は抽出テキストから 1 行ずつ取っている。</p>
+
+<h2>★規模の測定</h2>
+
+<table>
+<tr><th>条</th><th>内容</th><th>要した入力</th></tr>
+<tr><td>(i)</td><td>分解 + 一意性 + 3 つの同値</td><td><code>Definition 1.3, (iv), (a)</code> / <code>(v), (b)</code></td></tr>
+<tr><td>(ii)</td><td>関手 <code>φ_*</code> + 圏同値 + <code>𝒪^×(A)^imtr-pre</code></td><td>(iii)(d) の<strong>第2</strong>同値、<code>(v), (c)</code>、<strong>Φ の divisorial 性</strong></td></tr>
+<tr><td>(iii)</td><td>関手 <code>φ^*</code> + 一意性</td><td><code>Definition 1.3, (i), (c)</code>(初使用)、<code>Definition 1.2, (ii)</code></td></tr>
+<tr><td>(iv)</td><td>isotropic 性が両向きに移る</td><td>isotropic hull の普遍性 + co-angularity</td></tr>
+<tr><td>(v)</td><td><code>𝒞^istr</code> が Frobenioid + 随伴 + 保存 11 種</td><td><strong>21 条すべての移送</strong></td></tr>
+<tr><td>(vi)</td><td>isotropic hull の特徴づけ</td><td>(vii)(a)(b)</td></tr>
+<tr><td>(vii)</td><td>isometric pre-step の特徴づけ</td><td>isotropic hull の普遍性</td></tr>
+</table>
+
+<h2>★★測定の要点</h2>
+
+<p>★<strong>(v) は「再検証」ではなく「移送」だった。</strong> 21 条を書き直す必要は
+最後まで一度も生じなかった。<code>Definition 1.3, (vii), (b)</code>(isotropic な対象から出る射の
+終域は isotropic)が、前向きの構成をすべて <code>𝒞^istr</code> の内側に閉じ込めるからである。
+<strong>後ろ向きの条は 2 つだけ</strong>((i)(a) <code>baseSurj</code> と (i)(b) <code>preStepSpan</code>)で、
+そこにだけ isotropification が要った。</p>
+
+<p>★<strong>随伴は (v) を「述べる」ためだけでなく「示す」ために要る。</strong>
+pull-back の移送の難しい向き(<code>𝒞^istr</code> の pull-back が <code>𝒞</code> の pull-back であること)は、
+<code>Definition 1.2, (ii)</code> の全単射が「<strong>すべての</strong> <code>Z ∈ Ob(𝒞)</code>」について要求されるのに
+<code>𝒞^istr</code> 側は isotropic な <code>Z</code> しか与えないため、随伴で埋める必要がある。
+<strong>原文はこのことを述べていない。</strong></p>
+
+<p>★<strong>圏同値 3 本は同じ骨格だった</strong> ——
+忠実性だけは <code>𝒞^istr</code> の中で直接出る(<code>𝒞^istr</code> も totally epimorphic、pre-step も mono)。
+充満性と本質的全射性は <code>𝒞</code> 側から引く。違うのは「対象が <code>𝒞^istr</code> に残る」補題 1 本だけで、
+それぞれ <code>isotropic_dom_of_pullBack</code> / <code>isotropicClosed</code> / <strong>(iv) そのもの</strong>である。</p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-i"
+         data-paper="FrdI"
+         data-pdf-page="31"
+         data-item="Proposition 1.9, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) Any base-isomorphism φ : A →B of C admits a factorization</div>
+<div class="verbatim">where α is an isometric pre-step, and β is a co-angular base-isomorphism; this</div>
+<div class="verbatim">β is a morphism of Frobenius type; φ is co-angular if and only if α is an</div>
+<div class="verbatim">isomorphism; φ is a pull-back morphism if and only if φ is an isomorphism.</div>
+<div class="reading">base-isomorphism は「co-angular base-iso ≫ isometric pre-step」に一意分解し、
+isometric / co-angular / pull-back の 3 つの性質が因子の言葉で言い換えられる。</div>
+<p class="open">★<strong>原文の「pull-back ⟺ 同型」だけは分解と無関係</strong>で、
+<code>Remark 1.2.1</code>(base-isomorphism な pull-back は同型)がそのまま効く。
+残り 2 つが分解の一意性を使う。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-ii"
+         data-paper="FrdI"
+         data-pdf-page="31"
+         data-item="Proposition 1.9, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) Any base-isomorphism φ : A →B of C induces a functor [well-defined</div>
+<div class="verbatim">C →A with φ : A →B. Moreover, if φ is a co-angular pre-step, then φ∗is an</div>
+<div class="verbatim">the subgroup of v ∈O×(A) for which vimtr-pre is the identity.</div>
+<div class="reading">base-isomorphism <code>φ</code> は関手 <code>φ_* : 𝒞^imtr-pre_A → 𝒞^imtr-pre_B</code> を誘導し、
+<code>φ</code> が co-angular pre-step なら圏同値。<code>𝒪^×(A)^imtr-pre</code> は
+<code>u_*</code> が恒等と同型になる <code>u</code> の全体。</div>
+<p class="open">★★<strong>「[well-defined up to isomorphism]」は対象の割り当てだけに掛かる</strong>と測れた。
+<code>𝒞^imtr-pre_A</code> の hom 集合は<strong>高々1元</strong>(pre-step が mono)なので、
+<strong>射の割り当ては一意で、関手則 <code>map_id</code> / <code>map_comp</code> は無料</strong>である。
+同じ理由で <code>φ_*</code> の<strong>忠実性も無料</strong>。</p>
+<p class="open">★★<strong>圏同値の中身は本質的全射性と充満性で、両方が同じ構成から出る</strong> ——
+原文の「by possibly replacing φ by ψ」は、その構成を
+<code>(φ, β)</code> の代わりに <code>(β_W, h)</code> に当て直すことだと特定できた。</p>
+<p class="open">★★<strong>ここで <code>Φ</code> の divisorial 性が新しい形で効く。</strong>
+本質的全射性が返すのは <code>Order(Φ(D))</code> の<strong>同型</strong>であって等式ではない。
+<code>Order(M)</code> が反対称的(＝半順序)であるためには <strong>integral と sharp の両方</strong>が要り、
+どちらも落とせない(負の対照: <code>ℤ</code> は integral だが sharp でなく、
+<code>ℕ/(n∼n+2)</code> は sharp だが integral でない)。
+★<strong>原文は <code>Order(M)</code> を前順序としてしか定義しておらず、この点に触れていない。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-iii"
+         data-paper="FrdI"
+         data-pdf-page="31"
+         data-item="Proposition 1.9, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) Any pull-back morphism φ : A →B of C induces a functor [well-</div>
+<div class="verbatim">that maps an isometric pre-step δ : D →B to the unique [up to isomorphism]</div>
+<div class="verbatim">isometric pre-step γ : C →A that fits into a commutative diagram</div>
+<div class="reading">pull-back <code>φ</code> は関手 <code>φ^* : 𝒞^imtr-pre_B → 𝒞^imtr-pre_A</code> を誘導する。</div>
+<p class="open">★★<strong><code>Definition 1.3, (i), (c)</code> の圏同値の初使用</strong>がここである。
+使うのは<strong>本質的全射性だけ</strong>で、充満性・忠実性は使わない
+(<code>Base(δ)⁻¹ ∘ Base(φ)</code> に対応する pull-back を取るだけ)。</p>
+<p class="open">★<code>γ</code> が isometric pre-step であることは <strong><code>Proposition 1.4, (ii)</code></strong>
+(pull-back は linear isometry)と <code>Proposition 1.7, (v)</code> から出る。
+一意性は <code>Definition 1.2, (ii)</code> の全単射だけで、<strong>圏同値を使わない</strong>。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-iv"
+         data-paper="FrdI"
+         data-pdf-page="31"
+         data-item="Proposition 1.9, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iv) Let φ : A →B be a co-angular linear morphism [e.g., a pull-back</div>
+<div class="reading">co-angular linear な射に沿って isotropic 性は両向きに移る。</div>
+<p class="open">★<code>⇒</code> は <code>Definition 1.3, (vii), (b)</code> の一言。<strong>中身は <code>⇐</code></strong> で、
+<code>A</code> の isotropic hull <code>α</code> を取って普遍性で <code>φ = α ≫ β</code> と分解し、
+<strong>co-angularity を <code>γ := 𝟙</code> に当てる技</strong>で <code>α</code> を同型にする。</p>
+<p class="open">★★<strong>負の対照</strong>: <code>co-angular</code> は落とせない。模型 <code>cP</code>(<code>Vee</code> 上の定数関手)で
+<code>vLeftTop : left ⟶ top</code> は linear で <code>top</code> は isotropic だが、
+<code>left</code> は isotropic でない。<strong><code>Proposition 1.4, (i)</code> の負の対照がそのまま効いた。</strong></p>
+<p class="open">★<strong>(iv) は (v) の中で 3 回使われた</strong> ——
+(iv) 自身 / pull-back の始域が isotropic であること / (iii)(d) スライス側の移送。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-v"
+         data-paper="FrdI"
+         data-pdf-page="32"
+         data-item="Proposition 1.9, (v)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(v) Cistr [equipped with the restriction to C of the given functor C →FΦ] is a</div>
+<div class="verbatim">Bistr forms a left adjoint to the inclusion functor Cistr →C, through which</div>
+<div class="verbatim">morphic to the identity functor. Finally, the isotropification functor preserves</div>
+<div class="verbatim">morphisms, base-isomorphisms, base-FSM-morphisms, base-identity en-</div>
+<div class="reading"><code>𝒞^istr</code> は Frobenioid。isotropification 関手は包含関手の左随伴で、
+<code>𝒞^istr</code> への制限は恒等関手と同型。11 種の射のクラスを保存する。</div>
+<p class="open">★★<strong>21 条すべてが「移送」で済み、書き直しは 1 つも生じなかった。</strong>
+原文の <code>[from the fact that C is a Frobenioid!]</code> は<strong>全面的に検証された</strong>。</p>
+<p class="open">★<strong>選択が要るのは 1 箇所だけ</strong> ——
+<code>isotropicHullExists</code> が <code>∃</code>(<code>∃!</code> ではない)なので、対象ごとに hull を 1 つ選ぶところ。
+<strong>射の側には選択が要らない</strong>(普遍性が <code>∃!</code> だから)。</p>
+<p class="open">★<strong>随伴は「述べる」ためだけでなく「示す」ために要った</strong>(上の測定を参照)。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-vi"
+         data-paper="FrdI"
+         data-pdf-page="32"
+         data-item="Proposition 1.9, (vi)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(vi) A morphism of C is an isotropic hull if and only if its codomain is</div>
+<div class="verbatim">isotropic, and, moreover, it is minimal-coadjoint to the morphisms with isotropic</div>
+<div class="reading">isotropic hull ⟺ 終域が isotropic かつ「始域が isotropic な射」に minimal-coadjoint。</div>
+<p class="open">★<code>Definition 1.2, (iv)</code> の isotropic hull の定義には
+「isometric pre-step であること」と「普遍性」が含まれるが、
+<strong>(vi) はそれを minimal-coadjoint に置き換える</strong>。
+普遍性の一意性の部分は <code>𝒞</code> が totally epimorphic であることから出るので<strong>条件ではない</strong>。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-9-vii"
+         data-paper="FrdI"
+         data-pdf-page="32"
+         data-item="Proposition 1.9, (vii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(vii) A morphism A →B of C is an isometric pre-step if and only if the com-</div>
+<div class="verbatim">posite of this morphism A →B with an isotropic hull B →C yields an isotropic</div>
+<div class="reading">isometric pre-step ⟺ isotropic hull と合成すると isotropic hull になる。</div>
+<p class="open">★<code>⇐</code> は<strong>観察 1 本</strong>(合成が isometric pre-step なら因子もそう)で終わる。
+<code>⇒</code> は <code>A</code> の isotropic hull を取って普遍性で分解し、
+<strong>「isotropic な対象へ入る isometric pre-step は同型」</strong>で閉じる。</p>
+</section>
+
+</body>
+</html>

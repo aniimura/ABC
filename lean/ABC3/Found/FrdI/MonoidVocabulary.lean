@@ -1188,4 +1188,101 @@ theorem isCharacteristicallyInjective_of_injective_mChar
     IsCharacteristicallyInjective g :=
   ⟨hg, charMap_injective_of_sharp (isSharp_mChar B) hg⟩
 
+/-! ### ★`≤` の反対称性 —— `Order(M)` が半順序になる条件
+
+原文 (FrdI p.12):
+> observe that the relation “≤” on elements of M determines a category
+
+★原文は `Order(M)` を**前順序**の圏として作るだけで、半順序とは言わない。
+実際に反対称性が要るかは使う側の問題である。ここでは
+**divisorial(= integral かつ sharp)なら反対称的**であることと、
+**どちらの仮定も落とせない**ことを示す。
+-/
+
+/-- ★★**`M` が integral かつ sharp なら `≤` は反対称的**。
+
+★**2つの仮定がそれぞれ別の役割を持つ**:
+`a + c = b`, `b + d = a` から `a + (c + d) = a + 0` を作り、
+**integral(= 消約律)**で `c + d = 0`、すなわち `c` は可逆、
+**sharp** で `c = 0`。 -/
+theorem mle_antisymm {M : Type*} [AddCommMonoid M] (hint : IsIntegralMonoid M)
+    (hsh : IsSharp M) {a b : M} (h1 : MLe a b) (h2 : MLe b a) : a = b := by
+  obtain ⟨c, hc⟩ := h1
+  obtain ⟨d, hd⟩ := h2
+  letI := isCancelAdd_of_isIntegralMonoid M hint
+  have hstab : a + (c + d) = a + 0 := by
+    rw [← add_assoc, hc, hd, add_zero]
+  have hcd : c + d = 0 := add_left_cancel hstab
+  have hc0 : c = 0 := hsh c ⟨⟨c, d, hcd, by rw [add_comm]; exact hcd⟩, rfl⟩
+  rw [← hc, hc0, add_zero]
+
+/-- ★**負の対照 (1): `sharp` は落とせない** —— `ℤ` は integral だが sharp でなく、
+`0 ≤ 1` かつ `1 ≤ 0` なのに `0 ≠ 1`。 -/
+theorem not_mle_antisymm_int : MLe (0 : ℤ) 1 ∧ MLe (1 : ℤ) 0 ∧ (0 : ℤ) ≠ 1 :=
+  ⟨⟨1, by ring⟩, ⟨-1, by ring⟩, by decide⟩
+
+/-! #### ★負の対照 (2) 用の模型 —— `ℕ/(n ∼ n+2, n ≥ 1)`
+
+3元 `{0, o, e}`(`o` = 奇数の類、`e` = 正の偶数の類)。
+`o + o = e`、`o + e = o`、`e + e = e`。 -/
+
+/-- `ℕ` を「0 / 正の奇数 / 正の偶数」で潰したモノイド。 -/
+inductive Par : Type
+  | zero : Par
+  | odd : Par
+  | even : Par
+  deriving DecidableEq, Repr
+
+namespace Par
+
+instance : Fintype Par where
+  elems := {Par.zero, Par.odd, Par.even}
+  complete := by intro x; cases x <;> simp
+
+instance : Zero Par := ⟨Par.zero⟩
+
+/-- `Par` の加法。 -/
+def add : Par → Par → Par
+  | zero, y => y
+  | x, zero => x
+  | odd, odd => even
+  | odd, even => odd
+  | even, odd => odd
+  | even, even => even
+
+instance : Add Par := ⟨Par.add⟩
+
+instance : AddCommMonoid Par where
+  add_assoc := by decide
+  zero_add := by decide
+  add_zero := by decide
+  add_comm := by decide
+  nsmul := nsmulRec
+
+/-- `Par` では `v + w = 0` なら `v = 0`。 -/
+theorem add_eq_zero_left : ∀ v w : Par, v + w = 0 → v = 0 := by decide
+
+end Par
+
+/-- ★`Par` は **sharp** —— `0` 以外に可逆元は無い。 -/
+theorem isSharp_par : IsSharp Par := by
+  rintro a ⟨u, rfl⟩
+  exact Par.add_eq_zero_left _ _ u.val_neg
+
+/-- ★`Par` は **integral でない** —— `o + o = e + e` だが `o ≠ e`。 -/
+theorem not_isIntegralMonoid_par : ¬ IsIntegralMonoid Par := by
+  intro h
+  letI := isCancelAdd_of_isIntegralMonoid Par h
+  have : Par.zero = Par.even :=
+    add_left_cancel (a := Par.odd) (show Par.odd + Par.zero = Par.odd + Par.even from by decide)
+  exact absurd this (by decide)
+
+/-- ★★**負の対照 (2): `integral` も落とせない** —— `Par` は sharp だが integral でなく、
+`o ≤ e`(`o + o = e`)かつ `e ≤ o`(`e + o = o`)なのに `o ≠ e`。
+
+★これで `mle_antisymm` の2つの仮定が**どちらも本質的**であることが確定する。 -/
+theorem not_mle_antisymm_par :
+    IsSharp Par ∧ MLe Par.odd Par.even ∧ MLe Par.even Par.odd ∧ Par.odd ≠ Par.even :=
+  ⟨isSharp_par, ⟨Par.odd, by decide⟩, ⟨Par.odd, by decide⟩, by decide⟩
+
 end ABC3.Found.FrdI
