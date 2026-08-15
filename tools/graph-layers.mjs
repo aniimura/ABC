@@ -243,12 +243,15 @@ const ours = new Map();
   const SRC_RE = /paper\s*:=\s*"([^"]*)"[\s\S]{0,400}?item\s*:=\s*"([^"]*)"/g;
   const EDGE_RE = /\.otherPaper\s+"\[?([A-Za-z]+)\]?"\s+"([^"]*)"/g;
   const ITEM_RE = new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`);
-  const rank = { named: 0, skeleton: 1, landed: 2 };
+  // ★`done` = `Found/` に `.src` がある(その原典項目を**完全に**実装したという主張)。
+  //   `tools/frdi-progress.mjs` の分子と同じ規則である。部分実装には `.src` を付けない。
+  const rank = { named: 0, skeleton: 1, landed: 2, done: 3 };
   const put = (k, kind, file) => { const c = ours.get(k); if (!c || rank[kind] > rank[c.kind]) ours.set(k, { kind, file }); };
   for (const f of walk(LEAN)) {
     const rel = f.slice(ROOT.length + 1).replace(/\\/g, '/'), t = readFileSync(f, 'utf8');
     const landed = /\.inProject|\.inMathlib/.test(t);
-    for (const m of t.matchAll(SRC_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, landed ? 'landed' : 'skeleton', rel); }
+    const inFound = rel.includes('/Found/');   // ★実装が置かれる場所
+    for (const m of t.matchAll(SRC_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, inFound ? 'done' : (landed ? 'landed' : 'skeleton'), rel); }
     for (const m of t.matchAll(EDGE_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, 'named', rel); }
   }
 }
@@ -304,6 +307,7 @@ const B = [...boxes.entries()].map(([id, b]) => ({
   id, layer: b.layer, x: Math.round(b.x), y: Math.round(b.y), w: b.w, h: Math.round(b.h),
   tags: b.tags, n: b.items.length, scc: b.scc ? 1 : 0,
   ours: b.items.filter((k) => ours.has(k)).length,
+  done: b.items.filter((k) => ours.get(k)?.kind === 'done').length,   // ★Lean 形式化が完了した項目数
   landed: b.items.filter((k) => ours.get(k)?.kind === 'landed').length,
   root: b.items.includes(ROOTK) ? 1 : 0,
   items: b.items.slice(0, 400).map((k) => ({ k, p: page.get(k) ?? 0, o: ours.get(k)?.kind ?? null })),

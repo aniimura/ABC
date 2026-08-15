@@ -5,6 +5,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#eef0f3;overflow:hidden;font-family:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;color:#1c1e21}
 canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
+/* ★Lean 形式化が完了した項目のラベル: 薄い灰色の網掛け */
+#detb li.dn{background:repeating-linear-gradient(45deg,#e9ecef 0 5px,#f7f8fa 5px 10px);border-radius:3px;padding:1px 4px;margin:1px -4px;color:#5b6169}
+#detb li.dn b{color:#6b7280!important}
 #sb{position:fixed;top:0;left:0;width:330px;height:100vh;background:#fff;box-shadow:2px 0 14px rgba(0,0,0,.13);z-index:50;display:flex;flex-direction:column;transition:transform .22s}
 #sb.hid{transform:translateX(-330px)}
 #tg{position:fixed;top:10px;left:10px;z-index:60;width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;color:#555;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:left .22s}
@@ -54,6 +57,10 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
         <span style="display:inline-block;width:11px;height:11px;background:#2f6fd0;border-radius:3px;vertical-align:-1px"></span>
         塗り = 我々が触れている割合。<br>
         太い線 = 依存が多い辺。<br>
+        <span style="display:inline-block;width:11px;height:11px;background:#d5d8dd;border:1px solid #9aa0a8;border-radius:3px;vertical-align:-1px"></span>
+        灰色 = <b>Lean 形式化が完了したボックス</b>(中の全項目が `Found/` に実装済み)。<br>
+        <span style="display:inline-block;width:11px;height:11px;background:repeating-linear-gradient(45deg,#e9ecef 0 3px,#f7f8fa 3px 6px);border:1px solid #c8ccd2;border-radius:3px;vertical-align:-1px"></span>
+        網掛け = <b>一部だけ完了</b>。掛かっている幅が完了した割合で、詳細では ■ の付いたラベルがそれ。<br>
         <span style="display:inline-block;width:11px;height:11px;background:#fffdf5;border:2px dashed #c99a2e;border-radius:3px;vertical-align:-1px"></span>
         黄の破線 = <b>語彙(番号を持たない概念)</b>。番号付き項目とは別に拾ったもの。<br><br>
         <b>ボックスをクリックすると:</b><br>
@@ -75,6 +82,9 @@ const PAL=['#2f6fd0','#d0492f','#2f9e6b','#a05fd0','#d09a2f','#2fa8c0','#c02f7a'
 const color=t=>{let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))>>>0;return PAL[h%PAL.length];};
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 let vx=60,vy=40,sc=.5,drag=false,lx=0,ly=0,sel=null,hov=null,fitted=false;
+// ★ドラッグは「押している間だけ」。押し下げからの移動量を測り、動いていたら
+//   直後の click を選択として扱わない(パンのつもりが選択になるのを防ぐ)。
+let dx0=0,dy0=0,moved=false;
 
 // ── 依存のハイライト用: 前向き(これが要るもの=左)と後ろ向き(これを使うもの=右) ──
 const fwd=new Map(), bwd=new Map();
@@ -140,24 +150,32 @@ function draw(){
     const dim=sel!==null&&i!==sel&&!isDep&&!isUse;
     ctx.globalAlpha=dim?.2:1;
     const isC=b.tags[0][0]==='CONCEPT';
-    ctx.fillStyle=isC?'#fffdf5':'#fff';
-    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(b.scc?'#c0392b':(isC?'#c99a2e':'#c8ccd2')));
+    // ★Lean 形式化の状態。`done` は `Found/` に `.src` がある項目数(完全実装の主張)。
+    const nd=b.done||0, allDone=b.n>0&&nd>=b.n, someDone=nd>0&&nd<b.n;
+    ctx.fillStyle=allDone?'#d5d8dd':(isC?'#fffdf5':'#fff');
+    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(allDone?'#9aa0a8':(b.scc?'#c0392b':(isC?'#c99a2e':'#c8ccd2'))));
     ctx.lineWidth=(isDep||isUse)?2.2:(b.scc?2.4:(isC?2:1.1));
     if(isC){ctx.setLineDash([5,3]);}
     ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();ctx.setLineDash([]);
     if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.2:.09;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.globalAlpha=1;}
-    // 触れている割合
-    if(b.ours>0){ctx.fillStyle=c;ctx.globalAlpha=.2;
+    // 触れている割合(完了していないぶん)
+    if(b.ours>0&&!allDone){ctx.fillStyle=c;ctx.globalAlpha=.2;
       ctx.beginPath();ctx.roundRect(b.x,b.y,b.w*Math.min(1,b.ours/b.n),b.h,7);ctx.fill();ctx.globalAlpha=1;}
+    // ★一部だけ形式化が完了している場合: そのぶんを薄い灰色の網掛けで示す
+    if(someDone){ctx.save();ctx.beginPath();
+      ctx.roundRect(b.x,b.y,b.w*(nd/b.n),b.h,7);ctx.clip();
+      ctx.strokeStyle='rgba(120,128,140,.42)';ctx.lineWidth=1;
+      for(let g=-b.h;g<b.w;g+=6){ctx.beginPath();ctx.moveTo(b.x+g,b.y+b.h);ctx.lineTo(b.x+g+b.h,b.y);ctx.stroke();}
+      ctx.restore();}
     // 上端の色帯
-    ctx.fillStyle=c;ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
+    ctx.fillStyle=allDone?'#9aa0a8':c;ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
     if(i===sel||i===hov){ctx.strokeStyle='#111';ctx.lineWidth=2.4;ctx.beginPath();ctx.roundRect(b.x-3,b.y-3,b.w+6,b.h+6,9);ctx.stroke();}
     ctx.fillStyle='#1c1e21';ctx.font='bold 12px -apple-system,Segoe UI,sans-serif';
     const ttl=isC?'語彙(概念)':b.tags.map(([t,n])=>b.scc?`${t}:${n}`:t).join(' ');
     ctx.fillText(ttl.length>21?ttl.slice(0,20)+'…':ttl,b.x+9,b.y+21);
     ctx.font='11px -apple-system,Segoe UI,sans-serif';ctx.fillStyle='#6b7280';
-    ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}`,b.x+9,b.y+36);
+    ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}${nd?`  ■ ${nd}`:''}`,b.x+9,b.y+36);
     if(b.scc){ctx.fillStyle='#c0392b';ctx.fillText('循環(分割不可)',b.x+9,b.y+50);}
     if(b.root){ctx.fillStyle='#a5311f';ctx.font='bold 11px -apple-system,Segoe UI,sans-serif';ctx.fillText('★ Corollary 3.12',b.x+9,b.y+(b.scc?64:50));}
     ctx.globalAlpha=1;
@@ -169,14 +187,19 @@ function pick(mx,my){
   for(let i=B.length-1;i>=0;i--){const b=B[i];if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return i;}
   return null;
 }
-cv.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.classList.add('dragging');});
+cv.addEventListener('mousedown',e=>{drag=true;moved=false;lx=dx0=e.clientX;ly=dy0=e.clientY;cv.classList.add('dragging');});
 addEventListener('mouseup',()=>{drag=false;cv.classList.remove('dragging');});
-cv.addEventListener('mousemove',e=>{if(drag){vx+=e.clientX-lx;vy+=e.clientY-ly;lx=e.clientX;ly=e.clientY;draw();return;}
+// ★ボタンを離さずにカーソルが外へ出た場合も、押している間だけの原則を守る
+addEventListener('blur',()=>{drag=false;cv.classList.remove('dragging');});
+cv.addEventListener('mousemove',e=>{if(drag){if(Math.abs(e.clientX-dx0)+Math.abs(e.clientY-dy0)>4)moved=true;vx+=e.clientX-lx;vy+=e.clientY-ly;lx=e.clientX;ly=e.clientY;draw();return;}
   const h=pick(e.clientX,e.clientY);if(h!==hov){hov=h;cv.style.cursor=h===null?'grab':'pointer';draw();}});
 cv.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.12:1/1.12;
   vx-=(e.clientX-vx)*(f-1);vy-=(e.clientY-vy)*(f-1);sc=Math.max(.08,Math.min(3,sc*f));draw();},{passive:false});
 cv.addEventListener('click',e=>{
-  const h=pick(e.clientX,e.clientY);sel=h;setHighlight(h);
+  if(moved){moved=false;return;}            // ★パンの直後は選択を変えない
+  const p=pick(e.clientX,e.clientY);
+  const h=(p!==null&&p===sel)?null:p;       // ★同じ節点をもう一度押したら解除
+  sel=h;setHighlight(h);
   const d=document.getElementById('det');
   if(h===null){d.style.display='none';draw();return;}
   const b=B[h];
@@ -188,13 +211,13 @@ cv.addEventListener('click',e=>{
     `<h3>${b.tags.map(([t,n])=>`${t}${b.scc?` (${n})`:''}`).join(' + ')}</h3>`+
     `<div class="sub">層 ${b.layer}${b.scc?' ・ <b style="color:#c0392b">循環している塊(分割不可)</b>':''}${b.root?' ・ <b>根を含む</b>':''}</div>`+
     `<div class="row"><span>項目数</span><span><b>${b.n}</b></span></div>`+
-    `<div class="row"><span>我々が触れた</span><span>${b.ours}${b.landed?`(うち着地 ${b.landed})`:''}</span></div>`+
+    `<div class="row"><span>我々が触れた</span><span>${b.ours}${b.landed?`(うち着地 ${b.landed})`:''}</span></div>`+`<div class="row"><span>Lean 形式化が完了</span><span><b>${b.done||0} / ${b.n}</b>${b.n>0&&(b.done||0)>=b.n?' —— このボックスは完了':''}</span></div>`+
     `<hr style="border:0;border-top:1px solid #eee;margin:7px 0">`+
     `<div class="row"><span style="color:${C_DEP}">← これに要る</span><span><b style="color:${C_DEP}">${hlDeps.size} ボックス / ${depN} 項目</b>(直接 ${deps.length})</span></div>`+
     `<div class="row"><span style="color:${C_USE}">→ これを使う</span><span><b style="color:${C_USE}">${hlUsers.size} ボックス / ${useN} 項目</b>(直接 ${used.length})</span></div>`+
     (hlDeps.size?`<div class="row"><span>最も左の層</span><span>層 ${minL}(ここから積み上げる)</span></div>`:
                  `<div class="row"><span>依存</span><span><b style="color:${C_DEP}">無し —— 今すぐ着手できる</b></span></div>`)+
-    `<ul>${b.items.map(it=>`<li>${it.o?`<b style="color:#1e7a52">●</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`).join('')}</ul>`;
+    `<ul>${b.items.map(it=>`<li${it.o==='done'?' class="dn"':''}>${it.o?`<b style="color:${it.o==='done'?'#6b7280':'#1e7a52'}">${it.o==='done'?'■':'●'}</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`).join('')}</ul>`;
   d.style.display='block';draw();
 });
 document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').style.display='none';sel=null;setHighlight(null);draw();};
