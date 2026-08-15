@@ -1838,4 +1838,101 @@ Frobenius 型射に沿っては片側の `∃!` しかない。**
 最も強い実例である** —— **原文は同じ論文の別の場所で、必要な仮定を明示している。**
 -/
 
+/-! ### ★★★選択肢 (β) が出た —— **探していた道具は最初から手元にあった**
+
+★我々は「`ζ n` で**左から**消せること(mono)」を探し、`Definition 1.3` が
+pre-step にしか mono を与えないことで詰まっていた。★**必要だったのは 2 つとも別物だった。**
+
+★★**全射性**: `α ∈ 𝒪^▷(A)` に対し `IsPerfectObj` の (b) が pre-step `β` を与え
+`ζ n ≫ α = β ≫ ζ n`。**Frobenius-normalized** から `ζ n ≫ β^n = β ≫ ζ n = ζ n ≫ α`。
+★★**`𝒞` は totally epimorphic なので `ζ n` は epi** —— `Epi f` は
+**`f ≫ x = f ≫ y ⟹ x = y`**、すなわち**左に置かれた `f` を消す**。
+★**これがちょうど要る向きだった** ⟹ **`β^n = α`**。
+
+★★**単射性**: `β₁^n = β₂^n = α` なら、Frobenius-normalized から
+`ζ n ≫ α = βᵢ ≫ ζ n`(`i = 1, 2`)。
+★★**(b) の `∃!` が「`ψ′ = α` に対する `ψ` は一意」と言っている** ⟹ **`β₁ = β₂`**。
+
+★★★**我々は `faithfulUpToUnits` を経由して単元の吸収に苦しんでいたが、
+`totEpiC` と (b) の `∃!` だけで足りた。**
+★**「読み落とし」(6 種類目のギャップ)の 3 例目である。**
+★★**3 回とも、必要なものは既に手元にあった。**
+(1: §0 の torsion-free、2: `Gp M` の群構造の import、3: これ)
+
+★**そして `𝒪^×(A)` の可換性は要らなかった** ——
+原典が `Frobenius-compact` で可換性を仮定しているのは**別の目的**である。
+★**我々が「穴」と呼んでいたものは、遠回りの経路にしか存在しなかった。**
+-/
+
+include P in
+/-- ★★★**`Proposition 1.10, (iii)` の moreover(`𝒪^▷(A)` の側)完成** ——
+`𝒪^▷(A)` では `n` 乗根が**一意に存在する**。
+
+★**全射性**は `𝒞` の totally epimorphic 性(epi)から、
+★**単射性**は `IsPerfectObj` の (b) の `∃!` から。
+★**`𝒪^×(A)` の可換性は要らない。** -/
+theorem prop_1_10_iii_otri_perfect {A : C}
+    (hperf : IsPerfectObj P A) (hfn : IsFrobeniusNormalized P A)
+    (n : ℕ+) (ζn : End A) (hζb : IsBaseIdentity P ζn) (hζf : IsFrobeniusType P ζn)
+    (hζd : P.degFr ζn = n) (α : End A) (hα : α ∈ OTri P A) :
+    ∃! β : End A, β ∈ OTri P A ∧ (β ^ (n : ℕ) : End A) = α := by
+  haveI : Epi (ζn : A ⟶ A) := P.totEpiC _ _ _
+  have hαs : IsPreStep P (α : A ⟶ A) := by
+    refine ⟨hα.2, ?_⟩
+    show IsIso (P.Base (α : A ⟶ A))
+    rw [show P.Base (α : A ⟶ A) = P.Base (𝟙 A) from hα.1, P.Base_id]
+    infer_instance
+  have hAA : BaseIsomorphic P A A := ⟨Iso.refl _⟩
+  obtain ⟨β, ⟨hβs, hsq⟩, huniq⟩ :=
+    (hperf n).2 A A A A ζn ζn hζf hζd hζf hζd hAA hAA (α : End A) hαs
+  -- `β` は base-identity
+  have hβb : IsBaseIdentity P β := by
+    show P.Base β = P.Base (𝟙 A)
+    have h := congrArg P.Base hsq
+    rw [P.Base_comp, P.Base_comp, show P.Base (α : A ⟶ A) = P.Base (𝟙 A) from hα.1,
+      P.Base_id, Category.comp_id, show P.Base ζn = P.Base (𝟙 A) from hζb,
+      P.Base_id, Category.comp_id] at h
+    rw [P.Base_id]
+    simpa using h.symm
+  have hβm : β ∈ OTri P A := ⟨hβb, hβs.1⟩
+  -- Frobenius-normalized で `ζ n ≫ β^n = β ≫ ζ n`
+  have hfnb := hfn ζn hζb β hβm
+  rw [hζd] at hfnb
+  refine ⟨β, ⟨hβm, ?_⟩, ?_⟩
+  · -- 全射性: `ζ n` が epi
+    refine (cancel_epi (ζn : A ⟶ A)).mp ?_
+    rw [hfnb, hsq]
+  · -- 単射性: (b) の `∃!`
+    rintro γ ⟨hγm, hγp⟩
+    refine huniq γ ⟨⟨hγm.2, ?_⟩, ?_⟩
+    · show IsIso (P.Base (γ : A ⟶ A))
+      rw [show P.Base (γ : A ⟶ A) = P.Base (𝟙 A) from hγm.1, P.Base_id]
+      infer_instance
+    · have hfng := hfn ζn hζb γ hγm
+      rw [hζd, hγp] at hfng
+      exact hfng
+
+include P in
+/-- ★★★**`Proposition 1.10, (iii)` の moreover 完成** —— `𝒪^×(A)` も perfect。
+
+★`𝒪^▷(A)` の結果に、★**「`β^n` が同型なら `β` も同型」**(`isIso_of_pow_isIso`)を
+足すだけ。★**単元の側は `𝒪^▷` の側から自動で従う。** -/
+theorem prop_1_10_iii_otimes_perfect (F : FrobenioidCore P) {A : C}
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hperf : IsPerfectObj P A) (hfn : IsFrobeniusNormalized P A)
+    (n : ℕ+) (ζn : End A) (hζb : IsBaseIdentity P ζn) (hζf : IsFrobeniusType P ζn)
+    (hζd : P.degFr ζn = n) (α : End A) (hα : α ∈ OTimes P A) :
+    ∃! β : End A, β ∈ OTimes P A ∧ (β ^ (n : ℕ) : End A) = α := by
+  obtain ⟨β, ⟨hβm, hβp⟩, huniq⟩ :=
+    prop_1_10_iii_otri_perfect P hperf hfn n ζn hζb hζf hζd α hα.1
+  -- `β^n = α` は単元なので `β` も単元
+  haveI hpow : IsIso ((β ^ (n : ℕ) : End A) : A ⟶ A) := by
+    rw [hβp]
+    exact (CategoryTheory.isUnit_iff_isIso (α : End A)).mp hα.2
+  have hβiso : IsIso ((β : End A) : A ⟶ A) :=
+    isIso_of_pow_isIso P F hiso β hβm.1 hβm.2 n.pos hpow
+  refine ⟨β, ⟨⟨hβm, (CategoryTheory.isUnit_iff_isIso (β : End A)).mpr hβiso⟩, hβp⟩, ?_⟩
+  rintro γ ⟨hγm, hγp⟩
+  exact huniq γ ⟨hγm.1, hγp⟩
+
 end ABC3.Found.FrdI
