@@ -462,6 +462,97 @@ theorem cfp_lbInvertible_iff {X Y : CfpCat P G} (φ : X ⟶ Y) :
     IsLBInvertible (cfpPreFrobenioid P G hG hD') φ ↔ IsLBInvertible P (CfpCat.fst φ) :=
   and_congr (cfp_coAngular_iff P G hG hD' φ) (cfp_isometric_iff P G hG hD' φ)
 
+/-! ### ★★**分類表** —— 「型は等しいが字面が違う」問題の症状・原因・対処
+
+★**個数ではなく「症状が分岐したこと」が表を作る合図**だった。
+同じ `def` 由来でも対処が違うと分かった時点で分ける。
+★**切り替え点(新しいファイル/section/新しい種類の補題)でこの表を引く。**
+
+| # | 症状(出るエラー) | 原因 | 対処 |
+|---|---|---|---|
+| 1 | `rw` が「目標に見えているのに見つからない」 | 同じ型に2つの綴り(`def` が展開されない) | **`rw` を使わず `Eq.trans`/`congrArg` で項として繋ぐ** |
+| 2 | `inv` を書くと `motive is not type correct` | `InducedCategory.Hom` に包まれて型が簡約されない | **`inv` を書かず `IsIso.out` から逆射を取る**(例外: 主張自体に `inv` が現れるときは `IsIso.eq_inv_comp` にインスタンスを明示) |
+| 3 | 部分型 `{p : _ × _ // _}` の成分の型が食い違う | 成分の型が別綴りで書かれている | **`obtain ⟨h', rfl⟩ : ∃ h' : 正しい型, h' = h` で綴りの決まった変数を先に導入** |
+| 4 | `(f …).obj.right` が簡約されず `rw`/合成が落ちる | 補助 `def` の射影は簡約されない | **補助 `def` を作らず構造リテラルを直接書く** |
+| 5 | `failed to synthesize instance` (文脈に `haveI` があるのに) | インスタンス型が `def`(例: `cfpProp`)で書かれ展開されない | **`have h : IsIso … := inferInstance` を先に置き、その項を明示的に渡す** |
+| 6 | `refine h _ _ …` の穴が埋まらない | 中間対象がメタ変数のまま残る | **対象を明示的に書く**(`_` に頼らない) |
+| 7 | `include` し忘れで `Unknown identifier` | 主張に現れない変数は自動包含されない | **最初に `include F in`** |
+-/
+
+/-! ## ★(iv) —— base-isomorphism についての3クラスと `𝒪^▷`
+
+原文 (FrdI p.28):
+> tively, pre-step; step) if and only if its projection to C is. Moreover, the projection
+
+★★**基準の4例目**: (iv) が「**base-isomorphism について**」と限定して述べられているのは、
+**その仮定が鎖そのものを与える**からである。仮定を外すと
+「`fst f` が base-iso でも `snd f` が同型とは限らない」(`G` は同型を反映しない)ので、
+**⟸ 向きが壊れる**。★**原文の限定は必要であり、我々の基準がその理由を説明する。** -/
+
+/-- **(iv)** —— base-isomorphism については **pre-step** が射影で決まる。 -/
+theorem cfp_preStep_iff {X Y : CfpCat P G} (f : X ⟶ Y)
+    (hb : IsBaseIsomorphism (cfpPreFrobenioid P G hG hD') f) :
+    IsPreStep (cfpPreFrobenioid P G hG hD') f ↔ IsPreStep P (CfpCat.fst f) :=
+  ⟨fun h => ⟨h.1, cfp_baseIso_fst P G hG hD' f hb⟩, fun h => ⟨h.1, hb⟩⟩
+
+/-- **(iv)** —— base-isomorphism については **Frobenius 型**が射影で決まる。 -/
+theorem cfp_frobType_iff {X Y : CfpCat P G} (f : X ⟶ Y)
+    (hb : IsBaseIsomorphism (cfpPreFrobenioid P G hG hD') f) :
+    IsFrobeniusType (cfpPreFrobenioid P G hG hD') f ↔ IsFrobeniusType P (CfpCat.fst f) :=
+  ⟨fun h => ⟨(cfp_lbInvertible_iff P G hG hD' f).mp h.1, cfp_baseIso_fst P G hG hD' f hb⟩,
+   fun h => ⟨(cfp_lbInvertible_iff P G hG hD' f).mpr h.1, hb⟩⟩
+
+/-- **(iv)** —— base-isomorphism については **step** が射影で決まる。
+
+★同型性の両向きは `cfp_isIso_of` / `cfp_isIso_fst`。 -/
+theorem cfp_step_iff {X Y : CfpCat P G} (f : X ⟶ Y)
+    (hb : IsBaseIsomorphism (cfpPreFrobenioid P G hG hD') f) :
+    IsStep (cfpPreFrobenioid P G hG hD') f ↔ IsStep P (CfpCat.fst f) := by
+  constructor
+  · rintro ⟨hs, hni⟩
+    exact ⟨(cfp_preStep_iff P G hG hD' f hb).mp hs,
+      fun hi => hni (cfp_isIso_of P G f hi hb)⟩
+  · rintro ⟨hs, hni⟩
+    exact ⟨(cfp_preStep_iff P G hG hD' f hb).mpr hs,
+      fun hi => hni (cfp_isIso_fst P G f hi)⟩
+
+/-- ★`𝒞'` の base-identity 自己射は、`𝒟'` 成分が `𝟙` であること。 -/
+theorem cfp_baseIdentity_iff {A : CfpCat P G} (e : A ⟶ A) :
+    IsBaseIdentity (cfpPreFrobenioid P G hG hD') e ↔ CfpCat.snd e = 𝟙 A.obj.right :=
+  Iff.rfl
+
+/-- ★その `𝒞` 成分は `𝒞` の base-identity。 -/
+theorem cfp_baseIdentity_fst {A : CfpCat P G} (e : A ⟶ A)
+    (h : IsBaseIdentity (cfpPreFrobenioid P G hG hD') e) :
+    IsBaseIdentity P (CfpCat.fst e) := by
+  haveI hA : IsIso A.obj.hom := A.property
+  have hsq := cfp_square e
+  rw [(cfp_baseIdentity_iff P G hG hD' e).mp h, G.map_id, Category.comp_id] at hsq
+  show P.proj.map (CfpCat.fst e) = P.proj.map (𝟙 A.obj.left)
+  rw [P.proj.map_id]
+  exact (cancel_mono A.obj.hom).mp (hsq.trans (Category.id_comp _).symm)
+
+/-- **(iv)** —— 射影は **`𝒪^▷` のモノイド同型**を誘導する。
+
+★原文の当該行(`functor C′ →C determines a bijection of monoids O▷(A′)`)は
+**`′`(prime) と `▷` を含むため逐語照合できない**。書き換えず、照合できない事実として記す。
+
+★★**基準の5例目**: `base-identity` の定義が **`𝒟'` 成分を `𝟙` に固定する**ので、
+`𝒪^▷` の元は `𝒞` 成分だけで決まる。**鎖どころか、`𝒟'` 成分が一意に定まる。** -/
+def cfpOTriEquiv (A : CfpCat P G) :
+    OTri (cfpPreFrobenioid P G hG hD') A ≃* OTri P A.obj.left where
+  toFun e := ⟨CfpCat.fst (e : End A), cfp_baseIdentity_fst P G hG hD' _ e.2.1, e.2.2⟩
+  invFun e :=
+    ⟨InducedCategory.homMk ⟨(e : End A.obj.left), 𝟙 _, by
+      have h1 : P.proj.map (e : End A.obj.left) = 𝟙 _ := e.2.1.trans (P.Base_id _)
+      rw [h1, G.map_id, Category.comp_id, Category.id_comp]⟩,
+     by show CfpCat.snd _ = 𝟙 _; rfl, e.2.2⟩
+  left_inv e := by
+    refine Subtype.ext (InducedCategory.hom_ext (CommaMorphism.ext rfl ?_))
+    exact ((cfp_baseIdentity_iff P G hG hD' (e : End A)).mp e.2.1).symm
+  right_inv e := Subtype.ext rfl
+  map_mul' x y := rfl
+
 end Dict
 
 end ABC3.Found.FrdI

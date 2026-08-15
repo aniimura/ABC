@@ -440,6 +440,19 @@ def IsUnitTrivial (A : C) : Prop := OTimes P A = ⊥
 def IsIsotropic (A : C) : Prop :=
   ∀ (Dd : C) (φ : A ⟶ Dd), IsIsometric P φ → IsPreStep P φ → IsIso φ
 
+/-- **(iv)** `Frobenius-isotropic object` —— isotropic な対象への Frobenius 型射がある。
+
+原文 (FrdI p.23):
+> A Frobenius-isotropic object of C is defined to be an object C such that there exists
+
+原文 (FrdI p.23):
+> a morphism of Frobenius type C →D such that D is isotropic.
+
+★`Proposition 1.6, (v)` が 11 個の type を挙げるうち、これだけ未写しだった
+(2026-08-15 に追加)。 -/
+def IsFrobeniusIsotropic (A : C) : Prop :=
+  ∃ (Dd : C) (φ : A ⟶ Dd), IsFrobeniusType P φ ∧ IsIsotropic P Dd
+
 /-- **(iv)** `isotropic hull` —— isometric pre-step であって、終域が isotropic で、
 isotropic な対象への射を**一意に**通す(普遍性)。 -/
 def IsIsotropicHull {A B : C} (φ : A ⟶ B) : Prop :=
@@ -641,6 +654,11 @@ def IsPrimeFrobenius.src : ABC3.Meta.Source :=
 
 def IsFrobeniusAmple.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — Frobenius-ample object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsFrobeniusIsotropic.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-isotropic object",
     sectionId := "frdi-def-1-2-iv" }
 
 def IsFrobeniusTrivial.src : ABC3.Meta.Source :=
