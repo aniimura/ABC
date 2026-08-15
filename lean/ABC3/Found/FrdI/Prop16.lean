@@ -1039,6 +1039,56 @@ theorem cfp_isotropicHullExists (A : CfpCat P G) :
     exact InducedCategory.hom_ext
       (CommaMorphism.ext (hβ₀u _ hf) (hs.trans (Category.id_comp _)).symm)
 
+include F in
+/-- ★`𝒪^▷` の元は `𝒞'` へそのまま持ち上がる(★(b) `𝒟'` 成分固定型)。 -/
+theorem cfp_otri_lift (A : CfpCat P G) (x : End A.obj.left) (hx : x ∈ OTri P A.obj.left) :
+    ∃ y : End A, y ∈ OTri (cfpPreFrobenioid P G hG hD') A ∧ CfpCat.fst y = x := by
+  haveI hA : IsIso A.obj.hom := A.property
+  have hsq : P.proj.map (x : A.obj.left ⟶ A.obj.left) ≫ A.obj.hom
+      = A.obj.hom ≫ G.map (𝟙 A.obj.right) := by
+    rw [show P.proj.map (x : A.obj.left ⟶ A.obj.left) = 𝟙 _ from hx.1.trans (P.Base_id _),
+      G.map_id, Category.comp_id, Category.id_comp]
+  exact ⟨InducedCategory.homMk ⟨(x : A.obj.left ⟶ A.obj.left), 𝟙 _, hsq⟩,
+    ⟨by show CfpCat.snd _ = 𝟙 _; rfl, hx.2⟩, rfl⟩
+
+include F in
+/-- **(iii)(c)** 順方向の移送。
+
+★`𝒪^▷` の元は base-identity なので **`𝒟'` 成分が `𝟙` に固定**され、
+`𝒞` の `∃!` がそのまま上がる。 -/
+theorem cfp_otriFwd {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (hca : IsCoAngular (cfpPreFrobenioid P G hG hD') φ)
+    (hps : IsPreStep (cfpPreFrobenioid P G hG hD') φ)
+    (α : End X) (hα : α ∈ OTri (cfpPreFrobenioid P G hG hD') X) :
+    ∃! β : End Y, β ∈ OTri (cfpPreFrobenioid P G hG hD') Y ∧
+      (φ ≫ β : X ⟶ Y) = (α : X ⟶ X) ≫ φ := by
+  obtain ⟨β₀, ⟨hβ₀m, hβ₀e⟩, hβ₀u⟩ := F.otriFwd (CfpCat.fst φ)
+    ((cfp_coAngular_iff P G hG hD' φ).mp hca)
+    ((cfp_preStep_iff P G hG hD' φ hps.2).mp hps)
+    (CfpCat.fst (α : End X))
+    ⟨cfp_baseIdentity_fst P G hG hD' _ hα.1, hα.2⟩
+  obtain ⟨β, hβm, hβf⟩ := cfp_otri_lift P G hG hD' F Y β₀ hβ₀m
+  have hαs : CfpCat.snd (α : End X) = 𝟙 _ := hα.1
+  have hβs : CfpCat.snd (β : End Y) = 𝟙 _ := hβm.1
+  refine ⟨β, ⟨hβm, ?_⟩, ?_⟩
+  · refine InducedCategory.hom_ext (CommaMorphism.ext ?_ ?_)
+    · show CfpCat.fst φ ≫ CfpCat.fst (β : End Y) = CfpCat.fst (α : End X) ≫ CfpCat.fst φ
+      rw [hβf]
+      exact hβ₀e
+    · show CfpCat.snd φ ≫ CfpCat.snd (β : End Y) = CfpCat.snd (α : End X) ≫ CfpCat.snd φ
+      rw [hβs, hαs, Category.comp_id, Category.id_comp]
+  · rintro γ ⟨hγm, hγe⟩
+    have hγf : CfpCat.fst φ ≫ CfpCat.fst (γ : End Y)
+        = CfpCat.fst (α : End X) ≫ CfpCat.fst φ :=
+      congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hγe
+    refine InducedCategory.hom_ext (CommaMorphism.ext ?_ ?_)
+    · show CfpCat.fst (γ : End Y) = CfpCat.fst (β : End Y)
+      rw [hβf]
+      exact hβ₀u _ ⟨⟨cfp_baseIdentity_fst P G hG hD' _ hγm.1, hγm.2⟩, hγf⟩
+    · show CfpCat.snd (γ : End Y) = CfpCat.snd (β : End Y)
+      rw [hβs]
+      exact hγm.1
+
 end Core
 
 end Dict
