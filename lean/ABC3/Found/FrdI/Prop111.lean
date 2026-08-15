@@ -765,4 +765,44 @@ theorem prop_1_11_vii_coaPre (G : Frobenioid P) {B Cc : C}
   obtain ⟨α, _, _, hα⟩ := coaPre_factor_of_mle P G φ hφc hφs δ hδc hδs hleφ
   exact ⟨Dd, γ, α, hγc, hγs, by rw [hγ, hα]⟩
 
+/-! ## ★(v) —— 圏同値の関手性
+
+原文 (FrdI p.37):
+> (v) The equivalences of categories of Definition 1.3, (iii), (d), are “functorial”
+
+原文 (FrdI p.37):
+> if and only if ψ is.
+
+★**原文の証明**(p.38、目視):
+> the uniqueness of ψ follows from the fact that **β is a monomorphism**
+> [cf. Definition 1.3, (v), (a)] in the non-resp'd case and from the
+> **total epimorphicity of C applied to α** in the resp'd case.
+
+★★**2 つの向きで一意性の理由が違う** —— non-resp'd は **`β` が mono**、
+resp'd は **`α` が epi**。
+★**`Proposition 1.11, (iv)` でも同じことが起きた**(単射性は epi、一意性は mono)。
+★★**この命題は「向き」に一貫して自覚的である。**
+-/
+
+include P in
+/-- ★**(v) の一意性(non-resp'd)** —— `β` が mono であることから。 -/
+theorem prop_1_11_v_unique_nonresp (F : FrobenioidCore P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (α : Cc ⟶ A) (β : Dd ⟶ B) (hβs : IsPreStep P β)
+    {ψ₁ ψ₂ : Cc ⟶ Dd}
+    (h₁ : ψ₁ ≫ β = α ≫ φ) (h₂ : ψ₂ ≫ β = α ≫ φ) : ψ₁ = ψ₂ := by
+  haveI : Mono β := F.preStepMono β hβs
+  exact (cancel_mono β).mp (h₁.trans h₂.symm)
+
+include P in
+/-- ★**(v) の一意性(resp'd)** —— `𝒞` の totally epimorphicity から。
+
+★★**non-resp'd とは理由が違う** —— あちらは mono、こちらは epi。
+★**原文はこの違いを明示している。** -/
+theorem prop_1_11_v_unique_resp {A B Cc Dd : C}
+    (φ : A ⟶ B) (α : A ⟶ Cc) (β : B ⟶ Dd)
+    {ψ₁ ψ₂ : Cc ⟶ Dd}
+    (h₁ : α ≫ ψ₁ = φ ≫ β) (h₂ : α ≫ ψ₂ = φ ≫ β) : ψ₁ = ψ₂ := by
+  haveI : Epi α := P.totEpiC _ _ _
+  exact (cancel_epi α).mp (h₁.trans h₂.symm)
+
 end ABC3.Found.FrdI
