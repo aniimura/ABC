@@ -907,4 +907,45 @@ theorem pnat_irreducible_iff_prime (n : ℕ+) :
       · exact Or.inl (PNat.coe_injective (by simpa using Nat.isUnit_iff.mp h))
       · exact Or.inr (PNat.coe_injective (by simpa using Nat.isUnit_iff.mp h))
 
+/-! ### ★(iv) の片向き —— irreducible ⟹ prime-Frobenius
+
+★**射の分解が次数の分解に写る**のが要点:
+`φ = φ₁ ≫ (φ₂ ≫ δ)` の形を `frobDegSurj` ＋ `frobDegUniq` で作り、
+既約性から片方が同型と分かると、★**その次数が 1 になる**。
+つまり **`degFr φ = a * b` ⟹ `a = 1` または `b = 1`**。
+そこに `pnat_irreducible_iff_prime` を当てて素数性を得る。
+
+★**`isotropic` の仮定が効く場所**: 「次数 1 ⟹ 同型」に `Proposition 1.4, (iii)` を
+使うには LB-invertible が要り、その co-angular の部分を
+**`Proposition 1.4, (i)`(isotropic なら全射が co-angular)**が供給する。
+★**原文が `[cf. §0]` としか書かない (iv) の中で、isotropic はここに効いている。**
+-/
+
+include P in
+/-- **(iv) の片向き** —— isotropic な域を持つ Frobenius 型射が irreducible なら
+prime-Frobenius。 -/
+theorem prop_1_10_iv_mpr (F : FrobenioidCore P) {A B : C}
+    (hiso : ∀ (X : C), (A ⟶ X) → IsIsotropic P X)
+    (φ : A ⟶ B) (hφ : IsFrobeniusType P φ) (hirr : IsIrreducibleMor φ) :
+    IsPrimeFrobenius P φ := by
+  refine ⟨hφ, ?_⟩
+  rw [← pnat_irreducible_iff_prime]
+  refine ⟨fun h => hirr.1 (prop_1_4_iii P F φ hφ.1 ⟨h, hφ.2⟩), fun a b hab => ?_⟩
+  obtain ⟨Z, φ₁, hφ₁, hd₁⟩ := F.frobDegSurj A a
+  obtain ⟨W, φ₂, hφ₂, hd₂⟩ := F.frobDegSurj Z b
+  have hcomp : IsFrobeniusType P (φ₁ ≫ φ₂) := IsFrobeniusType.comp P F hφ₁ hφ₂
+  have hdc : P.degFr (φ₁ ≫ φ₂) = P.degFr φ := by
+    rw [P.degFr_comp, hd₁, hd₂, hab, mul_comm]
+  obtain ⟨δ, hδiso, hδ⟩ := F.frobDegUniq A W B (φ₁ ≫ φ₂) φ hcomp hφ hdc
+  haveI : IsIso δ := hδiso
+  have hfac : φ = φ₁ ≫ (φ₂ ≫ δ) := by rw [← hδ, Category.assoc]
+  rcases hirr.2 Z φ₁ (φ₂ ≫ δ) hfac with h | h
+  · haveI := h
+    exact Or.inl (by rw [← hd₁]; exact (degFr_of_isIso P φ₁).symm ▸ rfl)
+  · haveI := h
+    refine Or.inr ?_
+    have hd := degFr_of_isIso P (φ₂ ≫ δ)
+    rw [P.degFr_comp, degFr_of_isIso P δ, one_mul, hd₂] at hd
+    exact hd
+
 end ABC3.Found.FrdI
