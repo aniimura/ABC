@@ -223,6 +223,62 @@ def IsDivisorialOn : Prop := ∀ A : D, IsDivisorial (Φ.val A)
 
 end MonoidOn
 
+/-! ### ★`Φ^char` —— [FrdI] Proposition 1.5 が使うモノイド
+
+原文 (FrdI p.27):
+> (i) FΦ, equipped with the natural functor FΦ →FΦchar, is a Frobenioid of Aut-
+
+★`Proposition 1.5` は `Φ` が **pre-divisorial**(sharp とは限らない)のとき、
+pre-Frobenioid 構造を **`Φ^char` 経由**で入れる。`PreFrobenioid` は `Φ` が
+**divisorial**(= pre-divisorial + sharp)を要求するので、
+`Φ^char` が無条件に sharp であること(`isSharp_mChar`)が鍵である。
+-/
+
+namespace MonoidOn
+
+/-- `Φ^char` の台となる反変関手。 -/
+def charFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMonCat.{w} where
+  obj X := AddCommMonCat.of (MChar (Φ.val X.unop))
+  map {X Y} f := AddCommMonCat.ofHom (charMap (Φ.map f.unop))
+  map_id X := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    obtain ⟨a, rfl⟩ := toChar_surjective (Φ.val X.unop) x
+    show charMap (Φ.map (𝟙 X.unop)) (toChar a) = _
+    rw [charMap_toChar, Φ.map_id]
+    rfl
+  map_comp {X Y Z} f g := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    obtain ⟨a, rfl⟩ := toChar_surjective (Φ.val X.unop) x
+    show charMap (Φ.map (g.unop ≫ f.unop)) (toChar a) = _
+    rw [charMap_toChar, Φ.map_comp]
+    show _ = charMap (Φ.map g.unop) (charMap (Φ.map f.unop) (toChar a))
+    rw [charMap_toChar, charMap_toChar]
+
+/-- ★**`Φ^char`** —— `Φ` の characteristic を取った `𝒟` 上のモノイド。
+
+★(a) は `Φ.charInj` の**第2成分そのもの**(もう一段は `isSharp_mChar` で出る)、
+(b) は `Φ.fsmIso` から `charMap` の全単射性で出る。 -/
+def charOn (Φ : MonoidOn.{v, u, w} D) : MonoidOn.{v, u, w} D where
+  functor := Φ.charFunctor
+  charInj α := by
+    show IsCharacteristicallyInjective (charMap (Φ.map α))
+    exact isCharacteristicallyInjective_of_injective_mChar (Φ.charInj α).2
+  fsmIso α hα := by
+    show Function.Bijective (charMap (Φ.map α))
+    exact ⟨(Φ.charInj α).2, charMap_surjective (Φ.fsmIso α hα).2⟩
+
+@[simp] theorem charOn_val (Φ : MonoidOn.{v, u, w} D) (A : D) :
+    (Φ.charOn).val A = MChar (Φ.val A) := rfl
+
+/-- ★**`Φ` が pre-divisorial なら `Φ^char` は divisorial** —— `isDivisorial_mChar` の系。
+
+★これが `PreFrobenioid` の `divisorial` フィールドを埋める。 -/
+theorem charOn_isDivisorialOn (Φ : MonoidOn.{v, u, w} D)
+    (h : ∀ A : D, IsPreDivisorial (Φ.val A)) : (Φ.charOn).IsDivisorialOn :=
+  fun A => isDivisorial_mChar (Φ.val A) (h A)
+
+end MonoidOn
+
 /-! ### ★`𝔽_Φ` —— [FrdI] Definition 1.1, (iii) の一般形
 
 原文 (FrdI p.20):
