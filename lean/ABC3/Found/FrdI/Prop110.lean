@@ -788,4 +788,70 @@ theorem prop_1_10_v (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B) :
   ⟨fun h => isPrimeFrobComposite_of_isFrobeniusType P F _ φ h rfl,
    isFrobeniusType_of_isPrimeFrobComposite P F⟩
 
+/-! ## ★(vi) —— `𝒞^istr` と group-like 対象
+
+原文 (FrdI p.35):
+> (vi) The Frobenioid Cistr is of sub-quasi-Frobenius-trivial type. Moreover,
+
+原文 (FrdI p.35):
+> every group-like object A ∈Ob(Cistr) is Frobenius-trivial.
+
+★**後半(group-like ⟹ Frobenius-trivial)の証明**(p.36、目視):
+> If, moreover, A is group-like, then [since Cistr is a Frobenioid — cf. Proposition 1.9, (v)]
+> it follows from Definition 1.3, (i), (a), (b), that there exist [co-angular — cf.
+> Proposition 1.4, (i)] pre-steps A′ →A, A′ →A′′, where A′′ is Frobenius-trivial.
+> But by Proposition 1.4, (iii), these pre-steps are isomorphisms, so A is Frobenius-trivial.
+
+★★**「これらの pre-step が同型である」に `Proposition 1.4, (iii)` を使うには
+LB-invertible が要る。** 原文は `[co-angular — cf. Proposition 1.4, (i)]` で
+**co-angular のほうだけ**括弧に入れており、★**isometric のほうを書いていない。**
+
+★**isometric はどこから来るか**: `A` が group-like で、`Φ` が **divisorial(＝ sharp を含む)**
+なら、★**`Φ(A)` のすべての元が 0** である。よって `A` から出る任意の射の `Div` は 0、
+すなわち **isometric**。
+
+★★**これは (i) の `Div` の公式・(ii)・(iii) で見つけた「原文が isometry を書かない」
+というパターンの 4 例目**である。★**同じ省略が 4 箇所で起きている。**
+-/
+
+/-- ★**group-like ＋ sharp ⟹ モノイドは零**。
+
+★`IsGroupLike M ↔ ∀ a, IsAddUnit a`(`isGroupLike_iff`)と
+`IsSharp M := ∀ a, IsAddUnit a → a = 0` を合わせるだけ。
+★**しかしこの一行が (vi) の後半の要点である。** -/
+theorem eq_zero_of_isGroupLike_of_isSharp {M : Type w} [AddCommMonoid M]
+    (hg : IsGroupLike M) (hs : IsSharp M) (a : M) : a = 0 :=
+  hs a ((isGroupLike_iff M).mp hg a)
+
+include P in
+/-- ★★**group-like 対象から出る射はすべて isometric**。
+
+★**原文が書いていない一歩**(上の docstring を見よ)。
+`Φ` が divisorial であることの **sharp の部分**がここで効く ——
+★**divisorial の定義に sharp が入っている理由の 1 つがこれである。** -/
+theorem isIsometric_of_isGroupLikeObj {A B : C} (hA : IsGroupLikeObj P A)
+    (φ : A ⟶ B) : IsIsometric P φ :=
+  eq_zero_of_isGroupLike_of_isSharp hA (P.divisorial _).2 (P.Div φ)
+
+include P in
+/-- ★**(vi) の後半の要点** —— isotropic かつ group-like な対象から出る
+pre-step は同型。
+
+★原文の「by Proposition 1.4, (iii), these pre-steps are isomorphisms」の中身。
+★**co-angular は isotropic から(`Proposition 1.4, (i)`)、
+isometric は group-like から(上の補題)。原文は後者を書いていない。** -/
+theorem isIso_of_preStep_of_isGroupLikeObj (F : FrobenioidCore P) {A B : C}
+    (hiso : ∀ (X : C), (A ⟶ X) → IsIsotropic P X) (hA : IsGroupLikeObj P A)
+    (φ : A ⟶ B) (hφ : IsPreStep P φ) : IsIso φ :=
+  prop_1_4_iii P F φ ⟨prop_1_4_i P φ hiso, isIsometric_of_isGroupLikeObj P hA φ⟩ hφ
+
+include P in
+/-- ★**`𝒞` が isotropic 型のときの形**(`𝒞^istr` で使うのはこちら)。
+
+★`Proposition 1.9` の `𝒞^istr` は全対象が isotropic なので、仮定はそこから供給される。 -/
+theorem isIso_of_preStep_of_isGroupLikeObj' (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (hA : IsGroupLikeObj P A)
+    (φ : A ⟶ B) (hφ : IsPreStep P φ) : IsIso φ :=
+  isIso_of_preStep_of_isGroupLikeObj P F (fun X _ => hiso X) hA φ hφ
+
 end ABC3.Found.FrdI
