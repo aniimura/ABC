@@ -251,4 +251,56 @@ theorem prop_1_11_iv_exists (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
   refine ⟨δ, hδm, ?_⟩
   rw [hfac, Category.assoc, hγXsq, ← Category.assoc, hδsq, Category.assoc]
 
+/-! ## ★(i) —— `𝒞^pl-bk → 𝒟` の full 性
+
+原文 (FrdI p.36):
+> (i) Suppose further that C is of Aut-ample and base-trivial type. Then the
+
+★**原文の証明**(p.37、目視)は 4 手:
+1. `Definition 1.3, (i), (c)` の圏同値の**本質的全射性**で、
+   `φ_𝒟` に対応する pull-back 射 `ψ : C ⟶ B` を得る(`C_𝒟 ≅ A_𝒟`)
+2. ★**base-trivial 型**なので `C ≅ A`、よって `A = C` としてよい
+3. すると `φ_𝒟 = ψ_𝒟 ∘ δ`(`δ ∈ Aut_𝒟(A_𝒟)`)と書ける
+4. ★**Aut-ample 型**なので `δ` が `γ ∈ Aut_𝒞(A)` に持ち上がり、`ψ ∘ γ` が求めるもの
+
+★★**2 つの型が別々の手で効く** —— base-trivial は**対象**を合わせ、
+Aut-ample は**射**を合わせる。★**構造化のときの見立てが当たった。**
+
+★**ここでは手 2–4 を実装する**(手 1 の本質的全射性は `plBkOverFunctor` の
+プランビングで、`coaPre_realize` と同型の作業)。★**手 1 の出力を仮定として型に出す。**
+-/
+
+include P in
+/-- ★**(i) の手 2–4** —— pull-back `ψ : Cc ⟶ B` と底の同型が与えられたとき、
+base-trivial ＋ Aut-ample から `A ⟶ B` の pull-back 射で底が `φ_𝒟` のものを作る。
+
+★**仮定 `hψ` が手 1(圏同値の本質的全射性)の出力**である。 -/
+theorem prop_1_11_i_lift (F : FrobenioidCore P) {A B Cc : C}
+    (hbt : IsBaseTrivial P A) (haa : IsAutAmple P A)
+    (φD : (P.toElem.obj A).base ⟶ (P.toElem.obj B).base)
+    (ψ : Cc ⟶ B) (hψpb : IsPullBack P ψ)
+    (θ : (P.toElem.obj Cc).base ≅ (P.toElem.obj A).base)
+    (hθ : P.Base ψ = θ.hom ≫ φD) :
+    ∃ χ : A ⟶ B, IsPullBack P χ ∧ P.Base χ = φD := by
+  -- 手2: base-trivial で `Cc ≅ A`
+  obtain ⟨ι⟩ := hbt Cc ⟨θ.symm⟩
+  -- 手3: `δ := Base ι.inv ≫ θ.hom` は `Aut_𝒟(A_𝒟)`
+  haveI : IsIso (P.Base ι.inv) := by
+    refine ⟨P.Base ι.hom, ?_, ?_⟩
+    · rw [← P.Base_comp, ι.inv_hom_id, P.Base_id]
+    · rw [← P.Base_comp, ι.hom_inv_id, P.Base_id]
+  set δ : End ((P.toElem.obj A).base) := P.Base ι.inv ≫ θ.hom with hδ
+  haveI : IsIso (δ : _ ⟶ _) := by rw [hδ]; infer_instance
+  -- 手4: Aut-ample で `δ⁻¹` を持ち上げる
+  obtain ⟨γ, hγiso, hγb⟩ := haa (inv (δ : _ ⟶ _)) inferInstance
+  haveI : IsIso (γ : A ⟶ A) := hγiso
+  refine ⟨(γ : A ⟶ A) ≫ ι.inv ≫ ψ, ?_, ?_⟩
+  · exact IsPullBack.comp P (isPullBack_of_isIso P _)
+      (IsPullBack.comp P (isPullBack_of_isIso P _) hψpb)
+  · rw [P.Base_comp, P.Base_comp, hγb, hθ]
+    calc inv (δ : _ ⟶ _) ≫ P.Base ι.inv ≫ θ.hom ≫ φD
+        = (inv (δ : _ ⟶ _) ≫ (δ : _ ⟶ _)) ≫ φD := by
+          simp only [hδ, Category.assoc]
+      _ = φD := by rw [IsIso.inv_hom_id, Category.id_comp]
+
 end ABC3.Found.FrdI
