@@ -1085,4 +1085,60 @@ theorem prop_1_10_vi_descend {B Cc : C} (γ : B ⟶ Cc) (hγ : IsPreStep P γ)
     rw [P.degFr_comp, P.degFr_comp, hγ.1, hdC, one_mul, mul_one] at h
     exact h
 
+/-! ## ★★`Definition 1.3, (iii), (d)` の圏同値を**消費する**
+
+★**測定(2026-08-16)**: `coaPreUnderEquiv` / `coaPreOverEquiv` は
+`Prop15`(`𝔽_Φ` の場合)と `Prop19`(`𝒞^istr` への移送)で**構成**されているが、
+★**下流で一度も消費されていない**(`grep` で確認)。
+
+★**`Proposition 1.10` の残り 2 件((iii) の後半、(vi) の前半)は
+どちらもこの圏同値を待っている。** だから**橋を 1 本架ける**。
+
+★**橋の形**: `(𝒞^coa-pre)_{Cc} ⥤ Order(Φ(Cc))^opp` が**充満**であることから、
+`Div` の順序関係 `γ の不変量 ≤ γ′ の不変量` を、
+★**射の因子分解 `β ≫ γ = γ′`** に変換する。
+
+★**なぜ `op` が要るか**: 関手は反変(`Order(...)^opp` へ行く)。
+`F(Z_{γ′}) ⟶ F(Z_γ)` は `op γ′_inv ⟶ op γ_inv`、すなわち
+`γ_inv ⟶ γ′_inv` の `op`、すなわち **`γ_inv ≤ γ′_inv`**。
+★**「大きいほうから小さいほうへ射がある」の向きが、`op` で 1 回ひっくり返る。**
+-/
+
+include P in
+/-- ★★**`Definition 1.3, (iii), (d)` の第2の圏同値の初の消費**。
+
+co-angular pre-step の `Div` 不変量に順序関係があれば、**因子分解が存在する**。
+
+★原文(p.36)の
+> the portion of assertion (ii) concerning the relationship between Div(γ), Div(γ′)
+> implies, in light of the second equivalence of categories of Definition 1.3, (iii), (d),
+> that γ′ factors through γ
+の「in light of the second equivalence」の実体である。
+
+★**`[IsIso (P.Base γ)]` を instance binder で取っている理由**: `inv (P.Base γ)` が
+**文の中**に現れるので、`hγs.2` を証明の中で `haveI` しても遅い。
+★**「仮定に含まれている事実を、インスタンスとしても渡す」必要がある** ——
+`IsPreStep` は構造体の連言であってインスタンスではないから。
+★これは分類表 #5(インスタンス合成)の**設計側の現れ**である。 -/
+theorem coaPre_factor_of_mle (G : Frobenioid P) {Cc B B' : C}
+    (γ : B ⟶ Cc) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (γ' : B' ⟶ Cc) (hγ'c : IsCoAngular P γ') (hγ's : IsPreStep P γ')
+    [IsIso (P.Base γ)] [IsIso (P.Base γ')]
+    (hle : MLe (Φ.map (inv (P.Base γ)) (P.Div γ) : Φ.val (P.toElem.obj Cc).base)
+      (Φ.map (inv (P.Base γ')) (P.Div γ'))) :
+    ∃ β : B' ⟶ B, IsCoAngular P β ∧ IsPreStep P β ∧ β ≫ γ = γ' := by
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreOverEquiv Cc
+  set Zγ : Over (⟨Cc⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨B⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨Cc⟩ from ⟨γ, hγc, hγs⟩) with hZγ
+  set Zγ' : Over (⟨Cc⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨B'⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨Cc⟩ from ⟨γ', hγ'c, hγ's⟩) with hZγ'
+  have hmor : (coaPreOverFunctor P Cc).obj Zγ' ⟶ (coaPreOverFunctor P Cc).obj Zγ :=
+    (homOfLE (show (toOrderCat (Φ.map (inv (P.Base γ)) (P.Div γ)))
+      ≤ toOrderCat (Φ.map (inv (P.Base γ')) (P.Div γ')) from hle)).op
+  let f := (coaPreOverFunctor P Cc).preimage hmor
+  refine ⟨f.left.hom, f.left.property.1, f.left.property.2, ?_⟩
+  have hw := Over.w f
+  exact congrArg (fun t => t.hom) hw
+
 end ABC3.Found.FrdI
