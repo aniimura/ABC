@@ -2,6 +2,8 @@ import Mathlib.CategoryTheory.Category.Preorder
 import Mathlib.CategoryTheory.Types.Basic
 import Mathlib.CategoryTheory.Endomorphism
 import Mathlib.CategoryTheory.MorphismProperty.Basic
+import Mathlib.CategoryTheory.Comma.Basic
+import Mathlib.CategoryTheory.ObjectProperty.FullSubcategory
 import ABC3.Meta.Claim
 
 /-!
@@ -613,6 +615,87 @@ theorem not_isEndEquivalence_vee (β : Vee.left ⟶ Vee.top) : ¬ IsEndEquivalen
   rintro ⟨g⟩
   rcases leOfHom g with h | h <;> exact Vee.noConfusion h
 
+/-! ### ★§0 `CFP`(categorical fiber product)
+
+原文 (FrdI p.17):
+> are functors, then we define the “CFP” — i.e., “categorical fiber product” —
+
+原文 (FrdI p.17):
+> where Ai ∈Ob(Ci) (for i = 1, 2); α is an isomorphism of D; and whose morphisms
+
+★★**mathlib の実測(2026-08-15)**: `IsoComma` は **0 件**。しかし
+`CategoryTheory.Comma` はあり、その対象は三つ組
+`⟨left, right, hom : L.obj left ⟶ R.obj right⟩`、射は
+`L.map left ≫ Y.hom = X.hom ≫ R.map right` を満たす対である。
+
+★原文の条件 `β ∘ Φ₁(γ₁) = Φ₂(γ₂) ∘ α` は、合成の向きを直すと
+`Φ₁.map γ₁ ≫ β = α ≫ Φ₂.map γ₂` であり、**`Comma` の条件と字義どおり一致する**。
+したがって **CFP は `Comma` の「`hom` が同型」という充満部分圏**である
+(p.17 を 400 dpi で目視して確認した)。
+
+★**mathlib にあるものを書き直さない** —— `Comma` はそのまま使い、
+`ObjectProperty.FullSubcategory` を被せるだけにする。
+-/
+
+section CFP
+
+universe v₁ u₁ v₂ u₂ v₃ u₃
+
+variable {C₁ : Type u₁} [Category.{v₁} C₁] {C₂ : Type u₂} [Category.{v₂} C₂]
+  {Dd : Type u₃} [Category.{v₃} Dd]
+
+/-- CFP を切り出す対象の性質 —— 三つ組の `α` が**同型**であること。 -/
+def cfpProp (Φ₁ : C₁ ⥤ Dd) (Φ₂ : C₂ ⥤ Dd) : ObjectProperty (Comma Φ₁ Φ₂) :=
+  fun X => IsIso X.hom
+
+/-- **§0 `𝒞₁ ×_𝒟 𝒞₂`** —— categorical fiber product。 -/
+abbrev CFP (Φ₁ : C₁ ⥤ Dd) (Φ₂ : C₂ ⥤ Dd) : Type _ := (cfpProp Φ₁ Φ₂).FullSubcategory
+
+/-- 第1射影 `𝒞₁ ×_𝒟 𝒞₂ ⥤ 𝒞₁`。 -/
+def cfpFst (Φ₁ : C₁ ⥤ Dd) (Φ₂ : C₂ ⥤ Dd) : CFP Φ₁ Φ₂ ⥤ C₁ :=
+  (cfpProp Φ₁ Φ₂).ι ⋙ Comma.fst Φ₁ Φ₂
+
+/-- 第2射影 `𝒞₁ ×_𝒟 𝒞₂ ⥤ 𝒞₂`。 -/
+def cfpSnd (Φ₁ : C₁ ⥤ Dd) (Φ₂ : C₂ ⥤ Dd) : CFP Φ₁ Φ₂ ⥤ C₂ :=
+  (cfpProp Φ₁ Φ₂).ι ⋙ Comma.snd Φ₁ Φ₂
+
+/-- ★**§0 の主張** —— `Φ₂` が圏同値なら第1射影も圏同値。
+
+原文 (FrdI p.17):
+> Φ2(γ2)◦α. One verifies easily that if Φ2 is an equivalence, then the natural projection
+
+★**中身は「`α` が同型であること」が第2成分を完全に決める**という一点である:
+`Φ₂(γ₂) = α⁻¹ ∘ Φ₁(γ₁) ∘ β` なので、`Φ₂` の忠実性から一意、充満性から存在が出る。 -/
+theorem cfpFst_isEquivalence (Φ₁ : C₁ ⥤ Dd) (Φ₂ : C₂ ⥤ Dd) [Φ₂.IsEquivalence] :
+    (cfpFst Φ₁ Φ₂).IsEquivalence := by
+  haveI hfaith : (cfpFst Φ₁ Φ₂).Faithful := by
+    constructor
+    intro X Y f g hfg
+    haveI hX : IsIso X.obj.hom := X.property
+    have hl : f.hom.left = g.hom.left := hfg
+    have hr : Φ₂.map f.hom.right = Φ₂.map g.hom.right := by
+      rw [← cancel_epi X.obj.hom, ← f.hom.w, ← g.hom.w, hl]
+    exact InducedCategory.hom_ext (CommaMorphism.ext hl (Φ₂.map_injective hr))
+  haveI hfull : (cfpFst Φ₁ Φ₂).Full := by
+    constructor
+    intro X Y u
+    haveI hX : IsIso X.obj.hom := X.property
+    obtain ⟨v, hv⟩ := Φ₂.map_surjective (inv X.obj.hom ≫ Φ₁.map u ≫ Y.obj.hom)
+    refine ⟨InducedCategory.homMk ⟨u, v, ?_⟩, rfl⟩
+    show Φ₁.map u ≫ Y.obj.hom = X.obj.hom ≫ Φ₂.map v
+    rw [hv, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    rfl
+  haveI hess : (cfpFst Φ₁ Φ₂).EssSurj := by
+    constructor
+    intro A
+    obtain ⟨e, he⟩ : ∃ e : Φ₂.obj (Φ₂.objPreimage (Φ₁.obj A)) ≅ Φ₁.obj A,
+        e = Φ₂.objObjPreimageIso (Φ₁.obj A) := ⟨_, rfl⟩
+    exact ⟨⟨⟨A, Φ₂.objPreimage (Φ₁.obj A), e.inv⟩, inferInstanceAs (IsIso e.inv)⟩,
+      ⟨Iso.refl A⟩⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+end CFP
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def IsOfAutTypeObj.src : ABC3.Meta.Source :=
@@ -666,5 +749,9 @@ def IsFSMMorphism.src : ABC3.Meta.Source :=
 def IsOfFSMType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 14, item := "§0 Categories — category of FSM-type",
     sectionId := "frdi-s0-fsm" }
+
+def CFP.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — CFP (categorical fiber product)",
+    sectionId := "frdi-s0-cfp" }
 
 end ABC3.Found.FrdI

@@ -258,5 +258,29 @@ minimal-adjoint は<strong>最初</strong>、minimal-coadjoint は<strong>最後
 <strong>示していないことを書かない</strong>)。</p>
 </section>
 
+<section class="statement definition"
+         id="frdi-s0-cfp"
+         data-paper="FrdI"
+         data-pdf-page="17"
+         data-item="§0 Categories — CFP (categorical fiber product)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">where Ai ∈Ob(Ci) (for i = 1, 2); α is an isomorphism of D; and whose morphisms</div>
+<div class="verbatim">Φ2(γ2)◦α. One verifies easily that if Φ2 is an equivalence, then the natural projection</div>
+<div class="reading">対象は三つ組 <code>(A₁, A₂, α : Φ₁(A₁) ≅ Φ₂(A₂))</code>、射は
+<code>β ∘ Φ₁(γ₁) = Φ₂(γ₂) ∘ α</code> を満たす対。
+<code>Φ₂</code> が圏同値なら射影 <code>𝒞₁ ×_𝒟 𝒞₂ → 𝒞₁</code> も圏同値。</div>
+<p class="open">★★<strong>mathlib の実測(2026-08-15)</strong>: <code>IsoComma</code> は<strong>0 件</strong>。
+しかし <code>CategoryTheory.Comma</code> はあり、対象は
+<code>⟨left, right, hom⟩</code>、射の条件は <code>L.map left ≫ Y.hom = X.hom ≫ R.map right</code>。
+★原文の <code>β ∘ Φ₁(γ₁) = Φ₂(γ₂) ∘ α</code> は合成の向きを直すと
+<code>Φ₁.map γ₁ ≫ β = α ≫ Φ₂.map γ₂</code> で、<strong>字義どおり一致する</strong>。
+よって <strong>CFP は <code>Comma</code> の「<code>hom</code> が同型」な充満部分圏</strong>として書けた
+(<code>Comma</code> は書き直していない)。</p>
+<p class="open">★<strong>「射影が圏同値」の中身は「<code>α</code> が同型であることが第2成分を完全に決める」</strong>の一点:
+<code>Φ₂(γ₂) = α⁻¹ ∘ Φ₁(γ₁) ∘ β</code> なので、<code>Φ₂</code> の<strong>忠実性から一意</strong>、
+<strong>充満性から存在</strong>、<strong>本質的全射性から対象</strong>が出る。
+★原文の「One verifies easily」は正しく、3成分がきれいに分かれる。</p>
+</section>
+
 </body>
 </html>
