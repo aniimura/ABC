@@ -1031,4 +1031,39 @@ theorem prop_1_11_vii_pullBack (G : Frobenioid P) {B Cc : C}
     prop_1_11_v_exists_pullBack P G ε hεpb γ hγc hγs φ hφc hφs hγinv
   exact ⟨Dd, γ, ψ, hγc, hγs, hψ.symm⟩
 
+/-! ### ★★(vii) の isometric pre-step の場合 —— なぜ別の道具が要るか
+
+★**原文**(p.38、目視):
+> if ϵ is an isometric pre-step, then the existence of γ, α with the desired properties
+> follows formally from **the equivalence of categories of Proposition 1.9, (ii)** [induced by φ].
+
+★**なぜ pull-back の場合と同じ手が使えないか、構造的な理由が特定できた。**
+
+★★**`Proposition 1.4, (iii)`: LB-invertible な pre-step は同型である。**
+`LB-invertible = co-angular ∧ isometric` なので、
+★★**co-angular な isometric pre-step は同型**である。
+
+★**したがって、同型でない isometric pre-step は決して co-angular ではない。**
+★**我々の (v) の存在(co-angular pre-step の場合・pull-back の場合)はどちらも
+`ε` の co-angular 性を使うので、この場合には使えない。**
+
+★★**これが原文が isometric pre-step の場合にだけ `Proposition 1.9, (ii)` を
+挙げている理由である。** ★**原文は理由を書いていないが、
+「co-angular でないクラス」だから別の道具が要る、という一点に帰着する。**
+
+★**同型の場合は既に済んでいる**(`liftsCoaPre_of_isIso`)ので、
+★**残るのは「同型でない isometric pre-step」だけ**である。
+-/
+
+include P in
+/-- ★★**co-angular な isometric pre-step は同型**。
+
+★`Proposition 1.4, (iii)` の直接の帰結だが、★**(vii) の場合分けの構造を説明する。**
+「同型でない isometric pre-step は co-angular でない」——だから
+原文は isometric pre-step の場合にだけ別の道具(`Proposition 1.9, (ii)`)を挙げる。 -/
+theorem isIso_of_isometric_coAngular_preStep (F : FrobenioidCore P) {A B : C}
+    (ε : A ⟶ B) (hi : IsIsometric P ε) (hc : IsCoAngular P ε) (hs : IsPreStep P ε) :
+    IsIso ε :=
+  prop_1_4_iii P F ε ⟨hc, hi⟩ hs
+
 end ABC3.Found.FrdI
