@@ -33,14 +33,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-15 ・ コミット 46 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-15 ・ コミット 47 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">32/32</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">271</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">282</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">87</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">26</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">4</div></div>
@@ -83,12 +83,12 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
   <div class="card"><div class="k">語彙(概念)</div><div class="v">18</div></div>
   <div class="card"><div class="k">番号付き項目</div><div class="v">64</div></div>
   <div class="card ok"><div class="k">★着手できる(名指し)</div><div class="v">8</div></div>
-  <div class="card ok"><div class="k">うち完了</div><div class="v">2</div></div>
+  <div class="card ok"><div class="k">うち完了</div><div class="v">5</div></div>
 </div>
 <table><tr><th style="width:38%">項目</th><th style="width:54px">壁</th><th style="width:58px">状態</th><th>根拠</th></tr>
-<tr><td><b>[FrdI] §0 integral(モノイド)</b></td><td>種類 5</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">原文『M → M^gp が単射』を GrothendieckGroup.of + of_injective [IsCancelMul M] と突き合わせ済み</td></tr>
-<tr><td><b>[FrdI] §0 saturated(モノイド)</b></td><td>種類 5</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">原文『n·a が像に入れば a も像に入る』を Submonoid.PowSaturated と突き合わせ済み</td></tr>
-<tr><td><b>[FrdI] §0 sharp(モノイド)</b></td><td>種類 3</td><td><b style="color:#2f6fd0">作業中</b></td><td style="font-size:12px">∀ a, IsUnit a → a = 1 の1行。★grep の 17 件は全部『sharp bound』で別物だった</td></tr>
+<tr><td><b>[FrdI] §0 integral(モノイド)</b></td><td>種類 5</td><td><b style="color:#1e7a52">完了</b></td><td style="font-size:12px">原文『M → M^gp が単射』を GrothendieckGroup.of + of_injective [IsCancelMul M] と突き合わせ済み。★非退化 witness(ℕ は integral、ℕ∞ は非 integral)と独立性つき</td></tr>
+<tr><td><b>[FrdI] §0 saturated(モノイド)</b></td><td>種類 5</td><td><b style="color:#1e7a52">完了</b></td><td style="font-size:12px">原文『n·a が像に入れば a も像に入る』を Submonoid.PowSaturated と突き合わせ済み。★非退化 witness(偶数の部分モノイドは非 saturated)と独立性つき</td></tr>
+<tr><td><b>[FrdI] §0 sharp(モノイド)</b></td><td>種類 3</td><td><b style="color:#1e7a52">完了</b></td><td style="font-size:12px">∀ a, IsUnit a → a = 1 の1行。★grep の 17 件は全部『sharp bound』で別物だった。★非退化 witness(ℕ は sharp、ℤ は非 sharp)と独立性つき</td></tr>
 <tr><td><b>[EtTh] §0 essential image</b></td><td>種類 5</td><td>未着手</td><td style="font-size:12px">CategoryTheory.Functor.essImage そのもの</td></tr>
 <tr><td><b>[GenEll] Lemma 3.1(SL_2 の構造)</b></td><td>種類 3</td><td>未着手</td><td style="font-size:12px">純古典。IUT 語彙ゼロ。標本6件のうち唯一の着手可能</td></tr>
 <tr><td><b>[IUTchIII] Remark 3.9.5 (i) holomorphic hull</b></td><td>種類 3</td><td>未着手</td><td style="font-size:12px">原文 p.127 で λ·𝒪(整数環のスカラー倍)と確定、400dpi 目視済み</td></tr>
@@ -116,6 +116,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>3fc283c</code></td><td>2026-08-15</td><td>残る穴の規模を測った——本文語彙は §0 の 0.2 倍なので今は入れない</td></tr>
 <tr><td><code>3e9930a</code></td><td>2026-08-15</td><td>層0の仕分けをリモートから見えるようにした——データ駆動で古びないように</td></tr>
 <tr><td><code>b918be5</code></td><td>2026-08-15</td><td>層0を仕分けた——壁の種類は5つになり、着手できるものを6件名指しできた</td></tr>
 <tr><td><code>5a4f24a</code></td><td>2026-08-15</td><td>§0 の抽出を強化した——行末ハイフン分割と冠詞なしの定義文型が主因だった</td></tr>
@@ -127,7 +128,6 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <tr><td><code>fee156e</code></td><td>2026-08-15</td><td>辺の意味を定めて 11 本を仕分け直した——深さ 3 は前方参照の上に建っていた</td></tr>
 <tr><td><code>4a1f305</code></td><td>2026-08-15</td><td>番号を持たない概念を節点として拾った——語彙は非循環で、左から着手できる</td></tr>
 <tr><td><code>1ad7957</code></td><td>2026-08-15</td><td>引用キーを論文ごとに解決した——そしてグラフが中層を過小表示していると判明した</td></tr>
-<tr><td><code>5f41b2f</code></td><td>2026-08-15</td><td>左右が反転していたのを直し、クリックで依存をハイライトするようにした</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない

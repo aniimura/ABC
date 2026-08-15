@@ -3,6 +3,7 @@ import ABC3.Found.ResidueFieldFinite
 import ABC3.Found.PGC.LocalFieldNorm
 import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
+import ABC3.Found.FrdI.MonoidVocabulary
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog

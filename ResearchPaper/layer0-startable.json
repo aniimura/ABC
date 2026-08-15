@@ -6,31 +6,93 @@
     "tools/index-html.mjs がこの JSON を読んで index.html に出す。手で数字を書かないため。"
   ],
   "measuredAt": "2026-08-15",
-  "layer0": { "total": 129, "section0Terms": 47, "concepts": 18, "numberedItems": 64 },
+  "layer0": {
+    "total": 129,
+    "section0Terms": 47,
+    "concepts": 18,
+    "numberedItems": 64
+  },
   "wallKinds": [
-    { "n": 1, "name": "mathlib の不在", "example": "p進対数(評価 API がノルム体に原理的に不適用)", "weight": "作業量" },
-    { "n": 2, "name": "Lean の透明度", "example": "tempered 群、packet-normalization", "weight": "作業量" },
-    { "n": 3, "name": "どれでもない(安い)", "example": "対数体積、型の訂正", "weight": "小。見分け方: 原文が elementary と書く / 原文に当たれば決まる" },
-    { "n": 4, "name": "語彙の不在", "example": "procession-normalization", "weight": "★最も重い。中層を作るまで手が付かない" },
-    { "n": 5, "name": "mathlib にそのものがある", "example": "integral / saturated / essential image", "weight": "★最小" }
+    {
+      "n": 1,
+      "name": "mathlib の不在",
+      "example": "p進対数(評価 API がノルム体に原理的に不適用)",
+      "weight": "作業量"
+    },
+    {
+      "n": 2,
+      "name": "Lean の透明度",
+      "example": "tempered 群、packet-normalization",
+      "weight": "作業量"
+    },
+    {
+      "n": 3,
+      "name": "どれでもない(安い)",
+      "example": "対数体積、型の訂正",
+      "weight": "小。見分け方: 原文が elementary と書く / 原文に当たれば決まる"
+    },
+    {
+      "n": 4,
+      "name": "語彙の不在",
+      "example": "procession-normalization",
+      "weight": "★最も重い。中層を作るまで手が付かない"
+    },
+    {
+      "n": 5,
+      "name": "mathlib にそのものがある",
+      "example": "integral / saturated / essential image",
+      "weight": "★最小"
+    }
   ],
   "startable": [
-    { "item": "[FrdI] §0 integral(モノイド)", "kind": 5, "state": "building",
-      "basis": "原文『M → M^gp が単射』を GrothendieckGroup.of + of_injective [IsCancelMul M] と突き合わせ済み" },
-    { "item": "[FrdI] §0 saturated(モノイド)", "kind": 5, "state": "building",
-      "basis": "原文『n·a が像に入れば a も像に入る』を Submonoid.PowSaturated と突き合わせ済み" },
-    { "item": "[FrdI] §0 sharp(モノイド)", "kind": 3, "state": "building",
-      "basis": "∀ a, IsUnit a → a = 1 の1行。★grep の 17 件は全部『sharp bound』で別物だった" },
-    { "item": "[EtTh] §0 essential image", "kind": 5, "state": "ready",
-      "basis": "CategoryTheory.Functor.essImage そのもの" },
-    { "item": "[GenEll] Lemma 3.1(SL_2 の構造)", "kind": 3, "state": "ready",
-      "basis": "純古典。IUT 語彙ゼロ。標本6件のうち唯一の着手可能" },
-    { "item": "[IUTchIII] Remark 3.9.5 (i) holomorphic hull", "kind": 3, "state": "ready",
-      "basis": "原文 p.127 で λ·𝒪(整数環のスカラー倍)と確定、400dpi 目視済み" },
-    { "item": "[AbsTopIII] (L1) log-shell はコンパクト", "kind": 3, "state": "done",
-      "basis": "Found/IUTchIII/PadicLog.lean に ℚ_p について構成済み(非退化性つき、sorry 無し)" },
-    { "item": "[AbsTopIII] Proposition 5.7 局所体積", "kind": 3, "state": "done",
-      "basis": "Found/IUTchIII/LogVolume.lean。★Interface の posit が初めて実物に置き換わった" }
+    {
+      "item": "[FrdI] §0 integral(モノイド)",
+      "kind": 5,
+      "state": "done",
+      "basis": "原文『M → M^gp が単射』を GrothendieckGroup.of + of_injective [IsCancelMul M] と突き合わせ済み。★非退化 witness(ℕ は integral、ℕ∞ は非 integral)と独立性つき"
+    },
+    {
+      "item": "[FrdI] §0 saturated(モノイド)",
+      "kind": 5,
+      "state": "done",
+      "basis": "原文『n·a が像に入れば a も像に入る』を Submonoid.PowSaturated と突き合わせ済み。★非退化 witness(偶数の部分モノイドは非 saturated)と独立性つき"
+    },
+    {
+      "item": "[FrdI] §0 sharp(モノイド)",
+      "kind": 3,
+      "state": "done",
+      "basis": "∀ a, IsUnit a → a = 1 の1行。★grep の 17 件は全部『sharp bound』で別物だった。★非退化 witness(ℕ は sharp、ℤ は非 sharp)と独立性つき"
+    },
+    {
+      "item": "[EtTh] §0 essential image",
+      "kind": 5,
+      "state": "ready",
+      "basis": "CategoryTheory.Functor.essImage そのもの"
+    },
+    {
+      "item": "[GenEll] Lemma 3.1(SL_2 の構造)",
+      "kind": 3,
+      "state": "ready",
+      "basis": "純古典。IUT 語彙ゼロ。標本6件のうち唯一の着手可能"
+    },
+    {
+      "item": "[IUTchIII] Remark 3.9.5 (i) holomorphic hull",
+      "kind": 3,
+      "state": "ready",
+      "basis": "原文 p.127 で λ·𝒪(整数環のスカラー倍)と確定、400dpi 目視済み"
+    },
+    {
+      "item": "[AbsTopIII] (L1) log-shell はコンパクト",
+      "kind": 3,
+      "state": "done",
+      "basis": "Found/IUTchIII/PadicLog.lean に ℚ_p について構成済み(非退化性つき、sorry 無し)"
+    },
+    {
+      "item": "[AbsTopIII] Proposition 5.7 局所体積",
+      "kind": 3,
+      "state": "done",
+      "basis": "Found/IUTchIII/LogVolume.lean。★Interface の posit が初めて実物に置き換わった"
+    }
   ],
   "notComplete": {
     "reason": "★層0であることは、易しいことを意味しない。",

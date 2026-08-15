@@ -77,7 +77,8 @@ variable (M : Type*) [AddCommMonoid M]
 /-- **`M^gp`** —— 原文の groupification。mathlib の `AddLocalization` そのもの。
 
 原文 (FrdI p.11):
-> the natural homomorphism from M to its groupification M gp. Thus, M gp is the -/
+> the natural homomorphism from M to its groupification M gp. Thus, M gp is the
+-/
 abbrev Gp : Type _ := AddLocalization (⊤ : AddSubmonoid M)
 
 /-- 正準写像 `M → M^gp`。 -/
@@ -106,13 +107,15 @@ variable (M)
 /-- **[FrdI] §0 `sharp`** —— `M^± = 0`、すなわち可逆元が `0` だけ。
 
 原文 (FrdI p.11):
-> M ± = 0; we shall say that M is integral if the natural map M →M gp is injective; -/
+> M ± = 0; we shall say that M is integral if the natural map M →M gp is injective;
+-/
 def IsSharp : Prop := ∀ a : M, IsAddUnit a → a = 0
 
 /-- **[FrdI] §0 `integral`** —— `M → M^gp` が単射。
 
 原文 (FrdI p.11):
-> M ± = 0; we shall say that M is integral if the natural map M →M gp is injective; -/
+> M ± = 0; we shall say that M is integral if the natural map M →M gp is injective;
+-/
 def IsIntegralMonoid : Prop := Function.Injective (toGp M)
 
 /-- **[FrdI] §0 `saturated`** —— `n · a` が `M` の像に入るような `a ∈ M^gp`
@@ -122,7 +125,8 @@ def IsIntegralMonoid : Prop := Function.Injective (toGp M)
 > we shall say that M is saturated if every a ∈M gp for which n · a lies in the image
 
 原文 (FrdI p.11):
-> of M for some n ∈N≥1 lies in the image of M. -/
+> of M for some n ∈N≥1 lies in the image of M.
+-/
 def IsSaturatedMonoid : Prop :=
   ∀ (a : Gp M) (n : ℕ), 0 < n → n • a ∈ Set.range (toGp M) → a ∈ Set.range (toGp M)
 
@@ -205,5 +209,108 @@ theorem not_saturated_evens :
 theorem saturated_top :
     ∀ (a : ℕ) (n : ℕ), 0 < n → n • a ∈ (⊤ : AddSubmonoid ℕ) → a ∈ (⊤ : AddSubmonoid ℕ) :=
   fun _ _ _ _ => trivial
+
+/-! ### ★独立性 —— どの1語も他の2語から従わない -/
+
+/-- `M → M^gp` が全射なら saturated(自明に)。 -/
+theorem isSaturatedMonoid_of_range_eq_univ (h : Set.range (toGp M) = Set.univ) :
+    IsSaturatedMonoid M := fun a _ _ _ => h ▸ Set.mem_univ a
+
+/-- `ℤ` では `M → M^gp` は全射。 -/
+theorem range_toGp_int : Set.range (toGp ℤ) = Set.univ := by
+  ext x
+  simp only [Set.mem_univ, iff_true]
+  induction x using AddLocalization.ind with
+  | _ p =>
+    obtain ⟨a, b⟩ := p
+    refine ⟨a - (b : ℤ), ?_⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists]
+    exact ⟨0, by simp⟩
+
+/-- `ℕ∞` では `M → M^gp` は全射(`⊤` がすべてを潰すので `M^gp` は1点)。 -/
+theorem range_toGp_enat : Set.range (toGp ℕ∞) = Set.univ := by
+  ext x
+  simp only [Set.mem_univ, iff_true]
+  induction x using AddLocalization.ind with
+  | _ p =>
+    obtain ⟨a, b⟩ := p
+    refine ⟨0, ?_⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists]
+    refine ⟨⟨⊤, trivial⟩, ?_⟩
+    simp
+
+/-- ★**独立性 (1)**: `ℤ` は **integral かつ saturated だが sharp でない**。 -/
+theorem independence_sharp :
+    IsIntegralMonoid ℤ ∧ IsSaturatedMonoid ℤ ∧ ¬ IsSharp ℤ :=
+  ⟨isIntegralMonoid_of_isCancelAdd ℤ,
+   isSaturatedMonoid_of_range_eq_univ ℤ range_toGp_int,
+   not_isSharp_int⟩
+
+/-- `ℕ∞` は sharp —— 正準順序つき加法モノイドでは `a + b = 0 → a = 0`。 -/
+theorem isSharp_enat : IsSharp ℕ∞ := by
+  intro a ha
+  obtain ⟨u, rfl⟩ := ha
+  have h := u.val_neg
+  exact (add_eq_zero.mp h).1
+
+/-- ★**独立性 (2)**: `ℕ∞` は **sharp かつ saturated だが integral でない**。 -/
+theorem independence_integral :
+    IsSharp ℕ∞ ∧ IsSaturatedMonoid ℕ∞ ∧ ¬ IsIntegralMonoid ℕ∞ :=
+  ⟨isSharp_enat,
+   isSaturatedMonoid_of_range_eq_univ ℕ∞ range_toGp_enat,
+   not_isIntegralMonoid_enat⟩
+
+/-! ### 独立性 (3) —— `saturated` が他の2語から従わないこと -/
+
+/-- `⟨2,3⟩ ⊆ ℕ` が生成する部分モノイド。`1` を含まないことが効く。 -/
+abbrev TwoThree : AddSubmonoid ℕ := AddSubmonoid.closure ({2, 3} : Set ℕ)
+
+theorem two_mem_twoThree : (2 : ℕ) ∈ TwoThree :=
+  AddSubmonoid.subset_closure (by simp)
+
+theorem three_mem_twoThree : (3 : ℕ) ∈ TwoThree :=
+  AddSubmonoid.subset_closure (by simp)
+
+theorem one_not_mem_twoThree : (1 : ℕ) ∉ TwoThree := by
+  intro h
+  rw [AddSubmonoid.mem_closure_pair] at h
+  obtain ⟨m, n, hmn⟩ := h
+  simp only [smul_eq_mul] at hmn
+  omega
+
+/-- ★**独立性 (3)**: `⟨2,3⟩` は **sharp かつ integral だが saturated でない**。
+
+`a := mk 3 2`(= `1`)は `2 • a = mk 6 4`(= `2`)が像に入るのに、
+それ自身は像に入らない —— `1 ∉ ⟨2,3⟩` だから。 -/
+theorem independence_saturated :
+    IsSharp (TwoThree) ∧ IsIntegralMonoid (TwoThree) ∧ ¬ IsSaturatedMonoid (TwoThree) := by
+  refine ⟨?_, isIntegralMonoid_of_isCancelAdd _, ?_⟩
+  · intro a ha
+    obtain ⟨u, rfl⟩ := ha
+    have h := u.val_neg
+    have hsum : ((u : TwoThree) : ℕ) + ((u.neg : TwoThree) : ℕ) = 0 := congrArg Subtype.val h
+    refine Subtype.ext ?_
+    show ((u : TwoThree) : ℕ) = 0
+    omega
+  · intro hsat
+    set a : Gp TwoThree :=
+      AddLocalization.mk ⟨3, three_mem_twoThree⟩ ⟨⟨2, two_mem_twoThree⟩, trivial⟩ with ha
+    have hmem : (2 : ℕ) • a ∈ Set.range (toGp TwoThree) := by
+      refine ⟨⟨2, two_mem_twoThree⟩, ?_⟩
+      rw [ha, AddLocalization.mk_nsmul, toGp, AddLocalization.mk_eq_mk_iff,
+        AddLocalization.r_iff_exists]
+      refine ⟨0, ?_⟩
+      ext
+      simp
+    obtain ⟨m, hm⟩ := hsat a 2 (by omega) hmem
+    rw [ha, toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists] at hm
+    obtain ⟨c, hc⟩ := hm
+    have : ((m : TwoThree) : ℕ) + 2 = 3 := by
+      have := congrArg Subtype.val hc
+      simp at this
+      omega
+    refine one_not_mem_twoThree ?_
+    have hm1 : ((m : TwoThree) : ℕ) = 1 := by omega
+    simp [← hm1]
 
 end ABC3.Found.FrdI
