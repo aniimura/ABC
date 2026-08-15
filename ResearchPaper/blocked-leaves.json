@@ -11,7 +11,7 @@
     {
       "key": "[IUTchIII] Proposition 3.9",
       "reason": "手続き正規化モノ解析的対数体積そのものの構成(物理 p.115、目視確認済み)。対数体積は 𝔐(−)(空でないコンパクト開集合の集まり)の上の ℝ 値関数として定まるが、その構成には [AbsTopIII] Proposition 5.7 の radial/angular 対数体積が要る。我々は対数体積を1つも作っていない。",
-      "unblockedBy": "[AbsTopIII] Proposition 5.7 の転写と、log-shell の対数体積の構成。★log-shell 自体は ℚ_p について Found/ にあるので、ここは中層の中では最も近い。"
+      "unblockedBy": "★2026-08-15 に半分解けた: 対数体積そのものは `Found/IUTchIII/LogVolume.lean` に ℚ_p について構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残るのは **procession-normalized**(j ∈ |F_l| 上の行列による正規化)の側で、これは prime-strip の procession が要るので中層のまま。"
     }
   ],
   "expandableWithWork": [

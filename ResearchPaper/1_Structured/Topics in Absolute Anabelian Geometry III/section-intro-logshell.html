@@ -55,5 +55,17 @@ Reconstruction Algorithms</em>。全 164 ページ、<code>pageOffset = 0</code>
 <p class="open">本単位が写したのは Corollary 5.10 の<strong>見出しと設定の1行だけ</strong>である。(i)〜(iv) の内容は写していない。</p>
 </section>
 
+<section class="statement definition"
+         id="prop-5-7-i-a-local-volume"
+         data-paper="AbsTopIII"
+         data-pdf-page="137"
+         data-item="Proposition 5.7, (i), (a)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">that satisfies the following properties: (1) additivity, i.e., <em data-txt="μk(A">μ<sub>k</sub>(A</em></div>
+<div class="reading">★<strong>対数体積の定義そのもの</strong>。原文は <code>μ_k : 𝕄(k) → ℝ<sub>&gt;0</sub></code> を、(1) 加法性 (2) 平行移動不変 (3) 正規化 <code>μ_k(𝒪_k) = 1</code> の3条件で<strong>一意に</strong>特徴づける。対数体積はその自然対数。</div>
+<div class="reading">原文は直前に「The following result is elementary and well-known.」と書いている。★この3条件は <strong>mathlib の Haar 測度そのもの</strong>であり、<code>Found/IUTchIII/LogVolume.lean</code> で ℚ_p について実物を構成した(<code>padicVolume</code> / <code>padicLogVol</code>、<code>sorry</code> 無し)。</div>
+<p class="open">★原文の定義域は<strong>コンパクト開</strong>集合 <code>𝕄(k)</code> であり、値域は<strong>正の実数</strong>である。ところが我々の <code>Interface</code> の <code>logVolCompact</code> は<strong>すべてのコンパクト集合</strong>に実数値を要求している。これは実装側への<strong>要求の強化</strong>であり、我々の側の欠陥(<code>Check/IUTchIII/LogVolumeFillsInterface.lean</code> の <code>padicLogVolCompact_empty_is_junk</code> で実際に示した)。</p>
+</section>
+
 </body>
 </html>
