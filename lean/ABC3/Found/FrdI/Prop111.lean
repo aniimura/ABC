@@ -303,4 +303,43 @@ theorem prop_1_11_i_lift (F : FrobenioidCore P) {A B Cc : C}
           simp only [hδ, Category.assoc]
       _ = φD := by rw [IsIso.inv_hom_id, Category.id_comp]
 
+/-! ## ★(vi) —— pull-back の 4 性質は底と対応する
+
+原文 (FrdI p.37):
+> (vi) A pull-back morphism φ ∈Arr(C) is an FSM-morphism (respectively,
+
+原文 (FrdI p.37):
+> and only if Base(φ) ∈Arr(D) is.
+
+★**原文の証明**(p.38、目視):
+> assertion (vi) follows **formally** from the isomorphism of functors appearing in the
+> definition of a "pull-back morphism" [cf. Definition 1.2, (ii)], together with the
+> **equivalence of categories induced by the projection functor in Definition 1.3, (i), (c)**
+
+★★**着手前の予測「(vi) は要注意」が当たった。** 4 つの性質のうち、
+★**`Definition 1.2, (ii)` だけで出るのは `mono` の `⟸` 向きだけ**である。
+他の 3 つと `mono` の `⟹` 向きは、★**`𝒟` の対象・射を `𝒞` へ持ち上げる**必要があり、
+それには `Definition 1.3, (i), (c)` の圏同値(＝ (i) の full 性)が要る。
+
+★★**「formally」はここでも「新しい材料が要らない」の意味である** ——
+`Definition 1.2, (ii)` と `Definition 1.3, (i), (c)` の 2 つで足りる。
+★**しかし「どちらがどの向きに要るか」は書かれていない。**
+
+★**ここでは `mono` の `⟸` 向きを実装する**(`Definition 1.2, (ii)` だけで出る)。
+-/
+
+include P in
+/-- ★**(vi) の mono の `⟸` 向き** —— 底が mono なら pull-back 射も mono。
+
+★★**`Definition 1.2, (ii)` の単射性だけで出る。** 圏同値は要らない。
+★**`Proposition 1.11, (i)` の full 性が要るのは残りの向きである。** -/
+theorem prop_1_11_vi_mono_of_baseMono {A B : C} (φ : A ⟶ B) (hφ : IsPullBack P φ)
+    (hm : Mono (P.Base φ)) : Mono φ := by
+  refine ⟨fun {X} f g h => ?_⟩
+  obtain ⟨hinj, _⟩ := hφ X
+  refine hinj (Subtype.ext (Prod.ext h ?_))
+  show P.Base f = P.Base g
+  refine (cancel_mono (P.Base φ)).mp ?_
+  rw [← P.Base_comp, ← P.Base_comp, h]
+
 end ABC3.Found.FrdI
