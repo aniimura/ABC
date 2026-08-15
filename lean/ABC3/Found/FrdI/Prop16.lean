@@ -994,11 +994,50 @@ theorem cfp_frobDegUniq (A B E : CfpCat P G) (φ : A ⟶ B) (ψ : A ⟶ E)
     rw [← Category.assoc, ← P.proj.map_comp, hβ, cfp_square ψ, ← Category.assoc,
       cfp_square φ, Category.assoc, ← G.map_comp, ← Category.assoc,
       IsIso.hom_inv_id, Category.id_comp]
+  have hsnd : IsIso (inv (CfpCat.snd φ) ≫ CfpCat.snd ψ) := inferInstance
   refine ⟨InducedCategory.homMk ⟨β₀, inv (CfpCat.snd φ) ≫ CfpCat.snd ψ, hsq⟩,
-    cfp_isIso_of P G _ hβiso inferInstance, ?_⟩
+    cfp_isIso_of P G _ hβiso hsnd, ?_⟩
   refine InducedCategory.hom_ext (CommaMorphism.ext hβ ?_)
   show CfpCat.snd φ ≫ inv (CfpCat.snd φ) ≫ CfpCat.snd ψ = CfpCat.snd ψ
   rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+
+include F in
+/-- **(vii)(a)** の移送 —— isotropic hull の存在(普遍性つき)。
+
+★hull は isometric pre-step なので**鎖**があり、新しい対象が持ち上がる。
+★普遍性の `∃!` は、**`𝒟'` 成分が `snd γ` に一意に決まる**ので `𝒞` の一意性から出る。 -/
+theorem cfp_isotropicHullExists (A : CfpCat P G) :
+    ∃ (B : CfpCat P G) (α : A ⟶ B), IsIsotropicHull (cfpPreFrobenioid P G hG hD') α := by
+  haveI hA : IsIso A.obj.hom := A.property
+  obtain ⟨B₀, α₀, hαi, hαs, hBiso, huniv⟩ := F.isotropicHullExists A.obj.left
+  haveI hαb : IsIso (P.proj.map α₀) := hαs.2
+  have hzi : IsIso (inv (P.proj.map α₀) ≫ A.obj.hom) := inferInstance
+  refine ⟨⟨⟨B₀, A.obj.right, inv (P.proj.map α₀) ≫ A.obj.hom⟩, hzi⟩,
+    InducedCategory.homMk ⟨α₀, 𝟙 _, by simp⟩,
+    (cfp_isometric_iff P G hG hD' _).mpr hαi,
+    ⟨hαs.1, by show IsIso (𝟙 _); infer_instance⟩,
+    (cfp_isotropic_iff P G hG hD' _).mpr hBiso, ?_⟩
+  intro Cc hCc γ
+  haveI hC : IsIso Cc.obj.hom := Cc.property
+  obtain ⟨β₀, hβ₀, hβ₀u⟩ := huniv Cc.obj.left ((cfp_isotropic_iff P G hG hD' Cc).mp hCc)
+    (CfpCat.fst γ)
+  have hsq : P.proj.map β₀ ≫ Cc.obj.hom
+      = (inv (P.proj.map α₀) ≫ A.obj.hom) ≫ G.map (CfpCat.snd γ) := by
+    rw [Category.assoc, ← cfp_square γ,
+      show P.proj.map (CfpCat.fst γ) = P.proj.map α₀ ≫ P.proj.map β₀ from by
+        rw [hβ₀, P.proj.map_comp],
+      ← Category.assoc, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  refine ⟨InducedCategory.homMk ⟨β₀, (CfpCat.snd γ : A.obj.right ⟶ Cc.obj.right), hsq⟩, ?_, ?_⟩
+  · refine InducedCategory.hom_ext (CommaMorphism.ext hβ₀ ?_)
+    show CfpCat.snd γ = 𝟙 _ ≫ CfpCat.snd γ
+    simp
+  · intro β hβ
+    have hf : CfpCat.fst γ = α₀ ≫ CfpCat.fst β :=
+      congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hβ
+    have hs : CfpCat.snd γ = 𝟙 _ ≫ CfpCat.snd β :=
+      congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) hβ
+    exact InducedCategory.hom_ext
+      (CommaMorphism.ext (hβ₀u _ hf) (hs.trans (Category.id_comp _)).symm)
 
 end Core
 
