@@ -553,6 +553,159 @@ def cfpOTriEquiv (A : CfpCat P G) :
   right_inv e := Subtype.ext rfl
   map_mul' x y := rfl
 
+/-! ## ★(v) —— 対象タイプ
+
+原文 (FrdI p.28):
+> and only if it projects to such an object of C.
+
+★★**仕分け**(基準を対象タイプ向けに変形したもの):
+
+* **(a) 鎖型** —— 定義に現れる射が base-isomorphism なので中間対象が持ち上がる。
+  `isotropic`(isometric pre-step) / `sub-quasi-Frobenius-trivial`(pre-step) /
+  `Frobenius-isotropic`(Frobenius 型) / `perfect`(仮定の `base-isomorphic` が鎖)
+* **(b) `𝒟'` 成分固定型** —— `base-identity` が `𝒟'` 成分を `𝟙` に固定する。
+  `Frobenius-trivial` / `quasi-Frobenius-trivial` / `Frobenius-normalized` /
+  `unit-trivial`(`𝒪^×` 経由) / `group-like`(`Φ` の同型経由)
+* ★**(c) 未解決** —— `metrically trivial` / `base-trivial`。
+  **結論が「`Nonempty (X ≅ A)`」**で、`𝒞'` の同型を作るには四角形が
+  `𝒞` 成分の `Base` を1つに指定してしまう。**`Aut-ample` 相当**が要り、仮定にない。
+-/
+
+/-- **(v)** —— **isotropic** は射影で決まる(★(a) 鎖型)。 -/
+theorem cfp_isotropic_iff (A : CfpCat P G) :
+    IsIsotropic (cfpPreFrobenioid P G hG hD') A ↔ IsIsotropic P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · intro h Dd₀ φ₀ hi hs
+    haveI hφb : IsIso (P.proj.map φ₀) := hs.2
+    have hzi : IsIso (inv (P.proj.map φ₀) ≫ A.obj.hom) := inferInstance
+    refine cfp_isIso_fst P G
+      (X := A) (Y := ⟨⟨Dd₀, A.obj.right, inv (P.proj.map φ₀) ≫ A.obj.hom⟩, hzi⟩)
+      (InducedCategory.homMk ⟨φ₀, 𝟙 _, by simp⟩) ?_
+    refine h ⟨⟨Dd₀, A.obj.right, inv (P.proj.map φ₀) ≫ A.obj.hom⟩, hzi⟩
+      (InducedCategory.homMk ⟨φ₀, 𝟙 _, by simp⟩)
+      ((cfp_isometric_iff P G hG hD' _).mpr hi) ⟨hs.1, by show IsIso (𝟙 _); infer_instance⟩
+  · intro h Dd' φ hi hs
+    exact cfp_isIso_of P G φ
+      (h Dd'.obj.left (CfpCat.fst φ) ((cfp_isometric_iff P G hG hD' φ).mp hi)
+        ((cfp_preStep_iff P G hG hD' φ hs.2).mp hs)) hs.2
+
+/-- **(v)** —— **Frobenius-isotropic** は射影で決まる(★(a) 鎖型)。 -/
+theorem cfp_frobIsotropic_iff (A : CfpCat P G) :
+    IsFrobeniusIsotropic (cfpPreFrobenioid P G hG hD') A ↔
+      IsFrobeniusIsotropic P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · rintro ⟨Dd', φ, hft, hiso⟩
+    exact ⟨Dd'.obj.left, CfpCat.fst φ, (cfp_frobType_iff P G hG hD' φ hft.2).mp hft,
+      (cfp_isotropic_iff P G hG hD' Dd').mp hiso⟩
+  · rintro ⟨Dd₀, φ₀, hft, hiso⟩
+    haveI hφb : IsIso (P.proj.map φ₀) := hft.2
+    have hzi : IsIso (inv (P.proj.map φ₀) ≫ A.obj.hom) := inferInstance
+    refine ⟨⟨⟨Dd₀, A.obj.right, inv (P.proj.map φ₀) ≫ A.obj.hom⟩, hzi⟩,
+      InducedCategory.homMk ⟨φ₀, 𝟙 _, by simp⟩, ?_, ?_⟩
+    · exact (cfp_frobType_iff P G hG hD' _ (by show IsIso (𝟙 _); infer_instance)).mpr hft
+    · exact (cfp_isotropic_iff P G hG hD' _).mpr hiso
+
+/-- **(v)** —— **quasi-Frobenius-trivial** は射影で決まる(★(b) `𝒟'` 成分固定型)。 -/
+theorem cfp_quasiFrobTrivial_iff (A : CfpCat P G) :
+    IsQuasiFrobeniusTrivial (cfpPreFrobenioid P G hG hD') A ↔
+      IsQuasiFrobeniusTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · intro h n
+    obtain ⟨φ, hbi, hdeg⟩ := h n
+    exact ⟨CfpCat.fst φ, cfp_baseIdentity_fst P G hG hD' φ hbi, hdeg⟩
+  · intro h n
+    obtain ⟨φ₀, hbi, hdeg⟩ := h n
+    have hid : P.proj.map φ₀ = 𝟙 _ := hbi.trans (P.Base_id _)
+    exact ⟨InducedCategory.homMk ⟨φ₀, 𝟙 _, by rw [hid, G.map_id, Category.comp_id,
+      Category.id_comp]⟩, by show CfpCat.snd _ = 𝟙 _; rfl, hdeg⟩
+
+/-- **(v)** —— **Frobenius-trivial** は射影で決まる(★(b) 型)。
+
+★`ζ : ℕ≥1 →* End A` を運ぶとき、**`𝒟'` 成分をすべて `𝟙` に取る**ので
+モノイド準同型であることが自動になる。 -/
+theorem cfp_frobTrivial_iff (A : CfpCat P G) :
+    IsFrobeniusTrivial (cfpPreFrobenioid P G hG hD') A ↔ IsFrobeniusTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · rintro ⟨ζ, hdeg, hprop⟩
+    refine ⟨⟨⟨fun n => CfpCat.fst (ζ n), ?_⟩, ?_⟩, hdeg, fun n =>
+      ⟨cfp_baseIdentity_fst P G hG hD' _ (hprop n).1,
+       (cfp_frobType_iff P G hG hD' _ (hprop n).2.2).mp (hprop n).2⟩⟩
+    · show CfpCat.fst (ζ 1) = 𝟙 _
+      rw [ζ.map_one]; rfl
+    · intro m n
+      show CfpCat.fst (ζ (m * n)) = CfpCat.fst (ζ n) ≫ CfpCat.fst (ζ m)
+      rw [ζ.map_mul]; rfl
+  · rintro ⟨ζ₀, hdeg, hprop⟩
+    have hsq : ∀ n : ℕ+, P.proj.map (ζ₀ n) ≫ A.obj.hom
+        = A.obj.hom ≫ G.map (𝟙 A.obj.right) := fun n => by
+      rw [show P.proj.map (ζ₀ n) = 𝟙 _ from (hprop n).1.trans (P.Base_id _),
+        G.map_id, Category.comp_id, Category.id_comp]
+    refine ⟨⟨⟨fun n => InducedCategory.homMk ⟨ζ₀ n, 𝟙 _, hsq n⟩, ?_⟩, ?_⟩, hdeg, fun n =>
+      ⟨by show CfpCat.snd _ = 𝟙 _; rfl,
+       (cfp_frobType_iff P G hG hD' _ (by show IsIso (𝟙 _); infer_instance)).mpr (hprop n).2⟩⟩
+    · refine InducedCategory.hom_ext (CommaMorphism.ext ?_ ?_)
+      · show (ζ₀ 1 : A.obj.left ⟶ A.obj.left) = 𝟙 _
+        rw [ζ₀.map_one]; rfl
+      · show (𝟙 A.obj.right) = 𝟙 _; rfl
+    · intro m n
+      refine InducedCategory.hom_ext (CommaMorphism.ext ?_ ?_)
+      · show (ζ₀ (m * n) : A.obj.left ⟶ A.obj.left) = ζ₀ n ≫ ζ₀ m
+        rw [ζ₀.map_mul]; rfl
+      · show (𝟙 A.obj.right) = 𝟙 _ ≫ 𝟙 _
+        simp
+
+/-- **(v)** —— **sub-quasi-Frobenius-trivial** は射影で決まる(★(a) 鎖型)。 -/
+theorem cfp_subQuasiFrobTrivial_iff (A : CfpCat P G) :
+    IsSubQuasiFrobeniusTrivial (cfpPreFrobenioid P G hG hD') A ↔
+      IsSubQuasiFrobeniusTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · rintro ⟨Dd', α, hca, hps, hq⟩
+    exact ⟨Dd'.obj.left, CfpCat.fst α, (cfp_coAngular_iff P G hG hD' α).mp hca,
+      (cfp_preStep_iff P G hG hD' α hps.2).mp hps,
+      (cfp_quasiFrobTrivial_iff P G hG hD' Dd').mp hq⟩
+  · rintro ⟨Dd₀, α₀, hca, hps, hq⟩
+    haveI hαb : IsIso (P.proj.map α₀) := hps.2
+    have hzi : IsIso (P.proj.map α₀ ≫ A.obj.hom) := inferInstance
+    refine ⟨⟨⟨Dd₀, A.obj.right, P.proj.map α₀ ≫ A.obj.hom⟩, hzi⟩,
+      InducedCategory.homMk ⟨α₀, 𝟙 _, by simp⟩, ?_, ⟨hps.1, by show IsIso (𝟙 _); infer_instance⟩,
+      ?_⟩
+    · exact cfp_coAngular_of P G hG hD' _ hca
+    · exact (cfp_quasiFrobTrivial_iff P G hG hD' _).mpr hq
+
+/-- **(v)** —— **unit-trivial** は射影で決まる(★(b) `𝒟'` 成分固定型)。 -/
+theorem cfp_unitTrivial_iff (A : CfpCat P G) :
+    IsUnitTrivial (cfpPreFrobenioid P G hG hD') A ↔ IsUnitTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  constructor
+  · intro h
+    refine Submonoid.eq_bot_iff_forall _ |>.mpr ?_
+    intro x₀ hx₀
+    have hid : P.proj.map (x₀ : A.obj.left ⟶ A.obj.left) = 𝟙 _ :=
+      hx₀.1.1.trans (P.Base_id _)
+    have hsq : P.proj.map (x₀ : A.obj.left ⟶ A.obj.left) ≫ A.obj.hom
+        = A.obj.hom ≫ G.map (𝟙 A.obj.right) := by
+      rw [hid, G.map_id, Category.comp_id, Category.id_comp]
+    haveI hxi : IsIso (x₀ : A.obj.left ⟶ A.obj.left) := (isUnit_iff_isIso _).mp hx₀.2
+    have hmem : (InducedCategory.homMk ⟨(x₀ : A.obj.left ⟶ A.obj.left), 𝟙 _, hsq⟩ : End A)
+        ∈ OTimes (cfpPreFrobenioid P G hG hD') A := by
+      refine ⟨⟨by show CfpCat.snd _ = 𝟙 _; rfl, hx₀.1.2⟩, (isUnit_iff_isIso _).mpr ?_⟩
+      exact cfp_isIso_of P G _ hxi (by show IsIso (𝟙 _); infer_instance)
+    have := (Submonoid.eq_bot_iff_forall _).mp h _ hmem
+    exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) this
+  · intro h
+    refine Submonoid.eq_bot_iff_forall _ |>.mpr ?_
+    intro x hx
+    have hfst : CfpCat.fst (x : End A) ∈ OTimes P A.obj.left := by
+      refine ⟨⟨cfp_baseIdentity_fst P G hG hD' _ hx.1.1, hx.1.2⟩, (isUnit_iff_isIso _).mpr ?_⟩
+      exact cfp_isIso_fst P G _ ((isUnit_iff_isIso _).mp hx.2)
+    have h1 : CfpCat.fst (x : End A) = 𝟙 _ := (Submonoid.eq_bot_iff_forall _).mp h _ hfst
+    exact InducedCategory.hom_ext (CommaMorphism.ext h1 hx.1.1)
+
 end Dict
 
 end ABC3.Found.FrdI
