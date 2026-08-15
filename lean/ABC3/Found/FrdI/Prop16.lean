@@ -1444,6 +1444,60 @@ theorem isPullBack_of_comp_left {Cc : Type u2} [Category.{v2} Cc] {Ψ : MonoidOn
     · show Q.Base (h ≫ f) = Q.Base g
       rw [Q.Base_comp, h2, hcond]
 
+/-! ### ★`plBkEquiv` —— 数学は完了、Lean は 1 箇所で止まっている(再現手順つき)
+
+★★**数学**: 忠実性・充満性は **`𝒞'` の pull-back 性(対象の定義そのもの)を直接使う**。
+充満性で要る「pull-back の左簡約」は **`isPullBack_of_comp_left`(仮定なし)** で証明済みなので
+**循環しない**。本質的全射性は `𝒞` の `plBkEquiv` の本質的全射性 ＋ `cfp_isPullBack_of`
+(構成の向き)だけで足りる。★**pull-back の「`𝒞' ⟹ 𝒞`」向きは要らない。**
+
+★**Lean で止まる唯一の箇所**(本質的全射性の中):
+```
+hw  : e ≫ (G.map Y.hom ≫ inv A.obj.hom) = P.proj.map Z'.hom.hom
+⊢    P.proj.map Z'.hom.hom ≫ A.obj.hom = e ≫ G.map Y.hom
+```
+`rw [← hw, Category.assoc, Category.assoc]` の後、目標は表示上
+`e ≫ G.map Y.hom ≫ inv A.obj.hom ≫ A.obj.hom = e ≫ G.map Y.hom` になるが、
+★**`rw [IsIso.inv_hom_id]` が「`inv ?f ≫ ?f` が見つからない」と言う。**
+
+★試して駄目だったもの(6 通り): `simp` / `simp only [Category.assoc, hwA2]` /
+`Category.assoc` を引数明示で 2 回 / `calc` で括弧を明示 /
+`wA`(`hA.out` から取った逆射)版 / `@inv _ _ _ _ A.obj.hom hA` 版。
+★**原因は特定できていない。** 分類表 #1 の一種と見ているが、
+**「症状ではなく原因を特定する」を実行できていない**ので、そのまま記録する。
+
+★★**親による原因の候補(2026-08-15。★これは答えではなく「判別法」である)**
+
+第12段で我々は「もっともらしい原因を思いついても、それが原因であることは
+別に確かめる必要がある」を学んだ(C1 が偽だった)。だから候補として書く。
+
+**候補A —— `inv` のインスタンス引数違い**
+  `inv f` は `[IsIso f]` を暗黙に取る。目標中の `inv A.obj.hom` が担いでいる
+  インスタンスと、`rw [IsIso.inv_hom_id]` が単一化で合成するインスタンスが
+  **別物**なら、項として異なるので構文的な `rw` は照合に失敗する。
+  `A.obj.hom` の `IsIso` には `A.property`(`FullSubcategory` の `Prop` フィールド)由来と
+  `haveI hA` 由来の 2 つがありうる。
+  ★**第12段で偽と判定した C1 が、別の場所で真になっている**可能性である。
+
+**候補B —— `rw [Category.assoc]` の適用位置**
+  `rw` は**最初の出現だけ**を書き換える。2 回当てても狙った位置に行くとは限らない。
+
+★**判別法**: `simp only [Category.assoc]` **だけ**を当てて右結合に正規化してから
+`rw [IsIso.inv_hom_id]` を試す。
+  - **通れば B**(位置の問題だった)
+  - **なお落ちれば A**(インスタンスの問題)。そのとき `set_option pp.all true` で
+    `inv` の第4引数を目視すれば確定する。
+
+★**未試行の手が 2 つある**(子の 6 通りに含まれない):
+  1. `simp only [Category.assoc, IsIso.inv_hom_id, Category.comp_id]`
+     —— 子が試したのは `hwA2` 版で、`IsIso.inv_hom_id` を simp 補題として
+     入れた版は試していない。
+  2. ★**`slice_lhs 3 4 => rw [IsIso.inv_hom_id]`**
+     —— `Mathlib/Tactic/CategoryTheory/Slice.lean` にある。
+     ★**位置で指定するので、結合にも `rw` の適用順にも依存しない。**
+     候補 A・B のどちらであっても B なら確実に抜ける。
+-/
+
 /-! ### ★(参考) `plBkEquiv` の構造
 
 ★★**数学は片付きました**: 忠実性と充満性は **`𝒞'` の pull-back 性を直接使う**だけでよく、
