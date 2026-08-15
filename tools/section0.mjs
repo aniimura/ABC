@@ -19,13 +19,23 @@
 //   ★`[cf. §0]` が無い箇所では張らない。語が偶然出ただけでは辺にしない。
 //     (Frobenioid のような語がどこにでも出て入次数が爆発するのを避けるため)
 
+// ★行末ハイフン分割を戻す。pdftotext は "char- acteristically" のように割る。
+//   戻さないと、抽出側でも照合側でも語が一致しない(2026-08-15 実測: 取りこぼしの主因)。
+export const dehyph = (s) => s.replace(/(\w)-\s+(\w)/g, '$1$2').replace(/\s+/g, ' ');
+
+const TERM = '([a-z][a-z0-9 ()≥-]{2,38}?)';
+const END = '(?=[,.;:]|\\s+(?:and|or|if|which|whose|that|when|for|in|of|to)\\b)';
 const DEF_LINES = [
-  // we shall refer to … as a/an/the X
-  /we shall refer to[^.]{0,200}?\bas (?:a|an|the)\s+([a-z][a-z0-9 -]{2,38}?)(?=[,.;:]|\s+(?:and|or|if|which|whose|that|when|for|in|of)\b)/gi,
-  // we shall say that … is X
-  /we shall say that[^.]{0,160}?\bis\s+([a-z][a-z0-9 -]{2,38}?)(?=[,.;:]|\s+(?:and|or|if|which|whose|that|when|for|in|of)\b)/gi,
-  // … will be referred to as a/an/the X
-  /will be referred to as (?:a|an|the)\s+([a-z][a-z0-9 -]{2,38}?)(?=[,.;:]|\s+(?:and|or|if|which|that)\b)/gi,
+  // we shall refer to … as (a|an|the)? X   ★冠詞は任意("as monoprime" の形がある)
+  new RegExp(`we shall refer to[^.]{0,220}?\\bas (?:a |an |the )?${TERM}${END}`, 'gi'),
+  // we shall say that … is (a|an)? X
+  new RegExp(`we shall say that[^.]{0,180}?\\bis (?:a |an )?${TERM}${END}`, 'gi'),
+  // … will be referred to as (a|an|the)? X
+  new RegExp(`will be referred to as (?:a |an |the )?${TERM}${END}`, 'gi'),
+  // we (shall )?write/denote by X
+  new RegExp(`we (?:shall )?(?:write|denote by)\\s+${TERM}${END}`, 'gi'),
+  // X is defined to be / X will be called
+  new RegExp(`${TERM}\\s+(?:is defined to be|will be called)`, 'gi'),
 ];
 
 const STOP = new Set(['set', 'element', 'elements', 'map', 'maps', 'object', 'objects',
@@ -54,7 +64,7 @@ export function section0Terms(lines, pageOf) {
   const out = new Map();
   // 6行ずつの窓で走査(pdftotext は文を折り返す)
   for (let i = s; i < e; i++) {
-    const win = lines.slice(i, i + 6).join(' ').replace(/\s+/g, ' ');
+    const win = dehyph(lines.slice(i, i + 6).join(' '));
     for (const re of DEF_LINES) {
       re.lastIndex = 0;
       let m;
@@ -75,7 +85,7 @@ export function section0Terms(lines, pageOf) {
  * @returns [{term, page}] の配列
  */
 export function section0Refs(body, terms, WINDOW = 70) {
-  const flat = body.replace(/\s+/g, ' ');
+  const flat = dehyph(body);
   const out = new Set();
   const re = /\[cf\.\s*§0|\bcf\.\s*§0|§0\s*[\],]/g;
   let m, seen = 0, matched = 0;
