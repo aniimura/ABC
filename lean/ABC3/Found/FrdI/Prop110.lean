@@ -1609,4 +1609,39 @@ theorem prop_1_10_iii_otri_upToUnit (F : FrobenioidCore P) {A : C}
         show P.Base (β : A ⟶ A) = P.Base (𝟙 A) from hβb])
     hd (hcoa α) (hpre α hαb hαl) (hcoa β) (hpre β hβb hβl)
 
+/-! ### ★★単元の吸収が難しい理由が構造から分かった
+
+★**残る穴**: `α = β^n ≫ u`(`u ∈ 𝒪^×(A)`)から `α = γ^n` を出したい。
+`𝒪^×(A)` も perfect なら `u = v^n` と書けるが、
+★**`β^n ≫ v^n = (β ≫ v)^n` には `β` と `v` の可換性が要る。**
+
+★★**そして `𝒪^▷(A)` は一般に可換ではない。**
+
+原典の序文(p.1、目視):
+> kind of Frobenioid "FM" is the **non-commutative** monoid given by forming the
+> "semi-direct product monoid" of a given commutative monoid M with the multi-
+> plicative monoid N≥1
+
+★**`𝔽_M` は明示的に非可換**である(`M` と `ℕ≥1` の半直積)。
+ただし `𝒪^▷(A)` は **linear**(次数 1)な base-identity 自己射の集まりなので、
+半直積の `M` 側にあたり、**素朴には可換に見える**。
+
+★★**しかし一般の Frobenioid ではそうとは限らない。** 我々が持っている情報は
+`faithfulUpToUnits`(`Definition 1.3, (vi)`)だけで、それが言うのは
+★**「base と `Div` が一致する co-angular pre-step は単元の違いしかない」** ——
+すなわち ★**`𝒪^▷(A)` は単元を法としてのみ `Φ(A)` に埋まる。**
+
+★★**したがって「単元の吸収」は、この命題の中で最も構造に近い場所にある。**
+`𝒪^×(A)` が何であるかは `Definition 1.3` が直接には規定していない。
+
+★**次の仕事(3 通り、まだ試していない)**:
+  (a) `𝒪^▷(A)` の可換性を Frobenioid の公理から導く —— **未確認**
+  (b) `𝒪^×(A)` が中心に入ることを示す —— **未確認**
+  (c) 可換性を使わない別の議論 —— **未発見**
+
+★**「試していない」と明記する**(3 分類の第 3 カテゴリ)。
+★**ただし前段と違い、今回は「なぜ難しいか」が構造から言えている** ——
+★**原典が序文で「non-commutative」と宣言している当のものに触れている。**
+-/
+
 end ABC3.Found.FrdI
