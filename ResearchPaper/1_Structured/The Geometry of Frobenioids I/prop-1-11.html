@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.11 — Pull-back and Linear Morphisms</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.11 — Pull-back and Linear Morphisms</h1>
+
+<p>物理 p.36–37。<strong>400 dpi 目視確認 2026-08-16</strong>（親が p.36 / p.37 を描画して照合）。</p>
+
+<h2>★規模の測定（着手前）</h2>
+
+<table>
+<tr><th>条</th><th>主張</th><th>内容</th></tr>
+<tr><td>(i)</td><td>1</td><td><code>𝒞<sup>pl-bk</sup> → 𝒟</code> が <strong>full</strong>（Aut-ample ＋ base-trivial 型）</td></tr>
+<tr><td>(ii)</td><td>1</td><td>同じ関手が <strong>faithful</strong>（unit-trivial 型）</td></tr>
+<tr><td>(iii)</td><td>1</td><td>pull-back に沿った自己射の<strong>一意な持ち上げ</strong></td></tr>
+<tr><td>(iv)</td><td>2</td><td><code>𝒪<sup>▷</sup>(A) ↪ 𝒪<sup>▷</sup>(B)</code> の存在 ＋ 一意性</td></tr>
+<tr><td>(v)</td><td>4</td><td>(iii)(d) の圏同値の関手性（2 通り × 一意存在 ＋ pull-back の iff）</td></tr>
+<tr><td>(vi)</td><td>4</td><td>pull-back が FSM / fiberwise-surjective / mono / irreducible ⟺ その底が</td></tr>
+<tr><td>(vii)</td><td>2</td><td>co-angular pre-step の「持ち上げ」＋「In particular」FSM</td></tr>
+</table>
+
+<p>★<strong>合計 15 主張。</strong><code>Proposition 1.10</code>（21 主張）より小さいが、
+★<strong>(v) と (vi) は我々が未消費・未実装の道具を要する</strong>（下記）。</p>
+
+<h2>★★依存の照合（着手前）</h2>
+
+<table>
+<tr><th>要るもの</th><th>状況</th></tr>
+<tr><td><code>plBkOverFunctor</code>（<code>Definition 1.3, (i), (c)</code>）</td><td>あり（<code>Frobenioid.lean</code>）</td></tr>
+<tr><td><code>coaPreUnderEquiv</code> / <code>coaPreOverEquiv</code></td><td>★<strong>あり、かつ <code>Proposition 1.10</code> で初めて消費した</strong></td></tr>
+<tr><td><code>IsAutAmple</code> / <code>IsBaseTrivial</code> / <code>IsUnitTrivial</code></td><td>あり（<code>MorphismTypes.lean</code>）</td></tr>
+<tr><td><code>IsFSMMorphism</code> / <code>IsFiberwiseSurjective</code></td><td>あり（<code>CategoryVocabulary.lean</code>）</td></tr>
+<tr><td><strong>irreducible</strong>（§0）</td><td>★<strong>あり ——<code>Proposition 1.10</code> のためにこのセッションで足した</strong></td></tr>
+<tr><td><code>𝒞<sup>lin</sup></code>（linear 射のなす広い部分圏）</td><td>★<strong>未実装</strong>（(v) が要る）</td></tr>
+</table>
+
+<p class="open">★<strong>不足は 1 つだけ</strong>：<code>𝒞<sup>lin</sup></code>。
+<code>𝒞<sup>pl-bk</sup></code> と同じく <code>WideSubcategory</code> で作れるはず
+（<code>IsLinear</code> は合成で閉じる ——<code>IsLinear.comp</code> が実装済み）。</p>
+
+<p class="open">★<strong><code>Proposition 1.10</code> との連続性</strong>：
+(iv) の <code>𝒪<sup>▷</sup></code> の話は <code>1.10, (iii)</code> の moreover と同じ対象を扱い、
+(vi) の <strong>irreducible</strong> は <code>1.10, (iv)</code> が使った語彙である。
+★<strong>1.10 を完成させたことが、そのまま 1.11 の足場になっている。</strong></p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11"
+         data-paper="FrdI"
+         data-pdf-page="36"
+         data-item="Proposition 1.11 — 前文"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(Pull-back and Linear Morphisms) Let Φ be a divi-</div>
+<div class="verbatim">sorial monoid on a connected, totally epimorphic category D; C →FΦ a Frobe-</div>
+<div class="reading">仮定は <code>Proposition 1.10</code> と同じ。<strong>追加の仮定は各条が個別に置く。</strong></div>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-i"
+         data-paper="FrdI"
+         data-pdf-page="36"
+         data-item="Proposition 1.11, (i)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(i) Suppose further that C is of Aut-ample and base-trivial type. Then the</div>
+<div class="verbatim">natural projection functor Cpl-bk →D is full.</div>
+<div class="reading"><code>𝒞</code> が Aut-ample かつ base-trivial 型なら、
+<code>𝒞<sup>pl-bk</sup> → 𝒟</code> は <strong>full</strong>。</div>
+<p class="open">★<strong>2 つの型が両方要る</strong>：<code>base-trivial</code> が対象の側を、
+<code>Aut-ample</code> が射の側を供給するはず。★<strong>着手前の見立て</strong>であり、
+実装で確かめる。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-ii"
+         data-paper="FrdI"
+         data-pdf-page="36"
+         data-item="Proposition 1.11, (ii)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(ii) Suppose further that C is of unit-trivial type. Then the natural projection</div>
+<div class="verbatim">functor Cpl-bk →D is faithful.</div>
+<div class="reading"><code>unit-trivial</code> 型なら同じ関手が <strong>faithful</strong>。</div>
+<p class="open">★<strong>(i) と (ii) で仮定が違う</strong>のが目を引く ——
+full と faithful が<strong>別々の型</strong>から来ている。
+★<strong>圏同値の 3 成分が別々の仮定に対応する</strong>という、我々が
+<code>Proposition 1.6</code> で何度も見た形の再来である。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-iii"
+         data-paper="FrdI"
+         data-pdf-page="36"
+         data-item="Proposition 1.11, (iii)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(iii) Let φ : B →A be a pull-back morphism that projects to a morphism</div>
+<div class="verbatim">such that Base(α) ◦φD = φD ◦βD, there exists a unique β ∈EndC(B) such that</div>
+<div class="reading">pull-back <code>φ : B ⟶ A</code> と、底で四角形を可換にする
+<code>α ∈ End(A)</code>、<code>β_𝒟 ∈ End(B_𝒟)</code> があれば、
+<strong>それを持ち上げる <code>β ∈ End(B)</code> が一意に存在する</strong>。</div>
+<p class="open">★<strong>これは <code>plBkOverFunctor</code> の圏同値の言い換えに近い</strong>。
+<code>Definition 1.3, (i), (c)</code> は
+<code>(𝒞<sup>pl-bk</sup>)<sub>A</sub> → 𝒟<sub>A_𝒟</sub></code> が圏同値と言うが、
+★<strong>(iii) はそれを「自己射の持ち上げ」として述べ直したもの</strong>と読める。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-iv"
+         data-paper="FrdI"
+         data-pdf-page="36"
+         data-item="Proposition 1.11, (iv)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(iv) Every co-angular linear morphism φ : B →A determines an injection</div>
+<div class="verbatim">which is uniquely determined by the condition that O▷(A) ∋α →β ∈O▷(B)</div>
+<div class="reading">co-angular で linear な射 <code>φ : B ⟶ A</code> は、
+モノイドの<strong>単射</strong> <code>𝒪<sup>▷</sup>(A) ↪ 𝒪<sup>▷</sup>(B)</code> を定める。
+条件は <code>α ↦ β</code> が <code>α ∘ φ = φ ∘ β</code> を満たすこと。</div>
+<p class="open">★★<strong>逐語の注意（事故 #5 の再確認）</strong>：
+PDF は <code>𝒪<sup>▷</sup>(A) <strong>↪</strong> 𝒪<sup>▷</sup>(B)</code>（<strong>単射の矢印</strong>）だが、
+<code>pdftotext</code> は <code>O▷(A) →O▷(B)</code> と<strong>普通の矢印に変える</strong>。
+★<strong>400 dpi 目視で確認した。</strong>
+★<strong>これは事故 #5 で最初に記録した文字であり、別の場所で同じ変異が起きている。</strong>
+散文に「an injection」とあるので意味は復元できるが、
+★<strong>矢印だけを見ると単射性が消える。</strong></p>
+<p class="open">★<code>Proposition 1.10, (iii)</code> の moreover で我々は
+<code>𝒪<sup>▷</sup>(A)</code> の perfect 性を扱った。★<strong>(iv) は同じ対象の
+別の側面（射に沿った単射）である。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-v"
+         data-paper="FrdI"
+         data-pdf-page="37"
+         data-item="Proposition 1.11, (v)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(v) The equivalences of categories of Definition 1.3, (iii), (d), are “functorial”</div>
+<div class="verbatim">if and only if ψ is.</div>
+<div class="reading"><code>Definition 1.3, (iii), (d)</code> の圏同値が<strong>関手的</strong>であること。
+<code>𝒞<sup>lin</sup></code> の射 <code>φ</code> と co-angular pre-step <code>α</code>、<code>β</code> が
+<code>Div</code> の条件を満たすとき、<strong>一意な <code>ψ</code> が存在し</strong>、
+さらに <strong><code>φ</code> が pull-back ⟺ <code>ψ</code> が pull-back</strong>。</div>
+<p class="open">★★<strong>これは我々が <code>Proposition 1.10</code> で初めて消費した圏同値の
+「次の使い方」である。</strong>
+1.10 では**1 点で**使った（因子分解と元の実現）が、
+★<strong>(v) は関手全体としての振る舞いを問う。</strong></p>
+<p class="open">★<strong>不足している道具</strong>：<code>𝒞<sup>lin</sup></code>（linear 射のなす広い部分圏）。
+<code>IsLinear.comp</code> は実装済みなので <code>WideSubcategory</code> で作れるはず。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-vi"
+         data-paper="FrdI"
+         data-pdf-page="37"
+         data-item="Proposition 1.11, (vi)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(vi) A pull-back morphism φ ∈Arr(C) is an FSM-morphism (respectively,</div>
+<div class="verbatim">fiberwise-surjective morphism; monomorphism; irreducible morphism) if</div>
+<div class="verbatim">and only if Base(φ) ∈Arr(D) is.</div>
+<div class="reading">pull-back 射については、<strong>4 つの性質が底と完全に対応する</strong>
+（FSM / fiberwise-surjective / monomorphism / irreducible）。</div>
+<p class="open">★★<strong>irreducible はこのセッションで足した語彙である</strong>
+（<code>Proposition 1.10, (iv)</code> のために §0 p.17 から写した）。
+★<strong>1 つの項目のために足した語彙が、次の項目で再び要る</strong> ——
+語彙の投資が回収される形。</p>
+<p class="open">★<strong>4 つとも iff</strong>である。<code>Proposition 1.10, (i)</code> の
+「7 タイプ」が場合によって独立でなかったのと違い、
+★<strong>ここは 4 つが別々の性質</strong>である（FSM と mono は無関係、
+irreducible は分解の話）。★<strong>着手前の見立て</strong>。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-11-vii"
+         data-paper="FrdI"
+         data-pdf-page="37"
+         data-item="Proposition 1.11, (vii)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(vii) Let φ : A →B be a co-angular pre-step; <span class="glyph" data-txt="">ϵ</span> : C →B a morphism. Then</div>
+<div class="reading">co-angular pre-step <code>φ : A ⟶ B</code> と任意の射 <code>ϵ : C ⟶ B</code> に対し、
+co-angular pre-step <code>γ : D ⟶ C</code> と <code>α : D ⟶ A</code> が
+<code>ϵ ∘ γ = φ ∘ α</code> を満たす。<strong>とくに co-angular pre-step は FSM 射</strong>。</div>
+<p class="open">★<strong>「In particular」が付いている</strong> ——
+我々は <code>Proposition 1.10, (iv)</code> でも「In particular」を開いた。
+★<strong>あちらは無限性の主張だったが、ここは定義の直接の帰結</strong>に見える。
+<code>IsFSMMorphism</code> の定義と突き合わせて確かめる。</p>
+</section>
+
+<h2>★着手前の予測（実装後に突き合わせる）</h2>
+
+<table>
+<tr><th>条</th><th>予測</th><th>根拠</th></tr>
+<tr><td>(iii)</td><td>★<strong>いちばん先に通る</strong></td><td><code>plBkEquiv</code> の言い換えで、道具は実装済み</td></tr>
+<tr><td>(vii)</td><td>通る</td><td><code>IsFSMMorphism</code> の定義の直接の帰結に見える</td></tr>
+<tr><td>(iv)</td><td>通る</td><td><code>𝒪<sup>▷</sup></code> の扱いは <code>1.10</code> で慣れた</td></tr>
+<tr><td>(i)(ii)</td><td>通る</td><td>型の仮定が明示されている</td></tr>
+<tr><td>(vi)</td><td>★<strong>要注意</strong></td><td>4 つの性質が別々。<strong>mono と irreducible は
+<code>𝒟</code> 側の性質を <code>𝒞</code> へ上げる</strong>ので、
+<code>Proposition 1.6</code> で見た「向き」の問題が出るかもしれない</td></tr>
+<tr><td>(v)</td><td>★<strong>最後</strong></td><td><code>𝒞<sup>lin</sup></code> を作る必要がある</td></tr>
+</table>
+
+<p class="open">★<strong>この予測が何件当たるかを実装後に測る。</strong>
+<code>Proposition 1.10</code> では着手前の依存照合が効いて多くが一発で通った。
+★<strong>同じ手順が 2 項目目でも効くかどうかが、この項目の裏のテーマである。</strong></p>
+
+</body>
+</html>
