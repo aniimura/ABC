@@ -209,4 +209,46 @@ theorem prop_1_11_iv_unique (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
   haveI : Mono φ := F.preStepMono φ hφs
   exact (cancel_mono φ).mp (h₁.symm.trans h₂)
 
+include P in
+/-- ★★**(iv) の存在** —— co-angular linear `φ : B ⟶ A` に沿って
+`𝒪^▷(A)` の元が `𝒪^▷(B)` へ移る。
+
+★**構成は原文どおり 3 手**:
+1. `Proposition 1.7, (iii)` で `φ = β ≫ α`(`β` pre-step、`α` pull-back)と分解
+   ——★**`β` が co-angular であることは `Proposition 1.4, (iv)` から**
+2. ★**(iii)** を pull-back `α` に当てて `γ_X ∈ End X` を得る
+   (★**`γ_X` が linear であることは次数の消去から出る** ——原文は書いていない)
+3. ★**`otriBwd`**(`Definition 1.3, (iii), (c)`)を co-angular pre-step `β` に当てて
+   `δ ∈ 𝒪^▷(B)` を得る -/
+theorem prop_1_11_iv_exists (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) (γA : End A) (hγA : γA ∈ OTri P A) :
+    ∃ δ : End B, δ ∈ OTri P B ∧ φ ≫ (γA : A ⟶ A) = (δ : B ⟶ B) ≫ φ := by
+  -- 手1: 分解
+  obtain ⟨X, β, α, hfac, hβs, hαpb⟩ := (prop_1_7_iii_linear_factor P F φ).mp hφl
+  have hβc : IsCoAngular P β :=
+    prop_1_4_iv_mpr P F (show φ = 𝟙 B ≫ β ≫ α by rw [hfac, Category.id_comp])
+      (isFrobeniusType_of_isIso P (𝟙 B)) hβs hαpb hφc
+  -- 手2: (iii) を `α` に当てる
+  have hsq : P.Base α ≫ P.Base (γA : A ⟶ A) = 𝟙 _ ≫ P.Base α := by
+    rw [show P.Base (γA : A ⟶ A) = P.Base (𝟙 A) from hγA.1, P.Base_id,
+      Category.comp_id, Category.id_comp]
+  obtain ⟨γX, ⟨hγXb, hγXsq⟩, _⟩ := prop_1_11_iii P α hαpb γA (𝟙 _) hsq
+  -- `γ_X` は linear(★次数の消去。原文は書いていない)
+  have hγXl : IsLinear P (γX : X ⟶ X) := by
+    have h := congrArg P.degFr hγXsq
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr (γA : A ⟶ A) = 1 from hγA.2,
+      one_mul] at h
+    show P.degFr (γX : X ⟶ X) = 1
+    have h2 : P.degFr α * 1 = P.degFr α * P.degFr (γX : X ⟶ X) := by
+      rw [mul_one]; exact h
+    exact (mul_left_cancel h2).symm
+  have hγXm : (γX : End X) ∈ OTri P X := by
+    refine ⟨?_, hγXl⟩
+    show P.Base (γX : X ⟶ X) = P.Base (𝟙 X)
+    rw [hγXb, P.Base_id]
+  -- 手3: `otriBwd`
+  obtain ⟨δ, ⟨hδm, hδsq⟩, _⟩ := F.otriBwd β hβc hβs (γX : End X) hγXm
+  refine ⟨δ, hδm, ?_⟩
+  rw [hfac, Category.assoc, hγXsq, ← Category.assoc, hδsq, Category.assoc]
+
 end ABC3.Found.FrdI
