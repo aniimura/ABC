@@ -1486,4 +1486,73 @@ theorem prop_1_10_iii_image_perfect (G : Frobenioid P) (hpt : IsOfPerfectType P)
     IsPerfectMonoid (Φ.val (P.toElem.obj A).base) :=
   prop_1_10_iii_perfect P G (hpt A)
 
+/-! ## ★(iii) の「moreover」—— `𝒪^▷(A)` と `𝒪^×(A)` が perfect
+
+原文 (FrdI p.35):
+> immediately [cf. Remark 1.1.1] from the fact that A is perfect [cf. Definition 1.2,
+
+★**主張そのものの行(「then the monoids O▷(A) and O×(A) are perfect.」)は
+引用できない**(事故 #2 の再来。`▷` が layout モードで消え 15/38 文字で停止)。
+★**`▷` は事故 #2 で既に記録した文字である** —— 同じ文字が別の場所で再び落ちた。
+証明側の隣接行を引く。
+
+★**まず語彙の問題**: `𝒪^▷(A)` は `Submonoid (End A)` であり**乗法**モノイドである。
+我々の `IsPerfectMonoid` は**加法**モノイド用(`∀ n, Bijective (n • ·)`)。
+★**乗法版が要る。** 原文は両方を同じ「perfect」で呼ぶが、
+★**`Φ(A)` は加法、`𝒪^▷(A)` は乗法**で、**同じ語が 2 つの構造を指している。**
+
+★**原文の証明**(p.35、目視):
+> the fact that the monoids O▷(A) and O×(A) are perfect follows immediately from the
+> fact that A is perfect [cf. Definition 1.2, (iv), **applied to the base-identity
+> endomorphisms of Frobenius type of the Frobenius-trivial object A**] and Frobenius-normalized.
+-/
+
+/-- ★**乗法モノイドの perfect** —— `n` 乗が全単射。
+
+★`IsPerfectMonoid`(加法)の乗法版。★**原文が同じ語で呼ぶ 2 つを、我々は別の述語で書く。** -/
+def IsPerfectMulMonoid (M : Type*) [Monoid M] : Prop :=
+  ∀ n : ℕ+, Function.Bijective (fun a : M => a ^ (n : ℕ))
+
+/-- ★**非退化(下)**: 自明モノイドは perfect。 -/
+theorem isPerfectMulMonoid_punit : IsPerfectMulMonoid PUnit :=
+  fun _ => ⟨fun _ _ _ => rfl, fun _ => ⟨PUnit.unit, rfl⟩⟩
+
+/-- ★**非退化(上)**: `Multiplicative ℕ` は perfect でない —— 2 乗写像が全射でない
+(`ofAdd 1` は平方の像に入らない)。 -/
+theorem not_isPerfectMulMonoid_nat : ¬ IsPerfectMulMonoid (Multiplicative ℕ) := by
+  intro h
+  obtain ⟨a, ha⟩ := (h 2).2 (Multiplicative.ofAdd 1)
+  have h1 : Multiplicative.toAdd (a ^ (2 : ℕ)) = 1 := congrArg Multiplicative.toAdd ha
+  rw [show (2 : ℕ) = 1 + 1 from rfl, pow_add, pow_one] at h1
+  have h2 : Multiplicative.toAdd a + Multiplicative.toAdd a = 1 := h1
+  omega
+
+/-! ### ★★(iii) の moreover —— 残る穴を型で書く
+
+★**構成**(原文の 3 段、目視で確認):
+1. `A` が Frobenius-trivial なので、各 `n` に base-identity・Frobenius 型の
+   自己射 `ζ n`(次数 `n`)がある
+2. `IsPerfectObj` の (b) を `φ₁ = φ₂ = ζ n`、`ψ′ := α ∈ 𝒪^▷(A)` に当てると、
+   ★**一意の pre-step `β` が `ζ n ≫ α = β ≫ ζ n` を満たす**
+3. **Frobenius-normalized** を `φ := ζ n`、`α := β` に当てると
+   `ζ n ≫ β^n = β ≫ ζ n = ζ n ≫ α`
+
+★★**残る穴はただ 1 つ**: 上から `β^n = α` を結論するには
+★**`ζ n` で左から消せること(mono)**が要る。
+★**`Definition 1.3` は pre-step が mono であること(`preStepMono`)しか言っていない。**
+`ζ n` は次数 `n` なので pre-step ではない。
+
+★★**したがってこれが「原文の `follows immediately` が使っている、
+書かれていない事実」である。** 3 通りのどれかである:
+  (a) Frobenioid では Frobenius 型射は常に mono —— **原文にも我々の公理にも無い**
+  (b) isotropic 型ではそうなる —— **未確認**
+  (c) 別の議論で mono を回避できる —— **未発見**
+
+★**`sorry` は置かない。** 3 通りのどれかを確かめるのが次の仕事である。
+★**「試していない」と明記する**(前段で立てた 3 分類の第 3 category)。
+
+★**語彙は先に置いた**(`IsPerfectMulMonoid`)ので、
+**残りは上の 1 点だけ**である。
+-/
+
 end ABC3.Found.FrdI
