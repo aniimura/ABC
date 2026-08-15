@@ -708,4 +708,61 @@ theorem liftsCoaPre_of_isIso (F : FrobenioidCore P) {B Cc : C} (ε : Cc ⟶ B) [
   · exact IsPreStep.comp P hφs (isPreStep_of_isIso P (inv ε))
   · rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id, Category.id_comp]
 
+/-! ### ★スライス側の実現補題 —— `coaPre_realize` の対応物
+
+★`Proposition 1.10` で作った `coaPre_realize` は**コスライス**(対象から出る射)側だった。
+(vii) の co-angular pre-step の場合には**スライス**(対象へ入る射)側が要る。
+
+★★**`Order` は前順序圏なので、`op` の同型は両向きの `MLe`** であり、
+`mle_antisymm`(integral ＋ sharp)で等号になる ——★**`coaPre_realize` と同じ構造。**
+-/
+
+include P in
+/-- ★★**第2の圏同値のスライス側の消費** —— `Φ(B_𝒟)` の任意の元は、
+**`B` へ入る co-angular pre-step の不変量**として実現できる。 -/
+theorem coaPre_realize_over (G : Frobenioid P) (B : C)
+    (c : Φ.val (P.toElem.obj B).base) :
+    ∃ (Dd : C) (δ : Dd ⟶ B) (hδc : IsCoAngular P δ) (hδs : IsPreStep P δ),
+      haveI : IsIso (P.Base δ) := hδs.2
+      Φ.map (inv (P.Base δ)) (P.Div δ) = c := by
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreOverEquiv B
+  obtain ⟨Z, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := coaPreOverFunctor P B)
+    (Opposite.op (toOrderCat c))
+  refine ⟨Z.left.obj, Z.hom.hom, Z.hom.property.1, Z.hom.property.2, ?_⟩
+  refine mle_antisymm (P.divisorial _).1.1 (P.divisorial _).2 ?_ ?_
+  · exact leOfHom e.inv.unop
+  · exact leOfHom e.hom.unop
+
+include P in
+/-- ★★★**(vii) の co-angular pre-step の場合** ——
+原文の「follows immediately from the second equivalence of categories of
+Definition 1.3, (iii), (d)」の実体。
+
+★★**構成**: `ε` と `φ` の不変量 `x_ε`、`x_φ` の**和**を取り、
+それを不変量とする co-angular pre-step `δ : Dd ⟶ B` を実現する。
+`x_ε ≤ x_ε + x_φ` と `x_φ ≤ x_ε + x_φ` から、橋(`coaPre_factor_of_mle`)が
+`γ : Dd ⟶ Cc` と `α : Dd ⟶ A` を与え、どちらも `δ` を経由するので等しくなる。
+
+★★**「和を取る」が要点である。** 原文は「immediately」と書くが、
+★**`Order(Φ(B))` の中で `x_ε` と `x_φ` の上界を作る**という一手が入っている。
+★**モノイドが可換だから和が上界になる** —— そこも書かれていない。 -/
+theorem prop_1_11_vii_coaPre (G : Frobenioid P) {B Cc : C}
+    (ε : Cc ⟶ B) (hεc : IsCoAngular P ε) (hεs : IsPreStep P ε) :
+    LiftsCoaPre P ε := by
+  intro A φ hφc hφs
+  haveI hbε : IsIso (P.Base ε) := hεs.2
+  haveI hbφ : IsIso (P.Base φ) := hφs.2
+  set xε := Φ.map (inv (P.Base ε)) (P.Div ε) with hxε
+  set xφ := Φ.map (inv (P.Base φ)) (P.Div φ) with hxφ
+  obtain ⟨Dd, δ, hδc, hδs, hδinv⟩ := coaPre_realize_over P G B (xε + xφ)
+  haveI hbδ : IsIso (P.Base δ) := hδs.2
+  have hleε : MLe xε (Φ.map (inv (P.Base δ)) (P.Div δ)) := by
+    rw [hδinv]; exact ⟨xφ, rfl⟩
+  have hleφ : MLe xφ (Φ.map (inv (P.Base δ)) (P.Div δ)) := by
+    rw [hδinv]; exact ⟨xε, by rw [add_comm]⟩
+  obtain ⟨γ, hγc, hγs, hγ⟩ := coaPre_factor_of_mle P G ε hεc hεs δ hδc hδs hleε
+  obtain ⟨α, _, _, hα⟩ := coaPre_factor_of_mle P G φ hφc hφs δ hδc hδs hleφ
+  exact ⟨Dd, γ, α, hγc, hγs, by rw [hγ, hα]⟩
+
 end ABC3.Found.FrdI
