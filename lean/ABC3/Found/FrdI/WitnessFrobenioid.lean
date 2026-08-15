@@ -516,42 +516,6 @@ instance wCoaPreOverEssSurj (A : wC) : (coaPreOverFunctor wP A).EssSurj where
 theorem wCoaPreOverEquiv (A : wC) : (coaPreOverFunctor wP A).IsEquivalence :=
   ⟨inferInstance, inferInstance, inferInstance⟩
 
-/-! ### ★★判定 —— `wP` は Frobenioid である -/
-
-/-- ★★**`wP` は [FrdI] Definition 1.3 の意味で Frobenioid である。**
-
-したがって **`Frobenioid` は空ではない** ——
-`Definition 1.3` は退化した(誰も満たさない)条件の束ではない。
-
-★構成要素はすべて上で個別に証明したもので、`sorry` も「手で確かめた」も含まない。 -/
-theorem wIsFrobenioid : Frobenioid wP where
-  core :=
-    { baseSurj := wBaseSurj
-      preStepSpan := wPreStepSpan
-      plBkEquiv := wPlBkEquiv
-      frobDegSurj := wFrobDegSurj
-      frobDegUniq := wFrobDegUniq
-      coAngularComp := wCoAngularComp
-      coAngularOfPreStep := wCoAngularOfPreStep
-      otriFwd := wOtriFwd
-      otriBwd := wOtriBwd
-      otriBase := wOtriBase
-      arbFactor := wArbFactor
-      arbFactorUniq := wArbFactorUniq
-      pullBackLB := wPullBackLB
-      preStepMono := fun φ _ => wMono φ
-      preStepFactor := wPreStepFactor
-      preStepFactor' := wPreStepFactor'
-      faithfulUpToUnits := wFaithfulUpToUnits
-      isotropicHullExists := wIsotropicHullExists
-      isotropicClosed := fun φ h => wIsotropicClosed φ h }
-  coaPreUnderEquiv := wCoaPreUnderEquiv
-  coaPreOverEquiv := wCoaPreOverEquiv
-
-/-- ★**Frobenioid は空でない**(上の系)。 -/
-theorem frobenioid_nonempty : ∃ (P : PreFrobenioid wC wΦ), Frobenioid P :=
-  ⟨wP, wIsFrobenioid⟩
-
 /-! ### ★自己監査で追加した2条(2026-08-15)
 
 `(v)(b)(c)` の**一意性節**を写し落としていたので `Frobenioid.lean` に足した。
@@ -623,5 +587,44 @@ theorem wPreStepFactorUniq' {A B : wC} (X X' : wC) (β : A ⟶ X) (α : X ⟶ B)
   refine ⟨wIsoOfBases (wP.Base β) hsβ.2 (wP.Base β') hsβ'.2, ?_, ?_⟩
   · exact wHom_ext (by simp [hd]) (by simp [hnα, hnα'])
   · exact wHom_ext (by simp [hdβ, hdβ']) (by simp [hnβ, hnβ'])
+
+
+/-! ### ★★判定 —— `wP` は Frobenioid である -/
+
+/-- ★★**`wP` は [FrdI] Definition 1.3 の意味で Frobenioid である。**
+
+したがって **`Frobenioid` は空ではない** ——
+`Definition 1.3` は退化した(誰も満たさない)条件の束ではない。
+
+★構成要素はすべて上で個別に証明したもので、`sorry` も「手で確かめた」も含まない。 -/
+theorem wIsFrobenioid : Frobenioid wP where
+  core :=
+    { baseSurj := wBaseSurj
+      preStepSpan := wPreStepSpan
+      plBkEquiv := wPlBkEquiv
+      frobDegSurj := wFrobDegSurj
+      frobDegUniq := wFrobDegUniq
+      coAngularComp := wCoAngularComp
+      coAngularOfPreStep := wCoAngularOfPreStep
+      otriFwd := wOtriFwd
+      otriBwd := wOtriBwd
+      otriBase := wOtriBase
+      arbFactor := wArbFactor
+      arbFactorUniq := wArbFactorUniq
+      pullBackLB := wPullBackLB
+      preStepMono := fun φ _ => wMono φ
+      preStepFactor := wPreStepFactor
+      preStepFactorUniq := wPreStepFactorUniq
+      preStepFactor' := wPreStepFactor'
+      preStepFactorUniq' := wPreStepFactorUniq'
+      faithfulUpToUnits := wFaithfulUpToUnits
+      isotropicHullExists := wIsotropicHullExists
+      isotropicClosed := fun φ h => wIsotropicClosed φ h }
+  coaPreUnderEquiv := wCoaPreUnderEquiv
+  coaPreOverEquiv := wCoaPreOverEquiv
+
+/-- ★**Frobenioid は空でない**(上の系)。 -/
+theorem frobenioid_nonempty : ∃ (P : PreFrobenioid wC wΦ), Frobenioid P :=
+  ⟨wP, wIsFrobenioid⟩
 
 end ABC3.Found.FrdI
