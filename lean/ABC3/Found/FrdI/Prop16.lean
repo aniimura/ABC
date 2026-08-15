@@ -851,61 +851,6 @@ def cfpEndHomSnd (A : CfpCat P G) : End A →* End A.obj.right where
 theorem cfpEndHomSnd_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
     cfpEndHomSnd P G A (x ^ k) = (cfpEndHomSnd P G A x) ^ k :=
   map_pow (cfpEndHomSnd P G A) x k
-/-- **(v)** —— **Frobenius-normalized** は射影で決まる(★(b) `𝒟'` 成分固定型)。
-
-★★**`^` の扱い方(表 #3 の適用箇所を1つ広げた)**: `End A` と `A ⟶ A` は同じ型の2つの綴りで、
-`Monoid`(したがって `^`)は `End A` の綴りにしか付かない。
-★**冪の式そのものを `obtain ⟨y, hy⟩ : ∃ y : End A, y = α ^ d` で変数に固定する**と、
-以後は `y` について `cfpEndHom_pow` を当てるだけで済む。
-★**「綴りの決まった変数を先に導入する」を、射だけでなく<b>冪の式</b>にも当てる。** -/
-theorem cfp_frobNormalized_iff (A : CfpCat P G) :
-    IsFrobeniusNormalized (cfpPreFrobenioid P G hG hD') A ↔
-      IsFrobeniusNormalized P A.obj.left := by
-  haveI hA : IsIso A.obj.hom := A.property
-  have hsq : ∀ x : End A.obj.left, IsBaseIdentity P x →
-      P.proj.map (x : A.obj.left ⟶ A.obj.left) ≫ A.obj.hom
-        = A.obj.hom ≫ G.map (𝟙 A.obj.right) := by
-    intro x hx
-    rw [show P.proj.map (x : A.obj.left ⟶ A.obj.left) = 𝟙 _ from hx.trans (P.Base_id _),
-      G.map_id, Category.comp_id, Category.id_comp]
-  constructor
-  · intro h φ₀ hb α₀ hα₀
-    obtain ⟨d, hd⟩ : ∃ d : ℕ, d = (P.degFr (φ₀ : A.obj.left ⟶ A.obj.left) : ℕ) := ⟨_, rfl⟩
-    obtain ⟨y, hy⟩ : ∃ y : End A,
-        y = (InducedCategory.homMk ⟨(α₀ : A.obj.left ⟶ A.obj.left), 𝟙 _, hsq α₀ hα₀.1⟩
-          : End A) ^ d := ⟨_, rfl⟩
-    have hyf : cfpEndHom P G A y = (α₀ : End A.obj.left) ^ d := by
-      rw [hy]; exact cfpEndHom_pow P G _ _
-    have hh := h (InducedCategory.homMk ⟨(φ₀ : A.obj.left ⟶ A.obj.left), 𝟙 _, hsq φ₀ hb⟩)
-      (by show CfpCat.snd _ = 𝟙 _; rfl)
-      (InducedCategory.homMk ⟨(α₀ : A.obj.left ⟶ A.obj.left), 𝟙 _, hsq α₀ hα₀.1⟩)
-      ⟨by show CfpCat.snd _ = 𝟙 _; rfl, hα₀.2⟩
-    rw [← hd, ← hy] at hh
-    have hfst := congrArg (cfpEndHom P G A) hh
-    rw [hd] at hyf
-    exact hyf ▸ hfst
-  · intro h φ hb α hα
-    obtain ⟨d, hd⟩ : ∃ d : ℕ,
-        d = ((cfpPreFrobenioid P G hG hD').degFr (φ : End A) : ℕ) := ⟨_, rfl⟩
-    obtain ⟨y, hy⟩ : ∃ y : End A, y = (α : End A) ^ d := ⟨_, rfl⟩
-    have hyf : cfpEndHom P G A y = (cfpEndHom P G A (α : End A)) ^ d := by
-      rw [hy]; exact cfpEndHom_pow P G _ _
-    have hys : cfpEndHomSnd P G A y = (cfpEndHomSnd P G A (α : End A)) ^ d := by
-      rw [hy]; exact cfpEndHomSnd_pow P G _ _
-    have hsnd1 : cfpEndHomSnd P G A (α : End A) = 𝟙 A.obj.right := hα.1
-    have hsnd2 : cfpEndHomSnd P G A (φ : End A) = 𝟙 A.obj.right := hb
-    have hfst := h (cfpEndHom P G A φ) (cfp_baseIdentity_fst P G hG hD' _ hb)
-      (cfpEndHom P G A α) ⟨cfp_baseIdentity_fst P G hG hD' _ hα.1, hα.2⟩
-    rw [← hd, ← hy]
-    refine InducedCategory.hom_ext (CommaMorphism.ext ?_ ?_)
-    · show cfpEndHom P G A (φ : End A) ≫ cfpEndHom P G A y
-        = cfpEndHom P G A (α : End A) ≫ cfpEndHom P G A (φ : End A)
-      rw [hyf, hd]
-      exact hfst
-    · show cfpEndHomSnd P G A (φ : End A) ≫ cfpEndHomSnd P G A y
-        = cfpEndHomSnd P G A (α : End A) ≫ cfpEndHomSnd P G A (φ : End A)
-      rw [hys, hsnd1, hsnd2, show (𝟙 A.obj.right : End A.obj.right) = 1 from rfl, one_pow]
-      rfl
 
 /-! ### ★(参考) `Frobenius-normalized` の以前の記録
 
