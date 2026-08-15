@@ -1164,7 +1164,7 @@ theorem istr_preStepFactorUniq {A B : Istr P} (X X' : Istr P)
     (hβc' : IsCoAngular (istrPre P) β') (hβs' : IsPreStep (istrPre P) β')
     (hαi' : IsIsometric (istrPre P) α') (hαs' : IsPreStep (istrPre P) α') :
     ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
-  obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq X.obj X' .obj β.hom α.hom β'.hom α'.hom
+  obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq X.obj X'.obj β.hom α.hom β'.hom α'.hom
     (congrArg InducedCategory.Hom.hom heq)
     (isCoAngular_of_isotropic_dom P F A.property _) hβs hαi hαs
     (isCoAngular_of_isotropic_dom P F A.property _) hβs' hαi' hαs'
@@ -1202,6 +1202,63 @@ theorem istr_faithfulUpToUnits {A B : Istr P} (φ ψ : A ⟶ B)
   refine (isUnit_iff_isIso _).mpr ?_
   exact ⟨InducedCategory.homMk (inv (α₀ : B.obj ⟶ B.obj)),
     InducedCategory.hom_ext (by simp), InducedCategory.hom_ext (by simp)⟩
+
+include F in
+/-- **(iv)(a)** の一意性の移送 —— 2つの同型をどちらも持ち上げる。 -/
+theorem istr_arbFactorUniq {A B : Istr P} (X Y X' Y' : Istr P)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (heq : (γ ≫ β ≫ α : A ⟶ B) = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType (istrPre P) γ) (hβ : IsPreStep (istrPre P) β)
+    (hα : IsPullBack (istrPre P) α)
+    (hγ' : IsFrobeniusType (istrPre P) γ') (hβ' : IsPreStep (istrPre P) β')
+    (hα' : IsPullBack (istrPre P) α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  obtain ⟨δ₀, ε₀, h1, h2, h3⟩ := F.arbFactorUniq X.obj Y.obj X'.obj Y'.obj
+    γ.hom β.hom α.hom γ'.hom β'.hom α'.hom
+    (congrArg InducedCategory.Hom.hom heq)
+    ((istr_frobType_iff P F γ).mp hγ) hβ (istr_isPullBack_to P F α hα)
+    ((istr_frobType_iff P F γ').mp hγ') hβ' (istr_isPullBack_to P F α' hα')
+  exact ⟨InducedCategory.isoMk δ₀, InducedCategory.isoMk ε₀,
+    InducedCategory.hom_ext h1, InducedCategory.hom_ext h2, InducedCategory.hom_ext h3⟩
+
+include F in
+/-- **(iii)(c)** 順方向の移送。★`𝒪^▷` の元は `.hom` でそのまま対応する。 -/
+theorem istr_otriFwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) φ)
+    (α : End A) (hα : α ∈ OTri (istrPre P) A) :
+    ∃! β : End B, β ∈ OTri (istrPre P) B ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  obtain ⟨β₀, ⟨hβ₀m, hβ₀e⟩, hβ₀u⟩ := F.otriFwd φ.hom
+    (isCoAngular_of_isotropic_dom P F A.property _) hst α.hom hα
+  refine ⟨InducedCategory.homMk β₀, ⟨hβ₀m, InducedCategory.hom_ext hβ₀e⟩, ?_⟩
+  rintro β ⟨hβm, hβe⟩
+  exact InducedCategory.hom_ext
+    (hβ₀u β.hom ⟨hβm, congrArg InducedCategory.Hom.hom hβe⟩)
+
+include F in
+/-- **(iii)(c)** 逆方向の移送。 -/
+theorem istr_otriBwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) φ)
+    (β : End B) (hβ : β ∈ OTri (istrPre P) B) :
+    ∃! α : End A, α ∈ OTri (istrPre P) A ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  obtain ⟨α₀, ⟨hα₀m, hα₀e⟩, hα₀u⟩ := F.otriBwd φ.hom
+    (isCoAngular_of_isotropic_dom P F A.property _) hst β.hom hβ
+  refine ⟨InducedCategory.homMk α₀, ⟨hα₀m, InducedCategory.hom_ext hα₀e⟩, ?_⟩
+  rintro α ⟨hαm, hαe⟩
+  exact InducedCategory.hom_ext
+    (hα₀u α.hom ⟨hαm, congrArg InducedCategory.Hom.hom hαe⟩)
+
+include F in
+/-- **(iii)(c)** `Base` にしか依らないことの移送。 -/
+theorem istr_otriBase {A B : Istr P} (φ φ' : A ⟶ B)
+    (hst : IsPreStep (istrPre P) φ) (hst' : IsPreStep (istrPre P) φ')
+    (hbase : (istrPre P).Base φ = (istrPre P).Base φ')
+    (α : End A) (hα : α ∈ OTri (istrPre P) A)
+    (β : End B) (hβ : β ∈ OTri (istrPre P) B)
+    (h : (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ) :
+    (φ' ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ' :=
+  InducedCategory.hom_ext
+    (F.otriBase φ.hom φ'.hom (isCoAngular_of_isotropic_dom P F A.property _) hst
+      (isCoAngular_of_isotropic_dom P F A.property _) hst' hbase α.hom hα β.hom hβ
+      (congrArg InducedCategory.Hom.hom h))
 
 end Istr
 
