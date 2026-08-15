@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] §1 — Definition 1.1 / Definition 1.2</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] §1 — Definition 1.1 / Definition 1.2</h1>
+
+<p>物理 p.19–p.23。<strong>400 dpi 目視確認 2026-08-15</strong>。</p>
+
+<p>★<strong>§1 は循環を持たない。</strong>2026-08-15 の測定で、以前「7節点の強連結成分」
+と見えていたものは引用タグの正規表現(<code>[A-Za-z]+</code> が <code>[Mzk15]</code> = FrdII を
+masking し損ねる)の副産物だと判明した。位相順序は
+<code>Definition 1.1 → 1.2 → 1.3 → Proposition 1.4 → 1.7 → 1.9 → 1.10</code>。</p>
+
+<h2>Definition 1.1 — elementary Frobenioid と pre-Frobenioid</h2>
+
+<section class="statement definition"
+         id="frdi-def-1-1-i"
+         data-paper="FrdI"
+         data-pdf-page="19"
+         data-item="Definition 1.1, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) We shall say that M ∈Ob(Mon) is pre-divisorial if it is integral [cf. §0],</div>
+<div class="reading"><code>pre-divisorial</code> = <code>integral</code> ∧ <code>saturated</code> ∧ <code>of characteristic type</code>。
+そのうえで <code>group-like</code> = 「<code>M<sup>char</sup></code> が零」、
+<code>divisorial</code> = pre-divisorial かつ <code>sharp</code>。</div>
+<p class="open">★(i) が §0 から引く語はちょうど3つで、Lean 側で全部揃っている。
+<code>group-like</code> は <code>M<sup>char</sup></code> を商モノイドとして作って初めて書けた。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-1-ii"
+         data-paper="FrdI"
+         data-pdf-page="19"
+         data-item="Definition 1.1, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">as a monoid on D if the following conditions are satisfied: (a) every morphism of</div>
+<div class="reading"><code>monoid on 𝒟</code> = 反変関手 <code>Φ : 𝒟 → 𝔐𝔬𝔫</code> であって
+(a) すべての <code>α*</code> が characteristically injective、
+(b) <code>α</code> が FSM-morphism なら <code>α*</code> が同型、を満たすもの。</div>
+<p class="open">★<strong>§0 の2語(<code>characteristically injective</code> と
+<code>FSM-morphism</code>)がここで初めて合流する。</strong>
+Lean 側は <code>Dᵒᵖ ⥤ AddCommMonCat</code> として書いた(<code>𝔐𝔬𝔫</code> は可換モノイドの圏)。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-1-iii"
+         data-paper="FrdI"
+         data-pdf-page="20"
+         data-item="Definition 1.1, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">then (a1, n1) · (a2, n2) = (a1 + n1 · a2, n1 · n2). Also, we shall write F def = FZ≥0 and</div>
+<div class="reading"><code>𝔽<sub>M</sub></code> の台は <code>M × ℕ<sub>≥1</sub></code>、積は
+<code>(a₁,n₁)·(a₂,n₂) = (a₁ + n₁·a₂, n₁·n₂)</code>。
+<code>𝔽 = 𝔽<sub>ℤ≥0</sub></code> が standard Frobenioid。</div>
+<p class="open">★これは<strong>半直積の形</strong>だが、mathlib の
+<code>SemidirectProduct (φ : G →* MulAut N)</code> は<strong>群かつ自己同型</strong>を要求するので使えない。
+<code>ℕ<sub>≥1</sub></code> の作用 <code>a ↦ n·a</code> は自己同型ではない(<code>M = ℕ</code> で
+<code>2·(−)</code> は全射でない)。<strong>自前で書く理由はこれである。</strong></p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-1-iv"
+         data-paper="FrdI"
+         data-pdf-page="20"
+         data-item="Definition 1.1, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">as a pre-Frobenioid structure on C. The natural projection functor FΦ →D thus</div>
+<div class="reading"><code>pre-Frobenioid structure</code> = 共変関手 <code>𝒞 → 𝔽<sub>Φ</sub></code>。
+仮定は「<code>Φ</code> が divisorial」「<code>𝒞</code>、<code>𝒟</code> が connected, totally epimorphic」。</div>
+<p class="open">★<strong>関手そのものには追加条件が無い</strong>。条件は <code>Φ</code> と
+<code>𝒞</code>、<code>𝒟</code> の側にある。★<code>connected</code>(圏について)は §0 で
+グラフ連結性として定義されているが、それは始対象を排除しない
+(<code>section-0.html#frdi-s0-connected-cat</code> 参照)。</p>
+</section>
+
+<h2>Definition 1.2 — 射と対象の類型</h2>
+
+<section class="statement definition"
+         id="frdi-def-1-2-i"
+         data-paper="FrdI"
+         data-pdf-page="21"
+         data-item="Definition 1.2, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) We shall say that φ is linear if degFr(φ) = 1. We shall say that φ is isometric,</div>
+<div class="reading"><code>linear</code> = <code>deg<sub>Fr</sub>(φ) = 1</code>。
+<code>isometric</code> = <code>Div(φ) = 0</code>。
+<code>metrically equivalent</code> = <code>Div(φ) = Div(ψ)</code>(co-objective な2射について)。</div>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-2-ii"
+         data-paper="FrdI"
+         data-pdf-page="21"
+         data-item="Definition 1.2, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) We shall refer to φ as a base-isomorphism (respectively, base-FSM-morphism)</div>
+<div class="reading"><code>base-isomorphism</code> / <code>base-FSM-morphism</code> / <code>base-isomorphic</code> /
+<code>pull-back morphism</code> / <code>base-equivalent</code> / <code>Div-equivalent</code> /
+<code>base-identity</code> / <code>Div-identity</code>、および部分モノイド
+<code>𝒪<sup>×</sup>(A)</code>、<code>𝒪<sup>▷</sup>(A)</code>。</div>
+<p class="open">★<code>Div-equivalent</code> は <code>Φ(φ) = Φ(ψ)</code>(誘導される単項式射の一致)であって、
+(i) の <code>metrically equivalent</code>(<code>Div(φ) = Div(ψ)</code>)とは<strong>別の条件</strong>である。
+原文が (i) と (ii) で別々に定めている。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-2-iii"
+         data-paper="FrdI"
+         data-pdf-page="22"
+         data-item="Definition 1.2, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) We shall say that φ is a pre-step [a term motivated by the point of view</div>
+<div class="reading"><code>pre-step</code>(linear な base-isomorphism)/ <code>step</code>(同型でない pre-step)/
+<code>primary pre-step</code> / <code>co-angular</code> / <code>LB-invertible</code> /
+<code>morphism of Frobenius type</code> / <code>prime-Frobenius morphism</code>。</div>
+<p class="open">★<code>co-angular</code> の本文は <code>[Mzk15], Definition 3.1, (iii)</code> を引用するが、
+<code>[Mzk15]</code> は <strong>The Geometry of Frobenioids II</strong> であり、
+<strong>FrdI 自身の Definition 3.1 ではない</strong>。この取り違えが
+「7節点の強連結成分」という偽の構造を生んでいた。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-2-iv"
+         data-paper="FrdI"
+         data-pdf-page="22"
+         data-item="Definition 1.2, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iv) A Frobenius-ample object of C is defined to be an object C such that for any</div>
+<div class="reading">対象の類型: <code>Frobenius-ample</code> / <code>Frobenius-trivial</code> /
+<code>Div-Frobenius-trivial</code> / <code>universally Div-Frobenius-trivial</code> /
+<code>quasi-Frobenius-trivial</code> / <code>sub-quasi-Frobenius-trivial</code> /
+<code>metrically trivial</code> / <code>base-trivial</code> / <code>group-like</code> /
+<code>unit-trivial</code> / <code>isotropic</code> / <code>isotropic hull</code> ほか。</div>
+<p class="open">★Lean 側で写していないもの: <code>Aut-ample</code> / <code>Aut<sup>sub</sup>-ample</code> /
+<code>End-ample</code> / <code>perfect</code> / <code>Frobenius-compact</code> /
+<code>Frobenius-normalized</code> / <code>Frobenius-isotropic</code>、および (v)。
+<code>Frobenius-compact</code> は <code>𝒪<sup>×</sup>(C)<sup>pf</sup></code>(perfection)を要求する。
+いずれも <code>Definition 1.3</code> は引かない。</p>
+</section>
+
+</body>
+</html>

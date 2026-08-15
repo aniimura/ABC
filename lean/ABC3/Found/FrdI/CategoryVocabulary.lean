@@ -1,0 +1,356 @@
+import Mathlib.CategoryTheory.Category.Preorder
+import Mathlib.CategoryTheory.Types.Basic
+import ABC3.Meta.Claim
+
+/-!
+# [FrdI] §0 の圏の語彙 —— `totally epimorphic` / `fiberwise-surjective` / `FSM-morphism`
+
+原典: S. Mochizuki, *The Geometry of Frobenioids I: The General Theory* [FrdI]、
+物理 p.14 と p.15(**400 dpi 目視確認 2026-08-15**)。
+
+## なぜここを作るか
+
+`[FrdI] Definition 1.1, (ii)/(iv)` は圏の側の語彙を §0 から引く:
+
+* `(ii)` (b): 「if α is an **FSM-morphism** [cf. §0] of 𝒟, then α* is an isomorphism」
+* `(iv)`: 「𝒞, 𝒟 are connected, **totally epimorphic** categories [cf. §0]」
+
+★前回作った `MonoidVocabulary.lean` は `Definition 1.1, (i)`(モノイドの側)だけを
+閉じたものである。**`Definition 1.2` が依拠するのは (ii)(iii)(iv)、すなわち圏の側**であり、
+そこはまだ何も無かった。
+
+## ★mathlib の実測(2026-08-15)
+
+| 原文の語 | mathlib | 判定 |
+|---|---|---|
+| `totally epimorphic` | **0 件** | 無い。自前で書く(1行) |
+| `fiberwise-surjective` | **0 件** | 無い。自前で書く |
+| `FSM-morphism` | **0 件** | 無い |
+| epimorphism / monomorphism | `CategoryTheory.Epi` / `.Mono` | ★**使う** |
+| 前順序を圏と見る | `Preorder.smallCategory`、`homOfLE` / `leOfHom` | ★**使う** |
+| `Type` の epi ⟺ 全射 | `CategoryTheory.epi_iff_surjective` | ★**使う** |
+
+★語で 0 件だったので、S2(概念)でも探した。`fiberwise-surjective` は
+「引き戻しが空でない」という形の条件だが、mathlib の `Limits.HasPullback` 系は
+**極限の存在**を要求するので別物である(原文の条件は極限を要求しない)。
+-/
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory
+
+universe v u
+
+variable (C : Type u) [Category.{v} C]
+
+/-! ### 定義 -/
+
+/-- **[FrdI] §0 `totally epimorphic`** —— 圏のすべての射が epimorphism。
+
+原文 (FrdI p.15):
+> nected objects are always quasi-connected. We shall say that a category C is totally
+
+原文 (FrdI p.15):
+> (respectively, almost totally) epimorphic if every morphism in C whose domain is
+
+原文 (FrdI p.15):
+> arbitrary (respectively, nonempty) and whose codomain is arbitrary (respectively,
+
+原文 (FrdI p.15):
+> connected) is an epimorphism.
+
+★原文は括弧で `almost totally` と二重に述べるが、`totally` の側は
+「domain も codomain も**任意**」なので、条件は「すべての射が epi」に尽きる。
+-/
+def IsTotallyEpimorphic : Prop := ∀ (A B : C) (f : A ⟶ B), Epi f
+
+variable {C}
+
+/-- **[FrdI] §0 `fiberwise-surjective`**。
+
+原文 (FrdI p.14):
+> We shall say that an arrow β : B →A of a category C is fiberwise-surjective
+
+原文 (FrdI p.14):
+> if, for every arrow γ : C →A of C, there exist arrows δB : D →B, δC : D →C
+
+原文 (FrdI p.14):
+> such that β ◦δB = γ ◦δC. An arrow of a category which is a fiberwise-surjective
+
+★原文の `β ◦ δB` は Lean の `≫` では `δB ≫ β` である(合成の向きが逆)。
+-/
+def IsFiberwiseSurjective {B A : C} (β : B ⟶ A) : Prop :=
+  ∀ ⦃Z : C⦄ (γ : Z ⟶ A), ∃ (D : C) (δB : D ⟶ B) (δZ : D ⟶ Z), δB ≫ β = δZ ≫ γ
+
+/-- **[FrdI] §0 `FSM-morphism`** —— fiberwise-surjective な monomorphism。
+
+原文 (FrdI p.14):
+> monomorphism will be referred to as an FSM-morphism. One verifies immediately
+-/
+def IsFSMMorphism {B A : C} (β : B ⟶ A) : Prop := IsFiberwiseSurjective β ∧ Mono β
+
+variable (C)
+
+/-- **[FrdI] §0 `category of FSM-type`** —— FSM-morphism がすべて同型。
+
+原文 (FrdI p.14):
+> which satisfies the property that every FSM-morphism of C is, in fact, an isomor-
+
+原文 (FrdI p.14):
+> phism will be referred to as a category of FSM-type.
+-/
+def IsOfFSMType : Prop := ∀ (B A : C) (β : B ⟶ A), IsFSMMorphism β → IsIso β
+
+/-! ### ★原文が主張していることを証明する
+
+原文 (FrdI p.14):
+> that every composite of FSM-morphisms is again an FSM-morphism. A category C
+
+★原文は「One verifies immediately that …」と書くだけで証明を置かない。
+**それを実際に示す**のがここの目的である。
+-/
+
+variable {C}
+
+/-- 恒等射は fiberwise-surjective。 -/
+theorem isFiberwiseSurjective_id (A : C) : IsFiberwiseSurjective (𝟙 A) :=
+  fun _ γ => ⟨_, γ, 𝟙 _, by simp⟩
+
+/-- fiberwise-surjective は合成で閉じる。
+
+`γ : Z ⟶ A'` に対し、まず `β'` の性質で `D₁, δA, δZ` を取り、
+その `δA : D₁ ⟶ A` に `β` の性質を当てて `D₂, δB, δD₁` を取る。すると
+`δB ≫ (β ≫ β') = (δD₁ ≫ δZ) ≫ γ`。 -/
+theorem IsFiberwiseSurjective.comp {B A A' : C} {β : B ⟶ A} {β' : A ⟶ A'}
+    (hβ : IsFiberwiseSurjective β) (hβ' : IsFiberwiseSurjective β') :
+    IsFiberwiseSurjective (β ≫ β') := by
+  intro Z γ
+  obtain ⟨D₁, δA, δZ, h₁⟩ := hβ' γ
+  obtain ⟨D₂, δB, δD₁, h₂⟩ := hβ δA
+  refine ⟨D₂, δB, δD₁ ≫ δZ, ?_⟩
+  calc δB ≫ β ≫ β' = (δB ≫ β) ≫ β' := by simp
+    _ = (δD₁ ≫ δA) ≫ β' := by rw [h₂]
+    _ = δD₁ ≫ (δA ≫ β') := by simp
+    _ = δD₁ ≫ (δZ ≫ γ) := by rw [h₁]
+    _ = (δD₁ ≫ δZ) ≫ γ := by simp
+
+/-- ★**原文の主張** —— FSM-morphism の合成は FSM-morphism。
+
+原文 (FrdI p.14):
+> that every composite of FSM-morphisms is again an FSM-morphism. A category C
+-/
+theorem IsFSMMorphism.comp {B A A' : C} {β : B ⟶ A} {β' : A ⟶ A'}
+    (hβ : IsFSMMorphism β) (hβ' : IsFSMMorphism β') : IsFSMMorphism (β ≫ β') :=
+  ⟨hβ.1.comp hβ'.1, @mono_comp _ _ _ _ _ _ hβ.2 _ hβ'.2⟩
+
+/-! ### ★非退化 —— 各語に「満たす例」と「満たさない例」 -/
+
+/-- hom 集合が subsingleton な圏(= 前順序の圏)は totally epimorphic。 -/
+theorem isTotallyEpimorphic_of_subsingleton_hom
+    (hs : ∀ X Y : C, Subsingleton (X ⟶ Y)) : IsTotallyEpimorphic C :=
+  fun _ _ _ => ⟨fun g h _ => (hs _ _).elim g h⟩
+
+/-- `Type` の中の非全射な射(`PUnit → Bool`、値は `true` のみ)。 -/
+private def punitToBool : PUnit ⟶ Bool := TypeCat.ofHom fun _ => true
+
+/-- ★`Type` は **totally epimorphic でない** —— `PUnit → Bool` は全射でないので epi でない。 -/
+theorem not_isTotallyEpimorphic_type : ¬ IsTotallyEpimorphic (Type) := by
+  intro h
+  have he : Epi punitToBool := h _ _ _
+  rw [CategoryTheory.epi_iff_surjective] at he
+  obtain ⟨_, hx⟩ := he false
+  exact Bool.noConfusion hx
+
+/-- ★★**始対象を持つ圏では「すべての射」が fiberwise-surjective である。**
+
+始対象を `D` に取ると、条件 `δB ≫ β = δZ ≫ γ` が**始対象からの射の一意性**だけで
+満たされてしまうからである。
+
+★これは原文の定義についての測定結果である: `fiberwise-surjective` は
+**始対象を持つ圏では退化する**。だから原文は `Definition 1.1, (iv)` で
+「**connected**, totally epimorphic categories」と、圏の側に条件を課している。
+
+★ここでは `Limits` を import せず、始対象の性質(全対象への射があり、それが一意)を
+仮定としてそのまま書く。 -/
+theorem isFiberwiseSurjective_of_initial (I : C) (arr : ∀ X : C, I ⟶ X)
+    (huniq : ∀ (X : C) (f g : I ⟶ X), f = g) {B A : C} (β : B ⟶ A) :
+    IsFiberwiseSurjective β :=
+  fun _ _ => ⟨I, arr _, arr _, huniq _ _ _⟩
+
+/-- ★`Type` では `PEmpty` が始対象なので、**すべての射**が fiberwise-surjective。 -/
+theorem isFiberwiseSurjective_of_type {X Y : Type} (f : X ⟶ Y) :
+    IsFiberwiseSurjective f :=
+  isFiberwiseSurjective_of_initial PEmpty (fun _ => TypeCat.ofHom fun e => e.elim)
+    (fun _ _ _ => by ext e; exact e.elim) f
+
+/-! #### ★V 字の半順序 —— 下限を持たない圏
+
+`left` と `right` はともに `top` の下にあるが、互いに比較不能で、
+**共通の下界を持たない**。これが `fiberwise-surjective` を破る最小の形である。 -/
+
+/-- 3点の半順序 `left ≤ top`、`right ≤ top`、`left` と `right` は比較不能。 -/
+inductive Vee : Type
+  | left : Vee
+  | right : Vee
+  | top : Vee
+  deriving DecidableEq
+
+instance : Preorder Vee where
+  le a b := a = b ∨ b = Vee.top
+  le_refl _ := Or.inl rfl
+  le_trans a b c hab hbc := by
+    rcases hab with rfl | rfl
+    · exact hbc
+    · rcases hbc with rfl | h
+      · exact Or.inr rfl
+      · exact Or.inr h
+
+/-- `Vee` は totally epimorphic(前順序の圏だから)。 -/
+theorem isTotallyEpimorphic_vee : IsTotallyEpimorphic Vee :=
+  isTotallyEpimorphic_of_subsingleton_hom fun X Y => Preorder.subsingleton_hom X Y
+
+/-- `Vee` で `top` へ向かう射のうち、始点が `top` でないものは
+**fiberwise-surjective でない**。
+
+`X` と別の `Z`(ともに `top` でない)を取ると、`D ≤ X` かつ `D ≤ Z` は
+`D = X` かつ `D = Z` を強いるので矛盾する。 -/
+theorem not_isFiberwiseSurjective_vee (X Z : Vee) (hXZ : X ≠ Z)
+    (hX : X ≠ Vee.top) (hZ : Z ≠ Vee.top) (β : X ⟶ Vee.top) :
+    ¬ IsFiberwiseSurjective β := by
+  intro h
+  obtain ⟨D, δB, δZ, -⟩ := h (homOfLE (show Z ≤ Vee.top from Or.inr rfl))
+  rcases leOfHom δB with h1 | h1
+  · rcases leOfHom δZ with h2 | h2
+    · exact hXZ (h1.symm.trans h2)
+    · exact hZ h2
+  · exact hX h1
+
+/-- ★`Vee` の `left ⟶ top` は **fiberwise-surjective でない**(具体例)。 -/
+theorem not_isFiberwiseSurjective_vee_left :
+    ¬ IsFiberwiseSurjective (homOfLE (show Vee.left ≤ Vee.top from Or.inr rfl)) :=
+  not_isFiberwiseSurjective_vee Vee.left Vee.right (by decide) (by decide) (by decide) _
+
+/-- `Vee` の自己射はすべて同型(hom が subsingleton だから)。 -/
+theorem isIso_vee_self {X : Vee} (f : X ⟶ X) : IsIso f :=
+  ⟨⟨𝟙 X, Subsingleton.elim _ _, Subsingleton.elim _ _⟩⟩
+
+/-- ★`Vee` は **of FSM-type** —— FSM-morphism は恒等射しかない。 -/
+theorem isOfFSMType_vee : IsOfFSMType Vee := by
+  intro X Y β hβ
+  rcases leOfHom β with rfl | rfl
+  · exact isIso_vee_self β
+  · obtain (rfl | rfl | rfl) : X = Vee.left ∨ X = Vee.right ∨ X = Vee.top := by
+      cases X
+      · exact Or.inl rfl
+      · exact Or.inr (Or.inl rfl)
+      · exact Or.inr (Or.inr rfl)
+    · exact absurd hβ.1
+        (not_isFiberwiseSurjective_vee Vee.left Vee.right (by decide) (by decide) (by decide) β)
+    · exact absurd hβ.1
+        (not_isFiberwiseSurjective_vee Vee.right Vee.left (by decide) (by decide) (by decide) β)
+    · exact isIso_vee_self β
+
+/-! ### ★★退化の射程 —— 「始対象があると `fiberwise-surjective` が潰れる」の帰結
+
+`isFiberwiseSurjective_of_initial` は「始対象があれば全射が fiberwise-surjective」
+と言う。すると `FSM-morphism` は単なる monomorphism に潰れ、
+`of FSM-type` は「すべての mono が同型」という非常に強い条件になる。
+
+**では原文の設定でそれが起きるか。** 測定した結果は次のとおりである。
+
+★**§0 は圏についての `connected` を定義している**(物理 p.16、400 dpi 目視確認)。
+
+原文 (FrdI p.16):
+> as a connected component of C. In particular, we shall say that C is connected if
+
+そして**それはグラフの連結性であって、始対象を排除しない**——始対象を持つ圏は
+つねにグラフとして連結である。したがって `Definition 1.1, (iv)` の
+「connected, totally epimorphic categories」の `connected` では退化を防げない。
+
+★★**防いでいるのは `totally epimorphic` の側である。** 下の
+`subsingleton_hom_of_isTotallyEpimorphic_of_initial` が示すとおり、
+**totally epimorphic な圏が始対象を持てば、その圏は前順序になる**
+(hom がすべて subsingleton)。したがって
+
+* `𝒟` が前順序でない(= 実際の設定)なら、`𝒟` に始対象は無く、退化は起きない
+* `𝒟` が始対象を持つなら、`𝒟` は前順序であり、Frobenioid 論は自明化する
+
+★**原文はこの条件を明示していない**(「𝒟 は始対象を持たない」とは書いていない)。
+読者が `totally epimorphic` から導く必要がある。ここではその導出を定理として置く。
+-/
+
+/-- ★★**totally epimorphic な圏が始対象を持てば、hom はすべて subsingleton**
+(= その圏は前順序である)。
+
+始対象からの一意な射 `i : I ⟶ X` は epi である。`f g : X ⟶ Y` に対し
+`i ≫ f` と `i ≫ g` はどちらも `I ⟶ Y` なので始対象の一意性から等しく、
+`i` が epi なので `f = g`。 -/
+theorem subsingleton_hom_of_isTotallyEpimorphic_of_initial
+    (h : IsTotallyEpimorphic C) (I : C) (arr : ∀ X : C, I ⟶ X)
+    (huniq : ∀ (X : C) (f g : I ⟶ X), f = g) (X Y : C) : Subsingleton (X ⟶ Y) := by
+  refine ⟨fun f g => ?_⟩
+  haveI : Epi (arr X) := h _ _ _
+  exact (cancel_epi (arr X)).mp (huniq Y _ _)
+
+/-- ★**原文が「in passing」と述べる主張** —— totally epimorphic な圏では、
+`α ∘ β` が同型なら `α` と `β` も同型。
+
+原文 (FrdI p.16):
+> We observe in passing that if C is a totally epimorphic category, and α ◦β
+
+原文 (FrdI p.16):
+> [where α, β ∈Arr(C)] is an isomorphism, then α, β are isomorphisms.
+
+★原文は証明を置かない。**それを実際に示す。**
+`β ≫ (α ≫ (β ≫ α)⁻¹) = 𝟙` なので `β` は split mono、さらに `β` が epi なので
+逆向きの合成も `𝟙` になり `β` は同型。`α` はその後 `β⁻¹ ≫ (β ≫ α)` として同型。 -/
+theorem isIso_of_isIso_comp (h : IsTotallyEpimorphic C) {A B E : C}
+    (β : A ⟶ B) (α : B ⟶ E) [IsIso (β ≫ α)] : IsIso β ∧ IsIso α := by
+  haveI : Epi β := h _ _ _
+  have hβ : IsIso β := by
+    refine ⟨α ≫ inv (β ≫ α), ?_, ?_⟩
+    · rw [← Category.assoc, IsIso.hom_inv_id]
+    · refine (cancel_epi β).mp ?_
+      rw [← Category.assoc, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp,
+        Category.comp_id]
+  refine ⟨hβ, ?_⟩
+  haveI := hβ
+  have : α = inv β ≫ (β ≫ α) := by rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  rw [this]
+  infer_instance
+
+/-- ★`Type` は **of FSM-type でない** —— `PUnit → Bool` は
+単射(mono)で、かつ `Type` では自動的に fiberwise-surjective なので FSM-morphism だが、
+全単射でないので同型でない。
+
+★`isFiberwiseSurjective_of_type` の退化がここに効いている。 -/
+theorem not_isOfFSMType_type : ¬ IsOfFSMType (Type) := by
+  intro h
+  have hm : Mono punitToBool := by
+    rw [CategoryTheory.mono_iff_injective]
+    intro a b _
+    exact Subsingleton.elim a b
+  have := h _ _ _ ⟨isFiberwiseSurjective_of_type _, hm⟩
+  rw [CategoryTheory.isIso_iff_bijective] at this
+  obtain ⟨_, hx⟩ := this.2 false
+  exact Bool.noConfusion hx
+
+/-! ### ★出典の紐付け(`.src`) -/
+
+def IsTotallyEpimorphic.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 15, item := "§0 Categories — totally epimorphic",
+    sectionId := "frdi-s0-tot-epi" }
+
+def IsFiberwiseSurjective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — fiberwise-surjective",
+    sectionId := "frdi-s0-fsm" }
+
+def IsFSMMorphism.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — FSM-morphism",
+    sectionId := "frdi-s0-fsm" }
+
+def IsOfFSMType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — category of FSM-type",
+    sectionId := "frdi-s0-fsm" }
+
+end ABC3.Found.FrdI

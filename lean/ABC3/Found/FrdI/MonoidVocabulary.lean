@@ -6,6 +6,8 @@ import Mathlib.Tactic.Ring
 import Mathlib.Tactic.NormNum
 import Mathlib.Algebra.Group.Submonoid.Membership
 import Mathlib.Data.ZMod.Basic
+import Mathlib.GroupTheory.Congruence.Hom
+import ABC3.Meta.Claim
 
 /-!
 # [FrdI] §0 のモノイド語彙 —— `sharp` / `integral` / `saturated`
@@ -502,5 +504,301 @@ theorem isPreDivisorial_int : IsPreDivisorial ℤ :=
 /-- ★`ℤ` は **divisorial ではない** —— sharp でないから。
 `pre-divisorial` と `divisorial` が別物であることの確認。 -/
 theorem not_isDivisorial_int : ¬ IsDivisorial ℤ := fun h => not_isSharp_int h.2
+
+/-! ### ★出典の紐付け(`.src`)
+
+`Skeleton/` の宣言は `.src` で原典項目に紐づいている。`Found/` にはその規約が
+及んでいなかったため、**実装を原典に対して数えられなかった**(器具が 0 件と印字していた)。
+ここで主要な定義に `.src` を付ける。★`Skeleton/` と**同じ検査**(論文の登記・
+物理ページの範囲・`1_Structured` の `sectionId` の実在)が走る。 -/
+
+def IsSharp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — sharp",
+    sectionId := "frdi-s0-sharp-integral" }
+
+def IsIntegralMonoid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — integral",
+    sectionId := "frdi-s0-sharp-integral" }
+
+def IsSaturatedMonoid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — saturated",
+    sectionId := "frdi-s0-saturated" }
+
+def IsOfCharacteristicType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — of characteristic type",
+    sectionId := "frdi-s0-char-type" }
+
+def MChar.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — M^char = M/M^±",
+    sectionId := "frdi-s0-char-type" }
+
+def IsCharacteristicallyInjective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — characteristically injective",
+    sectionId := "frdi-s0-char-inj" }
+
+def IsPrimaryElt.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — primary",
+    sectionId := "frdi-s0-primary" }
+
+def IsPreDivisorial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — pre-divisorial",
+    sectionId := "frdi-def-1-1-i" }
+
+def IsDivisorial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — divisorial",
+    sectionId := "frdi-def-1-1-i" }
+
+def IsGroupLike.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — group-like",
+    sectionId := "frdi-def-1-1-i" }
+
+/-! ### ★`M^char = M/M^±` を**商モノイドとして**作る(2026-08-15 追加)
+
+前回はここを `CharRel`(同じファイバーに属する関係)で止めた。今回 `Definition 1.1` を
+閉じるために、**商モノイドそのもの**を作る。これが要るのは2箇所である:
+
+* `Definition 1.1, (i)` の `group-like`(「`M^char` が零」)
+* `Definition 1.1, (ii)` (a) の `characteristically injective`(§0)
+
+原文 (FrdI p.11):
+> the quotient monoid of M by M ±, which we shall refer to as the characteristic of
+-/
+
+variable (M)
+
+/-- `CharRel` は**加法合同関係**である。
+
+推移律: `a + u = b + v`、`b + u' = c + v'` から
+`a + (u+u') = (a+u) + u' = (b+v) + u' = (b+u') + v = (c+v') + v = c + (v'+v)`。
+-/
+def charCon : AddCon M where
+  r := CharRel
+  iseqv :=
+    { refl := charRel_refl
+      symm := fun ⟨u, v, hu, hv, h⟩ => ⟨v, u, hv, hu, h.symm⟩
+      trans := fun ⟨u, v, hu, hv, h⟩ ⟨u', v', hu', hv', h'⟩ =>
+        ⟨u + u', v' + v, hu.add hu', hv'.add hv, by
+          rw [← add_assoc, h, add_right_comm, h', add_assoc]⟩ }
+  add' := fun ⟨u, v, hu, hv, h⟩ ⟨u', v', hu', hv', h'⟩ =>
+    ⟨u + u', v + v', hu.add hu', hv.add hv', by
+      rw [add_add_add_comm, h, h', add_add_add_comm]⟩
+
+/-- **[FrdI] §0** —— **`M^char = M/M^±`**、商モノイドとして。 -/
+abbrev MChar : Type _ := (charCon M).Quotient
+
+variable {M}
+
+/-- 自然な全射 `M ↠ M^char`。 -/
+def toChar : M →+ MChar M := (charCon M).mk'
+
+@[simp] theorem toChar_eq_iff {a b : M} : toChar a = toChar b ↔ CharRel a b :=
+  AddCon.eq _
+
+variable (M)
+
+/-- **[FrdI] Definition 1.1, (i)** —— `group-like` = 「`M^char` が零」。
+
+原文 (FrdI p.19):
+> divisorial. Then we shall say that M is group-like if M char is zero; we shall say that
+-/
+def IsGroupLike : Prop := ∀ x : MChar M, x = 0
+
+/-- ★`group-like` ⟺ **M が群である**(全元が可逆)。
+
+原文の「`M^char` が零」を、`M` の側の条件に翻訳したもの。★これが
+`M^char` を**商モノイドとして**作った見返りである——`CharRel` のままでは
+「零である」という条件そのものが書けなかった。 -/
+theorem isGroupLike_iff : IsGroupLike M ↔ ∀ a : M, IsAddUnit a := by
+  constructor
+  · intro h a
+    have : (toChar a : MChar M) = toChar 0 := by rw [h (toChar a), map_zero]
+    obtain ⟨u, v, hu, hv, huv⟩ := toChar_eq_iff.mp this
+    obtain ⟨V, rfl⟩ := hv
+    refine ⟨⟨a, u + V.neg, ?_, ?_⟩, rfl⟩
+    · rw [← add_assoc, huv, zero_add, V.val_neg]
+    · rw [add_comm, ← add_assoc, huv, zero_add, V.val_neg]
+  · intro h x
+    induction x using AddCon.induction_on with
+    | H a =>
+      obtain ⟨A, rfl⟩ := h a
+      show (toChar (A : M) : MChar M) = toChar 0
+      exact toChar_eq_iff.mpr ⟨A.neg, 0, ⟨-A, rfl⟩, isAddUnit_zero, by simp⟩
+
+/-! ### 非退化(`group-like`) -/
+
+/-- `ℤ` は **group-like**。 -/
+theorem isGroupLike_int : IsGroupLike ℤ :=
+  (isGroupLike_iff ℤ).mpr fun a => ⟨⟨a, -a, by omega, by omega⟩, rfl⟩
+
+/-- ★`ℕ` は **group-like でない** —— `1` が可逆でない。 -/
+theorem not_isGroupLike_nat : ¬ IsGroupLike ℕ := by
+  intro h
+  obtain ⟨A, hA⟩ := (isGroupLike_iff ℕ).mp h 1
+  have := A.val_neg
+  omega
+
+/-! ### ★§0 `characteristically injective`
+
+`Definition 1.1, (ii)` (a) が引く語。**`M^char` を作ったので初めて書ける。**
+
+原文 (FrdI p.11):
+> φ : M1 →M2 is a morphism of Mon, then we shall say that φ is characteristically
+原文 (FrdI p.11):
+> injective if φ is injective, and, moreover, the morphism M char
+-/
+
+variable {M} {N : Type*} [AddCommMonoid N]
+
+/-- `φ : M →+ N` が誘導する `M^char →+ N^char`。 -/
+def charMap (φ : M →+ N) : MChar M →+ MChar N :=
+  AddCon.lift _ (toChar.comp φ) <| by
+    rintro a b ⟨u, v, hu, hv, huv⟩
+    exact toChar_eq_iff.mpr ⟨φ u, φ v, hu.map φ, hv.map φ, by
+      simpa using congrArg φ huv⟩
+
+@[simp] theorem charMap_toChar (φ : M →+ N) (a : M) :
+    charMap φ (toChar a) = toChar (φ a) := rfl
+
+/-- **[FrdI] §0** —— `characteristically injective`。
+
+★原文は「`φ` が単射で、**かつ** `M₁^char → M₂^char` も単射」と**2つ**要求する。
+片方だけでは足りないことは下の非退化で示す。 -/
+def IsCharacteristicallyInjective (φ : M →+ N) : Prop :=
+  Function.Injective φ ∧ Function.Injective (charMap φ)
+
+/-! ### 非退化(`characteristically injective`) -/
+
+/-- `AddMonoidHom.id` は characteristically injective。 -/
+theorem isCharacteristicallyInjective_id :
+    IsCharacteristicallyInjective (AddMonoidHom.id M) := by
+  refine ⟨fun a b h => h, ?_⟩
+  intro x y h
+  induction x using AddCon.induction_on with
+  | H a =>
+    induction y using AddCon.induction_on with
+    | H b => exact toChar_eq_iff.mpr (toChar_eq_iff.mp h)
+
+/-- ★**単射だが characteristically injective でない射がある** ——
+`ℕ →+ ℤ`(包含)。`ℕ^char = ℕ`(可逆元が 0 のみ)だが `ℤ^char = 0` なので、
+誘導される `ℕ^char → ℤ^char` は単射でない。
+
+★これが「2つ要求する」ことの意味である。 -/
+theorem not_isCharacteristicallyInjective_natCast :
+    ¬ IsCharacteristicallyInjective ((Nat.castAddMonoidHom ℤ)) := by
+  rintro ⟨-, h2⟩
+  have h0 : charMap (Nat.castAddMonoidHom ℤ) (toChar (0 : ℕ)) = charMap (Nat.castAddMonoidHom ℤ) (toChar (1 : ℕ)) := by
+    rw [charMap_toChar, charMap_toChar]
+    exact (isGroupLike_int _).trans (isGroupLike_int _).symm
+  have : (0 : ℕ) = 1 := by
+    have := toChar_eq_iff.mp (h2 h0)
+    obtain ⟨u, v, hu, hv, huv⟩ := this
+    obtain ⟨U, rfl⟩ := hu
+    obtain ⟨V, rfl⟩ := hv
+    have := U.val_neg; have := V.val_neg
+    omega
+  exact absurd this (by decide)
+
+/-! ### ★`ℕ` は divisorial である
+
+`Definition 1.2` の非退化 witness に**具体的な pre-Frobenioid** が要る。
+その divisor monoid として `ℕ` を使うので、`Definition 1.1, (i)` の条件を
+全部確かめておく。残っていたのは `saturated` である。 -/
+
+/-- `Gp ℕ` の元 `mk p q` が `ℕ` の像に入る ⟺ `q ≤ p`。 -/
+theorem mem_range_toGp_nat (p : ℕ) (q : (⊤ : AddSubmonoid ℕ)) :
+    AddLocalization.mk p q ∈ Set.range (toGp ℕ) ↔ (q : ℕ) ≤ p := by
+  constructor
+  · rintro ⟨m, hm⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists] at hm
+    obtain ⟨c, hc⟩ := hm
+    simp only [AddSubmonoid.coe_zero] at hc
+    omega
+  · intro h
+    refine ⟨p - (q : ℕ), ?_⟩
+    rw [toGp, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists]
+    exact ⟨0, by simp only [AddSubmonoid.coe_zero]; omega⟩
+
+/-- ★`ℕ` は **saturated**。
+
+`n • mk p q = mk (n·p) (n·q)` が `ℕ` の像に入るなら `n·q ≤ n·p`、
+`n ≥ 1` なので `q ≤ p`、よって `mk p q` 自身も像に入る。 -/
+theorem isSaturatedMonoid_nat : IsSaturatedMonoid ℕ := by
+  intro a n hn
+  induction a using AddLocalization.ind with
+  | _ y =>
+    obtain ⟨p, q⟩ := y
+    intro hmem
+    rw [AddLocalization.mk_nsmul] at hmem
+    have h1 := (mem_range_toGp_nat _ _).mp hmem
+    simp only [AddSubmonoidClass.coe_nsmul, smul_eq_mul] at h1
+    exact (mem_range_toGp_nat p q).mpr (Nat.le_of_mul_le_mul_left h1 hn)
+
+/-- ★`ℕ` は **pre-divisorial**。 -/
+theorem isPreDivisorial_nat : IsPreDivisorial ℕ :=
+  ⟨isIntegralMonoid_nat, isSaturatedMonoid_nat, isOfCharacteristicType_nat⟩
+
+/-- ★`ℕ` は **divisorial** —— `Definition 1.1, (iv)` が `Φ` に課す条件を満たす
+具体的なモノイド。 -/
+theorem isDivisorial_nat : IsDivisorial ℕ := ⟨isPreDivisorial_nat, isSharp_nat⟩
+
+/-! ### ★§0 の順序と `primary`(物理 p.12、**400 dpi 目視確認 2026-08-15**)
+
+`[FrdI] Definition 1.2, (iii)` の `primary pre-step` が引く語。
+
+原文 (FrdI p.12):
+> if ∃c ∈M such that a + c = b and
+
+原文 (FrdI p.12):
+> if ∃n ∈N≥1 such that a ≤n · b. If a subset S ⊆M satisfies the property that there
+
+原文 (FrdI p.12):
+> is irreducible if any equation a = b + c in M, where b, c ∈M, implies that b = 0
+
+原文 (FrdI p.12):
+> Denote by Primary(M) the set of primary
+
+★`primary` の定義文そのもの(「for any `M ∋ b ⪯ a`, where `b ≠ 0`, it holds that
+`a ⪯ b`」)は逐語照合に掛けていない。`≠` が pdftotext では合成文字
+(スラッシュ + 等号)になり、照合器が拾えないためである。**書き換えずに、
+照合できない事実として記す。**
+-/
+
+/-- **[FrdI] §0** —— `a ≤ b`。 -/
+def MLe (a b : M) : Prop := ∃ c : M, a + c = b
+
+/-- **[FrdI] §0** —— `a ⪯ b`。 -/
+def MPrec (a b : M) : Prop := ∃ n : ℕ, 0 < n ∧ MLe a (n • b)
+
+/-- **[FrdI] §0** —— `irreducible`。 -/
+def IsIrreducibleElt (a : M) : Prop := a ≠ 0 ∧ ∀ b c : M, a = b + c → b = 0 ∨ c = 0
+
+/-- **[FrdI] §0** —— `primary`。 -/
+def IsPrimaryElt (a : M) : Prop := a ≠ 0 ∧ ∀ b : M, b ≠ 0 → MPrec b a → MPrec a b
+
+/-! #### 非退化 -/
+
+/-- `1 : ℕ` は irreducible。 -/
+theorem isIrreducibleElt_one_nat : IsIrreducibleElt (1 : ℕ) := ⟨one_ne_zero, fun b c h => by omega⟩
+
+/-- ★`2 : ℕ` は **irreducible でない**(`2 = 1 + 1`)。 -/
+theorem not_isIrreducibleElt_two_nat : ¬ IsIrreducibleElt (2 : ℕ) := by
+  rintro ⟨-, h⟩
+  rcases h 1 1 rfl with h1 | h1 <;> omega
+
+/-- `1 : ℕ` は primary —— `ℕ` では `0` でない元は互いに `⪯` で結ばれる。 -/
+theorem isPrimaryElt_one_nat : IsPrimaryElt (1 : ℕ) := by
+  refine ⟨one_ne_zero, fun b hb _ => ⟨1, one_pos, b - 1, ?_⟩⟩
+  simp only [one_smul]
+  omega
+
+/-- ★`(1,1) : ℕ × ℕ` は **primary でない**。
+
+`(1,0) ⪯ (1,1)` は成り立つが、`(1,1) ⪯ (1,0)` は第2成分で破れる
+(`1 + c = 0` は `ℕ` で解けない)。★`primary` が自明な条件でないことの実例。 -/
+theorem not_isPrimaryElt_nat_prod : ¬ IsPrimaryElt ((1, 1) : ℕ × ℕ) := by
+  rintro ⟨-, h⟩
+  obtain ⟨n, -, c, hc⟩ := h (1, 0) (by simp) ⟨1, one_pos, (0, 1), by simp⟩
+  have := congrArg Prod.snd hc
+  simp at this
 
 end ABC3.Found.FrdI

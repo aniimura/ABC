@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] §0 — モノイドと圏の語彙</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] §0 — モノイドと圏の語彙</h1>
+
+<p>物理 p.11–p.16。<strong>400 dpi 目視確認 2026-08-15</strong>。
+<code>Definition 1.1</code> と <code>Definition 1.2</code> が引く語をここに集める。</p>
+
+<h2>モノイドの語彙(p.11–p.12)</h2>
+
+<section class="statement definition"
+         id="frdi-s0-sharp-integral"
+         data-paper="FrdI"
+         data-pdf-page="11"
+         data-item="§0 Monoids — sharp / integral"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">M ± = 0; we shall say that M is integral if the natural map M →M gp is injective;</div>
+<div class="reading"><code>sharp</code> = 可逆元が <code>0</code> だけ(<code>M<sup>±</sup> = 0</code>)。
+<code>integral</code> = 群化への自然写像 <code>M → M<sup>gp</sup></code> が単射。</div>
+<p class="open">★<code>M ±</code> は原文では上付きの <code>M<sup>±</sup></code>。
+<code>pdftotext</code> が上付きを空白区切りの別トークンにするため <code>M ±</code> と出る。
+<strong>「M と ±」に読め、単項演算の記号と紛れる。</strong></p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-saturated"
+         data-paper="FrdI"
+         data-pdf-page="11"
+         data-item="§0 Monoids — saturated"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">we shall say that M is saturated if every a ∈M gp for which n · a lies in the image</div>
+<div class="reading"><code>saturated</code> = <code>n · a</code>(<code>n ≥ 1</code>)が <code>M</code> の像に入るような
+<code>a ∈ M<sup>gp</sup></code> は、それ自身 <code>M</code> の像に入る。</div>
+<p class="open">★これは mathlib の <code>AddSubmonoid.NSMulSaturated</code> と<strong>同じ条件</strong>である。
+Lean 側の <code>frdI_saturated_iff</code> で同値を証明した。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-char-type"
+         data-paper="FrdI"
+         data-pdf-page="11"
+         data-item="§0 Monoids — of characteristic type"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">characteristic type if the fibers of the natural map M →M char are torsors over M ±.</div>
+<div class="reading"><code>of characteristic type</code> = <code>M → M<sup>char</sup></code> のファイバーが
+<code>M<sup>±</sup></code> 上のトーサー(単純推移的)。</div>
+<p class="open">★<code>M<sup>char</sup> = M/M<sup>±</sup></code> は<strong>商モノイド</strong>である。
+Lean 側では <code>charCon : AddCon M</code> を作って <code>MChar M</code> として構成した。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-char-inj"
+         data-paper="FrdI"
+         data-pdf-page="11"
+         data-item="§0 Monoids — characteristically injective"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">injective if φ is injective, and, moreover, the morphism M char</div>
+<div class="reading"><code>characteristically injective</code> = <code>φ</code> が単射で、<strong>かつ</strong>
+誘導される <code>M<sub>1</sub><sup>char</sup> → M<sub>2</sub><sup>char</sup></code> も単射。</div>
+<p class="open">★<strong>2つ要求する</strong>のが要点である。単射だけでは足りないことは
+Lean 側の <code>not_isCharacteristicallyInjective_natCast</code>(<code>ℕ ↪ ℤ</code>)で示した。
+これは <code>Definition 1.1, (ii), (a)</code> が引く語。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-primary"
+         data-paper="FrdI"
+         data-pdf-page="12"
+         data-item="§0 Monoids — primary"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">Denote by Primary(M) the set of primary</div>
+<div class="reading"><code>primary</code> = <code>0 ≠ a</code> であって、<code>0 ≠ b ⪯ a</code> なる任意の <code>b</code> に対し
+<code>a ⪯ b</code> が成り立つもの。<code>Definition 1.2, (iii)</code> の <code>primary pre-step</code> が引く。</div>
+<p class="open">★<code>primary</code> の定義文そのものは逐語照合に掛けていない。
+<code>≠</code> が <code>pdftotext</code> では合成文字(スラッシュ + 等号)になり、照合器が拾えないためである。
+<strong>書き換えずに、照合できない事実として記す。</strong></p>
+</section>
+
+<h2>圏の語彙(p.14–p.16)</h2>
+
+<section class="statement definition"
+         id="frdi-s0-fsm"
+         data-paper="FrdI"
+         data-pdf-page="14"
+         data-item="§0 Categories — FSM-morphism"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">monomorphism will be referred to as an FSM-morphism. One verifies immediately</div>
+<div class="reading"><code>FSM-morphism</code> = fiberwise-surjective な monomorphism。
+<code>fiberwise-surjective</code> は「任意の <code>γ : C → A</code> に対し
+<code>β ∘ δ<sub>B</sub> = γ ∘ δ<sub>C</sub></code> となる <code>δ<sub>B</sub> : D → B</code>、
+<code>δ<sub>C</sub> : D → C</code> が存在する」。</div>
+<p class="open">★★<strong>この定義は始対象を持つ圏で退化する</strong>——
+<code>D</code> に始対象を取ると条件が空虚に満たされ、<strong>すべての射</strong>が
+fiberwise-surjective になる。Lean 側の <code>isFiberwiseSurjective_of_initial</code> で証明した。
+★原文は <code>D</code> に条件を付けていない。防いでいるのは <code>totally epimorphic</code> の側で、
+<code>subsingleton_hom_of_isTotallyEpimorphic_of_initial</code> により
+「totally epimorphic + 始対象 ⟹ 前順序」となる。
+<strong>原文はこの導出を明示していない。</strong></p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-tot-epi"
+         data-paper="FrdI"
+         data-pdf-page="15"
+         data-item="§0 Categories — totally epimorphic"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(respectively, almost totally) epimorphic if every morphism in C whose domain is</div>
+<div class="reading"><code>totally epimorphic</code> = すべての射が epimorphism。
+原文は括弧で <code>almost totally</code> と二重に述べるが、<code>totally</code> の側は
+domain も codomain も<strong>任意</strong>なので条件はこれに尽きる。</div>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-connected-cat"
+         data-paper="FrdI"
+         data-pdf-page="16"
+         data-item="§0 Categories — connected (of a category)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">as a connected component of C. In particular, we shall say that C is connected if</div>
+<div class="reading">★<strong>§0 は圏についての <code>connected</code> を定義している</strong>——
+グラフ <code>G(C)</code>(対象を頂点、射を辺とする)が連結であること。</div>
+<p class="open">★<strong>これは始対象を排除しない</strong>。始対象を持つ圏はつねにグラフとして連結である。
+したがって <code>Definition 1.1, (iv)</code> の「connected, totally epimorphic categories」の
+<code>connected</code> では上記の退化を防げない。<strong>防いでいるのは
+<code>totally epimorphic</code> の側である</strong>(上の <code>frdi-s0-fsm</code> 参照)。</p>
+</section>
+
+<section class="statement remark"
+         id="frdi-s0-iso-comp"
+         data-paper="FrdI"
+         data-pdf-page="16"
+         data-item="§0 Categories — 合成が同型なら各因子も同型"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">We observe in passing that if C is a totally epimorphic category, and α ◦β</div>
+<div class="reading">totally epimorphic な圏では、<code>α ∘ β</code> が同型なら <code>α</code> と <code>β</code> も同型。</div>
+<p class="open">★原文は「in passing」と述べるだけで証明を置かない。
+Lean 側の <code>isIso_of_isIso_comp</code> で<strong>実際に証明した</strong>。</p>
+</section>
+
+</body>
+</html>

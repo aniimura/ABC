@@ -775,13 +775,26 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   }
 
   // ── G1-Lean: Skeleton の宣言は Source を伴い、その locator が実在する
+  //
+  // ★2026-08-15 拡張: `Found/`(実装)にも同じ検査を掛ける。ただし**要求はしない**。
+  //   理由は非対称である:
+  //     - `Skeleton/` は「原典の主張を写す」場所なので、出典が無い宣言は意味を成さない
+  //       → `.src` を **必須**にする。
+  //     - `Found/` には補助補題・witness・型クラスの橋渡しなど、**原典の項目に
+  //       対応しない**宣言が多数ある。必須にすると、それらに嘘の出典を書かせる
+  //       逆インセンティブが生まれる(G7 の基準に反する)。
+  //       → `.src` が **書かれていれば**、`Skeleton/` と同じ厳しさで検証する。
+  //   ★この設計だと「`.src` を書かない」ことで検査を逃げられるが、その場合
+  //     `Found/ にある原典項目の実装` の件数が増えないので、**逃げても得しない**。
   let nSrcOk = 0;
-  for (const d of decls.filter((x) => x.bucket === 'Skeleton')) {
+  let nSrcOkFound = 0;
+  for (const d of decls.filter((x) => x.bucket === 'Skeleton' || x.bucket === 'Found')) {
+    const required = d.bucket === 'Skeleton';
     // 台帳の付随宣言そのものには出典を要求しない
     if (/\.(src|needs|nonvacuous|waiting|record|loadBearing|negControl)$/.test(d.name)) continue;
     if (!['theorem', 'lemma', 'def', 'abbrev', 'structure'].includes(d.kind)) continue;
     if (!names.has(`${d.name}.src`)) {
-      ng(at(d), `G1 出典が無い: \`${d.name}.src : ABC3.Meta.Source\` を書く`);
+      if (required) ng(at(d), `G1 出典が無い: \`${d.name}.src : ABC3.Meta.Source\` を書く`);
       continue;
     }
     const src = texts.get(d.file) ?? '';
@@ -800,7 +813,7 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
                 `——先に構造化するか、id を直す`);
       continue;
     }
-    nSrcOk++;
+    if (required) nSrcOk++; else nSrcOkFound++;
   }
 
   // ── 依存グラフ(指標。★ゲートではない)
@@ -878,8 +891,10 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       const implNames = new Set(decls.filter((x) => x.bucket === 'Found').map((x) => x.name));
       const impl = [...implNames].filter((n) => n.endsWith('.src')).map((n) => n.slice(0, -4));
       const foundQuotes = decls.filter((x) => x.bucket === 'Found').length;
-      console.log(`  -- ★Found/ にある原典項目の実装(\`.src\` つき): ${impl.length} 件`);
+      console.log(`  -- ★Found/ にある原典項目の実装(\`.src\` つき): ${impl.length} 件` +
+                  `(うち locator 検証を通ったもの ${nSrcOkFound} 件)`);
       for (const i of impl.slice(0, 8)) console.log(`     ${i}`);
+      if (impl.length > 8) console.log(`     … 他 ${impl.length - 8} 件`);
       if (impl.length === 0 && foundQuotes > 0) {
         // ★0 件であることが情報である。捨てずに理由を書く。
         console.log('     ★0 件なのは実装が無いからではない。`.src` の規約が `Skeleton/` にしか');
@@ -1116,6 +1131,11 @@ function selftest() {
     ['D30 同一論文内の辺も範囲検査される', 'Skeleton', 'd30-edge-same-paper.lean', true],
     ['D31 文字列内の sorry を台帳に数えない', 'Skeleton', 'd31-sorry-in-string.lean', false],
     ['D32 文字列を潰しても本物の sorry は落とせる', 'Found', 'd32-real-sorry-in-found.lean', true],
+    ['D33 Found/ の .src が実在しない sectionId を指す', 'Found',
+      'd33-found-src-bad-section.lean', true],
+    ['D34 Found/ の宣言に .src が無くても通る(任意である)', 'Found',
+      'd34-found-no-src.lean', false],
+    ['D35 Found/ の正しい .src は通る', 'Found', 'd35-found-src-ok.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
