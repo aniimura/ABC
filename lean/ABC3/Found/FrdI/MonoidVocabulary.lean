@@ -160,6 +160,26 @@ theorem isIntegralMonoid_of_isCancelAdd [IsCancelAdd M] : IsIntegralMonoid M := 
   obtain ⟨c, hc⟩ := toGp_eq_iff.mp h
   exact add_right_cancel hc
 
+/-- ★**逆も成り立つ —— integral なら cancellative**(2026-08-15 追加)。
+
+★これは `[FrdI] Proposition 1.5` の証明の第1段を写すために測った問いである。
+原文は `𝔽_Φ` が totally epimorphic であることを
+「`𝒟` が totally epimorphic」「**pre-divisorial monoid が integral**」
+「`Definition 1.1, (ii), (a)` の単射性」の3つから出す。
+そこで **integral が cancellative を与えるか**が関門になる。**与える。**
+
+`a + c = b + c` は `toGp_eq_iff` によりそのまま `toGp a = toGp b` を意味するので、
+`toGp` の単射性が `a = b` を与える。 -/
+theorem isCancelAdd_of_isIntegralMonoid (h : IsIntegralMonoid M) : IsCancelAdd M where
+  add_left_cancel a b c hbc := h (toGp_eq_iff.mpr ⟨a, by
+    rw [add_comm b a, add_comm c a]; exact hbc⟩)
+  add_right_cancel a b c hac := h (toGp_eq_iff.mpr ⟨a, hac⟩)
+
+/-- ★**integral ⟺ cancellative**。 -/
+theorem isIntegralMonoid_iff_isCancelAdd : IsIntegralMonoid M ↔ Nonempty (IsCancelAdd M) :=
+  ⟨fun h => ⟨isCancelAdd_of_isIntegralMonoid M h⟩,
+   fun ⟨h⟩ => letI := h; isIntegralMonoid_of_isCancelAdd M⟩
+
 /-! ### ★非退化 —— 3語それぞれに「満たす例」と「満たさない例」
 
 ★これが無いと「型は付くが中身が空」を排除できない。 -/
@@ -636,6 +656,57 @@ theorem not_isGroupLike_nat : ¬ IsGroupLike ℕ := by
   obtain ⟨A, hA⟩ := (isGroupLike_iff ℕ).mp h 1
   have := A.val_neg
   omega
+
+/-! ### ★`M^char` の性質 —— `Proposition 1.5` の `𝔽_Φ → 𝔽_{Φ^char}` に要る
+
+原文 (FrdI p.27):
+> (i) FΦ, equipped with the natural functor FΦ →FΦchar, is a Frobenioid of Aut-
+
+★`Proposition 1.5` は `Φ` が **pre-divisorial**(sharp とは限らない)のとき、
+pre-Frobenioid 構造を **`Φ^char` 経由**で入れる。`PreFrobenioid` は `Φ` が
+**divisorial**(= pre-divisorial + sharp)であることを要求するので、
+`Φ^char` が sharp であることが鍵になる。 -/
+
+/-- ★**`M^char` は sharp** —— `Definition 1.1, (i)` の但し書き
+「Thus, if M is pre-divisorial, then M char is divisorial」の sharp の部分。
+
+`toChar a` が可逆なら `a` 自身が可逆で、そのとき `CharRel a 0` が成り立つ。 -/
+theorem toChar_surjective : Function.Surjective (toChar : M → MChar M) := fun x => by
+  induction x using AddCon.induction_on with
+  | H a => exact ⟨a, rfl⟩
+
+theorem isSharp_mChar : IsSharp (MChar M) := by
+  intro x hx
+  obtain ⟨a, rfl⟩ := toChar_surjective M x
+  obtain ⟨X, hX⟩ := hx
+  obtain ⟨b, hb⟩ := toChar_surjective M (X.neg : MChar M)
+  have h0 : (toChar a : MChar M) + toChar b = 0 := by
+    rw [hb, ← hX]; exact X.val_neg
+  have hab : (toChar (a + b) : MChar M) = toChar 0 := by
+    rw [map_add, map_zero]; exact h0
+  obtain ⟨u, v, hu, hv, huv⟩ := toChar_eq_iff.mp hab
+  obtain ⟨V, rfl⟩ := hv
+  -- `a + (b + u + V.neg) = 0` なので `a` は可逆
+  have ha : IsAddUnit a := by
+    refine ⟨⟨a, b + u + V.neg, ?_, ?_⟩, rfl⟩
+    · have e : a + (b + u + V.neg) = (a + b + u) + V.neg := by simp only [add_assoc]
+      rw [e, huv, zero_add, V.val_neg]
+    · have e : b + u + V.neg + a = (a + b + u) + V.neg := by
+        simp [add_comm, add_left_comm, add_assoc]
+      rw [e, huv, zero_add, V.val_neg]
+  obtain ⟨A, rfl⟩ := ha
+  show (toChar (A : M) : MChar M) = toChar 0
+  exact toChar_eq_iff.mpr ⟨A.neg, 0, ⟨-A, rfl⟩, isAddUnit_zero, by simp⟩
+
+/-- ★**sharp なら `CharRel` は等号** —— したがって sharp なモノイドでは
+`M^char` は `M` と同じである。 -/
+theorem charRel_iff_eq (h : IsSharp M) {a b : M} : CharRel a b ↔ a = b := by
+  constructor
+  · rintro ⟨u, v, hu, hv, huv⟩
+    rw [h u hu, h v hv, add_zero, add_zero] at huv
+    exact huv
+  · rintro rfl
+    exact charRel_refl a
 
 /-! ### ★§0 `characteristically injective`
 

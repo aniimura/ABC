@@ -48,31 +48,12 @@ variable {D : Type u} [Category.{v} D]
 @[simp] theorem MonoidOn.const_map (M : Type w) [AddCommMonoid M] {A B : D} (α : B ⟶ A)
     (x : M) : (MonoidOn.const D M).map α x = x := rfl
 
-/-! ### `𝔽_Φ` が totally epimorphic になる十分条件 -/
+/-! ### ★witness 本体
 
-/-- `𝒟` の hom が subsingleton で、`Φ(A)` が加法的に簡約的なら、
-`𝔽_Φ` は **totally epimorphic** である。
-
-`f ≫ g = f ≫ h` から `deg` は `ℕ+` の簡約性で、`base` は subsingleton で、
-`div` は `Φ.map` の単射性(条件 (a))と `Φ(A)` の簡約性で一致する。 -/
-theorem isTotallyEpimorphic_elemFrobCat {Φ : MonoidOn.{v, u, w} D}
-    (hD : ∀ X Y : D, Subsingleton (X ⟶ Y))
-    (hc : ∀ A : D, IsCancelAdd (Φ.val A)) :
-    IsTotallyEpimorphic (ElemFrobCat Φ) := by
-  intro X Y f
-  refine ⟨fun {Z} g h hgh => ?_⟩
-  have hdeg : g.deg = h.deg := by
-    have := congrArg ElemFrobCat.Hom.deg hgh
-    simp only [ElemFrobCat.comp_deg] at this
-    exact mul_right_cancel this
-  have hdiv : g.div = h.div := by
-    have hh := congrArg ElemFrobCat.Hom.div hgh
-    simp only [ElemFrobCat.div_comp, hdeg] at hh
-    letI := hc Y.base
-    exact Φ.map_injective f.base (add_right_cancel hh)
-  exact ElemFrobCat.Hom.ext ((hD _ _).elim _ _) hdiv hdeg
-
-/-! ### ★witness 本体 -/
+★`𝔽_Φ` が totally epimorphic であることは
+`ElementaryFrobenioid.lean` の `isTotallyEpimorphic_elemFrobCat` を使う。
+**2026-08-15 に仮定を原文どおりに弱めた**——以前はここに
+「`𝒟` の hom が subsingleton」という原文より強い仮定の版を置いていた。 -/
 
 /-- witness の divisor monoid —— `Vee` 上の定数関手 `ℕ`。 -/
 abbrev wΦ : MonoidOn.{0, 0, 0} Vee := MonoidOn.const Vee ℕ
@@ -84,8 +65,8 @@ abbrev wC : Type := ElemFrobCat wΦ
 def wP : PreFrobenioid wC wΦ where
   toElem := 𝟭 _
   divisorial _ := isDivisorial_nat
-  totEpiC := isTotallyEpimorphic_elemFrobCat (fun X Y => Preorder.subsingleton_hom X Y)
-    (fun _ => inferInstanceAs (IsCancelAdd ℕ))
+  totEpiC := isTotallyEpimorphic_elemFrobCat isTotallyEpimorphic_vee
+    (fun _ => isIntegralMonoid_nat)
   totEpiD := isTotallyEpimorphic_vee
 
 @[simp] theorem wP_degFr {A B : wC} (φ : A ⟶ B) : wP.degFr φ = φ.deg := rfl

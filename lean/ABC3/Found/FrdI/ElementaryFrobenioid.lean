@@ -369,6 +369,50 @@ theorem div_eq_zero_of_isIso (hsharp : ∀ A : D, IsSharp (Φ.val A))
 
 end ElemFrobCat
 
+/-- ★**`𝔽_Φ` は totally epimorphic である**。
+
+原文 (FrdI p.27):
+> Proof. Since D is a connected, totally epimorphic category, the fact that FΦ is
+
+原文 (FrdI p.27):
+> tion 1.1, (iii); the fact that a pre-divisorial monoid is integral [cf. Definition 1.1,
+
+★これは `Proposition 1.5` の証明の**第1段**である。原文が挙げる入力は3つ:
+
+1. **`𝒟` が totally epimorphic**(`hD`)
+2. **`Φ(A)` が integral**(`hint`)—— pre-divisorial なら integral
+3. **`Definition 1.1, (ii), (a)` の単射性** —— `MonoidOn.charInj` として構造に入っている
+
+★**3つがそのまま3成分に対応する**: `base` は 1 で、`div` は 2 と 3 で、`deg` は `ℕ+` の簡約で消える。
+
+★**2026-08-15 訂正の記録**: 一度この補題を
+「`𝒟` の hom が subsingleton」+「`Φ(A)` が `IsCancelAdd`」という**原文より強い仮定**で書いていた。
+模型(`Vee` は前順序)では通るが**一般には使えない**形で、`Proposition 1.5` を阻む。
+★「模型で通る」と「一般に使える」は違う、という実例。 -/
+theorem isTotallyEpimorphic_elemFrobCat {Φ : MonoidOn.{v, u, w} D}
+    (hD : IsTotallyEpimorphic D) (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) :
+    IsTotallyEpimorphic (ElemFrobCat Φ) := by
+  intro X Y f
+  refine ⟨fun {Z} g h hgh => ?_⟩
+  -- `deg`: `ℕ+` は簡約的
+  have hdeg : ElemFrobCat.Hom.deg g = ElemFrobCat.Hom.deg h := by
+    have hh := congrArg ElemFrobCat.Hom.deg hgh
+    simp only [ElemFrobCat.comp_deg] at hh
+    exact mul_right_cancel hh
+  -- `base`: ★入力1 —— `𝒟` が totally epimorphic なので `Base f` は epi
+  have hbase : ElemFrobCat.Hom.base g = ElemFrobCat.Hom.base h := by
+    haveI : Epi (ElemFrobCat.Hom.base f) := hD _ _ _
+    have hh := congrArg ElemFrobCat.Hom.base hgh
+    simp only [ElemFrobCat.comp_base] at hh
+    exact (cancel_epi (ElemFrobCat.Hom.base f)).mp hh
+  -- `div`: ★入力2 と 3
+  have hdiv : ElemFrobCat.Hom.div g = ElemFrobCat.Hom.div h := by
+    have hh := congrArg ElemFrobCat.Hom.div hgh
+    simp only [ElemFrobCat.div_comp, hdeg] at hh
+    letI := isCancelAdd_of_isIntegralMonoid _ (hint X.base)
+    exact Φ.map_injective (ElemFrobCat.Hom.base f) (add_right_cancel hh)
+  exact ElemFrobCat.Hom.ext hbase hdiv hdeg
+
 /-! ### ★`pre-Frobenioid structure` —— [FrdI] Definition 1.1, (iv)
 
 原文 (FrdI p.20):
