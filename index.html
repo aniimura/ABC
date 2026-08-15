@@ -33,16 +33,16 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-15 ・ コミット 50 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-15 ・ コミット 52 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
-  <div class="card ok"><div class="k">selftest</div><div class="v">32/32</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">296</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">101</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">26</div></div>
+  <div class="card ok"><div class="k">selftest</div><div class="v">35/35</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">505</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">197</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">43</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">4</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
@@ -118,6 +118,8 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>201f00a</code></td><td>2026-08-15</td><td>Frobenioid の1段手前まで実装した——Definition 1.1 と 1.2、および退化の射程を証明で確定</td></tr>
+<tr><td><code>cffa6ef</code></td><td>2026-08-15</td><td>引用タグの正規表現に数字を許した——7節点 SCC は存在せず、Frobenioid は循環の外だった</td></tr>
 <tr><td><code>c175d99</code></td><td>2026-08-15</td><td>実装が指標に出ない穴を器具に出した——0 件であることが情報である</td></tr>
 <tr><td><code>d428411</code></td><td>2026-08-15</td><td>§0 のモノイド語彙を閉じ、[FrdI] Definition 1.1 (i) を実装した——原文の含意は sharp だけで足りた</td></tr>
 <tr><td><code>a745e01</code></td><td>2026-08-15</td><td>層0から3語を作った——[FrdI] §0 の integral / saturated / sharp、独立性つき</td></tr>
@@ -128,15 +130,13 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <tr><td><code>fcf1842</code></td><td>2026-08-15</td><td>§0(Notations and Conventions)をグラフに入れた——層0から中層が動き始めた</td></tr>
 <tr><td><code>6d342ce</code></td><td>2026-08-15</td><td>公開の準備: 第三者の著作物を除外し、状況を確認できる index.html を用意した</td></tr>
 <tr><td><code>ba1105a</code></td><td>2026-08-15</td><td>Proposition 3.9 は「残り半分」ではなく「残り2つ」だった——4つ目の壁「語彙の不在」を確定した</td></tr>
-<tr><td><code>00e489a</code></td><td>2026-08-15</td><td>Interface の型を原文に合わせた——壊れたのは退化 witness だけで、同種の欠陥が他に3件見つかった</td></tr>
-<tr><td><code>42c25b9</code></td><td>2026-08-15</td><td>対数体積を構成した——Interface の posit が初めて Found/ の実物に置き換わり、Cor 3.12 から実物まで鎖が通った</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(101 件)。</div>
+<b>すべて PDF と機械照合している</b>(197 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
