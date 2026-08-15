@@ -942,4 +942,70 @@ co-angular の場合、我々は
 (`Proposition 1.10, (iii)` の moreover で 2 回、ここで 1 回)。
 -/
 
+include P in
+/-- ★★★**(v) の存在(non-resp'd、`φ` が pull-back の場合)** —— 前段で「組み方が分からない」
+と書いたものが組めた。
+
+★★**構成(5 手)**:
+1. ★**`plBk_realize`** で `Base φ ≫ inv (Base β)` を底とする pull-back `φ' : E ⟶ Dd` を得る
+2. ★**`Definition 1.2, (ii)` の全射性**で `β' : E ⟶ A`(`β' ≫ φ = φ' ≫ β`、底は `θ`)を作る
+3. `β'` が co-angular pre-step であることを **`Proposition 1.7, (v)`** から出す
+4. ★**`β'` の不変量が `Φ.map (Base φ) x_β` に等しい**ことを計算する
+   ——★**仮定より `x_α` に等しい**
+5. 不変量が等しいので橋(`coaPre_factor_of_mle`)が `κ : Cc ⟶ E`(`κ ≫ β' = α`)を与え、
+   ★**`ψ := κ ≫ φ'`**
+
+★★**原文が挙げる 4 つの道具が、手 1・2・3・5 に正確に対応する。**
+★**「材料は全部ある。足りないのは組み方」と前段で書いたが、
+組み方は「不変量が一致する対象を作る」だった。** -/
+theorem prop_1_11_v_exists_pullBack (G : Frobenioid P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (hφpb : IsPullBack P φ)
+    (α : Cc ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (β : Dd ⟶ B) (hβc : IsCoAngular P β) (hβs : IsPreStep P β)
+    (hcond : haveI : IsIso (P.Base α) := hαs.2
+             haveI : IsIso (P.Base β) := hβs.2
+             Φ.map (inv (P.Base α)) (P.Div α)
+               = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) :
+    ∃ ψ : Cc ⟶ Dd, ψ ≫ β = α ≫ φ := by
+  haveI hbα : IsIso (P.Base α) := hαs.2
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  obtain ⟨hφlb, hφlin⟩ := (prop_1_4_ii P G.core φ).mp hφpb
+  -- 手1
+  obtain ⟨E, φ', hφ'pb, θ, hθ⟩ := plBk_realize P G.core Dd (P.Base φ ≫ inv (P.Base β))
+  obtain ⟨hφ'lb, hφ'lin⟩ := (prop_1_4_ii P G.core φ').mp hφ'pb
+  -- 手2
+  obtain ⟨_, hsurj⟩ := hφpb E
+  obtain ⟨β', hβ'⟩ := hsurj ⟨(φ' ≫ β, θ.hom), by
+    rw [P.Base_comp, hθ, Category.assoc, Category.assoc, IsIso.inv_hom_id,
+      Category.comp_id]⟩
+  have hβ'' := congrArg Subtype.val hβ'
+  have hsq : β' ≫ φ = φ' ≫ β := congrArg Prod.fst hβ''
+  have hbb : P.Base β' = θ.hom := congrArg Prod.snd hβ''
+  -- 手3: `β'` は co-angular pre-step
+  have hcocomp : IsCoAngular P (β' ≫ φ) := by
+    rw [hsq]; exact G.core.coAngularComp φ' β hφ'lb.1 hβc
+  have hlincomp : IsLinear P (β' ≫ φ) := by
+    rw [hsq]; exact IsLinear.comp P hφ'lin hβs.1
+  obtain ⟨⟨hβ'co, hβ'lin⟩, _⟩ :=
+    prop_1_7_v_coAngularLinear P G.core β' φ hcocomp hlincomp
+  haveI hbβ' : IsIso (P.Base β') := by rw [hbb]; infer_instance
+  have hβ's : IsPreStep P β' := ⟨hβ'lin, hbβ'⟩
+  -- 手4: 不変量が一致する
+  have hdiv' : P.Div β' = Φ.map (P.Base φ') (P.Div β) := by
+    have h := congrArg P.Div hsq
+    rw [P.Div_comp, P.Div_comp, show P.Div φ = 0 from hφlb.2,
+      show P.Div φ' = 0 from hφ'lb.2, show P.degFr φ = 1 from hφlin] at h
+    simpa using h
+  -- ★`inv` の下を書き換えると motive エラー(表 #2)。外から特徴づける
+  have hinvb' : inv (P.Base β') = θ.inv :=
+    CategoryTheory.IsIso.inv_eq_of_hom_inv_id (by rw [hbb, θ.hom_inv_id])
+  have hinvb : Φ.map (inv (P.Base β')) (P.Div β')
+      = Φ.map (inv (P.Base α)) (P.Div α) := by
+    rw [hdiv', hcond, hinvb', ← Φ.map_comp, ← Φ.map_comp, hθ,
+      ← Category.assoc, θ.inv_hom_id, Category.id_comp]
+  -- 手5
+  obtain ⟨κ, _, _, hκ⟩ :=
+    coaPre_factor_of_mle P G β' hβ'co hβ's α hαc hαs (hinvb ▸ ⟨0, add_zero _⟩)
+  exact ⟨κ ≫ φ', by rw [Category.assoc, ← hsq, ← Category.assoc, hκ]⟩
+
 end ABC3.Found.FrdI
