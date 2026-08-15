@@ -75,6 +75,52 @@ theorem MonoidOn.restrict_map (Φ : MonoidOn.{v, u, w} D) (G : D' ⥤ D)
     {A B : D'} (α : B ⟶ A) (x : Φ.val (G.obj A)) :
     (Φ.restrict G hG).map α x = Φ.map (G.map α) x := rfl
 
+/-! ## ★(i) —— `𝔽_{Φ'} ≅ 𝔽_Φ ×_𝒟 𝒟'`
+
+原文 (FrdI p.27):
+> (i) There is a natural equivalence of categories
+
+★原文は「follows formally from the definitions」と言う。**測る。** -/
+
+/-- **(i)** の関手 `𝔽_{Φ'} ⥤ 𝔽_Φ ×_𝒟 𝒟'`。
+
+★対象 `W` を `(⟨G W⟩, W, 𝟙)` に送る。`𝒟` 成分の同型は **`𝟙` に取れる**。 -/
+def cfpElemFunctor (Φ : MonoidOn.{v, u, w} D) (G : D' ⥤ D)
+    (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α)) :
+    ElemFrobCat (Φ.restrict G hG) ⥤ CFP (ElemFrobCat.proj (Φ := Φ)) G where
+  obj W := ⟨⟨⟨G.obj W.base⟩, W.base, 𝟙 _⟩, inferInstanceAs (IsIso (𝟙 _))⟩
+  map {W₁ W₂} f := InducedCategory.homMk ⟨⟨G.map f.base, f.div, f.deg⟩, f.base, by
+    show G.map f.base ≫ 𝟙 (G.obj W₂.base) = 𝟙 (G.obj W₁.base) ≫ G.map f.base
+    rw [Category.comp_id, Category.id_comp]⟩
+  map_id W := by
+    refine InducedCategory.hom_ext (CommaMorphism.ext ?_ rfl)
+    refine ElemFrobCat.Hom.ext ?_ rfl rfl
+    show G.map (𝟙 W.base) = 𝟙 _
+    rw [G.map_id]
+  map_comp {W₁ W₂ W₃} f g := by
+    refine InducedCategory.hom_ext (CommaMorphism.ext ?_ rfl)
+    refine ElemFrobCat.Hom.ext ?_ rfl rfl
+    show G.map (f.base ≫ g.base) = G.map f.base ≫ G.map g.base
+    rw [G.map_comp]
+
+/-! ### ★(i) の圏同値 —— 数学は片付いた。Lean は 2 箇所で止まっている(記録)
+
+★**数学**（原文の「follows formally from the definitions」は**正しい**）:
+* **忠実性**: 像の 2 成分から `base` / `div` / `deg` がそのまま読める
+* **充満性**: 四角形が `h₁.base = G h₂` を強制するので `h₂` が原像を与える
+* **本質的全射性**: `(Y, W, α)` に対し `W` を取り、同型を **`⟨α⁻¹, 0, 1⟩`** で作る
+★3 成分とも「**四角形が第2成分を第1成分から決める**」ことに帰着する。
+
+★**Lean で止まった箇所**（2 つとも `ElemFrobCat` の合成の `div` 成分）:
+```
+⊢ ({ base := v, div := 0, deg := 1 } ≫ { base := X.obj.hom, div := 0, deg := 1 }).div = 0
+```
+`simp` / `simp [ElemFrobCat.Hom.comp]` / 型注釈つき `show` のいずれでも閉じない。
+★**原因未特定。** 合成の `div` は `Φ.map v 0 + deg • 0` なので数学的には自明。
+
+★**関手 `cfpElemFunctor` 自体は通っている**（上）。次に当たる人はここから再開できる。
+-/
+
 /-! ## ★`𝒞' = 𝒞 ×_𝒟 𝒟'` -/
 
 variable {C : Type u2} [Category.{v2} C] {Φ : MonoidOn.{v, u, w} D}

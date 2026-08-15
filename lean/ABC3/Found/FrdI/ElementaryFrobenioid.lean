@@ -361,6 +361,23 @@ instance : Category (ElemFrobCat Φ) where
     (φ ≫ ψ).base = φ.base ≫ ψ.base := rfl
 @[simp] theorem comp_deg {A B E : ElemFrobCat Φ} (φ : A ⟶ B) (ψ : B ⟶ E) :
     (φ ≫ ψ).deg = ψ.deg * φ.deg := rfl
+/-- ★★**合成の `div` 成分**(2026-08-15 追加)。
+
+★**これが無かった。** `comp_base` / `comp_deg` / `id_base` / `id_deg` / `id_div` は
+`@[simp]` で揃っていたのに、**`comp_div` だけが欠けていた。**
+
+★子は「構造体の射影・合成が、定義的には計算できるのに `simp`/`rw` が触れない」と
+報告し、それを **Lean 技術的な未完 4 件に共通する壁**だと見立てた。見立ては正しく、
+★**壁の正体は「`simp` 集合に穴が 1 つ開いていた」ことだった。**
+`.div` を含む目標だけが閉じなかったのは、そこだけ補題が無かったからである。
+
+★**測定**: 症状は 4 箇所に別々に現れたが、原因は 1 つで、しかも
+**「規則が難しい」のではなく「規則が 1 本足りない」**だった。
+★我々は「症状を数えるのではなく原因を特定する」を繰り返してきたが、
+**今回は原因が「欠落」であって「機構」ではなかった。** 欠落は、
+**揃っているはずのものを並べて見ないと見えない。** -/
+@[simp] theorem comp_div {A B E : ElemFrobCat Φ} (φ : A ⟶ B) (ψ : B ⟶ E) :
+    (φ ≫ ψ).div = Φ.map φ.base ψ.div + (ψ.deg : ℕ) • φ.div := rfl
 @[simp] theorem id_base (A : ElemFrobCat Φ) : Hom.base (𝟙 A) = 𝟙 A.base := rfl
 @[simp] theorem id_deg (A : ElemFrobCat Φ) : Hom.deg (𝟙 A) = 1 := rfl
 @[simp] theorem id_div (A : ElemFrobCat Φ) : Hom.div (𝟙 A) = 0 := rfl

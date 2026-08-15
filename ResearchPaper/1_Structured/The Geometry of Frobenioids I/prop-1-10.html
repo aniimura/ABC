@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Proposition 1.10 — Morphisms of Frobenius Type</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Proposition 1.10 — Morphisms of Frobenius Type</h1>
+
+<p>物理 p.34–35。<strong>400 dpi 目視確認 2026-08-15</strong>（親が p.34 と p.35 の両方を描画して照合）。</p>
+
+<h2>★規模の測定</h2>
+
+<table>
+<tr><th>条</th><th>主張</th><th>内訳</th></tr>
+<tr><td>(i)</td><td><strong>10</strong></td><td>一意存在 1 ／ <code>deg<sub>Fr</sub></code> の等式 1 ／ <code>Div</code> の公式 1 ／ <strong>7 タイプの保存</strong></td></tr>
+<tr><td>(ii)</td><td>3</td><td>分解 1 ／ <code>deg<sub>Fr</sub></code> 1 ／ <code>Div</code> 1</td></tr>
+<tr><td>(iii)</td><td>3</td><td>像のモノイドが perfect 1 ／ <code>O<sup>▷</sup>(A)</code> 1 ／ <code>O<sup>×</sup>(A)</code> 1</td></tr>
+<tr><td>(iv)</td><td>2</td><td>prime-Frobenius ⟺ irreducible 1 ／ 無限個の同型類 1</td></tr>
+<tr><td>(v)</td><td>1</td><td>Frobenius 型 ⟺ prime-Frobenius の合成</td></tr>
+<tr><td>(vi)</td><td>2</td><td><code>𝒞<sup>istr</sup></code> が sub-quasi-Frobenius-trivial 型 1 ／ group-like ⟹ Frobenius-trivial 1</td></tr>
+</table>
+
+<p>★<strong>合計 21 主張。</strong>証明は <strong>p.35 に 2 段落</strong>（(i)–(ii) が第1段落、(iii) が第2段落）。
+(iv)–(vi) の証明は p.35 の続き（本ファイルの対象外、別途）。</p>
+
+<h2>★★依存はすべて実装済み（着手前の測定）</h2>
+
+<p>(i) の証明が名指しする材料を目視で列挙し、`Found/` にあるかを照合した。</p>
+
+<table>
+<tr><th>原文が名指す材料</th><th>我々の実装</th></tr>
+<tr><td><code>Proposition 1.7, (i)</code>（合成で閉じる）</td><td>あり</td></tr>
+<tr><td><code>Remark 1.1.1</code>（次数の乗法性）</td><td>あり</td></tr>
+<tr><td><code>Definition 1.3, (ii)</code>（各次数の Frobenius 型射の存在と本質的一意性）</td><td>あり</td></tr>
+<tr><td><code>Definition 1.3, (iv), (a)</code>（分解）</td><td>あり</td></tr>
+<tr><td><code>Proposition 1.4, (i)(ii)(iv)(v)</code></td><td>あり</td></tr>
+<tr><td><code>Definition 1.3, (iii), (c)(d)</code>（(iii) で使う圏同値）</td><td>あり</td></tr>
+<tr><td><code>Definition 1.2, (iv)</code>（perfect 対象）</td><td>あり</td></tr>
+</table>
+
+<p>★<strong>不足している語彙は 2 つだけ</strong>：<strong>irreducible arrow</strong>（§0、(iv)(v) が使う）と
+<strong>of perfect type</strong>（全対象が perfect、(iii) が使う）。どちらも短い定義である。</p>
+
+<p class="open">★<strong>これは <code>Proposition 1.6</code> と対照的である。</strong>
+<code>1.6</code> は追加の関手 <code>G : 𝒟' ⥤ 𝒟</code> に何も仮定されていないことが原因で
+未解決が 4 件出た。<code>1.10</code> は <strong>単一の Frobenioid の中の話</strong>で、
+外から入ってくる未定義の対象がない。★<strong>着手前の見立て：未解決は出ない。</strong></p>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10"
+         data-paper="FrdI"
+         data-pdf-page="34"
+         data-item="Proposition 1.10 — 前文"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(Morphisms of Frobenius Type) Let Φ be a divisorial</div>
+<div class="verbatim">monoid on a connected, totally epimorphic category D; C →FΦ a Frobenioid.</div>
+<div class="reading">仮定は <code>Proposition 1.8</code> と同じ（divisorial monoid ＋ connected かつ
+totally epimorphic な <code>𝒟</code> ＋ Frobenioid）。<strong>追加の仮定はない。</strong></div>
+<p class="open">★<strong>抽出の分解</strong>：PDF は <code>𝒞 → 𝔽<sub>Φ</sub></code> だが
+<code>pdftotext</code> は <code>C →FΦ</code> にする（<code>𝔽</code> のフラクトゥールが落ち、
+下付き <code>Φ</code> が連結する）。<strong>papers.json の既知アーティファクトどおり</strong>で、
+意味の変異ではない。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-i"
+         data-paper="FrdI"
+         data-pdf-page="34"
+         data-item="Proposition 1.10, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) Let φ : A →B be an arbitrary morphism of C. Suppose that α : A →A<span class="prime" data-txt="">′</span>,</div>
+<div class="verbatim">β : B →B′ are morphisms of Frobenius type, of Frobenius degree d ∈N≥1.</div>
+<div class="verbatim">Then there exists a unique morphism φ′ : A′ →B′ such that the following diagram</div>
+<div class="verbatim">In this situation, degFr(φ) = degFr(φ′); Div(φ′) = d · α∗(Div(φ)) [where we write</div>
+<div class="verbatim">isomorphism α]. Finally, if φ is a morphism of Frobenius type (respectively,</div>
+<div class="verbatim">pre-step; pull-back morphism; co-angular morphism; base-isomorphism;</div>
+<div class="verbatim">isometry; LB-invertible morphism), then the same is true of φ′.</div>
+<div class="reading">任意の射 <code>φ : A ⟶ B</code> と、同じ次数 <code>d</code> の Frobenius 型射
+<code>α : A ⟶ A′</code>、<code>β : B ⟶ B′</code> があるとき、四角形を可換にする
+<code>φ′ : A′ ⟶ B′</code> が<strong>一意に存在する</strong>。さらに
+<code>deg<sub>Fr</sub></code> は保たれ、<code>Div</code> は <code>d</code> 倍されて移り、
+<strong>7 つのタイプが保存される</strong>。</div>
+<p class="open">★<strong>図式は抽出では断片になる</strong>：<code>A</code> / <code>φ</code> / <code>−→</code> /
+<code>B</code> / <code>⏐⏐α</code> / <code>⏐⏐β</code> / <code>A′</code> / <code>φ′</code> / <code>−→</code> /
+<code>B′</code> の 10 行に割れる。<strong>400 dpi 目視で「上段 A →φ→ B、縦に α と β、
+下段 A′ →φ′→ B′」であることを確認した。</strong>
+<code>⏐⏐</code> は縦矢印の胴であって別の記号ではない。</p>
+<p class="open">★<strong>7 タイプの内訳</strong>：Frobenius type / pre-step / pull-back morphism /
+co-angular morphism / base-isomorphism / isometry / LB-invertible morphism。
+★<strong>これは <code>Proposition 1.7, (i)</code> が「合成で閉じる」と述べているのと同じ 7 つではない。</strong>
+どのタイプがどの経路で保存されるかは、証明が 3 つの場合分け（Frobenius 型 / pre-step /
+pull-back）で与えている。</p>
+<p class="open">★<strong>証明が名指す材料（p.35 第1段落、目視）</strong>：
+一意性は <strong>totally epimorphic</strong> から。存在は 3 場合に分け、
+それぞれ <code>Definition 1.3, (ii)</code> の「各次数の Frobenius 型射の存在と本質的一意性」を使う。
+<code>deg<sub>Fr</sub></code>・<code>Div</code> の部分は <code>Remark 1.1.1</code> から。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-ii"
+         data-paper="FrdI"
+         data-pdf-page="34"
+         data-item="Proposition 1.10, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) Any composite morphism β ◦α of C, where α is a pre-step, and β is of</div>
+<div class="verbatim">Frobenius type, may be written as a composite</div>
+<div class="verbatim">where α′ is a pre-step, and β′ is of Frobenius type such that:</div>
+<div class="reading">pre-step のあとに Frobenius 型を合成したものは、
+<strong>順序を入れ替えて</strong>「Frobenius 型のあとに pre-step」と書き直せる。
+次数は保たれ、<code>Div</code> は次数倍される。</div>
+<p class="open">★<strong>原文は「follows formally from assertion (i)」と書いている</strong>（p.35、目視）。
+★<strong>つまり (ii) は (i) の系である。</strong>ただし
+<code>Definition 1.3, (ii)</code> の存在部分を別に使う（<code>β′</code> を作るため）。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-iii"
+         data-paper="FrdI"
+         data-pdf-page="34"
+         data-item="Proposition 1.10, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) Suppose that C is of perfect type. Then the monoids in the image of</div>
+<div class="verbatim">Φ are perfect. If, moreover, C is of isotropic and Frobenius-normalized type,</div>
+<div class="verbatim">then the monoids O▷(A) and O×(A) are perfect.</div>
+<div class="reading"><code>𝒞</code> が perfect 型なら <code>Φ</code> の像のモノイドは perfect。
+さらに isotropic かつ Frobenius-normalized 型なら
+<code>O<sup>▷</sup>(A)</code> と <code>O<sup>×</sup>(A)</code> も perfect。</div>
+<p class="open">★<strong>「of perfect type」は我々が未定義</strong>（<code>IsPerfectObj</code> は対象に対して
+定義済み。<strong>「型」は全対象がそれである、という形</strong>）。★<strong>ここで足す。</strong></p>
+<p class="open">★<strong>証明は <code>Definition 1.3, (iii), (d)</code> の圏同値を使う</strong>（p.35 第2段落、目視）。
+★我々はこの 2 本の圏同値を <code>Frobenioid</code> のフィールドとして持っており、
+<code>Proposition 1.8, (iii)</code> が<strong>初使用</strong>だった。★<strong>ここが 2 度目の使用になる。</strong></p>
+<p class="open">★<strong>後半は <code>Frobenius-trivial</code> 対象の存在を使って
+「<code>A</code> が Frobenius-trivial と仮定してよい」に帰着させる</strong>
+（<code>Definition 1.3, (i), (a), (b)</code> と <code>(iii), (c)</code> の同型、目視）。</p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-iv"
+         data-paper="FrdI"
+         data-pdf-page="34"
+         data-item="Proposition 1.10, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">nius morphism if and only if it is irreducible [cf. §0]. In particular, if A ∈Ob(C)</div>
+<div class="verbatim">that arise from irreducible arrows with domain A.</div>
+<div class="reading">isotropic な域を持つ Frobenius 型射が prime-Frobenius であることと、
+<strong>§0 の意味で irreducible</strong> であることは同値。
+とくに <code>A</code> が isotropic なら、域 <code>A</code> の irreducible 射から生じる対象の
+同型類は<strong>無限個</strong>ある。</div>
+<p class="open">★<strong>逐語の注意</strong>：原文は行末で <code>prime-Frobe-</code> / <code>nius</code> と
+<strong>ハイフンで分かれている</strong>（400 dpi 目視確認）。
+したがって「<code>prime-Frobenius</code>」という連続文字列は p.34 に<strong>存在しない</strong>。
+★<strong>これは事故 #1（2 行を繋いで引用した ＝ 捏造）と同じ形の罠である。</strong>
+繋がずに、実在する行だけを引く。</p>
+<p class="open">★<strong>「irreducible」は §0 の語彙で、我々は未実装</strong>
+（<code>IsIrreducibleElt</code> はモノイドの元に対してはある）。★<strong>射に対するものをここで足す。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-v"
+         data-paper="FrdI"
+         data-pdf-page="35"
+         data-item="Proposition 1.10, (v)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(v) A morphism of C is a morphism of Frobenius type if and only if it is a</div>
+<div class="verbatim">composite of prime-Frobenius morphisms.</div>
+<div class="reading">Frobenius 型射であることと、prime-Frobenius 射の合成であることは同値。</div>
+<p class="open">★<strong>(iv) と対になっている</strong>：(iv) が「prime-Frobenius ＝ irreducible」を与え、
+(v) が「Frobenius 型 ＝ その合成」を与える。
+★<strong>つまり Frobenius 型射の全体が、irreducible なものから生成される。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-10-vi"
+         data-paper="FrdI"
+         data-pdf-page="35"
+         data-item="Proposition 1.10, (vi)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(vi) The Frobenioid Cistr is of sub-quasi-Frobenius-trivial type. Moreover,</div>
+<div class="verbatim">every group-like object A ∈Ob(Cistr) is Frobenius-trivial.</div>
+<div class="reading"><code>𝒞<sup>istr</sup></code>（isotropification）は sub-quasi-Frobenius-trivial 型であり、
+その group-like 対象はすべて Frobenius-trivial。</div>
+<p class="open">★<strong>抽出の分解</strong>：PDF は <code>𝒞<sup>istr</sup></code> だが
+<code>pdftotext</code> は <code>Cistr</code> にする（上付きが連結する。
+papers.json の既知アーティファクト <code>M^char → M char</code> の同類だが、
+<strong>ここでは空白すら入らない</strong>）。400 dpi 目視で上付きであることを確認した。</p>
+<p class="open">★<strong>我々は <code>𝒞<sup>istr</sup></code> を <code>Proposition 1.9</code> で構成済み</strong>
+（<code>istr_frobenioid : Frobenioid P → Frobenioid (istrPre P)</code>）。
+★<strong>(vi) はその性質を述べるので、1.9 の直接の下流である。</strong></p>
+</section>
+
+<h2>★着手前の予測（実装後に突き合わせる）</h2>
+
+<p><code>Proposition 1.6</code> では机上の仕分けが 18 条すべてで当たった。同じことをここでも行う。</p>
+
+<table>
+<tr><th>条</th><th>予測</th><th>根拠</th></tr>
+<tr><td>(i) 一意性</td><td>通る</td><td>totally epimorphic は仮定にある</td></tr>
+<tr><td>(i) 存在（3 場合）</td><td>通る</td><td><code>Def 1.3 (ii)(iv)(a)</code> と <code>Prop 1.4 (v)</code> が実装済み</td></tr>
+<tr><td>(i) 7 タイプ</td><td>通る</td><td><code>Prop 1.7 (i)</code> の閉性が実装済み</td></tr>
+<tr><td>(ii)</td><td>通る</td><td>原文が「formally from (i)」と書いている</td></tr>
+<tr><td>(iii) 前半</td><td>通る</td><td><code>Def 1.3 (iii)(d)</code> は <code>Prop 1.8</code> で使用実績あり</td></tr>
+<tr><td>(iii) 後半</td><td>★<strong>要注意</strong></td><td><code>Frobenius-normalized</code> は定義は持つが、
+<code>Prop 1.6</code> の CFP 移送では 3 回切っている。<strong>ただし定義そのものは健在</strong>なので、
+ここでは使えるはず</td></tr>
+<tr><td>(iv)(v)</td><td>★<strong>語彙を足す必要</strong></td><td>irreducible arrow が未実装</td></tr>
+<tr><td>(vi)</td><td>通る</td><td><code>Prop 1.9</code> の <code>istr_frobenioid</code> が実装済み</td></tr>
+</table>
+
+<p class="open">★<strong>この予測が何件当たるかが、<code>Proposition 1.6</code> で作った資産
+（分類表・4 つの判定基準・同型を作る定型）が<strong>別の項目でも効くか</strong>の測定になる。</strong></p>
+
+</body>
+</html>
