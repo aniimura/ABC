@@ -445,4 +445,52 @@ theorem not_linProp_of_degFr_ne_one {A B : C} (φ : A ⟶ B) (h : P.degFr φ ≠
 -/
 
 
+/-! ## ★★`Definition 1.3, (i), (c)` の圏同値を消費する
+
+★**(i) の手 1、(vi) の残り、(vii) の一部が、すべてこの 1 本を待っている。**
+`Proposition 1.10` で `coaPreUnderEquiv` / `coaPreOverEquiv` を消費したのと
+**同じ形のプランビング**である。
+
+★**橋の形**: `𝒟` の射 `f : Y ⟶ A_𝒟` に対し、
+**pull-back 射 `ψ : X ⟶ A` で `Base ψ` が `f` に(スライスで)同型なもの**が存在する。
+
+★★**これが原文の「the equivalence of categories induced by the projection functor
+in Definition 1.3, (i), (c)」の実体である。**
+-/
+
+include P in
+/-- ★★**`Definition 1.3, (i), (c)` の圏同値の初の消費**。
+
+`𝒟` の射 `f : Y ⟶ A_𝒟` は、**pull-back 射の底として実現できる**
+(スライス `𝒟_{A_𝒟}` での同型を除いて)。
+
+★**`Proposition 1.11, (i)` の手 1 がこれである。** -/
+theorem plBk_realize (F : FrobenioidCore P) (A : C) {Y : D}
+    (f : Y ⟶ (P.toElem.obj A).base) :
+    ∃ (X : C) (ψ : X ⟶ A) (_ : IsPullBack P ψ)
+      (θ : (P.toElem.obj X).base ≅ Y), P.Base ψ = θ.hom ≫ f := by
+  haveI := F.plBkEquiv A
+  obtain ⟨Z, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := plBkOverFunctor P A)
+    (Over.mk f)
+  refine ⟨Z.left.obj, Z.hom.hom, Z.hom.property, ⟨e.hom.left, e.inv.left, ?_, ?_⟩, ?_⟩
+  · exact congrArg CommaMorphism.left e.hom_inv_id
+  · exact congrArg CommaMorphism.left e.inv_hom_id
+  · exact (Over.w e.hom).symm
+
+include P in
+/-- ★★★**`Proposition 1.11, (i)` 完成** —— `𝒞^pl-bk → 𝒟` は **full**。
+
+Aut-ample かつ base-trivial 型なら、`𝒟` の任意の射 `φ_𝒟 : A_𝒟 ⟶ B_𝒟` は
+**pull-back 射の底として実現できる**。
+
+★**手 1 は `plBk_realize`(圏同値の消費)、手 2–4 は `prop_1_11_i_lift`。**
+★**構造化のときの見立て「base-trivial は対象を、Aut-ample は射を合わせる」が
+そのまま構成になった。** -/
+theorem prop_1_11_i (F : FrobenioidCore P) {A B : C}
+    (hbt : IsBaseTrivial P A) (haa : IsAutAmple P A)
+    (φD : (P.toElem.obj A).base ⟶ (P.toElem.obj B).base) :
+    ∃ χ : A ⟶ B, IsPullBack P χ ∧ P.Base χ = φD := by
+  obtain ⟨X, ψ, hψpb, θ, hθ⟩ := plBk_realize P F B φD
+  exact prop_1_11_i_lift P F hbt haa φD ψ hψpb θ hθ
+
 end ABC3.Found.FrdI
