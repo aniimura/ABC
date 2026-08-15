@@ -1060,48 +1060,148 @@ theorem istr_isPullBack_to {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack (istrPre
   intro Z
   haveI hZb : IsIso (P.Base (hullMap P F Z)) := (hullMap_spec P F Z).2.1.2
   haveI hZe : Epi (hullMap P F Z) := P.totEpiC _ _ _
+  set u := hullMap P F Z with hu
+  haveI hub : IsIso (P.Base u) := hZb
   constructor
   · intro f₁ f₂ hf
     have hp := Subtype.ext_iff.mp hf
     have h1 : (f₁ ≫ g.hom : Z ⟶ Y.obj) = f₂ ≫ g.hom := congrArg Prod.fst hp
     have h2 : P.Base f₁ = P.Base f₂ := congrArg Prod.snd hp
-    have e₁ : hullMap P F Z ≫ ((hullHomEquiv P F Z X).symm f₁).hom = f₁ :=
+    have e₁ : u ≫ ((hullHomEquiv P F Z X).symm f₁).hom = f₁ :=
       (hullHomEquiv P F Z X).apply_symm_apply f₁
-    have e₂ : hullMap P F Z ≫ ((hullHomEquiv P F Z X).symm f₂).hom = f₂ :=
+    have e₂ : u ≫ ((hullHomEquiv P F Z X).symm f₂).hom = f₂ :=
       (hullHomEquiv P F Z X).apply_symm_apply f₂
     have hgg : (hullHomEquiv P F Z X).symm f₁ = (hullHomEquiv P F Z X).symm f₂ := by
       refine (h (hullIstr P F Z)).1 (Subtype.ext (Prod.ext ?_ ?_))
       · refine InducedCategory.hom_ext ?_
-        refine (cancel_epi (hullMap P F Z)).mp ?_
-        show hullMap P F Z ≫ (((hullHomEquiv P F Z X).symm f₁).hom ≫ g.hom)
-          = hullMap P F Z ≫ (((hullHomEquiv P F Z X).symm f₂).hom ≫ g.hom)
-        rw [← Category.assoc, ← Category.assoc, e₁, e₂, h1]
+        refine (cancel_epi u).mp ?_
+        calc u ≫ (((hullHomEquiv P F Z X).symm f₁) ≫ g).hom
+            = (u ≫ ((hullHomEquiv P F Z X).symm f₁).hom) ≫ g.hom :=
+              (Category.assoc _ _ _).symm
+          _ = f₁ ≫ g.hom := by rw [e₁]
+          _ = f₂ ≫ g.hom := h1
+          _ = (u ≫ ((hullHomEquiv P F Z X).symm f₂).hom) ≫ g.hom := by rw [e₂]
+          _ = u ≫ (((hullHomEquiv P F Z X).symm f₂) ≫ g).hom := Category.assoc _ _ _
       · show P.Base ((hullHomEquiv P F Z X).symm f₁).hom
           = P.Base ((hullHomEquiv P F Z X).symm f₂).hom
-        refine (cancel_epi (P.Base (hullMap P F Z))).mp ?_
-        rw [← P.Base_comp, ← P.Base_comp, e₁, e₂, h2]
-    rw [← e₁, ← e₂, hgg]
+        refine (cancel_epi (P.Base u)).mp ?_
+        calc P.Base u ≫ P.Base ((hullHomEquiv P F Z X).symm f₁).hom
+            = P.Base (u ≫ ((hullHomEquiv P F Z X).symm f₁).hom) := (P.Base_comp _ _).symm
+          _ = P.Base f₁ := by rw [e₁]
+          _ = P.Base f₂ := h2
+          _ = P.Base (u ≫ ((hullHomEquiv P F Z X).symm f₂).hom) := by rw [e₂]
+          _ = P.Base u ≫ P.Base ((hullHomEquiv P F Z X).symm f₂).hom := P.Base_comp _ _
+    calc f₁ = u ≫ ((hullHomEquiv P F Z X).symm f₁).hom := e₁.symm
+      _ = u ≫ ((hullHomEquiv P F Z X).symm f₂).hom := by rw [hgg]
+      _ = f₂ := e₂
   · rintro ⟨⟨a, b⟩, hab⟩
-    have ea : hullMap P F Z ≫ ((hullHomEquiv P F Z Y).symm a).hom = a :=
+    obtain ⟨w, hw1, hw2⟩ := hZb.out
+    have ea : u ≫ ((hullHomEquiv P F Z Y).symm a).hom = a :=
       (hullHomEquiv P F Z Y).apply_symm_apply a
     have hcond : (istrPre P).Base ((hullHomEquiv P F Z Y).symm a)
-        = (inv (P.Base (hullMap P F Z)) ≫ b) ≫ (istrPre P).Base g := by
+        = (w ≫ b) ≫ (istrPre P).Base g := by
       show P.Base ((hullHomEquiv P F Z Y).symm a).hom
-        = (inv (P.Base (hullMap P F Z)) ≫ b) ≫ P.Base g.hom
-      rw [Category.assoc, ← hab, ← ea, P.Base_comp, ← Category.assoc, IsIso.inv_hom_id,
-        Category.id_comp]
+        = (w ≫ b) ≫ P.Base g.hom
+      have hbase : P.Base u ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom
+          = b ≫ P.Base g.hom := by
+        rw [← P.Base_comp, ea, hab]
+      calc P.Base ((hullHomEquiv P F Z Y).symm a).hom
+          = 𝟙 _ ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom := (Category.id_comp _).symm
+        _ = (w ≫ P.Base u) ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom :=
+              congrArg (fun t => t ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom) hw2.symm
+        _ = w ≫ (P.Base u ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom) :=
+              Category.assoc _ _ _
+        _ = w ≫ (b ≫ P.Base g.hom) := by rw [hbase]
+        _ = (w ≫ b) ≫ P.Base g.hom := (Category.assoc _ _ _).symm
     obtain ⟨f', hf'⟩ := (h (hullIstr P F Z)).2
-      ⟨((hullHomEquiv P F Z Y).symm a, inv (P.Base (hullMap P F Z)) ≫ b), hcond⟩
+      ⟨((hullHomEquiv P F Z Y).symm a, w ≫ b), hcond⟩
     have hp := Subtype.ext_iff.mp hf'
     have k1 : (f' ≫ g : hullIstr P F Z ⟶ Y) = (hullHomEquiv P F Z Y).symm a :=
       congrArg Prod.fst hp
-    have k2 : P.Base f'.hom = inv (P.Base (hullMap P F Z)) ≫ b := congrArg Prod.snd hp
-    refine ⟨hullMap P F Z ≫ f'.hom, Subtype.ext (Prod.ext ?_ ?_)⟩
-    · show (hullMap P F Z ≫ f'.hom) ≫ g.hom = a
-      rw [Category.assoc, show f'.hom ≫ g.hom = ((hullHomEquiv P F Z Y).symm a).hom from
-        congrArg InducedCategory.Hom.hom k1, ea]
-    · show P.Base (hullMap P F Z ≫ f'.hom) = b
-      rw [P.Base_comp, k2, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    have k2 : P.Base f'.hom = w ≫ b := congrArg Prod.snd hp
+    have hk : f'.hom ≫ g.hom = ((hullHomEquiv P F Z Y).symm a).hom :=
+      congrArg InducedCategory.Hom.hom k1
+    refine ⟨u ≫ f'.hom, Subtype.ext (Prod.ext ?_ ?_)⟩
+    · show (u ≫ f'.hom) ≫ g.hom = a
+      calc (u ≫ f'.hom) ≫ g.hom = u ≫ (f'.hom ≫ g.hom) := Category.assoc _ _ _
+        _ = u ≫ ((hullHomEquiv P F Z Y).symm a).hom := congrArg (fun t => u ≫ t) hk
+        _ = a := ea
+    · show P.Base (u ≫ f'.hom) = b
+      calc P.Base (u ≫ f'.hom) = P.Base u ≫ P.Base f'.hom := P.Base_comp _ _
+        _ = P.Base u ≫ (w ≫ b) := congrArg (fun t => P.Base u ≫ t) k2
+        _ = (P.Base u ≫ w) ≫ b := (Category.assoc _ _ _).symm
+        _ = 𝟙 _ ≫ b := by rw [hw1]
+        _ = b := Category.id_comp _
+
+/-! ### ★残りの条の移送 —— 「前向き／後ろ向き」の仕分け
+
+★**前向き**(与えられた対象の間で射を作る・一意性を言う)は、
+新しい対象を作らないので**そのまま移送できる**。
+★**後ろ向き**(`𝒟` の情報から `𝒞` の対象を作る)は **isotropification が要る**。
+
+| 条 | 向き |
+|---|---|
+| `pullBackLB` / `preStepFactorUniq` / `preStepFactorUniq'` / `arbFactorUniq` | **前向き** |
+| `faithfulUpToUnits` / `otriFwd` / `otriBwd` / `otriBase` | **前向き** |
+| `baseSurj` / `preStepSpan` | ★**後ろ向き** |
+| `plBkEquiv` | 圏同値(別扱い) |
+-/
+
+include F in
+/-- **(iv)(b)** の移送 —— ★**逆向きの pull-back 移送が開いた**ので通る。 -/
+theorem istr_pullBackLB {X Y : Istr P} (α : X ⟶ Y) (h : IsPullBack (istrPre P) α) :
+    IsLBInvertible (istrPre P) α ∧ IsLinear (istrPre P) α := by
+  obtain ⟨hlb, hlin⟩ := F.pullBackLB α.hom (istr_isPullBack_to P F α h)
+  exact ⟨⟨istr_coAngular P α, hlb.2⟩, hlin⟩
+
+include F in
+/-- **(v)(b)** の一意性の移送 —— `C` で得た同型を充満部分圏へ持ち上げるだけ。 -/
+theorem istr_preStepFactorUniq {A B : Istr P} (X X' : Istr P)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
+    (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
+    (hβc : IsCoAngular (istrPre P) β) (hβs : IsPreStep (istrPre P) β)
+    (hαi : IsIsometric (istrPre P) α) (hαs : IsPreStep (istrPre P) α)
+    (hβc' : IsCoAngular (istrPre P) β') (hβs' : IsPreStep (istrPre P) β')
+    (hαi' : IsIsometric (istrPre P) α') (hαs' : IsPreStep (istrPre P) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq X.obj X' .obj β.hom α.hom β'.hom α'.hom
+    (congrArg InducedCategory.Hom.hom heq)
+    (isCoAngular_of_isotropic_dom P F A.property _) hβs hαi hαs
+    (isCoAngular_of_isotropic_dom P F A.property _) hβs' hαi' hαs'
+  exact ⟨InducedCategory.isoMk γ₀, InducedCategory.hom_ext h1, InducedCategory.hom_ext h2⟩
+
+include F in
+/-- **(v)(c)** の一意性の移送。 -/
+theorem istr_preStepFactorUniq' {A B : Istr P} (X X' : Istr P)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
+    (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
+    (hβi : IsIsometric (istrPre P) β) (hβs : IsPreStep (istrPre P) β)
+    (hαc : IsCoAngular (istrPre P) α) (hαs : IsPreStep (istrPre P) α)
+    (hβi' : IsIsometric (istrPre P) β') (hβs' : IsPreStep (istrPre P) β')
+    (hαc' : IsCoAngular (istrPre P) α') (hαs' : IsPreStep (istrPre P) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq' X.obj X'.obj β.hom α.hom β'.hom α'.hom
+    (congrArg InducedCategory.Hom.hom heq)
+    hβi hβs (isCoAngular_of_isotropic_dom P F X.property _) hαs
+    hβi' hβs' (isCoAngular_of_isotropic_dom P F X'.property _) hαs'
+  exact ⟨InducedCategory.isoMk γ₀, InducedCategory.hom_ext h1, InducedCategory.hom_ext h2⟩
+
+include F in
+/-- **(vi)** の移送 —— `𝒪^×` の元も `C` から持ち上がる。 -/
+theorem istr_faithfulUpToUnits {A B : Istr P} (φ ψ : A ⟶ B)
+    (hb : BaseEquivalent (istrPre P) φ ψ) (hm : MetricallyEquivalent (istrPre P) φ ψ)
+    (hφc : IsCoAngular (istrPre P) φ) (hφs : IsPreStep (istrPre P) φ)
+    (hψc : IsCoAngular (istrPre P) ψ) (hψs : IsPreStep (istrPre P) ψ) :
+    ∃ α : End B, α ∈ OTimes (istrPre P) B ∧ φ = ψ ≫ (α : B ⟶ B) := by
+  obtain ⟨α₀, hα₀, hφψ⟩ := F.faithfulUpToUnits φ.hom ψ.hom hb hm
+    (isCoAngular_of_isotropic_dom P F A.property _) hφs
+    (isCoAngular_of_isotropic_dom P F A.property _) hψs
+  refine ⟨InducedCategory.homMk α₀, ⟨⟨hα₀.1.1, hα₀.1.2⟩, ?_⟩, InducedCategory.hom_ext hφψ⟩
+  obtain ⟨v, hv⟩ := hα₀.2
+  haveI : IsIso (α₀ : B.obj ⟶ B.obj) := (isUnit_iff_isIso _).mp hα₀.2
+  refine (isUnit_iff_isIso _).mpr ?_
+  exact ⟨InducedCategory.homMk (inv (α₀ : B.obj ⟶ B.obj)),
+    InducedCategory.hom_ext (by simp), InducedCategory.hom_ext (by simp)⟩
 
 end Istr
 
