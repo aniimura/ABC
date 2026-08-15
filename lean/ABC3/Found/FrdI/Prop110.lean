@@ -1697,4 +1697,61 @@ theorem otri_comm_upToUnit (F : FrobenioidCore P) {A : C}
   exact F.faithfulUpToUnits _ _ hb hd (hcoa _)
     (IsPreStep.comp P (hpre α) (hpre β)) (hcoa _) (IsPreStep.comp P (hpre β) (hpre α))
 
+/-! ### ★選択肢 (b) の一部 —— `β^n` が同型なら `β` も同型
+
+★**`𝒪^×(A)` の側を先に片づけようとして出た副産物**である。
+
+★**主張**: isotropic 型で、`β` が pre-step、`β^n` が同型なら `β` は同型。
+★**証明**: `β^n` が同型 ⟹ `Div (β^n) = 0`。`β` は base-identity 型の pre-step なので
+`Div (β^n) = n • Div β`(★`Div_comp` を `n` 回、`Base β = 𝟙` と `degFr β = 1` で潰す)。
+★**sharp から `Div β = 0`** ⟹ `β` は isometric。isotropic から co-angular なので
+LB-invertible な pre-step、`Proposition 1.4, (iii)` で**同型**。
+
+★★**これは `𝒪^▷(A)` の中で `𝒪^×(A)` が「`n` 乗で閉じている」ことの逆向きである。**
+★**単元の吸収そのものは片づかないが、「どの元が単元か」の判定は 1 つ増えた。**
+-/
+
+include P in
+/-- ★`γ^k` の 3 つの不変量を一度に。★**`End A` の乗法は `x * y = y ≫ x`**
+(mathlib の規約)なので、`pow_succ` を開くと `γ ≫ γ^m` になる。 -/
+theorem otri_pow_invariants {A : C} (γ : End A) (hb : IsBaseIdentity P γ) (hl : IsLinear P γ) :
+    ∀ k : ℕ, P.Base ((γ ^ k : End A) : A ⟶ A) = P.Base (𝟙 A) ∧
+      P.degFr ((γ ^ k : End A) : A ⟶ A) = 1 ∧
+      P.Div ((γ ^ k : End A) : A ⟶ A) = k • P.Div (γ : A ⟶ A) := by
+  intro k
+  induction k with
+  | zero => exact ⟨rfl, by simpa using P.degFr_id A, by simpa using P.Div_id A⟩
+  | succ m ih =>
+      obtain ⟨ihb, ihd, ihv⟩ := ih
+      have hmul : ((γ ^ (m + 1) : End A) : A ⟶ A) = (γ : End A) ≫ (γ ^ m : End A) := by
+        rw [pow_succ]; rfl
+      refine ⟨?_, ?_, ?_⟩
+      · rw [hmul, P.Base_comp, ihb, P.Base_id, Category.comp_id]
+        rw [show P.Base (γ : A ⟶ A) = P.Base (𝟙 A) from hb, P.Base_id]
+      · rw [hmul, P.degFr_comp, ihd, hl, one_mul]
+      · rw [hmul, P.Div_comp, ihv, ihd,
+          show P.Base (γ : A ⟶ A) = P.Base (𝟙 A) from hb, P.Base_id, Φ.map_id]
+        simp [succ_nsmul, add_comm]
+
+include P in
+/-- ★★**`β^n` が同型なら `β` も同型**(isotropic 型、`β` は `𝒪^▷(A)` の元)。
+
+★sharp が「`n • x = 0 ⟹ x = 0`」として効く。 -/
+theorem isIso_of_pow_isIso (F : FrobenioidCore P) {A : C}
+    (hiso : ∀ X : C, IsIsotropic P X) (β : End A)
+    (hb : IsBaseIdentity P β) (hl : IsLinear P β)
+    {n : ℕ} (hn : 0 < n) (hpow : IsIso ((β ^ n : End A) : A ⟶ A)) :
+    IsIso (β : A ⟶ A) := by
+  haveI := hpow
+  have hdiv0 : P.Div ((β ^ n : End A) : A ⟶ A) = 0 :=
+    (isIsometric_of_isIso P ((β ^ n : End A) : A ⟶ A))
+  have hdβ : P.Div (β : A ⟶ A) = 0 :=
+    eq_zero_of_nsmul_eq_zero_of_isSharp (P.divisorial _).2 hn
+      (by rw [← (otri_pow_invariants P β hb hl n).2.2]; exact hdiv0)
+  have hbi : IsIso (P.Base (β : A ⟶ A)) := by
+    rw [show P.Base (β : A ⟶ A) = P.Base (𝟙 A) from hb, P.Base_id]
+    infer_instance
+  exact prop_1_4_iii P F (β : A ⟶ A)
+    ⟨prop_1_4_i P (β : A ⟶ A) (fun X _ => hiso X), hdβ⟩ ⟨hl, hbi⟩
+
 end ABC3.Found.FrdI
