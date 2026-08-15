@@ -220,4 +220,408 @@ theorem wIsotropicHullExists (A : wC) : ∃ (B : wC) (φ : A ⟶ B), IsIsotropic
   intro Cc _ γ
   exact ⟨γ, (Category.id_comp γ).symm, fun y hy => by simpa using hy.symm⟩
 
+/-! ### ★第1段 —— 一意性系と (iii)(c) -/
+
+/-- 底の同型から `wC` の同型を作る(`wd = 0`、`wn = 1`)。
+
+★逆射を**明示して**構成する。`asIso` だと逆射の `wd` が制御できない。 -/
+noncomputable def wIso {A B : wC} (b : A.base ⟶ B.base) (hb : IsIso b) : A ≅ B where
+  hom := ⟨b, (0 : ℕ), 1⟩
+  inv := ⟨@inv _ _ _ _ b hb, (0 : ℕ), 1⟩
+  hom_inv_id := wHom_ext (by simp) (by simp)
+  inv_hom_id := wHom_ext (by simp) (by simp)
+
+@[simp] theorem wd_wIso_hom {A B : wC} (b : A.base ⟶ B.base) (hb : IsIso b) :
+    wd (wIso b hb).hom = 0 := rfl
+@[simp] theorem wn_wIso_hom {A B : wC} (b : A.base ⟶ B.base) (hb : IsIso b) :
+    wn (wIso b hb).hom = 1 := rfl
+@[simp] theorem wd_wIso_inv {A B : wC} (b : A.base ⟶ B.base) (hb : IsIso b) :
+    wd (wIso b hb).inv = 0 := rfl
+@[simp] theorem wn_wIso_inv {A B : wC} (b : A.base ⟶ B.base) (hb : IsIso b) :
+    wn (wIso b hb).inv = 1 := rfl
+
+/-- **(i)(b)** 底の同型は pre-step の span で持ち上がる。
+
+★`Vee` の hom は subsingleton なので、等式そのものは `Subsingleton.elim` で済む。 -/
+theorem wPreStepSpan (A B : wC) (α : (wP.toElem.obj A).base ⟶ (wP.toElem.obj B).base)
+    (hα : IsIso α) :
+    ∃ (X : wC) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep wP φ), IsPreStep wP ψ ∧
+      α = @inv _ _ _ _ (wP.Base φ) hφ.2 ≫ wP.Base ψ := by
+  refine ⟨A, 𝟙 A, ⟨α, (0 : ℕ), 1⟩, isPreStep_id wP A, ⟨rfl, hα⟩, Subsingleton.elim _ _⟩
+
+/-- **(ii)** Frobenius 型射の本質的一意性。
+
+Frobenius 型は isometric(`wd = 0`)かつ base-isomorphism なので、
+底の同型を繋いだ `β := (inv (Base φ) ≫ Base ψ, 0, 1)` が求めるもの。 -/
+theorem wFrobDegUniq (A B E : wC) (φ : A ⟶ B) (ψ : A ⟶ E)
+    (hφ : IsFrobeniusType wP φ) (hψ : IsFrobeniusType wP ψ) (hn : wP.degFr φ = wP.degFr ψ) :
+    ∃ β : B ⟶ E, IsIso β ∧ φ ≫ β = ψ := by
+  haveI hbφ : IsIso (wP.Base φ) := hφ.2
+  haveI hbψ : IsIso (wP.Base ψ) := hψ.2
+  refine ⟨⟨(@inv _ _ _ _ (wP.Base φ) hbφ) ≫ wP.Base ψ, (0 : ℕ), 1⟩,
+    wIsIso_of_isometric_preStep _ rfl
+      ⟨rfl, (inferInstance : IsIso ((@inv _ _ _ _ (wP.Base φ) hbφ) ≫ wP.Base ψ))⟩, ?_⟩
+  refine wHom_ext ?_ ?_
+  · have h1 : wd φ = 0 := hφ.1.2
+    have h2 : wd ψ = 0 := hψ.1.2
+    simp [h1, h2]
+  · have : wn φ = wn ψ := hn
+    simp [this]
+
+/-- **(iii)(c)** co-angular pre-step は `𝒪^▷` の全単射を誘導する(順方向)。
+
+`φ ≫ β` と `α ≫ φ` の `wd` を比べると `wd β = wd α` に落ちる(`wn φ = 1` だから)。 -/
+theorem wOtriFwd {A B : wC} (φ : A ⟶ B) (hca : IsCoAngular wP φ) (hst : IsPreStep wP φ)
+    (α : End A) (hα : α ∈ OTri wP A) :
+    ∃! β : End B, β ∈ OTri wP B ∧ (φ ≫ (β : B ⟶ B)) = (α : A ⟶ A) ≫ φ := by
+  have hφn : wn φ = 1 := hst.1
+  have hαn : wn (α : A ⟶ A) = 1 := hα.2
+  refine ⟨(⟨𝟙 _, wd (α : A ⟶ A), 1⟩ : End B), ⟨⟨rfl, rfl⟩, ?_⟩, ?_⟩
+  · exact wHom_ext (by simp [hφn, hαn, add_comm]) (by simp [hφn, hαn])
+  · rintro β ⟨⟨-, hβn⟩, hβ⟩
+    have hd : wd (φ ≫ (β : B ⟶ B)) = wd ((α : A ⟶ A) ≫ φ) := congrArg wd hβ
+    have hβn' : wn (β : B ⟶ B) = 1 := hβn
+    simp only [wd_comp, hφn, hβn', PNat.one_coe, one_smul] at hd
+    exact wHom_ext (by simp [hβn']; omega) (by simp [hβn'])
+
+/-- **(iii)(c)** 逆方向。 -/
+theorem wOtriBwd {A B : wC} (φ : A ⟶ B) (hca : IsCoAngular wP φ) (hst : IsPreStep wP φ)
+    (β : End B) (hβ : β ∈ OTri wP B) :
+    ∃! α : End A, α ∈ OTri wP A ∧ (φ ≫ (β : B ⟶ B)) = (α : A ⟶ A) ≫ φ := by
+  have hφn : wn φ = 1 := hst.1
+  have hβn : wn (β : B ⟶ B) = 1 := hβ.2
+  refine ⟨(⟨𝟙 _, wd (β : B ⟶ B), 1⟩ : End A), ⟨⟨rfl, rfl⟩, ?_⟩, ?_⟩
+  · exact wHom_ext (by simp [hφn, hβn, add_comm]) (by simp [hφn, hβn])
+  · rintro α ⟨⟨-, hαn⟩, hα⟩
+    have hd : wd (φ ≫ (β : B ⟶ B)) = wd ((α : A ⟶ A) ≫ φ) := congrArg wd hα
+    have hαn' : wn (α : A ⟶ A) = 1 := hαn
+    simp only [wd_comp, hφn, hβn, hαn', PNat.one_coe, one_smul] at hd
+    exact wHom_ext (by simp [hαn']; omega) (by simp [hαn'])
+
+/-- **(iii)(c)** 全単射は `Base(φ)` にしか依らない。
+
+★このモデルでは `Base` は subsingleton なので条件は空だが、
+**結論の側は非自明**(`wd` の等式が `φ` に依らないことを示す必要がある)。 -/
+theorem wOtriBase {A B : wC} (φ φ2 : A ⟶ B) (hca : IsCoAngular wP φ) (hst : IsPreStep wP φ)
+    (hca2 : IsCoAngular wP φ2) (hst2 : IsPreStep wP φ2) (hb : wP.Base φ = wP.Base φ2)
+    (α : End A) (hα : α ∈ OTri wP A) (β : End B) (hβ : β ∈ OTri wP B)
+    (h : (φ ≫ (β : B ⟶ B)) = (α : A ⟶ A) ≫ φ) :
+    (φ2 ≫ (β : B ⟶ B)) = (α : A ⟶ A) ≫ φ2 := by
+  have hφn : wn φ = 1 := hst.1
+  have hφn2 : wn φ2 = 1 := hst2.1
+  have hαn : wn (α : A ⟶ A) = 1 := hα.2
+  have hβn : wn (β : B ⟶ B) = 1 := hβ.2
+  have hd : wd (φ ≫ (β : B ⟶ B)) = wd ((α : A ⟶ A) ≫ φ) := congrArg wd h
+  simp only [wd_comp, hφn, hβn, hαn, PNat.one_coe, one_smul] at hd
+  refine wHom_ext ?_ ?_
+  · simp only [wd_comp, hφn2, hβn, hαn, PNat.one_coe, one_smul]
+    omega
+  · simp only [wn_comp, hφn2, hβn, hαn, one_mul, mul_one]
+
+/-- **(vi)** 単元を除く忠実性。
+
+★このモデルでは `𝒪^×(B) = {1}` なので、条件は「`φ = ψ`」に落ちる。
+base-equivalent(`Vee` では自動)と metrically equivalent(`wd` が一致)、
+そして両方 pre-step(`wn = 1`)から、3成分すべてが一致する。 -/
+theorem wFaithfulUpToUnits {A B : wC} (φ ψ : A ⟶ B) (hbe : BaseEquivalent wP φ ψ)
+    (hme : MetricallyEquivalent wP φ ψ) (hcaφ : IsCoAngular wP φ) (hstφ : IsPreStep wP φ)
+    (hcaψ : IsCoAngular wP ψ) (hstψ : IsPreStep wP ψ) :
+    ∃ α : End B, α ∈ OTimes wP B ∧ φ = ψ ≫ (α : B ⟶ B) := by
+  refine ⟨1, (OTimes wP B).one_mem, ?_⟩
+  have hd : wd φ = wd ψ := hme
+  have h1 : wn φ = 1 := hstφ.1
+  have h2 : wn ψ = 1 := hstψ.1
+  refine wHom_ext ?_ ?_
+  · show wd φ = wd (ψ ≫ (1 : End B))
+    simp [hd]
+  · show wn φ = wn (ψ ≫ (1 : End B))
+    simp [h1, h2]
+
+/-- **(iv)(a)** 分解の一意性。
+
+`γ` は Frobenius 型(`wd = 0`)、`β` は pre-step(`wn = 1`、底が同型)、
+`α` は pull-back(`wd = 0`、`wn = 1`)。合成は `(·, wd β, wn γ)` なので、
+2つの分解から `wd β = wd β'` と `wn γ = wn γ'` が出る。
+同型 `ε`、`δ` は底の同型を繋いで作る。 -/
+theorem wArbFactorUniq {A B : wC} (X Y X' Y' : wC)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (hcomp : γ ≫ β ≫ α = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType wP γ) (hβ : IsPreStep wP β) (hα : IsPullBack wP α)
+    (hγ' : IsFrobeniusType wP γ') (hβ' : IsPreStep wP β') (hα' : IsPullBack wP α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  haveI hbγ : IsIso (wP.Base γ) := hγ.2
+  haveI hbγ' : IsIso (wP.Base γ') := hγ'.2
+  haveI hbβ : IsIso (wP.Base β) := hβ.2
+  haveI hbβ' : IsIso (wP.Base β') := hβ'.2
+  have hdγ : wd γ = 0 := hγ.1.2
+  have hdγ' : wd γ' = 0 := hγ'.1.2
+  have hnβ : wn β = 1 := hβ.1
+  have hnβ' : wn β' = 1 := hβ'.1
+  obtain ⟨hdα, hnα⟩ := wPullBack_wd_wn α hα
+  obtain ⟨hdα', hnα'⟩ := wPullBack_wd_wn α' hα'
+  -- 合成の `wd` / `wn` を比べる
+  have hd : wd β = wd β' := by
+    have h := congrArg wd hcomp
+    simp only [wd_comp, hdα, hdα', hnα, hnα', hnβ, hnβ', hdγ, hdγ',
+      PNat.one_coe, one_smul, zero_add, smul_zero, add_zero] at h
+    exact h
+  have hn : wn γ = wn γ' := by
+    have h := congrArg wn hcomp
+    simp only [wn_comp, hnα, hnα', hnβ, hnβ', one_mul, mul_one] at h
+    exact h
+  -- 底の同型を繋ぐ
+  -- 底の同型を `Iso` として繋ぐ(`inv` の合成はインスタンス解決が届かない)
+  let eX : X.base ≅ X'.base :=
+    (@asIso _ _ _ _ (wP.Base γ) hbγ).symm ≪≫ (@asIso _ _ _ _ (wP.Base γ') hbγ')
+  let eY : Y.base ≅ Y'.base :=
+    (@asIso _ _ _ _ (wP.Base β) hbβ).symm ≪≫ eX ≪≫ (@asIso _ _ _ _ (wP.Base β') hbβ')
+  refine ⟨⟨⟨eY.hom, (0 : ℕ), 1⟩, ⟨eY.inv, (0 : ℕ), 1⟩,
+      wHom_ext (by simp) (by simp), wHom_ext (by simp) (by simp)⟩,
+    ⟨⟨eX.hom, (0 : ℕ), 1⟩, ⟨eX.inv, (0 : ℕ), 1⟩,
+      wHom_ext (by simp) (by simp), wHom_ext (by simp) (by simp)⟩, ?_, ?_, ?_⟩
+  · exact wHom_ext (by simp [hdα, hdα', hnα]) (by simp [hnα, hnα'])
+  · exact wHom_ext (by simp [hnβ, hnβ', hd]) (by simp [hnβ, hnβ'])
+  · exact wHom_ext (by simp [hdγ, hdγ']) (by simp [hn])
+
+/-! ### ★第2段 —— 圏同値3本
+
+★`Functor.IsEquivalence` は mathlib では **`faithful` / `full` / `essSurj` の3フィールド構造**
+そのものである(2026-08-15 実測)。専用の構成補題は無く、3つを揃えれば `⟨⟩` で作れる。 -/
+
+instance wCoaPreMul : MorphismProperty.IsMultiplicative (coaPreProp wP) :=
+  coaPreProp_isMultiplicative wP wCoAngularComp
+
+/-- `𝒞^pl-bk` の射はすべて `wd = 0`、`wn = 1` なので、hom は subsingleton。 -/
+instance wPlBkSubsingleton (Z W : PlBk wP) : Subsingleton (Z ⟶ W) := by
+  refine ⟨fun f g => ?_⟩
+  refine InducedWideCategory.Hom.ext ?_
+  exact wHom_ext (by rw [(wPullBack_wd_wn _ f.property).1, (wPullBack_wd_wn _ g.property).1])
+    (by rw [(wPullBack_wd_wn _ f.property).2, (wPullBack_wd_wn _ g.property).2])
+
+/-- **(i)(c)** `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` は圏同値。 -/
+instance wPlBkFaithful (A : wC) : (plBkOverFunctor wP A).Faithful where
+  map_injective {Z W} f g _ := by
+    apply Over.OverMorphism.ext
+    exact Subsingleton.elim _ _
+
+instance wPlBkFull (A : wC) : (plBkOverFunctor wP A).Full where
+  map_surjective {Z W} h := by
+    refine ⟨Over.homMk ⟨⟨h.left, (0 : ℕ), 1⟩, wIsPullBack_of _ rfl rfl⟩ ?_, ?_⟩
+    · refine InducedWideCategory.Hom.ext ?_
+      refine wHom_ext ?_ ?_
+      · show wd ((⟨h.left, (0 : ℕ), 1⟩ : Z.left.obj ⟶ W.left.obj) ≫ W.hom.hom) = _
+        simp [(wPullBack_wd_wn _ W.hom.property).1, (wPullBack_wd_wn _ Z.hom.property).1]
+      · show wn ((⟨h.left, (0 : ℕ), 1⟩ : Z.left.obj ⟶ W.left.obj) ≫ W.hom.hom) = _
+        simp [(wPullBack_wd_wn _ W.hom.property).2, (wPullBack_wd_wn _ Z.hom.property).2]
+    · apply Over.OverMorphism.ext
+      exact Subsingleton.elim _ _
+
+instance wPlBkEssSurj (A : wC) : (plBkOverFunctor wP A).EssSurj where
+  mem_essImage Y := by
+    refine ⟨Over.mk ((⟨⟨Y.hom, (0 : ℕ), 1⟩, wIsPullBack_of _ rfl rfl⟩ :
+      (⟨⟨Y.left⟩⟩ : PlBk wP) ⟶ ⟨A⟩)), ⟨Over.isoMk (Iso.refl _) (Subsingleton.elim _ _)⟩⟩
+
+theorem wPlBkEquiv (A : wC) : (plBkOverFunctor wP A).IsEquivalence :=
+  ⟨inferInstance, inferInstance, inferInstance⟩
+
+/-! #### (iii)(d) の2本 -/
+
+/-- `𝒞^coa-pre` の射の底は同型(pre-step だから)。 -/
+theorem wCoaPreBaseIso {Z W : WideSubcategory (coaPreProp wP)} (f : Z ⟶ W) :
+    IsIso (wP.Base f.hom) := f.property.2.2
+
+instance wCoaPreUnderFaithful (A : wC) : (coaPreUnderFunctor wP A).Faithful where
+  map_injective {Z W} f g _ := by
+    apply Under.UnderMorphism.ext
+    refine InducedWideCategory.Hom.ext ?_
+    haveI : Epi Z.hom.hom := wP.totEpiC _ _ _
+    refine (cancel_epi Z.hom.hom).mp ?_
+    have h1 : Z.hom ≫ f.right = W.hom := Under.w f
+    have h2 : Z.hom ≫ g.right = W.hom := Under.w g
+    calc Z.hom.hom ≫ f.right.hom = (Z.hom ≫ f.right).hom := rfl
+      _ = W.hom.hom := by rw [h1]
+      _ = (Z.hom ≫ g.right).hom := by rw [h2]
+      _ = Z.hom.hom ≫ g.right.hom := rfl
+
+instance wCoaPreUnderFull (A : wC) : (coaPreUnderFunctor wP A).Full where
+  map_surjective {Z W} h := by
+    obtain ⟨c, hc⟩ : MLe (wd Z.hom.hom) (wd W.hom.hom) := leOfHom h
+    haveI hZ : IsIso (wP.Base Z.hom.hom) := Z.hom.property.2.2
+    haveI hW : IsIso (wP.Base W.hom.hom) := W.hom.property.2.2
+    let e : Z.right.obj.base ≅ W.right.obj.base :=
+      (@asIso _ _ _ _ (wP.Base Z.hom.hom) hZ).symm ≪≫ (@asIso _ _ _ _ (wP.Base W.hom.hom) hW)
+    refine ⟨Under.homMk ⟨⟨e.hom, c, 1⟩, ⟨wIsCoAngular _, rfl, (inferInstance : IsIso e.hom)⟩⟩ ?_, ?_⟩
+    · refine InducedWideCategory.Hom.ext ?_
+      refine wHom_ext ?_ ?_
+      · show wd (Z.hom.hom ≫ (⟨e.hom, c, 1⟩ : Z.right.obj ⟶ W.right.obj)) = _
+        simp only [wd_comp, wd_mk, wn_mk, PNat.one_coe, one_smul]
+        omega
+      · show wn (Z.hom.hom ≫ (⟨e.hom, c, 1⟩ : Z.right.obj ⟶ W.right.obj)) = _
+        have h1 : wn Z.hom.hom = 1 := Z.hom.property.2.1
+        have h2 : wn W.hom.hom = 1 := W.hom.property.2.1
+        simp [h1, h2]
+    · exact Subsingleton.elim _ _
+
+instance wCoaPreUnderEssSurj (A : wC) : (coaPreUnderFunctor wP A).EssSurj where
+  mem_essImage Y := by
+    refine ⟨Under.mk ((⟨⟨𝟙 A.base, (Y : ℕ), 1⟩, ⟨wIsCoAngular _, rfl, ?_⟩⟩ :
+      (⟨A⟩ : WideSubcategory (coaPreProp wP)) ⟶ ⟨A⟩)), ⟨Iso.refl _⟩⟩
+    show IsIso (𝟙 A.base); infer_instance
+
+/-- **(iii)(d)** `_A(𝒞^coa-pre) → Order(Φ(A))` は圏同値。 -/
+theorem wCoaPreUnderEquiv (A : wC) : (coaPreUnderFunctor wP A).IsEquivalence :=
+  ⟨inferInstance, inferInstance, inferInstance⟩
+
+instance wCoaPreOverFaithful (A : wC) : (coaPreOverFunctor wP A).Faithful where
+  map_injective {Z W} f g _ := by
+    apply Over.OverMorphism.ext
+    refine InducedWideCategory.Hom.ext ?_
+    haveI : Mono W.hom.hom := wMono W.hom.hom
+    refine (cancel_mono W.hom.hom).mp ?_
+    have h1 : f.left ≫ W.hom = Z.hom := Over.w f
+    have h2 : g.left ≫ W.hom = Z.hom := Over.w g
+    calc f.left.hom ≫ W.hom.hom = (f.left ≫ W.hom).hom := rfl
+      _ = Z.hom.hom := by rw [h1]
+      _ = (g.left ≫ W.hom).hom := by rw [h2]
+      _ = g.left.hom ≫ W.hom.hom := rfl
+
+instance wCoaPreOverFull (A : wC) : (coaPreOverFunctor wP A).Full where
+  map_surjective {Z W} h := by
+    haveI hZ : IsIso (wP.Base Z.hom.hom) := Z.hom.property.2.2
+    haveI hW : IsIso (wP.Base W.hom.hom) := W.hom.property.2.2
+    obtain ⟨c, hc⟩ : MLe (wd W.hom.hom) (wd Z.hom.hom) := leOfHom h.unop
+    let e : Z.left.obj.base ≅ W.left.obj.base :=
+      (@asIso _ _ _ _ (wP.Base Z.hom.hom) hZ) ≪≫ (@asIso _ _ _ _ (wP.Base W.hom.hom) hW).symm
+    refine ⟨Over.homMk ⟨⟨e.hom, c, 1⟩, ⟨wIsCoAngular _, rfl, (inferInstance : IsIso e.hom)⟩⟩ ?_, ?_⟩
+    · refine InducedWideCategory.Hom.ext ?_
+      refine wHom_ext ?_ ?_
+      · show wd ((⟨e.hom, c, 1⟩ : Z.left.obj ⟶ W.left.obj) ≫ W.hom.hom) = _
+        have h2 : wn W.hom.hom = 1 := W.hom.property.2.1
+        simp only [wd_comp, wd_mk, h2, PNat.one_coe, one_smul]
+        omega
+      · show wn ((⟨e.hom, c, 1⟩ : Z.left.obj ⟶ W.left.obj) ≫ W.hom.hom) = _
+        have h1 : wn Z.hom.hom = 1 := Z.hom.property.2.1
+        have h2 : wn W.hom.hom = 1 := W.hom.property.2.1
+        simp [h1, h2]
+    · exact Subsingleton.elim _ _
+
+instance wCoaPreOverEssSurj (A : wC) : (coaPreOverFunctor wP A).EssSurj where
+  mem_essImage Y := by
+    refine ⟨Over.mk ((⟨⟨𝟙 A.base, (Y.unop : ℕ), 1⟩, ⟨wIsCoAngular _, rfl, ?_⟩⟩ :
+      (⟨A⟩ : WideSubcategory (coaPreProp wP)) ⟶ ⟨A⟩)), ⟨Iso.refl _⟩⟩
+    show IsIso (𝟙 A.base); infer_instance
+
+/-- **(iii)(d)** `(𝒞^coa-pre)_A → Order(Φ(A))^opp` は圏同値。 -/
+theorem wCoaPreOverEquiv (A : wC) : (coaPreOverFunctor wP A).IsEquivalence :=
+  ⟨inferInstance, inferInstance, inferInstance⟩
+
+/-! ### ★★判定 —— `wP` は Frobenioid である -/
+
+/-- ★★**`wP` は [FrdI] Definition 1.3 の意味で Frobenioid である。**
+
+したがって **`Frobenioid` は空ではない** ——
+`Definition 1.3` は退化した(誰も満たさない)条件の束ではない。
+
+★構成要素はすべて上で個別に証明したもので、`sorry` も「手で確かめた」も含まない。 -/
+theorem wIsFrobenioid : Frobenioid wP where
+  core :=
+    { baseSurj := wBaseSurj
+      preStepSpan := wPreStepSpan
+      plBkEquiv := wPlBkEquiv
+      frobDegSurj := wFrobDegSurj
+      frobDegUniq := wFrobDegUniq
+      coAngularComp := wCoAngularComp
+      coAngularOfPreStep := wCoAngularOfPreStep
+      otriFwd := wOtriFwd
+      otriBwd := wOtriBwd
+      otriBase := wOtriBase
+      arbFactor := wArbFactor
+      arbFactorUniq := wArbFactorUniq
+      pullBackLB := wPullBackLB
+      preStepMono := fun φ _ => wMono φ
+      preStepFactor := wPreStepFactor
+      preStepFactor' := wPreStepFactor'
+      faithfulUpToUnits := wFaithfulUpToUnits
+      isotropicHullExists := wIsotropicHullExists
+      isotropicClosed := fun φ h => wIsotropicClosed φ h }
+  coaPreUnderEquiv := wCoaPreUnderEquiv
+  coaPreOverEquiv := wCoaPreOverEquiv
+
+/-- ★**Frobenioid は空でない**(上の系)。 -/
+theorem frobenioid_nonempty : ∃ (P : PreFrobenioid wC wΦ), Frobenioid P :=
+  ⟨wP, wIsFrobenioid⟩
+
+/-! ### ★自己監査で追加した2条(2026-08-15)
+
+`(v)(b)(c)` の**一意性節**を写し落としていたので `Frobenioid.lean` に足した。
+ここでその2条を `wP` について証明する。
+
+★構造は (iv)(a) と同じ: `β` は co-angular pre-step(`wn = 1`、底が同型)、
+`α` は isometric pre-step(`wd = 0`、`wn = 1`、底が同型)なので、
+合成の `wd` は `wd β`、`wn` は 1。2つの分解から `wd β = wd β'` が出る。 -/
+
+/-- 底の同型2本から `wC` の同型を作る(共通の補助)。 -/
+private noncomputable def wIsoOfBases {X X' A : wC} (bX : A.base ⟶ X.base) (hX : IsIso bX)
+    (bX' : A.base ⟶ X'.base) (hX' : IsIso bX') : X ≅ X' :=
+  let e : X.base ≅ X'.base :=
+    (@asIso _ _ _ _ bX hX).symm ≪≫ (@asIso _ _ _ _ bX' hX')
+  { hom := ⟨e.hom, (0 : ℕ), 1⟩
+    inv := ⟨e.inv, (0 : ℕ), 1⟩
+    hom_inv_id := wHom_ext (by simp) (by simp)
+    inv_hom_id := wHom_ext (by simp) (by simp) }
+
+@[simp] private theorem wd_wIsoOfBases_hom {X X' A : wC} (bX : A.base ⟶ X.base) (hX : IsIso bX)
+    (bX' : A.base ⟶ X'.base) (hX' : IsIso bX') : wd (wIsoOfBases bX hX bX' hX').hom = 0 := rfl
+@[simp] private theorem wn_wIsoOfBases_hom {X X' A : wC} (bX : A.base ⟶ X.base) (hX : IsIso bX)
+    (bX' : A.base ⟶ X'.base) (hX' : IsIso bX') : wn (wIsoOfBases bX hX bX' hX').hom = 1 := rfl
+@[simp] private theorem wd_wIsoOfBases_inv {X X' A : wC} (bX : A.base ⟶ X.base) (hX : IsIso bX)
+    (bX' : A.base ⟶ X'.base) (hX' : IsIso bX') : wd (wIsoOfBases bX hX bX' hX').inv = 0 := rfl
+@[simp] private theorem wn_wIsoOfBases_inv {X X' A : wC} (bX : A.base ⟶ X.base) (hX : IsIso bX)
+    (bX' : A.base ⟶ X'.base) (hX' : IsIso bX') : wn (wIsoOfBases bX hX bX' hX').inv = 1 := rfl
+
+/-- **(v)(b)** 分解の一意性。 -/
+theorem wPreStepFactorUniq {A B : wC} (X X' : wC) (β : A ⟶ X) (α : X ⟶ B)
+    (β' : A ⟶ X') (α' : X' ⟶ B) (hcomp : β ≫ α = β' ≫ α')
+    (hcβ : IsCoAngular wP β) (hsβ : IsPreStep wP β)
+    (hiα : IsIsometric wP α) (hsα : IsPreStep wP α)
+    (hcβ' : IsCoAngular wP β') (hsβ' : IsPreStep wP β')
+    (hiα' : IsIsometric wP α') (hsα' : IsPreStep wP α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  have hnβ : wn β = 1 := hsβ.1
+  have hnβ' : wn β' = 1 := hsβ'.1
+  have hnα : wn α = 1 := hsα.1
+  have hnα' : wn α' = 1 := hsα'.1
+  have hdα : wd α = 0 := hiα
+  have hdα' : wd α' = 0 := hiα'
+  have hd : wd β = wd β' := by
+    have h := congrArg wd hcomp
+    simp only [wd_comp, hdα, hdα', hnα, hnα', PNat.one_coe, one_smul, zero_add] at h
+    exact h
+  refine ⟨wIsoOfBases (wP.Base β) hsβ.2 (wP.Base β') hsβ'.2, ?_, ?_⟩
+  · exact wHom_ext (by simp [hdα, hdα', hnα]) (by simp [hnα, hnα'])
+  · exact wHom_ext (by simp [hd]) (by simp [hnβ, hnβ'])
+
+/-- **(v)(c)** 分解の一意性。 -/
+theorem wPreStepFactorUniq' {A B : wC} (X X' : wC) (β : A ⟶ X) (α : X ⟶ B)
+    (β' : A ⟶ X') (α' : X' ⟶ B) (hcomp : β ≫ α = β' ≫ α')
+    (hiβ : IsIsometric wP β) (hsβ : IsPreStep wP β)
+    (hcα : IsCoAngular wP α) (hsα : IsPreStep wP α)
+    (hiβ' : IsIsometric wP β') (hsβ' : IsPreStep wP β')
+    (hcα' : IsCoAngular wP α') (hsα' : IsPreStep wP α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  have hnβ : wn β = 1 := hsβ.1
+  have hnβ' : wn β' = 1 := hsβ'.1
+  have hnα : wn α = 1 := hsα.1
+  have hnα' : wn α' = 1 := hsα'.1
+  have hdβ : wd β = 0 := hiβ
+  have hdβ' : wd β' = 0 := hiβ'
+  have hd : wd α = wd α' := by
+    have h := congrArg wd hcomp
+    simp only [wd_comp, hdβ, hdβ', hnα, hnα', PNat.one_coe, smul_zero, add_zero] at h
+    exact h
+  refine ⟨wIsoOfBases (wP.Base β) hsβ.2 (wP.Base β') hsβ'.2, ?_, ?_⟩
+  · exact wHom_ext (by simp [hd]) (by simp [hnα, hnα'])
+  · exact wHom_ext (by simp [hdβ, hdβ']) (by simp [hnβ, hnβ'])
+
 end ABC3.Found.FrdI

@@ -380,12 +380,19 @@ def IsIsotropicHull {A B : C} (φ : A ⟶ B) : Prop :=
 > pull-back morphism which is a base-isomorphism ⇐⇒ isomorphism
 
 原文 (FrdI p.24):
+> base-trivial =⇒metrically trivial
+
+原文 (FrdI p.24):
 > base-identity =⇒ Div-identity
 
 原文 (FrdI p.24):
 > universally Div-Frobenius-trivial =⇒ Div-Frobenius-trivial
 
 ★原文は「follow formally」と書くだけで証明を置かない。**それを実際に示す。**
+
+★**含意は4本である**(2026-08-15 訂正)。一度この docstring は3本しか引用しておらず、
+2本目(`base-trivial ⟹ metrically trivial`)を写し落としていた。
+下の `isMetricallyTrivial_of_isBaseTrivial` がその4本目である。
 -/
 
 /-- ★**`base-identity ⟹ Div-identity`**(Remark 1.2.1 の第3行)。
@@ -395,6 +402,15 @@ theorem isDivIdentity_of_isBaseIdentity {A : C} {φ : A ⟶ A}
     (h : IsBaseIdentity P φ) : IsDivIdentity P φ := by
   show Φ.map (P.Base φ) = Φ.map (P.Base (𝟙 A))
   rw [show P.Base φ = P.Base (𝟙 A) from h]
+
+/-- ★**`base-trivial ⟹ metrically trivial`**(Remark 1.2.1 の第2行)。
+
+co-angular pre-step は特に pre-step なので base-isomorphism、よって始域と終域は
+base-isomorphic。`base-trivial` はそれを同型に格上げする。 -/
+theorem isMetricallyTrivial_of_isBaseTrivial {A : C}
+    (h : IsBaseTrivial P A) : IsMetricallyTrivial P A := by
+  intro Dd φ _ hstep
+  exact h Dd ⟨@asIso _ _ _ _ (P.Base φ) hstep.2⟩
 
 /-- ★**`base-equivalent ⟹ Div-equivalent`**(上の一般形)。 -/
 theorem divEquivalent_of_baseEquivalent {A B : C} {φ ψ : A ⟶ B}

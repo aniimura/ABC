@@ -371,7 +371,7 @@ structure FrobenioidCore : Prop where
   -/
   otriBase : ∀ {A B : C} (φ φ' : A ⟶ B), IsCoAngular P φ → IsPreStep P φ →
     IsCoAngular P φ' → IsPreStep P φ' → P.Base φ = P.Base φ' →
-    ∀ (α : End A) (β : End B), (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ →
+    ∀ α ∈ OTri P A, ∀ β ∈ OTri P B, (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ →
       (φ' ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ'
   /-- **(iv)(a)** 任意射の分解 `φ = α ∘ β ∘ γ`(Lean では `φ = γ ≫ β ≫ α`)。
 
@@ -415,6 +415,20 @@ structure FrobenioidCore : Prop where
   preStepFactor : ∀ {A B : C} (φ : A ⟶ B), IsPreStep P φ →
     ∃ (X : C) (β : A ⟶ X) (α : X ⟶ B),
       φ = β ≫ α ∧ IsCoAngular P β ∧ IsPreStep P β ∧ IsIsometric P α ∧ IsPreStep P α
+  /-- **(v)(b)** その分解の一意性(同型 `γ` を除く)。
+
+  原文 (FrdI p.25):
+  > is unique, up to replacing the pair (α, β) by a pair of the form (α ◦γ, γ−1 ◦β), where
+
+  ★**2026-08-15 追加(訂正の記録)**。一度この一意性節を**写し落としていた**。
+  (iv)(a) では `arbFactorUniq` として写していたのに (v)(b)(c) では落としており、
+  扱いが不統一だった。★自己監査で見つけたもので、`(iii)(c)` の `otriBase` が
+  緩すぎた件と**同じ種類の欠陥**である。 -/
+  preStepFactorUniq : ∀ {A B : C} (X X' : C) (β : A ⟶ X) (α : X ⟶ B)
+      (β' : A ⟶ X') (α' : X' ⟶ B), β ≫ α = β' ≫ α' →
+    IsCoAngular P β → IsPreStep P β → IsIsometric P α → IsPreStep P α →
+    IsCoAngular P β' → IsPreStep P β' → IsIsometric P α' → IsPreStep P α' →
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom
   /-- **(v)(c)** pre-step は「co-angular ∘ isometric」にも分解する。
 
   原文 (FrdI p.25):
@@ -423,15 +437,30 @@ structure FrobenioidCore : Prop where
   preStepFactor' : ∀ {A B : C} (φ : A ⟶ B), IsPreStep P φ →
     ∃ (X : C) (β : A ⟶ X) (α : X ⟶ B),
       φ = β ≫ α ∧ IsIsometric P β ∧ IsPreStep P β ∧ IsCoAngular P α ∧ IsPreStep P α
+  /-- **(v)(c)** その分解の一意性(同型 `γ'` を除く)。
+
+  原文 (FrdI p.25):
+  > an isomorphism of C.
+  -/
+  preStepFactorUniq' : ∀ {A B : C} (X X' : C) (β : A ⟶ X) (α : X ⟶ B)
+      (β' : A ⟶ X') (α' : X' ⟶ B), β ≫ α = β' ≫ α' →
+    IsIsometric P β → IsPreStep P β → IsCoAngular P α → IsPreStep P α →
+    IsIsometric P β' → IsPreStep P β' → IsCoAngular P α' → IsPreStep P α' →
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom
   /-- **(vi)** 単元を除く忠実性。
 
   原文 (FrdI p.25):
   > equivalent co-angular pre-steps of C. Then there exists a [necessarily unique] α ∈
-  -/
+
+  ★**`∃` で書く**(2026-08-15 訂正)。原文の `[necessarily unique]` は
+  (ii) の `[unique — since C is totally epimorphic]` と**同じ編集上の注記**であり、
+  条件そのものではなく**帰結**である。一度ここだけ `∃!` で書いて (ii) と扱いが
+  不統一だったので揃えた。一意性は下の `faithfulUpToUnits_unique` で
+  `totEpiC` から**証明する**。 -/
   faithfulUpToUnits : ∀ {A B : C} (φ ψ : A ⟶ B), BaseEquivalent P φ ψ →
     MetricallyEquivalent P φ ψ → IsCoAngular P φ → IsPreStep P φ →
     IsCoAngular P ψ → IsPreStep P ψ →
-    ∃! α : End B, α ∈ OTimes P B ∧ φ = ψ ≫ (α : B ⟶ B)
+    ∃ α : End B, α ∈ OTimes P B ∧ φ = ψ ≫ (α : B ⟶ B)
   /-- **(vii)(a)** isotropic hull が存在する。
 
   原文 (FrdI p.25):
@@ -466,6 +495,25 @@ structure Frobenioid : Prop where
   coaPreOverEquiv :
     letI := coaPreProp_isMultiplicative P core.coAngularComp
     ∀ A : C, (coaPreOverFunctor P A).IsEquivalence
+
+end ABC3.Found.FrdI
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory
+
+universe v u w
+
+/-- ★**(vi) の一意性は条件ではなく帰結である** —— `𝒞` が totally epimorphic なので
+`ψ` は epi、よって `ψ ≫ α = ψ ≫ α'` から `α = α'`。
+
+★原文の `[necessarily unique]` を `∃!` として構造に書き込むのではなく、
+**ここで証明する**のが正しい扱いである((ii) と同じ扱い)。 -/
+theorem faithfulUpToUnits_unique {D : Type u} [Category.{v} D] {C : Type u} [Category.{v} C]
+    {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) {A B : C} (ψ : A ⟶ B)
+    (α α' : End B) (h : (ψ ≫ (α : B ⟶ B)) = ψ ≫ (α' : B ⟶ B)) : α = α' := by
+  haveI : Epi ψ := P.totEpiC _ _ _
+  exact (cancel_epi ψ).mp h
 
 end ABC3.Found.FrdI
 
