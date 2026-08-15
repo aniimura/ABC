@@ -74,16 +74,20 @@ structure InitialThetaDataFieldPart where
   instIsAlgClosure : IsAlgClosure F Fbar
 
 def InitialThetaDataFieldPart.src : Source :=
-  { paper := "IUTchI", pdfPage := 61, item := "Definition 3.1, (b)",
-    sectionId := "def-3-1-b" }
+  { paper := "IUTchI", pdfPage := 61, item := "Definition 3.1, (a)",
+    sectionId := "def-3-1-a" }
 
 /-- 原文の Definition 3.1 が要求するもの(G6)。
 
 ★これは **下界** である。(a) からは外部依存が出ないが、(b) 以降は
-mathlib に無い語彙を要求する。ここではそれを `.citation` として測定つきで記録し、
-原文が明示的に別論文へ渡している箇所を `.otherPaper` の**辺**として書く。 -/
+mathlib に無い語彙を要求する。ここではそれを `.citation` として測定つきで記録する。
+
+★**辺(`.otherPaper`)は 0 本である。** 条件 (a) は何も引用していない。
+一度 `[AbsTopIII] Definition 5.1, (ii)` への辺を書いていたが、それは条件 (b) の引用であり、
+(b) は転写していない。2026-08-15 の仕分けで落とした(下の1件目に記録)。 -/
 def InitialThetaDataFieldPart.needs : List ProofObligation :=
-  [ .otherPaper "[AbsTopIII]" "Definition 5.1, (ii)(field of moduli——原文 (b) が引用)" 113,
+  [ .implicitStep
+      "★2026-08-15 に辺を1本**落とした**: 一度 `[AbsTopIII] Definition 5.1, (ii)`(field of moduli、物理 p.113)への辺を書いていたが、それを引用しているのは条件 **(b)** であり、我々が転写したのは条件 **(a)** である。(a) は何も引用しない。転写していない条件の引用を辺として書けば、依存グラフは我々が持っていない依存を持っているように見える" 61,
     .citation "mathlib v4.31.0-rc2" "once-punctured elliptic curve(1点抜き楕円曲線)"
       (.absent <|
         "(S1) 原文側の呼称は “once-punctured elliptic curve” / “hyperbolic curve of type (1,1)”。" ++

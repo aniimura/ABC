@@ -878,6 +878,26 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
                 `(同一論文内 ${sameEdges} / 論文をまたぐ ${edges.length - sameEdges})` +
                 ` / 最大深さ ${maxDepth} / 循環 ${cycles.length} 件`);
     for (const c of cycles) console.log(`       循環: ${c}`);
+    // ★「循環 N 件」の意味(2026-08-15 に辺の意味を定めてから、この行は主張になった)。
+    //   辺は「原文の証明・主張が実際に依拠しているもの」であり、前方参照・解説案内・
+    //   導入部からの指しは辺ではない(`Meta/Claim.lean` の `otherPaper`)。
+    //   したがって:
+    //     循環 0 件 = **証明の依拠関係に循環が無い**(= 我々が写した範囲では、
+    //                 原典の議論に順序が付く)。
+    //     循環あり  = 次のどれか。**既定は①**:
+    //       ① 我々の転写の誤り(前方参照や解説案内を辺として書いてしまった)。
+    //          原文側のグラフで実測: 目印つきの辺を落とすと最大 SCC が 262 → 8 になり、
+    //          残る循環はすべて1論文の中に閉じた(`ResearchPaper/cycle-analysis.md`)。
+    //          すなわち**循環の大半は辺の定義の副作用**である。
+    //       ② 同時再帰的な定義・主張(原典が意図して同時に立てているもの)。
+    //          この場合は循環ではなく「束ねて1つの節点にする」のが正しい写し方。
+    //       ③ 原典側の問題。★これを主張するには ① と ② を先に潰すこと。
+    if (cycles.length === 0) {
+      console.log('       ★循環 0 件 = 我々が写した範囲では、証明の依拠関係に順序が付く');
+    } else {
+      console.log('       ★循環あり——既定の疑いは**我々の転写の誤り**(前方参照や解説案内を');
+      console.log('          辺にしていないか)。原典側の問題と判断する前に、それを潰すこと');
+    }
     console.log(`     着地した葉            ${statusTally.inMathlib + statusTally.inProject} 件` +
                 `(mathlib ${statusTally.inMathlib} / 公開プロジェクト ${statusTally.inProject})`);
     // ★葉を仕分ける。「次に張れる」と「中層が無いので今は張れない」は別物である。

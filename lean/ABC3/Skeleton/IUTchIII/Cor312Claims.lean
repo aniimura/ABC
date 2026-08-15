@@ -66,8 +66,8 @@ def PossibleImagesContained.src : Source :=
     sectionId := "remark-3-9-5-vii-ob1" }
 
 def PossibleImagesContained.needs : List ProofObligation :=
-  [ .otherPaper "[IUTchIII]"
-      "Theorem 3.11(「possible images」はその多輻的アルゴリズムの出力である)" 153,
+  [ .implicitStep
+      "★2026-08-15 に辺を1本**落とした**: 一度 `[IUTchIII] Theorem 3.11`(物理 p.153)への辺を書いていたが、原文 p.131 は「arises from applying the multiradial algorithms of Theorem 3.11 **below**」と書いており、**前方参照**である。Remark 3.9.5(物理 p.126-131)は Theorem 3.11(物理 p.153)より**前**にあるので、その主張が Theorem 3.11 に依拠することはできない。★迷いを記録する: Ob1 の内容は多輻的アルゴリズムの出力について述べているので、内容としては Theorem 3.11 を前提しているとも読める。それでも辺にしないのは、(a) 原文が `below` と明示していること、(b) `cor_3_12` から Theorem 3.11 への辺が既にあり依存は表現されていること、の2点による" 131,
     .implicitStep
       "log-shell の**テンソルパケット** `ℐ_k` の構成そのもの(j 上のテンソル積)を写していない。我々は `logShellPacket : Set Amb` という単一の部分集合で受けている" 131,
     .implicitStep
@@ -95,7 +95,9 @@ def LogShellPacketCompact.src : Source :=
     sectionId := "thm-3-11-i-a" }
 
 def LogShellPacketCompact.needs : List ProofObligation :=
-  [ .otherPaper "[AbsTopIII]" "(L1)(log-shell はコンパクトで、ゆえに有限な log-volume を持つ)" 5,
+  [ .otherPaper "[AbsTopIII]" "Corollary 5.10, (i)(log-shell の基本性質)" 145,
+    .implicitStep
+      "★2026-08-15 に辺を**差し替えた**: 一度 `[AbsTopIII] (L1)`(物理 p.5)へ向けていたが、原文 [IUTchIII] 物理 p.31 が実際に引用しているのは「is compact, hence of finite log-volume [cf. [AbsTopIII], Corollary 5.10, (i)]」である。(L1) は導入部の要約であって、それ自身 [cf. Corollary 5.10, (i)] と本体を指している。導入部から本体への指しは辺にしない(導入部は証明を持たない)" 31,
     .implicitStep
       "★単一の log-shell のコンパクト性(p.31)から**テンソルパケット**のコンパクト性への段を写していない。有限テンソル積であることが要るが、原文はここを明示していない" 146 ]
 
@@ -171,7 +173,7 @@ def QLogVolMem.src : Source :=
 def QLogVolMem.needs : List ProofObligation :=
   [ .implicitStep
       "原文 p.184 の限定『subject to the condition』と『perhaps only up to some sort of approximation, as a result of various indeterminacies』を写していない。仮説の強化にあたりうる意図的な単純化(check.mjs 冒頭 A6)" 184,
-    .otherPaper "[IUTchII]"
-      "Corollary 4.10, (i)(ラベル 0 と ⟨F_l⟩ の同定——出力データの構成が入力データの pilot-object 対数体積を与えるという段が依拠する)" 158 ]
+    .implicitStep
+      "★2026-08-15 に辺を1本**落とした**: 一度 `[IUTchII] Corollary 4.10, (i)`(物理 p.158)への辺を書いていたが、**原文 p.184 に `[IUTchII]` の引用は 0 件**である(実測)。あれは私が『出力データの構成が入力データの pilot-object 対数体積を与える段が依拠するはずだ』と**推測して書いたもの**であり、原文が言っていない依存だった。なお `cor_3_12` から `[IUTchII] Corollary 4.10, (i)` への辺は原文 p.174(記号 △ の定義)にあるので、そちらは残る" 184 ]
 
 end ABC3.Skeleton.IUTchIII

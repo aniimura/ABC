@@ -11,6 +11,23 @@ Algorithms* [AbsTopIII]、物理 p.5(全 164 ページ。**400 dpi 目視確認�
 原文 (AbsTopIII p.5):
 > (L1) a log-shell is compact and hence of finite “log-volume” [cf. Corollary
 
+## ★2026-08-15 の訂正: 出典を (L1) から Corollary 5.10, (i) へ移した
+
+一度この節点の出典を `[AbsTopIII] (L1)`(物理 p.5、**導入部**)に置いていたが、
+**原文が実際に引用しているのはそこではない**。[IUTchIII] 物理 p.31 は
+
+> (anon) I†Fv is compact, hence of finite log-volume [cf. [AbsTopIII], Corollary 5.10, (i)]
+
+と書く。(L1) は導入部の要約であって、それ自身 `[cf. Corollary 5.10, (i)]` と本体を指している。
+**導入部から本体への指しは辺にしない**——導入部は証明を持たないので「依拠」という関係が無い
+(辺の意味は `Meta/Claim.lean` の `otherPaper` に定めた)。
+
+原文 (AbsTopIII p.145):
+> (Fundamental Properties of Log-shells) In the notation
+
+原文 (AbsTopIII p.145) は直前でこう述べる:
+> We are now ready to state the main result of the present §5 [and, indeed, of
+
 ## なぜここを張るか
 
 `tools/check.mjs` の依存グラフで `[AbsTopIII] (L1)` が**未展開の葉**として現れた
@@ -48,8 +65,8 @@ def LogShellCompactAndFinite {K : Type} (τ : TopologicalSpace K)
   @IsCompact K τ shell ∧ logVol shell ≠ ⊤
 
 def LogShellCompactAndFinite.src : Source :=
-  { paper := "AbsTopIII", pdfPage := 5, item := "(L1)",
-    sectionId := "l1-log-shell-compact" }
+  { paper := "AbsTopIII", pdfPage := 145, item := "Corollary 5.10, (i)",
+    sectionId := "cor-5-10-log-shell-properties" }
 
 /-- (L1) が要求するもの。
 

@@ -19,11 +19,16 @@
       "key": "[IUTchII] Corollary 4.10",
       "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
       "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
-    },
+    }
+  ],
+  "★2026-08-15 の仕分け直しで消えた葉": [
     {
       "key": "[AbsTopIII] Definition 5.1",
-      "reason": "同上。[AbsTopIII] の 1_Structured は (L1) のぶんだけ作った。物理 p.113 は目視確認済み(field of moduli)。",
-      "cost": "既存の 1_Structured/Topics in Absolute Anabelian Geometry III/ に単位を1つ追加"
+      "why": "辺そのものを落としたため葉でなくなった。`InitialThetaDataFieldPart` が転写したのは [IUTchI] Definition 3.1 の条件 (a) であり、[AbsTopIII] Definition 5.1 を引用しているのは条件 (b) である。(b) は転写していないので、その引用を辺として書くのは誤りだった。"
+    },
+    {
+      "key": "[AbsTopIII] (L1)",
+      "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
     }
   ]
 }
