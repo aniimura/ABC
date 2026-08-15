@@ -948,4 +948,95 @@ theorem prop_1_10_iv_mpr (F : FrobenioidCore P) {A B : C}
     rw [P.degFr_comp, degFr_of_isIso P δ, one_mul, hd₂] at hd
     exact hd
 
+/-! ### ★sharp モノイドの 2 つの補題 —— (iv) の逆向きに要る
+
+★**どちらも「和が 0 なら可逆、可逆なら 0」という sharp の一行の帰結**だが、
+**使う形が違う**ので別々に置く。
+
+★**原文はこれらを一度も書かない。** `Definition 1.1, (i)` で `divisorial` に
+`sharp` を入れておいて、以後は暗黙に使う。★**「sharp を仮定に入れる」という
+一回の判断が、下流の何箇所で効いているかは、形式化するまで見えない。**
+-/
+
+/-- ★**sharp なら、和が 0 の両項は 0**。 -/
+theorem eq_zero_of_add_eq_zero_of_isSharp {M : Type w} [AddCommMonoid M]
+    (hs : IsSharp M) {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 :=
+  ⟨hs a ⟨⟨a, b, h, by rw [add_comm]; exact h⟩, rfl⟩,
+   hs b ⟨⟨b, a, by rw [add_comm]; exact h, h⟩, rfl⟩⟩
+
+/-- ★**sharp なら、`n • a = 0`(`n ≥ 1`)から `a = 0`**。
+
+★`n • a = a + (n-1) • a` なので `a` は可逆。 -/
+theorem eq_zero_of_nsmul_eq_zero_of_isSharp {M : Type w} [AddCommMonoid M]
+    (hs : IsSharp M) {n : ℕ} (hn : 0 < n) {a : M} (h : n • a = 0) : a = 0 := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  rw [succ_nsmul] at h
+  exact (eq_zero_of_add_eq_zero_of_isSharp hs h).2
+
+/-! ### ★(iv) の逆向き —— prime-Frobenius ⟹ irreducible
+
+★**任意の分解 `φ = β ≫ α` に対して片方が同型**を示す。分解は**任意の射**なので、
+`β`・`α` が Frobenius 型であることは**与えられていない**。そこで 3 つを別々に出す:
+
+1. **base-isomorphism**: `Base φ = Base β ≫ Base α` が同型で `𝒟` は totally epimorphic
+   なので、**両方が同型**(`isIso_of_isIso_comp`)
+2. **isometric**: `Div φ = 0`(Frobenius 型)を `Div_comp` で開くと
+   `Φ.map (Base β) (Div α) + (degFr α) • Div β = 0`。
+   ★**sharp なので両項が 0**、さらに `Φ.map` は**常に単射**なので `Div α = 0`、
+   `n • x = 0` から `Div β = 0`。
+3. **co-angular**: `𝒞` が isotropic 型なので `Proposition 1.4, (i)` から自動
+
+★あとは次数。`degFr α * degFr β = degFr φ` が素数なので
+`pnat_irreducible_iff_prime` の `⟸` 向きから **片方が 1**。
+次数 1 ＋ LB-invertible ＋ base-iso なら `Proposition 1.4, (iii)` で同型。
+
+★★**ここで sharp が 2 回効いている**(和の分解と `n` 倍の消去)。
+★**原文は (iv) を「Proposition 1.7, (v) と ℕ≥1 の well-known structure から
+immediately」と書くだけで、この 3 段は書いていない。**
+-/
+
+include P in
+/-- **(iv) の逆向き** —— prime-Frobenius なら irreducible。
+
+★`𝒞` が isotropic 型であることを使う(原文の `Proposition 1.4, (i)` 経由)。 -/
+theorem prop_1_10_iv_mp (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B : C} (φ : A ⟶ B) (hp : IsPrimeFrobenius P φ) : IsIrreducibleMor φ := by
+  refine ⟨fun h => ?_, fun X β α hfac => ?_⟩
+  · haveI := h
+    have h2 := hp.2
+    rw [degFr_of_isIso P φ] at h2
+    exact Nat.not_prime_one (by simpa using h2)
+  · -- base-isomorphism を両方に降ろす
+    have hb : IsIso (P.Base β ≫ P.Base α) := by
+      rw [← P.Base_comp, ← hfac]; exact hp.1.2
+    haveI := hb
+    obtain ⟨hbβ, hbα⟩ := isIso_of_isIso_comp P.totEpiD (P.Base β) (P.Base α)
+    -- isometric を両方に降ろす
+    have hsum : Φ.map (P.Base β) (P.Div α) + (P.degFr α : ℕ) • P.Div β = 0 := by
+      rw [← P.Div_comp, ← hfac]; exact hp.1.1.2
+    obtain ⟨e1, e2⟩ := eq_zero_of_add_eq_zero_of_isSharp (P.divisorial _).2 hsum
+    have hdβ : P.Div β = 0 :=
+      eq_zero_of_nsmul_eq_zero_of_isSharp (P.divisorial _).2 (P.degFr α).pos e2
+    have hdα : P.Div α = 0 :=
+      Φ.map_injective (P.Base β) (by rw [e1, map_zero])
+    -- 次数の分解
+    have hd : P.degFr φ = P.degFr α * P.degFr β := by rw [hfac, P.degFr_comp]
+    rcases ((pnat_irreducible_iff_prime (P.degFr φ)).mpr hp.2).2 _ _ hd with h | h
+    · -- degFr α = 1 ⟹ α は同型
+      exact Or.inr (prop_1_4_iii P F α
+        ⟨prop_1_4_i P α (fun Y _ => hiso Y), hdα⟩ ⟨h, hbα⟩)
+    · -- degFr β = 1 ⟹ β は同型
+      exact Or.inl (prop_1_4_iii P F β
+        ⟨prop_1_4_i P β (fun Y _ => hiso Y), hdβ⟩ ⟨h, hbβ⟩)
+
+include P in
+/-- ★★**`Proposition 1.10, (iv)` の前半の完成形**(iff)。
+
+★isotropic 型の `𝒞` において、Frobenius 型射が prime-Frobenius であることと
+irreducible であることは同値。 -/
+theorem prop_1_10_iv (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B : C} (φ : A ⟶ B) (hφ : IsFrobeniusType P φ) :
+    IsPrimeFrobenius P φ ↔ IsIrreducibleMor φ :=
+  ⟨prop_1_10_iv_mp P F hiso φ, prop_1_10_iv_mpr P F (fun X _ => hiso X) φ hφ⟩
+
 end ABC3.Found.FrdI
