@@ -741,6 +741,13 @@ theorem cfpEndHom_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
     cfpEndHom P G A (x ^ k) = (cfpEndHom P G A x) ^ k :=
   map_pow (cfpEndHom P G A) x k
 
+/-! ★**測定**: `CfpCat.fst (x ^ k) = (CfpCat.fst x) ^ k` を
+`CfpCat.fst` の綴りで述べようとすると、型注釈を付けても
+`HPow (A.obj.left ⟶ A.obj.left) ℕ` が合成できない
+(`End X` の `Monoid` インスタンスは `End X` の綴りにしか付かない)。
+★**したがって `cfpEndHom_pow`(返り値の型が `End A.obj.left` である形)を
+`show` で当てるのが正しい**。`Frobenius-normalized` はこの形で書き直せるはずだが、未着手。 -/
+
 /-- ★`𝒟'` 成分の方のモノイド準同型。 -/
 def cfpEndHomSnd (A : CfpCat P G) : End A →* End A.obj.right where
   toFun f := CfpCat.snd f
@@ -763,13 +770,237 @@ theorem cfpEndHomSnd_pow {A : CfpCat P G} (x : End A) (k : ℕ) :
 ★逆向きは「`𝒟` の自己射 `g₀` に対応する `𝒟'` の自己射」を要求するので
 **`G` の充満性**が要り、仮定にない。★**原文が片向きでしか述べていないのは正しい。** -/
 
-/-! ### ★(vi) の実装は未完(切った)
+/-! ### ★★**#5 の原因の特定** —— 「インスタンス合成の失敗」は独立の症状ではなかった
 
-★**数学は上の説明で完成している**が、Lean では
-`IsIso (A.obj.hom ≫ G.map g ≫ w)` のインスタンス合成が
-(文脈に各因子の `IsIso` があるのに)通らず、分類表 #5 の対処でも抜けなかった。
-**無理に通さず切る**という方針に従う。
--/
+★`IsAutAmple P' A` の `g` の型は `End ((cfpToElem …).obj A).base` であり、
+**`A.obj.right` に簡約されるのは `cfpToElem` を展開したあと**である。
+したがって `G.map g` の型が「もう一つの綴り」になり、
+`A.obj.hom ≫ G.map g ≫ w` の `IsIso` を探すときに
+文脈の `hA : IsIso A.obj.hom` と**綴りが合わず**合成が失敗する。
+
+★★**つまり #5 は #1(2つの綴り)が「インスタンス探索」を通して現れたもの**であり、
+対処も #3 と同じ ——**綴りの決まった変数を先に導入する**。
+★**表は 7 行のままでよい。#5 の「原因」欄を #1 と同じに直すのが正しい。** -/
+
+/-- **(vi)** —— **End-ample** は射影から降りる(★片向き)。 -/
+theorem cfp_endAmple_of (A : CfpCat P G) (h : IsEndAmple P A.obj.left) :
+    IsEndAmple (cfpPreFrobenioid P G hG hD') A := by
+  haveI hA : IsIso A.obj.hom := A.property
+  obtain ⟨w, hw1, hw2⟩ := hA.out
+  intro g0
+  -- ★#3: 綴りの決まった変数を先に導入する
+  obtain ⟨g, rfl⟩ : ∃ g : End A.obj.right, g = g0 := ⟨g0, rfl⟩
+  obtain ⟨φ₀, hφ₀⟩ := h (A.obj.hom ≫ G.map g ≫ w)
+  refine ⟨InducedCategory.homMk ⟨φ₀, g, ?_⟩, rfl⟩
+  show P.proj.map φ₀ ≫ A.obj.hom = A.obj.hom ≫ G.map g
+  rw [show P.proj.map φ₀ = A.obj.hom ≫ G.map g ≫ w from hφ₀, Category.assoc,
+    Category.assoc, hw2, Category.comp_id]
+
+/-- **(vi)** —— **Aut-ample** は射影から降りる(★片向き)。 -/
+theorem cfp_autAmple_of (A : CfpCat P G) (h : IsAutAmple P A.obj.left) :
+    IsAutAmple (cfpPreFrobenioid P G hG hD') A := by
+  haveI hA : IsIso A.obj.hom := A.property
+  obtain ⟨w, hw1, hw2⟩ := hA.out
+  haveI hwi : IsIso w := ⟨A.obj.hom, hw2, hw1⟩
+  intro g0 hg0
+  obtain ⟨g, rfl⟩ : ∃ g : End A.obj.right, g = g0 := ⟨g0, rfl⟩
+  haveI hgi : IsIso g := hg0
+  haveI hGg : IsIso (G.map g) := inferInstance
+  haveI hcomp : IsIso (A.obj.hom ≫ G.map g ≫ w) := inferInstance
+  obtain ⟨φ₀, hiso, hφ₀⟩ := h (A.obj.hom ≫ G.map g ≫ w) hcomp
+  refine ⟨InducedCategory.homMk ⟨φ₀, g, ?_⟩, ?_, rfl⟩
+  · show P.proj.map φ₀ ≫ A.obj.hom = A.obj.hom ≫ G.map g
+    rw [show P.proj.map φ₀ = A.obj.hom ≫ G.map g ≫ w from hφ₀, Category.assoc,
+      Category.assoc, hw2, Category.comp_id]
+  · exact cfp_isIso_of P G _ hiso hg0
+
+/-! ## ★(ii) —— `Definition 1.3` の 21 条の移送
+
+原文 (FrdI p.28):
+> equivalences, the conditions of Definition 1.3 follow via a routine verification. Thus,
+
+★**机上の仕分けを実装で検証する段**である。まず辞書から直に出る条から。 -/
+
+section Core
+
+variable (F : FrobenioidCore P)
+
+include F in
+/-- **(iii)(a)** の移送 —— co-angular は合成で閉じる。 -/
+theorem cfp_coAngularComp {X Y Z : CfpCat P G} (ψ : X ⟶ Y) (φ : Y ⟶ Z) :
+    IsCoAngular (cfpPreFrobenioid P G hG hD') ψ →
+      IsCoAngular (cfpPreFrobenioid P G hG hD') φ →
+      IsCoAngular (cfpPreFrobenioid P G hG hD') (ψ ≫ φ) := by
+  intro hψ hφ
+  refine cfp_coAngular_of P G hG hD' _ ?_
+  exact F.coAngularComp (CfpCat.fst ψ) (CfpCat.fst φ)
+    ((cfp_coAngular_iff P G hG hD' ψ).mp hψ) ((cfp_coAngular_iff P G hG hD' φ).mp hφ)
+
+include F in
+/-- **(iii)(b)** の移送。 -/
+theorem cfp_coAngularOfPreStep {X Y : CfpCat P G} (α : X ⟶ Y)
+    (hca : IsCoAngular (cfpPreFrobenioid P G hG hD') α)
+    (hps : IsPreStep (cfpPreFrobenioid P G hG hD') α)
+    (φ : X ⟶ Y) : IsCoAngular (cfpPreFrobenioid P G hG hD') φ :=
+  cfp_coAngular_of P G hG hD' φ
+    (F.coAngularOfPreStep (CfpCat.fst α) ((cfp_coAngular_iff P G hG hD' α).mp hca)
+      ((cfp_preStep_iff P G hG hD' α hps.2).mp hps) (CfpCat.fst φ))
+
+include F in
+/-- **(v)(a)** の移送 —— pre-step は mono。
+
+★**両成分がそれぞれ mono** であればよい: `𝒞` 側は `F.preStepMono`、
+`𝒟'` 側は **pre-step の定義から `snd` が同型**。 -/
+theorem cfp_preStepMono {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (hφ : IsPreStep (cfpPreFrobenioid P G hG hD') φ) : Mono φ := by
+  haveI hm : Mono (CfpCat.fst φ) :=
+    F.preStepMono (CfpCat.fst φ) ((cfp_preStep_iff P G hG hD' φ hφ.2).mp hφ)
+  haveI hi : IsIso (CfpCat.snd φ) := hφ.2
+  constructor
+  intro Z g h hgh
+  have e1 : CfpCat.fst g ≫ CfpCat.fst φ = CfpCat.fst h ≫ CfpCat.fst φ :=
+    congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hgh
+  have e2 : CfpCat.snd g ≫ CfpCat.snd φ = CfpCat.snd h ≫ CfpCat.snd φ :=
+    congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) hgh
+  exact InducedCategory.hom_ext
+    (CommaMorphism.ext ((cancel_mono (CfpCat.fst φ)).mp e1)
+      ((cancel_mono (CfpCat.snd φ)).mp e2))
+
+include F in
+/-- **(vii)(b)** の移送 —— isotropic な対象から出る射の終域は isotropic。 -/
+theorem cfp_isotropicClosed {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (h : IsIsotropic (cfpPreFrobenioid P G hG hD') X) :
+    IsIsotropic (cfpPreFrobenioid P G hG hD') Y :=
+  (cfp_isotropic_iff P G hG hD' Y).mpr
+    (F.isotropicClosed (CfpCat.fst φ) ((cfp_isotropic_iff P G hG hD' X).mp h))
+
+include F in
+/-- **(ii)** の移送 —— 各次数の Frobenius 型射が存在する。
+
+★Frobenius 型は base-isomorphism なので**鎖**があり、
+新しい対象 `B` の `𝒟'` 成分は `A` のものを流用して `snd φ = 𝟙` に取れる。 -/
+theorem cfp_frobDegSurj (A : CfpCat P G) (n : ℕ+) :
+    ∃ (B : CfpCat P G) (φ : A ⟶ B),
+      IsFrobeniusType (cfpPreFrobenioid P G hG hD') φ ∧
+        (cfpPreFrobenioid P G hG hD').degFr φ = n := by
+  haveI hA : IsIso A.obj.hom := A.property
+  obtain ⟨B₀, φ₀, hft, hdeg⟩ := F.frobDegSurj A.obj.left n
+  haveI hφb : IsIso (P.proj.map φ₀) := hft.2
+  have hzi : IsIso (inv (P.proj.map φ₀) ≫ A.obj.hom) := inferInstance
+  refine ⟨⟨⟨B₀, A.obj.right, inv (P.proj.map φ₀) ≫ A.obj.hom⟩, hzi⟩,
+    InducedCategory.homMk ⟨φ₀, 𝟙 _, by simp⟩, ?_, hdeg⟩
+  exact (cfp_frobType_iff P G hG hD' _ (by show IsIso (𝟙 _); infer_instance)).mpr hft
+
+include F in
+/-- **(v)(b)** の移送 —— pre-step は「co-angular pre-step ≫ isometric pre-step」に分解する。
+
+★中間対象は**両側とも pre-step に挟まれる**ので鎖がある。 -/
+theorem cfp_preStepFactor {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (hφ : IsPreStep (cfpPreFrobenioid P G hG hD') φ) :
+    ∃ (Z : CfpCat P G) (β : X ⟶ Z) (α : Z ⟶ Y),
+      φ = β ≫ α ∧ IsCoAngular (cfpPreFrobenioid P G hG hD') β ∧
+        IsPreStep (cfpPreFrobenioid P G hG hD') β ∧
+        IsIsometric (cfpPreFrobenioid P G hG hD') α ∧
+        IsPreStep (cfpPreFrobenioid P G hG hD') α := by
+  haveI hX : IsIso X.obj.hom := X.property
+  obtain ⟨Z₀, β₀, α₀, hfac, hβc, hβs, hαi, hαs⟩ :=
+    F.preStepFactor (CfpCat.fst φ) ((cfp_preStep_iff P G hG hD' φ hφ.2).mp hφ)
+  haveI hβb : IsIso (P.proj.map β₀) := hβs.2
+  have hzi : IsIso (inv (P.proj.map β₀) ≫ X.obj.hom) := inferInstance
+  refine ⟨⟨⟨Z₀, X.obj.right, inv (P.proj.map β₀) ≫ X.obj.hom⟩, hzi⟩,
+    InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩,
+    InducedCategory.homMk ⟨α₀, (CfpCat.snd φ : X.obj.right ⟶ Y.obj.right), ?_⟩, ?_, ?_,
+    ⟨hβs.1, by show IsIso (𝟙 _); infer_instance⟩, ?_, ?_⟩
+  · show P.proj.map α₀ ≫ Y.obj.hom
+      = (inv (P.proj.map β₀) ≫ X.obj.hom) ≫ G.map (CfpCat.snd φ)
+    rw [Category.assoc, ← cfp_square φ,
+      show P.proj.map (CfpCat.fst φ) = P.proj.map β₀ ≫ P.proj.map α₀ from by
+        rw [hfac, P.proj.map_comp],
+      ← Category.assoc, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  · refine InducedCategory.hom_ext (CommaMorphism.ext hfac ?_)
+    show CfpCat.snd φ = 𝟙 _ ≫ CfpCat.snd φ
+    simp
+  · exact cfp_coAngular_of P G hG hD' _ hβc
+  · exact (cfp_isometric_iff P G hG hD' _).mpr hαi
+  · exact ⟨hαs.1, hφ.2⟩
+
+include F in
+/-- **(v)(c)** の移送 —— pre-step は「isometric pre-step ≫ co-angular pre-step」に分解する。 -/
+theorem cfp_preStepFactor' {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (hφ : IsPreStep (cfpPreFrobenioid P G hG hD') φ) :
+    ∃ (Z : CfpCat P G) (β : X ⟶ Z) (α : Z ⟶ Y),
+      φ = β ≫ α ∧ IsIsometric (cfpPreFrobenioid P G hG hD') β ∧
+        IsPreStep (cfpPreFrobenioid P G hG hD') β ∧
+        IsCoAngular (cfpPreFrobenioid P G hG hD') α ∧
+        IsPreStep (cfpPreFrobenioid P G hG hD') α := by
+  haveI hX : IsIso X.obj.hom := X.property
+  obtain ⟨Z₀, β₀, α₀, hfac, hβi, hβs, hαc, hαs⟩ :=
+    F.preStepFactor' (CfpCat.fst φ) ((cfp_preStep_iff P G hG hD' φ hφ.2).mp hφ)
+  haveI hβb : IsIso (P.proj.map β₀) := hβs.2
+  have hzi : IsIso (inv (P.proj.map β₀) ≫ X.obj.hom) := inferInstance
+  refine ⟨⟨⟨Z₀, X.obj.right, inv (P.proj.map β₀) ≫ X.obj.hom⟩, hzi⟩,
+    InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩,
+    InducedCategory.homMk ⟨α₀, (CfpCat.snd φ : X.obj.right ⟶ Y.obj.right), ?_⟩, ?_, ?_,
+    ⟨hβs.1, by show IsIso (𝟙 _); infer_instance⟩, ?_, ?_⟩
+  · show P.proj.map α₀ ≫ Y.obj.hom
+      = (inv (P.proj.map β₀) ≫ X.obj.hom) ≫ G.map (CfpCat.snd φ)
+    rw [Category.assoc, ← cfp_square φ,
+      show P.proj.map (CfpCat.fst φ) = P.proj.map β₀ ≫ P.proj.map α₀ from by
+        rw [hfac, P.proj.map_comp],
+      ← Category.assoc, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  · refine InducedCategory.hom_ext (CommaMorphism.ext hfac ?_)
+    show CfpCat.snd φ = 𝟙 _ ≫ CfpCat.snd φ
+    simp
+  · exact (cfp_isometric_iff P G hG hD' _).mpr hβi
+  · exact cfp_coAngular_of P G hG hD' _ hαc
+  · exact ⟨hαs.1, hφ.2⟩
+
+include F in
+/-- **(i)(a)** の移送 —— `𝒟'` のどの対象の上にも Frobenius-trivial な対象がある。
+
+★`𝒞` の `baseSurj` を `G Y` に当てて得た同型を、そのまま CFP の三つ組の第3成分にする。
+★**新しい対象を作るのに鎖は要らない** —— 同型が入力として与えられるから。 -/
+theorem cfp_baseSurj (Y : D') :
+    ∃ A : CfpCat P G, IsFrobeniusTrivial (cfpPreFrobenioid P G hG hD') A ∧
+      Nonempty (((cfpPreFrobenioid P G hG hD').toElem.obj A).base ≅ Y) := by
+  obtain ⟨A₀, hft, ⟨e⟩⟩ := F.baseSurj (G.obj Y)
+  haveI : IsIso e.hom := e.isIso_hom
+  refine ⟨⟨⟨A₀, Y, e.hom⟩, inferInstanceAs (IsIso e.hom)⟩, ?_, ⟨Iso.refl _⟩⟩
+  exact (cfp_frobTrivial_iff P G hG hD' _).mpr hft
+
+include F in
+/-- **(ii)** の移送 —— 同じ次数の Frobenius 型射の本質的一意性。
+
+★★**`𝒟'` 成分は `(snd φ)⁻¹ ≫ snd ψ` に取れる** —— Frobenius 型は base-isomorphism なので
+両方の `𝒟'` 成分が同型であり、**`G` の充満性は要らない**。 -/
+theorem cfp_frobDegUniq (A B E : CfpCat P G) (φ : A ⟶ B) (ψ : A ⟶ E)
+    (hφ : IsFrobeniusType (cfpPreFrobenioid P G hG hD') φ)
+    (hψ : IsFrobeniusType (cfpPreFrobenioid P G hG hD') ψ)
+    (hd : (cfpPreFrobenioid P G hG hD').degFr φ = (cfpPreFrobenioid P G hG hD').degFr ψ) :
+    ∃ β : B ⟶ E, IsIso β ∧ φ ≫ β = ψ := by
+  haveI hA : IsIso A.obj.hom := A.property
+  haveI hB : IsIso B.obj.hom := B.property
+  haveI hE : IsIso E.obj.hom := E.property
+  haveI hsφ : IsIso (CfpCat.snd φ) := hφ.2
+  haveI hsψ : IsIso (CfpCat.snd ψ) := hψ.2
+  haveI hpφ : IsIso (P.proj.map (CfpCat.fst φ)) := cfp_baseIso_fst P G hG hD' φ hφ.2
+  obtain ⟨β₀, hβiso, hβ⟩ := F.frobDegUniq A.obj.left B.obj.left E.obj.left
+    (CfpCat.fst φ) (CfpCat.fst ψ)
+    ((cfp_frobType_iff P G hG hD' φ hφ.2).mp hφ)
+    ((cfp_frobType_iff P G hG hD' ψ hψ.2).mp hψ) hd
+  have hsq : P.proj.map β₀ ≫ E.obj.hom
+      = B.obj.hom ≫ G.map (inv (CfpCat.snd φ) ≫ CfpCat.snd ψ) := by
+    refine (cancel_epi (P.proj.map (CfpCat.fst φ))).mp ?_
+    rw [← Category.assoc, ← P.proj.map_comp, hβ, cfp_square ψ, ← Category.assoc,
+      cfp_square φ, Category.assoc, ← G.map_comp, ← Category.assoc,
+      IsIso.hom_inv_id, Category.id_comp]
+  refine ⟨InducedCategory.homMk ⟨β₀, inv (CfpCat.snd φ) ≫ CfpCat.snd ψ, hsq⟩,
+    cfp_isIso_of P G _ hβiso inferInstance, ?_⟩
+  refine InducedCategory.hom_ext (CommaMorphism.ext hβ ?_)
+  show CfpCat.snd φ ≫ inv (CfpCat.snd φ) ≫ CfpCat.snd ψ = CfpCat.snd ψ
+  rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+
+end Core
 
 end Dict
 
