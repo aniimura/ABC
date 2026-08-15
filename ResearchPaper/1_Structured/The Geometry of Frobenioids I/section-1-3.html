@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[FrdI] Definition 1.3 — Frobenioid</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "未解決: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+</style>
+</head>
+<body>
+
+<h1>[FrdI] Definition 1.3 — Frobenioid</h1>
+
+<p>物理 p.24–p.25。<strong>400 dpi 目視確認 2026-08-15(実装のための再読)</strong>。</p>
+
+<h2>★添字の確定(目視でしか決まらない箇所)</h2>
+
+<p>§0(p.13)の規約は <code>𝒞_A</code>(<strong>後置</strong>)= 対象が <code>B → A</code> の圏 = <strong>スライス</strong>、
+<code>_A𝒞</code>(<strong>前置</strong>)= 対象が <code>A → B</code> の圏 = <strong>コスライス</strong>。
+Definition 1.3 では <strong>(i)(c) が後置</strong>、<strong>(iii)(d) は前置と後置の両方</strong>が現れる。
+<code>pdftotext</code> では前置の <code>_A</code> が落ちるか行頭に紛れるので、ここは目視でしか決まらない。</p>
+
+<section class="statement definition"
+         id="frdi-def-1-3-i"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Definition 1.3, (i)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(i) (Surjectivity to the Base Category via Pull-back Morphisms) (a) Every iso-</div>
+<div class="reading">(a) <code>𝒟</code> の各同型類は <strong>Frobenius-trivial</strong> な対象の像として現れる。
+(b) 底の同型は pre-step の span で持ち上がる。
+(c) <code>(𝒞^pl-bk)_A → 𝒟_{A_𝒟}</code> が<strong>圏同値</strong>。</div>
+<p class="open">★(c) の <code>𝒞^pl-bk</code> が<strong>圏になること</strong>(pull-back morphism が合成で閉じること)は
+Definition 1.3 の条件では<strong>ない</strong> —— Definition 1.2 (ii) の定義から従う。
+Lean 側の <code>IsPullBack.comp</code> で<strong>証明した</strong>。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-ic"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Definition 1.3, (i), (c) — 圏同値"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">equivalence of categories [cf. §0].</div>
+<div class="reading"><code>(𝒞^pl-bk)_A → 𝒟_{A_𝒟}</code>(★<strong>後置</strong> = スライス)が圏同値であること。</div>
+<p class="open">★mathlib の <code>MorphismProperty.overObj</code> は使えない ——
+それは <code>Over X</code> の<strong>充満</strong>部分圏を作るが、<code>(𝒞^pl-bk)_A</code> は
+射も pull-back morphism に限るので<strong>充満でない</strong>。
+正しいのは <code>WideSubcategory</code> を先に作り、その <code>Over</code> を取る順である。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-ii"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Definition 1.3, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">Ob(C), n ∈N≥1, there exists a morphism of Frobenius type φ : A →B in C of</div>
+<div class="reading">各対象 <code>A</code> と各次数 <code>n</code> について、次数 <code>n</code> の Frobenius 型射が存在し、
+<strong>同型を除いて一意</strong>(𝒞 が totally epimorphic なので一意性まで言える)。</div>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-iii"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Definition 1.3, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) (Surjectivity to the Divisor Monoid via Co-angular Morphisms) (a) The</div>
+<div class="reading">(a) co-angular 射は合成で閉じる。(b) co-angular pre-step が1本あれば
+その始域終域の間の射は全部 co-angular。(c) co-angular pre-step は
+<code>𝒪^▷</code> の全単射を誘導し、それは <code>Base(φ)</code> にしか依らない。
+(d) <code>_A(𝒞^coa-pre) → Order(Φ(A))</code> と <code>(𝒞^coa-pre)_A → Order(Φ(A))^opp</code> が圏同値。</div>
+<p class="open">★★<strong>(iii)(d) は (iii)(a) を前提している</strong> ——
+<code>𝒞^coa-pre</code> が圏になるには co-angular が合成で閉じることが要り、それが (iii)(a) そのものである。
+<strong>原文はこの順序依存を明示していない。</strong>
+Lean 側は (iii)(a) を先のフィールドに置き、そこから <code>IsMultiplicative</code> を作って (iii)(d) を述べた。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-iiid"
+         data-paper="FrdI"
+         data-pdf-page="24"
+         data-item="Definition 1.3, (iii), (d) — 2つの関手"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">co-angular pre-steps. Then the natural functors</div>
+<div class="reading">対応は p.25 に書かれている ——
+<code>φ : A → B</code> には <code>Div(φ) ∈ Φ(A)</code> を、
+<code>ψ : B → A</code> には <code>(ψ*)⁻¹(Div(ψ)) ∈ Φ(A)</code> を割り当てる。</div>
+<p class="open">★<code>(ψ*)⁻¹</code> は <code>Φ.map (inv (Base ψ))</code> として書ける ——
+<code>Φ</code> は関手なので <code>Φ.map (inv h) ∘ Φ.map h = Φ.map (h ≫ inv h) = id</code>。
+<strong>逆写像を選ぶ必要はない。</strong></p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-iv"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Definition 1.3, (iv)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iv) (Factorization of Arbitrary Morphisms) Let φ : A →B be a morphism of</div>
+<div class="reading">任意の射は <code>φ = α ∘ β ∘ γ</code>(α は pull-back、β は pre-step、γ は Frobenius 型)
+に分解し、その分解は同型 <code>δ</code>、<code>ε</code> を除いて一意。
+(b) pull-back morphism は LB-invertible かつ linear。</div>
+<p class="open">★原文の <code>φ = α ∘ β ∘ γ</code> は「先に γ」なので、Lean では <code>φ = γ ≫ β ≫ α</code>。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-v"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Definition 1.3, (v)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(v) (Factorization of Pre-steps) Let φ : A →B be a pre-step of C. Then: (a)</div>
+<div class="reading">(a) pre-step は monomorphism。
+(b) <code>φ = α ∘ β</code>(α は isometric pre-step、β は co-angular pre-step)に分解。
+(c) <code>φ = α′ ∘ β′</code>(α′ は co-angular、β′ は isometric)にも分解。いずれも同型を除いて一意。</div>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-vi"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Definition 1.3, (vi)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">equivalent co-angular pre-steps of C. Then there exists a [necessarily unique] α ∈</div>
+<div class="reading">base-equivalent かつ metrically equivalent な co-angular pre-step の対は、
+<code>𝒪^×(B)</code> の元1つ分だけ違う(単元を除く忠実性)。</div>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-3-vii"
+         data-paper="FrdI"
+         data-pdf-page="25"
+         data-item="Definition 1.3, (vii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(vii) (Isotropic Objects) (a) For every A ∈Ob(C), there exists a [necessarily</div>
+<div class="reading">(a) 各対象は isotropic hull を持つ(一意な同型を除いて一意)。
+(b) isotropic な対象からの射の終域も isotropic。</div>
+</section>
+
+<h2>§0 の補助</h2>
+
+<section class="statement definition"
+         id="frdi-s0-order"
+         data-paper="FrdI"
+         data-pdf-page="12"
+         data-item="§0 Monoids — Order(M)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">observe that the relation “≤” on elements of M determines a category</div>
+<div class="reading"><code>Order(M)</code> = <code>≤</code>(<code>a ≤ b ⟺ ∃ c, a + c = b</code>)が定める前順序を圏と見たもの。
+<code>Definition 1.3, (iii), (d)</code> の行き先。</div>
+<p class="open">★Lean 側は型シノニム <code>OrderCat M</code> を作って <code>Preorder</code> を入れた ——
+<code>M</code> 自身に前順序を入れると他のインスタンスと衝突する。</p>
+</section>
+
+</body>
+</html>

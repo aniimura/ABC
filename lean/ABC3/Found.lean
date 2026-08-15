@@ -8,6 +8,8 @@ import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
 import ABC3.Found.FrdI.Witness
+import ABC3.Found.FrdI.Frobenioid
+import ABC3.Found.FrdI.WitnessFrobenioid
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog

@@ -172,8 +172,8 @@ theorem wStep_div1 : IsStep wP wDiv1 := by
 
 isometric(`div = 0`)な pre-step(`deg = 1`、底が同型)は、成分がすべて
 恒等射の値になるので同型である。★`isotropic` の**満たす例**。 -/
-theorem wIsotropic (A : wC) : IsIsotropic wP A := by
-  intro Dd φ hiso hstep
+theorem wIsIso_of_isometric_preStep {A Dd : wC} (φ : A ⟶ Dd)
+    (hiso : IsIsometric wP φ) (hstep : IsPreStep wP φ) : IsIso φ := by
   have hdeg : ElemFrobCat.Hom.deg φ = 1 := hstep.1
   have hdiv : ElemFrobCat.Hom.div φ = 0 := hiso
   have hbase : IsIso (ElemFrobCat.Hom.base φ) := hstep.2
@@ -188,6 +188,9 @@ theorem wIsotropic (A : wC) : IsIsotropic wP A := by
     · rw [ElemFrobCat.div_comp, hdiv, smul_zero, add_zero]
       rfl
     · simp [hdeg]
+
+theorem wIsotropic (A : wC) : IsIsotropic wP A :=
+  fun _ φ hiso hstep => wIsIso_of_isometric_preStep φ hiso hstep
 
 /-- ★`isotropic` が空虚な条件でないことの確認 —— `wDiv1` は
 **isometric でない** pre-step なので、`isotropic` の条件の前提に入らない。
