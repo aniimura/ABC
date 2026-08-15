@@ -866,6 +866,28 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
                 `(免除 ${axiomExempt.length} ファイル)`);
     const nCheck = decls.filter((x) => x.bucket === 'Check').length;
     console.log(`  -- Skeleton の出典照合: ${nSrcOk} 件 OK / Check(我々のモデルの検査): ${nCheck} 宣言`);
+    // ★`Found/` にある「原典項目の実装」を数える(2026-08-15 追加)。
+    //   依存グラフの節点は `Skeleton/` からしか集めていないので、`Found/` に**実装した**
+    //   ものはグラフに現れない。子が自己申告した取りこぼし——
+    //   実例: [FrdI] Definition 1.1 (i) は posit ではなく実装なので `Found/` に置いたが、
+    //   そのぶんグラフの節点数が増えなかった。**実装は skeleton より強い被覆**なので、
+    //   数えないのは指標として向きが逆である。
+    //   ★グラフ本体の再構成はしていない。ここは件数の印字だけである。
+    //   ★逆インセンティブは働かない: この数を上げる唯一の方法は実装を書くことである。
+    {
+      const implNames = new Set(decls.filter((x) => x.bucket === 'Found').map((x) => x.name));
+      const impl = [...implNames].filter((n) => n.endsWith('.src')).map((n) => n.slice(0, -4));
+      const foundQuotes = decls.filter((x) => x.bucket === 'Found').length;
+      console.log(`  -- ★Found/ にある原典項目の実装(\`.src\` つき): ${impl.length} 件`);
+      for (const i of impl.slice(0, 8)) console.log(`     ${i}`);
+      if (impl.length === 0 && foundQuotes > 0) {
+        // ★0 件であることが情報である。捨てずに理由を書く。
+        console.log('     ★0 件なのは実装が無いからではない。`.src` の規約が `Skeleton/` にしか');
+        console.log('       及んでいないためである。`Found/` には PDF と機械照合済みの逐語が多数あるが、');
+        console.log('       「この宣言がどの原典項目の実装か」という**構造化された紐付け**は無い。');
+        console.log('       → 実装を原典に対して数えられない。`Found/` にも `.src` を書くべきである。');
+      }
+    }
     console.log(`  -- Interface 実装待ち: ${waiting.length} 件(= Track B の作業キュー)`);
     for (const w of waiting) console.log(`     ${w}`);
     console.log(`  -- Gap(飛躍): ${gaps.length} 件`);
