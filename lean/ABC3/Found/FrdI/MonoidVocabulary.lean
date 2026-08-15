@@ -572,6 +572,10 @@ def IsGroupLike.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — group-like",
     sectionId := "frdi-def-1-1-i" }
 
+def IsPerfectMonoid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — perfect",
+    sectionId := "frdi-s0-perfect" }
+
 /-! ### ★`M^char = M/M^±` を**商モノイドとして**作る(2026-08-15 追加)
 
 前回はここを `CharRel`(同じファイバーに属する関係)で止めた。今回 `Definition 1.1` を
@@ -655,6 +659,53 @@ theorem not_isGroupLike_nat : ¬ IsGroupLike ℕ := by
   intro h
   obtain ⟨A, hA⟩ := (isGroupLike_iff ℕ).mp h 1
   have := A.val_neg
+  omega
+
+/-! ### `perfect` モノイド
+
+原文 (FrdI p.11):
+> M is sharp, integral, and saturated. We shall say that M is perfect if multiplication
+
+原文 (FrdI p.11):
+> by any element of N≥1 on M is bijective. Thus, M pf is always perfect; M is perfect
+-/
+
+/-- **[FrdI] §1 (p.11)** —— `perfect` モノイド。
+
+`ℕ≥1` の任意の元による**乗法(= `n` 倍)が全単射**。 -/
+def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n : ℕ) • a)
+
+/-! ### 非退化(`perfect`) -/
+
+/-- `ℚ` は **perfect** —— `n` 倍は `1/n` 倍を逆に持つ。 -/
+theorem isPerfectMonoid_rat : IsPerfectMonoid ℚ := by
+  intro n
+  have hn : (n : ℚ) ≠ 0 := by
+    exact_mod_cast (n : ℕ+).ne_zero
+  constructor
+  · intro a b hab
+    simp only [nsmul_eq_mul] at hab
+    exact mul_left_cancel₀ hn hab
+  · intro b
+    refine ⟨b / (n : ℚ), ?_⟩
+    show (n : ℕ) • (b / (n : ℚ)) = b
+    rw [nsmul_eq_mul, mul_comm, div_mul_cancel₀ _ hn]
+
+/-- ★`ℕ` は **perfect でない** —— `2` 倍は全射でない(`1` が像にない)。 -/
+theorem not_isPerfectMonoid_nat : ¬ IsPerfectMonoid ℕ := by
+  intro h
+  obtain ⟨a, ha⟩ := (h 2).2 1
+  simp only [PNat.val_ofNat, smul_eq_mul] at ha
+  omega
+
+/-- ★**group-like でも perfect とは限らない** —— `ℤ` は群だが `2` 倍が全射でない。
+
+★負の対照を2つ並べる理由: `perfect` は `group-like` の帰結ではない。 -/
+theorem not_isPerfectMonoid_int : ¬ IsPerfectMonoid ℤ := by
+  intro h
+  obtain ⟨a, ha⟩ := (h 2).2 1
+  simp only [PNat.val_ofNat, nsmul_eq_mul] at ha
+  push_cast at ha
   omega
 
 /-! ### ★`M^char` の性質 —— `Proposition 1.5` の `𝔽_Φ → 𝔽_{Φ^char}` に要る

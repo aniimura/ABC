@@ -153,5 +153,43 @@ domain も codomain も<strong>任意</strong>なので条件はこれに尽き�
 Lean 側の <code>isIso_of_isIso_comp</code> で<strong>実際に証明した</strong>。</p>
 </section>
 
+<h2>★2026-08-15 追加 —— `Proposition 1.5` が要求した §0 の語彙</h2>
+
+<section class="statement definition"
+         id="frdi-s0-perfect"
+         data-paper="FrdI"
+         data-pdf-page="11"
+         data-item="§0 Monoids — perfect"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">M is sharp, integral, and saturated. We shall say that M is perfect if multiplication</div>
+<div class="verbatim">by any element of N≥1 on M is bijective. Thus, M pf is always perfect; M is perfect</div>
+<div class="reading"><code>perfect</code> = <strong><code>ℕ≥1</code> の任意の元による <code>n</code> 倍が全単射</strong>。
+<code>Proposition 1.5, (iii)</code> が引く。</div>
+<p class="open">★非退化: <code>ℚ</code> は perfect、<code>ℕ</code> と <strong><code>ℤ</code></strong> は perfect でない。
+<strong><code>ℤ</code> を負の対照に入れたのは、<code>group-like</code> でも <code>perfect</code> とは限らないことを示すため</strong>である
+(原文の (iii) は perfect と group-like を並列に扱うので、独立性を明示する必要がある)。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-s0-subaut"
+         data-paper="FrdI"
+         data-pdf-page="14"
+         data-item="§0 Categories — sub-automorphism"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">shall say that an endomorphism α ∈EndC(A) of C is a sub-automorphism if there</div>
+<div class="verbatim">exists an arrow φ : B →A of C and an automorphism β ∈AutC(B) such that</div>
+<div class="verbatim">for the subset of EndC(A) determined by the sub-automorphisms of A. We shall say</div>
+<div class="reading"><code>α</code> が sub-automorphism ⟺ ある <code>φ : B ⟶ A</code> と <code>β ∈ Aut(B)</code> があって
+<code>β ≫ φ = φ ≫ α</code>。<code>Definition 1.2, (iv)</code> の <code>Aut^sub-ample</code> が引く。</div>
+<p class="open">★★<strong>測定: この定義は始対象を持つ圏で退化する。</strong>
+<code>φ</code> を始対象からの射に取ると条件が一意性だけで満たされるので、
+<strong>すべての自己射が sub-automorphism になる</strong>(Lean 側 <code>isSubAutomorphism_of_initial</code>)。
+<code>Type</code> では <code>PEmpty</code> がそれで、定数写像 <code>Bool → Bool</code> が
+<strong>自己同型でない sub-automorphism</strong> の実例になる。
+★これは §0 の <code>fiberwise-surjective</code> が始対象で退化するのと<strong>同じ形</strong>である。</p>
+<p class="open">★満たさない例は前順序圏では作れない(<code>End A = {𝟙}</code>)。
+<code>𝔽_Φ</code> の Frobenius 次数 <code>≥ 2</code> の自己射を要した。</p>
+</section>
+
 </body>
 </html>

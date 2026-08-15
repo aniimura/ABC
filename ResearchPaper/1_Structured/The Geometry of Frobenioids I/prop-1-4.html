@@ -146,5 +146,38 @@ Frobenioid になる(7つの type つき)。</div>
 <strong>それが模型固有の性質だった</strong>。</p>
 </section>
 
+<section class="statement proposition"
+         id="frdi-prop-1-5-ii"
+         data-paper="FrdI"
+         data-pdf-page="27"
+         data-item="Proposition 1.5, (ii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(ii) There is a natural, functorial isomorphism</div>
+<div class="reading"><code>𝒪^▷(A) ≅ Φ(A)</code>、したがって <code>𝒪^×(A) ≅ Φ(A)^±</code>。</div>
+<p class="open">★<strong>「immediate」だったか</strong>: 同型そのものは immediate だった ——
+<code>𝒪^▷(A)</code> は「底が <code>𝟙</code>・次数 1」の自己射の集合で、零因子が全単射を与える。
+★しかし<strong>「functorial」は immediate ではなかった</strong>。
+推移写像は <code>φ ≫ β = α ≫ φ</code> で決まるが、これを解くと
+<code>Φ(Base φ)(b) = deg_Fr(φ) · a</code> であって
+<strong>Frobenius 次数が入る</strong>。関手則が言えるのは <code>deg_Fr(φ) = 1</code>(linear)の範囲だけである。
+<strong>原文の「functorial」はこの範囲の主張として読むほかない。</strong></p>
+</section>
+
+<section class="statement proposition"
+         id="frdi-prop-1-5-iii"
+         data-paper="FrdI"
+         data-pdf-page="27"
+         data-item="Proposition 1.5, (iii)"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">(iii) If all of the monoids in the image of Φ are perfect (respectively, group-</div>
+<div class="reading"><code>Φ</code> の像がすべて perfect(resp. group-like)なら、
+<code>𝔽_Φ</code> は perfect(resp. group-like)type。</div>
+<p class="open">★<strong>「immediate」だったか</strong>: <code>group-like</code> は immediate(<code>Φ(A)</code> が群なら
+<code>Φ(A)^char</code> は零)。★<strong><code>perfect</code> は immediate ではなかった</strong> ——
+<code>Definition 1.2, (iv)</code> の <code>perfect object</code> は「pre-step が一意に降りる」という条件を含み、
+その存在と一意性はちょうど <strong><code>n</code> 倍の全射性と単射性</strong>に対応する。
+<strong>書いてみて初めて、モノイドの perfect 性がどこで効くかが1箇所に特定できた。</strong></p>
+</section>
+
 </body>
 </html>

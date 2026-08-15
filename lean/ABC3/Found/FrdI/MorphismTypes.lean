@@ -32,13 +32,15 @@ import ABC3.Meta.Claim
   `universally Div-Frobenius-trivial` / `Frobenius-ample` / `quasi-Frobenius-trivial` /
   `sub-quasi-Frobenius-trivial`
 
-★**写していないもの(明示する)**: (iv) の
-`Aut-ample` / `Aut^sub-ample` / `End-ample` / `perfect` /
-`Frobenius-compact` / `Frobenius-normalized` / `Frobenius-isotropic`、
+★**2026-08-15 追加**: `Proposition 1.5, (i)` が要求したので、(iv) の
+`Aut-ample` / `Aut^sub-ample` / `End-ample` / `Frobenius-normalized` / `perfect object`
+を**追加で写した**(§0 の `sub-automorphism` と `perfect` モノイドも同時に写した)。
+
+★**まだ写していないもの(明示する)**: (iv) の
+`Frobenius-compact` / `Frobenius-isotropic`、
 および (v)(pre-Frobenioid に「of X type」を付ける言い換え)。
-`Frobenius-compact` は `𝒪^×(C)^pf`(**perfection**)を要求し、
-`perfect object` は「base-isomorphic な対象すべて」に渡る条件を含む。
-どちらも `Definition 1.3` は引かない。
+`Frobenius-compact` は `𝒪^×(C)^pf`(**perfection**)を要求する。
+どちらも `Definition 1.3` も `Proposition 1.5` も引かない。
 
 ## ★mathlib の実測(2026-08-15)
 
@@ -352,6 +354,79 @@ def IsMetricallyTrivial (A : C) : Prop :=
 /-- **(iv)** `base-trivial object`。 -/
 def IsBaseTrivial (A : C) : Prop := ∀ Dd : C, BaseIsomorphic P A Dd → Nonempty (Dd ≅ A)
 
+/-! #### ★`Definition 1.2, (iv)` の未写し分(2026-08-15 追加)
+
+`Proposition 1.5, (i)` が `𝔽_Φ` について主張する 7 つの type のうち、
+`Aut-ample` / `Aut^sub-ample` / `End-ample` / `Frobenius-normalized` /
+`perfect` はここまで写していなかった。**`Proposition 1.5` が要求するので写す。**
+
+原文 (FrdI p.23):
+> isomorphic to C. An Aut-ample (respectively, Autsub-ample; End-ample) object
+
+原文 (FrdI p.23):
+> of C is defined to be an object C such that, if we write CD
+
+原文 (FrdI p.23):
+> the natural map AutC(C) →AutD(CD) (respectively, Autsub
+
+原文 (FrdI p.23):
+> EndC(C) →EndD(CD)) is surjective. A perfect object of C is defined to be an object
+-/
+
+/-- **(iv)** `Aut-ample object` —— `Aut_𝒞(C) → Aut_𝒟(C_𝒟)` が**全射**。 -/
+def IsAutAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), IsIso g → ∃ φ : End A, IsIso φ ∧ P.Base φ = g
+
+/-- **(iv)** `Aut^sub-ample object` —— `Aut^sub_𝒞(C) → Aut^sub_𝒟(C_𝒟)` が**全射**。
+
+★`Aut^sub` は §0 の `sub-automorphism`(`CategoryVocabulary.lean`)。 -/
+def IsAutSubAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), IsSubAutomorphism g →
+    ∃ φ : End A, IsSubAutomorphism φ ∧ P.Base φ = g
+
+/-- **(iv)** `End-ample object` —— `End_𝒞(C) → End_𝒟(C_𝒟)` が**全射**。 -/
+def IsEndAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), ∃ φ : End A, P.Base φ = g
+
+/-- **(iv)** `Frobenius-normalized object`。
+
+原文 (FrdI p.23):
+> that if φ ∈EndC(C) is a base-identity endomorphism of Frobenius degree d ∈N≥1,
+
+★原文の続き(物理 p.23、400 dpi 目視確認 2026-08-15)は
+「`and α ∈O▷(C), then αd ◦φ = φ ◦α.`」だが、
+★**この行は逐語照合に掛けていない** —— `O▷` の `▷` が `pdftotext` の layout 抽出で
+別の文字列になり、照合器が拾えないためである。`frdi-s0-primary` の `≠` と同じ事情で、
+**書き換えずに、照合できない事実として記す**。
+
+★原文の `α^d ◦ φ = φ ◦ α` は「先に `φ`」なので、Lean では `φ ≫ α^d = α ≫ φ`。 -/
+def IsFrobeniusNormalized (A : C) : Prop :=
+  ∀ φ : End A, IsBaseIdentity P φ → ∀ α ∈ OTri P A,
+    ((φ : A ⟶ A) ≫ ((α ^ (P.degFr φ : ℕ) : End A) : A ⟶ A)) = (α : A ⟶ A) ≫ (φ : A ⟶ A)
+
+/-- **(iv)** `perfect object`。
+
+原文 (FrdI p.23):
+> C such that for every n ∈N≥1, it holds that every B ∈Ob(C) base-isomorphic to
+
+原文 (FrdI p.23):
+> C appears as the codomain of a morphism of Frobenius type of Frobenius degree
+
+★原文はこの後 `every pre-step ψ′ : B′1 →B′2` と続くが、
+★**この行も逐語照合に掛けていない**(`′` が同じ理由で拾えない)。
+
+★条件は**2つ**である: (a) 各次数の Frobenius 型射の**終域として現れる**こと、
+(b) その上の pre-step が**一意に降りる**こと。 -/
+def IsPerfectObj (A : C) : Prop :=
+  ∀ n : ℕ+,
+    (∀ B : C, BaseIsomorphic P A B →
+      ∃ (B₀ : C) (φ : B₀ ⟶ B), IsFrobeniusType P φ ∧ P.degFr φ = n) ∧
+    (∀ (B₁ B₁' B₂ B₂' : C) (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂'),
+      IsFrobeniusType P φ₁ → P.degFr φ₁ = n → IsFrobeniusType P φ₂ → P.degFr φ₂ = n →
+      BaseIsomorphic P B₁ A → BaseIsomorphic P B₂ A →
+      ∀ ψ' : B₁' ⟶ B₂', IsPreStep P ψ' →
+        ∃! ψ : B₁ ⟶ B₂, IsPreStep P ψ ∧ φ₁ ≫ ψ' = ψ ≫ φ₂)
+
 /-- **(iv)** `group-like object` —— `Φ(C) = 0`。
 
 ★`Definition 1.1, (i)` の `IsGroupLike`(`M^char` が零)を、
@@ -597,6 +672,26 @@ def IsMetricallyTrivial.src : ABC3.Meta.Source :=
 def IsBaseTrivial.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — base-trivial object",
     sectionId := "frdi-def-1-2-iv" }
+
+def IsAutAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Aut-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsAutSubAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Aut^sub-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsEndAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — End-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsFrobeniusNormalized.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Frobenius-normalized",
+    sectionId := "frdi-def-1-2-iv-frob-norm" }
+
+def IsPerfectObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — perfect object",
+    sectionId := "frdi-def-1-2-iv-perfect" }
 
 def IsGroupLikeObj.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — group-like object",

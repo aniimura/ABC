@@ -1,5 +1,6 @@
 import Mathlib.CategoryTheory.Category.Preorder
 import Mathlib.CategoryTheory.Types.Basic
+import Mathlib.CategoryTheory.Endomorphism
 import ABC3.Meta.Claim
 
 /-!
@@ -335,7 +336,97 @@ theorem not_isOfFSMType_type : ¬ IsOfFSMType (Type) := by
   obtain ⟨_, hx⟩ := this.2 false
   exact Bool.noConfusion hx
 
+/-! ### §0 —— `sub-automorphism`(原文 p.14)
+
+`Definition 1.2, (iv)` の `Aut^sub-ample` が土台に要求する語である。
+
+原文 (FrdI p.14):
+> shall say that an endomorphism α ∈EndC(A) of C is a sub-automorphism if there
+
+原文 (FrdI p.14):
+> exists an arrow φ : B →A of C and an automorphism β ∈AutC(B) such that
+
+原文 (FrdI p.14):
+> φ ◦β = α ◦φ; write
+-/
+
+/-- **§0** `sub-automorphism` —— 自己射 `α ∈ End_𝒞(A)` であって、
+ある射 `φ : B ⟶ A` と自己同型 `β ∈ Aut_𝒞(B)` が `φ ∘ β = α ∘ φ` を満たすもの。
+
+★原文の `φ ◦ β = α ◦ φ` は「先に `β`」なので、Lean では `β ≫ φ = φ ≫ α`。 -/
+def IsSubAutomorphism {A : C} (α : End A) : Prop :=
+  ∃ (B : C) (φ : B ⟶ A) (β : End B), IsIso β ∧ (β ≫ φ : B ⟶ A) = φ ≫ (α : A ⟶ A)
+
+/-- **§0** `Aut^sub_𝒞(A)` —— sub-automorphism の集合。
+
+★原文は `(Aut_𝒞(A) ⊆) Aut^sub_𝒞(A) ⊆ End_𝒞(A)` と書き、**部分集合**としか言わない
+(部分モノイドとは主張していない)ので、`Set` として写す。
+
+原文 (FrdI p.14):
+> for the subset of EndC(A) determined by the sub-automorphisms of A. We shall say
+-/
+def SubAut (A : C) : Set (End A) := {α | IsSubAutomorphism α}
+
+@[simp] theorem mem_subAut {A : C} {α : End A} :
+    α ∈ SubAut A ↔ IsSubAutomorphism α := Iff.rfl
+
+/-- ★原文の括弧書き `(Aut_𝒞(A) ⊆)` —— **自己同型は sub-automorphism**。
+
+`φ := 𝟙_A`、`β := α` に取ればよい。 -/
+theorem isSubAutomorphism_of_isIso {A : C} (α : End A) (h : IsIso α) :
+    IsSubAutomorphism α :=
+  ⟨A, 𝟙 A, α, h, by simp⟩
+
+/-- ★★**始対象があると `Aut^sub` は `End` 全体に潰れる**。
+
+`φ : B ⟶ A` を始対象からの一意な射、`β := 𝟙_B` に取ると、
+`β ≫ φ` と `φ ≫ α` はともに始対象から出る射なので**必ず一致する**。
+
+★これは原文の定義の**退化条件**である。§0 の `totally epimorphic` が
+始対象を持つと前順序に潰れる(`subsingleton_hom_of_isTotallyEpimorphic_of_initial`)
+のと**同じ形の退化**であり、`Aut^sub-ample` を非自明に使うには
+始対象を持たない圏が要る。
+
+★`isFiberwiseSurjective_of_initial` と同じく、`Limits` を import せず
+始対象の性質を仮定としてそのまま書く。 -/
+theorem isSubAutomorphism_of_initial {A : C} (I : C) (arr : ∀ X : C, I ⟶ X)
+    (huniq : ∀ (X : C) (f g : I ⟶ X), f = g) (α : End A) :
+    IsSubAutomorphism α :=
+  ⟨I, arr A, 𝟙 I, inferInstance, huniq _ _ _⟩
+
+/-! ### 非退化(`sub-automorphism`)
+
+★**満たす例**は `isSubAutomorphism_of_isIso`(自己同型)。
+★**自己同型でない sub-automorphism** は下の `isSubAutomorphism_of_initial` を
+`Type` に当てたもの —— `PEmpty` が始対象なので、**定数写像すら** sub-automorphism になる。
+★**満たさない例**は `ElementaryFrobenioid.lean` の
+`not_isSubAutomorphism_of_deg_ne_one` —— `Vee` のような前順序圏では
+`End A = {𝟙}` で反例が作れず、`𝔽_Φ` の Frobenius 次数 `≥ 2` の自己射を要した。 -/
+
+/-- ★**自己同型でない sub-automorphism が実在する** —— `Type` の定数写像
+`Bool → Bool`。`PEmpty` が始対象であることが効いている。 -/
+def constTrue : (Bool : Type) ⟶ Bool := TypeCat.ofHom fun _ => true
+
+theorem isSubAutomorphism_constTrue : IsSubAutomorphism constTrue :=
+  isSubAutomorphism_of_initial PEmpty (fun _ => TypeCat.ofHom fun e => e.elim)
+    (fun _ _ _ => by ext e; exact e.elim) _
+
+/-- ★その定数写像は**自己同型ではない** —— 全射でない。 -/
+theorem not_isIso_constTrue : ¬ IsIso constTrue := by
+  intro h
+  rw [CategoryTheory.isIso_iff_bijective] at h
+  obtain ⟨_, hx⟩ := h.2 false
+  exact Bool.noConfusion hx
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def IsSubAutomorphism.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — sub-automorphism",
+    sectionId := "frdi-s0-subaut" }
+
+def SubAut.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 14, item := "§0 Categories — Aut^sub",
+    sectionId := "frdi-s0-subaut" }
 
 def IsTotallyEpimorphic.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 15, item := "§0 Categories — totally epimorphic",

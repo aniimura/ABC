@@ -427,6 +427,70 @@ theorem div_eq_zero_of_isIso (hsharp : ∀ A : D, IsSharp (Φ.val A))
   have hz := hsharp A.base _ hunit
   exact isTorsionFreeNaive_of_isSharp (hsharp A.base) _ _ (Hom.deg (inv φ)).pos hz
 
+/-- ★★**`𝔽_Φ` の同型の完全な判定** ——
+`φ` が同型 ⟺ 「底が同型」「零因子が**可逆**」「Frobenius 次数が 1」。
+
+★`div_eq_zero_of_isIso` は `Φ(A)` が **sharp** な場合の系である
+(sharp なら可逆元は `0` だけ)。**一般には「可逆」であって「零」ではない。**
+`Proposition 1.5` が `𝔽_Φ → 𝔽_{Φ^char}` を経由する理由がここにある。 -/
+theorem isIso_iff {A B : ElemFrobCat Φ} (φ : A ⟶ B) :
+    IsIso φ ↔ IsIso (Hom.base φ) ∧ IsAddUnit (Hom.div φ) ∧ Hom.deg φ = 1 := by
+  constructor
+  · intro h
+    have hd1 := congrArg Hom.deg (IsIso.hom_inv_id φ)
+    rw [comp_deg, id_deg] at hd1
+    have hd1' : ((Hom.deg (inv φ) : ℕ+) : ℕ) * ((Hom.deg φ : ℕ+) : ℕ) = 1 := by
+      exact_mod_cast congrArg (fun n : ℕ+ => (n : ℕ)) hd1
+    have hdegi : Hom.deg (inv φ) = 1 :=
+      PNat.coe_eq_one_iff.mp (Nat.dvd_one.mp ⟨(Hom.deg φ : ℕ+), hd1'.symm⟩)
+    have hdeg : Hom.deg φ = 1 :=
+      PNat.coe_eq_one_iff.mp
+        (Nat.dvd_one.mp ⟨(Hom.deg (inv φ) : ℕ+), by rw [mul_comm]; exact hd1'.symm⟩)
+    have hdv := congrArg Hom.div (IsIso.hom_inv_id φ)
+    rw [div_comp, id_div, hdegi] at hdv
+    simp only [PNat.one_coe, one_smul] at hdv
+    refine ⟨⟨Hom.base (inv φ), ?_, ?_⟩, ⟨⟨Hom.div φ, Φ.map (Hom.base φ) (Hom.div (inv φ)),
+      by rw [add_comm]; exact hdv, hdv⟩, rfl⟩, hdeg⟩
+    · rw [← comp_base, IsIso.hom_inv_id, id_base]
+    · rw [← comp_base, IsIso.inv_hom_id, id_base]
+  · rintro ⟨hbase, ⟨U, hU⟩, hdeg⟩
+    refine ⟨⟨Hom.mk (inv (Hom.base φ)) (Φ.map (inv (Hom.base φ)) U.neg) 1, ?_, ?_⟩⟩
+    · refine Hom.ext (IsIso.hom_inv_id _) ?_ ?_
+      · show Φ.map (Hom.base φ) (Φ.map (inv (Hom.base φ)) U.neg) + ((1 : ℕ+) : ℕ) • Hom.div φ
+          = (0 : Φ.val A.base)
+        rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]
+        simp only [PNat.one_coe, one_smul, ← hU]
+        rw [add_comm]
+        exact U.val_neg
+      · show (1 : ℕ+) * Hom.deg φ = 1
+        simp [hdeg]
+    · refine Hom.ext (IsIso.inv_hom_id _) ?_ ?_
+      · show Φ.map (inv (Hom.base φ)) (Hom.div φ)
+            + ((Hom.deg φ : ℕ+) : ℕ) • Φ.map (inv (Hom.base φ)) U.neg
+          = (0 : Φ.val B.base)
+        rw [hdeg]
+        simp only [PNat.one_coe, one_smul, ← map_add, ← hU]
+        rw [U.val_neg, map_zero]
+      · show Hom.deg φ * 1 = 1
+        simp [hdeg]
+
+/-- ★**負の対照(`sub-automorphism`)** —— Frobenius 次数が `1` でない自己射は
+**sub-automorphism ではない**。
+
+`β ≫ φ = φ ≫ α` の次数成分は `deg φ · deg β = deg α · deg φ` であり、
+`β` が同型なら `deg β = 1` なので `ℕ+` の簡約で `deg α = 1` が出る。
+
+★`CategoryVocabulary.lean` の `isSubAutomorphism_of_isInitial` が示すとおり、
+始対象を持つ圏ではこの反例は作れない。**`𝔽_Φ` を要した**のはそのためである。 -/
+theorem not_isSubAutomorphism_of_deg_ne_one {A : ElemFrobCat Φ} (α : End A)
+    (h : Hom.deg α ≠ 1) : ¬ IsSubAutomorphism α := by
+  rintro ⟨B, φ, β, hβ, hcomm⟩
+  have hβdeg : Hom.deg β = 1 := ((isIso_iff β).mp hβ).2.2
+  have hh := congrArg Hom.deg hcomm
+  rw [comp_deg, comp_deg, hβdeg, mul_one] at hh
+  have hc : (1 : ℕ+) * Hom.deg φ = Hom.deg α * Hom.deg φ := by rw [one_mul]; exact hh
+  exact h (mul_right_cancel hc).symm
+
 end ElemFrobCat
 
 /-- ★**`𝔽_Φ` は totally epimorphic である**。

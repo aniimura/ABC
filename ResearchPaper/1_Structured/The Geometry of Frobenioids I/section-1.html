@@ -185,5 +185,53 @@ universally Div-Frobenius-trivial ⟹ Div-Frobenius-trivial。</div>
 <strong>4本とも証明した</strong>。★2本目は一度写し落としており、親の指摘で足した。</p>
 </section>
 
+<h2>★2026-08-15 追加 —— `Definition 1.2, (iv)` の未写し分</h2>
+
+<p><code>Proposition 1.5, (i)</code> が要求したので写した。<strong>400 dpi 目視確認 2026-08-15</strong>。</p>
+
+<section class="statement definition"
+         id="frdi-def-1-2-iv-ample"
+         data-paper="FrdI"
+         data-pdf-page="23"
+         data-item="Definition 1.2, (iv) — Aut-ample / Aut^sub-ample / End-ample"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">isomorphic to C. An Aut-ample (respectively, Autsub-ample; End-ample) object</div>
+<div class="verbatim">of C is defined to be an object C such that, if we write CD</div>
+<div class="verbatim">EndC(C) →EndD(CD)) is surjective. A perfect object of C is defined to be an object</div>
+<div class="reading"><code>Aut_𝒞(C) → Aut_𝒟(C_𝒟)</code>(resp. <code>Aut^sub</code>、<code>End</code>)が<strong>全射</strong>。</div>
+<p class="open">★<code>Aut^sub</code> は §0 の <code>sub-automorphism</code> を土台にする。
+<code>𝔽_Φ</code> では <code>⟨g, 0, 1⟩</code> が3つとも同時に持ち上げになる ——
+<strong>零因子を 0 に取ると <code>𝒟</code> の等式だけで済む</strong>のが効いている。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-2-iv-perfect"
+         data-paper="FrdI"
+         data-pdf-page="23"
+         data-item="Definition 1.2, (iv) — perfect object"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">C such that for every n ∈N≥1, it holds that every B ∈Ob(C) base-isomorphic to</div>
+<div class="reading"><strong>2条</strong>: (a) 各次数 <code>n</code> の Frobenius 型射の<strong>終域として現れる</strong>、
+(b) その上の pre-step が<strong>一意に降りる</strong>。</div>
+<p class="open">★<code>Proposition 1.5, (iii)</code> の証明で測ったところ、
+<strong>モノイドの perfect 性が効くのは (b) の零因子成分だけ</strong>だった ——
+<code>n · Div(ψ) = t</code> を解くのに <code>n</code> 倍の全単射性が要る。
+(a) と、(b) の底成分・次数成分は perfect 性を使わない。</p>
+</section>
+
+<section class="statement definition"
+         id="frdi-def-1-2-iv-frob-norm"
+         data-paper="FrdI"
+         data-pdf-page="23"
+         data-item="Definition 1.2, (iv) — Frobenius-normalized"
+         data-notation-checked="2026-08-15">
+<div class="verbatim">O×(C)pf. A Frobenius-normalized object of C is defined to be an object C such</div>
+<div class="verbatim">that if φ ∈EndC(C) is a base-identity endomorphism of Frobenius degree d ∈N≥1,</div>
+<div class="reading"><code>φ</code> が base-identity で次数 <code>d</code>、<code>α ∈ 𝒪^▷(C)</code> なら <code>α^d ∘ φ = φ ∘ α</code>。</div>
+<p class="open">★<code>𝔽_Φ</code> では零因子成分が左辺 <code>d·a + Div(φ)</code>、右辺 <code>Div(φ) + d·a</code> となり、
+<strong>加法の可換性だけ</strong>で一致する。★これは <code>Proposition 1.5, (ii)</code> の
+「推移写像に Frobenius 次数が入る」という測定と<strong>同じ計算</strong>である。</p>
+</section>
+
 </body>
 </html>
