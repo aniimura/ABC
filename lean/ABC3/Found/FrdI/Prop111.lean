@@ -342,4 +342,41 @@ theorem prop_1_11_vi_mono_of_baseMono {A B : C} (φ : A ⟶ B) (hφ : IsPullBack
   refine (cancel_mono (P.Base φ)).mp ?_
   rw [← P.Base_comp, ← P.Base_comp, h]
 
+/-! ## ★(vii) —— co-angular pre-step は FSM 射
+
+原文 (FrdI p.37):
+> (vii) Let φ : A →B be a co-angular pre-step;
+
+★**続きは引用できない**: `ϵ`(varepsilon)が layout モードで消える。
+400 dpi 目視では「`ϵ : C → B` を任意の射とする」と続く。
+★**構造化 HTML では `data-txt` で明示したが、Lean の docstring には
+その逃げ道が無い**(第27段で記録した制約)。
+
+★★**主張本体は `IsFiberwiseSurjective φ` そのものである。**
+`IsFiberwiseSurjective (β : B ⟶ A) := ∀ Z (γ : Z ⟶ A), ∃ D δB δZ, δB ≫ β = δZ ≫ γ`
+と (vii) の「`ϵ ∘ γ = φ ∘ α` を満たす `γ`・`α` が存在する」は**同じ形**である
+(★ただし (vii) は `γ` が **co-angular pre-step** であることまで言うので**強い**)。
+
+★**原文の証明**(p.38、目視)は `ϵ` について **4 場合に分ける**
+(pull-back / isometric pre-step / co-angular pre-step / Frobenius 型)。
+分け方は `Definition 1.3, (iv), (a)` と `(v), (b)` の分解による。
+
+★**ここでは「In particular」を実装する** —— 主張本体を仮定に取れば
+`IsFSMMorphism = IsFiberwiseSurjective ∧ Mono` の残り半分は
+★**`preStepMono`(`Definition 1.3, (v), (a)`)から直ちに出る。**
+-/
+
+include P in
+/-- ★**(vii) の「In particular」** —— co-angular pre-step は FSM 射。
+
+★**`IsFSMMorphism = IsFiberwiseSurjective ∧ Mono`** なので、
+主張本体(fiberwise-surjectivity)が与えられれば、
+残りは `preStepMono` から直ちに出る。
+
+★**原文の「In particular」は、定義の分解そのものである** ——
+`Proposition 1.10, (iv)` の「In particular」(無限性)とは種類が違う。 -/
+theorem prop_1_11_vii_fsm (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hφs : IsPreStep P φ) (hfs : IsFiberwiseSurjective φ) : IsFSMMorphism φ :=
+  ⟨hfs, F.preStepMono φ hφs⟩
+
 end ABC3.Found.FrdI
