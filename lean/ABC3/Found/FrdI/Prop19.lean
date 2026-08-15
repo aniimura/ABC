@@ -319,6 +319,166 @@ theorem prop_1_9_vii (F : FrobenioidCore P) {A B Cc : C} (φ : A ⟶ B) (ψ : B 
   · intro h
     exact (isometricPreStep_of_comp P φ ψ h.1 h.2.1).1
 
+/-! ## ★第2段 —— (ii)(iii) の対象レベル
+
+原文 (FrdI p.31):
+> (ii) Any base-isomorphism φ : A →B of C induces a functor [well-defined
+
+原文 (FrdI p.31):
+> (iii) Any pull-back morphism φ : A →B of C induces a functor [well-
+
+★**原文は「関手 [well-defined up to isomorphism]」と言う。**
+まず**対象への割り当てとその一意性**を作る —— そこが数学的な中身であり、
+`Definition 1.3, (i), (c)` を使うのもそこである。
+-/
+
+/-- **(ii) の対象レベル** —— base-isomorphism `φ : A ⟶ B` は、
+`A` への isometric pre-step `ε` を `B` への isometric pre-step `α` へ送る。
+
+★中身は **(i) を合成 `ε ≫ φ` に当てるだけ**。`ε` は base-isomorphism、
+`φ` も base-isomorphism なので合成も base-isomorphism で、(i) が使える。 -/
+theorem prop_1_9_ii_obj (F : FrobenioidCore P) {A B Cc : C} (φ : A ⟶ B)
+    (hφ : IsBaseIsomorphism P φ) (ε : Cc ⟶ A)
+    (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    ∃ (X : C) (β : Cc ⟶ X) (α : X ⟶ B),
+      ε ≫ φ = β ≫ α ∧ (IsCoAngular P β ∧ IsBaseIsomorphism P β) ∧
+        (IsIsometric P α ∧ IsPreStep P α) :=
+  prop_1_9_i_factor P F (ε ≫ φ) (isBaseIsomorphism_comp P hεs.2 hφ)
+
+/-- **(iii) の対象レベル** —— ★★**`Definition 1.3, (i), (c)`(`plBkEquiv`)の初使用**。
+
+pull-back `φ : A ⟶ B` と isometric pre-step `δ : D ⟶ B` に対し、
+原文が描く可換四角形
+
+```
+Cc --γ--> A
+|ψ        |φ
+D  --δ--> B
+```
+
+を作る。★**手順は原文どおり**:
+
+1. `Base(δ)⁻¹ ∘ Base(φ) : A_𝒟 ⟶ D_𝒟` を `𝒟_{D_𝒟}` の対象と見る
+2. **`Definition 1.3, (i), (c)` の圏同値の本質的全射性**で、それを実現する
+   pull-back `ψ : Cc ⟶ D` を取る
+3. **`Definition 1.2, (ii)`(pull-back の定義そのもの)の全単射**で `γ : Cc ⟶ A` を取る
+4. `γ` が isometric pre-step であることは `Proposition 1.7, (v)` から出る -/
+theorem prop_1_9_iii_lift (F : FrobenioidCore P) {A B Dd : C} (φ : A ⟶ B)
+    (hpb : IsPullBack P φ) (δ : Dd ⟶ B) (hδi : IsIsometric P δ) (hδs : IsPreStep P δ) :
+    ∃ (Cc : C) (γ : Cc ⟶ A) (ψ : Cc ⟶ Dd),
+      γ ≫ φ = ψ ≫ δ ∧ IsPullBack P ψ ∧ IsIsometric P γ ∧ IsPreStep P γ := by
+  haveI := (F.plBkEquiv Dd).essSurj
+  haveI hδb : IsIso (P.Base δ) := hδs.2
+  obtain ⟨hφlb, hφlin⟩ := (prop_1_4_ii P F φ).mp hpb
+  -- 1./2. 圏同値の**本質的全射性**で pull-back `ψ` を取る
+  have hiso := (plBkOverFunctor P Dd).objObjPreimageIso
+    (Over.mk (P.Base φ ≫ inv (P.Base δ)))
+  set Z := (plBkOverFunctor P Dd).objPreimage
+    (Over.mk (P.Base φ ≫ inv (P.Base δ))) with hZ
+  have hle : IsIso (Over.Hom.left hiso.hom) :=
+    inferInstanceAs (IsIso (((Over.forget ((P.toElem.obj Dd).base)).mapIso hiso).hom))
+  -- ★`Over` の射の `left` は型が簡約されないので、素の型の射に落としてから使う
+  obtain ⟨e, he⟩ : ∃ e : (P.toElem.obj Z.left.obj).base ⟶ (P.toElem.obj A).base,
+      e = Over.Hom.left hiso.hom := ⟨Over.Hom.left hiso.hom, rfl⟩
+  haveI hei : IsIso e := by rw [he]; exact hle
+  have hw : e ≫ (P.Base φ ≫ inv (P.Base δ)) = P.Base Z.hom.hom := by
+    rw [he]; exact Over.w hiso.hom
+  -- 3. pull-back の定義の全単射
+  have hcond : P.Base (Z.hom.hom ≫ δ) = e ≫ P.Base φ := by
+    rw [P.Base_comp, ← hw, Category.assoc, Category.assoc, IsIso.inv_hom_id,
+      Category.comp_id]
+  obtain ⟨γ, hγ⟩ := (hpb Z.left.obj).2 ⟨(Z.hom.hom ≫ δ, e), hcond⟩
+  have hp := Subtype.ext_iff.mp hγ
+  have h1 : (γ ≫ φ : Z.left.obj ⟶ B) = Z.hom.hom ≫ δ := congrArg Prod.fst hp
+  have h2 : P.Base γ = e := congrArg Prod.snd hp
+  obtain ⟨hψlb, hψlin⟩ := (prop_1_4_ii P F Z.hom.hom).mp Z.hom.property
+  -- 4. `γ` は isometric pre-step
+  refine ⟨Z.left.obj, γ, Z.hom.hom, h1, Z.hom.property, ?_, ?_, ?_⟩
+  · refine (prop_1_7_v_isometric P γ φ ?_).1
+    rw [h1]
+    exact IsIsometric.comp P hψlb.2 hδi
+  · have hd : P.degFr φ * P.degFr γ = 1 := by
+      rw [← P.degFr_comp, h1, P.degFr_comp, hδs.1, hψlin, one_mul]
+    exact pnat_right_eq_one hd
+  · show IsIso (P.Base γ)
+    rw [h2]
+    exact hei
+
+/-- ★(iii) の四角形を2つ与えると、その間の射が**一意に**作れる。
+
+★使うのは **`ψ'` が pull-back であること**(射を作る)と
+**`φ` が pull-back であること**(作った射が `γ` と可換であることを保証する)。
+★**圏同値は使わない** —— ここは `Definition 1.2, (ii)` の全単射だけである。 -/
+theorem prop_1_9_iii_hom (P : PreFrobenioid C Φ) {A B Dd : C} (φ : A ⟶ B)
+    (hpb : IsPullBack P φ) (δ : Dd ⟶ B) (hδs : IsPreStep P δ)
+    {X Y : C} (a : X ⟶ A) (b : X ⟶ Dd) (a' : Y ⟶ A) (b' : Y ⟶ Dd)
+    (ha : a ≫ φ = b ≫ δ) (hb : a' ≫ φ = b' ≫ δ)
+    (ha2 : IsPreStep P a') (hb' : IsPullBack P b') :
+    ∃ h : X ⟶ Y, h ≫ a' = a ∧ h ≫ b' = b := by
+  haveI hia : IsIso (P.Base a') := ha2.2
+  haveI hid : IsIso (P.Base δ) := hδs.2
+  have hbase : ∀ {Z : C} (u : Z ⟶ A) (v : Z ⟶ Dd), u ≫ φ = v ≫ δ →
+      P.Base v = P.Base u ≫ P.Base φ ≫ inv (P.Base δ) := by
+    intro Z u v huv
+    have := congrArg P.Base huv
+    rw [P.Base_comp, P.Base_comp] at this
+    rw [← Category.assoc, IsIso.eq_comp_inv]
+    exact this.symm
+  have hcond : P.Base b = (P.Base a ≫ inv (P.Base a')) ≫ P.Base b' := by
+    rw [hbase a b ha, hbase a' b' hb, Category.assoc, ← Category.assoc (inv (P.Base a')),
+      IsIso.inv_hom_id, Category.id_comp]
+  obtain ⟨h, hh⟩ := (hb' X).2 ⟨(b, P.Base a ≫ inv (P.Base a')), hcond⟩
+  have hp := Subtype.ext_iff.mp hh
+  have hb1 : (h ≫ b' : X ⟶ Dd) = b := congrArg Prod.fst hp
+  have hb2 : P.Base h = P.Base a ≫ inv (P.Base a') := congrArg Prod.snd hp
+  refine ⟨h, ?_, hb1⟩
+  refine (hpb X).1 (Subtype.ext (Prod.ext ?_ ?_))
+  · show (h ≫ a') ≫ φ = a ≫ φ
+    rw [Category.assoc, hb, ← Category.assoc, hb1, ← ha]
+  · show P.Base (h ≫ a') = P.Base a
+    rw [P.Base_comp, hb2, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+
+/-- **(iii) の一意性** —— 原文の「the **unique** [up to isomorphism] isometric pre-step」。
+
+★`prop_1_9_iii_hom` を両向きに使い、`γ` が pre-step ゆえ **mono**
+(`Definition 1.3, (v), (a)`)であることで両側逆射を得る。 -/
+theorem prop_1_9_iii_uniq (F : FrobenioidCore P) {A B Dd : C} (φ : A ⟶ B)
+    (hpb : IsPullBack P φ) (δ : Dd ⟶ B) (hδs : IsPreStep P δ)
+    {C₁ C₂ : C} (γ₁ : C₁ ⟶ A) (ψ₁ : C₁ ⟶ Dd) (γ₂ : C₂ ⟶ A) (ψ₂ : C₂ ⟶ Dd)
+    (h₁ : γ₁ ≫ φ = ψ₁ ≫ δ) (hψ₁ : IsPullBack P ψ₁) (hγ₁ : IsPreStep P γ₁)
+    (h₂ : γ₂ ≫ φ = ψ₂ ≫ δ) (hψ₂ : IsPullBack P ψ₂) (hγ₂ : IsPreStep P γ₂) :
+    ∃ e : C₁ ≅ C₂, e.hom ≫ γ₂ = γ₁ := by
+  obtain ⟨h, hh1, hh2⟩ :=
+    prop_1_9_iii_hom P φ hpb δ hδs γ₁ ψ₁ γ₂ ψ₂ h₁ h₂ hγ₂ hψ₂
+  obtain ⟨h', hh1', hh2'⟩ :=
+    prop_1_9_iii_hom P φ hpb δ hδs γ₂ ψ₂ γ₁ ψ₁ h₂ h₁ hγ₁ hψ₁
+  haveI : Mono γ₁ := F.preStepMono γ₁ hγ₁
+  haveI : Mono γ₂ := F.preStepMono γ₂ hγ₂
+  have e1 : h ≫ h' = 𝟙 C₁ := by
+    refine (cancel_mono γ₁).mp ?_
+    rw [Category.assoc, hh1', hh1, Category.id_comp]
+  have e2 : h' ≫ h = 𝟙 C₂ := by
+    refine (cancel_mono γ₂).mp ?_
+    rw [Category.assoc, hh1, hh1', Category.id_comp]
+  exact ⟨⟨h, h', e1, e2⟩, hh1⟩
+
+/-- ★★**(ii)(iii) の「関手」の射の割り当ては一意に決まる**。
+
+`𝒞^imtr-pre_A` の対象は `A` への isometric pre-step `γ` であり、
+その間の射 `h` は `h ≫ γ₂ = γ₁` を満たすもの。
+★`γ₂` は pre-step ゆえ **mono**(`Definition 1.3, (v), (a)`)なので、
+**そのような `h` は高々1つ**である。
+
+★★**測定**: したがって「関手 [well-defined up to isomorphism]」のうち
+**選択が要るのは対象の割り当てだけ**で、**射の割り当てと関手則は自動**である。
+★これは (v) の isotropification 関手についての見込み(普遍性が `∃!` なので
+射の側に選択は要らない)と**同じ形**であり、ここで先に確かめられた。 -/
+theorem imtrPre_hom_uniq (F : FrobenioidCore P) {A C₁ C₂ : C}
+    (γ₁ : C₁ ⟶ A) (γ₂ : C₂ ⟶ A) (hγ₂ : IsPreStep P γ₂)
+    (h h' : C₁ ⟶ C₂) (hh : h ≫ γ₂ = γ₁) (hh' : h' ≫ γ₂ = γ₁) : h = h' := by
+  haveI : Mono γ₂ := F.preStepMono γ₂ hγ₂
+  exact (cancel_mono γ₂).mp (hh.trans hh'.symm)
+
 /-! ## ★負の対照 —— (iv) の `co-angular` は落とせない
 
 ★(iv) は「co-angular **かつ** linear なら isotropic 性が両向きに移る」と言う。
