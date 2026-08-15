@@ -641,4 +641,28 @@ def prop_1_7_v.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 29, item := "Proposition 1.7, (v)",
     sectionId := "frdi-prop-1-7-v" }
 
+/-! ## ★★命題全体の `.src`(2026-08-16 に新設した段)
+
+★条つきは **locator の記録**、条なしは ★★**命題全体を完全に実装したという主張**。
+★以前の器具は条つきの先頭だけを見ており、条 1 つで命題全体が数に出ていた。
+
+★**`Proposition 1.7` は「alternatively」の 2 つも含めて全主張が揃っている**:
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | 9 クラスが合成で閉じる | `prop_1_7_i` |
+| (ii) | pull-back ⟺ base-isomorphism に minimal-adjoint | `prop_1_7_ii_pullBack_minimalAdjoint` |
+| (ii) | base-isomorphism ⟺ pull-back に minimal-coadjoint | `prop_1_7_ii_baseIso_minimalCoadjoint` |
+| (ii) | ★**alternatively**: base-isomorphism ⟺ `α ◦ β` と書ける | `prop_1_7_ii_baseIso_factor` |
+| (iii) | Frobenius 型 ⟺ linear に minimal-coadjoint | `prop_1_7_iii_frobType_minimalCoadjoint` |
+| (iii) | linear ⟺ Frobenius 型に minimal-adjoint | `prop_1_7_iii_linear_minimalAdjoint` |
+| (iii) | ★**alternatively**: linear の分解 | `prop_1_7_iii_linear_factor` |
+| (iv) | iff | `prop_1_7_iv` |
+| (v) | 8 クラス ＋「**If, moreover**, 域が isotropic なら Frobenius 型」 | `prop_1_7_v` |
+-/
+
+def prop_1_7.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 28, item := "Proposition 1.7",
+    sectionId := "frdi-prop-1-7-i" }
+
 end ABC3.Found.FrdI

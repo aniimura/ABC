@@ -2320,4 +2320,29 @@ def prop_1_9_vii.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 32, item := "Proposition 1.9, (vii)",
     sectionId := "frdi-prop-1-9-vii" }
 
+/-! ## ★★命題全体の `.src` は**まだ付けられない**(2026-08-16 の監査)
+
+★上の `.src` はすべて**条つき**であり、器具の数には入らない。
+★命題全体の `.src`(`item := "Proposition 1.9"`)を付けるには、
+★★**(v) の欠落を埋める必要がある。**
+
+原文 (FrdI p.32):
+> forms a left adjoint to the inclusion functor Cistr →C, through which the functor
+
+★★**「through which the functor `𝒞 → 𝔽_Φ` factors」に対応する宣言が無い。**
+`grep` で確認した ——「factor」を含む宣言は本ファイルに無く、
+`isotropification` を含む自然同型は `isotropificationRestrictIso`
+(`ι ⋙ isotropification ≅ 𝟭 (Istr P)`)の 1 本だけである。
+
+★**これは定義から従うものではない**。`istrPre.toElem := ι ⋙ P.toElem` なので、
+求めるのは `isotropification P F ⋙ (istrPre P).toElem ≅ P.toElem` であり、
+★`A` と `hullObj A` は**別の対象**だから、`hullMap` に沿った自然同型を作る仕事が要る。
+
+★もう 1 つ、原文 (v) の保存 11 クラスのうち **co-angular** だけが
+`isotropification_*` の系列に無い(`istr_coAngular` で実質は覆われているが、
+原文の列挙どおりの形では述べていない)。
+
+★**この 2 件が (v) の残りである。**
+-/
+
 end ABC3.Found.FrdI

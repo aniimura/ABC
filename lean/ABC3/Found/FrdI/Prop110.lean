@@ -1070,8 +1070,8 @@ include P in
 /-- **(iv) の逆向き** —— prime-Frobenius なら irreducible。
 
 ★`𝒞` が isotropic 型であることを使う(原文の `Proposition 1.4, (i)` 経由)。 -/
-theorem prop_1_10_iv_mp (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
-    {A B : C} (φ : A ⟶ B) (hp : IsPrimeFrobenius P φ) : IsIrreducibleMor φ := by
+theorem prop_1_10_iv_mp (F : FrobenioidCore P) {A B : C} (hA : IsIsotropic P A)
+    (φ : A ⟶ B) (hp : IsPrimeFrobenius P φ) : IsIrreducibleMor φ := by
   refine ⟨fun h => ?_, fun X β α hfac => ?_⟩
   · haveI := h
     have h2 := hp.2
@@ -1094,21 +1094,29 @@ theorem prop_1_10_iv_mp (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P 
     have hd : P.degFr φ = P.degFr α * P.degFr β := by rw [hfac, P.degFr_comp]
     rcases ((pnat_irreducible_iff_prime (P.degFr φ)).mpr hp.2).2 _ _ hd with h | h
     · -- degFr α = 1 ⟹ α は同型
+      -- ★`α : X ⟶ B` の域 `X` は `β : A ⟶ X` を通じて `A` から到達するので isotropic
       exact Or.inr (prop_1_4_iii P F α
-        ⟨prop_1_4_i P α (fun Y _ => hiso Y), hdα⟩ ⟨h, hbα⟩)
+        ⟨prop_1_4_i P α (fun _ f => F.isotropicClosed f (F.isotropicClosed β hA)), hdα⟩
+        ⟨h, hbα⟩)
     · -- degFr β = 1 ⟹ β は同型
       exact Or.inl (prop_1_4_iii P F β
-        ⟨prop_1_4_i P β (fun Y _ => hiso Y), hdβ⟩ ⟨h, hbβ⟩)
+        ⟨prop_1_4_i P β (fun _ f => F.isotropicClosed f hA), hdβ⟩ ⟨h, hbβ⟩)
 
 include P in
 /-- ★★**`Proposition 1.10, (iv)` の前半の完成形**(iff)。
 
-★isotropic 型の `𝒞` において、Frobenius 型射が prime-Frobenius であることと
-irreducible であることは同値。 -/
-theorem prop_1_10_iv (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
-    {A B : C} (φ : A ⟶ B) (hφ : IsFrobeniusType P φ) :
+★★**仮定は「域 `A` が isotropic」だけ**である。
+
+原文 (FrdI p.34):
+> (iv) A morphism of Frobenius type with isotropic domain is a prime-Frobe-
+
+★**監査以前は `∀ X : C, IsIsotropic P X`(圏全体)を仮定していた** ——
+原文が要求しない仮定を足していた。`F.isotropicClosed` で域から伝播させれば足りる。 -/
+theorem prop_1_10_iv (F : FrobenioidCore P) {A B : C} (hA : IsIsotropic P A)
+    (φ : A ⟶ B) (hφ : IsFrobeniusType P φ) :
     IsPrimeFrobenius P φ ↔ IsIrreducibleMor φ :=
-  ⟨prop_1_10_iv_mp P F hiso φ, prop_1_10_iv_mpr P F (fun X _ => hiso X) φ hφ⟩
+  ⟨prop_1_10_iv_mp P F hA φ,
+   prop_1_10_iv_mpr P F (fun _ f => F.isotropicClosed f hA) φ hφ⟩
 
 /-! ### ★(vi) の前半の核心 —— base-identity 自己射を pre-step に沿って降ろす
 
@@ -2038,7 +2046,7 @@ include P in
 
 ★**これが「無限個の同型類」の内容である**(素数は無限にあるので)。 -/
 theorem prop_1_10_iv_infinitely_many (F : FrobenioidCore P)
-    (hiso : ∀ X : C, IsIsotropic P X) (A : C) :
+    {A : C} (hA : IsIsotropic P A) :
     (∀ p : ℕ+, Nat.Prime (p : ℕ) →
        ∃ (B : C) (φ : A ⟶ B), IsIrreducibleMor φ ∧ P.degFr φ = p) ∧
     (∀ (Bp Bq : C) (φp : A ⟶ Bp) (φq : A ⟶ Bq), P.degFr φp ≠ P.degFr φq →
@@ -2047,10 +2055,30 @@ theorem prop_1_10_iv_infinitely_many (F : FrobenioidCore P)
   · intro p hp
     obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A p
     refine ⟨B, φ, ?_, hd⟩
-    exact prop_1_10_iv_mp P F hiso φ ⟨hφ, by rw [hd]; exact hp⟩
+    exact prop_1_10_iv_mp P F hA φ ⟨hφ, by rw [hd]; exact hp⟩
   · intro Bp Bq φp φq hne θ
     haveI : IsIso θ.hom := inferInstance
     exact frobType_not_iso_of_degFr_ne P φp φq hne θ.hom
+
+include P in
+/-- ★★**原文「there exist infinitely many isomorphism classes」そのもの**。
+
+原文 (FrdI p.34):
+> is isotropic, then there exist infinitely many isomorphism classes of objects of AC
+
+★**監査以前は「無限個」を述べていなかった**(素数ごとの存在と非同型性まで)。
+★**次数がいくらでも大きく取れる**という形で述べる ——
+`prop_1_10_iv_infinitely_many` の第2主張(次数が違えば非同型)と合わせて、
+★同型類が無限個あることを与える。 -/
+theorem prop_1_10_iv_unbounded (F : FrobenioidCore P) {A : C} (hA : IsIsotropic P A) :
+    ∀ n : ℕ, ∃ (B : C) (φ : A ⟶ B), IsIrreducibleMor φ ∧ n ≤ (P.degFr φ : ℕ) := by
+  intro n
+  obtain ⟨p, hpn, hp⟩ := Nat.exists_infinite_primes n
+  have hppos : 0 < p := hp.pos
+  obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A ⟨p, hppos⟩
+  refine ⟨B, φ, prop_1_10_iv_mp P F hA φ ⟨hφ, ?_⟩, ?_⟩
+  · rw [hd]; exact hp
+  · rw [hd]; exact hpn
 
 /-! ### ★(vi) 後半の最終段 —— `IsFrobeniusTrivial` を同型に沿って移す
 

@@ -384,4 +384,30 @@ def prop_1_8_iii_out.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 30, item := "Proposition 1.8, (iii)",
     sectionId := "frdi-prop-1-8-iii" }
 
+/-! ## ★★命題全体の `.src`(2026-08-16 に新設した段)
+
+★条つきは **locator の記録**、条なしは ★★**命題全体を完全に実装したという主張**。
+
+★**`Proposition 1.8` は 6 主張すべてが揃っている**:
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | `𝒞 → 𝒟` が充満なら pre-step は linear End-equivalence | `prop_1_8_i_mp` |
+| (i) | ★**`𝒟` が Aut-type なら**逆 | `prop_1_8_i_mpr` |
+| (ii) | ⟹ | `prop_1_8_ii_mp` |
+| (ii) | ⟸ | `prop_1_8_ii_mpr` |
+| (iii) | non-group-like ⟺ co-angular step `A → B` の存在 | `prop_1_8_iii_out` |
+| (iii) | ★**alternatively**: `B → A` の側 | `prop_1_8_iii_in` |
+| (iii) | ★**Also**: base-isomorphic なら group-like 性が一致 | `prop_1_8_iii_baseIso` |
+
+★§0 の語彙の写しも照合済み ——
+`IsEndEquivalence φ := Nonempty (B ⟶ A)` は原文 p.14 の
+「an arrow A →B of C is an End-equivalence **if there exists an arrow B →A in C**」
+そのものであり、★**射自身が条件に現れないのは原文どおり**である。
+-/
+
+def prop_1_8.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 30, item := "Proposition 1.8",
+    sectionId := "frdi-prop-1-8-i" }
+
 end ABC3.Found.FrdI

@@ -433,4 +433,32 @@ def cP.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 25, item := "Proposition 1.4, (i) — 負の対照",
     sectionId := "frdi-prop-1-4-i" }
 
+/-! ## ★★命題全体の `.src`(2026-08-16 に新設した段)
+
+★**器具の修正に合わせて、`.src` を 2 階建てにした**:
+- **条つき**(`"Proposition 1.4, (i)"` 等) —— **locator の記録**。数に入らない。
+- **条なし**(`"Proposition 1.4"`) —— ★★**命題全体を完全に実装したという主張**。数に入る。
+
+★以前の器具は条つきの先頭だけを見ていたため、
+★★**条が 1 つ実装された時点で命題全体が数に出ていた。**
+★文脈を持たない検証役の監査で判明した(同日、`Proposition 1.10` の `.src` 6 個を取り下げ)。
+
+★**`Proposition 1.4` は 8 主張すべてが揃っていることを、条ごとに照合して確認した**:
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | co-angular | `prop_1_4_i` |
+| (i) | In particular: Frobenius 型 ⟺ isometric base-isomorphism | `prop_1_4_i_frobeniusType` |
+| (ii) | iff | `prop_1_4_ii` |
+| (iii) | LB-invertible な pre-step は同型 | `prop_1_4_iii` |
+| (iv) | ⟸ | `prop_1_4_iv_mp` |
+| (iv) | ⟹ | `prop_1_4_iv_mpr` |
+| (v) | ⟸ | `prop_1_4_v_mp` |
+| (v) | ⟹(原文の証明が 3 段の側) | `prop_1_4_v_mpr` |
+-/
+
+def prop_1_4.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 25, item := "Proposition 1.4",
+    sectionId := "frdi-prop-1-4-i" }
+
 end ABC3.Found.FrdI

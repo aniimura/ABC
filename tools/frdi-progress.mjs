@@ -97,11 +97,19 @@ const need = new Set(direct.keys());
 { const q = [...need]; while (q.length) { const v = q.shift(); for (const w of intraEdges(v)) if (!need.has(w)) { need.add(w); q.push(w); } } }
 
 // ── 分子: Found/ の `.src` が指す原典項目
-const ITEM_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`);
+// ★★2026-08-16 修正: **項目名が丸ごと `Kind N.M` のものだけを数える。**
+//   以前は先頭一致(`^…`)だったので `item := "Proposition 1.9, (i)"` が
+//   キー "Proposition 1.9" に潰れ、★**条が 1 つでもあれば命題全体が実装済みに数えられた。**
+//   これは上の docstring が宣言している規則(「全部終わるまで数に出ない」)と**食い違っていた**。
+//   ★文脈を持たない検証役の指摘で判明した。器具を docstring の意図に戻す。
+const ITEM_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*$`);
+// 条つき `.src`(`"Proposition 1.9, (i)"` 等)を拾う——**数えないが、見えるようにする。**
+const PART_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*[,—-]`);
 const SRC_RE = /\.src[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?item\s*:=\s*"([^"]*)"/g;
 function walk(d, out = []) { for (const e of readdirSync(d)) { const p = join(d, e); if (statSync(p).isDirectory()) walk(p, out); else out.push(p); } return out; }
 const LEAN = join(ROOT, 'lean', 'ABC3');
-const done = new Map();     // "Kind N.M" -> Set(ファイル)
+const done = new Map();     // "Kind N.M" -> Set(ファイル)  ★完全実装の主張
+const partial = new Map();  // "Kind N.M" -> Set(条つき item 文字列)  ★数えない
 for (const f of walk(LEAN).filter((p) => p.endsWith('.lean'))) {
   const rel = relative(LEAN, f).split('\\').join('/');
   if (rel.split('/')[0] !== 'Found') continue;
@@ -109,7 +117,15 @@ for (const f of walk(LEAN).filter((p) => p.endsWith('.lean'))) {
   for (const m of text.matchAll(SRC_RE)) {
     if (m[1] !== 'FrdI') continue;
     const im = ITEM_RE.exec(m[2]);
-    if (!im) continue;                                   // §0 の語彙などは番号項目でない
+    if (!im) {
+      const pm = PART_RE.exec(m[2]);                     // 条つき —— 記録だけ
+      if (pm) {
+        const pk = `${pm[1]} ${pm[2]}`;
+        if (!partial.has(pk)) partial.set(pk, new Set());
+        partial.get(pk).add(m[2]);
+      }
+      continue;                                          // §0 の語彙などは番号項目でない
+    }
     const k = `${im[1]} ${im[2]}`;
     if (!done.has(k)) done.set(k, new Set());
     done.get(k).add(rel);
@@ -147,6 +163,15 @@ console.log(`★ゴール進捗: [FrdI] の必要分 ${doneInNeed.length} / ${ne
 if (missingConsumers.length) console.log(`  ★.txt が無い需要側: ${missingConsumers.join(', ')} —— 分母はそのぶん小さく出ている`);
 console.log(`  直接名指し ${direct.size} 件 → 推移閉包 ${need.size} 件 / FrdI 全 ${F.decls.size} 件`);
 if (doneOutside.length) console.log(`  ★必要分の外に実装したもの: ${doneOutside.join(' / ')}`);
+{
+  const partInNeed = [...partial.keys()].filter((k) => need.has(k) && !done.has(k)).sort(cmp);
+  if (partInNeed.length) {
+    console.log(`  ★条つき \`.src\` はあるが命題全体の \`.src\` が無いもの ${partInNeed.length} 件`);
+    console.log(`     ★★これは**数に入らない**。`);
+    console.log(`     ★命題全体が揃ったときに \`item := "Kind N.M"\`(条なし)の \`.src\` を 1 個足すこと。`);
+    for (const k of partInNeed) console.log(`     ${k} — 条つき ${partial.get(k).size} 個`);
+  }
+}
 
 console.log('\n節別:');
 for (const s of [...new Set([...need].map(bySec))].sort((a, b) => +a - +b)) {
