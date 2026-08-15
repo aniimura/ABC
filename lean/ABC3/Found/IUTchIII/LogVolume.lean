@@ -248,4 +248,91 @@ theorem padicLogVol_smallBall_ne_integerBall :
 theorem padicVolume_logShell_lt_top : padicVolume p (logShell (p := p)) < ⊤ :=
   isCompact_logShell'.measure_lt_top
 
+/-! ### ★単位球の p 個の剰余類分解 —— 体積の**厳密値**
+
+原文 (AbsTopIII p.137):
+> a positive integer, then, for n ∈Z, μlog
+
+原文は剰余体の位数が `p^f` のとき `μ_k^log(𝔪_k^n) = −f · n · log(p)` という
+**明示値**を与える。ℚ_p では `f = 1`(剰余体は 𝔽_p——`Found/PGC/QpResidueField.lean` の
+`residueCard_selfField` で証明済み)なので、`n = 1` では `μ^log(𝔪) = −log p` になる。
+ここではそれを証明する。 -/
+
+/-- `‖x‖ ≤ 1` なら、`0 ≤ i < p` のどれかで `‖x − i‖ ≤ 1/p`。
+
+`PadicInt.appr` の `n = 1` の場合。 -/
+private theorem exists_residue_repr (x : ℚ_[p]) (hx : ‖x‖ ≤ 1) :
+    ∃ i : ℕ, i < p ∧ ‖x - (i : ℚ_[p])‖ ≤ (p : ℝ)⁻¹ := by
+  set y : ℤ_[p] := ⟨x, hx⟩ with hy
+  refine ⟨y.appr 1, by simpa using PadicInt.appr_lt y 1, ?_⟩
+  have hmem : y - (y.appr 1 : ℤ_[p]) ∈ Ideal.span {(p : ℤ_[p]) ^ 1} :=
+    PadicInt.appr_spec 1 y
+  have hnorm : ‖y - (y.appr 1 : ℤ_[p])‖ ≤ (p : ℝ) ^ (-1 : ℤ) :=
+    (PadicInt.norm_le_pow_iff_mem_span_pow _ 1).mpr hmem
+  have hcoe : ‖x - (y.appr 1 : ℚ_[p])‖ = ‖y - (y.appr 1 : ℤ_[p])‖ := by
+    rw [← PadicInt.padic_norm_e_of_padicInt]
+    norm_cast
+  rw [hcoe]
+  exact hnorm.trans (le_of_eq (by rw [zpow_neg, zpow_one]))
+
+set_option maxHeartbeats 1000000 in
+/-- 単位球は `p` 個の `1/p` 球の平行移動で**覆われる**。
+
+★**非交性は含まない。** 当初この docstring は「非交和である」と書いていたが、
+statement が主張しているのは和集合の等式だけで、**非交性はこの定理の外**にある
+(それが下の `residue_cosets_disjoint` であり、未証明のまま止めた地点)。
+docstring が statement より強いことを言うのは A7 と同じ失敗形なので訂正した
+(2026-08-15、親が発見)。 -/
+theorem unitBall_eq_biUnion :
+    closedBall (0 : ℚ_[p]) 1
+      = ⋃ i ∈ Finset.range p,
+          ((fun z : ℚ_[p] => (-(i : ℚ_[p])) + z) ⁻¹' closedBall 0 ((p : ℝ)⁻¹)) := by
+  have hp1 : (1 : ℝ) < p := by exact_mod_cast (Fact.out : p.Prime).one_lt
+  have hinv : ((p : ℝ)⁻¹) ≤ 1 := by rw [inv_le_one_iff₀]; right; linarith
+  refine Set.Subset.antisymm (fun x hx => ?_) (fun x hx => ?_)
+  · simp only [mem_closedBall, dist_zero_right] at hx
+    obtain ⟨i, hi, hnorm⟩ := exists_residue_repr x hx
+    refine Set.mem_biUnion (Finset.mem_range.mpr hi) ?_
+    simp only [Set.mem_preimage, mem_closedBall, dist_zero_right]
+    rw [show (-(i : ℚ_[p])) + x = x - (i : ℚ_[p]) by ring]
+    exact hnorm
+  · obtain ⟨i, _, hxi⟩ := Set.mem_iUnion₂.mp hx
+    simp only [Set.mem_preimage, mem_closedBall, dist_zero_right] at hxi
+    simp only [mem_closedBall, dist_zero_right]
+    rw [show x = (i : ℚ_[p]) + ((-(i : ℚ_[p])) + x) by ring]
+    refine le_trans (IsUltrametricDist.norm_add_le_max _ _) (max_le ?_ (le_trans hxi hinv))
+    exact_mod_cast Padic.norm_int_le_one (i : ℤ)
+
+/-! ### ★★ここで止めた —— 「あと1つ補題があれば通る」地点(2026-08-15)
+
+体積の**厳密値** `μ(𝔪) = 1/p`(= 原文 [AbsTopIII] p.137 の
+`μ_k^log(𝔪_k^n) = −f·n·log p` の `f = 1, n = 1` の場合)まで、**あと1つ**である。
+
+**通ったもの**: `exists_residue_repr`(剰余代表の存在)と `unitBall_eq_biUnion`
+(単位球が `p` 個の `1/p` 球の平行移動で**覆われる**こと)。
+
+**通らなかったもの**は次の1本で、型のレベルで書くとこうなる:
+
+```
+theorem residue_cosets_disjoint :
+    (↑(Finset.range p) : Set ℕ).PairwiseDisjoint
+      (fun i : ℕ => (fun z : ℚ_[p] => (-(i : ℚ_[p])) + z) ⁻¹' closedBall 0 ((p : ℝ)⁻¹))
+```
+
+これが通れば、`measure_biUnion_finset` と平行移動不変性から
+`1 = p · μ(closedBall 0 (1/p))`、したがって `μ = 1/p`、
+`padicLogVol (closedBall 0 ((p:ℝ)⁻¹)) = −Real.log p` が出る。
+
+★**止めた理由は数学ではない。** 数学は明快で、`‖i − j‖ < 1 → p ∣ (i − j)` と
+`0 < |i − j| < p` の矛盾だけである。使う補題も実在する
+(`PadicInt.norm_int_lt_one_iff_dvd`、`PadicInt.padic_norm_e_of_padicInt`)。
+落ちたのは **Lean の elaboration** で、`((j : ℤ) - (i : ℤ) : ℤ_[p])` という
+`ℤ → ℤ_[p]` の係数変換で `whnf` が **1,000,000 heartbeats を使い切る**。
+`ℚ_[p]` 側に `norm_int_lt_one_iff_dvd` に相当する補題が無い(実測)ので、
+`ℤ_[p]` を経由するしかなく、そこで詰まっている。
+
+★これは 2026-08-15 時点で **3回目の壁**(別のアプローチ3つ: 直接の `omega` 決着、
+`abs` 経由、ℕ に落として `Nat.le_of_dvd`)なので、規律に従って止めた。
+-/
+
 end ABC3.Found.IUTchIII

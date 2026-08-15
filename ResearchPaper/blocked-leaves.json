@@ -10,8 +10,9 @@
     },
     {
       "key": "[IUTchIII] Proposition 3.9",
-      "reason": "手続き正規化モノ解析的対数体積そのものの構成(物理 p.115、目視確認済み)。対数体積は 𝔐(−)(空でないコンパクト開集合の集まり)の上の ℝ 値関数として定まるが、その構成には [AbsTopIII] Proposition 5.7 の radial/angular 対数体積が要る。我々は対数体積を1つも作っていない。",
-      "unblockedBy": "★2026-08-15 に半分解けた: 対数体積そのものは `Found/IUTchIII/LogVolume.lean` に ℚ_p について構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残るのは **procession-normalized**(j ∈ |F_l| 上の行列による正規化)の側で、これは prime-strip の procession が要るので中層のまま。"
+      "reason": "★2026-08-15 に定義を確定させた(物理 p.115/p.116/p.119/p.120 を 400dpi 目視)。Proposition 3.9 は**2つの正規化**を要求する。(A) **packet-normalization**(p.115): 「multiplication of an element of 𝔐(−) by p_v corresponds to adding the quantity −log(p_v)」。これは対数体積そのものの性質で、我々の `padicLogVol` の上に載る。**語彙の不足は無い**。(B) **procession-normalization**(p.116): 「log-volumes on the products of the 𝔐(−) associated to the various **capsules** under consideration, which we normalize by taking the **average**, over the various capsules under consideration」。★演算は**重みなしの平均**で、算術としては自明。内容はすべて**索引構造**にある。",
+      "unblockedBy": "★(B) を阻んでいるのは **語彙**である。索引構造は p.120 で具体的に書かれている——procession は `j ∈ {1, …, l⋇}` で添字づけられ、j 番目の capsule の索引集合は `S^±_{j+1}`(ラベル {0,…,j})。しかし capsule の**中身**は `𝒟⊢-prime-strip`(Proposition 3.4, (ii) / [IUTchI] Proposition 6.9, (ii))であり、prime-strip / capsule / procession はいずれも IUT 固有の語彙で、我々は1つも持っていない。★平均だけを `Finset.sum / card` として書けば型は付くが、それは**索引構造の無い空の節点**であり、被覆率を上げるだけになる。★(A) の側は別で、mathlib の Haar のスケーリング(`μ(p·U) = p⁻¹·μ(U)`)が要る。これは語彙の問題ではなく**数学の作業**で、単位球の p 個の剰余類分解(ℤ_p ↔ closedBall(0,1) の橋 + `PadicInt.toZModPow`)を要する。mathlib の Haar 一意性(`Mathlib/MeasureTheory/Measure/Haar/Unique.lean`)は積分ベース(`haarScalarFactor`)で、こちらも軽くはない。",
+      "★halfSolved": "対数体積そのものは `Found/IUTchIII/LogVolume.lean` に構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残りは (A) 数学の作業 + (B) 語彙の不在。"
     }
   ],
   "expandableWithWork": [
