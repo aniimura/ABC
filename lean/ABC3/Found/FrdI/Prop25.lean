@@ -188,6 +188,85 @@ theorem nsmul_injective_of_divisorial {M : Type w} [AddCommMonoid M]
   refine hint ?_
   rw [← sub_eq_zero, ← ha, ha0, toGp_zero]
 
+/-! ## ★★isotropic hull に沿った `𝒪^▷` の移送 —— 非 isotropic への拡張の部品
+
+原文 (FrdI p.49):
+> [which applies even if A is not isotropic — cf. Definition 2.3, (a), (b)] to
+
+★★**原文は `Proposition 2.5, (iii)` の証明で「分裂は `A` が isotropic でなくても
+使える」と述べ、根拠に `Definition 2.3, (a), (b)` を挙げる。**
+★我々はここを機械で追おうとして、**(a)(b) だけからは出ないこと**を見つけた
+(下の記録を見よ)。ここではその途中まで——確実に出る 2 本——を用意する。
+-/
+
+section HullTransport
+
+variable (F : FrobenioidCore P) {A B : C} {φ : A ⟶ B} (hφ : IsIsotropicHull P φ)
+
+include P hφ in
+/-- ★★**移送は `Div` を底に沿って戻す** ——
+`Div α = Φ.map (Base φ) (Div (hullOTriHom α))`。
+
+★`φ` は等長 pre-step(`Div φ = 0`, `degFr φ = 1`)で `α` は base-identity なので、
+`hullOTriMap_sq` の四角形の両辺の `Div` を取るとこれだけが残る。 -/
+theorem hullOTriHom_div (α : End A) (hα : α ∈ OTri P A) :
+    P.Div ((α : A ⟶ A)) = Φ.map (P.Base φ) (P.Div ((hullOTriHom P φ hφ α : B ⟶ B))) := by
+  have hsq := hullOTriMap_sq P φ hφ α
+  have hl : P.Div ((α : A ⟶ A) ≫ φ) = P.Div ((α : A ⟶ A)) := by
+    rw [P.Div_comp, show P.Div φ = 0 from hφ.1,
+      show P.Base ((α : A ⟶ A)) = 𝟙 _ by
+        have h : P.Base ((α : A ⟶ A)) = P.Base (𝟙 A) := hα.1
+        rwa [P.Base_id] at h,
+      MonoidOn.map_id, show P.degFr φ = 1 from hφ.2.1.1]
+    simp
+  have hr : P.Div (φ ≫ (hullOTriMap P φ hφ α : B ⟶ B))
+      = Φ.map (P.Base φ) (P.Div ((hullOTriMap P φ hφ α : B ⟶ B))) := by
+    rw [P.Div_comp, show P.Div φ = 0 from hφ.1]
+    simp
+  rw [← hl, hsq, hr]
+  rfl
+
+include P F hφ in
+/-- ★★**`τ(A^istr)` は `𝒪^▷(A)` から一意に来る** ——
+存在は `Definition 2.3, (b)`(`hullMem`)、一意性は
+`Proposition 2.2, (iv)` の単射性。
+
+★これが「非 isotropic な `A` に `τ(A)` を定める」ための道具である。 -/
+theorem hullTau_existsUnique {τ : ∀ X : C, Submonoid (End X)}
+    (hτ : IsCharacteristicSplitting P F τ) (t : End B) (ht : t ∈ τ B) :
+    ∃! s : OTri P A, hullOTriHom P φ hφ ((s : End A)) = t := by
+  obtain ⟨s, hs⟩ := hτ.hullMem hφ t ht
+  refine ⟨s, hs, fun s' hs' => ?_⟩
+  exact Subtype.ext (hullOTriHom_injective P F φ hφ (hs'.trans hs.symm))
+
+end HullTransport
+
+/-! ## ★★★測定 —— 原文の「非 isotropic でも使える」は (a)(b) からは出ない
+
+★★`Proposition 2.5, (iii)` の証明で原文は、非 isotropic な `A` についても
+分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)` が使えるとし、根拠に
+`Definition 2.3, (a), (b)` だけを挙げる。★機械で追うと次で詰まる:
+
+`x ∈ 𝒪^▷(A)` を取り、単射 `ι : 𝒪^▷(A) ↪ 𝒪^▷(A^istr)`(`Proposition 2.2, (iv)`)で
+送ると、(a) により `ι x = u' · t'`(`u' ∈ 𝒪^×(A^istr)`, `t' ∈ τ(A^istr)`)と
+分裂する。(b) により `t' = ι t` なる `t ∈ 𝒪^▷(A)` が**一意に**取れる
+(上の `hullTau_existsUnique`)。
+
+★★**しかし `u'` が `ι` の像に入ることは (a)(b) から出ない。**
+`Proposition 2.2, (iv)` は「モノイドの自然な単射」しか主張せず、
+★**単元の部分が全射である**とは言っていない。`ι t` は一般に可逆でないので
+`u' = ι x · (ι t)⁻¹` と書くこともできない。
+
+★この観測は**まだ `Gap` ではない**——③ を主張するには
+「(a)(b) を満たすが非 isotropic な対象で分裂が破れる Frobenioid」という
+**falsifier** が要る。★現時点では「**我々が導けなかった**」という測定である。
+
+★★**帰結**: `Prop25iii.lean` の `psiMap` は `IsOfIsotropicType` を仮定したままである。
+外すには (α) 上の穴を埋めるか、(β) `𝒞^istr` で構成して
+`Proposition 1.9, (v)` の isotropification 関手で移すか、のどちらかが要る。
+★原文の段 8 は (β) の筋である。
+-/
+
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 
 原文 (FrdI p.48):
