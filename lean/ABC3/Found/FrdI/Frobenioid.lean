@@ -525,9 +525,19 @@ def OrderCat.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — Order(M)",
     sectionId := "frdi-s0-order" }
 
+/-- ★**locator を訂正した(2026-08-16)。**
+
+以前は `item := "Definition 1.3, (i), (c)"` としていたが、
+★**`𝒞^pl-bk` を定義しているのは `Definition 1.2, (iv)`**(物理 p.23)である ——
+
+原文 (FrdI p.23):
+> for the subcategories determined, respectively, by the linear morphisms, base-isomor-
+
+`Definition 1.3, (i), (c)` はそれを**使う**側(`(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` が圏同値)。
+★文脈を持たない検証役の監査で判明した。 -/
 def PlBk.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 24, item := "Definition 1.3, (i), (c) — 𝒞^pl-bk",
-    sectionId := "frdi-def-1-3-ic" }
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^pl-bk",
+    sectionId := "frdi-def-1-2-iv" }
 
 def coaPreProp.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 24, item := "Definition 1.3, (iii), (d) — 𝒞^coa-pre",
@@ -547,6 +557,41 @@ def coaPreOverFunctor.src : ABC3.Meta.Source :=
 
 def FrobenioidCore.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 24, item := "Definition 1.3, (i)(ii)(iii)(a)(b)(c)(iv)(v)(vi)(vii)",
+    sectionId := "frdi-def-1-3-i" }
+
+/-! ## ★★命題全体の `.src`(2026-08-16)
+
+★**文脈を持たない検証役の監査で、`Definition 1.3` は自身の 16 小条が
+すべて実装済みであることが確認された** —— 分解の向き、三つ組の置き換え
+`(α◦δ, δ⁻¹◦β◦ε, ε⁻¹◦γ)` の形、`β◦φ = ψ` の向きまで逐語照合されている。
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i)(a) | 底の同型類は Frobenius-trivial 対象の像 | `baseSurj` |
+| (i)(b) | 底の同型は pre-step の span で持ち上がる | `preStepSpan` |
+| (i)(c) | `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` が圏同値 | `plBkEquiv` |
+| (ii) | 各次数の Frobenius 型射の存在 ＋ 本質的一意性 | `frobDegSurj`, `frobDegUniq` |
+| (iii)(a) | co-angular が合成で閉じる | `coAngularComp` |
+| (iii)(b) | co-angular pre-step があれば全射が co-angular | `coAngularOfPreStep` |
+| (iii)(c) | `𝒪^▷(A) ≅ 𝒪^▷(B)` ＋「`Base(φ)` にしか依らない」 | `otriFwd`, `otriBwd`, `otriBase` |
+| (iii)(d) | コスライス・スライスの 2 本の圏同値 | `coaPreUnderEquiv`, `coaPreOverEquiv` |
+| (iv)(a) | 任意射の 3 分解 ＋ 一意性 | `arbFactor`, `arbFactorUniq` |
+| (iv)(b) | pull-back は LB-invertible かつ linear | `pullBackLB` |
+| (v)(a) | pre-step は mono | `preStepMono` |
+| (v)(b) | 「isometric ∘ co-angular」分解 ＋ 一意性 | `preStepFactor`, `preStepFactorUniq` |
+| (v)(c) | 「co-angular ∘ isometric」分解 ＋ 一意性 | `preStepFactor'`, `preStepFactorUniq'` |
+| (vi) | 単元を除く忠実性 | `faithfulUpToUnits`(＋ `faithfulUpToUnits_unique`) |
+| (vii)(a) | isotropic hull の存在 | `isotropicHullExists` |
+| (vii)(b) | isotropic は射の先へ伝わる | `isotropicClosed` |
+
+★★**付けられなかった唯一の理由は前提の継承だった** —— 原文は
+「Let `D`, `Φ`, `C →FΦ` be **as in Definition 1.2**」で始まり、
+`Definition 1.2` は `Definition 1.1, (iv)` の pre-Frobenioid を前提する。
+その `PreFrobenioid` が `connected` を落としていた。
+★**同日にそれを埋めたので、ここで付けられる。** -/
+
+def definition_1_3.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 24, item := "Definition 1.3",
     sectionId := "frdi-def-1-3-i" }
 
 def Frobenioid.src : ABC3.Meta.Source :=
