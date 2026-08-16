@@ -526,6 +526,19 @@ def elemFrobMap {Φ Ψ : MonoidOn.{v, u, w} D} (η : Φ.functor ⟶ Ψ.functor) 
     congr 1
     exact congrArg (fun t => (AddCommMonCat.Hom.hom t) ψ.div) (η.naturality φ.base.op)
 
+/-- ★★**割り当てが関手的であること（恒等）**。
+
+★★**監査で「各 `η` が関手を誘導する」までは示せているが、
+「割り当てが**関手的である**」は示せていないと指摘された**。
+★`pushFunctor` に `map_id`/`map_comp` がなければ関手と呼べないのと同じ形である。 -/
+@[simp] theorem elemFrobMap_id (Φ : MonoidOn.{v, u, w} D) :
+    elemFrobMap (𝟙 Φ.functor) = 𝟭 (ElemFrobCat Φ) := rfl
+
+/-- ★★**割り当てが関手的であること（合成）**。 -/
+theorem elemFrobMap_comp {Φ Ψ Θ : MonoidOn.{v, u, w} D}
+    (η : Φ.functor ⟶ Ψ.functor) (θ : Ψ.functor ⟶ Θ.functor) :
+    elemFrobMap (η ≫ θ) = elemFrobMap η ⋙ elemFrobMap θ := rfl
+
 /-! ★**`elemFrobToChar`（`Prop15`）はこの特殊例である** —— 監査の指摘。
 ★実際の写像は下流にあるので、ここでは形の一致だけを記録する。 -/
 
