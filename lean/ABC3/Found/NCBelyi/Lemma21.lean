@@ -150,6 +150,91 @@ theorem belyi_ge_self (a b : ℕ) {β : ℝ} (hβ : 2 ≤ β) :
   have h2 : (1 : ℝ) ≤ (β - 1) ^ (b + 1) := one_le_pow₀ (by linarith)
   nlinarith
 
+/-! ## ★★`f₀ ≤ 1/4` —— 原文の 4 場合分けは要らなかった -/
+
+/-- ★`r = m/(m+n)` での値の絶対値は `(m/(m+n))^m·(n/(m+n))^n`。
+
+原文 (NCBelyi p.3):
+> f0 = |f(r)| = {m/(m + n)}m · {n/(m + n)}n
+-/
+theorem abs_belyi_at_r (a b : ℕ) :
+    |((a + 1 : ℝ) / (a + 1 + (b + 1))) ^ (a + 1)
+        * ((a + 1 : ℝ) / (a + 1 + (b + 1)) - 1) ^ (b + 1)|
+      = ((a + 1 : ℝ) / (a + 1 + (b + 1))) ^ (a + 1)
+          * ((b + 1 : ℝ) / (a + 1 + (b + 1))) ^ (b + 1) := by
+  have hd : (0 : ℝ) < (a : ℝ) + 1 + ((b : ℝ) + 1) := by positivity
+  have hsub : ((a + 1 : ℝ) / (a + 1 + (b + 1)) - 1)
+      = -((b + 1 : ℝ) / (a + 1 + (b + 1))) := by
+    field_simp
+    ring
+  rw [hsub, abs_mul, abs_pow, abs_pow, abs_neg, abs_of_nonneg (by positivity),
+    abs_of_nonneg (by positivity)]
+
+/-- ★★**`f₀ ≤ 1/4`**。
+
+原文 (NCBelyi p.3):
+> Note,   moreover,          that     this   expression       for  f0   implies   that   0 < f0      ≤   1  .  [Indeed,  this
+
+★★**原文は 4 つの場合分けで確かめている**
+(`m, n ≥ 2` / `m = n = 1` / 片方が 1 で他方が `≥ 3` / 片方が 1 で他方が 2)。
+★**要らなかった。** `p ≝ m/(m+n)`、`q ≝ n/(m+n)` と置けば `p + q = 1` で
+
+> `p^m·q^n = (p·q)·(p^{m−1}·q^{n−1}) ≤ (1/4)·1`
+
+——**AM–GM(`p·q ≤ ((p+q)/2)² = 1/4`)1 回**で済む。
+★「正面から要ると思ったものが要らなかった」の型がまた出た。 -/
+theorem belyi_f0_le_quarter (a b : ℕ) :
+    ((a + 1 : ℝ) / (a + 1 + (b + 1))) ^ (a + 1)
+        * ((b + 1 : ℝ) / (a + 1 + (b + 1))) ^ (b + 1)
+      ≤ 1 / 4 := by
+  set d : ℝ := (a : ℝ) + 1 + ((b : ℝ) + 1) with hd
+  have hd0 : (0 : ℝ) < d := by rw [hd]; positivity
+  set p : ℝ := ((a : ℝ) + 1) / d with hp
+  set q : ℝ := ((b : ℝ) + 1) / d with hq
+  have hp0 : (0 : ℝ) < p := by rw [hp]; positivity
+  have hq0 : (0 : ℝ) < q := by rw [hq]; positivity
+  have hsum : p + q = 1 := by
+    rw [hp, hq, div_add_div _ _ hd0.ne' hd0.ne']
+    field_simp
+    ring
+  have hp1 : p ≤ 1 := by linarith
+  have hq1 : q ≤ 1 := by linarith
+  have hpq : p * q ≤ 1 / 4 := by nlinarith [sq_nonneg (p - q)]
+  have hpa : p ^ a ≤ 1 := pow_le_one₀ hp0.le hp1
+  have hqb : q ^ b ≤ 1 := pow_le_one₀ hq0.le hq1
+  calc p ^ (a + 1) * q ^ (b + 1) = (p * q) * (p ^ a * q ^ b) := by ring
+    _ ≤ (1 / 4) * (1 * 1) := by
+        refine mul_le_mul hpq ?_ (by positivity) (by norm_num)
+        exact mul_le_mul hpa hqb (by positivity) zero_le_one
+    _ = 1 / 4 := by norm_num
+
+/-! ## ★性質 (c) —— `f(β) ∉ f(S)` の根拠 -/
+
+/-- ★**`β ≥ 2` かつ `x ∈ [0,1]` なら `f(β) ≠ f(x)`**。
+
+★`f(β) ≥ β ≥ 2 > 1` かつ `|f(x)| ≤ 1` である。 -/
+theorem belyi_ne_of_mem_unitInterval (a b : ℕ) {β x : ℝ} (hβ : 2 ≤ β)
+    (h0 : 0 ≤ x) (h1 : x ≤ 1) :
+    β ^ (a + 1) * (β - 1) ^ (b + 1) ≠ x ^ (a + 1) * (x - 1) ^ (b + 1) := by
+  have hfβ : β ≤ β ^ (a + 1) * (β - 1) ^ (b + 1) := belyi_ge_self a b hβ
+  have hfx : |x ^ (a + 1) * (x - 1) ^ (b + 1)| ≤ 1 := belyi_abs_le_one a b h0 h1
+  have hfx' : x ^ (a + 1) * (x - 1) ^ (b + 1) ≤ 1 := le_trans (le_abs_self _) hfx
+  intro hcon
+  rw [hcon] at hfβ
+  linarith
+
+/-- ★**`1 < α < β` なら `f(α) < f(β)`**(狭義単調)。 -/
+theorem belyi_strictMono (a b : ℕ) {α β : ℝ} (hα : 1 < α) (hαβ : α < β) :
+    α ^ (a + 1) * (α - 1) ^ (b + 1) < β ^ (a + 1) * (β - 1) ^ (b + 1) := by
+  have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hα
+  have hα1 : (0 : ℝ) < α - 1 := sub_pos.2 hα
+  have hfα : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) := by positivity
+  have hq : (1 : ℝ) < β / α := (one_lt_div hα0).2 hαβ
+  have h := belyi_ratio_ge a b hα hαβ.le
+  have h1 : (1 : ℝ) < (β / α) ^ 2 := one_lt_pow₀ hq (by norm_num)
+  rw [le_div_iff₀ hfα] at h
+  nlinarith
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def belyi_ratio_ge.src : ABC3.Meta.Source :=
