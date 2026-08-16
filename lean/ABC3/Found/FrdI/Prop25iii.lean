@@ -212,10 +212,6 @@ variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
   (hτ : IsCharacteristicSplitting P F τ) (hA : IsIsotropic P A)
   (hfn : IsFrobeniusNormalized P A)
 
-/-- ★**Frobenius-normalized 型のもとで `𝒪^▷(A)` を可換モノイドと見る**。 -/
-def otriCommMonoid : CommMonoid (OTri P A) :=
-  { (inferInstance : Monoid (OTri P A)) with mul_comm := otri_mul_comm P hfn }
-
 /-- ★`𝒪^×(A)` の元を `𝒪^▷(A)` の元と見る。 -/
 def uOf (u : OTimes P A) : OTri P A := ⟨(u : End A), OTimes_le_OTri P A u.2⟩
 
@@ -253,6 +249,61 @@ theorem psiOTri_div (d : ℕ+) (β : OTri P A) :
       = P.Div ((((tOf P F hτ hA p.2) ^ ((d : ℕ+) : ℕ) : OTri P A) : End A)) :=
     otri_div_unit_mul P p.1 _
   rw [h2, otri_div_pow P (tOf P F hτ hA p.2) ((d : ℕ+) : ℕ), h1]
+
+/-! ### ★★分裂はモノイド同型 —— そこから `Ψ` の乗法性が出る -/
+
+include hfn in
+/-- ★**可換性から出る並べ替え** —— `a * b * (c * e) = a * c * (b * e)`。 -/
+theorem otri_mul_mul_comm (a b c e : OTri P A) : a * b * (c * e) = a * c * (b * e) := by
+  have hcomm : ∀ x y : OTri P A, x * y = y * x := otri_mul_comm P hfn
+  rw [mul_assoc a, ← mul_assoc b, hcomm b c, mul_assoc c, ← mul_assoc a]
+
+include hfn in
+/-- ★★**分裂はモノイド同型**。
+
+★`(u₁u₂)(t₁t₂) = (u₁t₁)(u₂t₂)` は**可換性そのもの**である。 -/
+noncomputable def splitMulEquiv : (OTimes P A × τ A) ≃* OTri P A where
+  toEquiv := splitEquiv P F hτ hA
+  map_mul' := fun p q => by
+    show uOf P p.1 * uOf P q.1 * (tOf P F hτ hA p.2 * tOf P F hτ hA q.2)
+      = uOf P p.1 * tOf P F hτ hA p.2 * (uOf P q.1 * tOf P F hτ hA q.2)
+    exact otri_mul_mul_comm P hfn _ _ _ _
+
+include hfn in
+/-- ★★**`Ψ` は乗法的** —— 分裂がモノイド同型で、`ᵒ^▷` が可換だから。 -/
+theorem psiOTri_mul (d : ℕ+) (x y : OTri P A) :
+    psiOTri P F hτ hA d (x * y)
+      = psiOTri P F hτ hA d x * psiOTri P F hτ hA d y := by
+  have hcomm : ∀ a b : OTri P A, a * b = b * a := otri_mul_comm P hfn
+  have hsymm : (splitEquiv P F hτ hA).symm (x * y)
+      = (splitEquiv P F hτ hA).symm x * (splitEquiv P F hτ hA).symm y :=
+    (splitMulEquiv P F hτ hA hfn).symm.map_mul x y
+  show uOf P (((splitEquiv P F hτ hA).symm (x * y)).1)
+      * (tOf P F hτ hA (((splitEquiv P F hτ hA).symm (x * y)).2)) ^ ((d : ℕ+) : ℕ) = _
+  rw [hsymm]
+  show uOf P (((splitEquiv P F hτ hA).symm x).1) * uOf P (((splitEquiv P F hτ hA).symm y).1)
+      * (tOf P F hτ hA (((splitEquiv P F hτ hA).symm x).2)
+          * tOf P F hτ hA (((splitEquiv P F hτ hA).symm y).2)) ^ ((d : ℕ+) : ℕ) = _
+  rw [Commute.mul_pow (hcomm _ _), otri_mul_mul_comm P hfn]
+  rfl
+
+include hfn in
+/-- ★**`Ψ` は単位元を保つ**。 -/
+theorem psiOTri_one (d : ℕ+) : psiOTri P F hτ hA d 1 = 1 := by
+  have h1 : (splitEquiv P F hτ hA).symm 1 = 1 :=
+    (splitMulEquiv P F hτ hA hfn).symm.map_one
+  show uOf P (((splitEquiv P F hτ hA).symm 1).1)
+      * (tOf P F hτ hA (((splitEquiv P F hτ hA).symm 1).2)) ^ ((d : ℕ+) : ℕ) = 1
+  rw [h1]
+  show (1 : OTri P A) * (1 : OTri P A) ^ ((d : ℕ+) : ℕ) = 1
+  rw [one_pow, one_mul]
+
+include hfn in
+/-- ★★★**`Ψ` は `ᵒ^▷(A)` のモノイド自己準同型**。 -/
+noncomputable def psiOTriHom (d : ℕ+) : OTri P A →* OTri P A where
+  toFun := psiOTri P F hτ hA d
+  map_one' := psiOTri_one P F hτ hA hfn d
+  map_mul' := psiOTri_mul P F hτ hA hfn d
 
 end Psi
 
