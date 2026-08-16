@@ -80,7 +80,7 @@ structure TorsionGaloisRepData where
 /-- Track B は何を作らねばならないか。 -/
 def TorsionGaloisRepData.waiting : WaitingFor :=
   { what := "楕円曲線の l 進 Tate 加群への Galois 表現 Gal(ℚ̄/L) → GL₂(ℤ_l)、Faltings 高さ ht^Falt、局所高さ・潜在的乗法還元(Tate 曲線)、および compactly bounded / Galois-finite(Example 1.3)"
-    trackB := "Found/GenEll — ★mathlib は楕円曲線の群構造(`Affine.Point` の `AddCommGroup`)と分点多項式(`DivisionPolynomial`)までは持つが、`E[n] ≅ (ℤ/n)²` と Galois 作用は無い(2026-08-16 実測)。★FLT プロジェクト(EPSRC 2029 まで)のブループリント §2.5・§3 と重なるので、独立に作る前に突き合わせること" }
+    trackB := "Found/GenEll — ★mathlib は楕円曲線の群構造(`Affine.Point` の `AddCommGroup`)と分点多項式(`DivisionPolynomial`)までは持つが、`E[n] ≅ (ℤ/n)²` と Galois 作用は無い(2026-08-16 実測)。★★**FLT プロジェクトを実測した結果、そこにも無かった**(2026-08-17、clone して計数): `FLT/EllipticCurve/Torsion.lean` は 124 行中 sorry 10 件で `n_torsion_card` / `n_torsion_dimension`(= E[n] ≅ (ℤ/n)²)が**いずれも sorry**、`FLT/TateCurve/TateCurve.lean` は 20 行の入口だけ、`GaloisRepresentation/` は Frey 曲線の 3 進表現に特化。★**重なるのは予定であって実装ではない**——待てば済む段ではない(`ResearchPaper/lean-ecosystem.json`)" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 

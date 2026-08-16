@@ -748,3 +748,49 @@ S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない�
 ★**「まだ 4/24」と「もう 4/24」の両方が同じ数で言える**ようにしてある。
 `node tools/genell-progress.mjs` はいつでもその数を出し、
 `node tools/check.mjs` は `Interface` の `waiting` が何を待っているかを並べる。
+
+## 9-5. ★★公開プロジェクトの実測(2026-08-17)—— §9-3 の記述を 1 つ訂正する
+
+規律どおり **clone して `sorry` を数えた**(`ResearchPaper/lean-ecosystem.json` に全文)。
+
+### ★訂正: 「S3 は FLT と重なる」は**予定の話**であって実装の話ではなかった
+
+§9-3 の表に「S3 … 公開プロジェクト: ★**FLT プロジェクト**…ブループリント §2.5・§3 と重なる」と書いた。
+★**実測すると、我々が要る土台は FLT にも無い。**
+
+| ファイル | 実測(2026-08-17) |
+|---|---|
+| `FLT/EllipticCurve/Torsion.lean` | ★**124 行中 sorry 10 件**。`n_torsion_card` / `n_torsion_dimension`(= `E[n] ≅ (ℤ/n)²`)が**いずれも sorry** |
+| `FLT/TateCurve/TateCurve.lean` | ★**20 行**。Tate 曲線の理論ではなく入口の宣言だけ |
+| `FLT/GaloisRepresentation/` | 611 行・sorry 9 件。★**Frey 曲線の 3 進表現に特化**。一般の `Gal(ℚ̄/L) → GL₂(ℤ_l)` ではない |
+
+★toolchain も `v4.34.0-rc1`(我々は `v4.31.0-rc2`)で差が大きい。
+★★**S3 は「FLT を待てば済む」段ではない。**
+
+### ★★`Remark 4.1.1` は埋まりうる —— ただし依存の判断はユーザーのもの
+
+`PrimeNumberTheoremAnd/Consequences.lean:177` に
+**`chebyshev_asymptotic : θ ~[atTop] id`** がある。
+
+★★**`θ` は mathlib の `Chebyshev.theta` そのもの**である
+——我々が `Found/GenEll/PrimesOfSize.lean` で使っているものと**同一**で、変換が要らない。
+
+★推移的 import 閉包は**プロジェクト内 9 ファイルだけ**、その sorry は**合計 2 件**で、
+どちらも我々の経路の外にある(`prelim_decay_2` は**どこからも使われず**、
+`prelim_decay_3` を使う `decay_alt` を使うのは閉包外の `IEANTN/CH2` だけ)。
+
+★**ただし決定的ではない**——grep による依存追跡であって `#print axioms` ではない。
+確定には build が要るが、toolchain が違う(`v4.32.2`)。
+
+★★**依存に加えてはいない。** build 時間・保守・toolchain の巻き添えが伴うので、
+これは**ユーザーの判断**である。採用すれば `genell-progress` は 4/24 → **5/24**。
+
+### ★この測定が変えたこと
+
+| | 測定前 | 測定後 |
+|---|---|---|
+| S3 の見通し | 「FLT と重なるので独立に作ると重複投資」 | ★**FLT にも無い。重複投資の心配より『誰も作っていない』方が問題** |
+| `Remark 4.1.1` | 「素数定理が要るので不可能」 | ★**外部依存を 1 つ足せば可能**(判断はユーザー) |
+| 到達可能な上限 | 4/24 | 4/24(依存を足せば **5/24**) |
+
+★**S2 の律速(複素解析空間 `X^arc`)はどちらのプロジェクトにも無い。** ここは変わらない。
