@@ -91,6 +91,131 @@ theorem prop_2_2_i : (dStarToD P).IsEquivalence := by
     exact (@asIso _ _ _ _ (P.Base φ) hbi).symm ≪≫ e
   exact ⟨inferInstance, inferInstance, ‹_›⟩
 
+/-! ## ★(ii) —— 反変関手 `𝒪^▷(−)`
+
+原文 (FrdI p.45):
+> (ii) There is a unique contravariant functor
+
+原文 (FrdI p.45):
+> is the bijection of Definition 1.3, (iii), (c). By abuse of notation, we shall
+
+★**中身は 4 つ**:
+1. 関手の存在
+2. 一意性
+3. (a) linear 射での値が `Proposition 1.11, (iv)` の埋め込み
+4. (b) pre-step での値が `Definition 1.3, (iii), (c)` の全単射
+
+★★**`𝒞^istr` では co-angular 性が自動である**(`Proposition 1.4, (i)`、
+`isCoAngular_of_isotropic_dom`)——原文が 2 度くり返す
+「necessarily co-angular」がこれである。
+★**したがって (a) と (b) は 1 本の構成に統合できる** ——
+pre-step は linear なので、`Proposition 1.11, (iv)` の埋め込みが
+pre-step のときにちょうど `Definition 1.3, (iii), (c)` の全単射になる。
+-/
+
+section FunctorII
+
+/-- ★★**(ii) の射の対応** —— `𝒞^istr` の linear 射 `φ : A ⟶ B` に沿う
+`𝒪^▷(B) →* 𝒪^▷(A)`。
+
+★**`Proposition 1.11, (iv)` の埋め込みそのもの**であり(＝原文の (a))、
+`𝒞^istr` では co-angular 性が自動で付く。 -/
+noncomputable def otriLin {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hl : IsLinear P φ) : OTri P B →* OTri P A :=
+  otriPullHom P F φ (isCoAngular_of_isotropic_dom P F hA φ) hl
+
+/-- ★`otriLin` を特徴づける四角形。 -/
+theorem otriLin_spec {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hl : IsLinear P φ) (γ : OTri P B) :
+    φ ≫ ((γ : End B) : B ⟶ B)
+      = ((otriLin P F hA hl γ : End A) : A ⟶ A) ≫ φ :=
+  otriPull_spec P F φ (isCoAngular_of_isotropic_dom P F hA φ) hl γ
+
+/-- ★★**`otriLin` の一意性** —— 四角形を満たす `𝒪^▷(A)` の元は 1 つだけ。
+
+★**これが (ii) の「unique」の中身**である。 -/
+theorem otriLin_uniq {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hl : IsLinear P φ) (γ : OTri P B) (δ : OTri P A)
+    (h : φ ≫ ((γ : End B) : B ⟶ B) = ((δ : End A) : A ⟶ A) ≫ φ) :
+    δ = otriLin P F hA hl γ :=
+  Subtype.ext (prop_1_11_iv_unique' P F φ (isCoAngular_of_isotropic_dom P F hA φ) hl
+    γ.2 δ.2 (otriLin P F hA hl γ).2 h (otriLin_spec P F hA hl γ))
+
+/-- ★**(ii) の関手性 1** —— 恒等射では恒等準同型。 -/
+theorem otriLin_id {A : C} (hA : IsIsotropic P A) :
+    otriLin P F hA (isLinear_id P A) = MonoidHom.id (OTri P A) := by
+  ext γ
+  exact congrArg (fun x : OTri P A => ((x : End A) : A ⟶ A))
+    (otriLin_uniq P F hA (isLinear_id P A) γ γ (by simp)).symm
+
+/-- ★★**(ii) の関手性 2** —— 合成を(反変に)保つ。
+
+★**一意性から出る**:`(φ ≫ ψ) ≫ γ_E = φ ≫ (γ_B ≫ ψ) = (γ_A ≫ φ) ≫ ψ`。 -/
+theorem otriLin_comp {A B E : C} (hA : IsIsotropic P A) (hB : IsIsotropic P B)
+    {φ : A ⟶ B} (hlφ : IsLinear P φ) {ψ : B ⟶ E} (hlψ : IsLinear P ψ) :
+    otriLin P F hA (IsLinear.comp P hlφ hlψ)
+      = (otriLin P F hA hlφ).comp (otriLin P F hB hlψ) := by
+  ext γ
+  exact congrArg (fun x : OTri P A => ((x : End A) : A ⟶ A))
+    (otriLin_uniq P F hA (IsLinear.comp P hlφ hlψ) γ
+      (otriLin P F hA hlφ (otriLin P F hB hlψ γ)) (by
+        rw [Category.assoc, otriLin_spec P F hB hlψ γ, ← Category.assoc,
+          otriLin_spec P F hA hlφ (otriLin P F hB hlψ γ), Category.assoc])).symm
+
+/-- ★**(a)** `otriLin` は単射 —— `Proposition 1.11, (iv)` の「injection」。 -/
+theorem otriLin_injective {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hl : IsLinear P φ) : Function.Injective (otriLin P F hA hl) :=
+  otriPullHom_injective P F φ (isCoAngular_of_isotropic_dom P F hA φ) hl
+
+/-- ★★★**(b)** `φ` が pre-step なら `otriLin` は**全単射** ——
+`Definition 1.3, (iii), (c)` の全単射に一致する。
+
+★**全射性は `otriFwd`(順方向)から**、単射性は `Proposition 1.11, (iv)` から。
+★**両者が同じ四角形で特徴づけられるので、写像として一致する。** -/
+theorem otriLin_bijective_of_preStep {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hs : IsPreStep P φ) : Function.Bijective (otriLin P F hA hs.1) := by
+  refine ⟨otriLin_injective P F hA hs.1, fun α => ?_⟩
+  obtain ⟨β, ⟨hβm, hβe⟩, -⟩ :=
+    F.otriFwd φ (isCoAngular_of_isotropic_dom P F hA φ) hs (α : End A) α.2
+  exact ⟨⟨β, hβm⟩, (otriLin_uniq P F hA hs.1 ⟨β, hβm⟩ α hβe).symm⟩
+
+/-- ★★**(b)** `Definition 1.3, (iii), (c)` の全単射との一致(逆方向)。
+
+`otriFwd` が与える `β` は、ちょうど `otriLin` の逆像である。 -/
+theorem otriLin_otriFwd {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B}
+    (hs : IsPreStep P φ) (α : OTri P A) {β : End B} (hβm : β ∈ OTri P B)
+    (hβe : φ ≫ β = ((α : End A) : A ⟶ A) ≫ φ) :
+    otriLin P F hA hs.1 ⟨β, hβm⟩ = α :=
+  (otriLin_uniq P F hA hs.1 ⟨β, hβm⟩ α hβe).symm
+
+/-! ### ★★関手として束ねる —— `(𝒞^istr)^lin → Mon`
+
+原文 (FrdI p.45):
+> the restriction of this functor on D∗to (Cistr)lin. Finally,
+
+★**対象は `𝒞^istr` の対象、射は linear なものだけ**。 -/
+
+/-- ★**`(𝒞^istr)^lin`** —— `𝒞^lin` の isotropic 対象がなす充満部分圏。 -/
+abbrev IstrLin : Type u2 :=
+  ObjectProperty.FullSubcategory (fun A : Lin P => IsIsotropic P A.obj)
+
+/-- ★★★**[FrdI] Proposition 2.2, (ii)(の `(𝒞^istr)^lin` への制限)**
+—— 反変関手 `𝒪^▷(−) : (𝒞^istr)^lin → Mon`。
+
+★**射の対応は `Proposition 1.11, (iv)` の埋め込み**(＝原文の (a))、
+★**pre-step の上ではそれが `Definition 1.3, (iii), (c)` の全単射になる**(＝原文の (b))。 -/
+noncomputable def otriFunctorLin : (IstrLin P)ᵒᵖ ⥤ MonCat.{v2} where
+  obj A := MonCat.of (OTri P A.unop.obj.obj)
+  map {_ B} f := MonCat.ofHom (otriLin P F B.unop.property f.unop.hom.2)
+  map_id A := by
+    apply MonCat.hom_ext
+    exact otriLin_id P F A.unop.property
+  map_comp {_ B E} f g := by
+    apply MonCat.hom_ext
+    exact otriLin_comp P F E.unop.property B.unop.property g.unop.hom.2 f.unop.hom.2
+
+end FunctorII
+
 /-! ## ★(iii) —— `𝒪^×` は `𝒪^▷` の単元群、`Div` はその核を潰す
 
 原文 (FrdI p.45):
