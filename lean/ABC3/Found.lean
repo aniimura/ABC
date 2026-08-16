@@ -23,6 +23,7 @@ import ABC3.Found.FrdI.Prop113
 import ABC3.Found.FrdI.Prop114
 import ABC3.Found.FrdI.Prop21
 import ABC3.Found.FrdI.Prop22
+import ABC3.Found.FrdI.Prop22Star
 import ABC3.Found.FrdI.Def23
 import ABC3.Found.FrdI.Def27
 import ABC3.Found.IUTchIII.LogShell
