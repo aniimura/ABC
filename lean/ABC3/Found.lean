@@ -33,6 +33,7 @@ import ABC3.Found.GenEll.Lemma31
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence
+import ABC3.Found.GenEll.Sl2Level
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
