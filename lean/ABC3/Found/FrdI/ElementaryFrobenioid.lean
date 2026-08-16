@@ -268,6 +268,52 @@ def charOn (Φ : MonoidOn.{v, u, w} D) : MonoidOn.{v, u, w} D where
     show Function.Bijective (charMap (Φ.map α))
     exact ⟨(Φ.charInj α).2, charMap_surjective (Φ.fsmIso α hα).2⟩
 
+/-! ### ★★`Φ^gp`（2026-08-16 追加）
+
+原文 (FrdI p.19):
+> by assigning A →Φ(A)char, A →Φ(A)gp, A →Φ(A)pf], which we shall refer to,
+
+★★**条件 (a) の第2成分は無料である** —— 値が群なので
+`M^char` が自明になる（`charMap_injective_of_addGroup`）。
+★第1成分は `gpMap_injective` で、**各 `Φ(A)` の簡約性**を要求する。
+★`Φ` が pre-divisorial なら integral であり、`isCancelAdd_of_isIntegralMonoid` が与える。 -/
+
+/-- `Φ^gp` の台となる反変関手。 -/
+noncomputable def gpFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMonCat.{w} where
+  obj X := AddCommMonCat.of (Gp (Φ.val X.unop))
+  map {X Y} f := AddCommMonCat.ofHom (gpMap _ (Φ.map f.unop))
+  map_id X := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    have h : Φ.map (𝟙 X.unop) = AddMonoidHom.id _ := by
+      ext a; exact Φ.map_id _ a
+    show gpMap _ (Φ.map (𝟙 X.unop)) x = _
+    rw [h, gpMap_id]
+    rfl
+  map_comp {X Y Z} f g := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    have h : Φ.map (g.unop ≫ f.unop) = (Φ.map g.unop).comp (Φ.map f.unop) := by
+      ext a; exact Φ.map_comp _ _ a
+    show gpMap _ (Φ.map (g.unop ≫ f.unop)) x = _
+    rw [h, gpMap_comp]
+    rfl
+
+/-- ★★**`Φ^gp`** —— `Φ` の groupification。
+
+★`hint` は各 `Φ(A)` が integral であること（`Φ` が pre-divisorial なら従う）。 -/
+noncomputable def gpOn (Φ : MonoidOn.{v, u, w} D)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) : MonoidOn.{v, u, w} D where
+  functor := gpFunctor Φ
+  charInj {A B} α := by
+    letI := isCancelAdd_of_isIntegralMonoid (Φ.val A) (hint A)
+    letI := isCancelAdd_of_isIntegralMonoid (Φ.val B) (hint B)
+    show IsCharacteristicallyInjective (gpMap _ (Φ.map α))
+    exact ⟨gpMap_injective _ (Φ.map_injective α), charMap_injective_of_addGroup _⟩
+  fsmIso {A B} α hα := by
+    letI := isCancelAdd_of_isIntegralMonoid (Φ.val A) (hint A)
+    letI := isCancelAdd_of_isIntegralMonoid (Φ.val B) (hint B)
+    show Function.Bijective (gpMap _ (Φ.map α))
+    exact ⟨gpMap_injective _ (Φ.fsmIso α hα).1, gpMap_surjective _ (Φ.fsmIso α hα).2⟩
+
 /-! ### ★★`Φ` が `non-dilating`（2026-08-16 追加）
 
 原文 (FrdI p.19):
@@ -277,7 +323,7 @@ def charOn (Φ : MonoidOn.{v, u, w} D) : MonoidOn.{v, u, w} D where
 `End_𝒟(A)` が誘導する自己準同型全体に課したもの**である。 -/
 
 /-- **[FrdI] Definition 1.1, (ii)** `Φ` が `non-dilating`。 -/
-def MonoidOn.IsNonDilatingOn (Φ : MonoidOn.{v, u, w} D) : Prop :=
+def IsNonDilatingOn (Φ : MonoidOn.{v, u, w} D) : Prop :=
   ∀ (A : D) (e : A ⟶ A), IsNonDilating (Φ.map e)
 
 

@@ -770,6 +770,32 @@ theorem gpMap_injective {N : Type*} [AddCommMonoid N] [IsCancelAdd M] [IsCancelA
   simpa using h
 
 
+/-- ★**`gpMap` の関手性（恒等）**。 -/
+@[simp] theorem gpMap_id : gpMap M (AddMonoidHom.id M) = AddMonoidHom.id (Gp M) := by
+  ext x
+  induction x using AddLocalization.induction_on with | _ x =>
+  simp [gpMap_mk]
+
+/-- ★**`gpMap` の関手性（合成）**。 -/
+theorem gpMap_comp {N O : Type*} [AddCommMonoid N] [AddCommMonoid O]
+    (f : M →+ N) (g : N →+ O) :
+    gpMap M (g.comp f) = (gpMap N g).comp (gpMap M f) := by
+  ext x
+  induction x using AddLocalization.induction_on with | _ x =>
+  simp [gpMap_mk]
+
+/-- ★**`gpMap` は全射性も保つ**。 -/
+theorem gpMap_surjective {N : Type*} [AddCommMonoid N] {f : M →+ N}
+    (hf : Function.Surjective f) : Function.Surjective (gpMap M f) := by
+  intro y
+  induction y using AddLocalization.induction_on with | _ y =>
+  obtain ⟨a, ha⟩ := hf y.1
+  obtain ⟨c, hc⟩ := hf (y.2 : N)
+  refine ⟨AddLocalization.mk a ⟨c, AddSubmonoid.mem_top _⟩, ?_⟩
+  rw [gpMap_mk, ha]
+  congr 1
+  exact Subtype.ext hc
+
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
 ★★**これは `Φ^gp` を `monoid on D` にする際の障壁を 1 つ外す**。
