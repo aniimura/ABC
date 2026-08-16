@@ -845,6 +845,42 @@ theorem psiMap_frob_comp (d : ℕ+) {A A' B : C} {δ' : A' ⟶ A}
   · rw [hf]; simp
   · rw [he]; simp
 
+include hτ hmt haa in
+/-- ★★★**左から等長 pre-step を掛ける場合** —— `Ψ(γ ≫ φ) = γ ≫ Ψ(φ)`。
+
+★★**isotropy は要らない。** 鍵は `frob_past_preStep`——
+`γ ≫ δ = ζ ≫ γ''`(`ζ` は Frobenius 型、`γ''` は pre-step)と組み替えれば、
+`γ'' ≫ γ` が新しい等長 pre-step になって**正規形が保たれる**。
+★`γ''` が等長なのは `Φ.map` の単射性から出る。
+
+★★★**右から掛ける場合と違い、`𝒪^▷` を通す必要がない**のが要点である
+——`β` は分解の中で動かない。 -/
+theorem psiMap_isometricPreStep_comp (d : ℕ+) {A A' B : C} {γ : A' ⟶ A}
+    (hγi : IsIsometric P γ) (hγs : IsPreStep P γ) (φ : A ⟶ B) :
+    psiMap P F hτ hmt haa d (γ ≫ φ)
+      = γ ≫ psiMap P F hτ hmt haa d φ := by
+  obtain ⟨X, Y, δ, γ₃, β, α, hm, hf, hδ, hγi₃, hγs₃, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hmt haa d φ
+  obtain ⟨W, ζ, γ'', hpast, hζF, hγ''s⟩ := frob_past_preStep P F hγs hδ
+  have hγ''i : IsIsometric P γ'' := by
+    have h0 : P.Div (γ ≫ δ) = 0 := by
+      rw [P.Div_comp, show P.Div δ = 0 from hδ.1.2, show P.Div γ = 0 from hγi]
+      simp
+    rw [hpast, P.Div_comp, show P.Div ζ = 0 from hζF.1.2] at h0
+    show P.Div γ'' = 0
+    exact Φ.map_injective (P.Base ζ) (by simpa using h0)
+  refine psiMap_eq P F hτ hmt haa d ?_
+  refine ⟨W, Y, ζ, γ'' ≫ γ₃, β, α, hm, ?_, hζF,
+    IsIsometric.comp P hγ''i hγi₃, IsPreStep.comp P hγ''s hγs₃, hβs, hβc, hα, ?_⟩
+  · rw [hf]
+    simp only [Category.assoc]
+    conv_lhs => rw [← Category.assoc γ δ _, hpast]
+    simp
+  · rw [he]
+    simp only [Category.assoc]
+    conv_lhs => rw [← Category.assoc γ δ _, hpast]
+    simp
+
 include hτ hiso hmt haa hfn in
 /-- ★★★**右から `𝒪^▷` の元を掛ける場合** —— `Ψ(φ ≫ β') = Ψ(φ) ≫ Ψ(β')`。
 
