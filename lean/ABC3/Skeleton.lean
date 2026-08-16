@@ -7,6 +7,10 @@ import ABC3.Skeleton.IUTchI.InitialThetaData
 import ABC3.Skeleton.IUTchIII.Cor312
 import ABC3.Skeleton.GenEll.Heights
 import ABC3.Skeleton.GenEll.GaloisImage
+import ABC3.Skeleton.GenEll.Section1
+import ABC3.Skeleton.GenEll.Section2
+import ABC3.Skeleton.GenEll.Section3
+import ABC3.Skeleton.GenEll.Section4
 /-!
 # Skeleton — 論文の主張(証明しない)
 

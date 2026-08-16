@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] §4 Primes of Prescribed Size — 5 件(Corollary 4.4 まで)</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] §4 Primes of Prescribed Size — 5 件(Corollary 4.4 まで)</h1>
+
+<p>物理 p.20–p.23。<strong>260 dpi 目視確認 2026-08-16</strong>。</p>
+
+<p class="open">★<code>Corollary 4.4</code> が<strong>本トラックの北極星</strong>である
+(<code>ResearchPaper/genell-goal.md</code>)。
+そして <code>Corollary 4.3</code> / <code>4.4</code> は <strong><code>Theorem 3.8</code> の上にしか立たない</strong>——
+すなわち §4 の 5 件は Galois 表現に律速される。</p>
+
+<p class="open">★★<strong>ただし §4 の 5 件のうち 2 件は今すぐ作れる。</strong>
+<code>Lemma 4.1</code> は Chebyshev の評価を<strong>仮説として受け取る</strong>形になっており
+(条件 (i)(ii) が仮定である)、<code>Remark 4.1.1</code> が
+「条件 (i) は素数定理の帰結」と<strong>明示的に圏外へ置いている</strong>。
+<code>Lemma 4.2</code> は原文の証明が 2 行の初等評価である。</p>
+
+<section class="statement lemma"
+         id="genell-lemma-4-1"
+         data-paper="GenEll"
+         data-pdf-page="20"
+         data-item="Lemma 4.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 4.1. (The Existence of Primes of Prescribed Size) Write</div>
+<div class="reading"><code>ℝ′_{&gt;0} ⊆ ℝ_{&gt;0}</code> を素数の集合の補集合、
+<code>θ(x) ≝ Σ_{p&lt;x} log(p)</code>(和は素数 <code>p &lt; x</code> について)とする。
+<code>M</code> を正整数、<code>ϵ, x_ϵ, C_ϵ ∈ ℝ_{&gt;0}</code> を
+<code>0 &lt; ϵ &lt; 1/4</code>、<code>ϵ·x_ϵ &gt; C_ϵ</code> かつ次を満たすものとする:
+<br><strong>(i)</strong> 全ての <code>x ∈ ℝ′_{&gt;0}</code> で <code>(5/4)·x + C_ϵ &gt; θ(x)</code>;
+かつ <code>x ≥ x_ϵ</code> なる全ての <code>x ∈ ℝ′_{&gt;0}</code> で <code>θ(x) &gt; (1−ϵ)x</code>;
+<br><strong>(ii)</strong> <code>x ≥ x_ϵ</code> なる全ての <code>x ∈ ℝ_{&gt;0}</code> で <code>M·log(x) ≤ ϵ·x</code>。
+<br>また有限素数集合 <code>A</code> に対し <code>x_A ≝ Σ_{p∈A} log(p)</code> と書く。
+<br>このとき<strong>任意の非負 <code>h ∈ ℝ</code> と <code>x_A &gt; x_ϵ</code> なる任意の有限素数集合 <code>A</code> に対し、
+<code>M</code> 個の相異なる素数 <code>p_1,…,p_M</code> が存在して
+<code>p_j ∉ A</code> かつ <code>h ≤ p_j ≤ (1+6ϵ)·x_A + 8h</code></strong>(<code>j = 1,…,M</code>)。</div>
+<p class="open">★★<strong>Chebyshev の評価 (i) は「仮説」である。</strong>
+補題は「(i)(ii) を満たす <code>ϵ, x_ϵ, C_ϵ</code> が<strong>与えられたとき</strong>」を主張しており、
+<strong>それらが存在することは主張していない</strong>。
+★ゆえに<strong>素数定理を証明する必要がない</strong>——次の <code>Remark 4.1.1</code> がそれを明言する。</p>
+<p class="open">★mathlib に <code>Chebyshev.theta</code>(<code>θ(x) = Σ_{p≤x} log p</code>)は<strong>実在する</strong>
+(2026-08-16 実測)。★ただし原文の和は <code>p &lt; x</code>(狭義)であり、
+mathlib は <code>p ≤ x</code>。<strong>この差は <code>x</code> が素数のとき効く</strong>が、
+原文は <code>x ∈ ℝ′_{&gt;0}</code>(素数でない実数)に限っているので<strong>差は消える</strong>——
+★この一致は偶然ではなく、原文が <code>ℝ′_{&gt;0}</code> を導入した理由そのものだと読める。</p>
+<p class="open">★証明は<strong>背理法</strong>で、6 行の不等式計算に尽きる(p.21 目視確認)。
+最後の矛盾は <code>ϵ·x_A &gt; ϵ·x_ϵ &gt; C_ϵ</code> と <code>5(1+δ)/4 &lt; 4</code> から出る。</p>
+</section>
+
+<section class="statement remark"
+         id="genell-rem-4-1-1"
+         data-paper="GenEll"
+         data-pdf-page="21"
+         data-item="Remark 4.1.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">which satisfy condition (ii) of Lemma 4.1 is entirely elementary. On the other hand, with regard to condition (i), the fact that</div>
+<div class="reading"><code>Lemma 4.1</code> の条件 (ii) を満たす <code>ϵ, x_ϵ, C_ϵ</code> を見つけるのは
+<strong>完全に初等的</strong>である。一方、条件 (i) については、
+<code>θ(x)/x → 1</code>(<code>x → ∞</code>)が<strong>古典解析的数論の素数定理のよく知られた帰結</strong>である
+——cf. [Edw], p. 76。</div>
+<p class="open">★★<strong>この Remark が「素数定理は圏外」と明示している。</strong>
+原文は素数定理を<strong>証明せず</strong>、条件 (i) を満たす定数の存在の根拠として
+外部文献を指しているだけである。
+★ゆえに <code>Lemma 4.1</code> を「(i)(ii) を仮定した条件つき命題」として形式化することは、
+<strong>主張の弱化ではなく原文の忠実な写し</strong>である。</p>
+</section>
+
+<section class="statement lemma"
+         id="genell-lemma-4-2"
+         data-paper="GenEll"
+         data-pdf-page="21"
+         data-item="Lemma 4.2"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 4.2. (Some Elementary Estimates) Let n be a positive integer;</div>
+<div class="reading"><code>n</code> を正整数、<code>p_1,…,p_n</code> を素数、<code>h_1,…,h_n</code> を正整数とし
+<code>h ≝ Σ_{j=1}^n h_j·log(p_j)</code> とすると:
+<br><strong><code>Σ_{j=1}^n log(p_j) ≤ h</code></strong>、
+<br><strong><code>Σ_{j=1}^n log(h_j) ≤ Σ_{j=1}^n log(h_j + 1) ≤ 3h/2</code></strong>。</div>
+<p class="open">★★<strong>純粋に初等的であり、今すぐ <code>Found/</code> に実装できる。</strong>
+原文の証明は 2 行——第 1・第 2 不等式は直ちに従い、第 3 不等式は
+<strong>「任意の正整数 <code>H</code> について <code>log(H+1) ≤ (3H/2)·log(2)</code>」</strong>という
+容易に確かめられる事実から従う(p.21 目視確認)。</p>
+<p class="open">★<code>p_j ≥ 2</code> より <code>log(p_j) ≥ log 2</code> なので
+<code>h ≥ log(2)·Σ h_j</code>、したがって
+<code>Σ log(h_j+1) ≤ (3/2)·log(2)·Σ h_j ≤ (3/2)·h</code>。★<strong>この筋は完全に追える</strong>。</p>
+</section>
+
+<section class="statement corollary"
+         id="genell-cor-4-3"
+         data-paper="GenEll"
+         data-pdf-page="22"
+         data-item="Corollary 4.3"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)</div>
+<div class="reading"><code>ℚ̄</code> を <code>ℚ</code> の代数閉包、<code>ϵ ∈ ℝ_{&gt;0}</code> とすると、
+<strong>定数 <code>C ∈ ℝ_{&gt;0}</code> と Galois-finite な部分集合 <code>Exc ⊆ M_ell(ℚ̄)</code> が存在して</strong>次を満たす:
+<br><code>E_L</code> を数体 <code>L ⊆ ℚ̄</code> 上の楕円曲線で、<code>L</code> が点 <code>[E_L] ∈ M_ell(ℚ̄)</code> の
+<strong>最小定義体</strong>であり <code>[E_L] ∉ Exc</code> とし、<code>S</code> を有限素数集合、
+<code>E_L</code> は<strong>潜在的乗法還元の素点を 1 つ以上持つ</strong>とする。
+<code>d ≝ [L:ℚ]</code>、<code>x_S ≝ Σ_{p∈S} log(p)</code> と書くと、
+<strong><code>S</code> に属さない素数 <code>l_∘, l_•</code> が存在して</strong>:
+<br><strong>(a)</strong> <code>l_∘</code>, <code>l_•</code> は <code>E_L</code> の潜在的乗法還元の素点および局所高さと素。
+さらに <code>l_•</code> は <code>L</code> で分岐する <code>ℚ</code> の素数および <code>ℚ</code> の素数の <code>L</code> での分岐指数と素。
+<br><strong>(b)</strong> <code>Gal(ℚ̄/L) → GL₂(ℤ_{l_∘})</code> の像は <code>SL₂(ℤ_{l_∘})</code> を含み、
+<code>Gal(ℚ̄/L) → GL₂(ℤ_{l_•})</code> は<strong>全射</strong>。
+<br><strong>(c)</strong> <code>l_∘ ≤ 23040·900d·ht^Falt([E_L]) + 2x_S + C·d^{1+ϵ}</code>、
+<code>l_• ≤ 23040·900d·ht^Falt([E_L]) + 6d·log-diff_{M̄_ell}([E_L]) + 2x_S + C·d^{1+ϵ}</code>。</div>
+<p class="open">★<strong>証明は <code>Theorem 3.8</code> の条件 (a) を使う</strong>。
+途中で「<code>l</code> が <code>L</code> で不分岐なら『像が <code>SL₂</code> を含む』⇔『全射』」を
+<strong><code>ℚ(ζ_{l^∞})/ℚ</code> が <code>l</code> で完全分岐、ゆえに <code>L/ℚ</code> と線型無関連</strong>から出している。
+★<code>23040·900 = 23040·(2·3·12 + 8·100 ≤ 900)</code> という係数の由来も p.23 に書かれている。</p>
+</section>
+
+<section class="statement corollary"
+         id="genell-cor-4-4"
+         data-paper="GenEll"
+         data-pdf-page="23"
+         data-item="Corollary 4.4"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Corollary 4.4. (Full Galois Actions for Compactly Bounded Subsets)</div>
+<div class="reading"><code>ℚ̄</code> を <code>ℚ</code> の代数閉包、<code>K_V ⊆ M_ell(ℚ̄)</code> を <strong>compactly bounded subset</strong> とすると、
+<strong>定数 <code>C ∈ ℝ_{&gt;0}</code> と Galois-finite な部分集合 <code>Exc ⊆ M_ell(ℚ̄)</code> が存在して</strong>次を満たす:
+<br><code>E_L</code> を数体 <code>L ⊆ ℚ̄</code> 上の楕円曲線で、<code>L</code> が <code>[E_L]</code> の最小定義体、
+<code>[E_L] ∈ K_V</code> かつ <code>[E_L] ∉ Exc</code>、<code>S</code> を有限素数集合とする。
+<code>d ≝ [L:ℚ]</code>、<code>x_S ≝ Σ_{p∈S} log(p)</code> と書くと、
+<code>S</code> に属さない素数 <code>l_∘, l_•</code> が存在して (a)(b) は <code>Corollary 4.3</code> と同一、
+<br><strong>(c)</strong> <code>l_∘ ≤ 23040·100d·ht^Falt([E_L]) + 2x_S + C·d</code>、
+<code>l_• ≤ 23040·100d·ht^Falt([E_L]) + 6d·log-diff_{M̄_ell}([E_L]) + 2x_S + C·d</code>。</div>
+<p class="open">★★<strong><code>Corollary 4.3</code> との差は (c) の 2 箇所だけである</strong>(目視で 1 文字ずつ照合):
+係数が <code>900d</code> → <strong><code>100d</code></strong>、末項が <code>C·d^{1+ϵ}</code> → <strong><code>C·d</code></strong>。
+★すなわち <strong>compactly bounded という仮定が <code>d</code> の指数を <code>1+ϵ</code> から <code>1</code> へ下げる</strong>。
+<code>ϵ</code> が statement から消えるのもこのためである。</p>
+<p class="open">★原文の証明は 3 行——「<code>Corollary 4.3</code> と<strong>まったく同様(むしろ易しい)</strong>。
+ただし <code>Theorem 3.8</code> の条件 (a) の代わりに<strong>条件 (b)</strong> を使い、
+<code>Lemma 4.1</code> を使うときは <strong><code>h</code> を <code>0</code> に取る</strong>」。
+★<code>h = 0</code> にできることが、<code>8h</code> の項を消して <code>C·d</code> を出す機構である。</p>
+</section>
+
+</body>
+</html>

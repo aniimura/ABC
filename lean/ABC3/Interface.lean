@@ -3,6 +3,10 @@ import ABC3.Interface.PGC.LocalFieldData
 import ABC3.Interface.IUTchIII.PilotObjects
 import ABC3.Interface.GenEll.ArithLineBundle
 import ABC3.Interface.GenEll.GaloisRep
+import ABC3.Interface.GenEll.HeightTheory
+import ABC3.Interface.GenEll.AbcSetup
+import ABC3.Interface.GenEll.TateLocal
+import ABC3.Interface.GenEll.EllModuli
 /-!
 # Interface — まだ無い基礎の型
 

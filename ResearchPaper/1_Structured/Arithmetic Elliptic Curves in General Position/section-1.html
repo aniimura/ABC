@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] §1 Generalities on Heights — 必要 9 件の statement</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .scr { font-style: italic; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] §1 Generalities on Heights — 必要 9 件の statement</h1>
+
+<p>物理 p.3–p.10。<strong>260 dpi 目視確認 2026-08-16</strong>(p.3・p.5・p.6・p.8・p.9・p.10)。</p>
+
+<p>本ファイルは <strong>S0(24 件すべての statement を型で固定する)</strong> のための出典アンカーである。
+<code>Definition 1.1</code> / <code>Definition 1.2</code> は枝番ごとの節が
+<code>definition-1-1.html</code> / <code>definition-1-2.html</code> に既にあるので、
+ここでは<strong>命題全体を指すアンカー</strong>だけを置く
+(<code>tools/genell-progress.mjs</code> は<strong>条なしの <code>.src</code></strong> しか数えないため)。</p>
+
+<h2>★このページで実測したこと</h2>
+
+<p class="open">★<strong><code>≲</code> は <code>pdftotext</code> の出力に何も残さない</strong>(既知)。
+そのうえ <strong>p.10 の証明は「<code>=</code> と <code>≤</code> であって <code>≲</code> ではない」「<code>≥</code> であって <code>≳</code> ではない」と
+本文で明示的に区別している</strong>——
+すなわち<strong>この論文では <code>≲</code> と <code>≤</code> の差が主張の内容である</strong>。
+<code>.txt</code> からは両者の区別が原理的に付かないので、§1 の不等式はすべて目視で写した。</p>
+
+<p class="open">★<code>Definition 1.5</code>, (iii)(iv) の <code>log-diff</code> / <code>log-cond</code> は
+<strong><code>ADiv(F)</code> と正規化次数 <code>deg</code>(下線つき)の上に直接立つ</strong>。
+この 2 つは <code>lean/ABC3/Found/GenEll/ArithDiv.lean</code> に
+<strong><code>sorry</code> 無しで実装済み</strong>(<code>ADiv</code> / <code>degNormalized</code>)。
+★したがって §1 の中でも <strong>(iii)(iv) は「Arakelov 理論が要る」部分と要らない部分の境界の上</strong>にある。</p>
+
+<h2>命題全体のアンカー(条なし <code>.src</code> 用)</h2>
+
+<section class="statement definition"
+         id="genell-def-1-1"
+         data-paper="GenEll"
+         data-pdf-page="3"
+         data-item="Definition 1.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">There is an evident notion of tensor product of arithmetic line bundles on X. The isomorphism classes of arithmetic line bundles on X, together with the operation of tensor product, thus determine a group APic(X).</div>
+<div class="reading"><strong>算術直線束</strong> <code>L̄ = (L, |−|_L)</code>(直線束 ＋ <code>X^arc</code> 上のエルミート計量で複素共役 <code>ι_X</code> と両立するもの)と、
+その射・大域切断 <code>Γ(L̄)</code>・テンソル積、そして<strong>群 <code>APic(X)</code></strong>((ii) では射 <code>φ : Y → X</code> による引き戻し <code>φ*L̄</code>)。</div>
+<p class="open">★<code>APic(X)</code> は <strong>mathlib に 0 件</strong>(<code>Arakelov</code> / <code>arithmetic line bundle</code> / <code>LineBundle</code> いずれも 0、2026-08-16 実測)。
+ゆえに <code>Interface/GenEll/ArithLineBundle.lean</code> が受ける。</p>
+</section>
+
+<section class="statement definition"
+         id="genell-def-1-2"
+         data-paper="GenEll"
+         data-pdf-page="5"
+         data-item="Definition 1.2"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">The relation "≈" clearly defines an equivalence relation on the set of functions</div>
+<div class="reading">(i) 高さ関数 <code>ht_M̄ : X(ℚ̄) → ℝ</code>。
+(ii) <code>α ≲_F β</code> ⇔ ある定数 <code>C</code> があって<strong>すべての <code>x ∈ F</code> で <code>β(x) − α(x) ≤ C</code></strong>
+(<code>≳</code> は <code>α(x) − β(x) ≤ C</code>、<code>≈</code> は <code>|α(x) − β(x)| ≤ C</code>)。
+<code>≈</code> は同値関係で、その同値類が <strong>BD-class</strong>。
+★最後の一文が要点——<strong><code>≳</code>・<code>≲</code>・<code>≈</code> を BD-class に対しても適用してよい</strong>。</div>
+<p class="open">★<strong>実装済み</strong>: <code>lean/ABC3/Found/GenEll/BDClass.lean</code>(<code>sorry</code> 無し)。
+<code>BDle</code> / <code>BDge</code> / <code>BDeq</code> / <code>bdSetoid</code> / <code>BDClass</code> に加え、
+上の最後の一文に対応する <code>BDClass.le</code> / <code>BDClass.ge</code>(<code>Quotient.lift₂</code>)まで作ってある。</p>
+</section>
+
+<h2>Example 1.3 — Galois-finite と compactly bounded の出所</h2>
+
+<section class="statement example"
+         id="genell-ex-1-3"
+         data-paper="GenEll"
+         data-pdf-page="5"
+         data-item="Example 1.3"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Example 1.3. Various Natural Subsets of the Set of Points. In the notation of the above discussion, we consider various natural examples of subsets</div>
+<div class="reading">(i) <code>d ∈ ℕ ∪ {∞}</code> に対し <code>X(ℚ̄)^{≤d}</code> は <code>[F:ℚ] ≤ d</code> なる数体上の点の和集合、
+<code>X(ℚ̄)^{=d} ≝ X(ℚ̄)^{≤d} \ X(ℚ̄)^{≤d−1}</code>。
+部分集合 <code>E ⊆ X(ℚ̄)</code> が <strong>Galois-finite</strong> ⇔ <strong>すべての正整数 <code>d</code> で <code>E^{≤d}</code> が有限</strong>。
+(ii) <strong>compact domain</strong> = 内部の閉包に等しいコンパクト集合。
+<code>V ⊆ V(ℚ)</code> を <code>V(ℚ)^arc</code> を含む有限集合とし、各 <code>v</code> に対し領域 <code>K_v</code> を取る。
+<code>K_V ⊆ X(ℚ̄)</code> を「x が定める点がすべて <code>K_v</code> に入る」点の集合とし、これを
+<strong>compactly bounded subset</strong>、<code>V</code> をその <strong>support</strong>、<code>K_v</code> を <strong>bounding domains</strong> と呼ぶ。</div>
+<p class="open">★<strong><code>Theorem 3.8</code> と <code>Theorem 2.1</code> の両方がこの 2 語を使う</strong>——
+<code>Interface/GenEll/GaloisRep.lean</code> の <code>CompactlyBounded</code> / <code>GaloisFinite</code> はここから来ている。
+★(i) の Galois-finite は<strong>純粋に集合論的</strong>で、Arakelov も Galois 表現も要らない。
+(ii) は <code>X^arc</code>(複素解析空間)を要求するので <strong>§1 の Arakelov 側</strong>に落ちる。</p>
+</section>
+
+<h2>Proposition 1.4 / Remark 1.4.1 — 高さの基本性質</h2>
+
+<section class="statement proposition"
+         id="genell-prop-1-4"
+         data-paper="GenEll"
+         data-pdf-page="6"
+         data-item="Proposition 1.4"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Proposition 1.4. (Basic Properties of Heights) In the notation of the above</div>
+<div class="reading">算術直線束 <code>L̄</code>, <code>M̄</code> に対し:
+(i) <code>ht_{L̄⊗M̄}(x) = ht_L̄(x) + ht_M̄(x)</code>(<strong>等号</strong>、BD-class ではない)。
+(ii) <code>L_ℚ</code> のある正のテンソル冪が大域切断で生成される(例: <code>L_ℚ</code> が ample)なら <code>ht_L̄ ≳ 0</code>。
+(iii) <code>ht_L̄</code> の <strong>BD-class は <code>L_ℚ</code> の同型類だけに依る</strong>。ゆえに <code>[ht_L]</code> と書ける。
+(iv) <code>d</code> 正整数・<code>C ∈ ℝ</code>・<code>L_ℚ</code> が ample なら
+<strong><code>{x ∈ X(ℚ̄)^{≤d} : ht_L̄(x) ≤ C}</code> は有限</strong>(Northcott)。</div>
+<p class="open">★(i) は <strong><code>≈</code> ではなく <code>=</code></strong>、(ii) は <strong><code>≥</code> ではなく <code>≳</code></strong>。
+目視で確認した(<code>.txt</code> では両方とも記号が消えて区別が付かない)。
+★(iii) が <code>Remark 1.4.1</code> と <code>Proposition 1.6</code> の前提であり、
+<strong>この論文の高さがすべて BD-class で語られる根拠</strong>である。</p>
+</section>
+
+<section class="statement remark"
+         id="genell-rem-1-4-1"
+         data-paper="GenEll"
+         data-pdf-page="8"
+         data-item="Remark 1.4.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Remark 1.4.1. Observe that it follows immediately from the definitions, together with Proposition 1.4, (iii), that the theory of</div>
+<div class="reading"><code>Proposition 1.4, (iii)</code> から直ちに、<strong><code>X(ℚ̄)</code> 上の高さ関数 <code>ht_L̄(−)</code> の BD-class の理論は
+スキーム <code>X_ℚ</code> だけに依る</strong>。ゆえにこの理論は
+<strong>ℚ 上の任意の正規射影スキーム <code>Y</code></strong> に適用できる
+(<code>Y</code> の射影埋め込みから来る ℤ-平坦・ℤ-射影モデル <code>X</code> の <code>X_ℚ</code> と見なせばよい)。</div>
+<p class="open">★これは <strong>Theorem 2.1 が「数体上の曲線」から出発できる根拠</strong>である——
+モデル <code>X</code> の取り方に依らないことを保証している。</p>
+</section>
+
+<h2>Definition 1.5 / Remark 1.5.1 — log-diff と log-cond</h2>
+
+<section class="statement definition"
+         id="genell-def-1-5"
+         data-paper="GenEll"
+         data-pdf-page="8"
+         data-item="Definition 1.5"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Note if x ∈ X(F ) ⊆ X(Q), where [F : Q] &lt; ∞, then by considering the scheme-theoretic image of the corresponding morphism Spec(F ) → X, one obtains a well-defined minimal field of definition Fmin ⊆ F of x.</div>
+<div class="reading">(i) 点 <code>x</code> の <strong>minimal field of definition <code>F_min</code></strong>。
+(ii) 正規ネーター scheme の正則部分に含まれる有効 Cartier 因子 <code>E</code> が <strong>reduced</strong> ⇔ <code>E = E_red</code>。
+(iii) <code>F</code> を <code>x</code> の minimal field of definition とすると <code>F</code> の<strong>差積イデアル</strong>が
+有効算術因子 <code>δ_x ∈ ADiv(F)</code> を定め、
+<code>log-diff_X(x) ≝ deg_F(δ_x) ∈ ℝ</code>(<strong><code>deg</code> は下線つき＝正規化次数</strong>)。
+(iv) 有効 Cartier 因子 <code>D ⊆ X</code>、<code>U_X ≝ X\D</code> とし、<code>D</code> を <code>Spec(O_F)</code> に引き戻して
+<code>f_x^D ≝ (D_x)_red ∈ ADiv(F)</code>(<strong>conductor</strong>)、
+<code>log-cond_D(x) ≝ deg_F(f_x^D) ∈ ℝ</code>。</div>
+<p class="open">★<strong>ここが「今すぐ作れる層」との接点である</strong>——
+<code>ADiv(F)</code> と正規化次数 <code>deg</code> は
+<code>lean/ABC3/Found/GenEll/ArithDiv.lean</code> に <code>sorry</code> 無しで実装済み
+(<code>ADiv</code> / <code>deg</code> / <code>degNormalized</code> / <code>principalADiv</code> / <code>APrc</code>)。
+★残るのは <strong>差積イデアル → <code>ADiv(F)</code></strong> と
+<strong>Cartier 因子の引き戻し</strong>の 2 つで、これは Arakelov 理論そのものではなく
+<strong>可換環論と scheme 論</strong>である。</p>
+</section>
+
+<section class="statement remark"
+         id="genell-rem-1-5-1"
+         data-paper="GenEll"
+         data-pdf-page="8"
+         data-item="Remark 1.5.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Remark 1.5.1. In the spirit of Remark 1.4.1, we observe that the log-different</div>
+<div class="reading"><code>log-diff_X</code> は<strong>スキーム <code>X_ℚ</code> だけに依る</strong>。
+一方 <code>log-cond_D</code> は対 <code>(X, D)</code> に依り得るが、
+その <strong>BD-class は ℚ-スキームの対 <code>(X_ℚ, D_ℚ)</code> だけに依る</strong>。
+理由: 別の対 <code>(X′, D′)</code> について <code>X′_ℚ ≅ X_ℚ</code> が <code>D′_ℚ ≅ D_ℚ</code> を誘導するなら、
+<strong>ある有限素数集合 <code>Σ</code> の上で</strong>その同型は <code>ℤ[Σ^{-1}]</code> へ延びる。</div>
+<p class="open">★<strong>「有限個の素数を除けば」という緩みが BD-class に吸収される</strong>という構造——
+この論文が BD-class を使う理由そのものであり、<code>Proposition 1.7</code> の証明でも
+「<code>Σ</code> の上の寄与は <code>≈ 0</code>」として同じ形で現れる。</p>
+</section>
+
+<h2>Proposition 1.6 / 1.7 — 導手と log-different</h2>
+
+<section class="statement proposition"
+         id="genell-prop-1-6"
+         data-paper="GenEll"
+         data-pdf-page="9"
+         data-item="Proposition 1.6"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Proposition 1.6. (Conductor Bounded by the Height) Let D ⊆ X be an effective Cartier divisor,</div>
+<div class="reading"><code>L = O_X(D)</code> なる算術直線束 <code>L̄</code> を取り、<code>U ≝ X\D</code>、<code>ht_D ≝ ht_L̄</code> とすると、
+<code>U(ℚ̄)</code> 上で <strong><code>log-cond_D ≲ ht_D</code></strong>。</div>
+<p class="open">★<strong>枝番を持たない単一の主張</strong>である(目視確認)。
+証明は 5 行——非アルキメデス側は <code>Definition 1.5, (iv)</code> の <code>(−)_red</code> から、
+アルキメデス側は<strong>コンパクト空間 <code>X^arc</code> 上の連続関数 <code>|s|_L</code> が有界</strong>であることから従う。
+★後者が <code>X^arc</code>(複素解析空間)を要求するので、<strong>この命題は Arakelov 層に落ちる</strong>。</p>
+</section>
+
+<section class="statement proposition"
+         id="genell-prop-1-7"
+         data-paper="GenEll"
+         data-pdf-page="9"
+         data-item="Proposition 1.7"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Proposition 1.7. (Conductors and Log Differents) Let</div>
+<div class="reading"><code>φ : Y → Z</code> を次元 2 の正規・ℤ-固有・ℤ-平坦スキームの<strong>生成的有限射</strong>とし、
+<code>e</code> を正整数、<code>D ⊆ Y</code>・<code>E ⊆ Z</code> を有効 ℤ-平坦 Cartier 因子で
+(a) <code>D_ℚ</code>, <code>E_ℚ</code> が reduced、(b) <code>D_ℚ = φ_ℚ^{-1}(E_ℚ)_red</code>、
+(c) <code>φ_ℚ</code> が <code>(U_Y)_ℚ → (U_Z)_ℚ</code> 上有限エタール、
+(d) <code>D_ℚ</code> の各点での <code>φ_ℚ</code> の分岐指数が <code>e</code> を割る、を満たすとする。
+(i) <code>U_Y(ℚ̄)</code> 上で
+<strong><code>log-cond_E − log-cond_D ≲ log-diff_Y − log-diff_Z ≲ (1 − 1/e)·log-cond_E</code></strong>。
+(ii) 分岐指数が各点で <code>e</code> に<strong>等しい</strong>なら Riemann–Hurwitz の関係式
+<code>deg(ω_{Y_ℚ}) = deg(ω_{Z_ℚ}(E_ℚ)|_{Y_ℚ}) {1 − deg(O_{Z_ℚ}(E_ℚ)) / (e·deg(ω_{Z_ℚ}(E_ℚ)))}</code>。</div>
+<p class="open">★<strong>この論文で <code>≲</code> と <code>≤</code> の差が主張になる場所である</strong>——
+p.10 の証明は「prime-to-Σ 部分では <strong><code>=</code> と <code>≤</code> であって <code>≲</code> ではない</strong>」
+「<code>Σ</code> の上の <code>log-diff_Y − log-diff_Z</code> は <strong><code>≥ 0</code> であって <code>≳</code> ではない</strong>」と
+本文中で明示的に注記している(目視確認、2026-08-16)。
+★<code>.txt</code> ではこの区別が<strong>原理的に復元できない</strong>ので、この命題は目視必須である。</p>
+<p class="open">★証明の核は<strong>初等的な主張</strong>: 「素数 <code>p</code> と正整数 <code>d</code> を固定すると、
+<code>[L:K] ≤ d</code> なる <code>ℚ_p</code> の有限拡大の有限 Galois 拡大 <code>L/K</code> すべてについて
+差積イデアルが <code>p^n·O_L</code> を含むような正整数 <code>n</code> が存在する」。
+★これは<strong>局所体の分岐理論と Kummer 理論だけ</strong>で、Arakelov も Galois 表現も要らない。</p>
+</section>
+
+</body>
+</html>

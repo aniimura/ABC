@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] §3 Full Special Linear Galois Actions — 残り 7 件</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .bar { text-decoration: overline; }
+ .frak { font-style: italic; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] §3 Full Special Linear Galois Actions — 残り 7 件</h1>
+
+<p>物理 p.15–p.18。<strong>260 dpi 目視確認 2026-08-16</strong>(p.15・p.17・p.18)。
+<code>Lemma 3.1</code> は <code>lemma-3-1.html</code>、<code>Theorem 3.8</code> は <code>theorem-3-8.html</code> にある。</p>
+
+<h2>★★このページで実測した最も重要なこと</h2>
+
+<p class="open">★<strong><code>Lemma 3.6</code>(An Elementary Estimate)は純粋な実解析である</strong>——
+Arakelov 理論も Galois 表現も要らない。
+<strong>「<code>ϵ &gt; 0</code> に対し定数 <code>C₀ &gt; 0</code> が存在して、<code>y ≥ 1</code> かつ
+<code>x ≥ C₀y^{1+ϵ}</code> なる全ての実数 <code>x, y</code> について <code>x ≥ y·log(x)</code>」</strong>だけである。
+★<strong>これは今すぐ <code>Found/</code> に実装できる</strong>。
+以前「2 理論なしで届くのは 3 件」と数えたが、<strong>正しくは 4 件</strong>である。</p>
+
+<p class="open">★<code>Theorem 3.8</code> の証明(p.20)を読み直して確認した——
+<strong>群論に頼るのは <code>Lemma 3.1, (iv)</code> ただ 1 つ</strong>。原文はそこで
+「the image of Galois in <code>GL₂(𝔽_l)</code> contains the element "α" of Lemma 3.1, (iv), i.e.,
+<code>(1 1 / 0 1)</code>」と書き、最後に
+「we conclude from Lemma 3.1, (iv), that the image of Galois in <code>GL₂(ℤ_l)</code> contains <code>SL₂(ℤ_l)</code>」で閉じる。</p>
+
+<section class="statement lemma"
+         id="genell-lemma-3-2"
+         data-paper="GenEll"
+         data-pdf-page="15"
+         data-item="Lemma 3.2"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 3.2. (Local Rank One Subgroups of l-Torsion)</div>
+<div class="reading"><code>M_l(E) ≝ Hom(ℤ/l·ℤ, E(K̄))</code>(<code>E_K</code> の "mod l" Tate 加群)は
+<code>𝔽_l</code>-加群として <code>𝔽_l × 𝔽_l</code> と(<strong>非標準的に</strong>)同型で、<code>G_K</code> の連続作用を持ち、
+<code>G_K</code>-加群の完全列 <code>0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0</code> に入る。
+<br>(i) <code>N ⊆ M_l(E)</code> を <code>G_K</code> で安定な 1 次元 <code>𝔽_l</code>-部分空間とすると、
+<strong><code>v_K(q_E) ∈ l·ℤ</code> であるか、または <code>N = 𝔽_l(1)</code></strong> のいずれか。
+<br>(ii) <code>𝔽_l(1) ⊆ M_l(E)</code> は有限平坦部分群スキーム <code>μ_l ⊆ E</code> を定め、
+その商 <code>E′ ≝ E/μ_l</code> の Tate 母数は <code>q_{E′} = q_E^l</code>、したがって
+<strong><code>deg_∞(E′) = l·deg_∞(E)</code></strong>。ここで <code>deg_∞(E) ≝ log(#(O_K/(q_E)))</code>。</div>
+<p class="open">★<strong>Tate 曲線と Tate 母数 <code>q_E</code> が前提</strong>である。
+mathlib は <code>EllipticCurve/Reduction.lean</code> を持つが、
+<strong>Tate 曲線・半安定還元の理論は無い</strong>(2026-08-16、ディレクトリ全宣言を確認)。</p>
+</section>
+
+<section class="statement definition"
+         id="genell-def-3-3"
+         data-paper="GenEll"
+         data-pdf-page="15"
+         data-item="Definition 3.3"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].</div>
+<div class="reading"><strong>局所高さ</strong> ≝ <code>v_K(q_E) ∈ ℤ_{&gt;0}</code>、すなわち Tate 母数の付値。</div>
+<p class="open">★<strong>1 文の定義である</strong>が、<code>q_E</code>(Tate 母数)に全面的に依存する。
+<code>Theorem 3.8</code> の条件 (b)「<code>l</code> is prime to the local heights」はこの語である。</p>
+</section>
+
+<section class="statement remark"
+         id="genell-rem-3-3-1"
+         data-paper="GenEll"
+         data-pdf-page="16"
+         data-item="Remark 3.3.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Remark 3.3.1. Note that even if EK only has potentially multiplicative reduction, one may define the local height of EK as the element ∈ Q computed by dividing the local height of</div>
+<div class="reading"><code>E_K</code> が<strong>潜在的</strong>乗法還元しか持たない場合でも、局所高さを
+<strong><code>ℚ</code> の元として</strong>定義できる——<code>E_K</code> が乗法還元を持つ有限拡大 <code>L/K</code> を取り、
+<code>E_K ×_K L</code> の局所高さを <code>L/K</code> の<strong>分岐指数で割る</strong>。
+この定義は <code>L</code> の取り方に依らない。</div>
+<p class="open">★<strong>局所高さの値域が <code>ℤ_{&gt;0}</code> から <code>ℚ</code> へ広がる</strong>のがこの Remark の役目である。
+★<code>Theorem 3.8</code>・<code>Corollary 4.3</code>・<code>Corollary 4.4</code> はいずれも
+「<strong>潜在的</strong>乗法還元」を仮定に持つので、<strong>この拡張が無いと statement が書けない</strong>。</p>
+</section>
+
+<section class="statement proposition"
+         id="genell-prop-3-4"
+         data-paper="GenEll"
+         data-pdf-page="17"
+         data-item="Proposition 3.4"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any</div>
+<div class="reading">任意の <code>ϵ ∈ ℝ_{&gt;0}</code> に対し、<code>M_ell(ℚ̄)</code> 上で
+<code>deg_∞ ≲ ht_∞ ≲ 12(1+ϵ)·ht^Falt ≲ (1+ϵ)·ht_∞</code>。
+とくに <code>C ∈ ℝ</code> なら
+<strong><code>{[E] ∈ M_ell(ℚ̄)^{≤d} : ht^Falt([E]) ≤ C}</code> は有限</strong>。</div>
+<p class="open">★<strong>Faltings 高さ <code>ht^Falt</code> が初めて出る場所</strong>である。
+mathlib に <code>Arakelov</code> は 0 件、<code>arithmetic line bundle</code> も 0 件(2026-08-16 実測)。</p>
+<p class="open">★証明は 4 行で、最初の <code>≲</code> は <code>Proposition 1.6</code> の証明から、
+残りは <strong>[Silv2] Proposition 2.1</strong> と <strong>[FC] Chapter V, Proposition 4.5</strong>
+(無限遠での計量の<strong>対数的特異性</strong>)から。有限性は <code>Proposition 1.4, (iv)</code> から。
+★<strong>外部文献 2 本に依拠しており、そのどちらも mathlib に無い</strong>。</p>
+</section>
+
+<section class="statement lemma"
+         id="genell-lemma-3-5"
+         data-paper="GenEll"
+         data-pdf-page="17"
+         data-item="Lemma 3.5"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let</div>
+<div class="reading"><code>ϵ ∈ ℝ_{&gt;0}</code>、<code>l</code> 素数、<code>H_F ⊆ E_F</code> を
+<code>H_F ×_F ℚ̄ ≅ ℤ/l·ℤ</code> なる部分群スキーム(これを <strong>l-cyclic</strong> と呼ぶ)とし、
+<code>(E_H)_F ≝ E_F/H_F</code>。<code>l</code> が <code>E</code> の(悪い)乗法還元の素点すべてでの局所高さと素なら
+<strong><code>(1/(12(1+ϵ)))·l·deg_∞(E) ≤ ht^Falt(E) + 2log(l) + C</code></strong>
+——ここで <code>C ∈ ℝ</code> は <code>ϵ</code> に依り得るが <strong><code>E</code>, <code>F</code>, <code>H_F</code>, <code>l</code> に依らない</strong>。</div>
+<p class="open">★証明は <code>Lemma 3.2, (i)(ii)</code> と <code>Proposition 3.4</code> から。
+途中で <strong>[FC] Chapter I, Proposition 2.7</strong>(次数 <code>l</code> の被覆射の延長)を引く。
+★<strong>「<code>(1,1)</code>-形式の積分が <code>l</code> 倍だけ違う」という複素解析の段</strong>が入っており、
+ここも <code>X^arc</code> 側である。</p>
+</section>
+
+<section class="statement lemma"
+         id="genell-lemma-3-6"
+         data-paper="GenEll"
+         data-pdf-page="17"
+         data-item="Lemma 3.6"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 3.6. (An Elementary Estimate) Let</div>
+<div class="reading"><code>ϵ ∈ ℝ_{&gt;0}</code> とする。このとき<strong>定数 <code>C₀ ∈ ℝ_{&gt;0}</code> が存在して</strong>、
+<code>y ≥ 1</code> かつ <code>x ≥ C₀·y^{1+ϵ}</code> なる全ての <code>x, y ∈ ℝ</code> について
+<strong><code>x ≥ y·log(x)</code></strong> が成り立つ。</div>
+<p class="open">★★<strong>これは純粋な実解析であり、今すぐ <code>Found/</code> に実装できる。</strong>
+原文の証明も 1 行——「<code>x^{1/(1+ϵ)}·log(x)/x = log(x)·x^{−ϵ/(1+ϵ)} → 0</code>(<code>x → ∞</code>)という
+よく知られた初等的事実から直ちに従う」(p.18 目視確認)。</p>
+<p class="open">★<strong>2 理論(Arakelov・Galois 表現)なしで届く項目は 3 件ではなく 4 件である</strong>——
+<code>Lemma 3.1</code>・<code>Lemma 3.6</code>・<code>Lemma 4.1</code>・<code>Lemma 4.2</code>。
+本ページの測定でこれが 1 件増えた。</p>
+</section>
+
+<section class="statement lemma"
+         id="genell-lemma-3-7"
+         data-paper="GenEll"
+         data-pdf-page="18"
+         data-item="Lemma 3.7"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Lemma 3.7. (Finite Exceptional Sets) Let</div>
+<div class="reading"><code>K_V ⊆ M_ell(ℚ̄)</code> を compactly bounded subset、<code>ϵ ∈ ℝ_{&gt;0}</code> とすると、
+<strong>定数 <code>C ∈ ℝ_{&gt;0}</code> と Galois-finite な部分集合 <code>Exc ⊆ M_ell(ℚ̄)</code> が存在して</strong>次を満たす:
+<br><code>E_L</code> を数体 <code>L</code> 上の楕円曲線で <code>L</code> の全有限素点で半安定還元を持つものとし、
+<code>d ≝ [L:ℚ]</code>、<code>l</code> を素数として、
+<br><strong>(a)</strong> <code>l ≥ 100d·(ht^Falt([E_L]) + C·d^ϵ)</code> かつ <code>E_L</code> が(悪い)乗法還元の素点を 1 つ以上持つ、
+<br><strong>(b)</strong> <code>[E_L] ∈ K_V</code> かつ <code>l</code> が乗法還元の全素点での局所高さと素、
+<br>とすると: (a) なら <code>l</code> は乗法還元の全素点での局所高さ<strong>より大きい</strong>。
+(b) かつ <code>[E_L] ∉ Exc</code> なら <code>E_L</code> は乗法還元の素点を 1 つ以上持つ。
+(a) か (b) が成り立ち、さらに <code>E_L</code> が l-cyclic 部分群スキームを持つなら <strong><code>[E_L] ∈ Exc</code></strong>。</div>
+<p class="open">★<code>Theorem 3.8</code> の条件 (a)(b) は<strong>この補題の (a)(b) をそのまま引き継いでいる</strong>
+(<code>Theorem 3.8</code> は係数が <code>23040·100d</code>、こちらは <code>100d</code>)。
+★証明は <code>Lemma 3.5</code>・<code>Proposition 3.4</code>・<code>Proposition 1.4, (iv)</code> に依る。</p>
+</section>
+
+</body>
+</html>

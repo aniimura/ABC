@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] §2 Bounds on Heights — Theorem 2.1</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] §2 Bounds on Heights — Theorem 2.1</h1>
+
+<p>物理 p.11。<strong>260 dpi 目視確認 2026-08-16</strong>。</p>
+
+<p class="open">★<strong><code>[IUTchIV]</code> が最も多く引く項目</strong>(10 回)であり、
+かつ <strong>IUT を経由しない第 2 の頂上</strong>である——
+本定理は <code>[IUTchIV]</code> の結果を一切使わず、§1 の枠組みと
+<strong>noncritical Belyi maps</strong>([Mzk1])だけで証明される。</p>
+
+<section class="statement theorem"
+         id="genell-thm-2-1"
+         data-paper="GenEll"
+         data-pdf-page="11"
+         data-item="Theorem 2.1"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.</div>
+<div class="reading">有限素数集合 <code>Σ</code> に対し、<strong>次の 2 つは同値</strong>:
+<br>(i) <strong>(Effective Mordell/ABC/Vojta Conjecture)</strong>
+<code>X</code> を数体上の滑らかな固有幾何的連結曲線、<code>D ⊆ X</code> を reduced 因子、
+<code>U_X ≝ X\D</code>、<code>d</code> 正整数、<code>ϵ ∈ ℝ_{&gt;0}</code>。
+<code>ω_X</code> を <code>X</code> の標準層とする。<code>U_X</code> が<strong>双曲的</strong>
+——すなわち直線束 <code>ω_X(D)</code> の次数が正——とすると、BD-class の不等式
+<code>ht_{ω_X(D)} ≲ (1 + ϵ)(log-diff_X + log-cond_D)</code>
+が <code>U_X(ℚ̄)^{≤d}</code> 上で成り立つ。
+<br>(ii) <strong>(ABC Conjecture for Σ-Supported Compactly Bounded Subsets)</strong>
+<code>P ≝ ℙ¹_ℚ</code>、<code>C ⊆ P</code> を 3 点 <code>"0"</code>, <code>"1"</code>, <code>"∞"</code> からなる因子、
+<code>U_P ≝ P\C</code>、<code>d</code> 正整数、<code>ϵ ∈ ℝ_{&gt;0}</code>、
+<code>K_V ⊆ U_P(ℚ̄)</code> を<strong>support が <code>Σ</code> を含む</strong> compactly bounded subset とする。
+このとき <code>ht_{ω_P(C)} ≲ (1 + ϵ)(log-diff_P + log-cond_C)</code> が
+<code>K_V ∩ U_P(ℚ̄)^{≤d}</code> 上で成り立つ。</div>
+<p class="open">★<strong><code>pdftotext</code> は <code>ϵ</code> を落とす</strong>——(ii) の
+<code>ϵ ∈ ℝ_{&gt;0}</code> は <code>.txt</code> では <code>∈ R&gt;0</code> と出る(2026-08-16 実測)。
+<code>Theorem 3.8</code> の条件 (a) と<strong>同じ脱落</strong>である。
+★<code>≲</code> も出力に残らないため、<strong>この定理は <code>.txt</code> からは書き写せない</strong>。</p>
+<p class="open">★<strong>(i) ⟹ (ii) は定義から直ちに従う</strong>。実質は <strong>(ii) ⟹ (i)</strong> で、
+そこで<strong>双曲的曲線の副有限基本群の構造</strong>(任意の正整数 <code>e</code> に対し、
+<code>E ≝ (D ×_X Y)_red</code> の各点で分岐指数がちょうど <code>e</code> となる
+連結有限エタール Galois 被覆 <code>U_Y → U_X</code> が存在する)と
+<code>Proposition 1.7</code> が使われる。</p>
+<p class="open">★<strong>Belyi 写像が要る</strong>(<code>noncritical Belyi maps</code>、[Mzk1])。
+mathlib に <code>Belyi</code> は <strong>0 件</strong>(2026-08-16 実測)。
+★<strong>ゆえに本定理は「IUT を使わない」が「mathlib に無い理論を 2 つ(Arakelov・Belyi)使う」</strong>。
+IUT 非依存であることは<strong>形式化が容易であることを意味しない</strong>。</p>
+</section>
+
+</body>
+</html>
