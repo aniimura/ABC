@@ -1321,23 +1321,35 @@ end PsiHom
 `φ'` を分解して右から 1 因子ずつ剥がすだけでよい:
 `α'`(pull-back)/ `β'`(`𝒪^▷`)/ `γ'`(等長 pre-step)/ `δ'`(Frobenius 型)。
 
-### ★★★残っている 1 点 —— **仮定が原文より強い**
+### ★★★残っている点 —— **仮定が原文より強い**(縮小中)
 
 我々の `psiMap` は次の 2 つを仮定している:
 
 1. `IsOfIsotropicType P`
-2. `∀ X, IsFrobeniusTrivial P X`
+2. `∀ X, IsFrobeniusTrivial P X`(`𝒞^istr` では `prop_2_5_ii_frobTrivial` から自動)
 
-★**どちらも `𝒞^istr` では自動**である(2 は `prop_2_5_ii_frobTrivial`)。
-★★したがって得られたのは実質**「`𝒞^istr` 上の (iii)」**であり、
-一般の `𝒞` へは原文の段 8(isotropic hull が単射なので、
-`Proposition 1.9, (v)` の isotropification 関手で移す)が要る。
+★★**1 の内訳は当初 3 つあったが、2 つは解消済みである**:
 
-★**なぜ 1 が要るのか**: `charSplitting_bijective` が `IsIsotropic` を要求する。
-原文は分裂を「`A` が isotropic でなくても使える」と明言し、根拠に
-`Definition 2.3, (b)`(我々の `hullMem`)を挙げている。
-★★★**さらに深い理由**として、`prop_1_4_i`(isotropic なら任意射が co-angular)を
-`psiMap_comp_frob` などで使っており、これは isotropy に**本質的に依存**する。
+| 使い道 | 状態 |
+|---|---|
+| `charSplitting_bijective` が `IsIsotropic` を要求 | ✅ **解消**——`charSplitting_bijective_all`(`Prop25.lean`) |
+| `𝒪^▷` の元の co-angular 性(`prop_1_4_i`) | ✅ **解消**——`isCoAngular_of_endo`(`Prop18.lean`)で十分 |
+| `psiMap_comp_frob` の `δ̃` を Frobenius 型にする | ★**道具は在る**——下を見よ |
+| `psiMap_comp_isometricPreStep` の `γ̃` の co-angular 性 | ★**未** |
+
+★★**`psiMap_comp_frob` の道具**: `prop_1_10_i_exists_pullBack`(`Prop110.lean`)が
+「pull-back `α` と Frobenius 型 `δ̃` の四角形」を与える。
+`frobDegSurj Y (degFr δ')` で `δ̃ : Y ⟶ Ỹ` を作り、この補題で
+`α ≫ β = δ̃ ≫ φ'`(`β` は Frobenius 型、`φ'` は pull-back)を得て、
+`frobDegUniq` で `β ≫ θ = δ'` とすれば
+**`α ≫ δ' = δ̃ ≫ (φ' ≫ θ)`** となり、`δ̃` は**構成から Frobenius 型**である。
+★これで `plBk_shuffle` ＋ `prop_1_4_i` の経路を置き換えられる。
+
+★★**残る本丸は `γ̃` の co-angular 性**である。
+`α ≫ γ' = γ̃ ≫ α̃` で `γ'` は等長 pre-step(quadFactor の `preStepFactor'` 側なので
+co-angular とは限らない)。`otriLin` を `γ̃` に沿って使うにはこれが要る。
+★対応する `Proposition 1.10, (i)` の型保存(`prop_1_10_i_coAngular_of`)は
+両側が **Frobenius 型**であることを要求するので、そのままでは当たらない。
 
 ★★**この 1 点があるので、`Proposition 2.5` に条なし `.src` は付けない。**
 条なしは「原典項目を**完全に**実装した」の意味であり、
