@@ -382,6 +382,56 @@ theorem prop_1_14_ii_alpha_fs {A Cc B : C} (β : A ⟶ Cc) (α : Cc ⟶ B)
   obtain ⟨Dd, δA, δZ, hsq⟩ := hfs γ
   exact ⟨Dd, δA ≫ β, δZ, by rw [Category.assoc, hsq]⟩
 
+/-! ### ★★(ii) 十分性の第 4′ 段 —— 「WLOG `ϵ₁, ϵ₂` は pull-back」
+
+★**原文**(p.42、目視):
+> hence, by applying the factorization of Definition 1.3, (iv), (a) [and the total
+> epimorphicity of C; cf. also Definition 1.3, (ii), and the equivalences of categories
+> of Definition 1.3, (iii), (d)], we may assume without loss of generality [from the
+> point of view of showing that α is a monomorphism] that ϵ1, ϵ2 are pull-back morphisms.
+
+★★**原文より短い道があった。**
+★原文は `ϵᵢ` から Frobenius 因子を剥がして pull-back に落とす道を取るが、
+★**`α` が pull-back であること**を使えば、
+「`α` が mono」は ★**「`Base α` が `𝒟` で mono」に帰着する**
+(`Proposition 1.11, (vi)`)。
+
+★**そして `Base α` の mono 性は、底の 2 射を `𝒞` へ持ち上げて
+`prop_1_14_ii_epsilon_eq` に渡せば出る** ——
+持ち上げは `Definition 1.3, (i), (c)` と **`α` の pull-back 全射性**の 2 つで、
+★**どちらも「同じ対象 `U` の上で」できる**(これが要点。
+`plBk_realize` を 2 回使うと対象が別々になってしまう)。
+-/
+
+include P in
+/-- ★★★**(ii) 十分性の第 4 段(完全形)** —— `Base α` は mono。
+
+★`Base α` の 2 射 `u`, `v` を、**同じ対象 `U`** の上の pull-back 射に持ち上げる:
+`u` は `plBk_realize` で、★**`v` は `α` の pull-back 全射性で**(対象を変えずに)。 -/
+theorem prop_1_14_ii_base_alpha_mono (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A Cc B : C} (β : A ⟶ Cc) (hβs : IsPreStep P β)
+    (α : Cc ⟶ B) (hαpb : IsPullBack P α) (hmono : Mono (β ≫ α)) :
+    Mono (P.Base α) := by
+  refine ⟨fun {Y} u v huv => ?_⟩
+  obtain ⟨U, pu, hpupb, θ, hθ⟩ := plBk_realize P F Cc u
+  obtain ⟨-, hsurj⟩ := hαpb U
+  obtain ⟨w, hw⟩ := hsurj ⟨(pu ≫ α, θ.hom ≫ v), by
+    show P.Base (pu ≫ α) = (θ.hom ≫ v) ≫ P.Base α
+    rw [P.Base_comp, hθ, Category.assoc, huv, ← Category.assoc]⟩
+  have hw' := congrArg Subtype.val hw
+  have hwα : w ≫ α = pu ≫ α := congrArg Prod.fst hw'
+  have hbw : P.Base w = θ.hom ≫ v := congrArg Prod.snd hw'
+  have hwpb : IsPullBack P w := by
+    have hc : IsPullBack P (w ≫ α) := by rw [hwα]; exact IsPullBack.comp P hpupb hαpb
+    obtain ⟨hlb, hlin⟩ := prop_1_4_ii_mp P F (w ≫ α) hc
+    obtain ⟨⟨hwco, hwlin⟩, -⟩ := prop_1_7_v_coAngularLinear P F w α hlb.1 hlin
+    exact (prop_1_4_ii P F w).mpr
+      ⟨⟨hwco, (prop_1_7_v_isometric P w α hlb.2).1⟩, hwlin⟩
+  have heq : w = pu :=
+    prop_1_14_ii_epsilon_eq P G hiso β hβs α hmono w pu hwpb hpupb hwα
+  have hbb : θ.hom ≫ v = θ.hom ≫ u := by rw [← hbw, heq, hθ]
+  exact ((cancel_epi θ.hom).mp hbb).symm
+
 /-! ### ★★(ii) 十分性の第 5–7 段 —— FSMFF 型から矛盾を出す
 
 ★**原文**(p.42、目視):
@@ -464,7 +514,81 @@ theorem prop_1_14_ii_alpha_isIso (F : FrobenioidCore P) (hFSMFF : IsOfFSMFFType 
   rw [hf]
   infer_instance
 
-/-! ### ★(ii) の十分性 —— 未実装(2026-08-16 の測定)
+/-! ### ★★(ii) 十分性の第 1–2 段と組み立て -/
+
+include P in
+/-- ★prime-Frobenius の合成は「同型」か「prime-Frobenius 因子を持つ」かのいずれか。 -/
+theorem IsPrimeFrobComposite.isIso_or_exists {A B : C} {γ : A ⟶ B}
+    (h : IsPrimeFrobComposite P γ) :
+    IsIso γ ∨ ∃ (X : C) (ζ : A ⟶ X) (rest : X ⟶ B),
+      γ = ζ ≫ rest ∧ IsPrimeFrobenius P ζ := by
+  cases h with
+  | iso _ hi => exact Or.inl hi
+  | cons hζ _ => exact Or.inr ⟨_, _, _, rfl, hζ⟩
+
+include P in
+/-- ★★**(ii) 十分性の第 2 段** —— Frobenius 因子は同型である。
+
+★**原文**: 「By assertion (i) [cf. also Proposition 1.10, (v)], it follows that
+γ is an isomorphism」。
+
+★**中身**: `Proposition 1.10, (v)` が `γ` を prime-Frobenius の合成に分解する。
+同型でなければ prime-Frobenius 因子 `ζ` があり、それは (i) により irreducible で、
+次数が素数なので pre-step ではない。★**mid-adjoint の仮定が `ζ` を同型にし、
+次数 1 になって素数性に矛盾する。** -/
+theorem prop_1_14_ii_gamma_isIso (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A X B : C} (γ : A ⟶ X) (hγF : IsFrobeniusType P γ) (ρ : X ⟶ B)
+    (φ : A ⟶ B) (hfac : φ = γ ≫ ρ)
+    (hmid : IsMidAdjoint (irredNonPreStep P) φ) : IsIso γ := by
+  rcases IsPrimeFrobComposite.isIso_or_exists P ((prop_1_10_v P F γ).mp hγF) with
+    h | ⟨Z, ζ, rest, hzfac, hζ⟩
+  · exact h
+  · exfalso
+    have hirr : IsIrreducibleMor ζ := prop_1_10_iv_mp P F (hiso A) ζ hζ
+    have hnp : ¬ IsPreStep P ζ := by
+      intro hps
+      have h1 : ((P.degFr ζ : ℕ+) : ℕ) = 1 := by rw [show P.degFr ζ = 1 from hps.1]; rfl
+      exact Nat.not_prime_one (h1 ▸ hζ.2)
+    haveI := hmid A Z (𝟙 A) ζ (rest ≫ ρ)
+      (by rw [hfac, hzfac, Category.id_comp, Category.assoc]) ⟨hirr, hnp⟩
+    have h1 : ((P.degFr ζ : ℕ+) : ℕ) = 1 := by rw [degFr_of_isIso P ζ]; rfl
+    exact Nat.not_prime_one (h1 ▸ hζ.2)
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (ii) の十分性** ——
+FSM 射で非 pre-step irreducible 射に mid-adjoint なら pre-step。 -/
+theorem prop_1_14_ii_mpr (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hFSMFF : IsOfFSMFFType D)
+    {A B : C} (φ : A ⟶ B) (hfsm : IsFSMMorphism φ)
+    (hmid : IsMidAdjoint (irredNonPreStep P) φ) : IsPreStep P φ := by
+  obtain ⟨X, Y, γ, β, α, hfac, hγF, hβs, hαpb⟩ := F.arbFactor φ
+  haveI hγi : IsIso γ := prop_1_14_ii_gamma_isIso P F hiso γ hγF (β ≫ α) φ hfac hmid
+  have hfac' : φ = (γ ≫ β) ≫ α := by rw [hfac, Category.assoc]
+  have hβ's : IsPreStep P (γ ≫ β) := IsPreStep.comp P (isPreStep_of_isIso P γ) hβs
+  have hmono : Mono ((γ ≫ β) ≫ α) := by rw [← hfac']; exact hfsm.2
+  have hfs : IsFiberwiseSurjective α :=
+    prop_1_14_ii_alpha_fs P (γ ≫ β) α (by rw [← hfac']; exact hfsm.1)
+  have hαmono : Mono α := (prop_1_11_vi_mono P F α hαpb).mpr
+    (prop_1_14_ii_base_alpha_mono P F G hiso (γ ≫ β) hβ's α hαpb hmono)
+  haveI : IsIso α :=
+    prop_1_14_ii_alpha_isIso P F hFSMFF (γ ≫ β) α hαpb ⟨hfs, hαmono⟩ φ hfac' hmid
+  rw [hfac']
+  exact IsPreStep.comp P hβ's (isPreStep_of_isIso P α)
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (ii)** —— pre-step ⟺ FSM ＋ mid-adjoint。 -/
+theorem prop_1_14_ii (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hFSMFF : IsOfFSMFFType D)
+    {A B : C} (φ : A ⟶ B) :
+    IsPreStep P φ ↔ (IsFSMMorphism φ ∧ IsMidAdjoint (irredNonPreStep P) φ) := by
+  constructor
+  · intro h
+    obtain ⟨h1, h2⟩ := prop_1_14_ii_mp P F G hiso φ h
+    exact ⟨h1, isMidAdjoint_irredNonPreStep_of_nonPreStep P φ h2⟩
+  · rintro ⟨h1, h2⟩
+    exact prop_1_14_ii_mpr P F G hiso hFSMFF φ h1 h2
+
+/-! ### ★(旧)(ii) の十分性 —— 段取りの記録(2026-08-16)
 
 ★**原文の証明**(p.42、目視、要旨):
 1. `Definition 1.3, (iv), (a)` で `φ = γ ≫ β ≫ α`(Frobenius 型・pre-step・pull-back)
