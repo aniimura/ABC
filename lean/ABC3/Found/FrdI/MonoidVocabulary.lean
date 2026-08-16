@@ -875,6 +875,65 @@ theorem isPerfectMonoid_pf : IsPerfectMonoid (Pf M) := by
     simp only [smul_smul]
     ring_nf
 
+/-! ### ★★perfection の関手性(`Φ^pf` を `MonoidOn` にするための部品)
+
+原文 (FrdI p.19):
+> is a monoid on D, then Φ determines monoids “Φchar”, “Φgp”, Φpf” on D [i.e.,
+
+★`Φ^pf` を `monoid on D` にするには、原文 (ii) の 2 条件
+(a) characteristically injective の保存、(b) FSM-morphism で同型、が要る。
+★**ここでは関手性と、単射性・全射性の保存までを作る。** -/
+
+/-- ★**perfection は関手的** —— `m/a ↦ f(m)/a`。 -/
+def map {N : Type*} [AddCommMonoid N] (f : M →+ N) : Pf M →+ Pf N where
+  toFun := Quotient.map (fun x : M × ℕ+ => (f x.1, x.2))
+    (by
+      rintro ⟨m, a⟩ ⟨m', a'⟩ ⟨k, e⟩
+      exact ⟨k, by simpa only [← map_nsmul] using congrArg f e⟩)
+  map_zero' := by
+    show mk (f 0) 1 = mk 0 1
+    rw [map_zero]
+  map_add' x y := by
+    induction x using Pf.inductionOn with | _ m a =>
+    induction y using Pf.inductionOn with | _ m' a' =>
+    show mk (f ((a' : ℕ) • m + (a : ℕ) • m')) (a * a')
+      = mk ((a' : ℕ) • f m + (a : ℕ) • f m') (a * a')
+    rw [map_add, map_nsmul, map_nsmul]
+
+@[simp] theorem map_mk {N : Type*} [AddCommMonoid N] (f : M →+ N) (m : M) (a : ℕ+) :
+    map f (mk m a) = mk (f m) a := rfl
+
+@[simp] theorem map_id : map (AddMonoidHom.id M) = AddMonoidHom.id (Pf M) := by
+  ext x
+  induction x using Pf.inductionOn with | _ m a => rfl
+
+theorem map_comp {N O : Type*} [AddCommMonoid N] [AddCommMonoid O]
+    (f : M →+ N) (g : N →+ O) : map (g.comp f) = (map g).comp (map f) := by
+  ext x
+  induction x using Pf.inductionOn with | _ m a => rfl
+
+/-- ★**単射性は perfection で保たれる**。
+
+★`f((k a')•m) = f((k a)•m')` から単射性で `(k a')•m = (k a)•m'` が出る ——
+★**`k` はそのまま使える**(濾過性を壊さない)。 -/
+theorem map_injective {N : Type*} [AddCommMonoid N] {f : M →+ N}
+    (hf : Function.Injective f) : Function.Injective (map f) := by
+  intro x y h
+  induction x using Pf.inductionOn with | _ m a =>
+  induction y using Pf.inductionOn with | _ m' a' =>
+  obtain ⟨k, e⟩ := Quotient.exact h
+  refine Pf.sound k ?_
+  apply hf
+  simpa only [map_nsmul] using e
+
+/-- ★**全射性も保たれる** —— 分母はそのままでよい。 -/
+theorem map_surjective {N : Type*} [AddCommMonoid N] {f : M →+ N}
+    (hf : Function.Surjective f) : Function.Surjective (map f) := by
+  intro y
+  induction y using Pf.inductionOn with | _ n a =>
+  obtain ⟨m, rfl⟩ := hf n
+  exact ⟨mk m a, rfl⟩
+
 end Pf
 
 def Pf.src : ABC3.Meta.Source :=
