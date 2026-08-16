@@ -37,6 +37,7 @@ import ABC3.Found.FrdI.Prop22Star
 import ABC3.Found.FrdI.Def23
 import ABC3.Found.FrdI.Def27
 import ABC3.Found.FrdI.Prop25
+import ABC3.Found.FrdI.Prop25iii
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
