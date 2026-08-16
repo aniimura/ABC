@@ -934,6 +934,46 @@ theorem map_surjective {N : Type*} [AddCommMonoid N] {f : M →+ N}
   obtain ⟨m, rfl⟩ := hf n
   exact ⟨mk m a, rfl⟩
 
+/-! ### ★★`ℚ>0` 倍作用を**構成せずに書く**（2026-08-16）
+
+原文 (FrdI p.23) の `Frobenius-compact` の第3節は
+「every element of Aut_C(C) that acts on O×(C)pf via multiplication by an element
+∈Q>0 in fact acts trivially」である。
+
+★★**ここで `ℚ>0` を型として構成する必要はない。**
+「`q = c/d` 倍として作用する」は、`ℚ` を一切使わずに
+
+    ∀ x, (d : ℕ) • σ x = (c : ℕ) • x       （`c d : ℕ+`）
+
+と書ける。★**`Pf M` は perfect なので `d •` は全単射であり、
+この式は `σ x` を一意に決める** —— したがって両者は同値である。
+
+★**監査は「`ℚ>0` 作用が未実装で、これが最大の未着手部分」と見積もったが、
+★★実際には「作用を書く」のには不要だった。** 作るのは式であって型ではない。 -/
+
+/-- ★**`Pf M` では `n •` は単射** —— `isPerfectMonoid_pf` の半分を取り出した形。
+
+★「`d • y = c • x` が `y` を一意に決める」の中身である。 -/
+theorem nsmul_injective (n : ℕ+) :
+    Function.Injective (fun x : Pf M => ((n : ℕ+) : ℕ) • x) :=
+  (isPerfectMonoid_pf (M := M) n).1
+
+/-- ★★**「`c/d` 倍として作用する」は写像を一意に決める**。
+
+★`σ` と `τ` がどちらも `c/d` 倍として作用するなら、両者は一致する。
+★**これが「`ℚ>0` を構成せずに済む」ことの根拠である。** -/
+theorem eq_of_qact {c d : ℕ+} {σ τ : Pf M → Pf M}
+    (hσ : ∀ x, ((d : ℕ+) : ℕ) • σ x = ((c : ℕ+) : ℕ) • x)
+    (hτ : ∀ x, ((d : ℕ+) : ℕ) • τ x = ((c : ℕ+) : ℕ) • x) : σ = τ := by
+  funext x
+  exact nsmul_injective d ((hσ x).trans (hτ x).symm)
+
+/-- ★**`c = d` なら作用は自明** —— 原文の「acts trivially」の形。 -/
+theorem eq_id_of_qact_one {c : ℕ+} {σ : Pf M → Pf M}
+    (hσ : ∀ x, ((c : ℕ+) : ℕ) • σ x = ((c : ℕ+) : ℕ) • x) : σ = id := by
+  funext x
+  exact nsmul_injective c (hσ x)
+
 end Pf
 
 def Pf.src : ABC3.Meta.Source :=
