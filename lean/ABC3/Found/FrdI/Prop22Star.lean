@@ -487,4 +487,128 @@ theorem dstarMap_uniq_of_linear
   rw [hlin ⟨Z, hZ⟩ B ρ hρ, hlin ⟨Z, hZ⟩ A σ hσ.1] at h1
   exact h1.symm
 
+/-! ## ★(iii) の前半 —— `𝒪^×` は部分関手であり `𝒪^▷^±` に等しい
+
+原文 (FrdI p.45):
+> functor of the functor of (ii) which is equal to the subfunctor
+-/
+
+/-- ★★**(iii)-1** `𝒪^×(A)` は `𝒪^▷(A)` の**単元群**に一致する
+(原文の `𝒪^▷(A)^±`)。
+
+★`⟸` は「部分モノイドの単元は元の単元」。
+★`⟹` は「`End A` で可逆な `𝒪^▷` の元は、その逆射も `𝒪^▷` に入る」——
+底は `Base (inv x) ≫ Base x = 𝟙` から、次数は `degFr_of_isIso` から。 -/
+theorem otimes_eq_units {A : C} (x : End A) :
+    x ∈ OTimes P A ↔ ∃ u : (OTri P A)ˣ, ((u : OTri P A) : End A) = x := by
+  constructor
+  · intro hx
+    haveI hiso : IsIso ((x : End A) : A ⟶ A) :=
+      (CategoryTheory.isUnit_iff_isIso _).mp hx.2
+    have hbx : P.Base ((x : End A) : A ⟶ A) = 𝟙 _ := by
+      have h : P.Base ((x : End A) : A ⟶ A) = P.Base (𝟙 A) := hx.1.1
+      rwa [P.Base_id] at h
+    have hinv : (inv ((x : End A) : A ⟶ A)) ∈ OTri P A := by
+      refine ⟨?_, degFr_of_isIso P _⟩
+      show P.Base (inv ((x : End A) : A ⟶ A)) = P.Base (𝟙 A)
+      have h : P.Base (inv ((x : End A) : A ⟶ A)) ≫ P.Base ((x : End A) : A ⟶ A)
+          = P.Base (𝟙 A) := by rw [← P.Base_comp, IsIso.inv_hom_id]
+      rwa [hbx, Category.comp_id] at h
+    exact ⟨⟨⟨x, hx.1⟩, ⟨inv ((x : End A) : A ⟶ A), hinv⟩,
+      Subtype.ext (by show inv ((x : End A) : A ⟶ A) ≫ _ = _; simp),
+      Subtype.ext (by show ((x : End A) : A ⟶ A) ≫ _ = _; simp)⟩, rfl⟩
+  · rintro ⟨u, rfl⟩
+    exact ⟨(u : OTri P A).2, IsUnit.map (OTri P A).subtype u.isUnit⟩
+
+include F in
+/-- ★★**(iii)-1** `𝒪^×` は (ii) の関手の**部分関手** ——
+`dstarMap` は `𝒪^×` を `𝒪^×` へ写す。
+
+★モノイド準同型は単元を単元へ送るので、上の `otimes_eq_units` から直ちに従う。 -/
+theorem dstarMap_otimes_mem (A B : Istr P)
+    (ψ : (P.toElem.obj A.obj).base ⟶ (P.toElem.obj B.obj).base)
+    (u : OTri P B.obj) (hu : ((u : End B.obj)) ∈ OTimes P B.obj) :
+    ((dstarMap P F A B ψ u : End A.obj)) ∈ OTimes P A.obj := by
+  obtain ⟨w, hw⟩ := (otimes_eq_units P ((u : End B.obj))).mp hu
+  have hwu : (w : OTri P B.obj) = u := Subtype.ext hw
+  refine (otimes_eq_units P _).mpr ⟨Units.map (dstarMap P F A B ψ) w, ?_⟩
+  show ((dstarMap P F A B ψ (w : OTri P B.obj) : OTri P A.obj) : End A.obj)
+      = ((dstarMap P F A B ψ u : OTri P A.obj) : End A.obj)
+  rw [hwu]
+
+/-! ## ★(iii) の後半 —— `Div` は関手的な準同型 `𝒪^▷(A) → Φ(A)`
+
+原文 (FrdI p.45):
+> the notation of §0]. Moreover, the operation “Div(−)” determines a functorial
+-/
+
+/-- ★★★**(iii)-3** `Div` は `otriLin` と**両立する** ——
+`Div (otriLin ρ γ) = ρ*(Div γ)`。
+
+★**四角形 `ρ ≫ γ = δ ≫ ρ` に `Div` を当てるだけ**だが、
+`Div ρ` を両辺から消すのに ★**`Φ` が integral(消約的)であること**が要る
+(`Definition 1.1, (i)` の pre-divisorial に含まれる)。 -/
+theorem otriLin_Div {A B : C} (hA : IsIsotropic P A) {ρ : A ⟶ B} (hl : IsLinear P ρ)
+    (γ : OTri P B) :
+    P.Div ((otriLin P F hA hl γ : End A) : A ⟶ A)
+      = Φ.map (P.Base ρ) (P.Div ((γ : End B) : B ⟶ B)) := by
+  haveI := isCancelAdd_of_isIntegralMonoid
+    (M := Φ.val (P.toElem.obj A).base) (P.divisorial _).1.1
+  have hd := congrArg P.Div (otriLin_spec P F hA hl γ)
+  rw [P.Div_comp, P.Div_comp] at hd
+  have hbδ : P.Base ((otriLin P F hA hl γ : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((otriLin P F hA hl γ : End A) : A ⟶ A) = P.Base (𝟙 A) :=
+      (otriLin P F hA hl γ).2.1
+    rwa [P.Base_id] at h
+  rw [hbδ, MonoidOn.map_id, show P.degFr ((γ : End B) : B ⟶ B) = 1 from γ.2.2,
+    show P.degFr ρ = 1 from hl] at hd
+  simp only [PNat.one_coe, one_smul] at hd
+  refine add_left_cancel (a := P.Div ρ) ?_
+  rw [← hd]
+  exact add_comm _ _
+
+include F in
+/-- ★★★**(iii)-3** `𝒟*` の版 —— `Div` は `dstarMap` と両立する。
+
+★**これが原文の「`Div(−)` determines a functorial homomorphism `𝒪^▷(A) → Φ(A)`」**
+の中身である。★span を 1 本取って `otriLin_Div` を 2 回使い、
+`Φ.map (Base σ)` の単射性(`Definition 1.1, (ii), (a)`)で締める。 -/
+theorem dstarMap_Div (A B : Istr P)
+    (ψ : (P.toElem.obj A.obj).base ⟶ (P.toElem.obj B.obj).base) (γ : OTri P B.obj) :
+    P.Div ((dstarMap P F A B ψ γ : End A.obj) : A.obj ⟶ A.obj)
+      = Φ.map ψ (P.Div ((γ : End B.obj) : B.obj ⟶ B.obj)) := by
+  obtain ⟨Z, hZ, σ, hσ, ρ, hρ, hb⟩ := dstar_span P F A B ψ
+  have key : otriLin P F hZ hσ.1 (dstarMap P F A B ψ γ) = otriLin P F hZ hρ γ :=
+    DFunLike.congr_fun (dstarMap_spec P F A B ψ Z hZ σ hσ ρ hρ hb) γ
+  have h1 := otriLin_Div P F hZ hσ.1 (dstarMap P F A B ψ γ)
+  have h2 := otriLin_Div P F hZ hρ γ
+  refine Φ.map_injective (P.Base σ) ?_
+  rw [← h1, key, h2, hb, Φ.map_comp]
+
+/-! ## ★★★`Proposition 2.2` 全体の `.src`
+
+★★**9 主張すべての実装名**(数え落とし防止のため表にする):
+
+| 条 | 主張 | 実装 |
+|---|---|---|
+| (i) | `𝒟* → 𝒟` は圏同値 | `prop_2_2_i` |
+| (ii) | 反変関手 `𝒪^▷(−) : 𝒟* → Mon` の**存在** | `otriStar`(＋`dstarMap` / `dstar_map_exists_unique`) |
+| (ii) | その**一意性** | `dstarMap_uniq_of_linear`(＋`dstarMap_uniq`) |
+| (ii)(a) | linear 射での値が `Proposition 1.11, (iv)` の埋め込み | `dstarMap_eq_otriLin`(＋`otriLin` / `otriLin_injective`) |
+| (ii)(b) | pre-step での値が `Definition 1.3, (iii), (c)` の全単射 | `dstarMap_bijective_of_preStep`(＋`otriLin_bijective_of_preStep` / `otriLin_otriFwd`) |
+| (iii) | `𝒪^×` は (ii) の関手の**部分関手** | `dstarMap_otimes_mem`(＋`otriLin_otimes_mem`) |
+| (iii) | それが `𝒪^▷(A)^±` に**等しい** | `otimes_eq_units` |
+| (iii) | `Div` が**関手的な準同型** `𝒪^▷(A) → Φ(A)`、その核が `𝒪^×` | `otri_Div_mul` / `otri_Div_one` / `otriLin_Div` / `dstarMap_Div`、核は `otri_isUnit_iff_Div_zero` / `otri_div_eq_iff` |
+| (iv) | isotropic hull が誘導する `𝒪^▷` の埋め込み | `hullOTriHom` / `hullOTriHom_injective` / `hullOTriHom_mem` |
+
+★**`(𝒞^istr)^lin` への制限**(原文の「the restriction of this functor on D* to (Cistr)lin」)は
+`otriFunctorLin`(`Prop22.lean`)であり、`dstarMap_eq_otriLin` がその一致を与える。
+
+★★**追加の仮定は 1 つも足していない。** `otriStar` / `dstarMap_comp` が
+`G : Frobenioid P` を取るのは、原文が `Proposition 2.2` を Frobenioid について
+述べているためであって、原文より強い仮定ではない。 -/
+def prop_2_2.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 45, item := "Proposition 2.2",
+    sectionId := "frdi-prop-2-2" }
+
 end ABC3.Found.FrdI
