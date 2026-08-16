@@ -69,6 +69,31 @@ theorem IsPullBack.lift {Y Z : C} {α : Y ⟶ Z} (hα : IsPullBack P α) (X : C)
   rw [hg'2.1, hg'2.2]
   exact hg'.symm
 
+include P in
+/-- ★**pull-back は底の上で忠実** —— 普遍性の**単射性**の側。 -/
+theorem IsPullBack.hom_ext {Y Z : C} {α : Y ⟶ Z} (hα : IsPullBack P α) {X : C}
+    (g g' : X ⟶ Y) (h1 : g ≫ α = g' ≫ α) (h2 : P.Base g = P.Base g') : g = g' := by
+  refine (hα X).1 ?_
+  apply Subtype.ext
+  show (g ≫ α, P.Base g) = (g' ≫ α, P.Base g')
+  rw [h1, h2]
+
+include P in
+/-- ★★**底が同型な pull-back は同型** —— 普遍性から直ちに逆射が作れる。
+
+★★分解 `δ ≫ γ ≫ β ≫ α` において**全体の底が同型**なら
+(`δ`・`γ`・`β` の底はいつも同型なので)`α` の底も同型になり、
+したがって **`α` 自身が同型**になる。★合成した分解を正規形に戻すときに効く。 -/
+theorem isIso_of_isPullBack_of_baseIso {Y Z : C} {α : Y ⟶ Z} (hα : IsPullBack P α)
+    (hb : IsIso (P.Base α)) : IsIso α := by
+  haveI := hb
+  obtain ⟨g, ⟨hg1, hg2⟩, -⟩ :=
+    IsPullBack.lift P hα Z (𝟙 Z) (inv (P.Base α)) (by rw [P.Base_id, IsIso.inv_hom_id])
+  refine ⟨g, ?_, hg1⟩
+  refine IsPullBack.hom_ext P hα _ _ ?_ ?_
+  · rw [Category.assoc, hg1, Category.comp_id, Category.id_comp]
+  · rw [P.Base_comp, hg2, IsIso.hom_inv_id, P.Base_id]
+
 /-! ## ★手 2 —— どの底の射に沿っても pull-back が取れる -/
 
 include P in
