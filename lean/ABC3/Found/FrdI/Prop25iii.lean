@@ -1155,7 +1155,7 @@ computation")のおかげ**である。
 
 ★**`hft` は `𝒞^istr` では `Proposition 2.5, (ii)` から自動**である
 (`prop_2_5_ii_frobTrivial`)。ここでは仮定として明示する。 -/
-theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
+theorem psiMap_comp_frob (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+)
     {A B E : C} (hA : IsIsotropic P A) (φ : A ⟶ B) {δ' : B ⟶ E} (hδ' : IsFrobeniusType P δ') :
     psiMap P F hτ hmt haa d (φ ≫ δ')
       = psiMap P F hτ hmt haa d φ ≫ δ' := by
@@ -1172,7 +1172,7 @@ theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     ⟨⟨prop_1_4_i P _ (fun Z g => F.isotropicClosed g hY), hδti⟩, hbδt⟩
   have hdeg : P.degFr δt = P.degFr δ' := plBk_shuffle_degFr P F hα hshuf hαt
   -- ★手 2: `Y` は Frobenius-trivial なので `δ̃ = ζ ≫ θ`
-  obtain ⟨ζ, hζdeg, hζprop⟩ := hft Y
+  obtain ⟨ζ, hζdeg, hζprop⟩ := hft Y hY
   obtain ⟨θ, hθiso, hθeq⟩ :=
     F.frobDegUniq Y Y Yt ((ζ (P.degFr δt) : End Y) : Y ⟶ Y) δt
       (hζprop _).2 hδtF (hζdeg _)
@@ -1253,7 +1253,7 @@ include hτ hmt haa hfn in
 | `δ'`(Frobenius 型) | `psiMap_comp_frob` |
 
 ★**4 重分解がちょうど 4 本の合成則に対応していた。** -/
-theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
+theorem psiMap_comp_ptwise (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+)
     {A B E : C} (hA : IsIsotropic P A) (φ : A ⟶ B) (φ' : B ⟶ E) :
     psiMap P F hτ hmt haa d (φ ≫ φ')
       = psiMap P F hτ hmt haa d φ ≫ psiMap P F hτ hmt haa d φ' := by
@@ -1268,16 +1268,130 @@ theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     psiMap_comp_frob P F hτ hmt haa hfn hft d hA φ hδ'F]
   simp
 
+include hτ hmt haa hfn in
+/-- ★★★★★**原文の段 3** —— `Ψ` は **isotropic hull を右から掛けること**と可換。
+
+★★連鎖はこうである(すべて isotropy の大域仮定なし):
+1. `χ` を 4 重分解し、**左からの合成則 2 本**で `Ψ(χ≫h) = δ≫γ≫Ψ(β≫α≫h)` に落とす
+2. 押し出しで `α ≫ h = h̃ ≫ α̃`。★`α̃` は pull-back で終域が isotropic なので
+   **`Yt` は isotropic**(`isotropic_dom_of_pullBack`)。`h̃` は等長 pre-step
+3. `Y` の hull `h_Y` の普遍性で `h̃ = h_Y ≫ m`。★`Div m = 0`
+4. よって `n := m ≫ α̃` は**等長**で `Ψ(n) = n`
+5. `β ≫ α ≫ h = h_Y ≫ (ι β) ≫ n` なので、左からの合成則で
+   `Ψ(β≫α≫h) = h_Y ≫ Ψ((ι β) ≫ n)`
+6. ★**`Y^istr` は isotropic** なので**点ごとの**合成両立が使え、
+   `Ψ((ι β) ≫ n) = Ψ(ι β) ≫ n`
+7. 他方 `Ψβ ≫ α ≫ h = h_Y ≫ ι(Ψβ) ≫ n` で、`psiOTri_hull` が
+   `ι(Ψβ) = Ψ(ι β)` を与える -/
+theorem psiMap_hull_comp (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+)
+    {A E Ei : C} {h : E ⟶ Ei} (hhull : IsIsotropicHull P h) (χ : A ⟶ E) :
+    psiMap P F hτ hmt haa d (χ ≫ h) = psiMap P F hτ hmt haa d χ ≫ h := by
+  obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hmt haa d χ
+  -- ★手 2: 押し出し
+  obtain ⟨Yt, ht, αt, hshuf, hαt, hbht⟩ := plBk_shuffle P F hα h
+  have hYt : IsIsotropic P Yt := isotropic_dom_of_pullBack P F αt hαt hhull.2.2.1
+  have hhti : IsIsometric P ht := by
+    show P.Div ht = 0
+    rw [plBk_shuffle_div P F hα hshuf hαt, show P.Div h = 0 from hhull.1, map_zero]
+  have hhts : IsPreStep P ht := ⟨by
+    show P.degFr ht = 1
+    rw [plBk_shuffle_degFr P F hα hshuf hαt]; exact hhull.2.1.1, hbht⟩
+  -- ★手 3: `Y` の hull と `m`
+  obtain ⟨Yi, hY, hYhull⟩ := F.isotropicHullExists Y
+  obtain ⟨m, hmeq, -⟩ := hYhull.2.2.2 Yt hYt ht
+  have hdm : P.Div m = 0 := by
+    have h0 : P.Div ht = 0 := hhti
+    rw [hmeq, P.Div_comp, show P.Div hY = 0 from hYhull.1] at h0
+    exact Φ.map_injective (P.Base hY) (by simpa using h0)
+  -- ★手 4: `n := m ≫ α̃` は等長
+  have hn : IsIsometric P (m ≫ αt) := by
+    show P.Div (m ≫ αt) = 0
+    rw [P.Div_comp, show P.Div αt = 0 from (F.pullBackLB αt hαt).1.2, hdm]
+    simp
+  -- ★手 5: 四角形
+  have hsqβ : ((β : Y ⟶ Y)) ≫ hY
+      = hY ≫ (((hullOTriMon P hYhull ⟨β, hm⟩ : OTri P Yi) : End Yi) : Yi ⟶ Yi) :=
+    hullOTriMap_sq P hY hYhull β
+  have hsqΨ : (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y) ≫ hY
+      = hY ≫ (((hullOTriMon P hYhull (psiOTri P F hτ d ⟨β, hm⟩) :
+          OTri P Yi) : End Yi) : Yi ⟶ Yi) :=
+    hullOTriMap_sq P hY hYhull _
+  -- ★手 6: 左辺
+  have hL : psiMap P F hτ hmt haa d (χ ≫ h)
+      = δ ≫ γ ≫ (hY ≫ (((hullOTriMon P hYhull (psiOTri P F hτ d ⟨β, hm⟩) :
+          OTri P Yi) : End Yi) : Yi ⟶ Yi) ≫ (m ≫ αt)) := by
+    have e1 : χ ≫ h = δ ≫ γ ≫ (hY ≫
+        (((hullOTriMon P hYhull ⟨β, hm⟩ : OTri P Yi) : End Yi) : Yi ⟶ Yi) ≫ (m ≫ αt)) := by
+      rw [hf]
+      simp only [Category.assoc]
+      conv_lhs => rw [hshuf, hmeq]
+      simp only [Category.assoc]
+      conv_lhs => rw [← Category.assoc β hY _, hsqβ]
+      simp
+    rw [e1, psiMap_frob_comp P F hτ hmt haa d hδ,
+      psiMap_isometricPreStep_comp P F hτ hmt haa d hγi hγs,
+      psiMap_isometricPreStep_comp P F hτ hmt haa d hYhull.1 hYhull.2.1,
+      psiMap_comp_ptwise P F hτ hmt haa hfn hft d hYhull.2.2.1 _ (m ≫ αt),
+      psiMap_of_isometric P F hτ hmt haa d _ hn,
+      psiMap_otri P F hτ hmt haa d (hullOTriMon P hYhull ⟨β, hm⟩),
+      psiOTri_hull P F hτ hYhull d ⟨β, hm⟩]
+  -- ★手 7: 右辺
+  rw [hL, he]
+  simp only [Category.assoc]
+  conv_rhs => rw [hshuf, hmeq]
+  simp only [Category.assoc]
+  conv_rhs => rw [← Category.assoc _ hY _, hsqΨ]
+  simp
+
+include hτ hmt haa hfn in
+/-- ★★★★★**`Ψ` の関手性(一般の `𝒞`)** —— **isotropy の大域仮定なし**。
+
+★★原文の段 3 そのもの: **isotropic hull は mono** なので `h_E` で消去できる。
+両辺を `h_E` と合成すると、hull の普遍性で
+`ψ ≫ h_E = h_B ≫ ψ'`、`φ ≫ h_B = h_A ≫ φ'` と書け、
+★`psiMap_hull_comp`(段 3)と**左からの合成則**で両辺とも
+
+  `h_A ≫ Ψ(φ') ≫ Ψ(ψ')`
+
+に落ちる。★★`φ'`・`ψ'` の始域 `A^istr` は **isotropic** なので、
+そこでは**点ごとの**合成両立(`psiMap_comp_ptwise`)が使える。 -/
+theorem psiMap_comp_all (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+)
+    {A B E : C} (φ : A ⟶ B) (ψ : B ⟶ E) :
+    psiMap P F hτ hmt haa d (φ ≫ ψ)
+      = psiMap P F hτ hmt haa d φ ≫ psiMap P F hτ hmt haa d ψ := by
+  obtain ⟨Ai, hA, hAh⟩ := F.isotropicHullExists A
+  obtain ⟨Bi, hB, hBh⟩ := F.isotropicHullExists B
+  obtain ⟨Ei, hE, hEh⟩ := F.isotropicHullExists E
+  haveI : Mono hE := F.preStepMono hE hEh.2.1
+  obtain ⟨ψ', hψ', -⟩ := hBh.2.2.2 Ei hEh.2.2.1 (ψ ≫ hE)
+  obtain ⟨φ', hφ', -⟩ := hAh.2.2.2 Bi hBh.2.2.1 (φ ≫ hB)
+  refine (cancel_mono hE).mp ?_
+  have hL : psiMap P F hτ hmt haa d (φ ≫ ψ) ≫ hE
+      = hA ≫ psiMap P F hτ hmt haa d φ' ≫ psiMap P F hτ hmt haa d ψ' := by
+    rw [← psiMap_hull_comp P F hτ hmt haa hfn hft d hEh (φ ≫ ψ)]
+    have e : (φ ≫ ψ) ≫ hE = hA ≫ (φ' ≫ ψ') := by
+      rw [Category.assoc, hψ', ← Category.assoc, hφ', Category.assoc]
+    rw [e, psiMap_isometricPreStep_comp P F hτ hmt haa d hAh.1 hAh.2.1,
+      psiMap_comp_ptwise P F hτ hmt haa hfn hft d hAh.2.2.1 φ' ψ']
+  have hR : (psiMap P F hτ hmt haa d φ ≫ psiMap P F hτ hmt haa d ψ) ≫ hE
+      = hA ≫ psiMap P F hτ hmt haa d φ' ≫ psiMap P F hτ hmt haa d ψ' := by
+    rw [Category.assoc, ← psiMap_hull_comp P F hτ hmt haa hfn hft d hEh ψ, hψ',
+      psiMap_isometricPreStep_comp P F hτ hmt haa d hBh.1 hBh.2.1, ← Category.assoc,
+      ← psiMap_hull_comp P F hτ hmt haa hfn hft d hBh φ, hφ',
+      psiMap_isometricPreStep_comp P F hτ hmt haa d hAh.1 hAh.2.1, Category.assoc]
+  rw [hL, hR]
+
 /-! ### ★★★★関手 `Ψ : 𝒞 ⥤ 𝒞(d)` -/
 
 /-- ★★★**unit-linear Frobenius 関手**(`𝒞` への自己関手として)。
 
 ★原文 (a)「対象の上で恒等」がそのまま `obj A := A` になっている。 -/
-noncomputable def psiFunctor (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+) : C ⥤ C where
+noncomputable def psiFunctor (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+) : C ⥤ C where
   obj A := A
   map φ := psiMap P F hτ hmt haa d φ
   map_id A := psiMap_id P F hτ hmt haa d A
-  map_comp φ φ' := psiMap_comp P F hτ hmt haa hfn hft d (hiso _) φ φ'
+  map_comp φ φ' := psiMap_comp_all P F hτ hmt haa hfn hft d φ φ'
 
 include hτ hmt haa hfn in
 /-- ★★**`Ψ` の像は `𝒞(d)` に入る** —— `Div (Ψφ) = d • Div φ` だから。 -/
@@ -1292,7 +1406,7 @@ theorem psiMap_mem_cd (d : ℕ+) {A B : C} (φ : A ⟶ B) :
 ★★`Definition 2.4, (iii)` の `𝒞(d)`(零因子が `d · Φ` に入る広い部分圏)へ
 実際に落ちる。★これが原文 (b)「`d` の Frobenius 関手と 1-compatible」の
 圏としての形である。 -/
-noncomputable def psiFunctorCd (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+) :
+noncomputable def psiFunctorCd (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X) (d : ℕ+) :
     C ⥤ Cd P d where
   obj A := ⟨A⟩
   map φ := ⟨psiMap P F hτ hmt haa d φ, psiMap_mem_cd P F hτ hmt haa hfn d φ⟩
@@ -1301,7 +1415,7 @@ noncomputable def psiFunctorCd (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : �
     exact psiMap_id P F hτ hmt haa d A
   map_comp φ φ' := by
     apply InducedWideCategory.Hom.ext
-    exact psiMap_comp P F hτ hmt haa hfn hft d (hiso _) φ φ'
+    exact psiMap_comp_all P F hτ hmt haa hfn hft d φ φ'
 
 /-! ### ★★★圏同値の 3 性質
 
@@ -1505,22 +1619,22 @@ theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
 
 /-! ### ★★★★`Ψ : 𝒞 ≃ 𝒞(d)` -/
 
-variable (hft : ∀ X : C, IsFrobeniusTrivial P X)
+variable (hft : ∀ X : C, IsIsotropic P X → IsFrobeniusTrivial P X)
 
 theorem psiFunctorCd_faithful (d : ℕ+) :
-    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Faithful where
+    (psiFunctorCd P F hτ hmt haa hfn hft d).Faithful where
   map_injective {_ _ f g} h :=
     psiMap_injective P F hτ hmt haa hfn d
       (congrArg InducedWideCategory.Hom.hom h)
 
 theorem psiFunctorCd_full (G : Frobenioid P) (d : ℕ+) :
-    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Full where
+    (psiFunctorCd P F hτ hmt haa hfn hft d).Full where
   map_surjective {_ _} f := by
     obtain ⟨ψ, hψ⟩ := psiMap_surjective P F hτ hmt haa hfn G d f.hom f.property
     exact ⟨ψ, InducedWideCategory.Hom.ext hψ⟩
 
 theorem psiFunctorCd_essSurj (d : ℕ+) :
-    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).EssSurj where
+    (psiFunctorCd P F hτ hmt haa hfn hft d).EssSurj where
   mem_essImage Z := ⟨Z.obj, ⟨Iso.refl _⟩⟩
 
 /-- ★★★★★**[FrdI] Proposition 2.5, (iii)** —— unit-linear Frobenius 関手
@@ -1534,13 +1648,64 @@ theorem psiFunctorCd_essSurj (d : ℕ+) :
 
 の 3 つである。 -/
 theorem prop_2_5_iii (G : Frobenioid P) (d : ℕ+) :
-    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).IsEquivalence := by
-  haveI := psiFunctorCd_faithful P F hτ hiso hmt haa hfn hft d
-  haveI := psiFunctorCd_full P F hτ hiso hmt haa hfn hft G d
-  haveI := psiFunctorCd_essSurj P F hτ hiso hmt haa hfn hft d
+    (psiFunctorCd P F hτ hmt haa hfn hft d).IsEquivalence := by
+  haveI := psiFunctorCd_faithful P F hτ hmt haa hfn hft d
+  haveI := psiFunctorCd_full P F hτ hmt haa hfn hft G d
+  haveI := psiFunctorCd_essSurj P F hτ hmt haa hfn hft d
   exact { }
 
 end PsiHom
+
+/-! ## ★★★★★[FrdI] Proposition 2.5 —— 原文の仮定だけで閉じる -/
+
+section Final
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ)
+  (hmt : ∀ X : C, IsMetricallyTrivial P X) (haa : IsOfAutAmpleType P)
+  (hfn : IsOfFrobeniusNormalizedType P)
+
+include hτ hmt haa hfn in
+/-- ★★★★★**[FrdI] Proposition 2.5, (iii)** —— unit-linear Frobenius 関手
+`Ψ : 𝒞 ≃ 𝒞(d)` は**圏同値**。
+
+★★**仮定は原文どおり**である: `𝒞` は Frobenioid、`τ` は characteristic splitting、
+`𝒞` は **Frobenius-normalized・metrically trivial・Aut-ample 型**、`d ∈ ℕ≥1`。
+★(ii) の後半(isotropic な対象は Frobenius-trivial)は
+`isFrobeniusTrivial_of_isotropic` として **`hmt` から導いて**供給する
+——仮定ではない。 -/
+theorem prop_2_5_iii' (G : Frobenioid P) (d : ℕ+) :
+    (psiFunctorCd P F hτ hmt haa hfn
+      (isFrobeniusTrivial_of_isotropic P F hmt) d).IsEquivalence :=
+  prop_2_5_iii P F hτ hmt haa hfn (isFrobeniusTrivial_of_isotropic P F hmt) G d
+
+end Final
+
+/-- ★★★★★**[FrdI] Proposition 2.5** —— 3 条 4 主張すべてを実装した。
+
+| 条 | # | 主張 | 実装 |
+|---|---|---|---|
+| (i) | 1 | `𝒪^▷(A)^char → Φ(A)` が**全単射** | `prop_2_5_i_bijective` / `prop_2_5_i_equiv` |
+| (ii) | 2 | `𝒞^istr` が **base-trivial 型** | `prop_2_5_ii_baseTrivial` |
+| (ii) | 3 | `𝒞^istr` のどの対象も **Frobenius-trivial** | `prop_2_5_ii_frobTrivial` / `isFrobeniusTrivial_of_isotropic` |
+| (iii) | 4 | **unit-linear Frobenius 関手** `Ψ : 𝒞 ≃ 𝒞(d)` | `psiFunctorCd` / `prop_2_5_iii'` |
+| (iii)(a) | | `Ψ` は**対象と等長射の上で恒等** | `psiFunctorCd.obj A = ⟨A⟩` / `psiMap_of_isometric` |
+| (iii)(b) | | `d` の Frobenius 関手と **1-compatible** | `psiMap_div`(`Div Ψφ = d • Div φ`)/ `psiMap_mem_cd` |
+
+★★**仮定は原文どおり** —— Frobenius-normalized・metrically trivial・Aut-ample 型、
+characteristic splitting `τ`、`d ∈ ℕ≥1`。**isotropic 型は仮定していない。**
+
+★★★**原文が一言で済ませる箇所を 2 つ、機械で開いた**:
+1. 「分裂は `A` が isotropic でなくても使える」(p.49)
+   —— `charSplitting_bijective_all`。★`Definition 2.3` の `τ` は
+   `(𝒞^istr)^lin` 上の部分関手なので、非 isotropic での `τ(A)` は**引き戻しが定義**
+   である旨を `hullPullback` として明示した(条件の追加ではない)
+2. 「isotropic hull は mono なので一般の `φ` へ移る」(p.50)
+   —— `psiMap_hull_comp` ＋ `psiMap_comp_all`。★核は
+   **`Ψ` が hull の埋め込みと可換**(`psiOTri_hull`)であった -/
+def prop_2_5.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 48, item := "Proposition 2.5",
+    sectionId := "frdi-prop-2-5" }
 
 /-! ## ★★★到達点と、残っている 1 点
 

@@ -138,6 +138,26 @@ theorem prop_2_5_ii_frobTrivial (hmt : ∀ A : C, IsMetricallyTrivial P A) (A : 
   obtain ⟨θ⟩ := prop_2_5_ii_baseTrivial P F hmt A B ⟨e.symm⟩
   exact isFrobeniusTrivial_of_iso (istrPre P F) (istr_frobenioidCore P F) θ hB
 
+/-- ★★★**(ii) の後半を `𝒞` の言葉で** —— isotropic な対象は Frobenius-trivial。
+
+★`prop_2_5_ii_frobTrivial` は `istrPre P F` の言葉で書かれている。
+★★`Istr P` は**充満部分圏**なので `End` は一致し、`istrPre` の `Base`/`degFr` は
+包含関手を通して定義されているから、**そのまま落ちる**。 -/
+theorem isFrobeniusTrivial_of_isotropic (Fc : FrobenioidCore P)
+    (hmt : ∀ A : C, IsMetricallyTrivial P A)
+    (X : C) (hX : IsIsotropic P X) : IsFrobeniusTrivial P X := by
+  obtain ⟨ζ, hdeg, hprop⟩ := prop_2_5_ii_frobTrivial P Fc hmt ⟨X, hX⟩
+  refine ⟨⟨⟨fun n => ((ζ n).hom : X ⟶ X), ?_⟩, ?_⟩, ?_, ?_⟩
+  · exact congrArg (fun z : End (⟨X, hX⟩ : Istr P) => (z.hom : X ⟶ X)) (map_one ζ)
+  · intro a b
+    exact congrArg (fun z : End (⟨X, hX⟩ : Istr P) => (z.hom : X ⟶ X)) (map_mul ζ a b)
+  · intro n; exact hdeg n
+  · -- ★co-angular だけは `istrPre` と `P` で意味が違う(分解を取る圏が違う)。
+    -- ★★`X` は isotropic なので `Proposition 1.4, (i)` が `C` の側で供給する。
+    intro n
+    exact ⟨(hprop n).1, ⟨⟨prop_1_4_i P _ (fun Z g => Fc.isotropicClosed g hX),
+      (hprop n).2.1.2⟩, (hprop n).2.2⟩⟩
+
 /-! ## ★★divisorial なモノイドでは `d` 倍が単射
 
 ★★**`Ψ` が忠実・充満であることの土台**である。原文は `Proposition 2.5, (iii)` の
