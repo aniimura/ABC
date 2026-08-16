@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[NCBelyi] Theorem 2.5 — Belyi Maps Noncritical at Prescribed Points</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[NCBelyi] Theorem 2.5 — Belyi Maps Noncritical at Prescribed Points</h1>
+
+<p>S. Mochizuki, <em>Noncritical Belyi Maps</em>(全 9 ページ)。物理 p.5–p.6。
+<strong>260 dpi 目視確認 2026-08-17</strong>。</p>
+
+<h2>★なぜこの論文を構造化するのか</h2>
+
+<p>★<code>[GenEll] Theorem 2.1</code>(<strong>IUT を経由しない第 2 の頂上</strong>)の証明が
+<strong>唯一引く外部文献</strong>がこれである(<code>[GenEll]</code> 物理 p.11、
+「except that instead of using "arbitrary" Belyi maps, we use <strong>noncritical Belyi maps</strong>,
+as discussed in [Mzk1]」)。</p>
+
+<p class="open">★<strong>そして [Mzk1] は <code>0_Source</code> にある</strong>(9 ページ)。
+mathlib に <code>Belyi</code> は <strong>0 件</strong>(2026-08-16 実測)だが、
+<strong>原典は手元にある</strong>——ゆえにこの依存は「不在」ではなく「未転写」である。
+★<code>theorem_2_1.needs</code> の分類を <code>.citation … .absent</code> から
+<code>.otherPaper "[NCBelyi]"</code> へ**格上げできる**。</p>
+
+<h2>★★記法の実測(この論文に固有)</h2>
+
+<p class="open">★<strong><code>ℚ̄</code>(上線つき)と <code>ℚ</code> の区別が主張の内容である。</strong>
+<code>Theorem 2.5</code> は <strong><code>ℚ̄</code> 上の曲線</strong>について
+<code>φ : X → ℙ¹<sub>ℚ̄</sub></code> を出す(<code>ℙ¹<sub>ℚ</sub></code> <strong>ではない</strong>)。
+<code>pdftotext</code> は上線を落とすので <strong><code>.txt</code> では両者が同じ <code>Q</code> になる</strong>。</p>
+
+<p class="open">★<strong>この論文では小文字ギリシャ文字 <code>φ</code> が <code>pdftotext</code> に残る</strong>
+——[GenEll] では <code>α β γ δ ε λ μ</code> がすべて空白に潰れたのと**逆**である。
+★<strong>「ギリシャ文字は落ちる」は論文ごとの性質であって、一般則ではない</strong>(2026-08-17 実測)。</p>
+
+<p class="open">★一方 <code>∩</code> は落ちる——p.1 の要約行は
+<code>φ(y) {0, 1, ∞} = ∅</code> と出る(本来は <code>φ(y) ∩ {0,1,∞} = ∅</code>)。</p>
+
+<section class="statement theorem"
+         id="ncbelyi-thm-2-5"
+         data-paper="NCBelyi"
+         data-pdf-page="5"
+         data-item="Theorem 2.5"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Theorem 2.5. (Belyi Maps Noncritical at Prescribed Points) Let X be a smooth, proper, connected curve over <span class="bb bar">Q</span> and</div>
+<div class="reading"><code>X</code> を <code>ℚ̄</code> 上の滑らかな固有連結曲線、
+<code>S, T ⊆ X(ℚ̄)</code> を <code>S ∩ T = ∅</code> なる <code>ℚ̄</code>-有理点の有限集合とする。
+このとき<strong>射 <code>φ : X → ℙ¹<sub>ℚ̄</sub></code> が存在して</strong>:
+<br><strong>(a)</strong> <code>φ</code> は <code>ℙ¹<sub>ℚ̄</sub> \ {0,1,∞}</code> の上で<strong>不分岐</strong>;
+<br><strong>(b)</strong> <code>φ(S) ⊆ {0,1,∞}</code>;
+<br><strong>(c)</strong> <code>φ(T) ∩ {0,1,∞} = ∅</code>。
+<br>さらに <code>X, S, T</code> が数体 <code>F</code> 上定義されているなら、
+<strong><code>φ</code> も <code>F</code> 上定義されたものに取れる</strong>。</div>
+<p class="open">★<strong>(c) が「noncritical」の中身である</strong>——古典的な Belyi の定理は (a)(b) だけを言う。
+指定した点集合 <code>T</code> を <code>{0,1,∞}</code> の**外**に逃がせる、という強化がこの論文の主結果。</p>
+<p class="open">★最後の一文(<code>F</code> 上に降りる)が
+<code>[GenEll] Theorem 2.1</code> にとって本質的である——
+そこでは<strong>数体上の曲線</strong>を扱うからである。</p>
+</section>
+
+<section class="statement theorem"
+         id="ncbelyi-thm-2-5-conditions"
+         data-paper="NCBelyi"
+         data-pdf-page="6"
+         data-item="Theorem 2.5"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Moreover, if X, S, and T are defined over a number field F, then φ may be taken to be defined over F.</div>
+<div class="reading">条件 (a)(b)(c) の直後に置かれた一文。★<strong>これが無いと
+<code>[GenEll] Theorem 2.1</code> では使えない</strong>。</div>
+<p class="open">★証明(p.6)の骨格を目視で追った:
+<code>T</code> に点を足して <code>|T| ≥ 2g_X + 1</code> とし、<code>D ≝ Σ_{t∈T} [t]</code> の
+直線束 <code>L = O_X(D)</code> を取る。<code>deg(ω_X ⊗ L^{-1}(x)) ≤ −2</code> から
+<strong>Serre 双対性</strong>で <code>H¹(X, L(−x)) = 0</code>、
+ゆえに <code>Γ(X,L) ↠ L ⊗ k(x)</code>。
+これで基点を持たない線型系が得られ、有限射 <code>ψ : X → ℙ¹_ℚ̄</code> が出る。
+★<strong>あとは <code>X = ℙ¹</code> の場合に帰着し、Lemma 2.3・2.4 の入れ子帰納法で閉じる</strong>。</p>
+<p class="open">★<strong>要る道具</strong>: 曲線の直線束と次数・<strong>Serre 双対性</strong>・
+長完全列・線型系。★mathlib に Serre 双対性は無い(2026-08-17 未測定——
+これは「まだ測っていない」であって「無い」ではない)。</p>
+</section>
+
+</body>
+</html>

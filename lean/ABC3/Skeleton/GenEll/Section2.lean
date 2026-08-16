@@ -91,8 +91,8 @@ def theorem_2_1.src : Source :=
 
 ★**(i) ⟹ (ii) は 1 行**(定義から)。実質はすべて **(ii) ⟹ (i)** の側にある。 -/
 def theorem_2_1.needs : List ProofObligation :=
-  [ .citation "[GenEll]" "noncritical Belyi maps([Mzk1] = Mochizuki, Noncritical Belyi Maps)"
-      (.absent "mathlib に `Belyi` は 0 件(2026-08-16、Mathlib 全体を `Belyi` で検索して 0 件)") 11,
+  [ .otherPaper "[NCBelyi]"
+      "Theorem 2.5(Belyi Maps Noncritical at Prescribed Points)——★原文 [GenEll] p.11 の『[Mzk1]』がこれである。**原典 9 ページは 0_Source にあり、statement は Skeleton/NCBelyi/Theorem25.lean に固定済み**(2026-08-17)。mathlib に `Belyi` は 0 件だが、これは『不在』ではなく『未転写』である" 5,
     .otherPaper "[GenEll]" "Proposition 1.7(導手と log-different)" 9,
     .otherPaper "[GenEll]" "Example 1.3, (ii)(compactly bounded subset と support)" 5,
     .otherPaper "[GenEll]" "Remark 1.4.1 / Remark 1.5.1(理論が X_ℚ・(X_ℚ,D_ℚ) だけに依ること)" 8,

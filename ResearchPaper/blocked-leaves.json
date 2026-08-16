@@ -1,35 +1,55 @@
 {
-  "measuredAt": "2026-08-15",
-  "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
-  "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
-  "blocked": [
-    {
-      "key": "[IUTchIII] Definition 3.8",
-      "reason": "Θ-パイロット対象 / q-パイロット対象は『大域実現 Frobenioid の対象で、ある monoid の生成元(捩れを除いて)により定まるもの』として定義される(物理 p.112、目視確認済み)。Frobenioid を我々は持っていない。名前だけの structure を置けば節点は増えるが、それは**被覆率を上げるためだけの空の節点**であり、指標を壊す。",
-      "unblockedBy": "Frobenioid([FrdI])の転写。2026-08-15 の機械概算で [FrdI] は根 Theorem 6.4 から到達 45 項目・辺 184 本・平均出次数 4.1 で、測った4論文の中で最も密。"
-    },
-    {
-      "key": "[IUTchIII] Proposition 3.9",
-      "reason": "★2026-08-15 に定義を確定させた(物理 p.115/p.116/p.119/p.120 を 400dpi 目視)。Proposition 3.9 は**2つの正規化**を要求する。(A) **packet-normalization**(p.115): 「multiplication of an element of 𝔐(−) by p_v corresponds to adding the quantity −log(p_v)」。これは対数体積そのものの性質で、我々の `padicLogVol` の上に載る。**語彙の不足は無い**。(B) **procession-normalization**(p.116): 「log-volumes on the products of the 𝔐(−) associated to the various **capsules** under consideration, which we normalize by taking the **average**, over the various capsules under consideration」。★演算は**重みなしの平均**で、算術としては自明。内容はすべて**索引構造**にある。",
-      "unblockedBy": "★(B) を阻んでいるのは **語彙**である。索引構造は p.120 で具体的に書かれている——procession は `j ∈ {1, …, l⋇}` で添字づけられ、j 番目の capsule の索引集合は `S^±_{j+1}`(ラベル {0,…,j})。しかし capsule の**中身**は `𝒟⊢-prime-strip`(Proposition 3.4, (ii) / [IUTchI] Proposition 6.9, (ii))であり、prime-strip / capsule / procession はいずれも IUT 固有の語彙で、我々は1つも持っていない。★平均だけを `Finset.sum / card` として書けば型は付くが、それは**索引構造の無い空の節点**であり、被覆率を上げるだけになる。★(A) の側は別で、mathlib の Haar のスケーリング(`μ(p·U) = p⁻¹·μ(U)`)が要る。これは語彙の問題ではなく**数学の作業**で、単位球の p 個の剰余類分解(ℤ_p ↔ closedBall(0,1) の橋 + `PadicInt.toZModPow`)を要する。mathlib の Haar 一意性(`Mathlib/MeasureTheory/Measure/Haar/Unique.lean`)は積分ベース(`haarScalarFactor`)で、こちらも軽くはない。",
-      "★halfSolved": "対数体積そのものは `Found/IUTchIII/LogVolume.lean` に構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残りは (A) 数学の作業 + (B) 語彙の不在。"
-    }
-  ],
-  "expandableWithWork": [
-    {
-      "key": "[IUTchII] Corollary 4.10",
-      "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
-      "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
-    }
-  ],
-  "★2026-08-15 の仕分け直しで消えた葉": [
-    {
-      "key": "[AbsTopIII] Definition 5.1",
-      "why": "辺そのものを落としたため葉でなくなった。`InitialThetaDataFieldPart` が転写したのは [IUTchI] Definition 3.1 の条件 (a) であり、[AbsTopIII] Definition 5.1 を引用しているのは条件 (b) である。(b) は転写していないので、その引用を辺として書くのは誤りだった。"
-    },
-    {
-      "key": "[AbsTopIII] (L1)",
-      "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
-    }
-  ]
+ "measuredAt": "2026-08-17(NCBelyi の 3 件と GenEll Definition 1.1 を追加。既存は 2026-08-15)",
+ "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
+ "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
+ "blocked": [
+  {
+   "key": "[IUTchIII] Definition 3.8",
+   "reason": "Θ-パイロット対象 / q-パイロット対象は『大域実現 Frobenioid の対象で、ある monoid の生成元(捩れを除いて)により定まるもの』として定義される(物理 p.112、目視確認済み)。Frobenioid を我々は持っていない。名前だけの structure を置けば節点は増えるが、それは**被覆率を上げるためだけの空の節点**であり、指標を壊す。",
+   "unblockedBy": "Frobenioid([FrdI])の転写。2026-08-15 の機械概算で [FrdI] は根 Theorem 6.4 から到達 45 項目・辺 184 本・平均出次数 4.1 で、測った4論文の中で最も密。"
+  },
+  {
+   "key": "[IUTchIII] Proposition 3.9",
+   "reason": "★2026-08-15 に定義を確定させた(物理 p.115/p.116/p.119/p.120 を 400dpi 目視)。Proposition 3.9 は**2つの正規化**を要求する。(A) **packet-normalization**(p.115): 「multiplication of an element of 𝔐(−) by p_v corresponds to adding the quantity −log(p_v)」。これは対数体積そのものの性質で、我々の `padicLogVol` の上に載る。**語彙の不足は無い**。(B) **procession-normalization**(p.116): 「log-volumes on the products of the 𝔐(−) associated to the various **capsules** under consideration, which we normalize by taking the **average**, over the various capsules under consideration」。★演算は**重みなしの平均**で、算術としては自明。内容はすべて**索引構造**にある。",
+   "unblockedBy": "★(B) を阻んでいるのは **語彙**である。索引構造は p.120 で具体的に書かれている——procession は `j ∈ {1, …, l⋇}` で添字づけられ、j 番目の capsule の索引集合は `S^±_{j+1}`(ラベル {0,…,j})。しかし capsule の**中身**は `𝒟⊢-prime-strip`(Proposition 3.4, (ii) / [IUTchI] Proposition 6.9, (ii))であり、prime-strip / capsule / procession はいずれも IUT 固有の語彙で、我々は1つも持っていない。★平均だけを `Finset.sum / card` として書けば型は付くが、それは**索引構造の無い空の節点**であり、被覆率を上げるだけになる。★(A) の側は別で、mathlib の Haar のスケーリング(`μ(p·U) = p⁻¹·μ(U)`)が要る。これは語彙の問題ではなく**数学の作業**で、単位球の p 個の剰余類分解(ℤ_p ↔ closedBall(0,1) の橋 + `PadicInt.toZModPow`)を要する。mathlib の Haar 一意性(`Mathlib/MeasureTheory/Measure/Haar/Unique.lean`)は積分ベース(`haarScalarFactor`)で、こちらも軽くはない。",
+   "★halfSolved": "対数体積そのものは `Found/IUTchIII/LogVolume.lean` に構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残りは (A) 数学の作業 + (B) 語彙の不在。"
+  },
+  {
+   "key": "[GenEll] Definition 1.1",
+   "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。",
+   "unblockedBy": "★**複素解析空間の理論**(`X(ℂ)` の位相と、その上の連接層・エルミート計量)。これは mathlib に着手の形跡が無い。★ただし `ADiv(F)` と正規化次数、および**差積イデアル → 算術因子**(`Found/GenEll/LogDiff.lean`、2026-08-17)は既に実装済みで、`Definition 1.5, (iii)` の側は `X` を必要としないことも分かっている——**§1 は一枚岩ではない**。"
+  }
+ ],
+ "expandableWithWork": [
+  {
+   "key": "[IUTchII] Corollary 4.10",
+   "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
+   "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
+  },
+  {
+   "key": "[NCBelyi] Lemma 2.2",
+   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.3。入れ子帰納法の受け皿(`Theorem 2.5` の最終段が『Thus, Theorem 2.5 follows from Lemma 2.2』で閉じる)。まだ逐語を転写していないだけである。",
+   "cost": "1_Structured/Noncritical Belyi Maps/ に逐語 1〜2 単位を足す(物理 p.3 の 260 dpi 目視 → HTML)"
+  },
+  {
+   "key": "[NCBelyi] Lemma 2.3",
+   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.4。有理係数の自己同型による正規化(`|α| ≤ 1` かつ `|β| ≥ C` に持ち込む段)。まだ逐語を転写していないだけである。",
+   "cost": "同上(物理 p.4)"
+  },
+  {
+   "key": "[NCBelyi] Lemma 2.4",
+   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.5。`S ⊆ ℙ¹(ℚ)` の場合への帰着。`m(S)`・`d(S)` についての**入れ子帰納法**が本体。まだ逐語を転写していないだけである。",
+   "cost": "同上(物理 p.5。★証明は目視済みで、`m(S′) < m(S)` または `m(S′) = m(S) ∧ d(S′) < d(S)` の 2 分岐まで確認してある)"
+  }
+ ],
+ "★2026-08-15 の仕分け直しで消えた葉": [
+  {
+   "key": "[AbsTopIII] Definition 5.1",
+   "why": "辺そのものを落としたため葉でなくなった。`InitialThetaDataFieldPart` が転写したのは [IUTchI] Definition 3.1 の条件 (a) であり、[AbsTopIII] Definition 5.1 を引用しているのは条件 (b) である。(b) は転写していないので、その引用を辺として書くのは誤りだった。"
+  },
+  {
+   "key": "[AbsTopIII] (L1)",
+   "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
+  }
+ ]
 }

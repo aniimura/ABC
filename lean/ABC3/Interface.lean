@@ -7,6 +7,7 @@ import ABC3.Interface.GenEll.HeightTheory
 import ABC3.Interface.GenEll.AbcSetup
 import ABC3.Interface.GenEll.TateLocal
 import ABC3.Interface.GenEll.EllModuli
+import ABC3.Interface.NCBelyi.BelyiSetup
 /-!
 # Interface — まだ無い基礎の型
 
