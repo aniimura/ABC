@@ -3036,4 +3036,75 @@ theorem isAutAmple_of_baseTrivial_of_untwisted [MorphismProperty.IsMultiplicativ
   rw [hpu, hbv, hbu, hgeq]
   simp
 
+include P in
+/-- ★★★**`base-trivial` ⟹ `Aut-ample`**(★捻れに触れない版)。
+
+★★**`htwist` を使わない** —— 代わりに
+`hsurj`「`Φ(A)` のどの元も **底恒等な pre-step 自己射の `Div`** として現れる」
+だけを仮定する。
+
+★★**筋がずっと素直になる**:
+`preStepSpan` の 2 本 `φ', ψ'`(`A` の pre-step 自己射)の `Div` を
+**後から底恒等な pre-step を継いで揃える** ——
+`Φ(Base φ')` は全単射(`Definition 1.1, (ii), (b)`)なので
+`Div r₁ := Φ(Base φ')⁻¹(Div ψ')` が取れて、
+`Div (φ' ≫ r₁) = Div ψ' + Div φ'`。同様に `Div (ψ' ≫ r₂) = Div φ' + Div ψ'`。
+★**底は `𝟙` を継ぐので変わらず、比 `g` も保たれる。**
+あとは `coaPre_base_diff` が同型 `f` を与え、★**`Base f = g` がそのまま出る。**
+
+★★**正直な注記**: `hsurj` は `base-trivial` の下で **`Aut-ample` と同値**である
+(逆向きは、`Div = x` の自己射の底を `Aut-ample` で打ち消せばよい)。
+★**したがってこれは穴を閉じたのではなく、穴を言い換えたものである。**
+★ただし `htwist`(捻れの技術的条件)より **`Definition 1.2` の語彙に近い**形になった:
+「**`𝒪^▷(A) → Φ(A)` が全射**」。 -/
+theorem isAutAmple_of_baseTrivial_of_divSurj
+    [MorphismProperty.IsMultiplicative (coaPreProp P)] (F : FrobenioidCore P)
+    (hequiv : ∀ X : C, (coaPreUnderFunctor P X).IsEquivalence)
+    {A : C} (h : IsBaseTrivial P A)
+    (hsurj : ∀ x : Φ.val (P.toElem.obj A).base, ∃ r : A ⟶ A, IsPreStep P r ∧
+      P.Base r = 𝟙 _ ∧ P.Div r = x) :
+    IsAutAmple P A := by
+  intro g hg
+  haveI := hg
+  obtain ⟨X, φ, ψ, hφ, hψ, hgeq⟩ := F.preStepSpan A A g hg
+  haveI hφb : IsIso (P.Base φ) := hφ.2
+  obtain ⟨e⟩ := h X ⟨(asIso (P.Base φ)).symm⟩
+  set φ' : A ⟶ A := e.inv ≫ φ with hφ'def
+  set ψ' : A ⟶ A := e.inv ≫ ψ with hψ'def
+  have hφ' : IsPreStep P φ' := (isPreStep_of_isIso P e.inv).comp P hφ
+  have hψ' : IsPreStep P ψ' := (isPreStep_of_isIso P e.inv).comp P hψ
+  haveI hb1 : IsIso (P.Base φ') := hφ'.2
+  haveI hb2 : IsIso (P.Base ψ') := hψ'.2
+  -- ★`Φ(Base φ')` は全単射
+  obtain ⟨y₁, hy₁⟩ := (Φ.fsmIso (P.Base φ') (isFSMMorphism_of_isIso _)).2 (P.Div ψ')
+  obtain ⟨y₂, hy₂⟩ := (Φ.fsmIso (P.Base ψ') (isFSMMorphism_of_isIso _)).2 (P.Div φ')
+  have hy₁' : Φ.map (P.Base φ') y₁ = P.Div ψ' := hy₁
+  have hy₂' : Φ.map (P.Base ψ') y₂ = P.Div φ' := hy₂
+  obtain ⟨r₁, hr₁s, hr₁b, hr₁d⟩ := hsurj y₁
+  obtain ⟨r₂, hr₂s, hr₂b, hr₂d⟩ := hsurj y₂
+  -- ★`Div` を揃える
+  have hd1 : P.Div (φ' ≫ r₁) = P.Div ψ' + P.Div φ' := by
+    rw [P.Div_comp, hr₁d, hy₁', hr₁s.1]
+    simp
+  have hd2 : P.Div (ψ' ≫ r₂) = P.Div φ' + P.Div ψ' := by
+    rw [P.Div_comp, hr₂d, hy₂', hr₂s.1]
+    simp
+  have hdeq : P.Div (φ' ≫ r₁) = P.Div (ψ' ≫ r₂) := by
+    rw [hd1, hd2, add_comm]
+  -- ★底は変わらない
+  have hb1' : P.Base (φ' ≫ r₁) = P.Base φ' := by rw [P.Base_comp, hr₁b, Category.comp_id]
+  have hb2' : P.Base (ψ' ≫ r₂) = P.Base ψ' := by rw [P.Base_comp, hr₂b, Category.comp_id]
+  obtain ⟨f, hfi, hf⟩ := coaPre_base_diff P hequiv (φ' ≫ r₁) (ψ' ≫ r₂)
+    ⟨endo_isCoAngular P F _, hφ'.comp P hr₁s⟩ ⟨endo_isCoAngular P F _, hψ'.comp P hr₂s⟩ hdeq
+  refine ⟨f, hfi, ?_⟩
+  have hbf := congrArg P.Base hf
+  rw [P.Base_comp, hb1', hb2'] at hbf
+  -- ★`Base φ' ≫ Base f = Base ψ'`、かつ `g = (Base φ')⁻¹ ≫ Base ψ'`
+  have hbφ' : P.Base φ' = P.Base e.inv ≫ P.Base φ := by rw [hφ'def, P.Base_comp]
+  have hbψ' : P.Base ψ' = P.Base e.inv ≫ P.Base ψ := by rw [hψ'def, P.Base_comp]
+  haveI hei : IsIso (P.Base e.inv) := isBaseIsomorphism_of_isIso P e.inv
+  refine (cancel_epi (P.Base φ')).mp ?_
+  rw [hbf, hgeq, hbφ', hbψ']
+  simp
+
 end ABC3.Found.FrdI
