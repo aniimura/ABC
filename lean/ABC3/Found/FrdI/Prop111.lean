@@ -12,17 +12,27 @@ import ABC3.Found.FrdI.Prop110
 
 ## ★この命題の規模(着手前の測定)
 
-**7 条 (i)–(vii)、主張は 15**:
+**7 条 (i)–(vii)、主張は 19**:
+
+★★**着手前の私の数えは 15 だった。★検証役が原文から数え直して 19 になった**
+(2026-08-16)。★**差は (iv) と (v) にあり、どちらも「原文が名詞句の中に
+畳み込んだ主張」を私が落としていた** ——
+「an **injection of monoids**」の**準同型**と**単射**、
+「**arbitrary** morphism of `𝒞^lin`」「unique ψ **in `𝒞^lin`**」
+「**Moreover**, φ is a pull-back morphism if and only if ψ is」。
 
 | 条 | 主張 | 内容 |
 |---|---|---|
 | (i) | 1 | `𝒞^pl-bk → 𝒟` が **full**(Aut-ample ＋ base-trivial 型) |
 | (ii) | 1 | 同じ関手が **faithful**(unit-trivial 型) |
 | (iii) | 1 | pull-back に沿った自己射の一意な持ち上げ |
-| (iv) | 2 | `𝒪^▷(A) ↪ 𝒪^▷(B)` の存在 ＋ 一意性 |
-| (v) | 4 | `Definition 1.3, (iii), (d)` の圏同値の**関手性** |
+| (iv) | **4** | `𝒪^▷(A) → 𝒪^▷(B)` の存在 ＋ ★**準同型** ＋ ★**単射** ＋ 一意性 |
+| (v) | **6** | non-resp'd の存在・一意性 ＋ resp'd の存在・一意性 ＋ ★**`ψ` が linear** ＋ ★**pull-back ⟺** |
 | (vi) | 4 | pull-back が FSM / fiberwise-surj / mono / irreducible ⟺ その底が |
 | (vii) | 2 | co-angular pre-step の持ち上げ ＋「In particular」FSM |
+
+★★**教訓**: 主張を数えるとき、★**原文の名詞句の中を開く**こと。
+「injection of monoids」は 1 語ではなく 2 主張である。
 
 ## ★★`Proposition 1.10` の投資が回収されている
 
