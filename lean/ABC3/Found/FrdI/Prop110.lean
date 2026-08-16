@@ -55,37 +55,12 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 
 原文 (FrdI p.17):
 > that either α or β is an isomorphism, then we shall say that φ is irreducible. We
+
+★★**2026-08-16 に `CategoryVocabulary.lean` へ移した。**
+`Proposition 1.14` が同じ段落の `FSMI` / `FSMFF-type` / `subordinate` を要求し、
+★**それらは `irreducible` の上に建つ**ので、§0 の語彙は 1 か所にまとめた。
+名前空間は同じ(`ABC3.Found.FrdI`)なので、ここでの参照はそのまま通る。
 -/
-
-section Vocab
-
-/-- **[FrdI] §0** `irreducible`(射)。
-
-原文の `φ = α ◦ β` は **「先に `β`、次に `α`」**であり、Lean では `φ = β ≫ α` と書く。
-★**逆に写すと別の定義になる** —— `α` と `β` の役割は非対称だからである
-(minimal-adjoint と minimal-coadjoint の違いがまさにそれ)。
-
-★**「分解できない」ではなく「自明にしか分解できない」。** -/
-def IsIrreducibleMor {A B : C} (φ : A ⟶ B) : Prop :=
-  ¬ IsIso φ ∧ ∀ (X : C) (β : A ⟶ X) (α : X ⟶ B), φ = β ≫ α → IsIso β ∨ IsIso α
-
-/-- ★**非退化(下から)**: 同型は irreducible でない。定義の第1条件そのものだが、
-**「irreducible が空でない」を主張する前に「全体でもない」を押さえる**ために書く。 -/
-theorem not_isIrreducibleMor_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] :
-    ¬ IsIrreducibleMor φ := fun h => h.1 inferInstance
-
-/-- ★**非退化(上から)**: `φ` が irreducible なら、`φ = β ≫ α` の分解で
-**両方が非同型になることはない**。定義の言い換えだが、
-★**使うときはこの向き**(分解を与えて片方の同型性を得る)である。 -/
-theorem IsIrreducibleMor.isIso_left_or_right {A B X : C} {φ : A ⟶ B}
-    (h : IsIrreducibleMor φ) (β : A ⟶ X) (α : X ⟶ B) (hf : φ = β ≫ α) :
-    IsIso β ∨ IsIso α := h.2 X β α hf
-
-end Vocab
-
-def IsIrreducibleMor.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — irreducible",
-    sectionId := "frdi-s0-irreducible" }
 
 /-! ## ★(i) —— 一意性
 

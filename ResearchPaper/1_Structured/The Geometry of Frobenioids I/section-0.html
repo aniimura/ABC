@@ -269,6 +269,41 @@ FSMI-morphisms」と述べている</strong>。これは<strong>非退化の裏�
 <strong>(iv)+(v) で「Frobenius 型射の全体は irreducible なものから生成される」</strong>ことになる。</p>
 </section>
 
+<h2>★2026-08-16 追加 —— `Proposition 1.14` が要求した §0 の語彙</h2>
+
+<section class="statement definition"
+         id="frdi-s0-fsmff"
+         data-paper="FrdI"
+         data-pdf-page="17"
+         data-item="§0 Categories — FSMFF-type"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">We shall say that a category C is of FSMFF-type [i.e., “FSM-finitely factorizable</div>
+<div class="verbatim">type”] if the following two conditions hold: (a) every FSM-morphism of C which is</div>
+<div class="verbatim">not an isomorphism factors as a composite of finitely many FSMI-morphisms; (b)</div>
+<div class="verbatim">for every A ∈Ob(C), there exists a natural number N such that for every composite</div>
+<div class="verbatim">of FSMI-morphisms φ1, . . . , φn such that the domain of φ1 is equal to A, it holds</div>
+<div class="verbatim">that n ≤N. Thus, if C is of FSM-type, then it is of FSMFF-type. Also, we observe</div>
+<div class="verbatim">that [by condition (b)] no endomorphism of an object of a category of FSMFF-type</div>
+<div class="verbatim">is an FSMI-morphism.</div>
+<div class="reading"><strong>FSMFF-type</strong>（FSM-finitely factorizable type）＝
+(a)「同型でない FSM 射は有限個の FSMI 射の合成に分解する」＋
+(b)「対象ごとに、そこを域とする FSMI 射の合成鎖の長さに上界がある」。</div>
+<p class="open">★<strong>(b) の量化子の順序が要点</strong>：上界 <code>N</code> は
+<strong>対象 <code>A</code> ごと</strong>に取れればよく、圏全体で一様である必要はない。
+原文の「for every <code>A ∈ Ob(C)</code>, there exists a natural number <code>N</code>」の
+順序をそのまま写す。</p>
+<p class="open">★<strong>原文はこの段落で自分から 2 つの帰結を述べている</strong>：
+「FSM-type ⟹ FSMFF-type」と「FSMFF-type の圏では自己射は FSMI でない」。
+★<strong>前者は <code>Thus</code>、後者は <code>by condition (b)</code> の一言だが、
+中身は違う</strong> —— 前者は (a) が空虚に真になるだけでなく、(b) 側で
+「鎖の長さが 0 に限る」ことを<strong>導く</strong>必要があり、
+後者は「FSMI な自己射があれば任意の長さの鎖が作れる」という
+<strong>繰り返しの構成</strong>である。</p>
+<p class="open">★<code>Proposition 1.14</code> は <strong>底の圏 <code>D</code> が
+FSMFF-type であること</strong>を仮定し、その条件 (a) を使って
+「<code>Base(α)</code> が従属する FSMI 射を持つ」を出す。</p>
+</section>
+
 <h2>★2026-08-15 追加 —— `Proposition 1.8` が要求した §0 の語彙</h2>
 
 <section class="statement definition"

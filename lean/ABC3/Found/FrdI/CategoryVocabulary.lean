@@ -471,6 +471,134 @@ def IsMinimalCoadjoint (S : MorphismProperty C) {A B : C} (φ : A ⟶ B) : Prop 
 def IsMidAdjoint (S : MorphismProperty C) {A B : C} (φ : A ⟶ B) : Prop :=
   ∀ (X Y : C) (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B), φ = γ ≫ β ≫ α → S β → IsIso β
 
+/-! ### §0 —— `subordinate` / `irreducible` / `FSMI` / `FSMFF-type`(原文 p.17–18)
+
+原文 (FrdI p.17):
+> admits a factorization φ = α ◦β ◦γ in C, then we shall say that β is subordinate to
+
+原文 (FrdI p.17):
+> that either α or β is an isomorphism, then we shall say that φ is irreducible. We
+
+原文 (FrdI p.17):
+> shall refer to an FSM-morphism which is irreducible as an FSMI-morphism. Thus,
+
+原文 (FrdI p.17):
+> not an isomorphism factors as a composite of finitely many FSMI-morphisms; (b)
+
+原文 (FrdI p.18):
+> that n ≤N. Thus, if C is of FSM-type, then it is of FSMFF-type. Also, we observe
+
+★★**この 4 語は同じ段落で、順に積み上がっている**(`irreducible` → `FSMI` →
+`FSMFF-type`、`subordinate` は `mid-adjoint` と同じ分解の形)。
+★**`Proposition 1.14` はこの 4 語すべてを使う。**
+
+★★**`irreducible` は当初 `Prop110.lean` に置いていたが、ここへ移した**(2026-08-16)。
+★**§0 の語彙は §0 の場所に置く** —— `Proposition 1.14` が同じ段落の残り 3 語を
+要求したことで、分散していたことが問題になった。
+-/
+
+/-- **§0** `subordinate to φ` —— `φ = γ ≫ β ≫ α` と分解できるとき `β` は `φ` に従属。
+
+★`mid-adjoint` とちょうど同じ分解の形である ——
+★**`φ` が `S` に mid-adjoint とは「`S` に属する従属射はすべて同型」**ということ。 -/
+def IsSubordinateTo {A B X Y : C} (β : X ⟶ Y) (φ : A ⟶ B) : Prop :=
+  ∃ (γ : A ⟶ X) (α : Y ⟶ B), φ = γ ≫ β ≫ α
+
+/-- **§0** `irreducible`(射)。
+
+原文の `φ = α ◦ β` は **「先に `β`、次に `α`」**であり、Lean では `φ = β ≫ α` と書く。
+★**逆に写すと別の定義になる** —— `α` と `β` の役割は非対称だからである
+(minimal-adjoint と minimal-coadjoint の違いがまさにそれ)。
+
+★**「分解できない」ではなく「自明にしか分解できない」。** -/
+def IsIrreducibleMor {A B : C} (φ : A ⟶ B) : Prop :=
+  ¬ IsIso φ ∧ ∀ (X : C) (β : A ⟶ X) (α : X ⟶ B), φ = β ≫ α → IsIso β ∨ IsIso α
+
+/-- ★**非退化(下から)**: 同型は irreducible でない。定義の第1条件そのものだが、
+**「irreducible が空でない」を主張する前に「全体でもない」を押さえる**ために書く。 -/
+theorem not_isIrreducibleMor_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] :
+    ¬ IsIrreducibleMor φ := fun h => h.1 inferInstance
+
+/-- ★**非退化(上から)**: `φ` が irreducible なら、`φ = β ≫ α` の分解で
+**両方が非同型になることはない**。定義の言い換えだが、
+★**使うときはこの向き**(分解を与えて片方の同型性を得る)である。 -/
+theorem IsIrreducibleMor.isIso_left_or_right {A B X : C} {φ : A ⟶ B}
+    (h : IsIrreducibleMor φ) (β : A ⟶ X) (α : X ⟶ B) (hf : φ = β ≫ α) :
+    IsIso β ∨ IsIso α := h.2 X β α hf
+
+/-- **§0** `FSMI-morphism` —— irreducible な FSM 射。 -/
+def IsFSMI {A B : C} (φ : A ⟶ B) : Prop := IsFSMMorphism φ ∧ IsIrreducibleMor φ
+
+/-- ★**原文の「Thus, a category of FSM-type does not contain any FSMI-morphisms.」** ——
+FSM 型の圏には FSMI 射が無い。★**原文が `Thus` で片づける一歩**だが、
+中身は「FSM 射は同型 ⟹ irreducible の第1条件に反する」だけである。 -/
+theorem not_isFSMI_of_isOfFSMType (h : IsOfFSMType C) {A B : C} (φ : A ⟶ B) :
+    ¬ IsFSMI φ := fun hf => hf.2.1 (h A B φ hf.1)
+
+/-- **§0** `FSMI 射の合成鎖` —— `φ : A ⟶ B` が長さ `n` の FSMI 射の合成であること。
+
+★原文の `φ_n ◦ … ◦ φ_1` を、**長さを添字として持つ帰納的述語**で書く。
+★**`FSMFF-type` の条件 (a)(b) はどちらもこの述語で述べられる** ——
+(a) は「ある `n` がある」、(b) は「`n` に上界がある」。 -/
+inductive IsFSMIChain : ℕ → ∀ {A B : C}, (A ⟶ B) → Prop
+  | nil {A : C} : IsFSMIChain 0 (𝟙 A)
+  | cons {n : ℕ} {A B E : C} {φ : A ⟶ B} {ψ : B ⟶ E} :
+      IsFSMI φ → IsFSMIChain n ψ → IsFSMIChain (n + 1) (φ ≫ ψ)
+
+variable (C) in
+/-- **§0** `category of FSMFF-type`(FSM-finitely factorizable type)。
+
+原文の 2 条件:
+- **(a)** 同型でない FSM 射は、**有限個の FSMI 射の合成**に分解する
+- **(b)** 各対象 `A` について、`A` を域とする FSMI 射の合成鎖の長さに**一様な上界**がある
+
+★★**(b) の量化子の順序が要点**である —— 上界 `N` は **`A` ごと**に取れればよく、
+圏全体で一様である必要はない。★**「for every A ∈ Ob(C), there exists a natural
+number N」の順序をそのまま写す。** -/
+def IsOfFSMFFType : Prop :=
+  (∀ (A B : C) (φ : A ⟶ B), IsFSMMorphism φ → ¬ IsIso φ →
+      ∃ n : ℕ, 0 < n ∧ IsFSMIChain n φ) ∧
+  (∀ A : C, ∃ N : ℕ, ∀ (n : ℕ) (B : C) (φ : A ⟶ B), IsFSMIChain n φ → n ≤ N)
+
+/-- ★**原文の「Thus, if C is of FSM-type, then it is of FSMFF-type.」** ——
+FSM 型なら FSMFF 型。
+
+★★**原文は `Thus` で済ませるが、2 条件それぞれに理由が要る**:
+- **(a)**: FSM 型では同型でない FSM 射が**存在しない**ので、含意は空虚に真
+- **(b)**: FSMI 射が 1 本も無いので、鎖の長さは必ず `0`。したがって `N = 0` で足りる
+
+★**(b) のほうは「空虚に真」ではない** —— 鎖 `IsFSMIChain n φ` から
+`n = 0` を**導く**必要がある(`cons` の場合に FSMI 射の非存在で矛盾を出す)。 -/
+theorem isOfFSMFFType_of_isOfFSMType (h : IsOfFSMType C) : IsOfFSMFFType C := by
+  constructor
+  · exact fun A B φ hφ hni => absurd (h A B φ hφ) hni
+  · refine fun A => ⟨0, ?_⟩
+    intro n B φ hchain
+    cases hchain with
+    | nil => exact Nat.le_refl 0
+    | cons hfsmi _ => exact absurd hfsmi (not_isFSMI_of_isOfFSMType h _)
+
+/-- ★**原文の「no endomorphism of an object of a category of FSMFF-type is an
+FSMI-morphism」** —— FSMFF 型の圏では自己射は FSMI でない。
+
+★★**原文は「by condition (b)」と一言で片づけるが、中身は
+「FSMI な自己射があれば、それを何度でも繰り返して任意の長さの鎖が作れる」**である。
+★`N + 1` 回繰り返した鎖が `N` を超えるので矛盾する。 -/
+theorem not_isFSMI_endo_of_isOfFSMFFType (h : IsOfFSMFFType C) {A : C} (φ : End A) :
+    ¬ IsFSMI (φ : A ⟶ A) := by
+  intro hφ
+  obtain ⟨N, hN⟩ := h.2 A
+  have hchain : ∀ n : ℕ, IsFSMIChain n ((φ : A ⟶ A) ^ n : End A) := by
+    intro n
+    induction n with
+    | zero => exact IsFSMIChain.nil
+    | succ m ih =>
+        have hpow : ((φ : A ⟶ A) ^ (m + 1) : End A) = (φ : A ⟶ A) ≫ ((φ : A ⟶ A) ^ m : End A) := by
+          rw [pow_succ]; rfl
+        rw [hpow]
+        exact IsFSMIChain.cons hφ ih
+  exact absurd (hN (N + 1) A _ (hchain (N + 1))) (by omega)
+
 /-! ### 非退化(3語)
 
 ★**満たす例**と**満たさない例**を、`S = ⊤`(すべての射)について両方与える。
@@ -742,6 +870,22 @@ def IsMinimalCoadjoint.src : ABC3.Meta.Source :=
 def IsMidAdjoint.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 17, item := "§0 Categories — mid-adjoint",
     sectionId := "frdi-s0-minimal-adjoint" }
+
+def IsSubordinateTo.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — subordinate",
+    sectionId := "frdi-s0-irreducible" }
+
+def IsIrreducibleMor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — irreducible",
+    sectionId := "frdi-s0-irreducible" }
+
+def IsFSMI.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — FSMI-morphism",
+    sectionId := "frdi-s0-irreducible" }
+
+def IsOfFSMFFType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 17, item := "§0 Categories — FSMFF-type",
+    sectionId := "frdi-s0-fsmff" }
 
 def IsSubAutomorphism.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 14, item := "§0 Categories — sub-automorphism",
