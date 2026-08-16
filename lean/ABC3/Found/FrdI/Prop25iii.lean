@@ -581,6 +581,108 @@ theorem psiOTri_conj {Y Y' : C} (j : Y ⟶ Y') [IsIso j] (d : ℕ+) (β : OTri P
 
 end ConjPsi
 
+/-! ## ★★★★★`Ψ` は **isotropic hull の埋め込みと可換**
+
+★★これが原文の段 3 の鍵である。`β ∈ 𝒪^▷(Y)` と hull `h : Y ⟶ Y^istr` に対し
+`hullOTriMap_sq` が `β ≫ h = h ≫ ι(β)` を与える(`ι` は
+`Proposition 2.2, (iv)` の単射)。★したがって
+
+  `Ψ(β ≫ h) = Ψ(h ≫ ι β) = h ≫ Ψ(ι β)`   (左からの合成則、isotropy 不要)
+  `Ψ(β) ≫ h = h ≫ ι(Ψ β)`                  (同じ四角形)
+
+なので、★★★**`Ψ(ι β) = ι(Ψ β)` さえ言えれば `Ψ(β ≫ h) = Ψ(β) ≫ h` が出る。**
+
+★そしてそれは `ι` が**単元を保ち**(モノイド準同型)、★**`τ` を保つ**
+(`Definition 2.3, (b)` の `hullPullback`)ことから、分裂が `ι` と可換になって従う。
+-/
+
+section HullPsi
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ) {Y Z : C} {hh : Y ⟶ Z}
+  (hhull : IsIsotropicHull P hh)
+
+/-- ★hull の誘導する `𝒪^▷` の単射を、`𝒪^▷` 上のモノイド準同型として。 -/
+noncomputable def hullOTriMon : OTri P Y →* OTri P Z where
+  toFun x := ⟨hullOTriHom P hh hhull ((x : End Y)), hullOTriHom_mem P hh hhull _ x.2⟩
+  map_one' := Subtype.ext (map_one (hullOTriHom P hh hhull))
+  map_mul' x y := Subtype.ext (map_mul (hullOTriHom P hh hhull) _ _)
+
+include P in
+/-- ★**hull の埋め込みは単元を単元へ写す**。 -/
+theorem hullOTriMon_otimes_mem (u : OTri P Y) (hu : ((u : End Y)) ∈ OTimes P Y) :
+    ((hullOTriMon P hhull u : OTri P Z) : End Z) ∈ OTimes P Z := by
+  haveI : IsIso ((((u : End Y))) : Y ⟶ Y) := (CategoryTheory.isUnit_iff_isIso _).mp hu.2
+  have hbu : P.Base ((((u : End Y))) : Y ⟶ Y) = 𝟙 _ := by
+    have h : P.Base ((((u : End Y))) : Y ⟶ Y) = P.Base (𝟙 Y) := u.2.1
+    rwa [P.Base_id] at h
+  have hinv : (inv ((((u : End Y))) : Y ⟶ Y)) ∈ OTri P Y := by
+    refine ⟨?_, degFr_of_isIso P _⟩
+    show P.Base (inv ((((u : End Y))) : Y ⟶ Y)) = P.Base (𝟙 Y)
+    have h : P.Base (inv ((((u : End Y))) : Y ⟶ Y))
+        ≫ P.Base ((((u : End Y))) : Y ⟶ Y) = P.Base (𝟙 Y) := by
+      rw [← P.Base_comp, IsIso.inv_hom_id]
+    rwa [hbu, Category.comp_id] at h
+  have hmul : u * (⟨inv ((((u : End Y))) : Y ⟶ Y), hinv⟩ : OTri P Y) = 1 :=
+    Subtype.ext (by show inv ((((u : End Y))) : Y ⟶ Y) ≫ _ = _; simp)
+  have hmul' : (⟨inv ((((u : End Y))) : Y ⟶ Y), hinv⟩ : OTri P Y) * u = 1 :=
+    Subtype.ext (by show ((((u : End Y))) : Y ⟶ Y) ≫ _ = _; simp)
+  refine ⟨(hullOTriMon P hhull u).2, (CategoryTheory.isUnit_iff_isIso _).mpr ?_⟩
+  refine ⟨((hullOTriMon P hhull ⟨inv ((((u : End Y))) : Y ⟶ Y), hinv⟩ :
+    OTri P Z) : End Z), ?_, ?_⟩
+  · have h := congrArg (fun z : OTri P Z => ((z : End Z)))
+      ((hullOTriMon P hhull).map_mul ⟨inv ((((u : End Y))) : Y ⟶ Y), hinv⟩ u).symm
+    simp only [hmul', map_one] at h
+    exact h
+  · have h := congrArg (fun z : OTri P Z => ((z : End Z)))
+      ((hullOTriMon P hhull).map_mul u ⟨inv ((((u : End Y))) : Y ⟶ Y), hinv⟩).symm
+    simp only [hmul, map_one] at h
+    exact h
+
+include hτ in
+/-- ★★**hull の埋め込みは `τ` を保つ** —— `Definition 2.3, (b)`(`hullPullback`)。 -/
+theorem hullOTriMon_tau_mem (t : OTri P Y) (ht : ((t : End Y)) ∈ τ Y) :
+    ((hullOTriMon P hhull t : OTri P Z) : End Z) ∈ τ Z :=
+  (hτ.hullPullback hhull ((t : End Y)) t.2).mp ht
+
+include hτ in
+/-- ★★**hull の埋め込みは分裂と可換**。 -/
+theorem splitEquiv_hull (β : OTri P Y) :
+    (splitEquiv P F hτ).symm (hullOTriMon P hhull β)
+      = (⟨((hullOTriMon P hhull (uOf P ((splitEquiv P F hτ).symm β).1) :
+            OTri P Z) : End Z),
+          hullOTriMon_otimes_mem P hhull _ ((splitEquiv P F hτ).symm β).1.2⟩,
+         ⟨((hullOTriMon P hhull (tOf P F hτ ((splitEquiv P F hτ).symm β).2) :
+            OTri P Z) : End Z),
+          hullOTriMon_tau_mem P F hτ hhull _ ((splitEquiv P F hτ).symm β).2.2⟩) := by
+  refine (splitEquiv P F hτ).symm_apply_eq.mpr ?_
+  rw [splitEquiv_apply]
+  show hullOTriMon P hhull β
+    = hullOTriMon P hhull (uOf P _) * hullOTriMon P hhull (tOf P F hτ _)
+  rw [← map_mul]
+  congr 1
+  show β = uOf P ((splitEquiv P F hτ).symm β).1 * tOf P F hτ _
+  rw [← splitEquiv_apply P F hτ]
+  exact ((splitEquiv P F hτ).apply_symm_apply β).symm
+
+include hτ in
+/-- ★★★★**`Ψ` は hull の埋め込みと可換** —— `Ψ(ι β) = ι(Ψ β)`。
+
+★★これが原文の段 3(isotropic hull による移行)の**核**である。 -/
+theorem psiOTri_hull (d : ℕ+) (β : OTri P Y) :
+    psiOTri P F hτ d (hullOTriMon P hhull β)
+      = hullOTriMon P hhull (psiOTri P F hτ d β) := by
+  show uOf P (((splitEquiv P F hτ).symm (hullOTriMon P hhull β)).1)
+      * (tOf P F hτ (((splitEquiv P F hτ).symm (hullOTriMon P hhull β)).2))
+        ^ ((d : ℕ+) : ℕ) = _
+  rw [splitEquiv_hull P F hτ hhull β]
+  show (hullOTriMon P hhull (uOf P _) : OTri P Z)
+      * (hullOTriMon P hhull (tOf P F hτ _) : OTri P Z) ^ ((d : ℕ+) : ℕ) = _
+  rw [← map_pow, ← map_mul]
+  rfl
+
+end HullPsi
+
 /-! ## ★★★`Ψ` の well-defined 性
 
 ★4 重分解は一意ではない。★**しかし曖昧性はちょうど 2 種類しかない**——
