@@ -149,8 +149,13 @@ noncomputable def degHom : ADiv F →+ ℝ where
 
 ★正規化する理由は**有限次拡大で不変にする**ためであり、
 その不変性が `ht` を `X(ℚ̄)` の上で well-defined にする。
-★**不変性そのものは本ファイルでは示していない**——`Skeleton/GenEll/Heights.lean` の
-`deg_normalized_base_change` を参照(そこが層 D)。 -/
+★**不変性そのものは本ファイルでは示していない**が、
+`Found/GenEll/BaseChange.lean` の **`degNormalized_baseChange` で証明済み**である
+(2026-08-17。`deg_K(a_K) = [K:F]·deg_F(a)` から `[K:F]` が約分される)。
+
+★★ただし `X` 上の**直線束の高さ**の底変換不変性は別物で、そちらは
+`Skeleton/GenEll/Heights.lean` の `degNormalized_base_change` が
+`Interface` の仮説として輸入したままである(層 D)。**混同しない。** -/
 noncomputable def degNormalized (a : ADiv F) : ℝ :=
   deg a / (Module.finrank ℚ F : ℝ)
 
