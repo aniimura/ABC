@@ -1394,16 +1394,21 @@ co-angular とは限らない)。`otriLin` を `γ̃` に沿って使うには�
 `h_A : A ⟶ A^istr` の先で自由に使える —— これが原文の段 3 を回す土台になる。
 
 **手順**:
-1. `splitEquiv` を `charSplitting_bijective_all` に差し替え、
-   `psiOTri` 系から `hA` を落とす(★機械的だが**連鎖が深い**——
-   `psiOTri` / `psiOTri_div` / `_mul` / `_one` / `psiOTriHom` / `_pow` /
-   `_unit_mul` / `_of_div_zero` / `_injective` / `psiOTri_otriLin` の
-   引数がすべて変わる。一度試して緑を壊したので、**1 宣言ずつ**進めること)
-2. `otriLin` の使用を `otriPullHom` ＋ 明示の co-angular 性に置き換える
-   (pull-back は `pullBackLB` から、同型は `isCoAngular_of_isIso` から)
-3. `psiMap_comp_frob` の `δ̃` は `prop_1_10_i_exists_pullBack` で作る
-4. 残る `psiMap_comp_isometricPreStep` に**始域の isotropy** を要求する
-5. 一般の `φ` へは hull の mono 性で移す(原文の段 3)
+1. ✅ **完了** —— `splitEquiv` を `charSplitting_bijective_all` に差し替え、
+   `psiOTri` 系 10 宣言から `IsIsotropic` を落とした。
+   ★**`IsPsiValue` から `hiso` が消えた**のが要点である。
+2. ★★**測定の結果、この道は無い** —— `otriLin` を `otriPullHom` に替えても
+   **`IsCharacteristicSplitting.map_mem` が `IsIsotropic` を要求する**。
+   ★これは原文に忠実である: 原文の `τ` は `(𝒞^istr)^lin` 上の部分関手なので、
+   **`τ` の関手性は isotropic な対象の上でしか主張されていない**。
+   ★★★したがって `psiOTri_otriLin`(`Ψ` の自然性)は本質的に isotropic な
+   対象を要求し、**合成両立の補題から isotropy を外すことはできない**。
+3. `psiMap_comp_frob` の `δ̃` は `prop_1_10_i_exists_pullBack` で作れる(任意)
+4. 合成両立の補題を**始域の isotropy**(点ごと)に書き換える。
+   ★`isotropicClosed` により中間対象は自動で isotropic になる
+5. ★★**本丸**: 一般の `φ` へは hull の mono 性で移す(原文の段 3)。
+   `φ ≫ h_B = h_A ≫ φ'`(hull の普遍性)で `φ'` を取り、
+   `Ψ(φ) ≫ h_B = h_A ≫ Ψ(φ')` を示し、`h_B` が mono なので合成両立が落ちる。
 
 ★★**この 1 点があるので、`Proposition 2.5` に条なし `.src` は付けない。**
 条なしは「原典項目を**完全に**実装した」の意味であり、
