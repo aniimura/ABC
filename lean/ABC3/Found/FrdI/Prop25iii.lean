@@ -797,6 +797,68 @@ theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
     simp only [Category.assoc]
     rw [← hpsispec]
 
+include hτ hiso hmt haa hfn in
+/-- ★★★**右から等長 pre-step を掛ける場合** —— `Ψ(φ ≫ γ') = Ψ(φ) ≫ γ'`。
+
+★★**押し出し `plBk_shuffle` がここで効く**: `α ≫ γ' = γ̃ ≫ α̃` と組み替えると、
+- `degFr γ̃ = degFr γ' = 1`(`plBk_shuffle_degFr`)
+- `Div γ̃ = Φ.map (Base α) (Div γ') = 0`(`plBk_shuffle_div`)
+- `Base γ̃` は同型
+
+なので **`γ̃` はまた等長 pre-step になる**。★したがって `γ ≫ γ̃` が新しい
+等長 pre-step になり、`β` は `otriLin` の**逆**で `Ỹ` 側へ移る。
+
+★★★`Ψ` がその逆とも可換なのは `psiOTri_otriLin` の**単射性側**である。 -/
+theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' : B ⟶ E}
+    (hγ'i : IsIsometric P γ') (hγ's : IsPreStep P γ') :
+    psiMap P F hτ hiso hmt haa d (φ ≫ γ')
+      = psiMap P F hτ hiso hmt haa d φ ≫ γ' := by
+  obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ
+  obtain ⟨Yt, γt, αt, hshuf, hαt, hbγt⟩ := plBk_shuffle P F hα γ'
+  -- ★`γ̃` は等長 pre-step
+  have hγti : IsIsometric P γt := by
+    show P.Div γt = 0
+    rw [plBk_shuffle_div P F hα hshuf hαt, show P.Div γ' = 0 from hγ'i, map_zero]
+  have hγtlin : IsLinear P γt := by
+    show P.degFr γt = 1
+    rw [plBk_shuffle_degFr P F hα hshuf hαt]
+    exact hγ's.1
+  have hγts : IsPreStep P γt := ⟨hγtlin, hbγt⟩
+  -- ★`β` を `otriLin` の逆で `Ỹ` 側へ移す
+  obtain ⟨⟨tm, htm⟩, ht⟩ :=
+    (otriLin_bijective_of_preStep P F (hiso Y) hγts).2 (⟨β, hm⟩ : OTri P Y)
+  have hspec : γt ≫ tm = β ≫ γt := by
+    have h := otriLin_spec P F (hiso Y) hγtlin (⟨tm, htm⟩ : OTri P Yt)
+    rw [ht] at h
+    exact h
+  have hpsispec :
+      γt ≫ (((psiOTri P F hτ (hiso Yt) d ⟨tm, htm⟩ : OTri P Yt) : End Yt) : Yt ⟶ Yt)
+        = (((psiOTri P F hτ (hiso Y) d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y) ≫ γt := by
+    have h := otriLin_spec P F (hiso Y) hγtlin
+      (psiOTri P F hτ (hiso Yt) d (⟨tm, htm⟩ : OTri P Yt))
+    rw [← psiOTri_otriLin P F hτ (hiso Y) (hiso Yt) hγtlin d (⟨tm, htm⟩ : OTri P Yt),
+      ht] at h
+    exact h
+  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine ⟨X, Yt, δ, γ ≫ γt, tm, αt, htm, ?_,
+    hδ, IsIsometric.comp P hγi hγti, IsPreStep.comp P hγs hγts, ?_, ?_, hαt, ?_⟩
+  · -- 分解が `φ ≫ γ'` に戻る
+    rw [hf]
+    simp only [Category.assoc]
+    conv_rhs => rw [← Category.assoc γt tm αt, hspec, Category.assoc, ← hshuf]
+  · -- pre-step
+    refine ⟨htm.2, ?_⟩
+    show IsIso (P.Base _)
+    rw [show P.Base tm = P.Base (𝟙 Yt) from htm.1, P.Base_id]
+    infer_instance
+  · -- co-angular
+    exact prop_1_4_i P _ (fun X _ => hiso X)
+  · -- `Ψ` の値
+    rw [he]
+    simp only [Category.assoc]
+    conv_rhs => rw [← Category.assoc γt _ αt, hpsispec, Category.assoc, ← hshuf]
+
 end PsiHom
 
 /-! ## ★★★残り —— 関手性と圏同値(段取り)
