@@ -1297,54 +1297,51 @@ theorem prop_2_5_iii (G : Frobenioid P) (d : ℕ+) :
 
 end PsiHom
 
-/-! ## ★★★残り —— 関手性と圏同値(段取り)
+/-! ## ★★★到達点と、残っている 1 点
 
 原文 (FrdI p.50):
 > monomorphisms [cf. Definition 1.3, (v), (a)], this implies [by relating an
 
-★**ここまでで揃ったもの**: `psiMap` が**関数として**定まり(well-defined)、
-`Base`・`degFr` を保ち、`Div` を `d` 倍し、等長射の上で恒等である。
-★残るのは**合成との両立**と、そこから出る `𝒞 ≃ 𝒞(d)` である。
+### ★段取りの現在地(原文の筋を我々の道具に翻訳したもの)
 
-### ★段取り(原文の筋を我々の道具に翻訳したもの)
-
-| 段 | 内容 | 使う道具 | 状態 |
+| 段 | 内容 | 道具 | 状態 |
 |---|---|---|---|
 | 1 | pull-back を右へ寄せる | `plBk_shuffle` | ✅ |
 | 2 | 底が同型な pull-back は同型 | `isIso_of_isPullBack_of_baseIso` | ✅ |
 | 3 | `𝒪^▷` を Frobenius 型射の右へ通す | `otri_comp_frobBaseId` | ✅ |
-| 4 | `𝒪^▷` を等長 pre-step の右へ通す | `otriFwd` / `otriLin` | ✅(既存) |
+| 4 | `𝒪^▷` を等長 pre-step の右へ通す | `otriLin` | ✅ |
 | 5 | `Ψ(β^k) = Ψ(β)^k` | `psiOTri_pow` | ✅ |
-| 6 | 合成の 4 重分解を組み立てる | 上の 1–4 | ★**未** |
-| 7 | `Ψ(φ ≫ φ') = Ψφ ≫ Ψφ'`(`𝒞^istr` 上) | 6 ＋ 5 ＋ 自然性 2 本 | ★**未** |
-| 8 | isotropic hull が単射 ⟹ 一般の `𝒞` へ | `Definition 1.3, (v), (a)` | ★**未** |
-| 9 | 関手 `𝒞 ⥤ 𝒞(d)`(`Cd` は `Definition 2.4` にある) | 7,8 | ★**未** |
-| 10 | 本質的全射・忠実・充満 | `prop_2_5_i_bijective` | ★**未** |
+| 6 | 合成の 4 重分解を組み立てる | 4 本の合成則 | ✅ |
+| 7 | `Ψ(φ ≫ φ') = Ψφ ≫ Ψφ'` | `psiMap_comp` | ✅ |
+| 9 | 関手 `𝒞 ⥤ 𝒞(d)` | `psiFunctorCd` | ✅ |
+| 10 | 本質的全射・忠実・充満 | `prop_2_5_iii` | ✅ |
+| **8** | **isotropic hull が単射 ⟹ 一般の `𝒞` へ** | `Definition 1.3, (v), (a)` | ★**未** |
 
-### ★段 6 の具体的な形(導出済み、実装待ち)
+★★**段 6 は「4 重分解がちょうど 4 本の合成則に対応する」**という形に落ちた——
+`φ'` を分解して右から 1 因子ずつ剥がすだけでよい:
+`α'`(pull-back)/ `β'`(`𝒪^▷`)/ `γ'`(等長 pre-step)/ `δ'`(Frobenius 型)。
 
-`φ = δ≫γ≫β≫α`、`φ' = δ'≫γ'≫β'≫α'` とすると
+### ★★★残っている 1 点 —— **仮定が原文より強い**
 
-  `φ≫φ' = δ≫γ≫β≫(α ≫ δ'≫γ'≫β')≫α'`
+我々の `psiMap` は次の 2 つを仮定している:
 
-で、`ρ := δ'≫γ'≫β'` に段 1 を当てると `α≫ρ = ρ̃≫α̃`(`α̃` は pull-back、
-`Base ρ̃` は同型)。★`α̃≫α'` は pull-back なので
+1. `IsOfIsotropicType P`
+2. `∀ X, IsFrobeniusTrivial P X`
 
-  `φ≫φ' = δ≫γ≫(β≫ρ̃)≫(α̃≫α')`
+★**どちらも `𝒞^istr` では自動**である(2 は `prop_2_5_ii_frobTrivial`)。
+★★したがって得られたのは実質**「`𝒞^istr` 上の (iii)」**であり、
+一般の `𝒞` へは原文の段 8(isotropic hull が単射なので、
+`Proposition 1.9, (v)` の isotropification 関手で移す)が要る。
 
-となり、あとは `ρ̃` を `δ₂≫γ₂≫β₂` に分解して(段 2 でその pull-back 部分が
-同型になる)、`β` を段 3・段 4 で `δ₂`・`γ₂` の右へ通せばよい。
+★**なぜ 1 が要るのか**: `charSplitting_bijective` が `IsIsotropic` を要求する。
+原文は分裂を「`A` が isotropic でなくても使える」と明言し、根拠に
+`Definition 2.3, (b)`(我々の `hullMem`)を挙げている。
+★★★**さらに深い理由**として、`prop_1_4_i`(isotropic なら任意射が co-angular)を
+`psiMap_comp_frob` などで使っており、これは isotropy に**本質的に依存**する。
 
-★★**段 3 が `𝒞^istr` を要求する**(Frobenius 型射を base-identity に取るため)
-——これが原文が `𝒞^istr` で議論し、段 8 で一般へ移す理由である。
-
-### ★★我々の実装が原文より強い点(記録)
-
-原文は特性分裂を「**`A` が isotropic でなくても使える**」と明言し、根拠に
-`Definition 2.3, (b)`(我々の `hullMem`)を挙げている。★我々の
-`charSplitting_bijective` は `IsIsotropic` を要求するので、`psiMap` は現在
-`IsOfIsotropicType` を仮定していて**原文より強い**。`hullMem` で
-非 isotropic へ延ばせば外せる。★段 8 と同時に解消するのが自然である。
+★★**この 1 点があるので、`Proposition 2.5` に条なし `.src` は付けない。**
+条なしは「原典項目を**完全に**実装した」の意味であり、
+仮定が強いままでそれを主張するのは過剰申告である。
 -/
 
 end ABC3.Found.FrdI
