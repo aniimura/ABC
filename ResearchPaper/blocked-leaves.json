@@ -41,8 +41,8 @@
   },
   {
    "key": "[NCBelyi] Lemma 2.2",
-   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.3。入れ子帰納法の受け皿(`Theorem 2.5` の最終段が『Thus, Theorem 2.5 follows from Lemma 2.2』で閉じる)。まだ逐語を転写していないだけである。",
-   "cost": "1_Structured/Noncritical Belyi Maps/ に逐語 1〜2 単位を足す(物理 p.3 の 260 dpi 目視 → HTML)"
+   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.3。入れ子帰納法の受け皿(`Theorem 2.5` の最終段が『Thus, Theorem 2.5 follows from Lemma 2.2』で閉じる)。★★**2026-08-17 訂正**: 逐語は既に `1_Structured/Noncritical Belyi Maps/section-2.html #ncbelyi-lemma-2-2` にある(この項目の旧記述『まだ逐語を転写していないだけ』は古かった)。残っているのは **`|S|` についての帰納法の実装**である。",
+   "cost": "★`Lemma 2.1` の計算核は 2026-08-17 に実装済み(`Found/NCBelyi/Lemma21.lean` —— 導関数の恒等式・性質 (e)・単調性・`|f| ≤ 1` on [0,1])。残るのは (1) `Lemma 2.1` の (a)(c)(d) を `S` の言葉でまとめる、(2) `Lemma 2.2` の `|S|` 帰納法。**いずれも初等的で、外部理論を要しない。**"
   },
   {
    "key": "[NCBelyi] Lemma 2.4",
