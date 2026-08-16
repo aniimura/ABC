@@ -2163,6 +2163,53 @@ theorem inv_mem_otimesImtrPre (A : C) {u w : End A}
       pushFunctorIdIso P F A (isBaseIsomorphism_of_isIso P (𝟙 A))
   exact (Functor.rightUnitor _).symm ≪≫ Functor.isoWhiskerLeft _ eu.symm ≪≫ e1
 
+/-! ### ★★`u^{imtr-pre} = id` の**十分条件**
+
+★**`u` が isometric pre-step と「同型を除いて可換」なら `u_* ≅ 𝟭`。**
+
+★これは `Proposition 1.13, (iii)` で使う ——
+`𝒞_A → 𝒞` の自己同型 `α` は、自然性から
+`γ ≫ α_X = α_Y ≫ γ`(`γ` は isometric pre-step)を満たし、
+`α_Y` は同型だから、まさにこの形になる。 -/
+
+include F in
+/-- ★`u` と `γ` が同型 `v` を挟んで可換なら、`γ ≫ u` の第2の分解が `(v, γ)` である。 -/
+theorem pushComm_uniq {A : C} (u : A ⟶ A) (hb : IsBaseIsomorphism P u)
+    (Z : Over (⟨A⟩ : ImtrPre P)) (v : Z.left.obj ⟶ Z.left.obj) [IsIso v]
+    (hcomm : Z.hom.hom ≫ u = v ≫ Z.hom.hom) :
+    ∃ δ : pushObj P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≅ Z.left.obj,
+      Z.hom.hom = δ.inv ≫ pushHom P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ∧
+      v = pushMid P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≫ δ.hom :=
+  prop_1_9_i_uniq P F _ _ _ _ v Z.hom.hom
+    (by rw [← pushFac P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2]; exact hcomm)
+    (pushMid_spec P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushMid_spec P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushHom_spec P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushHom_spec P F u hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (isCoAngular_of_isIso P v) (isBaseIsomorphism_of_isIso P v)
+    Z.hom.property.1 Z.hom.property.2
+
+include F in
+/-- ★★**`u` が isometric pre-step と同型を除いて可換なら `u_* ≅ 𝟭`**。
+
+★`pushFunctorIdIso` の一般化(`v = 𝟙` がその場合)。自然性は
+`imtrPreOver_hom_subsingleton` から自動。 -/
+noncomputable def pushFunctorIsoOfCommutes {A : C} (u : A ⟶ A) (hb : IsBaseIsomorphism P u)
+    (comm : ∀ Z : Over (⟨A⟩ : ImtrPre P),
+      Σ' v : Z.left.obj ⟶ Z.left.obj, PLift (IsIso v) ×' Z.hom.hom ≫ u = v ≫ Z.hom.hom) :
+    pushFunctor P F u hb ≅ 𝟭 (Over (⟨A⟩ : ImtrPre P)) :=
+  NatIso.ofComponents
+    (fun Z =>
+      haveI : IsIso (comm Z).1 := (comm Z).2.1.down
+      Over.isoMk (imtrPreIsoOfIso P (pushComm_uniq P F u hb Z (comm Z).1 (comm Z).2.2).choose)
+        (InducedWideCategory.Hom.ext (by
+          have h2 := congrArg
+            (fun t => (pushComm_uniq P F u hb Z (comm Z).1 (comm Z).2.2).choose.hom ≫ t)
+            (pushComm_uniq P F u hb Z (comm Z).1 (comm Z).2.2).choose_spec.1
+          simp only [Iso.hom_inv_id_assoc] at h2
+          exact h2)))
+    (fun _ => imtrPreOver_hom_subsingleton P F _ _)
+
 include F in
 /-- ★★**`𝒪^×(A)^{imtr-pre}` を部分モノイドとして包む**。
 

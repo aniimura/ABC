@@ -440,6 +440,104 @@ theorem prop_1_13_ii_global (F : FrobenioidCore P) (hslim : IsSlimCat D) :
     IsRigidFunctor P.toElem :=
   isRigidFunctor_of_forall_over P.toElem fun A => prop_1_13_ii P F hslim A
 
+/-! ## ★(iii) —— `𝒞` が slim
+
+原文 (FrdI p.40):
+> (iii) Suppose, moreover, that every object A ∈Ob(C) satisfies [at least] one of
+
+★**原文の証明は 3 段**:
+1. `α` の成分は base-identity 自己同型、すなわち `𝒪^×(−)` に属する。
+2. **isometric pre-step についての自然性**から `𝒪^×(−)^{imtr-pre}` に属する。
+3. 条件 (a) または (b) から自明。
+
+★★**1 段目は原文より短く済む** —— 原文は (i) を使って base-identity を出すが、
+★**(ii) を使えば `𝔽_Φ` の像が `𝟙` になり、base-identity・`Div = 0`・次数 1 が
+一度に出る**。`𝒪^×` の membership に必要なものがそのまま揃う。 -/
+
+include P in
+/-- ★★**(iii) の第1段** —— `α` の成分は `𝒪^×` に属する。
+
+★**(ii) から直ちに出る**(原文は (i) を経由するが、(ii) のほうが強い)。 -/
+theorem prop_1_13_iii_mem_otimes (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
+    (α : (Over.forget A : Over A ⥤ C) ≅ Over.forget A) (X : Over A) :
+    (α.hom.app X : End X.left) ∈ OTimes P X.left := by
+  have h := prop_1_13_ii P F hslim A (Functor.isoWhiskerRight α P.toElem)
+  have hc : P.toElem.map (α.hom.app X) = 𝟙 (P.toElem.obj X.left) :=
+    congrArg (fun t => t.hom.app X) h
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · show P.Base (α.hom.app X) = P.Base (𝟙 X.left)
+    show (P.toElem.map (α.hom.app X)).base = _
+    rw [hc]; simp
+  · show P.degFr (α.hom.app X) = 1
+    show (P.toElem.map (α.hom.app X)).deg = 1
+    rw [hc]; rfl
+  · exact (CategoryTheory.isUnit_iff_isIso (α.hom.app X : End X.left)).mpr inferInstance
+
+include P in
+/-- ★★**(iii) の第2段** —— `α` の成分は `𝒪^×(−)^{imtr-pre}` に属する。
+
+★★**自然性がそのまま「同型を除いて可換」を与える。**
+`γ : Cc ⟶ X.left` が isometric pre-step なら、`Cc` は `γ ≫ X.hom` によって
+`𝒞_A` の対象になり、`Over.homMk γ` が射になる。`α` の自然性は
+```
+γ ≫ α_X = α_{(Cc, γ ≫ X.hom)} ≫ γ
+```
+を与え、右の `α_{...}` は同型である。★**これが
+`pushFunctorIsoOfCommutes` の仮定そのもの。** -/
+theorem prop_1_13_iii_mem_imtrPre (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
+    (α : (Over.forget A : Over A ⥤ C) ≅ Over.forget A) (X : Over A) :
+    (α.hom.app X : End X.left) ∈ OTimesImtrPre P F X.left := by
+  refine ⟨prop_1_13_iii_mem_otimes P F hslim A α X,
+    isBaseIsomorphism_of_isIso P (α.hom.app X), ⟨?_⟩⟩
+  refine pushFunctorIsoOfCommutes P F (α.hom.app X)
+    (isBaseIsomorphism_of_isIso P (α.hom.app X)) (fun Z => ?_)
+  -- `Z.hom.hom : Z.left.obj ⟶ X.left` は isometric pre-step
+  refine ⟨α.hom.app (Over.mk (Z.hom.hom ≫ X.hom)),
+    ⟨⟨⟨α.inv.app (Over.mk (Z.hom.hom ≫ X.hom)),
+      α.hom_inv_id_app (Over.mk (Z.hom.hom ≫ X.hom)),
+      α.inv_hom_id_app (Over.mk (Z.hom.hom ≫ X.hom))⟩⟩⟩, ?_⟩
+  exact α.hom.naturality (Over.homMk Z.hom.hom rfl : Over.mk (Z.hom.hom ≫ X.hom) ⟶ X)
+
+include P in
+/-- ★★**`Proposition 1.13, (iii)` の条件 (a) の場合** —— `𝒞` は slim。
+
+原文 (FrdI p.40):
+> the following two conditions: (a) O×(A)imtr-pre = {1} [cf. Proposition 1.9, (ii)];
+
+★第 1 段と第 2 段を繋ぐだけで閉じる。 -/
+theorem prop_1_13_iii_a (F : FrobenioidCore P) (hslim : IsSlimCat D)
+    (ha : ∀ A : C, OTimesImtrPre P F A = {1}) : IsSlimCat C := by
+  intro A α
+  apply Iso.ext
+  apply NatTrans.ext
+  funext X
+  have h := prop_1_13_iii_mem_imtrPre P F hslim A α X
+  rw [ha X.left] at h
+  exact h
+
+/-! ### ★残るのは条件 (b) の場合（2026-08-16 時点）
+
+原文 (FrdI p.40):
+> (b) 
+
+★原文の (iii) は「each object satisfies **at least one of** (a), (b)」だから、
+★★**(a) だけでは命題全体の実装にならない**。
+
+★**(b) の中身**: `⋂_{n∈ℕ≥1} {𝒪^×(A)}^n = {1}` かつ、co-angular pre-step
+`B → A` で `B` が quasi-Frobenius-trivial かつ Frobenius-normalized なものがある。
+★原文の議論は「base-identity 自己準同型についての自然性」から
+成分が `⋂_n {𝒪^×(−)}^n` に属することを得る。
+
+★**必要な部品**（測定済み）:
+- `⋂_n {𝒪^×(A)}^n` を書くこと（`OTimes` は `Submonoid` なのでべき乗の交わり）
+- quasi-Frobenius-trivial かつ Frobenius-normalized な対象での、
+  base-identity 自己準同型に沿った自然性の帰結
+- `Definition 1.3, (iii), (c)` の全単射で (b) の対象へ送る段
+
+★**まだ試していない**（「証明できなかった」ではない）。
+★**これが埋まれば `Proposition 1.13` に条なし `.src` を付けられる。**
+-/
+
 end PropI
 
 end ABC3.Found.FrdI
