@@ -31,6 +31,40 @@
 ★<strong>実際に実装できた</strong>(<code>lean/ABC3/Found/NCBelyi/Separation.lean</code>)。</p>
 
 <section class="statement lemma"
+         id="ncbelyi-lemma-2-1"
+         data-paper="NCBelyi"
+         data-pdf-page="2"
+         data-item="Lemma 2.1"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Lemma 2.1. (Separating Properties of Belyi Maps) Let C ∈ R be such</div>
+<div class="reading"><code>C ∈ ℝ</code>、<code>C ≥ 2</code>。<code>S ⊆ ℙ¹(ℚ)</code> を有理点の有限集合で
+<strong>(i)</strong> <code>0, 1, ∞ ∈ S</code>、
+<strong>(ii)</strong> <code>0 &lt; r &lt; 1</code> なる <code>r ∈ S</code> が存在、
+<strong>(iii)</strong> <code>α ∈ S</code> かつ <code>α ≠ 0, r, 1, ∞</code> ⟹ <code>α &gt; 1</code>
+を満たすものとする。<code>β ∈ ℚ\S</code> が
+<strong>(iv)</strong> すべての <code>α ∈ S\{0,∞}</code> について <code>β/α ≥ C</code>
+を満たすとする。<code>r = m/(m+n)</code>(<code>m, n ≥ 1</code> は整数)と書くとき、
+<code>f(x) ≝ x^m·(x−1)^n</code> は次を満たす:
+<strong>(a)</strong> <code>f({0,r,1,∞}) ⊆ {0, f(r), ∞}</code>;
+<strong>(b)</strong> <code>f′(x) = 0</code>(<code>x ∈ ℂ</code>)⟹ <code>x ∈ {0,r,1,∞} ⊆ S</code>;
+<strong>(c)</strong> <code>f(β) ∉ f(S)</code>;
+<strong>(d)</strong> <code>f(α) + f₀ ≠ 0</code> なるすべての <code>α ∈ S\{∞}</code> について
+<code>(f(β)+f₀)/(f(α)+f₀) ≥ C</code>。
+ここで <code>f₀ ≝ − min_α {f(α)}</code>(<code>α</code> は <code>S\{∞}</code> を走る)。</div>
+<p class="open">★★<strong>pdftotext が落としているものを 2 つ、260 dpi 目視で発見した(2026-08-17)</strong>——
+<strong>(1)</strong> 条件 (iii) の <code>α ≠ 0, r, 1, ∞</code> の <strong><code>≠</code> が <code>=</code> に化ける</strong>。
+<strong>(2)</strong> <code>f′(x)</code> の<strong>プライム <code>′</code> が消える</strong>(<code>f (x) = 0</code> に見える)。
+条件 (d) の <code>f(α) + f₀ ≠ 0</code> も同様。
+★逐語照合は pdftotext の出力に対して行うので、<strong>verbatim は pdftotext の綴りに合わせ、
+reading に真の文を書く</strong>——本節はその形にしてある。
+★この論文の <code>notationRisk</code> を <code>medium</code> と記録していたのは正しかった。</p>
+<p class="open">★<strong>本補題は本論文の計算の中心である</strong>。証明は完全に初等的で、
+中心は導関数の恒等式 <code>f′(x) = x^{m−1}·(x−1)^{n−1}·{(m+n)x − m}</code> と、
+そこから出る「実 <code>x &gt; 1</code> で <code>f</code> は単調増加」である。
+★性質 (e)(証明中で導入)<code>f(β)/f(α) ≥ (β/α)² ≥ β/α</code> が (d) の両場合を貫く。</p>
+</section>
+
+<section class="statement lemma"
          id="ncbelyi-lemma-2-2"
          data-paper="NCBelyi"
          data-pdf-page="3"
