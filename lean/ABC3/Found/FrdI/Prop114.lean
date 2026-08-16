@@ -239,6 +239,80 @@ theorem prop_1_14_i (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
     · exact prop_1_14_i_of_step P hiso φ hst hdiv
     · exact prop_1_14_i_of_pullBack P G.core φ hpb hb
 
+/-! ## ★(ii) —— pre-step ⟺ FSM ＋ mid-adjoint
+
+原文 (FrdI p.41):
+> (ii) φ is a pre-step if and only if it is an FSM-morphism that is mid-
+
+原文 (FrdI p.41):
+> adjoint [cf. §0] to the irreducible morphisms which are not pre-steps.
+
+★**原文の証明の必要性**(p.42、目視):
+> Thus, suppose that φ is a pre-step. By Proposition 1.11, (vii), φ is an FSM-morphism;
+> by Proposition 1.7, (v), φ is mid-adjoint to the non-pre-steps.
+
+★★**原文は主張より強いものを証明している** —— 主張は「**irreducible な**
+非 pre-step に mid-adjoint」だが、証明は「**非 pre-step 全体**に mid-adjoint」を出す。
+★`S` が大きいほど mid-adjoint は強い主張なので、これは余剰である。
+★★**`Proposition 1.11, (vii)` でも同じことが起きた**(原文の証明が主張より強い `α` を作る)。
+★**この命題群は「証明が主張より多くを語る」箇所を繰り返し持っている。**
+
+★**必要性の中身は空虚性である** —— `Proposition 1.7, (v)` により
+pre-step の 3 分解の真ん中は必ず pre-step だから、
+★**「真ん中が非 pre-step」という仮定を満たす分解が存在しない。**
+-/
+
+/-- ★(ii) の `S` —— 「pre-step でない irreducible 射」。 -/
+def irredNonPreStep : MorphismProperty C := fun _ _ f => IsIrreducibleMor f ∧ ¬ IsPreStep P f
+
+/-- ★原文の証明が実際に使う `S` —— 「pre-step でない射」全体(★こちらが**大きい**)。 -/
+def nonPreStep : MorphismProperty C := fun _ _ f => ¬ IsPreStep P f
+
+include P in
+/-- ★**大きい `S` に mid-adjoint なら、小さい `S` にも mid-adjoint**。 -/
+theorem isMidAdjoint_irredNonPreStep_of_nonPreStep {A B : C} (φ : A ⟶ B)
+    (h : IsMidAdjoint (nonPreStep P) φ) : IsMidAdjoint (irredNonPreStep P) φ :=
+  fun X Y γ β α hfac hS => h X Y γ β α hfac hS.2
+
+include P in
+/-- ★★**(ii) の必要性(しかも原文の証明どおり、強い形で)** ——
+pre-step は FSM 射であり、★**非 pre-step 全体に mid-adjoint** である。
+
+★**FSM 性は `Proposition 1.11, (vii)`**(isotropic 型なので全射が co-angular)、
+★**mid-adjoint 性は `Proposition 1.7, (v)` による空虚性**。 -/
+theorem prop_1_14_ii_mp (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B) (hφ : IsPreStep P φ) :
+    IsFSMMorphism φ ∧ IsMidAdjoint (nonPreStep P) φ := by
+  refine ⟨prop_1_11_vii_fsm_of_coaPre P F G hiso φ
+    (prop_1_4_i P φ (fun Y _ => hiso Y)) hφ, ?_⟩
+  intro X Y γ β α hfac hS
+  exact absurd
+    (prop_1_7_v_preStep P β α (prop_1_7_v_preStep P γ (β ≫ α) (hfac ▸ hφ)).2).1 hS
+
+/-! ### ★(ii) の十分性 —— 未実装(2026-08-16 の測定)
+
+★**原文の証明**(p.42、目視、要旨):
+1. `Definition 1.3, (iv), (a)` で `φ = γ ≫ β ≫ α`(Frobenius 型・pre-step・pull-back)
+2. (i)(＋`Proposition 1.10, (v)`)により `γ` は同型 ⟹ `φ = β ≫ α` としてよい
+3. `φ` が FSM 射であることから `α` は fiberwise-surjective
+4. ★**`α` が mono であることを示す**(ここが山) ——
+   `α ≫ ϵ₁ = α ≫ ϵ₂` から `Remark 1.1.1` で `degFr`・`Div` の一致を出し、
+   分解と全射性で `ϵ₁, ϵ₂` を pull-back としてよいとし、
+   ★★**「`β∗(Div(β))` の引き戻しを `ϵ₁, ϵ₂` 経由で足す」**という構成で
+   pre-step `ζ` と `γ₁, γ₂` を作って `φ ≫ γ₁ = φ ≫ γ₂` に持ち込む
+5. よって `α` は FSM 射、`Proposition 1.11, (vi)` で `Base(α)` も FSM 射
+6. `𝒟` が FSMFF 型なので、`α` が同型でなければ `Base(α)` は従属する FSMI 射を持ち、
+   `Proposition 1.11, (vi)` で `α` も従属する FSMI 射(かつ pull-back)を持つ
+7. それは mid-adjoint の仮定に矛盾。よって `α` は同型で `φ` は pre-step
+
+★★**4 の「adding the pull-backs of β∗(Div(β)) via ϵ₁, ϵ₂」が
+検証役の言う「引用符で名前だけ与える型」である** ——
+★**構成の名前が引用符の中にあるだけで、構成そのものは書かれていない。**
+★**ここが (ii) の山であり、まだ登っていない。**
+
+★★**`sorry` は置かない**(`Found/` の規律)。
+-/
+
 /-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性
 
 ★★**引用を選び直した記録(事故 #3 の 10 度目)**: (iv) の主張は 3 行だが、
