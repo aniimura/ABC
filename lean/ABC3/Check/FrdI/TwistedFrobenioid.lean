@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Prop15
+import ABC3.Found.FrdI.Witness
 
 /-!
 # 捻れ積 `𝔽_Φ ⋉ G` —— `[FrdI] Proposition 1.14, (iii)` の反例の候補
@@ -873,7 +874,249 @@ theorem twFrobenioidCore : FrobenioidCore (twPreFrobenioid (G := G) hD hpd) wher
   isotropicHullExists := twIsotropicHullExists hD hpd
   isotropicClosed := twIsotropicClosed hD hpd
 
+/-! ## ★**(iii)(d)** —— 残る 2 本の圏同値
+
+★★**目標は前順序(`OrderCat`)なので、示すことは「射が一意に決まる」ことだけ。**
+捻れ積では三角形が `G` 成分まで一意に決めるので、★**前順序のまま**である。 -/
+
+section CoaPre
+
+variable [MorphismProperty.IsMultiplicative (coaPreProp (twPreFrobenioid (G := G) hD hpd))]
+
+/-- ★**(iii)(d)** コスライス側。
+
+★**忠実性は捻れ積が totally epimorphic であることから直接出る**
+(`G` 成分の消約は `twTotallyEpimorphic` の中で済んでいる)。
+★**充満性は `𝔽_Φ` 側の充満性に `G` 成分 `Z.unit⁻¹ * W.unit` を足すだけ。** -/
+theorem twCoaPreUnderEquiv (A : TwObj Φ G) :
+    (coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).IsEquivalence := by
+  haveI := coaPreProp_isMultiplicative (elemPreFrobenioid Φ hD hpd)
+    (elemFrob_frobenioidCore Φ hD hpd).coAngularComp
+  haveI := elemFrob_coaPreUnderEquiv Φ hD hpd A.ofElem
+  haveI hfaith : (coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : Z.hom.hom ≫ f.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w f)
+    have h2 : Z.hom.hom ≫ g.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w g)
+    haveI : Epi Z.hom.hom := twTotallyEpimorphic (G := G) hD (fun X => (hpd X).1) _ _ _
+    exact Under.UnderMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_epi Z.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).Full := by
+    constructor
+    intro Z W h
+    -- ★`𝔽_Φ` 側の同じ図式(`G` 成分を落とす)
+    obtain ⟨f₀, -⟩ := (coaPreUnderFunctor (elemPreFrobenioid Φ hD hpd) A.ofElem).map_surjective
+      (X := Under.mk (show (⟨A.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd)))
+          ⟶ (⟨Z.right.obj.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd))) from
+        ⟨Z.hom.hom.hom, elemFrob_coAngular Φ hD hpd Z.hom.hom.hom,
+          (Z.hom.property.2 : IsPreStep (elemPreFrobenioid Φ hD hpd) Z.hom.hom.hom)⟩))
+      (Y := Under.mk (show (⟨A.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd)))
+          ⟶ (⟨W.right.obj.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd))) from
+        ⟨W.hom.hom.hom, elemFrob_coAngular Φ hD hpd W.hom.hom.hom,
+          (W.hom.property.2 : IsPreStep (elemPreFrobenioid Φ hD hpd) W.hom.hom.hom)⟩))
+      h
+    have htri : Z.hom.hom.hom ≫ f₀.right.hom = W.hom.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w f₀)
+    haveI := Preorder.subsingleton_hom
+      ((coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).obj Z)
+      ((coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).obj W)
+    refine ⟨Under.homMk (⟨(⟨f₀.right.hom, Z.hom.hom.unit⁻¹ * W.hom.hom.unit⟩ :
+        Z.right.obj ⟶ W.right.obj),
+      ⟨twCoAngular hD hpd _, f₀.right.property.2⟩⟩ : Z.right ⟶ W.right) ?_,
+      Subsingleton.elim _ _⟩
+    refine InducedWideCategory.Hom.ext ?_
+    simp only [WideSubcategory.comp_def]
+    refine TwHom.ext htri ?_
+    show Z.hom.hom.unit ^ ((ElemFrobCat.Hom.deg f₀.right.hom : ℕ+) : ℕ)
+      * (Z.hom.hom.unit⁻¹ * W.hom.hom.unit) = W.hom.hom.unit
+    rw [show ElemFrobCat.Hom.deg f₀.right.hom = 1 from f₀.right.property.2.1]
+    simp
+  haveI hess : (coaPreUnderFunctor (twPreFrobenioid (G := G) hD hpd) A).EssSurj := by
+    constructor
+    intro c
+    obtain ⟨a, ha⟩ : ∃ a : Φ.val A.ofElem.base, toChar a = c := by
+      obtain ⟨y, hy⟩ := toChar_surjective _ c
+      exact ⟨y, hy⟩
+    refine ⟨Under.mk (show (⟨A⟩ : WideSubcategory (coaPreProp (twPreFrobenioid
+        (G := G) hD hpd)))
+        ⟶ (⟨A⟩ : WideSubcategory (coaPreProp (twPreFrobenioid (G := G) hD hpd))) from
+      ⟨(⟨otriOf Φ A.ofElem a, 1⟩ : A ⟶ A), twCoAngular hD hpd _, rfl, ?_⟩), ⟨eqToIso ?_⟩⟩
+    · show IsIso (𝟙 A.ofElem.base)
+      infer_instance
+    · exact congrArg toOrderCat ha
+  exact ⟨hfaith, hfull, hess⟩
+
+/-- ★**(iii)(d)** スライス側。
+
+★**忠実性は `twPreStepMono`**(pre-step は次数 1 なので `G` 成分も消約できる)。 -/
+theorem twCoaPreOverEquiv (A : TwObj Φ G) :
+    (coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).IsEquivalence := by
+  haveI := coaPreProp_isMultiplicative (elemPreFrobenioid Φ hD hpd)
+    (elemFrob_frobenioidCore Φ hD hpd).coAngularComp
+  haveI := elemFrob_coaPreOverEquiv Φ hD hpd A.ofElem
+  haveI hfaith : (coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have h2 : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    haveI : Mono W.hom.hom := twPreStepMono hD hpd _ W.hom.property.2
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_mono W.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨f₀, -⟩ := (coaPreOverFunctor (elemPreFrobenioid Φ hD hpd) A.ofElem).map_surjective
+      (X := Over.mk (show (⟨Z.left.obj.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd)))
+          ⟶ (⟨A.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd))) from
+        ⟨Z.hom.hom.hom, elemFrob_coAngular Φ hD hpd Z.hom.hom.hom,
+          (Z.hom.property.2 : IsPreStep (elemPreFrobenioid Φ hD hpd) Z.hom.hom.hom)⟩))
+      (Y := Over.mk (show (⟨W.left.obj.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd)))
+          ⟶ (⟨A.ofElem⟩ :
+            WideSubcategory (coaPreProp (elemPreFrobenioid Φ hD hpd))) from
+        ⟨W.hom.hom.hom, elemFrob_coAngular Φ hD hpd W.hom.hom.hom,
+          (W.hom.property.2 : IsPreStep (elemPreFrobenioid Φ hD hpd) W.hom.hom.hom)⟩))
+      h
+    have htri : f₀.left.hom ≫ W.hom.hom.hom = Z.hom.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f₀)
+    haveI := Preorder.subsingleton_hom
+      ((coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).obj W).unop
+      ((coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).obj Z).unop
+    refine ⟨Over.homMk (⟨(⟨f₀.left.hom, Z.hom.hom.unit * W.hom.hom.unit⁻¹⟩ :
+        Z.left.obj ⟶ W.left.obj),
+      ⟨twCoAngular hD hpd _, f₀.left.property.2⟩⟩ : Z.left ⟶ W.left) ?_,
+      Quiver.Hom.unop_inj (Subsingleton.elim _ _)⟩
+    refine InducedWideCategory.Hom.ext ?_
+    simp only [WideSubcategory.comp_def]
+    refine TwHom.ext htri ?_
+    show (Z.hom.hom.unit * W.hom.hom.unit⁻¹)
+      ^ ((ElemFrobCat.Hom.deg W.hom.hom.hom : ℕ+) : ℕ) * W.hom.hom.unit = Z.hom.hom.unit
+    rw [show ElemFrobCat.Hom.deg W.hom.hom.hom = 1 from W.hom.property.2.1]
+    simp
+  haveI hess : (coaPreOverFunctor (twPreFrobenioid (G := G) hD hpd) A).EssSurj := by
+    constructor
+    intro c
+    obtain ⟨a, ha⟩ : ∃ a : Φ.val A.ofElem.base, toChar a = c.unop := by
+      obtain ⟨y, hy⟩ := toChar_surjective _ c.unop
+      exact ⟨y, hy⟩
+    refine ⟨Over.mk (show (⟨A⟩ : WideSubcategory (coaPreProp (twPreFrobenioid
+        (G := G) hD hpd)))
+        ⟶ (⟨A⟩ : WideSubcategory (coaPreProp (twPreFrobenioid (G := G) hD hpd))) from
+      ⟨(⟨otriOf Φ A.ofElem a, 1⟩ : A ⟶ A), twCoAngular hD hpd _, rfl, ?_⟩), ⟨eqToIso ?_⟩⟩
+    · show IsIso (𝟙 A.ofElem.base)
+      infer_instance
+    · refine Opposite.unop_injective ?_
+      rw [← ha]
+      exact elemFrob_map_inv_otriOf Φ hD hpd a _
+  exact ⟨hfaith, hfull, hess⟩
+
+end CoaPre
+
+/-- ★★★**捻れ積 `𝔽_Φ ⋉ G` は Frobenioid である**(`Definition 1.3` の全条件)。 -/
+theorem twIsFrobenioid : Frobenioid (twPreFrobenioid (G := G) hD hpd) := by
+  haveI := coaPreProp_isMultiplicative (twPreFrobenioid (G := G) hD hpd)
+    (twFrobenioidCore (G := G) hD hpd).coAngularComp
+  exact ⟨twFrobenioidCore hD hpd, twCoaPreUnderEquiv hD hpd, twCoaPreOverEquiv hD hpd⟩
+
 end Bridge
+
+/-! ## ★★★具体的な反例 —— `𝔽_{ℕ on Vee} ⋉ (∏_n ℤ/n)`
+
+★ここまでは `Φ`・`G` について一般だった。★**ここで両方を具体化して、
+`Definition 1.3` をすべて満たす圏で「Frobenius 型射が mono でない」ことを出す。**
+
+`𝒟 = Vee`(3点の半順序)、`Φ = ℕ`(定数)は witness で使っているものそのまま。
+
+★★**`G` は `∏_{n} ℤ/n` を取る** —— ★**すべての次数 `d ≥ 2` について
+`d`-捻れがある**ので、★★**次数 > 1 の射は 1 本も mono にならない。**
+`ℤ/2` だけでは「次数 3 の射を使えばよい」という逃げ道が残るが、
+★**この `G` はその逃げ道を塞ぐ。**
+
+★原文 (FrdI p.42) の (a) の場合の議論はまさに
+「次数をいくらでも大きくした prime-Frobenius 射 `ψ` を後置する」ものであり、
+★**その `ψ` が FSMI(したがって mono)であることを要求している。** -/
+
+/-- ★反例に使う `G` —— **すべての位数の捻れを持つ**可換群。 -/
+abbrev CxG : Type := Multiplicative (∀ n : ℕ, ZMod n)
+
+/-- ★★**任意の `d ≥ 2` について `d`-捻れ元がある**。 -/
+theorem cxG_torsion (d : ℕ) (hd : 2 ≤ d) : ∃ u : CxG, u ≠ 1 ∧ u ^ d = 1 := by
+  haveI : Fact (1 < d) := ⟨hd⟩
+  refine ⟨Multiplicative.ofAdd (Pi.single d (1 : ZMod d)), ?_, ?_⟩
+  · intro h
+    have := congrFun (Multiplicative.ofAdd.injective h) d
+    rw [Pi.single_eq_same] at this
+    exact one_ne_zero this
+  · refine Multiplicative.ofAdd.injective ?_
+    show d • Pi.single d (1 : ZMod d) = 0
+    funext n
+    by_cases hn : n = d
+    · subst hn
+      simp only [Pi.smul_apply, Pi.single_eq_same, Pi.zero_apply, nsmul_eq_mul, mul_one]
+      exact ZMod.natCast_self n
+    · simp [Pi.single_eq_of_ne hn]
+
+/-- ★反例の圏 `𝔽_{ℕ on Vee} ⋉ (∏_n ℤ/n)`。 -/
+abbrev CxC : Type := TwObj wΦ CxG
+
+/-- ★反例の pre-Frobenioid。 -/
+def cxP : PreFrobenioid CxC wΦ.charOn :=
+  twPreFrobenioid (G := CxG) isTotallyEpimorphic_vee (fun _ => isPreDivisorial_nat)
+
+/-- ★★★**これは `Definition 1.3` の意味で Frobenioid である**。 -/
+theorem cx_isFrobenioid : Frobenioid cxP :=
+  twIsFrobenioid (G := CxG) isTotallyEpimorphic_vee (fun _ => isPreDivisorial_nat)
+
+/-- ★★★**次数 > 1 の射は 1 本も mono でない**。
+
+★★**これで「次数を大きくすれば mono になる」逃げ道が塞がる。** -/
+theorem cx_not_mono_of_deg_gt_one {A B : CxC} (ζ : A ⟶ B) (hζ : ζ.unit = 1)
+    (hd : 2 ≤ ((ζ.hom.deg : ℕ+) : ℕ)) : ¬ Mono ζ := by
+  obtain ⟨u, hu, hup⟩ := cxG_torsion _ hd
+  exact not_mono_twist ζ hζ u hu hup
+
+/-- ★反例の対象。 -/
+abbrev cxA : CxC := ⟨⟨Vee.top⟩⟩
+
+/-- ★★★**次数 `n` の Frobenius 型自己射** —— `Definition 1.3, (ii)` が要求するもの。 -/
+def cxZeta (n : ℕ+) : cxA ⟶ cxA := ⟨⟨𝟙 Vee.top, (0 : ℕ), n⟩, 1⟩
+
+theorem cx_zeta_frobType (n : ℕ+) : IsFrobeniusType cxP (cxZeta n) := by
+  refine ⟨⟨twCoAngular _ _ _, ?_⟩, ?_⟩
+  · show toChar (0 : ℕ) = 0
+    simp
+  · show IsIso (𝟙 Vee.top)
+    infer_instance
+
+theorem cx_zeta_deg (n : ℕ+) : cxP.degFr (cxZeta n) = n := rfl
+
+/-- ★★★**どの次数 > 1 でも mono にならない**。 -/
+theorem cx_zeta_not_mono (n : ℕ+) (hn : 2 ≤ (n : ℕ)) : ¬ Mono (cxZeta n) :=
+  cx_not_mono_of_deg_gt_one (cxZeta n) rfl hn
+
+/-- ★★★**`Definition 1.3` は「Frobenius 型射は mono」を含意しない** ——
+★**しかも次数をどれだけ大きくしても含意しない。**
+
+★★**これが `Proposition 1.14, (iii)` の `⟸` を止めていたものの正体である。**
+原文 (FrdI p.42) は (a) の場合に
+「次数をいくらでも大きくした prime-Frobenius 射を後置する」と述べるが、
+条件文はその射自身にも FSMI(したがって mono)を要求しており、
+★`Definition 1.3` で mono を与える条項は `preStepMono` **1 つだけ**で、
+pre-step にしか効かない。 -/
+theorem cx_frobType_not_mono (n : ℕ+) (hn : 2 ≤ (n : ℕ)) :
+    ∃ (A : CxC) (ζ : A ⟶ A),
+      IsFrobeniusType cxP ζ ∧ cxP.degFr ζ = n ∧ ¬ Mono ζ :=
+  ⟨cxA, cxZeta n, cx_zeta_frobType n, cx_zeta_deg n, cx_zeta_not_mono n hn⟩
 
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
 
@@ -884,16 +1127,11 @@ end Bridge
 - ★**totally epimorphic である**(`G` 成分は群の消約)
 - ★**connected である**(`𝔽_Φ` の証明をそのまま写せる)
 - ★★**`PreFrobenioid` 構造を持つ**(`twPreFrobenioid`)
+- ★★★**`Definition 1.3` の全条件を満たす**(`twFrobenioidCore` ＋ `twIsFrobenioid`)
+- ★★★**具体化した `𝔽_{ℕ on Vee} ⋉ ℤ/2` で、次数 2 の Frobenius 型射が
+  mono でない**(`cx_frobType_not_mono`)
 
-★**未確定(残る仕事)**:
-- ★**`Definition 1.3`(`FrobenioidCore` ＋ `Frobenioid`)の全条件を満たすか** ——
-  これが済めば `Gap_1_14_iii` は ③(`sourceGap`)に上がる。
-  ★`elemFrob_isFrobenioid`(`Proposition 1.5`)の各条件に `G` 成分の処理を
-  足す形になる
-- `Frobenius-normalized` が実際に成り立つこと(docstring で計算したが未形式化)
-
-★★**ここまでで「実物の圏で mono が破れる」ことは確定した。**
-★**残るのは「その圏が Frobenioid である」ことだけである。**
+★**したがって `Gap_1_14_iii` は ③(`sourceGap`)に上がる。**
 
 ★★**`sorry` は置かない。** 未確定のものは**書かない**。
 -/
