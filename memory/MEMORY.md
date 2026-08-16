@@ -8,3 +8,5 @@
 - [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
 - [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで 0/24。律速は Arakelov 理論と l 捩れ Galois 表現の不在。Lemma 3.1 (iv) は 9 段中 6 段が済。
 - [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
+- [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
+- [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
