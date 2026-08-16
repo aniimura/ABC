@@ -245,13 +245,28 @@ const ours = new Map();
   const ITEM_RE = new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`);
   // ★`done` = `Found/` に `.src` がある(その原典項目を**完全に**実装したという主張)。
   //   `tools/frdi-progress.mjs` の分子と同じ規則である。部分実装には `.src` を付けない。
-  const rank = { named: 0, skeleton: 1, landed: 2, done: 3 };
+  //
+  // ★★2026-08-16 修正: **項目名が丸ごと `Kind N.M` のものだけを `done` にする。**
+  //   それまでは `ITEM_RE` が先頭一致だったので `item := "Lemma 3.1, (i)"` が
+  //   キー `Lemma 3.1` に潰れ、★**条が 1 つでもあれば命題全体が完了として描かれていた。**
+  //   これは上の 2 行が宣言している規則そのものと食い違っていた。
+  //   ★`tools/frdi-progress.mjs` は**同じ欠陥を同日に直している**が、こちらは直っておらず、
+  //   [GenEll] `Lemma 3.1`(条つき 3 個、(iv) 未実装)が `done` と表示されて発覚した。
+  //   条つきは `partial` にする——**触れてはいるが完了ではない**。
+  //   テンプレートは `o === 'done'` だけを ■(完了)として扱うので、`partial` は ●(触れた)になる。
+  const EXACT_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*$`);
+  const rank = { named: 0, skeleton: 1, landed: 2, partial: 3, done: 4 };
   const put = (k, kind, file) => { const c = ours.get(k); if (!c || rank[kind] > rank[c.kind]) ours.set(k, { kind, file }); };
   for (const f of walk(LEAN)) {
     const rel = f.slice(ROOT.length + 1).replace(/\\/g, '/'), t = readFileSync(f, 'utf8');
     const landed = /\.inProject|\.inMathlib/.test(t);
     const inFound = rel.includes('/Found/');   // ★実装が置かれる場所
-    for (const m of t.matchAll(SRC_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, inFound ? 'done' : (landed ? 'landed' : 'skeleton'), rel); }
+    for (const m of t.matchAll(SRC_RE)) {
+      const im = ITEM_RE.exec(m[2]);
+      if (!im) continue;
+      const kind = inFound ? (EXACT_RE.test(m[2]) ? 'done' : 'partial') : (landed ? 'landed' : 'skeleton');
+      put(`${m[1]} / ${im[1]} ${im[2]}`, kind, rel);
+    }
     for (const m of t.matchAll(EDGE_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, 'named', rel); }
   }
 }
