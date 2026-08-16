@@ -1066,18 +1066,65 @@ theorem prop_1_11_vii_pullBack (G : Frobenioid P) {B Cc : C}
 `(pushFunctor φ).obj W ≅ ⟨ε⟩` が取れ、
 `pushFac : W.hom.hom ≫ φ = pushMid ≫ pushHom` が求める四角形を与える。
 
-★★**しかし 1 点足りない**: `pushMid_spec` が与えるのは
-**co-angular かつ base-isomorphism** であって、**linear ではない**。
-原文の (vii) は `γ` が **co-angular pre-step**
-(= linear ∧ base-isomorphism ∧ co-angular) であることを要求するので、
-★**`pushMid` の linear 性を別途出す必要がある**。
-
-★**次に当たるときの手**: `pushFac` の両辺に `degFr` を適用する。
-左辺は `degFr φ * degFr (W.hom.hom) = 1`(どちらも pre-step なので linear)、
-右辺は `degFr (pushHom) * degFr (pushMid)`。
-★`ℕ+` の消去で両方が 1 になるはずである。
-★★**つまり linear 性は `pushFac` から自動で出ると見ている。まだ試していない。**
+★★**部品はすべて揃っていた**。一度「`pushMid` の linear 性が足りない」と
+書いたが、★**`pushMid_isPreStep` が既に `Prop19` にあった**(同日訂正)。
+★**「無い」と書く前に `grep` する** —— 本日 2 度目の同じ種類の誤りである。
 -/
+
+include P in
+/-- ★★★**`Proposition 1.11, (vii)` の isometric pre-step の場合**。
+
+原文 (FrdI p.38、目視):
+> … by applying the equivalence of categories of Proposition 1.9, (ii) …
+
+★★**`ε` が isometric pre-step なら、それは `Over (⟨B⟩ : ImtrPre P)` の対象そのもの**である。
+`φ` が co-angular pre-step なので `pushFunctor φ` は圏同値であり、
+★**本質的全射性**が `W` を与え、`pushFac` が四角形を与える。
+
+★`γ = pushMid ≫ (同型)` が co-angular pre-step であることは
+`pushMid_spec`(co-angular)と `pushMid_isPreStep`(pre-step)から出る。 -/
+theorem prop_1_11_vii_isometric (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B Cc : C} (φ : A ⟶ B) (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ)
+    (ε : Cc ⟶ B) (hεi : IsIsometric P ε) (hεs : IsPreStep P ε) :
+    ∃ (Dd : C) (γ : Dd ⟶ Cc) (α : Dd ⟶ A),
+      IsCoAngular P γ ∧ IsPreStep P γ ∧ γ ≫ ε = α ≫ φ := by
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := pushFunctor_isEquivalence P F G.coaPreOverEquiv φ hφc hφs
+  set Z : Over (⟨B⟩ : ImtrPre P) :=
+    Over.mk (⟨ε, ⟨hεi, hεs⟩⟩ : (⟨Cc⟩ : ImtrPre P) ⟶ (⟨B⟩ : ImtrPre P)) with hZ
+  obtain ⟨W, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := pushFunctor P F φ hφs.2) Z
+  -- 底の同型
+  have hgg : e.hom.left.hom ≫ e.inv.left.hom = 𝟙 _ :=
+    congrArg InducedWideCategory.Hom.hom
+      (congrArg CommaMorphism.left e.hom_inv_id)
+  have hgg' : e.inv.left.hom ≫ e.hom.left.hom = 𝟙 _ :=
+    congrArg InducedWideCategory.Hom.hom
+      (congrArg CommaMorphism.left e.inv_hom_id)
+  haveI : IsIso e.hom.left.hom := ⟨⟨e.inv.left.hom, hgg, hgg'⟩⟩
+  -- 三角形: `e.hom.left.hom ≫ ε = pushHom`
+  have htri : e.hom.left.hom ≫ ε
+      = pushHom P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2 :=
+    congrArg InducedWideCategory.Hom.hom (Over.w e.hom)
+  refine ⟨W.left.obj,
+    pushMid P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2 ≫ e.hom.left.hom,
+    W.hom.hom, ?_, ?_, ?_⟩
+  · exact F.coAngularComp _ _
+      (pushMid_spec P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2).1
+      (isCoAngular_of_isIso P e.hom.left.hom)
+  · exact IsPreStep.comp P
+      (pushMid_isPreStep P F φ hφs.2 hφs.1 W.hom.hom W.hom.property.1 W.hom.property.2)
+      (isPreStep_of_isIso P e.hom.left.hom)
+  · calc (pushMid P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2
+          ≫ e.hom.left.hom) ≫ ε
+        = pushMid P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2
+            ≫ (e.hom.left.hom ≫ ε) := Category.assoc _ _ _
+      _ = pushMid P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2
+            ≫ pushHom P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2 :=
+          congrArg
+            (fun t => pushMid P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2 ≫ t)
+            htri
+      _ = W.hom.hom ≫ φ :=
+          (pushFac P F φ hφs.2 W.hom.hom W.hom.property.1 W.hom.property.2).symm
 
 include P in
 /-- ★★**co-angular な isometric pre-step は同型**。
