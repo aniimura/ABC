@@ -42,7 +42,7 @@ open CategoryTheory
 universe v u w u2 v2
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
-  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) {A : C}
 
 include P in
 /-- ★★★**4 重分解** —— metrically trivial ＋ Aut-ample 型のもとで、
@@ -133,6 +133,68 @@ theorem quadFactor_div (Fc : FrobenioidCore P) {A X Y B : C}
     rw [P.Div_comp, h1, hγi]
     simp
   rw [P.Div_comp, h2, show P.Div δ = 0 from hδ.1.2, P.Base_comp]
+  simp
+
+/-! ## ★★`𝒪^▷(A)` は Frobenius-normalized 型なら**可換**
+
+★`Definition 1.2, (iv)` の `Frobenius-normalized` は
+`φ ≫ α^{degFr φ} = α ≫ φ`(`φ` base-identity、`α ∈ 𝒪^▷`)である。
+★★**`φ` も `𝒪^▷` の元に取ると `degFr φ = 1` なので `φ ≫ α = α ≫ φ`** ——
+すなわち `𝒪^▷(A)` は可換モノイドになる。
+
+★**これが `Ψ(β) = β₀ · β₁^d` が乗法的である根拠**である。
+-/
+
+include P in
+/-- ★★**Frobenius-normalized 型なら `𝒪^▷(A)` は可換**。 -/
+theorem otri_mul_comm (hfn : IsFrobeniusNormalized P A) (x y : OTri P A) :
+    x * y = y * x := by
+  have hx1 : P.degFr ((x : End A) : A ⟶ A) = 1 := x.2.2
+  have h := hfn (x : End A) x.2.1 (y : End A) y.2
+  rw [hx1] at h
+  refine Subtype.ext ?_
+  show ((y : End A) : A ⟶ A) ≫ ((x : End A) : A ⟶ A)
+    = ((x : End A) : A ⟶ A) ≫ ((y : End A) : A ⟶ A)
+  simpa using h.symm
+
+/-! ## ★`Div` と冪 -/
+
+include P in
+/-- ★**`𝒪^▷` の元の冪の `Div`** —— `Div (t^k) = k • Div t`。
+
+★`t` は base-identity かつ linear なので、合成則が単純な足し算に潰れる。 -/
+theorem otri_div_pow (t : OTri P A) (k : ℕ) :
+    P.Div (((t ^ k : OTri P A) : End A) : A ⟶ A) = k • P.Div ((t : End A) : A ⟶ A) := by
+  have htb : P.Base ((t : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((t : End A) : A ⟶ A) = P.Base (𝟙 A) := t.2.1
+    rwa [P.Base_id] at h
+  induction k with
+  | zero => simpa using P.Div_id A
+  | succ n ih =>
+    have hstep : (((t ^ (n + 1) : OTri P A) : End A) : A ⟶ A)
+        = (((t ^ n : OTri P A) : End A) : A ⟶ A) ≫ ((t : End A) : A ⟶ A) := by
+      rw [pow_succ']
+      rfl
+    have htnb : P.Base (((t ^ n : OTri P A) : End A) : A ⟶ A) = 𝟙 _ := by
+      have h : P.Base (((t ^ n : OTri P A) : End A) : A ⟶ A) = P.Base (𝟙 A) := (t ^ n).2.1
+      rwa [P.Base_id] at h
+    rw [hstep, P.Div_comp, htnb, MonoidOn.map_id, ih,
+      show P.degFr ((t : End A) : A ⟶ A) = 1 from t.2.2, succ_nsmul]
+    simp [add_comm]
+
+include P in
+/-- ★**単元を掛けても `Div` は変わらない**。 -/
+theorem otri_div_unit_mul (u : OTimes P A) (x : OTri P A) :
+    P.Div ((((⟨(u : End A), OTimes_le_OTri P A u.2⟩ : OTri P A) * x : OTri P A) : End A) : A ⟶ A)
+      = P.Div ((x : End A) : A ⟶ A) := by
+  haveI : IsIso (((u : End A)) : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso _).mp u.2.2
+  have hxb : P.Base ((x : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((x : End A) : A ⟶ A) = P.Base (𝟙 A) := x.2.1
+    rwa [P.Base_id] at h
+  show P.Div (((x : End A) : A ⟶ A) ≫ (((u : End A)) : A ⟶ A)) = _
+  rw [P.Div_comp, hxb, MonoidOn.map_id,
+    show P.Div (((u : End A)) : A ⟶ A) = 0 from isIsometric_of_isIso P _,
+    show P.degFr (((u : End A)) : A ⟶ A) = 1 from u.2.1.2]
   simp
 
 end ABC3.Found.FrdI
