@@ -68,6 +68,7 @@ import ABC3.Found.GenEll.MinField
 import ABC3.Found.GenEll.RadicalPrincipal
 import ABC3.Found.GenEll.LogDiffFinite
 import ABC3.Found.GenEll.HeightADiv
+import ABC3.Found.GenEll.NorthcottNF
 import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
