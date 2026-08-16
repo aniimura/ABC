@@ -515,6 +515,42 @@ theorem prop_1_13_iii_a (F : FrobenioidCore P) (hslim : IsSlimCat D)
   rw [ha X.left] at h
   exact h
 
+include P in
+/-- ★★**(iii)(b) の核心** —— Frobenius-normalized な対象では、
+`α` の成分は**任意の次数 `n` について `n` 乗**である。
+
+原文 (FrdI p.40):
+> functoriality of the automorphisms induced by α with respect to base-identity en-
+
+★★**自然性と Frobenius-normalized の式を合わせるだけで出る**:
+- 自然性: `ζ ≫ α_X = α_Z ≫ ζ`（`Z` は `ζ ≫ X.hom` を構造射に持つ対象）
+- normalized: `ζ ≫ (α_Z)^n = α_Z ≫ ζ`
+- ★**`𝒞` は totally epimorphic なので `ζ` は epi**、左から消せる。 -/
+theorem prop_1_13_iii_pow (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
+    (α : (Over.forget A : Over A ⥤ C) ≅ Over.forget A) (X : Over A)
+    (hfn : IsFrobeniusNormalized P X.left)
+    (ζ : End X.left) (hζb : IsBaseIdentity P (ζ : X.left ⟶ X.left)) (n : ℕ+)
+    (hζd : P.degFr (ζ : X.left ⟶ X.left) = n) :
+    ∃ β : End X.left, β ∈ OTimes P X.left ∧
+      ((α.hom.app X : End X.left) : X.left ⟶ X.left)
+        = ((β ^ (n : ℕ) : End X.left) : X.left ⟶ X.left) := by
+  set Z : Over A := Over.mk ((ζ : X.left ⟶ X.left) ≫ X.hom) with hZ
+  have hnat := α.hom.naturality
+    (Over.homMk (ζ : X.left ⟶ X.left) rfl : Z ⟶ X)
+  -- 自然性: `ζ ≫ α_X = α_Z ≫ ζ`
+  have hn : (ζ : X.left ⟶ X.left) ≫ α.hom.app X
+      = α.hom.app Z ≫ (ζ : X.left ⟶ X.left) := hnat
+  have hmemZ : (α.hom.app Z : End X.left) ∈ OTimes P X.left :=
+    prop_1_13_iii_mem_otimes P F hslim A α Z
+  -- normalized: `ζ ≫ (α_Z)^{degFr ζ} = α_Z ≫ ζ`
+  have hfn' := hfn ζ hζb (α.hom.app Z : End X.left) (OTimes_le_OTri P X.left hmemZ)
+  rw [hζd] at hfn'
+  refine ⟨(α.hom.app Z : End X.left), hmemZ, ?_⟩
+  haveI : Epi (ζ : X.left ⟶ X.left) := P.totEpiC _ _ _
+  refine (cancel_epi (ζ : X.left ⟶ X.left)).mp ?_
+  rw [hn]
+  exact hfn'.symm
+
 /-! ### ★残るのは条件 (b) の場合（2026-08-16 時点）
 
 原文 (FrdI p.40):
