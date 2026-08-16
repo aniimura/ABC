@@ -2,6 +2,7 @@ import Mathlib.GroupTheory.MonoidLocalization.Basic
 import Mathlib.GroupTheory.Subgroup.Saturated
 import Mathlib.Data.ENat.Basic
 import Mathlib.Algebra.Order.Group.Nat
+import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.NormNum
 import Mathlib.Algebra.Group.Submonoid.Membership
@@ -689,6 +690,196 @@ theorem pnat_right_eq_one {a b : ℕ+} (h : a * b = 1) : b = 1 :=
 
 `ℕ≥1` の任意の元による**乗法(= `n` 倍)が全単射**。 -/
 def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n : ℕ) • a)
+
+/-! ### ★★`M^pf` —— **perfection**(2026-08-16 追加)
+
+原文 (FrdI p.11):
+> the perfection of M, that is to say, the inductive limit of the inductive system I∗of
+
+★★**帰納系の実体**: 添字は `(ℕ≥1, |)`、`I_a = M`、`a | b` の射は `(b/a)·`。
+
+★★**濾過的帰納極限なので、対 `(m, a)`(＝「`m/a`」)の同値類として書ける**:
+```
+(m, a) ~ (m', a')  ⟺  ∃ k : ℕ+, (k*a') • m = (k*a) • m'
+```
+★**`k` を自由に取れるのが濾過性**であり、**推移律はそこで効く**
+(中間の分母を `k` に取り込む)。★**`k` を落として `a' • m = a • m'` にすると
+推移律が消去律を要求してしまう** —— 一般のモノイドでは成り立たない。
+
+★**これが無いために `Φ^pf`(Definition 1.1)と `Frobenius-compact`
+(Definition 1.2, (iv))の両方が書けなかった**(2026-08-16 の監査)。 -/
+
+/-- perfection を定める同値関係。★`k` が濾過性を担う。 -/
+def PfRel : (M × ℕ+) → (M × ℕ+) → Prop :=
+  fun x y => ∃ k : ℕ+, ((k : ℕ) * (y.2 : ℕ)) • x.1 = ((k : ℕ) * (x.2 : ℕ)) • y.1
+
+theorem pfRel_refl (x : M × ℕ+) : PfRel M x x := ⟨1, rfl⟩
+
+theorem pfRel_symm {x y : M × ℕ+} (h : PfRel M x y) : PfRel M y x :=
+  ⟨h.choose, h.choose_spec.symm⟩
+
+theorem pfRel_trans {x y z : M × ℕ+} (h1 : PfRel M x y) (h2 : PfRel M y z) :
+    PfRel M x z := by
+  obtain ⟨k₁, e₁⟩ := h1
+  obtain ⟨k₂, e₂⟩ := h2
+  refine ⟨k₁ * k₂ * y.2, ?_⟩
+  have s₁ : (((k₂ : ℕ) * (z.2 : ℕ)) * ((k₁ : ℕ) * (y.2 : ℕ))) • x.1
+      = (((k₂ : ℕ) * (z.2 : ℕ)) * ((k₁ : ℕ) * (x.2 : ℕ))) • y.1 := by
+    have e₁' := e₁
+    simp only [mul_smul] at e₁' ⊢
+    rw [e₁']
+  have s₂ : (((k₁ : ℕ) * (x.2 : ℕ)) * ((k₂ : ℕ) * (z.2 : ℕ))) • y.1
+      = (((k₁ : ℕ) * (x.2 : ℕ)) * ((k₂ : ℕ) * (y.2 : ℕ))) • z.1 := by
+    have e₂' := e₂
+    simp only [mul_smul] at e₂' ⊢
+    rw [e₂']
+  push_cast
+  calc ((k₁ : ℕ) * (k₂ : ℕ) * (y.2 : ℕ) * (z.2 : ℕ)) • x.1
+      = (((k₂ : ℕ) * (z.2 : ℕ)) * ((k₁ : ℕ) * (y.2 : ℕ))) • x.1 := by ring_nf
+    _ = (((k₂ : ℕ) * (z.2 : ℕ)) * ((k₁ : ℕ) * (x.2 : ℕ))) • y.1 := s₁
+    _ = (((k₁ : ℕ) * (x.2 : ℕ)) * ((k₂ : ℕ) * (z.2 : ℕ))) • y.1 := by ring_nf
+    _ = (((k₁ : ℕ) * (x.2 : ℕ)) * ((k₂ : ℕ) * (y.2 : ℕ))) • z.1 := s₂
+    _ = ((k₁ : ℕ) * (k₂ : ℕ) * (y.2 : ℕ) * (x.2 : ℕ)) • z.1 := by ring_nf
+
+/-- perfection の setoid。 -/
+def pfSetoid : Setoid (M × ℕ+) where
+  r := PfRel M
+  iseqv := ⟨pfRel_refl M, pfRel_symm M, pfRel_trans M⟩
+
+/-- **[FrdI] §0** `M^pf` —— `M` の **perfection**。 -/
+def Pf : Type _ := Quotient (pfSetoid M)
+
+namespace Pf
+
+variable {M}
+
+/-- `M^pf` の元 `m/a`。 -/
+def mk (m : M) (a : ℕ+) : Pf M := Quotient.mk (pfSetoid M) (m, a)
+
+theorem sound {m m' : M} {a a' : ℕ+} (k : ℕ+)
+    (h : ((k : ℕ) * (a' : ℕ)) • m = ((k : ℕ) * (a : ℕ)) • m') : mk m a = mk m' a' :=
+  Quotient.sound ⟨k, h⟩
+
+@[elab_as_elim]
+theorem inductionOn {p : Pf M → Prop} (x : Pf M) (h : ∀ (m : M) (a : ℕ+), p (mk m a)) : p x :=
+  Quotient.inductionOn x fun y => h y.1 y.2
+
+/-- `m/a + m'/a' = (a'·m + a·m')/(a·a')`。 -/
+instance : Add (Pf M) :=
+  ⟨Quotient.map₂ (fun x y : M × ℕ+ => ((y.2 : ℕ) • x.1 + (x.2 : ℕ) • y.1, x.2 * y.2))
+    (by
+      rintro ⟨m₁, a₁⟩ ⟨n₁, b₁⟩ ⟨k₁, e₁⟩ ⟨m₂, a₂⟩ ⟨n₂, b₂⟩ ⟨k₂, e₂⟩
+      refine ⟨k₁ * k₂, ?_⟩
+      simp only [PNat.mul_coe, smul_add, smul_smul]
+      have h₁ : ((k₂ : ℕ) * b₂ * a₂) • (((k₁ : ℕ) * b₁) • m₁)
+          = ((k₂ : ℕ) * b₂ * a₂) • (((k₁ : ℕ) * a₁) • n₁) := by rw [e₁]
+      have h₂ : ((k₁ : ℕ) * b₁ * a₁) • (((k₂ : ℕ) * b₂) • m₂)
+          = ((k₁ : ℕ) * b₁ * a₁) • (((k₂ : ℕ) * a₂) • n₂) := by rw [e₂]
+      simp only [smul_smul] at h₁ h₂
+      calc ((k₁ : ℕ) * (k₂ : ℕ) * ((b₁ : ℕ) * (b₂ : ℕ)) * (a₂ : ℕ)) • m₁
+            + ((k₁ : ℕ) * (k₂ : ℕ) * ((b₁ : ℕ) * (b₂ : ℕ)) * (a₁ : ℕ)) • m₂
+          = ((k₂ : ℕ) * b₂ * a₂ * ((k₁ : ℕ) * b₁)) • m₁
+            + ((k₁ : ℕ) * b₁ * a₁ * ((k₂ : ℕ) * b₂)) • m₂ := by ring_nf
+        _ = ((k₂ : ℕ) * b₂ * a₂ * ((k₁ : ℕ) * a₁)) • n₁
+            + ((k₁ : ℕ) * b₁ * a₁ * ((k₂ : ℕ) * a₂)) • n₂ := by rw [h₁, h₂]
+        _ = ((k₁ : ℕ) * (k₂ : ℕ) * ((a₁ : ℕ) * (a₂ : ℕ)) * (b₂ : ℕ)) • n₁
+            + ((k₁ : ℕ) * (k₂ : ℕ) * ((a₁ : ℕ) * (a₂ : ℕ)) * (b₁ : ℕ)) • n₂ := by ring_nf)⟩
+
+@[simp] theorem mk_add_mk (m m' : M) (a a' : ℕ+) :
+    mk m a + mk m' a' = mk ((a' : ℕ) • m + (a : ℕ) • m') (a * a') := rfl
+
+instance : Zero (Pf M) := ⟨mk 0 1⟩
+
+@[simp] theorem zero_def : (0 : Pf M) = mk 0 1 := rfl
+
+instance : AddCommMonoid (Pf M) where
+  add_assoc x y z := by
+    induction x using Pf.inductionOn with | _ m₁ a₁ =>
+    induction y using Pf.inductionOn with | _ m₂ a₂ =>
+    induction z using Pf.inductionOn with | _ m₃ a₃ =>
+    refine (Pf.sound 1 ?_).trans (congrArg (mk _) (mul_assoc a₁ a₂ a₃))
+    push_cast
+    simp only [smul_add, smul_smul, one_mul]
+    ring_nf <;> abel
+  zero_add x := by
+    induction x using Pf.inductionOn with | _ m a =>
+    refine (Pf.sound 1 ?_).trans (congrArg (mk _) (one_mul a))
+    push_cast
+    simp only [smul_add, smul_smul, one_mul, smul_zero, zero_add]
+    ring_nf <;> abel
+  add_zero x := by
+    induction x using Pf.inductionOn with | _ m a =>
+    refine (Pf.sound 1 ?_).trans (congrArg (mk _) (mul_one a))
+    push_cast
+    simp only [smul_add, smul_smul, one_mul, smul_zero, add_zero]
+    ring_nf <;> abel
+  add_comm x y := by
+    induction x using Pf.inductionOn with | _ m₁ a₁ =>
+    induction y using Pf.inductionOn with | _ m₂ a₂ =>
+    refine (Pf.sound 1 ?_).trans (congrArg (mk _) (mul_comm a₁ a₂))
+    push_cast
+    simp only [smul_add, smul_smul, one_mul]
+    ring_nf <;> abel
+  nsmul n x := nsmulRec n x
+
+@[simp] theorem nsmul_mk (n : ℕ) (m : M) (a : ℕ+) : n • mk m a = mk (n • m) a := by
+  induction n with
+  | zero => exact (Pf.sound 1 (by simp)).symm
+  | succ n ih =>
+    rw [succ_nsmul, ih, mk_add_mk]
+    refine Pf.sound 1 ?_
+    push_cast
+    simp only [smul_add, smul_smul, succ_nsmul, one_mul]
+    ring_nf <;> abel
+
+/-- ★**自然な射 `M → M^pf`**。
+
+原文 (FrdI p.11):
+> which is injective if M is torsion-free, integral, and saturated, hence, in particular, if
+-/
+def of : M →+ Pf M where
+  toFun m := mk m 1
+  map_zero' := rfl
+  map_add' m m' := (Pf.sound 1 (by simp)).symm
+
+@[simp] theorem of_apply (m : M) : (of m : Pf M) = mk m 1 := rfl
+
+/-- ★★**`M^pf` は常に perfect**。
+
+原文 (FrdI p.11):
+> by any element of N≥1 on M is bijective. Thus, M pf is always perfect; M is perfect
+
+★**全射**は分母に `n` を掛ければよい(`m/a = (m/(n·a)) を n 倍したもの`)。
+★**単射**は `k` を `k·n` に取り替えるだけ —— ★**濾過性がここで効く。** -/
+theorem isPerfectMonoid_pf : IsPerfectMonoid (Pf M) := by
+  intro n
+  constructor
+  · intro x y h
+    induction x using Pf.inductionOn with | _ m a =>
+    induction y using Pf.inductionOn with | _ m' a' =>
+    simp only [nsmul_mk] at h
+    obtain ⟨k, e⟩ := Quotient.exact h
+    refine Pf.sound (k * n) ?_
+    push_cast at e ⊢
+    simp only [smul_smul] at e
+    calc ((k : ℕ) * (n : ℕ) * (a' : ℕ)) • m
+        = ((k : ℕ) * (a' : ℕ) * (n : ℕ)) • m := by ring_nf
+      _ = ((k : ℕ) * (a : ℕ) * (n : ℕ)) • m' := e
+      _ = ((k : ℕ) * (n : ℕ) * (a : ℕ)) • m' := by ring_nf
+  · intro x
+    induction x using Pf.inductionOn with | _ m a =>
+    refine ⟨mk m (n * a), ?_⟩
+    simp only [nsmul_mk]
+    refine Pf.sound 1 ?_
+    push_cast
+    simp only [smul_smul]
+    ring_nf
+
+end Pf
+
+def Pf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 11, item := "§0 Monoids — perfection M^pf",
+    sectionId := "frdi-s0-perfect" }
 
 /-! ### 非退化(`perfect`) -/
 
