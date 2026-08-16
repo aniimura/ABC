@@ -290,6 +290,10 @@ noncomputable def otriFunctor : Dᵒᵖ ⥤ MonCat.{max v w} where
     rfl
 
 
+
+
+
+
 /-- ★★**原文の「[so O×(A) ∼→Φ(A)±]」**（2026-08-16 追加）。
 
 原文 (FrdI p.27):
@@ -389,6 +393,30 @@ theorem otriOf_natural {A B : ElemFrobCat Φ} (φ : A ⟶ B)
   show _ = ((ElemFrobCat.Hom.deg φ : ℕ+) : ℕ) • _
   rw [show ElemFrobCat.Hom.deg φ = 1 from hφ]
   simp
+
+/-! ### ★★`otriFunctor` と可換関係を結ぶ（2026-08-16）
+
+★★**監査の指摘**: `otriFunctor` は `Φ.map` を `otriEquiv` で輸送して
+**定義**しているので、関手則も構成上自明であり、
+★**そのままでは「`Φ` を着替えさせたもの」に留まる**。
+内容は `otriOf_natural` にあるが、両者が結ばれていなかった。
+
+★**ここで結ぶ**。 -/
+
+/-- ★★**`otriFunctor` の推移は可換関係で特徴づけられる**（linear な射に沿って）。
+
+★★**これが `Proposition 1.5, (ii)` の内容のある部分である** ——
+関手 `otriFunctor` は `Φ.map` の着替えで定義されているが、
+★**その推移が「`α ◦ φ = φ ◦ β`」という圧の式で決まる**ことは自明でない。
+
+★原文の「functorial」が linear の範囲であるのは、まさにこの式が
+linear でないと崩れるからである（`otriOf_comm_iff` の `deg_Fr` の項）。 -/
+theorem otriFunctor_map_comm {A B : ElemFrobCat Φ} (φ : A ⟶ B)
+    (hφ : IsLinear (elemPreFrobenioid Φ hD hpd) φ) (b : Φ.val B.base) :
+    (φ ≫ otriOf Φ B b : A ⟶ B)
+      = ((otriEquiv Φ hD hpd A) (Multiplicative.ofAdd
+          (Φ.map (ElemFrobCat.Hom.base φ) b)) : End A) ≫ φ :=
+  otriOf_natural Φ hD hpd φ hφ b
 
 /-! ## ★第2段 —— 射が pull-back ⟺ **linear isometry**
 

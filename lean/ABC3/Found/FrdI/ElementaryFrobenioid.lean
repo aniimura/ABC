@@ -297,6 +297,24 @@ noncomputable def gpFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMon
     rw [h, gpMap_comp]
     rfl
 
+/-! ★★**原文の一文についての測定（2026-08-16）**
+
+原文 (FrdI p.19) は仮定なしに「Φ determines monoids Φchar, Φgp, Φpf on D」と
+述べるが、★★**`Φ^gp` についてはそのままでは成り立たないらしい**。
+
+★**検証役が示した障害**: `ℕ ↪ ℕ∪{∞}` は characteristically injective だが、
+`Gp(ℕ) = ℤ → Gp(ℕ∪{∞}) = 0` は単射でない。
+つまり**整域性を落とすと条件 (a) が壊れる**。
+
+★**ただしこれはモノイドの層での障害であって、
+そういう`Φ` と `D` を実際に構成したわけではない** ——
+★★**「整域性なしでは危ない」までは言えるが、「原文が誤っている」とは断定しない。**
+
+★**下流では失われない**: `Definition 1.1, (iv)` 以降 `Φ` は常に divisorial
+（integral ∧ sharp を含む）なので、`gpOn` の `hint` も `pfOn` の `hsh` も自動で満たされる。
+
+★**`pfOn` の `hsh` が本当に必要かは UNVERIFIED** である（落とせる可能性がある）。 -/
+
 /-- ★★**`Φ^gp`** —— `Φ` の groupification。
 
 ★`hint` は各 `Φ(A)` が integral であること（`Φ` が pre-divisorial なら従う）。 -/
