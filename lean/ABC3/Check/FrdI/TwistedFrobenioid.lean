@@ -199,6 +199,68 @@ theorem twIsIso_of {A B : TwObj Φ G} (f : A ⟶ B) (h : IsIso f.hom) : IsIso f 
     rw [hdeg]
     simp
 
+/-! ## ★不変量は `𝔽_Φ` 成分だけで決まる(橋渡し)
+
+★★**これが「`G` 成分を無視する」の正確な意味**である。 -/
+
+section Bridge
+
+variable (hD : IsTotallyEpimorphic D) [IsConnected D]
+  (hpd : ∀ A : D, IsPreDivisorial (Φ.val A))
+
+@[simp] theorem twBase {A B : TwObj Φ G} (f : A ⟶ B) :
+    (twPreFrobenioid (G := G) hD hpd).Base f = f.hom.base := rfl
+
+@[simp] theorem twDegFr {A B : TwObj Φ G} (f : A ⟶ B) :
+    (twPreFrobenioid (G := G) hD hpd).degFr f = f.hom.deg := rfl
+
+@[simp] theorem twDiv {A B : TwObj Φ G} (f : A ⟶ B) :
+    (twPreFrobenioid (G := G) hD hpd).Div f = toChar f.hom.div := rfl
+
+/-- ★★**捻れ積も isotropic 型** —— `Div = 0` の pre-step は同型。
+
+★`𝔽_Φ` の側(`elemFrob_isotropic`)で `hom` が同型になり、
+`twIsIso_of` が `G` 成分の逆を自動で作る。 -/
+theorem twIsotropic (A : TwObj Φ G) : IsIsotropic (twPreFrobenioid (G := G) hD hpd) A := by
+  intro Dd φ hisom hstep
+  refine twIsIso_of φ ?_
+  exact elemFrob_isotropic Φ hD hpd A.ofElem Dd.ofElem φ.hom hisom hstep
+
+/-- ★★**捻れ積では全射が co-angular**(`Proposition 1.4, (i)`)。
+
+★★**これで `Definition 1.3` の (iii)(a)(b) が自明になる。** -/
+theorem twCoAngular {A B : TwObj Φ G} (φ : A ⟶ B) :
+    IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ :=
+  prop_1_4_i _ φ (fun Y _ => twIsotropic hD hpd Y)
+
+/-- ★**捻れ積でも pre-step は mono**(`Definition 1.3, (v), (a)`)。
+
+★`𝔽_Φ` 成分は `elemFrob_preStepMono`、★**`G` 成分は次数 1 なので単純に消約**。 -/
+theorem twPreStepMono {A B : TwObj Φ G} (φ : A ⟶ B)
+    (hφ : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ) : Mono φ := by
+  haveI : Mono φ.hom := elemFrob_preStepMono Φ hD hpd φ.hom hφ
+  refine ⟨fun {Z} f g hh => ?_⟩
+  have hhom : f.hom = g.hom := (cancel_mono φ.hom).mp (congrArg TwHom.hom hh)
+  refine TwHom.ext hhom ?_
+  have hu := congrArg TwHom.unit hh
+  rw [twComp_unit, twComp_unit, show ElemFrobCat.Hom.deg φ.hom = 1 from hφ.1] at hu
+  simpa using mul_right_cancel hu
+
+/-- ★**各次数の Frobenius 型自己射がある**(`Definition 1.3, (ii)` の存在部分)。
+
+★`(⟨𝟙, 0, n⟩, 1)` を取ればよい。★**co-angular は `twCoAngular` が無条件に与える。** -/
+theorem twFrobDegSurj (A : TwObj Φ G) (n : ℕ+) :
+    ∃ (B : TwObj Φ G) (φ : A ⟶ B),
+      IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) φ ∧
+      (twPreFrobenioid (G := G) hD hpd).degFr φ = n := by
+  refine ⟨A, ⟨⟨𝟙 A.ofElem.base, 0, n⟩, 1⟩, ⟨⟨twCoAngular hD hpd _, ?_⟩, ?_⟩, rfl⟩
+  · show toChar (0 : Φ.val A.ofElem.base) = 0
+    simp
+  · show IsIso (𝟙 A.ofElem.base)
+    infer_instance
+
+end Bridge
+
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
 
 ★**確定した**:
