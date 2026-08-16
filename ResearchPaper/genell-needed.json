@@ -1,0 +1,217 @@
+{
+ "generated": "node tools/genell-progress.mjs --json",
+ "limits": [
+  "分母は測定値であって定義ではない。番号の無い依存を数えていないので下界寄り。",
+  "一方「cf.」の案内も引用として数えているので上に振れる方向もある。桁を見るための数である。",
+  "pdftotext 経由なので項目名は壊れうる(事実2)。逐語には使えない。",
+  "★本体の終端は「次の宣言行 または 次の Section N: 見出し」。frdi-progress は節見出しで切らない。",
+  "分子は .src の形だけを見る。locator の検証は check.mjs の G1 が行う。"
+ ],
+ "needed": [
+  {
+   "item": "Definition 1.1",
+   "page": 3,
+   "section": "1",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Definition 1.2",
+   "page": 5,
+   "section": "1",
+   "citedBy": [
+    "IUTchI",
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Example 1.3",
+   "page": 5,
+   "section": "1",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Proposition 1.4",
+   "page": 6,
+   "section": "1",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Remark 1.4.1",
+   "page": 8,
+   "section": "1",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Definition 1.5",
+   "page": 8,
+   "section": "1",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Remark 1.5.1",
+   "page": 8,
+   "section": "1",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Proposition 1.6",
+   "page": 9,
+   "section": "1",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Proposition 1.7",
+   "page": 9,
+   "section": "1",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Theorem 2.1",
+   "page": 11,
+   "section": "2",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 3.1",
+   "page": 13,
+   "section": "3",
+   "citedBy": [
+    "IUTchI",
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 3.2",
+   "page": 15,
+   "section": "3",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Definition 3.3",
+   "page": 15,
+   "section": "3",
+   "citedBy": [
+    "IUTchI",
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Remark 3.3.1",
+   "page": 16,
+   "section": "3",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Proposition 3.4",
+   "page": 17,
+   "section": "3",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 3.5",
+   "page": 17,
+   "section": "3",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 3.6",
+   "page": 17,
+   "section": "3",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Lemma 3.7",
+   "page": 18,
+   "section": "3",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Theorem 3.8",
+   "page": 19,
+   "section": "3",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 4.1",
+   "page": 20,
+   "section": "4",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Remark 4.1.1",
+   "page": 21,
+   "section": "4",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  },
+  {
+   "item": "Lemma 4.2",
+   "page": 21,
+   "section": "4",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Corollary 4.3",
+   "page": 22,
+   "section": "4",
+   "citedBy": [],
+   "done": false
+  },
+  {
+   "item": "Corollary 4.4",
+   "page": 23,
+   "section": "4",
+   "citedBy": [
+    "IUTchIV"
+   ],
+   "done": false
+  }
+ ],
+ "total": 24,
+ "done": 0
+}

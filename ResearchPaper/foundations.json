@@ -1,0 +1,162 @@
+{
+  "_comment": [
+    "★北極星(IUT 全体 + abc)に要る**基礎理論**の登記簿。番号付き項目のグラフには出ない層である。",
+    "既存のグラフ(tools/full-graph.mjs 等)の節点は**論文の番号付き項目**だけなので、",
+    "『その項目を書くのに何の理論が要るか』は見えない。この登記簿がその層を持つ。",
+    "",
+    "★status の意味:",
+    "  inMathlib   — mathlib にそのものがある(そのまま使える)",
+    "  partial     — mathlib に近いものはあるが**枠組みが違う**か一部だけ",
+    "  inProject   — mathlib 外の公開プロジェクトに在る/計画されている(★drop-in とは限らない)",
+    "  building    — 我々が自前で構築中",
+    "  absent      — 見つからなかった。★searched(探索範囲)が無い absent は書いてはならない",
+    "",
+    "★measuredAt を必ず書く。測定は古びる(lean-ecosystem.json と同じ規律)。",
+    "★公開プロジェクトの『在る』は『使える』ではない——lean-ecosystem.json の実測では",
+    "  drop-in で使えたものは 0 件だった。scope と caveat を必ず書くこと。"
+  ],
+  "measuredAt": "2026-08-16",
+  "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
+  "foundations": [
+    {
+      "id": "arakelov",
+      "name": "Arakelov 理論(算術直線束・APic・ADiv・deg_F)",
+      "why": "[GenEll] Definition 1.1 が hermitian 計量つき直線束で高さを定義する。§1 の 9 件すべてがこの上に立つ",
+      "neededBy": [
+        { "paper": "GenEll", "items": ["Definition 1.1", "Definition 1.2", "Example 1.3", "Proposition 1.4", "Definition 1.5", "Remark 1.4.1", "Remark 1.5.1", "Proposition 1.6", "Proposition 1.7"] }
+      ],
+      "status": "absent",
+      "searched": [
+        "mathlib v4.31.0-rc2 全体: grep -rniE 'Arakelov' → 0 件",
+        "同: grep -rniE 'arithmetic.*line bundle' → 0 件",
+        "Web 検索(2026-08-16): 'Arakelov theory arithmetic line bundle Lean 4 mathlib formalization heights Weil' → Lean の形式化は 1 件も出ず、すべて数学の論文"
+      ],
+      "publicProjects": [],
+      "note": "★近いものはある(下の weil-heights)が**枠組みが違う**。mathlib の高さは ℙⁿ 上の Weil 高さであって、任意のスキーム上の算術直線束に付随する高さではない"
+    },
+    {
+      "id": "weil-heights",
+      "name": "Weil 高さ(数体上・射影空間・Northcott)",
+      "why": "[GenEll] §1 の高さの土台になりうる。ただし Definition 1.1 の枠組みとは一致しない",
+      "neededBy": [
+        { "paper": "GenEll", "items": ["Definition 1.2", "Proposition 1.4"] }
+      ],
+      "status": "partial",
+      "searched": [
+        "mathlib v4.31.0-rc2: Mathlib/NumberTheory/Height/{Basic,MvPolynomial,Northcott,NumberField,Projectivization}.lean = 5 ファイル 2006 行(2026-08-16 実測)",
+        "主要宣言: mulHeight / logHeight / mulHeight₁ / logHeight₁ / totalWeight / Northcott",
+        "NumberField.InfinitePlace 経由の archAbsVal / nonarchAbsVal がある(70 件)"
+      ],
+      "publicProjects": [],
+      "note": "★**ある**が、`ht_M̄`(算術直線束 M̄ に付随する高さ)ではない。橋渡しが要る"
+    },
+    {
+      "id": "galois-rep-torsion",
+      "name": "楕円曲線の l 捩れ点への Galois 表現(Gal(Q̄/L) → GL₂(ℤ_l))",
+      "why": "[GenEll] §3 の 9 件(Theorem 3.8 を含む)がこの上に立つ。[GenEll] Corollary 4.4 は §3 の上にしか立たない",
+      "neededBy": [
+        { "paper": "GenEll", "items": ["Lemma 3.2", "Definition 3.3", "Remark 3.3.1", "Proposition 3.4", "Lemma 3.5", "Lemma 3.6", "Lemma 3.7", "Theorem 3.8", "Corollary 4.3", "Corollary 4.4"] }
+      ],
+      "status": "inProject",
+      "searched": [
+        "mathlib v4.31.0-rc2: grep -rniE 'torsion' Mathlib/AlgebraicGeometry/EllipticCurve/*.lean → 8 件、**すべて 2-torsion polynomial**(2026-08-16 実測)",
+        "同ディレクトリの構成: Affine / DivisionPolynomial / IsomOfJ / Jacobian / LFunction / ModelsWithJ / NormalForms / Projective / Reduction / VariableChange / Weierstrass",
+        "Web 検索(2026-08-16): 'Lean 4 formalization Galois representation elliptic curve torsion points project' → mathlib には部分的にしか無いという報告"
+      ],
+      "publicProjects": [
+        {
+          "name": "FLT (Fermat's Last Theorem project)",
+          "url": "https://github.com/ImperialCollegeLondon/FLT",
+          "lead": "Kevin Buzzard (Imperial College London), EPSRC EP/Y022904/1、2029-09 まで",
+          "scope": "ブループリント(2026-08-16 取得)に **§2.5 'Galois representations and elliptic curves'**、**§3 'Reducibility of p-torsion of the Frey curve'**、付録 §14.5 'Galois representations' がある",
+          "caveat": "★**現在の実装状況は未確認**。ブループリントに章があることは、その定理が Lean で完成していることを意味しない。使う前に clone して sorry を数えること(lean-ecosystem.json の規律)"
+        }
+      ],
+      "note": "★**重複投資の危険がここにある**。局所類体論で ClassFieldTheory を見つけたのと同じ構図"
+    },
+    {
+      "id": "belyi",
+      "name": "noncritical Belyi maps",
+      "why": "[GenEll] Theorem 2.1 の証明が [Mzk1] Theorem 2.5 を引く。abc ⟺ ℙ¹版 abc の同値性の要",
+      "neededBy": [{ "paper": "GenEll", "items": ["Theorem 2.1"] }],
+      "status": "absent",
+      "searched": [
+        "mathlib v4.31.0-rc2 全体: grep -rni 'belyi' → 0 件(2026-08-16 実測)"
+      ],
+      "publicProjects": [],
+      "note": "★ただし原典 [Mzk1] *Noncritical Belyi Maps*(全 9 ページ)は `0_Source` に**ある**。転写の対象にできる"
+    },
+    {
+      "id": "pro-l-groups",
+      "name": "pro-l 群(位相・Frattini 論法・合同フィルトレーション)",
+      "why": "[GenEll] Lemma 3.1, (iv) が [Serre] Ch IV §3.4 Lemma 3 を引く。その [Serre] は 0_Source に無い",
+      "neededBy": [{ "paper": "GenEll", "items": ["Lemma 3.1"] }],
+      "status": "absent",
+      "searched": [
+        "mathlib v4.31.0-rc2: grep -rn 'ProfiniteGrp' → 135 件(profinite 群はある)",
+        "同: grep -rniE 'IsProPGroup|pro-p' → **2 件**(pro-p 群は実質不在)",
+        "同: grep -rniE 'congruence.*subgroup' → SL(2,ℤ) 用の Mathlib/NumberTheory/ModularForms/CongruenceSubgroups.lean のみ。ℤ_l 上のものは無い"
+      ],
+      "publicProjects": [],
+      "note": "★**位相が要るのは (iv) の最後の 1 歩だけ**と切り分け済み(genell-goal.md の (A)/(B))。(A) の材料は 8 種すべて自前で揃えた"
+    },
+    {
+      "id": "modular-rep",
+      "name": "標数 l の表現論(随伴表現の既約性・非分裂拡大)",
+      "why": "Lemma 3.1, (iv) の別経路(合同フィルトレーション + 既約性)に要る",
+      "neededBy": [{ "paper": "GenEll", "items": ["Lemma 3.1"] }],
+      "status": "building",
+      "searched": [
+        "mathlib v4.31.0-rc2: grep -rniE 'modular representation|Representation.*char' → **1 件**(実質不在)",
+        "同: IsSimpleModule は 119 件あるが、標数 l の SL₂ 加群の既約性は無い"
+      ],
+      "publicProjects": [],
+      "note": "★**必要な分は自前で取った**——`Found/GenEll/Sl2Adjoint.lean` の `sl2_adjoint_irreducible`(要る仮定は `2 ≠ 0` だけ)"
+    },
+    {
+      "id": "tate-curve",
+      "name": "Tate 曲線・半安定還元・局所高さ",
+      "why": "[GenEll] §3 の算術側(Lemma 3.2–3.7)が使う",
+      "neededBy": [{ "paper": "GenEll", "items": ["Lemma 3.2", "Lemma 3.5", "Lemma 3.7", "Theorem 3.8"] }],
+      "status": "absent",
+      "searched": [
+        "mathlib v4.31.0-rc2: Mathlib/AlgebraicGeometry/EllipticCurve/Reduction.lean はあるが Tate 曲線・半安定還元の理論は無い(2026-08-16、ディレクトリ全宣言を確認)"
+      ],
+      "publicProjects": [],
+      "note": "外部文献 [FC] Faltings–Chai *Degenerations of Abelian Varieties* に依存する箇所がある(0_Source に無い)"
+    },
+    {
+      "id": "local-cft",
+      "name": "局所類体論(相互律・高次分岐群・局所 Tate 双対性)",
+      "why": "[pGC] トラックの義務 #1/#4/#5/§2",
+      "neededBy": [{ "paper": "pGC", "items": ["Proposition 1.1", "§2"] }],
+      "status": "inProject",
+      "searched": ["ResearchPaper/lean-ecosystem.json(2026-08-14 測定)を参照"],
+      "publicProjects": [
+        {
+          "name": "ClassFieldTheory",
+          "url": "https://github.com/kbuzzard/ClassFieldTheory",
+          "scope": "群/Tate コホモロジー・抽象的類形成の相互律・非アルキメデス局所体",
+          "caveat": "★Instances.lean に sorry 11 件——我々が要る箇所がちょうど未完成。toolchain も我々より新しい"
+        },
+        {
+          "name": "LocalClassFieldTheory",
+          "url": "https://github.com/mariainesdff/LocalClassFieldTheory",
+          "scope": "完備離散付値環・局所体",
+          "caveat": "★sorry 114 件、1 年以上更新なし"
+        }
+      ],
+      "note": "★詳細は `ResearchPaper/lean-ecosystem.json`。**drop-in で使えたものは 0 件**だった"
+    },
+    {
+      "id": "frobenioid",
+      "name": "Frobenioid([FrdI] の理論全体)",
+      "why": "[IUTchIII] Definition 3.8(Θ/q-パイロット対象)の解消条件。Cor 3.12 の Interface が待っている",
+      "neededBy": [{ "paper": "IUTchIII", "items": ["Definition 3.8"] }],
+      "status": "building",
+      "searched": ["mathlib に Frobenioid は無い(PLAN.md 事実3)。公開プロジェクトも無い"],
+      "publicProjects": [],
+      "note": "★我々が自前で構築中。`node tools/frdi-progress.mjs` で 13/54(2026-08-16)"
+    }
+  ]
+}

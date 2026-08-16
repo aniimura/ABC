@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] Definition 1.2 — 高さ関数と BD-class</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .scr { font-style: italic; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] Definition 1.2 — 高さ関数と BD-class</h1>
+
+<p>物理 p.5。<strong>260 dpi 目視確認 2026-08-16</strong>。</p>
+
+<h2>★★原典の記号の向きが食い違っている(3 箇所を目視して確定)</h2>
+
+<table>
+<tr><th>出典</th><th>目視した内容</th></tr>
+<tr>
+  <td>[GenEll] p.5<br>Def 1.2, (ii)</td>
+  <td><code>α ≲<sub>F</sub> β</code> ⟺ ∃C, <strong><code>β(x) − α(x) ≤ C</code></strong>
+      (= <code>β − α</code> が<strong>上</strong>に有界)</td>
+</tr>
+<tr>
+  <td>[GenEll] p.11<br>Thm 2.1, (i)</td>
+  <td>表題が <strong>“Effective Mordell/ABC/Vojta Conjecture”</strong> で、内容は
+      <code>ht<sub>ω<sub>X</sub>(D)</sub> ≲ (1+ε)(log-diff<sub>X</sub> + log-cond<sub>D</sub>)</code></td>
+</tr>
+<tr>
+  <td>[IUTchIV] p.54<br>Cor 2.3</td>
+  <td>同じ式に対し「i.e., the function <code>(1+ε)(log-diff + log-cond) − ht</code>
+      <strong>is bounded below</strong> by a constant」。
+      しかも <code>[cf. [GenEll], Definition 1.2, (ii)]</code> と明示的に引いている</td>
+</tr>
+</table>
+
+<p class="open">★<strong>abc/Vojta の内容は <code>ht ≤ (1+ε)(log-diff + log-cond) + C</code></strong>、
+すなわち <code>(1+ε)(…) − ht</code> が<strong>下</strong>に有界、である。
+したがって [IUTchIV] の説明文と [GenEll] Thm 2.1 の表題は整合し、
+<strong>[GenEll] Definition 1.2, (ii) に印字された不等号だけが逆</strong>である。</p>
+
+<p class="open">★<strong>トリアージ</strong>(<code>PLAN.md</code> §5-2):
+<strong>①(我々のモデル化の誤り)は排除した</strong>——3 箇所とも 260 dpi の PDF 目視であり、
+<code>pdftotext</code> は経由していない。②(未構築の数学)は該当しない。
+③(原典側)に当たるが、これは §5 が想定した<strong>「飛躍」ではなく記号定義の誤植</strong>であり、
+<code>Gap</code> の機構(追加仮説として型に出す)は当たらない。</p>
+
+<p class="open">★<strong>ゆえの扱い</strong>: <strong>どちらも型に出し、両者が互いに逆であることを定理にした。</strong>
+<code>lean/ABC3/Found/GenEll/BDClass.lean</code> の <code>BDle</code>(印字どおり)/
+<code>BDge</code>(abc の向き)/ <code>bdle_ne_bdge</code>(反例で両者が別物であることを示す)。
+<strong>abc の主張を書くときは <code>BDge</code> を使う</strong>——その選択を機械可読にした。</p>
+
+<section class="statement definition"
+         id="genell-def-1-2-i"
+         data-paper="GenEll"
+         data-pdf-page="5"
+         data-item="Definition 1.2, (i)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">as the <em>height function</em> associated to the arithmetic line bundle <span class="scr bar">M</span>.</div>
+<div class="reading">算術直線束 <code>M̄</code> に付随する高さ関数 <code>ht_M̄ : X(Q̄) → ℝ</code> の命名。</div>
+<p class="open">★<strong>未実装</strong>。算術直線束(<code>Definition 1.1</code>)を要し、
+そこには Arakelov 理論(hermitian 計量つき直線束・<code>APic</code>)が要る。
+mathlib に算術直線束は無い(探索範囲: <code>Mathlib</code> 全体を
+<code>arithmetic.*line bundle</code> / <code>Arakelov</code> で grep、0 件)。</p>
+</section>
+
+<section class="statement definition"
+         id="genell-def-1-2-ii"
+         data-paper="GenEll"
+         data-pdf-page="5"
+         data-item="Definition 1.2, (ii)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">if there exists a [“constant”] C ∈ <span class="bb">R</span> such that β(x) − α(x) ≤ C (respectively,</div>
+<div class="verbatim">(ii) Fix a subset <span class="scr">F</span> ⊆ X(<span class="bb bar">Q</span>). If α, β : <span class="scr">F</span> → <span class="bb">R</span> are functions, then we shall write</div>
+<div class="reading">関数 <code>F → ℝ</code> の上の 3 つの関係。<code>≈</code> は同値関係で、
+その同値類が <strong>BD-class</strong>(bounded discrepancy class)。
+★<strong>Arakelov 理論を一切要しない</strong>——ここだけ先に実装できる理由である。</div>
+<p class="open">★原文は「The relation “≈” <strong>clearly</strong> defines an equivalence relation」と書く。
+その「clearly」を実際に証明した(<code>bdeq_equivalence</code>)。
+また「it makes sense to apply the notation … to BD-classes」も
+<strong>well-defined 性を示していない</strong>ので、<code>bdle_congr</code> として証明した。</p>
+<p class="open">★<strong>向きの食い違いは上表のとおり</strong>。実装は逐語どおりの
+<code>BDle</code> を第一に置き、abc の向きを <code>BDge</code> として併記した。</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,545 @@
+# [GenEll] トラックの長期ゴール（2026-08-16 設定）
+
+対象: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]（物理 25 ページ、番号付き項目 **26 件**）。
+
+本書は `PLAN.md` §0 の北極星（IUT 全体 + abc）に対する**下位の北極星**を 1 つ設定する。
+`layer0-triage.md` が「★★いま着手できるもの」の 5 番に挙げた `[GenEll] Lemma 3.1`
+（純古典・IUT 語彙ゼロ）が**何に向かう最下段なのか**を測って決めた。
+
+**★すべて `.txt`（pdftotext）由来であり、目視していない。**事実2により項目名・逐語は壊れうる。
+本書の数はすべて「桁を見るための数」であり、逐語には使えない。着手時に PDF 目視が要る。
+
+---
+
+## 0. 一行
+
+> **★北極星（B トラック）: `[GenEll] Corollary 4.4` まで、IUTchIV が要る範囲の [GenEll] を `Found/` に `sorry` 無しで載せる。**
+>
+> **★同じ土台の上に立つ第二の頂: `[GenEll] Theorem 2.1`** ——「abc ⟺ ℙ¹∖{0,1,∞} 版 abc」という**古典的同値性**。**IUT を一切使わない。**
+
+---
+
+## 1. なぜこの 2 つが頂になるか（実測）
+
+### 1-1. Corollary 4.4 の側 —— IUT の**入力が空虚でない**ことを言う唯一の道
+
+[IUTchIV] Corollary 2.2 の証明（`.txt` l.3055–3100）は、与えられた楕円曲線から
+初期 Θ-データを構成するために (P1)–(P7) を順に立てる。その中の (P6):
+
+> (P6) the image of the outer homomorphism Gal(Q/F) →GL2(Fl) determined
+> by the l-torsion points of EF contains the subgroup SL2(Fl) ⊆GL2(Fl).
+>
+> Indeed, since, by (P5), EF has bad multiplicative reduction at some valuation ∈
+> Vbad_mod ≠ ∅, (P6) follows formally from (P2), (P4), and **[GenEll], Lemma 3.1, (iii)**
+> [cf. the proof of the final portion of [GenEll], Theorem 3.8].
+
+そして (P1)–(P7) が揃うことで
+
+> there exist data “CK”, “V”, and “ϵ” such that all of the conditions of
+> **[IUTchI], Definition 3.1, (a), (b), (c), (d), (e), (f), are satisfied**
+
+★**これは `PLAN.md` §4 の G2（非空虚 witness）の穴に、この一点で正面から当たる。**
+G2 は「退化 witness でも通る」ことが実証済みで、内容を保証しない。
+本プロジェクトの `Skeleton/IUTchI/InitialThetaData.lean` は現在 **Definition 3.1 の条件 (a) だけ**の転写であり、
+その docstring 自身が「これは initial Θ-data ではない」と書いている。
+**初期 Θ-データの「本物の witness」を作る道は、(P1)–(P7) を通る以外に無く、その (P6) が Lemma 3.1 (iii) である。**
+
+### 1-2. Theorem 2.1 の側 —— abc への最終段の**半分そのもの**で、しかも IUT 非依存
+
+[IUTchIV] Corollary 2.3（= Diophantine Inequalities。`dependency-scale.md` が「ABC 予想を導くもの」と記録している系）の証明（`.txt` l.3608–3640）:
+
+> One verifies immediately that the content of the statement of Corollary 2.3
+> coincides precisely with the content of **[GenEll], Theorem 2.1, (i)**. Thus, it follows
+> from **the equivalence of [GenEll], Theorem 2.1**, that, in order to complete the proof
+> of Corollary 2.3, it suffices to verify that **[GenEll], Theorem 2.1, (ii)**, holds.
+
+すなわち abc への最終段は 2 枚に分かれる:
+
+| | 内容 | 誰が示すか |
+|---|---|---|
+| (A) | 一般の双曲曲線の Vojta 不等式 ⟺ ℙ¹∖{0,1,∞} の compactly bounded subset 版 | **[GenEll] Theorem 2.1**（Elkies / Moret-Bailly / Szpiro の技法 + noncritical Belyi maps）|
+| (B) | その ℙ¹ 版を実際に示す | **IUT 本体**（Cor 3.12 → IUTchIV Cor 2.2）|
+
+**本プロジェクトはこれまで (B) 側しか見ていない。(A) は独立に形式化でき、IUT の当否に依存しない。**
+`idea2.md` ①「解けなくても数学的成果が残る問題を選ぶ」の理想形であり、
+しかも (B) が完成したときに**接続がそのまま閉じる**。
+
+---
+
+## 2. 規模（実測。★器具を作り直して測った）
+
+### ★2-0. 訂正の記録 —— `tools/intra-graph.mjs` の近似が結論を変えていた
+
+`intra-graph.mjs` は項目の本体を「**次の宣言行まで**」と近似する。
+節の最後の項目では**次の節の導入文を巻き込む**。実害を実測した:
+
+| | Theorem 2.1 の到達 | 内訳 |
+|---|---:|---|
+| `intra-graph.mjs`（次の宣言行まで） | **17 件** | §3 の項目（Theorem 3.8 / Lemma 3.1 / …）を含む |
+| 節見出しでも切る（本書） | **9 件** | **§1 と自身のみ** |
+
+原因は §2 が Theorem 2.1 **1 項目しか持たない**こと。その本体が `Section 3:` の導入文
+（`… is “rather large” [cf. Theorem 3.8]`）まで伸び、そこにある参照を Theorem 2.1 の依存として数えていた。
+
+> ★**「Theorem 2.1 は Theorem 3.8 に依存する」は誤りである。**
+> Theorem 2.1 の本体（118 行）が引く論文内項目は
+> **Example 1.3 ×2 / Proposition 1.7 ×3 / Proposition 1.4 ×2 / Proposition 1.6 ×1** の 4 件だけ、
+> 外部文献は **[Mzk1] ×2** だけである。
+> これは規模の見積りを **17 → 9** に、しかも**最重量部（§3 の Galois 表現）を圏外に**動かす差である。
+
+再現: `scratchpad/genell-closure.mjs`（節見出しでも本体を切る版）。
+★`tools/intra-graph.mjs` 自体は**直していない**（別セッションが稼働中の共有ファイルのため）。
+直すなら「本体の終端 = 次の宣言行 **または** 次の `Section N:` 見出しのうち先に来る方」。
+
+### 2-1. 到達（節見出しで切った版）
+
+| 根 | 到達 | 深さ | 内訳 |
+|---|---:|---:|---|
+| **Theorem 2.1** | **9** | 3 | §1 の 8 件 + 自身。**§3・§4 を含まない** |
+| **Theorem 3.8** | 13 | 3 | §1 の 4 件 + §3 の 8 件 + 自身 |
+| **Corollary 4.4** | **18** | 3 | §1 の 4 件 + §3 の 9 件 + §4 の 4 件 + 自身 |
+| **Lemma 3.1** | **1** | 0 | ★**真の葉**（出次数 0） |
+
+比較（`dependency-scale.md`）: [FrdI] は 83 項目・到達 45・辺 184・平均出次数 4.1。
+**[GenEll] は項目数で FrdI の 1/3、到達で 18/26。**
+
+### 2-2. IUTchIV が [GenEll] を直接引く回数（実測、14 種）
+
+```
+Theorem 2.1 ×10 / Example 1.3 ×7 / Proposition 1.4 ×5 / Lemma 3.5 ×5 / Definition 1.2 ×5
+Proposition 3.4 ×3 / Theorem 3.8 ×2 / Definition 1.5 ×2 / Corollary 4.4 ×2
+Remark 4.1.1 / Lemma 3.7 / Lemma 3.1 / Definition 3.3 / Definition 1.1 各 ×1
+```
+
+★**§1（高さ）は両方の頂の共通の土台である。** Theorem 2.1 の到達 9 件のうち 8 件が §1、
+Corollary 4.4 の到達 18 件のうち 4 件が §1。
+
+---
+
+## 3. ★証明側の依存（statement には現れない）
+
+`PLAN.md` §8-1 の教訓（pGC §1 の選定の誤り = *statement が言及する対象*だけを見て*証明の依存*を見なかった）を、ここで先に払う。
+
+### 3-1. 外部文献（GenEll 本文中の出現位置つき）
+
+| 文献 | 使う箇所 | `0_Source` |
+|---|---|---|
+| **[Mzk1]** Noncritical Belyi Maps, Thm 2.5 | **Theorem 2.1 の証明**（l.627） | ★**ある**（`Noncritical Belyi Maps.pdf`）|
+| **[Serre]** Abelian l-adic Repr., Ch IV §3.4 Lemma 3 | **Lemma 3.1 (iv)**（l.798） | 無い（書籍 1968）|
+| [FC] Degenerations of Abelian Varieties, I 2.7 / III 7.3 / V 4.5 | §3 の算術側（l.823, 928, 955）| 無い |
+| [Falt] / [Merel] / [Silv1] / [Szp] / [Elkies] / [vF] | §2・§3 の背景と技法 | 無い |
+
+★**`[EL]` は参考文献ではない。** 本文で 59 回現れ外部文献の最多に見えるが、
+**楕円曲線 `E_L` の下付き文字が pdftotext で `[EL]` になったもの**である（`[EL] ∈Mell(Q)`）。
+GenEll の参考文献欄に `[EL]` は無い。事実2の実例をもう 1 つ。
+**外部文献を角括弧パターンで自動計数すると誤る**（`tools/bibmap.mjs` の入力にする際は要注意）。
+
+### 3-2. mathlib（探索範囲つき。`check.mjs` A2 の S1–S4）
+
+| 我々が要るもの | 原文側の呼称 | mathlib | 探索範囲 |
+|---|---|---|---|
+| 高さ | “height” | ★**ある**。`Mathlib/NumberTheory/Height/` **5 ファイル 2006 行**（`mulHeight`/`logHeight`/`Northcott`/`NumberField`/`Projectivization`）| `find Mathlib -ipath "*eight*" -name "*.lean"` |
+| Sylow 論 | “l-Sylow subgroup” | ある（272 件）| mathlib 全体 grep |
+| 交換子群 | “commutator subgroup” | ある（591 件）| 同上 |
+| transvection | （原文は行列で書く）| ある（288 件）。`diagonal_transvection_induction_of_det_ne_zero`（体上）まで | `Mathlib/LinearAlgebra/Matrix/Transvection.lean` |
+| 群の完全性 | “no nontrivial abelian quotients” | ★**無い**。`perfect` の hit は**すべて perfect matching**（グラフ理論）| mathlib 全体 case-insensitive |
+| SL₂(F_l) の生成 | “generated by the matrices α, β” | ★**無い** | `LinearAlgebra/SpecialLinearGroup.lean` / `LinearAlgebra/Matrix/SpecialLinearGroup.lean` / `NumberTheory/Modular.lean` / `NumberTheory/ModularForms/*.lean` |
+| 楕円曲線の l-捩れ Galois 加群 | “the Galois representation Gal(Q/L) → GL2(Zl)” | ★**無い**（`torsion` の hit 8 件はすべて 2-torsion polynomial）| `Mathlib/AlgebraicGeometry/EllipticCurve/*.lean` |
+| Belyi 写像 | “Belyi map” | ★**無い**（0 件）| mathlib 全体 case-insensitive |
+
+★`perfect` の件は「**語の一致は当てにならない**」（`layer0-triage.md` の `sharp` と同型）の実例をもう 1 つ増やす。
+
+---
+
+## 4. 段階 —— 各段が単独で成果になるように切る
+
+| 段 | 内容 | 前提 | 止まってもここまでは残る |
+|---|---|---|---|
+| **0** | **Lemma 3.1 (i)(ii)(iii)** —— SL₂(F_l) の生成 / 完全性 / Sylow 判定 | mathlib の Sylow・commutator・transvection | ★**IUTchIV が (P6) で直接使うのは (iii) である**。mathlib へ PR できる純群論 |
+| **1** | **Lemma 3.1 (iv)** —— 閉部分群 J ⊆ GL₂(ℤ_l) の持ち上げ | [Serre] Ch IV §3.4 Lemma 3 は `0_Source` に無い → **自分で証明する**（Frattini 型。mathlib の `Frattini` は 15 件）| ★これで **Theorem 3.8 の群論側が完成**する（原文の証明が使う群論は Lemma 3.1 (iv) だけ、実測）|
+| **2** | **§1（高さ）** —— Definition 1.2 / Example 1.3 / Proposition 1.4 / Definition 1.5 / Proposition 1.6 / 1.7 | mathlib の Height 2006 行の上に **BD-class**（bounded discrepancy）と **compactly bounded subset** を載せる | ★**両方の頂の共通の土台**。IUTchIV が最も多く引く群（Ex 1.3 ×7 / Prop 1.4 ×5 / Def 1.2 ×5）|
+| **3** | **§3 の算術側** —— Lemma 3.2 / Def 3.3 / Prop 3.4 / Lemma 3.5・3.6・3.7 | ★**l-捩れ Galois 表現が mathlib に無い**（`layer0-triage.md` の壁の種類 4 = 最も重い）。Tate 曲線・semi-stable reduction・[FC] 3 箇所 | person-month 級。★**stop-loss の主対象** |
+| **4** | **Theorem 3.8 → §4 → Corollary 4.4** | 段 1 + 段 3 | 北極星（B）到達 |
+| **★別線** | **Theorem 2.1** | **段 2 + [Mzk1] の転写**（★段 3 は要らない、実測）| ★**abc ⟺ ℙ¹版 abc**。IUT が偽でも真であり続ける古典的同値性 |
+
+★**段 2 が終わった時点で、Theorem 2.1 に残るのは [Mzk1] だけになる。**
+論文内の依存は §1 で尽きる（§2-0 の訂正）。[Mzk1] は `0_Source` にある。
+**したがって「§3 の壁（l-捩れ Galois 表現）に当たる前に、abc 側の頂が 1 つ射程に入る。」**
+
+---
+
+## 5. 受理条件（既存のゲートに合わせる）
+
+**着手前の準備（G1 の前提）**
+
+- `ResearchPaper/papers.json` に **`GenEll` を登記**する。★現在の登記は 8 本（pGC / EtTh / IUTchIII / AbsTopIII / SemiAnbd / IUTchI / IUTchII / FrdI）で、**GenEll は未登記**。登記なしに `.src` を書くと G1 が落ちる。
+- `notationRisk` は**未測定**。最初の目視（物理 p.13–14 = Lemma 3.1）で決める。★GenEll は行列を多用するので、`pdftotext` の 2 次元レイアウト破壊が EtTh/IUTchIII 型の下線問題とは**別種の危険**として出る可能性がある（実例: Lemma 3.1 の α, β, γ は `.txt` 上で行列の中身がばらける）。
+- 段 4 以降に進むなら `[Mzk1]`（Noncritical Belyi Maps）も `papers.json` と `tools/_fileof.json` に足す（`_fileof.json` に現在**無い**）。
+
+**各項目**
+
+- `Found/` は `sorry` ゼロ・`axiom` ゼロ（G4）。止まったら**理由を定理か docstring として残す**（`sorry` を置かない）。
+- `.src` は「**その原典項目を完全に実装した**」という 2 値の主張。条つき（`, (i)`）は数に入れない。
+- 完成宣言の前に、**文脈を持たない子による監査**（`memory/challenger-audit-without-context.md`）。
+- 進捗は機械で数える: **`tools/genell-progress.mjs`**（分母 = **IUTchIV からの需要の推移閉包**）。
+  ★`tools/frdi-progress.mjs` は FrdI 決め打ちなので、共通化ではなく**別ファイル**として作る
+  （FrdI 側が稼働中の共有ファイルを触らないため。共通化はどちらも止まっているときに）。
+
+---
+
+## 6. stop-loss
+
+`PLAN.md` §8-3 に従い、**時間ではなく進捗の質**で切る。
+
+- ★**段 3 が唯一「壁の種類 4（語彙の不在）」に当たる段**である。ここに入る前に段 0–2 を完成させ、
+  「何が要るか」を `ProofObligation` として書き切っておく。
+- 段 3 に入ってから「同じエラーに 3 回戻る／迂回路を 2 つ試して全部同じ壁」になったら、
+  そこで **Theorem 2.1 の別線（段 2 + [Mzk1]）へ移る**。★この goal は頂が 2 つあるので、
+  片方が詰まっても撤退にならない。
+
+---
+
+## 7. この目標が外れうる点（先に書く）
+
+1. **§1 の 2 つの引用は `.txt` 由来で目視していない。** [IUTchIV] p.46 の (P6) と p.55 の Cor 2.3 の証明は、
+   **目視で確かめるまで暫定**である。特に (P6) の `Gal(Q/F)` は
+   `Skeleton/IUTchI/InitialThetaData.lean` が記録している**オーバーバー脱落**（`Gal(F̄/F)` → `Gal(F/F)`）と
+   同じ形をしており、**自明群と読めてしまう**。最初の目視対象はここにする。
+2. **到達件数は pdftotext 由来**で、番号なしの依存を数え落とし、「cf.」型の案内を数え過ぎる。
+   §2-0 で 1 件直したが、**同種の誤りが他にもありうる**。
+3. **段 4 は実質「論文 2 本」**である（[Mzk1] の転写を含む）。
+4. **Lemma 3.1 (iv) の [Serre] Ch IV §3.4 Lemma 3 を我々は読んでいない。** 「Frattini 型で自分で証明できる」は
+   **見込みであって測定ではない**。段 1 に入った時点で最初に確かめること。
+
+---
+
+## 8. 実装状況
+
+進捗の機械計数: **`node tools/genell-progress.mjs`**(`--json` で `ResearchPaper/genell-needed.json`)。
+
+```
+★ゴール進捗: [GenEll] の必要分 0 / 24 件 (0%)
+  直接名指し 16 件 → 推移閉包 24 件 / GenEll 全 26 件
+  ★条つき `.src` はあるが命題全体の `.src` が無いもの 1 件
+     Lemma 3.1 — 条つき 3 個 ((i) / (ii) / (iii))
+  §1 0/9   §2 0/1   §3 0/9   §4 0/5
+```
+
+★**分母は 24 件**(本書 §2 の「Cor 4.4 の到達 18 件」より大きい)。
+需要側(IUTchI–IV・EtTh)が**直接名指しする 16 件**の閉包であり、
+`Theorem 2.1` と §1 の 9 件を含むためである。両方の頂が分母に入っている。
+
+### 段 0 —— 完了(2026-08-16)
+
+| | |
+|---|---|
+| 目視 | 物理 p.13–14、200 dpi。`papers.json` に `GenEll` 登記(`notationRisk: high`) |
+| 構造化 | `1_Structured/Arithmetic Elliptic Curves in General Position/`(index + lemma-3-1)。`check.mjs --structured` **PASS**(構造単位 112 件・逐語照合 112 件) |
+| Lean | `lean/ABC3/Found/GenEll/Lemma31.lean`。**(i)(ii)(iii) を `sorry` 無しで証明**。`#print axioms` は標準 3 公理のみ |
+| 逐語 | Lean コメント内の引用 6 件を PDF に対して照合、**NG 0**(すべて `layout` モードで一致) |
+| 負の対照 | `lemma_3_1_ii_neg_control` —— `l = 2, 3` では全ての `λ` が `λ² = 1`。**`l ≥ 5` は飾りではない** |
+
+★**`.src` は条つき 3 個のみ**。`Lemma 3.1` 全体の `.src` は (iv) が済むまで付けない
+(器具の 2 値規則どおり。ゆえに進捗の数字は 0 のまま動かない——**これは正しい挙動**である)。
+
+### ★実装して分かったこと(原文を読むだけでは出なかったもの)
+
+1. **(i) の原文の道は `SL₂` の外に出る。** 原文は `γ ≝ (0 1 / 1 0)` を経由するが
+   **det γ = −1** なので `γ ∉ SL₂(𝔽_l)`。原文はこれを注記していない。
+   Lean では分解 `g = upper((a−1)/c)·lower(c)·upper((d−1)/c)` を明示する方が短い。
+2. **(iii) に Sylow 論は要らない。** `W ≝ upper(−a/c)·M` の左上成分が 0 になることを使えば
+   `W·upper(u)·W⁻¹ = lower(1)` が**行列の等式 1 本**で出る。
+   原文の道(l-Sylow の個数 = l+1、正規化群 = Borel)は
+   `|GL₂(𝔽_l)|` の計算と Borel の同定を要し、どちらも mathlib に無い。
+3. **`l ≥ 5` が効くのは (ii) だけ**である(原文の証明も同じ)。
+4. ★**器具の発見**: mathlib の `ring` は失敗すると `ring_nf` にフォールバックして
+   **成功扱いになる**ため、`first | ring | …` は次の候補へ進まない。`ring1` を使う。
+   本作業で 2 回これに当たった。
+
+### ★段 1 の柱 1 を先に取った(同日)
+
+段 0 の実装中に、(i) の証明が**体を一切使っていない**ことが分かった——
+使うのは「`c` が可逆」か「`a` が可逆」の二択だけで、それは**局所環の定義そのもの**である。
+そこで `mem_of_upper_lower_mem` を局所環 `[CommRing R] [IsLocalRing R]` へ一般化し、
+系として次を得た(`sorry` 無し・標準 3 公理):
+
+```lean
+theorem closure_elementary_padic (l : ℕ) [Fact (Nat.Prime l)] :
+    Subgroup.closure ((Set.range (upper : ℤ_[l] → SL(2, ℤ_[l]))) ∪
+                      (Set.range (lower : ℤ_[l] → SL(2, ℤ_[l])))) = ⊤
+```
+
+★**`SL(2, ℤ_l)` は基本行列で代数的に生成される。位相を一切使っていない。**
+
+さらに、その系として**還元の全射性**も (i) だけで出た:
+
+```lean
+theorem redPadic_surjective : Function.Surjective (redPadic l)
+    -- redPadic l : SL(2, ℤ_[l]) →* SL(2, ZMod l) = SpecialLinearGroup.map PadicInt.toZMod
+```
+
+★`SL(2, 𝔽_l)` が `upper 1` と `lower 1` で生成され、その 2 つが明らかに持ち上がるから。
+**Hensel の補題も位相も要らない。**
+
+### ★★段 2 の入口で原典の記号の食い違いを発見した(2026-08-16)
+
+§1 に入って最初に実装したのが `Definition 1.2, (ii)`(BD-class)である。
+★**Arakelov 理論を要さない唯一の条**であり、しかも **abc の結論がこの語彙で書かれている**。
+
+そこで**原典の記号 `≲` の向きが食い違っている**ことが判明した。**3 箇所すべて 260 dpi の PDF 目視**:
+
+| 出典 | 目視した内容 |
+|---|---|
+| [GenEll] p.5, Def 1.2, (ii) | `α ≲ β` ⟺ ∃C, **`β(x) − α(x) ≤ C`**(= `β − α` が**上**に有界) |
+| [GenEll] p.11, Thm 2.1, (i) | 表題が **“Effective Mordell/ABC/Vojta Conjecture”**、内容は `ht ≲ (1+ε)(log-diff + log-cond)` |
+| [IUTchIV] p.54, Cor 2.3 | 同じ式に「i.e., the function `(1+ε)(…) − ht` **is bounded below** by a constant」<br>しかも `[cf. [GenEll], Definition 1.2, (ii)]` と明示的に引く |
+
+★**ここまでが観測。以下は推論であり、区別して書く。**
+
+**推論**: abc/Vojta の内容は `ht ≤ (1+ε)(…) + C`(= `(1+ε)(…) − ht` が**下**に有界)。
+Thm 2.1 の表題と [IUTchIV] の言い換えは互いに整合し、abc の内容とも整合する。
+Def 1.2, (ii) の印字だけがそれと逆になる。
+→ **最も無理のない読みは「(a) で α と β が入れ替わっている(誤植)」**である。
+★**これは推論であって観測ではない。**
+
+**トリアージ**(`PLAN.md` §5-2): **① は読字については排除**(3 箇所とも PDF 目視、`pdftotext` 非経由)。
+ただし「abc の内容は `ht ≤ (1+ε)(…) + C`」という**我々の数学的了解**が誤っている可能性までは
+排除していない。② は該当しない。③ は上の推論が正しければ該当するが、
+これは §5 が想定した「**飛躍**」ではなく**記号定義の誤植**であり、`Gap` の機構は当たらない。
+
+★**独立確認: 取れた**(2026-08-16)。文脈を持たない子に、**結論を伏せたまま**
+同じ 3 箇所を読ませた(260 dpi 全頁 ＋ 該当箇所 500 dpi 拡大)。子は各所を逐語で引いたうえで:
+
+> **A4: 逆** —— 同じ差 `(1+ε)(log-diff + log-cond) − ht` を、
+> (a) は「≤ C(上に有界)」と定義し、(c) は「bounded below by a constant(下に有界)」と
+> 言い換えているから。
+
+★これは `GAP` 型(否定的)の判定であり、`memory/challenger-audit-without-context.md` の
+基準では `OK` より強い証拠である。**読字については独立に裏が取れた。**
+残る共有前提は「abc の内容は `ht ≤ (1+ε)(…) + C` である」という数学的了解のみで、
+そこは第三者の確認を経ていない。
+
+### ★★Challenger 監査が実際に 1 件落とした —— `Definition 1.2, (ii)`(2026-08-16)
+
+`BDClass.lean` にも同じ規律を当てた(依頼 3)。結果は **OK 4 / GAP 2 / UNVERIFIED 0**。
+落ちたのは同一の 1 項目である:
+
+> **GAP** —— 原文は「Finally, we observe that it makes sense to apply the notation
+> “≳”, “≲”, “≈” **to BD-classes**.」と述べるが、Lean にあるのは関数レベルの両立性
+> `bdle_congr` / `bdge_congr` の 2 本だけで、`BDClass F` 上の関係は 1 つも無く、
+> **記号は BD-class に適用されていない**。
+
+★**指摘は正しかった。** 親は「両立性(= well-defined 性の前提)を示したから適用できる」と
+思っていたが、原文が言っているのは**適用そのもの**である。
+`BDClass.le` / `BDClass.ge` / `BDClass.mk_eq_mk`(≈ の適用 = 類の等号)/
+`BDClass.eq_of_le_of_ge` を足して埋め、**再監査(依頼 4)で `OK 1 / GAP 0`** を得た。
+
+★**これが「完成宣言は文脈を持たない子に監査させる」規律の値打ちである**——
+`memory/challenger-audit-without-context.md` が記録した `Prop 1.10` の実例と同型の
+「親には構造上見えない欠落」が、`.src` を付けた直後の項目でもう 1 件出た。
+
+★**運用上の学び**(子を使った 4 件で実測):
+1. **報告手順を書かないと届かない**——依頼 1 では子が自力で `parent_send` を見つけたが、
+   依頼 2 では黙って自分のセッション内に書いて終わった。**依頼文に報告手段を明記すること。**
+2. **複数セッションが動いていると `wait_for_child` / `child_read` の出力が混ざる**
+   (`[session switched → …]` が挟まる)。★**確実なのはファイル経由**——
+   リポジトリ外の一時ファイルに書かせて親が読む方式に切り替えて解決した。
+
+★**扱い**: どちらも型に出し、**両者が互いに逆であることを定理にした**——
+`BDle`(印字どおり)/ `BDge`(abc の向き)/ `bdle_ne_bdge`(反例で別物と示す)。
+**abc の主張を書くときは `BDge` を使う**という選択が、これで機械可読になった。
+
+★**PLAN への含意**: `PLAN.md` §5 の類型(①モデル化 ②未構築 ③飛躍)に
+**第 4 の類型「原典の誤植」が要る**。飛躍と違い falsifier は要らず、
+**別の箇所での同じ記号の用法**が証拠になる。今回は同じ著者の別論文が証拠だった。
+
+### ゲートの状態(2026-08-16)
+
+`node tools/check.mjs` **PASS**(別セッションのビルドが止まった隙に 2 回実行):
+`lake build` 成功 / `Found/` の `sorry` 0 / `.src` つき原典項目 **125 件**(locator 検証 114 件)。
+1_Structured は構造単位 **114 件**・逐語照合 114 件で PASS。
+
+★ゲートが実際に落とした例が 1 件ある: `definition-1-2.html` の初版で
+HTML 実体参照(`&isin;` `&beta;` 等)を使ったところ、`check.mjs` の変換表に無いため
+**S4 逐語照合が落ちた**(「先頭 27/72 文字まで一致」と場所まで印字された)。
+リテラル文字に直して PASS。**器具は書き手の手癖を実際に捕まえる。**
+
+## 8-2. ★★規模の結論(2026-08-16、実測)——24 件は 2 つの不在に律速される
+
+§1 に入って測った結果、**残り 23 件はすべて、mathlib に無い 2 つの古典理論のどちらかに律速される**:
+
+| 塊 | 件数 | 律速するもの | mathlib(探索範囲つき) |
+|---|---:|---|---|
+| §1(高さ) | 9 | **Arakelov 理論**——hermitian 計量つき算術直線束・`APic`・`ADiv`・`deg_F` | ★**0 件**(`Arakelov` / `arithmetic.*line bundle` で mathlib 全体を case-insensitive grep) |
+| §2(Theorem 2.1) | 1 | §1 ＋ noncritical Belyi maps | Belyi **0 件**。ただし [Mzk1] は `0_Source` にある |
+| §3(Galois 作用) | 9 | **l 捩れ点への Galois 表現**・Tate 曲線・半安定還元 | ★**0 件**(`EllipticCurve/*.lean` の `torsion` 8 件はすべて 2-torsion polynomial) |
+| §4(素数の大きさ) | 5 | §3 | — |
+
+★**あるもの**: `Mathlib/NumberTheory/Height/` **2006 行**(`mulHeight`/`logHeight`/Northcott/
+`InfinitePlace` 経由の `archAbsVal`)。ただしこれは **ℙⁿ 上の Weil 高さ**であって、
+**任意のスキーム上の算術直線束に付随する高さではない**。Def 1.1 の枠組みへは直接は載らない。
+
+> ★**したがって B トラックは「IUT の転写」ではなく、
+> Arakelov 理論と Galois 表現論という古典的数学を 2 本作る仕事である。**
+> 規模は [FrdI] トラックと同程度かそれ以上——`PLAN.md` §9 の「見積りを Phase 2 の前に出さない」に従い、
+> person-month/year の数字は出さない。**言えるのは「2 本の古典理論が丸ごと要る」までである。**
+
+★**この測定の価値**: 着手前は「§1 は mathlib に高さがあるから軽い」と見込んでいた(本書 §3-2)。
+**実測はその見込みを外した**——高さはあるが**枠組みが違う**。
+`PLAN.md` §8-1 の教訓(statement が言及する対象だけを見て証明の依存を見ない)と同型の誤りを、
+今回は**着手前ではなく着手 1 日目に**捕まえたことになる。
+
+## 9. 次の 1 手
+
+**段 1 = `Lemma 3.1, (iv)` の残り(柱 2)。**
+
+| 柱 | 内容 | 状態 |
+|---|---|---|
+| 1 | `SL(2, ℤ_l)` が `upper t` / `lower t` で生成される | ★**済**(上記) |
+| 2 | 閉部分群 `J` が `upper t` / `lower t` を**全部**含むこと | **未** |
+
+柱 2 が [Serre] Ch IV §3.4 Lemma 3 に当たる部分であり、pro-l 群の位相が要る。
+**mathlib の実測(2026-08-16、探索範囲つき)**:
+
+| 要るもの | mathlib | 探索範囲 |
+|---|---|---|
+| 還元 `SL₂(ℤ_l) → SL₂(𝔽_l)` | ★**ある**: `Matrix.SpecialLinearGroup.map (f : R →+* S)` | `LinearAlgebra/Matrix/SpecialLinearGroup.lean` |
+| profinite 群 | **ある**(`ProfiniteGrp` 135 件) | mathlib 全体 grep |
+| **pro-p 群** | ★**実質無い**(2 件) | mathlib 全体 grep(`IsProPGroup` / `pro-p`) |
+| `ℤ_l` 上の合同部分群の族 | ★**無い**。`SL(2, ℤ)` 用のものが `NumberTheory/ModularForms/CongruenceSubgroups.lean` にあるだけ | 同上(`congruence.*subgroup`) |
+
+→ 柱 2 は「壁の種類 1(mathlib の不在)」であり、**合同フィルトレーション
+`Γ(l^n)` とその商 `≅ 𝔰𝔩₂(𝔽_l)` を自分で作る**ことになる。
+
+### ★柱 2 を 4 段に割り、うち 1 段を実装した(2026-08-16)
+
+(iv) の証明を解析して、[Serre] の補題の中身を次の 4 段に割った:
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1a | `K_n / K_{n+1}` が**加法**群で、跡 0 の行列で書ける(代数部分) | ★**済**(`Found/GenEll/Sl2Congruence.lean`) |
+| 1b-有限 | 合同核が `ℤ/l^{n+1}` の中で `p = l^n`、`p² = 0` を満たす | ★**済**(`pow_self_mul_self_eq_zero` / `congruence_mul` / `congruence_det`) |
+| 1b-共役 | **共役作用が随伴作用に落ちる**(`g(1+p·A)g⁻¹ = 1+p·(gAg⁻¹)`)と、跡が保たれる | ★**済**(`conj_one_add_smul` / `trace_conj`。★`p² = 0` すら要らない) |
+| 1b-位相 | `ℤ_l` の逆極限として `K_n` を定義する | **未**(位相が要る。★ここだけ) |
+| 2 | `J ∩ K_n` の像が部分加群になる | **未** |
+| 3 | **`𝔰𝔩₂(𝔽_l)` が既約**——部分加群は `0` か全体 | ★**済**(`Found/GenEll/Sl2Adjoint.lean`) |
+| 4a | `Σ_{i<l} (1+D)^i = 0`(`D³ = 0`・標数 `l`・`l ≥ 5`) | ★**済**(`Sl2Congruence.lean`) |
+| 4b | それを `x^l` の類の計算に接続する(`Ad(u) = 1 + D`、`D³ = 0` の同定) | **未** |
+
+★**段 1a で取った代数の核**(`p² = 0` なる `p` に対して):
+
+```lean
+theorem mul_one_add_smul : (1 + p • A) * (1 + p • B) = 1 + p • (A + B)
+theorem det_one_add_smul : (1 + p • A).det = 1 + p * (A 0 0 + A 1 1)
+```
+
+★**積が和に化けるのは `p²` の項が消えるからで、それ以外の理由は無い**。
+そして 2 番目が「**なぜ跡 0 なのか**」を説明する——`det = 1` は `p · tr(A) = 0` と同値である。
+
+★**段 4 の算術核は取った**(`Sl2Congruence.lean` の `WhereFiveEnters` 節):
+
+```lean
+theorem choose_one_two_three_eq_zero (l : ℕ) (hl : Nat.Prime l) (h5 : 5 ≤ l) :
+    ((l.choose 1 : ℕ) : ZMod l) = 0 ∧ ((l.choose 2 : ℕ) : ZMod l) = 0
+      ∧ ((l.choose 3 : ℕ) : ZMod l) = 0
+
+theorem choose_three_three_ne_zero_mod_three :   -- ★負の対照
+    ((Nat.choose 3 3 : ℕ) : ZMod 3) ≠ 0
+```
+
+★**負の対照が `l ≥ 5` の必要性を機械で固定する**——`l = 3` では `C(3,3) = 1 ≠ 0` なので
+段 4 の消去が破れる。**`l ≥ 5` は飾りではない**。
+
+★★**そして段 4 の代数は閉じた**:
+
+```lean
+theorem sum_range_choose_eq (n j : ℕ) :          -- hockey-stick(range 版)
+    ∑ i ∈ Finset.range n, i.choose j = n.choose (j + 1)
+
+theorem one_add_pow_of_cube_eq_zero (hD : D ^ 3 = 0) (i : ℕ) :
+    (1 + D) ^ i = 1 + (i : R) * D + (i.choose 2 : R) * D ^ 2
+
+theorem sum_range_one_add_pow_eq_zero (l : ℕ) (hl : Nat.Prime l) (h5 : 5 ≤ l)
+    (hchar : (l : R) = 0) (hD : D ^ 3 = 0) :
+    ∑ i ∈ Finset.range l, (1 + D) ^ i = 0        -- ★段 4 の核
+```
+
+★**`Σ_{i<l} (1+D)^i = 0`** ——これが「`x^l` の類が**持ち上げ方に依らない**」ことの中身である。
+`l ≥ 5` は `C(l,3)` を消す 1 箇所だけで効く。
+
+### ★★位相が要るのは最後の 1 歩だけ、と切り分けた(2026-08-16)
+
+(iv) は `SL₂(ℤ_l)` の**閉**部分群についての主張だが、証明を 2 つに割ると:
+
+| | 内容 | 位相 |
+|---|---|---|
+| (A) | `H ≤ SL₂(ℤ/l^n)` が `SL₂(𝔽_l)` へ全射なら `H = ⊤` | ★**要らない**(有限群論) |
+| (B) | 閉部分群 `J ⊆ SL₂(ℤ_l)` は各 `mod l^n` の像で決まる | 要る(逆極限) |
+
+★**(A) の帰納法に要る材料はすべて揃った**:
+
+| 材料 | 宣言 |
+|---|---|
+| 合同核が加法群 | `mul_one_add_smul` / `slOfSmul_mul` |
+| `det = 1 ⟺ 跡 0` | `det_one_add_smul` |
+| `p = l^n` が `ℤ/l^{n+1}` で `p² = 0` | `pow_self_mul_self_eq_zero` |
+| **共役作用 = 随伴作用**、跡を保つ | `conj_one_add_smul` / `trace_conj` |
+| **核の元が `1 + l^n·A` と書ける** | `exists_matrix_of_castHom_eq_zero` |
+| `𝔰𝔩₂(𝔽_l)` の既約性 | `sl2_adjoint_irreducible` |
+| `Σ_{i<l}(1+D)^i = 0`(`l ≥ 5`) | `sum_range_one_add_pow_eq_zero` |
+
+**残るのは (A) の帰納法を組むことと、(B) の逆極限**である。
+★**位相を要するのは (B) だけ**——他はすべて有限段の代数で閉じている。
+
+★**段 4 が `l ≥ 5` の本当の在り処である**。`x` を `upper 1` の持ち上げとすると
+`x^l` の `K_1/K_2` における類は `E₁₂ + (Σ_{i<l} Ad(u^i))·A` で、
+`u` が冪単なので `Σ_{i<l} Ad(u^i) = Σ_j C(l, j+1) N^j`(`N³ = 0`)。
+`C(l,1) = l`、`C(l,2) = l(l−1)/2`、**`C(l,3) = l(l−1)(l−2)/6`** がすべて `≡ 0 (mod l)` に
+なるのに **`l ≥ 5`** が要る(`l = 3` では `C(3,3) = 1 ≢ 0`)。
+→ ★**`l ≥ 5` は「持ち上げ方に依らず `x^l` の類が `E₁₂` になる」ことの条件**である。
+(この計算はまだ Lean にしていない。上の段 4。)
+
+★**段 3 で分かったこと**: 既約性そのものに要るのは **`2 ≠ 0` だけ**であった。
+`l ≥ 5` は要らない。仮定は `Submodule K` で、`AddSubgroup` で書くと
+**スカラー倍で閉じないので `e` が取り出せない**(最初そう書いて失敗した)。
+
+★**2026-08-16 に 2 経路を検討し、どちらも同じ壁に当たると測った**:
+
+| 経路 | 要るもの | mathlib |
+|---|---|---|
+| (a) pro-l 群の Frattini 論法 | pro-p 群の理論 | **2 件**(実質不在) |
+| (b) 合同フィルトレーション ＋ 随伴表現の既約性 ＋ 非分裂性 | 標数 l の modular representation theory | **1 件**(実質不在) |
+
+`PLAN.md` §8-3 の stop-loss(「迂回路を 2 つ以上試して全部同じ壁」)に該当する。
+★ただし (b) の中の「`𝔰𝔩₂(𝔽_l)` が `SL₂(𝔽_l)`-加群として既約(l ≥ 5)」は
+**初等的な線形代数で書ける**ので、着手するならそこが入口である。
+
+## 10. ★次にやるべきことの候補(どれも重い。ユーザーの判断が要る)
+
+| | 内容 | 規模 | 効き方 |
+|---|---|---|---|
+| **A** | **Arakelov 理論の最下段**——`ADiv(F)` / `APrc(F)` / `deg_F`(GenEll p.3–4)。`NumberField.InfinitePlace`(70 件)と `HeightOneSpectrum` の上に載る | 中 | §1 の 9 件すべての土台。**Def 1.1 の完成には算術直線束が要るので、この段階では `.src` は付かない** |
+| **B** | **`𝔰𝔩₂(𝔽_l)` の既約性**(l ≥ 5) | 小〜中 | 段 1 柱 2 (b) の入口 |
+| **C** | **[Mzk1] Noncritical Belyi Maps の構造化**(9 ページ、`0_Source` にある) | 中 | Theorem 2.1 の外部依存を 1 つ潰す。Lean を触らない |
+| ~~**D**~~ | ~~段 0 の Challenger 監査~~ | — | ★**実施した(下記)** |
+
+### ★D の結果 —— Challenger 監査(2026-08-16、文脈を持たない子)
+
+`memory/challenger-audit-without-context.md` の規律どおり、**親の判断を書かず**、
+出力を `OK:` / `GAP:` / `UNVERIFIED:` の 3 値に固定して依頼した。
+
+**判定: OK 3 / GAP 0 / UNVERIFIED 0。**
+
+★**子は `.txt` を使わず PDF を 260 dpi で画像化して読んだ**(依頼文で「PDF が権威」とだけ伝え、
+行列の順序が壊れることは**伝えていない**)。その上で
+`upper 1 = !![1,1;0,1] = α`・`lower 1 = !![1,0;1,1] = β` と同定している——
+★**`.txt` の罠(α と β が入れ替わる)を独立に回避した**ことになる。
+
+★子が指摘した事実(判定には影響しないが記録する):
+**(i) と (iii) は原文の `l ≥ 5` を落としている。**
+これは仮定の削除(= 一般化)であり、`l ≥ 5` を代入すれば原文の主張がそのまま出る。
+`PLAN.md` の A6 が危険とするのは**仮説の強化**であって、その鏡像である**弱化は安全**である。
+実際 Lean は `5 ≤ l` 無しで型検査を通しており、**主張が真であることの証拠は証明そのもの**である。
+
+★**なお `OK` は `GAP` より弱い証拠である**(同 memory)。そこで、より強い証拠が取れる
+**否定的な問い**(記号 `≲` の向きが 3 箇所で整合するか)を、結論を伏せたまま別途ぶつけた。

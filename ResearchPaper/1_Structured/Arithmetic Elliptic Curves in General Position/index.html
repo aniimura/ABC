@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] Arithmetic Elliptic Curves in General Position — 構造化の索引</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .warn { color: #8a2f00; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] Arithmetic Elliptic Curves in General Position</h1>
+
+<p>原典: S. Mochizuki, <em>Arithmetic Elliptic Curves in General Position</em> (2010)。
+全 25 ページ、<code>pageOffset = 0</code>。登記は <code>ResearchPaper/papers.json</code> の
+<code>GenEll</code>。番号付き項目は <strong>26 件</strong>。</p>
+
+<p class="warn">★<strong>本論文は <code>notationRisk: high</code>。ただし危険の型が他論文と違う。</strong>
+[EtTh] / [IUTchIII] の high は「下線・点で同じ基底文字から別の対象を作る」ことによるが、
+本論文の危険は <strong>2 次元組版(行列)が 1 次元テキストに潰れるときの順序の入れ替わり</strong>である。
+実測(2026-08-16、物理 p.14):
+<code>pdftotext</code> の<strong>既定モード</strong>は原文 <code>α ≝ (1 1 / 0 1)</code>、<code>β ≝ (1 0 / 1 1)</code> を
+<strong>逆順に</strong>出力し、しかも α・β のギリシャ文字自体が脱落する。
+★実害: <code>(iii)</code> の仮定は目視では <code>α</code>(上三角)だが、
+既定モードの出力だけを読むと <strong><code>β</code>(下三角)についての主張に読める</strong>。
+<strong><code>-layout</code> モードでは順序が保たれる</strong>(このため
+<code>check.mjs</code> が <code>layout</code> を第一モードにしているのは本論文で正しく効く)。
+詳細は <code>papers.json</code> の <code>GenEll.notationNotes</code>。</p>
+
+<h2>なぜこの論文を構造化するか</h2>
+
+<p>長期ゴールは <code>ResearchPaper/genell-goal.md</code>。要点は 2 つ:</p>
+
+<table>
+<tr><th>頂</th><th>何であるか</th><th>IUT への関係</th></tr>
+<tr>
+  <td><code>Corollary 4.4</code></td>
+  <td>Primes of Prescribed Size</td>
+  <td>[IUTchIV] Corollary 2.2 が<strong>初期 Θ-データを構成する</strong>ために使う側。
+      その (P6) は <code>[GenEll], Lemma 3.1, (iii)</code> から出る</td>
+</tr>
+<tr>
+  <td><code>Theorem 2.1</code></td>
+  <td>Compactly Bounded Subsets and the ABC Conjecture</td>
+  <td>[IUTchIV] Corollary 2.3(= abc)の証明が「Cor 2.3 の内容は Theorem 2.1, (i) と一致する」と述べる。
+      ★<strong>IUT を一切使わない</strong></td>
+</tr>
+</table>
+
+<p>★<strong>着手点は <code>Lemma 3.1</code></strong>。同一論文内の依存グラフで<strong>到達 0 件の真の葉</strong>であり
+(実測)、かつ <code>Theorem 3.8</code> の証明が使う群論は <code>Lemma 3.1, (iv)</code> ただ 1 つである。</p>
+
+<h2>ファイル</h2>
+<ul>
+  <li><a href="lemma-3-1.html">lemma-3-1.html</a> — §3 Lemma 3.1(The Structure of SL<sub>2</sub>)</li>
+  <li><a href="definition-1-2.html">definition-1-2.html</a> — §1 Definition 1.2(高さ関数と BD-class)。
+      ★<strong>原典の記号 <code>≲</code> の向きが 3 箇所で食い違っている件</strong>を記録</li>
+</ul>
+
+</body>
+</html>

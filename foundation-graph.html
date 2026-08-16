@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>基礎理論グラフ — 北極星に着くのに何本の理論が要るか</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 70em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; padding: 0 1em; }
+ h1 { font-size: 1.3em; } h2 { font-size: 1.1em; margin-top: 2em; }
+ code { background: #eee; padding: 0 .2em; }
+ .warn { color: #8a2f00; }
+ table { border-collapse: collapse; margin: 1em 0; width: 100%; }
+ td, th { border: 1px solid #ccc; padding: .35em .6em; font-size: .95em; vertical-align: top; }
+ .lanes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; margin: 1.5em 0; }
+ .lane h3 { font-size: .95em; margin: 0 0 .5em; padding-bottom: .3em; border-bottom: 2px solid #333; }
+ .node { border: 1px solid #bbb; border-left-width: 6px; padding: .6em .8em; margin-bottom: .8em; font-size: .9em; background: #fafafa; }
+ .node .name { font-weight: bold; }
+ .node .status { font-size: .85em; margin: .2em 0; }
+ .node .why { font-size: .85em; color: #444; }
+ .node .items { font-size: .8em; color: #555; margin-top: .4em; }
+ .node .proj { font-size: .82em; margin-top: .5em; background: #eef4ff; padding: .4em; }
+ .node .caveat { color: #8a2f00; font-size: .95em; }
+ .node details { margin-top: .4em; font-size: .8em; }
+ .node .note { color: #8a2f00; }
+ .absent { border-left-color: #b33; } .partial { border-left-color: #d90; }
+ .project { border-left-color: #36c; } .building { border-left-color: #693; }
+ .ok { border-left-color: #093; }
+ .legend span { display: inline-block; margin-right: 1em; font-size: .9em; }
+ .legend i { display: inline-block; width: 1em; height: .8em; margin-right: .3em; vertical-align: middle; border: 1px solid #999; }
+ .legend i.absent { background: #b33; } .legend i.partial { background: #d90; }
+ .legend i.project { background: #36c; } .legend i.building { background: #693; }
+ .legend i.ok { background: #093; }
+ .star { color: #8a2f00; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>基礎理論グラフ —— 北極星に着くのに、どの理論を何本作る必要があるのか</h1>
+
+<p>生成: <code>node tools/foundation-graph.mjs</code>。登記は <code>ResearchPaper/foundations.json</code>(測定日 <b>2026-08-16</b>)。
+toolchain <code>leanprover/lean4:v4.31.0-rc2</code>。</p>
+
+<p class="warn"><span class="star">★この図が既存のグラフと違う点</span>:
+<code>tools/full-graph.mjs</code> などの節点は<b>論文の番号付き項目</b>である。
+だから「その項目を書くのに何の理論が要るか」は<b>出ない</b>。
+実際 [GenEll] の 24 件はグラフ上 24 個の節点だが、その下には
+<b>mathlib に 1 件も無い古典理論</b>が横たわっている。<b>その層を節点にしたのが本図である。</b></p>
+
+<h2>進捗(項目の数)</h2>
+<table>
+<tr><th>論文</th><th>完了 / 需要</th><th>器具</th></tr>
+<tr><td>[GenEll]</td><td><b>0 / 24</b></td><td><code>node tools/genell-progress.mjs</code></td></tr><tr><td>[FrdI]</td><td><b>5 / 54</b></td><td><code>node tools/frdi-progress.mjs</code></td></tr>
+</table>
+
+<h2>基礎理論の状態</h2>
+
+<p class="legend">
+<span><i class="ok"></i>mathlib にある</span><span><i class="partial"></i>近いものはあるが枠組みが違う</span><span><i class="project"></i>公開プロジェクトに在る/計画</span><span><i class="building"></i>我々が構築中</span><span><i class="absent"></i>見つからなかった</span>
+</p>
+
+<table>
+<tr><th>状態</th><th>件数</th></tr>
+<tr><td>見つからなかった</td><td>4</td></tr><tr><td>近いものはあるが枠組みが違う</td><td>1</td></tr><tr><td>公開プロジェクトに在る/計画</td><td>2</td></tr><tr><td>我々が構築中</td><td>2</td></tr>
+</table>
+
+<div class="lanes">
+  <div class="lane">
+    <h3>① 見つからなかった / 枠組みが違う</h3>
+    
+<div class="node absent">
+  <div class="name">Arakelov 理論(算術直線束・APic・ADiv・deg_F)</div>
+  <div class="status">見つからなかった</div>
+  <div class="why">[GenEll] Definition 1.1 が hermitian 計量つき直線束で高さを定義する。§1 の 9 件すべてがこの上に立つ</div>
+  <div class="items"><b>支えている項目 9 件</b>: GenEll Definition 1.1 / GenEll Definition 1.2 / GenEll Example 1.3 / GenEll Proposition 1.4 / GenEll Definition 1.5 / GenEll Remark 1.4.1 / GenEll Remark 1.5.1 / GenEll Proposition 1.6 / GenEll Proposition 1.7</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2 全体: grep -rniE 'Arakelov' → 0 件</li><li>同: grep -rniE 'arithmetic.*line bundle' → 0 件</li><li>Web 検索(2026-08-16): 'Arakelov theory arithmetic line bundle Lean 4 mathlib formalization heights Weil' → Lean の形式化は 1 件も出ず、すべて数学の論文</li></ul>
+    <p class="note">★近いものはある(下の weil-heights)が**枠組みが違う**。mathlib の高さは ℙⁿ 上の Weil 高さであって、任意のスキーム上の算術直線束に付随する高さではない</p>
+  </details>
+</div>
+<div class="node partial">
+  <div class="name">Weil 高さ(数体上・射影空間・Northcott)</div>
+  <div class="status">近いものはあるが枠組みが違う</div>
+  <div class="why">[GenEll] §1 の高さの土台になりうる。ただし Definition 1.1 の枠組みとは一致しない</div>
+  <div class="items"><b>支えている項目 2 件</b>: GenEll Definition 1.2 / GenEll Proposition 1.4</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2: Mathlib/NumberTheory/Height/{Basic,MvPolynomial,Northcott,NumberField,Projectivization}.lean = 5 ファイル 2006 行(2026-08-16 実測)</li><li>主要宣言: mulHeight / logHeight / mulHeight₁ / logHeight₁ / totalWeight / Northcott</li><li>NumberField.InfinitePlace 経由の archAbsVal / nonarchAbsVal がある(70 件)</li></ul>
+    <p class="note">★**ある**が、`ht_M̄`(算術直線束 M̄ に付随する高さ)ではない。橋渡しが要る</p>
+  </details>
+</div>
+<div class="node absent">
+  <div class="name">noncritical Belyi maps</div>
+  <div class="status">見つからなかった</div>
+  <div class="why">[GenEll] Theorem 2.1 の証明が [Mzk1] Theorem 2.5 を引く。abc ⟺ ℙ¹版 abc の同値性の要</div>
+  <div class="items"><b>支えている項目 1 件</b>: GenEll Theorem 2.1</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2 全体: grep -rni 'belyi' → 0 件(2026-08-16 実測)</li></ul>
+    <p class="note">★ただし原典 [Mzk1] *Noncritical Belyi Maps*(全 9 ページ)は `0_Source` に**ある**。転写の対象にできる</p>
+  </details>
+</div>
+<div class="node absent">
+  <div class="name">pro-l 群(位相・Frattini 論法・合同フィルトレーション)</div>
+  <div class="status">見つからなかった</div>
+  <div class="why">[GenEll] Lemma 3.1, (iv) が [Serre] Ch IV §3.4 Lemma 3 を引く。その [Serre] は 0_Source に無い</div>
+  <div class="items"><b>支えている項目 1 件</b>: GenEll Lemma 3.1</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2: grep -rn 'ProfiniteGrp' → 135 件(profinite 群はある)</li><li>同: grep -rniE 'IsProPGroup|pro-p' → **2 件**(pro-p 群は実質不在)</li><li>同: grep -rniE 'congruence.*subgroup' → SL(2,ℤ) 用の Mathlib/NumberTheory/ModularForms/CongruenceSubgroups.lean のみ。ℤ_l 上のものは無い</li></ul>
+    <p class="note">★**位相が要るのは (iv) の最後の 1 歩だけ**と切り分け済み(genell-goal.md の (A)/(B))。(A) の材料は 8 種すべて自前で揃えた</p>
+  </details>
+</div>
+<div class="node absent">
+  <div class="name">Tate 曲線・半安定還元・局所高さ</div>
+  <div class="status">見つからなかった</div>
+  <div class="why">[GenEll] §3 の算術側(Lemma 3.2–3.7)が使う</div>
+  <div class="items"><b>支えている項目 4 件</b>: GenEll Lemma 3.2 / GenEll Lemma 3.5 / GenEll Lemma 3.7 / GenEll Theorem 3.8</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2: Mathlib/AlgebraicGeometry/EllipticCurve/Reduction.lean はあるが Tate 曲線・半安定還元の理論は無い(2026-08-16、ディレクトリ全宣言を確認)</li></ul>
+    <p class="note">外部文献 [FC] Faltings–Chai *Degenerations of Abelian Varieties* に依存する箇所がある(0_Source に無い)</p>
+  </details>
+</div>
+  </div>
+  <div class="lane">
+    <h3>② 公開プロジェクトに在る/計画</h3>
+    
+<div class="node project">
+  <div class="name">楕円曲線の l 捩れ点への Galois 表現(Gal(Q̄/L) → GL₂(ℤ_l))</div>
+  <div class="status">公開プロジェクトに在る/計画</div>
+  <div class="why">[GenEll] §3 の 9 件(Theorem 3.8 を含む)がこの上に立つ。[GenEll] Corollary 4.4 は §3 の上にしか立たない</div>
+  <div class="items"><b>支えている項目 10 件</b>: GenEll Lemma 3.2 / GenEll Definition 3.3 / GenEll Remark 3.3.1 / GenEll Proposition 3.4 / GenEll Lemma 3.5 / GenEll Lemma 3.6 / GenEll Lemma 3.7 / GenEll Theorem 3.8 / GenEll Corollary 4.3 / GenEll Corollary 4.4</div>
+  <div class="proj"><b>公開プロジェクト</b>
+    <div class="p"><a href="https://github.com/ImperialCollegeLondon/FLT">FLT (Fermat's Last Theorem project)</a> — ブループリント(2026-08-16 取得)に **§2.5 'Galois representations and elliptic curves'**、**§3 'Reducibility of p-torsion of the Frey curve'**、付録 §14.5 'Galois representations' がある
+      <div class="caveat">★**現在の実装状況は未確認**。ブループリントに章があることは、その定理が Lean で完成していることを意味しない。使う前に clone して sorry を数えること(lean-ecosystem.json の規律)</div></div></div>
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2: grep -rniE 'torsion' Mathlib/AlgebraicGeometry/EllipticCurve/*.lean → 8 件、**すべて 2-torsion polynomial**(2026-08-16 実測)</li><li>同ディレクトリの構成: Affine / DivisionPolynomial / IsomOfJ / Jacobian / LFunction / ModelsWithJ / NormalForms / Projective / Reduction / VariableChange / Weierstrass</li><li>Web 検索(2026-08-16): 'Lean 4 formalization Galois representation elliptic curve torsion points project' → mathlib には部分的にしか無いという報告</li></ul>
+    <p class="note">★**重複投資の危険がここにある**。局所類体論で ClassFieldTheory を見つけたのと同じ構図</p>
+  </details>
+</div>
+<div class="node project">
+  <div class="name">局所類体論(相互律・高次分岐群・局所 Tate 双対性)</div>
+  <div class="status">公開プロジェクトに在る/計画</div>
+  <div class="why">[pGC] トラックの義務 #1/#4/#5/§2</div>
+  <div class="items"><b>支えている項目 2 件</b>: pGC Proposition 1.1 / pGC §2</div>
+  <div class="proj"><b>公開プロジェクト</b>
+    <div class="p"><a href="https://github.com/kbuzzard/ClassFieldTheory">ClassFieldTheory</a> — 群/Tate コホモロジー・抽象的類形成の相互律・非アルキメデス局所体
+      <div class="caveat">★Instances.lean に sorry 11 件——我々が要る箇所がちょうど未完成。toolchain も我々より新しい</div></div>
+    <div class="p"><a href="https://github.com/mariainesdff/LocalClassFieldTheory">LocalClassFieldTheory</a> — 完備離散付値環・局所体
+      <div class="caveat">★sorry 114 件、1 年以上更新なし</div></div></div>
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>ResearchPaper/lean-ecosystem.json(2026-08-14 測定)を参照</li></ul>
+    <p class="note">★詳細は `ResearchPaper/lean-ecosystem.json`。**drop-in で使えたものは 0 件**だった</p>
+  </details>
+</div>
+  </div>
+  <div class="lane">
+    <h3>③ 我々が構築中 / mathlib にある</h3>
+    
+<div class="node building">
+  <div class="name">標数 l の表現論(随伴表現の既約性・非分裂拡大)</div>
+  <div class="status">我々が構築中</div>
+  <div class="why">Lemma 3.1, (iv) の別経路(合同フィルトレーション + 既約性)に要る</div>
+  <div class="items"><b>支えている項目 1 件</b>: GenEll Lemma 3.1</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib v4.31.0-rc2: grep -rniE 'modular representation|Representation.*char' → **1 件**(実質不在)</li><li>同: IsSimpleModule は 119 件あるが、標数 l の SL₂ 加群の既約性は無い</li></ul>
+    <p class="note">★**必要な分は自前で取った**——`Found/GenEll/Sl2Adjoint.lean` の `sl2_adjoint_irreducible`(要る仮定は `2 ≠ 0` だけ)</p>
+  </details>
+</div>
+<div class="node building">
+  <div class="name">Frobenioid([FrdI] の理論全体)</div>
+  <div class="status">我々が構築中</div>
+  <div class="why">[IUTchIII] Definition 3.8(Θ/q-パイロット対象)の解消条件。Cor 3.12 の Interface が待っている</div>
+  <div class="items"><b>支えている項目 1 件</b>: IUTchIII Definition 3.8</div>
+  
+  <details><summary>探索範囲(この「無い」の根拠)</summary>
+    <ul><li>mathlib に Frobenioid は無い(PLAN.md 事実3)。公開プロジェクトも無い</li></ul>
+    <p class="note">★我々が自前で構築中。`node tools/frdi-progress.mjs` で 13/54(2026-08-16)</p>
+  </details>
+</div>
+  </div>
+</div>
+
+<h2 class="warn">★この図の限界(先に書く)</h2>
+<ol>
+<li>★北極星(IUT 全体 + abc)に要る**基礎理論**の登記簿。番号付き項目のグラフには出ない層である。</li><li>★status の意味:</li><li>★measuredAt を必ず書く。測定は古びる(lean-ecosystem.json と同じ規律)。</li><li>★公開プロジェクトの『在る』は『使える』ではない——lean-ecosystem.json の実測では</li>
+<li><b>これは人手の登記である。</b>機械が「この項目にはこの理論が要る」と判定しているのではない。
+    したがって <code>neededBy</code> は<b>下界</b>であり、抜けがありうる。</li>
+<li><b>status は測定値だが古びる。</b><code>measuredAt</code> を必ず見ること。</li>
+<li><b>公開プロジェクトの「在る」は「使える」ではない。</b>
+    <code>ResearchPaper/lean-ecosystem.json</code> の実測では、drop-in で使えたものは <b>0 件</b>だった。</li>
+</ol>
+
+</body>
+</html>

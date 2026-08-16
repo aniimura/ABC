@@ -3,6 +3,9 @@ import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Field.ZMod
+import Mathlib.RingTheory.LocalRing.Basic
+import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.NumberTheory.Padics.RingHoms
 import Mathlib.Tactic.LinearCombination
 import Mathlib.GroupTheory.QuotientGroup.Basic
 import ABC3.Meta.Claim
@@ -48,8 +51,14 @@ import ABC3.Meta.Claim
 ★**(i) で道を変えた理由**: 原文は `γ ≝ (0 1 / 1 0)` を経由するが、
 **det γ = −1 なので `γ ∉ SL₂(𝔽_l)`** である(原文は注記していない)。
 軌道の議論は「群の外の行列」を要し、Lean では型を跨ぐ。
-一方 `c ≠ 0` のときの分解 `g = upper((a−1)/c) · lower(c) · upper((d−1)/c)` は
-**座標だけの計算**で閉じ、`c = 0` の場合は `g · lower 1` に帰着する。
+一方 `c` が可逆なときの分解 `g = upper((a−1)e) · lower(c) · upper((d−1)e)`(`ce = 1`)は
+**座標だけの計算**で閉じ、`c` が可逆でない場合は `lower 1 · g` に帰着する。
+
+★★**その結果、(i) は体でなく局所環で成り立つ形になった**(`mem_of_upper_lower_mem`)。
+使うのは「`c` が可逆」か「`a` が可逆」の二択だけで、それは**局所環の定義そのもの**である。
+★これは **`Lemma 3.1, (iv)` の 2 本柱の 1 本**を先に取ったことになる——
+`ℤ_[l]` は局所環なので `SL(2, ℤ_[l])` は基本行列で**代数的に**生成される
+(`closure_elementary_padic`。**位相を一切使っていない**)。
 
 ★**(iii) で道を変えた理由**: 原文の道は
 **`|GL₂(𝔽_l)|` の計算**と**正規化群 = 上三角全体の同定**の 2 つを前提にしており、
@@ -70,8 +79,21 @@ mathlib には Sylow 論(272 件)はあるが、この 2 つの具体形は無�
 
 (iv) は **[Serre], Chapter IV, §3.4, Lemma 3** に依存し、
 その [Serre](*Abelian l-adic Representations and Elliptic Curves*, Benjamin 1968)は
-`0_Source` に**無い**。したがって (iv) は引用ではなく**自分で証明する**ことになり、
-pro-l 群の位相(Frattini 型の議論)が要る。段を分けた。
+`0_Source` に**無い**。したがって (iv) は引用ではなく**自分で証明する**ことになる。
+
+★**(iv) に残っている仕事の切り分け**(2026-08-16 に測った):
+
+| 柱 | 内容 | 状態 |
+|---|---|---|
+| 1 | `SL(2, ℤ_[l])` が `upper t` / `lower t` で生成される | ★**済**(`closure_elementary_padic`。位相不要) |
+| 2 | 閉部分群 `J` が `upper t` / `lower t` を**全部**含むこと | **未**。[Serre] の補題に当たる |
+
+柱 2 には pro-l 群の位相が要る。mathlib の実測(2026-08-16、探索範囲つき):
+`ProfiniteGrp` は **135 件**あるが、**pro-p 群は 2 件**で実質不在。
+`Matrix.SpecialLinearGroup.map (f : R →+* S)` はあるので還元 `SL₂(ℤ_l) → SL₂(𝔽_l)` は書ける。
+合同部分群の族は `SL(2, ℤ)` について `NumberTheory/ModularForms/CongruenceSubgroups.lean` に
+あるだけで、`ℤ_[l]` については無い。
+
 ★**したがって本ファイルに `Lemma 3.1` 全体の `.src` は付けない**——
 条つき `.src` は locator の記録であり、命題全体の完全実装の主張ではない。
 
@@ -141,74 +163,151 @@ end Elementary
 
 section GeneratedByElementary
 
-variable {K : Type*} [Field K]
+variable {R : Type*} [CommRing R]
 
-/-- `SL(2, K)` の元の行列式の展開。 -/
-theorem det_entries (g : SL(2, K)) :
-    (g : Matrix (Fin 2) (Fin 2) K) 0 0 * (g : Matrix (Fin 2) (Fin 2) K) 1 1
-      - (g : Matrix (Fin 2) (Fin 2) K) 0 1 * (g : Matrix (Fin 2) (Fin 2) K) 1 0 = 1 := by
+/-- `SL(2, R)` の元の行列式の展開。 -/
+theorem det_entries (g : SL(2, R)) :
+    (g : Matrix (Fin 2) (Fin 2) R) 0 0 * (g : Matrix (Fin 2) (Fin 2) R) 1 1
+      - (g : Matrix (Fin 2) (Fin 2) R) 0 1 * (g : Matrix (Fin 2) (Fin 2) R) 1 0 = 1 := by
   have h := g.2
   rwa [Matrix.det_fin_two] at h
 
 /-- ★分解を座標だけで書いたもの(`SL` の型は関係しない)。
 
-`c ≠ 0` なら `!![a,b;c,d] = upper((a−1)/c) · lower(c) · upper((d−1)/c)`。
-`(0,1)` 成分が合うところで**行列式の条件 `ad − bc = 1` を使う**——
-他の 3 成分は条件を使わずに合う。 -/
-theorem matrix_factor (a b c d : K) (hdet : a * d - b * c = 1) (hc : c ≠ 0) :
+**左下成分 `c` が可逆**(`c · e = 1`)なら
+`!![a,b;c,d] = upper((a−1)·e) · lower(c) · upper((d−1)·e)`。
+★体でなく **`c` の可逆性だけ**を使うので、`ℤ_[l]` のような局所環でもそのまま効く。
+`(0,1)` 成分でだけ**行列式の条件 `ad − bc = 1` を使う**——他の 3 成分は使わない。 -/
+theorem matrix_factor (a b c d e : R) (hdet : a * d - b * c = 1) (he : c * e = 1) :
     !![a, b; c, d]
-      = (!![1, (a - 1) / c; 0, 1] * !![1, 0; c, 1]) * !![1, (d - 1) / c; 0, 1] := by
+      = (!![1, (a - 1) * e; 0, 1] * !![1, 0; c, 1]) * !![1, (d - 1) * e; 0, 1] := by
   ext i j
   fin_cases i <;> fin_cases j <;>
     simp <;>
-    field_simp <;>
     first
-      | ring1
-      | linear_combination -hdet
+      | linear_combination (1 - a) * he
+      | linear_combination (-(b + (d - 1) * (a - 1) * e)) * he + (-e) * hdet
+      | linear_combination (1 - d) * he
 
 /-- ★左下成分が可逆なときの明示的な分解。 -/
-theorem eq_upper_mul_lower_mul_upper (g : SL(2, K))
-    (hc : (g : Matrix (Fin 2) (Fin 2) K) 1 0 ≠ 0) :
-    g = upper (((g : Matrix (Fin 2) (Fin 2) K) 0 0 - 1) / (g : Matrix (Fin 2) (Fin 2) K) 1 0)
-        * lower ((g : Matrix (Fin 2) (Fin 2) K) 1 0)
-        * upper (((g : Matrix (Fin 2) (Fin 2) K) 1 1 - 1) / (g : Matrix (Fin 2) (Fin 2) K) 1 0) := by
+theorem eq_upper_mul_lower_mul_upper (g : SL(2, R)) {e : R}
+    (he : (g : Matrix (Fin 2) (Fin 2) R) 1 0 * e = 1) :
+    g = upper (((g : Matrix (Fin 2) (Fin 2) R) 0 0 - 1) * e)
+        * lower ((g : Matrix (Fin 2) (Fin 2) R) 1 0)
+        * upper (((g : Matrix (Fin 2) (Fin 2) R) 1 1 - 1) * e) := by
   apply Subtype.ext
   rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_mul,
     coe_upper, coe_lower, coe_upper]
-  conv_lhs => rw [Matrix.eta_fin_two ((g : Matrix (Fin 2) (Fin 2) K))]
-  exact matrix_factor _ _ _ _ (det_entries g) hc
+  conv_lhs => rw [Matrix.eta_fin_two ((g : Matrix (Fin 2) (Fin 2) R))]
+  exact matrix_factor _ _ _ _ _ (det_entries g) he
 
-variable {S : Subgroup SL(2, K)} (hu : ∀ t : K, upper t ∈ S) (hl : ∀ t : K, lower t ∈ S)
+variable {S : Subgroup SL(2, R)} (hu : ∀ t : R, upper t ∈ S) (hl : ∀ t : R, lower t ∈ S)
 
 include hu hl in
-theorem mem_of_ne (g : SL(2, K))
-    (hc : (g : Matrix (Fin 2) (Fin 2) K) 1 0 ≠ 0) : g ∈ S := by
-  rw [eq_upper_mul_lower_mul_upper g hc]
+theorem mem_of_isUnit_lowerLeft (g : SL(2, R))
+    (hc : IsUnit ((g : Matrix (Fin 2) (Fin 2) R) 1 0)) : g ∈ S := by
+  obtain ⟨e, he⟩ := hc.exists_right_inv
+  rw [eq_upper_mul_lower_mul_upper g he]
   exact mul_mem (mul_mem (hu _) (hl _)) (hu _)
 
-include hu hl in
-/-- ★基本行列を全部含む部分群は `SL(2, K)` 全体である。
+end GeneratedByElementary
 
-`c = 0` の場合は `g · lower 1` の左下成分が `d ≠ 0` になることで
-`c ≠ 0` の場合に帰着する(`ad = 1` だから `d ≠ 0`)。 -/
-theorem mem_of_upper_lower_mem (g : SL(2, K)) : g ∈ S := by
-  by_cases hc : (g : Matrix (Fin 2) (Fin 2) K) 1 0 = 0
-  · have hd : (g : Matrix (Fin 2) (Fin 2) K) 1 1 ≠ 0 := by
-      intro h
-      have hdet := det_entries g
-      rw [h, hc] at hdet
-      simp at hdet
-    have hentry : ((g * lower 1 : SL(2, K)) : Matrix (Fin 2) (Fin 2) K) 1 0
-        = (g : Matrix (Fin 2) (Fin 2) K) 1 1 := by
+section LocalRing
+
+variable {R : Type*} [CommRing R] [IsLocalRing R]
+
+/-- 局所環では「単元 + 非単元 = 単元」。 -/
+theorem isUnit_add_of_not_isUnit {a c : R} (ha : IsUnit a) (hc : ¬ IsUnit c) :
+    IsUnit (a + c) := by
+  have h : IsUnit ((a + c) + (-c)) := by simpa using ha
+  rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add h with h1 | h2
+  · exact h1
+  · exact absurd (by simpa using h2.neg) hc
+
+variable {S : Subgroup SL(2, R)} (hu : ∀ t : R, upper t ∈ S) (hl : ∀ t : R, lower t ∈ S)
+
+include hu hl in
+/-- ★★**局所環 `R` 上では、基本行列を全部含む部分群は `SL(2, R)` 全体である。**
+
+`c` が可逆なら分解がそのまま効く。可逆でないときは `ad − bc = 1` から
+**`a` が可逆**で(局所環だから `ad` か `bc` の一方は可逆、`bc` が可逆なら `c` も可逆)、
+`lower 1 · g` の左下成分が `a + c` = 単元 + 非単元 = 単元になる。
+
+★**これは `Lemma 3.1, (iv)` の 2 本柱の 1 本**である——`ℤ_[l]` は局所環なので、
+`SL(2, ℤ_[l])` は基本行列で(位相を使わず)**代数的に**生成される。
+残る 1 本(閉部分群が基本行列を全部含むこと)は [Serre] Ch IV §3.4 Lemma 3 に当たる。 -/
+theorem mem_of_upper_lower_mem (g : SL(2, R)) : g ∈ S := by
+  by_cases hc : IsUnit ((g : Matrix (Fin 2) (Fin 2) R) 1 0)
+  · exact mem_of_isUnit_lowerLeft hu hl g hc
+  · -- `a` が可逆であること
+    have hdet := det_entries g
+    have hsum : IsUnit ((g : Matrix (Fin 2) (Fin 2) R) 0 0 * (g : Matrix (Fin 2) (Fin 2) R) 1 1
+        + -((g : Matrix (Fin 2) (Fin 2) R) 0 1 * (g : Matrix (Fin 2) (Fin 2) R) 1 0)) := by
+      rw [← sub_eq_add_neg, hdet]; exact isUnit_one
+    have ha : IsUnit ((g : Matrix (Fin 2) (Fin 2) R) 0 0) := by
+      rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add hsum with h1 | h2
+      · exact isUnit_of_mul_isUnit_left h1
+      · exact absurd (isUnit_of_mul_isUnit_right (by simpa using h2.neg)) hc
+    -- `lower 1 * g` の左下成分は `a + c`
+    have hentry : ((lower 1 * g : SL(2, R)) : Matrix (Fin 2) (Fin 2) R) 1 0
+        = (g : Matrix (Fin 2) (Fin 2) R) 0 0 + (g : Matrix (Fin 2) (Fin 2) R) 1 0 := by
       rw [Matrix.SpecialLinearGroup.coe_mul]
-      simp [Matrix.mul_apply, Fin.sum_univ_succ, hc]
-    have hstep : g * lower 1 ∈ S :=
-      mem_of_ne hu hl _ (by rw [hentry]; exact hd)
-    have hg : g = (g * lower 1) * lower (-1) := by
-      rw [mul_assoc, lower_mul_lower]; simp
+      simp [Matrix.mul_apply, Fin.sum_univ_succ]
+    have hstep : lower 1 * g ∈ S :=
+      mem_of_isUnit_lowerLeft hu hl _ (by rw [hentry]; exact isUnit_add_of_not_isUnit ha hc)
+    have hg : g = lower (-1) * (lower 1 * g) := by
+      rw [← mul_assoc, lower_mul_lower]; simp
     rw [hg]
-    exact mul_mem hstep (hl _)
-  · exact mem_of_ne hu hl g hc
+    exact mul_mem (hl _) hstep
+
+/-- 基本行列の生成する部分群は `SL(2, R)` 全体(局所環 `R`)。 -/
+theorem closure_elementary_eq_top :
+    Subgroup.closure ((Set.range (upper : R → SL(2, R))) ∪ (Set.range (lower : R → SL(2, R))))
+      = ⊤ :=
+  eq_top_iff.2 fun g _ =>
+    mem_of_upper_lower_mem (fun t => Subgroup.subset_closure (Or.inl ⟨t, rfl⟩))
+      (fun t => Subgroup.subset_closure (Or.inr ⟨t, rfl⟩)) g
+
+end LocalRing
+
+section PadicPillar
+
+/-- ★★**`SL(2, ℤ_[l])` は基本行列で代数的に生成される。**
+
+`Lemma 3.1, (iv)` の 2 本柱の 1 本。★**位相を一切使っていない**——
+`ℤ_[l]` が局所環であることだけで出る。
+残る 1 本は「閉部分群 `J` が `upper t`・`lower t` を**全部**含むこと」であり、
+そこが [Serre] Ch IV §3.4 Lemma 3(`0_Source` に無い)に当たる。 -/
+theorem closure_elementary_padic (l : ℕ) [Fact (Nat.Prime l)] :
+    Subgroup.closure
+        ((Set.range (upper : ℤ_[l] → SL(2, ℤ_[l]))) ∪ (Set.range (lower : ℤ_[l] → SL(2, ℤ_[l]))))
+      = ⊤ :=
+  closure_elementary_eq_top
+
+end PadicPillar
+
+section Reduction
+
+variable {R : Type*} [CommRing R] {S : Type*} [CommRing S]
+
+@[simp] theorem map_upper (f : R →+* S) (t : R) :
+    Matrix.SpecialLinearGroup.map f (upper t) = upper (f t) := by
+  apply Subtype.ext
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [Matrix.SpecialLinearGroup.map, upper]
+
+@[simp] theorem map_lower (f : R →+* S) (t : R) :
+    Matrix.SpecialLinearGroup.map f (lower t) = lower (f t) := by
+  apply Subtype.ext
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [Matrix.SpecialLinearGroup.map, lower]
+
+end Reduction
+
+
+section Diagonal
+
+variable {K : Type*} [Field K]
 
 /-- 原文 `ε ≝ diag(λ, λ⁻¹)`。 -/
 def diagUnit (u : Kˣ) : SL(2, K) :=
@@ -256,7 +355,7 @@ theorem commutator_diag_lower (u : Kˣ) (t : K) :
   congr 1
   ring
 
-end GeneratedByElementary
+end Diagonal
 
 section PrimeField
 
@@ -468,6 +567,51 @@ theorem lemma_3_1_iii (H : Subgroup (GL (Fin 2) (ZMod l)))
   exact hcomap (Subgroup.mem_top g)
 
 end PrimeFieldGL
+
+section PadicReduction
+
+variable (l : ℕ) [Fact (Nat.Prime l)]
+
+/-- 還元 `SL(2, ℤ_l) → SL(2, 𝔽_l)`。(iv) はこの写像の**切断**についての主張である。 -/
+noncomputable def redPadic : SL(2, ℤ_[l]) →* SL(2, ZMod l) :=
+  Matrix.SpecialLinearGroup.map (PadicInt.toZMod)
+
+/-- ★還元 `SL(2, ℤ_l) → SL(2, 𝔽_l)` は**全射**である。
+
+★証明は (i) をそのまま使う——`SL(2, 𝔽_l)` は `upper 1` と `lower 1` で生成され、
+その 2 つは明らかに持ち上がるから。**位相も Hensel も要らない。** -/
+theorem redPadic_surjective : Function.Surjective (redPadic l) := by
+  rw [← MonoidHom.range_eq_top, eq_top_iff, ← lemma_3_1_i l]
+  refine (Subgroup.closure_le _).2 ?_
+  rintro x (rfl | rfl)
+  · exact ⟨upper 1, by simp [redPadic]⟩
+  · exact ⟨lower 1, by simp [redPadic]⟩
+
+end PadicReduction
+
+section FiniteReduction
+
+open Matrix.SpecialLinearGroup
+
+variable (l n : ℕ) [Fact (Nat.Prime l)]
+
+/-- 有限段の還元 `SL(2, ℤ/l^n) → SL(2, 𝔽_l)`。
+
+★`Lemma 3.1, (iv)` の証明は「閉部分群」の主張だが、
+**位相が要るのは逆極限の 1 歩だけ**で、帰納法の本体はこの有限段で回る
+(`ResearchPaper/genell-goal.md` の (A) / (B) の切り分け)。 -/
+def redPow (hn : n ≠ 0) : SL(2, ZMod (l ^ n)) →* SL(2, ZMod l) :=
+  Matrix.SpecialLinearGroup.map (ZMod.castHom (dvd_pow_self l hn) (ZMod l))
+
+/-- ★有限段の還元も**全射**である。証明は `ℤ_l` 版と同じ——(i) をそのまま使う。 -/
+theorem redPow_surjective (hn : n ≠ 0) : Function.Surjective (redPow l n hn) := by
+  rw [← MonoidHom.range_eq_top, eq_top_iff, ← lemma_3_1_i l]
+  refine (Subgroup.closure_le _).2 ?_
+  rintro x (rfl | rfl)
+  · exact ⟨upper 1, by rw [redPow, map_upper, map_one]⟩
+  · exact ⟨lower 1, by rw [redPow, map_lower, map_one]⟩
+
+end FiniteReduction
 
 /-! ## ★出典の紐付け(`.src`)
 
