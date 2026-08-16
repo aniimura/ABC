@@ -1515,6 +1515,14 @@ theorem MLe.map {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N
   obtain ⟨c, hc⟩ := h
   exact ⟨f c, by rw [← map_add, hc]⟩
 
+/-- ★**加法準同型は `≼` も保つ** —— `MLe.map` に `map_nsmul` を挟むだけ。
+
+★★**`Proposition 1.14, (v)` で `non-dilating` の仮定を作るのに要る。** -/
+theorem MPrec.map {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
+    {a b : M} (h : MPrec a b) : MPrec (f a) (f b) := by
+  obtain ⟨n, hn, hle⟩ := h
+  exact ⟨n, hn, by simpa [map_nsmul] using MLe.map f hle⟩
+
 /-! ### ★★(vi) の最後の穴を塞ぐ —— 3–5 段
 
 ★**道具は全部そろっている**: (ii)(`prop_1_10_ii`)、`Div` の公式

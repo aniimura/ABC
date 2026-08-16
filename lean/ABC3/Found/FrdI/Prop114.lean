@@ -1107,4 +1107,139 @@ theorem prop_1_14_v_mp (F : FrobenioidCore P) (G : Frobenioid P)
   exact hdα (eq_zero_of_add_eq_zero_of_isSharp
     (P.divisorial (P.toElem.obj A).base).2 (add_right_cancel h3)).2
 
+/-! ### ★★(v) の十分性 —— `non-dilating` の当て方
+
+★★**検証役の調査で「隙間なし」と確定した**(2026-08-16)。
+
+★**心配していた点**: `IsNonDilating` は `M^char` の上の条件だが、
+原文の議論が出すのは `Φ(A_𝒟)` の元についての `≤` / `≼` である。
+
+★★**sharp が隙間を塞ぐ** —— `Φ` は divisorial なので各 `Φ(A_𝒟)` は sharp、
+すなわち**可逆元は `0` だけ**。したがって `CharRel a b` は `a = b` に潰れ、
+★**`toChar` は単射**(`toChar_injective_of_isSharp`、既存)。
+★**`M^char` を経由することによる損失はゼロである。**
+
+★**降ろすほうは `MPrec.map`**(新規、`MLe.map` に `map_nsmul` を挟むだけ)。
+
+★★**そして構成を原文より短くできた** —— 原文は
+「pull-back でないことを示す」→「prime-Frobenius と分かる」→「もう一度
+`non-dilating` を当てて `Div-identity`」の順だが、
+★**`degFr ψ = degFr φ` を (iv) で先に出しておけば、`φ` の型を場合分けせずに
+`φ∗(x + y) = degFr(φ) · x` が一様に出る。**
+★**したがって `Div-identity` が先に出て、pull-back でないことはその系になる。**
+-/
+
+include P in
+/-- ★★**`non-dilating` から `Div-identity` を出す**。
+
+★`M^char` の primary 元についての `≼` に降ろし、結論を `toChar` の単射性で上げる。 -/
+theorem isDivIdentity_of_forall_mprec {A : C} (φ : A ⟶ A)
+    (hnd : IsNonDilating (Φ.map (P.Base φ)))
+    (h : ∀ x : Φ.val (P.toElem.obj A).base, x ≠ 0 →
+      MPrec (Φ.map (P.Base φ) x) x) : IsDivIdentity P φ := by
+  have hsharp : IsSharp (Φ.val (P.toElem.obj A).base) := (P.divisorial _).2
+  have hchar : charMap (Φ.map (P.Base φ)) = AddMonoidHom.id _ := by
+    refine hnd (fun a ha => ?_)
+    obtain ⟨x, rfl⟩ := toChar_surjective _ a
+    have hx : x ≠ 0 := fun hz => ha.1 (by rw [hz, map_zero])
+    rw [charMap_toChar]
+    exact MPrec.map toChar (h x hx)
+  show Φ.map (P.Base φ) = Φ.map (P.Base (𝟙 A))
+  refine AddMonoidHom.ext (fun x => ?_)
+  rw [P.Base_id, Φ.map_id]
+  refine toChar_injective_of_isSharp hsharp ?_
+  rw [← charMap_toChar, hchar]
+  rfl
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (v) の十分性**。 -/
+theorem prop_1_14_v_mpr (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hnd : MonoidOn.IsNonDilatingOn Φ)
+    {A : C} (hA : ¬ IsGroupLikeObj P A) (φ : A ⟶ A)
+    (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P φ)
+    (hcond : ∀ (B : C) (α : A ⟶ B), IsStep P α →
+      ∃ (B' : C) (ψ : B ⟶ B') (β : B ⟶ B'),
+        IsIrreducibleMor ψ ∧ ¬ IsPreStep P ψ ∧ IsStep P β ∧
+        α ≫ ψ = φ ≫ α ≫ β) :
+    IsPrimeFrobenius P φ ∧ IsDivIdentity P φ := by
+  -- `φ` は isometry((i) の 3 分類のうち step は除外される)
+  have hdφ : P.Div φ = 0 := by
+    rcases (prop_1_14_i P G hiso φ).mp hirr with hpf | ⟨hst, -⟩ | ⟨hpb, -⟩
+    · exact hpf.1.1.2
+    · exact absurd hst.1 hnps
+    · exact (prop_1_4_ii_mp P F φ hpb).1.2
+  -- ★核心の等式
+  have key : ∀ x : Φ.val (P.toElem.obj A).base, x ≠ 0 →
+      ∃ y : Φ.val (P.toElem.obj A).base, y ≠ 0 ∧
+        Φ.map (P.Base φ) (x + y) = ((P.degFr φ : ℕ+) : ℕ) • x := by
+    intro x hx
+    obtain ⟨B, α, hαc, hαs, hαd⟩ := coaPre_realize P G A x
+    have hstep : IsStep P α := ⟨hαs, fun hi => hx (by
+      haveI := hi
+      rw [← hαd]
+      exact isIsometric_of_isIso P α)⟩
+    obtain ⟨B', ψ, β, hψirr, hψnp, hβstep, hsq⟩ := hcond B α hstep
+    have hdegβ : P.degFr β = 1 := hβstep.1.1
+    have hdegα : P.degFr α = 1 := hαs.1
+    have hdegψ : P.degFr ψ = P.degFr φ := by
+      refine prop_1_14_iv_degFr P α ψ φ (α ≫ β) hsq ?_
+      rw [P.degFr_comp, hdegβ, hdegα, one_mul]
+    have hdψ : P.Div ψ = 0 := by
+      rcases (prop_1_14_i P G hiso ψ).mp hψirr with hpf | ⟨hst, -⟩ | ⟨hpb, -⟩
+      · exact hpf.1.1.2
+      · exact absurd hst.1 hψnp
+      · exact (prop_1_4_ii_mp P F ψ hpb).1.2
+    refine ⟨Φ.map (P.Base α) (P.Div β), ?_, ?_⟩
+    · intro hz
+      exact hβstep.2 (hiso B B' β
+        (Φ.map_injective (P.Base α) (by rw [hz, map_zero])) hβstep.1)
+    · have h := congrArg P.Div hsq
+      rw [P.Div_comp, P.Div_comp, P.Div_comp, hdψ, map_zero, zero_add, hdφ, smul_zero,
+        add_zero, hαd, hdegψ, hdegβ] at h
+      rw [add_comm x]
+      simpa using h.symm
+  -- ★`Div-identity`
+  have hdiv : IsDivIdentity P φ := by
+    refine isDivIdentity_of_forall_mprec P φ (hnd _ (P.Base φ)) (fun x hx => ?_)
+    obtain ⟨y, hy, heq⟩ := key x hx
+    exact ⟨((P.degFr φ : ℕ+) : ℕ), (P.degFr φ).2,
+      ⟨Φ.map (P.Base φ) y, by rw [← map_add, heq]⟩⟩
+  refine ⟨?_, hdiv⟩
+  -- ★`φ` は pull-back ではない
+  rcases (prop_1_14_i P G hiso φ).mp hirr with hpf | ⟨hst, -⟩ | ⟨hpb, -⟩
+  · exact hpf
+  · exact absurd hst.1 hnps
+  · exfalso
+    -- 非 group-like から非零元を取る
+    obtain ⟨a, ha⟩ : ∃ a : MChar (Φ.val (P.toElem.obj A).base), a ≠ 0 := by
+      by_contra hc
+      push_neg at hc
+      exact hA hc
+    obtain ⟨x, rfl⟩ := toChar_surjective _ a
+    have hx : x ≠ 0 := fun hz => ha (by rw [hz, map_zero])
+    obtain ⟨y, hy, heq⟩ := key x hx
+    -- `φ` が pull-back なら次数 1、`Div-identity` なので `x + y = x`
+    rw [show ((P.degFr φ : ℕ+) : ℕ) = 1 by
+      rw [show P.degFr φ = 1 from (prop_1_4_ii_mp P F φ hpb).2]; rfl, one_smul,
+      show Φ.map (P.Base φ) = Φ.map (P.Base (𝟙 A)) from hdiv, P.Base_id,
+      Φ.map_id] at heq
+    letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj A).base).1.1
+    exact hy (by
+      have h2 : x + y = x + 0 := by rw [add_zero]; exact heq
+      exact add_left_cancel h2)
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (v)** —— 両方向。 -/
+theorem prop_1_14_v (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hnd : MonoidOn.IsNonDilatingOn Φ)
+    {A : C} (hA : ¬ IsGroupLikeObj P A) (φ : A ⟶ A)
+    (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P φ) :
+    (IsPrimeFrobenius P φ ∧ IsDivIdentity P φ) ↔
+      (∀ (B : C) (α : A ⟶ B), IsStep P α →
+        ∃ (B' : C) (ψ : B ⟶ B') (β : B ⟶ B'),
+          IsIrreducibleMor ψ ∧ ¬ IsPreStep P ψ ∧ IsStep P β ∧
+          α ≫ ψ = φ ≫ α ≫ β) :=
+  ⟨fun h B α hα => prop_1_14_v_mp P F G hiso φ h.1.1 h.1.2 h.2 α hα,
+   fun h => prop_1_14_v_mpr P F G hiso hnd hA φ hirr hnps h⟩
+
 end ABC3.Found.FrdI
