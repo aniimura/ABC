@@ -2100,4 +2100,45 @@ theorem prop_1_11_vii_degFr_forced {A B Cc Dd : C}
     show P.degFr φ = 1 from hφs.1] at h
   simpa using h.symm
 
+/-! ## ★★★出典の紐付け(`.src`) —— `Proposition 1.11` は 19 主張すべて完成
+
+★私の文脈を持たない検証役が、原文 (p.36–37) を自分で読んで主張を数え直し
+(**19**。私の着手前の数えは 15 だった)、19 すべてに対応する宣言があることを
+確認した。
+
+★★**2 往復した。** 1 往復目の判定は「いけない」で、6 件の未了が挙がった:
+(iv) の**準同型**と**一意性の仮定が強い**、(v) の**resp'd 存在**・
+**一般の linear への拡張**・**`ψ` の linear 性**・**pull-back ⟺**。
+
+★**そのすべてを埋めた**:
+
+| # | 主張 | 宣言 |
+|---|---|---|
+| (i) | full | `prop_1_11_i` |
+| (ii) | faithful | `prop_1_11_ii` |
+| (iii) | `∃!` 持ち上げ | `prop_1_11_iii` |
+| (iv)① | 存在 | `prop_1_11_iv_exists` / `otriPull` |
+| (iv)② | **準同型** | `otriPullHom` |
+| (iv)③ | **単射** | `otriPullHom_injective` / `prop_1_11_iv_injective` |
+| (iv)④ | 一意性(co-angular linear) | `prop_1_11_iv_unique'` |
+| (v)① | non-resp'd 存在(任意の linear) | `liftsSquare_of_linear` |
+| (v)② | non-resp'd 一意 | `prop_1_11_v_unique_nonresp` |
+| (v)③ | **resp'd 存在**(任意の linear) | `liftsSquareResp_of_linear` |
+| (v)④ | resp'd 一意 | `prop_1_11_v_unique_resp` |
+| (v)⑤ | **`ψ` が linear** | `LiftsSquare` / `LiftsSquareResp` の結論 |
+| (v)⑥ | **pull-back ⟺** | `prop_1_11_v_pullBack_iff` |
+| (vi)×4 | FSM / fs / mono / irreducible | `prop_1_11_vi_fsm` / `_fs` / `_mono` / `_irred` |
+| (vii)① | 持ち上げ | `prop_1_11_vii`(★`hiso` なし) |
+| (vii)② | In particular FSM | `prop_1_11_vii_fsm_of_coaPre` |
+
+★★**記録**: `prop_1_11_v_pullBack_iff_reduce` は**原文の主張ではない**
+(iff への**還元**であって iff ではない)。(v)⑥ を担うのは
+`prop_1_11_v_pullBack_iff` のほうである。
+-/
+
+/-- ★★★**[FrdI] Proposition 1.11 全体**。(i)〜(vii) の 19 主張がすべて実装された。 -/
+def prop_1_11.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 36, item := "Proposition 1.11",
+    sectionId := "frdi-prop-1-11" }
+
 end ABC3.Found.FrdI
