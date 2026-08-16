@@ -227,12 +227,12 @@ noncomputable def splitEquiv : (OTimes P A × τ A) ≃ OTri P A :=
   Equiv.ofBijective _ (charSplitting_bijective P F hτ hA)
 
 theorem splitEquiv_apply (p : OTimes P A × τ A) :
-    splitEquiv P F hτ hA p = uOf P p.1 * tOf P hτ hA p.2 := rfl
+    splitEquiv P F hτ hA p = uOf P p.1 * tOf P F hτ hA p.2 := rfl
 
 /-- ★★★**`Ψ` の `𝒪^▷(A)` 上の定義** —— `β₀ · β₁ ↦ β₀ · β₁^d`。 -/
 noncomputable def psiOTri (d : ℕ+) (β : OTri P A) : OTri P A :=
   uOf P ((splitEquiv P F hτ hA).symm β).1
-    * (tOf P hτ hA ((splitEquiv P F hτ hA).symm β).2) ^ ((d : ℕ+) : ℕ)
+    * (tOf P F hτ hA ((splitEquiv P F hτ hA).symm β).2) ^ ((d : ℕ+) : ℕ)
 
 include hfn in
 /-- ★★**`Div Ψ(β) = d • Div β`** —— 単元部分は `Div` に効かず、
@@ -243,16 +243,16 @@ theorem psiOTri_div (d : ℕ+) (β : OTri P A) :
     P.Div (((psiOTri P F hτ hA d β : OTri P A) : End A) : A ⟶ A)
       = ((d : ℕ+) : ℕ) • P.Div ((β : End A) : A ⟶ A) := by
   set p := (splitEquiv P F hτ hA).symm β with hp
-  have hβ : β = uOf P p.1 * tOf P hτ hA p.2 := by
+  have hβ : β = uOf P p.1 * tOf P F hτ hA p.2 := by
     rw [hp, ← splitEquiv_apply P F hτ hA]
     exact ((splitEquiv P F hτ hA).apply_symm_apply β).symm
-  have h1 : P.Div ((β : End A) : A ⟶ A) = P.Div (((tOf P hτ hA p.2 : OTri P A) : End A)) := by
+  have h1 : P.Div ((β : End A) : A ⟶ A) = P.Div (((tOf P F hτ hA p.2 : OTri P A) : End A)) := by
     rw [hβ]
-    exact otri_div_unit_mul P p.1 (tOf P hτ hA p.2)
+    exact otri_div_unit_mul P p.1 (tOf P F hτ hA p.2)
   have h2 : P.Div (((psiOTri P F hτ hA d β : OTri P A) : End A))
-      = P.Div ((((tOf P hτ hA p.2) ^ ((d : ℕ+) : ℕ) : OTri P A) : End A)) :=
+      = P.Div ((((tOf P F hτ hA p.2) ^ ((d : ℕ+) : ℕ) : OTri P A) : End A)) :=
     otri_div_unit_mul P p.1 _
-  rw [h2, otri_div_pow P (tOf P hτ hA p.2) ((d : ℕ+) : ℕ), h1]
+  rw [h2, otri_div_pow P (tOf P F hτ hA p.2) ((d : ℕ+) : ℕ), h1]
 
 end Psi
 
