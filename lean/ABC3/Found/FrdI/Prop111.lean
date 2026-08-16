@@ -1211,7 +1211,86 @@ theorem liftsSquare_of_pullBack (G : Frobenioid P) {A B : C} (φ : A ⟶ B)
   intro Cc Dd α hαc hαs β hβc hβs hcond
   exact prop_1_11_v_exists_pullBack' P G φ hφpb α hαc hαs β hβc hβs hcond
 
-/-! ### ★残る 1 場合 —— **isometric pre-step**(2026-08-16 の測定)
+/-! ### ★★(v) の resp'd(コスライス)側 —— 存在が無かった(2026-08-16)
+
+★★**検証役の指摘**: 原文の (v) は 2 つの場合を括弧つきで並べている:
+> α : C →A and β : D →B (**respectively**, α : A →C and β : B →D) …
+> such that (α∗)−1(Div(α)) = φ∗{(β∗)−1(Div(β))} (**respectively**, Div(α) = φ∗(Div(β)))
+> … such that β ◦ψ = φ ◦α (**respectively**, ψ ◦α = β ◦φ)
+
+★**一意性(`prop_1_11_v_unique_resp`)はあったが、存在が無かった。**
+
+★★**条件の形が非対称である**ことに注意 —— スライス側は**不変量**
+(`(α∗)⁻¹(Div α)`)で、コスライス側は **`Div` そのもの**である。
+★**コスライスでは `Φ(A)` が既に始域側の単系なので、輸送が要らない。**
+★**これは私が `coaPre_factor_under_of_mle` を作ったときに見た非対称と同じである。**
+-/
+
+/-- ★(v) の resp'd(コスライス側)の性質。 -/
+def LiftsSquareResp {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ {Cc Dd : C} (α : A ⟶ Cc), IsCoAngular P α → IsPreStep P α →
+    ∀ (β : B ⟶ Dd), IsCoAngular P β → IsPreStep P β →
+      P.Div α = Φ.map (P.Base φ) (P.Div β) →
+      ∃ ψ : Cc ⟶ Dd, α ≫ ψ = φ ≫ β ∧ IsLinear P ψ
+
+include P in
+/-- ★★**resp'd 側も合成で閉じる**。
+
+★スライス側との違いは**中間の実現に `coaPre_realize`(コスライス)を使う**ことだけ。 -/
+theorem liftsSquareResp_comp (G : Frobenioid P) {A X B : C} {φ₁ : A ⟶ X} {φ₂ : X ⟶ B}
+    (h₁ : LiftsSquareResp P φ₁) (h₂ : LiftsSquareResp P φ₂) :
+    LiftsSquareResp P (φ₁ ≫ φ₂) := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  obtain ⟨X', β', hβ'c, hβ's, hβ'div⟩ :=
+    coaPre_realize P G X (Φ.map (P.Base φ₂) (P.Div β))
+  obtain ⟨ψ₂, hψ₂, hψ₂l⟩ := h₂ β' hβ'c hβ's β hβc hβs (by rw [hβ'div])
+  obtain ⟨ψ₁, hψ₁, hψ₁l⟩ := h₁ α hαc hαs β' hβ'c hβ's (by
+    rw [hβ'div, ← Φ.map_comp, ← P.Base_comp]; exact hcond)
+  exact ⟨ψ₁ ≫ ψ₂, by rw [← Category.assoc, hψ₁, Category.assoc, hψ₂, ← Category.assoc],
+    IsLinear.comp P hψ₁l hψ₂l⟩
+
+include P in
+/-- ★★**resp'd 側の co-angular pre-step の場合**。
+
+★★**`coaPre_factor_under_of_mle`(第1圏同値のコスライス側)が
+そのまま効く** —— `Div (φ ≫ β) = Div α + Div φ` なので
+`MLe (Div α) (Div (φ ≫ β))` が**証人 `Div φ` で直ちに出る**。
+★**条件が `Div` そのものであることが、ここで効いている。** -/
+theorem liftsSquareResp_of_coaPre (G : Frobenioid P) {A B : C} (φ : A ⟶ B)
+    (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ) : LiftsSquareResp P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  have hcc : IsCoAngular P (φ ≫ β) := G.core.coAngularComp φ β hφc hβc
+  have hcs : IsPreStep P (φ ≫ β) := IsPreStep.comp P hφs hβs
+  have hdiv : P.Div (φ ≫ β) = P.Div α + P.Div φ := by
+    rw [P.Div_comp, show P.degFr β = 1 from hβs.1, hcond]
+    simp
+  obtain ⟨ψ, -, hψs, hψ⟩ :=
+    coaPre_factor_under_of_mle P G α hαc hαs (φ ≫ β) hcc hcs ⟨P.Div φ, by rw [hdiv]⟩
+  exact ⟨ψ, hψ, hψs.1⟩
+
+/-! ### ★残る場合(2026-08-16 の測定)
+
+| 側 | co-angular pre-step | pull-back | isometric pre-step |
+|---|---|---|---|
+| non-resp'd(スライス) | ★実装 | ★実装 | 未実装 |
+| resp'd(コスライス) | ★実装 | 未実装 | 未実装 |
+
+★**合成閉性は両側とも実装した**ので、上の表が埋まれば
+`Proposition 1.7, (iii)` ＋ `Definition 1.3, (v), (b)` で
+★**任意の linear `φ`** に届く。
+
+★★**そして isometric pre-step の場合は本当に別物である** ——
+★**同型でない isometric pre-step は co-angular ではない**
+(co-angular の定義に `φ = 𝟙 ≫ φ ≫ 𝟙` を当てれば「`φ` が同型」が出てしまう)。
+
+★**手掛かり**: `prop_1_11_vii_isometric` が同じ「isometric pre-step の場合」を
+`Proposition 1.9` の `pushFunctor` の圏同値で処理している。
+★**そこと同じ機械が要ると見ている**(未検証)。
+
+★★**`sorry` は置かない。**
+-/
+
+/-! ### ★(旧)残る 1 場合 —— **isometric pre-step**(2026-08-16 の測定)
 
 ★`Proposition 1.7, (iii)` が linear `φ` を `(pre-step) ≫ (pull-back)` に割り、
 `Definition 1.3, (v), (b)` が pre-step を
