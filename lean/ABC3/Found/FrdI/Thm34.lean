@@ -156,12 +156,14 @@ theorem isCategoricalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B
       intro γ hγ
       refine Ψ.map_injective ?_
       rw [Ψ.map_comp, hψ₀]
-      have := hψ (Ψ.mapAut A γ) ⟨γ, hγ, rfl⟩
+      have hthis : Ψ.map ((γ : Aut A).hom : A ⟶ A) ≫ ψ = ψ :=
+        hψ (Ψ.mapAut A γ) ⟨γ, hγ, rfl⟩
       show Ψ.map (γ : Aut A).hom ≫ (ψ ≫ e.inv) = ψ ≫ e.inv
-      rw [← Category.assoc, this]
+      rw [← Category.assoc, hthis]
     obtain ⟨ψ₀', hψ₀'eq, hψ₀'uniq⟩ := h.2 Cc₀ ψ₀ hψ₀inv
     refine ⟨Ψ.map ψ₀' ≫ e.hom, ?_, ?_⟩
-    · rw [← Category.assoc, ← Ψ.map_comp, ← hψ₀'eq, hψ₀]
+    · show ψ = Ψ.map φ ≫ (Ψ.map ψ₀' ≫ e.hom)
+      rw [← Category.assoc, ← Ψ.map_comp, ← hψ₀'eq, hψ₀]
       simp
     · intro y hy
       have hy₀ : ψ₀ = φ ≫ (Ψ.preimage (y ≫ e.inv)) := by
