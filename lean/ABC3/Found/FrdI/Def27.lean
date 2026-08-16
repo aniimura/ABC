@@ -299,6 +299,146 @@ theorem fdist_and_pdist_eq_id [IsConnected D] (Fc : FrobenioidCore P) {S : BaseS
   rw [← hn, hn1, map_one]
   rfl
 
+/-! ## ★Remark 2.7.2 の第 2・第 3 主張 —— 3 分解とその一意性
+
+原文 (FrdI p.52):
+> is a base-identity pre-step endomorphism;
+
+★**`𝒞` が base-trivial 型かつ skeleton** のとき、どの射も
+`φ = γ ≫ β ≫ α`(原文の `α ∘ β ∘ γ`)と**一意に**分解する。
+-/
+
+section Rem272
+
+variable [IsConnected D] {S : BaseSection P}
+
+/-- ★**base-trivial 型かつ `𝒞` が skeleton なら、`𝒞` のどの対象も `𝒫` の対象**。
+
+★`𝒫 → 𝒟` の本質的全射性で底の同型な `𝒫`-対象を取り、
+base-trivial 型でそれが `𝒞` で同型になり、skeleton で**等しく**なる。 -/
+theorem objP_of_baseTrivial_of_skeletal (S : BaseSection P)
+    (hbt : ∀ A : C, IsBaseTrivial P A) (hskel : Skeletal C) (A : C) : S.objP A := by
+  obtain ⟨A', hA', ⟨e⟩⟩ := S.essSurjP ((P.toElem.obj A).base)
+  obtain ⟨g⟩ := hbt A A' ⟨e.symm⟩
+  exact (hskel ⟨g⟩ : A' = A) ▸ hA'
+
+/-- ★★★**[FrdI] Remark 2.7.2 の第 2 主張** —— 3 分解の**存在**。
+
+★**手順**:
+1. `𝒫 → 𝒟` の充満性で `Base α = Base φ` なる `P-distinguished` な `α` を取る
+2. `α` は pull-back 射なので、`f ≫ α = φ` かつ `Base f = 𝟙` なる `f` が**一意に**取れる
+3. `Definition 1.3, (iv), (a)` で `f = γ₁ ≫ β₁ ≫ α₁` と分け、
+   base-trivial ＋ skeleton で中間対象が `A` に**潰れる**
+4. `Base f = 𝟙` から `Base α₁` が同型、よって `α₁` 自身が同型
+   (`Remark 1.2.1`、`isIso_of_isPullBack_of_isBaseIso`)
+5. `Definition 1.3, (ii)` の一意性(`frobDegUniq`)で `γ₁` を
+   `F` の像 `γ = F(n)_A` に取り替える —— ずれた同型は `β` に吸収する -/
+theorem rem_2_7_2_factor (Fc : FrobenioidCore P) {Fs : ℕ+ →* SectionEnd S}
+    (hFs : IsFrobeniusSection S Fs)
+    (hbt : ∀ A : C, IsBaseTrivial P A) (hskel : Skeletal C)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) :
+    ∃ (n : ℕ+) (β : A ⟶ A) (α : A ⟶ B),
+      φ = ((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ β ≫ α ∧
+      IsBaseIdentity P β ∧ IsPreStep P β ∧ S.homP α := by
+  -- 段 1
+  obtain ⟨α, hαP, hαb⟩ := S.fullP hA hB (P.Base φ)
+  have hαpb : IsPullBack P α := S.isPullBack hαP
+  -- 段 2
+  obtain ⟨-, hsurj⟩ := hαpb A
+  obtain ⟨f, hf⟩ := hsurj ⟨(φ, 𝟙 _), by rw [hαb, Category.id_comp]⟩
+  have hf' := congrArg Subtype.val hf
+  have hfα : f ≫ α = φ := congrArg Prod.fst hf'
+  have hfb : P.Base f = 𝟙 _ := congrArg Prod.snd hf'
+  -- 段 3
+  obtain ⟨X, Y, γ₁, β₁, α₁, hfac, hγ₁, hβ₁, hα₁⟩ := Fc.arbFactor f
+  haveI : IsIso (P.Base γ₁) := hγ₁.2
+  obtain ⟨gX⟩ := hbt A X ⟨asIso (P.Base γ₁)⟩
+  have hXA : A = X := (hskel ⟨gX⟩).symm
+  subst hXA
+  haveI : IsIso (P.Base β₁) := hβ₁.2
+  obtain ⟨gY⟩ := hbt A Y ⟨asIso (P.Base β₁)⟩
+  have hYA : A = Y := (hskel ⟨gY⟩).symm
+  subst hYA
+  -- 段 4
+  have hbα₁ : IsIso (P.Base α₁) := by
+    have h : P.Base γ₁ ≫ P.Base β₁ ≫ P.Base α₁ = 𝟙 _ := by
+      rw [← P.Base_comp, ← P.Base_comp, ← hfac, hfb]
+    haveI : IsIso (P.Base γ₁ ≫ P.Base β₁ ≫ P.Base α₁) := by rw [h]; infer_instance
+    haveI := IsIso.of_isIso_comp_left (P.Base γ₁) (P.Base β₁ ≫ P.Base α₁)
+    exact IsIso.of_isIso_comp_left (P.Base β₁) (P.Base α₁)
+  haveI : IsIso α₁ := isIso_of_isPullBack_of_isBaseIso P Fc α₁ hα₁ hbα₁
+  have hβ₂ : IsPreStep P (β₁ ≫ α₁) := IsPreStep.comp P hβ₁ (isPreStep_of_isIso P α₁)
+  -- 段 5
+  set n : ℕ+ := P.degFr γ₁ with hn
+  have hγdeg : P.degFr ((Fs n).app ⟨A, hA⟩) = n :=
+    (SectionEnd.deg_eq (Fs n) ⟨A, hA⟩).symm.trans (hFs.degSection n)
+  obtain ⟨e, hei, hee⟩ := Fc.frobDegUniq A A A γ₁ ((Fs n).app ⟨A, hA⟩) hγ₁
+    (hFs.frobType n ⟨A, hA⟩) (by rw [hγdeg])
+  haveI := hei
+  have hγ₁e : γ₁ = ((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ inv e := by rw [← hee]; simp
+  refine ⟨n, inv e ≫ β₁ ≫ α₁, α, ?_, ?_, ?_, hαP⟩
+  · rw [← hfα, hfac, hγ₁e]
+    simp
+  · -- base-identity
+    show P.Base (inv e ≫ β₁ ≫ α₁) = P.Base (𝟙 A)
+    have hγb : P.Base ((Fs n).app ⟨A, hA⟩) = P.Base (𝟙 A) := hFs.baseIdentity n ⟨A, hA⟩
+    have h : P.Base ((Fs n).app ⟨A, hA⟩) ≫ P.Base (inv e ≫ β₁ ≫ α₁) = P.Base (𝟙 A) := by
+      rw [← P.Base_comp, ← Category.assoc, ← hγ₁e, ← hfac, hfb, P.Base_id]
+    rw [hγb, P.Base_id, Category.id_comp] at h
+    rw [P.Base_id]
+    exact h
+  · exact IsPreStep.comp P (isPreStep_of_isIso P (inv e)) hβ₂
+
+/-- ★★★**[FrdI] Remark 2.7.2 の第 3 主張** —— 3 分解の**一意性**(strict)。
+
+★**手順**: `γ`, `β` が base-identity なので `Base α = Base φ = Base α'`、
+`𝒫 → 𝒟` の忠実性で `α = α'`。次に `α` が pull-back 射だから
+`γ ≫ β = γ' ≫ β'`。次数を取ると `β` が linear なので `n = m`。
+最後は `𝒞` の totally epimorphicity(`γ` が epi)で `β = β'`。 -/
+theorem rem_2_7_2_uniq {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) {n m : ℕ+} {β β' : A ⟶ A} {α α' : A ⟶ B}
+    (hβ : IsBaseIdentity P β) (hβs : IsPreStep P β) (hαP : S.homP α)
+    (hβ' : IsBaseIdentity P β') (hβ's : IsPreStep P β') (hα'P : S.homP α')
+    (heq : ((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ β ≫ α
+        = ((Fs m).app ⟨A, hA⟩ : A ⟶ A) ≫ β' ≫ α') :
+    n = m ∧ β = β' ∧ α = α' := by
+  have hγb : ∀ k : ℕ+, P.Base ((Fs k).app ⟨A, hA⟩) = 𝟙 _ := by
+    intro k
+    have h : P.Base ((Fs k).app ⟨A, hA⟩) = P.Base (𝟙 A) := hFs.baseIdentity k ⟨A, hA⟩
+    rwa [P.Base_id] at h
+  have hβb : P.Base β = 𝟙 _ := by have h : P.Base β = P.Base (𝟙 A) := hβ; rwa [P.Base_id] at h
+  have hβ'b : P.Base β' = 𝟙 _ := by have h : P.Base β' = P.Base (𝟙 A) := hβ'; rwa [P.Base_id] at h
+  -- `α = α'`
+  have hbase : P.Base α = P.Base α' := by
+    have h := congrArg P.Base heq
+    rw [P.Base_comp, P.Base_comp, P.Base_comp, P.Base_comp, hγb n, hγb m, hβb, hβ'b] at h
+    simpa using h
+  have hαα : α = α' := S.faithfulP hαP hα'P hbase
+  subst hαα
+  -- `γ ≫ β = γ' ≫ β'`
+  have hcomp : ((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ β = ((Fs m).app ⟨A, hA⟩ : A ⟶ A) ≫ β' := by
+    obtain ⟨hinj, -⟩ := S.isPullBack hαP A
+    refine hinj (Subtype.ext (Prod.ext ?_ ?_))
+    · show (((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ β) ≫ α = (((Fs m).app ⟨A, hA⟩ : A ⟶ A) ≫ β') ≫ α
+      rw [Category.assoc, Category.assoc]; exact heq
+    · show P.Base (((Fs n).app ⟨A, hA⟩ : A ⟶ A) ≫ β)
+        = P.Base (((Fs m).app ⟨A, hA⟩ : A ⟶ A) ≫ β')
+      rw [P.Base_comp, P.Base_comp, hγb n, hγb m, hβb, hβ'b]
+  -- `n = m`
+  have hnm : n = m := by
+    have h := congrArg P.degFr hcomp
+    rw [P.degFr_comp, P.degFr_comp,
+      show P.degFr β = 1 from hβs.1, show P.degFr β' = 1 from hβ's.1,
+      ← SectionEnd.deg_eq (Fs n) ⟨A, hA⟩, ← SectionEnd.deg_eq (Fs m) ⟨A, hA⟩,
+      hFs.degSection n, hFs.degSection m] at h
+    simpa using h
+  subst hnm
+  -- `β = β'`
+  haveI : Epi ((Fs n).app ⟨A, hA⟩ : A ⟶ A) := P.totEpiC _ _ _
+  exact ⟨rfl, (cancel_epi ((Fs n).app ⟨A, hA⟩ : A ⟶ A)).mp hcomp, rfl⟩
+
+end Rem272
+
 /-! ## ★★★出典の紐付け(`.src`) -/
 
 variable (P) in
@@ -321,5 +461,18 @@ variable (P) in
 def BaseSection.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 51, item := "Definition 2.7",
     sectionId := "frdi-def-2-7" }
+
+/-- ★★★**[FrdI] Remark 2.7.2** —— 3 主張すべてが実装された。
+
+| # | 主張 | 実装 |
+|---|---|---|
+| 1 | F- かつ P-distinguished な射は恒等射 | `fdist_and_pdist_eq_id` |
+| 2 | base-trivial ＋ skeleton なら 3 分解が**存在** | `rem_2_7_2_factor` |
+| 3 | その分解は(strict に)**一意** | `rem_2_7_2_uniq` |
+
+★補助として「どの対象も `𝒫` の対象」(`objP_of_baseTrivial_of_skeletal`)を出した。 -/
+def rem_2_7_2_factor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 52, item := "Remark 2.7.2",
+    sectionId := "frdi-remark-2-7-2" }
 
 end ABC3.Found.FrdI
