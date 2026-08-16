@@ -526,6 +526,26 @@ theorem IsIrreducibleMor.isIso_left_or_right {A B X : C} {φ : A ⟶ B}
     (h : IsIrreducibleMor φ) (β : A ⟶ X) (α : X ⟶ B) (hf : φ = β ≫ α) :
     IsIso β ∨ IsIso α := h.2 X β α hf
 
+/-- ★**irreducible は同型との合成で保たれる(右から)**。
+
+★`Proposition 1.14, (ii)` の十分性で、底の分解を `𝒞` へ持ち上げるときに要る ——
+持ち上げは**同型を除いてしか**底を再現しないからである。 -/
+theorem IsIrreducibleMor.comp_isIso {A B E : C} {f : A ⟶ B}
+    (h : IsIrreducibleMor f) (g : B ⟶ E) [IsIso g] : IsIrreducibleMor (f ≫ g) := by
+  refine ⟨fun hiso => h.1 ?_, fun X u v huv => ?_⟩
+  · haveI := hiso
+    have hf : f = (f ≫ g) ≫ inv g := by simp
+    rw [hf]
+    infer_instance
+  · have hf : f = u ≫ (v ≫ inv g) := by rw [← Category.assoc, ← huv]; simp
+    rcases h.2 X u (v ≫ inv g) hf with h1 | h2
+    · exact Or.inl h1
+    · refine Or.inr ?_
+      haveI := h2
+      have hv : v = (v ≫ inv g) ≫ g := by simp
+      rw [hv]
+      infer_instance
+
 /-- **§0** `FSMI-morphism` —— irreducible な FSM 射。 -/
 def IsFSMI {A B : C} (φ : A ⟶ B) : Prop := IsFSMMorphism φ ∧ IsIrreducibleMor φ
 
@@ -544,6 +564,17 @@ inductive IsFSMIChain : ℕ → ∀ {A B : C}, (A ⟶ B) → Prop
   | nil {A : C} : IsFSMIChain 0 (𝟙 A)
   | cons {n : ℕ} {A B E : C} {φ : A ⟶ B} {ψ : B ⟶ E} :
       IsFSMI φ → IsFSMIChain n ψ → IsFSMIChain (n + 1) (φ ≫ ψ)
+
+/-- ★**長さ 1 以上の鎖は、最初の因子として FSMI 射を切り出せる**。
+
+★★**`FSMFF-type` の条件 (a) を「従属する FSMI 射がある」に変換する道具**である
+(原文の「Base(α) admits a subordinate FSMI-morphism」)。 -/
+theorem IsFSMIChain.exists_first {n : ℕ} (hn : 0 < n) {A B : C} {f : A ⟶ B}
+    (h : IsFSMIChain n f) :
+    ∃ (X : C) (u : A ⟶ X) (v : X ⟶ B), f = u ≫ v ∧ IsFSMI u := by
+  cases h with
+  | nil => omega
+  | cons hu _ => exact ⟨_, _, _, rfl, hu⟩
 
 variable (C) in
 /-- **§0** `category of FSMFF-type`(FSM-finitely factorizable type)。

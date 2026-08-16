@@ -370,6 +370,100 @@ theorem prop_1_14_ii_epsilon_eq (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropi
   refine (cancel_epi ζ).mp ?_
   rw [← hγ₁, ← hγ₂, hgeq]
 
+include P in
+/-- ★**(ii) 十分性の第 3 段** —— `φ = β ≫ α` が fiberwise-surjective なら
+`α` もそうである。
+
+★★**原文の「it follows formally」は本当に formal だった** ——
+`φ` の証人 `δ_A` に `β` を後置するだけ(`δ_Cc := δ_A ≫ β`)。 -/
+theorem prop_1_14_ii_alpha_fs {A Cc B : C} (β : A ⟶ Cc) (α : Cc ⟶ B)
+    (hfs : IsFiberwiseSurjective (β ≫ α)) : IsFiberwiseSurjective α := by
+  intro Z γ
+  obtain ⟨Dd, δA, δZ, hsq⟩ := hfs γ
+  exact ⟨Dd, δA ≫ β, δZ, by rw [Category.assoc, hsq]⟩
+
+/-! ### ★★(ii) 十分性の第 5–7 段 —— FSMFF 型から矛盾を出す
+
+★**原文**(p.42、目視):
+> Thus, it follows [cf. Proposition 1.11, (vi)] that Base(α) is an FSM-morphism
+> of D. Since, however, we are operating under the assumption that D is of FSMFF-
+> type, it follows that if α is not an isomorphism, then Base(α) admits a subordinate
+> FSMI-morphism, which implies [cf. Proposition 1.11, (vi)] that α admits a subordinate
+> FSMI-morphism [which is also a pull-back morphism].
+
+★★**「which implies」が持ち上げの段である** —— 底の分解を `𝒞` へ持ち上げるのに
+`Definition 1.3, (i), (c)`(`plBk_realize`)と **pull-back の全射性**を使う。
+
+★★**持ち上げは同型を除いてしか底を再現しない** ——
+`plBk_realize` が返す `θ : Base E ≅ Z` がそれである。
+★**だから「irreducible は同型との合成で保たれる」(`IsIrreducibleMor.comp_isIso`)が要る。**
+
+★**最後の一歩**: `a₁` は irreducible で pre-step でない(底が同型でないから)ので、
+mid-adjoint の仮定が `a₁` を同型にする。★**すると底の `f₁` も同型になり、
+`f₁` が FSMI(したがって irreducible、したがって非同型)であることに矛盾する。**
+-/
+
+include P in
+/-- ★★★**(ii) 十分性の第 5–7 段** —— `α` は同型である。
+
+★`φ = β ≫ α`(`α` は FSM な pull-back)で `φ` が非 pre-step irreducible 射に
+mid-adjoint なら、`α` は同型。 -/
+theorem prop_1_14_ii_alpha_isIso (F : FrobenioidCore P) (hFSMFF : IsOfFSMFFType D)
+    {A Cc B : C} (β : A ⟶ Cc) (α : Cc ⟶ B) (hαpb : IsPullBack P α)
+    (hαfsm : IsFSMMorphism α) (φ : A ⟶ B) (hfac : φ = β ≫ α)
+    (hmid : IsMidAdjoint (irredNonPreStep P) φ) : IsIso α := by
+  by_contra hni
+  -- 段 5: `Base α` は FSM 射で、同型ではない
+  have hbfsm : IsFSMMorphism (P.Base α) := (prop_1_11_vi_fsm P F α hαpb).mp hαfsm
+  have hbni : ¬ IsIso (P.Base α) := fun h =>
+    hni (isIso_of_isPullBack_of_isBaseIso P F α hαpb h)
+  -- 段 6: FSMFF 型の条件 (a) から従属する FSMI 射
+  obtain ⟨n, hnpos, hchain⟩ := hFSMFF.1 _ _ (P.Base α) hbfsm hbni
+  obtain ⟨Z, f₁, g, hbfac, hf₁⟩ := hchain.exists_first hnpos
+  -- 持ち上げ: `Definition 1.3, (i), (c)`
+  obtain ⟨E, p, hppb, θ, hθ⟩ := plBk_realize P F B g
+  obtain ⟨-, hsurj⟩ := hppb Cc
+  obtain ⟨a₁, ha₁⟩ := hsurj ⟨(α, f₁ ≫ θ.inv), by
+    show P.Base α = (f₁ ≫ θ.inv) ≫ P.Base p
+    rw [hθ, ← Category.assoc, Category.assoc f₁ θ.inv θ.hom, θ.inv_hom_id,
+      Category.comp_id, hbfac]⟩
+  have ha₁' := congrArg Subtype.val ha₁
+  have hsq : a₁ ≫ p = α := congrArg Prod.fst ha₁'
+  have hba₁ : P.Base a₁ = f₁ ≫ θ.inv := congrArg Prod.snd ha₁'
+  -- `a₁` は pull-back
+  obtain ⟨hαlb, hαlin⟩ := prop_1_4_ii_mp P F α hαpb
+  have hcoc : IsCoAngular P (a₁ ≫ p) := by rw [hsq]; exact hαlb.1
+  have hlinc : IsLinear P (a₁ ≫ p) := by rw [hsq]; exact hαlin
+  obtain ⟨⟨ha₁co, ha₁lin⟩, -⟩ := prop_1_7_v_coAngularLinear P F a₁ p hcoc hlinc
+  have ha₁isom : IsIsometric P a₁ :=
+    (prop_1_7_v_isometric P a₁ p (by rw [hsq]; exact hαlb.2)).1
+  have ha₁pb : IsPullBack P a₁ := (prop_1_4_ii P F a₁).mpr ⟨⟨ha₁co, ha₁isom⟩, ha₁lin⟩
+  -- `a₁` は irreducible
+  have ha₁irr : IsIrreducibleMor a₁ := by
+    refine (prop_1_11_vi_irred P F a₁ ha₁pb).mpr ?_
+    rw [hba₁]
+    exact hf₁.2.comp_isIso θ.inv
+  -- `a₁` は pre-step でない
+  have ha₁np : ¬ IsPreStep P a₁ := by
+    intro hps
+    refine hf₁.2.1 ?_
+    haveI : IsIso (P.Base a₁) := hps.2
+    have hf : f₁ = P.Base a₁ ≫ θ.hom := by rw [hba₁, Category.assoc, θ.inv_hom_id,
+      Category.comp_id]
+    rw [hf]
+    infer_instance
+  -- 段 7: mid-adjoint の仮定から矛盾
+  haveI := hmid Cc E β a₁ p (by rw [hfac, ← hsq]) ⟨ha₁irr, ha₁np⟩
+  refine hf₁.2.1 ?_
+  have hf : f₁ = P.Base a₁ ≫ θ.hom := by
+    rw [hba₁, Category.assoc, θ.inv_hom_id, Category.comp_id]
+  haveI : IsIso (P.Base a₁) := by
+    rw [show P.Base a₁ = P.Base a₁ from rfl]
+    exact ⟨⟨P.Base (inv a₁), by rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id],
+      by rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]⟩⟩
+  rw [hf]
+  infer_instance
+
 /-! ### ★(ii) の十分性 —— 未実装(2026-08-16 の測定)
 
 ★**原文の証明**(p.42、目視、要旨):
@@ -397,12 +491,10 @@ theorem prop_1_14_ii_epsilon_eq (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropi
 |---|---|---|
 | 1 | `Definition 1.3, (iv), (a)` で `φ = γ ≫ β ≫ α` | 道具あり(`arbFactor`) |
 | 2 | (i) で `γ` は同型 ⟹ `φ = β ≫ α` としてよい | 道具あり |
-| 3 | `φ` が FSM ⟹ `α` は fiberwise-surjective | ★**「follows formally」は本当に formal**(`δ_C := δ_A ≫ β`) |
+| 3 | `φ` が FSM ⟹ `α` は fiberwise-surjective | ★**実装した**(`prop_1_14_ii_alpha_fs`) |
 | 4 | ★**`α` が mono** | ★**実装した**(`prop_1_14_ii_epsilon_eq`、ただし `ϵᵢ` が pull-back の場合) |
 | 4′ | 「WLOG `ϵ₁, ϵ₂` は pull-back」の正当化 | ★**未実装** |
-| 5 | `Proposition 1.11, (vi)` で `Base(α)` も FSM | 道具あり |
-| 6 | `𝒟` が FSMFF 型 ⟹ 従属する FSMI 射 | ★**未実装**(`IsOfFSMFFType` の (a) を使う) |
-| 7 | mid-adjoint の仮定と矛盾 ⟹ `α` は同型 | 道具あり |
+| 5–7 | `Base(α)` も FSM ⟹ FSMFF 型 ⟹ 従属 FSMI 射 ⟹ mid-adjoint と矛盾 | ★**実装した**(`prop_1_14_ii_alpha_isIso`) |
 
 ★★**`sorry` は置かない**(`Found/` の規律)。
 -/
