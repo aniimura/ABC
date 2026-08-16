@@ -418,6 +418,26 @@ theorem otriFunctor_map_comm {A B : ElemFrobCat Φ} (φ : A ⟶ B)
           (Φ.map (ElemFrobCat.Hom.base φ) b)) : End A) ≫ φ :=
   otriOf_natural Φ hD hpd φ hφ b
 
+/-- ★★★**`Proposition 1.5, (ii)` の「natural, functorial **isomorphism**」の実体**。
+
+★**`otriEquiv` の族が `otriFunctor` と `Φ` の間の自然同型である**ことを、
+四角形の可換性として述べる。
+
+★★**構成上ほぼ自明である**（`otriFunctor.map` を `otriEquiv` による輸送で
+定義しているため）が、★**原文の「isomorphism」はこの四角形のことであり、
+述べておかなければ「対象ごとの同型がある」で止まる**。 -/
+theorem otriEquiv_naturality {X Y : Dᵒᵖ} (f : X ⟶ Y) (a : Φ.val X.unop) :
+    ((otriFunctor Φ hD hpd).map f).hom
+        ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)) (Multiplicative.ofAdd a))
+      = (otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ))
+          (Multiplicative.ofAdd (Φ.map f.unop a)) := by
+  show (otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ))
+      (AddMonoidHom.toMultiplicative (Φ.map f.unop)
+        ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)).symm
+          ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)) (Multiplicative.ofAdd a)))) = _
+  rw [(otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)).symm_apply_apply]
+  rfl
+
 /-! ## ★第2段 —— 射が pull-back ⟺ **linear isometry**
 
 原文 (FrdI p.27):
