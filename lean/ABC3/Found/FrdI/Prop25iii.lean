@@ -1218,7 +1218,7 @@ theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
     congr 1
     exact (congrArg (fun z : OTri P Y => ((z : End Y) : Y ⟶ Y)) hβ).symm
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**`Ψ` は Hom 集合の上で単射**(＝ 忠実)。
 
 ★★筋は `isPsiValue_unique` と同じ —— 2 つの `Ψ` 分解を `arbFactorUniq` ＋
@@ -1237,8 +1237,8 @@ theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
     show IsIso (P.Base _)
     rw [show P.Base (((z : End Y)) : Y ⟶ Y) = P.Base (𝟙 Y) from z.2.1, P.Base_id]
     infer_instance
-  have hcoa : ∀ {Z W : C} (f : Z ⟶ W), IsCoAngular P f :=
-    fun f => prop_1_4_i P f (fun Z _ => hiso Z)
+  have hcoaE : ∀ (Z : C) (z : OTri P Z), IsCoAngular P (((z : End Z)) : Z ⟶ Z) :=
+    fun Z z => isCoAngular_of_endo P F _
   -- ★手 1: `arbFactorUniq`
   have hps₁ : IsPreStep P (γ₁ ≫ (((psiOTri P F hτ d ⟨β₁, hm₁⟩ :
       OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁)) := IsPreStep.comp P hγs₁ (hpre Y₁ _)
@@ -1259,10 +1259,10 @@ theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
     rw [hβe]; simp only [Category.assoc]
   obtain ⟨g, hga, hgb⟩ :=
     F.preStepFactorUniq' Y₂ Y₁ γ₂ _ (eX.inv ≫ γ₁) _ hsplit
-      hγi₂ hγs₂ (hcoa _) (hpre Y₂ _)
+      hγi₂ hγs₂ (hcoaE Y₂ _) (hpre Y₂ _)
       (by simpa using IsIsometric.comp P (isIsometric_of_isIso P eX.inv) hγi₁)
       (IsPreStep.comp P (isPreStep_of_isIso P eX.inv) hγs₁)
-      (hcoa _)
+      (F.coAngularComp _ eY.hom (hcoaE Y₁ _) (isCoAngular_of_isIso P eY.hom))
       (IsPreStep.comp P (hpre Y₁ _) (isPreStep_of_isIso P eY.hom))
   have hbΨ : (((psiOTri P F hτ d ⟨β₂, hm₂⟩ : OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂)
       = g.hom ≫ (((psiOTri P F hτ d ⟨β₁, hm₁⟩ :
@@ -1325,7 +1325,7 @@ variable (hft : ∀ X : C, IsFrobeniusTrivial P X)
 theorem psiFunctorCd_faithful (d : ℕ+) :
     (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Faithful where
   map_injective {_ _ f g} h :=
-    psiMap_injective P F hτ hiso hmt haa hfn d
+    psiMap_injective P F hτ hmt haa hfn d
       (congrArg InducedWideCategory.Hom.hom h)
 
 theorem psiFunctorCd_full (G : Frobenioid P) (d : ℕ+) :
