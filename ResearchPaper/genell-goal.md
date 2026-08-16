@@ -686,3 +686,65 @@ sorry 無し・公理依存ゼロのまま `0 = 1` まで証明できる**。
 
 ★残るのは (a) 有限段の帰納法をこれらで組むこと、(b) `ℤ_l` の位相で閉包を取ること。
 **(b) が「位相が要る最後の 1 歩」**である(§9 の切り分けを参照)。
+
+## 9-4. ★★`Lemma 3.1` 完成の記録と、S2 の分解(2026-08-17)
+
+### ★4/24 —— 2 理論なしで届く上限に到達した
+
+```
+★ゴール進捗: [GenEll] の必要分 4 / 24 件 (17%)
+  §3   2/ 9  ██·······     §4   2/ 5  ██···
+```
+
+| 項目 | 実装 | 実測して分かったこと |
+|---|---|---|
+| `Lemma 3.1` | `Lemma31.lean` ＋ `Sl2Level.lean` ＋ `Sl2Padic.lean` | ★(iv) の [Serre] Ch IV §3.4 Lemma 3 は `0_Source` に無く mathlib にも無い——**自分で証明した**(1094 行) |
+| `Lemma 3.6` | `Elementary.lean` | ★原文は極限で片づけるが**極限では定数が出ない**。`C₀ ≝ ((1+ϵ)/ϵ)^{1+ϵ}` を明示構成 |
+| `Lemma 4.1` | `PrimesOfSize.lean` | ★原文末尾の WLOG を、`θ` を `ℝ′_{>0}` から `ℝ_{>0}` へ延ばして**消した** |
+| `Lemma 4.2` | `Elementary.lean` | ★`H+1 ≤ 2^H` で原文より強い中間評価(主張は原文どおり) |
+
+### ★副次的に得たもの(いずれも mathlib に無い)
+
+| 宣言 | 内容 |
+|---|---|
+| `sl2_commutator_eq_top` | ★**`SL₂(𝔽_l)` は完全群**(`l ≥ 5`)。`layer0-triage.md` が「群の完全性は mathlib に無い」と記録していたもの |
+| `subgroup_eq_top_of_redPow_surj` | `SL₂(ℤ/l^n)` の合同部分群論(**位相不要**、813 行) |
+| `sl2_padic_eq_top_of_isClosed` | [Serre] Ch IV §3.4 Lemma 3 の `SL₂` 版 |
+| `sum_adU_eq_zero` | `Σ_{i<l^n} Ad(u^i) = 0` on `𝔰𝔩₂(𝔽_l)`——★演算子環(非可換)を避けて**成分で**取った |
+
+### ★★残り 20 件は 1 件も 2 理論を迂回できない(再確認)
+
+| 節 | 残り | 律速 |
+|---|---:|---|
+| §1 | 9 | ★**Arakelov**——`APic(X)`(算術直線束)と `X^arc`(複素解析空間) |
+| §2 | 1 | Arakelov ＋ **Belyi** |
+| §3 | 7 | **Tate 曲線**・**Faltings 高さ**(= Arakelov) |
+| §4 | 3 | 上の全部(`Theorem 3.8` 経由) |
+
+★例外は `Remark 4.1.1` の 1 件で、これだけは別種の壁——**素数定理**である
+(mathlib の `Chebyshev.lean` は Chebyshev 型の評価を持つが `θ(x)/x → 1` は無い)。
+公開プロジェクト `PrimeNumberTheoremAnd` が持つが、
+★**使う前に clone して `sorry` を数えること**(`lean-ecosystem.json` の規律)。まだ測っていない。
+
+### ★★S2(12/24)に何が要るか —— 分解して測った
+
+S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない」。
+`Interface/GenEll/HeightTheory.lean` の `waiting` が名指ししているものを分解する:
+
+| # | 作るもの | mathlib | 依存 |
+|---|---|---|---|
+| A1 | **差積イデアル → 算術因子** `δ_F ∈ ADiv(F)` | ★`IsDedekindDomain.differentIdeal` が**ある** | `ADiv`(実装済み) |
+| A2 | Cartier 因子の `Spec(O_F)` への引き戻し | scheme 論はあるが算術因子との橋は無い | scheme |
+| A3 | **複素解析空間** `X^arc` とエルミート計量 | ★**0 件** | 複素解析 ＋ GAGA |
+| A4 | **算術直線束** `APic(X)` | ★**0 件** | A3 |
+| A5 | 高さ `ht_L̄` と `Proposition 1.4` | ★**0 件** | A4 |
+
+★★**A1 だけが今すぐ取れる**——mathlib の `differentIdeal` と我々の `ADiv` が既にあるからである。
+★A3 は**複素解析空間の理論そのもの**であり、mathlib に着手の形跡が無い(2026-08-16 実測)。
+**S2 はこの 1 点で律速される。**
+
+### ★この文書の役目(再掲)
+
+★**「まだ 4/24」と「もう 4/24」の両方が同じ数で言える**ようにしてある。
+`node tools/genell-progress.mjs` はいつでもその数を出し、
+`node tools/check.mjs` は `Interface` の `waiting` が何を待っているかを並べる。
