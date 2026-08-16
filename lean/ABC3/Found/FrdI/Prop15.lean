@@ -410,12 +410,23 @@ theorem otriOf_natural {A B : ElemFrobCat Φ} (φ : A ⟶ B)
 ★**その推移が「`α ◦ φ = φ ◦ β`」という圧の式で決まる**ことは自明でない。
 
 ★原文の「functorial」が linear の範囲であるのは、まさにこの式が
-linear でないと崩れるからである（`otriOf_comm_iff` の `deg_Fr` の項）。 -/
+linear でないと崩れるからである（`otriOf_comm_iff` の `deg_Fr` の項）。
+
+★★**2026-08-16 に述べ直した**。以前の形は右辺を `otriEquiv` だけで書いており、
+★**`otriFunctor` に一度も触れていなかった** —— つまり `otriOf_natural` の
+綴り替えに留まり、「関手の推移が可換関係で決まる」を述べていなかった
+（検証役の監査で発見された）。★いま `(otriFunctor).map (Base φ).op` を
+主語に据えたので、**関手のほうが可換関係で決まる**という主張になっている。
+
+★向きについて: `otriFunctor : 𝒟ᵒᵖ ⥤ MonCat` なので、`Base φ : A_𝒟 ⟶ B_𝒟` に
+対応する射は `(Base φ).op : op B_𝒟 ⟶ op A_𝒟` であり、
+`map` は `𝒪^▷(B) → 𝒪^▷(A)` を与える —— 圧が `φ` に沿って**戻る**向きである。 -/
 theorem otriFunctor_map_comm {A B : ElemFrobCat Φ} (φ : A ⟶ B)
     (hφ : IsLinear (elemPreFrobenioid Φ hD hpd) φ) (b : Φ.val B.base) :
-    (φ ≫ otriOf Φ B b : A ⟶ B)
-      = ((otriEquiv Φ hD hpd A) (Multiplicative.ofAdd
-          (Φ.map (ElemFrobCat.Hom.base φ) b)) : End A) ≫ φ :=
+    (φ ≫ ((otriEquiv Φ hD hpd B (Multiplicative.ofAdd b) : OTri _ B) : End B) : A ⟶ B)
+      = (Subtype.val (((otriFunctor Φ hD hpd).map (ElemFrobCat.Hom.base φ).op).hom
+          (otriEquiv Φ hD hpd (⟨B.base⟩ : ElemFrobCat Φ) (Multiplicative.ofAdd b)))
+          : End A) ≫ φ :=
   otriOf_natural Φ hD hpd φ hφ b
 
 /-- ★★★**`Proposition 1.5, (ii)` の「natural, functorial **isomorphism**」の実体**。
@@ -1514,7 +1525,20 @@ theorem elemFrob_isFrobenioid : Frobenioid (elemPreFrobenioid Φ hD hpd) := by
   `elemFrob_baseTrivial` / `elemFrob_frobeniusTrivial` /
   `elemFrob_frobeniusNormalized` / `elemFrob_isotropic`)
 * **(ii)**: `otriEquiv`(モノイド同型)＋ `otriOf_mem_otimes`(`𝒪^×` ↔ `Φ(A)^±`)
+  ＋ `otriFunctor`(関手)＋ `otriEquiv_naturality`(自然性の四角形)
+  ＋ `otriFunctor_map_comm`(★**推移が可換関係で決まる** —— 内容のある部分)
 * **(iii)**: `elemFrob_perfect` / `elemFrob_groupLike`
+
+★★**条なしの `.src` を付ける根拠**(2026-08-16)。
+
+★検証役の監査で (ii) が 2 度差し戻された。1 度目は「対象ごとの同型しかなく、
+`natural, functorial` を述べていない」、2 度目は
+「`otriFunctor_map_comm` が `otriFunctor` に触れておらず、
+`otriOf_natural` の綴り替えに留まる」。★**2 度目は正しい指摘であった** ——
+`otriFunctor` は輸送で**定義**されているので関手則も自然性も構成上自明であり、
+内容を与えるのは可換関係との接続だけだからである。
+★いま `(otriFunctor).map (Base φ).op` を主語に据えて述べ直したので、
+**関手・自然同型・可換関係による決定**の 3 つが揃った。
 -/
 
 def elemFrob_isFrobenioid.src : ABC3.Meta.Source :=
@@ -1528,5 +1552,10 @@ def otriEquiv.src : ABC3.Meta.Source :=
 def elemFrob_perfect.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 27, item := "Proposition 1.5, (iii)",
     sectionId := "frdi-prop-1-5-iii" }
+
+/-- ★★★**`Proposition 1.5` 全体**。(i)(ii)(iii) がすべて実装された。 -/
+def prop_1_5.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 27, item := "Proposition 1.5",
+    sectionId := "frdi-prop-1-5-i" }
 
 end ABC3.Found.FrdI

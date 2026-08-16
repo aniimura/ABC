@@ -877,4 +877,27 @@ def PreFrobenioid.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 20, item := "Definition 1.1, (iv) — pre-Frobenioid structure",
     sectionId := "frdi-def-1-1-iv" }
 
+/-! ### ★★★`Definition 1.1` 全体(条なしの `.src`)
+
+★条なしの `.src` は「その原典項目を**完全に**実装した」という主張である。
+`Definition 1.1` は (i)〜(iv) の 18 項目がすべて実装されたので、ここで付ける。
+
+* **(i)** 単元・可換性の語彙: `IsPreDivisorial` / `IsDivisorial` / `IsGroupLike` /
+  `isDivisorial_mChar` / `IsNonDilating`
+* **(ii)** `𝒟` 上の単系: `MonoidOn` / `charOn` / `gpOn` / `pfOn` / `IsNonDilatingOn`
+* **(iii)** `𝔽_Φ` と `𝔽_M`: `ElemFrobCat` / `proj` / `elemFrobMap` ＋ 関手則 2 本
+  (`elemFrobMap_id` / `elemFrobMap_comp`) / `ElemFrob` / `Standard` /
+  `constPhi` / `constObj` / `constEndEquiv`
+* **(iv)** `PreFrobenioid` / `PreFrobenioid.divisorFunctor`
+
+★★**最後に埋まったのは (iii) の `Φ ↦ 𝔽_Φ` の関手性**である。
+`elemFrobMap_id` / `elemFrobMap_comp` は結局 `rfl` で通った ——
+恒等側は射の構造体の eta、合成側は関手圏の合成が成分ごとであることによる。
+★「`rfl` で通るから中身が無い」ではない: `ElemFrobCat Φ` は一般に
+subsingleton ではなく、文そのものは原文が要求する関手則である
+(検証役の監査で確認した)。 -/
+def definition_1_1.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19, item := "Definition 1.1",
+    sectionId := "frdi-def-1-1-i" }
+
 end ABC3.Found.FrdI
