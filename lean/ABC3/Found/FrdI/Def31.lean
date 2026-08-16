@@ -20,10 +20,10 @@ import ABC3.Found.FrdI.Prop110
 | (i) | 3 | `Frobenius-slim` な圏 | ★**ここで実装** |
 | (ii) | 4 | `𝒞^Fr-tp` / `𝒞^bi-Fr` と `Hom^pf_𝒞(A,B)`(**帰納極限**) | 未 |
 | (iii) | 5 | `𝒞^pf`(Frobenioid の**完備化**)と `𝒞 → 𝒞^pf` | 未 |
-| (iv) | 6 | `unit-equivalent` と `Hom^un-tr` | 未(`Proposition 3.3, (ii)` を前方参照する) |
+| (iv) | 6 | `unit-equivalent` と `Hom^un-tr` | ★**関係の定義はここ**。`Hom^un-tr` は `Proposition 3.3, (ii)` 待ち |
 | (iv) | 7 | `𝒞^un-tr` | 未 |
 
-★**(ii)(iii)(iv) が入るまで `.src` は付けない。**
+★**(ii)(iii) と (iv) の `Hom^un-tr` / `ᶜ^un-tr` が入るまで `.src` は付けない。**
 
 ## ★`Frobenius-slim` の `F` について
 
@@ -113,5 +113,34 @@ structure IsOfStandardType (F : FrobenioidCore P) : Prop where
   baseFSMFF : IsOfFSMFFType D
   /-- **(e)** `Φ` が non-dilating。 -/
   phiNonDilating : MonoidOn.IsNonDilatingOn Φ
+
+/-! ## ★(iv) —— `unit-equivalent`
+
+原文 (FrdI p.57):
+> unit-equivalent if there exist morphisms
+
+★**`α₁ = β ∘ γ`、`α₂ = β ∘ δ ∘ γ`** —— Lean の `≫` では
+`α₁ = γ ≫ β`、`α₂ = γ ≫ δ ≫ β`。
+
+★★**同値関係であることと合成で閉じることは `Proposition 3.3, (ii)` が与える**
+(原文が明示的に前方参照している)。ここでは関係の定義だけを置く。
+-/
+
+/-- ★★★**[FrdI] Definition 3.1, (iv)** —— `𝒞^istr` の co-objective な 2 射が
+**unit-equivalent** であること。
+
+★中間対象 `Cc` と `γ : A ⟶ Cc`、`β : Cc ⟶ B`、`δ ∈ 𝒪^×(Cc)` があって
+`α₁ = γ ≫ β`、`α₂ = γ ≫ δ ≫ β` となること。 -/
+def IsUnitEquivalent {A B : C} (α₁ α₂ : A ⟶ B) : Prop :=
+  ∃ (Cc : C) (γ : A ⟶ Cc) (β : Cc ⟶ B) (δ : End Cc), δ ∈ OTimes P Cc ∧
+    α₁ = γ ≫ β ∧ α₂ = γ ≫ ((δ : Cc ⟶ Cc)) ≫ β
+
+/-- ★**反射的** —— `δ = 1` を取ればよい。 -/
+theorem isUnitEquivalent_refl {A B : C} (α : A ⟶ B) : IsUnitEquivalent P α α :=
+  ⟨A, 𝟙 A, α, 1, (OTimes P A).one_mem, by simp, by simp⟩
+
+/-- ★**単元は `𝒪^×` の元** —— `unit-equivalent` の `δ` は同型。 -/
+theorem isIso_of_mem_otimes {Cc : C} {δ : End Cc} (h : δ ∈ OTimes P Cc) :
+    IsIso ((δ : Cc ⟶ Cc)) := (CategoryTheory.isUnit_iff_isIso _).mp h.2
 
 end ABC3.Found.FrdI
