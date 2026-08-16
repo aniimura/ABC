@@ -250,25 +250,45 @@ theorem otriOf_mem_otimes (A : ElemFrobCat Φ) (a : Φ.val A.base) :
     exact (isUnit_iff_isIso _).mpr
       ((ElemFrobCat.isIso_iff _).mpr ⟨by simp only [otriOf_base]; infer_instance, hu, rfl⟩)
 
-/-! ### ★★(ii) の「functorial」を関手の同型として述べる —— 設計の測定（2026-08-16）
+/-! ### ★★(ii) の「functorial」を関手の同型として述べる（2026-08-16）
 
-★検証役の監査によれば、候補は 2 つある。
+★検証役の監査が示した 2 候補のうち、★**`Dᵒᵖ ⥤ Mon`（`Proposition 2.2` の形）**を採る。
 
-| 形 | 原文のどこに対応するか | 問題 |
-|---|---|---|
-| `Dᵒᵖ ⥤ Mon` | `Proposition 2.2`（原文が実際に関手を作る場所） | ★推移写像を `Φ.map (Base φ)` で**定義**するので、非自明さが `otriOf_natural` に移る |
-| `Linᵒᵖ ⥤ Mon` | `Proposition 1.11, (iv)` に最も近い | ★★**依存順で使えない**（下記） |
+★★**推移写像を `Φ.map (Base φ)` で定義する**ので、
+関手則は `MonoidOn.map_id` / `map_comp` から直ちに出る。
+★**非自明さは `otriOf_natural`（この推移が可換関係と一致すること）に移る** ——
+そちらは既にある。
 
-★★**依存順の制約を見つけた**: `Lin`（`linProp` の `WideSubcategory`）は
-`Prop111.lean:410` にある。しかし `Prop111` は `Prop110 → Prop19 → … → Prop15` と
-このファイルを**下流に持つ**ので、★**`Prop15` から `Lin` は参照できない**。
+★`𝔽_Φ` の対象は `𝒟` の対象そのものなので、`Dᵒᵖ` で添字できる。 -/
 
-★**採るなら `linProp` / `Lin` を `MorphismTypes.lean` へ移す必要がある**。
-★本日 `𝒞^bs-iso` を `Prop17` に置いたが、★★**部分圧の置き場所は
-`Definition 1.2, (iv)` の実装場所（`MorphismTypes.lean`）に揃えるのが筋である** ——
-現状は `Lin` が `Prop111`、`BsIso` が `Prop17`、`PlBk` が `Frobenioid` と散っている。
+/-- ★★**`𝒪^▷(−)` を関手として組む** —— `Proposition 1.5, (ii)` の「functorial」。 -/
+noncomputable def otriFunctor : Dᵒᵖ ⥤ MonCat.{max v w} where
+  obj X := MonCat.of (OTri (elemPreFrobenioid Φ hD hpd) (⟨X.unop⟩ : ElemFrobCat Φ))
+  map {X Y} f := MonCat.ofHom
+    (((otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ)).toMonoidHom).comp
+      ((AddMonoidHom.toMultiplicative (Φ.map f.unop)).comp
+        ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)).symm.toMonoidHom)))
+  map_id X := by
+    refine MonCat.ext (fun x => ?_)
+    show (otriEquiv Φ hD hpd _) (AddMonoidHom.toMultiplicative (Φ.map (𝟙 X.unop))
+      ((otriEquiv Φ hD hpd _).symm x)) = x
+    simp only [AddMonoidHom.toMultiplicative_apply_apply, Φ.map_id]
+    exact (otriEquiv Φ hD hpd _).apply_symm_apply x
+  map_comp {X Y Z} f g := by
+    refine MonCat.ext (fun x => ?_)
+    show (otriEquiv Φ hD hpd (⟨Z.unop⟩ : ElemFrobCat Φ)) (AddMonoidHom.toMultiplicative
+      (Φ.map (g.unop ≫ f.unop))
+      ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)).symm x)) = _
+    simp only [AddMonoidHom.toMultiplicative_apply_apply, Φ.map_comp]
+    show _ = (otriEquiv Φ hD hpd (⟨Z.unop⟩ : ElemFrobCat Φ))
+      (AddMonoidHom.toMultiplicative (Φ.map g.unop)
+        ((otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ)).symm
+          ((otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ))
+            (AddMonoidHom.toMultiplicative (Φ.map f.unop)
+              ((otriEquiv Φ hD hpd (⟨X.unop⟩ : ElemFrobCat Φ)).symm x)))))
+    rw [(otriEquiv Φ hD hpd (⟨Y.unop⟩ : ElemFrobCat Φ)).symm_apply_apply]
+    rfl
 
-★**まだ試していない**。★これが `Proposition 1.5` に残る唯一の項目である。 -/
 
 /-- ★★**原文の「[so O×(A) ∼→Φ(A)±]」**（2026-08-16 追加）。
 
