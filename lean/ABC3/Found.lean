@@ -9,6 +9,7 @@ import ABC3.Found.FrdI.CategoryAnchor
 import ABC3.Found.FrdI.Def31
 import ABC3.Found.FrdI.Prop33
 import ABC3.Found.FrdI.UnTr
+import ABC3.Found.FrdI.Example310
 import ABC3.Found.FrdI.Remark311
 import ABC3.Found.FrdI.Remark312
 import ABC3.Found.FrdI.CategoryVocabulary
