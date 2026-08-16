@@ -2104,6 +2104,27 @@ theorem prop_1_10_iv_unbounded (F : FrobenioidCore P) {A : C} (hA : IsIsotropic 
     simp
 
 include P in
+/-- ★★**共役は `𝒪^×` を保つ**（2026-08-16 追加）。
+
+★`Definition 1.2, (iv)` の `Frobenius-compact` の第3節で
+`Aut_𝒞(C)` の `𝒪^×(C)` への作用を書くのに要る。
+
+★**3 成分とも `Base` / `degFr` の関手性と同型の linear 性から出る**。 -/
+theorem endConj_mem_otimes {A B : C} (θ : A ≅ B) {f : End A} (hf : f ∈ OTimes P A) :
+    endConj θ f ∈ OTimes P B := by
+  refine ⟨⟨?_, ?_⟩, IsUnit.map (endConj θ) hf.2⟩
+  · show P.Base (θ.inv ≫ (f : A ⟶ A) ≫ θ.hom) = P.Base (𝟙 B)
+    rw [P.Base_comp, P.Base_comp,
+      show P.Base (f : A ⟶ A) = P.Base (𝟙 A) from hf.1.1,
+      P.Base_id, Category.id_comp, ← P.Base_comp, θ.inv_hom_id]
+  · show P.degFr (θ.inv ≫ (f : A ⟶ A) ≫ θ.hom) = 1
+    rw [P.degFr_comp, P.degFr_comp,
+      show P.degFr (f : A ⟶ A) = 1 from hf.1.2,
+      show P.degFr θ.hom = 1 from isLinear_of_isIso P θ.hom,
+      show P.degFr θ.inv = 1 from isLinear_of_isIso P θ.inv]
+    simp
+
+include P in
 /-- ★★**`IsFrobeniusTrivial` は同型に沿って移る**。
 
 ★原文の「so A is Frobenius-trivial」の中身。 -/
