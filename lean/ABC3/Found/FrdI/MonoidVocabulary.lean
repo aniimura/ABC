@@ -1,4 +1,5 @@
 import Mathlib.GroupTheory.MonoidLocalization.Basic
+import Mathlib.GroupTheory.MonoidLocalization.GrothendieckGroup
 import Mathlib.GroupTheory.Subgroup.Saturated
 import Mathlib.Data.ENat.Basic
 import Mathlib.Algebra.Order.Group.Nat
@@ -700,10 +701,10 @@ def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n 
 
 | 項目 | 状態 |
 |---|---|
-| 関手 `A ↦ Gp (Φ.val A)` | ★**写像は `AddGrothendieckGroup.lift` で作れる**（mathlib）。`Gp.map f := lift (of.comp f)` |
+| 関手 `A ↦ Gp (Φ.val A)` | ★**写像は `GrothendieckAddGroup.lift` で作れる**（mathlib）。`gpMap f := lift (of.comp f)` |
 | 条件 (a) の第2成分（`charMap` の単射性） | ★**無料**。`charMap_injective_of_addGroup`（下） |
-| 条件 (a) の第1成分（`Gp.map f` の単射性） | ★**未実装**。下の見通しを見よ |
-| 条件 (b)（FSM で全単射） | `f` が全単射なら `Gp.map f` も全単射（未実装だが形式的） |
+| 条件 (a) の第1成分（`gpMap f` の単射性） | ★**未実装**。下の見通しを見よ |
+| 条件 (b)（FSM で全単射） | `f` が全単射なら `gpMap f` も全単射（未実装だが形式的） |
 
 ★★**第1成分の見通し**: `mk (f a) (f b) = mk (f a') (f b')` は
 `∃ d ∈ N, f a + f b' + d = f a' + f b + d` である。
@@ -717,6 +718,22 @@ def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n 
 ★**`Φ^pf` のほうは違う** —— `Pf M` は群ではないので
 条件 (a) の第2成分が無料にならず、`MChar (Pf M)` の記述が要る。
 ★第1成分は `Pf.map_injective` で既にある。 -/
+
+/-- ★**`M^gp` の関手性** —— mathlib の `GrothendieckAddGroup.lift` で作る。
+
+★`Gp N` は群なので、`M →+ Gp N` が `Gp M →+ Gp N` に一意に持ち上がる。 -/
+noncomputable def gpMap {N : Type*} [AddCommMonoid N] (f : M →+ N) : Gp M →+ Gp N :=
+  Algebra.GrothendieckAddGroup.lift ((Algebra.GrothendieckAddGroup.of).comp f)
+
+/-! ★**`gpMap` の定義式（`gpMap f (toGp m) = toGp (f m)`）は未実装**。
+
+★`Algebra.GrothendieckAddGroup.lift` は `Equiv` で、`left_inv` から
+`lift (of.comp f) ∘ of = of ∘ f` が出るはずだが、
+★**`toGp m = mk m 0` と `of m` を結ぶ一段が `simp` で閉じなかった**。
+★**次に当たるときの手**: `Submonoid.LocalizationMap.lift_mk'` 系の
+補題を探して `lift` を `mk` に直接適用する形で書く。
+
+★**型は通っている（`gpMap` は定義済み）**ので、残るのは性質だけである。 -/
 
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
