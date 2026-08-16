@@ -24,6 +24,13 @@
    "reason": "★★**2026-08-17 に一度書いた判断を同日中に訂正した記録である。**\n\n【誤った判断(取り消し)】「`grep -rln Cartier Mathlib/` が 0 件。ゆえに `Definition 1.5, (iv)` / `Proposition 1.6` / `1.7` / `Definition 3.3` / `Corollary 4.3` / `4.4` はすべてこの 1 点で止まる。『重い』のではなく『底が抜けている』。」\n\n【訂正】`Cartier` という**名前**が 0 件なのは事実である。しかし原文が要求している**中身**——因子を `x_F : Spec(𝓞_F) → X` で引き戻すこと——は `AlgebraicGeometry.Scheme.IdealSheafData.comap` + `Scheme.IdealSheafData.equivOfIsAffine` + `Scheme.ΓSpecIso` の 3 つで**そのまま届く**。実際 `Found/GenEll/CartierPullback.lean` がその 3 つだけで `f_x^D` と `log-cond` を構成した(sorry 0、負の対照 `logCond_top` つき)。★**名前で測って「無い」と結論したのが誤りの型である。**\n\n【現在の真の障害】残っているのは `Proposition 1.6` の**右辺**、すなわち「**高さ** `ht_L(x)`」の側である。それには `X` 上の**算術直線束**(`Definition 1.1`)が要り、そちらは `X^arc`(コンパクト正規複素解析空間)上のエルミート計量を要求するので依然として届かない。★本ファイルの `[GenEll] Definition 1.1` の項目を見ること——**塞がっているのはそこ 1 点であって、Cartier 因子ではない。**",
    "unblockedBy": "★`Definition 1.1`(算術直線束)と同じ——**複素解析空間の理論**。`Proposition 1.6` の左辺(導手)側は 2026-08-17 に実装済み。",
    "★halfSolved": "`Found/GenEll/CartierPullback.lean`(2026-08-17): `IsEffectiveCartier` / `pullbackIdeal`(= `D_x`)/ `conductorADiv`(= `f_x^D ≝ (D_x)_red`)/ `logCond` / `logCond_le_degNormalized_pullback`(導手 ≤ 引き戻した因子の次数)。★★**`Proposition 1.6` の「手前の段」までは取れている。** 残るのは高さとの接続だけである。"
+  },
+  {
+   "key": "[GenEll] Definition 1.5, (ii) —— 「E_red も有効 Cartier 因子である」",
+   "reason": "原文(物理 p.8)は『正規ネーター scheme `Z` の**正則部分**に含まれる有効 Cartier 因子 `E` について、`E_red` もまた有効 Cartier 因子である』と言う。★数学的な中身は **正則局所環は UFD である(Auslander–Buchsbaum)** に帰着する——UFD なら主イデアルの根基は(相異なる素因子の積で生成される)主イデアルだからである。★★**mathlib 実測 2026-08-17: Auslander–Buchsbaum は 0 件。** `IsRegularLocalRing` は `RingTheory/RegularLocalRing/Defs.lean` **1 ファイルだけ**にあり、中身は定義と基本補題(`isRegularLocalRing_iff` / `of_ringEquiv` / `iff_finrank_cotangentSpace` / PID なら正則 / Dedekind なら正則)のみ。**『正則局所環は UFD』も『高さ 1 素イデアルは主』も無い。**",
+   "unblockedBy": "★**Auslander–Buchsbaum の定理**(正則局所環 ⇒ UFD)。ホモロジー代数(有限自由分解、`Ext`、深さ)を要し、mathlib には着手の形跡が無い。",
+   "★皮肉": "★★**`Definition 1.5` の 4 条のうち、(i)(iii)(iv) は 2026-08-17 に実装できたのに、いちばん素朴に見える (ii) だけが残った。** (i) は `Scheme.SpecToEquivOfField` で、(iv) は `IdealSheafData.comap` で、いずれも mathlib の既製品 1 個で届いた。★『難しそうな順』と『実際に詰まる順』は一致しない——これは本プロジェクトで繰り返し出ている型である。",
+   "★halfSolved": "算術因子の水準での被約化(`Found/GenEll/Conductor.lean` の `ADivRed` / `adivRed_idem` / `adivRed_isEffective` / `deg_adivRed_le`)は実装済みで、**`Proposition 1.6` の非アルキメデス側にはそれで足りている**。足りていないのは『scheme の上で `E_red` が Cartier である』という一般論の側だけである。★★**ゆえに `Definition 1.5` には条なしの `.src` を付けない**(付ければ `genell-progress` が 4→5 に動くが、それは過剰主張である)。"
   }
  ],
  "expandableWithWork": [

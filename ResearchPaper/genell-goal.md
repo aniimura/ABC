@@ -879,3 +879,74 @@ S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない�
 | `Proposition 1.7` の証明の核(局所体の分岐＋Kummer) | ★局所体の差積イデアルの整備。`ClassFieldTheory` は該当箇所に sorry 11 件(2026-08-14 実測) |
 | `Definition 1.5, (iv)` の引き戻し | scheme 論 |
 | `Proposition 1.4, (iv)` の一般次数版 | 数え上げ(`ℚ` の場合は済) |
+
+## §9-7 2026-08-17 —— `§1` の底を 4 箇所測り直した(3 箇所で自分の判断が誤っていた)
+
+★本日の作業は「基礎理論の構築を続ける」というユーザの選択に従ったものである。
+**`genell-progress` は 4/24 のまま動いていない**——それは想定どおりで、
+本節が記録するのは**指標ではなく地図の訂正**である。
+
+### 取ったもの(すべて `Found/`、sorry 0、`#print axioms` は標準 3 つのみ)
+
+| ファイル | 中身 |
+|---|---|
+| `FinitePlaceRel.lean` | `hosComap`(素点の引き戻し)/ `hosFiber` / **`Σ_{w\|v} e·f = [K:F]`** |
+| `BaseChange.lean` | `baseChange : ADiv F → ADiv K` / **`degNormalized` の底変換不変性** |
+| `LogDiffTower.lean` | **`log-diff(F) ≤ log-diff(K)`**(= 原文が "minimal" と書く理由) |
+| `CartierPullback.lean` | `IsEffectiveCartier` / `pullbackIdeal` / `conductorADiv` / **`log-cond`** |
+| `MinField.lean` | **`F_min`** と**極小性**(`minField_le_of_factors`) |
+
+### ★★自分の判断が誤っていた 3 箇所
+
+1. **「`Cartier` が mathlib に 0 件 ⟹ 底が抜けている」は誤り。**
+   名前は確かに 0 件だが、中身(因子の引き戻し)は
+   `IdealSheafData.comap` + `equivOfIsAffine` + `ΓSpecIso` で**そのまま届いた**。
+   ★**名前で測って「無い」と結論したのが誤りの型である。**
+   同日中に `blocked-leaves.json` を書き換えて取り消した。
+
+2. **`Definition 1.5, (i)` に scheme 論的像の理論は要らなかった。**
+   `Scheme.SpecToEquivOfField : (Spec K ⟶ X) ≃ Σ x, (κ(x) ⟶ K)` が
+   mathlib に**ある**ので、構成と分解が同時に手に入り、
+   極小性は**単射性を 1 回**使うだけで出た。
+
+3. **`degNormalized` の不変性は「`Interface` の仮説」ではなく定理にできた。**
+   `ArithDiv.lean` は「不変性そのものは本ファイルでは示していない」と
+   書いたままだった。有限側(基本等式)と無限側(相対次数和)を
+   別々に組んで、`ADiv` の層では定理になった。
+   ★★**ただし `X` 上の直線束の高さの不変性は別物**で、
+   `Interface/GenEll/ArithLineBundle.lean` の `base_change_invariant` は
+   **消えていない**。混同しない。
+
+### ★★★止まったのは、いちばん素朴に見えた条だった
+
+`Definition 1.5` は (i)(ii)(iii)(iv) の 4 条。本日 (i)(iii)(iv) が揃った。
+**残ったのは (ii)** ——「正規ネーター scheme の正則部分に含まれる有効 Cartier 因子 `E`
+について `E_red` もまた有効 Cartier 因子である」。
+
+★中身は **Auslander–Buchsbaum(正則局所環は UFD)** に帰着する。
+★★**mathlib 実測: 0 件。** `IsRegularLocalRing` は `RegularLocalRing/Defs.lean`
+**1 ファイルだけ**で、定義と基本補題しかない。
+
+★★**したがって `Definition 1.5` には条なしの `.src` を付けない。**
+付ければ `genell-progress` は 4→5 に動くが、それは過剰主張である。
+(本日、同種の過剰主張を `deg_adivRed_le` で 1 度やって取り消している。)
+
+### ★「正面から解く必要は無かった」が 2 件増えた(累計 7 件)
+
+6. **因子の引き戻しに Cartier 因子の理論は要らなかった** —— `IdealSheafData.comap` で足りた。
+7. **`F_min` に scheme 論的像は要らなかった** —— `SpecToEquivOfField` で足りた。
+
+### ★§1 の「一枚岩ではない」表を更新
+
+| 箇所 | 状態(2026-08-17 夜) |
+|---|---|
+| `Definition 1.5, (i)` minimal field | ★**実装済み**(極小性つき) |
+| `Definition 1.5, (ii)` `E_red` が Cartier | ★**Auslander–Buchsbaum 待ち** |
+| `Definition 1.5, (iii)` log-diff | ★**実装済み**(値・tower・極小性の理由まで) |
+| `Definition 1.5, (iv)` log-cond | ★**実装済み**(負の対照 `logCond_top` つき) |
+| `degNormalized` の底変換不変性 | ★**実装済み** |
+| `Proposition 1.6` 非アルキメデス側 | ★**実装済み**(導手 ≤ 引き戻した因子の次数) |
+| `Proposition 1.6` の右辺(**高さ**) | ★`Definition 1.1` → `X^arc` 待ち |
+| `Definition 1.1` 算術直線束 | ★`X^arc`(複素解析空間)待ち |
+
+★★**§1 で残っている障害は 2 つだけになった: `X^arc` と Auslander–Buchsbaum。**
