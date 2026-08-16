@@ -194,6 +194,35 @@ theorem isCategoricalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B
       rw [← this]
       simp
 
+/-! ### ★★★段 5 の設計(測定済み・実装待ち)
+
+★残るのは **mono-minimal の移送**である。定義
+
+  `IsMonoMinimalQuotient G φ := ∀ A' ζ φ', Mono ζ → φ = ζ ≫ φ' →`
+  `  ∀ G' (e : G ≃* G'), (両立) → IsIso ζ`
+
+で **`G'` と `e` が全称量化**されているので、移送では **`C` 側の `G₀`・`e₀` を
+こちらが構成してよい**。これが要点である。
+
+**手順**:
+1. `A'' ≅ Ψ.obj A₀`(本質的全射性)、`ζ₀ := Ψ.preimage (ζ ≫ ε.inv)`、
+   `φ₀ := Ψ.preimage (ε.hom ≫ φ'')`。★`Mono ζ₀` は**忠実関手が mono を反射する**
+   ことから(`Ψ.map ζ₀ = ζ ≫ ε.inv` は mono ≫ 同型)
+2. `K : Aut A₀ ≃* Aut A''` を **`Ψ.mapAut A₀` と `ε.conjAut` の合成**として作る
+   (どちらも全単射 —— 前者は `mapAut_bijective`、後者は `Iso.conjAut`)
+3. `G₀ := G''.comap K`、`e₀ : G ≃* G₀` は
+   `G ≃* G.map (Ψ.mapAut A)`(単射)→ `e` → `K.symm` の制限、で作る
+4. 両立条件は `Ψ.map` で写して確かめる。★計算すると
+   `Ψ.map (e₀ γ).hom = ε.hom ≫ (e γ').hom ≫ ε.inv` なので、
+   両辺とも `ζ ≫ (e γ').hom ≫ ε.inv` に落ちる
+5. `h` を当てて `IsIso ζ₀` ⟹ `IsIso (Ψ.map ζ₀) = IsIso (ζ ≫ ε.inv)` ⟹ `IsIso ζ`
+
+★★これが済めば `IsIsoSubanchor` の移送が
+`isSubanchor_map` ＋ `isCategoricalQuotient_map` ＋ 本補題で組み上がり、
+★★★**`quasi-isotropic 型`の定義(`¬IsIsotropic ↔ IsIsoSubanchor`)から
+「`Ψ` は isotropic 対象を保つ」**——`Theorem 3.4, (i)` の第 1 歩——が出る。
+-/
+
 /-- ★**圏同値は subanchor を保つ**。 -/
 theorem isSubanchor_map {A : C} (h : IsSubanchor C A) : IsSubanchor D (Ψ.obj A) := by
   obtain ⟨B, φ, hB⟩ := h
