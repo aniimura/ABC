@@ -1,5 +1,6 @@
 import ABC3.Found.FrdI.Prop25
 import ABC3.Found.FrdI.Def24
+import ABC3.Found.FrdI.PlBkShuffle
 
 /-!
 # [FrdI] Proposition 2.5, (iii) へ向けた 4 重分解
