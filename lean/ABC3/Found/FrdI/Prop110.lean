@@ -2885,4 +2885,29 @@ def prop_1_10.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10",
     sectionId := "frdi-prop-1-10" }
 
+/-! ## ★★`base-trivial` な対象は `Frobenius-trivial`(2026-08-16 追加)
+
+★★**`Proposition 1.6, (v)` の `⟸` を証明する道の第 1 歩**である。
+`Gap_1_6_v` に不足しているのは `Aut-ample`(底を指定した同型の取り直し)だが、
+★**反例の設計が 2 度とも `Definition 1.3` に弾かれた**ので、
+★**「出ない」ではなく「出る」方を試す。**
+
+★中身は `Definition 1.3, (i), (a)` そのもの ——
+`𝒟` のどの同型類も **Frobenius-trivial な対象**から来るので、
+`base-trivial` はその対象を自分自身へ引き寄せる。
+
+★**道具は既にあった**(`isFrobeniusTrivial_of_iso`)—— 2026-08-16 に
+「無い」と思って書き直しかけたが、`grep` の出力を `head` で切っていただけだった。 -/
+
+include P in
+/-- ★★★**`base-trivial` な対象は `Frobenius-trivial`**。
+
+★`Definition 1.3, (i), (a)` が「底の同型類は Frobenius-trivial な対象から来る」と言い、
+`base-trivial` が「底が同型なら対象も同型」と言う。★**噛み合う。** -/
+theorem isFrobeniusTrivial_of_baseTrivial (F : FrobenioidCore P) {A : C}
+    (h : IsBaseTrivial P A) : IsFrobeniusTrivial P A := by
+  obtain ⟨A₀, hft, ⟨e⟩⟩ := F.baseSurj (P.toElem.obj A).base
+  obtain ⟨k⟩ := h A₀ ⟨e.symm⟩
+  exact isFrobeniusTrivial_of_iso P F k hft
+
 end ABC3.Found.FrdI
