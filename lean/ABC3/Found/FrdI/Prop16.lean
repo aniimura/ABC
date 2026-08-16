@@ -688,6 +688,56 @@ theorem cfp_isotropic_iff (A : CfpCat P G) :
       (h Dd'.obj.left (CfpCat.fst φ) ((cfp_isometric_iff P G hG hD' hcC hcD' φ).mp hi)
         ((cfp_preStep_iff P G hG hD' hcC hcD' φ hs.2).mp hs)) hs.2
 
+/-! ### ★★(c) の 2 件 —— **片向きだけ実装する**(2026-08-16)
+
+★`metrically trivial` / `base-trivial` は結論が `Nonempty (X ≅ A)` である。
+
+★★**`⟸`(`𝒞` で成り立つ ⟹ `𝒞'` で成り立つ)は出ない** ——
+`𝒞'` の同型を作るには四角形
+`A.hom ∘ Base f = G(g) ∘ Dd'.hom` を満たす `(f, g)` が要り、
+★**`f` の `Base` が 1 つに指定されてしまう。**
+`base-trivial` が与えるのは**ある**同型であって、底を指定した同型ではない。
+★**直すには `Aut-ample` 相当(または `G` の充満性)が要るが、`Proposition 1.6` の
+仮定は「FSM 射を FSM 射に送る関手」だけである。**
+
+★★**`⟹` は出る。** `𝒞` の対象 `Dd₀` を `A.obj.right` と組んで `𝒞'` の対象にし、
+`𝒞'` の主張を当てて `fst` を取ればよい ——
+★**この向きは「底を指定する」必要がない。**
+
+★★**原文が (vi) を「if」(片向き)としか書いていないことに注意** ——
+★**著者は (v) と (vi) で向きを書き分けている。**
+★**(v) の 2 件については、我々は片向きしか出せていない。**
+-/
+
+/-- ★**(v) の `metrically trivial`(★片向き)**。 -/
+theorem cfp_metricallyTrivial_mp (A : CfpCat P G)
+    (h : IsMetricallyTrivial (cfpPreFrobenioid P G hG hD' hcC hcD') A) :
+    IsMetricallyTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  intro Dd₀ φ₀ hc hs
+  haveI hφb : IsIso (P.proj.map φ₀) := hs.2
+  have hzi : IsIso (inv (P.proj.map φ₀) ≫ A.obj.hom) := inferInstance
+  obtain ⟨w⟩ := h ⟨⟨Dd₀, A.obj.right, inv (P.proj.map φ₀) ≫ A.obj.hom⟩, hzi⟩
+    (InducedCategory.homMk ⟨φ₀, 𝟙 _, by simp⟩)
+    ((cfp_coAngular_iff P G hG hD' hcC hcD' _).mpr hc)
+    ⟨hs.1, by show IsIso (𝟙 _); infer_instance⟩
+  haveI := cfp_isIso_fst P G w.hom inferInstance
+  exact ⟨asIso (CfpCat.fst w.hom)⟩
+
+/-- ★**(v) の `base-trivial`(★片向き)**。 -/
+theorem cfp_baseTrivial_mp (A : CfpCat P G)
+    (h : IsBaseTrivial (cfpPreFrobenioid P G hG hD' hcC hcD') A) :
+    IsBaseTrivial P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  intro Dd₀ hbi
+  obtain ⟨e⟩ := hbi
+  have hh : (P.toElem.obj Dd₀).base ≅ G.obj A.obj.right :=
+    e.symm ≪≫ (@asIso _ _ _ _ A.obj.hom hA)
+  obtain ⟨w⟩ := h ⟨⟨Dd₀, A.obj.right, hh.hom⟩, inferInstanceAs (IsIso hh.hom)⟩
+    ⟨Iso.refl _⟩
+  haveI := cfp_isIso_fst P G w.hom inferInstance
+  exact ⟨asIso (CfpCat.fst w.hom)⟩
+
 /-- **(v)** —— **Frobenius-isotropic** は射影で決まる(★(a) 鎖型)。 -/
 theorem cfp_frobIsotropic_iff (A : CfpCat P G) :
     IsFrobeniusIsotropic (cfpPreFrobenioid P G hG hD' hcC hcD') A ↔
