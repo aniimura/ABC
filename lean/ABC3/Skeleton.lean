@@ -5,6 +5,7 @@ import ABC3.Skeleton.PGC.Section1Cor13
 import ABC3.Skeleton.AbsTopIII.LogShell
 import ABC3.Skeleton.IUTchI.InitialThetaData
 import ABC3.Skeleton.IUTchIII.Cor312
+import ABC3.Skeleton.GenEll.Heights
 /-!
 # Skeleton — 論文の主張(証明しない)
 

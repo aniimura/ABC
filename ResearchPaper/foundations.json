@@ -38,10 +38,27 @@
       "searched": [
         "mathlib v4.31.0-rc2 全体: grep -rniE 'Arakelov' → 0 件",
         "同: grep -rniE 'arithmetic.*line bundle' → 0 件",
+        "同: grep -rniE 'LineBundle|invertible sheaf|Scheme.*Picard' → いずれも 0 件(2026-08-16)",
+        "同: grep -rniE 'analytification|GAGA|complex analytic space' → いずれも 0 件(2026-08-16)",
         "Web 検索(2026-08-16): 'Arakelov theory arithmetic line bundle Lean 4 mathlib formalization heights Weil' → Lean の形式化は 1 件も出ず、すべて数学の論文"
       ],
       "publicProjects": [],
-      "note": "★近いものはある(下の weil-heights)が**枠組みが違う**。mathlib の高さは ℙⁿ 上の Weil 高さであって、任意のスキーム上の算術直線束に付随する高さではない"
+      "note": "★近いものはある(下の weil-heights)が**枠組みが違う**。mathlib の高さは ℙⁿ 上の Weil 高さであって、任意のスキーム上の算術直線束に付随する高さではない",
+      "★layers": [
+        "★2026-08-16 に原文(物理 p.3–4)を 260dpi 目視して層に割った。詳細は",
+        "  1_Structured/Arithmetic Elliptic Curves in General Position/definition-1-1.html。",
+        "  境界を決めたのは高さの定義 `ht_M̄(x) ≝ deg_F(x_F^* M̄)` である——",
+        "  ★**一般の X 上の算術直線束は『APic(Spec 𝒪_F) の元を作る』ためにだけ要る。**",
+        "A: ADiv(F) / deg_F(数体の素点だけ) —— ★**実装済**(Found/GenEll/ArithDiv.lean、sorry 無し)",
+        "B: スキーム上の直線束・APic(X)・引き戻し —— mathlib 0 件。Interface/GenEll/ArithLineBundle.lean が waiting で受ける",
+        "C: X^arc(スキームの解析化)・hermitian 計量・ι_X —— mathlib 0 件。★**Arakelov 理論のさらに下の層**",
+        "D: 同型 ADiv/APrc ≅ APic と ht の well-defined 性 —— Skeleton/GenEll/Heights.lean(sorry 3 件)"
+      ],
+      "acceptance": {
+        "goal": "Skeleton/GenEll/Heights.lean の sorry が 0 になり、Interface/GenEll/ArithLineBundle.lean が waiting でなくなること",
+        "checkable": "node tools/check.mjs の `sorry 台帳` と `Interface 実装待ち` の 2 つの印字で機械的に見える",
+        "★注意": "これは『Arakelov 理論を作った』ではなく『[GenEll] §1 の高さの枠組みが Found/ に載った』である。両者を混同しないこと"
+      }
     },
     {
       "id": "weil-heights",

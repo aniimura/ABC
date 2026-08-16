@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[GenEll] Definition 1.1 と §1 の地の文 — 算術直線束・算術因子・次数・高さ</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .scr { font-style: italic; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[GenEll] Definition 1.1 と §1 の地の文 — 算術直線束・算術因子・次数・高さ</h1>
+
+<p>物理 p.3–p.4。<strong>260 dpi 目視確認 2026-08-16</strong>。</p>
+
+<h2>★★層の境界(この構造化の要点)</h2>
+
+<p>§1 が最終的に要るのは <strong>高さ <code>ht<sub>M̄</sub></code></strong> だが、目視で読むと定義は</p>
+
+<p style="text-align:center"><code>ht<sub>M̄</sub>(x) ≝ <u>deg</u><sub>F</sub>(x<sub>F</sub><sup>*</sup>M̄) ∈ ℝ</code></p>
+
+<p>である。すなわち <strong>一般の <code>X</code> 上の算術直線束は「<code>APic(Spec 𝒪<sub>F</sub>)</code> の元を作る」ためにだけ要る</strong>。
+そして原文自身が</p>
+
+<p style="text-align:center"><code>ADiv(F)/APrc(F) ⥲ APic(Spec(𝒪<sub>F</sub>))</code></p>
+
+<p>という同型を述べている。<strong>右辺はスキーム論だが、左辺は数体の素点だけで書ける。</strong></p>
+
+<table>
+<tr><th>層</th><th>中身</th><th>mathlib(2026-08-16 実測)</th><th>置き場所</th></tr>
+<tr>
+  <td>A</td>
+  <td><code>ADiv(F)</code> / <code>APrc(F)</code> / <code>deg<sub>F</sub></code>(数体の素点だけ)</td>
+  <td>★材料あり: <code>NumberField.InfinitePlace</code> 70 件 / <code>HeightOneSpectrum</code> 301 件</td>
+  <td><strong><code>Found/</code></strong></td>
+</tr>
+<tr>
+  <td>B</td>
+  <td>スキーム上の直線束・<code>APic(X)</code>・引き戻し</td>
+  <td>★<strong>無い</strong>(<code>LineBundle</code> 0 件 / <code>invertible sheaf</code> 0 件)</td>
+  <td><strong><code>Interface/</code></strong></td>
+</tr>
+<tr>
+  <td>C</td>
+  <td><code>X<sup>arc</sup></code>(スキームの解析化)・hermitian 計量・<code>ι<sub>X</sub></code></td>
+  <td>★<strong>無い</strong>(<code>analytification</code> 0 件 / <code>GAGA</code> 0 件 / <code>complex analytic space</code> 0 件)</td>
+  <td><strong><code>Interface/</code></strong></td>
+</tr>
+<tr>
+  <td>D</td>
+  <td><code>ADiv(F)/APrc(F) ≅ APic(Spec 𝒪<sub>F</sub>)</code> と <code>ht</code> の定義</td>
+  <td>—</td>
+  <td><strong><code>Skeleton/</code></strong></td>
+</tr>
+</table>
+
+<p class="open">★<strong>層 C が「もう一段下」である</strong>——hermitian 計量を載せる先の
+<code>X<sup>arc</sup></code> そのものが mathlib に無い。<strong>Arakelov 理論は
+<code>L0:基礎</code> の最下段ではなく、その下にさらに層がある。</strong></p>
+
+<section class="statement setup"
+         id="genell-s1-setup"
+         data-paper="GenEll"
+         data-pdf-page="3"
+         data-item="§1 地の文(X の設定と X^arc)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">Let X be a normal scheme which is proper and flat over Spec(<span class="bb">Z</span>) [where <span class="bb">Z</span></div>
+<div class="verbatim">conjugation automorphism ι<sub>X</sub> of X<sup>arc</sup> which is compatible with ι<sub><span class="bb">C</span></sub>.</div>
+<div class="reading"><code>X</code> は <code>Spec(ℤ)</code> 上 proper かつ flat な正規スキーム。
+<code>X<sup>arc</sup></code> は <code>X</code> が定める<strong>コンパクト正規複素解析空間</strong>で、
+台の位相空間は <code>X(ℂ)</code>。<code>ℂ</code> の複素共役 <code>ι<sub>ℂ</sub></code> が
+<code>X<sup>arc</sup></code> の自己同型 <code>ι<sub>X</sub></code> を誘導する。</div>
+<p class="open">★<strong>ここが層 C</strong>。<code>X<sup>arc</sup></code> を mathlib で作る道具は無い
+(探索範囲: <code>Mathlib</code> 全体を <code>analytification</code> / <code>GAGA</code> /
+<code>complex analytic space</code> で grep、いずれも 0 件、2026-08-16)。</p>
+</section>
+
+<section class="statement definition"
+         id="genell-def-1-1-i"
+         data-paper="GenEll"
+         data-pdf-page="3"
+         data-item="Definition 1.1, (i)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">pair consisting of a line bundle <span class="scr">L</span> on X and a hermitian metric | − |<sub><span class="scr">L</span></sub> on the line</div>
+<div class="verbatim">of tensor product, thus determine a group APic(X).</div>
+<div class="reading">算術直線束 <code>L̄ = (L, |−|<sub>L</sub>)</code> = <code>X</code> 上の直線束 ＋
+<code>X<sup>arc</sup></code> 上の hermitian 計量(<code>ι<sub>X</sub></code> と両立)。
+射は「局所的に <code>|−|<sub>L</sub> ≤ 1</code> の切断が <code>|−|<sub>M</sub> ≤ 1</code> へ移る」もの。
+<code>Γ(L̄)</code> は <code>Ō<sub>X</sub> → L̄</code> の射の集合。テンソル積で同型類が群
+<code>APic(X)</code> をなす。</div>
+<p class="open">★<strong>層 B ＋ 層 C</strong>。直線束(層 B)も計量(層 C)も mathlib に無い。
+★ただし <strong>下流が使うのは <code>APic(Spec 𝒪<sub>F</sub>)</code> だけ</strong>である
+(<code>ht</code> の定義を見よ)。<code>Spec 𝒪<sub>F</sub></code> は 1 次元なので、
+一般の <code>X</code> の場合より軽い可能性がある——<strong>未測定</strong>。</p>
+</section>
+
+<section class="statement definition"
+         id="genell-def-1-1-ii"
+         data-paper="GenEll"
+         data-pdf-page="3"
+         data-item="Definition 1.1, (ii)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">(ii) Let φ : Y → X be a morphism of normal, <span class="bb">Z</span>-proper, <span class="bb">Z</span>-flat schemes. Then</div>
+<div class="reading">算術直線束の引き戻し <code>φ<sup>*</sup>L̄</code>(= <code>L̄|<sub>Y</sub></code>)。
+★<code>ht</code> の定義で使うのは <code>x<sub>F</sub> : Spec(𝒪<sub>F</sub>) → X</code> による引き戻しである。</div>
+</section>
+
+<section class="statement setup"
+         id="genell-adiv"
+         data-paper="GenEll"
+         data-pdf-page="4"
+         data-item="§1 地の文(算術因子 ADiv(F))"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">An arithmetic divisor on F is defined to be a finite formal sum</div>
+<div class="reading"><code>Σ<sub>v∈𝕍(F)</sub> c<sub>v</sub>·v</code>、係数は
+<strong>非アルキメデスなら <code>ℤ</code>、アルキメデスなら <code>ℝ</code></strong>。
+すべて <code>≥ 0</code> なら effective。群 <code>ADiv(F)</code> をなす。
+<code>f ∈ F</code> に対し
+<code>ADiv(f) ≝ Σ<sub>non</sub> ord<sub>v</sub>(f)·v − Σ<sub>arc</sub> [F<sub>v</sub>:ℝ]·log(|f|<sub>v</sub>)·v</code>
+が principal で、部分群 <code>APrc(F)</code> をなす。</div>
+<p class="open">★<strong>ここが層 A —— スキームも解析化も要らない。</strong>
+材料は mathlib にある(<code>NumberField.InfinitePlace</code> 70 件、
+<code>IsDedekindDomain.HeightOneSpectrum</code> 301 件、2026-08-16 実測)。
+<strong>Arakelov 理論のうち、ここだけは今すぐ <code>Found/</code> に置ける。</strong></p>
+<p class="open">★<strong>アルキメデス側の係数が <code>ℝ</code> である</strong>ことに注意——
+`ADiv(F)` は自由アーベル群ではなく <code>(有限素点 →₀ ℤ) × (無限素点 →₀ ℝ)</code> の形。</p>
+</section>
+
+<section class="statement setup"
+         id="genell-deg"
+         data-paper="GenEll"
+         data-pdf-page="4"
+         data-item="§1 地の文(次数写像 deg_F)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">[cf. [Szp], §1.1] determines a homomorphism APic(Spec(<span class="scr">O</span><sub>F</sub>)) → <span class="bb">R</span>, which we shall</div>
+<div class="reading"><code>deg<sub>F</sub></code> は
+<code>𝕍(F)<sup>non</sup> ∋ v ↦ log(q<sub>v</sub>)</code>、
+<code>𝕍(F)<sup>arc</sup> ∋ v ↦ 1</code> で定まる準同型。
+正規化版 <code><u>deg</u><sub>F</sub> ≝ (1/[F:ℚ])·deg<sub>F</sub></code> は
+<strong>有限次拡大で不変</strong>:
+<code><u>deg</u><sub>K</sub>(L̄|<sub>Spec 𝒪<sub>K</sub></sub>) = <u>deg</u><sub>F</sub>(L̄)</code>。</div>
+<p class="open">★<strong>この不変性が <code>ht</code> を <code>X(ℚ̄)</code> 上で well-defined にする</strong>——
+<code>x</code> をどの <code>F</code> で見ても同じ値になる、というのが定義の要である。
+★<strong>したがって形式化ではこの不変性が「定義が成立する条件」になる</strong>(飾りではない)。</p>
+</section>
+
+<section class="statement setup"
+         id="genell-ht"
+         data-paper="GenEll"
+         data-pdf-page="4"
+         data-item="§1 地の文(高さ ht_M̄)"
+         data-notation-checked="2026-08-16">
+<div class="verbatim">— where x<sub>F</sub> : Spec(<span class="scr">O</span><sub>F</sub>) → X is any morphism that gives rise to x.</div>
+<div class="reading"><code>ht<sub>M̄</sub>(x) ≝ <u>deg</u><sub>F</sub>(x<sub>F</sub><sup>*</sup>M̄) ∈ ℝ</code>、
+<code>x ∈ X(ℚ̄) = ∪<sub>[F:ℚ]&lt;∞</sub> X(F)</code>。</div>
+<p class="open">★★<strong>この 1 行が層の境界を決めている</strong>——
+一般の <code>X</code> 上の算術直線束が要るのは、
+<code>x<sub>F</sub><sup>*</sup>M̄ ∈ APic(Spec 𝒪<sub>F</sub>)</code> を作るためだけである。
+<strong><code>Interface</code> でここを受ければ、下流(<code>deg</code>・高さ・BD-class)は
+層 A だけで書ける。</strong></p>
+</section>
+
+</body>
+</html>

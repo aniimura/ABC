@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.PGC.LocalFieldData
 import ABC3.Interface.IUTchIII.PilotObjects
+import ABC3.Interface.GenEll.ArithLineBundle
 /-!
 # Interface — まだ無い基礎の型
 
