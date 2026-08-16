@@ -738,6 +738,117 @@ theorem cfp_baseTrivial_mp (A : CfpCat P G)
   haveI := cfp_isIso_fst P G w.hom inferInstance
   exact ⟨asIso (CfpCat.fst w.hom)⟩
 
+/-! ### ★★(c) の `⟸` —— **`Aut-ample` を足せば通る**(2026-08-16)
+
+★**両向きが 1 点に帰着することを先に確定させた**:
+`𝒞'` の同型は対 `(θ, g)` で四角形
+`P.proj.map θ ≫ A.obj.hom = X.obj.hom ≫ G.map g` を満たすものなので、
+★**`θ` の底が 1 つに指定される。**
+
+* `base-trivial`: 指定される底は `X.obj.hom ≫ G.map g ≫ inv A.obj.hom`
+* `metrically trivial`: `cfp_square` を解くと `inv (P.Base (fst φ))`
+
+★★**したがって要るのはただ 1 つ**:
+> **(†) 指定された同型 `v : Base X₀ ≅ Base A₀` に対し、`Base θ = v` なる同型 `θ : X₀ ≅ A₀`**
+
+★`X₀ := A₀` と取れるので **(†) ⟺ `A₀` が `Aut-ample`** である。
+★**`Definition 1.3` の 21 条からは (†) は出ない**(測定の記録は上の docstring)。
+★★**ここでは原文の仮定に `Aut-ample` を足して閉じる。** -/
+
+/-- ★★**底を指定した同型**(`Aut-ample` の言い換え) ——
+「**ある**同型」を「**指定の底を持つ**同型」に直す。
+
+★`base-trivial` / `metrically trivial` はどちらも「ある同型」しか与えないので、
+★**この 1 本が (v) の残り 2 件の共通の心臓部**である。 -/
+theorem cfp_iso_of_isAutAmple {A₀ X₀ : C} (haa : IsAutAmple P A₀)
+    (θ₀ : X₀ ≅ A₀) (v : P.proj.obj X₀ ⟶ P.proj.obj A₀) [IsIso v] :
+    ∃ θ : X₀ ⟶ A₀, IsIso θ ∧ P.proj.map θ = v := by
+  haveI hb0 : IsIso (P.proj.map θ₀.hom) := by
+    refine ⟨P.proj.map θ₀.inv, ?_, ?_⟩
+    · rw [← P.proj.map_comp, θ₀.hom_inv_id, P.proj.map_id]
+    · rw [← P.proj.map_comp, θ₀.inv_hom_id, P.proj.map_id]
+  have hviso : IsIso (P.proj.map θ₀.inv ≫ v) := by
+    haveI : IsIso (P.proj.map θ₀.inv) := by
+      refine ⟨P.proj.map θ₀.hom, ?_, ?_⟩
+      · rw [← P.proj.map_comp, θ₀.inv_hom_id, P.proj.map_id]
+      · rw [← P.proj.map_comp, θ₀.hom_inv_id, P.proj.map_id]
+    infer_instance
+  obtain ⟨c, hci, hcb⟩ := haa (P.proj.map θ₀.inv ≫ v) hviso
+  haveI := hci
+  refine ⟨θ₀.hom ≫ (c : A₀ ⟶ A₀), inferInstance, ?_⟩
+  rw [P.proj.map_comp,
+    show P.proj.map (c : A₀ ⟶ A₀) = P.proj.map θ₀.inv ≫ v from hcb,
+    ← Category.assoc, ← P.proj.map_comp, θ₀.hom_inv_id, P.proj.map_id, Category.id_comp]
+
+/-- ★★**(v) の `metrically trivial`(`⟸`、`Aut-ample` 仮定)**。
+
+★`𝒞'` の co-angular pre-step `φ` の `𝒞` 成分に metric triviality を当てて同型 `κ` を得、
+★**`cfp_iso_of_isAutAmple` で底を `inv (Base (fst φ))` に直す。**
+`𝒟'` 成分は `inv (snd φ)` を取れば四角形が `cfp_square` から出る。 -/
+theorem cfp_metricallyTrivial_mpr (A : CfpCat P G) (haa : IsAutAmple P A.obj.left)
+    (h : IsMetricallyTrivial P A.obj.left) :
+    IsMetricallyTrivial (cfpPreFrobenioid P G hG hD' hcC hcD') A := by
+  haveI hA : IsIso A.obj.hom := A.property
+  intro Dd' φ hc hs
+  haveI hD : IsIso Dd'.obj.hom := Dd'.property
+  have hψc : IsCoAngular P (CfpCat.fst φ) := (cfp_coAngular_iff P G hG hD' hcC hcD' φ).mp hc
+  have hψs : IsPreStep P (CfpCat.fst φ) := (cfp_preStep_iff P G hG hD' hcC hcD' φ hs.2).mp hs
+  haveI hψb : IsIso (P.proj.map (CfpCat.fst φ)) := hψs.2
+  haveI hsb : IsIso (CfpCat.snd φ) := hs.2
+  obtain ⟨κ⟩ := h Dd'.obj.left (CfpCat.fst φ) hψc hψs
+  obtain ⟨θ, hθi, hθv⟩ :=
+    cfp_iso_of_isAutAmple P haa κ (inv (P.proj.map (CfpCat.fst φ)))
+  haveI := hθi
+  have hsq : P.proj.map θ ≫ A.obj.hom
+      = Dd'.obj.hom ≫ G.map (inv (CfpCat.snd φ)) := by
+    rw [hθv, G.map_inv, IsIso.eq_comp_inv, Category.assoc, ← cfp_square φ,
+      ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  haveI : IsIso (cfpHom P G (X := Dd') (Y := A) θ (inv (CfpCat.snd φ)) hsq) :=
+    cfp_isIso_of P G _ hθi (inferInstanceAs (IsIso (inv (CfpCat.snd φ))))
+  exact ⟨asIso (cfpHom P G (X := Dd') (Y := A) θ (inv (CfpCat.snd φ)) hsq)⟩
+
+/-- ★★**(v) の `base-trivial`(`⟸`、`Aut-ample` 仮定)**。
+
+★`𝒟'` 成分の同型 `e'` を `G` で送って `𝒞` 成分の底同型 `v` を作り、
+base-triviality で**ある**同型を取ってから
+★**`cfp_iso_of_isAutAmple` で底を `v` に直す。** -/
+theorem cfp_baseTrivial_mpr (A : CfpCat P G) (haa : IsAutAmple P A.obj.left)
+    (h : IsBaseTrivial P A.obj.left) :
+    IsBaseTrivial (cfpPreFrobenioid P G hG hD' hcC hcD') A := by
+  haveI hA : IsIso A.obj.hom := A.property
+  intro X hbi
+  haveI hX : IsIso X.obj.hom := X.property
+  obtain ⟨e'⟩ := hbi
+  have he' : A.obj.right ≅ X.obj.right := e'
+  haveI hv : IsIso (X.obj.hom ≫ G.map he'.inv ≫ inv A.obj.hom) := inferInstance
+  obtain ⟨θ₀⟩ := h X.obj.left
+    ⟨(@asIso _ _ _ _ (X.obj.hom ≫ G.map he'.inv ≫ inv A.obj.hom) hv).symm⟩
+  obtain ⟨θ, hθi, hθv⟩ :=
+    cfp_iso_of_isAutAmple P haa θ₀ (X.obj.hom ≫ G.map he'.inv ≫ inv A.obj.hom)
+  haveI := hθi
+  have hsq : P.proj.map θ ≫ A.obj.hom = X.obj.hom ≫ G.map he'.inv := by
+    rw [hθv, Category.assoc, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+  haveI : IsIso (cfpHom P G (X := X) (Y := A) θ he'.inv hsq) :=
+    cfp_isIso_of P G _ hθi (inferInstanceAs (IsIso he'.inv))
+  exact ⟨asIso (cfpHom P G (X := X) (Y := A) θ he'.inv hsq)⟩
+
+/-- ★★★**上の 2 本の仮定は空虚ではない**。
+
+★★**「仮定を足せば何でも証明できる」への歯止め**である ——
+足した `Aut-ample` が `base-trivial` と両立しないなら上の 2 本は**空虚に真**になるが、
+★**両方を満たす対象は実在する**: `𝔽_Φ` の対象はすべてそうである
+(`Proposition 1.5, (i)`、`elemFrob_autAmple` / `elemFrob_baseTrivial`)。
+
+★あわせて記録: 上の 2 本は `haa` と `h` を**どちらも使う**(片方だけでは通らない)。
+★そして `.src` は**付けない** —— `Proposition 1.6` の (v) を完全に実装したという
+主張ではないからである。穴は `Gap/FrdI/Section1.lean` の `Gap_1_6_v` のまま。 -/
+theorem autAmple_and_baseTrivial_nonvacuous {Φ₀ : MonoidOn.{v, u, w} D}
+    (hD₀ : IsTotallyEpimorphic D) [IsConnected D]
+    (hpd₀ : ∀ A : D, IsPreDivisorial (Φ₀.val A)) (A : ElemFrobCat Φ₀) :
+    IsAutAmple (elemPreFrobenioid Φ₀ hD₀ hpd₀) A ∧
+      IsBaseTrivial (elemPreFrobenioid Φ₀ hD₀ hpd₀) A :=
+  ⟨elemFrob_autAmple Φ₀ hD₀ hpd₀ A, elemFrob_baseTrivial Φ₀ hD₀ hpd₀ A⟩
+
 /-- **(v)** —— **Frobenius-isotropic** は射影で決まる(★(a) 鎖型)。 -/
 theorem cfp_frobIsotropic_iff (A : CfpCat P G) :
     IsFrobeniusIsotropic (cfpPreFrobenioid P G hG hD' hcC hcD') A ↔
