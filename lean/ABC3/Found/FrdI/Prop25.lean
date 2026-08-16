@@ -299,6 +299,91 @@ theorem otri_div_eq_iff' (F : FrobenioidCore P) {A : C} (x y : OTri P A) :
       show P.degFr ((u : End A) : A ⟶ A) = 1 from u.2.1.2]
     simp
 
+/-! ## ★★★★分裂は **`A` が isotropic でなくても**全単射
+
+原文 (FrdI p.49):
+> [which applies even if A is not isotropic — cf. Definition 2.3, (a), (b)] to
+
+★★原文のこの一言を、我々の道具 4 つで閉じる:
+
+| 道具 | 役割 |
+|---|---|
+| `hullPullback`(`Definition 2.3, (b)`) | `τ(A)` は `τ(A^istr)` の引き戻し |
+| `hullTau_existsUnique` | `τ(A^istr)` の元は `𝒪^▷(A)` から**一意に**来る |
+| `hullOTriHom_div` | `Div` が hull を通して底に沿って対応する |
+| `otri_div_eq_iff'` | ★**`Div` が等しい ⟺ `𝒪^×` 倍だけ違う**(isotropy 不要) |
+
+★★★**最後の 1 本が鍵**だった——`Definition 1.3, (iii), (b)` を恒等射に当てると
+自己射はすべて co-angular なので、`Proposition 2.2, (iii)` に isotropy は要らない。
+-/
+
+theorem charSplitting_bijective_all (F : FrobenioidCore P)
+    {τ : ∀ X : C, Submonoid (End X)} (hτ : IsCharacteristicSplitting P F τ) (A : C) :
+    Function.Bijective
+      (fun p : OTimes P A × τ A =>
+        (⟨((p.1 : End A)) * ((p.2 : End A)),
+          mul_mem (OTimes_le_OTri P A p.1.2) (hτ.le_otri A p.2.2)⟩ : OTri P A)) := by
+  obtain ⟨B, φ, hφ⟩ := F.isotropicHullExists A
+  have hunit : ∀ u : OTimes P A, P.Div (((u : End A)) : A ⟶ A) = 0 := by
+    intro u
+    haveI : IsIso (((u : End A)) : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso _).mp u.2.2
+    exact isIsometric_of_isIso P _
+  have hdiv : ∀ (u : OTimes P A) (t : OTri P A),
+      P.Div ((((u : End A)) * ((t : End A)) : End A) : A ⟶ A)
+        = P.Div (((t : End A)) : A ⟶ A) := by
+    intro u t
+    show P.Div ((((t : End A)) : A ⟶ A) ≫ (((u : End A)) : A ⟶ A)) = _
+    rw [P.Div_comp, hunit u,
+      show P.Base (((t : End A)) : A ⟶ A) = 𝟙 _ from by
+        have h : P.Base (((t : End A)) : A ⟶ A) = P.Base (𝟙 A) := t.2.1
+        rwa [P.Base_id] at h,
+      MonoidOn.map_id, show P.degFr (((u : End A)) : A ⟶ A) = 1 from u.2.1.2]
+    simp
+  -- ★hull を通した `Div` の対応
+  have hpull : ∀ z : OTri P A, P.Div (((z : End A)) : A ⟶ A)
+      = Φ.map (P.Base φ) (P.Div ((hullOTriHom P φ hφ (z : End A) : B ⟶ B))) :=
+    fun z => hullOTriHom_div P hφ (z : End A) z.2
+  constructor
+  · rintro ⟨u₁, t₁⟩ ⟨u₂, t₂⟩ h
+    have h' : (((u₁ : End A)) * ((t₁ : End A)) : End A)
+        = (((u₂ : End A)) * ((t₂ : End A)) : End A) := congrArg Subtype.val h
+    have hd : P.Div (((t₁ : End A)) : A ⟶ A) = P.Div (((t₂ : End A)) : A ⟶ A) := by
+      rw [← hdiv u₁ ⟨(t₁ : End A), hτ.le_otri A t₁.2⟩,
+        ← hdiv u₂ ⟨(t₂ : End A), hτ.le_otri A t₂.2⟩]
+      exact congrArg (fun z : End A => P.Div (z : A ⟶ A)) h'
+    -- ★hull へ送って `charBij` の一意性を使う
+    have hdB : P.Div ((hullOTriHom P φ hφ (t₁ : End A) : B ⟶ B))
+        = P.Div ((hullOTriHom P φ hφ (t₂ : End A) : B ⟶ B)) := by
+      refine Φ.map_injective (P.Base φ) ?_
+      rw [← hpull ⟨(t₁ : End A), hτ.le_otri A t₁.2⟩, ← hpull ⟨(t₂ : End A), hτ.le_otri A t₂.2⟩]
+      exact hd
+    have hm₁ : hullOTriHom P φ hφ (t₁ : End A) ∈ τ B :=
+      (hτ.hullPullback hφ _ (hτ.le_otri A t₁.2)).mp t₁.2
+    have hm₂ : hullOTriHom P φ hφ (t₂ : End A) ∈ τ B :=
+      (hτ.hullPullback hφ _ (hτ.le_otri A t₂.2)).mp t₂.2
+    obtain ⟨w, -, huniq⟩ := hτ.charBij B hφ.2.2.1
+      ⟨hullOTriHom P φ hφ (t₁ : End A), hullOTriHom_mem P φ hφ _ (hτ.le_otri A t₁.2)⟩
+    have hiota : hullOTriHom P φ hφ (t₁ : End A) = hullOTriHom P φ hφ (t₂ : End A) :=
+      congrArg Subtype.val
+        ((huniq ⟨_, hm₁⟩ rfl).trans (huniq ⟨_, hm₂⟩ hdB.symm).symm)
+    have ht : t₁ = t₂ := Subtype.ext (hullOTriHom_injective P F φ hφ hiota)
+    subst ht
+    refine Prod.ext ?_ rfl
+    refine Subtype.ext ?_
+    haveI : Epi ((((t₁ : End A))) : A ⟶ A) := P.totEpiC _ _ _
+    exact (cancel_epi ((((t₁ : End A))) : A ⟶ A)).mp h'
+  · intro x
+    -- ★`ι x` を `A^istr` で分裂させ、`τ` 成分を `A` へ引き戻す
+    obtain ⟨t', ht', -⟩ := hτ.charBij B hφ.2.2.1
+      ⟨hullOTriHom P φ hφ (x : End A), hullOTriHom_mem P φ hφ _ x.2⟩
+    obtain ⟨s, hs⟩ := hτ.hullMem hφ (t' : End B) t'.2
+    have hsτ : ((s : End A)) ∈ τ A :=
+      (hτ.hullPullback hφ _ s.2).mpr (by rw [hs]; exact t'.2)
+    have hds : P.Div (((s : End A)) : A ⟶ A) = P.Div (((x : End A)) : A ⟶ A) := by
+      rw [hpull s, hpull x, hs, ht']
+    obtain ⟨u, hu⟩ := (otri_div_eq_iff' P F x ⟨(s : End A), s.2⟩).mp hds.symm
+    exact ⟨⟨u, ⟨(s : End A), hsτ⟩⟩, Subtype.ext hu.symm⟩
+
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 
 原文 (FrdI p.48):
