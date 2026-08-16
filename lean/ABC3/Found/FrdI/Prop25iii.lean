@@ -321,6 +321,22 @@ theorem psiOTri_pow (d : ℕ+) (β : OTri P A) (k : ℕ) :
     psiOTri P F hτ hA d (β ^ k) = (psiOTri P F hτ hA d β) ^ k :=
   map_pow (psiOTriHom P F hτ hA hfn d) β k
 
+include hfn in
+/-- ★★**`𝒪^▷` を Frobenius 型射の右へ通す** —— `Definition 1.2, (iv)` の
+Frobenius-normalized の定義そのもの。
+
+  `β ≫ ζ = ζ ≫ β^{degFr ζ}`
+
+★★**`ζ` が base-identity である必要がある**。`𝒞^istr` では
+`Proposition 2.5, (ii)`(すべての対象が Frobenius-trivial)により
+**Frobenius 型射を base-identity 自己射に取れる**ので、この形が使える。
+★これが原文が関手性の議論を `𝒞^istr` に限る理由である。 -/
+theorem otri_comp_frobBaseId {ζ : End A} (hζb : IsBaseIdentity P ζ) (β : OTri P A) :
+    ((β : End A) : A ⟶ A) ≫ ((ζ : End A) : A ⟶ A)
+      = ((ζ : End A) : A ⟶ A)
+        ≫ (((β ^ (P.degFr ((ζ : End A) : A ⟶ A) : ℕ) : OTri P A) : End A) : A ⟶ A) :=
+  (hfn ζ hζb (β : End A) β.2).symm
+
 /-! ### ★★`Ψ` の自然性 —— well-defined 性の核
 
 ★4 重分解には**選び方の自由**がある(原文の
@@ -660,5 +676,55 @@ theorem psiMap_id (d : ℕ+) (A : C) :
   psiMap_of_isometric P F hτ hiso hmt haa d (𝟙 A) (P.Div_id A)
 
 end PsiHom
+
+/-! ## ★★★残り —— 関手性と圏同値(段取り)
+
+原文 (FrdI p.50):
+> for d′ ∈N≥1 — it follows that the assignment φ →Ψ(φ) is compatible with com-
+
+★**ここまでで揃ったもの**: `psiMap` が**関数として**定まり(well-defined)、
+`Base`・`degFr` を保ち、`Div` を `d` 倍し、等長射の上で恒等である。
+★残るのは**合成との両立**と、そこから出る `𝒞 ≃ 𝒞(d)` である。
+
+### ★段取り(原文の筋を我々の道具に翻訳したもの)
+
+| 段 | 内容 | 使う道具 | 状態 |
+|---|---|---|---|
+| 1 | pull-back を右へ寄せる | `plBk_shuffle` | ✅ |
+| 2 | 底が同型な pull-back は同型 | `isIso_of_isPullBack_of_baseIso` | ✅ |
+| 3 | `𝒪^▷` を Frobenius 型射の右へ通す | `otri_comp_frobBaseId` | ✅ |
+| 4 | `𝒪^▷` を等長 pre-step の右へ通す | `otriFwd` / `otriLin` | ✅(既存) |
+| 5 | `Ψ(β^k) = Ψ(β)^k` | `psiOTri_pow` | ✅ |
+| 6 | 合成の 4 重分解を組み立てる | 上の 1–4 | ★**未** |
+| 7 | `Ψ(φ ≫ φ') = Ψφ ≫ Ψφ'`(`𝒞^istr` 上) | 6 ＋ 5 ＋ 自然性 2 本 | ★**未** |
+| 8 | isotropic hull が単射 ⟹ 一般の `𝒞` へ | `Definition 1.3, (v), (a)` | ★**未** |
+| 9 | 関手 `𝒞 ⥤ 𝒞(d)`(`Cd` は `Definition 2.4` にある) | 7,8 | ★**未** |
+| 10 | 本質的全射・忠実・充満 | `prop_2_5_i_bijective` | ★**未** |
+
+### ★段 6 の具体的な形(導出済み、実装待ち)
+
+`φ = δ≫γ≫β≫α`、`φ' = δ'≫γ'≫β'≫α'` とすると
+
+  `φ≫φ' = δ≫γ≫β≫(α ≫ δ'≫γ'≫β')≫α'`
+
+で、`ρ := δ'≫γ'≫β'` に段 1 を当てると `α≫ρ = ρ̃≫α̃`(`α̃` は pull-back、
+`Base ρ̃` は同型)。★`α̃≫α'` は pull-back なので
+
+  `φ≫φ' = δ≫γ≫(β≫ρ̃)≫(α̃≫α')`
+
+となり、あとは `ρ̃` を `δ₂≫γ₂≫β₂` に分解して(段 2 でその pull-back 部分が
+同型になる)、`β` を段 3・段 4 で `δ₂`・`γ₂` の右へ通せばよい。
+
+★★**段 3 が `𝒞^istr` を要求する**(Frobenius 型射を base-identity に取るため)
+——これが原文が `𝒞^istr` で議論し、段 8 で一般へ移す理由である。
+
+### ★★我々の実装が原文より強い点(記録)
+
+原文は特性分裂を「**`A` が isotropic でなくても使える**」と明言し、根拠に
+`Definition 2.3, (b)`(我々の `hullMem`)を挙げている。★我々の
+`charSplitting_bijective` は `IsIsotropic` を要求するので、`psiMap` は現在
+`IsOfIsotropicType` を仮定していて**原文より強い**。`hullMem` で
+非 isotropic へ延ばせば外せる。★段 8 と同時に解消するのが自然である。
+-/
 
 end ABC3.Found.FrdI
