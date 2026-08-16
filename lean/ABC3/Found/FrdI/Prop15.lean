@@ -293,9 +293,22 @@ theorem otriOf_comm_iff {A B : ElemFrobCat Φ} (φ : A ⟶ B)
 `Φ.map` は `MonoidOn.map_id` / `MonoidOn.map_comp` で関手則を満たすから、
 `𝒪^▷` の推移も関手則を満たす。
 
-★**測定結果**: 関手性が言えるのは **linear な射に沿ってだけ**である。
+★★**測定結果を訂正した（2026-08-16）**。
+
+★以前ここに「`(𝔽_Φ)ᵒᵖ` 全体の上の関手にはならない」と書いたが、
+★★**これは誤りである**。`φ ↦ Φ.map (Base φ)` は全体で関手になる
+（`Proposition 2.2` は実際 `D*` 全体の上にこの関手を作っている）。
+
+★**壊れるのは関手性ではなく、可換関係による特徴づけのほうである** ——
 一般の射では `otriOf_comm_iff` のとおり Frobenius 次数 `deg_Fr(φ)` が入るので、
-`(𝔽_Φ)ᵒᵖ` 全体の上の関手にはならない。原文の「functorial」はこの範囲の主張である。 -/
+「`α ◦ φ = φ ◦ β`」という形での推移写像の決定は linear に限る。
+
+★★**検証役の監査で発見された。本日 2 件目の「結論は正しいが理由が違う」である**
+（1 件目は `Pf.eq_of_qact` を根拠とした件）。
+★原文の「functorial」が linear の範囲であること自体は、
+`Proposition 1.11, (iv)`（「co-angular linear 射が単射を定める」）と
+`Proposition 2.2`（原文自身が `(𝒞^istr)^lin` へ制限している）から
+検証役が確認した。 -/
 theorem otriOf_natural {A B : ElemFrobCat Φ} (φ : A ⟶ B)
     (hφ : IsLinear (elemPreFrobenioid Φ hD hpd) φ) (b : Φ.val B.base) :
     (φ ≫ otriOf Φ B b : A ⟶ B)
