@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import ABC3.Interface.GenEll.TateLocal
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Found.GenEll.Lemma31
+import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.BDClass
 import Mathlib.Topology.Algebra.Ring.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
@@ -201,11 +202,11 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
 原文の証明も 1 行——「`x^{1/(1+ϵ)}·log(x)/x = log(x)·x^{−ϵ/(1+ϵ)} → 0`(`x → ∞`)という
 よく知られた初等的事実から直ちに従う」(p.18 目視確認 2026-08-16)。
 
-★**本 statement は `Skeleton` に置くが、実装は `Found/GenEll/Elementary.lean` にある。**
-ここに残すのは「§3 の 9 項目のうちどれか」を型で辿れるようにするためである。 -/
+★★**本 statement は `sorry` ではない**——`Found/GenEll/Elementary.lean` の
+実装をそのまま参照している。§3 の 9 項目のうち**実装まで済んでいる唯一の項目**である。 -/
 theorem lemma_3_6 (eps : ℝ) (heps : 0 < eps) :
-    ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ x y : ℝ, 1 ≤ y → C₀ * y ^ (1 + eps) ≤ x → y * Real.log x ≤ x := by
-  sorry
+    ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ x y : ℝ, 1 ≤ y → C₀ * y ^ (1 + eps) ≤ x → y * Real.log x ≤ x :=
+  ABC3.Found.GenEll.lemma_3_6 eps heps
 
 /-! ## Lemma 3.7 —— 有限例外集合 -/
 

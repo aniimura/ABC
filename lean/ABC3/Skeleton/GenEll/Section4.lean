@@ -1,5 +1,7 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.GenEll.EllModuli
+import ABC3.Found.GenEll.Elementary
+import ABC3.Found.GenEll.PrimesOfSize
 import Mathlib.NumberTheory.Chebyshev
 
 /-!
@@ -73,7 +75,12 @@ open ABC3.Meta ABC3.Interface.GenEll
 **与えられたとき**」を主張しており、**存在することは主張していない**。
 ★ゆえに素数定理を証明する必要がない——`Remark 4.1.1` がそれを明言する。
 
-★`Chebyshev.theta` をそのまま使えることは上の docstring で実測した。 -/
+★`Chebyshev.theta` をそのまま使えることは上の docstring で実測した。
+
+★★**本 statement は `sorry` ではない**——`Found/GenEll/PrimesOfSize.lean` の
+実装をそのまま参照している。★原文が末尾で「WLOG `y_A, (1+δ)h ∈ ℝ′_{>0}`」と
+済ませた段は、**`θ` の側を `ℝ_{>0}` 全体へ延ばす**ことで消してある
+(`theta_le_of_cond_i` / `theta_gt_of_cond_ii`)。 -/
 theorem lemma_4_1 (M : ℕ) (hM : 0 < M)
     (eps xeps Ceps : ℝ) (heps : 0 < eps) (hxeps : 0 < xeps) (hCeps : 0 < Ceps)
     (heps4 : eps < 1 / 4) (hxC : Ceps < eps * xeps)
@@ -86,8 +93,9 @@ theorem lemma_4_1 (M : ℕ) (hM : 0 < M)
     (hAx : xeps < ∑ p ∈ A, Real.log p) :
     ∃ P : Finset ℕ, P.card = M ∧ (∀ p ∈ P, p.Prime) ∧ (∀ p ∈ P, p ∉ A) ∧
       ∀ p ∈ P, h ≤ (p : ℝ) ∧
-        (p : ℝ) ≤ (1 + 6 * eps) * (∑ q ∈ A, Real.log q) + 8 * h := by
-  sorry
+        (p : ℝ) ≤ (1 + 6 * eps) * (∑ q ∈ A, Real.log q) + 8 * h :=
+  ABC3.Found.GenEll.lemma_4_1 M hM eps xeps Ceps heps hxeps hCeps heps4 hxC
+    hi1 hi2 hii h hh A hA hAx
 
 /-! ## Remark 4.1.1 —— 条件 (ii) は初等的、条件 (i) は素数定理 -/
 
@@ -124,14 +132,17 @@ theorem remark_4_1_1 :
 「任意の正整数 `H` について `log(H+1) ≤ (3H/2)·log(2)`」から従う(p.21 目視確認)。
 
 ★筋は完全に追える: `p_j ≥ 2` より `log(p_j) ≥ log 2` なので `h ≥ log(2)·Σ h_j`、
-したがって `Σ log(h_j+1) ≤ (3/2)·log(2)·Σ h_j ≤ (3/2)·h`。 -/
+したがって `Σ log(h_j+1) ≤ (3/2)·log(2)·Σ h_j ≤ (3/2)·h`。
+
+★★**本 statement は `sorry` ではない**——`Found/GenEll/Elementary.lean` の
+実装をそのまま参照している。§4 の 5 項目のうち**実装まで済んでいる唯一の項目**である。 -/
 theorem lemma_4_2 (n : ℕ) (hn : 0 < n) (p : Fin n → ℕ) (hp : ∀ j, (p j).Prime)
     (hh : Fin n → ℕ) (hhpos : ∀ j, 0 < hh j) :
     (∑ j, Real.log (p j)) ≤ (∑ j, (hh j : ℝ) * Real.log (p j))
   ∧ (∑ j, Real.log (hh j)) ≤ (∑ j, Real.log ((hh j : ℝ) + 1))
   ∧ (∑ j, Real.log ((hh j : ℝ) + 1))
-      ≤ 3 / 2 * (∑ j, (hh j : ℝ) * Real.log (p j)) := by
-  sorry
+      ≤ 3 / 2 * (∑ j, (hh j : ℝ) * Real.log (p j)) :=
+  ABC3.Found.GenEll.lemma_4_2 n hn p hp hh hhpos
 
 /-! ## Corollary 4.3 —— 退化する楕円曲線の完全 Galois 作用 -/
 
