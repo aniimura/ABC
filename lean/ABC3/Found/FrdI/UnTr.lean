@@ -178,4 +178,21 @@ instance : (unTrToElem P).Faithful where
 theorem istrToUnTr_comp_unTrToElem :
     istrToUnTr P ⋙ unTrToElem P = (isotropicProp P).ι ⋙ P.toElem := rfl
 
+include P in
+/-- ★★★**[FrdI] Proposition 3.3, (iv)** —— `𝒞^un-tr → 𝔽_Φ` は**本質的全射**。
+
+★`Definition 1.3, (i), (a)`(`baseSurj`)で底を実現し、
+`Definition 1.3, (vii), (a)`(isotropic hull)で `𝒞^istr` へ移す
+——`Proposition 2.2, (i)` と同じ 2 手である。 -/
+theorem unTrToElem_essSurj (Fc : FrobenioidCore P) : (unTrToElem P).EssSurj := by
+  refine ⟨fun X => ?_⟩
+  obtain ⟨A₀, -, ⟨e⟩⟩ := Fc.baseSurj X.base
+  obtain ⟨B, φ, hφ⟩ := Fc.isotropicHullExists A₀
+  haveI hbi : IsIso (P.Base φ) := hφ.2.1.2
+  have e' : (P.toElem.obj B).base ≅ X.base := (@asIso _ _ _ _ (P.Base φ) hbi).symm ≪≫ e
+  haveI : IsIso ((⟨e'.hom, 0, 1⟩ : P.toElem.obj B ⟶ X)) :=
+    (ElemFrobCat.isIso_iff _).mpr ⟨inferInstance, isAddUnit_zero, rfl⟩
+  exact ⟨(show UnTr P from (⟨B, hφ.2.2.1⟩ : Istr P)),
+    ⟨asIso ((⟨e'.hom, 0, 1⟩ : P.toElem.obj B ⟶ X))⟩⟩
+
 end ABC3.Found.FrdI
