@@ -384,6 +384,78 @@ theorem charSplitting_bijective_all (F : FrobenioidCore P)
     obtain ⟨u, hu⟩ := (otri_div_eq_iff' P F x ⟨(s : End A), s.2⟩).mp hds.symm
     exact ⟨⟨u, ⟨(s : End A), hsτ⟩⟩, Subtype.ext hu.symm⟩
 
+/-! ## ★★★★`τ` は**同型による共役**で保たれる —— isotropy 不要
+
+★★`IsCharacteristicSplitting.map_mem` は `IsIsotropic` を要求する
+(原文の `τ` が `(𝒞^istr)^lin` 上の部分関手だから)。
+★★★**しかし「射が同型の場合」だけは isotropy 抜きで出る。**
+
+★筋: 同型 `j : Y ⟶ Y'` は hull を hull へ写す(`j ≫ h'` は `Y` の hull)。
+hull の普遍性で `θ : H ⟶ H'` を取ると、`h` が mono なので
+**共役が hull を通して対応する**:
+
+  `θ ≫ (h' を通した t) = (h を通した s) ≫ θ`
+
+★あとは **`H`・`H'` は isotropic** なので `map_mem` が使え、
+`hullPullback` で `Y` 側へ引き戻す。
+
+★★**これが `isPsiValue_unique`(well-defined 性)の要**である——
+そこに現れる射は `arbFactorUniq` の出す**同型**だけだから。
+-/
+
+theorem tau_conj_mem (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+    (hτ : IsCharacteristicSplitting P F τ) {Y Y' : C} (j : Y ⟶ Y') [IsIso j]
+    (t : OTri P Y') (ht : ((t : End Y')) ∈ τ Y') :
+    ((otriPull P F j (isCoAngular_of_isIso P j) (isLinear_of_isIso P j) t : End Y))
+      ∈ τ Y := by
+  obtain ⟨H, h, hh⟩ := F.isotropicHullExists Y
+  obtain ⟨H', h', hh'⟩ := F.isotropicHullExists Y'
+  -- ★手 1: hull の普遍性で `θ : H ⟶ H'`
+  obtain ⟨θ, hθ, -⟩ := hh.2.2.2 H' hh'.2.2.1 (j ≫ h')
+  have hθlin : IsLinear P θ := by
+    have hd := congrArg P.degFr hθ
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr j = 1 from isLinear_of_isIso P j,
+      show P.degFr h' = 1 from hh'.2.1.1, show P.degFr h = 1 from hh.2.1.1] at hd
+    show P.degFr θ = 1
+    simpa using hd.symm
+  -- ★手 2: 共役が hull を通して対応する
+  set s := otriPull P F j (isCoAngular_of_isIso P j) (isLinear_of_isIso P j) t with hs
+  have hspec : j ≫ ((t : End Y') : Y' ⟶ Y') = ((s : End Y) : Y ⟶ Y) ≫ j :=
+    otriPull_spec P F j (isCoAngular_of_isIso P j) (isLinear_of_isIso P j) t
+  haveI : Epi h := P.totEpiC _ _ _
+  have hsq : θ ≫ (hullOTriMap P h' hh' ((t : End Y')) : H' ⟶ H')
+      = (hullOTriMap P h hh ((s : End Y)) : H ⟶ H) ≫ θ := by
+    refine (cancel_epi h).mp ?_
+    calc h ≫ θ ≫ (hullOTriMap P h' hh' ((t : End Y')) : H' ⟶ H')
+        = (h ≫ θ) ≫ (hullOTriMap P h' hh' ((t : End Y')) : H' ⟶ H') := by simp
+      _ = (j ≫ h') ≫ (hullOTriMap P h' hh' ((t : End Y')) : H' ⟶ H') := by rw [hθ]
+      _ = j ≫ (h' ≫ (hullOTriMap P h' hh' ((t : End Y')) : H' ⟶ H')) := by simp
+      _ = j ≫ (((t : End Y') : Y' ⟶ Y') ≫ h') := by rw [← hullOTriMap_sq P h' hh' _]
+      _ = (j ≫ ((t : End Y') : Y' ⟶ Y')) ≫ h' := by simp
+      _ = (((s : End Y) : Y ⟶ Y) ≫ j) ≫ h' := by rw [hspec]
+      _ = ((s : End Y) : Y ⟶ Y) ≫ (j ≫ h') := by simp
+      _ = ((s : End Y) : Y ⟶ Y) ≫ (h ≫ θ) := by rw [hθ]
+      _ = (((s : End Y) : Y ⟶ Y) ≫ h) ≫ θ := by simp
+      _ = (h ≫ (hullOTriMap P h hh ((s : End Y)) : H ⟶ H)) ≫ θ := by
+            rw [hullOTriMap_sq P h hh _]
+      _ = h ≫ (hullOTriMap P h hh ((s : End Y)) : H ⟶ H) ≫ θ := by simp
+  -- ★手 3: `H` 側で `map_mem`、`Y` 側へ `hullPullback`
+  have htH' : (hullOTriHom P h' hh' ((t : End Y'))) ∈ τ H' :=
+    (hτ.hullPullback hh' _ t.2).mp ht
+  have hmem := hτ.map_mem hh.2.2.1 hθlin
+    (⟨hullOTriHom P h' hh' ((t : End Y')), hullOTriHom_mem P h' hh' _ t.2⟩ : OTri P H') htH'
+  have heq : (⟨hullOTriHom P h hh ((s : End Y)),
+      hullOTriHom_mem P h hh _ s.2⟩ : OTri P H)
+      = otriLin P F hh.2.2.1 hθlin
+        ⟨hullOTriHom P h' hh' ((t : End Y')), hullOTriHom_mem P h' hh' _ t.2⟩ :=
+    otriLin_uniq P F hh.2.2.1 hθlin _ _ hsq
+  refine (hτ.hullPullback hh _ s.2).mpr ?_
+  rw [show hullOTriHom P h hh ((s : End Y))
+    = ((otriLin P F hh.2.2.1 hθlin
+        ⟨hullOTriHom P h' hh' ((t : End Y')), hullOTriHom_mem P h' hh' _ t.2⟩ :
+          OTri P H) : End H) from congrArg Subtype.val heq]
+  exact hmem
+
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 
 原文 (FrdI p.48):
