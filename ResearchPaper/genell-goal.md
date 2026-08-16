@@ -527,6 +527,63 @@ theorem sum_range_one_add_pow_eq_zero (l : ℕ) (hl : Nat.Prime l) (h5 : 5 ≤ l
 ★ただし (b) の中の「`𝔰𝔩₂(𝔽_l)` が `SL₂(𝔽_l)`-加群として既約(l ≥ 5)」は
 **初等的な線形代数で書ける**ので、着手するならそこが入口である。
 
+## 9-2. ★★24/24 への段階つき長期ゴール(2026-08-16 設定)
+
+### ★まず前提: **スケルトン化では 24/24 にならない**
+
+`tools/genell-progress.mjs` は **`Found/` の `.src` だけ**を数える
+(`rel.split('/')[0] !== 'Found'` で除外。設計どおり——この数は「実装」を測る)。
+★したがって `Skeleton/` を厚くしても分子は 1 も動かない。
+
+**そのかわり副指標を足した**(同ファイル、2026-08-16):
+
+```
+★ゴール進捗: [GenEll] の必要分 0 / 24 件 (0%)
+  ★副指標(**完了の数ではない**): statement が固定されている項目 1 件 / 手つかず 23 件
+     Theorem 3.8 — Interface/GenEll/GaloisRep.lean / Skeleton/GenEll/GaloisImage.lean
+```
+
+★**動く数と動かない数を並べて見せる**ことで、「スケルトン化＝進捗」という誤解を封じる。
+
+### ★段階(各段に**機械で判定できる**受理条件を付けた)
+
+| 段 | 内容 | 受理条件(機械) | 2 理論が要るか |
+|---|---|---|---|
+| **S0** | 到達点を型で固定する | 副指標「statement が固定」が **24/24** | 要らない(語彙は `Interface` に posit) |
+| **S1** | 2 理論なしで到達できる 3 件を実装 | `genell-progress` が **3/24** | ★**要らない** |
+| **S2** | Arakelov の層 A・B・C を作り §1 を実装 | `genell-progress` が **12/24** かつ `ArithLineBundle` が `waiting` でない | Arakelov |
+| **S3** | Galois 表現を作り §3 を実装 | `genell-progress` が **21/24** かつ `GaloisRep` が `waiting` でない | Galois 表現 |
+| **S4** | §2・§4 を実装(Belyi と `Cor 4.4`) | `genell-progress` が **24/24** | 両方 ＋ Belyi |
+
+★**S1 が「2 理論なしで到達できる上限」である**(下記)。S2 以降は理論を作らない限り 1 件も動かない。
+
+### ★★S1 の中身 —— 2 理論なしで到達できるのは **3 件**(実測 2026-08-16)
+
+| 項目 | なぜ 2 理論が要らないか | mathlib |
+|---|---|---|
+| `Lemma 3.1` | **純群論**。(i)(ii)(iii) は実装済み、残りは (iv) の pro-l 群 | Sylow・交換子・transvection あり |
+| `Lemma 4.1` | ★**Chebyshev の評価 (i)(ii) は「仮説」として与えられている**——PNT を証明する必要が無い(`Remark 4.1.1` が「PNT の帰結」と明記して仮説の外に置く) | ★`Chebyshev.theta`(`θ(x) = Σ_{p≤x} log p`)が**ある** |
+| `Lemma 4.2` | 「Some Elementary Estimates」。原文の証明が **2 行** | 初等 |
+
+★**この 3 件は `Interface` を使わずに `Found/` へ載る**——だから空虚になりようがない。
+★残る 21 件は `§1 → Arakelov` / `§3 → Galois 表現` / `§2・§4 → その上` で、
+**1 件も 2 理論を迂回できない**(`ResearchPaper/foundations.json` の `neededBy`)。
+
+### ★受理条件に「sorry 0 / axiom 0」だけを使わない理由
+
+`PLAN.md` §1 が実演したとおり、**条件を取り違えた `structure` は
+sorry 無し・公理依存ゼロのまま `0 = 1` まで証明できる**。
+本セッションでも `Skeleton/GenEll/Heights.lean` の sorry を
+`Interface` への輸入で 0 にした実例が出た。ゆえに各段の受理条件は
+
+1. `genell-progress` の分子(= `Found/` の条なし `.src`)
+2. `Found/` の `sorry` 0
+3. `axiom` 0
+4. ★対応する `Interface` が **`waiting` でない**
+5. ★G2 の**非空虚 witness**
+
+の **5 つを同時に**要求する。★4 と 5 が無いと 1〜3 は空虚になれる。
+
 ## 10. ★次にやるべきことの候補(どれも重い。ユーザーの判断が要る)
 
 | | 内容 | 規模 | 効き方 |

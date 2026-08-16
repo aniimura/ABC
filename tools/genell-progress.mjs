@@ -126,6 +126,27 @@ for (const f of walk(LEAN).filter((p) => p.endsWith('.lean'))) {
   }
 }
 
+// ── ★副指標: **statement が固定されている**項目(`Skeleton/` か `Interface/` に `.src` がある)
+//   ★★これは**完了の数ではない**。`Found/` の分子(上)とは別の行に印字し、決して足さない。
+//   動機: 「スケルトン化すれば数が動く」という誤解を封じるため、
+//   **動く数と動かない数を並べて見せる**。スケルトンは「何を作れば終わりか」を固定するだけで、
+//   実装したことにはならない。
+const stated = new Map();     // "Kind N.M" -> Set(ファイル)
+for (const f of walk(LEAN).filter((p) => p.endsWith('.lean'))) {
+  const rel = relative(LEAN, f).split('\\').join('/');
+  const top = rel.split('/')[0];
+  if (top !== 'Skeleton' && top !== 'Interface') continue;
+  const text = readFileSync(f, 'utf8');
+  for (const m of text.matchAll(SRC_RE)) {
+    if (m[1] !== 'GenEll') continue;
+    const im = ITEM_RE.exec(m[2]);
+    if (!im) continue;                      // 条つき・地の文は数えない(分子と同じ規則)
+    const k = `${im[1]} ${im[2]}`;
+    if (!stated.has(k)) stated.set(k, new Set());
+    stated.get(k).add(rel);
+  }
+}
+
 const doneInNeed = [...done.keys()].filter((k) => need.has(k)).sort();
 const doneOutside = [...done.keys()].filter((k) => !need.has(k)).sort();
 const remaining = [...need].filter((k) => !done.has(k));
@@ -157,6 +178,18 @@ if (process.argv.includes('--json')) {
 console.log(`★ゴール進捗: [GenEll] の必要分 ${doneInNeed.length} / ${need.size} 件 (${(doneInNeed.length / need.size * 100).toFixed(0)}%)`);
 if (missingConsumers.length) console.log(`  ★.txt が無い需要側: ${missingConsumers.join(', ')} —— 分母はそのぶん小さく出ている`);
 console.log(`  直接名指し ${direct.size} 件 → 推移閉包 ${need.size} 件 / GenEll 全 ${G.decls.size} 件`);
+{
+  // ★★副指標。**足さない。** 上の数(完了)とは別のものを測っている。
+  const statedInNeed = [...stated.keys()].filter((k) => need.has(k) && !done.has(k)).sort(cmp);
+  const untouched = [...need].filter((k) => !done.has(k) && !stated.has(k));
+  console.log(`  ★副指標(**完了の数ではない**): statement が固定されている項目 ${statedInNeed.length} 件` +
+    ` / 手つかず ${untouched.length} 件`);
+  if (statedInNeed.length) {
+    console.log('     ★Skeleton/ か Interface/ に条なし .src がある = 「何を作れば終わりか」が型で決まっている状態。');
+    console.log(`     ★**実装したことにはならない。** 完了は上の ${doneInNeed.length} 件だけである。`);
+    for (const k of statedInNeed) console.log(`     ${k} — ${[...stated.get(k)].join(' / ')}`);
+  }
+}
 if (doneOutside.length) console.log(`  ★必要分の外に実装したもの: ${doneOutside.join(' / ')}`);
 {
   const partInNeed = [...partial.keys()].filter((k) => need.has(k) && !done.has(k)).sort(cmp);
