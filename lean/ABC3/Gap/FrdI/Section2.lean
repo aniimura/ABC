@@ -53,10 +53,10 @@ universe v u w u2 v2
 ★原典の語彙で書けば「**1 つの次数 `d` で `Ψ_d` が圏同値なら、
 すべての次数で Frobenius 型射の終域が取れる**」。
 
-★★**これは量化子の問題であって、数学の穴とは限らない** ——
-原文が `d` を固定して書いたのは**書き方の都合**で、
-著者は「すべての `d` について」を意図していた可能性が高い。
-★だから分類は ①(`modelError`)でも ③(`sourceGap`)でもなく ②(`missingMath`)とする。 -/
+★★**「`d` 固定」の読みは機械検証で偽になった**(`Check/FrdI/Prop21QuantifierGap.lean`)。
+★だから分類は ③(`sourceGap`)である。
+★**ただし数学の誤りではなく書き方の不備と見るのが妥当**で、
+意図された主張(すべての `d`)は `prop_2_1_iii` で証明済みである。 -/
 structure Gap_2_1_iii {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
     {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (d : ℕ+) :
     Prop where
@@ -67,17 +67,23 @@ def Gap_2_1_iii.record : ABC3.Meta.GapRecord :=
   { source :=
       { paper := "FrdI", pdfPage := 44, item := "Proposition 2.1, (iii)",
         sectionId := "frdi-prop-2-1" },
-    classification := ABC3.Meta.GapClass.missingMath,
+    classification := ABC3.Meta.GapClass.sourceGap,
     falsifier :=
+      "★★**機械検証済み**(`Check/FrdI/Prop21QuantifierGap.lean`)。" ++
       "★原文は `Let d ∈N≥1.` と冒頭で `d` を固定したうえで (iii) を述べるが、" ++
-      "`perfect object`(Definition 1.2, (iv))は**すべての n ∈ N≥1** を量化する。" ++
-      "`Ψ_d` が圏同値であることから出るのは n = d の場合だけで、" ++
-      "次数は乗法的なので 1 つの d から他の n は作れない(d の冪しか出ない)。" ++
-      "★これが覆るのは (a) 1 つの d から全次数の Frobenius 型射の終域が作れることが" ++
-      "示された場合(→ ①、我々の読み落とし)、または (b) 原文の意図が" ++
-      "「すべての d について」だと確定した場合(→ 実質 ①、書き方の問題)である。" ++
-      "★★我々の実装 `prop_2_1_iii` は `⟸` に「すべての n」を仮定しており、" ++
-      "`⟹` の側は原文どおり d を固定したまま成り立つ(`prop_2_1_iii_mp`)。" ++
+      "**その読みでは偽**である: " ++
+      "(1) `prop_2_1_iii_fixed_degree_false_general` —— d = 1 では " ++
+      "「素朴 Frobenius 函手が恒等函手と同型」がつねに成り立つので、" ++
+      "perfect 型でない Frobenioid **すべて**で反例になる。" ++
+      "(2) `prop_2_1_iii_fixed_degree_false_deg_three` —— d ≥ 2 でも同じ: " ++
+      "Φ = Z/2(定数)では 3 倍が全単射だが 2 倍は非全射なので、" ++
+      "次数 3 の素朴 Frobenius 函手は圏同値だが n = 2 で perfect の条件が破れる。" ++
+      "★原因は `perfect object`(Definition 1.2, (iv))が**すべての n ∈ N≥1** を量化すること。" ++
+      "★★**ただしこれは書き方の不備であって、数学の誤りではない可能性が高い** —— " ++
+      "意図された主張「すべての d で Ψ_d が圏同値 ⟺ perfect 型」は " ++
+      "`Found/FrdI/Prop21.lean` の `prop_2_1_iii` で**証明済み**である。" ++
+      "★`⟹` の側は原文どおり d を固定したまま成り立つ(`prop_2_1_iii_mp`)。" ++
+      "★これが覆るのは、原典の `d` が実は全称だと確定した場合のみである。" ++
       "★`.src` は付けていない。" }
 
 end ABC3.Gap.FrdI
