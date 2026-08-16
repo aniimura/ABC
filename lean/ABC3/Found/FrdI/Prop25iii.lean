@@ -602,7 +602,7 @@ def IsPsiValue (d : ℕ+) {A B : C} (φ ψ : A ⟶ B) : Prop :=
       IsPreStep P β ∧ IsCoAngular P β ∧ IsPullBack P α ∧
       ψ = δ ≫ γ ≫ (((psiOTri P F hτ d ⟨β, hβ⟩ : OTri P Y) : End Y) : Y ⟶ Y) ≫ α
 
-include hτ hiso in
+include hτ in
 /-- ★**存在** —— 4 重分解が取れるから。 -/
 theorem isPsiValue_exists (hmt : ∀ X : C, IsMetricallyTrivial P X)
     (haa : IsOfAutAmpleType P) (d : ℕ+) {A B : C} (φ : A ⟶ B) :
@@ -611,7 +611,7 @@ theorem isPsiValue_exists (hmt : ∀ X : C, IsMetricallyTrivial P X)
     quadFactor P F hmt haa φ
   exact ⟨_, X, Y, δ, γ, β, α, ⟨hβb, hβs.1⟩, hfac, hδ, hγi, hγs, hβs, hβc, hα, rfl⟩
 
-include hτ hiso in
+include hτ in
 /-- ★★★**well-defined 性** —— 4 重分解の取り方に依らない。
 
 ★**曖昧性が「同型による共役」と「単元倍」に尽きる**ことを、
@@ -660,17 +660,17 @@ theorem isPsiValue_unique (d : ℕ+) {A B : C} {φ ψ₁ ψ₂ : A ⟶ B}
       ⟨hkb, isLinear_of_isIso P (g.hom ≫ eY.hom)⟩, hku⟩
   -- ★手 4: `β₂ = k · (g による β₁ の共役)`
   have hgl : IsLinear P g.hom := isLinear_of_isIso P g.hom
-  have hconj : ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+  have hconj : ((conjHom P F g.hom ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
       = g.hom ≫ β₁ ≫ g.inv := by
     have hs : g.hom ≫ β₁
-        = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂) ≫ g.hom :=
-      otriLin_spec P F (hiso Y₂) hgl (⟨β₁, hm₁⟩ : OTri P Y₁)
+        = ((conjHom P F g.hom ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂) ≫ g.hom :=
+      conjHom_spec P F g.hom (⟨β₁, hm₁⟩ : OTri P Y₁)
     rw [← Category.assoc, hs]
     simp
   have hsplit₂ : (⟨β₂, hm₂⟩ : OTri P Y₂)
-      = uOf P k * otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ := by
+      = uOf P k * conjHom P F g.hom ⟨β₁, hm₁⟩ := by
     apply Subtype.ext
-    show β₂ = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+    show β₂ = ((conjHom P F g.hom ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
       ≫ (g.hom ≫ eY.hom)
     rw [hconj, hβ₂]
     simp
@@ -679,12 +679,12 @@ theorem isPsiValue_unique (d : ℕ+) {A B : C} {φ ψ₁ ψ₂ : A ⟶ B}
       = g.hom ≫ ((psiOTri P F hτ d ⟨β₁, hm₁⟩ : OTri P Y₁) : End Y₁)
         ≫ eY.hom := by
     have hs : g.hom ≫ ((psiOTri P F hτ d ⟨β₁, hm₁⟩ : OTri P Y₁) : End Y₁)
-        = ((otriLin P F (hiso Y₂) hgl (psiOTri P F hτ d ⟨β₁, hm₁⟩) :
+        = ((conjHom P F g.hom (psiOTri P F hτ d ⟨β₁, hm₁⟩) :
             OTri P Y₂) : End Y₂) ≫ g.hom :=
-      otriLin_spec P F (hiso Y₂) hgl _
+      conjHom_spec P F g.hom _
     rw [hsplit₂, psiOTri_unit_mul P F hτ d k,
-      psiOTri_otriLin P F hτ (hiso Y₂) (hiso Y₁) hgl d ⟨β₁, hm₁⟩]
-    show ((otriLin P F (hiso Y₂) hgl (psiOTri P F hτ d ⟨β₁, hm₁⟩) :
+      psiOTri_conj P F hτ g.hom d ⟨β₁, hm₁⟩]
+    show ((conjHom P F g.hom (psiOTri P F hτ d ⟨β₁, hm₁⟩) :
         OTri P Y₂) : End Y₂) ≫ (g.hom ≫ eY.hom) = _
     rw [← Category.assoc, ← hs]
     simp
@@ -711,8 +711,8 @@ include hτ hiso hmt haa in
 ★これで `Ψ : Hom(A,B) → Hom(A,B)` が**関数として定まった**。 -/
 theorem psiHom_existsUnique (d : ℕ+) {A B : C} (φ : A ⟶ B) :
     ∃! ψ : A ⟶ B, IsPsiValue P F hτ d φ ψ := by
-  obtain ⟨ψ, hψ⟩ := isPsiValue_exists P F hτ hiso hmt haa d φ
-  exact ⟨ψ, hψ, fun ψ' hψ' => isPsiValue_unique P F hτ hiso d hψ' hψ⟩
+  obtain ⟨ψ, hψ⟩ := isPsiValue_exists P F hτ hmt haa d φ
+  exact ⟨ψ, hψ, fun ψ' hψ' => isPsiValue_unique P F hτ d hψ' hψ⟩
 
 /-- ★**`Ψ` の射の上の値**。 -/
 noncomputable def psiMap (d : ℕ+) {A B : C} (φ : A ⟶ B) : A ⟶ B :=
@@ -727,7 +727,7 @@ include hτ hiso hmt haa in
 /-- ★**分解から `Ψ` の値が読める**。 -/
 theorem psiMap_eq (d : ℕ+) {A B : C} {φ ψ : A ⟶ B}
     (h : IsPsiValue P F hτ d φ ψ) : psiMap P F hτ hiso hmt haa d φ = ψ :=
-  isPsiValue_unique P F hτ hiso d (psiMap_spec P F hτ hiso hmt haa d φ) h
+  isPsiValue_unique P F hτ d (psiMap_spec P F hτ hiso hmt haa d φ) h
 
 /-! ### ★原文 (a)(b) —— `Ψ` の基本性質 -/
 
@@ -1277,26 +1277,26 @@ theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
       ⟨hkb, isLinear_of_isIso P (g.hom ≫ eY.hom)⟩, hku⟩
   have hgl : IsLinear P g.hom := isLinear_of_isIso P g.hom
   have hconj : ∀ z : OTri P Y₁,
-      ((otriLin P F (hiso Y₂) hgl z : OTri P Y₂) : End Y₂)
+      ((conjHom P F g.hom z : OTri P Y₂) : End Y₂)
         = g.hom ≫ ((z : End Y₁) : Y₁ ⟶ Y₁) ≫ g.inv := by
     intro z
     have hs : g.hom ≫ ((z : End Y₁) : Y₁ ⟶ Y₁)
-        = ((otriLin P F (hiso Y₂) hgl z : OTri P Y₂) : End Y₂) ≫ g.hom :=
-      otriLin_spec P F (hiso Y₂) hgl z
+        = ((conjHom P F g.hom z : OTri P Y₂) : End Y₂) ≫ g.hom :=
+      conjHom_spec P F g.hom z
     rw [← Category.assoc, hs]
     simp
   -- ★手 4: `Ψ` の単射性で `β` の側に戻す
   have hkey : (⟨β₂, hm₂⟩ : OTri P Y₂)
-      = uOf P k * otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ := by
+      = uOf P k * conjHom P F g.hom ⟨β₁, hm₁⟩ := by
     refine psiOTri_injective P F hτ (hiso Y₂) (hfn Y₂) d ?_
     rw [psiOTri_unit_mul P F hτ d k _,
-      psiOTri_otriLin P F hτ (hiso Y₂) (hiso Y₁) hgl d ⟨β₁, hm₁⟩]
+      psiOTri_conj P F hτ g.hom d ⟨β₁, hm₁⟩]
     apply Subtype.ext
-    show _ = ((otriLin P F (hiso Y₂) hgl _ : OTri P Y₂) : End Y₂) ≫ (g.hom ≫ eY.hom)
+    show _ = ((conjHom P F g.hom _ : OTri P Y₂) : End Y₂) ≫ (g.hom ≫ eY.hom)
     rw [hconj, hbΨ]
     simp
   have hβ₂m : β₂ = g.hom ≫ β₁ ≫ eY.hom := by
-    have hcg : β₂ = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+    have hcg : β₂ = ((conjHom P F g.hom ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
         ≫ (g.hom ≫ eY.hom) :=
       congrArg (fun z : OTri P Y₂ => ((z : End Y₂) : Y₂ ⟶ Y₂)) hkey
     rw [hcg, hconj]
