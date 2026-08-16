@@ -551,6 +551,48 @@ theorem prop_1_13_iii_pow (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
   rw [hn]
   exact hfn'.symm
 
+/-- ★`⋂_{n∈ℕ≥1} {𝒪^×(A)}^n` —— 原文 (b) の第1条件が `{1}` だと言っている集合。 -/
+def OTimesPowInter (A : C) : Set (End A) :=
+  ⋂ n : ℕ+, (fun x : End A => x ^ (n : ℕ)) '' (OTimes P A : Set (End A))
+
+include P in
+/-- ★★**quasi-Frobenius-trivial かつ Frobenius-normalized な対象では、
+`α` の成分は `⋂_n {𝒪^×}^n` に属する**。
+
+★`IsQuasiFrobeniusTrivial` は「各次数の base-identity 自己射がある」であり、
+★**`prop_1_13_iii_pow` が要求するものそのもの**である。 -/
+theorem prop_1_13_iii_mem_powInter (F : FrobenioidCore P) (hslim : IsSlimCat D) (A : C)
+    (α : (Over.forget A : Over A ⥤ C) ≅ Over.forget A) (X : Over A)
+    (hq : IsQuasiFrobeniusTrivial P X.left) (hfn : IsFrobeniusNormalized P X.left) :
+    (α.hom.app X : End X.left) ∈ OTimesPowInter P X.left := by
+  refine Set.mem_iInter.mpr (fun n => ?_)
+  obtain ⟨φ, hφb, hφd⟩ := hq n
+  obtain ⟨β, hβ, hEq⟩ := prop_1_13_iii_pow P F hslim A α X hfn φ hφb n hφd
+  exact ⟨β, hβ, hEq.symm⟩
+
+include P in
+/-- ★★**`Proposition 1.13, (iii)` の条件 (b) の場合**。
+
+原文 (FrdI p.40):
+> such that B is quasi-Frobenius-trivial and Frobenius-normalized. Then the
+
+★★**原文より強い仮定であることを明記する**。原文は
+「co-angular pre-step `B → A` で `B` が quasi-Frobenius-trivial かつ
+Frobenius-normalized なものがある」という形で、`Definition 1.3, (iii), (c)` の
+全単射 `𝒪^×(B) ≅ 𝒪^×(A)` で `A` へ送る。
+★**ここでは `A` 自身がその性質を持つ場合を実装している**。 -/
+theorem prop_1_13_iii_b (F : FrobenioidCore P) (hslim : IsSlimCat D)
+    (hq : ∀ A : C, IsQuasiFrobeniusTrivial P A)
+    (hfn : ∀ A : C, IsFrobeniusNormalized P A)
+    (hb : ∀ A : C, OTimesPowInter P A = {1}) : IsSlimCat C := by
+  intro A α
+  apply Iso.ext
+  apply NatTrans.ext
+  funext X
+  have h := prop_1_13_iii_mem_powInter P F hslim A α X (hq X.left) (hfn X.left)
+  rw [hb X.left] at h
+  exact h
+
 /-! ### ★残るのは条件 (b) の場合（2026-08-16 時点）
 
 原文 (FrdI p.40):
