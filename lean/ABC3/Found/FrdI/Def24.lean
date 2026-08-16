@@ -324,6 +324,18 @@ structure IsPerfFactorialWith (M : Type w) [AddCommMonoid M]
   `a ∈ M^pf_factor`、`b ∈ M^pf`、`Supp(a) ⊆ Supp(b)` ならば `a ∈ M^pf`。 -/
   supp : ∀ a : RlfFactor M, (∀ p, a p ∈ ι p '' pCarrierPf M p) →
       ∀ b : Pf M, Supp a ⊆ Supp (factorMap ι b) → a ∈ Set.range (factorMap ι)
+  /-- ★★**`M^rlf_p = M^pf_p ⊗ ℝ≥0`** であることの、ℝ-monoprime の場合の内容 ——
+  `M_p` が ℝ-monoprime なら `p` 成分は**正の実数倍で閉じる**。
+
+  ★★**追加した理由(2026-08-17 の測定)**: 上の `embedAdd` / `embedInj` / `embedMono`
+  だけでは `ι p` が**順序埋め込み**であることしか言っておらず、
+  ★**原文の `M^rlf_p := M^pf_p ⊗ ℝ≥0` が持つ「実数錐である」という性質が落ちる。**
+  ★原文で `Λ = ℝ` が `M` に作用できるのは、ℝ-monoprime のとき
+  `M^pf_p ⊗ ℝ≥0 = M^pf_p`(テンソルが何も足さない)だからであり、
+  ★**それをここで明示する。** ℝ-monoprime でない `p` では仮定が偽なので**空虚**であり、
+  一般の perf-factorial を強めてはいない。 -/
+  realScale : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real →
+      ∀ r : ℝ≥0, r ≠ 0 → ∀ x ∈ ι p '' pCarrierPf M p, r * x ∈ ι p '' pCarrierPf M p
 
 /-- ★★★**[FrdI] Definition 2.4, (i)** —— `perf-factorial`。
 
@@ -382,7 +394,7 @@ theorem IsPerfFactorialWith.smul {ι ι' : Prime M → Pf M → ℝ≥0} (c : Pr
     intro p T
     rw [Set.image_image]
     exact congrArg (· '' T) (funext (h p))
-  refine ⟨H.divisorial, H.monoprimeAt, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨H.divisorial, H.monoprimeAt, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro p x y hx hy
     rw [h, h, h, H.embedAdd p hx hy, mul_add]
   · intro p x hx y hy hxy
@@ -431,6 +443,11 @@ theorem IsPerfFactorialWith.smul {ι ι' : Prime M → Pf M → ℝ≥0} (c : Pr
     obtain ⟨y, hy⟩ := H.supp _ ha' b hsupp'
     refine ⟨y, funext fun p => ?_⟩
     rw [hfm, congrFun hy p, ← mul_assoc, mul_inv_cancel₀ (hc p), one_mul]
+  · intro p hp r hr x hx
+    rw [himg p (pCarrierPf M p)] at hx ⊢
+    obtain ⟨z, hz, rfl⟩ := hx
+    refine ⟨r * z, H.realScale p hp r hr z hz, ?_⟩
+    ring
 
 /-! ## ★段 3 —— `Definition 2.4, (ii)` `Λ supports M`
 
@@ -473,6 +490,20 @@ noncomputable def nsmulEquiv {M : Type w} [AddCommMonoid M] (h : IsPerfectMonoid
     (n : ℕ+) : M ≃+ M :=
   AddEquiv.ofBijective (nsmulHom ((n : ℕ+) : ℕ) M) (h n)
 
+/-- ★★**「`Λ>0` acts naturally on `M`」の `Λ = ℚ` の場合** ——
+`q = num/den` に対し `q · x` は `den • y = num • x` なる**一意な** `y`。
+
+★**一意性を与えるのが `M` の perfect 性**(`nsmulEquiv`)。 -/
+noncomputable def ratSmulHom {M : Type w} [AddCommMonoid M] (h : IsPerfectMonoid M)
+    (q : ℚ≥0) : M →+ M :=
+  (nsmulEquiv h ⟨q.den, NNRat.den_pos q⟩).symm.toAddMonoidHom.comp (nsmulHom q.num M)
+
+/-- ★`ratSmulHom` を特徴づける等式 —— `den • (q · x) = num • x`。 -/
+theorem ratSmulHom_spec {M : Type w} [AddCommMonoid M] (h : IsPerfectMonoid M)
+    (q : ℚ≥0) (x : M) : q.den • ratSmulHom h q x = q.num • x := by
+  show (nsmulEquiv h ⟨q.den, NNRat.den_pos q⟩) ((nsmulEquiv h ⟨q.den, NNRat.den_pos q⟩).symm (q.num • x)) = _
+  rw [AddEquiv.apply_symm_apply]
+
 /-! ### ★「`Λ>0` が `M` に自然に作用する」について
 
 ★原文は (ii) の末尾で
@@ -487,6 +518,98 @@ noncomputable def nsmulEquiv {M : Type w} [AddCommMonoid M] (h : IsPerfectMonoid
   正のスカラー倍で閉じ、`Supp` が変わらないので **(d) の条件により `M^pf` に戻る**。
   ★**(c) が ℝ-monoprime を要求する理由がこれである。**
 -/
+
+/-! ### ★★`Λ = ℝ` の作用 —— 「`Λ>0` acts naturally on `M`」の ℝ の場合
+
+★★**筋**: `factorMap` の像の上で成分ごとに `ℝ≥0` 倍し、★**(d) で `M^pf` に戻す**。
+
+★**(d) が使える理由**: 正の実数倍は `Supp` を変えない(`0` は `0` に、`≠ 0` は `≠ 0` に)。
+★**成分が `M^pf_p` に留まる理由**: 各 `M_p` が ℝ-monoprime なので
+`M^rlf_p = M^pf_p ⊗ ℝ≥0 = M^pf_p`(`realScale`)。
+★★**この 2 点がちょうど (c)(d) と (ii)(c) の ℝ-monoprime 条件に対応する。** -/
+
+/-- ★因子分解写像は `0` を `0` に送る。 -/
+theorem factorMap_zero {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι) :
+    factorMap ι 0 = 0 := by
+  have h := H.factorAdd 0 0
+  rw [add_zero] at h
+  refine funext fun p => ?_
+  have hp := congrFun h p
+  simp only [Pi.add_apply] at hp
+  show factorMap ι 0 p = 0
+  have h2 : factorMap ι 0 p + 0 = factorMap ι 0 p + factorMap ι 0 p := by
+    rw [add_zero]; exact hp
+  exact (add_left_cancel h2).symm
+
+/-- ★★★**`ℝ>0` の作用の存在と一意性** —— 各成分を `r` 倍した元が `M^pf` にただ 1 つある。 -/
+theorem exists_real_smul {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) (a : Pf M) :
+    ∃! b : Pf M, ∀ p, factorMap ι b p = r * factorMap ι a p := by
+  have h1 : ∀ p, (fun q => r * factorMap ι a q) p ∈ ι p '' pCarrierPf M p :=
+    fun p => H.realScale p (hR p) r hr _ (H.factorMem a p)
+  have h2 : Supp (fun q => r * factorMap ι a q) ⊆ Supp (factorMap ι a) := by
+    intro p hp
+    show factorMap ι a p ≠ 0
+    intro h0
+    exact hp (show r * factorMap ι a p = 0 by rw [h0, mul_zero])
+  obtain ⟨b, hb⟩ := H.supp _ h1 a h2
+  refine ⟨b, fun p => congrFun hb p, fun b' hb' => ?_⟩
+  refine H.factorInj (funext fun p => ?_)
+  rw [hb' p, congrFun hb p]
+
+/-- ★★**`ℝ>0` の `M^pf` への作用**。 -/
+noncomputable def realSmul {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) (a : Pf M) : Pf M :=
+  (exists_real_smul H hR hr a).choose
+
+theorem realSmul_spec {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) (a : Pf M) (p : Prime M) :
+    factorMap ι (realSmul H hR hr a) p = r * factorMap ι a p :=
+  (exists_real_smul H hR hr a).choose_spec.1 p
+
+theorem realSmul_zero {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) : realSmul H hR hr 0 = 0 := by
+  refine H.factorInj (funext fun p => ?_)
+  rw [realSmul_spec, factorMap_zero H]
+  show r * (0 : RlfFactor M) p = (0 : RlfFactor M) p
+  simp
+
+theorem realSmul_add {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) (a b : Pf M) :
+    realSmul H hR hr (a + b) = realSmul H hR hr a + realSmul H hR hr b := by
+  refine H.factorInj (funext fun p => ?_)
+  rw [realSmul_spec, H.factorAdd, H.factorAdd]
+  simp only [Pi.add_apply]
+  rw [realSmul_spec, realSmul_spec, mul_add]
+
+/-- ★★★**「`Λ>0` acts naturally on `M`」の `Λ = ℝ` の場合** ——
+`r ∈ ℝ>0` は `M^pf` の**加法自己準同型**を定める。 -/
+noncomputable def realSmulHom {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r : ℝ≥0} (hr : r ≠ 0) : Pf M →+ Pf M where
+  toFun := realSmul H hR hr
+  map_zero' := realSmul_zero H hR hr
+  map_add' := realSmul_add H hR hr
+
+/-- ★**作用であること 1** —— `1` 倍は恒等。 -/
+theorem realSmul_one {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real) (a : Pf M) :
+    realSmul H hR one_ne_zero a = a := by
+  refine H.factorInj (funext fun p => ?_)
+  rw [realSmul_spec, one_mul]
+
+/-- ★★**作用であること 2** —— 積は合成に対応する。 -/
+theorem realSmul_mul {ι : Prime M → Pf M → ℝ≥0} (H : IsPerfFactorialWith M ι)
+    (hR : ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real)
+    {r s : ℝ≥0} (hr : r ≠ 0) (hs : s ≠ 0) (a : Pf M) :
+    realSmul H hR (mul_ne_zero hr hs) a = realSmul H hR hr (realSmul H hR hs a) := by
+  refine H.factorInj (funext fun p => ?_)
+  rw [realSmul_spec, realSmul_spec, realSmul_spec, mul_assoc]
 
 /-! ## ★段 4 —— `Definition 2.4, (iii)` `d·Φ(−)` / `𝒞(d)` / `d` の Frobenius 函手
 
@@ -618,5 +741,40 @@ theorem isScalarAction_nsmul (d : ℕ+) :
   ⟨fun α x => by rw [nsmulHom_apply, nsmulHom_apply, map_nsmul]⟩
 
 end Cd
+
+/-! ## ★★★`Definition 2.4` 全体の `.src`
+
+★★**原文の項目と実装の対応**(数え落とし防止のため表にする):
+
+| 原文 | 実装 |
+|---|---|
+| (i)(a) `M` is divisorial | `IsPerfFactorialWith.divisorial` |
+| (i)(b) 各 `M_p` が monoprime | `IsPerfFactorialWith.monoprimeAt` |
+| (i)(c) 因子分解写像 well-defined | `IsPerfFactorialWith.bounded`(★原文が角括弧で書く**条件**) |
+| (i)(c) 単射準同型 | `IsPerfFactorialWith.factorAdd` / `.factorInj`(写像は `factorMap`) |
+| (i)(c) 像が `∏_p M^pf_p` に入る | `IsPerfFactorialWith.factorMem`(★これも**条件**) |
+| (i)(d) `Supp` の条件 | `IsPerfFactorialWith.supp` |
+| (i) `M^rlf`(realification、p.48) | `Rlf` / `factorMap_mem_rlf` |
+| (ii) `Λ supports M` | `Supports`(3 場合そのまま) |
+| (ii) `Λ>0` が `M` に自然に作用する | `nsmulHom`(ℤ) / `ratSmulHom`(ℚ、`ratSmulHom_spec`) / `realSmulHom`(ℝ、`realSmul_one` / `realSmul_mul`) |
+| (iii) `d · Φ(−) ⊆ Φ(−)` | `scalePhi` / `scalePhi_map`、一般の `Λ` は `scalePhiOf` / `scalePhiOf_map` |
+| (iii) `C(d) ⊆ C` | `Cd`、一般の `Λ` は `CdOf` |
+| (iii) `d` の Frobenius 函手 `F_Φ → F_Φ` | `frobFunctorOfDeg` |
+| (iii) 次数・射影との両立 | `frobFunctorOfDeg_deg` / `frobFunctorOfDeg_base` / `frobFunctorOfDeg_div_mem` |
+
+★★**`⊗ ℝ≥0` の実体**(原文が一言で済ませる箇所)は `pfLift`(`m/n ↦ f m / n`)であり、
+★**同型の取り方に依らないこと**は `pfLift_smul`(正の実数倍を除いて一意)＋
+`IsPerfFactorialWith.smul`(その取り替えで perf-factorial 性が保たれる)で押さえた。
+
+★★**`realScale` フィールドについて**: `embedAdd` / `embedInj` / `embedMono` だけでは
+`ι p` が**順序埋め込み**であることしか言わず、
+★原文の `M^rlf_p := M^pf_p ⊗ ℝ≥0` が持つ「**実数錐である**」性質が落ちる。
+★`realScale` はその性質の、**ℝ-monoprime の場合の内容**(`M^pf_p ⊗ ℝ≥0 = M^pf_p`)であり、
+★**ℝ-monoprime でない `p` では仮定が偽なので空虚**である(一般の perf-factorial を強めない)。
+★これが無いと `Λ = ℝ` の作用が作れない —— ★**原文が (ii)(c) に ℝ-monoprime を
+入れている必然性がここにある。** -/
+def definition_2_4.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 47, item := "Definition 2.4",
+    sectionId := "frdi-def-2-4" }
 
 end ABC3.Found.FrdI
