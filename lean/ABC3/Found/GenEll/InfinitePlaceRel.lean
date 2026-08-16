@@ -134,6 +134,65 @@ theorem sum_mult_comap_eq (v : InfinitePlace F) :
       InfinitePlace.card_filter_mk_eq v]
   rw [← hcount1, hcount2]
 
+/-! ## ★★底変換のアルキメデス側
+
+原文 (GenEll p.4):
+> — where cv ∈ Z if v ∈ V(F )non and cv ∈ R if v ∈ V(F )arc [cf. [Szp], §1.1]. Here, if
+
+★算術因子を `F` から `K` へ引き戻すとき、アルキメデス側の係数は
+`[K_w : F_v]·r_v`(= `(mult w / mult v)·r_v`)である。
+その総和が **`[K:F]` 倍**になることが、正規化次数の底変換不変性の
+アルキメデス側そのものである。 -/
+
+open scoped Classical in
+/-- ★★**底変換でアルキメデス側の次数は `[K:F]` 倍になる**。
+
+★上の `sum_mult_comap_eq` の直接の帰結である。
+`mult` の比を**実数の割り算**で取ることで、自然数の整除を経由せずに済む。 -/
+theorem sum_arc_base_change (r : InfinitePlace F → ℝ) :
+    ∑ w : InfinitePlace K,
+        ((InfinitePlace.mult w : ℝ)
+            / (InfinitePlace.mult (w.comap (algebraMap F K)) : ℝ))
+          * r (w.comap (algebraMap F K))
+      = (Module.finrank F K : ℝ) * ∑ v : InfinitePlace F, r v := by
+  classical
+  rw [← Finset.sum_fiberwise_of_maps_to
+    (g := fun w : InfinitePlace K => w.comap (algebraMap F K))
+    (t := (Finset.univ : Finset (InfinitePlace F)))
+    (fun w _ => Finset.mem_univ _)]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun v _ => ?_
+  have hmv : ((InfinitePlace.mult v : ℕ) : ℝ) ≠ 0 := InfinitePlace.mult_coe_ne_zero
+  have hinner : ∑ w ∈ Finset.univ.filter
+      (fun w : InfinitePlace K => w.comap (algebraMap F K) = v),
+        ((InfinitePlace.mult w : ℝ)
+            / (InfinitePlace.mult (w.comap (algebraMap F K)) : ℝ))
+          * r (w.comap (algebraMap F K))
+      = (∑ w ∈ Finset.univ.filter
+          (fun w : InfinitePlace K => w.comap (algebraMap F K) = v),
+            (InfinitePlace.mult w : ℝ)) / (InfinitePlace.mult v : ℝ) * r v := by
+    rw [Finset.sum_div, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun w hw => ?_
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hw
+    rw [hw]
+  rw [hinner]
+  have hsum : (∑ w ∈ Finset.univ.filter
+      (fun w : InfinitePlace K => w.comap (algebraMap F K) = v),
+        (InfinitePlace.mult w : ℝ))
+      = ((InfinitePlace.mult v : ℕ) : ℝ) * (Module.finrank F K : ℝ) := by
+    have := sum_mult_comap_eq F K v
+    have hcast : ((∑ w ∈ Finset.univ.filter
+        (fun w : InfinitePlace K => w.comap (algebraMap F K) = v),
+          InfinitePlace.mult w : ℕ) : ℝ)
+        = ∑ w ∈ Finset.univ.filter
+            (fun w : InfinitePlace K => w.comap (algebraMap F K) = v),
+              (InfinitePlace.mult w : ℝ) := by push_cast; ring
+    rw [← hcast, this]
+    push_cast
+    ring
+  rw [hsum]
+  field_simp
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mult_comap_eq.src : ABC3.Meta.Source :=
