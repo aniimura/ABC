@@ -1410,6 +1410,126 @@ theorem liftsSquareResp_of_linear (F : FrobenioidCore P) (G : Frobenioid P)
   exact liftsSquareResp_of_coAngularLinear P F G p
     (prop_1_4_ii_mp P F p hppb).1.1 (prop_1_4_ii_mp P F p hppb).2
 
+/-! ### ★★co-angular 性は「合成から因子へ」なら継承される(2026-08-16)
+
+★★**「co-angular 性は分解しない」と私は何度も書いたが、正確ではなかった。**
+
+★co-angular の定義は「3 分解 `φ = γ ≫ β ≫ α` の**真ん中** `β` が同型」である。
+★**合成 `α₀ ≫ φ` の 3 分解は `φ` の 3 分解から作れる**(`γ` を `α₀ ≫ γ` に替えるだけ)ので、
+★★**`α₀ ≫ φ` が co-angular なら `φ` も co-angular** ——
+ただし側条件「`α` か `γ` が base-isomorphism」を保つために
+★**`α₀` が base-isomorphism であること**が要る。
+
+★**反対側も同じ**: `φ ≫ β₀` が co-angular で `β₀` が base-isomorphism ＋ linear なら
+`φ` も co-angular。
+
+★★**分解しないのは「合成が co-angular ⟹ **両**因子が co-angular」のほうであって、
+「合成が co-angular ⟹ **注目する**因子が co-angular」は
+`base-isomorphism` の側条件つきで成り立つ。**
+★**私は前者の反例を後者に読み替えていた。**
+
+★★**片側は `Proposition 1.9` の `isCoAngular_of_comp_left` として既にあった**
+(`Prop19.lean:70`)。★**もう片側(右から合成する側)がここで要る。**
+-/
+
+include P in
+/-- ★**`φ ≫ β` が co-angular で `β` が base-isomorphism ＋ linear なら
+`φ` も co-angular**。
+
+★`Prop19.lean` の `isCoAngular_of_comp_left`(左から合成する側)の対である。 -/
+theorem isCoAngular_of_comp_right {A B Z : C} (φ : A ⟶ B) (β : B ⟶ Z)
+    (hβb : IsBaseIsomorphism P β) (hβlin : IsLinear P β)
+    (h : IsCoAngular P (φ ≫ β)) : IsCoAngular P φ := by
+  intro X Y γ β' α' hfac hα'lin hβ'iso hβ'step hbase
+  refine h X Y γ β' (α' ≫ β) (by rw [hfac]; simp)
+    (IsLinear.comp P hα'lin hβlin) hβ'iso hβ'step ?_
+  rcases hbase with h1 | h2
+  · refine Or.inl ?_
+    show IsIso (P.Base (α' ≫ β))
+    haveI : IsIso (P.Base α') := h1
+    haveI : IsIso (P.Base β) := hβb
+    rw [P.Base_comp]
+    infer_instance
+  · exact Or.inr h2
+
+/-! ### ★★(v) の「Moreover, φ is a pull-back morphism if and only if ψ is」
+
+★★**検証役の指摘**: `prop_1_11_v_pullBack_iff_reduce` は
+`(IsPullBack φ ↔ IsPullBack ψ) ↔ (IsLBInvertible φ ↔ IsLBInvertible ψ)` という
+★**還元**にすぎず、還元先が証明されていなかった。
+
+★**LB-invertible = co-angular ＋ isometric** なので、2 つに分かれる:
+- **isometric**: ★**`Div ψ = Φ.map (Base α) (Div φ)`** が言えれば両向き
+  (`Φ.map` は単射)。この等式は条件 `hcond` と `Div` の合成則から**消約**で出る
+- **co-angular**: 上の 2 本(合成から因子へ)で両向き
+-/
+
+include P in
+/-- ★★**(v) の四角形は `Div` を移す** —— `Div ψ = α∗(Div φ)`。
+
+★**条件 `hcond` から `Div α = Φ.map (Base ψ) (Div β)` が出て**、
+それを `Div` の合成則に入れて消約すると出る。 -/
+theorem prop_1_11_v_div_transfer {A B Cc Dd : C} (φ : A ⟶ B) (ψ : Cc ⟶ Dd)
+    (α : Cc ⟶ A) (hαs : IsPreStep P α) (β : Dd ⟶ B) (hβs : IsPreStep P β)
+    (hsq : ψ ≫ β = α ≫ φ) (hφl : IsLinear P φ) (hψl : IsLinear P ψ)
+    (hcond : haveI : IsIso (P.Base α) := hαs.2
+             haveI : IsIso (P.Base β) := hβs.2
+             Φ.map (inv (P.Base α)) (P.Div α)
+               = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) :
+    P.Div ψ = Φ.map (P.Base α) (P.Div φ) := by
+  haveI hbα : IsIso (P.Base α) := hαs.2
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  have hbsq : P.Base ψ ≫ P.Base β = P.Base α ≫ P.Base φ := by
+    rw [← P.Base_comp, ← P.Base_comp, hsq]
+  have hbb : Φ.map (P.Base β) (Φ.map (inv (P.Base β)) (P.Div β)) = P.Div β := by
+    rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]
+  have hdivα : P.Div α = Φ.map (P.Base ψ) (P.Div β) := by
+    have h := congrArg (Φ.map (P.Base α)) hcond
+    rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id, ← Φ.map_comp, ← hbsq, Φ.map_comp,
+      hbb] at h
+    exact h
+  have h := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp, show P.degFr β = 1 from hβs.1,
+    show P.degFr φ = 1 from hφl, hdivα] at h
+  letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj Cc).base).1.1
+  simp only [PNat.one_coe, one_smul] at h
+  have h' : Φ.map (P.Base ψ) (P.Div β) + P.Div ψ
+      = Φ.map (P.Base ψ) (P.Div β) + Φ.map (P.Base α) (P.Div φ) := by
+    rw [add_comm (Φ.map (P.Base ψ) (P.Div β)) (Φ.map (P.Base α) (P.Div φ))]
+    exact h
+  exact add_left_cancel h'
+
+include P in
+/-- ★★★**(v) の「Moreover」** —— `φ` が pull-back ⟺ `ψ` が pull-back。 -/
+theorem prop_1_11_v_pullBack_iff (F : FrobenioidCore P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (ψ : Cc ⟶ Dd)
+    (α : Cc ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (β : Dd ⟶ B) (hβc : IsCoAngular P β) (hβs : IsPreStep P β)
+    (hsq : ψ ≫ β = α ≫ φ) (hφl : IsLinear P φ) (hψl : IsLinear P ψ)
+    (hcond : haveI : IsIso (P.Base α) := hαs.2
+             haveI : IsIso (P.Base β) := hβs.2
+             Φ.map (inv (P.Base α)) (P.Div α)
+               = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) :
+    IsPullBack P φ ↔ IsPullBack P ψ := by
+  have hdt := prop_1_11_v_div_transfer P φ ψ α hαs β hβs hsq hφl hψl hcond
+  rw [prop_1_4_ii P F φ, prop_1_4_ii P F ψ]
+  constructor
+  · rintro ⟨⟨hco, hisom⟩, -⟩
+    refine ⟨⟨?_, ?_⟩, hψl⟩
+    · refine isCoAngular_of_comp_right P ψ β hβs.2 hβs.1 ?_
+      rw [hsq]
+      exact F.coAngularComp α φ hαc hco
+    · show P.Div ψ = 0
+      rw [hdt, show P.Div φ = 0 from hisom, map_zero]
+  · rintro ⟨⟨hco, hisom⟩, -⟩
+    refine ⟨⟨?_, ?_⟩, hφl⟩
+    · refine isCoAngular_of_comp_left P α φ ?_ hαs.2
+      rw [← hsq]
+      exact F.coAngularComp ψ β hco hβc
+    · show P.Div φ = 0
+      refine Φ.map_injective (P.Base α) ?_
+      rw [← hdt, show P.Div ψ = 0 from hisom, map_zero]
+
 /-! ### ★(旧)残る 1 場合 —— **isometric pre-step**(2026-08-16 の測定)
 
 ★`Proposition 1.7, (iii)` が linear `φ` を `(pre-step) ≫ (pull-back)` に割り、
