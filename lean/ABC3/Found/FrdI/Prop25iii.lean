@@ -305,6 +305,91 @@ noncomputable def psiOTriHom (d : ℕ+) : OTri P A →* OTri P A where
   map_one' := psiOTri_one P F hτ hA hfn d
   map_mul' := psiOTri_mul P F hτ hA hfn d
 
+/-! ### ★★`Ψ` の自然性 —— well-defined 性の核
+
+★4 重分解には**選び方の自由**がある(原文の
+`(α∘ε, ε⁻¹∘β∘ζ, ζ⁻¹∘γ∘θ, θ⁻¹∘δ)`)。★**その自由度は 2 種類**である:
+
+1. **単元倍** —— `β` が `𝒪^×` の元だけずれる
+2. **同型による共役** —— `β` が別の対象へ移る
+
+★**`Ψ` はどちらにも可換である**ことをここで示す。
+-/
+
+include hfn in
+/-- ★★**単元倍との可換性** —— `Ψ(u · β) = u · Ψ(β)`。
+
+★分裂の単元成分に `u` が乗るだけで、`τ` 成分は変わらない。 -/
+theorem psiOTri_unit_mul (d : ℕ+) (u : OTimes P A) (β : OTri P A) :
+    psiOTri P F hτ hA d (uOf P u * β) = uOf P u * psiOTri P F hτ hA d β := by
+  set p := (splitEquiv P F hτ hA).symm β with hp
+  have hβ : uOf P p.1 * tOf P F hτ hA p.2 = β := by
+    rw [hp, ← splitEquiv_apply P F hτ hA]
+    exact (splitEquiv P F hτ hA).apply_symm_apply β
+  have hsplit : (splitEquiv P F hτ hA).symm (uOf P u * β) = (u * p.1, p.2) := by
+    refine (splitEquiv P F hτ hA).symm_apply_eq.mpr ?_
+    rw [splitEquiv_apply]
+    show uOf P u * β = uOf P (u * p.1) * tOf P F hτ hA p.2
+    rw [show uOf P (u * p.1) = uOf P u * uOf P p.1 from rfl, mul_assoc, hβ]
+  show uOf P (((splitEquiv P F hτ hA).symm (uOf P u * β)).1)
+      * (tOf P F hτ hA (((splitEquiv P F hτ hA).symm (uOf P u * β)).2)) ^ ((d : ℕ+) : ℕ) = _
+  rw [hsplit]
+  show uOf P (u * p.1) * (tOf P F hτ hA p.2) ^ ((d : ℕ+) : ℕ) = _
+  rw [show uOf P (u * p.1) = uOf P u * uOf P p.1 from rfl, mul_assoc]
+  rfl
+
 end Psi
+
+/-! ## ★★同型による共役との可換性
+
+★`otriLin`(`Proposition 2.2, (ii)` の射の対応)は、同型 `j` に沿えば
+`𝒪^▷` の間のモノイド同型を与える。★**`τ` は部分関手なのでそれで保たれ**
+(`IsCharacteristicSplitting.map_mem`)、★**`𝒪^×` も保たれる**
+(`otriLin_otimes_mem`)。★したがって分裂が可換になり、`Ψ` も可換になる。
+-/
+
+section Conj
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ)
+
+include hτ in
+/-- ★★**`otriLin` は分裂と可換** —— `𝒪^×` も `τ` も保たれるから。 -/
+theorem splitEquiv_otriLin {Y Y' : C} (hY : IsIsotropic P Y) (hY' : IsIsotropic P Y')
+    {j : Y ⟶ Y'} (hjl : IsLinear P j) (β : OTri P Y') :
+    (splitEquiv P F hτ hY).symm (otriLin P F hY hjl β)
+      = (⟨((otriLin P F hY hjl (uOf P ((splitEquiv P F hτ hY').symm β).1) : OTri P Y) : End Y),
+          otriLin_otimes_mem P F hY hjl _ ((splitEquiv P F hτ hY').symm β).1.2⟩,
+         ⟨((otriLin P F hY hjl (tOf P F hτ hY' ((splitEquiv P F hτ hY').symm β).2) :
+              OTri P Y) : End Y),
+          hτ.map_mem hY hjl _ ((splitEquiv P F hτ hY').symm β).2.2⟩) := by
+  refine (splitEquiv P F hτ hY).symm_apply_eq.mpr ?_
+  rw [splitEquiv_apply]
+  show otriLin P F hY hjl β
+    = otriLin P F hY hjl (uOf P _) * otriLin P F hY hjl (tOf P F hτ hY' _)
+  rw [← map_mul]
+  congr 1
+  show β = uOf P ((splitEquiv P F hτ hY').symm β).1 * tOf P F hτ hY' _
+  rw [← splitEquiv_apply P F hτ hY']
+  exact ((splitEquiv P F hτ hY').apply_symm_apply β).symm
+
+include hτ in
+/-- ★★★**`Ψ` は `otriLin` と可換** —— `Ψ(otriLin j β) = otriLin j (Ψ β)`。
+
+★**これが 4 重分解の「対象の取り替え」に対する不変性**である。 -/
+theorem psiOTri_otriLin {Y Y' : C} (hY : IsIsotropic P Y) (hY' : IsIsotropic P Y')
+    {j : Y ⟶ Y'} (hjl : IsLinear P j) (d : ℕ+) (β : OTri P Y') :
+    psiOTri P F hτ hY d (otriLin P F hY hjl β)
+      = otriLin P F hY hjl (psiOTri P F hτ hY' d β) := by
+  show uOf P (((splitEquiv P F hτ hY).symm (otriLin P F hY hjl β)).1)
+      * (tOf P F hτ hY (((splitEquiv P F hτ hY).symm (otriLin P F hY hjl β)).2))
+        ^ ((d : ℕ+) : ℕ) = _
+  rw [splitEquiv_otriLin P F hτ hY hY' hjl β]
+  show (otriLin P F hY hjl (uOf P _) : OTri P Y)
+      * (otriLin P F hY hjl (tOf P F hτ hY' _) : OTri P Y) ^ ((d : ℕ+) : ℕ) = _
+  rw [← map_pow, ← map_mul]
+  rfl
+
+end Conj
 
 end ABC3.Found.FrdI
