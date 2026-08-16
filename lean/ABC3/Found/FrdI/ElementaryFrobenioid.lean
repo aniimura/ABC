@@ -268,6 +268,19 @@ def charOn (Φ : MonoidOn.{v, u, w} D) : MonoidOn.{v, u, w} D where
     show Function.Bijective (charMap (Φ.map α))
     exact ⟨(Φ.charInj α).2, charMap_surjective (Φ.fsmIso α hα).2⟩
 
+/-! ### ★★`Φ` が `non-dilating`（2026-08-16 追加）
+
+原文 (FrdI p.19):
+> divisorial, then we shall say that Φ is non-dilating if the endomorphisms of Φ(A),
+
+★**対象ごとの `IsNonDilating`（`MonoidVocabulary`）を、
+`End_𝒟(A)` が誘導する自己準同型全体に課したもの**である。 -/
+
+/-- **[FrdI] Definition 1.1, (ii)** `Φ` が `non-dilating`。 -/
+def MonoidOn.IsNonDilatingOn (Φ : MonoidOn.{v, u, w} D) : Prop :=
+  ∀ (A : D) (e : A ⟶ A), IsNonDilating (Φ.map e)
+
+
 @[simp] theorem charOn_val (Φ : MonoidOn.{v, u, w} D) (A : D) :
     (Φ.charOn).val A = MChar (Φ.val A) := rfl
 

@@ -704,12 +704,12 @@ def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n 
 `CharRel a b` の証人に `u := b`, `v := a` を取ればよい。 -/
 
 /-- ★**群では任意の 2 元が `CharRel` で結ばれる**。 -/
-theorem charRel_of_addGroup {G : Type w} [AddCommGroup G] (a b : G) : CharRel a b :=
+theorem charRel_of_addGroup {G : Type*} [AddCommGroup G] (a b : G) : CharRel a b :=
   ⟨b, a, ⟨⟨b, -b, by simp, by simp⟩, rfl⟩, ⟨⟨a, -a, by simp, by simp⟩, rfl⟩,
     add_comm a b⟩
 
 /-- ★★**群の `M^char` は自明**。 -/
-instance subsingleton_mChar_of_addGroup {G : Type w} [AddCommGroup G] :
+instance subsingleton_mChar_of_addGroup {G : Type*} [AddCommGroup G] :
     Subsingleton (MChar G) := by
   constructor
   intro x y
@@ -1189,7 +1189,7 @@ def charMap (φ : M →+ N) : MChar M →+ MChar N :=
 /-- ★**従って、群の間の写像の `charMap` は自動で単射**。
 
 ★★**これが「`Φ^gp` の条件 (a) の半分は無料」の中身である。** -/
-theorem charMap_injective_of_addGroup {G H : Type w} [AddCommGroup G] [AddCommGroup H]
+theorem charMap_injective_of_addGroup {G H : Type*} [AddCommGroup G] [AddCommGroup H]
     (g : G →+ H) : Function.Injective (charMap g) :=
   fun _ _ _ => Subsingleton.elim _ _
 
