@@ -23,6 +23,7 @@ import ABC3.Found.FrdI.Prop113
 import ABC3.Found.FrdI.Prop114
 import ABC3.Found.FrdI.Prop21
 import ABC3.Found.FrdI.Prop22
+import ABC3.Found.FrdI.Def23
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -34,6 +35,7 @@ import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence
 import ABC3.Found.GenEll.Sl2Level
+import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
