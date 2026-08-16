@@ -570,6 +570,52 @@ theorem prop_1_10_i_lbInvertible_of (F : FrobenioidCore P) {A B A' B' : C}
   ⟨prop_1_10_i_coAngular_of P F hα hβ hsq hφ.1,
    prop_1_10_i_isometric_of P hα.1.2 hβ.1.2 hsq hφ.2⟩
 
+include P in
+/-- ★**`φ` が linear なら `φ′` もそう**。★`degFr` の一致から直ちに出る。 -/
+theorem prop_1_10_i_linear_of {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hd : P.degFr α = P.degFr β) (hsq : φ ≫ β = α ≫ φ') (hφ : IsLinear P φ) :
+    IsLinear P φ' := by
+  show P.degFr φ' = 1
+  rw [← prop_1_10_i_degFr_phi_eq P hd hsq]
+  exact hφ
+
+include P in
+/-- ★**`φ` が pre-step なら `φ′` もそう**（7 タイプのうちの 1 つ）。 -/
+theorem prop_1_10_i_preStep_of {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsFrobeniusType P α) (hβ : IsFrobeniusType P β)
+    (hd : P.degFr α = P.degFr β) (hsq : φ ≫ β = α ≫ φ') (hφ : IsPreStep P φ) :
+    IsPreStep P φ' :=
+  ⟨prop_1_10_i_linear_of P hd hsq hφ.1,
+   prop_1_10_i_baseIso_of P hα.2 hβ.2 hsq hφ.2⟩
+
+include P in
+/-- ★**`φ` が Frobenius 型なら `φ′` もそう**（7 タイプのうちの 1 つ）。 -/
+theorem prop_1_10_i_frobType_of (F : FrobenioidCore P) {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsFrobeniusType P α) (hβ : IsFrobeniusType P β)
+    (hsq : φ ≫ β = α ≫ φ') (hφ : IsFrobeniusType P φ) :
+    IsFrobeniusType P φ' :=
+  ⟨prop_1_10_i_lbInvertible_of P F hα hβ hsq hφ.1,
+   prop_1_10_i_baseIso_of P hα.2 hβ.2 hsq hφ.2⟩
+
+include P in
+/-- ★★**`φ` が pull-back なら `φ′` もそう**（7 タイプの最後の 1 つ）。
+
+★★**`Proposition 1.4, (ii)` を両向きに使う**:
+`IsPullBack ⇔ IsLBInvertible ∧ IsLinear`。
+★普遍性（hom 集合の全単射）を直接扱わずに済む。 -/
+theorem prop_1_10_i_pullBack_of (F : FrobenioidCore P) {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsFrobeniusType P α) (hβ : IsFrobeniusType P β)
+    (hd : P.degFr α = P.degFr β) (hsq : φ ≫ β = α ≫ φ') (hφ : IsPullBack P φ) :
+    IsPullBack P φ' := by
+  obtain ⟨hlb, hlin⟩ := (prop_1_4_ii P F φ).mp hφ
+  exact (prop_1_4_ii P F φ').mpr
+    ⟨prop_1_10_i_lbInvertible_of P F hα hβ hsq hlb,
+     prop_1_10_i_linear_of P hd hsq hlin⟩
+
 /-! ## ★★(ii) —— **pre-step と Frobenius 型は順序を入れ替えられる**
 
 原文 (FrdI p.34):
@@ -2311,7 +2357,7 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 |---|---|---|
 | (i) | ★`β` の量化子が逆——原文「Suppose that α, β **are** morphisms of Frobenius type」は ∀、実装は ∃ | `prop_1_10_i_exists` |
 | (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
-| (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★残るは pre-step と pull-back の 2 タイプ | `prop_1_10_i_four_types` |
+| (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★★**7 タイプすべて実装完了**（上の 4 本 ＋  /  /  / ） | `prop_1_10_i_four_types` |
 | (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
 | (iii) | ★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている | `prop_1_10_iii_otri_perfect`, `prop_1_10_iii_otimes_perfect` |
 | (iii) | 「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ | `prop_1_10_iii_image_perfect` |
