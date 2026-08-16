@@ -138,6 +138,56 @@ theorem prop_2_5_ii_frobTrivial (hmt : ∀ A : C, IsMetricallyTrivial P A) (A : 
   obtain ⟨θ⟩ := prop_2_5_ii_baseTrivial P F hmt A B ⟨e.symm⟩
   exact isFrobeniusTrivial_of_iso (istrPre P F) (istr_frobenioidCore P F) θ hB
 
+/-! ## ★★divisorial なモノイドでは `d` 倍が単射
+
+★★**`Ψ` が忠実・充満であることの土台**である。原文は `Proposition 2.5, (iii)` の
+最後で「`Ψ`・`𝒞(d)` の定義から明らか」と書くが、そこには
+**「`t^d` から `t` が一意に戻る」**という事実が要る。
+
+★★★**証明は `Gp M` を経由する**:
+`d • x = d • y` なら `z := x − y ∈ Gp M` が `d • z = 0` を満たす。
+★`0` は `M` の像なので **saturated** から `z` も `−z` も `M` の像であり、
+その和が `0` なので **integral** ＋ **sharp** で `z = 0`。
+-/
+
+/-- ★`toGp` は零を保つ。 -/
+theorem toGp_zero (M : Type w) [AddCommMonoid M] : toGp M 0 = 0 :=
+  AddLocalization.mk_zero
+
+theorem toGp_add {M : Type w} [AddCommMonoid M] (a b : M) :
+    toGp M (a + b) = toGp M a + toGp M b := by
+  show AddLocalization.mk (a + b) (0 : (⊤ : AddSubmonoid M)) = _
+  rw [show (toGp M a + toGp M b) = AddLocalization.mk (a + b) (0 + 0 : (⊤ : AddSubmonoid M))
+    from AddLocalization.mk_add a b 0 0, zero_add]
+
+theorem toGp_nsmul {M : Type w} [AddCommMonoid M] (n : ℕ) (a : M) :
+    toGp M (n • a) = n • toGp M a := by
+  induction n with
+  | zero => simpa using toGp_zero M
+  | succ k ih => rw [succ_nsmul, toGp_add, ih, succ_nsmul]
+
+/-- ★★★**divisorial なモノイドでは `n` 倍(`n ≥ 1`)は単射**。
+
+★integral(`Gp` への単射)・saturated・sharp の 3 つがちょうど使われる。 -/
+theorem nsmul_injective_of_divisorial {M : Type w} [AddCommMonoid M]
+    (hint : IsIntegralMonoid M) (hsat : IsSaturatedMonoid M) (hsh : IsSharp M)
+    {n : ℕ} (hn : 0 < n) {x y : M} (h : n • x = n • y) : x = y := by
+  have hmem : ∀ w : Gp M, n • w = 0 → w ∈ Set.range (toGp M) := by
+    intro w hw
+    refine hsat w n hn ?_
+    rw [hw]
+    exact ⟨0, toGp_zero M⟩
+  have hnz : n • (toGp M x - toGp M y) = 0 := by
+    rw [smul_sub, ← toGp_nsmul, ← toGp_nsmul, h, sub_self]
+  obtain ⟨a, ha⟩ := hmem _ hnz
+  obtain ⟨b, hb⟩ := hmem (-(toGp M x - toGp M y)) (by rw [smul_neg, hnz, neg_zero])
+  have hab : a + b = 0 := by
+    refine hint ?_
+    rw [toGp_add, ha, hb, add_neg_cancel, toGp_zero]
+  have ha0 : a = 0 := hsh a ⟨⟨a, b, hab, by rw [add_comm]; exact hab⟩, rfl⟩
+  refine hint ?_
+  rw [← sub_eq_zero, ← ha, ha0, toGp_zero]
+
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 
 原文 (FrdI p.48):
