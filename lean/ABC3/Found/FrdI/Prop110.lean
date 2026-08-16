@@ -1474,6 +1474,48 @@ theorem prop_1_10_vi_first (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X
       (fun n φC hbC hftC hdC =>
         prop_1_10_vi_step P G hiso γ hγc hγs n φC hbC hftC hdC))
 
+include P in
+/-- ★★★**`α`・`γ`・`C` を `Definition 1.3, (i), (a), (b)` から導く**（2026-08-16）。
+
+★★**監査で「原文は導いているのに仮定に逃がしている」と指摘された段**である。
+
+★**導き方**（3 段）:
+1. `baseSurj` を `Base A` に当て、**Frobenius-trivial な `A₀` と底の同型**を得る
+2. `preStepSpan` をその同型に当て、**pre-step の span** `A ← X → A₀` を得る
+3. ★`𝒞` が isotropic 型なので、`Proposition 1.4, (i)` により
+   **すべての射が co-angular** —— span の両辺が co-angular pre-step になる
+
+★★**これで `prop_1_10_vi_first` の仮定がすべて供給される**。 -/
+theorem prop_1_10_vi_data (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X) (A : C) :
+    ∃ (B Cc : C) (α : B ⟶ A) (γ : B ⟶ Cc),
+      IsCoAngular P α ∧ IsPreStep P α ∧ IsCoAngular P γ ∧ IsPreStep P γ ∧
+      IsFrobeniusTrivial P Cc := by
+  obtain ⟨A₀, hA₀ft, ⟨e⟩⟩ := G.core.baseSurj (P.toElem.obj A).base
+  haveI : IsIso e.inv := inferInstance
+  obtain ⟨X, φ, ψ, hφ, hψ, -⟩ := G.core.preStepSpan A₀ A e.hom e.isIso_hom
+  exact ⟨X, A₀, ψ, φ,
+    prop_1_4_i P ψ (fun Y _ => hiso Y), hψ,
+    prop_1_4_i P φ (fun Y _ => hiso Y), hφ, hA₀ft⟩
+
+include P in
+/-- ★★★**`Proposition 1.10, (vi)` 前半の「型」の形**（2026-08-16）。
+
+原文 (FrdI p.35):
+> (vi) The Frobenioid Cistr is of sub-quasi-Frobenius-trivial type. Moreover,
+
+★★**監査で「「type」の ∀ が無い」と指摘された形**である。
+`prop_1_10_vi_data`（`Definition 1.3, (i), (a), (b)` からの導出）と
+`prop_1_10_vi_first`（本体）を合成するだけで出る。
+
+★**isotropic 型の Frobenioid は sub-quasi-Frobenius-trivial 型である** ——
+★`𝒞^istr` は isotropic 型なので、これを `istrPre` に当てれば原文の形になる。 -/
+theorem prop_1_10_vi_ofType (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X) :
+    IsOfSubQuasiFrobeniusTrivialType P := by
+  intro A
+  obtain ⟨B, Cc, α, γ, hαc, hαs, hγc, hγs, hC⟩ := prop_1_10_vi_data P G hiso A
+  exact prop_1_10_vi_first P G hiso α hαc hαs γ hγc hγs hC
+
+
 /-! ## ★★(iii) —— 第1の圏同値も消費する
 
 ★**前段では第2(スライス)の圏同値を消費した**(`coaPre_factor_of_mle`)。
