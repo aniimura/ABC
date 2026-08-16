@@ -79,6 +79,7 @@ import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
+import ABC3.Found.NCBelyi.Normalize
 /-!
 # Found — 実装済みの基礎
 
