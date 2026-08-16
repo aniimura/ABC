@@ -11,3 +11,4 @@
 - [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
 - [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
 - [Lean の合否は lake build で判定する](lean-build-check-discipline.md) — `cd` を必ず絶対パスで書く。`lake env lean` が通っても build は落ちうる。ゲートはパイプせず終了コードを読む。
+- [並行セッションが自分のファイルを巻き込む](parallel-session-sweeps-my-files.md) — 相手が git add -A を使うのでパス限定 add では守れない。1 ファイル通るごとに即コミット。git add -p は対話に入るので使わない。
