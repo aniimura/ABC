@@ -1268,12 +1268,44 @@ theorem liftsSquareResp_of_coaPre (G : Frobenioid P) {A B : C} (φ : A ⟶ B)
     coaPre_factor_under_of_mle P G α hαc hαs (φ ≫ β) hcc hcs ⟨P.Div φ, by rw [hdiv]⟩
   exact ⟨ψ, hψ, hψs.1⟩
 
+include P in
+/-- ★★★**resp'd 側は co-angular linear `φ` すべてで成り立つ**。
+
+★★**co-angular pre-step の場合を一般化したもの**である。
+`φ ≫ β` は co-angular linear なので、`Proposition 1.7, (iii)` で
+`u ≫ p`(pre-step ＋ pull-back)と割れ、`u` は `Proposition 1.4, (iv)` で co-angular。
+`Div u = Div α + Div φ` なので `coaPre_factor_under_of_mle` が
+`α ≫ κ = u` なる `κ` を与え、★**`ψ := κ ≫ p`** が求めるものになる。
+
+★★**pull-back の場合も、co-angular pre-step の場合も、その合成も、これ 1 本で済む。**
+★**残るのは co-angular でない場合、すなわち isometric pre-step だけである。** -/
+theorem liftsSquareResp_of_coAngularLinear (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B : C} (φ : A ⟶ B) (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) :
+    LiftsSquareResp P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  have hcc : IsCoAngular P (φ ≫ β) := G.core.coAngularComp φ β hφc hβc
+  have hcl : IsLinear P (φ ≫ β) := IsLinear.comp P hφl hβs.1
+  obtain ⟨X, u, p, hfac, hus, hppb⟩ := (prop_1_7_iii_linear_factor P F (φ ≫ β)).mp hcl
+  have huc : IsCoAngular P u :=
+    prop_1_4_iv_mpr P F (show φ ≫ β = 𝟙 A ≫ u ≫ p by rw [hfac, Category.id_comp])
+      (isFrobeniusType_of_isIso P (𝟙 A)) hus hppb hcc
+  obtain ⟨hplb, hplin⟩ := prop_1_4_ii_mp P F p hppb
+  -- `Div u = Div α + Div φ`
+  have hdivu : P.Div u = P.Div α + P.Div φ := by
+    have h := congrArg P.Div hfac
+    rw [P.Div_comp, P.Div_comp, show P.Div p = 0 from hplb.2,
+      show P.degFr p = 1 from hplin, show P.degFr β = 1 from hβs.1, ← hcond] at h
+    simpa using h.symm
+  obtain ⟨κ, -, hκs, hκ⟩ :=
+    coaPre_factor_under_of_mle P G α hαc hαs u huc hus ⟨P.Div φ, by rw [hdivu]⟩
+  exact ⟨κ ≫ p, by rw [← Category.assoc, hκ, hfac], IsLinear.comp P hκs.1 hplin⟩
+
 /-! ### ★残る場合(2026-08-16 の測定)
 
 | 側 | co-angular pre-step | pull-back | isometric pre-step |
 |---|---|---|---|
 | non-resp'd(スライス) | ★実装 | ★実装 | 未実装 |
-| resp'd(コスライス) | ★実装 | 未実装 | 未実装 |
+| resp'd(コスライス) | ★**co-angular linear 全体で実装** | ★同左 | 未実装 |
 
 ★**合成閉性は両側とも実装した**ので、上の表が埋まれば
 `Proposition 1.7, (iii)` ＋ `Definition 1.3, (v), (b)` で
