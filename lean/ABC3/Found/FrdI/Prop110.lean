@@ -1,4 +1,5 @@
 import Mathlib.GroupTheory.MonoidLocalization.GrothendieckGroup
+import Mathlib.NumberTheory.PrimeCounting
 import ABC3.Found.FrdI.Prop19
 
 /-!
@@ -734,6 +735,29 @@ theorem prop_1_10_i_Div_formula {A B A' B' : C}
   have h := congrArg P.Div hsq
   rw [P.Div_comp, P.Div_comp, hα, hβ] at h
   simpa using h.symm
+
+include P in
+/-- ★**(i) の `Div` の公式 —— 原文の `α∗`(全単射)の向き**。
+
+★上の `prop_1_10_i_Div_formula` は `Φ.map (Base α)` を**左辺に押し出した**形で、
+原文の `Div(φ′) = degFr(β) · α∗(Div(φ))` の形ではない。
+`α` は Frobenius 型ゆえ base-isomorphism なので、その逆で向きを直せる。
+
+★★**検証役の指摘**: (ii) の同形の補題(`prop_1_10_ii_Div_formula'`)が
+**(ii) の名前の下にしかなく、(i) を探した読者は押し出し形しか見つけられない**。
+★**変数の対応は (ii) の `(α, β, β′, α′)` に (i) の `(φ, β, α, φ′)` を代入したものだが、
+名前が違えば見つからない。** -/
+theorem prop_1_10_i_Div_formula' {A B A' B' : C}
+    (φ : A ⟶ B) (α : A ⟶ A') (β : B ⟶ B') (φ' : A' ⟶ B')
+    (hα : IsFrobeniusType P α) (hβ : IsIsometric P β)
+    (hsq : φ ≫ β = α ≫ φ') :
+    haveI : IsIso (P.Base α) := hα.2
+    P.Div φ' = (P.degFr β : ℕ) • Φ.map (inv (P.Base α)) (P.Div φ) := by
+  haveI : IsIso (P.Base α) := hα.2
+  have h := prop_1_10_i_Div_formula P φ α β φ' hα.1.2 hβ hsq
+  have h2 := congrArg (Φ.map (inv (P.Base α))) h
+  rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id, map_nsmul] at h2
+  exact h2
 
 /-- **(i) の `degFr` の等式**(第1の場合の構成に対して)。
 
@@ -2528,6 +2552,42 @@ theorem prop_1_10_iv_degrees_infinite (F : FrobenioidCore P) {A : C}
   obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A ⟨p, hp.pos⟩
   exact ⟨B, φ, prop_1_10_iv_mp P F hA φ ⟨hφ, by rw [hd]; exact hp⟩, by rw [hd]; rfl⟩
 
+include P in
+/-- ★★★**原文「there exist infinitely many isomorphism classes of objects of _A𝒞
+that arise from irreducible arrows with domain A」そのもの**。
+
+★★**検証役に 2 度差し戻された箇所である。**
+1 度目は「『無限個』そのものを述べていない」、
+2 度目は ★**「次数の集合の無限性(`_degrees_infinite`)と非同型性
+(`_infinitely_many` の第2主張)は**別の集合**についての主張で、
+橋渡しの一段がどの宣言にも無い」**。
+
+★**私は docstring に「合わせて同型類の無限性にした」と書きながら、
+その「合わせて」を書いていなかった。**
+★★**「述べたと書いたものを述べていない」型の 4 例目**である。
+
+★**ここで渡す**: `_A𝒞`(コスライス)の対象は `A` から出る射、同型は
+「終域の同型 `θ` で `φ_m ≫ θ = φ_n` となるもの」。
+素数の**単射列** `Nat.nth Nat.Prime` を次数に使えば、
+次数が相異なるので `frobType_not_iso_of_degFr_ne` が非同型を与える。
+★**`ℕ` で添字づけられた互いに非同型な族**が、「無限個の同型類」の忠実な形である。 -/
+theorem prop_1_10_iv_iso_classes_infinite (F : FrobenioidCore P) {A : C}
+    (hA : IsIsotropic P A) :
+    ∃ f : ℕ → Σ B : C, A ⟶ B,
+      (∀ n, IsIrreducibleMor (f n).2) ∧
+      (∀ m n, m ≠ n → ∀ θ : (f m).1 ≅ (f n).1, (f m).2 ≫ θ.hom ≠ (f n).2) := by
+  have hex : ∀ n : ℕ, ∃ (B : C) (φ : A ⟶ B), IsIrreducibleMor φ ∧
+      ((P.degFr φ : ℕ+) : ℕ) = Nat.nth Nat.Prime n := by
+    intro n
+    have hp : Nat.Prime (Nat.nth Nat.Prime n) := Nat.prime_nth_prime n
+    obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A ⟨Nat.nth Nat.Prime n, hp.pos⟩
+    exact ⟨B, φ, prop_1_10_iv_mp P F hA φ ⟨hφ, by rw [hd]; exact hp⟩, by rw [hd]; rfl⟩
+  choose B φ hirr hdeg using hex
+  refine ⟨fun n => ⟨B n, φ n⟩, hirr, fun m n hmn θ => ?_⟩
+  haveI : IsIso θ.hom := inferInstance
+  refine frobType_not_iso_of_degFr_ne P (φ m) (φ n) (fun h => hmn ?_) θ.hom
+  refine Nat.nth_injective Nat.infinite_setOf_prime ?_
+  rw [← hdeg m, ← hdeg n, h]
 
 /-! ### ★(vi) 後半の最終段 —— `IsFrobeniusTrivial` を同型に沿って移す
 
