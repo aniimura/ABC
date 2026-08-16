@@ -21,6 +21,8 @@ import ABC3.Found.FrdI.Prop110
 import ABC3.Found.FrdI.Prop111
 import ABC3.Found.FrdI.Prop113
 import ABC3.Found.FrdI.Prop114
+import ABC3.Found.FrdI.Prop21
+import ABC3.Found.FrdI.Prop22
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
