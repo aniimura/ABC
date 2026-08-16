@@ -1155,6 +1155,79 @@ theorem prop_1_11_v_exists_pullBack' (G : Frobenioid P) {A B Cc Dd : C}
   exact ⟨ψ, hψ, isLinear_of_square P φ α β ψ
     ((prop_1_4_ii_mp P G.core φ hφpb).2) hαs.1 hβs.1 hψ⟩
 
+/-! ### ★★(v) の存在を**任意の linear `φ`** へ広げる(2026-08-16)
+
+★★**検証役の指摘**: 原文の (v) は「`φ` is an **arbitrary morphism of `𝒞^lin`**」だが、
+我々の 2 本は `φ` が **co-angular pre-step** か **pull-back** の場合しか覆っていない。
+
+★**性質に名前を付けて合成閉性を示すのが筋である**(`LiftsCoaPre` と同じ作法)。
+
+★★**合成閉性の鍵は「中間の co-angular pre-step を実現する」こと** ——
+`φ = φ₁ ≫ φ₂` に対し、`Φ.map (Base φ₂) invβ` を不変量とする `α′` を
+`coaPre_realize_over` で作れば、`φ₂` 側と `φ₁` 側の条件がちょうど繋がる。
+★**`Φ.map` の関手性(`Φ.map (Base φ₁ ≫ Base φ₂) = Φ.map (Base φ₁) ∘ Φ.map (Base φ₂)`)が
+条件の繋ぎ目になる。**
+-/
+
+/-- ★(v) の non-resp'd(スライス側)の性質。★「WLOG」を扱うには名前が要る。 -/
+def LiftsSquare {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ {Cc Dd : C} (α : Cc ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (β : Dd ⟶ B) (hβc : IsCoAngular P β) (hβs : IsPreStep P β),
+    (haveI : IsIso (P.Base α) := hαs.2
+     haveI : IsIso (P.Base β) := hβs.2
+     Φ.map (inv (P.Base α)) (P.Div α)
+       = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) →
+    ∃ ψ : Cc ⟶ Dd, ψ ≫ β = α ≫ φ ∧ IsLinear P ψ
+
+include P in
+/-- ★★**(v) の性質は合成で閉じる**。 -/
+theorem liftsSquare_comp (G : Frobenioid P) {A X B : C} {φ₁ : A ⟶ X} {φ₂ : X ⟶ B}
+    (h₁ : LiftsSquare P φ₁) (h₂ : LiftsSquare P φ₂) : LiftsSquare P (φ₁ ≫ φ₂) := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  haveI hbα : IsIso (P.Base α) := hαs.2
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  obtain ⟨X', α', hα'c, hα's, hα'inv⟩ :=
+    coaPre_realize_over P G X (Φ.map (P.Base φ₂) (Φ.map (inv (P.Base β)) (P.Div β)))
+  haveI hbα' : IsIso (P.Base α') := hα's.2
+  obtain ⟨ψ₂, hψ₂, hψ₂l⟩ := h₂ α' hα'c hα's β hβc hβs (by rw [hα'inv])
+  obtain ⟨ψ₁, hψ₁, hψ₁l⟩ := h₁ α hαc hαs α' hα'c hα's (by
+    rw [hα'inv, ← Φ.map_comp, ← P.Base_comp]; exact hcond)
+  exact ⟨ψ₁ ≫ ψ₂, by rw [Category.assoc, hψ₂, ← Category.assoc, hψ₁, Category.assoc],
+    IsLinear.comp P hψ₁l hψ₂l⟩
+
+include P in
+/-- ★**co-angular pre-step の場合**(既存の `_exists_nonresp` を性質の形に直す)。 -/
+theorem liftsSquare_of_coaPre (G : Frobenioid P) {A B : C} (φ : A ⟶ B)
+    (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ) : LiftsSquare P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  obtain ⟨ψ, -, hψs, hψ⟩ :=
+    prop_1_11_v_exists_nonresp P G φ hφc hφs α hαc hαs β hβc hβs hcond
+  exact ⟨ψ, hψ, hψs.1⟩
+
+include P in
+/-- ★**pull-back の場合**(既存の `_exists_pullBack'` を性質の形に直す)。 -/
+theorem liftsSquare_of_pullBack (G : Frobenioid P) {A B : C} (φ : A ⟶ B)
+    (hφpb : IsPullBack P φ) : LiftsSquare P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  exact prop_1_11_v_exists_pullBack' P G φ hφpb α hαc hαs β hβc hβs hcond
+
+/-! ### ★残る 1 場合 —— **isometric pre-step**(2026-08-16 の測定)
+
+★`Proposition 1.7, (iii)` が linear `φ` を `(pre-step) ≫ (pull-back)` に割り、
+`Definition 1.3, (v), (b)` が pre-step を
+`(co-angular pre-step) ≫ (isometric pre-step)` に割る。
+★**したがって残る場合は「`φ` が isometric pre-step」の 1 つだけである。**
+
+★★**そしてこの場合は本当に別物である** —— ★**同型でない isometric pre-step は
+co-angular ではない**(co-angular の定義に `φ = 𝟙 ≫ φ ≫ 𝟙` を当てれば
+「`φ` が同型」が出てしまう)。★**だから既存の 2 本のどちらにも当たらない。**
+
+★**手掛かり**: `prop_1_11_vii_isometric` が同じ「isometric pre-step の場合」を
+`Proposition 1.9` の `pushFunctor` の圏同値で処理している。
+★**そこと同じ機械が要ると見ている**(未検証)。
+
+★★**`sorry` は置かない。**
+-/
 include P in
 /-- ★★★**(vii) の pull-back の場合** —— 原文の
 「by "pulling back the zero divisor of φ via ϵ" — cf. assertion (v)」の実体。
