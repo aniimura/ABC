@@ -409,6 +409,10 @@ instance : MorphismProperty.IsMultiplicative (linProp P) where
 /-- **`𝒞^lin`** —— linear 射が定める広い部分圏。★`(v)` が使う。 -/
 abbrev Lin : Type u2 := WideSubcategory (linProp P)
 
+def Lin.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^lin",
+    sectionId := "frdi-def-1-2-iv" }
+
 /-- ★**非退化(下)**: 恒等射は `𝒞^lin` の射である(`ContainsIdentities` の言い換え)。 -/
 theorem linProp_id (A : C) : linProp P (𝟙 A) := isLinear_id P A
 

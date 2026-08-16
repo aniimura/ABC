@@ -260,6 +260,33 @@ def baseIsoProp : MorphismProperty C := fun _ _ φ => IsBaseIsomorphism P φ
 /-- `linear morphism` のクラス。 -/
 def linearProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
 
+/-! ### ★★`𝒞^bs-iso` を**部分圧として**作る（2026-08-16 追加）
+
+原文 (FrdI p.23):
+> for the subcategories determined, respectively, by the linear morphisms, base-isomor-
+
+★監査で「`MorphismProperty` どまりで部分圧になっていない」と指摘されたが、
+★★**`𝒞^lin` のほうは `Prop111` に `linProp` / `Lin` として既にあった**
+（検証役は `Prop17` の `linearProp` だけを見ていた）。
+★**ビルドが重複宣言を指摘して判明した** —— 子の報告も検証の対象である。
+
+★形は `Prop19` の `isometricPreStepProp` と同じで、材料はすべて手元にあった。 -/
+
+instance : (baseIsoProp P).ContainsIdentities :=
+  ⟨fun A => isBaseIsomorphism_of_isIso P (𝟙 A)⟩
+
+instance : (baseIsoProp P).IsStableUnderComposition :=
+  ⟨fun _ _ hf hg => isBaseIsomorphism_comp P hf hg⟩
+
+instance : (baseIsoProp P).IsMultiplicative where
+
+/-- **[FrdI] Definition 1.2, (iv)** `𝒞^bs-iso` —— base-isomorphism が定める広い部分圧。 -/
+abbrev BsIso : Type u2 := WideSubcategory (baseIsoProp P)
+
+def BsIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^bs-iso",
+    sectionId := "frdi-def-1-2-iv" }
+
 /-- `morphism of Frobenius type` のクラス。 -/
 def frobTypeProp : MorphismProperty C := fun _ _ φ => IsFrobeniusType P φ
 
