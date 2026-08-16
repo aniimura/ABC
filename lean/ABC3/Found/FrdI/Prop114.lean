@@ -700,6 +700,25 @@ pre-step にしか mono を与えない。**
 ★**「原文が誤り」とは断定しない** —— 上の条件を満たす Frobenioid を
 実際に構成してはいないからである。★**言えるのは
 「(iii) の (a) の側は、書かれている仮定だけでは閉じない」ことである。**
+
+★★**使用箇所を調べた(2026-08-16)。追加の仮定は課されていない。**
+
+原文 (FrdI p.63) の `Theorem 3.4` の証明:
+> the fact that Ψ preserves pre-steps follows formally from Proposition 1.14, (ii), (iii).
+
+★**そこは isotropic 型に還元済みの文脈**であり、我々が既に仮定しているものと同じ。
+★**`unit-trivial` などの追加仮定は無い。**
+
+★★**なぜ (ii) だけでなく (iii) も要るのかも分かった** ——
+(ii) の特徴づけは「**pre-step でない** irreducible 射に mid-adjoint」であって
+★**「pre-step でない」を含むので、それ自体では循環している。**
+★**(iii) がその循環を切る**(「非 pre-step」を FSMI 鎖の長さの有界性という
+**圏論的な**条件に言い換える)。
+★**だから (iii) の両向きが本当に要る。**
+
+★★**したがってこの穴は迂回できない。**
+★**残る道は 2 つ**: 「prime-Frobenius ⟹ FSM」を `Definition 1.3` から導く別の道を
+見つけるか、★**`𝒪^×` に `p`-捻れを持つ Frobenioid を構成して原文の反例とするか**。
 -/
 
 include P in
