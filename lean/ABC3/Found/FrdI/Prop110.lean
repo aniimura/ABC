@@ -2966,4 +2966,74 @@ theorem preStep_endo_scale (F : FrobenioidCore P) {A : C} (hft : IsFrobeniusTriv
     simp only [map_zero, zero_add, smul_zero, add_zero, MonoidOn.map_id, id_eq] at h
     exact h.symm
 
+include P in
+/-- ★★**自己射はすべて co-angular** —— `Definition 1.3, (iii), (b)` を `𝟙` に当てるだけ。
+
+★`𝟙_A` は co-angular pre-step なので、(iii)(b) が `A ⟶ A` のすべてを co-angular にする。 -/
+theorem endo_isCoAngular (F : FrobenioidCore P) {A : C} (φ : A ⟶ A) : IsCoAngular P φ :=
+  F.coAngularOfPreStep (𝟙 A) (isCoAngular_id P A) (isPreStep_id P A) φ
+
+include P in
+/-- ★★★**`base-trivial` ⟹ `Aut-ample`**(★捻れが自明な場合)。
+
+★★**`Proposition 1.6, (v)` の `⟸` を証明する道の組み立て**である。
+
+★**筋**:
+1. `preStepSpan` が `α = (Base φ)⁻¹ ≫ Base ψ`(`φ, ψ` は pre-step)を与える
+2. `base-trivial` で中間対象を `A` へ寄せ、`φ, ψ` を **`A` の自己射**にする
+3. 自己射はすべて co-angular(`endo_isCoAngular`)
+4. `preStep_endo_scale` で `Div` を 2 倍した `t`(`Base t = Base s`)を作り、
+   `s ≫ s`(`Div = Φ(Base s)(Div s) + Div s`)と `Div` を突き合わせる
+5. `coaPre_base_diff` が同型 `f` を与え、`Base f = Base s` が出る
+
+★★**残る仮定 `htwist` が唯一の穴である** ——
+`Φ(Base s)(Div s) = Div s`、すなわち ★**pre-step 自己射の底が自分の `Div` を動かさない**こと。
+`Φ` が定数関手ならこれは自明だが、一般には言えていない。
+★**これが `Gap_1_6_v` の正体を 1 点に絞ったものである。** -/
+theorem isAutAmple_of_baseTrivial_of_untwisted [MorphismProperty.IsMultiplicative (coaPreProp P)]
+    (F : FrobenioidCore P)
+    (hequiv : ∀ X : C, (coaPreUnderFunctor P X).IsEquivalence)
+    {A : C} (h : IsBaseTrivial P A)
+    (htwist : ∀ s : A ⟶ A, IsPreStep P s → Φ.map (P.Base s) (P.Div s) = P.Div s) :
+    IsAutAmple P A := by
+  have hft : IsFrobeniusTrivial P A := isFrobeniusTrivial_of_baseTrivial P F h
+  -- ★核心: pre-step 自己射の底は、同型の底として実現できる
+  have key : ∀ s : A ⟶ A, IsPreStep P s → ∃ u : A ⟶ A, IsIso u ∧ P.Base u = P.Base s := by
+    intro s hs
+    obtain ⟨t, hts, htb, htd⟩ := preStep_endo_scale P F hft s hs 2
+    have hdiv : P.Div t = P.Div (s ≫ s) := by
+      rw [htd, P.Div_comp, htwist s hs, hs.1]
+      simp [two_nsmul]
+    obtain ⟨f, hfi, hf⟩ := coaPre_base_diff P hequiv t (s ≫ s)
+      ⟨endo_isCoAngular P F t, hts⟩ ⟨endo_isCoAngular P F _, hs.comp P hs⟩ hdiv
+    haveI := hfi
+    haveI : IsIso (P.Base s) := hs.2
+    refine ⟨f, hfi, ?_⟩
+    have hb := congrArg P.Base hf
+    rw [P.Base_comp, P.Base_comp, htb] at hb
+    exact (cancel_epi (P.Base s)).mp hb
+  intro g hg
+  haveI := hg
+  obtain ⟨X, φ, ψ, hφ, hψ, hgeq⟩ := F.preStepSpan A A g hg
+  haveI hφb : IsIso (P.Base φ) := hφ.2
+  obtain ⟨e⟩ := h X ⟨(asIso (P.Base φ)).symm⟩
+  -- ★`e : X ≅ A`。`e.inv ≫ φ`、`e.inv ≫ ψ` は `A` の pre-step 自己射
+  have hφ' : IsPreStep P (e.inv ≫ φ) := (isPreStep_of_isIso P e.inv).comp P hφ
+  have hψ' : IsPreStep P (e.inv ≫ ψ) := (isPreStep_of_isIso P e.inv).comp P hψ
+  obtain ⟨u, hui, hub⟩ := key _ hφ'
+  obtain ⟨v, hvi, hvb⟩ := key _ hψ'
+  haveI := hui
+  haveI := hvi
+  refine ⟨inv u ≫ v, inferInstance, ?_⟩
+  haveI hei : IsIso (P.Base e.inv) := isBaseIsomorphism_of_isIso P e.inv
+  haveI hbui : IsIso (P.Base u) := isBaseIsomorphism_of_isIso P u
+  have hbu : P.Base u = P.Base e.inv ≫ P.Base φ := by rw [hub, P.Base_comp]
+  have hbv : P.Base v = P.Base e.inv ≫ P.Base ψ := by rw [hvb, P.Base_comp]
+  -- ★`inv` の下を書き換えると motive が壊れるので、`P.Base u` を前から掛けて消す
+  have hpu : P.Base u ≫ P.Base (inv u ≫ v) = P.Base v := by
+    rw [← P.Base_comp, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+  refine (cancel_epi (P.Base u)).mp ?_
+  rw [hpu, hbv, hbu, hgeq]
+  simp
+
 end ABC3.Found.FrdI
