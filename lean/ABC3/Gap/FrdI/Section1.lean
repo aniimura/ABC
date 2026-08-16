@@ -102,6 +102,37 @@ isotropic 型(`cx2_isotropic`)、`𝒟` が FSMFF 型(`cx2_fsmff`)、
 ★**注意**: 反証は `BoundedFSMIFactor` という**我々の写し方**に対するものである。
 原文の条件文は `αn ◦ … ◦ α1 = ψ ◦ φ`(`α` たちと `ψ` が FSMI)の `n` の有界性で、
 ★**`ψ` に FSMI を課すのは原文の文言そのもの**(上の p.41 の引用)である。
+
+## ★★★逐語照合の結果(2026-08-16)
+
+★**照合した**(原文と 1 条ずつ):
+- `§0` の `fiberwise-surjective`(p.14)・`FSM-morphism`・`irreducible`(p.17)・
+  `FSMI`・`FSMFF-type`(p.17–18) —— ★**すべて一致**
+- `Definition 1.3` の **21 条すべて** —— ★**一致**(合成の向きも確認した)
+- (iii) の条件文(p.41)—— `BoundedFSMIFactor` は忠実
+- `Frobenius-normalized`(p.23)—— 一致
+
+★**未照合**: `Definition 1.2` の語彙(`pre-step` 等)、`Definition 1.1`。
+
+## ★★★著者は機構を知っている —— `Example 3.6`(p.70)
+
+★★**原文 `Example 3.6` は `G := ℤ ⊕ (⊕_{p∈Primes} ℤ/pℤ)` を取る** ——
+★**我々が使ったのと同じ「あらゆる位数の捻れ」**である。そして原文は:
+
+> every morphism of D is either an isomorphism or a non-monomorphism
+
+と述べ、その根拠を **`cf. the existence of the torsion subgroup ⊕_p ℤ/pℤ ⊆ G`**
+と明記する。★★**これは我々の `not_mono_of_frobNormalized_of_torsion` そのものである。**
+
+★**ただし原文はそれを「底圏 `𝒟` が FSM 型になる」ことに使う** ——
+FSMI 射が 1 本も無くなる方向である。
+★★**Frobenioid `𝒞` の側に同じ捻れを置いたとき `Proposition 1.14, (iii)` の
+(a) の議論(次数を大きくした prime-Frobenius を後置する)がどうなるかは、
+我々が読んだ範囲の本文では論じられていない。**
+
+★したがって現時点の見立ては
+「原文の (iii) の (a) の段は、**書かれていない有限性の仮定**を使っている」である。
+★**`Definition 1.2` の照合が済むまで、これ以上は言わない。**
 -/
 
 /-- ★**`Proposition 1.14, (iii)` の `⟸` に不足しているもの**。

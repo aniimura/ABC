@@ -54,6 +54,8 @@ namespace ABC3.Check.FrdI
 
 open CategoryTheory ABC3.Found.FrdI
 
+universe v u w v3 u3
+
 /-! ## ★有限台の置換のなす群 -/
 
 /-- ★**有限台の置換**のなす `Equiv.Perm ℕ` の部分群。 -/
@@ -157,5 +159,121 @@ instance dact_isConnected : IsConnected DAct := by
   rw [hobj]
   exact (hstep (ActionCategory.homOfPair (γ • (0 : ℕ)) γ)).mp
     (by simpa using hp0)
+
+/-! ## ★`𝒟` 上の pre-Frobenioid としての `𝒞 = 𝔽_{Φ∘π}` -/
+
+/-- ★底圏の射はすべて同型なので FSM 射。 -/
+theorem dact_fsm {A B : DAct} (α : B ⟶ A) (_ : IsFSMMorphism α) :
+    IsFSMMorphism ((ActionCategory.π Gam ℕ).map α) :=
+  isFSMMorphism_of_isIso _
+
+/-- ★1 対象の底圏上の `Φ = ℕ`(定数)。 -/
+abbrev AgPhi : MonoidOn.{0, 0, 0} DSingle := MonoidOn.const DSingle ℕ
+
+/-- ★作用亜群へ制限した `Φ`。 -/
+abbrev AgPhiAct : MonoidOn.{0, 0, 0} DAct :=
+  AgPhi.restrict (ActionCategory.π Gam ℕ) dact_fsm
+
+/-- ★★底圏の関手に沿って `𝔽` を押し出す関手。
+
+★`Div` と `deg` はそのまま、`base` だけ `G` で送る。
+★**`Φ.restrict` の `map` は `Φ.map (G.map ·)` そのものなので、`div` 成分は `rfl`。** -/
+def elemPush {D : Type u} [Category.{v} D] {D' : Type u3} [Category.{v3} D']
+    (Φ : MonoidOn.{v, u, w} D) (G : D' ⥤ D)
+    (hG : ∀ {A B : D'} (α : B ⟶ A), IsFSMMorphism α → IsFSMMorphism (G.map α)) :
+    ElemFrobCat (Φ.restrict G hG) ⥤ ElemFrobCat Φ where
+  obj W := ⟨G.obj W.base⟩
+  map {X Y} f := { base := G.map f.base, div := f.div, deg := f.deg }
+  map_id W := ElemFrobCat.Hom.ext (by simp) rfl rfl
+  map_comp f g := ElemFrobCat.Hom.ext (by simp) rfl rfl
+
+/-- ★反例の圏 —— 作用亜群上の `𝔽`。 -/
+abbrev AgC : Type := ElemFrobCat AgPhiAct
+
+/-- ★★★**`𝒟 = SingleObj Γ` 上の pre-Frobenioid**。
+
+★★**ここが要点** —— 圏は作用亜群の上の `𝔽` だが、
+★**`Base` は 1 対象の底圏に落ちる。** -/
+def AgP : PreFrobenioid AgC AgPhi where
+  toElem := elemPush AgPhi (ActionCategory.π Gam ℕ) dact_fsm
+  divisorial _ := isDivisorial_nat
+  totEpiC := isTotallyEpimorphic_elemFrobCat dact_totEpi (fun _ => isIntegralMonoid_nat)
+  totEpiD := dsingle_totEpi
+  connectedC := isConnected_elemFrobCat AgPhiAct
+  connectedD := dsingle_isConnected
+
+/-- ★`DAct` の射の**台となる群の元**。 -/
+def dactElt {X Y : DAct} (f : X ⟶ Y) : Gam := f.1
+
+theorem dactElt_spec {X Y : DAct} (f : X ⟶ Y) : dactElt f • X.back = Y.back := f.2
+
+/-! ## ★★2 つの事実 —— base-trivial なのに Aut-ample でない -/
+
+/-- ★★**`𝒞` の対象はすべて同型** —— 作用が推移的だから。 -/
+theorem ag_allIso (X Y : AgC) : Nonempty (X ≅ Y) := by
+  obtain ⟨γ, hγ⟩ := gam_transitive X.base.back Y.base.back
+  let b : X.base ⟶ Y.base := ⟨γ, hγ⟩
+  haveI hbi : IsIso b := IsIso.of_groupoid b
+  let f : X ⟶ Y := { base := b, div := (0 : ℕ), deg := 1 }
+  haveI : IsIso f := (ElemFrobCat.isIso_iff f).mpr ⟨hbi, isAddUnit_zero, rfl⟩
+  exact ⟨asIso f⟩
+
+/-- ★★★**すべての対象が base-trivial** ——
+`𝒟` が 1 対象なので `BaseIsomorphic` は常に真で、対象がすべて同型だから。 -/
+theorem ag_baseTrivial (X : AgC) : IsBaseTrivial AgP X :=
+  fun Dd _ => ag_allIso Dd X
+
+/-- ★反例の対象 —— `0 ∈ ℕ` の上。 -/
+abbrev AgA : AgC := ⟨(⟨(), (0 : ℕ)⟩ : DAct)⟩
+
+/-- ★★★**それは `Aut-ample` ではない** ——
+`Aut_𝒞(A)` の像は `Stab(0)` であって `Γ` ではない。
+
+★★**したがって `Proposition 1.6, (v)` の `⟸` の証明に要る
+「底を指定した同型の取り直し」は、この `𝒞` では効かない。** -/
+theorem ag_not_autAmple : ¬ IsAutAmple AgP AgA := by
+  intro h
+  obtain ⟨γ₀, hγ₀⟩ := gam_stab_proper
+  obtain ⟨φ, -, hbase⟩ := h γ₀ (IsIso.of_groupoid _)
+  -- ★`φ.base` は `DAct` の射なので、その台元は `0` を固定する
+  have hfix := dactElt_spec (ElemFrobCat.Hom.base φ)
+  have hb : dactElt (ElemFrobCat.Hom.base φ) = γ₀ := hbase
+  rw [hb] at hfix
+  exact hγ₀ hfix
+
+/-! ## ★★★設計は `Definition 1.3` を満たさない —— 自己訂正
+
+★**上の設計は `preStepSpan`(`Definition 1.3, (i), (b)`)を満たさない。**
+★★**それをここで式にする** —— 散文の訂正ではなく、証明で示す。 -/
+
+/-- ★★★**この `𝒞` は `preStepSpan` を満たさない**。
+
+★★**要点**: pre-step `φ : X ⟶ A` の底は「`X` の点を `A` の点へ送る」`Γ` の元に
+限られる。したがって `inv(Base φ) ≫ Base ψ` は必ず `A` の点を `B` の点へ送り、
+★**`Γ` 全体を張れない。**
+
+★**したがって `Gap_1_6_v` の反例としては、この設計は使えない。**
+★★**`preStepSpan` は「底の同型を pre-step の比で実現せよ」と要求しており、
+それ自体が `Aut-ample` に近い条件である** ——
+これは私が最初の見立てで**使っていなかった道具**である。 -/
+theorem ag_not_frobenioidCore : ¬ FrobenioidCore AgP := by
+  intro F
+  obtain ⟨γ₀, hγ₀⟩ := gam_stab_proper
+  obtain ⟨X, φ, ψ, hφ, -, heq⟩ := F.preStepSpan AgA AgA γ₀ (IsIso.of_groupoid _)
+  have hφs : dactElt (ElemFrobCat.Hom.base φ) • X.base.back = (0 : ℕ) :=
+    dactElt_spec (ElemFrobCat.Hom.base φ)
+  have hψs : dactElt (ElemFrobCat.Hom.base ψ) • X.base.back = (0 : ℕ) :=
+    dactElt_spec (ElemFrobCat.Hom.base ψ)
+  -- ★`inv` を消す —— 両辺に `Base φ` を前から掛ければ `hom_inv_id` で潰れる
+  have h2 := congrArg (fun t : (AgP.toElem.obj AgA).base ⟶ (AgP.toElem.obj AgA).base =>
+    AgP.Base φ ≫ t) heq
+  rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp] at h2
+  -- ★`SingleObj` では `f ≫ g = g * f` なので、これは群の等式そのもの
+  have hkey : γ₀ * dactElt (ElemFrobCat.Hom.base φ) = dactElt (ElemFrobCat.Hom.base ψ) := h2
+  refine hγ₀ ?_
+  have h3 : (γ₀ * dactElt (ElemFrobCat.Hom.base φ)) • X.base.back = (0 : ℕ) := by
+    rw [hkey]; exact hψs
+  rw [mul_smul, hφs] at h3
+  exact h3
 
 end ABC3.Check.FrdI
