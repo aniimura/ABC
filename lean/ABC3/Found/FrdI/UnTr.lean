@@ -146,4 +146,36 @@ theorem prop_3_3_iii (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
     rw [h₁, h₂, hd1]
     simp
 
+/-! ## ★`Proposition 3.3, (iv)` の前半 —— `𝒞^un-tr → 𝔽_Φ` は忠実
+
+原文 (FrdI p.60):
+> which is faithful and essentially surjective; moreover, this functor determines
+
+★**忠実性は構成そのもの** —— `𝒞^un-tr` は `𝔽_Φ` への像で同一視して作ったから。
+★**`𝒞^un-tr` に Frobenioid の構造を入れる**部分と、射の類型が
+`𝒞^istr` から来ること(原文の後半)は別途取る。
+-/
+
+/-- ★★**`𝒞^un-tr → 𝔽_Φ`** —— `𝒞^istr → 𝔽_Φ` が商を経由する。 -/
+def unTrToElem : UnTr P ⥤ ElemFrobCat Φ where
+  obj A := P.toElem.obj (show Istr P from A).obj
+  map {_ _} f := Quotient.liftOn f (fun α => P.toElem.map α) (fun _ _ h => h)
+  map_id A := P.toElem.map_id (show Istr P from A).obj
+  map_comp {_ _ _} f g := by
+    refine Quotient.inductionOn₂ f g (fun α β => ?_)
+    exact P.toElem.map_comp α β
+
+/-- ★★★**[FrdI] Proposition 3.3, (iv) の前半** —— `𝒞^un-tr → 𝔽_Φ` は**忠実**。
+
+★**構成そのもの**である —— `𝒞^un-tr` の射は `𝔽_Φ` への像で同一視した類だから。 -/
+instance : (unTrToElem P).Faithful where
+  map_injective {A B} {f g} := by
+    refine Quotient.inductionOn₂ f g (fun α β h => ?_)
+    exact (toHomUnTr_eq_iff P α β).mpr h
+
+/-- ★**`𝒞^istr → 𝒞^un-tr → 𝔽_Φ` は `𝒞^istr → 𝔽_Φ` に等しい**
+(原文の「The functor `𝒞^istr → 𝔽_Φ` factors naturally through `𝒞^un-tr`」)。 -/
+theorem istrToUnTr_comp_unTrToElem :
+    istrToUnTr P ⋙ unTrToElem P = (isotropicProp P).ι ⋙ P.toElem := rfl
+
 end ABC3.Found.FrdI
