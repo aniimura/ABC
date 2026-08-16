@@ -1,5 +1,7 @@
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import Mathlib.CategoryTheory.Endomorphism
+import Mathlib.CategoryTheory.Widesubcategory
+import Mathlib.CategoryTheory.MorphismProperty.Composition
 import Mathlib.Data.Nat.Prime.Basic
 import ABC3.Meta.Claim
 
@@ -609,6 +611,32 @@ theorem IsLinear.comp {A B E : C} {ψ : A ⟶ B} {φ : B ⟶ E}
     (hψ : IsLinear P ψ) (hφ : IsLinear P φ) : IsLinear P (ψ ≫ φ) := by
   show P.degFr (ψ ≫ φ) = 1
   rw [P.degFr_comp, show P.degFr φ = 1 from hφ, show P.degFr ψ = 1 from hψ, mul_one]
+
+/-! ### ★★`𝒞^lin` をここに置く（2026-08-16 に `Prop111` から移した）
+
+原文 (FrdI p.23):
+> for the subcategories determined, respectively, by the linear morphisms, base-isomor-
+
+★★**依存順の制約で移した** —— `Prop111` に置くと
+`Proposition 1.5`（上流）から参照できない。
+★`Definition 1.2, (iv)` の語彙なのだから、**実装場所もここであるべき**だった。 -/
+
+/-- **[FrdI] Definition 1.2, (iv)** `linear` 射がなす `MorphismProperty`。 -/
+def linProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
+
+instance : (linProp P).ContainsIdentities := ⟨fun A => isLinear_id P A⟩
+
+instance : (linProp P).IsStableUnderComposition :=
+  ⟨fun _ _ hf hg => IsLinear.comp P hf hg⟩
+
+instance : MorphismProperty.IsMultiplicative (linProp P) where
+
+/-- **[FrdI] Definition 1.2, (iv)** `𝒞^lin` —— linear 射が定める広い部分圧。 -/
+abbrev Lin : Type u2 := WideSubcategory (linProp P)
+
+def Lin.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^lin",
+    sectionId := "frdi-def-1-2-iv" }
 
 /-- `isometric` は合成で閉じる。
 

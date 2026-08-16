@@ -257,9 +257,6 @@ theorem prop_1_7_ii_baseIso_factor (F : FrobenioidCore P) {A B : C} (φ : A ⟶ 
 /-- `base-isomorphism` のクラス。 -/
 def baseIsoProp : MorphismProperty C := fun _ _ φ => IsBaseIsomorphism P φ
 
-/-- `linear morphism` のクラス。 -/
-def linearProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
-
 /-! ### ★★`𝒞^bs-iso` を**部分圧として**作る（2026-08-16 追加）
 
 原文 (FrdI p.23):
@@ -267,7 +264,8 @@ def linearProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
 
 ★監査で「`MorphismProperty` どまりで部分圧になっていない」と指摘されたが、
 ★★**`𝒞^lin` のほうは `Prop111` に `linProp` / `Lin` として既にあった**
-（検証役は `Prop17` の `linearProp` だけを見ていた）。
+（検証役は `Prop17` の `linearProp` だけを見ていた。その `linearProp` は
+2026-08-16 に削除し、`linProp` に一本化した）。
 ★**ビルドが重複宣言を指摘して判明した** —— 子の報告も検証の対象である。
 
 ★形は `Prop19` の `isometricPreStepProp` と同じで、材料はすべて手元にあった。 -/
@@ -353,7 +351,7 @@ theorem prop_1_7_iii_linear_minimalAdjoint (F : FrobenioidCore P) {A B : C} (φ 
 
 ★`⇒` は **co-angularity を `α := 𝟙` に当てる技**で出る。 -/
 theorem prop_1_7_iii_frobType_minimalCoadjoint (F : FrobenioidCore P) {A B : C}
-    (φ : A ⟶ B) : IsFrobeniusType P φ ↔ IsMinimalCoadjoint (linearProp P) φ := by
+    (φ : A ⟶ B) : IsFrobeniusType P φ ↔ IsMinimalCoadjoint (linProp P) φ := by
   constructor
   · rintro hft X α β rfl hβ
     refine isIso_of_isCoAngular_right P α β hft.1.1 ?_ ⟨hβ, ?_⟩

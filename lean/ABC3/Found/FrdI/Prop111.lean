@@ -395,24 +395,6 @@ theorem prop_1_11_vii_fsm (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
 ★**我々も同じ判断をする(定義を 3 行で置く)。**
 -/
 
-/-- `linear` 射がなす `MorphismProperty`。 -/
-def linProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
-
-instance : (linProp P).ContainsIdentities :=
-  ⟨fun A => isLinear_id P A⟩
-
-instance : (linProp P).IsStableUnderComposition :=
-  ⟨fun _ _ hf hg => IsLinear.comp P hf hg⟩
-
-instance : MorphismProperty.IsMultiplicative (linProp P) where
-
-/-- **`𝒞^lin`** —— linear 射が定める広い部分圏。★`(v)` が使う。 -/
-abbrev Lin : Type u2 := WideSubcategory (linProp P)
-
-def Lin.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^lin",
-    sectionId := "frdi-def-1-2-iv" }
-
 /-- ★**非退化(下)**: 恒等射は `𝒞^lin` の射である(`ContainsIdentities` の言い換え)。 -/
 theorem linProp_id (A : C) : linProp P (𝟙 A) := isLinear_id P A
 
