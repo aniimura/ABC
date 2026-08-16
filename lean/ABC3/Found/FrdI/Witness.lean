@@ -48,6 +48,49 @@ variable {D : Type u} [Category.{v} D]
 @[simp] theorem MonoidOn.const_map (M : Type w) [AddCommMonoid M] {A B : D} (α : B ⟶ A)
     (x : M) : (MonoidOn.const D M).map α x = x := rfl
 
+/-! ### ★★一射圧上の `Φ_M` —— `𝔽_M` の得られ方（2026-08-16 追加）
+
+原文 (FrdI p.20):
+> morphism [cf. §0] category that assigns to the unique object of the category the
+
+原文 (FrdI p.20):
+> monoid M is itself a one-object [cf. §0] category, whose endomorphism monoid
+
+★★**監査で「`𝔽_M` の定義はあるが、それがこう得られることは未実装」と
+指摘された項目**である。
+
+★**一射圧**は `Discrete PUnit`。その上の定数 `Φ_M` に対し、
+`𝔽_{Φ_M}` は一対象圧で、その `End` が `𝔽_M` になる。
+
+★★**積の向きがちょうど合う** —— `End` の積は `x * y = y ≫ x` で、
+`(g ≫ f).div = Φ.map g.base f.div + f.deg • g.div = f.div + f.deg • g.div`
+（定数関手なので `Φ.map` は恒等）、
+`(g ≫ f).deg = f.deg * g.deg`。これは `ElemFrob` の積そのものである。 -/
+
+/-- 一射圧上の定数 `Φ_M`。 -/
+abbrev constPhi (M : Type) [AddCommMonoid M] : MonoidOn.{0, 0, 0} (Discrete PUnit) :=
+  MonoidOn.const (Discrete PUnit) M
+
+/-- 一射圧上の `𝔽_{Φ_M}` の唯一の対象。 -/
+abbrev constObj (M : Type) [AddCommMonoid M] : ElemFrobCat (constPhi M) :=
+  ⟨⟨⟨⟩⟩⟩
+
+/-- ★**一対象圧である**。 -/
+instance (M : Type) [AddCommMonoid M] : Subsingleton (ElemFrobCat (constPhi M)) :=
+  ⟨fun A B => by
+    obtain ⟨a⟩ := A
+    obtain ⟨b⟩ := B
+    rw [Subsingleton.elim a b]⟩
+
+/-- ★★**`𝔽_{Φ_M}` の自己準同型モノイドは `𝔽_M`**（原文 p.20）。 -/
+def constEndEquiv (M : Type) [AddCommMonoid M] :
+    End (constObj M) ≃* ElemFrob M where
+  toFun f := ⟨f.div, f.deg⟩
+  invFun x := ⟨𝟙 _, x.div, x.deg⟩
+  left_inv f := ElemFrobCat.Hom.ext (Subsingleton.elim _ _) rfl rfl
+  right_inv x := rfl
+  map_mul' f g := rfl
+
 /-! ### ★witness 本体
 
 ★`𝔽_Φ` が totally epimorphic であることは
