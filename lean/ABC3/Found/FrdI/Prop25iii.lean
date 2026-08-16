@@ -523,6 +523,52 @@ theorem psiOTri_otriLin {Y Y' : C} (hY : IsIsotropic P Y) (hY' : IsIsotropic P Y
 
 end Conj
 
+/-! ## ★★★★同型に沿った共役と `Ψ` —— **isotropy 不要**版
+
+★`isPsiValue_unique` に現れる射は `arbFactorUniq` の出す**同型だけ**なので、
+ここを `conjHom`(`Prop25.lean`)に置き換えれば
+★★**`Ψ` の well-defined 性から isotropy が消える。**
+-/
+
+section ConjPsi
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ)
+
+include hτ in
+/-- ★★**共役は分裂と可換** —— 単元も `τ` も保たれるから(isotropy 不要)。 -/
+theorem splitEquiv_conj {Y Y' : C} (j : Y ⟶ Y') [IsIso j] (β : OTri P Y') :
+    (splitEquiv P F hτ).symm (conjHom P F j β)
+      = (⟨((conjHom P F j (uOf P ((splitEquiv P F hτ).symm β).1) : OTri P Y) : End Y),
+          conjHom_otimes_mem P F j _ ((splitEquiv P F hτ).symm β).1.2⟩,
+         ⟨((conjHom P F j (tOf P F hτ ((splitEquiv P F hτ).symm β).2) : OTri P Y) : End Y),
+          conjHom_tau_mem P F j hτ _ ((splitEquiv P F hτ).symm β).2.2⟩) := by
+  refine (splitEquiv P F hτ).symm_apply_eq.mpr ?_
+  rw [splitEquiv_apply]
+  show conjHom P F j β
+    = conjHom P F j (uOf P _) * conjHom P F j (tOf P F hτ _)
+  rw [← map_mul]
+  congr 1
+  show β = uOf P ((splitEquiv P F hτ).symm β).1 * tOf P F hτ _
+  rw [← splitEquiv_apply P F hτ]
+  exact ((splitEquiv P F hτ).apply_symm_apply β).symm
+
+include hτ in
+/-- ★★★**`Ψ` は同型による共役と可換** —— `isotropy` を仮定しない版。
+
+★★これが `isPsiValue_unique` の isotropy を外す鍵である。 -/
+theorem psiOTri_conj {Y Y' : C} (j : Y ⟶ Y') [IsIso j] (d : ℕ+) (β : OTri P Y') :
+    psiOTri P F hτ d (conjHom P F j β) = conjHom P F j (psiOTri P F hτ d β) := by
+  show uOf P (((splitEquiv P F hτ).symm (conjHom P F j β)).1)
+      * (tOf P F hτ (((splitEquiv P F hτ).symm (conjHom P F j β)).2)) ^ ((d : ℕ+) : ℕ) = _
+  rw [splitEquiv_conj P F hτ j β]
+  show (conjHom P F j (uOf P _) : OTri P Y)
+      * (conjHom P F j (tOf P F hτ _) : OTri P Y) ^ ((d : ℕ+) : ℕ) = _
+  rw [← map_pow, ← map_mul]
+  rfl
+
+end ConjPsi
+
 /-! ## ★★★`Ψ` の well-defined 性
 
 ★4 重分解は一意ではない。★**しかし曖昧性はちょうど 2 種類しかない**——
