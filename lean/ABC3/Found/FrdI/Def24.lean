@@ -247,4 +247,187 @@ theorem boundSup_mono (ι : M → ℝ≥0) (S : Set M) {a b : M} (h : MLe a b)
     boundSup ι S a ≤ boundSup ι S b :=
   boundSup_le ι h0 a fun x hx => le_boundSup ι S b hbdd (bound_mono h hx)
 
+/-! ## ★★段 2 —— `Definition 2.4, (i)` perf-factorial
+
+原文 (FrdI p.47):
+> Definition 2.4.
+
+★★**族 `ι` をパラメータに出す**(案 B) —— 原文も `M^rlf_p` を
+「(b) から得られているもの」として名前で参照し、条件の列挙とは別の層に置いている。
+★段 1 の `pfLift_smul`(**正の実数倍を除いて一意**)がこの層を安全にしている。
+
+★★**(c1)(c3) は「条件」であって定理ではない** ——
+原文は (c) の中で
+「well-defined [i.e., the various Bound(a) are bounded subsets]」
+「whose image lies in ∏_p M^pf_p」
+と**角括弧と関係詞で条件として**書いている。★我々の測定(2026-08-17)でも、
+`Bound` を押さえる `a` は `M^pf` の元であって `M^pf_p` の元ではないので
+有界性は自動ではなく、また `M^pf_p ≃ ℚ≥0` は `ℝ≥0` の中で `sup` について閉じない。
+★**したがって条件として書くのが正しい。**
+-/
+
+/-- ★★`M^rlf_factor := ∏_{p ∈ Prime(M)} M^rlf_p`。
+
+★段 1 により各 `M^rlf_p ≃ ℝ≥0` なので、`Prime(M) → ℝ≥0` として実現する。 -/
+abbrev RlfFactor (M : Type w) [AddCommMonoid M] : Type w := Prime M → ℝ≥0
+
+/-- ★**`Supp(a) ⊆ Prime(M)`** —— 成分が `0` でない素点の集合。 -/
+def Supp (a : RlfFactor M) : Set (Prime M) := {p | a p ≠ 0}
+
+variable (M) in
+/-- ★**`M^pf` の中の「`p` ∪ {0}」** —— 原文 `Bound^p_{0}` の添字集合。
+
+★`p` の元は「正の整数倍が `Primary(M)` の `p` 類に入る `M^pf` の元」
+(§0 p.12 の `Primary(M^pf)` の特徴づけ、`isPrimaryElt_pf_iff`)。
+★`{0}` を足すのは **`sup` を取る集合を空にしないため**。 -/
+def pCarrierPf (p : Prime M) : Set (Pf M) :=
+  {x : Pf M | ∃ (n : ℕ+) (b : M), b ∈ primeCarrier M p ∧ ((n : ℕ+) : ℕ) • x = Pf.of b}
+    ∪ {0}
+
+theorem zero_mem_pCarrierPf (p : Prime M) : (0 : Pf M) ∈ pCarrierPf M p :=
+  Or.inr rfl
+
+/-- ★★**因子分解写像**(族 `ι` を与えたとき)——
+原文の `a ↦ (…, sup(Bound_{p ∪ {0}}(a)), …)`。 -/
+noncomputable def factorMap (ι : Prime M → Pf M → ℝ≥0) (a : Pf M) : RlfFactor M :=
+  fun p => boundSup (ι p) (pCarrierPf M p) a
+
+/-- ★★★**[FrdI] Definition 2.4, (i)** —— `perf-factorial`(族 `ι` を明示した形)。
+
+★**フィールドは原文の (a)(b)(c)(d) と 1 対 1**((c) は原文どおり 3 つに割る)。 -/
+structure IsPerfFactorialWith (M : Type w) [AddCommMonoid M]
+    (ι : Prime M → Pf M → ℝ≥0) : Prop where
+  /-- **(a)** `M` is divisorial. -/
+  divisorial : IsDivisorial M
+  /-- **(b)** 各 `p ∈ Prime(M)` で `M_p` は monoprime。 -/
+  monoprimeAt : ∀ p : Prime M, IsMonoprime (Mp M p)
+  /-- ★`ι p` は `p` 成分の上で**加法的**(`M^rlf_p ≃ ℝ≥0` の同一視)。 -/
+  embedAdd : ∀ (p : Prime M) {x y : Pf M}, x ∈ pCarrierPf M p → y ∈ pCarrierPf M p →
+      ι p (x + y) = ι p x + ι p y
+  /-- ★`ι p` は `p` 成分の上で**単射**。 -/
+  embedInj : ∀ p : Prime M, Set.InjOn (ι p) (pCarrierPf M p)
+  /-- ★`ι p` は `p` 成分の上で **`≤` を保つ**。 -/
+  embedMono : ∀ (p : Prime M) {x y : Pf M}, x ∈ pCarrierPf M p → y ∈ pCarrierPf M p →
+      MLe x y → ι p x ≤ ι p y
+  /-- **(c1)** ★**原文が角括弧で条件として書く所** —— `Bound` の像が上に有界。 -/
+  bounded : ∀ (a : Pf M) (p : Prime M),
+      BddAbove (ι p '' Bound (Pf M) (pCarrierPf M p) a)
+  /-- **(c2)** 因子分解写像は**加法的**。 -/
+  factorAdd : ∀ a b : Pf M, factorMap ι (a + b) = factorMap ι a + factorMap ι b
+  /-- **(c2)** 因子分解写像は**単射**。 -/
+  factorInj : Function.Injective (factorMap ι)
+  /-- **(c3)** ★**これも原文が条件として書く所** —— 像が `∏_p M^pf_p` に入る。 -/
+  factorMem : ∀ (a : Pf M) (p : Prime M), factorMap ι a p ∈ ι p '' pCarrierPf M p
+  /-- **(d)** `Supp` の条件 ——
+  `a ∈ M^pf_factor`、`b ∈ M^pf`、`Supp(a) ⊆ Supp(b)` ならば `a ∈ M^pf`。 -/
+  supp : ∀ a : RlfFactor M, (∀ p, a p ∈ ι p '' pCarrierPf M p) →
+      ∀ b : Pf M, Supp a ⊆ Supp (factorMap ι b) → a ∈ Set.range (factorMap ι)
+
+/-- ★★★**[FrdI] Definition 2.4, (i)** —— `perf-factorial`。
+
+★族 `ι`(＝各素点での `M^rlf_p ≃ ℝ≥0` の同一視)を存在量化した形。 -/
+def IsPerfFactorial (M : Type w) [AddCommMonoid M] : Prop :=
+  ∃ ι : Prime M → Pf M → ℝ≥0, IsPerfFactorialWith M ι
+
+/-- ★★**realification `M^rlf ⊆ M^rlf_factor`**(原文 p.48)——
+`∃ b ∈ M^pf, Supp(a) ⊆ Supp(b)` を満たす `a` の全体。 -/
+def Rlf (ι : Prime M → Pf M → ℝ≥0) : Set (RlfFactor M) :=
+  {a : RlfFactor M | ∃ b : Pf M, Supp a ⊆ Supp (factorMap ι b)}
+
+/-- ★`M^pf` の像は `M^rlf` に入る。 -/
+theorem factorMap_mem_rlf (ι : Prime M → Pf M → ℝ≥0) (b : Pf M) :
+    factorMap ι b ∈ Rlf ι :=
+  ⟨b, subset_rfl⟩
+
+/-! ### ★★族の取り替えに対する不変性
+
+★★**案 B(族をパラメータに出す)を安全にしている根拠**である ——
+段 1 の `pfLift_smul` により、族の取り方は**各素点で正の実数倍を除いて一意**。
+★**その取り替えで `IsPerfFactorialWith` は保たれる。** -/
+
+/-- ★`ℝ≥0` では正のスカラー倍は `sSup` と可換。 -/
+theorem boundSup_smul (ι : M → ℝ≥0) (S : Set M) (a : M) {c : ℝ≥0} (hc : c ≠ 0)
+    (h0 : (0 : M) ∈ S) (hbdd : BddAbove (ι '' Bound M S a)) :
+    boundSup (fun x => c * ι x) S a = c * boundSup ι S a := by
+  have hne : (ι '' Bound M S a).Nonempty := ⟨ι 0, 0, zero_mem_bound M h0 a, rfl⟩
+  have h := (OrderIso.mulLeft₀ c (pos_iff_ne_zero.mpr hc)).map_csSup' hne hbdd
+  show sSup ((fun x => c * ι x) '' Bound M S a) = c * sSup (ι '' Bound M S a)
+  rw [show ((fun x => c * ι x) '' Bound M S a)
+      = (OrderIso.mulLeft₀ c (pos_iff_ne_zero.mpr hc)) '' (ι '' Bound M S a) from by
+    rw [Set.image_image]; rfl]
+  exact h.symm
+
+/-- ★因子分解写像は族のスカラー倍に**共変**。 -/
+theorem factorMap_smul {ι ι' : Prime M → Pf M → ℝ≥0} (c : Prime M → ℝ≥0)
+    (hc : ∀ p, c p ≠ 0) (h : ∀ p x, ι' p x = c p * ι p x)
+    (hbdd : ∀ (a : Pf M) (p : Prime M),
+      BddAbove (ι p '' Bound (Pf M) (pCarrierPf M p) a))
+    (a : Pf M) (p : Prime M) :
+    factorMap ι' a p = c p * factorMap ι a p := by
+  show boundSup (ι' p) (pCarrierPf M p) a = c p * boundSup (ι p) (pCarrierPf M p) a
+  rw [show ι' p = fun x => c p * ι p x from funext (h p)]
+  exact boundSup_smul (ι p) _ a (hc p) (zero_mem_pCarrierPf p) (hbdd a p)
+
+/-- ★★★**族の取り替えに対する不変性** ——
+各素点で正の実数倍だけ違う族に取り替えても `perf-factorial` 性は保たれる。 -/
+theorem IsPerfFactorialWith.smul {ι ι' : Prime M → Pf M → ℝ≥0} (c : Prime M → ℝ≥0)
+    (hc : ∀ p, c p ≠ 0) (h : ∀ p x, ι' p x = c p * ι p x)
+    (H : IsPerfFactorialWith M ι) : IsPerfFactorialWith M ι' := by
+  have hfm : ∀ (a : Pf M) (p : Prime M), factorMap ι' a p = c p * factorMap ι a p :=
+    factorMap_smul c hc h H.bounded
+  have himg : ∀ (p : Prime M) (T : Set (Pf M)),
+      ι' p '' T = (fun z => c p * z) '' (ι p '' T) := by
+    intro p T
+    rw [Set.image_image]
+    exact congrArg (· '' T) (funext (h p))
+  refine ⟨H.divisorial, H.monoprimeAt, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro p x y hx hy
+    rw [h, h, h, H.embedAdd p hx hy, mul_add]
+  · intro p x hx y hy hxy
+    refine H.embedInj p hx hy ?_
+    rw [h, h] at hxy
+    exact mul_left_cancel₀ (hc p) hxy
+  · intro p x y hx hy hle
+    rw [h, h]
+    exact mul_le_mul_left' (H.embedMono p hx hy hle) _
+  · intro a p
+    obtain ⟨u, hu⟩ := H.bounded a p
+    refine ⟨c p * u, ?_⟩
+    rintro _ ⟨x, hx, rfl⟩
+    rw [h]
+    exact mul_le_mul_left' (hu ⟨x, hx, rfl⟩) _
+  · intro a b
+    refine funext fun p => ?_
+    simp only [Pi.add_apply]
+    rw [hfm, hfm, hfm, congrFun (H.factorAdd a b) p]
+    simp only [Pi.add_apply]
+    exact mul_add _ _ _
+  · intro a b hab
+    refine H.factorInj (funext fun p => ?_)
+    have hp := congrFun hab p
+    rw [hfm, hfm] at hp
+    exact mul_left_cancel₀ (hc p) hp
+  · intro a p
+    rw [hfm, himg p (pCarrierPf M p)]
+    exact ⟨factorMap ι a p, H.factorMem a p, rfl⟩
+  · intro a ha b hsupp
+    have ha' : ∀ p, ((c p)⁻¹ * a p) ∈ ι p '' pCarrierPf M p := by
+      intro p
+      obtain ⟨x, hx, hxe⟩ := ha p
+      refine ⟨x, hx, ?_⟩
+      rw [h p x] at hxe
+      rw [← hxe, ← mul_assoc, inv_mul_cancel₀ (hc p), one_mul]
+    have hsupp' : Supp (fun q => (c q)⁻¹ * a q) ⊆ Supp (factorMap ι b) := by
+      intro p hp
+      have hap : a p ≠ 0 := by
+        intro h0
+        exact hp (show (c p)⁻¹ * a p = 0 by rw [h0, mul_zero])
+      have hin : p ∈ Supp (factorMap ι' b) := hsupp hap
+      show factorMap ι b p ≠ 0
+      intro h0
+      exact hin (by rw [hfm, h0, mul_zero])
+    obtain ⟨y, hy⟩ := H.supp _ ha' b hsupp'
+    refine ⟨y, funext fun p => ?_⟩
+    rw [hfm, congrFun hy p, ← mul_assoc, mul_inv_cancel₀ (hc p), one_mul]
+
 end ABC3.Found.FrdI
