@@ -259,6 +259,27 @@ noncomputable def splitEquiv : (OTimes P A × τ A) ≃ OTri P A :=
 theorem splitEquiv_apply (p : OTimes P A × τ A) :
     splitEquiv P F hτ p = uOf P p.1 * tOf P F hτ p.2 := rfl
 
+include hτ in
+/-- ★★★**`Div` は `τ(A)` の上で単射** —— **isotropy 不要**版。
+
+★従来は `Definition 2.3, (a)` の `charBij`(isotropic な `A` でしか無い)を
+使っていた。★★**分裂の単射性(`charSplitting_bijective_all`)と
+`otri_div_eq_iff'`(こちらも isotropy 不要)で置き換えられる**:
+`Div t₁ = Div t₂` なら `t₁ = t₂ · u` なので
+`splitEquiv (1, t₁) = splitEquiv (u, t₂)`、単射性で第 2 成分が一致する。 -/
+theorem tau_div_injective (t₁ t₂ : τ A)
+    (h : P.Div (((t₁ : End A)) : A ⟶ A) = P.Div (((t₂ : End A)) : A ⟶ A)) : t₁ = t₂ := by
+  obtain ⟨u, hu⟩ :=
+    (otri_div_eq_iff' P F (tOf P F hτ t₁) (tOf P F hτ t₂)).mp h
+  have hsplit : splitEquiv P F hτ ((1 : OTimes P A), t₁)
+      = splitEquiv P F hτ (u, t₂) := by
+    rw [splitEquiv_apply, splitEquiv_apply]
+    refine Subtype.ext ?_
+    show (((t₁ : End A)) : A ⟶ A) ≫ (𝟙 A) = (((t₂ : End A)) : A ⟶ A) ≫ (((u : End A)))
+    rw [Category.comp_id]
+    exact hu
+  exact congrArg Prod.snd ((splitEquiv P F hτ).injective hsplit)
+
 /-- ★★★**`Ψ` の `𝒪^▷(A)` 上の定義** —— `β₀ · β₁ ↦ β₀ · β₁^d`。 -/
 noncomputable def psiOTri (d : ℕ+) (β : OTri P A) : OTri P A :=
   uOf P ((splitEquiv P F hτ).symm β).1
@@ -366,7 +387,7 @@ theorem otri_comp_frobBaseId {ζ : End A} (hζb : IsBaseIdentity P ζ) (β : OTr
         ≫ (((β ^ (P.degFr ((ζ : End A) : A ⟶ A) : ℕ) : OTri P A) : End A) : A ⟶ A) :=
   (hfn ζ hζb (β : End A) β.2).symm
 
-include hfn hA in
+include hfn in
 /-- ★★★**`Ψ` は `𝒪^▷(A)` の上で単射**。
 
 ★分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)` の下で `Ψ` は `(u, t) ↦ (u, t^d)` なので、
@@ -403,10 +424,8 @@ theorem psiOTri_injective (d : ℕ+) :
       intro s
       exact (otri_div_pow P (tOf P F hτ s) ((d : ℕ+) : ℕ)).symm
     rw [e, e, h2]
-  have h3 : ((splitEquiv P F hτ).symm b).2 = ((splitEquiv P F hτ).symm b').2 := by
-    obtain ⟨t₁, -, huniq⟩ :=
-      hτ.charBij A hA (tOf P F hτ ((splitEquiv P F hτ).symm b').2)
-    rw [huniq _ hdiv, huniq _ rfl]
+  have h3 : ((splitEquiv P F hτ).symm b).2 = ((splitEquiv P F hτ).symm b').2 :=
+    tau_div_injective P F hτ _ _ hdiv
   exact (splitEquiv P F hτ).symm.injective (Prod.ext h1 h3)
 
 /-! ### ★★`Ψ` の自然性 —— well-defined 性の核
@@ -441,7 +460,6 @@ theorem psiOTri_unit_mul (d : ℕ+) (u : OTimes P A) (β : OTri P A) :
   rw [show uOf P (u * p.1) = uOf P u * uOf P p.1 from rfl, mul_assoc]
   rfl
 
-include hA in
 /-- ★★**等長な元では `Ψ` は恒等** —— 原文 (a)「`Ψ` は等長射の上で恒等」の中身。
 
 ★`Div β = 0` なら `Definition 2.3, (a)` の全単射性から **`τ` 成分が `1`** になる。 -/
@@ -455,14 +473,8 @@ theorem psiOTri_of_div_zero (d : ℕ+) (β : OTri P A)
     rw [← h, hβ]
     exact (otri_div_unit_mul P p.1 (tOf P F hτ p.2)).symm
   have hdt' : P.Div (((p.2 : End A)) : A ⟶ A) = 0 := hdt
-  have hone : p.2 = 1 := by
-    obtain ⟨t₀, -, huniq⟩ := hτ.charBij A hA (1 : OTri P A)
-    have e1 : P.Div (((p.2 : End A)) : A ⟶ A)
-        = P.Div ((((1 : OTri P A) : End A)) : A ⟶ A) := by
-      rw [hdt']; exact (P.Div_id A).symm
-    have e2 : P.Div ((((1 : τ A) : End A)) : A ⟶ A)
-        = P.Div ((((1 : OTri P A) : End A)) : A ⟶ A) := rfl
-    rw [huniq p.2 e1, huniq 1 e2]
+  have hone : p.2 = 1 :=
+    tau_div_injective P F hτ p.2 1 (by rw [hdt']; exact (P.Div_id A).symm)
   show uOf P p.1 * (tOf P F hτ p.2) ^ ((d : ℕ+) : ℕ) = β
   conv_rhs => rw [hβ]
   rw [hone]
@@ -705,7 +717,7 @@ variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
   (hmt : ∀ X : C, IsMetricallyTrivial P X) (haa : IsOfAutAmpleType P)
   (hfn : IsOfFrobeniusNormalizedType P)
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★★**`Ψ` は射の上でちょうど一つの値をとる**。
 
 ★これで `Ψ : Hom(A,B) → Hom(A,B)` が**関数として定まった**。 -/
@@ -716,39 +728,39 @@ theorem psiHom_existsUnique (d : ℕ+) {A B : C} (φ : A ⟶ B) :
 
 /-- ★**`Ψ` の射の上の値**。 -/
 noncomputable def psiMap (d : ℕ+) {A B : C} (φ : A ⟶ B) : A ⟶ B :=
-  (psiHom_existsUnique P F hτ hiso hmt haa d φ).choose
+  (psiHom_existsUnique P F hτ hmt haa d φ).choose
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 theorem psiMap_spec (d : ℕ+) {A B : C} (φ : A ⟶ B) :
-    IsPsiValue P F hτ d φ (psiMap P F hτ hiso hmt haa d φ) :=
-  (psiHom_existsUnique P F hτ hiso hmt haa d φ).choose_spec.1
+    IsPsiValue P F hτ d φ (psiMap P F hτ hmt haa d φ) :=
+  (psiHom_existsUnique P F hτ hmt haa d φ).choose_spec.1
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★**分解から `Ψ` の値が読める**。 -/
 theorem psiMap_eq (d : ℕ+) {A B : C} {φ ψ : A ⟶ B}
-    (h : IsPsiValue P F hτ d φ ψ) : psiMap P F hτ hiso hmt haa d φ = ψ :=
-  isPsiValue_unique P F hτ d (psiMap_spec P F hτ hiso hmt haa d φ) h
+    (h : IsPsiValue P F hτ d φ ψ) : psiMap P F hτ hmt haa d φ = ψ :=
+  isPsiValue_unique P F hτ d (psiMap_spec P F hτ hmt haa d φ) h
 
 /-! ### ★原文 (a)(b) —— `Ψ` の基本性質 -/
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★**`Ψ` は `Base` を変えない**。 -/
 theorem psiMap_base (d : ℕ+) {A B : C} (φ : A ⟶ B) :
-    P.Base (psiMap P F hτ hiso hmt haa d φ) = P.Base φ := by
+    P.Base (psiMap P F hτ hmt haa d φ) = P.Base φ := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   have hb : P.Base (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y)
       = P.Base β := by
     rw [show P.Base β = P.Base (𝟙 Y) from hm.1]
     exact (psiOTri P F hτ d ⟨β, hm⟩).2.1
   rw [he, hf, P.Base_comp, P.Base_comp, P.Base_comp, P.Base_comp, P.Base_comp, P.Base_comp, hb]
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★**`Ψ` は Frobenius 次数を変えない**。 -/
 theorem psiMap_degFr (d : ℕ+) {A B : C} (φ : A ⟶ B) :
-    P.degFr (psiMap P F hτ hiso hmt haa d φ) = P.degFr φ := by
+    P.degFr (psiMap P F hτ hmt haa d φ) = P.degFr φ := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   have hb : P.degFr (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y)
       = P.degFr β := by
     rw [show P.degFr β = 1 from hm.2]
@@ -756,12 +768,12 @@ theorem psiMap_degFr (d : ℕ+) {A B : C} (φ : A ⟶ B) :
   rw [he, hf]
   simp only [P.degFr_comp, hb]
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**`Ψ` は `Div` を `d` 倍する** —— 原文 (b)「`d` の Frobenius 函手と 1-compatible」。 -/
 theorem psiMap_div (d : ℕ+) {A B : C} (φ : A ⟶ B) :
-    P.Div (psiMap P F hτ hiso hmt haa d φ) = ((d : ℕ+) : ℕ) • P.Div φ := by
+    P.Div (psiMap P F hτ hmt haa d φ) = ((d : ℕ+) : ℕ) • P.Div φ := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   have hbi : IsPreStep P (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y) := by
     refine ⟨(psiOTri P F hτ d ⟨β, hm⟩).2.2, ?_⟩
     show IsIso (P.Base _)
@@ -773,26 +785,26 @@ theorem psiMap_div (d : ℕ+) {A B : C} (φ : A ⟶ B) :
   rw [he, hψ, psiOTri_div P F hτ (hfn Y) d ⟨β, hm⟩, map_nsmul, hf,
     quadFactor_div P F hδ hγi hγs hm.1 hβs hα]
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★★**等長射の上で `Ψ` は恒等** —— 原文 (a)。
 
 ★★`Φ.map` は **`Definition 1.1, (a)` の characteristic 単射性から常に単射**なので、
 `Div φ = 0` から直ちに `Div β = 0` が出る。 -/
 theorem psiMap_of_isometric (d : ℕ+) {A B : C} (φ : A ⟶ B) (hφ : IsIsometric P φ) :
-    psiMap P F hτ hiso hmt haa d φ = φ := by
+    psiMap P F hτ hmt haa d φ = φ := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   have hd0 : P.Div β = 0 := by
     refine Φ.map_injective (P.Base (δ ≫ γ)) ?_
     rw [map_zero, ← quadFactor_div P F hδ hγi hγs hm.1 hβs hα, ← hf]
     exact hφ
-  rw [he, psiOTri_of_div_zero P F hτ (hiso Y) d ⟨β, hm⟩ hd0, ← hf]
+  rw [he, psiOTri_of_div_zero P F hτ d ⟨β, hm⟩ hd0, ← hf]
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★**`Ψ(𝟙) = 𝟙`** —— 恒等射は等長だから。 -/
 theorem psiMap_id (d : ℕ+) (A : C) :
-    psiMap P F hτ hiso hmt haa d (𝟙 A) = 𝟙 A :=
-  psiMap_of_isometric P F hτ hiso hmt haa d (𝟙 A) (P.Div_id A)
+    psiMap P F hτ hmt haa d (𝟙 A) = 𝟙 A :=
+  psiMap_of_isometric P F hτ hmt haa d (𝟙 A) (P.Div_id A)
 
 /-! ### ★合成則のうち、分解を組み替えずに出る 2 つ
 
@@ -801,33 +813,33 @@ theorem psiMap_id (d : ℕ+) (A : C) :
 残るのは真ん中(等長 pre-step と base-identity 自己射)を通す場合である。
 -/
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★**右から pull-back を掛ける場合** —— `Ψ(φ ≫ α') = Ψ(φ) ≫ α'`。
 
 ★pull-back どうしの合成は pull-back なので、分解の右端が伸びるだけ。 -/
 theorem psiMap_comp_pullBack (d : ℕ+) {A B E : C} (φ : A ⟶ B) {α' : B ⟶ E}
     (hα' : IsPullBack P α') :
-    psiMap P F hτ hiso hmt haa d (φ ≫ α')
-      = psiMap P F hτ hiso hmt haa d φ ≫ α' := by
+    psiMap P F hτ hmt haa d (φ ≫ α')
+      = psiMap P F hτ hmt haa d φ ≫ α' := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+    psiMap_spec P F hτ hmt haa d φ
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨X, Y, δ, γ, β, α ≫ α', hm, ?_, hδ, hγi, hγs, hβs, hβc,
     IsPullBack.comp P hα hα', ?_⟩
   · rw [hf]; simp
   · rw [he]; simp
 
-include hτ hiso hmt haa in
+include hτ hmt haa in
 /-- ★★**左から Frobenius 型射を掛ける場合** —— `Ψ(δ' ≫ φ) = δ' ≫ Ψ(φ)`。
 
 ★Frobenius 型射どうしの合成は Frobenius 型なので、分解の左端が伸びるだけ。 -/
 theorem psiMap_frob_comp (d : ℕ+) {A A' B : C} {δ' : A' ⟶ A}
     (hδ' : IsFrobeniusType P δ') (φ : A ⟶ B) :
-    psiMap P F hτ hiso hmt haa d (δ' ≫ φ)
-      = δ' ≫ psiMap P F hτ hiso hmt haa d φ := by
+    psiMap P F hτ hmt haa d (δ' ≫ φ)
+      = δ' ≫ psiMap P F hτ hmt haa d φ := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+    psiMap_spec P F hτ hmt haa d φ
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨X, Y, δ' ≫ δ, γ, β, α, hm, ?_, IsFrobeniusType.comp P F hδ' hδ,
     hγi, hγs, hβs, hβc, hα, ?_⟩
   · rw [hf]; simp
@@ -846,11 +858,11 @@ include hτ hiso hmt haa hfn in
 
 の 2 本で閉じる。★**先に用意した自然性がそのまま効いた。** -/
 theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
-    psiMap P F hτ hiso hmt haa d (φ ≫ (((β' : End B)) : B ⟶ B))
-      = psiMap P F hτ hiso hmt haa d φ
+    psiMap P F hτ hmt haa d (φ ≫ (((β' : End B)) : B ⟶ B))
+      = psiMap P F hτ hmt haa d φ
         ≫ (((psiOTri P F hτ d β' : OTri P B) : End B) : B ⟶ B) := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   have hαlin : IsLinear P α := (F.pullBackLB α hα).2
   have hspec : α ≫ (((β' : End B)) : B ⟶ B)
       = (((otriLin P F (hiso Y) hαlin β' : OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
@@ -862,7 +874,7 @@ theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
   set s : OTri P Y := otriLin P F (hiso Y) hαlin β' with hsdef
   set b : OTri P Y := ⟨β, hm⟩ with hbdef
   have hnew : (((s * b : OTri P Y) : End Y) : Y ⟶ Y) = β ≫ (((s : End Y)) : Y ⟶ Y) := rfl
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨X, Y, δ, γ, (((s * b : OTri P Y) : End Y) : Y ⟶ Y), α, (s * b).2, ?_, hδ,
     hγi, hγs, ?_, ?_, hα, ?_⟩
   · -- 分解が `φ ≫ β'` に戻る
@@ -901,10 +913,10 @@ include hτ hiso hmt haa hfn in
 ★★★`Ψ` がその逆とも可換なのは `psiOTri_otriLin` の**単射性側**である。 -/
 theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' : B ⟶ E}
     (hγ'i : IsIsometric P γ') (hγ's : IsPreStep P γ') :
-    psiMap P F hτ hiso hmt haa d (φ ≫ γ')
-      = psiMap P F hτ hiso hmt haa d φ ≫ γ' := by
+    psiMap P F hτ hmt haa d (φ ≫ γ')
+      = psiMap P F hτ hmt haa d φ ≫ γ' := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   obtain ⟨Yt, γt, αt, hshuf, hαt, hbγt⟩ := plBk_shuffle P F hα γ'
   -- ★`γ̃` は等長 pre-step
   have hγti : IsIsometric P γt := by
@@ -930,7 +942,7 @@ theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' 
     rw [← psiOTri_otriLin P F hτ (hiso Y) (hiso Yt) hγtlin d (⟨tm, htm⟩ : OTri P Yt),
       ht] at h
     exact h
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨X, Yt, δ, γ ≫ γt, tm, αt, htm, ?_,
     hδ, IsIsometric.comp P hγi hγti, IsPreStep.comp P hγs hγts, ?_, ?_, hαt, ?_⟩
   · -- 分解が `φ ≫ γ'` に戻る
@@ -965,10 +977,10 @@ computation")のおかげ**である。
 (`prop_2_5_ii_frobTrivial`)。ここでは仮定として明示する。 -/
 theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     {A B E : C} (φ : A ⟶ B) {δ' : B ⟶ E} (hδ' : IsFrobeniusType P δ') :
-    psiMap P F hτ hiso hmt haa d (φ ≫ δ')
-      = psiMap P F hτ hiso hmt haa d φ ≫ δ' := by
+    psiMap P F hτ hmt haa d (φ ≫ δ')
+      = psiMap P F hτ hmt haa d φ ≫ δ' := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   obtain ⟨Yt, δt, αt, hshuf, hαt, hbδt⟩ := plBk_shuffle P F hα δ'
   -- ★手 1: `δ̃` もまた Frobenius 型
   have hδti : IsIsometric P δt := by
@@ -1019,7 +1031,7 @@ theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     rw [hpast, P.Div_comp, show P.Div ζ' = 0 from hζ'F.1.2] at h0
     show P.Div γ'' = 0
     exact Φ.map_injective (P.Base ζ') (by simpa using h0)
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨W, Yt, δ ≫ ζ', γ'', xm, αt, hxm, ?_,
     IsFrobeniusType.comp P F hδ hζ'F, hγ''i, hγ''s, ?_, ?_, hαt, ?_⟩
   · -- 分解が `φ ≫ δ'` に戻る
@@ -1061,14 +1073,14 @@ include hτ hiso hmt haa hfn in
 ★**4 重分解がちょうど 4 本の合成則に対応していた。** -/
 theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     {A B E : C} (φ : A ⟶ B) (φ' : B ⟶ E) :
-    psiMap P F hτ hiso hmt haa d (φ ≫ φ')
-      = psiMap P F hτ hiso hmt haa d φ ≫ psiMap P F hτ hiso hmt haa d φ' := by
+    psiMap P F hτ hmt haa d (φ ≫ φ')
+      = psiMap P F hτ hmt haa d φ ≫ psiMap P F hτ hmt haa d φ' := by
   obtain ⟨X', Y', δ', γ', β', α', hm', hf', hδ'F, hγi', hγs', hβs', hβc', hα', he'⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ'
+    psiMap_spec P F hτ hmt haa d φ'
   rw [he']
   conv_lhs => rw [hf']
   have e0 : φ ≫ δ' ≫ γ' ≫ β' ≫ α' = (((φ ≫ δ') ≫ γ') ≫ β') ≫ α' := by simp
-  rw [e0, psiMap_comp_pullBack P F hτ hiso hmt haa d _ hα',
+  rw [e0, psiMap_comp_pullBack P F hτ hmt haa d _ hα',
     psiMap_comp_otri P F hτ hiso hmt haa hfn d _ (⟨β', hm'⟩ : OTri P Y'),
     psiMap_comp_isometricPreStep P F hτ hiso hmt haa hfn d _ hγi' hγs',
     psiMap_comp_frob P F hτ hiso hmt haa hfn hft d φ hδ'F]
@@ -1081,17 +1093,17 @@ theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
 ★原文 (a)「対象の上で恒等」がそのまま `obj A := A` になっている。 -/
 noncomputable def psiFunctor (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+) : C ⥤ C where
   obj A := A
-  map φ := psiMap P F hτ hiso hmt haa d φ
-  map_id A := psiMap_id P F hτ hiso hmt haa d A
+  map φ := psiMap P F hτ hmt haa d φ
+  map_id A := psiMap_id P F hτ hmt haa d A
   map_comp φ φ' := psiMap_comp P F hτ hiso hmt haa hfn hft d φ φ'
 
 include hτ hiso hmt haa hfn in
 /-- ★★**`Ψ` の像は `𝒞(d)` に入る** —— `Div (Ψφ) = d • Div φ` だから。 -/
 theorem psiMap_mem_cd (d : ℕ+) {A B : C} (φ : A ⟶ B) :
-    cdProp P d (psiMap P F hτ hiso hmt haa d φ) :=
+    cdProp P d (psiMap P F hτ hmt haa d φ) :=
   ⟨P.Div φ, by
     rw [nsmulHom_apply]
-    exact (psiMap_div P F hτ hiso hmt haa hfn d φ).symm⟩
+    exact (psiMap_div P F hτ hmt haa hfn d φ).symm⟩
 
 /-- ★★★★**原文の `Ψ : 𝒞 → 𝒞(d)`**。
 
@@ -1101,10 +1113,10 @@ theorem psiMap_mem_cd (d : ℕ+) {A B : C} (φ : A ⟶ B) :
 noncomputable def psiFunctorCd (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+) :
     C ⥤ Cd P d where
   obj A := ⟨A⟩
-  map φ := ⟨psiMap P F hτ hiso hmt haa d φ, psiMap_mem_cd P F hτ hiso hmt haa hfn d φ⟩
+  map φ := ⟨psiMap P F hτ hmt haa d φ, psiMap_mem_cd P F hτ hiso hmt haa hfn d φ⟩
   map_id A := by
     apply InducedWideCategory.Hom.ext
-    exact psiMap_id P F hτ hiso hmt haa d A
+    exact psiMap_id P F hτ hmt haa d A
   map_comp φ φ' := by
     apply InducedWideCategory.Hom.ext
     exact psiMap_comp P F hτ hiso hmt haa hfn hft d φ φ'
@@ -1133,7 +1145,7 @@ include hτ hiso hmt haa hfn in
 ★`Proposition 2.5, (i)` の全射性 ＋ `Definition 2.3, (a)` の全単射性で
 **`t₀ = t^d` なる `t ∈ τ` が取れる**。あとは `β := u₀ · t` とすればよい。 -/
 theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
-    (hd : cdProp P d f) : ∃ ψ : A ⟶ B, psiMap P F hτ hiso hmt haa d ψ = f := by
+    (hd : cdProp P d f) : ∃ ψ : A ⟶ B, psiMap P F hτ hmt haa d ψ = f := by
   obtain ⟨X, Y, δ, γ, β₀, α, hfac, hδ, hγi, hγs, hβb, hβs, hβc, hα⟩ :=
     quadFactor P F hmt haa f
   have hm₀ : β₀ ∈ OTri P Y := ⟨hβb, hβs.1⟩
@@ -1179,7 +1191,7 @@ theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
     rw [huniq p.2 e1, huniq _ e2]
   -- ★手 4: `β := u₀ · t`
   refine ⟨δ ≫ γ ≫ (((uOf P p.1 * tOf P F hτ t : OTri P Y) : End Y) : Y ⟶ Y) ≫ α, ?_⟩
-  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine psiMap_eq P F hτ hmt haa d ?_
   refine ⟨X, Y, δ, γ, _, α, (uOf P p.1 * tOf P F hτ t).2, rfl, hδ, hγi, hγs,
     ?_, ?_, hα, ?_⟩
   · exact ⟨(uOf P p.1 * tOf P F hτ t).2.2, by
@@ -1214,11 +1226,11 @@ include hτ hiso hmt haa hfn in
 ★★★そこで **`Ψ` が `𝒪^▷` の上で単射**(`psiOTri_injective`)を使って
 `β₂ = k · (g による β₁ の共役)` に戻すと、同型がすべて打ち消える。 -/
 theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
-    (h : psiMap P F hτ hiso hmt haa d φ = psiMap P F hτ hiso hmt haa d φ') : φ = φ' := by
+    (h : psiMap P F hτ hmt haa d φ = psiMap P F hτ hmt haa d φ') : φ = φ' := by
   obtain ⟨X₁, Y₁, δ₁, γ₁, β₁, α₁, hm₁, hf₁, hδ₁, hγi₁, hγs₁, hβs₁, hβc₁, hα₁, he₁⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ
+    psiMap_spec P F hτ hmt haa d φ
   obtain ⟨X₂, Y₂, δ₂, γ₂, β₂, α₂, hm₂, hf₂, hδ₂, hγi₂, hγs₂, hβs₂, hβc₂, hα₂, he₂⟩ :=
-    psiMap_spec P F hτ hiso hmt haa d φ'
+    psiMap_spec P F hτ hmt haa d φ'
   have hpre : ∀ (Y : C) (z : OTri P Y), IsPreStep P (((z : End Y)) : Y ⟶ Y) := by
     intro Y z
     refine ⟨z.2.2, ?_⟩
@@ -1288,7 +1300,7 @@ theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
   -- ★手 4: `Ψ` の単射性で `β` の側に戻す
   have hkey : (⟨β₂, hm₂⟩ : OTri P Y₂)
       = uOf P k * conjHom P F g.hom ⟨β₁, hm₁⟩ := by
-    refine psiOTri_injective P F hτ (hiso Y₂) (hfn Y₂) d ?_
+    refine psiOTri_injective P F hτ (hfn Y₂) d ?_
     rw [psiOTri_unit_mul P F hτ d k _,
       psiOTri_conj P F hτ g.hom d ⟨β₁, hm₁⟩]
     apply Subtype.ext
