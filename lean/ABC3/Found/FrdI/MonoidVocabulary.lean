@@ -733,27 +733,42 @@ noncomputable def gpMap {N : Type*} [AddCommMonoid N] (f : M →+ N) : Gp M →+
   rw [AddSubmonoid.LocalizationMap.lift_eq]
   rfl
 
-/-! ★★**`gpMap` の単射性 —— 道具を特定した（2026-08-16）**
+/-- ★**`mk a b + toGp b = toGp a`** —— `M^gp` での基本式。
 
-★**`AddLocalization.mk_eq_mk_iff'`**（`[IsCancelAdd]` 下）が道具である:
+★これを使うと、**群での消去**だけで `mk` 上の値を決められる。 -/
+theorem mk_add_toGp (a : M) (b : (⊤ : AddSubmonoid M)) :
+    AddLocalization.mk a b + toGp M (b : M) = toGp M a := by
+  show AddLocalization.mk a b + AddLocalization.mk (b : M) 0 = AddLocalization.mk a 0
+  rw [AddLocalization.mk_add, AddLocalization.mk_eq_mk_iff, AddLocalization.r_iff_exists]
+  exact ⟨0, by simp [add_comm, add_assoc, add_left_comm]⟩
 
-    mk a₁ a₂ = mk b₁ b₂  ↔  ↑b₂ + a₁ = a₂ + b₁
+/-- ★**`gpMap` の `mk` 上での値**。
 
-★これで**存在量化子が消える**のが要点である——
-一般の局所化の同値関係には証人 `c` が入るが、簡約性がそれを消す。
+★★**群での消去だけで出る** —— 両辺に `toGp (f b)` を足すと
+どちらも `toGp (f a)` になるので、`add_right_cancel` で等しい。 -/
+theorem gpMap_mk {N : Type*} [AddCommMonoid N] (f : M →+ N)
+    (a : M) (b : (⊤ : AddSubmonoid M)) :
+    gpMap M f (AddLocalization.mk a b)
+      = AddLocalization.mk (f a) (⟨f (b : M), AddSubmonoid.mem_top _⟩ : (⊤ : AddSubmonoid N)) := by
+  have h1 := congrArg (gpMap M f) (mk_add_toGp M a b)
+  simp only [map_add, gpMap_toGp] at h1
+  have h2 := mk_add_toGp N (f a) (⟨f (b : M), AddSubmonoid.mem_top _⟩ : (⊤ : AddSubmonoid N))
+  exact add_right_cancel (h1.trans h2.symm)
 
-★**残る形**:
-1. `gpMap_mk : gpMap M f (mk a b) = mk (f a) ⟨f b, trivial⟩`
-   ★`mk a b = toGp a - toGp b` と `gpMap` の加法性から出るはず。
-   ★**部分モノイドの部分型（`↑b`）の扱いが一手間。**
-2. `gpMap_injective [IsCancelAdd M] [IsCancelAdd N] (hf : Injective f) :
-   Injective (gpMap M f)`
-   ★`mk_eq_mk_iff'` を両側に適用し、`f (b' + a) = f (b + a')` から
-   `hf` で戻すだけ。
+/-- ★★**`gpMap` は単射性を保つ**（両方が簡約的なとき）。
 
-★`Φ` は divisorial なので各 `Φ(A)` は integral、
-`isCancelAdd_of_isIntegralMonoid` が両方の簡約性を与える。
-★★**材料はすべて手元にある。まだ書いていない。** -/
+★**`AddLocalization.mk_eq_mk_iff'`（簡約性の下）で存在量化子が消える**のが要点。
+★★**これが `Φ^gp` を `monoid on D` にする条件 (a) の第1成分である**。 -/
+theorem gpMap_injective {N : Type*} [AddCommMonoid N] [IsCancelAdd M] [IsCancelAdd N]
+    {f : M →+ N} (hf : Function.Injective f) : Function.Injective (gpMap M f) := by
+  intro x y h
+  induction x using AddLocalization.induction_on with | _ x =>
+  induction y using AddLocalization.induction_on with | _ y =>
+  rw [gpMap_mk, gpMap_mk, AddLocalization.mk_eq_mk_iff'] at h
+  rw [AddLocalization.mk_eq_mk_iff']
+  refine hf ?_
+  simpa using h
+
 
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
