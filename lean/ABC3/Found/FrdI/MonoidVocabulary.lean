@@ -934,6 +934,20 @@ theorem map_surjective {N : Type*} [AddCommMonoid N] {f : M →+ N}
   obtain ⟨m, rfl⟩ := hf n
   exact ⟨mk m a, rfl⟩
 
+/-- ★★**`m/a` が `M^pf` で零 ⇔ `m` は `ℕ+` 倍で消える**。
+
+★★**これが「`M^pf ≠ 0`」を `Pf` を経由せずに書ける根拠である** ——
+`M^pf = 0` ⇔ 「すべての `m` について `∃ k : ℕ+, k • m = 0`」。 -/
+theorem mk_eq_zero_iff (m : M) (a : ℕ+) :
+    mk m a = (0 : Pf M) ↔ ∃ k : ℕ+, ((k : ℕ+) : ℕ) • m = 0 := by
+  constructor
+  · intro h
+    obtain ⟨k, e⟩ := Quotient.exact h
+    exact ⟨k, by simpa using e⟩
+  · rintro ⟨k, e⟩
+    refine Pf.sound k ?_
+    simpa [mul_comm, mul_smul, e] using congrArg (fun t => ((a : ℕ+) : ℕ) • t) e
+
 /-! ### ★★`ℚ>0` 倍作用を**構成せずに書く**（2026-08-16）
 
 原文 (FrdI p.23) の `Frobenius-compact` の第3節は

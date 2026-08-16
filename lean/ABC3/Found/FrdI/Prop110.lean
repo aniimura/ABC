@@ -2124,6 +2124,57 @@ theorem endConj_mem_otimes {A B : C} (θ : A ≅ B) {f : End A} (hf : f ∈ OTim
       show P.degFr θ.inv = 1 from isLinear_of_isIso P θ.inv]
     simp
 
+/-! ### ★★`Frobenius-compact`（2026-08-16 追加）
+
+原文 (FrdI p.23):
+> C such that O×(C) is commutative, O×(C)pf
+
+★**引用を切った記録（事故 #3 の 7 度目）**: 続く `̸= 0, and every element of AutC(C)` は
+★**`̸=`（打ち消し付きの等号）が抽出で落ちる**ため引用できない（35/63 文字で停止）。
+★`′`・`▷`・`≼` に続く 4 つ目の「目では見えるが抽出に無い文字」である。
+
+★★**`Pf` を経由せずに書く。** 理由は 2 つある。
+
+1. `𝒪^×(C)` は **乗法**の `Submonoid (End A)` であり、`Pf` は
+   `[AddCommMonoid M]` を要求する。★**しかも可換性は①として
+   仮定される側**であって既知ではないので、型を作るのに仮定が要る。
+2. ★★**同値な式がある**。
+
+★**②の翻訳**（`Pf.mk_eq_zero_iff` が根拠）:
+`M^pf = 0` ⇔ 「すべての `m` に `∃ k, k • m = 0`」。
+乗法で書き直すと `M^pf ≠ 0` ⇔ ★**「ある `u ∈ 𝒪^×(C)` が無限位数を持つ」**。
+
+★**③の翻訳**（`Pf.eq_of_qact` が根拠）:
+「`q = c/d` 倍として作用する」は `ℚ` を使わずに
+`∀ x, d • σ x = c • x` と書ける。`M → M^pf` の像の上で書き直すと
+`∃ k, (σ u)^(d k) = u^(c k)`。「acts trivially」は `∃ k, (σ u)^k = u^k`。
+
+★★**原文の三節をそのまま三連言にする。** -/
+
+include P in
+/-- **[FrdI] Definition 1.2, (iv)** `Frobenius-compact object`。
+
+★上の docstring の翻訳に従う。★**共役が `𝒪^×` を保つ**こと
+（`endConj_mem_otimes`）が③を書くのに要る。 -/
+def IsFrobeniusCompact (A : C) : Prop :=
+  (∀ x y : End A, x ∈ OTimes P A → y ∈ OTimes P A → x * y = y * x) ∧
+  (∃ u : End A, u ∈ OTimes P A ∧ ∀ k : ℕ+, (u ^ ((k : ℕ+) : ℕ) : End A) ≠ 1) ∧
+  (∀ (θ : A ≅ A) (c d : ℕ+),
+    (∀ u : End A, u ∈ OTimes P A → ∃ k : ℕ+,
+      ((endConj θ u) ^ (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)
+        = (u ^ (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)) →
+    ∀ u : End A, u ∈ OTimes P A → ∃ k : ℕ+,
+      ((endConj θ u) ^ ((k : ℕ+) : ℕ) : End A) = (u ^ ((k : ℕ+) : ℕ) : End A))
+
+include P in
+/-- **[FrdI] Definition 1.2, (v)** `of Frobenius-compact type`。 -/
+def IsOfFrobeniusCompactType : Prop := ∀ A : C, IsFrobeniusCompact P A
+
+def IsFrobeniusCompact.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-compact object",
+    sectionId := "frdi-def-1-2-iv" }
+
 include P in
 /-- ★★**`IsFrobeniusTrivial` は同型に沿って移る**。
 
