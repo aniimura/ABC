@@ -172,6 +172,33 @@ def twPreFrobenioid (hD : IsTotallyEpimorphic D) [IsConnected D]
   connectedC := twIsConnected
   connectedD := inferInstance
 
+/-! ## ★同型は `𝔽_Φ` 成分だけで決まる
+
+★★**これが「捻れ積も isotropic 型である」ことの土台**である ——
+`Div = 0` の pre-step は `𝔽_Φ` で同型になり、`G` 成分は自動で逆が取れる。
+-/
+
+/-- ★★**`𝔽_Φ` 成分が同型なら、捻れ積でも同型**。
+
+★逆射の `G` 成分は `f.unit⁻¹`。★**同型の次数は 1**(`ElemFrobCat.isIso_iff`)
+なので指数が消え、両側の等式がそろう。 -/
+theorem twIsIso_of {A B : TwObj Φ G} (f : A ⟶ B) (h : IsIso f.hom) : IsIso f := by
+  haveI := h
+  obtain ⟨-, -, hdeg⟩ := (ElemFrobCat.isIso_iff f.hom).mp h
+  have hdegi : ElemFrobCat.Hom.deg (inv f.hom) = 1 := by
+    have h1 := congrArg ElemFrobCat.Hom.deg (IsIso.inv_hom_id f.hom)
+    rw [ElemFrobCat.degFr_comp, hdeg, one_mul] at h1
+    exact h1
+  refine ⟨⟨⟨inv f.hom, f.unit⁻¹⟩, ?_, ?_⟩⟩
+  · refine TwHom.ext (IsIso.hom_inv_id f.hom) ?_
+    show f.unit ^ ((ElemFrobCat.Hom.deg (inv f.hom) : ℕ+) : ℕ) * f.unit⁻¹ = (1 : G)
+    rw [hdegi]
+    simp
+  · refine TwHom.ext (IsIso.inv_hom_id f.hom) ?_
+    show f.unit⁻¹ ^ ((ElemFrobCat.Hom.deg f.hom : ℕ+) : ℕ) * f.unit = (1 : G)
+    rw [hdeg]
+    simp
+
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
 
 ★**確定した**:
