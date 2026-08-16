@@ -133,6 +133,45 @@ theorem isAnchor_map {A : C} (h : IsAnchor C A) : IsAnchor D (Ψ.obj A) := by
   rfl
 
 
+/-! ## ★段 4 —— categorical quotient と mono-minimal は保たれる -/
+
+/-- ★★**圏同値は categorical quotient を保つ**。
+
+★不変性は `Ψ.map` の関手性から。★**普遍性の側**が要点で、
+`Cc` を `Ψ.obj Cc₀` に戻し(本質的全射性)、`ψ` を戻し(充満性)、
+`C` の側の一意性を使って戻す。 -/
+theorem isCategoricalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B}
+    (h : IsCategoricalQuotient G φ) :
+    IsCategoricalQuotient (G.map (Ψ.mapAut A)) (Ψ.map φ) := by
+  constructor
+  · rintro γ' ⟨γ, hγ, rfl⟩
+    show (Ψ.mapAut A γ : Aut (Ψ.obj A)).hom ≫ Ψ.map φ = Ψ.map φ
+    show Ψ.map (γ : Aut A).hom ≫ Ψ.map φ = Ψ.map φ
+    rw [← Ψ.map_comp, h.1 γ hγ]
+  · intro Cc ψ hψ
+    obtain ⟨Cc₀, ⟨e⟩⟩ : ∃ Cc₀ : C, Nonempty (Ψ.obj Cc₀ ≅ Cc) :=
+      ⟨Ψ.objPreimage Cc, ⟨Ψ.objObjPreimageIso Cc⟩⟩
+    obtain ⟨ψ₀, hψ₀⟩ := Ψ.map_surjective (ψ ≫ e.inv)
+    have hψ₀inv : ∀ γ ∈ G, ((γ : Aut A).hom : A ⟶ A) ≫ ψ₀ = ψ₀ := by
+      intro γ hγ
+      refine Ψ.map_injective ?_
+      rw [Ψ.map_comp, hψ₀]
+      have := hψ (Ψ.mapAut A γ) ⟨γ, hγ, rfl⟩
+      show Ψ.map (γ : Aut A).hom ≫ (ψ ≫ e.inv) = ψ ≫ e.inv
+      rw [← Category.assoc, this]
+    obtain ⟨ψ₀', hψ₀'eq, hψ₀'uniq⟩ := h.2 Cc₀ ψ₀ hψ₀inv
+    refine ⟨Ψ.map ψ₀' ≫ e.hom, ?_, ?_⟩
+    · rw [← Category.assoc, ← Ψ.map_comp, ← hψ₀'eq, hψ₀]
+      simp
+    · intro y hy
+      have hy₀ : ψ₀ = φ ≫ (Ψ.preimage (y ≫ e.inv)) := by
+        refine Ψ.map_injective ?_
+        rw [Ψ.map_comp, Ψ.map_preimage, hψ₀, hy]
+        simp
+      have := hψ₀'uniq _ hy₀
+      rw [← this]
+      simp
+
 /-- ★**圏同値は subanchor を保つ**。 -/
 theorem isSubanchor_map {A : C} (h : IsSubanchor C A) : IsSubanchor D (Ψ.obj A) := by
   obtain ⟨B, φ, hB⟩ := h
