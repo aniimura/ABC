@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Frobenioid
+import ABC3.Found.FrdI.Prop17
 
 /-!
 # [FrdI] pull-back 射を右へ寄せる —— 分解を合成するための道具
@@ -159,5 +160,54 @@ theorem plBk_shuffle_div (F : FrobenioidCore P) {Y Yt B Z : C} {α : Y ⟶ B}
   rw [P.Div_comp, P.Div_comp, (F.pullBackLB α hα).1.2, (F.pullBackLB αt hαt).1.2,
     (F.pullBackLB αt hαt).2] at h
   simpa using h.symm
+
+/-! ## ★★★底が同型な射の正規形 —— pull-back 部分が消える
+
+★`Definition 1.3, (iv), (a)` の分解 `φ = γ ≫ β ≫ α` において、
+`γ`(Frobenius 型)と `β`(pre-step)の底は**いつも同型**である。
+★★したがって **`Base φ` が同型なら `Base α` も同型**になり、
+上の `isIso_of_isPullBack_of_baseIso` で **`α` 自身が同型**になる。
+
+★★★**帰結: 底が同型な射は「Frobenius 型 ≫ pre-step」に分解する。**
+これは「Frobenius 型射を pre-step の右へ通す」ことにそのまま使える
+(`γ ≫ ζ` に当てればよい)。
+-/
+
+include P in
+/-- ★★**底が同型な射は「Frobenius 型 ≫ pre-step」に分解する**。
+
+★`arbFactor` の pull-back 部分が同型になって pre-step に吸収される。 -/
+theorem baseIso_factor (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hb : IsIso (P.Base φ)) :
+    ∃ (X : C) (ζ : A ⟶ X) (σ : X ⟶ B),
+      φ = ζ ≫ σ ∧ IsFrobeniusType P ζ ∧ IsPreStep P σ := by
+  obtain ⟨X, Y, γ, β, α, hfac, hγ, hβ, hα⟩ := F.arbFactor φ
+  haveI := hb
+  haveI hbγ : IsIso (P.Base γ) := hγ.2
+  haveI hbβ : IsIso (P.Base β) := hβ.2
+  have hbase : P.Base φ = P.Base γ ≫ P.Base β ≫ P.Base α := by
+    rw [hfac, P.Base_comp, P.Base_comp]
+  haveI hbα : IsIso (P.Base α) := by
+    have h1 : IsIso (P.Base γ ≫ P.Base β ≫ P.Base α) := hbase ▸ hb
+    have h2 : IsIso (P.Base β ≫ P.Base α) := IsIso.of_isIso_comp_left (P.Base γ) _
+    exact IsIso.of_isIso_comp_left (P.Base β) _
+  haveI : IsIso α := isIso_of_isPullBack_of_baseIso P hα hbα
+  exact ⟨X, γ, β ≫ α, by rw [hfac], hγ,
+    IsPreStep.comp P hβ (isPreStep_of_isIso P α)⟩
+
+include P in
+/-- ★★**Frobenius 型射を pre-step の右へ通す** —— `baseIso_factor` を
+`γ ≫ ζ` に当てただけ。
+
+★★段 6(合成の 4 重分解の組み立て)で、`δ₂` を `γ` の左へ運ぶのに要る。 -/
+theorem frob_past_preStep (F : FrobenioidCore P) {X Y Z : C}
+    {γ : X ⟶ Y} (hγ : IsPreStep P γ) {ζ : Y ⟶ Z} (hζ : IsFrobeniusType P ζ) :
+    ∃ (W : C) (ζ' : X ⟶ W) (γ' : W ⟶ Z),
+      γ ≫ ζ = ζ' ≫ γ' ∧ IsFrobeniusType P ζ' ∧ IsPreStep P γ' := by
+  refine baseIso_factor P F (γ ≫ ζ) ?_
+  haveI : IsIso (P.Base γ) := hγ.2
+  haveI : IsIso (P.Base ζ) := hζ.2
+  rw [P.Base_comp]
+  infer_instance
 
 end ABC3.Found.FrdI

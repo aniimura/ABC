@@ -140,6 +140,35 @@ theorem quadFactor_div (Fc : FrobenioidCore P) {A X Y B : C}
   rw [P.Div_comp, h2, show P.Div δ = 0 from hδ.1.2, P.Base_comp]
   simp
 
+include P in
+/-- ★★★**底が同型な射の 4 重分解では `α` が同型になる**。
+
+★★段 6 で `plBk_shuffle` の出す `ρ̃`(`Base ρ̃` が同型)を分解するときに、
+**pull-back 部分が消えて `δ₂ ≫ γ₂ ≫ β₂` になる**ことを保証する。 -/
+theorem baseIso_quadFactor (Fc : FrobenioidCore P)
+    (hmt : ∀ X : C, IsMetricallyTrivial P X) (haa : IsOfAutAmpleType P)
+    {A B : C} (φ : A ⟶ B) (hb : IsIso (P.Base φ)) :
+    ∃ (X Y : C) (δ : A ⟶ X) (γ : X ⟶ Y) (β : Y ⟶ Y) (α : Y ⟶ B),
+      φ = δ ≫ γ ≫ β ≫ α ∧ IsFrobeniusType P δ ∧
+        IsIsometric P γ ∧ IsPreStep P γ ∧
+        IsBaseIdentity P β ∧ IsPreStep P β ∧ IsCoAngular P β ∧ IsIso α := by
+  obtain ⟨X, Y, δ, γ, β, α, hfac, hδ, hγi, hγs, hβb, hβs, hβc, hα⟩ :=
+    quadFactor P Fc hmt haa φ
+  haveI := hb
+  haveI : IsIso (P.Base δ) := hδ.2
+  haveI : IsIso (P.Base γ) := hγs.2
+  haveI : IsIso (P.Base β) := hβs.2
+  haveI hbα : IsIso (P.Base α) := by
+    have h0 : P.Base φ = P.Base δ ≫ P.Base γ ≫ P.Base β ≫ P.Base α := by
+      rw [hfac, P.Base_comp, P.Base_comp, P.Base_comp]
+    have h1 : IsIso (P.Base δ ≫ P.Base γ ≫ P.Base β ≫ P.Base α) := h0 ▸ hb
+    have h2 : IsIso (P.Base γ ≫ P.Base β ≫ P.Base α) :=
+      IsIso.of_isIso_comp_left (P.Base δ) _
+    have h3 : IsIso (P.Base β ≫ P.Base α) := IsIso.of_isIso_comp_left (P.Base γ) _
+    exact IsIso.of_isIso_comp_left (P.Base β) _
+  exact ⟨X, Y, δ, γ, β, α, hfac, hδ, hγi, hγs, hβb, hβs, hβc,
+    isIso_of_isPullBack_of_baseIso P hα hbα⟩
+
 /-! ## ★★`𝒪^▷(A)` は Frobenius-normalized 型なら**可換**
 
 ★`Definition 1.2, (iv)` の `Frobenius-normalized` は
