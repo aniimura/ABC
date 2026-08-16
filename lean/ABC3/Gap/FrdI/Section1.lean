@@ -207,7 +207,19 @@ def Gap_1_14_iii.record : ABC3.Meta.GapRecord :=
       "fiberwise-surjective でないことを示す(Div は偶数しか作れず Div = 1 の繊維に乗らない)。" ++
       "★そして `ef_unitTrivial` がその `𝔽_ℕ` が unit-trivial であることを示す。" ++
       "★★したがって『unit-trivial を課せば閉じる』は誤りである。" ++
-      "★要ると見ているのは Φ の d-可除性(Definition 1.2, (iv) の perfect 型)だが未証明。" ++
+      "★★2026-08-16 追記(2)。fiberwise-surjectivity の側も**原文の語彙で埋まった** —— " ++
+      "`Check/FrdI/TwistedFrobenioid.lean` の " ++
+      "`elemFrob_frobZeta_isFiberwiseSurjective_of_perfect` が、Φ が §0(p.11)の意味で " ++
+      "`perfect`(∀ n : ℕ+, n 倍が全単射)なら、底恒等かつ Div = 0 の自己射は " ++
+      "fiberwise-surjective であることを示す。★構成は δB := ⟨Base γ, m, deg γ⟩ " ++
+      "(ただし deg ζ • m = Div γ —— ここだけで perfect 性を使う)と δZ := ⟨𝟙, 0, deg ζ⟩。" ++
+      "★そして `nat_not_isPerfectMonoid` が ℕ は perfect でないことを示す —— " ++
+      "★★つまり `𝔽_ℕ` の反例が効くのは Φ が perfect でないからであり、" ++
+      "Φ が perfect(例: ℚ≥0)なら反例は消える。" ++
+      "★★★したがって穴は原文自身の語彙 2 語で書ける: " ++
+      "mono ← `unit-trivial`(Definition 1.2, (iv))、" ++
+      "fiberwise-surjectivity ← `perfect`(§0, p.11)。" ++
+      "★未確認: [FrdII] の model Frobenioid が実際に perfect / unit-trivial かは測っていない。" ++
       "★なお `⟸` 自体は上の 2 つを仮定として明示的に足した形で証明済み" ++
       "(`prop_1_14_iii_mpr`、`.src` は付けない)。" }
 

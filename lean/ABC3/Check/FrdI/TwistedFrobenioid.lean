@@ -1424,6 +1424,45 @@ theorem ef_not_isFiberwiseSurjective : ¬ IsFiberwiseSurjective efFrob := by
 theorem ef_not_isFSMMorphism : ¬ IsFSMMorphism efFrob :=
   fun h => ef_not_isFiberwiseSurjective h.1
 
+/-- ★★★**`Φ` が `perfect` なら、Frobenius 型の底恒等自己射は fiberwise-surjective**。
+
+★★**これが `ef_not_isFiberwiseSurjective` の境界を定める** ——
+`𝔽_ℕ` で壊れたのは ★**`ℕ` が `perfect` でない**からである(`2 · m = 1` が解けない)。
+★`ℚ≥0` のように「`n` 倍が全射」なら、★**同じ構成がそのまま通る。**
+
+★**`perfect` は原文 `§0`(p.11)の語彙そのもの**である ——
+`IsPerfectMonoid M := ∀ n : ℕ+, Function.Bijective (fun a => n • a)`。
+
+★構成: `γ : Z ⟶ A` に対し `Dd := Z`、
+`δB := ⟨Base γ, m, deg γ⟩`(ただし `n • m = Div γ`、★**ここで perfect 性を使う**)、
+`δZ := ⟨𝟙, 0, n⟩` と取ると、`Div` は両辺 `Div γ`、次数は両辺 `n · deg γ` で一致する。 -/
+theorem elemFrob_frobZeta_isFiberwiseSurjective_of_perfect
+    (hperf : ∀ X : D, IsPerfectMonoid (Φ.val X)) {A : ElemFrobCat Φ} (ζ : A ⟶ A)
+    (hb : ElemFrobCat.Hom.base ζ = 𝟙 A.base) (hz : ElemFrobCat.Hom.div ζ = 0) :
+    IsFiberwiseSurjective ζ := by
+  intro Z γ
+  obtain ⟨m, hm⟩ := (hperf Z.base (ElemFrobCat.Hom.deg ζ)).2 (ElemFrobCat.Hom.div γ)
+  refine ⟨Z, ⟨ElemFrobCat.Hom.base γ, m, ElemFrobCat.Hom.deg γ⟩,
+    ⟨𝟙 Z.base, 0, ElemFrobCat.Hom.deg ζ⟩, ?_⟩
+  refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+  · show ElemFrobCat.Hom.base γ ≫ ElemFrobCat.Hom.base ζ
+      = 𝟙 _ ≫ ElemFrobCat.Hom.base γ
+    rw [hb]
+    simp
+  · show Φ.map (ElemFrobCat.Hom.base γ) (ElemFrobCat.Hom.div ζ)
+      + ((ElemFrobCat.Hom.deg ζ : ℕ+) : ℕ) • m
+      = Φ.map (𝟙 Z.base) (ElemFrobCat.Hom.div γ)
+        + ((ElemFrobCat.Hom.deg γ : ℕ+) : ℕ) • (0 : Φ.val Z.base)
+    rw [hz, map_zero, zero_add, MonoidOn.map_id, smul_zero, add_zero]
+    exact hm
+  · exact mul_comm _ _
+
+/-- ★★★**`ℕ` は `perfect` でない** —— 上の補題が `𝔽_ℕ` に効かない理由。 -/
+theorem nat_not_isPerfectMonoid : ¬ IsPerfectMonoid ℕ := by
+  intro h
+  obtain ⟨m, hm⟩ := (h 2).2 1
+  simp at hm
+
 /-- ★★★**`𝔽_ℕ` は `unit-trivial`** —— `ℕ` の加法可逆元は `0` だけだから。 -/
 theorem ef_unitTrivial : IsUnitTrivial efP efA := by
   show OTimes efP efA = ⊥
