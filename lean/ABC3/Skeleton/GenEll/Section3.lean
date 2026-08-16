@@ -3,6 +3,7 @@ import ABC3.Interface.GenEll.TateLocal
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Found.GenEll.Lemma31
 import ABC3.Found.GenEll.Elementary
+import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.BDClass
 import Mathlib.Topology.Algebra.Ring.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
@@ -47,10 +48,8 @@ open scoped MatrixGroups
 
 /-! ## Lemma 3.1 —— 全体(i)–(iv) -/
 
-/-- `GL₂(ℤ_l) → GL₂(𝔽_l)` の還元。★`Lemma 3.1, (iv)` の「image `H_J` in `GL₂(𝔽_l)`」。 -/
-noncomputable def glRedPadic (l : ℕ) [Fact (Nat.Prime l)] :
-    GL (Fin 2) ℤ_[l] →* GL (Fin 2) (ZMod l) :=
-  Units.map (PadicInt.toZMod.mapMatrix (m := Fin 2)).toMonoidHom
+/-! ★`glRedPadic`(`GL₂(ℤ_l) → GL₂(𝔽_l)` の還元)は
+`Found/GenEll/Sl2Padic.lean` に移した——`Lemma 3.1, (iv)` の証明が使うからである。 -/
 
 /-- **[GenEll] Lemma 3.1**(The Structure of SL2)。
 
@@ -62,10 +61,13 @@ noncomputable def glRedPadic (l : ℕ) [Fact (Nat.Prime l)] :
 (iii) `GL₂(𝔽_l)` の部分群が `α` と**非上三角**な行列を含めば `SL₂(𝔽_l)` を含む。
 (iv) `GL₂(ℤ_l)` の**閉**部分群 `J` の `GL₂(𝔽_l)` での像が同じ条件を満たせば `SL₂(ℤ_l) ⊆ J`。
 
-★★**(i)(ii)(iii) は `Found/GenEll/Lemma31.lean` に実装済み**
-(`lemma_3_1_i` / `lemma_3_1_ii` / `lemma_3_1_iii`、いずれも `sorry` 無し)。
-本 statement が `sorry` なのは **(iv) が未実装だから**であり、
-命題全体としては未完である——`.src` を条なしで置くのはそのことを表すためである。
+★★**4 条すべてが実装された(2026-08-17)。**
+(i)(ii)(iii) は `Found/GenEll/Lemma31.lean`、
+**(iv) は `Found/GenEll/Sl2Padic.lean`** ——原文が引く [Serre] Chapter IV, §3.4, Lemma 3 が
+`0_Source` に無いので、段 (A)(`Sl2Level.lean`、有限群論)と
+段 (B)(`Sl2Padic.lean`、位相)で**自分で証明した**。
+
+★**本 statement はもう `sorry` ではない。**
 
 ★**「閉」を落としてはいけない**。落とせば主張が強くなる(G5 の裏返し)。
 `ℤ_l` の位相から `GL₂(ℤ_l)` に入る位相で `IsClosed` を要求している。 -/
@@ -80,8 +82,8 @@ theorem lemma_3_1 (l : ℕ) [Fact (Nat.Prime l)] (hl : 5 ≤ l) :
   ∧ (∀ J : Subgroup (GL (Fin 2) ℤ_[l]), IsClosed (J : Set (GL (Fin 2) ℤ_[l])) →
         (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l)) ∈ J.map (glRedPadic l) →
         (∃ M ∈ J.map (glRedPadic l), (M : Matrix (Fin 2) (Fin 2) (ZMod l)) 1 0 ≠ 0) →
-        ∀ g : SL(2, ℤ_[l]), (toGL g : GL (Fin 2) ℤ_[l]) ∈ J) := by
-  sorry
+        ∀ g : SL(2, ℤ_[l]), (toGL g : GL (Fin 2) ℤ_[l]) ∈ J) :=
+  ABC3.Found.GenEll.lemma_3_1 l hl
 
 /-! ## Lemma 3.2 —— l-捩れの局所階数 1 部分群 -/
 
@@ -297,10 +299,6 @@ def localHeight_pos.src : Source :=
 その正性は Tate 母数が `𝔪_K` に属することから来る。
 `Interface/GenEll/TateLocal.lean` の `waiting` がそれを名指ししている。 -/
 def localHeight_pos.needs : List ProofObligation := []
-
-def glRedPadic.src : Source :=
-  { paper := "GenEll", pdfPage := 14, item := "Lemma 3.1, (iv)",
-    sectionId := "genell-lemma-3-1-iv" }
 
 def potLocalHeight.src : Source :=
   { paper := "GenEll", pdfPage := 16, item := "Remark 3.3.1",

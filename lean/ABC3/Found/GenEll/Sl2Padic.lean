@@ -3,6 +3,8 @@ import Mathlib.NumberTheory.Padics.RingHoms
 import Mathlib.Topology.Algebra.Group.Matrix
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.Analysis.SpecificLimits.Basic
+import Mathlib.GroupTheory.Commutator.Basic
+import Mathlib.GroupTheory.Abelianization.Defs
 
 /-!
 # [GenEll] Lemma 3.1, (iv) の**位相段**(段 B)
@@ -186,5 +188,150 @@ theorem sl2_commutator_eq_top (h5 : 5 ≤ l) :
   exact mul_comm (G := Abelianization SL(2, ZMod l)) x y
 
 end Perfect
+
+/-! ## ★★`Lemma 3.1, (iv)` —— `GL` から `SL` へ降ろす
+
+★**位相的閉包は要らなかった。** `J.comap toGL` が既に閉である
+(`toGL` は連続、`mathlib` の `continuous_toGL`)。
+
+`GL₂(𝔽_l)` での像が `SL₂(𝔽_l)` を含むことから、**交換子を取って行列式を 1 に落とす**。
+`⁅SL₂(𝔽_l), SL₂(𝔽_l)⁆ = SL₂(𝔽_l)`(上の `sl2_commutator_eq_top`)がここで効く。 -/
+
+section GLtoSL
+
+variable (l : ℕ) [Fact (Nat.Prime l)]
+
+open Matrix.SpecialLinearGroup
+
+/-- `GL₂(ℤ_l) → GL₂(𝔽_l)` の還元。★原文 (iv) の「image `H_J` in `GL₂(𝔽_l)`」。 -/
+noncomputable def glRedPadic : GL (Fin 2) ℤ_[l] →* GL (Fin 2) (ZMod l) :=
+  Units.map (PadicInt.toZMod.mapMatrix (m := Fin 2)).toMonoidHom
+
+/-- ★還元と包含は可換。 -/
+theorem glRedPadic_toGL (x : SL(2, ℤ_[l])) :
+    glRedPadic l (toGL x) = toGL (redPadic l x) := by
+  apply Units.ext
+  rfl
+
+/-- ★★**[GenEll] Lemma 3.1, (iv)**。
+
+原文 (GenEll p.14):
+> (iv) Let J ⊆ GL2(Zl) be a closed subgroup whose image HJ in GL2(Fl) contains
+
+`GL₂(ℤ_l)` の**閉**部分群 `J` の `GL₂(𝔽_l)` における像が
+`α = (1 1 / 0 1)` と**非上三角**な行列を含むなら、**`SL₂(ℤ_l) ⊆ J`**。
+
+★原文は [Serre] Chapter IV, §3.4, Lemma 3 を引くが `0_Source` に無いので、
+段 (A)(`Sl2Level.lean`)＋段 (B)(本ファイル)で**自分で証明した**。 -/
+theorem lemma_3_1_iv (h5 : 5 ≤ l) (J : Subgroup (GL (Fin 2) ℤ_[l]))
+    (hclosed : IsClosed (J : Set (GL (Fin 2) ℤ_[l])))
+    (hα : (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l)) ∈ J.map (glRedPadic l))
+    (hMex : ∃ M ∈ J.map (glRedPadic l), (M : Matrix (Fin 2) (Fin 2) (ZMod l)) 1 0 ≠ 0)
+    (g : SL(2, ℤ_[l])) : (toGL g : GL (Fin 2) ℤ_[l]) ∈ J := by
+  classical
+  -- (1) `J₁ := J.comap toGL` は閉部分群
+  have hclosed₁ : IsClosed ((J.comap (toGL : SL(2, ℤ_[l]) →* GL (Fin 2) ℤ_[l]))
+      : Set SL(2, ℤ_[l])) :=
+    hclosed.preimage continuous_toGL
+  -- (2) `H_J` は `toGL SL₂(𝔽_l)` を含む —— これは (iii)
+  obtain ⟨M, hM1, hM2⟩ := hMex
+  have hHJ : ∀ s : SL(2, ZMod l),
+      (toGL s : GL (Fin 2) (ZMod l)) ∈ J.map (glRedPadic l) :=
+    fun s => lemma_3_1_iii l (J.map (glRedPadic l)) hα M hM1 hM2 s
+  -- (3) `J₁` の `mod l` 像は `SL₂(𝔽_l)` 全体
+  have hcomm : commutator SL(2, ZMod l)
+      ≤ (J.comap (toGL : SL(2, ℤ_[l]) →* GL (Fin 2) ℤ_[l])).map (redPadic l) := by
+    rw [commutator_def]
+    refine Subgroup.commutator_le.2 fun a _ b _ => ?_
+    obtain ⟨α, hαJ, hαa⟩ := hHJ a
+    obtain ⟨β, hβJ, hβb⟩ := hHJ b
+    have hγJ : α * β * α⁻¹ * β⁻¹ ∈ J :=
+      J.mul_mem (J.mul_mem (J.mul_mem hαJ hβJ) (J.inv_mem hαJ)) (J.inv_mem hβJ)
+    have hdet : Matrix.GeneralLinearGroup.det (α * β * α⁻¹ * β⁻¹) = 1 := by
+      simp only [map_mul, map_inv]
+      rw [mul_comm (Matrix.GeneralLinearGroup.det α) (Matrix.GeneralLinearGroup.det β)]
+      group
+    obtain ⟨x, hx⟩ : α * β * α⁻¹ * β⁻¹
+        ∈ Set.range (toGL : SL(2, ℤ_[l]) → GL (Fin 2) ℤ_[l]) := by
+      rw [range_toGL]; exact hdet
+    refine ⟨x, ?_, ?_⟩
+    · show toGL x ∈ J
+      rw [hx]; exact hγJ
+    · apply toGL_injective
+      show (toGL (redPadic l x) : GL (Fin 2) (ZMod l)) = toGL (a * b * a⁻¹ * b⁻¹)
+      rw [← glRedPadic_toGL, hx]
+      simp only [map_mul, map_inv, hαa, hβb]
+  -- (4) Serre の補題を適用する
+  have hsurj : ∀ s : SL(2, ZMod l),
+      ∃ x ∈ J.comap (toGL : SL(2, ℤ_[l]) →* GL (Fin 2) ℤ_[l]), redPadic l x = s := by
+    intro s
+    have hmem : s ∈ (J.comap (toGL : SL(2, ℤ_[l]) →* GL (Fin 2) ℤ_[l])).map (redPadic l) := by
+      refine hcomm ?_
+      rw [sl2_commutator_eq_top l h5]
+      trivial
+    obtain ⟨x, hx, hxs⟩ := hmem
+    exact ⟨x, hx, hxs⟩
+  have htop := sl2_padic_eq_top_of_isClosed l h5 _ hclosed₁ hsurj
+  have hgJ : g ∈ J.comap (toGL : SL(2, ℤ_[l]) →* GL (Fin 2) ℤ_[l]) := by
+    rw [htop]; trivial
+  exact hgJ
+
+end GLtoSL
+
+/-! ## ★★`Lemma 3.1` 全体(i)–(iv)
+
+★(i)(ii)(iii) は `Lemma31.lean`、(iv) は本ファイル。**4 条すべてが `sorry` 無しで揃った。**
+ここで初めて **条なしの `.src`** を付けられる(2 値規則)。 -/
+
+section Whole
+
+variable (l : ℕ) [Fact (Nat.Prime l)]
+
+open Matrix.SpecialLinearGroup
+
+/-- **[GenEll] Lemma 3.1**(The Structure of SL2)—— **4 条すべて**。
+
+原文 (GenEll p.13):
+> Lemma 3.1. (The Structure of SL2) Let l ≥ 5 be a prime number. Then:
+
+(i) `SL₂(𝔽_l)` は `α = (1 1 / 0 1)` と `β = (1 0 / 1 1)` で生成される。
+(ii) `SL₂(𝔽_l)` の正規部分群で商が可換なものは全体。
+(iii) `GL₂(𝔽_l)` の部分群が `α` と**非上三角**な行列を含めば `SL₂(𝔽_l)` を含む。
+(iv) `GL₂(ℤ_l)` の**閉**部分群 `J` の `GL₂(𝔽_l)` での像が同じ条件を満たせば `SL₂(ℤ_l) ⊆ J`。
+
+★★**原文が (iv) で引く [Serre] Chapter IV, §3.4, Lemma 3 は `0_Source` に無い。**
+段 (A)(`Sl2Level.lean`、有限群論 813 行)と段 (B)(本ファイル、位相)で
+**自分で証明した**——これが本項目が「well-known facts の復習」でありながら
+最も手数を要した理由である。 -/
+theorem lemma_3_1 (hl : 5 ≤ l) :
+    (Subgroup.closure ({upper (1 : ZMod l), lower (1 : ZMod l)} : Set SL(2, ZMod l)) = ⊤)
+  ∧ (∀ (N : Subgroup SL(2, ZMod l)) [N.Normal],
+        (∀ x y : SL(2, ZMod l) ⧸ N, x * y = y * x) → N = ⊤)
+  ∧ (∀ H : Subgroup (GL (Fin 2) (ZMod l)),
+        (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l)) ∈ H →
+        (∃ M ∈ H, (M : Matrix (Fin 2) (Fin 2) (ZMod l)) 1 0 ≠ 0) →
+        ∀ g : SL(2, ZMod l), (toGL g : GL (Fin 2) (ZMod l)) ∈ H)
+  ∧ (∀ J : Subgroup (GL (Fin 2) ℤ_[l]), IsClosed (J : Set (GL (Fin 2) ℤ_[l])) →
+        (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l)) ∈ J.map (glRedPadic l) →
+        (∃ M ∈ J.map (glRedPadic l), (M : Matrix (Fin 2) (Fin 2) (ZMod l)) 1 0 ≠ 0) →
+        ∀ g : SL(2, ℤ_[l]), (toGL g : GL (Fin 2) ℤ_[l]) ∈ J) := by
+  refine ⟨lemma_3_1_i l, fun N _ habel => lemma_3_1_ii l hl N habel, ?_, ?_⟩
+  · rintro H hα ⟨M, hM, hMnt⟩ g
+    exact lemma_3_1_iii l H hα M hM hMnt g
+  · intro J hclosed hα hMex g
+    exact lemma_3_1_iv l hl J hclosed hα hMex g
+
+/-! ### ★出典の紐付け -/
+
+/-- ★**条なし** —— `Lemma 3.1` は 4 条すべてが揃った。 -/
+def lemma_3_1.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 13, item := "Lemma 3.1",
+    sectionId := "genell-lemma-3-1" }
+
+def lemma_3_1_iv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 14, item := "Lemma 3.1, (iv)",
+    sectionId := "genell-lemma-3-1-iv" }
+
+end Whole
 
 end ABC3.Found.GenEll
