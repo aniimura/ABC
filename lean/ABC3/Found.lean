@@ -62,6 +62,7 @@ import ABC3.Found.GenEll.NorthcottRat
 import ABC3.Found.GenEll.InfinitePlaceRel
 import ABC3.Found.GenEll.FinitePlaceRel
 import ABC3.Found.GenEll.BaseChange
+import ABC3.Found.GenEll.LogDiffTower
 import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
