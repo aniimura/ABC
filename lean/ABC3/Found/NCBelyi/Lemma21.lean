@@ -235,6 +235,93 @@ theorem belyi_strictMono (a b : ℕ) {α β : ℝ} (hα : 1 < α) (hαβ : α < 
   rw [le_div_iff₀ hfα] at h
   nlinarith
 
+/-! ## ★★★性質 (d) —— 原文の 4 つの場合
+
+原文 (NCBelyi p.3):
+> [by property (e)] or f(α) ≤ f0, in which case
+
+★**集合 `S` をモデル化せずに、純粋な実数の不等式として取る。**
+原文の場合分け(`n` 偶/奇 × `α > 1` / `α ∈ {0,1}` / `α = r`)は、
+下の 4 本のいずれかに帰着する。
+★★こうすると `Lemma 2.2` の帰納法を書くときに**そのまま使える形**になる。
+-/
+
+section PropD
+
+variable {C α β f0 : ℝ}
+
+/-- ★**(d) の場合 1** —— `f₀ = 0`、`α > 1`(原文の `n` 偶かつ `α > 1`)。
+
+`f(β)/f(α) ≥ (β/α)² ≥ β/α ≥ C`。 -/
+theorem belyi_d_pos (a b : ℕ) (hC : 2 ≤ C) (hα : 1 < α) (hCα : C * α ≤ β) :
+    C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1)) / (α ^ (a + 1) * (α - 1) ^ (b + 1)) := by
+  have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hα
+  have hq : C ≤ β / α := (le_div_iff₀ hα0).2 hCα
+  have hq1 : (1 : ℝ) ≤ β / α := le_trans (by linarith) hq
+  have hαβ : α ≤ β := by
+    have := (le_div_iff₀ hα0).1 hq1
+    linarith
+  have h := belyi_ratio_ge a b hα hαβ
+  have h2 : β / α ≤ (β / α) ^ 2 := by nlinarith
+  linarith
+
+/-- ★**(d) の場合 2** —— `f₀ = 0`、`α = r`(`0 < f(r) ≤ 1`)。
+
+`f(β)/f(r) ≥ f(β) ≥ β ≥ C`。 -/
+theorem belyi_d_r (a b : ℕ) (hC : 2 ≤ C) (hβ : C ≤ β)
+    (hfr0 : 0 < f0) (hfr1 : f0 ≤ 1) :
+    C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1)) / f0 := by
+  have hβ2 : (2 : ℝ) ≤ β := le_trans hC hβ
+  have hfβ : β ≤ β ^ (a + 1) * (β - 1) ^ (b + 1) := belyi_ge_self a b hβ2
+  rw [le_div_iff₀ hfr0]
+  nlinarith
+
+/-- ★★**(d) の場合 3** —— `f₀ > 0` かつ `f(α) ≥ f₀`(原文の `n` 奇の第 1 の場合)。
+
+`(f(β)+f₀)/(f(α)+f₀) ≥ f(β)/(2f(α)) ≥ (1/2)(β/α)² ≥ β/α ≥ C`。
+★最後から 2 つ目の不等号に **`β/α ≥ 2`** が要る——原文が `C ≥ 2` を仮定する理由である。 -/
+theorem belyi_d_ge (a b : ℕ) (hC : 2 ≤ C) (hα : 1 < α) (hCα : C * α ≤ β)
+    (hf0 : 0 < f0) (hge : f0 ≤ α ^ (a + 1) * (α - 1) ^ (b + 1)) :
+    C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1) + f0)
+          / (α ^ (a + 1) * (α - 1) ^ (b + 1) + f0) := by
+  have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hα
+  have hα1 : (0 : ℝ) < α - 1 := sub_pos.2 hα
+  have hfα : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) := by positivity
+  have hq : C ≤ β / α := (le_div_iff₀ hα0).2 hCα
+  have hq2 : (2 : ℝ) ≤ β / α := le_trans hC hq
+  have hαβ : α ≤ β := by
+    have : (1 : ℝ) ≤ β / α := le_trans (by linarith) hq2
+    have := (le_div_iff₀ hα0).1 this
+    linarith
+  have h := belyi_ratio_ge a b hα hαβ
+  rw [le_div_iff₀ hfα] at h
+  have hden : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) + f0 := by linarith
+  rw [le_div_iff₀ hden]
+  -- `f(β) ≥ (β/α)²·f(α)` と `(β/α)² ≥ 2·(β/α)` から
+  have hsq : 2 * (β / α) ≤ (β / α) ^ 2 := by nlinarith
+  nlinarith
+
+/-- ★★**(d) の場合 4** —— `f₀ > 0` かつ `f(α) ≤ f₀ ≤ 1/4`(原文の `n` 奇の第 2 の場合)。
+
+`(f(β)+f₀)/(f(α)+f₀) ≥ f(β)/(2f₀) ≥ 2f(β) ≥ 2β ≥ C`。
+★**`f₀ ≤ 1/4`(`belyi_f0_le_quarter`)がここで効く。** -/
+theorem belyi_d_le (a b : ℕ) (hC : 2 ≤ C) (hα : 1 < α) (hCα : C * α ≤ β)
+    (hf0 : 0 < f0) (hf04 : f0 ≤ 1 / 4)
+    (hle : α ^ (a + 1) * (α - 1) ^ (b + 1) ≤ f0)
+    (hfα0 : 0 ≤ α ^ (a + 1) * (α - 1) ^ (b + 1)) :
+    C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1) + f0)
+          / (α ^ (a + 1) * (α - 1) ^ (b + 1) + f0) := by
+  have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hα
+  have hβC : C ≤ β := by nlinarith
+  have hβ2 : (2 : ℝ) ≤ β := le_trans hC hβC
+  have hfβ : β ≤ β ^ (a + 1) * (β - 1) ^ (b + 1) := belyi_ge_self a b hβ2
+  have hden : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) + f0 := by linarith
+  rw [le_div_iff₀ hden]
+  -- 分母は `2·f₀ ≤ 1/2` 以下、分子は `f(β) ≥ β ≥ C` 以上
+  nlinarith
+
+end PropD
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def belyi_ratio_ge.src : ABC3.Meta.Source :=
