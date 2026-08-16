@@ -253,7 +253,12 @@ theorem otriOf_mem_otimes (A : ElemFrobCat Φ) (a : Φ.val A.base) :
 /-- ★★**原文の「[so O×(A) ∼→Φ(A)±]」**（2026-08-16 追加）。
 
 原文 (FrdI p.27):
-> There is a natural, functorial isomorphism O▷(A) ∼→Φ(A) [so O×(A) ∼→Φ(A)±]
+> There is a natural, functorial isomorphism
+
+★**引用を切った記録（事故 #3 の 8 度目）**: 続く
+「O▷(A) ∼→Φ(A) [so O×(A) ∼→Φ(A)±]」は
+★**`▷` が抽出で落ちる**ため引用できない（38/64 文字で停止）。
+★本ファイルで `▷` による引用失敗はこれで 2 度目である。
 
 ★★**監査で「元レベルの iff しか無い」と指摘されたもの**。
 `otriEquiv` を `M^±`（`unitsSubmonoid`）へ制限すれば出る ——
