@@ -453,6 +453,43 @@ def IsIsotropic (A : C) : Prop :=
 def IsFrobeniusIsotropic (A : C) : Prop :=
   ∃ (Dd : C) (φ : A ⟶ Dd), IsFrobeniusType P φ ∧ IsIsotropic P Dd
 
+/-! ## ★★**Definition 1.2, (v)** —— 「of X type」（2026-08-16 追加）
+
+原文 (FrdI p.23):
+> C →FΦ is of Frobenius-ample type (respectively, of Frobenius-trivial type; of Div-
+
+★★**監査で「(v) の 18 語のうち名前のある述語は `IsOfPerfectType` 1 つだけ」と
+指摘されたもの**。他は下流で `∀ X : C, IsIsotropic P X` のように
+その場で展開して書かれていた。
+
+★**原文は 18 語**。うち `perfect` は `IsOfPerfectType`（`Prop110`）で既にあり、
+★**`Frobenius-compact` は対象の述語自体が未実装**なので、ここでは **16 語**を置く。
+
+★★**どれも「全対象がその性質を持つ」という同じ形である** ——
+原文が「(respectively, …)」で 18 語を一行に畳んでいるのもそのためである。 -/
+
+def IsOfFrobeniusAmpleType : Prop := ∀ A : C, IsFrobeniusAmple P A
+def IsOfFrobeniusTrivialType : Prop := ∀ A : C, IsFrobeniusTrivial P A
+def IsOfDivFrobeniusTrivialType : Prop := ∀ A : C, IsDivFrobeniusTrivial P A
+def IsOfUnivDivFrobeniusTrivialType : Prop := ∀ A : C, IsUnivDivFrobeniusTrivial P A
+def IsOfQuasiFrobeniusTrivialType : Prop := ∀ A : C, IsQuasiFrobeniusTrivial P A
+def IsOfSubQuasiFrobeniusTrivialType : Prop := ∀ A : C, IsSubQuasiFrobeniusTrivial P A
+def IsOfMetricallyTrivialType : Prop := ∀ A : C, IsMetricallyTrivial P A
+def IsOfBaseTrivialType : Prop := ∀ A : C, IsBaseTrivial P A
+def IsOfAutAmpleType : Prop := ∀ A : C, IsAutAmple P A
+def IsOfAutSubAmpleType : Prop := ∀ A : C, IsAutSubAmple P A
+def IsOfEndAmpleType : Prop := ∀ A : C, IsEndAmple P A
+def IsOfGroupLikeType : Prop := ∀ A : C, IsGroupLikeObj P A
+def IsOfFrobeniusNormalizedType : Prop := ∀ A : C, IsFrobeniusNormalized P A
+def IsOfUnitTrivialType : Prop := ∀ A : C, IsUnitTrivial P A
+def IsOfIsotropicType : Prop := ∀ A : C, IsIsotropic P A
+def IsOfFrobeniusIsotropicType : Prop := ∀ A : C, IsFrobeniusIsotropic P A
+
+def IsOfIsotropicType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (v) — of X type（16 語）",
+    sectionId := "frdi-def-1-2-v" }
+
 /-- **(iv)** `isotropic hull` —— isometric pre-step であって、終域が isotropic で、
 isotropic な対象への射を**一意に**通す(普遍性)。 -/
 def IsIsotropicHull {A B : C} (φ : A ⟶ B) : Prop :=
