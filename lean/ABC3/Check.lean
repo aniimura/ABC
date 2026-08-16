@@ -10,6 +10,7 @@ import ABC3.Check.IUTchIII.Cor312Degenerate
 import ABC3.Check.PGC.RefutationAttempts
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
+import ABC3.Check.FrdI.Prop21QuantifierGap
 /-!
 # Check — 我々のモデルについての検査
 

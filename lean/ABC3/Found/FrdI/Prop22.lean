@@ -270,6 +270,44 @@ theorem otri_isUnit_iff_Div_zero {A : C} (hiso : IsIsotropic P A) (x : OTri P A)
       rw [hb]
       infer_instance⟩
 
+include F in
+/-- ★★★**(iii)-3 の本体** —— `𝒪^▷(A)^char = 𝒪^▷(A)/𝒪^×(A) ↪ Φ(A)` の**単射性**。
+
+★`Div x = Div y` なら `x` と `y` は**単元 1 つ分しか違わない** ——
+これが「induces an inclusion」の中身である。
+
+★★**理由は `Proposition 1.11, (vi)`(`faithfulUpToUnits`)**:
+`𝒪^▷(A)` の元は base-identity かつ linear なので **pre-step** であり、
+`Div` が等しければ metrically equivalent、底はどちらも `𝟙` だから base-equivalent。
+★co-angular 性は `A` が isotropic であることから自動で付く。 -/
+theorem otri_div_eq_iff {A : C} (hiso : IsIsotropic P A) (x y : OTri P A) :
+    P.Div ((x : End A) : A ⟶ A) = P.Div ((y : End A) : A ⟶ A)
+      ↔ ∃ u : OTimes P A, ((x : End A) : A ⟶ A) = ((y : End A) : A ⟶ A)
+          ≫ ((u : End A) : A ⟶ A) := by
+  have hbx : P.Base ((x : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((x : End A) : A ⟶ A) = P.Base (𝟙 A) := x.2.1
+    rwa [P.Base_id] at h
+  have hby : P.Base ((y : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((y : End A) : A ⟶ A) = P.Base (𝟙 A) := y.2.1
+    rwa [P.Base_id] at h
+  have hsx : IsPreStep P ((x : End A) : A ⟶ A) :=
+    ⟨x.2.2, by show IsIso (P.Base ((x : End A) : A ⟶ A)); rw [hbx]; infer_instance⟩
+  have hsy : IsPreStep P ((y : End A) : A ⟶ A) :=
+    ⟨y.2.2, by show IsIso (P.Base ((y : End A) : A ⟶ A)); rw [hby]; infer_instance⟩
+  constructor
+  · intro h
+    obtain ⟨u, hu, he⟩ := F.faithfulUpToUnits ((x : End A) : A ⟶ A) ((y : End A) : A ⟶ A)
+      (show P.Base _ = P.Base _ from by rw [hbx, hby]) h
+      (isCoAngular_of_isotropic_dom P F hiso _) hsx
+      (isCoAngular_of_isotropic_dom P F hiso _) hsy
+    exact ⟨⟨u, hu⟩, he⟩
+  · rintro ⟨u, he⟩
+    haveI : IsIso ((u : End A) : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso _).mp u.2.2
+    rw [he, P.Div_comp, hby, MonoidOn.map_id,
+      show P.Div ((u : End A) : A ⟶ A) = 0 from isIsometric_of_isIso P _,
+      show P.degFr ((u : End A) : A ⟶ A) = 1 from u.2.1.2]
+    simp
+
 /-! ## ★(iv) —— isotropic hull が誘導する `𝒪^▷` の埋め込み
 
 原文 (FrdI p.45):
