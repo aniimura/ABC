@@ -464,6 +464,32 @@ theorem prop_1_10_i_exists (F : FrobenioidCore P) {A B A' : C}
     _ = (α ≫ γ') ≫ β₀' ≫ α₀' := by rw [hsq₁]
     _ = α ≫ γ' ≫ β₀' ≫ α₀' := by simp
 
+include P in
+/-- ★★★**`Proposition 1.10, (i)` の原文の形** —— `β` を**与えられたもの**として受ける。
+
+原文 (FrdI p.34):
+> pre-step; pull-back morphism; co-angular morphism; base-isomorphism;
+
+★★**監査で「量化子が逆」と指摘された項目**である。
+原文は「Suppose that α, β **are** morphisms of Frobenius type」と `β` を与える（∀）が、
+`prop_1_10_i_exists` は `β` を**自分で作る**（∃）。
+
+★★**橋渡しは `Definition 1.3, (ii)` の本質的一意性（`frobDegUniq`）**である ——
+同じ次数の Frobenius 型射は同型を除いて一意なので、
+自分で作った `β₀` を与えられた `β` に合わせられる。
+★一意性は `prop_1_10_i_uniq`（既存）。 -/
+theorem prop_1_10_i_exists_given (F : FrobenioidCore P) {A B A' B' : C}
+    (φ : A ⟶ B) (α : A ⟶ A') (hα : IsFrobeniusType P α)
+    (β : B ⟶ B') (hβ : IsFrobeniusType P β) (hd : P.degFr α = P.degFr β) :
+    ∃! φ' : A' ⟶ B', φ ≫ β = α ≫ φ' := by
+  obtain ⟨B₀, β₀, φ₀, hβ₀, hd₀, hsq₀⟩ := prop_1_10_i_exists P F φ α hα
+  obtain ⟨θ, hθiso, hθ⟩ := F.frobDegUniq B B₀ B' β₀ β hβ₀ hβ (by rw [hd₀, hd])
+  have hmain : φ ≫ β = α ≫ (φ₀ ≫ θ) := by
+    rw [← hθ, ← Category.assoc, hsq₀, Category.assoc]
+  refine ⟨φ₀ ≫ θ, hmain, ?_⟩
+  intro ψ hψ
+  exact prop_1_10_i_uniq P.totEpiC φ α β ψ (φ₀ ≫ θ) hψ hmain
+
 /-! ### ★★監査で欠落が判明した主張(2026-08-16)
 
 原文 (FrdI p.34):
@@ -2355,7 +2381,7 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 
 | 条 | 欠けているもの | 該当宣言 |
 |---|---|---|
-| (i) | ★`β` の量化子が逆——原文「Suppose that α, β **are** morphisms of Frobenius type」は ∀、実装は ∃ | `prop_1_10_i_exists` |
+| (i) | ~~★`β` の量化子が逆~~ → ★**実装した**。`Definition 1.3, (ii)` の本質的一意性（`frobDegUniq`）で、自分で作った `β₀` を与えられた `β` に合わせる | `prop_1_10_i_exists_given` |
 | (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
 | (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★★**7 タイプすべて実装完了**（上の 4 本 ＋ `prop_1_10_i_linear_of` / `prop_1_10_i_preStep_of` / `prop_1_10_i_frobType_of` / `prop_1_10_i_pullBack_of`）。★pull-back は `Proposition 1.4, (ii)` を両向きに使って普遍性を避けた | `prop_1_10_i_four_types` |
 | (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
