@@ -5,6 +5,7 @@ import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Found.FrdI.MonoidVocabulary
 import ABC3.Found.FrdI.MonoidPrime
+import ABC3.Found.FrdI.CategoryAnchor
 import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
