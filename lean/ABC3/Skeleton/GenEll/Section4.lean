@@ -109,13 +109,21 @@ theorem lemma_4_1 (M : ℕ) (hM : 0 < M)
 **素数定理のよく知られた帰結**である(cf. [Edw], p. 76)。
 
 ★★**この Remark が「素数定理は圏外」と明示している。**
-第 1 項(初等的な部分)は今すぐ証明できる。
-★**第 2 項が素数定理そのもの**であり、mathlib に無い(上の docstring で実測)。 -/
+
+★★**第 1 項は 2026-08-17 に証明した**——`Found/GenEll/PrimesOfSize.lean` の
+`exists_xeps_cond_ii`。原文が "entirely elementary" と書いた中身は
+`Real.isLittleO_log_id_atTop`(`log` は恒等写像より真に小さい)である。
+
+★**残る `sorry` は第 2 項だけ**であり、それは**素数定理そのもの**である
+(mathlib に無い。公開プロジェクト `PrimeNumberTheoremAnd` が持つ)。
+★★**半分取れたことを全部取れたと読まない**——`.src` は条つきのままである。 -/
 theorem remark_4_1_1 :
     (∀ (M : ℕ) (eps : ℝ), 0 < eps →
         ∃ xeps : ℝ, 0 < xeps ∧ ∀ x : ℝ, xeps ≤ x → (M : ℝ) * Real.log x ≤ eps * x)
-  ∧ Filter.Tendsto (fun x : ℝ => Chebyshev.theta x / x) Filter.atTop (nhds 1) := by
-  sorry
+  ∧ Filter.Tendsto (fun x : ℝ => Chebyshev.theta x / x) Filter.atTop (nhds 1) :=
+  ⟨ABC3.Found.GenEll.exists_xeps_cond_ii,
+    -- ★ここだけが素数定理である。mathlib に無い(2026-08-16 実測)。
+    by sorry⟩
 
 /-! ## Lemma 4.2 —— いくつかの初等的な評価 -/
 
