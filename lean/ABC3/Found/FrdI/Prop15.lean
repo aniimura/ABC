@@ -250,6 +250,33 @@ theorem otriOf_mem_otimes (A : ElemFrobCat Φ) (a : Φ.val A.base) :
     exact (isUnit_iff_isIso _).mpr
       ((ElemFrobCat.isIso_iff _).mpr ⟨by simp only [otriOf_base]; infer_instance, hu, rfl⟩)
 
+/-- ★★**原文の「[so O×(A) ∼→Φ(A)±]」**（2026-08-16 追加）。
+
+原文 (FrdI p.27):
+> There is a natural, functorial isomorphism O▷(A) ∼→Φ(A) [so O×(A) ∼→Φ(A)±]
+
+★★**監査で「元レベルの iff しか無い」と指摘されたもの**。
+`otriEquiv` を `M^±`（`unitsSubmonoid`）へ制限すれば出る ——
+★**制限がうまくいく根拠が `otriOf_mem_otimes` である**。 -/
+def otimesEquiv (A : ElemFrobCat Φ) :
+    Multiplicative (unitsSubmonoid (Φ.val A.base))
+      ≃* OTimes (elemPreFrobenioid Φ hD hpd) A where
+  toFun a := ⟨otriOf Φ A (a.toAdd : Φ.val A.base),
+    ⟨otriOf_mem Φ hD hpd A _, ((otriOf_mem_otimes Φ hD hpd A _).mpr a.toAdd.2).2⟩⟩
+  invFun x := Multiplicative.ofAdd
+    (⟨ElemFrobCat.Hom.div ((x : End A) : A ⟶ A),
+      ((ElemFrobCat.isIso_iff _).mp
+        ((CategoryTheory.isUnit_iff_isIso ((x : End A))).mp x.2.2)).2.1⟩ :
+      unitsSubmonoid (Φ.val A.base))
+  left_inv _ := rfl
+  right_inv x := Subtype.ext ((mem_otri_iff Φ hD hpd _).mp x.2.1).symm
+  map_mul' a b := by
+    refine Subtype.ext (ElemFrobCat.Hom.ext (by simp) ?_ (by simp))
+    show (a.toAdd : Φ.val A.base) + (b.toAdd : Φ.val A.base)
+      = Φ.map (𝟙 A.base) (a.toAdd : Φ.val A.base)
+        + ((1 : ℕ+) : ℕ) • (b.toAdd : Φ.val A.base)
+    simp
+
 /-! ### ★関手性を測る
 
 ★`𝒪^▷` の推移写像は、原文が `Definition 1.3, (iii), (c)` で与える
