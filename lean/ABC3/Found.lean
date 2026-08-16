@@ -39,6 +39,7 @@ import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
+import ABC3.Found.GenEll.LogDiff
 /-!
 # Found — 実装済みの基礎
 

@@ -98,7 +98,7 @@ structure HeightTheoryData where
 「無矛盾です」と言っても情報がない——**言うべきなのは「まだ作っていない」の中身**である。 -/
 def HeightTheoryData.waiting : WaitingFor :=
   { what := "算術直線束 APic(X) とエルミート計量、複素解析空間 X^arc(= X(ℂ) と複素共役 ι_X)、および高さ関数 ht_L̄ の構成。mathlib に Arakelov / arithmetic line bundle / LineBundle / Scheme…Picard / analytification / GAGA / complex analytic space はいずれも 0 件(2026-08-16、ディレクトリ全宣言を確認)"
-    trackB := "Found/GenEll — ★ADiv(F) と正規化次数 deg は Found/GenEll/ArithDiv.lean に実装済み(sorry 無し)。残るのは (a) X^arc の複素解析側、(b) 差積イデアル → ADiv(F)、(c) Cartier 因子の Spec(O_F) への引き戻し。★(b)(c) は Arakelov 理論ではなく可換環論・scheme 論なので、mathlib の IsDedekindDomain.differentIdeal と Ideal 論から届きうる" }
+    trackB := "Found/GenEll — ★実装済み: ADiv(F) と正規化次数 deg(ArithDiv.lean)、および **差積イデアル → ADiv(F)**(LogDiff.lean、2026-08-17。mathlib の IsDedekindDomain.differentIdeal と Associates.finite_factors の上に載った)。★残るのは (a) X^arc の複素解析側、(b) Cartier 因子の Spec(O_F) への引き戻し。★★律速は (a) である——複素解析空間の理論そのものが mathlib に無く、着手の形跡も無い(2026-08-16 実測)" }
 
 /-- **`Proposition 1.7` の被覆の設定**を受ける `Interface`。
 
