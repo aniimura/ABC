@@ -387,6 +387,40 @@ theorem twIsPullBack_of {A B : TwObj Φ G} (f : A ⟶ B) (hlin : f.hom.deg = 1)
     rw [hlin]
     simp
 
+/-- ★★**pull-back 性の逆向きの橋** —— 捻れ積で pull-back なら `𝔽_Φ` でも pull-back。
+
+★`G` 成分を `1` に取って `𝔽_Φ` の四角形を捻れ積に持ち上げるだけ。 -/
+theorem twPullBack_hom {A B : TwObj Φ G} (α : A ⟶ B)
+    (h : IsPullBack (twPreFrobenioid (G := G) hD hpd) α) :
+    IsPullBack (elemPreFrobenioid Φ hD hpd) α.hom := by
+  intro X₀
+  obtain ⟨hinj, hsurj⟩ := h ⟨X₀⟩
+  constructor
+  · intro g₁ g₂ hg
+    have hv := congrArg Subtype.val hg
+    have e1 : g₁ ≫ α.hom = g₂ ≫ α.hom := congrArg Prod.fst hv
+    have e2 : g₁.base = g₂.base := congrArg Prod.snd hv
+    have := hinj (a₁ := (⟨g₁, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
+      (a₂ := (⟨g₂, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
+      (Subtype.ext (Prod.ext (TwHom.ext e1 rfl) e2))
+    exact congrArg TwHom.hom this
+  · intro y
+    obtain ⟨g, hg⟩ := hsurj ⟨((⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B), y.1.2), y.2⟩
+    have hg' := congrArg Subtype.val hg
+    have hp1 : g ≫ α = (⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B) := congrArg Prod.fst hg'
+    have hp2 : g.hom.base = y.1.2 := congrArg Prod.snd hg'
+    exact ⟨g.hom, Subtype.ext (Prod.ext (congrArg TwHom.hom hp1) hp2)⟩
+
+/-- ★★**pull-back 性の判定は `𝔽_Φ` と完全に一致する**。 -/
+theorem twIsPullBack_iff {A B : TwObj Φ G} (f : A ⟶ B) :
+    IsPullBack (twPreFrobenioid (G := G) hD hpd) f ↔
+      ElemFrobCat.Hom.deg f.hom = 1 ∧ toChar (ElemFrobCat.Hom.div f.hom) = 0 := by
+  constructor
+  · intro h
+    exact (elemFrob_isPullBack_iff Φ hD hpd f.hom).mp (twPullBack_hom hD hpd f h)
+  · rintro ⟨hd, hz⟩
+    exact twIsPullBack_of hD hpd f hd ((elemFrob_isPullBack_iff Φ hD hpd f.hom).mpr ⟨hd, hz⟩)
+
 /-- ★**(iv)(b)** pull-back は LB-invertible かつ linear。
 
 ★co-angular は無条件、isometric と linear は `𝔽_Φ` 側から。 -/
@@ -394,27 +428,450 @@ theorem twPullBackLB {A B : TwObj Φ G} (α : A ⟶ B)
     (h : IsPullBack (twPreFrobenioid (G := G) hD hpd) α) :
     IsLBInvertible (twPreFrobenioid (G := G) hD hpd) α ∧
       IsLinear (twPreFrobenioid (G := G) hD hpd) α := by
-  -- `𝔽_Φ` 側の pull-back 性を取り出す
-  have h0 : IsPullBack (elemPreFrobenioid Φ hD hpd) α.hom := by
-    intro X₀
-    obtain ⟨hinj, hsurj⟩ := h ⟨X₀⟩
-    constructor
-    · intro g₁ g₂ hg
-      have hv := congrArg Subtype.val hg
-      have e1 : g₁ ≫ α.hom = g₂ ≫ α.hom := congrArg Prod.fst hv
-      have e2 : g₁.base = g₂.base := congrArg Prod.snd hv
-      have := hinj (a₁ := (⟨g₁, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
-        (a₂ := (⟨g₂, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
-        (Subtype.ext (Prod.ext (TwHom.ext e1 rfl) e2))
-      exact congrArg TwHom.hom this
-    · intro y
-      obtain ⟨g, hg⟩ := hsurj ⟨((⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B), y.1.2), y.2⟩
-      have hg' := congrArg Subtype.val hg
-      have hp1 : g ≫ α = (⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B) := congrArg Prod.fst hg'
-      have hp2 : g.hom.base = y.1.2 := congrArg Prod.snd hg'
-      exact ⟨g.hom, Subtype.ext (Prod.ext (congrArg TwHom.hom hp1) hp2)⟩
-  obtain ⟨hlb, hlin⟩ := elemFrob_pullBackLB Φ hD hpd α.hom h0
+  obtain ⟨hlb, hlin⟩ := elemFrob_pullBackLB Φ hD hpd α.hom (twPullBack_hom hD hpd α h)
   exact ⟨⟨twCoAngular hD hpd α, hlb.2⟩, hlin⟩
+
+/-- ★**(iv)(a)** 任意射の 3 分解。
+
+★`𝔽_Φ` の分解に `G` 成分を **Frobenius 因子へ集める** ——
+残り 2 因子は次数 1 なので `G` 成分が素通りする。 -/
+theorem twArbFactor {A B : TwObj Φ G} (φ : A ⟶ B) :
+    ∃ (X Y : TwObj Φ G) (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B),
+      φ = γ ≫ β ≫ α ∧ IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) γ ∧
+        IsPreStep (twPreFrobenioid (G := G) hD hpd) β ∧
+        IsPullBack (twPreFrobenioid (G := G) hD hpd) α := by
+  obtain ⟨X₀, Y₀, γ₀, β₀, α₀, hfac, hγ₀, hβ₀, hα₀⟩ := elemFrob_arbFactor Φ hD hpd φ.hom
+  obtain ⟨-, hα₀lin⟩ := elemFrob_pullBackLB Φ hD hpd α₀ hα₀
+  refine ⟨⟨X₀⟩, ⟨Y₀⟩, ⟨γ₀, φ.unit⟩, ⟨β₀, 1⟩, ⟨α₀, 1⟩, ?_,
+    ⟨⟨twCoAngular hD hpd _, hγ₀.1.2⟩, hγ₀.2⟩, hβ₀,
+    twIsPullBack_of hD hpd _ hα₀lin hα₀⟩
+  refine TwHom.ext hfac ?_
+  show φ.unit = φ.unit ^ ((ElemFrobCat.Hom.deg (β₀ ≫ α₀) : ℕ+) : ℕ) * ((1 : G) ^ _ * 1)
+  rw [show ElemFrobCat.Hom.deg (β₀ ≫ α₀) = 1 by
+    rw [ElemFrobCat.degFr_comp, show ElemFrobCat.Hom.deg α₀ = 1 from hα₀lin,
+      show ElemFrobCat.Hom.deg β₀ = 1 from hβ₀.1, one_mul]]
+  simp
+
+/-- ★**(vi)** 単元を除く忠実性。
+
+★`𝔽_Φ` は忠実なので `hom` は `α₀` の差だけ。
+★**`G` 成分の差 `ψ.unit⁻¹ * φ.unit` を足せば単元になる。** -/
+theorem twFaithfulUpToUnits {A B : TwObj Φ G} (φ ψ : A ⟶ B)
+    (hb : BaseEquivalent (twPreFrobenioid (G := G) hD hpd) φ ψ)
+    (hm : MetricallyEquivalent (twPreFrobenioid (G := G) hD hpd) φ ψ)
+    (hφ : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ)
+    (hψ : IsPreStep (twPreFrobenioid (G := G) hD hpd) ψ) :
+    ∃ α : End B, α ∈ OTimes (twPreFrobenioid (G := G) hD hpd) B ∧
+      φ = ψ ≫ (α : B ⟶ B) := by
+  obtain ⟨α₀, hα₀m, hα₀⟩ :=
+    elemFrob_faithfulUpToUnits Φ hD hpd φ.hom ψ.hom hb hm hφ hψ
+  haveI : IsIso (α₀ : B.ofElem ⟶ B.ofElem) :=
+    (CategoryTheory.isUnit_iff_isIso (α₀ : End B.ofElem)).mp hα₀m.2
+  refine ⟨⟨α₀, ψ.unit⁻¹ * φ.unit⟩, ⟨⟨hα₀m.1.1, hα₀m.1.2⟩, ?_⟩, ?_⟩
+  · exact (CategoryTheory.isUnit_iff_isIso _).mpr (twIsIso_of _ ‹_›)
+  · refine TwHom.ext hα₀ ?_
+    show φ.unit = ψ.unit ^ ((ElemFrobCat.Hom.deg (α₀ : B.ofElem ⟶ B.ofElem) : ℕ+) : ℕ)
+      * (ψ.unit⁻¹ * φ.unit)
+    rw [show ElemFrobCat.Hom.deg (α₀ : B.ofElem ⟶ B.ofElem) = 1 from hα₀m.1.2]
+    simp
+
+/-- ★**(v)(b)** pre-step は「co-angular ∘ isometric」に分解する。
+
+★`G` 成分は**第1因子へ集める**(第2因子は次数 1 なので素通り)。 -/
+theorem twPreStepFactor {A B : TwObj Φ G} (φ : A ⟶ B)
+    (hφ : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ) :
+    ∃ (X : TwObj Φ G) (β : A ⟶ X) (α : X ⟶ B),
+      φ = β ≫ α ∧ IsCoAngular (twPreFrobenioid (G := G) hD hpd) β ∧
+        IsPreStep (twPreFrobenioid (G := G) hD hpd) β ∧
+        IsIsometric (twPreFrobenioid (G := G) hD hpd) α ∧
+        IsPreStep (twPreFrobenioid (G := G) hD hpd) α := by
+  obtain ⟨X₀, β₀, α₀, hfac, -, hβ₀s, hα₀i, hα₀s⟩ :=
+    elemFrob_preStepFactor Φ hD hpd φ.hom hφ
+  refine ⟨⟨X₀⟩, ⟨β₀, φ.unit⟩, ⟨α₀, 1⟩, ?_, twCoAngular hD hpd _, hβ₀s, hα₀i, hα₀s⟩
+  refine TwHom.ext hfac ?_
+  show φ.unit = φ.unit ^ ((ElemFrobCat.Hom.deg α₀ : ℕ+) : ℕ) * 1
+  rw [show ElemFrobCat.Hom.deg α₀ = 1 from hα₀s.1]
+  simp
+
+/-- ★**(v)(c)** pre-step は「isometric ∘ co-angular」にも分解する。 -/
+theorem twPreStepFactor' {A B : TwObj Φ G} (φ : A ⟶ B)
+    (hφ : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ) :
+    ∃ (X : TwObj Φ G) (β : A ⟶ X) (α : X ⟶ B),
+      φ = β ≫ α ∧ IsIsometric (twPreFrobenioid (G := G) hD hpd) β ∧
+        IsPreStep (twPreFrobenioid (G := G) hD hpd) β ∧
+        IsCoAngular (twPreFrobenioid (G := G) hD hpd) α ∧
+        IsPreStep (twPreFrobenioid (G := G) hD hpd) α := by
+  obtain ⟨X₀, β₀, α₀, hfac, hβ₀i, hβ₀s, -, hα₀s⟩ :=
+    elemFrob_preStepFactor' Φ hD hpd φ.hom hφ
+  refine ⟨⟨X₀⟩, ⟨β₀, φ.unit⟩, ⟨α₀, 1⟩, ?_, hβ₀i, hβ₀s, twCoAngular hD hpd _, hα₀s⟩
+  refine TwHom.ext hfac ?_
+  show φ.unit = φ.unit ^ ((ElemFrobCat.Hom.deg α₀ : ℕ+) : ℕ) * 1
+  rw [show ElemFrobCat.Hom.deg α₀ = 1 from hα₀s.1]
+  simp
+
+/-! ### ★`𝒪^▷` の対応
+
+★★**`OTri` の元は次数 1 なので、`G` 成分の指数がすべて消える。**
+残るのは `G` の可換性だけで、対応は「`G` 成分をそのまま写す」になる。 -/
+
+/-- ★`OTri` の帰属は `𝔽_Φ` 成分だけで決まる(定義の展開)。 -/
+theorem tw_mem_otri_iff {A : TwObj Φ G} (α : End A) :
+    α ∈ OTri (twPreFrobenioid (G := G) hD hpd) A ↔
+      (α.hom : End A.ofElem) ∈ OTri (elemPreFrobenioid Φ hD hpd) A.ofElem := Iff.rfl
+
+/-- ★**(iii)(c)** 順方向。★`G` 成分は `α.unit` をそのまま渡す。 -/
+theorem twOtriFwd {A B : TwObj Φ G} (φ : A ⟶ B)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ)
+    (hst : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ)
+    (α : End A) (hα : α ∈ OTri (twPreFrobenioid (G := G) hD hpd) A) :
+    ∃! β : End B, β ∈ OTri (twPreFrobenioid (G := G) hD hpd) B ∧
+      (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  have hφd : ElemFrobCat.Hom.deg φ.hom = 1 := hst.1
+  have hαd : ElemFrobCat.Hom.deg α.hom = 1 := ((tw_mem_otri_iff hD hpd α).mp hα).2
+  obtain ⟨β₀, ⟨hβ₀m, hβ₀e⟩, huniq⟩ :=
+    elemFrob_otriFwd Φ hD hpd φ.hom hst α.hom ((tw_mem_otri_iff hD hpd α).mp hα)
+  have hβ₀d : ElemFrobCat.Hom.deg β₀ = 1 := hβ₀m.2
+  refine ⟨⟨β₀, α.unit⟩, ⟨hβ₀m, ?_⟩, ?_⟩
+  · refine TwHom.ext hβ₀e ?_
+    show φ.unit ^ ((ElemFrobCat.Hom.deg β₀ : ℕ+) : ℕ) * α.unit
+      = α.unit ^ ((ElemFrobCat.Hom.deg φ.hom : ℕ+) : ℕ) * φ.unit
+    rw [hβ₀d, hφd]
+    simpa using mul_comm φ.unit α.unit
+  · rintro β ⟨hβ, hβe⟩
+    have hβd : ElemFrobCat.Hom.deg β.hom = 1 := ((tw_mem_otri_iff hD hpd β).mp hβ).2
+    have hhom : β.hom = β₀ :=
+      huniq β.hom ⟨(tw_mem_otri_iff hD hpd β).mp hβ, congrArg TwHom.hom hβe⟩
+    refine TwHom.ext hhom ?_
+    have hu := congrArg TwHom.unit hβe
+    rw [twComp_unit, twComp_unit, hβd, hφd] at hu
+    simp only [PNat.one_coe, pow_one] at hu
+    exact mul_left_cancel (a := φ.unit) (by rw [hu, mul_comm])
+
+/-- ★**(iii)(c)** 逆方向。★`G` 成分は `β.unit` をそのまま戻す。 -/
+theorem twOtriBwd {A B : TwObj Φ G} (φ : A ⟶ B)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ)
+    (hst : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ)
+    (β : End B) (hβ : β ∈ OTri (twPreFrobenioid (G := G) hD hpd) B) :
+    ∃! α : End A, α ∈ OTri (twPreFrobenioid (G := G) hD hpd) A ∧
+      (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  have hφd : ElemFrobCat.Hom.deg φ.hom = 1 := hst.1
+  have hβd : ElemFrobCat.Hom.deg β.hom = 1 := ((tw_mem_otri_iff hD hpd β).mp hβ).2
+  obtain ⟨α₀, ⟨hα₀m, hα₀e⟩, huniq⟩ :=
+    elemFrob_otriBwd Φ hD hpd φ.hom hst β.hom ((tw_mem_otri_iff hD hpd β).mp hβ)
+  have hα₀d : ElemFrobCat.Hom.deg α₀ = 1 := hα₀m.2
+  refine ⟨⟨α₀, β.unit⟩, ⟨hα₀m, ?_⟩, ?_⟩
+  · refine TwHom.ext hα₀e ?_
+    show φ.unit ^ ((ElemFrobCat.Hom.deg β.hom : ℕ+) : ℕ) * β.unit
+      = β.unit ^ ((ElemFrobCat.Hom.deg φ.hom : ℕ+) : ℕ) * φ.unit
+    rw [hβd, hφd]
+    simpa using mul_comm φ.unit β.unit
+  · rintro α ⟨hα, hαe⟩
+    have hαd : ElemFrobCat.Hom.deg α.hom = 1 := ((tw_mem_otri_iff hD hpd α).mp hα).2
+    have hhom : α.hom = α₀ :=
+      huniq α.hom ⟨(tw_mem_otri_iff hD hpd α).mp hα, congrArg TwHom.hom hαe⟩
+    refine TwHom.ext hhom ?_
+    have hu := congrArg TwHom.unit hαe
+    rw [twComp_unit, twComp_unit, hβd, hφd] at hu
+    simp only [PNat.one_coe, pow_one] at hu
+    exact mul_right_cancel (b := φ.unit) (by rw [← hu, mul_comm])
+
+/-- ★**(iii)(c)** 対応は `Base φ` にしか依らない。
+
+★`G` 成分の等式は `φ.unit * β.unit = α.unit * φ.unit`、すなわち
+★**`β.unit = α.unit`** であり、`φ` を `φ'` に取り替えても同じ形になる。 -/
+theorem twOtriBase {A B : TwObj Φ G} (φ φ' : A ⟶ B)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ)
+    (hst : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ')
+    (hst' : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ')
+    (hbase : (twPreFrobenioid (G := G) hD hpd).Base φ
+      = (twPreFrobenioid (G := G) hD hpd).Base φ')
+    (α : End A) (hα : α ∈ OTri (twPreFrobenioid (G := G) hD hpd) A)
+    (β : End B) (hβ : β ∈ OTri (twPreFrobenioid (G := G) hD hpd) B)
+    (h : (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ) :
+    (φ' ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ' := by
+  have hφd : ElemFrobCat.Hom.deg φ.hom = 1 := hst.1
+  have hφd' : ElemFrobCat.Hom.deg φ'.hom = 1 := hst'.1
+  have hαd : ElemFrobCat.Hom.deg α.hom = 1 := ((tw_mem_otri_iff hD hpd α).mp hα).2
+  have hβd : ElemFrobCat.Hom.deg β.hom = 1 := ((tw_mem_otri_iff hD hpd β).mp hβ).2
+  refine TwHom.ext (elemFrob_otriBase Φ hD hpd φ.hom φ'.hom hst hst' hbase
+    α.hom ((tw_mem_otri_iff hD hpd α).mp hα)
+    β.hom ((tw_mem_otri_iff hD hpd β).mp hβ) (congrArg TwHom.hom h)) ?_
+  have hu := congrArg TwHom.unit h
+  rw [twComp_unit, twComp_unit, hβd, hφd] at hu
+  show φ'.unit ^ ((ElemFrobCat.Hom.deg β.hom : ℕ+) : ℕ) * β.unit
+    = α.unit ^ ((ElemFrobCat.Hom.deg φ'.hom : ℕ+) : ℕ) * φ'.unit
+  rw [hβd, hφd']
+  simp only [PNat.one_coe, pow_one] at hu ⊢
+  rw [show β.unit = α.unit from mul_left_cancel (a := φ.unit) (by rw [hu, mul_comm])]
+  exact mul_comm _ _
+
+/-! ### ★分解の一意性
+
+★★**同型 `γ` の `G` 成分は「両辺の `G` 成分の差」で一意に決まる。**
+2 つの条件(`α' = γ.inv ≫ α` と `β' = β ≫ γ.hom`)が同じ `g` を要求するが、
+★**それが一致するのは仮定 `β ≫ α = β' ≫ α'` の `G` 成分そのものである。** -/
+
+/-- ★`𝔽_Φ` の同型に `G` 成分を足して捻れ積の同型にする。 -/
+def twIsoOf {X X' : ElemFrobCat Φ} (e : X ≅ X') (g : G) :
+    (⟨X⟩ : TwObj Φ G) ≅ ⟨X'⟩ where
+  hom := ⟨e.hom, g⟩
+  inv := ⟨e.inv, g⁻¹⟩
+  hom_inv_id := by
+    have hdh : ElemFrobCat.Hom.deg e.hom = 1 :=
+      ((ElemFrobCat.isIso_iff e.hom).mp inferInstance).2.2
+    have hd : ElemFrobCat.Hom.deg e.inv = 1 := by
+      have h1 := congrArg ElemFrobCat.Hom.deg e.hom_inv_id
+      rw [ElemFrobCat.degFr_comp, hdh, mul_one] at h1
+      simpa using h1
+    refine TwHom.ext e.hom_inv_id ?_
+    show g ^ ((ElemFrobCat.Hom.deg e.inv : ℕ+) : ℕ) * g⁻¹ = (1 : G)
+    rw [hd]; simp
+  inv_hom_id := by
+    have hd : ElemFrobCat.Hom.deg e.hom = 1 :=
+      ((ElemFrobCat.isIso_iff e.hom).mp inferInstance).2.2
+    refine TwHom.ext e.inv_hom_id ?_
+    show g⁻¹ ^ ((ElemFrobCat.Hom.deg e.hom : ℕ+) : ℕ) * g = (1 : G)
+    rw [hd]; simp
+
+@[simp] theorem twIsoOf_hom_unit {X X' : ElemFrobCat Φ} (e : X ≅ X') (g : G) :
+    (twIsoOf (G := G) e g).hom.unit = g := rfl
+
+@[simp] theorem twIsoOf_inv_unit {X X' : ElemFrobCat Φ} (e : X ≅ X') (g : G) :
+    (twIsoOf (G := G) e g).inv.unit = g⁻¹ := rfl
+
+/-- ★**(v)(b)** の一意性。 -/
+theorem twPreStepFactorUniq {A B : TwObj Φ G} (X X' : TwObj Φ G)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) β)
+    (hβs : IsPreStep (twPreFrobenioid (G := G) hD hpd) β)
+    (hαi : IsIsometric (twPreFrobenioid (G := G) hD hpd) α)
+    (hαs : IsPreStep (twPreFrobenioid (G := G) hD hpd) α)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) β')
+    (hβs' : IsPreStep (twPreFrobenioid (G := G) hD hpd) β')
+    (hαi' : IsIsometric (twPreFrobenioid (G := G) hD hpd) α')
+    (hαs' : IsPreStep (twPreFrobenioid (G := G) hD hpd) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨γ₀, hα₀, hβ₀⟩ := elemFrob_preStepFactorUniq Φ hD hpd X.ofElem X'.ofElem
+    β.hom α.hom β'.hom α'.hom (congrArg TwHom.hom heq)
+    hβs hαi hαs.1 hβs' hαi' hαs'.1
+  have hu := congrArg TwHom.unit heq
+  rw [twComp_unit, twComp_unit, show ElemFrobCat.Hom.deg α.hom = 1 from hαs.1,
+    show ElemFrobCat.Hom.deg α'.hom = 1 from hαs'.1] at hu
+  simp only [PNat.one_coe, pow_one] at hu
+  refine ⟨twIsoOf (G := G) γ₀ (β.unit⁻¹ * β'.unit), ?_, ?_⟩
+  · refine TwHom.ext hα₀ ?_
+    show α'.unit = (β.unit⁻¹ * β'.unit)⁻¹ ^ ((ElemFrobCat.Hom.deg α.hom : ℕ+) : ℕ) * α.unit
+    rw [show ElemFrobCat.Hom.deg α.hom = 1 from hαs.1]
+    simp only [PNat.one_coe, pow_one, mul_inv_rev, inv_inv]
+    rw [mul_assoc, hu]
+    simp
+  · refine TwHom.ext hβ₀ ?_
+    show β'.unit = β.unit ^ ((ElemFrobCat.Hom.deg γ₀.hom : ℕ+) : ℕ) * (β.unit⁻¹ * β'.unit)
+    rw [show ElemFrobCat.Hom.deg γ₀.hom = 1 from
+      ((ElemFrobCat.isIso_iff γ₀.hom).mp inferInstance).2.2]
+    simp
+
+/-- ★**(v)(c)** の一意性。★同じ計算(`α` 側も `β` 側も次数 1)。 -/
+theorem twPreStepFactorUniq' {A B : TwObj Φ G} (X X' : TwObj Φ G)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (hβi : IsIsometric (twPreFrobenioid (G := G) hD hpd) β)
+    (hβs : IsPreStep (twPreFrobenioid (G := G) hD hpd) β)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) α)
+    (hαs : IsPreStep (twPreFrobenioid (G := G) hD hpd) α)
+    (hβi' : IsIsometric (twPreFrobenioid (G := G) hD hpd) β')
+    (hβs' : IsPreStep (twPreFrobenioid (G := G) hD hpd) β')
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) α')
+    (hαs' : IsPreStep (twPreFrobenioid (G := G) hD hpd) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨γ₀, hα₀, hβ₀⟩ := elemFrob_preStepFactorUniq' Φ hD hpd X.ofElem X'.ofElem
+    β.hom α.hom β'.hom α'.hom (congrArg TwHom.hom heq)
+    hβi hβs hαs hβi' hβs' hαs'
+  have hu := congrArg TwHom.unit heq
+  rw [twComp_unit, twComp_unit, show ElemFrobCat.Hom.deg α.hom = 1 from hαs.1,
+    show ElemFrobCat.Hom.deg α'.hom = 1 from hαs'.1] at hu
+  simp only [PNat.one_coe, pow_one] at hu
+  refine ⟨twIsoOf (G := G) γ₀ (β.unit⁻¹ * β'.unit), ?_, ?_⟩
+  · refine TwHom.ext hα₀ ?_
+    show α'.unit = (β.unit⁻¹ * β'.unit)⁻¹ ^ ((ElemFrobCat.Hom.deg α.hom : ℕ+) : ℕ) * α.unit
+    rw [show ElemFrobCat.Hom.deg α.hom = 1 from hαs.1]
+    simp only [PNat.one_coe, pow_one, mul_inv_rev, inv_inv]
+    rw [mul_assoc, hu]
+    simp
+  · refine TwHom.ext hβ₀ ?_
+    show β'.unit = β.unit ^ ((ElemFrobCat.Hom.deg γ₀.hom : ℕ+) : ℕ) * (β.unit⁻¹ * β'.unit)
+    rw [show ElemFrobCat.Hom.deg γ₀.hom = 1 from
+      ((ElemFrobCat.isIso_iff γ₀.hom).mp inferInstance).2.2]
+    simp
+
+/-- ★**(iv)(a)** 3 分解の一意性。
+
+★★**`G` 成分は 2 つの同型が別々に決める** ——
+`ε` は Frobenius 因子の差 `γ.unit⁻¹ * γ'.unit`、
+`δ` は pull-back 因子の差 `α.unit * α'.unit⁻¹`。
+★**中央の条件が両者と整合するのは、まさに仮定の `G` 成分
+`γ.unit * β.unit * α.unit = γ'.unit * β'.unit * α'.unit` である。** -/
+theorem twArbFactorUniq {A B : TwObj Φ G} (X Y X' Y' : TwObj Φ G)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (heq : (γ ≫ β ≫ α : A ⟶ B) = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) γ)
+    (hβ : IsPreStep (twPreFrobenioid (G := G) hD hpd) β)
+    (hα : IsPullBack (twPreFrobenioid (G := G) hD hpd) α)
+    (hγ' : IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) γ')
+    (hβ' : IsPreStep (twPreFrobenioid (G := G) hD hpd) β')
+    (hα' : IsPullBack (twPreFrobenioid (G := G) hD hpd) α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  have hα0 : IsPullBack (elemPreFrobenioid Φ hD hpd) α.hom := twPullBack_hom hD hpd α hα
+  have hα0' : IsPullBack (elemPreFrobenioid Φ hD hpd) α'.hom := twPullBack_hom hD hpd α' hα'
+  have hαl : ElemFrobCat.Hom.deg α.hom = 1 := (elemFrob_pullBackLB Φ hD hpd α.hom hα0).2
+  have hαl' : ElemFrobCat.Hom.deg α'.hom = 1 := (elemFrob_pullBackLB Φ hD hpd α'.hom hα0').2
+  have hβl : ElemFrobCat.Hom.deg β.hom = 1 := hβ.1
+  have hβl' : ElemFrobCat.Hom.deg β'.hom = 1 := hβ'.1
+  obtain ⟨δ₀, ε₀, hδα, hδβ, hδγ⟩ := elemFrob_arbFactorUniq Φ hD hpd
+    X.ofElem Y.ofElem X'.ofElem Y'.ofElem γ.hom β.hom α.hom γ'.hom β'.hom α'.hom
+    (congrArg TwHom.hom heq) (twFrobType_hom hD hpd γ hγ) hβ hα0
+    (twFrobType_hom hD hpd γ' hγ') hβ' hα0'
+  have hδd : ElemFrobCat.Hom.deg δ₀.hom = 1 :=
+    ((ElemFrobCat.isIso_iff δ₀.hom).mp inferInstance).2.2
+  have hεd : ElemFrobCat.Hom.deg ε₀.hom = 1 :=
+    ((ElemFrobCat.isIso_iff ε₀.hom).mp inferInstance).2.2
+  -- ★仮定の `G` 成分(すべての次数が 1 なので指数が消える)
+  have hu : γ.unit * (β.unit * α.unit) = γ'.unit * (β'.unit * α'.unit) := by
+    have h := congrArg TwHom.unit heq
+    rw [twComp_unit, twComp_unit, twComp_unit, twComp_unit, twComp_hom, twComp_hom,
+      ElemFrobCat.degFr_comp, ElemFrobCat.degFr_comp,
+      hαl, hαl', hβl, hβl'] at h
+    simpa using h
+  refine ⟨twIsoOf (G := G) δ₀ (α.unit * α'.unit⁻¹),
+    twIsoOf (G := G) ε₀ (γ.unit⁻¹ * γ'.unit), ?_, ?_, ?_⟩
+  · refine TwHom.ext hδα ?_
+    show α'.unit = (α.unit * α'.unit⁻¹)⁻¹ ^ ((ElemFrobCat.Hom.deg α.hom : ℕ+) : ℕ) * α.unit
+    rw [hαl]
+    simp [mul_comm, mul_assoc, mul_left_comm]
+  · refine TwHom.ext hδβ ?_
+    show β'.unit = (γ.unit⁻¹ * γ'.unit)⁻¹
+        ^ ((ElemFrobCat.Hom.deg (β.hom ≫ δ₀.hom) : ℕ+) : ℕ)
+        * (β.unit ^ ((ElemFrobCat.Hom.deg δ₀.hom : ℕ+) : ℕ) * (α.unit * α'.unit⁻¹))
+    rw [ElemFrobCat.degFr_comp, hβl, hδd, mul_one]
+    have hb' : β'.unit = γ'.unit⁻¹ * (γ.unit * (β.unit * α.unit)) * α'.unit⁻¹ := by
+      rw [hu]; simp
+    rw [hb']
+    simp [mul_inv_rev, mul_comm, mul_assoc, mul_left_comm]
+  · refine TwHom.ext hδγ ?_
+    show γ'.unit = γ.unit ^ ((ElemFrobCat.Hom.deg ε₀.hom : ℕ+) : ℕ) * (γ.unit⁻¹ * γ'.unit)
+    rw [hεd]
+    simp
+
+/-- ★**(i)(c)** `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` は圏同値。
+
+★★**`G` 成分は三角形 `f ≫ W.hom = Z.hom` が一意に決める** ——
+`W.hom` は pull-back で次数 1 なので `f.unit = Z.unit * W.unit⁻¹` である。
+★**忠実性の `G` 成分はこの消約、充満性の `G` 成分は
+`IsPullBack` の全射性が捻れ積のままで与える。** -/
+theorem twPlBkEquiv (A : TwObj Φ G) :
+    (plBkOverFunctor (twPreFrobenioid (G := G) hD hpd) A).IsEquivalence := by
+  haveI hfaith : (plBkOverFunctor (twPreFrobenioid (G := G) hD hpd) A).Faithful := by
+    constructor
+    intro Z W f g hfg
+    have hb : ElemFrobCat.Hom.base f.left.hom.hom = ElemFrobCat.Hom.base g.left.hom.hom :=
+      congrArg CommaMorphism.left hfg
+    obtain ⟨hWl, -⟩ := (twIsPullBack_iff hD hpd W.hom.hom).mp W.hom.property
+    obtain ⟨hfl, -⟩ := (twIsPullBack_iff hD hpd f.left.hom).mp f.left.property
+    obtain ⟨hgl, -⟩ := (twIsPullBack_iff hD hpd g.left.hom).mp g.left.property
+    have hwf : (f.left.hom ≫ W.hom.hom) = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have hwg : (g.left.hom ≫ W.hom.hom) = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    letI := isCancelAdd_of_isIntegralMonoid _ ((hpd Z.left.obj.ofElem.base).1)
+    have hdiv : ElemFrobCat.Hom.div f.left.hom.hom = ElemFrobCat.Hom.div g.left.hom.hom := by
+      have h1 := congrArg (fun x : _ ⟶ _ => ElemFrobCat.Hom.div (TwHom.hom x))
+        (hwf.trans hwg.symm)
+      simp only [twComp_hom] at h1
+      rw [ElemFrobCat.div_comp, ElemFrobCat.div_comp, hb, hWl] at h1
+      simp only [PNat.one_coe, one_smul] at h1
+      exact add_left_cancel h1
+    have hunit : f.left.hom.unit = g.left.hom.unit := by
+      have hu := congrArg TwHom.unit (hwf.trans hwg.symm)
+      rw [twComp_unit, twComp_unit, hWl] at hu
+      simp only [PNat.one_coe, pow_one] at hu
+      exact mul_right_cancel hu
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      (TwHom.ext (ElemFrobCat.Hom.ext hb hdiv (hfl.trans hgl.symm)) hunit))
+  haveI hfull : (plBkOverFunctor (twPreFrobenioid (G := G) hD hpd) A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨hWl, hWi⟩ := (twIsPullBack_iff hD hpd W.hom.hom).mp W.hom.property
+    obtain ⟨hZl, hZi⟩ := (twIsPullBack_iff hD hpd Z.hom.hom).mp Z.hom.property
+    obtain ⟨S, hS⟩ := toChar_eq_zero_iff.mp hZi
+    obtain ⟨f₀, hf₀⟩ := (W.hom.property Z.left.obj).2 ⟨(Z.hom.hom, h.left), (Over.w h).symm⟩
+    have hp := Subtype.ext_iff.mp hf₀
+    have h1 : (f₀ ≫ W.hom.hom) = Z.hom.hom := congrArg Prod.fst hp
+    have h2 : ElemFrobCat.Hom.base f₀.hom = h.left := congrArg Prod.snd hp
+    have h1' : (f₀.hom ≫ W.hom.hom.hom) = Z.hom.hom.hom := congrArg TwHom.hom h1
+    have hdeg : ElemFrobCat.Hom.deg f₀.hom = 1 := by
+      have hh := congrArg ElemFrobCat.Hom.deg h1'
+      rw [ElemFrobCat.comp_deg, hWl, one_mul, hZl] at hh
+      exact hh
+    have hd : Φ.map (ElemFrobCat.Hom.base f₀.hom) (ElemFrobCat.Hom.div W.hom.hom.hom)
+        + ElemFrobCat.Hom.div f₀.hom = ElemFrobCat.Hom.div Z.hom.hom.hom := by
+      have hh := congrArg ElemFrobCat.Hom.div h1'
+      rw [ElemFrobCat.div_comp, hWl] at hh
+      simpa using hh
+    have hdivu : IsAddUnit (ElemFrobCat.Hom.div f₀.hom) := by
+      refine ⟨⟨ElemFrobCat.Hom.div f₀.hom,
+        Φ.map (ElemFrobCat.Hom.base f₀.hom) (ElemFrobCat.Hom.div W.hom.hom.hom) + S.neg,
+        ?_, ?_⟩, rfl⟩
+      · rw [← add_assoc, add_comm (ElemFrobCat.Hom.div f₀.hom), hd, ← hS, S.val_neg]
+      · rw [add_assoc, add_comm S.neg, ← add_assoc, hd, ← hS, S.val_neg]
+    refine ⟨Over.homMk (⟨f₀, (twIsPullBack_iff hD hpd f₀).mpr
+      ⟨hdeg, toChar_eq_zero_iff.mpr hdivu⟩⟩ : Z.left ⟶ W.left)
+      (InducedWideCategory.Hom.ext h1), Over.OverMorphism.ext h2⟩
+  haveI hess : (plBkOverFunctor (twPreFrobenioid (G := G) hD hpd) A).EssSurj := by
+    constructor
+    intro Y
+    obtain ⟨q, hq⟩ : ∃ q : Y.left ⟶ A.ofElem.base, q = Y.hom := ⟨Y.hom, rfl⟩
+    refine ⟨Over.mk (show (⟨(⟨⟨Y.left⟩⟩ : TwObj Φ G)⟩ :
+        PlBk (twPreFrobenioid (G := G) hD hpd))
+          ⟶ (⟨A⟩ : PlBk (twPreFrobenioid (G := G) hD hpd)) from
+      ⟨(⟨(⟨q, 0, 1⟩ : (⟨Y.left⟩ : ElemFrobCat Φ) ⟶ A.ofElem), 1⟩ :
+          (⟨⟨Y.left⟩⟩ : TwObj Φ G) ⟶ A),
+        (twIsPullBack_iff hD hpd _).mpr ⟨rfl, map_zero _⟩⟩), ⟨?_⟩⟩
+    refine Over.isoMk (Iso.refl _) ?_
+    show 𝟙 Y.left ≫ Y.hom = q
+    rw [Category.id_comp, hq]
+  exact ⟨hfaith, hfull, hess⟩
+
+/-! ## ★★★捻れ積は `Definition 1.3` の core 21 条をすべて満たす -/
+
+/-- ★★★**`𝔽_Φ ⋉ G` は `FrobenioidCore` を満たす** —— 21 条すべて。 -/
+theorem twFrobenioidCore : FrobenioidCore (twPreFrobenioid (G := G) hD hpd) where
+  baseSurj := twBaseSurj hD hpd
+  preStepSpan := twPreStepSpan hD hpd
+  plBkEquiv := twPlBkEquiv hD hpd
+  frobDegSurj := twFrobDegSurj hD hpd
+  frobDegUniq := twFrobDegUniq hD hpd
+  coAngularComp := twCoAngularComp hD hpd
+  coAngularOfPreStep := fun α hca hst φ => twCoAngularOfPreStep hD hpd α hca hst φ
+  otriFwd := fun φ hca hst α hα => twOtriFwd hD hpd φ hca hst α hα
+  otriBwd := fun φ hca hst β hβ => twOtriBwd hD hpd φ hca hst β hβ
+  otriBase := fun φ φ' hca hst hca' hst' hbase α hα β hβ h =>
+    twOtriBase hD hpd φ φ' hca hst hca' hst' hbase α hα β hβ h
+  arbFactor := twArbFactor hD hpd
+  arbFactorUniq := fun X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα' =>
+    twArbFactorUniq hD hpd X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα'
+  pullBackLB := twPullBackLB hD hpd
+  preStepMono := twPreStepMono hD hpd
+  preStepFactor := twPreStepFactor hD hpd
+  preStepFactorUniq := fun X X' β α β' α' heq hca hβ hαi hα hca' hβ' hαi' hα' =>
+    twPreStepFactorUniq hD hpd X X' β α β' α' heq hca hβ hαi hα hca' hβ' hαi' hα'
+  preStepFactor' := twPreStepFactor' hD hpd
+  preStepFactorUniq' := fun X X' β α β' α' heq hβi hβ hca hα hβi' hβ' hca' hα' =>
+    twPreStepFactorUniq' hD hpd X X' β α β' α' heq hβi hβ hca hα hβi' hβ' hca' hα'
+  faithfulUpToUnits := fun φ ψ hb hm _ hφ _ hψ =>
+    twFaithfulUpToUnits hD hpd φ ψ hb hm hφ hψ
+  isotropicHullExists := twIsotropicHullExists hD hpd
+  isotropicClosed := twIsotropicClosed hD hpd
 
 end Bridge
 
