@@ -10,3 +10,4 @@
 - [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
 - [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
 - [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
+- [Lean の合否は lake build で判定する](lean-build-check-discipline.md) — `cd` を必ず絶対パスで書く。`lake env lean` が通っても build は落ちうる。ゲートはパイプせず終了コードを読む。
