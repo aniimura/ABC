@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.MonoidPrime
+import ABC3.Found.FrdI.Frobenioid
 
 /-!
 # [FrdI] Definition 2.4 —— perf-factorial / `Λ supports M` / `C(d)`
@@ -27,8 +28,9 @@ import ABC3.Found.FrdI.MonoidPrime
 namespace ABC3.Found.FrdI
 
 open scoped NNReal
+open CategoryTheory
 
-universe w
+universe v u w u2 v2
 
 variable (M : Type w) [AddCommMonoid M]
 
@@ -429,5 +431,192 @@ theorem IsPerfFactorialWith.smul {ι ι' : Prime M → Pf M → ℝ≥0} (c : Pr
     obtain ⟨y, hy⟩ := H.supp _ ha' b hsupp'
     refine ⟨y, funext fun p => ?_⟩
     rw [hfm, congrFun hy p, ← mul_assoc, mul_inv_cancel₀ (hc p), one_mul]
+
+/-! ## ★段 3 —— `Definition 2.4, (ii)` `Λ supports M`
+
+原文 (FrdI p.48):
+> (ii) Let
+
+★**3 つの場合分けそのもの**である。 -/
+
+/-- **[FrdI] Definition 2.4, (ii)** —— `Λ>0`。 -/
+def MonoidType.Pos : MonoidType → Type
+  | .int => ℕ+
+  | .rat => {q : ℚ≥0 // q ≠ 0}
+  | .real => {r : ℝ≥0 // r ≠ 0}
+
+/-- ★★★**[FrdI] Definition 2.4, (ii)** —— **`Λ supports M`**。
+
+★`(a) Λ = ℤ`、`(b) Λ = ℚ` かつ `M` perfect、
+`(c) Λ = ℝ` かつ `M` perfect かつ perf-factorial かつ各 `M_p` が ℝ-monoprime。 -/
+def Supports (Λ : MonoidType) (M : Type w) [AddCommMonoid M] : Prop :=
+  match Λ with
+  | .int => True
+  | .rat => IsPerfectMonoid M
+  | .real => IsPerfectMonoid M ∧ IsPerfFactorial M
+      ∧ ∀ p : Prime M, IsLambdaMonoprime (Mp M p) MonoidType.real
+
+/-- ★`ℤ` はつねに supports する。 -/
+theorem supports_int (M : Type w) [AddCommMonoid M] : Supports MonoidType.int M := trivial
+
+/-- ★`n •` を加法準同型として。 -/
+def nsmulHom (n : ℕ) (M : Type w) [AddCommMonoid M] : M →+ M where
+  toFun x := n • x
+  map_zero' := smul_zero n
+  map_add' x y := smul_add n x y
+
+@[simp] theorem nsmulHom_apply (n : ℕ) (M : Type w) [AddCommMonoid M] (x : M) :
+    nsmulHom n M x = n • x := rfl
+
+/-- ★★**`M` が perfect なら `n •` は加法同型** —— これが `Λ = ℚ` の作用の一意性の中身。 -/
+noncomputable def nsmulEquiv {M : Type w} [AddCommMonoid M] (h : IsPerfectMonoid M)
+    (n : ℕ+) : M ≃+ M :=
+  AddEquiv.ofBijective (nsmulHom ((n : ℕ+) : ℕ) M) (h n)
+
+/-! ### ★「`Λ>0` が `M` に自然に作用する」について
+
+★原文は (ii) の末尾で
+「Note that if `Λ` supports `M`, then `Λ>0` acts naturally on `M`」
+と注意する。★**その作用の中身**:
+
+- **`Λ = ℤ`**: `n • x` そのもの(`nsmulHom`)。
+- **`Λ = ℚ`**: `q = c/e` に対し `q · x` は `e • y = c • x` なる一意な `y`。
+  ★**一意性を与えるのが `M` の perfect 性**(`nsmulEquiv`)。
+- **`Λ = ℝ`**: 因子分解 `M^pf ↪ ∏_p M^rlf_p` の各成分で `ℝ≥0` のスカラー倍を取る。
+  ★★**ここで「各 `M_p` が ℝ-monoprime」が効く** —— 成分が `ℝ≥0` **全体**なので
+  正のスカラー倍で閉じ、`Supp` が変わらないので **(d) の条件により `M^pf` に戻る**。
+  ★**(c) が ℝ-monoprime を要求する理由がこれである。**
+-/
+
+/-! ## ★段 4 —— `Definition 2.4, (iii)` `d·Φ(−)` / `𝒞(d)` / `d` の Frobenius 函手
+
+原文 (FrdI p.48):
+> for the subcategory determined by the arrows whose zero divisor lies in d
+
+★**以下は `Λ = ℤ`(すなわち `d ∈ ℕ≥1`)の場合を構成する** ——
+`Proposition 2.1, (ii)` と同じ設定であり、`Proposition 2.5, (iii)` が使うのもこの形。 -/
+
+section Cd
+
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+
+
+variable {P} in
+/-- ★★**`d · Φ(−) ⊆ Φ(−)`**(`Definition 2.4, (iii)`)。 -/
+def scalePhi (d : ℕ+) (Y : D) : AddSubmonoid (Φ.val Y) :=
+  AddMonoidHom.mrange (nsmulHom ((d : ℕ+) : ℕ) (Φ.val Y))
+
+theorem mem_scalePhi_iff (d : ℕ+) {Y : D} (x : Φ.val Y) :
+    x ∈ scalePhi (Φ := Φ) d Y ↔ ∃ u, ((d : ℕ+) : ℕ) • u = x := Iff.rfl
+
+/-- ★**部分関手であること** —— `Φ.map` は `d · Φ(−)` を保つ。 -/
+theorem scalePhi_map (d : ℕ+) {Y Z : D} (α : Z ⟶ Y) {x : Φ.val Y}
+    (hx : x ∈ scalePhi (Φ := Φ) d Y) : Φ.map α x ∈ scalePhi (Φ := Φ) d Z := by
+  obtain ⟨u, rfl⟩ := hx
+  exact ⟨Φ.map α u, by rw [nsmulHom_apply, nsmulHom_apply, map_nsmul]⟩
+
+/-- ★★**`𝒞(d)` を定める射の性質** —— 零因子が `d · Φ(−)` に入ること。 -/
+def cdProp (d : ℕ+) : MorphismProperty C :=
+  fun A _ φ => P.Div φ ∈ scalePhi (Φ := Φ) d (P.toElem.obj A).base
+
+instance cdProp_isMultiplicative (d : ℕ+) : (cdProp P d).IsMultiplicative where
+  id_mem A := ⟨0, by rw [nsmulHom_apply, smul_zero]; exact (P.Div_id A).symm⟩
+  comp_mem {A B E} ψ φ hψ hφ := by
+    obtain ⟨v, hv⟩ := hψ
+    obtain ⟨u, hu⟩ := hφ
+    refine ⟨Φ.map (P.Base ψ) u + ((P.degFr φ : ℕ+) : ℕ) • v, ?_⟩
+    rw [nsmulHom_apply] at hv hu ⊢
+    rw [P.Div_comp, ← hv, ← hu, smul_add, map_nsmul, smul_comm]
+
+/-- ★★★**`𝒞(d) ⊆ 𝒞`**(`Definition 2.4, (iii)`)。 -/
+abbrev Cd (d : ℕ+) : Type u2 := WideSubcategory (cdProp P d)
+
+/-- ★★**`Φ` の自己準同型「`d` 倍」** —— `Definition 1.1, (iii)` の意味での
+`𝔽_Φ → 𝔽_Φ` を誘導する自然変換。 -/
+def phiNsmulNat (d : ℕ+) : Φ.functor ⟶ Φ.functor where
+  app Y := AddCommMonCat.ofHom (nsmulHom ((d : ℕ+) : ℕ) _)
+  naturality {Y Z} f := by
+    refine AddCommMonCat.hom_ext (AddMonoidHom.ext fun x => ?_)
+    show ((d : ℕ+) : ℕ) • (Φ.functor.map f).hom x
+      = (Φ.functor.map f).hom (((d : ℕ+) : ℕ) • x)
+    rw [map_nsmul]
+
+/-- ★★★**`d` の Frobenius 函手 `𝔽_Φ → 𝔽_Φ`**(`Definition 2.4, (iii)`)。
+
+★**`Proposition 2.1, (ii)` の `𝔽_Φ` 側の函手そのもの**である。 -/
+def frobFunctorOfDeg (d : ℕ+) : ElemFrobCat Φ ⥤ ElemFrobCat Φ :=
+  ElemFrobCat.elemFrobMap (phiNsmulNat (Φ := Φ) d)
+
+@[simp] theorem frobFunctorOfDeg_obj (d : ℕ+) (A : ElemFrobCat Φ) :
+    (frobFunctorOfDeg (Φ := Φ) d).obj A = ⟨A.base⟩ := rfl
+
+/-- ★**Frobenius 次数と両立する**(原文の "compatible with Frobenius degrees")。 -/
+@[simp] theorem frobFunctorOfDeg_deg (d : ℕ+) {A B : ElemFrobCat Φ} (φ : A ⟶ B) :
+    ((frobFunctorOfDeg (Φ := Φ) d).map φ).deg = φ.deg := rfl
+
+/-- ★**`𝒟` への射影と両立する**(原文の "the natural projection functor")。 -/
+@[simp] theorem frobFunctorOfDeg_base (d : ℕ+) {A B : ElemFrobCat Φ} (φ : A ⟶ B) :
+    ((frobFunctorOfDeg (Φ := Φ) d).map φ).base = φ.base := rfl
+
+@[simp] theorem frobFunctorOfDeg_div (d : ℕ+) {A B : ElemFrobCat Φ} (φ : A ⟶ B) :
+    ((frobFunctorOfDeg (Φ := Φ) d).map φ).div = ((d : ℕ+) : ℕ) • φ.div := rfl
+
+/-- ★★**像が `(𝔽_Φ)(d)` に入る** —— 原文の `C(d) → F_{d·Φ} = (F_Φ)(d)`。 -/
+theorem frobFunctorOfDeg_div_mem (d : ℕ+) {A B : ElemFrobCat Φ} (φ : A ⟶ B) :
+    ((frobFunctorOfDeg (Φ := Φ) d).map φ).div ∈ scalePhi (Φ := Φ) d A.base :=
+  ⟨φ.div, rfl⟩
+
+/-! ### ★★一般の `Λ` —— 作用をパラメータにした形
+
+★原文の (iii) は `d ∈ Λ>0` について述べる。★**`Λ>0` の作用**(＝ (ii) の末尾の注意)
+**を与えれば、`d · Φ(−)` と `𝒞(d)` は同じ形で書ける。**
+★`Λ = ℤ` の場合が上の `scalePhi` / `cdProp` である。 -/
+
+variable {P} in
+/-- ★★`Φ` 上のスカラー作用(`d ∈ Λ>0` が定める自己準同型の族)。
+
+★**要求は自然性だけ**である —— `ℕ` 倍との可換性は加法準同型から自動で従う。 -/
+structure IsScalarAction (σ : ∀ Y : D, Φ.val Y →+ Φ.val Y) : Prop where
+  /-- ★`Φ.map` と可換すること(部分関手になるための条件)。 -/
+  natural : ∀ {Y Z : D} (α : Z ⟶ Y) (x : Φ.val Y), Φ.map α (σ Y x) = σ Z (Φ.map α x)
+
+variable {P} in
+/-- ★★**`d · Φ(−) ⊆ Φ(−)`**(一般の `Λ`)。 -/
+def scalePhiOf (σ : ∀ Y : D, Φ.val Y →+ Φ.val Y) (Y : D) : AddSubmonoid (Φ.val Y) :=
+  AddMonoidHom.mrange (σ Y)
+
+/-- ★**部分関手であること**。 -/
+theorem scalePhiOf_map {σ : ∀ Y : D, Φ.val Y →+ Φ.val Y} (hσ : IsScalarAction σ)
+    {Y Z : D} (α : Z ⟶ Y) {x : Φ.val Y} (hx : x ∈ scalePhiOf σ Y) :
+    Φ.map α x ∈ scalePhiOf σ Z := by
+  obtain ⟨u, rfl⟩ := hx
+  exact ⟨Φ.map α u, (hσ.natural α u).symm⟩
+
+/-- ★★**`𝒞(d)` を定める射の性質**(一般の `Λ`)。 -/
+def cdPropOf (σ : ∀ Y : D, Φ.val Y →+ Φ.val Y) : MorphismProperty C :=
+  fun A _ φ => P.Div φ ∈ scalePhiOf σ (P.toElem.obj A).base
+
+theorem cdPropOf_isMultiplicative {σ : ∀ Y : D, Φ.val Y →+ Φ.val Y}
+    (hσ : IsScalarAction σ) : (cdPropOf P σ).IsMultiplicative where
+  id_mem A := ⟨0, by rw [map_zero]; exact (P.Div_id A).symm⟩
+  comp_mem {A B E} ψ φ hψ hφ := by
+    obtain ⟨v, hv⟩ := hψ
+    obtain ⟨u, hu⟩ := hφ
+    refine ⟨Φ.map (P.Base ψ) u + ((P.degFr φ : ℕ+) : ℕ) • v, ?_⟩
+    rw [map_add, map_nsmul, ← hσ.natural, hu, hv, P.Div_comp]
+
+/-- ★★★**`𝒞(d) ⊆ 𝒞`**(一般の `Λ`)。 -/
+abbrev CdOf (σ : ∀ Y : D, Φ.val Y →+ Φ.val Y) (hσ : IsScalarAction σ) : Type u2 :=
+  letI := cdPropOf_isMultiplicative P hσ
+  WideSubcategory (cdPropOf P σ)
+
+/-- ★`Λ = ℤ` の作用(`d •`)は確かにスカラー作用である。 -/
+theorem isScalarAction_nsmul (d : ℕ+) :
+    IsScalarAction (Φ := Φ) (fun Y => nsmulHom ((d : ℕ+) : ℕ) (Φ.val Y)) :=
+  ⟨fun α x => by rw [nsmulHom_apply, nsmulHom_apply, map_nsmul]⟩
+
+end Cd
 
 end ABC3.Found.FrdI
