@@ -241,10 +241,56 @@ theorem prop_1_14_iii_mpr_false :
 ★**著者は (v) と (vi) で向きを書き分けている。**
 -/
 
+/-! ## ★★★2026-08-16 —— 穴を 1 点に絞った
+
+★**当初は「`Definition 1.3` からは `Aut-ample` は出ない」と見立てていた。**
+反例の設計を 2 度試して 2 度とも `Definition 1.3` に弾かれたので、
+★**「出る」方に切り替えて組み立てたところ、ほぼ全部出た。**
+
+`Found/FrdI/Prop110.lean` の `isAutAmple_of_baseTrivial_of_untwisted` が到達点で、
+使った道具は:
+- `isFrobeniusTrivial_of_baseTrivial`(`Definition 1.3, (i), (a)` ＋ base-trivial)
+- `endo_isCoAngular`(`(iii), (b)` を `𝟙` に当てる ⟹ **自己射はすべて co-angular**)
+- `preStep_endo_scale`(`(iv), (a)` ＋ `(ii)` ⟹ **`Base` を保って `Div` を `n` 倍**)
+- `coaPre_base_diff`(`(iii), (d)` ⟹ **同じ `Div` なら同型 1 本だけ違う**)
+- `preStepSpan`(`(i), (b)`)
+
+★★**残る穴はただ 1 つ**:
+```
+htwist : ∀ s : A ⟶ A, IsPreStep P s → Φ.map (P.Base s) (P.Div s) = P.Div s
+```
+すなわち ★**pre-step 自己射の底が、自分の `Div` を動かさない**こと。
+
+## ★★穴の性質(2026-08-16 の解析)
+
+`H := Base(Aut_𝒞(A))`、`c(d) := β_d H ∈ Γ/H`(`β_d` は `Div = d` の
+co-angular pre-step 自己射の底)と置くと、上の道具から
+- `c(n·d) = c(d)`(`preStep_endo_scale`)
+- `c(Φ(β_d)(e) + d) = c(d) + c(e)`(合成)
+- `c(0) = 0`
+
+が出る。★`Φ(β_d)` が `d` を固定するなら `c(2d) = 2c(d)` と `c(2d) = c(d)` から
+★**`c(d) = 0`、すなわち `Aut-ample`**。
+
+★★**`Φ(β_d)` が位数 `m` で `d` を動かすときは `m·c(d) = 0` までしか出ない**
+(巡回和 `Σ_{i<m} Φ(β_d)^i(d)` が固定点になることを使う)。
+★したがって ★**反例があるとすれば `Γ/H` に位数 `m` の捻れが要る** ——
+`Prop 1.14` のときと**同じ形の要求**である。
+★`Γ/H = ℤ/2`・`N = ℕ⊕ℕ`(`swap` 作用)で探したが、
+`c` の条件を全部満たす関数は見つからなかった(★**未決着**)。
+
+## ★分類
+
+★**`missingMath`(②)のままとする。** ③ を名乗るには反例が要る。
+-/
+
 /-- ★**`Proposition 1.6, (v)` の 2 件の `⟸` に不足しているもの**。
 
 ★原典の語彙で書けば「**`𝒟` の自己同型が `𝒞` に持ち上がる**」、すなわち
-`Definition 1.2, (iv)` の `Aut-ample`。 -/
+`Definition 1.2, (iv)` の `Aut-ample`。
+
+★★**2026-08-16: これは `htwist` 1 点に絞られた**
+(`isAutAmple_of_baseTrivial_of_untwisted` を見よ)。 -/
 structure Gap_1_6_v {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
     {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) : Prop where
   /-- 不足: **全対象が `Aut-ample`** であること。
@@ -258,9 +304,12 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
         sectionId := "frdi-prop-1-6" },
     classification := ABC3.Meta.GapClass.missingMath,
     falsifier :=
-      "CFP の構造(`Definition 1.3` ＋ `G` が FSM 射を保つこと)だけから" ++
-      "「底を指定した同型を取り直せる」ことが導かれれば ① に落ちる。" ++
-      "逆に `Aut-ample` でない対象を持つ具体的な CFP を構成して反例にできれば ③ に上がる。" ++
+      "★2026-08-16 に穴を 1 点に絞った: `isAutAmple_of_baseTrivial_of_untwisted` は" ++
+      "`base-trivial ⟹ Aut-ample` を仮定 `htwist`(pre-step 自己射の底が自分の Div を" ++
+      "動かさない)の下で証明する。したがって残るのは `htwist` だけである。" ++
+      "★`htwist` が `Definition 1.3` から導かれれば ① に落ち、`Proposition 1.6, (v)` は" ++
+      "完全に実装できる。逆に `Γ/H` に捻れを持つ反例を構成できれば ③ に上がる" ++
+      "(解析により、反例があるなら `Φ(β_d)` の作用の位数と同じ捻れが `Γ/H` に要る)。" ++
       "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" }
 
 end ABC3.Gap.FrdI
