@@ -996,6 +996,69 @@ theorem prop_1_10_v (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B) :
   ⟨fun h => isPrimeFrobComposite_of_isFrobeniusType P F _ φ h rfl,
    isFrobeniusType_of_isPrimeFrobComposite P F⟩
 
+/-! ### ★★(v) の基底 —— 「意図的な修復」を**反例**に格上げする(2026-08-16)
+
+★★**取り下げ表の (v) の項目**: 基底を「任意の同型」に取ったことを
+**意図的な修復**として記録していた。★しかし「修復」と「反例がある」は違う ——
+★**素直な読み(基底は恒等射)が実際に偽であることを示せば、
+同型に取るのは選択ではなく強制になる。**
+
+★**ここでそれを示す。** 素直な読み `IsPrimeFrobCompositeId` を別に定義し、
+★**恒等射でない同型は決してその形に書けない**ことを証明する。
+`Proposition 1.7, (i)`(同型は Frobenius 型)により、そのような射は
+**(v) の左辺を満たす**から、素直な読みでは iff が破れる。
+
+★★**理由は次数だけである** —— prime-Frobenius 射の次数は素数(≥2)であり、
+次数は合成で掛かる(`Remark 1.1.1`)。★空でない合成の次数は 2 以上だが、
+同型の次数は 1 である。★**だから空の合成しか残らず、それは `𝟙` である。**
+
+★★**これは「原文の言葉が形式化で 2 通りに分かれ、一方が偽になる」例である。**
+自然言語の「composite of prime-Frobenius morphisms」は、
+★**同型を法として読む以外にない。**
+-/
+
+/-- ★**(v) の素直な読み** —— 基底を**恒等射**に取った「prime-Frobenius の合成」。
+
+★これが原文の字面どおりの読みである。★下でこれが**偽**であることを示す。 -/
+inductive IsPrimeFrobCompositeId : ∀ {A B : C}, (A ⟶ B) → Prop
+  | nil {A : C} : IsPrimeFrobCompositeId (𝟙 A)
+  | cons {A B E : C} {φ : A ⟶ B} {ψ : B ⟶ E} :
+      IsPrimeFrobenius P φ → IsPrimeFrobCompositeId ψ → IsPrimeFrobCompositeId (φ ≫ ψ)
+
+include P in
+/-- ★**次数 1 の「素直な合成」は空の合成しかない**。
+
+★prime-Frobenius 射の次数は素数(≥2)で、次数は合成で掛かるので、
+★**`cons` の場合は次数が 2 以上になり、1 にはなり得ない。** -/
+theorem eq_id_of_isPrimeFrobCompositeId_of_degFr_one :
+    ∀ {A B : C} {φ : A ⟶ B}, IsPrimeFrobCompositeId P φ →
+      ((P.degFr φ : ℕ+) : ℕ) = 1 → ∃ h : A = B, φ = eqToHom h := by
+  intro A B φ h
+  induction h with
+  | nil => exact fun _ => ⟨rfl, by simp⟩
+  | @cons A' B' E' φ' ψ' hp _ _ =>
+      intro hd
+      exfalso
+      rw [P.degFr_comp, PNat.mul_coe] at hd
+      have h2 : 2 ≤ ((P.degFr φ' : ℕ+) : ℕ) := hp.2.two_le
+      have h1 : ((P.degFr φ' : ℕ+) : ℕ) = 1 :=
+        Nat.dvd_one.mp (Dvd.intro_left _ hd)
+      omega
+
+include P in
+/-- ★★★**(v) の素直な読みは偽である** —— 恒等射でない自己同型は、
+prime-Frobenius 射の(恒等射を基底とする)合成には決して書けない。
+
+★★**しかし `Proposition 1.7, (i)` によりそれは Frobenius 型である。**
+したがって素直な読みでは (v) の iff が破れる ——
+★**基底を同型に取ったのは修復ではなく、強制であった。** -/
+theorem not_isPrimeFrobCompositeId_of_isIso_of_ne_id {A : C} (u : A ⟶ A) [IsIso u]
+    (hne : u ≠ 𝟙 A) : ¬ IsPrimeFrobCompositeId P u := by
+  intro h
+  obtain ⟨hAA, hu⟩ := eq_id_of_isPrimeFrobCompositeId_of_degFr_one P h
+    (by rw [degFr_of_isIso P u]; rfl)
+  exact hne (by simpa using hu)
+
 /-! ## ★(vi) —— `𝒞^istr` と group-like 対象
 
 原文 (FrdI p.35):
@@ -2634,6 +2697,44 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
   -- `A″ ≅ A′ ≅ A`
   exact isFrobeniusTrivial_of_iso P F ((asIso γ).symm ≪≫ asIso α) hA''
 
+/-! ### ★★(vi) の主語を置く —— `𝒞^istr` への具体化(2026-08-16)
+
+原文 (FrdI p.35):
+> (vi) The Frobenioid Cistr is of sub-quasi-Frobenius-trivial type. Moreover,
+
+原文 (FrdI p.35):
+> every group-like object A ∈Ob(Cistr) is Frobenius-trivial.
+
+★★**取り下げ表の (vi) の残り 2 件**。`prop_1_10_vi_ofType` /
+`prop_1_10_vi_groupLike` はどちらも「isotropic 型の Frobenioid」について述べており、
+★**原文の主語 `𝒞^istr` がコメントの外に一度も現れていなかった。**
+
+★**具体化そのものは 1 手である** —— `Proposition 1.9` が
+`istr_frobenioid`(`𝒞^istr` は Frobenioid)と `istr_isotropic`(全対象が isotropic)を
+既に与えているので、それを当てるだけでよい。
+★★**「主語が不在」という欠落は、材料が揃っていても消えない** ——
+一般形を証明したことと、原文が名指した対象について述べたことは別である。
+-/
+
+/-- ★★★**`Proposition 1.10, (vi)` 前半 —— 原文の主語で**。
+`𝒞^istr` は sub-quasi-Frobenius-trivial 型である。 -/
+theorem prop_1_10_vi_istr (F : FrobenioidCore P) (G : Frobenioid P) :
+    IsOfSubQuasiFrobeniusTrivialType (istrPre P F) :=
+  prop_1_10_vi_ofType (istrPre P F) (istr_frobenioid P F G) (istr_isotropic P F)
+
+/-- ★★★**`Proposition 1.10, (vi)` 後半 —— 原文の主語で**。
+`𝒞^istr` の group-like な対象は Frobenius-trivial である。
+
+★`α`・`γ`・`Cc` は `prop_1_10_vi_data` が `Definition 1.3, (i), (a), (b)` から
+導くので、ここでも仮定に置かない。 -/
+theorem prop_1_10_vi_istr_groupLike (F : FrobenioidCore P) (G : Frobenioid P)
+    (A : Istr P) (hA : IsGroupLikeObj (istrPre P F) A) :
+    IsFrobeniusTrivial (istrPre P F) A := by
+  obtain ⟨_, _, α, γ, hαc, hαs, hγc, hγs, hCc⟩ :=
+    prop_1_10_vi_data (istrPre P F) (istr_frobenioid P F G) (istr_isotropic P F) A
+  exact prop_1_10_vi_groupLike (istrPre P F) (istr_frobenioidCore P F)
+    (istr_isotropic P F) hA α hαc hαs γ hγc hγs hCc
+
 /-! ## ★★★出典の紐付け(`.src`) —— `Proposition 1.10` は **21 主張すべて完成**
 
 ★**`.src` は「その原典項目を完全に実装した」という主張である**(2026-08-15 に明文化した規則)。
@@ -2662,19 +2763,24 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 | (i) | ~~★`β` の量化子が逆~~ → ★**実装した**。`Definition 1.3, (ii)` の本質的一意性（`frobDegUniq`）で、自分で作った `β₀` を与えられた `β` に合わせる | `prop_1_10_i_exists_given` |
 | (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
 | (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★★**7 タイプすべて実装完了**（上の 4 本 ＋ `prop_1_10_i_linear_of` / `prop_1_10_i_preStep_of` / `prop_1_10_i_frobType_of` / `prop_1_10_i_pullBack_of`）。★pull-back は `Proposition 1.4, (ii)` を両向きに使って普遍性を避けた | `prop_1_10_i_four_types` |
-| (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
+| (ii) | ~~`Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない~~ → ★**実装した**。`β′` は Frobenius 型ゆえ base-isomorphism なので、`Φ.map (Base β′)` の逆で原文の向きに直せる | `prop_1_10_ii_Div_formula'` |
 | (iii) | ~~★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている~~ → ★**実装した**。原文が名指す 3 つ(`Definition 1.3, (i), (a)` / `(i), (b)` / `(iii), (c)`)がそのまま 3 段になった。★`isotropic` の最初の用途が**span の pre-step を co-angular にすること**だったと分かった | `prop_1_10_iii_otri_perfect_of_type`, `prop_1_10_iii_otimes_perfect_of_type` |
 | (iii) | ~~「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ~~ → ★**実装した**。`baseSurj` の同型を `MonoidOn.map_bijective_of_iso` で渡り、perfect 性を `isPerfectMonoid_of_bijective` で移した | `prop_1_10_iii_image_perfect_of_base` |
-| (iv) | ★原文は「**域が** isotropic」だけを要求するが、実装は `∀ X : C, IsIsotropic P X`(**圏全体**)を仮定 | `prop_1_10_iv`, `prop_1_10_iv_mp` |
-| (iv) | 「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで) | `prop_1_10_iv_infinitely_many` |
-| (v) | `IsPrimeFrobComposite` の基底を「任意の同型」に取った——**意図的な修復**だが、原文項目そのものの実装ではない | `IsPrimeFrobComposite` |
-| (vi) | ★★**`𝒞^istr` がコメント外に一度も現れない**。(vi) の主語が不在 | `prop_1_10_vi_first` |
-| (vi) | ★`α`,`γ`,`Cc` の存在を**仮定に置いている**が、原文は `Definition 1.3, (i), (a), (b)` から**導いている** | `prop_1_10_vi_first` |
-| (vi) | 「Moreover, every group-like object … is Frobenius-trivial.」が別宣言で、そちらも `𝒞^istr` への具体化がない | `prop_1_10_vi_groupLike` |
+| (iv) | ~~★原文は「**域が** isotropic」だけを要求するが、実装は `∀ X : C, IsIsotropic P X`(**圏全体**)を仮定~~ → ★**実装した**。`isotropicClosed` で域の isotropic 性から下流へ伝播させれば足りた | `prop_1_10_iv`, `prop_1_10_iv_mp` |
+| (iv) | ~~「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで)~~ → ★**実装した**。★**次数の集合が無限**であることを述べ、非同型性と合わせて同型類の無限性にした | `prop_1_10_iv_degrees_infinite` |
+| (v) | ~~`IsPrimeFrobComposite` の基底を「任意の同型」に取った——**意図的な修復**だが、原文項目そのものの実装ではない~~ → ★★**反例に格上げした**。素直な読み(基底＝恒等射)を `IsPrimeFrobCompositeId` として別に定義し、★**恒等射でない同型はその形に書けない**ことを示した。同型は Frobenius 型なので、素直な読みでは iff が破れる —— ★**基底を同型に取ったのは修復ではなく強制であった** | `not_isPrimeFrobCompositeId_of_isIso_of_ne_id` |
+| (vi) | ~~★★**`𝒞^istr` がコメント外に一度も現れない**。(vi) の主語が不在~~ → ★**実装した**。`Proposition 1.9` の `istr_frobenioid` / `istr_isotropic` を当てるだけだった | `prop_1_10_vi_istr` |
+| (vi) | ~~★`α`,`γ`,`Cc` の存在を**仮定に置いている**が、原文は `Definition 1.3, (i), (a), (b)` から**導いている**~~ → ★**実装した** | `prop_1_10_vi_data`, `prop_1_10_vi_ofType` |
+| (vi) | ~~「Moreover, every group-like object … is Frobenius-trivial.」が別宣言で、そちらも `𝒞^istr` への具体化がない~~ → ★**実装した** | `prop_1_10_vi_istr_groupLike` |
 
 ★★**ここにある定理はどれも真であり、`sorry` も無い。**
 ★失われたのは「完全である」という**主張**だけである。
-★**上の表がそのまま次の作業のチェックリストになる。**
+★**上の表がそのまま次の作業のチェックリストになった。**
+
+★★**2026-08-16: 表の 12 行すべてが埋まった。**
+★ただし ★**`.src` を付けるのは、私の文脈を持たない検証役が改めて全条を監査してからである** ——
+過去 3 回、「埋めた」と数えた項目に**別種の**欠落が見つかっている。
+★**表が埋まったことは「もう欠落が無い」ことを意味しない。**
 
 ★★**教訓**: 自分の文脈を継いだ検証は、自分の誤読も継ぐ。
 「21/21」と数えたのは私であり、その数え方は「**実装したものを数えた**」ものであって、
