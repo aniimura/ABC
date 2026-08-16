@@ -287,4 +287,206 @@ def IsMonoprime.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 10, item := "§0 — monoprime",
     sectionId := "frdi-s0-monoprime" }
 
+/-! ## ★★`Prime(M) ≃ Prime(M^pf)` —— 原文 p.12 の 3 本
+
+原文 (FrdI p.12):
+> the set of primes of M. If p
+
+★★**原文は `Prime(M)` の定義の直後に 3 本を並べる**(p.12):
+`Primary(M^pf)` の記述、`Primary(M)` が `Primary(M^pf)` と `M` の交わりであること、
+そして ★**`Prime(M)` から `Prime(M^pf)` への自然な全単射**。
+
+★★★**3 本目が `Definition 2.4, (i), (c)` で要る同一視**である ——
+原文はそこで添字を `p ∈ Prime(M)` に取りながら成分を `M^pf_p` と書く。
+
+★★**測定(2026-08-17)**: 原文 p.12 冒頭の standing hypothesis は
+「sharp, integral, and saturated」だが、★**この 3 本には torsion-free だけで足りる**
+(`isTorsionFreeNaive_of_isSharp` により sharp から出る)。
+★以下ではその弱い仮定だけを使う。
+-/
+
+/-- ★**加法準同型は `⪯` を保つ**。 -/
+theorem mprec_map {N : Type*} [AddCommMonoid N] (f : M →+ N) {a b : M}
+    (h : MPrec a b) : MPrec (f a) (f b) := by
+  obtain ⟨n, hn, c, hc⟩ := h
+  exact ⟨n, hn, f c, by rw [← map_add, hc, map_nsmul]⟩
+
+/-- ★**正の整数倍は `⪯` の左側で効かない**。 -/
+theorem mprec_nsmul_left {a b : M} {n : ℕ} (hn : 0 < n) :
+    MPrec (n • a) b ↔ MPrec a b := by
+  constructor
+  · intro h
+    exact mprec_trans (mprec_of_mle (mle_nsmul_self hn a)) h
+  · rintro ⟨m, hm, hle⟩
+    refine ⟨n * m, Nat.mul_pos hn hm, ?_⟩
+    have h2 := mle_smul (M := M) n hle
+    rwa [smul_smul] at h2
+
+/-- ★**正の整数倍は `⪯` の右側でも効かない**。 -/
+theorem mprec_nsmul_right {a b : M} {n : ℕ} (hn : 0 < n) :
+    MPrec a (n • b) ↔ MPrec a b := by
+  constructor
+  · rintro ⟨m, hm, hle⟩
+    refine ⟨m * n, Nat.mul_pos hm hn, ?_⟩
+    rwa [← smul_smul]
+  · intro h
+    exact mprec_trans h (mprec_of_mle (mle_nsmul_self hn b))
+
+/-- ★**primary 性は正の整数倍で変わらない**(torsion-free のもとで)。 -/
+theorem isPrimaryElt_nsmul_iff (htf : IsTorsionFreeNaive M) {a : M} {n : ℕ}
+    (hn : 0 < n) : IsPrimaryElt (n • a) ↔ IsPrimaryElt a := by
+  constructor
+  · rintro ⟨hne, h⟩
+    refine ⟨fun h0 => hne (by rw [h0, smul_zero]), fun b hb hp => ?_⟩
+    exact (mprec_nsmul_left hn).mp (h b hb ((mprec_nsmul_right hn).mpr hp))
+  · rintro ⟨hne, h⟩
+    refine ⟨fun h0 => hne (htf a n hn h0), fun b hb hp => ?_⟩
+    exact (mprec_nsmul_left hn).mpr (h b hb ((mprec_nsmul_right hn).mp hp))
+
+/-- ★★**`M^pf` の元は正の整数倍で `M` に入る** —— `k · (m/k) = m`。
+
+★★**これが「`M^pf` の `⪯` は `M` の `⪯` で決まる」ことの土台**である。 -/
+theorem Pf.nsmul_mk_self (m : M) (k : ℕ+) :
+    ((k : ℕ+) : ℕ) • Pf.mk m k = (Pf.of m : Pf M) := by
+  rw [Pf.nsmul_mk, Pf.of_apply]
+  exact Pf.sound 1 (by simp [mul_comm, mul_smul])
+
+/-- ★`M^pf` も torsion-free(`M^pf` は perfect なので `n •` が単射)。 -/
+theorem isTorsionFreeNaive_pf : IsTorsionFreeNaive (Pf M) := by
+  intro x n hn h
+  refine Pf.nsmul_injective (M := M) ⟨n, hn⟩ ?_
+  simpa using h
+
+/-- ★`M` が torsion-free なら `M → M^pf` は `0` を反映する。 -/
+theorem Pf.of_eq_zero_iff (htf : IsTorsionFreeNaive M) {m : M} :
+    (Pf.of m : Pf M) = 0 ↔ m = 0 := by
+  rw [Pf.of_apply, Pf.mk_eq_zero_iff]
+  constructor
+  · rintro ⟨k, hk⟩
+    exact htf m ((k : ℕ+) : ℕ) k.pos hk
+  · rintro rfl
+    exact ⟨1, by simp⟩
+
+/-- ★`M → M^pf` の像の等式は「ある正の整数倍で等しい」ことと同値。 -/
+theorem Pf.of_eq_of_iff {a b : M} :
+    (Pf.of a : Pf M) = Pf.of b ↔ ∃ j : ℕ+, ((j : ℕ+) : ℕ) • a = ((j : ℕ+) : ℕ) • b := by
+  rw [Pf.of_apply, Pf.of_apply]
+  constructor
+  · intro h
+    obtain ⟨j, hj⟩ := Quotient.exact h
+    exact ⟨j, by simpa using hj⟩
+  · rintro ⟨j, hj⟩
+    exact Pf.sound j (by simpa using hj)
+
+/-- ★★**`M^pf` の `⪯` は `M` の `⪯` で決まる**(`M` の元の間では一致する)。
+
+★**分母を払う**のが要点 —— `c = e/l` に `l` を掛けると `l · c = e ∈ M` になる。 -/
+theorem mprec_pf_of_iff {a b : M} :
+    MPrec (Pf.of a : Pf M) (Pf.of b) ↔ MPrec a b := by
+  constructor
+  · rintro ⟨n, hn, c, hc⟩
+    induction c using Pf.inductionOn with
+    | _ e l =>
+      have h1 : ((l : ℕ+) : ℕ) • ((Pf.of a : Pf M) + Pf.mk e l)
+          = ((l : ℕ+) : ℕ) • (n • (Pf.of b : Pf M)) := by rw [hc]
+      rw [smul_add, Pf.nsmul_mk_self, smul_smul, ← map_nsmul, ← map_add,
+        ← map_nsmul] at h1
+      obtain ⟨j, hj⟩ := Pf.of_eq_of_iff.mp h1
+      refine (mprec_nsmul_left (n := ((j : ℕ+) : ℕ) * ((l : ℕ+) : ℕ))
+        (Nat.mul_pos j.pos l.pos)).mp ?_
+      refine ⟨((j : ℕ+) : ℕ) * (((l : ℕ+) : ℕ) * n), by positivity,
+        ((j : ℕ+) : ℕ) • e, ?_⟩
+      simpa [smul_add, smul_smul] using hj
+  · intro h
+    exact mprec_map (Pf.of : M →+ Pf M) h
+
+/-- ★★**`Primary(M) = Primary(M^pf) ∩ M`**(原文 p.12 の 2 本目)。 -/
+theorem isPrimaryElt_pf_of_iff (htf : IsTorsionFreeNaive M) {m : M} :
+    IsPrimaryElt (Pf.of m : Pf M) ↔ IsPrimaryElt m := by
+  constructor
+  · rintro ⟨hne, h⟩
+    refine ⟨fun h0 => hne (by rw [h0, map_zero]), fun b hb hp => ?_⟩
+    exact mprec_pf_of_iff.mp
+      (h (Pf.of b) (fun h0 => hb ((Pf.of_eq_zero_iff htf).mp h0)) (mprec_pf_of_iff.mpr hp))
+  · rintro ⟨hne, h⟩
+    refine ⟨fun h0 => hne ((Pf.of_eq_zero_iff htf).mp h0), fun x hx hp => ?_⟩
+    induction x using Pf.inductionOn with
+    | _ d k =>
+      have hkx : ((k : ℕ+) : ℕ) • Pf.mk d k = (Pf.of d : Pf M) := Pf.nsmul_mk_self d k
+      have hd0 : d ≠ 0 := by
+        intro h0
+        refine hx ?_
+        have : ((k : ℕ+) : ℕ) • Pf.mk d k = 0 := by rw [hkx, h0, map_zero]
+        exact isTorsionFreeNaive_pf (M := M) _ _ k.pos this
+      have hpd : MPrec d m := by
+        refine mprec_pf_of_iff.mp ?_
+        rw [← hkx]
+        exact (mprec_nsmul_left k.pos).mpr hp
+      have := mprec_pf_of_iff.mpr (h d hd0 hpd)
+      rw [← hkx] at this
+      exact (mprec_nsmul_right k.pos).mp this
+
+/-- ★★**`Primary(M^pf)` の特徴づけ**(原文 p.12 の 1 本目)——
+`M^pf` の元が primary であるのは、正の整数倍が `M` の primary 元になるとき。 -/
+theorem isPrimaryElt_pf_iff (htf : IsTorsionFreeNaive M) (x : Pf M) :
+    IsPrimaryElt x ↔ ∃ (n : ℕ+) (b : M), IsPrimaryElt b
+      ∧ ((n : ℕ+) : ℕ) • x = (Pf.of b : Pf M) := by
+  constructor
+  · intro hx
+    induction x using Pf.inductionOn with
+    | _ d k =>
+      refine ⟨k, d, ?_, Pf.nsmul_mk_self d k⟩
+      refine (isPrimaryElt_pf_of_iff htf).mp ?_
+      rw [← Pf.nsmul_mk_self d k]
+      exact (isPrimaryElt_nsmul_iff (isTorsionFreeNaive_pf (M := M)) k.pos).mpr hx
+  · rintro ⟨n, b, hb, hn⟩
+    refine (isPrimaryElt_nsmul_iff (isTorsionFreeNaive_pf (M := M)) n.pos).mp ?_
+    rw [hn]
+    exact (isPrimaryElt_pf_of_iff htf).mpr hb
+
+/-- ★★**`Prime(M) → Prime(M^pf)`**(原文 p.12 の 3 本目の写像)。 -/
+def primeToPf (htf : IsTorsionFreeNaive M) : Prime M → Prime (Pf M) :=
+  Quotient.map (fun x => ⟨Pf.of x.1, (isPrimaryElt_pf_of_iff htf).mpr x.2⟩)
+    (fun _ _ h => mprec_pf_of_iff.mpr h)
+
+@[simp] theorem primeToPf_mk (htf : IsTorsionFreeNaive M) {a : M} (ha : IsPrimaryElt a) :
+    primeToPf htf (toPrime M a ha)
+      = toPrime (Pf M) (Pf.of a) ((isPrimaryElt_pf_of_iff htf).mpr ha) := rfl
+
+/-- ★★★**原文 p.12 の 3 本目** —— `Prime(M) → Prime(M^pf)` は**全単射**。 -/
+theorem primeToPf_bijective (htf : IsTorsionFreeNaive M) :
+    Function.Bijective (primeToPf htf) := by
+  constructor
+  · refine Quotient.ind fun a => Quotient.ind fun b => ?_
+    intro h
+    exact Quotient.sound (mprec_pf_of_iff.mp (Quotient.exact h))
+  · refine Quotient.ind fun x => ?_
+    obtain ⟨n, b, hb, hn⟩ := (isPrimaryElt_pf_iff htf x.1).mp x.2
+    refine ⟨toPrime M b hb, ?_⟩
+    refine Quotient.sound ?_
+    show MPrec (Pf.of b) x.1
+    rw [← hn]
+    exact (mprec_nsmul_left n.pos).mpr (mprec_refl x.1)
+
+/-- ★★★**原文 p.12 の 3 本目**(全単射としての形)。
+
+★★**`Definition 2.4, (i), (c)` が `p ∈ Prime(M)` を添字にしながら
+成分を `M^pf_p` と書けるのは、この同一視による。** -/
+noncomputable def primeEquivPf (htf : IsTorsionFreeNaive M) : Prime M ≃ Prime (Pf M) :=
+  Equiv.ofBijective _ (primeToPf_bijective htf)
+
+/-! ### ★出典 -/
+
+def isPrimaryElt_pf_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — Primary(M^pf)",
+    sectionId := "frdi-s0-prime" }
+
+def isPrimaryElt_pf_of_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — Primary(M) = Primary(M^pf) cap M",
+    sectionId := "frdi-s0-prime" }
+
+def primeEquivPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — Prime(M) = Prime(M^pf)",
+    sectionId := "frdi-s0-prime" }
+
 end ABC3.Found.FrdI
