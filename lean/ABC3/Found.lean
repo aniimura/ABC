@@ -38,6 +38,7 @@ import ABC3.Found.FrdI.Def23
 import ABC3.Found.FrdI.Def27
 import ABC3.Found.FrdI.Prop25
 import ABC3.Found.FrdI.Prop25iii
+import ABC3.Found.FrdI.HomColim
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -58,6 +59,7 @@ import ABC3.Found.GenEll.ProductFormula
 import ABC3.Found.GenEll.Conductor
 import ABC3.Found.GenEll.LogDiff
 import ABC3.Found.GenEll.LogDiffValue
+import ABC3.Found.GenEll.NorthcottRat
 import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
