@@ -59,7 +59,7 @@ open CategoryTheory Opposite
 
 universe v u w u2 v2
 
-variable {D : Type u} [Category.{v} D] (Φ : MonoidOn.{v, u, w} D)
+variable {D : Type u} [Category.{v} D] [IsConnected D] (Φ : MonoidOn.{v, u, w} D)
 
 /-! ### ★関手 `𝔽_Φ → 𝔽_{Φ^char}`
 
@@ -110,6 +110,8 @@ def elemPreFrobenioid : PreFrobenioid (ElemFrobCat Φ) Φ.charOn where
   divisorial := Φ.charOn_isDivisorialOn hpd
   totEpiC := isTotallyEpimorphic_elemFrobCat hD (fun A => (hpd A).1)
   totEpiD := hD
+  connectedC := isConnected_elemFrobCat Φ
+  connectedD := inferInstance
 
 @[simp] theorem elemPreFrobenioid_Div {A B : ElemFrobCat Φ} (f : A ⟶ B) :
     (elemPreFrobenioid Φ hD hpd).Div f = toChar f.div := rfl

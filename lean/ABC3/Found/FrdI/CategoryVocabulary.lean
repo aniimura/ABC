@@ -1,4 +1,5 @@
 import Mathlib.CategoryTheory.Category.Preorder
+import Mathlib.CategoryTheory.IsConnected
 import Mathlib.CategoryTheory.Types.Basic
 import Mathlib.CategoryTheory.Endomorphism
 import Mathlib.CategoryTheory.MorphismProperty.Basic
@@ -212,6 +213,22 @@ instance : Preorder Vee where
 /-- `Vee` は totally epimorphic(前順序の圏だから)。 -/
 theorem isTotallyEpimorphic_vee : IsTotallyEpimorphic Vee :=
   isTotallyEpimorphic_of_subsingleton_hom fun X Y => Preorder.subsingleton_hom X Y
+
+/-- ★**`Vee` は connected**(2026-08-16 に追加)。
+
+★`left → top ← right` の V 字なので、`top` から両側へ辺がある。
+★原文 `Definition 1.1, (iv)` の `connected` を witness が満たすことに要る。 -/
+instance isConnected_vee : IsConnected Vee := by
+  refine IsConnected.of_induct (j₀ := Vee.top) ?_
+  intro p hp0 hstep j
+  have hl : (Vee.left : Vee) ∈ p :=
+    (hstep (homOfLE (show Vee.left ≤ Vee.top from Or.inr rfl))).mpr hp0
+  have hr : (Vee.right : Vee) ∈ p :=
+    (hstep (homOfLE (show Vee.right ≤ Vee.top from Or.inr rfl))).mpr hp0
+  cases j
+  · exact hl
+  · exact hr
+  · exact hp0
 
 /-- `Vee` で `top` へ向かう射のうち、始点が `top` でないものは
 **fiberwise-surjective でない**。

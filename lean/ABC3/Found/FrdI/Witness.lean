@@ -68,6 +68,8 @@ def wP : PreFrobenioid wC wΦ where
   totEpiC := isTotallyEpimorphic_elemFrobCat isTotallyEpimorphic_vee
     (fun _ => isIntegralMonoid_nat)
   totEpiD := isTotallyEpimorphic_vee
+  connectedC := isConnected_elemFrobCat wΦ
+  connectedD := isConnected_vee
 
 @[simp] theorem wP_degFr {A B : wC} (φ : A ⟶ B) : wP.degFr φ = φ.deg := rfl
 @[simp] theorem wP_Div {A B : wC} (φ : A ⟶ B) : wP.Div φ = φ.div := rfl

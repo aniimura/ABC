@@ -1,5 +1,6 @@
 import ABC3.Found.FrdI.MonoidVocabulary
 import ABC3.Found.FrdI.CategoryVocabulary
+import Mathlib.CategoryTheory.IsConnected
 import Mathlib.Data.PNat.Basic
 import Mathlib.Algebra.Category.MonCat.Basic
 
@@ -566,6 +567,20 @@ theorem isTotallyEpimorphic_elemFrobCat {Φ : MonoidOn.{v, u, w} D}
 > as a pre-Frobenioid structure on C. The natural projection functor FΦ →D thus
 -/
 
+/-- ★**`𝒟` が connected なら `𝔽_Φ` も connected**(2026-08-16 に追加)。
+
+★`𝔽_Φ` の対象は `𝒟` の対象と 1 対 1 で、`𝒟` の射 `f` は `⟨f, 0, 1⟩` として持ち上がる。
+★したがって `𝒟` の連結成分がそのまま `𝔽_Φ` の連結成分になる。 -/
+theorem isConnected_elemFrobCat (Φ : MonoidOn.{v, u, w} D) [IsConnected D] :
+    IsConnected (ElemFrobCat Φ) := by
+  obtain ⟨d₀⟩ := (inferInstance : Nonempty D)
+  refine IsConnected.of_induct (j₀ := (⟨d₀⟩ : ElemFrobCat Φ)) ?_
+  intro p hp0 hstep A
+  have key : ∀ d : D, (⟨d⟩ : ElemFrobCat Φ) ∈ p :=
+    induct_on_objects (J := D) {d | (⟨d⟩ : ElemFrobCat Φ) ∈ p} hp0
+      (fun {d₁ d₂} f => hstep (⟨f, 0, 1⟩ : (⟨d₁⟩ : ElemFrobCat Φ) ⟶ (⟨d₂⟩ : ElemFrobCat Φ)))
+  exact key A.base
+
 /-- **[FrdI] Definition 1.1, (iv)** —— `𝒞` 上の pre-Frobenioid structure。
 
 ★★**この docstring は誤っていた。2026-08-16 に訂正した。**
@@ -607,6 +622,10 @@ structure PreFrobenioid (C : Type u2) [Category.{v2} C] (Φ : MonoidOn.{v, u, w}
   totEpiC : IsTotallyEpimorphic C
   /-- `𝒟` は totally epimorphic -/
   totEpiD : IsTotallyEpimorphic D
+  /-- ★`𝒞` は connected(2026-08-16 に追加。原文 p.20 の仮定) -/
+  connectedC : IsConnected C
+  /-- ★`𝒟` は connected(同上) -/
+  connectedD : IsConnected D
 
 namespace PreFrobenioid
 

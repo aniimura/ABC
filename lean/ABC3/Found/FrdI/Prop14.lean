@@ -372,6 +372,8 @@ def cP : PreFrobenioid Vee wΦ where
   divisorial _ := isDivisorial_nat
   totEpiC := isTotallyEpimorphic_vee
   totEpiD := isTotallyEpimorphic_vee
+  connectedC := isConnected_vee
+  connectedD := isConnected_vee
 
 @[simp] theorem cP_Base {A B : Vee} (φ : A ⟶ B) : cP.Base φ = 𝟙 Vee.top := rfl
 @[simp] theorem cP_Div {A B : Vee} (φ : A ⟶ B) : cP.Div φ = 0 := rfl

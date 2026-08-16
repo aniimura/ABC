@@ -695,6 +695,22 @@ theorem istr_totEpi : IsTotallyEpimorphic (Istr P) := by
   refine InducedCategory.hom_ext ?_
   exact (cancel_epi f.hom).mp (congrArg InducedCategory.Hom.hom hgh)
 
+include F in
+/-- ★**`𝒞` が connected なら `𝒞^istr` も connected**（2026-08-16 に追加）。
+
+★`isotropification` が `𝒞` の zigzag を `𝒞^istr` に送り、
+どの isotropic 対象 `Y` も `hullMap` によって `Y^istr` とつながる。
+★★**同型である必要はない** —— 辺が 1 本あれば連結性には十分である。 -/
+theorem isConnected_istr : IsConnected (Istr P) := by
+  haveI := P.connectedC
+  obtain ⟨A₀⟩ := (inferInstance : Nonempty C)
+  refine IsConnected.of_induct (j₀ := hullIstr P F A₀) ?_
+  intro p hp0 hstep Y
+  have key : ∀ A : C, hullIstr P F A ∈ p :=
+    induct_on_objects (J := C) {A | hullIstr P F A ∈ p} hp0
+      (fun {A B} f => hstep ((isotropification P F).map f))
+  exact (hstep (⟨hullMap P F Y.obj⟩ : Y ⟶ hullIstr P F Y.obj)).mpr (key Y.obj)
+
 /-- ★★**`𝒞^istr` の pre-Frobenioid 構造** —— 原文の
 「equipped with the **restriction** to `𝒞` of the given functor `𝒞 → 𝔽_Φ`」。
 
@@ -705,6 +721,8 @@ def istrPre : PreFrobenioid (Istr P) Φ where
   divisorial := P.divisorial
   totEpiC := istr_totEpi P
   totEpiD := P.totEpiD
+  connectedC := isConnected_istr P F
+  connectedD := P.connectedD
 
 /-- ★`isotropification` の射を、`𝒞` の素の射として取り出したもの。
 
@@ -721,13 +739,13 @@ noncomputable def istrMap {A B : C} (f : A ⟶ B) : hullObj P F A ⟶ hullObj P 
 ★原文が「compatible with the inclusion functor」と言うのはこれで、
 **`rfl` である**(`istrPre` の `toElem` が `ι ⋙ P.toElem` だから)。 -/
 theorem istr_compat_degFr {X Y : Istr P} (g : X ⟶ Y) :
-    (istrPre P).degFr g = P.degFr g.hom := rfl
+    (istrPre P F).degFr g = P.degFr g.hom := rfl
 
 theorem istr_compat_Base {X Y : Istr P} (g : X ⟶ Y) :
-    (istrPre P).Base g = P.Base g.hom := rfl
+    (istrPre P F).Base g = P.Base g.hom := rfl
 
 theorem istr_compat_Div {X Y : Istr P} (g : X ⟶ Y) :
-    (istrPre P).Div g = P.Div g.hom := rfl
+    (istrPre P F).Div g = P.Div g.hom := rfl
 
 /-- ★★**isotropification の定義四角形**。
 
@@ -861,7 +879,7 @@ theorem isotropification_frobType {A B : C} (f : A ⟶ B) (h : IsFrobeniusType P
     (isotropification_isometric_iff P F f).mpr h.1.2⟩,
    (isotropification_baseIso_iff P F f).mpr h.2⟩
 
-theorem istr_isotropic (X : Istr P) : IsIsotropic (istrPre P) X := by
+theorem istr_isotropic (X : Istr P) : IsIsotropic (istrPre P F) X := by
   intro Dd φ hi hs
   haveI : IsIso φ.hom := X.property Dd.obj φ.hom hi hs
   exact ⟨InducedCategory.homMk (inv φ.hom), InducedCategory.hom_ext (by simp),
@@ -872,12 +890,12 @@ theorem istr_isotropic (X : Istr P) : IsIsotropic (istrPre P) X := by
 ★原文が保存リストで「co-angular morphisms [cf. Proposition 1.4, (i)]」と
 括弧書きするのはこれ —— **`𝒞^istr` では co-angular 性が自明になる**ので、
 「保存する」は言うまでもない。 -/
-theorem istr_coAngular {X Y : Istr P} (g : X ⟶ Y) : IsCoAngular (istrPre P) g :=
-  prop_1_4_i (istrPre P) g (fun Z _ => istr_isotropic P Z)
+theorem istr_coAngular {X Y : Istr P} (g : X ⟶ Y) : IsCoAngular (istrPre P F) g :=
+  prop_1_4_i (istrPre P F) g (fun Z _ => istr_isotropic P F Z)
 
 /-! ### ★★21 条の「移送」—— まず辞書と、移送しやすい条から
 
-★`Definition 1.3` の各条を `istrPre P` について示す。原文は
+★`Definition 1.3` の各条を `istrPre P F` について示す。原文は
 「[from the fact that `𝒞` is a Frobenioid!]」の一言だが、
 **Lean では `Istr P` と `C` の間の辞書を1本ずつ引く**必要がある。
 どこまでが本当に「移送」かを条ごとに測る。 -/
@@ -887,42 +905,42 @@ include F in
 
 ★co-angular は**両側で自動**なので、実質は isometric と base-isomorphism の移送。 -/
 theorem istr_frobType_iff {X Y : Istr P} (g : X ⟶ Y) :
-    IsFrobeniusType (istrPre P) g ↔ IsFrobeniusType P g.hom :=
+    IsFrobeniusType (istrPre P F) g ↔ IsFrobeniusType P g.hom :=
   ⟨fun h => ⟨⟨isCoAngular_of_isotropic_dom P F X.property g.hom, h.1.2⟩, h.2⟩,
-   fun h => ⟨⟨istr_coAngular P g, h.1.2⟩, h.2⟩⟩
+   fun h => ⟨⟨istr_coAngular P F g, h.1.2⟩, h.2⟩⟩
 
 include F in
 /-- **(iii)(a)** の移送 —— `𝒞^istr` では co-angular が自動なので**自明**。 -/
 theorem istr_coAngularComp {X Y Z : Istr P} (ψ : X ⟶ Y) (φ : Y ⟶ Z) :
-    IsCoAngular (istrPre P) ψ → IsCoAngular (istrPre P) φ →
-      IsCoAngular (istrPre P) (ψ ≫ φ) :=
-  fun _ _ => istr_coAngular P _
+    IsCoAngular (istrPre P F) ψ → IsCoAngular (istrPre P F) φ →
+      IsCoAngular (istrPre P F) (ψ ≫ φ) :=
+  fun _ _ => istr_coAngular P F _
 
 include F in
 /-- **(iii)(b)** の移送 —— 同上。 -/
 theorem istr_coAngularOfPreStep {X Y : Istr P} (α : X ⟶ Y) :
-    IsCoAngular (istrPre P) α → IsPreStep (istrPre P) α →
-      ∀ φ : X ⟶ Y, IsCoAngular (istrPre P) φ :=
-  fun _ _ φ => istr_coAngular P φ
+    IsCoAngular (istrPre P F) α → IsPreStep (istrPre P F) α →
+      ∀ φ : X ⟶ Y, IsCoAngular (istrPre P F) φ :=
+  fun _ _ φ => istr_coAngular P F φ
 
 include F in
 /-- **(vii)(b)** の移送 —— `𝒞^istr` の対象はすべて isotropic なので**自明**。 -/
 theorem istr_isotropicClosed {X Y : Istr P} (_φ : X ⟶ Y) :
-    IsIsotropic (istrPre P) X → IsIsotropic (istrPre P) Y :=
-  fun _ => istr_isotropic P Y
+    IsIsotropic (istrPre P F) X → IsIsotropic (istrPre P F) Y :=
+  fun _ => istr_isotropic P F Y
 
 include F in
 /-- **(vii)(a)** の移送 —— `X` 自身が isotropic なので `𝟙_X` が isotropic hull。 -/
 theorem istr_isotropicHullExists (X : Istr P) :
-    ∃ (Y : Istr P) (φ : X ⟶ Y), IsIsotropicHull (istrPre P) φ :=
-  ⟨X, 𝟙 X, (istrPre P).Div_id X, isPreStep_id _ X, istr_isotropic P X,
+    ∃ (Y : Istr P) (φ : X ⟶ Y), IsIsotropicHull (istrPre P F) φ :=
+  ⟨X, 𝟙 X, (istrPre P F).Div_id X, isPreStep_id _ X, istr_isotropic P F X,
     fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm, fun β hβ => by
       have hg : γ = β := by simpa using hβ
       exact hg.symm⟩⟩
 
 include F in
 /-- **(v)(a)** の移送 —— `C` の mono 性が充満部分圏へそのまま降りる。 -/
-theorem istr_preStepMono {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P) φ) :
+theorem istr_preStepMono {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P F) φ) :
     Mono φ := by
   haveI : Mono φ.hom := F.preStepMono φ.hom hφ
   refine ⟨fun {Z} g h hgh => ?_⟩
@@ -932,8 +950,8 @@ theorem istr_preStepMono {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre
 include F in
 /-- **(ii)** の本質的一意性の移送 —— `C` で得た同型を充満部分圏へ持ち上げるだけ。 -/
 theorem istr_frobDegUniq (X Y Z : Istr P) (φ : X ⟶ Y) (ψ : X ⟶ Z)
-    (hφ : IsFrobeniusType (istrPre P) φ) (hψ : IsFrobeniusType (istrPre P) ψ)
-    (hd : (istrPre P).degFr φ = (istrPre P).degFr ψ) :
+    (hφ : IsFrobeniusType (istrPre P F) φ) (hψ : IsFrobeniusType (istrPre P F) ψ)
+    (hd : (istrPre P F).degFr φ = (istrPre P F).degFr ψ) :
     ∃ β : Y ⟶ Z, IsIso β ∧ φ ≫ β = ψ := by
   obtain ⟨β₀, hβiso, hβ⟩ := F.frobDegUniq X.obj Y.obj Z.obj φ.hom ψ.hom
     ((istr_frobType_iff P F φ).mp hφ) ((istr_frobType_iff P F ψ).mp hψ) hd
@@ -955,7 +973,7 @@ theorem istr_frobDegUniq (X Y Z : Istr P) (φ : X ⟶ Y) (ψ : X ⟶ Z)
 ★**逆向き**(「`𝒞^istr` の pull-back は `𝒞` の pull-back」)は
 `Z` が isotropic でない場合を埋める必要があり、**随伴を使う**。そちらは別に扱う。 -/
 theorem istr_isPullBack_of {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack P g.hom) :
-    IsPullBack (istrPre P) g := by
+    IsPullBack (istrPre P F) g := by
   intro Z
   constructor
   · intro f₁ f₂ hf
@@ -982,47 +1000,47 @@ include F in
 `𝒞` の分解に現れる対象がそのまま `𝒞^istr` の対象になる。 -/
 theorem istr_arbFactor {X Y : Istr P} (φ : X ⟶ Y) :
     ∃ (Z W : Istr P) (γ : X ⟶ Z) (β : Z ⟶ W) (α : W ⟶ Y),
-      φ = γ ≫ β ≫ α ∧ IsFrobeniusType (istrPre P) γ ∧
-        IsPreStep (istrPre P) β ∧ IsPullBack (istrPre P) α := by
+      φ = γ ≫ β ≫ α ∧ IsFrobeniusType (istrPre P F) γ ∧
+        IsPreStep (istrPre P F) β ∧ IsPullBack (istrPre P F) α := by
   obtain ⟨Z₀, W₀, γ₀, β₀, α₀, heq, hγ, hβ, hα⟩ := F.arbFactor φ.hom
   have hZ : IsIsotropic P Z₀ := F.isotropicClosed γ₀ X.property
   have hW : IsIsotropic P W₀ := F.isotropicClosed β₀ hZ
   refine ⟨⟨Z₀, hZ⟩, ⟨W₀, hW⟩, InducedCategory.homMk γ₀, InducedCategory.homMk β₀,
     InducedCategory.homMk α₀, InducedCategory.hom_ext heq, ?_, hβ,
-    istr_isPullBack_of P _ hα⟩
+    istr_isPullBack_of P F _ hα⟩
   exact (istr_frobType_iff P F (X := X) (Y := ⟨Z₀, hZ⟩)
     (InducedCategory.homMk γ₀)).mpr hγ
 
 include F in
 /-- **(ii)** の移送 —— 各次数の Frobenius 型射。中間対象は自動で isotropic。 -/
 theorem istr_frobDegSurj (X : Istr P) (n : ℕ+) :
-    ∃ (Y : Istr P) (φ : X ⟶ Y), IsFrobeniusType (istrPre P) φ ∧
-      (istrPre P).degFr φ = n := by
+    ∃ (Y : Istr P) (φ : X ⟶ Y), IsFrobeniusType (istrPre P F) φ ∧
+      (istrPre P F).degFr φ = n := by
   obtain ⟨B₀, φ₀, hφ, hd⟩ := F.frobDegSurj X.obj n
   exact ⟨⟨B₀, F.isotropicClosed φ₀ X.property⟩, InducedCategory.homMk φ₀,
     (istr_frobType_iff P F _).mpr hφ, hd⟩
 
 include F in
 /-- **(v)(b)** の移送。 -/
-theorem istr_preStepFactor {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P) φ) :
+theorem istr_preStepFactor {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P F) φ) :
     ∃ (Z : Istr P) (β : X ⟶ Z) (α : Z ⟶ Y),
-      φ = β ≫ α ∧ IsCoAngular (istrPre P) β ∧ IsPreStep (istrPre P) β ∧
-        IsIsometric (istrPre P) α ∧ IsPreStep (istrPre P) α := by
+      φ = β ≫ α ∧ IsCoAngular (istrPre P F) β ∧ IsPreStep (istrPre P F) β ∧
+        IsIsometric (istrPre P F) α ∧ IsPreStep (istrPre P F) α := by
   obtain ⟨Z₀, β₀, α₀, heq, hβc, hβs, hαi, hαs⟩ := F.preStepFactor φ.hom hφ
   refine ⟨⟨Z₀, F.isotropicClosed β₀ X.property⟩, InducedCategory.homMk β₀,
     InducedCategory.homMk α₀, InducedCategory.hom_ext heq, ?_, hβs, hαi, hαs⟩
-  exact istr_coAngular P _
+  exact istr_coAngular P F _
 
 include F in
 /-- **(v)(c)** の移送。 -/
-theorem istr_preStepFactor' {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P) φ) :
+theorem istr_preStepFactor' {X Y : Istr P} (φ : X ⟶ Y) (hφ : IsPreStep (istrPre P F) φ) :
     ∃ (Z : Istr P) (β : X ⟶ Z) (α : Z ⟶ Y),
-      φ = β ≫ α ∧ IsIsometric (istrPre P) β ∧ IsPreStep (istrPre P) β ∧
-        IsCoAngular (istrPre P) α ∧ IsPreStep (istrPre P) α := by
+      φ = β ≫ α ∧ IsIsometric (istrPre P F) β ∧ IsPreStep (istrPre P F) β ∧
+        IsCoAngular (istrPre P F) α ∧ IsPreStep (istrPre P F) α := by
   obtain ⟨Z₀, β₀, α₀, heq, hβi, hβs, hαc, hαs⟩ := F.preStepFactor' φ.hom hφ
   refine ⟨⟨Z₀, F.isotropicClosed β₀ X.property⟩, InducedCategory.homMk β₀,
     InducedCategory.homMk α₀, InducedCategory.hom_ext heq, hβi, hβs, ?_, hαs⟩
-  exact istr_coAngular P _
+  exact istr_coAngular P F _
 
 include F in
 /-- ★★**isotropic な対象への pull-back の始域は isotropic**。
@@ -1055,7 +1073,7 @@ include F in
 
 ★★**原文はこの依存を書いていない**(「it follows immediately」で済ませている)。
 ★**随伴は (v) の主張の一部であるだけでなく、(v) を証明する道具でもある。** -/
-theorem istr_isPullBack_to {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack (istrPre P) g) :
+theorem istr_isPullBack_to {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack (istrPre P F) g) :
     IsPullBack P g.hom := by
   intro Z
   haveI hZb : IsIso (P.Base (hullMap P F Z)) := (hullMap_spec P F Z).2.1.2
@@ -1098,8 +1116,8 @@ theorem istr_isPullBack_to {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack (istrPre
     obtain ⟨w, hw1, hw2⟩ := hZb.out
     have ea : u ≫ ((hullHomEquiv P F Z Y).symm a).hom = a :=
       (hullHomEquiv P F Z Y).apply_symm_apply a
-    have hcond : (istrPre P).Base ((hullHomEquiv P F Z Y).symm a)
-        = (w ≫ b) ≫ (istrPre P).Base g := by
+    have hcond : (istrPre P F).Base ((hullHomEquiv P F Z Y).symm a)
+        = (w ≫ b) ≫ (istrPre P F).Base g := by
       show P.Base ((hullHomEquiv P F Z Y).symm a).hom
         = (w ≫ b) ≫ P.Base g.hom
       have hbase : P.Base u ≫ P.Base ((hullHomEquiv P F Z Y).symm a).hom
@@ -1149,20 +1167,20 @@ theorem istr_isPullBack_to {X Y : Istr P} (g : X ⟶ Y) (h : IsPullBack (istrPre
 
 include F in
 /-- **(iv)(b)** の移送 —— ★**逆向きの pull-back 移送が開いた**ので通る。 -/
-theorem istr_pullBackLB {X Y : Istr P} (α : X ⟶ Y) (h : IsPullBack (istrPre P) α) :
-    IsLBInvertible (istrPre P) α ∧ IsLinear (istrPre P) α := by
+theorem istr_pullBackLB {X Y : Istr P} (α : X ⟶ Y) (h : IsPullBack (istrPre P F) α) :
+    IsLBInvertible (istrPre P F) α ∧ IsLinear (istrPre P F) α := by
   obtain ⟨hlb, hlin⟩ := F.pullBackLB α.hom (istr_isPullBack_to P F α h)
-  exact ⟨⟨istr_coAngular P α, hlb.2⟩, hlin⟩
+  exact ⟨⟨istr_coAngular P F α, hlb.2⟩, hlin⟩
 
 include F in
 /-- **(v)(b)** の一意性の移送 —— `C` で得た同型を充満部分圏へ持ち上げるだけ。 -/
 theorem istr_preStepFactorUniq {A B : Istr P} (X X' : Istr P)
     (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
     (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
-    (hβc : IsCoAngular (istrPre P) β) (hβs : IsPreStep (istrPre P) β)
-    (hαi : IsIsometric (istrPre P) α) (hαs : IsPreStep (istrPre P) α)
-    (hβc' : IsCoAngular (istrPre P) β') (hβs' : IsPreStep (istrPre P) β')
-    (hαi' : IsIsometric (istrPre P) α') (hαs' : IsPreStep (istrPre P) α') :
+    (hβc : IsCoAngular (istrPre P F) β) (hβs : IsPreStep (istrPre P F) β)
+    (hαi : IsIsometric (istrPre P F) α) (hαs : IsPreStep (istrPre P F) α)
+    (hβc' : IsCoAngular (istrPre P F) β') (hβs' : IsPreStep (istrPre P F) β')
+    (hαi' : IsIsometric (istrPre P F) α') (hαs' : IsPreStep (istrPre P F) α') :
     ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
   obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq X.obj X'.obj β.hom α.hom β'.hom α'.hom
     (congrArg InducedCategory.Hom.hom heq)
@@ -1175,10 +1193,10 @@ include F in
 theorem istr_preStepFactorUniq' {A B : Istr P} (X X' : Istr P)
     (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
     (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
-    (hβi : IsIsometric (istrPre P) β) (hβs : IsPreStep (istrPre P) β)
-    (hαc : IsCoAngular (istrPre P) α) (hαs : IsPreStep (istrPre P) α)
-    (hβi' : IsIsometric (istrPre P) β') (hβs' : IsPreStep (istrPre P) β')
-    (hαc' : IsCoAngular (istrPre P) α') (hαs' : IsPreStep (istrPre P) α') :
+    (hβi : IsIsometric (istrPre P F) β) (hβs : IsPreStep (istrPre P F) β)
+    (hαc : IsCoAngular (istrPre P F) α) (hαs : IsPreStep (istrPre P F) α)
+    (hβi' : IsIsometric (istrPre P F) β') (hβs' : IsPreStep (istrPre P F) β')
+    (hαc' : IsCoAngular (istrPre P F) α') (hαs' : IsPreStep (istrPre P F) α') :
     ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
   obtain ⟨γ₀, h1, h2⟩ := F.preStepFactorUniq' X.obj X'.obj β.hom α.hom β'.hom α'.hom
     (congrArg InducedCategory.Hom.hom heq)
@@ -1189,10 +1207,10 @@ theorem istr_preStepFactorUniq' {A B : Istr P} (X X' : Istr P)
 include F in
 /-- **(vi)** の移送 —— `𝒪^×` の元も `C` から持ち上がる。 -/
 theorem istr_faithfulUpToUnits {A B : Istr P} (φ ψ : A ⟶ B)
-    (hb : BaseEquivalent (istrPre P) φ ψ) (hm : MetricallyEquivalent (istrPre P) φ ψ)
-    (hφc : IsCoAngular (istrPre P) φ) (hφs : IsPreStep (istrPre P) φ)
-    (hψc : IsCoAngular (istrPre P) ψ) (hψs : IsPreStep (istrPre P) ψ) :
-    ∃ α : End B, α ∈ OTimes (istrPre P) B ∧ φ = ψ ≫ (α : B ⟶ B) := by
+    (hb : BaseEquivalent (istrPre P F) φ ψ) (hm : MetricallyEquivalent (istrPre P F) φ ψ)
+    (hφc : IsCoAngular (istrPre P F) φ) (hφs : IsPreStep (istrPre P F) φ)
+    (hψc : IsCoAngular (istrPre P F) ψ) (hψs : IsPreStep (istrPre P F) ψ) :
+    ∃ α : End B, α ∈ OTimes (istrPre P F) B ∧ φ = ψ ≫ (α : B ⟶ B) := by
   obtain ⟨α₀, hα₀, hφψ⟩ := F.faithfulUpToUnits φ.hom ψ.hom hb hm
     (isCoAngular_of_isotropic_dom P F A.property _) hφs
     (isCoAngular_of_isotropic_dom P F A.property _) hψs
@@ -1208,10 +1226,10 @@ include F in
 theorem istr_arbFactorUniq {A B : Istr P} (X Y X' Y' : Istr P)
     (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
     (heq : (γ ≫ β ≫ α : A ⟶ B) = γ' ≫ β' ≫ α')
-    (hγ : IsFrobeniusType (istrPre P) γ) (hβ : IsPreStep (istrPre P) β)
-    (hα : IsPullBack (istrPre P) α)
-    (hγ' : IsFrobeniusType (istrPre P) γ') (hβ' : IsPreStep (istrPre P) β')
-    (hα' : IsPullBack (istrPre P) α') :
+    (hγ : IsFrobeniusType (istrPre P F) γ) (hβ : IsPreStep (istrPre P F) β)
+    (hα : IsPullBack (istrPre P F) α)
+    (hγ' : IsFrobeniusType (istrPre P F) γ') (hβ' : IsPreStep (istrPre P F) β')
+    (hα' : IsPullBack (istrPre P F) α') :
     ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
       α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
   obtain ⟨δ₀, ε₀, h1, h2, h3⟩ := F.arbFactorUniq X.obj Y.obj X'.obj Y'.obj
@@ -1224,9 +1242,9 @@ theorem istr_arbFactorUniq {A B : Istr P} (X Y X' Y' : Istr P)
 
 include F in
 /-- **(iii)(c)** 順方向の移送。★`𝒪^▷` の元は `.hom` でそのまま対応する。 -/
-theorem istr_otriFwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) φ)
-    (α : End A) (hα : α ∈ OTri (istrPre P) A) :
-    ∃! β : End B, β ∈ OTri (istrPre P) B ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+theorem istr_otriFwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P F) φ)
+    (α : End A) (hα : α ∈ OTri (istrPre P F) A) :
+    ∃! β : End B, β ∈ OTri (istrPre P F) B ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
   obtain ⟨β₀, ⟨hβ₀m, hβ₀e⟩, hβ₀u⟩ := F.otriFwd φ.hom
     (isCoAngular_of_isotropic_dom P F A.property _) hst α.hom hα
   refine ⟨InducedCategory.homMk β₀, ⟨hβ₀m, InducedCategory.hom_ext hβ₀e⟩, ?_⟩
@@ -1236,9 +1254,9 @@ theorem istr_otriFwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) 
 
 include F in
 /-- **(iii)(c)** 逆方向の移送。 -/
-theorem istr_otriBwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) φ)
-    (β : End B) (hβ : β ∈ OTri (istrPre P) B) :
-    ∃! α : End A, α ∈ OTri (istrPre P) A ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+theorem istr_otriBwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P F) φ)
+    (β : End B) (hβ : β ∈ OTri (istrPre P F) B) :
+    ∃! α : End A, α ∈ OTri (istrPre P F) A ∧ (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
   obtain ⟨α₀, ⟨hα₀m, hα₀e⟩, hα₀u⟩ := F.otriBwd φ.hom
     (isCoAngular_of_isotropic_dom P F A.property _) hst β.hom hβ
   refine ⟨InducedCategory.homMk α₀, ⟨hα₀m, InducedCategory.hom_ext hα₀e⟩, ?_⟩
@@ -1249,10 +1267,10 @@ theorem istr_otriBwd {A B : Istr P} (φ : A ⟶ B) (hst : IsPreStep (istrPre P) 
 include F in
 /-- **(iii)(c)** `Base` にしか依らないことの移送。 -/
 theorem istr_otriBase {A B : Istr P} (φ φ' : A ⟶ B)
-    (hst : IsPreStep (istrPre P) φ) (hst' : IsPreStep (istrPre P) φ')
-    (hbase : (istrPre P).Base φ = (istrPre P).Base φ')
-    (α : End A) (hα : α ∈ OTri (istrPre P) A)
-    (β : End B) (hβ : β ∈ OTri (istrPre P) B)
+    (hst : IsPreStep (istrPre P F) φ) (hst' : IsPreStep (istrPre P F) φ')
+    (hbase : (istrPre P F).Base φ = (istrPre P F).Base φ')
+    (α : End A) (hα : α ∈ OTri (istrPre P F) A)
+    (β : End B) (hβ : β ∈ OTri (istrPre P F) B)
     (h : (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ) :
     (φ' ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ' :=
   InducedCategory.hom_ext
@@ -1383,7 +1401,7 @@ include F in
 ★**`𝒞 → 𝔽_Φ` は isotropification を経由する**(自然同型を除いて)。
 ★成分は `toElem_map_hullMap_isIso`、自然性は `isotropification_square` そのもの。 -/
 noncomputable def isotropificationFactorIso :
-    P.toElem ≅ isotropification P F ⋙ (istrPre P).toElem :=
+    P.toElem ≅ isotropification P F ⋙ (istrPre P F).toElem :=
   NatIso.ofComponents
     (fun A => @asIso _ _ _ _ (P.toElem.map (hullMap P F A)) (toElem_map_hullMap_isIso P F A))
     (fun {A B} f => by
@@ -1420,8 +1438,8 @@ include F in
 * Frobenius-trivial の `ζ` は **isotropification が関手であること**でそのまま運べる
 * 底の同型は `Base (hullMap)` が同型であることで繋ぐ -/
 theorem istr_baseSurj (Y : D) :
-    ∃ A : Istr P, IsFrobeniusTrivial (istrPre P) A ∧
-      Nonempty (((istrPre P).toElem.obj A).base ≅ Y) := by
+    ∃ A : Istr P, IsFrobeniusTrivial (istrPre P F) A ∧
+      Nonempty (((istrPre P F).toElem.obj A).base ≅ Y) := by
   obtain ⟨A₀, ⟨ζ, hdeg, hprop⟩, ⟨e⟩⟩ := F.baseSurj Y
   haveI hb : IsIso (P.Base (hullMap P F A₀)) := (hullMap_spec P F A₀).2.1.2
   refine ⟨hullIstr P F A₀, ⟨⟨⟨fun n => (isotropification P F).map (ζ n), ?_⟩, ?_⟩, ?_, ?_⟩,
@@ -1454,10 +1472,10 @@ include F in
 ★一方、証明の中で使う逆射はすべて `IsIso.out` から明示的に取り、`inv` は書かない。
 ★**手順は固定するものではなく、反例が出たら条件を精密化するもの** という形の一例。 -/
 theorem istr_preStepSpan (A B : Istr P)
-    (α : ((istrPre P).toElem.obj A).base ⟶ ((istrPre P).toElem.obj B).base) (hα : IsIso α) :
-    ∃ (X : Istr P) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep (istrPre P) φ),
-      IsPreStep (istrPre P) ψ ∧
-        α = @inv _ _ _ _ ((istrPre P).Base φ) hφ.2 ≫ (istrPre P).Base ψ := by
+    (α : ((istrPre P F).toElem.obj A).base ⟶ ((istrPre P F).toElem.obj B).base) (hα : IsIso α) :
+    ∃ (X : Istr P) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep (istrPre P F) φ),
+      IsPreStep (istrPre P F) ψ ∧
+        α = @inv _ _ _ _ ((istrPre P F).Base φ) hφ.2 ≫ (istrPre P F).Base ψ := by
   obtain ⟨X₀, φ₀, ψ₀, hφ₀, hψ₀, heq⟩ := F.preStepSpan A.obj B.obj α hα
   haveI hmA : IsIso (hullMap P F A.obj) := hullMap_isIso P F A.obj A.property
   haveI hmB : IsIso (hullMap P F B.obj) := hullMap_isIso P F B.obj B.property
@@ -1501,7 +1519,7 @@ theorem istr_preStepSpan (A B : Istr P)
   -- `heq` を `Base φ₀ ≫ α = Base ψ₀` に直す
   have heq' : P.Base φ₀ ≫ α = P.Base ψ₀ :=
     (@IsIso.eq_inv_comp _ _ _ _ _ (P.Base φ₀) hφ₀.2 _ _).mp heq
-  refine (@IsIso.eq_inv_comp _ _ _ _ _ ((istrPre P).Base
+  refine (@IsIso.eq_inv_comp _ _ _ _ _ ((istrPre P F).Base
     (InducedCategory.homMk (istrMap P F φ₀ ≫ wA) : hullIstr P F X₀ ⟶ A)) hpsA.2 _ _).mpr ?_
   show P.Base (istrMap P F φ₀ ≫ wA) ≫ α = P.Base (istrMap P F ψ₀ ≫ wB)
   rw [key A.obj φ₀ wA hwA1, key B.obj ψ₀ wB hwB1, Category.assoc, heq']
@@ -1513,14 +1531,14 @@ include F in
 /-- 補助: `(𝒞^istr)^pl-bk` の `A` 上の対象を `𝒞^pl-bk` の `A.obj` 上へ運ぶ。
 
 ★ここで **`istr_isPullBack_to`(難しい向き)** を使う。 -/
-def istrPlBkToC (A : Istr P) (Z : Over (⟨A⟩ : PlBk (istrPre P))) :
+def istrPlBkToC (A : Istr P) (Z : Over (⟨A⟩ : PlBk (istrPre P F))) :
     Over (⟨A.obj⟩ : PlBk P) :=
   Over.mk (⟨Z.hom.hom.hom, istr_isPullBack_to P F Z.hom.hom Z.hom.property⟩ :
     (⟨Z.left.obj.obj⟩ : PlBk P) ⟶ (⟨A.obj⟩ : PlBk P))
 
 include F in
 /-- 補助: 射のほうの運搬。 -/
-def istrPlBkToCMap {A : Istr P} {Z W : Over (⟨A⟩ : PlBk (istrPre P))} (h : Z ⟶ W) :
+def istrPlBkToCMap {A : Istr P} {Z W : Over (⟨A⟩ : PlBk (istrPre P F))} (h : Z ⟶ W) :
     istrPlBkToC P F A Z ⟶ istrPlBkToC P F A W :=
   Over.homMk (⟨h.left.hom.hom, istr_isPullBack_to P F h.left.hom h.left.property⟩ :
       (⟨Z.left.obj.obj⟩ : PlBk P) ⟶ (⟨W.left.obj.obj⟩ : PlBk P))
@@ -1539,12 +1557,12 @@ include F in
 
 ★充満性・忠実性・本質的全射性の**3つとも** `F.plBkEquiv A.obj` から来る。 -/
 theorem istr_plBkEquiv (A : Istr P) :
-    (plBkOverFunctor (istrPre P) A).IsEquivalence := by
+    (plBkOverFunctor (istrPre P F) A).IsEquivalence := by
   haveI := F.plBkEquiv A.obj
-  haveI hfaith : (plBkOverFunctor (istrPre P) A).Faithful := by
+  haveI hfaith : (plBkOverFunctor (istrPre P F) A).Faithful := by
     constructor
     intro Z W f g hfg
-    have hb : (istrPre P).Base f.left.hom = (istrPre P).Base g.left.hom :=
+    have hb : (istrPre P F).Base f.left.hom = (istrPre P F).Base g.left.hom :=
       congrArg CommaMorphism.left hfg
     have hmap : (plBkOverFunctor P A.obj).map (istrPlBkToCMap P F f)
         = (plBkOverFunctor P A.obj).map (istrPlBkToCMap P F g) :=
@@ -1553,7 +1571,7 @@ theorem istr_plBkEquiv (A : Istr P) :
     have h3 : f.left.hom.hom = g.left.hom.hom :=
       congrArg (fun x => InducedWideCategory.Hom.hom (CommaMorphism.left x)) h2
     exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext (InducedCategory.hom_ext h3))
-  haveI hfull : (plBkOverFunctor (istrPre P) A).Full := by
+  haveI hfull : (plBkOverFunctor (istrPre P F) A).Full := by
     constructor
     intro Z W h
     obtain ⟨f', hf'⟩ := (plBkOverFunctor P A.obj).map_surjective
@@ -1562,11 +1580,11 @@ theorem istr_plBkEquiv (A : Istr P) :
     have hw : f'.left.hom ≫ W.hom.hom.hom = Z.hom.hom.hom :=
       congrArg InducedWideCategory.Hom.hom (Over.w f')
     refine ⟨Over.homMk (⟨InducedCategory.homMk f'.left.hom,
-        istr_isPullBack_of P (InducedCategory.homMk f'.left.hom) f'.left.property⟩ :
+        istr_isPullBack_of P F (InducedCategory.homMk f'.left.hom) f'.left.property⟩ :
         Z.left ⟶ W.left)
       (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), ?_⟩
     exact Over.OverMorphism.ext (congrArg CommaMorphism.left hf')
-  haveI hess : (plBkOverFunctor (istrPre P) A).EssSurj := by
+  haveI hess : (plBkOverFunctor (istrPre P F) A).EssSurj := by
     constructor
     intro Y
     obtain ⟨Z', hZ'⟩ : ∃ Z' : Over (⟨A.obj⟩ : PlBk P),
@@ -1577,8 +1595,8 @@ theorem istr_plBkEquiv (A : Istr P) :
       isotropic_dom_of_pullBack P F Z'.hom.hom Z'.hom.property A.property
     refine ⟨Over.mk (⟨(InducedCategory.homMk Z'.hom.hom :
           (⟨Z'.left.obj, hiso⟩ : Istr P) ⟶ A),
-        istr_isPullBack_of P _ Z'.hom.property⟩ :
-      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : PlBk (istrPre P)) ⟶ (⟨A⟩ : PlBk (istrPre P))), ?_⟩
+        istr_isPullBack_of P F _ Z'.hom.property⟩ :
+      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : PlBk (istrPre P F)) ⟶ (⟨A⟩ : PlBk (istrPre P F))), ?_⟩
     exact ⟨hiZ⟩
   exact ⟨hfaith, hfull, hess⟩
 
@@ -1591,7 +1609,7 @@ include F in
 ★**21 条のうち 19 条は「前向き」で自動**((vii)(b) が `𝒞^istr` を閉じるから)、
 **2 条だけが「後ろ向き」**で isotropification を要した(`baseSurj` / `preStepSpan`)。
 `plBkEquiv` は両向きが要った(`istr_isPullBack_to` が随伴を使う)。 -/
-theorem istr_frobenioidCore : FrobenioidCore (istrPre P) where
+theorem istr_frobenioidCore : FrobenioidCore (istrPre P F) where
   baseSurj := istr_baseSurj P F
   preStepSpan := istr_preStepSpan P F
   plBkEquiv := istr_plBkEquiv P F
@@ -1628,12 +1646,12 @@ theorem istr_frobenioidCore : FrobenioidCore (istrPre P) where
 
 section CoaPre
 
-variable [(coaPreProp P).IsMultiplicative] [(coaPreProp (istrPre P)).IsMultiplicative]
+variable [(coaPreProp P).IsMultiplicative] [(coaPreProp (istrPre P F)).IsMultiplicative]
 
 include F in
 /-- 補助: `_A(𝒞^istr,coa-pre)` の対象を `_{A.obj}(𝒞^coa-pre)` へ。 -/
 def istrCoaPreUnder (A : Istr P)
-    (Z : Under (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))) :
+    (Z : Under (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P F)))) :
     Under (⟨A.obj⟩ : WideSubcategory (coaPreProp P)) :=
   Under.mk (⟨Z.hom.hom.hom,
       isCoAngular_of_isotropic_dom P F A.property _, Z.hom.property.2⟩ :
@@ -1643,7 +1661,7 @@ def istrCoaPreUnder (A : Istr P)
 include F in
 /-- 補助: `(𝒞^istr,coa-pre)_A` の対象を `(𝒞^coa-pre)_{A.obj}` へ。 -/
 def istrCoaPreOver (A : Istr P)
-    (Z : Over (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))) :
+    (Z : Over (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P F)))) :
     Over (⟨A.obj⟩ : WideSubcategory (coaPreProp P)) :=
   Over.mk (⟨Z.hom.hom.hom,
       isCoAngular_of_isotropic_dom P F Z.left.obj.property _, Z.hom.property.2⟩ :
@@ -1654,19 +1672,19 @@ include F in
 /-- **(iii)(d)** コスライス側の移送。 -/
 theorem istr_coaPreUnderEquiv
     (hC : ∀ A : C, (coaPreUnderFunctor P A).IsEquivalence) (A : Istr P) :
-    (coaPreUnderFunctor (istrPre P) A).IsEquivalence := by
+    (coaPreUnderFunctor (istrPre P F) A).IsEquivalence := by
   haveI := hC A.obj
-  haveI hfaith : (coaPreUnderFunctor (istrPre P) A).Faithful := by
+  haveI hfaith : (coaPreUnderFunctor (istrPre P F) A).Faithful := by
     constructor
     intro Z W f g _
     have h1 : Z.hom.hom ≫ f.right.hom = W.hom.hom :=
       congrArg InducedWideCategory.Hom.hom (Under.w f)
     have h2 : Z.hom.hom ≫ g.right.hom = W.hom.hom :=
       congrArg InducedWideCategory.Hom.hom (Under.w g)
-    haveI : Epi Z.hom.hom := (istrPre P).totEpiC _ _ _
+    haveI : Epi Z.hom.hom := (istrPre P F).totEpiC _ _ _
     exact Under.UnderMorphism.ext (InducedWideCategory.Hom.ext
       ((cancel_epi Z.hom.hom).mp (h1.trans h2.symm)))
-  haveI hfull : (coaPreUnderFunctor (istrPre P) A).Full := by
+  haveI hfull : (coaPreUnderFunctor (istrPre P F) A).Full := by
     constructor
     intro Z W h
     obtain ⟨f', -⟩ := (coaPreUnderFunctor P A.obj).map_surjective
@@ -1676,9 +1694,9 @@ theorem istr_coaPreUnderEquiv
       congrArg InducedWideCategory.Hom.hom (Under.w f')
     refine ⟨Under.homMk (⟨(InducedCategory.homMk f'.right.hom :
           Z.right.obj ⟶ W.right.obj),
-        ⟨istr_coAngular P _, f'.right.property.2⟩⟩ : Z.right ⟶ W.right)
+        ⟨istr_coAngular P F _, f'.right.property.2⟩⟩ : Z.right ⟶ W.right)
       (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), Subsingleton.elim _ _⟩
-  haveI hess : (coaPreUnderFunctor (istrPre P) A).EssSurj := by
+  haveI hess : (coaPreUnderFunctor (istrPre P F) A).EssSurj := by
     constructor
     intro Y
     obtain ⟨Z', hZ'⟩ : ∃ Z' : Under (⟨A.obj⟩ : WideSubcategory (coaPreProp P)),
@@ -1688,10 +1706,10 @@ theorem istr_coaPreUnderEquiv
     have hiso : IsIsotropic P Z'.right.obj := F.isotropicClosed Z'.hom.hom A.property
     exact ⟨Under.mk (⟨(InducedCategory.homMk Z'.hom.hom :
           A ⟶ (⟨Z'.right.obj, hiso⟩ : Istr P)),
-        ⟨istr_coAngular P _, Z'.hom.property.2⟩⟩ :
-      (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P))) ⟶
+        ⟨istr_coAngular P F _, Z'.hom.property.2⟩⟩ :
+      (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P F))) ⟶
         (⟨(⟨Z'.right.obj, hiso⟩ : Istr P)⟩ :
-          WideSubcategory (coaPreProp (istrPre P)))), ⟨hiZ⟩⟩
+          WideSubcategory (coaPreProp (istrPre P F)))), ⟨hiZ⟩⟩
   exact ⟨hfaith, hfull, hess⟩
 
 include F in
@@ -1700,9 +1718,9 @@ include F in
 終域が isotropic なら始域も isotropic。 -/
 theorem istr_coaPreOverEquiv
     (hC : ∀ A : C, (coaPreOverFunctor P A).IsEquivalence) (A : Istr P) :
-    (coaPreOverFunctor (istrPre P) A).IsEquivalence := by
+    (coaPreOverFunctor (istrPre P F) A).IsEquivalence := by
   haveI := hC A.obj
-  haveI hfaith : (coaPreOverFunctor (istrPre P) A).Faithful := by
+  haveI hfaith : (coaPreOverFunctor (istrPre P F) A).Faithful := by
     constructor
     intro Z W f g _
     have h1 : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
@@ -1712,7 +1730,7 @@ theorem istr_coaPreOverEquiv
     haveI : Mono W.hom.hom := istr_preStepMono P F _ W.hom.property.2
     exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
       ((cancel_mono W.hom.hom).mp (h1.trans h2.symm)))
-  haveI hfull : (coaPreOverFunctor (istrPre P) A).Full := by
+  haveI hfull : (coaPreOverFunctor (istrPre P F) A).Full := by
     constructor
     intro Z W h
     obtain ⟨f', -⟩ := (coaPreOverFunctor P A.obj).map_surjective
@@ -1722,9 +1740,9 @@ theorem istr_coaPreOverEquiv
       congrArg InducedWideCategory.Hom.hom (Over.w f')
     refine ⟨Over.homMk (⟨(InducedCategory.homMk f'.left.hom :
           Z.left.obj ⟶ W.left.obj),
-        ⟨istr_coAngular P _, f'.left.property.2⟩⟩ : Z.left ⟶ W.left)
+        ⟨istr_coAngular P F _, f'.left.property.2⟩⟩ : Z.left ⟶ W.left)
       (InducedWideCategory.Hom.ext (InducedCategory.hom_ext hw)), Subsingleton.elim _ _⟩
-  haveI hess : (coaPreOverFunctor (istrPre P) A).EssSurj := by
+  haveI hess : (coaPreOverFunctor (istrPre P F) A).EssSurj := by
     constructor
     intro Y
     obtain ⟨Z', hZ'⟩ : ∃ Z' : Over (⟨A.obj⟩ : WideSubcategory (coaPreProp P)),
@@ -1735,21 +1753,21 @@ theorem istr_coaPreOverEquiv
       (prop_1_9_iv P F Z'.hom.hom Z'.hom.property.1 Z'.hom.property.2.1).mpr A.property
     exact ⟨Over.mk (⟨(InducedCategory.homMk Z'.hom.hom :
           (⟨Z'.left.obj, hiso⟩ : Istr P) ⟶ A),
-        ⟨istr_coAngular P _, Z'.hom.property.2⟩⟩ :
-      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : WideSubcategory (coaPreProp (istrPre P))) ⟶
-        (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P)))), ⟨hiZ⟩⟩
+        ⟨istr_coAngular P F _, Z'.hom.property.2⟩⟩ :
+      (⟨(⟨Z'.left.obj, hiso⟩ : Istr P)⟩ : WideSubcategory (coaPreProp (istrPre P F))) ⟶
+        (⟨A⟩ : WideSubcategory (coaPreProp (istrPre P F)))), ⟨hiZ⟩⟩
   exact ⟨hfaith, hfull, hess⟩
 
 end CoaPre
 
 /-- ★★★**`Proposition 1.9, (v)`** —— `𝒞^istr` は Frobenioid である。 -/
-theorem istr_frobenioid (G : Frobenioid P) : Frobenioid (istrPre P) := by
+theorem istr_frobenioid (G : Frobenioid P) : Frobenioid (istrPre P F) := by
   haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
-  haveI := coaPreProp_isMultiplicative (istrPre P)
-    (istr_frobenioidCore P G.core).coAngularComp
-  exact ⟨istr_frobenioidCore P G.core,
-    istr_coaPreUnderEquiv P G.core G.coaPreUnderEquiv,
-    istr_coaPreOverEquiv P G.core G.coaPreOverEquiv⟩
+  haveI := coaPreProp_isMultiplicative (istrPre P F)
+    (istr_frobenioidCore P F).coAngularComp
+  exact ⟨istr_frobenioidCore P F,
+    istr_coaPreUnderEquiv P F G.coaPreUnderEquiv,
+    istr_coaPreOverEquiv P F G.coaPreOverEquiv⟩
 
 end Istr
 
@@ -2581,7 +2599,7 @@ def prop_1_9_vii.src : ABC3.Meta.Source :=
 
 ★★**(v) の 2 件**:
 - 「through which the functor `𝒞 → 𝔽_Φ` factors」→ `isotropificationFactorIso`
-  (`P.toElem ≅ isotropification P F ⋙ (istrPre P).toElem`)。
+  (`P.toElem ≅ isotropification P F ⋙ (istrPre P F).toElem`)。
   ★中身は「**isotropic hull は `𝔽_Φ` では同型になる**」(`toElem_map_hullMap_isIso`) ——
   isometric ＋ pre-step から `div = 0`・`deg = 1`・base 同型が揃うため。
 - 保存 11 クラスのうち co-angular → `isotropification_coAngular`(仮定不要。原文より強い)。

@@ -62,18 +62,35 @@ theorem isTotallyEpimorphic_nC : IsTotallyEpimorphic nC := by
     _ = (f ≫ h).hom := by rw [hgh]
     _ = f.hom ≫ h.hom := rfl
 
-/-- ★**負の対照の pre-Frobenioid**。`Definition 1.1, (iv)` の4条件をすべて満たす。
+/-- ★**`nC` は connected**(2026-08-16 に追加)。
+
+★次数 1 に絞っても `Vee` の射の持ち上げ `⟨f, 0, 1⟩` は残るので、
+連結性は落ちない。★**(ii) が落ちるのは次数 2 が無いからであって、
+連結性とは無関係である**ことがここで見える。 -/
+instance isConnected_nC : IsConnected nC := by
+  refine IsConnected.of_induct (j₀ := (⟨⟨Vee.top⟩⟩ : nC)) ?_
+  intro p hp0 hstep A
+  have key : ∀ d : Vee, (⟨⟨d⟩⟩ : nC) ∈ p :=
+    induct_on_objects (J := Vee) {d | (⟨⟨d⟩⟩ : nC) ∈ p} hp0
+      (fun {d₁ d₂} f => hstep (⟨⟨f, 0, 1⟩, rfl⟩ :
+        (⟨⟨d₁⟩⟩ : nC) ⟶ (⟨⟨d₂⟩⟩ : nC)))
+  exact key A.obj.base
+
+/-- ★**負の対照の pre-Frobenioid**。`Definition 1.1, (iv)` の条件をすべて満たす。
 
 * 関手 `𝒞 → 𝔽_Φ` = 広い部分圏の包含
 * `Φ` は divisorial(`isDivisorial_nat`)
 * `𝒞` は totally epimorphic(上で証明)
 * `𝒟 = Vee` は totally epimorphic(`isTotallyEpimorphic_vee`)
+* ★`𝒞`, `𝒟` は connected(2026-08-16 に追加)
 -/
 def nP : PreFrobenioid nC wΦ where
   toElem := wideSubcategoryInclusion deg1Prop
   divisorial _ := isDivisorial_nat
   totEpiC := isTotallyEpimorphic_nC
   totEpiD := isTotallyEpimorphic_vee
+  connectedC := isConnected_nC
+  connectedD := isConnected_vee
 
 /-- 包含なので `deg_Fr` は下の圏の次数そのもの。 -/
 @[simp] theorem nP_degFr {A B : nC} (φ : A ⟶ B) : nP.degFr φ = wn φ.hom := rfl
