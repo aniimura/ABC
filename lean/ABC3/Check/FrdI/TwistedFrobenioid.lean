@@ -259,6 +259,70 @@ theorem twFrobDegSurj (A : TwObj Φ G) (n : ℕ+) :
   · show IsIso (𝟙 A.ofElem.base)
     infer_instance
 
+/-- ★**(iii)(a)** co-angular は合成で閉じる —— ★**全射が co-angular なので自明**。 -/
+theorem twCoAngularComp {A B E : TwObj Φ G} (ψ : A ⟶ B) (φ : B ⟶ E)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) ψ)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ) :
+    IsCoAngular (twPreFrobenioid (G := G) hD hpd) (ψ ≫ φ) :=
+  twCoAngular hD hpd _
+
+/-- ★**(vii)(b)** isotropic は下流へ伝播 —— ★**全対象が isotropic なので自明**。 -/
+theorem twIsotropicClosed {A B : TwObj Φ G} (_ : A ⟶ B)
+    (_ : IsIsotropic (twPreFrobenioid (G := G) hD hpd) A) :
+    IsIsotropic (twPreFrobenioid (G := G) hD hpd) B :=
+  twIsotropic hD hpd B
+
+/-- ★**(ii) の本質的一意性** —— 同じ次数の Frobenius 型射は同型を除いて一意。
+
+★`𝔽_Φ` 側の `β₀` に、★**`G` 成分を `φ.unit⁻¹ * ψ.unit` と取れば四角形が閉じる**
+(`β₀` は同型なので次数 1)。 -/
+theorem twFrobType_hom {A B : TwObj Φ G} (φ : A ⟶ B)
+    (hφ : IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) φ) :
+    IsFrobeniusType (elemPreFrobenioid Φ hD hpd) φ.hom :=
+  ⟨⟨prop_1_4_i _ φ.hom (fun Y _ => elemFrob_isotropic Φ hD hpd Y), hφ.1.2⟩, hφ.2⟩
+
+theorem twFrobDegUniq (A B E : TwObj Φ G) (φ : A ⟶ B) (ψ : A ⟶ E)
+    (hφ : IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) φ)
+    (hψ : IsFrobeniusType (twPreFrobenioid (G := G) hD hpd) ψ)
+    (hd : (twPreFrobenioid (G := G) hD hpd).degFr φ
+        = (twPreFrobenioid (G := G) hD hpd).degFr ψ) :
+    ∃ β : B ⟶ E, IsIso β ∧ φ ≫ β = ψ := by
+  obtain ⟨β₀, hβ₀iso, hβ₀⟩ :=
+    elemFrob_frobDegUniq Φ hD hpd A.ofElem B.ofElem E.ofElem φ.hom ψ.hom
+      (twFrobType_hom hD hpd φ hφ) (twFrobType_hom hD hpd ψ hψ) hd
+  haveI := hβ₀iso
+  obtain ⟨-, -, hdβ₀⟩ := (ElemFrobCat.isIso_iff β₀).mp hβ₀iso
+  refine ⟨⟨β₀, φ.unit⁻¹ * ψ.unit⟩, twIsIso_of _ hβ₀iso, ?_⟩
+  refine TwHom.ext hβ₀ ?_
+  show φ.unit ^ ((ElemFrobCat.Hom.deg β₀ : ℕ+) : ℕ) * (φ.unit⁻¹ * ψ.unit) = ψ.unit
+  rw [hdβ₀]
+  simp
+
+/-- ★`ζ n := (⟨𝟙, 0, n⟩, 1)` —— Frobenius-trivial 性を与えるモノイド準同型。
+
+★★**`End` の乗法は `x * y = y ≫ x`** なので、`map_mul'` は
+`ζ (n*m) = ζ m ≫ ζ n` を示すことになる。 -/
+def twZeta (Y : D) : ℕ+ →* End (⟨⟨Y⟩⟩ : TwObj Φ G) where
+  toFun n := ⟨⟨𝟙 Y, 0, n⟩, 1⟩
+  map_one' := TwHom.ext (ElemFrobCat.Hom.ext rfl rfl rfl) rfl
+  map_mul' n m := by
+    refine TwHom.ext ?_ ?_
+    · refine ElemFrobCat.Hom.ext ?_ ?_ rfl
+      · show 𝟙 Y = 𝟙 Y ≫ 𝟙 Y
+        simp
+      · show (0 : Φ.val Y) = Φ.map (𝟙 Y) 0 + ((n : ℕ+) : ℕ) • (0 : Φ.val Y)
+        simp
+    · show (1 : G) = (1 : G) ^ ((n : ℕ+) : ℕ) * 1
+      simp
+
+/-- ★**(i)(a)** 各底に Frobenius-trivial 対象がある。 -/
+theorem twBaseSurj (Y : D) :
+    ∃ A : TwObj Φ G, IsFrobeniusTrivial (twPreFrobenioid (G := G) hD hpd) A ∧
+      Nonempty (((twPreFrobenioid (G := G) hD hpd).toElem.obj A).base ≅ Y) := by
+  refine ⟨⟨⟨Y⟩⟩, ⟨twZeta (G := G) Y, fun n => rfl, fun n => ?_⟩, ⟨Iso.refl _⟩⟩
+  exact ⟨rfl, ⟨twCoAngular hD hpd _, by show toChar (0 : Φ.val Y) = 0; simp⟩,
+    by show IsIso (𝟙 Y); infer_instance⟩
+
 end Bridge
 
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
