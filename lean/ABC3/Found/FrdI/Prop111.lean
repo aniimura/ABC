@@ -251,6 +251,134 @@ theorem prop_1_11_iv_exists (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
   refine ⟨δ, hδm, ?_⟩
   rw [hfac, Category.assoc, hγXsq, ← Category.assoc, hδsq, Category.assoc]
 
+/-! ### ★★(iv) の一意性を原文の仮定まで弱める(2026-08-16)
+
+★★**検証役の指摘**: `prop_1_11_iv_unique` は `IsPreStep P φ` を要求しているが、
+原文が課すのは **co-angular linear** だけである。
+★**base-isomorphism でない co-angular linear 射(例: 非同型の pull-back)が
+覆われていなかった。**
+
+★**pre-step を落とすと `φ` が mono でなくなる**ので、消去では出せない。
+★★**代わりに `Definition 1.3, (iii), (c)` の `∃!` を使う。**
+
+★**組み立て**: `φ = β₀ ≫ α₀`(co-angular pre-step ＋ pull-back)と割り、
+1. `Proposition 1.11, (iii)` が `γX ∈ 𝒪^▷(X)` を与える(`α₀ ≫ γA = γX ≫ α₀`)
+2. 与えられた `δᵢ` について ★**`β₀ ≫ γX = δᵢ ≫ β₀`** を示す ——
+   ★**`α₀` が pull-back なので「合成と底」が一致すれば射が一致する**。
+   底はどちらも `Base β₀`(`γX`・`δᵢ` はどちらも base-identity)
+3. `otriBwd` の `∃!` が `δ₁ = δ₂` を与える
+
+★★**`φ` の mono 性を使わない証明である。**
+★**原文が「uniquely determined」と書くとき、その一意性は
+`Definition 1.3, (iii), (c)` から来ていて、mono から来ていない。**
+-/
+
+include P in
+/-- ★★**(iv) の一意性(原文の仮定のまま)** —— co-angular linear `φ` について、
+`γA ∈ 𝒪^▷(A)` に対応する `δ ∈ 𝒪^▷(B)` は高々 1 つ。 -/
+theorem prop_1_11_iv_unique' (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) {γA : End A} (hγA : γA ∈ OTri P A)
+    {δ₁ δ₂ : End B} (hδ₁ : δ₁ ∈ OTri P B) (hδ₂ : δ₂ ∈ OTri P B)
+    (e₁ : φ ≫ (γA : A ⟶ A) = (δ₁ : B ⟶ B) ≫ φ)
+    (e₂ : φ ≫ (γA : A ⟶ A) = (δ₂ : B ⟶ B) ≫ φ) : δ₁ = δ₂ := by
+  obtain ⟨X, β, α, hfac, hβs, hαpb⟩ := (prop_1_7_iii_linear_factor P F φ).mp hφl
+  have hβc : IsCoAngular P β :=
+    prop_1_4_iv_mpr P F (show φ = 𝟙 B ≫ β ≫ α by rw [hfac, Category.id_comp])
+      (isFrobeniusType_of_isIso P (𝟙 B)) hβs hαpb hφc
+  have hsq : P.Base α ≫ P.Base (γA : A ⟶ A) = 𝟙 _ ≫ P.Base α := by
+    rw [show P.Base (γA : A ⟶ A) = P.Base (𝟙 A) from hγA.1, P.Base_id,
+      Category.comp_id, Category.id_comp]
+  obtain ⟨γX, ⟨hγXb, hγXsq⟩, -⟩ := prop_1_11_iii P α hαpb γA (𝟙 _) hsq
+  have hγXl : IsLinear P (γX : X ⟶ X) := by
+    have h := congrArg P.degFr hγXsq
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr (γA : A ⟶ A) = 1 from hγA.2,
+      one_mul] at h
+    show P.degFr (γX : X ⟶ X) = 1
+    have h2 : P.degFr α * 1 = P.degFr α * P.degFr (γX : X ⟶ X) := by
+      rw [mul_one]; exact h
+    exact (mul_left_cancel h2).symm
+  have hγXm : (γX : End X) ∈ OTri P X := by
+    refine ⟨?_, hγXl⟩
+    show P.Base (γX : X ⟶ X) = P.Base (𝟙 X)
+    rw [hγXb, P.Base_id]
+  -- ★`β ≫ γX = δᵢ ≫ β` を pull-back の単射性で出す
+  have key : ∀ δ : End B, δ ∈ OTri P B →
+      φ ≫ (γA : A ⟶ A) = (δ : B ⟶ B) ≫ φ →
+      (β ≫ (γX : X ⟶ X) : B ⟶ X) = (δ : B ⟶ B) ≫ β := by
+    intro δ hδ e
+    obtain ⟨hinj, -⟩ := hαpb B
+    refine hinj (Subtype.ext (Prod.ext ?_ ?_))
+    · show (β ≫ (γX : X ⟶ X)) ≫ α = ((δ : B ⟶ B) ≫ β) ≫ α
+      rw [Category.assoc, ← hγXsq, ← Category.assoc, ← hfac, e, hfac, Category.assoc]
+    · show P.Base (β ≫ (γX : X ⟶ X)) = P.Base ((δ : B ⟶ B) ≫ β)
+      rw [P.Base_comp, P.Base_comp,
+        show P.Base (γX : X ⟶ X) = P.Base (𝟙 X) from hγXm.1, P.Base_id,
+        show P.Base (δ : B ⟶ B) = P.Base (𝟙 B) from hδ.1, P.Base_id,
+        Category.comp_id, Category.id_comp]
+  obtain ⟨δ₀, -, huniq⟩ := F.otriBwd β hβc hβs (γX : End X) hγXm
+  rw [huniq δ₁ ⟨hδ₁, key δ₁ hδ₁ e₁⟩, huniq δ₂ ⟨hδ₂, key δ₂ hδ₂ e₂⟩]
+
+/-! ### ★★(iv) の「injection of monoids」を束ねる(2026-08-16)
+
+★★**検証役の指摘**: 原文は「determines an **injection of monoids**
+`𝒪^▷(A) → 𝒪^▷(B)`」と言うが、★**モノイド準同型であることが実装されていなかった**
+(`grep MonoidHom` が 0 件)。★**私の数え(2 主張)が「準同型」と「単射」を落としていた。**
+
+★**準同型性は一意性から出る**: `φ ≫ (γ₁ * γ₂) = (δ₁ * δ₂) ≫ φ` を
+`End` の乗法(`x * y = y ≫ x`)で計算すればよい。
+-/
+
+include P in
+/-- ★(iv) の対応 `γA ↦ δ`(選択で取り出す)。 -/
+noncomputable def otriPull (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) (γA : OTri P A) : OTri P B :=
+  ⟨(prop_1_11_iv_exists P F φ hφc hφl (γA : End A) γA.2).choose,
+   (prop_1_11_iv_exists P F φ hφc hφl (γA : End A) γA.2).choose_spec.1⟩
+
+include P in
+/-- `otriPull` の定義式。 -/
+theorem otriPull_spec (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) (γA : OTri P A) :
+    φ ≫ ((γA : End A) : A ⟶ A)
+      = ((otriPull P F φ hφc hφl γA : End B) : B ⟶ B) ≫ φ :=
+  (prop_1_11_iv_exists P F φ hφc hφl (γA : End A) γA.2).choose_spec.2
+
+include P in
+/-- ★★★**(iv) の「injection of monoids」** —— `𝒪^▷(A) →* 𝒪^▷(B)`。
+
+★**準同型性は `prop_1_11_iv_unique'` の一意性から**、
+★**単射性は `prop_1_11_iv_injective`(totally epimorphicity)から**。 -/
+noncomputable def otriPullHom (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) : OTri P A →* OTri P B where
+  toFun := otriPull P F φ hφc hφl
+  map_one' := by
+    refine Subtype.ext (prop_1_11_iv_unique' P F φ hφc hφl (OTri P A).one_mem
+      (otriPull P F φ hφc hφl 1).2 (OTri P B).one_mem ?_ ?_)
+    · exact otriPull_spec P F φ hφc hφl 1
+    · show φ ≫ (𝟙 A : A ⟶ A) = (𝟙 B : B ⟶ B) ≫ φ
+      simp
+  map_mul' a b := by
+    refine Subtype.ext (prop_1_11_iv_unique' P F φ hφc hφl (a * b).2
+      (otriPull P F φ hφc hφl (a * b)).2
+      ((otriPull P F φ hφc hφl a) * (otriPull P F φ hφc hφl b)).2 ?_ ?_)
+    · exact otriPull_spec P F φ hφc hφl (a * b)
+    · show φ ≫ (((b : End A) : A ⟶ A) ≫ ((a : End A) : A ⟶ A))
+        = (((otriPull P F φ hφc hφl b : End B) : B ⟶ B)
+            ≫ ((otriPull P F φ hφc hφl a : End B) : B ⟶ B)) ≫ φ
+      rw [← Category.assoc, otriPull_spec P F φ hφc hφl b, Category.assoc,
+        otriPull_spec P F φ hφc hφl a, ← Category.assoc]
+
+include P in
+/-- ★**(iv) の「injection」** —— `otriPullHom` は単射。 -/
+theorem otriPullHom_injective (F : FrobenioidCore P) {A B : C} (φ : B ⟶ A)
+    (hφc : IsCoAngular P φ) (hφl : IsLinear P φ) :
+    Function.Injective (otriPullHom P F φ hφc hφl) := by
+  intro a b hab
+  refine Subtype.ext (prop_1_11_iv_injective P φ (β := (otriPull P F φ hφc hφl a : End B))
+    (otriPull_spec P F φ hφc hφl a) ?_)
+  rw [show (otriPull P F φ hφc hφl a) = otriPull P F φ hφc hφl b from hab]
+  exact otriPull_spec P F φ hφc hφl b
+
 /-! ## ★(i) —— `𝒞^pl-bk → 𝒟` の full 性
 
 原文 (FrdI p.36):
@@ -993,6 +1121,39 @@ theorem prop_1_11_v_exists_pullBack (G : Frobenioid P) {A B Cc Dd : C}
   obtain ⟨κ, _, _, hκ⟩ :=
     coaPre_factor_of_mle P G β' hβ'co hβ's α hαc hαs (hinvb ▸ ⟨0, add_zero _⟩)
   exact ⟨κ ≫ φ', by rw [Category.assoc, ← hsq, ← Category.assoc, hκ]⟩
+
+include P in
+/-- ★**四角形の 3 辺が linear なら残る 1 辺も linear**。
+
+★★**検証役の指摘**: 原文の (v) は「there exists a unique morphism `ψ` **in `𝒞^lin`**」と
+書いており、★**`ψ` が linear であることも主張の一部**である。
+`prop_1_11_v_exists_pullBack` の結論はそれを言っていなかった。
+
+★**次数を数えるだけで出る**(`Remark 1.1.1`)。 -/
+theorem isLinear_of_square {A B Cc Dd : C} (φ : A ⟶ B) (α : Cc ⟶ A) (β : Dd ⟶ B)
+    (ψ : Cc ⟶ Dd) (hφl : IsLinear P φ) (hαl : IsLinear P α) (hβl : IsLinear P β)
+    (h : ψ ≫ β = α ≫ φ) : IsLinear P ψ := by
+  have h2 := congrArg P.degFr h
+  rw [P.degFr_comp, P.degFr_comp, hφl, hβl, hαl] at h2
+  show P.degFr ψ = 1
+  simpa using h2
+
+include P in
+/-- ★★**(v) の pull-back の場合 —— `ψ` の linear 性まで込めた形**。
+
+★原文の「a unique morphism ψ : C →D **in Clin**」に対応する。 -/
+theorem prop_1_11_v_exists_pullBack' (G : Frobenioid P) {A B Cc Dd : C}
+    (φ : A ⟶ B) (hφpb : IsPullBack P φ)
+    (α : Cc ⟶ A) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (β : Dd ⟶ B) (hβc : IsCoAngular P β) (hβs : IsPreStep P β)
+    (hcond : haveI : IsIso (P.Base α) := hαs.2
+             haveI : IsIso (P.Base β) := hβs.2
+             Φ.map (inv (P.Base α)) (P.Div α)
+               = Φ.map (P.Base φ) (Φ.map (inv (P.Base β)) (P.Div β))) :
+    ∃ ψ : Cc ⟶ Dd, ψ ≫ β = α ≫ φ ∧ IsLinear P ψ := by
+  obtain ⟨ψ, hψ⟩ := prop_1_11_v_exists_pullBack P G φ hφpb α hαc hαs β hβc hβs hcond
+  exact ⟨ψ, hψ, isLinear_of_square P φ α β ψ
+    ((prop_1_4_ii_mp P G.core φ hφpb).2) hαs.1 hβs.1 hψ⟩
 
 include P in
 /-- ★★★**(vii) の pull-back の場合** —— 原文の
