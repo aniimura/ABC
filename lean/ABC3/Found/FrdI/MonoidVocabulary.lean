@@ -733,6 +733,28 @@ noncomputable def gpMap {N : Type*} [AddCommMonoid N] (f : M →+ N) : Gp M →+
   rw [AddSubmonoid.LocalizationMap.lift_eq]
   rfl
 
+/-! ★★**`gpMap` の単射性 —— 道具を特定した（2026-08-16）**
+
+★**`AddLocalization.mk_eq_mk_iff'`**（`[IsCancelAdd]` 下）が道具である:
+
+    mk a₁ a₂ = mk b₁ b₂  ↔  ↑b₂ + a₁ = a₂ + b₁
+
+★これで**存在量化子が消える**のが要点である——
+一般の局所化の同値関係には証人 `c` が入るが、簡約性がそれを消す。
+
+★**残る形**:
+1. `gpMap_mk : gpMap M f (mk a b) = mk (f a) ⟨f b, trivial⟩`
+   ★`mk a b = toGp a - toGp b` と `gpMap` の加法性から出るはず。
+   ★**部分モノイドの部分型（`↑b`）の扱いが一手間。**
+2. `gpMap_injective [IsCancelAdd M] [IsCancelAdd N] (hf : Injective f) :
+   Injective (gpMap M f)`
+   ★`mk_eq_mk_iff'` を両側に適用し、`f (b' + a) = f (b + a')` から
+   `hf` で戻すだけ。
+
+★`Φ` は divisorial なので各 `Φ(A)` は integral、
+`isCancelAdd_of_isIntegralMonoid` が両方の簡約性を与える。
+★★**材料はすべて手元にある。まだ書いていない。** -/
+
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
 ★★**これは `Φ^gp` を `monoid on D` にする際の障壁を 1 つ外す**。
