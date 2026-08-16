@@ -492,6 +492,43 @@ def proj : ElemFrobCat Φ ⥤ D where
   obj A := A.base
   map φ := φ.base
 
+/-! ### ★★`Φ ↦ 𝔽_Φ` の関手性（2026-08-16 追加）
+
+原文 (FrdI p.20):
+> Observe that the assignment Φ →FΦ is functorial with respect to homomorphisms
+
+★★**監査で「指摘したのはこちらだ」と区別された項目**である ——
+`PreFrobenioid.divisorFunctor`（原文 p.21）は `Φ` を**固定して** `𝒞` 上へ持ち上げるもので、
+★こちらは **`Φ` を動かす**。★**量化している対象が違う。**
+
+★原文の「homomorphisms of functors [on D] valued in monoids」は
+★**単なる自然変換** `Φ.functor ⟶ Φ'.functor` である（(a)(b) は各々の `Φ` の側の条件）。
+
+★★**関手性の非自明な部分は `Div` 成分だけで、
+そこで使うのが `η` の自然性である** —— `η (Φ.map f x) = Φ'.map f (η x)`。 -/
+
+/-- ★★**`Φ ↦ 𝔽_Φ` の関手性**。自然変換 `η : Φ ⟶ Φ'` が
+関手 `𝔽_Φ ⥤ 𝔽_{Φ'}` を誘導する。 -/
+def elemFrobMap {Φ Ψ : MonoidOn.{v, u, w} D} (η : Φ.functor ⟶ Ψ.functor) :
+    ElemFrobCat Φ ⥤ ElemFrobCat Ψ where
+  obj A := ⟨A.base⟩
+  map {A B} φ := ⟨φ.base, (η.app (op A.base)).hom φ.div, φ.deg⟩
+  map_id A := by
+    refine ElemFrobCat.Hom.ext rfl ?_ rfl
+    show (η.app (op A.base)).hom 0 = 0
+    exact map_zero _
+  map_comp {A B E} φ ψ := by
+    refine ElemFrobCat.Hom.ext rfl ?_ rfl
+    show (η.app (op A.base)).hom (Φ.map φ.base ψ.div + ((ψ.deg : ℕ+) : ℕ) • φ.div)
+      = Ψ.map φ.base ((η.app (op B.base)).hom ψ.div)
+        + ((ψ.deg : ℕ+) : ℕ) • (η.app (op A.base)).hom φ.div
+    rw [map_add, map_nsmul]
+    congr 1
+    exact congrArg (fun t => (AddCommMonCat.Hom.hom t) ψ.div) (η.naturality φ.base.op)
+
+/-! ★**`elemFrobToChar`（`Prop15`）はこの特殊例である** —— 監査の指摘。
+★実際の写像は下流にあるので、ここでは形の一致だけを記録する。 -/
+
 /-! ### ★Remark 1.1.1 の3式
 
 原文 (FrdI p.21):
