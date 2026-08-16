@@ -462,8 +462,10 @@ def IsFrobeniusIsotropic (A : C) : Prop :=
 指摘されたもの**。他は下流で `∀ X : C, IsIsotropic P X` のように
 その場で展開して書かれていた。
 
-★**原文は 18 語**。うち `perfect` は `IsOfPerfectType`（`Prop110`）で既にあり、
-★**`Frobenius-compact` は対象の述語自体が未実装**なので、ここでは **16 語**を置く。
+★**原文は 18 語**。ここに 16 語を置き、残り 2 語は別の場所にある ——
+`IsOfPerfectType`（`Prop110`）と `IsOfFrobeniusCompactType`（`Prop110`、同日実装）。
+★★**合計 18/18 である**（★一度この docstring に「`Frobenius-compact` は未実装」と
+書いたが、同じ日に実装していた。検証役の再監査で訂正）。
 
 ★★**どれも「全対象がその性質を持つ」という同じ形である** ——
 原文が「(respectively, …)」で 18 語を一行に畳んでいるのもそのためである。 -/
@@ -487,7 +489,7 @@ def IsOfFrobeniusIsotropicType : Prop := ∀ A : C, IsFrobeniusIsotropic P A
 
 def IsOfIsotropicType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 23,
-    item := "Definition 1.2, (v) — of X type（16 語）",
+    item := "Definition 1.2, (v) — of X type",
     sectionId := "frdi-def-1-2-v" }
 
 /-- **(iv)** `isotropic hull` —— isometric pre-step であって、終域が isotropic で、
@@ -763,5 +765,34 @@ def IsIsotropic.src : ABC3.Meta.Source :=
 def IsIsotropicHull.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — isotropic hull",
     sectionId := "frdi-def-1-2-iv" }
+
+/-! ## ★★命題全体の `.src`（2026-08-16）
+
+★★**文脈を持たない検証役が、原文を 61 項目に番号付けして 2 度監査した。**
+
+| 回 | 結果 |
+|---|---|
+| 1 回目 | OK 41 / GAP 20 |
+| 本日の実装 | GAP 20 件をすべて埋めた |
+| 2 回目（再監査） | ★**61/61 が実在**。回帰なし。条なし `.src` 可 |
+
+★**埋めた 20 件**: `Frobenius-compact` / `𝒞^bs-iso` /
+(v) の「of X type」16 語 ＋ `IsOfFrobeniusCompactType`。
+（`𝒞^lin` は検証役の誤りで、実は `Prop111` に既にあった。
+★**重複宣言のビルドエラーで判明した** —— 子の報告も検証の対象である。）
+
+★★**再監査が見つけた docstring の誤り 2 件も訂正済み**:
+1. 「(v) は 16 語」→ 実際は **18/18**（`Frobenius-compact` を同日実装していた）
+2. ③の翻訳の根拠を `Pf.eq_of_qact` と書いたが、
+   ★**実際に効くのは `Pf.nsmul_injective` ＋ 誘導写像の加法性**である
+
+★**検証役が明示した限界（記録）**: `Frobenius-compact` の③は
+`Pf` を経由しない同値な式で書いており、★**原文形との同値を定理としては持っていない**。
+手検証は検証役が全段追った。`IsPullBack` も同じ形の手検証つき言い換えであり、
+★**同じ基準で扱っている**。 -/
+
+def definition_1_2.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2",
+    sectionId := "frdi-def-1-2-i" }
 
 end ABC3.Found.FrdI
