@@ -983,6 +983,42 @@ theorem psiMap_isometricPreStep_comp (d : ℕ+) {A A' B : C} {γ : A' ⟶ A}
     conv_lhs => rw [← Category.assoc γ δ _, hpast]
     simp
 
+include hτ hmt haa in
+/-- ★**`𝒪^▷` の元の上では `Ψ = psiOTri`** —— 分解 `𝟙 ≫ 𝟙 ≫ β ≫ 𝟙` を渡すだけ。 -/
+theorem psiMap_otri (d : ℕ+) {Y : C} (β : OTri P Y) :
+    psiMap P F hτ hmt haa d (((β : End Y) : Y ⟶ Y))
+      = (((psiOTri P F hτ d β : OTri P Y) : End Y) : Y ⟶ Y) := by
+  refine psiMap_eq P F hτ hmt haa d ?_
+  refine ⟨Y, Y, 𝟙 Y, 𝟙 Y, ((β : End Y) : Y ⟶ Y), 𝟙 Y, β.2, by simp,
+    isFrobeniusType_of_isIso P (𝟙 Y), isIsometric_of_isIso P (𝟙 Y),
+    isPreStep_of_isIso P (𝟙 Y), ?_, isCoAngular_of_endo P F _,
+    isPullBack_of_isIso P (𝟙 Y), by simp⟩
+  refine ⟨β.2.2, ?_⟩
+  show IsIso (P.Base _)
+  rw [show P.Base (((β : End Y) : Y ⟶ Y)) = P.Base (𝟙 Y) from β.2.1, P.Base_id]
+  infer_instance
+
+include hτ hmt haa in
+/-- ★★★★**`Ψ` は isotropic hull を右から掛けることと可換**(`𝒪^▷` の元について)。
+
+★★`hullOTriMap_sq` の四角形 `β ≫ h = h ≫ ι(β)` と
+**左からの合成則**(isotropy 不要)、そして `psiOTri_hull` の 3 つで閉じる。
+
+★これが原文の段 3 の第 1 歩である。 -/
+theorem psiMap_otri_hull (d : ℕ+) {Y Z : C} {hh : Y ⟶ Z}
+    (hhull : IsIsotropicHull P hh) (β : OTri P Y) :
+    psiMap P F hτ hmt haa d (((β : End Y) : Y ⟶ Y) ≫ hh)
+      = psiMap P F hτ hmt haa d (((β : End Y) : Y ⟶ Y)) ≫ hh := by
+  have hsq : ((β : End Y) : Y ⟶ Y) ≫ hh
+      = hh ≫ (((hullOTriMon P hhull β : OTri P Z) : End Z) : Z ⟶ Z) :=
+    hullOTriMap_sq P hh hhull ((β : End Y))
+  have hsqΨ : (((psiOTri P F hτ d β : OTri P Y) : End Y) : Y ⟶ Y) ≫ hh
+      = hh ≫ (((hullOTriMon P hhull (psiOTri P F hτ d β) : OTri P Z) : End Z) : Z ⟶ Z) :=
+    hullOTriMap_sq P hh hhull _
+  rw [hsq, psiMap_isometricPreStep_comp P F hτ hmt haa d hhull.1 hhull.2.1,
+    psiMap_otri P F hτ hmt haa d (hullOTriMon P hhull β),
+    psiOTri_hull P F hτ hhull d β, psiMap_otri P F hτ hmt haa d β, hsqΨ]
+
 include hτ hiso hmt haa hfn in
 /-- ★★★**右から `𝒪^▷` の元を掛ける場合** —— `Ψ(φ ≫ β') = Ψ(φ) ≫ Ψ(β')`。
 
