@@ -64,6 +64,7 @@ import ABC3.Found.GenEll.FinitePlaceRel
 import ABC3.Found.GenEll.BaseChange
 import ABC3.Found.GenEll.LogDiffTower
 import ABC3.Found.GenEll.CartierPullback
+import ABC3.Found.GenEll.MinField
 import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
