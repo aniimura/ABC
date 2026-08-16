@@ -1019,7 +1019,7 @@ theorem psiMap_otri_hull (d : ℕ+) {Y Z : C} {hh : Y ⟶ Z}
     psiMap_otri P F hτ hmt haa d (hullOTriMon P hhull β),
     psiOTri_hull P F hτ hhull d β, psiMap_otri P F hτ hmt haa d β, hsqΨ]
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**右から `𝒪^▷` の元を掛ける場合** —— `Ψ(φ ≫ β') = Ψ(φ) ≫ Ψ(β')`。
 
 ★★**pull-back `α` は(isotropic 型のもとで)co-angular かつ linear なので
@@ -1031,21 +1031,24 @@ include hτ hiso hmt haa hfn in
 - `Ψ` が `otriLin` と可換であること(`psiOTri_otriLin`)
 
 の 2 本で閉じる。★**先に用意した自然性がそのまま効いた。** -/
-theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
+theorem psiMap_comp_otri (d : ℕ+) {A B : C} (hA : IsIsotropic P A) (φ : A ⟶ B)
+    (β' : OTri P B) :
     psiMap P F hτ hmt haa d (φ ≫ (((β' : End B)) : B ⟶ B))
       = psiMap P F hτ hmt haa d φ
         ≫ (((psiOTri P F hτ d β' : OTri P B) : End B) : B ⟶ B) := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
     psiMap_spec P F hτ hmt haa d φ
+  have hY : IsIsotropic P Y := F.isotropicClosed (δ ≫ γ) hA
+  have hB : IsIsotropic P B := F.isotropicClosed φ hA
   have hαlin : IsLinear P α := (F.pullBackLB α hα).2
   have hspec : α ≫ (((β' : End B)) : B ⟶ B)
-      = (((otriLin P F (hiso Y) hαlin β' : OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
-    otriLin_spec P F (hiso Y) hαlin β'
+      = (((otriLin P F hY hαlin β' : OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
+    otriLin_spec P F hY hαlin β'
   have hpsispec : α ≫ (((psiOTri P F hτ d β' : OTri P B) : End B) : B ⟶ B)
-      = (((otriLin P F (hiso Y) hαlin (psiOTri P F hτ d β') :
+      = (((otriLin P F hY hαlin (psiOTri P F hτ d β') :
           OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
-    otriLin_spec P F (hiso Y) hαlin _
-  set s : OTri P Y := otriLin P F (hiso Y) hαlin β' with hsdef
+    otriLin_spec P F hY hαlin _
+  set s : OTri P Y := otriLin P F hY hαlin β' with hsdef
   set b : OTri P Y := ⟨β, hm⟩ with hbdef
   have hnew : (((s * b : OTri P Y) : End Y) : Y ⟶ Y) = β ≫ (((s : End Y)) : Y ⟶ Y) := rfl
   refine psiMap_eq P F hτ hmt haa d ?_
@@ -1063,12 +1066,12 @@ theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
     infer_instance
   · -- co-angular —— isotropic 型なので `Proposition 1.4, (i)`
     rw [hnew]
-    exact F.coAngularComp _ _ hβc (prop_1_4_i P _ (fun X _ => hiso X))
+    exact F.coAngularComp _ _ hβc (prop_1_4_i P _ (fun Z g => F.isotropicClosed g hY))
   · -- `Ψ` の値
     rw [he, psiOTri_mul P F hτ (hfn Y) d s b, hsdef,
-      psiOTri_otriLin P F hτ (hiso Y) (hiso B) hαlin d β']
+      psiOTri_otriLin P F hτ hY hB hαlin d β']
     show _ ≫ _ = δ ≫ γ ≫ ((((psiOTri P F hτ d b : OTri P Y) : End Y) : Y ⟶ Y)
-      ≫ (((otriLin P F (hiso Y) hαlin (psiOTri P F hτ d β') :
+      ≫ (((otriLin P F hY hαlin (psiOTri P F hτ d β') :
         OTri P Y) : End Y) : Y ⟶ Y)) ≫ α
     simp only [Category.assoc]
     rw [← hpsispec]
@@ -1255,7 +1258,7 @@ theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
   conv_lhs => rw [hf']
   have e0 : φ ≫ δ' ≫ γ' ≫ β' ≫ α' = (((φ ≫ δ') ≫ γ') ≫ β') ≫ α' := by simp
   rw [e0, psiMap_comp_pullBack P F hτ hmt haa d _ hα',
-    psiMap_comp_otri P F hτ hiso hmt haa hfn d _ (⟨β', hm'⟩ : OTri P Y'),
+    psiMap_comp_otri P F hτ hmt haa hfn d (hiso _) _ (⟨β', hm'⟩ : OTri P Y'),
     psiMap_comp_isometricPreStep P F hτ hiso hmt haa hfn d _ hγi' hγs',
     psiMap_comp_frob P F hτ hiso hmt haa hfn hft d φ hδ'F]
   simp
