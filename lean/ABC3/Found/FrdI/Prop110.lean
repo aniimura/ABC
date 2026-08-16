@@ -1743,6 +1743,29 @@ theorem prop_1_10_iii_image_perfect (G : Frobenioid P) (hpt : IsOfPerfectType P)
     IsPerfectMonoid (Φ.val (P.toElem.obj A).base) :=
   prop_1_10_iii_perfect P G (hpt A)
 
+include P in
+/-- ★★**(iii) 第1主張 ——「the monoids in the image of Φ」の本当の範囲**。
+
+★★**取り下げの原因の1つを埋める**(2026-08-16)。
+`prop_1_10_iii_image_perfect` は `𝒞` の対象の底、すなわち
+**`Base` の像**についてしか述べていなかった。★原文の「the image of Φ」は
+`Φ : 𝒟ᵒᵖ ⥤ 𝔐𝔬𝔫` の像であり、★**`Ob(𝒟)` 全体に渡る。**
+
+★**渡し方**: `Definition 1.3, (i), (a)`(`baseSurj`)が、任意の `Y : 𝒟` に対し
+`Base(A) ≅ Y` なる(しかも Frobenius-trivial な)`A : 𝒞` を与える。
+`Φ.map` はその同型に沿って全単射(`MonoidOn.map_bijective_of_iso`)であり、
+perfect 性は加法的全単射で移る(`isPerfectMonoid_of_bijective`)。
+
+★★**ここで初めて `𝒟` 側と `𝒞` 側の隔たりが埋まった** ——
+`Proposition 1.10` の他の条はすべて `𝒞` の中の話だが、
+★**(iii) の第1主張だけは `𝒟` の全対象について述べている。**
+その差を原文は書いていない(「the image of Φ」の一語で済ませている)。 -/
+theorem prop_1_10_iii_image_perfect_of_base (F : FrobenioidCore P) (G : Frobenioid P)
+    (hpt : IsOfPerfectType P) (Y : D) : IsPerfectMonoid (Φ.val Y) := by
+  obtain ⟨A, -, ⟨e⟩⟩ := F.baseSurj Y
+  exact isPerfectMonoid_of_bijective (Φ.map e.symm.hom) (Φ.map_bijective_of_iso e.symm)
+    (prop_1_10_iii_image_perfect P G hpt A)
+
 /-! ## ★(iii) の「moreover」—— `𝒪^▷(A)` と `𝒪^×(A)` が perfect
 
 原文 (FrdI p.35):
@@ -2192,6 +2215,170 @@ theorem prop_1_10_iii_otimes_perfect (F : FrobenioidCore P) {A : C}
   rintro γ ⟨hγm, hγp⟩
   exact huniq γ ⟨hγm.1, hγp⟩
 
+/-! ### ★★(iii) の還元 —— 原文「we may assume that A is Frobenius-trivial」
+
+原文 (FrdI p.35):
+> of Frobenius-trivial objects [cf. Definition 1.3, (i), (a), (b); the isomorphism of Def-
+
+原文 (FrdI p.35):
+> inition 1.3, (iii), (c)], we may assume that A is Frobenius-trivial. Now the fact that
+
+★★**取り下げの原因の1つを埋める**(2026-08-16)。
+`prop_1_10_iii_otri_perfect` は「次数 `n` の base-identity Frobenius 型自己射 `ζ n` が
+ある」を**仮定に置いていた** —— それは `A` が Frobenius-trivial だということである。
+★原文はそこを**還元して**いる。その還元をここで実装する。
+
+★**原文が名指す 3 つが、そのまま 3 段になる**:
+1. `Definition 1.3, (i), (a)`(`baseSurj`) —— `Base(A)` を底に持つ
+   **Frobenius-trivial な `A₀`** がある
+2. `Definition 1.3, (i), (b)`(`preStepSpan`) —— その底の同型は
+   **pre-step の span** `A₀ ← X → A` に持ち上がる
+3. `Definition 1.3, (iii), (c)`(`otriFwd` / `otriBwd`) —— **co-angular** pre-step は
+   `𝒪^▷` の全単射を与える
+
+★★**`isotropic` の仮定がここで効く**。原文の角括弧
+「so all morphisms of C are co-angular — cf. Proposition 1.4, (i)」がそれである ——
+span の pre-step が co-angular だと分かって初めて 3 が使える。
+★**原文は「isotropic」を moreover の仮定として置いているが、
+その最初の用途はこの還元である**(perfect 性の議論そのものではない)。
+
+★★**「一意存在が移る」ことだけが要る**。全単射そのもの(`MulEquiv`)は要らない ——
+`otriFwd` / `otriBwd` の 2 つの `∃!` と、四角形が積と可換すること
+(`φ ≫ (β₂ ≫ β₁) = (α₂ ≫ α₁) ≫ φ`)があれば、`n` 乗根の一意存在は渡る。
+-/
+
+section PowTransfer
+
+variable {M N : Type*} [Monoid M] [Monoid N]
+
+/-- ★**全単射の graph に沿って「`n` 乗根の一意存在」が移る**。
+
+★`R` は `Definition 1.3, (iii), (c)` の四角形「`φ ≫ β = α ≫ φ`」であり、
+`otriFwd` / `otriBwd` がちょうど**両向きの一意性**を与える。
+★積と可換する(`hmul`)ことから `n` 乗とも可換し、両側の一意性で挟める。
+
+★**`MulEquiv` を作らないのは、`R` が `∃!` の形でしか与えられないからである** ——
+写像を取り出すには選択が要るが、主張は選択なしで書ける。 -/
+theorem exists_unique_pow_transfer (R : M → N → Prop)
+    (hfwd : ∀ a : M, ∃! b : N, R a b) (hbwd : ∀ b : N, ∃! a : M, R a b)
+    (hone : R 1 1)
+    (hmul : ∀ (a₁ a₂ : M) (b₁ b₂ : N), R a₁ b₁ → R a₂ b₂ → R (a₁ * a₂) (b₁ * b₂))
+    (n : ℕ) (h : ∀ a : M, ∃! x : M, x ^ n = a) (b : N) : ∃! y : N, y ^ n = b := by
+  have hpow : ∀ (a : M) (b : N), R a b → ∀ k : ℕ, R (a ^ k) (b ^ k) := by
+    intro a b hab k
+    induction k with
+    | zero => rw [pow_zero, pow_zero]; exact hone
+    | succ k ih => rw [pow_succ, pow_succ]; exact hmul _ _ _ _ ih hab
+  obtain ⟨a, hab, hau⟩ := hbwd b
+  obtain ⟨x, hxa, hxu⟩ := h a
+  obtain ⟨y, hxy, hyu⟩ := hfwd x
+  obtain ⟨z, -, hzu⟩ := hfwd (x ^ n)
+  refine ⟨y, ?_, ?_⟩
+  · show y ^ n = b
+    rw [hzu _ (hpow x y hxy n), hzu b (by rw [hxa]; exact hab)]
+  · intro y' hy'
+    have hy'' : y' ^ n = b := hy'
+    obtain ⟨a', ha'y, -⟩ := hbwd y'
+    have ha'n : a' ^ n = a := hau _ (by rw [← hy'']; exact hpow a' y' ha'y n)
+    exact hyu y' (by rw [← hxu a' ha'n]; exact ha'y)
+
+end PowTransfer
+
+/-- ★`𝒪^▷` の「`n` 乗根の一意存在」の 2 つの綴りが同値であること ——
+`End A` の元＋所属で書いた形と、部分モノイドの元で書いた形。
+
+★**前者は原文の言い回しに近く、後者は移送の補題に渡しやすい。** -/
+theorem otri_existsUnique_pow_iff {A : C} (n : ℕ) :
+    (∀ α ∈ OTri P A, ∃! β : End A, β ∈ OTri P A ∧ (β ^ n : End A) = α)
+      ↔ (∀ a : OTri P A, ∃! x : OTri P A, x ^ n = a) := by
+  constructor
+  · intro h a
+    obtain ⟨β, ⟨hβm, hβp⟩, hβu⟩ := h (a : End A) a.2
+    refine ⟨⟨β, hβm⟩, Subtype.ext (by simpa using hβp), fun y hy => ?_⟩
+    exact Subtype.ext (hβu (y : End A) ⟨y.2, by simpa using congrArg Subtype.val hy⟩)
+  · intro h α hα
+    obtain ⟨x, hx, hxu⟩ := h ⟨α, hα⟩
+    refine ⟨(x : End A), ⟨x.2, by simpa using congrArg Subtype.val hx⟩, ?_⟩
+    rintro β ⟨hβm, hβp⟩
+    exact congrArg Subtype.val (hxu ⟨β, hβm⟩ (Subtype.ext (by simpa using hβp)))
+
+/-- ★★**`Definition 1.3, (iii), (c)` を「perfect 性の移送」として使う**。
+
+co-angular pre-step `φ : A ⟶ B` に沿って、`𝒪^▷` の `n` 乗根の一意存在は
+★**両向きに**移る(`otriFwd` と `otriBwd` の両方があるため)。 -/
+theorem otri_pow_transfer (F : FrobenioidCore P) {A B : C} (φ : A ⟶ B)
+    (hc : IsCoAngular P φ) (hs : IsPreStep P φ) (n : ℕ) :
+    (∀ a : OTri P A, ∃! x : OTri P A, x ^ n = a) ↔
+      (∀ b : OTri P B, ∃! y : OTri P B, y ^ n = b) := by
+  set R : OTri P A → OTri P B → Prop :=
+    fun a b => (φ ≫ (b : End B) : A ⟶ B) = (a : End A) ≫ φ with hR
+  have hfwd : ∀ a : OTri P A, ∃! b : OTri P B, R a b := by
+    intro a
+    obtain ⟨b, ⟨hbm, hbr⟩, hbu⟩ := F.otriFwd φ hc hs (a : End A) a.2
+    exact ⟨⟨b, hbm⟩, hbr, fun y hy => Subtype.ext (hbu (y : End B) ⟨y.2, hy⟩)⟩
+  have hbwd : ∀ b : OTri P B, ∃! a : OTri P A, R a b := by
+    intro b
+    obtain ⟨a, ⟨ham, har⟩, hau⟩ := F.otriBwd φ hc hs (b : End B) b.2
+    exact ⟨⟨a, ham⟩, har, fun y hy => Subtype.ext (hau (y : End A) ⟨y.2, hy⟩)⟩
+  have hone : R 1 1 := by
+    show (φ ≫ (𝟙 B : End B) : A ⟶ B) = (𝟙 A : End A) ≫ φ
+    simp
+  have hmul : ∀ (a₁ a₂ : OTri P A) (b₁ b₂ : OTri P B),
+      R a₁ b₁ → R a₂ b₂ → R (a₁ * a₂) (b₁ * b₂) := by
+    intro a₁ a₂ b₁ b₂ h₁ h₂
+    show (φ ≫ ((b₂ : End B) ≫ (b₁ : End B)) : A ⟶ B)
+      = ((a₂ : End A) ≫ (a₁ : End A)) ≫ φ
+    rw [← Category.assoc φ, show (φ ≫ (b₂ : End B) : A ⟶ B) = (a₂ : End A) ≫ φ from h₂,
+      Category.assoc, show (φ ≫ (b₁ : End B) : A ⟶ B) = (a₁ : End A) ≫ φ from h₁,
+      ← Category.assoc]
+  exact ⟨fun h => exists_unique_pow_transfer R hfwd hbwd hone hmul n h,
+    fun h => exists_unique_pow_transfer (fun b a => R a b) hbwd hfwd hone
+      (fun b₁ b₂ a₁ a₂ h₁ h₂ => hmul a₁ a₂ b₁ b₂ h₁ h₂) n h⟩
+
+/-- ★★★**`Proposition 1.10, (iii)` の moreover —— 還元まで込めた完成形**(`𝒪^▷`)。
+
+★原文の仮定そのもの(「`𝒞` が perfect・isotropic・Frobenius-normalized 型」)から、
+★**任意の対象 `A`** について `𝒪^▷(A)` で `n` 乗根が一意に存在する。
+`ζ n` の存在はもはや仮定ではなく、`Definition 1.3, (i), (a)` から**導かれる**。 -/
+theorem prop_1_10_iii_otri_perfect_of_type (F : FrobenioidCore P)
+    (hpt : IsOfPerfectType P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hfnt : ∀ X : C, IsFrobeniusNormalized P X) (A : C) (n : ℕ+)
+    (α : End A) (hα : α ∈ OTri P A) :
+    ∃! β : End A, β ∈ OTri P A ∧ (β ^ (n : ℕ) : End A) = α := by
+  -- 1 段: `Definition 1.3, (i), (a)` —— 同じ底を持つ Frobenius-trivial な `A₀`
+  obtain ⟨A₀, ⟨ζ, hζd, hζbf⟩, ⟨e⟩⟩ := F.baseSurj (P.toElem.obj A).base
+  have hA₀ : ∀ a : OTri P A₀, ∃! x : OTri P A₀, x ^ (n : ℕ) = a :=
+    (otri_existsUnique_pow_iff P (n : ℕ)).mp (fun β hβ =>
+      prop_1_10_iii_otri_perfect P (hpt A₀) (hfnt A₀) n (ζ n)
+        (hζbf n).1 (hζbf n).2 (hζd n) β hβ)
+  -- 2 段: `Definition 1.3, (i), (b)` —— pre-step の span `A₀ ← X → A`
+  obtain ⟨X, φ, ψ, hφs, hψs, -⟩ := F.preStepSpan A₀ A e.hom inferInstance
+  -- 3 段: isotropic ⟹ co-angular(`Proposition 1.4, (i)`)、`(iii)(c)` で両向きに移送
+  have hφc : IsCoAngular P φ := prop_1_4_i P φ (fun Y _ => hiso Y)
+  have hψc : IsCoAngular P ψ := prop_1_4_i P ψ (fun Y _ => hiso Y)
+  exact (otri_existsUnique_pow_iff P (n : ℕ)).mpr
+    ((otri_pow_transfer P F ψ hψc hψs (n : ℕ)).mp
+      ((otri_pow_transfer P F φ hφc hφs (n : ℕ)).mpr hA₀)) α hα
+
+/-- ★★★**`Proposition 1.10, (iii)` の moreover —— 還元まで込めた完成形**(`𝒪^×`)。
+
+★`𝒪^▷` の側に「`β^n` が同型なら `β` も同型」を足すだけ。 -/
+theorem prop_1_10_iii_otimes_perfect_of_type (F : FrobenioidCore P)
+    (hpt : IsOfPerfectType P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hfnt : ∀ X : C, IsFrobeniusNormalized P X) (A : C) (n : ℕ+)
+    (α : End A) (hα : α ∈ OTimes P A) :
+    ∃! β : End A, β ∈ OTimes P A ∧ (β ^ (n : ℕ) : End A) = α := by
+  obtain ⟨β, ⟨hβm, hβp⟩, huniq⟩ :=
+    prop_1_10_iii_otri_perfect_of_type P F hpt hiso hfnt A n α hα.1
+  haveI hpow : IsIso ((β ^ (n : ℕ) : End A) : A ⟶ A) := by
+    rw [hβp]
+    exact (CategoryTheory.isUnit_iff_isIso (α : End A)).mp hα.2
+  have hβiso : IsIso ((β : End A) : A ⟶ A) :=
+    isIso_of_pow_isIso P F hiso β hβm.1 hβm.2 n.pos hpow
+  refine ⟨β, ⟨⟨hβm, (CategoryTheory.isUnit_iff_isIso (β : End A)).mpr hβiso⟩, hβp⟩, ?_⟩
+  rintro γ ⟨hγm, hγp⟩
+  exact huniq γ ⟨hγm.1, hγp⟩
+
 /-! ### ★(iv) の「In particular」—— 無限個の同型類
 
 原文 (FrdI p.34):
@@ -2476,8 +2663,8 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 | (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
 | (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★★**7 タイプすべて実装完了**（上の 4 本 ＋ `prop_1_10_i_linear_of` / `prop_1_10_i_preStep_of` / `prop_1_10_i_frobType_of` / `prop_1_10_i_pullBack_of`）。★pull-back は `Proposition 1.4, (ii)` を両向きに使って普遍性を避けた | `prop_1_10_i_four_types` |
 | (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
-| (iii) | ★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている | `prop_1_10_iii_otri_perfect`, `prop_1_10_iii_otimes_perfect` |
-| (iii) | 「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ | `prop_1_10_iii_image_perfect` |
+| (iii) | ~~★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている~~ → ★**実装した**。原文が名指す 3 つ(`Definition 1.3, (i), (a)` / `(i), (b)` / `(iii), (c)`)がそのまま 3 段になった。★`isotropic` の最初の用途が**span の pre-step を co-angular にすること**だったと分かった | `prop_1_10_iii_otri_perfect_of_type`, `prop_1_10_iii_otimes_perfect_of_type` |
+| (iii) | ~~「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ~~ → ★**実装した**。`baseSurj` の同型を `MonoidOn.map_bijective_of_iso` で渡り、perfect 性を `isPerfectMonoid_of_bijective` で移した | `prop_1_10_iii_image_perfect_of_base` |
 | (iv) | ★原文は「**域が** isotropic」だけを要求するが、実装は `∀ X : C, IsIsotropic P X`(**圏全体**)を仮定 | `prop_1_10_iv`, `prop_1_10_iv_mp` |
 | (iv) | 「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで) | `prop_1_10_iv_infinitely_many` |
 | (v) | `IsPrimeFrobComposite` の基底を「任意の同型」に取った——**意図的な修復**だが、原文項目そのものの実装ではない | `IsPrimeFrobComposite` |

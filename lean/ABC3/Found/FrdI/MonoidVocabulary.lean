@@ -692,6 +692,34 @@ theorem pnat_right_eq_one {a b : ℕ+} (h : a * b = 1) : b = 1 :=
 `ℕ≥1` の任意の元による**乗法(= `n` 倍)が全単射**。 -/
 def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n : ℕ) • a)
 
+/-- ★**perfect 性は加法的全単射で移る**。
+
+★`n` 倍写像は加法準同型と**可換する**(`map_nsmul`)ので、
+全単射で共役を取れば `n` 倍写像同士が移り合う。
+
+★★**`Proposition 1.10, (iii)` の「the monoids in the image of Φ」で要る** ——
+原文の像は `Ob(𝒟)` 全体に渡るが、perfect 性が直接出るのは
+`𝒞` の対象の底に限られる。`Definition 1.3, (i), (a)` の全射性が
+**同型を1つ与える**ので、そこをこの補題で渡る。 -/
+theorem isPerfectMonoid_of_bijective {M N : Type*} [AddCommMonoid M] [AddCommMonoid N]
+    (f : M →+ N) (hf : Function.Bijective f) (h : IsPerfectMonoid M) :
+    IsPerfectMonoid N := by
+  intro n
+  constructor
+  · intro a b hab
+    obtain ⟨a', rfl⟩ := hf.2 a
+    obtain ⟨b', rfl⟩ := hf.2 b
+    have hab' : f ((n : ℕ) • a') = f ((n : ℕ) • b') := by
+      rw [map_nsmul, map_nsmul]; exact hab
+    exact congrArg f ((h n).1 (hf.1 hab'))
+  · intro b
+    obtain ⟨b', rfl⟩ := hf.2 b
+    obtain ⟨a', ha'⟩ := (h n).2 b'
+    refine ⟨f a', ?_⟩
+    show (n : ℕ) • f a' = f b'
+    rw [← map_nsmul]
+    exact congrArg f ha'
+
 /-! ### ★★`Φ^gp` を `monoid on D` にする道筋（2026-08-16 の測定）
 
 原文 (FrdI p.19):

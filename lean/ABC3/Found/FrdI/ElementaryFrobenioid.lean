@@ -215,6 +215,18 @@ def map {A B : D} (α : B ⟶ A) : Φ.val A →+ Φ.val B := (Φ.functor.map α.
 theorem map_injective {A B : D} (α : B ⟶ A) : Function.Injective (Φ.map α) :=
   (Φ.charInj α).1
 
+/-- ★**同型に沿った `α*` は全単射**。逆は `e.inv` の `α*` そのもの。
+
+★`(b)`(FSM-morphism なら同型)を使わずに、`map_id` / `map_comp` だけで出る ——
+反変関手であることの直接の帰結である。 -/
+theorem map_bijective_of_iso {A B : D} (e : A ≅ B) :
+    Function.Bijective (Φ.map e.hom) := by
+  refine Function.bijective_iff_has_inverse.mpr ⟨Φ.map e.inv, fun x => ?_, fun y => ?_⟩
+  · show Φ.map e.inv (Φ.map e.hom x) = x
+    rw [← Φ.map_comp e.hom e.inv, e.inv_hom_id, Φ.map_id]
+  · show Φ.map e.hom (Φ.map e.inv y) = y
+    rw [← Φ.map_comp e.inv e.hom, e.hom_inv_id, Φ.map_id]
+
 /-- `Φ` が **divisorial** であること。
 
 原文 (FrdI p.19):
