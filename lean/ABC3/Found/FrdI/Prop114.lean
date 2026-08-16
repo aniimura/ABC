@@ -623,6 +623,60 @@ theorem prop_1_14_ii (F : FrobenioidCore P) (G : Frobenioid P)
 ★★**`sorry` は置かない**(`Found/` の規律)。
 -/
 
+/-! ## ★(iii) —— 非 pre-step ⟺ FSMI 分解の長さが有界
+
+原文 (FrdI p.41):
+> (iii) Suppose that φ is irreducible. Then φ is a non-pre-step if and only if
+
+原文 (FrdI p.41):
+> of composites in C
+
+★**主張の条件を型で書いておく**(証明は未了。下の測定を見よ)。
+-/
+
+/-- ★(iii) の条件 —— 「`φ` の後ろに FSMI 射を 1 本足したものを FSMI 射の合成に
+分解したとき、その長さに一様な上界がある」。
+
+★原文の `αn ◦ … ◦ α1 = ψ ◦ φ` は Lean では
+`IsFSMIChain n χ` かつ `χ = φ ≫ ψ` である(合成の向きが逆)。 -/
+def BoundedFSMIFactor {A B : C} (φ : A ⟶ B) : Prop :=
+  ∃ N : ℕ, ∀ (n : ℕ) (E : C) (ψ : B ⟶ E) (χ : A ⟶ E),
+    IsFSMI ψ → IsFSMIChain n χ → χ = φ ≫ ψ → n ≤ N
+
+/-! ### ★(iii) の測定(2026-08-16)
+
+★**原文の証明**(p.42–43、目視)は (i) の 3 分類に沿って場合分けする。
+
+**(a) `φ` が irreducible な pre-step のとき、条件は偽**:
+> by taking ψ to be a prime-Frobenius morphism of increasingly large Frobenius degree
+> [cf. Proposition 1.10, (ii)]
+
+★**中身**: `φ` は step で `Div φ` は irreducible((i))。次数 `p` の
+prime-Frobenius `ψ` を後置すると `Div (φ ≫ ψ) = p · Div φ` になり、
+★**`p` 個の step の合成に分解できる**ので鎖の長さが `p` とともに伸びる。
+★**この分解を作るのに第1の圏同値が要る。**
+
+★★**さらに「prime-Frobenius 射が FSM である」ことが要る**(FSMI の M の部分)。
+★**mono は `Definition 1.3, (v), (a)` が pre-step にしか与えない** ——
+Frobenius 型射の mono 性がどこから来るかは未確認。
+
+**(b) `φ` が非 pre-step のとき、条件は真**:
+> since ψ◦φ and ψ are FSM-morphisms, it thus follows formally that φ is also an
+> FSM-morphism … Div(ψ ◦φ) is either zero or irreducible; since, moreover,
+> degFr(ψ ◦φ) always divides a product of two prime numbers …, it thus follows that
+> in any factorization of ψ ◦φ by FSMI-morphisms, all but three … are pull-back
+> morphisms … this implies that factorizations of arbitrarily large length determine
+> chains of FSMI-morphisms … originating from the projection to D of the domain of φ
+> which are also of arbitrarily large length, a contradiction
+
+★★**「all but three」の数え上げが山である** ——
+次数の素因数が高々 2 つ、零因子の既約因子が高々 1 つ、合わせて 3。
+★**残りはすべて pull-back なので、`Proposition 1.11, (vi)` で底へ落ち、
+`𝒟` の FSMFF 型の条件 (b)(鎖の長さの上界)に矛盾する。**
+
+★★**`sorry` は置かない。**
+-/
+
 /-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性
 
 ★★**引用を選び直した記録(事故 #3 の 10 度目)**: (iv) の主張は 3 行だが、
