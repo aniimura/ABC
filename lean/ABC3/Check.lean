@@ -9,6 +9,7 @@ import ABC3.Check.IUTchIII.LogVolumeFillsInterface
 import ABC3.Check.IUTchIII.Cor312Degenerate
 import ABC3.Check.PGC.RefutationAttempts
 import ABC3.Check.FrdI.TwistedFrobenioid
+import ABC3.Check.FrdI.AutAmpleGap
 /-!
 # Check — 我々のモデルについての検査
 
