@@ -1296,29 +1296,35 @@ theorem exists_degFr_into (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
 それ自体が `Definition 1.3` から出る事実であり、
 ★**「条項からは出ないが導かれた機械からは出る」という構図の記録**でもある。
 
-★**`hiso` を使うのは 1 か所だけ**(剥がした pre-step の co-angular 性)。
+★★**当初はここに `hiso`(isotropic 型)が残っていたが、落とせた**(下を見よ)。
 -/
 
 include P in
-/-- ★★★**`Proposition 1.11, (vii)` の Frobenius 型の場合**(isotropic 型のもとで)。
+/-- ★★★**`Proposition 1.11, (vii)` の Frobenius 型の場合**。
 
 ★**8 段の組み立て**:
 1. `t := Φ.map (Base ε) (invφ)` と置く(`invφ` は `φ` の不変量)
 2. `coaPre_realize_over` で `invγ = t` なる co-angular pre-step `γ : Dd ⟶ Cc` を作る
    ★**ここで `Dd` が決まる**
 3. `χ := γ ≫ ε` は base-isomorphism、次数 `d`、`Div χ = d • Div γ`
-4. `Proposition 1.7, (ii)` で `χ = γ₂ ≫ β₂`(Frobenius 型 ＋ pre-step)と剥がす。
-   次数から `degFr γ₂ = d`
-5. `Proposition 1.4, (i)` で `β₂` は co-angular(★**`hiso` を使うのはここだけ**)
-6. 計算: ★**`invβ₂ = d • invφ`**
-7. `mle_nsmul_self` ＋ `coaPre_factor_of_mle` で `ρ ≫ φ = β₂` なる `ρ : Y ⟶ A`
-8. `α := γ₂ ≫ ρ` と置くと `α ≫ φ = γ₂ ≫ β₂ = χ = γ ≫ ε`
+4. `Proposition 1.7, (ii)` で `χ = γ₂ ≫ β₂`(Frobenius 型 ＋ pre-step)と剥がす
+5. ★★**`Definition 1.3, (v), (c)` で `β₂ = b₁ ≫ b₂`(isometric pre-step ＋
+   **co-angular** pre-step)ともう一段割る**
+6. 計算: ★**`invb₂ = d • invφ`**(`b₁` は isometric なので不変量は変わらない)
+7. `mle_nsmul_self` ＋ `coaPre_factor_of_mle` で `ρ ≫ φ = b₂` なる `ρ : W ⟶ A`
+8. `α := (γ₂ ≫ b₁) ≫ ρ` と置くと `α ≫ φ = (γ₂ ≫ b₁) ≫ b₂ = χ = γ ≫ ε`
 
-★★**`α` が (Frobenius 型) ≫ (co-angular pre-step) の形になっているのは、
-原文の「a morphism of Frobenius type α : D →A」を還元前に戻した形と一致する。** -/
+★★**`hiso` はここで落ちた。** 当初は段 5 で「`β₂` は co-angular」を
+`Proposition 1.4, (i)`(isotropic ⟹ 全射が co-angular)から得ていた。
+★**`Definition 1.3, (v), (c)` は pre-step を無条件に
+「isometric ＋ co-angular」に割る** ので、isotropic 性は要らない。
+★**co-angular 性は分解しないが、割り直せば取り出せた。**
+
+★★**`α` が (Frobenius 型) ≫ (isometric pre-step) ≫ (co-angular pre-step) の形に
+なっているのは、原文の「a morphism of Frobenius type α : D →A」を
+還元前に戻した形と一致する。** -/
 theorem prop_1_11_vii_frobType (F : FrobenioidCore P) (G : Frobenioid P)
-    (hiso : ∀ X : C, IsIsotropic P X) {B Cc : C} (ε : Cc ⟶ B)
-    (hε : IsFrobeniusType P ε) : LiftsCoaPre P ε := by
+    {B Cc : C} (ε : Cc ⟶ B) (hε : IsFrobeniusType P ε) : LiftsCoaPre P ε := by
   intro A φ hφc hφs
   haveI hbφ : IsIso (P.Base φ) := hφs.2
   haveI hbε : IsIso (P.Base ε) := hε.2
@@ -1330,46 +1336,57 @@ theorem prop_1_11_vii_frobType (F : FrobenioidCore P) (G : Frobenioid P)
   have hχb : IsBaseIsomorphism P (γ ≫ ε) := by
     show IsIso (P.Base (γ ≫ ε))
     rw [P.Base_comp]; infer_instance
-  -- 段 4
+  -- 段 4: Frobenius 因子を剥がす
   obtain ⟨Y, γ₂, β₂, hfac, hγ₂F, hβ₂s⟩ := (prop_1_7_ii_baseIso_factor P F (γ ≫ ε)).mp hχb
-  haveI hbβ₂ : IsIso (P.Base β₂) := hβ₂s.2
   haveI hbγ₂ : IsIso (P.Base γ₂) := hγ₂F.2
-  -- 段 5(★`hiso` を使うのはここだけ)
-  have hβ₂c : IsCoAngular P β₂ := prop_1_4_i P β₂ (fun Y' _ => hiso Y')
+  -- 段 5: ★★`Definition 1.3, (v), (c)` で pre-step をもう一段割る
+  obtain ⟨W, b₁, b₂, hbfac, hb₁i, hb₁s, hb₂c, hb₂s⟩ := F.preStepFactor' β₂ hβ₂s
+  haveI hbb₁ : IsIso (P.Base b₁) := hb₁s.2
+  haveI hbb₂ : IsIso (P.Base b₂) := hb₂s.2
+  -- `g := γ₂ ≫ b₁` にまとめる(Frobenius 型 ≫ isometric pre-step、`Div g = 0`)
+  haveI hbg : IsIso (P.Base (γ₂ ≫ b₁)) := by
+    rw [P.Base_comp]; infer_instance
+  have hgdiv : P.Div (γ₂ ≫ b₁) = 0 := by
+    rw [P.Div_comp, show P.Div b₁ = 0 from hb₁i, show P.Div γ₂ = 0 from hγ₂F.1.2]
+    simp
+  have hfac2 : γ ≫ ε = (γ₂ ≫ b₁) ≫ b₂ := by
+    rw [hfac, hbfac, Category.assoc]
   -- 底の四角形
-  have h1 : P.Base γ₂ ≫ P.Base β₂ = P.Base γ ≫ P.Base ε := by
-    rw [← P.Base_comp, ← P.Base_comp, hfac]
-  have hinv : inv (P.Base β₂) ≫ inv (P.Base γ₂)
+  have h1 : P.Base (γ₂ ≫ b₁) ≫ P.Base b₂ = P.Base γ ≫ P.Base ε := by
+    rw [← P.Base_comp, ← P.Base_comp, hfac2]
+  have hinv : inv (P.Base b₂) ≫ inv (P.Base (γ₂ ≫ b₁))
       = inv (P.Base ε) ≫ inv (P.Base γ) := by
-    have e2 : inv (P.Base γ ≫ P.Base ε) = inv (P.Base β₂) ≫ inv (P.Base γ₂) := by
+    have e2 : inv (P.Base γ ≫ P.Base ε)
+        = inv (P.Base b₂) ≫ inv (P.Base (γ₂ ≫ b₁)) := by
       refine IsIso.inv_eq_of_hom_inv_id ?_
       rw [← h1]
       simp
     rw [← e2]
     simp
-  -- 段 6: ★`invβ₂ = d • invφ`
-  have hC : Φ.map (P.Base γ₂) (P.Div β₂) = ((P.degFr ε : ℕ+) : ℕ) • P.Div γ := by
-    have h := congrArg P.Div hfac
-    rw [P.Div_comp, P.Div_comp, show P.Div ε = 0 from hε.1.2,
-      show P.Div γ₂ = 0 from hγ₂F.1.2] at h
+  -- 段 6: ★`invb₂ = d • invφ`
+  have hC : Φ.map (P.Base (γ₂ ≫ b₁)) (P.Div b₂) = ((P.degFr ε : ℕ+) : ℕ) • P.Div γ := by
+    have h := congrArg P.Div hfac2
+    rw [P.Div_comp, P.Div_comp, show P.Div ε = 0 from hε.1.2, hgdiv] at h
     simpa using h.symm
-  have hD : P.Div β₂ = ((P.degFr ε : ℕ+) : ℕ) • Φ.map (inv (P.Base γ₂)) (P.Div γ) := by
-    have h := congrArg (Φ.map (inv (P.Base γ₂))) hC
+  have hD : P.Div b₂
+      = ((P.degFr ε : ℕ+) : ℕ) • Φ.map (inv (P.Base (γ₂ ≫ b₁))) (P.Div γ) := by
+    have h := congrArg (Φ.map (inv (P.Base (γ₂ ≫ b₁)))) hC
     rwa [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id, map_nsmul] at h
   have hE : Φ.map (inv (P.Base ε) ≫ inv (P.Base γ)) (P.Div γ)
       = Φ.map (inv (P.Base φ)) (P.Div φ) := by
     rw [Φ.map_comp, hγinv, ← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
-  have hkey : Φ.map (inv (P.Base β₂)) (P.Div β₂)
+  have hkey : Φ.map (inv (P.Base b₂)) (P.Div b₂)
       = ((P.degFr ε : ℕ+) : ℕ) • Φ.map (inv (P.Base φ)) (P.Div φ) := by
     rw [hD, map_nsmul, ← Φ.map_comp, hinv, hE]
   -- 段 7
   have hle : MLe (Φ.map (inv (P.Base φ)) (P.Div φ))
-      (Φ.map (inv (P.Base β₂)) (P.Div β₂)) := by
+      (Φ.map (inv (P.Base b₂)) (P.Div b₂)) := by
     rw [hkey]
     exact mle_nsmul_self (P.degFr ε).pos _
-  obtain ⟨ρ, hρc, hρs, hρ⟩ := coaPre_factor_of_mle P G φ hφc hφs β₂ hβ₂c hβ₂s hle
+  obtain ⟨ρ, hρc, hρs, hρ⟩ := coaPre_factor_of_mle P G φ hφc hφs b₂ hb₂c hb₂s hle
   -- 段 8
-  exact ⟨Dd, γ, γ₂ ≫ ρ, hγc, hγs, by rw [hfac, Category.assoc, hρ]⟩
+  have hfin : ((γ₂ ≫ b₁) ≫ ρ) ≫ φ = (γ₂ ≫ b₁) ≫ b₂ := by rw [Category.assoc, hρ]
+  exact ⟨Dd, γ, (γ₂ ≫ b₁) ≫ ρ, hγc, hγs, by rw [hfac2, hfin]⟩
 
 /-! ### ★★★(vii) の本体が完成した —— 4 つの場合がすべて揃った
 
@@ -1393,11 +1410,11 @@ include P in
 `Definition 1.3, (v), (b)` が `β = β₁ ≫ β₂`(co-angular pre-step・isometric pre-step)に
 さらに分ける。★**4 因子それぞれで示し、合成閉性で繋ぐ。** -/
 theorem prop_1_11_vii (F : FrobenioidCore P) (G : Frobenioid P)
-    (hiso : ∀ X : C, IsIsotropic P X) {B Cc : C} (ε : Cc ⟶ B) : LiftsCoaPre P ε := by
+    {B Cc : C} (ε : Cc ⟶ B) : LiftsCoaPre P ε := by
   obtain ⟨X, Y, γ, β, α, hfac, hγF, hβs, hαpb⟩ := F.arbFactor ε
   obtain ⟨Z, β₁, β₂, hβfac, hβ₁c, hβ₁s, hβ₂i, hβ₂s⟩ := F.preStepFactor β hβs
   rw [hfac, hβfac]
-  refine liftsCoaPre_comp P (prop_1_11_vii_frobType P F G hiso γ hγF) ?_
+  refine liftsCoaPre_comp P (prop_1_11_vii_frobType P F G γ hγF) ?_
   refine liftsCoaPre_comp P (liftsCoaPre_comp P
     (prop_1_11_vii_coaPre P G β₁ hβ₁c hβ₁s) ?_) (prop_1_11_vii_pullBack P G α hαpb)
   exact fun {A'} φ hφc hφs => prop_1_11_vii_isometric P F G φ hφc hφs β₂ hβ₂i hβ₂s
@@ -1411,10 +1428,10 @@ fiberwise-surjective。
 後者は「`B` へ入る任意の射を `φ` に沿って引き戻せる」。
 ★**`ε` と `φ` の役割を入れ替えるだけで移る。** -/
 theorem prop_1_11_vii_isFiberwiseSurjective (F : FrobenioidCore P) (G : Frobenioid P)
-    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B)
+    {A B : C} (φ : A ⟶ B)
     (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ) : IsFiberwiseSurjective φ := by
   intro Z γ
-  obtain ⟨Dd, γ', α, -, -, hsq⟩ := prop_1_11_vii P F G hiso γ φ hφc hφs
+  obtain ⟨Dd, γ', α, -, -, hsq⟩ := prop_1_11_vii P F G γ φ hφc hφs
   exact ⟨Dd, α, γ', hsq.symm⟩
 
 include P in
@@ -1427,34 +1444,36 @@ include P in
 ★**`ϵ` を含むため引用できない**(0/64 文字で停止した既知の文字)。1 行前を引く。
 
 ★**mono は `Definition 1.3, (v), (a)` から、fiberwise-surjective は (vii) の本体から。**
-★★**仮定に `hiso` が残っている**(下の測定を見よ)。 -/
+★★**追加仮定は無い** —— 原文と同じ形である。 -/
 theorem prop_1_11_vii_fsm_of_coaPre (F : FrobenioidCore P) (G : Frobenioid P)
-    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B)
+    {A B : C} (φ : A ⟶ B)
     (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ) : IsFSMMorphism φ :=
-  ⟨prop_1_11_vii_isFiberwiseSurjective P F G hiso φ hφc hφs, F.preStepMono φ hφs⟩
+  ⟨prop_1_11_vii_isFiberwiseSurjective P F G φ hφc hφs, F.preStepMono φ hφs⟩
 
-/-! ### ★★残っている差 —— `hiso` (2026-08-16 の測定)
+/-! ### ★★★`hiso` を落とした記録(2026-08-16)
 
-★★**原文の (vii) は isotropic 型を仮定していない。我々の (vii) は仮定している。**
-★**したがって `Proposition 1.11` 全体にはまだ条なしの `.src` を付けられない。**
+★★**一度は「原文より強い仮定の下でしか証明できていない」と記録した。**
+`prop_1_11_vii_frobType` の段 5、すなわち
+★**剥がした pre-step `β₂` が co-angular であること**に
+`Proposition 1.4, (i)`(isotropic ⟹ 全射が co-angular)を使っていたからである。
 
-★**`hiso` を使うのは 1 か所だけ**である —— `prop_1_11_vii_frobType` の段 5、
-すなわち ★**剥がした pre-step `β₂` が co-angular であること**。
-
-★**なぜそこが要るか**: `coaPre_factor_of_mle`(第2圏同値)は
+★**そこが要る理由**: `coaPre_factor_of_mle`(第2圏同値)は
 **co-angular pre-step どうし**にしか使えない。
 
-★**なぜ他から出ないか**: 合成 `χ = γ₂ ≫ β₂` は co-angular だが、
-★★**co-angular 性は分解しない** —— `Definition 1.3, (iii), (a)` は
+★**そして co-angular 性は分解しない** —— `Definition 1.3, (iii), (a)` は
 合成で閉じることしか言わず、`Proposition 1.7, (v)` の分解表にも co-angular は無い
 (base-isomorphism / linear / pre-step / isometric はある)。
 `Definition 1.3, (iii), (b)`(`coAngularOfPreStep`)は域と余域が一致する場合にしか使えない。
 
-★★**分類は ①〜⑥ のどれでもない新しい形である**: 「**証明できたが、原文より強い仮定の下で**」。
-★**これは「取り下げ」の対象になる型である** —— 実装があっても原文項目の実装ではない。
+★★**しかし「分解しない」ことと「取り出せない」ことは違った。**
+`Definition 1.3, (v), (c)`(`preStepFactor'`)は
+★**任意の pre-step を無条件に「isometric ＋ co-angular」に割る。**
+★`β₂` を割り直せば co-angular な因子 `b₂` が出て、
+`b₁` は isometric なので**不変量を変えない** —— 計算はそのまま通る。
 
-★★**ただし `Proposition 1.14` は「a Frobenioid of isotropic type」を課している**
-(原文 p.41)ので、★**1.14 の用途にはこのままで足りる。**
+★★**教訓**: 「性質 X が分解で保たれない」は「X を持つ因子が取れない」を意味しない。
+★**別の分解定理を探すべきだった。**
+★**一度「原文より強い仮定」と記録したものが、その日のうちに落ちた。**
 -/
 
 /-! ### ★★(旧)残る 2 点の記録(2026-08-16、上で解消した)

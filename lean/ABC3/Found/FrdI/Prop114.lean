@@ -283,7 +283,7 @@ pre-step は FSM 射であり、★**非 pre-step 全体に mid-adjoint** であ
 theorem prop_1_14_ii_mp (F : FrobenioidCore P) (G : Frobenioid P)
     (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B) (hφ : IsPreStep P φ) :
     IsFSMMorphism φ ∧ IsMidAdjoint (nonPreStep P) φ := by
-  refine ⟨prop_1_11_vii_fsm_of_coaPre P F G hiso φ
+  refine ⟨prop_1_11_vii_fsm_of_coaPre P F G φ
     (prop_1_4_i P φ (fun Y _ => hiso Y)) hφ, ?_⟩
   intro X Y γ β α hfac hS
   exact absurd
