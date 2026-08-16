@@ -1379,6 +1379,30 @@ co-angular とは限らない)。`otriLin` を `γ̃` に沿って使うには�
 ★**次段はこの筋で組む。** shuffle 由来の補題
 (`psiMap_comp_isometricPreStep` など)は `𝒞^istr` 用として残す。
 
+### ★★★★次段の具体手順(測定済み・実行待ち)
+
+★★**鍵は `Definition 1.3, (vii), (b)` の `isotropicClosed`** ——
+**isotropy は射に沿って前へ伝わる**(`∀ φ : A ⟶ B, IsIsotropic P A → IsIsotropic P B`)。
+★したがって `φ : A ⟶ B` の始域 `A` が isotropic なら、4 重分解の
+`X`・`Y`・`B`(および押し出しの `Yt`)は**すべて自動的に isotropic** である
+(`δ ≫ γ : A ⟶ Y` などに当てればよい)。
+
+★★★**帰結: 大域仮定 `IsOfIsotropicType P` を「始域の isotropy」に置き換えられる。**
+そして isotropic hull の終域は isotropic なので、`Ψ` の合成両立は
+`h_A : A ⟶ A^istr` の先で自由に使える —— これが原文の段 3 を回す土台になる。
+
+**手順**:
+1. `splitEquiv` を `charSplitting_bijective_all` に差し替え、
+   `psiOTri` 系から `hA` を落とす(★機械的だが**連鎖が深い**——
+   `psiOTri` / `psiOTri_div` / `_mul` / `_one` / `psiOTriHom` / `_pow` /
+   `_unit_mul` / `_of_div_zero` / `_injective` / `psiOTri_otriLin` の
+   引数がすべて変わる。一度試して緑を壊したので、**1 宣言ずつ**進めること)
+2. `otriLin` の使用を `otriPullHom` ＋ 明示の co-angular 性に置き換える
+   (pull-back は `pullBackLB` から、同型は `isCoAngular_of_isIso` から)
+3. `psiMap_comp_frob` の `δ̃` は `prop_1_10_i_exists_pullBack` で作る
+4. 残る `psiMap_comp_isometricPreStep` に**始域の isotropy** を要求する
+5. 一般の `φ` へは hull の mono 性で移す(原文の段 3)
+
 ★★**この 1 点があるので、`Proposition 2.5` に条なし `.src` は付けない。**
 条なしは「原典項目を**完全に**実装した」の意味であり、
 仮定が強いままでそれを主張するのは過剰申告である。
