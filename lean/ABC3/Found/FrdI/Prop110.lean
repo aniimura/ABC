@@ -534,6 +534,42 @@ theorem prop_1_10_i_isometric_of {A B A' B' : C}
   | exact h
   | exact h.symm
 
+include P in
+/-- ★★**`φ` が co-angular なら `φ′` もそう**（7 タイプのうちの 1 つ）。
+
+★★**鍵は「`φ ≫ β` が co-angular である」こと**である ——
+`β` は Frobenius 型なので LB-invertible、したがって co-angularであり、
+co-angular は合成で閉じる（`Definition 1.3, (iii), (a)`）。
+
+★`φ′` の分解 `φ′ = γ ≫ β₀ ≫ α₀` に `α` を前合成すれば
+`φ ≫ β` の分解になる。★**側面条件のうち base-isomorphism の選択肢だけが
+手を要す** —— `γ` が base-isomorphism なら `α ≫ γ` もそうである
+（`α` は Frobenius 型なので base-isomorphism）。 -/
+theorem prop_1_10_i_coAngular_of (F : FrobenioidCore P) {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsFrobeniusType P α) (hβ : IsFrobeniusType P β)
+    (hsq : φ ≫ β = α ≫ φ') (hφ : IsCoAngular P φ) :
+    IsCoAngular P φ' := by
+  intro X Y γ β₀ α₀ hfac hlin hiso hstep hor
+  have hcomp : IsCoAngular P (φ ≫ β) := F.coAngularComp φ β hφ hβ.1.1
+  refine hcomp X Y (α ≫ γ) β₀ α₀ ?_ hlin hiso hstep ?_
+  · rw [hsq, hfac]; simp
+  · rcases hor with h | h
+    · exact Or.inl h
+    · exact Or.inr (isBaseIsomorphism_comp P hα.2 h)
+
+include P in
+/-- ★**`φ` が LB-invertible なら `φ′` もそう**（7 タイプのうちの 1 つ）。
+
+★LB-invertible = co-angular ∧ isometric なので、上の 2 本の合わせ技。 -/
+theorem prop_1_10_i_lbInvertible_of (F : FrobenioidCore P) {A B A' B' : C}
+    {φ : A ⟶ B} {α : A ⟶ A'} {β : B ⟶ B'} {φ' : A' ⟶ B'}
+    (hα : IsFrobeniusType P α) (hβ : IsFrobeniusType P β)
+    (hsq : φ ≫ β = α ≫ φ') (hφ : IsLBInvertible P φ) :
+    IsLBInvertible P φ' :=
+  ⟨prop_1_10_i_coAngular_of P F hα hβ hsq hφ.1,
+   prop_1_10_i_isometric_of P hα.1.2 hβ.1.2 hsq hφ.2⟩
+
 /-! ## ★★(ii) —— **pre-step と Frobenius 型は順序を入れ替えられる**
 
 原文 (FrdI p.34):
@@ -2275,7 +2311,7 @@ theorem prop_1_10_vi_groupLike (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotr
 |---|---|---|
 | (i) | ★`β` の量化子が逆——原文「Suppose that α, β **are** morphisms of Frobenius type」は ∀、実装は ∃ | `prop_1_10_i_exists` |
 | (i) | ~~原文「In this situation, degFr(φ) = degFr(φ′)」が**ファイルに存在しない**~~ → ★**実装した** | `prop_1_10_i_degFr_phi_eq` |
-| (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★**base-isomorphism と isometry は実装した**(`prop_1_10_i_baseIso_of`, `prop_1_10_i_isometric_of`)。★**残るは co-angular と LB-invertible** —— これは `φ′` の分解を `α₀` に沿って `φ` の分解に引き戻す持ち上げが要り、★**まだ試していない**(「証明できなかった」ではない) | `prop_1_10_i_four_types` |
+| (i) | ★★原文「then the same is true of **φ′**」の 7 タイプ。`prop_1_10_i_four_types` は `φ` についての主張で `φ′` のものではない。★★**4 つすべて実装した**(`prop_1_10_i_baseIso_of` / `_isometric_of` / `_coAngular_of` / `_lbInvertible_of`)。★co-angular の鍵は「`φ ≫ β` が co-angular」であることだった —— 引き戻す必要はなく、**分解の側を前合成で延ばせばよかった**。★残るは pre-step と pull-back の 2 タイプ | `prop_1_10_i_four_types` |
 | (ii) | `Div` の式が `β′` の base-isomorphism 性を仮定せず、原文の `β′∗`(全単射)の形になっていない | `prop_1_10_ii_Div_formula` |
 | (iii) | ★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている | `prop_1_10_iii_otri_perfect`, `prop_1_10_iii_otimes_perfect` |
 | (iii) | 「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ | `prop_1_10_iii_image_perfect` |
