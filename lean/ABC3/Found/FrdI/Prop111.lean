@@ -1215,6 +1215,97 @@ Frobenius 型射を与えるものではない。
 **そしてその余剰は、後の命題で使われるかもしれない**(未確認)。
 -/
 
+/-! ### ★★★穴の第1点が埋まった —— 「`A` へ入る次数 `d` の射」の供給源(2026-08-16)
+
+★★**検証役(私の文脈を持たない子)の調査で見つかった。**
+
+★私は「`Definition 1.3` は `A` へ入る次数 `d` の射を与えない」と記録した。
+★★**それ自体は正しい**(検証役が `FrobenioidCore` / `Frobenioid` の
+全フィールドを分類して確認した。射の**存在**を主張するフィールドのうち、
+次数 `d` を入る向きに与えるのは `frobDegSurj` の**余域**と、
+`baseSurj` が与える**Frobenius-trivial 対象それ自身**だけである)。
+
+★★**しかし供給源は「条項」ではなく「導かれた機械」のほうにあった** ——
+`Proposition 1.10, (vi)` のために私が組んだ 3 本がそのまま使える:
+
+1. `prop_1_10_vi_data` —— `Definition 1.3, (i), (a), (b)` から
+   co-angular pre-step `α : B ⟶ A`、`γ : B ⟶ Cc`、`Cc` が Frobenius-trivial を**導く**
+2. `prop_1_10_vi_step` —— ★**Frobenius 型射を co-angular pre-step に沿って引き戻す**
+   (`φB ≫ γ = γ ≫ ζ d`)
+3. `prop_1_10_vi_descend` —— `φB` が base-identity で次数 `d` であることを**降ろす**
+
+★**`φB ≫ α : B ⟶ A` の次数は `1 · d = d`。**
+
+★★**循環していない**: 2 の中身は `prop_1_10_ii` ＋ `Div` の公式 ＋
+`Definition 1.3, (iii), (d)` の第2圏同値であり、`Proposition 1.11, (vii)` を使っていない。
+
+★★**代償は `hiso`(isotropic 型)である。** `Proposition 1.11` はそれを仮定しないが、
+★**`Proposition 1.14` は「a Frobenioid of isotropic type」を課している**(原文 p.41)。
+★**したがって (vii) を `hiso` 付きで閉じれば `Proposition 1.14, (ii)` には足りる。**
+
+★**残る穴は 2 点に絞られた**(下の測定を見よ)。
+-/
+
+include P in
+/-- ★★★**isotropic 型の Frobenioid では、任意の対象へ入る任意次数の射がある**。
+
+★★**これが「`A` へ入る次数 `d` の Frobenius 型射がどこから来るか」への答えである。**
+`Definition 1.3` の条項からは出ないが、★**`Proposition 1.10, (vi)` のために
+組んだ機械から出る。**
+
+★得られる `m` は Frobenius 型とは限らない(`Div m` は制御していない)。
+★**しかし (vii) の主張は `α` に型を要求していない** ——
+要求されるのは次数だけであり(`prop_1_11_vii_degFr_forced`)、それは満たしている。 -/
+theorem exists_degFr_into (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    (A : C) (d : ℕ+) :
+    ∃ (B : C) (m : B ⟶ A), P.degFr m = d ∧ IsBaseIsomorphism P m := by
+  obtain ⟨B, Cc, α, γ, hαc, hαs, hγc, hγs, hCc⟩ := prop_1_10_vi_data P G hiso A
+  obtain ⟨ζ, hζd, hζbf⟩ := hCc
+  obtain ⟨φB, hsq⟩ :=
+    prop_1_10_vi_step P G hiso γ hγc hγs d (ζ d) (hζbf d).1 (hζbf d).2 (hζd d)
+  obtain ⟨hbB, hdB⟩ := prop_1_10_vi_descend P γ hγs (ζ d) φB (hζbf d).1 (hζd d) hsq
+  refine ⟨B, φB ≫ α, ?_, ?_⟩
+  · rw [P.degFr_comp, hdB, show P.degFr α = 1 from hαs.1, one_mul]
+  · show IsIso (P.Base (φB ≫ α))
+    rw [P.Base_comp, show P.Base φB = P.Base (𝟙 B) from hbB, P.Base_id, Category.id_comp]
+    exact hαs.2
+
+/-! ### ★★残る 2 点(2026-08-16 の測定)
+
+★上の `exists_degFr_into` で `α` の**素材**は揃った。
+`m : B₀ ⟶ A`(次数 `d`)の前に co-angular pre-step `σ` を置いて `α := σ ≫ m` とする。
+
+★★**割り切れの帳尻は合う。** `u := Div (m ≫ φ)` と置き、
+`coaPre_realize_over` を `B₀` に当てて `σ` の**不変量**を `c` に取ると
+`Div σ = Φ.map (Base σ) c` だから
+```
+Div (σ ≫ m ≫ φ) = Φ.map (Base σ) u + Div σ = Φ.map (Base σ) (u + c)
+```
+★**`c := (d-1) • u` と取れば `u + c = d • u`** ⟹ 右辺が `d` で割り切れる。
+
+★★**これは `Proposition 1.10, (iii)` の「像のモノイド」で使ったのと同じ一手である。**
+★**原文の還元「Div(φ) = degFr(ϵ)·x」は、`φ` 側ではなく `m` 側に前置しても
+同じ効果を持つ** —— そして `m` 側なら `m` の構成後に置けるので、
+「`A′` を作ってからでないと `m` が作れない」という循環が消える。
+
+★★**残る穴は 2 点である**:
+
+**(1) 域が合わない。** `coaPre_realize_over` を `Cc` に当てれば co-angular pre-step は
+作れるが、★**その域は圏同値が決めるので `Dd` に指定できない。**
+逆に `γ` を先に作って `α` を「`γ ≫ ε` を `φ` で割る」形で得ようとすると、
+★**「任意の射を co-angular pre-step で割る」道具が要る**
+(`coaPre_factor_of_mle` / `coaPre_factor_under_of_mle` は
+co-angular pre-step どうしにしか使えない)。
+
+**(2) 不変量が一致しても射は一致しない。** `Definition 1.3` は
+★**単元を除いてしか忠実でない**(`faithfulUpToUnits`)ので、
+`Base`・`Div`・`degFr` を合わせただけでは四角形は出ない。
+★**四角形そのものを構成する必要がある。**
+
+★★**分類は ⑤(道具の向きが合わない)から ⑥(道具そのものが無い)へ移った** ——
+欠けているのは「割り算」の補題である。
+-/
+
 include P in
 /-- ★★**(vii) の Frobenius 型の場合: `α` の次数は強制される**。
 
