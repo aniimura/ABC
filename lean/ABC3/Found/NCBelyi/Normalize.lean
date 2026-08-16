@@ -88,6 +88,33 @@ theorem ratio_scale_invariant {lam β α : ℚ} (hlam : 0 < lam) (hα : 0 < α) 
   rw [mul_div_mul_left _ _ hlam.ne']
   exact h
 
+/-! ## ★`|S′| < |S|` —— 2 点が同じ値へ行けば像は小さくなる -/
+
+/-- ★**衝突があれば像の要素数は減る**。
+
+原文 (NCBelyi p.4):
+> which the cardinalities of S , S satisfy |S | < |S|.
+
+★`Lemma 2.1` の `f` は `f(0) = f(1) = 0` なので、
+`0` と `1` が**同じ値へ行く**。ここから `|S′| < |S|` が出る。
+★★原文は `|S′| < |S|` とだけ書くが、**その根拠は `f(0) = f(1)` である**。 -/
+theorem card_image_lt_of_collision {α β : Type*} [DecidableEq α] [DecidableEq β]
+    {T : Finset α} {g : α → β} {x y : α}
+    (hx : x ∈ T) (hy : y ∈ T) (hxy : x ≠ y) (hg : g x = g y) :
+    (T.image g).card < T.card := by
+  classical
+  have hsub : T.image g = (T.erase x).image g := by
+    refine Finset.Subset.antisymm (fun z hz => ?_) ?_
+    · obtain ⟨t, htT, rfl⟩ := Finset.mem_image.1 hz
+      by_cases h : t = x
+      · subst h
+        exact Finset.mem_image.2 ⟨y, Finset.mem_erase.2 ⟨Ne.symm hxy, hy⟩, hg.symm⟩
+      · exact Finset.mem_image.2 ⟨t, Finset.mem_erase.2 ⟨h, htT⟩, rfl⟩
+    · exact Finset.image_subset_image (Finset.erase_subset _ _)
+  rw [hsub]
+  calc ((T.erase x).image g).card ≤ (T.erase x).card := Finset.card_image_le
+    _ < T.card := Finset.card_erase_lt_of_mem hx
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_normalizing_scale.src : ABC3.Meta.Source :=

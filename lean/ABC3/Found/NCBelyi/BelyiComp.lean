@@ -110,6 +110,51 @@ theorem IsBelyiPoly.comp {f g : ℚ[X]} (hf : IsBelyiPoly f) (hg : IsBelyiPoly g
     · -- `g′(f(x)) = 0`
       exact hg.crit _ h2
 
+/-! ## ★★★自己訂正 —— 帰納法が合成するのは Belyi 型どうしではない
+
+★上の `IsBelyiPoly.comp` は**正しい定理**である(Belyi 写像は合成で閉じる)。
+★★**しかし `Lemma 2.2` の帰納法が合成するのは、それではない。**
+
+原文の帰納法は `g ∘ (f + f₀)` を作る:
+- `f + f₀` は `Lemma 2.1` の多項式で、**`0, 1` を `f₀` へ写す**
+  ——`{0,1}` を `{0,1}` へ写さないので `IsBelyiPoly` ではない
+- `g` は帰納法の仮定から得た `S′` 上の Belyi 写像
+
+★合成が Belyi 型になるのは、`f + f₀` の**臨界値が `f(S) ⊆ S′` に入る**からであり、
+`g(S′) ⊆ {0,1,∞}` がそれを吸収する。
+★★**これが帰納法の本当の構造である。** 下の `comp_crit_of_rel` がそれを取る。
+-/
+
+/-- ★★★**相対版の合成** —— `Lemma 2.2` の帰納法が実際に使う形。
+
+- `f` の臨界値は `f(S)` に入る(`f + f₀` は `Lemma 2.1` (b) からこれを満たす)
+- `g` は `f(S)` を `{0,1}` へ写す(帰納法の仮定 (a))
+- `g` の臨界値は `{0,1}` に入る(帰納法の仮定 (c))
+
+なら `g ∘ f` の臨界値も `{0,1}` に入る。
+
+★★`IsBelyiPoly.comp` と違い、**`f({0,1}) ⊆ {0,1}` を要求しない**。 -/
+theorem comp_crit_of_rel {S : Finset ℚ} {f g : ℚ[X]}
+    (hf_crit : ∀ x : ℂ, (derivative (f.map (algebraMap ℚ ℂ))).eval x = 0 →
+      ∃ s ∈ S, (f.map (algebraMap ℚ ℂ)).eval x = algebraMap ℚ ℂ (f.eval s))
+    (hg_S : ∀ s ∈ S, g.eval (f.eval s) = 0 ∨ g.eval (f.eval s) = 1)
+    (hg_crit : ∀ y : ℂ, (derivative (g.map (algebraMap ℚ ℂ))).eval y = 0 →
+      (g.map (algebraMap ℚ ℂ)).eval y = 0 ∨ (g.map (algebraMap ℚ ℂ)).eval y = 1) :
+    ∀ x : ℂ, (derivative ((g.comp f).map (algebraMap ℚ ℂ))).eval x = 0 →
+      ((g.comp f).map (algebraMap ℚ ℂ)).eval x = 0
+        ∨ ((g.comp f).map (algebraMap ℚ ℂ)).eval x = 1 := by
+  intro x hx
+  rw [Polynomial.map_comp] at hx ⊢
+  rw [derivative_comp, eval_mul, eval_comp] at hx
+  rw [eval_comp]
+  rcases mul_eq_zero.1 hx with h1 | h2
+  · -- `f′(x) = 0` —— 臨界値は `f(S)` に入る
+    obtain ⟨s, hsS, hs⟩ := hf_crit x h1
+    rw [hs, eval_map_ratCast g (f.eval s)]
+    rcases hg_S s hsS with h | h <;> rw [h] <;> simp
+  · -- `g′(f(x)) = 0`
+    exact hg_crit _ h2
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsBelyiPoly.comp.src : ABC3.Meta.Source :=
