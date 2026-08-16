@@ -517,7 +517,83 @@ theorem belyi_d (a b : ℕ) {C r β : ℝ} (hC : 2 ≤ C) (S : Finset ℝ)
       · exact belyi_d_ge a b hC hgt hCα hf0pos hge
       · exact belyi_d_le' a b hC hβC hf0pos hf0q hlt.le (by linarith)
 
+/-! ## ★★★[NCBelyi] Lemma 2.1 —— (a)(b)(c)(d) を 1 本にまとめる -/
+
+open scoped Classical in
+/-- ★★★**[NCBelyi] Lemma 2.1**(Separating Properties of Belyi Maps)。
+
+原文 (NCBelyi p.2):
+> Lemma 2.1. (Separating Properties of Belyi Maps) Let C ∈ R be such
+
+`f(x) ≝ x^m·(x−1)^n`(`m = a+1`, `n = b+1`、`r = m/(m+n)`)について、
+原文の (a)(b)(c)(d) を 1 本にまとめる。`f₀ ≝ −min_{α∈S} f(α)`。
+
+## ★原文との差を明記する
+
+- **`S : Finset ℝ`** としてある。原文は `S ⊆ ℙ¹(ℚ)` だが、
+  (a)–(d) の証明に有理性は使わない。★**仮説が弱いので原文の場合を含む**。
+- **`∞` は扱わない。** 多項式写像は `∞ ↦ ∞` で全分岐し、
+  `∞ ∈ {0,1,∞}` なので (a)(b) はどちらも満たされる。有限部分だけで足りる。
+  原文 (b) の `x ∈ {0, r, 1, ∞}` は、有限部分では `{0, 1, r}` である。
+- 原文 (a) の `f({0,r,1,∞}) ⊆ {0, f(r), ∞}` のうち `f(r) ↦ f(r)` は自明なので、
+  実質は **`f(0) = f(1) = 0`** である。
+
+## ★★pdftotext が落としているもの(2026-08-17 目視)
+
+原文 (b) は `f′(x) = 0`(プライムつき)、(d) の条件は `f(α) + f₀ ≠ 0` である。
+pdftotext はプライムと `≠` の両方を落とす。 -/
+theorem lemma_2_1 (C : ℝ) (hC : 2 ≤ C) (a b : ℕ) (S : Finset ℝ) (hne : S.Nonempty)
+    (r β : ℝ)
+    (hr : r = ((a : ℝ) + 1) / (((a : ℝ) + 1) + ((b : ℝ) + 1)))
+    (h0S : (0 : ℝ) ∈ S) (h1S : (1 : ℝ) ∈ S) (hrS : r ∈ S)
+    (hS : ∀ α ∈ S, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α)
+    (hβ : ∀ α ∈ S, α ≠ 0 → C * α ≤ β) :
+    -- (a) `f(0) = f(1) = 0`
+    ((0 : ℝ) ^ (a + 1) * ((0 : ℝ) - 1) ^ (b + 1) = 0
+      ∧ (1 : ℝ) ^ (a + 1) * ((1 : ℝ) - 1) ^ (b + 1) = 0)
+    -- (b) 臨界点は `{0, 1, r}`
+    ∧ (∀ x : ℂ, (derivative ((X : ℂ[X]) ^ (a + 1) * (X - 1) ^ (b + 1))).eval x = 0 →
+        x = 0 ∨ x = 1 ∨ x = ((a : ℂ) + 1) / (((a : ℂ) + 1) + ((b : ℂ) + 1)))
+    -- (c) `f(β) ∉ f(S)`
+    ∧ (∀ α ∈ S, β ^ (a + 1) * (β - 1) ^ (b + 1) ≠ α ^ (a + 1) * (α - 1) ^ (b + 1))
+    -- (d) `(f(β)+f₀)/(f(α)+f₀) ≥ C`
+    ∧ (∀ α ∈ S,
+        α ^ (a + 1) * (α - 1) ^ (b + 1)
+            - S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1)) ≠ 0 →
+        C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1)
+              - S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1)))
+            / (α ^ (a + 1) * (α - 1) ^ (b + 1)
+              - S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1)))) := by
+  classical
+  have hd0 : (0 : ℝ) < (a : ℝ) + 1 + ((b : ℝ) + 1) := by positivity
+  have hr0 : 0 < r := by rw [hr]; positivity
+  have hr1 : r < 1 := by
+    rw [hr, div_lt_one hd0]
+    linarith [Nat.cast_nonneg (α := ℝ) b]
+  -- `f₀ = −inf' = max(0, −f(r))`
+  have hinf : S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1))
+      = min 0 (r ^ (a + 1) * (r - 1) ^ (b + 1)) :=
+    belyi_inf_eq a b S hne h0S hrS hS
+  have hf0 : -(S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1)))
+      = max 0 (-(r ^ (a + 1) * (r - 1) ^ (b + 1))) := by
+    rw [hinf]
+    rcases le_or_gt 0 (r ^ (a + 1) * (r - 1) ^ (b + 1)) with h | h
+    · rw [min_eq_left h, max_eq_left (by linarith), neg_zero]
+    · rw [min_eq_right h.le, max_eq_right (by linarith)]
+  refine ⟨⟨by simp, by simp⟩, fun x => belyi_critical a b, belyi_c a b hC S hr0.le hr1.le hS h1S hβ, ?_⟩
+  intro α hα hne'
+  have hkey := belyi_d a b hC S hr hS h1S hβ
+      (-(S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1)))) hf0 α hα (by
+        rw [← sub_eq_add_neg]; exact hne')
+  rw [← sub_eq_add_neg, ← sub_eq_add_neg] at hkey
+  exact hkey
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+/-- ★★**条なしの `.src`** —— `Lemma 2.1` は (a)(b)(c)(d) すべて実装できた。 -/
+def lemma_2_1.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 2, item := "Lemma 2.1",
+    sectionId := "ncbelyi-lemma-2-1" }
 
 def belyi_ratio_ge.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 2,
