@@ -1024,7 +1024,7 @@ end PsiHom
 /-! ## ★★★残り —— 関手性と圏同値(段取り)
 
 原文 (FrdI p.50):
-> for d′ ∈N≥1 — it follows that the assignment φ →Ψ(φ) is compatible with com-
+> monomorphisms [cf. Definition 1.3, (v), (a)], this implies [by relating an
 
 ★**ここまでで揃ったもの**: `psiMap` が**関数として**定まり(well-defined)、
 `Base`・`degFr` を保ち、`Div` を `d` 倍し、等長射の上で恒等である。
