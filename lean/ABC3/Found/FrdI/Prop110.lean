@@ -2259,6 +2259,26 @@ theorem prop_1_10_iv_unbounded (F : FrobenioidCore P) {A : C} (hA : IsIsotropic 
   · rw [hd]; exact hp
   · rw [hd]; exact hpn
 
+include P in
+/-- ★★★**原文の「infinitely many isomorphism classes」を集合の無限性で述べる**。
+
+原文 (FrdI p.34):
+> is isotropic, then there exist infinitely many isomorphism classes of objects of AC
+
+★★**監査で「「無限個」そのものを述べていない」と指摘されたもの**。
+
+★**実現される次数の集合が無限**であることを述べる。
+★`prop_1_10_iv_infinitely_many` の第2主張（次数が違えば非同型）と合わせれば、
+★★**同型類が無限個ある**ことになる（次数が全単射の代わりをする）。 -/
+theorem prop_1_10_iv_degrees_infinite (F : FrobenioidCore P) {A : C}
+    (hA : IsIsotropic P A) :
+    {n : ℕ | ∃ (B : C) (φ : A ⟶ B), IsIrreducibleMor φ ∧ ((P.degFr φ : ℕ+) : ℕ) = n}.Infinite := by
+  refine Set.Infinite.mono ?_ Nat.infinite_setOf_prime
+  intro p hp
+  obtain ⟨B, φ, hφ, hd⟩ := F.frobDegSurj A ⟨p, hp.pos⟩
+  exact ⟨B, φ, prop_1_10_iv_mp P F hA φ ⟨hφ, by rw [hd]; exact hp⟩, by rw [hd]; rfl⟩
+
+
 /-! ### ★(vi) 後半の最終段 —— `IsFrobeniusTrivial` を同型に沿って移す
 
 ★**原文(p.36)の最後の 1 文**:
