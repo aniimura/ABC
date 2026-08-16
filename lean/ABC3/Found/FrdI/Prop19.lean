@@ -1333,6 +1333,65 @@ theorem isotropification_lbInvertible {A B : C} (f : A ⟶ B) (h : IsLBInvertibl
    (isotropification_isometric_iff P F f).mpr h.2⟩
 
 include F in
+/-- ★**(v)** の保存リスト —— `co-angular`。★**監査で「列挙どおりの形が無い」と指摘された 1 件。**
+
+原文 (FrdI p.32):
+> morphisms, base-FSM-morphisms, base-identity en-
+
+★★**仮定は要らない** —— `𝒞^istr` の対象は isotropic なので、
+そこから出る射はすべて co-angular(`isCoAngular_of_isotropic_dom`)。
+★原文の「preserves co-angular morphisms」より**強い**。 -/
+theorem isotropification_coAngular {A B : C} (f : A ⟶ B) :
+    IsCoAngular P (istrMap P F f) :=
+  isCoAngular_of_isotropic_dom P F (hullMap_spec P F A).2.2.1 _
+
+/-! ### ★★(v) の「through which the functor `C →FΦ` factors」
+
+原文 (FrdI p.32):
+> Bistr forms a left adjoint to the inclusion functor Cistr →C, through which
+
+★★**原文の代名詞「which」の先行詞が曖昧である**(測定として記録する)。
+直前の名詞句は「the inclusion functor `Cistr →C`」だが、
+★**包含関手は `𝒞` へ**入る**ので、`𝒞 → 𝔽_Φ` がそれを経由することはできない**(向きが合わない)。
+★**型が通る唯一の読みは「isotropification 関手 `𝒞 → 𝒞^istr` を経由する」**である。
+★我々はこちらを採る。★**原文の曖昧さであり、我々の選択である**ことを明記しておく。
+
+★**「経由する」の中身**: `A` とその isotropic hull `A^istr` は `𝒞` では別の対象だが、
+★★**`𝔽_Φ` に落とすと同型になる。** isotropic hull は
+- isometric ⟹ `Div = 0`
+- pre-step ⟹ `IsLinear`(`degFr = 1`)かつ base-isomorphism
+なので、`𝔽_Φ` の同型判定 `isIso_iff`(base 同型 ∧ div 可逆 ∧ deg = 1)を満たす。
+-/
+
+include F in
+/-- ★★**isotropic hull は `𝔽_Φ` では同型になる**。
+
+★これが「factors」の中身である。 -/
+theorem toElem_map_hullMap_isIso (A : C) : IsIso (P.toElem.map (hullMap P F A)) := by
+  obtain ⟨hisom, hstep, -, -⟩ := hullMap_spec P F A
+  refine (ElemFrobCat.isIso_iff _).mpr ⟨hstep.2, ?_, hstep.1⟩
+  show IsAddUnit (P.Div (hullMap P F A))
+  rw [show P.Div (hullMap P F A) = 0 from hisom]
+  exact isAddUnit_zero
+
+include F in
+/-- ★★**`Proposition 1.9, (v)` の「through which the functor `C →FΦ` factors」**。
+
+原文 (FrdI p.32):
+> the functor C →FΦ factors.
+
+★**`𝒞 → 𝔽_Φ` は isotropification を経由する**(自然同型を除いて)。
+★成分は `toElem_map_hullMap_isIso`、自然性は `isotropification_square` そのもの。 -/
+noncomputable def isotropificationFactorIso :
+    P.toElem ≅ isotropification P F ⋙ (istrPre P).toElem :=
+  NatIso.ofComponents
+    (fun A => @asIso _ _ _ _ (P.toElem.map (hullMap P F A)) (toElem_map_hullMap_isIso P F A))
+    (fun {A B} f => by
+      show P.toElem.map f ≫ P.toElem.map (hullMap P F B)
+        = P.toElem.map (hullMap P F A) ≫ P.toElem.map (istrMap P F f)
+      rw [← P.toElem.map_comp, ← P.toElem.map_comp, isotropification_square P F f])
+
+include F in
 /-- ★**(v)** —— **isotropification 関手の `𝒞^istr` への制限は恒等関手と同型**。
 
 原文 (FrdI p.32):
@@ -2329,20 +2388,33 @@ def prop_1_9_vii.src : ABC3.Meta.Source :=
 原文 (FrdI p.32):
 > forms a left adjoint to the inclusion functor Cistr →C, through which the functor
 
-★★**「through which the functor `𝒞 → 𝔽_Φ` factors」に対応する宣言が無い。**
-`grep` で確認した ——「factor」を含む宣言は本ファイルに無く、
-`isotropification` を含む自然同型は `isotropificationRestrictIso`
-(`ι ⋙ isotropification ≅ 𝟭 (Istr P)`)の 1 本だけである。
+★★**(v) の 2 件は同日に埋めた**:
+- 「through which the functor `𝒞 → 𝔽_Φ` factors」→ `isotropificationFactorIso`
+  (`P.toElem ≅ isotropification P F ⋙ (istrPre P).toElem`)。
+  ★中身は「**isotropic hull は `𝔽_Φ` では同型になる**」(`toElem_map_hullMap_isIso`) ——
+  isometric ＋ pre-step から `div = 0`・`deg = 1`・base 同型が揃うため。
+- 保存 11 クラスのうち co-angular → `isotropification_coAngular`(仮定不要。原文より強い)。
 
-★**これは定義から従うものではない**。`istrPre.toElem := ι ⋙ P.toElem` なので、
-求めるのは `isotropification P F ⋙ (istrPre P).toElem ≅ P.toElem` であり、
-★`A` と `hullObj A` は**別の対象**だから、`hullMap` に沿った自然同型を作る仕事が要る。
+★★**残るのは (ii) の 1 件である。**
 
-★もう 1 つ、原文 (v) の保存 11 クラスのうち **co-angular** だけが
-`isotropification_*` の系列に無い(`istr_coAngular` で実質は覆われているが、
-原文の列挙どおりの形では述べていない)。
+原文 (FrdI p.31):
+> the subgroup of v ∈O×(A) for which vimtr-pre is the identity.
 
-★**この 2 件が (v) の残りである。**
+★**原文は `𝒪^×(A)^{imtr-pre}` が `𝒪^×(A)` の部分群であると述べている**が、
+`OTimesImtrPre` は `Set (End A)` で、包含 `otimesImtrPre_subset` しか無い。
+★**単位元を含むこと・積で閉じること・逆元で閉じることを示していない。**
+
+★**必要な材料**(測定済み):
+- `1 ∈`: `pushFunctor P F (𝟙 A) _ ≅ 𝟭` —— `pushFunctor_id` に相当。
+- 積で閉じる: `pushFunctor (u ≫ v) ≅ pushFunctor u ⋙ pushFunctor v` —— `pushFunctor_comp` に相当。
+どちらも `prop_1_9_i_uniq`(分解の一意性)から出るはずである。
+
+★★**楽になる事実**: `Over (⟨A⟩ : ImtrPre P)` の hom は subsingleton
+(`imtrPreOver_hom_subsingleton`。`pushFunctor` の `map_id`/`map_comp` がこれで潰れている)。
+★**したがって自然性は自動で、対象ごとの同型さえ作れば関手の同型が得られる。**
+
+★**まだ試していない**(「証明できなかった」ではない)。
+★**これが埋まれば `Proposition 1.9` に条なし `.src` を付けられる。**
 -/
 
 end ABC3.Found.FrdI
