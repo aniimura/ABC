@@ -1,6 +1,7 @@
 import Mathlib.GroupTheory.MonoidLocalization.GrothendieckGroup
 import Mathlib.NumberTheory.PrimeCounting
 import ABC3.Found.FrdI.Prop19
+import ABC3.Found.FrdI.MonoidPrime
 
 /-!
 # [FrdI] Proposition 1.10 —— Morphisms of Frobenius Type
@@ -1497,17 +1498,12 @@ theorem prop_1_10_vi_subQuasi {A B : C} (α : B ⟶ A)
     (hq : IsQuasiFrobeniusTrivial P B) : IsSubQuasiFrobeniusTrivial P A :=
   ⟨B, α, hαc, hαs, hq⟩
 
-/-! ### ★MLe の 2 つの補助 —— 穴を塞ぐのに要る
+/-! ### ★MLe の補助 —— 穴を塞ぐのに要る
 
-★どちらも `MLe a b := ∃ c, a + c = b` の定義から直に出るが、
-**使う形が違う**ので別々に置く。
+★`MLe a b := ∃ c, a + c = b` の定義から直に出る。
+★**`mle_nsmul_self` は 2026-08-17 に `MonoidPrime.lean` へ移した**——
+§0 の語彙なのだから、実装場所もそちらであるべきだった。
 -/
-
-/-- ★**`x ≤ n • x`**(`n ≥ 1`)。★`n • x = x + (n-1) • x` から。 -/
-theorem mle_nsmul_self {M : Type w} [AddCommMonoid M] {n : ℕ} (hn : 0 < n) (x : M) :
-    MLe x (n • x) := by
-  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  exact ⟨m • x, by rw [succ_nsmul, add_comm]⟩
 
 /-- ★**加法準同型は `MLe` を保つ**。 -/
 theorem MLe.map {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)

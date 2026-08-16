@@ -4,6 +4,7 @@ import ABC3.Found.PGC.LocalFieldNorm
 import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Found.FrdI.MonoidVocabulary
+import ABC3.Found.FrdI.MonoidPrime
 import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
@@ -42,6 +43,7 @@ import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.LogDiff
+import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
 
