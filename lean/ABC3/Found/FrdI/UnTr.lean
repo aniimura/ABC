@@ -190,9 +190,12 @@ theorem unTrToElem_essSurj (Fc : FrobenioidCore P) : (unTrToElem P).EssSurj := b
   obtain ⟨B, φ, hφ⟩ := Fc.isotropicHullExists A₀
   haveI hbi : IsIso (P.Base φ) := hφ.2.1.2
   have e' : (P.toElem.obj B).base ≅ X.base := (@asIso _ _ _ _ (P.Base φ) hbi).symm ≪≫ e
-  haveI : IsIso ((⟨e'.hom, 0, 1⟩ : P.toElem.obj B ⟶ X)) :=
-    (ElemFrobCat.isIso_iff _).mpr ⟨inferInstance, isAddUnit_zero, rfl⟩
-  exact ⟨(show UnTr P from (⟨B, hφ.2.2.1⟩ : Istr P)),
-    ⟨asIso ((⟨e'.hom, 0, 1⟩ : P.toElem.obj B ⟶ X))⟩⟩
+  obtain ⟨k, hk⟩ : ∃ k : P.toElem.obj B ⟶ X, k = ⟨e'.hom, 0, 1⟩ := ⟨_, rfl⟩
+  have hkiso : IsIso k := by
+    refine (ElemFrobCat.isIso_iff k).mpr ⟨?_, ?_, ?_⟩
+    · rw [hk]; exact inferInstanceAs (IsIso e'.hom)
+    · rw [hk]; exact isAddUnit_zero
+    · rw [hk]
+  exact ⟨(show UnTr P from (⟨B, hφ.2.2.1⟩ : Istr P)), ⟨@asIso _ _ _ _ k hkiso⟩⟩
 
 end ABC3.Found.FrdI
