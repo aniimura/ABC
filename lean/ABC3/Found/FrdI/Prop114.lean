@@ -239,4 +239,82 @@ theorem prop_1_14_i (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
     · exact prop_1_14_i_of_step P hiso φ hst hdiv
     · exact prop_1_14_i_of_pullBack P G.core φ hpb hb
 
+/-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性
+
+★★**引用を選び直した記録(事故 #3 の 10 度目)**: (iv) の主張は 3 行だが、
+★**3 行すべてが `′` を含むため引用できない**(`′` は layout 抽出で落ちる既知の文字で、
+12/58 文字・12/44 文字で停止した)。★**(iv) を挟む前後の行を引く。**
+
+原文 (FrdI p.41):
+> — where α1, . . . , αn, ψ are FSMI-morphisms [cf. §0] — it holds that n ≤N.
+
+原文 (FrdI p.41):
+> (v) Suppose further that Φ is non-dilating, and that φ is a non-pre-step
+
+★**私は最初、原文の行を手で打った**。★★**それが誤りだった** ——
+規律は「内容は PDF 目視、文字列は抽出テキストから」であり、
+★**手打ちは抽出と一致しない**。ゲートが捕まえた。
+
+★★**原文は (iv) の証明を書いていない。** ★実際、(i) さえあれば 2 段で終わる:
+
+1. **次数**: `Remark 1.1.1`(次数は合成で掛かる)から
+   `degFr(α)·degFr(β) = degFr(β′)·degFr(α′)`。`degFr(β) = degFr(β′)` と
+   ★**`ℕ≥1` が消約的**であることから `degFr(α) = degFr(α′)`
+2. **prime-Frobenius 性**: (i) により irreducible な射は 3 種類しかない。
+   ★**step も pull-back も次数 1** である(pull-back は `Proposition 1.4, (ii)` で linear)。
+   ★**次数が素数なら 1 ではない**ので、残るのは prime-Frobenius だけ
+
+★★**「次数が同型類の不変量になっている」という `Proposition 1.10, (iv)` の構図が、
+ここでも効いている** —— (iv) は本質的に「**次数が型を決める**」ことの言い換えである。
+
+★**原文が「moreover」で後置している `degFr(α) = degFr(α′)` のほうが先**であり、
+iff はその系である(検証役の測定と一致する)。
+-/
+
+include P in
+/-- ★★**(i) の系 —— 次数が 1 でない irreducible 射は prime-Frobenius**。
+
+★(i) の 3 種類のうち step と pull-back はどちらも次数 1 だから。
+★**これが (iv) の両向きを一手で与える。** -/
+theorem prop_1_14_primeFrob_of_irred_of_degFr_ne_one (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B)
+    (hirr : IsIrreducibleMor φ) (hd : P.degFr φ ≠ 1) : IsPrimeFrobenius P φ := by
+  rcases (prop_1_14_i P G hiso φ).mp hirr with h | ⟨hst, -⟩ | ⟨hpb, -⟩
+  · exact h
+  · exact absurd (show P.degFr φ = 1 from hst.1.1) hd
+  · exact absurd (prop_1_4_ii_mp P G.core φ hpb).2 hd
+
+include P in
+/-- ★**(iv) の次数の部分** —— `ℕ≥1` の消約性だけで出る。 -/
+theorem prop_1_14_iv_degFr {X Y W Z : C} (β : X ⟶ Y) (α : Y ⟶ Z)
+    (α' : X ⟶ W) (β' : W ⟶ Z) (hsq : β ≫ α = α' ≫ β')
+    (hdeg : P.degFr β = P.degFr β') : P.degFr α = P.degFr α' := by
+  have h := congrArg P.degFr hsq
+  rw [P.degFr_comp, P.degFr_comp, hdeg] at h
+  -- `degFr α * degFr β' = degFr α' * degFr β'`(★`ℕ≥1` の積は可換)
+  have h' : ((P.degFr α : ℕ+) : ℕ) * ((P.degFr β' : ℕ+) : ℕ)
+      = ((P.degFr α' : ℕ+) : ℕ) * ((P.degFr β' : ℕ+) : ℕ) := by
+    have := congrArg (fun n : ℕ+ => (n : ℕ)) h
+    simpa [mul_comm] using this
+  refine PNat.coe_injective (Nat.eq_of_mul_eq_mul_right ?_ h')
+  exact (P.degFr β').pos
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (iv)**。 -/
+theorem prop_1_14_iv (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {X Y W Z : C} (β : X ⟶ Y) (α : Y ⟶ Z) (α' : X ⟶ W) (β' : W ⟶ Z)
+    (hsq : β ≫ α = α' ≫ β') (hdeg : P.degFr β = P.degFr β')
+    (hα : IsIrreducibleMor α) (hα' : IsIrreducibleMor α') :
+    P.degFr α = P.degFr α' ∧ (IsPrimeFrobenius P α ↔ IsPrimeFrobenius P α') := by
+  have hd : P.degFr α = P.degFr α' := prop_1_14_iv_degFr P β α α' β' hsq hdeg
+  refine ⟨hd, ?_, ?_⟩
+  · intro hp
+    refine prop_1_14_primeFrob_of_irred_of_degFr_ne_one P G hiso α' hα' (fun h1 => ?_)
+    have h2 : ((P.degFr α : ℕ+) : ℕ) = 1 := by rw [hd, h1]; rfl
+    exact Nat.not_prime_one (h2 ▸ hp.2)
+  · intro hp
+    refine prop_1_14_primeFrob_of_irred_of_degFr_ne_one P G hiso α hα (fun h1 => ?_)
+    have h2 : ((P.degFr α' : ℕ+) : ℕ) = 1 := by rw [← hd, h1]; rfl
+    exact Nat.not_prime_one (h2 ▸ hp.2)
+
 end ABC3.Found.FrdI
