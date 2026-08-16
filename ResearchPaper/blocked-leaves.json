@@ -1,5 +1,5 @@
 {
- "measuredAt": "2026-08-17(NCBelyi の 3 件と GenEll Definition 1.1 を追加。既存は 2026-08-15)",
+ "measuredAt": "2026-08-17(★Cartier 因子の不在を追加。NCBelyi の 3 件と GenEll Definition 1.1 も同日。既存は 2026-08-15)",
  "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
  "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
  "blocked": [
@@ -18,6 +18,12 @@
    "key": "[GenEll] Definition 1.1",
    "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。",
    "unblockedBy": "★**複素解析空間の理論**(`X(ℂ)` の位相と、その上の連接層・エルミート計量)。これは mathlib に着手の形跡が無い。★ただし `ADiv(F)` と正規化次数、および**差積イデアル → 算術因子**(`Found/GenEll/LogDiff.lean`、2026-08-17)は既に実装済みで、`Definition 1.5, (iii)` の側は `X` を必要としないことも分かっている——**§1 は一枚岩ではない**。"
+  },
+  {
+   "key": "[GenEll] Definition 1.5, (iv) —— log-cond(および Proposition 1.6 / 1.7 / Definition 3.3 / Corollary 4.3 / 4.4 の同じ底)",
+   "reason": "log-cond は『有効 **Cartier** 因子 `D ⊆ X` を `Spec(𝓞_F)` へ引き戻して被約化したもの `f_x^D ≝ (D_x)_red`』として定義される(物理 p.8)。★★**mathlib 実測 2026-08-17: `grep -rln Cartier Mathlib/` が 0 件**。EffectiveCartierDivisor も CartierDivisor も無い。因子論そのものが `Mathlib/AlgebraicGeometry/` に無く、ディレクトリ一覧にも Divisor 系のファイルが 1 つも無い。★これは『重い』のではなく『**底が抜けている**』——`Proposition 1.6`(導手 ≤ 高さ)も `Proposition 1.7` も `Definition 3.3` も `Corollary 4.3/4.4` も、すべてこの 1 点で止まる。",
+   "unblockedBy": "★スキーム上の**有効 Cartier 因子**の理論(可逆イデアル層、引き戻し、被約化、次数)。mathlib のスキーム論の土台(`AlgebraicGeometry.Scheme`、`IdealSheaf`、`Scheme.Hom.image`)は**ある**ので、ゼロからではない。★実際 `AlgebraicGeometry/IdealSheaf/Subscheme.lean` に `Scheme.Hom.image`(scheme 論的像)が**ある**——これは `Definition 1.5, (i)`(minimal field of definition)の側には道があることを意味する。★★**(i) と (iv) で底の深さが違う。**",
+   "★halfSolved": "非アルキメデス側の被約化(`(D_x)_red` に当たる操作)は `ADiv` の層では実装済み——`Found/GenEll/Conductor.lean` の `ADivRed`/`adivRed_idem`/`deg_adivRed_le`、および `Found/GenEll/LogDiffValue.lean` の `deg_idealADiv_radical_le`。**足りないのは `D` から `D_x` を作る引き戻しだけ**である。"
   }
  ],
  "expandableWithWork": [

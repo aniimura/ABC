@@ -121,7 +121,8 @@ theorem logDiffOfField_tower :
 **最小の定義体でだけ `x` の不変量になる**。
 
 原文 (GenEll p.8):
-> (iii) Let x ∈ X(F ) ⊆ X(Q), where F is a minimal field of definition of x. Then the diﬀerent ideal of F determines an eﬀective arithmetic divisor -/
+> (iii) Let x ∈ X(F ) ⊆ X(Q), where F is a minimal field of definition of x. Then the diﬀerent ideal of F determines an eﬀective arithmetic divisor
+-/
 theorem logDiffOfField_le : logDiffOfField F ≤ logDiffOfField K := by
   rw [logDiffOfField_tower F K]
   have hK : (0 : ℝ) < (Module.finrank ℚ K : ℝ) := by
