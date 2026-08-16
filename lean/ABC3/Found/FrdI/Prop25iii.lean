@@ -704,6 +704,45 @@ theorem psiMap_id (d : ℕ+) (A : C) :
     psiMap P F hτ hiso hmt haa d (𝟙 A) = 𝟙 A :=
   psiMap_of_isometric P F hτ hiso hmt haa d (𝟙 A) (P.Div_id A)
 
+/-! ### ★合成則のうち、分解を組み替えずに出る 2 つ
+
+★4 重分解 `δ ≫ γ ≫ β ≫ α` の**両端**——左の Frobenius 型と右の pull-back ——は
+合成しても形が変わらない。★したがってこの 2 方向の合成則は**ただちに出る**。
+残るのは真ん中(等長 pre-step と base-identity 自己射)を通す場合である。
+-/
+
+include hτ hiso hmt haa in
+/-- ★★**右から pull-back を掛ける場合** —— `Ψ(φ ≫ α') = Ψ(φ) ≫ α'`。
+
+★pull-back どうしの合成は pull-back なので、分解の右端が伸びるだけ。 -/
+theorem psiMap_comp_pullBack (d : ℕ+) {A B E : C} (φ : A ⟶ B) {α' : B ⟶ E}
+    (hα' : IsPullBack P α') :
+    psiMap P F hτ hiso hmt haa d (φ ≫ α')
+      = psiMap P F hτ hiso hmt haa d φ ≫ α' := by
+  obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ
+  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine ⟨X, Y, δ, γ, β, α ≫ α', hm, ?_, hδ, hγi, hγs, hβs, hβc,
+    IsPullBack.comp P hα hα', ?_⟩
+  · rw [hf]; simp
+  · rw [he]; simp
+
+include hτ hiso hmt haa in
+/-- ★★**左から Frobenius 型射を掛ける場合** —— `Ψ(δ' ≫ φ) = δ' ≫ Ψ(φ)`。
+
+★Frobenius 型射どうしの合成は Frobenius 型なので、分解の左端が伸びるだけ。 -/
+theorem psiMap_frob_comp (d : ℕ+) {A A' B : C} {δ' : A' ⟶ A}
+    (hδ' : IsFrobeniusType P δ') (φ : A ⟶ B) :
+    psiMap P F hτ hiso hmt haa d (δ' ≫ φ)
+      = δ' ≫ psiMap P F hτ hiso hmt haa d φ := by
+  obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ
+  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine ⟨X, Y, δ' ≫ δ, γ, β, α, hm, ?_, IsFrobeniusType.comp P F hδ' hδ,
+    hγi, hγs, hβs, hβc, hα, ?_⟩
+  · rw [hf]; simp
+  · rw [he]; simp
+
 end PsiHom
 
 /-! ## ★★★残り —— 関手性と圏同値(段取り)
