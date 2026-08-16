@@ -250,6 +250,26 @@ theorem otriOf_mem_otimes (A : ElemFrobCat Φ) (a : Φ.val A.base) :
     exact (isUnit_iff_isIso _).mpr
       ((ElemFrobCat.isIso_iff _).mpr ⟨by simp only [otriOf_base]; infer_instance, hu, rfl⟩)
 
+/-! ### ★★(ii) の「functorial」を関手の同型として述べる —— 設計の測定（2026-08-16）
+
+★検証役の監査によれば、候補は 2 つある。
+
+| 形 | 原文のどこに対応するか | 問題 |
+|---|---|---|
+| `Dᵒᵖ ⥤ Mon` | `Proposition 2.2`（原文が実際に関手を作る場所） | ★推移写像を `Φ.map (Base φ)` で**定義**するので、非自明さが `otriOf_natural` に移る |
+| `Linᵒᵖ ⥤ Mon` | `Proposition 1.11, (iv)` に最も近い | ★★**依存順で使えない**（下記） |
+
+★★**依存順の制約を見つけた**: `Lin`（`linProp` の `WideSubcategory`）は
+`Prop111.lean:410` にある。しかし `Prop111` は `Prop110 → Prop19 → … → Prop15` と
+このファイルを**下流に持つ**ので、★**`Prop15` から `Lin` は参照できない**。
+
+★**採るなら `linProp` / `Lin` を `MorphismTypes.lean` へ移す必要がある**。
+★本日 `𝒞^bs-iso` を `Prop17` に置いたが、★★**部分圧の置き場所は
+`Definition 1.2, (iv)` の実装場所（`MorphismTypes.lean`）に揃えるのが筋である** ——
+現状は `Lin` が `Prop111`、`BsIso` が `Prop17`、`PlBk` が `Frobenioid` と散っている。
+
+★**まだ試していない**。★これが `Proposition 1.5` に残る唯一の項目である。 -/
+
 /-- ★★**原文の「[so O×(A) ∼→Φ(A)±]」**（2026-08-16 追加）。
 
 原文 (FrdI p.27):
