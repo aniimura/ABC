@@ -64,6 +64,71 @@ instance hosComap_liesOver (w : HeightOneSpectrum (𝓞 K)) :
     w.asIdeal.LiesOver (hosComap F K w).asIdeal :=
   ⟨rfl⟩
 
+/-! ## ★★引き戻しの fiber —— `w | v` の集合
+
+★mathlib の `Ideal.sum_ramification_inertia` は
+**`IsDedekindDomain.primesOverFinset` の上の和**として述べられており、
+`HeightOneSpectrum` ではない。ここでその 2 つを繋ぐ。 -/
+
+/-- ★`v` の上にある素点は**有限個**である。
+
+★`primesOverFinset`(mathlib、有限)への単射で押さえる。
+`HeightOneSpectrum` は `asIdeal` で決まる(残る 2 つのフィールドは Prop)から単射。 -/
+theorem finite_hosComap_fiber (v : HeightOneSpectrum (𝓞 F)) :
+    {w : HeightOneSpectrum (𝓞 K) | hosComap F K w = v}.Finite := by
+  haveI : v.asIdeal.IsMaximal := v.isPrime.isMaximal v.ne_bot
+  refine Set.Finite.of_finite_image (f := HeightOneSpectrum.asIdeal) ?_ ?_
+  · refine Set.Finite.subset
+      (IsDedekindDomain.primesOverFinset v.asIdeal (𝓞 K)).finite_toSet ?_
+    rintro _ ⟨w, hw, rfl⟩
+    simp only [Set.mem_setOf_eq] at hw
+    rw [Finset.mem_coe, IsDedekindDomain.mem_primesOverFinset_iff v.ne_bot]
+    exact ⟨w.isPrime, ⟨(congrArg HeightOneSpectrum.asIdeal hw).symm⟩⟩
+  · intro a _ b _ h
+    exact HeightOneSpectrum.ext h
+
+open scoped Classical in
+/-- ★`v` の上にある素点全体の `Finset`。 -/
+noncomputable def hosFiber (v : HeightOneSpectrum (𝓞 F)) :
+    Finset (HeightOneSpectrum (𝓞 K)) :=
+  (finite_hosComap_fiber F K v).toFinset
+
+open scoped Classical in
+@[simp] theorem mem_hosFiber {v : HeightOneSpectrum (𝓞 F)}
+    {w : HeightOneSpectrum (𝓞 K)} :
+    w ∈ hosFiber F K v ↔ hosComap F K w = v := by
+  simp [hosFiber]
+
+open scoped Classical in
+/-- ★★**基本等式の `HeightOneSpectrum` 版** —— `Σ_{w | v} e(w|v)·f(w|v) = [K:F]`。
+
+★mathlib の `Ideal.sum_ramification_inertia` は
+**`IsDedekindDomain.primesOverFinset` の上の和**であり、
+`HeightOneSpectrum` ではない(2026-08-17 実測)。
+★本定理がその 2 つを繋ぐ——`asIdeal` による**全単射**である。 -/
+theorem sum_ramification_inertia_hos (v : HeightOneSpectrum (𝓞 F)) :
+    ∑ w ∈ hosFiber F K v,
+        v.asIdeal.ramificationIdx w.asIdeal * v.asIdeal.inertiaDeg w.asIdeal
+      = Module.finrank F K := by
+  classical
+  haveI : v.asIdeal.IsMaximal := v.isPrime.isMaximal v.ne_bot
+  rw [← Ideal.sum_ramification_inertia (𝓞 K) F K v.ne_bot]
+  refine Finset.sum_bij (i := fun w _ => w.asIdeal) ?_ ?_ ?_ ?_
+  · intro w hw
+    rw [mem_hosFiber] at hw
+    rw [IsDedekindDomain.mem_primesOverFinset_iff v.ne_bot]
+    exact ⟨w.isPrime, ⟨(congrArg HeightOneSpectrum.asIdeal hw).symm⟩⟩
+  · intro a _ b _ h
+    exact HeightOneSpectrum.ext h
+  · intro P hP
+    rw [IsDedekindDomain.mem_primesOverFinset_iff v.ne_bot] at hP
+    have hPne : P ≠ ⊥ := Ideal.ne_bot_of_mem_primesOver v.ne_bot hP
+    refine ⟨⟨P, hP.1, hPne⟩, ?_, rfl⟩
+    rw [mem_hosFiber]
+    exact HeightOneSpectrum.ext hP.2.over.symm
+  · intro a _
+    rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def hosComap.src : ABC3.Meta.Source :=
