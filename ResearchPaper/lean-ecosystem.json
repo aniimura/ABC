@@ -1,141 +1,189 @@
 {
-  "_comment": [
-    "mathlib 以外の公開 Lean プロジェクトの調査記録。",
-    "「mathlib に無い」は Lean エコシステム全体では偽でありうる——2026-08-14 の調査で確認した。",
-    "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
-    "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。"
-  ],
-  "measuredAt": "2026-08-14",
-  "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
-  "projects": {
-    "ClassFieldTheory": {
-      "url": "https://github.com/kbuzzard/ClassFieldTheory",
-      "what": "局所・大域類体論の主定理。2025年 Clay 夏の学校のリポジトリ",
-      "toolchain": "leanprover/lean4:v4.33.0-rc1",
-      "toolchainGap": "我々より新しい(v4.31.0-rc2 → v4.33.0-rc1)",
-      "leanFiles": 108,
-      "theorems": 483,
-      "sorries": 25,
-      "lastCommit": "2026-07-31",
-      "status": "進行中",
-      "structure": {
-        "Cohomology/": "群コホモロジー・Tate コホモロジー・dimension shifting・inflation-restriction・Herbrand 商・reciprocityIso(抽象的な類形成の相互律)",
-        "IsNonarchimedeanLocalField/": "13ファイル。Qp.lean(ℚ_p が非アルキメデス局所体)・Tower.lean(拡大の塔)・RamificationInertia.lean・Unramified.lean・HerbrandQuotient.lean・Valuation.lean(1 → 𝒪[K]ˣ → Kˣ → ℤ → 0)",
-        "LocalCFT/": "2ファイルのみ(Continuity.lean・Teichmuller.lean)——局所類体論の本体はまだ薄い"
-      },
-      "findings": [
-        "reciprocityIso は **抽象的な類形成**の相互律(tateCohomology N 0 ≅ Abelianization G)であって、具体的な Γ_K^ab ≅ (K^×)^∧ ではない",
-        "Instances.lean(有限次拡大に付値構造を与えるインスタンス群)に **sorry が 11 件**——我々が必要とする箇所がちょうど未完成",
-        "Valuation.lean の 1 → 𝒪[K]ˣ → Kˣ → ℤ → 0 は、我々の義務#5(0 → U_K → (K^×)^∧ → Ẑ → 0)の**副有限完備化前の版**。重なりはあるが同一ではない"
-      ],
-      "notFound": [
-        "局所 Tate 双対性",
-        "高次分岐群(下付き/上付き番号付け)"
-      ]
-    },
-    "LocalClassFieldTheory": {
-      "url": "https://github.com/mariainesdff/LocalClassFieldTheory",
-      "what": "完備離散付値環と局所体(de Frutos-Fernández・Nuccio、CPP 2024)",
-      "paper": "https://arxiv.org/pdf/2310.01998",
-      "toolchain": "leanprover/lean4:v4.22.0-rc2",
-      "toolchainGap": "我々より古い(v4.22.0-rc2)。差が大きい",
-      "leanFiles": 66,
-      "theorems": 234,
-      "sorries": 114,
-      "lastCommit": "2025-07-02",
-      "status": "1年以上更新なし・sorry 多数",
-      "structure": {
-        "DiscreteValuationRing/": "離散付値環・剰余体・拡大",
-        "LocalField/": "局所体の抽象的定義",
-        "MixedCharacteristic/": "混標数(ℚ_p 系)",
-        "EqCharacteristic/": "等標数(F_p((X)) 系)",
-        "ClassFormation/": "類形成",
-        "FromMathlib/CpDef.lean": "ℂ_p の定義"
-      },
-      "findings": [
-        "論文の要旨は「ℚ_p の有限次拡大が局所体であることを示す応用」を謳うが、リポジトリ全体で sorry が 114 件あり、そのまま使える状態ではない"
-      ],
-      "notFound": [
-        "局所 Tate 双対性",
-        "高次分岐群"
-      ]
-    }
+ "_comment": [
+  "mathlib 以外の公開 Lean プロジェクトの調査記録。",
+  "「mathlib に無い」は Lean エコシステム全体では偽でありうる——2026-08-14 の調査で確認した。",
+  "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
+  "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。"
+ ],
+ "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定)",
+ "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
+ "projects": {
+  "ClassFieldTheory": {
+   "url": "https://github.com/kbuzzard/ClassFieldTheory",
+   "what": "局所・大域類体論の主定理。2025年 Clay 夏の学校のリポジトリ",
+   "toolchain": "leanprover/lean4:v4.33.0-rc1",
+   "toolchainGap": "我々より新しい(v4.31.0-rc2 → v4.33.0-rc1)",
+   "leanFiles": 108,
+   "theorems": 483,
+   "sorries": 25,
+   "lastCommit": "2026-07-31",
+   "status": "進行中",
+   "structure": {
+    "Cohomology/": "群コホモロジー・Tate コホモロジー・dimension shifting・inflation-restriction・Herbrand 商・reciprocityIso(抽象的な類形成の相互律)",
+    "IsNonarchimedeanLocalField/": "13ファイル。Qp.lean(ℚ_p が非アルキメデス局所体)・Tower.lean(拡大の塔)・RamificationInertia.lean・Unramified.lean・HerbrandQuotient.lean・Valuation.lean(1 → 𝒪[K]ˣ → Kˣ → ℤ → 0)",
+    "LocalCFT/": "2ファイルのみ(Continuity.lean・Teichmuller.lean)——局所類体論の本体はまだ薄い"
+   },
+   "findings": [
+    "reciprocityIso は **抽象的な類形成**の相互律(tateCohomology N 0 ≅ Abelianization G)であって、具体的な Γ_K^ab ≅ (K^×)^∧ ではない",
+    "Instances.lean(有限次拡大に付値構造を与えるインスタンス群)に **sorry が 11 件**——我々が必要とする箇所がちょうど未完成",
+    "Valuation.lean の 1 → 𝒪[K]ˣ → Kˣ → ℤ → 0 は、我々の義務#5(0 → U_K → (K^×)^∧ → Ẑ → 0)の**副有限完備化前の版**。重なりはあるが同一ではない"
+   ],
+   "notFound": [
+    "局所 Tate 双対性",
+    "高次分岐群(下付き/上付き番号付け)"
+   ]
   },
-  "conclusionForUs": {
-    "summary": "どちらも drop-in で使える状態ではない。ただし「ゼロから作る」でもない——特に局所類体論はコミュニティの進行中作業があり、独立に作ると重複投資になる。",
-    "_absentPolicy": [
-      "★2026-08-14 追加: `absent` は **探索範囲** を伴わなければならない。",
-      "根拠(実失敗): Found/PGC/LocalFieldNorm.lean に「mathlib に charP_of_prime_eq_zero 相当は無い(実測)」と",
-      "書いたが誤りだった——CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 にある。",
-      "見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけで、Basic.lean を見ていなかった。",
-      "探索範囲を書かない「無い」は再現も反証もできず、測定ではなく印象である。",
-      "Lean 側も `LeanStatus.absent (searched : String)` に変更し、型が範囲を要求するようにした",
-      "(lean/ABC3/Meta/Claim.lean)。範囲を書けないなら `unmeasured` を使うこと。",
-      "以下の searchedIn は、mathlib については 2026-08-14 に本リポジトリ内で再実行した実際の grep。",
-      "公開プロジェクトは本リポジトリに clone されていないため、2026-08-14 の測定の記録であって当日の再現ではない。"
-    ],
-    "byObligation": {
-      "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": {
-        "status": "absent",
-        "note": "両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
-        "searchedIn": {
-          "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
-            "grep -rlE 'localTateDuality|local Tate|TateDuality|tateDuality' Mathlib/ → 0 件",
-            "grep -rlE '\\bTate\\b' Mathlib/ → 4 件、全て別物(EllipticCurve/Weierstrass.lean・RingTheory/Adjoin/Tower.lean・RingTheory/Perfectoid/BDeRham.lean・RingTheory/Perfectoid/FontaineTheta.lean)",
-            "grep -rlE 'tateCohomology|TateCohomology|GaloisCohomology|galoisCohomology' Mathlib/ → 0 件",
-            "grep -rli 'duality' Mathlib/NumberTheory/ Mathlib/RepresentationTheory/ → DirichletCharacter/Orthogonality.lean・MulChar/Duality.lean・NumberField/Cyclotomic/Galois.lean・Tannaka.lean のみ(いずれも局所 Tate 双対性ではない)"
-          ],
-          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定、当日は clone 済み)": [
-            "各リポジトリの notFound に「局所 Tate 双対性」を記録済み(本ファイル projects.*.notFound)",
-            "★現在は clone されていないため再現していない。再測定時は clone してから grep すること"
-          ]
-        }
-      },
-      "pGC#4 局所類体論の相互律 Γ_K^ab ≅ (K^×)^∧": "inProgress(ClassFieldTheory)。抽象的な相互律はあるが具体形は未完成",
-      "pGC#5 0 → U_K → (K^×)^∧ → Ẑ → 0": "inProgress(ClassFieldTheory Valuation.lean に完備化前の版)",
-      "pGC#6 p進対数": {
-        "status": "absent",
-        "note": "U_K の開部分群を(捩れを除いて)K の開部分群と同一視するために要る",
-        "searchedIn": {
-          "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
-            "grep -rliE 'padicLog|Padic.log|padic_log|logOneAdd|log_one_add' Mathlib/ → 6 件、全て実/複素の解析(Analysis/Normed/Module/MultipliableUniformlyOn.lean・Analysis/SpecialFunctions/Complex/Analytic.lean・Complex/LogBounds.lean・Log/Deriv.lean・Log/Summable.lean・Stirling.lean)",
-            "ls Mathlib/NumberTheory/Padics/ → 13 項目、log 系のファイルは無い",
-            "Padics 配下の 'log' の出現は全て Nat.log / Real.log(付値やファクトリアルの評価)で、p進対数ではない",
-            "grep -rlniE 'padicExp|expPadic' Mathlib/ → 0 件(対になる p進指数関数も無い)"
-          ],
-          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
-            "0 件。★現在は clone されていないため再現していない"
-          ]
-        }
-      },
-      "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": {
-        "status": "absent",
-        "note": "mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
-        "searchedIn": {
-          "mathlib v4.31.0-rc2 (2026-08-14 の測定)": [
-            "RingTheory/Valuation/RamificationGroup.lean に分解群・惰性群はあるが、同ファイルに 'TODO: Define higher ramification groups in lower numbering' が残る",
-            "上付き番号付け・Herbrand の定理は 0 件(PLAN.md 事実3)",
-            "★この項目は今回の再測定の対象外——上の2件と違い、当日の grep コマンドを再実行していない"
-          ],
-          "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
-            "両リポジトリの notFound に「高次分岐群」を記録済み"
-          ]
-        }
-      },
-      "ℚ_p の有限次拡大 → IsNonarchimedeanLocalField のインスタンス": "inProgress(ClassFieldTheory Instances.lean、sorry 11件)"
-    },
-    "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。",
-    "trackBReconnaissance": {
-      "measuredAt": "2026-08-14",
-      "target": "Interface ResidueCardinality の実装(Track B)",
-      "verified": "PAdicLocalField p(= ℚ_p の有限次拡大)に対し、mathlib の道具だけで NormedField / IsUltrametricDist / NormedAlgebra / NontriviallyNormedField / Valued(NNReal) / RankOne / ProperSpace が全て構成できることを確認(lean/ABC3/Found/PGC/LocalFieldNorm.lean、sorry無し)。鍵は spectralNorm.normedField。",
-      "blocked": "【解消済み 2026-08-14】ノルムのダイヤモンドは round-trip 補題を書かずに回避できた——CompactSpace 𝒪[K] を経由すれば、問題はノルムでなく位相の一致に落ち、NormedField.toValued は toUniformSpace に元のノルムのものをそのまま使うので位相は定義的に一致する。剰余体の有限性 finite_residueField を証明済み(sorry無し、一般の完備 proper 非アルキメデスノルム体について)。",
-      "done": "【完了 2026-08-14】isPrimePow(q = p^f, f>0)まで到達し、ResidueCardinality を discharge した(sorry無し、axiom は mathlib 標準の3つのみ)。要ったのは ‖(p:K)‖ = 1/p < 1 ただ一つ——p は 𝒪[K] の単元でない → 極大イデアルに入る → (p : 𝓀[K]) = 0 → CharP.charP_iff_prime_eq_zero → FiniteField.card。一般部分は lean/ABC3/Found/ResidueFieldFinite.lean、実装は Found/PGC/ResidueCardinality.lean。",
-      "correctedClaim": "★上記 nextStep には当初「mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行」と書いてあったが、これは誤りだった。CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 に存在する(同 100 行に CharP.ringChar_of_prime_eq_zero も)。見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけだった。この失敗が上の _absentPolicy の根拠。",
-      "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。",
-      "lesson2": "「無い」は探索範囲とセットでしか記録してはならない。範囲の無い absent は再現も反証もできない——LeanStatus.absent を searched 付きに変えたのはこのため。",
-      "valueComputed": "【2026-08-14】residueCard の値を初めて計算した: residueCard (selfField p) = p(= ℚ_[p] の剰余体は p 元体)。lean/ABC3/Found/PGC/QpResidueField.lean、sorry 無し。これで realResidueCardinality は「型が付くだけ」の対象ではなくなった。ただし Check/PGC/DischargeFiresNothing.lean の real_eq_degenerate_at_base が示すとおり、我々が名指しできる唯一の実例 base の上では本物と退化版は同じ値を返すので、両者の区別には依然 f ≥ 2 の実例が要る。",
-      "lesson3": "★打ち切り時に『障害』と呼んだものが迂回可能な配線だった、が **3件目**(1: round-trip 補題、2: charP_iff_prime_eq_zero の探索範囲、3: 今回の『障害A ノルムのダイヤモンド / 障害B IsLocalRing ↥(PadicInt.subring p)』)。3件とも、正面から解く必要は無く別経路があった。今回の迂回は (a) ノルム構造の一致を示さず algebraMap 経由の等式だけ使う (b) 付値環の集合としての一致まで来たらノルムを置き去りにする (c) 中間型 ↥(PadicInt.subring p) を型として書かず ℤ_[p] へ直接繋ぐ。PLAN §8-3 の『無いと判断した実例が既に2件』は 3件に更新できる。"
-    }
+  "LocalClassFieldTheory": {
+   "url": "https://github.com/mariainesdff/LocalClassFieldTheory",
+   "what": "完備離散付値環と局所体(de Frutos-Fernández・Nuccio、CPP 2024)",
+   "paper": "https://arxiv.org/pdf/2310.01998",
+   "toolchain": "leanprover/lean4:v4.22.0-rc2",
+   "toolchainGap": "我々より古い(v4.22.0-rc2)。差が大きい",
+   "leanFiles": 66,
+   "theorems": 234,
+   "sorries": 114,
+   "lastCommit": "2025-07-02",
+   "status": "1年以上更新なし・sorry 多数",
+   "structure": {
+    "DiscreteValuationRing/": "離散付値環・剰余体・拡大",
+    "LocalField/": "局所体の抽象的定義",
+    "MixedCharacteristic/": "混標数(ℚ_p 系)",
+    "EqCharacteristic/": "等標数(F_p((X)) 系)",
+    "ClassFormation/": "類形成",
+    "FromMathlib/CpDef.lean": "ℂ_p の定義"
+   },
+   "findings": [
+    "論文の要旨は「ℚ_p の有限次拡大が局所体であることを示す応用」を謳うが、リポジトリ全体で sorry が 114 件あり、そのまま使える状態ではない"
+   ],
+   "notFound": [
+    "局所 Tate 双対性",
+    "高次分岐群"
+   ]
+  },
+  "PrimeNumberTheoremAnd": {
+   "url": "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd",
+   "what": "素数定理とその周辺(Kontorovich・Tao ら)。★[GenEll] Remark 4.1.1 の後半(θ(x)/x → 1)がここにある",
+   "measuredAt": "2026-08-17",
+   "toolchain": "leanprover/lean4:v4.32.2",
+   "toolchainGap": "★我々より新しい(v4.31.0-rc2 → v4.32.2)。依存に加えるには我々の toolchain を上げる必要がある",
+   "leanFiles": 236,
+   "sorries": 286,
+   "lastCommit": "2026-08-15",
+   "status": "進行中。★ただし我々が要る部分は完成している可能性が高い(下記)",
+   "whatWeNeed": "PrimeNumberTheoremAnd/Consequences.lean:177 の `chebyshev_asymptotic : θ ~[atTop] id`",
+   "findings": [
+    "★★**θ は mathlib の `Chebyshev.theta` そのもの**である(`Chebyshev.theta_le_psi` / `Chebyshev.theta_eq_sum_Icc` を使っている)。我々が `Found/GenEll/PrimesOfSize.lean` で使っているものと同一——**変換が要らない**",
+    "★推移的 import 閉包(プロジェクト内)は **9 ファイルだけ**: Consequences / Defs / Fourier / Mathlib/Algebra/Notation/Support / Mathlib/Analysis/Asymptotics/Asymptotics / Mathlib/Analysis/SpecialFunctions/Log/Basic / SmoothExistence / Sobolev / Wiener",
+    "★その 9 ファイルの sorry は **合計 2 件**で、どちらも Wiener.lean の `prelim_decay_2`(Fourier 減衰、**どこからも使われていない**)と `prelim_decay_3`",
+    "★`prelim_decay_3` を使うのは `decay_alt` ただ 1 つ、`decay_alt` を使うのは `IEANTN/CH2/CH2_part1.lean` ただ 1 つ——**閉包の外**である",
+    "★★したがって **`chebyshev_asymptotic` は sorry に依存していない**と読める",
+    "★repo 全体の sorry 286 件は `IEANTN/`(明示的な数値評価、Dusart / Kadiri など)と `StrongPNT.lean` に集中しており、我々の使う経路には無い"
+   ],
+   "caveats": [
+    "★★**これは grep による依存追跡であって `#print axioms` ではない。** 決定的な確認には build が要るが、toolchain が違う(v4.32.2 対 v4.31.0-rc2)ので、まず toolchain 更新の判断が要る",
+    "★**依存に加えるのはユーザーの判断である**——build 時間・保守・toolchain の巻き添えが発生する。本記録は『使えそうだ』までであり、加えてはいない"
+   ],
+   "effectIfAdopted": "[GenEll] Remark 4.1.1 が実装可能になり、genell-progress が 4/24 → 5/24 になる。★それ以上は動かない(残り 19 件は Arakelov / Galois 表現 / Belyi に律速される)"
+  },
+  "FLT": {
+   "url": "https://github.com/ImperialCollegeLondon/FLT",
+   "what": "Fermat 予想の Lean 形式化(Buzzard、EPSRC EP/Y022904/1、2029-09 まで)。★[GenEll] §3 が要る Galois 表現・Tate 曲線と重なる",
+   "measuredAt": "2026-08-17",
+   "toolchain": "leanprover/lean4:v4.34.0-rc1",
+   "toolchainGap": "★我々より新しい(v4.31.0-rc2 → v4.34.0-rc1)。差は PNT より大きい",
+   "leanFiles": 260,
+   "sorries": 70,
+   "lastCommit": "2026-08-15",
+   "status": "進行中",
+   "structure": {
+    "FLT/EllipticCurve/Torsion.lean": "★**124 行中 sorry 10 件**。`n_torsion_finite` / `n_torsion_card` / `n_torsion_dimension` がいずれも sorry",
+    "FLT/TateCurve/TateCurve.lean": "★**20 行・sorry 0**。ただし 20 行しかなく、Tate 曲線の理論ではなく入口の宣言だけ",
+    "FLT/GaloisRepresentation/": "611 行・sorry 9 件。HardlyRamified(Frey 曲線の 3 進表現)が中心",
+    "その他": "Deformations / Patching / AutomorphicForm / QuaternionAlgebra など、FLT 本体の道具"
+   },
+   "findings": [
+    "★★**S3 が要る土台は FLT にも無い。** `E[n] ≅ (ℤ/n)²`(`n_torsion_card` / `n_torsion_dimension`)は**宣言されているが sorry** である",
+    "★`TateCurve.lean` は 20 行——[GenEll] §3 が要求する Tate 母数 `q_E`・半安定還元・`M_l(E)` の完全列は無い",
+    "★GaloisRepresentation は **Frey 曲線の 3 進表現に特化**しており、[GenEll] Theorem 3.8 が要る一般の `Gal(ℚ̄/L) → GL₂(ℤ_l)` ではない"
+   ],
+   "conclusionForS3": "★**drop-in では使えない。** [GenEll] §3 の形式化は、FLT の進捗を待つか、独立に作るかの二択である。ただし独立に作ると重複投資になるので、**着手前に FLT 側の予定と突き合わせること**"
   }
+ },
+ "conclusionForUs": {
+  "summary": "どちらも drop-in で使える状態ではない。ただし「ゼロから作る」でもない——特に局所類体論はコミュニティの進行中作業があり、独立に作ると重複投資になる。",
+  "_absentPolicy": [
+   "★2026-08-14 追加: `absent` は **探索範囲** を伴わなければならない。",
+   "根拠(実失敗): Found/PGC/LocalFieldNorm.lean に「mathlib に charP_of_prime_eq_zero 相当は無い(実測)」と",
+   "書いたが誤りだった——CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 にある。",
+   "見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけで、Basic.lean を見ていなかった。",
+   "探索範囲を書かない「無い」は再現も反証もできず、測定ではなく印象である。",
+   "Lean 側も `LeanStatus.absent (searched : String)` に変更し、型が範囲を要求するようにした",
+   "(lean/ABC3/Meta/Claim.lean)。範囲を書けないなら `unmeasured` を使うこと。",
+   "以下の searchedIn は、mathlib については 2026-08-14 に本リポジトリ内で再実行した実際の grep。",
+   "公開プロジェクトは本リポジトリに clone されていないため、2026-08-14 の測定の記録であって当日の再現ではない。"
+  ],
+  "byObligation": {
+   "pGC#1 局所Tate双対性 (Bloch-Kato Prop 3.8)": {
+    "status": "absent",
+    "note": "両プロジェクトとも 0 ヒット。ただし群コホモロジーの土台は ClassFieldTheory にある",
+    "searchedIn": {
+     "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
+      "grep -rlE 'localTateDuality|local Tate|TateDuality|tateDuality' Mathlib/ → 0 件",
+      "grep -rlE '\\bTate\\b' Mathlib/ → 4 件、全て別物(EllipticCurve/Weierstrass.lean・RingTheory/Adjoin/Tower.lean・RingTheory/Perfectoid/BDeRham.lean・RingTheory/Perfectoid/FontaineTheta.lean)",
+      "grep -rlE 'tateCohomology|TateCohomology|GaloisCohomology|galoisCohomology' Mathlib/ → 0 件",
+      "grep -rli 'duality' Mathlib/NumberTheory/ Mathlib/RepresentationTheory/ → DirichletCharacter/Orthogonality.lean・MulChar/Duality.lean・NumberField/Cyclotomic/Galois.lean・Tannaka.lean のみ(いずれも局所 Tate 双対性ではない)"
+     ],
+     "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定、当日は clone 済み)": [
+      "各リポジトリの notFound に「局所 Tate 双対性」を記録済み(本ファイル projects.*.notFound)",
+      "★現在は clone されていないため再現していない。再測定時は clone してから grep すること"
+     ]
+    }
+   },
+   "pGC#4 局所類体論の相互律 Γ_K^ab ≅ (K^×)^∧": "inProgress(ClassFieldTheory)。抽象的な相互律はあるが具体形は未完成",
+   "pGC#5 0 → U_K → (K^×)^∧ → Ẑ → 0": "inProgress(ClassFieldTheory Valuation.lean に完備化前の版)",
+   "pGC#6 p進対数": {
+    "status": "absent",
+    "note": "U_K の開部分群を(捩れを除いて)K の開部分群と同一視するために要る",
+    "searchedIn": {
+     "mathlib v4.31.0-rc2 (全体, 再測定 2026-08-14)": [
+      "grep -rliE 'padicLog|Padic.log|padic_log|logOneAdd|log_one_add' Mathlib/ → 6 件、全て実/複素の解析(Analysis/Normed/Module/MultipliableUniformlyOn.lean・Analysis/SpecialFunctions/Complex/Analytic.lean・Complex/LogBounds.lean・Log/Deriv.lean・Log/Summable.lean・Stirling.lean)",
+      "ls Mathlib/NumberTheory/Padics/ → 13 項目、log 系のファイルは無い",
+      "Padics 配下の 'log' の出現は全て Nat.log / Real.log(付値やファクトリアルの評価)で、p進対数ではない",
+      "grep -rlniE 'padicExp|expPadic' Mathlib/ → 0 件(対になる p進指数関数も無い)"
+     ],
+     "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
+      "0 件。★現在は clone されていないため再現していない"
+     ]
+    }
+   },
+   "pGC §2 高次分岐群(上付き/下付き番号付け・Herbrand)": {
+    "status": "absent",
+    "note": "mathlib・両プロジェクトとも無い。mathlib 側には TODO コメントがある",
+    "searchedIn": {
+     "mathlib v4.31.0-rc2 (2026-08-14 の測定)": [
+      "RingTheory/Valuation/RamificationGroup.lean に分解群・惰性群はあるが、同ファイルに 'TODO: Define higher ramification groups in lower numbering' が残る",
+      "上付き番号付け・Herbrand の定理は 0 件(PLAN.md 事実3)",
+      "★この項目は今回の再測定の対象外——上の2件と違い、当日の grep コマンドを再実行していない"
+     ],
+     "ClassFieldTheory / LocalClassFieldTheory (2026-08-14 の測定)": [
+      "両リポジトリの notFound に「高次分岐群」を記録済み"
+     ]
+    }
+   },
+   "ℚ_p の有限次拡大 → IsNonarchimedeanLocalField のインスタンス": "inProgress(ClassFieldTheory Instances.lean、sorry 11件)"
+  },
+  "predictionVsMeasurement": "★調査前の見込みは「2件は既存で埋まる」だったが、実測では **drop-in で使えるものは0件**だった。予測は部分的に外れた——類推でなく実測を優先する規律(idea2.md ⑤)の実例として記録する。",
+  "trackBReconnaissance": {
+   "measuredAt": "2026-08-14",
+   "target": "Interface ResidueCardinality の実装(Track B)",
+   "verified": "PAdicLocalField p(= ℚ_p の有限次拡大)に対し、mathlib の道具だけで NormedField / IsUltrametricDist / NormedAlgebra / NontriviallyNormedField / Valued(NNReal) / RankOne / ProperSpace が全て構成できることを確認(lean/ABC3/Found/PGC/LocalFieldNorm.lean、sorry無し)。鍵は spectralNorm.normedField。",
+   "blocked": "【解消済み 2026-08-14】ノルムのダイヤモンドは round-trip 補題を書かずに回避できた——CompactSpace 𝒪[K] を経由すれば、問題はノルムでなく位相の一致に落ち、NormedField.toValued は toUniformSpace に元のノルムのものをそのまま使うので位相は定義的に一致する。剰余体の有限性 finite_residueField を証明済み(sorry無し、一般の完備 proper 非アルキメデスノルム体について)。",
+   "done": "【完了 2026-08-14】isPrimePow(q = p^f, f>0)まで到達し、ResidueCardinality を discharge した(sorry無し、axiom は mathlib 標準の3つのみ)。要ったのは ‖(p:K)‖ = 1/p < 1 ただ一つ——p は 𝒪[K] の単元でない → 極大イデアルに入る → (p : 𝓀[K]) = 0 → CharP.charP_iff_prime_eq_zero → FiniteField.card。一般部分は lean/ABC3/Found/ResidueFieldFinite.lean、実装は Found/PGC/ResidueCardinality.lean。",
+   "correctedClaim": "★上記 nextStep には当初「mathlib に charP_of_prime_eq_zero 相当の直接の補題は無く(実測)、ringChar 経由で数行」と書いてあったが、これは誤りだった。CharP.charP_iff_prime_eq_zero が Mathlib/Algebra/CharP/Basic.lean:103 に存在する(同 100 行に CharP.ringChar_of_prime_eq_zero も)。見ていたのは Algebra/CharP/Defs.lean の ringChar 名前空間だけだった。この失敗が上の _absentPolicy の根拠。",
+   "lesson": "ダイヤモンドは「等しいことを証明する」より「触れずに済ませる」方が安い。当初 round-trip 補題を正面から書きにいったが、位相へ落とす迂回で不要になった。",
+   "lesson2": "「無い」は探索範囲とセットでしか記録してはならない。範囲の無い absent は再現も反証もできない——LeanStatus.absent を searched 付きに変えたのはこのため。",
+   "valueComputed": "【2026-08-14】residueCard の値を初めて計算した: residueCard (selfField p) = p(= ℚ_[p] の剰余体は p 元体)。lean/ABC3/Found/PGC/QpResidueField.lean、sorry 無し。これで realResidueCardinality は「型が付くだけ」の対象ではなくなった。ただし Check/PGC/DischargeFiresNothing.lean の real_eq_degenerate_at_base が示すとおり、我々が名指しできる唯一の実例 base の上では本物と退化版は同じ値を返すので、両者の区別には依然 f ≥ 2 の実例が要る。",
+   "lesson3": "★打ち切り時に『障害』と呼んだものが迂回可能な配線だった、が **3件目**(1: round-trip 補題、2: charP_iff_prime_eq_zero の探索範囲、3: 今回の『障害A ノルムのダイヤモンド / 障害B IsLocalRing ↥(PadicInt.subring p)』)。3件とも、正面から解く必要は無く別経路があった。今回の迂回は (a) ノルム構造の一致を示さず algebraMap 経由の等式だけ使う (b) 付値環の集合としての一致まで来たらノルムを置き去りにする (c) 中間型 ↥(PadicInt.subring p) を型として書かず ℤ_[p] へ直接繋ぐ。PLAN §8-3 の『無いと判断した実例が既に2件』は 3件に更新できる。"
+  }
+ }
 }
