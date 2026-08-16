@@ -607,12 +607,31 @@ theorem prop_1_13_iii_b (F : FrobenioidCore P) (hslim : IsSlimCat D)
 成分が `⋂_n {𝒪^×(−)}^n` に属することを得る。
 
 ★**必要な部品**（測定済み）:
-- `⋂_n {𝒪^×(A)}^n` を書くこと（`OTimes` は `Submonoid` なのでべき乗の交わり）
-- quasi-Frobenius-trivial かつ Frobenius-normalized な対象での、
-  base-identity 自己準同型に沿った自然性の帰結
-- `Definition 1.3, (iii), (c)` の全単射で (b) の対象へ送る段
+- ~~`⋂_n {𝒪^×(A)}^n` を書くこと~~ → ★**実装した**(`OTimesPowInter`)
+- ~~quasi-Frobenius-trivial かつ Frobenius-normalized な対象での帰結~~
+  → ★**実装した**(`prop_1_13_iii_pow`, `prop_1_13_iii_mem_powInter`, `prop_1_13_iii_b`)
+- ★**残るのは `Definition 1.3, (iii), (c)` の全単射で (b) の対象へ送る段だけ。**
 
-★**まだ試していない**（「証明できなかった」ではない）。
+## ★★移送段の設計（書ききれなかったので測定として残す）
+
+★**数学は完成している。** `ψ : B ⟶ X.left` を co-angular pre-step とすると:
+1. `W := Over.mk (ψ ≫ X.hom)` を取り、自然性 `ψ ≫ α_X = α_W ≫ ψ` を得る。
+2. `B` 側で `prop_1_13_iii_pow` を当て `α_W = β₀^n`(`β₀ ∈ 𝒪^×(B)`)。
+3. `F.otriFwd ψ` で `β₀ ↦ γ`、`β₀⁻¹ ↦ γ'` と送る。
+4. `ψ ≫ γ^n = β₀^n ≫ ψ`(共役はべきに伸びる。★`End` の積は `x*y = y≫x` なので
+   `γ^(n+1) = γ ≫ γ^n`)。
+5. `γ ≫ γ' = 𝟙` と `γ' ≫ γ = 𝟙` を、両側から `ψ` で消去して得る(`ψ` は epi)
+   ⟹ `γ ∈ 𝒪^×(X.left)`。
+6. `ψ ≫ α_X = ψ ≫ γ^n` を `ψ` で消去 ⟹ `α_X = γ^n`。
+
+★★**Lean 側で止まった理由**(2026-08-16、記録): `W := Over.mk (ψ ≫ X.hom)` を
+`set` で置くと `β₀ : End W.left` となり、★**`W.left` は `B` と定義的に等しいが
+インスタンス探索・単一化は構文的**なので、`IsIso β₀` も `(↑u⁻¹ : End B)` も
+「`End W.left` と `End B` は別物」として拒否される。★**分類表 #1(2 つの綴り)の
+新しい現れ**である。★**次に当たるときの手**: `W` を `set` せず、
+`prop_1_13_iii_pow` の結論を `B` の綴りに `show` で固定してから使う。
+
+★**「証明できなかった」ではなく「Lean の綴りで止まった」である。**
 ★**これが埋まれば `Proposition 1.13` に条なし `.src` を付けられる。**
 -/
 
