@@ -1030,3 +1030,51 @@ S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない�
 | **Auslander–Buchsbaum**(`Definition 1.5, (ii)`) | mathlib に無い。**数学の作業** |
 
 ★そして `§1` 全体を止めている本命は依然として **`X^arc`**(複素解析空間)である。
+
+### §9-7 追記(同日、深夜)—— ★★★高さの拡大公式と、mathlib の TODO 3 件
+
+| ファイル | 中身 |
+|---|---|
+| `NorthcottProj.lean` | ★**mathlib の TODO 2 件**: `Northcott (Projectivization.mulHeight/logHeight)` |
+| `HeightExtension.lean` | ★★★**`H_L(x) = H_K(x)^{[L:K]}`** と **絶対高さ** `h(x) ≝ logHeight₁/[K:ℚ]` |
+
+#### ★★★今朝の道具が夜に効いた
+
+`HeightExtension.lean` の証明は、**今朝 `degNormalized` の底変換不変性のために作った
+2 つの相対和をそのまま使う**:
+
+- `sum_mult_comap_eq`(`Σ_{w|v} mult_w = mult_v·[L:K]`、`InfinitePlaceRel.lean`)
+- `sum_ramification_inertia_hos`(`Σ_{w|v} e·f = [L:K]`、`FinitePlaceRel.lean`)
+
+★★どちらも「**素点の族を `[L:K]` 倍に数える**」という同じ形だからである。
+**朝の段階でこの再利用は見えていなかった。**
+
+★`hosComap_liesOver` を instance にしておいたことも効いた——
+mathlib の `HeightOneSpectrum.valuation_liesOver`(`ord_w(x) = e·ord_v(x)`)が
+インスタンス引数でそれを要求する。
+
+#### ★★`e` と `f` が両方要る構造が 2 度現れた
+
+| 場所 | `e` の出所 | `f` の出所 |
+|---|---|---|
+| `BaseChange.lean`(算術因子) | 底変換の係数 | 重み `log q_w` |
+| `HeightExtension.lean`(高さ) | `ord` の関係 | 剰余体の大きさ |
+
+★同じ構造が**別の量について 2 度**現れた。偶然ではなく、
+どちらも「素点を数える」量だからである。
+
+#### ★本日 mathlib に無かったものを 4 つ与えた
+
+1. `Northcott (mulHeight₁ (K := K))` の**基底 instance**(数体一般)
+2. `Northcott (Projectivization.mulHeight)`(mathlib が TODO と明記)
+3. `Northcott (Projectivization.logHeight)`(同上)
+4. `Ideal.radical (span {a}) = span {radical a}`(mathlib が TODO と明記)
+
+★および `HeightOneSpectrum.comap`、無限素点の相対次数和、
+高さの拡大公式(いずれも検索して 0 件だったもの)。
+
+#### ★★それでも `genell-progress` は 4/24 である
+
+★**高さ理論の側は厚くなったが、`ht_L̄`(算術直線束の高さ)には
+依然として `X^arc` が要る。** `Definition 1.1` が空いている限り
+`§1` の項目は埋まらない。**混同しない。**
