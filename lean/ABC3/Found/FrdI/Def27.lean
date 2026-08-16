@@ -270,6 +270,35 @@ theorem isPreModelType_iff_quasi [IsConnected D] :
     IsPreModelType P ↔ Nonempty (Quot (QuasiBaseFrobRel (P := P))) :=
   ⟨fun ⟨p⟩ => ⟨Quot.mk _ p⟩, fun ⟨c⟩ => Quot.recOnSubsingleton c fun p => ⟨p⟩⟩
 
+/-! ## ★Remark 2.7.2 の第 1 主張
+
+原文 (FrdI p.52):
+> pair of C. Then the only arrows of C which are both F- and P-distinguished [hence
+
+★**F- かつ P-distinguished な射は恒等射に限る。**
+-/
+
+/-- ★★★**[FrdI] Remark 2.7.2 の第 1 主張** ——
+`F-distinguished` かつ `P-distinguished` な射は**恒等射**である。
+
+★**理由は次数の消去**: `P-distinguished` なら pull-back 射ゆえ linear(次数 1)、
+`F-distinguished` なら次数は `n`。よって `n = 1` で、`F` はモノイド準同型だから
+`F(1) = 1`、すなわち恒等射。
+
+★**base-trivial 型も `𝒞` が skeleton であることも要らない**
+(原文はそれらを「Suppose further」として第 2 主張のためにだけ課している)。 -/
+theorem fdist_and_pdist_eq_id [IsConnected D] (Fc : FrobenioidCore P) {S : BaseSection P}
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A : C} (hA : S.objP A) (f : End A)
+    (hF : IsFDistinguished Fs hA f) (hP : S.homP f) : f = 𝟙 A := by
+  obtain ⟨n, hn⟩ := hF
+  have hlin : P.degFr f = 1 := (Fc.pullBackLB f (S.isPullBack hP)).2
+  have hdeg : P.degFr f = n := by
+    rw [← hn, ← SectionEnd.deg_eq (Fs n) ⟨A, hA⟩, hFs.degSection n]
+  have hn1 : n = 1 := by rw [← hdeg, hlin]
+  rw [← hn, hn1, map_one]
+  rfl
+
 /-! ## ★★★出典の紐付け(`.src`) -/
 
 variable (P) in
