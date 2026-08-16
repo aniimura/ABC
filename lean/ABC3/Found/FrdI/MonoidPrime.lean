@@ -475,7 +475,55 @@ theorem primeToPf_bijective (htf : IsTorsionFreeNaive M) :
 noncomputable def primeEquivPf (htf : IsTorsionFreeNaive M) : Prime M ≃ Prime (Pf M) :=
   Equiv.ofBijective _ (primeToPf_bijective htf)
 
+/-- ★primary 元の素点は正の整数倍で変わらない。 -/
+theorem toPrime_nsmul {N : Type*} [AddCommMonoid N] (htf : IsTorsionFreeNaive N)
+    {x : N} (hx : IsPrimaryElt x) {n : ℕ} (hn : 0 < n) :
+    toPrime N (n • x) ((isPrimaryElt_nsmul_iff htf hn).mpr hx) = toPrime N x hx :=
+  (toPrime_eq_iff _ _).mpr ((mprec_nsmul_left hn).mpr (mprec_refl x))
+
+/-- ★★**`(M^pf)_{p'}` の生成元は正の整数倍で `M_p` に入る**。 -/
+theorem exists_nsmul_of_mem_primeCarrier_pf (htf : IsTorsionFreeNaive M) (p : Prime M)
+    {x : Pf M} (hx : x ∈ primeCarrier (Pf M) (primeToPf htf p)) :
+    ∃ (n : ℕ+) (b : M), b ∈ primeCarrier M p ∧ ((n : ℕ+) : ℕ) • x = Pf.of b := by
+  obtain ⟨hxp, hxe⟩ := hx
+  obtain ⟨n, b, hb, hn⟩ := (isPrimaryElt_pf_iff htf x).mp hxp
+  refine ⟨n, b, ⟨hb, ?_⟩, hn⟩
+  refine (primeToPf_bijective htf).1 ?_
+  rw [primeToPf_mk]
+  have h1 : toPrime (Pf M) (Pf.of b) ((isPrimaryElt_pf_of_iff htf).mpr hb)
+      = toPrime (Pf M) x hxp := by
+    refine (toPrime_eq_iff _ _).mpr ?_
+    rw [← hn]
+    exact (mprec_nsmul_left n.pos).mpr (mprec_refl x)
+  rw [h1]
+  exact hxe
+
+/-- ★★★**`(M_p)^pf ≃ (M^pf)_{p'}` の実質** ——
+`(M^pf)_{p'}` の元は**正の整数倍で `M_p` に入る**。
+
+★★**閉包の元は有限和**なので、★**各項の分母を掛け合わせて揃える**のが要点である
+(原文はこの一歩を一言も書いていない)。 -/
+theorem exists_nsmul_mem_Mp_of_mem_Mp_pf (htf : IsTorsionFreeNaive M) (p : Prime M)
+    {x : Pf M} (hx : x ∈ Mp (Pf M) (primeToPf htf p)) :
+    ∃ (n : ℕ+) (b : M), b ∈ Mp M p ∧ ((n : ℕ+) : ℕ) • x = Pf.of b := by
+  induction hx using AddSubmonoid.closure_induction with
+  | mem y hy =>
+    obtain ⟨n, b, hb, hn⟩ := exists_nsmul_of_mem_primeCarrier_pf htf p hy
+    exact ⟨n, b, mem_Mp_of_mem_primeCarrier hb, hn⟩
+  | zero => exact ⟨1, 0, (Mp M p).zero_mem, by simp⟩
+  | add y z _ _ hy hz =>
+    obtain ⟨n, b, hb, hn⟩ := hy
+    obtain ⟨m, c, hc, hm⟩ := hz
+    refine ⟨n * m, ((m : ℕ+) : ℕ) • b + ((n : ℕ+) : ℕ) • c,
+      (Mp M p).add_mem ((Mp M p).nsmul_mem hb _) ((Mp M p).nsmul_mem hc _), ?_⟩
+    rw [map_add, map_nsmul, map_nsmul, ← hn, ← hm, smul_smul, smul_smul,
+      mul_comm ((m : ℕ+) : ℕ) ((n : ℕ+) : ℕ), smul_add, PNat.mul_coe]
+
 /-! ### ★出典 -/
+
+def exists_nsmul_mem_Mp_of_mem_Mp_pf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — M_p and M^pf",
+    sectionId := "frdi-s0-prime" }
 
 def isPrimaryElt_pf_iff.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 12, item := "§0 Monoids — Primary(M^pf)",

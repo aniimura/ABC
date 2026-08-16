@@ -7,6 +7,7 @@ import ABC3.Found.FrdI.MonoidVocabulary
 import ABC3.Found.FrdI.MonoidPrime
 import ABC3.Found.FrdI.CategoryAnchor
 import ABC3.Found.FrdI.Def31
+import ABC3.Found.FrdI.Prop33
 import ABC3.Found.FrdI.Remark311
 import ABC3.Found.FrdI.Remark312
 import ABC3.Found.FrdI.CategoryVocabulary
