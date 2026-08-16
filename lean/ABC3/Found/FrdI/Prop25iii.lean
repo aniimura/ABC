@@ -366,6 +366,48 @@ theorem otri_comp_frobBaseId {ζ : End A} (hζb : IsBaseIdentity P ζ) (β : OTr
         ≫ (((β ^ (P.degFr ((ζ : End A) : A ⟶ A) : ℕ) : OTri P A) : End A) : A ⟶ A) :=
   (hfn ζ hζb (β : End A) β.2).symm
 
+include hfn in
+/-- ★★★**`Ψ` は `𝒪^▷(A)` の上で単射**。
+
+★分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)` の下で `Ψ` は `(u, t) ↦ (u, t^d)` なので、
+★★**`t ↦ t^d` が単射**であればよい。それは
+- `Div (t^d) = d • Div t`(`otri_div_pow`)
+- ★**`Φ` は divisorial なので `d` 倍が単射**(`nsmul_injective_of_divisorial`)
+- `Div` は `τ(A)` の上で単射(`Definition 2.3, (a)` の `charBij`)
+
+の 3 段で出る。 -/
+theorem psiOTri_injective (d : ℕ+) : Function.Injective (psiOTri P F hτ hA d) := by
+  intro b b' h
+  have key : ∀ z : OTri P A,
+      splitEquiv P F hτ hA
+        (((splitEquiv P F hτ hA).symm z).1,
+          ((splitEquiv P F hτ hA).symm z).2 ^ ((d : ℕ+) : ℕ))
+        = psiOTri P F hτ hA d z := by
+    intro z
+    rw [splitEquiv_apply]
+    rfl
+  have hpair := (splitEquiv P F hτ hA).injective ((key b).trans (h.trans (key b').symm))
+  have h1raw := congrArg (fun z : OTimes P A × τ A => z.1) hpair
+  have h2raw := congrArg (fun z : OTimes P A × τ A => z.2) hpair
+  have h1 : ((splitEquiv P F hτ hA).symm b).1 = ((splitEquiv P F hτ hA).symm b').1 := h1raw
+  have h2 : ((splitEquiv P F hτ hA).symm b).2 ^ ((d : ℕ+) : ℕ)
+      = ((splitEquiv P F hτ hA).symm b').2 ^ ((d : ℕ+) : ℕ) := h2raw
+  -- ★`t ↦ t^d` の単射性
+  have hdiv : P.Div ((((splitEquiv P F hτ hA).symm b).2 : End A) : A ⟶ A)
+      = P.Div ((((splitEquiv P F hτ hA).symm b').2 : End A) : A ⟶ A) := by
+    refine nsmul_injective_of_divisorial (P.divisorial _).1.1 (P.divisorial _).1.2.1
+      (P.divisorial _).2 (n := ((d : ℕ+) : ℕ)) (PNat.pos d) ?_
+    have e : ∀ s : τ A, ((d : ℕ+) : ℕ) • P.Div (((s : End A)) : A ⟶ A)
+        = P.Div ((((s ^ ((d : ℕ+) : ℕ) : τ A) : End A)) : A ⟶ A) := by
+      intro s
+      exact (otri_div_pow P (tOf P F hτ hA s) ((d : ℕ+) : ℕ)).symm
+    rw [e, e, h2]
+  have h3 : ((splitEquiv P F hτ hA).symm b).2 = ((splitEquiv P F hτ hA).symm b').2 := by
+    obtain ⟨t₁, -, huniq⟩ :=
+      hτ.charBij A hA (tOf P F hτ hA ((splitEquiv P F hτ hA).symm b').2)
+    rw [huniq _ hdiv, huniq _ rfl]
+  exact (splitEquiv P F hτ hA).symm.injective (Prod.ext h1 h3)
+
 /-! ### ★★`Ψ` の自然性 —— well-defined 性の核
 
 ★4 重分解には**選び方の自由**がある(原文の
@@ -1018,6 +1060,240 @@ noncomputable def psiFunctorCd (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : �
   map_comp φ φ' := by
     apply InducedWideCategory.Hom.ext
     exact psiMap_comp P F hτ hiso hmt haa hfn hft d φ φ'
+
+/-! ### ★★★圏同値の 3 性質
+
+原文 (FrdI p.50):
+> monomorphisms [cf. Definition 1.3, (v), (a)], this implies [by relating an
+
+★原文は「`Ψ`・`𝒞(d)` の定義から明らか [cf. assertion (i)]」と一言で済ませる。
+★★実際に使うのは **(i) の全単射**と、★**divisorial なモノイドで `d` 倍が単射**
+であること(`nsmul_injective_of_divisorial`)の 2 つである。
+-/
+
+include P in
+/-- ★`Φ.map` は底の同型に沿えば全射(逆写像は `Φ.map (inv u)`)。 -/
+theorem phiMap_surjective_of_isIso {Y Z : D} (u : Z ⟶ Y) [IsIso u] (x : Φ.val Z) :
+    ∃ y : Φ.val Y, Φ.map u y = x :=
+  ⟨Φ.map (inv u) x, by rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]⟩
+
+include hτ hiso hmt haa hfn in
+/-- ★★★**`Ψ` は Hom 集合の上で `𝒞(d)` へ全射**(＝ 充満)。
+
+★★筋: `f` を 4 重分解して `β₀` を分裂 `u₀ · t₀` に分けると、
+`Div t₀ = Div f` の引き戻しなので **`d` で割れる**。
+★`Proposition 2.5, (i)` の全射性 ＋ `Definition 2.3, (a)` の全単射性で
+**`t₀ = t^d` なる `t ∈ τ` が取れる**。あとは `β := u₀ · t` とすればよい。 -/
+theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
+    (hd : cdProp P d f) : ∃ ψ : A ⟶ B, psiMap P F hτ hiso hmt haa d ψ = f := by
+  obtain ⟨X, Y, δ, γ, β₀, α, hfac, hδ, hγi, hγs, hβb, hβs, hβc, hα⟩ :=
+    quadFactor P F hmt haa f
+  have hm₀ : β₀ ∈ OTri P Y := ⟨hβb, hβs.1⟩
+  haveI : IsIso (P.Base δ) := hδ.2
+  haveI : IsIso (P.Base γ) := hγs.2
+  haveI hbu : IsIso (P.Base (δ ≫ γ)) := by rw [P.Base_comp]; infer_instance
+  -- ★手 1: `Div β₀` は `d` で割れる
+  obtain ⟨c, hc⟩ := hd
+  obtain ⟨x, hx⟩ := phiMap_surjective_of_isIso P (P.Base (δ ≫ γ)) c
+  have hdivβ : ((d : ℕ+) : ℕ) • x = P.Div β₀ := by
+    refine Φ.map_injective (P.Base (δ ≫ γ)) ?_
+    rw [map_nsmul, hx, ← quadFactor_div P F hδ hγi hγs hβb hβs hα, ← hfac]
+    rw [nsmulHom_apply] at hc
+    exact hc
+  -- ★手 2: `Div t = x` なる `t ∈ τ(Y)` を取る
+  obtain ⟨y, hy⟩ := prop_2_5_i_surjective P G (hmt Y) (haa Y) x
+  obtain ⟨t, ht, -⟩ := hτ.charBij Y (hiso Y) y
+  have hdt : P.Div ((((tOf P F hτ (hiso Y) t : OTri P Y) : End Y)) : Y ⟶ Y) = x := by
+    show P.Div (((t : End Y)) : Y ⟶ Y) = x
+    rw [ht, hy]
+  -- ★手 3: 分裂の `τ` 成分は `t^d` に一致する
+  set p := (splitEquiv P F hτ (hiso Y)).symm (⟨β₀, hm₀⟩ : OTri P Y) with hp
+  have hsplit : uOf P p.1 * tOf P F hτ (hiso Y) p.2 = (⟨β₀, hm₀⟩ : OTri P Y) := by
+    rw [hp, ← splitEquiv_apply P F hτ (hiso Y)]
+    exact (splitEquiv P F hτ (hiso Y)).apply_symm_apply _
+  have hdivt₀ : P.Div (((p.2 : End Y)) : Y ⟶ Y) = ((d : ℕ+) : ℕ) • x := by
+    have h1 : P.Div ((((tOf P F hτ (hiso Y) p.2 : OTri P Y) : End Y)) : Y ⟶ Y)
+        = P.Div β₀ := by
+      conv_rhs => rw [show β₀ = (((⟨β₀, hm₀⟩ : OTri P Y) : End Y) : Y ⟶ Y) from rfl, ← hsplit]
+      exact (otri_div_unit_mul P p.1 (tOf P F hτ (hiso Y) p.2)).symm
+    rw [show P.Div (((p.2 : End Y)) : Y ⟶ Y) = _ from h1, hdivβ]
+  have hpow : p.2 = t ^ ((d : ℕ+) : ℕ) := by
+    obtain ⟨t₁, -, huniq⟩ := hτ.charBij Y (hiso Y) (tOf P F hτ (hiso Y) p.2)
+    have e2 : P.Div ((((t ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
+        = P.Div ((((tOf P F hτ (hiso Y) p.2 : OTri P Y) : End Y)) : Y ⟶ Y) := by
+      have hp2 : P.Div ((((tOf P F hτ (hiso Y) p.2 : OTri P Y) : End Y)) : Y ⟶ Y)
+          = ((d : ℕ+) : ℕ) • x := hdivt₀
+      rw [hp2, show ((((t ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
+        = (((tOf P F hτ (hiso Y) t ^ ((d : ℕ+) : ℕ) : OTri P Y) : End Y) : Y ⟶ Y) from rfl,
+        otri_div_pow P (tOf P F hτ (hiso Y) t) ((d : ℕ+) : ℕ), hdt]
+    have e1 : P.Div (((p.2 : End Y)) : Y ⟶ Y)
+        = P.Div ((((tOf P F hτ (hiso Y) p.2 : OTri P Y) : End Y)) : Y ⟶ Y) := rfl
+    rw [huniq p.2 e1, huniq _ e2]
+  -- ★手 4: `β := u₀ · t`
+  refine ⟨δ ≫ γ ≫ (((uOf P p.1 * tOf P F hτ (hiso Y) t : OTri P Y) : End Y) : Y ⟶ Y) ≫ α, ?_⟩
+  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine ⟨X, Y, δ, γ, _, α, (uOf P p.1 * tOf P F hτ (hiso Y) t).2, rfl, hδ, hγi, hγs,
+    ?_, ?_, hα, ?_⟩
+  · exact ⟨(uOf P p.1 * tOf P F hτ (hiso Y) t).2.2, by
+      show IsIso (P.Base _)
+      rw [show P.Base ((((uOf P p.1 * tOf P F hτ (hiso Y) t : OTri P Y) : End Y)) : Y ⟶ Y)
+        = P.Base (𝟙 Y) from (uOf P p.1 * tOf P F hτ (hiso Y) t).2.1, P.Base_id]
+      infer_instance⟩
+  · exact prop_1_4_i P _ (fun Z _ => hiso Z)
+  · -- `Ψ` の値が `f` に戻る
+    have hβ : psiOTri P F hτ (hiso Y) d
+        ⟨(((uOf P p.1 * tOf P F hτ (hiso Y) t : OTri P Y) : End Y) : Y ⟶ Y),
+          (uOf P p.1 * tOf P F hτ (hiso Y) t).2⟩ = (⟨β₀, hm₀⟩ : OTri P Y) := by
+      have hsym : (splitEquiv P F hτ (hiso Y)).symm
+          (uOf P p.1 * tOf P F hτ (hiso Y) t) = (p.1, t) :=
+        (splitEquiv P F hτ (hiso Y)).symm_apply_eq.mpr
+          (splitEquiv_apply P F hτ (hiso Y) (p.1, t)).symm
+      show uOf P _ * (tOf P F hτ (hiso Y) _) ^ ((d : ℕ+) : ℕ) = _
+      rw [hsym]
+      show uOf P p.1 * (tOf P F hτ (hiso Y) t) ^ ((d : ℕ+) : ℕ) = _
+      rw [← hsplit, hpow]
+      rfl
+    rw [hfac]
+    congr 2
+    congr 1
+    exact (congrArg (fun z : OTri P Y => ((z : End Y) : Y ⟶ Y)) hβ).symm
+
+include hτ hiso hmt haa hfn in
+/-- ★★★**`Ψ` は Hom 集合の上で単射**(＝ 忠実)。
+
+★★筋は `isPsiValue_unique` と同じ —— 2 つの `Ψ` 分解を `arbFactorUniq` ＋
+`preStepFactorUniq'` で比べると `Ψβ₂ = k · (g による Ψβ₁ の共役)` になる。
+★★★そこで **`Ψ` が `𝒪^▷` の上で単射**(`psiOTri_injective`)を使って
+`β₂ = k · (g による β₁ の共役)` に戻すと、同型がすべて打ち消える。 -/
+theorem psiMap_injective (d : ℕ+) {A B : C} {φ φ' : A ⟶ B}
+    (h : psiMap P F hτ hiso hmt haa d φ = psiMap P F hτ hiso hmt haa d φ') : φ = φ' := by
+  obtain ⟨X₁, Y₁, δ₁, γ₁, β₁, α₁, hm₁, hf₁, hδ₁, hγi₁, hγs₁, hβs₁, hβc₁, hα₁, he₁⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ
+  obtain ⟨X₂, Y₂, δ₂, γ₂, β₂, α₂, hm₂, hf₂, hδ₂, hγi₂, hγs₂, hβs₂, hβc₂, hα₂, he₂⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ'
+  have hpre : ∀ (Y : C) (z : OTri P Y), IsPreStep P (((z : End Y)) : Y ⟶ Y) := by
+    intro Y z
+    refine ⟨z.2.2, ?_⟩
+    show IsIso (P.Base _)
+    rw [show P.Base (((z : End Y)) : Y ⟶ Y) = P.Base (𝟙 Y) from z.2.1, P.Base_id]
+    infer_instance
+  have hcoa : ∀ {Z W : C} (f : Z ⟶ W), IsCoAngular P f :=
+    fun f => prop_1_4_i P f (fun Z _ => hiso Z)
+  -- ★手 1: `arbFactorUniq`
+  have hps₁ : IsPreStep P (γ₁ ≫ (((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ :
+      OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁)) := IsPreStep.comp P hγs₁ (hpre Y₁ _)
+  have hps₂ : IsPreStep P (γ₂ ≫ (((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ :
+      OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂)) := IsPreStep.comp P hγs₂ (hpre Y₂ _)
+  have hcomp : δ₁ ≫ (γ₁ ≫ (((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ :
+        OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁)) ≫ α₁
+      = δ₂ ≫ (γ₂ ≫ (((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ :
+        OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂)) ≫ α₂ := by
+    simp only [Category.assoc]
+    rw [← he₁, ← he₂, h]
+  obtain ⟨eY, eX, hαe, hβe, hδe⟩ :=
+    F.arbFactorUniq X₁ Y₁ X₂ Y₂ δ₁ _ α₁ δ₂ _ α₂ hcomp hδ₁ hps₁ hα₁ hδ₂ hps₂ hα₂
+  -- ★手 2: `preStepFactorUniq'`
+  have hsplit : γ₂ ≫ (((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ : OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂)
+      = (eX.inv ≫ γ₁) ≫ ((((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ :
+          OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁) ≫ eY.hom) := by
+    rw [hβe]; simp only [Category.assoc]
+  obtain ⟨g, hga, hgb⟩ :=
+    F.preStepFactorUniq' Y₂ Y₁ γ₂ _ (eX.inv ≫ γ₁) _ hsplit
+      hγi₂ hγs₂ (hcoa _) (hpre Y₂ _)
+      (by simpa using IsIsometric.comp P (isIsometric_of_isIso P eX.inv) hγi₁)
+      (IsPreStep.comp P (isPreStep_of_isIso P eX.inv) hγs₁)
+      (hcoa _)
+      (IsPreStep.comp P (hpre Y₁ _) (isPreStep_of_isIso P eY.hom))
+  have hbΨ : (((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ : OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂)
+      = g.hom ≫ (((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ :
+        OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁) ≫ eY.hom := by
+    rw [hga, ← Category.assoc, g.hom_inv_id, Category.id_comp]
+  -- ★手 3: `k := g.hom ≫ eY.hom` は `𝒪^×(Y₂)` の元
+  have hkb : P.Base (g.hom ≫ eY.hom) = P.Base (𝟙 Y₂) := by
+    have hb₂ : P.Base (((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ :
+        OTri P Y₂) : End Y₂) : Y₂ ⟶ Y₂) = P.Base (𝟙 Y₂) :=
+      (psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩).2.1
+    rw [hbΨ, P.Base_comp, P.Base_comp,
+      show P.Base (((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ : OTri P Y₁) : End Y₁) : Y₁ ⟶ Y₁)
+        = P.Base (𝟙 Y₁) from (psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩).2.1,
+      P.Base_id, Category.id_comp] at hb₂
+    rw [P.Base_comp]; exact hb₂
+  have hku : IsUnit (M := End Y₂) (g.hom ≫ eY.hom) := by
+    refine isUnit_iff_exists.mpr ⟨(eY.inv ≫ g.inv : End Y₂), ?_, ?_⟩
+    · show (eY.inv ≫ g.inv) ≫ (g.hom ≫ eY.hom) = 𝟙 Y₂
+      simp
+    · show (g.hom ≫ eY.hom) ≫ (eY.inv ≫ g.inv) = 𝟙 Y₂
+      simp
+  let k : OTimes P Y₂ :=
+    ⟨(g.hom ≫ eY.hom : End Y₂),
+      ⟨hkb, isLinear_of_isIso P (g.hom ≫ eY.hom)⟩, hku⟩
+  have hgl : IsLinear P g.hom := isLinear_of_isIso P g.hom
+  have hconj : ∀ z : OTri P Y₁,
+      ((otriLin P F (hiso Y₂) hgl z : OTri P Y₂) : End Y₂)
+        = g.hom ≫ ((z : End Y₁) : Y₁ ⟶ Y₁) ≫ g.inv := by
+    intro z
+    have hs : g.hom ≫ ((z : End Y₁) : Y₁ ⟶ Y₁)
+        = ((otriLin P F (hiso Y₂) hgl z : OTri P Y₂) : End Y₂) ≫ g.hom :=
+      otriLin_spec P F (hiso Y₂) hgl z
+    rw [← Category.assoc, hs]
+    simp
+  -- ★手 4: `Ψ` の単射性で `β` の側に戻す
+  have hkey : (⟨β₂, hm₂⟩ : OTri P Y₂)
+      = uOf P k * otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ := by
+    refine psiOTri_injective P F hτ (hiso Y₂) (hfn Y₂) d ?_
+    rw [psiOTri_unit_mul P F hτ (hiso Y₂) d k _,
+      psiOTri_otriLin P F hτ (hiso Y₂) (hiso Y₁) hgl d ⟨β₁, hm₁⟩]
+    apply Subtype.ext
+    show _ = ((otriLin P F (hiso Y₂) hgl _ : OTri P Y₂) : End Y₂) ≫ (g.hom ≫ eY.hom)
+    rw [hconj, hbΨ]
+    simp
+  have hβ₂m : β₂ = g.hom ≫ β₁ ≫ eY.hom := by
+    have hcg : β₂ = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+        ≫ (g.hom ≫ eY.hom) :=
+      congrArg (fun z : OTri P Y₂ => ((z : End Y₂) : Y₂ ⟶ Y₂)) hkey
+    rw [hcg, hconj]
+    simp
+  -- ★手 5: 代入すると同型がすべて打ち消える
+  have hγ₂ : γ₂ = (eX.inv ≫ γ₁) ≫ g.inv := by rw [hgb]; simp
+  rw [hf₁, hf₂, hδe, hαe, hβ₂m, hγ₂]
+  simp
+
+/-! ### ★★★★`Ψ : 𝒞 ≃ 𝒞(d)` -/
+
+variable (hft : ∀ X : C, IsFrobeniusTrivial P X)
+
+theorem psiFunctorCd_faithful (d : ℕ+) :
+    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Faithful where
+  map_injective {_ _ f g} h :=
+    psiMap_injective P F hτ hiso hmt haa hfn d
+      (congrArg InducedWideCategory.Hom.hom h)
+
+theorem psiFunctorCd_full (G : Frobenioid P) (d : ℕ+) :
+    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Full where
+  map_surjective {_ _} f := by
+    obtain ⟨ψ, hψ⟩ := psiMap_surjective P F hτ hiso hmt haa hfn G d f.hom f.property
+    exact ⟨ψ, InducedWideCategory.Hom.ext hψ⟩
+
+theorem psiFunctorCd_essSurj (d : ℕ+) :
+    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).EssSurj where
+  mem_essImage Z := ⟨Z.obj, ⟨Iso.refl _⟩⟩
+
+/-- ★★★★★**[FrdI] Proposition 2.5, (iii)** —— unit-linear Frobenius 関手
+`Ψ : 𝒞 ≃ 𝒞(d)` は**圏同値**。
+
+★原文は「`Ψ`・`𝒞(d)` の定義から明らか [cf. assertion (i)]」と一言で済ませる。
+★★実際に効いたのは
+- **充満**: (i) の全射性 ＋ `Definition 2.3, (a)` の全単射性で `t₀ = t^d` を解く
+- **忠実**: ★**`Ψ` が `𝒪^▷` 上で単射**——`Φ` が divisorial だから `d` 倍が単射
+- **本質的全射**: `Ψ` は対象の上で恒等(原文 (a))
+
+の 3 つである。 -/
+theorem prop_2_5_iii (G : Frobenioid P) (d : ℕ+) :
+    (psiFunctorCd P F hτ hiso hmt haa hfn hft d).IsEquivalence := by
+  haveI := psiFunctorCd_faithful P F hτ hiso hmt haa hfn hft d
+  haveI := psiFunctorCd_full P F hτ hiso hmt haa hfn hft G d
+  haveI := psiFunctorCd_essSurj P F hτ hiso hmt haa hfn hft d
+  exact { }
 
 end PsiHom
 
