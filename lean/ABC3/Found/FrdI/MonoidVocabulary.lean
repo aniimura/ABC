@@ -691,6 +691,32 @@ theorem pnat_right_eq_one {a b : ℕ+} (h : a * b = 1) : b = 1 :=
 `ℕ≥1` の任意の元による**乗法(= `n` 倍)が全単射**。 -/
 def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n : ℕ) • a)
 
+/-! ### ★★群の `M^char` は自明（2026-08-16 追加）
+
+★★**これは `Φ^gp` を `monoid on D` にする際の障壁を 1 つ外す**。
+
+`MonoidOn` の条件 (a) は `characteristically injective`、すなわち
+「写像自体が単射 ∧ `M^char` 上の誘導写像も単射」である。
+★**`Φ^gp` の場合、値は群なので `M^char` は自明になり、
+第2成分は自動で成立する** —— 残るのは第1成分だけである。
+
+★理由は一行である: 群では**すべての元が可逆**なので、
+`CharRel a b` の証人に `u := b`, `v := a` を取ればよい。 -/
+
+/-- ★**群では任意の 2 元が `CharRel` で結ばれる**。 -/
+theorem charRel_of_addGroup {G : Type w} [AddCommGroup G] (a b : G) : CharRel a b :=
+  ⟨b, a, ⟨⟨b, -b, by simp, by simp⟩, rfl⟩, ⟨⟨a, -a, by simp, by simp⟩, rfl⟩,
+    add_comm a b⟩
+
+/-- ★★**群の `M^char` は自明**。 -/
+instance subsingleton_mChar_of_addGroup {G : Type w} [AddCommGroup G] :
+    Subsingleton (MChar G) := by
+  constructor
+  intro x y
+  induction x using Quotient.inductionOn with | _ a =>
+  induction y using Quotient.inductionOn with | _ b =>
+  exact Quotient.sound (charRel_of_addGroup a b)
+
 /-! ### ★★`M^pf` —— **perfection**(2026-08-16 追加)
 
 原文 (FrdI p.11):
@@ -1159,6 +1185,14 @@ def charMap (φ : M →+ N) : MChar M →+ MChar N :=
 
 @[simp] theorem charMap_toChar (φ : M →+ N) (a : M) :
     charMap φ (toChar a) = toChar (φ a) := rfl
+
+/-- ★**従って、群の間の写像の `charMap` は自動で単射**。
+
+★★**これが「`Φ^gp` の条件 (a) の半分は無料」の中身である。** -/
+theorem charMap_injective_of_addGroup {G H : Type w} [AddCommGroup G] [AddCommGroup H]
+    (g : G →+ H) : Function.Injective (charMap g) :=
+  fun _ _ _ => Subsingleton.elim _ _
+
 
 /-- **[FrdI] §0** —— `characteristically injective`。
 
