@@ -115,6 +115,51 @@ theorem card_image_lt_of_collision {α β : Type*} [DecidableEq α] [DecidableEq
   calc ((T.erase x).image g).card ≤ (T.erase x).card := Finset.card_image_le
     _ < T.card := Finset.card_erase_lt_of_mem hx
 
+/-! ## ★★基底段 —— `|S| ≤ 3` では 1 次式で足りる
+
+原文 (NCBelyi p.4):
+> λ. Then, so long as |S| ≥ 4, the polynomial “f(x) + f0” of Lemma 2.1 determines
+
+★★**原文は「so long as |S| ≥ 4」と書くだけで、`|S| ≤ 3` の場合を書いていない。**
+帰納法の基底段は読者に委ねられている。★ここで明示する。
+
+`S` は `0, ∞` を含むので `|S| ≤ 3` ⟺ `|S\{0,∞}| ≤ 1`:
+- `S = {0,∞}`: `c ≝ 1/(2β)` と取れば `φ(0)=0`、`φ(β)=1/2 ∉ {0,1,∞}`
+- `S = {0,α,∞}`: `c ≝ 1/α` と取れば `φ(0)=0`、`φ(α)=1`、`φ(β)=β/α ∉ {0,1,∞}`
+
+★どちらも **1 次式 `x ↦ c·x`** で、臨界点を持たない(`(cx)′ = c ≠ 0`)。
+-/
+
+/-- ★★**基底段の係数の存在**。
+
+`T ≝ S\{0,∞}` が 1 元以下なら、`c ≠ 0` があって
+`c·0 = 0`、`c·T = {1}`、`c·β ∉ {0,1}` となる。 -/
+theorem exists_base_scale (T : Finset ℚ) (hcard : T.card ≤ 1) (hpos : ∀ α ∈ T, 0 < α)
+    (β : ℚ) (hβ0 : β ≠ 0) (hβT : β ∉ T) :
+    ∃ c : ℚ, c ≠ 0 ∧ (∀ α ∈ T, c * α = 1) ∧ c * β ≠ 0 ∧ c * β ≠ 1 := by
+  classical
+  rcases Finset.eq_empty_or_nonempty T with rfl | ⟨α, hαT⟩
+  · -- `T = ∅`
+    have hkey : (1 / (2 * β)) * β = 1 / 2 := by field_simp
+    refine ⟨1 / (2 * β), one_div_ne_zero (by simpa using hβ0), by simp, ?_, ?_⟩
+    · rw [hkey]; norm_num
+    · rw [hkey]; norm_num
+  · -- `T = {α}`
+    have hα0 : 0 < α := hpos α hαT
+    have huniq : ∀ y ∈ T, y = α := fun y hy => (Finset.card_le_one.1 hcard) y hy α hαT
+    have hβα : β ≠ α := fun h => hβT (by rw [h]; exact hαT)
+    refine ⟨1 / α, one_div_ne_zero hα0.ne', ?_, ?_, ?_⟩
+    · intro y hy
+      rw [huniq y hy]
+      field_simp
+    · rw [one_div, inv_mul_eq_div]
+      exact div_ne_zero hβ0 hα0.ne'
+    · rw [one_div, inv_mul_eq_div]
+      intro hc
+      apply hβα
+      field_simp at hc
+      exact hc
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_normalizing_scale.src : ABC3.Meta.Source :=
