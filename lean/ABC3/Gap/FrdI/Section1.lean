@@ -195,14 +195,35 @@ def Gap_1_14_iii.record : ABC3.Meta.GapRecord :=
       "示された場合、または (b) 我々の `BoundedFSMIFactor` の写し方が原文と違う場合" ++
       "(どちらも → ①、我々の側の誤り)である。ψ に FSMI を課すのは原文の文言そのもの" ++
       "(p.41「where α1, . . . , αn, ψ are FSMI-morphisms」)であることは確認した。" ++
-      "なお使用箇所(FrdI p.63 の Theorem 3.4)では追加の仮定は課されていない。" }
+      "なお使用箇所(FrdI p.63 の Theorem 3.4)では追加の仮定は課されていない。" ++
+      "★★2026-08-16 追記(穴は 2 つに分かれる)。FSMI = FSM ∧ irreducible、" ++
+      "FSM = fiberwise-surjective ∧ mono であり、欠けているのは両方である。" ++
+      "(1) mono の側: `Found/FrdI/Prop114.lean` の `mono_of_frobType_of_unitTrivial` が" ++
+      "★原文自身の語彙『unit-trivial 型』(Definition 1.2, (iv))だけで埋めた" ++
+      "(isotropic 型は Proposition 1.14 が既に課しているので新たな負担ではない)。" ++
+      "(2) ★★fiberwise-surjectivity の側は `𝒪^×` の仮定では埋まらない —— " ++
+      "`Check/FrdI/TwistedFrobenioid.lean` の `ef_not_isFiberwiseSurjective` は、" ++
+      "★捻れの無い `𝔽_ℕ`(𝒟 = Discrete PUnit、Φ = ℕ)で次数 2 の素 Frobenius 射が" ++
+      "fiberwise-surjective でないことを示す(Div は偶数しか作れず Div = 1 の繊維に乗らない)。" ++
+      "★そして `ef_unitTrivial` がその `𝔽_ℕ` が unit-trivial であることを示す。" ++
+      "★★したがって『unit-trivial を課せば閉じる』は誤りである。" ++
+      "★要ると見ているのは Φ の d-可除性(Definition 1.2, (iv) の perfect 型)だが未証明。" ++
+      "★なお `⟸` 自体は上の 2 つを仮定として明示的に足した形で証明済み" ++
+      "(`prop_1_14_iii_mpr`、`.src` は付けない)。" }
 
 open ABC3.Check.FrdI in
 /-- ★★★**`Definition 1.3` は `Gap_1_14_iii` を含意しない** ——
 それを満たさない Frobenioid が実在する。
 
 ★`cx_isFrobenioid` がその圏が Frobenioid であることを与え、
-`cx_frobType_not_mono` が次数 2 の Frobenius 型射が mono でないことを与える。 -/
+`cx_frobType_not_mono` が次数 2 の Frobenius 型射が mono でないことを与える。
+
+★★**2026-08-16 追記** —— ここで壊れるのは `frobTypeMono` の側だが、
+★**`frobTypeFS` の側は別に、しかも捻れの無い `𝔽_ℕ` で壊れる**
+(`ABC3.Check.FrdI.ef_not_isFiberwiseSurjective`、偶奇による)。
+★★その `𝔽_ℕ` は **unit-trivial** である(`ABC3.Check.FrdI.ef_unitTrivial`)から、
+★**`𝒪^×` にどんな仮定を置いても `frobTypeFS` は回復しない。**
+★mono の側だけは原文の語彙で埋まる(`mono_of_frobType_of_unitTrivial`)。 -/
 theorem not_gap_1_14_iii : ¬ Gap_1_14_iii cxP := by
   intro h
   obtain ⟨A, ζ, hft, -, hnm⟩ := cx_frobType_not_mono 2 (le_refl 2)

@@ -766,6 +766,153 @@ theorem mono_of_frobType_of_faithful (hfaith : P.toElem.Faithful)
   obtain ⟨hb, hd, hv⟩ := frobType_cancel_invariants P ε hε h
   exact hfaith.map_injective (ElemFrobCat.Hom.ext hb hv hd)
 
+/-! ### ★★★穴を閉じる —— `unit-trivial` 型を**足した**場合
+
+★★**これは原文の仮定ではない。** `Proposition 1.14` が課すのは
+「`Φ` は divisorial」「`𝒟` は連結・totally epimorphic・FSMFF 型」
+「`𝒞` は isotropic 型の Frobenioid」だけであり、
+★**`unit-trivial` 型(`Definition 1.2, (iv)` —— `𝒪^×(A) = {1}`)は
+我々が足したものである。★したがって下の 2 本に `.src` は付けない。**
+
+★**足す根拠**: 上の測定のとおり、穴は「不変量(`Base`・`degFr`・`Div`)が
+一致する 2 射は等しいか」ただ 1 点であり、`Definition 1.3, (vi)`
+(`faithfulUpToUnits`)はそれを**単元を除いてしか**保証しない。
+★`unit-trivial` はその単元をちょうど潰す。
+
+★★**`Check/FrdI/TwistedFrobenioid.lean` の反例 `cx2P` はこれで排除される** ——
+そこでは `𝒪^×(A) ≅ ∏_n ℤ/n ≠ {1}` である。★反例が `𝒪^×` の**捻れ**だけに
+依っていたことの裏返しである。
+
+★**isotropic 型も要る**が、これは `Proposition 1.14` が既に課しているので
+**新たな負担ではない**: `faithfulUpToUnits` は **co-angular** pre-step にしか
+効かず、isotropic 型なら `Proposition 1.4, (i)` で全射が co-angular になる。
+-/
+
+/-- ★★★**isotropic 型 + unit-trivial 型 ⟹ 不変量が一致する 2 射は等しい**。
+
+★これは `P.toElem : 𝒞 ⥤ 𝔽_Φ` が**忠実**であることに他ならない。
+★★**`unit-trivial` は原文の仮定ではない**(上の節を見よ)。`.src` は付けない。
+
+★**証明の骨**(4 段):
+1. `Definition 1.3, (iv), (a)` で `f = γ ≫ β ≫ α` と分解する
+   (`γ` Frobenius 型、`β` pre-step、`α` pull-back)
+2. ★★**`α` の pull-back 普遍性で `g` を `α` に通す** ——
+   `w ≫ α = g` かつ `Base w = Base (γ ≫ β)` なる `w` が取れる。
+   ★これで pull-back 部分が `f` と `g` で**共通**になり、
+   `Definition 1.3, (i), (c)` の圏同値(slice 圏)を触らずに済む
+3. `w` は base-isomorphism なので、`w` の分解の pull-back 部分は
+   `Proposition 1.4, (iii)` により**同型**。よって `w` も
+   「Frobenius 型 ≫ pre-step」の形に書ける
+4. `Definition 1.3, (ii)` で Frobenius 部分を揃え、残った 2 本の pre-step に
+   `faithfulUpToUnits` を当て、★`unit-trivial` で単元を潰す -/
+theorem toElem_faithful_of_unitTrivial (F : FrobenioidCore P)
+    (hisot : IsOfIsotropicType P) (hut : IsOfUnitTrivialType P)
+    {X A : C} {f g : X ⟶ A} (hb : P.Base f = P.Base g)
+    (hd : P.degFr f = P.degFr g) (hv : P.Div f = P.Div g) : f = g := by
+  obtain ⟨Y, Z, γ, β, α, hf, hγ, hβ, hα⟩ := F.arbFactor f
+  have hαlin : P.degFr α = 1 := (F.pullBackLB α hα).2
+  have hαisom : P.Div α = 0 := (F.pullBackLB α hα).1.2
+  have hfv : f = (γ ≫ β) ≫ α := by rw [hf, Category.assoc]
+  -- 手 2: `g` を `α` の pull-back 普遍性で通す
+  have hbg : P.Base g = P.Base (γ ≫ β) ≫ P.Base α := by
+    rw [← hb, hfv, P.Base_comp]
+  obtain ⟨w, hwe⟩ := (hα X).2 ⟨(g, P.Base (γ ≫ β)), hbg⟩
+  have hwv := congrArg Subtype.val hwe
+  have hw1 : w ≫ α = g := congrArg Prod.fst hwv
+  have hw2 : P.Base w = P.Base (γ ≫ β) := congrArg Prod.snd hwv
+  -- 手 3: 不変量を `γ ≫ β` と `w` に落とす
+  have hdvw : P.degFr (γ ≫ β) = P.degFr w := by
+    have h1 : P.degFr f = P.degFr (γ ≫ β) := by
+      rw [hfv, P.degFr_comp, hαlin, one_mul]
+    have h2 : P.degFr g = P.degFr w := by
+      rw [← hw1, P.degFr_comp, hαlin, one_mul]
+    rw [← h1, ← h2, hd]
+  have hvvw : P.Div (γ ≫ β) = P.Div w := by
+    have h1 : P.Div f = P.Div (γ ≫ β) := by
+      rw [hfv, P.Div_comp, hαisom]; simp [hαlin]
+    have h2 : P.Div g = P.Div w := by
+      rw [← hw1, P.Div_comp, hαisom]; simp [hαlin]
+    rw [← h1, ← h2, hv]
+  haveI hbγ : IsIso (P.Base γ) := hγ.2
+  haveI hbβ : IsIso (P.Base β) := hβ.2
+  haveI hbw : IsIso (P.Base w) := by rw [hw2, P.Base_comp]; infer_instance
+  -- 手 3': `w` の分解の pull-back 部分は同型
+  obtain ⟨Y', Z', γ', β', α', hw', hγ', hβ', hα'⟩ := F.arbFactor w
+  haveI hbγ' : IsIso (P.Base γ') := hγ'.2
+  haveI hbβ' : IsIso (P.Base β') := hβ'.2
+  haveI hbα' : IsIso (P.Base α') := by
+    have hcomp : P.Base γ' ≫ P.Base β' ≫ P.Base α' = P.Base w := by
+      rw [hw', P.Base_comp, P.Base_comp]
+    haveI : IsIso (P.Base γ' ≫ P.Base β' ≫ P.Base α') := by rw [hcomp]; infer_instance
+    haveI : IsIso (P.Base β' ≫ P.Base α') := IsIso.of_isIso_comp_left (P.Base γ') _
+    exact IsIso.of_isIso_comp_left (P.Base β') _
+  haveI hα'iso : IsIso α' := isIso_of_isPullBack_of_isBaseIso P F α' hα' hbα'
+  have hβ'' : IsPreStep P (β' ≫ α') := IsPreStep.comp P hβ' (isPreStep_of_isIso P α')
+  have hw'' : w = γ' ≫ β' ≫ α' := hw'
+  -- 手 4: Frobenius 部分を揃える
+  have hdγ : P.degFr γ = P.degFr γ' := by
+    have h1 : P.degFr (γ ≫ β) = P.degFr γ := by rw [P.degFr_comp, hβ.1, one_mul]
+    have h2 : P.degFr w = P.degFr γ' := by rw [hw'', P.degFr_comp, hβ''.1, one_mul]
+    rw [← h1, ← h2, hdvw]
+  obtain ⟨θ, hθiso, hθ⟩ := F.frobDegUniq X Y Y' γ γ' hγ hγ' hdγ
+  haveI := hθiso
+  have hβ₂ : IsPreStep P (θ ≫ β' ≫ α') :=
+    IsPreStep.comp P (isPreStep_of_isIso P θ) hβ''
+  have hw₂ : w = γ ≫ θ ≫ β' ≫ α' := by rw [hw'', ← hθ, Category.assoc]
+  -- 残る 2 本の pre-step に `faithfulUpToUnits` を当て、単元を潰す
+  have hbe : P.Base β = P.Base (θ ≫ β' ≫ α') := by
+    have h1 : P.Base γ ≫ P.Base β = P.Base γ ≫ P.Base (θ ≫ β' ≫ α') := by
+      rw [← P.Base_comp, ← P.Base_comp, ← hw₂, hw2]
+    exact (cancel_epi (P.Base γ)).mp h1
+  have hme : P.Div β = P.Div (θ ≫ β' ≫ α') := by
+    have h1 : Φ.map (P.Base γ) (P.Div β) = Φ.map (P.Base γ) (P.Div (θ ≫ β' ≫ α')) := by
+      have e1 : P.Div (γ ≫ β) = Φ.map (P.Base γ) (P.Div β) := by
+        rw [P.Div_comp, hγ.1.2]; simp
+      have e2 : P.Div w = Φ.map (P.Base γ) (P.Div (θ ≫ β' ≫ α')) := by
+        rw [hw₂, P.Div_comp, hγ.1.2]; simp
+      rw [← e1, ← e2, hvvw]
+    exact Φ.map_injective _ h1
+  have hcoa : ∀ (U V : C) (u : U ⟶ V), IsCoAngular P u :=
+    fun _ _ u => prop_1_4_i P u (fun Y'' _ => hisot Y'')
+  obtain ⟨u, hu, hβu⟩ :=
+    F.faithfulUpToUnits β (θ ≫ β' ≫ α') hbe hme (hcoa _ _ β) hβ (hcoa _ _ _) hβ₂
+  have hu1 : u = 1 := by
+    have hZ := hut Z
+    rw [show OTimes P Z = ⊥ from hZ] at hu
+    exact Submonoid.mem_bot.mp hu
+  have hββ₂ : β = θ ≫ β' ≫ α' := by
+    rw [hβu, hu1]; exact Category.comp_id _
+  rw [hfv, ← hw1, hw₂, hββ₂]
+
+/-- ★★★**isotropic 型 + unit-trivial 型 ⟹ Frobenius 型射は mono**。
+
+★★**`unit-trivial` は原文の仮定ではない**(上の節を見よ)。`.src` は付けない。
+★原文の証明は「素 Frobenius 射を FSMI として後置する」ので、その mono 性を
+暗黙に使っている。★**その半分をここで埋めた。**
+
+★★★**ただしこれだけでは `Proposition 1.14, (iii)` の `⟸` は閉じない**
+(2026-08-16 の測定)。★`FSMI = FSM ∧ irreducible` であり
+`FSM = fiberwise-surjective ∧ mono` なので、★**残る半分
+「素 Frobenius 射は fiberwise-surjective か」がまだ空いている。**
+
+★★**そしてそちらは `𝒪^×` の仮定では埋まらない** —— ★手計算による反例:
+`𝒟 = Discrete PUnit`、`Φ = ℕ` の**捻れていない** `𝔽_ℕ` を取る。
+`Div_comp` / `degFr_comp` より `(a,f) ≫ (m,d) = (m + d·a, d·f)` なので、
+`β = (0,2)`(次数 2 の素 Frobenius 射)と `γ = (1,2)` に対し
+`δB ≫ β = δZ ≫ γ` は `0 + 2a = 1 + 2z` を要求し、★**偶奇で解が無い。**
+★したがって `β` は fiberwise-surjective でなく FSMI でもない。
+★★**`𝔽_ℕ` は `𝒪^×(A) = {(0,1)} = {1}`、すなわち `unit-trivial` である。**
+
+★★★**要るのは `Φ` の `d`-可除性**(`Definition 1.2, (iv)` の `perfect` 型;
+`Proposition 1.10, (iii)` が「perfect 型なら `Φ` の像は perfect」と述べる)。
+`Div γ = d · x` と書ければ `δB := (x, deg γ)`、`δZ := (0, d)` で解ける。 -/
+theorem mono_of_frobType_of_unitTrivial (F : FrobenioidCore P)
+    (hisot : IsOfIsotropicType P) (hut : IsOfUnitTrivialType P)
+    {Cc B : C} (ε : Cc ⟶ B) (hε : IsFrobeniusType P ε) : Mono ε := by
+  refine ⟨fun {X} f g h => ?_⟩
+  obtain ⟨hb, hd, hv⟩ := frobType_cancel_invariants P ε hε h
+  exact toElem_faithful_of_unitTrivial P F hisot hut hb hd hv
+
 include P in
 /-- ★★★**prime-Frobenius 射が mono でなくなる機構**。
 
@@ -1006,6 +1153,184 @@ theorem prop_1_14_iii_mp (F : FrobenioidCore P) (G : Frobenioid P)
       rw [hdχ] at hxy
       exact hx (eq_zero_of_add_eq_zero_of_isSharp
         (P.divisorial (P.toElem.obj A).base).2 hxy.symm).1
+  omega
+
+/-! ### ★★★(iii) の `⟸` —— **穴を仮定として明示的に足した**版(2026-08-16)
+
+★★**原文が仮定しているもの**: `Φ` は divisorial、`𝒟` は連結・totally epimorphic・
+FSMFF 型、`𝒞 → 𝔽_Φ` は **isotropic 型の Frobenioid**。★それだけである。
+
+★★★**我々が足したもの**(下の `prop_1_14_iii_mpr` の `hFrobMono` / `hFrobFS`):
+- `hFrobMono`: Frobenius 型射は **monomorphism**
+- `hFrobFS`: Frobenius 型射は **fiberwise-surjective**
+
+★**なぜ足さざるを得ないか**: 原文 (FrdI p.42) の証明は
+> by taking ψ to be a prime-Frobenius morphism of increasingly large Frobenius degree
+
+と述べ、★**その `ψ` が FSMI(したがって FSM = fiberwise-surjective ∧ mono)である**
+ことを使う。★★**`Definition 1.3` はそれを与えない。** mono を与えるのは
+`(v), (a)` だけで、そこは **pre-step にしか効かない**
+(原文全体で `monomorphism` の根拠は例外なく `Definition 1.3, (v), (a)` である)。
+
+★★★**2 つとも実際に壊れる**(`Check/FrdI/TwistedFrobenioid.lean`):
+- **mono が壊れる**: `cx2_refutes_1_14_iii` ——
+  `𝔽_{ℕ on Discrete PUnit} ⋉ (∏_n ℤ/n)` で `𝒪^×` の `d`-捻れが mono を壊す
+- ★★**fiberwise-surjectivity が壊れる**: `ef_not_isFSMMorphism` ——
+  ★**捻れの無い `𝔽_ℕ`、すなわち原文自身の基本例**で壊れる(偶奇)。
+  ★しかも `𝔽_ℕ` は `unit-trivial`(`ef_unitTrivial`)なので、
+  ★★**`𝒪^×` にどんな仮定を置いてもこちらは埋まらない。**
+
+★`Found/FrdI/Prop114.lean` の `mono_of_frobType_of_unitTrivial` は
+★**mono の側だけ**を原文の語彙(`unit-trivial` 型)で埋めたものである。
+★★**`hFrobFS` の側を原文の語彙で埋めるには `Φ` の `d`-可除性
+(`Definition 1.2, (iv)` の `perfect` 型)が要る**と見ている(未証明)。
+
+★**したがって以下の 3 本に `.src` は付けない。** -/
+
+include P in
+/-- ★**`Div` が既約な co-angular pre-step は FSMI**。
+
+`FSM` は `Proposition 1.11, (vii)`、irreducible は `Proposition 1.14, (i)` の
+「(b) `Div` が既約な step」から。★どちらも**原文の仮定だけ**で出る。 -/
+theorem isFSMI_of_coaPre_irreducibleDiv (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {Y X : C} (χ : Y ⟶ X)
+    (hχc : IsCoAngular P χ) (hχs : IsPreStep P χ)
+    (hd : IsIrreducibleElt (P.Div χ)) : IsFSMI χ := by
+  refine ⟨prop_1_11_vii_fsm_of_coaPre P F G χ hχc hχs, ?_⟩
+  refine (prop_1_14_i P G hiso χ).mpr (Or.inr (Or.inl ⟨⟨hχs, ?_⟩, hd⟩))
+  intro hi
+  haveI := hi
+  exact hd.1 (isIsometric_of_isIso P χ)
+
+include P in
+/-- ★★★**急所** —— `Div` が既約元 `c` の `k+1` 倍である co-angular pre-step は、
+`Div` が `c`(の輸送)である co-angular pre-step **`k+1` 本の鎖**になる。
+
+★★**原文 (FrdI p.42) が「the first category equivalence が要る」と言っている所**
+であり、実際 `Definition 1.3, (iii), (d)`(コスライスの圏同値)を 2 通りに使う:
+- **本質的全射性** → `coaPre_realize`(`Div = c` の 1 本を作る)
+- **充満性** → `coaPre_factor_under_of_mle`(作った 1 本を経由させる)
+
+★`Div β` の計算には `Φ` が **integral**(消約的)であることが要る
+(`Definition 1.1, (i)` の pre-divisorial に含まれる)。 -/
+theorem coaPre_chain_of_nsmul (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) :
+    ∀ (k : ℕ) {Y X : C} (c : Φ.val (P.toElem.obj Y).base), IsIrreducibleElt c →
+      ∀ (χ : Y ⟶ X), IsCoAngular P χ → IsPreStep P χ → P.Div χ = (k + 1) • c →
+      IsFSMIChain (k + 1) χ := by
+  intro k
+  induction k with
+  | zero =>
+    intro Y X c hc χ hχc hχs hdiv
+    rw [one_nsmul] at hdiv
+    have hfsmi := isFSMI_of_coaPre_irreducibleDiv P F G hiso χ hχc hχs (hdiv ▸ hc)
+    have h := IsFSMIChain.cons hfsmi (IsFSMIChain.nil (A := X))
+    rwa [Category.comp_id] at h
+  | succ k ih =>
+    intro Y X c hc χ hχc hχs hdiv
+    obtain ⟨X₁, ψ, hψc, hψs, hψd⟩ := coaPre_realize P G Y c
+    have hle : MLe (P.Div ψ) (P.Div χ) := by
+      rw [hψd, hdiv]; exact mle_nsmul_self (by omega) c
+    obtain ⟨β, hβc, hβs, hβe⟩ :=
+      coaPre_factor_under_of_mle P G ψ hψc hψs χ hχc hχs hle
+    haveI := isCancelAdd_of_isIntegralMonoid
+      (M := Φ.val (P.toElem.obj Y).base) (P.divisorial _).1.1
+    have hbd : Φ.map (P.Base ψ) (P.Div β) = (k + 1) • c := by
+      have h1 : P.Div χ = Φ.map (P.Base ψ) (P.Div β) + P.Div ψ := by
+        rw [← hβe, P.Div_comp, hβs.1]; simp
+      rw [hdiv, hψd, succ_nsmul] at h1
+      exact (add_right_cancel h1.symm)
+    haveI hbψ : IsIso (P.Base ψ) := hψs.2
+    have hround : ∀ x : Φ.val (P.toElem.obj X₁).base,
+        Φ.map (inv (P.Base ψ)) (Φ.map (P.Base ψ) x) = x := by
+      intro x
+      rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+    have hc'irr : IsIrreducibleElt (Φ.map (inv (P.Base ψ)) c) :=
+      isIrreducibleElt_of_bijective _
+        (Φ.map_bijective_of_iso (asIso (P.Base ψ)).symm) hc
+    have hdβ : P.Div β = (k + 1) • Φ.map (inv (P.Base ψ)) c := by
+      rw [← hround (P.Div β), hbd, map_nsmul]
+    have hchain := ih (Φ.map (inv (P.Base ψ)) c) hc'irr β hβc hβs hdβ
+    have hfsmiψ :=
+      isFSMI_of_coaPre_irreducibleDiv P F G hiso ψ hψc hψs (hψd ▸ hc)
+    have h := IsFSMIChain.cons hfsmiψ hchain
+    rwa [hβe] at h
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (iii) の `⟸`** —— irreducible な `φ` について
+「FSMI 分解の長さが有界」ならば `φ` は非 pre-step。
+★対偶を示す: **irreducible な pre-step では有界にならない**。
+
+★★**上の節のとおり `hFrobMono` / `hFrobFS` は原文の仮定ではない。**
+`.src` を付けないのはそのためである。
+★不整合の実体は `Check/FrdI/TwistedFrobenioid.lean` の
+`cx2_refutes_1_14_iii`(mono)と `ef_not_isFSMMorphism`(fiberwise-surjectivity)。
+
+★**筋**(原文 p.42 の (a) の場合):
+1. `Proposition 1.14, (i)` で `φ` は **`Div φ` が既約な step**
+2. 素数 `p > N` を取り、`Definition 1.3, (ii)` で **次数 `p` の Frobenius 型射 `ψ`** を作る
+   (★ここで `hFrobMono` / `hFrobFS` が効いて `ψ` が FSMI になる)
+3. `Proposition 1.10, (ii)` で `φ ≫ ψ = ψ' ≫ φ'`(`ψ'` Frobenius 型・`φ'` pre-step)
+4. `Div φ' = p • (Div φ の輸送)` を計算する
+5. ★`coaPre_chain_of_nsmul` で `φ'` を **長さ `p` の FSMI 鎖**にする
+6. `ψ'` を頭に付けて長さ `p + 1 > N` —— 有界性に反する -/
+theorem prop_1_14_iii_mpr (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hFSMFF : IsOfFSMFFType D)
+    (hFrobMono : ∀ {X Y : C} (ε : X ⟶ Y), IsFrobeniusType P ε → Mono ε)
+    (hFrobFS : ∀ {X Y : C} (ε : X ⟶ Y), IsFrobeniusType P ε → IsFiberwiseSurjective ε)
+    {A B : C} (φ : A ⟶ B) (hirr : IsIrreducibleMor φ) (hps : IsPreStep P φ) :
+    ¬ BoundedFSMIFactor φ := by
+  rintro ⟨N, hN⟩
+  -- 手 1: `φ` は `Div` が既約な step
+  have hdirr : IsIrreducibleElt (P.Div φ) := by
+    rcases (prop_1_14_i P G hiso φ).mp hirr with hpf | ⟨-, hd⟩ | ⟨-, hbirr⟩
+    · exfalso
+      have h1 : ((P.degFr φ : ℕ+) : ℕ) = 1 := by rw [hps.1]; rfl
+      exact Nat.not_prime_one (h1 ▸ hpf.2)
+    · exact hd
+    · exact absurd hps.2 hbirr.1
+  -- 手 2: 素数 `p > N`
+  obtain ⟨p, hpN, hp⟩ := Nat.exists_infinite_primes (N + 1)
+  -- 手 3: 次数 `p` の Frobenius 型射 —— ★足した 2 仮定でここが FSMI になる
+  obtain ⟨E, ψ, hψF, hψdeg⟩ := F.frobDegSurj B ⟨p, hp.pos⟩
+  have hpdeg : ((P.degFr ψ : ℕ+) : ℕ) = p := by rw [hψdeg]; rfl
+  have hψfsmi : IsFSMI ψ :=
+    ⟨⟨hFrobFS ψ hψF, hFrobMono ψ hψF⟩,
+      (prop_1_14_i P G hiso ψ).mpr (Or.inl ⟨hψF, hpdeg ▸ hp⟩)⟩
+  -- 手 4: `Proposition 1.10, (ii)` で Frobenius 型を前へ出す
+  obtain ⟨Y, ψ', φ', hψ'F, hψ'deg, hφ's, hsq⟩ := prop_1_10_ii P F φ hps ψ hψF
+  haveI hbψ' : IsIso (P.Base ψ') := hψ'F.2
+  -- 手 5: `Div φ'` を計算する
+  have hkey : Φ.map (P.Base ψ') (P.Div φ') = p • P.Div φ := by
+    have h1 : P.Div (ψ' ≫ φ') = Φ.map (P.Base ψ') (P.Div φ') := by
+      rw [P.Div_comp, hψ'F.1.2, smul_zero, add_zero]
+    have h2 : P.Div (φ ≫ ψ) = p • P.Div φ := by
+      rw [P.Div_comp, hψF.1.2, map_zero, zero_add, hpdeg]
+    rw [← h1, hsq, h2]
+  have hround : ∀ x : Φ.val (P.toElem.obj Y).base,
+      Φ.map (inv (P.Base ψ')) (Φ.map (P.Base ψ') x) = x := by
+    intro x
+    rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+  have hdφ' : P.Div φ' = p • Φ.map (inv (P.Base ψ')) (P.Div φ) := by
+    rw [← hround (P.Div φ'), hkey, map_nsmul]
+  have hc'irr : IsIrreducibleElt (Φ.map (inv (P.Base ψ')) (P.Div φ)) :=
+    isIrreducibleElt_of_bijective _
+      (Φ.map_bijective_of_iso (asIso (P.Base ψ')).symm) hdirr
+  -- 手 6: `φ'` を長さ `p` の FSMI 鎖にする
+  obtain ⟨q, hq⟩ : ∃ q, p = q + 1 := ⟨p - 1, by have := hp.pos; omega⟩
+  have hchain : IsFSMIChain p φ' := by
+    rw [hq]
+    refine coaPre_chain_of_nsmul P F G hiso q _ hc'irr φ'
+      (prop_1_4_i P φ' (fun Y'' _ => hiso Y'')) hφ's ?_
+    rw [hdφ', hq]
+  -- 手 7: `ψ'` を頭に付ける
+  have hψ'fsmi : IsFSMI ψ' :=
+    ⟨⟨hFrobFS ψ' hψ'F, hFrobMono ψ' hψ'F⟩,
+      (prop_1_14_i P G hiso ψ').mpr
+        (Or.inl ⟨hψ'F,
+          by rw [show ((P.degFr ψ' : ℕ+) : ℕ) = p by rw [hψ'deg, hψdeg]; rfl]; exact hp⟩)⟩
+  have hfull : IsFSMIChain (p + 1) (ψ' ≫ φ') := IsFSMIChain.cons hψ'fsmi hchain
+  have := hN (p + 1) E ψ (ψ' ≫ φ') hψfsmi hfull hsq
   omega
 
 /-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性

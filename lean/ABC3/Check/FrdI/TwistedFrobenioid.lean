@@ -1369,4 +1369,75 @@ theorem cx2_refutes_1_14_iii :
 ★★**`sorry` は置かない。** 未確定のものは**書かない**。
 -/
 
+/-! ## ★★★`unit-trivial` では閉じない —— **捻れていない `𝔽_ℕ` 自身が反例**(2026-08-16)
+
+★★**穴は `𝒪^×` の捻れだけではなかった。**
+`FSMI = FSM ∧ irreducible`、`FSM = fiberwise-surjective ∧ mono` であり、
+`Found/FrdI/Prop114.lean` の `mono_of_frobType_of_unitTrivial` は
+`unit-trivial` 型のもとで **mono の側**を埋める。
+★★**しかし fiberwise-surjective の側は `𝒪^×` の仮定では埋まらない。**
+
+★中身は**偶奇**である。`ElemFrobCat.div_comp` より
+`(a,f) ≫ (m,d)` の `Div` は `m + d·a` なので、
+次数 2 の素 Frobenius 射 `(0,2)` の後ろに現れる `Div` は**偶数**しか作れず、
+`Div = 1`・次数 2 の射 `(1,2)` の繊維に乗らない。
+
+★★★**そして `𝔽_ℕ` は `unit-trivial` である**(`𝒪^×(A) ≅ ℕ^± = 0`)。
+★したがって `Proposition 1.14, (iii)` の `⟸` は
+**`𝒪^×` にどんな仮定を置いても閉じない**。
+★★**要るのは `Φ` の `d`-可除性**(`Definition 1.2, (iv)` の `perfect` 型)である ——
+`Div γ = d · x` と書ければ `δB := (x, deg γ)`、`δZ := (0, d)` で繊維に乗る。 -/
+
+/-- ★捻れていない `𝔽_ℕ`(一対象)の pre-Frobenioid。 -/
+abbrev efP : PreFrobenioid (ElemFrobCat Cx2Phi) Cx2Phi.charOn :=
+  elemPreFrobenioid Cx2Phi cx2_totEpi (fun _ => isPreDivisorial_nat)
+
+/-- ★その唯一の対象。 -/
+abbrev efA : ElemFrobCat Cx2Phi := constObj ℕ
+
+/-- ★定数 `Φ` では `α*` は恒等。 -/
+@[simp] theorem constPhi_map {M : Type} [AddCommMonoid M] {A B : Discrete PUnit}
+    (α : B ⟶ A) (x : M) : (constPhi M).map α x = x := rfl
+
+/-- ★次数 2 の素 Frobenius 射(`Div = 0`)。 -/
+def efFrob : efA ⟶ efA := ⟨𝟙 _, 0, 2⟩
+
+/-- ★`Div = 1`・次数 2 の射 —— これが `efFrob` の繊維に乗らない。 -/
+def efTest : efA ⟶ efA := ⟨𝟙 _, (1 : ℕ), 2⟩
+
+/-- ★★★**次数 2 の素 Frobenius 射は fiberwise-surjective でない**。
+
+★`δB ≫ efFrob` の `Div` は `0 + 2·a` で**偶数**、
+`δZ ≫ efTest` の `Div` は `1 + 2·z` で**奇数**。 -/
+theorem ef_not_isFiberwiseSurjective : ¬ IsFiberwiseSurjective efFrob := by
+  intro h
+  obtain ⟨Dd, δB, δZ, he⟩ := h efTest
+  have hd := congrArg ElemFrobCat.Hom.div he
+  rw [ElemFrobCat.div_comp, ElemFrobCat.div_comp] at hd
+  simp only [efFrob, efTest, constPhi_map, zero_add] at hd
+  rw [show ((2 : ℕ+) : ℕ) = 2 from rfl, two_nsmul, two_nsmul] at hd
+  obtain ⟨a, b, hab⟩ : ∃ a b : ℕ, a + a = 1 + (b + b) :=
+    ⟨ElemFrobCat.Hom.div δB, ElemFrobCat.Hom.div δZ, hd⟩
+  omega
+
+/-- ★★★**したがって FSM 射でない**(`FSM = fiberwise-surjective ∧ mono`)。 -/
+theorem ef_not_isFSMMorphism : ¬ IsFSMMorphism efFrob :=
+  fun h => ef_not_isFiberwiseSurjective h.1
+
+/-- ★★★**`𝔽_ℕ` は `unit-trivial`** —— `ℕ` の加法可逆元は `0` だけだから。 -/
+theorem ef_unitTrivial : IsUnitTrivial efP efA := by
+  show OTimes efP efA = ⊥
+  rw [Submonoid.eq_bot_iff_forall]
+  intro x hx
+  have hx' := (mem_otri_iff Cx2Phi cx2_totEpi (fun _ => isPreDivisorial_nat) x).mp
+    (OTimes_le_OTri efP efA hx)
+  have hu : IsAddUnit (ElemFrobCat.Hom.div x) := by
+    rw [← otriOf_mem_otimes Cx2Phi cx2_totEpi (fun _ => isPreDivisorial_nat) efA
+      (ElemFrobCat.Hom.div x)]
+    rwa [← hx']
+  have h0 : ElemFrobCat.Hom.div x = 0 := Nat.isAddUnit_iff.mp hu
+  calc x = otriOf Cx2Phi efA (ElemFrobCat.Hom.div x) := hx'
+    _ = otriOf Cx2Phi efA 0 := by rw [h0]
+    _ = 1 := rfl
+
 end ABC3.Check.FrdI
