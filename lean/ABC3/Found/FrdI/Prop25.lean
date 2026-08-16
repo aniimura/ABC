@@ -138,4 +138,105 @@ theorem prop_2_5_ii_frobTrivial (hmt : ∀ A : C, IsMetricallyTrivial P A) (A : 
   obtain ⟨θ⟩ := prop_2_5_ii_baseTrivial P F hmt A B ⟨e.symm⟩
   exact isFrobeniusTrivial_of_iso (istrPre P F) (istr_frobenioidCore P F) θ hB
 
+/-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
+
+原文 (FrdI p.48):
+> (i) The natural inclusion O
+
+★**特性モノイド `𝒪^▷(A)^char` を「`Div` の核による合同」として作る。**
+`Proposition 2.2, (iii)`(`otri_div_eq_iff`)が
+「`Div` が等しい ⟺ `𝒪^×` 倍だけ違う」を与えるので、
+★**この商はちょうど原文の `𝒪^▷(A)^char`(＝ `𝒪^▷(A)/𝒪^×(A)`)である**
+(`otriChar_rel_iff` で確認する)。
+
+★この作り方だと**単射性は構成から自動**になり、
+残るのは `prop_2_5_i_surjective` の全射性だけになる。
+-/
+
+section Char
+
+variable {A : C}
+
+include P in
+/-- ★**`𝒪^▷(A)` 上では `Div` は加法的** —— base-identity かつ linear なので
+合成則 `Div (ψ ≫ φ) = Φ.map (Base ψ) (Div φ) + (degFr φ) • Div ψ` が
+ただの和に潰れる。 -/
+theorem otri_div_mul (x y : OTri P A) :
+    P.Div ((((x * y : OTri P A) : End A)) : A ⟶ A)
+      = P.Div ((x : End A) : A ⟶ A) + P.Div ((y : End A) : A ⟶ A) := by
+  have hby : P.Base ((y : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((y : End A) : A ⟶ A) = P.Base (𝟙 A) := y.2.1
+    rwa [P.Base_id] at h
+  show P.Div (((y : End A) : A ⟶ A) ≫ ((x : End A) : A ⟶ A)) = _
+  rw [P.Div_comp, hby, MonoidOn.map_id, show P.degFr ((x : End A) : A ⟶ A) = 1 from x.2.2]
+  simp
+
+/-- ★**`Div` をモノイド準同型として見る** —— 終域は `Φ(A)` を乗法的に見たもの。 -/
+def otriDivHom (A : C) : OTri P A →* Multiplicative (Φ.val (P.toElem.obj A).base) where
+  toFun x := Multiplicative.ofAdd (P.Div ((x : End A) : A ⟶ A))
+  map_one' := by
+    show Multiplicative.ofAdd (P.Div (𝟙 A)) = 1
+    rw [P.Div_id]
+    rfl
+  map_mul' x y := by
+    show Multiplicative.ofAdd (P.Div (((x * y : OTri P A) : End A) : A ⟶ A)) = _
+    rw [otri_div_mul P x y]
+    rfl
+
+/-- ★★**特性モノイド `𝒪^▷(A)^char`** —— `Div` の核による商。 -/
+def OTriChar (A : C) : Type v2 := (Con.ker (otriDivHom P A)).Quotient
+
+noncomputable instance : Monoid (OTriChar P A) :=
+  inferInstanceAs (Monoid (Con.ker (otriDivHom P A)).Quotient)
+
+/-- ★`𝒪^▷(A) ↠ 𝒪^▷(A)^char`。 -/
+def toOTriChar : OTri P A →* OTriChar P A := (Con.ker (otriDivHom P A)).mk'
+
+/-- ★★`𝒪^▷(A)^char → Φ(A)` —— 原文の「natural inclusion」。 -/
+def otriCharDiv : OTriChar P A →* Multiplicative (Φ.val (P.toElem.obj A).base) :=
+  Con.kerLift (otriDivHom P A)
+
+/-- ★**構成から単射**。 -/
+theorem otriCharDiv_injective : Function.Injective (otriCharDiv P (A := A)) :=
+  Con.kerLift_injective _
+
+include P in
+/-- ★★**この商がちょうど原文の `𝒪^▷(A)/𝒪^×(A)` である**ことの確認。
+
+★`Proposition 2.2, (iii)`(`otri_div_eq_iff`)そのもの。 -/
+theorem otriChar_rel_iff (F : FrobenioidCore P) (hiso : IsIsotropic P A) (x y : OTri P A) :
+    toOTriChar P x = toOTriChar P y
+      ↔ ∃ u : OTimes P A, ((x : End A) : A ⟶ A)
+          = ((y : End A) : A ⟶ A) ≫ ((u : End A) : A ⟶ A) := by
+  rw [← otri_div_eq_iff P F hiso x y]
+  constructor
+  · intro h
+    exact (Con.eq _).mp h
+  · intro h
+    exact (Con.eq _).mpr h
+
+include P in
+/-- ★★★**[FrdI] Proposition 2.5, (i)** —— `𝒪^▷(A)^char → Φ(A)` は**全単射**。
+
+★単射性は構成から、全射性は `prop_2_5_i_surjective` から。 -/
+theorem prop_2_5_i_bijective (G : Frobenioid P)
+    (hmt : IsMetricallyTrivial P A) (haa : IsAutAmple P A) :
+    Function.Bijective (otriCharDiv P (A := A)) := by
+  refine ⟨otriCharDiv_injective P, ?_⟩
+  intro c
+  obtain ⟨x, hx⟩ := prop_2_5_i_surjective P G hmt haa (Multiplicative.toAdd c)
+  refine ⟨toOTriChar P x, ?_⟩
+  show Multiplicative.ofAdd (P.Div ((x : End A) : A ⟶ A)) = c
+  rw [hx]
+  rfl
+
+include P in
+/-- ★**同型として述べたもの**。 -/
+noncomputable def prop_2_5_i_equiv (G : Frobenioid P)
+    (hmt : IsMetricallyTrivial P A) (haa : IsAutAmple P A) :
+    OTriChar P A ≃* Multiplicative (Φ.val (P.toElem.obj A).base) :=
+  MulEquiv.ofBijective _ (prop_2_5_i_bijective P G hmt haa)
+
+end Char
+
 end ABC3.Found.FrdI
