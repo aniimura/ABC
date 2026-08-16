@@ -125,18 +125,72 @@ theorem not_mono_twist {B E : TwObj Φ G} (ζ : B ⟶ E) (hζ : ζ.unit = 1)
   have := (cancel_mono ζ).mp hsq
   exact hu (congrArg TwHom.unit this).symm
 
+/-! ## ★捻れ積の `PreFrobenioid` 構造
+
+★`𝔽_Φ` の側の結果に **`G` 成分の処理を足す**だけで出る。
+-/
+
+/-- ★**捻れ積も totally epimorphic**。
+
+★`𝔽_Φ` 成分は `isTotallyEpimorphic_elemFrobCat`、
+★**`G` 成分は群の消約**(指数が一致するので左から消せる)。 -/
+theorem twTotallyEpimorphic (hD : IsTotallyEpimorphic D)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) :
+    IsTotallyEpimorphic (TwObj Φ G) := by
+  intro A B f
+  haveI : Epi f.hom := isTotallyEpimorphic_elemFrobCat hD hint _ _ f.hom
+  refine ⟨fun {Z} h₁ h₂ hh => ?_⟩
+  have hhom : h₁.hom = h₂.hom := (cancel_epi f.hom).mp (congrArg TwHom.hom hh)
+  refine TwHom.ext hhom ?_
+  have hu := congrArg TwHom.unit hh
+  rw [twComp_unit, twComp_unit, hhom] at hu
+  exact mul_left_cancel hu
+
+/-- ★**捻れ積も connected** —— `𝔽_Φ` の証明をそのまま写す。 -/
+theorem twIsConnected [IsConnected D] : IsConnected (TwObj Φ G) := by
+  obtain ⟨d₀⟩ := (inferInstance : Nonempty D)
+  refine IsConnected.of_induct (j₀ := (⟨⟨d₀⟩⟩ : TwObj Φ G)) ?_
+  intro p hp0 hstep A
+  have key : ∀ d : D, (⟨⟨d⟩⟩ : TwObj Φ G) ∈ p :=
+    induct_on_objects (J := D) {d | (⟨⟨d⟩⟩ : TwObj Φ G) ∈ p} hp0
+      (fun {d₁ d₂} f => hstep
+        (⟨(⟨f, 0, 1⟩ : (⟨d₁⟩ : ElemFrobCat Φ) ⟶ (⟨d₂⟩ : ElemFrobCat Φ)), 1⟩ :
+          (⟨⟨d₁⟩⟩ : TwObj Φ G) ⟶ ⟨⟨d₂⟩⟩))
+  exact key A.ofElem.base
+
+/-- ★★**捻れ積の pre-Frobenioid 構造**。
+
+★`𝔽_Φ` の pre-Frobenioid 構造に射影関手を前合成するだけ ——
+★**`Base`・`Div`・`degFr` はすべて `G` 成分を無視する。** -/
+def twPreFrobenioid (hD : IsTotallyEpimorphic D) [IsConnected D]
+    (hpd : ∀ A : D, IsPreDivisorial (Φ.val A)) :
+    PreFrobenioid (TwObj Φ G) Φ.charOn where
+  toElem := twProj Φ G ⋙ elemFrobToChar Φ
+  divisorial := Φ.charOn_isDivisorialOn hpd
+  totEpiC := twTotallyEpimorphic hD (fun A => (hpd A).1)
+  totEpiD := hD
+  connectedC := twIsConnected
+  connectedD := inferInstance
+
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
 
 ★**確定した**:
 - 捻れ積は**圏である**(結合律・単位律を証明した)
 - 射影関手 `twProj : 𝔽_Φ ⋉ G ⥤ 𝔽_Φ` がある
 - ★★**次数 `d` の射(`G` 成分が `1`)は、`G` に `d`-捻れがあれば mono でない**
+- ★**totally epimorphic である**(`G` 成分は群の消約)
+- ★**connected である**(`𝔽_Φ` の証明をそのまま写せる)
+- ★★**`PreFrobenioid` 構造を持つ**(`twPreFrobenioid`)
 
 ★**未確定(残る仕事)**:
-- 捻れ積が `PreFrobenioid` の残りの条件(totally epimorphic・connected)を満たすか
-- ★**`Definition 1.3` の全条件を満たすか** —— これが済めば
-  `Gap_1_14_iii` は ③(`sourceGap`)に上がる
+- ★**`Definition 1.3`(`FrobenioidCore` ＋ `Frobenioid`)の全条件を満たすか** ——
+  これが済めば `Gap_1_14_iii` は ③(`sourceGap`)に上がる。
+  ★`elemFrob_isFrobenioid`(`Proposition 1.5`)の各条件に `G` 成分の処理を
+  足す形になる
 - `Frobenius-normalized` が実際に成り立つこと(docstring で計算したが未形式化)
+
+★★**ここまでで「実物の圏で mono が破れる」ことは確定した。**
+★**残るのは「その圏が Frobenioid である」ことだけである。**
 
 ★★**`sorry` は置かない。** 未確定のものは**書かない**。
 -/
