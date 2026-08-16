@@ -950,3 +950,46 @@ S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない�
 | `Definition 1.1` 算術直線束 | ★`X^arc`(複素解析空間)待ち |
 
 ★★**§1 で残っている障害は 2 つだけになった: `X^arc` と Auslander–Buchsbaum。**
+
+### §9-7 追記(同日、後半)—— さらに 4 本
+
+| ファイル | 中身 |
+|---|---|
+| `PrimesOfSize.lean` (追記) | `exists_xeps_cond_ii` —— `Remark 4.1.1` の**第 1 項** |
+| `RadicalPrincipal.lean` | ★**mathlib の TODO**: `Ideal.radical (span {a}) = span {radical a}` |
+| `LogDiffFinite.lean` | ★**log-diff の Northcott 性**(次数を切れば体は有限個) |
+| `HeightADiv.lean` | ★★★**`logHeight₁(x) = deg_F(polarADiv x)`** |
+| `NorthcottNF.lean` | 数体の**整元**についての Northcott 性 |
+
+#### ★★「高さ = 算術因子の次数」を `X^arc` 抜きで取った
+
+`HeightADiv.lean` の `logHeight₁_eq_deg_polarADiv` は、
+原文の「高さ = 引き戻した算術直線束の次数」という見方の
+**最も単純な場合**(`X = ℙ¹`、`L = O(1)`)を、
+**`X^arc` を一切使わずに**取ったものである。
+
+★★**一般の `X` には届かない**——一般には `L` の計量が `X^arc` 上の
+エルミート計量として与えられねばならない。**混同しない。**
+
+★副産物: `ordv` の符号(本日一度直した)の**独立な検算**になった。
+符号が逆なら極因子ではなく零因子になり、高さが負になる。
+
+#### ★半分だけ取れたものを 3 つ、条つきで記録した
+
+| 項目 | 取れた側 | 残った側 |
+|---|---|---|
+| `Remark 4.1.1` | 条件 (ii) の初等性 | **素数定理**(`θ(x)/x → 1`) |
+| `Definition 1.5, (ii)` | UFD での主イデアルの根基 | **Auslander–Buchsbaum** + scheme 化 |
+| `Proposition 1.4, (iv)` | 数体の**整元**の Northcott 性 | **分母イデアルのノルム評価** |
+
+★★いずれも `.src` を**条つき**にしてあり、`genell-progress` は **4/24** のままである。
+**半分取れたことを全部取れたと読まない。**
+
+#### ★残った 3 つの穴の性質は違う
+
+- **素数定理**: 公開プロジェクト `PrimeNumberTheoremAnd` に**ある**(sorry 無しに見える)。
+  依存を足すかどうかの**判断**の問題であって、数学の問題ではない。
+- **Auslander–Buchsbaum**: mathlib に無く、ホモロジー代数を要する。**数学の作業**。
+- **分母イデアルのノルム評価**: 道筋は明確
+  (`N(𝔡_x) = ∏ᶠ_v max(|x|_v,1) ≤ H(x)` と `Ideal.absNorm I ∈ I`)。
+  **手間**の問題。★`HeightADiv.lean` の `finsum_posLog_finitePlace` が既にその半分である。
