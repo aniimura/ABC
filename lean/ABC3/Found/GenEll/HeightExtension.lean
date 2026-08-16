@@ -269,7 +269,44 @@ theorem mulHeight₁_extension (x : Kˣ) :
   have := congrArg Real.exp h
   rwa [Real.exp_log h1, ← Real.log_pow, Real.exp_log (by positivity)] at this
 
+/-! ## ★★★絶対高さ —— 体に依らない量 -/
+
 end HeightExtension
+
+/-- ★★**絶対対数高さ** `h(x) ≝ logHeight₁_K(x) / [K:ℚ]`。
+
+★原文が `X(ℚ̄)` の上で高さを語れるのは、この量が**体の取り方に依らない**からである。
+`degNormalized`(`ArithDiv.lean`)と**まったく同じ正規化**である。 -/
+noncomputable def logAbsHeight (K : Type*) [Field K] [NumberField K] (x : K) : ℝ :=
+  Height.logHeight₁ x / (Module.finrank ℚ K : ℝ)
+
+section AbsHeight
+
+variable (K L : Type*) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
+
+/-- ★★★**絶対高さは体拡大で不変である**。
+
+> `h_L(x) = h_K(x)`(`x ∈ K ⊆ L`)
+
+★★これが `Definition 1.2, (i)` の `ht : X(ℚ̄) → ℝ` が well-defined である理由の、
+**高さ理論の側の中身**である。
+
+★`Found/GenEll/BaseChange.lean` の `degNormalized_baseChange`(算術因子の次数)と
+**同じ形**である——どちらも `[L:K]` が約分される。 -/
+theorem logAbsHeight_extension (x : Kˣ) :
+    logAbsHeight L (((unitsExt K L x : Lˣ) : L)) = logAbsHeight K ((x : K)) := by
+  haveI : FiniteDimensional K L := Module.Finite.of_restrictScalars_finite ℚ K L
+  have htower : Module.finrank ℚ K * Module.finrank K L = Module.finrank ℚ L :=
+    Module.finrank_mul_finrank ℚ K L
+  have hKL : (0 : ℝ) < (Module.finrank K L : ℝ) := by
+    exact_mod_cast Module.finrank_pos (R := K) (M := L)
+  have hK : (0 : ℝ) < (Module.finrank ℚ K : ℝ) := by
+    exact_mod_cast Module.finrank_pos (R := ℚ) (M := K)
+  rw [logAbsHeight, logAbsHeight, logHeight₁_extension K L x, ← htower]
+  push_cast
+  field_simp
+
+end AbsHeight
 
 /-! ## ★出典の紐付け(`.src`) -/
 
