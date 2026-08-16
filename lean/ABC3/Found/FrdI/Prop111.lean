@@ -1053,6 +1053,30 @@ theorem prop_1_11_vii_pullBack (G : Frobenioid P) {B Cc : C}
 
 ★**同型の場合は既に済んでいる**(`liftsCoaPre_of_isIso`)ので、
 ★**残るのは「同型でない isometric pre-step」だけ**である。
+
+## ★★使う道具を特定した（2026-08-16）
+
+★★**`pushFunctor_isEquivalence` の本質的全射性がその道具である。**
+
+`φ : A ⟶ B` が co-angular pre-step なら、`Proposition 1.9, (ii)` により
+`pushFunctor φ` は圏同値である。
+★**`ε : C ⟶ B` が isometric pre-step なら、それは
+`Over (⟨B⟩ : ImtrPre P)` の対象そのもの**である。
+本質的全射性から `W : Over (⟨A⟩ : ImtrPre P)` と同型
+`(pushFunctor φ).obj W ≅ ⟨ε⟩` が取れ、
+`pushFac : W.hom.hom ≫ φ = pushMid ≫ pushHom` が求める四角形を与える。
+
+★★**しかし 1 点足りない**: `pushMid_spec` が与えるのは
+**co-angular かつ base-isomorphism** であって、**linear ではない**。
+原文の (vii) は `γ` が **co-angular pre-step**
+(= linear ∧ base-isomorphism ∧ co-angular) であることを要求するので、
+★**`pushMid` の linear 性を別途出す必要がある**。
+
+★**次に当たるときの手**: `pushFac` の両辺に `degFr` を適用する。
+左辺は `degFr φ * degFr (W.hom.hom) = 1`(どちらも pre-step なので linear)、
+右辺は `degFr (pushHom) * degFr (pushMid)`。
+★`ℕ+` の消去で両方が 1 になるはずである。
+★★**つまり linear 性は `pushFac` から自動で出ると見ている。まだ試していない。**
 -/
 
 include P in
