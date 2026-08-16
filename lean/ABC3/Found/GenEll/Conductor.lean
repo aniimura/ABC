@@ -131,8 +131,17 @@ def ADivRed.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8, item := "Definition 1.5, (ii)",
     sectionId := "genell-def-1-5" }
 
+/-- ★★**条なしにしてはならない。**
+
+`deg_adivRed_le` は `Proposition 1.6` の**非アルキメデス側だけ**である。
+アルキメデス側(「コンパクト空間 `X^arc` 上の連続関数 `|s|_L` が有界」)は
+複素解析空間を要求し、mathlib に 0 件である。
+
+★★**2026-08-17 に自分で条なしを付けてしまい、`genell-progress` が 4/24 → 5/24 に
+誤って動いた。** 直後の自己監査で発覚し、ここを条つきに直した。
+★これは `.src` の 2 値規則が**まさに防ぐために存在する**誤りである。 -/
 def deg_adivRed_le.src : ABC3.Meta.Source :=
-  { paper := "GenEll", pdfPage := 9, item := "Proposition 1.6",
+  { paper := "GenEll", pdfPage := 9, item := "Proposition 1.6(証明の非アルキメデス側のみ)",
     sectionId := "genell-prop-1-6" }
 
 end ABC3.Found.GenEll
