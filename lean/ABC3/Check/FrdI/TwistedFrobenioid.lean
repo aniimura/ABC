@@ -323,6 +323,39 @@ theorem twBaseSurj (Y : D) :
   exact ⟨rfl, ⟨twCoAngular hD hpd _, by show toChar (0 : Φ.val Y) = 0; simp⟩,
     by show IsIso (𝟙 Y); infer_instance⟩
 
+/-- ★**(iii)(b)** —— ★**全射が co-angular なので自明**。 -/
+theorem twCoAngularOfPreStep {A' A : TwObj Φ G} (α : A' ⟶ A)
+    (_ : IsCoAngular (twPreFrobenioid (G := G) hD hpd) α)
+    (_ : IsPreStep (twPreFrobenioid (G := G) hD hpd) α) (φ : A' ⟶ A) :
+    IsCoAngular (twPreFrobenioid (G := G) hD hpd) φ :=
+  twCoAngular hD hpd φ
+
+/-- ★**(vii)(a)** isotropic hull は `𝟙` —— ★**全対象が isotropic だから**。 -/
+theorem twIsotropicHullExists (A : TwObj Φ G) :
+    ∃ (B : TwObj Φ G) (φ : A ⟶ B),
+      IsIsotropicHull (twPreFrobenioid (G := G) hD hpd) φ :=
+  ⟨A, 𝟙 A, (twPreFrobenioid (G := G) hD hpd).Div_id A,
+    isPreStep_id _ A, twIsotropic hD hpd A,
+    fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm, fun β hβ => by
+      have hg : γ = β := by simpa using hβ
+      exact hg.symm⟩⟩
+
+/-- ★**(i)(b)** 底の同型は pre-step の span に持ち上がる。
+
+★`𝔽_Φ` の証人に `G` 成分 `1` を添えるだけ ——
+★**結論の等式は `𝒟` の中の話なので `G` 成分に影響されない。** -/
+theorem twPreStepSpan (A B : TwObj Φ G)
+    (α : ((twPreFrobenioid (G := G) hD hpd).toElem.obj A).base ⟶
+      ((twPreFrobenioid (G := G) hD hpd).toElem.obj B).base) (hα : IsIso α) :
+    ∃ (X : TwObj Φ G) (φ : X ⟶ A) (ψ : X ⟶ B)
+      (hφ : IsPreStep (twPreFrobenioid (G := G) hD hpd) φ),
+      IsPreStep (twPreFrobenioid (G := G) hD hpd) ψ ∧
+      α = @inv _ _ _ _ ((twPreFrobenioid (G := G) hD hpd).Base φ) hφ.2
+            ≫ (twPreFrobenioid (G := G) hD hpd).Base ψ := by
+  obtain ⟨X₀, φ₀, ψ₀, hφ₀, hψ₀, heq⟩ :=
+    elemFrob_preStepSpan Φ hD hpd A.ofElem B.ofElem α hα
+  exact ⟨⟨X₀⟩, ⟨φ₀, 1⟩, ⟨ψ₀, 1⟩, hφ₀, hψ₀, heq⟩
+
 end Bridge
 
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
