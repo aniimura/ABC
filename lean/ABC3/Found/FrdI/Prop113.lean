@@ -593,47 +593,144 @@ theorem prop_1_13_iii_b (F : FrobenioidCore P) (hslim : IsSlimCat D)
   rw [hb X.left] at h
   exact h
 
-/-! ### ★残るのは条件 (b) の場合（2026-08-16 時点）
+/-- ★**共役はべきに伸びる** —— `ψ ≫ γ = β ≫ ψ` なら `ψ ≫ γ^n = β^n ≫ ψ`。
+
+★**`End` の積は `x * y = y ≫ x`** なので `γ^(n+1) = γ^n * γ = γ ≫ γ^n` である。 -/
+theorem comp_pow_of_comp {A B : C} (ψ : B ⟶ A) {β : End B} {γ : End A}
+    (h : ψ ≫ (γ : A ⟶ A) = (β : B ⟶ B) ≫ ψ) (n : ℕ) :
+    ψ ≫ ((γ ^ n : End A) : A ⟶ A) = ((β ^ n : End B) : B ⟶ B) ≫ ψ := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hg : ((γ ^ (n + 1) : End A) : A ⟶ A)
+        = (γ : A ⟶ A) ≫ ((γ ^ n : End A) : A ⟶ A) := by rw [pow_succ]; rfl
+    have hb : ((β ^ (n + 1) : End B) : B ⟶ B)
+        = (β : B ⟶ B) ≫ ((β ^ n : End B) : B ⟶ B) := by rw [pow_succ]; rfl
+    rw [hg, hb, ← Category.assoc, h, Category.assoc, ih, ← Category.assoc]
+
+include P in
+/-- ★**単元の逆元も `𝒪^▷` に入る** —— `Base` と `degFr` の関手性から。 -/
+theorem otri_inv_mem {B : C} (β β' : End B) (hβ : β ∈ OTimes P B)
+    (hcomp : (β : B ⟶ B) ≫ (β' : B ⟶ B) = 𝟙 B) : β' ∈ OTri P B := by
+  constructor
+  · show P.Base (β' : B ⟶ B) = P.Base (𝟙 B)
+    have hb := congrArg P.Base hcomp
+    rw [P.Base_comp, show P.Base (β : B ⟶ B) = P.Base (𝟙 B) from hβ.1.1,
+      P.Base_id, Category.id_comp] at hb
+    simpa using hb
+  · show P.degFr (β' : B ⟶ B) = 1
+    have hd := congrArg P.degFr hcomp
+    rw [P.degFr_comp, show P.degFr (β : B ⟶ B) = 1 from hβ.1.2, P.degFr_id, mul_one] at hd
+    exact hd
+
+include P in
+/-- ★★**(iii)(b) の移送** —— co-angular pre-step `ψ : B ⟶ X.left` に沿って
+`B` 側の情報を `X.left` へ送る。
 
 原文 (FrdI p.40):
-> (b) 
+> Frobenius-normalized objects — hence also [cf. Definition 1.3, (iii), (c)] objects as in (b)
 
-★原文の (iii) は「each object satisfies **at least one of** (a), (b)」だから、
-★★**(a) だけでは命題全体の実装にならない**。
+★★**`Definition 1.3, (iii), (c)` の全単射がここで使われる。**
 
-★**(b) の中身**: `⋂_{n∈ℕ≥1} {𝒪^×(A)}^n = {1}` かつ、co-angular pre-step
-`B → A` で `B` が quasi-Frobenius-trivial かつ Frobenius-normalized なものがある。
-★原文の議論は「base-identity 自己準同型についての自然性」から
-成分が `⋂_n {𝒪^×(−)}^n` に属することを得る。
+★**Lean の手**(2026-08-16 の記録どおり): `Over.mk (ψ ≫ X.hom)` を `set` で置くと
+`End (Over.mk …).left` と `End B` が**同じ型の 2 つの綴り**になり、
+インスタンス探索が通らない(表 #1)。
+★**`have` の型注釈で一度だけ定義的等しさを使い、以後は `B` の綴りに固定する。** -/
+theorem prop_1_13_iii_transfer (F : FrobenioidCore P) (hslim : IsSlimCat D)
+    (A₀ : C) (α : (Over.forget A₀ : Over A₀ ⥤ C) ≅ Over.forget A₀) (X : Over A₀)
+    {B : C} (ψ : B ⟶ X.left) (hψc : IsCoAngular P ψ) (hψs : IsPreStep P ψ)
+    (hq : IsQuasiFrobeniusTrivial P B) (hfn : IsFrobeniusNormalized P B) :
+    (α.hom.app X : End X.left) ∈ OTimesPowInter P X.left := by
+  refine Set.mem_iInter.mpr (fun n => ?_)
+  haveI : Epi ψ := P.totEpiC _ _ _
+  obtain ⟨φ, hφb, hφd⟩ := hq n
+  -- ★型注釈で `B` の綴りに固定する
+  have hnat : ψ ≫ (α.hom.app X : X.left ⟶ X.left)
+      = ((α.hom.app (Over.mk (ψ ≫ X.hom)) : End B) : B ⟶ B) ≫ ψ :=
+    α.hom.naturality (Over.homMk ψ rfl : Over.mk (ψ ≫ X.hom) ⟶ X)
+  have key : ∃ β : End B, β ∈ OTimes P B ∧
+      ((α.hom.app (Over.mk (ψ ≫ X.hom)) : End B) : B ⟶ B)
+        = ((β ^ (n : ℕ) : End B) : B ⟶ B) :=
+    prop_1_13_iii_pow P F hslim A₀ α (Over.mk (ψ ≫ X.hom)) hfn φ hφb n hφd
+  obtain ⟨β₀, hβ₀, hEq⟩ := key
+  obtain ⟨u, hu⟩ := hβ₀.2
+  have hiu : (β₀ : B ⟶ B) ≫ ((↑u⁻¹ : End B) : B ⟶ B) = 𝟙 B := by
+    rw [← hu]; exact u.inv_val
+  have hui : ((↑u⁻¹ : End B) : B ⟶ B) ≫ (β₀ : B ⟶ B) = 𝟙 B := by
+    rw [← hu]; exact u.val_inv
+  obtain ⟨γ, ⟨hγo, hγ⟩, -⟩ := F.otriFwd ψ hψc hψs β₀ (OTimes_le_OTri P B hβ₀)
+  obtain ⟨γ', ⟨hγo', hγ'⟩, -⟩ := F.otriFwd ψ hψc hψs (↑u⁻¹ : End B)
+    (otri_inv_mem P β₀ (↑u⁻¹ : End B) hβ₀ hiu)
+  have hgg' : (γ : X.left ⟶ X.left) ≫ (γ' : X.left ⟶ X.left) = 𝟙 X.left := by
+    refine (cancel_epi ψ).mp ?_
+    rw [← Category.assoc, hγ, Category.assoc, hγ', ← Category.assoc, hiu,
+      Category.id_comp, Category.comp_id]
+  have hg'g : (γ' : X.left ⟶ X.left) ≫ (γ : X.left ⟶ X.left) = 𝟙 X.left := by
+    refine (cancel_epi ψ).mp ?_
+    rw [← Category.assoc, hγ', Category.assoc, hγ, ← Category.assoc, hui,
+      Category.id_comp, Category.comp_id]
+  refine ⟨γ, ⟨hγo, (CategoryTheory.isUnit_iff_isIso γ).mpr
+    ⟨⟨(γ' : X.left ⟶ X.left), hgg', hg'g⟩⟩⟩, ?_⟩
+  refine (cancel_epi ψ).mp ?_
+  have e1 : ψ ≫ ((γ ^ (n : ℕ) : End X.left) : X.left ⟶ X.left)
+      = ((β₀ ^ (n : ℕ) : End B) : B ⟶ B) ≫ ψ := comp_pow_of_comp ψ hγ (n : ℕ)
+  rw [e1, ← hEq]
+  exact hnat.symm
 
-★**必要な部品**（測定済み）:
-- ~~`⋂_n {𝒪^×(A)}^n` を書くこと~~ → ★**実装した**(`OTimesPowInter`)
-- ~~quasi-Frobenius-trivial かつ Frobenius-normalized な対象での帰結~~
-  → ★**実装した**(`prop_1_13_iii_pow`, `prop_1_13_iii_mem_powInter`, `prop_1_13_iii_b`)
-- ★**残るのは `Definition 1.3, (iii), (c)` の全単射で (b) の対象へ送る段だけ。**
+include P in
+/-- ★★★**`Proposition 1.13, (iii)`** —— 各対象が (a) または (b) を満たせば `𝒞` は slim。
 
-## ★★移送段の設計（書ききれなかったので測定として残す）
+原文 (FrdI p.40):
+> (iii) Suppose, moreover, that every object A ∈Ob(C) satisfies [at least] one of
 
-★**数学は完成している。** `ψ : B ⟶ X.left` を co-angular pre-step とすると:
-1. `W := Over.mk (ψ ≫ X.hom)` を取り、自然性 `ψ ≫ α_X = α_W ≫ ψ` を得る。
-2. `B` 側で `prop_1_13_iii_pow` を当て `α_W = β₀^n`(`β₀ ∈ 𝒪^×(B)`)。
-3. `F.otriFwd ψ` で `β₀ ↦ γ`、`β₀⁻¹ ↦ γ'` と送る。
-4. `ψ ≫ γ^n = β₀^n ≫ ψ`(共役はべきに伸びる。★`End` の積は `x*y = y≫x` なので
-   `γ^(n+1) = γ ≫ γ^n`)。
-5. `γ ≫ γ' = 𝟙` と `γ' ≫ γ = 𝟙` を、両側から `ψ` で消去して得る(`ψ` は epi)
-   ⟹ `γ ∈ 𝒪^×(X.left)`。
-6. `ψ ≫ α_X = ψ ≫ γ^n` を `ψ` で消去 ⟹ `α_X = γ^n`。
+★**原文の「at least one of」を `∨` でそのまま書く。** -/
+theorem prop_1_13_iii (F : FrobenioidCore P) (hslim : IsSlimCat D)
+    (h : ∀ A : C,
+      OTimesImtrPre P F A = {1} ∨
+      (OTimesPowInter P A = {1} ∧
+        ∃ (B : C) (ψ : B ⟶ A), IsCoAngular P ψ ∧ IsPreStep P ψ ∧
+          IsQuasiFrobeniusTrivial P B ∧ IsFrobeniusNormalized P B)) :
+    IsSlimCat C := by
+  intro A α
+  apply Iso.ext
+  apply NatTrans.ext
+  funext X
+  rcases h X.left with ha | ⟨hb, B, ψ, hψc, hψs, hq, hfn⟩
+  · have hm := prop_1_13_iii_mem_imtrPre P F hslim A α X
+    rw [ha] at hm
+    exact hm
+  · have hm := prop_1_13_iii_transfer P F hslim A α X ψ hψc hψs hq hfn
+    rw [hb] at hm
+    exact hm
 
-★★**Lean 側で止まった理由**(2026-08-16、記録): `W := Over.mk (ψ ≫ X.hom)` を
-`set` で置くと `β₀ : End W.left` となり、★**`W.left` は `B` と定義的に等しいが
-インスタンス探索・単一化は構文的**なので、`IsIso β₀` も `(↑u⁻¹ : End B)` も
-「`End W.left` と `End B` は別物」として拒否される。★**分類表 #1(2 つの綴り)の
-新しい現れ**である。★**次に当たるときの手**: `W` を `set` せず、
-`prop_1_13_iii_pow` の結論を `B` の綴りに `show` で固定してから使う。
+/-! ## ★★命題全体の `.src`（2026-08-16）
 
-★**「証明できなかった」ではなく「Lean の綴りで止まった」である。**
-★**これが埋まれば `Proposition 1.13` に条なし `.src` を付けられる。**
--/
+★**原文の主張は 3 ではなく 5 であった** —— (i)(ii) にそれぞれ
+「In particular」の第2主張がある。ファイル冒頭の見積もり表は誤っていた。
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | `𝒞_A → 𝒟` が rigid | `prop_1_13_i` |
+| (i) | **In particular**: `𝒞 → 𝒟` が rigid | `prop_1_13_i_global` |
+| (ii) | `𝒞_A → 𝔽_Φ` が rigid | `prop_1_13_ii` |
+| (ii) | **In particular**: `𝒞 → 𝔽_Φ` が rigid | `prop_1_13_ii_global` |
+| (iii) | (a) または (b) の下で `𝒞` が slim | `prop_1_13_iii` |
+
+★**原文が一言で済ませていた段をすべて実体にした**:
+- 「the first functor is an equivalence of categories」→ `isRigidFunctor_comp_of_equivalence`
+- 「Since A is arbitrary」→ `isRigidFunctor_of_forall_over`
+- 「By assertion (i), it follows that …」→ (ii) の 2 段
+- 「the functoriality … with respect to isometric pre-steps」→ `prop_1_13_iii_mem_imtrPre`
+- 「the functoriality … with respect to base-identity endomorphisms」→ `prop_1_13_iii_pow`
+- 「hence also [cf. Definition 1.3, (iii), (c)] objects as in (b)」→ `prop_1_13_iii_transfer`
+
+★★**この項目で繰り返し現れた骨格**: 原文が一言で済ませる段は、
+たいてい**自然性が式を与え、`epi` / `mono` / `hom の subsingleton` のいずれかが
+消去を与える**という形であった。 -/
+
+def prop_1_13.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 39, item := "Proposition 1.13",
+    sectionId := "frdi-prop-1-13-i" }
 
 end PropI
 
