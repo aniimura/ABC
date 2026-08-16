@@ -1189,6 +1189,35 @@ theorem not_isPrimaryElt_nat_prod : ¬ IsPrimaryElt ((1, 1) : ℕ × ℕ) := by
   have := congrArg Prod.snd hc
   simp at this
 
+/-! ### ★★`non-dilating`(2026-08-16 追加)
+
+原文 (FrdI p.19):
+> we shall say that α is non-dilating if the endomorphism αchar of M char induced by
+
+★**引用を選び直した記録(事故 #3 の 6 度目)**: 続く行
+「α is the identity endomorphism of M char whenever αchar(a) ≼a for all primary [cf.」は
+★**`≼` が抽出で落ちるため引用できない**(49/68 文字で停止)。
+★**`′`・`▷` に続く 3 つ目の「目では見えるが抽出に無い文字」である。
+
+★★**「whenever」は含意である** —— 「すべての primary `a` について
+`α^char(a) ≼ a`」**ならば**「`α^char = id`」。★条件そのものではなく**含意**が
+定義であることに注意(原文の語順が逆なので読み違えやすい)。
+
+★**監査(2026-08-16)で `Definition 1.1, (i)` の未実装 1 件として挙がった。** -/
+
+/-- **[FrdI] Definition 1.1, (i)** —— 自己準同型が `non-dilating`。 -/
+def IsNonDilating (α : M →+ M) : Prop :=
+  (∀ a : MChar M, IsPrimaryElt a → MPrec (charMap α a) a) →
+    charMap α = AddMonoidHom.id (MChar M)
+
+/-! #### ★非退化を両側から(我々の作法) -/
+
+/-- ★**非退化(下)**: 恒等射は non-dilating。 -/
+theorem isNonDilating_id : IsNonDilating (AddMonoidHom.id M) := by
+  intro _
+  ext a
+  rfl
+
 variable (M)
 
 /-! #### 2. saturated —— ★簡約的なモノイドでは初等的な形に落ちる -/
@@ -1346,6 +1375,27 @@ theorem toChar_eq_zero_iff {A : Type*} [AddCommMonoid A] {a : A} :
   · rintro ⟨A0, rfl⟩
     show (toChar (A0 : A) : MChar A) = toChar 0
     exact toChar_eq_iff.mpr ⟨A0.neg, 0, ⟨-A0, rfl⟩, isAddUnit_zero, by simp⟩
+
+
+/-- ★**非退化(上)**: `ℕ` の零自己準同型は non-dilating **でない**。
+
+★`ℕ` は sharp なので `toChar` は単射。primary 元 `1` について
+`0 ≼ 1` は成り立つので仮定は満たされるが、`α^char = 0 ≠ id` である。 -/
+theorem not_isNonDilating_zero_nat : ¬ IsNonDilating (0 : ℕ →+ ℕ) := by
+  intro h
+  have hprem : ∀ a : MChar ℕ, IsPrimaryElt a → MPrec (charMap (0 : ℕ →+ ℕ) a) a := by
+    intro a _
+    refine ⟨1, one_pos, ?_⟩
+    induction a using Quotient.inductionOn with | _ x =>
+    refine ⟨toChar x, ?_⟩
+    show (charMap (0 : ℕ →+ ℕ)) (toChar x) + toChar x = (1 : ℕ) • toChar x
+    rw [charMap_toChar]
+    simp
+  have hid := h hprem
+  have h1 : charMap (0 : ℕ →+ ℕ) (toChar (1 : ℕ)) = toChar (1 : ℕ) := by
+    rw [hid]; rfl
+  rw [charMap_toChar] at h1
+  exact one_ne_zero (toChar_injective_of_isSharp isSharp_nat h1.symm)
 
 /-! #### ★`charMap` の単射性・全射性 —— `Φ^char` を `MonoidOn` にするための部品 -/
 
