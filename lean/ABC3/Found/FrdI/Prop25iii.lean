@@ -1397,12 +1397,13 @@ co-angular とは限らない)。`otriLin` を `γ̃` に沿って使うには�
 1. ✅ **完了** —— `splitEquiv` を `charSplitting_bijective_all` に差し替え、
    `psiOTri` 系 10 宣言から `IsIsotropic` を落とした。
    ★**`IsPsiValue` から `hiso` が消えた**のが要点である。
-2. ★★**測定の結果、この道は無い** —— `otriLin` を `otriPullHom` に替えても
-   **`IsCharacteristicSplitting.map_mem` が `IsIsotropic` を要求する**。
-   ★これは原文に忠実である: 原文の `τ` は `(𝒞^istr)^lin` 上の部分関手なので、
-   **`τ` の関手性は isotropic な対象の上でしか主張されていない**。
-   ★★★したがって `psiOTri_otriLin`(`Ψ` の自然性)は本質的に isotropic な
-   対象を要求し、**合成両立の補題から isotropy を外すことはできない**。
+2. ★★**「道が無い」は言い過ぎだった** —— `map_mem` は確かに `IsIsotropic` を
+   要求する(原文の `τ` が `(𝒞^istr)^lin` 上の部分関手だから)が、
+   ★★★**射が同型の場合だけは isotropy 抜きで出る**(`tau_conj_mem`、`Prop25.lean`)。
+   hull の普遍性 ＋ `h` が epi であること ＋ `hullPullback` で閉じる。
+   ★**`isPsiValue_unique` に現れる射は `arbFactorUniq` の出す同型だけ**なので、
+   ★★**well-defined 性(`psiMap` の存在そのもの)からは isotropy を外せる。**
+   ★合成両立の補題(等長 pre-step を通す側)には依然 isotropy が要る。
 3. `psiMap_comp_frob` の `δ̃` は `prop_1_10_i_exists_pullBack` で作れる(任意)
 4. 合成両立の補題を**始域の isotropy**(点ごと)に書き換える。
    ★`isotropicClosed` により中間対象は自動で isotropic になる
