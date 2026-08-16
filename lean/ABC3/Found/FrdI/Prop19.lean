@@ -1975,6 +1975,92 @@ def OTimesImtrPre (A : C) : Set (End A) :=
 theorem otimesImtrPre_subset (A : C) : OTimesImtrPre P F A ⊆ OTimes P A :=
   fun _ h => h.1
 
+/-! ### ★★`𝒪^×(A)^{imtr-pre}` が**部分群**であること
+
+原文 (FrdI p.31):
+> the subgroup of v ∈O×(A) for which vimtr-pre is the identity.
+
+★★**原文は「部分群」と述べている。** 上の `Set` だけでは主張を満たさない
+(2026-08-16 の監査で判明)。単位元・積・逆元の閉性を示す。
+
+★**楽になる事実**: `Over (⟨A⟩ : ImtrPre P)` の hom は subsingleton
+(`imtrPreOver_hom_subsingleton`)。★**したがって自然性は自動**で、
+対象ごとの同型さえ作れば関手の同型が得られる。 -/
+
+/-- ★**`ImtrPre P` の同型を、`𝒞` の同型から作る**。
+
+★同型は isometric(`isIsometric_of_isIso`)かつ pre-step(`isPreStep_of_isIso`)。 -/
+def imtrPreIsoOfIso {X Y : C} (δ : X ≅ Y) : (⟨X⟩ : ImtrPre P) ≅ (⟨Y⟩ : ImtrPre P) where
+  hom := ⟨δ.hom, ⟨isIsometric_of_isIso P δ.hom, isPreStep_of_isIso P δ.hom⟩⟩
+  inv := ⟨δ.inv, ⟨isIsometric_of_isIso P δ.inv, isPreStep_of_isIso P δ.inv⟩⟩
+  hom_inv_id := InducedWideCategory.Hom.ext (by simp)
+  inv_hom_id := InducedWideCategory.Hom.ext (by simp)
+
+include F in
+/-- ★★**`(𝟙 A)_* ≅ 𝟭`** —— `𝒪^×(A)^{imtr-pre}` が**単位元を含む**ことの中身。
+
+★`ε` 自身が isometric pre-step なので、`ε = 𝟙 ≫ ε` が第2の分解を与える。
+★**分解の一意性**(`prop_1_9_i_uniq`)が対象ごとの同型を出し、
+自然性は hom の subsingleton 性から自動。 -/
+theorem pushId_uniq (A : C) (hb : IsBaseIsomorphism P (𝟙 A))
+    (Z : Over (⟨A⟩ : ImtrPre P)) :
+    ∃ δ : pushObj P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≅ Z.left.obj,
+      Z.hom.hom
+        = δ.inv ≫ pushHom P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ∧
+      (𝟙 Z.left.obj : Z.left.obj ⟶ Z.left.obj)
+        = pushMid P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≫ δ.hom :=
+  prop_1_9_i_uniq P F _ _ _ _ (𝟙 Z.left.obj) Z.hom.hom
+    (by rw [← pushFac P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2]; simp)
+    (pushMid_spec P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushMid_spec P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (pushHom_spec P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+    (pushHom_spec P F (𝟙 A) hb Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+    (isCoAngular_id P _) (isBaseIsomorphism_of_isIso P _)
+    Z.hom.property.1 Z.hom.property.2
+
+include F in
+/-- ★★**`(𝟙 A)_* ≅ 𝟭`**。★`∃` からデータを取るので `choose` を経由する。 -/
+noncomputable def pushFunctorIdIso (A : C) (hb : IsBaseIsomorphism P (𝟙 A)) :
+    pushFunctor P F (𝟙 A) hb ≅ 𝟭 (Over (⟨A⟩ : ImtrPre P)) :=
+  NatIso.ofComponents
+    (fun Z =>
+      Over.isoMk (imtrPreIsoOfIso P (pushId_uniq P F A hb Z).choose)
+        (InducedWideCategory.Hom.ext (by
+          -- ★`rw` は motive が壊れる(`pushHom` の**証明引数**が `Z.hom.hom` に依存する)。
+          -- ★`congrArg` なら関数が明示なので依存が起きない。
+          have h2 := congrArg (fun t => (pushId_uniq P F A hb Z).choose.hom ≫ t)
+            (pushId_uniq P F A hb Z).choose_spec.1
+          simp only [Iso.hom_inv_id_assoc] at h2
+          -- ★`simpa` ではなく `exact`(既定透明度でないと 2 つの綴りが同一視されない、表 #1)
+          exact h2)))
+    (fun _ => imtrPreOver_hom_subsingleton P F _ _)
+
+include F in
+/-- ★★**`𝒪^×(A)^{imtr-pre}` は単位元を含む**(部分群性の 3 条件のうち 1 つ目)。 -/
+theorem one_mem_otimesImtrPre (A : C) : (1 : End A) ∈ OTimesImtrPre P F A :=
+  ⟨(OTimes P A).one_mem, isBaseIsomorphism_of_isIso P (𝟙 A),
+   ⟨pushFunctorIdIso P F A (isBaseIsomorphism_of_isIso P (𝟙 A))⟩⟩
+
+/-! ### ★残り —— 積と逆元の閉性(2026-08-16 時点)
+
+★**単位元は上で埋めた。** 残るのは
+- 積: `pushFunctor P F (u ≫ v) ≅ pushFunctor P F u ⋙ pushFunctor P F v`
+- 逆元: `u ∈ ⟹ u⁻¹ ∈`
+
+★**積の見通し**(測定済み、まだ書いていない): `ε : Cc ⟶ A` を isometric pre-step とすると
+```
+ε ≫ (u ≫ v) = (pushMid u ε ≫ pushMid v (pushHom u ε)) ≫ pushHom v (pushHom u ε)
+```
+であり、★**左因子は co-angular base-isomorphism の合成**(`F.coAngularComp` と
+`isBaseIsomorphism_comp`)、右因子は isometric pre-step。
+したがって `prop_1_9_i_uniq` がそのまま対象ごとの同型を与える。
+★自然性は `imtrPreOver_hom_subsingleton` から自動(上と同じ)。
+
+★**逆元は積と単位元から出る**(`u ≫ u⁻¹ = 1`)。
+
+★**これが埋まれば `Proposition 1.9` に条なし `.src` を付けられる**(§1 が 6/15 になる)。
+-/
+
 end ImtrPreFunctor
 
 /-! ## ★第5段 —— (ii) の圏同値
