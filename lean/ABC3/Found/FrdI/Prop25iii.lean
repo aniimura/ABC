@@ -309,6 +309,17 @@ noncomputable def psiOTriHom (d : ℕ+) : OTri P A →* OTri P A where
   map_one' := psiOTri_one P F hτ hA hfn d
   map_mul' := psiOTri_mul P F hτ hA hfn d
 
+include hfn in
+/-- ★★**原文が「elementary computation」と呼ぶ等式** ——
+`Ψ(β^{d'}) = Ψ(β₀^{d'} · β₁^{d'}) = β₀^{d'} · (β₁^{d'})^d = (β₀ · β₁^d)^{d'} = Ψ(β)^{d'}`。
+
+★★これは `psiOTriHom` が**モノイド準同型**であることに尽きる ——
+そしてその根拠は `𝒪^▷(A)` の可換性、すなわち **Frobenius-normalized 型**である。
+★**合成との両立(関手性)を `𝒞^istr` 上で出すときに使う。** -/
+theorem psiOTri_pow (d : ℕ+) (β : OTri P A) (k : ℕ) :
+    psiOTri P F hτ hA d (β ^ k) = (psiOTri P F hτ hA d β) ^ k :=
+  map_pow (psiOTriHom P F hτ hA hfn d) β k
+
 /-! ### ★★`Ψ` の自然性 —— well-defined 性の核
 
 ★4 重分解には**選び方の自由**がある(原文の
@@ -640,6 +651,12 @@ theorem psiMap_of_isometric (d : ℕ+) {A B : C} (φ : A ⟶ B) (hφ : IsIsometr
     rw [map_zero, ← quadFactor_div P F hδ hγi hγs hm.1 hβs hα, ← hf]
     exact hφ
   rw [he, psiOTri_of_div_zero P F hτ (hiso Y) d ⟨β, hm⟩ hd0, ← hf]
+
+include hτ hiso hmt haa in
+/-- ★**`Ψ(𝟙) = 𝟙`** —— 恒等射は等長だから。 -/
+theorem psiMap_id (d : ℕ+) (A : C) :
+    psiMap P F hτ hiso hmt haa d (𝟙 A) = 𝟙 A :=
+  psiMap_of_isometric P F hτ hiso hmt haa d (𝟙 A) (P.Div_id A)
 
 end PsiHom
 
