@@ -54,15 +54,43 @@ open Polynomial
 > mediately from the fact that:
 
 ★`m, n ≥ 1` を `a+1, b+1` と書いて自然数の引き算を避けた。 -/
-theorem derivative_belyi (a b : ℕ) :
-    derivative ((X : ℝ[X]) ^ (a + 1) * (X - 1) ^ (b + 1))
+theorem derivative_belyi {R : Type*} [CommRing R] (a b : ℕ) :
+    derivative ((X : R[X]) ^ (a + 1) * (X - 1) ^ (b + 1))
       = X ^ a * (X - 1) ^ b
-          * (C ((a + b + 2 : ℕ) : ℝ) * X - C ((a + 1 : ℕ) : ℝ)) := by
+          * (C ((a + b + 2 : ℕ) : R) * X - C ((a + 1 : ℕ) : R)) := by
   rw [derivative_mul, derivative_X_pow, derivative_pow, derivative_sub,
     derivative_X, derivative_one]
   push_cast
   simp only [C_add, C_1, map_ofNat]
   ring
+
+/-- ★★**性質 (b)** —— 臨界点は `{0, 1, r}` に入る(`ℂ` の上で)。
+
+原文 (NCBelyi p.2):
+> mediately from the fact that:
+
+★導関数の恒等式から、積が `0` になるのは 3 つの因子のいずれかが `0` のときだけ。
+★★原文は `x ∈ {0, r, 1, ∞}` と書くが、`∞` は多項式写像の全分岐点で、
+有限部分では `{0, 1, r}` である。 -/
+theorem belyi_critical (a b : ℕ) {x : ℂ}
+    (h : (derivative ((X : ℂ[X]) ^ (a + 1) * (X - 1) ^ (b + 1))).eval x = 0) :
+    x = 0 ∨ x = 1 ∨ x = ((a : ℂ) + 1) / ((a : ℂ) + 1 + ((b : ℂ) + 1)) := by
+  rw [derivative_belyi] at h
+  simp only [eval_mul, eval_pow, eval_X, eval_sub, eval_one, eval_C] at h
+  have hd : ((a : ℂ) + 1 + ((b : ℂ) + 1)) ≠ 0 := by
+    intro hc
+    have : ((a + b + 2 : ℕ) : ℂ) = 0 := by push_cast; push_cast at hc; linear_combination hc
+    exact_mod_cast (Nat.cast_ne_zero (R := ℂ)).2 (by omega) this
+  rcases mul_eq_zero.1 h with h1 | h2
+  · rcases mul_eq_zero.1 h1 with h3 | h4
+    · exact Or.inl (pow_eq_zero_iff'.1 h3).1
+    · refine Or.inr (Or.inl ?_)
+      exact sub_eq_zero.1 (pow_eq_zero_iff'.1 h4).1
+  · refine Or.inr (Or.inr ?_)
+    rw [sub_eq_zero] at h2
+    push_cast at h2
+    field_simp
+    linear_combination h2
 
 /-! ## ★★性質 (e) -/
 
@@ -369,6 +397,125 @@ theorem belyi_c (a b : ℕ) {C r β : ℝ} (hC : 2 ≤ C) (S : Finset ℝ)
       have h := hβ α hα (by linarith)
       nlinarith
     exact ne_of_gt (belyi_strictMono a b hgt hαβ)
+
+/-! ## ★★★性質 (d) を集合の水準で -/
+
+/-- ★★**`f₀ = max(0, −f(r))`** —— `min` は `0` か `f(r)` でしか達しない。
+
+原文 (NCBelyi p.2):
+> Here, we write f0 d=ef − minα {f(α)}, where α ranges over the elements of S\{∞}.
+
+★`S` の元は `0`、`r`、`1`、または `> 1` であり、
+`f(0) = f(1) = 0`、`α > 1` では `f(α) > 0` だから、
+**最小値は `min(0, f(r))` である**。
+
+★★これで **`n` の偶奇の場合分けが要らなくなる**——
+原文は `n` 偶(`f₀ = 0`)と `n` 奇(`f₀ = |f(r)|`)を分けるが、
+`max(0, −f(r))` は両方を 1 つの式で表す。 -/
+theorem belyi_inf_eq (a b : ℕ) {r : ℝ} (S : Finset ℝ) (hne : S.Nonempty)
+    (h0 : (0 : ℝ) ∈ S) (hrS : r ∈ S)
+    (hS : ∀ α ∈ S, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α) :
+    S.inf' hne (fun x => x ^ (a + 1) * (x - 1) ^ (b + 1))
+      = min 0 (r ^ (a + 1) * (r - 1) ^ (b + 1)) := by
+  refine le_antisymm ?_ ?_
+  · refine le_min ?_ ?_
+    · have h := Finset.inf'_le (f := fun x : ℝ => x ^ (a + 1) * (x - 1) ^ (b + 1)) h0
+      simpa using h
+    · exact Finset.inf'_le _ hrS
+  · refine Finset.le_inf' hne _ (fun α hα => ?_)
+    rcases hS α hα with h | h | h | hgt
+    · rw [h]
+      simp only [zero_pow (Nat.succ_ne_zero a), zero_mul]
+      exact min_le_left _ _
+    · rw [h]; exact min_le_right _ _
+    · rw [h]
+      simp only [sub_self, zero_pow (Nat.succ_ne_zero b), mul_zero]
+      exact min_le_left _ _
+    · have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hgt
+      have hα1 : (0 : ℝ) < α - 1 := sub_pos.2 hgt
+      have : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) := by positivity
+      exact le_trans (min_le_left _ _) this.le
+
+/-- ★★★**性質 (d)** —— `S` の水準で。
+
+原文 (NCBelyi p.2):
+> (d) (f(β) + f0)/(f(α) + f0) ≥ C for all α ∈ S\{∞} such that f(α) + f0 = 0.
+
+★(pdftotext は末尾の `≠` を `=` に化けさせている。真の条件は `f(α) + f₀ ≠ 0` である。)
+
+★★`f₀ = max(0, −f(r))` と書いたので **`n` の偶奇で分けなくてよい**。
+場合分けは `α` の位置(`0` / `r` / `1` / `> 1`)と、
+`α > 1` のときの `f(α)` と `f₀` の大小だけである。 -/
+theorem belyi_d (a b : ℕ) {C r β : ℝ} (hC : 2 ≤ C) (S : Finset ℝ)
+    (hr : r = ((a : ℝ) + 1) / ((a : ℝ) + 1 + ((b : ℝ) + 1)))
+    (hS : ∀ α ∈ S, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α)
+    (hone : (1 : ℝ) ∈ S)
+    (hβ : ∀ α ∈ S, α ≠ 0 → C * α ≤ β)
+    (f0 : ℝ) (hf0 : f0 = max 0 (-(r ^ (a + 1) * (r - 1) ^ (b + 1)))) :
+    ∀ α ∈ S, α ^ (a + 1) * (α - 1) ^ (b + 1) + f0 ≠ 0 →
+      C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1) + f0)
+            / (α ^ (a + 1) * (α - 1) ^ (b + 1) + f0) := by
+  -- `r` の位置と `|f(r)| ≤ 1/4`
+  have hd0 : (0 : ℝ) < (a : ℝ) + 1 + ((b : ℝ) + 1) := by positivity
+  have hr0 : 0 < r := by rw [hr]; positivity
+  have hr1 : r < 1 := by
+    rw [hr, div_lt_one hd0]
+    linarith [Nat.cast_nonneg (α := ℝ) b]
+  have hfrq : |r ^ (a + 1) * (r - 1) ^ (b + 1)| ≤ 1 / 4 := by
+    rw [hr, abs_belyi_at_r a b]
+    exact belyi_f0_le_quarter a b
+  have hfr1 : |r ^ (a + 1) * (r - 1) ^ (b + 1)| ≤ 1 :=
+    belyi_abs_le_one a b hr0.le hr1.le
+  have hf0nn : 0 ≤ f0 := by rw [hf0]; exact le_max_left _ _
+  have hf0q : f0 ≤ 1 / 4 := by
+    rw [hf0]
+    refine max_le (by norm_num) ?_
+    exact le_trans (neg_le_abs _) hfrq
+  have hβ2 : (2 : ℝ) ≤ β := by
+    have h := hβ 1 hone one_ne_zero
+    linarith
+  have hβC : C ≤ β := by
+    have h := hβ 1 hone one_ne_zero
+    linarith
+  intro α hα hne
+  rcases hS α hα with h | h | h | hgt
+  · -- α = 0: f(α) = 0
+    rw [h] at hne ⊢
+    simp only [zero_pow (Nat.succ_ne_zero a), zero_mul, zero_add] at hne ⊢
+    have hf0pos : 0 < f0 := lt_of_le_of_ne hf0nn (Ne.symm hne)
+    simpa using belyi_d_le' (fα := 0) a b hC hβC hf0pos hf0q hf0pos.le (by simpa using hf0pos)
+  · -- α = r
+    rw [h] at hne ⊢
+    rcases le_or_gt 0 (r ^ (a + 1) * (r - 1) ^ (b + 1)) with hfr | hfr
+    · -- f(r) ≥ 0 なので f₀ = 0
+      have hf00 : f0 = 0 := by
+        rw [hf0, max_eq_left (by linarith)]
+      rw [hf00] at hne ⊢
+      have hfrpos : 0 < r ^ (a + 1) * (r - 1) ^ (b + 1) :=
+        lt_of_le_of_ne hfr (by simpa using Ne.symm hne)
+      simpa using belyi_d_r a b hC hβC hfrpos (le_trans (le_abs_self _) hfr1)
+    · -- f(r) < 0 なので f₀ = −f(r) で、f(r) + f₀ = 0 —— 除外される
+      exfalso
+      apply hne
+      rw [hf0, max_eq_right (by linarith)]
+      ring
+  · -- α = 1: f(α) = 0
+    rw [h] at hne ⊢
+    simp only [sub_self, zero_pow (Nat.succ_ne_zero b), mul_zero, zero_add] at hne ⊢
+    have hf0pos : 0 < f0 := lt_of_le_of_ne hf0nn (Ne.symm hne)
+    simpa using belyi_d_le' (fα := 0) a b hC hβC hf0pos hf0q hf0pos.le (by simpa using hf0pos)
+  · -- α > 1
+    have hα0 : (0 : ℝ) < α := lt_trans zero_lt_one hgt
+    have hα1 : (0 : ℝ) < α - 1 := sub_pos.2 hgt
+    have hfα : (0 : ℝ) < α ^ (a + 1) * (α - 1) ^ (b + 1) := by positivity
+    have hCα : C * α ≤ β := hβ α hα (by linarith)
+    rcases eq_or_lt_of_le hf0nn with hf00 | hf0pos
+    · -- f₀ = 0
+      rw [← hf00]
+      simpa using belyi_d_pos a b hC hgt hCα
+    · rcases le_or_gt f0 (α ^ (a + 1) * (α - 1) ^ (b + 1)) with hge | hlt
+      · exact belyi_d_ge a b hC hgt hCα hf0pos hge
+      · exact belyi_d_le' a b hC hβC hf0pos hf0q hlt.le (by linarith)
 
 /-! ## ★出典の紐付け(`.src`) -/
 
