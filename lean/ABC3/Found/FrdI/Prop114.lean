@@ -677,6 +677,55 @@ Frobenius 型射の mono 性がどこから来るかは未確認。
 ★★**`sorry` は置かない。**
 -/
 
+/-! ### ★★★(a) の側は原文の仮定では閉じない —— 障害を定理にした(2026-08-16)
+
+★★**検証役の調査で確定した。**
+
+★**(a) の側は「prime-Frobenius 射が FSM である」を避けて通れない** ——
+条件文は鎖の各因子だけでなく ★**`ψ` 自身にも FSMI を要求している**
+(原文 l.2136「where α1, . . . , αn, **ψ** are FSMI-morphisms」)。
+そして合成の次数は乗法的なので、`degFr (φ ≫ ψ) = p > 1` である以上、
+★**鎖のどこかに次数 > 1 の因子が必ずあり、(i) によりそれは prime-Frobenius である。**
+
+★★**ところが `Definition 1.3` で mono を与える条項は `preStepMono` **1 つだけ**であり、
+pre-step にしか mono を与えない。**
+
+★★**そして「prime-Frobenius ⟹ mono」は偽になりうる。** 下の定理がその機構である ——
+`Frobenius-normalized` の等式 `ζ ≫ α^(degFr ζ) = α ≫ ζ` に
+★**`𝒪^×(A)` の `p`-捻れ元** `α`(`α^p = 1`, `α ≠ 1`)を当てると
+`𝟙 ≫ ζ = α ≫ ζ` になり、`ζ` は mono でない。
+
+★★**障害は `𝒪^×` の `p`-捻れに正確に局在している。**
+
+★**「原文が誤り」とは断定しない** —— 上の条件を満たす Frobenioid を
+実際に構成してはいないからである。★**言えるのは
+「(iii) の (a) の側は、書かれている仮定だけでは閉じない」ことである。**
+-/
+
+include P in
+/-- ★★★**prime-Frobenius 射が mono でなくなる機構**。
+
+`A` が Frobenius-normalized で、`𝒪^×(A)`(実は `𝒪^▷(A)` で足りる)に
+`α^p = 1` なる `α ≠ 1` があれば、次数 `p` の base-identity Frobenius 型自己射は
+★**mono ではない**。
+
+★★**`Prop 1.14, (iii)` の (a) の側が原文の仮定では閉じない理由がこれである** ——
+そこは「prime-Frobenius 射が FSMI(したがって mono)」を要求する。 -/
+theorem not_mono_of_frobNormalized_of_torsion {A : C} (hfn : IsFrobeniusNormalized P A)
+    (ζ : End A) (hζb : IsBaseIdentity P ζ) (α : End A) (hα : α ∈ OTri P A)
+    (hαp : α ^ ((P.degFr (ζ : A ⟶ A) : ℕ+) : ℕ) = 1) (hne : α ≠ 1) :
+    ¬ Mono (ζ : A ⟶ A) := by
+  intro hm
+  refine hne ?_
+  have h := hfn ζ hζb α hα
+  rw [hαp] at h
+  -- `ζ ≫ 𝟙 = α ≫ ζ`
+  have h2 : (𝟙 A : A ⟶ A) ≫ (ζ : A ⟶ A) = (α : A ⟶ A) ≫ (ζ : A ⟶ A) := by
+    rw [Category.id_comp, ← h]
+    show (ζ : A ⟶ A) = (ζ : A ⟶ A) ≫ (𝟙 A : A ⟶ A)
+    rw [Category.comp_id]
+  exact ((cancel_mono (ζ : A ⟶ A)).mp h2).symm
+
 /-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性
 
 ★★**引用を選び直した記録(事故 #3 の 10 度目)**: (iv) の主張は 3 行だが、
