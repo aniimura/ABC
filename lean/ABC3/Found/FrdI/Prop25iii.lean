@@ -60,7 +60,7 @@ theorem quadFactor (Fc : FrobenioidCore P)
     ∃ (X Y : C) (δ : A ⟶ X) (γ : X ⟶ Y) (β : Y ⟶ Y) (α : Y ⟶ B),
       φ = δ ≫ γ ≫ β ≫ α ∧ IsFrobeniusType P δ ∧
         IsIsometric P γ ∧ IsPreStep P γ ∧
-        IsBaseIdentity P β ∧ IsPreStep P β ∧ IsPullBack P α := by
+        IsBaseIdentity P β ∧ IsPreStep P β ∧ IsCoAngular P β ∧ IsPullBack P α := by
   -- 手 1: `Definition 1.3, (iv), (a)`
   obtain ⟨X, Z, δ, p, α₀, hfac, hδ, hp, hα₀⟩ := Fc.arbFactor φ
   -- 手 2: `Definition 1.3, (v), (c)` —— pre-step を「等長 ≫ co-angular」に
@@ -77,7 +77,7 @@ theorem quadFactor (Fc : FrobenioidCore P)
     ⟨inv (u : Y ⟶ Y), IsIso.hom_inv_id _, IsIso.inv_hom_id _⟩
   haveI hwi : IsIso w := ⟨(u : Y ⟶ Y), hw2, hw1⟩
   refine ⟨X, Y, δ, γ, (β₀ ≫ e.hom) ≫ w, ((u : Y ⟶ Y) ≫ e.inv) ≫ α₀,
-    ?_, hδ, hγi, hγs, ?_, ?_, ?_⟩
+    ?_, hδ, hγi, hγs, ?_, ?_, ?_, ?_⟩
   · -- 分解が元の射に戻る
     have hkey : ((β₀ ≫ e.hom) ≫ w) ≫ (((u : Y ⟶ Y)) ≫ e.inv) ≫ α₀ = β₀ ≫ α₀ := by
       simp only [Category.assoc]
@@ -89,6 +89,10 @@ theorem quadFactor (Fc : FrobenioidCore P)
     rw [P.Base_comp, P.Base_id, ← hub, ← P.Base_comp, hw1, P.Base_id]
   · -- `β` は pre-step
     exact IsPreStep.comp P hβ₁s (isPreStep_of_isIso P w)
+  · -- ★`β` は co-angular —— `β₀` が co-angular で、残りは同型
+    exact Fc.coAngularComp _ w
+      (Fc.coAngularComp _ e.hom hβ₀c (isCoAngular_of_isIso P e.hom))
+      (isCoAngular_of_isIso P w)
   · -- `α` は pull-back
     exact IsPullBack.comp P
       (IsPullBack.comp P (isPullBack_of_isIso P (u : Y ⟶ Y)) (isPullBack_of_isIso P e.inv))
@@ -316,7 +320,6 @@ noncomputable def psiOTriHom (d : ℕ+) : OTri P A →* OTri P A where
 ★**`Ψ` はどちらにも可換である**ことをここで示す。
 -/
 
-include hfn in
 /-- ★★**単元倍との可換性** —— `Ψ(u · β) = u · Ψ(β)`。
 
 ★分裂の単元成分に `u` が乗るだけで、`τ` 成分は変わらない。 -/
@@ -391,5 +394,166 @@ theorem psiOTri_otriLin {Y Y' : C} (hY : IsIsotropic P Y) (hY' : IsIsotropic P Y
   rfl
 
 end Conj
+
+/-! ## ★★★`Ψ` の well-defined 性
+
+★4 重分解は一意ではない。★**しかし曖昧性はちょうど 2 種類しかない**——
+`arbFactorUniq` と `preStepFactorUniq'` を続けて使うと、
+2 つの分解 `δᵢ ≫ γᵢ ≫ βᵢ ≫ αᵢ` の間に同型 `eX : X₁ ≅ X₂`、`eY : Y₁ ≅ Y₂`、
+`g : Y₂ ≅ Y₁` が取れて
+
+- `δ₂ = δ₁ ≫ eX.hom`
+- `γ₂ ≫ g.hom = eX.inv ≫ γ₁`
+- `β₂ = g.hom ≫ β₁ ≫ eY.hom`
+- `α₂ = eY.inv ≫ α₁`
+
+となる。★★ここで **`k := g.hom ≫ eY.hom` は `𝒪^×(Y₂)` の元**である
+(`β₁`・`β₂` が base-identity だから底が `𝟙` になり、同型だから単元)。
+★したがって `β₂ = k · (g による β₁ の共役)` で、**上の自然性 2 本がそのまま効き**
+
+  `Ψ(β₂) = g.hom ≫ Ψ(β₁) ≫ eY.hom`
+
+となる。★★★**あとは代入すると同型がすべて打ち消える。**
+-/
+
+section WellDef
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ) (hiso : IsOfIsotropicType P)
+
+/-- ★**「`ψ` は `φ` の `Ψ` 値である」** —— 4 重分解を 1 つ選んで計算した結果。 -/
+def IsPsiValue (d : ℕ+) {A B : C} (φ ψ : A ⟶ B) : Prop :=
+  ∃ (X Y : C) (δ : A ⟶ X) (γ : X ⟶ Y) (β : Y ⟶ Y) (α : Y ⟶ B) (hβ : β ∈ OTri P Y),
+    φ = δ ≫ γ ≫ β ≫ α ∧ IsFrobeniusType P δ ∧ IsIsometric P γ ∧ IsPreStep P γ ∧
+      IsPreStep P β ∧ IsCoAngular P β ∧ IsPullBack P α ∧
+      ψ = δ ≫ γ ≫ (((psiOTri P F hτ (hiso Y) d ⟨β, hβ⟩ : OTri P Y) : End Y) : Y ⟶ Y) ≫ α
+
+include hτ hiso in
+/-- ★**存在** —— 4 重分解が取れるから。 -/
+theorem isPsiValue_exists (hmt : ∀ X : C, IsMetricallyTrivial P X)
+    (haa : IsOfAutAmpleType P) (d : ℕ+) {A B : C} (φ : A ⟶ B) :
+    ∃ ψ : A ⟶ B, IsPsiValue P F hτ hiso d φ ψ := by
+  obtain ⟨X, Y, δ, γ, β, α, hfac, hδ, hγi, hγs, hβb, hβs, hβc, hα⟩ :=
+    quadFactor P F hmt haa φ
+  exact ⟨_, X, Y, δ, γ, β, α, ⟨hβb, hβs.1⟩, hfac, hδ, hγi, hγs, hβs, hβc, hα, rfl⟩
+
+include hτ hiso in
+/-- ★★★**well-defined 性** —— 4 重分解の取り方に依らない。
+
+★**曖昧性が「同型による共役」と「単元倍」に尽きる**ことを、
+`arbFactorUniq` ＋ `preStepFactorUniq'` で取り出して使う。 -/
+theorem isPsiValue_unique (d : ℕ+) {A B : C} {φ ψ₁ ψ₂ : A ⟶ B}
+    (h₁ : IsPsiValue P F hτ hiso d φ ψ₁) (h₂ : IsPsiValue P F hτ hiso d φ ψ₂) :
+    ψ₁ = ψ₂ := by
+  obtain ⟨X₁, Y₁, δ₁, γ₁, β₁, α₁, hm₁, hf₁, hδ₁, hγi₁, hγs₁, hβs₁, hβc₁, hα₁, he₁⟩ := h₁
+  obtain ⟨X₂, Y₂, δ₂, γ₂, β₂, α₂, hm₂, hf₂, hδ₂, hγi₂, hγs₂, hβs₂, hβc₂, hα₂, he₂⟩ := h₂
+  -- ★手 1: `arbFactorUniq` —— pre-step 部分をまとめて比較する
+  have hps₁ : IsPreStep P (γ₁ ≫ β₁) := IsPreStep.comp P hγs₁ hβs₁
+  have hps₂ : IsPreStep P (γ₂ ≫ β₂) := IsPreStep.comp P hγs₂ hβs₂
+  have hcomp : δ₁ ≫ (γ₁ ≫ β₁) ≫ α₁ = δ₂ ≫ (γ₂ ≫ β₂) ≫ α₂ := by
+    simp only [Category.assoc]
+    rw [← hf₁, ← hf₂]
+  obtain ⟨eY, eX, hαe, hβe, hδe⟩ :=
+    F.arbFactorUniq X₁ Y₁ X₂ Y₂ δ₁ (γ₁ ≫ β₁) α₁ δ₂ (γ₂ ≫ β₂) α₂ hcomp
+      hδ₁ hps₁ hα₁ hδ₂ hps₂ hα₂
+  -- ★手 2: `preStepFactorUniq'` —— 中間対象 `Y` を比較する
+  have hsplit : γ₂ ≫ β₂ = (eX.inv ≫ γ₁) ≫ (β₁ ≫ eY.hom) := by
+    rw [hβe]; simp only [Category.assoc]
+  obtain ⟨g, hga, hgb⟩ :=
+    F.preStepFactorUniq' Y₂ Y₁ γ₂ β₂ (eX.inv ≫ γ₁) (β₁ ≫ eY.hom) hsplit
+      hγi₂ hγs₂ hβc₂ hβs₂
+      (by simpa using IsIsometric.comp P (isIsometric_of_isIso P eX.inv) hγi₁)
+      (IsPreStep.comp P (isPreStep_of_isIso P eX.inv) hγs₁)
+      (F.coAngularComp _ eY.hom hβc₁ (isCoAngular_of_isIso P eY.hom))
+      (IsPreStep.comp P hβs₁ (isPreStep_of_isIso P eY.hom))
+  -- `hga : β₁ ≫ eY.hom = g.inv ≫ β₂`、`hgb : eX.inv ≫ γ₁ = γ₂ ≫ g.hom`
+  have hβ₂ : β₂ = g.hom ≫ β₁ ≫ eY.hom := by
+    rw [hga, ← Category.assoc, g.hom_inv_id, Category.id_comp]
+  -- ★手 3: `k := g.hom ≫ eY.hom` は `𝒪^×(Y₂)` の元
+  have hb₁ : P.Base β₁ = P.Base (𝟙 Y₁) := hm₁.1
+  have hb₂ : P.Base β₂ = P.Base (𝟙 Y₂) := hm₂.1
+  have hkb : P.Base (g.hom ≫ eY.hom) = P.Base (𝟙 Y₂) := by
+    rw [hβ₂, P.Base_comp, P.Base_comp, hb₁, P.Base_id, Category.id_comp] at hb₂
+    rw [P.Base_comp]; exact hb₂
+  have hku : IsUnit (M := End Y₂) (g.hom ≫ eY.hom) := by
+    refine isUnit_iff_exists.mpr ⟨(eY.inv ≫ g.inv : End Y₂), ?_, ?_⟩
+    · show (eY.inv ≫ g.inv) ≫ (g.hom ≫ eY.hom) = 𝟙 Y₂
+      simp
+    · show (g.hom ≫ eY.hom) ≫ (eY.inv ≫ g.inv) = 𝟙 Y₂
+      simp
+  let k : OTimes P Y₂ :=
+    ⟨(g.hom ≫ eY.hom : End Y₂),
+      ⟨hkb, isLinear_of_isIso P (g.hom ≫ eY.hom)⟩, hku⟩
+  -- ★手 4: `β₂ = k · (g による β₁ の共役)`
+  have hgl : IsLinear P g.hom := isLinear_of_isIso P g.hom
+  have hconj : ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+      = g.hom ≫ β₁ ≫ g.inv := by
+    have hs : g.hom ≫ β₁
+        = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂) ≫ g.hom :=
+      otriLin_spec P F (hiso Y₂) hgl (⟨β₁, hm₁⟩ : OTri P Y₁)
+    rw [← Category.assoc, hs]
+    simp
+  have hsplit₂ : (⟨β₂, hm₂⟩ : OTri P Y₂)
+      = uOf P k * otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ := by
+    apply Subtype.ext
+    show β₂ = ((otriLin P F (hiso Y₂) hgl ⟨β₁, hm₁⟩ : OTri P Y₂) : End Y₂)
+      ≫ (g.hom ≫ eY.hom)
+    rw [hconj, hβ₂]
+    simp
+  -- ★手 5: 自然性 2 本で `Ψ(β₂) = g.hom ≫ Ψ(β₁) ≫ eY.hom`
+  have hpsi₂ : ((psiOTri P F hτ (hiso Y₂) d ⟨β₂, hm₂⟩ : OTri P Y₂) : End Y₂)
+      = g.hom ≫ ((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ : OTri P Y₁) : End Y₁)
+        ≫ eY.hom := by
+    have hs : g.hom ≫ ((psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩ : OTri P Y₁) : End Y₁)
+        = ((otriLin P F (hiso Y₂) hgl (psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩) :
+            OTri P Y₂) : End Y₂) ≫ g.hom :=
+      otriLin_spec P F (hiso Y₂) hgl _
+    rw [hsplit₂, psiOTri_unit_mul P F hτ (hiso Y₂) d k,
+      psiOTri_otriLin P F hτ (hiso Y₂) (hiso Y₁) hgl d ⟨β₁, hm₁⟩]
+    show ((otriLin P F (hiso Y₂) hgl (psiOTri P F hτ (hiso Y₁) d ⟨β₁, hm₁⟩) :
+        OTri P Y₂) : End Y₂) ≫ (g.hom ≫ eY.hom) = _
+    rw [← Category.assoc, ← hs]
+    simp
+  -- ★手 6: 代入すると同型がすべて打ち消える
+  have hγ₂ : γ₂ = (eX.inv ≫ γ₁) ≫ g.inv := by
+    rw [hgb]; simp
+  rw [he₁, he₂, hδe, hαe, hpsi₂, hγ₂]
+  simp
+
+end WellDef
+
+/-! ## ★★`Ψ` を射の上の写像として取り出す -/
+
+section PsiHom
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ) (hiso : IsOfIsotropicType P)
+  (hmt : ∀ X : C, IsMetricallyTrivial P X) (haa : IsOfAutAmpleType P)
+
+include hτ hiso hmt haa in
+/-- ★★★**`Ψ` は射の上でちょうど一つの値をとる**。
+
+★これで `Ψ : Hom(A,B) → Hom(A,B)` が**関数として定まった**。 -/
+theorem psiHom_existsUnique (d : ℕ+) {A B : C} (φ : A ⟶ B) :
+    ∃! ψ : A ⟶ B, IsPsiValue P F hτ hiso d φ ψ := by
+  obtain ⟨ψ, hψ⟩ := isPsiValue_exists P F hτ hiso hmt haa d φ
+  exact ⟨ψ, hψ, fun ψ' hψ' => isPsiValue_unique P F hτ hiso d hψ' hψ⟩
+
+/-- ★**`Ψ` の射の上の値**。 -/
+noncomputable def psiMap (d : ℕ+) {A B : C} (φ : A ⟶ B) : A ⟶ B :=
+  (psiHom_existsUnique P F hτ hiso hmt haa d φ).choose
+
+include hτ hiso hmt haa in
+theorem psiMap_spec (d : ℕ+) {A B : C} (φ : A ⟶ B) :
+    IsPsiValue P F hτ hiso d φ (psiMap P F hτ hiso hmt haa d φ) :=
+  (psiHom_existsUnique P F hτ hiso hmt haa d φ).choose_spec.1
+
+include hτ hiso hmt haa in
+/-- ★**分解から `Ψ` の値が読める**。 -/
+theorem psiMap_eq (d : ℕ+) {A B : C} {φ ψ : A ⟶ B}
+    (h : IsPsiValue P F hτ hiso d φ ψ) : psiMap P F hτ hiso hmt haa d φ = ψ :=
+  isPsiValue_unique P F hτ hiso d (psiMap_spec P F hτ hiso hmt haa d φ) h
+
+end PsiHom
 
 end ABC3.Found.FrdI

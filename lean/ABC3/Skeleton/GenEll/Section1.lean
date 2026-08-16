@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import ABC3.Interface.GenEll.HeightTheory
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.ArithDiv
+import ABC3.Found.GenEll.Conductor
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -170,29 +171,9 @@ scheme 論(Cartier 因子の引き戻し)である。 -/
 noncomputable def defn_1_5 {F : Type*} [Field F] [NumberField F] : ADiv F → ℝ :=
   degNormalized
 
-/-- **[GenEll] Definition 1.5, (ii)** の `(−)_red`、算術因子の上での形。
-
-原文 (GenEll p.8):
-> is also an effective Cartier divisor. We shall say that E is reduced if E = Ered.
-
-★**これは実際に計算できる** —— 有限素点の係数を、正なら `1`、そうでなければ `0` に潰す。
-`Finsupp.mapRange` が `0 ↦ 0` を要求するので、その条件はここで満たされている。
-★アルキメデス側は `(−)_red` の対象外(原文の `(D_x)_red` は `𝕍(F)^non` に台を持つ)。 -/
-noncomputable def ADivRed {F : Type*} [Field F] [NumberField F] (a : ADiv F) : ADiv F :=
-  (Finsupp.mapRange (fun n : ℤ => if 0 < n then (1 : ℤ) else 0) (by simp) a.fin, 0)
-
-/-- ★`ADivRed` は**冪等**である。`(E_red)_red = E_red` —— 原文の `E = E_red` が
-「被約化の不動点」であることの機械的な確認。
-
-★これを置く理由: `ADivRed` が本当に「被約化」として振る舞うことを、
-定義を眺めるのではなく**証明で**確かめるため。 -/
-theorem adivRed_idem {F : Type*} [Field F] [NumberField F] (a : ADiv F) :
-    ADivRed (ADivRed a) = ADivRed a := by
-  simp only [ADivRed, ADiv.fin]
-  refine Prod.ext ?_ rfl
-  ext v
-  simp only [Finsupp.mapRange_apply]
-  split_ifs <;> omega
+/-! ★`(−)_red`(`ADivRed`)とその冪等性・有効性・**次数不等式**は
+`Found/GenEll/Conductor.lean` へ移した——★`Proposition 1.6` の**非アルキメデス側**が
+そこで実際に証明されるからである(`deg((a)_red) ≤ deg(a)`)。 -/
 
 /-! ## Remark 1.5.1 —— log-cond の BD-class が `(X_ℚ, D_ℚ)` だけに依ること -/
 
@@ -294,18 +275,6 @@ def degEq.src : Source :=
 def GaloisFinite.src : Source :=
   { paper := "GenEll", pdfPage := 5, item := "Example 1.3, (i)",
     sectionId := "genell-ex-1-3" }
-
-def ADivRed.src : Source :=
-  { paper := "GenEll", pdfPage := 8, item := "Definition 1.5, (ii)",
-    sectionId := "genell-def-1-5" }
-
-def adivRed_idem.src : Source :=
-  { paper := "GenEll", pdfPage := 8, item := "Definition 1.5, (ii)",
-    sectionId := "genell-def-1-5" }
-
-/-- ★**空リストは省略ではなく主張である**——被約化の冪等性は
-原文の何にも依拠しない(`Finsupp.mapRange` と場合分けだけで閉じる)。 -/
-def adivRed_idem.needs : List ProofObligation := []
 
 def example_1_3.src : Source :=
   { paper := "GenEll", pdfPage := 5, item := "Example 1.3",
