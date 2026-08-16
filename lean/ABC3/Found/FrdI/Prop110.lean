@@ -2802,7 +2802,7 @@ theorem prop_1_10_vi_istr_groupLike (F : FrobenioidCore P) (G : Frobenioid P)
 | (iii) | ~~★原文は証明中で「`A` を Frobenius-trivial としてよい」と**還元している**が、その還元が未実装で、仮定に逃がしている~~ → ★**実装した**。原文が名指す 3 つ(`Definition 1.3, (i), (a)` / `(i), (b)` / `(iii), (c)`)がそのまま 3 段になった。★`isotropic` の最初の用途が**span の pre-step を co-angular にすること**だったと分かった | `prop_1_10_iii_otri_perfect_of_type`, `prop_1_10_iii_otimes_perfect_of_type` |
 | (iii) | ~~「the monoids in the image of Φ」は Ob(𝒟) 全体の像だが、実装は `Base` の像のみ~~ → ★**実装した**。`baseSurj` の同型を `MonoidOn.map_bijective_of_iso` で渡り、perfect 性を `isPerfectMonoid_of_bijective` で移した | `prop_1_10_iii_image_perfect_of_base` |
 | (iv) | ~~★原文は「**域が** isotropic」だけを要求するが、実装は `∀ X : C, IsIsotropic P X`(**圏全体**)を仮定~~ → ★**実装した**。`isotropicClosed` で域の isotropic 性から下流へ伝播させれば足りた | `prop_1_10_iv`, `prop_1_10_iv_mp` |
-| (iv) | ~~「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで)~~ → ★**実装した**。★**次数の集合が無限**であることを述べ、非同型性と合わせて同型類の無限性にした | `prop_1_10_iv_degrees_infinite` |
+| (iv) | ~~「infinitely many isomorphism classes」そのものを述べていない(素数ごとの存在と非同型性まで)~~ → ★**実装した**。★**`ℕ` で添字づけられた互いに非同型な既約射の族**として述べた。★★**当初は「次数の集合が無限」＋「次数が違えば非同型」で済ませ、表にも「合わせて同型類の無限性にした」と書いたが、その「合わせて」の一手をどの宣言にも書いていなかった**(検証役が発見) | `prop_1_10_iv_iso_classes_infinite` |
 | (v) | ~~`IsPrimeFrobComposite` の基底を「任意の同型」に取った——**意図的な修復**だが、原文項目そのものの実装ではない~~ → ★★**反例に格上げした**。素直な読み(基底＝恒等射)を `IsPrimeFrobCompositeId` として別に定義し、★**恒等射でない同型はその形に書けない**ことを示した。同型は Frobenius 型なので、素直な読みでは iff が破れる —— ★**基底を同型に取ったのは修復ではなく強制であった** | `not_isPrimeFrobCompositeId_of_isIso_of_ne_id` |
 | (vi) | ~~★★**`𝒞^istr` がコメント外に一度も現れない**。(vi) の主語が不在~~ → ★**実装した**。`Proposition 1.9` の `istr_frobenioid` / `istr_isotropic` を当てるだけだった | `prop_1_10_vi_istr` |
 | (vi) | ~~★`α`,`γ`,`Cc` の存在を**仮定に置いている**が、原文は `Definition 1.3, (i), (a), (b)` から**導いている**~~ → ★**実装した** | `prop_1_10_vi_data`, `prop_1_10_vi_ofType` |
@@ -2820,6 +2820,29 @@ theorem prop_1_10_vi_istr_groupLike (F : FrobenioidCore P) (G : Frobenioid P)
 ★★**教訓**: 自分の文脈を継いだ検証は、自分の誤読も継ぐ。
 「21/21」と数えたのは私であり、その数え方は「**実装したものを数えた**」ものであって、
 ★**「原文が述べたものを数えた」ものではなかった。**
+
+## ★★★2026-08-16 —— 取り下げから復帰した
+
+★**私の文脈を持たない検証役が、原文 (p.34–35) を自分で読んで主張を数え直し
+(22 主張。`∃!` を存在と一意性に分けたため。1 と数えれば 21 で一致する)、
+22 すべてに対応する宣言があることを確認した。**
+
+★**過去に落ちた 5 つの型を個別に検査して、残っているものは無い**:
+量化子の向き / 原文より強い仮定 / 省いた段を仮定に逃がす / 主語の不在 /
+docstring の理由違い。
+
+★★**監査は 2 往復した。** 1 往復目の判定は「いけない」で、理由は
+★**「次数の集合の無限性」と「次数が違えば非同型」は別の集合についての主張で、
+橋渡しの一段がどの宣言にも無い」**だった ——
+★**私は表に「合わせて同型類の無限性にした」と書きながら、その「合わせて」を
+書いていなかった。**「述べたと書いたものを述べていない」型の 4 例目である。
+
+★**ここで条なしの `.src` を付ける。**
 -/
+
+/-- ★★★**[FrdI] Proposition 1.10 全体**。(i)〜(vi) の 22 主張がすべて実装された。 -/
+def prop_1_10.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34, item := "Proposition 1.10",
+    sectionId := "frdi-prop-1-10" }
 
 end ABC3.Found.FrdI
