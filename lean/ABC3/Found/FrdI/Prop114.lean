@@ -289,6 +289,87 @@ theorem prop_1_14_ii_mp (F : FrobenioidCore P) (G : Frobenioid P)
   exact absurd
     (prop_1_7_v_preStep P β α (prop_1_7_v_preStep P γ (β ≫ α) (hfac ▸ hφ)).2).1 hS
 
+/-! ### ★★(ii) 十分性の第 4 段 —— 「adding」の中身
+
+★★**原文が引用符で名前だけ与えた構成**:
+> Now by “adding the pull-backs of β∗(Div(β)) via ϵ1, ϵ2” …, it follows that there
+> exists a pre-step ζ : E →D such that there exist γ1, γ2 ∈Arr(C) satisfying
+> ϵ1 ◦ζ = β ◦γ1, ϵ2 ◦ζ = β ◦γ2.
+
+★**まず記法**: `β : A ⟶ Cc` なので `β∗ = Φ.map (Base β) : Φ(Cc_𝒟) → Φ(A_𝒟)` であり、
+★**`Div β ∈ Φ(A_𝒟)` だから `β∗(Div β)` は型が合わない。**
+`Definition 1.3, (iii), (d)` が `(ψ∗)⁻¹(Div ψ)` と書いているとおり、
+★**原文の意図は `(β∗)⁻¹(Div β)`、すなわち `β` の不変量**である
+(検証役が発見した。私も型で確認した)。
+
+★★**そして「adding」は本当に必要である。**
+`ϵ1` 用の条件は `invζ = Φ.map (Base ϵ1) invβ`、`ϵ2` 用は `Φ.map (Base ϵ2) invβ` で、
+★**2 つは一般に違う**(`Base ϵ1 = Base ϵ2` は出ない ——
+`Base ϵ1 ≫ Base α = Base ϵ2 ≫ Base α` から `Base α` を右から消すには
+**mono** が要るが、totally epimorphic が与えるのは **epi** である)。
+★**だから両方を**上から押さえる**ものが要る。それが和である。**
+
+★**組み立て**:
+1. `zᵢ := Φ.map (Base ϵᵢ) invβ` を実現する co-angular pre-step `ζᵢ : Eᵢ ⟶ D`
+2. `z := z₁ + z₂` を実現する `ζ : E ⟶ D`
+3. `MLe zᵢ z` から `coaPre_factor_of_mle` が `κᵢ ≫ ζᵢ = ζ` を与える
+4. `prop_1_11_v_exists_pullBack` が `γᵢ′ ≫ β = ζᵢ ≫ ϵᵢ` を与える
+5. `γᵢ := κᵢ ≫ γᵢ′` と置くと `γᵢ ≫ β = ζ ≫ ϵᵢ`
+6. `φ = β ≫ α` は mono なので `γ₁ = γ₂`、よって `ζ ≫ ϵ₁ = ζ ≫ ϵ₂`
+7. ★**`ζ` は epi**(`𝒞` が totally epimorphic)—— こちらは**左から**消せる ⟹ `ϵ₁ = ϵ₂`
+
+★★**epi と mono の使い分けがこの証明の要点である** ——
+6 で mono を使い、7 で epi を使う。★**どちらも「消す側」が違う。**
+-/
+
+include P in
+/-- ★★★**(ii) 十分性の第 4 段の核** ——
+`ϵ₁, ϵ₂` が pull-back のとき、`α` は(その 2 本について)mono である。
+
+★**`φ = β ≫ α` が mono であることだけを使う**(FSM 射の mono 部分)。 -/
+theorem prop_1_14_ii_epsilon_eq (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A Cc B : C} (β : A ⟶ Cc) (hβs : IsPreStep P β) (α : Cc ⟶ B)
+    (hmono : Mono (β ≫ α)) {Dd : C} (ε₁ ε₂ : Dd ⟶ Cc)
+    (hε₁ : IsPullBack P ε₁) (hε₂ : IsPullBack P ε₂)
+    (hsq : ε₁ ≫ α = ε₂ ≫ α) : ε₁ = ε₂ := by
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  have hβc : IsCoAngular P β := prop_1_4_i P β (fun Y _ => hiso Y)
+  set invβ := Φ.map (inv (P.Base β)) (P.Div β) with hinvβ
+  -- 段 1: 各 `ϵᵢ` の条件を実現する `ζᵢ`
+  obtain ⟨E₁, ζ₁, hζ₁c, hζ₁s, hζ₁inv⟩ :=
+    coaPre_realize_over P G Dd (Φ.map (P.Base ε₁) invβ)
+  obtain ⟨E₂, ζ₂, hζ₂c, hζ₂s, hζ₂inv⟩ :=
+    coaPre_realize_over P G Dd (Φ.map (P.Base ε₂) invβ)
+  -- 段 2: ★**和**を実現する `ζ`
+  obtain ⟨E, ζ, hζc, hζs, hζinv⟩ :=
+    coaPre_realize_over P G Dd (Φ.map (P.Base ε₁) invβ + Φ.map (P.Base ε₂) invβ)
+  haveI hbζ₁ : IsIso (P.Base ζ₁) := hζ₁s.2
+  haveI hbζ₂ : IsIso (P.Base ζ₂) := hζ₂s.2
+  haveI hbζ : IsIso (P.Base ζ) := hζs.2
+  -- 段 3: `MLe` から因子分解
+  obtain ⟨κ₁, -, -, hκ₁⟩ := coaPre_factor_of_mle P G ζ₁ hζ₁c hζ₁s ζ hζc hζs
+    (by rw [hζ₁inv, hζinv]; exact ⟨Φ.map (P.Base ε₂) invβ, rfl⟩)
+  obtain ⟨κ₂, -, -, hκ₂⟩ := coaPre_factor_of_mle P G ζ₂ hζ₂c hζ₂s ζ hζc hζs
+    (by rw [hζ₂inv, hζinv]; exact ⟨Φ.map (P.Base ε₁) invβ, by rw [add_comm]⟩)
+  -- 段 4: `Proposition 1.11, (v)` の pull-back の場合
+  obtain ⟨γ₁', hγ₁'⟩ :=
+    prop_1_11_v_exists_pullBack P G ε₁ hε₁ ζ₁ hζ₁c hζ₁s β hβc hβs (by rw [hζ₁inv])
+  obtain ⟨γ₂', hγ₂'⟩ :=
+    prop_1_11_v_exists_pullBack P G ε₂ hε₂ ζ₂ hζ₂c hζ₂s β hβc hβs (by rw [hζ₂inv])
+  -- 段 5: `γᵢ := κᵢ ≫ γᵢ′`
+  have hγ₁ : (κ₁ ≫ γ₁') ≫ β = ζ ≫ ε₁ := by
+    rw [Category.assoc, hγ₁', ← Category.assoc, hκ₁]
+  have hγ₂ : (κ₂ ≫ γ₂') ≫ β = ζ ≫ ε₂ := by
+    rw [Category.assoc, hγ₂', ← Category.assoc, hκ₂]
+  -- 段 6: `φ = β ≫ α` は mono
+  have hmm : (κ₁ ≫ γ₁') ≫ (β ≫ α) = (κ₂ ≫ γ₂') ≫ (β ≫ α) := by
+    rw [← Category.assoc, hγ₁, ← Category.assoc, hγ₂, Category.assoc, Category.assoc, hsq]
+  have hgeq : κ₁ ≫ γ₁' = κ₂ ≫ γ₂' := (cancel_mono (β ≫ α)).mp hmm
+  -- 段 7: `ζ` は epi
+  haveI : Epi ζ := P.totEpiC _ _ _
+  refine (cancel_epi ζ).mp ?_
+  rw [← hγ₁, ← hγ₂, hgeq]
+
 /-! ### ★(ii) の十分性 —— 未実装(2026-08-16 の測定)
 
 ★**原文の証明**(p.42、目視、要旨):
@@ -308,7 +389,20 @@ theorem prop_1_14_ii_mp (F : FrobenioidCore P) (G : Frobenioid P)
 ★★**4 の「adding the pull-backs of β∗(Div(β)) via ϵ₁, ϵ₂」が
 検証役の言う「引用符で名前だけ与える型」である** ——
 ★**構成の名前が引用符の中にあるだけで、構成そのものは書かれていない。**
-★**ここが (ii) の山であり、まだ登っていない。**
+
+★★**その中身は上の `prop_1_14_ii_epsilon_eq` で実装した**(2026-08-16)。
+★**残るのは 1・2・3・5・6・7 段**である:
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | `Definition 1.3, (iv), (a)` で `φ = γ ≫ β ≫ α` | 道具あり(`arbFactor`) |
+| 2 | (i) で `γ` は同型 ⟹ `φ = β ≫ α` としてよい | 道具あり |
+| 3 | `φ` が FSM ⟹ `α` は fiberwise-surjective | ★**「follows formally」は本当に formal**(`δ_C := δ_A ≫ β`) |
+| 4 | ★**`α` が mono** | ★**実装した**(`prop_1_14_ii_epsilon_eq`、ただし `ϵᵢ` が pull-back の場合) |
+| 4′ | 「WLOG `ϵ₁, ϵ₂` は pull-back」の正当化 | ★**未実装** |
+| 5 | `Proposition 1.11, (vi)` で `Base(α)` も FSM | 道具あり |
+| 6 | `𝒟` が FSMFF 型 ⟹ 従属する FSMI 射 | ★**未実装**(`IsOfFSMFFType` の (a) を使う) |
+| 7 | mid-adjoint の仮定と矛盾 ⟹ `α` は同型 | 道具あり |
 
 ★★**`sorry` は置かない**(`Found/` の規律)。
 -/
