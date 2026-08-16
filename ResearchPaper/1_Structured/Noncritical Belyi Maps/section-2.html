@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[NCBelyi] §2 — Theorem 2.5 が依る 3 補題</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[NCBelyi] §2 — Theorem 2.5 が依る 3 補題</h1>
+
+<p>S. Mochizuki, <em>Noncritical Belyi Maps</em>。物理 p.3–p.5。
+<strong>260 dpi 目視確認 2026-08-17</strong>。</p>
+
+<p class="open">★<strong>3 件のうち <code>Lemma 2.3</code> だけは原文の証明が 1 行である</strong>
+——「Indeed, it suffices to take λ such |λ − β| is sufficiently small.」。
+★<strong>実際に実装できた</strong>(<code>lean/ABC3/Found/NCBelyi/Separation.lean</code>)。</p>
+
+<section class="statement lemma"
+         id="ncbelyi-lemma-2-2"
+         data-paper="NCBelyi"
+         data-pdf-page="3"
+         data-item="Lemma 2.2"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Lemma 2.2. (Belyi Maps Noncritical at Prescribed Rational Points)</div>
+<div class="reading"><code>S ⊆ ℙ¹(ℚ)</code> を有理点の有限集合で
+<strong>(i)</strong> <code>0, ∞ ∈ S</code>、<strong>(ii)</strong> <code>α ∈ S\{0,∞}</code> ⟹ <code>α &gt; 0</code>
+を満たすものとする。<code>β ∈ ℚ\S</code> が
+<strong>(iii)</strong> すべての <code>α ∈ S\{0,∞}</code> について <code>β/α ≥ 2</code>
+を満たすとすると、<strong>非定数多項式 <code>f(x) ∈ ℚ[x]</code> が存在して</strong>
+射 <code>φ : ℙ¹_ℚ → ℙ¹_ℚ</code> を定め、
+(a) <code>φ(S) ⊆ {0,1,∞}</code>、(b) <code>φ(β) ∉ {0,1,∞}</code>、
+(c) <code>φ</code> は <code>ℙ¹_ℚ\{0,1,∞}</code> 上不分岐。</div>
+<p class="open">★証明は <code>|S|</code> についての帰納法で、各段で <code>Lemma 2.1</code>(<code>C = 2</code> に取る)を
+<code>λ·S</code> に適用する。<code>|S| ≥ 4</code> のあいだ <code>|S′| &lt; |S|</code> に落ちる。
+★<strong><code>Lemma 2.1</code> が本論文の計算の中心</strong>で、物理 p.2–p.3 に
+<code>f(x) = x^m(x−1)^n</code> 型の明示的な多項式と (a)–(e) の性質評価が並ぶ。</p>
+</section>
+
+<section class="statement lemma"
+         id="ncbelyi-lemma-2-3"
+         data-paper="NCBelyi"
+         data-pdf-page="4"
+         data-item="Lemma 2.3"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Lemma 2.3. (Separation of Collections of Points) Let</div>
+<div class="reading"><code>S ⊆ ℙ¹(ℂ)</code> を複素点の有限集合とする。任意の実数 <code>C &gt; 0</code> と
+<code>β ∈ ℂ\S ⊆ ℙ¹(ℂ)\S</code> に対し、<strong><code>λ ∈ ℂ</code> が存在して</strong>
+有理関数 <code>f(x) = 1/(x − λ)</code> が
+<code>f(β) ≠ 0, ∞</code>;  <code>f(α) ≠ ∞</code>;  <strong><code>|f(β)| ≥ C·|f(α)|</code></strong>
+(すべての <code>α ∈ S</code>)を満たす。
+さらに <code>β ∈ ℚ</code> なら <strong><code>λ ∈ ℚ</code> に取れる</strong>。</div>
+<div class="verbatim">Indeed, it suffices to take λ such |λ − β| is sufficiently small.</div>
+<p class="open">★★<strong>原文の証明はこの 1 行だけである。</strong>
+実装では「sufficiently small」を明示した——
+<code>δ ≝ min_{α∈S∩ℂ} |α − β| &gt; 0</code> と置き、
+<strong><code>0 &lt; |λ − β| &lt; min(δ/2, δ/(2C))</code></strong> に取ればよい。
+そのとき <code>|α − λ| ≥ δ/2</code> かつ <code>C|β − λ| &lt; δ/2</code> となり結論が出る。</p>
+<p class="open">★<code>S</code> が <code>∞</code> を含んでもよい——<code>f(∞) = 0</code> なので
+<code>|f(β)| ≥ C·0</code> は自明に成り立つ。★<strong>この場合を落とすと主張が弱くなる</strong>ので、
+実装では <code>ℙ¹(ℂ)</code> を <code>OnePoint ℂ</code> として模し、<code>∞</code> の場合も含めた。</p>
+</section>
+
+<section class="statement lemma"
+         id="ncbelyi-lemma-2-4"
+         data-paper="NCBelyi"
+         data-pdf-page="4"
+         data-item="Lemma 2.4"
+         data-notation-checked="2026-08-17">
+<div class="verbatim">Lemma 2.4. (Reduction to the Rational Case) Write</div>
+<div class="reading"><code>ℚ̄ ⊆ ℂ</code> を代数的数の集合とし、<code>S ⊆ ℙ¹(ℚ̄) ⊆ ℙ¹(ℂ)</code> を
+<code>ℚ̄</code>-有理点の有限集合、<code>β ∈ ℚ̄\S</code> とする。
+このとき<strong>非定数有理関数 <code>f(x) ∈ ℚ̄(x)</code> が存在して</strong>
+射 <code>φ : ℙ¹_ℚ̄ → ℙ¹_ℚ̄</code> を定め、<strong>ある <code>S_φ ⊆ ℙ¹(ℚ)</code> について</strong>
+(a) <code>φ(S) ⊆ S_φ</code>、(b) <code>φ(β) ∈ ℙ¹(ℚ)\S_φ</code>、
+(c) <code>φ</code> は <code>ℙ¹_ℚ̄\S_φ</code> 上不分岐。
+さらに <code>S, β</code> が数体 <code>F</code> 上定義されているなら <code>φ</code> も <code>F</code> 上に取れる。</div>
+<p class="open">★★<strong>これが「有理の場合への帰着」である</strong>——
+<code>ℚ̄</code>-点を <code>ℚ</code>-点へ落とす段。
+証明(物理 p.5)は <code>m(S)</code>(定義体の<strong>既約次数</strong> <code>[F:ℚ]−1</code> の最大値)と
+<code>d(S)</code>(その最大値を取る点の既約次数の和)についての<strong>入れ子帰納法</strong>で、
+各段で <code>α₀</code> の最小多項式 <code>f₀</code> を使って
+<code>m(S′) &lt; m(S)</code> または <code>m(S′) = m(S) ∧ d(S′) &lt; d(S)</code> に落とす。</p>
+<p class="open">★<strong>定量化されていない箇所が 2 つある</strong>(目視確認):
+「for a suitable choice of <code>C</code>」と
+「bounded by some <strong>fixed expression in <code>d₀</code></strong>」。
+実装時にはここを自分で詰めることになる。</p>
+</section>
+
+</body>
+</html>

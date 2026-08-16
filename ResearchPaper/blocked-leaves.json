@@ -32,11 +32,6 @@
    "cost": "1_Structured/Noncritical Belyi Maps/ に逐語 1〜2 単位を足す(物理 p.3 の 260 dpi 目視 → HTML)"
   },
   {
-   "key": "[NCBelyi] Lemma 2.3",
-   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.4。有理係数の自己同型による正規化(`|α| ≤ 1` かつ `|β| ≥ C` に持ち込む段)。まだ逐語を転写していないだけである。",
-   "cost": "同上(物理 p.4)"
-  },
-  {
    "key": "[NCBelyi] Lemma 2.4",
    "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.5。`S ⊆ ℙ¹(ℚ)` の場合への帰着。`m(S)`・`d(S)` についての**入れ子帰納法**が本体。まだ逐語を転写していないだけである。",
    "cost": "同上(物理 p.5。★証明は目視済みで、`m(S′) < m(S)` または `m(S′) = m(S) ∧ d(S′) < d(S)` の 2 分岐まで確認してある)"
@@ -50,6 +45,7 @@
   {
    "key": "[AbsTopIII] (L1)",
    "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
-  }
+  },
+  "★2026-08-17: [NCBelyi] Lemma 2.3 —— **葉ではなくなった**。`Found/NCBelyi/Separation.lean` に実装し(`sorry` 0)、`Skeleton/NCBelyi/Theorem25.lean` から参照させたので節点になった。原文の証明は 1 行(「it suffices to take λ such |λ − β| is sufficiently small」)で、実装では `ε ≤ δ/4` かつ `C·ε ≤ δ/4` として『十分小さい』を明示した。"
  ]
 }

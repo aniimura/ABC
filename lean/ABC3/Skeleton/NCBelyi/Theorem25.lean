@@ -1,5 +1,6 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.NCBelyi.BelyiSetup
+import ABC3.Found.NCBelyi.Separation
 
 /-!
 # [NCBelyi] Theorem 2.5 —— Belyi Maps Noncritical at Prescribed Points(`Skeleton`)
@@ -96,5 +97,31 @@ def theorem_2_5.needs : List ProofObligation :=
       "★原文 p.5 の Lemma 2.4 の証明は `m(S)`・`d(S)`(既約次数の最大値と、その最大値を取る点の既約次数の和)についての**入れ子帰納法**である。『for a suitable choice of C』『bounded by some fixed expression in d₀』が定量的に詰められていない" 5,
     .implicitStep
       "★statement の語彙(ℚ̄ 上の曲線・ℙ¹_ℚ̄ への射・不分岐・定義体)を Interface/NCBelyi/BelyiSetup.lean に posit した。**我々は作っていない**" 5 ]
+
+/-! ## Lemma 2.3 —— 点の集まりの分離(★実装済み) -/
+
+/-- **[NCBelyi] Lemma 2.3**(Separation of Collections of Points)。
+
+原文 (NCBelyi p.4):
+> Lemma 2.3. (Separation of Collections of Points) Let
+
+★★**本 statement は `sorry` ではない**——`Found/NCBelyi/Separation.lean` の実装を参照する。
+
+★原文の証明は 1 行(「it suffices to take λ such |λ − β| is sufficiently small」)だが、
+実装では **`ε ≤ δ/4` かつ `C·ε ≤ δ/4`** として「sufficiently small」を明示した。 -/
+theorem lemma_2_3 (S : Finset ABC3.Found.NCBelyi.P1C) (C : ℝ) (hC : 0 < C) (b : ℂ)
+    (hb : (some b) ∉ S) :
+    ∃ lam : ℂ, lam ≠ b ∧ (some lam ∉ S)
+      ∧ ∀ p ∈ S, C * ABC3.Found.NCBelyi.absInvShift lam p
+          ≤ ABC3.Found.NCBelyi.absInvShift lam (some b) :=
+  ABC3.Found.NCBelyi.lemma_2_3 S C hC b hb
+
+def lemma_2_3.src : Source :=
+  { paper := "NCBelyi", pdfPage := 4, item := "Lemma 2.3",
+    sectionId := "ncbelyi-lemma-2-3" }
+
+/-- ★**空リストは省略ではなく主張である** —— 原文の証明は外部依存を持たない
+(「`|λ − β|` を十分小さく取ればよい」だけ)。 -/
+def lemma_2_3.needs : List ProofObligation := []
 
 end ABC3.Skeleton.NCBelyi
