@@ -1076,7 +1076,7 @@ theorem psiMap_comp_otri (d : ℕ+) {A B : C} (hA : IsIsotropic P A) (φ : A ⟶
     simp only [Category.assoc]
     rw [← hpsispec]
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**右から等長 pre-step を掛ける場合** —— `Ψ(φ ≫ γ') = Ψ(φ) ≫ γ'`。
 
 ★★**押し出し `plBk_shuffle` がここで効く**: `α ≫ γ' = γ̃ ≫ α̃` と組み替えると、
@@ -1088,13 +1088,16 @@ include hτ hiso hmt haa hfn in
 等長 pre-step になり、`β` は `otriLin` の**逆**で `Ỹ` 側へ移る。
 
 ★★★`Ψ` がその逆とも可換なのは `psiOTri_otriLin` の**単射性側**である。 -/
-theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' : B ⟶ E}
+theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (hA : IsIsotropic P A)
+    (φ : A ⟶ B) {γ' : B ⟶ E}
     (hγ'i : IsIsometric P γ') (hγ's : IsPreStep P γ') :
     psiMap P F hτ hmt haa d (φ ≫ γ')
       = psiMap P F hτ hmt haa d φ ≫ γ' := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
     psiMap_spec P F hτ hmt haa d φ
+  have hY : IsIsotropic P Y := F.isotropicClosed (δ ≫ γ) hA
   obtain ⟨Yt, γt, αt, hshuf, hαt, hbγt⟩ := plBk_shuffle P F hα γ'
+  have hYt : IsIsotropic P Yt := F.isotropicClosed γt hY
   -- ★`γ̃` は等長 pre-step
   have hγti : IsIsometric P γt := by
     show P.Div γt = 0
@@ -1106,17 +1109,17 @@ theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' 
   have hγts : IsPreStep P γt := ⟨hγtlin, hbγt⟩
   -- ★`β` を `otriLin` の逆で `Ỹ` 側へ移す
   obtain ⟨⟨tm, htm⟩, ht⟩ :=
-    (otriLin_bijective_of_preStep P F (hiso Y) hγts).2 (⟨β, hm⟩ : OTri P Y)
+    (otriLin_bijective_of_preStep P F hY hγts).2 (⟨β, hm⟩ : OTri P Y)
   have hspec : γt ≫ tm = β ≫ γt := by
-    have h := otriLin_spec P F (hiso Y) hγtlin (⟨tm, htm⟩ : OTri P Yt)
+    have h := otriLin_spec P F hY hγtlin (⟨tm, htm⟩ : OTri P Yt)
     rw [ht] at h
     exact h
   have hpsispec :
       γt ≫ (((psiOTri P F hτ d ⟨tm, htm⟩ : OTri P Yt) : End Yt) : Yt ⟶ Yt)
         = (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) : End Y) : Y ⟶ Y) ≫ γt := by
-    have h := otriLin_spec P F (hiso Y) hγtlin
+    have h := otriLin_spec P F hY hγtlin
       (psiOTri P F hτ d (⟨tm, htm⟩ : OTri P Yt))
-    rw [← psiOTri_otriLin P F hτ (hiso Y) (hiso Yt) hγtlin d (⟨tm, htm⟩ : OTri P Yt),
+    rw [← psiOTri_otriLin P F hτ hY hYt hγtlin d (⟨tm, htm⟩ : OTri P Yt),
       ht] at h
     exact h
   refine psiMap_eq P F hτ hmt haa d ?_
@@ -1132,13 +1135,13 @@ theorem psiMap_comp_isometricPreStep (d : ℕ+) {A B E : C} (φ : A ⟶ B) {γ' 
     rw [show P.Base tm = P.Base (𝟙 Yt) from htm.1, P.Base_id]
     infer_instance
   · -- co-angular
-    exact prop_1_4_i P _ (fun X _ => hiso X)
+    exact prop_1_4_i P _ (fun Z g => F.isotropicClosed g hYt)
   · -- `Ψ` の値
     rw [he]
     simp only [Category.assoc]
     conv_rhs => rw [← Category.assoc γt _ αt, hpsispec, Category.assoc, ← hshuf]
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**右から Frobenius 型射を掛ける場合** —— `Ψ(φ ≫ δ') = Ψ(φ) ≫ δ'`。
 
 ★★ここが原文の核心である。押し出しで `α ≫ δ' = δ̃ ≫ α̃` としたあと、
@@ -1153,18 +1156,20 @@ computation")のおかげ**である。
 ★**`hft` は `𝒞^istr` では `Proposition 2.5, (ii)` から自動**である
 (`prop_2_5_ii_frobTrivial`)。ここでは仮定として明示する。 -/
 theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
-    {A B E : C} (φ : A ⟶ B) {δ' : B ⟶ E} (hδ' : IsFrobeniusType P δ') :
+    {A B E : C} (hA : IsIsotropic P A) (φ : A ⟶ B) {δ' : B ⟶ E} (hδ' : IsFrobeniusType P δ') :
     psiMap P F hτ hmt haa d (φ ≫ δ')
       = psiMap P F hτ hmt haa d φ ≫ δ' := by
   obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
     psiMap_spec P F hτ hmt haa d φ
+  have hY : IsIsotropic P Y := F.isotropicClosed (δ ≫ γ) hA
   obtain ⟨Yt, δt, αt, hshuf, hαt, hbδt⟩ := plBk_shuffle P F hα δ'
+  have hYt : IsIsotropic P Yt := F.isotropicClosed δt hY
   -- ★手 1: `δ̃` もまた Frobenius 型
   have hδti : IsIsometric P δt := by
     show P.Div δt = 0
     rw [plBk_shuffle_div P F hα hshuf hαt, show P.Div δ' = 0 from hδ'.1.2, map_zero]
   have hδtF : IsFrobeniusType P δt :=
-    ⟨⟨prop_1_4_i P _ (fun Z _ => hiso Z), hδti⟩, hbδt⟩
+    ⟨⟨prop_1_4_i P _ (fun Z g => F.isotropicClosed g hY), hδti⟩, hbδt⟩
   have hdeg : P.degFr δt = P.degFr δ' := plBk_shuffle_degFr P F hα hshuf hαt
   -- ★手 2: `Y` は Frobenius-trivial なので `δ̃ = ζ ≫ θ`
   obtain ⟨ζ, hζdeg, hζprop⟩ := hft Y
@@ -1177,17 +1182,17 @@ theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
   -- ★手 3: `β^n` を `θ` の右へ移す
   set n : ℕ := ((P.degFr δt : ℕ+) : ℕ) with hn
   obtain ⟨⟨xm, hxm⟩, hx⟩ :=
-    (otriLin_bijective_of_preStep P F (hiso Y) hθs).2 ((⟨β, hm⟩ : OTri P Y) ^ n)
+    (otriLin_bijective_of_preStep P F hY hθs).2 ((⟨β, hm⟩ : OTri P Y) ^ n)
   have hxspec : θ ≫ xm = (((⟨β, hm⟩ ^ n : OTri P Y) : End Y) : Y ⟶ Y) ≫ θ := by
-    have h := otriLin_spec P F (hiso Y) hθlin (⟨xm, hxm⟩ : OTri P Yt)
+    have h := otriLin_spec P F hY hθlin (⟨xm, hxm⟩ : OTri P Yt)
     rw [hx] at h
     exact h
   have hpsixspec :
       θ ≫ (((psiOTri P F hτ d ⟨xm, hxm⟩ : OTri P Yt) : End Yt) : Yt ⟶ Yt)
         = (((psiOTri P F hτ d ⟨β, hm⟩ : OTri P Y) ^ n : OTri P Y) : End Y) ≫ θ := by
-    have h := otriLin_spec P F (hiso Y) hθlin
+    have h := otriLin_spec P F hY hθlin
       (psiOTri P F hτ d (⟨xm, hxm⟩ : OTri P Yt))
-    rw [← psiOTri_otriLin P F hτ (hiso Y) (hiso Yt) hθlin d (⟨xm, hxm⟩ : OTri P Yt),
+    rw [← psiOTri_otriLin P F hτ hY hYt hθlin d (⟨xm, hxm⟩ : OTri P Yt),
       hx, psiOTri_pow P F hτ (hfn Y) d ⟨β, hm⟩ n] at h
     exact h
   -- ★手 4: `β ≫ δ̃ = δ̃ ≫ x`(と `Ψ` 版)
@@ -1224,7 +1229,7 @@ theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
     rw [show P.Base xm = P.Base (𝟙 Yt) from hxm.1, P.Base_id]
     infer_instance
   · -- co-angular
-    exact prop_1_4_i P _ (fun Z _ => hiso Z)
+    exact prop_1_4_i P _ (fun Z g => F.isotropicClosed g hYt)
   · -- `Ψ` の値
     rw [he]
     simp only [Category.assoc]
@@ -1235,7 +1240,7 @@ theorem psiMap_comp_frob (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
         (((psiOTri P F hτ d ⟨xm, hxm⟩ : OTri P Yt) : End Yt) : Yt ⟶ Yt) hpsixspec,
       Category.assoc, ← hshuf]
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★★**`Ψ` の関手性** —— `Ψ(φ ≫ φ') = Ψ(φ) ≫ Ψ(φ')`。
 
 ★★`φ'` を 4 重分解して**右から 1 因子ずつ剥がす**だけで出る:
@@ -1249,7 +1254,7 @@ include hτ hiso hmt haa hfn in
 
 ★**4 重分解がちょうど 4 本の合成則に対応していた。** -/
 theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
-    {A B E : C} (φ : A ⟶ B) (φ' : B ⟶ E) :
+    {A B E : C} (hA : IsIsotropic P A) (φ : A ⟶ B) (φ' : B ⟶ E) :
     psiMap P F hτ hmt haa d (φ ≫ φ')
       = psiMap P F hτ hmt haa d φ ≫ psiMap P F hτ hmt haa d φ' := by
   obtain ⟨X', Y', δ', γ', β', α', hm', hf', hδ'F, hγi', hγs', hβs', hβc', hα', he'⟩ :=
@@ -1258,9 +1263,9 @@ theorem psiMap_comp (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+)
   conv_lhs => rw [hf']
   have e0 : φ ≫ δ' ≫ γ' ≫ β' ≫ α' = (((φ ≫ δ') ≫ γ') ≫ β') ≫ α' := by simp
   rw [e0, psiMap_comp_pullBack P F hτ hmt haa d _ hα',
-    psiMap_comp_otri P F hτ hmt haa hfn d (hiso _) _ (⟨β', hm'⟩ : OTri P Y'),
-    psiMap_comp_isometricPreStep P F hτ hiso hmt haa hfn d _ hγi' hγs',
-    psiMap_comp_frob P F hτ hiso hmt haa hfn hft d φ hδ'F]
+    psiMap_comp_otri P F hτ hmt haa hfn d hA _ (⟨β', hm'⟩ : OTri P Y'),
+    psiMap_comp_isometricPreStep P F hτ hmt haa hfn d hA _ hγi' hγs',
+    psiMap_comp_frob P F hτ hmt haa hfn hft d hA φ hδ'F]
   simp
 
 /-! ### ★★★★関手 `Ψ : 𝒞 ⥤ 𝒞(d)` -/
@@ -1272,9 +1277,9 @@ noncomputable def psiFunctor (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+
   obj A := A
   map φ := psiMap P F hτ hmt haa d φ
   map_id A := psiMap_id P F hτ hmt haa d A
-  map_comp φ φ' := psiMap_comp P F hτ hiso hmt haa hfn hft d φ φ'
+  map_comp φ φ' := psiMap_comp P F hτ hmt haa hfn hft d (hiso _) φ φ'
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★**`Ψ` の像は `𝒞(d)` に入る** —— `Div (Ψφ) = d • Div φ` だから。 -/
 theorem psiMap_mem_cd (d : ℕ+) {A B : C} (φ : A ⟶ B) :
     cdProp P d (psiMap P F hτ hmt haa d φ) :=
@@ -1290,13 +1295,13 @@ theorem psiMap_mem_cd (d : ℕ+) {A B : C} (φ : A ⟶ B) :
 noncomputable def psiFunctorCd (hft : ∀ X : C, IsFrobeniusTrivial P X) (d : ℕ+) :
     C ⥤ Cd P d where
   obj A := ⟨A⟩
-  map φ := ⟨psiMap P F hτ hmt haa d φ, psiMap_mem_cd P F hτ hiso hmt haa hfn d φ⟩
+  map φ := ⟨psiMap P F hτ hmt haa d φ, psiMap_mem_cd P F hτ hmt haa hfn d φ⟩
   map_id A := by
     apply InducedWideCategory.Hom.ext
     exact psiMap_id P F hτ hmt haa d A
   map_comp φ φ' := by
     apply InducedWideCategory.Hom.ext
-    exact psiMap_comp P F hτ hiso hmt haa hfn hft d φ φ'
+    exact psiMap_comp P F hτ hmt haa hfn hft d (hiso _) φ φ'
 
 /-! ### ★★★圏同値の 3 性質
 
