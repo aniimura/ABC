@@ -135,6 +135,26 @@ theorem isAnchor_map {A : C} (h : IsAnchor C A) : IsAnchor D (Ψ.obj A) := by
 
 /-! ## ★段 4 —— categorical quotient と mono-minimal は保たれる -/
 
+/-- ★★**圏同値は `Aut` を全単射に写す**。
+
+★単射性は忠実性、★全射性は充満性(`preimageIso`)から。
+★★**mono-minimal の移送で部分群を戻すときに要る**。 -/
+theorem mapAut_bijective (A : C) : Function.Bijective (Ψ.mapAut A) := by
+  constructor
+  · intro g₁ g₂ hg
+    refine Aut.ext ?_
+    refine Ψ.map_injective ?_
+    exact congrArg (fun z : Aut (Ψ.obj A) => z.hom) hg
+  · intro g
+    refine ⟨(Functor.FullyFaithful.ofFullyFaithful Ψ).preimageIso g, ?_⟩
+    refine Aut.ext ?_
+    show Ψ.map ((Functor.FullyFaithful.ofFullyFaithful Ψ).preimageIso g).hom = g.hom
+    simp
+
+/-- ★**同型として述べたもの** —— `Aut A ≃* Aut (Ψ.obj A)`。 -/
+noncomputable def mapAutEquiv (A : C) : Aut A ≃* Aut (Ψ.obj A) :=
+  MulEquiv.ofBijective (Ψ.mapAut A) (mapAut_bijective Ψ A)
+
 /-- ★★**圏同値は categorical quotient を保つ**。
 
 ★不変性は `Ψ.map` の関手性から。★**普遍性の側**が要点で、
