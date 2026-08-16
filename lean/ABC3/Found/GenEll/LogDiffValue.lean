@@ -111,6 +111,38 @@ theorem logDiffOfField_eq :
       = Real.log ((NumberField.discr F).natAbs) / (Module.finrank ℚ F : ℝ) := by
   rw [logDiffOfField, degNormalized, deg_differentADiv]
 
+/-! ## ★★導手の評価のイデアル側 —— `Proposition 1.6` の非アルキメデス側(第 2 の形) -/
+
+/-- ★**`deg(idealADiv (radical I)) ≤ deg(idealADiv I)`**。
+
+原文 (GenEll p.9):
+> Proposition 1.6. (Conductor Bounded by the Height) Let D ⊆ X be an effective Cartier divisor,
+
+★`Found/GenEll/Conductor.lean` の `deg_adivRed_le` は**算術因子の側**で同じことを言う。
+本定理は**イデアルの側**である——原文の `f_x^D ≝ (D_x)_red` の `D_x` が
+`Spec(O_F)` 上の因子(= イデアル)として来るので、こちらの形が直接使える。
+
+★★**根基の素因子分解を経由しない。** 要るのは `I ≤ radical I` だけで、
+そこから `absNorm(radical I) ∣ absNorm I`(`Ideal.absNorm_dvd_absNorm_of_le`)、
+したがってノルムが小さく、対数も小さい。
+★「被約化すると次数が減る」ことに**分解は要らなかった**。 -/
+theorem deg_idealADiv_radical_le (I : Ideal (𝓞 F)) (hI : I ≠ 0) :
+    deg (idealADiv F I.radical) ≤ deg (idealADiv F I) := by
+  have hrad : I.radical ≠ 0 := by
+    intro hcon
+    apply hI
+    have hle : I ≤ I.radical := Ideal.le_radical
+    rw [hcon] at hle
+    simpa using hle
+  have hne : Ideal.absNorm I ≠ 0 := (Ideal.absNorm_eq_zero_iff).not.2 hI
+  have hne' : Ideal.absNorm I.radical ≠ 0 := (Ideal.absNorm_eq_zero_iff).not.2 hrad
+  have hdvd : Ideal.absNorm I.radical ∣ Ideal.absNorm I :=
+    Ideal.absNorm_dvd_absNorm_of_le Ideal.le_radical
+  have hle : Ideal.absNorm I.radical ≤ Ideal.absNorm I :=
+    Nat.le_of_dvd (Nat.pos_of_ne_zero hne) hdvd
+  rw [deg_idealADiv F _ hrad, deg_idealADiv F I hI]
+  exact Real.log_le_log (by exact_mod_cast Nat.pos_of_ne_zero hne') (by exact_mod_cast hle)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def deg_idealADiv.src : ABC3.Meta.Source :=
