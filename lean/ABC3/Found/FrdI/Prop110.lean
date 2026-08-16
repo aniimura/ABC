@@ -1419,6 +1419,38 @@ theorem coaPre_factor_of_mle (G : Frobenioid P) {Cc B B' : C}
   have hw := Over.w f
   exact congrArg (fun t => t.hom) hw
 
+include P in
+/-- ★★**第1の圏同値(コスライス側)を「因子分解」として消費する**。
+
+`coaPre_factor_of_mle` の**鏡像**である —— あちらは `Cc` へ**入る** co-angular
+pre-step どうしを比べ、こちらは `A` から**出る**ものどうしを比べる。
+
+★**向きの違いが 2 か所に出る**:
+- 不変量が `Φ.map (inv (Base γ)) (Div γ)` ではなく **`Div ψ` そのもの**
+  (コスライスでは `Φ(A)` が既に始域側の単系だから、輸送が要らない)
+- `Order` への関手が**共変**なので、`op` を取らない
+
+★★**`Proposition 1.14, (i)` の「`Div(φ)` が irreducible」がこれを要求する** ——
+`Div φ = a + b` という分解から `φ` の分解を作るのに、
+「`a` を実現する `ψ`(`coaPre_realize`)＋ `φ` が `ψ` を経由すること(この補題)」の
+2 つが要る。 -/
+theorem coaPre_factor_under_of_mle (G : Frobenioid P) {A X B : C}
+    (ψ : A ⟶ X) (hψc : IsCoAngular P ψ) (hψs : IsPreStep P ψ)
+    (φ : A ⟶ B) (hφc : IsCoAngular P φ) (hφs : IsPreStep P φ)
+    (hle : MLe (P.Div ψ) (P.Div φ)) :
+    ∃ β : X ⟶ B, IsCoAngular P β ∧ IsPreStep P β ∧ ψ ≫ β = φ := by
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv A
+  set Zψ : Under (⟨A⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨A⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨X⟩ from ⟨ψ, hψc, hψs⟩) with hZψ
+  set Zφ : Under (⟨A⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨A⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨B⟩ from ⟨φ, hφc, hφs⟩) with hZφ
+  have hmor : (coaPreUnderFunctor P A).obj Zψ ⟶ (coaPreUnderFunctor P A).obj Zφ :=
+    homOfLE (show toOrderCat (P.Div ψ) ≤ toOrderCat (P.Div φ) from hle)
+  let f := (coaPreUnderFunctor P A).preimage hmor
+  refine ⟨f.right.hom, f.right.property.1, f.right.property.2, ?_⟩
+  exact congrArg (fun t => t.hom) (Under.w f)
+
 /-! ### ★(vi) の前半の組み立て
 
 原文(p.36)の段取りは 7 段:
