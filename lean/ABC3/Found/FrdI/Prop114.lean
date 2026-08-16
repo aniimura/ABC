@@ -719,7 +719,52 @@ pre-step にしか mono を与えない。**
 ★★**したがってこの穴は迂回できない。**
 ★**残る道は 2 つ**: 「prime-Frobenius ⟹ FSM」を `Definition 1.3` から導く別の道を
 見つけるか、★**`𝒪^×` に `p`-捻れを持つ Frobenioid を構成して原文の反例とするか**。
+
+★★**穴の正体を定理にした**(下の 2 本、2026-08-16)。
+★**Frobenius 型射で消去すると、不変量(`Base`・`degFr`・`Div`)はすべて一致する。**
+★**したがって残るのは「不変量が一致する 2 射は等しいか」だけであり、
+`Definition 1.3` はそれを単元を除いてしか保証しない**(`faithfulUpToUnits`、
+しかも co-angular pre-step についてのみ)。
+★★**「prime-Frobenius ⟹ mono」の穴は、ちょうど単元の分だけ開いている。**
 -/
+
+include P in
+/-- ★★**Frobenius 型射で消去すると不変量は一致する**。
+
+★3 つの理由が別々である:
+- **`Base`**: Frobenius 型は base-isomorphism なので、同型を右から消せる
+- **`degFr`**: `ℕ≥1` の消約性
+- **`Div`**: Frobenius 型は isometry なので `Div ε = 0`、残る `degFr ε • ` を
+  `divisorial` の単射性(`nsmul_injective_of_isDivisorial`)で消す -/
+theorem frobType_cancel_invariants {A Cc B : C} (ε : Cc ⟶ B)
+    (hε : IsFrobeniusType P ε) {f g : A ⟶ Cc} (h : f ≫ ε = g ≫ ε) :
+    P.Base f = P.Base g ∧ P.degFr f = P.degFr g ∧ P.Div f = P.Div g := by
+  haveI hbε : IsIso (P.Base ε) := hε.2
+  refine ⟨?_, ?_, ?_⟩
+  · have hb := congrArg P.Base h
+    rw [P.Base_comp, P.Base_comp] at hb
+    exact (cancel_mono (P.Base ε)).mp hb
+  · have hd := congrArg P.degFr h
+    rw [P.degFr_comp, P.degFr_comp] at hd
+    exact mul_left_cancel hd
+  · have hv := congrArg P.Div h
+    rw [P.Div_comp, P.Div_comp, show P.Div ε = 0 from hε.1.2] at hv
+    simp only [map_zero, zero_add] at hv
+    exact nsmul_injective_of_isDivisorial (P.divisorial _) (P.degFr ε).2 hv
+
+include P in
+/-- ★★★**Frobenius 型射は、`𝒞 → 𝔽_Φ` が忠実なら mono**。
+
+★★**`Proposition 1.14, (iii)` の (a) の側の穴は、ちょうどこの仮定の分だけ開いている。**
+`Definition 1.3` が与えるのは `faithfulUpToUnits`(単元を除く忠実性、
+しかも co-angular pre-step についてのみ)であって、忠実性そのものではない。
+
+★**`𝒪^×` が自明なら忠実性が出るはずである**(未実装)。 -/
+theorem mono_of_frobType_of_faithful (hfaith : P.toElem.Faithful)
+    {Cc B : C} (ε : Cc ⟶ B) (hε : IsFrobeniusType P ε) : Mono ε := by
+  refine ⟨fun {X} f g h => ?_⟩
+  obtain ⟨hb, hd, hv⟩ := frobType_cancel_invariants P ε hε h
+  exact hfaith.map_injective (ElemFrobCat.Hom.ext hb hv hd)
 
 include P in
 /-- ★★★**prime-Frobenius 射が mono でなくなる機構**。
