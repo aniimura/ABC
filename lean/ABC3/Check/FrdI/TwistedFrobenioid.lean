@@ -1,5 +1,6 @@
 import ABC3.Found.FrdI.Prop15
 import ABC3.Found.FrdI.Witness
+import ABC3.Found.FrdI.Prop114
 
 /-!
 # 捻れ積 `𝔽_Φ ⋉ G` —— `[FrdI] Proposition 1.14, (iii)` の反例の候補
@@ -117,14 +118,26 @@ theorem twComp_unit_pow {A B E : TwObj Φ G} (f : A ⟶ B) (ζ : B ⟶ E)
 
 ★★**これが `Proposition 1.14, (iii)` の `⟸` を破る機構である** ——
 そこは「prime-Frobenius 射が FSMI(したがって mono)」を要求する。 -/
-theorem not_mono_twist {B E : TwObj Φ G} (ζ : B ⟶ E) (hζ : ζ.unit = 1)
+theorem not_mono_twist {B E : TwObj Φ G} (ζ : B ⟶ E)
     (u : G) (hu : u ≠ 1) (hup : u ^ ((ζ.hom.deg : ℕ+) : ℕ) = 1) : ¬ Mono ζ := by
   intro hm
   have hsq : (⟨𝟙 B.ofElem, 1⟩ : TwHom B B) ≫ ζ = (⟨𝟙 B.ofElem, u⟩ : TwHom B B) ≫ ζ := by
     refine TwHom.ext rfl ?_
-    rw [twComp_unit, twComp_unit, hζ, mul_one, mul_one, one_pow, hup]
+    rw [twComp_unit, twComp_unit, one_pow, hup]
   have := (cancel_mono ζ).mp hsq
   exact hu (congrArg TwHom.unit this).symm
+
+/-- ★★**mono なら次数は 1** —— `G` に `d`-捻れがあるすべての `d` について。
+
+★**`ζ.unit` に条件は要らない** —— 左から掛ける `G` 成分だけで反例が作れる。 -/
+theorem deg_eq_one_of_mono_of_torsion {B E : TwObj Φ G} (ζ : B ⟶ E) (hm : Mono ζ)
+    (htor : ∀ d : ℕ, 2 ≤ d → ∃ u : G, u ≠ 1 ∧ u ^ d = 1) :
+    ElemFrobCat.Hom.deg ζ.hom = 1 := by
+  by_contra hne
+  have hpos : 0 < ((ζ.hom.deg : ℕ+) : ℕ) := ζ.hom.deg.pos
+  have hne' : ((ζ.hom.deg : ℕ+) : ℕ) ≠ 1 := fun h => hne (PNat.coe_injective h)
+  obtain ⟨u, hu, hup⟩ := htor ((ζ.hom.deg : ℕ+) : ℕ) (by omega)
+  exact not_mono_twist ζ u hu hup hm
 
 /-! ## ★捻れ積の `PreFrobenioid` 構造
 
@@ -1080,10 +1093,15 @@ theorem cx_isFrobenioid : Frobenioid cxP :=
 /-- ★★★**次数 > 1 の射は 1 本も mono でない**。
 
 ★★**これで「次数を大きくすれば mono になる」逃げ道が塞がる。** -/
-theorem cx_not_mono_of_deg_gt_one {A B : CxC} (ζ : A ⟶ B) (hζ : ζ.unit = 1)
+theorem cx_not_mono_of_deg_gt_one {A B : CxC} (ζ : A ⟶ B)
     (hd : 2 ≤ ((ζ.hom.deg : ℕ+) : ℕ)) : ¬ Mono ζ := by
   obtain ⟨u, hu, hup⟩ := cxG_torsion _ hd
-  exact not_mono_twist ζ hζ u hu hup
+  exact not_mono_twist ζ u hu hup
+
+/-- ★★★**mono な射は次数 1** —— この圏では逆も成り立つ(下の `cx_mono_iff`)。 -/
+theorem cx_deg_eq_one_of_mono {A B : CxC} (ζ : A ⟶ B) (hm : Mono ζ) :
+    ElemFrobCat.Hom.deg ζ.hom = 1 :=
+  deg_eq_one_of_mono_of_torsion ζ hm fun d hd => cxG_torsion d hd
 
 /-- ★反例の対象。 -/
 abbrev cxA : CxC := ⟨⟨Vee.top⟩⟩
@@ -1102,7 +1120,7 @@ theorem cx_zeta_deg (n : ℕ+) : cxP.degFr (cxZeta n) = n := rfl
 
 /-- ★★★**どの次数 > 1 でも mono にならない**。 -/
 theorem cx_zeta_not_mono (n : ℕ+) (hn : 2 ≤ (n : ℕ)) : ¬ Mono (cxZeta n) :=
-  cx_not_mono_of_deg_gt_one (cxZeta n) rfl hn
+  cx_not_mono_of_deg_gt_one (cxZeta n) hn
 
 /-- ★★★**`Definition 1.3` は「Frobenius 型射は mono」を含意しない** ——
 ★**しかも次数をどれだけ大きくしても含意しない。**
@@ -1118,6 +1136,215 @@ theorem cx_frobType_not_mono (n : ℕ+) (hn : 2 ≤ (n : ℕ)) :
       IsFrobeniusType cxP ζ ∧ cxP.degFr ζ = n ∧ ¬ Mono ζ :=
   ⟨cxA, cxZeta n, cx_zeta_frobType n, cx_zeta_deg n, cx_zeta_not_mono n hn⟩
 
+/-! ## ★★★もう一段強い具体化 —— 一対象の底圏
+
+★上の `Vee` 版は「原文の証明の一歩が出ない」ことしか言えなかった。
+★★**底圏を一対象(`Discrete PUnit`)に取ると、`Proposition 1.14, (iii)` の
+`⟸` そのものを反証できる。**
+
+★理由: この圏では ★**FSMI 射はちょうど `Div = 1` の射**である
+(mono ⟹ 次数 1、irreducible ⟹ `Div` は 1)。したがって
+★★**鎖の長さは `Div` そのもの**になり、`φ ≫ ψ` の `Div` は `1 + 1 = 2` で止まる。
+★原文が (a) の場合に使う「次数を大きくした prime-Frobenius を後置する」手は、
+★**それらが 1 本も mono でないので使えない。** -/
+
+/-- ★一対象の底圏上の `Φ = ℕ`。 -/
+abbrev Cx2Phi : MonoidOn.{0, 0, 0} (Discrete PUnit) := constPhi ℕ
+
+/-- ★反例その 2 の圏。 -/
+abbrev Cx2C : Type := TwObj Cx2Phi CxG
+
+instance : Subsingleton Cx2C :=
+  ⟨fun A B => by
+    obtain ⟨a⟩ := A
+    obtain ⟨b⟩ := B
+    rw [Subsingleton.elim a b]⟩
+
+theorem cx2_totEpi : IsTotallyEpimorphic (Discrete PUnit) :=
+  isTotallyEpimorphic_of_subsingleton_hom fun _ _ => inferInstance
+
+/-- ★反例その 2 の pre-Frobenioid。 -/
+def cx2P : PreFrobenioid Cx2C Cx2Phi.charOn :=
+  twPreFrobenioid (G := CxG) cx2_totEpi (fun _ => isPreDivisorial_nat)
+
+/-- ★★これも Frobenioid である。 -/
+theorem cx2_isFrobenioid : Frobenioid cx2P :=
+  twIsFrobenioid (G := CxG) cx2_totEpi (fun _ => isPreDivisorial_nat)
+
+/-- ★全対象が isotropic(`Proposition 1.14` が課す仮定)。 -/
+theorem cx2_isotropic (X : Cx2C) : IsIsotropic cx2P X :=
+  twIsotropic cx2_totEpi (fun _ => isPreDivisorial_nat) X
+
+instance discretePUnitIsIso {X Y : Discrete PUnit} (f : X ⟶ Y) : IsIso f :=
+  ⟨⟨⟨⟨f.down.down.symm⟩⟩, Subsingleton.elim _ _, Subsingleton.elim _ _⟩⟩
+
+/-- ★底圏は FSM 型(射がすべて同型)、したがって **FSMFF 型**
+(`Proposition 1.14` が課す仮定)。 -/
+theorem cx2_fsmff : IsOfFSMFFType (Discrete PUnit) :=
+  isOfFSMFFType_of_isOfFSMType (fun _ _ f _ => inferInstance)
+
+/-- ★`ℕ+` で `a * b = 1` なら両方 1。 -/
+theorem pnat_mul_eq_one {a b : ℕ+} (h : a * b = 1) : a = 1 ∧ b = 1 := by
+  have h' : (a : ℕ) * (b : ℕ) = 1 := by
+    exact_mod_cast congrArg (fun x : ℕ+ => (x : ℕ)) h
+  exact ⟨PNat.coe_injective (Nat.dvd_one.mp ⟨_, h'.symm⟩),
+    PNat.coe_injective (Nat.dvd_one.mp ⟨_, (by rw [mul_comm] at h'; exact h'.symm)⟩)⟩
+
+/-- ★`ℕ` では可逆元は `0` だけ。 -/
+theorem nat_isAddUnit_iff {n : ℕ} : IsAddUnit n ↔ n = 0 := by
+  constructor
+  · rintro ⟨u, rfl⟩
+    have h := u.val_neg
+    omega
+  · rintro rfl
+    exact isAddUnit_zero
+
+/-- ★★`Div` を **`ℕ` として** 取り出す。
+
+★`Cx2Phi.val A` は `ℕ` と defeq だが、そのままでは数値リテラルの
+instance 探索が通らないので、ここで `ℕ` に固定する。 -/
+def cx2div {X Y : Cx2C} (f : X ⟶ Y) : ℕ := ElemFrobCat.Hom.div f.hom
+
+/-- ★★**この圏では 同型 ⟺ `Div = 0` かつ次数 1**(底の射はすべて同型なので)。 -/
+theorem cx2_isIso_iff {X Y : Cx2C} (f : X ⟶ Y) :
+    IsIso f ↔ cx2div f = 0 ∧ ElemFrobCat.Hom.deg f.hom = 1 := by
+  constructor
+  · intro h
+    haveI := h
+    have h0 : IsIso f.hom :=
+      ⟨⟨(inv f).hom, congrArg TwHom.hom (IsIso.hom_inv_id f),
+        congrArg TwHom.hom (IsIso.inv_hom_id f)⟩⟩
+    obtain ⟨-, hd, hn⟩ := (ElemFrobCat.isIso_iff f.hom).mp h0
+    exact ⟨nat_isAddUnit_iff.mp hd, hn⟩
+  · rintro ⟨hd, hn⟩
+    exact twIsIso_of _ ((ElemFrobCat.isIso_iff f.hom).mpr
+      ⟨inferInstance, nat_isAddUnit_iff.mpr hd, hn⟩)
+
+/-- ★次数 1 の射で合成すると `Div` は素直に足し算になる(`Φ.map` が恒等)。 -/
+theorem cx2_div_comp {X Y Z : Cx2C} (ψ : X ⟶ Y) (φ : Y ⟶ Z)
+    (hφ : ElemFrobCat.Hom.deg φ.hom = 1) :
+    cx2div (ψ ≫ φ) = cx2div φ + cx2div ψ := by
+  have h := ElemFrobCat.div_comp ψ.hom φ.hom
+  rw [hφ] at h
+  simp only [PNat.one_coe, one_smul, MonoidOn.const_map] at h
+  exact h
+
+/-- ★反例その 2 の対象。 -/
+abbrev cx2A : Cx2C := ⟨constObj ℕ⟩
+
+/-- ★★★**`Div = 1` の step** —— これが irreducible な pre-step である。 -/
+def cx2Step : cx2A ⟶ cx2A := ⟨⟨𝟙 _, (1 : ℕ), 1⟩, 1⟩
+
+theorem cx2Step_div : cx2div cx2Step = 1 := rfl
+theorem cx2Step_deg : ElemFrobCat.Hom.deg cx2Step.hom = 1 := rfl
+
+theorem cx2Step_preStep : IsPreStep cx2P cx2Step := by
+  refine ⟨rfl, ?_⟩
+  show IsIso (𝟙 (constObj ℕ).base)
+  infer_instance
+
+theorem cx2Step_irreducible : IsIrreducibleMor cx2Step := by
+  constructor
+  · intro h
+    have hz := ((cx2_isIso_iff cx2Step).mp h).1
+    rw [cx2Step_div] at hz
+    exact one_ne_zero hz
+  · intro X β α hfac
+    obtain rfl : X = cx2A := Subsingleton.elim X cx2A
+    have hprod : ElemFrobCat.Hom.deg α.hom * ElemFrobCat.Hom.deg β.hom = 1 := by
+      have h : ElemFrobCat.Hom.deg cx2Step.hom = ElemFrobCat.Hom.deg (β ≫ α).hom :=
+        congrArg (fun f : cx2A ⟶ cx2A => ElemFrobCat.Hom.deg f.hom) hfac
+      rw [cx2Step_deg] at h
+      exact h.symm
+    obtain ⟨hα1, hβ1⟩ := pnat_mul_eq_one hprod
+    have hdiv : cx2div α + cx2div β = 1 := by
+      have h : cx2div cx2Step = cx2div (β ≫ α) :=
+        congrArg (fun f : cx2A ⟶ cx2A => cx2div f) hfac
+      rw [cx2Step_div, cx2_div_comp β α hα1] at h
+      exact h.symm
+    rcases Nat.eq_zero_or_pos (cx2div β) with hb | hb
+    · exact Or.inl ((cx2_isIso_iff β).mpr ⟨hb, hβ1⟩)
+    · exact Or.inr ((cx2_isIso_iff α).mpr ⟨by omega, hα1⟩)
+
+/-- ★★**FSMI 射は次数 1**(mono だから)。 -/
+theorem cx2_fsmi_deg {X Y : Cx2C} (ψ : X ⟶ Y) (h : IsFSMI ψ) :
+    ElemFrobCat.Hom.deg ψ.hom = 1 :=
+  deg_eq_one_of_mono_of_torsion ψ h.1.2 fun d hd => cxG_torsion d hd
+
+/-- ★★★**FSMI 射は `Div = 1`** —— 下からは「同型でない」、上からは「irreducible」。 -/
+theorem cx2_fsmi_div {X Y : Cx2C} (ψ : X ⟶ Y) (h : IsFSMI ψ) : cx2div ψ = 1 := by
+  obtain rfl : X = cx2A := Subsingleton.elim X cx2A
+  obtain rfl : Y = cx2A := Subsingleton.elim Y cx2A
+  have hdeg := cx2_fsmi_deg ψ h
+  have hne : cx2div ψ ≠ 0 := fun h0 => h.2.1 ((cx2_isIso_iff ψ).mpr ⟨h0, hdeg⟩)
+  by_contra hne1
+  have h2 : 2 ≤ cx2div ψ := by omega
+  have hsplit : ψ = cx2Step
+      ≫ (⟨⟨𝟙 _, ((cx2div ψ - 1 : ℕ) : ℕ), 1⟩, ψ.unit⟩ : cx2A ⟶ cx2A) := by
+    refine TwHom.ext (ElemFrobCat.Hom.ext ?_ ?_ ?_) ?_
+    · exact (Subsingleton.elim _ _).trans (Category.comp_id _).symm
+    · show (cx2div ψ : ℕ) = (cx2div ψ - 1 : ℕ) + ((1 : ℕ+) : ℕ) • (1 : ℕ)
+      simp only [PNat.one_coe, one_smul]
+      omega
+    · show ElemFrobCat.Hom.deg ψ.hom = 1 * 1
+      rw [hdeg, mul_one]
+    · show ψ.unit = (1 : CxG) ^ ((1 : ℕ+) : ℕ) * ψ.unit
+      simp
+  rcases h.2.2 cx2A cx2Step
+      (⟨⟨𝟙 _, ((cx2div ψ - 1 : ℕ) : ℕ), 1⟩, ψ.unit⟩ : cx2A ⟶ cx2A) hsplit with hiso | hiso
+  · have hz := ((cx2_isIso_iff cx2Step).mp hiso).1
+    rw [cx2Step_div] at hz
+    exact one_ne_zero hz
+  · have hz : (cx2div ψ - 1 : ℕ) = 0 :=
+      ((cx2_isIso_iff (⟨⟨𝟙 _, ((cx2div ψ - 1 : ℕ) : ℕ), 1⟩, ψ.unit⟩ : cx2A ⟶ cx2A)).mp hiso).1
+    omega
+
+theorem cx2_chain_deg {n : ℕ} {X Y : Cx2C} {χ : X ⟶ Y} (h : IsFSMIChain n χ) :
+    ElemFrobCat.Hom.deg χ.hom = 1 := by
+  induction h with
+  | nil => rfl
+  | @cons n A B E φ ψ hφ _ ih =>
+      show ElemFrobCat.Hom.deg (φ.hom ≫ ψ.hom) = 1
+      rw [ElemFrobCat.comp_deg, ih, cx2_fsmi_deg φ hφ, mul_one]
+
+/-- ★★★**鎖の長さは `Div` そのもの** —— FSMI 射がちょうど `Div = 1` だから。 -/
+theorem cx2_chain_div {n : ℕ} {X Y : Cx2C} {χ : X ⟶ Y} (h : IsFSMIChain n χ) :
+    cx2div χ = n := by
+  induction h with
+  | nil => rfl
+  | @cons n A B E φ ψ hφ hψ ih =>
+      rw [cx2_div_comp φ ψ (cx2_chain_deg hψ), ih, cx2_fsmi_div φ hφ]
+
+/-- ★★★**`cx2Step` について鎖の長さは 2 で頭打ちになる**。
+
+★★**これが `Proposition 1.14, (iii)` の `⟸` の反証である** ——
+`cx2Step` は irreducible な **pre-step** なのに、条件(有界性)が成り立つ。 -/
+theorem cx2_bounded : BoundedFSMIFactor cx2Step := by
+  refine ⟨2, fun n E ψ χ hψ hchain hχ => ?_⟩
+  have hd := cx2_chain_div hchain
+  rw [hχ, cx2_div_comp cx2Step ψ (cx2_fsmi_deg ψ hψ), cx2_fsmi_div ψ hψ, cx2Step_div] at hd
+  omega
+
+/-- ★★★**[FrdI] Proposition 1.14, (iii) の `⟸` は成り立たない**。
+
+原文 (FrdI p.41):
+> — where α1, . . . , αn, ψ are FSMI-morphisms [cf. §0] — it holds that n ≤N.
+
+原文 (FrdI p.42):
+> taking ψ to be a prime-Frobenius morphism of increasingly large Frobenius degree
+
+★原文は (a) の場合に「次数を大きくした prime-Frobenius 射を後置する」と述べるが、
+★★**条件文はその射自身にも FSMI を要求している**。
+★この圧では次数 > 1 の射が 1 本も mono でないので、その射は存在しない。
+
+★`cx2_isFrobenioid` が `Definition 1.3` を、`cx2_isotropic` が
+`Proposition 1.14` の課す isotropic 性を、`cx2_fsmff` が底圧の FSMFF 型を与える。
+その上で ★**irreducible な pre-step が有界性を満たしてしまう。** -/
+theorem cx2_refutes_1_14_iii :
+    ∃ (X : Cx2C) (φ : X ⟶ X),
+      IsIrreducibleMor φ ∧ IsPreStep cx2P φ ∧ BoundedFSMIFactor φ :=
+  ⟨cx2A, cx2Step, cx2Step_irreducible, cx2Step_preStep, cx2_bounded⟩
+
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
 
 ★**確定した**:
@@ -1128,10 +1355,16 @@ theorem cx_frobType_not_mono (n : ℕ+) (hn : 2 ≤ (n : ℕ)) :
 - ★**connected である**(`𝔽_Φ` の証明をそのまま写せる)
 - ★★**`PreFrobenioid` 構造を持つ**(`twPreFrobenioid`)
 - ★★★**`Definition 1.3` の全条件を満たす**(`twFrobenioidCore` ＋ `twIsFrobenioid`)
-- ★★★**具体化した `𝔽_{ℕ on Vee} ⋉ ℤ/2` で、次数 2 の Frobenius 型射が
-  mono でない**(`cx_frobType_not_mono`)
+- ★★★**`𝔽_{ℕ on Vee} ⋉ (∏_n ℤ/n)` で、次数 > 1 の射は 1 本も mono でない**
+  (`cx_not_mono_of_deg_gt_one`)
+- ★★★**底圏を一対象にした `cx2P` で、`Proposition 1.14, (iii)` の `⟸` が偽**
+  (`cx2_refutes_1_14_iii`)——
+  ★**FSMI 射がちょうど `Div = 1` なので鎖の長さは `Div` そのものになり、
+  irreducible な pre-step でも有界になってしまう。**
 
 ★**したがって `Gap_1_14_iii` は ③(`sourceGap`)に上がる。**
+★★**さらに `Proposition 1.14` は「実装できない項目」である** ——
+主張が偽なので `.src`(＝完全実装の主張)を付ける道は無い。
 
 ★★**`sorry` は置かない。** 未確定のものは**書かない**。
 -/

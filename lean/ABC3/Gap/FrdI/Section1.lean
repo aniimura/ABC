@@ -79,19 +79,29 @@ pre-step にしか mono を与えない。**
 ★`ℤ/2` だけだと「次数 3 の射を使えばよい」という逃げ道が残るが、
 ★**この `G` はその逃げ道を塞ぐ。**
 
-## ★★何が確定し、何が確定していないか
+## ★★★底圏を一対象にすると、主張そのものが反証できる
 
-★★**確定した**: ★**`Definition 1.3` からは「Frobenius 型射は mono」が出ない。**
-原文 (FrdI p.42) の (a) の場合の議論は
-「次数をいくらでも大きくした prime-Frobenius 射 `ψ` を後置する」ものであり、
-条件文はその `ψ` 自身にも FSMI(したがって mono)を要求している。
-★**その一歩が `Definition 1.3` から出ないことを反例で示した**(`not_gap_1_14_iii`)。
+★★**`𝒟 = Discrete PUnit`(一対象)、`Φ = ℕ`、`G = ∏_n ℤ/n` を取る**
+(`Check/FrdI/TwistedFrobenioid.lean` の `cx2P`)。この圏では:
 
-★★**確定していない**: ★**この反例の中で `(iii)` の `⟸` 自体が偽であるとは
-示していない。** 実際この圏では次数 > 1 の射が 1 本も FSM でないので、
-鎖はむしろ**短くなり**、結論の側は成り立っている可能性が高い。
-★**したがってここで言えるのは「原文の証明の一歩が原文の仮定から出ない」ことであって、
-「原文の主張が偽である」ことではない。** ③ は前者の意味で名乗る。
+- ★**FSMI 射はちょうど `Div = 1` の射**である ——
+  mono から次数 1(`cx2_fsmi_deg`)、irreducible から `Div = 1`(`cx2_fsmi_div`)
+- したがって ★★**鎖の長さは `Div` そのもの**(`cx2_chain_div`)
+- `Div = 1` の step `cx2Step` は irreducible な **pre-step** だが、
+  `cx2Step ≫ ψ` の `Div` は `1 + 1 = 2` で止まる(`cx2_bounded`)
+
+★**原文が (a) の場合に使う「次数を大きくした prime-Frobenius を後置する」手は、
+それらが 1 本も mono でないので使えない。**
+
+★★★**したがって `(iii)` の `⟸`(条件 ⟹ 非 pre-step)は偽である**
+(`cx2_refutes_1_14_iii`)。
+仮定はすべて満たしている —— `Definition 1.3`(`cx2_isFrobenioid`)、
+isotropic 型(`cx2_isotropic`)、`𝒟` が FSMFF 型(`cx2_fsmff`)、
+`𝒟` が connected・totally epimorphic、`Φ` が divisorial。
+
+★**注意**: 反証は `BoundedFSMIFactor` という**我々の写し方**に対するものである。
+原文の条件文は `αn ◦ … ◦ α1 = ψ ◦ φ`(`α` たちと `ψ` が FSMI)の `n` の有界性で、
+★**`ψ` に FSMI を課すのは原文の文言そのもの**(上の p.41 の引用)である。
 -/
 
 /-- ★**`Proposition 1.14, (iii)` の `⟸` に不足しているもの**。
@@ -117,14 +127,14 @@ def Gap_1_14_iii.record : ABC3.Meta.GapRecord :=
     classification := ABC3.Meta.GapClass.sourceGap,
     falsifier :=
       "★2026-08-16 に ② から ③ へ上げた。根拠は `Check/FrdI/TwistedFrobenioid.lean` の" ++
-      "`cx_isFrobenioid`(捻れ積 𝔽_{ℕ on Vee} ⋉ ∏_n ℤ/n が Definition 1.3 の全条件を満たす)" ++
-      "と `not_gap_1_14_iii`(その圏で Frobenius 型射が mono でない)。" ++
+      "`cx2_isFrobenioid`(捻れ積 𝔽_{ℕ on 一対象圏} ⋉ ∏_n ℤ/n が Definition 1.3 の" ++
+      "全条件を満たす)と `cx2_refutes_1_14_iii`(その圏で irreducible な pre-step が" ++
+      "条件を満たしてしまう)。仮定はすべて充足済み(isotropic 型・𝒟 が FSMFF 型・" ++
+      "connected・totally epimorphic・Φ が divisorial)。" ++
       "★これが覆るのは (a) この捻れ積が Definition 1.3 のどれかの条項を実は満たさないと" ++
-      "示された場合(→ ①、我々のモデル化の誤り)、または (b) 原文の (a) の場合の議論が" ++
-      "prime-Frobenius 射の FSMI 性を使わない形に書き直せる場合(→ ②)である。" ++
-      "★注意: ここで示したのは「原文の証明の一歩が原文の仮定から出ない」ことであって、" ++
-      "「(iii) の ⟸ の主張が偽である」ことではない。この圏では次数 > 1 の射が 1 本も" ++
-      "FSM でないので鎖はむしろ短くなり、結論の側は成り立っている可能性が高い。" ++
+      "示された場合、または (b) 我々の `BoundedFSMIFactor` の写し方が原文と違う場合" ++
+      "(どちらも → ①、我々の側の誤り)である。ψ に FSMI を課すのは原文の文言そのもの" ++
+      "(p.41「where α1, . . . , αn, ψ are FSMI-morphisms」)であることは確認した。" ++
       "なお使用箇所(FrdI p.63 の Theorem 3.4)では追加の仮定は課されていない。" }
 
 open ABC3.Check.FrdI in
@@ -137,6 +147,19 @@ theorem not_gap_1_14_iii : ¬ Gap_1_14_iii cxP := by
   intro h
   obtain ⟨A, ζ, hft, -, hnm⟩ := cx_frobType_not_mono 2 (le_refl 2)
   exact hnm (h.frobTypeMono ζ hft)
+
+open ABC3.Check.FrdI in
+/-- ★★★**`Proposition 1.14, (iii)` の `⟸` そのものが偽である**。
+
+★★**`Gap_1_14_iii` は「原文の証明の一歩が足りない」という記録だったが、
+こちらは「主張が成り立たない」という記録である。**
+したがって ★**この項目に `.src`(＝完全実装の主張)を付けることはできない。** -/
+theorem prop_1_14_iii_mpr_false :
+    ¬ (∀ {X : Cx2C} (φ : X ⟶ X), IsIrreducibleMor φ → BoundedFSMIFactor φ →
+        ¬ IsPreStep cx2P φ) := by
+  intro h
+  obtain ⟨X, φ, hirr, hstep, hbdd⟩ := cx2_refutes_1_14_iii
+  exact h φ hirr hbdd hstep
 
 /-! ## ★`Proposition 1.6, (v)` の `base-trivial` / `metrically trivial` の `⟸`
 
