@@ -1022,4 +1022,89 @@ theorem prop_1_14_iv (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
     have h2 : ((P.degFr α' : ℕ+) : ℕ) = 1 := by rw [← hd, h1]; rfl
     exact Nat.not_prime_one (h2 ▸ hp.2)
 
+/-! ## ★(v) —— Div-identity prime-Frobenius 自己射の特徴づけ
+
+原文 (FrdI p.41):
+> (v) Suppose further that Φ is non-dilating, and that φ is a non-pre-step
+
+原文 (FrdI p.41):
+> condition holds: For every step α : A →B, there exists a non-pre-step irreducible
+
+★**引用を選び直した記録(事故 #3 の 12 度目)**: 主張の最後の行
+「morphism ψ : B →B′ and a step β : B →B′ such that ψ ◦α = β ◦α ◦φ.」は
+★**`′` を含むため引用できない**(13/46 文字で停止)。1 行前を引く。
+★**また手で打っていた** —— 抽出から差し込む規律を守れていない。
+
+★**原文の必要性の証明**(p.43、目視):
+> the necessity of the condition in the statement of assertion (v) [where we take ψ to
+> be a prime-Frobenius morphism such that degFr(φ) = degFr(ψ)] follows immediately
+> from Proposition 1.10, (i) [cf. also Definition 1.3, (ii); assertion (i); the first
+> equivalence of categories of Definition 1.3, (iii), (d)].
+
+★★**「follows immediately」の中身は 4 段である**:
+1. `Definition 1.3, (ii)` が次数 `p` の Frobenius 型 `ψ : B ⟶ B′` を与える
+   ((i) で irreducible、次数が素数なので非 pre-step)
+2. `Proposition 1.10, (i)` が **一意の** `α′` で `α ≫ ψ = φ ≫ α′` を与える
+3. ★**`φ` が Div-identity であることが効く** —— `Div α′ = p · Div α` になる
+   (一般には `p · Φ(Base φ)⁻¹(Div α)`)
+4. 第1の圏同値(`coaPre_factor_under_of_mle`)が `α ≫ β = α′` なる `β` を与え、
+   ★**`Div β ≠ 0` は `(p−1)·Div α ≠ 0` から出る**(`p ≥ 2` と sharp)
+-/
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (v) の必要性**。 -/
+theorem prop_1_14_v_mp (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A : C} (φ : A ⟶ A)
+    (hφF : IsFrobeniusType P φ) (hφp : Nat.Prime ((P.degFr φ : ℕ+) : ℕ))
+    (hφd : IsDivIdentity P φ) {B : C} (α : A ⟶ B) (hαs : IsStep P α) :
+    ∃ (B' : C) (ψ : B ⟶ B') (β : B ⟶ B'),
+      IsIrreducibleMor ψ ∧ ¬ IsPreStep P ψ ∧ IsStep P β ∧
+      α ≫ ψ = φ ≫ α ≫ β := by
+  haveI hbφ : IsIso (P.Base φ) := hφF.2
+  -- 段 1
+  obtain ⟨B', ψ, hψF, hψd⟩ := F.frobDegSurj B (P.degFr φ)
+  have hψp : IsPrimeFrobenius P ψ := ⟨hψF, by rw [hψd]; exact hφp⟩
+  have hψirr : IsIrreducibleMor ψ := prop_1_10_iv_mp P F (hiso B) ψ hψp
+  have hψnp : ¬ IsPreStep P ψ := by
+    intro hps
+    have h1 : ((P.degFr ψ : ℕ+) : ℕ) = 1 := by rw [show P.degFr ψ = 1 from hps.1]; rfl
+    exact Nat.not_prime_one (h1 ▸ hψp.2)
+  -- 段 2
+  obtain ⟨α', hsq, -⟩ := prop_1_10_i_exists_given P F α φ hφF ψ hψF hψd.symm
+  have hα's : IsPreStep P α' := prop_1_10_i_preStep_of P hφF hψF hψd.symm hsq hαs.1
+  have hα'c : IsCoAngular P α' := prop_1_4_i P α' (fun Y _ => hiso Y)
+  have hαc : IsCoAngular P α := prop_1_4_i P α (fun Y _ => hiso Y)
+  -- 段 3: ★`Div-identity` が `Φ.map (inv (Base φ))` を恒等にする
+  have hid : ∀ x : Φ.val (P.toElem.obj A).base, Φ.map (inv (P.Base φ)) x = x := by
+    intro x
+    have hb : Φ.map (P.Base φ) x = x := by
+      rw [show Φ.map (P.Base φ) = Φ.map (P.Base (𝟙 A)) from hφd, P.Base_id, Φ.map_id]
+    calc Φ.map (inv (P.Base φ)) x = Φ.map (inv (P.Base φ)) (Φ.map (P.Base φ) x) := by rw [hb]
+      _ = x := by rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+  have hdα' : P.Div α' = ((P.degFr ψ : ℕ+) : ℕ) • P.Div α := by
+    rw [prop_1_10_i_Div_formula' P α φ ψ α' hφF hψF.1.2 hsq, hid]
+  -- `Div α ≠ 0`(step だから)
+  have hdα : P.Div α ≠ 0 := fun h => hαs.2 (hiso A B α h hαs.1)
+  -- 段 4
+  obtain ⟨β, -, hβs, hβ⟩ := coaPre_factor_under_of_mle P G α hαc hαs.1 α' hα'c hα's
+    (by rw [hdα']; exact mle_nsmul_self (P.degFr ψ).2 _)
+  refine ⟨B', ψ, β, hψirr, hψnp, ⟨hβs, ?_⟩, by rw [hsq, hβ]⟩
+  -- `β` は同型でない
+  intro hβiso
+  haveI := hβiso
+  have hz : P.Div β = 0 := isIsometric_of_isIso P β
+  have h2 : ((P.degFr ψ : ℕ+) : ℕ) • P.Div α = ((1 : ℕ)) • P.Div α := by
+    rw [← hdα', ← hβ, P.Div_comp, hz, map_zero, zero_add,
+      show P.degFr β = 1 from hβs.1]
+    rfl
+  have hp2 : 2 ≤ ((P.degFr ψ : ℕ+) : ℕ) := by rw [hψd]; exact hφp.two_le
+  letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj A).base).1.1
+  obtain ⟨m, hm⟩ : ∃ m, ((P.degFr ψ : ℕ+) : ℕ) = m + 1 + 1 :=
+    ⟨((P.degFr ψ : ℕ+) : ℕ) - 2, by omega⟩
+  rw [hm, one_smul, succ_nsmul, succ_nsmul] at h2
+  have h3 : (m • P.Div α + P.Div α) + P.Div α = 0 + P.Div α := by
+    rw [zero_add]; exact h2
+  exact hdα (eq_zero_of_add_eq_zero_of_isSharp
+    (P.divisorial (P.toElem.obj A).base).2 (add_right_cancel h3)).2
+
 end ABC3.Found.FrdI
