@@ -197,4 +197,63 @@ theorem otri_div_unit_mul (u : OTimes P A) (x : OTri P A) :
     show P.degFr (((u : End A)) : A ⟶ A) = 1 from u.2.1.2]
   simp
 
+/-! ## ★★`Ψ` の `𝒪^▷(A)` 上の定義 —— `β = β₀ · β₁ ↦ β₀ · β₁^d`
+
+原文 (FrdI p.49):
+> we obtain a factorization
+
+★**characteristic splitting `τ` が `β` を「単元部分」と「`τ` 部分」に分け、
+`τ` 部分だけを `d` 乗する。**
+-/
+
+section Psi
+
+variable (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
+  (hτ : IsCharacteristicSplitting P F τ) (hA : IsIsotropic P A)
+  (hfn : IsFrobeniusNormalized P A)
+
+/-- ★**Frobenius-normalized 型のもとで `𝒪^▷(A)` を可換モノイドと見る**。 -/
+def otriCommMonoid : CommMonoid (OTri P A) :=
+  { (inferInstance : Monoid (OTri P A)) with mul_comm := otri_mul_comm P hfn }
+
+/-- ★`𝒪^×(A)` の元を `𝒪^▷(A)` の元と見る。 -/
+def uOf (u : OTimes P A) : OTri P A := ⟨(u : End A), OTimes_le_OTri P A u.2⟩
+
+/-- ★`τ(A)` の元を `𝒪^▷(A)` の元と見る。 -/
+def tOf (t : τ A) : OTri P A := ⟨(t : End A), hτ.le_otri A hA t.2⟩
+
+/-- ★★**分裂の逆** —— `Definition 2.3, (a)` の全単射から。 -/
+noncomputable def splitEquiv : (OTimes P A × τ A) ≃ OTri P A :=
+  Equiv.ofBijective _ (charSplitting_bijective P F hτ hA)
+
+theorem splitEquiv_apply (p : OTimes P A × τ A) :
+    splitEquiv P F hτ hA p = uOf P p.1 * tOf P hτ hA p.2 := rfl
+
+/-- ★★★**`Ψ` の `𝒪^▷(A)` 上の定義** —— `β₀ · β₁ ↦ β₀ · β₁^d`。 -/
+noncomputable def psiOTri (d : ℕ+) (β : OTri P A) : OTri P A :=
+  uOf P ((splitEquiv P F hτ hA).symm β).1
+    * (tOf P hτ hA ((splitEquiv P F hτ hA).symm β).2) ^ ((d : ℕ+) : ℕ)
+
+include hfn in
+/-- ★★**`Div Ψ(β) = d • Div β`** —— 単元部分は `Div` に効かず、
+`τ` 部分の `d` 乗が `Div` を `d` 倍する。
+
+★**これが原文の (b)「`d` の Frobenius 函手と 1-compatible」の中身**である。 -/
+theorem psiOTri_div (d : ℕ+) (β : OTri P A) :
+    P.Div (((psiOTri P F hτ hA d β : OTri P A) : End A) : A ⟶ A)
+      = ((d : ℕ+) : ℕ) • P.Div ((β : End A) : A ⟶ A) := by
+  set p := (splitEquiv P F hτ hA).symm β with hp
+  have hβ : β = uOf P p.1 * tOf P hτ hA p.2 := by
+    rw [hp, ← splitEquiv_apply P F hτ hA]
+    exact ((splitEquiv P F hτ hA).apply_symm_apply β).symm
+  have h1 : P.Div ((β : End A) : A ⟶ A) = P.Div (((tOf P hτ hA p.2 : OTri P A) : End A)) := by
+    rw [hβ]
+    exact otri_div_unit_mul P p.1 (tOf P hτ hA p.2)
+  have h2 : P.Div (((psiOTri P F hτ hA d β : OTri P A) : End A))
+      = P.Div ((((tOf P hτ hA p.2) ^ ((d : ℕ+) : ℕ) : OTri P A) : End A)) :=
+    otri_div_unit_mul P p.1 _
+  rw [h2, otri_div_pow P (tOf P hτ hA p.2) ((d : ℕ+) : ℕ), h1]
+
+end Psi
+
 end ABC3.Found.FrdI
