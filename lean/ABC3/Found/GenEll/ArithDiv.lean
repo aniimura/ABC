@@ -173,9 +173,22 @@ open IsDedekindDomain
 /-- **`ord_v(f)`** —— 原文「we shall write ord_v(−) : F_v → Z for the order defined by v」。
 
 `v.valuation` は `ℤᵐ⁰ = WithZero (Multiplicative ℤ)` に値を取るので、
-`f ≠ 0` を使って `ℤ` へ落とす。 -/
+`f ≠ 0` を使って `ℤ` へ落とす。
+
+## ★★符号について(2026-08-17 に訂正した)
+
+★**mathlib の `intValuationDef` は `exp(−count)` である**——
+`v.valuation π` は素元 `π` に対し `ofAdd(−1)` を返す。
+ゆえに `toAdd (unzero (v.valuation f))` は**古典的な `ord_v(f)` の符号違い**になる。
+
+★★**当初その符号違いのまま定義していた。** 発覚したのは
+`deg(ADiv(f)) = 0`(= 積公式)を証明しようとしたときで、
+符号が合わないと `deg` が `−2Σ_w mult_w log|f|_w` になって 0 にならない。
+**次の定理を証明しようとして初めて出た誤り**である。
+
+★負号を付けて原文の向きに合わせた。`ordv_of_uniformizer_pos` が機械的な確認である。 -/
 noncomputable def ordv (v : FinitePlace F) (f : Fˣ) : ℤ :=
-  Multiplicative.toAdd
+  -Multiplicative.toAdd
     (WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)))
 
 theorem ordv_eq_zero_iff (v : FinitePlace F) (f : Fˣ) :
@@ -185,19 +198,52 @@ theorem ordv_eq_zero_iff (v : FinitePlace F) (f : Fˣ) :
     have := WithZero.coe_unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f))
     rw [← this]
     have h1 : WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)) = 1 := by
-      simp only [ordv] at h
+      simp only [ordv, neg_eq_zero] at h
       have h2 := congrArg Multiplicative.ofAdd h
       rwa [ofAdd_toAdd, ofAdd_zero] at h2
     rw [h1]
     rfl
   · intro h
-    simp only [ordv]
+    simp only [ordv, neg_eq_zero]
     have : WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)) = 1 := by
       apply WithZero.coe_injective
       rw [WithZero.coe_unzero, h]
       rfl
     rw [this]
     rfl
+
+/-- ★★**符号規約を機械的に固定する確認**。
+
+整元 `x ≠ 0` について `ord_v(x)` は **`v` が `(x)` の分解に現れる重複度**に等しい
+——とくに**非負**である。
+
+★★**この定理が無いと符号の誤りが再発する。**
+実際、当初 `ordv` は負号を欠いており、`deg(ADiv(f)) = 0`(積公式)を
+証明しようとして初めて発覚した(2026-08-17)。
+mathlib の `intValuationDef` が `exp(−count)` を返すのが原因である。 -/
+theorem ordv_algebraMap_eq_count (v : FinitePlace F) (x : 𝓞 F) (hx : x ≠ 0) (f : Fˣ)
+    (hf : (f : F) = algebraMap (𝓞 F) F x) :
+    ordv v f
+      = ((Associates.mk v.asIdeal).count
+          (Associates.mk (Ideal.span {x} : Ideal (𝓞 F))).factors : ℤ) := by
+  have hval : v.valuation F ((f : F))
+      = WithZero.exp (-((Associates.mk v.asIdeal).count
+          (Associates.mk (Ideal.span {x} : Ideal (𝓞 F))).factors : ℤ)) := by
+    rw [hf, IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap,
+      v.intValuation_if_neg hx]
+  have hu : WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f))
+      = Multiplicative.ofAdd (-((Associates.mk v.asIdeal).count
+          (Associates.mk (Ideal.span {x} : Ideal (𝓞 F))).factors : ℤ)) := by
+    apply WithZero.coe_injective
+    rw [WithZero.coe_unzero, hval]
+    rfl
+  simp only [ordv, hu, toAdd_ofAdd, neg_neg]
+
+/-- ★整元については `ord_v ≥ 0`(上の系)。★**符号が逆だとこれが破れる**。 -/
+theorem ordv_algebraMap_nonneg (v : FinitePlace F) (x : 𝓞 F) (hx : x ≠ 0) (f : Fˣ)
+    (hf : (f : F) = algebraMap (𝓞 F) F x) : 0 ≤ ordv v f := by
+  rw [ordv_algebraMap_eq_count v x hx f hf]
+  exact Int.natCast_nonneg _
 
 /-- ★**`ord_v(f) ≠ 0` となる `v` は有限個**。
 

@@ -61,6 +61,7 @@ theorem ordv_mul (v : FinitePlace F) (f g : Fˣ) :
     exact hval
   simp only [ordv]
   rw [key, toAdd_mul]
+  ring
 
 /-! ## ★`principalADiv` は準同型 -/
 
