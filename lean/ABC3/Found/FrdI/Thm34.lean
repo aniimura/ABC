@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Def31
+import Mathlib.CategoryTheory.Conj
 
 /-!
 # [FrdI] Theorem 3.4 —— 底と Frobenius 次数の圏論性
@@ -194,7 +195,81 @@ theorem isCategoricalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B
       rw [← this]
       simp
 
-/-! ### ★★★段 5 の設計(測定済み・実装待ち)
+/-- ★**`Aut` の移送** —— `Ψ` による写しと、同型による共役の合成。 -/
+noncomputable def autTransfer {A₀ : C} {A'' : D} (ε : Ψ.obj A₀ ≅ A'') :
+    Aut A₀ ≃* Aut A'' :=
+  (mapAutEquiv Ψ A₀).trans ε.conjAut
+
+/-- ★★★**圏同値は mono-minimal categorical quotient を保つ**。
+
+★★**要点は `G'` と `e` が定義で全称量化されている**こと ——
+移送では **`C` 側の部分群 `G₀` と同型 `e₀` をこちらが構成してよい**。 -/
+theorem isMonoMinimalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B}
+    (h : IsMonoMinimalQuotient G φ) :
+    IsMonoMinimalQuotient (G.map (Ψ.mapAut A)) (Ψ.map φ) := by
+  intro A'' ζ φ'' hmono hfac G'' e hcompat
+  -- ★手 1: 対象と射を `C` へ戻す
+  set A₀ := Ψ.objPreimage A'' with hA₀
+  set ε : Ψ.obj A₀ ≅ A'' := Ψ.objObjPreimageIso A'' with hε
+  set ζ₀ : A ⟶ A₀ := Ψ.preimage (ζ ≫ ε.inv) with hζ₀def
+  have hζ₀ : Ψ.map ζ₀ = ζ ≫ ε.inv := Ψ.map_preimage _
+  haveI : Mono (ζ ≫ ε.inv) := by haveI := hmono; infer_instance
+  have hmono₀ : Mono ζ₀ := by
+    haveI : Mono (Ψ.map ζ₀) := hζ₀ ▸ inferInstance
+    exact Ψ.mono_of_mono_map this
+  set φ₀ : A₀ ⟶ B := Ψ.preimage (ε.hom ≫ φ'') with hφ₀def
+  have hfac₀ : φ = ζ₀ ≫ φ₀ := by
+    refine Ψ.map_injective ?_
+    rw [Ψ.map_comp, hζ₀, hφ₀def, Ψ.map_preimage, hfac]
+    simp
+  -- ★手 2: 群を戻す
+  set K : Aut A₀ ≃* Aut A'' := autTransfer Ψ ε with hK
+  set i₁ : G ≃* G.map (Ψ.mapAut A) :=
+    Subgroup.equivMapOfInjective G (Ψ.mapAut A) (mapAut_bijective Ψ A).1 with hi₁
+  set G₀ : Subgroup (Aut A₀) := G''.map K.symm.toMonoidHom with hG₀
+  set e₀ : G ≃* G₀ := i₁.trans (e.trans (K.symm.subgroupMap G'')) with he₀
+  -- ★手 3: 両立条件
+  have hcompat₀ : ∀ γ : G, ((γ : Aut A).hom : A ⟶ A) ≫ ζ₀
+      = ζ₀ ≫ ((e₀ γ : Aut A₀).hom : A₀ ⟶ A₀) := by
+    intro γ
+    refine Ψ.map_injective ?_
+    have hKe : (K (e₀ γ : Aut A₀) : Aut A'').hom = ((e (i₁ γ) : Aut A'')).hom :=
+      congrArg (fun z : Aut A'' => z.hom) (K.apply_symm_apply _)
+    have hKf : (K (e₀ γ : Aut A₀) : Aut A'').hom
+        = ε.inv ≫ Ψ.map ((e₀ γ : Aut A₀).hom) ≫ ε.hom := rfl
+    have hval : Ψ.map ((e₀ γ : Aut A₀).hom)
+        = ε.hom ≫ ((e (i₁ γ) : Aut A'').hom) ≫ ε.inv := by
+      rw [← hKe, hKf]
+      simp
+    have hc : Ψ.map ((γ : Aut A).hom : A ⟶ A) ≫ ζ
+        = ζ ≫ ((e (i₁ γ) : Aut A'').hom) := hcompat (i₁ γ)
+    rw [Ψ.map_comp, Ψ.map_comp, hζ₀, hval, ← Category.assoc, hc]
+    simp
+  -- ★手 4: `C` の側で結論を得て戻す
+  haveI : IsIso ζ₀ := h A₀ ζ₀ φ₀ hmono₀ hfac₀ G₀ e₀ hcompat₀
+  haveI : IsIso (Ψ.map ζ₀) := inferInstance
+  haveI : IsIso (ζ ≫ ε.inv) := hζ₀ ▸ inferInstance
+  have hz : ζ = (ζ ≫ ε.inv) ≫ ε.hom := by simp
+  rw [hz]
+  infer_instance
+
+/-! ### ★★★残り —— isotropic 対象が保たれること
+
+★★上で **iso-subanchor が保たれる**ことが取れた。★`quasi-isotropic 型`の定義は
+
+  `∀ A, ¬ IsIsotropic P A ↔ IsIsoSubanchor C A`
+
+なので、両側でこれを使えば **`Ψ` は isotropic 対象を保つ**が出る。
+
+★**残る部品は 1 つ**: 逆向き(`IsIsoSubanchor D (Ψ.obj A) → IsIsoSubanchor C A`)。
+準逆関手 `Ψ.inv` に上の補題を当てると
+`IsIsoSubanchor C (Ψ.inv.obj (Ψ.obj A))` が出るので、
+★**`IsIsoSubanchor` が同型で不変**であること(`φ' ≫ iso.inv` を取る)を
+足せばよい。categorical quotient と mono-minimal が
+**同型との後合成で保たれる**ことを見ればよい。
+-/
+
+/-! ### ★★★段 5 の設計(実装済み。以下は記録)
 
 ★残るのは **mono-minimal の移送**である。定義
 
@@ -227,5 +302,18 @@ theorem isCategoricalQuotient_map {A B : C} (G : Subgroup (Aut A)) {φ : A ⟶ B
 theorem isSubanchor_map {A : C} (h : IsSubanchor C A) : IsSubanchor D (Ψ.obj A) := by
   obtain ⟨B, φ, hB⟩ := h
   exact ⟨Ψ.obj B, Ψ.map φ, isAnchor_map Ψ hB⟩
+
+/-- ★★★★★**圏同値は iso-subanchor を保つ** —— 原文が
+「iso-subanchors are manifestly preserved by any equivalence of categories」と
+一言で済ませる主張。
+
+★★**「明らかに」の中身は 5 段**だった:
+irreducible 射 → anchor → subanchor → categorical quotient → mono-minimal。 -/
+theorem isIsoSubanchor_map {A : C} (h : IsIsoSubanchor C A) :
+    IsIsoSubanchor D (Ψ.obj A) := by
+  obtain ⟨B, hB, G, φ, hcq, hmm⟩ := h
+  exact ⟨Ψ.obj B, isSubanchor_map Ψ hB, G.map (Ψ.mapAut B), Ψ.map φ,
+    isCategoricalQuotient_map Ψ G hcq, isMonoMinimalQuotient_map Ψ G hmm⟩
+
 
 end ABC3.Found.FrdI
