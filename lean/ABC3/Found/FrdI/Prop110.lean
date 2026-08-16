@@ -761,6 +761,30 @@ theorem prop_1_10_ii_Div_formula {A X B Y : C}
     Φ.map (P.Base β') (P.Div α') = (P.degFr β : ℕ) • P.Div α :=
   prop_1_10_i_Div_formula P α β' β α' hβ'.1.2 hβ.1.2 hsq.symm
 
+include P in
+/-- ★★★**原文の形の `Div` の公式**（2026-08-16）。
+
+原文 (FrdI p.34):
+> where α′ is a pre-step, and β′ is of Frobenius type such that:
+
+★★**監査で「`β′` の base-isomorphism 性を仮定せず、原文の `β′∗`（全単射）の
+形になっていない」と指摘されたもの**である。
+
+★`β′` は Frobenius 型なので base-isomorphism、したがって
+`Φ.map (Base β′)` は全単射であり、その逆を使って原文の向きに直せる。 -/
+theorem prop_1_10_ii_Div_formula' {A X B Y : C}
+    (α : A ⟶ X) (β : X ⟶ B) (β' : A ⟶ Y) (α' : Y ⟶ B)
+    (hβ' : IsFrobeniusType P β') (hβ : IsFrobeniusType P β)
+    (hsq : β' ≫ α' = α ≫ β) :
+    haveI : IsIso (P.Base β') := hβ'.2
+    P.Div α' = (P.degFr β : ℕ) • Φ.map (inv (P.Base β')) (P.Div α) := by
+  haveI : IsIso (P.Base β') := hβ'.2
+  have h := prop_1_10_ii_Div_formula P α β β' α' hβ' hβ hsq
+  have h2 := congrArg (Φ.map (inv (P.Base β'))) h
+  rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id, map_nsmul] at h2
+  exact h2
+
+
 /-! ## ★(iii) —— `of perfect type` と像のモノイドの perfect 性
 
 原文 (FrdI p.34):
