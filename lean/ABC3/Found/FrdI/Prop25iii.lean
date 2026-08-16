@@ -743,6 +743,60 @@ theorem psiMap_frob_comp (d : ℕ+) {A A' B : C} {δ' : A' ⟶ A}
   · rw [hf]; simp
   · rw [he]; simp
 
+include hτ hiso hmt haa hfn in
+/-- ★★★**右から `𝒪^▷` の元を掛ける場合** —— `Ψ(φ ≫ β') = Ψ(φ) ≫ Ψ(β')`。
+
+★★**pull-back `α` は(isotropic 型のもとで)co-angular かつ linear なので
+`otriLin` が使える** —— `α ≫ β' = otriLin(β') ≫ α`。したがって `β'` は
+分解の中の `β` に**掛け算として吸収される**。
+
+★★★あとは
+- `psiOTri` がモノイド準同型であること(`psiOTri_mul`)と
+- `Ψ` が `otriLin` と可換であること(`psiOTri_otriLin`)
+
+の 2 本で閉じる。★**先に用意した自然性がそのまま効いた。** -/
+theorem psiMap_comp_otri (d : ℕ+) {A B : C} (φ : A ⟶ B) (β' : OTri P B) :
+    psiMap P F hτ hiso hmt haa d (φ ≫ (((β' : End B)) : B ⟶ B))
+      = psiMap P F hτ hiso hmt haa d φ
+        ≫ (((psiOTri P F hτ (hiso B) d β' : OTri P B) : End B) : B ⟶ B) := by
+  obtain ⟨X, Y, δ, γ, β, α, hm, hf, hδ, hγi, hγs, hβs, hβc, hα, he⟩ :=
+    psiMap_spec P F hτ hiso hmt haa d φ
+  have hαlin : IsLinear P α := (F.pullBackLB α hα).2
+  have hspec : α ≫ (((β' : End B)) : B ⟶ B)
+      = (((otriLin P F (hiso Y) hαlin β' : OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
+    otriLin_spec P F (hiso Y) hαlin β'
+  have hpsispec : α ≫ (((psiOTri P F hτ (hiso B) d β' : OTri P B) : End B) : B ⟶ B)
+      = (((otriLin P F (hiso Y) hαlin (psiOTri P F hτ (hiso B) d β') :
+          OTri P Y) : End Y) : Y ⟶ Y) ≫ α :=
+    otriLin_spec P F (hiso Y) hαlin _
+  set s : OTri P Y := otriLin P F (hiso Y) hαlin β' with hsdef
+  set b : OTri P Y := ⟨β, hm⟩ with hbdef
+  have hnew : (((s * b : OTri P Y) : End Y) : Y ⟶ Y) = β ≫ (((s : End Y)) : Y ⟶ Y) := rfl
+  refine psiMap_eq P F hτ hiso hmt haa d ?_
+  refine ⟨X, Y, δ, γ, (((s * b : OTri P Y) : End Y) : Y ⟶ Y), α, (s * b).2, ?_, hδ,
+    hγi, hγs, ?_, ?_, hα, ?_⟩
+  · -- 分解が `φ ≫ β'` に戻る
+    rw [hf, hnew]
+    simp only [Category.assoc]
+    rw [← hspec]
+  · -- pre-step
+    refine ⟨(s * b).2.2, ?_⟩
+    show IsIso (P.Base _)
+    rw [show P.Base ((((s * b : OTri P Y) : End Y) : Y ⟶ Y)) = P.Base (𝟙 Y) from (s * b).2.1,
+      P.Base_id]
+    infer_instance
+  · -- co-angular —— isotropic 型なので `Proposition 1.4, (i)`
+    rw [hnew]
+    exact F.coAngularComp _ _ hβc (prop_1_4_i P _ (fun X _ => hiso X))
+  · -- `Ψ` の値
+    rw [he, psiOTri_mul P F hτ (hiso Y) (hfn Y) d s b, hsdef,
+      psiOTri_otriLin P F hτ (hiso Y) (hiso B) hαlin d β']
+    show _ ≫ _ = δ ≫ γ ≫ ((((psiOTri P F hτ (hiso Y) d b : OTri P Y) : End Y) : Y ⟶ Y)
+      ≫ (((otriLin P F (hiso Y) hαlin (psiOTri P F hτ (hiso B) d β') :
+        OTri P Y) : End Y) : Y ⟶ Y)) ≫ α
+    simp only [Category.assoc]
+    rw [← hpsispec]
+
 end PsiHom
 
 /-! ## ★★★残り —— 関手性と圏同値(段取り)
