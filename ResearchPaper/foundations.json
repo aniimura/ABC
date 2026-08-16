@@ -13,7 +13,16 @@
     "",
     "★measuredAt を必ず書く。測定は古びる(lean-ecosystem.json と同じ規律)。",
     "★公開プロジェクトの『在る』は『使える』ではない——lean-ecosystem.json の実測では",
-    "  drop-in で使えたものは 0 件だった。scope と caveat を必ず書くこと。"
+    "  drop-in で使えたものは 0 件だった。scope と caveat を必ず書くこと。",
+    "",
+    "★この登記は tools/graph-layers.mjs が読み、dependency-graph.html の左端に",
+    "  『基礎 / …』という**出辺を持たない節点**として合流する(§0 語彙・概念と同じやり方)。",
+    "★neededBy に書けるのは**番号付き項目**だけである(グラフの節点がそれだから)。",
+    "  番号を持たない依存先は neededByUnnumbered に書く——辺にはならないが、消さない。",
+    "★★合流時に張れなかった辺の実測(2026-08-16): 3 件。",
+    "  GenEll / Definition 1.1・Corollary 4.3・Corollary 4.4 は、本グラフの根が",
+    "  [IUTchIII] Corollary 3.12 であるために**到達集合に入っていない**",
+    "  (これらを直接引くのは IUTchIV である)。★グラフに無いことは『要らない』ではない。"
   ],
   "measuredAt": "2026-08-16",
   "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
@@ -129,7 +138,8 @@
       "id": "local-cft",
       "name": "局所類体論(相互律・高次分岐群・局所 Tate 双対性)",
       "why": "[pGC] トラックの義務 #1/#4/#5/§2",
-      "neededBy": [{ "paper": "pGC", "items": ["Proposition 1.1", "§2"] }],
+      "neededBy": [{ "paper": "pGC", "items": ["Proposition 1.1"] }],
+      "neededByUnnumbered": ["[pGC] §2(高次分岐群・上付き/下付き番号付け・Herbrand)——★番号付き項目ではないので節点にできない"],
       "status": "inProject",
       "searched": ["ResearchPaper/lean-ecosystem.json(2026-08-14 測定)を参照"],
       "publicProjects": [

@@ -195,6 +195,41 @@ const adj = new Map(), page = new Map();
   console.log(`    概念どうしの辺 ${ce.length}(導入順に反するとして落とした ${droppedByOrder.length})/ 項目→概念の辺 ${ie.length}`);
 }
 
+// ── ★★基礎理論(「理論のまとまり」)を節点として合流させる ──────────────
+//   ★2026-08-16 追加。動機の実測:
+//   [GenEll] の必要分 24 件はグラフ上 24 節点だが、その下には **Arakelov 理論**と
+//   **l 捩れ点への Galois 表現**という「mathlib に 1 件も無い古典理論 2 本」が横たわっている。
+//   ★それは番号付き項目でも §0 語でも概念語でもないので、既存の 3 層のどれにも出なかった——
+//   合流前の本グラフを検索すると `Arakelov` 0 件 / `torsion` 0 件だった。
+//   ★概念層が拾えないのは、原文に**定義文が無い**からである。原文は
+//   "the Galois representation … associated to E_L" と**使う**だけで、定義文型では導入しない。
+//
+//   ★出辺を持たせない = **真の葉**にする。層 0(左端)に出るのが正しい——
+//   「これを作らないと右へ進めない」ものだから。
+//
+//   ★限界: 登記 `ResearchPaper/foundations.json` は**人手**である。機械が
+//   「この項目にはこの理論が要る」と判定しているのではない。**`neededBy` は下界**。
+{
+  const FJ = join(ROOT, 'ResearchPaper', 'foundations.json');
+  if (existsSync(FJ)) {
+    const F = JSON.parse(readFileSync(FJ, 'utf8'));
+    const SHORT = { inMathlib: 'mathlibにある', partial: '枠組みが違う',
+                    inProject: '公開プロジェクトあり', building: '構築中', absent: '無い' };
+    let added = 0, edged = 0, unreached = 0;
+    for (const f of F.foundations ?? []) {
+      const nk = `基礎 / ${f.name} [${SHORT[f.status] ?? f.status}]`;
+      if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, 0); added++; }
+      for (const n of f.neededBy ?? []) for (const it of n.items ?? []) {
+        const k = `${n.paper} / ${it}`;
+        if (!adj.has(k)) { unreached++; continue; }   // 到達していない項目へは張らない
+        if (!adj.get(k).includes(nk)) { adj.get(k).push(nk); edged++; }
+      }
+    }
+    console.log(`  基礎理論を合流: ${added} 節点 / 項目→基礎理論の辺 ${edged}` +
+      `(到達していない項目 ${unreached} 件へは張らない)`);
+  }
+}
+
 // ── Tarjan SCC(反復版) ────────────────────────────────────
 const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
 let idx = 0, nc = 0;
