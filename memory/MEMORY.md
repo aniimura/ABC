@@ -6,3 +6,5 @@
 - [完成宣言は文脈を持たない子に監査させる](challenger-audit-without-context.md) — 自分の文脈を継いだ検証は自分の誤読も継ぐ。Prop 1.10 の .src 6 個が全滅した実例。
 - [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
 - [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
+- [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで 0/24。律速は Arakelov 理論と l 捩れ Galois 表現の不在。Lemma 3.1 (iv) は 9 段中 6 段が済。
+- [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
