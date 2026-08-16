@@ -73,6 +73,7 @@ import ABC3.Found.GenEll.OrdvIntegral
 import ABC3.Found.GenEll.DenominatorBound
 import ABC3.Found.GenEll.NorthcottProj
 import ABC3.Found.GenEll.HeightExtension
+import ABC3.Found.GenEll.NorthcottDegree
 import ABC3.Found.NCBelyi.Separation
 /-!
 # Found — 実装済みの基礎
