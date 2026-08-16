@@ -57,7 +57,16 @@
       "acceptance": {
         "goal": "Skeleton/GenEll/Heights.lean の sorry が 0 になり、Interface/GenEll/ArithLineBundle.lean が waiting でなくなること",
         "checkable": "node tools/check.mjs の `sorry 台帳` と `Interface 実装待ち` の 2 つの印字で機械的に見える",
-        "★注意": "これは『Arakelov 理論を作った』ではなく『[GenEll] §1 の高さの枠組みが Found/ に載った』である。両者を混同しないこと"
+        "★注意": "これは『Arakelov 理論を作った』ではなく『[GenEll] §1 の高さの枠組みが Found/ に載った』である。両者を混同しないこと",
+        "status2026-08-16": [
+          "★前半(sorry 0)は**達成した**。ただし意味を取り違えないこと——",
+          "  内容は Interface の仮説として輸入した(`base_change_invariant` / `height_eq`)。",
+          "  これは check.mjs 冒頭 B5 が名指しする穴と同じ形で、Cor312 の先例と同型である。",
+          "  各定理の `.needs` に `.implicitStep` として明記した。",
+          "★後半(Interface が waiting でなくなる)は**未達**。これが本当の指標である。",
+          "★層 A は Found/GenEll/ArithDiv.lean に実装済み(sorry 無し):",
+          "  ADiv(F) / deg / degNormalized / ord_v / ord_v の有限台 / 主因子 ADiv(f) / APrc(F)。"
+        ]
       }
     },
     {

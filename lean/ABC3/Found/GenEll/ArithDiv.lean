@@ -1,5 +1,7 @@
 import Mathlib.NumberTheory.NumberField.InfinitePlace.Basic
 import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.RingTheory.DedekindDomain.AdicValuation
+import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
 import Mathlib.RingTheory.Ideal.Norm.AbsNorm
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import ABC3.Meta.Claim
@@ -161,6 +163,105 @@ theorem degNormalized_add (a b : ADiv F) :
   simp [degNormalized]
 
 end Degree
+
+section Principal
+
+variable {F : Type*} [Field F] [NumberField F]
+
+open IsDedekindDomain
+
+/-- **`ord_v(f)`** —— 原文「we shall write ord_v(−) : F_v → Z for the order defined by v」。
+
+`v.valuation` は `ℤᵐ⁰ = WithZero (Multiplicative ℤ)` に値を取るので、
+`f ≠ 0` を使って `ℤ` へ落とす。 -/
+noncomputable def ordv (v : FinitePlace F) (f : Fˣ) : ℤ :=
+  Multiplicative.toAdd
+    (WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)))
+
+theorem ordv_eq_zero_iff (v : FinitePlace F) (f : Fˣ) :
+    ordv v f = 0 ↔ v.valuation F (f : F) = 1 := by
+  constructor
+  · intro h
+    have := WithZero.coe_unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f))
+    rw [← this]
+    have h1 : WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)) = 1 := by
+      simp only [ordv] at h
+      have h2 := congrArg Multiplicative.ofAdd h
+      rwa [ofAdd_toAdd, ofAdd_zero] at h2
+    rw [h1]
+    rfl
+  · intro h
+    simp only [ordv]
+    have : WithZero.unzero ((Valuation.ne_zero_iff (v.valuation F)).2 (Units.ne_zero f)) = 1 := by
+      apply WithZero.coe_injective
+      rw [WithZero.coe_unzero, h]
+      rfl
+    rw [this]
+    rfl
+
+/-- ★**`ord_v(f) ≠ 0` となる `v` は有限個**。
+
+`f` と `f⁻¹` の台(mathlib の `HeightOneSpectrum.Support`)の合併に含まれる。
+★これが「有限形式和」であることの中身であり、`Finsupp` を作る根拠である。 -/
+theorem ordv_finite_support (f : Fˣ) :
+    {v : FinitePlace F | ordv v f ≠ 0}.Finite := by
+  have hsub : {v : FinitePlace F | ordv v f ≠ 0}
+      ⊆ HeightOneSpectrum.Support (𝓞 F) (f : F)
+        ∪ HeightOneSpectrum.Support (𝓞 F) ((f⁻¹ : Fˣ) : F) := by
+    intro v hv
+    by_contra hmem
+    simp only [Set.mem_union, not_or] at hmem
+    apply hv
+    rw [ordv_eq_zero_iff]
+    have h1 : v.valuation F (f : F) ≤ 1 := not_lt.mp hmem.1
+    have h2 : v.valuation F ((f⁻¹ : Fˣ) : F) ≤ 1 := not_lt.mp hmem.2
+    have hmul : v.valuation F (f : F) * v.valuation F ((f⁻¹ : Fˣ) : F) = 1 := by
+      rw [← Valuation.map_mul]
+      simp
+    exact le_antisymm h1 (by
+      by_contra hlt
+      rw [not_le] at hlt
+      have : v.valuation F (f : F) * v.valuation F ((f⁻¹ : Fˣ) : F) < 1 :=
+        mul_lt_one_of_lt_of_le hlt h2
+      exact absurd hmul (ne_of_lt this))
+  exact Set.Finite.subset
+    ((HeightOneSpectrum.Support.finite (𝓞 F) (f : F)).union
+      (HeightOneSpectrum.Support.finite (𝓞 F) ((f⁻¹ : Fˣ) : F))) hsub
+
+/-- **主算術因子** `ADiv(f)`。
+
+原文 (GenEll p.4):
+> An arithmetic divisor on F is defined to be a finite formal sum
+
+原文の定義:
+`ADiv(f) ≝ Σ_{v∈𝕍(F)^non} ord_v(f)·v − Σ_{v∈𝕍(F)^arc} [F_v : ℝ]·log(|f|_v)·v`。
+
+★アルキメデス側の `[F_v : ℝ]` は `InfinitePlace.mult`(実素点で 1、複素素点で 2)である。
+★アルキメデス素点は有限個(`Fintype (InfinitePlace F)`)なので `Finsupp` は自動で作れる。 -/
+noncomputable def principalADiv (f : Fˣ) : ADiv F :=
+  (Finsupp.onFinset (ordv_finite_support f).toFinset (fun v => ordv v f)
+     (by intro v hv; simpa using hv),
+   Finsupp.onFinset Finset.univ
+     (fun v : InfinitePlace F => -((v.mult : ℝ) * Real.log (v (f : F))))
+     (by intro v _; exact Finset.mem_univ v))
+
+/-- **主算術因子のなす部分群** `APrc(F) ⊆ ADiv(F)`。
+
+原文 (GenEll p.4):
+> An arithmetic divisor on F is defined to be a finite formal sum
+
+★原文は「the principal arithmetic divisors determine a subgroup APrc(F) ⊆ ADiv(F)」と述べる。
+**部分群であること自体は `principalADiv` が準同型であることから出る**が、
+ここでは**生成する部分群**として定義する——両者は一致する(原文の主張)。
+★`principalADiv` が準同型であることは**まだ示していない**。示せば
+`AddMonoidHom.range` と一致することが言える。 -/
+noncomputable def APrc (F : Type*) [Field F] [NumberField F] : AddSubgroup (ADiv F) :=
+  AddSubgroup.closure (Set.range (principalADiv : Fˣ → ADiv F))
+
+theorem principalADiv_mem_APrc (f : Fˣ) : principalADiv f ∈ APrc F :=
+  AddSubgroup.subset_closure ⟨f, rfl⟩
+
+end Principal
 
 /-! ## ★出典の紐付け(`.src`)
 

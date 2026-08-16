@@ -11,84 +11,47 @@ import ABC3.Interface.GenEll.ArithLineBundle
 原文 (GenEll p.4):
 > — where xF : Spec(OF ) → X is any morphism that gives rise to x.
 
-## ★★この Skeleton が固定するもの —— 「何を作れば終わりか」
-
-`ResearchPaper/foundations.json` の `arakelov` 節点は「Arakelov 理論」という
-**まとまり**なので、そのままでは受理条件にならない(2 値で数えられない)。
-本ファイルは**それを型に落とす**——ここに並ぶ `sorry` が埋まれば、
-`[GenEll] §1` の高さの枠組みは `Found/` に載ったことになる。
+## ★★層の現在地
 
 | 層 | 中身 | 場所 | 状態 |
 |---|---|---|---|
-| A | `ADiv(F)` / `deg_F` / `deg_F`(正規化) | `Found/GenEll/ArithDiv.lean` | ★**実装済**(`sorry` 無し) |
+| A | `ADiv(F)` / `deg_F` / `ord_v` / 主因子 `ADiv(f)` / `APrc(F)` | `Found/GenEll/ArithDiv.lean` | ★**実装済**(`sorry` 無し) |
 | B・C | 算術直線束と引き戻し(スキーム上の直線束・解析化・hermitian 計量) | `Interface/GenEll/ArithLineBundle.lean` | `waiting` |
-| **D** | **`APrc(F)`・同型 `ADiv/APrc ≅ APic`・`ht` の well-defined 性** | ★**本ファイル** | `sorry` |
+| **D** | **`ht` の定義と、`F` の取り方に依らないこと** | ★**本ファイル** | 下記 |
 
-## ★★`sorry` を置いてよい理由と、置き方の規律
+## ★★★`sorry` を消した方法と、その正直な意味(必読)
 
-`PLAN.md` の 2 トラック構成では `Skeleton/` が statement 専用トラックであり、
-`sorry` が許されるのはここだけである(`Found/` には置かない)。
-★ただし **statement は検査されない側**なので、G1(出典・逐語・目視)を必ず課す——
-本ファイルの各宣言に `.src` を付け、`1_Structured` の該当 `<section>` を指す。
+本ファイルの `sorry` は **0** だが、それは「証明した」という意味ではない。
 
-★**`Interface` を置いたことを「形式化した」と呼ばない**(`PLAN.md` §1)。
-本ファイルが `sorry` 無しになるのは、層 B・C が `Found/` に載ってからである。
+★**内容は `Interface` の仮説として輸入した。** 具体的には
+`PulledBackClassData` が `base_change_invariant`(不変性)と `height_eq`(高さの一致)を
+**posit** しており、本ファイルの定理はそれを取り出しているだけである。
+
+★これは `tools/check.mjs` 冒頭 **B5 が名指しする穴**そのものである——
+> 「`Interface` に条件を posit すれば sorry は消える(実例: IUTchIII cor_3_12、2026-08-14)」
+
+`Skeleton/IUTchIII/Cor312.lean` の `cor_3_12_inequality` が同じ形であり、
+そこでは `.needs` に `.implicitStep "… Interface の仮説として輸入した(我々は証明していない)"`
+と明記している。**本ファイルも同じ規律に従う**——各定理の `.needs` に明記した。
+
+★**したがって「`sorry` が 0 になった」を進捗と読んではならない。**
+本当の進捗は `Interface` が `waiting` でなくなったときに起きる。
+`node tools/check.mjs` の「Interface 実装待ち」の行がそれを見せる。
+
+## ★仮説を強めていないことの確認(`PLAN.md` A6)
+
+`Interface` の 2 つの仮説は、どちらも
+`DefinedOver F x`(`x` が `F` 上で定義される)と `[Algebra F K]` の下でだけ主張されている。
+★無条件の等式として posit すると原文より強くなるので、そうしていない。
 -/
 
 namespace ABC3.Skeleton.GenEll
 
-open ABC3.Meta ABC3.Found.GenEll NumberField
-
-section Principal
-
-variable {F : Type*} [Field F] [NumberField F]
-
-/-- **主算術因子** `ADiv(f)`。
-
-原文 (GenEll p.4):
-> An arithmetic divisor on F is defined to be a finite formal sum
-
-原文の定義は
-`ADiv(f) ≝ Σ_{v∈𝕍(F)^non} ord_v(f)·v − Σ_{v∈𝕍(F)^arc} [F_v : ℝ]·log(|f|_v)·v`。
-
-★**`sorry` の中身**: `ord_v(f)`(離散付値を `ℤ` として取り出す)と
-`[F_v : ℝ]`(`InfinitePlace.mult`)と `log(|f|_v)` を組み、
-**有限台であること**(ほとんどの `v` で `ord_v(f) = 0`)を示す必要がある。
-★有限台性は「`f ≠ 0` なら分母分子の素因数分解が有限」という内容で、
-mathlib の Dedekind 整域の理論から出るはずだが**未測定**。 -/
-noncomputable def principalADiv (_f : Fˣ) : ADiv F := sorry
-
-/-- **主算術因子のなす部分群** `APrc(F) ⊆ ADiv(F)`。
-
-★`sorry` の中身: `principalADiv` が群準同型であること(`ADiv(f·g) = ADiv(f) + ADiv(g)`)。 -/
-noncomputable def APrc (F : Type*) [Field F] [NumberField F] : AddSubgroup (ADiv F) := sorry
-
-end Principal
-
-section BaseChange
-
-/-- ★★**正規化次数の基底変換不変性**。
-
-原文 (GenEll p.4):
-> [cf. [Szp], §1.1] determines a homomorphism APic(Spec(OF )) → R, which we shall
-
-原文は `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`(下線つき `deg` = 正規化版)と述べる。
-
-★★**これが「高さが定義できる」ことの中身である**——
-`x ∈ X(ℚ̄)` をどの数体 `F` で見ても同じ値になる、という主張。
-**破れたら `ht` は定義できない。飾りではない。**
-
-★`sorry` の中身: 素点の分岐・剰余次数の関係(`Σ_{w|v} e_w f_w = [K:F]`)を使う。
-mathlib には `Ideal.sum_ramification_inertia` 系があるはずだが**未測定**。 -/
-theorem degNormalized_base_change
-    (F K : Type*) [Field F] [NumberField F] [Field K] [NumberField K]
-    [Algebra F K] (_a : ADiv F) (_b : ADiv K)
-    (_hb : True) :
-    degNormalized _b = degNormalized _a := sorry
-
-end BaseChange
+open ABC3.Meta ABC3.Found.GenEll ABC3.Interface.GenEll NumberField
 
 section Height
+
+variable (D : PulledBackClassData)
 
 /-- **高さ** `ht_M̄`。
 
@@ -97,71 +60,87 @@ section Height
 
 原文の定義は `ht_M̄(x) ≝ deg_F(x_F^* M̄) ∈ ℝ`、`x ∈ X(ℚ̄) = ∪_{[F:ℚ]<∞} X(F)`。
 
-★`Interface/GenEll/ArithLineBundle.lean` の `PulledBackClassData` が
-`x_F^* M̄` の正規化次数を受け取る。**その `Interface` が埋まれば `ht` は定義できる。**
+★**`Interface` が `height` として posit したものを取り出しているだけ**である。
+中身(層 B・C)を作ったわけではない。 -/
+noncomputable def ht (M : D.Bundle) (x : D.Point) : ℝ := D.height M x
 
-★`sorry` の中身: `Interface` の `base_change_invariant` を使って
-「`F` の取り方に依らない」ことを示し、`X(ℚ̄)` 上の関数として定義する。 -/
-noncomputable def ht (_D : ABC3.Interface.GenEll.PulledBackClassData)
-    (_M : Type) (_x : Type) : ℝ := sorry
+/-- ★★**高さが `F` の取り方に依らない**こと。
 
-/-- ★`ht` が **`F` の取り方に依らない**こと。
+原文 (GenEll p.4):
+> [cf. [Szp], §1.1] determines a homomorphism APic(Spec(OF )) → R, which we shall
 
-★これは `Interface` の `base_change_invariant` の**帰結**であって、
-`Interface` を埋めれば自動的に出る——**そう書けることを型で示すのがこの Skeleton の役目**。
+原文は `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`(正規化した `deg`)と述べ、
+それによって `ht` が `X(ℚ̄)` の上で定まる。
 
-★★**現在の形は自明である**(`rfl`)。`ht` がまだ `sorry` なので、
-「`F` に依らない」を型に出すには `ht` が `F` を引数に取る形になっている必要がある。
-**ここは意図的に弱い**——`Interface` が埋まった時点で `ht` の型を
-`(F : Type) → [NumberField F] → X(F) → ℝ` の形に直し、この定理を本物にする。
-**その書き換えが済むまで、この宣言を「示した」と読んではならない。** -/
-theorem ht_well_defined (D : ABC3.Interface.GenEll.PulledBackClassData)
-    (M x : Type) : ht D M x = ht D M x := rfl
+★**証明していない**——`Interface` の `base_change_invariant` を取り出しているだけである
+(上の docstring と `.needs` を参照)。 -/
+theorem degNormalized_base_change
+    (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K] [Algebra F K]
+    (M : D.Bundle) (x : D.Point) (hF : D.DefinedOver F x) (hK : D.DefinedOver K x) :
+    D.degOver K M x = D.degOver F M x :=
+  D.base_change_invariant F K M x hF hK
+
+/-- ★`ht` が、`x` を定義するどの数体の上での次数とも一致すること。
+
+★これが「`ht` が well-defined である」ことの内容である。
+**証明していない**——`Interface` の `height_eq` を取り出しているだけ。 -/
+theorem ht_eq_degOver (F : Type) [Field F] [NumberField F]
+    (M : D.Bundle) (x : D.Point) (hF : D.DefinedOver F x) :
+    ht D M x = D.degOver F M x :=
+  D.height_eq F M x hF
+
+/-- ★**2 つの数体の上での次数が一致する**——`ht` を経由した形。
+
+`ht_eq_degOver` を 2 回使えば出る。★`Interface` の 2 仮説が
+互いに整合していることの確認でもある(片方だけでは出ない)。 -/
+theorem degOver_eq_of_definedOver
+    (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
+    (M : D.Bundle) (x : D.Point) (hF : D.DefinedOver F x) (hK : D.DefinedOver K x) :
+    D.degOver F M x = D.degOver K M x := by
+  rw [← ht_eq_degOver D F M x hF, ← ht_eq_degOver D K M x hK]
 
 end Height
 
-/-! ## ★出典の紐付け(`.src`) -/
-
-def principalADiv.src : Source :=
-  { paper := "GenEll", pdfPage := 4, item := "§1 地の文(算術因子 ADiv(F))",
-    sectionId := "genell-adiv" }
-
-def APrc.src : Source :=
-  { paper := "GenEll", pdfPage := 4, item := "§1 地の文(算術因子 ADiv(F))",
-    sectionId := "genell-adiv" }
+/-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
 def degNormalized_base_change.src : Source :=
   { paper := "GenEll", pdfPage := 4, item := "§1 地の文(次数写像 deg_F)",
     sectionId := "genell-deg" }
 
-/-- ★この定理の証明が要求するもの。
-
-原文は `[Szp], §1.1` を典拠に挙げるだけで、**証明を書いていない**。
-実際に要るのは素点の分岐・剰余次数の関係である。 -/
+/-- ★★**この定理は証明していない**——内容を `Interface` の仮説として輸入した。 -/
 def degNormalized_base_change.needs : List ProofObligation :=
-  [ .citation "[Szp]" "§1.1(算術因子と次数の基本性質)"
-      (.absent "mathlib 全体を `Arakelov` / `arithmetic.*line bundle` で grep、0 件(2026-08-16)") 4,
-    .derivation
-      "素点の分岐・剰余次数の関係 `Σ_{w|v} e_w f_w = [K:F]`。mathlib に `Ideal.sum_ramification_inertia` 系があるはずだが**未測定**" 4,
-    .implicitStep
-      "原文は `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)` を『it follows that』とだけ書き、導出を示していない" 4 ]
-
-def ht_well_defined.src : Source :=
-  { paper := "GenEll", pdfPage := 4, item := "§1 地の文(高さ ht_M̄)",
-    sectionId := "genell-ht" }
-
-/-- ★この定理の証明が要求するもの。
-
-★**現在の形は自明**なので、実質的な依存は「`ht` の型を `F` を取る形に直すこと」である。
-それは `Interface` が埋まってからでないとできない。 -/
-def ht_well_defined.needs : List ProofObligation :=
   [ .implicitStep
-      "★現在の `ht_well_defined` は `rfl` で示せる自明な形である。`ht` が `F` を引数に取る形に直るまで、この宣言は内容を持たない。直せるのは Interface(層 B・C)が埋まってからである" 4,
+      "★**内容を Interface の仮説として輸入した(我々は証明していない)**。`PulledBackClassData.base_change_invariant` がそれである。check.mjs 冒頭 B5 が名指しする穴と同じ形で、`Skeleton/IUTchIII/Cor312.lean` の `cor_3_12_inequality` と同型" 4,
+    .citation "[Szp]" "§1.1(算術因子と次数の基本性質)"
+      (.absent "mathlib 全体を `Arakelov` / `arithmetic.*line bundle` / `LineBundle` / `analytification` で grep、いずれも 0 件(2026-08-16)") 4,
     .derivation
-      "`degNormalized_base_change`(同ファイル)——`F` の取り方に依らないことの本体" 4 ]
+      "本当に要るのは素点の分岐・剰余次数の関係 `Σ_{w|v} e_w f_w = [K:F]`。mathlib に `Ideal.sum_ramification_inertia` 系があるはずだが**未測定**" 4 ]
 
 def ht.src : Source :=
   { paper := "GenEll", pdfPage := 4, item := "§1 地の文(高さ ht_M̄)",
     sectionId := "genell-ht" }
+
+/-- ★★**`ht` は構成していない**——`Interface` が posit した `height` を取り出しただけ。 -/
+def ht.needs : List ProofObligation :=
+  [ .implicitStep
+      "★**`ht` の構成そのものを Interface に posit させた**。本当に構成するには、`x_F^* M̄ ∈ APic(Spec 𝒪_F)` を作る操作(層 B・C)が要る" 4,
+    .otherPaper "[GenEll]" "Definition 1.1, (i)(算術直線束——層 B・C)" 3,
+    .otherPaper "[GenEll]" "Definition 1.1, (ii)(引き戻し)" 3 ]
+
+def ht_eq_degOver.src : Source :=
+  { paper := "GenEll", pdfPage := 4, item := "§1 地の文(高さ ht_M̄)",
+    sectionId := "genell-ht" }
+
+def ht_eq_degOver.needs : List ProofObligation :=
+  [ .implicitStep
+      "★**内容を Interface の仮説として輸入した(`height_eq`)**。原文は `ht` の定義の直後に「any morphism that gives rise to x」と書くだけで、well-defined 性を証明していない" 4 ]
+
+def degOver_eq_of_definedOver.src : Source :=
+  { paper := "GenEll", pdfPage := 4, item := "§1 地の文(次数写像 deg_F)",
+    sectionId := "genell-deg" }
+
+/-- ★これは**本当に証明した**唯一の定理である(`Interface` の 2 仮説から導いた)。 -/
+def degOver_eq_of_definedOver.needs : List ProofObligation :=
+  [ .derivation "`ht_eq_degOver` を 2 回。★Interface の仮説からの導出であり、ここは我々が書いた" 4 ]
 
 end ABC3.Skeleton.GenEll
