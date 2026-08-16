@@ -993,3 +993,40 @@ S2 の受理条件は「12/24 かつ `ArithLineBundle` が `waiting` でない�
 - **分母イデアルのノルム評価**: 道筋は明確
   (`N(𝔡_x) = ∏ᶠ_v max(|x|_v,1) ≤ H(x)` と `Ideal.absNorm I ∈ I`)。
   **手間**の問題。★`HeightADiv.lean` の `finsum_posLog_finitePlace` が既にその半分である。
+
+### §9-7 追記(同日、夜)—— ★★★数体上の Northcott 性が**完成した**
+
+昼に「残った 3 つの穴」の 1 つとして
+「`Proposition 1.4, (iv)` の**分母イデアルのノルム評価**(**手間**の問題)」
+と書いた。★**その日のうちに埋めた。**
+
+| ファイル | 中身 |
+|---|---|
+| `OrdvIntegral.lean` | `v(f) ≤ 1 ⟺ ord_v(f) ≥ 0`、`ord_v ≥ 0` なら整元 |
+| `DenominatorBound.lean` | `denIdeal` / `N(𝔡_x) = ∏ᶠ_v max(\|x\|_v,1)` / **`{y : K \| H(y) ≤ B}` は有限** |
+
+★★**mathlib の穴を 1 つ塞いだ**——`Height/Northcott.lean` は
+条件つき instance を 1 つ持つだけで **`Northcott (mulHeight₁ (K := K))` の
+基底 instance を 1 つも持たない**。それを与えた。
+これが入ると mathlib 側の条件つき instance が発火して
+`Northcott (logHeight₁ (K := K))` も自動で付く。
+
+#### ★機構——高さの有限素点側が、そのまま分母イデアルのノルムだった
+
+`HeightADiv.lean` で `max(|x|_v,1) = q_v^{max(−ord_v(x),0)}` を取っていたので、
+**分母イデアル `𝔡_x ≝ ∏_v v^{max(−ord_v(x),0)}` のノルムが高さの有限素点側そのもの**
+になった。`Ideal.absNorm I ∈ I`(mathlib)で、分母として使える
+**具体的な自然数** `d ≝ N(𝔡_x) ≤ H(x)` が手に入る。
+
+★★**高さの「積の形」(`H(d·y) ≤ H(d)·H(y)`)は一切要らなかった**——
+共役の絶対値を直接評価すれば済んだ(`‖φ(d·y)‖ = d·‖φ(y)‖`)。
+★「正面から要ると思ったものが要らなかった」の **8 例目**。
+
+#### ★残った穴は 2 つになった
+
+| 穴 | 性質 |
+|---|---|
+| **素数定理**(`Remark 4.1.1` の第 2 項) | 公開プロジェクトに**ある**。**判断**の問題 |
+| **Auslander–Buchsbaum**(`Definition 1.5, (ii)`) | mathlib に無い。**数学の作業** |
+
+★そして `§1` 全体を止めている本命は依然として **`X^arc`**(複素解析空間)である。

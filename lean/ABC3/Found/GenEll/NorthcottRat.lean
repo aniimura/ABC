@@ -38,6 +38,16 @@ import Mathlib.NumberTheory.Height.Northcott
 ★★**これは基底の場合である。** `Proposition 1.4, (iv)` が要求するのは
 `X(ℚ̄)^{≤d}`(**次数有界**の代数点)上の有限性で、そちらは数え上げが要る。
 **基底が取れたことと、全体が取れたことを混同しない。**
+
+## ★★追記(2026-08-17 夜)—— 任意の数体へ一般化された
+
+`Found/GenEll/DenominatorBound.lean` の `northcott_mulHeight₁` が
+**任意の数体 `K`** について同じ instance を与えたので、
+★**本ファイルの `northcott_mulHeight₁_rat` はその特別な場合になった**。
+
+★本ファイルを残すのは、`Rat.mulHeight₁_eq_max`(高さ = `max |num| den`)による
+**明示的な** 評価 `num_den_le_of_mulHeight₁_le` が別途有用だからである。
+一般の場合の証明は分母イデアルを経由しており、`ℚ` のこの明示形は出てこない。
 -/
 
 namespace ABC3.Found.GenEll
