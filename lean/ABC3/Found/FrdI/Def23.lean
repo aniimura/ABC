@@ -59,7 +59,7 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 ★**条件 3 が (a)**、★**条件 4 が (b)** である。 -/
 structure IsCharacteristicSplitting (τ : ∀ A : C, Submonoid (End A)) : Prop where
   /-- **部分関手 1** —— `τ(A) ⊆ 𝒪^▷(A)`。 -/
-  le_otri : ∀ A : C, IsIsotropic P A → τ A ≤ OTri P A
+  le_otri : ∀ A : C, τ A ≤ OTri P A
   /-- **部分関手 2** —— `(𝒞^istr)^lin` の射(＝ isotropic 対象からの linear 射)で保たれる。 -/
   map_mem : ∀ {A B : C} (hA : IsIsotropic P A) {φ : A ⟶ B} (hl : IsLinear P φ)
     (t : OTri P B), ((t : End B)) ∈ τ B → ((otriLin P F hA hl t : End A)) ∈ τ A
@@ -78,6 +78,21 @@ structure IsCharacteristicSplitting (τ : ∀ A : C, Submonoid (End A)) : Prop w
   -/
   hullMem : ∀ {A B : C} {φ : A ⟶ B} (hφ : IsIsotropicHull P φ) (t : End B), t ∈ τ B →
     ∃ s : OTri P A, hullOTriHom P φ hφ ((s : End A)) = t
+  /-- **(b) の言い換え —— 非 isotropic な `A` での `τ(A)` は引き戻しである。**
+
+  ★★**これは条件の追加ではない。** 原文の `τ` は
+  `τ : (𝒞^istr)^lin → Mon` と、**`𝒞^istr` の上でのみ**定義された部分関手である
+  (`Definition 2.3` 冒頭)。★したがって非 isotropic な `A` での `τ(A)` は
+  原文では**この引き戻しが定義**であり、我々が `τ` を全対象で与えている以上、
+  その対応を条件として書かねばならない。
+
+  ★`A` が isotropic なら hull は同型なので、条件は自動的に満たされる。
+
+  原文 (FrdI p.47):
+  > via the natural injection of Proposition 2.2,
+  -/
+  hullPullback : ∀ {A B : C} {φ : A ⟶ B} (hφ : IsIsotropicHull P φ) (s : End A),
+    s ∈ OTri P A → (s ∈ τ A ↔ hullOTriHom P φ hφ s ∈ τ B)
 
 /-! ## ★(a) の後半 —— 分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)`
 
@@ -104,7 +119,7 @@ theorem charSplitting_bijective :
     Function.Bijective
       (fun p : OTimes P A × τ A =>
         (⟨((p.1 : End A)) * ((p.2 : End A)),
-          mul_mem (OTimes_le_OTri P A p.1.2) (hτ.le_otri A hA p.2.2)⟩ : OTri P A)) := by
+          mul_mem (OTimes_le_OTri P A p.1.2) (hτ.le_otri A p.2.2)⟩ : OTri P A)) := by
   -- 単元は `Div = 0`、`degFr = 1`、`Base = 𝟙`
   have hunit : ∀ u : OTimes P A, P.Div (((u : End A)) : A ⟶ A) = 0 := by
     intro u
@@ -129,11 +144,11 @@ theorem charSplitting_bijective :
         = (((u₂ : End A)) * ((t₂ : End A)) : End A) := congrArg Subtype.val h
     -- `Div` を取ると `t₁` と `t₂` の `Div` が一致する
     have hd : P.Div (((t₁ : End A)) : A ⟶ A) = P.Div (((t₂ : End A)) : A ⟶ A) := by
-      rw [← hdiv u₁ ⟨(t₁ : End A), hτ.le_otri A hA t₁.2⟩,
-        ← hdiv u₂ ⟨(t₂ : End A), hτ.le_otri A hA t₂.2⟩]
+      rw [← hdiv u₁ ⟨(t₁ : End A), hτ.le_otri A t₁.2⟩,
+        ← hdiv u₂ ⟨(t₂ : End A), hτ.le_otri A t₂.2⟩]
       exact congrArg (fun z : End A => P.Div (z : A ⟶ A)) h'
     -- `charBij` の一意性で `t₁ = t₂`
-    obtain ⟨w, -, huniq⟩ := hτ.charBij A hA ⟨(t₁ : End A), hτ.le_otri A hA t₁.2⟩
+    obtain ⟨w, -, huniq⟩ := hτ.charBij A hA ⟨(t₁ : End A), hτ.le_otri A t₁.2⟩
     have ht : t₁ = t₂ := (huniq t₁ rfl).trans (huniq t₂ hd.symm).symm
     subst ht
     -- 残りは epi による消去
@@ -143,7 +158,7 @@ theorem charSplitting_bijective :
     exact (cancel_epi ((((t₁ : End A))) : A ⟶ A)).mp h'
   · intro x
     obtain ⟨t, ht, -⟩ := hτ.charBij A hA x
-    obtain ⟨u, hu⟩ := (otri_div_eq_iff P F hA x ⟨(t : End A), hτ.le_otri A hA t.2⟩).mp ht.symm
+    obtain ⟨u, hu⟩ := (otri_div_eq_iff P F hA x ⟨(t : End A), hτ.le_otri A t.2⟩).mp ht.symm
     exact ⟨⟨u, t⟩, Subtype.ext hu.symm⟩
 
 omit hτ hA in
@@ -220,7 +235,7 @@ Frobenioid では、`τ := 𝒪^▷(−)` 自身が characteristic splitting で
 theorem isCharacteristicSplitting_otri
     (hiso : ∀ A : C, IsIsotropic P A) (hut : ∀ A : C, IsUnitTrivial P A) :
     IsCharacteristicSplitting P F (OTri P) where
-  le_otri _ _ := le_rfl
+  le_otri _ := le_rfl
   map_mem := by
     intro A B hA φ hl t _
     exact (otriLin P F hA hl t).2
@@ -254,6 +269,8 @@ theorem isCharacteristicSplitting_otri
       simp
     exact ⟨⟨φ ≫ t ≫ inv φ, hbs, hds⟩,
       (hullOTriMap_uniq P φ hφ (φ ≫ t ≫ inv φ) t hsq).symm⟩
+  hullPullback {A B φ} hφ s hs :=
+    ⟨fun _ => hullOTriHom_mem P φ hφ s hs, fun _ => hs⟩
 
 /-! ## ★★★出典の紐付け(`.src`) -/
 
