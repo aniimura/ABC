@@ -160,6 +160,48 @@ theorem exists_base_scale (T : Finset ℚ) (hcard : T.card ≤ 1) (hpos : ∀ α
       field_simp at hc
       exact hc
 
+/-! ## ★`r = m/(m+n)` の形に書く —— 正規化と `Lemma 2.1` を繋ぐ
+
+原文 (NCBelyi p.2):
+> Write r = m/(m + n), where m, n ≥ 1 are integers. Then the function
+
+★`exists_normalizing_scale` が出す `r ∈ (0,1)` を、
+`Lemma 2.1` が要求する `m/(m+n)`(`m, n ≥ 1`)の形に書き直す段。
+★**`m ≝ r.num`、`n ≝ r.den − r.num`** と取ればよい。
+`0 < r < 1` から `0 < r.num < r.den` なので、どちらも `≥ 1` である。
+-/
+
+/-- ★**`0 < r < 1` なら `r = (a+1)/((a+1)+(b+1))` と書ける**。
+
+★`Lemma 2.1` の `m = a+1`、`n = b+1` にあたる。 -/
+theorem exists_num_den (r : ℚ) (h0 : 0 < r) (h1 : r < 1) :
+    ∃ a b : ℕ, (r : ℝ) = ((a : ℝ) + 1) / (((a : ℝ) + 1) + ((b : ℝ) + 1)) := by
+  have hnum : 0 < r.num := Rat.num_pos.2 h0
+  have hlt : r.num < (r.den : ℤ) := by
+    by_contra hc
+    push_neg at hc
+    have hd : (0 : ℚ) < (r.den : ℚ) := by exact_mod_cast r.pos
+    have hge : (1 : ℚ) ≤ r := by
+      rw [← Rat.num_div_den r, le_div_iff₀ hd, one_mul]
+      exact_mod_cast hc
+    linarith
+  refine ⟨(r.num.toNat - 1), (r.den - r.num.toNat - 1), ?_⟩
+  have hnt : (r.num.toNat : ℤ) = r.num := Int.toNat_of_nonneg hnum.le
+  have h1' : 1 ≤ r.num.toNat := by omega
+  have h2' : r.num.toNat < r.den := by omega
+  have hcastN : ((r.num.toNat : ℕ) : ℝ) = (r.num : ℝ) := by
+    exact_mod_cast congrArg (fun z : ℤ => (z : ℝ)) hnt
+  have ha : ((r.num.toNat - 1 : ℕ) : ℝ) + 1 = (r.num : ℝ) := by
+    rw [Nat.cast_sub h1', hcastN]
+    norm_num
+  have hb : ((r.den - r.num.toNat - 1 : ℕ) : ℝ) + 1 = (r.den : ℝ) - (r.num : ℝ) := by
+    have hA : r.num.toNat ≤ r.den := by omega
+    have hB : 1 ≤ r.den - r.num.toNat := by omega
+    rw [Nat.cast_sub hB, Nat.cast_sub hA, hcastN]
+    ring
+  rw [ha, hb, show (r.num : ℝ) + ((r.den : ℝ) - (r.num : ℝ)) = (r.den : ℝ) by ring,
+    Rat.cast_def]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_normalizing_scale.src : ABC3.Meta.Source :=
