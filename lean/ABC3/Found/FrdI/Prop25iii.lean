@@ -1137,7 +1137,7 @@ theorem phiMap_surjective_of_isIso {Y Z : D} (u : Z ⟶ Y) [IsIso u] (x : Φ.val
     ∃ y : Φ.val Y, Φ.map u y = x :=
   ⟨Φ.map (inv u) x, by rw [← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]⟩
 
-include hτ hiso hmt haa hfn in
+include hτ hmt haa hfn in
 /-- ★★★**`Ψ` は Hom 集合の上で `𝒞(d)` へ全射**(＝ 充満)。
 
 ★★筋: `f` を 4 重分解して `β₀` を分裂 `u₀ · t₀` に分けると、
@@ -1162,10 +1162,17 @@ theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
     exact hc
   -- ★手 2: `Div t = x` なる `t ∈ τ(Y)` を取る
   obtain ⟨y, hy⟩ := prop_2_5_i_surjective P G (hmt Y) (haa Y) x
-  obtain ⟨t, ht, -⟩ := hτ.charBij Y (hiso Y) y
-  have hdt : P.Div ((((tOf P F hτ t : OTri P Y) : End Y)) : Y ⟶ Y) = x := by
-    show P.Div (((t : End Y)) : Y ⟶ Y) = x
-    rw [ht, hy]
+  -- ★`charBij` ではなく**分裂そのもの**から `τ` 成分を取る(isotropy 不要)
+  set q := (splitEquiv P F hτ).symm y with hq
+  have hyq : uOf P q.1 * tOf P F hτ q.2 = y := by
+    rw [hq, ← splitEquiv_apply P F hτ]
+    exact (splitEquiv P F hτ).apply_symm_apply y
+  have hdt : P.Div ((((tOf P F hτ q.2 : OTri P Y) : End Y)) : Y ⟶ Y) = x := by
+    have hstep : P.Div ((((tOf P F hτ q.2 : OTri P Y) : End Y)) : Y ⟶ Y)
+        = P.Div (((y : End Y)) : Y ⟶ Y) := by
+      conv_rhs => rw [← hyq]
+      exact (otri_div_unit_mul P q.1 (tOf P F hτ q.2)).symm
+    rw [hstep, hy]
   -- ★手 3: 分裂の `τ` 成分は `t^d` に一致する
   set p := (splitEquiv P F hτ).symm (⟨β₀, hm₀⟩ : OTri P Y) with hp
   have hsplit : uOf P p.1 * tOf P F hτ p.2 = (⟨β₀, hm₀⟩ : OTri P Y) := by
@@ -1177,40 +1184,36 @@ theorem psiMap_surjective (G : Frobenioid P) (d : ℕ+) {A B : C} (f : A ⟶ B)
       conv_rhs => rw [show β₀ = (((⟨β₀, hm₀⟩ : OTri P Y) : End Y) : Y ⟶ Y) from rfl, ← hsplit]
       exact (otri_div_unit_mul P p.1 (tOf P F hτ p.2)).symm
     rw [show P.Div (((p.2 : End Y)) : Y ⟶ Y) = _ from h1, hdivβ]
-  have hpow : p.2 = t ^ ((d : ℕ+) : ℕ) := by
-    obtain ⟨t₁, -, huniq⟩ := hτ.charBij Y (hiso Y) (tOf P F hτ p.2)
-    have e2 : P.Div ((((t ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
-        = P.Div ((((tOf P F hτ p.2 : OTri P Y) : End Y)) : Y ⟶ Y) := by
-      have hp2 : P.Div ((((tOf P F hτ p.2 : OTri P Y) : End Y)) : Y ⟶ Y)
-          = ((d : ℕ+) : ℕ) • x := hdivt₀
-      rw [hp2, show ((((t ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
-        = (((tOf P F hτ t ^ ((d : ℕ+) : ℕ) : OTri P Y) : End Y) : Y ⟶ Y) from rfl,
-        otri_div_pow P (tOf P F hτ t) ((d : ℕ+) : ℕ), hdt]
-    have e1 : P.Div (((p.2 : End Y)) : Y ⟶ Y)
-        = P.Div ((((tOf P F hτ p.2 : OTri P Y) : End Y)) : Y ⟶ Y) := rfl
-    rw [huniq p.2 e1, huniq _ e2]
+  have hpow : p.2 = q.2 ^ ((d : ℕ+) : ℕ) := by
+    refine tau_div_injective P F hτ p.2 (q.2 ^ ((d : ℕ+) : ℕ)) ?_
+    have e2 : P.Div ((((q.2 ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
+        = ((d : ℕ+) : ℕ) • x := by
+      rw [show ((((q.2 ^ ((d : ℕ+) : ℕ) : τ Y) : End Y)) : Y ⟶ Y)
+        = (((tOf P F hτ q.2 ^ ((d : ℕ+) : ℕ) : OTri P Y) : End Y) : Y ⟶ Y) from rfl,
+        otri_div_pow P (tOf P F hτ q.2) ((d : ℕ+) : ℕ), hdt]
+    rw [hdivt₀, e2]
   -- ★手 4: `β := u₀ · t`
-  refine ⟨δ ≫ γ ≫ (((uOf P p.1 * tOf P F hτ t : OTri P Y) : End Y) : Y ⟶ Y) ≫ α, ?_⟩
+  refine ⟨δ ≫ γ ≫ (((uOf P p.1 * tOf P F hτ q.2 : OTri P Y) : End Y) : Y ⟶ Y) ≫ α, ?_⟩
   refine psiMap_eq P F hτ hmt haa d ?_
-  refine ⟨X, Y, δ, γ, _, α, (uOf P p.1 * tOf P F hτ t).2, rfl, hδ, hγi, hγs,
+  refine ⟨X, Y, δ, γ, _, α, (uOf P p.1 * tOf P F hτ q.2).2, rfl, hδ, hγi, hγs,
     ?_, ?_, hα, ?_⟩
-  · exact ⟨(uOf P p.1 * tOf P F hτ t).2.2, by
+  · exact ⟨(uOf P p.1 * tOf P F hτ q.2).2.2, by
       show IsIso (P.Base _)
-      rw [show P.Base ((((uOf P p.1 * tOf P F hτ t : OTri P Y) : End Y)) : Y ⟶ Y)
-        = P.Base (𝟙 Y) from (uOf P p.1 * tOf P F hτ t).2.1, P.Base_id]
+      rw [show P.Base ((((uOf P p.1 * tOf P F hτ q.2 : OTri P Y) : End Y)) : Y ⟶ Y)
+        = P.Base (𝟙 Y) from (uOf P p.1 * tOf P F hτ q.2).2.1, P.Base_id]
       infer_instance⟩
-  · exact prop_1_4_i P _ (fun Z _ => hiso Z)
+  · exact isCoAngular_of_endo P F _
   · -- `Ψ` の値が `f` に戻る
     have hβ : psiOTri P F hτ d
-        ⟨(((uOf P p.1 * tOf P F hτ t : OTri P Y) : End Y) : Y ⟶ Y),
-          (uOf P p.1 * tOf P F hτ t).2⟩ = (⟨β₀, hm₀⟩ : OTri P Y) := by
+        ⟨(((uOf P p.1 * tOf P F hτ q.2 : OTri P Y) : End Y) : Y ⟶ Y),
+          (uOf P p.1 * tOf P F hτ q.2).2⟩ = (⟨β₀, hm₀⟩ : OTri P Y) := by
       have hsym : (splitEquiv P F hτ).symm
-          (uOf P p.1 * tOf P F hτ t) = (p.1, t) :=
+          (uOf P p.1 * tOf P F hτ q.2) = (p.1, q.2) :=
         (splitEquiv P F hτ).symm_apply_eq.mpr
-          (splitEquiv_apply P F hτ (p.1, t)).symm
+          (splitEquiv_apply P F hτ (p.1, q.2)).symm
       show uOf P _ * (tOf P F hτ _) ^ ((d : ℕ+) : ℕ) = _
       rw [hsym]
-      show uOf P p.1 * (tOf P F hτ t) ^ ((d : ℕ+) : ℕ) = _
+      show uOf P p.1 * (tOf P F hτ q.2) ^ ((d : ℕ+) : ℕ) = _
       rw [← hsplit, hpow]
       rfl
     rw [hfac]
@@ -1331,7 +1334,7 @@ theorem psiFunctorCd_faithful (d : ℕ+) :
 theorem psiFunctorCd_full (G : Frobenioid P) (d : ℕ+) :
     (psiFunctorCd P F hτ hiso hmt haa hfn hft d).Full where
   map_surjective {_ _} f := by
-    obtain ⟨ψ, hψ⟩ := psiMap_surjective P F hτ hiso hmt haa hfn G d f.hom f.property
+    obtain ⟨ψ, hψ⟩ := psiMap_surjective P F hτ hmt haa hfn G d f.hom f.property
     exact ⟨ψ, InducedWideCategory.Hom.ext hψ⟩
 
 theorem psiFunctorCd_essSurj (d : ℕ+) :
