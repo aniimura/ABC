@@ -1351,6 +1351,34 @@ co-angular とは限らない)。`otriLin` を `γ̃` に沿って使うには�
 ★対応する `Proposition 1.10, (i)` の型保存(`prop_1_10_i_coAngular_of`)は
 両側が **Frobenius 型**であることを要求するので、そのままでは当たらない。
 
+### ★★★★しかし原文の経路は我々のものと違う —— 正しい筋(次段の設計)
+
+原文 (FrdI p.50):
+> monomorphisms [cf. Definition 1.3, (v), (a)], this implies [by relating an
+
+★★**原文は shuffle を使っていない。** 原文の段取りは:
+
+1. `Ψ` を **`𝒞` 全体で定義**する(分裂が非 isotropic でも使えるので)
+   —— ✅ `charSplitting_bijective_all` で足場は完成した
+2. 合成との両立を **`𝒞^istr` の射についてだけ**示す
+   —— ✅ 我々の現行証明はそこでは通る(isotropy が使えるので)
+3. ★**isotropic hull が mono である**ことを使い、
+   `Proposition 1.9, (v)` の isotropification 関手で一般の `φ` へ移す
+
+★★★**つまり我々が `γ̃` の co-angular 性で詰まっているのは、
+原文が通らない道(shuffle による正規形の組み替え)を選んだからである。**
+
+★段 3 に要るのは **`Ψ` の hull に関する自然性**:
+
+  `Ψ(φ) ≫ h_B = h_A ≫ Ψ(φ^istr)`
+
+これは `hullOTriHom` がモノイド準同型で、`hullPullback` により `τ` を保ち、
+単元も保つことから従うはずである(分裂が hull と可換になる)。
+★あとは `h_B` が mono なので、合成の両立が `𝒞^istr` から `𝒞` へ落ちる。
+
+★**次段はこの筋で組む。** shuffle 由来の補題
+(`psiMap_comp_isometricPreStep` など)は `𝒞^istr` 用として残す。
+
 ★★**この 1 点があるので、`Proposition 2.5` に条なし `.src` は付けない。**
 条なしは「原典項目を**完全に**実装した」の意味であり、
 仮定が強いままでそれを主張するのは過剰申告である。
