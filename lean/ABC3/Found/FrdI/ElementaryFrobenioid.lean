@@ -314,6 +314,47 @@ noncomputable def gpOn (Φ : MonoidOn.{v, u, w} D)
     show Function.Bijective (gpMap _ (Φ.map α))
     exact ⟨gpMap_injective _ (Φ.fsmIso α hα).1, gpMap_surjective _ (Φ.fsmIso α hα).2⟩
 
+/-! ### ★★`Φ^pf`（2026-08-16 追加）
+
+★★**`Φ^gp` と違って条件 (a) の第2成分が無料にならない**が、
+★**`Φ` が divisorial なら各 `Φ(A)` は sharp で、
+`isSharp_pf` で `Pf (Φ(A))` も sharp になる** ——
+すると `toChar` が単射になり、`charMap` の単射性が
+`Pf.map` の単射性に帰着する。 -/
+
+/-- `Φ^pf` の台となる反変関手。 -/
+noncomputable def pfFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMonCat.{w} where
+  obj X := AddCommMonCat.of (Pf (Φ.val X.unop))
+  map {X Y} f := AddCommMonCat.ofHom (Pf.map (Φ.map f.unop))
+  map_id X := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    have h : Φ.map (𝟙 X.unop) = AddMonoidHom.id _ := by
+      ext a; exact Φ.map_id _ a
+    show Pf.map (Φ.map (𝟙 X.unop)) x = _
+    rw [h, Pf.map_id]
+    rfl
+  map_comp {X Y Z} f g := by
+    refine AddCommMonCat.ext (fun x => ?_)
+    have h : Φ.map (g.unop ≫ f.unop) = (Φ.map g.unop).comp (Φ.map f.unop) := by
+      ext a; exact Φ.map_comp _ _ a
+    show Pf.map (Φ.map (g.unop ≫ f.unop)) x = _
+    rw [h, Pf.map_comp]
+    rfl
+
+/-- ★★**`Φ^pf`** —— `Φ` の perfection。
+
+★`hsh` は各 `Φ(A)` が sharp であること（`Φ` が divisorial なら従う）。 -/
+noncomputable def pfOn (Φ : MonoidOn.{v, u, w} D)
+    (hsh : ∀ A : D, IsSharp (Φ.val A)) : MonoidOn.{v, u, w} D where
+  functor := pfFunctor Φ
+  charInj {A B} α := by
+    show IsCharacteristicallyInjective (Pf.map (Φ.map α))
+    exact ⟨Pf.map_injective (Φ.map_injective α),
+      charMap_pfMap_injective (hsh B) (Φ.map_injective α)⟩
+  fsmIso {A B} α hα := by
+    show Function.Bijective (Pf.map (Φ.map α))
+    exact ⟨Pf.map_injective (Φ.fsmIso α hα).1, Pf.map_surjective (Φ.fsmIso α hα).2⟩
+
 /-! ### ★★`Φ` が `non-dilating`（2026-08-16 追加）
 
 原文 (FrdI p.19):

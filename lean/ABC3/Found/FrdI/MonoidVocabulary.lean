@@ -1184,6 +1184,24 @@ theorem isAddUnit_mk_iff (m : M) (a : ℕ+) :
       simp [smul_add, smul_smul, PNat.mul_coe, mul_comm]
     rw [this, hy, smul_zero, smul_zero]
 
+/-- ★★**sharp なモノイドの perfection も sharp**（2026-08-16）。
+
+★★**上の 2 つの補題がそのまま重なる**:
+- `mk m a` が可逆 ⇔ `∃ k, IsAddUnit (k • m)`（`isAddUnit_mk_iff`）
+- `mk m a = 0` ⇔ `∃ k, k • m = 0`（`mk_eq_zero_iff`）
+
+`M` が sharp なら `IsAddUnit x ↔ x = 0` なので、右辺同士が一致する。
+
+★**これが `Φ^pf` の障壁を外す** —— `Φ` は divisorial なので各 `Φ(A)` は sharp、
+★★**したがって `Pf (Φ(A))` も sharp で、`toChar` が単射になる**。 -/
+theorem isSharp_pf (h : IsSharp M) : IsSharp (Pf M) := by
+  intro x hx
+  induction x using Pf.inductionOn with | _ m a =>
+  rw [isAddUnit_mk_iff] at hx
+  obtain ⟨k, hk⟩ := hx
+  rw [mk_eq_zero_iff]
+  exact ⟨k, h _ hk⟩
+
 end Pf
 
 def Pf.src : ABC3.Meta.Source :=
@@ -1638,6 +1656,23 @@ variable {M}
 theorem toChar_injective_of_isSharp (h : IsSharp M) :
     Function.Injective (toChar : M → MChar M) :=
   fun _ _ hab => (charRel_iff_eq M h).mp (toChar_eq_iff.mp hab)
+
+/-- ★★**`charMap (Pf.map f)` の単射性**（両方が sharp なとき）。
+
+★★**sharp なら `toChar` が単射**なので、`charMap` の単射性は
+`Pf.map` の単射性に帰着する。
+★**これが `Φ^pf` の条件 (a) の第2成分である**。 -/
+theorem charMap_pfMap_injective {A B : Type*} [AddCommMonoid A] [AddCommMonoid B]
+    (hB : IsSharp B) {f : A →+ B} (hf : Function.Injective f) :
+    Function.Injective (charMap (Pf.map f)) := by
+  intro x y hxy
+  induction x using Quotient.inductionOn with | _ u =>
+  induction y using Quotient.inductionOn with | _ v =>
+  have h1 : toChar (Pf.map f u) = toChar (Pf.map f v) := hxy
+  have h2 : Pf.map f u = Pf.map f v :=
+    toChar_injective_of_isSharp (Pf.isSharp_pf hB) h1
+  exact congrArg toChar (Pf.map_injective hf h2)
+
 
 variable (M)
 
