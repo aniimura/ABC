@@ -691,6 +691,33 @@ theorem pnat_right_eq_one {a b : ℕ+} (h : a * b = 1) : b = 1 :=
 `ℕ≥1` の任意の元による**乗法(= `n` 倍)が全単射**。 -/
 def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n : ℕ) • a)
 
+/-! ### ★★`Φ^gp` を `monoid on D` にする道筋（2026-08-16 の測定）
+
+原文 (FrdI p.19):
+> is a monoid on D, then Φ determines monoids “Φchar”, “Φgp”, Φpf” on D [i.e.,
+
+★**必要なものは 3 つ**で、本日時点での状態は次のとおり:
+
+| 項目 | 状態 |
+|---|---|
+| 関手 `A ↦ Gp (Φ.val A)` | ★**写像は `AddGrothendieckGroup.lift` で作れる**（mathlib）。`Gp.map f := lift (of.comp f)` |
+| 条件 (a) の第2成分（`charMap` の単射性） | ★**無料**。`charMap_injective_of_addGroup`（下） |
+| 条件 (a) の第1成分（`Gp.map f` の単射性） | ★**未実装**。下の見通しを見よ |
+| 条件 (b)（FSM で全単射） | `f` が全単射なら `Gp.map f` も全単射（未実装だが形式的） |
+
+★★**第1成分の見通し**: `mk (f a) (f b) = mk (f a') (f b')` は
+`∃ d ∈ N, f a + f b' + d = f a' + f b + d` である。
+★**この `d` は `f` の像の外に出うる**ので、`f` の単射性だけでは戻せない。
+★**`N` が簡約的（cancellative）であれば `d` を消せ**、
+`f (a + b') = f (a' + b)` から `a + b' = a' + b` が出て `c = 0` で済む。
+★`Φ` は divisorial なので各 `Φ(A)` は integral、
+そして `isCancelAdd_of_isIntegralMonoid` が簡約性を与える。
+★★**つまり材料はすべて手元にある。まだ書いていない。**
+
+★**`Φ^pf` のほうは違う** —— `Pf M` は群ではないので
+条件 (a) の第2成分が無料にならず、`MChar (Pf M)` の記述が要る。
+★第1成分は `Pf.map_injective` で既にある。 -/
+
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
 ★★**これは `Φ^gp` を `monoid on D` にする際の障壁を 1 つ外す**。
