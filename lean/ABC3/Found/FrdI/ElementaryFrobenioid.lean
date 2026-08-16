@@ -697,6 +697,21 @@ variable {C : Type u2} [Category.{v2} C] {Φ : MonoidOn.{v, u, w} D}
 -/
 def proj (P : PreFrobenioid C Φ) : C ⥤ D := P.toElem ⋙ ElemFrobCat.proj
 
+/-- ★★**「`Φ` を `𝒞` 上の関手とみなす」**（2026-08-16 追加）。
+
+原文 (FrdI p.21):
+> often regard Φ as a functor on C [i.e., by composing the original functor Φ with
+
+★**原文はこれを abuse of notation として導入している**が、
+★★**Lean では同じ名前を使い回せないので、別の定義として置く必要がある**。
+★原文が「記法の乱用」で済ませているものは、形式化すると
+**別の射になる** —— この項目での 1 例目。 -/
+def divisorFunctor (P : PreFrobenioid C Φ) : Cᵒᵖ ⥤ AddCommMonCat.{w} :=
+  P.proj.op ⋙ Φ.functor
+
+@[simp] theorem divisorFunctor_obj (P : PreFrobenioid C Φ) (A : C) :
+    ((divisorFunctor P).obj (op A) : AddCommMonCat.{w}) = Φ.functor.obj (op (P.proj.obj A)) := rfl
+
 /-- **`Base(−)`** —— `𝒞` の射に制限した操作。 -/
 abbrev Base (P : PreFrobenioid C Φ) {A B : C} (φ : A ⟶ B) :
     (P.toElem.obj A).base ⟶ (P.toElem.obj B).base := (P.toElem.map φ).base
