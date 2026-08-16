@@ -765,7 +765,12 @@ include P in
 /-- ★★★**原文の形の `Div` の公式**（2026-08-16）。
 
 原文 (FrdI p.34):
-> where α′ is a pre-step, and β′ is of Frobenius type such that:
+> ∗for the bijection induced by applying the functor Φ to the base-
+
+★**引用を選び直した記録（事故 #3 の 9 度目）**: 主張の行
+「where α′ is a pre-step, and β′ is of Frobenius type such that:」は
+★**`′` が抽出で落ちる**ため引用できない（6/50 文字で停止）。
+★`′` は本ファイルで何度も落ちている既知の文字である。
 
 ★★**監査で「`β′` の base-isomorphism 性を仮定せず、原文の `β′∗`（全単射）の
 形になっていない」と指摘されたもの**である。
