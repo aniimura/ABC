@@ -726,6 +726,224 @@ theorem not_mono_of_frobNormalized_of_torsion {A : C} (hfn : IsFrobeniusNormaliz
     rw [Category.comp_id]
   exact ((cancel_mono (ζ : A ⟶ A)).mp h2).symm
 
+/-! ### ★★(b) の側 —— 数え上げ
+
+★**検証役が詰めた 4 段**:
+1. `Div (φ ≫ ψ)` は **0 か既約**(`φ` が isometry で、`Φ.map (Base φ)` が
+   `Definition 1.1, (ii), (b)` により同型だから既約性を保つ)
+2. `degFr (φ ≫ ψ)` は**高々 2 つの素数の積**((i) より irreducible 射の次数は 1 か素数)
+3. 鎖の各因子を (i) の 3 分類に当てる ——
+   ★**(a) 型は高々 2 本**(次数)、★**(b) 型は高々 1 本**(`Div` の既約性)、
+   残りはすべて **(c) 型 ＝ pull-back**
+4. (c) 型は `Proposition 1.11, (vi)` で `𝒟` の FSMI 射に落ち、
+   ★**(a)(b) 型は底が同型なので隣に吸収できる** ⟹
+   `𝒟` に長さ `≥ n − 3` の FSMI 鎖ができ、FSMFF 型の条件 (b) に当たる
+
+★★**求める `N` は `N_𝒟 + 3` で、証明は構成的である。**
+★**「非有界」と仮定するのは `n` だけで、他はすべて有界。**
+-/
+
+include P in
+/-- ★**FSMI 射の 3 分類**((i) の系、不変量の形で)。
+
+★(a) 次数が素数・`Div = 0`・底は同型 /
+(b) 次数 1・`Div` が既約・底は同型 /
+(c) 次数 1・`Div = 0`・★**底が `𝒟` の FSMI 射**。 -/
+theorem isFSMI_trichotomy (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (χ : A ⟶ B) (h : IsFSMI χ) :
+    (Nat.Prime ((P.degFr χ : ℕ+) : ℕ) ∧ P.Div χ = 0 ∧ IsIso (P.Base χ)) ∨
+    (P.degFr χ = 1 ∧ IsIrreducibleElt (P.Div χ) ∧ IsIso (P.Base χ)) ∨
+    (P.degFr χ = 1 ∧ P.Div χ = 0 ∧ IsFSMI (P.Base χ)) := by
+  rcases (prop_1_14_i P G hiso χ).mp h.2 with hpf | ⟨hst, hdiv⟩ | ⟨hpb, hbirr⟩
+  · exact Or.inl ⟨hpf.2, hpf.1.1.2, hpf.1.2⟩
+  · exact Or.inr (Or.inl ⟨hst.1.1, hdiv, hst.1.2⟩)
+  · obtain ⟨hlb, hlin⟩ := prop_1_4_ii_mp P F χ hpb
+    exact Or.inr (Or.inr ⟨hlin, hlb.2,
+      (prop_1_11_vi_fsm P F χ hpb).mp h.1, hbirr⟩)
+
+include P in
+/-- ★★★**鎖の射影と数え上げ**(2026-08-16)。
+
+`𝒞` の長さ `n` の FSMI 鎖 `χ` について、3 つの数 `k`, `a`, `b` があって
+`n = k + a + b` であり:
+- **`k`** —— `𝒟` に `Base A` から出る長さ `k` の FSMI 鎖がある((c) 型の本数)
+- **`a`** —— `degFr χ` の素因数の個数(重複込み)((a) 型の本数)
+- **`b`** —— `Div ≠ 0` の因子の本数((b) 型の本数)。
+  ★`b = 0` なら `Div χ = 0`、`b ≥ 1` なら `Div χ ≠ 0`、
+  ★**`b ≥ 2` なら `Div χ` は非零の 2 項の和に分かれる**
+
+★★**最後の条件が「(b) 型は高々 1 本」を与える** ——
+`Div χ` が既約なら非零の 2 項の和には分かれないからである。 -/
+theorem chain_project (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) :
+    ∀ {n : ℕ} {A B : C} {χ : A ⟶ B}, IsFSMIChain n χ →
+      ∃ k a b : ℕ, n = k + a + b ∧
+        (∃ (Z : D) (g : (P.toElem.obj A).base ⟶ Z), IsFSMIChain k g) ∧
+        (((P.degFr χ : ℕ+) : ℕ).primeFactorsList.length = a) ∧
+        (b = 0 → P.Div χ = 0) ∧ (0 < b → P.Div χ ≠ 0) ∧
+        (2 ≤ b → ∃ x y : Φ.val (P.toElem.obj A).base,
+          P.Div χ = x + y ∧ x ≠ 0 ∧ y ≠ 0) := by
+  intro n A B χ h
+  induction h with
+  | @nil A₀ =>
+      refine ⟨0, 0, 0, rfl, ⟨_, 𝟙 _, IsFSMIChain.nil⟩, ?_, fun _ => P.Div_id A₀,
+        by omega, by omega⟩
+      rw [show ((P.degFr (𝟙 A₀) : ℕ+) : ℕ) = 1 by rw [P.degFr_id]; rfl,
+        Nat.primeFactorsList_one]
+      rfl
+  | @cons m A₁ B₁ E₁ u v hu hv ih =>
+      obtain ⟨k, a, b, hn, ⟨Z, g, hg⟩, hdeg, hb0, hb1, hb2⟩ := ih
+      have hdv : P.Div (u ≫ v)
+          = Φ.map (P.Base u) (P.Div v) + ((P.degFr v : ℕ+) : ℕ) • P.Div u := P.Div_comp u v
+      have hdegc : ((P.degFr (u ≫ v) : ℕ+) : ℕ)
+          = ((P.degFr v : ℕ+) : ℕ) * ((P.degFr u : ℕ+) : ℕ) := by
+        rw [P.degFr_comp]; rfl
+      -- 鎖の前置(同型の場合)
+      have hchain_iso : ∀ (e : (P.toElem.obj A₁).base ⟶ (P.toElem.obj B₁).base), IsIso e →
+          ∃ (Z' : D) (g' : (P.toElem.obj A₁).base ⟶ Z'), IsFSMIChain k g' := by
+        intro e he
+        rcases Nat.eq_zero_or_pos k with hk | hk
+        · exact ⟨_, 𝟙 _, hk ▸ IsFSMIChain.nil⟩
+        · haveI := he
+          exact ⟨Z, e ≫ g, hg.isIso_comp e hk⟩
+      -- 素因数の個数
+      have hdeglen : ∀ c : ℕ, ((P.degFr u : ℕ+) : ℕ).primeFactorsList.length = c →
+          ((P.degFr (u ≫ v) : ℕ+) : ℕ).primeFactorsList.length = a + c := by
+        intro c hc
+        have hperm := Nat.perm_primeFactorsList_mul
+          (a := ((P.degFr v : ℕ+) : ℕ)) (b := ((P.degFr u : ℕ+) : ℕ))
+          (P.degFr v).2.ne' (P.degFr u).2.ne'
+        rw [hdegc, hperm.length_eq, List.length_append, hdeg, hc]
+      rcases isFSMI_trichotomy P F G hiso u hu with
+        ⟨hp, hz, hbi⟩ | ⟨h1, hirr, hbi⟩ | ⟨h1, hz, hfsmi⟩
+      · -- (a) 型
+        haveI := hbi
+        refine ⟨k, a + 1, b, by omega, hchain_iso _ hbi, ?_, ?_, ?_, ?_⟩
+        · exact hdeglen 1 (by rw [Nat.primeFactorsList_prime hp]; rfl)
+        · intro hb
+          rw [hdv, hz, smul_zero, add_zero, hb0 hb, map_zero]
+        · intro hb hzero
+          rw [hdv, hz, smul_zero, add_zero] at hzero
+          exact hb1 hb (Φ.map_injective (P.Base u) (by rw [hzero, map_zero]))
+        · intro hb
+          obtain ⟨x, y, hxy, hx, hy⟩ := hb2 hb
+          refine ⟨Φ.map (P.Base u) x, Φ.map (P.Base u) y, ?_, ?_, ?_⟩
+          · rw [hdv, hz, smul_zero, add_zero, hxy, map_add]
+          · exact fun hc => hx (Φ.map_injective (P.Base u) (by rw [hc, map_zero]))
+          · exact fun hc => hy (Φ.map_injective (P.Base u) (by rw [hc, map_zero]))
+      · -- (b) 型
+        haveI := hbi
+        have hdu : P.Div u ≠ 0 := hirr.1
+        refine ⟨k, a, b + 1, by omega, hchain_iso _ hbi, ?_, by omega, ?_, ?_⟩
+        · exact (hdeglen 0 (by rw [show ((P.degFr u : ℕ+) : ℕ) = 1 by rw [h1]; rfl,
+            Nat.primeFactorsList_one]; rfl)).trans (by omega)
+        · intro _ hzero
+          rw [hdv] at hzero
+          exact hdu (eq_zero_of_nsmul_eq_zero_of_isSharp
+            (P.divisorial (P.toElem.obj A₁).base).2 (P.degFr v).2
+            (eq_zero_of_add_eq_zero_of_isSharp
+              (P.divisorial (P.toElem.obj A₁).base).2 hzero).2)
+        · intro hb
+          refine ⟨Φ.map (P.Base u) (P.Div v), ((P.degFr v : ℕ+) : ℕ) • P.Div u, hdv, ?_, ?_⟩
+          · exact fun hc => hb1 (by omega)
+              (Φ.map_injective (P.Base u) (by rw [hc, map_zero]))
+          · exact fun hc => hdu (eq_zero_of_nsmul_eq_zero_of_isSharp
+              (P.divisorial (P.toElem.obj A₁).base).2 (P.degFr v).2 hc)
+      · -- (c) 型
+        haveI := hfsmi
+        refine ⟨k + 1, a, b, by omega, ⟨Z, P.Base u ≫ g, IsFSMIChain.cons hfsmi hg⟩,
+          ?_, ?_, ?_, ?_⟩
+        · exact (hdeglen 0 (by rw [show ((P.degFr u : ℕ+) : ℕ) = 1 by rw [h1]; rfl,
+            Nat.primeFactorsList_one]; rfl)).trans (by omega)
+        · intro hb
+          rw [hdv, hz, smul_zero, add_zero, hb0 hb, map_zero]
+        · intro hb hzero
+          rw [hdv, hz, smul_zero, add_zero] at hzero
+          exact hb1 hb (Φ.map_injective (P.Base u) (by rw [hzero, map_zero]))
+        · intro hb
+          obtain ⟨x, y, hxy, hx, hy⟩ := hb2 hb
+          refine ⟨Φ.map (P.Base u) x, Φ.map (P.Base u) y, ?_, ?_, ?_⟩
+          · rw [hdv, hz, smul_zero, add_zero, hxy, map_add]
+          · exact fun hc => hx (Φ.map_injective (P.Base u) (by rw [hc, map_zero]))
+          · exact fun hc => hy (Φ.map_injective (P.Base u) (by rw [hc, map_zero]))
+
+include P in
+/-- ★★★**[FrdI] Proposition 1.14, (iii) の `⟹`** ——
+irreducible な非 pre-step は条件を満たす(`N := N_𝒟 + 3`)。
+
+★**「非有界」と仮定するのは `n` だけで、他はすべて有界である**:
+(a) 型は次数から高々 2 本、(b) 型は `Div` の既約性から高々 1 本、
+(c) 型は `𝒟` の FSMFF 型の条件 (b) から高々 `N_𝒟` 本。 -/
+theorem prop_1_14_iii_mp (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hFSMFF : IsOfFSMFFType D)
+    {A B : C} (φ : A ⟶ B) (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P φ) :
+    BoundedFSMIFactor φ := by
+  obtain ⟨N, hN⟩ := hFSMFF.2 (P.toElem.obj A).base
+  refine ⟨N + 3, fun n E ψ χ hψ hchain hχ => ?_⟩
+  obtain ⟨k, a, b, hn, ⟨Z, g, hg⟩, hdeg, -, -, hb2⟩ := chain_project P F G hiso hchain
+  have hk : k ≤ N := hN k Z g hg
+  -- `φ` の型: (i) で prime-Frobenius か pull-back(step は pre-step なので除外)
+  have hφ : (Nat.Prime ((P.degFr φ : ℕ+) : ℕ) ∧ P.Div φ = 0 ∧ IsIso (P.Base φ)) ∨
+      (P.Div φ = 0 ∧ IsPullBack P φ) := by
+    rcases (prop_1_14_i P G hiso φ).mp hirr with hpf | ⟨hst, -⟩ | ⟨hpb, -⟩
+    · exact Or.inl ⟨hpf.2, hpf.1.1.2, hpf.1.2⟩
+    · exact absurd hst.1 hnps
+    · exact Or.inr ⟨(prop_1_4_ii_mp P F φ hpb).1.2, hpb⟩
+  -- ★`φ` は FSM(鎖が FSM で `ψ` が mono)
+  have hφfsm : IsFSMMorphism φ := by
+    refine isFSMMorphism_of_comp φ ψ ?_ hψ.1.2
+    rw [← hχ]
+    exact hchain.isFSMMorphism
+  have hbfsm : IsFSMMorphism (P.Base φ) := by
+    rcases hφ with ⟨-, -, hbi⟩ | ⟨-, hpb⟩
+    · haveI := hbi; exact isFSMMorphism_of_isIso _
+    · exact (prop_1_11_vi_fsm P F φ hpb).mp hφfsm
+  have hbij : Function.Bijective (Φ.map (P.Base φ)) := Φ.fsmIso (P.Base φ) hbfsm
+  -- ★`a ≤ 2` —— irreducible 射の次数は 1 か素数
+  have hlen1 : ∀ {X Y : C} (ρ : X ⟶ Y), IsIrreducibleMor ρ →
+      ((P.degFr ρ : ℕ+) : ℕ).primeFactorsList.length ≤ 1 := by
+    intro X Y ρ hρ
+    rcases (prop_1_14_i P G hiso ρ).mp hρ with hpf | ⟨hst, -⟩ | ⟨hpb, -⟩
+    · rw [Nat.primeFactorsList_prime hpf.2]; simp
+    · rw [show ((P.degFr ρ : ℕ+) : ℕ) = 1 by rw [show P.degFr ρ = 1 from hst.1.1]; rfl,
+        Nat.primeFactorsList_one]; simp
+    · rw [show ((P.degFr ρ : ℕ+) : ℕ) = 1 by
+        rw [show P.degFr ρ = 1 from (prop_1_4_ii_mp P F ρ hpb).2]; rfl,
+        Nat.primeFactorsList_one]; simp
+  have ha : a ≤ 2 := by
+    have h1 := hlen1 ψ hψ.2
+    have h2 := hlen1 φ hirr
+    have hperm := Nat.perm_primeFactorsList_mul
+      (a := ((P.degFr ψ : ℕ+) : ℕ)) (b := ((P.degFr φ : ℕ+) : ℕ))
+      (P.degFr ψ).2.ne' (P.degFr φ).2.ne'
+    rw [← hdeg, hχ, show ((P.degFr (φ ≫ ψ) : ℕ+) : ℕ)
+        = ((P.degFr ψ : ℕ+) : ℕ) * ((P.degFr φ : ℕ+) : ℕ) by rw [P.degFr_comp]; rfl,
+      hperm.length_eq, List.length_append]
+    omega
+  -- ★`b ≤ 1` —— `Div χ` は 0 か既約
+  have hb : b ≤ 1 := by
+    by_contra hcon
+    push_neg at hcon
+    obtain ⟨x, y, hxy, hx, hy⟩ := hb2 (by omega)
+    have hdφ : P.Div φ = 0 := by rcases hφ with ⟨-, h, -⟩ | ⟨h, -⟩ <;> exact h
+    have hdχ : P.Div χ = Φ.map (P.Base φ) (P.Div ψ) := by
+      rw [hχ, P.Div_comp, hdφ, smul_zero, add_zero]
+    rcases isFSMI_trichotomy P F G hiso ψ hψ with ⟨-, hz, -⟩ | ⟨-, hirrψ, -⟩ | ⟨-, hz, -⟩
+    · rw [hz, map_zero] at hdχ
+      rw [hdχ] at hxy
+      exact hx (eq_zero_of_add_eq_zero_of_isSharp
+        (P.divisorial (P.toElem.obj A).base).2 hxy.symm).1
+    · have hirrχ := isIrreducibleElt_of_bijective (Φ.map (P.Base φ)) hbij hirrψ
+      rw [← hdχ] at hirrχ
+      rcases hirrχ.2 x y hxy with h1 | h1
+      · exact hx h1
+      · exact hy h1
+    · rw [hz, map_zero] at hdχ
+      rw [hdχ] at hxy
+      exact hx (eq_zero_of_add_eq_zero_of_isSharp
+        (P.divisorial (P.toElem.obj A).base).2 hxy.symm).1
+  omega
+
 /-! ## ★(iv) —— 四角形を渡る prime-Frobenius 性
 
 ★★**引用を選び直した記録(事故 #3 の 10 度目)**: (iv) の主張は 3 行だが、

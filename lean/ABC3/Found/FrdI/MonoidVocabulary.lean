@@ -1523,6 +1523,23 @@ def MPrec (a b : M) : Prop := ∃ n : ℕ, 0 < n ∧ MLe a (n • b)
 /-- **[FrdI] §0** —— `irreducible`。 -/
 def IsIrreducibleElt (a : M) : Prop := a ≠ 0 ∧ ∀ b c : M, a = b + c → b = 0 ∨ c = 0
 
+/-- ★**既約性は加法的全単射で移る**。
+
+★★**`Proposition 1.14, (iii)` で要る** —— `Div (φ ≫ ψ) = Φ.map (Base φ) (Div ψ)` の
+既約性を、`Div ψ` の既約性から出すのに使う。
+★`Φ.map (Base φ)` が全単射であることは
+`Definition 1.1, (ii), (b)`(`MonoidOn.fsmIso`)が与える。 -/
+theorem isIrreducibleElt_of_bijective {M N : Type*} [AddCommMonoid M] [AddCommMonoid N]
+    (f : M →+ N) (hf : Function.Bijective f) {a : M} (h : IsIrreducibleElt a) :
+    IsIrreducibleElt (f a) := by
+  refine ⟨fun hz => h.1 (hf.1 (by rw [hz, map_zero])), fun b c hbc => ?_⟩
+  obtain ⟨b', rfl⟩ := hf.2 b
+  obtain ⟨c', rfl⟩ := hf.2 c
+  rw [← map_add] at hbc
+  rcases h.2 b' c' (hf.1 hbc) with h1 | h1
+  · exact Or.inl (by rw [h1, map_zero])
+  · exact Or.inr (by rw [h1, map_zero])
+
 /-- **[FrdI] §0** —— `primary`。 -/
 def IsPrimaryElt (a : M) : Prop := a ≠ 0 ∧ ∀ b : M, b ≠ 0 → MPrec b a → MPrec a b
 

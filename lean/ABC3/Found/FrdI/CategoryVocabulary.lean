@@ -549,6 +549,34 @@ theorem IsIrreducibleMor.comp_isIso {A B E : C} {f : A ⟶ B}
 /-- **§0** `FSMI-morphism` —— irreducible な FSM 射。 -/
 def IsFSMI {A B : C} (φ : A ⟶ B) : Prop := IsFSMMorphism φ ∧ IsIrreducibleMor φ
 
+/-- ★**同型は FSM 射**。 -/
+theorem isFSMMorphism_of_isIso {A B : C} (f : A ⟶ B) [IsIso f] : IsFSMMorphism f :=
+  ⟨fun Z γ => ⟨Z, γ ≫ inv f, 𝟙 Z, by
+    rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id, Category.id_comp]⟩,
+   inferInstance⟩
+
+/-- ★**irreducible は同型との合成で保たれる(左から)**。 -/
+theorem IsIrreducibleMor.isIso_comp {A A' B : C} (e : A ⟶ A') [IsIso e]
+    {f : A' ⟶ B} (h : IsIrreducibleMor f) : IsIrreducibleMor (e ≫ f) := by
+  refine ⟨fun hiso => h.1 ?_, fun X u v huv => ?_⟩
+  · haveI := hiso
+    have hf : f = inv e ≫ (e ≫ f) := by simp
+    rw [hf]
+    infer_instance
+  · have hf : f = (inv e ≫ u) ≫ v := by rw [Category.assoc, ← huv, ← Category.assoc]; simp
+    rcases h.2 X (inv e ≫ u) v hf with h1 | h2
+    · refine Or.inl ?_
+      haveI := h1
+      have hu : u = e ≫ (inv e ≫ u) := by simp
+      rw [hu]
+      infer_instance
+    · exact Or.inr h2
+
+/-- ★**FSMI は同型との合成で保たれる(左から)**。 -/
+theorem IsFSMI.isIso_comp {A A' B : C} (e : A ⟶ A') [IsIso e]
+    {f : A' ⟶ B} (h : IsFSMI f) : IsFSMI (e ≫ f) :=
+  ⟨IsFSMMorphism.comp (isFSMMorphism_of_isIso e) h.1, h.2.isIso_comp e⟩
+
 /-- ★**原文の「Thus, a category of FSM-type does not contain any FSMI-morphisms.」** ——
 FSM 型の圏には FSMI 射が無い。★**原文が `Thus` で片づける一歩**だが、
 中身は「FSM 射は同型 ⟹ irreducible の第1条件に反する」だけである。 -/
@@ -575,6 +603,41 @@ theorem IsFSMIChain.exists_first {n : ℕ} (hn : 0 < n) {A B : C} {f : A ⟶ B}
   cases h with
   | nil => omega
   | cons hu _ => exact ⟨_, _, _, rfl, hu⟩
+
+/-- ★**FSMI 鎖の合成は FSM 射**。 -/
+theorem IsFSMIChain.isFSMMorphism {n : ℕ} {A B : C} {f : A ⟶ B}
+    (h : IsFSMIChain n f) : IsFSMMorphism f := by
+  induction h with
+  | nil => exact isFSMMorphism_of_isIso _
+  | cons hu _ ih => exact IsFSMMorphism.comp hu.1 ih
+
+/-- ★★**`φ ≫ ψ` が FSM で `ψ` が mono なら `φ` も FSM**。
+
+★★**原文の「since ψ◦φ and ψ are FSM-morphisms, it thus follows formally that
+φ is also an FSM-morphism」がこれである。**
+★fiberwise-surjectivity は `γ ≫ ψ` に当てて `ψ` の mono で消す。 -/
+theorem isFSMMorphism_of_comp {A B E : C} (φ : A ⟶ B) (ψ : B ⟶ E)
+    (h : IsFSMMorphism (φ ≫ ψ)) (hψ : Mono ψ) : IsFSMMorphism φ := by
+  haveI := hψ
+  haveI := h.2
+  refine ⟨fun Z γ => ?_, mono_of_mono φ ψ⟩
+  obtain ⟨Dd, δA, δZ, hsq⟩ := h.1 (γ ≫ ψ)
+  refine ⟨Dd, δA, δZ, (cancel_mono ψ).mp ?_⟩
+  rw [Category.assoc, Category.assoc]
+  exact hsq
+
+/-- ★**鎖に同型を前置しても長さは変わらない**(長さ 1 以上のとき)。
+
+★★**`Proposition 1.14, (iii)` の「(a)(b) 型は底が同型なので隣に吸収できる」**が
+これである。★**長さ 0 のときは成り立たない**(`𝟙` に同型を前置しても `𝟙` にならない)ので、
+そこは別に扱う。 -/
+theorem IsFSMIChain.isIso_comp {n : ℕ} {A A' B : C} (e : A ⟶ A') [IsIso e]
+    {f : A' ⟶ B} (h : IsFSMIChain n f) (hn : 0 < n) : IsFSMIChain n (e ≫ f) := by
+  cases h with
+  | nil => omega
+  | cons hu hv =>
+      rw [← Category.assoc]
+      exact IsFSMIChain.cons (hu.isIso_comp e) hv
 
 variable (C) in
 /-- **§0** `category of FSMFF-type`(FSM-finitely factorizable type)。
