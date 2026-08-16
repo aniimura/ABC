@@ -45,17 +45,24 @@ variable {K : Type*} [Field K] [NumberField K] [Algebra K ℂ]
 ★根の集合が `{φ(x)}` であることは mathlib
 (`range_eval_eq_rootSet_minpoly`)、
 各 `‖φ(x)‖ ≤ H_K(x)` は `NorthcottNF.lean` の `infinitePlace_le_mulHeight₁`。 -/
-theorem norm_le_of_mem_rootSet_minpoly (x : K) {B : ℝ}
-    (hB : Height.mulHeight₁ x ≤ B) :
+theorem norm_le_of_mem_rootSet_minpoly' (x : K) {B : ℝ}
+    (hB : ∀ φ : K →+* ℂ, ‖φ x‖ ≤ B) :
     ∀ z ∈ (minpoly ℚ (algebraMap K ℂ x)).rootSet ℂ, ‖z‖ ≤ B := by
   intro z hz
   have hmin : minpoly ℚ (algebraMap K ℂ x) = minpoly ℚ x :=
     minpoly.algebraMap_eq (algebraMap K ℂ).injective x
   rw [hmin, ← NumberField.Embeddings.range_eval_eq_rootSet_minpoly K ℂ x] at hz
   obtain ⟨φ, rfl⟩ := hz
-  calc ‖φ x‖ = (InfinitePlace.mk φ) x := (InfinitePlace.apply φ x).symm
-    _ ≤ Height.mulHeight₁ x := infinitePlace_le_mulHeight₁ _ x
-    _ ≤ B := hB
+  exact hB φ
+
+/-- ★**高さ版** —— 上の系。 -/
+theorem norm_le_of_mem_rootSet_minpoly (x : K) {B : ℝ}
+    (hB : Height.mulHeight₁ x ≤ B) :
+    ∀ z ∈ (minpoly ℚ (algebraMap K ℂ x)).rootSet ℂ, ‖z‖ ≤ B :=
+  norm_le_of_mem_rootSet_minpoly' x (fun φ => by
+    calc ‖φ x‖ = (InfinitePlace.mk φ) x := (InfinitePlace.apply φ x).symm
+      _ ≤ Height.mulHeight₁ x := infinitePlace_le_mulHeight₁ _ x
+      _ ≤ B := hB)
 
 open scoped Classical in
 /-- ★★**分母は高さ以下** —— `H_K(x) ≤ B` なら `B` 以下の自然数 `m` があって
