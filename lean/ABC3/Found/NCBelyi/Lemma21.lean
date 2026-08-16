@@ -320,7 +320,55 @@ theorem belyi_d_le (a b : ℕ) (hC : 2 ≤ C) (hα : 1 < α) (hCα : C * α ≤ 
   -- 分母は `2·f₀ ≤ 1/2` 以下、分子は `f(β) ≥ β ≥ C` 以上
   nlinarith
 
+/-- ★★**(d) の場合 4(一般形)** —— `α > 1` を仮定しない版。
+
+`f(α) ≤ f₀ ≤ 1/4` と `C ≤ β` だけから
+`(f(β)+f₀)/(f(α)+f₀) ≥ C` が出る。
+
+★★**`α ∈ {0,1}` の場合(原文の最後の場合)もこれで覆える**——
+そこでは `f(α) = 0 ≤ f₀` だからである。
+★分母は `f(α) + f₀ ≤ 2f₀ ≤ 1/2`、分子は `f(β) + f₀ ≥ β ≥ C` である。 -/
+theorem belyi_d_le' (a b : ℕ) {fα : ℝ} (hC : 2 ≤ C) (hβ : C ≤ β)
+    (hf0 : 0 < f0) (hf04 : f0 ≤ 1 / 4) (hfα : fα ≤ f0) (hpos : 0 < fα + f0) :
+    C ≤ (β ^ (a + 1) * (β - 1) ^ (b + 1) + f0) / (fα + f0) := by
+  have hβ2 : (2 : ℝ) ≤ β := le_trans hC hβ
+  have hfβ : β ≤ β ^ (a + 1) * (β - 1) ^ (b + 1) := belyi_ge_self a b hβ2
+  rw [le_div_iff₀ hpos]
+  nlinarith
+
 end PropD
+
+/-! ## ★★性質 (c) を集合の水準で -/
+
+/-- ★★**性質 (c)** —— `f(β) ∉ f(S)`。
+
+原文 (NCBelyi p.3):
+> that property (c) is satisﬁed.
+
+★`S` の元は原文の (i)(ii)(iii) より `0`、`r`、`1`、または `> 1` である。
+- `0, r, 1 ∈ [0,1]` では `|f| ≤ 1 < f(β)`
+- `α > 1` では `α < β` より `f(α) < f(β)`(狭義単調)
+
+★★**原文は `S ⊆ ℙ¹(ℚ)` だが、有理性は (c) の証明に使われない**——
+`S : Finset ℝ` で述べておく(仮説が弱いので原文の場合を含む)。 -/
+theorem belyi_c (a b : ℕ) {C r β : ℝ} (hC : 2 ≤ C) (S : Finset ℝ)
+    (hr0 : 0 ≤ r) (hr1 : r ≤ 1)
+    (hS : ∀ α ∈ S, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α)
+    (hone : (1 : ℝ) ∈ S)
+    (hβ : ∀ α ∈ S, α ≠ 0 → C * α ≤ β) :
+    ∀ α ∈ S, β ^ (a + 1) * (β - 1) ^ (b + 1) ≠ α ^ (a + 1) * (α - 1) ^ (b + 1) := by
+  have hβ2 : (2 : ℝ) ≤ β := by
+    have h := hβ 1 hone one_ne_zero
+    linarith
+  intro α hα
+  rcases hS α hα with h | h | h | hgt
+  · rw [h]; exact belyi_ne_of_mem_unitInterval a b hβ2 le_rfl zero_le_one
+  · rw [h]; exact belyi_ne_of_mem_unitInterval a b hβ2 hr0 hr1
+  · rw [h]; exact belyi_ne_of_mem_unitInterval a b hβ2 zero_le_one le_rfl
+  · have hαβ : α < β := by
+      have h := hβ α hα (by linarith)
+      nlinarith
+    exact ne_of_gt (belyi_strictMono a b hgt hαβ)
 
 /-! ## ★出典の紐付け(`.src`) -/
 
