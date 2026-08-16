@@ -5,3 +5,4 @@
 - [争点はCor 3.12に集中](abc3-disputed-locus-cor312.md) — Scholze–Stix「自明化」とJoshi「witness不足」が、G3/G2ゲートとそのまま対応する。
 - [完成宣言は文脈を持たない子に監査させる](challenger-audit-without-context.md) — 自分の文脈を継いだ検証は自分の誤読も継ぐ。Prop 1.10 の .src 6 個が全滅した実例。
 - [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
+- [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
