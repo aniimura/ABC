@@ -8,6 +8,7 @@ import ABC3.Check.PGC.ResidueCardinalityNondegenerate
 import ABC3.Check.IUTchIII.LogVolumeFillsInterface
 import ABC3.Check.IUTchIII.Cor312Degenerate
 import ABC3.Check.PGC.RefutationAttempts
+import ABC3.Check.FrdI.TwistedFrobenioid
 /-!
 # Check — 我々のモデルについての検査
 
