@@ -356,6 +356,66 @@ theorem twPreStepSpan (A B : TwObj Φ G)
     elemFrob_preStepSpan Φ hD hpd A.ofElem B.ofElem α hα
   exact ⟨⟨X₀⟩, ⟨φ₀, 1⟩, ⟨ψ₀, 1⟩, hφ₀, hψ₀, heq⟩
 
+/-- ★★**pull-back 性は `𝔽_Φ` 成分だけで決まる**(次数 1 のとき)。
+
+★**単射性**: `G` 成分は次数 1 なので消約される。
+★**全射性**: 目標の `G` 成分から `f.unit⁻¹` を掛けて逆算する。 -/
+theorem twIsPullBack_of {A B : TwObj Φ G} (f : A ⟶ B) (hlin : f.hom.deg = 1)
+    (h : IsPullBack (elemPreFrobenioid Φ hD hpd) f.hom) :
+    IsPullBack (twPreFrobenioid (G := G) hD hpd) f := by
+  intro X
+  obtain ⟨hinj, hsurj⟩ := h X.ofElem
+  constructor
+  · intro g₁ g₂ hg
+    have hv := congrArg Subtype.val hg
+    have h1 : g₁ ≫ f = g₂ ≫ f := congrArg Prod.fst hv
+    have h2 : g₁.hom.base = g₂.hom.base := congrArg Prod.snd hv
+    have hhom : g₁.hom = g₂.hom :=
+      hinj (Subtype.ext (Prod.ext (congrArg TwHom.hom h1) h2))
+    refine TwHom.ext hhom ?_
+    have hu := congrArg TwHom.unit h1
+    rw [twComp_unit, twComp_unit, hlin] at hu
+    simpa using mul_right_cancel hu
+  · intro y
+    obtain ⟨f₀, hf₀⟩ := hsurj ⟨(y.1.1.hom, y.1.2), y.2⟩
+    have hf₀' := congrArg Subtype.val hf₀
+    have e1 : f₀ ≫ f.hom = y.1.1.hom := congrArg Prod.fst hf₀'
+    have e2 : f₀.base = y.1.2 := congrArg Prod.snd hf₀'
+    refine ⟨⟨f₀, y.1.1.unit * f.unit⁻¹⟩, Subtype.ext (Prod.ext ?_ e2)⟩
+    refine TwHom.ext e1 ?_
+    show (y.1.1.unit * f.unit⁻¹) ^ ((f.hom.deg : ℕ+) : ℕ) * f.unit = y.1.1.unit
+    rw [hlin]
+    simp
+
+/-- ★**(iv)(b)** pull-back は LB-invertible かつ linear。
+
+★co-angular は無条件、isometric と linear は `𝔽_Φ` 側から。 -/
+theorem twPullBackLB {A B : TwObj Φ G} (α : A ⟶ B)
+    (h : IsPullBack (twPreFrobenioid (G := G) hD hpd) α) :
+    IsLBInvertible (twPreFrobenioid (G := G) hD hpd) α ∧
+      IsLinear (twPreFrobenioid (G := G) hD hpd) α := by
+  -- `𝔽_Φ` 側の pull-back 性を取り出す
+  have h0 : IsPullBack (elemPreFrobenioid Φ hD hpd) α.hom := by
+    intro X₀
+    obtain ⟨hinj, hsurj⟩ := h ⟨X₀⟩
+    constructor
+    · intro g₁ g₂ hg
+      have hv := congrArg Subtype.val hg
+      have e1 : g₁ ≫ α.hom = g₂ ≫ α.hom := congrArg Prod.fst hv
+      have e2 : g₁.base = g₂.base := congrArg Prod.snd hv
+      have := hinj (a₁ := (⟨g₁, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
+        (a₂ := (⟨g₂, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ A))
+        (Subtype.ext (Prod.ext (TwHom.ext e1 rfl) e2))
+      exact congrArg TwHom.hom this
+    · intro y
+      obtain ⟨g, hg⟩ := hsurj ⟨((⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B), y.1.2), y.2⟩
+      have hg' := congrArg Subtype.val hg
+      have hp1 : g ≫ α = (⟨y.1.1, 1⟩ : (⟨X₀⟩ : TwObj Φ G) ⟶ B) := congrArg Prod.fst hg'
+      have hp2 : g.hom.base = y.1.2 := congrArg Prod.snd hg'
+      exact ⟨g.hom, Subtype.ext (Prod.ext (congrArg TwHom.hom hp1) hp2)⟩
+  obtain ⟨hlb, hlin⟩ := elemFrob_pullBackLB Φ hD hpd α.hom h0
+  exact ⟨⟨twCoAngular hD hpd α, hlb.2⟩, hlin⟩
+
 end Bridge
 
 /-! ### ★測定 —— ここまでで確定したこと(2026-08-16)
