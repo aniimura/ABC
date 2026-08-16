@@ -1300,27 +1300,115 @@ theorem liftsSquareResp_of_coAngularLinear (F : FrobenioidCore P) (G : Frobenioi
     coaPre_factor_under_of_mle P G α hαc hαs u huc hus ⟨P.Div φ, by rw [hdivu]⟩
   exact ⟨κ ≫ p, by rw [← Category.assoc, hκ, hfac], IsLinear.comp P hκs.1 hplin⟩
 
-/-! ### ★残る場合(2026-08-16 の測定)
+/-! ### ★★★pre-step の場合が両側で閉じた —— **割り直せばよかった**(2026-08-16)
 
-| 側 | co-angular pre-step | pull-back | isometric pre-step |
-|---|---|---|---|
-| non-resp'd(スライス) | ★実装 | ★実装 | 未実装 |
-| resp'd(コスライス) | ★**co-angular linear 全体で実装** | ★同左 | 未実装 |
+★私は「同型でない isometric pre-step は co-angular ではないから、
+既存のどちらの場合にも当たらない」と記録した。★**それ自体は正しい。**
 
-★**合成閉性は両側とも実装した**ので、上の表が埋まれば
-`Proposition 1.7, (iii)` ＋ `Definition 1.3, (v), (b)` で
-★**任意の linear `φ`** に届く。
+★★**しかし `φ` そのものを co-angular にする必要はなかった** ——
+必要なのは**因子分解に現れる射**が co-angular であることだけである。
 
-★★**そして isometric pre-step の場合は本当に別物である** ——
-★**同型でない isometric pre-step は co-angular ではない**
-(co-angular の定義に `φ = 𝟙 ≫ φ ≫ 𝟙` を当てれば「`φ` が同型」が出てしまう)。
+- **スライス側**: `α ≫ φ` を `Definition 1.3, (v), (c)`(`preStepFactor'`)で
+  `(isometric pre-step) ≫ (co-angular pre-step)` と割る。
+  ★**`B` へ入る側が co-angular になる**ので `coaPre_factor_of_mle` が使える
+- **コスライス側**: `φ ≫ β` を `Definition 1.3, (v), (b)`(`preStepFactor`)で
+  `(co-angular pre-step) ≫ (isometric pre-step)` と割る。
+  ★**`A` から出る側が co-angular になる**ので `coaPre_factor_under_of_mle` が使える
 
-★**手掛かり**: `prop_1_11_vii_isometric` が同じ「isometric pre-step の場合」を
-`Proposition 1.9` の `pushFunctor` の圏同値で処理している。
-★**そこと同じ機械が要ると見ている**(未検証)。
+★★**2 つの分解定理が、ちょうど反対側の因子を co-angular にする。**
+★**(v)(b) と (v)(c) が別々に要るのは、このためである。**
 
-★★**`sorry` は置かない。**
+★**これは `Proposition 1.11, (vii)` で `hiso` を落としたときと同じ一手である。**
+★★**同じ日に 3 度目**(1 度目: (vii) の `hiso`、2 度目: resp'd の co-angular linear、
+3 度目: ここ)。
 -/
+
+include P in
+/-- ★★★**(v) スライス側の pre-step の場合**。
+
+★`α ≫ φ` を `Definition 1.3, (v), (c)` で
+`(isometric pre-step) ≫ (co-angular pre-step)` と割り、
+★**co-angular になった側**を `coaPre_factor_of_mle` に渡す。 -/
+theorem liftsSquare_of_preStep (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B : C} (φ : A ⟶ B) (hφs : IsPreStep P φ) : LiftsSquare P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  haveI hbα : IsIso (P.Base α) := hαs.2
+  haveI hbβ : IsIso (P.Base β) := hβs.2
+  haveI hbφ : IsIso (P.Base φ) := hφs.2
+  obtain ⟨W, b₁, b₂, hfac, hb₁i, hb₁s, hb₂c, hb₂s⟩ :=
+    F.preStepFactor' (α ≫ φ) (IsPreStep.comp P hαs hφs)
+  haveI hbb₁ : IsIso (P.Base b₁) := hb₁s.2
+  haveI hbb₂ : IsIso (P.Base b₂) := hb₂s.2
+  have hbase : P.Base b₁ ≫ P.Base b₂ = P.Base α ≫ P.Base φ := by
+    rw [← P.Base_comp, ← P.Base_comp, hfac]
+  have hinv : inv (P.Base b₂) ≫ inv (P.Base b₁)
+      = inv (P.Base φ) ≫ inv (P.Base α) := by
+    have e2 : inv (P.Base α ≫ P.Base φ) = inv (P.Base b₂) ≫ inv (P.Base b₁) := by
+      refine IsIso.inv_eq_of_hom_inv_id ?_
+      rw [← hbase]; simp
+    rw [← e2]; simp
+  have hdiv : Φ.map (P.Base b₁) (P.Div b₂) = Φ.map (P.Base α) (P.Div φ) + P.Div α := by
+    have h := congrArg P.Div hfac
+    rw [P.Div_comp, P.Div_comp, show P.Div b₁ = 0 from hb₁i,
+      show P.degFr b₂ = 1 from hb₂s.1, show P.degFr φ = 1 from hφs.1] at h
+    simpa using h.symm
+  have hdiv2 : P.Div b₂
+      = Φ.map (inv (P.Base b₁)) (Φ.map (P.Base α) (P.Div φ) + P.Div α) := by
+    have h := congrArg (Φ.map (inv (P.Base b₁))) hdiv
+    rwa [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id] at h
+  have hJ : Φ.map (inv (P.Base b₂) ≫ inv (P.Base b₁)) (P.Div α)
+      = Φ.map (inv (P.Base β)) (P.Div β) := by
+    rw [hinv, Φ.map_comp, hcond, ← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+  have hle : MLe (Φ.map (inv (P.Base β)) (P.Div β))
+      (Φ.map (inv (P.Base b₂)) (P.Div b₂)) := by
+    refine ⟨Φ.map ((inv (P.Base b₂) ≫ inv (P.Base b₁)) ≫ P.Base α) (P.Div φ), ?_⟩
+    rw [hdiv2, ← Φ.map_comp, map_add, ← Φ.map_comp, ← hJ, add_comm]
+  obtain ⟨ψ', -, hψ's, hψ'⟩ := coaPre_factor_of_mle P G β hβc hβs b₂ hb₂c hb₂s hle
+  exact ⟨b₁ ≫ ψ', by rw [Category.assoc, hψ', hfac], IsLinear.comp P hb₁s.1 hψ's.1⟩
+
+include P in
+/-- ★★★**(v) コスライス側の pre-step の場合**。
+
+★`φ ≫ β` を `Definition 1.3, (v), (b)` で
+`(co-angular pre-step) ≫ (isometric pre-step)` と割る。★**反対側が co-angular になる。** -/
+theorem liftsSquareResp_of_preStep (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B : C} (φ : A ⟶ B) (hφs : IsPreStep P φ) : LiftsSquareResp P φ := by
+  intro Cc Dd α hαc hαs β hβc hβs hcond
+  obtain ⟨W, w, z, hfac, hwc, hws, hzi, hzs⟩ :=
+    F.preStepFactor (φ ≫ β) (IsPreStep.comp P hφs hβs)
+  have hdivw : P.Div w = P.Div α + P.Div φ := by
+    have h := congrArg P.Div hfac
+    rw [P.Div_comp, P.Div_comp, show P.Div z = 0 from hzi,
+      show P.degFr z = 1 from hzs.1, show P.degFr β = 1 from hβs.1, ← hcond] at h
+    simpa using h.symm
+  obtain ⟨κ, -, hκs, hκ⟩ :=
+    coaPre_factor_under_of_mle P G α hαc hαs w hwc hws ⟨P.Div φ, by rw [hdivw]⟩
+  exact ⟨κ ≫ z, by rw [← Category.assoc, hκ, hfac], IsLinear.comp P hκs.1 hzs.1⟩
+
+/-! ### ★★★(v) が任意の linear `φ` で閉じた
+
+★`Proposition 1.7, (iii)` が linear を `(pre-step) ≫ (pull-back)` に割り、
+両因子で成り立ち、合成で閉じる。★**これで原文の「arbitrary morphism of `𝒞^lin`」に届いた。**
+-/
+
+include P in
+/-- ★★★**(v) の存在(スライス側)—— 任意の linear `φ`**。 -/
+theorem liftsSquare_of_linear (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B : C} (φ : A ⟶ B) (hφl : IsLinear P φ) : LiftsSquare P φ := by
+  obtain ⟨X, u, p, hfac, hus, hppb⟩ := (prop_1_7_iii_linear_factor P F φ).mp hφl
+  rw [hfac]
+  exact liftsSquare_comp P G (liftsSquare_of_preStep P F G u hus)
+    (liftsSquare_of_pullBack P G p hppb)
+
+include P in
+/-- ★★★**(v) の存在(コスライス側)—— 任意の linear `φ`**。 -/
+theorem liftsSquareResp_of_linear (F : FrobenioidCore P) (G : Frobenioid P)
+    {A B : C} (φ : A ⟶ B) (hφl : IsLinear P φ) : LiftsSquareResp P φ := by
+  obtain ⟨X, u, p, hfac, hus, hppb⟩ := (prop_1_7_iii_linear_factor P F φ).mp hφl
+  rw [hfac]
+  refine liftsSquareResp_comp P G (liftsSquareResp_of_preStep P F G u hus) ?_
+  exact liftsSquareResp_of_coAngularLinear P F G p
+    (prop_1_4_ii_mp P F p hppb).1.1 (prop_1_4_ii_mp P F p hppb).2
 
 /-! ### ★(旧)残る 1 場合 —— **isometric pre-step**(2026-08-16 の測定)
 
