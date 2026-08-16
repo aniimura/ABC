@@ -456,6 +456,70 @@ theorem tau_conj_mem (F : FrobenioidCore P) {τ : ∀ X : C, Submonoid (End X)}
           OTri P H) : End H) from congrArg Subtype.val heq]
   exact hmem
 
+/-! ## ★★同型に沿った共役準同型 —— `isPsiValue_unique` が要る形
+
+★`isPsiValue_unique`(`Ψ` の well-defined 性)に現れる射は
+`arbFactorUniq` の出す**同型だけ**である。★したがってそこで使う道具を
+**同型専用**に用意すれば、isotropy を仮定せずに済む。
+-/
+
+section Conj
+
+variable (F : FrobenioidCore P) {Y Y' : C} (j : Y ⟶ Y') [IsIso j]
+
+/-- ★★**同型に沿った共役** `𝒪^▷(Y') →* 𝒪^▷(Y)` —— isotropy 不要。
+
+★同型は co-angular かつ linear なので `Proposition 1.11, (iv)` がそのまま使える。 -/
+noncomputable def conjHom : OTri P Y' →* OTri P Y :=
+  otriPullHom P F j (isCoAngular_of_isIso P j) (isLinear_of_isIso P j)
+
+include P in
+/-- ★共役の定義式 —— `j ≫ t = conj(t) ≫ j`。 -/
+theorem conjHom_spec (t : OTri P Y') :
+    j ≫ (((t : End Y')) : Y' ⟶ Y') = (((conjHom P F j t : OTri P Y) : End Y) : Y ⟶ Y) ≫ j :=
+  otriPull_spec P F j (isCoAngular_of_isIso P j) (isLinear_of_isIso P j) t
+
+include P in
+/-- ★★**共役は単元を単元へ写す** —— モノイド準同型なので、
+`𝒪^▷` の中での逆元がそのまま移る。 -/
+theorem conjHom_otimes_mem (u : OTri P Y') (hu : ((u : End Y')) ∈ OTimes P Y') :
+    ((conjHom P F j u : OTri P Y) : End Y) ∈ OTimes P Y := by
+  haveI : IsIso ((((u : End Y'))) : Y' ⟶ Y') := (CategoryTheory.isUnit_iff_isIso _).mp hu.2
+  have hbu : P.Base ((((u : End Y'))) : Y' ⟶ Y') = 𝟙 _ := by
+    have h : P.Base ((((u : End Y'))) : Y' ⟶ Y') = P.Base (𝟙 Y') := u.2.1
+    rwa [P.Base_id] at h
+  have hinv : (inv ((((u : End Y'))) : Y' ⟶ Y')) ∈ OTri P Y' := by
+    refine ⟨?_, degFr_of_isIso P _⟩
+    show P.Base (inv ((((u : End Y'))) : Y' ⟶ Y')) = P.Base (𝟙 Y')
+    have h : P.Base (inv ((((u : End Y'))) : Y' ⟶ Y'))
+        ≫ P.Base ((((u : End Y'))) : Y' ⟶ Y') = P.Base (𝟙 Y') := by
+      rw [← P.Base_comp, IsIso.inv_hom_id]
+    rwa [hbu, Category.comp_id] at h
+  have hmul : u * (⟨inv ((((u : End Y'))) : Y' ⟶ Y'), hinv⟩ : OTri P Y') = 1 :=
+    Subtype.ext (by show inv ((((u : End Y'))) : Y' ⟶ Y') ≫ _ = _; simp)
+  have hmul' : (⟨inv ((((u : End Y'))) : Y' ⟶ Y'), hinv⟩ : OTri P Y') * u = 1 :=
+    Subtype.ext (by show ((((u : End Y'))) : Y' ⟶ Y') ≫ _ = _; simp)
+  refine ⟨(conjHom P F j u).2, (CategoryTheory.isUnit_iff_isIso _).mpr ?_⟩
+  refine ⟨((conjHom P F j ⟨inv ((((u : End Y'))) : Y' ⟶ Y'), hinv⟩ : OTri P Y) : End Y),
+    ?_, ?_⟩
+  · have h := congrArg (fun z : OTri P Y => ((z : End Y)))
+      ((conjHom P F j).map_mul ⟨inv ((((u : End Y'))) : Y' ⟶ Y'), hinv⟩ u).symm
+    simp only [hmul', map_one] at h
+    exact h
+  · have h := congrArg (fun z : OTri P Y => ((z : End Y)))
+      ((conjHom P F j).map_mul u ⟨inv ((((u : End Y'))) : Y' ⟶ Y'), hinv⟩).symm
+    simp only [hmul, map_one] at h
+    exact h
+
+include P in
+/-- ★★★**共役は `τ` を保つ** —— `tau_conj_mem` の言い換え。 -/
+theorem conjHom_tau_mem {τ : ∀ X : C, Submonoid (End X)}
+    (hτ : IsCharacteristicSplitting P F τ) (t : OTri P Y')
+    (ht : ((t : End Y')) ∈ τ Y') : ((conjHom P F j t : OTri P Y) : End Y) ∈ τ Y :=
+  tau_conj_mem P F hτ j t ht
+
+end Conj
+
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 
 原文 (FrdI p.48):
