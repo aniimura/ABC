@@ -118,7 +118,22 @@ isotropic 型(`cx2_isotropic`)、`𝒟` が FSMFF 型(`cx2_fsmff`)、
   要求は「`Φ` が divisorial」「`𝒞`・`𝒟` が connected かつ totally epimorphic」だけで、
   ★**関手 `𝒞 → 𝔽_Φ` に追加条件は無い。**
 
-★**未照合**: `Definition 1.2` の語彙(`pre-step`・`co-angular` 等)。
+- `Definition 1.2`(p.21–23)—— ★★**全項一致**:
+  - (i) `linear` / `isometric`(★原文どおり **`Div(φ) = 0`**)/ `metrically equivalent`
+  - (ii) `base-isomorphism` / `base-isomorphic` / `pull-back morphism`(ファイバー積の形)/
+    `base-equivalent` / `base-identity` / **`𝒪^×(A) ⊆ Aut_𝒞(A)`・`𝒪^▷(A) ⊆ End_𝒞(A)`**
+    (base-identity かつ linear な自己射)
+  - (iii) `pre-step` / `step` / ★**`co-angular`**(3 分解 `φ = α ◦ β ◦ γ` で
+    `α` linear・`β` isometric pre-step・`α` か `γ` が base-isomorphism ⟹ `β` が同型)/
+    `LB-invertible` / `Frobenius type` / `prime-Frobenius`
+  - (iv) `Frobenius-trivial` / `metrically trivial` / `base-trivial` / `isotropic`
+
+★★★**これで `Prop 1.14, (iii)` に入る定義はすべて照合済みになった** ——
+`§0`・`Definition 1.1`・`Definition 1.2`・`Definition 1.3`。★**食い違いは 1 つも出なかった。**
+
+★**残る不確かさは「定義の写し」ではなく「命題の証明」の側**である ——
+`Proposition 1.4` / `Proposition 1.5` の我々の証明、および捻れ積が 21 条を満たすという
+我々の証明。★**後者は機械検証済みなので、定義が正しければ健全である。**
 
 ★★**照合中に出た未解決の疑問**(原文側): `Example 3.6` は `Φ = G`(群)を取り
 「`𝒞` は group-like 型の Frobenioid」と述べるが、群は sharp でないので
