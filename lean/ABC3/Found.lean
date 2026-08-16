@@ -54,6 +54,7 @@ import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.ArithDivHom
+import ABC3.Found.GenEll.ProductFormula
 import ABC3.Found.GenEll.LogDiff
 import ABC3.Found.NCBelyi.Separation
 /-!
