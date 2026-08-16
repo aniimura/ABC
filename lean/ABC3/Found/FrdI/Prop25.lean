@@ -241,31 +241,63 @@ theorem hullTau_existsUnique {τ : ∀ X : C, Submonoid (End X)}
 
 end HullTransport
 
-/-! ## ★★★測定 —— 原文の「非 isotropic でも使える」は (a)(b) からは出ない
+/-! ## ★★★訂正 —— 「非 isotropic でも使える」は導ける。私が見落としていた
 
-★★`Proposition 2.5, (iii)` の証明で原文は、非 isotropic な `A` についても
-分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)` が使えるとし、根拠に
-`Definition 2.3, (a), (b)` だけを挙げる。★機械で追うと次で詰まる:
+★★一度「原文の主張は `Definition 2.3, (a), (b)` から導けない」と記録したが、
+★★★**それは誤りだった**。見落としていたのは `Definition 1.3, (iii), (b)` である。
 
-`x ∈ 𝒪^▷(A)` を取り、単射 `ι : 𝒪^▷(A) ↪ 𝒪^▷(A^istr)`(`Proposition 2.2, (iv)`)で
-送ると、(a) により `ι x = u' · t'`(`u' ∈ 𝒪^×(A^istr)`, `t' ∈ τ(A^istr)`)と
-分裂する。(b) により `t' = ι t` なる `t ∈ 𝒪^▷(A)` が**一意に**取れる
-(上の `hullTau_existsUnique`)。
+原文 (FrdI p.24):
+> angular pre-step of C, then any morphism A
 
-★★**しかし `u'` が `ι` の像に入ることは (a)(b) から出ない。**
-`Proposition 2.2, (iv)` は「モノイドの自然な単射」しか主張せず、
-★**単元の部分が全射である**とは言っていない。`ι t` は一般に可逆でないので
-`u' = ι x · (ι t)⁻¹` と書くこともできない。
+★**恒等射は co-angular な pre-step** なので、これを `A′ = A` に当てると
+★★★**`A` の自己射はすべて co-angular**——**isotropy は要らない**。
 
-★この観測は**まだ `Gap` ではない**——③ を主張するには
-「(a)(b) を満たすが非 isotropic な対象で分裂が破れる Frobenioid」という
-**falsifier** が要る。★現時点では「**我々が導けなかった**」という測定である。
+★★**しかもこの補題は既に `Prop18.lean` にあった**(`isCoAngular_of_endo`)。
+★自分たちで作った道具を使い損ねて「導けない」と記録しかけたのである。
+★★**教訓: 「導けない」と書く前に、まず自分の在庫を検索する。**
 
-★★**帰結**: `Prop25iii.lean` の `psiMap` は `IsOfIsotropicType` を仮定したままである。
-外すには (α) 上の穴を埋めるか、(β) `𝒞^istr` で構成して
-`Proposition 1.9, (v)` の isotropification 関手で移すか、のどちらかが要る。
-★原文の段 8 は (β) の筋である。
+★★これで `Proposition 2.2, (iii)`(`otri_div_eq_iff`、「`Div` が等しい ⟺
+`𝒪^×` 倍だけ違う」)が**任意の `A` で成り立つ**(下の `otri_div_eq_iff'`)。
+★詰まっていた「`u'` が像に入るか」は**迂回できる**——`u'` を持ち上げる代わりに、
+`Div x = Div t` から直接 `x = t ≫ u` を得ればよい。
+
+★**残る作業**(次段): `τ(A)` を非 isotropic な `A` で `τ(A^istr)` の引き戻しとして
+確定させること。原文の `τ` は `(𝒞^istr)^lin` 上の部分関手なので、
+非 isotropic な `A` での `τ(A)` は**その引き戻しが定義**である。
+我々は `τ` を全対象で与えているため、この対応を条件として書く必要がある。
 -/
+
+include P in
+/-- ★★★**`Proposition 2.2, (iii)` は任意の `A` で成り立つ** ——
+`otri_div_eq_iff` の isotropy 仮定を外したもの。
+
+★co-angular 性は `isCoAngular_of_endo` から来る。 -/
+theorem otri_div_eq_iff' (F : FrobenioidCore P) {A : C} (x y : OTri P A) :
+    P.Div ((x : End A) : A ⟶ A) = P.Div ((y : End A) : A ⟶ A)
+      ↔ ∃ u : OTimes P A, ((x : End A) : A ⟶ A) = ((y : End A) : A ⟶ A)
+          ≫ ((u : End A) : A ⟶ A) := by
+  have hbx : P.Base ((x : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((x : End A) : A ⟶ A) = P.Base (𝟙 A) := x.2.1
+    rwa [P.Base_id] at h
+  have hby : P.Base ((y : End A) : A ⟶ A) = 𝟙 _ := by
+    have h : P.Base ((y : End A) : A ⟶ A) = P.Base (𝟙 A) := y.2.1
+    rwa [P.Base_id] at h
+  have hsx : IsPreStep P ((x : End A) : A ⟶ A) :=
+    ⟨x.2.2, by show IsIso (P.Base ((x : End A) : A ⟶ A)); rw [hbx]; infer_instance⟩
+  have hsy : IsPreStep P ((y : End A) : A ⟶ A) :=
+    ⟨y.2.2, by show IsIso (P.Base ((y : End A) : A ⟶ A)); rw [hby]; infer_instance⟩
+  constructor
+  · intro h
+    obtain ⟨u, hu, he⟩ := F.faithfulUpToUnits ((x : End A) : A ⟶ A) ((y : End A) : A ⟶ A)
+      (show P.Base _ = P.Base _ from by rw [hbx, hby]) h
+      (isCoAngular_of_endo P F _) hsx (isCoAngular_of_endo P F _) hsy
+    exact ⟨⟨u, hu⟩, he⟩
+  · rintro ⟨u, he⟩
+    haveI : IsIso ((u : End A) : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso _).mp u.2.2
+    rw [he, P.Div_comp, hby, MonoidOn.map_id,
+      show P.Div ((u : End A) : A ⟶ A) = 0 from isIsometric_of_isIso P _,
+      show P.degFr ((u : End A) : A ⟶ A) = 1 from u.2.1.2]
+    simp
 
 /-! ## ★★★`𝒪^▷(A)^char → Φ(A)` の全単射 —— (i) を閉じる
 

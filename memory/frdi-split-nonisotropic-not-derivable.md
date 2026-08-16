@@ -1,33 +1,36 @@
 ---
 name: frdi-split-nonisotropic-not-derivable
-description: [FrdI] Prop 2.5 (iii) の「分裂は非 isotropic でも使える」は Def 2.3 (a)(b) からは導けなかった。単元部分の全射性が欠けている。
+description: 「導けない」と書く前に自分の在庫を検索する。[FrdI] の分裂の非 isotropic 拡張で一度これを誤った。
 metadata:
-  type: project
+  type: feedback
 ---
 
-[FrdI] `Proposition 2.5, (iii)` の証明(物理 p.49)で原文は、非 isotropic な `A` でも
-特性分裂 `𝒪^×(A) × τ(A) ≅ 𝒪^▷(A)` が使えると述べ、根拠に
-**`Definition 2.3, (a), (b)` だけ**を挙げる。★**2026-08-17 に機械で追い、導けなかった。**
+**「導けない」と記録する前に、まず自分たちが既に作った補題を検索する。**
 
-**詰まる場所**: `x ∈ 𝒪^▷(A)` を単射 `ι : 𝒪^▷(A) ↪ 𝒪^▷(A^istr)`(`Prop 2.2, (iv)`)で
-送ると (a) で `ι x = u' · t'` と分裂し、(b) で `t' = ι t` なる `t` が一意に取れる
-(`hullTau_existsUnique`、`lean/ABC3/Found/FrdI/Prop25.lean`)。
-★**しかし `u' ∈ 𝒪^×(A^istr)` が `ι` の像に入ることが出ない。**
-`Prop 2.2, (iv)` は「モノイドの自然な単射」しか主張せず、単元部分の全射性は言わない。
-`ι t` は一般に可逆でないので `u' = ι x · (ι t)⁻¹` とも書けない。
+**Why:** 2026-08-17、[FrdI] `Proposition 2.5, (iii)` の「分裂は `A` が isotropic でなくても
+使える」(物理 p.49)について、★**「`Definition 2.3, (a), (b)` からは導けない」と測定して
+コミットした**。★★**それは誤りだった。**
 
-**Why:** これは `Proposition 2.5` を数えられるかどうかの**律速**である。この穴があるため
-`Prop25iii.lean` の `psiMap` は `IsOfIsotropicType P` を仮定したままで、
-得られているのは実質「`𝒞^istr` 上の (iii)」である(圏同値そのものは通っている)。
-★原文の段 8(isotropic hull が単射 ⟹ 一般の `𝒞` へ)も、**Ψ を非 isotropic な対象で
-定義する**ために同じ分裂を要求するので、迂回にならない。
+見落としていたのは `Definition 1.3, (iii), (b)`:
+> If A′ → A is a co-angular pre-step of C, then any morphism A′ → A is co-angular.
+
+★**恒等射は co-angular な pre-step** なので `A′ = A` に当てると
+**自己射はすべて co-angular**——isotropy は要らない。これで
+`Proposition 2.2, (iii)`(`Div` が等しい ⟺ `𝒪^×` 倍だけ違う)が任意の `A` で成り立ち
+(`otri_div_eq_iff'`、`lean/ABC3/Found/FrdI/Prop25.lean`)、詰まっていた
+「`u'` が像に入るか」は**迂回できる**——`u'` を持ち上げず、`Div x = Div t` から
+直接 `x = t ≫ u` を得ればよい。
+
+★★★**しかもその補題は既に `Prop18.lean` に `isCoAngular_of_endo` として存在した。**
+自分たちの在庫を使い損ねたのである。
 
 **How to apply:**
-- ★**まだ ③ `sourceGap` ではない**。③ を主張するには「(a)(b) を満たすが非 isotropic な
-  対象で分裂が破れる Frobenioid」という **falsifier** が要る。現状は「導けなかった」測定。
-- 埋める候補: (α) `𝒪^×(A) → 𝒪^×(A^istr)` の全射性を別経路で出す
-  (isotropic hull が mono であることと `Definition 1.3, (v), (a)` あたり)、
-  (β) `Definition 2.3` に条件を足す —— ただし (β) は既に数えた項目の忠実度を下げるので、
-  やるなら「原文が (a)(b) から従うとする内容を、我々は導けないので条件として明示する」と
-  docstring に書くこと。
-- 関連: [[frdi-prop21-quantifier-false]](原文の literal な主張が偽だった別の例)。
+- 「原文のこの段が導けない」と書きたくなったら、★**まず `grep` で自分の在庫を探す**。
+  次に**原文の同じ節の他の条**(ここでは `Definition 1.3` の (iii)(b))を読み直す。
+- 測定の記録は安いが、**誤った測定は後の判断を歪める**。撤回も同じ場所に書くこと。
+- 残作業(2026-08-17 時点): 非 isotropic な `A` での `τ(A)` を `τ(A^istr)` の
+  引き戻しとして確定させること。原文の `τ` は `(𝒞^istr)^lin` 上の部分関手なので、
+  非 isotropic での `τ(A)` は**引き戻しが定義**である。我々は `τ` を全対象で
+  与えているため、この対応を `IsCharacteristicSplitting` の条件として書く必要がある。
+  これが済めば `Prop25iii.lean` の `IsOfIsotropicType` を外す道が開く。
+- 関連: [[frdi-prop21-quantifier-false]] / [[lean-build-check-discipline]]。
