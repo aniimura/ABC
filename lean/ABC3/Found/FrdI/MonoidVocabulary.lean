@@ -725,15 +725,13 @@ def IsPerfectMonoid : Prop := ∀ n : ℕ+, Function.Bijective (fun a : M => (n 
 noncomputable def gpMap {N : Type*} [AddCommMonoid N] (f : M →+ N) : Gp M →+ Gp N :=
   Algebra.GrothendieckAddGroup.lift ((Algebra.GrothendieckAddGroup.of).comp f)
 
-/-! ★**`gpMap` の定義式（`gpMap f (toGp m) = toGp (f m)`）は未実装**。
-
-★`Algebra.GrothendieckAddGroup.lift` は `Equiv` で、`left_inv` から
-`lift (of.comp f) ∘ of = of ∘ f` が出るはずだが、
-★**`toGp m = mk m 0` と `of m` を結ぶ一段が `simp` で閉じなかった**。
-★**次に当たるときの手**: `Submonoid.LocalizationMap.lift_mk'` 系の
-補題を探して `lift` を `mk` に直接適用する形で書く。
-
-★**型は通っている（`gpMap` は定義済み）**ので、残るのは性質だけである。 -/
+@[simp] theorem gpMap_toGp {N : Type*} [AddCommMonoid N] (f : M →+ N) (m : M) :
+    gpMap M f (toGp M m) = toGp N (f m) := by
+  have hb : toGp M m = (AddLocalization.addMonoidOf (⊤ : AddSubmonoid M)) m := rfl
+  rw [hb]
+  simp only [gpMap, Algebra.GrothendieckAddGroup.lift, Equiv.coe_fn_mk]
+  rw [AddSubmonoid.LocalizationMap.lift_eq]
+  rfl
 
 /-! ### ★★群の `M^char` は自明（2026-08-16 追加）
 
