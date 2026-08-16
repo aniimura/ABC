@@ -548,6 +548,28 @@ theorem coaPre_iso_of_div_eq (hequiv : ∀ X : C, (coaPreUnderFunctor P X).IsEqu
   exact ⟨⟨f, g, (coaPreUnderFunctor P A).map_injective (Subsingleton.elim _ _),
     (coaPreUnderFunctor P A).map_injective (Subsingleton.elim _ _)⟩⟩
 
+/-- ★★**同じ `Div` を持つ co-angular pre-step は、`𝒞` の同型 1 本だけ違う**。
+
+★上の `coaPre_iso_of_div_eq` はコスライスの同型を与える。
+★**ここではその `𝒞` 成分を取り出す** —— 使うときはこの形が要る。
+
+★★**`Proposition 1.6, (v)` の `⟸` を証明する道の第 2 歩**である ——
+`A` の co-angular pre-step 自己射の**底**が、`Base(Aut_𝒞(A))` の
+同じ剰余類に入ることが、これで言える。 -/
+theorem coaPre_base_diff (hequiv : ∀ X : C, (coaPreUnderFunctor P X).IsEquivalence)
+    {A B E : C} (φ : A ⟶ B) (ψ : A ⟶ E)
+    (hφ : coaPreProp P φ) (hψ : coaPreProp P ψ) (h : P.Div φ = P.Div ψ) :
+    ∃ f : B ⟶ E, IsIso f ∧ φ ≫ f = ψ := by
+  obtain ⟨e⟩ := coaPre_iso_of_div_eq P hequiv
+    (Under.mk (Y := (⟨B⟩ : WideSubcategory (coaPreProp P)))
+      (⟨φ, hφ⟩ : (⟨A⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨B⟩))
+    (Under.mk (Y := (⟨E⟩ : WideSubcategory (coaPreProp P)))
+      (⟨ψ, hψ⟩ : (⟨A⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨E⟩)) h
+  refine ⟨(CommaMorphism.right e.hom).hom, ⟨(CommaMorphism.right e.inv).hom, ?_, ?_⟩, ?_⟩
+  · exact congrArg (fun t => InducedWideCategory.Hom.hom (CommaMorphism.right t)) e.hom_inv_id
+  · exact congrArg (fun t => InducedWideCategory.Hom.hom (CommaMorphism.right t)) e.inv_hom_id
+  · exact congrArg InducedWideCategory.Hom.hom (Under.w e.hom)
+
 end CoaPreIso
 
 /-! ## ★`𝒞^imtr-pre` —— isometric pre-step が定める部分圏

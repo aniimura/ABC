@@ -2910,4 +2910,60 @@ theorem isFrobeniusTrivial_of_baseTrivial (F : FrobenioidCore P) {A : C}
   obtain ⟨k⟩ := h A₀ ⟨e.symm⟩
   exact isFrobeniusTrivial_of_iso P F k hft
 
+include P in
+/-- ★★★**pre-step 自己射は、`Base` を保ったまま `Div` を `n` 倍できる**。
+
+★★**`Proposition 1.6, (v)` の `⟸` を証明する道の第 3 歩**である。
+
+★**中身**: `A` が Frobenius-trivial なら底恒等な Frobenius 自己射 `ζ_n` がある。
+`s ≫ ζ_n` を `Definition 1.3, (iv), (a)` で 3 分解し、Frobenius 因子を
+(ii) の本質的一意性で `ζ_n` に取り替えると `s ≫ ζ_n = ζ_n ≫ t` になる。
+★**`ζ_n` は底恒等で `Div = 0` なので、`Base t = Base s` かつ `Div t = n · Div s`。** -/
+theorem preStep_endo_scale (F : FrobenioidCore P) {A : C} (hft : IsFrobeniusTrivial P A)
+    (s : A ⟶ A) (hs : IsPreStep P s) (n : ℕ+) :
+    ∃ t : A ⟶ A, IsPreStep P t ∧ P.Base t = P.Base s ∧
+      P.Div t = ((n : ℕ+) : ℕ) • P.Div s := by
+  obtain ⟨ζ, hdeg, hprop⟩ := hft
+  have hzb : P.Base (ζ n : A ⟶ A) = 𝟙 _ := by
+    have h := (hprop n).1
+    show P.Base (ζ n : A ⟶ A) = 𝟙 _
+    rw [← P.Base_id A]
+    exact h
+  have hzd : P.Div (ζ n : A ⟶ A) = 0 := (hprop n).2.1.2
+  -- ★`s ≫ ζ n` を `Definition 1.3, (iv), (a)` で 3 分解する
+  obtain ⟨X, Y, γ, β, α, hx, hγ, hβ, hα⟩ := F.arbFactor (s ≫ (ζ n : A ⟶ A))
+  obtain ⟨-, hαl⟩ := F.pullBackLB α hα
+  have hdγ : P.degFr γ = n := by
+    have h := congrArg P.degFr hx
+    rw [P.degFr_comp, hdeg n, hs.1, mul_one, P.degFr_comp, P.degFr_comp, hαl, hβ.1,
+      one_mul, one_mul] at h
+    exact h.symm
+  -- ★(ii) の本質的一意性で Frobenius 因子を `ζ n` に取り替える
+  obtain ⟨θ, hθi, hθ⟩ := F.frobDegUniq A X A γ (ζ n : A ⟶ A) hγ (hprop n).2
+    (by rw [hdγ, hdeg n])
+  haveI := hθi
+  refine ⟨inv θ ≫ β ≫ α, ⟨?_, ?_⟩, ?_, ?_⟩ <;>
+    [skip; skip; skip; skip]
+  case refine_1 =>
+    show P.degFr (inv θ ≫ β ≫ α) = 1
+    rw [P.degFr_comp, P.degFr_comp, hαl, hβ.1, degFr_of_isIso P (inv θ)]
+    simp
+  all_goals
+    have hxt : s ≫ (ζ n : A ⟶ A) = (ζ n : A ⟶ A) ≫ (inv θ ≫ β ≫ α) := by
+      rw [hx, ← hθ]; simp
+    have hbase : P.Base (inv θ ≫ β ≫ α) = P.Base s := by
+      have h := congrArg P.Base hxt
+      rw [P.Base_comp, P.Base_comp, hzb, Category.comp_id, Category.id_comp] at h
+      exact h.symm
+  case refine_2 =>
+    show IsIso (P.Base (inv θ ≫ β ≫ α))
+    rw [hbase]
+    exact hs.2
+  case refine_3 => exact hbase
+  case refine_4 =>
+    have h := congrArg P.Div hxt
+    rw [P.Div_comp, P.Div_comp, hzb, hzd, hdeg n] at h
+    simp only [map_zero, zero_add, smul_zero, add_zero, MonoidOn.map_id, id_eq] at h
+    exact h.symm
+
 end ABC3.Found.FrdI
