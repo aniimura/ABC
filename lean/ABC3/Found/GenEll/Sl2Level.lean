@@ -35,20 +35,37 @@ import Mathlib.Algebra.Module.ZMod
 - `M = 𝔰𝔩₂` なら `K ≤ H`、`H·K = ⊤` と併せて `H = ⊤`。
 - `M = 0` なら `H ∩ K = 1`。
 
-★★**`M = 0` を潰すのが本ファイルの山場である。**
-`H·K = ⊤` から `π(h) = π(u)`(`u ≝ upper 1`)なる `h ∈ H` を取る。
-`π(u)` は `SL₂(ℤ/l^n)` で位数 `l^n` なので `h^{l^n} ∈ K ∩ H = 1`。ところが
+★★**場合分けは要らなかった。** 当初は `M = 0` を背理法で潰すつもりだったが、
+**`M ≠ 0` を直接示せる**——`slE ∈ M` が always 成り立つ:
+
+`H·K = ⊤` から `π(h) = π(u)`(`u ≝ upper 1`)なる `h ∈ H` を取り、`h = k·u`(`k ∈ K`)と書くと
 
 ```
-h = u·(1 + l^n·A)  ⟹  h^{l^n} = u^{l^n} · (1 + l^n·Σ_{i<l^n} Ad(u^{-i})(A))
+h^{l^n} = (1 + l^n·Σ_{i<l^n} Ad(u^i)(B)) · u^{l^n}
 ```
 
-で、**`Σ_{i<l^n} Ad(u^{-i})` は `𝔽_l` 上ゼロ写像**(下の `sum_range_one_add_pow_pow_eq_zero`)。
-したがって `h^{l^n} = u^{l^n} = upper(l^n) = 1 + l^n·e ≠ 1`。★**矛盾**。
+で、**`Σ_{i<l^n} Ad(u^i)` は `𝔽_l` 上ゼロ写像**(`sum_adU_eq_zero`)。
+したがって **`h^{l^n} = u^{l^n} = upper(l^n) = 1 + l^n·e`** であり、`e ∈ M`。
+★これで `M ≠ 0` が出るので、あとは既約性から `M = 𝔰𝔩₂` が直ちに従う。
 
 ★**そしてそこに `l ≥ 5` が要る**——`C(l^n,3)` を落とすのに `3 < l^n` が要り、
 `l = 3, n = 1` では `C(3,3) = 1 ≠ 0` である
 (`Sl2Congruence.lean` の `choose_three_three_ne_zero_mod_three`)。
+
+## ★★段 (A) は完成した(2026-08-17)
+
+本体は **`subgroup_eq_top_of_redPow_surj`**:
+
+> `l ≥ 5` 素数、`H ≤ SL₂(ℤ/l^{k+1})` が `SL₂(𝔽_l)` へ全射なら `H = ⊤`。
+
+★**`sorry` 0・公理 0。** mathlib は `SL₂` の合同部分群の理論を持たないので、
+`ZMod` の水準から組み上げた。
+
+★残るのは **段 (B)** ——`ℤ_l` の位相で「閉部分群は各 `mod l^n` の像で決まる」。
+そこだけが位相を要する。
+
+★**`.src` は付けない。** `Lemma 3.1, (iv)` はまだ完成していない
+——`.src` の 2 値規則(条なし = 命題全体が済んだ)を守る。
 -/
 
 namespace ABC3.Found.GenEll
@@ -396,5 +413,418 @@ theorem sum_adU_eq_zero (hl : Nat.Prime l) (h5 : 5 ≤ l) (hn : 1 ≤ n)
       _ = 0 := by rw [key0, neg_zero]
 
 end AdjointSum
+
+
+/-! ## ★段 6 —— 可換環上の随伴作用と、`(k·u)^m` の積公式
+
+★`Sl2Adjoint.lean` の `adU` は**体上でしか定義されていない**(`[Field K]`)。
+`ℤ/l^{n+1}` は体ではないので、同じ式を可換環上で取り直す。 -/
+
+section AdjointRing
+
+variable {R : Type*} [CommRing R]
+
+/-- 上三角基本行列 `!![1,t;0,1]`(`SL` を経由しない生の行列)。 -/
+def upperM (t : R) : Matrix (Fin 2) (Fin 2) R := !![1, t; 0, 1]
+
+@[simp] theorem upperM_zero : upperM (0 : R) = 1 := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [upperM, Matrix.one_fin_two]
+
+theorem upperM_mul (s t : R) : upperM s * upperM t = upperM (s + t) := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [upperM] <;> ring
+
+@[simp] theorem upperM_mul_neg (t : R) : upperM t * upperM (-t) = 1 := by
+  rw [upperM_mul]; simp
+
+@[simp] theorem upperM_neg_mul (t : R) : upperM (-t) * upperM t = 1 := by
+  rw [upperM_mul]; simp
+
+theorem upperM_pow (t : R) (m : ℕ) : upperM t ^ m = upperM ((m : R) * t) := by
+  induction m with
+  | zero => simp
+  | succ k ih => rw [pow_succ, ih, upperM_mul]; push_cast; ring_nf
+
+/-- 可換環上の随伴作用。★体上では `Sl2Adjoint.lean` の `adU` と**同じ式**である。 -/
+def adUR (t : R) (X : Matrix (Fin 2) (Fin 2) R) : Matrix (Fin 2) (Fin 2) R :=
+  upperM t * X * upperM (-t)
+
+theorem adUR_eq_adU {K : Type*} [Field K] (t : K) (X : Matrix (Fin 2) (Fin 2) K) :
+    adUR t X = adU t X := rfl
+
+end AdjointRing
+
+section ProductFormula
+
+variable (l : ℕ) [Fact (Nat.Prime l)] (n : ℕ)
+
+/-- ★`upperM t` を左から通すと随伴作用が出る。 -/
+theorem upperM_mul_congElt (t : ZMod (l ^ (n + 1)))
+    (B : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) :
+    upperM t * congElt l n B = congElt l n (adUR t B) * upperM t := by
+  rw [congElt, congElt, adUR, mul_add, mul_one, add_mul, one_mul,
+    Matrix.mul_smul, Matrix.smul_mul, mul_assoc, mul_assoc, upperM_neg_mul, mul_one]
+
+/-- ★★**積公式** —— `(k·u)^m = (1 + l^n·Σ_{i<m} Ad(u^i)B) · u^m`。
+
+★これが「`x^{l^n}` の類が持ち上げ方に依らない」ことを計算に落とす形である。 -/
+theorem pow_congElt_mul_upperM (hn : 1 ≤ n)
+    (B : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) (m : ℕ) :
+    (congElt l n B * upperM (1 : ZMod (l ^ (n + 1)))) ^ m
+      = congElt l n (∑ i ∈ Finset.range m, adUR ((i : ZMod (l ^ (n + 1)))) B)
+          * upperM ((m : ZMod (l ^ (n + 1)))) := by
+  induction m with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ (congElt l n B * upperM (1 : ZMod (l ^ (n + 1)))) k, ih]
+    calc congElt l n (∑ i ∈ Finset.range k, adUR ((i : ZMod (l ^ (n + 1)))) B)
+            * upperM ((k : ZMod (l ^ (n + 1))))
+            * (congElt l n B * upperM (1 : ZMod (l ^ (n + 1))))
+        = congElt l n (∑ i ∈ Finset.range k, adUR ((i : ZMod (l ^ (n + 1)))) B)
+            * (upperM ((k : ZMod (l ^ (n + 1)))) * congElt l n B)
+            * upperM (1 : ZMod (l ^ (n + 1))) := by simp only [mul_assoc]
+      _ = congElt l n (∑ i ∈ Finset.range k, adUR ((i : ZMod (l ^ (n + 1)))) B)
+            * (congElt l n (adUR ((k : ZMod (l ^ (n + 1)))) B)
+                * upperM ((k : ZMod (l ^ (n + 1)))))
+            * upperM (1 : ZMod (l ^ (n + 1))) := by rw [upperM_mul_congElt]
+      _ = congElt l n (∑ i ∈ Finset.range k, adUR ((i : ZMod (l ^ (n + 1)))) B)
+            * congElt l n (adUR ((k : ZMod (l ^ (n + 1)))) B)
+            * (upperM ((k : ZMod (l ^ (n + 1)))) * upperM (1 : ZMod (l ^ (n + 1)))) := by
+          simp only [mul_assoc]
+      _ = congElt l n (∑ i ∈ Finset.range (k + 1), adUR ((i : ZMod (l ^ (n + 1)))) B)
+            * upperM (((k + 1 : ℕ) : ZMod (l ^ (n + 1)))) := by
+          rw [congElt_mul l n hn, upperM_mul, Finset.sum_range_succ]
+          push_cast
+          ring_nf
+
+end ProductFormula
+
+
+/-! ## ★段 7 —— `kerImage` の随伴不変性
+
+★`H` が `SL₂(𝔽_l)` へ全射であることが、ここで初めて効く。
+`conj_one_add_smul`(共役作用が随伴作用に落ちる)をそのまま使う。 -/
+
+section Stability
+
+variable (l : ℕ) [Fact (Nat.Prime l)] (n : ℕ)
+
+@[simp] theorem redMatHom_coe (x : SL(2, ZMod (l ^ (n + 1)))) :
+    redMatHom l n (x : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1))))
+      = ((redPow l (n + 1) (Nat.succ_ne_zero n) x : SL(2, ZMod l))
+          : Matrix (Fin 2) (Fin 2) (ZMod l)) := rfl
+
+/-- ★`kerImage` は `adU t` で不変。 -/
+theorem kerImage_adU_mem (H : Subgroup SL(2, ZMod (l ^ (n + 1)))) (hn : 1 ≤ n)
+    (hsurj : ∀ g : SL(2, ZMod l), ∃ h ∈ H, redPow l (n + 1) (Nat.succ_ne_zero n) h = g)
+    (t : ZMod l) {A : Matrix (Fin 2) (Fin 2) (ZMod l)} (hA : A ∈ kerImage l n H hn) :
+    adU t A ∈ kerImage l n H hn := by
+  obtain ⟨h, hh, B, hB, rfl⟩ := hA
+  obtain ⟨g, hg, hgu⟩ := hsurj (upper t)
+  refine ⟨g * h * g⁻¹, H.mul_mem (H.mul_mem hg hh) (H.inv_mem hg),
+    (g : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) * B
+      * ((g⁻¹ : SL(2, ZMod (l ^ (n + 1)))) : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))),
+    ?_, ?_⟩
+  · rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_mul, hB]
+    exact conj_one_add_smul g B
+  · rw [map_mul, map_mul, redMatHom_coe, redMatHom_coe, map_inv, hgu, upper_inv]
+    simp only [coe_upper]
+    rfl
+
+/-- ★`kerImage` は `adL t` で不変。 -/
+theorem kerImage_adL_mem (H : Subgroup SL(2, ZMod (l ^ (n + 1)))) (hn : 1 ≤ n)
+    (hsurj : ∀ g : SL(2, ZMod l), ∃ h ∈ H, redPow l (n + 1) (Nat.succ_ne_zero n) h = g)
+    (t : ZMod l) {A : Matrix (Fin 2) (Fin 2) (ZMod l)} (hA : A ∈ kerImage l n H hn) :
+    adL t A ∈ kerImage l n H hn := by
+  obtain ⟨h, hh, B, hB, rfl⟩ := hA
+  obtain ⟨g, hg, hgu⟩ := hsurj (lower t)
+  refine ⟨g * h * g⁻¹, H.mul_mem (H.mul_mem hg hh) (H.inv_mem hg),
+    (g : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) * B
+      * ((g⁻¹ : SL(2, ZMod (l ^ (n + 1)))) : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))),
+    ?_, ?_⟩
+  · rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_mul, hB]
+    exact conj_one_add_smul g B
+  · rw [map_mul, map_mul, redMatHom_coe, redMatHom_coe, map_inv, hgu, lower_inv]
+    simp only [coe_lower]
+    rfl
+
+end Stability
+
+/-! ## ★段 8 —— `slE` が像に入る(`M ≠ 0`)
+
+★★**ここが原文の「`x^l` の類は持ち上げ方に依らない」に対応する段である。**
+
+`redLevel` が全射なので `π(h) = π(u)`(`u = upper 1`)なる `h ∈ H` が取れる。
+`h = k·u`(`k ∈ K`)と書いて `h^{l^n}` を積公式で展開すると、
+`Σ_{i<l^n} Ad(u^i)` が `𝔽_l` 上ゼロなので **`h^{l^n} = u^{l^n} = 1 + l^n·e`** になる。
+★ゆえに `e ∈ M` であり、とくに **`M ≠ 0`**。 -/
+
+section Nonvanishing
+
+variable (l : ℕ) [Fact (Nat.Prime l)] (n : ℕ)
+
+theorem coe_pow_sl {R : Type*} [CommRing R] (g : SL(2, R)) (m : ℕ) :
+    ((g ^ m : SL(2, R)) : Matrix (Fin 2) (Fin 2) R)
+      = (g : Matrix (Fin 2) (Fin 2) R) ^ m := by
+  induction m with
+  | zero => simp
+  | succ k ih => rw [pow_succ, pow_succ, Matrix.SpecialLinearGroup.coe_mul, ih]
+
+@[simp] theorem redMatHom_upperM (t : ZMod (l ^ (n + 1))) :
+    redMatHom l n (upperM t) = upperM (toPrime l n t) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [upperM, redMatHom, RingHom.mapMatrix]
+
+theorem redMatHom_adUR (t : ZMod (l ^ (n + 1)))
+    (B : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) :
+    redMatHom l n (adUR t B) = adUR (toPrime l n t) (redMatHom l n B) := by
+  rw [adUR, adUR, map_mul, map_mul, redMatHom_upperM, ← map_neg, redMatHom_upperM]
+
+/-- ★`mod l` で消える `S` については `1 + l^n·S = 1`。 -/
+theorem congElt_eq_one_of_redMatHom_eq_zero (hn : 1 ≤ n)
+    (S : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) (hS : redMatHom l n S = 0) :
+    congElt l n S = 1 := by
+  have hl0 : 0 < l := (Fact.out : Nat.Prime l).pos
+  have hzero : ((l : ZMod (l ^ (n + 1)))) ^ n • S = 0 := by
+    ext i j
+    have h0 : toPrime l n (S i j) = 0 := by
+      have := congrFun (congrFun hS i) j
+      simpa [redMatHom, RingHom.mapMatrix] using this
+    have := pow_mul_congr_of_castPrime_eq n hl0 (S i j) 0 (by simpa [toPrime] using h0)
+    simpa using this
+  rw [congElt, hzero, add_zero]
+
+/-- ★`(x : SL)` が `congElt B` の形なら `redMatHom B` は跡 0。 -/
+theorem trace_redMatHom_eq_zero (hn : 1 ≤ n) (x : SL(2, ZMod (l ^ (n + 1))))
+    (B : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1))))
+    (hB : (x : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) = congElt l n B) :
+    (redMatHom l n B) 0 0 + (redMatHom l n B) 1 1 = 0 := by
+  have hdet : (x : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))).det = 1 := x.2
+  rw [hB, congElt, congruence_det l n hn B] at hdet
+  have hzero : ((l : ZMod (l ^ (n + 1))) ^ n) * (B 0 0 + B 1 1) = 0 := by
+    linear_combination hdet
+  have hl0 : 0 < l := (Fact.out : Nat.Prime l).pos
+  have := castPrime_eq_zero_of_pow_mul_eq_zero n hl0 hn _ hzero
+  simpa [redMatHom, RingHom.mapMatrix, toPrime, map_add] using this
+
+/-- 可換環上の `e = !![0,1;0,0]`(`Sl2Adjoint.lean` の `slE` は体上のみ)。 -/
+def slER {R : Type*} [CommRing R] : Matrix (Fin 2) (Fin 2) R := !![0, 1; 0, 0]
+
+theorem upperM_eq_congElt (l n : ℕ) [Fact (Nat.Prime l)] :
+    upperM (((l ^ n : ℕ) : ZMod (l ^ (n + 1)))) = congElt l n slER := by
+  have hcast : ((l ^ n : ℕ) : ZMod (l ^ (n + 1))) = (l : ZMod (l ^ (n + 1))) ^ n := by
+    push_cast; ring
+  rw [congElt, hcast]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [upperM, slER, Matrix.one_fin_two]
+
+theorem redMatHom_slER (l n : ℕ) [Fact (Nat.Prime l)] :
+    redMatHom l n slER = (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [redMatHom, RingHom.mapMatrix, slER, slE, toPrime]
+
+/-- ★★**`slE` は像に入る** —— `M ≠ 0` の中身。 -/
+theorem slE_mem_kerImage (H : Subgroup SL(2, ZMod (l ^ (n + 1)))) (hn : 1 ≤ n) (h5 : 5 ≤ l)
+    (hfull : ∀ y : SL(2, ZMod (l ^ n)), ∃ h ∈ H, redLevel l (Nat.le_succ n) h = y) :
+    (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) ∈ kerImage l n H hn := by
+  have hl : Nat.Prime l := Fact.out
+  have hl0 : 0 < l := hl.pos
+  obtain ⟨h, hh, hhu⟩ := hfull
+    (redLevel l (Nat.le_succ n) (upper (1 : ZMod (l ^ (n + 1)))))
+  have hker : redLevel l (Nat.le_succ n) (h * (upper (1 : ZMod (l ^ (n + 1))))⁻¹) = 1 := by
+    rw [map_mul, map_inv, hhu, mul_inv_cancel]
+  have hentry : ∀ i j, ZMod.castHom (pow_dvd_pow l (Nat.le_succ n)) (ZMod (l ^ n))
+      (((h * (upper (1 : ZMod (l ^ (n + 1))))⁻¹ : SL(2, ZMod (l ^ (n + 1))))
+          : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j
+        - (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j) = 0 := by
+    intro i j
+    have h1 := congrFun (congrFun (congrArg
+      (fun x : SL(2, ZMod (l ^ n)) => (x : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n)))) hker) i) j
+    rw [redLevel_coe] at h1
+    have h2 : ZMod.castHom (pow_dvd_pow l (Nat.le_succ n)) (ZMod (l ^ n))
+        ((1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j)
+        = (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j := by
+      by_cases hij : i = j
+      · subst hij; rw [Matrix.one_apply_eq, Matrix.one_apply_eq, map_one]
+      · simp [Matrix.one_apply_ne hij]
+    rw [map_sub, h1, h2]
+    show ((1 : SL(2, ZMod (l ^ n))) : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j
+      - (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j = 0
+    simp
+  obtain ⟨B, hB⟩ := exists_matrix_of_castHom_eq_zero l n hl0 _ hentry
+  have hcoe : (h : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1))))
+      = congElt l n B * upperM (1 : ZMod (l ^ (n + 1))) := by
+    have hhk : h = (h * (upper (1 : ZMod (l ^ (n + 1))))⁻¹) * upper (1 : ZMod (l ^ (n + 1))) := by
+      rw [inv_mul_cancel_right]
+    rw [hhk, Matrix.SpecialLinearGroup.coe_mul, hB]
+    rfl
+  have htr : (redMatHom l n B) 0 0 + (redMatHom l n B) 1 1 = 0 :=
+    trace_redMatHom_eq_zero l n hn _ B hB
+  have hSzero : redMatHom l n
+      (∑ i ∈ Finset.range (l ^ n), adUR ((i : ZMod (l ^ (n + 1)))) B) = 0 := by
+    rw [map_sum]
+    have hcongr : ∀ i ∈ Finset.range (l ^ n),
+        redMatHom l n (adUR ((i : ZMod (l ^ (n + 1)))) B)
+          = adU ((i : ℕ) : ZMod l) (redMatHom l n B) := by
+      intro i _
+      rw [redMatHom_adUR]
+      congr 1
+      simp [toPrime]
+    rw [Finset.sum_congr rfl hcongr]
+    exact sum_adU_eq_zero l n hl h5 hn _ htr
+  refine ⟨h ^ (l ^ n), H.pow_mem hh _, slER, ?_, redMatHom_slER l n⟩
+  rw [coe_pow_sl, hcoe, pow_congElt_mul_upperM l n hn B (l ^ n),
+    congElt_eq_one_of_redMatHom_eq_zero l n hn _ hSzero, one_mul, upperM_eq_congElt]
+
+end Nonvanishing
+
+/-! ## ★段 9 —— 有限段の本体
+
+★`slE ∈ M` と随伴不変性から `sl2_adjoint_irreducible` で `M = 𝔰𝔩₂` が出る。
+そこから合同核が `H` に入り、帰納法の仮定と併せて `H = ⊤`。 -/
+
+section FiniteLevelMain
+
+variable (l : ℕ) [Fact (Nat.Prime l)]
+
+theorem two_ne_zero_of_five_le (h5 : 5 ≤ l) : (2 : ZMod l) ≠ 0 := by
+  have hl : Nat.Prime l := Fact.out
+  intro hcon
+  have : ((2 : ℕ) : ZMod l) = 0 := by exact_mod_cast hcon
+  have hdvd : l ∣ 2 := (ZMod.natCast_eq_zero_iff _ _).1 this
+  have := Nat.le_of_dvd (by norm_num) hdvd
+  omega
+
+theorem slE_ne_zero (h5 : 5 ≤ l) : (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) ≠ 0 := by
+  intro hcon
+  have h1 : (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) 0 1 = 0 := by rw [hcon]; rfl
+  have h2 : (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) 0 1 = 1 := rfl
+  have h3 : (1 : ZMod l) = 0 := by rw [← h2, h1]
+  haveI : Fact (1 < l) := ⟨by omega⟩
+  exact one_ne_zero h3
+
+variable (n : ℕ)
+
+/-- ★★**合同核は `H` に含まれる** —— 既約性の帰結。 -/
+theorem ker_le_of_slE_mem (H : Subgroup SL(2, ZMod (l ^ (n + 1)))) (hn : 1 ≤ n) (h5 : 5 ≤ l)
+    (hsurj : ∀ g : SL(2, ZMod l), ∃ h ∈ H, redPow l (n + 1) (Nat.succ_ne_zero n) h = g)
+    (hslE : (slE : Matrix (Fin 2) (Fin 2) (ZMod l)) ∈ kerImage l n H hn)
+    (x : SL(2, ZMod (l ^ (n + 1))))
+    (hx : redLevel l (Nat.le_succ n) x = 1) : x ∈ H := by
+  have hl : Nat.Prime l := Fact.out
+  have hl0 : 0 < l := hl.pos
+  -- `M` を `𝔽_l`-部分加群として見る
+  set V : Submodule (ZMod l) (Matrix (Fin 2) (Fin 2) (ZMod l)) :=
+    AddSubgroup.toZModSubmodule l (kerImage l n H hn) with hV
+  have hmemV : ∀ A : Matrix (Fin 2) (Fin 2) (ZMod l), A ∈ V ↔ A ∈ kerImage l n H hn :=
+    fun A => Iff.rfl
+  have hU : ∀ (t : ZMod l) {X : Matrix (Fin 2) (Fin 2) (ZMod l)}, X ∈ V → adU t X ∈ V :=
+    fun t _ hX => (hmemV _).2 (kerImage_adU_mem l n H hn hsurj t ((hmemV _).1 hX))
+  have hL : ∀ (t : ZMod l) {X : Matrix (Fin 2) (Fin 2) (ZMod l)}, X ∈ V → adL t X ∈ V :=
+    fun t _ hX => (hmemV _).2 (kerImage_adL_mem l n H hn hsurj t ((hmemV _).1 hX))
+  have htr : ∀ X ∈ V, X 0 0 + X 1 1 = 0 :=
+    fun X hX => kerImage_trace_eq_zero l n H hn X ((hmemV _).1 hX)
+  obtain ⟨heV, hfV, hhV⟩ := sl2_adjoint_irreducible V hU hL htr (two_ne_zero_of_five_le l h5)
+    ((hmemV _).2 hslE) (slE_ne_zero l h5)
+  -- 跡 0 の行列はすべて `V` に入る
+  have hall : ∀ A : Matrix (Fin 2) (Fin 2) (ZMod l), A 0 0 + A 1 1 = 0 → A ∈ V := by
+    intro A hA
+    have hform : A = A 0 0 • (slH : Matrix (Fin 2) (Fin 2) (ZMod l))
+        + A 0 1 • (slE : Matrix (Fin 2) (Fin 2) (ZMod l))
+        + A 1 0 • (slF : Matrix (Fin 2) (Fin 2) (ZMod l)) := by
+      ext i j
+      fin_cases i <;> fin_cases j <;> simp [slE, slF, slH] <;> linear_combination hA
+    rw [hform]
+    exact V.add_mem (V.add_mem (V.smul_mem _ hhV) (V.smul_mem _ heV)) (V.smul_mem _ hfV)
+  -- `x` を `congElt` の形に書く
+  have hentry : ∀ i j, ZMod.castHom (pow_dvd_pow l (Nat.le_succ n)) (ZMod (l ^ n))
+      ((x : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j
+        - (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j) = 0 := by
+    intro i j
+    have h1 := congrFun (congrFun (congrArg
+      (fun z : SL(2, ZMod (l ^ n)) => (z : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n)))) hx) i) j
+    rw [redLevel_coe] at h1
+    have h2 : ZMod.castHom (pow_dvd_pow l (Nat.le_succ n)) (ZMod (l ^ n))
+        ((1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1)))) i j)
+        = (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j := by
+      by_cases hij : i = j
+      · subst hij; rw [Matrix.one_apply_eq, Matrix.one_apply_eq, map_one]
+      · simp [Matrix.one_apply_ne hij]
+    rw [map_sub, h1, h2]
+    show ((1 : SL(2, ZMod (l ^ n))) : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j
+      - (1 : Matrix (Fin 2) (Fin 2) (ZMod (l ^ n))) i j = 0
+    simp
+  obtain ⟨B, hB⟩ := exists_matrix_of_castHom_eq_zero l n hl0 _ hentry
+  have htrB : (redMatHom l n B) 0 0 + (redMatHom l n B) 1 1 = 0 :=
+    trace_redMatHom_eq_zero l n hn x B hB
+  obtain ⟨h, hh, B', hB', hBB'⟩ := (hmemV _).1 (hall _ htrB)
+  have hB'' : (h : Matrix (Fin 2) (Fin 2) (ZMod (l ^ (n + 1))))
+      = 1 + ((l : ZMod (l ^ (n + 1)))) ^ n • B' := hB'
+  -- ★`l^n·B = l^n·B'` —— `mod l` で一致していれば十分である
+  have hsm : ((l : ZMod (l ^ (n + 1)))) ^ n • B = ((l : ZMod (l ^ (n + 1)))) ^ n • B' := by
+    ext i j
+    have hpt : toPrime l n (B i j) = toPrime l n (B' i j) := by
+      have := congrFun (congrFun hBB' i) j
+      simpa [redMatHom, RingHom.mapMatrix] using this.symm
+    simpa using
+      pow_mul_congr_of_castPrime_eq n hl0 (B i j) (B' i j) (by simpa [toPrime] using hpt)
+  have hxh : x = h := by
+    apply Subtype.ext
+    rw [hB, hB'', hsm]
+  rw [hxh]
+  exact hh
+
+/-- ★★**段 (A) の本体**(`n ≥ 1`)。
+
+`SL₂(ℤ/l^n)` の部分群が `SL₂(𝔽_l)` へ全射なら、それは全体である。 -/
+theorem subgroup_eq_top_of_redPow_surj (h5 : 5 ≤ l) :
+    ∀ (k : ℕ) (H : Subgroup SL(2, ZMod (l ^ (k + 1)))),
+      (∀ g : SL(2, ZMod l), ∃ h ∈ H, redPow l (k + 1) (Nat.succ_ne_zero k) h = g) → H = ⊤ := by
+  have hl : Nat.Prime l := Fact.out
+  haveI : NeZero l := ⟨hl.ne_zero⟩
+  intro k
+  induction k with
+  | zero =>
+    -- `l^1` の段: `redPow` は単射
+    intro H hsurj
+    have hinj : Function.Injective (redPow l 1 (Nat.succ_ne_zero 0)) := by
+      intro x y hxy
+      apply Subtype.ext
+      ext i j
+      have := congrFun (congrFun (congrArg
+        (fun z : SL(2, ZMod l) => (z : Matrix (Fin 2) (Fin 2) (ZMod l))) hxy) i) j
+      exact castHom_pow_one_injective l this
+    refine (Subgroup.eq_top_iff' H).2 fun g => ?_
+    obtain ⟨h, hh, hhg⟩ := hsurj (redPow l 1 (Nat.succ_ne_zero 0) g)
+    rwa [hinj hhg] at hh
+  | succ n ih =>
+    intro H hsurj
+    have hn : 1 ≤ n + 1 := Nat.one_le_iff_ne_zero.2 (Nat.succ_ne_zero n)
+    -- 帰納法の仮定で 1 段下は全体
+    have hlower : H.map (redLevel l (Nat.le_succ (n + 1))) = ⊤ := by
+      refine ih _ ?_
+      intro g
+      obtain ⟨h, hh, hhg⟩ := hsurj g
+      refine ⟨redLevel l (Nat.le_succ (n + 1)) h, ⟨h, hh, rfl⟩, ?_⟩
+      have := congrFun (congrArg (fun f : SL(2, ZMod (l ^ (n + 2))) →* SL(2, ZMod l) => f.toFun)
+        (redPow_comp_redLevel l (Nat.succ_ne_zero n))) h
+      simpa [hhg] using this
+    have hfull : ∀ y : SL(2, ZMod (l ^ (n + 1))),
+        ∃ h ∈ H, redLevel l (Nat.le_succ (n + 1)) h = y := by
+      intro y
+      have : y ∈ H.map (redLevel l (Nat.le_succ (n + 1))) := by rw [hlower]; trivial
+      exact this
+    -- `slE ∈ M` から合同核が `H` に入る
+    have hslE := slE_mem_kerImage l (n + 1) H hn h5 hfull
+    have hker := ker_le_of_slE_mem l (n + 1) H hn h5 hsurj hslE
+    refine (Subgroup.eq_top_iff' H).2 fun g => ?_
+    obtain ⟨h, hh, hhg⟩ := hfull (redLevel l (Nat.le_succ (n + 1)) g)
+    have hmem : g * h⁻¹ ∈ H := by
+      refine hker _ ?_
+      rw [map_mul, map_inv, hhg, mul_inv_cancel]
+    have : g = (g * h⁻¹) * h := by rw [inv_mul_cancel_right]
+    rw [this]
+    exact H.mul_mem hmem hh
+
+end FiniteLevelMain
 
 end ABC3.Found.GenEll
