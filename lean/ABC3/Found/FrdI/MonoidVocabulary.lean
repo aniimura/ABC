@@ -1144,6 +1144,46 @@ theorem eq_id_of_qact_one {c : ℕ+} {σ : Pf M → Pf M}
   funext x
   exact nsmul_injective c (hσ x)
 
+/-- ★可逆元の言い換え（可換モノイドでは「逆元がある」だけでよい）。 -/
+theorem isAddUnit_iff_exists_add_eq_zero {A : Type*} [AddCommMonoid A] (x : A) :
+    IsAddUnit x ↔ ∃ y, x + y = 0 :=
+  ⟨fun ⟨u, hu⟩ => ⟨u.neg, by rw [← hu]; exact u.val_neg⟩,
+   fun ⟨y, h⟩ => ⟨⟨x, y, h, by rw [add_comm]; exact h⟩, rfl⟩⟩
+
+/-- ★★**`Pf M` の可逆元の特徴づけ**（2026-08-16）。
+
+    `mk m a` が可逆  ⇔  ∃ k : ℕ+, `k • m` が `M` で可逆
+
+★★**両向きとも計算だけで出る**:
+- (⇐) `k•m + y = 0` なら `mk m a + mk y (k*a) = 0`（分子を `a` 倍して見る）
+- (⇒) `mk m a + mk m' a' = 0` は `∃k, (k a')•m + (k a)•m' = 0` なので、
+  ★**`(k a')•m` の逆元が `(k a)•m'` として見えている**
+
+★**これが `MChar (Pf M)` を記述する第一歩である**。 -/
+theorem isAddUnit_mk_iff (m : M) (a : ℕ+) :
+    IsAddUnit (mk m a) ↔ ∃ k : ℕ+, IsAddUnit (((k : ℕ+) : ℕ) • m) := by
+  rw [isAddUnit_iff_exists_add_eq_zero]
+  constructor
+  · rintro ⟨y, hy⟩
+    induction y using Pf.inductionOn with | _ m' a' =>
+    rw [mk_add_mk, mk_eq_zero_iff] at hy
+    obtain ⟨k, e⟩ := hy
+    refine ⟨k * a', (isAddUnit_iff_exists_add_eq_zero _).mpr
+      ⟨(((k : ℕ+) : ℕ) * ((a : ℕ+) : ℕ)) • m', ?_⟩⟩
+    have e' : (((k : ℕ+) : ℕ) * ((a' : ℕ+) : ℕ)) • m
+        + (((k : ℕ+) : ℕ) * ((a : ℕ+) : ℕ)) • m' = 0 := by
+      simpa [smul_add, smul_smul, mul_comm, mul_assoc, mul_left_comm] using e
+    simpa [PNat.mul_coe, mul_comm, mul_assoc, mul_left_comm] using e'
+  · rintro ⟨k, hk⟩
+    obtain ⟨y, hy⟩ := (isAddUnit_iff_exists_add_eq_zero _).mp hk
+    refine ⟨mk y (k * a), ?_⟩
+    rw [mk_add_mk, mk_eq_zero_iff]
+    refine ⟨1, ?_⟩
+    have : (((k * a : ℕ+) : ℕ)) • m + ((a : ℕ+) : ℕ) • y
+        = ((a : ℕ+) : ℕ) • ((((k : ℕ+) : ℕ)) • m + y) := by
+      simp [smul_add, smul_smul, PNat.mul_coe, mul_comm]
+    rw [this, hy, smul_zero, smul_zero]
+
 end Pf
 
 def Pf.src : ABC3.Meta.Source :=
