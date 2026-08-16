@@ -568,11 +568,36 @@ theorem isTotallyEpimorphic_elemFrobCat {Φ : MonoidOn.{v, u, w} D}
 
 /-- **[FrdI] Definition 1.1, (iv)** —— `𝒞` 上の pre-Frobenioid structure。
 
-★原文が課す仮定を**すべて**フィールドとして持つ:
-`Φ` が divisorial、`𝒞` と `𝒟` が totally epimorphic、そして関手 `𝒞 → 𝔽_Φ`。
+★★**この docstring は誤っていた。2026-08-16 に訂正した。**
 
-★`connected`(**圏**について)は §0 が**対象**についてしか定めていないため、
-ここには入れていない。原文の曖昧さであり、測定結果として報告に残す。 -/
+以前ここには「`connected`(**圏**について)は §0 が**対象**についてしか定めていないため、
+ここには入れていない。原文の曖昧さであり…」と書かれていた。
+★★**これは事実に反する。** 原文 §0(物理 p.16)は圏について定義している:
+
+原文 (FrdI p.16):
+> as a connected component of C. In particular, we shall say that C is connected if
+
+★しかも**同じリポジトリの `CategoryVocabulary.lean` が同じ行を引用して
+「§0 は圏についての `connected` を定義している」と正しく書いていた** ——
+★★**2 つのファイルが矛盾しており、誤った側の理由で条件が落ちていた。**
+文脈を持たない検証役の監査で判明した。
+
+★**現状(測定)**: 原文 `Definition 1.1, (iv)` は
+
+原文 (FrdI p.20):
+> and that C, D are connected, totally epimorphic categories [cf. §0]. Then we shall
+
+と述べるが、下のフィールドには `connected` が **2 つとも無い**。
+したがって我々の `PreFrobenioid` は**原文より広い**(定理は強くなるが、
+★**定義そのものは原文と一致していない**)。
+
+★**足すときの手**(測定済み): mathlib の `CategoryTheory.IsConnected` を使う。
+構成サイトは 6 つ —— `wP` / `nP` / `cP` / `elemPreFrobenioid` /
+`cfpPreFrobenioid` / `istrPre`。★`Istr P` の連結性は `isotropification` が
+`C` の zigzag を送ることから出る(isotropic な `A` では `hullMap` が同型)。
+
+★現在フィールドとして持つのは:
+`Φ` が divisorial、`𝒞` と `𝒟` が totally epimorphic、そして関手 `𝒞 → 𝔽_Φ`。 -/
 structure PreFrobenioid (C : Type u2) [Category.{v2} C] (Φ : MonoidOn.{v, u, w} D) where
   /-- 原文の `𝒞 → 𝔽_Φ` -/
   toElem : C ⥤ ElemFrobCat Φ
