@@ -2041,25 +2041,129 @@ theorem one_mem_otimesImtrPre (A : C) : (1 : End A) ∈ OTimesImtrPre P F A :=
   ⟨(OTimes P A).one_mem, isBaseIsomorphism_of_isIso P (𝟙 A),
    ⟨pushFunctorIdIso P F A (isBaseIsomorphism_of_isIso P (𝟙 A))⟩⟩
 
-/-! ### ★残り —— 積と逆元の閉性(2026-08-16 時点)
+include F in
+/-- ★★**合成の分解** —— `ε ≫ (φ ≫ ψ)` の**第2の分解**。
 
-★**単位元は上で埋めた。** 残るのは
-- 積: `pushFunctor P F (u ≫ v) ≅ pushFunctor P F u ⋙ pushFunctor P F v`
-- 逆元: `u ∈ ⟹ u⁻¹ ∈`
+★左因子は co-angular base-isomorphism の**合成**(`F.coAngularComp` と
+`isBaseIsomorphism_comp`)、右因子は isometric pre-step。 -/
+theorem pushComp_uniq {A B E : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    (ψ : B ⟶ E) (hψ : IsBaseIsomorphism P ψ) (Z : Over (⟨A⟩ : ImtrPre P)) :
+    ∃ δ : pushObj P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ)
+            Z.hom.hom Z.hom.property.1 Z.hom.property.2
+        ≅ pushObj P F ψ hψ
+            (pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+            (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+            (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2,
+      pushHom P F ψ hψ
+          (pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+          (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+          (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2
+        = δ.inv ≫ pushHom P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ)
+            Z.hom.hom Z.hom.property.1 Z.hom.property.2 ∧
+      (pushMid P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2
+        ≫ pushMid P F ψ hψ
+            (pushHom P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2)
+            (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).1
+            (pushHom_spec P F φ hφ Z.hom.hom Z.hom.property.1 Z.hom.property.2).2)
+        = pushMid P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ)
+            Z.hom.hom Z.hom.property.1 Z.hom.property.2 ≫ δ.hom := by
+  set ε := Z.hom.hom with hε
+  set hεi := Z.hom.property.1
+  set hεs := Z.hom.property.2
+  set h1 := (pushHom_spec P F φ hφ ε hεi hεs).1
+  set h2 := (pushHom_spec P F φ hφ ε hεi hεs).2
+  refine prop_1_9_i_uniq P F _ _ _ _
+    (pushMid P F φ hφ ε hεi hεs ≫ pushMid P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2)
+    (pushHom P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  · rw [← pushFac P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ) ε hεi hεs,
+      Category.assoc, ← pushFac P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2,
+      ← Category.assoc, pushFac P F φ hφ ε hεi hεs, Category.assoc]
+  · exact (pushMid_spec P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ) ε hεi hεs).1
+  · exact (pushMid_spec P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ) ε hεi hεs).2
+  · exact (pushHom_spec P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ) ε hεi hεs).1
+  · exact (pushHom_spec P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ) ε hεi hεs).2
+  · exact F.coAngularComp _ _ (pushMid_spec P F φ hφ ε hεi hεs).1
+      (pushMid_spec P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2).1
+  · exact isBaseIsomorphism_comp P (pushMid_spec P F φ hφ ε hεi hεs).2
+      (pushMid_spec P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2).2
+  · exact (pushHom_spec P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2).1
+  · exact (pushHom_spec P F ψ hψ (pushHom P F φ hφ ε hεi hεs) h1 h2).2
 
-★**積の見通し**(測定済み、まだ書いていない): `ε : Cc ⟶ A` を isometric pre-step とすると
-```
-ε ≫ (u ≫ v) = (pushMid u ε ≫ pushMid v (pushHom u ε)) ≫ pushHom v (pushHom u ε)
-```
-であり、★**左因子は co-angular base-isomorphism の合成**(`F.coAngularComp` と
-`isBaseIsomorphism_comp`)、右因子は isometric pre-step。
-したがって `prop_1_9_i_uniq` がそのまま対象ごとの同型を与える。
-★自然性は `imtrPreOver_hom_subsingleton` から自動(上と同じ)。
+include F in
+/-- ★★**`(φ ≫ ψ)_* ≅ φ_* ⋙ ψ_*`**。★自然性は hom の subsingleton 性から自動。 -/
+noncomputable def pushFunctorCompIso {A B E : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ)
+    (ψ : B ⟶ E) (hψ : IsBaseIsomorphism P ψ) :
+    pushFunctor P F (φ ≫ ψ) (isBaseIsomorphism_comp P hφ hψ)
+      ≅ pushFunctor P F φ hφ ⋙ pushFunctor P F ψ hψ :=
+  NatIso.ofComponents
+    (fun Z =>
+      Over.isoMk (imtrPreIsoOfIso P (pushComp_uniq P F φ hφ ψ hψ Z).choose)
+        (InducedWideCategory.Hom.ext (by
+          have h2 := congrArg (fun t => (pushComp_uniq P F φ hφ ψ hψ Z).choose.hom ≫ t)
+            (pushComp_uniq P F φ hφ ψ hψ Z).choose_spec.1
+          simp only [Iso.hom_inv_id_assoc] at h2
+          exact h2)))
+    (fun _ => imtrPreOver_hom_subsingleton P F _ _)
 
-★**逆元は積と単位元から出る**(`u ≫ u⁻¹ = 1`)。
+include F in
+/-- ★★**積で閉じる**(部分群性の 2 つ目)。
 
-★**これが埋まれば `Proposition 1.9` に条なし `.src` を付けられる**(§1 が 6/15 になる)。
--/
+★**`End A` の積は `x * y = y ≫ x`** である(合成の向きに注意)。 -/
+theorem mul_mem_otimesImtrPre (A : C) {u v : End A}
+    (hu : u ∈ OTimesImtrPre P F A) (hv : v ∈ OTimesImtrPre P F A) :
+    u * v ∈ OTimesImtrPre P F A := by
+  obtain ⟨huo, hbu, ⟨eu⟩⟩ := hu
+  obtain ⟨hvo, hbv, ⟨ev⟩⟩ := hv
+  refine ⟨(OTimes P A).mul_mem huo hvo, isBaseIsomorphism_comp P hbv hbu, ⟨?_⟩⟩
+  exact pushFunctorCompIso P F _ hbv _ hbu ≪≫
+    Functor.isoWhiskerRight ev (pushFunctor P F (u : A ⟶ A) hbu) ≪≫
+    Functor.leftUnitor _ ≪≫ eu
+
+include F in
+/-- ★★**逆元で閉じる**(部分群性の 3 つ目)。
+
+★`u * w = 1`(すなわち `w ≫ u = 𝟙`)なる `w` が `𝒪^×(A)` にあれば、
+`u ∈ ⟹ w ∈`。★**積と単位元の結果から出る。** -/
+theorem inv_mem_otimesImtrPre (A : C) {u w : End A}
+    (hu : u ∈ OTimesImtrPre P F A) (hwo : w ∈ OTimes P A) (h : u * w = 1) :
+    w ∈ OTimesImtrPre P F A := by
+  obtain ⟨-, hbu, ⟨eu⟩⟩ := hu
+  -- `w` が base-isomorphism であること —— `𝒪^×` の元は同型
+  haveI hwi : IsIso (w : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso (w : End A)).mp hwo.2
+  have hbw : IsBaseIsomorphism P (w : A ⟶ A) := isBaseIsomorphism_of_isIso P _
+  refine ⟨hwo, hbw, ⟨?_⟩⟩
+  -- `w ≫ u = 𝟙` から `pushFunctor w ⋙ pushFunctor u ≅ 𝟭`
+  -- ★`End A` の積は `x * y = y ≫ x` なので、`u * w = 1` は `w ≫ u = 𝟙` である
+  have hcomp : ((w : A ⟶ A) ≫ (u : A ⟶ A)) = 𝟙 A := h
+  have hEq : pushFunctor P F ((w : A ⟶ A) ≫ (u : A ⟶ A)) (isBaseIsomorphism_comp P hbw hbu)
+      = pushFunctor P F (𝟙 A) (isBaseIsomorphism_of_isIso P (𝟙 A)) := by
+    -- ★`rw` は motive が壊れる(証明引数が射に依存)。`congr` なら証明無関係が効く。
+    congr 1
+  have e1 : pushFunctor P F (w : A ⟶ A) hbw ⋙ pushFunctor P F (u : A ⟶ A) hbu
+      ≅ 𝟭 (Over (⟨A⟩ : ImtrPre P)) :=
+    (pushFunctorCompIso P F _ hbw _ hbu).symm ≪≫ eqToIso hEq ≪≫
+      pushFunctorIdIso P F A (isBaseIsomorphism_of_isIso P (𝟙 A))
+  exact (Functor.rightUnitor _).symm ≪≫ Functor.isoWhiskerLeft _ eu.symm ≪≫ e1
+
+include F in
+/-- ★★**`𝒪^×(A)^{imtr-pre}` を部分モノイドとして包む**。
+
+原文 (FrdI p.31):
+> the subgroup of v ∈O×(A) for which vimtr-pre is the identity.
+
+★**`𝒪^×(A)` 自体が `End A` の部分モノイドとして実装されている**ので、
+ここも部分モノイドとして構成し、★**逆元の閉性は `inv_mem_otimesImtrPre` で別に述べる**。
+`𝒪^×` の元はすべて可逆なので、この 3 条件が原文の「subgroup」の内容である。 -/
+def OTimesImtrPreSubmonoid (A : C) : Submonoid (End A) where
+  carrier := OTimesImtrPre P F A
+  one_mem' := one_mem_otimesImtrPre P F A
+  mul_mem' hx hy := mul_mem_otimesImtrPre P F A hx hy
+
+include F in
+/-- ★`𝒪^×(A)^{imtr-pre} ≤ 𝒪^×(A)` —— 原文の包含。 -/
+theorem otimesImtrPreSubmonoid_le (A : C) :
+    OTimesImtrPreSubmonoid P F A ≤ OTimes P A :=
+  fun _ h => h.1
 
 end ImtrPreFunctor
 
@@ -2465,42 +2569,70 @@ def prop_1_9_vii.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 32, item := "Proposition 1.9, (vii)",
     sectionId := "frdi-prop-1-9-vii" }
 
-/-! ## ★★命題全体の `.src` は**まだ付けられない**(2026-08-16 の監査)
+/-! ## ★★命題全体の `.src`(2026-08-16)
 
-★上の `.src` はすべて**条つき**であり、器具の数には入らない。
-★命題全体の `.src`(`item := "Proposition 1.9"`)を付けるには、
-★★**(v) の欠落を埋める必要がある。**
+★上の `.src` はすべて**条つき**で、locator の記録である(器具の数には入らない)。
+★下の `prop_1_9.src` が**命題全体を完全に実装したという主張**である。
+
+★★**文脈を持たない検証役の監査(2026-08-16)で欠落が 2 件見つかり、どちらも同日に埋めた。**
 
 原文 (FrdI p.32):
 > forms a left adjoint to the inclusion functor Cistr →C, through which the functor
 
-★★**(v) の 2 件は同日に埋めた**:
+★★**(v) の 2 件**:
 - 「through which the functor `𝒞 → 𝔽_Φ` factors」→ `isotropificationFactorIso`
   (`P.toElem ≅ isotropification P F ⋙ (istrPre P).toElem`)。
   ★中身は「**isotropic hull は `𝔽_Φ` では同型になる**」(`toElem_map_hullMap_isIso`) ——
   isometric ＋ pre-step から `div = 0`・`deg = 1`・base 同型が揃うため。
 - 保存 11 クラスのうち co-angular → `isotropification_coAngular`(仮定不要。原文より強い)。
 
-★★**残るのは (ii) の 1 件である。**
+★★**(ii) の 1 件**:
 
 原文 (FrdI p.31):
 > the subgroup of v ∈O×(A) for which vimtr-pre is the identity.
 
 ★**原文は `𝒪^×(A)^{imtr-pre}` が `𝒪^×(A)` の部分群であると述べている**が、
-`OTimesImtrPre` は `Set (End A)` で、包含 `otimesImtrPre_subset` しか無い。
-★**単位元を含むこと・積で閉じること・逆元で閉じることを示していない。**
+監査以前は `Set (End A)` と包含補題しか無かった。3 条件を埋めた:
+- 単位元: `one_mem_otimesImtrPre`(`ε` 自身が isometric pre-step なので `ε = 𝟙 ≫ ε` が第2の分解)
+- 積: `mul_mem_otimesImtrPre`(`ε ≫ (φ ≫ ψ)` の第2の分解 —— 左因子は
+  co-angular base-isomorphism の**合成**、右因子は isometric pre-step)
+- 逆元: `inv_mem_otimesImtrPre`(積と単位元から)
+- 包装: `OTimesImtrPreSubmonoid`, `otimesImtrPreSubmonoid_le`
 
-★**必要な材料**(測定済み):
-- `1 ∈`: `pushFunctor P F (𝟙 A) _ ≅ 𝟭` —— `pushFunctor_id` に相当。
-- 積で閉じる: `pushFunctor (u ≫ v) ≅ pushFunctor u ⋙ pushFunctor v` —— `pushFunctor_comp` に相当。
-どちらも `prop_1_9_i_uniq`(分解の一意性)から出るはずである。
+★★**共通の鍵**: `Over (⟨A⟩ : ImtrPre P)` の hom は subsingleton
+(`imtrPreOver_hom_subsingleton`)。★**したがって自然性は自動**で、
+対象ごとの同型さえ作れば関手の同型が得られる。
 
-★★**楽になる事実**: `Over (⟨A⟩ : ImtrPre P)` の hom は subsingleton
-(`imtrPreOver_hom_subsingleton`。`pushFunctor` の `map_id`/`map_comp` がこれで潰れている)。
-★**したがって自然性は自動で、対象ごとの同型さえ作れば関手の同型が得られる。**
+## ★条ごとの照合表
 
-★**まだ試していない**(「証明できなかった」ではない)。
-★**これが埋まれば `Proposition 1.9` に条なし `.src` を付けられる。**
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | 分解の存在 | `prop_1_9_i_factor` |
+| (i) | 一意性(`(α◦γ, γ⁻¹◦β)` を除く) | `prop_1_9_i_uniq` |
+| (i) | φ isometric ⟺ β が Frobenius 型 | `prop_1_9_i_isometric_iff` |
+| (i) | φ co-angular ⟺ α が同型 | `prop_1_9_i_coAngular_iff` |
+| (i) | φ pull-back ⟺ φ が同型 | `prop_1_9_i_pullBack_iff` |
+| (ii) | 関手 `φ_*` | `pushFunctor` |
+| (ii) | **Moreover**: co-angular pre-step なら圏同値 | `pushFunctor_isEquivalence` |
+| (ii) | `𝒪^×(A)^{imtr-pre}` と包含 | `OTimesImtrPre`, `otimesImtrPre_subset` |
+| (ii) | ★**部分群であること**(監査で発見) | `OTimesImtrPreSubmonoid` ほか 3 本 |
+| (iii) | 関手 `φ^*` | `pullFunctor` |
+| (iii) | 四角形と、同型を除く一意性 | `pullFac`, `prop_1_9_iii_uniq`, `prop_1_9_iii_lift` |
+| (iv) | iff | `prop_1_9_iv` |
+| (v) | `𝒞^istr` が Frobenioid | `istr_frobenioid` |
+| (v) | isotropification が左随伴 | `isotropificationAdj` |
+| (v) | ★**`𝒞 → 𝔽_Φ` が経由する**(監査で発見) | `isotropificationFactorIso` |
+| (v) | 制限が恒等と同型 | `isotropificationRestrictIso` |
+| (v) | 保存 11 クラス(★`isotropification_coAngular` は監査で追加) | `isotropification_*` 11 本 |
+| (v) | moreover: 包含関手との互換性 | `istr_compat_*`, `istr_frobType_iff`, `istr_isPullBack_*` |
+| (vi) | iff ＋ moreover | `prop_1_9_vi` |
+| (vii) | iff | `prop_1_9_vii` |
+
+★**★印の 3 行が、監査以前には存在しなかった主張である。**
 -/
+
+def prop_1_9.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 30, item := "Proposition 1.9",
+    sectionId := "frdi-prop-1-9-i" }
 
 end ABC3.Found.FrdI
