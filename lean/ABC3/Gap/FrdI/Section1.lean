@@ -112,7 +112,21 @@ isotropic 型(`cx2_isotropic`)、`𝒟` が FSMFF 型(`cx2_fsmff`)、
 - (iii) の条件文(p.41)—— `BoundedFSMIFactor` は忠実
 - `Frobenius-normalized`(p.23)—— 一致
 
-★**未照合**: `Definition 1.2` の語彙(`pre-step` 等)、`Definition 1.1`。
+- `Definition 1.1, (iii)`(`𝔽_Φ` の合成則、p.19–20)—— ★**一致**
+  (`Div(ψ∘φ) = Base(φ)*(Div ψ) + degFr(ψ)·Div(φ)` の向きも確認)
+- `Definition 1.1, (iv)`(pre-Frobenioid、p.20)—— ★**一致**。
+  要求は「`Φ` が divisorial」「`𝒞`・`𝒟` が connected かつ totally epimorphic」だけで、
+  ★**関手 `𝒞 → 𝔽_Φ` に追加条件は無い。**
+
+★**未照合**: `Definition 1.2` の語彙(`pre-step`・`co-angular` 等)。
+
+★★**照合中に出た未解決の疑問**(原文側): `Example 3.6` は `Φ = G`(群)を取り
+「`𝒞` は group-like 型の Frobenioid」と述べるが、群は sharp でないので
+`Definition 1.1, (i)` の意味で **divisorial ではない**。
+`Definition 1.1, (iv)` は `Φ` が divisorial であることを要求している。
+★**この食い違いを私は解けていない** —— 私の読み違いか、原文の慣用かは未確定。
+★なお我々の反例は `Φ^char`(常に divisorial)を divisor monoid に取るので、
+★**どちらの読みでも安全側にある。**
 
 ## ★★★著者は機構を知っている —— `Example 3.6`(p.70)
 
