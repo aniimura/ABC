@@ -131,7 +131,7 @@
    "citedBy": [
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 2.2",
@@ -226,7 +226,7 @@
    "page": 59,
    "section": "3",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 3.4",
@@ -261,7 +261,7 @@
    "page": 73,
    "section": "3",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 4.1",
@@ -282,7 +282,7 @@
    "page": 81,
    "section": "4",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 4.4",
@@ -298,7 +298,7 @@
    "page": 86,
    "section": "4",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 4.5.1",
@@ -453,5 +453,5 @@
   }
  ],
  "total": 54,
- "done": 24
+ "done": 29
 }

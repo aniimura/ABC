@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-17 ・ コミット 733 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-17 ・ コミット 734 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">4100</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1087</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">4125</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1094</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
@@ -197,6 +197,7 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>53b6958</code></td><td>2026-08-17</td><td>★★★★§4 が 2/10 に動いた——`Example 4.3` を最後まで(Frobenioid・standard 型・`Ψ_λ`)</td></tr>
 <tr><td><code>3506604</code></td><td>2026-08-17</td><td>★★★★検査を 0.01 秒にした——Lean REPL の MCP。ついでに `Example 4.3` の 21 条が閉じた</td></tr>
 <tr><td><code>390df8f</code></td><td>2026-08-17</td><td>引き戻しの最後の 1 歩を特定した(§9-40)</td></tr>
 <tr><td><code>265b0a3</code></td><td>2026-08-17</td><td>引き戻しの連鎖が繋がったことを記録した(§9-39)</td></tr>
@@ -208,14 +209,13 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 <tr><td><code>6f6e73d</code></td><td>2026-08-17</td><td>★★★★★★B1——係数変換の lax monoidal の `ε` も取れた(2 部品完成)</td></tr>
 <tr><td><code>2057882</code></td><td>2026-08-17</td><td>★★★★★★B1 の第 18 ブロック——係数変換の lax monoidal の `μ`(前層レベル)</td></tr>
 <tr><td><code>302df5f</code></td><td>2026-08-17</td><td>引き戻しの残作業が 1 本に確定した(§9-38)</td></tr>
-<tr><td><code>ae05af6</code></td><td>2026-08-17</td><td>引き戻しのモノイダル性への道を実測した(§9-37)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1087 件)。</div>
+<b>すべて PDF と機械照合している</b>(1094 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
