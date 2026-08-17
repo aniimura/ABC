@@ -102,13 +102,24 @@ theorem isPrimaryElt_iff_of_perfect (hperf : IsPerfectMonoid M) {x : M} (hx : x 
         exact hb (by rw [← hb', h0, smul_zero])
       exact mprec_trans (hcond b' c' hx'.symm hb0 hc0) ⟨1, one_pos, by rw [one_smul]; exact hbb'⟩
 
-/-! ### ★`.src` を付けない理由(2026-08-17 の測定)
+/-! ### ★§4 を構造化した(2026-08-17)
 
-★★**`1_Structured/` に §4 の構造化 HTML がまだ無い**——
-`frdi-thm-3-4` までしか sectionId が存在しないので、
-ゲートの G1(locator 検証)を通す `.src` を書けない。
-★**§4 に本格的に入る前に、まず §4 を構造化する必要がある**。
-★これは数学の穴ではなく、**器具の準備の問題**である。
+★★**着手時点では `1_Structured/` に §4 の構造化 HTML が無かった**——
+`frdi-thm-3-4` までしか sectionId が存在せず、ゲートの G1(locator 検証)を
+通す `.src` を**一切書けなかった**。★これは数学の穴ではなく**器具の準備**の問題で、
+★★**§4–§6 が 0 件で止まっていた理由の一部がここにあった**。
+
+★`section-4.html` を作り、§4 の必要 10 項目すべてに sectionId を用意した
+(逐語は抽出テキストから ASCII 純粋な断片のみを splice、S1–S6 PASS)。
+★これで §4 の実装に `.src` が付けられる。
 -/
+
+/-- ★**locator** —— `Proposition 4.1, (i)` の**モノイド層**。
+
+★★**条つき**(命題全体の完全実装の主張ではない)。圏層
+(`Definition 1.3, (iii), (d)` による翻訳)は未実装なので数には出ない。 -/
+def isPrimaryElt_iff_of_perfect.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 76, item := "Proposition 4.1, (i) — モノイド層",
+    sectionId := "frdi-prop-4-1" }
 
 end ABC3.Found.FrdI
