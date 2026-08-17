@@ -88,6 +88,7 @@ import ABC3.Found.GenEll.HeightNonneg
 import ABC3.Found.GenEll.HeightClass
 import ABC3.Found.GenEll.RadicalCartier
 import ABC3.Found.GenEll.StalkSupport
+import ABC3.Found.GenEll.ConductorHeight
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
