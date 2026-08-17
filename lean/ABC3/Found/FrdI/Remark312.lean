@@ -127,7 +127,7 @@ theorem elemFrob_factors_of_gen_eq_one {N : Type*} [Monoid N]
 /-- ★★★**可換かつ簡約的なモノイドへの準同型は `deg` を経由する**。
 
 原文 (FrdI p.60):
-> obtained by considering the Frobenius degree of the induced endomorphism of A --
+> obtained by considering the Frobenius degree of the induced endomorphism of A
 
 ★★**原文が `Proposition 3.3, (i)` の証明で引く「`ℕ≥1` は可換」の中身**である。
 ★`elemFrob_conj` を送ると `f(0,d) · γ = γ^d · f(0,d)`。

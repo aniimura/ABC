@@ -22,7 +22,7 @@ import ABC3.Found.FrdI.Prop22
 ## ★★★主張 1 の骨(原文どおり、2026-08-17 に測定)
 
 原文 (FrdI p.60):
-> obtained by considering the Frobenius degree of the induced endomorphism of A --
+> obtained by considering the Frobenius degree of the induced endomorphism of A
 
 ★**2 つの準同型に分けて、それぞれ `𝔽 ↠ ℕ≥1` を経由させる**:
 
@@ -119,7 +119,7 @@ def endDegHom (A : C) : End (plBkOverToC P A) →* ℕ+ where
 `⟨1,1⟩` の像は **linear**(次数 1)である。
 
 原文 (FrdI p.60):
-> obtained by considering the Frobenius degree of the induced endomorphism of A --
+> obtained by considering the Frobenius degree of the induced endomorphism of A
 
 ★★**`ℕ≥1` が可換かつ簡約的**なので `elemFrob_factors_of_cancel` が効き、
 合成 `𝔽 → ℕ≥1` は `deg` を経由する。★`⟨1,1⟩` の次数は `1` なので像も `1`。 -/
