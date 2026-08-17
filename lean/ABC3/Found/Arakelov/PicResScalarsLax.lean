@@ -83,21 +83,96 @@ noncomputable def resScalarsEps :
       congrArg (fun g : R.obj X ⟶ R'.obj Y => CommRingCat.Hom.hom g r) (α.naturality f)
     exact h
 
-/-! ## ★★残り 5 条(2026-08-17 実測: `cat_disch` では落ちない)
+/-! ## ★★★★★★coherence 5 条
 
-    μ_natural_left / μ_natural_right / associativity /
-    left_unitality / right_unitality
+★★**recipe**(`μ` / `ε` で確立、5 条すべてに効く):
 
-★★★いずれも `μ` / `ε` と**同じ手**で落ちる見込みである:
-
-1. 成分に落とす(`PresheafOfModules` の射の等式 → 各 `X` での `ModuleCat` の射の等式)
-2. `TensorProduct.ext'` で純テンソルへ
-3. ★**`show` で両辺を明示的に書き下す**(片側だけでは駄目——本 turn で 8 回試して確定)
+1. `PresheafOfModules.hom_ext` で成分に落とす
+2. `ModuleCat.hom_ext` + `TensorProduct.ext'` で純テンソルへ
+3. ★**`show` で両辺を明示的に書き下す**(片側だけでは駄目)
 4. `ModuleCat.restrictScalars_μ_tmul` / `restrictScalars_η` で書き換え
 5. `rfl`
+-/
 
-★これが揃えば `Adjunction.leftAdjointOplaxMonoidal` で
-`pullback` が oplax monoidal になり、`PicardData.pullback` が書ける。 -/
+/-- ★★★★★★**係数変換は lax monoidal である**(前層レベル)。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これで `pushforward φ` が lax monoidal になり、
+`Adjunction.leftAdjointOplaxMonoidal` で **`pullback` が oplax monoidal** になる。 -/
+noncomputable instance resScalarsLax : (resScalars α).LaxMonoidal where
+  ε := resScalarsEps α
+  μ M N := resScalarsMu α M N
+  μ_natural_left := by
+    intro M N f X'
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply TensorProduct.ext'
+    intro m n
+    show Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) (N.obj Z) (X'.obj Z)
+        ((f.app Z m) ⊗ₜ n)
+      = ((resScalars α).map (f ▷ X')).app Z
+          (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom)
+            (M.obj Z) (X'.obj Z) (m ⊗ₜ n))
+    rw [ModuleCat.restrictScalars_μ_tmul, ModuleCat.restrictScalars_μ_tmul]
+    rfl
+  μ_natural_right := by
+    intro M N X' f
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply TensorProduct.ext'
+    intro m n
+    show Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) (X'.obj Z) (N.obj Z)
+        (m ⊗ₜ (f.app Z n))
+      = ((resScalars α).map (X' ◁ f)).app Z
+          (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom)
+            (X'.obj Z) (M.obj Z) (m ⊗ₜ n))
+    rw [ModuleCat.restrictScalars_μ_tmul, ModuleCat.restrictScalars_μ_tmul]
+    rfl
+  associativity := by
+    intro M N P
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply TensorProduct.ext_threefold
+    intro m n p
+    show ((resScalars α).map (α_ M N P).hom).app Z
+        (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) _ (P.obj Z)
+          ((Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom)
+            (M.obj Z) (N.obj Z) (m ⊗ₜ n)) ⊗ₜ p))
+      = Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) (M.obj Z) _
+          (m ⊗ₜ (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom)
+            (N.obj Z) (P.obj Z) (n ⊗ₜ p)))
+    rw [ModuleCat.restrictScalars_μ_tmul, ModuleCat.restrictScalars_μ_tmul,
+      ModuleCat.restrictScalars_μ_tmul, ModuleCat.restrictScalars_μ_tmul]
+    rfl
+  left_unitality := by
+    intro M
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply TensorProduct.ext'
+    intro r m
+    show r • m = ((resScalars α).map (λ_ M).hom).app Z
+        (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) _ (M.obj Z)
+          ((Functor.LaxMonoidal.ε (ModuleCat.restrictScalars (α.app Z).hom) r) ⊗ₜ m))
+    rw [ModuleCat.restrictScalars_η, ModuleCat.restrictScalars_μ_tmul]
+    rfl
+  right_unitality := by
+    intro M
+    apply PresheafOfModules.hom_ext
+    intro Z
+    apply ModuleCat.hom_ext
+    apply TensorProduct.ext'
+    intro m r
+    show r • m = ((resScalars α).map (ρ_ M).hom).app Z
+        (Functor.LaxMonoidal.μ (ModuleCat.restrictScalars (α.app Z).hom) (M.obj Z) _
+          (m ⊗ₜ (Functor.LaxMonoidal.ε (ModuleCat.restrictScalars (α.app Z).hom) r)))
+    rw [ModuleCat.restrictScalars_η, ModuleCat.restrictScalars_μ_tmul]
+    rfl
 
 /-! ## ★出典の紐付け(`.src`) -/
 
