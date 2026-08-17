@@ -20,3 +20,5 @@
 - [heredoc はバックスラッシュを 1 段食う](heredoc-eats-backslash.md) — `<<'EOF'` でも。`` がバックスペース文字(0x08)になり、正規表現が静かに一致しなくなる。器具が嘘の測定値を出した。Write/Edit を使う。
 - [形式化は葉から積む](leaf-first-with-graph-feedback.md) — 依存グラフの葉(層が小さいもの)から。途中で必要物が出たらスケルトンを足してグラフを更新し、新しい葉から再開する。★目的は「大きな塊を壁として認識しない」こと。2026-08-17 に Prop 3.2 を上から掘って**カウンタが 1 も動かなかった**実例つき。
 - [Lean の検査は MCP の lean_check で](lean-check-via-mcp-repl.md) — `lake env lean` はファイル全体を再検査する(3,800 行で数分)。`abc3-lean` MCP なら 0.01 秒。★ただし**確定は必ず `lake build`**(書いた順序・`variable`・リンタは build でしか出ない)。Windows では `repl.exe` を直に spawn してはならない(`lake env` 経由)。
+- [葉は測る、当てない](leaves-are-measured-not-guessed.md) — `node tools/frdi-leaves.mjs` で「未実装依存の数」と「波及」を出す。★ページ順では葉が分からない実例つき(`Theorem 5.2` は §5 の大物に見えて依存 0 の葉・波及 6 件だった)。
+- [WideSubcategory / toElem の型の罠](widesubcategory-type-trap.md) — `{ obj := A }.obj.base` は `A.base` と構文上別物。`rw` 失敗・instance 合成失敗・motive 不整合として**別々の症状に見える**。射の構成は素の型を取る補題に出す。
