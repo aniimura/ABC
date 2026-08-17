@@ -54,6 +54,27 @@ theorem isIso_sheafify_whiskerRight
       (PresheafOfModules.toPresheaf X.ringCatSheaf.obj)) _
     (W_whiskerRight_of_basis (Opens.grothendieckTopology X) f M htriv)
 
+/-- ★★★★**左からのテンソルでも層化は同型に送る**。
+
+★第 10 ブロックの `W_whiskerLeft_of_basis`(braiding で右から左へ移したもの)を
+そのまま `Localization.inverts` に通す。 -/
+theorem isIso_sheafify_whiskerLeft
+    {P Q : PresheafOfModules.{u} (X.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u})}
+    (f : P ⟶ Q)
+    [PresheafOfModules.IsLocallyInjective (Opens.grothendieckTopology X) f]
+    [PresheafOfModules.IsLocallySurjective (Opens.grothendieckTopology X) f]
+    (M : PresheafOfModules.{u} (X.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u}))
+    (htriv : ∀ U : X.Opens, ∃ S : Sieve U, S ∈ (Opens.grothendieckTopology X) U ∧
+      ∀ ⦃V : X.Opens⦄ (i : V ⟶ U), S i →
+        Nonempty ((X.presheaf.obj (op V) : Type u) ≃ₗ[(X.presheaf.obj (op V) : Type u)]
+          M.obj (op V))) :
+    IsIso ((PresheafOfModules.sheafification (R := X.ringCatSheaf)
+      (𝟙 X.ringCatSheaf.obj)).map (M ◁ f)) :=
+  Localization.inverts _
+    ((Opens.grothendieckTopology X).W.inverseImage
+      (PresheafOfModules.toPresheaf X.ringCatSheaf.obj)) _
+    (W_whiskerLeft_of_basis (Opens.grothendieckTopology X) f M htriv)
+
 /-! ## ★★左からのテンソル(対称性で出る)
 
 ★`M ◁ f = (β_ M P).hom ≫ (f ▷ M) ≫ (β_ Q M).hom` なので、
