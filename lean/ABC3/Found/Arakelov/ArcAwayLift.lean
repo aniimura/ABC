@@ -309,6 +309,43 @@ theorem arcTopology_opensRange_awayι (A : CommRingCat.{0}) (s : A) :
   show (q ≫ (awayIsoOpensRange A s).inv) ≫ awayι A s = q ≫ ((awayι A s).opensRange).ι
   rw [Category.assoc, awayIsoOpensRange_inv_comp]
 
+/-! ## ★★★`awayι` の像は基本開集合である -/
+
+/-- ★★★**`awayι A g` の像は基本開集合 `D(g)` である**。
+
+★機構は mathlib の `PrimeSpectrum.localization_away_comap_range` と
+`Spec.map_apply`(`(Spec.map φ).base = PrimeSpectrum.comap φ.hom`)。
+★★係数は `Opens.ext` が吸収する(mathlib 自身の作法)。
+
+★★★これで**基本開集合が基底であること**を使って被覆を作れる。 -/
+theorem opensRange_awayι (A : CommRingCat.{0}) (g : A) :
+    (awayι A g).opensRange = PrimeSpectrum.basicOpen g :=
+  TopologicalSpace.Opens.ext (by
+    show Set.range (fun x => (awayι A g).base x) = _
+    have h : (fun x => (awayι A g).base x)
+        = PrimeSpectrum.comap (algebraMap (A : Type) (Localization.Away g)) := by
+      funext x
+      exact Spec.map_apply _ x
+    rw [h]
+    exact PrimeSpectrum.localization_away_comap_range (Localization.Away g) g)
+
+/-- ★★★**任意の開集合の各点は、その中に含まれる `awayι` の像で覆われる**。
+
+★★これが被覆である——`PrimeSpectrum.isTopologicalBasis_basic_opens`(基本開集合が基底)
+と `opensRange_awayι` の合成。 -/
+theorem exists_awayι_le {A : CommRingCat.{0}} (O : (Spec A).Opens) (x : Spec A)
+    (hx : x ∈ O) :
+    ∃ g : A, x ∈ (awayι A g).opensRange ∧ (awayι A g).opensRange ≤ O := by
+  obtain ⟨u, hu, hxu, huO⟩ :=
+    (PrimeSpectrum.isTopologicalBasis_basic_opens (R := A)).exists_subset_of_mem_open
+      (a := x) hx O.isOpen
+  obtain ⟨g, rfl⟩ := hu
+  refine ⟨g, ?_, ?_⟩
+  · rw [opensRange_awayι]; exact hxu
+  · intro y hy
+    rw [opensRange_awayι] at hy
+    exact huO hy
+
 /-! ## ★★★★開部分スキームへの持ち上げ(アフィン周囲、基本開集合の上で) -/
 
 /-- ★★**基本開集合から開部分スキーム `O` への持ち上げ**。
@@ -377,6 +414,16 @@ def awayLift_comp_awayι.src : ABC3.Meta.Source :=
 def awayLift_eq_openLift.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——基本開集合の持ち上げが一般の持ち上げと一致すること)",
+    sectionId := "genell-def-1-1-i" }
+
+def opensRange_awayι.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——awayι の像が基本開集合であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def exists_awayι_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開集合が awayι の像で覆われること)",
     sectionId := "genell-def-1-1-i" }
 
 def continuous_liftToOpen.src : ABC3.Meta.Source :=
