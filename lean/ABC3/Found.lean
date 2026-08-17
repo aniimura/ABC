@@ -53,6 +53,7 @@ import ABC3.Found.FrdI.Thm34Rigid
 import ABC3.Found.FrdI.Lemma65
 import ABC3.Found.FrdI.Prop44Pre
 import ABC3.Found.FrdI.Def45
+import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
