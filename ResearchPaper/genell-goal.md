@@ -3326,3 +3326,51 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 3. **保存性をインスタンス束縛子で受けると渡せない** → `(hA hB : ..)` と明示引数にする
 
 ★★2 と 3 は第 11 ブロックの規則(型の書き方をまたげない)の 6・7 例目である。
+
+
+---
+
+## §9-46 (2026-08-18) ★★★★★★★最終段の骨組みが型検査を通った——残りは要素の等式 1 本
+
+### ★★★★★★示すべき等式(型検査済み、2026-08-18)
+
+    (pullbackPre f).map (iotaY V W) ≫ pullbackDelta f (freeY V) (freeY W)
+      = (pullbackFreeYonedaIso f (V ⊓ W)).hom
+        ≫ (targetIso f V W).inv
+        ≫ ((pullbackFreeYonedaIso f V).symm ⊗ᵢ (pullbackFreeYonedaIso f W).symm).hom
+
+ここで
+
+    iotaY V W  := (freeYonedaInfIso (R := Y.presheaf) V W).inv        -- 第 26
+    targetIso  := freeYonedaInfIso (R := X.presheaf) (f⁻¹V) (f⁻¹W)     -- 第 26(X 側)
+
+★★★**右辺は同型の合成である。**したがってこの等式が証明できれば
+
+    IsIso ((pullbackPre f).map (iotaY V W) ≫ δ)
+
+が出て、`(pullbackPre f).map (iotaY V W)` が同型だから **`IsIso δ`** が出る。
+★第 30 ブロックの二重持ち上げで**全対象**に伝播する。
+
+### ★★証明の骨組み(ここまで通っている)
+
+    refine (adj.homEquiv _ _).injective ?_          -- ★随伴の単射性
+    erw [Adjunction.homEquiv_naturality_left]       -- ★★`erw` が要る(型の書き方の違い)
+    rw [homEquiv_pullbackDelta]                     -- ★第 33: δ の adjunct = (unit ⊗ₘ unit) ≫ μ
+    refine PresheafOfModules.freeYonedaEquiv.injective ?_   -- ★生成元だから元で決まる
+    simp only [PresheafOfModules.freeYonedaEquiv_comp]      -- ★合成則
+    -- ★★★残り: 要素の等式 1 本
+
+### ★★★残った要素の等式の中身(数学としては確認済み)
+
+左辺の元は
+
+    unit_P(freeMk i_V) ⊗ₜ unit_Q(freeMk i_W)        (第 31 + 第 32 で計算できる)
+
+であり、右辺は `freeMk (𝟙 U₀)` の像である。★`U₀ = f⁻¹V ⊓ f⁻¹W = f⁻¹(V ⊓ W)`(第 23、`rfl`)。
+
+★★**両者が一致することは、`unit` が生成元を生成元に送ることに他ならない。**
+
+### ★注意
+
+★この骨組みは `sorry` を含むので `Found/` には置けない(規則どおり)。
+★★本節に全文を記録した——次の turn はここから再開する。
