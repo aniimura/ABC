@@ -2982,3 +2982,42 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 
 `tilde` も随伴の左側(`tilde ⊣ Γ`)なので、同じ手が使えるかもしれない。
 ★`Tilde.lean` の `tilde.adjunction` が材料。
+
+
+---
+
+## §9-38 (2026-08-17) ★★★引き戻しの残作業が 1 本に確定した
+
+### ★実測(2026-08-17)
+
+| 何 | 状態 |
+|---|---|
+| `ModuleCat.restrictScalars f` が lax monoidal | ★★**mathlib に在る**(`instLaxMonoidalRestrictScalars`) |
+| その `μ` を取り出せる | ★探りで確認(`Functor.LaxMonoidal.μ`) |
+| `PresheafOfModules.restrictScalars α` が lax monoidal | ★★★**無い** |
+| `AlgebraicGeometry/Modules` にモノイダル性 | ★★★**無い** |
+
+### ★★★残作業は 1 本
+
+    (PresheafOfModules.restrictScalars α).LaxMonoidal
+
+★`restrictScalars` は**成分ごと**の定義(`restrictScalarsObj` の `obj := fun X ↦ ...`)なので、
+`ε` と `μ` は成分ごとに `ModuleCat` の在庫から取れる。
+★★残るのは**自然性と 5 つの coherence** を前層レベルで書くこと。
+
+★★★これが出れば:
+
+    (pushforward φ).LaxMonoidal            -- pushforward₀(strong)⋙ restrictScalars(lax)
+    → Adjunction.leftAdjointOplaxMonoidal  -- ★mathlib
+    → pullback が oplax monoidal
+    → 比較射が同型(可逆層なら局所的に恒等——第 15・16 ブロックが効く)
+    → f^*(L ⊗ M) ≅ f^*L ⊗ f^*M
+    → PicardData.pullback と pullback_mul
+
+★★同じ随伴の手が `equivPicRing`(`tilde ⊣ Γ`)にも効く見込みである。
+
+### ★規模
+
+mathlib の `PushforwardZeroMonoidal.lean` は 11 行だが、あれは `μ`・`ε` が恒等の場合。
+★`restrictScalars` の `μ` は**同型でない標準写像** `M ⊗_R N → M ⊗_S N` なので、
+coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)**。
