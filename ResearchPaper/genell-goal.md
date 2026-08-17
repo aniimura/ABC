@@ -1607,3 +1607,17 @@ Green 関数に条件を付けていない。
 | 4. `X(ℚ̄)` の型 | 設計 |
 
 ★★★**4 段すべてが配線と設計であり、未知の数学は無い。**
+
+### ★段 1 の橋も測った(2026-08-17 深夜)
+
+`idealADiv` は `Associates.count _ (Associates.mk J).factors` を使い、
+mathlib の重複度公式は `emultiplicity` で述べられている。
+★**両者を直接繋ぐ補題は無い**(`UniqueFactorizationDomain/` を実測)。
+
+★★ただし**どちらも整除で特徴づけられる**ので橋は架かる:
+
+- `Associates.prime_pow_dvd_iff_le` —— `p^n ∣ a ↔ n ≤ count p a.factors`
+- `emultiplicity` の定義 —— `p^n ∣ b ∧ ¬p^(n+1) ∣ b`
+
+★★★**したがって段 1 も「未知の数学」ではなく配線である。**
+次のセッションはこの橋から始めるのが最短である。
