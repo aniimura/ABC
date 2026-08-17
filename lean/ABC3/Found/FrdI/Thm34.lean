@@ -477,6 +477,40 @@ theorem psiIstr_isEquivalence (h₁ : IsOfQuasiIsotropicType C P₁)
   haveI := psiIstr_essSurj Ψ P₁ P₂ h₁ h₂
   exact { }
 
+/-- ★★★**`Ψ^istr` と包含関手の可換性** —— 図式の 1-可換性の**核**。
+
+★★これは **`Iso.refl` で済む**(構成から `ι₂ ∘ Ψ^istr` と `Ψ ∘ ι₁` は
+対象・射ともに同じものだから)。★原文が「1-commutative」と書く所が、
+**包含関手の側では恒等的に可換**になっている。 -/
+def psiIstr_comp_iota (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) :
+    psiIstr Ψ P₁ P₂ h₁ h₂ ⋙ (isotropicProp P₂).ι ≅ (isotropicProp P₁).ι ⋙ Ψ :=
+  Iso.refl _
+
+/-! ### ★★★残り —— 図式の 1-可換性と rigidity(設計)
+
+★上の `psiIstr_comp_iota` は**包含関手**の側の可換性である。
+原文の図式はもう一方、**isotropification 関手**の側:
+
+  `Ψ^istr ∘ isotropification₁ ≅ isotropification₂ ∘ Ψ`
+
+★★**筋(測定済み)**: どちらも**左随伴**である。
+- `isotropification₁ ⊣ ι₁`(`isotropificationAdj`)、`Ψ^istr` は圏同値
+- `isotropification₂ ⊣ ι₂`、`Ψ` は圏同値
+
+★したがって `Adjunction.comp` で両者を左随伴として書き、
+★★**右随伴が一致すること**を `psiIstr_comp_iota`(上)から出せば、
+`Adjunction.leftAdjointUniq` で自然同型が得られる。
+
+★**1-一意性**も同じ随伴の一意性から出る。
+
+★★残る `rigidity` は別筋である。原文 (FrdI p.63):
+`Proposition 1.13, (ii)` を使い、**Frobenius-trivial 対象の
+base-identity 自己射(任意の Frobenius 次数)に関する関手性**から
+`α^d = α`(すべての `d`)を出して `α` を自明にする。
+★Frobenius-normalized 型が効く箇所である。
+-/
+
 end Isotropic
 
 end ABC3.Found.FrdI
