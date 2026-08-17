@@ -3,6 +3,9 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm52
 import ABC3.Found.FrdI.Prop15
+import ABC3.Found.FrdI.Prop17
+import ABC3.Found.FrdI.Remark311
+import ABC3.Found.FrdI.Def31
 
 /-!
 # [FrdI] Theorem 5.2, (ii) —— model Frobenioid は Frobenioid である
@@ -1241,6 +1244,76 @@ theorem model_frobenioid (h : Hyp M) : Frobenioid (modelPre h) where
   core := model_frobenioidCore h
   coaPreUnderEquiv := model_coaPreUnderEquiv h
   coaPreOverEquiv := model_coaPreOverEquiv h
+
+/-! ## ★15. Frobenius-normalized 型
+
+★`𝒪^▷(A)` の元の冪は `Div` と `u` を `n` 倍するだけなので、
+`φ ≫ α^{deg φ} = α ≫ φ` は両辺とも `Div(φ) + n·Div(α)` になる。 -/
+
+/-- ★`𝒪^▷(A)` の元の冪の 4 成分。 -/
+theorem otri_pow (h : Hyp M) {A : Obj M} {α : End A} (hα : α ∈ OTri (modelPre h) A) (n : ℕ) :
+    ((α ^ n : End A).base = 𝟙 A.base ∧ (α ^ n : End A).deg = 1) ∧
+      (α ^ n : End A).div = n • α.div ∧ (α ^ n : End A).u = n • α.u := by
+  obtain ⟨hb, hd⟩ := (mem_otri_iff h α).mp hα
+  induction n with
+  | zero => exact ⟨⟨rfl, rfl⟩, by simp, by simp⟩
+  | succ k ih =>
+      obtain ⟨⟨hbk, hdk⟩, hdivk, huk⟩ := ih
+      have hmul : (α ^ (k + 1) : End A) = (α : A ⟶ A) ≫ (α ^ k : End A) := by
+        rw [pow_succ]
+        rfl
+      refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
+      · rw [hmul]
+        show α.base ≫ (α ^ k : End A).base = 𝟙 A.base
+        rw [hb, hbk, Category.id_comp]
+      · rw [hmul]
+        show (α ^ k : End A).deg * α.deg = 1
+        rw [hdk, hd, mul_one]
+      · rw [hmul]
+        show M.phi.map α.base (α ^ k : End A).div + ((α ^ k : End A).deg : ℕ) • α.div
+          = (k + 1) • α.div
+        rw [hb, hdk, hdivk, MonoidOn.map_id]
+        simp [add_smul, add_comm]
+      · rw [hmul]
+        show M.bmon.map α.base (α ^ k : End A).u + ((α ^ k : End A).deg : ℕ) • α.u
+          = (k + 1) • α.u
+        rw [hb, hdk, huk, MonoidOn.map_id]
+        simp [add_smul, add_comm]
+
+/-- ★★`𝒞` は **Frobenius-normalized 型**。 -/
+theorem model_frobNormalizedType (h : Hyp M) : IsOfFrobeniusNormalizedType (modelPre h) := by
+  intro A φ hφb α hα
+  have hφbase : φ.base = 𝟙 A.base := by
+    have h0 : (modelPre h).Base φ = (modelPre h).Base (𝟙 A) := hφb
+    rw [(modelPre h).Base_id A] at h0
+    exact h0
+  obtain ⟨hαb, hαd⟩ := (mem_otri_iff h α).mp hα
+  obtain ⟨⟨hpb, hpd⟩, hpdiv, hpu⟩ := otri_pow h hα ((modelPre h).degFr φ : ℕ)
+  refine Hom.ext ?_ ?_ ?_ ?_
+  · show φ.base ≫ (α ^ ((modelPre h).degFr φ : ℕ) : End A).base = α.base ≫ φ.base
+    rw [hpb, hαb, Category.comp_id, Category.id_comp]
+  · show M.phi.map φ.base (α ^ ((modelPre h).degFr φ : ℕ) : End A).div
+        + ((α ^ ((modelPre h).degFr φ : ℕ) : End A).deg : ℕ) • φ.div
+      = M.phi.map α.base φ.div + (φ.deg : ℕ) • α.div
+    rw [hpd, hpdiv, hαb, hφbase, MonoidOn.map_id, MonoidOn.map_id]
+    simp [add_comm]
+  · show (α ^ ((modelPre h).degFr φ : ℕ) : End A).deg * φ.deg = φ.deg * α.deg
+    rw [hpd, hαd, one_mul, mul_one]
+  · show M.bmon.map φ.base (α ^ ((modelPre h).degFr φ : ℕ) : End A).u
+        + ((α ^ ((modelPre h).degFr φ : ℕ) : End A).deg : ℕ) • φ.u
+      = M.bmon.map α.base φ.u + (φ.deg : ℕ) • α.u
+    rw [hpd, hpu, hαb, hφbase, MonoidOn.map_id, MonoidOn.map_id]
+    simp [add_comm]
+
+/-- ★★`𝒞` は **quasi-isotropic 型**(isotropic 型だから)。 -/
+theorem model_quasiIsotropicType (h : Hyp M) :
+    IsOfQuasiIsotropicType (Obj M) (modelPre h) :=
+  isOfQuasiIsotropicType_of_isOfIsotropicType (modelPre h) (model_frobenioidCore h)
+    (model_isotropicType h)
+
+/-- ★★`𝒞` は **Frobenius-isotropic 型**(すべての対象が isotropic)。 -/
+theorem model_frobIsotropicType (h : Hyp M) : IsOfFrobeniusIsotropicType (modelPre h) :=
+  fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (modelPre h) (𝟙 A), model_isotropic h A⟩
 
 end ModelData
 
