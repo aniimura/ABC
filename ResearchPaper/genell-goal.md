@@ -2862,3 +2862,48 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 ★★★残る壁は変わらず **「層化が局所自明性を保つ」** ——
 これは `(層化 P)|_V ≅ P|_V`(`P|_V` が層のとき)であり、
 `Over V` 上の局所全単射から出す。★mathlib に該当補題は無い。
+
+
+---
+
+## §9-35 (2026-08-17) ★★★★★★壁の部品が**すべて**mathlib に在った
+
+### ★訂正の直後に前進した
+
+§9-34 で第 16–20 ブロックを撤回した(「局所自明な前層は層」が偽)。
+★★正しい道(層側)に戻したうえで、残る壁
+
+> **層化は局所自明性を保つ**:  `P|_V ≅ 𝟙_|_V`  ⟹  `(層化 P).val|_V ≅ 𝟙_|_V`
+
+の**部品をすべて実測で確認した**。
+
+### ★★★★★★4 部品すべて mathlib に在った
+
+| 部品 | 在庫 | 状態 |
+|---|---|---|
+| `Over.forget V` が cocontinuous | `Sites/Over.lean` | ★取得(`isCocontinuous_overForget`) |
+| 制限が局所全射を保つ | `Sites/PreservesLocallyBijective.lean` | ★取得(`isLocallySurjective_restrict`) |
+| 制限が局所単射を保つ | 同上 | ★取得(`isLocallyInjective_restrict`) |
+| **層どうしの局所全単射は同型** | `Sites/LocallyBijective.lean` の `Sheaf.isLocallyBijective_iff_isIso` | ★実測で確認 |
+
+★★★★**「mathlib に該当補題なし」と 2 度判定したが、いずれも誤りだった**
+——見積り外し **7 度目**。
+
+### ★★★残る組み立て(機械的)
+
+1. `η_P : P ⟶ (層化 P).val` は局所全単射(mathlib の instance、第 11 ブロックで確認済み)
+2. 制限して `η_P|_V` も局所全単射(★本 turn で取得)
+3. `P|_V` は層(`≅ 𝟙_|_V` かつ `𝟙_` の制限は層)
+4. `(層化 P).val|_V` も層(制限は層を保つ——`op_comp_isSheaf_of_isSheaf`)
+5. `Sheaf.isLocallyBijective_iff_isIso` で `η_P|_V` は同型
+6. ⟹ `(層化 P).val|_V ≅ P|_V ≅ 𝟙_|_V`
+
+★★**唯一の手間**は 3–5 で `PresheafOfModules` の射を `Sheaf J A` の射として
+包み直すこと(`SheafOfModules.toSheaf` が `ReflectsIsomorphisms` を持つ)。
+
+### ★★★★★この turn の 2 つの教訓
+
+1. ★★★**「無い」と決める前に測る**(7 度成功)
+2. ★★★★**「有る(自明に成り立つ)」と決める前にも測る**(1 度失敗)
+   ——「局所自明な前層は層」を `ℙ¹` の `𝒪(1) ⊗ 𝒪(-1)` で検算していれば
+   5 ブロック前に気づけた。**両方向に測ること。**
