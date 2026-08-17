@@ -2747,3 +2747,58 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 `Functor.Monoidal` / `CoreMonoidal` を作る仕事である。
 ★`pushforward₀OfCommRingCat` については mathlib が既に作っている
 (`PushforwardZeroMonoidal.lean`)ので、**同じ型の仕事**であり見通しは立っている。
+
+
+---
+
+## §9-33 (2026-08-17) ★★★★★★B1 —— 20 ブロック。`equivPicRing` の乗法性が無料で出た
+
+### ★★★★★★「前層の段で組む」判断の 2 つ目の配当
+
+前層テンソルは**各開集合ごと**である(`tensorObj_obj` は定義そのもの):
+
+    (F ⊗ G)(U) = F(U) ⊗_{𝒪(U)} G(U)
+
+★★したがって `Γ = (·)(⊤)` は**乗法を保つ**。
+★★★`picToSectionsPic X : PicPre X →* CommRing.Pic Γ(X, ⊤)` が取れた。
+
+★★★★**前 turn に「`tilde` のモノイダル性が要る」と判定したのは誤りだった**
+——見積り外し **6 度目**。
+
+### ★機構(すべて mathlib の在庫)
+
+| 何 | 道具 |
+|---|---|
+| 可逆加群であること | `L.isInv` を `⊤` で評価 → `Module.Invertible.left` |
+| 乗法性 | `CommRing.Pic.mk_tensor` |
+| well-defined | `CommRing.Pic.mk_eq_mk_iff` |
+| `map_one` | `CommRing.Pic.mk_eq_one_iff` |
+
+### ★★★★B1 の到達状況 —— `PicardData` の 10 フィールド
+
+| フィールド | 状態 |
+|---|---|
+| `Pic` | ✅ `PicPre X`(第 17) |
+| `group` | ✅ `CommGroup (PicPre X)`(第 17) |
+| `carrier` / `carrier_invertible` | ✅ 第 16・19 |
+| `carrier_one` / `carrier_mul` | ✅ **rfl**(第 16) |
+| `carrier_injective` / `carrier_surjective` | ✅ 第 17・19 |
+| `pullback` / `pullback_mul` / `pullback_id` / `pullback_comp` | ★残 |
+| `equivPicRing` | ★★**乗法性は取得**(第 20)。残るは**全単射性** |
+
+### ★★★残り 2 点の正体
+
+#### (1) `equivPicRing` の全単射性 = **アフィンでの層と加群の対応**
+
+★局所自明な前層 `F` on `Spec R` について `F ≅ tilde (F(⊤))` を言うこと。
+★★材料は `Tilde.lean` に在る(`tilde` 充満忠実 /
+`isIso_fromTildeΓ_of_presentation` / `IsLocallyFree → IsQuasicoherent`)が、
+**我々の `Pic` は前層側**なので層側へ渡す段が要る。
+
+#### (2) 引き戻し `f^*`
+
+★mathlib の `Scheme.Modules.pullback` は**層**の側。
+★★モノイダル性が未登録で、かつ前層側との橋が要る。
+
+★★★**どちらも「前層 ↔ 層」の橋に帰着する。**
+すなわち「**局所自明な前層は層である**」——これが B1 の最後の壁である。
