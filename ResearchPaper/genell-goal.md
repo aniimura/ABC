@@ -1828,3 +1828,98 @@ mathlib の重複度公式は `emultiplicity` で述べられている。
 
 ★★★`ArcModel` は**データ**(埋め込み)を受けてコンパクト性を**証明する**——
 そこが posit との違いである。
+
+---
+
+## §9-19 ★★★残作業を条ごとに測り直した——記録していた見積りが 2 つ誤っていた
+
+**2026-08-17 深夜。**カウンタが動かない理由を「怠慢ではなく 2 値規則」と書いてきたが、
+★**その先の「あと何が要るか」を条の水準で測っていなかった**。測り直した。
+
+### ★★★分子の規則(再確認)
+
+`tools/genell-progress.mjs` の分子は **`Found/` にある条なしの `.src`** である
+(`item := "Kind N.M"` **完全一致**)。★★**`"Definition 1.5, (i)"` のような
+条番号つきは分子に入らない**——サブ項目もまた「条つき」である。
+
+### ★★§1 の残作業(条ごと)
+
+| 命題 | `Found/` に条なしで在る条 | 残る条 | 残りを埋めるのに要るもの |
+|---|---|---|---|
+| Definition 1.1 | — | 全体 | 射影埋め込み(`ArcModel` の構成) |
+| Definition 1.2 | (ii) | (i) | 可逆層のテンソル積 or 移動補題 |
+| Example 1.3 | **(i)** ←本日 | (ii) | コンパクト領域(非アルキメデス側) |
+| Proposition 1.4 | (iv) | (i)(ii)(iii) | (i)(iii) 可逆層、(ii) 射影埋め込み |
+| Definition 1.5 | (i)(iii)(iv) | **(ii)** | **Auslander–Buchsbaum** |
+| Proposition 1.6 | — | 全体 | 射影埋め込み(`ArcModel` の構成) |
+
+### ★★★誤り 1: 「`ℙⁿ` の点の関手で 5/24 → 7/24」は**過大**である
+
+§9-18 と `memory/genell-track-b.md` にそう書いた。★**誤りである。**
+
+`ℙⁿ` の点の関手が解くのは `Proposition 1.4, (ii)` と `Proposition 1.6` だが、
+★★`Proposition 1.4` は **(i)(ii)(iii)(iv) が全部揃わないと数に入らない**。
+(i)(iii) は可逆層の側が要るので、`ℙⁿ` だけでは埋まらない。
+
+★★★**正しくは 5/24 → 6/24**(`Proposition 1.6` の 1 件のみ)。
+
+### ★★★誤り 2: 「Auslander–Buchsbaum 1 本」は**規模を過小評価**していた
+
+原文 `Definition 1.5, (ii)` の逐語:
+> (ii) Let E ⊆ Z be an effective Cartier divisor contained in the regular locus of
+> a normal noetherian scheme Z. Then observe that the closed subscheme Ered ⊆ Z
+> is also an effective Cartier divisor.
+
+★機構は「正則局所環 `𝒪_{Z,x}` は UFD だから `√(f)` が単項」である。
+★★mathlib の在庫は **`RingTheory/RegularLocalRing/Defs.lean` 1 ファイルだけ**で、
+Auslander–Buchsbaum は入っていない。
+
+★★★**「1 本」だが、その 1 本が Serre の特徴づけ(正則 ⟺ 有限大域次元)
+＋ Nagata の補題 ＋ 次元の帰納**である。**mathlib 級の企画**であって、
+セッション単位の作業ではない。
+
+★ただし**位置は良い**——`Definition 1.5` は (i)(iii)(iv) が既に揃っているので、
+**この 1 本だけで 1 件動く**。§1 で単一の障害しか残っていないのはこれだけである。
+
+### ★§3・§4 の残りも測った(初めて)
+
+| 節 | 済 | 残り | 何が要るか |
+|---|---|---|---|
+| §3 | `Lemma 3.1` / `Lemma 3.6` | 7 件 | Faltings 高さ・半安定還元・`M_ell` の理論 |
+| §4 | `Lemma 4.1` / `Remark 4.1.1` / `Lemma 4.2` | `Cor 4.3` / `Cor 4.4` | **論文の最終結果**(IUT 依存) |
+
+★★§4 が 3/5 と見えるのは残り 2 件が**最終結果**だからで、近いのではない。
+★`Lemma 3.5` / `Lemma 3.7` を「補題だから自己完結だろう」と当たったが、
+**`htFalt` / `deg∞` / `M_ell` が要る**——mathlib に無い。
+
+### ★★★結論: 24 件のうち安い項目は残っていない
+
+**19 件すべてが、mathlib 級の基盤(Auslander–Buchsbaum / Faltings 高さ /
+楕円曲線のモデュライ / `ℙⁿ` の点の関手 / 可逆層のテンソル積)か、
+IUT そのものを要求する。**
+
+★これは「進まない」の言い換えではなく、**どれを取るかの判断材料**である。
+★★★単一障害で 1 件動くのは **`Definition 1.5`(Auslander–Buchsbaum)**と
+**`Proposition 1.6`(射影埋め込み)**の 2 つだけである。
+
+### ★本日の実装: `Example 1.3, (i)`(`Found/GenEll/DegSubset.lean`)
+
+原文の (i) は**定義のみ**である。4 つの記号を全部作った:
+
+| 記号 | Lean |
+|---|---|
+| `X(ℚ̄)^{≤d}` (`d ∈ ℕ ∪ {∞}`) | `leDeg X D (d : ℕ∞)` |
+| `X(ℚ̄)^{=d}` | `eqDeg X D d` |
+| `E^{≤d}` / `E^{=d}` | `subLeDeg E d` / `subEqDeg E d` |
+| Galois-finite | `GaloisFinite E` |
+
+★原文が付けている但し書き 2 つも定理にした:
+- `X(ℚ̄)^{≤∞} = X(ℚ̄)` → `leDeg_top`
+- 「最小定義体を見よ」→ `mem_eqDeg_iff`
+  (`x ∈ X^{=d}` ⟺ **定義体の次数の最小値が `d`**)
+
+★★★**商 `UPoint` の上で「次数」は代表元ごとに違う**——だから `≤ d` は
+**「そういう代表元が存在する」**と読むのが正しい。存在量化なので
+`Quot` の上で well-defined であることは自動である。
+
+★これは `Lemma 3.7`(Galois-finite な例外集合 `Exc`)が直接要求するものである。

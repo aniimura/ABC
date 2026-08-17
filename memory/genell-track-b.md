@@ -32,26 +32,55 @@ metadata:
 **構成に置き換えると真になる**——しかも (ii)(iii) は原文より強い形
 (`≳` でなく `≥`、BD-class でなく等式)で出る。
 
-## ★★§1 に残るのは mathlib の在庫 3 本だけ
+## ★★★2026-08-17 深夜: 条ごとに測り直したら、見積りが 2 つ誤っていた
 
-| 残り | 効く先 |
-|---|---|
-| `ℙⁿ` の**点の関手**(`ℙⁿ(ℂ) ≅ ℙ ℂ V`) | `Prop 1.4 (ii)` + `Prop 1.6` の 2 件 |
-| **Auslander–Buchsbaum**(正則局所 ⇒ UFD) | `Def 1.5 (ii)` |
-| 可逆層のテンソル積 or 移動補題 | `Def 1.2 (i)` の全域化 |
+**分子の規則**: `Found/` にある**条なし**の `.src`(`item := "Kind N.M"` 完全一致)。
+★★`"Definition 1.5, (i)"` のような**サブ項目も「条つき」**で分子に入らない。
 
-★★★**どれも「原文の数学」ではなく「mathlib の在庫」の問題である。**
+| 命題 | `Found/` に条なしで在る条 | 残る条 | 要るもの |
+|---|---|---|---|
+| Definition 1.1 | — | 全体 | 射影埋め込み(`ArcModel` の構成) |
+| Definition 1.2 | (ii) | (i) | 可逆層のテンソル積 or 移動補題 |
+| Example 1.3 | (i) | (ii) | コンパクト領域(非アルキメデス側) |
+| Proposition 1.4 | (iv) | (i)(ii)(iii) | (i)(iii) 可逆層、(ii) 射影埋め込み |
+| Definition 1.5 | (i)(iii)(iv) | (ii) | **Auslander–Buchsbaum** |
+| Proposition 1.6 | — | 全体 | 射影埋め込み(`ArcModel` の構成) |
+
+★★★**誤り 1**: 「`ℙⁿ` の点の関手で 5/24 → 7/24」は**過大**。
+`Proposition 1.4` は (i)(ii)(iii)(iv) 全部揃って初めて数に入るので、
+`ℙⁿ` が解くのは `Proposition 1.6` の **1 件だけ**(5/24 → **6/24**)。
+
+★★★**誤り 2**: 「Auslander–Buchsbaum 1 本」は**規模の過小評価**。
+mathlib の在庫は `RingTheory/RegularLocalRing/Defs.lean` **1 ファイルだけ**で、
+定理本体は Serre の特徴づけ + Nagata の補題 + 次元の帰納——**mathlib 級の企画**。
+★ただし **`Definition 1.5` はこの 1 本だけで 1 件動く**(位置は良い)。
+
+## ★§3・§4 の残りも測った
+
+- §3 済 = `Lemma 3.1` / `Lemma 3.6`。残り 7 件は **Faltings 高さ・半安定還元・`M_ell`**。
+  ★`Lemma 3.5` / `Lemma 3.7` を「補題だから自己完結」と当てたが**外れ**——`htFalt` が要る。
+- §4 済 = `Lemma 4.1` / `Remark 4.1.1` / `Lemma 4.2`。残り 2 件は
+  `Cor 4.3` / `Cor 4.4` = **論文の最終結果**(IUT 依存)。
+  ★★3/5 と見えるのは残りが最終結果だからで、**近いのではない**。
+
+★★★**24 件のうち安い項目は残っていない。**単一障害で 1 件動くのは
+`Definition 1.5`(Auslander–Buchsbaum)と `Proposition 1.6`(射影埋め込み)の 2 つだけ。
 
 **Why:** 分母 24 のうち完成は **5 件**。カウンタが動かないのは怠慢ではなく、
-`.src` の 2 値規則(条つきは数えない)による。★本日 §1 の実質は大きく進んだが、
+`.src` の 2 値規則(条つきは数えない)による。★§1 の実質は大きく進んだが、
 1 件に数えるには命題**全体**が原文どおりの仮定で揃う必要がある。
 
 **How to apply:**
-- ★最短の再開点は **`Proposition 1.6`**。残るのは `ℙⁿ` の点の関手 1 本で、
-  それが入れば `Prop 1.4 (ii)` と合わせて **5/24 → 7/24** も見える。
-- ★★§3(Galois 作用)は未着手のまま。`Lemma 3.1 (iv)` は 9 段中 6 段が済。
-- ★★★**「mathlib に無い」と書く前に別の語で検索する**——本日 2 度外した
+- ★最短の再開点は **`Proposition 1.6`**(`ℙⁿ` の点の関手 → `ArcModel` の構成)。
+  ★★ただし**動くのは 1 件**である。7/24 と書いた古い見積りを使わないこと。
+- ★★`Example 1.3, (i)`(`Found/GenEll/DegSubset.lean`)は済——
+  `X(ℚ̄)^{≤d}` / `X(ℚ̄)^{=d}` / `E^{≤d}` / Galois-finite。`Lemma 3.7` が要求するもの。
+  ★商 `UPoint` の上で「次数」は代表元ごとに違うので、`≤ d` は
+  **「そういう代表元が存在する」**と読む(存在量化なので well-defined が自動)。
+- ★★★**「mathlib に無い」と書く前に別の語で検索する**——2026-08-17 に 2 度外した
   ([[frdi-split-nonisotropic-not-derivable]] に記録)。
+  ★同日、`ProjectiveSpectrum/Functor.lean` は**ディレクトリを見て**当てた——
+  概念名(`functor of points`)では引けなかった。
 
 関連: [[abc3-plan-two-track]] / [[challenger-audit-without-context]] /
 [[genell-bd-class-direction]] / [[frdi-split-nonisotropic-not-derivable]]

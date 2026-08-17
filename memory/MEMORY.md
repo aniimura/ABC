@@ -6,7 +6,7 @@
 - [完成宣言は文脈を持たない子に監査させる](challenger-audit-without-context.md) — 自分の文脈を継いだ検証は自分の誤読も継ぐ。Prop 1.10 の .src 6 個が全滅した実例。
 - [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
 - [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
-- [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで **5/24**。★2026-08-17 に「§1 の律速は Arakelov 理論」判定を**撤回**し、高さを構成した。残るは mathlib の在庫 3 本。
+- [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで **5/24**。★2026-08-17 に残作業を**条ごと**に測り直し、見積り 2 件を訂正。単一障害で 1 件動くのは Def 1.5 と Prop 1.6 だけ。
 - [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
 - [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
 - [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
