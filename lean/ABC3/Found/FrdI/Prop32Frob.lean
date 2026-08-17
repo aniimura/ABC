@@ -1640,4 +1640,145 @@ theorem pfRoot_otriBase_sameRoot (hfi : IsOfFrobeniusIsotropicType P)
   rw [hββ]
   exact heq0'
 
+/-! ## ★31. 根を揃えて (iii)(c) を一般の場合へ
+
+★★`X = (A,n)`、`Y = (B,m)` を `X' = (A^m, n*m)`、`Y' = (B^n, n*m)` に取り替える。
+★どちらも根が `n*m` なので `sameRoot` 版が当たり、結果は共役で戻す。 -/
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (iii)(c)** の順方向、`𝒞^pf` 版。 -/
+theorem pfRoot_otriFwd (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (φ : X ⟶ Y) (_hφc : IsCoAngular (pfRootPre P F) φ)
+    (hφs : IsPreStep (pfRootPre P F) φ) (α : End X) (hα : α ∈ OTri (pfRootPre P F) X) :
+    ∃! β : End Y, β ∈ OTri (pfRootPre P F) Y ∧
+      ((φ ≫ (β : Y ⟶ Y)) = ((α : X ⟶ X) ≫ φ)) := by
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root Y.root
+    (X.root * Y.root) rfl
+  obtain ⟨eY, hYiso⟩ := pfRoot_exists_iso_root (F := F) Y.obj Y.root X.root
+    (X.root * Y.root) (mul_comm _ _)
+  haveI := hXiso
+  haveI := hYiso
+  have hφ' : IsPreStep (pfRootPre P F) (inv eX ≫ φ ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφs (isPreStep_of_isIso (pfRootPre P F) eY))
+  have hα' := oTri_conj (F := F) eX (inv eX) (IsIso.hom_inv_id eX) (IsIso.inv_hom_id eX)
+    α hα
+  obtain ⟨β', hβ'O, hβ'e⟩ := pfRoot_otriFwd_sameRoot (F := F) hfi (inv eX ≫ φ ≫ eY) hφ'
+    (inv eX ≫ (α : X ⟶ X) ≫ eX) hα'
+  have hβO := oTri_conj (F := F) (inv eY) eY (IsIso.inv_hom_id eY) (IsIso.hom_inv_id eY)
+    β' hβ'O
+  have h1 : inv eX ≫ (φ ≫ eY ≫ (β' : _ ⟶ _))
+      = inv eX ≫ ((α : X ⟶ X) ≫ φ ≫ eY) := by
+    have h := hβ'e
+    simp only [Category.assoc] at h ⊢
+    rw [h]
+    simp only [Category.assoc, IsIso.hom_inv_id_assoc]
+  haveI : Epi (inv eX) := IsIso.epi_of_iso _
+  have h2 : φ ≫ eY ≫ (β' : _ ⟶ _) = (α : X ⟶ X) ≫ φ ≫ eY :=
+    (cancel_epi (inv eX)).mp h1
+  have hβe : (φ ≫ (eY ≫ (β' : _ ⟶ _) ≫ inv eY)) = ((α : X ⟶ X) ≫ φ) := by
+    calc φ ≫ (eY ≫ (β' : _ ⟶ _) ≫ inv eY)
+        = (φ ≫ eY ≫ (β' : _ ⟶ _)) ≫ inv eY := by simp only [Category.assoc]
+      _ = ((α : X ⟶ X) ≫ φ ≫ eY) ≫ inv eY := by rw [h2]
+      _ = (α : X ⟶ X) ≫ φ := by
+          simp only [Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+  refine ⟨eY ≫ (β' : _ ⟶ _) ≫ inv eY, ⟨hβO, hβe⟩, ?_⟩
+  rintro y ⟨-, hy⟩
+  haveI : Epi φ := pfRoot_totEpi P F _ _ φ
+  exact (cancel_epi φ).mp (hy.trans hβe.symm)
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (iii)(c)** の逆方向、`𝒞^pf` 版。 -/
+theorem pfRoot_otriBwd (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (φ : X ⟶ Y) (_hφc : IsCoAngular (pfRootPre P F) φ)
+    (hφs : IsPreStep (pfRootPre P F) φ) (β : End Y) (hβ : β ∈ OTri (pfRootPre P F) Y) :
+    ∃! α : End X, α ∈ OTri (pfRootPre P F) X ∧
+      ((φ ≫ (β : Y ⟶ Y)) = ((α : X ⟶ X) ≫ φ)) := by
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root Y.root
+    (X.root * Y.root) rfl
+  obtain ⟨eY, hYiso⟩ := pfRoot_exists_iso_root (F := F) Y.obj Y.root X.root
+    (X.root * Y.root) (mul_comm _ _)
+  haveI := hXiso
+  haveI := hYiso
+  have hφ' : IsPreStep (pfRootPre P F) (inv eX ≫ φ ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφs (isPreStep_of_isIso (pfRootPre P F) eY))
+  have hβ' := oTri_conj (F := F) eY (inv eY) (IsIso.hom_inv_id eY) (IsIso.inv_hom_id eY)
+    β hβ
+  obtain ⟨α', hα'O, hα'e⟩ := pfRoot_otriBwd_sameRoot (F := F) hfi (inv eX ≫ φ ≫ eY) hφ'
+    (inv eY ≫ (β : Y ⟶ Y) ≫ eY) hβ'
+  have hαO := oTri_conj (F := F) (inv eX) eX (IsIso.inv_hom_id eX) (IsIso.hom_inv_id eX)
+    α' hα'O
+  have h1 : inv eX ≫ (φ ≫ (β : Y ⟶ Y) ≫ eY)
+      = inv eX ≫ ((eX ≫ (α' : _ ⟶ _) ≫ inv eX) ≫ φ ≫ eY) := by
+    have h := hα'e
+    simp only [Category.assoc, IsIso.hom_inv_id_assoc] at h
+    simp only [Category.assoc, IsIso.inv_hom_id_assoc]
+    exact h
+  haveI : Epi (inv eX) := IsIso.epi_of_iso _
+  have h2 : φ ≫ (β : Y ⟶ Y) ≫ eY = (eX ≫ (α' : _ ⟶ _) ≫ inv eX) ≫ φ ≫ eY :=
+    (cancel_epi (inv eX)).mp h1
+  haveI : Mono eY := IsIso.mono_of_iso _
+  have hαe : (φ ≫ (β : Y ⟶ Y)) = ((eX ≫ (α' : _ ⟶ _) ≫ inv eX) ≫ φ) := by
+    refine (cancel_mono eY).mp ?_
+    simp only [Category.assoc]
+    simp only [Category.assoc] at h2
+    exact h2
+  refine ⟨eX ≫ (α' : _ ⟶ _) ≫ inv eX, ⟨hαO, hαe⟩, ?_⟩
+  rintro y ⟨-, hy⟩
+  haveI : Mono φ := pfRoot_preStepMono (F := F) φ hφs
+  exact (cancel_mono φ).mp (hy.symm.trans hαe)
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (iii)(c)** の第 3 条、`𝒞^pf` 版。 -/
+theorem pfRoot_otriBase (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (φ φ' : X ⟶ Y) (_hφc : IsCoAngular (pfRootPre P F) φ)
+    (hφs : IsPreStep (pfRootPre P F) φ) (_hφ'c : IsCoAngular (pfRootPre P F) φ')
+    (hφ's : IsPreStep (pfRootPre P F) φ')
+    (hbase : (pfRootPre P F).Base φ = (pfRootPre P F).Base φ')
+    (α : End X) (hα : α ∈ OTri (pfRootPre P F) X)
+    (β : End Y) (hβ : β ∈ OTri (pfRootPre P F) Y)
+    (heq : (φ ≫ (β : Y ⟶ Y)) = ((α : X ⟶ X) ≫ φ)) :
+    (φ' ≫ (β : Y ⟶ Y)) = ((α : X ⟶ X) ≫ φ') := by
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root Y.root
+    (X.root * Y.root) rfl
+  obtain ⟨eY, hYiso⟩ := pfRoot_exists_iso_root (F := F) Y.obj Y.root X.root
+    (X.root * Y.root) (mul_comm _ _)
+  haveI := hXiso
+  haveI := hYiso
+  have hψ : IsPreStep (pfRootPre P F) (inv eX ≫ φ ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφs (isPreStep_of_isIso (pfRootPre P F) eY))
+  have hψ' : IsPreStep (pfRootPre P F) (inv eX ≫ φ' ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφ's (isPreStep_of_isIso (pfRootPre P F) eY))
+  have hbase' : (pfRootPre P F).Base (inv eX ≫ φ ≫ eY)
+      = (pfRootPre P F).Base (inv eX ≫ φ' ≫ eY) := by
+    rw [(pfRootPre P F).Base_comp, (pfRootPre P F).Base_comp,
+      (pfRootPre P F).Base_comp, (pfRootPre P F).Base_comp, hbase]
+  have hα' := oTri_conj (F := F) eX (inv eX) (IsIso.hom_inv_id eX) (IsIso.inv_hom_id eX)
+    α hα
+  have hβ' := oTri_conj (F := F) eY (inv eY) (IsIso.hom_inv_id eY) (IsIso.inv_hom_id eY)
+    β hβ
+  have heq' : ((inv eX ≫ φ ≫ eY) ≫ (inv eY ≫ (β : Y ⟶ Y) ≫ eY))
+      = ((inv eX ≫ (α : X ⟶ X) ≫ eX) ≫ (inv eX ≫ φ ≫ eY)) := by
+    simp only [Category.assoc, IsIso.hom_inv_id_assoc, IsIso.inv_hom_id_assoc]
+    have h3 : (φ ≫ (β : Y ⟶ Y)) ≫ eY = ((α : X ⟶ X) ≫ φ) ≫ eY :=
+      congrArg (fun t => t ≫ eY) heq
+    simp only [Category.assoc] at h3
+    exact congrArg (fun t => inv eX ≫ t) h3
+  have hres := pfRoot_otriBase_sameRoot (F := F) hfi (inv eX ≫ φ ≫ eY)
+    (inv eX ≫ φ' ≫ eY) hψ hψ' hbase' (inv eX ≫ (α : X ⟶ X) ≫ eX) hα'
+    (inv eY ≫ (β : Y ⟶ Y) ≫ eY) hβ' heq'
+  simp only [Category.assoc, IsIso.hom_inv_id_assoc, IsIso.inv_hom_id_assoc] at hres
+  haveI : Epi (inv eX) := IsIso.epi_of_iso _
+  haveI : Mono eY := IsIso.mono_of_iso _
+  refine (cancel_mono eY).mp ?_
+  refine (cancel_epi (inv eX)).mp ?_
+  simp only [Category.assoc]
+  exact hres
+
 end ABC3.Found.FrdI
