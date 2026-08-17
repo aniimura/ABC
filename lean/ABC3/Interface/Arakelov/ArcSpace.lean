@@ -67,6 +67,29 @@ structure ArcSpaceData where
   conj_involutive : ∀ (X : Scheme.{0}) (p : Arc X), conj X (conj X p) = p
   /-- ★`ι_X` は連続。 -/
   conj_continuous : ∀ (X : Scheme.{0}), @Continuous _ _ (topology X) (topology X) (conj X)
+  /-- ★★★**台は複素点の集合そのもの**——これを言わないと `Arc` は何でもよくなる。
+
+  ★`Interface/` は `Found/` を import できないので、`complexPoints` を参照せず
+  ここに書き下す(中身は同じ)。 -/
+  equivComplexPoints : (X : Scheme.{0}) → Arc X ≃ (Spec (CommRingCat.of ℂ) ⟶ X)
+  /-- ★アフィン `Spec A` の点における、切断 `a : A` の**評価** `a(p) ∈ ℂ`。 -/
+  evalAffine : (A : CommRingCat.{0}) → Arc (Spec A) → A → ℂ
+  /-- ★★★**位相を固定する(その 1)**——アフィンでは**各点収束の位相**である。
+
+  ★★★これが無いと**離散位相で埋まってしまう**
+  (`conj_continuous` は離散位相なら自明に成り立つ)。
+  ★原文の `X^arc` は複素多様体の位相であって、離散ではない。 -/
+  topology_affine : ∀ A : CommRingCat.{0},
+    topology (Spec A) = TopologicalSpace.induced (evalAffine A) Pi.topologicalSpace
+  /-- 射に沿った複素点の移送。 -/
+  map : {X Y : Scheme.{0}} → (X ⟶ Y) → Arc X → Arc Y
+  /-- ★★★**位相を固定する(その 2)**——開埋め込みは位相を誘導する。
+
+  ★★アフィンだけを縛っても、貼り合わせた `X`(例えば `ℙⁿ`)の位相は決まらない。
+  ★開被覆に沿って誘導であることを課すと、そこも決まる。
+  ★★★これが無いと、射影的な `X` で**密着位相**が通ってしまう。 -/
+  topology_openImmersion : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y), IsOpenImmersion f →
+    topology X = TopologicalSpace.induced (map f) (topology Y)
 
 def ArcSpaceData.waiting : WaitingFor :=
   { what := "(C1) X^arc(複素点のなす位相空間)とその複素共役 ι_X"
