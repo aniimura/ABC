@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
 import Mathlib.RingTheory.ClassGroup.Basic
+import Mathlib.RingTheory.PicardGroup
 import Mathlib.NumberTheory.NumberField.Basic
 
 /-!
@@ -63,6 +64,14 @@ structure PicardData where
   /-- ★引き戻しは関手的(合成)。 -/
   pullback_comp : ∀ {X Y Z : Scheme.{0}} (f : X ⟶ Y) (g : Y ⟶ Z) (L : Pic Z),
     pullback (f ≫ g) L = pullback f (pullback g L)
+  /-- ★★★**アフィンでは mathlib の `Pic R` と一致する**。
+
+  ★★★**これが退化を殺す。**`Pic := PUnit`(自明群)では
+  `Pic (Spec ℤ[√-5]) ≃* Pic ℤ[√-5]`(位数 2)が成り立たない。
+  ★mathlib の `Mathlib/RingTheory/PicardGroup.lean` に `Pic R` と
+  `ClassGroup.equivPic` があるので、これは**書ける条件**である。 -/
+  equivPicRing : (R : CommRingCat.{0}) →
+    letI := (group (Spec R)); Pic (Spec R) ≃* CommRing.Pic R
 
 /-- Track B は何を作らねばならないか。 -/
 def PicardData.waiting : WaitingFor :=
