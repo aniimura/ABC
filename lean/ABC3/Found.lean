@@ -92,6 +92,7 @@ import ABC3.Found.GenEll.ConductorHeight
 import ABC3.Found.GenEll.ArchBound
 import ABC3.Found.GenEll.ProjClosed
 import ABC3.Found.GenEll.CompactBound
+import ABC3.Found.GenEll.ArcModel
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
