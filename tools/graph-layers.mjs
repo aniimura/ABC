@@ -230,48 +230,6 @@ const adj = new Map(), page = new Map();
   }
 }
 
-// ── Tarjan SCC(反復版) ────────────────────────────────────
-const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
-let idx = 0, nc = 0;
-for (const s of adj.keys()) {
-  if (index.has(s)) continue;
-  const work = [[s, 0]];
-  while (work.length) {
-    const fr = work[work.length - 1], v = fr[0];
-    if (fr[1] === 0) { index.set(v, idx); low.set(v, idx); idx++; stk.push(v); onstk.add(v); }
-    let rec = false;
-    const es = adj.get(v) ?? [];
-    for (let i = fr[1]; i < es.length; i++) {
-      const w = es[i]; if (!adj.has(w)) continue;
-      if (!index.has(w)) { fr[1] = i + 1; work.push([w, 0]); rec = true; break; }
-      else if (onstk.has(w)) low.set(v, Math.min(low.get(v), index.get(w)));
-    }
-    if (rec) continue;
-    if (low.get(v) === index.get(v)) { const c = nc++; while (true) { const w = stk.pop(); onstk.delete(w); comp.set(w, c); if (w === v) break; } }
-    work.pop();
-    if (work.length) { const p = work[work.length - 1][0]; low.set(p, Math.min(low.get(p), low.get(v))); }
-  }
-}
-const members = new Map();
-for (const [k, c] of comp) { if (!members.has(c)) members.set(c, []); members.get(c).push(k); }
-
-// 凝縮 DAG と層(左 0 = 依存なし)
-const cadj = new Map();
-for (const [v, es] of adj) {
-  const cv = comp.get(v); if (!cadj.has(cv)) cadj.set(cv, new Set());
-  for (const w of es) { const cw = comp.get(w); if (cw !== undefined && cw !== cv) cadj.get(cv).add(cw); }
-}
-for (const c of members.keys()) if (!cadj.has(c)) cadj.set(c, new Set());
-const memo = new Map();
-const layerOf = (c, st = new Set()) => {
-  if (memo.has(c)) return memo.get(c);
-  if (st.has(c)) return 0;
-  st.add(c); let d = 0;
-  for (const w of cadj.get(c) ?? []) d = Math.max(d, layerOf(w, st) + 1);
-  st.delete(c); memo.set(c, d); return d;
-};
-
-
 // ── ★★Interface の義務(構造体)を節点として合流させる ──────────────
 //   ★2026-08-17 追加。動機の実測: グラフの節点語彙は**原文の項目番号**なので、
 //   `GenEll Definition 1.1` に **8 本**の obligation がぶら下がっていても
@@ -321,6 +279,48 @@ const layerOf = (c, st = new Set()) => {
   console.log(`  Interface の義務を合流: ${added} 節点(埋まった ${done})/ 項目→義務の辺 ${edged}` +
     `(錨の無いもの ${unanchored} 件)`);
 }
+
+// ── Tarjan SCC(反復版) ────────────────────────────────────
+const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
+let idx = 0, nc = 0;
+for (const s of adj.keys()) {
+  if (index.has(s)) continue;
+  const work = [[s, 0]];
+  while (work.length) {
+    const fr = work[work.length - 1], v = fr[0];
+    if (fr[1] === 0) { index.set(v, idx); low.set(v, idx); idx++; stk.push(v); onstk.add(v); }
+    let rec = false;
+    const es = adj.get(v) ?? [];
+    for (let i = fr[1]; i < es.length; i++) {
+      const w = es[i]; if (!adj.has(w)) continue;
+      if (!index.has(w)) { fr[1] = i + 1; work.push([w, 0]); rec = true; break; }
+      else if (onstk.has(w)) low.set(v, Math.min(low.get(v), index.get(w)));
+    }
+    if (rec) continue;
+    if (low.get(v) === index.get(v)) { const c = nc++; while (true) { const w = stk.pop(); onstk.delete(w); comp.set(w, c); if (w === v) break; } }
+    work.pop();
+    if (work.length) { const p = work[work.length - 1][0]; low.set(p, Math.min(low.get(p), low.get(v))); }
+  }
+}
+const members = new Map();
+for (const [k, c] of comp) { if (!members.has(c)) members.set(c, []); members.get(c).push(k); }
+
+// 凝縮 DAG と層(左 0 = 依存なし)
+const cadj = new Map();
+for (const [v, es] of adj) {
+  const cv = comp.get(v); if (!cadj.has(cv)) cadj.set(cv, new Set());
+  for (const w of es) { const cw = comp.get(w); if (cw !== undefined && cw !== cv) cadj.get(cv).add(cw); }
+}
+for (const c of members.keys()) if (!cadj.has(c)) cadj.set(c, new Set());
+const memo = new Map();
+const layerOf = (c, st = new Set()) => {
+  if (memo.has(c)) return memo.get(c);
+  if (st.has(c)) return 0;
+  st.add(c); let d = 0;
+  for (const w of cadj.get(c) ?? []) d = Math.max(d, layerOf(w, st) + 1);
+  st.delete(c); memo.set(c, d); return d;
+};
+
 
 // ── 我々の位置(3層) ───────────────────────────────────────
 function walk(d, a = []) { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p, a); else if (p.endsWith('.lean')) a.push(p); } return a; }
