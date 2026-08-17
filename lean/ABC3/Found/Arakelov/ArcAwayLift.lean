@@ -309,6 +309,49 @@ theorem arcTopology_opensRange_awayι (A : CommRingCat.{0}) (s : A) :
   show (q ≫ (awayIsoOpensRange A s).inv) ≫ awayι A s = q ≫ ((awayι A s).opensRange).ι
   rw [Category.assoc, awayIsoOpensRange_inv_comp]
 
+/-! ## ★★★★開部分スキームへの持ち上げ(アフィン周囲、基本開集合の上で) -/
+
+/-- ★★**基本開集合から開部分スキーム `O` への持ち上げ**。
+
+★`opensRange ≤ O` のとき、`awayLift` を `O` の中へ送る。 -/
+noncomputable def liftToOpen (A : CommRingCat.{0}) (O : (Spec A).Opens) (g : A)
+    (hle : ((awayι A g).opensRange) ≤ O) (p : arcBasicOpen A g) :
+    Spec (CommRingCat.of ℂ) ⟶ O.toScheme :=
+  awayLift A g p ≫ (awayIsoOpensRange A g).hom ≫ (Spec A).homOfLE hle
+
+/-- ★★★**持ち上げてから `O.ι` と合成するともとに戻る**。 -/
+theorem liftToOpen_comp (A : CommRingCat.{0}) (O : (Spec A).Opens) (g : A)
+    (hle : ((awayι A g).opensRange) ≤ O) (p : arcBasicOpen A g) :
+    liftToOpen A O g hle p ≫ O.ι = p.1 := by
+  rw [liftToOpen, Category.assoc, Category.assoc, Scheme.homOfLE_ι,
+    awayIsoOpensRange_fac, awayLift_comp_awayι]
+
+/-- ★★★★**その持ち上げは連続である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★機構は `continuous_awayLift`(基本開集合の持ち上げ、既取得)と
+**固定した射との合成の連続性**(`continuous_comp_openImmersion`)。 -/
+theorem continuous_liftToOpen (A : CommRingCat.{0}) (O : (Spec A).Opens) (g : A)
+    (hle : ((awayι A g).opensRange) ≤ O) :
+    @Continuous _ _ (@instTopologicalSpaceSubtype _ _ (arcTopologyAffine A))
+      (arcTopology O.toScheme) (liftToOpen A O g hle) := by
+  letI := arcTopologyAffine A
+  letI := arcTopologyAffine (CommRingCat.of (Localization.Away g))
+  letI := arcTopology O.toScheme
+  have h : liftToOpen A O g hle
+      = (fun q : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away g)) =>
+          q ≫ ((awayIsoOpensRange A g).hom ≫ (Spec A).homOfLE hle))
+        ∘ (awayLift A g) := by
+    funext p
+    rw [liftToOpen]
+    exact (Category.assoc _ _ _).symm
+  rw [h]
+  refine Continuous.comp ?_ (continuous_awayLift A g)
+  rw [← arcTopology_spec (CommRingCat.of (Localization.Away g))]
+  exact continuous_comp_openImmersion _
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -334,6 +377,11 @@ def awayLift_comp_awayι.src : ABC3.Meta.Source :=
 def awayLift_eq_openLift.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——基本開集合の持ち上げが一般の持ち上げと一致すること)",
+    sectionId := "genell-def-1-1-i" }
+
+def continuous_liftToOpen.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——基本開集合から開部分スキームへの持ち上げの連続性)",
     sectionId := "genell-def-1-1-i" }
 
 def arcTopologyAffine_away.src : ABC3.Meta.Source :=
