@@ -163,6 +163,33 @@ theorem exists_imageAffineOpen {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion
   rw [imageAffineOpen_eq_affineOpensEquiv]
   exact congrArg Subtype.val ((IsOpenImmersion.affineOpensEquiv f).apply_symm_apply ⟨V, hV⟩)
 
+/-! ## ★★★同型の場合の `topology_openImmersion` -/
+
+/-- ★★★**同型に沿っては位相が誘導される**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これは `topology_openImmersion` の**同型の場合**である。
+★手順 4b で使う 3 本の同型(`isoSpec` / `Γ(U',D(g)) ≅ Away g` /
+`imageAffineOpenIso`)のうち、輸送の骨がこれである。
+
+★機構は簡単: 逆向きの合成 `(· ≫ e.inv)` が連続なので、
+像 `(· ≫ e.hom) '' V` は `(· ≫ e.inv) ⁻¹' V` に一致して開である。 -/
+theorem arcTopology_iso {X Y : Scheme.{0}} (e : X ≅ Y) :
+    arcTopology X
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ e.hom) (arcTopology Y) := by
+  letI := arcTopology X
+  letI := arcTopology Y
+  refine le_antisymm (continuous_iff_le_induced.1 (continuous_comp_openImmersion e.hom)) ?_
+  intro V hV
+  refine isOpen_induced_iff.2
+    ⟨(fun q : Spec (CommRingCat.of ℂ) ⟶ Y => q ≫ e.inv) ⁻¹' V, ?_, ?_⟩
+  · exact (continuous_comp_openImmersion e.inv).isOpen_preimage _ hV
+  · ext p
+    simp only [Set.mem_preimage, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def imageAffineOpen.src : ABC3.Meta.Source :=
@@ -183,6 +210,11 @@ def continuous_comp_openImmersion.src : ABC3.Meta.Source :=
 def comp_openImmersion_injective.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開埋め込みとの合成が単射であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcTopology_iso.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——同型に沿って位相が誘導されること)",
     sectionId := "genell-def-1-1-i" }
 
 def exists_imageAffineOpen.src : ABC3.Meta.Source :=
