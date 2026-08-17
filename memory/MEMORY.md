@@ -19,3 +19,4 @@
 - [F.map g は平の射へ束縛し直す](lean-rebind-morphisms-clean-types.md) — `(F.obj A)` と `A` は構文が違うので `≫` の型検査が落ち、巻き添えで `IsIso (𝟙 X)` すら合成できなくなる。`obtain ⟨aa, haa⟩ : ∃ aa : X ⟶ Y, aa = F.map g := ⟨_, rfl⟩`。
 - [heredoc はバックスラッシュを 1 段食う](heredoc-eats-backslash.md) — `<<'EOF'` でも。`` がバックスペース文字(0x08)になり、正規表現が静かに一致しなくなる。器具が嘘の測定値を出した。Write/Edit を使う。
 - [形式化は葉から積む](leaf-first-with-graph-feedback.md) — 依存グラフの葉(層が小さいもの)から。途中で必要物が出たらスケルトンを足してグラフを更新し、新しい葉から再開する。★目的は「大きな塊を壁として認識しない」こと。2026-08-17 に Prop 3.2 を上から掘って**カウンタが 1 も動かなかった**実例つき。
+- [Lean の検査は MCP の lean_check で](lean-check-via-mcp-repl.md) — `lake env lean` はファイル全体を再検査する(3,800 行で数分)。`abc3-lean` MCP なら 0.01 秒。★ただし**確定は必ず `lake build`**(書いた順序・`variable`・リンタは build でしか出ない)。Windows では `repl.exe` を直に spawn してはならない(`lake env` 経由)。

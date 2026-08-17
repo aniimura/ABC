@@ -581,6 +581,34 @@ Cor 3.12 から後ろ向きに `Skeleton/` を展開。**この段階では G1�
 > `Proposition 3.2` は (iii)(d) の 2 本の圏同値・(ii) の辞書・perfect 型・
 > `𝒞^pf ≃ (𝒞^pf)^pf` を残しており、条なし `.src` に届かないからである。
 
+### ★Lean の検査規則 —— `lean_check` で 1 宣言ずつ、確定は `lake build`(2026-08-17 導入)
+
+★★**律速は検査である。** `lake env lean` は**ファイル全体を再検査する**ので、
+ファイルが育つほど 1 往復が重くなる。実測:
+
+| 検査のしかた | 1 往復 |
+|---|---|
+| `lake env lean ABC3/Found/FrdI/Prop32Frob.lean`(3,804 行) | **数分** |
+| `lake env lean ABC3/Found/FrdI/Example43.lean`(322 行) | **9 秒** |
+| `abc3-lean` MCP の `lean_check`(基準環境を再利用) | **0.01〜0.02 秒** |
+
+★**規則**:
+
+1. 書きかけの定理は **`lean_check` で 1 個ずつ**通す。
+   `lake env lean` でファイル全体を回さない。
+2. `import` の読み込みは `lean_start` でセッション中 1 回だけ
+   (冷たいときで約 90 秒・温まっていれば約 8 秒)。
+   ★**`olean` を作り直したら `lean_start` を呼び直す**。
+3. ★★**節目では必ず `lake build` を通す。** REPL は `olean` を読むだけなので、
+   **ファイルに書いた順序・`variable` の効き方・リンタは `lake build` でしか出ない**。
+   `lean_check` が通ったことを「ファイルが通った」と読まないこと。
+4. ゲート(`node tools/check.mjs`)はコミット前に必ず回す。
+
+★道具は `tools/mcp-lean/`(依存なしの Node サーバ)と `tools/lean-repl/`
+(`leanprover-community/repl` の `v4.31.0`、`git` からは無視)。`.mcp.json` で登録済み。
+★**ファイルを小さく割る**のも同じ方向の対策で、`lake build` の側には効き続けるので、
+1 ファイルが 1,000 行を超えたら分割を検討する。
+
 ### Phase 3 — 下から埋める
 
 `Interface` を Track B で本物にする。load-bearing なものから。実装1件ごとに上の skeleton 群が非空虚性の検査を受ける(§3)。ここで `Gap` が立ち始める(§5)。

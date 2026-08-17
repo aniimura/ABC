@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "abc3-lean": {
+      "command": "node",
+      "args": ["tools/mcp-lean/server.mjs"]
+    }
+  }
+}

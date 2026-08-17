@@ -319,4 +319,217 @@ theorem ex43_isIso_of_isPullBack {a b : Ex43} (f : a ⟶ b) (hf : IsPullBack ex4
   rw [hfid]
   infer_instance
 
+/-! ## ★7. 対象の等式に落ちる 2 つの補題
+
+★★`Example 4.3` では**同型は恒等射しかない**(圏は skeletal)。
+その源は「等長 pre-step も pull-back も対象を動かさない」ことである。 -/
+
+instance : Subsingleton (Discrete PUnit) :=
+  ⟨fun a b => by obtain ⟨x⟩ := a; obtain ⟨y⟩ := b; rfl⟩
+
+theorem ex43_eq_of_isometric_preStep {a b : Ex43} (f : a ⟶ b)
+    (hm : IsIsometric ex43P f) (hs : IsPreStep ex43P f) : a = b := by
+  have hd : f.deg = 1 := hs.1
+  have h2 := (ex43_isometric_iff f).mp hm
+  rw [hd] at h2
+  have h3 : a.val = b.val := by simpa using h2.symm
+  exact Ex43.ext h3
+
+theorem ex43_eq_of_isPullBack {a b : Ex43} (f : a ⟶ b) (hf : IsPullBack ex43P f) :
+    a = b := by
+  haveI := ex43_isIso_of_isPullBack f hf
+  exact ex43_eq_of_isometric_preStep f (isIsometric_of_isIso ex43P f)
+    (isPreStep_of_isIso ex43P f)
+
+theorem ex43_deg_of_isPullBack {a b : Ex43} (f : a ⟶ b) (hf : IsPullBack ex43P f) :
+    f.deg = 1 := by
+  haveI := ex43_isIso_of_isPullBack f hf
+  exact isLinear_of_isIso ex43P f
+
+/-- ★`𝒪^▷(a)` の元は恒等射だけ。 -/
+theorem ex43_oTri_eq_id {a : Ex43} (α : End a) (hα : α ∈ OTri ex43P a) :
+    α = 𝟙 a := Ex43.hom_ext (by rw [Ex43.id_deg]; exact hα.2)
+
+/-! ## ★8. (i)(c) —— `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` は圏同値
+
+★★pull-back 射は同型しかなく、同型は恒等射しかないので、
+**両辺とも「対象 1 個・射 1 本」の圏**である。 -/
+
+theorem ex43_plBkOver_faithful (A : Ex43) : (plBkOverFunctor ex43P A).Faithful where
+  map_injective {Z W} {f g} _ := by
+    refine Over.OverMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    exact Ex43.hom_ext (by
+      rw [ex43_deg_of_isPullBack _ f.left.property,
+        ex43_deg_of_isPullBack _ g.left.property])
+
+theorem ex43_plBkOver_full (A : Ex43) : (plBkOverFunctor ex43P A).Full := by
+  constructor
+  intro Z W h
+  have hZ : Z.left.obj = A := ex43_eq_of_isPullBack Z.hom.hom Z.hom.property
+  have hW : W.left.obj = A := ex43_eq_of_isPullBack W.hom.hom W.hom.property
+  have hval : Z.left.obj.val = W.left.obj.val := by rw [hZ, hW]
+  have hle : (((1 : ℕ+) : ℕ) : ℚ) * Z.left.obj.val ≤ W.left.obj.val := by
+    simpa using le_of_eq hval
+  obtain ⟨g, hgdeg⟩ : ∃ g : Z.left.obj ⟶ W.left.obj, g.deg = 1 :=
+    ⟨⟨1, hle⟩, rfl⟩
+  haveI : IsIso g :=
+    ex43_isIso_of_isometric_preStep g
+      ((ex43_isometric_iff g).mpr (by rw [hgdeg]; simpa using hval.symm))
+      ((ex43_isPreStep_iff g).mpr hgdeg)
+  have hgc : g ≫ W.hom.hom = Z.hom.hom :=
+    Ex43.hom_ext (by
+      rw [Ex43.comp_deg, hgdeg, mul_one,
+        ex43_deg_of_isPullBack _ W.hom.property,
+        ex43_deg_of_isPullBack _ Z.hom.property])
+  refine ⟨Over.homMk (show Z.left ⟶ W.left from ⟨g, isPullBack_of_isIso ex43P g⟩)
+    (WideSubcategory.hom_ext _ hgc), ?_⟩
+  exact Over.OverMorphism.ext (Subsingleton.elim _ _)
+
+theorem ex43_plBkOver_essSurj (A : Ex43) : (plBkOverFunctor ex43P A).EssSurj := by
+  refine ⟨fun T => ?_⟩
+  refine ⟨Over.mk (show (⟨A⟩ : PlBk ex43P) ⟶ ⟨A⟩ from
+    ⟨𝟙 A, isPullBack_of_isIso ex43P (𝟙 A)⟩), ⟨?_⟩⟩
+  exact Over.isoMk (eqToIso (Subsingleton.elim _ _)) (Subsingleton.elim _ _)
+
+theorem ex43_plBkEquiv (A : Ex43) : (plBkOverFunctor ex43P A).IsEquivalence :=
+  ⟨ex43_plBkOver_faithful A, ex43_plBkOver_full A, ex43_plBkOver_essSurj A⟩
+
+/-! ## ★9. `Definition 1.3` の 21 条
+
+原文 (FrdI p.82):
+> verifies immediately that C is a Frobenioid of isotropic type. Since D is clearly of
+-/
+
+/-- ★`0 ∈ ℚ` は Frobenius-trivial。 -/
+theorem ex43_frobTrivial_zero : IsFrobeniusTrivial ex43P (Ex43.mk 0) := by
+  refine ⟨{ toFun := fun n => (⟨n, by simp⟩ : End (Ex43.mk 0))
+            map_one' := Ex43.hom_ext rfl
+            map_mul' := fun x y => Ex43.hom_ext rfl }, fun n => rfl, fun n => ⟨?_, ?_⟩⟩
+  · exact Subsingleton.elim _ _
+  · refine (ex43_isFrobType_iff _).mpr ((ex43_isometric_iff _).mpr ?_)
+    simp
+
+/-- ★★★**`Example 4.3` の `𝒞` は `Definition 1.3` の 21 条を満たす**。 -/
+theorem ex43_core : FrobenioidCore ex43P where
+  baseSurj Y := ⟨Ex43.mk 0, ex43_frobTrivial_zero, ⟨eqToIso (Subsingleton.elim _ _)⟩⟩
+  preStepSpan A B α _ :=
+    ⟨Ex43.mk (min A.val B.val),
+      ⟨1, by simpa using min_le_left A.val B.val⟩,
+      ⟨1, by simpa using min_le_right A.val B.val⟩,
+      (ex43_isPreStep_iff _).mpr rfl, (ex43_isPreStep_iff _).mpr rfl,
+      Subsingleton.elim _ _⟩
+  plBkEquiv A := ex43_plBkEquiv A
+  frobDegSurj A n :=
+    ⟨Ex43.mk (((n : ℕ+) : ℕ) * A.val), ⟨n, by simp⟩,
+      (ex43_isFrobType_iff _).mpr ((ex43_isometric_iff _).mpr (by simp)), rfl⟩
+  frobDegUniq A B E φ ψ hφ hψ hdeg := by
+    have hB := (ex43_isometric_iff φ).mp ((ex43_isFrobType_iff φ).mp hφ)
+    have hE := (ex43_isometric_iff ψ).mp ((ex43_isFrobType_iff ψ).mp hψ)
+    have hdeg' : φ.deg = ψ.deg := hdeg
+    have hBE : B = E := Ex43.ext (by rw [hB, hE, hdeg'])
+    subst hBE
+    exact ⟨𝟙 B, inferInstance, Ex43.hom_ext (by
+      rw [Ex43.comp_deg, Ex43.id_deg, one_mul]; exact hdeg')⟩
+  coAngularComp _ _ _ _ := ex43_coAngular _
+  coAngularOfPreStep _ _ _ _ := ex43_coAngular _
+  otriFwd φ _ _ α hα := by
+    refine ⟨𝟙 _, ⟨(OTri ex43P _).one_mem, ?_⟩, ?_⟩
+    · rw [ex43_oTri_eq_id α hα, Category.comp_id, Category.id_comp]
+    · rintro y ⟨hy, -⟩
+      exact ex43_oTri_eq_id y hy
+  otriBwd φ _ _ β hβ := by
+    refine ⟨𝟙 _, ⟨(OTri ex43P _).one_mem, ?_⟩, ?_⟩
+    · rw [ex43_oTri_eq_id β hβ, Category.comp_id, Category.id_comp]
+    · rintro y ⟨hy, -⟩
+      exact ex43_oTri_eq_id y hy
+  otriBase φ φ' _ _ _ _ _ α hα β hβ _ := by
+    rw [ex43_oTri_eq_id α hα, ex43_oTri_eq_id β hβ, Category.comp_id, Category.id_comp]
+  arbFactor {A B} φ :=
+    ⟨Ex43.mk (((φ.deg : ℕ) : ℚ) * A.val), B,
+      ⟨φ.deg, by simp⟩, ⟨1, by simpa using Ex43Hom.cond φ⟩, 𝟙 B,
+      Ex43.hom_ext (by simp),
+      (ex43_isFrobType_iff _).mpr ((ex43_isometric_iff _).mpr (by simp)),
+      (ex43_isPreStep_iff _).mpr rfl,
+      isPullBack_of_isIso ex43P (𝟙 B)⟩
+  arbFactorUniq {A B} X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα' := by
+    have hαd : α.deg = 1 := ex43_deg_of_isPullBack α hα
+    have hα'd : α'.deg = 1 := ex43_deg_of_isPullBack α' hα'
+    have hβd : β.deg = 1 := hβ.1
+    have hβ'd : β'.deg = 1 := hβ'.1
+    have hdeg : γ.deg = γ'.deg := by
+      have hd := congrArg (fun t : A ⟶ B => Ex43Hom.deg t) heq
+      rw [Ex43.comp_deg, Ex43.comp_deg, Ex43.comp_deg, Ex43.comp_deg,
+        hαd, hα'd, hβd, hβ'd] at hd
+      simpa using hd
+    have hX : X = X' := by
+      have h1 := (ex43_isometric_iff γ).mp ((ex43_isFrobType_iff γ).mp hγ)
+      have h2 := (ex43_isometric_iff γ').mp ((ex43_isFrobType_iff γ').mp hγ')
+      exact Ex43.ext (by rw [h1, h2, hdeg])
+    have hY : Y = B := ex43_eq_of_isPullBack α hα
+    have hY' : Y' = B := ex43_eq_of_isPullBack α' hα'
+    subst hX
+    subst hY
+    subst hY'
+    refine ⟨Iso.refl _, Iso.refl _, Ex43.hom_ext ?_, Ex43.hom_ext ?_, Ex43.hom_ext ?_⟩
+    · rw [Ex43.comp_deg, hα'd, hαd]
+      simp
+    · rw [Ex43.comp_deg, Ex43.comp_deg, hβ'd, hβd]
+      simp
+    · rw [Ex43.comp_deg]
+      simp [← hdeg]
+  pullBackLB α hα := by
+    haveI := ex43_isIso_of_isPullBack α hα
+    exact ⟨⟨ex43_coAngular α, isIsometric_of_isIso ex43P α⟩, isLinear_of_isIso ex43P α⟩
+  preStepMono {A B} φ _ := by
+    refine ⟨fun {Z} g h hgh => Ex43.hom_ext ?_⟩
+    have hd := congrArg (fun t : Z ⟶ B => Ex43Hom.deg t) hgh
+    rw [Ex43.comp_deg, Ex43.comp_deg] at hd
+    exact mul_left_cancel hd
+  preStepFactor {A B} φ hφ :=
+    ⟨B, φ, 𝟙 B, (Category.comp_id φ).symm, ex43_coAngular φ, hφ,
+      isIsometric_of_isIso ex43P (𝟙 B), isPreStep_of_isIso ex43P (𝟙 B)⟩
+  preStepFactorUniq {A B} X X' β α β' α' heq _ _ hαm hαs _ _ hα'm hα's := by
+    have hαd : α.deg = 1 := hαs.1
+    have hα'd : α'.deg = 1 := hα's.1
+    have hd := congrArg (fun t : A ⟶ B => Ex43Hom.deg t) heq
+    rw [Ex43.comp_deg, Ex43.comp_deg, hαd, hα'd] at hd
+    have hd' : β.deg = β'.deg := by simpa using hd
+    have hX : X = B := ex43_eq_of_isometric_preStep α hαm hαs
+    have hX' : X' = B := ex43_eq_of_isometric_preStep α' hα'm hα's
+    subst hX
+    subst hX'
+    refine ⟨Iso.refl _, Ex43.hom_ext ?_, Ex43.hom_ext ?_⟩
+    · rw [hα'd, Ex43.comp_deg, hαd]
+      simp
+    · rw [Ex43.comp_deg]
+      simp [← hd']
+  preStepFactor' {A B} φ hφ :=
+    ⟨A, 𝟙 A, φ, (Category.id_comp φ).symm, isIsometric_of_isIso ex43P (𝟙 A),
+      isPreStep_of_isIso ex43P (𝟙 A), ex43_coAngular φ, hφ⟩
+  preStepFactorUniq' {A B} X X' β α β' α' heq hβm hβs _ _ hβ'm hβ's _ _ := by
+    have hβd : β.deg = 1 := hβs.1
+    have hβ'd : β'.deg = 1 := hβ's.1
+    have hd := congrArg (fun t : A ⟶ B => Ex43Hom.deg t) heq
+    rw [Ex43.comp_deg, Ex43.comp_deg, hβd, hβ'd] at hd
+    have hd' : α.deg = α'.deg := by simpa using hd
+    have hX : A = X := ex43_eq_of_isometric_preStep β hβm hβs
+    have hX' : A = X' := ex43_eq_of_isometric_preStep β' hβ'm hβ's
+    subst hX
+    subst hX'
+    refine ⟨Iso.refl _, Ex43.hom_ext ?_, Ex43.hom_ext ?_⟩
+    · rw [← hd']
+      simp
+    · rw [Ex43.comp_deg, hβ'd, hβd]
+      simp
+  faithfulUpToUnits {A B} φ ψ _ _ _ hφs _ hψs :=
+    ⟨1, (OTimes ex43P B).one_mem, Ex43.hom_ext (by
+      show φ.deg = (ψ ≫ 𝟙 B).deg
+      rw [Ex43.comp_deg, Ex43.id_deg, one_mul]
+      exact (show φ.deg = 1 from hφs.1).trans (show ψ.deg = 1 from hψs.1).symm)⟩
+  isotropicHullExists A :=
+    ⟨A, 𝟙 A, isIsometric_of_isIso ex43P (𝟙 A), isPreStep_of_isIso ex43P (𝟙 A),
+      ex43_isotropicType A, fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm,
+        fun y hy => by rw [hy, Category.id_comp]⟩⟩
+  isotropicClosed φ _ := ex43_isotropicType _
+
 end ABC3.Found.FrdI

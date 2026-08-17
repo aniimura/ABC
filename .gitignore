@@ -22,3 +22,6 @@ ResearchPaper/0_Source/
 
 # 別プロジェクトのファイル(誤って追跡されていた)
 rpr_acc_dth_rec_downstream.html
+
+# 第三者の Lean REPL(tools/mcp-lean が使う。v4.31.0 を clone してビルドする)
+tools/lean-repl/
