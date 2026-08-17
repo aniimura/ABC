@@ -392,4 +392,105 @@ theorem birat_isOfIsotropicType (hiso : ∀ X : C, IsIsotropic P X)
     exact birat_isIso_of_coaPre φ hφc hφs
   exact IsIso.of_isIso_comp_left ((toBiratCat P G).map Z.unop.hom.hom) (HomBirat.mk Z φ)
 
+/-! ## ★10. ★★★★[FrdI] Proposition 4.4, (ii) —— `𝒞 → 𝒞^birat` は忠実
+
+原文 (FrdI p.84):
+> C →Cbirat is faithful and determines an injection O▷(A)gp →O×(Abirat), for
+
+★★**帰納極限の等号判定 ＋ `𝒞` が totally epimorphic**、それだけである。 -/
+
+include P in
+theorem toBiratCat_faithful : (toBiratCat P G).Faithful where
+  map_injective {A B} {f g} h := by
+    obtain ⟨V, u, hu⟩ := HomBirat.eq_iff_same.mp h
+    haveI : Epi u.unop.left.hom := P.totEpiC _ _ _
+    exact (cancel_epi u.unop.left.hom).mp hu
+
+/-! ## ★11. ★★★★辞書の「同型 ⟹ co-angular pre-step」
+
+原文 (FrdI p.83):
+> morphism of a given Frobenius degree; isometry; pre-step; base-isomorphism) of
+
+★★**筋**(2026-08-17、紙の上で確定):
+1. 逆射の代表を `(b, χ)` と書くと、`[b] ≫ (逆射) = [χ]` なので `[χ ≫ φ] = [b]`。
+   ★**`𝒞 → 𝒞^birat` が忠実**(上)なので `χ ≫ φ = b`。
+2. `φ` を `Definition 1.3, (v), (b)` で `φ = β ≫ α`(`β` co-angular pre-step、
+   `α` **等長** pre-step)と分解する。
+3. ★★★**`b` の co-angular 性を分解 `b = (χ ≫ β) ≫ α ≫ 𝟙` に当てる** ——
+   真ん中が等長 pre-step、最後が線型かつ底同型なので、`α` は同型。
+4. よって `φ = β ≫ (同型)` は co-angular pre-step。
+
+★★**要点は 3** —— 「co-angular の定義は**真ん中の等長 pre-step が同型**」なので、
+`b` の co-angular 性が `φ` の等長部分をそのまま潰す。 -/
+
+include P in
+/-- ★★★**同型なら代表元は co-angular pre-step** —— 辞書の「同型」の `⟹`。 -/
+theorem birat_coaPre_of_isIso {A B : C} (φ : A ⟶ B)
+    (hiso : IsIso ((toBiratCat P G).map φ)) :
+    IsCoAngular P φ ∧ IsPreStep P φ := by
+  haveI := hiso
+  haveI := toBiratCat_faithful (P := P) (G := G)
+  -- ★段 0: `φ` は pre-step
+  have hdeg : P.degFr φ = 1 := by
+    have h := biratDeg_toHomBirat (P := P) (G := G) φ
+    have h1 : biratDeg ((toBiratCat P G).map φ) = 1 := by
+      have := degFr_of_isIso (biratPre P G) ((toBiratCat P G).map φ)
+      exact this
+    rw [← h]; exact h1
+  have hbase : IsBaseIsomorphism P φ := by
+    have h1 : IsIso ((biratPre P G).Base ((toBiratCat P G).map φ)) :=
+      isBaseIsomorphism_of_isIso (biratPre P G) ((toBiratCat P G).map φ)
+    show IsIso (P.Base φ)
+    rw [← biratBase_toHomBirat (P := P) (G := G) φ]
+    exact h1
+  have hφs : IsPreStep P φ := ⟨hdeg, hbase⟩
+  -- ★段 1: 逆射の代表から `χ ≫ φ = b`
+  obtain ⟨g, hg1, hg2⟩ := hiso.out
+  obtain ⟨W, χ, hWχ⟩ := HomBirat.exists_rep (P := P) (G := G) g
+  have hb : χ ≫ φ = W.unop.hom.hom := by
+    refine (toBiratCat P G).map_injective ?_
+    have hstep : (toBiratCat P G).map W.unop.hom.hom ≫ g = (toBiratCat P G).map χ := by
+      refine Eq.trans ?_ (birat_toHom_comp_mk W.unop.hom.hom W.unop.hom.property.1
+        W.unop.hom.property.2 χ)
+      rw [← hWχ]
+      rfl
+    have h2 : (toBiratCat P G).map χ ≫ (toBiratCat P G).map φ
+        = (toBiratCat P G).map W.unop.hom.hom :=
+      calc (toBiratCat P G).map χ ≫ (toBiratCat P G).map φ
+          = ((toBiratCat P G).map W.unop.hom.hom ≫ g) ≫ (toBiratCat P G).map φ :=
+            congrArg (fun t => t ≫ (toBiratCat P G).map φ) hstep.symm
+        _ = (toBiratCat P G).map W.unop.hom.hom ≫ (g ≫ (toBiratCat P G).map φ) :=
+            Category.assoc _ _ _
+        _ = (toBiratCat P G).map W.unop.hom.hom ≫ 𝟙 _ :=
+            congrArg (fun t => (toBiratCat P G).map W.unop.hom.hom ≫ t) hg2
+        _ = (toBiratCat P G).map W.unop.hom.hom := Category.comp_id _
+    rw [← (toBiratCat P G).map_comp] at h2
+    exact h2
+  -- ★段 2: `φ` を分解する
+  obtain ⟨X, β, α, heq, hβc, hβs, hαi, hαs⟩ := G.core.preStepFactor φ hφs
+  -- ★段 3: `b` の co-angular 性で `α` は同型
+  have hbc : IsCoAngular P W.unop.hom.hom := W.unop.hom.property.1
+  haveI hαiso : IsIso α := by
+    refine hbc X B (χ ≫ β) α (𝟙 B) ?_ ?_ hαi hαs ?_
+    · calc W.unop.hom.hom = χ ≫ φ := hb.symm
+        _ = χ ≫ (β ≫ α) := congrArg (fun t => χ ≫ t) heq
+        _ = (χ ≫ β) ≫ α := (Category.assoc _ _ _).symm
+        _ = (χ ≫ β) ≫ α ≫ 𝟙 B := by rw [Category.comp_id]
+    · exact isLinear_of_isIso P (𝟙 B)
+    · exact Or.inl (isBaseIsomorphism_of_isIso P (𝟙 B))
+  -- ★段 4: `φ = β ≫ (同型)`
+  refine ⟨?_, hφs⟩
+  rw [heq]
+  exact IsCoAngular.comp P G.core hβc (isCoAngular_of_isIso P α)
+
+include P in
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の「同型」の条** ——
+`𝒞` の射が `𝒞^birat` で同型になるのは、ちょうど **co-angular pre-step** のとき。
+
+原文 (FrdI p.83):
+> morphism of a given Frobenius degree; isometry; pre-step; base-isomorphism) of -/
+theorem birat_isIso_iff {A B : C} (φ : A ⟶ B) :
+    IsIso ((toBiratCat P G).map φ) ↔ (IsCoAngular P φ ∧ IsPreStep P φ) :=
+  ⟨birat_coaPre_of_isIso φ, fun h => birat_isIso_of_coaPre φ h.1 h.2⟩
+
 end ABC3.Found.FrdI
