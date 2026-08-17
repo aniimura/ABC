@@ -90,29 +90,74 @@ def TateCurveData.waiting : WaitingFor :=
 
 /-! ## ★★G7 —— 半安定還元とモデル -/
 
-/-- **(G7)** 半安定還元と、数体の整数環 `𝓞_L` 上への延長。
+/-- **半安定**であること —— 離散付値環 `R` の上で**良還元または乗法還元**。
 
 原文 (GenEll p.15):
 > Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
 
-★★原文は「`E` は `L` のすべての有限素点で半安定還元をもつ」を繰り返し仮定する。
-★その意味を与えるのが本 obligation である。 -/
+★★★**posit ではなく mathlib の還元型による定義である。**
+`Reduction.lean` の三分律(良・乗法・加法)のうち加法還元を除いたものが半安定。 -/
+def IsSemiStableAt (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [W.IsMinimal R] : Prop :=
+  W.HasGoodReduction R ∨ W.HasMultiplicativeReduction R
+
+/-- ★半安定とは「加法還元でない」ことである(三分律から)。 -/
+theorem isSemiStableAt_iff_not_additive (R : Type) [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [W.IsMinimal R] :
+    IsSemiStableAt R W ↔ ¬ W.HasAdditiveReduction R := by
+  constructor
+  · rintro (h | h)
+    · exact h.not_hasAdditiveReduction
+    · exact h.not_hasAdditiveReduction
+  · intro h
+    rcases WeierstrassCurve.hasGoodReduction_or_hasMultiplicativeReduction_or_hasAdditiveReduction
+      R (W := W) with hg | hm | ha
+    · exact Or.inl hg
+    · exact Or.inr hm
+    · exact absurd ha h
+
+/-- **(G7)** 半安定還元と、`𝓞_L` 上への延長が与える **Néron 微分** `ω_E`。
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+★★原文は「`E` は `L` のすべての有限素点で半安定還元をもつ」を繰り返し仮定し、
+そこから `𝓞_L` 上の 1 次元半アーベルスキームへの延長を得る。
+
+★★★**その延長が使われるのは `ω_E` を作るためだけ**である
+(`Proposition 3.4` の `ht^Falt = deg(ω_E)`)。ゆえに `ω_E` を型に出す。
+
+★★★**`ω_E` は階数 1** —— これが退化(`PUnit` は階数 0)を殺す。 -/
 structure SemistableModelData where
   /-- 台となる Tate 曲線。 -/
   toTateCurveData : TateCurveData
-  /-- `E_L` が `L` のすべての有限素点で半安定還元をもつこと。 -/
+  /-- ★★**Néron 微分** `ω_E` —— `𝓞_L` 上の加群。 -/
+  omega : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Type
+  /-- 加法群の構造。 -/
+  omegaAddCommGroup : (L : Type) → [Field L] → [NumberField L] →
+    (W : WeierstrassCurve L) → AddCommGroup (omega L W)
+  /-- `𝓞_L` 加群の構造。 -/
+  omegaModule : (L : Type) → [inst : Field L] → [instN : NumberField L] →
+    (W : WeierstrassCurve L) →
+    @Module (𝓞 L) (omega L W) _ (omegaAddCommGroup L W).toAddCommMonoid
+  /-- ★★★**階数 1**(可逆加群)——これが退化を殺す。 -/
+  omega_rank_one : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
+    @Module.rank (𝓞 L) (omega L W) _ (omegaAddCommGroup L W).toAddCommMonoid
+      (omegaModule L W) = 1
+  /-- 大域の半安定性(原文が繰り返し仮定するもの)。 -/
   SemiStable : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Prop
-  /-- ★★`𝓞_L` 上の 1 次元半アーベルスキームへの延長。 -/
-  ExtendsToOL : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Prop
-  /-- ★半安定なら `𝓞_L` 上へ延びる。 -/
-  semiStable_extends : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L),
-    SemiStable L E → ExtendsToOL L E
-  /-- ★★**同種な曲線も半安定**(原文が `E_H = E/H` について使う)。 -/
-  semiStable_isogeny : (L : Type) → [Field L] → [NumberField L] →
-    WeierstrassCurve L → WeierstrassCurve L → Prop
+  /-- ★★★**その意味を固定する**——各離散付値環の上で半安定であること。
+
+  ★これがあるので `SemiStable := True` のような自由な posit にはならない。 -/
+  semiStable_iff : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
+    SemiStable L W ↔
+      ∀ (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+        [Algebra R L] [IsFractionRing R L] [W.IsMinimal R], IsSemiStableAt R W
 
 def SemistableModelData.waiting : WaitingFor :=
-  { what := "(G7) 半安定還元の定義と、𝓞_L 上の 1 次元半アーベルスキームへの延長"
+  { what := "(G7) 半安定還元(★mathlib の還元型で定義済——posit ではない)と、𝓞_L 上への延長が与える階数 1 の Néron 微分 omega_E"
     trackB := "Found/GaloisRep — ★mathlib は `AlgebraicGeometry/EllipticCurve/Reduction.lean` を持つ(2026-08-17 実測)が、**Néron モデル・半アーベルスキームは無い**。★★原文は延長の存在を [FC] Chapter I, Proposition 2.7 に帰している" }
 
 /-! ## ★★★G8 —— Faltings 高さ(Arakelov 側との合流点) -/
