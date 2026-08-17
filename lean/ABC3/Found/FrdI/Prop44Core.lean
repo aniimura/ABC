@@ -1,0 +1,194 @@
+import ABC3.Found.FrdI.Prop44Pre
+
+/-!
+# [FrdI] Proposition 4.4, (ii) —— `𝒞^birat` の `FrobenioidCore` を埋める
+
+原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.85。
+
+原文 (FrdI p.85):
+> exercise to check that Cbirat is, in fact, a Frobenioid of group-like type. Moreover, it
+
+★★**要は「`𝒞^birat` の co-angular pre-step はすべて同型」**
+(`birat_isIso_of_coaPre_birat`、`Prop44Pre.lean`)である。
+★`Definition 1.3` の (iii)(c)・(v)(b)(c)・(vi) はどれも co-angular pre-step についての
+条件なので、それが同型に潰れると**ほぼ自明**になる。
+
+## ★本ファイルで埋まる 6 条(測定、2026-08-17)
+
+| 条 | フィールド | 手 |
+|---|---|---|
+| (v)(b) | `preStepFactor` | ★`φ = 𝟙 ≫ φ`(等長は `𝒞^birat` で自動) |
+| (v)(b) | `preStepFactorUniq` | ★`γ := β⁻¹ ≫ β'`(`β`・`β'` は同型) |
+| (v)(c) | `preStepFactor'` | ★`φ = φ ≫ 𝟙` |
+| (v)(c) | `preStepFactorUniq'` | ★`γ := α ≫ α'⁻¹` |
+| (vi) | `faithfulUpToUnits` | ★`α := ψ⁻¹ ≫ φ` |
+| (i)(b) | `preStepSpan` | ★`𝒞` のものを押し出す(pre-step は渡る) |
+
+★★**`inv` は使わない** —— `IsIso.out` で逆射を平の射として取り出す
+(`lean-rebind-morphisms-clean-types` の規則)。
+-/
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory
+
+universe v u w u2 v2
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) (G : Frobenioid P)
+
+/-! ## ★0. 逆射を平の射として取り出す -/
+
+include P in
+/-- ★**co-angular pre-step の逆射**(平の射として)。 -/
+theorem birat_coaPre_inv {X Y : BiratCat P G} (f : X ⟶ Y)
+    (hc : IsCoAngular (biratPre P G) f) (hs : IsPreStep (biratPre P G) f) :
+    ∃ f' : Y ⟶ X, f ≫ f' = 𝟙 X ∧ f' ≫ f = 𝟙 Y :=
+  (birat_isIso_of_coaPre_birat f hc hs).out
+
+include P in
+/-- ★**同型の Frobenius 次数は 1**(平の射の形で)。 -/
+theorem birat_degFr_of_inv {X Y : BiratCat P G} {f : X ⟶ Y} {f' : Y ⟶ X}
+    (h : f ≫ f' = 𝟙 X) (hf : (biratPre P G).degFr f = 1) :
+    (biratPre P G).degFr f' = 1 := by
+  have h1 := congrArg (biratPre P G).degFr h
+  rw [(biratPre P G).degFr_comp, hf, mul_one, (biratPre P G).degFr_id] at h1
+  exact h1
+
+include P in
+/-- ★**同型の底は逆向きの底**(平の射の形で)。 -/
+theorem birat_base_of_inv {X Y : BiratCat P G} {f : X ⟶ Y} {f' : Y ⟶ X}
+    (h : f' ≫ f = 𝟙 Y) :
+    (biratPre P G).Base f' ≫ (biratPre P G).Base f = 𝟙 _ := by
+  have h1 := congrArg (biratPre P G).Base h
+  rw [(biratPre P G).Base_comp, (biratPre P G).Base_id] at h1
+  exact h1
+
+/-! ## ★1. (v)(b)(c) —— pre-step の 2 通りの分解 -/
+
+include P in
+theorem birat_preStepFactor {A B : BiratCat P G} (φ : A ⟶ B)
+    (hφ : IsPreStep (biratPre P G) φ) :
+    ∃ (X : BiratCat P G) (β : A ⟶ X) (α : X ⟶ B),
+      φ = β ≫ α ∧ IsCoAngular (biratPre P G) β ∧ IsPreStep (biratPre P G) β
+        ∧ IsIsometric (biratPre P G) α ∧ IsPreStep (biratPre P G) α :=
+  ⟨A, 𝟙 A, φ, (Category.id_comp φ).symm,
+    isCoAngular_of_isIso (biratPre P G) (𝟙 A),
+    isPreStep_of_isIso (biratPre P G) (𝟙 A), birat_isIsometric φ, hφ⟩
+
+include P in
+theorem birat_preStepFactor' {A B : BiratCat P G} (φ : A ⟶ B)
+    (hφ : IsPreStep (biratPre P G) φ) :
+    ∃ (X : BiratCat P G) (β : A ⟶ X) (α : X ⟶ B),
+      φ = β ≫ α ∧ IsIsometric (biratPre P G) β ∧ IsPreStep (biratPre P G) β
+        ∧ IsCoAngular (biratPre P G) α ∧ IsPreStep (biratPre P G) α :=
+  ⟨B, φ, 𝟙 B, (Category.comp_id φ).symm, birat_isIsometric φ, hφ,
+    isCoAngular_of_isIso (biratPre P G) (𝟙 B), isPreStep_of_isIso (biratPre P G) (𝟙 B)⟩
+
+/-! ## ★2. (v)(b)(c) の一意性 —— co-angular 部分が同型だから
+
+★★**`γ` は「同型どうしの繋ぎ替え」で作れる。** -/
+
+include P in
+theorem birat_preStepFactorUniq {A B : BiratCat P G} (X X' : BiratCat P G)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (hβc : IsCoAngular (biratPre P G) β) (hβs : IsPreStep (biratPre P G) β)
+    (_hαi : IsIsometric (biratPre P G) α) (_hαs : IsPreStep (biratPre P G) α)
+    (hβ'c : IsCoAngular (biratPre P G) β') (hβ's : IsPreStep (biratPre P G) β')
+    (_hα'i : IsIsometric (biratPre P G) α') (_hα's : IsPreStep (biratPre P G) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨b, hb1, hb2⟩ := birat_coaPre_inv P G β hβc hβs
+  obtain ⟨b', hb'1, hb'2⟩ := birat_coaPre_inv P G β' hβ'c hβ's
+  refine ⟨⟨b ≫ β', b' ≫ β, ?_, ?_⟩, ?_, ?_⟩
+  · calc (b ≫ β') ≫ (b' ≫ β) = b ≫ ((β' ≫ b') ≫ β) := by simp only [Category.assoc]
+      _ = b ≫ (𝟙 A ≫ β) := by rw [hb'1]
+      _ = b ≫ β := by rw [Category.id_comp]
+      _ = 𝟙 X := hb2
+  · calc (b' ≫ β) ≫ (b ≫ β') = b' ≫ ((β ≫ b) ≫ β') := by simp only [Category.assoc]
+      _ = b' ≫ (𝟙 A ≫ β') := by rw [hb1]
+      _ = b' ≫ β' := by rw [Category.id_comp]
+      _ = 𝟙 X' := hb'2
+  · calc α' = 𝟙 X' ≫ α' := (Category.id_comp α').symm
+      _ = (b' ≫ β') ≫ α' := by rw [hb'2]
+      _ = b' ≫ (β' ≫ α') := Category.assoc _ _ _
+      _ = b' ≫ (β ≫ α) := by rw [heq]
+      _ = (b' ≫ β) ≫ α := (Category.assoc _ _ _).symm
+  · calc β' = 𝟙 A ≫ β' := (Category.id_comp β').symm
+      _ = (β ≫ b) ≫ β' := by rw [hb1]
+      _ = β ≫ (b ≫ β') := Category.assoc _ _ _
+
+include P in
+theorem birat_preStepFactorUniq' {A B : BiratCat P G} (X X' : BiratCat P G)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (_hβi : IsIsometric (biratPre P G) β) (_hβs : IsPreStep (biratPre P G) β)
+    (hαc : IsCoAngular (biratPre P G) α) (hαs : IsPreStep (biratPre P G) α)
+    (_hβ'i : IsIsometric (biratPre P G) β') (_hβ's : IsPreStep (biratPre P G) β')
+    (hα'c : IsCoAngular (biratPre P G) α') (hα's : IsPreStep (biratPre P G) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  obtain ⟨a, ha1, ha2⟩ := birat_coaPre_inv P G α hαc hαs
+  obtain ⟨a', ha'1, ha'2⟩ := birat_coaPre_inv P G α' hα'c hα's
+  refine ⟨⟨α ≫ a', α' ≫ a, ?_, ?_⟩, ?_, ?_⟩
+  · calc (α ≫ a') ≫ (α' ≫ a) = α ≫ ((a' ≫ α') ≫ a) := by simp only [Category.assoc]
+      _ = α ≫ (𝟙 B ≫ a) := by rw [ha'2]
+      _ = α ≫ a := by rw [Category.id_comp]
+      _ = 𝟙 X := ha1
+  · calc (α' ≫ a) ≫ (α ≫ a') = α' ≫ ((a ≫ α) ≫ a') := by simp only [Category.assoc]
+      _ = α' ≫ (𝟙 B ≫ a') := by rw [ha2]
+      _ = α' ≫ a' := by rw [Category.id_comp]
+      _ = 𝟙 X' := ha'1
+  · calc α' = α' ≫ 𝟙 B := (Category.comp_id α').symm
+      _ = α' ≫ (a ≫ α) := by rw [ha2]
+      _ = (α' ≫ a) ≫ α := (Category.assoc _ _ _).symm
+  · calc β' = β' ≫ 𝟙 X' := (Category.comp_id β').symm
+      _ = β' ≫ (α' ≫ a') := by rw [ha'1]
+      _ = (β' ≫ α') ≫ a' := (Category.assoc _ _ _).symm
+      _ = (β ≫ α) ≫ a' := by rw [heq]
+      _ = β ≫ (α ≫ a') := Category.assoc _ _ _
+
+/-! ## ★3. (vi) —— 単元を除く忠実性
+
+★★co-angular pre-step は同型なので、`α := ψ⁻¹ ≫ φ` が求める単元である。 -/
+
+include P in
+theorem birat_faithfulUpToUnits {A B : BiratCat P G} (φ ψ : A ⟶ B)
+    (hbe : BaseEquivalent (biratPre P G) φ ψ)
+    (_hme : MetricallyEquivalent (biratPre P G) φ ψ)
+    (hφc : IsCoAngular (biratPre P G) φ) (hφs : IsPreStep (biratPre P G) φ)
+    (hψc : IsCoAngular (biratPre P G) ψ) (hψs : IsPreStep (biratPre P G) ψ) :
+    ∃ α : End B, α ∈ OTimes (biratPre P G) B ∧ φ = ψ ≫ (α : B ⟶ B) := by
+  obtain ⟨p, hp1, hp2⟩ := birat_coaPre_inv P G φ hφc hφs
+  obtain ⟨q, hq1, hq2⟩ := birat_coaPre_inv P G ψ hψc hψs
+  refine ⟨q ≫ φ, ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · -- ★base-identity
+    show (biratPre P G).Base (q ≫ φ) = (biratPre P G).Base (𝟙 B)
+    rw [(biratPre P G).Base_comp, hbe, (biratPre P G).Base_id]
+    exact birat_base_of_inv P G hq2
+  · -- ★linear
+    show (biratPre P G).degFr (q ≫ φ) = 1
+    rw [(biratPre P G).degFr_comp,
+      show (biratPre P G).degFr φ = 1 from hφs.1,
+      show (biratPre P G).degFr q = 1 from birat_degFr_of_inv P G hq1 hψs.1, mul_one]
+  · -- ★単元
+    refine (CategoryTheory.isUnit_iff_isIso ((q ≫ φ : End B) : B ⟶ B)).mpr ?_
+    refine ⟨⟨p ≫ ψ, ?_, ?_⟩⟩
+    · calc (q ≫ φ) ≫ (p ≫ ψ) = q ≫ ((φ ≫ p) ≫ ψ) := by simp only [Category.assoc]
+        _ = q ≫ (𝟙 A ≫ ψ) := by rw [hp1]
+        _ = q ≫ ψ := by rw [Category.id_comp]
+        _ = 𝟙 B := hq2
+    · calc (p ≫ ψ) ≫ (q ≫ φ) = p ≫ ((ψ ≫ q) ≫ φ) := by simp only [Category.assoc]
+        _ = p ≫ (𝟙 A ≫ φ) := by rw [hq1]
+        _ = p ≫ φ := by rw [Category.id_comp]
+        _ = 𝟙 B := hp2
+  · -- ★`φ = ψ ≫ (q ≫ φ)`
+    calc φ = 𝟙 A ≫ φ := (Category.id_comp φ).symm
+      _ = (ψ ≫ q) ≫ φ := by rw [hq1]
+      _ = ψ ≫ (q ≫ φ) := Category.assoc _ _ _
+
+/-! ## ★4. 残り —— (i)(a)(b)(c)・(ii)・(iii)(a)(b)(c)・(iv)
+
+★★残るのは **co-angular 性と Frobenius 型と pull-back の辞書**に依るものである
+(`Proposition 4.4, (iv)` の残りの条)。
+★本ファイルの 5 条は**辞書を要さない**ので先に取った。
+-/
+
+end ABC3.Found.FrdI
