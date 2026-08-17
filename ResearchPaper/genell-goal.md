@@ -1489,3 +1489,50 @@ ConductorHeight  ArchBound  ProjClosed  CompactBound  ArcModel
 
 `Found/FrdI/` を含め、**圏論を経由するすべての証明**に効く。
 ★★「実装の摩擦」として流さず、**規則として書いた**ことが本日の成果である。
+
+---
+
+## §9-14 2026-08-17 深夜 —— **原文が要求する「複素共役との両立」の理由が出た**
+
+### ★★★`Definition 1.1` はなぜ `ι_X` との両立を要求するのか
+
+原文 `Definition 1.1` は、エルミート計量が
+**複素共役 `ι_X` と両立する**ことを要求する。★原文は理由を書いていない。
+
+★★★**理由は「高さの底変換不変性」である。**
+
+### ★★機構
+
+高さが `X(ℚ̄) → ℝ` として well-defined であるには、定義体 `F ⊆ K` の
+取り替えで値が変わらないこと(底変換不変性)が要る。
+
+- **有限素点側**: `x_K^* D = (x_F^* D)·𝓞_K`
+  ★本日 `PullbackBase.lean` の `pullbackIdeal_comp` で取得
+- **アルキメデス側**: `w : InfinitePlace K` を `F` に制限すると `v` になるが、
+  ★★**`v.embedding` は `w.embedding|_F` **または その複素共役**に等しい**
+  (mathlib `NumberField.InfinitePlace.embedding_mk_eq`:
+  `embedding (mk φ) = φ ∨ embedding (mk φ) = conjugate φ`)
+
+★★★**したがって Green 関数が複素共役で不変でなければ、
+`archPoint` の値が `F` の取り方に依ってしまう。**
+
+### ★★これで「原文が書いていない理由」の 2 例目
+
+| 原文の要求 | 書かれていない理由 | 見つけた場所 |
+|---|---|---|
+| 次数を `[F:ℚ]` で**正規化**する | ★`≲` の定数を `F` に依らなくするため | §9-11(`ArchBound.lean`) |
+| 計量が `ι_X` と**両立**する | ★★高さの**底変換不変性**のため | ★本節 |
+
+★★★**どちらも「型が要求したので探したら、原文の中に既にあった」**という形である。
+Gap(原文の飛躍)ではない——**原文は正しく、理由を省いていただけ**である。
+
+### ★★`ArithCartier` に条件を足す必要がある
+
+`Found/GenEll/ArchPoint.lean` の `ArithCartier` は
+Green 関数に条件を付けていない。
+★★★**底変換不変性を取るには `green` に複素共役不変性を課す必要がある。**
+それは `Definition 1.1` の忠実な写しでもある。
+
+★次のセッションはここから: `ArithCartier` に `green_conj` を足し、
+アルキメデス側の底変換を取り、`degNormalized_baseChange` と繋ぐ。
+★それが入れば `ht` が `X(ℚ̄)` の上で well-defined になり、`Definition 1.2` が閉じる。
