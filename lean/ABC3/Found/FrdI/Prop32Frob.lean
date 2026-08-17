@@ -656,4 +656,161 @@ theorem pfRoot_baseSurj (hfi : IsOfFrobeniusIsotropicType P) (Y : D) :
     exact ⟨toPfRoot_isBaseIdentity (F := F) (ζ n) (hbf n).1,
       toPfRoot_isFrobeniusType hfi _ (hbf n).2⟩
 
+/-! ## ★16. 根を上げる道具
+
+★★`𝒞` の射を「両側の `k` 乗根の間」へ運ぶ。★添字圏の遷移として書けば
+`idxTransport_isPreStep`(と `repDeg_map`)がそのまま使える。 -/
+
+variable {P F} in
+/-- ★`k` 乗根へ上げる添字。 -/
+noncomputable def idxPow (U V : C) (k : ℕ+) : IdxPf P F U V :=
+  idxMk (P := P) (F := F) (rtExt P F U k) (rtExt P F V k)
+    (rtExt_frobType P F U k) (rtExt_frobType P F V k)
+    (by rw [rtExt_degFr, rtExt_degFr])
+
+variable {P F} in
+/-- ★始対象からの遷移射。 -/
+noncomputable def idxPowHom (U V : C) (k : ℕ+) : idxOne P F U V ⟶ idxPow (F := F) U V k :=
+  Under.homMk (show (⟨(U, V)⟩ : BiFr P F) ⟶ (⟨(rtObj P F U k, rtObj P F V k)⟩ : BiFr P F) from
+    ⟨(rtExt P F U k, rtExt P F V k), rtExt_frobType P F U k, rtExt_frobType P F V k,
+      by rw [rtExt_degFr, rtExt_degFr]⟩)
+    (WideSubcategory.hom_ext _ (Prod.ext (Category.id_comp _) (Category.id_comp _)))
+
+variable {P F} in
+/-- ★★**`k` 乗へ運んだ射**。 -/
+noncomputable def liftPow {U V : C} (p : U ⟶ V) (k : ℕ+) :
+    rtObj P F U k ⟶ rtObj P F V k :=
+  idxTransport P F (idxPowHom (F := F) U V k) p
+
+variable {P F} in
+/-- ★四角形。 -/
+theorem liftPow_spec {U V : C} (p : U ⟶ V) (k : ℕ+) :
+    p ≫ rtExt P F V k = rtExt P F U k ≫ liftPow (F := F) p k :=
+  idxTransport_spec (F := F) (idxPowHom (F := F) U V k) p
+
+variable {P F} in
+/-- ★pre-step は保たれる。 -/
+theorem liftPow_isPreStep {U V : C} (p : U ⟶ V) (k : ℕ+) (hp : IsPreStep P p) :
+    IsPreStep P (liftPow (F := F) p k) :=
+  idxTransport_isPreStep (F := F) (idxPowHom (F := F) U V k) p hp
+
+variable {P F} in
+/-- ★★**`rtObj (rtObj A m) n` と `rtObj A (n * m)` を同一視する**。 -/
+theorem exists_rtObj_assoc (A : C) (m n t : ℕ+) (ht : t = n * m) :
+    ∃ β : rtObj P F (rtObj P F A m) n ⟶ rtObj P F A t,
+      IsIso β ∧ rtExt P F A m ≫ rtExt P F (rtObj P F A m) n ≫ β = rtExt P F A t := by
+  have h1 : IsFrobeniusType P (rtExt P F A m ≫ rtExt P F (rtObj P F A m) n) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A m) (rtExt_frobType P F (rtObj P F A m) n)
+  have h2 : IsFrobeniusType P (rtExt P F A t) := rtExt_frobType P F A t
+  have hdeg : P.degFr (rtExt P F A m ≫ rtExt P F (rtObj P F A m) n)
+      = P.degFr (rtExt P F A t) := by
+    rw [P.degFr_comp, rtExt_degFr, rtExt_degFr, rtExt_degFr, ht]
+  obtain ⟨β, hβ, hβe⟩ := F.frobDegUniq A _ _ _ _ h1 h2 hdeg
+  exact ⟨β, hβ, (Category.assoc _ _ _).symm.trans hβe⟩
+
+/-! ## ★17. (i)(b) —— 底の同型は pre-step の span で持ち上がる
+
+★★根の取り方が要点である。`X = (A, n)`、`Y = (B, m)` に対し
+**`𝒞` の span を `A^m` と `B^n` の間で取り**、その頂点 `V₀` を
+`W := (V₀, n * m)` として使う。
+★モデルで言えば `W = V₀/(nm) ≤ A/n ⟺ V₀ ≤ mA` であり、
+これがちょうど `V₀ ⟶ A^m` という pre-step である。 -/
+
+variable {P F} in
+/-- ★始対象の添字での `repBase` は `Base` そのもの。 -/
+theorem repBase_idxOne {A B : C} (φ : A ⟶ B) :
+    repBase (idxOne P F A B) φ = P.Base φ := by
+  have h := repBase_spec (F := F) (idxOne P F A B) φ
+  show repBase (idxOne P F A B) φ = P.Base φ
+  have h2 : repBase (idxOne P F A B) φ ≫ P.Base (𝟙 B) = P.Base (𝟙 A) ≫ P.Base φ := h
+  rw [P.Base_id, P.Base_id, Category.comp_id, Category.id_comp] at h2
+  exact h2
+
+/-- ★`f ≫ α = g` から `α = f⁻¹ ≫ g`。 -/
+theorem eq_inv_comp_of {W X Y : D} (f : W ⟶ X) (hf : IsIso f) (g : W ⟶ Y) (α : X ⟶ Y)
+    (h : f ≫ α = g) : α = @inv _ _ _ _ f hf ≫ g := by
+  haveI := hf
+  rw [← h, IsIso.inv_hom_id_assoc]
+
+variable {P F} in
+/-- ★★**(i)(b)** —— `𝒞^pf` 版。 -/
+theorem pfRoot_preStepSpan (X Y : PfRootObj P F)
+    (α : ((pfRootPre P F).toElem.obj X).base ⟶ ((pfRootPre P F).toElem.obj Y).base)
+    (hα : IsIso α) :
+    ∃ (W : PfRootObj P F) (φ : W ⟶ X) (ψ : W ⟶ Y) (hφ : IsPreStep (pfRootPre P F) φ),
+      IsPreStep (pfRootPre P F) ψ ∧
+        α = @inv _ _ _ _ ((pfRootPre P F).Base φ) hφ.2 ≫ (pfRootPre P F).Base ψ := by
+  haveI := hα
+  haveI hieA : IsIso (P.Base (rtExt P F X.obj Y.root)) := (rtExt_frobType P F X.obj Y.root).2
+  haveI hieB : IsIso (P.Base (rtExt P F Y.obj X.root)) := (rtExt_frobType P F Y.obj X.root).2
+  haveI hinv : IsIso (@inv _ _ _ _ (P.Base (rtExt P F X.obj Y.root)) hieA ≫ α
+      ≫ P.Base (rtExt P F Y.obj X.root)) :=
+    IsIso.comp_isIso' (IsIso.inv_isIso) (IsIso.comp_isIso' hα hieB)
+  obtain ⟨V₀, p, q, hp, hq, hspan⟩ := F.preStepSpan (rtObj P F X.obj Y.root)
+    (rtObj P F Y.obj X.root)
+    (@inv _ _ _ _ (P.Base (rtExt P F X.obj Y.root)) hieA ≫ α
+      ≫ P.Base (rtExt P F Y.obj X.root)) hinv
+  haveI hip : IsIso (P.Base p) := hp.2
+  haveI hiq : IsIso (P.Base q) := hq.2
+  obtain ⟨βA, hβA, hβAe⟩ := exists_rtObj_assoc (F := F) X.obj Y.root X.root (X.root * Y.root) rfl
+  obtain ⟨βB, hβB, hβBe⟩ := exists_rtObj_assoc (F := F) Y.obj X.root Y.root (X.root * Y.root)
+    (mul_comm _ _)
+  haveI := hβA
+  haveI := hβB
+  have hφs : IsPreStep P (liftPow (F := F) p X.root ≫ βA) :=
+    IsPreStep.comp P (liftPow_isPreStep (F := F) p X.root hp) (isPreStep_of_isIso P βA)
+  have hψs : IsPreStep P (liftPow (F := F) q Y.root ≫ βB) :=
+    IsPreStep.comp P (liftPow_isPreStep (F := F) q Y.root hq) (isPreStep_of_isIso P βB)
+  have hbase : ∀ {U V : C} (r : V₀ ⟶ U) (k t : ℕ+)
+      (L : rtObj P F V₀ k ⟶ rtObj P F U k)
+      (_hL : r ≫ rtExt P F U k = rtExt P F V₀ k ≫ L)
+      (γ : rtObj P F U k ⟶ rtObj P F V t) (eU : V ⟶ U) (heU : IsIso (P.Base eU))
+      (_hcomp : eU ≫ rtExt P F U k ≫ γ = rtExt P F V t),
+      rootBase (show HomRoot P F ⟨V₀, t⟩ ⟨V, k⟩ from
+          HomPf.mk (idxOne P F (rtObj P F V₀ k) (rtObj P F V t)) (L ≫ γ))
+        = P.Base r ≫ @inv _ _ _ _ (P.Base eU) heU := by
+    intro U V r k t L hL γ eU heU hcomp
+    haveI := heU
+    have hmor : rtExt P F V₀ k ≫ (L ≫ γ) = r ≫ (rtExt P F U k ≫ γ) := by
+      rw [← Category.assoc, ← hL, Category.assoc]
+    refine (rootBase_uniq _ _ ?_).symm
+    show (P.Base r ≫ @inv _ _ _ _ (P.Base eU) heU) ≫ P.Base (rtExt P F V t)
+      = P.Base (rtExt P F V₀ k) ≫ pfBase (HomPf.mk (idxOne P F _ _) _)
+    rw [pfBase_mk, repBase_idxOne, ← hcomp]
+    have hRHS : P.Base (rtExt P F V₀ k) ≫ P.Base (L ≫ γ)
+        = P.Base r ≫ P.Base (rtExt P F U k ≫ γ) :=
+      (P.Base_comp _ _).symm.trans ((congrArg P.Base hmor).trans (P.Base_comp _ _))
+    have hLHS : (P.Base r ≫ @inv _ _ _ _ (P.Base eU) heU)
+          ≫ P.Base (eU ≫ (rtExt P F U k ≫ γ))
+        = P.Base r ≫ P.Base (rtExt P F U k ≫ γ) := by
+      rw [P.Base_comp eU (rtExt P F U k ≫ γ)]
+      simp
+    exact hLHS.trans hRHS.symm
+  have hbφ := hbase p X.root (X.root * Y.root) (liftPow (F := F) p X.root)
+    (liftPow_spec (F := F) p X.root) βA (rtExt P F X.obj Y.root) hieA hβAe
+  have hbψ := hbase q Y.root (X.root * Y.root) (liftPow (F := F) q Y.root)
+    (liftPow_spec (F := F) q Y.root) βB (rtExt P F Y.obj X.root) hieB hβBe
+  refine ⟨⟨V₀, X.root * Y.root⟩,
+    HomPf.mk (idxOne P F _ _) (liftPow (F := F) p X.root ≫ βA),
+    HomPf.mk (idxOne P F _ _) (liftPow (F := F) q Y.root ≫ βB),
+    (isPreStep_mk_iff (X := (⟨V₀, X.root * Y.root⟩ : PfRootObj P F)) (Y := X) _ _).mpr hφs,
+    (isPreStep_mk_iff (X := (⟨V₀, X.root * Y.root⟩ : PfRootObj P F)) (Y := Y) _ _).mpr hψs, ?_⟩
+  have hkey : rootBase (show HomRoot P F ⟨V₀, X.root * Y.root⟩ X from
+        HomPf.mk (idxOne P F _ _) (liftPow (F := F) p X.root ≫ βA)) ≫ α
+      = rootBase (show HomRoot P F ⟨V₀, X.root * Y.root⟩ Y from
+        HomPf.mk (idxOne P F _ _) (liftPow (F := F) q Y.root ≫ βB)) := by
+    have h1 : P.Base p ≫ (@inv _ _ _ _ (P.Base (rtExt P F X.obj Y.root)) hieA ≫ α
+        ≫ P.Base (rtExt P F Y.obj X.root)) = P.Base q := by
+      refine (congrArg (fun t => P.Base p ≫ t) hspan).trans ?_
+      rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    have hcancel : P.Base (rtExt P F Y.obj X.root)
+        ≫ @inv _ _ _ _ (P.Base (rtExt P F Y.obj X.root)) hieB = 𝟙 _ :=
+      @IsIso.hom_inv_id _ _ _ _ (P.Base (rtExt P F Y.obj X.root)) hieB
+    rw [hbφ, hbψ, ← h1]
+    simp only [Category.assoc]
+    refine congrArg (fun t => P.Base p
+      ≫ (@inv _ _ _ _ (P.Base (rtExt P F X.obj Y.root)) hieA ≫ t)) ?_
+    exact (Category.comp_id α).symm.trans (congrArg (fun t => α ≫ t) hcancel.symm)
+  exact eq_inv_comp_of _ _ _ _ hkey
+
 end ABC3.Found.FrdI
