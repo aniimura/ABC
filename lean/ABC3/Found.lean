@@ -40,6 +40,7 @@ import ABC3.Found.FrdI.Prop25
 import ABC3.Found.FrdI.Prop25iii
 import ABC3.Found.FrdI.Thm34
 import ABC3.Found.FrdI.Rmk341
+import ABC3.Found.FrdI.Prop41
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
