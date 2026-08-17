@@ -144,9 +144,12 @@ ${esc(L0.notComplete.detail)}<br><br>
 
 <h2>原文の記載不備と、我々が足した前提</h2>
 <div class="note"><b>★この節は「原文をそのままでは形式化できなかった箇所」の一覧である。</b><br>
-2 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）と、
-<b>(B) 我々が前提を足したもの</b>（原文の主張そのものは未決着のまま）。
-<b>(A) だけを指標に数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。</div>
+3 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）、
+<b>(B) 我々が前提を足したもの</b>（原文の主張そのものは未決着のまま）、
+<b>(C) 数学は標準的だが mathlib に在庫が無く、未実装のもの</b>（原典に瑕疵は無い）。
+<b>(A) だけを指標に数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。
+(C) も数えていない——証明が無いからである。<b>★(C) を隠さず出すのは、
+「進捗が止まっている理由」が原典側なのか在庫側なのかを、読む側が判定できるようにするためである。</b></div>
 <table><tr><th style="width:26%">項目</th><th style="width:52px">種別</th><th style="width:56px">数えたか</th><th>中身</th></tr>
 <tr><td><b>[FrdI] Proposition 2.1, (iii)</b></td><td><b style="color:#b3261e">A</b></td><td><b style="color:#1e7a52">数えた</b></td><td style="font-size:12px">
 <b>★原文の訂正が必要。</b>原文 p.44 は「Let d ∈N≥1.」で <code>d</code> を先に固定してから
@@ -178,6 +181,44 @@ ${esc(L0.notComplete.detail)}<br><br>
 <b>単元を除いた</b>忠実性だけで、unit-trivial はその単元をちょうど潰す。
 <b>★さらに (iii) にはもう 1 つ穴がある</b>——<code>hFrobFS</code> の側は
 <b>𝒪^× にどんな仮定を置いても埋まらず</b>、Φ の <code>d</code> 可除性（perfect 型）が要ると見ている（未証明）。</td></tr>
+<tr><td><b>[FrdI] Proposition 4.4, (ii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+<code>𝒞^birat</code> が Frobenioid であることを、<code>Definition 1.3</code> の 21 条のうち
+<b>20 条＋圏同値 <code>plBkEquiv</code> まで証明した</b>（<code>Found/FrdI/Prop44Core.lean</code>）。
+<b>残るのは <code>otriBase</code>（(iii)(c) の「全単射は <code>Base(φ)</code> にしか依らない」）1 条だけ</b>。
+★★測定の結果、これは <b><code>𝒪^×(A^birat)</code> が可換であること</b>と<b>同値</b>だと分かった。
+原文 p.85 はここを「routine exercise」と書いて証明を置かない。
+<code>Remark 1.3.1</code> は可換性を (iii)(b),(c) から導くが、<b>その (c) が <code>otriBase</code> 自身なので循環している</b>。
+我々は <b><code>𝒪^▷(A)_𝒞</code> の像が中心に入るところまでは証明した</b>——
+足りないのは「その像と逆元が全体を生成する」ことだけである。
+記録: <code>Gap/FrdI/Prop44.lean</code> の <code>Gap_4_4_ii_otriBase</code>（分類 ② missingMath、③ へ上がる条件つき）。</td></tr>
+<tr><td><b>[FrdI] Definition 2.8, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
+<b>位相的有限生成な副有限アーベル群の pro-<code>l</code> 分解</b>（<code>M ≅ ∏_l M[l]</code>）が要る。
+mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極限表示と有限アーベル群の準素分解は<b>ある</b>が、
+<b>pro-<code>l</code> 群そのものが実質不在</b>である。
+★道は見えている（<code>M[l] := lim_U (M/U)[l]</code> を作り、極限と積の交換で出す）が、
+<b>規模は mathlib の PR 数本ぶん</b>と見積もった。
+★迂回できない——原文 p.106–107 はこの分解を<b>そのまま等式として</b>使うので、
+「分解を仮定に置く」形では下流が posit に依ることになる。
+<b>★これが §2 を 7/8 で止めている唯一の原因である。</b>
+記録: <code>Gap/FrdI/Section2.lean</code> の <code>Gap_2_8_ii</code>（分類 ② missingMath）。</td></tr>
+<tr><td><b>[FrdI] Lemma 6.5, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
+(i)「<code>log p</code>（<code>p</code> は素数）は <code>ℚ</code> 上一次独立」は<b>実装済み</b>
+（<code>Found/FrdI/Lemma65.lean</code> の <code>log_primes_linearIndependent</code>）。
+(ii) は原文が <b>Lang の定理</b>＝<b>six exponentials theorem</b> に送っており、
+mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <code>e</code> の超越性しか無い</b>
+（Gelfond–Schneider すら無い。2026-08-17 に検索、<code>six_exponentials</code> は 0 件）。
+★★<b>mathlib の PR 何本かでは済まず、解析的整数論の一分野を入れる作業になる。</b>
+★ただし影響範囲は限定的で、Frobenioid の理論本体ではなく <code>Example 6.3</code> の非同型性を言う所にだけ使われる。
+記録: <code>Gap/FrdI/Section6.lean</code> の <code>Gap_6_5_ii</code>（分類 ② missingMath）。</td></tr>
+<tr><td><b>[GenEll] Definition 1.2, (ii)</b></td><td><b style="color:#b3261e">A?</b></td><td>数えていない</td><td style="font-size:12px">
+<b>原文 p.5 の <code>≲</code> の定義と、p.6・p.9・p.11 の用法が逆向きである。</b>
+★我々は<b>写しを原文に合わせたまま</b>にし、食い違いを記録に置いた——
+直してしまうと、この食い違いは二度と検出できなくなるからである。
+<b>向きの違いが無害でないことは機械で確かめた</b>（<code>bdle_ne_bdge</code>：
+<code>BDle α β</code> かつ <code>¬ BDge α β</code> となる <code>α, β</code> が実在する）。
+★分類は今のところ <b>① modelError</b>（我々の読み違いの線がまだ消えていない）。
+[IUTchIV] を含む他論文で同じ <code>≲</code> の用例を数えれば ③ sourceGap へ上がる。
+記録: <code>Gap/GenEll/BDDirection.lean</code> の <code>bdDirection</code>。</td></tr>
 </table>
 
 <h2>いま分かっていること</h2>
