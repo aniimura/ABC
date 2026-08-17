@@ -1536,3 +1536,44 @@ Green 関数に条件を付けていない。
 ★次のセッションはここから: `ArithCartier` に `green_conj` を足し、
 アルキメデス側の底変換を取り、`degNormalized_baseChange` と繋ぐ。
 ★それが入れば `ht` が `X(ℚ̄)` の上で well-defined になり、`Definition 1.2` が閉じる。
+
+---
+
+## §9-15 2026-08-17 深夜 —— `Definition 1.2` に残る鎖を測った
+
+### ★★底変換の両側は取れた
+
+| 側 | 場所 | 状態 |
+|---|---|---|
+| 有限素点側 `x_K^* D = (x_F^* D)·𝓞_K` | `PullbackBase.lean` | ★★★取得 |
+| アルキメデス側(ℂ-点の値) | `ArchBaseChange.lean` | ★★★取得 |
+
+★アルキメデス側は共役の場合分けを `IsConjInvariant`(原文の `ι_X` 両立)が吸収する。
+
+### ★★★残る鎖(次のセッションはここから)
+
+1. **有限素点側を `ADiv` に繋ぐ**:
+   `idealADiv K (J·𝓞_K) = baseChangeFin F K (idealADiv F J)`
+   ★要るのは **`ord_w(J·𝓞_K) = e(w/v)·ord_v(J)`**。
+   ★★mathlib には `ramificationIdx`(素イデアルについて)はあるが、
+   **一般のイデアルの拡大の重複度公式は無い**(2026-08-17 実測)。
+   分解の乗法性から組む必要がある。
+
+2. **アルキメデス側を `ADiv` に繋ぐ**:
+   `archADiv K g xK = baseChangeArc F K (archADiv F g xF)`
+   ★要るのは無限素点の相対次数和(`InfinitePlaceRel.lean` に部品あり)。
+
+3. **`degNormalized_baseChange` を当てる**(既に取得済)。
+
+4. **`X(ℚ̄)` の型を作る**: 数体の圏についての colimit。
+   ★★これは設計の仕事であり、証明の仕事ではない。
+
+### ★★これが取れると何が起きるか
+
+`ht : X(ℚ̄) → ℝ` が well-defined になり、
+`Definition 1.2, (i)` が閉じる。(ii) は既に取得済(`BDClass.lean`)なので
+★★★**`Definition 1.2` が完成し、指標が 5/24 → 6/24 に動く。**
+
+★本日の指標が動かなかったのは、この 4 段が残っているためである。
+★★**数学の穴は 1 だけ**(一般のイデアルの拡大の重複度公式)であり、
+2 は部品あり、3 は取得済、4 は設計である。
