@@ -93,15 +93,34 @@ theorem ideal_comap_top_eq_ker (f : X ⟶ Y) (U : X.affineOpens) :
   rw [← ideal_comap_eq_ker, Scheme.IdealSheafData.comap_top]
   rfl
 
-/-! ## ★★残る段を明示する
+/-! ## ★★残る段を明示する —— 部品名まで特定した(2026-08-17 夜)
 
 ★★★**核が `Ideal.map` に等しい**ことが残る:
 
     `RingHom.ker ((pullback.fst f I.subschemeι).app U) = (I.ideal V).map (f.appLE V U _)`
 
-これには `Γ(ファイバー積) = テンソル積`(`AlgebraicGeometry.pullbackSpecIso`)が要る。
-★★それが入れば `Ideal.map_mul` から **`comap_mul` が出る**——
-すなわち `Proposition 1.4, (i)` が構成から無条件に出る。
+### ★実測: 使える部品は mathlib に揃っている
+
+| 部品 | 場所 | 内容 |
+|---|---|---|
+| `ker_subschemeι_app` | `IdealSheaf/Subscheme.lean` | `ker (I.subschemeι.app U) = I.ideal U` |
+| `subschemeι_app_surjective` | 同上 | `I.subschemeι.app U` は**全射** |
+| `subschemeObjIso` | 同上 | `Γ(𝒪ₓ/I, U) ≅ Γ(X,U)/I(U)` |
+| `pullbackSpecIso` | `AlgebraicGeometry/` | `Γ(ファイバー積) = テンソル積` |
+| `comap_comp` | `IdealSheaf/Functorial.lean` | アフィンへの帰着に使う |
+| `ideal_comap_of_isOpenImmersion` | 同上 | 開埋め込みへの制限 |
+
+### ★★★筋道(次のセッションはここから)
+
+1. `comap_comp` + `ideal_comap_of_isOpenImmersion` で
+   **`X`, `Y` がアフィンな場合に帰着する**
+   (`U ↪ X → Y` を `U → V ↪ Y` と分解する)
+2. アフィンでは `f = Spec.map φ`、`I.subscheme ≅ Spec (R/I₀)` なので
+   `pullbackSpecIso` により `Γ(ファイバー積) ≅ A ⊗_R R/I₀ ≅ A/I₀A`
+3. `ker (A → A/I₀A) = I₀·A = Ideal.map φ I₀`
+4. `Ideal.map_mul` から **`comap_mul`**
+
+★★これが入れば `Proposition 1.4, (i)` が構成から**無条件に**出る。
 
 ★本ファイルは**そこまでは主張しない**。取ったのは第 1 段だけである。
 -/
