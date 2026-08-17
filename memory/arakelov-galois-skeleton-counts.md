@@ -240,6 +240,34 @@ metadata:
 
 ★残るのは `PresheafOfModules` の射を `Sheaf J A` の射として包み直す手間だけ。
 
+## ★★★★★★★★B1 の中核が完成した(2026-08-17)——`CommGroup (PicSheaf X)`
+
+`Found/Arakelov/` 15 ファイル、すべて sorry 0。★★**層の側**で組んである
+(前層の段で組もうとした最初の試みは誤りで撤回済み)。
+
+| 段 | 定理 |
+|---|---|
+| 壁 | ★`isLocallyTrivial_sheafify`(層化は局所自明性を保つ) |
+| 閉性 | ★`isLocallyTrivial_tensorModules` |
+| 並べ替え | ★`tensorRearrange` |
+| 群 | ★★★`instance : CommGroup (PicSheaf X)` |
+
+### ★★壁の破り方——4 部品すべて mathlib に在った
+
+    η_P|_V は局所全単射(`Sites/PreservesLocallyBijective.lean`)
+    両側とも層(`Functor.op_comp_isSheaf`)
+    ⟹ 同型(`Sheaf.isLocallyBijective_iff_isIso`)
+    ⟹ 前層加群の射としても同型(`toPresheaf` が同型を反映)
+
+★★★**「mathlib に該当補題なし」と 2 度判定したが、いずれも誤りだった。**
+
+### ★B1 の残り 2 点——どちらも「関手がテンソル積を保つ」
+
+- 引き戻し `f^*`: `Scheme.Modules.pullback` は在るが**モノイダル性が未登録**
+- `equivPicRing`: `tilde` の**モノイダル性**
+
+★mathlib は `pushforward₀OfCommRingCat` について既に作っているので同じ型の仕事。
+
 ## ★★グラフにも 28 件が出るようになった(2026-08-17)
 
 `dependency-graph.html` の節点語彙は**原文の項目番号**なので、

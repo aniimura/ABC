@@ -2907,3 +2907,48 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 2. ★★★★**「有る(自明に成り立つ)」と決める前にも測る**(1 度失敗)
    ——「局所自明な前層は層」を `ℙ¹` の `𝒪(1) ⊗ 𝒪(-1)` で検算していれば
    5 ブロック前に気づけた。**両方向に測ること。**
+
+
+---
+
+## §9-36 (2026-08-17) ★★★★★★★★B1 の中核が完成 —— `CommGroup (PicSheaf X)`
+
+### ★取れたもの(`Found/Arakelov/` 15 ファイル、すべて sorry 0)
+
+| 段 | 定理 |
+|---|---|
+| 壁 | ★`isLocallyTrivial_sheafify`(層化は局所自明性を保つ) |
+| 閉性 | ★`isLocallyTrivial_tensorModules`(乗法が閉じる) |
+| 並べ替え | ★`tensorRearrange`(`(A⊗B)⊗(A'⊗B') ≅ (A⊗A')⊗(B⊗B')`) |
+| 型 | `InvSheaf X` / `one` / `symm` / `mul` |
+| 商 | `PicSheaf X` |
+| **群** | ★★★`instance : CommGroup (PicSheaf X)` |
+
+### ★★★★★壁の破り方——4 部品すべて mathlib に在った
+
+    η_P|_V : P|_V ⟶ (層化 P).val|_V
+      ・局所全単射(`Sites/PreservesLocallyBijective.lean`)
+      ・両側とも層(`Functor.op_comp_isSheaf` / `sheafCompose`)
+    ⟹ 同型(`Sheaf.isLocallyBijective_iff_isIso`)
+    ⟹ 前層加群の射としても同型(`toPresheaf` が同型を反映)
+
+★★**「mathlib に該当補題なし」と 2 度判定したが、いずれも誤りだった。**
+
+### ★★B1 の残り 2 点 —— どちらも「関手がテンソル積を保つ」
+
+| 何 | 欠けているもの |
+|---|---|
+| 引き戻し `f^*` | `Scheme.Modules.pullback` は在るが**モノイダル性が未登録** |
+| `equivPicRing` | `tilde` の**モノイダル性**(または `Γ` の準連接層上での乗法性) |
+
+★mathlib は `pushforward₀OfCommRingCat` については既に作っている
+(`PushforwardZeroMonoidal.lean`)ので、**同じ型の仕事**である。
+
+### ★★★★★この session の方法論(記録)
+
+| 姿勢 | 実績 |
+|---|---|
+| 「**無い**」と決める前に測る | ★**7 度成功** |
+| 「**有る(自明)**」と決める前にも測る | ★★★**1 度失敗**(`ℙ¹` の `𝒪(1)⊗𝒪(-1)` で検算していれば防げた) |
+
+★★★★**両方向に測る。**「自動的に成り立つ」と思った補題こそ具体例で検算する。
