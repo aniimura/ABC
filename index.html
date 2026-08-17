@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 743 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 747 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">4217</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1104</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">4230</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1105</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
@@ -169,6 +169,15 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 ★★<b>mathlib の PR 何本かでは済まず、解析的整数論の一分野を入れる作業になる。</b>
 ★ただし影響範囲は限定的で、Frobenioid の理論本体ではなく <code>Example 6.3</code> の非同型性を言う所にだけ使われる。
 記録: <code>Gap/FrdI/Section6.lean</code> の <code>Gap_6_5_ii</code>（分類 ② missingMath）。</td></tr>
+<tr><td><b>[FrdI] Theorem 5.2, (ii) — pre-model 型</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+model Frobenioid が <b>pre-model 型</b>（base-Frobenius pair を持つ）であることを示すのに、
+<b><code>𝒟</code> が skeletal であること</b>を仮定に足した（<code>model_isPreModelType</code>）。
+★原文は <code>Theorem 5.1, (iv)</code> で <code>(𝒞^Fr-tr)^pl-bk</code> の <b>skeletal な部分圏</b>を選ぶ
+（選択公理で取れる）が、我々の <code>BaseSection.objP</code> は <b>𝒞 の対象上の述語</b>なので、
+「同型類から代表を選ぶ」を述語で書けない。そこで代表元の選択を <code>𝒟</code> 側の仮定に移した。
+★<b>消費側は影響を受けない</b>——原文自身 (iv) の証明で「<code>𝒞</code> は skeleton としてよい」と述べている。
+★外すには mathlib の <code>CategoryTheory.Skeleton</code> を使って
+<code>objP A := A.cls = 0 ∧ (A の底が骨格の像)</code> と書けばよい（未実施）。</td></tr>
 <tr><td><b>[GenEll] Definition 1.2, (ii)</b></td><td><b style="color:#b3261e">A?</b></td><td>数えていない</td><td style="font-size:12px">
 <b>原文 p.5 の <code>≲</code> の定義と、p.6・p.9・p.11 の用法が逆向きである。</b>
 ★我々は<b>写しを原文に合わせたまま</b>にし、食い違いを記録に置いた——
@@ -197,6 +206,10 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>ffd7862</code></td><td>2026-08-18</td><td>逐語を直した——p.101 の 1 行は `α` を含むので ASCII では取れない</td></tr>
+<tr><td><code>77667a8</code></td><td>2026-08-18</td><td>model Frobenioid は pre-model 型——base-Frobenius pair を作った</td></tr>
+<tr><td><code>5846dfd</code></td><td>2026-08-18</td><td>model Frobenioid の `𝒪^×(A)` は `Div_B` の核</td></tr>
+<tr><td><code>653e5da</code></td><td>2026-08-18</td><td>★★★★§4 が 3/10 に——`Remark 4.9.1`(`Example 4.3` は rational 型でない)</td></tr>
 <tr><td><code>09a39ad</code></td><td>2026-08-18</td><td>記憶を 2 つ——葉は測る／WideSubcategory の型の罠</td></tr>
 <tr><td><code>955d218</code></td><td>2026-08-18</td><td>葉を測る道具を作った——`tools/frdi-leaves.mjs`</td></tr>
 <tr><td><code>b7f68c3</code></td><td>2026-08-18</td><td>`Theorem 5.2, (iii)` の前半——standard 型の判定</td></tr>
@@ -205,17 +218,13 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 <tr><td><code>a21a51c</code></td><td>2026-08-18</td><td>★★★★★`Theorem 5.2, (ii)` の中核——model Frobenioid が `Definition 1.3` の 21 条を満たした</td></tr>
 <tr><td><code>2f6026f</code></td><td>2026-08-18</td><td>`Theorem 5.2, (ii)` に着手——同型・pull-back の判定と 21 条のうち 13 条</td></tr>
 <tr><td><code>f3b28a1</code></td><td>2026-08-17</td><td>`Theorem 5.2, (i)` の続き——model Frobenioid の pre-Frobenioid 構造</td></tr>
-<tr><td><code>f54b220</code></td><td>2026-08-17</td><td>★★★§5 に着手——`Theorem 5.2, (i)` の model Frobenioid の圏を構成した</td></tr>
-<tr><td><code>53b6958</code></td><td>2026-08-17</td><td>★★★★§4 が 2/10 に動いた——`Example 4.3` を最後まで(Frobenioid・standard 型・`Ψ_λ`)</td></tr>
-<tr><td><code>3506604</code></td><td>2026-08-17</td><td>★★★★検査を 0.01 秒にした——Lean REPL の MCP。ついでに `Example 4.3` の 21 条が閉じた</td></tr>
-<tr><td><code>390df8f</code></td><td>2026-08-17</td><td>引き戻しの最後の 1 歩を特定した(§9-40)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1104 件)。</div>
+<b>すべて PDF と機械照合している</b>(1105 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

@@ -210,6 +210,15 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 ★★<b>mathlib の PR 何本かでは済まず、解析的整数論の一分野を入れる作業になる。</b>
 ★ただし影響範囲は限定的で、Frobenioid の理論本体ではなく <code>Example 6.3</code> の非同型性を言う所にだけ使われる。
 記録: <code>Gap/FrdI/Section6.lean</code> の <code>Gap_6_5_ii</code>（分類 ② missingMath）。</td></tr>
+<tr><td><b>[FrdI] Theorem 5.2, (ii) — pre-model 型</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+model Frobenioid が <b>pre-model 型</b>（base-Frobenius pair を持つ）であることを示すのに、
+<b><code>𝒟</code> が skeletal であること</b>を仮定に足した（<code>model_isPreModelType</code>）。
+★原文は <code>Theorem 5.1, (iv)</code> で <code>(𝒞^Fr-tr)^pl-bk</code> の <b>skeletal な部分圏</b>を選ぶ
+（選択公理で取れる）が、我々の <code>BaseSection.objP</code> は <b>𝒞 の対象上の述語</b>なので、
+「同型類から代表を選ぶ」を述語で書けない。そこで代表元の選択を <code>𝒟</code> 側の仮定に移した。
+★<b>消費側は影響を受けない</b>——原文自身 (iv) の証明で「<code>𝒞</code> は skeleton としてよい」と述べている。
+★外すには mathlib の <code>CategoryTheory.Skeleton</code> を使って
+<code>objP A := A.cls = 0 ∧ (A の底が骨格の像)</code> と書けばよい（未実施）。</td></tr>
 <tr><td><b>[GenEll] Definition 1.2, (ii)</b></td><td><b style="color:#b3261e">A?</b></td><td>数えていない</td><td style="font-size:12px">
 <b>原文 p.5 の <code>≲</code> の定義と、p.6・p.9・p.11 の用法が逆向きである。</b>
 ★我々は<b>写しを原文に合わせたまま</b>にし、食い違いを記録に置いた——
