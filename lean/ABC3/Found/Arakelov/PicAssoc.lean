@@ -137,11 +137,54 @@ noncomputable def sheafifyTensorLeft (A P : X.PresheafOfModules)
   asIso ((PresheafOfModules.sheafification (R := X.ringCatSheaf)
     (𝟙 X.ringCatSheaf.obj)).map (A ◁ (sheafifyUnit X P)))
 
+/-! ## ★★★★★★結合律 -/
+
+/-- ★★★★★★**前層の段での結合子**——可逆層 `A`, `C` について。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★3 本を貼り合わせる:
+
+    層化 ((層化 (A ⊗ B)).val ⊗ C)
+      ≅ 層化 ((A ⊗ B) ⊗ C)          -- sheafifyTensorRight の逆
+      ≅ 層化 (A ⊗ (B ⊗ C))          -- 前層の結合子 α_ を層化で送る
+      ≅ 層化 (A ⊗ (層化 (B ⊗ C)).val) -- sheafifyTensorLeft -/
+noncomputable def sheafifyAssoc (A B C : X.PresheafOfModules)
+    (hA : IsLocallyRankOne X A) (hC : IsLocallyRankOne X C) :
+    (PresheafOfModules.sheafification (R := X.ringCatSheaf) (𝟙 X.ringCatSheaf.obj)).obj
+        (((PresheafOfModules.sheafification (R := X.ringCatSheaf)
+          (𝟙 X.ringCatSheaf.obj)).obj (A ⊗ B)).val ⊗ C)
+      ≅ (PresheafOfModules.sheafification (R := X.ringCatSheaf) (𝟙 X.ringCatSheaf.obj)).obj
+          (A ⊗ ((PresheafOfModules.sheafification (R := X.ringCatSheaf)
+            (𝟙 X.ringCatSheaf.obj)).obj (B ⊗ C)).val) :=
+  (sheafifyTensorRight X (A ⊗ B) C hC).symm
+    ≪≫ (PresheafOfModules.sheafification (R := X.ringCatSheaf)
+          (𝟙 X.ringCatSheaf.obj)).mapIso (α_ A B C)
+    ≪≫ sheafifyTensorLeft X A (B ⊗ C) hA
+
+/-- ★★★★★★**層加群のテンソル積の結合律**(可逆層について)。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★**これで `Pic X` の `CommGroup` の 4 公理のうち 3 本目が揃った**
+(乗法・可換・単位元・結合律)。残るのは逆元だけである。 -/
+noncomputable def tensorModulesAssoc (A B C : X.Modules)
+    (hA : IsLocallyRankOne X A.val) (hC : IsLocallyRankOne X C.val) :
+    tensorModules (tensorModules A B) C ≅ tensorModules A (tensorModules B C) :=
+  sheafifyAssoc X A.val B.val C.val hA hC
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isIso_sheafify_whiskerRight.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 B——層化が f ▷ M を同型に送ること)",
+    sectionId := "genell-def-1-1-i" }
+
+def tensorModulesAssoc.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 B——層加群のテンソル積の結合律)",
     sectionId := "genell-def-1-1-i" }
 
 def sheafifyTensorRight.src : ABC3.Meta.Source :=
