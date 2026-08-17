@@ -311,4 +311,85 @@ theorem birat_isIso_of_coaPre {A B : C} (φ : A ⟶ B) (hc : IsCoAngular P φ)
 ★その先に `Frobenioid` の 21 + 2 フィールド(原文の「routine exercise」)がある。
 -/
 
+
+/-! ## ★9. ★★★★[FrdI] Proposition 4.8, (i) —— isotropic 型は `𝒞^birat` へ渡る
+
+原文 (FrdI p.88):
+> Assertion (i) follows formally from Proposition 4.4, (iv). To prove assertion
+
+★★**`𝒞^birat` ではすべての射が等長**(零因子が 1 元単系)なので、
+**isotropic 性は「pre-step がすべて同型」**に潰れる。
+★`𝒞^birat` の pre-step は代表元 `(a, φ)` で `φ` が `𝒞` の pre-step であること。
+★`𝒞` が isotropic 型なら `Proposition 1.4, (i)` で `φ` は co-angular、
+したがって `𝒞^birat` で同型(`birat_isIso_of_coaPre`)。
+★★あとは `a` も同型なので、`f = [a]⁻¹ ≫ [φ]` が同型になる。 -/
+
+/-- ★★**代表元は `a` と `φ` の合成に分かれる** —— `[a] ≫ [a⁻¹ ≫ φ] = [φ]`。 -/
+theorem birat_toHom_comp_mk {A B A' : C} (a : A' ⟶ A) (hac : IsCoAngular P a)
+    (has : IsPreStep P a) (φ : A' ⟶ B) :
+    compBirat P G G.core (toHomBirat (P := P) (G := G) a)
+        (HomBirat.mk (idxBiratMk P G a hac has) φ)
+      = toHomBirat (P := P) (G := G) φ := by
+  haveI : Mono a := G.core.preStepMono a has
+  have hsq := biratPull_sq G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has)
+  have hga : biratPullGamma G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has)
+      = biratPullAlpha G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has) :=
+    (cancel_mono a).mp hsq
+  rw [show toHomBirat (P := P) (G := G) a = HomBirat.mk (idxBiratOne P G A') a from rfl,
+    compBirat_mk G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has)]
+  refine Eq.trans ?_ (HomBirat.mk_map
+    (idxBiratHomMk (Z := idxBiratOne P G A')
+      (W := biratPullIdx G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has))
+      (biratPullGamma G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has))
+      (biratPullGamma_coAngular G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has))
+      (biratPullGamma_preStep G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has))
+      rfl) φ)
+  refine congrArg (HomBirat.mk
+    (biratPullIdx G.core (idxBiratOne P G A') a (idxBiratMk P G a hac has))) ?_
+  rw [idxBiratHomMk_left]
+  exact congrArg (fun t => t ≫ φ) hga.symm
+
+/-- ★★**`𝒞^birat` の pre-step は代表元の `φ` が `𝒞` の pre-step であること**。 -/
+theorem birat_preStep_rep {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B)
+    (h : IsPreStep (biratPre P G) (HomBirat.mk Z φ)) : IsPreStep P φ := by
+  haveI hZ : IsIso (P.Base Z.unop.hom.hom) := Z.unop.hom.property.2.2
+  refine ⟨?_, ?_⟩
+  · have hd : biratDeg (HomBirat.mk Z φ) = 1 := h.1
+    rw [biratDeg_mk] at hd
+    exact hd
+  · have hb : IsIso (biratBase (HomBirat.mk Z φ)) := h.2
+    rw [biratBase_mk, sliceBaseOf_eq] at hb
+    haveI := hb
+    have : IsIso (P.Base Z.unop.hom.hom ≫ (inv (P.Base Z.unop.hom.hom) ≫ P.Base φ)) :=
+      IsIso.comp_isIso' inferInstance hb
+    rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp] at this
+    exact this
+
+include P in
+/-- ★★★★**[FrdI] Proposition 4.8, (i)** —— `𝒞` が isotropic 型なら `𝒞^birat` もそう。
+
+原文 (FrdI p.88):
+> Assertion (i) follows formally from Proposition 4.4, (iv). To prove assertion -/
+theorem birat_isOfIsotropicType (hiso : ∀ X : C, IsIsotropic P X)
+    (X : BiratCat P G) : IsIsotropic (biratPre P G) X := by
+  intro Y f _ hs
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  -- ★代表元の `φ` は `𝒞` の pre-step、しかも co-angular
+  have hφs : IsPreStep P φ := birat_preStep_rep Z φ hs
+  have hφc : IsCoAngular P φ := prop_1_4_i P φ (fun W _ => hiso W)
+  haveI : IsIso ((toBiratCat P G).map φ) := birat_isIso_of_coaPre φ hφc hφs
+  -- ★添字の構造射 `a` も co-angular pre-step なので同型
+  haveI : IsIso ((toBiratCat P G).map Z.unop.hom.hom) :=
+    birat_isIso_of_coaPre Z.unop.hom.hom Z.unop.hom.property.1 Z.unop.hom.property.2
+  -- ★`[a] ≫ f = [φ]` なので `f` は同型
+  have hcomp : (toBiratCat P G).map Z.unop.hom.hom ≫ HomBirat.mk Z φ
+      = (toBiratCat P G).map φ := by
+    refine Eq.trans ?_ (birat_toHom_comp_mk Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2 φ)
+    rfl
+  haveI : IsIso ((toBiratCat P G).map Z.unop.hom.hom ≫ HomBirat.mk Z φ) := by
+    rw [hcomp]
+    exact birat_isIso_of_coaPre φ hφc hφs
+  exact IsIso.of_isIso_comp_left ((toBiratCat P G).map Z.unop.hom.hom) (HomBirat.mk Z φ)
+
 end ABC3.Found.FrdI
