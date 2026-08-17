@@ -1,12 +1,21 @@
-// 「壁」から到達不能になっている [FrdI] の項目を数える。
+// **まだ閉じていない 3 つの塊**の下流に何件あるかを数える。
 //
-// ★動機(2026-08-18): 残り 24 件のうち、いくつかは**在庫が無い**ために
-//   どうやっても閉じない。その伝播を機械で測る。
+// ★動機(2026-08-18): 残り 24 件のうち、いくつかは 3 つの未着手の塊の下流にある。
+//   その伝播を機械で測る。
 //
-// 壁(2026-08-18 時点、`tools/index-html.mjs` の逸脱表と `Gap/` の記録に対応):
-//   - Definition 2.8  …… mathlib に pro-l 群が無い(位相的有限生成副有限アーベル群の分解)
-//   - Lemma 6.5       …… mathlib に six exponentials theorem が無い
-//   - Proposition 4.4 …… (ii) の `otriBase`。model / birat-Frobenius-normalized では閉じたが一般は未
+// ★★**訂正(2026-08-18 夕)**: この道具は当初「壁」と呼び、
+//   節ごとの「到達可能な上限」を印字していた。**その読み方は捨てる。**
+//   CLAUDE.md の姿勢——「工数の山を『壁』と呼ばない。既知数学の person-years は
+//   壁でなく道」——に従い、3 つとも `ResearchPaper/frdi-decomposition.json` の
+//   **チェーン**(内部の小目標の DAG)に割った。
+//   ★葉と層は `node tools/frdi-newleaves.mjs` が印字する。
+//   **この道具が印字するのは「そのチェーンを閉じると何件動くか」であって、
+//   到達不能の証明ではない。**
+//
+// 3 つの塊(`ResearchPaper/frdi-decomposition.json` のチェーンに対応):
+//   - Definition 2.8  …… 副有限アーベル群の pro-l 分解        (チェーン prol、葉 4)
+//   - Lemma 6.5       …… six exponentials theorem            (チェーン sixexp、葉 3)
+//   - Proposition 4.4 …… (ii) の `otriBase`(一般の 𝒞)       (チェーン otricomm、葉 2 は済)
 //
 // ★これは pdftotext 経由の依存抽出に乗っているので、当たりを付けるためだけに使う。
 //
@@ -23,9 +32,9 @@ const TXT = path.join(REPO, 'ResearchPaper', '0_Source',
 const NEED = path.join(REPO, 'ResearchPaper', 'frdi-needed.json');
 
 const WALLS = new Map([
-  ['Definition 2.8', 'mathlib に pro-l 群が無い'],
-  ['Lemma 6.5', 'mathlib に six exponentials theorem が無い'],
-  ['Proposition 4.4', '(ii) の otriBase(一般の 𝒞)'],
+  ['Definition 2.8', 'チェーン prol(pro-l 分解)'],
+  ['Lemma 6.5', 'チェーン sixexp(six exponentials)'],
+  ['Proposition 4.4', 'チェーン otricomm((ii) の otriBase)'],
 ]);
 
 const KIND = 'Definition|Proposition|Theorem|Corollary|Remark|Lemma|Example';
@@ -81,16 +90,16 @@ const bad = todo.filter((x) => blocked.has(x.item));
 const ok = todo.filter((x) => !blocked.has(x.item));
 
 console.log(`★[FrdI] 残り ${todo.length} 件のうち`);
-console.log(`  ★★壁に阻まれている: ${bad.length} 件`);
+console.log(`  ★★3 つのチェーンの下流にある: ${bad.length} 件`);
 for (const x of bad) {
   console.log(`     §${x.section} p.${String(x.page).padStart(3)} ${x.item.padEnd(18)} ${blocked.get(x.item)}`);
 }
-console.log(`  ★手を動かせば閉じる: ${ok.length} 件`);
+console.log(`  ★チェーンに依らず単独で閉じる: ${ok.length} 件`);
 for (const x of ok) {
   console.log(`     §${x.section} p.${String(x.page).padStart(3)} ${x.item}`);
 }
 
-// 節ごとの到達可能な上限
+// 節ごとの「いまチェーン待ちの数」
 const bySec = new Map();
 for (const x of needed) {
   const s = bySec.get(x.section) ?? { total: 0, done: 0, blocked: 0 };
@@ -99,10 +108,12 @@ for (const x of needed) {
   else if (blocked.has(x.item)) s.blocked += 1;
   bySec.set(x.section, s);
 }
-console.log('\n★節ごとの「到達可能な上限」(= 全体 − 壁に阻まれた数)');
+console.log('\n★節ごとの「いまチェーン待ちの数」');
+console.log('  ★★これは到達不能の証明ではない。3 つのチェーンはいずれも既知数学であり、');
+console.log('     葉と層は `node tools/frdi-newleaves.mjs` が印字する。');
 for (const [sec, s] of [...bySec].sort()) {
   console.log(
-    `  §${sec}  現在 ${s.done}/${s.total}   到達可能な上限 ${s.total - s.blocked}/${s.total}` +
-      (s.blocked ? `   (壁 ${s.blocked} 件)` : ''),
+    `  §${sec}  現在 ${s.done}/${s.total}   チェーンに依らず届く ${s.total - s.blocked}/${s.total}` +
+      (s.blocked ? `   (チェーン待ち ${s.blocked} 件)` : ''),
   );
 }

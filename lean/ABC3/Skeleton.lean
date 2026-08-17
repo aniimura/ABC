@@ -12,6 +12,8 @@ import ABC3.Skeleton.GenEll.Section2
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
+import ABC3.Skeleton.FrdI.Def28ProL
+import ABC3.Skeleton.FrdI.Lemma65SixExp
 /-!
 # Skeleton — 論文の主張(証明しない)
 

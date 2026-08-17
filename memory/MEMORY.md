@@ -22,4 +22,5 @@
 - [Lean の検査は MCP の lean_check で](lean-check-via-mcp-repl.md) — `lake env lean` はファイル全体を再検査する(3,800 行で数分)。`abc3-lean` MCP なら 0.01 秒。★ただし**確定は必ず `lake build`**(書いた順序・`variable`・リンタは build でしか出ない)。Windows では `repl.exe` を直に spawn してはならない(`lake env` 経由)。
 - [葉は測る、当てない](leaves-are-measured-not-guessed.md) — `node tools/frdi-leaves.mjs` で「未実装依存の数」と「波及」を出す。★ページ順では葉が分からない実例つき(`Theorem 5.2` は §5 の大物に見えて依存 0 の葉・波及 6 件だった)。
 - [WideSubcategory / toElem の型の罠](widesubcategory-type-trap.md) — `{ obj := A }.obj.base` は `A.base` と構文上別物。`rw` 失敗・instance 合成失敗・motive 不整合として**別々の症状に見える**。射の構成は素の型を取る補題に出す。
-- [壁は 3 つ、目標は現在の在庫では到達不能](frdi-three-walls.md) — §2 7/8・§4 5/10・§5 2/7・§6 3/5 が到達可能な上限。壁は pro-l 群 / Prop 4.4 (ii) の一般ケース / six exponentials。★壁が無いのは §1 と §3 だけ。
+- [塊は 3 つ、いずれも「壁」ではなくチェーン](frdi-three-chains.md) — otricomm(下流 11 件・最大の律速)/ prol / sixexp。★割ったら在庫の測り違いが 2 件出た。数字は node tools/frdi-newleaves.mjs で。
+- [「壁」と呼ばず、割って葉を出す](no-wall-decompose-instead.md) — 到達不能と報告する前に塊を小目標の DAG に割る。★absent の searched は**実在するパス**か確かめること(存在しないディレクトリの grep 0 件は測定ではない)。

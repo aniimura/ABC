@@ -68,6 +68,45 @@ import ABC3.Found.FrdI.Prop44Core
 (したがって birationally Frobenius-normalized 型)なので、
 ★★**下流で実際に要る場面では本条は埋まっている**。
 
+## ★★★2026-08-18 の訂正 —— 「見る条を間違えていた」
+
+★上の欄に
+
+> `preStepSpan` は `X ⟶ A`・`X ⟶ E` の span を与えるだけで、
+> 必要な `A ⟶ E` 向きの co-angular pre-step は与えない
+
+と書いた。★**これは誤りである。**要るものを (i)(b) の `preStepSpan` から出そうとしていたが、
+実際に効くのは **(iii)(d) の `coaPreOverEquiv`**、すなわち
+
+  `(𝒞^coa-pre)_A ≃ Order(Φ(A))^opp`
+
+である。★`Order(Φ(A))` は**前順序圏**なので射は高々 1 本、そして `Φ(A)` は
+`δ ≼ δ + ε` により**有向**である。ゆえに `(𝒞^coa-pre)_A` は**余フィルター**で、
+`δ_c + δ_s` に対応する対象から `(E,c)`・`(E,s)` の双方へ射が降りる。
+
+★★★**したがって Ore の四角形は一般の Frobenioid で作れる**
+(`Found/FrdI/Prop44Ore.lean` の `exists_ore_square_coaPre`・`exists_ore_common`、
+**証明済み・`sorry` 無し**)。`Thm52Frob.lean` の `exists_ore_square` は model について
+因子を明示して作ったものだったが、**model であることは要らなかった**。
+
+## ★★残りを分解した(2026-08-18)
+
+★★**「壁」ではなく道である。**`ResearchPaper/frdi-decomposition.json` の
+`otricomm` チェーン(7 節点・5 層)に割った。`node tools/frdi-newleaves.mjs` が層と葉を印字する。
+
+| 層 | 節点 | 状態 |
+|---|---|---|
+| 0 | `ore-square`(Ore の四角形) | ★**済**(`exists_ore_square_coaPre`) |
+| 0 | `divgp-hom`(`𝒪^▷(A^birat) → Φ^gp(A)` が準同型) | ★**済**(`otriDivGpHom`) |
+| 0 | `image-central`(`𝒪^▷(A)_𝒞` の像が中心) | ★済(2026-08-17) |
+| 1 | `ker-eq-image`(核 = `𝒪^×(A)` の像。(vi) `faithfulUpToUnits` から) | 未 |
+| 2 | `central-ext`(中心拡大 ⟹ 交換子が交代双線形形式) | 未 |
+| 3 | ★**`pairing-vanishes`(その形式が消えること)** | ★**未。ここが本体** |
+| 4 | `otriBase`(可換性からの帰結) | 半済(`birat_otriBase_of_comm`) |
+
+★★★**穴の形が変わった**——「圏論の条件 1 つ」から
+「**1 つの交代双線形形式が消えるか**」になった。反例があるならその形式が非零な例として見える。
+
 ## ★影響範囲
 
 ★`Proposition 4.4, (ii)` が閉じないので、
@@ -103,6 +142,13 @@ def Gap_4_4_ii_otriBase.record : ABC3.Meta.GapRecord :=
       "`Definition 1.3` を満たすが `𝒪^×(A^birat)` が非可換になる Frobenioid の" ++
       "**反例**を作って示すこと。★このとき原文の「routine exercise」は誤りになる。" ++
       "★我々の測定(2026-08-17)では `𝒪^▷(A)_𝒞` の像が中心に入ることまでは出ており、" ++
-      "反例があるなら中心拡大の交換子で見えるはずである。" }
+      "反例があるなら中心拡大の交換子で見えるはずである。" ++
+      "★★**2026-08-18 の更新**: (iii)(d) `coaPreOverEquiv` から " ++
+      "**Ore の四角形が一般の 𝒞 で作れる**ことを証明した" ++
+      "(`Found/FrdI/Prop44Ore.lean` の `exists_ore_square_coaPre` / `exists_ore_common`)。" ++
+      "零因子準同型 `otriDivGpHom` も取得した。★残りは " ++
+      "`ResearchPaper/frdi-decomposition.json` の `otricomm` チェーンの " ++
+      "`ker-eq-image` → `central-ext` → **`pairing-vanishes`** の 3 段であり、" ++
+      "最後の 1 段が本体である。" }
 
 end ABC3.Gap.FrdI

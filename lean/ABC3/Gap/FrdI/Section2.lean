@@ -122,7 +122,23 @@ def Gap_2_1_iii.record : ABC3.Meta.GapRecord :=
 
 ★**道はある**: `M ≅ lim_U M/U`(mathlib)＋ 各 `M/U` の準素分解(mathlib)から
 `M[l] := lim_U (M/U)[l]` を作り、極限と積の交換で `M ≅ ∏_l M[l]` を出す。
-★★**しかし規模は mathlib の PR 数本ぶん**である。
+
+## ★★2026-08-18 —— 「壁」と呼ぶのをやめ、statement を型で固定して道を割った
+
+★CLAUDE.md の**姿勢**(「工数の山を『壁』と呼ばない。既知数学の person-years は
+壁でなく道」)に従い、次を行った:
+
+- ★statement を **`Skeleton/FrdI/Def28ProL.lean`** に型で固定した
+  (`IsProL` の定義と `def_2_8_ii`)。`sorry` は `Skeleton/` では正しい状態である。
+- ★道を **`ResearchPaper/frdi-decomposition.json`** の `prol` チェーン
+  (7 節点・4 層・葉 4 個)に割った。`node tools/frdi-newleaves.mjs` が層と葉を印字する。
+
+★★測り直すと、**部品の 4/5 は既に在庫にある**:
+`ProfiniteGrp.continuousMulEquivLimittoFiniteQuotientFunctor`(極限表示)・
+`Ideal.iSup_primaryComponent_eq_top` / `Ideal.iSupIndep_primaryComponent`(準素分解)・
+`Ideal.primaryComponent.map`(その関手性)・
+`CategoryTheory.Limits.limitFlipCompLimIsoLimitCompLim`(極限と積の交換)。
+★足りないのは **pro-`l` の語彙**(我々が定義した)と、それらを繋ぐ作業である。
 
 ## ★なぜ迂回できないか
 

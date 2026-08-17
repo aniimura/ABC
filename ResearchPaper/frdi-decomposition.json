@@ -1,0 +1,234 @@
+{
+  "measuredAt": "2026-08-18",
+  "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
+  "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
+  "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
+  "★訂正": [
+    {
+      "what": "six exponentials の在庫測定",
+      "旧": "「mathlib の Analysis/Transcendental/ には Liouville 数と e の超越性しか無い」(2026-08-17、Gap/FrdI/Section6.lean)",
+      "誤り": "★**探索先のパスが存在しない**。mathlib に Analysis/Transcendental/ というディレクトリは無く、実体は **NumberTheory/Transcendental/** である。無いものを探して 0 件を得ていた。",
+      "新": "★★mathlib には **NumberTheory/SiegelsLemma.lean**(Siegel の補題)と **NumberTheory/NumberField/House.lean**(代数的数の house + **数体上の Siegel の補題** `NumberField.house.exists_ne_zero_int_vec_house_le`)がある。これは超越性証明の**算術側の心臓部**である。解析側(最大値原理・Schwarz・Cauchy 評価・Hadamard 三線・Jensen)も Analysis/Complex/ に揃っている。",
+      "★教訓": "Meta/Claim.lean の LeanStatus.absent が searched を要求するのは、まさにこの型の誤りを捕まえるためだった。**searched に書いたパスが実在するかを確かめる段が抜けていた。**"
+    },
+    {
+      "what": "Proposition 4.4, (ii) の残り 1 条(otriBase)",
+      "旧": "「preStepSpan は X ⟶ A・X ⟶ E の span を与えるだけで、必要な A ⟶ E 向きの co-angular pre-step は与えない」(2026-08-17、Gap/FrdI/Prop44.lean)",
+      "誤り": "★**見る条を間違えていた**。要るものを (i)(b) preStepSpan から出そうとしていたが、実際に効くのは **(iii)(d) coaPreOverEquiv**(`(𝒞^coa-pre)_A ≃ Order(Φ(A))^opp`)である。",
+      "新": "★★`Order(Φ(A))` は**前順序圏**(射は高々 1 本)で、`Φ(A)` は `δ ≼ δ+ε` により**有向**である。ゆえに `(𝒞^coa-pre)_A` は**余フィルター**で、`δ_c + δ_s` に対応する対象 `(E', w)` から `(E,c)`・`(E,s)` へ**一意な** co-angular pre-step `m`・`p` が降りる。すなわち `p ≫ s = m ≫ c = w` —— ★**Ore の四角形は一般の `𝒞` で作れる**(model 限定ではなかった)。",
+      "★残る本体": "Ore の四角形があっても可換性は直ちには出ない。下の otricomm チェーンの pairing-vanishes が本体である。"
+    }
+  ],
+  "chains": [
+    {
+      "id": "otricomm",
+      "title": "𝒪^×(A^birat) の可換性 —— Proposition 4.4, (ii) の残る 1 条",
+      "serves": { "paper": "FrdI", "item": "Proposition 4.4, (ii)", "page": 85 },
+      "unblocks": [
+        "Proposition 4.4", "Theorem 4.2", "Proposition 4.8", "Corollary 4.10",
+        "Corollary 4.11", "Theorem 5.1", "Corollary 5.4", "Proposition 5.5",
+        "Proposition 5.6", "Corollary 5.7", "Theorem 6.4"
+      ],
+      "★位置づけ": "★★**残り 24 件のうち 11 件を止めている、最大の律速**。原文は p.85 で「routine exercise」と書いて証明を置かない。",
+      "nodes": [
+        {
+          "id": "ore-square",
+          "title": "Ore の四角形 —— (iii)(d) から `p ≫ s = m ≫ c` を作る",
+          "deps": [],
+          "status": "todo",
+          "size": "小(半日)",
+          "evidence": "★`coaPreOverEquiv : (𝒞^coa-pre)_A ≃ Order(Φ(A))^opp` は `Frobenioid` の場である(Found/FrdI/Frobenioid.lean)。`Order(Φ(A))` は前順序圏なので射は高々 1 本、`Φ(A)` は有向。`δ_c + δ_s` の対象から一意に降りる。",
+          "★model 版": "Found/FrdI/Thm52Frob.lean の `exists_ore_square`(model について実装済み)。**一般化がこの節点**である。"
+        },
+        {
+          "id": "divgp-hom",
+          "title": "`biratDivGp : 𝒪^×(A^birat) →* Φ(A)^gp` が群準同型であること",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "`biratDivGp` は Found/FrdI/Prop44Core.lean に既にある。合成についての加法性を示す。"
+        },
+        {
+          "id": "image-central",
+          "title": "`𝒪^▷(A)_𝒞` の像が `𝒪^×(A^birat)` の中心に入ること",
+          "deps": [],
+          "status": "done",
+          "size": "——",
+          "evidence": "★2026-08-17 に取得済み(Gap/FrdI/Prop44.lean の測定欄)。`𝒞` の `otriBase` を `c`・`s` に当てて `Θ_c = Θ_s` を得る。"
+        },
+        {
+          "id": "ker-eq-image",
+          "title": "ker(divgp-hom) = `𝒪^×(A)` の像 —— (vi) `faithfulUpToUnits` から",
+          "deps": ["divgp-hom"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "★`u = [c]⁻¹ ≫ [s]` の像が 0 ⟺ `δ_c = δ_s`。このとき `c`・`s` は base-equivalent かつ metrically equivalent な co-angular pre-step なので、(vi) が `α ∈ 𝒪^×(A)` で `c = s ≫ α` を与える。ゆえに `u = [α]⁻¹`。"
+        },
+        {
+          "id": "central-ext",
+          "title": "`𝒪^×(A^birat)` は中心拡大 —— 交換子が交代双線形形式を誘導する",
+          "deps": ["ker-eq-image", "image-central"],
+          "size": "中",
+          "status": "todo",
+          "evidence": "中心拡大 `1 → Z → G → Λ → 1`(`Λ ⊆ Φ(A)^gp` はアーベル)では `[·,·] : Λ × Λ → Z` が well-defined な交代双線形形式になる。★これは純群論で、原典にも mathlib にも依存しない。",
+          "★意味": "★★これで**可換性 ⟺ 1 つの双線形形式が消えること**に落ちる。穴の形が『圏論の条件』から『1 本の等式』に変わる。"
+        },
+        {
+          "id": "pairing-vanishes",
+          "title": "★★その双線形形式が消えること —— Ore の四角形で交換子を計算する",
+          "deps": ["ore-square", "central-ext"],
+          "status": "todo",
+          "size": "★大(ここが本体。原典が「routine exercise」と書いた所)",
+          "evidence": "★model では消える(Found/FrdI/Thm52Birat.lean の `model_birat_otri_comm`、Ore の四角形 2 つの脚が `𝒞` で一致することを 4 成分の計算で示した)。一般の `𝒞` では `ore-square` の一意性(前順序圏なので射は高々 1 本)が同じ役割を果たすと見ている。",
+          "★反証の形": "`Definition 1.3` を満たすが `𝒪^×(A^birat)` が非可換な Frobenioid の**反例**。中心拡大なので、あるなら交換子形式が非零な例として見えるはずである。"
+        },
+        {
+          "id": "otribase",
+          "title": "`otriBase` —— 可換性からの帰結",
+          "deps": ["pairing-vanishes"],
+          "status": "半済",
+          "size": "小",
+          "evidence": "★同値性は 2026-08-18 に取得済み(Found/FrdI/Prop44Otri.lean の `birat_otriBase_of_comm` / `birat_frobenioidCore_of_comm`)。可換性が来れば 21 条が閉じる。"
+        }
+      ]
+    },
+    {
+      "id": "prol",
+      "title": "副有限アーベル群の pro-l 分解 —— Definition 2.8, (ii)",
+      "serves": { "paper": "FrdI", "item": "Definition 2.8, (ii)", "page": 52 },
+      "unblocks": ["Definition 2.8"],
+      "★位置づけ": "§2 に残る唯一の未実装項目。下流を止めてはいない(止めているのは自分 1 件だけ)。",
+      "nodes": [
+        {
+          "id": "finite-primary",
+          "title": "有限アーベル群の l-準素分解を `∏_l` の形にする",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "★mathlib に**ある**: `Ideal.iSup_primaryComponent_eq_top`(捻れ加群、`[IsDedekindDomain A]`)と `Ideal.iSupIndep_primaryComponent`(Algebra/Module/Torsion/PrimaryComponent.lean:140,175)。`A = ℤ` で使う。`Ideal.primaryComponent.map` も**ある**(同 :76)ので関手性も取れる。"
+        },
+        {
+          "id": "prol-def",
+          "title": "pro-l 群の定義(有限商がすべて l 群)と基本性質",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "★mathlib に**無い**。探索: `lean/.lake/packages/mathlib/Mathlib/` 全体を `IsProPGroup|ProPGroup|pro-p group` で grep して 0 件(2026-08-18)。★定義自体は `ProfiniteGrp` の `OpenNormalSubgroup` 商が `IsPGroup` であること、と書ける。"
+        },
+        {
+          "id": "limit-pi-comm",
+          "title": "極限と積の交換 `lim_U ∏_l = ∏_l lim_U`",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "★mathlib に**ある**: `CategoryTheory.Limits.limitFlipCompLimIsoLimitCompLim`(CategoryTheory/Limits/Fubini.lean:545)。積も極限なのでそのまま。"
+        },
+        {
+          "id": "M-limit",
+          "title": "`M ≅ lim_U M/U`(開正規部分群による極限表示)",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "★mathlib に**ある**: `ProfiniteGrp.continuousMulEquivLimittoFiniteQuotientFunctor`(Topology/Algebra/Category/ProfiniteGrp/Limits.lean:129)。`isoLimittoFiniteQuotientFunctor`(:142)も。"
+        },
+        {
+          "id": "M-l-part",
+          "title": "`M[l] := lim_U (M/U)[l]` の構成と、それが pro-l であること",
+          "deps": ["finite-primary", "prol-def", "M-limit"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。"
+        },
+        {
+          "id": "decomposition",
+          "title": "`M ≅ ∏_l M[l]`(位相群の同型)",
+          "deps": ["M-l-part", "limit-pi-comm"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "`M ≅ lim_U M/U ≅ lim_U ∏_l (M/U)[l] ≅ ∏_l lim_U (M/U)[l] = ∏_l M[l]`。"
+        },
+        {
+          "id": "def28",
+          "title": "`Definition 2.8` の (i)(ii)(iii) —— co-prime 型と λ 乗写像",
+          "deps": ["decomposition"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "★(i) と (iii) の `co-prime type` は分解を要さない(定義だけ)。(iii) の λ 乗写像は `M[l]` ごとに `λ(l)` 乗するので `decomposition` が要る。"
+        }
+      ]
+    },
+    {
+      "id": "sixexp",
+      "title": "six exponentials theorem —— Lemma 6.5, (ii)",
+      "serves": { "paper": "FrdI", "item": "Lemma 6.5, (ii)", "page": 116 },
+      "unblocks": ["Lemma 6.5"],
+      "★位置づけ": "§6 の**例**(`Example 6.3` の非同型性)にだけ使う。Frobenioid の理論本体には入らない。下流を止めてはいない。",
+      "nodes": [
+        {
+          "id": "siegel-nf",
+          "title": "数体上の Siegel の補題(house 版)",
+          "deps": [],
+          "status": "inMathlib",
+          "size": "——",
+          "evidence": "★★mathlib に**ある**: `NumberField.house.exists_ne_zero_int_vec_house_le`(NumberTheory/NumberField/House.lean)。土台の `Int.Matrix.exists_ne_zero_int_vec_norm_le`(NumberTheory/SiegelsLemma.lean:181)も。★これが超越性証明の算術側の心臓部である。"
+        },
+        {
+          "id": "liouville-ineq",
+          "title": "Liouville 不等式 —— 0 でない代数的整数は小さくなれない",
+          "deps": [],
+          "status": "todo",
+          "size": "小",
+          "evidence": "★mathlib の `NumberField.exists_conjugate_one_le_norm`(0 でない代数的整数はノルム ≥ 1 の共役を持つ)と `norm_embedding_le_house` から、`|α| ≥ house(α)^{-(d-1)}` は短い。"
+        },
+        {
+          "id": "schwarz-many-zeros",
+          "title": "多点で消える正則関数の小ささ(Schwarz の補題の多零点版)",
+          "deps": [],
+          "status": "todo",
+          "size": "中",
+          "evidence": "★`f(z)/∏(z - z_i)` に最大値原理を当てる。mathlib に最大値原理(`Complex.norm_le_of_forall_mem_frontier_norm_le`、Analysis/Complex/AbsMax.lean:400)と 1 点の高位版(`Complex.dist_le_mul_div_pow_of_mapsTo_ball_of_isLittleO`、Schwarz.lean:144)は**ある**。多点版は**無い**(2026-08-18、`Analysis/Complex/` を目視)。"
+        },
+        {
+          "id": "aux-function",
+          "title": "補助関数 `F(z) = Σ c_pq exp((p x₁ + q x₂) z)` の構成",
+          "deps": ["siegel-nf"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "`F(m₁y₁+m₂y₂+m₃y₃)` の値は `exp(x_i y_j)` の単項式の代数的結合。Siegel で `c_pq` を選び、多くの点で消させる。"
+        },
+        {
+          "id": "growth",
+          "title": "`F` の増大度評価(有限指数の整関数)",
+          "deps": ["aux-function"],
+          "status": "todo",
+          "size": "小",
+          "evidence": "指数和なので `|F(z)| ≤ (Σ|c_pq|) exp(C|z|)`。初等的。"
+        },
+        {
+          "id": "extrapolation",
+          "title": "外挿の帰納 —— `F` が新しい格子点でも消えること",
+          "deps": ["schwarz-many-zeros", "liouville-ineq", "growth"],
+          "status": "todo",
+          "size": "★大(ここが本体)",
+          "evidence": "解析側(小さい)と算術側(0 でなければ大きい)を突き合わせて 0 を強制する、超越性証明の標準の段。"
+        },
+        {
+          "id": "sixexp-thm",
+          "title": "six exponentials theorem",
+          "deps": ["extrapolation"],
+          "status": "todo",
+          "size": "中",
+          "evidence": "`x₁,x₂` が ℚ 上一次独立・`y₁,y₂,y₃` が ℚ 上一次独立なら `exp(x_i y_j)` の 6 個のうち少なくとも 1 つは超越的。"
+        },
+        {
+          "id": "lemma65ii",
+          "title": "`Lemma 6.5, (ii)` への適用",
+          "deps": ["sixexp-thm"],
+          "status": "todo",
+          "size": "小",
+          "evidence": "原文は `{log p₂, log p₄, log p₆}` と `{1, log p₃/log p₄}` に当てる。(i) は実装済み(`Found/FrdI/Lemma65.lean` の `log_primes_linearIndependent`)。"
+        }
+      ]
+    }
+  ]
+}
