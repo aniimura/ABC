@@ -228,6 +228,21 @@ theorem isRigidFunctor_comp_of_isEquivalence (F : D ⥤ E) (hF : IsRigidFunctor 
   simp only [Iso.refl_hom]
   rfl
 
+/-- ★★**rigidity は関手の同型で移る** —— `F ≅ G` で `G` が rigid なら `F` も rigid。
+
+★★図式の**もう一方の合成関手**に rigidity を渡すのに要る ——
+1-可換性が「2 つの合成関手は同型」を与えるので、片方で示せば両方に届く。 -/
+theorem isRigidFunctor_of_iso {F G : C ⥤ E} (e : F ≅ G) (hG : IsRigidFunctor G) :
+    IsRigidFunctor F := by
+  intro η
+  have h : e.symm ≪≫ η ≪≫ e = Iso.refl G := hG _
+  have hη : η = e ≪≫ (e.symm ≪≫ η ≪≫ e) ≪≫ e.symm := by
+    refine Iso.ext (NatTrans.ext (funext fun X => ?_))
+    simp
+  rw [hη, h]
+  refine Iso.ext (NatTrans.ext (funext fun X => ?_))
+  simp
+
 end Rigid
 
 /-! ## ★段 2・3 —— anchor と subanchor は保たれる -/

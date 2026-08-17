@@ -781,6 +781,27 @@ noncomputable def psiBaseCommute :
       erw [Category.assoc, Category.assoc, hid2, Category.comp_id]
       rfl)
 
+include hbi in
+/-- ★★★★**[FrdI] Proposition 3.11, (iii) の rigidity** ——
+`𝒟₂` が slim なら、図式の**両方の合成関手**が rigid である。
+
+原文 (FrdI p.74):
+> Finally, we consider assertion (iii). Write N for the one-object category whose
+
+★★**2 手**:
+1. `Ψ ⋙ (𝒞₂ → 𝒟₂)` —— `Proposition 1.13, (i)` が `𝒞₂ → 𝒟₂` の rigidity を与え、
+   `isRigidFunctor_comp_of_isEquivalence` が圏同値との合成へ運ぶ
+2. `(𝒞₁ → 𝒟₁) ⋙ Ψ_Base` —— **1-可換性で 1 と同型**なので
+   `isRigidFunctor_of_iso` で届く
+
+★原文が「follows immediately from Proposition 1.13, (i)」と書く所の中身である ——
+**`Proposition 1.13` は合成関手については何も言っていない。** -/
+theorem psiBase_rigid [Ψ.IsEquivalence] (Fc₂ : FrobenioidCore P₂) (hslim : IsSlimCat D₂) :
+    IsRigidFunctor (Ψ ⋙ P₂.proj) ∧ IsRigidFunctor (P₁.proj ⋙ psiBase Ψ P₁ P₂) := by
+  have h1 : IsRigidFunctor (Ψ ⋙ P₂.proj) :=
+    isRigidFunctor_comp_of_isEquivalence Ψ P₂.proj (prop_1_13_i_global P₂ Fc₂ hslim)
+  exact ⟨h1, isRigidFunctor_of_iso (psiBaseCommute Ψ P₁ P₂ hbi) h1⟩
+
 end BaseFunctor
 
 end ABC3.Found.FrdI
