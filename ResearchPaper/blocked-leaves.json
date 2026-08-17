@@ -1,64 +1,69 @@
 {
- "measuredAt": "2026-08-17(★Cartier 因子の不在を追加。NCBelyi の 3 件と GenEll Definition 1.1 も同日。既存は 2026-08-15)",
- "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
- "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
- "blocked": [
-  {
-   "key": "[IUTchIII] Definition 3.8",
-   "reason": "Θ-パイロット対象 / q-パイロット対象は『大域実現 Frobenioid の対象で、ある monoid の生成元(捩れを除いて)により定まるもの』として定義される(物理 p.112、目視確認済み)。Frobenioid を我々は持っていない。名前だけの structure を置けば節点は増えるが、それは**被覆率を上げるためだけの空の節点**であり、指標を壊す。",
-   "unblockedBy": "Frobenioid([FrdI])の転写。2026-08-15 の機械概算で [FrdI] は根 Theorem 6.4 から到達 45 項目・辺 184 本・平均出次数 4.1 で、測った4論文の中で最も密。"
-  },
-  {
-   "key": "[IUTchIII] Proposition 3.9",
-   "reason": "★2026-08-15 に定義を確定させた(物理 p.115/p.116/p.119/p.120 を 400dpi 目視)。Proposition 3.9 は**2つの正規化**を要求する。(A) **packet-normalization**(p.115): 「multiplication of an element of 𝔐(−) by p_v corresponds to adding the quantity −log(p_v)」。これは対数体積そのものの性質で、我々の `padicLogVol` の上に載る。**語彙の不足は無い**。(B) **procession-normalization**(p.116): 「log-volumes on the products of the 𝔐(−) associated to the various **capsules** under consideration, which we normalize by taking the **average**, over the various capsules under consideration」。★演算は**重みなしの平均**で、算術としては自明。内容はすべて**索引構造**にある。",
-   "unblockedBy": "★(B) を阻んでいるのは **語彙**である。索引構造は p.120 で具体的に書かれている——procession は `j ∈ {1, …, l⋇}` で添字づけられ、j 番目の capsule の索引集合は `S^±_{j+1}`(ラベル {0,…,j})。しかし capsule の**中身**は `𝒟⊢-prime-strip`(Proposition 3.4, (ii) / [IUTchI] Proposition 6.9, (ii))であり、prime-strip / capsule / procession はいずれも IUT 固有の語彙で、我々は1つも持っていない。★平均だけを `Finset.sum / card` として書けば型は付くが、それは**索引構造の無い空の節点**であり、被覆率を上げるだけになる。★(A) の側は別で、mathlib の Haar のスケーリング(`μ(p·U) = p⁻¹·μ(U)`)が要る。これは語彙の問題ではなく**数学の作業**で、単位球の p 個の剰余類分解(ℤ_p ↔ closedBall(0,1) の橋 + `PadicInt.toZModPow`)を要する。mathlib の Haar 一意性(`Mathlib/MeasureTheory/Measure/Haar/Unique.lean`)は積分ベース(`haarScalarFactor`)で、こちらも軽くはない。",
-   "★halfSolved": "対数体積そのものは `Found/IUTchIII/LogVolume.lean` に構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残りは (A) 数学の作業 + (B) 語彙の不在。"
-  },
-  {
-   "key": "[GenEll] Definition 1.1",
-   "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。",
-   "unblockedBy": "★**複素解析空間の理論**(`X(ℂ)` の位相と、その上の連接層・エルミート計量)。これは mathlib に着手の形跡が無い。★ただし `ADiv(F)` と正規化次数、および**差積イデアル → 算術因子**(`Found/GenEll/LogDiff.lean`、2026-08-17)は既に実装済みで、`Definition 1.5, (iii)` の側は `X` を必要としないことも分かっている——**§1 は一枚岩ではない**。"
-  },
-  {
-   "key": "[GenEll] Proposition 1.6 / Proposition 1.7 —— 導手を「高さ」で抑える所",
-   "reason": "★★**2026-08-17 に一度書いた判断を同日中に訂正した記録である。**\n\n【誤った判断(取り消し)】「`grep -rln Cartier Mathlib/` が 0 件。ゆえに `Definition 1.5, (iv)` / `Proposition 1.6` / `1.7` / `Definition 3.3` / `Corollary 4.3` / `4.4` はすべてこの 1 点で止まる。『重い』のではなく『底が抜けている』。」\n\n【訂正】`Cartier` という**名前**が 0 件なのは事実である。しかし原文が要求している**中身**——因子を `x_F : Spec(𝓞_F) → X` で引き戻すこと——は `AlgebraicGeometry.Scheme.IdealSheafData.comap` + `Scheme.IdealSheafData.equivOfIsAffine` + `Scheme.ΓSpecIso` の 3 つで**そのまま届く**。実際 `Found/GenEll/CartierPullback.lean` がその 3 つだけで `f_x^D` と `log-cond` を構成した(sorry 0、負の対照 `logCond_top` つき)。★**名前で測って「無い」と結論したのが誤りの型である。**\n\n【現在の真の障害】残っているのは `Proposition 1.6` の**右辺**、すなわち「**高さ** `ht_L(x)`」の側である。それには `X` 上の**算術直線束**(`Definition 1.1`)が要り、そちらは `X^arc`(コンパクト正規複素解析空間)上のエルミート計量を要求するので依然として届かない。★本ファイルの `[GenEll] Definition 1.1` の項目を見ること——**塞がっているのはそこ 1 点であって、Cartier 因子ではない。**",
-   "unblockedBy": "★`Definition 1.1`(算術直線束)と同じ——**複素解析空間の理論**。`Proposition 1.6` の左辺(導手)側は 2026-08-17 に実装済み。",
-   "★halfSolved": "`Found/GenEll/CartierPullback.lean`(2026-08-17): `IsEffectiveCartier` / `pullbackIdeal`(= `D_x`)/ `conductorADiv`(= `f_x^D ≝ (D_x)_red`)/ `logCond` / `logCond_le_degNormalized_pullback`(導手 ≤ 引き戻した因子の次数)。★★**`Proposition 1.6` の「手前の段」までは取れている。** 残るのは高さとの接続だけである。"
-  },
-  {
-   "key": "[GenEll] Definition 1.5, (ii) —— 「E_red も有効 Cartier 因子である」",
-   "reason": "原文(物理 p.8)は『正規ネーター scheme `Z` の**正則部分**に含まれる有効 Cartier 因子 `E` について、`E_red` もまた有効 Cartier 因子である』と言う。★数学的な中身は **正則局所環は UFD である(Auslander–Buchsbaum)** に帰着する——UFD なら主イデアルの根基は(相異なる素因子の積で生成される)主イデアルだからである。★★**mathlib 実測 2026-08-17: Auslander–Buchsbaum は 0 件。** `IsRegularLocalRing` は `RingTheory/RegularLocalRing/Defs.lean` **1 ファイルだけ**にあり、中身は定義と基本補題(`isRegularLocalRing_iff` / `of_ringEquiv` / `iff_finrank_cotangentSpace` / PID なら正則 / Dedekind なら正則)のみ。**『正則局所環は UFD』も『高さ 1 素イデアルは主』も無い。**",
-   "unblockedBy": "★**Auslander–Buchsbaum の定理**(正則局所環 ⇒ UFD)。ホモロジー代数(有限自由分解、`Ext`、深さ)を要し、mathlib には着手の形跡が無い。",
-   "★皮肉": "★★**`Definition 1.5` の 4 条のうち、(i)(iii)(iv) は 2026-08-17 に実装できたのに、いちばん素朴に見える (ii) だけが残った。** (i) は `Scheme.SpecToEquivOfField` で、(iv) は `IdealSheafData.comap` で、いずれも mathlib の既製品 1 個で届いた。★『難しそうな順』と『実際に詰まる順』は一致しない——これは本プロジェクトで繰り返し出ている型である。",
-   "★halfSolved": "算術因子の水準での被約化(`Found/GenEll/Conductor.lean` の `ADivRed` / `adivRed_idem` / `adivRed_isEffective` / `deg_adivRed_le`)は実装済みで、**`Proposition 1.6` の非アルキメデス側にはそれで足りている**。足りていないのは『scheme の上で `E_red` が Cartier である』という一般論の側だけである。★★**ゆえに `Definition 1.5` には条なしの `.src` を付けない**(付ければ `genell-progress` が 4→5 に動くが、それは過剰主張である)。"
-  }
- ],
- "expandableWithWork": [
-  {
-   "key": "[IUTchII] Corollary 4.10",
-   "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
-   "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
-  },
-  {
-   "key": "[NCBelyi] Lemma 2.2",
-   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.3。入れ子帰納法の受け皿(`Theorem 2.5` の最終段が『Thus, Theorem 2.5 follows from Lemma 2.2』で閉じる)。★★**2026-08-17 訂正**: 逐語は既に `1_Structured/Noncritical Belyi Maps/section-2.html #ncbelyi-lemma-2-2` にある(この項目の旧記述『まだ逐語を転写していないだけ』は古かった)。残っているのは **`|S|` についての帰納法の実装**である。",
-   "cost": "★`Lemma 2.1` の計算核は 2026-08-17 に実装済み(`Found/NCBelyi/Lemma21.lean` —— 導関数の恒等式・性質 (e)・単調性・`|f| ≤ 1` on [0,1])。残るのは (1) `Lemma 2.1` の (a)(c)(d) を `S` の言葉でまとめる、(2) `Lemma 2.2` の `|S|` 帰納法。**いずれも初等的で、外部理論を要しない。**"
-  },
-  {
-   "key": "[NCBelyi] Lemma 2.4",
-   "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.5。`S ⊆ ℙ¹(ℚ)` の場合への帰着。`m(S)`・`d(S)` についての**入れ子帰納法**が本体。まだ逐語を転写していないだけである。",
-   "cost": "同上(物理 p.5。★証明は目視済みで、`m(S′) < m(S)` または `m(S′) = m(S) ∧ d(S′) < d(S)` の 2 分岐まで確認してある)"
-  }
- ],
- "★2026-08-15 の仕分け直しで消えた葉": [
-  {
-   "key": "[AbsTopIII] Definition 5.1",
-   "why": "辺そのものを落としたため葉でなくなった。`InitialThetaDataFieldPart` が転写したのは [IUTchI] Definition 3.1 の条件 (a) であり、[AbsTopIII] Definition 5.1 を引用しているのは条件 (b) である。(b) は転写していないので、その引用を辺として書くのは誤りだった。"
-  },
-  {
-   "key": "[AbsTopIII] (L1)",
-   "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
-  },
-  "★2026-08-17: [NCBelyi] Lemma 2.3 —— **葉ではなくなった**。`Found/NCBelyi/Separation.lean` に実装し(`sorry` 0)、`Skeleton/NCBelyi/Theorem25.lean` から参照させたので節点になった。原文の証明は 1 行(「it suffices to take λ such |λ − β| is sufficiently small」)で、実装では `ε ≤ δ/4` かつ `C·ε ≤ δ/4` として『十分小さい』を明示した。"
- ]
+  "measuredAt": "2026-08-17 夕(★Definition 1.5, (ii) の残りが Auslander–Buchsbaum 1 本に絞れた。★comap の積保存を expandableWithWork に追加。既存は 2026-08-17 昼 / 2026-08-15)",
+  "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
+  "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
+  "blocked": [
+    {
+      "key": "[IUTchIII] Definition 3.8",
+      "reason": "Θ-パイロット対象 / q-パイロット対象は『大域実現 Frobenioid の対象で、ある monoid の生成元(捩れを除いて)により定まるもの』として定義される(物理 p.112、目視確認済み)。Frobenioid を我々は持っていない。名前だけの structure を置けば節点は増えるが、それは**被覆率を上げるためだけの空の節点**であり、指標を壊す。",
+      "unblockedBy": "Frobenioid([FrdI])の転写。2026-08-15 の機械概算で [FrdI] は根 Theorem 6.4 から到達 45 項目・辺 184 本・平均出次数 4.1 で、測った4論文の中で最も密。"
+    },
+    {
+      "key": "[IUTchIII] Proposition 3.9",
+      "reason": "★2026-08-15 に定義を確定させた(物理 p.115/p.116/p.119/p.120 を 400dpi 目視)。Proposition 3.9 は**2つの正規化**を要求する。(A) **packet-normalization**(p.115): 「multiplication of an element of 𝔐(−) by p_v corresponds to adding the quantity −log(p_v)」。これは対数体積そのものの性質で、我々の `padicLogVol` の上に載る。**語彙の不足は無い**。(B) **procession-normalization**(p.116): 「log-volumes on the products of the 𝔐(−) associated to the various **capsules** under consideration, which we normalize by taking the **average**, over the various capsules under consideration」。★演算は**重みなしの平均**で、算術としては自明。内容はすべて**索引構造**にある。",
+      "unblockedBy": "★(B) を阻んでいるのは **語彙**である。索引構造は p.120 で具体的に書かれている——procession は `j ∈ {1, …, l⋇}` で添字づけられ、j 番目の capsule の索引集合は `S^±_{j+1}`(ラベル {0,…,j})。しかし capsule の**中身**は `𝒟⊢-prime-strip`(Proposition 3.4, (ii) / [IUTchI] Proposition 6.9, (ii))であり、prime-strip / capsule / procession はいずれも IUT 固有の語彙で、我々は1つも持っていない。★平均だけを `Finset.sum / card` として書けば型は付くが、それは**索引構造の無い空の節点**であり、被覆率を上げるだけになる。★(A) の側は別で、mathlib の Haar のスケーリング(`μ(p·U) = p⁻¹·μ(U)`)が要る。これは語彙の問題ではなく**数学の作業**で、単位球の p 個の剰余類分解(ℤ_p ↔ closedBall(0,1) の橋 + `PadicInt.toZModPow`)を要する。mathlib の Haar 一意性(`Mathlib/MeasureTheory/Measure/Haar/Unique.lean`)は積分ベース(`haarScalarFactor`)で、こちらも軽くはない。",
+      "★halfSolved": "対数体積そのものは `Found/IUTchIII/LogVolume.lean` に構成済み(`padicVolume` / `padicLogVol`、sorry 無し、非退化性つき)。残りは (A) 数学の作業 + (B) 語彙の不在。"
+    },
+    {
+      "key": "[GenEll] Definition 1.1",
+      "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。",
+      "unblockedBy": "★**複素解析空間の理論**(`X(ℂ)` の位相と、その上の連接層・エルミート計量)。これは mathlib に着手の形跡が無い。★ただし `ADiv(F)` と正規化次数、および**差積イデアル → 算術因子**(`Found/GenEll/LogDiff.lean`、2026-08-17)は既に実装済みで、`Definition 1.5, (iii)` の側は `X` を必要としないことも分かっている——**§1 は一枚岩ではない**。"
+    },
+    {
+      "key": "[GenEll] Proposition 1.6 / Proposition 1.7 —— 導手を「高さ」で抑える所",
+      "reason": "★★**2026-08-17 に一度書いた判断を同日中に訂正した記録である。**\n\n【誤った判断(取り消し)】「`grep -rln Cartier Mathlib/` が 0 件。ゆえに `Definition 1.5, (iv)` / `Proposition 1.6` / `1.7` / `Definition 3.3` / `Corollary 4.3` / `4.4` はすべてこの 1 点で止まる。『重い』のではなく『底が抜けている』。」\n\n【訂正】`Cartier` という**名前**が 0 件なのは事実である。しかし原文が要求している**中身**——因子を `x_F : Spec(𝓞_F) → X` で引き戻すこと——は `AlgebraicGeometry.Scheme.IdealSheafData.comap` + `Scheme.IdealSheafData.equivOfIsAffine` + `Scheme.ΓSpecIso` の 3 つで**そのまま届く**。実際 `Found/GenEll/CartierPullback.lean` がその 3 つだけで `f_x^D` と `log-cond` を構成した(sorry 0、負の対照 `logCond_top` つき)。★**名前で測って「無い」と結論したのが誤りの型である。**\n\n【現在の真の障害】残っているのは `Proposition 1.6` の**右辺**、すなわち「**高さ** `ht_L(x)`」の側である。それには `X` 上の**算術直線束**(`Definition 1.1`)が要り、そちらは `X^arc`(コンパクト正規複素解析空間)上のエルミート計量を要求するので依然として届かない。★本ファイルの `[GenEll] Definition 1.1` の項目を見ること——**塞がっているのはそこ 1 点であって、Cartier 因子ではない。**",
+      "unblockedBy": "★`Definition 1.1`(算術直線束)と同じ——**複素解析空間の理論**。`Proposition 1.6` の左辺(導手)側は 2026-08-17 に実装済み。",
+      "★halfSolved": "`Found/GenEll/CartierPullback.lean`(2026-08-17): `IsEffectiveCartier` / `pullbackIdeal`(= `D_x`)/ `conductorADiv`(= `f_x^D ≝ (D_x)_red`)/ `logCond` / `logCond_le_degNormalized_pullback`(導手 ≤ 引き戻した因子の次数)。★★**`Proposition 1.6` の「手前の段」までは取れている。** 残るのは高さとの接続だけである。"
+    },
+    {
+      "key": "[GenEll] Definition 1.5, (ii) —— 「E_red も有効 Cartier 因子である」",
+      "reason": "原文(物理 p.8)は『正規ネーター scheme `Z` の**正則部分**に含まれる有効 Cartier 因子 `E` について、`E_red` もまた有効 Cartier 因子である』と言う。★数学的な中身は **正則局所環は UFD である(Auslander–Buchsbaum)** に帰着する——UFD なら主イデアルの根基は(相異なる素因子の積で生成される)主イデアルだからである。★★**mathlib 実測 2026-08-17: Auslander–Buchsbaum は 0 件。** `IsRegularLocalRing` は `RingTheory/RegularLocalRing/Defs.lean` **1 ファイルだけ**にあり、中身は定義と基本補題(`isRegularLocalRing_iff` / `of_ringEquiv` / `iff_finrank_cotangentSpace` / PID なら正則 / Dedekind なら正則)のみ。**『正則局所環は UFD』も『高さ 1 素イデアルは主』も無い。**\n\n★★★【2026-08-17 夕 追記——A–B 以外はすべて取れた】 lean/ABC3/Found/GenEll/RadicalCartier.lean で以下を sorry 0 / 標準 3 公理のみで取得した: (a) 茎と根基の交換 stalk_radical(IsAffineOpen.isLocalization_stalk + IsLocalization.map_radical)、(b) 点ごとの主張 IsEffectiveCartierAt.radical、(c) scheme への大域化 isEffectiveCartierStalk_radical(各茎が UFD であることを仮定)、(d) 被約性の定義と冪等性。★★したがって残るのは **Auslander–Buchsbaum ただ 1 本**である。★器具の記録: (a) は最初 whnf が 100 万ヒートビートでも終わらず組めなかった。点を ↥U の変数として持つ補題(ideal_radical_map_germ)を経由すると通る——数学は同じで点の持ち方だけが違う。",
+      "unblockedBy": "★**Auslander–Buchsbaum の定理**(正則局所環 ⇒ UFD)**のみ**。ホモロジー代数(有限自由分解、Ext、深さ)を要し、mathlib には着手の形跡が無い。★★2026-08-17 時点で他の段はすべて取得済み(上記 reason 末尾)——この 1 本が入れば Definition 1.5, (ii) は原文どおりの仮定で閉じる。",
+      "★皮肉": "★★**`Definition 1.5` の 4 条のうち、(i)(iii)(iv) は 2026-08-17 に実装できたのに、いちばん素朴に見える (ii) だけが残った。** (i) は `Scheme.SpecToEquivOfField` で、(iv) は `IdealSheafData.comap` で、いずれも mathlib の既製品 1 個で届いた。★『難しそうな順』と『実際に詰まる順』は一致しない——これは本プロジェクトで繰り返し出ている型である。",
+      "★halfSolved": "算術因子の水準での被約化(`Found/GenEll/Conductor.lean` の `ADivRed` / `adivRed_idem` / `adivRed_isEffective` / `deg_adivRed_le`)は実装済みで、**`Proposition 1.6` の非アルキメデス側にはそれで足りている**。足りていないのは『scheme の上で `E_red` が Cartier である』という一般論の側だけである。★★**ゆえに `Definition 1.5` には条なしの `.src` を付けない**(付ければ `genell-progress` が 4→5 に動くが、それは過剰主張である)。"
+    }
+  ],
+  "expandableWithWork": [
+    {
+      "key": "[IUTchII] Corollary 4.10",
+      "reason": "張れないのではなく、[IUTchII] の 1_Structured 文書が未作成なだけ。物理 p.158 は目視確認済み。",
+      "cost": "1_Structured/Inter-universal Teichmuller Theory II/ の新規作成(逐語1〜2単位)"
+    },
+    {
+      "key": "[NCBelyi] Lemma 2.2",
+      "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.3。入れ子帰納法の受け皿(`Theorem 2.5` の最終段が『Thus, Theorem 2.5 follows from Lemma 2.2』で閉じる)。★★**2026-08-17 訂正**: 逐語は既に `1_Structured/Noncritical Belyi Maps/section-2.html #ncbelyi-lemma-2-2` にある(この項目の旧記述『まだ逐語を転写していないだけ』は古かった)。残っているのは **`|S|` についての帰納法の実装**である。",
+      "cost": "★`Lemma 2.1` の計算核は 2026-08-17 に実装済み(`Found/NCBelyi/Lemma21.lean` —— 導関数の恒等式・性質 (e)・単調性・`|f| ≤ 1` on [0,1])。残るのは (1) `Lemma 2.1` の (a)(c)(d) を `S` の言葉でまとめる、(2) `Lemma 2.2` の `|S|` 帰納法。**いずれも初等的で、外部理論を要しない。**"
+    },
+    {
+      "key": "[NCBelyi] Lemma 2.4",
+      "reason": "★**張れないのではない。原典が `0_Source` にある**(`Noncritical Belyi Maps.pdf`、全 9 ページ)。物理 p.5。`S ⊆ ℙ¹(ℚ)` の場合への帰着。`m(S)`・`d(S)` についての**入れ子帰納法**が本体。まだ逐語を転写していないだけである。",
+      "cost": "同上(物理 p.5。★証明は目視済みで、`m(S′) < m(S)` または `m(S′) = m(S) ∧ d(S′) < d(S)` の 2 分岐まで確認してある)"
+    },
+    {
+      "key": "[GenEll] Proposition 1.4, (i) —— 引き戻しが積を保つこと(Scheme.IdealSheafData.comap_mul)",
+      "reason": "★2026-08-17 実測: mathlib の Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean に **comap_mul は無い**(mul で検索して 0 件)。あるのは comap_sup(comap は左随伴なので上限は保つ)であり、積は別件である。★comap I f := (pullback.fst f I.subschemeι).ker と**ファイバー積の射影の核**で定義されているため、アフィン局所の記述が要る——それは ideal_comap_of_isOpenImmersion(開埋め込みの場合)しか無い。★★**数学的には真である**: comap I f は逆像イデアル層 I·O_X であり、逆像イデアル層は積を保つ。★★★本プロジェクトでは PullbackMul として型に出し、恒等射での非空虚性(pullbackMul_id)を証明した(Found/GenEll/HeightConstruction.lean)。しかもその証明は NumberField を使っておらず、**任意のアフィンスキームで成り立つ**——comap が問題になるのは射が非自明なときだけである。★茎の水準では既に取れている(stalkPullback_mul、Found/GenEll/StalkPullback.lean)。",
+      "cost": "mathlib 級の貢献 1 本。comap のアフィン局所記述(ファイバー積の Γ を計算する)を作れば Ideal.map_mul に落ちる。★あるいは (comap I f).stalk x = stalkPullback I f x という橋を架け、「イデアルは局所化で決まる」で戻す道もある。★★これが入れば Proposition 1.4, (i) が構成から無条件に出る((ii)(iii) は 2026-08-17 に無条件で取得済み)。"
+    }
+  ],
+  "★2026-08-15 の仕分け直しで消えた葉": [
+    {
+      "key": "[AbsTopIII] Definition 5.1",
+      "why": "辺そのものを落としたため葉でなくなった。`InitialThetaDataFieldPart` が転写したのは [IUTchI] Definition 3.1 の条件 (a) であり、[AbsTopIII] Definition 5.1 を引用しているのは条件 (b) である。(b) は転写していないので、その引用を辺として書くのは誤りだった。"
+    },
+    {
+      "key": "[AbsTopIII] (L1)",
+      "why": "辺の先を `[AbsTopIII] Corollary 5.10, (i)`(物理 p.145)へ差し替え、我々のスケルトン節点の出典もそちらへ移したため、葉ではなく**展開済みの節点**になった。原文 [IUTchIII] p.31 が実際に引用しているのは Corollary 5.10, (i) であり、(L1) は導入部の要約である。"
+    },
+    "★2026-08-17: [NCBelyi] Lemma 2.3 —— **葉ではなくなった**。`Found/NCBelyi/Separation.lean` に実装し(`sorry` 0)、`Skeleton/NCBelyi/Theorem25.lean` から参照させたので節点になった。原文の証明は 1 行(「it suffices to take λ such |λ − β| is sufficiently small」)で、実装では `ε ≤ δ/4` かつ `C·ε ≤ δ/4` として『十分小さい』を明示した。"
+  ]
 }
