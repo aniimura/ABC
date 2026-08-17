@@ -54,6 +54,7 @@ import ABC3.Found.FrdI.Thm34Rigid
 import ABC3.Found.FrdI.Lemma65
 import ABC3.Found.FrdI.Prop44Pre
 import ABC3.Found.FrdI.Def45
+import ABC3.Found.FrdI.Example43
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Core
 import ABC3.Found.IUTchIII.LogShell
@@ -154,6 +155,7 @@ import ABC3.Found.Arakelov.PicRestrictLocal
 import ABC3.Found.Arakelov.PicSheafifyTrivial
 import ABC3.Found.Arakelov.PicSheafGroup
 import ABC3.Found.Arakelov.PicResScalarsLax
+import ABC3.Found.Arakelov.PicPushLax
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
