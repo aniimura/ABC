@@ -203,7 +203,188 @@ variable {P G} in
   rw [hmap]
   simp [gpMap_id]
 
-/-! ## ★4. 残り —— 合成則と関手
+/-! ## ★4. ★★★★合成則
+
+★★**紙の上の計算(2026-08-17)**。`f = (a, φ)`、`g = (b, ψ)`、引き戻しを `(γ, α)`
+(`γ ≫ φ = α ≫ b`)とし、`m = degFr φ`、`n = degFr ψ` と置く。
+
+★**両辺とも `Φ^gp(Base a)⁻¹` の像**なので、`A′` の上の等式に落ちる。
+★さらに `Φ^gp(Base γ)⁻¹` を外に出すと、**`Dd` の上の等式**
+
+```
+Div(α ≫ ψ) − (n·m)·Div(γ ≫ a) = Φ^gp(Base α)(…ψ…) + n · Φ^gp(Base γ)(…φ…)
+```
+
+になり、★★**残るのは `γ ≫ φ = α ≫ b` の零因子成分**
+
+```
+Φ(Base γ)(Div φ) + m·Div γ = Φ(Base α)(Div b) + Div α
+```
+
+**だけ**である。★これが「合成が well-defined」の中身そのものである。 -/
+
+variable {P G} in
+/-- ★引き戻しの `α` の次数は `φ` の次数に等しい —— `γ`・`b` が pre-step だから。 -/
+theorem biratPullAlpha_degFr' (F : FrobenioidCore P) {A B : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (W : IdxBirat P G B) :
+    P.degFr (biratPullAlpha F Z φ W) = P.degFr φ := by
+  have h : P.degFr φ * P.degFr (biratPullGamma F Z φ W)
+      = P.degFr W.unop.hom.hom * P.degFr (biratPullAlpha F Z φ W) :=
+    (P.degFr_comp _ _).symm.trans
+      ((congrArg P.degFr (biratPull_sq F Z φ W)).trans (P.degFr_comp _ _))
+  rw [show P.degFr (biratPullGamma F Z φ W) = 1 from (biratPullGamma_preStep F Z φ W).1,
+    show P.degFr W.unop.hom.hom = 1 from W.unop.hom.property.2.1, mul_one, one_mul] at h
+  exact h.symm
+
+variable {P G} in
+/-- ★★**引き戻しの四角形の零因子成分** —— 合成則の核心。 -/
+theorem biratPull_div (F : FrobenioidCore P) {A B : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (W : IdxBirat P G B) :
+    Φ.map (P.Base (biratPullGamma F Z φ W)) (P.Div φ)
+        + ((P.degFr φ : ℕ+) : ℕ) • P.Div (biratPullGamma F Z φ W)
+      = Φ.map (P.Base (biratPullAlpha F Z φ W)) (P.Div W.unop.hom.hom)
+        + P.Div (biratPullAlpha F Z φ W) := by
+  have h : Φ.map (P.Base (biratPullGamma F Z φ W)) (P.Div φ)
+        + ((P.degFr φ : ℕ+) : ℕ) • P.Div (biratPullGamma F Z φ W)
+      = Φ.map (P.Base (biratPullAlpha F Z φ W)) (P.Div W.unop.hom.hom)
+        + ((P.degFr W.unop.hom.hom : ℕ+) : ℕ) • P.Div (biratPullAlpha F Z φ W) :=
+    (P.Div_comp _ _).symm.trans
+      ((congrArg P.Div (biratPull_sq F Z φ W)).trans (P.Div_comp _ _))
+  rw [show P.degFr W.unop.hom.hom = 1 from W.unop.hom.property.2.1,
+    PNat.one_coe, one_smul] at h
+  exact h
+
+variable {P} in
+/-- ★★★★**代表元レベルの合成則** —— `𝒞^birat → 𝔽_{Φ^gp}` の関手性の本体。
+
+★★**両辺とも `Φ^gp(Base (γ≫a))⁻¹` の像**に書けるので、
+`Dd` の上の等式に落ちる。★そこで残るのは
+**`γ ≫ φ = α ≫ b` の零因子成分**だけである。 -/
+theorem sliceDivGpOf_comp {A B E A' B' Dd : C}
+    (a : A' ⟶ A) (ha : IsIso (P.Base a)) (has : P.degFr a = 1)
+    (b : B' ⟶ B) (hb : IsIso (P.Base b)) (hbs : P.degFr b = 1)
+    (φ : A' ⟶ B) (ψ : B' ⟶ E)
+    (γ : Dd ⟶ A') (hγ : IsIso (P.Base γ)) (hγs : P.degFr γ = 1)
+    (α : Dd ⟶ B') (hsq : γ ≫ φ = α ≫ b)
+    (hca : IsIso (P.Base (γ ≫ a))) :
+    sliceDivGpOf (γ ≫ a) hca (α ≫ ψ)
+      = gpMap _ (Φ.map (sliceBaseOf (P := P) a ha φ)) (sliceDivGpOf b hb ψ)
+        + ((P.degFr ψ : ℕ+) : ℕ) • sliceDivGpOf a ha φ := by
+  haveI := ha; haveI := hb; haveI := hγ; haveI := hca
+  -- ★次数
+  have hdα : P.degFr α = P.degFr φ := by
+    have h : P.degFr φ * P.degFr γ = P.degFr b * P.degFr α :=
+      (P.degFr_comp _ _).symm.trans ((congrArg P.degFr hsq).trans (P.degFr_comp _ _))
+    rw [hγs, hbs, mul_one, one_mul] at h
+    exact h.symm
+  -- ★底の 2 本
+  have hbsq : P.Base γ ≫ P.Base φ = P.Base α ≫ P.Base b := by
+    rw [← P.Base_comp, ← P.Base_comp, hsq]
+  have hb1 : inv (P.Base γ) ≫ P.Base α = P.Base φ ≫ inv (P.Base b) := by
+    rw [IsIso.inv_comp_eq, ← Category.assoc, hbsq, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have hinvca : inv (P.Base (γ ≫ a)) = inv (P.Base a) ≫ inv (P.Base γ) := by
+    refine IsIso.inv_eq_of_hom_inv_id ?_
+    rw [P.Base_comp, Category.assoc, ← Category.assoc (P.Base a), IsIso.hom_inv_id,
+      Category.id_comp, IsIso.hom_inv_id]
+  -- ★零因子の等式(`hsq` の成分)
+  have hdiv : Φ.map (P.Base γ) (P.Div φ) + ((P.degFr φ : ℕ+) : ℕ) • P.Div γ
+      = Φ.map (P.Base α) (P.Div b) + P.Div α := by
+    have h : Φ.map (P.Base γ) (P.Div φ) + ((P.degFr φ : ℕ+) : ℕ) • P.Div γ
+        = Φ.map (P.Base α) (P.Div b) + ((P.degFr b : ℕ+) : ℕ) • P.Div α :=
+      (P.Div_comp _ _).symm.trans ((congrArg P.Div hsq).trans (P.Div_comp _ _))
+    rwa [hbs, PNat.one_coe, one_smul] at h
+  have hB : toGp _ (P.Div α)
+      = toGp _ (Φ.map (P.Base γ) (P.Div φ)) + ((P.degFr φ : ℕ+) : ℕ) • toGp _ (P.Div γ)
+        - toGp _ (Φ.map (P.Base α) (P.Div b)) := by
+    have hgp : toGp (Φ.val (P.toElem.obj Dd).base) (Φ.map (P.Base γ) (P.Div φ))
+          + ((P.degFr φ : ℕ+) : ℕ) • toGp _ (P.Div γ)
+        = toGp _ (Φ.map (P.Base α) (P.Div b)) + toGp _ (P.Div α) := by
+      rw [← toGp_nsmul, ← toGp_add, ← toGp_add, hdiv]
+    exact eq_sub_of_add_eq' hgp.symm
+  -- ★★★`Dd` の上の等式
+  have hkey : toGp _ (P.Div (α ≫ ψ))
+        - ((P.degFr (α ≫ ψ) : ℕ+) : ℕ) • toGp _ (P.Div (γ ≫ a))
+      = gpMap _ (Φ.map (P.Base α))
+          (toGp _ (P.Div ψ) - ((P.degFr ψ : ℕ+) : ℕ) • toGp _ (P.Div b))
+        + ((P.degFr ψ : ℕ+) : ℕ) • gpMap _ (Φ.map (P.Base γ))
+          (toGp _ (P.Div φ) - ((P.degFr φ : ℕ+) : ℕ) • toGp _ (P.Div a)) := by
+    rw [P.Div_comp, P.Div_comp, P.degFr_comp, hdα, has, PNat.one_coe, one_smul,
+      toGp_add, toGp_add, toGp_nsmul, map_sub, map_sub, gpMap_toGp, gpMap_toGp,
+      map_nsmul, map_nsmul, gpMap_toGp, gpMap_toGp, hB, PNat.mul_coe]
+    simp only [smul_sub, smul_add, smul_smul]
+    abel
+  -- ★★両辺を `Φ^gp(Base (γ≫a))⁻¹` の像に揃える
+  have e1 : (inv (P.Base a) ≫ inv (P.Base γ)) ≫ P.Base α
+      = (inv (P.Base a) ≫ P.Base φ) ≫ inv (P.Base b) := by
+    rw [Category.assoc, hb1, ← Category.assoc]
+  have e2 : (inv (P.Base a) ≫ inv (P.Base γ)) ≫ P.Base γ = inv (P.Base a) := by
+    rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+  rw [sliceDivGpOf_eq, sliceDivGpOf_eq, sliceDivGpOf_eq, sliceBaseOf_eq, hkey, hinvca,
+    map_add, map_nsmul, gpMap_phi_comp, gpMap_phi_comp, gpMap_phi_comp, e1, e2]
+
+variable {P G} in
+/-- ★★★★**`Hom^birat` の零因子は合成を保つ** —— 中段の関手性の本体。
+
+原文 (FrdI p.83):
+> where the functors between elementary Frobenioids are those induced by the natural
+
+★`𝔽_{Φ^gp}` の合成則そのものの形
+`Div(f ≫ g) = Φ^gp(Base f)(Div g) + degFr(g) · Div(f)` になっている。 -/
+theorem biratDivGp_comp {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E) :
+    biratDivGp (compBirat P G G.core f g)
+      = gpMap _ (Φ.map (biratBase f)) (biratDivGp g)
+        + ((biratDeg g : ℕ+) : ℕ) • biratDivGp f := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratDivGp_mk, biratDivGp_mk, biratDivGp_mk, biratBase_mk, biratDeg_mk]
+  exact sliceDivGpOf_comp Z.unop.hom.hom Z.unop.hom.property.2.2 Z.unop.hom.property.2.1
+    W.unop.hom.hom W.unop.hom.property.2.2 W.unop.hom.property.2.1 φ ψ
+    (biratPullGamma G.core Z φ W) (biratPullGamma_preStep G.core Z φ W).2
+    (biratPullGamma_preStep G.core Z φ W).1
+    (biratPullAlpha G.core Z φ W) (biratPull_sq G.core Z φ W) _
+
+/-! ## ★5. ★★★★関手 `𝒞^birat ⥤ 𝔽_{Φ^gp}` —— 原文の図式の中段 -/
+
+/-- ★★★★**[FrdI] Proposition 4.4, (i)** —— **関手 `𝒞^birat → 𝔽_{Φ^gp}`**。
+
+原文 (FrdI p.83):
+> where the functors between elementary Frobenioids are those induced by the natural
+
+★底と次数は下段(`biratToElem`)と同じ、★**零因子だけが新しい**。 -/
+noncomputable def biratToElemGp : BiratCat P G ⥤ ElemFrobCat (Φ.gpOn (phi_integral P)) where
+  obj A := ⟨(P.toElem.obj (biratDown P G A)).base⟩
+  map f := ⟨biratBase f, biratDivGp f, biratDeg f⟩
+  map_id A := by
+    refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+    · show biratBase (toHomBirat (P := P) (G := G) (𝟙 (biratDown P G A))) = 𝟙 _
+      rw [biratBase_toHomBirat, P.Base_id]
+    · show biratDivGp (toHomBirat (P := P) (G := G) (𝟙 (biratDown P G A))) = 0
+      rw [biratDivGp_toHomBirat, P.Div_id]
+      exact toGp_zero
+    · show biratDeg (toHomBirat (P := P) (G := G) (𝟙 (biratDown P G A))) = 1
+      rw [biratDeg_toHomBirat, P.degFr_id]
+  map_comp f g :=
+    ElemFrobCat.Hom.ext (biratBase_comp G.core f g) (biratDivGp_comp f g)
+      (biratDeg_comp G.core f g)
+
+/-- ★★★**図式の上半分が可換**(対象) —— `𝒞 → 𝔽_Φ → 𝔽_{Φ^gp}` と
+`𝒞 → 𝒞^birat → 𝔽_{Φ^gp}` は同じ対象を与える。 -/
+theorem biratGp_square_obj (A : C) :
+    (toBiratCat P G ⋙ biratToElemGp P G).obj A
+      = (P.toElem ⋙ elemToGp P).obj A := rfl
+
+variable {P G} in
+/-- ★★★**図式の上半分が可換**(射) —— 底・零因子・次数のいずれも一致する。
+
+★零因子が一致するのが `biratDivGp_toHomBirat`(`Div φ` の `Φ^gp` での像)である。 -/
+theorem biratGp_square_map {A B : C} (φ : A ⟶ B) :
+    (toBiratCat P G ⋙ biratToElemGp P G).map φ
+      = (P.toElem ⋙ elemToGp P).map φ :=
+  ElemFrobCat.Hom.ext (biratBase_toHomBirat φ) (biratDivGp_toHomBirat φ)
+    (biratDeg_toHomBirat φ)
+
+/-! ## ★6. 残り —— `Φ^birat`
 
 ★★不変性(上)があるので、**余錐 `biratDivGpCocone` はそのまま組める**。
 ★その先の `map_comp`(合成則)が `𝔽_{Φ^gp}` への関手を与え、
