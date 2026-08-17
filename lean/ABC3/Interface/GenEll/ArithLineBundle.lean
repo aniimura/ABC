@@ -63,11 +63,15 @@ open ABC3.Meta NumberField
 
 ★これは「算術直線束そのもの」ではなく、**高さの定義が実際に使うものだけ**である。
 `X` や `M̄` の中身(層 B・C)は型に出さない——出すには解析化と可逆層が要り、それは無い。 -/
-structure PulledBackClassData where
-  /-- `X(ℚ̄)` の点を表す型。 -/
-  Point : Type
+structure PulledBackClassData.{u, v} where
+  /-- `X(ℚ̄)` の点を表す型。
+
+  ★**宇宙は多相にしてある。**`Found/` の witness では点の型が
+  「定義体 `F : Type` を含む構造の商」なので `Type 1` に居る
+  (`Found/GenEll/UPoint.lean` の `UPoint`)。 -/
+  Point : Type u
   /-- `X` 上の算術直線束 `M̄` を表す型。 -/
-  Bundle : Type
+  Bundle : Type v
   /-- 点 `x` が数体 `F` の上で定義されること(原文 `x ∈ X(F)`)。 -/
   DefinedOver : (F : Type) → [Field F] → [NumberField F] → Point → Prop
   /-- `x` を定義する数体 `F` の上での正規化次数 `deg_F(x_F^* M̄)`。 -/
