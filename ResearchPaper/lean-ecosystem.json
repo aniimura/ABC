@@ -63,13 +63,13 @@
   "PrimeNumberTheoremAnd": {
    "url": "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd",
    "what": "素数定理とその周辺(Kontorovich・Tao ら)。★[GenEll] Remark 4.1.1 の後半(θ(x)/x → 1)がここにある",
-   "measuredAt": "2026-08-17",
-   "toolchain": "leanprover/lean4:v4.32.2",
-   "toolchainGap": "★我々より新しい(v4.31.0-rc2 → v4.32.2)。依存に加えるには我々の toolchain を上げる必要がある",
+   "measuredAt": "2026-08-17(★依存に加えた日。当初測定も同日)",
+   "toolchain": "leanprover/lean4:v4.31.0(pin したコミット時点)。HEAD は v4.32.2",
+   "toolchainGap": "★★**当初の記述「我々より新しい(v4.31.0-rc2 → v4.32.2)。toolchain を上げる必要がある」は粗すぎた**。PNT には **lean v4.31.0 の期間**があり(2026-06-20 の `efed0f9e` 〜 2026-07-18 の `9ecc1b67` 直前)、その最後の `b01237e8` に `chebyshev_asymptotic` が入っている。★我々は `v4.31.0-rc2` だったので **rc → 正式版の小移動**で済んだ。",
    "leanFiles": 236,
    "sorries": 286,
    "lastCommit": "2026-08-15",
-   "status": "進行中。★ただし我々が要る部分は完成している可能性が高い(下記)",
+   "status": "★★**依存に加えた(2026-08-17)**。pin は `b01237e8389be17d52c32419cc8ae8a6d4e4218b`——**lean v4.31.0 期間の最後のコミット**である。",
    "whatWeNeed": "PrimeNumberTheoremAnd/Consequences.lean:177 の `chebyshev_asymptotic : θ ~[atTop] id`",
    "findings": [
     "★★**θ は mathlib の `Chebyshev.theta` そのもの**である(`Chebyshev.theta_le_psi` / `Chebyshev.theta_eq_sum_Icc` を使っている)。我々が `Found/GenEll/PrimesOfSize.lean` で使っているものと同一——**変換が要らない**",
@@ -77,7 +77,12 @@
     "★その 9 ファイルの sorry は **合計 2 件**で、どちらも Wiener.lean の `prelim_decay_2`(Fourier 減衰、**どこからも使われていない**)と `prelim_decay_3`",
     "★`prelim_decay_3` を使うのは `decay_alt` ただ 1 つ、`decay_alt` を使うのは `IEANTN/CH2/CH2_part1.lean` ただ 1 つ——**閉包の外**である",
     "★★したがって **`chebyshev_asymptotic` は sorry に依存していない**と読める",
-    "★repo 全体の sorry 286 件は `IEANTN/`(明示的な数値評価、Dusart / Kadiri など)と `StrongPNT.lean` に集中しており、我々の使う経路には無い"
+    "★repo 全体の sorry 286 件は `IEANTN/`(明示的な数値評価、Dusart / Kadiri など)と `StrongPNT.lean` に集中しており、我々の使う経路には無い",
+    "★★**`#print axioms chebyshev_asymptotic` は `[propext, Classical.choice, Quot.sound]` のみ**(2026-08-17、実際にビルドして実測)。同 repo の `Wiener.lean` に sorry 2 件(`prelim_decay_2` / `prelim_decay_3`、Fourier 変換の減衰評価)があるが、**経路外**であることをこの実測が示している。★静的に辿るのではなく **`#print axioms` で確定させた**。",
+    "★**PNT は追加で 4 つのパッケージを引く** —— `LeanArchitect` / `checkdecls` / `leancert` / `PrimeCert`。依存の足跡は想定より大きい。",
+    "★**mathlib は `v4.31.0-rc2` タグではなく master コミット `db127794` を pin している**。我々もそこへ合わせた。★★その結果、我々の 2800 宣言で直したのは **`Finset.sum_inter_add_sum_diff` → `..._sdiff` の 1 箇所だけ**だった。",
+    "★**`θ` は mathlib の `Chebyshev.theta` そのもの**(`Consequences.lean` は `open scoped Chebyshev` して `Chebyshev.theta_le_psi` / `theta_eq_sum_Icc` を使う)。橋は `Asymptotics.isEquivalent_iff_tendsto_one` 1 本で済んだ。",
+    "★**別ワークツリーで先に検証した**(`git worktree add`)。共有ワークツリーを壊さずに go/no-go を決められた。"
    ],
    "caveats": [
     "★★**これは grep による依存追跡であって `#print axioms` ではない。** 決定的な確認には build が要るが、toolchain が違う(v4.32.2 対 v4.31.0-rc2)ので、まず toolchain 更新の判断が要る",

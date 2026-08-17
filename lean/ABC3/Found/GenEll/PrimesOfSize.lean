@@ -305,7 +305,7 @@ theorem lemma_4_1 (M : ℕ) (hM : 0 < M)
             exact mul_le_mul_of_nonneg_right hcard hlogY0
     calc ∑ p ∈ T, logPrime p
         = ∑ p ∈ T ∩ A, logPrime p + ∑ p ∈ T \ A, logPrime p := by
-          rw [Finset.sum_inter_add_sum_diff]
+          rw [Finset.sum_inter_add_sum_sdiff]
       _ ≤ xA + (M - 1 : ℕ) * Real.log Y := add_le_add hTA hTS
   -- ★残る 2 つの評価
   have hthH : Chebyshev.theta H ≤ 5 / 4 * H + Ceps :=

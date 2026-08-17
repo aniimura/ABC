@@ -7,10 +7,24 @@ pp.unicode.fun = true
 relaxedAutoImplicit = false
 autoImplicit = false
 
+# ★mathlib —— `v4.31.0-rc2` タグから master コミット `db127794` へ移した(2026-08-17)。
+# PrimeNumberTheoremAnd が pin している rev に合わせるためである。
+# ★我々の 2800 宣言のうち直った箇所は 1 つだけだった
+# (`Finset.sum_inter_add_sum_diff` → `..._sdiff`)。
 [[require]]
 name = "mathlib"
-scope = "leanprover-community"
-rev = "v4.31.0-rc2"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "db127794c79fdeb86f6b0cf6ff2c804026fbaff1"
+
+# ★素数定理(`[GenEll] Remark 4.1.1` の第 2 項)を借りるため(2026-08-17)。
+# ★`b01237e8` は PNT の **lean v4.31.0 期間の最後**のコミットである。
+# HEAD は v4.32.2 なので、そちらを取ると toolchain の跳びが大きくなる。
+# ★`chebyshev_asymptotic` は `#print axioms` で標準 3 公理のみ(実測)。
+# 同 repo の `Wiener.lean` に sorry 2 件があるが**経路外**である。
+[[require]]
+name = "PrimeNumberTheoremAnd"
+git = "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git"
+rev = "b01237e8389be17d52c32419cc8ae8a6d4e4218b"
 
 [[lean_lib]]
 name = "ABC3"

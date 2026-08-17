@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.PrimesOfSize
+import ABC3.Found.GenEll.PrimeNumberTheorem
 import Mathlib.NumberTheory.Chebyshev
 
 /-!
@@ -110,20 +111,22 @@ theorem lemma_4_1 (M : ℕ) (hM : 0 < M)
 
 ★★**この Remark が「素数定理は圏外」と明示している。**
 
-★★**第 1 項は 2026-08-17 に証明した**——`Found/GenEll/PrimesOfSize.lean` の
-`exists_xeps_cond_ii`。原文が "entirely elementary" と書いた中身は
-`Real.isLittleO_log_id_atTop`(`log` は恒等写像より真に小さい)である。
+★★**本 statement は `sorry` ではない**(2026-08-17 に閉じた)——
+`Found/GenEll/PrimeNumberTheorem.lean` の `remark_4_1_1` を参照する。
 
-★**残る `sorry` は第 2 項だけ**であり、それは**素数定理そのもの**である
-(mathlib に無い。公開プロジェクト `PrimeNumberTheoremAnd` が持つ)。
-★★**半分取れたことを全部取れたと読まない**——`.src` は条つきのままである。 -/
+- 第 1 項(条件 (ii) の初等性)は**我々が証明した**。
+  原文が "entirely elementary" と書いた中身は `Real.isLittleO_log_id_atTop`
+  (`log` は恒等写像より真に小さい)である。
+- ★★第 2 項(`θ(x)/x → 1`)は**素数定理そのもの**で、**外部から借りた**——
+  `PrimeNumberTheoremAnd.chebyshev_asymptotic`(`#print axioms` で
+  標準 3 公理のみを実測。同 repo の `Wiener.lean` の sorry 2 件は経路外)。
+  ★**原文も [Edw], p.76 を指すだけで証明していない。**
+  借りたことは `Found` 側の docstring と `.src` に明記してある。 -/
 theorem remark_4_1_1 :
     (∀ (M : ℕ) (eps : ℝ), 0 < eps →
         ∃ xeps : ℝ, 0 < xeps ∧ ∀ x : ℝ, xeps ≤ x → (M : ℝ) * Real.log x ≤ eps * x)
   ∧ Filter.Tendsto (fun x : ℝ => Chebyshev.theta x / x) Filter.atTop (nhds 1) :=
-  ⟨ABC3.Found.GenEll.exists_xeps_cond_ii,
-    -- ★ここだけが素数定理である。mathlib に無い(2026-08-16 実測)。
-    by sorry⟩
+  ABC3.Found.GenEll.remark_4_1_1
 
 /-! ## Lemma 4.2 —— いくつかの初等的な評価 -/
 
