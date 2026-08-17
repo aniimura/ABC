@@ -39,6 +39,7 @@ import ABC3.Found.FrdI.Def27
 import ABC3.Found.FrdI.Prop25
 import ABC3.Found.FrdI.Prop25iii
 import ABC3.Found.FrdI.Thm34
+import ABC3.Found.FrdI.Rmk341
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -80,6 +81,7 @@ import ABC3.Found.GenEll.PrimeNumberTheorem
 import ABC3.Found.GenEll.ProjTopology
 import ABC3.Found.GenEll.IdealStalk
 import ABC3.Found.GenEll.StalkPullback
+import ABC3.Found.GenEll.DegMul
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
