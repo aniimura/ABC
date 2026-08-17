@@ -637,6 +637,40 @@ noncomputable def isotropificationCommute (F₁ : FrobenioidCore P₁) (F₂ : F
         Category.assoc, isotropicHullIso_hom, ← Category.assoc, isotropicHullIso_hom,
         isotropification_square])
 
+/-- ★★**1-一意性の核** —— 図式に入る関手は、すべて
+`ι₁ ⋙ Ψ ⋙ isotropification₂` と同型である。
+
+★★鍵は `Proposition 1.9, (v)` の **`ι₁ ⋙ isotropification₁ ≅ 𝟭`**
+(`isotropificationRestrictIso`、在庫)——★これは
+「**isotropification は `𝒞^istr` 上では恒等**」という一言だが、
+1-一意性はまさにその一言で決まる: 図式の等式を `ι₁` で前合成すると
+**左辺の `isotropification₁` が消えて `G` そのものになる**。 -/
+noncomputable def commuteUniqAux (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (G : Istr P₁ ⥤ Istr P₂)
+    (hG : isotropification P₁ F₁ ⋙ G ≅ Ψ ⋙ isotropification P₂ F₂) :
+    G ≅ (isotropicProp P₁).ι ⋙ Ψ ⋙ isotropification P₂ F₂ :=
+  (Functor.leftUnitor G).symm ≪≫
+    Functor.isoWhiskerRight (isotropificationRestrictIso P₁ F₁).symm G ≪≫
+    Functor.associator _ _ _ ≪≫
+    Functor.isoWhiskerLeft (isotropicProp P₁).ι hG
+
+/-- ★★★★**[FrdI] Theorem 3.4, (i) の 1-一意性** —— 図式に入る関手は
+`Ψ^istr` と(自然に)同型である。
+
+原文 (FrdI p.62):
+> there exists a 1-unique functor Ψistr : Cistr
+
+★★**両者を同じ第三の関手に繋ぐだけ**で済む(`commuteUniqAux`)。
+★随伴の一意性は要らなかった。 -/
+noncomputable def isotropificationCommute_uniq (F₁ : FrobenioidCore P₁)
+    (F₂ : FrobenioidCore P₂) (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) (G : Istr P₁ ⥤ Istr P₂)
+    (hG : isotropification P₁ F₁ ⋙ G ≅ Ψ ⋙ isotropification P₂ F₂) :
+    G ≅ psiIstr Ψ P₁ P₂ h₁ h₂ :=
+  commuteUniqAux Ψ P₁ P₂ F₁ F₂ G hG ≪≫
+    (commuteUniqAux Ψ P₁ P₂ F₁ F₂ (psiIstr Ψ P₁ P₂ h₁ h₂)
+      (isotropificationCommute Ψ P₁ P₂ F₁ F₂ h₁ h₂)).symm
+
 end Isotropic
 
 end ABC3.Found.FrdI
