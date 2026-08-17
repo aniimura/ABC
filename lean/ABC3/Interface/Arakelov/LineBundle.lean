@@ -3,6 +3,9 @@ import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
 import Mathlib.RingTheory.ClassGroup.Basic
 import Mathlib.RingTheory.PicardGroup
 import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.Monoidal
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 
 /-!
 # Arakelov 理論のスケルトン(1/3)—— **幾何側: 可逆層と `Pic`**
@@ -40,6 +43,34 @@ open ABC3.Meta AlgebraicGeometry CategoryTheory NumberField
 
 /-! ## ★★B1 —— `Pic(X)` -/
 
+/-! ## ★★★退化封じの道具 —— 層加群のテンソル積(mathlib だけで書く)
+
+★★★**2026-08-17 に穴が見つかった。** 当初の `PicardData` は
+
+    Pic X := CommRing.Pic Γ(X, ⊤)
+
+を**通してしまう**。これは `equivPicRing` も関手性もすべて満たすが、
+★**非アフィンな `X` では数学的に誤り**である(例: `Pic(ℙ¹) = ℤ` だが
+`Γ(ℙ¹, 𝒪) = k` なので `CommRing.Pic k = 0`)。
+
+★★構造がアフィンでしか `Pic` を縛っていなかったのが原因である。
+これは C1 で見つけた `evalAffine` の穴と**同じ型の見落とし**
+——「一部で固定しても、残りが自由なら誤った witness が通る」。
+
+★塞ぎ方: `Pic X` の元に**下にある可逆層**を持たせ、
+「`Pic X` は可逆層の同型類そのものである」ことを課す。
+★`Interface/` は `Found/` を import できないので、テンソル積を
+mathlib の前層テンソル(`PresheafOfModules.Monoidal.tensorObj`)+ 層化で書き下す。 -/
+
+/-- ★層加群のテンソル積(前層でテンソルしてから層化する)。 -/
+noncomputable def modTensor (X : Scheme.{0}) (F G : X.Modules) : X.Modules :=
+  (PresheafOfModules.sheafification (R := X.ringCatSheaf) (𝟙 X.ringCatSheaf.obj)).obj
+    (PresheafOfModules.Monoidal.tensorObj (R := X.presheaf) F.val G.val)
+
+/-- ★可逆層 = テンソル積の逆を持つ層加群。 -/
+def IsInvertibleSheaf {X : Scheme.{0}} (F : X.Modules) : Prop :=
+  ∃ G : X.Modules, Nonempty (modTensor X F G ≅ SheafOfModules.unit X.ringCatSheaf)
+
 /-- **(B1)** スキーム上の**可逆層の群** `Pic(X)`。
 
 原文 (GenEll p.3):
@@ -72,6 +103,31 @@ structure PicardData where
   `ClassGroup.equivPic` があるので、これは**書ける条件**である。 -/
   equivPicRing : (R : CommRingCat.{0}) →
     letI := (group (Spec R)); Pic (Spec R) ≃* CommRing.Pic R
+  /-- ★★★★**`Pic X` の元は可逆層である**——下にある層を持たせる。
+
+  ★★★**これが「非アフィンで自由」の穴を塞ぐ。**
+  これが無いと `Pic X := CommRing.Pic Γ(X, ⊤)` が通ってしまい、
+  `Pic(ℙ¹) = ℤ` を `0` と主張する witness が「達成」と数えられる。 -/
+  sheafOf : (X : Scheme.{0}) → Pic X → X.Modules
+  /-- ★下にある層は可逆である。 -/
+  sheafOf_invertible : ∀ (X : Scheme.{0}) (L : Pic X), IsInvertibleSheaf (sheafOf X L)
+  /-- ★単位元の下にあるのは構造層。 -/
+  sheafOf_one : ∀ (X : Scheme.{0}),
+    Nonempty (sheafOf X (group X).toDivInvMonoid.toMonoid.toOne.one
+      ≅ SheafOfModules.unit X.ringCatSheaf)
+  /-- ★★積はテンソル積に移る。 -/
+  sheafOf_mul : ∀ (X : Scheme.{0}) (L M : Pic X),
+    Nonempty (sheafOf X (@HMul.hMul _ _ _
+        (@instHMul _ (group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
+      ≅ modTensor X (sheafOf X L) (sheafOf X M))
+  /-- ★★★**同型な層は同じ元を与える**(`Pic` は同型類の集合)。 -/
+  sheafOf_injective : ∀ (X : Scheme.{0}) (L M : Pic X),
+    Nonempty (sheafOf X L ≅ sheafOf X M) → L = M
+  /-- ★★★**可逆層はすべて現れる**(`Pic` に足りない元が無い)。
+
+  ★★これと `sheafOf_injective` を合わせて「`Pic X` = 可逆層の同型類」が確定する。 -/
+  sheafOf_surjective : ∀ (X : Scheme.{0}) (F : X.Modules), IsInvertibleSheaf F →
+    ∃ L : Pic X, Nonempty (sheafOf X L ≅ F)
 
 /-- Track B は何を作らねばならないか。 -/
 def PicardData.waiting : WaitingFor :=
