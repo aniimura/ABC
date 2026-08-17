@@ -115,4 +115,47 @@ theorem prop_3_11_i (Fc : FrobenioidCore P) (G : Frobenioid P)
     (isOfAutAmpleType_of_groupLike P Fc hgl hiso) hut
     (isOfBaseTrivialType_of_groupLike P Fc hgl hiso)
 
+/-! ## ★(ii) の第 1 歩 —— **FSMI 自己射は prime-Frobenius 自己射である**
+
+原文 (FrdI p.73):
+> follows that Di has no FSMI-endomorphisms [cf. §0], hence that a morphism of Ci
+
+原文 (FrdI p.73):
+> is an FSMI-endomorphism if and only if it is a prime-Frobenius endomorphism [cf.
+
+★★**原文が挙げる 2 つの根拠がそのまま 2 つの場合を潰す**:
+
+| `Proposition 1.14, (i)` の 3 分類 | 潰し方 |
+|---|---|
+| (a) prime-Frobenius | ★これが結論 |
+| (b) `Div` が既約な step | ★**group-like なので `Div = 0`**、`0` は既約でない |
+| (c) 底が既約な pull-back | ★★**底が `𝒟` の FSMI 自己射になる**(`Proposition 1.11, (vi)`)——`𝒟` は FSMFF 型なので矛盾 |
+
+★★**`⟸` の側(prime-Frobenius 自己射は FSMI)は別問題**である ——
+`Prop114.lean` の測定によれば「prime-Frobenius ⟹ mono」は一般には**偽になりうる**
+(障害は `𝒪^×(A)` の `p`-捻れ)。★`Proposition 3.11` は **unit-trivial 型**を仮定するので
+その障害は消えるが、**fiberwise-surjective の側は未測定**である。
+-/
+
+include P in
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 1 歩** ——
+`𝒟` が FSMFF 型で `𝒞` が group-like・isotropic 型なら、
+**`𝒞` の FSMI 自己射は prime-Frobenius 自己射である**。
+
+★★`Proposition 1.14, (i)` の 3 分類のうち 2 つが潰れる:
+group-like から `Div = 0`(既約でない)、
+FSMFF 型から「底が既約な pull-back」が排除される。 -/
+theorem isPrimeFrobenius_of_isFSMI_endo (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hFSMFF : IsOfFSMFFType D) (hgl : IsOfGroupLikeType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A : C} {φ : A ⟶ A} (h : IsFSMI φ) :
+    IsPrimeFrobenius P φ := by
+  rcases (prop_1_14_i P G hiso φ).mp h.2 with hpf | ⟨-, hd⟩ | ⟨hpb, hb⟩
+  · exact hpf
+  · -- ★(b): group-like なら `Div φ = 0`、しかし既約元は `0` でない
+    exact absurd (isIsometric_of_groupLikeType P hgl φ) hd.1
+  · -- ★(c): 底が `𝒟` の FSMI 自己射になる —— FSMFF 型に矛盾
+    exact absurd
+      (⟨(prop_1_11_vi_fsm P Fc φ hpb).mp h.1, hb⟩ : IsFSMI (P.Base φ))
+      (not_isFSMI_endo_of_isOfFSMFFType hFSMFF (P.Base φ))
+
 end ABC3.Found.FrdI
