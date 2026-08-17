@@ -123,6 +123,26 @@ theorem ideal_comap_top_eq_ker (f : X ⟶ Y) (U : X.affineOpens) :
 ★★これが入れば `Proposition 1.4, (i)` が構成から**無条件に**出る。
 
 ★本ファイルは**そこまでは主張しない**。取ったのは第 1 段だけである。
+
+### ★★★器具の記録 —— 易しい側の包含すら組めなかった
+
+`Ideal.map (f.appLE V U h) (I.ideal V) ≤ (I.comap f).ideal U`(易しい側)を
+10 回試して**組み上がらなかった**。★数学は 3 行である:
+`pullback.condition` を `V` で `app` に落とし、
+`s ∈ I.ideal V = ker (I.subschemeι.app V)` を使い、`appLE_comp_appLE` で `U` へ制限する。
+
+★★**摩擦は `CommRingCat.Hom.hom` と `ConcreteCategory.hom` の正規形の争い**である。
+`simp only` を当てるたびに**どちらかへ揺れ戻り**、`rw [h0]` が当たらない。
+`CommRingCat.comp_apply` / `ConcreteCategory.comp_apply` / `RingHom.comp_apply` /
+`CommRingCat.hom_comp` のどれを入れても、別の形に正規化されて次の `rw` が外れた。
+
+★★★**同じ証明が、import の重さで通ったり通らなかったりした**——
+軽い import の probe では通り、同じ内容を本ファイルに置くと通らない。
+★これは本日 5 例目の「同じ数学が書き方で通ったり通らなかったりする」であり、
+**今までで最も悪質な型**である(書き方ではなく**環境**で変わる)。
+
+★次に取るときは `ConcreteCategory` の API に統一して書くこと。
+**半端に `sorry` を置かず、取れた第 1 段だけを残す。**
 -/
 
 /-! ## ★出典の紐付け(`.src`) -/
