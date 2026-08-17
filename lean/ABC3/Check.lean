@@ -17,6 +17,7 @@ import ABC3.Check.FrdI.Prop21QuantifierGap
 import ABC3.Check.Arakelov.ArcSpaceNondegenerate
 import ABC3.Check.Arakelov.PicNondegenerate
 import ABC3.Check.Arakelov.PullbackNondegenerate
+import ABC3.Check.GaloisRep.OmegaNondegenerate
 /-!
 # Check — 我々のモデルについての検査
 

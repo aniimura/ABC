@@ -3246,3 +3246,45 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 
 ★★★これは (a) を迂回できる可能性を示す——ただし対象の同型を出すにも
 結局は生成元と余極限を通す必要があり、(b) は残る。
+
+
+---
+
+## §9-44 (2026-08-18) ★★★★★★同じ型の穴が 4 例——一般規則を抽出した
+
+### ★★4 例
+
+| # | 場所 | 穴 | 状態 |
+|---|---|---|---|
+| 1 | C1 `evalAffine` | 値がアフィンでしか固定されていなかった | ★塞いだ(2026-08-17) |
+| 2 | B1 `Pic` | 非アフィンで自由だった | ★塞いだ(`sheafOf` 追加、2026-08-17) |
+| 3 | B1 `pullback` | `sheafOf` と結ばれていなかった | ★塞いだ(`sheafOf_pullback` 追加、2026-08-18) |
+| 4 | G7 `omega` | **曲線と結ばれていない** | ★★**未**(検査だけ書いた) |
+
+★どれも `Check/` で**機械的に**穴の実在を示した。
+
+### ★★★★★★一般規則
+
+> **`→ Type` の posit(台を仮定する欄)は、必ず
+> 「その欄と入力データの両方を言及する条件」を 1 本以上持たねばならない。**
+
+★★階数・濃度・群構造だけでは足りない——それらは**入力を無視する定数**で満たせる。
+
+| 足りない条件の例 | 通ってしまう witness |
+|---|---|
+| 「階数 1」だけ | `omega L W := 𝓞 L`(曲線を無視) |
+| 「群である」だけ | `Pic X := Multiplicative ℤ`(スキームを無視) |
+| 「アフィンで一致」だけ | 非アフィンで自由 |
+
+### ★★★監査すべき残り(`Interface/` の `→ Type` posit、2026-08-18 実測で 20 件超)
+
+    APic.APic / APic.AlgPoint / ArcSpace.Metric
+    Torsion.tateModule
+    GenEll/AbcSetup.Curve / GaloisRep.EllClass / GaloisRep.Curve
+    HeightTheory.Point / ABundle / Divisor / GenericClass
+    TateLocal.LocalField / Curve / StableLine / MultExt
+    IUTchIII/PilotObjects.Amb
+    NCBelyi/BelyiSetup.Curve / Point / ProjPoint / Mor / NumField
+
+★★★**「達成」を数える前に、この監査を通すこと。**
+★通っていない欄が残ったまま埋めると、**誤った達成**が数えられる。
