@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-17 ・ コミット 469 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-17 ・ コミット 470 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">35/35</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">3040</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">779</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">3055</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">783</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">172</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
@@ -124,7 +124,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 2026-08-16 に穴は <code>htwist</code> 1 点まで絞れており、反例があるとすれば
 <code>Aut_C(A)</code> の底が <code>Φ(A)</code> に非自明に作用する所にしかない、と分かっている。
 <b>足した前提が空虚でないことは証明済み</b>（<code>autAmple_and_baseTrivial_nonvacuous</code>：𝔽_Φ の対象はすべて両方を満たす）。
-<b>★併せて (ii) の <code>plBkEquiv</code> の本質的全射性が未実装</b>（Lean の書き換えが通らず打ち切った）。</td></tr>
+<b>★★併せて (ii)「𝒞′ = 𝒞 ×_𝒟 𝒟′ が Frobenioid」は<u>まだ構成していない</u></b>——
+<code>cfpPreFrobenioid</code>（pre-Frobenioid 構造）までで、<code>Definition 1.3</code> の 21 条は組み立てていない。
+律速は <code>plBkEquiv</code>（<code>(𝒞′^pl-bk)_A → 𝒟′_{A_𝒟}</code> が圏同値）の本質的全射性で、
+<b>数学は片付いている</b>（循環しないことも確認済み）が Lean の書き換えで打ち切った。
+したがって Prop 1.6 は「前提を足した」だけでなく<b>未実装の条を持つ</b>。</td></tr>
 <tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
 「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
 （<code>mono_of_frobType_of_unitTrivial</code>）。原文が課すのは
@@ -152,6 +156,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>4796443</code></td><td>2026-08-17</td><td>`Proposition 2.1` を数えた——原文の記載不備は index.html に開示した</td></tr>
 <tr><td><code>17d606a</code></td><td>2026-08-17</td><td>★★★病は `Proposition 1.4` だけではなかった——§1 の Skeleton は系統的に偽である</td></tr>
 <tr><td><code>7e3aa96</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (iii)`——構成の側では BD-class ではなく等式が出る</td></tr>
 <tr><td><code>c4c5314</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (ii)`——因子で表すと仮定はアルキメデス側にしか効かない</td></tr>
@@ -163,14 +168,13 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <tr><td><code>24da0d4</code></td><td>2026-08-17</td><td>★★次数は積を和に送る——`Proposition 1.4, (i)` の次数側を取った</td></tr>
 <tr><td><code>0a71555</code></td><td>2026-08-17</td><td>★★★引き戻しは積を保つ——`comap` では無理だったものが茎では 1 行</td></tr>
 <tr><td><code>65fbb16</code></td><td>2026-08-17</td><td>重複を撤去した——`isotropification` の四角形は在庫にあった</td></tr>
-<tr><td><code>e882b05</code></td><td>2026-08-17</td><td>★★★有効 Cartier 因子は積で閉じる——茎で定義したら摩擦が消えた</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(779 件)。</div>
+<b>すべて PDF と機械照合している</b>(783 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

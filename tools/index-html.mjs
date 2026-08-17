@@ -165,7 +165,11 @@ ${esc(L0.notComplete.detail)}<br><br>
 2026-08-16 に穴は <code>htwist</code> 1 点まで絞れており、反例があるとすれば
 <code>Aut_C(A)</code> の底が <code>Φ(A)</code> に非自明に作用する所にしかない、と分かっている。
 <b>足した前提が空虚でないことは証明済み</b>（<code>autAmple_and_baseTrivial_nonvacuous</code>：𝔽_Φ の対象はすべて両方を満たす）。
-<b>★併せて (ii) の <code>plBkEquiv</code> の本質的全射性が未実装</b>（Lean の書き換えが通らず打ち切った）。</td></tr>
+<b>★★併せて (ii)「𝒞′ = 𝒞 ×_𝒟 𝒟′ が Frobenioid」は<u>まだ構成していない</u></b>——
+<code>cfpPreFrobenioid</code>（pre-Frobenioid 構造）までで、<code>Definition 1.3</code> の 21 条は組み立てていない。
+律速は <code>plBkEquiv</code>（<code>(𝒞′^pl-bk)_A → 𝒟′_{A_𝒟}</code> が圏同値）の本質的全射性で、
+<b>数学は片付いている</b>（循環しないことも確認済み）が Lean の書き換えで打ち切った。
+したがって Prop 1.6 は「前提を足した」だけでなく<b>未実装の条を持つ</b>。</td></tr>
 <tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
 「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
 （<code>mono_of_frobType_of_unitTrivial</code>）。原文が課すのは
