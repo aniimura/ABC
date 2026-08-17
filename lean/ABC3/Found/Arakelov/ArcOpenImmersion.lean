@@ -60,6 +60,68 @@ theorem imageAffineOpenIso_fac {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion
     (imageAffineOpenIso f U).hom ≫ (imageAffineOpen f U).1.ι = U.1.ι ≫ f :=
   IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
 
+/-! ## ★★★開埋め込みに沿った合成の連続性 -/
+
+/-- ★★**chart 同士の同型に沿った合成は連続**。
+
+★`iso.hom ≫ isoSpecV.hom = isoSpecU.hom ≫ (isoSpecU.inv ≫ iso.hom ≫ isoSpecV.hom)` と
+分解する。★★括弧の中は `Spec Γ(X,U) ⟶ Spec Γ(Y,V)` という**アフィン射**なので
+`continuous_comp_affine` が効く。 -/
+theorem continuous_comp_imageIso {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (U : X.affineOpens) :
+    @Continuous _ _ (arcTopologyOpen U) (arcTopologyOpen (imageAffineOpen f U))
+      (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ (imageAffineOpenIso f U).hom) := by
+  letI := arcTopologyOpen U
+  letI := arcTopologyOpen (imageAffineOpen f U)
+  letI := arcTopologyAffine (X.presheaf.obj (Opposite.op U.1))
+  letI := arcTopologyAffine (Y.presheaf.obj (Opposite.op (imageAffineOpen f U).1))
+  refine continuous_induced_rng.2 ?_
+  have h : (fun q : Spec (CommRingCat.of ℂ) ⟶ (imageAffineOpen f U).1.toScheme =>
+        q ≫ (imageAffineOpen f U).2.isoSpec.hom)
+        ∘ (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme =>
+            p ≫ (imageAffineOpenIso f U).hom)
+      = (fun q : Spec (CommRingCat.of ℂ) ⟶ Spec (X.presheaf.obj (Opposite.op U.1)) =>
+          q ≫ (U.2.isoSpec.inv ≫ (imageAffineOpenIso f U).hom ≫
+            (imageAffineOpen f U).2.isoSpec.hom))
+        ∘ (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.2.isoSpec.hom) := by
+    funext p
+    simp only [Function.comp_apply, Category.assoc, Iso.hom_inv_id_assoc]
+  rw [h]
+  exact Continuous.comp (continuous_comp_affine _) continuous_induced_dom
+
+/-- ★★★**開埋め込みとの合成は連続である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これが `ArcSpaceData.topology_openImmersion` の**前半**
+(`topology X ≤ induced (map f) (topology Y)`)である。
+
+★機構は `imageAffineOpenIso_fac`——**`X` の chart が `Y` の chart 1 つに収まる**。 -/
+theorem continuous_comp_openImmersion {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    @Continuous _ _ (arcTopology X) (arcTopology Y)
+      (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) := by
+  refine continuous_iSup_dom.2 fun U => ?_
+  refine continuous_iSup_rng (i := imageAffineOpen f U) ?_
+  letI := arcTopologyOpen U
+  letI := arcTopologyOpen (imageAffineOpen f U)
+  letI : TopologicalSpace (Spec (CommRingCat.of ℂ) ⟶ Y) :=
+    TopologicalSpace.coinduced
+      (fun q : Spec (CommRingCat.of ℂ) ⟶ (imageAffineOpen f U).1.toScheme =>
+        q ≫ (imageAffineOpen f U).1.ι)
+      (arcTopologyOpen (imageAffineOpen f U))
+  refine continuous_coinduced_dom.2 ?_
+  have h : (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) ∘
+        (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.1.ι)
+      = (fun q : Spec (CommRingCat.of ℂ) ⟶ (imageAffineOpen f U).1.toScheme =>
+          q ≫ (imageAffineOpen f U).1.ι)
+        ∘ (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme =>
+            p ≫ (imageAffineOpenIso f U).hom) := by
+    funext p
+    simp only [Function.comp_apply, Category.assoc, imageAffineOpenIso_fac]
+  rw [h]
+  exact Continuous.comp continuous_coinduced_rng (continuous_comp_imageIso f U)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def imageAffineOpen.src : ABC3.Meta.Source :=
@@ -70,6 +132,11 @@ def imageAffineOpen.src : ABC3.Meta.Source :=
 def imageAffineOpenIso_fac.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開埋め込みの chart の分解)",
+    sectionId := "genell-def-1-1-i" }
+
+def continuous_comp_openImmersion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みとの合成の連続性)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
