@@ -621,4 +621,81 @@ theorem birat_coAngularComp {A B E : BiratCat P G} (ψ : A ⟶ B) (φ : B ⟶ E)
     hi1 hi2 hfin).mpr ?_
   exact IsCoAngular.comp P G.core hk₁c hφ₀c
 
+/-! ## ★10. `𝒞` から押し出すだけの 3 条 —— (i)(a)(b)・(ii)
+
+★★底(`𝒟`)も次数も `𝒞^birat` で変わらないので、`𝒞` の証人をそのまま送る。
+★Frobenius 型が渡ることは辞書(`birat_isFrobeniusType_iff`)による。 -/
+
+include P in
+/-- ★**(i)(b)** 底の同型は pre-step の span で持ち上がる。 -/
+theorem birat_preStepSpan (A B : BiratCat P G)
+    (α : ((biratPre P G).toElem.obj A).base ⟶ ((biratPre P G).toElem.obj B).base)
+    (hα : IsIso α) :
+    ∃ (X : BiratCat P G) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep (biratPre P G) φ),
+      IsPreStep (biratPre P G) ψ ∧
+        α = @inv _ _ _ _ ((biratPre P G).Base φ) hφ.2 ≫ (biratPre P G).Base ψ := by
+  obtain ⟨X, φ, ψ, hφ, hψ, heq⟩ := G.core.preStepSpan (biratDown P G A) (biratDown P G B) α hα
+  refine ⟨show BiratCat P G from X, (toBiratCat P G).map φ, (toBiratCat P G).map ψ,
+    (birat_isPreStep_iff (P := P) (G := G) φ).mpr hφ,
+    (birat_isPreStep_iff (P := P) (G := G) ψ).mpr hψ, ?_⟩
+  haveI : IsIso ((biratPre P G).Base ((toBiratCat P G).map φ)) :=
+    ((birat_isPreStep_iff (P := P) (G := G) φ).mpr hφ).2
+  refine (IsIso.eq_inv_comp ((biratPre P G).Base ((toBiratCat P G).map φ))).mpr ?_
+  have e1 : (biratPre P G).Base ((toBiratCat P G).map φ) = P.Base φ :=
+    biratBase_toHomBirat φ
+  have e2 : (biratPre P G).Base ((toBiratCat P G).map ψ) = P.Base ψ :=
+    biratBase_toHomBirat ψ
+  rw [e1]
+  haveI : IsIso (P.Base φ) := hφ.2
+  exact ((IsIso.eq_inv_comp (P.Base φ)).mp heq).trans e2.symm
+
+include P in
+/-- ★**(ii)** 各次数の Frobenius 型射が存在する。 -/
+theorem birat_frobDegSurj (A : BiratCat P G) (n : ℕ+) :
+    ∃ (B : BiratCat P G) (φ : A ⟶ B),
+      IsFrobeniusType (biratPre P G) φ ∧ (biratPre P G).degFr φ = n := by
+  obtain ⟨B, φ, hft, hdeg⟩ := G.core.frobDegSurj (biratDown P G A) n
+  exact ⟨show BiratCat P G from B, (toBiratCat P G).map φ,
+    (birat_isFrobeniusType_iff P G φ).mpr ⟨hft.1.1, hft.2⟩,
+    (birat_degFr_iff (P := P) (G := G) φ n).mpr hdeg⟩
+
+include P in
+/-- ★**Frobenius-trivial 性は `𝒞^birat` へ渡る** —— `ζ` を関手で送るだけ。 -/
+theorem birat_isFrobeniusTrivial (A : C) (h : IsFrobeniusTrivial P A) :
+    IsFrobeniusTrivial (biratPre P G) (show BiratCat P G from A) := by
+  obtain ⟨ζ, hζd, hζb⟩ := h
+  refine ⟨{ toFun := fun n => (toBiratCat P G).map ((ζ n : A ⟶ A))
+            map_one' := by
+              show (toBiratCat P G).map ((ζ 1 : A ⟶ A)) = 𝟙 _
+              rw [show (ζ 1 : A ⟶ A) = 𝟙 A from
+                congrArg (fun t : End A => (t : A ⟶ A)) ζ.map_one]
+              exact (toBiratCat P G).map_id A
+            map_mul' := fun x y => by
+              show (toBiratCat P G).map ((ζ (x * y) : A ⟶ A))
+                = (toBiratCat P G).map ((ζ y : A ⟶ A))
+                  ≫ (toBiratCat P G).map ((ζ x : A ⟶ A))
+              rw [show (ζ (x * y) : A ⟶ A) = (ζ y : A ⟶ A) ≫ (ζ x : A ⟶ A) from
+                congrArg (fun t : End A => (t : A ⟶ A)) (ζ.map_mul x y)]
+              exact (toBiratCat P G).map_comp _ _ }, ?_, ?_⟩
+  · intro n
+    exact (birat_degFr_iff (P := P) (G := G) ((ζ n : A ⟶ A)) n).mpr (hζd n)
+  · intro n
+    refine ⟨?_, ?_⟩
+    · show (biratPre P G).Base ((toBiratCat P G).map ((ζ n : A ⟶ A)))
+        = (biratPre P G).Base (𝟙 _)
+      have h1 : (biratPre P G).Base ((toBiratCat P G).map ((ζ n : A ⟶ A)))
+          = P.Base ((ζ n : A ⟶ A)) := biratBase_toHomBirat ((ζ n : A ⟶ A))
+      rw [h1, (biratPre P G).Base_id]
+      exact ((hζb n).1).trans (P.Base_id A)
+    · exact (birat_isFrobeniusType_iff P G ((ζ n : A ⟶ A))).mpr
+        ⟨(hζb n).2.1.1, (hζb n).2.2⟩
+
+include P in
+/-- ★**(i)(a)** 底への全射性。 -/
+theorem birat_baseSurj (Y : D) :
+    ∃ A : BiratCat P G, IsFrobeniusTrivial (biratPre P G) A ∧
+      Nonempty (((biratPre P G).toElem.obj A).base ≅ Y) := by
+  obtain ⟨A, hft, he⟩ := G.core.baseSurj Y
+  exact ⟨show BiratCat P G from A, birat_isFrobeniusTrivial P G A hft, he⟩
+
 end ABC3.Found.FrdI
