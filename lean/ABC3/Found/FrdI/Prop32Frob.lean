@@ -420,4 +420,176 @@ theorem pfRoot_frobDegSurj (hfi : IsOfFrobeniusIsotropicType P) (X : PfRootObj P
       (idxOne P F (rtObj P F X.obj X.root)
         (rtObj P F (rtObj P F X.obj n) X.root)) θ n).mpr hθd
 
+/-! ## ★11. 遷移は pre-step を保つ -/
+
+variable {P F} in
+/-- ★**添字の遷移は pre-step を保つ**。 -/
+theorem idxTransport_isPreStep {A B : C} {Z W : IdxPf P F A B} (u : Z ⟶ W)
+    (φ : Z.right.obj.1 ⟶ Z.right.obj.2) (h : IsPreStep P φ) :
+    IsPreStep P (idxTransport P F u φ) := by
+  have hsq := idxTransport_spec (F := F) u φ
+  obtain ⟨hua, hub, hud⟩ := u.right.property
+  refine ⟨?_, ?_⟩
+  · show P.degFr (idxTransport P F u φ) = 1
+    exact (repDeg_map (F := F) u φ).trans h.1
+  · haveI hia : IsIso (P.Base u.right.hom.1) := hua.2
+    haveI hib : IsIso (P.Base u.right.hom.2) := hub.2
+    haveI hif : IsIso (P.Base φ) := h.2
+    have h1 : P.Base (φ ≫ u.right.hom.2)
+        = P.Base (u.right.hom.1 ≫ idxTransport P F u φ) := congrArg P.Base hsq
+    rw [P.Base_comp, P.Base_comp] at h1
+    haveI : IsIso (P.Base u.right.hom.1 ≫ P.Base (idxTransport P F u φ)) := by
+      rw [← h1]; infer_instance
+    exact IsIso.of_isIso_comp_left (P.Base u.right.hom.1) _
+
+/-! ## ★12. ★★★`Hom^pf` の中で pre-step を消す
+
+★★添字の等式は「ある上界で一致」としか言わないので、
+その上界を **3 脚の像へ持ち上げ**(`idx13` の cofinal 性)、
+`IdxPf3` の filtered 性で `V` との上界を取る。
+★★`idx_hom_ext`(添字圏は細い)で 2 本の遷移射を同一視すれば、
+`idxTransport_comp_pair` が使えて `𝒞` の `preStepMono` に落ちる。 -/
+
+variable {P F} in
+/-- ★★★**`Hom^pf` の中で pre-step は消せる**。 -/
+theorem homPf_cancel_preStep {A B E : C} (V : IdxPf3 P F A B E)
+    (φ φ' : V.right.obj.1 ⟶ V.right.obj.2.1) (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2)
+    (hψ : IsPreStep P ψ)
+    (h : HomPf.mk ((idx13 P F A B E).obj V) (φ ≫ ψ)
+      = HomPf.mk ((idx13 P F A B E).obj V) (φ' ≫ ψ)) :
+    HomPf.mk ((idx12 P F A B E).obj V) φ = HomPf.mk ((idx12 P F A B E).obj V) φ' := by
+  obtain ⟨V', t, t', ht⟩ := HomPf.eq_iff.mp h
+  rw [idx_hom_ext t' t] at ht
+  obtain ⟨V'', ⟨k⟩⟩ := exists_hom_of_final (idx13 P F A B E) V'
+  set s : V ⟶ IsFiltered.max V V'' := IsFiltered.leftToMax V V'' with hs
+  set r : V'' ⟶ IsFiltered.max V V'' := IsFiltered.rightToMax V V'' with hr
+  have hm : t ≫ k ≫ (idx13 P F A B E).map r = (idx13 P F A B E).map s :=
+    idx_hom_ext _ _
+  have hA : idxTransport P F ((idx13 P F A B E).map s) (φ ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map r)
+          (idxTransport P F k (idxTransport P F t (φ ≫ ψ))) := by
+    rw [← hm, idxTransport_comp, idxTransport_comp]
+  have hB : idxTransport P F ((idx13 P F A B E).map s) (φ' ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map r)
+          (idxTransport P F k (idxTransport P F t (φ' ≫ ψ))) := by
+    rw [← hm, idxTransport_comp, idxTransport_comp]
+  have key : idxTransport P F ((idx13 P F A B E).map s) (φ ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map s) (φ' ≫ ψ) := by
+    rw [hA, hB, ht]
+  have e1 := idxTransport_comp_pair (F := F) s φ ψ
+  have e2 := idxTransport_comp_pair (F := F) s φ' ψ
+  have hcan : idxTransport P F ((idx12 P F A B E).map s) φ
+      ≫ idxTransport P F ((idx23 P F A B E).map s) ψ
+      = idxTransport P F ((idx12 P F A B E).map s) φ'
+      ≫ idxTransport P F ((idx23 P F A B E).map s) ψ := by
+    rw [e1, e2]
+    exact key
+  haveI : Mono (idxTransport P F ((idx23 P F A B E).map s) ψ) :=
+    F.preStepMono _ (idxTransport_isPreStep (F := F) ((idx23 P F A B E).map s) ψ hψ)
+  have hφφ' : idxTransport P F ((idx12 P F A B E).map s) φ
+      = idxTransport P F ((idx12 P F A B E).map s) φ' :=
+    (cancel_mono (idxTransport P F ((idx23 P F A B E).map s) ψ)).mp hcan
+  rw [← HomPf.mk_map ((idx12 P F A B E).map s) φ, ← HomPf.mk_map ((idx12 P F A B E).map s) φ',
+    hφφ']
+
+/-! ## ★13. 平行 2 射 ＋ 1 射を共通の 3 脚添字へ -/
+
+variable {P F} in
+/-- ★**左側が平行**な版(`Prop32.lean` の `exists_rep3_pair` は右側が平行)。 -/
+theorem exists_rep3_pairL {A B E : C} (u v : HomPf P F A B) (g : HomPf P F B E) :
+    ∃ (V : IdxPf3 P F A B E) (φ φ' : V.right.obj.1 ⟶ V.right.obj.2.1)
+      (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2),
+      u = HomPf.mk ((idx12 P F A B E).obj V) φ ∧
+      v = HomPf.mk ((idx12 P F A B E).obj V) φ' ∧
+      g = HomPf.mk ((idx23 P F A B E).obj V) ψ := by
+  obtain ⟨V₁, φ₁, ψ₁, hu, hg₁⟩ := exists_rep3 (P := P) (F := F) u g
+  obtain ⟨V₂, φ₂, ψ₂, hv, hg₂⟩ := exists_rep3 (P := P) (F := F) v g
+  refine ⟨IsFiltered.max V₁ V₂,
+    idxTransport P F ((idx12 P F A B E).map (IsFiltered.leftToMax V₁ V₂)) φ₁,
+    idxTransport P F ((idx12 P F A B E).map (IsFiltered.rightToMax V₁ V₂)) φ₂,
+    idxTransport P F ((idx23 P F A B E).map (IsFiltered.leftToMax V₁ V₂)) ψ₁,
+    ?_, ?_, ?_⟩
+  · rw [HomPf.mk_map]; exact hu
+  · rw [HomPf.mk_map]; exact hv
+  · rw [HomPf.mk_map]; exact hg₁
+
+variable {P F} in
+/-- ★★**`𝒞^pf` の合成(平行 2 射を揃えた版)**。 -/
+theorem compRoot_rep_pairL {W X Y : PfRootObj P F} (u v : W ⟶ X) (f : X ⟶ Y) :
+    ∃ (V : IdxPf3 P F (rtObj P F W.obj (Y.root * X.root))
+        (rtObj P F X.obj (Y.root * W.root)) (rtObj P F Y.obj (X.root * W.root)))
+      (φ φ' : V.right.obj.1 ⟶ V.right.obj.2.1)
+      (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2),
+      u = (rtRootIso P F W.obj X.obj
+          (show Y.root * X.root = Y.root * X.root from rfl)
+          (show Y.root * W.root = Y.root * W.root from rfl)).hom
+        (HomPf.mk ((idx12 P F _ _ _).obj V) φ) ∧
+      v = (rtRootIso P F W.obj X.obj
+          (show Y.root * X.root = Y.root * X.root from rfl)
+          (show Y.root * W.root = Y.root * W.root from rfl)).hom
+        (HomPf.mk ((idx12 P F _ _ _).obj V) φ') ∧
+      f = (rtRootIso P F X.obj Y.obj
+          (show Y.root * W.root = W.root * Y.root from mul_comm _ _)
+          (show X.root * W.root = W.root * X.root from mul_comm _ _)).hom
+        (HomPf.mk ((idx23 P F _ _ _).obj V) ψ) ∧
+      compRoot P F u f
+        = (rtRootIso P F W.obj Y.obj
+            (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+            (show X.root * W.root = X.root * W.root from rfl)).hom
+          (HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ)) ∧
+      compRoot P F v f
+        = (rtRootIso P F W.obj Y.obj
+            (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+            (show X.root * W.root = X.root * W.root from rfl)).hom
+          (HomPf.mk ((idx13 P F _ _ _).obj V) (φ' ≫ ψ)) := by
+  obtain ⟨V, φ, φ', ψ, hu, hv, hf⟩ := exists_rep3_pairL (P := P) (F := F)
+    ((rtRootIso P F W.obj X.obj (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * W.root = Y.root * W.root from rfl)).inv u)
+    ((rtRootIso P F W.obj X.obj (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * W.root = Y.root * W.root from rfl)).inv v)
+    ((rtRootIso P F X.obj Y.obj (show Y.root * W.root = W.root * Y.root from mul_comm _ _)
+      (show X.root * W.root = W.root * X.root from mul_comm _ _)).inv f)
+  refine ⟨V, φ, φ', ψ, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [← hu, Iso.inv_hom_id_apply]
+  · rw [← hv, Iso.inv_hom_id_apply]
+  · rw [← hf, Iso.inv_hom_id_apply]
+  · show compRoot P F u f = _
+    unfold compRoot
+    rw [hu, hf, compPf_mk]
+  · show compRoot P F v f = _
+    unfold compRoot
+    rw [hv, hf, compPf_mk]
+
+/-! ## ★14. (v)(a) —— `𝒞^pf` の pre-step は mono -/
+
+variable {P F} in
+/-- ★★★**(v)(a)** —— `𝒞^pf` の pre-step は monomorphism。 -/
+theorem pfRoot_preStepMono {X Y : PfRootObj P F} (f : X ⟶ Y)
+    (hf : IsPreStep (pfRootPre P F) f) : Mono f := by
+  refine ⟨fun {W} u v huv => ?_⟩
+  obtain ⟨V, φ, φ', ψ, hurep, hvrep, hfrep, hu, hv⟩ := compRoot_rep_pairL (F := F) u v f
+  have hψ : IsPreStep P ψ := by
+    refine (isPreStep_mk_iff (X := X) (Y := Y)
+      ((pushIdx (F := F)
+        (rtLift P F X.obj (show Y.root * W.root = W.root * Y.root from mul_comm _ _))
+        (rtLift_frobType P F X.obj _)
+        (rtLift P F Y.obj (show X.root * W.root = W.root * X.root from mul_comm _ _))
+        (rtLift_frobType P F Y.obj _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx23 P F _ _ _).obj V)) ψ).mp ?_
+    rw [← rtRootIso_hom_mk (F := F) X.obj Y.obj _ _ ((idx23 P F _ _ _).obj V) ψ, ← hfrep]
+    exact hf
+  have h0 : (rtRootIso P F W.obj Y.obj
+        (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+        (show X.root * W.root = X.root * W.root from rfl)).hom
+      (HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ))
+      = (rtRootIso P F W.obj Y.obj
+        (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+        (show X.root * W.root = X.root * W.root from rfl)).hom
+      (HomPf.mk ((idx13 P F _ _ _).obj V) (φ' ≫ ψ)) := by
+    rw [← hu, ← hv]; exact huv
+  have h1 : HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ)
+      = HomPf.mk ((idx13 P F _ _ _).obj V) (φ' ≫ ψ) :=
+    ((Iso.hom_inv_id_apply _ _).symm.trans (congrArg _ h0)).trans (Iso.hom_inv_id_apply _ _)
+  rw [hurep, hvrep, homPf_cancel_preStep (F := F) V φ φ' ψ hψ h1]
+
 end ABC3.Found.FrdI
