@@ -99,7 +99,7 @@
     "IUTchI",
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 3.2",
@@ -150,7 +150,7 @@
    "page": 17,
    "section": "3",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 3.7",
@@ -177,7 +177,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 4.1.1",
@@ -186,14 +186,14 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 4.2",
    "page": 21,
    "section": "4",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Corollary 4.3",
@@ -213,5 +213,5 @@
   }
  ],
  "total": 24,
- "done": 0
+ "done": 5
 }

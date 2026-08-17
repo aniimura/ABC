@@ -1,5 +1,6 @@
 import ABC3.Found.FrdI.Def45
 import ABC3.Found.FrdI.PlBkShuffle
+import ABC3.Found.FrdI.Remark311
 
 /-!
 # [FrdI] Example 4.3 —— 右手と左手の同型は一致しない
@@ -531,5 +532,346 @@ theorem ex43_core : FrobenioidCore ex43P where
       ex43_isotropicType A, fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm,
         fun y hy => by rw [hy, Category.id_comp]⟩⟩
   isotropicClosed φ _ := ex43_isotropicType _
+
+/-! ## ★10. (iii)(d) —— `𝒞^coa-pre` と `Order(Φ(A))` の 2 本の圏同値
+
+★★`Example 4.3` では **co-angular pre-step ⟺ 次数 1**、そして
+`Div ⟨1⟩ = b − a` なので、
+`_A(𝒞^coa-pre)` は「`a ≤ b` なる `b`」の順序集合そのものになる。 -/
+
+theorem ex43_coaPre_iff {a b : Ex43} (f : a ⟶ b) :
+    coaPreProp ex43P f ↔ f.deg = 1 :=
+  ⟨fun h => h.2.1, fun h => ⟨ex43_coAngular f, (ex43_isPreStep_iff f).mpr h⟩⟩
+
+local instance ex43_coaPre_mult : MorphismProperty.IsMultiplicative (coaPreProp ex43P) :=
+  coaPreProp_isMultiplicative ex43P ex43_core.coAngularComp
+
+/-- ★次数 1 の射の零因子は `b − a`。 -/
+theorem ex43Div_deg_one {a b : Ex43} (f : a ⟶ b) (hf : f.deg = 1) :
+    ((ex43Div f : ℚ≥0) : ℚ) = b.val - a.val := by
+  rw [ex43Div_val, hf]
+  push_cast
+  ring
+
+/-! ### ★前置 `_A(𝒞^coa-pre) → Order(Φ(A))` -/
+
+theorem ex43_coaPreUnder_faithful (A : Ex43) :
+    (coaPreUnderFunctor ex43P A).Faithful where
+  map_injective {Z W} {f g} _ := by
+    refine Under.UnderMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    exact Ex43.hom_ext (by
+      rw [(ex43_coaPre_iff _).mp f.right.property,
+        (ex43_coaPre_iff _).mp g.right.property])
+
+theorem ex43_coaPreUnder_full (A : Ex43) : (coaPreUnderFunctor ex43P A).Full := by
+  constructor
+  intro Z W h
+  have hZ : Z.hom.hom.deg = 1 := (ex43_coaPre_iff _).mp Z.hom.property
+  have hW : W.hom.hom.deg = 1 := (ex43_coaPre_iff _).mp W.hom.property
+  have hle : MLe (ex43Div Z.hom.hom) (ex43Div W.hom.hom) := leOfHom h
+  have hval : Z.right.obj.val ≤ W.right.obj.val := by
+    obtain ⟨c, hc⟩ := hle
+    have h2 : ((ex43Div Z.hom.hom : ℚ≥0) : ℚ) + (c : ℚ)
+        = ((ex43Div W.hom.hom : ℚ≥0) : ℚ) := by
+      rw [← NNRat.coe_add]
+      exact congrArg (fun t : ℚ≥0 => (t : ℚ)) hc
+    rw [ex43Div_deg_one _ hZ, ex43Div_deg_one _ hW] at h2
+    have hc0 : (0 : ℚ) ≤ (c : ℚ) := c.coe_nonneg
+    linarith
+  obtain ⟨t, ht⟩ : ∃ t : Z.right.obj ⟶ W.right.obj, t.deg = 1 :=
+    ⟨⟨1, by simpa using hval⟩, rfl⟩
+  have hcomp : Z.hom.hom ≫ t = W.hom.hom :=
+    Ex43.hom_ext (by rw [Ex43.comp_deg, ht, hZ, hW, mul_one])
+  refine ⟨Under.homMk (show Z.right ⟶ W.right from
+    ⟨t, (ex43_coaPre_iff t).mpr ht⟩) (WideSubcategory.hom_ext _ hcomp), ?_⟩
+  exact Subsingleton.elim _ _
+
+theorem ex43_coaPreUnder_essSurj (A : Ex43) : (coaPreUnderFunctor ex43P A).EssSurj := by
+  refine ⟨fun x => ?_⟩
+  obtain ⟨y, hy⟩ : ∃ y : ℚ≥0, toOrderCat y = x := ⟨x, rfl⟩
+  obtain ⟨φ, hφ⟩ : ∃ φ : A ⟶ Ex43.mk (A.val + (y : ℚ)), φ.deg = 1 :=
+    ⟨⟨1, by simpa using y.coe_nonneg⟩, rfl⟩
+  refine ⟨Under.mk (show (⟨A⟩ : WideSubcategory (coaPreProp ex43P)) ⟶ ⟨_⟩ from
+    ⟨φ, (ex43_coaPre_iff φ).mpr hφ⟩), ⟨eqToIso ?_⟩⟩
+  rw [← hy]
+  show toOrderCat (ex43Div φ) = toOrderCat y
+  refine congrArg toOrderCat (NNRat.coe_injective ?_)
+  rw [ex43Div_deg_one φ hφ]
+  simp
+
+theorem ex43_coaPreUnderEquiv (A : Ex43) : (coaPreUnderFunctor ex43P A).IsEquivalence :=
+  ⟨ex43_coaPreUnder_faithful A, ex43_coaPreUnder_full A, ex43_coaPreUnder_essSurj A⟩
+
+/-! ### ★後置 `(𝒞^coa-pre)_A → Order(Φ(A))^opp` -/
+
+theorem ex43_coaPreOver_faithful (A : Ex43) :
+    (coaPreOverFunctor ex43P A).Faithful where
+  map_injective {Z W} {f g} _ := by
+    refine Over.OverMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    exact Ex43.hom_ext (by
+      rw [(ex43_coaPre_iff _).mp f.left.property,
+        (ex43_coaPre_iff _).mp g.left.property])
+
+/-- ★後置の関手の値は `A − B`(底は `𝟙` なので `Φ.map` は恒等)。 -/
+theorem ex43_coaPreOver_obj {A : Ex43} (Z : Over (⟨A⟩ : WideSubcategory (coaPreProp ex43P))) :
+    ((coaPreOverFunctor ex43P A).obj Z).unop = toOrderCat (ex43Div Z.hom.hom) := rfl
+
+theorem ex43_coaPreOver_full (A : Ex43) : (coaPreOverFunctor ex43P A).Full := by
+  constructor
+  intro Z W h
+  have hZ : Z.hom.hom.deg = 1 := (ex43_coaPre_iff _).mp Z.hom.property
+  have hW : W.hom.hom.deg = 1 := (ex43_coaPre_iff _).mp W.hom.property
+  have hle : MLe (ex43Div W.hom.hom) (ex43Div Z.hom.hom) := leOfHom h.unop
+  have hval : Z.left.obj.val ≤ W.left.obj.val := by
+    obtain ⟨c, hc⟩ := hle
+    have h2 : ((ex43Div W.hom.hom : ℚ≥0) : ℚ) + (c : ℚ)
+        = ((ex43Div Z.hom.hom : ℚ≥0) : ℚ) := by
+      rw [← NNRat.coe_add]
+      exact congrArg (fun t : ℚ≥0 => (t : ℚ)) hc
+    rw [ex43Div_deg_one _ hZ, ex43Div_deg_one _ hW] at h2
+    have hc0 : (0 : ℚ) ≤ (c : ℚ) := c.coe_nonneg
+    linarith
+  obtain ⟨t, ht⟩ : ∃ t : Z.left.obj ⟶ W.left.obj, t.deg = 1 :=
+    ⟨⟨1, by simpa using hval⟩, rfl⟩
+  have hcomp : t ≫ W.hom.hom = Z.hom.hom :=
+    Ex43.hom_ext (by rw [Ex43.comp_deg, ht, hZ, hW, one_mul])
+  refine ⟨Over.homMk (show Z.left ⟶ W.left from
+    ⟨t, (ex43_coaPre_iff t).mpr ht⟩) (WideSubcategory.hom_ext _ hcomp), ?_⟩
+  exact Subsingleton.elim _ _
+
+theorem ex43_coaPreOver_essSurj (A : Ex43) : (coaPreOverFunctor ex43P A).EssSurj := by
+  refine ⟨fun x => ?_⟩
+  obtain ⟨y, hy⟩ : ∃ y : ℚ≥0, Opposite.op (toOrderCat y) = x := ⟨x.unop, rfl⟩
+  obtain ⟨φ, hφ⟩ : ∃ φ : Ex43.mk (A.val - (y : ℚ)) ⟶ A, φ.deg = 1 :=
+    ⟨⟨1, by simpa using y.coe_nonneg⟩, rfl⟩
+  refine ⟨Over.mk (show (⟨_⟩ : WideSubcategory (coaPreProp ex43P)) ⟶ ⟨A⟩ from
+    ⟨φ, (ex43_coaPre_iff φ).mpr hφ⟩), ⟨eqToIso ?_⟩⟩
+  rw [← hy]
+  refine Opposite.unop_injective ?_
+  show toOrderCat (ex43Div φ) = toOrderCat y
+  refine congrArg toOrderCat (NNRat.coe_injective ?_)
+  rw [ex43Div_deg_one φ hφ]
+  simp
+
+theorem ex43_coaPreOverEquiv (A : Ex43) : (coaPreOverFunctor ex43P A).IsEquivalence :=
+  ⟨ex43_coaPreOver_faithful A, ex43_coaPreOver_full A, ex43_coaPreOver_essSurj A⟩
+
+/-- ★★★★**`Example 4.3` の `𝒞` は Frobenioid**。 -/
+theorem ex43_frobenioid : Frobenioid ex43P where
+  core := ex43_core
+  coaPreUnderEquiv := ex43_coaPreUnderEquiv
+  coaPreOverEquiv := ex43_coaPreOverEquiv
+
+/-! ## ★11. group-like でない・底圏と `Φ` の型
+
+原文 (FrdI p.82):
+> no object of C is group-like. Thus, one
+-/
+
+/-- ★`ℚ≥0` は **group-like でない** —— sharp なので、`1` が可逆なら `1 = 0`。 -/
+theorem not_isGroupLike_nnrat : ¬ IsGroupLike ℚ≥0 := by
+  intro h
+  have h1 : IsAddUnit (1 : ℚ≥0) := (isGroupLike_iff ℚ≥0).mp h 1
+  exact one_ne_zero (isSharp_nnrat 1 h1)
+
+/-- ★★**主張 8** —— `𝒞` の対象はどれも **group-like でない**。 -/
+theorem ex43_not_groupLikeType : ¬ IsOfGroupLikeType ex43P := fun h =>
+  not_isGroupLike_nnrat (h (Ex43.mk 0))
+
+/-- ★底圏 `𝒟` の射はすべて同型(`Discrete` の射は等式)。 -/
+theorem d43_isIso {A B : Discrete PUnit} (f : A ⟶ B) : IsIso f := by
+  obtain rfl : A = B := Subsingleton.elim _ _
+  exact ⟨f, rfl, rfl⟩
+
+/-- ★★**主張 10** —— `𝒟` は **FSM-type**。 -/
+theorem d43_fsmType : IsOfFSMType (Discrete PUnit) := fun _ _ β _ => d43_isIso β
+
+/-- ★★**主張 10** —— したがって **FSMFF-type**。
+
+原文 (FrdI p.82):
+> FSMFF-type, and
+-/
+theorem d43_fsmffType : IsOfFSMFFType (Discrete PUnit) :=
+  isOfFSMFFType_of_isOfFSMType d43_fsmType
+
+/-- ★★**主張 13** —— `𝒟` は **slim**(射が 1 本しかないのでスライス圏の自己自然変換は恒等)。
+
+原文 (FrdI p.82):
+> a slim base category D. Now one verifies immediately that if
+-/
+theorem d43_slim : IsSlimCat (Discrete PUnit) := by
+  intro A η
+  refine Iso.ext (NatTrans.ext (funext fun X => ?_))
+  exact Subsingleton.elim _ _
+
+/-- ★★**主張 11** —— `Φ` は **non-dilating**(定数関手なので誘導射は恒等)。 -/
+theorem phi43_nonDilating : MonoidOn.IsNonDilatingOn Phi43 := by
+  intro A e
+  have h : Phi43.map e = AddMonoidHom.id ℚ≥0 := by ext x; rfl
+  rw [h]
+  exact isNonDilating_id (M := ℚ≥0)
+
+/-! ## ★12. Frobenius-normalized 型と standard 型 -/
+
+/-- ★`End a` の冪の次数は次数の冪(`End` の積は `x * y = y ≫ x`)。 -/
+theorem ex43_end_pow_deg {a : Ex43} (α : End a) (n : ℕ) :
+    (α ^ n : End a).deg = α.deg ^ n := by
+  induction n with
+  | zero => rfl
+  | succ k ih =>
+      have h1 : ((α ^ (k + 1) : End a)).deg = ((α ≫ (α ^ k : End a) : a ⟶ a)).deg :=
+        congrArg Ex43Hom.deg (pow_succ α k)
+      rw [h1, Ex43.comp_deg, ih, pow_succ]
+
+/-- ★★`𝒞` は **Frobenius-normalized 型** —— `𝒪^▷` が自明だから。 -/
+theorem ex43_frobNormalizedType : IsOfFrobeniusNormalizedType ex43P := by
+  intro A φ _ α hα
+  have hd : α.deg = 1 := hα.2
+  refine Ex43.hom_ext ?_
+  rw [Ex43.comp_deg, Ex43.comp_deg, ex43_end_pow_deg, hd, one_pow, one_mul, mul_one]
+
+/-- ★★★**主張 12** —— `𝒞` は **standard 型**。
+
+★(a) isotropic 型なので quasi-isotropic 型、かつ恒等射が Frobenius 型なので
+Frobenius-isotropic 型。★(b) group-like 型でないので前件が偽。
+★(c)(d)(e) は上で取った。
+
+原文 (FrdI p.82):
+> it follows that C is also of standard type, over
+-/
+theorem ex43_standardType : IsOfStandardType (Discrete PUnit) Ex43 ex43P ex43_core where
+  quasiIsotropic :=
+    isOfQuasiIsotropicType_of_isOfIsotropicType ex43P ex43_core ex43_isotropicType
+  frobIsotropic := fun A =>
+    ⟨A, 𝟙 A, isFrobeniusType_of_isIso ex43P (𝟙 A), ex43_isotropicType A⟩
+  groupLikeCompact := fun hgl => absurd hgl ex43_not_groupLikeType
+  frobNormalized := ex43_frobNormalizedType
+  baseFSMFF := d43_fsmffType
+  phiNonDilating := phi43_nonDilating
+
+/-! ## ★13. 自己同値 `Ψ_λ`
+
+原文 (FrdI p.82):
+> determines a self-equivalence of categories
+
+★**`a ↦ a`(`a ≥ 0`)・`−a ↦ −λ·a`** を 1 本の式にまとめると
+`ψ_λ(q) = if 0 ≤ q then q else λ · q` である。 -/
+
+/-- ★`Ψ_λ` の対象上の作用。 -/
+def psiVal (lam : ℚ) (q : ℚ) : ℚ := if 0 ≤ q then q else lam * q
+
+@[simp] theorem psiVal_of_nonneg {lam q : ℚ} (h : 0 ≤ q) : psiVal lam q = q := if_pos h
+
+@[simp] theorem psiVal_of_neg {lam q : ℚ} (h : q < 0) : psiVal lam q = lam * q :=
+  if_neg (not_le.mpr h)
+
+/-- ★`ψ_λ` は符号を保つ。 -/
+theorem psiVal_neg_of_neg {lam q : ℚ} (hl : 0 < lam) (h : q < 0) : psiVal lam q < 0 := by
+  rw [psiVal_of_neg h]
+  exact mul_neg_of_pos_of_neg hl h
+
+/-- ★★`ψ_λ` は「`n · a ≤ b`」を保つ。 -/
+theorem psiVal_cond {lam : ℚ} (hl : 0 < lam) {n a b : ℚ} (hn : 0 < n)
+    (h : n * a ≤ b) : n * psiVal lam a ≤ psiVal lam b := by
+  rcases le_or_gt 0 a with ha | ha
+  · rcases le_or_gt 0 b with hb | hb
+    · rwa [psiVal_of_nonneg ha, psiVal_of_nonneg hb]
+    · exact absurd h (not_le.mpr (lt_of_lt_of_le hb (mul_nonneg hn.le ha)))
+  · rcases le_or_gt 0 b with hb | hb
+    · rw [psiVal_of_nonneg hb, psiVal_of_neg ha]
+      exact le_trans (mul_neg_of_pos_of_neg hn (mul_neg_of_pos_of_neg hl ha)).le hb
+    · rw [psiVal_of_neg ha, psiVal_of_neg hb]
+      calc n * (lam * a) = lam * (n * a) := by ring
+        _ ≤ lam * b := mul_le_mul_of_nonneg_left h hl.le
+
+/-- ★★`ψ_λ` は「`n · a ≤ b`」を**反射する**。 -/
+theorem psiVal_cond_rev {lam : ℚ} (hl : 0 < lam) {n a b : ℚ} (hn : 0 < n)
+    (h : n * psiVal lam a ≤ psiVal lam b) : n * a ≤ b := by
+  rcases le_or_gt 0 a with ha | ha
+  · rcases le_or_gt 0 b with hb | hb
+    · rwa [psiVal_of_nonneg ha, psiVal_of_nonneg hb] at h
+    · rw [psiVal_of_nonneg ha, psiVal_of_neg hb] at h
+      exact absurd h (not_le.mpr (lt_of_lt_of_le (mul_neg_of_pos_of_neg hl hb)
+        (mul_nonneg hn.le ha)))
+  · rcases le_or_gt 0 b with hb | hb
+    · exact le_trans (mul_neg_of_pos_of_neg hn ha).le hb
+    · rw [psiVal_of_neg ha, psiVal_of_neg hb] at h
+      have h2 : lam * (n * a) ≤ lam * b := by linarith [h]
+      exact le_of_mul_le_mul_left h2 hl
+
+/-- ★★★**自己関手 `Ψ_λ`** —— 対象は `ψ_λ`、射は次数をそのまま写す。 -/
+def Psi43 (lam : ℚ) (hl : 0 < lam) : Ex43 ⥤ Ex43 where
+  obj a := Ex43.mk (psiVal lam a.val)
+  map {a b} f := ⟨f.deg, psiVal_cond hl (by exact_mod_cast f.deg.pos) f.cond⟩
+  map_id a := Ex43.hom_ext rfl
+  map_comp f g := Ex43.hom_ext rfl
+
+/-- ★★**`Ψ_λ` は Frobenius 次数を保つ**。
+
+原文 (FrdI p.82):
+> that preserves Frobenius degrees [cf. Theorem 3.4, (iii)]. On the other hand, it
+-/
+@[simp] theorem Psi43_map_deg {lam : ℚ} (hl : 0 < lam) {a b : Ex43} (f : a ⟶ b) :
+    ((Psi43 lam hl).map f).deg = f.deg := rfl
+
+theorem Psi43_degFr {lam : ℚ} (hl : 0 < lam) {a b : Ex43} (f : a ⟶ b) :
+    ex43P.degFr ((Psi43 lam hl).map f) = ex43P.degFr f := rfl
+
+theorem Psi43_faithful {lam : ℚ} (hl : 0 < lam) : (Psi43 lam hl).Faithful where
+  map_injective {a b} {f g} h := Ex43.hom_ext (by
+    have h2 : ((Psi43 lam hl).map f).deg = ((Psi43 lam hl).map g).deg :=
+      congrArg Ex43Hom.deg h
+    exact h2)
+
+theorem Psi43_full {lam : ℚ} (hl : 0 < lam) : (Psi43 lam hl).Full := by
+  constructor
+  intro a b g
+  refine ⟨⟨g.deg, psiVal_cond_rev hl (by exact_mod_cast g.deg.pos) g.cond⟩, ?_⟩
+  exact Ex43.hom_ext rfl
+
+theorem Psi43_essSurj {lam : ℚ} (hl : 0 < lam) : (Psi43 lam hl).EssSurj := by
+  refine ⟨fun q => ?_⟩
+  refine ⟨Ex43.mk (if 0 ≤ q.val then q.val else lam⁻¹ * q.val), ⟨eqToIso (Ex43.ext ?_)⟩⟩
+  show psiVal lam (if 0 ≤ q.val then q.val else lam⁻¹ * q.val) = q.val
+  rcases le_or_gt 0 q.val with h | h
+  · rw [if_pos h, psiVal_of_nonneg h]
+  · rw [if_neg (not_le.mpr h)]
+    have hneg : lam⁻¹ * q.val < 0 := mul_neg_of_pos_of_neg (inv_pos.mpr hl) h
+    rw [psiVal_of_neg hneg, ← mul_assoc, mul_inv_cancel₀ hl.ne', one_mul]
+
+/-- ★★★**`Ψ_λ` は自己同値**。 -/
+theorem Psi43_isEquivalence {lam : ℚ} (hl : 0 < lam) : (Psi43 lam hl).IsEquivalence :=
+  ⟨Psi43_faithful hl, Psi43_full hl, Psi43_essSurj hl⟩
+
+/-! ## ★14. `Ψ_λ` は `λ ≠ 1` なら恒等関手と同型でない
+
+★★これが原文の「**右辺の同型は恒等・左辺の同型は `λ` 倍**」の内容である。
+`Ψ_λ` は Frobenius 次数を保つ自己同値でありながら、`λ ≠ 1` では恒等と同型でない。
+
+原文 (FrdI p.82):
+> of Theorem 4.2, (iii), is the identity on
+-/
+
+/-- ★同型射があれば対象は等しい(同型は等長 pre-step)。 -/
+theorem ex43_eq_of_isIso {a b : Ex43} (f : a ⟶ b) [IsIso f] : a = b :=
+  ex43_eq_of_isometric_preStep f (isIsometric_of_isIso ex43P f) (isPreStep_of_isIso ex43P f)
+
+/-- ★★★`λ ≠ 1` なら `Ψ_λ ≇ 𝟭` —— `−1` の像が `−λ` だから。 -/
+theorem Psi43_not_iso_id {lam : ℚ} (hl : 0 < lam) (hne : lam ≠ 1) :
+    IsEmpty (Psi43 lam hl ≅ 𝟭 Ex43) := by
+  constructor
+  intro η
+  have hobj : (Psi43 lam hl).obj (Ex43.mk (-1)) = Ex43.mk (-1) := by
+    have hi := (η.app (Ex43.mk (-1))).isIso_hom
+    exact ex43_eq_of_isIso (η.app (Ex43.mk (-1))).hom
+  have hval : psiVal lam (-1 : ℚ) = (-1 : ℚ) := congrArg Ex43.val hobj
+  rw [psiVal_of_neg (by norm_num : (-1 : ℚ) < 0)] at hval
+  exact hne (by linarith)
+
+/-! ## ★★★★`Example 4.3` —— まとめ -/
+
+def ex43_frobenioid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 81, item := "Example 4.3",
+    sectionId := "frdi-example-4-3" }
 
 end ABC3.Found.FrdI

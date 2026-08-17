@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-17 ・ コミット 679 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-17 ・ コミット 733 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">3843</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1039</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">4100</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1087</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
@@ -197,25 +197,25 @@ mathlib の <code>Analysis/Transcendental/</code> には <b>Liouville 数と <co
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>e9e69ef</code></td><td>2026-08-17</td><td>★★★★B1 の第 4 ブロック——層加群を開集合へ制限できるようになった</td></tr>
-<tr><td><code>cf8458e</code></td><td>2026-08-17</td><td>★★★★負の対照——B1 の穴が実在したことを機械で確かめた</td></tr>
-<tr><td><code>207a08b</code></td><td>2026-08-17</td><td>★★★★B1 の穴を塞いだ——非アフィンで `Pic` が自由だった</td></tr>
-<tr><td><code>a577aa2</code></td><td>2026-08-17</td><td>★★★★B1 の本丸を特定した——内部 Hom(`Hom_R(F, G)` の前層版)</td></tr>
-<tr><td><code>0effa31</code></td><td>2026-08-17</td><td>★★★B1——テンソル積の単位律が取れた(`𝒪_X ⊗ M ≅ M`)</td></tr>
-<tr><td><code>c055527</code></td><td>2026-08-17</td><td>`𝒞^pf` の現在地(16/21)と残り 5 条の具体的な手を記録した</td></tr>
-<tr><td><code>1c5310f</code></td><td>2026-08-17</td><td>★★★★義務 28 件が層グラフに本当に載った——挿入位置が SCC 計算より後だった</td></tr>
-<tr><td><code>2492ea9</code></td><td>2026-08-17</td><td>★★★義務 28 件を層グラフ側へ移した——生成器を取り違えていた</td></tr>
-<tr><td><code>3217080</code></td><td>2026-08-17</td><td>`𝒞^pf` の (iii)(c) 3 条を一般の根で完成させた——16/21</td></tr>
-<tr><td><code>13ede0b</code></td><td>2026-08-17</td><td>★★★★B1 の第 2 ブロック——層加群のテンソル積が取れた(可換性つき)</td></tr>
-<tr><td><code>1860e92</code></td><td>2026-08-17</td><td>`dependency-graph.html` を層(木)構造に戻した——生成器を取り違えていた</td></tr>
-<tr><td><code>91b9a4e</code></td><td>2026-08-17</td><td>★★★B1 の第 1 ブロック——スキーム上の前層加群に対称モノイダル構造を渡した</td></tr>
+<tr><td><code>3506604</code></td><td>2026-08-17</td><td>★★★★検査を 0.01 秒にした——Lean REPL の MCP。ついでに `Example 4.3` の 21 条が閉じた</td></tr>
+<tr><td><code>390df8f</code></td><td>2026-08-17</td><td>引き戻しの最後の 1 歩を特定した(§9-40)</td></tr>
+<tr><td><code>265b0a3</code></td><td>2026-08-17</td><td>引き戻しの連鎖が繋がったことを記録した(§9-39)</td></tr>
+<tr><td><code>e2e6214</code></td><td>2026-08-17</td><td>★★★★★★★B1 の第 20 ブロック——引き戻しが oplax monoidal になった</td></tr>
+<tr><td><code>b9a7a27</code></td><td>2026-08-17</td><td>★★★★★★B1 の第 19 ブロック——押し出しが lax monoidal になった</td></tr>
+<tr><td><code>b3736cd</code></td><td>2026-08-17</td><td>進め方を明文化し、葉から積み直した——`Example 4.3` の pre-Frobenioid 構造まで</td></tr>
+<tr><td><code>b26aa12</code></td><td>2026-08-17</td><td>★★★★★★★★B1——係数変換の lax monoidal が完成した(7 フィールド sorry 0)</td></tr>
+<tr><td><code>efc4abb</code></td><td>2026-08-17</td><td>B1——lax monoidal の残り 5 条は `cat_disch` では落ちないことを実測した</td></tr>
+<tr><td><code>6f6e73d</code></td><td>2026-08-17</td><td>★★★★★★B1——係数変換の lax monoidal の `ε` も取れた(2 部品完成)</td></tr>
+<tr><td><code>2057882</code></td><td>2026-08-17</td><td>★★★★★★B1 の第 18 ブロック——係数変換の lax monoidal の `μ`(前層レベル)</td></tr>
+<tr><td><code>302df5f</code></td><td>2026-08-17</td><td>引き戻しの残作業が 1 本に確定した(§9-38)</td></tr>
+<tr><td><code>ae05af6</code></td><td>2026-08-17</td><td>引き戻しのモノイダル性への道を実測した(§9-37)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1039 件)。</div>
+<b>すべて PDF と機械照合している</b>(1087 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
