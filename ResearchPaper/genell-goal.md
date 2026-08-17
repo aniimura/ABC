@@ -2357,3 +2357,97 @@ IUT そのものを要求する。**
 `mem_range_comp_iff_base_default` / `continuous_base_default_scheme` /
 `isOpen_landsIn_scheme` / `awayLiftHom_mk` / `continuous_awayLift` /
 `awayLift_comp_awayι` / `awayLift_comp_awayι_self` / `arcTopologyAffine_away`
+
+
+---
+
+## §9-26 (2026-08-17) ★★★★★C1 達成と、残り 16 件の**到達可能性の実測**
+
+### ★★★★★C1 は落ちた —— Arakelov **1/9**
+
+`ArcSpaceData.nonvacuous` が取れた(`Found/Arakelov/` 14 ファイル、sorry 0、標準 3 公理)。
+`check.mjs` の「Interface 実装待ち」は **26 → 25 件**。
+
+3 段の積み上げ:
+
+| 段 | 定理 | 内容 |
+|---|---|---|
+| A | `arcTopology_opens_of_affine` | `Spec A` の**任意の**開部分スキーム |
+| B 前半 | `isOpenMap_comp_of_isAffine` | 任意のアフィン標的 |
+| B 後半 | `arcTopology_openImmersion` | 一般の開埋め込み |
+
+★★★段 B の核心は「**`U ⊓ O` を経由する**」ことだった:
+
+    (· ≫ U.ι) ⁻¹' ((· ≫ O.ι) '' V) = (· ≫ homOfLE) '' ((· ≫ homOfLE) ⁻¹' V)
+
+`arcTopology = ⨆`(アフィン chart)なので開性は chart ごとに降ろせ、
+各 chart は**アフィン**だから段 A が効く。
+
+★★★**GAGA は要らなかった**——当初の見積りは誤りで、実際に要ったのは
+**商位相と多項式の連続性**だけだった。
+
+### ★★★★退化封じの見落とし(2 度目の教訓)
+
+C1 は当初、次を**通していた**:
+
+    evalAffine := fun _ _ _ => 0 ;  topology := fun _ => ⊤(密着)
+
+`induced (fun _ _ => 0) Pi = ⊤` なので `topology_affine` は「`topology = ⊤`」を
+要求するだけになり、`topology_openImmersion` も `induced g ⊤ = ⊤` で自明に成り立つ。
+
+★`equivComplexPoints` は**台の型**を固定するが、**`evalAffine` の値**は固定しない。
+★`evalAffine_spec`(評価は `Spec.preimage` が与える環準同型)を足して塞いだ。
+★負の対照は `Check/Arakelov/ArcSpaceNondegenerate.lean`(離散・密着の両方が落ちる)。
+
+★★★**教訓: 退化封じでは「値が自由に選べるフィールド」を列挙する。型の固定だけでは足りない。**
+
+### ★★★★★残り 16 件は**すべて mathlib 規模の基礎**に閉ざされている(実測)
+
+2026-08-17 に mathlib を全走査して測った結果:
+
+| 障壁 | 実測 | 閉ざす obligation |
+|---|---|---|
+| **層の圏のモノイダル構造** | `SheafOfModules` に `MonoidalCategory` インスタンス **0 件** | B1 → B2 B3 C3 D1 D3(**6 件**) |
+| **ℙⁿ の点の関手** | `ProjectiveSpectrum` に `Hom(Spec ℂ, Proj) ≅ ℙ(ℂ^{n+1})` **無し** | C2 |
+| **E[n] ≅ (ℤ/n)²** | mathlib 無し、**FLT も sorry** | G1 → G2 G3 G4 G5(**5 件**) |
+| **Tate 曲線** | mathlib 無し、FLT は 20 行の入口だけ | G6 → G8 |
+| **Néron モデル** | mathlib 無し | G7 |
+
+★★★**したがって「9/9・8/8」は、現在の mathlib からは 1 セッションでは到達しない。**
+16 件はいずれも「我々が書き落とせば済む定理」ではなく、**基礎理論の建設**である。
+
+### ★★★★B1(Pic)への道筋 —— **部品は在る**
+
+B1 は 6 件を解くので投資先として最も効く。★2026-08-17 の実測で、
+**必要な機械は mathlib に揃っていた**(組み立てられていないだけ):
+
+| 部品 | 場所 | 状態 |
+|---|---|---|
+| 前層の対称モノイダル構造 | `ModuleCat/Presheaf/Monoidal.lean` | ★`monoidalCategory` / `symmetricCategory` **在り** |
+| 層化(前層 → 層) | `ModuleCat/Presheaf/Sheafification.lean` | ★`sheafificationAdjunction`、**counit は iso**(反射的) |
+| 局所化のモノイダル移送 | `CategoryTheory/Localization/Monoidal/` | ★`LocalizedMonoidal` **在り**(`W.IsMonoidal` が要る) |
+| モノイダル圏の Picard 群 | `CategoryTheory/Monoidal/Skeleton.lean` | ★`Skeleton` の `CommMonoid`、その `ˣ` が群 |
+| 局所自由性 | `ModuleCat/Sheaf/LocallyFree.lean` | ★`IsLocallyFree` **在り** |
+| アフィンでの対応 `M^~` | `AlgebraicGeometry/Modules/Tilde.lean` | ★★`tilde` / `SpecModulesToSheafFullyFaithful` / `fromTildeΓ` **在り** |
+| 環の Picard 群 | `RingTheory/PicardGroup.lean` | ★`CommRing.Pic` / `ClassGroup.equivPic` **在り** |
+
+#### ★2 つの道
+
+**道 1(一般):** 局所同型のなす `W` が `IsMonoidal` であることを示し、
+`LocalizedMonoidal` で層の圏にモノイダル構造を移す。★正攻法だが重い。
+
+**道 2(近道):** ★★★**可逆層に限れば層化は要らない**——
+局所自由有限階数の層どうしの**前層テンソル積は既に層である**
+(局所的に `𝒪^n` の有限直和で、層であることは局所的性質だから)。
+★これなら `Localization/Monoidal` を通さずに済む。
+
+#### ★残る難所
+
+いずれの道でも `equivPicRing : Pic (Spec R) ≃* CommRing.Pic R` が要る。
+★`Tilde.lean` の `fromTildeΓ` が**準連接層で iso** であることを言えば出る
+——mathlib には `Quasicoherent.lean` が在るが、**同値そのものは無い**。
+
+### ★★次の 1 手
+
+★★★**道 2 の第 1 ブロック**:「局所自由階数 1 の層 2 つの前層テンソル積は層である」。
+★これが取れれば `Pic X` の群構造が書け、B1 の 6 件が動き出す。
