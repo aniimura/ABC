@@ -389,6 +389,85 @@ theorem continuous_liftToOpen (A : CommRingCat.{0}) (O : (Spec A).Opens) (g : A)
   rw [← arcTopology_spec (CommRingCat.of (Localization.Away g))]
   exact continuous_comp_openImmersion _
 
+/-! ## ★★★★段 A —— アフィン周囲での任意の開部分スキームの chart 埋め込み -/
+
+/-- ★**基本開集合への所属は、像の点が `awayι` の像に入ることと同じ**。 -/
+theorem mem_arcBasicOpen_iff (A : CommRingCat.{0}) (g : A)
+    (p : Spec (CommRingCat.of ℂ) ⟶ Spec A) :
+    p ∈ arcBasicOpen A g ↔ p.base default ∈ (awayι A g).opensRange := by
+  rw [opensRange_awayι]
+  exact (mem_basicOpen_base_iff A g p).symm
+
+/-- ★`arcTopology (Spec A)` の側で述べた基本開集合の開性。 -/
+theorem isOpen_arcBasicOpen' (A : CommRingCat.{0}) (g : A) :
+    @IsOpen _ (arcTopology (Spec A)) (arcBasicOpen A g) := by
+  rw [arcTopology_spec]
+  exact isOpen_arcBasicOpen A g
+
+/-- ★`arcTopology (Spec A)` の側で述べた持ち上げの連続性。 -/
+theorem continuous_liftToOpen' (A : CommRingCat.{0}) (O : (Spec A).Opens) (g : A)
+    (hle : ((awayι A g).opensRange) ≤ O) :
+    @Continuous _ _ (@instTopologicalSpaceSubtype _ _ (arcTopology (Spec A)))
+      (arcTopology O.toScheme) (liftToOpen A O g hle) := by
+  rw [arcTopology_spec]
+  exact continuous_liftToOpen A O g hle
+
+/-- ★★★★**アフィン周囲での任意の開部分スキームの chart 埋め込み**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    arcTopology O.toScheme = induced (· ≫ O.ι) (arcTopology (Spec A))
+
+★★★これは `topology_openImmersion` の**アフィン周囲での完全な形**である。
+
+★機構は 5 部品の組み合わせ:
+被覆(`exists_awayι_le`)/ 各片の持ち上げの連続性(`continuous_liftToOpen`)/
+持ち上げが切断(`liftToOpen_comp`)/ 基本開集合が開(`isOpen_arcBasicOpen`)/
+単射性(`comp_openImmersion_injective`)。 -/
+theorem arcTopology_opens_of_affine (A : CommRingCat.{0}) (O : (Spec A).Opens) :
+    arcTopology O.toScheme
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => p ≫ O.ι)
+          (arcTopology (Spec A)) := by
+  letI := arcTopology (Spec A)
+  letI := arcTopology O.toScheme
+  refine le_antisymm (continuous_iff_le_induced.1 (continuous_comp_openImmersion O.ι)) ?_
+  intro V hV
+  refine isOpen_induced_iff.2
+    ⟨(fun q : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => q ≫ O.ι) '' V, ?_, ?_⟩
+  · -- ★像が開であること: 基本開集合ごとに分けて示す
+    rw [isOpen_iff_forall_mem_open]
+    intro p hp
+    obtain ⟨q, hqV, hq⟩ := hp
+    -- `p` は `O` に落ちる
+    have hpO : p.base default ∈ O := by
+      rw [← hq]
+      show (q ≫ O.ι).base default ∈ O
+      rw [Scheme.Hom.comp_apply]
+      exact (q.base default).2
+    obtain ⟨g, hxg, hgO⟩ := exists_awayι_le O (p.base default) hpO
+    have hpg : p ∈ arcBasicOpen A g := (mem_arcBasicOpen_iff A g p).2 hxg
+    refine ⟨Subtype.val '' ((liftToOpen A O g hgO) ⁻¹' V), ?_, ?_, ?_⟩
+    · -- ★★この部分集合は像に含まれる
+      rintro y ⟨⟨y', hy'⟩, hyV, rfl⟩
+      exact ⟨liftToOpen A O g hgO ⟨y', hy'⟩, hyV, liftToOpen_comp A O g hgO ⟨y', hy'⟩⟩
+    · -- ★★開である
+      exact (isOpen_arcBasicOpen' A g).isOpenMap_subtype_val _
+        ((continuous_liftToOpen' A O g hgO).isOpen_preimage _ hV)
+    · -- ★★`p` を含む
+      refine ⟨⟨p, hpg⟩, ?_, rfl⟩
+      show liftToOpen A O g hgO ⟨p, hpg⟩ ∈ V
+      have : liftToOpen A O g hgO ⟨p, hpg⟩ = q := by
+        refine comp_openImmersion_injective O.ι ?_
+        show liftToOpen A O g hgO ⟨p, hpg⟩ ≫ O.ι = q ≫ O.ι
+        rw [liftToOpen_comp]
+        exact hq.symm
+      rw [this]
+      exact hqV
+  · -- ★逆像がもとに戻る(単射性)
+    exact (comp_openImmersion_injective O.ι).preimage_image V
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -419,6 +498,11 @@ def awayLift_eq_openLift.src : ABC3.Meta.Source :=
 def opensRange_awayι.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——awayι の像が基本開集合であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcTopology_opens_of_affine.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——アフィン周囲での開部分スキームの chart 埋め込み)",
     sectionId := "genell-def-1-1-i" }
 
 def exists_awayι_le.src : ABC3.Meta.Source :=
