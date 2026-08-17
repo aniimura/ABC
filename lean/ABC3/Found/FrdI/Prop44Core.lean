@@ -187,7 +187,7 @@ theorem birat_faithfulUpToUnits {A B : BiratCat P G} (φ ψ : A ⟶ B)
 /-! ## ★4. ★★★★辞書の残りへ —— 「`𝒞^birat` の射は `[a]⁻¹ ≫ [φ]`」
 
 原文 (FrdI p.84):
-> where α′ [hence also α◦α′] is a co-angular pre-step. Then we take the composite of
+> Proposition 1.11, (vii), that there exists a commutative diagram
 
 ★★原文は (iv) の co-angular の条を
 「**`𝒞^birat` の分解は `𝒞` の分解から来る**([cf. the proof of assertion (i)])」
@@ -234,7 +234,7 @@ include P G in
 /-- ★★**`[·]⁻¹` を左へ寄せる** —— `Proposition 1.11, (vii)` そのもの。
 
 原文 (FrdI p.84):
-> where α′ [hence also α◦α′] is a co-angular pre-step. Then we take the composite of
+> Proposition 1.11, (vii), that there exists a commutative diagram
 
 ★`g : A₁ ⟶ U` と co-angular pre-step `b : B₁ ⟶ U` に対し、
 `g₁ ≫ g = k₁ ≫ b`(`g₁` は co-angular pre-step)が取れる。
