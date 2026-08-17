@@ -420,6 +420,29 @@ theorem isometricPreStep_map (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore
     exact isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ hcomp
   exact (prop_1_9_vii P₂ F₂ (Ψ.map φ) (Ψ.map ψ) hmapψ).mpr hmapcomp
 
+/-- ★★★★**[FrdI] Theorem 3.4, (i) の第 4 主張(関手の存在)** ——
+`Ψ` は **`Ψ^istr : 𝒞₁^istr ⥤ 𝒞₂^istr` に制限される**。
+
+原文 (FrdI p.62):
+> there exists a 1-unique functor Ψistr : Cistr
+
+★★対象の側は第 1 主張(`Ψ` は isotropic 対象を保つ)、
+射の側は `Ψ.map` そのもの。★**充満部分圏なので関手性は自明に落ちる。** -/
+def psiIstr (h₁ : IsOfQuasiIsotropicType C P₁) (h₂ : IsOfQuasiIsotropicType D P₂) :
+    Istr P₁ ⥤ Istr P₂ where
+  obj A := ⟨Ψ.obj A.obj, (thm_3_4_i_isotropic Ψ P₁ P₂ h₁ h₂ A.obj).mp A.property⟩
+  map {_ _} f := ObjectProperty.homMk (Ψ.map f.hom)
+  map_id _ := InducedCategory.hom_ext (Ψ.map_id _)
+  map_comp _ _ := InducedCategory.hom_ext (Ψ.map_comp _ _)
+
+/-- ★**`Ψ^istr` は忠実**(`Ψ` が忠実だから)。 -/
+theorem psiIstr_faithful (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) :
+    (psiIstr Ψ P₁ P₂ h₁ h₂).Faithful where
+  map_injective {_ _ f g} h := by
+    refine InducedCategory.hom_ext (Ψ.map_injective ?_)
+    exact congrArg (fun m : (psiIstr Ψ P₁ P₂ h₁ h₂).obj _ ⟶ _ => m.hom) h
+
 end Isotropic
 
 end ABC3.Found.FrdI
