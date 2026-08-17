@@ -3200,3 +3200,49 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 
 ★★**3 が本命**である——第 18 ブロックでは同種の壁を
 「`show` で両辺を明示的に書き下す」で 7 フィールドすべて抜けた。
+
+
+---
+
+## §9-43 (2026-08-18) ★★★★★★第 25・26 ブロックと、残り 2 点の見取り図
+
+### ★★★★★★二重路を抜けた(第 25 ブロック)
+
+`Ring` インスタンスの二重路((a) `RingCat` 由来 / (b) `CommRing.toRing` 由来)は
+**2 つの組み合わせ**で抜けた:
+
+1. **加群の段で naturality を書かない**——`freeObjDesc` に渡せば mathlib が担う。
+   ★型前層の段なら等式は**要素の等式**である。
+2. **`erw` を使う**——`rw` は `instances` 透明度で照合するので落ちるが、
+   `erw` は `default` 透明度なので**二重路を越えられる**。
+
+★★★これは記録に値する: 「`simp` が `@[simp]` 付きの補題にすら当たらない」ときは
+**インスタンス経路を疑い、`erw` を試す**。
+
+### ★★生成元の段が 4 本で閉じた
+
+    第 23: 逆像は ⊓ を保つ                        `opensMap_inf`
+    第 24: f^*(free (yoneda V)) ≅ free (yoneda (f⁻¹V))
+    第 25: free (F ⊗ G) ≅ free F ⊗ free G
+    第 26: yoneda V ⊗ yoneda W ≅ yoneda (V ⊓ W)
+
+★★★**両辺の対象が生成元の上で同型である**ことが確定した:
+
+    f^*(free(yoneda V) ⊗ free(yoneda W)) ≅ free(yoneda (f⁻¹V ⊓ f⁻¹W))
+                                         ≅ f^*free(yoneda V) ⊗ f^*free(yoneda W)
+
+### ★★★★残り 2 点
+
+| # | 主張 | 材料 |
+|---|---|---|
+| (a) | `δ` **自身**が上の同型と一致すること | ★mathlib は `δ X Y = adj.homEquiv.symm ((unit ⊗ₘ unit) ≫ μ)` と**具体的に**定義している。★★`pushforwardCompCoyonedaFreeYonedaCorepresentableBy` の `homEquiv` も `freeYonedaEquiv` で**具体的**である |
+| (b) | 余極限による持ち上げ | ★第 23 の余極限保存 3 本 + `isColimitFreeYonedaCoproductsCokernelCofork` |
+
+### ★★★★★★重要な観察 —— `δ` を経由しなくてもよい可能性
+
+`PicSheaf` は**同型による商**である。したがって `pullback_mul` に要るのは
+**対象の同型** `f^*(L ⊗ M) ≅ f^*L ⊗ f^*M` だけであり、
+★★**それが `δ` であることは要らない**。
+
+★★★これは (a) を迂回できる可能性を示す——ただし対象の同型を出すにも
+結局は生成元と余極限を通す必要があり、(b) は残る。
