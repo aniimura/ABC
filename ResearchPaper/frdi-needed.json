@@ -319,7 +319,7 @@
    "page": 90,
    "section": "4",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Corollary 4.10",
@@ -453,5 +453,5 @@
   }
  ],
  "total": 54,
- "done": 29
+ "done": 30
 }
