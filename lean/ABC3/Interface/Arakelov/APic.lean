@@ -36,24 +36,36 @@ open ABC3.Meta AlgebraicGeometry CategoryTheory NumberField
 
 ★原文の `L̄ = (L, |−|_L)` そのものである。 -/
 structure APicData where
-  /-- 台となる `Pic`。 -/
-  toPicardData : PicardData
-  /-- 台となる計量。 -/
+  /-- 台となる計量(その中に `Pic` も入っている)。 -/
   toHermitianMetricData : HermitianMetricData
   /-- `APic(X)` の台。 -/
   APic : Scheme.{0} → Type
   /-- テンソル積による群構造。 -/
   group : (X : Scheme.{0}) → CommGroup (APic X)
   /-- 下にある可逆層を忘れる写像。 -/
-  forgetMetric : (X : Scheme.{0}) → APic X → toPicardData.Pic X
+  forgetMetric : (X : Scheme.{0}) → APic X → toHermitianMetricData.toPicardData.Pic X
   /-- ★忘れる写像は群準同型。 -/
   forgetMetric_mul : ∀ (X : Scheme.{0}) (L M : APic X),
     forgetMetric X
       (@HMul.hMul _ _ _
         (@instHMul _ (group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
       = @HMul.hMul _ _ _
-          (@instHMul _ (toPicardData.group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul)
+          (@instHMul _ (toHermitianMetricData.toPicardData.group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul)
           (forgetMetric X L) (forgetMetric X M)
+  /-- ★★**層と計量の対から算術直線束を作る**(`mk` は構造体コンストラクタ名なので `ofMetric`)。 -/
+  ofMetric : (X : Scheme.{0}) → (L : toHermitianMetricData.toPicardData.Pic X) →
+    toHermitianMetricData.Metric X L → APic X
+  /-- ★★★**対を忘れると元の層に戻る**。
+
+  ★★★**これが退化を殺す。**`APic := PUnit` だと `forgetMetric` は定数だが、
+  この式はすべての `L` について `forgetMetric (mk X L m) = L` を要求する。
+  ★`Pic` は (B1) の `equivPicRing` で非自明が強制されているので、矛盾する。 -/
+  forgetMetric_mk : ∀ (X : Scheme.{0}) (L : toHermitianMetricData.toPicardData.Pic X)
+    (m : toHermitianMetricData.Metric X L), forgetMetric X (ofMetric X L m) = L
+  /-- ★★算術直線束はすべて対から来る(`APic` に余計な元が無い)。 -/
+  mk_surjective : ∀ (X : Scheme.{0}) (x : APic X),
+    ∃ (L : toHermitianMetricData.toPicardData.Pic X)
+      (m : toHermitianMetricData.Metric X L), ofMetric X L m = x
   /-- 射に沿った引き戻し。 -/
   pullback : {X Y : Scheme.{0}} → (X ⟶ Y) → APic Y → APic X
   /-- ★引き戻しは群準同型。 -/
