@@ -33,24 +33,43 @@ mathlib は各前層加群 `M` を
 ★★★これで `δ` の同型性は**生成元の 1 点だけ**に帰着した。
 -/
 
-universe u
+universe u uD vD u1 v1 u2 v2 u3 v3
 
 namespace ABC3.Found.Arakelov
 
 open CategoryTheory Limits PresheafOfModules
 
 variable {C : Type u} [SmallCategory C] {R : Cᵒᵖ ⥤ RingCat.{u}}
-  {D : Type u} [Category.{u} D]
+  {D : Type uD} [Category.{vD} D]
   {A B : PresheafOfModules.{u} R ⥤ D} (τ : A ⟶ B)
-  [PreservesColimitsOfSize.{u, u} A] [PreservesColimitsOfSize.{u, u} B]
+
+/-! ## ★合成の余極限保存(明示引数で渡すための器具) -/
+
+/-- ★★**合成も余極限を保つ**——汎用の圈で述べることが要点である。
+
+★★★具体の型(`Y.PresheafOfModules` と
+`PresheafOfModules (Y.presheaf ⋙ forget₂ _ _)`)の上では
+`comp_preservesColimits` の**探索が落ちる**——型の書き方が違うからである。
+★汎用の圈で述べて**明示引数で渡せば通る**。 -/
+theorem preservesColimitsOfSize_comp {C₁ : Type u1} [Category.{v1} C₁]
+    {C₂ : Type u2} [Category.{v2} C₂] {C₃ : Type u3} [Category.{v3} C₃]
+    (F : C₁ ⥤ C₂) (G : C₂ ⥤ C₃)
+    (hF : PreservesColimitsOfSize.{u, u} F) (hG : PreservesColimitsOfSize.{u, u} G) :
+    PreservesColimitsOfSize.{u, u} (F ⋙ G) := by
+  haveI := hF
+  haveI := hG
+  infer_instance
 
 /-! ## ★余積の上で -/
 
 /-- ★★**余積の上で同型**——第 28 ブロックを `Discrete` 図式に当てる。 -/
 theorem isIso_app_freeYonedaCoproduct
+    (hA : PreservesColimitsOfSize.{u, u} A) (hB : PreservesColimitsOfSize.{u, u} B)
     (h : ∀ (X : C), IsIso (τ.app ((PresheafOfModules.free R).obj (yoneda.obj X))))
-    (M : PresheafOfModules.{u} R) : IsIso (τ.app M.freeYonedaCoproduct) :=
-  isIso_app_of_colimit τ (Discrete.functor (Elements.freeYoneda (M := M)))
+    (M : PresheafOfModules.{u} R) : IsIso (τ.app M.freeYonedaCoproduct) := by
+  haveI := hA
+  haveI := hB
+  exact isIso_app_of_colimit τ (Discrete.functor (Elements.freeYoneda (M := M)))
     (fun j => h j.as.1.unop)
 
 /-! ## ★★★★★生成元から全対象へ -/
@@ -62,14 +81,19 @@ theorem isIso_app_freeYonedaCoproduct
 
 ★★★これが `δ` の同型性を**生成元の 1 点**に帰着させる器具である。 -/
 theorem isIso_app_of_freeYoneda
+    (hA : PreservesColimitsOfSize.{u, u} A) (hB : PreservesColimitsOfSize.{u, u} B)
     (h : ∀ (X : C), IsIso (τ.app ((PresheafOfModules.free R).obj (yoneda.obj X))))
     (M : PresheafOfModules.{u} R) : IsIso (τ.app M) := by
-  haveI := isIso_app_freeYonedaCoproduct τ h
+  haveI := hA
+  haveI := hB
+  haveI := isIso_app_freeYonedaCoproduct τ hA hB h
+  haveI : PreservesColimitsOfSize.{0, 0} A := preservesColimitsOfSize_shrink A
+  haveI : PreservesColimitsOfSize.{0, 0} B := preservesColimitsOfSize_shrink B
   refine isIso_app_of_isColimit τ (parallelPair M.toFreeYonedaCoproduct 0) _
     M.isColimitFreeYonedaCoproductsCokernelCofork ?_
   rintro (_ | _)
-  · exact isIso_app_freeYonedaCoproduct τ h _
-  · exact isIso_app_freeYonedaCoproduct τ h M
+  · exact isIso_app_freeYonedaCoproduct τ hA hB h _
+  · exact isIso_app_freeYonedaCoproduct τ hA hB h M
 
 /-! ## ★出典の紐付け(`.src`) -/
 
