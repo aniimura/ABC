@@ -142,6 +142,7 @@ import ABC3.Found.Arakelov.PicPresheafTensor
 import ABC3.Found.Arakelov.PicSheafTensor
 import ABC3.Found.Arakelov.PicRestrict
 import ABC3.Found.Arakelov.PicRestrictTensor
+import ABC3.Found.Arakelov.PicLocalSurj
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
