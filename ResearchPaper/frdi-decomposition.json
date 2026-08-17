@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-08-18",
+  "measuredAt": "2026-08-18(★otricomm の葉 2 個を同日に閉じた)",
   "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
   "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
   "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
@@ -23,11 +23,23 @@
     {
       "id": "otricomm",
       "title": "𝒪^×(A^birat) の可換性 —— Proposition 4.4, (ii) の残る 1 条",
-      "serves": { "paper": "FrdI", "item": "Proposition 4.4, (ii)", "page": 85 },
+      "serves": {
+        "paper": "FrdI",
+        "item": "Proposition 4.4, (ii)",
+        "page": 85
+      },
       "unblocks": [
-        "Proposition 4.4", "Theorem 4.2", "Proposition 4.8", "Corollary 4.10",
-        "Corollary 4.11", "Theorem 5.1", "Corollary 5.4", "Proposition 5.5",
-        "Proposition 5.6", "Corollary 5.7", "Theorem 6.4"
+        "Proposition 4.4",
+        "Theorem 4.2",
+        "Proposition 4.8",
+        "Corollary 4.10",
+        "Corollary 4.11",
+        "Theorem 5.1",
+        "Corollary 5.4",
+        "Proposition 5.5",
+        "Proposition 5.6",
+        "Corollary 5.7",
+        "Theorem 6.4"
       ],
       "★位置づけ": "★★**残り 24 件のうち 11 件を止めている、最大の律速**。原文は p.85 で「routine exercise」と書いて証明を置かない。",
       "nodes": [
@@ -35,18 +47,18 @@
           "id": "ore-square",
           "title": "Ore の四角形 —— (iii)(d) から `p ≫ s = m ≫ c` を作る",
           "deps": [],
-          "status": "todo",
-          "size": "小(半日)",
-          "evidence": "★`coaPreOverEquiv : (𝒞^coa-pre)_A ≃ Order(Φ(A))^opp` は `Frobenioid` の場である(Found/FrdI/Frobenioid.lean)。`Order(Φ(A))` は前順序圏なので射は高々 1 本、`Φ(A)` は有向。`δ_c + δ_s` の対象から一意に降りる。",
+          "status": "done",
+          "size": "——",
+          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ore.lean` の `exists_ore_square_coaPre`(2 本版)と `exists_ore_common`(有限族版)。道具は (iii)(d) `coaPreOverEquiv` ひとつ —— `Order(Φ(A))` は前順序圏、`Φ(A)` は `δ ≼ δ+ε` で有向、ゆえにスライスは余フィルター。★model 限定ではなかった。",
           "★model 版": "Found/FrdI/Thm52Frob.lean の `exists_ore_square`(model について実装済み)。**一般化がこの節点**である。"
         },
         {
           "id": "divgp-hom",
           "title": "`biratDivGp : 𝒪^×(A^birat) →* Φ(A)^gp` が群準同型であること",
           "deps": [],
-          "status": "todo",
-          "size": "小",
-          "evidence": "`biratDivGp` は Found/FrdI/Prop44Core.lean に既にある。合成についての加法性を示す。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ore.lean` の `otriDivGp_mul` と `otriDivGpHom`。合成公式 `Div(f≫g) = Φ(Base f)(Div g) + deg(g)·Div f` の 2 つの補正項が、底恒等・次数 1 でどちらも消える。"
         },
         {
           "id": "image-central",
@@ -59,7 +71,9 @@
         {
           "id": "ker-eq-image",
           "title": "ker(divgp-hom) = `𝒪^×(A)` の像 —— (vi) `faithfulUpToUnits` から",
-          "deps": ["divgp-hom"],
+          "deps": [
+            "divgp-hom"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "★`u = [c]⁻¹ ≫ [s]` の像が 0 ⟺ `δ_c = δ_s`。このとき `c`・`s` は base-equivalent かつ metrically equivalent な co-angular pre-step なので、(vi) が `α ∈ 𝒪^×(A)` で `c = s ≫ α` を与える。ゆえに `u = [α]⁻¹`。"
@@ -67,7 +81,10 @@
         {
           "id": "central-ext",
           "title": "`𝒪^×(A^birat)` は中心拡大 —— 交換子が交代双線形形式を誘導する",
-          "deps": ["ker-eq-image", "image-central"],
+          "deps": [
+            "ker-eq-image",
+            "image-central"
+          ],
           "size": "中",
           "status": "todo",
           "evidence": "中心拡大 `1 → Z → G → Λ → 1`(`Λ ⊆ Φ(A)^gp` はアーベル)では `[·,·] : Λ × Λ → Z` が well-defined な交代双線形形式になる。★これは純群論で、原典にも mathlib にも依存しない。",
@@ -76,7 +93,10 @@
         {
           "id": "pairing-vanishes",
           "title": "★★その双線形形式が消えること —— Ore の四角形で交換子を計算する",
-          "deps": ["ore-square", "central-ext"],
+          "deps": [
+            "ore-square",
+            "central-ext"
+          ],
           "status": "todo",
           "size": "★大(ここが本体。原典が「routine exercise」と書いた所)",
           "evidence": "★model では消える(Found/FrdI/Thm52Birat.lean の `model_birat_otri_comm`、Ore の四角形 2 つの脚が `𝒞` で一致することを 4 成分の計算で示した)。一般の `𝒞` では `ore-square` の一意性(前順序圏なので射は高々 1 本)が同じ役割を果たすと見ている。",
@@ -85,7 +105,9 @@
         {
           "id": "otribase",
           "title": "`otriBase` —— 可換性からの帰結",
-          "deps": ["pairing-vanishes"],
+          "deps": [
+            "pairing-vanishes"
+          ],
           "status": "半済",
           "size": "小",
           "evidence": "★同値性は 2026-08-18 に取得済み(Found/FrdI/Prop44Otri.lean の `birat_otriBase_of_comm` / `birat_frobenioidCore_of_comm`)。可換性が来れば 21 条が閉じる。"
@@ -95,8 +117,14 @@
     {
       "id": "prol",
       "title": "副有限アーベル群の pro-l 分解 —— Definition 2.8, (ii)",
-      "serves": { "paper": "FrdI", "item": "Definition 2.8, (ii)", "page": 52 },
-      "unblocks": ["Definition 2.8"],
+      "serves": {
+        "paper": "FrdI",
+        "item": "Definition 2.8, (ii)",
+        "page": 52
+      },
+      "unblocks": [
+        "Definition 2.8"
+      ],
       "★位置づけ": "§2 に残る唯一の未実装項目。下流を止めてはいない(止めているのは自分 1 件だけ)。",
       "nodes": [
         {
@@ -134,7 +162,11 @@
         {
           "id": "M-l-part",
           "title": "`M[l] := lim_U (M/U)[l]` の構成と、それが pro-l であること",
-          "deps": ["finite-primary", "prol-def", "M-limit"],
+          "deps": [
+            "finite-primary",
+            "prol-def",
+            "M-limit"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。"
@@ -142,7 +174,10 @@
         {
           "id": "decomposition",
           "title": "`M ≅ ∏_l M[l]`(位相群の同型)",
-          "deps": ["M-l-part", "limit-pi-comm"],
+          "deps": [
+            "M-l-part",
+            "limit-pi-comm"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "`M ≅ lim_U M/U ≅ lim_U ∏_l (M/U)[l] ≅ ∏_l lim_U (M/U)[l] = ∏_l M[l]`。"
@@ -150,7 +185,9 @@
         {
           "id": "def28",
           "title": "`Definition 2.8` の (i)(ii)(iii) —— co-prime 型と λ 乗写像",
-          "deps": ["decomposition"],
+          "deps": [
+            "decomposition"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "★(i) と (iii) の `co-prime type` は分解を要さない(定義だけ)。(iii) の λ 乗写像は `M[l]` ごとに `λ(l)` 乗するので `decomposition` が要る。"
@@ -160,8 +197,14 @@
     {
       "id": "sixexp",
       "title": "six exponentials theorem —— Lemma 6.5, (ii)",
-      "serves": { "paper": "FrdI", "item": "Lemma 6.5, (ii)", "page": 116 },
-      "unblocks": ["Lemma 6.5"],
+      "serves": {
+        "paper": "FrdI",
+        "item": "Lemma 6.5, (ii)",
+        "page": 116
+      },
+      "unblocks": [
+        "Lemma 6.5"
+      ],
       "★位置づけ": "§6 の**例**(`Example 6.3` の非同型性)にだけ使う。Frobenioid の理論本体には入らない。下流を止めてはいない。",
       "nodes": [
         {
@@ -191,7 +234,9 @@
         {
           "id": "aux-function",
           "title": "補助関数 `F(z) = Σ c_pq exp((p x₁ + q x₂) z)` の構成",
-          "deps": ["siegel-nf"],
+          "deps": [
+            "siegel-nf"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "`F(m₁y₁+m₂y₂+m₃y₃)` の値は `exp(x_i y_j)` の単項式の代数的結合。Siegel で `c_pq` を選び、多くの点で消させる。"
@@ -199,7 +244,9 @@
         {
           "id": "growth",
           "title": "`F` の増大度評価(有限指数の整関数)",
-          "deps": ["aux-function"],
+          "deps": [
+            "aux-function"
+          ],
           "status": "todo",
           "size": "小",
           "evidence": "指数和なので `|F(z)| ≤ (Σ|c_pq|) exp(C|z|)`。初等的。"
@@ -207,7 +254,11 @@
         {
           "id": "extrapolation",
           "title": "外挿の帰納 —— `F` が新しい格子点でも消えること",
-          "deps": ["schwarz-many-zeros", "liouville-ineq", "growth"],
+          "deps": [
+            "schwarz-many-zeros",
+            "liouville-ineq",
+            "growth"
+          ],
           "status": "todo",
           "size": "★大(ここが本体)",
           "evidence": "解析側(小さい)と算術側(0 でなければ大きい)を突き合わせて 0 を強制する、超越性証明の標準の段。"
@@ -215,7 +266,9 @@
         {
           "id": "sixexp-thm",
           "title": "six exponentials theorem",
-          "deps": ["extrapolation"],
+          "deps": [
+            "extrapolation"
+          ],
           "status": "todo",
           "size": "中",
           "evidence": "`x₁,x₂` が ℚ 上一次独立・`y₁,y₂,y₃` が ℚ 上一次独立なら `exp(x_i y_j)` の 6 個のうち少なくとも 1 つは超越的。"
@@ -223,7 +276,9 @@
         {
           "id": "lemma65ii",
           "title": "`Lemma 6.5, (ii)` への適用",
-          "deps": ["sixexp-thm"],
+          "deps": [
+            "sixexp-thm"
+          ],
           "status": "todo",
           "size": "小",
           "evidence": "原文は `{log p₂, log p₄, log p₆}` と `{1, log p₃/log p₄}` に当てる。(i) は実装済み(`Found/FrdI/Lemma65.lean` の `log_primes_linearIndependent`)。"
