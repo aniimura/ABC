@@ -408,33 +408,9 @@ noncomputable def isotropicHullIso {X H H' : K} {h : X ⟶ H} {h' : X ⟶ H'}
 
 variable (F : FrobenioidCore P)
 
-/-! ★★**`dsimp` 用の `rfl` 補題**。
-
-★これが無いと、射の**暗黙の対象引数**が `((isotropification P F).obj B).obj` の形で残り、
-`hullObj P F B` と**表示は同じなのに `rw` が噛まない**(defeq だが構文が違う)。
-★★実測(2026-08-17): `Category.assoc` すら「パターンが見つからない」と落ちる。 -/
-
-theorem isotropification_obj (A : K) : (isotropification P F).obj A = hullIstr P F A := rfl
-
-theorem hullIstr_obj (A : K) : (hullIstr P F A).obj = hullObj P F A := rfl
-
-/-- ★`hullHomEquiv` の値は**定義的に** `hullMap ≫ (射の下地)` である。 -/
-theorem hullHomEquiv_apply (A : K) (Y : Istr P) (g : hullIstr P F A ⟶ Y) :
-    hullHomEquiv P F A Y g = hullMap P F A ≫ g.hom := rfl
-
-/-- ★★**`isotropification` の射は hull の四角形を可換にする**。
-
-  `hullMap A ≫ (A^istr ⟶ B^istr) = f ≫ hullMap B`
-
-★★これが `isotropification` について**我々が必要とする唯一の情報**である
-——以下の 1-可換性の自然性は、すべてこの四角形と `isotropicHull_hom_ext` から出る。 -/
-theorem isotropification_map_comp {A B : K} (f : A ⟶ B) :
-    hullMap P F A ≫ ((isotropification P F).map f).hom = f ≫ hullMap P F B := by
-  have h := (hullHomEquiv P F A (hullIstr P F B)).apply_symm_apply
-    (f ≫ (hullHomEquiv P F B (hullIstr P F B)) (𝟙 _))
-  rw [hullHomEquiv_apply, hullHomEquiv_apply] at h
-  refine Eq.trans ?_ (congrArg (fun g => f ≫ g) (Category.comp_id (hullMap P F B)))
-  exact h
+/-! ★★**`isotropification` の四角形は在庫にあった**(`isotropification_square`,
+`Prop19.lean`)。★2026-08-17、私は同じ主張を `isotropification_map_comp` として
+**作り直してしまった**——作る前に在庫を検索する規則の再発である。撤去した。 -/
 
 end HullUniq
 
@@ -657,9 +633,9 @@ noncomputable def isotropificationCommute (F₁ : FrobenioidCore P₁) (F₂ : F
       refine isotropicHull_hom_ext P₂
         (isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ (hullMap_spec P₁ F₁ A))
         (hullMap_spec P₂ F₂ (Ψ.obj B)).2.2.1 ?_
-      erw [← Category.assoc, ← Ψ.map_comp, isotropification_map_comp, Ψ.map_comp,
+      erw [← Category.assoc, ← Ψ.map_comp, isotropification_square, Ψ.map_comp,
         Category.assoc, isotropicHullIso_hom, ← Category.assoc, isotropicHullIso_hom,
-        isotropification_map_comp])
+        isotropification_square])
 
 end Isotropic
 
