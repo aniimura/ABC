@@ -16,3 +16,4 @@
 - [「導けない」と書く前に在庫を検索する](frdi-split-nonisotropic-not-derivable.md) — 自分の在庫で 4 回、★**mathlib の在庫でも 2 回**外した。mathlib は概念名でなく「量の名前」で索引されている。
 - [1-一意性と rigidity は 2 つの型で落ちる](frdi-1uniqueness-rigidity-patterns.md) — 1-一意性は「恒等になる合成を 1 つ見つける」、rigidity は「その操作が圏同値であることを言う」。手で共役を組むと詰まる(2 度実測)。
 - [圏同値の3性質は別々の道具で落ちる](frdi-equivalence-three-properties.md) — 行き先が前順序圏なので充満性は「射が1本あればよい」。忠実性はコスライスがepi・スライスがmono。持ち上げは対象を先に分解して subst。
+- [F.map g は平の射へ束縛し直す](lean-rebind-morphisms-clean-types.md) — `(F.obj A)` と `A` は構文が違うので `≫` の型検査が落ち、巻き添えで `IsIso (𝟙 X)` すら合成できなくなる。`obtain ⟨aa, haa⟩ : ∃ aa : X ⟶ Y, aa = F.map g := ⟨_, rfl⟩`。
