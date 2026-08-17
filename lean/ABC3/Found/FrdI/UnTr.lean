@@ -297,4 +297,68 @@ theorem unTr_unitTrivial (Fc : FrobenioidCore P) (A : UnTr P) :
       congrArg ElemFrobCat.Hom.deg hid]
     exact hdeg
 
+/-! ### ★`Proposition 3.3, (iv)` の最終文 —— 射の類型は `𝒞^istr` から来る
+
+原文 (FrdI p.60):
+> phism; morphism of a given Frobenius degree) if and only if it arises from such
+
+★原文は **9 クラス**を挙げる: Frobenius 型 / pre-step / base-isomorphism / 同型 /
+pull-back / isometry / co-angular / LB-invertible / 与えられた Frobenius 次数。
+
+★★**仕分け(測定)**: このうち **4 クラスは `Base`・`Div`・`degFr` だけで決まる**ので
+`Iff.rfl` である(`unTrToElem` は代表元に `P.toElem` を当てるだけだから)。
+★**同型は `Iff.rfl` ではないが取れる** —— `𝒞^istr` が isotropic 型であることが効く。
+★残る 4 クラス(pull-back / co-angular / LB-invertible / Frobenius 型)は
+**圏論的な条件**なので、商を跨ぐには「unit-equivalent な 2 射で条件が一致すること」が要る。
+-/
+
+theorem unTr_degFr_iff (Fc : FrobenioidCore P) (n : ℕ+) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    (unTrPre P Fc).degFr (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B)) = n
+      ↔ P.degFr α = n := Iff.rfl
+
+theorem unTr_isBaseIsomorphism_iff (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    IsBaseIsomorphism (unTrPre P Fc)
+        (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      ↔ IsBaseIsomorphism P α := Iff.rfl
+
+theorem unTr_isIsometric_iff (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    IsIsometric (unTrPre P Fc)
+        (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      ↔ IsIsometric P α := Iff.rfl
+
+theorem unTr_isPreStep_iff (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    IsPreStep (unTrPre P Fc) (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      ↔ IsPreStep P α := Iff.rfl
+
+/-- ★★★**同型も `𝒞^istr` から来る**。
+
+★`⟸` は関手性。★★**`⟹` が中身のある向き**である ——
+`𝒞^un-tr` で同型なら `𝔽_Φ` で同型、したがって `Div = 0`・`degFr = 1`・`Base` が同型、
+すなわち `α` は **isometric な pre-step**。★`𝒞^istr` は isotropic 型なので
+`Definition 1.2, (iv)` により `α` は同型である。
+
+★★**商が同型を「新たに作らない」ことの証明**であり、`Proposition 3.3, (iii)` の
+「圏同値 ⟺ unit-trivial 型」とは別の主張である(あちらは忠実性の話)。 -/
+theorem unTr_isIso_iff (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    @IsIso (UnTr P) _ A B (toHomUnTr P α) ↔ IsIso α := by
+  constructor
+  · intro h
+    haveI := h
+    have hE : @IsIso (ElemFrobCat Φ) _ _ _
+        ((unTrToElem P).map (X := A) (Y := B) (toHomUnTr P α)) := inferInstance
+    have hE' : IsIso (P.toElem.map α) := hE
+    obtain ⟨hb, hu, hd⟩ := (ElemFrobCat.isIso_iff (P.toElem.map α)).mp hE'
+    have hdiv : IsIsometric P α := by
+      have hau : IsAddUnit (P.Div α) := hu
+      exact (P.divisorial (P.toElem.obj A.obj).base).2 _ hau
+    exact hiso A.obj B.obj α hdiv ⟨hd, hb⟩
+  · intro h
+    haveI := h
+    haveI hmap : IsIso ((isotropicProp P).ι.map (ObjectProperty.homMk α : A ⟶ B)) := h
+    haveI : IsIso (ObjectProperty.homMk α : A ⟶ B) :=
+      (ObjectProperty.fullyFaithfulι (isotropicProp P)).isIso_of_isIso_map _
+    let e := (istrToUnTr P).mapIso (asIso (ObjectProperty.homMk α : A ⟶ B))
+    exact ⟨⟨e.inv, e.hom_inv_id, e.inv_hom_id⟩⟩
+
 end ABC3.Found.FrdI
