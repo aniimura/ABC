@@ -82,11 +82,44 @@ theorem isOpen_landsIn_scheme {X : Scheme.{0}} (O : X.Opens) :
   letI := arcTopology X
   exact continuous_base_default_scheme.isOpen_preimage _ O.isOpen
 
+/-! ## ★★★アフィン開の上での「落ちる」条件(手順 4 で使う形) -/
+
+/-- ★★★**アフィン開 `U` の上でも「点が開集合に落ちる」条件は開である**。
+
+★`continuous_base_default_open` の直接の系。
+★★★これが `topology_openImmersion` の**手順 4** で使う形である
+——`U ⊓ U'` に落ちる点の集合が開であることを与える。 -/
+theorem isOpen_landsIn_open {X : Scheme.{0}} (U : X.affineOpens)
+    (O : U.1.toScheme.Opens) :
+    @IsOpen _ (arcTopologyOpen U)
+      {p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme | p.base default ∈ O} := by
+  letI := arcTopologyOpen U
+  exact (continuous_base_default_open U).isOpen_preimage _ O.isOpen
+
+/-- ★★**2 つのアフィン開の共通部分に落ちる点の集合は開である**。
+
+★★★手順 4 では `U ⊓ U'` を扱う——これがその形である。 -/
+theorem isOpen_landsIn_inter {X : Scheme.{0}} (U U' : X.affineOpens) :
+    @IsOpen _ (arcTopologyOpen U')
+      {p : Spec (CommRingCat.of ℂ) ⟶ U'.1.toScheme |
+        p.base default ∈ (U'.1.ι ⁻¹ᵁ U.1)} :=
+  isOpen_landsIn_open U' _
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def continuous_base_default_scheme.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——像の点を取る写像の連続性、一般のスキーム)",
+    sectionId := "genell-def-1-1-i" }
+
+def isOpen_landsIn_open.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——アフィン開の上で落ちる条件が開)",
+    sectionId := "genell-def-1-1-i" }
+
+def isOpen_landsIn_inter.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——2 つのアフィン開の共通部分に落ちる条件が開)",
     sectionId := "genell-def-1-1-i" }
 
 def isOpen_landsIn_scheme.src : ABC3.Meta.Source :=
