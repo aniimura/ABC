@@ -384,7 +384,113 @@ theorem biratGp_square_map {A B : C} (φ : A ⟶ B) :
   ElemFrobCat.Hom.ext (biratBase_toHomBirat φ) (biratDivGp_toHomBirat φ)
     (biratDeg_toHomBirat φ)
 
-/-! ## ★6. 残り —— `Φ^birat`
+/-! ## ★6. ★★★★`Φ^birat` —— `𝒪^×(A^birat)` の `Div^gp` による像
+
+原文 (FrdI p.83):
+> (iii) There exists a unique subfunctor of groups Φbirat ⊆Φgp such that
+
+★★原文は `Φ^birat` を「中段が経由する最小の部分関手」として特徴づけ、
+**各 `A^birat` で `𝒪^×(A^birat) ↠ Φ^birat(A^birat)` が全射**だと言う。
+★したがって**像として定義すれば全射性は定義そのもの**になる。 -/
+
+variable {P G} in
+/-- ★`𝒞^birat` の合成の零因子(圏の `≫` の形)。 -/
+theorem biratDivGp_comp' {A B E : BiratCat P G} (f : A ⟶ B) (g : B ⟶ E) :
+    biratDivGp (f ≫ g) = gpMap _ (Φ.map (biratBase f)) (biratDivGp g)
+      + ((biratDeg g : ℕ+) : ℕ) • biratDivGp f :=
+  biratDivGp_comp f g
+
+variable {P G} in
+theorem biratDivGp_id (A : BiratCat P G) : biratDivGp (𝟙 A) = 0 := by
+  show biratDivGp (toHomBirat (P := P) (G := G) (𝟙 (biratDown P G A))) = 0
+  rw [biratDivGp_toHomBirat, P.Div_id]
+  exact toGp_zero
+
+variable {P G} in
+/-- ★★**base-identity な射では `Φ^gp` の輸送が恒等になる**。 -/
+theorem gpMap_biratBase_of_baseIdentity {A : BiratCat P G} {δ : A ⟶ A}
+    (hδ : IsBaseIdentity (biratPre P G) δ)
+    (x : Gp (Φ.val (P.toElem.obj (biratDown P G A)).base)) :
+    gpMap _ (Φ.map (biratBase δ)) x = x := by
+  have hb : biratBase δ = 𝟙 _ := by
+    refine hδ.trans ?_
+    show biratBase (toHomBirat (P := P) (G := G) (𝟙 (biratDown P G A))) = 𝟙 _
+    rw [biratBase_toHomBirat, P.Base_id]
+  rw [hb]
+  have hmap : Φ.map (𝟙 ((P.toElem.obj (biratDown P G A)).base)) = AddMonoidHom.id _ := by
+    ext y; exact Φ.map_id _ y
+  rw [hmap, gpMap_id]
+  rfl
+
+variable {P G} in
+/-- ★★**`𝒪^×` の上では `Div^gp` は加法的**。 -/
+theorem biratDivGp_mul_otimes {A : BiratCat P G} {δ ε : End A}
+    (hδ : δ ∈ OTimes (biratPre P G) A) (hε : ε ∈ OTimes (biratPre P G) A) :
+    biratDivGp ((δ * ε : End A) : A ⟶ A)
+      = biratDivGp (δ : A ⟶ A) + biratDivGp (ε : A ⟶ A) := by
+  have h := biratDivGp_comp' (ε : A ⟶ A) (δ : A ⟶ A)
+  rw [gpMap_biratBase_of_baseIdentity hε.1.1,
+    show ((biratDeg (δ : A ⟶ A) : ℕ+) : ℕ) = 1 from by
+      rw [show biratDeg (δ : A ⟶ A) = 1 from hδ.1.2]; rfl,
+    one_smul] at h
+  exact h
+
+variable {P G} in
+/-- ★**単元の逆元も `𝒪^×` に入る**。 -/
+theorem otimes_inv_mem {A : BiratCat P G} {δ δ' : End A}
+    (hδ : δ ∈ OTimes (biratPre P G) A)
+    (h : (δ : A ⟶ A) ≫ (δ' : A ⟶ A) = 𝟙 A)
+    (h' : (δ' : A ⟶ A) ≫ (δ : A ⟶ A) = 𝟙 A) : δ' ∈ OTimes (biratPre P G) A := by
+  refine ⟨⟨?_, ?_⟩,
+    (CategoryTheory.isUnit_iff_isIso (δ' : A ⟶ A)).mpr ⟨⟨(δ : A ⟶ A), h', h⟩⟩⟩
+  · show (biratPre P G).Base (δ' : A ⟶ A) = (biratPre P G).Base (𝟙 A)
+    have hb := congrArg (biratPre P G).Base h
+    rw [(biratPre P G).Base_comp,
+      show (biratPre P G).Base (δ : A ⟶ A) = (biratPre P G).Base (𝟙 A) from hδ.1.1,
+      (biratPre P G).Base_id, Category.id_comp] at hb
+    exact hb.trans ((biratPre P G).Base_id A).symm
+  · show (biratPre P G).degFr (δ' : A ⟶ A) = 1
+    have hd := congrArg (biratPre P G).degFr h
+    rw [(biratPre P G).degFr_comp,
+      show (biratPre P G).degFr (δ : A ⟶ A) = 1 from hδ.1.2,
+      (biratPre P G).degFr_id, mul_one] at hd
+    exact hd
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iii)** —— `Φ^birat(A_𝒟)`。
+
+原文 (FrdI p.83):
+> (iii) There exists a unique subfunctor of groups Φbirat ⊆Φgp such that
+
+★**`𝒪^×(A^birat)` の `Div^gp` による像**として定義する。
+★★全射性(原文の `𝒪^×(A^birat) ↠ Φ^birat(A^birat)`)は**定義そのもの**になる。 -/
+noncomputable def phiBiratAt (A : BiratCat P G) :
+    AddSubgroup (Gp (Φ.val (P.toElem.obj (biratDown P G A)).base)) where
+  carrier := {x | ∃ δ ∈ OTimes (biratPre P G) A, biratDivGp (δ : A ⟶ A) = x}
+  zero_mem' := ⟨1, (OTimes (biratPre P G) A).one_mem, biratDivGp_id A⟩
+  add_mem' := by
+    rintro x y ⟨δ, hδ, rfl⟩ ⟨ε, hε, rfl⟩
+    exact ⟨δ * ε, (OTimes (biratPre P G) A).mul_mem hδ hε, biratDivGp_mul_otimes hδ hε⟩
+  neg_mem' := by
+    rintro x ⟨δ, hδ, rfl⟩
+    obtain ⟨u, hu⟩ := hδ.2
+    have h1 : (δ : A ⟶ A) ≫ ((↑u⁻¹ : End A) : A ⟶ A) = 𝟙 A := by
+      have hv := u.inv_val
+      rw [hu] at hv
+      exact hv
+    have h2 : ((↑u⁻¹ : End A) : A ⟶ A) ≫ (δ : A ⟶ A) = 𝟙 A := by
+      have hv := u.val_inv
+      rw [hu] at hv
+      exact hv
+    have hmem := otimes_inv_mem hδ h1 h2
+    refine ⟨(↑u⁻¹ : End A), hmem, ?_⟩
+    have hone : (δ * (↑u⁻¹ : End A) : End A) = 1 := h2
+    have hsum := biratDivGp_mul_otimes hδ hmem
+    rw [hone] at hsum
+    have hz : biratDivGp ((1 : End A) : A ⟶ A) = 0 := biratDivGp_id A
+    rw [hz] at hsum
+    exact eq_neg_of_add_eq_zero_left ((add_comm _ _).trans hsum.symm)
+
+/-! ## ★7. 残り —— `Φ^birat` の**関手性**
 
 ★★不変性(上)があるので、**余錐 `biratDivGpCocone` はそのまま組める**。
 ★その先の `map_comp`(合成則)が `𝔽_{Φ^gp}` への関手を与え、
