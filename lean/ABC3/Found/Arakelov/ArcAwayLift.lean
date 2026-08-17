@@ -64,6 +64,57 @@ theorem awayLiftHom_mk (A : CommRingCat.{0}) (s : A)
   simp only [map_pow, evalAffine] at hs ⊢
   field_simp
 
+/-! ## ★★★スキームの射への包みと連続性 -/
+
+/-- ★★**持ち上げをスキームの射として見る**。 -/
+noncomputable def awayLift (A : CommRingCat.{0}) (s : A)
+    (p : arcBasicOpen A s) :
+    Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s)) :=
+  Spec.map (CommRingCat.ofHom (awayLiftHom A s p.1 p.2))
+
+/-- ★**包んでも値は変わらない**。 -/
+@[simp] theorem evalAffine_awayLift (A : CommRingCat.{0}) (s : A)
+    (p : arcBasicOpen A s) (x : Localization.Away s) :
+    evalAffine (CommRingCat.of (Localization.Away s)) (awayLift A s p) x
+      = awayLiftHom A s p.1 p.2 x := by
+  rw [awayLift, evalAffine, evalHom_Spec_map]
+  rfl
+
+/-- ★★★**持ち上げは連続である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★**これが C1 の残り 1 点の本体である。**
+
+★機構は 2 つの対:
+- 代数側 `awayLiftHom_mk`(値は `φ(b)/φ(s)ⁿ`)
+- 解析側 `continuousOn_div_pow_evalAffine`(その式が連続)
+
+★★局所化の任意の元は `b/sⁿ` の形なので(`Localization.induction_on`)、
+成分ごとにこの対を当てればよい。 -/
+theorem continuous_awayLift (A : CommRingCat.{0}) (s : A) :
+    @Continuous _ _ (@instTopologicalSpaceSubtype _ _ (arcTopologyAffine A))
+      (arcTopologyAffine (CommRingCat.of (Localization.Away s)))
+      (awayLift A s) := by
+  letI := arcTopologyAffine A
+  letI := arcTopologyAffine (CommRingCat.of (Localization.Away s))
+  refine continuous_induced_rng.2 (continuous_pi fun x => ?_)
+  induction x using Localization.induction_on with
+  | H x =>
+    obtain ⟨b, y⟩ := x
+    obtain ⟨n, hn⟩ := y.2
+    have hval : ∀ p : arcBasicOpen A s,
+        evalAffine (CommRingCat.of (Localization.Away s)) (awayLift A s p)
+            (Localization.mk b y)
+          = evalAffine A p.1 b / (evalAffine A p.1 s) ^ n := by
+      intro p
+      rw [evalAffine_awayLift]
+      have : y = (⟨s ^ n, n, rfl⟩ : Submonoid.powers s) := Subtype.ext hn.symm
+      rw [this, awayLiftHom_mk]
+    simp only [Function.comp_apply, hval]
+    exact ((continuousOn_div_pow_evalAffine A b s n).restrict).congr (fun p => rfl)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -74,6 +125,11 @@ def awayLiftHom.src : ABC3.Meta.Source :=
 def awayLiftHom_mk.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——持ち上げの明示式)",
+    sectionId := "genell-def-1-1-i" }
+
+def continuous_awayLift.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——基本開集合への持ち上げの連続性)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
