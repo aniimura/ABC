@@ -521,6 +521,33 @@ base-identity 自己射(任意の Frobenius 次数)に関する関手性**から
 ★Frobenius-normalized 型が効く箇所である。
 -/
 
+/-- ★★**isotropic hull は一意** —— 同じ対象の 2 つの hull の間には
+**その対象の下で**一意な同型がある。
+
+★普遍性を両向きに使い、合成が恒等射であることを**同じ普遍性の一意性**で出す。
+★★これは `Theorem 3.4, (i)` の図式の 1-可換性で使う
+(`Ψ` が hull を保つので、`Ψ(A の hull)` と `Ψ(A) の hull` が両方 hull になる)。 -/
+noncomputable def isotropicHullIso {X H H' : C} {h : X ⟶ H} {h' : X ⟶ H'}
+    (hh : IsIsotropicHull P₁ h) (hh' : IsIsotropicHull P₁ h') : H ≅ H' where
+  hom := (hh.2.2.2 H' hh'.2.2.1 h').choose
+  inv := (hh'.2.2.2 H hh.2.2.1 h).choose
+  hom_inv_id := by
+    have hθ : h' = h ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose :=
+      (hh.2.2.2 H' hh'.2.2.1 h').choose_spec.1
+    have hθ' : h = h' ≫ (hh'.2.2.2 H hh.2.2.1 h).choose :=
+      (hh'.2.2.2 H hh.2.2.1 h).choose_spec.1
+    obtain ⟨w, -, wuniq⟩ := hh.2.2.2 H hh.2.2.1 h
+    exact (wuniq ((hh.2.2.2 H' hh'.2.2.1 h').choose ≫ (hh'.2.2.2 H hh.2.2.1 h).choose)
+        (by simp only []; rw [← Category.assoc, ← hθ, ← hθ'])).trans (wuniq (𝟙 H) (by simp)).symm
+  inv_hom_id := by
+    have hθ : h' = h ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose :=
+      (hh.2.2.2 H' hh'.2.2.1 h').choose_spec.1
+    have hθ' : h = h' ≫ (hh'.2.2.2 H hh.2.2.1 h).choose :=
+      (hh'.2.2.2 H hh.2.2.1 h).choose_spec.1
+    obtain ⟨w, -, wuniq⟩ := hh'.2.2.2 H' hh'.2.2.1 h'
+    exact (wuniq ((hh'.2.2.2 H hh.2.2.1 h).choose ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose)
+        (by simp only []; rw [← Category.assoc, ← hθ', ← hθ])).trans (wuniq (𝟙 H') (by simp)).symm
+
 end Isotropic
 
 end ABC3.Found.FrdI
