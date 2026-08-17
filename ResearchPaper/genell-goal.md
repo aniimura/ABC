@@ -3021,3 +3021,44 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 mathlib の `PushforwardZeroMonoidal.lean` は 11 行だが、あれは `μ`・`ε` が恒等の場合。
 ★`restrictScalars` の `μ` は**同型でない標準写像** `M ⊗_R N → M ⊗_S N` なので、
 coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)**。
+
+
+---
+
+## §9-39 (2026-08-17) ★★★★★★★引き戻しの連鎖が繋がった
+
+### ★取れたもの(第 18–20 ブロック、すべて sorry 0)
+
+| # | 定理 | 備考 |
+|---|---|---|
+| 18 | `(resScalars α).LaxMonoidal` | ★★★**mathlib に無かった**。7 フィールド手書き |
+| 19 | `(pushCR F R S α).LaxMonoidal` | ★strong ⋙ lax、**1 行** |
+| 20 | `(PresheafOfModules.pullback (alphaR ..)).OplaxMonoidal` | ★`Adjunction.leftAdjointOplaxMonoidal` |
+
+★★★**1 本(第 18)を作ったことで 3 段が自動で繋がった。**
+
+### ★★第 18 ブロックの recipe(7 フィールドすべてに効いた)
+
+1. `PresheafOfModules.hom_ext` で成分に落とす
+2. `ModuleCat.hom_ext` + `TensorProduct.ext'` / `ext_threefold` で純テンソルへ
+3. ★★**`show` で両辺を明示的に書き下す**(片側だけでは駄目)
+4. `ModuleCat.restrictScalars_μ_tmul` / `restrictScalars_η` で書き換え
+5. `rfl`
+
+★`cat_disch` は 5 条すべてで落ちなかったが、この recipe は**5 条すべてで一発**だった。
+
+### ★★残り —— 比較射 `δ` が同型であること
+
+`OplaxMonoidal` は `δ : F(X ⊗ Y) ⟶ F X ⊗ F Y` を与える。
+★★可逆層なら局所的に恒等なので同型になる——第 15・16 ブロック
+(局所自明性のテンソル閉性・層化での保存)と第 8 ブロック(局所性)が効く。
+
+★★★それが出れば `f^*(L ⊗ M) ≅ f^*L ⊗ f^*M` となり
+`PicardData.pullback` / `pullback_mul` / `pullback_id` / `pullback_comp` が書ける
+(後者 2 つは mathlib の `pullbackId` / `pullbackComp` から)。
+
+### ★実装の罠(この turn)
+
+★`(F.op ⋙ R) ⋙ forget₂` と `F.op ⋙ (R ⋙ forget₂)` は **defeq だが構文が違う**
+——型注釈つきの別名を置くと暗黙引数が決まる。
+★★`simp` は `Functor.LaxMonoidal.μ` を展開しない——`show` で適用形にする。
