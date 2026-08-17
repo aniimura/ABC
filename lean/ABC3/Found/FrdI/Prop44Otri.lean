@@ -103,12 +103,11 @@ theorem birat_otriBase_of_frobNormalized
     φ φ' hcφ hsφ hcφ' hsφ' hbase α hα β hβ h
 
 include P G in
-/-- ★★★★**`𝒞` が birationally Frobenius-normalized 型なら
-`𝒞^birat` は `Definition 1.3` の 21 条をすべて満たす**。
+/-- ★★★★**`𝒪^▷(A^birat)` が可換なら `𝒞^birat` は `Definition 1.3` の 21 条をすべて満たす**。
 
-★★これが `Proposition 4.4, (ii)` の穴を「そうでない `𝒞`」だけに絞る。 -/
-theorem birat_frobenioidCore_of_frobNormalized
-    (hbfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X) :
+★★これが `Proposition 4.4, (ii)` の残り 1 条の正体である。 -/
+theorem birat_frobenioidCore_of_comm
+    (hcomm : ∀ (X : BiratCat P G) (x y : OTri (biratPre P G) X), x * y = y * x) :
     FrobenioidCore (biratPre P G) where
   baseSurj := birat_baseSurj P G
   preStepSpan := birat_preStepSpan P G
@@ -120,7 +119,7 @@ theorem birat_frobenioidCore_of_frobNormalized
   otriFwd := birat_otriFwd P G
   otriBwd := birat_otriBwd P G
   otriBase := fun φ φ' hcφ hsφ hcφ' hsφ' hbase α hα β hβ h =>
-    birat_otriBase_of_frobNormalized P G hbfn φ φ' hcφ hsφ hcφ' hsφ' hbase α hα β hβ h
+    birat_otriBase_of_comm P G hcomm φ φ' hcφ hsφ hcφ' hsφ' hbase α hα β hβ h
   arbFactor := birat_arbFactor P G
   arbFactorUniq := birat_arbFactorUniq P G
   pullBackLB := birat_pullBackLB P G
@@ -133,9 +132,17 @@ theorem birat_frobenioidCore_of_frobNormalized
   isotropicHullExists := birat_isotropicHullExists P G
   isotropicClosed := birat_isotropicClosed P G
 
+include P G in
+/-- ★★★**birationally Frobenius-normalized 型なら 21 条がすべて出る**
+(`otri_mul_comm` 経由)。 -/
+theorem birat_frobenioidCore_of_frobNormalized
+    (hbfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X) :
+    FrobenioidCore (biratPre P G) :=
+  birat_frobenioidCore_of_comm P G (fun X x y => otri_mul_comm (biratPre P G) (hbfn X) x y)
+
 /-- ★**locator** —— `Proposition 4.4, (ii)` の 21 条(★**条つき**:
-`𝒞` が birationally Frobenius-normalized 型のときに限る)。 -/
-def birat_frobenioidCore_of_frobNormalized.src : ABC3.Meta.Source :=
+`𝒪^▷(A^birat)` の可換性を仮定する)。 -/
+def birat_frobenioidCore_of_comm.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 85,
     item := "Proposition 4.4, (ii) — Definition 1.3 の 21 条(birat-Frobenius-normalized 型のとき)",
     sectionId := "frdi-prop-4-4" }

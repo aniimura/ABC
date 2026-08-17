@@ -57,6 +57,7 @@ import ABC3.Found.FrdI.Def45
 import ABC3.Found.FrdI.Example43
 import ABC3.Found.FrdI.Thm52
 import ABC3.Found.FrdI.Thm52Frob
+import ABC3.Found.FrdI.Thm52Birat
 import ABC3.Found.FrdI.Remark491
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Core
