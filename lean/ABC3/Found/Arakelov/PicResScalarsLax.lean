@@ -61,7 +61,34 @@ noncomputable def resScalarsMu
     rfl
 
 
+/-- ★★**係数変換の lax monoidal の `ε`**(前層レベル)。
+
+★成分ごとに `ModuleCat.restrictScalars` の `ε`(= `α.app X` そのもの)を束ねる。 -/
+noncomputable def resScalarsEps :
+    𝟙_ (PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat.{u} RingCat.{u}))
+      ⟶ (resScalars α).obj (𝟙_ (PresheafOfModules.{u}
+          (R' ⋙ forget₂ CommRingCat.{u} RingCat.{u}))) where
+  app X := Functor.LaxMonoidal.ε (ModuleCat.restrictScalars (α.app X).hom)
+  naturality := by
+    intro X Y f
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro r
+    show Functor.LaxMonoidal.ε (ModuleCat.restrictScalars (α.app Y).hom)
+        ((R.map f).hom r)
+      = (R'.map f).hom
+          (Functor.LaxMonoidal.ε (ModuleCat.restrictScalars (α.app X).hom) r)
+    rw [ModuleCat.restrictScalars_η, ModuleCat.restrictScalars_η]
+    have h : (R.map f ≫ α.app Y).hom r = (α.app X ≫ R'.map f).hom r :=
+      congrArg (fun g : R.obj X ⟶ R'.obj Y => CommRingCat.Hom.hom g r) (α.naturality f)
+    exact h
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def resScalarsEps.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 B——係数変換の lax monoidal の ε)",
+    sectionId := "genell-def-1-1-i" }
 
 def resScalarsMu.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
