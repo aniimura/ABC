@@ -6,7 +6,7 @@ import ABC3.Found.GenEll.LogDiffValue
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.6。
 
 原文 (GenEll p.6):
-> (i) We have: ht
+> Proposition 1.4. (Basic Properties of Heights) In the notation of the above
 
 ## ★★★`ht` の加法性の「次数側」
 
@@ -87,7 +87,7 @@ theorem idealADiv_mul (I J : Ideal (𝓞 F)) (hI : I ≠ 0) (hJ : J ≠ 0) :
 /-- ★★★**次数は積を和に送る** —— `deg(idealADiv (I·J)) = deg(...I) + deg(...J)`。
 
 原文 (GenEll p.6):
-> (i) We have: ht
+> Proposition 1.4. (Basic Properties of Heights) In the notation of the above
 
 ★`idealADiv_mul` と `deg_add` から出る。
 ★★これが `Proposition 1.4, (i)` の**次数側**である。 -/
