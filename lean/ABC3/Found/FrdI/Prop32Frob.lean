@@ -1,6 +1,7 @@
 import ABC3.Found.FrdI.Prop32
 import ABC3.Found.FrdI.Prop25
 import ABC3.Found.FrdI.PlBkShuffle
+import ABC3.Found.FrdI.Prop44Core
 
 /-!
 # [FrdI] Proposition 3.2, (iii) —— `𝒞^pf` が Frobenioid であること(道具立て)
@@ -2629,7 +2630,10 @@ variable {P F} in
 theorem pfRoot_linearSplit_sameRoot {A B : C} {r : ℕ+}
     (α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) (hlin : IsLinear (pfRootPre P F) α) :
     ∃ (T : PfRootObj P F) (pp : (⟨A, r⟩ : PfRootObj P F) ⟶ T) (ll : T ⟶ ⟨B, r⟩),
-      IsPreStep (pfRootPre P F) pp ∧ IsIsometric (pfRootPre P F) ll ∧ α = pp ≫ ll := by
+      IsPreStep (pfRootPre P F) pp ∧ IsIsometric (pfRootPre P F) ll ∧ α = pp ≫ ll ∧
+      ∃ (Z' : IdxPf P F (rtObj P F T.obj r) (rtObj P F B T.root))
+        (χ' : Z'.right.obj.1 ⟶ Z'.right.obj.2),
+        ll = HomPf.mk Z' χ' ∧ IsPullBack P χ' := by
   obtain ⟨V, χ, hV⟩ := HomPf.exists_rep (P := P) (F := F)
     (show HomPf P F (rtObj P F A r) (rtObj P F B r) from α)
   have hχlin : IsLinear P χ :=
@@ -2665,7 +2669,7 @@ theorem pfRoot_linearSplit_sameRoot {A B : C} {r : ℕ+}
     rw [show P.degFr l₁ = 1 from isLinear_of_isIso P l₁, P.degFr_id]
   have hbe : P.degFr (𝟙 (rtObj P F Cc (r * r))) = P.degFr l₃ := by
     rw [show P.degFr l₃ = 1 from isLinear_of_isIso P l₃, P.degFr_id]
-  refine ⟨⟨Cc, t⟩, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨⟨Cc, t⟩, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · exact (rtRootIso P F A Cc (show r * t = r * t from rfl)
       (show r * r = r * r from rfl)).hom
       (HomPf.mk (idxMk (P := P) (F := F) l₁ (𝟙 (rtObj P F Cc (r * r))) hl₁F hl₂F hab)
@@ -2707,6 +2711,18 @@ theorem pfRoot_linearSplit_sameRoot {A B : C} {r : ℕ+}
           show P.degFr l₃ = 1 from isLinear_of_isIso P l₃,
           rtLift_degFr, rtLift_degFr])
       hl₁.symm hl₃.symm χ).trans hV
+  · refine ⟨(pushIdx (F := F)
+      (rtLift P F Cc (show r * r = r * r from mul_comm _ _)) (rtLift_frobType P F Cc _)
+      (rtLift P F B (show t * r = r * t from mul_comm _ _)) (rtLift_frobType P F B _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj
+      (idxMk (P := P) (F := F) (𝟙 (rtObj P F Cc (r * r))) l₃ hl₂F hl₃F hbe),
+      rtMap (F := F) (r * r) γ₁, ?_, ?_⟩
+    · rw [rtRootIso_hom_mk]
+    · exact prop_1_10_i_pullBack_of P F
+        (rtExt_frobType P F Cc (r * r)) (rtExt_frobType P F V.right.obj.2 (r * r))
+        ((rtExt_degFr P F Cc (r * r)).trans
+          (rtExt_degFr P F V.right.obj.2 (r * r)).symm)
+        (rtMap_spec (F := F) (r * r) γ₁) hγ₁
 
 /-! ## ★44. (iv)(b) —— pull-back は LB-invertible かつ linear
 
@@ -2719,7 +2735,7 @@ variable {P F} in
 theorem pfRoot_isIsometric_of_pullBack_sameRoot {A B : C} {r : ℕ+}
     (α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩)
     (hα : IsPullBack (pfRootPre P F) α) : IsIsometric (pfRootPre P F) α := by
-  obtain ⟨T, pp, ll, hpp, hll, heq⟩ := pfRoot_linearSplit_sameRoot α
+  obtain ⟨T, pp, ll, hpp, hll, heq, -⟩ := pfRoot_linearSplit_sameRoot α
     (pfRoot_isLinear_of_pullBack_sameRoot α hα)
   haveI hppb : IsIso ((pfRootPre P F).Base pp) := hpp.2
   have hbase : (pfRootPre P F).Base ll
@@ -2884,9 +2900,420 @@ theorem homPf_cancel_pullBack {A B E : C} (V : IdxPf3 P F A B E)
   rw [← HomPf.mk_map ((idx12 P F A B E).map s) φ, ← HomPf.mk_map ((idx12 P F A B E).map s) φ',
     hφφ']
 
+/-! ## ★46. pull-back の普遍性の**持ち上げの側**への下ごしらえ -/
+
+variable {P F} in
+/-- ★★**代表元での底の特徴づけ**(`inv` を使わない形)。 -/
+theorem rootBase_mk_spec {X Y : PfRootObj P F}
+    (W : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (ψ : W.right.obj.1 ⟶ W.right.obj.2) :
+    rootBase (show HomRoot P F X Y from HomPf.mk W ψ)
+        ≫ P.Base (rtExt P F Y.obj X.root) ≫ P.Base W.hom.hom.2
+      = (P.Base (rtExt P F X.obj Y.root) ≫ P.Base W.hom.hom.1) ≫ P.Base ψ := by
+  rw [← Category.assoc, rootBase_spec, Category.assoc, pfBase_mk, repBase_spec,
+    Category.assoc]
+  rfl
+
+variable {P F} in
+/-- ★★**代表元が pull-back であることは代表元の取り方によらない**
+(co-angular が言えている限り)。 -/
+theorem pfRoot_rep_isPullBack {A B : C} {Z₀ Z : IdxPf P F A B}
+    {χ₀ : Z₀.right.obj.1 ⟶ Z₀.right.obj.2} {χ : Z.right.obj.1 ⟶ Z.right.obj.2}
+    (hχ₀ : IsPullBack P χ₀) (heq : HomPf.mk Z₀ χ₀ = HomPf.mk Z χ)
+    (hco : IsCoAngular P χ) : IsPullBack P χ := by
+  obtain ⟨V, u, v, huv⟩ := HomPf.eq_iff.mp heq
+  have h1 : IsPullBack P (idxTransport P F u χ₀) :=
+    prop_1_10_i_pullBack_of P F u.right.property.1 u.right.property.2.1
+      u.right.property.2.2 (idxTransport_spec u χ₀) hχ₀
+  rw [huv] at h1
+  exact pullBack_of_transport_back F v.right.property.1 v.right.property.2.1
+    v.right.property.2.2 (idxTransport_spec v χ) h1 hco
+
+variable {P F} in
+/-- ★**終域を共有する 2 射を同じ 3 脚添字へ**(`exists_rep3` の co-span 版)。 -/
+theorem exists_rep3_cospan {A B E : C} (f : HomPf P F A E) (w : HomPf P F B E) :
+    ∃ (V : IdxPf3 P F A B E) (θ : V.right.obj.1 ⟶ V.right.obj.2.2)
+      (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2),
+      f = HomPf.mk ((idx13 P F A B E).obj V) θ ∧
+      w = HomPf.mk ((idx23 P F A B E).obj V) ψ := by
+  obtain ⟨Zf, θ₀, rfl⟩ := HomPf.exists_rep f
+  obtain ⟨Zw, ψ₀, rfl⟩ := HomPf.exists_rep w
+  obtain ⟨hfa, hfe, hfae⟩ := Zf.hom.property
+  obtain ⟨hwb, hwe, hwbe⟩ := Zw.hom.property
+  obtain ⟨B₁, b₁, hb₁, hb₁d⟩ := F.frobDegSurj B (P.degFr Zf.hom.hom.1)
+  obtain ⟨A₂, a₂, ha₂, ha₂d⟩ := F.frobDegSurj A (P.degFr Zw.hom.hom.1)
+  set Vf : IdxPf3 P F A B E :=
+    Under.mk (Y := (⟨(Zf.right.obj.1, B₁, Zf.right.obj.2)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(Zf.hom.hom.1, b₁, Zf.hom.hom.2), hfa, hb₁, hfe, hb₁d.symm,
+          hb₁d.trans hfae⟩) with hVf
+  set Vw : IdxPf3 P F A B E :=
+    Under.mk (Y := (⟨(A₂, Zw.right.obj.1, Zw.right.obj.2)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(a₂, Zw.hom.hom.1, Zw.hom.hom.2), ha₂, hwb, hwe, ha₂d, hwbe⟩) with hVw
+  exact ⟨IsFiltered.max Vf Vw,
+    idxTransport P F ((idx13 P F A B E).map (IsFiltered.leftToMax Vf Vw)) θ₀,
+    idxTransport P F ((idx23 P F A B E).map (IsFiltered.rightToMax Vf Vw)) ψ₀,
+    (HomPf.mk_map _ θ₀).symm, (HomPf.mk_map _ ψ₀).symm⟩
+
+/-! ## ★47. ★★★★`𝒞` の pull-back は `𝒞^pf` でも pull-back(一意性の側) -/
+
+set_option maxHeartbeats 2000000 in
+variable {P F} in
+/-- ★★★普遍性の**一意性**の側。 -/
+theorem pfRoot_isPullBack_mk_hext (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (α : X ⟶ Y)
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (χ : Z.right.obj.1 ⟶ Z.right.obj.2) (hαdef : α = HomPf.mk Z χ)
+    (hχ : IsPullBack P χ)
+    (T : PfRootObj P F) (u v : T ⟶ X) (h1 : u ≫ α = v ≫ α)
+    (h2 : (pfRootPre P F).Base u = (pfRootPre P F).Base v) : u = v := by
+  obtain ⟨V₀, φ₀, φ₀', ψ₀, hu₀, hv₀, hα₀, hc₀, hd₀⟩ :=
+    compRoot_rep_pairL (F := F) u v α
+  obtain ⟨V, tr, hisoV⟩ := exists_idx3_isotropic2 (F := F) hfi V₀
+  obtain ⟨φ, hφ⟩ : ∃ t : V.right.obj.1 ⟶ V.right.obj.2.1,
+      t = idxTransport P F ((idx12 P F _ _ _).map tr) φ₀ := ⟨_, rfl⟩
+  obtain ⟨φ', hφ'⟩ : ∃ t : V.right.obj.1 ⟶ V.right.obj.2.1,
+      t = idxTransport P F ((idx12 P F _ _ _).map tr) φ₀' := ⟨_, rfl⟩
+  obtain ⟨ψ, hψ⟩ : ∃ t : V.right.obj.2.1 ⟶ V.right.obj.2.2,
+      t = idxTransport P F ((idx23 P F _ _ _).map tr) ψ₀ := ⟨_, rfl⟩
+  have hu : u = (rtRootIso P F T.obj X.obj
+      (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * T.root = Y.root * T.root from rfl)).hom
+      (HomPf.mk ((idx12 P F _ _ _).obj V) φ) := by
+    rw [hφ, HomPf.mk_map]; exact hu₀
+  have hv : v = (rtRootIso P F T.obj X.obj
+      (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * T.root = Y.root * T.root from rfl)).hom
+      (HomPf.mk ((idx12 P F _ _ _).obj V) φ') := by
+    rw [hφ', HomPf.mk_map]; exact hv₀
+  have hα : α = (rtRootIso P F X.obj Y.obj
+      (show Y.root * T.root = T.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = T.root * X.root from mul_comm _ _)).hom
+      (HomPf.mk ((idx23 P F _ _ _).obj V) ψ) := by
+    rw [hψ, HomPf.mk_map]; exact hα₀
+  have hc : u ≫ α = (rtRootIso P F T.obj Y.obj
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = X.root * T.root from rfl)).hom
+      (HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ)) := by
+    refine Eq.trans hc₀ (congrArg _ ?_)
+    rw [hφ, hψ]
+    exact (HomPf.mk_map ((idx13 P F _ _ _).map tr) (φ₀ ≫ ψ₀)).symm.trans
+      (congrArg (HomPf.mk _) (idxTransport_comp_pair (F := F) tr φ₀ ψ₀).symm)
+  have hd : v ≫ α = (rtRootIso P F T.obj Y.obj
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = X.root * T.root from rfl)).hom
+      (HomPf.mk ((idx13 P F _ _ _).obj V) (φ' ≫ ψ)) := by
+    refine Eq.trans hd₀ (congrArg _ ?_)
+    rw [hφ', hψ]
+    exact (HomPf.mk_map ((idx13 P F _ _ _).map tr) (φ₀' ≫ ψ₀)).symm.trans
+      (congrArg (HomPf.mk _) (idxTransport_comp_pair (F := F) tr φ₀' ψ₀).symm)
+  have hψco : IsCoAngular P ψ := prop_1_4_i P ψ (fun _ g => F.isotropicClosed g hisoV)
+  have heqrep := hαdef.symm.trans hα
+  rw [rtRootIso_hom_mk] at heqrep
+  have hψpb : IsPullBack P ψ := pfRoot_rep_isPullBack (F := F) hχ heqrep hψco
+  have hcomp : HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ)
+      = HomPf.mk ((idx13 P F _ _ _).obj V) (φ' ≫ ψ) := by
+    have h := hc.symm.trans (h1.trans hd)
+    have h' := congrArg (fun t => (rtRootIso P F T.obj Y.obj
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = X.root * T.root from rfl)).inv t) h
+    rwa [Iso.hom_inv_id_apply, Iso.hom_inv_id_apply] at h'
+  have hbase : P.Base φ = P.Base φ' := by
+    have hu' := hu
+    have hv' := hv
+    rw [rtRootIso_hom_mk] at hu' hv'
+    rw [hu', hv'] at h2
+    exact base_eq_of_rootBase_eq (X := T) (Y := X)
+      ((pushIdx (F := F)
+        (rtLift P F T.obj (show Y.root * X.root = Y.root * X.root from rfl))
+        (rtLift_frobType P F T.obj _)
+        (rtLift P F X.obj (show Y.root * T.root = Y.root * T.root from rfl))
+        (rtLift_frobType P F X.obj _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx12 P F _ _ _).obj V)) φ φ' h2
+  have hfin := homPf_cancel_pullBack (F := F) V φ φ' ψ hψpb hbase hcomp
+  rw [hu, hv]
+  exact congrArg _ hfin
+
+/-! ## ★48. 底の比較 —— 3 つの位置で**同じ同型**が現れる
+
+★★`compRoot` の 3 つの `rtRootIso` はそれぞれ違う持ち上げを使うが、
+`rtLift_ext`(`rtExt d ≫ rtLift = rtExt t`)で潰すと
+**`Base(rtExt · t) ≫ Base(脚)` という同じ形**になる。★これが底の追跡を可能にする。 -/
+
+variable {P F} in
+/-- ★`rootBase_mk_spec` の `idxMk` 版。 -/
+theorem rootBase_mk_spec' {X Y : PfRootObj P F} {A' B' : C}
+    (a : rtObj P F X.obj Y.root ⟶ A') (b : rtObj P F Y.obj X.root ⟶ B')
+    (ha : IsFrobeniusType P a) (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b)
+    (φ : A' ⟶ B') :
+    rootBase (show HomRoot P F X Y from
+        HomPf.mk (idxMk (P := P) (F := F) a b ha hb hd) φ)
+        ≫ (P.Base (rtExt P F Y.obj X.root) ≫ P.Base b)
+      = (P.Base (rtExt P F X.obj Y.root) ≫ P.Base a) ≫ P.Base φ :=
+  rootBase_mk_spec (idxMk (P := P) (F := F) a b ha hb hd) φ
+
+variable {P F} in
+/-- ★★**根の取り替えを通した底の特徴づけ**。 -/
+theorem rootBase_rtRootIso_mk_spec {X Y : PfRootObj P F} {e tA tB : ℕ+}
+    (hA : tA = e * Y.root) (hB : tB = e * X.root)
+    (W : IdxPf P F (rtObj P F X.obj tA) (rtObj P F Y.obj tB))
+    (φ : W.right.obj.1 ⟶ W.right.obj.2) :
+    rootBase (show HomRoot P F X Y from
+        (rtRootIso P F X.obj Y.obj hA hB).hom (HomPf.mk W φ))
+        ≫ (P.Base (rtExt P F Y.obj tB) ≫ P.Base W.hom.hom.2)
+      = (P.Base (rtExt P F X.obj tA) ≫ P.Base W.hom.hom.1) ≫ P.Base φ := by
+  rw [rtRootIso_hom_mk]
+  have hL : P.Base (rtExt P F Y.obj X.root) ≫ P.Base (rtLift P F Y.obj hB ≫ W.hom.hom.2)
+      = P.Base (rtExt P F Y.obj tB) ≫ P.Base W.hom.hom.2 := by
+    rw [P.Base_comp, ← Category.assoc, ← P.Base_comp, rtLift_ext]
+  have hR : P.Base (rtExt P F X.obj Y.root) ≫ P.Base (rtLift P F X.obj hA ≫ W.hom.hom.1)
+      = P.Base (rtExt P F X.obj tA) ≫ P.Base W.hom.hom.1 := by
+    rw [P.Base_comp, ← Category.assoc, ← P.Base_comp, rtLift_ext]
+  have h := rootBase_mk_spec' (X := X) (Y := Y)
+    (rtLift P F X.obj hA ≫ W.hom.hom.1) (rtLift P F Y.obj hB ≫ W.hom.hom.2)
+    (IsFrobeniusType.comp P F (rtLift_frobType P F X.obj hA) W.hom.property.1)
+    (IsFrobeniusType.comp P F (rtLift_frobType P F Y.obj hB) W.hom.property.2.1)
+    (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr]
+        exact congrArg (fun m => m * e) W.hom.property.2.2)
+    φ
+  rw [hL, hR] at h
+  exact h
+
+/-! ## ★49. ★★★★`𝒞` の pull-back は `𝒞^pf` でも pull-back(持ち上げの側) -/
+
+set_option maxHeartbeats 2000000 in
+variable {P F} in
+/-- ★★★普遍性の**持ち上げ**の側。 -/
+theorem pfRoot_isPullBack_mk_lift (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (α : X ⟶ Y)
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (χ : Z.right.obj.1 ⟶ Z.right.obj.2) (hαdef : α = HomPf.mk Z χ)
+    (hχ : IsPullBack P χ)
+    (T : PfRootObj P F) (f : T ⟶ Y)
+    (b : ((pfRootPre P F).toElem.obj T).base ⟶ ((pfRootPre P F).toElem.obj X).base)
+    (hb : (pfRootPre P F).Base f = b ≫ (pfRootPre P F).Base α) :
+    ∃ g : T ⟶ X, g ≫ α = f ∧ (pfRootPre P F).Base g = b := by
+  obtain ⟨V₀, θ₀, ψ₀, hf₀, hα₀⟩ := exists_rep3_cospan (P := P) (F := F)
+    ((rtRootIso P F T.obj Y.obj
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = X.root * T.root from rfl)).inv f)
+    ((rtRootIso P F X.obj Y.obj
+      (show Y.root * T.root = T.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = T.root * X.root from mul_comm _ _)).inv α)
+  obtain ⟨V, tr, hisoV⟩ := exists_idx3_isotropic2 (F := F) hfi V₀
+  obtain ⟨hV1, hV2, hV3, hV12, hV23⟩ := V.hom.property
+  obtain ⟨θ, hθ⟩ : ∃ t : V.right.obj.1 ⟶ V.right.obj.2.2,
+      t = idxTransport P F ((idx13 P F _ _ _).map tr) θ₀ := ⟨_, rfl⟩
+  obtain ⟨ψ, hψ⟩ : ∃ t : V.right.obj.2.1 ⟶ V.right.obj.2.2,
+      t = idxTransport P F ((idx23 P F _ _ _).map tr) ψ₀ := ⟨_, rfl⟩
+  have hf : f = (rtRootIso P F T.obj Y.obj
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = X.root * T.root from rfl)).hom
+      (HomPf.mk ((idx13 P F _ _ _).obj V) θ) := by
+    rw [hθ, HomPf.mk_map, ← hf₀, Iso.inv_hom_id_apply]
+  have hα : α = (rtRootIso P F X.obj Y.obj
+      (show Y.root * T.root = T.root * Y.root from mul_comm _ _)
+      (show X.root * T.root = T.root * X.root from mul_comm _ _)).hom
+      (HomPf.mk ((idx23 P F _ _ _).obj V) ψ) := by
+    rw [hψ, HomPf.mk_map, ← hα₀, Iso.inv_hom_id_apply]
+  -- ★`ψ` は pull-back
+  have hψco : IsCoAngular P ψ := prop_1_4_i P ψ (fun _ g => F.isotropicClosed g hisoV)
+  have heqrep := hαdef.symm.trans hα
+  rw [rtRootIso_hom_mk] at heqrep
+  have hψpb : IsPullBack P ψ := pfRoot_rep_isPullBack (F := F) hχ heqrep hψco
+  -- ★底の 3 本
+  have hfb : rootBase f
+      ≫ (P.Base (rtExt P F Y.obj (X.root * T.root)) ≫ P.Base V.hom.hom.2.2)
+      = (P.Base (rtExt P F T.obj (Y.root * X.root)) ≫ P.Base V.hom.hom.1) ≫ P.Base θ := by
+    rw [hf]
+    exact rootBase_rtRootIso_mk_spec (X := T) (Y := Y) _ _ ((idx13 P F _ _ _).obj V) θ
+  have hαb : rootBase α
+      ≫ (P.Base (rtExt P F Y.obj (X.root * T.root)) ≫ P.Base V.hom.hom.2.2)
+      = (P.Base (rtExt P F X.obj (Y.root * T.root)) ≫ P.Base V.hom.hom.2.1) ≫ P.Base ψ := by
+    rw [hα]
+    exact rootBase_rtRootIso_mk_spec (X := X) (Y := Y) _ _ ((idx23 P F _ _ _).obj V) ψ
+  haveI hiT : IsIso (P.Base (rtExt P F T.obj (Y.root * X.root))) :=
+    (rtExt_frobType P F T.obj (Y.root * X.root)).2
+  haveI hiX : IsIso (P.Base (rtExt P F X.obj (Y.root * T.root))) :=
+    (rtExt_frobType P F X.obj (Y.root * T.root)).2
+  haveI hiY : IsIso (P.Base (rtExt P F Y.obj (X.root * T.root))) :=
+    (rtExt_frobType P F Y.obj (X.root * T.root)).2
+  haveI hi1 : IsIso (P.Base V.hom.hom.1) := hV1.2
+  haveI hi2 : IsIso (P.Base V.hom.hom.2.1) := hV2.2
+  haveI hi3 : IsIso (P.Base V.hom.hom.2.2) := hV3.2
+  haveI hiuT : IsIso (P.Base (rtExt P F T.obj (Y.root * X.root)) ≫ P.Base V.hom.hom.1) :=
+    IsIso.comp_isIso' hiT hi1
+  haveI hiuX : IsIso (P.Base (rtExt P F X.obj (Y.root * T.root)) ≫ P.Base V.hom.hom.2.1) :=
+    IsIso.comp_isIso' hiX hi2
+  -- ★底の持ち上げ条件
+  obtain ⟨bb, hbb⟩ : ∃ t : (P.toElem.obj V.right.obj.1).base
+        ⟶ (P.toElem.obj V.right.obj.2.1).base,
+      t = inv (P.Base (rtExt P F T.obj (Y.root * X.root)) ≫ P.Base V.hom.hom.1)
+        ≫ (b ≫ (P.Base (rtExt P F X.obj (Y.root * T.root)) ≫ P.Base V.hom.hom.2.1)) :=
+    ⟨_, rfl⟩
+  have hbθ : P.Base θ = bb ≫ P.Base ψ := by
+    have e1 : (P.Base (rtExt P F T.obj (Y.root * X.root)) ≫ P.Base V.hom.hom.1)
+          ≫ P.Base θ
+        = (b ≫ (P.Base (rtExt P F X.obj (Y.root * T.root)) ≫ P.Base V.hom.hom.2.1))
+          ≫ P.Base ψ :=
+      hfb.symm.trans (((congrArg (fun t => t
+          ≫ (P.Base (rtExt P F Y.obj (X.root * T.root)) ≫ P.Base V.hom.hom.2.2)) hb).trans
+        ((Category.assoc _ _ _).trans (congrArg (fun t => b ≫ t) hαb))).trans
+        (Category.assoc _ _ _).symm)
+    rw [hbb]
+    exact (eq_inv_comp_of _ hiuT _ _ e1).trans
+      (Category.assoc (inv (P.Base (rtExt P F T.obj (Y.root * X.root))
+        ≫ P.Base V.hom.hom.1))
+        (b ≫ (P.Base (rtExt P F X.obj (Y.root * T.root)) ≫ P.Base V.hom.hom.2.1))
+        (P.Base ψ)).symm
+  obtain ⟨φ, ⟨hφ1, hφ2⟩, -⟩ := IsPullBack.lift P hψpb V.right.obj.1 θ bb hbθ
+  refine ⟨(rtRootIso P F T.obj X.obj
+      (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * T.root = Y.root * T.root from rfl)).hom
+      (HomPf.mk ((idx12 P F _ _ _).obj V) φ), ?_, ?_⟩
+  · rw [hα, hf]
+    refine Eq.trans (compRoot_mk3 (X := T) (Y := X) (Z := Y)
+      V.hom.hom.1 V.hom.hom.2.1 V.hom.hom.2.2 hV1 hV2 hV3 hV12 hV23 φ ψ) ?_
+    exact congrArg _ (congrArg (HomPf.mk _) hφ1)
+  · have hgb := rootBase_rtRootIso_mk_spec (X := T) (Y := X)
+      (show Y.root * X.root = Y.root * X.root from rfl)
+      (show Y.root * T.root = Y.root * T.root from rfl) ((idx12 P F _ _ _).obj V) φ
+    refine (cancel_mono (P.Base (rtExt P F X.obj (Y.root * T.root))
+      ≫ P.Base V.hom.hom.2.1)).mp ?_
+    refine Eq.trans hgb ?_
+    refine Eq.trans (congrArg (fun t => (P.Base (rtExt P F T.obj (Y.root * X.root))
+      ≫ P.Base V.hom.hom.1) ≫ t) hφ2) ?_
+    rw [hbb]
+    exact IsIso.hom_inv_id_assoc _ _
+
+/-! ## ★50. ★★★★**`𝒞` の pull-back は `𝒞^pf` でも pull-back** -/
+
+variable {P F} in
+/-- ★★★★**代表元が `𝒞` の pull-back なら `𝒞^pf` でも pull-back**。 -/
+theorem pfRoot_isPullBack_mk (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (α : X ⟶ Y)
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (χ : Z.right.obj.1 ⟶ Z.right.obj.2) (hαdef : α = HomPf.mk Z χ)
+    (hχ : IsPullBack P χ) : IsPullBack (pfRootPre P F) α :=
+  isPullBack_of_lift (pfRootPre P F) α
+    (fun T u v h1 h2 => pfRoot_isPullBack_mk_hext hfi α Z χ hαdef hχ T u v h1 h2)
+    (fun T f b hb => pfRoot_isPullBack_mk_lift hfi α Z χ hαdef hχ T f b hb)
+
+variable {P F} in
+/-- ★`rtMap` は pull-back を保つ。 -/
+theorem rtMap_isPullBack (k : ℕ+) {A B : C} (φ : A ⟶ B) (hφ : IsPullBack P φ) :
+    IsPullBack P (rtMap (F := F) k φ) :=
+  prop_1_10_i_pullBack_of P F (rtExt_frobType P F A k) (rtExt_frobType P F B k)
+    (by rw [rtExt_degFr, rtExt_degFr]) (rtMap_spec (F := F) k φ) hφ
+
+/-! ## ★51. ★★★★(iv)(a) —— 任意射の 3 分解 -/
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★**Frobenius 型 ≫ 次数 1** への分解(根が等しい場合)。 -/
+theorem pfRoot_frobSplit_sameRoot (hfi : IsOfFrobeniusIsotropicType P) {A B : C} {r : ℕ+}
+    (f : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) :
+    ∃ (G : C) (Gam : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨G, r⟩)
+      (R : (⟨G, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩),
+      IsFrobeniusType (pfRootPre P F) Gam ∧ IsLinear (pfRootPre P F) R ∧ f = Gam ≫ R := by
+  obtain ⟨x, hx⟩ : ∃ x : HomPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)),
+      (rtJ P F A B r).hom x = f := ⟨(rtJ P F A B r).inv f, Iso.inv_hom_id_apply _ _⟩
+  obtain ⟨n, hn⟩ : ∃ n : ℕ+, pfDeg x = n := ⟨_, rfl⟩
+  obtain ⟨z, hz1, hz2⟩ := homPf_frobSplit (P := P) (F := F) x hn
+  have h1 : IsFrobeniusType P
+      (rtExt P F A n ≫ rtExt P F (rtObj P F A n) (r * r)) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A n)
+      (rtExt_frobType P F (rtObj P F A n) (r * r))
+  have h2 : IsFrobeniusType P
+      (rtExt P F A (r * r) ≫ rtExt P F (rtObj P F A (r * r)) n) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A (r * r))
+      (rtExt_frobType P F (rtObj P F A (r * r)) n)
+  have hdeg : P.degFr (rtExt P F A n ≫ rtExt P F (rtObj P F A n) (r * r))
+      = P.degFr (rtExt P F A (r * r) ≫ rtExt P F (rtObj P F A (r * r)) n) := by
+    rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, rtExt_degFr, rtExt_degFr, rtExt_degFr,
+      mul_comm]
+  obtain ⟨w, hw, -⟩ := F.frobDegUniq A _ _ _ _ h1 h2 hdeg
+  haveI := hw
+  obtain ⟨gam, hgam⟩ : ∃ t : rtObj P F A (r * r) ⟶ rtObj P F (rtObj P F A n) (r * r),
+      t = rtExt P F (rtObj P F A (r * r)) n ≫ @inv _ _ _ _ w hw := ⟨_, rfl⟩
+  have hgamF : IsFrobeniusType P gam := by
+    haveI : IsIso (@inv _ _ _ _ w hw) := @IsIso.inv_isIso _ _ _ _ w hw
+    rw [hgam]
+    exact IsFrobeniusType.comp P F (rtExt_frobType P F (rtObj P F A (r * r)) n)
+      (isFrobeniusType_of_isIso P (@inv _ _ _ _ w hw))
+  refine ⟨rtObj P F A n,
+    (rtJ P F A (rtObj P F A n) r).hom (toHomPf (F := F) gam),
+    (rtJ P F (rtObj P F A n) B r).hom (compPf P F (toHomPf (F := F) w) z), ?_, ?_, ?_⟩
+  · refine ⟨⟨pfRoot_isCoAngular hfi _, ?_⟩, ?_⟩
+    · exact (rtJ_isIsometric_iff (F := F) (A := A) (B := rtObj P F A n) r
+        (idxOne P F (rtObj P F A (r * r)) (rtObj P F (rtObj P F A n) (r * r))) gam).mpr
+        hgamF.1.2
+    · exact (rtJ_isBaseIso_iff (F := F) (A := A) (B := rtObj P F A n) r
+        (idxOne P F (rtObj P F A (r * r)) (rtObj P F (rtObj P F A n) (r * r))) gam).mpr
+        hgamF.2
+  · show (pfRootPre P F).degFr _ = 1
+    rw [rtJ_degFr', pfDeg_comp, hz1, pfDeg_toHomPf,
+      show P.degFr w = 1 from isLinear_of_isIso P w, mul_one]
+  · rw [rtJ_comp, ← compPf_assoc, ← toHomPf_comp, hgam, Category.assoc,
+      IsIso.inv_hom_id, Category.comp_id, hz2, hx]
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (iv)(a)** の `𝒞^pf` 版(根が等しい場合)。 -/
+theorem pfRoot_arbFactor_sameRoot (hfi : IsOfFrobeniusIsotropicType P) {A B : C} {r : ℕ+}
+    (f : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) :
+    ∃ (W₁ W₂ : PfRootObj P F) (γ : (⟨A, r⟩ : PfRootObj P F) ⟶ W₁) (β : W₁ ⟶ W₂)
+      (a : W₂ ⟶ (⟨B, r⟩ : PfRootObj P F)),
+      f = γ ≫ β ≫ a ∧ IsFrobeniusType (pfRootPre P F) γ ∧
+        IsPreStep (pfRootPre P F) β ∧ IsPullBack (pfRootPre P F) a := by
+  obtain ⟨G, Gam, R, hGam, hRlin, hfGR⟩ := pfRoot_frobSplit_sameRoot (F := F) hfi f
+  obtain ⟨T, pp, ll, hpp, -, hReq, Z', χ', hlldef, hχ'⟩ :=
+    pfRoot_linearSplit_sameRoot (F := F) R hRlin
+  exact ⟨⟨G, r⟩, T, Gam, pp, ll, hfGR.trans (congrArg (fun t => Gam ≫ t) hReq),
+    hGam, hpp, pfRoot_isPullBack_mk hfi ll Z' χ' hlldef hχ'⟩
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (iv)(a)** —— `𝒞^pf` 版。 -/
+theorem pfRoot_arbFactor (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (f : X ⟶ Y) :
+    ∃ (W₁ W₂ : PfRootObj P F) (γ : X ⟶ W₁) (β : W₁ ⟶ W₂) (a : W₂ ⟶ Y),
+      f = γ ≫ β ≫ a ∧ IsFrobeniusType (pfRootPre P F) γ ∧
+        IsPreStep (pfRootPre P F) β ∧ IsPullBack (pfRootPre P F) a := by
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root Y.root
+    (X.root * Y.root) rfl
+  obtain ⟨eY, hYiso⟩ := pfRoot_exists_iso_root (F := F) Y.obj Y.root X.root
+    (X.root * Y.root) (mul_comm _ _)
+  haveI := hXiso
+  haveI := hYiso
+  obtain ⟨W₁, W₂, γ, β, a, hfac, hγ, hβ, ha⟩ :=
+    pfRoot_arbFactor_sameRoot (F := F) hfi (inv eX ≫ f ≫ eY)
+  refine ⟨W₁, W₂, eX ≫ γ, β, a ≫ inv eY, ?_, ?_, hβ, ?_⟩
+  · have h0 : eX ≫ (inv eX ≫ f ≫ eY) ≫ inv eY = f := by
+      rw [Category.assoc, IsIso.hom_inv_id_assoc, Category.assoc, IsIso.hom_inv_id,
+        Category.comp_id]
+    conv_lhs => rw [← h0]
+    rw [hfac]
+    simp only [Category.assoc]
+  · refine ⟨⟨pfRoot_isCoAngular hfi _, ?_⟩, ?_⟩
+    · show (pfRootPre P F).Div (eX ≫ γ) = 0
+      rw [(pfRootPre P F).Div_comp,
+        show (pfRootPre P F).Div γ = 0 from hγ.1.2,
+        show (pfRootPre P F).Div eX = 0 from isIsometric_of_isIso (pfRootPre P F) eX,
+        map_zero, smul_zero, add_zero]
+    · haveI : IsIso ((pfRootPre P F).Base γ) := hγ.2
+      haveI : IsIso ((pfRootPre P F).Base eX) :=
+        isBaseIsomorphism_of_isIso (pfRootPre P F) eX
+      show IsIso ((pfRootPre P F).Base (eX ≫ γ))
+      rw [(pfRootPre P F).Base_comp]
+      infer_instance
+  · exact IsPullBack.comp (pfRootPre P F) ha
+      (isPullBack_of_isIso (pfRootPre P F) (inv eY))
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
-### 埋まった 18 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
+### 埋まった 19 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
 
 | 条 | 宣言 | 手 |
 |---|---|---|
@@ -2906,42 +3333,43 @@ theorem homPf_cancel_pullBack {A B E : C} (V : IdxPf3 P F A B E)
 | (v)(c) `preStepFactorUniq'` | `pfRoot_preStepFactorUniq'` | 同上 |
 | (vi) `faithfulUpToUnits` | `pfRoot_faithfulUpToUnits` | ★根を揃える ＋ `rootDiv` を `Div` に降ろす(divisorial) |
 | (iv)(b) `pullBackLB` | `pfRoot_pullBackLB` | ★★Frobenius 分解 ＋ linear 分解の 2 段で持ち上げる |
+| (iv)(a) `arbFactor` | `pfRoot_arbFactor` | ★★Frobenius 分解 ＋ linear 分解 ＋ `pfRoot_isPullBack_mk` |
 | (vii)(a) `isotropicHullExists` | `pfRoot_isotropicHullExists` | `𝟙` |
 | (vii)(b) `isotropicClosed` | `pfRoot_isotropicClosed` | 全対象 isotropic |
 
 ★土台は `pfRoot_isOfIsotropicType`(`𝒞` が Frobenius-isotropic 型 ⟹ `𝒞^pf` は isotropic 型)。
 
-### 残る 3 条と、それぞれの**具体的な**残り作業
+### 残る 2 条と、それぞれの**具体的な**残り作業
 
-★**(iv)(b) `pullBackLB` は 2026-08-17 に埋まった**。手は 2 段:
+★★**2026-08-17 に `pfRoot_isPullBack_mk` が取れた** ——
+**「代表元が `𝒞` の pull-back なら `𝒞^pf` でも pull-back」**。
+これが残り 3 条の共通の律速だった。手は普遍性の 2 側:
 
-1. ★**linear** —— `homPf_frobSplit` で `α = Γ ≫ R`(`Γ` は Frobenius 型、`R` は次数 1)。
-   中間対象は **`(A^{(n)}, r)`** に取れる(`homPf_frobSplit` の吸収先が標準拡大だから)。
-   `R` を `α` に沿って持ち上げると `1 = degFr α · degFr g` になる。
-2. ★★**等長** —— `pfRoot_linearSplit_sameRoot` で `α = pp ≫ ll`
-   (`pp` は pre-step、`ll` は等長)。★ここは**中間対象の根が変わる**:
-   代表元の脚の次数が `c` なら中間対象は **`(Cc, r·r·c)`** で、
-   `𝒞` の `Proposition 1.7, (iii)` の分解を **`rtMap (r·r)` で丸ごと持ち上げ**、
-   3 脚の添字の脚を**同型(次数 1)**に取る(`compRoot_mk3`)。
-   `ll` を `α` に沿って持ち上げると `pp ≫ u = 𝟙`、全射性で `pp` が同型になり
-   `Div α = 0` が出る。
+| 側 | 宣言 | 手 |
+|---|---|---|
+| 一意性 | `pfRoot_isPullBack_mk_hext` | `compRoot_rep_pairL` で共通代表元 → 第 2 脚を isotropic に押し上げ → `homPf_cancel_pullBack` |
+| 持ち上げ | `pfRoot_isPullBack_mk_lift` | `exists_rep3_cospan` で 3 脚へ → `𝒞` の `IsPullBack.lift` → `compRoot_mk3` で戻す |
 
-**(iv)(a) `arbFactor` / (iv)(a) `arbFactorUniq` / (i)(c) `plBkEquiv`**
-—— 残る 3 条はどれも ★★**「`𝒞` の pull-back は `𝒞^pf` でも pull-back」**
-(`pfRoot_isPullBack_map`)を要る。
-★`𝒞^birat` では `birat_isPullBack_map` として `isPullBack_of_lift`
-(`Prop44Core.lean` の汎用道具、pre-Frobenioid 一般)＋ 底の公式で出してある。
-★`𝒞^pf` 版では **`rtMap` が pull-back を保つこと**(`PlBkShuffle.lean` の
-基底変換)と、`compRoot_mk3` による持ち上げの構成が要る。
+★★**底の追跡が要点**である。`compRoot` の 3 つの `rtRootIso` はそれぞれ違う
+持ち上げを使うが、`rtLift_ext`(`rtExt d ≫ rtLift = rtExt t`)で潰すと
+**3 つとも `Base(rtExt · t) ≫ Base(脚)` という同じ同型**になる
+(`rootBase_rtRootIso_mk_spec`)。★これで `Base f = b ≫ Base α` が
+`𝒞` の側の持ち上げ条件へそのまま落ちる。
 
-★`arbFactor` そのものは上の 2 段(`homPf_frobSplit` ＋ `pfRoot_linearSplit_sameRoot`)を
-つなぐだけで形は出ており、**足りないのは `ll` が pull-back だと言う所だけ**である。
-★`arbFactorUniq` は `𝒞^birat` と同じく
-`frobDegUniq` ＋ 全射性 ＋ `IsPullBack.lift` の 3 点で出る。
+★`arbFactor` はこれで閉じた —— `pfRoot_frobSplit_sameRoot`(Frobenius 型 ≫ 次数 1)
+＋ `pfRoot_linearSplit_sameRoot`(pre-step ≫ 等長、しかも等長側は `𝒞` の pull-back の像)
+＋ 根を揃える共役の 3 つを繋ぐだけである。
+
+**(iv)(a) `arbFactorUniq` / (i)(c) `plBkEquiv`**
+—— `arbFactorUniq` は `𝒞^birat` と同じく
+`frobDegUniq` ＋ 全射性 ＋ `IsPullBack.lift` の 3 点で出る(`birat_arbFactorUniq` を写す)。
+★`plBkEquiv` は `(𝒞^pf)^pl-bk_X → 𝒟_{X_𝒟}` の圏同値で、
+**本質的全射性**が `𝒞` の `plBkEquiv` ＋ `pfRoot_isPullBack_mk` から、
+**充満忠実性**が `pfRoot_isPullBack_mk` の普遍性から出るはずである(未実装)。
 
 ### `Proposition 3.2` 全体として残るもの
 
-1. 上の 3 条(＋ `Frobenioid` の 2 本の圏同値 `coaPreUnderEquiv` / `coaPreOverEquiv`)
+1. 上の 2 条(＋ `Frobenioid` の 2 本の圏同値 `coaPreUnderEquiv` / `coaPreOverEquiv`)
 2. **(ii) の辞書の残り** —— Frobenius 型・pull-back・co-angular・
    base-identity 自己射・同型(`isPreStep` など 5 項は `Prop32.lean` で済み)
 3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
