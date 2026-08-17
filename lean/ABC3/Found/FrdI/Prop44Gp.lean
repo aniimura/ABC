@@ -123,7 +123,87 @@ theorem sliceDivGpOf_precomp {A B A' A'' : C} (a : A' ⟶ A) (ha : IsIso (P.Base
   exact congrArg (fun t => gpMap _ (Φ.map t)
     (toGp _ (P.Div φ) - ((P.degFr φ : ℕ+) : ℕ) • toGp _ (P.Div a))) hkey
 
-/-! ## ★3. 残り —— 余錐と関手
+/-! ## ★3. `Hom^birat` の上の関数として実現する
+
+★★**測定(2026-08-17)**: 余錐(`Cocone`)では作れない ——
+`homFunctorBirat` の値は `Type (max v u2 v2)` に住むのに、
+`Gp (Φ.val −)` は **`Type w`** に住み、`w` は他と独立だからである。
+★`biratDeg`(`ℕ+`)や `biratBase`(`Type v`)は `ULift` で持ち上がるが、
+★★**`Div` だけは持ち上がらない**。
+
+★★★**逃げ道: 代表元を選んで定義し、「代表元によらない」を別に示す。**
+`HomBirat.eq_iff` が共通の上界での一致を与えるので、
+不変性(`sliceDivGpOf_precomp`)を 2 回当てれば済む。 -/
+
+variable (G : Frobenioid P)
+
+variable {P G} in
+/-- ★★**代表元によらない** —— 共通の上界へ両方を送って不変性を当てる。 -/
+theorem sliceDivGpOf_eq_of_mk_eq {A B : C} {Z W : IdxBirat P G A}
+    {φ : Z.unop.left.obj ⟶ B} {ψ : W.unop.left.obj ⟶ B}
+    (h : HomBirat.mk Z φ = HomBirat.mk W ψ) :
+    sliceDivGpOf (P := P) Z.unop.hom.hom Z.unop.hom.property.2.2 φ
+      = sliceDivGpOf (P := P) W.unop.hom.hom W.unop.hom.property.2.2 ψ := by
+  obtain ⟨V, u, v, huv⟩ := HomBirat.eq_iff.mp h
+  have hZ : u.unop.left.hom ≫ Z.unop.hom.hom = V.unop.hom.hom :=
+    congrArg (fun t : V.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w u.unop)
+  have hW : v.unop.left.hom ≫ W.unop.hom.hom = V.unop.hom.hom :=
+    congrArg (fun t : V.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w v.unop)
+  have hcaZ : IsIso (P.Base (u.unop.left.hom ≫ Z.unop.hom.hom)) := by
+    rw [hZ]; exact V.unop.hom.property.2.2
+  have hcaW : IsIso (P.Base (v.unop.left.hom ≫ W.unop.hom.hom)) := by
+    rw [hW]; exact V.unop.hom.property.2.2
+  have h1 : sliceDivGpOf (P := P) V.unop.hom.hom V.unop.hom.property.2.2
+        (u.unop.left.hom ≫ φ)
+      = sliceDivGpOf (P := P) Z.unop.hom.hom Z.unop.hom.property.2.2 φ :=
+    (sliceDivGpOf_congr hZ hcaZ V.unop.hom.property.2.2 (u.unop.left.hom ≫ φ)).symm.trans
+      (sliceDivGpOf_precomp Z.unop.hom.hom Z.unop.hom.property.2.2
+        Z.unop.hom.property.2.1 u.unop.left.hom u.unop.left.property.2.2 hcaZ φ
+        u.unop.left.property.2.1)
+  have h2 : sliceDivGpOf (P := P) V.unop.hom.hom V.unop.hom.property.2.2
+        (v.unop.left.hom ≫ ψ)
+      = sliceDivGpOf (P := P) W.unop.hom.hom W.unop.hom.property.2.2 ψ :=
+    (sliceDivGpOf_congr hW hcaW V.unop.hom.property.2.2 (v.unop.left.hom ≫ ψ)).symm.trans
+      (sliceDivGpOf_precomp W.unop.hom.hom W.unop.hom.property.2.2
+        W.unop.hom.property.2.1 v.unop.left.hom v.unop.left.property.2.2 hcaW ψ
+        v.unop.left.property.2.1)
+  rw [← h1, ← h2, huv]
+
+variable {P G} in
+/-- ★★★**`Hom^birat` の零因子**(`Φ^gp` の中で)—— 原文の図式の中段。 -/
+noncomputable def biratDivGp {A B : C} (f : HomBirat P G A B) :
+    Gp (Φ.val (P.toElem.obj A).base) :=
+  sliceDivGpOf (P := P) (HomBirat.exists_rep f).choose.unop.hom.hom
+    (HomBirat.exists_rep f).choose.unop.hom.property.2.2
+    (HomBirat.exists_rep f).choose_spec.choose
+
+variable {P G} in
+@[simp] theorem biratDivGp_mk {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) :
+    biratDivGp (HomBirat.mk Z φ)
+      = sliceDivGpOf (P := P) Z.unop.hom.hom Z.unop.hom.property.2.2 φ :=
+  sliceDivGpOf_eq_of_mk_eq (HomBirat.exists_rep (HomBirat.mk Z φ)).choose_spec.choose_spec
+
+variable {P G} in
+/-- ★**`𝒞` から来た射の零因子はもとのまま**(`𝔽_Φ → 𝔽_{Φ^gp}` の像)。 -/
+@[simp] theorem biratDivGp_toHomBirat {A B : C} (φ : A ⟶ B) :
+    biratDivGp (toHomBirat (P := P) (G := G) φ) = toGp _ (P.Div φ) := by
+  rw [toHomBirat, biratDivGp_mk]
+  show sliceDivGpOf (P := P) (𝟙 A) _ φ = _
+  haveI : IsIso (P.Base (𝟙 A)) := by rw [P.Base_id]; infer_instance
+  rw [sliceDivGpOf_eq]
+  show gpMap _ (Φ.map (inv (P.Base (𝟙 A))))
+      (toGp _ (P.Div φ) - ((P.degFr φ : ℕ+) : ℕ) • toGp _ (P.Div (𝟙 A))) = _
+  have hd : P.Div (𝟙 A) = 0 := P.Div_id A
+  have hb : inv (P.Base (𝟙 A)) = 𝟙 _ := by
+    refine (IsIso.inv_eq_of_hom_inv_id ?_)
+    rw [P.Base_id, Category.id_comp]
+  rw [hd, hb]
+  have hmap : Φ.map (𝟙 ((P.toElem.obj A).base)) = AddMonoidHom.id _ := by
+    ext y; exact Φ.map_id _ y
+  rw [hmap]
+  simp [gpMap_id]
+
+/-! ## ★4. 残り —— 合成則と関手
 
 ★★不変性(上)があるので、**余錐 `biratDivGpCocone` はそのまま組める**。
 ★その先の `map_comp`(合成則)が `𝔽_{Φ^gp}` への関手を与え、
