@@ -1,6 +1,7 @@
 import ABC3.Interface.GaloisRep.Representation
 import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.GroupTheory.QuotientGroup.Basic
 
 /-!
@@ -175,13 +176,26 @@ def SemistableModelData.waiting : WaitingFor :=
 structure FaltingsHeightData where
   /-- 台となる半安定モデル。 -/
   toSemistableModelData : SemistableModelData
-  /-- ★★**Faltings 高さ**。 -/
+  /-- ★★**Faltings 高さ** `ht^Falt(E) = deg(ω_E)`。 -/
   htFalt : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
   /-- 無限遠因子の次数 `deg∞`。 -/
   degInf : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
   /-- ★`deg∞` は非負(局所高さの和だから)。 -/
   degInf_nonneg : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L),
     0 ≤ degInf L E
+  /-- ★★★**`deg∞` は局所高さの和である**——(G6) に縛りつける。
+
+  原文 (GenEll p.18):
+  > First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+  ★★★**これが「全部 0」の退化を殺す。**乗法還元をもつ素点が 1 つでもあれば
+  `deg∞ > 0` が強制される。★`d = [L:ℚ]` の正規化は原文どおり。 -/
+  degInf_ge_localHeight : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
+    (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R L] [IsFractionRing R L] [E.IsMinimal R]
+    (v : Lˣ →* Multiplicative ℤ) (h : E.HasSplitMultiplicativeReduction R),
+    (Module.finrank ℚ L : ℝ) * degInf L E
+      ≥ (toSemistableModelData.toTateCurveData.localHeight v E h : ℝ) * Real.log 2
   /-- ★★★**`Proposition 3.4`** —— `deg∞` は `ht^Falt` で上から抑えられる。
 
 原文 (GenEll p.17):
