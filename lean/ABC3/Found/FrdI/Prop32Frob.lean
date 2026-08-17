@@ -592,4 +592,68 @@ theorem pfRoot_preStepMono {X Y : PfRootObj P F} (f : X ⟶ Y)
     ((Iso.hom_inv_id_apply _ _).symm.trans (congrArg _ h0)).trans (Iso.hom_inv_id_apply _ _)
   rw [hurep, hvrep, homPf_cancel_preStep (F := F) V φ φ' ψ hψ h1]
 
+/-! ## ★15. (i)(a) —— 底の同型類は Frobenius-trivial 対象の像
+
+★★`𝒞^pf` の対象 `(A, n)` の底は `(P.toElem.obj A).base` そのもの
+(`pfRootToElem` の `obj`)なので、★`𝒞` の `baseSurj` の証人 `A` を
+`(A, 1)` として送るだけでよい。 -/
+
+variable {P F} in
+/-- ★`𝒞 → 𝒞^pf` は Frobenius 型射を Frobenius 型射に送る。 -/
+theorem toPfRoot_isFrobeniusType (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (φ : A ⟶ B)
+    (hφ : IsFrobeniusType P φ) : IsFrobeniusType (pfRootPre P F) ((toPfRoot P F).map φ) := by
+  refine ⟨⟨pfRoot_isCoAngular hfi _, ?_⟩, ?_⟩
+  · show rootDiv (toRootHom (F := F) φ) = 0
+    rw [rootDiv_toRootHom]
+    show Pf.mk (P.Div φ) 1 = 0
+    rw [show P.Div φ = 0 from hφ.1.2, Pf.mk_eq_zero_iff]
+    exact ⟨1, by simp⟩
+  · show IsIso (rootBase (toRootHom (F := F) φ))
+    rw [rootBase_toRootHom]
+    exact hφ.2
+
+variable {P F} in
+/-- ★`𝒞 → 𝒞^pf` は Frobenius 次数を保つ。 -/
+theorem toPfRoot_degFr {A B : C} (φ : A ⟶ B) :
+    (pfRootPre P F).degFr ((toPfRoot P F).map φ) = P.degFr φ :=
+  rootDeg_toRootHom (F := F) φ
+
+variable {P F} in
+/-- ★`𝒞 → 𝒞^pf` は base-identity を保つ。 -/
+theorem toPfRoot_isBaseIdentity {A : C} (φ : End A) (hφ : IsBaseIdentity P φ) :
+    IsBaseIdentity (pfRootPre P F) ((toPfRoot P F).map (φ : A ⟶ A)) := by
+  show rootBase (toRootHom (F := F) (φ : A ⟶ A))
+    = (pfRootPre P F).Base (𝟙 ((toPfRoot P F).obj A))
+  rw [rootBase_toRootHom, ← (toPfRoot P F).map_id A]
+  show P.Base (φ : A ⟶ A) = rootBase (toRootHom (F := F) (𝟙 A))
+  rw [rootBase_toRootHom]
+  exact hφ
+
+variable {P F} in
+/-- ★★**(i)(a)** —— `𝒞^pf` の底の同型類も Frobenius-trivial 対象の像。 -/
+theorem pfRoot_baseSurj (hfi : IsOfFrobeniusIsotropicType P) (Y : D) :
+    ∃ X : PfRootObj P F, IsFrobeniusTrivial (pfRootPre P F) X ∧
+      Nonempty (((pfRootPre P F).toElem.obj X).base ≅ Y) := by
+  obtain ⟨A, ⟨ζ, hdeg, hbf⟩, ⟨e⟩⟩ := F.baseSurj Y
+  refine ⟨(toPfRoot P F).obj A, ⟨{
+      toFun := fun n => (toPfRoot P F).map ((ζ n : A ⟶ A))
+      map_one' := by
+        show (toPfRoot P F).map ((ζ 1 : End A) : A ⟶ A) = 𝟙 _
+        rw [show ((ζ 1 : End A) : A ⟶ A) = 𝟙 A from
+          congrArg (fun t : End A => (t : A ⟶ A)) ζ.map_one]
+        exact (toPfRoot P F).map_id A
+      map_mul' := fun x y => by
+        show (toPfRoot P F).map ((ζ (x * y) : End A) : A ⟶ A)
+          = (toPfRoot P F).map ((ζ y : End A) : A ⟶ A)
+            ≫ (toPfRoot P F).map ((ζ x : End A) : A ⟶ A)
+        rw [show ((ζ (x * y) : End A) : A ⟶ A)
+          = ((ζ y : End A) : A ⟶ A) ≫ ((ζ x : End A) : A ⟶ A) from
+            congrArg (fun t : End A => (t : A ⟶ A)) (ζ.map_mul x y)]
+        exact (toPfRoot P F).map_comp _ _ }, ?_, ?_⟩, ⟨e⟩⟩
+  · intro n
+    exact (toPfRoot_degFr (F := F) ((ζ n : End A) : A ⟶ A)).trans (hdeg n)
+  · intro n
+    exact ⟨toPfRoot_isBaseIdentity (F := F) (ζ n) (hbf n).1,
+      toPfRoot_isFrobeniusType hfi _ (hbf n).2⟩
+
 end ABC3.Found.FrdI
