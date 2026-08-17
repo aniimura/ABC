@@ -256,6 +256,59 @@ theorem awayLift_eq_openLift (A : CommRingCat.{0}) (s : A) (p : arcBasicOpen A s
   show awayLift A s p ≫ awayι A s = openLift (awayι A s) p.1 h ≫ awayι A s
   rw [awayLift_comp_awayι, openLift_comp]
 
+/-! ## ★★★★基本開集合の chart 埋め込み(アフィン周囲) -/
+
+/-- ★★**`awayι` の像への同型**。
+
+★`opensRange` を使うと像の一致が自明になる(座標の摩擦を避けられる)。 -/
+noncomputable def awayIsoOpensRange (A : CommRingCat.{0}) (s : A) :
+    Spec (CommRingCat.of (Localization.Away s)) ≅ ((awayι A s).opensRange).toScheme :=
+  IsOpenImmersion.isoOfRangeEq (awayι A s) ((awayι A s).opensRange).ι
+    (by rw [Scheme.Opens.range_ι]; rfl)
+
+/-- ★**分解**: `awayι = iso.hom ≫ ι`。 -/
+theorem awayIsoOpensRange_fac (A : CommRingCat.{0}) (s : A) :
+    (awayIsoOpensRange A s).hom ≫ ((awayι A s).opensRange).ι = awayι A s :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+/-- ★**逆向きの分解**: `iso.inv ≫ awayι = ι`。
+
+★`Iso.inv_comp_eq` を使うと、`opensRange` の中の `awayι` を書き換えずに済む
+(素直に `rw` すると motive が壊れる)。 -/
+theorem awayIsoOpensRange_inv_comp (A : CommRingCat.{0}) (s : A) :
+    (awayIsoOpensRange A s).inv ≫ awayι A s = ((awayι A s).opensRange).ι :=
+  (Iso.inv_comp_eq _).2 (awayIsoOpensRange_fac A s).symm
+
+/-- ★★★★**基本開集合の chart 埋め込み(アフィン周囲)**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    arcTopology (awayι A s).opensRange.toScheme
+      = induced (· ≫ ι) (arcTopology (Spec A))
+
+★★★これは `topology_openImmersion` を**開部分スキームの言葉で述べた基底事例**である。
+★機構は 3 つの既取得定理の連鎖:
+`arcTopology_iso`(同型)/ `arcTopology_spec`(アフィン)/ `arcTopologyAffine_away`(基底事例)。 -/
+theorem arcTopology_opensRange_awayι (A : CommRingCat.{0}) (s : A) :
+    arcTopology ((awayι A s).opensRange).toScheme
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ ((awayι A s).opensRange).toScheme =>
+            p ≫ ((awayι A s).opensRange).ι)
+          (arcTopology (Spec A)) := by
+  have h1 : arcTopology (Spec (CommRingCat.of (Localization.Away s)))
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s)) =>
+            p ≫ awayι A s)
+          (arcTopology (Spec A)) := by
+    rw [arcTopology_spec, arcTopology_spec, arcTopologyAffine_away]
+  -- ★`iso.symm` で輸送する
+  rw [arcTopology_iso (awayIsoOpensRange A s).symm, h1, induced_compose]
+  congr 1
+  funext q
+  show (q ≫ (awayIsoOpensRange A s).inv) ≫ awayι A s = q ≫ ((awayι A s).opensRange).ι
+  rw [Category.assoc, awayIsoOpensRange_inv_comp]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
