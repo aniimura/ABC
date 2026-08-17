@@ -80,11 +80,46 @@ theorem lift_eq_of_comp_eq {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
     p = IsOpenImmersion.lift f q h :=
   IsOpenImmersion.lift_uniq f q h p hp
 
+/-! ## ★★★持ち上げ写像(点の条件から) -/
+
+/-- ★**唯一の点での条件から、像全体の包含が出る**(`Spec ℂ` は一点だから)。 -/
+theorem range_base_subset_of_mem {X Y : Scheme.{0}} (f : X ⟶ Y)
+    (q : Spec (CommRingCat.of ℂ) ⟶ Y) (h : q.base default ∈ Set.range f.base) :
+    Set.range q.base ⊆ Set.range f.base := by
+  intro y hy
+  obtain ⟨x, rfl⟩ := hy
+  have hx : x = default := Subsingleton.elim _ _
+  rw [hx]
+  exact h
+
+/-- ★★★**開埋め込みへの持ち上げ**——像の点が `f` の像に入っていれば持ち上がる。 -/
+noncomputable def openLift {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (q : Spec (CommRingCat.of ℂ) ⟶ Y) (h : q.base default ∈ Set.range f.base) :
+    Spec (CommRingCat.of ℂ) ⟶ X :=
+  IsOpenImmersion.lift f q (range_base_subset_of_mem f q h)
+
+/-- ★★**持ち上げてから合成するともとに戻る**。 -/
+@[simp] theorem openLift_comp {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (q : Spec (CommRingCat.of ℂ) ⟶ Y) (h : q.base default ∈ Set.range f.base) :
+    openLift f q h ≫ f = q :=
+  IsOpenImmersion.lift_fac f q _
+
+/-- ★★**逆に、合成してから持ち上げるともとに戻る**(単射性から)。 -/
+theorem openLift_comp_self {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (p : Spec (CommRingCat.of ℂ) ⟶ X) (h : (p ≫ f).base default ∈ Set.range f.base) :
+    openLift f (p ≫ f) h = p := by
+  exact comp_openImmersion_injective f (openLift_comp f (p ≫ f) h)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_comp_iff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——像への所属が点の条件で決まること)",
+    sectionId := "genell-def-1-1-i" }
+
+def openLift.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みへの持ち上げ写像)",
     sectionId := "genell-def-1-1-i" }
 
 def mem_range_comp_iff_base_default.src : ABC3.Meta.Source :=
