@@ -3527,6 +3527,105 @@ theorem pfRootCore (hfi : IsOfFrobeniusIsotropicType P) :
   isotropicHullExists := pfRoot_isotropicHullExists hfi
   isotropicClosed := pfRoot_isotropicClosed hfi
 
+/-! ## ★55. (iii)(d) への下ごしらえ —— `Λ_k` の零因子と、2 つの関手の忠実性 -/
+
+/-- ★`Pf` の約分。 -/
+theorem Pf.mk_smul_cancel {M : Type w} [AddCommMonoid M] (m : M) (k a : ℕ+) :
+    Pf.mk (((k : ℕ+) : ℕ) • m) (k * a) = Pf.mk m a :=
+  Pf.sound 1 (by
+    push_cast
+    rw [smul_smul, show (1 : ℕ) * ((a : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)
+        = 1 * (((k : ℕ+) : ℕ) * ((a : ℕ+) : ℕ)) from by ring])
+
+variable {P F} in
+/-- ★★**`Λ_k` の零因子は `Div φ / k`**。 -/
+theorem rootDiv_lamHom (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    (pfRootPre P F).Div (lamHom (F := F) k φ) = Pf.mk (P.Div φ) k := by
+  show Pf.divBy (k * k) (Pf.map (Φ.map (P.Base (rtExt P F A k)))
+    (pfDiv (toHomPf (F := F) (rtMap (F := F) k φ)))) = _
+  rw [pfDiv_toHomPf, Pf.map_mk, Pf.divBy_mk, rtMap_Div, mul_one]
+  exact Pf.mk_smul_cancel (P.Div φ) k k
+
+/-- ★★`_A(𝒞^coa-pre) → Order(Φ(A))` は**つねに忠実**(全射性から)。 -/
+theorem coaPreUnder_faithful {C3 : Type u3} [Category.{v3} C3]
+    {Φ3 : MonoidOn.{v, u, w} D} (Q : PreFrobenioid C3 Φ3)
+    [MorphismProperty.IsMultiplicative (coaPreProp Q)] (A : C3) :
+    (coaPreUnderFunctor Q A).Faithful where
+  map_injective {Z W} {f g} _ := by
+    refine Under.UnderMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    haveI : Epi Z.hom.hom := Q.totEpiC _ _ _
+    exact (cancel_epi Z.hom.hom).mp
+      ((congrArg InducedWideCategory.Hom.hom (Under.w f)).trans
+        (congrArg InducedWideCategory.Hom.hom (Under.w g)).symm)
+
+/-- ★★`(𝒞^coa-pre)_A → Order(Φ(A))^opp` は**pre-step が mono なら忠実**。 -/
+theorem coaPreOver_faithful {C3 : Type u3} [Category.{v3} C3]
+    {Φ3 : MonoidOn.{v, u, w} D} (Q : PreFrobenioid C3 Φ3)
+    [MorphismProperty.IsMultiplicative (coaPreProp Q)]
+    (hmono : ∀ {X Y : C3} (φ : X ⟶ Y), IsPreStep Q φ → Mono φ) (A : C3) :
+    (coaPreOverFunctor Q A).Faithful where
+  map_injective {Z W} {f g} _ := by
+    refine Over.OverMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    haveI : Mono W.hom.hom := hmono W.hom.hom W.hom.property.2
+    exact (cancel_mono W.hom.hom).mp
+      ((congrArg InducedWideCategory.Hom.hom (Over.w f)).trans
+        (congrArg InducedWideCategory.Hom.hom (Over.w g)).symm)
+
+/-! ## ★56. (iii)(d) の本質的全射性(前置の側)
+
+★★**手**: `X = (A,r)` と `x = a/n` に対し、まず `X ≅ (A^{(n)}, r·n)` で根を上げ、
+`𝒞` の `coaPreUnderEquiv` の本質的全射性を `A^{(n)}` で `r·a` に当て、
+その co-angular pre-step を `Λ_{r·n}` で押し出す。
+★`rootDiv (Λ_k ψ) = Div ψ / k` なので、出てくる零因子は `(r·a)/(r·n) = a/n` である。 -/
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★**(iii)(d) 前置の本質的全射性** —— `𝒞^pf` 版。 -/
+theorem pfRoot_coaPreUnder_essSurj (hfi : IsOfFrobeniusIsotropicType P) (G : Frobenioid P)
+    (X : PfRootObj P F) :
+    letI := coaPreProp_isMultiplicative (pfRootPre P F) (pfRoot_coAngularComp hfi)
+    (coaPreUnderFunctor (pfRootPre P F) X).EssSurj := by
+  letI := coaPreProp_isMultiplicative (pfRootPre P F) (pfRoot_coAngularComp hfi)
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  refine ⟨fun x => ?_⟩
+  obtain ⟨a, n, rfl⟩ : ∃ (a : Φ.val (P.toElem.obj X.obj).base) (n : ℕ+),
+      x = Pf.mk a n :=
+    Pf.inductionOn (p := fun y => ∃ (a : Φ.val (P.toElem.obj X.obj).base) (n : ℕ+),
+      y = Pf.mk a n) x (fun m b => ⟨m, b, rfl⟩)
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root n (X.root * n) rfl
+  haveI := hXiso
+  haveI hbiso : IsIso ((pfRootPre P F).Base eX) :=
+    isBaseIsomorphism_of_isIso (pfRootPre P F) eX
+  obtain ⟨Z₀, ⟨e₀⟩⟩ := (G.coaPreUnderEquiv (rtObj P F X.obj n)).essSurj.mem_essImage
+    (toOrderCat (Φ.map (@inv _ _ _ _ ((pfRootPre P F).Base eX) hbiso)
+      (((X.root : ℕ+) : ℕ) • a)))
+  have hdiv0 : P.Div Z₀.hom.hom
+      = Φ.map (@inv _ _ _ _ ((pfRootPre P F).Base eX) hbiso) (((X.root : ℕ+) : ℕ) • a) :=
+    mle_antisymm (P.divisorial _).1.1 (P.divisorial _).2
+      (leOfHom e₀.hom) (leOfHom e₀.inv)
+  -- ★押し出した射
+  obtain ⟨φ, hφdef⟩ : ∃ t : X ⟶ (⟨Z₀.right.obj, X.root * n⟩ : PfRootObj P F),
+      t = eX ≫ lamHom (F := F) (X.root * n) Z₀.hom.hom := ⟨_, rfl⟩
+  have hφstep : IsPreStep (pfRootPre P F) φ := by
+    rw [hφdef]
+    exact IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) eX)
+      (lamHom_isPreStep (X.root * n) Z₀.hom.hom Z₀.hom.property.2)
+  have hφdiv : (pfRootPre P F).Div φ = Pf.mk a n := by
+    rw [hφdef, (pfRootPre P F).Div_comp,
+      show (pfRootPre P F).Div eX = 0 from isIsometric_of_isIso (pfRootPre P F) eX,
+      smul_zero, add_zero, rootDiv_lamHom]
+    show Pf.map (Φ.map ((pfRootPre P F).Base eX)) (Pf.mk (P.Div Z₀.hom.hom) (X.root * n))
+      = Pf.mk a n
+    rw [Pf.map_mk, hdiv0, ← Φ.map_comp, IsIso.hom_inv_id, Φ.map_id]
+    exact Pf.mk_smul_cancel a X.root n
+  refine ⟨Under.mk (Y := (⟨(⟨Z₀.right.obj, X.root * n⟩ : PfRootObj P F)⟩ :
+      WideSubcategory (coaPreProp (pfRootPre P F))))
+    (show (⟨X⟩ : WideSubcategory (coaPreProp (pfRootPre P F))) ⟶ _ from
+      ⟨φ, pfRoot_isCoAngular hfi φ, hφstep⟩), ⟨eqToIso ?_⟩⟩
+  show toOrderCat ((pfRootPre P F).Div φ) = toOrderCat (Pf.mk a n)
+  rw [hφdiv]
+  rfl
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
 ### ★★★★★埋まった 21 条(`FrobenioidCore (pfRootPre P F)` の**全部**)
@@ -3576,6 +3675,27 @@ pull-back)の 1 本だった。これで `arbFactor` / `arbFactorUniq` / `plBkEq
 ### `Proposition 3.2` 全体として残るもの
 
 1. **`Frobenioid` の 2 本の圏同値** `coaPreUnderEquiv` / `coaPreOverEquiv`((iii)(d))
+   —— 4 つのうち **3 つは済んだ**(2026-08-17):
+
+   | 条 | 宣言 | 状態 |
+   |---|---|---|
+   | 前置・忠実 | `coaPreUnder_faithful` | ★済(pre-Frobenioid 一般。全射性から) |
+   | 後置・忠実 | `coaPreOver_faithful` | ★済(pre-Frobenioid 一般。pre-step が mono から) |
+   | 前置・本質的全射 | `pfRoot_coaPreUnder_essSurj` | ★済 |
+   | 前置・充満 | —— | ★**未** |
+   | 後置・本質的全射 | —— | ★**未** |
+   | 後置・充満 | —— | ★**未** |
+
+   ★★**前置・本質的全射の手**: `X = (A,r)`、`x = a/n` に対し
+   `X ≅ (A^{(n)}, r·n)` で根を上げ、`𝒞` の本質的全射性を `A^{(n)}` で `r·a` に当て、
+   `Λ_{r·n}` で押し出す。`rootDiv (Λ_k ψ) = Div ψ / k`(`rootDiv_lamHom`)なので
+   出てくる零因子は `(r·a)/(r·n) = a/n` である。
+
+   ★★**充満に要るもの**(測定済み、未実装): `φ : X ⟶ Y₁`・`ψ : X ⟶ Y₂` を
+   **3 脚の添字の上で**揃える道具(`exists_rep3_span` —— `exists_rep3_cospan` の双対)。
+   ★そのうえで `Pf` の `≼` を代表元の `≼` に落とす:
+   `Pf.mk c₁ N ≼ Pf.mk c₂ N` から `k` を取り、添字を `k` 倍に上げると
+   分子が `k·c₁ ≼ k·c₂` になる(遷移は分子を `k` 倍する)。
 2. **(ii) の辞書の残り** —— Frobenius 型・pull-back・co-angular・
    base-identity 自己射・同型(`isPreStep` など 5 項は `Prop32.lean` で済み)
 3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
