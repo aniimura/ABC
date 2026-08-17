@@ -2201,3 +2201,78 @@ IUT そのものを要求する。**
 
 ★★★**`TopologicalSpace` の `≤` は「細かい」**。`le_def` の表示は対称で読めないので、
 **`⊥` が離散かを試して**確定させること(2026-08-17 に一度誤った)。
+
+---
+
+## §9-24 ★★★C1 の到達点(2026-08-17 終)—— 残るのは 1 点、その論法まで特定した
+
+`Found/Arakelov/` は **11 ファイル・すべて sorry 0**。
+
+### ★★C1(`ArcSpaceData`)の 7 要求
+
+| 場 | 状態 | 場所 |
+|---|---|---|
+| `Arc X` / `equivComplexPoints` | ✅ | `complexPoints`(既存)/ `Equiv.refl` |
+| `evalAffine` | ✅ | `ArcEval.lean` |
+| `conj` / `conj_involutive` | ✅ | `ArcConjInvol.lean` |
+| `conj_continuous` | ✅ | `ArcTopology.lean` |
+| `topology` | ✅ | `ArcTopology.lean`(`⨆` over affine opens) |
+| `topology_affine` | ✅ | `ArcTopologyAffineEq.lean` |
+| `topology_openImmersion` | ★**1 点残** | `ArcOpenImmersion.lean` / `ArcLift.lean` |
+
+### ★★★`topology_openImmersion` の内訳
+
+    topology X = induced (· ≫ f) (topology Y)      (f : X ⟶ Y が開埋め込み)
+
+| 向き | 状態 | 定理 |
+|---|---|---|
+| `topology X ≤ induced` | ✅ | `continuous_comp_openImmersion` |
+| `induced ≤ topology X` | ★**1 点残** | 下記 |
+
+残り 1 向きは「**`(· ≫ f)` が開写像**」。★手元の部品:
+
+| 部品 | 定理 |
+|---|---|
+| chart が chart に収まる | `imageAffineOpenIso_fac` |
+| アフィン開の 1 対 1 対応(mathlib の順序同型) | `imageAffineOpen_eq_affineOpensEquiv` / `exists_imageAffineOpen` |
+| 単射性 | `comp_openImmersion_injective` |
+| 基本開集合は開 | `isOpen_arcBasicOpen` |
+| **点が `D(g)` に落ちる ⟺ `g(r) ≠ 0`** | `mem_basicOpen_base_iff` |
+| **像の点を取る写像は連続** | `continuous_base_default` |
+| **点が開集合に落ちる条件は開** | `isOpen_landsIn` |
+| **像への所属 ⟺ 点が像に落ちる** | `mem_range_comp_iff_base_default` |
+| 持ち上げの一意性 | `lift_eq_of_comp_eq` |
+
+### ★★★★残る 1 点と、その論法(次のセッションはここから)
+
+示すべきは、`V` が `arcTopology X` で開のとき
+
+    ∀ V' ∈ Y.affineOpens, chart^Y_{V'} ⁻¹' ((· ≫ f) '' V)  が arcTopologyOpen V' で開
+
+★★**難所は「`f⁻¹ᵁ V'` がアフィンでない」ことである。**
+`arcTopology` はアフィン chart で定義したので、
+`Arc (f⁻¹ᵁ V') → Arc X` の連続性が直接には使えない。
+
+★★★**論法(アフィン細分)**:
+
+1. `W' := V' ⊓ f.opensRange`(`V'` の開)。像に入る `r` は `W'` に落ちる
+   ——`mem_range_comp_iff_base_default` + `isOpen_landsIn` で**開集合**である。
+2. `W'` を **`Y` のアフィン開 `V''` で被覆**する(`V'' ≤ W'`)。
+   ★`exists_imageAffineOpen` により各 `V''` は `X` のアフィン開 `U''` の像である。
+3. `{r ∈ Arc V' ǀ r が V'' に落ちる}` の上では
+   `chart^Y_{V'}⁻¹((· ≫ f)''V) = (chart^X_{U''} を経た像)` になり、
+   `chart^X_{U''}⁻¹ V` が開(`V` が開だから)であることに帰着する。
+4. 開集合の**合併**なので全体も開。
+
+★★見積り: **100〜200 行**。★部品は 9 つとも揃っているので、
+新たな mathlib 探索は要らない見込みである。
+
+### ★★実装で 3 度かかった罠(必ず読むこと)
+
+1. ★★★**`simp only [Function.comp_def]` は `Scheme.Hom.mk` まで展開して壊す。**
+   `rw [h]` を使い、**`h` を「合成の形」で述べる**(ゴールが既に合成形)。
+2. ★★位相のインスタンスは `letI` で**明示的に**入れる(`⨆` の成分は自動で決まらない)。
+3. ★★★**`TopologicalSpace` の `≤` は「細かい」**。`le_def` の表示は対称なので、
+   **`⊥` が離散かを試して**確定させる(一度誤って `⨅`/`⨆` を逆にした)。
+4. ★`Spec ℂ` の点の型は **`↥(Spec (CommRingCat.of ℂ))`** で
+   `PrimeSpectrum (…)` と**構文的に別**(defeq だが `rw` は噛まない)。
