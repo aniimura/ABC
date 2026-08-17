@@ -698,4 +698,387 @@ theorem birat_baseSurj (Y : D) :
   obtain ⟨A, hft, he⟩ := G.core.baseSurj Y
   exact ⟨show BiratCat P G from A, birat_isFrobeniusTrivial P G A hft, he⟩
 
+/-! ## ★11. (iii)(c) の全単射 —— co-angular pre-step が同型だから共役で済む
+
+原文 (FrdI p.24):
+> depends only [among the bijections induced by the various co-angular pre-steps
+
+★★`𝒞^birat` では co-angular pre-step が**同型**なので、
+`𝒪^▷` の対応は**共役** `β = φ⁻¹ ≫ α ≫ φ` そのものである。 -/
+
+include P in
+/-- ★★**(iii)(c) の順方向**。 -/
+theorem birat_otriFwd {A B : BiratCat P G} (φ : A ⟶ B)
+    (hc : IsCoAngular (biratPre P G) φ) (hs : IsPreStep (biratPre P G) φ)
+    (α : End A) (hα : α ∈ OTri (biratPre P G) A) :
+    ∃! β : End B, β ∈ OTri (biratPre P G) B ∧
+      ((φ ≫ (β : B ⟶ B) : A ⟶ B) = ((α : A ⟶ A) ≫ φ)) := by
+  obtain ⟨p, hp1, hp2⟩ := birat_coaPre_inv P G φ hc hs
+  have hpd : (biratPre P G).degFr p = 1 := birat_degFr_of_inv P G hp1 hs.1
+  have hpb : (biratPre P G).Base p ≫ (biratPre P G).Base φ = 𝟙 _ :=
+    birat_base_of_inv P G hp2
+  refine ⟨p ≫ ((α : A ⟶ A) ≫ φ), ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · -- ★base-identity
+    show (biratPre P G).Base (p ≫ ((α : A ⟶ A) ≫ φ)) = (biratPre P G).Base (𝟙 B)
+    rw [(biratPre P G).Base_comp, (biratPre P G).Base_comp,
+      show (biratPre P G).Base (α : A ⟶ A) = (biratPre P G).Base (𝟙 A) from hα.1,
+      (biratPre P G).Base_id, Category.id_comp, (biratPre P G).Base_id]
+    exact hpb
+  · -- ★linear
+    show (biratPre P G).degFr (p ≫ ((α : A ⟶ A) ≫ φ)) = 1
+    rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp,
+      show (biratPre P G).degFr φ = 1 from hs.1,
+      show (biratPre P G).degFr (α : A ⟶ A) = 1 from hα.2, hpd, one_mul, one_mul]
+  · -- ★等式
+    have e1 : φ ≫ (p ≫ ((α : A ⟶ A) ≫ φ)) = (φ ≫ p) ≫ ((α : A ⟶ A) ≫ φ) :=
+      (Category.assoc _ _ _).symm
+    exact e1.trans ((congrArg (fun t => t ≫ ((α : A ⟶ A) ≫ φ)) hp1).trans
+      (Category.id_comp _))
+  · -- ★一意性
+    rintro β' ⟨-, hβ'⟩
+    have e2 : (β' : B ⟶ B) = 𝟙 B ≫ (β' : B ⟶ B) := (Category.id_comp _).symm
+    have e3 : 𝟙 B ≫ (β' : B ⟶ B) = (p ≫ φ) ≫ (β' : B ⟶ B) :=
+      congrArg (fun t => t ≫ (β' : B ⟶ B)) hp2.symm
+    have e4 : (p ≫ φ) ≫ (β' : B ⟶ B) = p ≫ (φ ≫ (β' : B ⟶ B)) := Category.assoc _ _ _
+    have e5 : p ≫ (φ ≫ (β' : B ⟶ B)) = p ≫ ((α : A ⟶ A) ≫ φ) :=
+      congrArg (fun t => p ≫ t) hβ'
+    exact ((e2.trans e3).trans (e4.trans e5))
+
+include P in
+/-- ★★**(iii)(c) の逆方向**。 -/
+theorem birat_otriBwd {A B : BiratCat P G} (φ : A ⟶ B)
+    (hc : IsCoAngular (biratPre P G) φ) (hs : IsPreStep (biratPre P G) φ)
+    (β : End B) (hβ : β ∈ OTri (biratPre P G) B) :
+    ∃! α : End A, α ∈ OTri (biratPre P G) A ∧
+      ((φ ≫ (β : B ⟶ B) : A ⟶ B) = ((α : A ⟶ A) ≫ φ)) := by
+  obtain ⟨p, hp1, hp2⟩ := birat_coaPre_inv P G φ hc hs
+  have hpd : (biratPre P G).degFr p = 1 := birat_degFr_of_inv P G hp1 hs.1
+  have hpb : (biratPre P G).Base φ ≫ (biratPre P G).Base p = 𝟙 _ :=
+    birat_base_of_inv P G hp1
+  refine ⟨φ ≫ ((β : B ⟶ B) ≫ p), ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · show (biratPre P G).Base (φ ≫ ((β : B ⟶ B) ≫ p)) = (biratPre P G).Base (𝟙 A)
+    rw [(biratPre P G).Base_comp, (biratPre P G).Base_comp,
+      show (biratPre P G).Base (β : B ⟶ B) = (biratPre P G).Base (𝟙 B) from hβ.1,
+      (biratPre P G).Base_id, Category.id_comp, (biratPre P G).Base_id]
+    exact hpb
+  · show (biratPre P G).degFr (φ ≫ ((β : B ⟶ B) ≫ p)) = 1
+    rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp,
+      show (biratPre P G).degFr φ = 1 from hs.1,
+      show (biratPre P G).degFr (β : B ⟶ B) = 1 from hβ.2, hpd, one_mul, mul_one]
+  · -- ★等式: `φ ≫ β = (φ ≫ β ≫ p) ≫ φ`
+    have e1 : (φ ≫ ((β : B ⟶ B) ≫ p)) ≫ φ = φ ≫ (((β : B ⟶ B) ≫ p) ≫ φ) :=
+      Category.assoc _ _ _
+    have e2 : ((β : B ⟶ B) ≫ p) ≫ φ = (β : B ⟶ B) ≫ (p ≫ φ) := Category.assoc _ _ _
+    have e3 : (β : B ⟶ B) ≫ (p ≫ φ) = (β : B ⟶ B) ≫ 𝟙 B :=
+      congrArg (fun t => (β : B ⟶ B) ≫ t) hp2
+    exact (e1.trans ((congrArg (fun t => φ ≫ t) (e2.trans e3)).trans
+      (congrArg (fun t => φ ≫ t) (Category.comp_id _)))).symm
+  · rintro α' ⟨-, hα'⟩
+    have e2 : (α' : A ⟶ A) = (α' : A ⟶ A) ≫ 𝟙 A := (Category.comp_id _).symm
+    have e3 : (α' : A ⟶ A) ≫ 𝟙 A = (α' : A ⟶ A) ≫ (φ ≫ p) :=
+      congrArg (fun t => (α' : A ⟶ A) ≫ t) hp1.symm
+    have e4 : (α' : A ⟶ A) ≫ (φ ≫ p) = ((α' : A ⟶ A) ≫ φ) ≫ p :=
+      (Category.assoc _ _ _).symm
+    have e5 : ((α' : A ⟶ A) ≫ φ) ≫ p = (φ ≫ (β : B ⟶ B)) ≫ p :=
+      congrArg (fun t => t ≫ p) hα'.symm
+    exact ((e2.trans e3).trans (e4.trans e5)).trans (Category.assoc _ _ _)
+
+/-! ## ★12. (v)(a) —— pre-step は mono
+
+★★代表元に落として `𝒞` の「pre-step は mono」を使う。 -/
+
+include P in
+theorem birat_preStepMono {A B : BiratCat P G} (f : A ⟶ B)
+    (hf : IsPreStep (biratPre P G) f) : Mono f := by
+  obtain ⟨A₁, a, φ, aa, a', hac, has, haa, ha1, ha2, hfeq⟩ := birat_hom_repr P G f
+  have hφs : IsPreStep P φ := by
+    refine (birat_isPreStep_iff (P := P) (G := G) φ).mp ?_
+    have e1 : (toBiratCat P G).map φ = aa ≫ f := by
+      rw [hfeq]
+      exact (((Category.assoc _ _ _).symm.trans
+        (congrArg (fun t => t ≫ (toBiratCat P G).map φ) ha1)).trans
+        (Category.id_comp _)).symm
+    rw [e1]
+    exact IsPreStep.comp (biratPre P G)
+      (haa ▸ (birat_isPreStep_iff (P := P) (G := G) a).mpr has) hf
+  haveI := toBiratCat_faithful (P := P) (G := G)
+  haveI hmono : Mono φ := G.core.preStepMono φ hφs
+  haveI hiso : IsIso a' := ⟨⟨aa, ha2, ha1⟩⟩
+  haveI hmono2 : Mono ((toBiratCat P G).map φ) := by
+    refine ⟨fun {W} u v huv => ?_⟩
+    obtain ⟨Z, u₀, v₀, hu, hv⟩ := HomBirat.exists_rep_pair (P := P) (G := G) u v
+    have hz : (toBiratCat P G).map Z.unop.hom.hom ≫ u = (toBiratCat P G).map u₀ := by
+      rw [← hu]
+      exact birat_toHom_comp_mk Z.unop.hom.hom Z.unop.hom.property.1
+        Z.unop.hom.property.2 u₀
+    have hz' : (toBiratCat P G).map Z.unop.hom.hom ≫ v = (toBiratCat P G).map v₀ := by
+      rw [← hv]
+      exact birat_toHom_comp_mk Z.unop.hom.hom Z.unop.hom.property.1
+        Z.unop.hom.property.2 v₀
+    have e2 : (toBiratCat P G).map (u₀ ≫ φ) = (toBiratCat P G).map (v₀ ≫ φ) := by
+      rw [(toBiratCat P G).map_comp, (toBiratCat P G).map_comp, ← hz, ← hz']
+      exact (Category.assoc _ _ _).trans
+        ((congrArg (fun t => (toBiratCat P G).map Z.unop.hom.hom ≫ t) huv).trans
+          (Category.assoc _ _ _).symm)
+    have e3 : u₀ ≫ φ = v₀ ≫ φ := (toBiratCat P G).map_injective e2
+    have e4 : u₀ = v₀ := (cancel_mono φ).mp e3
+    rw [← hu, ← hv, e4]
+  rw [hfeq]
+  refine ⟨fun {W} u v huv => ?_⟩
+  have h1 : (u ≫ a') ≫ (toBiratCat P G).map φ = (v ≫ a') ≫ (toBiratCat P G).map φ :=
+    (Category.assoc _ _ _).trans (huv.trans (Category.assoc _ _ _).symm)
+  have h2 : u ≫ a' = v ≫ a' := hmono2.right_cancellation _ _ h1
+  have h3 : (u ≫ a') ≫ aa = (v ≫ a') ≫ aa := congrArg (fun t => t ≫ aa) h2
+  have h4 : u ≫ (a' ≫ aa) = v ≫ (a' ≫ aa) :=
+    (Category.assoc _ _ _).symm.trans (h3.trans (Category.assoc _ _ _))
+  have h5 : u ≫ 𝟙 A = v ≫ 𝟙 A := by rw [← ha2]; exact h4
+  exact ((Category.comp_id u).symm.trans h5).trans (Category.comp_id v)
+
+/-! ## ★13. (iii)(b) —— co-angular pre-step があれば射は全部 co-angular
+
+原文 (FrdI p.24):
+> co-angular pre-step φ : A ->B, there exists a [uniquely determined] bijection of
+
+★★★**鍵は「`𝒞^birat` の自己射はすべて co-angular」**である ——
+標準形 `ψ = c' ≫ [ψ₀]` の添字の構造射 `c : A₃ ⟶ A` が
+**`𝒞` の co-angular pre-step**で、`ψ₀` も `A₃ ⟶ A` だから、
+★`𝒞` の (iii)(b) がそのまま当たる。 -/
+
+include P in
+/-- ★★★**`𝒞^birat` の自己射はすべて co-angular**。 -/
+theorem birat_isCoAngular_endo {X : BiratCat P G} (ψ : X ⟶ X) :
+    IsCoAngular (biratPre P G) ψ := by
+  obtain ⟨A₃, c, ψ₀, cc, c', hcc, hcs, -, hc1, hc2, hψeq⟩ := birat_hom_repr P G ψ
+  exact (birat_isCoAngular_repr P G ψ ψ₀ cc c' hc1 hc2 hψeq).mpr
+    (G.core.coAngularOfPreStep c hcc hcs ψ₀)
+
+include P in
+/-- ★★★**[FrdI] Definition 1.3, (iii)(b)** の `𝒞^birat` 版。
+
+★`α` は同型なので `φ = (φ ≫ α⁻¹) ≫ α` と書け、前半は自己射だから co-angular。 -/
+theorem birat_coAngularOfPreStep {A' A : BiratCat P G} (α : A' ⟶ A)
+    (hc : IsCoAngular (biratPre P G) α) (hs : IsPreStep (biratPre P G) α)
+    (φ : A' ⟶ A) : IsCoAngular (biratPre P G) φ := by
+  obtain ⟨p, hp1, hp2⟩ := birat_coaPre_inv P G α hc hs
+  have heq : (φ ≫ p) ≫ α = φ :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (fun t => φ ≫ t) hp2).trans (Category.comp_id φ))
+  have hcomp : IsCoAngular (biratPre P G) ((φ ≫ p) ≫ α) :=
+    birat_coAngularComp P G (φ ≫ p) α (birat_isCoAngular_endo P G (φ ≫ p)) hc
+  rwa [heq] at hcomp
+
+/-! ## ★14. isotropic 対象の辞書 —— (vii) を渡すための 3 補題
+
+原文 (FrdI p.83):
+> isotropic; ...
+
+★★**`𝒞` の中で 2 つ、`𝒞^birat` との間で 1 つ**:
+
+| 補題 | 内容 |
+|---|---|
+| `isCoAngular_of_isotropic` | isotropic 対象から出る pre-step は co-angular |
+| `isotropic_of_coaPre` | ★**isotropic 対象への co-angular pre-step は、始域も isotropic** |
+| `birat_isIsotropic_iff` | ★★`X` が `𝒞^birat` で isotropic ⟺ `𝒞` で isotropic |
+-/
+
+include G in
+/-- ★★**isotropic 対象から出る pre-step は co-angular**。
+
+★(v)(b) で `φ = β ≫ α`(`β` co-angular pre-step、`α` isometric pre-step)と分け、
+`β` の終域も isotropic((vii)(b))なので `α` は同型になる。 -/
+theorem isCoAngular_of_isotropic {A B : C} (hA : IsIsotropic P A) (φ : A ⟶ B)
+    (hφ : IsPreStep P φ) : IsCoAngular P φ := by
+  obtain ⟨M, β, α, hfac, hβc, hβs, hαi, hαs⟩ := G.core.preStepFactor φ hφ
+  have hM : IsIsotropic P M := G.core.isotropicClosed β hA
+  haveI hαiso : IsIso α := hM _ α hαi hαs
+  rw [hfac]
+  exact isCoAngular_compIso (Q := P) α (inv α) (IsIso.hom_inv_id α) (IsIso.inv_hom_id α) hβc
+
+include G in
+/-- ★★★**isotropic 対象への co-angular pre-step は、始域も isotropic**。
+
+★★`A` の isotropic hull `ι : A ⟶ H` を取り、`B` が isotropic なので
+`b = ι ≫ b̃` と分ける。★**`b` の co-angular 性を分解 `b = 𝟙 ≫ ι ≫ b̃` に当てる**と
+`ι` が同型になる —— これが要点である。 -/
+theorem isotropic_of_coaPre {A B : C} (b : A ⟶ B) (hbc : IsCoAngular P b)
+    (hbs : IsPreStep P b) (hB : IsIsotropic P B) : IsIsotropic P A := by
+  obtain ⟨H, ι, hιi, hιs, hιiso, hιuniv⟩ := G.core.isotropicHullExists A
+  obtain ⟨bt, hbt, -⟩ := hιuniv B hB b
+  have hdbt : P.degFr bt = 1 := by
+    have h1 : P.degFr b = 1 := hbs.1
+    rw [hbt, P.degFr_comp, show P.degFr ι = 1 from hιs.1, mul_one] at h1
+    exact h1
+  haveI hιIso : IsIso ι := by
+    refine hbc A H (𝟙 A) ι bt ?_ hdbt hιi hιs
+      (Or.inr (isBaseIsomorphism_of_isIso P (𝟙 A)))
+    rw [Category.id_comp]
+    exact hbt
+  intro Dd h hisom hstep
+  haveI : IsIso (inv ι ≫ h) :=
+    hιiso Dd (inv ι ≫ h) ((isIsometric_of_isIso P (inv ι)).comp P hisom)
+      ((isPreStep_of_isIso P (inv ι)).comp P hstep)
+  have h4 : IsIso (ι ≫ (inv ι ≫ h)) := inferInstance
+  rwa [← Category.assoc, IsIso.hom_inv_id, Category.id_comp] at h4
+
+include P in
+/-- ★★**`𝒞^birat` で isotropic なら `𝒞` でも isotropic**。
+
+★`𝒞` の isometric pre-step `h` を `𝒞^birat` へ送ると同型になるので、
+`h` は co-angular pre-step。★`Proposition 1.4, (iii)` で `𝒞` の中でも同型。 -/
+theorem birat_isotropic_down {X : BiratCat P G}
+    (hX : IsIsotropic (biratPre P G) X) : IsIsotropic P (biratDown P G X) := by
+  intro W h hisom hstep
+  haveI : IsIso ((toBiratCat P G).map h) :=
+    hX (show BiratCat P G from W) ((toBiratCat P G).map h) (birat_isIsometric _)
+      ((birat_isPreStep_iff (P := P) (G := G) h).mpr hstep)
+  obtain ⟨hc, -⟩ := (birat_isIso_iff (P := P) (G := G) h).mp inferInstance
+  exact prop_1_4_iii P G.core h ⟨hc, hisom⟩ hstep
+
+include P in
+/-- ★★★**`𝒞` で isotropic なら `𝒞^birat` でも isotropic**。
+
+★標準形 `g = b' ≫ [g₀]` の `B₁` は `isotropic_of_coaPre` で isotropic、
+そこから出る pre-step `g₀` は `isCoAngular_of_isotropic` で co-angular、
+よって `[g₀]` は同型。 -/
+theorem birat_isotropic_up {X : C} (hX : IsIsotropic P X) :
+    IsIsotropic (biratPre P G) (show BiratCat P G from X) := by
+  intro Y g _ hgs
+  obtain ⟨B₁, b, g₀, bb, b', hbc, hbs, hbb, hb1, hb2, hgeq⟩ := birat_hom_repr P G g
+  have hg₀s : IsPreStep P g₀ := by
+    refine (birat_isPreStep_iff (P := P) (G := G) g₀).mp ?_
+    have e1 : (toBiratCat P G).map g₀ = bb ≫ g := by
+      rw [hgeq]
+      exact (((Category.assoc _ _ _).symm.trans
+        (congrArg (fun t => t ≫ (toBiratCat P G).map g₀) hb1)).trans
+        (Category.id_comp _)).symm
+    rw [e1]
+    exact IsPreStep.comp (biratPre P G)
+      (hbb ▸ (birat_isPreStep_iff (P := P) (G := G) b).mpr hbs) hgs
+  have hB₁ : IsIsotropic P B₁ := isotropic_of_coaPre P G b hbc hbs hX
+  have hg₀c : IsCoAngular P g₀ := isCoAngular_of_isotropic P G hB₁ g₀ hg₀s
+  obtain ⟨mg, hmg⟩ : ∃ m : (show BiratCat P G from B₁) ⟶ Y,
+      m = (toBiratCat P G).map g₀ := ⟨_, rfl⟩
+  haveI : IsIso mg := hmg ▸ birat_isIso_of_coaPre g₀ hg₀c hg₀s
+  haveI hb'iso : IsIso b' := ⟨⟨bb, hb2, hb1⟩⟩
+  have hfin : IsIso (b' ≫ mg) := inferInstance
+  rw [hgeq, ← hmg]
+  exact hfin
+
+include P in
+/-- ★★★★**辞書 (iv) の「isotropic 対象」の条**。
+
+原文 (FrdI p.83):
+> isotropic; ...
+-/
+theorem birat_isIsotropic_iff (X : C) :
+    IsIsotropic (biratPre P G) (show BiratCat P G from X) ↔ IsIsotropic P X :=
+  ⟨fun h => birat_isotropic_down P G h, fun h => birat_isotropic_up P G h⟩
+
+include P in
+/-- ★★★**[FrdI] Definition 1.3, (vii)(b)** の `𝒞^birat` 版。
+
+★辞書で `𝒞` へ落とし、標準形の `A₁` も isotropic にしてから
+`𝒞` の (vii)(b) を当て、また辞書で戻す。 -/
+theorem birat_isotropicClosed {A B : BiratCat P G} (φ : A ⟶ B)
+    (hA : IsIsotropic (biratPre P G) A) : IsIsotropic (biratPre P G) B := by
+  obtain ⟨A₁, a, φ₀, aa, a', hac, has, haa, ha1, ha2, hφeq⟩ := birat_hom_repr P G φ
+  have hdA : IsIsotropic P (biratDown P G A) := birat_isotropic_down P G hA
+  have hA₁ : IsIsotropic P A₁ := isotropic_of_coaPre P G a hac has hdA
+  exact birat_isotropic_up P G (G.core.isotropicClosed φ₀ hA₁)
+
+/-! ## ★15. (vii)(a) —— `𝒞^birat` の isotropic hull
+
+原文 (FrdI p.25):
+> (vii) (Isotropic Objects) (a) For every A ∈Ob(C), there exists an isotropic hull
+
+★★**`𝒞` の isotropic hull `ι : A ⟶ H` をそのまま送る**。
+`H` が `𝒞^birat` でも isotropic なのは `birat_isIsotropic_iff`。
+
+★★★普遍性が要点である。標準形 `γ = a' ≫ [γ₀]` の `A₁` の hull `ι₁ : A₁ ⟶ H₁` を取り、
+`a ≫ ι` を `ι₁ ≫ t` と分ける。★**`t` は isotropic 対象 `H₁` から出る pre-step なので
+co-angular**(`isCoAngular_of_isotropic`)、よって `𝒞^birat` では**同型**であり、
+`β := t⁻¹ ≫ [β₁]` が取れる。★一意性は `𝒞^birat` が totally epimorphic だから。 -/
+
+include P in
+/-- ★★★★**[FrdI] Definition 1.3, (vii)(a)** の `𝒞^birat` 版。 -/
+theorem birat_isotropicHullExists (A : BiratCat P G) :
+    ∃ (B : BiratCat P G) (φ : A ⟶ B), IsIsotropicHull (biratPre P G) φ := by
+  obtain ⟨H, ι, hιi, hιs, hιiso, hιuniv⟩ := G.core.isotropicHullExists (biratDown P G A)
+  refine ⟨(show BiratCat P G from H), (toBiratCat P G).map ι,
+    birat_isIsometric _, (birat_isPreStep_iff (P := P) (G := G) ι).mpr hιs,
+    birat_isotropic_up P G hιiso, ?_⟩
+  intro Cc hCc γ
+  have hdCc : IsIsotropic P (biratDown P G Cc) := birat_isotropic_down P G hCc
+  obtain ⟨A₁, a, γ₀, aa, a', hac, has, haa, ha1, ha2, hγeq⟩ := birat_hom_repr P G γ
+  obtain ⟨H₁, ι₁, hι₁i, hι₁s, hι₁iso, hι₁univ⟩ := G.core.isotropicHullExists A₁
+  obtain ⟨β₁, hβ₁, -⟩ := hι₁univ (biratDown P G Cc) hdCc γ₀
+  obtain ⟨t, ht, -⟩ := hι₁univ H hιiso (a ≫ ι)
+  -- ★`t` は pre-step
+  have hdt : P.degFr t = 1 := by
+    have h1 : P.degFr (a ≫ ι) = P.degFr (ι₁ ≫ t) := congrArg P.degFr ht
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr a = 1 from has.1,
+      show P.degFr ι = 1 from hιs.1, show P.degFr ι₁ = 1 from hι₁s.1] at h1
+    simpa using h1.symm
+  have hbt : IsBaseIsomorphism P t := by
+    have hb1 : IsIso (P.Base (ι₁ ≫ t)) :=
+      ht ▸ isBaseIsomorphism_comp P has.2 hιs.2
+    haveI : IsIso (P.Base ι₁) := hι₁s.2
+    haveI : IsIso (P.Base ι₁ ≫ P.Base t) := by rwa [P.Base_comp] at hb1
+    exact IsIso.of_isIso_comp_left (P.Base ι₁) (P.Base t)
+  have hts : IsPreStep P t := ⟨hdt, hbt⟩
+  -- ★★`t` は isotropic 対象から出る pre-step なので co-angular、よって `𝒞^birat` で同型
+  have htc : IsCoAngular P t := isCoAngular_of_isotropic P G hι₁iso t hts
+  obtain ⟨mt, hmt⟩ : ∃ m : (show BiratCat P G from H₁) ⟶ (show BiratCat P G from H),
+      m = (toBiratCat P G).map t := ⟨_, rfl⟩
+  haveI hmtiso : IsIso mt := hmt ▸ birat_isIso_of_coaPre t htc hts
+  obtain ⟨mt', hmt1, hmt2⟩ :
+      ∃ m' : (show BiratCat P G from H) ⟶ (show BiratCat P G from H₁),
+        mt ≫ m' = 𝟙 _ ∧ m' ≫ mt = 𝟙 _ := hmtiso.out
+  obtain ⟨mβ, hmβ⟩ : ∃ m : (show BiratCat P G from H₁) ⟶ Cc,
+      m = (toBiratCat P G).map β₁ := ⟨_, rfl⟩
+  obtain ⟨mι, hmι⟩ : ∃ m : A ⟶ (show BiratCat P G from H),
+      m = (toBiratCat P G).map ι := ⟨_, rfl⟩
+  obtain ⟨mι₁, hmι₁⟩ : ∃ m : (show BiratCat P G from A₁) ⟶ (show BiratCat P G from H₁),
+      m = (toBiratCat P G).map ι₁ := ⟨_, rfl⟩
+  obtain ⟨mγ₀, hmγ₀⟩ : ∃ m : (show BiratCat P G from A₁) ⟶ Cc,
+      m = (toBiratCat P G).map γ₀ := ⟨_, rfl⟩
+  have mc1 : (toBiratCat P G).map (ι₁ ≫ t)
+      = (toBiratCat P G).map ι₁ ≫ (toBiratCat P G).map t := (toBiratCat P G).map_comp _ _
+  have mc2 : (toBiratCat P G).map (a ≫ ι)
+      = (toBiratCat P G).map a ≫ (toBiratCat P G).map ι := (toBiratCat P G).map_comp _ _
+  have mc3 : (toBiratCat P G).map (ι₁ ≫ β₁)
+      = (toBiratCat P G).map ι₁ ≫ (toBiratCat P G).map β₁ := (toBiratCat P G).map_comp _ _
+  have e_t : mι₁ ≫ mt = aa ≫ mι := by
+    rw [hmι₁, hmt, hmι, haa]
+    exact (mc1.symm.trans (congrArg (toBiratCat P G).map ht.symm)).trans mc2
+  have e_γ : mι₁ ≫ mβ = mγ₀ := by
+    rw [hmι₁, hmβ, hmγ₀]
+    exact mc3.symm.trans (congrArg (toBiratCat P G).map hβ₁.symm)
+  have hγ2 : γ = a' ≫ mγ₀ := by rw [hmγ₀]; exact hγeq
+  -- ★等式の組み立て
+  have q2 : (aa ≫ mι) ≫ mt' = mι₁ := by
+    have r1 : (mι₁ ≫ mt) ≫ mt' = mι₁ ≫ (mt ≫ mt') := Category.assoc _ _ _
+    have r2 : mι₁ ≫ (mt ≫ mt') = mι₁ :=
+      (congrArg (fun z => mι₁ ≫ z) hmt1).trans (Category.comp_id _)
+    exact ((congrArg (fun z => z ≫ mt') e_t).symm.trans r1).trans r2
+  have s0 : (aa ≫ mι) ≫ (mt' ≫ mβ) = mι₁ ≫ mβ :=
+    (Category.assoc _ _ _).symm.trans (congrArg (fun z => z ≫ mβ) q2)
+  have s1 : aa ≫ (mι ≫ (mt' ≫ mβ)) = mγ₀ :=
+    ((Category.assoc _ _ _).symm.trans s0).trans e_γ
+  have s2 : γ = mι ≫ (mt' ≫ mβ) := by
+    have u1 : a' ≫ mγ₀ = a' ≫ (aa ≫ (mι ≫ (mt' ≫ mβ))) :=
+      congrArg (fun z => a' ≫ z) s1.symm
+    have u2 : a' ≫ (aa ≫ (mι ≫ (mt' ≫ mβ))) = (a' ≫ aa) ≫ (mι ≫ (mt' ≫ mβ)) :=
+      (Category.assoc _ _ _).symm
+    have u3 : (a' ≫ aa) ≫ (mι ≫ (mt' ≫ mβ)) = 𝟙 A ≫ (mι ≫ (mt' ≫ mβ)) :=
+      congrArg (fun z => z ≫ (mι ≫ (mt' ≫ mβ))) ha2
+    exact ((hγ2.trans u1).trans (u2.trans u3)).trans (Category.id_comp _)
+  have hs2' : γ = (toBiratCat P G).map ι ≫ (mt' ≫ mβ) := by rw [← hmι]; exact s2
+  refine ⟨mt' ≫ mβ, hs2', ?_⟩
+  intro y hy
+  have hy' : γ = (toBiratCat P G).map ι ≫ y := hy
+  haveI hepi : Epi ((toBiratCat P G).map ι) :=
+    birat_totEpi P G _ _ ((toBiratCat P G).map ι)
+  exact hepi.left_cancellation _ _ (hy'.symm.trans hs2')
+
 end ABC3.Found.FrdI
