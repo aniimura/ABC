@@ -3626,6 +3626,97 @@ theorem pfRoot_coaPreUnder_essSurj (hfi : IsOfFrobeniusIsotropicType P) (G : Fro
   rw [hφdiv]
   rfl
 
+/-! ## ★57. (iii)(d) の充満性への下ごしらえ -/
+
+variable {P F} in
+/-- ★**始域を共有する 2 射を同じ 3 脚添字へ**(`exists_rep3_cospan` の双対)。 -/
+theorem exists_rep3_span {A B E : C} (f : HomPf P F A B) (g : HomPf P F A E) :
+    ∃ (V : IdxPf3 P F A B E) (φ : V.right.obj.1 ⟶ V.right.obj.2.1)
+      (ψ : V.right.obj.1 ⟶ V.right.obj.2.2),
+      f = HomPf.mk ((idx12 P F A B E).obj V) φ ∧
+      g = HomPf.mk ((idx13 P F A B E).obj V) ψ := by
+  obtain ⟨Zf, φ₀, rfl⟩ := HomPf.exists_rep f
+  obtain ⟨Zg, ψ₀, rfl⟩ := HomPf.exists_rep g
+  obtain ⟨hfa, hfb, hfab⟩ := Zf.hom.property
+  obtain ⟨hga, hge, hgae⟩ := Zg.hom.property
+  obtain ⟨E₁, e₁, he₁, he₁d⟩ := F.frobDegSurj E (P.degFr Zf.hom.hom.1)
+  obtain ⟨B₂, b₂, hb₂, hb₂d⟩ := F.frobDegSurj B (P.degFr Zg.hom.hom.1)
+  set Vf : IdxPf3 P F A B E :=
+    Under.mk (Y := (⟨(Zf.right.obj.1, Zf.right.obj.2, E₁)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(Zf.hom.hom.1, Zf.hom.hom.2, e₁), hfa, hfb, he₁, hfab,
+          hfab.symm.trans he₁d.symm⟩) with hVf
+  set Vg : IdxPf3 P F A B E :=
+    Under.mk (Y := (⟨(Zg.right.obj.1, B₂, Zg.right.obj.2)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(Zg.hom.hom.1, b₂, Zg.hom.hom.2), hga, hb₂, hge, hb₂d.symm,
+          hb₂d.trans hgae⟩) with hVg
+  exact ⟨IsFiltered.max Vf Vg,
+    idxTransport P F ((idx12 P F A B E).map (IsFiltered.leftToMax Vf Vg)) φ₀,
+    idxTransport P F ((idx13 P F A B E).map (IsFiltered.rightToMax Vf Vg)) ψ₀,
+    (HomPf.mk_map _ φ₀).symm, (HomPf.mk_map _ ψ₀).symm⟩
+
+/-- ★★**`Pf` の `≼` は、分子を `k` 倍すれば `M` の `≼` に落ちる**。 -/
+theorem Pf.mle_num_of_mle {M : Type w} [AddCommMonoid M] {c₁ c₂ : M} {N : ℕ+}
+    (h : MLe (Pf.mk c₁ N) (Pf.mk c₂ N)) :
+    ∃ k : ℕ+, MLe (((k : ℕ+) : ℕ) • c₁) (((k : ℕ+) : ℕ) • c₂) := by
+  obtain ⟨x, hx⟩ := h
+  obtain ⟨f, k, rfl⟩ : ∃ (f : M) (k : ℕ+), x = Pf.mk f k :=
+    Pf.inductionOn (p := fun y => ∃ (f : M) (k : ℕ+), y = Pf.mk f k) x
+      (fun m b => ⟨m, b, rfl⟩)
+  rw [Pf.mk_add_mk] at hx
+  obtain ⟨j, hj⟩ := Quotient.exact hx
+  refine ⟨j * N * k, ⟨(((j : ℕ+) : ℕ) * ((N : ℕ+) : ℕ)) • (((N : ℕ+) : ℕ) • f), ?_⟩⟩
+  rw [smul_add, smul_smul] at hj
+  push_cast at hj ⊢
+  rw [← mul_assoc] at hj
+  exact hj
+
+/-! ## ★58. 根の取り替えを通した零因子の公式
+
+★★`rootBase_rtRootIso_mk_spec` の零因子版。★★**同じ 3 脚添字の第 1 脚を共有する
+2 本の射は、分母も分子の写像も一致する**——これが (iii)(d) の充満性の要である。 -/
+
+variable {P F} in
+/-- ★★**根の取り替えを通した零因子**。 -/
+theorem rootDiv_rtRootIso_mk {X Y : PfRootObj P F} {e tA tB : ℕ+}
+    (hA : tA = e * Y.root) (hB : tB = e * X.root)
+    (W : IdxPf P F (rtObj P F X.obj tA) (rtObj P F Y.obj tB))
+    (φ : W.right.obj.1 ⟶ W.right.obj.2) :
+    (pfRootPre P F).Div (show HomRoot P F X Y from
+        (rtRootIso P F X.obj Y.obj hA hB).hom (HomPf.mk W φ))
+      = Pf.mk (Φ.map (P.Base (rtExt P F X.obj tA))
+          (Φ.map (P.Base W.hom.hom.1) (P.Div φ)))
+          (X.root * Y.root * (P.degFr W.hom.hom.1 * e)) := by
+  refine Eq.trans (congrArg (fun t : X ⟶ Y => (pfRootPre P F).Div t)
+    (rtRootIso_hom_mk (F := F) X.obj Y.obj hA hB W φ)) ?_
+  have hnum : Φ.map (P.Base (rtExt P F X.obj Y.root))
+        (Φ.map (P.Base (rtLift P F X.obj hA ≫ W.hom.hom.1)) (P.Div φ))
+      = Φ.map (P.Base (rtExt P F X.obj tA)) (Φ.map (P.Base W.hom.hom.1) (P.Div φ)) := by
+    rw [P.Base_comp, ← Φ.map_comp,
+      show P.Base (rtExt P F X.obj Y.root)
+          ≫ P.Base (rtLift P F X.obj hA) ≫ P.Base W.hom.hom.1
+        = P.Base (rtExt P F X.obj tA) ≫ P.Base W.hom.hom.1 from by
+          rw [← Category.assoc, ← P.Base_comp, rtLift_ext]]
+    exact Φ.map_comp _ _ _
+  have hden : P.degFr (rtLift P F X.obj hA ≫ W.hom.hom.1)
+      = P.degFr W.hom.hom.1 * e := by
+    rw [P.degFr_comp, rtLift_degFr]
+    rfl
+  show Pf.divBy (X.root * Y.root)
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root)))
+        (pfDiv (HomPf.mk ((pushIdx (F := F) (rtLift P F X.obj hA)
+          (rtLift_frobType P F X.obj hA) (rtLift P F Y.obj hB)
+          (rtLift_frobType P F Y.obj hB)
+          (by rw [rtLift_degFr, rtLift_degFr])).obj W) φ))) = _
+  rw [pfDiv_mk]
+  unfold repDiv
+  rw [Pf.map_mk, Pf.divBy_mk]
+  show Pf.mk (Φ.map (P.Base (rtExt P F X.obj Y.root))
+      (Φ.map (P.Base (rtLift P F X.obj hA ≫ W.hom.hom.1)) (P.Div φ)))
+      (X.root * Y.root * P.degFr (rtLift P F X.obj hA ≫ W.hom.hom.1)) = _
+  rw [hnum, hden]
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
 ### ★★★★★埋まった 21 条(`FrobenioidCore (pfRootPre P F)` の**全部**)
