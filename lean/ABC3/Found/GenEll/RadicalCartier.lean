@@ -16,30 +16,27 @@ import Mathlib.RingTheory.Localization.Ideal
 (UFD の主イデアルの根基は主イデアル)を取ったが、
 **scheme への大域化は未着手**だった。
 
-★★**茎で定義した有効 Cartier 因子(`IsEffectiveCartierStalk`)なら大域化が書ける。**
+★★★**茎で定義した有効 Cartier 因子(`IsEffectiveCartierStalk`)なら大域化が届いた。**
 必要なのは「茎を取る操作と根基を取る操作が交換する」ことだけであり、
-それは**茎が局所化である**ことから出るはずである:
+それは**茎が局所化である**ことから出る:
 
 - `IsAffineOpen.isLocalization_stalk` —— アフィン開集合の切断から茎は局所化
 - `IsLocalization.map_radical` —— 局所化は根基と交換する
 
 ★どちらも mathlib にある(2026-08-17 実測)。
-★★★**それでも組み上がらなかった** —— 理由は `StalkRadicalCommutes` の docstring に書いた
-(型クラス引数を通した `whnf` が 100 万ヒートビートでも終わらない)。
 
-## ★★これで (ii) はどこまで来たか(正直な表)
+## ★★これで (ii) はどこまで来たか
 
 | 段 | 状態 |
 |---|---|
 | UFD の局所的な主張 | ★`RadicalPrincipal.lean` で取得済 |
+| **茎と根基の交換** | ★★★**本ファイルで取得**(`stalk_radical`) |
 | **茎の水準への持ち上げ** | ★★**本ファイルで取得**(`IsEffectiveCartierAt.radical`) |
+| **scheme への大域化** | ★★★**本ファイルで取得**(`isEffectiveCartierStalk_radical`) |
 | **被約性の定義と冪等性** | ★★**本ファイルで取得** |
-| 茎と根基の交換(片側) | ★**本ファイルで取得**(`stalk_radical_le`) |
-| 茎と根基の交換(両側) | ★★★**器具で詰まっている**(`StalkRadicalCommutes`) |
 | 正則局所環は UFD(Auslander–Buchsbaum) | ★★★**mathlib に無い** |
 
-★★残るのは **2 本**である——茎と根基の交換(数学は済み、器具が詰まっている)と
-Auslander–Buchsbaum(mathlib に無い)。
+★★★**残るのは Auslander–Buchsbaum 1 本だけになった。**
 
 本ファイルは正則性の代わりに **`UniqueFactorizationMonoid` を仮定**する——
 正則 ⟹ UFD なので、これは原文より**弱い仮定で強い主張**である。
@@ -52,41 +49,42 @@ open AlgebraicGeometry CategoryTheory
 
 /-! ## ★★茎と根基は交換する -/
 
-/-- ★★**イデアル層の茎が根基と交換する**という条件。
+/-- ★★★**摩擦を抜けた形** —— 点を **`↥U` の変数として持つ**。
 
-★数学的には真である。機構は「茎は局所化である」ことで、部品は mathlib に**両方ある**:
-`IsAffineOpen.isLocalization_stalk`(茎は切断の局所化)と
-`IsLocalization.map_radical`(局所化は根基と交換)。
+## ★★★器具の記録 —— 点の持ち方だけで通ったり通らなかったりする
 
-★★★**それでも組み上がらなかった**——器具の問題である(下記)。
+最初は `x : X` と `hxU : x ∈ U` から `⟨x, hxU⟩` を組んで
+`hU.isLocalization_stalk ⟨x, hxU⟩` を使おうとした。★これは**通らない**——
+その instance は `Algebra Γ(X,U) (stalk ↑⟨x, hxU⟩)` に付いており、
+目標は `stalk x` に付いたものを要求する。
+`↑⟨x, hxU⟩` と `x` は定義的に等しいのに、`IsLocalization` の型クラス引数を通すと
+★**`whnf` が 100 万ヒートビートでも終わらない**(`erw` も `convert` も効かない)。
 
-## ★★★器具の記録 —— `whnf` が発散する
+★★★**`y : ↥U` を変数として持つと通る。** instance が目標と**構文的に**合うからである。
+★★数学は 1 ミリも変わっていない——**点の持ち方だけ**が違う。 -/
+theorem ideal_radical_map_germ {X : Scheme} (I : X.IdealSheafData)
+    {U : X.Opens} (hU : IsAffineOpen U) (y : U) :
+    ((I.ideal ⟨U, hU⟩).radical).map (X.presheaf.germ U y.1 y.2).hom
+      = ((I.ideal ⟨U, hU⟩).map (X.presheaf.germ U y.1 y.2).hom).radical := by
+  haveI := hU.isLocalization_stalk y
+  exact IsLocalization.map_radical (S := X.presheaf.stalk y.1)
+    (hU.primeIdealOf y).asIdeal.primeCompl _
 
-`hU.isLocalization_stalk ⟨x, hxU⟩` が与える instance は
-`Algebra Γ(X,U) (X.presheaf.stalk ↑⟨x, hxU⟩)` に付いており、
-目標は `X.presheaf.stalk x` に付いた instance を要求する。
-★`↑⟨x, hxU⟩` と `x` は**定義的に等しい**が、
-`IsLocalization` の型クラス引数を通して合わせようとすると
-**`whnf` が 100 万ヒートビートでも終わらない**(2026-08-17 実測)。
+/-- ★★★**イデアル層の茎は根基と交換する**。
 
-★★これは `germ_res` の `erw` や `Ideal.comap_symm` の強制経路と**同じ型の摩擦**だが、
-今回は `erw` でも `convert` でも抜けられなかった。
-★★★**したがって仮説として型に出す。** posit ではない——
-部品は両方あり、`Ideal.map_radical_le` により片側の包含は無条件に成り立つ。 -/
-def StalkRadicalCommutes (X : Scheme) : Prop :=
-  ∀ (I : X.IdealSheafData) (x : X),
-    (Scheme.IdealSheafData.radical I).stalk x = (I.stalk x).radical
+原文 (GenEll p.8):
+> is also an effective Cartier divisor. We shall say that E is reduced if E = Ered.
 
-/-- ★**片側の包含は無条件に成り立つ** —— `Ideal.map_radical_le` から出る。
-
-★★これが「`StalkRadicalCommutes` は真だが器具で組めていないだけ」の裏づけである。 -/
-theorem stalk_radical_le {X : Scheme} (I : X.IdealSheafData) (x : X) :
-    (Scheme.IdealSheafData.radical I).stalk x ≤ (I.stalk x).radical := by
+★機構は「茎は局所化である」こと
+(`IsAffineOpen.isLocalization_stalk` + `IsLocalization.map_radical`)。
+★★点を `↥U` の変数として持つ形(`ideal_radical_map_germ`)を経由すれば通る。 -/
+theorem stalk_radical {X : Scheme} (I : X.IdealSheafData) (x : X) :
+    (Scheme.IdealSheafData.radical I).stalk x = (I.stalk x).radical := by
   obtain ⟨_, ⟨U, hU, rfl⟩, hxU, -⟩ :=
     X.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ x) isOpen_univ
   rw [Scheme.IdealSheafData.stalk_eq_map (U := ⟨U, hU⟩) hxU,
     Scheme.IdealSheafData.stalk_eq_map (U := ⟨U, hU⟩) hxU]
-  exact Ideal.map_radical_le _
+  exact ideal_radical_map_germ I hU ⟨x, hxU⟩
 
 /-! ## ★★点ごとの主張 -/
 
@@ -123,11 +121,11 @@ theorem isEffectiveCartierStalk_radical {X : Scheme} (I : X.IdealSheafData)
     [∀ x : X, IsDomain (X.presheaf.stalk x)]
     [∀ x : X, NormalizationMonoid (X.presheaf.stalk x)]
     [∀ x : X, UniqueFactorizationMonoid (X.presheaf.stalk x)]
-    (hcomm : StalkRadicalCommutes X)
+
     (h : IsEffectiveCartierStalk I) (hne : ∀ x : X, I.stalk x ≠ ⊥) :
     IsEffectiveCartierStalk (Scheme.IdealSheafData.radical I) := by
   intro x
-  rw [hcomm I x]
+  rw [stalk_radical]
   exact IsEffectiveCartierAt.radical (h x) (hne x)
 
 /-- ★**被約であること**(原文「We shall say that E is reduced if E = Ered」)。 -/
@@ -150,9 +148,9 @@ def isEffectiveCartierStalk_radical.src : ABC3.Meta.Source :=
     item := "Definition 1.5, (ii)(茎が UFD であることを仮定した形——正則性からの含意は未取得)",
     sectionId := "genell-def-1-5" }
 
-def stalk_radical_le.src : ABC3.Meta.Source :=
+def stalk_radical.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
-    item := "Definition 1.5, (ii)(茎と根基の交換の片側のみ)",
+    item := "Definition 1.5, (ii)(茎と根基の交換のみ)",
     sectionId := "genell-def-1-5" }
 
 end ABC3.Found.GenEll
