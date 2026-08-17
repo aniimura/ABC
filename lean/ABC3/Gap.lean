@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import ABC3.Gap.FrdI.Section1
 import ABC3.Gap.FrdI.Section2
+import ABC3.Gap.FrdI.Section6
 import ABC3.Gap.GenEll.BDDirection
 /-!
 # Gap — 飛躍(追加仮説として型に出す)
