@@ -394,8 +394,8 @@ theorem birat_isOfIsotropicType (hiso : ∀ X : C, IsIsotropic P X)
 
 /-! ## ★10. ★★★★[FrdI] Proposition 4.4, (ii) —— `𝒞 → 𝒞^birat` は忠実
 
-原文 (FrdI p.84):
-> C →Cbirat is faithful and determines an injection O▷(A)gp →O×(Abirat), for
+原文 (FrdI p.85):
+> is immediate from the definitions [and the total epimorphicity of C] that the functor
 
 ★★**帰納極限の等号判定 ＋ `𝒞` が totally epimorphic**、それだけである。 -/
 
