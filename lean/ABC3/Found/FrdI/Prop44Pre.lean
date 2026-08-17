@@ -535,4 +535,85 @@ theorem birat_isIso_iff {A B : C} (φ : A ⟶ B) :
 `⟨⟨逆射, _, _⟩⟩` を**手で組む**。
 -/
 
+include P in
+/-- ★★★★**`𝒞^birat` の co-angular pre-step はすべて同型**。
+
+★★**Lean での 3 つの手**(2026-08-17 に実測):
+1. **`inv` を使わない** —— 逆射は `IsIso.out` で平の射として取り出す
+2. **`f` を代表元で置き換えない**(`rfl` で潰さない)—— 潰すと `HomBirat.mk Z φ` の型が
+   `X ⟶ Y` に見えなくなる
+3. ★★★**`(toBiratCat).map g` を、はじめに `X ⟶ Y` 型の平の射に束縛し直す** ——
+   `(toBiratCat P G).obj A` や `(coaPreObj P G A).obj` は `A` と定義的に等しいが
+   **構文が違う**ので、`≫` の型検査(`instances` 透過度)が通らない -/
+theorem birat_isIso_of_coaPre_birat {X Y : BiratCat P G} (f : X ⟶ Y)
+    (hc : IsCoAngular (biratPre P G) f) (hs : IsPreStep (biratPre P G) f) : IsIso f := by
+  obtain ⟨Z, φ, hZφ⟩ := HomBirat.exists_rep f
+  have hφs : IsPreStep P φ := birat_preStep_rep Z φ (hZφ ▸ hs)
+  obtain ⟨W, β, α, heq, hβc, hβs, hαi, hαs⟩ := G.core.preStepFactor φ hφs
+  -- ★★手 3: 型を綺麗にした平の射に束縛し直す
+  obtain ⟨aa, haa⟩ : ∃ aa : (show BiratCat P G from Z.unop.left.obj) ⟶ X,
+      aa = (toBiratCat P G).map Z.unop.hom.hom := ⟨_, rfl⟩
+  obtain ⟨bb, hbb⟩ :
+      ∃ bb : (show BiratCat P G from Z.unop.left.obj) ⟶ (show BiratCat P G from W),
+      bb = (toBiratCat P G).map β := ⟨_, rfl⟩
+  obtain ⟨cc, hcc⟩ : ∃ cc : (show BiratCat P G from W) ⟶ Y,
+      cc = (toBiratCat P G).map α := ⟨_, rfl⟩
+  -- ★手 1: 逆射を平の射として取り出す
+  obtain ⟨a', ha1, ha2⟩ : ∃ a' : X ⟶ (show BiratCat P G from Z.unop.left.obj),
+      aa ≫ a' = 𝟙 _ ∧ a' ≫ aa = 𝟙 X := by
+    rw [haa]
+    exact (birat_isIso_of_coaPre Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2).out
+  obtain ⟨b', hb1, hb2⟩ : ∃ b' : (show BiratCat P G from W)
+      ⟶ (show BiratCat P G from Z.unop.left.obj),
+      bb ≫ b' = 𝟙 _ ∧ b' ≫ bb = 𝟙 _ := by
+    rw [hbb]
+    exact (birat_isIso_of_coaPre β hβc hβs).out
+  -- ★`aa ≫ f = bb ≫ cc`
+  have hcomp : aa ≫ f = bb ≫ cc := by
+    rw [haa, hbb, hcc, ← hZφ]
+    refine Eq.trans (birat_toHom_comp_mk Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2 φ) ?_
+    exact (congrArg (toBiratCat P G).map heq).trans ((toBiratCat P G).map_comp β α)
+  -- ★`f = a' ≫ (bb ≫ cc)`
+  have hfeq : f = a' ≫ (bb ≫ cc) :=
+    calc f = 𝟙 X ≫ f := (Category.id_comp f).symm
+      _ = (a' ≫ aa) ≫ f := congrArg (fun t : X ⟶ X => t ≫ f) ha2.symm
+      _ = a' ≫ (aa ≫ f) := Category.assoc _ _ _
+      _ = a' ≫ (bb ≫ cc) := congrArg (fun t => a' ≫ t) hcomp
+  have hfeq2 : f = (a' ≫ bb) ≫ (cc ≫ 𝟙 Y) := by
+    simp only [Category.assoc, Category.comp_id]
+    exact hfeq
+  -- ★★co-angular 性で `cc` は同型
+  have hAl : IsIso cc :=
+    hc (show BiratCat P G from W) Y (a' ≫ bb) cc (𝟙 Y) hfeq2
+      (isLinear_of_isIso (biratPre P G) (𝟙 Y))
+      (birat_isIsometric _)
+      (by rw [hcc]; exact (birat_isPreStep_iff α).mpr hαs)
+      (Or.inl (isBaseIsomorphism_of_isIso (biratPre P G) (𝟙 Y)))
+  obtain ⟨c', hc1, hc2⟩ := hAl.out
+  -- ★打ち消し(平の射だけ)
+  have cancC : ∀ {T : BiratCat P G} (t : (show BiratCat P G from W) ⟶ T),
+      cc ≫ (c' ≫ t) = t := fun t =>
+    ((Category.assoc _ _ _).symm.trans (congrArg (fun s => s ≫ t) hc1)).trans
+      (Category.id_comp t)
+  have cancB : ∀ {T : BiratCat P G} (t : (show BiratCat P G from Z.unop.left.obj) ⟶ T),
+      bb ≫ (b' ≫ t) = t := fun t =>
+    ((Category.assoc _ _ _).symm.trans (congrArg (fun s => s ≫ t) hb1)).trans
+      (Category.id_comp t)
+  have cancB2 : ∀ {T : BiratCat P G} (t : (show BiratCat P G from W) ⟶ T),
+      b' ≫ (bb ≫ t) = t := fun t =>
+    ((Category.assoc _ _ _).symm.trans (congrArg (fun s => s ≫ t) hb2)).trans
+      (Category.id_comp t)
+  -- ★逆射を手で組む
+  refine ⟨⟨c' ≫ (b' ≫ aa), ?_, ?_⟩⟩
+  · rw [hfeq]
+    simp only [Category.assoc]
+    rw [cancC, cancB]
+    exact ha2
+  · simp only [Category.assoc]
+    rw [hcomp]
+    rw [cancB2]
+    exact hc2
+
 end ABC3.Found.FrdI
