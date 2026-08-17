@@ -108,6 +108,21 @@ structure APicSpecData where
     [Algebra F K] (φ : Spec (CommRingCat.of (𝓞 K)) ⟶ Spec (CommRingCat.of (𝓞 F)))
     (L : toAPicData.APic (Spec (CommRingCat.of (𝓞 F)))),
     degF K (toAPicData.pullback φ L) = degF F L
+  /-- ★★★**計量を定数倍すると次数が動く**——アルキメデス側の寄与そのもの。
+
+  原文 (GenEll p.4):
+  > — where xF : Spec(OF ) → X is any morphism that gives rise to x.
+
+  ★★★**これが「`deg_F ≡ 0`」の退化を殺す。**`deg_F` は計量に依存しなければならない。
+  ★係数 `1/[F:ℚ]` は原文の**正規化**である(`Found/GenEll/ArithDiv.lean` の
+  `degNormalized` と同じ規約)。 -/
+  degF_scale : ∀ (F : Type) [Field F] [NumberField F]
+    (L : toAPicData.toHermitianMetricData.toPicardData.Pic
+      (Spec (CommRingCat.of (𝓞 F))))
+    (m : toAPicData.toHermitianMetricData.Metric _ L) (c : ℝ),
+    degF F (toAPicData.ofMetric _ L
+        (toAPicData.toHermitianMetricData.scale _ L c m))
+      = degF F (toAPicData.ofMetric _ L m) - c
 
 def APicSpecData.waiting : WaitingFor :=
   { what := "(D2) APic(Spec 𝓞_F) ≅ ADiv(F)/APrc(F) と正規化次数 deg_F、およびその底変換不変性"
@@ -128,6 +143,9 @@ structure ArakelovHeightData where
   toAPicSpecData : APicSpecData
   /-- `X(ℚ̄)` の点。 -/
   AlgPoint : Scheme.{0} → Type
+  /-- `x ∈ X(ℚ̄)` が射 `x_F : Spec 𝓞_F → X` で表されること。 -/
+  IsPointOf : (X : Scheme.{0}) → (F : Type) → [Field F] → [NumberField F] →
+    (Spec (CommRingCat.of (𝓞 F)) ⟶ X) → AlgPoint X → Prop
   /-- ★★**高さ** `ht_L̄`。 -/
   height : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → AlgPoint X → ℝ
   /-- ★★**`Proposition 1.4, (i)`** —— 加法性(`X(ℚ̄)` **全体**で)。 -/
@@ -140,6 +158,19 @@ structure ArakelovHeightData where
   IsEffective : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → Prop
   height_bddBelow : ∀ (X : Scheme.{0}) (L : toAPicSpecData.toAPicData.APic X),
     IsEffective X L → ∃ C : ℝ, ∀ x : AlgPoint X, -C ≤ height X L x
+  /-- ★★★**高さは `deg_F` の引き戻しである**——原文 p.4 の定義そのもの。
+
+  原文 (GenEll p.5):
+  > as the height function associated to the arithmetic line bundle M.
+
+  ★★★**これが「`height ≡ 0`」の退化を殺す。**
+  `deg_F` は (D2) の `degF_scale` で非自明が強制されているので、
+  高さもそれに従って動かねばならない。 -/
+  height_eq_degF : ∀ (X : Scheme.{0}) (L : toAPicSpecData.toAPicData.APic X)
+    (F : Type) [Field F] [NumberField F]
+    (xF : Spec (CommRingCat.of (𝓞 F)) ⟶ X) (x : AlgPoint X),
+    IsPointOf X F xF x →
+    height X L x = toAPicSpecData.degF F (toAPicSpecData.toAPicData.pullback xF L)
 
 def ArakelovHeightData.waiting : WaitingFor :=
   { what := "(D3) 高さ ht_L̄ : X(Q̄) → R と Proposition 1.4 —— X(Q̄) 全体で"
