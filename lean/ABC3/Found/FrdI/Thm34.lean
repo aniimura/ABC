@@ -134,6 +134,41 @@ theorem isFSMMorphism_map {B A : C} {β : B ⟶ A} (h : IsFSMMorphism β) :
 theorem isFSMI_map {B A : C} {β : B ⟶ A} (h : IsFSMI β) : IsFSMI (Ψ.map β) :=
   ⟨isFSMMorphism_map Ψ h.1, isIrreducibleMor_map Ψ h.2⟩
 
+/-! ### ★FSMI は同型で挟んでも変わらない(反射のための道具) -/
+
+/-- ★**同型は fiberwise-surjective** —— `γ ≫ e⁻¹` と `𝟙` で潰せる。 -/
+theorem isFiberwiseSurjective_of_isIso {A B : C} (e : A ⟶ B) [IsIso e] :
+    IsFiberwiseSurjective e :=
+  fun _ γ => ⟨_, γ ≫ inv e, 𝟙 _, by simp⟩
+
+theorem isFSMI_isIso_comp {A A' B : C} (e : A ⟶ A') [IsIso e] {f : A' ⟶ B}
+    (h : IsFSMI f) : IsFSMI (e ≫ f) :=
+  ⟨⟨(isFiberwiseSurjective_of_isIso e).comp h.1.1, by haveI := h.1.2; infer_instance⟩,
+   h.2.isIso_comp e⟩
+
+theorem isFSMI_comp_isIso {A B E : C} {f : A ⟶ B} (h : IsFSMI f) (g : B ⟶ E) [IsIso g] :
+    IsFSMI (f ≫ g) :=
+  ⟨⟨h.1.1.comp (isFiberwiseSurjective_of_isIso g), by haveI := h.1.2; infer_instance⟩,
+   h.2.comp_isIso g⟩
+
+/-- ★★★**圏同値は FSMI 射を保ち、かつ反射する**。
+
+★`⟸` は擬逆 `Ψ⁻¹` に同じ補題を当て、単位同型で挟んだ形を上の 2 本で剥がす。
+★★**`Proposition 3.11, (ii)` は `𝒞 ≃ 𝔽_Φ`(同 (i))を通して計算するので、
+この反射の側が要る。** -/
+theorem isFSMI_map_iff {B A : C} (β : B ⟶ A) : IsFSMI β ↔ IsFSMI (Ψ.map β) := by
+  refine ⟨isFSMI_map Ψ, fun h => ?_⟩
+  have h' : IsFSMI (Ψ.inv.map (Ψ.map β)) := isFSMI_map Ψ.inv h
+  set eA := Ψ.asEquivalence.unitIso.app A with hEA
+  set eB := Ψ.asEquivalence.unitIso.app B with hEB
+  have hnat : β ≫ eA.hom = eB.hom ≫ Ψ.inv.map (Ψ.map β) :=
+    (Ψ.asEquivalence.unitIso).hom.naturality β
+  have hcomp : IsFSMI (β ≫ eA.hom) := by
+    rw [hnat]
+    exact isFSMI_isIso_comp eB.hom h'
+  have hfin := isFSMI_comp_isIso hcomp eA.inv
+  simpa using hfin
+
 /-! ## ★段 2・3 —— anchor と subanchor は保たれる -/
 
 /-- ★★**圏同値は anchor を保つ**。
