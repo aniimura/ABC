@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-08-17 夕(★Definition 1.5, (ii) の残りが Auslander–Buchsbaum 1 本に絞れた。★comap の積保存を expandableWithWork に追加。既存は 2026-08-17 昼 / 2026-08-15)",
+  "measuredAt": "2026-08-17 夜(★★★`Definition 1.1` の「複素解析空間が要る」判定を撤回した——位相とコンパクト性だけでよく、本日実装した。★`Definition 1.5, (ii)` の残りは Auslander–Buchsbaum 1 本。★`comap` の積保存を expandableWithWork に追加済。既存は 2026-08-17 昼 / 2026-08-15)",
   "whatThisIs": "依存グラフの**未展開の葉**のうち、『次に張れる』のではなく『中層が無いので今は張れない』ものの記録。tools/check.mjs が葉をこの表と突き合わせて仕分けて印字する。",
   "★這是自己申告である": "機械はこの判断を検証できない(check.mjs 冒頭 A 群と同じ性質)。書かせることしかできない。ゆえに各項目に **なぜ張れないか** と **何があれば張れるか** を必ず書く。",
   "blocked": [
@@ -16,8 +16,8 @@
     },
     {
       "key": "[GenEll] Definition 1.1",
-      "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。",
-      "unblockedBy": "★**複素解析空間の理論**(`X(ℂ)` の位相と、その上の連接層・エルミート計量)。これは mathlib に着手の形跡が無い。★ただし `ADiv(F)` と正規化次数、および**差積イデアル → 算術因子**(`Found/GenEll/LogDiff.lean`、2026-08-17)は既に実装済みで、`Definition 1.5, (iii)` の側は `X` を必要としないことも分かっている——**§1 は一枚岩ではない**。"
+      "reason": "算術直線束 `L̄ = (L, |−|_L)` の定義そのもの。直線束 `L` に加えて **`X^arc`(コンパクト正規複素解析空間)上のエルミート計量**を要求し、それが複素共役 `ι_X` と両立することまで言う(物理 p.3、260 dpi 目視確認 2026-08-16)。★mathlib 実測: `Arakelov` 0 件 / `arithmetic line bundle` 0 件 / `LineBundle` 0 件 / `analytification` 0 件 / `GAGA` 0 件 / `complex analytic space` 0 件。★★公開プロジェクトも見た——`PrimeNumberTheoremAnd` にも `FLT` にも無い(2026-08-17、clone して確認)。★名前だけの structure を置けば節点は増えるが、それは被覆率を上げるためだけの空の節点である。\n\n★★★【2026-08-17 夜 追記——この判定は誤りだった】\n「複素解析空間が要る」は**測り違い**である。`Definition 1.1` が実際に要求するのは\n`X^arc` の**位相とコンパクト性**だけであり、正則構造・連接層・GAGA はどこにも現れない\n(genell-goal.md §9-9 の層分けを参照)。\n★★本日 3 段階で解いた:\n(1) `Found/GenEll/ProjTopology.lean` —— `ℙ(V)` に商位相を入れ、\n    単位球面の連続像としてコンパクト性を証明した(Hausdorff 性は使っていない)。\n(2) `Found/GenEll/ProjClosed.lean` —— 閉錐が定める射影集合は閉、したがってコンパクト。\n    ★**多項式が連続であることしか使っていない**——GAGA は要らなかった。\n(3) `Found/GenEll/ArcModel.lean` —— 射影モデル(埋め込みをデータとして受ける)から\n    `X^arc` に位相が載り、**コンパクトであることを証明した**。\n★★★さらに `Found/GenEll/ArchPoint.lean` で **ℂ-点(`Spec ℂ ⟶ X`)を\n数論的な埋め込みから構成**し、Green 関数の引き戻しと\n`htArith`(高さそのもの)まで作った(`HeightConstruction.lean`)。\n★**算術直線束を可逆層でなく Cartier 因子 + Green 関数で提示する**ことで、\n`SheafOfModules` のテンソル積の不在も迂回した。\nいずれも sorry 0、`#print axioms` は標準 3 公理のみ。",
+      "unblockedBy": "★★**複素解析空間は要らないことが判明した(2026-08-17 夜)。** 残るのは 2 本:\n(a) **射影埋め込みの構成** —— `X` が ℤ-固有だから `ℙⁿ` に入ること、および\n    `X(ℂ)` がその閉錐集合として実現されること\n    (`ArcModel` を実際に構成する段。現在は与えられたデータとして受けている)。\n(b) **`Scheme.IdealSheafData.comap_mul`** —— 引き戻しが積を保つこと\n    (`Proposition 1.4, (i)` の残り。expandableWithWork の別 entry を参照)。\n★どちらも複素解析ではなく**代数幾何の配線**である。"
     },
     {
       "key": "[GenEll] Proposition 1.6 / Proposition 1.7 —— 導手を「高さ」で抑える所",

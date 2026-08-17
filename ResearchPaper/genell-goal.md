@@ -1381,3 +1381,67 @@ mathlib の型階層と強制の経路が、証明の書き方を決めている
 (茎の側で instance を合わせようとすると `RadicalCartier.lean` と同じ摩擦に入る)。
 
 ★★★**次のセッションはここから**——半端に作らず、測定だけを残す。
+
+---
+
+## §9-12 2026-08-17 夜 —— **`X^arc` の判定を撤回した**:複素解析空間は要らない
+
+### ★★★2026-08-16 の判定は誤りだった
+
+`blocked-leaves.json` の `[GenEll] Definition 1.1` は
+「複素解析空間の理論が要る。mathlib に着手の形跡が無い」と書いていた。
+★★★**撤回する。** `Definition 1.1` が実際に要求するのは
+`X^arc` の**位相とコンパクト性**だけであり、
+正則構造・連接層・GAGA はどこにも現れない。
+
+### ★★本日 3 段階で解いた
+
+| 段 | ファイル | 使ったもの |
+|---|---|---|
+| 1. `ℙ(V)` がコンパクト | `ProjTopology.lean` | 商位相 + 単位球面の連続像。★Hausdorff 性は不要 |
+| 2. 射影集合が閉 | `ProjClosed.lean` | ★**多項式の連続性だけ**。GAGA 不要 |
+| 3. `X^arc` に位相が載る | `ArcModel.lean` | 射影モデルをデータとして受け、コンパクト性を**証明** |
+
+★さらに `ArchPoint.lean` で **ℂ-点(`Spec ℂ ⟶ X`)を数論的な埋め込みから構成**し、
+Green 関数の引き戻しと `htArith`(高さそのもの)まで作った。
+
+### ★★★`ArcModel` は posit ではない
+
+`Interface` の `structure` は「まだ作っていないもの」を受ける。
+★★`ArcModel` が受けるのは**埋め込みそのもの**——
+「与えられた `X` について実際に構成できるもの」であり、**未証明の事実ではない**。
+コンパクト性は `ArcModel.compactSpace` で**証明した**。
+
+★★★**この区別が B5 を避ける線である。**
+posit は「事実を仮定する」、データは「対象を受け取る」。
+
+### ★★`Definition 1.1` に残るのは 2 本
+
+| 残り | 種別 |
+|---|---|
+| 射影埋め込みの構成(`ArcModel` を実際に作る) | ★代数幾何の配線 |
+| `Scheme.IdealSheafData.comap_mul` | ★mathlib 級の貢献 1 本 |
+
+★★**どちらも複素解析ではない。**
+
+### ★`Example 1.3, (ii)` も posit を外せる
+
+原文の「`x` が定める `X^arc` の `[F:ℚ]` 個の点」は `archPoint` そのものだった。
+★`CompactBound.lean` で `BoundedByArch` を**定義**し、
+「囲われた点ではアルキメデス側の寄与が一様に抑えられる」ことを**証明**した。
+★★★定数が `F` に依らないのは**正規化のおかげ**である
+(`#{無限素点} ≤ [F:ℚ]`)。
+
+### ★本日の `Found/GenEll/` 新規ファイル(14 件、すべて sorry 0・標準 3 公理のみ)
+
+```
+IdealStalk  StalkPullback  DegMul  ArchPoint  HeightConstruction
+HeightNonneg  HeightClass  RadicalCartier  StalkSupport
+ConductorHeight  ArchBound  ProjClosed  CompactBound  ArcModel
+```
+
+### ★進捗の数字は 5/24 のまま
+
+★**これは正しい状態である。** 1 件に数えるには命題**全体**が
+原文どおりの仮定で揃う必要がある。
+★★条つき `.src` を数に入れれば数字は上がるが、それは B5 そのものである。
