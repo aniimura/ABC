@@ -267,6 +267,135 @@ def toElem : Obj M ⥤ ElemFrobCat M.phi where
 @[simp] theorem toElem_map_deg {A B : Obj M} (φ : A ⟶ B) :
     ((toElem (M := M)).map φ).deg = φ.deg := rfl
 
+/-! ## ★4. 仮定 —— 原文が `Theorem 5.2` の手前で置いているもの
+
+原文 (FrdI p.100):
+> monoid on D; DivB : B →
+
+★`Φ` は divisorial、`B` は group-like、`𝒟` は connected かつ totally epimorphic。 -/
+
+variable (M) in
+/-- ★★**`Theorem 5.2` の仮定** —— これで `𝒞` が pre-Frobenioid になる。 -/
+structure Hyp : Prop where
+  /-- `Φ` は divisorial -/
+  divisorial : M.phi.IsDivisorialOn
+  /-- `B` は group-like -/
+  bmonGroupLike : ∀ A : D, IsGroupLike (M.bmon.val A)
+  /-- `𝒟` は totally epimorphic -/
+  totEpiD : IsTotallyEpimorphic D
+  /-- `𝒟` は connected -/
+  connectedD : IsConnected D
+
+/-- ★group-like なモノイドは簡約的。 -/
+theorem groupLike_add_right_cancel {N : Type w} [AddCommMonoid N] (hN : IsGroupLike N)
+    {a b c : N} (hab : a + c = b + c) : a = b := by
+  obtain ⟨u, rfl⟩ := (isGroupLike_iff N).mp hN c
+  have h1 : a + ((u : N) + ((-u : AddUnits N) : N))
+      = b + ((u : N) + ((-u : AddUnits N) : N)) := by
+    rw [← add_assoc, ← add_assoc, hab]
+  simpa using h1
+
+/-! ## ★5. `𝒞` は totally epimorphic
+
+★★`𝔽_Φ` の証明(`isTotallyEpimorphic_elemFrobCat`)と**同じ 3 本の入力**で、
+`u` 成分だけが 4 本目として増える —— そこは `B` が group-like だから消える。 -/
+
+theorem model_totEpi (h : Hyp M) : IsTotallyEpimorphic (Obj M) := by
+  intro X Y f
+  refine ⟨fun {Z} g k hgk => ?_⟩
+  have hdeg : g.deg = k.deg := by
+    have hh := congrArg Hom.deg hgk
+    simp only [comp_deg] at hh
+    exact mul_right_cancel hh
+  have hbase : g.base = k.base := by
+    haveI : Epi f.base := h.totEpiD _ _ _
+    have hh := congrArg Hom.base hgk
+    simp only [comp_base] at hh
+    exact (cancel_epi f.base).mp hh
+  have hdiv : g.div = k.div := by
+    have hh := congrArg Hom.div hgk
+    simp only [comp_div, hdeg] at hh
+    letI := isCancelAdd_of_isIntegralMonoid _ (h.divisorial X.base).1.1
+    exact M.phi.map_injective f.base (add_right_cancel hh)
+  have hu : g.u = k.u := by
+    have hh := congrArg Hom.u hgk
+    simp only [comp_u, hdeg] at hh
+    exact M.bmon.map_injective f.base
+      (groupLike_add_right_cancel (h.bmonGroupLike X.base) hh)
+  exact Hom.ext hbase hdiv hdeg hu
+
+/-! ## ★6. `𝒞` は connected
+
+★★**3 段**である:
+1. `(d, α) → (d, α + z)`(`z ∈ Φ(d)`)という射がつねにある。
+2. `Gp` の元は `mk a b`、すなわち `toGp a − toGp b` の形なので、
+   `(d, α)` と `(d, 0)` はどちらも `(d, toGp a)` に繋がる。
+3. `𝒟` の射 `f` は `(d₁, 0) → (d₂, 0)` に持ち上がる。 -/
+
+/-- ★`(d, α) ⟶ (d, α + toGp z)` —— 零因子 `z` を足すだけの射。 -/
+def shiftHom (d : D) (α : Gp (M.phi.val d)) (z : M.phi.val d) :
+    (⟨d, α⟩ : Obj M) ⟶ ⟨d, α + toGpHom _ z⟩ where
+  base := 𝟙 d
+  div := z
+  deg := 1
+  u := 0
+  cond := by simp
+
+/-- ★`𝒟` の射 `f` を `(d₁, 0) ⟶ (d₂, 0)` に持ち上げる。 -/
+def zeroHom {d₁ d₂ : D} (f : d₁ ⟶ d₂) : (⟨d₁, 0⟩ : Obj M) ⟶ ⟨d₂, 0⟩ where
+  base := f
+  div := 0
+  deg := 1
+  u := 0
+  cond := by simp
+
+theorem model_connected (h : Hyp M) : IsConnected (Obj M) := by
+  haveI := h.connectedD
+  obtain ⟨d₀⟩ := (inferInstance : Nonempty D)
+  refine IsConnected.of_induct (j₀ := (⟨d₀, 0⟩ : Obj M)) ?_
+  intro p hp0 hstep A
+  -- 3 段目 —— `(d, 0)` はすべて `p` に入る
+  have hzero : ∀ d : D, (⟨d, 0⟩ : Obj M) ∈ p :=
+    induct_on_objects (J := D) {d | (⟨d, 0⟩ : Obj M) ∈ p} hp0
+      (fun {d₁ d₂} f => hstep (zeroHom (M := M) f))
+  -- 1 段目 —— `z` を足す射
+  have hshift : ∀ (d : D) (α : Gp (M.phi.val d)) (z : M.phi.val d),
+      ((⟨d, α⟩ : Obj M) ∈ p ↔ (⟨d, α + toGpHom _ z⟩ : Obj M) ∈ p) :=
+    fun d α z => hstep (shiftHom (M := M) d α z)
+  -- 2 段目 —— `α = mk a b` を `toGp a` へ寄せる
+  obtain ⟨d, α⟩ := A
+  induction α using AddLocalization.induction_on with | _ x =>
+  have hb : AddLocalization.mk x.1 x.2 + toGpHom (M.phi.val d) (x.2 : M.phi.val d)
+      = toGpHom (M.phi.val d) x.1 := mk_add_toGp _ x.1 x.2
+  have h1 : ((⟨d, toGpHom _ x.1⟩ : Obj M) ∈ p) := by
+    have h2 := (hshift d 0 x.1).mp (hzero d)
+    simpa using h2
+  refine (hshift d (AddLocalization.mk x.1 x.2) (x.2 : M.phi.val d)).mpr ?_
+  rw [hb]
+  exact h1
+
+/-! ## ★7. `𝒞` の pre-Frobenioid 構造
+
+原文 (FrdI p.100):
+> divisor determine a functor
+-/
+
+/-- ★★★**model Frobenioid の pre-Frobenioid 構造**。 -/
+noncomputable def modelPre (h : Hyp M) : PreFrobenioid (Obj M) M.phi where
+  toElem := toElem
+  divisorial := h.divisorial
+  totEpiC := model_totEpi h
+  totEpiD := h.totEpiD
+  connectedC := model_connected h
+  connectedD := h.connectedD
+
+@[simp] theorem modelPre_degFr (h : Hyp M) {A B : Obj M} (φ : A ⟶ B) :
+    (modelPre h).degFr φ = φ.deg := rfl
+@[simp] theorem modelPre_Div (h : Hyp M) {A B : Obj M} (φ : A ⟶ B) :
+    (modelPre h).Div φ = φ.div := rfl
+@[simp] theorem modelPre_Base (h : Hyp M) {A B : Obj M} (φ : A ⟶ B) :
+    (modelPre h).Base φ = φ.base := rfl
+
 end ModelData
 
 /-- ★★★**[FrdI] Theorem 5.2, (i)** —— model Frobenioid の圏が構成でき、
