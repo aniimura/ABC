@@ -90,17 +90,33 @@ abbrev GreenFn (X : Scheme.{0}) : Type _ := complexPoints X → ℝ
 variable (F)
 
 open scoped Classical in
-/-- ★★**Green 関数の引き戻し** —— 各無限素点で `x` の ℂ-点における値を取る。
+/-- ★★**Green 関数の引き戻し** —— 各無限素点で `x` の ℂ-点における値を取り、
+**局所次数 `mult v` で重みを付ける**。
 
-★`InfinitePlace F` は有限なので `Finsupp` に載る。 -/
+★`InfinitePlace F` は有限なので `Finsupp` に載る。
+
+## ★★★`mult` の重みが要る理由(2026-08-17 深夜に訂正)
+
+★当初 `g (archPoint xF v)` だけを係数にしていた。**誤りだった。**
+
+`ADiv` の底変換(`BaseChange.lean` の `baseChangeArc`)は
+係数に `mult w / mult v` を掛ける。★★`archPoint` の値は底変換で**変わらない**ので、
+`mult` の重みが無いと `archADiv` は `baseChange` の形にならず、
+**高さが定義体の取り方に依ってしまう**。
+
+★★★`Σ_v mult v = [F : ℚ]` なので、`mult` を重みに入れて `[F:ℚ]` で割ると
+**重み付き平均**になり、底変換で不変になる。
+
+★**底変換を証明しようとして初めて露見した誤りである。** -/
 noncomputable def archADiv {X : Scheme.{0}} (g : GreenFn X)
     (xF : specRingOfIntegers F ⟶ X) : InfinitePlace F →₀ ℝ :=
-  Finsupp.onFinset Finset.univ (fun v => g (archPoint xF v)) (by
+  Finsupp.onFinset Finset.univ
+    (fun v => (InfinitePlace.mult v : ℝ) * g (archPoint xF v)) (by
     intro v _; exact Finset.mem_univ v)
 
 @[simp] theorem archADiv_apply {X : Scheme.{0}} (g : GreenFn X)
     (xF : specRingOfIntegers F ⟶ X) (v : InfinitePlace F) :
-    archADiv F g xF v = g (archPoint xF v) := rfl
+    archADiv F g xF v = (InfinitePlace.mult v : ℝ) * g (archPoint xF v) := rfl
 
 /-- ★★★**Green 関数の引き戻しは加法的**——**仮定を 1 つも要しない**。
 
@@ -114,12 +130,13 @@ theorem archADiv_add {X : Scheme.{0}} (g h : GreenFn X)
     archADiv F (fun p => g p + h p) xF = archADiv F g xF + archADiv F h xF := by
   ext v
   simp only [archADiv_apply, Finsupp.add_apply]
+  ring
 
 /-- ★**零 Green 関数の引き戻しは零**。 -/
 @[simp] theorem archADiv_zero {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) :
     archADiv F (fun _ : complexPoints X => (0 : ℝ)) xF = 0 := by
   ext v
-  simp only [archADiv_apply, Finsupp.coe_zero, Pi.zero_apply]
+  simp only [archADiv_apply, Finsupp.coe_zero, Pi.zero_apply, mul_zero]
 
 /-! ## ★★★算術因子の引き戻し —— 2 成分を束ねる -/
 

@@ -61,45 +61,57 @@ theorem card_infinitePlace_le_finrank :
 
 /-! ## ★★アルキメデス側の寄与の下界 -/
 
-/-- ★**Green 関数が `-C` 以上なら、寄与は `-C · #{無限素点}` 以上**。 -/
+/-- ★★★**Green 関数が `-C` 以上なら、寄与は `-C · [F : ℚ]` 以上**。
+
+★★★**`mult` の重みが入ったので、下界が厳密になった**(2026-08-17 深夜の訂正)。
+`Σ_v mult v = [F : ℚ]`(mathlib `InfinitePlace.sum_mult_eq`)がそのまま効く——
+以前の `#{無限素点} ≤ [F:ℚ]` という**緩んだ評価が要らなくなった**。 -/
 theorem archADiv_sum_ge {X : Scheme.{0}} (g : GreenFn X)
     (xF : specRingOfIntegers F ⟶ X) (C : ℝ) (hg : ∀ p, -C ≤ g p) :
-    -(C * (Fintype.card (InfinitePlace F) : ℝ))
+    -(C * (Module.finrank ℚ F : ℝ))
       ≤ (archADiv F g xF).sum (fun _ r => r) := by
   classical
   rw [Finsupp.sum]
   have hsub : (archADiv F g xF).support ⊆ (Finset.univ : Finset (InfinitePlace F)) :=
     fun v _ => Finset.mem_univ v
   have hle : ∀ v ∈ (Finset.univ : Finset (InfinitePlace F)),
-      -C ≤ (archADiv F g xF) v := by
+      -C * (InfinitePlace.mult v : ℝ) ≤ (archADiv F g xF) v := by
     intro v _
     rw [archADiv_apply]
-    exact hg _
+    have := mul_le_mul_of_nonneg_left (hg (archPoint xF v))
+      (Nat.cast_nonneg (InfinitePlace.mult v) : (0:ℝ) ≤ _)
+    linarith
   -- 台の外では値は `0` なので、`univ` 上の和に置き換えてよい
   have heq : ∑ v ∈ (archADiv F g xF).support, (archADiv F g xF) v
       = ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)), (archADiv F g xF) v :=
     Finset.sum_subset hsub (fun v _ hv => Finsupp.notMem_support_iff.1 hv)
+  have hmult : ∑ v : InfinitePlace F, ((InfinitePlace.mult v : ℝ))
+      = (Module.finrank ℚ F : ℝ) := by
+    exact_mod_cast congrArg (Nat.cast : ℕ → ℝ) (InfinitePlace.sum_mult_eq (K := F))
   rw [heq]
-  calc -(C * (Fintype.card (InfinitePlace F) : ℝ))
-      = ∑ _v ∈ (Finset.univ : Finset (InfinitePlace F)), (-C) := by
-        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
+  calc -(C * (Module.finrank ℚ F : ℝ))
+      = ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)),
+          (-C * (InfinitePlace.mult v : ℝ)) := by
+        rw [← Finset.mul_sum, hmult]; ring
     _ ≤ ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)), (archADiv F g xF) v :=
         Finset.sum_le_sum hle
 
 /-- ★★★**正規化するとアルキメデス側の下界は `F` に依らない**。
 
-★★`#{無限素点} ≤ [F : ℚ]` なので、`[F : ℚ]` で割れば `-C` で抑えられる。
-★★★**これが `Definition 1.1` が正規化した次数を使う理由の 1 つ**である。 -/
+★★`Σ_v mult v = [F : ℚ]` なので、`[F : ℚ]` で割れば**ちょうど** `-C` になる。
+★★★**これが `Definition 1.1` が正規化した次数を使う理由の 1 つ**である。
+
+★`mult` の重みを入れる前は `#{無限素点} ≤ [F:ℚ]` という緩んだ評価が要り、
+`hC : 0 ≤ C` も使っていた。★★**訂正後は不要になった**——
+下界が厳密なので `nlinarith` すら要らない。 -/
 theorem archADiv_sum_div_finrank_ge {X : Scheme.{0}} (g : GreenFn X)
-    (xF : specRingOfIntegers F ⟶ X) (C : ℝ) (hC : 0 ≤ C) (hg : ∀ p, -C ≤ g p) :
+    (xF : specRingOfIntegers F ⟶ X) (C : ℝ) (_hC : 0 ≤ C) (hg : ∀ p, -C ≤ g p) :
     -C ≤ (archADiv F g xF).sum (fun _ r => r) / (Module.finrank ℚ F : ℝ) := by
   have hpos : (0 : ℝ) < (Module.finrank ℚ F : ℝ) := by
     exact_mod_cast Module.finrank_pos (R := ℚ) (M := F)
   rw [le_div_iff₀ hpos]
-  refine le_trans ?_ (archADiv_sum_ge F g xF C hg)
-  have hcard : (Fintype.card (InfinitePlace F) : ℝ) ≤ (Module.finrank ℚ F : ℝ) := by
-    exact_mod_cast card_infinitePlace_le_finrank F
-  nlinarith
+  have := archADiv_sum_ge F g xF C hg
+  linarith
 
 /-! ## ★★★`Proposition 1.6` —— 原文の `≲` の形 -/
 

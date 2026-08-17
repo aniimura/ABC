@@ -102,18 +102,20 @@ theorem archADiv_sum_le_of_boundedBy {X : Scheme.{0}} (g : GreenFn X)
       = ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)), (archADiv F g xF) v :=
     Finset.sum_subset hsub (fun v _ hv => Finsupp.notMem_support_iff.1 hv)
   rw [heq]
+  -- ★`mult` の重みが入ったので、`Σ_v mult v = [F:ℚ]` がそのまま効く
   have hle : ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)), (archADiv F g xF) v
-      ≤ ∑ _v ∈ (Finset.univ : Finset (InfinitePlace F)), C := by
+      ≤ ∑ v ∈ (Finset.univ : Finset (InfinitePlace F)),
+          C * (InfinitePlace.mult v : ℝ) := by
     refine Finset.sum_le_sum fun v _ => ?_
     rw [archADiv_apply]
-    exact hg _ (hb ⟨v, rfl⟩)
-  have hcard : (Fintype.card (InfinitePlace F) : ℝ) ≤ (Module.finrank ℚ F : ℝ) := by
-    exact_mod_cast card_infinitePlace_le_finrank F
-  have hconst : ∑ _v ∈ (Finset.univ : Finset (InfinitePlace F)), C
-      = C * (Fintype.card (InfinitePlace F) : ℝ) := by
-    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
-  rw [hconst] at hle
-  nlinarith
+    have := mul_le_mul_of_nonneg_left (hg _ (hb ⟨v, rfl⟩))
+      (Nat.cast_nonneg (InfinitePlace.mult v) : (0:ℝ) ≤ _)
+    linarith
+  have hmult : ∑ v : InfinitePlace F, ((InfinitePlace.mult v : ℝ))
+      = (Module.finrank ℚ F : ℝ) := by
+    exact_mod_cast congrArg (Nat.cast : ℕ → ℝ) (InfinitePlace.sum_mult_eq (K := F))
+  rw [← Finset.mul_sum, hmult] at hle
+  linarith
 
 /-! ## ★仮定が discharge できること -/
 

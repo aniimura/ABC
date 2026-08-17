@@ -85,7 +85,8 @@ theorem pullbackADiv_isEffective {X : Scheme.{0}} (D : ArithCartier X)
     exact (idealADiv_isEffective F (pullbackIdeal F D.divisor xF)).1 v
   · intro v
     rw [pullbackADiv_arc, archADiv_apply]
-    exact hg _
+    -- ★`mult v ≥ 0` と Green 関数の非負性
+    exact mul_nonneg (Nat.cast_nonneg _) (hg _)
 
 /-! ## ★★★`Proposition 1.4, (ii)` -/
 

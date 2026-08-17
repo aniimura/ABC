@@ -67,7 +67,9 @@ theorem archADiv_sum_nonneg {X : Scheme.{0}} (g : GreenFn X)
     (xF : specRingOfIntegers F ⟶ X) (hg : ∀ p, 0 ≤ g p) :
     0 ≤ (archADiv F g xF).sum (fun _ r => r) := by
   rw [Finsupp.sum]
-  exact Finset.sum_nonneg fun v _ => hg _
+  refine Finset.sum_nonneg fun v _ => ?_
+  rw [archADiv_apply]
+  exact mul_nonneg (Nat.cast_nonneg _) (hg _)
 
 /-! ## ★★★`Proposition 1.6` の不等式 -/
 
