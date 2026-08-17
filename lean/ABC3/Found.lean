@@ -126,6 +126,7 @@ import ABC3.Found.GenEll.AlgPoint
 import ABC3.Found.Arakelov.ArcEval
 import ABC3.Found.Arakelov.ArcConjInvol
 import ABC3.Found.Arakelov.ArcTopologyAffine
+import ABC3.Found.Arakelov.ArcTopology
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
