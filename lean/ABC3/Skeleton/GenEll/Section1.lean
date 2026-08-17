@@ -116,7 +116,27 @@ def example_1_3 (D : HeightTheoryData) :
 
 ★(ii) の `≳ 0` は逐語では `BDge (ht L) 0`、すなわち `ht(x) − 0 ≤ C`。
 **定義どおりに読むと「上に有界」であって「下に有界」ではない**——
-これも上の docstring で述べた向きの食い違いの一例である(`Gap/GenEll/BDDirection.lean`)。 -/
+これも上の docstring で述べた向きの食い違いの一例である(`Gap/GenEll/BDDirection.lean`)。
+
+## ★★★この `sorry` は「まだ証明していない」ではなく「証明できない」
+
+★本 statement は `∀ D : HeightTheoryData` と量化しているが、
+**`HeightTheoryData` は公理を 1 つも持たないデータ**である
+(`Interface/GenEll/HeightTheory.lean` が明言)。
+★★したがって本 statement は**原文より強く、しかも偽**である。
+
+★**反例は `Check/GenEll/HeightAxiomGap.lean` に構成してある**
+(`prop_1_4_statement_false`、`#print axioms` は標準 3 公理のみ)。
+`Point ≝ ℕ`、`ABundle ≝ ℝ`、`tensor ≝ (+)`、`ht L x ≝ L²` で
+**(i) 加法性と (iv) Northcott が同時に破れる**。
+
+★★**原文は偽ではない。** 偽になったのは、`Interface` で「語彙だけ」を posit し、
+`Skeleton` でそれを全称量化したからである。
+★`check.mjs` 冒頭 B5(条件を posit して `sorry` を消す穴)の**裏側**——
+**条件を posit しないまま全称量化すると statement が偽になる**。
+
+★★**閉じるには `HeightTheoryData` を posit ではなく構成に置き換えるほかない。**
+公理を足すのは B5 そのものである(`Proposition 1.4` が仮定の言い換えになる)。 -/
 theorem prop_1_4 (D : HeightTheoryData) :
     (∀ (L M : D.ABundle) (x : D.Point),
         D.ht (D.tensor L M) x = D.ht L x + D.ht M x)
