@@ -63,6 +63,10 @@ import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Core
 import ABC3.Found.FrdI.Prop44Otri
 import ABC3.Found.FrdI.Prop44Ore
+import ABC3.Found.ProL.FinitePrimary
+import ABC3.Found.ProL.Defs
+import ABC3.Found.ProL.ProfiniteLimit
+import ABC3.Found.ProL.LimitPi
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog

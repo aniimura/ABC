@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-08-18(★otricomm の葉 2 個を同日に閉じた)",
+  "measuredAt": "2026-08-18(★prol の葉 4 個と otricomm の葉 2 個を同日に閉じた)",
   "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
   "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
   "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
@@ -131,33 +131,33 @@
           "id": "finite-primary",
           "title": "有限アーベル群の l-準素分解を `∏_l` の形にする",
           "deps": [],
-          "status": "todo",
-          "size": "小",
-          "evidence": "★mathlib に**ある**: `Ideal.iSup_primaryComponent_eq_top`(捻れ加群、`[IsDedekindDomain A]`)と `Ideal.iSupIndep_primaryComponent`(Algebra/Module/Torsion/PrimaryComponent.lean:140,175)。`A = ℤ` で使う。`Ideal.primaryComponent.map` も**ある**(同 :76)ので関手性も取れる。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★★2026-08-18 に**証明した**: `Found/ProL/FinitePrimary.lean`。mathlib の `CommGroup.primaryComponent` はあったが**分解も射影も無かった**ので、Euler の定理を使って射影 `π_p x = x^{(ordCompl[p] n)^{φ(ordProj[p] n)}}` を作り、(a) `π_p x` が p-準素、(b) p-成分で恒等、(c) 他の成分を潰す、(d) `x = ∏_p π_p x`(中国剰余定理)、(e) ★**自然性 `f(π_p x) = π_p(f x)`**(指数は群ごとに違うので分解の一意性から出す)を示した。"
         },
         {
           "id": "prol-def",
           "title": "pro-l 群の定義(有限商がすべて l 群)と基本性質",
           "deps": [],
-          "status": "todo",
-          "size": "小",
-          "evidence": "★mathlib に**無い**。探索: `lean/.lake/packages/mathlib/Mathlib/` 全体を `IsProPGroup|ProPGroup|pro-p group` で grep して 0 件(2026-08-18)。★定義自体は `ProfiniteGrp` の `OpenNormalSubgroup` 商が `IsPGroup` であること、と書ける。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★2026-08-18 に**実装した**: `Found/ProL/Defs.lean` の `IsProL`。離散なら通常の `l` 群と一致すること(`isProL_iff_isPGroup_of_discrete`)と、★**負の対照**(`not_isProL_three_Z2`: `ℤ/2` は pro-3 でない)・正の対照(`isProL_two_Z2`)を付けた。"
         },
         {
           "id": "limit-pi-comm",
-          "title": "極限と積の交換 `lim_U ∏_l = ∏_l lim_U`",
+          "title": "極限と積の交換(整合族の入れ替え)",
           "deps": [],
-          "status": "todo",
-          "size": "小",
-          "evidence": "★mathlib に**ある**: `CategoryTheory.Limits.limitFlipCompLimIsoLimitCompLim`(CategoryTheory/Limits/Fubini.lean:545)。積も極限なのでそのまま。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★2026-08-18 に**証明した**: `Found/ProL/LimitPi.lean` の `limitPiMulEquiv`。★★**設計を変えた**——台帳では `CategoryTheory.Limits.limitFlipCompLimIsoLimitCompLim` を使うと書いたが、`ProfiniteGrp` 上の双関手を組んでから使える形へ戻す手間が直接書くより大きい。整合族の入れ替えとして直接書いた(`left_inv`/`right_inv` はいずれも `rfl`)。★台帳の ★限界 が予告した通りの変更である。"
         },
         {
           "id": "M-limit",
           "title": "`M ≅ lim_U M/U`(開正規部分群による極限表示)",
           "deps": [],
-          "status": "todo",
-          "size": "小",
-          "evidence": "★mathlib に**ある**: `ProfiniteGrp.continuousMulEquivLimittoFiniteQuotientFunctor`(Topology/Algebra/Category/ProfiniteGrp/Limits.lean:129)。`isoLimittoFiniteQuotientFunctor`(:142)も。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★2026-08-18 に**実装した**: `Found/ProL/ProfiniteLimit.lean`。mathlib の圏論的極限のままでは使えないので、**分離**(`eq_of_forall_quotient_eq`)と**整合族の持ち上げ**(`exists_mk_eq_of_compatible`、一意性つき)の 2 つを具体形で取り出した。"
         },
         {
           "id": "M-l-part",
@@ -169,7 +169,7 @@
           ],
           "status": "todo",
           "size": "中",
-          "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。"
+          "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。 ★2026-08-18: 依存する 3 葉(finite-primary / prol-def / M-limit)がすべて閉じたので着手可能。"
         },
         {
           "id": "decomposition",
