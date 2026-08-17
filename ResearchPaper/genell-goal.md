@@ -3374,3 +3374,50 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 
 ★この骨組みは `sorry` を含むので `Found/` には置けない(規則どおり)。
 ★★本節に全文を記録した——次の turn はここから再開する。
+
+
+---
+
+## §9-47 (2026-08-18) ★★★★★★★★最終段の証明が数学として完成した
+
+### ★★★★★★示すべき等式(第 30 ブロックで全対象に伝播する)
+
+    f^*(iotaY V W) ≫ δ = (pullbackFreeYonedaIso f (V ⊓ W)).hom
+                          ≫ (targetIso f V W).inv
+                          ≫ ((pullbackFreeYonedaIso f V).symm ⊗ᵢ (..W).symm).hom
+
+★右辺は同型の合成なので、これで `IsIso δ` が出る。
+
+### ★★両辺を要素まで降ろすと
+
+**左辺**(`adj.homEquiv` → `freeYonedaEquiv` → 合成則):
+
+    unit_P.app (op (V ⊓ W)) (freeMk i_V) ⊗ₜ unit_Q.app (op (V ⊓ W)) (freeMk i_W)
+
+- `freeYonedaEquiv (iotaY V W) = freeMk i_V ⊗ₜ freeMk i_W`
+  (第 26 の `yonedaInfIso.inv (𝟙) = (i_V, i_W)` + 第 25 の `freeTensorHom_app_freeMk`)
+- `(unit_P ⊗ₘ unit_Q)` は純テンソルを成分ごとに送る
+- `μ` は純テンソルを純テンソルに送る(第 32)
+
+**右辺**(`homEquiv_naturality_right` → 第 34 → 第 35):
+
+    inv_V.app (op U₀) (freeMk j_V) ⊗ₜ inv_W.app (op U₀) (freeMk j_W)
+
+- `freeYonedaEquiv (adj.homEquiv hom) = hom.app (freeYonedaEquiv unit) = freeMk (𝟙 U₀)`
+  ——★★これが第 35 ブロック(`unit` は生成元を生成元に送る)
+- `targetIso.inv (freeMk 𝟙) = freeMk j_V ⊗ₜ freeMk j_W`(X 側で同じ計算)
+- `(inv_V ⊗ₘ inv_W)` を当てる
+
+### ★★★★★★一致する理由(1 行)
+
+> **両辺とも `freeYonedaEquiv (unit)` の `U₀` への制限である。**
+
+★左辺: `freeMk i_V = P.map i_V.op (freeMk 𝟙)` なので、`unit_P` の自然性から
+`unit_P.app (freeMk i_V)` は `unit_P.app (freeMk 𝟙)` の制限。
+★★右辺: `inv_V` の自然性から `inv_V.app (freeMk j_V)` も同じ元の制限。
+★★★そして第 34 ブロックが `freeYonedaEquiv (unit) = freeYonedaEquiv (inv)` を与える。
+
+### ★残る作業
+
+★Lean での鎖(`NatTrans.naturality_apply` を 2 回、その他は既存の補題)。
+★★**数学的な不確定性は無い**——記号の運搬だけである。
