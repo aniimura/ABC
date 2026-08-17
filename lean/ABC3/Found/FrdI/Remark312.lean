@@ -85,6 +85,72 @@ theorem elemFrob_gen_eq_one_of_finite {G : Type*} [Group G] [Finite G]
   -- `hkey : f ⟨0,d⟩ * γ = f ⟨0,d⟩`
   simpa using hkey
 
+/-! ## ★★「`f(1,1) = 1` なら経由する」は**群を使わない**
+
+★★`rem_3_1_2` の段 2–4 は**モノイド構造だけ**で通る。
+★括り出しておくと、**別の理由で `f(1,1) = 1` が言えた場合にそのまま使える**
+——`Proposition 3.3, (i)` は「可換かつ簡約的」という別の理由でそれを出す。 -/
+
+/-- ★★★**`f(1,1) = 1` なら `𝔽 → N` は `deg` を経由する**(モノイドで十分)。
+
+★段 2: `f(a,1) = f(1,1)^a = 1`。★段 3: `g n := f(0,n)`。
+★段 4: `x = (x.div, 1) · (0, x.deg)` に分けて段 2 を当てる。 -/
+theorem elemFrob_factors_of_gen_eq_one {N : Type*} [Monoid N]
+    (f : ElemFrob ℕ →* N) (hγ : f ⟨1, 1⟩ = 1) :
+    ∃ g : ℕ+ →* N, f = g.comp ElemFrob.degHom := by
+  have hdiv : ∀ a : ℕ, f ⟨a, 1⟩ = 1 := by
+    intro a
+    rw [← elemFrob_gen_pow a, map_pow, hγ, one_pow]
+  refine ⟨{ toFun := fun n => f ⟨0, n⟩
+            map_one' := by
+              show f ⟨0, 1⟩ = 1
+              exact f.map_one
+            map_mul' := fun n m => by
+              have hnm : (⟨0, n⟩ : ElemFrob ℕ) * ⟨0, m⟩ = ⟨0, n * m⟩ := by
+                ext
+                · show (0 : ℕ) + (n : ℕ) • (0 : ℕ) = 0
+                  simp
+                · rfl
+              show f ⟨0, n * m⟩ = f ⟨0, n⟩ * f ⟨0, m⟩
+              rw [← hnm, map_mul] }, ?_⟩
+  ext x
+  show f x = f ⟨0, x.deg⟩
+  have hx : x = (⟨x.div, 1⟩ : ElemFrob ℕ) * ⟨0, x.deg⟩ := by
+    ext
+    · show x.div = x.div + ((1 : ℕ+) : ℕ) • (0 : ℕ)
+      simp
+    · show x.deg = (1 : ℕ+) * x.deg
+      rw [one_mul]
+  conv_lhs => rw [hx]
+  rw [map_mul, hdiv, one_mul]
+
+/-- ★★★**可換かつ簡約的なモノイドへの準同型は `deg` を経由する**。
+
+原文 (FrdI p.60):
+> obtained by considering the Frobenius degree of the induced endomorphism of A --
+
+★★**原文が `Proposition 3.3, (i)` の証明で引く「`ℕ≥1` は可換」の中身**である。
+★`elemFrob_conj` を送ると `f(0,d) · γ = γ^d · f(0,d)`。
+可換性で右辺を並べ替え、**簡約**して `γ = γ^d`。★`d = 2` に取れば `γ = γ · γ`、
+もう一度簡約して `γ = 1`。 -/
+theorem elemFrob_factors_of_cancel {N : Type*} [CommMonoid N] [IsCancelMul N]
+    (f : ElemFrob ℕ →* N) : ∃ g : ℕ+ →* N, f = g.comp ElemFrob.degHom := by
+  refine elemFrob_factors_of_gen_eq_one f ?_
+  set γ : N := f ⟨1, 1⟩ with hγdef
+  have hkey := congrArg f (elemFrob_conj 2)
+  rw [map_mul, map_mul, map_pow] at hkey
+  -- `hkey : f ⟨0,2⟩ * γ = γ ^ 2 * f ⟨0,2⟩`
+  have h2 : f (⟨0, 2⟩ : ElemFrob ℕ) * γ = f (⟨0, 2⟩ : ElemFrob ℕ) * γ ^ ((2 : ℕ+) : ℕ) := by
+    rw [hkey, mul_comm]
+  have hpow : γ = γ ^ ((2 : ℕ+) : ℕ) := mul_left_cancel h2
+  have h3 : γ * 1 = γ * γ := by
+    rw [mul_one]
+    calc γ = γ ^ ((2 : ℕ+) : ℕ) := hpow
+      _ = γ * γ := by
+        show γ ^ (2 : ℕ) = γ * γ
+        rw [pow_two]
+  exact (mul_left_cancel h3).symm
+
 /-! ## ★剰余有限群の場合 —— 本体 -/
 
 /-- ★★★**[FrdI] Remark 3.1.2** —— 剰余有限群 `G` について、
@@ -102,34 +168,8 @@ theorem rem_3_1_2 {G : Type*} [Group G] [Group.ResiduallyFinite G]
       ((QuotientGroup.mk' H.toSubgroup).comp f)
     rw [MonoidHom.comp_apply] at h
     exact (QuotientGroup.eq_one_iff _).mp h
-  -- 段 2: `f(a, 1) = 1`
-  have hdiv : ∀ a : ℕ, f ⟨a, 1⟩ = 1 := by
-    intro a
-    rw [← elemFrob_gen_pow a, map_pow, hγ, one_pow]
-  -- 段 3: `g n := f (0, n)`
-  refine ⟨{ toFun := fun n => f ⟨0, n⟩
-            map_one' := by
-              show f ⟨0, 1⟩ = 1
-              exact f.map_one
-            map_mul' := fun n m => by
-              have hnm : (⟨0, n⟩ : ElemFrob ℕ) * ⟨0, m⟩ = ⟨0, n * m⟩ := by
-                ext
-                · show (0 : ℕ) + (n : ℕ) • (0 : ℕ) = 0
-                  simp
-                · rfl
-              show f ⟨0, n * m⟩ = f ⟨0, n⟩ * f ⟨0, m⟩
-              rw [← hnm, map_mul] }, ?_⟩
-  -- 段 4: `f = g ∘ deg`
-  ext x
-  show f x = f ⟨0, x.deg⟩
-  have hx : x = (⟨x.div, 1⟩ : ElemFrob ℕ) * ⟨0, x.deg⟩ := by
-    ext
-    · show x.div = x.div + ((1 : ℕ+) : ℕ) • (0 : ℕ)
-      simp
-    · show x.deg = (1 : ℕ+) * x.deg
-      rw [one_mul]
-  conv_lhs => rw [hx]
-  rw [map_mul, hdiv, one_mul]
+  -- 段 2–4: ★**括り出した一般補題**(群構造を使わない)
+  exact elemFrob_factors_of_gen_eq_one f hγ
 
 /-! ## ★系 —— `Aut(E_A → E)` が剰余有限なら `E` は Frobenius-slim
 
