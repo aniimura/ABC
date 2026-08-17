@@ -1,6 +1,6 @@
 import ABC3.Interface.GaloisRep.Representation
 import Mathlib.NumberTheory.NumberField.Basic
-import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
 import Mathlib.GroupTheory.QuotientGroup.Basic
 
 /-!
@@ -45,32 +45,44 @@ open ABC3.Meta WeierstrassCurve NumberField
 ★**mathlib の `WeierstrassCurve` と `Valuation` に接地し**、
 **Tate 一意化そのもの**を要求する形に改めた。 -/
 structure TateCurveData where
-  /-- `W` が **分裂乗法還元**をもつこと(原文の「[bad] multiplicative reduction」)。 -/
-  HasSplitMultRed : {K : Type} → [Field K] → WeierstrassCurve K → Prop
-  /-- ★★**Tate 母数** `q_E ∈ Kˣ`——分裂乗法還元のとき定まる。 -/
-  tateParam : {K : Type} → [Field K] → (W : WeierstrassCurve K) → HasSplitMultRed W → Kˣ
+  /-- ★★**Tate 母数** `q_E ∈ Kˣ`。
+
+  ★★★**述語は posit しない**——mathlib の
+  `WeierstrassCurve.HasSplitMultiplicativeReduction` に接地する。
+  ★これで「`HasSplitMultRed := False`」という**空虚 witness も不可能**になる。 -/
+  tateParam : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
+    {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
+    (W : WeierstrassCurve K) → [W.IsMinimal R] →
+    W.HasSplitMultiplicativeReduction R → Kˣ
   /-- ★★★**Tate 一意化** `E(K) ≅ Kˣ / q^ℤ`。
 
-  ★★★**これが退化を殺す。**`q` が実際に一意化していることを要求するので、
-  「曲線も体も 1 点」という witness は通らない。 -/
-  uniformization : ∀ {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
-    (h : HasSplitMultRed W),
-    Nonempty (W.toAffine.Point ≃+ Additive (Kˣ ⧸ Subgroup.zpowers (tateParam W h : Kˣ)))
+  ★★★**これが内容の本体である。**`q` が実際に一意化していることを要求する。 -/
+  uniformization : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    {K : Type} [Field K] [DecidableEq K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [W.IsMinimal R]
+    (h : W.HasSplitMultiplicativeReduction R),
+    Nonempty (W.toAffine.Point ≃+
+      Additive (Kˣ ⧸ Subgroup.zpowers (tateParam W h : Kˣ)))
   /-- ★★★**局所高さ** `v_K(q_E) ∈ ℤ_{>0}`(原文 `Definition 3.3`)。
 
-  ★★**付値を引数に取る**——「どの付値での高さか」は原文でも `v_K` と明示されている。
-  ★乗法群上の付値 `Kˣ →* Multiplicative ℤ` として受ける(型クラスが軽い)。 -/
-  localHeight : {K : Type} → [Field K] → (v : Kˣ →* Multiplicative ℤ) →
-    (W : WeierstrassCurve K) → HasSplitMultRed W → ℕ
+  ★付値は `Kˣ →* Multiplicative ℤ`(正規化離散付値)として受ける。 -/
+  localHeight : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
+    {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
+    (v : Kˣ →* Multiplicative ℤ) → (W : WeierstrassCurve K) → [W.IsMinimal R] →
+    W.HasSplitMultiplicativeReduction R → ℕ
   /-- ★★★**局所高さは Tate 母数の付値そのもの**——定義を型に出す。
 
   ★これがあるので `localHeight := 1` のような定数 witness は通らない。 -/
-  localHeight_eq : ∀ {K : Type} [Field K] (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K)
-    (h : HasSplitMultRed W),
+  localHeight_eq : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
+    (h : W.HasSplitMultiplicativeReduction R),
     (localHeight v W h : ℤ) = Multiplicative.toAdd (v (tateParam W h))
   /-- ★局所高さは正(原文が `∈ Z_{>0}` と書いている)。 -/
-  localHeight_pos : ∀ {K : Type} [Field K] (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K)
-    (h : HasSplitMultRed W), 0 < localHeight v W h
+  localHeight_pos : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
+    (h : W.HasSplitMultiplicativeReduction R), 0 < localHeight v W h
 
 def TateCurveData.waiting : WaitingFor :=
   { what := "(G6) Tate 曲線 E(K̄) ≅ K̄^x/q^Z、Tate 母数 q_E、および局所高さ v_K(q_E)(= [GenEll] Definition 3.3)"
