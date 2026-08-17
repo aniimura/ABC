@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-08-18(★8 葉のうち 6 葉を同日に閉じた)",
+  "measuredAt": "2026-08-18(★8 葉すべてを同日に閉じた)",
   "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
   "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
   "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
@@ -227,9 +227,9 @@
           "id": "schwarz-many-zeros",
           "title": "多点で消える正則関数の小ささ(Schwarz の補題の多零点版)",
           "deps": [],
-          "status": "todo",
-          "size": "中",
-          "evidence": "★`f(z)/∏(z - z_i)` に最大値原理を当てる。mathlib に最大値原理(`Complex.norm_le_of_forall_mem_frontier_norm_le`、Analysis/Complex/AbsMax.lean:400)と 1 点の高位版(`Complex.dist_le_mul_div_pow_of_mapsTo_ball_of_isLittleO`、Schwarz.lean:144)は**ある**。多点版は**無い**(2026-08-18、`Analysis/Complex/` を目視)。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★★2026-08-18 に**証明した**: `Found/SixExp/SchwarzZeros.lean` の `norm_le_mul_pow_of_forall_eq_zero` —— `|f(z)| ≤ M·(2r/(R−r))^N`。★部品(最大値原理 `Complex.norm_le_of_forall_mem_frontier_norm_le`・除去可能特異点 `Complex.differentiableOn_dslope`・`sub_smul_dslope_of_zero`)はすべて mathlib にあった。組み方(零点を `Finset ℂ` で持ち `dslope` で 1 個ずつ消す帰納)が我々の仕事。★`5r ≤ R` 版と負の対照つき。"
         },
         {
           "id": "aux-function",
@@ -237,9 +237,9 @@
           "deps": [
             "siegel-nf"
           ],
-          "status": "todo",
-          "size": "中",
-          "evidence": "`F(m₁y₁+m₂y₂+m₃y₃)` の値は `exp(x_i y_j)` の単項式の代数的結合。Siegel で `c_pq` を選び、多くの点で消させる。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★★2026-08-18 に**実装した**: `Found/SixExp/AuxFunction.lean`。`F(z) = ∑ c(p,q)·exp((p x₀+q x₁)z)` の整関数性・増大度・★★**格子点での値が 6 個の `exp(x_j y_i)` の単項式の線形結合であること**(`auxFun_latticePt`)・Siegel の補題との接続(`auxFun_eq_zero_of_system`)・係数の代数的整数性(`isIntegral_auxMatrix`)。★これが「解析」と「算術」の接点である。"
         },
         {
           "id": "growth",
@@ -247,9 +247,9 @@
           "deps": [
             "aux-function"
           ],
-          "status": "todo",
-          "size": "小",
-          "evidence": "指数和なので `|F(z)| ≤ (Σ|c_pq|) exp(C|z|)`。初等的。"
+          "status": "done",
+          "size": "——",
+          "evidence": "★2026-08-18 に**証明した**: `Found/SixExp/AuxFunction.lean` の `norm_auxFun_le` —— `‖F(z)‖ ≤ (∑‖c‖)·exp(B‖z‖)`。`aux-function` と同じファイルで取れた。"
         },
         {
           "id": "extrapolation",
