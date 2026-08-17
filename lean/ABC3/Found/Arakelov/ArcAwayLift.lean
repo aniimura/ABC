@@ -1,5 +1,6 @@
 import ABC3.Found.Arakelov.ArcBasicOpen
 import Mathlib.RingTheory.Localization.Away.Basic
+import ABC3.Found.Arakelov.ArcFunctorial
 
 /-!
 # Arakelov (C1) の配管 —— **基本開集合への持ち上げ(環の水準)**(`Found`)
@@ -115,6 +116,41 @@ theorem continuous_awayLift (A : CommRingCat.{0}) (s : A) :
     simp only [Function.comp_apply, hval]
     exact ((continuousOn_div_pow_evalAffine A b s n).restrict).congr (fun p => rfl)
 
+/-! ## ★★★合成の逆であること -/
+
+/-- ★**基本開集合への構造射**。 -/
+noncomputable def awayι (A : CommRingCat.{0}) (s : A) :
+    Spec (CommRingCat.of (Localization.Away s)) ⟶ Spec A :=
+  Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away s)))
+
+/-- ★★★**`awayLift` は構造射との合成の切断である**。
+
+    `awayLift A s p ≫ awayι A s = p.1`
+
+★★これと `continuous_awayLift` で、**アフィン間の部分空間位相**が出る
+——それが `topology_openImmersion` の基底事例である。 -/
+theorem awayLift_comp_awayι (A : CommRingCat.{0}) (s : A) (p : arcBasicOpen A s) :
+    awayLift A s p ≫ awayι A s = p.1 := by
+  refine evalHom_injective A ?_
+  rw [evalHom_comp, awayι, Spec.preimage_map, awayLift, evalHom_Spec_map]
+  ext a
+  exact awayLiftHom_algebraMap A s p.1 p.2 a
+
+/-- ★★**逆に、構造射との合成は基本開集合に入る**。 -/
+theorem comp_awayι_mem_arcBasicOpen (A : CommRingCat.{0}) (s : A)
+    (q : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s))) :
+    (q ≫ awayι A s) ∈ arcBasicOpen A s := by
+  have h : evalAffine A (q ≫ awayι A s) s
+      = evalAffine (CommRingCat.of (Localization.Away s)) q
+          (algebraMap A (Localization.Away s) s) := by
+    rw [evalAffine_comp, awayι, Spec.preimage_map]
+    rfl
+  rw [arcBasicOpen, Set.mem_setOf_eq, h]
+  have hunit : IsUnit (algebraMap (↥A) (Localization.Away s) s) :=
+    IsLocalization.Away.algebraMap_isUnit s
+  intro hzero
+  exact (isUnit_iff_ne_zero.1 (hunit.map (evalHom _ q).hom)) hzero
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -130,6 +166,11 @@ def awayLiftHom_mk.src : ABC3.Meta.Source :=
 def continuous_awayLift.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——基本開集合への持ち上げの連続性)",
+    sectionId := "genell-def-1-1-i" }
+
+def awayLift_comp_awayι.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——持ち上げが構造射の切断であること)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
