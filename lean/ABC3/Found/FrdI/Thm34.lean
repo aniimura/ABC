@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Def31
+import ABC3.Found.FrdI.Prop113
 import Mathlib.CategoryTheory.Conj
 
 /-!
@@ -169,7 +170,7 @@ theorem isFSMI_map_iff {B A : C} (β : B ⟶ A) : IsFSMI β ↔ IsFSMI (Ψ.map �
   have hfin := isFSMI_comp_isIso hcomp eA.inv
   simpa using hfin
 
-/-! ### ★★rigidity の移送 —— 設計だけ記録する(2026-08-17 に測定、未実装)
+/-! ### ★★rigidity の移送(2026-08-17)
 
 原文 (FrdI p.63):
 > functors may be verified as follows: By Proposition 1.13, (ii), it suffices to show,
@@ -189,13 +190,45 @@ theorem isFSMI_map_iff {B A : C} (β : B ⟶ A) : IsFSMI β ↔ IsFSMI (Ψ.map �
 3. **単位同型と `η` の自然性**で任意の `X` へ広げる ——
    `η.hom.app X ≫ (Ψ⋙F).map u = (Ψ⋙F).map u`(`u` は単位、同型)から `η.hom.app X = 𝟙`
 
-★★**2026-08-17 に実装を試みて差し戻した。** 詰まったのは 1 の**自然性**で、
+★★**2026-08-17 に上の筋で実装を試みて差し戻した。** 詰まったのは 1 の**自然性**で、
 `F.map (Ψ.map (Ψ⁻¹.map g))` を `Functor.fun_inv_map` で余単位に開いたあと、
 `F.map` を跨いだ結合の書き換えが `rw`/`simp` のどちらでも収束しなかった。
-★**推測でコードを残さない**ため撤去し、設計だけをここに置く。
-★次に試す手: `Iso.conj`(`Mathlib.CategoryTheory.Conj`、本ファイルが既に import 済み)で
-共役を**同型の演算として**書き、自然性を `Iso` の等式に持ち込む。
+
+★★★**別の筋で取れた(下)。** 共役を**手で書かない**のが要点である ——
+`Equivalence.congrLeft` により **`(𝒟 ⥤ ℰ) ⥤ (𝒞 ⥤ ℰ)`, `F ↦ Ψ ⋙ F` 自体が圏同値**なので、
+充満忠実性から `Aut(Ψ ⋙ F)` の元は `Aut(F)` の元の像である。
+★**自然性は `congrLeft` が既に持っている。**
 -/
+
+section Rigid
+
+universe v₁₁ u₁₁
+
+variable {E : Type u₁₁} [Category.{v₁₁} E]
+
+/-- ★★★**圏同値と合成しても rigid のまま**。
+
+★★**`F ↦ Ψ ⋙ F` は関手圏の圏同値**(`Equivalence.congrLeft` の逆関手)であり、
+したがって**充満忠実**。★ゆえに `Aut(Ψ ⋙ F)` の元は `Aut(F)` の元の像であり、
+`F` が rigid ならそれは恒等、よって像も恒等である。
+
+★**`Theorem 3.4, (i)` と `Proposition 3.11, (iii)` の rigidity が共通に要る**もの。 -/
+theorem isRigidFunctor_comp_of_isEquivalence (F : D ⥤ E) (hF : IsRigidFunctor F) :
+    IsRigidFunctor (Ψ ⋙ F) := by
+  intro η
+  haveI : ((Ψ.asEquivalence.congrLeft (E := E)).inverse).IsEquivalence := inferInstance
+  set W := (Ψ.asEquivalence.congrLeft (E := E)).inverse with hW
+  have hα : (Functor.FullyFaithful.ofFullyFaithful W).preimageIso
+      (show W.obj F ≅ W.obj F from η) = Iso.refl F := hF _
+  have h1 : W.map ((Functor.FullyFaithful.ofFullyFaithful W).preimageIso
+      (show W.obj F ≅ W.obj F from η)).hom = η.hom := W.map_preimage _
+  rw [hα] at h1
+  refine Iso.ext ?_
+  rw [← h1]
+  simp only [Iso.refl_hom]
+  rfl
+
+end Rigid
 
 /-! ## ★段 2・3 —— anchor と subanchor は保たれる -/
 
