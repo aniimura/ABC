@@ -502,6 +502,16 @@ def psiIstr_comp_iota (h₁ : IsOfQuasiIsotropicType C P₁)
 ★★**右随伴が一致すること**を `psiIstr_comp_iota`(上)から出せば、
 `Adjunction.leftAdjointUniq` で自然同型が得られる。
 
+★**一度実装を試みて差し戻した**(2026-08-17)。詰まったのは随伴の側ではなく
+**右随伴どうしの同型 `Ψ^istr⁻¹ ⋙ ι₁ ≅ ι₂ ⋙ Ψ⁻¹` の構成**である
+——`psiIstr ⋙ ι₂ = ι₁ ⋙ Ψ` は**定義的に等しい**のに、
+そこから逆関手側の同型を作るには単位・余単位の whisker 計算が要る。
+★**次段の候補 2 つ**:
+1. 上の随伴の筋を、whisker 計算を丁寧に書いて通す
+2. ★**hull の一意性から直接** `NatIso.ofComponents` で作る
+   —— どちらの対象も `Ψ.obj A` の hull だから(`isotropicHull_map`)。
+   自然性は hull の普遍性の一意性から出る。**こちらの方が短い見込み**
+
 ★**1-一意性**も同じ随伴の一意性から出る。
 
 ★★残る `rigidity` は別筋である。原文 (FrdI p.63):
