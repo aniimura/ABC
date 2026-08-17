@@ -80,6 +80,37 @@ theorem isOpen_preimage_basicOpen (A : CommRingCat.{0}) (g : A) :
   rw [preimage_basicOpen_eq_arcBasicOpen]
   exact isOpen_arcBasicOpen A g
 
+/-! ## ★★★像の点を取る写像は連続 -/
+
+/-- ★★★**ℂ-点からその像の点を取る写像は連続である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★**`X^arc` から Zariski 位相への連続写像**である。
+★機構は「**基本開集合が Zariski 位相の基底**」(`isTopologicalBasis_basic_opens`)+
+`isOpen_preimage_basicOpen`(本ファイル前段)。
+
+★★これで「点が任意の開集合に落ちる」条件が `X^arc` の開集合になる
+——それが `topology_openImmersion` の残り 1 向きに要るものである。 -/
+theorem continuous_base_default (A : CommRingCat.{0}) :
+    @Continuous _ _ (arcTopologyAffine A) _
+      (fun r : Spec (CommRingCat.of ℂ) ⟶ Spec A => r.base default) := by
+  letI := arcTopologyAffine A
+  refine (PrimeSpectrum.isTopologicalBasis_basic_opens
+    (R := A)).continuous_iff.2 ?_
+  rintro s ⟨g, rfl⟩
+  exact isOpen_preimage_basicOpen A g
+
+/-- ★★★**点が開集合に落ちる条件は `X^arc` の開集合である**。
+
+★★★これが `topology_openImmersion` の残り 1 向きで要る形そのものである。 -/
+theorem isOpen_landsIn (A : CommRingCat.{0}) (O : (Spec A).Opens) :
+    @IsOpen _ (arcTopologyAffine A)
+      {r : Spec (CommRingCat.of ℂ) ⟶ Spec A | r.base default ∈ O} := by
+  letI := arcTopologyAffine A
+  exact (continuous_base_default A).isOpen_preimage _ O.isOpen
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_basicOpen_base_iff.src : ABC3.Meta.Source :=
@@ -90,6 +121,16 @@ def mem_basicOpen_base_iff.src : ABC3.Meta.Source :=
 def isOpen_preimage_basicOpen.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——基本開集合に落ちる点の集合が開であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def continuous_base_default.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——像の点を取る写像が Zariski 位相へ連続であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def isOpen_landsIn.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——点が開集合に落ちる条件が開であること)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
