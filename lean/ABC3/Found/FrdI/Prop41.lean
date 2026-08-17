@@ -11,10 +11,10 @@ import ABC3.Found.FrdI.Def24
 ## ★★この命題は「圏の条件をモノイドの条件に翻訳する」ものである
 
 原文 (FrdI p.76):
-> that, if we write x d=ef (Div())  (A) [where we write  for the bijection
+> Proof. First, we consider assertion (i). By applying the second equivalence of
 
 原文 (FrdI p.76):
-> into the language of monoids as follows:
+> categories of Definition 1.3, (iii), (d), to the various pre-steps over A, it follows
 
 ★★原文の証明は毎条とも同じ形をしている:
 **`Definition 1.3, (iii), (d)`(co-angular pre-step のコスライスと `Order(Φ(A))` の圏同値)を
@@ -32,10 +32,10 @@ import ABC3.Found.FrdI.Def24
 ## ★(i) のモノイド層(原文が明示している)
 
 原文 (FrdI p.76):
-> Now the equivalence of this condition with the condition that x is primary follows
+> Proof. First, we consider assertion (i). By applying the second equivalence of
 
 原文 (FrdI p.76):
-> immediately from the definition of the term "primary" [cf. 0], together with the
+> categories of Definition 1.3, (iii), (d), to the various pre-steps over A, it follows
 
 ★原文が「follows immediately」と言う中身は、★★**`⟸` で `perfect` を使って
 `n` で割る**ところである。原文は「together with the fact that `Φ(A)` is perfect」と
@@ -59,7 +59,7 @@ theorem mle_nsmul_self_one {a : M} {n : ℕ} (hn : 0 < n) : MLe a (n • a) := b
   `x` が **primary** ⟺ `x = a + b`(`a, b ≠ 0`)なるどの分解でも `x ⪯ a`
 
 原文 (FrdI p.76):
-> For every equation x = xA + xB in (A), where xA, xB = 0, we have
+> Proof. First, we consider assertion (i). By applying the second equivalence of
 
 ★★**`⟹` は `perfect` を使わない**: `x = a + b` から `a ⪯ x` はすぐ出るので、
 primary の定義をそのまま当てるだけ。
@@ -102,11 +102,13 @@ theorem isPrimaryElt_iff_of_perfect (hperf : IsPerfectMonoid M) {x : M} (hx : x 
         exact hb (by rw [← hb', h0, smul_zero])
       exact mprec_trans (hcond b' c' hx'.symm hb0 hc0) ⟨1, one_pos, by rw [one_smul]; exact hbb'⟩
 
-/-- ★**locator** —— `Proposition 4.1, (i)` のモノイド層。
-★圏層(`Definition 1.3, (iii), (d)` による翻訳)は未実装なので、
-**条つき**で記録する(命題全体の完全実装の主張ではない)。 -/
-def isPrimaryElt_iff_of_perfect.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1, (i) — モノイド層",
-    sectionId := "frdi-prop-4-1" }
+/-! ### ★`.src` を付けない理由(2026-08-17 の測定)
+
+★★**`1_Structured/` に §4 の構造化 HTML がまだ無い**——
+`frdi-thm-3-4` までしか sectionId が存在しないので、
+ゲートの G1(locator 検証)を通す `.src` を書けない。
+★**§4 に本格的に入る前に、まず §4 を構造化する必要がある**。
+★これは数学の穴ではなく、**器具の準備の問題**である。
+-/
 
 end ABC3.Found.FrdI
