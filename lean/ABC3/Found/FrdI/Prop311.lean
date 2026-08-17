@@ -707,6 +707,80 @@ theorem isBaseIdentity_inv_map_nComp (Z : D₁ × SingleObj ℕ+) (n : ℕ+) :
   exact congrArg (fun g => ((toProdCat P₁).asEquivalence.counit.app Z).1 ≫ g)
     (Category.id_comp _)
 
+/-- ★★**`E₁` の射は「次数 1 の部分」と「`𝒩` 成分だけの自己射」に分かれる**。
+
+  `(Base f, degFr f) = (Base f, 1) ≫ (𝟙, degFr f)`
+
+★`SingleObj` の合成が `x ≫ y = y * x` なので、第 2 成分は `degFr f * 1` になる。 -/
+theorem toProdCat_map_split {A B : C₁} (f : A ⟶ B) :
+    (toProdCat P₁).map f
+      = ((P₁.Base f, (1 : ℕ+)) : (toProdCat P₁).obj A ⟶ (toProdCat P₁).obj B) ≫
+        ((𝟙 ((toProdCat P₁).obj B).1, P₁.degFr f) :
+          (toProdCat P₁).obj B ⟶ (toProdCat P₁).obj B) := by
+  refine Prod.ext ?_ ?_
+  · show P₁.Base f = P₁.Base f ≫ 𝟙 _
+    rw [Category.comp_id]
+  · show P₁.degFr f = P₁.degFr f * 1
+    rw [mul_one]
+
+variable (hbi : ∀ {A : C₁} (u : A ⟶ A), IsBaseIdentity P₁ u → IsBaseIdentity P₂ (Ψ.map u))
+
+include hbi in
+/-- ★★★★**[FrdI] Proposition 3.11, (iii) の 1-可換性** ——
+
+  `(𝒞₁ → 𝒟₁) ⋙ Ψ_Base ≅ Ψ ⋙ (𝒞₂ → 𝒟₂)`
+
+原文 (FrdI p.74):
+> morphisms of Ci, where two morphisms of Ci are regarded as equivalent if they
+
+★★**成分は単位同型そのもの**である(`Ψ_Base` は `E₁⁻¹` を経由するので、
+`E₁⁻¹(E₁ A)` と `A` の差だけが出る)。
+
+★★★**自然性で `base-identity 自己射の保存`をちょうど 1 回使う**:
+`toProdN` が射を次数 `1` に潰すぶんの食い違い `(𝟙, degFr f)` は
+`E₁⁻¹` で base-identity 自己射になり(`isBaseIdentity_inv_map_nComp`)、
+`Ψ` がそれを保つので `P₂.Base` を取ると `𝟙` に潰れる。 -/
+noncomputable def psiBaseCommute :
+    P₁.proj ⋙ psiBase Ψ P₁ P₂ ≅ Ψ ⋙ P₂.proj :=
+  NatIso.ofComponents
+    (fun A => (Ψ ⋙ P₂.proj).mapIso ((toProdCat P₁).asEquivalence.unitIso.app A).symm)
+    (fun {A B} f => by
+      set G := Ψ ⋙ P₂.proj with hG
+      set E := toProdCat P₁ with hEdef
+      set u : E.obj B ⟶ E.obj B := (𝟙 (E.obj B).1, P₁.degFr f) with hu
+      set w : E.obj A ⟶ E.obj B := (P₁.Base f, (1 : ℕ+)) with hw
+      -- ★`𝒩` 成分だけの自己射は `G` で `𝟙` に潰れる
+      have hGv : G.map (E.inv.map u) = 𝟙 _ := by
+        have h : P₂.Base (Ψ.map (E.inv.map u)) = P₂.Base (𝟙 _) :=
+          hbi (E.inv.map u) (isBaseIdentity_inv_map_nComp P₁ (E.obj B) (P₁.degFr f))
+        rw [P₂.Base_id] at h
+        exact h
+      -- ★`E.map f = w ≫ u` を `E.inv` と `G` で送る
+      have hsplit : E.inv.map (E.map f) = E.inv.map w ≫ E.inv.map u := by
+        rw [toProdCat_map_split P₁ f, E.inv.map_comp]
+      have hif : E.inv.map (E.map f)
+          = E.asEquivalence.unitInv.app A ≫ f ≫ E.asEquivalence.unit.app B :=
+        Functor.inv_fun_map E A B f
+      have key : G.map (E.inv.map w)
+          = G.map (E.asEquivalence.unitInv.app A ≫ f ≫ E.asEquivalence.unit.app B) := by
+        have h : G.map (E.inv.map w) ≫ G.map (E.inv.map u)
+            = G.map (E.asEquivalence.unitInv.app A ≫ f ≫ E.asEquivalence.unit.app B) := by
+          rw [← G.map_comp, ← hsplit, hif]
+          rfl
+        rw [hGv, Category.comp_id] at h
+        exact h
+      show G.map (E.inv.map w) ≫ G.map (E.asEquivalence.unitIso.app B).inv
+        = G.map (E.asEquivalence.unitIso.app A).inv ≫ G.map f
+      have hid2 : G.map (E.asEquivalence.unit.app B)
+          ≫ G.map (E.asEquivalence.unitIso.app B).inv = 𝟙 _ := by
+        rw [← G.map_comp,
+          show E.asEquivalence.unit.app B ≫ (E.asEquivalence.unitIso.app B).inv = 𝟙 B from
+            E.asEquivalence.unitIso.hom_inv_id_app B]
+        exact G.map_id B
+      rw [key, G.map_comp, G.map_comp]
+      erw [Category.assoc, Category.assoc, hid2, Category.comp_id]
+      rfl)
+
 end BaseFunctor
 
 end ABC3.Found.FrdI
