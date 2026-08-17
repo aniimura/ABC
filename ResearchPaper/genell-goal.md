@@ -2511,3 +2511,56 @@ B1 は 6 件を解くので投資先として最も効く。★2026-08-17 の実
 G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT にも無い(FLT は sorry)。
 ★`TorsionStructureData` は 2 条(`structure_eq` と `torsion_finite`)からなり、
 **witness には両方が要る**ので、片方だけでは件数は動かない。
+
+
+---
+
+## §9-29 (2026-08-17) ★★★★★B1 —— 5 ブロック積んだ。残りは局所全単射の 2 条
+
+### ★取れたもの(累計、すべて sorry 0)
+
+| ブロック | ファイル | 内容 |
+|---|---|---|
+| 1 | `PicPresheafTensor.lean` | `MonoidalCategory` / `SymmetricCategory` on `X.PresheafOfModules` |
+| 2 | `PicSheafTensor.lean` | `tensorModules`、`tensorModulesComm`(**可換**) |
+| 3 | 同上 | `tensorUnitLeft` / `tensorUnitRight`(**単位元**) |
+| 4 | `PicRestrict.lean` | `restrictOpen`(**開集合への制限**)、`restrictOpenIso` |
+| 5 | `PicRestrictTensor.lean` | ★**制限はテンソル積と両立**(`Functor.Monoidal.μIso`) |
+
+### ★★★★見積りを 3 度外した(記録)
+
+| 何 | 当初の見積り | 実際 |
+|---|---|---|
+| C1 の `X^arc` | 複素解析空間と GAGA が要る | ★商位相と多項式の連続性だけ |
+| 開集合への制限 | 自作せねばならない | ★`SheafOfModules.over` が在った |
+| 制限とテンソルの両立 | 自作せねばならない | ★`pushforward₀OfCommRingCat.Monoidal` が在った |
+
+★★★**「無い」と決める前に測る。**3 度効いた。
+
+### ★★★★残るのは 2 条だけ
+
+結合律は `W (η ▷ C)`(`η` は層化の単位)に帰着し、
+`WEqualsLocallyBijective` により **局所全射 + 局所単射**の 2 条になる。
+
+#### ★(a) 局所全射 —— **局所自由性は要らない**、直接証明できる
+
+`x ∈ (Q ⊗ C)(U)` は純テンソルの有限和 `Σ qᵢ ⊗ cᵢ`。
+各 `qᵢ` について `imageSieve η qᵢ ∈ J U` なので、有限個の交わりも被覆
+(`J.intersection_covering`)。その上で `x` は像に入る。
+
+★★**証明の型**: 「`imageSieve (η ▷ C) x ∈ J U` を満たす `x` の集合」が
+部分加群であって純テンソルを含むことを言い、`TensorProduct.induction_on` で閉じる。
+- `0` … `imageSieve` は `⊤`
+- 和 … 2 つの被覆篩の交わり
+- 純テンソル … `imageSieve_mem`
+
+#### ★(b) 局所単射 —— **ここで局所自由性が要る**
+
+一般の `C` では偽(平坦性が要る)。★可逆層は**局所的に `𝒪`** なので平坦であり、
+第 4・第 5 ブロック(制限と、制限がテンソルと両立すること)を使って
+局所自明化の開集合上へ落とす。
+
+### ★★次の 1 手
+
+★★★**(a) 局所全射から書く。**局所自由性を使わないので独立に取れる。
+その後 (b) に `IsLocallyFree` の局所自明化を当てる。
