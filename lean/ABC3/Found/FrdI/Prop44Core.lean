@@ -1585,4 +1585,189 @@ theorem birat_arbFactor {A B : BiratCat P G} (f : A ⟶ B) :
       ((birat_isFrobeniusType_iff P G γ).mpr ⟨hγ.1.1, hγ.2⟩)
   · exact (birat_isPreStep_iff (P := P) (G := G) β).mpr hβ
 
+/-! ## ★19. (iv)(a) の一意性
+
+原文 (FrdI p.25):
+> type; this factorization is unique, up to replacing the triple (α, β, γ) by a triple of
+
+★★`ε` は **`birat_frobDegUniq`** がそのまま与える(次数はどちらも `degFr f`)。
+★`γ` は全射なので消せて、残りは「pre-step ≫ pull-back」の 2 分解の一意性になり、
+★★**`IsPullBack.lift` を 2 回**掛けて互いに逆な `δ`・`δ⁻¹` を作れば済む。 -/
+
+include P in
+/-- ★★★★**[FrdI] Definition 1.3, (iv)(a)** の一意性、`𝒞^birat` 版。 -/
+theorem birat_arbFactorUniq {A B : BiratCat P G} (X Y X' Y' : BiratCat P G)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (heq : γ ≫ β ≫ α = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType (biratPre P G) γ) (hβ : IsPreStep (biratPre P G) β)
+    (hα : IsPullBack (biratPre P G) α)
+    (hγ' : IsFrobeniusType (biratPre P G) γ') (hβ' : IsPreStep (biratPre P G) β')
+    (hα' : IsPullBack (biratPre P G) α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  -- ★段 1: 次数はどちらも `degFr γ`
+  have c3 : (biratPre P G).degFr (β ≫ α) = 1 :=
+    ((biratPre P G).degFr_comp β α).trans (by
+      rw [show (biratPre P G).degFr α = 1 from (birat_pullBackLB P G α hα).2,
+        show (biratPre P G).degFr β = 1 from hβ.1]; simp)
+  have c3' : (biratPre P G).degFr (β' ≫ α') = 1 :=
+    ((biratPre P G).degFr_comp β' α').trans (by
+      rw [show (biratPre P G).degFr α' = 1 from (birat_pullBackLB P G α' hα').2,
+        show (biratPre P G).degFr β' = 1 from hβ'.1]; simp)
+  have e1 : (biratPre P G).degFr (γ ≫ β ≫ α) = (biratPre P G).degFr γ :=
+    ((biratPre P G).degFr_comp γ (β ≫ α)).trans (by rw [c3]; simp)
+  have e1' : (biratPre P G).degFr (γ' ≫ β' ≫ α') = (biratPre P G).degFr γ' :=
+    ((biratPre P G).degFr_comp γ' (β' ≫ α')).trans (by rw [c3']; simp)
+  have hdγ : (biratPre P G).degFr γ = (biratPre P G).degFr γ' :=
+    e1.symm.trans ((congrArg (biratPre P G).degFr heq).trans e1')
+  -- ★段 2: `ε`
+  obtain ⟨e, heiso, hee⟩ := birat_frobDegUniq P G A X X' γ γ' hγ hγ' hdγ
+  haveI := heiso
+  -- ★段 3: `γ` は全射なので消せる
+  haveI hepiγ : Epi γ := birat_totEpi P G _ _ γ
+  have hfac : β ≫ α = (e ≫ β') ≫ α' := by
+    have hcancel : β ≫ α = e ≫ (β' ≫ α') := by
+      refine hepiγ.left_cancellation _ _ ?_
+      have y1 : γ ≫ (e ≫ (β' ≫ α')) = (γ ≫ e) ≫ (β' ≫ α') :=
+        (Category.assoc _ _ _).symm
+      have y2 : (γ ≫ e) ≫ (β' ≫ α') = γ' ≫ (β' ≫ α') :=
+        congrArg (fun t => t ≫ (β' ≫ α')) hee
+      exact heq.trans (y1.trans y2).symm
+    exact hcancel.trans (Category.assoc _ _ _).symm
+  -- ★段 4: 底の同型
+  haveI hbβ : IsIso ((biratPre P G).Base β) := hβ.2
+  haveI hbβ' : IsIso ((biratPre P G).Base β') := hβ'.2
+  haveI hbe : IsIso ((biratPre P G).Base e) := isBaseIsomorphism_of_isIso (biratPre P G) e
+  have hbc : (biratPre P G).Base (e ≫ β')
+      = (biratPre P G).Base e ≫ (biratPre P G).Base β' := (biratPre P G).Base_comp e β'
+  haveI hbβ'' : IsIso ((biratPre P G).Base (e ≫ β')) := by rw [hbc]; infer_instance
+  have hbfac : (biratPre P G).Base β ≫ (biratPre P G).Base α
+      = (biratPre P G).Base (e ≫ β') ≫ (biratPre P G).Base α' :=
+    ((biratPre P G).Base_comp β α).symm.trans
+      ((congrArg (biratPre P G).Base hfac).trans ((biratPre P G).Base_comp _ _))
+  -- ★段 5: `δ` とその逆
+  have hb1 : (biratPre P G).Base α
+      = (@inv _ _ _ _ ((biratPre P G).Base β) hbβ ≫ (biratPre P G).Base (e ≫ β'))
+        ≫ (biratPre P G).Base α' := by
+    rw [Category.assoc, ← hbfac, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  have hb2 : (biratPre P G).Base α'
+      = (@inv _ _ _ _ ((biratPre P G).Base (e ≫ β')) hbβ'' ≫ (biratPre P G).Base β)
+        ≫ (biratPre P G).Base α := by
+    rw [Category.assoc, hbfac, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  obtain ⟨d1, ⟨hd1a, hd1b⟩, -⟩ := IsPullBack.lift (biratPre P G) hα' Y α
+    (@inv _ _ _ _ ((biratPre P G).Base β) hbβ ≫ (biratPre P G).Base (e ≫ β')) hb1
+  obtain ⟨d2, ⟨hd2a, hd2b⟩, -⟩ := IsPullBack.lift (biratPre P G) hα Y' α'
+    (@inv _ _ _ _ ((biratPre P G).Base (e ≫ β')) hbβ'' ≫ (biratPre P G).Base β) hb2
+  -- ★段 6: `d1`・`d2` は互いに逆
+  have hd12 : d1 ≫ d2 = 𝟙 Y := by
+    refine IsPullBack.hom_ext (biratPre P G) hα _ _ ?_ ?_
+    · have y1 : (d1 ≫ d2) ≫ α = d1 ≫ (d2 ≫ α) := Category.assoc _ _ _
+      have y2 : d1 ≫ (d2 ≫ α) = d1 ≫ α' := congrArg (fun t => d1 ≫ t) hd2a
+      exact ((y1.trans y2).trans hd1a).trans (Category.id_comp _).symm
+    · exact ((biratPre P G).Base_comp d1 d2).trans
+        (by rw [hd1b, hd2b, (biratPre P G).Base_id]; simp)
+  have hd21 : d2 ≫ d1 = 𝟙 Y' := by
+    refine IsPullBack.hom_ext (biratPre P G) hα' _ _ ?_ ?_
+    · have y1 : (d2 ≫ d1) ≫ α' = d2 ≫ (d1 ≫ α') := Category.assoc _ _ _
+      have y2 : d2 ≫ (d1 ≫ α') = d2 ≫ α := congrArg (fun t => d2 ≫ t) hd1a
+      exact ((y1.trans y2).trans hd2a).trans (Category.id_comp _).symm
+    · exact ((biratPre P G).Base_comp d2 d1).trans
+        (by rw [hd2b, hd1b, (biratPre P G).Base_id]; simp)
+  -- ★段 7: `β ≫ d1 = e ≫ β'`
+  have hbd : β ≫ d1 = e ≫ β' := by
+    refine IsPullBack.hom_ext (biratPre P G) hα' _ _ ?_ ?_
+    · have y1 : (β ≫ d1) ≫ α' = β ≫ (d1 ≫ α') := Category.assoc _ _ _
+      have y2 : β ≫ (d1 ≫ α') = β ≫ α := congrArg (fun t => β ≫ t) hd1a
+      exact ((y1.trans y2).trans hfac)
+    · exact ((biratPre P G).Base_comp β d1).trans
+        (by rw [hd1b, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp])
+  -- ★段 8: 組み立て
+  refine ⟨⟨d1, d2, hd12, hd21⟩, asIso e, hd2a.symm, ?_, hee.symm⟩
+  show β' = inv e ≫ (β ≫ d1)
+  have y1 : inv e ≫ (β ≫ d1) = inv e ≫ (e ≫ β') :=
+    congrArg (fun t => inv e ≫ t) hbd
+  have y2 : inv e ≫ (e ≫ β') = (inv e ≫ e) ≫ β' := (Category.assoc _ _ _).symm
+  have y3 : (inv e ≫ e) ≫ β' = 𝟙 _ ≫ β' :=
+    congrArg (fun t => t ≫ β') (IsIso.inv_hom_id e)
+  exact ((y1.trans (y2.trans y3)).trans (Category.id_comp _)).symm
+
+/-! ## ★20. (i)(c) の圏同値 —— `(𝒞^birat)^pl-bk_A ≃ 𝒟_{A_𝒟}`
+
+原文 (FrdI p.24):
+> equivalence of categories [cf. §0].
+
+★★3 つとも **pull-back の普遍性(`IsPullBack.lift` / `IsPullBack.hom_ext`)**で出る:
+
+| 条 | 手 |
+|---|---|
+| 忠実 | `W.hom` の `hom_ext`(合成も底も一致するから) |
+| 充満 | `W.hom` の `lift` ＋ ★**pull-back の右キャンセル** |
+| 本質的全射 | `𝒞` の `plBk_baseChange` を `birat_isPullBack_map` で押し出す |
+-/
+
+/-- ★★**pull-back の右キャンセル** —— `g ≫ w` と `w` が pull-back なら `g` も。 -/
+theorem isPullBack_of_comp_right {C3 : Type u3} [Category.{v3} C3]
+    {Φ3 : MonoidOn.{v, u, w} D} (Q : PreFrobenioid C3 Φ3) {X Y Z : C3}
+    (g : X ⟶ Y) (wm : Y ⟶ Z) (hgw : IsPullBack Q (g ≫ wm)) (hw : IsPullBack Q wm) :
+    IsPullBack Q g := by
+  refine isPullBack_of_lift Q g ?_ ?_
+  · intro T v v' h1 h2
+    refine IsPullBack.hom_ext Q hgw v v' ?_ h2
+    exact (Category.assoc _ _ _).symm.trans
+      ((congrArg (fun t => t ≫ wm) h1).trans (Category.assoc _ _ _))
+  · intro T f b hb
+    have hb2 : Q.Base (f ≫ wm) = b ≫ Q.Base (g ≫ wm) := by
+      rw [Q.Base_comp, Q.Base_comp, hb, Category.assoc]
+    obtain ⟨v, ⟨hv1, hv2⟩, -⟩ := IsPullBack.lift Q hgw T (f ≫ wm) b hb2
+    refine ⟨v, ?_, hv2⟩
+    refine IsPullBack.hom_ext Q hw (v ≫ g) f ?_ ?_
+    · exact (Category.assoc _ _ _).trans hv1
+    · rw [Q.Base_comp, hv2, ← hb]
+
+include P in
+/-- ★`(𝒞^birat)^pl-bk_A → 𝒟_{A_𝒟}` は忠実。 -/
+theorem birat_plBkOver_faithful (A : BiratCat P G) :
+    (plBkOverFunctor (biratPre P G) A).Faithful where
+  map_injective {Z W} {f g} h := by
+    refine Over.OverMorphism.ext (InducedWideCategory.Hom.ext ?_)
+    refine IsPullBack.hom_ext (biratPre P G) W.hom.property _ _ ?_ ?_
+    · exact (congrArg InducedWideCategory.Hom.hom (Over.w f)).trans
+        (congrArg InducedWideCategory.Hom.hom (Over.w g)).symm
+    · exact congrArg CommaMorphism.left h
+
+include P in
+/-- ★★`(𝒞^birat)^pl-bk_A → 𝒟_{A_𝒟}` は充満。 -/
+theorem birat_plBkOver_full (A : BiratCat P G) :
+    (plBkOverFunctor (biratPre P G) A).Full := by
+  constructor
+  intro Z W h
+  obtain ⟨g, ⟨hg1, hg2⟩, -⟩ := IsPullBack.lift (biratPre P G) W.hom.property
+    Z.left.obj Z.hom.hom h.left (Over.w h).symm
+  have hgpb : IsPullBack (biratPre P G) g :=
+    isPullBack_of_comp_right (biratPre P G) g W.hom.hom
+      (by rw [hg1]; exact Z.hom.property) W.hom.property
+  refine ⟨Over.homMk (show Z.left ⟶ W.left from ⟨g, hgpb⟩)
+    (WideSubcategory.hom_ext _ hg1), ?_⟩
+  exact Over.OverMorphism.ext hg2
+
+include P in
+/-- ★★`(𝒞^birat)^pl-bk_A → 𝒟_{A_𝒟}` は本質的全射。 -/
+theorem birat_plBkOver_essSurj (A : BiratCat P G) :
+    (plBkOverFunctor (biratPre P G) A).EssSurj := by
+  refine ⟨fun T => ?_⟩
+  obtain ⟨Yt, αt, k, hαt, hb⟩ :=
+    plBk_baseChange P G.core (biratDown P G A) T.hom
+  refine ⟨Over.mk (show (⟨(show BiratCat P G from Yt)⟩ : PlBk (biratPre P G)) ⟶ ⟨A⟩ from
+    ⟨(toBiratCat P G).map αt, birat_isPullBack_map P G αt hαt⟩), ⟨?_⟩⟩
+  refine Over.isoMk k ?_
+  show k.hom ≫ T.hom = (biratPre P G).Base ((toBiratCat P G).map αt)
+  exact hb.symm.trans (birat_Base_map P G αt).symm
+
+include P in
+/-- ★★★★**[FrdI] Definition 1.3, (i)(c)** の `𝒞^birat` 版。 -/
+theorem birat_plBkEquiv (A : BiratCat P G) :
+    (plBkOverFunctor (biratPre P G) A).IsEquivalence :=
+  ⟨birat_plBkOver_faithful P G A, birat_plBkOver_full P G A,
+    birat_plBkOver_essSurj P G A⟩
+
 end ABC3.Found.FrdI

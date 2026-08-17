@@ -142,6 +142,27 @@ theorem preimage_image_comp_openImmersion {X Y : Scheme.{0}} (f : X ⟶ Y)
         ((fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) '' V) = V :=
   (comp_openImmersion_injective f).preimage_image V
 
+/-! ## ★★★アフィン開の対応(mathlib との接続) -/
+
+/-- ★★★**`imageAffineOpen` は mathlib の `affineOpensEquiv` そのものである**。
+
+`IsOpenImmersion.affineOpensEquiv f : X.affineOpens ≃o {U : Y.affineOpens // U ≤ f.opensRange}`
+——★**順序同型**である(mathlib、2026-08-17 実測)。
+
+★★★これが残る 1 向きの鍵である: `X` のアフィン開被覆と
+`Y` のアフィン開被覆のうち `f` の像に入るものが**1 対 1 に対応する**。 -/
+theorem imageAffineOpen_eq_affineOpensEquiv {X Y : Scheme.{0}} (f : X ⟶ Y)
+    [IsOpenImmersion f] (U : X.affineOpens) :
+    imageAffineOpen f U = ((IsOpenImmersion.affineOpensEquiv f) U).1 := rfl
+
+/-- ★★**逆向きの対応**——`f` の像に入る `Y` のアフィン開は `X` のアフィン開から来る。 -/
+theorem exists_imageAffineOpen {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (V : Y.affineOpens) (hV : V.1 ≤ f.opensRange) :
+    ∃ U : X.affineOpens, imageAffineOpen f U = V := by
+  refine ⟨(IsOpenImmersion.affineOpensEquiv f).symm ⟨V, hV⟩, ?_⟩
+  rw [imageAffineOpen_eq_affineOpensEquiv]
+  exact congrArg Subtype.val ((IsOpenImmersion.affineOpensEquiv f).apply_symm_apply ⟨V, hV⟩)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def imageAffineOpen.src : ABC3.Meta.Source :=
@@ -162,6 +183,11 @@ def continuous_comp_openImmersion.src : ABC3.Meta.Source :=
 def comp_openImmersion_injective.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開埋め込みとの合成が単射であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def exists_imageAffineOpen.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みでのアフィン開の対応)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
