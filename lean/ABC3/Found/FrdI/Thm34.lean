@@ -169,6 +169,34 @@ theorem isFSMI_map_iff {B A : C} (β : B ⟶ A) : IsFSMI β ↔ IsFSMI (Ψ.map �
   have hfin := isFSMI_comp_isIso hcomp eA.inv
   simpa using hfin
 
+/-! ### ★★rigidity の移送 —— 設計だけ記録する(2026-08-17 に測定、未実装)
+
+原文 (FrdI p.63):
+> functors may be verified as follows: By Proposition 1.13, (ii), it suffices to show,
+
+★★**`Theorem 3.4, (i)` と `Proposition 3.11, (iii)` の rigidity が共通に要る**もの:
+
+  `Ψ` が圏同値で `F : 𝒟 ⥤ ℰ` が rigid なら `Ψ ⋙ F` も rigid
+
+★原文はどちらでも「`Proposition 1.13` から直ちに従う」と書くが、
+**`Proposition 1.13` が与えるのは `𝒞 → 𝒟`(あるいは `𝒞 → 𝔽_Φ`)の rigidity** であって、
+図式の**合成関手**の rigidity ではない。★その差がこの補題である。
+
+★★**設計(紙の上では確定)**:
+1. `η : Ψ ⋙ F ≅ Ψ ⋙ F` を**余単位で共役**して `α : F ≅ F` を作る ——
+   `α.app Y := (F.mapIso (ε.app Y)).symm ≪≫ η.app (Ψ⁻¹ Y) ≪≫ F.mapIso (ε.app Y)`
+2. `F` の rigidity から `α = Iso.refl F`、よって `η.hom.app (Ψ⁻¹ Y) = 𝟙`
+3. **単位同型と `η` の自然性**で任意の `X` へ広げる ——
+   `η.hom.app X ≫ (Ψ⋙F).map u = (Ψ⋙F).map u`(`u` は単位、同型)から `η.hom.app X = 𝟙`
+
+★★**2026-08-17 に実装を試みて差し戻した。** 詰まったのは 1 の**自然性**で、
+`F.map (Ψ.map (Ψ⁻¹.map g))` を `Functor.fun_inv_map` で余単位に開いたあと、
+`F.map` を跨いだ結合の書き換えが `rw`/`simp` のどちらでも収束しなかった。
+★**推測でコードを残さない**ため撤去し、設計だけをここに置く。
+★次に試す手: `Iso.conj`(`Mathlib.CategoryTheory.Conj`、本ファイルが既に import 済み)で
+共役を**同型の演算として**書き、自然性を `Iso` の等式に持ち込む。
+-/
+
 /-! ## ★段 2・3 —— anchor と subanchor は保たれる -/
 
 /-- ★★**圏同値は anchor を保つ**。
