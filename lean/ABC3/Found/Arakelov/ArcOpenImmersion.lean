@@ -122,6 +122,26 @@ theorem continuous_comp_openImmersion {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenIm
   rw [h]
   exact Continuous.comp continuous_coinduced_rng (continuous_comp_imageIso f U)
 
+/-! ## ★★単射性 -/
+
+/-- ★★**開埋め込みとの合成は単射である**(開埋め込みはモノだから)。
+
+★★★`topology_openImmersion` の残り 1 向き
+(`induced (· ≫ f) (arcTopology Y) ≤ arcTopology X`)には、
+「像が `Arc Y` で開」と合わせてこれが要る——★開集合 `V` に対し
+`W := (· ≫ f) '' V` を取り `(· ≫ f) ⁻¹' W = V` を得るのに単射性を使う。 -/
+theorem comp_openImmersion_injective {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    Function.Injective (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) := by
+  intro p q h
+  exact (cancel_mono f).1 h
+
+/-- ★**像の逆像はもとに戻る**(単射性の帰結)。 -/
+theorem preimage_image_comp_openImmersion {X Y : Scheme.{0}} (f : X ⟶ Y)
+    [IsOpenImmersion f] (V : Set (Spec (CommRingCat.of ℂ) ⟶ X)) :
+    (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) ⁻¹'
+        ((fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) '' V) = V :=
+  (comp_openImmersion_injective f).preimage_image V
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def imageAffineOpen.src : ABC3.Meta.Source :=
@@ -137,6 +157,11 @@ def imageAffineOpenIso_fac.src : ABC3.Meta.Source :=
 def continuous_comp_openImmersion.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開埋め込みとの合成の連続性)",
+    sectionId := "genell-def-1-1-i" }
+
+def comp_openImmersion_injective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みとの合成が単射であること)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
