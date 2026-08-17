@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 760 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 780 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">4294</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1119</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">4393</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1135</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -206,25 +206,25 @@ model Frobenioid が <b>pre-model 型</b>（base-Frobenius pair を持つ）で�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>df45962</code></td><td>2026-08-18</td><td>★★★★★★★B1 の第 24 ブロック——抽象に作られた引き戻しの、具体的な値が出た</td></tr>
-<tr><td><code>810e48c</code></td><td>2026-08-18</td><td>★★★★★★B1 の第 23 ブロック——δ を同型にする道の部品が全部そろった</td></tr>
-<tr><td><code>e0e36a1</code></td><td>2026-08-18</td><td>§9-40 を訂正した——δ は全対象で同型である(§9-41)</td></tr>
-<tr><td><code>10e966f</code></td><td>2026-08-18</td><td>★★★★★★★★B1 の第 22 ブロック——抽象で作った δ がスキームに効いた</td></tr>
-<tr><td><code>2c71065</code></td><td>2026-08-18</td><td>★★★★★★★B1 の第 21 ブロック——層の段の引き戻しは mathlib に在った</td></tr>
-<tr><td><code>4de8aca</code></td><td>2026-08-18</td><td>記憶に壁の測定を残した——目標の到達可能な上限</td></tr>
-<tr><td><code>bb2987a</code></td><td>2026-08-18</td><td>壁の伝播を PLAN.md に記録した——目標の到達可能な上限</td></tr>
-<tr><td><code>8d6a7ce</code></td><td>2026-08-18</td><td>壁の伝播を測る道具を作った——`tools/frdi-blocked.mjs`</td></tr>
-<tr><td><code>8129d36</code></td><td>2026-08-18</td><td>★★★★★model については `Proposition 4.4, (ii)` の 21 条が閉じた</td></tr>
-<tr><td><code>d4305c4</code></td><td>2026-08-18</td><td>因子分解の補題と、残る「birationally Frobenius-normalized 型」の測定</td></tr>
-<tr><td><code>42e55a9</code></td><td>2026-08-18</td><td>model Frobenioid の Ore の四角形——`[f] ≫ [a]⁻¹ = [p]⁻¹ ≫ [m]` の部品</td></tr>
-<tr><td><code>6d8bdb0</code></td><td>2026-08-18</td><td>★★★`Proposition 4.4, (ii)` の穴を絞った——birat-Frobenius-normalized なら 21 条が揃う</td></tr>
+<tr><td><code>f04af5a</code></td><td>2026-08-18</td><td>★★★★★★★★新しい葉 8/8 達成——3 チェーンの層 0〜1 がすべて閉じた</td></tr>
+<tr><td><code>67e90cc</code></td><td>2026-08-18</td><td>★★★★★★B1 の第 31 ブロック——抽象な随伴の unit に計算の手がかりを付けた</td></tr>
+<tr><td><code>a65b35c</code></td><td>2026-08-18</td><td>★★★★★★★★B1 の第 30 ブロック——δ の同型性が生成元 2 つの 1 点に帰着した</td></tr>
+<tr><td><code>6910b69</code></td><td>2026-08-18</td><td>★★★sixexp の葉 `liouville-ineq` を閉じた</td></tr>
+<tr><td><code>591cccc</code></td><td>2026-08-18</td><td>★★★★★★★★B1 の第 29 ブロック——持ち上げが通った(一発)</td></tr>
+<tr><td><code>f3d56b7</code></td><td>2026-08-18</td><td>★★★★★otricomm の葉 `ker-eq-image` を閉じた——核が決まった</td></tr>
+<tr><td><code>68663ab</code></td><td>2026-08-18</td><td>★★★★★G7・G8 の穴を 1 本で塞いだ——ht^Falt が ω_E と結ばれていなかった</td></tr>
+<tr><td><code>61a7973</code></td><td>2026-08-18</td><td>★★★★★★同じ型の穴が 4 例目——一般規則を抽出し、G7 の穴を検査で示した</td></tr>
+<tr><td><code>9ed8442</code></td><td>2026-08-18</td><td>ゲート NG を直した——Skeleton と Found で `IsProL` が衝突していた</td></tr>
+<tr><td><code>e43fa23</code></td><td>2026-08-18</td><td>★★★★prol チェーンの葉 4 個を Lean で閉じた</td></tr>
+<tr><td><code>987005a</code></td><td>2026-08-18</td><td>★★★★★B1 の 2 つ目の穴を塞いだ——引き戻しが層と結ばれていなかった</td></tr>
+<tr><td><code>f31d9b9</code></td><td>2026-08-18</td><td>★★★★★★B1 の第 28 ブロック——余極限で同型を持ち上げる器具を作った</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1119 件)。</div>
+<b>すべて PDF と機械照合している</b>(1135 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

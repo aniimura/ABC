@@ -33,10 +33,20 @@ metadata:
    (`(𝒞^coa-pre)_A ≃ Order(Φ(A))^opp`、前順序圏 × `Φ(A)` の有向性 ⟹ 余フィルター)。
    ★★**一般の Frobenioid で証明できた**(`Found/FrdI/Prop44Ore.lean`、`sorry` 無し)。
 
+## ★★2026-08-18 の実績 —— 新しい葉 8/8 を同日に閉じた
+
+| チェーン | 閉じた葉 | 実装 |
+|---|---|---|
+| otricomm | `ore-square` `divgp-hom` `ker-eq-image` | `Found/FrdI/Prop44Ore.lean` `Prop44Ker.lean` |
+| prol | `finite-primary` `prol-def` `M-limit` `limit-pi-comm` | `Found/ProL/` 4 ファイル |
+| sixexp | `liouville-ineq` `schwarz-many-zeros` `aux-function` `growth` | `Found/SixExp/` 3 ファイル |
+
+★★**次に着手できる葉は 3 個**: `central-ext`(otricomm 層2)/
+`M-l-part`(prol 層1)/ `extrapolation`(sixexp 層3)。
+
 ## ★`otricomm` の残り(2026-08-18 時点)
 
-`ore-square`(済)・`divgp-hom`(済)・`image-central`(済)
-→ `ker-eq-image`((vi) `faithfulUpToUnits` から核 = `𝒪^×(A)` の像)
+`ore-square`(済)・`divgp-hom`(済)・`image-central`(済)・`ker-eq-image`(★済)
 → `central-ext`(中心拡大 ⟹ 交換子が交代双線形形式)
 → ★★**`pairing-vanishes`(その形式が消えること。ここが本体)**
 → `otriBase`(`birat_otriBase_of_comm` で半済)
