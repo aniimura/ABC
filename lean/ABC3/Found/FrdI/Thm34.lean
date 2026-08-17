@@ -89,6 +89,51 @@ theorem isIrreducibleMor_map {A B : C} {φ : A ⟶ B} (h : IsIrreducibleMor φ) 
       rw [hα]
       infer_instance
 
+/-! ## ★段 1' —— FSM 射と FSMI 射は保たれる
+
+原文 (FrdI p.63):
+> phisms] the fact that Ψ preserves pre-steps follows formally from Proposition 1.14,
+
+★★原文は `Theorem 3.4, (ii)` の証明で
+「**任意の圏同値は明らかに FSM 射と irreducible 射を保つ**」と括弧書きで済ませる。
+★`IsFSMMorphism = IsFiberwiseSurjective ∧ Mono` はどちらも純粋に圏論的なので
+確かに保たれるが、**`fiberwise-surjective` の方は本質的全射性と充満性を実際に使う**。
+
+★**この 2 本は `Theorem 3.4, (ii)` と `Proposition 3.11, (ii)` の共通の入口**である。
+-/
+
+/-- ★★**圏同値は fiberwise-surjective を保つ**。
+
+★定義は「`A` へ入る任意の `γ` に対し、`β` と `γ` を同時に潰す `D` がある」。
+★**`Z` を本質的全射性で `C` へ戻し、`γ` を充満性で戻す**と `C` 側の条件が当たる。 -/
+theorem isFiberwiseSurjective_map {B A : C} {β : B ⟶ A} (h : IsFiberwiseSurjective β) :
+    IsFiberwiseSurjective (Ψ.map β) := by
+  intro Z' γ'
+  obtain ⟨Z₀, ⟨e⟩⟩ : ∃ Z₀ : C, Nonempty (Ψ.obj Z₀ ≅ Z') :=
+    ⟨Ψ.objPreimage Z', ⟨Ψ.objObjPreimageIso Z'⟩⟩
+  obtain ⟨γ₀, hγ₀⟩ := Ψ.map_surjective (e.hom ≫ γ')
+  obtain ⟨Dd, δB, δZ, hδ⟩ := h γ₀
+  refine ⟨Ψ.obj Dd, Ψ.map δB, Ψ.map δZ ≫ e.hom, ?_⟩
+  rw [Category.assoc, ← hγ₀, ← Ψ.map_comp, ← Ψ.map_comp, hδ]
+
+/-- ★★**圏同値は FSM 射を保つ**。
+
+★mono は圏同値が(左右の随伴として)保つ。★fiberwise-surjective は上の補題。 -/
+theorem isFSMMorphism_map {B A : C} {β : B ⟶ A} (h : IsFSMMorphism β) :
+    IsFSMMorphism (Ψ.map β) := by
+  refine ⟨isFiberwiseSurjective_map Ψ h.1, ?_⟩
+  haveI := h.2
+  infer_instance
+
+/-- ★★★**圏同値は FSMI 射を保つ**。
+
+原文 (FrdI p.63):
+> phisms] the fact that Ψ preserves pre-steps follows formally from Proposition 1.14,
+
+★`IsFSMI = IsFSMMorphism ∧ IsIrreducibleMor` なので、上の 2 本(と段 1)を組むだけ。 -/
+theorem isFSMI_map {B A : C} {β : B ⟶ A} (h : IsFSMI β) : IsFSMI (Ψ.map β) :=
+  ⟨isFSMMorphism_map Ψ h.1, isIrreducibleMor_map Ψ h.2⟩
+
 /-! ## ★段 2・3 —— anchor と subanchor は保たれる -/
 
 /-- ★★**圏同値は anchor を保つ**。
