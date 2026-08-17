@@ -111,6 +111,7 @@ import ABC3.Found.GenEll.ArchConj
 import ABC3.Found.GenEll.ArchBaseChange
 import ABC3.Found.GenEll.IdealADivBase
 import ABC3.Found.GenEll.ArchADivBase
+import ABC3.Found.GenEll.HeightBaseChange
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
