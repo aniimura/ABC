@@ -51,6 +51,7 @@ import ABC3.Found.FrdI.Prop33i
 import ABC3.Found.FrdI.Prop33Coa
 import ABC3.Found.FrdI.Thm34Rigid
 import ABC3.Found.FrdI.Lemma65
+import ABC3.Found.FrdI.Prop44Pre
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -120,6 +121,7 @@ import ABC3.Found.GenEll.ArchCompat
 import ABC3.Found.GenEll.HeightInvariant
 import ABC3.Found.GenEll.AlgPoint
 import ABC3.Found.GenEll.UPoint
+import ABC3.Found.GenEll.DegSubset
 import ABC3.Found.GenEll.Prop16
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
