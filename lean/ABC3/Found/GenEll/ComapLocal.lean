@@ -93,6 +93,70 @@ theorem ideal_comap_top_eq_ker (f : X ⟶ Y) (U : X.affineOpens) :
   rw [← ideal_comap_eq_ker, Scheme.IdealSheafData.comap_top]
   rfl
 
+/-! ## ★★★易しい側の包含 —— `Ideal.map ≤ comap` -/
+
+/-- ★★**因子の切断はファイバー積の上で消える**。
+
+★機構は `pullback.condition` を `V` で `app` に落とすことだけ。
+`s ∈ I.ideal V = ker (I.subschemeι.app V)`(`ker_subschemeι_app`)を使う。
+
+★★★**器具の要点: 射のレベルで分解し、元に降りるのは 1 度だけにする。**
+途中で `simp` を当てると `CommRingCat.Hom.hom` と `ConcreteCategory.hom` の間で
+正規形が揺れ戻り、次の `rw` が外れる(下の docstring に記録)。 -/
+theorem app_pullback_comp_eq_zero (I : Y.IdealSheafData) (f : X ⟶ Y)
+    (V : Y.affineOpens) (s : Γ(Y, V.1)) (hs : s ∈ I.ideal V) :
+    ((pullback.fst f I.subschemeι ≫ f).app V.1).hom s = 0 := by
+  have hcond := Scheme.Hom.congr_app
+    (pullback.condition (f := f) (g := I.subschemeι)) V.1
+  have hpre : (pullback.fst f I.subschemeι ≫ f) ⁻¹ᵁ V.1
+      = pullback.snd f I.subschemeι ⁻¹ᵁ I.subschemeι ⁻¹ᵁ V.1 := by
+    rw [pullback.condition]; rfl
+  -- ★射のレベルで分解する(元に降りない)
+  have hA : (pullback.fst f I.subschemeι ≫ f).app V.1
+      = I.subschemeι.app V.1 ≫
+        ((pullback.snd f I.subschemeι).app (I.subschemeι ⁻¹ᵁ V.1) ≫
+          (pullback f I.subschemeι).presheaf.map (eqToHom hpre).op) := by
+    rw [hcond, Scheme.Hom.comp_app]
+    exact Category.assoc _ _ _
+  -- ★ここで 1 度だけ元に降りる
+  rw [hA, CommRingCat.hom_comp, RingHom.comp_apply]
+  have h0 : (I.subschemeι.app V.1).hom s = 0 := by
+    rw [← RingHom.mem_ker, Scheme.IdealSheafData.ker_subschemeι_app]
+    exact hs
+  rw [h0, map_zero]
+
+/-- ★★★**引き戻したイデアルは `comap` に含まれる**。
+
+原文 (GenEll p.6):
+> Proposition 1.4. (Basic Properties of Heights) In the notation of the above
+
+★★これが `comap` のアフィン局所記述の**易しい側**である:
+
+    `Ideal.map (f.appLE V U h) (I.ideal V) ≤ (I.comap f).ideal U`
+
+★逆向き(`comap ≤ Ideal.map`)にはファイバー積の `Γ` の計算が要る。
+
+★★機構は `appLE_comp_appLE` で `V → U` の制限を合成に直し、
+`app_pullback_comp_eq_zero` を当てるだけである。 -/
+theorem map_appLE_le_ideal_comap (I : Y.IdealSheafData) (f : X ⟶ Y)
+    (U : X.affineOpens) (V : Y.affineOpens) (h : U.1 ≤ f ⁻¹ᵁ V.1) :
+    (I.ideal V).map (f.appLE V.1 U.1 h).hom ≤ (I.comap f).ideal U := by
+  rw [ideal_comap_eq_ker, Ideal.map_le_iff_le_comap]
+  intro s hs
+  simp only [Ideal.mem_comap, RingHom.mem_ker]
+  -- ★射のレベルで: `appLE f ≫ g.app U = (g ≫ f).appLE V (g⁻¹U)`
+  have key : (Scheme.Hom.appLE f V.1 U.1 h) ≫ ((pullback.fst f I.subschemeι).app U.1)
+      = (pullback.fst f I.subschemeι ≫ f).appLE V.1
+          ((pullback.fst f I.subschemeι) ⁻¹ᵁ U.1) (fun x hx => h hx) := by
+    rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_comp_appLE]
+  -- ★元に降りるのは 1 度だけ
+  have hdesc : ((pullback.fst f I.subschemeι).app U.1).hom ((f.appLE V.1 U.1 h).hom s)
+      = ((pullback.fst f I.subschemeι ≫ f).appLE V.1
+          ((pullback.fst f I.subschemeι) ⁻¹ᵁ U.1) (fun x hx => h hx)).hom s := by
+    rw [← key, CommRingCat.hom_comp, RingHom.comp_apply]
+  rw [hdesc, Scheme.Hom.appLE, CommRingCat.hom_comp, RingHom.comp_apply,
+    app_pullback_comp_eq_zero I f V s hs, map_zero]
+
 /-! ## ★★残る段を明示する —— 部品名まで特定した(2026-08-17 夜)
 
 ★★★**核が `Ideal.map` に等しい**ことが残る:
@@ -122,24 +186,27 @@ theorem ideal_comap_top_eq_ker (f : X ⟶ Y) (U : X.affineOpens) :
 
 ★★これが入れば `Proposition 1.4, (i)` が構成から**無条件に**出る。
 
-★本ファイルは**そこまでは主張しない**。取ったのは第 1 段だけである。
+★本ファイルが取ったのは**第 1 段(核として書ける)と易しい側の包含**である。
 
-### ★★★器具の記録 —— 易しい側の包含すら組めなかった
+### ★★★器具の記録 —— 「降り方」で通った
 
-`Ideal.map (f.appLE V U h) (I.ideal V) ≤ (I.comap f).ideal U`(易しい側)を
-10 回試して**組み上がらなかった**。★数学は 3 行である:
-`pullback.condition` を `V` で `app` に落とし、
+★**一度は「10 回試して組めなかった」と書いた。手を変えたら通った。**
+数学は 3 行である——`pullback.condition` を `V` で `app` に落とし、
 `s ∈ I.ideal V = ker (I.subschemeι.app V)` を使い、`appLE_comp_appLE` で `U` へ制限する。
 
-★★**摩擦は `CommRingCat.Hom.hom` と `ConcreteCategory.hom` の正規形の争い**である。
-`simp only` を当てるたびに**どちらかへ揺れ戻り**、`rw [h0]` が当たらない。
-`CommRingCat.comp_apply` / `ConcreteCategory.comp_apply` / `RingHom.comp_apply` /
-`CommRingCat.hom_comp` のどれを入れても、別の形に正規化されて次の `rw` が外れた。
+**通らない書き方**: 途中で `simp only` を当てる。
+★`CommRingCat.Hom.hom` と `ConcreteCategory.hom` の間で**正規形が揺れ戻り**、
+次の `rw` が外れる。`CommRingCat.comp_apply` / `ConcreteCategory.comp_apply` /
+`RingHom.comp_apply` / `CommRingCat.hom_comp` のどれを入れても別の形に正規化される。
+★★同じ証明が **import の重さで**通ったり通らなかったりした。
 
-★★★**同じ証明が、import の重さで通ったり通らなかったりした**——
-軽い import の probe では通り、同じ内容を本ファイルに置くと通らない。
-★これは本日 5 例目の「同じ数学が書き方で通ったり通らなかったりする」であり、
-**今までで最も悪質な型**である(書き方ではなく**環境**で変わる)。
+★★★**通る書き方: 射のレベルで分解を完成させ、元に降りるのは 1 度だけにする。**
+`Category.assoc` を `rw` ではなく `exact Category.assoc _ _ _` で当て、
+最後に `CommRingCat.hom_comp` + `RingHom.comp_apply` で 1 度だけ降りる。
+★★**`simp` を 1 度も使わない。**
+
+★これが本日 5 例目の「同じ数学が書き方で通ったり通らなかったりする」であり、
+**規則が 1 つ出た**——**圏の言葉で終わらせ、元には最後に 1 度だけ降りる。**
 
 ★次に取るときは `ConcreteCategory` の API に統一して書くこと。
 **半端に `sorry` を置かず、取れた第 1 段だけを残す。**
