@@ -1744,3 +1744,52 @@ mathlib の重複度公式は `emultiplicity` で述べられている。
 `Proposition 1.6` は `U_X(ℚ̄)` の上で述べられている。
 `Theorem 2.1` は compactly bounded subset の上で述べられている。
 ★★**どちらも本日の構成がそのまま使える。**
+
+---
+
+## §9-18 2026-08-17 深夜 —— `Proposition 1.6` が組み上がり、残る 1 点を測った
+
+### ★★★`Proposition 1.6` は組み上がった
+
+    `log-cond_D(x) ≤ ht_D(x) + C`   (`C` は `F` にも `x` にも依らない)
+
+`Found/GenEll/Prop16.lean`(sorry 0、標準 3 公理のみ)。
+★**射影モデルと Green 関数の連続性さえ与えれば、定数は自動で出る。**
+
+★★`L = O_X(D)` という原文の対応は、因子表示では**定義そのもの**になった。
+
+### ★★★残るのは `ArcModel` の構成 1 点
+
+`ArcModel`(`X(ℂ)` を `ℙ(V)` の閉錐集合として実現するデータ)を
+**与えられたものとして受けている**。
+★原文は「`X` は ℤ-固有」から射影埋め込みを得る
+(`Remark 1.4.1` が「ℤ-projective model that arises from a projective embedding」と明記)。
+
+★★構成に必要な段:
+
+| 段 | 状態 |
+|---|---|
+| `X(ℂ) → ℙⁿ(ℂ)`(閉埋め込みとの合成) | ★自明 |
+| 単射性(閉埋め込みは mono) | ★mathlib にある |
+| **`ℙⁿ(ℂ) ≅ ℙ ℂ (Fin (n+1) → ℂ)`** | ★★★**mathlib に無い** |
+| 像が閉(方程式で切れる) | ★`ProjClosed.lean` で取得済 |
+
+### ★★★測定: `Proj` の「点の関手」は mathlib に無い
+
+`Mathlib/AlgebraicGeometry/ProjectiveSpectrum/` は
+`Basic` / `Functor` / `Proper` / `Scheme` / `StructureSheaf` / `Topology` の 6 ファイル。
+★`Functor.lean` にあるのは **`Proj` の間の射の関手性**であり、
+**「`Proj` への射 = 直線」という点の関手の記述は無い**(2026-08-17 実測)。
+
+★★これは mathlib 級の貢献 1 本である。
+
+### ★★これで §1 の残りが出そろった
+
+| 項目 | 残り | 種別 |
+|---|---|---|
+| `Prop 1.6` | `ℙⁿ` の点の関手 | ★★mathlib 級 1 本 |
+| `Def 1.2, (i)` | 可逆層 or 移動補題 | ★★別規模 |
+| `Def 1.5, (ii)` | Auslander–Buchsbaum | ★★mathlib に着手なし |
+| `Prop 1.4, (iv)` | Northcott(ample との比較) | ★★別規模 |
+
+★★★**どれも「原文の数学」ではなく「mathlib の在庫」の問題である。**
