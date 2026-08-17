@@ -166,6 +166,7 @@ import ABC3.Found.Arakelov.PicPullOplax
 import ABC3.Found.Arakelov.PicSchemePullback
 import ABC3.Found.Arakelov.PicSchemeDelta
 import ABC3.Found.Arakelov.PicDeltaColimit
+import ABC3.Found.Arakelov.PicPullFree
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
