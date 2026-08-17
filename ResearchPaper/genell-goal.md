@@ -2564,3 +2564,66 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 
 ★★★**(a) 局所全射から書く。**局所自由性を使わないので独立に取れる。
 その後 (b) に `IsLocallyFree` の局所自明化を当てる。
+
+
+---
+
+## §9-30 (2026-08-17) ★★★★★★B1 —— 14 ブロック積み、`CommGroup` の 5 公理が揃った
+
+### ★取れたもの(すべて sorry 0、`Found/Arakelov/` 7 ファイル)
+
+| # | ファイル | 内容 |
+|---|---|---|
+| 1 | `PicPresheafTensor` | 前層加群の対称モノイダル構造(橋渡し) |
+| 2–3 | `PicSheafTensor` | `tensorModules` / 可換 / 単位律 |
+| 4 | `PicRestrict` | 開集合への制限 |
+| 5 | `PicRestrictTensor` | 制限とテンソルの両立(mathlib の `Monoidal` 在庫) |
+| 6 | `PicLocalSurj` | 局所全射性はテンソルで保たれる(★局所自由性不要) |
+| 7–8 | `PicLocalInj` / `PicLocality` | 局所単射性の基底・輸送・**局所性**(mathlib に無かった) |
+| 9 | `PicLocalBasis` | 局所基底から局所単射性(★`Over` 不要) |
+| 10 | `PicWhiskerW` | `W (f ▷ M)` / `W (M ◁ f)` |
+| 11–13 | `PicAssoc` | `W` → `IsIso` → 可逆層とのテンソル → **結合律** |
+| 14 | `PicType` | 可逆層の型 / `one` / **`symm`(逆元)** |
+
+### ★★★`CommGroup (Pic X)` の 5 公理
+
+| 公理 | 定理 |
+|---|---|
+| 乗法 | `tensorModules` |
+| 可換 | `tensorModulesComm` |
+| 単位元 | `tensorUnitLeft` / `tensorUnitRight` / `InvertibleSheaf.one` |
+| 結合律 | `tensorModulesAssoc` |
+| 逆元 | `InvertibleSheaf.symm` |
+
+### ★★★★残り 2 点(いずれも「局所自明化を presheaf の同型に上げる」が要る)
+
+#### (a) テンソル積が可逆層で閉じること
+
+`IsLocallyRankOne (tensorModules L M).val` が要る。★問題は
+**層化された**テンソル積の切断が直接計算できないことである。
+
+★★道筋: `L.val|_V ≅ 𝒪|_V` と `M.val|_V ≅ 𝒪|_V` を
+**`Over V` 上の前層の同型**として持てば、第 5 ブロック(制限はモノイダル)で
+`(L.val ⊗ M.val)|_V ≅ 𝒪|_V` となり、これは**層**なので層化が効かない。
+
+★★★したがって `IsLocallyRankOne` を
+「各 `V` で基底 1 本」から「`Over V` 上の前層同型」へ**強める**必要がある。
+★第 9 ブロック(局所単射性)は弱い形で十分だったが、こちらは強い形が要る。
+
+#### (b) 同型類への商と `CommGroup` インスタンス
+
+`Pic X := Quotient (可逆層を同型で割ったもの)` とし、
+乗法の well-defined 性(`tensorModulesIso`——第 2 ブロックに在る)と
+5 公理を商へ降ろす。★★`Interface` は `Pic : Scheme → Type`(**小さい型**)を
+要求するので `Shrink` が要る——本質的小ささの証明が別途要る。
+
+### ★★★この turn で 5 度踏んだ罠(記録)
+
+★★★**インスタンス束縛子は「型の書き方の違い」をまたげない。**
+
+    X.PresheafOfModules   と   PresheafOfModules (X.presheaf ⋙ forget₂ _ _)
+
+は `rfl` で等しいが、探索は片方でしか成功しない。
+★**対処: 局所単射性・局所全射性は `[..]` ではなく `(h : ..)` で受ける。**
+★もう 1 つ: **依存を書き換えたら `lake build` で先に olean を作り直す**
+——さもないと名前付き引数が古い署名で解決される。

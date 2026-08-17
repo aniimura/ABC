@@ -128,6 +128,43 @@ metadata:
 4. `Spec ℂ` の点の型は **`↥(Spec (CommRingCat.of ℂ))`** で
    `PrimeSpectrum (…)` と**構文的に別**(defeq だが `rw` は噛まない)。
 
+## ★★★★★B1 は 14 ブロックまで積んだ(2026-08-17)——`CommGroup` の 5 公理が揃った
+
+`Found/Arakelov/` に 7 ファイル(`PicPresheafTensor` … `PicType`)、すべて sorry 0。
+
+| 公理 | 定理 |
+|---|---|
+| 乗法 | `tensorModules`(前層でテンソル → 層化) |
+| 可換 | `tensorModulesComm` |
+| 単位元 | `tensorUnitLeft` / `InvertibleSheaf.one` |
+| 結合律 | `tensorModulesAssoc` |
+| 逆元 | `InvertibleSheaf.symm` |
+
+★★★**残り 2 点**: (a) テンソル積が可逆層で閉じること
+(`IsLocallyRankOne` を「`Over V` 上の前層同型」へ強める必要がある)、
+(b) 同型類への商と `CommGroup` インスタンス(`Shrink` の本質的小ささも)。
+
+### ★★★見積りを 4 度外した(すべて「無い」と決めてから在庫が見つかった)
+
+| 何 | 当初の見積り | 実際 |
+|---|---|---|
+| C1 の `X^arc` | 複素解析空間と GAGA | ★商位相と多項式の連続性だけ |
+| 開集合への制限 | 自作 | ★`SheafOfModules.over` が在った |
+| 制限とテンソルの両立 | 自作 | ★`pushforward₀OfCommRingCat.Monoidal` が在った |
+| 結合律 | 内部 Hom が要る(mathlib PR 級) | ★局所論法で回避、`Over` すら不要だった |
+
+★★★**「無い」と決める前に測る。**
+
+### ★★★★★Lean の罠(この turn で 5 度)
+
+★★**インスタンス束縛子は「型の書き方の違い」をまたげない。**
+`X.PresheafOfModules` と `PresheafOfModules (X.presheaf ⋙ forget₂ _ _)` は
+`rfl` で等しいが、インスタンス探索は片方でしか成功しない。
+★**対処: 条件を `[..]` でなく `(h : ..)` で受ける。**
+★別名(`abbrev` でも)を経由すると届かないことがある——**素の形で書く**。
+★依存を書き換えたら `lake build` で先に olean を作り直す
+(さもないと名前付き引数が古い署名で解決される)。
+
 ## ★★グラフにも 28 件が出るようになった(2026-08-17)
 
 `dependency-graph.html` の節点語彙は**原文の項目番号**なので、
