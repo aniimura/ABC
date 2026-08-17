@@ -1,5 +1,7 @@
 import ABC3.Found.FrdI.Prop33v
 import ABC3.Found.FrdI.Thm34
+import Mathlib.CategoryTheory.SingleObj
+import Mathlib.CategoryTheory.Products.Basic
 
 /-!
 # [FrdI] Proposition 3.11, (i) —— group-like・isotropic・unit-trivial 型なら `𝒞 ≃ 𝔽_Φ`
@@ -535,5 +537,80 @@ theorem prop_3_11_ii {A B : C₁} (φ : A ⟶ B) :
      hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂⟩
 
 end Preserve
+
+/-! ## ★(iii) の第 1 歩 —— **`Φ` が零なら `𝔽_Φ ≌ 𝒟 × 𝒩`**
+
+原文 (FrdI p.74):
+> Finally, we consider assertion (iii). Write N for the one-object category whose
+
+原文 (FrdI p.74):
+> of categories  Ci  Fi  Di  N
+
+★★**`Φ` が零モノイドなら `𝔽_Φ` の射 `(base, div, deg)` は `div` が消えて
+`(base, deg)` の 2 つ組になる**——これはちょうど `𝒟 × 𝒩` の射である
+(`𝒩` は自己射モノイドが `ℕ≥1` の 1 対象圏)。
+
+★★★**合成則まで一致する**: `𝔽_Φ` は `(ψ ≫ φ).deg = φ.deg * ψ.deg`、
+`SingleObj` は `comp x y := y * x`。★**原文が「≌」と書くところが `rfl` になる。**
+-/
+
+/-- ★★**`Φ` が零なら `𝔽_Φ → 𝒟 × 𝒩`** —— 射を `(base, deg)` に落とすだけ。
+
+★`map_id` も `map_comp` も **`rfl`** である。 -/
+def elemFrobToProd : ElemFrobCat Φ ⥤ D × SingleObj ℕ+ where
+  obj A := (A.base, SingleObj.star ℕ+)
+  map f := (ElemFrobCat.Hom.base f, ElemFrobCat.Hom.deg f)
+  map_id _ := rfl
+  map_comp _ _ := rfl
+
+/-- ★★**忠実** —— `Φ` が零なので `div` 成分に情報が無い。 -/
+theorem elemFrobToProd_faithful (hzero : ∀ (X : D) (a : Φ.val X), a = 0) :
+    (elemFrobToProd (Φ := Φ)).Faithful where
+  map_injective {A B f g} h := by
+    refine ElemFrobCat.Hom.ext ?_ ((hzero _ _).trans (hzero _ _).symm) ?_
+    · exact congrArg Prod.fst h
+    · exact congrArg Prod.snd h
+
+/-- ★★**充満** —— `(b, n)` は `⟨b, 0, n⟩` の像。 -/
+theorem elemFrobToProd_full : (elemFrobToProd (Φ := Φ)).Full where
+  map_surjective {A B} g := ⟨⟨g.1, 0, g.2⟩, rfl⟩
+
+/-- ★★**本質的全射** —— 対象は `𝒟` の対象そのもの。 -/
+theorem elemFrobToProd_essSurj : (elemFrobToProd (Φ := Φ)).EssSurj where
+  mem_essImage Z := ⟨⟨Z.1⟩, ⟨Iso.refl _⟩⟩
+
+/-- ★★★**[FrdI] Proposition 3.11, (iii) の第 1 歩** —— `Φ` が零モノイドなら
+**`𝔽_Φ` は `𝒟 × 𝒩` と圏同値**である。
+
+原文 (FrdI p.74):
+> of categories  Ci  Fi  Di  N
+
+★★**(i) と合わせると `𝒞 ≌ 𝒟 × 𝒩`** になる。★原文はこの分解を使って
+「`𝒟` は `𝒞` から圏論的に復元できる」(base-identity 自己射との合成が等しい射を同一視する)
+と論じる。 -/
+theorem elemFrobToProd_isEquivalence (hzero : ∀ (X : D) (a : Φ.val X), a = 0) :
+    (elemFrobToProd (Φ := Φ)).IsEquivalence := by
+  haveI := elemFrobToProd_faithful hzero
+  haveI := elemFrobToProd_full (Φ := Φ)
+  haveI := elemFrobToProd_essSurj (Φ := Φ)
+  exact { }
+
+include P in
+/-- ★**`𝒞` の側へ運んだ形** —— group-like・isotropic・unit-trivial 型なら
+`𝒞 ≌ 𝒟 × 𝒩`。
+
+★(i)(`𝒞 ≌ 𝔽_Φ`)と上(`𝔽_Φ ≌ 𝒟 × 𝒩`)の合成である。 -/
+theorem toElem_comp_prod_isEquivalence (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : IsOfIsotropicType P) (hut : IsOfUnitTrivialType P)
+    (hgl : IsOfGroupLikeType P) :
+    (P.toElem ⋙ elemFrobToProd (Φ := Φ)).IsEquivalence := by
+  haveI := prop_3_11_i P Fc G hiso hut hgl
+  haveI : (elemFrobToProd (Φ := Φ)).IsEquivalence := by
+    refine elemFrobToProd_isEquivalence (fun X a => ?_)
+    obtain ⟨A₀, -, ⟨e⟩⟩ := Fc.baseSurj X
+    have h0 : Φ.map e.hom a = 0 :=
+      eq_zero_of_groupLike_of_sharp P (hgl A₀) (P.divisorial _).2 _
+    exact Φ.map_injective e.hom (by rw [h0, map_zero])
+  infer_instance
 
 end ABC3.Found.FrdI
