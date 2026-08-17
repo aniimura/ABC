@@ -613,4 +613,78 @@ theorem toElem_comp_prod_isEquivalence (Fc : FrobenioidCore P) (G : Frobenioid P
     exact Φ.map_injective e.hom (by rw [h0, map_zero])
   infer_instance
 
+/-! ### ★射影は `𝒟 × 𝒩` の第 1 成分そのもの
+
+★★`ElemFrobCat.proj` は `obj A := A.base`、`map φ := φ.base`。
+`elemFrobToProd` は `obj A := (A.base, ⋆)`、`map f := (f.base, f.deg)`。
+★**したがって `elemFrobToProd ⋙ fst` は `proj` に等しい**——`rfl` である。 -/
+
+theorem elemFrobToProd_comp_fst :
+    elemFrobToProd (Φ := Φ) ⋙ CategoryTheory.Prod.fst D (SingleObj ℕ+)
+      = ElemFrobCat.proj := rfl
+
+/-- ★**`𝒟 → 𝒟 × 𝒩`**(第 2 成分は `⋆`、射は `1`)。
+
+★★`SingleObj` では `𝟙 = 1` なので、**これが関手になるのは `1 * 1 = 1` だから**である。 -/
+def toProdN : D ⥤ D × SingleObj ℕ+ :=
+  CategoryTheory.Functor.prod' (𝟭 D) ((Functor.const D).obj (SingleObj.star ℕ+))
+
+@[simp] theorem toProdN_obj (X : D) : (toProdN (D := D)).obj X = (X, SingleObj.star ℕ+) := rfl
+
+/-- ★★**`𝔽_Φ` の対象は `(base, ⋆)` そのもの** —— `toProdN` は `elemFrobToProd` の
+第 1 成分を取ってから戻すと元に戻る(対象について)。 -/
+theorem toProdN_elemFrobToProd_obj (A : ElemFrobCat Φ) :
+    (toProdN (D := D)).obj ((elemFrobToProd (Φ := Φ)).obj A).1
+      = (elemFrobToProd (Φ := Φ)).obj A := rfl
+
+/-! ## ★(iii) の第 2 歩 —— **`Ψ_Base : 𝒟₁ ⥤ 𝒟₂` の構成**
+
+原文 (FrdI p.74):
+> morphisms of Ci, where two morphisms of Ci are regarded as equivalent if they
+
+★★**`𝒞ᵢ ≌ 𝒟ᵢ × 𝒩` を使えば `Ψ_Base` は合成で書ける**:
+
+  `𝒟₁ --(X ↦ (X,⋆))--> 𝒟₁ × 𝒩 ≌ 𝒞₁ --Ψ--> 𝒞₂ ≌ 𝒟₂ × 𝒩 --fst--> 𝒟₂`
+
+★★★**要点は「`𝒟₁ → 𝒟₁ × 𝒩` が射を次数 `1` に潰す」こと**である。
+そのぶんの食い違い(`(Base φ, 1)` と `(Base φ, degFr φ)` の差)は
+**base-identity 自己射**であり、★原文が (iii) で仮定する
+「`Ψ` とその擬逆が base-identity 自己射を保つ」がちょうどそれを消す。
+-/
+
+section BaseFunctor
+
+universe v₇ u₇ v₈ u₈ w₇ w₈ v₉ u₉ v₁₀ u₁₀
+
+variable {C₁ : Type u₇} [Category.{v₇} C₁] {C₂ : Type u₈} [Category.{v₈} C₂]
+  (Ψ : C₁ ⥤ C₂)
+  {D₁ : Type u₉} [Category.{v₉} D₁] {Φ₁ : MonoidOn.{v₉, u₉, w₇} D₁}
+  (P₁ : PreFrobenioid C₁ Φ₁)
+  {D₂ : Type u₁₀} [Category.{v₁₀} D₂] {Φ₂ : MonoidOn.{v₁₀, u₁₀, w₈} D₂}
+  (P₂ : PreFrobenioid C₂ Φ₂)
+
+/-- ★**`𝒞 ⥤ 𝒟 × 𝒩`** —— `(i)` の圏同値の合成形。 -/
+abbrev toProdCat : C₁ ⥤ D₁ × SingleObj ℕ+ := P₁.toElem ⋙ elemFrobToProd
+
+/-- ★**射影は第 1 成分そのもの**(`rfl`)。 -/
+theorem toProdCat_comp_fst :
+    toProdCat P₁ ⋙ CategoryTheory.Prod.fst D₁ (SingleObj ℕ+) = P₁.proj := rfl
+
+variable [hE₁ : (toProdCat P₁).IsEquivalence]
+
+/-- ★★★**[FrdI] Proposition 3.11, (iii) の `Ψ_Base`**。
+
+★`𝒟₁ → 𝒟₁ × 𝒩 ≌ 𝒞₁ --Ψ--> 𝒞₂ ≌ 𝒟₂ × 𝒩 → 𝒟₂` の合成。 -/
+noncomputable def psiBase : D₁ ⥤ D₂ :=
+  toProdN ⋙ (toProdCat P₁).inv ⋙ Ψ ⋙ toProdCat P₂ ⋙
+    CategoryTheory.Prod.fst D₂ (SingleObj ℕ+)
+
+/-- ★**対象の側の可換性** —— `(X, ⋆)` に戻す操作が `𝔽_Φ` の対象では**恒等**なので、
+`Ψ_Base (Base A)` は `Base (Ψ (E₁⁻¹ (E₁ A)))` そのものである。 -/
+theorem psiBase_obj (A : C₁) :
+    (psiBase Ψ P₁ P₂).obj (P₁.proj.obj A)
+      = ((toProdCat P₂).obj (Ψ.obj ((toProdCat P₁).inv.obj ((toProdCat P₁).obj A)))).1 := rfl
+
+end BaseFunctor
+
 end ABC3.Found.FrdI
