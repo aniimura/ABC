@@ -127,8 +127,19 @@ theorem deg_adivRed_le (a : ADiv F) (ha : a.IsEffective) : deg (ADivRed a) ≤ d
 
 /-! ## ★出典の紐付け(`.src`) -/
 
+/-- ★**条を明示する**(2026-08-17 夕に修正)。
+
+`ADivRed` は `ADiv F`(= `Spec 𝓞_F` 上の算術因子)の被約化であり、
+原文 (ii) が言う**一般の正規ネーター scheme `Z`** の場合ではない。
+★`Spec 𝓞_F` は Dedekind なので非零イデアルはすべて可逆であり、
+**正則性も Auslander–Buchsbaum も要らない**——だから先に取れた。
+
+★★一般の場合は `RadicalCartier.lean` にあり、そこには
+「各茎が UFD」という仮定が残っている(正則 ⟹ UFD が mathlib に無いため)。
+★**ラベルが条を書いていないと、一般の場合まで取れたように読める。** -/
 def ADivRed.src : ABC3.Meta.Source :=
-  { paper := "GenEll", pdfPage := 8, item := "Definition 1.5, (ii)",
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (ii)(Spec 𝓞_F の場合のみ——一般の Z は RadicalCartier.lean)",
     sectionId := "genell-def-1-5" }
 
 /-- ★★**条なしにしてはならない。**
