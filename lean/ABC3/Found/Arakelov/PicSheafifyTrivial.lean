@@ -80,11 +80,61 @@ theorem isIso_restrict_sheafifyUnit (P : X.PresheafOfModules)
   exact inferInstanceAs (IsIso ((sheafToPresheaf
     ((Opens.grothendieckTopology X).over V) AddCommGrpCat.{u}).map φ))
 
+/-- ★★**制限した層化の単位は前層加群の射としても同型である**。
+
+★機構は `toPresheaf` が同型を反映すること + 制限関手の台が `whiskerLeft` そのものであること
+(どちらも 2026-08-17 に探りで確認)。 -/
+theorem isIso_restrictMap_sheafifyUnit (P : X.PresheafOfModules)
+    (hP : Presheaf.IsSheaf ((Opens.grothendieckTopology X).over V)
+      ((Over.forget V).op ⋙ P.presheaf)) :
+    IsIso ((restrictPresheafFunctor X V).map (sheafifyUnit X P)) := by
+  haveI := isIso_restrict_sheafifyUnit X V P hP
+  refine (isIso_iff_of_reflects_iso ((restrictPresheafFunctor X V).map (sheafifyUnit X P))
+    (PresheafOfModules.toPresheaf
+      (((Over.forget V).op ⋙ X.presheaf) ⋙ forget₂ CommRingCat.{u} RingCat.{u}))).1 ?_
+  exact ‹IsIso (Functor.whiskerLeft (Over.forget V).op
+    ((PresheafOfModules.toPresheaf X.ringCatSheaf.obj).map (sheafifyUnit X P)))›
+
+/-- ★★★★★★**層化は局所自明性を保つ**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★**これが B1 の最後の壁だった。**
+これで `tensorModules L M = 層化 (L.val ⊗ M.val)` が再び可逆層になる。 -/
+theorem isLocallyTrivial_sheafify (P : X.PresheafOfModules)
+    (h : IsLocallyTrivial X P) :
+    IsLocallyTrivial X ((PresheafOfModules.sheafification (R := X.ringCatSheaf)
+      (𝟙 X.ringCatSheaf.obj)).obj P).val := by
+  intro U
+  obtain ⟨S, hS, hV⟩ := h U
+  refine ⟨S, hS, ?_⟩
+  intro V i hi
+  obtain ⟨e⟩ := hV i hi
+  -- ★`P|_V` は層である(`𝟙_|_V` と同型で、`𝟙_|_V` は層)
+  have hunit : Presheaf.IsSheaf ((Opens.grothendieckTopology X).over V)
+      ((Over.forget V).op ⋙
+        (PresheafOfModules.unit X.ringCatSheaf.obj).presheaf) :=
+    isSheaf_restrict X V _
+      ((sheafCompose (Opens.grothendieckTopology X)
+        (forget₂ RingCat.{u} AddCommGrpCat.{u})).obj X.ringCatSheaf).property
+  have hP : Presheaf.IsSheaf ((Opens.grothendieckTopology X).over V)
+      ((Over.forget V).op ⋙ P.presheaf) :=
+    (Presheaf.isSheaf_of_iso_iff
+      ((PresheafOfModules.toPresheaf _).mapIso e)).2 hunit
+  haveI := isIso_restrictMap_sheafifyUnit X V P hP
+  exact ⟨(asIso ((restrictPresheafFunctor X V).map (sheafifyUnit X P))).symm ≪≫ e⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isSheaf_restrict.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 B——層の制限は層であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def isLocallyTrivial_sheafify.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 B——層化が局所自明性を保つこと)",
     sectionId := "genell-def-1-1-i" }
 
 def isIso_restrict_sheafifyUnit.src : ABC3.Meta.Source :=
