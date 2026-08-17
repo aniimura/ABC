@@ -1055,4 +1055,81 @@ theorem pfRoot_frobDegUniq (hfi : IsOfFrobeniusIsotropicType P)
       (congrArg (HomPf.mk ((idx13 P F _ _ _).obj W)) hβ₀e)) ?_
     rw [← hχW, Iso.inv_hom_id_apply]
 
+/-! ## ★22. ★★★根の指数は上げられる —— `(A, n) ≅ (A^m, n*m)`
+
+★★これで **2 つの対象を同じ根の指数に揃えられる**。
+`X = (A, n)`、`Y = (B, m)` なら `X ≅ (A^m, n*m)`、`Y ≅ (B^n, n*m)` である。
+
+★★★根が等しいと `compRoot` の 3 つの `rtRootIso` が**すべて同じ命題の証明**になり
+(`r*r = r*r`)、証明無関係で**同一の射**になる。★これが (iii)(c) や (vi) の鍵。 -/
+
+variable {P F} in
+/-- ★★**根の指数を上げる同型** —— `(A, n) ≅ (A^m, t)`(`t = n * m`)。 -/
+theorem pfRoot_exists_iso_root (A : C) (n m t : ℕ+) (ht : t = n * m) :
+    ∃ e : (⟨A, n⟩ : PfRootObj P F) ⟶ ⟨rtObj P F A m, t⟩, IsIso e := by
+  obtain ⟨β, hβ, -⟩ := exists_rtObj_assoc (F := F) A m n t ht
+  haveI := hβ
+  exact ⟨HomPf.mk (idxOne P F _ _) (@inv _ _ _ _ β hβ),
+    pfRoot_isIso_mk _ _ (@IsIso.inv_isIso _ _ _ _ β hβ)⟩
+
+/-! ## ★23. `𝒪^▷` と (iii)(c) は同型で移せる(圏の言葉だけ) -/
+
+variable {P F} in
+/-- ★同型で挟むと `𝒪^▷` の元は `𝒪^▷` の元に移る。 -/
+theorem oTri_conj {X X' : PfRootObj P F} (e : X ⟶ X') (e' : X' ⟶ X)
+    (he1 : e ≫ e' = 𝟙 X) (he2 : e' ≫ e = 𝟙 X') (α : End X)
+    (hα : α ∈ OTri (pfRootPre P F) X) :
+    (show End X' from e' ≫ (α : X ⟶ X) ≫ e) ∈ OTri (pfRootPre P F) X' := by
+  haveI : IsIso e := ⟨⟨e', he1, he2⟩⟩
+  haveI : IsIso e' := ⟨⟨e, he2, he1⟩⟩
+  constructor
+  · show (pfRootPre P F).Base (e' ≫ (α : X ⟶ X) ≫ e)
+      = (pfRootPre P F).Base (𝟙 X')
+    rw [(pfRootPre P F).Base_comp, (pfRootPre P F).Base_comp,
+      show (pfRootPre P F).Base (α : X ⟶ X) = (pfRootPre P F).Base (𝟙 X) from hα.1,
+      (pfRootPre P F).Base_id, Category.id_comp, (pfRootPre P F).Base_id,
+      ← (pfRootPre P F).Base_comp, he2, (pfRootPre P F).Base_id]
+  · show (pfRootPre P F).degFr (e' ≫ (α : X ⟶ X) ≫ e) = 1
+    rw [(pfRootPre P F).degFr_comp, (pfRootPre P F).degFr_comp,
+      show (pfRootPre P F).degFr (α : X ⟶ X) = 1 from hα.2,
+      show (pfRootPre P F).degFr e = 1 from isLinear_of_isIso (pfRootPre P F) e,
+      show (pfRootPre P F).degFr e' = 1 from isLinear_of_isIso (pfRootPre P F) e']
+    simp
+
+/-! ## ★24. 3 脚添字を「対角かつ isotropic」へ
+
+★★`𝒪^▷` の元を `𝒞` の `𝒪^▷` の元として読むには、
+**第 1・第 2 脚が同じ射**でなければならない(そうでないと
+`Base` が恒等にならず、共役が残る)。
+★`frob_common_upper` で 2 脚を揃え、そのうえで `hfi` で isotropic まで押す。 -/
+
+variable {P F} in
+/-- ★★**3 脚添字を「第 1・第 2 脚が一致し、終域が isotropic」な所まで押し上げる**。 -/
+theorem exists_idx3_diag (hfi : IsOfFrobeniusIsotropicType P) {A E : C}
+    (V : IdxPf3 P F A A E) :
+    ∃ (Dd E₃ : C) (l : A ⟶ Dd) (hl : IsFrobeniusType P l) (m : E ⟶ E₃)
+      (hm : IsFrobeniusType P m) (hd : P.degFr l = P.degFr m),
+      IsIsotropic P Dd ∧ Nonempty (V ⟶ idxMk3 (F := F) l l m hl hl hm rfl hd) := by
+  obtain ⟨hv1, hv2, hv3, h12, h23⟩ := V.hom.property
+  obtain ⟨X₃, a, c, ha, hc, had, hcd, hac⟩ :=
+    frob_common_upper P F V.hom.hom.1 hv1 V.hom.hom.2.1 hv2
+  obtain ⟨Dd, δ, hδ, hDd⟩ := hfi X₃
+  obtain ⟨E₃, e, he, hed⟩ := F.frobDegSurj V.right.obj.2.2 (P.degFr (a ≫ δ))
+  have hacδ : V.hom.hom.1 ≫ (a ≫ δ) = V.hom.hom.2.1 ≫ (c ≫ δ) := by
+    rw [← Category.assoc, ← Category.assoc, hac]
+    rfl
+  have hdaδ : P.degFr (a ≫ δ) = P.degFr (c ≫ δ) := by
+    rw [P.degFr_comp a δ, P.degFr_comp c δ, had, hcd, h12]
+    rfl
+  have hlm : P.degFr (V.hom.hom.1 ≫ (a ≫ δ)) = P.degFr (V.hom.hom.2.2 ≫ e) := by
+    rw [P.degFr_comp V.hom.hom.1 (a ≫ δ), P.degFr_comp V.hom.hom.2.2 e, hed, h12, h23]
+  refine ⟨Dd, E₃, V.hom.hom.1 ≫ (a ≫ δ),
+    IsFrobeniusType.comp P F hv1 (IsFrobeniusType.comp P F ha hδ),
+    V.hom.hom.2.2 ≫ e, IsFrobeniusType.comp P F hv3 he, hlm, hDd,
+    ⟨Under.homMk (show V.right ⟶ (⟨(Dd, Dd, E₃)⟩ : TriFr P F) from
+      ⟨(a ≫ δ, c ≫ δ, e), IsFrobeniusType.comp P F ha hδ,
+        IsFrobeniusType.comp P F hc hδ, he, hdaδ, ?_⟩)
+      (WideSubcategory.hom_ext _ (Prod.ext rfl (Prod.ext hacδ.symm rfl)))⟩⟩
+  rw [← hdaδ, hed]
+
 end ABC3.Found.FrdI
