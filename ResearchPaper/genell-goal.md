@@ -1359,3 +1359,25 @@ mathlib の型階層と強制の経路が、証明の書き方を決めている
 ★**これは正しい状態である。** 1 件に数えるには命題**全体**が要り、
 `Proposition 1.4` は (i)〜(iv) の 4 条すべてが揃って初めて 1 件になる。
 ★★条つき `.src` を数に入れれば数字は上がるが、それは B5 そのものである。
+
+### ★§9-11 追記 —— 迂回路の部品を精密に測った(2026-08-17 夜)
+
+`comap_mul` を迂回する道(台の有限性 + 茎での積保存)の部品を、
+実際に `lake env lean` で当てて測った。
+
+| 部品 | 状態 |
+|---|---|
+| 有限素点 → `Spec 𝓞_F` の点 | ★**そのまま通る**(`⟨v.asIdeal, v.isPrime⟩`) |
+| 茎 ≅ 局所化 | ★`StructureSheaf.stalkIso R p` は **`AlgEquiv`** で在る |
+| `Algebra 𝓞_F (茎)` の instance | ★★**無い**——`stalkIso` を明示的に通す必要がある |
+| 局所化が DVR | ★`IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain` が在る |
+| 　　同 instance | ★★**自動では出ない**(`P ≠ ⊥` と `IsLocalization.AtPrime` を明示する) |
+| 台が有限 | ★★`support_comap`(mathlib)+ `stalk_eq_top_iff`(本日取得)で道は通っている |
+| 茎での積保存 | ★★★**取得済**(`stalkPullback_mul`) |
+
+★★**数学の穴は無い。**すべての部品が mathlib か本プロジェクトに在る。
+★残るのは instance を明示的に通す配線であり、
+**`Localization.AtPrime v.asIdeal` の側で作業して `stalkIso` で最後に移す**のが筋である
+(茎の側で instance を合わせようとすると `RadicalCartier.lean` と同じ摩擦に入る)。
+
+★★★**次のセッションはここから**——半端に作らず、測定だけを残す。
