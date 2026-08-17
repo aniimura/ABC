@@ -997,6 +997,251 @@ theorem model_frobenioidCore (h : Hyp M) : FrobenioidCore (modelPre h) where
   isotropicHullExists := model_isotropicHullExists h
   isotropicClosed := model_isotropicClosed h
 
+/-! ## ★14. (iii)(d) の 2 本の圏同値
+
+★★`𝔽_Φ` は `Φ^char` 上に載っていたので `toChar`・`CharRel` を経由したが、
+model Frobenioid は **`Φ` そのもの**の上にあるので `MLe` がそのまま使える。
+代わりに **`u` 成分と `α` の整合(`cond`)**を作る手間が増える。
+
+★★**型の注意**: `WideSubcategory` を通ると対象が `{ obj := A }.obj` の形で現れ、
+`A.base` と**構文上は違う**ものになる。そこで **射の構成は素の型を取る補題に出し**、
+圏同値の証明ではそれを適用するだけにする。 -/
+
+theorem gpMapOn_injective_of_iso (h : Hyp M) {X Y : D} (f : X ⟶ Y) [IsIso f] :
+    Function.Injective (M.phi.gpMapOn f) := by
+  intro x y hxy
+  have h1 : ∀ z : Gp (M.phi.val Y), M.phi.gpMapOn (inv f) (M.phi.gpMapOn f z) = z := by
+    intro z
+    rw [← MonoidOn.gpMapOn_comp, IsIso.inv_hom_id, MonoidOn.gpMapOn_id]
+  rw [← h1 x, ← h1 y, hxy]
+
+/-- ★**前置** —— `z : A ⟶ Z`、`w : A ⟶ W` が pre-step で `Div z + x = Div w` なら、
+`z ≫ t = w` なる pre-step `t : Z ⟶ W` がある。 -/
+theorem exists_hom_under (h : Hyp M) {A Z W : Obj M} (z : A ⟶ Z) (w : A ⟶ W)
+    (hz : IsIso z.base) (hw : IsIso w.base) (hzd : z.deg = 1) (hwd : w.deg = 1)
+    (x : M.phi.val A.base) (hx : z.div + x = w.div) :
+    ∃ t : Z ⟶ W, z ≫ t = w ∧ t.deg = 1 ∧ IsIso t.base := by
+  haveI := hz
+  haveI := hw
+  have hZc := z.cond
+  have hWc := w.cond
+  rw [hzd] at hZc
+  rw [hwd] at hWc
+  simp only [PNat.one_coe, one_smul] at hZc hWc
+  have hz2 : M.phi.gpMapOn z.base Z.cls
+      = A.cls + toGpHom (M.phi.val A.base) z.div - M.divB A.base z.u :=
+    eq_sub_of_add_eq hZc.symm
+  have hw2 : M.phi.gpMapOn w.base W.cls
+      = A.cls + toGpHom (M.phi.val A.base) w.div - M.divB A.base w.u :=
+    eq_sub_of_add_eq hWc.symm
+  have hxg : toGpHom (M.phi.val A.base) z.div + toGpHom (M.phi.val A.base) x
+      = toGpHom (M.phi.val A.base) w.div := by
+    rw [← map_add, hx]
+  have hcond : ((1 : ℕ+) : ℕ) • Z.cls + toGpHom _ (M.phi.map (inv z.base) x)
+      = M.phi.gpMapOn (inv z.base ≫ w.base) W.cls
+        + M.divB _ (M.bmon.map (inv z.base) (w.u + bneg h z.u)) := by
+    refine gpMapOn_injective_of_iso h z.base ?_
+    simp only [PNat.one_coe, one_smul]
+    rw [(M.phi.gpMapOn z.base).map_add, (M.phi.gpMapOn z.base).map_add,
+      MonoidOn.gpMapOn_toGpHom, phi_map_roundtrip,
+      ← MonoidOn.gpMapOn_comp, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp,
+      ← M.divB_nat z.base _, bmon_map_roundtrip,
+      hz2, hw2, (M.divB A.base).map_add, divB_bneg, ← hxg]
+    abel
+  refine ⟨⟨inv z.base ≫ w.base, M.phi.map (inv z.base) x, 1,
+    M.bmon.map (inv z.base) (w.u + bneg h z.u), hcond⟩, ?_, rfl, ?_⟩
+  · refine Hom.ext ?_ ?_ ?_ ?_
+    · show z.base ≫ (inv z.base ≫ w.base) = w.base
+      rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    · show M.phi.map z.base (M.phi.map (inv z.base) x) + ((1 : ℕ+) : ℕ) • z.div = w.div
+      rw [phi_map_roundtrip]
+      simp only [PNat.one_coe, one_smul]
+      rw [add_comm]
+      exact hx
+    · show (1 : ℕ+) * z.deg = w.deg
+      rw [one_mul, hzd, hwd]
+    · show M.bmon.map z.base (M.bmon.map (inv z.base) (w.u + bneg h z.u))
+        + ((1 : ℕ+) : ℕ) • z.u = w.u
+      rw [bmon_map_roundtrip]
+      simp only [PNat.one_coe, one_smul]
+      rw [add_assoc, bneg_add, add_zero]
+  · show IsIso (inv z.base ≫ w.base)
+    infer_instance
+
+/-- ★`Div` がちょうど `a` の pre-step を `A` から出す。 -/
+theorem exists_hom_div (h : Hyp M) (A : Obj M) (a : M.phi.val A.base) :
+    ∃ (Z : Obj M) (z : A ⟶ Z), z.div = a ∧ z.deg = 1 ∧ IsIso z.base := by
+  refine ⟨⟨A.base, A.cls + toGpHom _ a⟩,
+    ⟨𝟙 A.base, a, 1, 0, by simp⟩, rfl, rfl, ?_⟩
+  show IsIso (𝟙 A.base)
+  infer_instance
+
+/-- ★**後置** —— `z : Z ⟶ A`、`w : W ⟶ A` が pre-step で
+`Base(t)^*(Div w) + y = Div z` なら、`t ≫ w = z` なる pre-step `t : Z ⟶ W` がある。 -/
+theorem exists_hom_over (h : Hyp M) {A Z W : Obj M} (z : Z ⟶ A) (w : W ⟶ A)
+    (hz : IsIso z.base) (hw : IsIso w.base) (hzd : z.deg = 1) (hwd : w.deg = 1)
+    (y : M.phi.val Z.base)
+    (hy : M.phi.map (z.base ≫ inv w.base) w.div + y = z.div) :
+    ∃ t : Z ⟶ W, t ≫ w = z ∧ t.deg = 1 ∧ IsIso t.base := by
+  haveI := hz
+  haveI := hw
+  have hZc := z.cond
+  have hWc := w.cond
+  rw [hzd] at hZc
+  rw [hwd] at hWc
+  simp only [PNat.one_coe, one_smul] at hZc hWc
+  have hyg : toGpHom (M.phi.val Z.base) (M.phi.map (z.base ≫ inv w.base) w.div)
+      + toGpHom (M.phi.val Z.base) y = toGpHom (M.phi.val Z.base) z.div := by
+    rw [← map_add, hy]
+  have hcond : ((1 : ℕ+) : ℕ) • Z.cls + toGpHom _ y
+      = M.phi.gpMapOn (z.base ≫ inv w.base) W.cls
+        + M.divB _ (z.u + bneg h (M.bmon.map (z.base ≫ inv w.base) w.u)) := by
+    have hWt := congrArg (M.phi.gpMapOn (z.base ≫ inv w.base)) hWc
+    rw [(M.phi.gpMapOn (z.base ≫ inv w.base)).map_add,
+      (M.phi.gpMapOn (z.base ≫ inv w.base)).map_add, MonoidOn.gpMapOn_toGpHom,
+      ← MonoidOn.gpMapOn_comp, Category.assoc, IsIso.inv_hom_id, Category.comp_id,
+      ← M.divB_nat (z.base ≫ inv w.base) w.u] at hWt
+    have hW3 : M.phi.gpMapOn (z.base ≫ inv w.base) W.cls
+        = M.phi.gpMapOn z.base A.cls
+          + M.divB Z.base (M.bmon.map (z.base ≫ inv w.base) w.u)
+          - toGpHom (M.phi.val Z.base) (M.phi.map (z.base ≫ inv w.base) w.div) :=
+      eq_sub_of_add_eq hWt
+    have hZ3 : M.phi.gpMapOn z.base A.cls
+        = Z.cls + toGpHom (M.phi.val Z.base) z.div - M.divB Z.base z.u :=
+      eq_sub_of_add_eq hZc.symm
+    rw [hW3, hZ3, (M.divB Z.base).map_add, divB_bneg, ← hyg]
+    simp only [PNat.one_coe, one_smul]
+    abel
+  refine ⟨⟨z.base ≫ inv w.base, y, 1,
+    z.u + bneg h (M.bmon.map (z.base ≫ inv w.base) w.u), hcond⟩, ?_, rfl, ?_⟩
+  · refine Hom.ext ?_ ?_ ?_ ?_
+    · show (z.base ≫ inv w.base) ≫ w.base = z.base
+      rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+    · show M.phi.map (z.base ≫ inv w.base) w.div + (w.deg : ℕ) • y = z.div
+      rw [hwd]
+      simp only [PNat.one_coe, one_smul]
+      exact hy
+    · show w.deg * 1 = z.deg
+      rw [mul_one, hzd, hwd]
+    · show M.bmon.map (z.base ≫ inv w.base) w.u
+        + (w.deg : ℕ) • (z.u + bneg h (M.bmon.map (z.base ≫ inv w.base) w.u)) = z.u
+      rw [hwd]
+      simp only [PNat.one_coe, one_smul]
+      rw [← add_assoc, add_comm (M.bmon.map (z.base ≫ inv w.base) w.u) z.u,
+        add_assoc, add_bneg, add_zero]
+  · show IsIso (z.base ≫ inv w.base)
+    infer_instance
+
+/-- ★co-angular pre-step は合成で閉じる。 -/
+instance model_coaPre_mult (h : Hyp M) :
+    MorphismProperty.IsMultiplicative (coaPreProp (modelPre h)) :=
+  coaPreProp_isMultiplicative (modelPre h) (model_coAngularComp h)
+
+/-- **(iii)(d)** コスライス側 `_A(𝒞^coa-pre) → Order(Φ(A))` は圏同値。 -/
+theorem model_coaPreUnderEquiv (h : Hyp M) (A : Obj M) :
+    (coaPreUnderFunctor (modelPre h) A).IsEquivalence := by
+  haveI hfaith : (coaPreUnderFunctor (modelPre h) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : Z.hom.hom ≫ f.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w f)
+    have h2 : Z.hom.hom ≫ g.right.hom = W.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Under.w g)
+    haveI : Epi Z.hom.hom := model_totEpi h _ _ _
+    exact Under.UnderMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_epi Z.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreUnderFunctor (modelPre h) A).Full := by
+    constructor
+    intro Z W hle
+    obtain ⟨x, hx⟩ := leOfHom hle
+    obtain ⟨t, ht, htd, htb⟩ := exists_hom_under h Z.hom.hom W.hom.hom
+      Z.hom.property.2.2 W.hom.property.2.2 Z.hom.property.2.1 W.hom.property.2.1 x hx
+    haveI := Preorder.subsingleton_hom
+      ((coaPreUnderFunctor (modelPre h) A).obj Z) ((coaPreUnderFunctor (modelPre h) A).obj W)
+    exact ⟨Under.homMk (⟨t, ⟨model_coAngular h _, htd, htb⟩⟩ : Z.right ⟶ W.right)
+      (InducedWideCategory.Hom.ext (by simp only [WideSubcategory.comp_def]; exact ht)),
+      Subsingleton.elim _ _⟩
+  haveI hess : (coaPreUnderFunctor (modelPre h) A).EssSurj := by
+    constructor
+    intro c
+    obtain ⟨a, rfl⟩ : ∃ a : M.phi.val ((modelPre h).toElem.obj A).base, toOrderCat a = c :=
+      ⟨c, rfl⟩
+    obtain ⟨Z, z, hzdiv, hzdeg, hzb⟩ := exists_hom_div h A a
+    exact ⟨Under.mk (show (⟨A⟩ : WideSubcategory (coaPreProp (modelPre h)))
+        ⟶ (⟨Z⟩ : WideSubcategory (coaPreProp (modelPre h))) from
+      ⟨z, ⟨model_coAngular h _, hzdeg, hzb⟩⟩),
+      ⟨eqToIso (congrArg toOrderCat hzdiv)⟩⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+/-- **(iii)(d)** スライス側 `(𝒞^coa-pre)_A → Order(Φ(A))^opp` は圏同値。 -/
+theorem model_coaPreOverEquiv (h : Hyp M) (A : Obj M) :
+    (coaPreOverFunctor (modelPre h) A).IsEquivalence := by
+  haveI hfaith : (coaPreOverFunctor (modelPre h) A).Faithful := by
+    constructor
+    intro Z W f g _
+    have h1 : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have h2 : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    haveI : Mono W.hom.hom :=
+      model_preStepMono h W.hom.hom ⟨W.hom.property.2.1, W.hom.property.2.2⟩
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      ((cancel_mono W.hom.hom).mp (h1.trans h2.symm)))
+  haveI hfull : (coaPreOverFunctor (modelPre h) A).Full := by
+    constructor
+    intro Z W hle
+    haveI hz : IsIso Z.hom.hom.base := Z.hom.property.2.2
+    haveI hw : IsIso W.hom.hom.base := W.hom.property.2.2
+    obtain ⟨x0, hx0⟩ := leOfHom hle.unop
+    obtain ⟨x, rfl⟩ : ∃ x : M.phi.val A.base, x = x0 := ⟨x0, rfl⟩
+    have hx' : M.phi.map (inv W.hom.hom.base) W.hom.hom.div + x
+        = M.phi.map (inv Z.hom.hom.base) Z.hom.hom.div := hx0
+    have hy : M.phi.map (Z.hom.hom.base ≫ inv W.hom.hom.base) W.hom.hom.div
+        + M.phi.map Z.hom.hom.base x = Z.hom.hom.div := by
+      have h3 := congrArg (M.phi.map Z.hom.hom.base) hx'
+      rw [map_add, phi_map_roundtrip, ← MonoidOn.map_comp] at h3
+      exact h3
+    obtain ⟨t, ht, htd, htb⟩ := exists_hom_over h Z.hom.hom W.hom.hom
+      Z.hom.property.2.2 W.hom.property.2.2 Z.hom.property.2.1 W.hom.property.2.1 _ hy
+    haveI := Preorder.subsingleton_hom
+      ((coaPreOverFunctor (modelPre h) A).obj Z).unop
+      ((coaPreOverFunctor (modelPre h) A).obj W).unop
+    exact ⟨Over.homMk (⟨t, ⟨model_coAngular h _, htd, htb⟩⟩ : Z.left ⟶ W.left)
+      (InducedWideCategory.Hom.ext (by simp only [WideSubcategory.comp_def]; exact ht)),
+      Subsingleton.elim _ _⟩
+  haveI hess : (coaPreOverFunctor (modelPre h) A).EssSurj := by
+    constructor
+    intro c
+    obtain ⟨a0, rfl⟩ :
+        ∃ a0 : M.phi.val ((modelPre h).toElem.obj A).base,
+          Opposite.op (toOrderCat a0) = c :=
+      ⟨c.unop, rfl⟩
+    obtain ⟨a, rfl⟩ : ∃ a : M.phi.val A.base, a = a0 := ⟨a0, rfl⟩
+    have hcond : ((1 : ℕ+) : ℕ) • (A.cls - toGpHom (M.phi.val A.base) a)
+        + toGpHom _ a = M.phi.gpMapOn (𝟙 A.base) A.cls + M.divB _ (0 : M.bmon.val A.base) := by
+      simp
+    refine ⟨Over.mk (show (⟨(⟨A.base, A.cls - toGpHom _ a⟩ : Obj M)⟩ :
+        WideSubcategory (coaPreProp (modelPre h)))
+        ⟶ (⟨A⟩ : WideSubcategory (coaPreProp (modelPre h))) from
+      ⟨(⟨𝟙 A.base, a, 1, 0, hcond⟩ : (⟨A.base, A.cls - toGpHom _ a⟩ : Obj M) ⟶ A),
+        ⟨model_coAngular h _, rfl, ?_⟩⟩), ⟨eqToIso ?_⟩⟩
+    · show IsIso (𝟙 A.base)
+      infer_instance
+    · refine congrArg Opposite.op (congrArg toOrderCat ?_)
+      show M.phi.map (inv (𝟙 A.base)) a = a
+      rw [IsIso.inv_id, MonoidOn.map_id]
+  exact ⟨hfaith, hfull, hess⟩
+
+/-- ★★★★★**[FrdI] Theorem 5.2, (ii)** —— model Frobenioid は **Frobenioid** である。
+
+原文 (FrdI p.101):
+> (ii) The category C is a Frobenioid [with respect to the functor C
+-/
+theorem model_frobenioid (h : Hyp M) : Frobenioid (modelPre h) where
+  core := model_frobenioidCore h
+  coaPreUnderEquiv := model_coaPreUnderEquiv h
+  coaPreOverEquiv := model_coaPreOverEquiv h
+
 end ModelData
 
 end ABC3.Found.FrdI
