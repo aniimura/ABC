@@ -813,4 +813,246 @@ theorem pfRoot_preStepSpan (X Y : PfRootObj P F)
     exact (Category.comp_id α).symm.trans (congrArg (fun t => α ≫ t) hcancel.symm)
   exact eq_inv_comp_of _ _ _ _ hkey
 
+/-! ## ★18. 遷移は同型を保つ
+
+★★逆射の遷移が逆射になる。★示すのは `a ≫ (T₁ ≫ T₂) = a ≫ 𝟙` で、
+`a` が epi(`𝒞` は totally epimorphic)なので消せる。 -/
+
+variable {P F} in
+/-- ★★**遷移は同型を保つ**。 -/
+theorem frobTransport_isIso {A' B' A'' B'' : C}
+    (a : A' ⟶ A'') (ha : IsFrobeniusType P a) (b : B' ⟶ B'') (hb : IsFrobeniusType P b)
+    (hd : P.degFr a = P.degFr b) (θ : A' ⟶ B') (hθ : IsIso θ) :
+    IsIso (frobTransport (F := F) a ha b hb hd θ) := by
+  haveI := hθ
+  haveI hea : Epi a := P.totEpiC _ _ _
+  haveI heb : Epi b := P.totEpiC _ _ _
+  have s1 : θ ≫ b = a ≫ frobTransport (F := F) a ha b hb hd θ :=
+    frobTransport_spec _ _ _ _ _ θ
+  have s2 : inv θ ≫ a = b ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ) :=
+    frobTransport_spec _ _ _ _ _ (inv θ)
+  refine ⟨frobTransport (F := F) b hb a ha hd.symm (inv θ), ?_, ?_⟩
+  · refine (cancel_epi a).mp ?_
+    have e1 : a ≫ (frobTransport (F := F) a ha b hb hd θ
+        ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ))
+        = (a ≫ frobTransport (F := F) a ha b hb hd θ)
+          ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ) := (Category.assoc _ _ _).symm
+    have e2 : (a ≫ frobTransport (F := F) a ha b hb hd θ)
+          ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ)
+        = (θ ≫ b) ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ) :=
+      congrArg (fun t => t ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ)) s1.symm
+    have e3 : (θ ≫ b) ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ)
+        = θ ≫ (b ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ)) := Category.assoc _ _ _
+    have e4 : θ ≫ (b ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ))
+        = θ ≫ (inv θ ≫ a) := congrArg (fun t => θ ≫ t) s2.symm
+    have e5 : θ ≫ (inv θ ≫ a) = a := by
+      rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    exact ((((e1.trans e2).trans e3).trans e4).trans e5).trans (Category.comp_id a).symm
+  · refine (cancel_epi b).mp ?_
+    have e1 : b ≫ (frobTransport (F := F) b hb a ha hd.symm (inv θ)
+        ≫ frobTransport (F := F) a ha b hb hd θ)
+        = (b ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ))
+          ≫ frobTransport (F := F) a ha b hb hd θ := (Category.assoc _ _ _).symm
+    have e2 : (b ≫ frobTransport (F := F) b hb a ha hd.symm (inv θ))
+          ≫ frobTransport (F := F) a ha b hb hd θ
+        = (inv θ ≫ a) ≫ frobTransport (F := F) a ha b hb hd θ :=
+      congrArg (fun t => t ≫ frobTransport (F := F) a ha b hb hd θ) s2.symm
+    have e3 : (inv θ ≫ a) ≫ frobTransport (F := F) a ha b hb hd θ
+        = inv θ ≫ (a ≫ frobTransport (F := F) a ha b hb hd θ) := Category.assoc _ _ _
+    have e4 : inv θ ≫ (a ≫ frobTransport (F := F) a ha b hb hd θ)
+        = inv θ ≫ (θ ≫ b) := congrArg (fun t => inv θ ≫ t) s1.symm
+    have e5 : inv θ ≫ (θ ≫ b) = b := by
+      rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    exact ((((e1.trans e2).trans e3).trans e4).trans e5).trans (Category.comp_id b).symm
+
+variable {P F} in
+/-- ★添字の遷移は同型を保つ。 -/
+theorem idxTransport_isIso {A B : C} {Z W : IdxPf P F A B} (u : Z ⟶ W)
+    (θ : Z.right.obj.1 ⟶ Z.right.obj.2) (hθ : IsIso θ) :
+    IsIso (idxTransport P F u θ) :=
+  frobTransport_isIso _ _ _ _ _ θ hθ
+
+/-! ## ★19. ★★代表元が同型なら同型(添字を持ち上げない形)
+
+★★`pfRoot_isIso_of_rep` は `compRoot` の定義に合わせた「持ち上げた添字」の形だが、
+★実際に使うのは**素の添字**の形である。`pushIdx` の cofinal 性で移す。 -/
+
+variable {P F} in
+/-- ★★★**素の添字で代表元が同型なら `𝒞^pf` でも同型**。 -/
+theorem pfRoot_isIso_mk {Y Z : PfRootObj P F}
+    (W : IdxPf P F (rtObj P F Y.obj Z.root) (rtObj P F Z.obj Y.root))
+    (β₀ : W.right.obj.1 ⟶ W.right.obj.2) (hβ₀ : IsIso β₀) :
+    IsIso (show Y ⟶ Z from HomPf.mk W β₀) := by
+  obtain ⟨V, ⟨u⟩⟩ := exists_hom_of_final
+    (pushIdx (F := F)
+      (rtLift P F Y.obj (show Y.root * Z.root = Y.root * Z.root from rfl))
+      (rtLift_frobType P F Y.obj _)
+      (rtLift P F Z.obj (show Y.root * Y.root = Y.root * Y.root from rfl))
+      (rtLift_frobType P F Z.obj _)
+      (by rw [rtLift_degFr, rtLift_degFr])) W
+  set β₁ := idxTransport P F u β₀ with hβ₁
+  have hiso : IsIso β₁ := by rw [hβ₁]; exact idxTransport_isIso (F := F) u β₀ hβ₀
+  have h1 : (show Y ⟶ Z from HomPf.mk W β₀)
+      = (rtRootIso P F Y.obj Z.obj (show Y.root * Z.root = Y.root * Z.root from rfl)
+          (show Y.root * Y.root = Y.root * Y.root from rfl)).hom
+        (HomPf.mk V β₁) := by
+    rw [rtRootIso_hom_mk, hβ₁]
+    exact (HomPf.mk_map (P := P) (F := F) u β₀).symm
+  refine pfRoot_isIso_of_rep (show Y ⟶ Z from HomPf.mk W β₀) V β₁ (hφ := hiso) ?_
+  rw [h1, Iso.hom_inv_id_apply]
+
+/-! ## ★20. 同じ始域から出る 2 射を揃える(co-span)
+
+★★`exists_rep3` は「合成できる 2 射」を揃えるが、
+`frobDegUniq` に要るのは**同じ始域から出る 2 射**である。
+★3 脚添字の `idx12` と `idx13` を使えば同じ形で作れる。 -/
+
+variable {P F} in
+/-- ★**co-span を共通の 3 脚添字へ**。 -/
+theorem exists_rep_cospan {A B E : C} (f : HomPf P F A B) (g : HomPf P F A E) :
+    ∃ (V : IdxPf3 P F A B E) (φ : V.right.obj.1 ⟶ V.right.obj.2.1)
+      (χ : V.right.obj.1 ⟶ V.right.obj.2.2),
+      f = HomPf.mk ((idx12 P F A B E).obj V) φ ∧
+      g = HomPf.mk ((idx13 P F A B E).obj V) χ := by
+  obtain ⟨Zf, φ₀, hf⟩ := HomPf.exists_rep (P := P) (F := F) f
+  obtain ⟨Zg, χ₀, hg⟩ := HomPf.exists_rep (P := P) (F := F) g
+  obtain ⟨hfa, hfb, hfab⟩ := Zf.hom.property
+  obtain ⟨hga, hge, hgae⟩ := Zg.hom.property
+  obtain ⟨E₁, e₁, he₁, he₁d⟩ := F.frobDegSurj E (P.degFr Zf.hom.hom.1)
+  obtain ⟨B₂, b₂, hb₂, hb₂d⟩ := F.frobDegSurj B (P.degFr Zg.hom.hom.1)
+  refine ⟨IsFiltered.max
+      (Under.mk (Y := (⟨(Zf.right.obj.1, Zf.right.obj.2, E₁)⟩ : TriFr P F))
+        (show triFrObj P F A B E ⟶ _ from
+          ⟨(Zf.hom.hom.1, Zf.hom.hom.2, e₁), hfa, hfb, he₁, hfab,
+            hfab.symm.trans he₁d.symm⟩))
+      (Under.mk (Y := (⟨(Zg.right.obj.1, B₂, Zg.right.obj.2)⟩ : TriFr P F))
+        (show triFrObj P F A B E ⟶ _ from
+          ⟨(Zg.hom.hom.1, b₂, Zg.hom.hom.2), hga, hb₂, hge, hb₂d.symm,
+            hb₂d.trans hgae⟩)),
+    idxTransport P F ((idx12 P F A B E).map (IsFiltered.leftToMax _ _)) φ₀,
+    idxTransport P F ((idx13 P F A B E).map (IsFiltered.rightToMax _ _)) χ₀, ?_, ?_⟩
+  · rw [HomPf.mk_map]; exact hf.symm
+  · rw [HomPf.mk_map]; exact hg.symm
+
+variable {P F} in
+/-- ★3 脚添字も「第 1 脚が isotropic」な所まで押し上げられる。 -/
+theorem exists_idx3_isotropic (hfi : IsOfFrobeniusIsotropicType P) {A B E : C}
+    (V : IdxPf3 P F A B E) :
+    ∃ (W : IdxPf3 P F A B E) (u : V ⟶ W), IsIsotropic P W.right.obj.1 := by
+  obtain ⟨Dd, a, ha, hDd⟩ := hfi V.right.obj.1
+  obtain ⟨B₂, b, hb, hbd⟩ := F.frobDegSurj V.right.obj.2.1 (P.degFr a)
+  obtain ⟨E₂, e, he, hed⟩ := F.frobDegSurj V.right.obj.2.2 (P.degFr a)
+  obtain ⟨hva, hvb, hve, hvab, hvbe⟩ := V.hom.property
+  refine ⟨Under.mk (Y := (⟨(Dd, B₂, E₂)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(V.hom.hom.1 ≫ a, V.hom.hom.2.1 ≫ b, V.hom.hom.2.2 ≫ e),
+          IsFrobeniusType.comp P F hva ha, IsFrobeniusType.comp P F hvb hb,
+          IsFrobeniusType.comp P F hve he, ?_, ?_⟩),
+    Under.homMk (show V.right ⟶ (⟨(Dd, B₂, E₂)⟩ : TriFr P F) from
+      ⟨(a, b, e), ha, hb, he, hbd.symm, hbd.trans hed.symm⟩)
+      (WideSubcategory.hom_ext _ rfl), hDd⟩
+  · rw [P.degFr_comp, P.degFr_comp, hbd, hvab]
+  · rw [P.degFr_comp, P.degFr_comp, hbd, hed, hvbe]
+
+/-! ## ★21. (ii) の一意性 —— `frobDegUniq`
+
+★★`φ`・`ψ` を **`compRoot` が使う根の高さ**へ持ち上げて co-span を揃え、
+添字を isotropic まで押し上げてから `𝒞` の `frobDegUniq` を当てる。
+★得た同型 `β₀` を `idx23` の添字で戻せば、合成則は `compPf_mk` そのもの。 -/
+
+set_option maxHeartbeats 2000000 in
+variable {P F} in
+/-- ★★★**(ii) の一意性** —— `𝒞^pf` 版。 -/
+theorem pfRoot_frobDegUniq (hfi : IsOfFrobeniusIsotropicType P)
+    (X Y Z : PfRootObj P F) (φ : X ⟶ Y) (ψ : X ⟶ Z)
+    (hφ : IsFrobeniusType (pfRootPre P F) φ) (hψ : IsFrobeniusType (pfRootPre P F) ψ)
+    (hdeg : (pfRootPre P F).degFr φ = (pfRootPre P F).degFr ψ) :
+    ∃ β : Y ⟶ Z, IsIso β ∧ φ ≫ β = ψ := by
+  obtain ⟨V, φ₀, χ₀, hφ0, hχ0⟩ := exists_rep_cospan (P := P) (F := F)
+    ((rtRootIso P F X.obj Y.obj (show Z.root * Y.root = Z.root * Y.root from rfl)
+      (show Z.root * X.root = Z.root * X.root from rfl)).inv φ)
+    ((rtRootIso P F X.obj Z.obj (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+      (show Y.root * X.root = Y.root * X.root from rfl)).inv ψ)
+  obtain ⟨W, u, hW⟩ := exists_idx3_isotropic (F := F) hfi V
+  set φ₁ := idxTransport P F ((idx12 P F _ _ _).map u) φ₀ with hφ₁
+  set χ₁ := idxTransport P F ((idx13 P F _ _ _).map u) χ₀ with hχ₁
+  have hφW : (rtRootIso P F X.obj Y.obj (show Z.root * Y.root = Z.root * Y.root from rfl)
+        (show Z.root * X.root = Z.root * X.root from rfl)).inv φ
+      = HomPf.mk ((idx12 P F _ _ _).obj W) φ₁ := by
+    rw [hφ₁, HomPf.mk_map]; exact hφ0
+  have hχW : (rtRootIso P F X.obj Z.obj (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+        (show Y.root * X.root = Y.root * X.root from rfl)).inv ψ
+      = HomPf.mk ((idx13 P F _ _ _).obj W) χ₁ := by
+    rw [hχ₁, HomPf.mk_map]; exact hχ0
+  -- ★`φ`・`ψ` を押し出した添字の代表元として書き直す
+  have hφmk : φ = HomPf.mk ((pushIdx (F := F)
+      (rtLift P F X.obj (show Z.root * Y.root = Z.root * Y.root from rfl))
+      (rtLift_frobType P F X.obj _)
+      (rtLift P F Y.obj (show Z.root * X.root = Z.root * X.root from rfl))
+      (rtLift_frobType P F Y.obj _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx12 P F _ _ _).obj W)) φ₁ := by
+    rw [← rtRootIso_hom_mk (F := F) X.obj Y.obj _ _ ((idx12 P F _ _ _).obj W) φ₁,
+      ← hφW, Iso.inv_hom_id_apply]
+  have hψmk : ψ = HomPf.mk ((pushIdx (F := F)
+      (rtLift P F X.obj (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _))
+      (rtLift_frobType P F X.obj _)
+      (rtLift P F Z.obj (show Y.root * X.root = Y.root * X.root from rfl))
+      (rtLift_frobType P F Z.obj _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx13 P F _ _ _).obj W)) χ₁ := by
+    rw [← rtRootIso_hom_mk (F := F) X.obj Z.obj _ _ ((idx13 P F _ _ _).obj W) χ₁,
+      ← hχW, Iso.inv_hom_id_apply]
+  set Wφ : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root) :=
+    (pushIdx (F := F)
+      (rtLift P F X.obj (show Z.root * Y.root = Z.root * Y.root from rfl))
+      (rtLift_frobType P F X.obj _)
+      (rtLift P F Y.obj (show Z.root * X.root = Z.root * X.root from rfl))
+      (rtLift_frobType P F Y.obj _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx12 P F _ _ _).obj W) with hWφ
+  set Wψ : IdxPf P F (rtObj P F X.obj Z.root) (rtObj P F Z.obj X.root) :=
+    (pushIdx (F := F)
+      (rtLift P F X.obj (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _))
+      (rtLift_frobType P F X.obj _)
+      (rtLift P F Z.obj (show Y.root * X.root = Y.root * X.root from rfl))
+      (rtLift_frobType P F Z.obj _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj ((idx13 P F _ _ _).obj W) with hWψ
+  -- ★代表元は `𝒞` の Frobenius 型
+  have hco : ∀ {U : C} (t : W.right.obj.1 ⟶ U), IsCoAngular P t :=
+    fun t => prop_1_4_i P t (fun _ g => F.isotropicClosed g hW)
+  have hφ₁F : IsFrobeniusType P φ₁ := by
+    refine ⟨⟨hco φ₁, ?_⟩, ?_⟩
+    · refine (isIsometric_mk_iff (X := X) (Y := Y) Wφ φ₁).mp ?_
+      rw [← hφmk]; exact hφ.1.2
+    · refine (isBaseIsomorphism_mk_iff (X := X) (Y := Y) Wφ φ₁).mp ?_
+      rw [← hφmk]; exact hφ.2
+  have hχ₁F : IsFrobeniusType P χ₁ := by
+    refine ⟨⟨hco χ₁, ?_⟩, ?_⟩
+    · refine (isIsometric_mk_iff (X := X) (Y := Z) Wψ χ₁).mp ?_
+      rw [← hψmk]; exact hψ.1.2
+    · refine (isBaseIsomorphism_mk_iff (X := X) (Y := Z) Wψ χ₁).mp ?_
+      rw [← hψmk]; exact hψ.2
+  have hd1 : P.degFr φ₁ = P.degFr χ₁ := by
+    have e1 : (pfRootPre P F).degFr φ = P.degFr φ₁ := by
+      rw [hφmk]
+      exact (degFr_mk_iff (X := X) (Y := Y) Wφ φ₁ (P.degFr φ₁)).mpr rfl
+    have e2 : (pfRootPre P F).degFr ψ = P.degFr χ₁ := by
+      rw [hψmk]
+      exact (degFr_mk_iff (X := X) (Y := Z) Wψ χ₁ (P.degFr χ₁)).mpr rfl
+    rw [← e1, ← e2, hdeg]
+  obtain ⟨β₀, hβ₀, hβ₀e⟩ := F.frobDegUniq _ _ _ φ₁ χ₁ hφ₁F hχ₁F hd1
+  -- ★戻す
+  refine ⟨(rtRootIso P F Y.obj Z.obj
+      (show Z.root * X.root = X.root * Z.root from mul_comm _ _)
+      (show Y.root * X.root = X.root * Y.root from mul_comm _ _)).hom
+    (HomPf.mk ((idx23 P F _ _ _).obj W) β₀), ?_, ?_⟩
+  · rw [rtRootIso_hom_mk]
+    exact pfRoot_isIso_mk _ _ hβ₀
+  · show compRoot P F φ _ = ψ
+    unfold compRoot
+    rw [hφW, Iso.hom_inv_id_apply, compPf_mk]
+    refine Eq.trans (congrArg (ConcreteCategory.hom (rtRootIso P F X.obj Z.obj
+        (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+        (show Y.root * X.root = Y.root * X.root from rfl)).hom)
+      (congrArg (HomPf.mk ((idx13 P F _ _ _).obj W)) hβ₀e)) ?_
+    rw [← hχW, Iso.inv_hom_id_apply]
+
 end ABC3.Found.FrdI
