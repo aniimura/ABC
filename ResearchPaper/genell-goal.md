@@ -1445,3 +1445,47 @@ ConductorHeight  ArchBound  ProjClosed  CompactBound  ArcModel
 ★**これは正しい状態である。** 1 件に数えるには命題**全体**が
 原文どおりの仮定で揃う必要がある。
 ★★条つき `.src` を数に入れれば数字は上がるが、それは B5 そのものである。
+
+---
+
+## §9-13 2026-08-17 深夜 —— **器具の規則が 1 つ出た**
+
+### ★★★規則: 圏の言葉で終わらせ、元には最後に 1 度だけ降りる
+
+本日 5 度、**同じ数学が書き方で通ったり通らなかったり**した。
+そのうち最後の 1 件で、**対処法が言語化できた**。
+
+| 件 | 通らない書き方 | 通る書き方 |
+|---|---|---|
+| `germ_res` | `rw` / `simp only` | `erw` |
+| `Ideal.comap_symm` | `rw`(強制の経路が違う) | `have := fun J => …` で定義的等しさで渡す |
+| `IsLocalization.map_radical` | `⟨x, hxU⟩` を組む(`whnf` 発散) | `y : ↥U` を**変数として持つ**補題を経由 |
+| `isClosed_coinduced` | `rw`(`inferInstanceAs` が構文的に合わない) | `convert … using 1` |
+| `comap` の易しい包含 | 途中で `simp only` を当てる | ★★★**射のレベルで分解を完成させ、最後に 1 度だけ降りる** |
+
+### ★★摩擦の正体
+
+`CommRingCat.Hom.hom` と `ConcreteCategory.hom` の**正規形が揺れ戻る**。
+`simp only` を当てるたびにどちらかへ寄り、次の `rw` が外れる。
+`CommRingCat.comp_apply` / `ConcreteCategory.comp_apply` / `RingHom.comp_apply` /
+`CommRingCat.hom_comp` のどれを入れても別の形になる。
+
+★★★**同じ証明が import の重さで通ったり通らなかったりした**——
+軽い import の probe では通り、本ファイルに置くと通らない。
+★`simp only` は与えた補題しか使わないはずだが、
+**環境にある instance が正規化の経路を変える**。
+
+### ★★★対処
+
+1. **証明を圏の言葉(`≫`、`Category.assoc`、`Scheme.Hom.comp_app`)で完成させる**
+2. `eqToHom` の証明項が違って `rw` が照合に失敗する所は
+   **`exact Category.assoc _ _ _`** で当てる(証明無関係で通る)
+3. **最後に 1 度だけ** `CommRingCat.hom_comp` + `RingHom.comp_apply` で元に降りる
+4. ★★**途中で `simp` を 1 度も使わない**
+
+★これで `map_appLE_le_ideal_comap`(10 回失敗していた)が通った。
+
+### ★この規則が効く範囲
+
+`Found/FrdI/` を含め、**圏論を経由するすべての証明**に効く。
+★★「実装の摩擦」として流さず、**規則として書いた**ことが本日の成果である。
