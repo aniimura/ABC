@@ -13,3 +13,4 @@
 - [Lean の合否は lake build で判定する](lean-build-check-discipline.md) — `cd` を必ず絶対パスで書く。`lake env lean` が通っても build は落ちうる。ゲートはパイプせず終了コードを読む。
 - [並行セッションが自分のファイルを巻き込む](parallel-session-sweeps-my-files.md) — 相手が git add -A を使うのでパス限定 add では守れない。1 ファイル通るごとに即コミット。git add -p は対話に入るので使わない。
 - [「導けない」と書く前に在庫を検索する](frdi-split-nonisotropic-not-derivable.md) — [FrdI] の分裂の非 isotropic 拡張で一度誤った。補題は既に `Prop18.lean` にあった。
+- [1-一意性と rigidity は 2 つの型で落ちる](frdi-1uniqueness-rigidity-patterns.md) — 1-一意性は「恒等になる合成を 1 つ見つける」、rigidity は「その操作が圏同値であることを言う」。手で共役を組むと詰まる(2 度実測)。
