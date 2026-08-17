@@ -35,6 +35,29 @@ namespace ABC3.Found.Arakelov
 
 open AlgebraicGeometry CategoryTheory
 
+/-! ## ★★連続性の局所性(一般位相の補助)
+
+★★★**mathlib に「開被覆の各員で `ContinuousOn` なら連続」が無かった**
+(2026-08-17 実測、`exact?` も当たらず)。★機構は
+`continuous_iff_continuousAt` + `ContinuousOn.continuousAt` で 4 行である。 -/
+
+/-- ★★**連続性は局所的**——開被覆の各員で `ContinuousOn` なら全体で連続。 -/
+theorem continuous_of_open_cover {α β : Type} [TopologicalSpace α] [TopologicalSpace β]
+    {f : α → β} {ι : Type} {U : ι → Set α} (hU : ∀ i, IsOpen (U i))
+    (hcov : ∀ x, ∃ i, x ∈ U i) (h : ∀ i, ContinuousOn f (U i)) : Continuous f := by
+  rw [continuous_iff_continuousAt]
+  intro x
+  obtain ⟨i, hx⟩ := hcov x
+  exact (h i).continuousAt ((hU i).mem_nhds hx)
+
+/-- ★**部分集合の上でも同じ**——被覆が `s` を覆えば `ContinuousOn f s`。 -/
+theorem continuousOn_of_open_cover {α β : Type} [TopologicalSpace α] [TopologicalSpace β]
+    {f : α → β} {s : Set α} {ι : Type} {U : ι → Set α} (hU : ∀ i, IsOpen (U i))
+    (hcov : ∀ x ∈ s, ∃ i, x ∈ U i) (h : ∀ i, ContinuousOn f (U i)) : ContinuousOn f s := by
+  intro x hx
+  obtain ⟨i, hxi⟩ := hcov x hx
+  exact ((h i).continuousAt ((hU i).mem_nhds hxi)).continuousWithinAt
+
 /-! ## ★★★像への所属の特徴づけ -/
 
 /-- ★★★**`(· ≫ f)` の像に入る ⟺ 点が `f` の像に落ちる**。
