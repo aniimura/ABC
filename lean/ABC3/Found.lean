@@ -107,6 +107,7 @@ import ABC3.Found.GenEll.ComapMul
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
 import ABC3.Found.GenEll.ArchConj
+import ABC3.Found.GenEll.ArchBaseChange
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
