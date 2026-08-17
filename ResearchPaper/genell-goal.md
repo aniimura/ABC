@@ -2952,3 +2952,33 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 | 「**有る(自明)**」と決める前にも測る | ★★★**1 度失敗**(`ℙ¹` の `𝒪(1)⊗𝒪(-1)` で検算していれば防げた) |
 
 ★★★★**両方向に測る。**「自動的に成り立つ」と思った補題こそ具体例で検算する。
+
+
+---
+
+## §9-37 (2026-08-17) ★★★★★引き戻しのモノイダル性への道(実測)
+
+### ★★mathlib の在庫
+
+| 在庫 | 場所 |
+|---|---|
+| `(extendScalars f).Monoidal` | `ModuleCat/Monoidal/Adjunction.lean`(加群の係数変換) |
+| `(restrictScalars f).LaxMonoidal` | 同上(随伴の右側から) |
+| `Adjunction.rightAdjointLaxMonoidal` | ★`Monoidal/Functor.lean` 908 |
+| `Adjunction.leftAdjointOplaxMonoidal` | ★★`Monoidal/Functor.lean` 1026 |
+| `pushforward₀OfCommRingCat.Monoidal` | `Presheaf/PushforwardZeroMonoidal.lean`(**11 行**、μ・ε が恒等) |
+
+### ★★★道筋
+
+`PresheafOfModules.pullback φ := (pushforward φ).leftAdjoint` である。したがって
+
+1. `(pushforward φ).LaxMonoidal` を示す
+2. `Adjunction.leftAdjointOplaxMonoidal` で `pullback` が oplax monoidal
+3. 比較射が同型であることを示して strong monoidal に上げる
+
+★★これで `f^*(L ⊗ M) ≅ f^*L ⊗ f^*M` が出て、`PicardData.pullback` が書ける。
+
+### ★同じ道が `equivPicRing` にも効く可能性
+
+`tilde` も随伴の左側(`tilde ⊣ Γ`)なので、同じ手が使えるかもしれない。
+★`Tilde.lean` の `tilde.adjunction` が材料。
