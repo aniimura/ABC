@@ -1,6 +1,7 @@
 import ABC3.Found.Arakelov.ArcBasicOpen
 import Mathlib.RingTheory.Localization.Away.Basic
 import ABC3.Found.Arakelov.ArcFunctorial
+import ABC3.Found.Arakelov.ArcLift
 
 /-!
 # Arakelov (C1) の配管 —— **基本開集合への持ち上げ(環の水準)**(`Found`)
@@ -234,6 +235,27 @@ theorem arcTopologyAffine_away (A : CommRingCat.{0}) (s : A) :
       exact ⟨⟨q ≫ awayι A s, comp_awayι_mem_arcBasicOpen A s q⟩,
         by rwa [awayLift_comp_awayι_self], rfl⟩
 
+/-! ## ★★★`awayι` は開埋め込みである -/
+
+/-- ★★**`awayι A s` は開埋め込み**(mathlib、2026-08-17 実測で判明)。
+
+★★★これにより `awayLift` を**一般の枠組み(`openLift`)に載せられる**。 -/
+instance isOpenImmersion_awayι (A : CommRingCat.{0}) (s : A) :
+    IsOpenImmersion (awayι A s) := by
+  rw [awayι]
+  exact Scheme.isOpenImmersion_SpecMap_localizationAway s
+
+/-- ★★★**`awayLift` は `openLift` と一致する**。
+
+★★これで一般の持ち上げの連続性が、基本開集合の上では
+`continuous_awayLift`(既取得)に帰着する。 -/
+theorem awayLift_eq_openLift (A : CommRingCat.{0}) (s : A) (p : arcBasicOpen A s)
+    (h : (p.1).base default ∈ Set.range (awayι A s).base) :
+    awayLift A s p = openLift (awayι A s) p.1 h := by
+  refine comp_openImmersion_injective (awayι A s) ?_
+  show awayLift A s p ≫ awayι A s = openLift (awayι A s) p.1 h ≫ awayι A s
+  rw [awayLift_comp_awayι, openLift_comp]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -254,6 +276,11 @@ def continuous_awayLift.src : ABC3.Meta.Source :=
 def awayLift_comp_awayι.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——持ち上げが構造射の切断であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def awayLift_eq_openLift.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——基本開集合の持ち上げが一般の持ち上げと一致すること)",
     sectionId := "genell-def-1-1-i" }
 
 def arcTopologyAffine_away.src : ABC3.Meta.Source :=
