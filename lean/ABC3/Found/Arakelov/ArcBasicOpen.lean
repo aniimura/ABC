@@ -96,6 +96,26 @@ theorem continuousOn_div_pow_evalAffine (A : CommRingCat.{0}) (b s : A) (n : ℕ
     ((continuous_evalAffine A s).continuousOn.pow n) (fun p hp => ?_)
   exact pow_ne_zero n hp
 
+/-! ## ★★★開集合の基本開集合への分解(一般の場合の手順 1) -/
+
+/-- ★★★**アフィンの開集合は基本開集合の合併である**。
+
+★★これが `topology_openImmersion` の一般の場合の**手順 1** である
+(`genell-goal.md` §9-25)。★機構は
+`PrimeSpectrum.isTopologicalBasis_basic_opens`(基本開集合が基底)。 -/
+theorem exists_basicOpen_iUnion (A : CommRingCat.{0})
+    (O : Set (PrimeSpectrum (A : Type))) (hO : IsOpen O) :
+    ∃ S : Set A, O = ⋃ g ∈ S,
+      (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum (A : Type))) := by
+  refine ⟨{g : A | (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum (A : Type))) ⊆ O}, ?_⟩
+  refine Set.Subset.antisymm (fun x hx => ?_) (fun x hx => ?_)
+  · obtain ⟨u, hu, hxu, huO⟩ :=
+      (PrimeSpectrum.isTopologicalBasis_basic_opens (R := A)).exists_subset_of_mem_open hx hO
+    obtain ⟨g, rfl⟩ := hu
+    exact Set.mem_biUnion huO hxu
+  · obtain ⟨g, hg, hx'⟩ := Set.mem_iUnion₂.1 hx
+    exact hg hx'
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isOpen_arcBasicOpen.src : ABC3.Meta.Source :=
@@ -106,6 +126,11 @@ def isOpen_arcBasicOpen.src : ABC3.Meta.Source :=
 def isClosed_arcZeroLocus.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——切断の零点集合が閉であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def exists_basicOpen_iUnion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——アフィンの開集合が基本開集合の合併であること)",
     sectionId := "genell-def-1-1-i" }
 
 def continuousOn_div_evalAffine.src : ABC3.Meta.Source :=
