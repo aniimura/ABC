@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-17 ・ コミット 470 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-17 ・ コミット 487 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">35/35</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">3055</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">783</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">3133</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">802</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">172</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
@@ -156,25 +156,25 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>4796443</code></td><td>2026-08-17</td><td>`Proposition 2.1` を数えた——原文の記載不備は index.html に開示した</td></tr>
-<tr><td><code>17d606a</code></td><td>2026-08-17</td><td>★★★病は `Proposition 1.4` だけではなかった——§1 の Skeleton は系統的に偽である</td></tr>
-<tr><td><code>7e3aa96</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (iii)`——構成の側では BD-class ではなく等式が出る</td></tr>
-<tr><td><code>c4c5314</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (ii)`——因子で表すと仮定はアルキメデス側にしか効かない</td></tr>
-<tr><td><code>a2d773a</code></td><td>2026-08-17</td><td>`Theorem 3.4, (i)` の 1-一意性を取った——在庫の `isotropificationRestrictIso` 1 本で済んだ</td></tr>
-<tr><td><code>1e1c780</code></td><td>2026-08-17</td><td>★★★高さを構成した——残るのは 1 本の等式だけになった</td></tr>
-<tr><td><code>07d3ec5</code></td><td>2026-08-17</td><td>★★★算術直線束の引き戻し——アルキメデス側は解析空間なしで構成できた</td></tr>
-<tr><td><code>b17890b</code></td><td>2026-08-17</td><td>逐語を直した——`(i) We have` にコロンも `ht` も無かった</td></tr>
-<tr><td><code>c333095</code></td><td>2026-08-17</td><td>[FrdI] `Remark 3.4.1` を取った——§3 が 4/9 → 5/9</td></tr>
-<tr><td><code>24da0d4</code></td><td>2026-08-17</td><td>★★次数は積を和に送る——`Proposition 1.4, (i)` の次数側を取った</td></tr>
-<tr><td><code>0a71555</code></td><td>2026-08-17</td><td>★★★引き戻しは積を保つ——`comap` では無理だったものが茎では 1 行</td></tr>
-<tr><td><code>65fbb16</code></td><td>2026-08-17</td><td>重複を撤去した——`isotropification` の四角形は在庫にあった</td></tr>
+<tr><td><code>6835cf1</code></td><td>2026-08-17</td><td>`Proposition 3.11, (ii)` の鍵を取った——FSMI 自己射 ⟺ prime-Frobenius 自己射</td></tr>
+<tr><td><code>f69c584</code></td><td>2026-08-17</td><td>★★★`X^arc` のコンパクト性が GAGA なしで出た——多項式が連続であることだけ</td></tr>
+<tr><td><code>b81a82b</code></td><td>2026-08-17</td><td>★★★正規化の理由が出た——アルキメデス側の定数を `F` に依らなくするためである</td></tr>
+<tr><td><code>d1aee12</code></td><td>2026-08-17</td><td>圏同値は FSMI 射を**反射**もする——`Prop 3.11, (ii)` を `𝔽_Φ` で計算するための道具</td></tr>
+<tr><td><code>0dc9788</code></td><td>2026-08-17</td><td>★★★`Proposition 1.6` の不等式が届いた——名指しした穴を同日に塞いだ</td></tr>
+<tr><td><code>cbd88d5</code></td><td>2026-08-17</td><td>§2 の最後の 1 件が止まっている所を測定した——mathlib に pro-`l` 群論が実質不在</td></tr>
+<tr><td><code>e632718</code></td><td>2026-08-17</td><td>迂回路の部品を精密に測った——数学の穴は無く、残るのは配線だけ</td></tr>
+<tr><td><code>c55f943</code></td><td>2026-08-17</td><td>`Proposition 3.11, (ii)` の第 1 歩——FSMI 自己射は prime-Frobenius 自己射である</td></tr>
+<tr><td><code>1de24dd</code></td><td>2026-08-17</td><td>圏同値は FSM 射・FSMI 射を保つ——`Theorem 3.4, (ii)` と `Prop 3.11, (ii)` の共通の入口</td></tr>
+<tr><td><code>8b0afcf</code></td><td>2026-08-17</td><td>★★★茎と台をつないだ——`comap` の積保存を迂回する道が開いた</td></tr>
+<tr><td><code>1fe089b</code></td><td>2026-08-17</td><td>在庫検索の規則を鋭くした——検索語は**日本語の言い回し**を必ず併用する</td></tr>
+<tr><td><code>3e0d72c</code></td><td>2026-08-17</td><td>本日の測定を追跡ファイルに落とした——残る穴は「mathlib に無い 1 本」2 件に収束</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(783 件)。</div>
+<b>すべて PDF と機械照合している</b>(802 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
