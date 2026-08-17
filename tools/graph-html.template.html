@@ -132,6 +132,7 @@ cv.addEventListener('click',e=>{
     (n.o?`<div class="row"><span>我々の側</span><span><b>${n.o}</b></span></div>`+
          `<div class="row"><span>ファイル</span><span><code>${n.f}</code></span></div>`
         :`<div class="row"><span>我々の側</span><span style="color:#b04">未着手</span></div>`)+
+    (n.it?`<div class="row"><span>典拠の項目</span><span>${n.it}</span></div>`:'')+
     (n.e?`<div class="row"><span>注</span><span>0_Source に無い外部文献</span></div>`:'')+
     `<div class="row" style="margin-top:6px"><span>依存先</span><span>${outs.slice(0,12).map(o=>`[${o.t}] ${o.n}`).join('、')||'—'}${outs.length>12?` ほか ${outs.length-12}`:''}</span></div>`;
   d.style.display='block';draw();
@@ -154,6 +155,11 @@ document.getElementById('cov').innerHTML=
   `<div class="st"><span>張った(statement を書いた)</span><b>${S.skeleton}</b></div>`+
   `<div class="st"><span>名前だけ知っている</span><b>${S.named}</b></div>`+
   `<div class="st"><span>合わせて</span><b>${S.ours} / ${S.nodes} = ${(S.ours/S.nodes*100).toFixed(1)}%</b></div>`+
+  `<div class="st" style="margin-top:8px;border-top:1px solid #eee;padding-top:8px"><span>Interface の義務(構造体)</span><b>${S.obligDone} / ${S.oblig}</b></div>`+
+  `<p style="font-size:11px;color:#777;margin-top:6px;line-height:1.6">
+   ★<b>義務は上の被覆率に含めていない</b>——語彙が違う(原文の項目番号 対 我々の構造体)。
+   凡例の <code>Interface</code> を押すと義務だけを見られる。
+   ★原文の 1 項目が何本に割れているかは、その項目から出る <code>Interface</code> の辺の数で読む。</p>`+
   `<p style="font-size:11px;color:#777;margin-top:6px;line-height:1.6">
    白縁=張った節点、黒縁=<code>Found/</code> に着地。灰色の小点は <code>0_Source</code> に無い外部文献。
    ★この率は<b>張れば上がる</b>——下げる方向の操作は無い。</p>

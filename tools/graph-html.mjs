@@ -164,6 +164,45 @@ const ours = new Map();  // key -> {file, kind}
   }
 }
 
+// ── Interface の義務(構造体)を節点として足す ──────────────────────
+// ★なぜ足すか: グラフの節点語彙は**原文の項目番号**なので、
+//   `GenEll Definition 1.1` に 9 本の obligation がぶら下がっていても
+//   **1 節点に潰れて見えなかった**(2026-08-17 実測)。
+//   check.mjs の「Interface 実装待ち」と同じ単位を図にも出す。
+// ★被覆率は汚さない —— 義務節点は `ob:1` を持ち、既存の統計から除く。
+{
+  const witness = new Set();
+  for (const f of walk(LEAN)) {
+    const t = readFileSync(f, 'utf8');
+    for (const m of t.matchAll(/^theorem\s+([A-Za-z_][\w'.]*)\.nonvacuous/gm))
+      witness.add(m[1].split('.').pop());
+  }
+  for (const f of walk(LEAN)) {
+    const rel = f.slice(ROOT.length + 1).replace(/\\/g, '/');
+    if (!/\/Interface\//.test(rel)) continue;
+    const t = readFileSync(f, 'utf8');
+    for (const sm of t.matchAll(/^structure\s+([A-Za-z_][A-Za-z0-9_']*)\s/gm)) {
+      const nm = sm[1];
+      // ★`.src` を持たない構造体もある(`.waiting` だけ)——錨を付けずに数える
+      const sm2 = new RegExp(`${nm}\\.src\\s*:[^=]*:=\\s*\\{([\\s\\S]{0,400}?)\\}`).exec(t);
+      const pm = sm2 ? /paper\s*:=\s*"([^"]*)"/.exec(sm2[1]) : null;
+      const im = sm2 ? /item\s*:=\s*"([^"]*)"/.exec(sm2[1]) : null;
+      const km = (pm && im) ? new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`).exec(im[1]) : null;
+      const anchorKey = (km && pm) ? key(pm[1], `${km[1]} ${km[2]}`) : null;
+      const anc = anchorKey && nodes.has(anchorKey) ? nodes.get(anchorKey) : null;
+      const k = `義務 / ${nm}`;
+      if (nodes.has(k)) continue;
+      nodes.set(k, {
+        tag: 'Interface', name: nm,
+        depth: anc ? (anc.depth === 99 ? 99 : anc.depth + 1) : 99,
+        page: anc ? anc.page : 0, external: false,
+        oblig: true, done: witness.has(nm), file: rel, item: im ? im[1] : null,
+      });
+      if (anc) edges.push([anchorKey, k]);
+    }
+  }
+}
+
 // ── 配置: 深さで同心円、角度は論文ごとにまとめる ─────────────────
 const byTag = new Map();
 for (const [k, v] of nodes) { if (!byTag.has(v.tag)) byTag.set(v.tag, []); byTag.get(v.tag).push(k); }
@@ -197,20 +236,27 @@ const idx = new Map([...nodes.keys()].map((k, i) => [k, i]));
 const N = [...nodes.entries()].map(([k, v]) => ({
   k, t: v.tag, n: v.name, d: v.depth === 99 ? maxDepth : v.depth, p: v.page,
   x: Math.round(v.x), y: Math.round(v.y),
-  o: ours.has(k) ? ours.get(k).kind : null,
-  f: ours.has(k) ? ours.get(k).file : null,
+  o: v.oblig ? (v.done ? '義務(埋まった)' : '義務(実装待ち)')
+             : (ours.has(k) ? ours.get(k).kind : null),
+  f: v.oblig ? v.file : (ours.has(k) ? ours.get(k).file : null),
   e: v.external ? 1 : 0,
+  ob: v.oblig ? (v.done ? 2 : 1) : 0,
+  it: v.oblig ? v.item : null,
 }));
 const E = edges.filter(([a, b]) => idx.has(a) && idx.has(b)).map(([a, b]) => [idx.get(a), idx.get(b)]);
 
+// ★義務節点は被覆率の分母・分子の**どちらにも入れない**(語彙が違うから)
+const NP = N.filter((n) => !n.ob);
 const stats = {
-  nodes: N.length, edges: E.length, maxDepth,
-  ours: N.filter((n) => n.o).length,
-  landed: N.filter((n) => n.o === 'landed').length,
-  skeleton: N.filter((n) => n.o === 'skeleton').length,
-  named: N.filter((n) => n.o === 'named').length,
-  papers: tags.length,
-  external: N.filter((n) => n.e).length,
+  nodes: NP.length, edges: E.filter(([a, b]) => !N[a].ob && !N[b].ob).length, maxDepth,
+  ours: NP.filter((n) => n.o).length,
+  landed: NP.filter((n) => n.o === 'landed').length,
+  skeleton: NP.filter((n) => n.o === 'skeleton').length,
+  named: NP.filter((n) => n.o === 'named').length,
+  papers: tags.filter((t) => t !== 'Interface').length,
+  external: NP.filter((n) => n.e).length,
+  oblig: N.filter((n) => n.ob).length,
+  obligDone: N.filter((n) => n.ob === 2).length,
 };
 
 const html = readFileSync(join(ROOT, 'tools', 'graph-html.template.html'), 'utf8')
@@ -219,3 +265,4 @@ writeFileSync(OUT, html, 'utf8');
 console.log(`書き出し: ${OUT}`);
 console.log(`  節点 ${stats.nodes} / 辺 ${stats.edges} / 最大深さ ${stats.maxDepth} / 論文 ${stats.papers} / 外部文献 ${stats.external}`);
 console.log(`  我々: 着地 ${stats.landed} / 張った ${stats.skeleton} / 名前だけ ${stats.named}`);
+console.log(`  Interface の義務: ${stats.obligDone} / ${stats.oblig}(★被覆率には入れていない——語彙が違う)`);

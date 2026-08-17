@@ -134,7 +134,7 @@ for (const s of samples) console.log('  ' + s);
 
 // 残った循環の中身を出す
 {
-  const f=(v,e)=>!/below|the discussion of/i.test(e.ctx) && !v.includes('/ Remark') && !e.to.includes('/ Remark');
+  const f=(v,e)=>!/\bbelow\b|the discussion of/i.test(e.ctx) && !v.includes('/ Remark') && !e.to.includes('/ Remark');
   const r=scc(f);
   const bySize=[...r.size.entries()].filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]);
   console.log('\n★注釈・前方参照・解説案内を落としたあとに残る循環:');
