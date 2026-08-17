@@ -245,4 +245,84 @@ theorem birat_move_inv {A₁ U B₁ : C} (g : A₁ ⟶ U) (b : B₁ ⟶ U)
       IsCoAngular P g₁ ∧ IsPreStep P g₁ ∧ g₁ ≫ g = k₁ ≫ b := by
   exact prop_1_11_vii P G.core G g b hbc hbs
 
+/-! ## ★5. ★★★★辞書の co-angular の条 —— まず `⟹`(反射)
+
+原文 (FrdI p.85):
+> that C′ →D′ is a co-angular pre-step, hence an isomorphism whenever it is an
+
+★★**`⟹` は 3 行で落ちる**:
+1. `𝒞` の分解を `𝒞^birat` へ押し出す(次数・底・pre-step は渡る、等長は自動)
+2. `[φ]` の co-angular 性で **真ん中 `[β]` が同型**
+3. ★辞書(`birat_isIso_iff`)で `β` は `𝒞` の **co-angular** pre-step、
+   ★★もともと**等長**だったので `Proposition 1.4, (iii)` で**同型**
+
+★★★**要点は 3** —— 「LB-invertible な pre-step は同型」がここで効く。 -/
+
+include P in
+/-- ★★★**`[φ]` が co-angular なら `φ` も co-angular**(辞書の `⟹`)。 -/
+theorem birat_coAngular_reflect {A B : C} (φ : A ⟶ B)
+    (h : IsCoAngular (biratPre P G) ((toBiratCat P G).map φ)) : IsCoAngular P φ := by
+  intro X Y γ β α heq hαl hβi hβs hor
+  have h1 : (toBiratCat P G).map φ
+      = (toBiratCat P G).map γ ≫ (toBiratCat P G).map β ≫ (toBiratCat P G).map α := by
+    rw [← (toBiratCat P G).map_comp, ← (toBiratCat P G).map_comp, ← heq]
+  have hiso : IsIso ((toBiratCat P G).map β) :=
+    h (show BiratCat P G from X) (show BiratCat P G from Y)
+      ((toBiratCat P G).map γ) ((toBiratCat P G).map β) ((toBiratCat P G).map α) h1
+      ((birat_isLinear_iff α).mpr hαl) (birat_isIsometric _)
+      ((birat_isPreStep_iff β).mpr hβs)
+      (hor.imp (fun hh => (birat_isBaseIsomorphism_iff α).mpr hh)
+        (fun hh => (birat_isBaseIsomorphism_iff γ).mpr hh))
+  have hβc : IsCoAngular P β := ((birat_isIso_iff β).mp hiso).1
+  exact prop_1_4_iii P G.core β ⟨hβc, hβi⟩ hβs
+
+/-! ## ★6. 同型で挟んでも co-angular は変わらない
+
+★★辞書の `⟸` で、`𝒞^birat` の射を `a' ≫ [φ]` の形に直すときに要る。 -/
+
+/-- ★**同型を前から合成しても co-angular**。 -/
+theorem isCoAngular_isoComp {Q : PreFrobenioid C Φ} {A A' B : C} (e : A ⟶ A') (e' : A' ⟶ A)
+    (he1 : e ≫ e' = 𝟙 A) (he2 : e' ≫ e = 𝟙 A') {f : A' ⟶ B} (hf : IsCoAngular Q f) :
+    IsCoAngular Q (e ≫ f) := by
+  intro X Y γ β α heq hαl hβi hβs hor
+  refine hf X Y (e' ≫ γ) β α ?_ hαl hβi hβs ?_
+  · calc f = 𝟙 A' ≫ f := (Category.id_comp f).symm
+      _ = (e' ≫ e) ≫ f := by rw [he2]
+      _ = e' ≫ (e ≫ f) := Category.assoc _ _ _
+      _ = e' ≫ (γ ≫ β ≫ α) := by rw [heq]
+      _ = (e' ≫ γ) ≫ β ≫ α := (Category.assoc _ _ _).symm
+  · refine hor.imp id (fun hh => ?_)
+    haveI hei : IsIso (Q.Base e) := ⟨⟨Q.Base e', by
+        rw [← Q.Base_comp, he1, Q.Base_id], by rw [← Q.Base_comp, he2, Q.Base_id]⟩⟩
+    haveI hei' : IsIso (Q.Base e') := ⟨⟨Q.Base e, by
+        rw [← Q.Base_comp, he2, Q.Base_id], by rw [← Q.Base_comp, he1, Q.Base_id]⟩⟩
+    haveI : IsIso (Q.Base γ) := hh
+    show IsIso (Q.Base (e' ≫ γ))
+    rw [Q.Base_comp]
+    exact IsIso.comp_isIso' hei' hh
+
+/-- ★**同型を後ろから合成しても co-angular**。 -/
+theorem isCoAngular_compIso {Q : PreFrobenioid C Φ} {A B B' : C} {f : A ⟶ B}
+    (e : B ⟶ B') (e' : B' ⟶ B) (he1 : e ≫ e' = 𝟙 B) (_he2 : e' ≫ e = 𝟙 B')
+    (hf : IsCoAngular Q f) : IsCoAngular Q (f ≫ e) := by
+  intro X Y γ β α heq hαl hβi hβs hor
+  haveI hei : IsIso (Q.Base e) := ⟨⟨Q.Base e', by
+      rw [← Q.Base_comp, he1, Q.Base_id], by rw [← Q.Base_comp, _he2, Q.Base_id]⟩⟩
+  haveI hei' : IsIso (Q.Base e') := ⟨⟨Q.Base e, by
+      rw [← Q.Base_comp, _he2, Q.Base_id], by rw [← Q.Base_comp, he1, Q.Base_id]⟩⟩
+  refine hf X Y γ β (α ≫ e') ?_ ?_ hβi hβs ?_
+  · calc f = f ≫ 𝟙 B := (Category.comp_id f).symm
+      _ = (f ≫ e) ≫ e' := by rw [← he1, Category.assoc]
+      _ = (γ ≫ β ≫ α) ≫ e' := by rw [heq]
+      _ = γ ≫ β ≫ (α ≫ e') := by simp only [Category.assoc]
+  · haveI : IsIso e' := ⟨⟨e, _he2, he1⟩⟩
+    show Q.degFr (α ≫ e') = 1
+    rw [Q.degFr_comp, show Q.degFr e' = 1 from degFr_of_isIso Q e',
+      show Q.degFr α = 1 from hαl, mul_one]
+  · refine hor.imp (fun hh => ?_) id
+    haveI : IsIso (Q.Base α) := hh
+    show IsIso (Q.Base (α ≫ e'))
+    rw [Q.Base_comp]
+    exact IsIso.comp_isIso' hh hei'
+
 end ABC3.Found.FrdI
