@@ -185,6 +185,7 @@ import ABC3.Found.Arakelov.PicUnitFree
 import ABC3.Found.Arakelov.PicPushMu
 import ABC3.Found.Arakelov.PicDeltaCalc
 import ABC3.Found.Arakelov.PicUnitCalc
+import ABC3.Found.Arakelov.PicGenVal
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
