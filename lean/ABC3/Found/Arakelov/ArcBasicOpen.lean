@@ -66,6 +66,36 @@ theorem isOpen_iUnion_arcBasicOpen (A : CommRingCat.{0}) {ι : Type} (gs : ι �
   letI := arcTopologyAffine A
   exact isOpen_iUnion fun i => isOpen_arcBasicOpen A (gs i)
 
+/-! ## ★★★局所化の延長の解析的核心 -/
+
+/-- ★★★**`φ ↦ φ(b)/φ(s)` は `{φ(s) ≠ 0}` 上で連続である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★**これが C1 の残る 1 点(局所化の延長の連続性)の解析的核心である。**
+
+`Arc (Spec A) = Hom_Ring(A, ℂ)` の上で、基本開集合 `D(s)` への持ち上げは
+`b/sⁿ ↦ φ(b)/φ(s)ⁿ` で与えられる。★その各成分の連続性が本定理である。
+
+★機構は `continuous_evalAffine`(切断は連続)と
+**分母が消えない所での除算の連続性**(`ContinuousOn.div`)。 -/
+theorem continuousOn_div_evalAffine (A : CommRingCat.{0}) (b s : A) :
+    @ContinuousOn _ _ (arcTopologyAffine A) _
+      (fun p => evalAffine A p b / evalAffine A p s) (arcBasicOpen A s) := by
+  letI := arcTopologyAffine A
+  exact ContinuousOn.div (continuous_evalAffine A b).continuousOn
+    (continuous_evalAffine A s).continuousOn (fun p hp => hp)
+
+/-- ★★**`φ(b)/φ(s)ⁿ` の形でも連続**(局所化の一般の元に対応)。 -/
+theorem continuousOn_div_pow_evalAffine (A : CommRingCat.{0}) (b s : A) (n : ℕ) :
+    @ContinuousOn _ _ (arcTopologyAffine A) _
+      (fun p => evalAffine A p b / (evalAffine A p s) ^ n) (arcBasicOpen A s) := by
+  letI := arcTopologyAffine A
+  refine ContinuousOn.div (continuous_evalAffine A b).continuousOn
+    ((continuous_evalAffine A s).continuousOn.pow n) (fun p hp => ?_)
+  exact pow_ne_zero n hp
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isOpen_arcBasicOpen.src : ABC3.Meta.Source :=
@@ -76,6 +106,11 @@ def isOpen_arcBasicOpen.src : ABC3.Meta.Source :=
 def isClosed_arcZeroLocus.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——切断の零点集合が閉であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def continuousOn_div_evalAffine.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——局所化の延長の連続性の核心)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
