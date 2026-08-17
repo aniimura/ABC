@@ -106,6 +106,32 @@ noncomputable def tensorModulesComm (M N : X.Modules) :
     tensorModules M N ≅ tensorModules N M :=
   (sheafifyFunctor X).mapIso (β_ M.val N.val)
 
+/-! ## ★★★単位律 -/
+
+/-- ★**構造層それ自身を層加群と見たもの**——テンソル積の単位。 -/
+noncomputable abbrev unitModules (X : Scheme.{u}) : X.Modules :=
+  SheafOfModules.unit X.ringCatSheaf
+
+/-- ★その台の前層は、前層モノイダル構造の単位そのものである。 -/
+theorem unitModules_val (X : Scheme.{u}) :
+    (unitModules X).val = 𝟙_ X.PresheafOfModules := rfl
+
+/-- ★★★**単位律(左)** `𝒪_X ⊗ M ≅ M`。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これが `Pic X` の**単位元**を与える。
+★機構は前層の左単位子 `λ_` を層化で送り、`sheafifyValIso`(層は層化で変わらない)で閉じる。 -/
+noncomputable def tensorUnitLeft (M : X.Modules) :
+    tensorModules (unitModules X) M ≅ M :=
+  (sheafifyFunctor X).mapIso (λ_ M.val) ≪≫ sheafifyValIso M
+
+/-- ★★★**単位律(右)** `M ⊗ 𝒪_X ≅ M`。 -/
+noncomputable def tensorUnitRight (M : X.Modules) :
+    tensorModules M (unitModules X) ≅ M :=
+  (sheafifyFunctor X).mapIso (ρ_ M.val) ≪≫ sheafifyValIso M
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sheafifyFunctor.src : ABC3.Meta.Source :=
@@ -116,6 +142,11 @@ def sheafifyFunctor.src : ABC3.Meta.Source :=
 def tensorModules.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 B——層加群のテンソル積)",
+    sectionId := "genell-def-1-1-i" }
+
+def tensorUnitLeft.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 B——テンソル積の単位律)",
     sectionId := "genell-def-1-1-i" }
 
 def tensorModulesComm.src : ABC3.Meta.Source :=
