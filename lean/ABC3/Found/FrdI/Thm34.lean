@@ -316,4 +316,63 @@ theorem isIsoSubanchor_map {A : C} (h : IsIsoSubanchor C A) :
     isCategoricalQuotient_map Ψ G hcq, isMonoMinimalQuotient_map Ψ G hmm⟩
 
 
+/-! ## ★段 5 の仕上げ —— isotropic 対象が保たれる -/
+
+omit [Ψ.IsEquivalence] in
+/-- ★**`IsIsoSubanchor` は同型で不変** —— `φ ≫ k.inv` を取ればよい。 -/
+theorem isIsoSubanchor_of_iso {A A' : C} (k : A ≅ A') (h : IsIsoSubanchor C A') :
+    IsIsoSubanchor C A := by
+  obtain ⟨B, hB, G, φ, hcq, hmm⟩ := h
+  refine ⟨B, hB, G, φ ≫ k.inv, ⟨?_, ?_⟩, ?_⟩
+  · intro γ hγ
+    rw [← Category.assoc, hcq.1 γ hγ]
+  · intro Cc ψ hψ
+    obtain ⟨ψ'', hψ''eq, hψ''uniq⟩ := hcq.2 Cc ψ hψ
+    refine ⟨k.hom ≫ ψ'', ?_, ?_⟩
+    · show ψ = (φ ≫ k.inv) ≫ (k.hom ≫ ψ'')
+      rw [Category.assoc, ← Category.assoc k.inv, k.inv_hom_id, Category.id_comp]
+      exact hψ''eq
+    · intro y hy
+      have hy2 : ψ = φ ≫ (k.inv ≫ y) := by
+        rw [← Category.assoc]; exact hy
+      have hu := hψ''uniq (k.inv ≫ y) hy2
+      rw [← hu]
+      simp
+  · intro A'' ζ φ'' hmono hfac G' e hcompat
+    refine hmm A'' ζ (φ'' ≫ k.hom) hmono ?_ G' e hcompat
+    rw [← Category.assoc, ← hfac, Category.assoc, k.inv_hom_id, Category.comp_id]
+
+/-- ★★**`IsIsoSubanchor` は圏同値で「保たれ、かつ反射される」**。 -/
+theorem isIsoSubanchor_map_iff {A : C} :
+    IsIsoSubanchor C A ↔ IsIsoSubanchor D (Ψ.obj A) := by
+  refine ⟨isIsoSubanchor_map Ψ, fun h => ?_⟩
+  have h' : IsIsoSubanchor C (Ψ.inv.obj (Ψ.obj A)) := isIsoSubanchor_map Ψ.inv h
+  exact isIsoSubanchor_of_iso ((Ψ.asEquivalence.unitIso).app A) h'
+
+section Isotropic
+
+universe v₃ u₃ w₃ v₄ u₄ w₄
+
+variable {E₁ : Type u₃} [Category.{v₃} E₁] {Φ₁ : MonoidOn.{v₃, u₃, w₃} E₁}
+  (P₁ : PreFrobenioid C Φ₁)
+  {E₂ : Type u₄} [Category.{v₄} E₂] {Φ₂ : MonoidOn.{v₄, u₄, w₄} E₂}
+  (P₂ : PreFrobenioid D Φ₂)
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (i) の第 1 主張** —— `𝒞₁`・`𝒞₂` が
+quasi-isotropic 型なら、**圏同値 `Ψ` は isotropic 対象を保つ**(かつ反射する)。
+
+原文 (FrdI p.63):
+> served by any equivalence of categories, it follows from our assumption that C
+
+★★`quasi-isotropic 型`の定義は `¬ IsIsotropic ↔ IsIsoSubanchor` であり、
+★**`IsIsoSubanchor` は純粋に圏論的**なので圏同値で保たれる
+(`isIsoSubanchor_map_iff`)。それだけで出る。 -/
+theorem thm_3_4_i_isotropic (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) (A : C) :
+    IsIsotropic P₁ A ↔ IsIsotropic P₂ (Ψ.obj A) := by
+  rw [← not_iff_not, h₁ A, h₂ (Ψ.obj A)]
+  exact isIsoSubanchor_map_iff Ψ
+
+end Isotropic
+
 end ABC3.Found.FrdI
