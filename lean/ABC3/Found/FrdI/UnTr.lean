@@ -198,4 +198,103 @@ theorem unTrToElem_essSurj (Fc : FrobenioidCore P) : (unTrToElem P).EssSurj := b
     · rw [hk]
   exact ⟨(show UnTr P from (⟨B, hφ.2.2.1⟩ : Istr P)), ⟨@asIso _ _ _ _ k hkiso⟩⟩
 
+/-! ## ★`Proposition 3.3, (iv)` の中盤 —— `𝒞^un-tr` の **pre-Frobenioid 構造**
+
+原文 (FrdI p.60):
+> which is faithful and essentially surjective; moreover, this functor determines
+
+★★原文は「determines a natural structure of Frobenioid」と 1 行で言うが、
+**まず `PreFrobenioid` の 6 フィールドを埋める**必要がある。★4 つは `P` のものが
+そのまま通り、要るのは **`totEpiC` と `connectedC` の 2 つ**である。
+
+★★**`totEpiC` は在庫で済んだ** —— `isTotallyEpimorphic_elemFrobCat`
+(`𝒟` が totally epimorphic ＋ `Φ(A)` が integral ⟹ `𝔽_Φ` が totally epimorphic)。
+★★★**そこで効いているのは `Definition 1.1, (ii), (a)` の
+「`Φ(A) → Φ(B)` は characteristically injective」**である。
+★私は一度「`Φ.map` の単射性は無いので `𝒞^un-tr` の全射性は原文の隠れ段だ」と
+測定しかけたが、**単射性は `MonoidOn` の構造フィールドとして最初から入っていた**
+(`MonoidOn.charInj` → `MonoidOn.map_injective`)。
+★★**「原文の隠れ段」と書く前に在庫を引く**、の 3 例目である。
+-/
+
+include P in
+/-- ★★**`𝒞^un-tr` は totally epimorphic**。
+
+★`𝒞^un-tr → 𝔽_Φ` は**忠実**なので、`𝔽_Φ` 側の epi 性がそのまま降りてくる。 -/
+theorem unTr_totEpi : IsTotallyEpimorphic (UnTr P) := by
+  intro A B f
+  refine ⟨fun {Z} g h hgh => ?_⟩
+  haveI : Epi ((unTrToElem P).map f) :=
+    isTotallyEpimorphic_elemFrobCat P.totEpiD (fun X => (P.divisorial X).1.1) _ _ _
+  refine (unTrToElem P).map_injective ?_
+  refine (cancel_epi ((unTrToElem P).map f)).mp ?_
+  rw [← (unTrToElem P).map_comp, ← (unTrToElem P).map_comp, hgh]
+
+include P in
+/-- ★★**`𝒞^un-tr` は connected** —— `istrToUnTr` は**対象について恒等**なので、
+`𝒞^istr` の zigzag をそのまま送るだけ。 -/
+theorem isConnected_unTr (Fc : FrobenioidCore P) : IsConnected (UnTr P) := by
+  haveI := isConnected_istr P Fc
+  haveI : Nonempty (UnTr P) := (inferInstance : Nonempty (Istr P))
+  refine zigzag_isConnected ?_
+  intro X Y
+  exact zigzag_obj_of_zigzag (istrToUnTr P)
+    (@isPreconnected_zigzag (Istr P) _ _ (X : Istr P) (Y : Istr P))
+
+/-- ★★★**[FrdI] Proposition 3.3, (iv)** —— `𝒞^un-tr` の **pre-Frobenioid 構造**。
+
+★6 フィールドのうち **4 つは `P` のものがそのまま通る**
+(`divisorial` は `Φ` のものだから、`totEpiD`・`connectedD` は `𝒟` が変わらないから)。 -/
+noncomputable def unTrPre (Fc : FrobenioidCore P) : PreFrobenioid (UnTr P) Φ where
+  toElem := unTrToElem P
+  divisorial := P.divisorial
+  totEpiC := unTr_totEpi P
+  totEpiD := P.totEpiD
+  connectedC := isConnected_unTr P Fc
+  connectedD := P.connectedD
+
+/-! ### ★射の 3 つの不変量は `𝒞^istr` のものと一致する
+
+原文 (FrdI p.60):
+> phism; morphism of a given Frobenius degree) if and only if it arises from such
+
+★★これは **`rfl`** である —— `unTrToElem` は代表元に `P.toElem` を当てるだけだから。
+★原文の「if and only if it arises from such an arrow of `𝒞^istr`」の
+**「only if」の側が構成から自明になる**のはこのためである。 -/
+
+theorem unTrPre_degFr (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    (unTrPre P Fc).degFr (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      = P.degFr α := rfl
+
+theorem unTrPre_Base (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    (unTrPre P Fc).Base (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      = P.Base α := rfl
+
+theorem unTrPre_Div (Fc : FrobenioidCore P) {A B : Istr P} (α : A.obj ⟶ B.obj) :
+    (unTrPre P Fc).Div (toHomUnTr P α : (show UnTr P from A) ⟶ (show UnTr P from B))
+      = P.Div α := rfl
+
+/-- ★★**`𝒞^un-tr` は unit-trivial 型** —— `𝒪^×` は `𝔽_Φ` で恒等に写る元の集合であり、
+`𝒞^un-tr` ではそれらがすべて `𝟙` に潰れている。
+
+★これが原文の「with respect to which `𝒞^un-tr` is of ... unit-trivial type」の中身。 -/
+theorem unTr_unitTrivial (Fc : FrobenioidCore P) (A : UnTr P) :
+    IsUnitTrivial (unTrPre P Fc) A := by
+  refine le_antisymm (fun δ hδ => ?_) bot_le
+  refine Submonoid.mem_bot.mpr ?_
+  obtain ⟨⟨hbase, hdeg⟩, hunit⟩ := hδ
+  haveI : IsIso ((δ : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso _).mp hunit
+  haveI : IsIso ((unTrToElem P).map (δ : A ⟶ A)) := inferInstance
+  refine (unTrToElem P).map_injective ?_
+  have hid : (unTrToElem P).map ((1 : End A) : A ⟶ A) = 𝟙 ((unTrToElem P).obj A) :=
+    (unTrToElem P).map_id A
+  refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+  · exact hbase
+  · rw [show ((unTrToElem P).map ((1 : End A) : A ⟶ A)).div = 0 from
+      congrArg ElemFrobCat.Hom.div hid]
+    exact ElemFrobCat.div_eq_zero_of_isIso (fun X => (P.divisorial X).2) _
+  · rw [show ((unTrToElem P).map ((1 : End A) : A ⟶ A)).deg = 1 from
+      congrArg ElemFrobCat.Hom.deg hid]
+    exact hdeg
+
 end ABC3.Found.FrdI

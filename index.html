@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-16 ・ コミット 287 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-17 ・ コミット 469 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">35/35</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">1653</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">492</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">114</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">4</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">3040</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">779</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">172</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">19</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -52,14 +52,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>依存グラフ(我々が写した範囲)</h2>
 <div class="grid">
-  <div class="card"><div class="k">節点</div><div class="v">11</div></div>
-  <div class="card"><div class="k">辺</div><div class="v">9</div></div>
-  <div class="card"><div class="k">最大深さ</div><div class="v">3</div></div>
+  <div class="card"><div class="k">節点</div><div class="v">38</div></div>
+  <div class="card"><div class="k">辺</div><div class="v">44</div></div>
+  <div class="card"><div class="k">最大深さ</div><div class="v">7</div></div>
   <div class="card ok"><div class="k">循環</div><div class="v">0</div></div>
-  <div class="card ok"><div class="k">着地した葉</div><div class="v">2</div></div>
-  <div class="card"><div class="k">未展開の葉</div><div class="v">3</div></div>
-  <div class="card"><div class="k">暗黙の段</div><div class="v">25</div></div>
-  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">2</div></div>
+  <div class="card ok"><div class="k">着地した葉</div><div class="v">3</div></div>
+  <div class="card"><div class="k">未展開の葉</div><div class="v">6</div></div>
+  <div class="card"><div class="k">暗黙の段</div><div class="v">57</div></div>
+  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">10</div></div>
 </div>
 
 <h2>見る</h2>
@@ -101,6 +101,40 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 [EtTh] Proposition 2.2 は層0にありながら Δ_X(幾何的基本群)を要る。Δ_X は §0 でも番号付き項目でもないので辺にならない——それだけの理由で層0にいる。層0は『どこから始められるか』の下界であって、難易度の順位ではない。<br><br>
 <b>次:</b> Δ_X・GFG-type のような論文固有の記号定義をグラフに入れる(§0 を入れて [FrdI] Definition 1.1 が層0→層1に移ったのと同じ操作)</div>
 
+<h2>原文の記載不備と、我々が足した前提</h2>
+<div class="note"><b>★この節は「原文をそのままでは形式化できなかった箇所」の一覧である。</b><br>
+2 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）と、
+<b>(B) 我々が前提を足したもの</b>（原文の主張そのものは未決着のまま）。
+<b>(A) だけを指標に数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。</div>
+<table><tr><th style="width:26%">項目</th><th style="width:52px">種別</th><th style="width:56px">数えたか</th><th>中身</th></tr>
+<tr><td><b>[FrdI] Proposition 2.1, (iii)</b></td><td><b style="color:#b3261e">A</b></td><td><b style="color:#1e7a52">数えた</b></td><td style="font-size:12px">
+<b>★原文の訂正が必要。</b>原文 p.44 は「Let d ∈N≥1.」で <code>d</code> を先に固定してから
+「<code>C</code> is of perfect type if and only if Ψ is an equivalence of categories」と述べるが、
+<b>その読みでは <code>⟸</code> が偽</b>である（機械検証済み、<code>Check/FrdI/Prop21QuantifierGap.lean</code>）。
+<code>d = 1</code> では Ψ₁ はつねに恒等関手と同型なので perfect 型でない Frobenioid すべてが反例になり、
+<code>d ≥ 2</code> でも <code>Φ = Z/2</code>・<code>d = 3</code> が反例になる。
+<b>論文の数学の誤りではない</b>——原文の証明文自身が perfect の定義（すべての <code>n</code> を量化）を引いており、
+意図された主張「すべての <code>d</code> で Ψ_d が圏同値 ⟺ perfect 型」は真で、我々はそれを証明した
+（<code>Found/FrdI/Prop21.lean</code> の <code>prop_2_1_iii</code>）。<b>壊れているのは印刷された文の量化子の位置だけ。</b>
+記録: <code>Gap/FrdI/Section2.lean</code> の <code>Gap_2_1_iii</code>（分類 ③ sourceGap、反例つき）。</td></tr>
+<tr><td><b>[FrdI] Proposition 1.6, (v)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+2 件の <code>⟸</code>（Aut-ample / base-trivial）に <b>「全対象が Aut-ample」を足した</b>
+（<code>cfp_autAmple_mpr</code> / <code>cfp_baseTrivial_mpr</code>）。
+<b>原文の主張が真かどうかは未決着</b>（<code>Gap_1_6_v</code>、分類 ② missingMath）。
+2026-08-16 に穴は <code>htwist</code> 1 点まで絞れており、反例があるとすれば
+<code>Aut_C(A)</code> の底が <code>Φ(A)</code> に非自明に作用する所にしかない、と分かっている。
+<b>足した前提が空虚でないことは証明済み</b>（<code>autAmple_and_baseTrivial_nonvacuous</code>：𝔽_Φ の対象はすべて両方を満たす）。
+<b>★併せて (ii) の <code>plBkEquiv</code> の本質的全射性が未実装</b>（Lean の書き換えが通らず打ち切った）。</td></tr>
+<tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
+（<code>mono_of_frobType_of_unitTrivial</code>）。原文が課すのは
+「Φ は divisorial」「𝒟 は連結・totally epimorphic・FSMFF 型」「𝒞 は isotropic 型の Frobenioid」だけで、
+<b>unit-trivial は我々が足したものである</b>。<code>Definition 1.3, (vi)</code> が与えるのは
+<b>単元を除いた</b>忠実性だけで、unit-trivial はその単元をちょうど潰す。
+<b>★さらに (iii) にはもう 1 つ穴がある</b>——<code>hFrobFS</code> の側は
+<b>𝒪^× にどんな仮定を置いても埋まらず</b>、Φ の <code>d</code> 可除性（perfect 型）が要ると見ている（未証明）。</td></tr>
+</table>
+
 <h2>いま分かっていること</h2>
 <table><tr><th>詰まる壁の種類</th><th>実例</th><th>重さ</th></tr>
 <tr><td><b>1. mathlib の不在</b></td><td>p進対数(評価 API がノルム体に原理的に不適用)</td><td>作業量</td></tr>
@@ -118,25 +152,25 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>7daf952</code></td><td>2026-08-16</td><td>記憶の索引に GenEll トラックの 2 件を足した</td></tr>
-<tr><td><code>cb19e06</code></td><td>2026-08-16</td><td>[GenEll] トラックを起こした——Lemma 3.1 の 3 条と、基礎理論の可視化</td></tr>
-<tr><td><code>2cffa77</code></td><td>2026-08-16</td><td>反例の探索範囲をさらに狭めた——指数 2・`H` 自明の場合は反例が無い</td></tr>
-<tr><td><code>143677d</code></td><td>2026-08-16</td><td>穴を捻れから外した——`𝒪^▷(A) → Φ(A)` の全射性に言い換えた</td></tr>
-<tr><td><code>1b431da</code></td><td>2026-08-16</td><td>`Gap_1_6_v` の記録を更新——穴は `htwist` 1 点、その性質も解析した</td></tr>
-<tr><td><code>0651d61</code></td><td>2026-08-16</td><td>組み立てた——`base-trivial ⟹ Aut-ample` を、穴 1 点を残して証明した</td></tr>
-<tr><td><code>74847b2</code></td><td>2026-08-16</td><td>`Prop 1.6, (v)` の `⟸` へ——第 2・第 3 歩を証明した</td></tr>
-<tr><td><code>13700a5</code></td><td>2026-08-16</td><td>`base-trivial` ⟹ `Frobenius-trivial`——`Prop 1.6, (v)` の `⟸` を証明する道の第 1 歩</td></tr>
-<tr><td><code>fdd2b62</code></td><td>2026-08-16</td><td>`Definition 1.2` も照合した——逐語照合が完了、食い違いは 1 つも無かった</td></tr>
-<tr><td><code>79775c2</code></td><td>2026-08-16</td><td>`Definition 1.1` も照合した——一致。残るは `Definition 1.2` の語彙</td></tr>
-<tr><td><code>80da111</code></td><td>2026-08-16</td><td>逐語照合をやった——`§0` と `Definition 1.3` は一致、著者は機構を知っていた</td></tr>
-<tr><td><code>b9414b3</code></td><td>2026-08-16</td><td>`Prop 1.6, (v)` の反例の設計を確定し、群論の中身を証明した</td></tr>
+<tr><td><code>17d606a</code></td><td>2026-08-17</td><td>★★★病は `Proposition 1.4` だけではなかった——§1 の Skeleton は系統的に偽である</td></tr>
+<tr><td><code>7e3aa96</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (iii)`——構成の側では BD-class ではなく等式が出る</td></tr>
+<tr><td><code>c4c5314</code></td><td>2026-08-17</td><td>★★★`Proposition 1.4, (ii)`——因子で表すと仮定はアルキメデス側にしか効かない</td></tr>
+<tr><td><code>a2d773a</code></td><td>2026-08-17</td><td>`Theorem 3.4, (i)` の 1-一意性を取った——在庫の `isotropificationRestrictIso` 1 本で済んだ</td></tr>
+<tr><td><code>1e1c780</code></td><td>2026-08-17</td><td>★★★高さを構成した——残るのは 1 本の等式だけになった</td></tr>
+<tr><td><code>07d3ec5</code></td><td>2026-08-17</td><td>★★★算術直線束の引き戻し——アルキメデス側は解析空間なしで構成できた</td></tr>
+<tr><td><code>b17890b</code></td><td>2026-08-17</td><td>逐語を直した——`(i) We have` にコロンも `ht` も無かった</td></tr>
+<tr><td><code>c333095</code></td><td>2026-08-17</td><td>[FrdI] `Remark 3.4.1` を取った——§3 が 4/9 → 5/9</td></tr>
+<tr><td><code>24da0d4</code></td><td>2026-08-17</td><td>★★次数は積を和に送る——`Proposition 1.4, (i)` の次数側を取った</td></tr>
+<tr><td><code>0a71555</code></td><td>2026-08-17</td><td>★★★引き戻しは積を保つ——`comap` では無理だったものが茎では 1 行</td></tr>
+<tr><td><code>65fbb16</code></td><td>2026-08-17</td><td>重複を撤去した——`isotropification` の四角形は在庫にあった</td></tr>
+<tr><td><code>e882b05</code></td><td>2026-08-17</td><td>★★★有効 Cartier 因子は積で閉じる——茎で定義したら摩擦が消えた</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(492 件)。</div>
+<b>すべて PDF と機械照合している</b>(779 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

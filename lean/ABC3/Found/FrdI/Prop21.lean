@@ -574,6 +574,37 @@ theorem prop_2_1_iii_mpr (h : ∀ n : ℕ+, (naiveFrob P F n).IsEquivalence) :
 theorem prop_2_1_iii : IsOfPerfectType P ↔ ∀ n : ℕ+, (naiveFrob P F n).IsEquivalence :=
   ⟨fun hpt n => prop_2_1_iii_mp P F n hpt, prop_2_1_iii_mpr P F⟩
 
+/-! ## ★★★`Proposition 2.1` 全体の `.src`(2026-08-17、利用者の判断により付与)
+
+★★**付与の条件は「意図された主張を完全に形式化できたか」である。** ここでは満たしている:
+
+| 条 | 実装 |
+|---|---|
+| (i) 素朴 Frobenius 関手の存在・合成則 | `naiveFrob` / `naiveFrob_comp` |
+| (ii) `𝔽` 側の Frobenius 関手との 1-両立、`𝒪^▷` 上の `d` 乗 | `naiveFrob_compat` 系 |
+| (iii) perfect 型 ⟺ 素朴 Frobenius 関手が圏同値 | `prop_2_1_iii` |
+
+★★★**ただし (iii) は原文どおりの量化子では偽である。**
+原文 p.44 は「Let d ∈N≥1.」で `d` を**先に固定**してから (iii) を述べるが、
+その読みでは `⟸` に**機械検証済みの反例**がある
+(`Check/FrdI/Prop21QuantifierGap.lean`):
+
+- `d = 1` では `Ψ₁` はつねに恒等関手と同型(次数 1 の Frobenius 型射は同型)。
+  よって **perfect 型でない Frobenioid すべて**が反例
+- `d ≥ 2` でも同じ: `Φ = Z/2` では 3 倍が全単射だが 2 倍は非全射
+
+★**これは論文の数学の誤りではない。** 原文の証明文自身が `perfect` の定義
+(`Definition 1.2, (iv)`、**すべての `n`** を量化)を引いており、
+**意図された主張「すべての `d` で `Ψ_d` が圏同値 ⟺ perfect 型」は真**で、
+それが `prop_2_1_iii` である。壊れているのは**印刷された文の量化子の位置**だけである。
+
+★★**原文の訂正が必要な箇所として `index.html` に記録した**
+(`tools/index-html.mjs` の「原文の記載不備と、我々が足した前提」)。
+`Gap/FrdI/Section2.lean` の `Gap_2_1_iii`(分類 ③ `sourceGap`、反例つき)も存置する。 -/
+def prop_2_1.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 44, item := "Proposition 2.1",
+    sectionId := "frdi-prop-2-1" }
+
 end PerfectType
 
 end ABC3.Found.FrdI

@@ -142,6 +142,40 @@ ${L0.startable.map((s) => {
 ${esc(L0.notComplete.detail)}<br><br>
 <b>次:</b> ${esc(L0.notComplete.next)}</div>` : ''}
 
+<h2>原文の記載不備と、我々が足した前提</h2>
+<div class="note"><b>★この節は「原文をそのままでは形式化できなかった箇所」の一覧である。</b><br>
+2 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）と、
+<b>(B) 我々が前提を足したもの</b>（原文の主張そのものは未決着のまま）。
+<b>(A) だけを指標に数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。</div>
+<table><tr><th style="width:26%">項目</th><th style="width:52px">種別</th><th style="width:56px">数えたか</th><th>中身</th></tr>
+<tr><td><b>[FrdI] Proposition 2.1, (iii)</b></td><td><b style="color:#b3261e">A</b></td><td><b style="color:#1e7a52">数えた</b></td><td style="font-size:12px">
+<b>★原文の訂正が必要。</b>原文 p.44 は「Let d ∈N≥1.」で <code>d</code> を先に固定してから
+「<code>C</code> is of perfect type if and only if Ψ is an equivalence of categories」と述べるが、
+<b>その読みでは <code>⟸</code> が偽</b>である（機械検証済み、<code>Check/FrdI/Prop21QuantifierGap.lean</code>）。
+<code>d = 1</code> では Ψ₁ はつねに恒等関手と同型なので perfect 型でない Frobenioid すべてが反例になり、
+<code>d ≥ 2</code> でも <code>Φ = Z/2</code>・<code>d = 3</code> が反例になる。
+<b>論文の数学の誤りではない</b>——原文の証明文自身が perfect の定義（すべての <code>n</code> を量化）を引いており、
+意図された主張「すべての <code>d</code> で Ψ_d が圏同値 ⟺ perfect 型」は真で、我々はそれを証明した
+（<code>Found/FrdI/Prop21.lean</code> の <code>prop_2_1_iii</code>）。<b>壊れているのは印刷された文の量化子の位置だけ。</b>
+記録: <code>Gap/FrdI/Section2.lean</code> の <code>Gap_2_1_iii</code>（分類 ③ sourceGap、反例つき）。</td></tr>
+<tr><td><b>[FrdI] Proposition 1.6, (v)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+2 件の <code>⟸</code>（Aut-ample / base-trivial）に <b>「全対象が Aut-ample」を足した</b>
+（<code>cfp_autAmple_mpr</code> / <code>cfp_baseTrivial_mpr</code>）。
+<b>原文の主張が真かどうかは未決着</b>（<code>Gap_1_6_v</code>、分類 ② missingMath）。
+2026-08-16 に穴は <code>htwist</code> 1 点まで絞れており、反例があるとすれば
+<code>Aut_C(A)</code> の底が <code>Φ(A)</code> に非自明に作用する所にしかない、と分かっている。
+<b>足した前提が空虚でないことは証明済み</b>（<code>autAmple_and_baseTrivial_nonvacuous</code>：𝔽_Φ の対象はすべて両方を満たす）。
+<b>★併せて (ii) の <code>plBkEquiv</code> の本質的全射性が未実装</b>（Lean の書き換えが通らず打ち切った）。</td></tr>
+<tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
+（<code>mono_of_frobType_of_unitTrivial</code>）。原文が課すのは
+「Φ は divisorial」「𝒟 は連結・totally epimorphic・FSMFF 型」「𝒞 は isotropic 型の Frobenioid」だけで、
+<b>unit-trivial は我々が足したものである</b>。<code>Definition 1.3, (vi)</code> が与えるのは
+<b>単元を除いた</b>忠実性だけで、unit-trivial はその単元をちょうど潰す。
+<b>★さらに (iii) にはもう 1 つ穴がある</b>——<code>hFrobFS</code> の側は
+<b>𝒪^× にどんな仮定を置いても埋まらず</b>、Φ の <code>d</code> 可除性（perfect 型）が要ると見ている（未証明）。</td></tr>
+</table>
+
 <h2>いま分かっていること</h2>
 <table><tr><th>詰まる壁の種類</th><th>実例</th><th>重さ</th></tr>
 ${(L0 ? L0.wallKinds : []).map((w) => `<tr><td><b>${w.n}. ${esc(w.name)}</b></td><td>${esc(w.example)}</td><td>${esc(w.weight)}</td></tr>`).join('\n')}
