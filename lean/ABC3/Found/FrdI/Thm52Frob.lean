@@ -1561,6 +1561,103 @@ theorem model_isPreModelType (h : Hyp M) (hskel : Skeletal D) :
   ⟨⟨modelBaseSection h hskel, modelFrobSection h hskel,
     modelFrobSection_isFrobSection h hskel⟩⟩
 
+/-! ## ★19. `𝒞^birat` へ向かう 2 つの構成
+
+★★`Theorem 5.2, (ii)` の残り「**birationally Frobenius-normalized 型**」は、
+`𝒞^birat` の射を `[a]⁻¹ ≫ [f]` の形で扱う計算になる。そこで要るのは次の 2 つ:
+
+| 構成 | 内容 |
+|---|---|
+| `preStepDown` | 任意の `K ∈ Φ(E)` に対し `Div = K` の co-angular pre-step `E↓K ⟶ E` |
+| `exists_ore_square` | `p ≫ f = m ≫ a`(**Ore の四角形**)—— `[f] ≫ [a]⁻¹ = [p]⁻¹ ≫ [m]` を与える |
+
+★★model Frobenioid では**どちらも明示的に作れる**のが要点である
+(`Definition 1.3` の公理から取り出すのではなく、`Φ`・`B` の元を直接指定する)。 -/
+
+/-- ★`Div` を `K` だけ下げた対象。 -/
+def objDown (E : Obj M) (K : M.phi.val E.base) : Obj M :=
+  ⟨E.base, E.cls - toGpHom _ K⟩
+
+@[simp] theorem objDown_base (E : Obj M) (K : M.phi.val E.base) :
+    (objDown E K).base = E.base := rfl
+@[simp] theorem objDown_cls (E : Obj M) (K : M.phi.val E.base) :
+    (objDown E K).cls = E.cls - toGpHom _ K := rfl
+
+/-- ★★**零因子を指定した pre-step** —— `Div = K`、底は `𝟙`、次数 1、`u = 0`。 -/
+def preStepDown (E : Obj M) (K : M.phi.val E.base) : objDown E K ⟶ E :=
+  ⟨𝟙 E.base, K, 1, 0, by
+    show ((1 : ℕ+) : ℕ) • (E.cls - toGpHom _ K) + toGpHom _ K
+      = M.phi.gpMapOn (𝟙 E.base) E.cls + M.divB _ (0 : M.bmon.val E.base)
+    rw [MonoidOn.gpMapOn_id, map_zero, add_zero]
+    simp only [PNat.one_coe, one_smul]
+    abel⟩
+
+@[simp] theorem preStepDown_base (E : Obj M) (K : M.phi.val E.base) :
+    (preStepDown E K).base = 𝟙 E.base := rfl
+@[simp] theorem preStepDown_div (E : Obj M) (K : M.phi.val E.base) :
+    (preStepDown E K).div = K := rfl
+@[simp] theorem preStepDown_deg (E : Obj M) (K : M.phi.val E.base) :
+    (preStepDown E K).deg = 1 := rfl
+@[simp] theorem preStepDown_u (E : Obj M) (K : M.phi.val E.base) :
+    (preStepDown E K).u = 0 := rfl
+
+theorem preStepDown_isPreStep (h : Hyp M) (E : Obj M) (K : M.phi.val E.base) :
+    IsPreStep (modelPre h) (preStepDown E K) := by
+  refine ⟨rfl, ?_⟩
+  show IsIso (𝟙 E.base)
+  infer_instance
+
+/-- ★★★**Ore の四角形** —— `a : E ⟶ A` が pre-step、`f : E ⟶ A` が同じ底を持ち、
+`Div a + d = Div f + deg(f)·K` なら、`p := preStepDown E K` と
+`m : E↓K ⟶ E`(`Div m = d`)が `p ≫ f = m ≫ a` を満たす。
+
+★★これが `𝒞^birat` で `[f] ≫ [a]⁻¹ = [p]⁻¹ ≫ [m]` を与える。 -/
+theorem exists_ore_square (h : Hyp M) {E A : Obj M} (a f : E ⟶ A)
+    (had : a.deg = 1) (hbase : f.base = a.base)
+    (K : M.phi.val E.base) (d : M.phi.val E.base)
+    (hd : a.div + d = f.div + (f.deg : ℕ) • K) :
+    ∃ m : objDown E K ⟶ E,
+      m.base = 𝟙 E.base ∧ m.div = d ∧ m.deg = f.deg ∧
+        m.u = f.u + bneg h a.u ∧ preStepDown E K ≫ f = m ≫ a := by
+  have hac := a.cond
+  have hfc := f.cond
+  rw [had] at hac
+  simp only [PNat.one_coe, one_smul] at hac
+  rw [hbase] at hfc
+  have hdg : toGpHom (M.phi.val E.base) a.div + toGpHom _ d
+      = toGpHom _ f.div + ((f.deg : ℕ)) • toGpHom _ K := by
+    rw [← map_add, hd, map_add, map_nsmul]
+  have hcond : ((f.deg : ℕ)) • (E.cls - toGpHom (M.phi.val E.base) K) + toGpHom _ d
+      = M.phi.gpMapOn (𝟙 E.base) E.cls + M.divB _ (f.u + bneg h a.u) := by
+    rw [MonoidOn.gpMapOn_id, map_add, divB_bneg, smul_sub]
+    have hkey : ((f.deg : ℕ)) • E.cls
+        = M.phi.gpMapOn a.base A.cls + M.divB _ f.u - toGpHom _ f.div :=
+      eq_sub_of_add_eq hfc
+    have hkey2 : M.phi.gpMapOn a.base A.cls
+        = E.cls + toGpHom _ a.div - M.divB _ a.u :=
+      eq_sub_of_add_eq hac.symm
+    have hdd : toGpHom (M.phi.val E.base) d
+        = toGpHom _ f.div + ((f.deg : ℕ)) • toGpHom _ K - toGpHom _ a.div :=
+      eq_sub_of_add_eq (by rw [add_comm]; exact hdg)
+    rw [hkey, hkey2, hdd]
+    abel
+  refine ⟨⟨𝟙 E.base, d, f.deg, f.u + bneg h a.u, hcond⟩, rfl, rfl, rfl, rfl, ?_⟩
+  refine Hom.ext ?_ ?_ ?_ ?_
+  · show 𝟙 E.base ≫ f.base = 𝟙 E.base ≫ a.base
+    rw [hbase]
+  · show M.phi.map (𝟙 E.base) f.div + (f.deg : ℕ) • K
+      = M.phi.map (𝟙 E.base) a.div + (a.deg : ℕ) • d
+    rw [had, MonoidOn.map_id, MonoidOn.map_id]
+    simp only [PNat.one_coe, one_smul]
+    exact hd.symm
+  · show f.deg * 1 = a.deg * f.deg
+    rw [had, mul_one, one_mul]
+  · show M.bmon.map (𝟙 E.base) f.u + (f.deg : ℕ) • (0 : M.bmon.val E.base)
+      = M.bmon.map (𝟙 E.base) a.u + (a.deg : ℕ) • (f.u + bneg h a.u)
+    rw [had, MonoidOn.map_id, MonoidOn.map_id]
+    simp only [PNat.one_coe, one_smul, smul_zero, add_zero]
+    rw [← add_assoc, add_comm a.u f.u, add_assoc, add_bneg, add_zero]
+
 end ModelData
 
 end ABC3.Found.FrdI
