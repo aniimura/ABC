@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Prop33v
+import ABC3.Found.FrdI.Thm34
 
 /-!
 # [FrdI] Proposition 3.11, (i) —— group-like・isotropic・unit-trivial 型なら `𝒞 ≃ 𝔽_Φ`
@@ -157,5 +158,90 @@ theorem isPrimeFrobenius_of_isFSMI_endo (Fc : FrobenioidCore P) (G : Frobenioid 
     exact absurd
       (⟨(prop_1_11_vi_fsm P Fc φ hpb).mp h.1, hb⟩ : IsFSMI (P.Base φ))
       (not_isFSMI_endo_of_isOfFSMFFType hFSMFF (P.Base φ))
+
+/-! ## ★(ii) の第 2 歩 —— **prime-Frobenius 自己射は FSMI である**
+
+原文 (FrdI p.73):
+> is an FSMI-endomorphism if and only if it is a prime-Frobenius endomorphism [cf.
+
+★★**ここは `𝔽_Φ` で計算する。** (i) が `𝒞 ≃ 𝔽_Φ` を与えており、
+`𝔽_Φ` の射は `(base, div, deg)` の 3 つ組なので **FSM 性が明示的に書ける**。
+★`Φ` は group-like かつ sharp なので `Div` はつねに `0`——**3 つ組が 2 つ組になる**。
+
+★★得た結果は `isFSMI_map_iff`(圏同値は FSMI を保ち、かつ**反射**する)で `𝒞` へ戻す。
+-/
+
+/-- ★★**`𝔽_Φ` では、底が fiberwise-surjective なら射も fiberwise-surjective**
+(`Φ` の値がすべて零のとき)。
+
+★**次数の側は `k₁ := γ.deg`, `k₂ := β.deg` と取れば `ℕ≥1` の可換性で揃う**。
+★零因子の側は `Φ` が零なので自動。★**底の側だけが本質**である。 -/
+theorem elemFrob_isFiberwiseSurjective_of_base
+    (hzero : ∀ (X : D) (a : Φ.val X), a = 0)
+    {B A : ElemFrobCat Φ} (β : B ⟶ A)
+    (hb : IsFiberwiseSurjective (ElemFrobCat.Hom.base β)) :
+    IsFiberwiseSurjective β := by
+  intro Z γ
+  obtain ⟨Dd, d₁, d₂, hd⟩ := hb (ElemFrobCat.Hom.base γ)
+  refine ⟨⟨Dd⟩, ⟨d₁, 0, ElemFrobCat.Hom.deg γ⟩, ⟨d₂, 0, ElemFrobCat.Hom.deg β⟩, ?_⟩
+  refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+  · exact hd
+  · exact (hzero _ _).trans (hzero _ _).symm
+  · exact mul_comm _ _
+
+include P in
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 2 歩** —— group-like・isotropic・
+unit-trivial 型なら、**prime-Frobenius 自己射は FSMI である**。
+
+★★**3 成分を `𝔽_Φ` で潰す**:
+
+| 成分 | `𝔽_Φ` での理由 |
+|---|---|
+| fiberwise-surjective | 底 `Base φ` は**同型**(Frobenius 型)ゆえ f.s.、あとは上の補題 |
+| mono | 底が同型で次数は `ℕ≥1` で簡約的、零因子は零 |
+| irreducible | `𝒞` 側で `Proposition 1.10, (iv)` を当ててから `Ψ` で送る |
+
+★★**「prime-Frobenius ⟹ mono」は一般には偽になりうる**(`Prop114.lean` の測定、
+障害は `𝒪^×(A)` の `p`-捻れ)。★**unit-trivial 型がその捻れをちょうど消す**——
+ここでは (i) の圏同値を通して自動的に効いている。 -/
+theorem isFSMI_of_isPrimeFrobenius_endo (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : IsOfIsotropicType P) (hut : IsOfUnitTrivialType P) (hgl : IsOfGroupLikeType P)
+    {A : C} {φ : A ⟶ A} (h : IsPrimeFrobenius P φ) : IsFSMI φ := by
+  haveI := prop_3_11_i P Fc G hiso hut hgl
+  have hzero : ∀ (X : D) (a : Φ.val X), a = 0 := by
+    intro X a
+    obtain ⟨A₀, -, ⟨e⟩⟩ := Fc.baseSurj X
+    have h0 : Φ.map e.hom a = 0 :=
+      eq_zero_of_groupLike_of_sharp P (hgl A₀) (P.divisorial _).2 _
+    exact Φ.map_injective e.hom (by rw [h0, map_zero])
+  refine (isFSMI_map_iff P.toElem φ).mpr ?_
+  haveI hbi : IsIso (P.Base φ) := h.1.2
+  refine ⟨⟨?_, ?_⟩, isIrreducibleMor_map P.toElem
+    ((prop_1_10_iv P Fc (hiso A) φ h.1).mp h)⟩
+  · exact elemFrob_isFiberwiseSurjective_of_base hzero _
+      (isFiberwiseSurjective_of_isIso (P.Base φ))
+  · refine ⟨fun {X} f g hfg => ?_⟩
+    have hb := congrArg ElemFrobCat.Hom.base hfg
+    have hdg := congrArg ElemFrobCat.Hom.deg hfg
+    refine ElemFrobCat.Hom.ext ?_ ((hzero _ _).trans (hzero _ _).symm) ?_
+    · exact (cancel_mono (P.Base φ)).mp hb
+    · exact mul_left_cancel hdg
+
+include P in
+/-- ★★★★**[FrdI] Proposition 3.11, (ii) の鍵** ——
+**`𝒞` の自己射が FSMI であるのは prime-Frobenius であるとき、かつそのときに限る**。
+
+原文 (FrdI p.73):
+> is an FSMI-endomorphism if and only if it is a prime-Frobenius endomorphism [cf.
+
+★★**これが「`Ψ` が prime-Frobenius 自己射を保つ」を与える** ——
+FSMI は純粋に圏論的(`isFSMI_map_iff`)だからである。
+★原文の「Thus, `Ψ` preserves the prime-Frobenius endomorphisms」の中身。 -/
+theorem isFSMI_endo_iff_isPrimeFrobenius (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hFSMFF : IsOfFSMFFType D) (hiso : IsOfIsotropicType P) (hut : IsOfUnitTrivialType P)
+    (hgl : IsOfGroupLikeType P) {A : C} (φ : A ⟶ A) :
+    IsFSMI φ ↔ IsPrimeFrobenius P φ :=
+  ⟨isPrimeFrobenius_of_isFSMI_endo P Fc G hFSMFF hgl (fun X => hiso X),
+   isFSMI_of_isPrimeFrobenius_endo P Fc G hiso hut hgl⟩
 
 end ABC3.Found.FrdI
