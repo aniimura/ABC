@@ -190,6 +190,50 @@ theorem comp_awayι_injective (A : CommRingCat.{0}) (s : A) :
   congr 1
   exact Subtype.ext h
 
+/-! ## ★★★★基底事例 —— アフィン間の `topology_openImmersion` -/
+
+/-- ★★★★**`topology_openImmersion` の基底事例**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    arcTopologyAffine (Away s) = induced (· ≫ awayι A s) (arcTopologyAffine A)
+
+★★★**両向き連続な全単射なので部分空間位相になる**——
+4 条件(`awayLift_comp_awayι` / `awayLift_comp_awayι_self` /
+`continuous_awayLift` / `continuous_comp_affine`)がすべて揃った帰結である。
+
+★★これが `Interface/Arakelov/ArcSpace.lean` の
+`topology_openImmersion` の**アフィンの場合**である。 -/
+theorem arcTopologyAffine_away (A : CommRingCat.{0}) (s : A) :
+    arcTopologyAffine (CommRingCat.of (Localization.Away s))
+      = TopologicalSpace.induced
+          (fun q : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s)) =>
+            q ≫ awayι A s)
+          (arcTopologyAffine A) := by
+  letI := arcTopologyAffine A
+  letI := arcTopologyAffine (CommRingCat.of (Localization.Away s))
+  refine le_antisymm (continuous_iff_le_induced.1 (continuous_comp_affine (awayι A s))) ?_
+  intro V hV
+  refine isOpen_induced_iff.2 ⟨Subtype.val '' (awayLift A s ⁻¹' V), ?_, ?_⟩
+  · exact (isOpen_arcBasicOpen A s).isOpenMap_subtype_val _
+      ((continuous_awayLift A s).isOpen_preimage _ hV)
+  · ext q
+    simp only [Set.mem_preimage, Set.mem_image]
+    constructor
+    · rintro ⟨p, hp, heq⟩
+      have : awayLift A s p = q := by
+        have h2 : awayLift A s ⟨q ≫ awayι A s,
+            comp_awayι_mem_arcBasicOpen A s q⟩ = q :=
+          awayLift_comp_awayι_self A s q
+        rw [← h2]
+        congr 1
+        exact Subtype.ext heq
+      rwa [← this]
+    · intro hq
+      exact ⟨⟨q ≫ awayι A s, comp_awayι_mem_arcBasicOpen A s q⟩,
+        by rwa [awayLift_comp_awayι_self], rfl⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
@@ -210,6 +254,11 @@ def continuous_awayLift.src : ABC3.Meta.Source :=
 def awayLift_comp_awayι.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——持ち上げが構造射の切断であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcTopologyAffine_away.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みで位相が誘導されること、基本開集合の場合)",
     sectionId := "genell-def-1-1-i" }
 
 end ABC3.Found.Arakelov
