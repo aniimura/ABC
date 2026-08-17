@@ -472,4 +472,153 @@ theorem birat_isCoAngular_iff {A B : C} (φ : A ⟶ B) :
     IsCoAngular (biratPre P G) ((toBiratCat P G).map φ) ↔ IsCoAngular P φ :=
   ⟨birat_coAngular_reflect P G φ, birat_coAngular_push P G φ⟩
 
+/-! ## ★8. 辞書の残り —— Frobenius 型、および「代表元で判定できる」
+
+原文 (FrdI p.83):
+> morphism of a given Frobenius degree; isometry; pre-step; base-isomorphism) of
+
+★★`𝒞^birat` では**等長が自動**なので、
+`Frobenius 型 = co-angular ∧ 底同型` に潰れる ——
+これが原文の「Frobenius 型 ⟺ **co-angular base-isomorphism**」である。 -/
+
+include P in
+/-- ★★★**[FrdI] Proposition 4.4, (iv) の「Frobenius 型」の条**。 -/
+theorem birat_isFrobeniusType_iff {A B : C} (φ : A ⟶ B) :
+    IsFrobeniusType (biratPre P G) ((toBiratCat P G).map φ)
+      ↔ (IsCoAngular P φ ∧ IsBaseIsomorphism P φ) := by
+  constructor
+  · rintro ⟨⟨hc, _⟩, hb⟩
+    exact ⟨(birat_isCoAngular_iff P G φ).mp hc,
+      (birat_isBaseIsomorphism_iff (P := P) (G := G) φ).mp hb⟩
+  · rintro ⟨hc, hb⟩
+    exact ⟨⟨(birat_isCoAngular_iff P G φ).mpr hc, birat_isIsometric _⟩,
+      (birat_isBaseIsomorphism_iff (P := P) (G := G) φ).mpr hb⟩
+
+include P in
+/-- ★★**co-angular 性は代表元で判定できる** —— `f = a' ≫ [φ]` のとき
+`f` が co-angular ⟺ `φ` が `𝒞` で co-angular。 -/
+theorem birat_isCoAngular_repr {X Y : BiratCat P G} (f : X ⟶ Y)
+    {A' : C} (φ : A' ⟶ biratDown P G Y)
+    (aa : (show BiratCat P G from A') ⟶ X) (a' : X ⟶ (show BiratCat P G from A'))
+    (h1 : aa ≫ a' = 𝟙 _) (h2 : a' ≫ aa = 𝟙 X)
+    (hf : f = a' ≫ (toBiratCat P G).map φ) :
+    IsCoAngular (biratPre P G) f ↔ IsCoAngular P φ := by
+  have hmap : (toBiratCat P G).map φ = aa ≫ f := by
+    rw [hf]
+    exact (((Category.assoc _ _ _).symm.trans
+      (congrArg (fun t => t ≫ (toBiratCat P G).map φ) h1)).trans
+      (Category.id_comp _)).symm
+  constructor
+  · intro hc
+    refine (birat_isCoAngular_iff P G φ).mp ?_
+    rw [hmap]
+    exact isCoAngular_isoComp aa a' h1 h2 hc
+  · intro hc
+    rw [hf]
+    exact isCoAngular_isoComp a' aa h2 h1 ((birat_isCoAngular_iff P G φ).mpr hc)
+
+/-! ## ★9. (iii)(a) —— co-angular は合成で閉じる
+
+原文 (FrdI p.24):
+> (iii) (Surjectivity to the Divisor Monoid via Co-angular Morphisms) (a) The
+
+★★**辞書を 2 度使う**:
+1. `ψ₀`・`φ₀` は `𝒞` で co-angular(辞書)
+2. `Proposition 1.11, (vii)` で `g₁ ≫ ψ₀ = k₁ ≫ b`。
+   ★`g₁ ≫ ψ₀` が co-angular なので `k₁ ≫ b` も、
+   ★★`[b]` は同型なので **`k₁` も co-angular**(辞書を往復)
+3. `ψ ≫ φ = (a' ≫ g') ≫ [k₁ ≫ φ₀]` で、`k₁ ≫ φ₀` は co-angular -/
+
+include P in
+/-- ★★★**[FrdI] Definition 1.3, (iii), (a)** for `𝒞^birat`。 -/
+theorem birat_coAngularComp {A B E : BiratCat P G} (ψ : A ⟶ B) (φ : B ⟶ E)
+    (hψ : IsCoAngular (biratPre P G) ψ) (hφ : IsCoAngular (biratPre P G) φ) :
+    IsCoAngular (biratPre P G) (ψ ≫ φ) := by
+  obtain ⟨A₁, a, ψ₀, aa, a', hac, has, haa, ha1, ha2, hψeq⟩ := birat_hom_repr P G ψ
+  obtain ⟨B₁, b, φ₀, bb, b', hbc, hbs, hbb, hb1, hb2, hφeq⟩ := birat_hom_repr P G φ
+  have hψ₀c : IsCoAngular P ψ₀ :=
+    (birat_isCoAngular_repr P G ψ ψ₀ aa a' ha1 ha2 hψeq).mp hψ
+  have hφ₀c : IsCoAngular P φ₀ :=
+    (birat_isCoAngular_repr P G φ φ₀ bb b' hb1 hb2 hφeq).mp hφ
+  -- ★`Proposition 1.11, (vii)`
+  obtain ⟨F₁, g₁, k₁, hg₁c, hg₁s, hsq⟩ := birat_move_inv P G ψ₀ b hbc hbs
+  obtain ⟨gg, hgg⟩ : ∃ gg : (show BiratCat P G from F₁) ⟶ (show BiratCat P G from A₁),
+      gg = (toBiratCat P G).map g₁ := ⟨_, rfl⟩
+  obtain ⟨g', hg'1, hg'2⟩ : ∃ g' : (show BiratCat P G from A₁) ⟶ (show BiratCat P G from F₁),
+      gg ≫ g' = 𝟙 _ ∧ g' ≫ gg = 𝟙 _ := by
+    rw [hgg]
+    exact (birat_isIso_of_coaPre (P := P) (G := G) g₁ hg₁c hg₁s).out
+  -- ★`k₁` は co-angular
+  have hk₁c : IsCoAngular P k₁ := by
+    have h1 : IsCoAngular P (k₁ ≫ b) := by
+      rw [← hsq]
+      exact IsCoAngular.comp P G.core hg₁c hψ₀c
+    have h2 : IsCoAngular (biratPre P G) ((toBiratCat P G).map (k₁ ≫ b)) :=
+      (birat_isCoAngular_iff P G _).mpr h1
+    have h3 : (toBiratCat P G).map (k₁ ≫ b) ≫ b' = (toBiratCat P G).map k₁ := by
+      rw [(toBiratCat P G).map_comp, ← hbb]
+      exact ((Category.assoc _ _ _).trans
+        (congrArg (fun t => (toBiratCat P G).map k₁ ≫ t) hb1)).trans (Category.comp_id _)
+    refine (birat_isCoAngular_iff P G k₁).mp ?_
+    rw [← h3]
+    exact isCoAngular_compIso b' bb hb2 hb1 h2
+  -- ★`[ψ₀] ≫ b' = g' ≫ [k₁]`
+  have e0 : gg ≫ (toBiratCat P G).map ψ₀ = (toBiratCat P G).map k₁ ≫ bb := by
+    rw [hgg, hbb]
+    exact ((toBiratCat P G).map_comp g₁ ψ₀).symm.trans
+      ((congrArg (toBiratCat P G).map hsq).trans ((toBiratCat P G).map_comp k₁ b))
+  have hmov : (toBiratCat P G).map ψ₀ ≫ b' = g' ≫ (toBiratCat P G).map k₁ := by
+    have e2 : ((toBiratCat P G).map k₁ ≫ bb) ≫ b' = (toBiratCat P G).map k₁ :=
+      ((Category.assoc _ _ _).trans
+        (congrArg (fun t => (toBiratCat P G).map k₁ ≫ t) hb1)).trans (Category.comp_id _)
+    have s1 : g' ≫ (toBiratCat P G).map k₁
+        = g' ≫ (((toBiratCat P G).map k₁ ≫ bb) ≫ b') :=
+      congrArg (fun t => g' ≫ t) e2.symm
+    have s2 : g' ≫ (((toBiratCat P G).map k₁ ≫ bb) ≫ b')
+        = g' ≫ ((gg ≫ (toBiratCat P G).map ψ₀) ≫ b') :=
+      congrArg (fun t => g' ≫ (t ≫ b')) e0.symm
+    have s3 : g' ≫ ((gg ≫ (toBiratCat P G).map ψ₀) ≫ b')
+        = (g' ≫ gg) ≫ ((toBiratCat P G).map ψ₀ ≫ b') := by
+      simp only [Category.assoc]; try rfl
+    have s4 : (g' ≫ gg) ≫ ((toBiratCat P G).map ψ₀ ≫ b')
+        = (toBiratCat P G).map ψ₀ ≫ b' :=
+      (congrArg (fun t => t ≫ ((toBiratCat P G).map ψ₀ ≫ b')) hg'2).trans
+        (Category.id_comp _)
+    exact ((s1.trans s2).trans (s3.trans s4)).symm
+  -- ★`ψ ≫ φ = (a' ≫ g') ≫ [k₁ ≫ φ₀]`
+  have hfin : ψ ≫ φ = (a' ≫ g') ≫ (toBiratCat P G).map (k₁ ≫ φ₀) := by
+    have e3 : (toBiratCat P G).map (k₁ ≫ φ₀)
+        = (toBiratCat P G).map k₁ ≫ (toBiratCat P G).map φ₀ :=
+      (toBiratCat P G).map_comp k₁ φ₀
+    rw [hψeq, hφeq, e3]
+    have t1 : (a' ≫ (toBiratCat P G).map ψ₀) ≫ (b' ≫ (toBiratCat P G).map φ₀)
+        = a' ≫ (((toBiratCat P G).map ψ₀ ≫ b') ≫ (toBiratCat P G).map φ₀) := by
+      simp only [Category.assoc]; try rfl
+    have t2 : a' ≫ (((toBiratCat P G).map ψ₀ ≫ b') ≫ (toBiratCat P G).map φ₀)
+        = a' ≫ ((g' ≫ (toBiratCat P G).map k₁) ≫ (toBiratCat P G).map φ₀) :=
+      congrArg (fun t => a' ≫ (t ≫ (toBiratCat P G).map φ₀)) hmov
+    have t3 : a' ≫ ((g' ≫ (toBiratCat P G).map k₁) ≫ (toBiratCat P G).map φ₀)
+        = (a' ≫ g') ≫ ((toBiratCat P G).map k₁ ≫ (toBiratCat P G).map φ₀) := by
+      simp only [Category.assoc]; try rfl
+    exact (t1.trans t2).trans t3
+  have hi1 : (gg ≫ aa) ≫ (a' ≫ g') = 𝟙 _ := by
+    have u1 : (gg ≫ aa) ≫ (a' ≫ g') = gg ≫ ((aa ≫ a') ≫ g') := by
+      simp only [Category.assoc]; try rfl
+    have u2 : gg ≫ ((aa ≫ a') ≫ g') = gg ≫ (𝟙 _ ≫ g') :=
+      congrArg (fun t => gg ≫ (t ≫ g')) ha1
+    have u3 : gg ≫ (𝟙 _ ≫ g') = gg ≫ g' :=
+      congrArg (fun t => gg ≫ t) (Category.id_comp g')
+    exact ((u1.trans u2).trans u3).trans hg'1
+  have hi2 : (a' ≫ g') ≫ (gg ≫ aa) = 𝟙 A := by
+    have u1 : (a' ≫ g') ≫ (gg ≫ aa) = a' ≫ ((g' ≫ gg) ≫ aa) := by
+      simp only [Category.assoc]; try rfl
+    have u2 : a' ≫ ((g' ≫ gg) ≫ aa) = a' ≫ (𝟙 _ ≫ aa) :=
+      congrArg (fun t => a' ≫ (t ≫ aa)) hg'2
+    have u3 : a' ≫ (𝟙 _ ≫ aa) = a' ≫ aa :=
+      congrArg (fun t => a' ≫ t) (Category.id_comp aa)
+    exact ((u1.trans u2).trans u3).trans ha2
+  refine (birat_isCoAngular_repr P G (ψ ≫ φ) (k₁ ≫ φ₀) (gg ≫ aa) (a' ≫ g')
+    hi1 hi2 hfin).mpr ?_
+  exact IsCoAngular.comp P G.core hk₁c hφ₀c
+
 end ABC3.Found.FrdI
