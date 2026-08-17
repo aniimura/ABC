@@ -236,7 +236,11 @@ document.getElementById('stats').innerHTML=
   `<div class="st"><span>うち循環(サイズ&gt;1)</span><b>${S.bigSccs}</b></div>`+
   `<div class="st"><span>ボックス(中期ゴール)</span><b>${S.boxes}</b></div>`+
   `<div class="st"><span>層</span><b>${S.layers}</b></div>`+
-  `<div class="st"><span>我々が触れた節点</span><b>${S.ours}</b></div>`;
+  `<div class="st"><span>我々が触れた節点</span><b>${S.ours}</b></div>`+
+  `<div class="st" style="margin-top:8px;border-top:1px solid #eee;padding-top:8px"><span>Interface の義務(構造体)</span><b>${S.obligDone} / ${S.oblig}</b></div>`+
+  `<p style="font-size:11px;color:#777;margin-top:6px;line-height:1.6">
+   ★<b>義務は「触れた節点」に含めていない</b>——語彙が違う(原文の項目番号 対 我々の構造体)。
+   ★義務は<b>出辺を持たない葉</b>なので層 0(左端)に出る——「これを作らないと右へ進めない」ものだから。</p>`;
 const mx=Math.max(...D.layerStats.map(l=>l.nodes));
 document.getElementById('layers').innerHTML=D.layerStats.map(l=>
   `<div class="lr" data-l="${l.L}"><span style="min-width:44px">層 ${l.L}</span>

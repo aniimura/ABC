@@ -271,6 +271,57 @@ const layerOf = (c, st = new Set()) => {
   st.delete(c); memo.set(c, d); return d;
 };
 
+
+// ── ★★Interface の義務(構造体)を節点として合流させる ──────────────
+//   ★2026-08-17 追加。動機の実測: グラフの節点語彙は**原文の項目番号**なので、
+//   `GenEll Definition 1.1` に **8 本**の obligation がぶら下がっていても
+//   **1 節点に潰れて見えなかった**(検索して 0 件を確認)。
+//   ★check.mjs の「Interface 実装待ち」と**同じ単位**を図にも出す。
+//
+//   ★基礎理論の合流と同じく**出辺を持たせない** = 真の葉にする。
+//   層 0(左端)に出るのが正しい——「これを作らないと右へ進めない」ものだから。
+//
+//   ★限界: `.src` を持たない構造体(`.waiting` だけのもの)は**錨が無い**ので
+//   孤立した葉になる。それも数には入れる。
+{
+  const wk = (d, a = []) => {
+    for (const f of readdirSync(d)) {
+      const q = join(d, f);
+      if (statSync(q).isDirectory()) wk(q, a); else if (q.endsWith('.lean')) a.push(q);
+    }
+    return a;
+  };
+  const files = wk(LEAN);
+  const witness = new Set();
+  for (const f of files) {
+    const t = readFileSync(f, 'utf8');
+    for (const m of t.matchAll(/^theorem\s+([A-Za-z_][\w'.]*)\.nonvacuous/gm))
+      witness.add(m[1].split('.').pop());
+  }
+  let added = 0, edged = 0, done = 0, unanchored = 0;
+  for (const f of files) {
+    const rel = f.slice(ROOT.length + 1).replace(/\\/g, '/');
+    if (!/\/Interface\//.test(rel)) continue;
+    const t = readFileSync(f, 'utf8');
+    for (const sm of t.matchAll(/^structure\s+([A-Za-z_][A-Za-z0-9_']*)\s/gm)) {
+      const nm = sm[1];
+      const ok = witness.has(nm);
+      const nk = `義務 / ${nm} [${ok ? '埋まった' : '実装待ち'}]`;
+      if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, 0); added++; if (ok) done++; }
+      const sm2 = new RegExp(`${nm}\\.src\\s*:[^=]*:=\\s*\\{([\\s\\S]{0,400}?)\\}`).exec(t);
+      const pm = sm2 ? /paper\s*:=\s*"([^"]*)"/.exec(sm2[1]) : null;
+      const im = sm2 ? /item\s*:=\s*"([^"]*)"/.exec(sm2[1]) : null;
+      const km = (pm && im) ? new RegExp(`(${KIND})\\s+(\\d+(?:\\.\\d+)+)`).exec(im[1]) : null;
+      if (!km || !pm) { unanchored++; continue; }
+      const k = `${pm[1]} / ${km[1]} ${km[2]}`;
+      if (!adj.has(k)) { unanchored++; continue; }
+      if (!adj.get(k).includes(nk)) { adj.get(k).push(nk); edged++; }
+    }
+  }
+  console.log(`  Interface の義務を合流: ${added} 節点(埋まった ${done})/ 項目→義務の辺 ${edged}` +
+    `(錨の無いもの ${unanchored} 件)`);
+}
+
 // ── 我々の位置(3層) ───────────────────────────────────────
 function walk(d, a = []) { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p, a); else if (p.endsWith('.lean')) a.push(p); } return a; }
 const ours = new Map();
@@ -304,6 +355,12 @@ const ours = new Map();
     }
     for (const m of t.matchAll(EDGE_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, 'named', rel); }
   }
+}
+
+// ★義務節点の状態を `ours` に載せる(色付けのため)
+for (const k of adj.keys()) {
+  if (!k.startsWith('義務 / ')) continue;
+  ours.set(k, { kind: k.includes('[埋まった]') ? 'done' : 'skeleton', file: 'lean/ABC3/Interface/' });
 }
 
 // ── ボックス化: SCC(>1) はそのまま / 単独節点は (層, 論文) でまとめる ──
@@ -375,7 +432,12 @@ const layerStats = [...byLayer.keys()].sort((a, b) => a - b).map((L) => ({
 const data = {
   B, BE, layerStats, maxL,
   stats: { nodes: adj.size, sccs: nc, bigSccs: [...members.values()].filter((m) => m.length > 1).length,
-    boxes: B.length, layers: maxL + 1, ours: [...ours.keys()].filter((k) => adj.has(k)).length },
+    boxes: B.length, layers: maxL + 1,
+    // ★被覆数から**義務節点を除く**——語彙が違う(原文の項目番号 対 我々の構造体)。
+    //   混ぜると「触れた節点」が 28 だけ水増しされ、進捗の読みを狂わせる。
+    ours: [...ours.keys()].filter((k) => adj.has(k) && !k.startsWith('義務 / ')).length,
+    oblig: [...adj.keys()].filter((k) => k.startsWith('義務 / ')).length,
+    obligDone: [...adj.keys()].filter((k) => k.startsWith('義務 / ') && k.includes('[埋まった]')).length },
   width: (maxL + 1) * (BW + GAPX), height: maxH + 40,
 };
 const html = readFileSync(join(ROOT, 'tools', 'graph-layers.template.html'), 'utf8').replace('/*__DATA__*/', JSON.stringify(data));
@@ -383,4 +445,5 @@ writeFileSync(OUT, html, 'utf8');
 console.log(`書き出し: ${OUT}`);
 console.log(`  節点 ${data.stats.nodes} / SCC ${data.stats.sccs}(サイズ>1 は ${data.stats.bigSccs})`);
 console.log(`  ボックス ${data.stats.boxes} / 層 ${data.stats.layers}(左 0 = 依存なし、右 ${maxL} = 根)`);
-console.log(`  我々が触れている節点 ${data.stats.ours}`);
+console.log(`  我々が触れている節点 ${data.stats.ours}(★義務は含めない)`);
+console.log(`  Interface の義務: ${data.stats.obligDone} / ${data.stats.oblig}`);
