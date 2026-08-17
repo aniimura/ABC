@@ -248,7 +248,7 @@ theorem birat_move_inv {A₁ U B₁ : C} (g : A₁ ⟶ U) (b : B₁ ⟶ U)
 /-! ## ★5. ★★★★辞書の co-angular の条 —— まず `⟹`(反射)
 
 原文 (FrdI p.85):
-> that C′ →D′ is a co-angular pre-step, hence an isomorphism whenever it is an
+> is a co-angular pre-step, so Cbirat
 
 ★★**`⟹` は 3 行で落ちる**:
 1. `𝒞` の分解を `𝒞^birat` へ押し出す(次数・底・pre-step は渡る、等長は自動)
