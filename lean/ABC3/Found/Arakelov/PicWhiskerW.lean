@@ -44,13 +44,15 @@ theorem W_whiskerRight_of_basis {C : Type u} [Category.{u} C]
     {R : Cᵒᵖ ⥤ CommRingCat.{u}}
     {P Q : PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat.{u} RingCat.{u})}
     (f : P ⟶ Q)
-    [PresheafOfModules.IsLocallyInjective J f]
-    [PresheafOfModules.IsLocallySurjective J f]
+    (hinj : PresheafOfModules.IsLocallyInjective J f)
+    (hsur : PresheafOfModules.IsLocallySurjective J f)
     (M : PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat.{u} RingCat.{u}))
     (htriv : ∀ U : C, ∃ S : Sieve U, S ∈ J U ∧ ∀ ⦃V : C⦄ (i : V ⟶ U), S i →
       Nonempty ((R.obj (op V) : Type u) ≃ₗ[(R.obj (op V) : Type u)] M.obj (op V))) :
     (J.W.inverseImage
         (PresheafOfModules.toPresheaf (R ⋙ forget₂ CommRingCat.{u} RingCat.{u}))) (f ▷ M) := by
+  haveI := hinj
+  haveI := hsur
   rw [MorphismProperty.inverseImage_iff]
   haveI := isLocallyInjective_whiskerRight_of_basis J f M htriv
   haveI := isLocallySurjective_whiskerRight J f M
@@ -65,8 +67,8 @@ theorem W_whiskerLeft_of_basis {C : Type u} [Category.{u} C]
     {R : Cᵒᵖ ⥤ CommRingCat.{u}}
     {P Q : PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat.{u} RingCat.{u})}
     (f : P ⟶ Q)
-    [PresheafOfModules.IsLocallyInjective J f]
-    [PresheafOfModules.IsLocallySurjective J f]
+    (hinj : PresheafOfModules.IsLocallyInjective J f)
+    (hsur : PresheafOfModules.IsLocallySurjective J f)
     (M : PresheafOfModules.{u} (R ⋙ forget₂ CommRingCat.{u} RingCat.{u}))
     (htriv : ∀ U : C, ∃ S : Sieve U, S ∈ J U ∧ ∀ ⦃V : C⦄ (i : V ⟶ U), S i →
       Nonempty ((R.obj (op V) : Type u) ≃ₗ[(R.obj (op V) : Type u)] M.obj (op V))) :
@@ -75,7 +77,7 @@ theorem W_whiskerLeft_of_basis {C : Type u} [Category.{u} C]
   ((J.W.inverseImage (PresheafOfModules.toPresheaf _)).arrow_mk_iso_iff
       (Arrow.isoMk (β_ M P) (β_ M Q)
         (BraidedCategory.braiding_naturality_right M f).symm)).2
-    (W_whiskerRight_of_basis J f M htriv)
+    (W_whiskerRight_of_basis J f hinj hsur M htriv)
 
 /-! ## ★出典の紐付け(`.src`) -/
 
