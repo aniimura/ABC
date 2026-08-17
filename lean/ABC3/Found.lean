@@ -139,6 +139,7 @@ import ABC3.Found.Arakelov.ArcAwayLift
 import ABC3.Found.Arakelov.ArcOpenMap
 import ABC3.Found.Arakelov.ArcSpaceInterface
 import ABC3.Found.Arakelov.PicPresheafTensor
+import ABC3.Found.Arakelov.PicSheafTensor
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
