@@ -67,9 +67,27 @@ noncomputable def modTensor (X : Scheme.{0}) (F G : X.Modules) : X.Modules :=
   (PresheafOfModules.sheafification (R := X.ringCatSheaf) (𝟙 X.ringCatSheaf.obj)).obj
     (PresheafOfModules.Monoidal.tensorObj (R := X.presheaf) F.val G.val)
 
-/-- ★可逆層 = テンソル積の逆を持つ層加群。 -/
+/-- ★★**可逆層(直線束)** —— 「テンソル積の逆を持つ」かつ「局所的に階数 1 自由」。
+
+★★★**2 条を課すのは、どちらも直線束の性質であり、どちらも使うからである**:
+
+| 条 | 何に効くか |
+|---|---|
+| 逆の存在 | `Pic X` の**逆元** |
+| 局所自由性 | 結合律の**局所論法**(`Found/Arakelov/PicLocalBasis.lean`) |
+
+★数学的には 2 条は同値である(片方から他方は Nakayama 型の議論で出る)。
+★★したがって**内容は変わらない**——Lean で両方を使えるようにしただけである。
+
+★局所自由性は「各開集合が、階数 1 自由な開集合で覆われる」と述べる。
+これは `Found/Arakelov/PicLocalBasis.lean` の
+`isLocallyInjective_whiskerRight_of_basis` の仮定そのものである。 -/
 def IsInvertibleSheaf {X : Scheme.{0}} (F : X.Modules) : Prop :=
-  ∃ G : X.Modules, Nonempty (modTensor X F G ≅ SheafOfModules.unit X.ringCatSheaf)
+  (∃ G : X.Modules, Nonempty (modTensor X F G ≅ SheafOfModules.unit X.ringCatSheaf)) ∧
+  (∀ U : X.Opens, ∃ S : Sieve U, S ∈ (Opens.grothendieckTopology X) U ∧
+    ∀ ⦃V : X.Opens⦄ (i : V ⟶ U), S i →
+      Nonempty ((X.presheaf.obj (Opposite.op V) : Type)
+        ≃ₗ[(X.presheaf.obj (Opposite.op V) : Type)] F.val.obj (Opposite.op V)))
 
 /-- **(B1)** スキーム上の**可逆層の群** `Pic(X)`。
 
