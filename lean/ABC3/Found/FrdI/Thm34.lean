@@ -399,6 +399,27 @@ theorem isotropicHull_map (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P�
   rw [hβ]
   infer_instance
 
+/-- ★★★★**[FrdI] Theorem 3.4, (i) の第 3 主張** —— `Ψ` は **等長 pre-step を保つ**。
+
+★★鍵は `Proposition 1.9, (vii)` の**圏論的な特徴づけ**
+
+  `φ` が等長 pre-step ⟺ `φ ≫ (B の hull)` が `A` の hull
+
+である。★hull の保存(第 2 主張)から直ちに従う。 -/
+theorem isometricPreStep_map (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (h₁ : IsOfQuasiIsotropicType C P₁) (h₂ : IsOfQuasiIsotropicType D P₂)
+    {A B : C} {φ : A ⟶ B} (hφi : IsIsometric P₁ φ) (hφs : IsPreStep P₁ φ) :
+    IsIsometric P₂ (Ψ.map φ) ∧ IsPreStep P₂ (Ψ.map φ) := by
+  obtain ⟨Bi, ψ, hψ⟩ := F₁.isotropicHullExists B
+  have hcomp : IsIsotropicHull P₁ (φ ≫ ψ) :=
+    (prop_1_9_vii P₁ F₁ φ ψ hψ).mp ⟨hφi, hφs⟩
+  have hmapψ : IsIsotropicHull P₂ (Ψ.map ψ) :=
+    isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ hψ
+  have hmapcomp : IsIsotropicHull P₂ (Ψ.map φ ≫ Ψ.map ψ) := by
+    rw [← Ψ.map_comp]
+    exact isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ hcomp
+  exact (prop_1_9_vii P₂ F₂ (Ψ.map φ) (Ψ.map ψ) hmapψ).mpr hmapcomp
+
 end Isotropic
 
 end ABC3.Found.FrdI
