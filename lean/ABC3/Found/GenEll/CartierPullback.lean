@@ -81,6 +81,59 @@ theorem isEffectiveCartier_top (X : Scheme) :
     rfl
   · exact Submonoid.one_mem _
 
+/-! ## ★★有効 Cartier 因子はモノイドをなす
+
+原文 (GenEll p.3):
+> There is an evident notion of tensor product of arithmetic line bundles on X. The
+
+★★**これが「テンソル積」の因子側での姿である。**
+`Pic(X) ≅ CaCl(X)`(正規整スキーム)の下で、直線束のテンソル積は
+**因子の和(= イデアル層の積)**になる。
+★mathlib には加群層のモノイダル構造が**無い**(2026-08-17 実測)ので、
+この迂回が要る。
+
+## ★機構 —— 共通のアフィン基本開集合を取る
+
+`I` が `U` 上で `f` に、`J` が `V` 上で `g` に主生成されているとき、
+`x ∈ U ⊓ V` のまわりで**共通のアフィン基本開集合** `W` を取れば
+(`AlgebraicGeometry.exists_basicOpen_le_affine_inter`)、
+`I·J` は `W` 上で `f|_W · g|_W` に主生成される。
+
+★★**非零因子であることが制限で保たれる**のが要点で、
+基本開集合への制限は**局所化**なので
+`IsLocalization.nonZeroDivisors_le_comap` が効く(mathlib にある)。
+★アフィン開集合の共通部分がアフィンである必要は無い(分離性を仮定しなくてよい)——
+**基本開集合を取り直せば済む**。
+
+## ★★本日はここで止まった —— 摩擦の所在を記録する
+
+**部品はすべて mathlib にある**ことを確認した:
+`exists_basicOpen_le_affine_inter` / `IdealSheafData.map_ideal` /
+`IsAffineOpen.isLocalization_basicOpen` / `IsLocalization.nonZeroDivisors_le_comap` /
+`algebra_section_section_basicOpen`。
+
+★★**それでも組み上がらなかった。摩擦は 2 つである:**
+
+1. **`X.affineOpens` と `X.Opens` の型階層** ——
+   `homOfLE h` は `h : W ≤ U` の型で行き先の圏が変わる。
+   `X.presheaf.map` は `X.Opens` の射を要求するので、`affineOpens` の `≤` から
+   直接は通らない。★下の `ideal_restrict_span` は**その形を固定したもの**である。
+2. **`X.basicOpen a = X.basicOpen b` に沿った輸送** ——
+   等号が開集合の間なので `Γ(X, ·)` の型が変わり、`rw` で運べない。
+
+★どちらも数学ではなく**書き方**の問題である。次のセッションはここから。
+-/
+
+/-- ★**主イデアルの制限は主イデアル**——生成元は制限した元である。
+
+★`IdealSheafData.map_ideal`(大きいアフィン開集合の切断を制限すると小さい方の切断になる)
+と `Ideal.map_span` を繋いだだけ。 -/
+theorem ideal_restrict_span {X : Scheme} (I : X.IdealSheafData) {U W : X.affineOpens}
+    (h : W ≤ U) {f : Γ(X, U.1)} (hf : I.ideal U = Ideal.span {f}) :
+    I.ideal W = Ideal.span {(X.presheaf.map (homOfLE h).op).hom f} := by
+  rw [← I.map_ideal h, hf, Ideal.map_span, Set.image_singleton]
+
+
 /-! ## ★引き戻し -/
 
 section Pullback
