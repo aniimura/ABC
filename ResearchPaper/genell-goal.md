@@ -1997,3 +1997,86 @@ IUT そのものを要求する。**
 
 ★★★**1 は規律への影響が大きい**——「`lake env lean` を通ったら即コミット」だけでは
 `lake build` の失敗を取り逃す。★**コミット後に `lake build` を回し、落ちたら次のコミットで直す。**
+
+---
+
+## §9-21 ★★★原典を集めた——`Definition 1.5, (ii)` の見積りが変わった
+
+**2026-08-17。**ユーザーの問い「必要な書籍はすべて有りますか?なければ公開記事や
+解説サイトなどを調査して必要な情報を取得できますか?」に答えて集めた記録である。
+
+### ★★★測定の更新: Auslander–Buchsbaum は「読む物が無い」段ではなかった
+
+§9-20 で「Auslander–Buchsbaum は Serre の特徴づけ + Nagata の補題 + 次元の帰納で
+**mathlib 級の企画**」と書いた。規模の判断は変えないが、★**前提が 2 つ変わった**:
+
+1. ★★★**証明が手元にある**——`Stacks Project` tag **`0AG0`**(Lemma 15.123.2)
+   「A regular local ring is a UFD」の**完全な証明**。次元の帰納で、依存も全部辿れる:
+
+   | 依存 | 内容 |
+   |---|---|
+   | Algebra 10.106.2 | 正則局所環は整域 |
+   | Algebra 10.106.3 | `R/(x)` が正則 |
+   | Algebra 10.120.6 | Noether 整域が UFD ⟺ 高さ 1 の素イデアルが全部単項 |
+   | Algebra 10.110.6 | ★**局所化が正則**(Serre の判定法。ここが最難) |
+   | Algebra 10.78.2 | 有限表示 + 各点で階数 1 自由 ⇒ 可逆 |
+   | More on Algebra 15.123.1 | |
+
+2. ★★**最難の入力が既に Lean4 で形式化されている**——
+   Guan–Hu, *Formalization of Auslander–Buchsbaum–Serre Criterion in Lean4*
+   (arXiv 2510.24818、2025-10 投稿 / 2025-12 改訂)。
+   Rees の定理・Auslander–Buchsbaum 公式・Ischebeck の定理・Cohen–Macaulay 加群・
+   Hilbert の syzygy 定理を含む。
+   ★**ただし「正則局所 ⇒ UFD」そのものは含まないと本文が述べている。**
+   ★公開先(GitHub)は未確認であり、mathlib に入っているかも未確認。
+
+★★★**したがって `Definition 1.5, (ii)` は「誰も書いていない」ではなく
+「他人が半分やっており、残り半分は証明が手元にある」段である。**
+
+### ★★取得した原典(15 本。すべて公開分)
+
+| tag | 出典 | 効く obligation |
+|---|---|---|
+| `Szp` | Szpiro, Degrés, intersections, hauteurs (Ast. 127) | B1・C3・D2。★`[GenEll]` 自身の参考文献 |
+| `MBMetr` | Moret-Bailly, Métriques permises (Ast. 127) | ★★C3・D1(エルミート計量) |
+| `Elkik` | Elkik, Fonctions de Green, volumes de Faltings (Ast. 127) | ★★C3・G8(Green 関数) |
+| `MBComp` | Moret-Bailly, Compactifications, hauteurs et finitude (Ast. 127) | D2・D3・`Prop 1.4 (iv)` |
+| `RayHt` | Raynaud, Hauteurs et isogénies (Ast. 127) | ★★★G8。`Lemma 3.5` の機構そのもの |
+| `DelRep` | Deligne, Représentations ℓ-adiques (Ast. 127) | ★★G3・G4 |
+| `DelSB616` | Deligne, Bourbaki 616(Faltings の解説) | G7・G8。`[Falt]`(有料)の代替 |
+| `RaySB427` | Raynaud, Bourbaki 427(Mumford 構成) | ★★★G6。`[FC]`(書籍)の代替 |
+| `EGA1` | Grothendieck, EGA I (Publ IHES 4) | B1 |
+| `EGA2` | Grothendieck, EGA II (Publ IHES 8) | ★★★C2。`Proj` と射影射 |
+| `GS` | Gillet–Soulé, Arithmetic intersection theory (Publ IHES 72) | ★★D1・D2・D3。算術版の移動補題 |
+| `SouleAI` | Soulé, Arithmetic Intersection(講義録) | `GS` の入口 |
+| `MilneAV` | Milne, Abelian Varieties(講義録) | ★★G1・G2・G3。`[Serre]` の代替になる範囲 |
+| `Stacks` | The Stacks Project(全 7654 頁) | ★★★`Def 1.5 (ii)`・B1・B2・C2 |
+| `ABSLean` | Guan–Hu, ABS 判定法の Lean4 形式化 | ★★★`Def 1.5 (ii)` の最難の入力 |
+
+★★取得元は **Numdam / IHES / arXiv / jmilne.org / Stacks** —— すべて公開である。
+
+### ★★★取得できないもの(著作権)
+
+| 参考文献 | 種別 | 代替 |
+|---|---|---|
+| `[FC]` Faltings–Chai | Springer 書籍 | ★`RaySB427`(Mumford 構成)——**同値ではない** |
+| `[Serre]` Abelian ℓ-adic Representations | Benjamin 書籍 | ★`MilneAV` + `DelRep`——**範囲が狭い** |
+| `[Silv1]` `[Silv2]` | Springer 書籍の章 | `Szp` / `MBComp` / `GS` |
+| `[Edw]` Riemann's Zeta Function | Academic Press 書籍 | ★不要(`PrimeNumberTheoremAnd` で代替済) |
+| `[Falt]` / `[Merel]` / `[Elkies]` / `[vF]` | 有料誌 | `DelSB616` が `[Falt]` を解説 |
+
+★★**購入または機関アクセスが要る。**海賊版は取らない。
+
+### ★★★登記は「未目視」と明記した
+
+全 15 本とも `notationRisk := "unmeasured"` / `verifiedPages := []`。
+テキスト層は取れている(Stacks は 1983 万字)が、
+★**どの記号が壊れるかは未測定**である。逐語を `.src` に使う前に目視すること。
+
+### ★`1_Structured` は作っていない
+
+**理由**: 構造化は逐語の正確さを前提にするが、**まだ 1 ページも目視していない**。
+★`[GenEll]` では pdftotext が**行列の出現順を入れ替える**という実害が出ており、
+1985 年のフランス語スキャンや 7654 頁の Stacks を無検証で構造化すると、
+**壊れた逐語が `.src` に固定される**。
+★★**実際に引く箇所だけを目視 → その節だけ構造化**、という順が正しい。

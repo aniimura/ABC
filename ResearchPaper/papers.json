@@ -233,6 +233,76 @@
       "notationRisk": "unmeasured",
       "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★[GenEll] の参考文献 [FC](Faltings–Chai, Springer 1990)は書籍で入手できない。★★★**Mumford 構成の公開の解説**であり、非アルキメデス的一意化(Tate 曲線の一般化)を扱う。(G6) TateCurveData に効く。",
       "verifiedPages": []
+    },
+    "EGA1": {
+      "title": "Éléments de géométrie algébrique : I. Le langage des schémas",
+      "file": "Grothendieck - EGA I, Le langage des schemas (Publ IHES 4, 1960)",
+      "year": 1960,
+      "pdfPages": 227,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★スキームと加群層の言語。Interface/Arakelov の (B1) PicardData の原典側。Numdam(公開)。",
+      "verifiedPages": []
+    },
+    "EGA2": {
+      "title": "Éléments de géométrie algébrique : II. Étude globale élémentaire de quelques classes de morphismes",
+      "file": "Grothendieck - EGA II, Etude globale elementaire (Publ IHES 8, 1961)",
+      "year": 1961,
+      "pdfPages": 219,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★**`Proj` と射影射**。Interface/Arakelov の (C2) ProjectiveModelData ——『ℙⁿ の点の関手』——の原典側である。`Proj` の語が 220 箇所。Numdam(公開)。",
+      "verifiedPages": []
+    },
+    "GS": {
+      "title": "Arithmetic intersection theory",
+      "file": "Gillet-Soule - Arithmetic intersection theory (Publ IHES 72, 1990)",
+      "year": 1990,
+      "pdfPages": 83,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Arakelov 理論の現代的基礎。Green カレントと**算術版の移動補題**を含む。(D1)(D2)(D3) と、`Definition 1.2, (i)` の全域化に効く。Numdam(公開)。",
+      "verifiedPages": []
+    },
+    "SouleAI": {
+      "title": "Arithmetic Intersection (lecture notes)",
+      "file": "Soule - Arithmetic Intersection (lecture notes, 2017)",
+      "year": 2017,
+      "pdfPages": 26,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★Soulé 本人が IHES のサイトで公開している講義録。`GS` の読みやすい入口。",
+      "verifiedPages": []
+    },
+    "ABSLean": {
+      "title": "Formalization of Auslander--Buchsbaum--Serre Criterion in Lean4",
+      "file": "Guan-Hu - Formalization of Auslander-Buchsbaum-Serre Criterion in Lean4 (arXiv 2510.24818)",
+      "year": 2025,
+      "pdfPages": 20,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★2025-10 の arXiv。**Auslander–Buchsbaum–Serre 判定法(正則局所 ⟺ 有限大域次元)を Lean4 で形式化**したという報告。Rees の定理・Auslander–Buchsbaum 公式・Ischebeck の定理・Cohen–Macaulay 加群・Hilbert の syzygy 定理を含む。★`Definition 1.5, (ii)` の最難の入力がここにある。★★ただし『正則局所 ⇒ UFD』そのものは含まないと本文が述べている。公開先(GitHub)は未確認。",
+      "verifiedPages": []
+    },
+    "MilneAV": {
+      "title": "Abelian Varieties (course notes)",
+      "file": "Milne - Abelian Varieties (lecture notes)",
+      "year": 2008,
+      "pdfPages": 172,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Milne が無償公開している講義録。**`T_ℓ A` が階数 2g の自由 `ℤ_ℓ` 加群であること**を述べる(実測: 本文 1995 行目)。Interface/GaloisRep の (G1)(G2)(G3) の原典側。★`[Serre]`(書籍、入手不可)の代替になる範囲がある。",
+      "verifiedPages": []
+    },
+    "Stacks": {
+      "title": "The Stacks Project",
+      "file": "Stacks Project (book, complete)",
+      "year": 2026,
+      "pdfPages": 7654,
+      "pageOffset": 0,
+      "notationRisk": "unmeasured",
+      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★公開の集大成。実測で確認した要点: **tag `0AG0` Lemma 15.123.2『正則局所環は UFD』の完全な証明**(次元の帰納。依存は Algebra 10.106.2 / 10.106.3 / 10.120.6 / 10.110.6 / 10.78.2 と More on Algebra 15.123.1)——これが `Definition 1.5, (ii)` の中身である。★また `Proj`(560 箇所)・点の関手・可逆層を網羅し、(B1)(B2)(C2) の原典側になる。",
+      "verifiedPages": []
     }
   }
 }
