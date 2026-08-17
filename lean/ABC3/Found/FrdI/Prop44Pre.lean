@@ -218,7 +218,84 @@ theorem birat_isPreStep_iff {A B : C} (φ : A ⟶ B) :
     IsPreStep (biratPre P G) ((toBiratCat P G).map φ) ↔ IsPreStep P φ :=
   and_congr (birat_isLinear_iff φ) (birat_isBaseIsomorphism_iff φ)
 
-/-! ## ★7. 残り —— 辞書の 5 項と Frobenioid 構造
+/-! ## ★7. 辞書の中心 —— **co-angular pre-step は `𝒞^birat` で同型になる**
+
+原文 (FrdI p.83):
+> morphism of a given Frobenius degree; isometry; pre-step; base-isomorphism) of
+
+★★**逆射は「添字を `φ` 自身に取って恒等射を置く」だけ**である ——
+`Hom^birat(B, A)` の添字は `B` へ入る co-angular pre-step なので、
+★`φ : A ⟶ B` 自身が添字になり、そこでの射 `𝟙_A` が逆射を与える。
+
+★★**2 つの合成則の計算はどちらも同じ形**で落ちる:
+1. `biratPull_sq` の四角形と **`φ`(または `𝟙`)が mono** であることから `γ = α`
+2. `HomBirat.mk_map`(前合成で移しても同じ元)で `𝟙` の代表に戻す -/
+
+theorem birat_inv_comp {A B : C} (φ : A ⟶ B) (hc : IsCoAngular P φ) (hs : IsPreStep P φ) :
+    compBirat P G G.core (toHomBirat (P := P) (G := G) φ)
+        (HomBirat.mk (idxBiratMk P G φ hc hs) (𝟙 A))
+      = toHomBirat (P := P) (G := G) (𝟙 A) := by
+  haveI : Mono φ := G.core.preStepMono φ hs
+  have hsq := biratPull_sq G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs)
+  have hga : biratPullGamma G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs)
+      = biratPullAlpha G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs) :=
+    (cancel_mono φ).mp hsq
+  rw [show toHomBirat (P := P) (G := G) φ = HomBirat.mk (idxBiratOne P G A) φ from rfl,
+    compBirat_mk G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs)]
+  refine Eq.trans ?_ (HomBirat.mk_map
+    (idxBiratHomMk (Z := idxBiratOne P G A)
+      (W := biratPullIdx G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs))
+      (biratPullGamma G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs))
+      (biratPullGamma_coAngular G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs))
+      (biratPullGamma_preStep G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs))
+      rfl) (𝟙 A))
+  refine congrArg (HomBirat.mk
+    (biratPullIdx G.core (idxBiratOne P G A) φ (idxBiratMk P G φ hc hs))) ?_
+  rw [idxBiratHomMk_left]
+  exact congrArg (fun t => t ≫ 𝟙 A) hga.symm
+
+theorem birat_comp_inv {A B : C} (φ : A ⟶ B) (hc : IsCoAngular P φ) (hs : IsPreStep P φ) :
+    compBirat P G G.core (HomBirat.mk (idxBiratMk P G φ hc hs) (𝟙 A))
+        (toHomBirat (P := P) (G := G) φ)
+      = toHomBirat (P := P) (G := G) (𝟙 B) := by
+  have hsq := biratPull_sq G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A)
+  have hga : biratPullGamma G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A)
+      = biratPullAlpha G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A) :=
+    (Category.comp_id _).symm.trans (hsq.trans (Category.comp_id _))
+  have hcc : IsCoAngular P
+      (biratPullGamma G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A) ≫ φ) :=
+    G.core.coAngularComp _ _
+      (biratPullGamma_coAngular G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A)) hc
+  have hcs : IsPreStep P
+      (biratPullGamma G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A) ≫ φ) :=
+    IsPreStep.comp P
+      (biratPullGamma_preStep G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A)) hs
+  rw [show toHomBirat (P := P) (G := G) φ = HomBirat.mk (idxBiratOne P G A) φ from rfl,
+    compBirat_mk G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A)]
+  refine Eq.trans ?_ (HomBirat.mk_map
+    (idxBiratHomMk (Z := idxBiratOne P G B)
+      (W := biratPullIdx G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A))
+      (biratPullGamma G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A) ≫ φ)
+      hcc hcs (Category.comp_id _)) (𝟙 B))
+  refine congrArg (HomBirat.mk
+    (biratPullIdx G.core (idxBiratMk P G φ hc hs) (𝟙 A) (idxBiratOne P G A))) ?_
+  rw [idxBiratHomMk_left]
+  exact (congrArg (fun t => t ≫ φ) hga.symm).trans (Category.comp_id _).symm
+
+/-- ★★★**[FrdI] Proposition 4.4, (iv) の中心** —— `𝒞` の co-angular pre-step は
+`𝒞^birat` の**同型**になる。
+
+原文 (FrdI p.83):
+> morphism of a given Frobenius degree; isometry; pre-step; base-isomorphism) of
+
+★★**これが「`𝒞^birat` は co-angular pre-step を反転して作った圏である」**
+という構成の意味そのものである。 -/
+theorem birat_isIso_of_coaPre {A B : C} (φ : A ⟶ B) (hc : IsCoAngular P φ)
+    (hs : IsPreStep P φ) : IsIso ((toBiratCat P G).map φ) :=
+  ⟨HomBirat.mk (idxBiratMk P G φ hc hs) (𝟙 A),
+    birat_inv_comp φ hc hs, birat_comp_inv φ hc hs⟩
+
+/-! ## ★8. 残り —— 辞書の 4 項と Frobenioid 構造
 
 ★★**残っているのは、単に不変量で決まらない 5 項**である:
 
