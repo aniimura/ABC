@@ -3147,3 +3147,56 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 ★★★**「偽」と決める前にも測る**(本件、2 回目の失敗)
 
 ——3 つとも同じ規則の系である: **決める前に測る。**
+
+
+---
+
+## §9-42 (2026-08-18) ★★★★★★第 21–24 ブロックと、`δ` 同型化の残り 1 点
+
+### ★★★★★★この turn で取れたもの(すべて sorry 0、push 済み)
+
+| # | 定理 | 一言 |
+|---|---|---|
+| 21 | `opensMapFinal` / `pullbackUnitIso` | ★★★★**構造層の引き戻しは構造層** |
+| 22 | `pullbackDelta` / `sheafifyPullbackApp` | ★★★★**比較射 δ がスキームの射に効く**(`alphaR` と `rfl` で一致) |
+| 23 | 余極限保存 3 本 / `opensMap_inf` | ★生成元による道の前提 |
+| 24 | `pullbackFreeYonedaIso` | ★★★★★**抽象な引き戻しの具体値**(余表現の一意性) |
+
+★★★**`pullback_id` / `pullback_comp` は mathlib に在る**
+(`Scheme.Modules.pullbackId` / `pullbackComp`)。`PicSheaf` は同型による商なので、
+自然同型がそのまま等式になる。
+
+### ★★残り 1 点 —— `free (yoneda V) ⊗ free (yoneda W) ≅ free (yoneda (V ⊓ W))`
+
+★構成そのものは**書けた**(`app` は型検査を通る):
+
+    app Z := ModuleCat.freeDesc (↾fun q => freeMk q.1 ⊗ₜ freeMk q.2)
+
+★★**通らないのは naturality の証明**である。
+
+### ★★★★★★障害の正体(2026-08-18 実測)——**`Ring` インスタンスの二重路**
+
+`↑((R ⋙ forget₂ CommRingCat RingCat).obj Z)` には `Ring` が **2 経路**で付く:
+
+| 経路 | 出どころ |
+|---|---|
+| (a) | `RingCat` の構造(`freeObj` / `restrictScalars` が使う) |
+| (b) | `CommRing.toRing`(`Presheaf/Monoidal.lean` 34 行の `CommRing` インスタンス経由。テンソルが使う) |
+
+★★**(a) と (b) は defeq だが構文が違う。**
+そのため `simp` / `rw` は `ConcreteCategory.hom (f ≫ g) y` **にすら当たらない**
+——`CategoryTheory.comp_apply` は `@[simp]` なのに発火しない。
+
+★★★これは第 11 ブロックで記録した
+「インスタンス束縛子は型の書き方の違いをまたげない」の**兄弟**である。
+違いは、あちらが**探索の失敗**で、こちらが**書き換えの失敗**であること。
+
+### ★塞ぎ方の候補(次の turn で測る)
+
+1. `letI` で `Ring` インスタンスを片方に固定してから構成する
+2. `ModuleCat.of` で束ね直し、両辺を同じ経路の項にする
+3. naturality を `LinearMap` の段まで降ろし、`TensorProduct.ext'` で純テンソルにしてから
+   `show` で両辺を書き下す(第 18 ブロックの recipe と同じ手口)
+
+★★**3 が本命**である——第 18 ブロックでは同種の壁を
+「`show` で両辺を明示的に書き下す」で 7 フィールドすべて抜けた。
