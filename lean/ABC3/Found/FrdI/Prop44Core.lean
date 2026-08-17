@@ -184,11 +184,65 @@ theorem birat_faithfulUpToUnits {A B : BiratCat P G} (φ ψ : A ⟶ B)
       _ = (ψ ≫ q) ≫ φ := by rw [hq1]
       _ = ψ ≫ (q ≫ φ) := Category.assoc _ _ _
 
-/-! ## ★4. 残り —— (i)(a)(b)(c)・(ii)・(iii)(a)(b)(c)・(iv)
+/-! ## ★4. ★★★★辞書の残りへ —— 「`𝒞^birat` の射は `[a]⁻¹ ≫ [φ]`」
 
-★★残るのは **co-angular 性と Frobenius 型と pull-back の辞書**に依るものである
-(`Proposition 4.4, (iv)` の残りの条)。
-★本ファイルの 5 条は**辞書を要さない**ので先に取った。
+原文 (FrdI p.84):
+> where α′ [hence also α◦α′] is a co-angular pre-step. Then we take the composite of
+
+★★原文は (iv) の co-angular の条を
+「**`𝒞^birat` の分解は `𝒞` の分解から来る**([cf. the proof of assertion (i)])」
+で片づける。★その「来る」の中身は **`Proposition 1.11, (vii)` を繰り返し当てて
+`[·]⁻¹` を左端へ寄せる**ことである。
+
+★本節はその**部品**を 2 つ置く:
+
+| 部品 | 内容 |
+|---|---|
+| `birat_hom_repr` | `𝒞^birat` の射は `a' ≫ [φ]`(`a'` は co-angular pre-step の逆射) |
+| `birat_move_inv` | `[g] ≫ [b]⁻¹ = [g₁]⁻¹ ≫ [k₁]`(`Proposition 1.11, (vii)`) |
 -/
+
+include P in
+/-- ★★**`𝒞^birat` の射の標準形** —— `f = a' ≫ [φ]`。
+
+★`a'` は co-angular pre-step `a` の**逆射**(平の射として持つ)。 -/
+theorem birat_hom_repr {X Y : BiratCat P G} (f : X ⟶ Y) :
+    ∃ (A' : C) (a : A' ⟶ biratDown P G X) (φ : A' ⟶ biratDown P G Y)
+      (aa : (show BiratCat P G from A') ⟶ X) (a' : X ⟶ (show BiratCat P G from A')),
+      IsCoAngular P a ∧ IsPreStep P a ∧ aa = (toBiratCat P G).map a ∧
+        aa ≫ a' = 𝟙 _ ∧ a' ≫ aa = 𝟙 X ∧ f = a' ≫ (toBiratCat P G).map φ := by
+  obtain ⟨Z, φ, hZφ⟩ := HomBirat.exists_rep f
+  obtain ⟨aa, haa⟩ : ∃ aa : (show BiratCat P G from Z.unop.left.obj) ⟶ X,
+      aa = (toBiratCat P G).map Z.unop.hom.hom := ⟨_, rfl⟩
+  obtain ⟨a', ha1, ha2⟩ : ∃ a' : X ⟶ (show BiratCat P G from Z.unop.left.obj),
+      aa ≫ a' = 𝟙 _ ∧ a' ≫ aa = 𝟙 X := by
+    rw [haa]
+    exact (birat_isIso_of_coaPre Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2).out
+  have hkey : aa ≫ f = (toBiratCat P G).map φ := by
+    rw [haa, ← hZφ]
+    exact birat_toHom_comp_mk Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2 φ
+  refine ⟨Z.unop.left.obj, Z.unop.hom.hom, φ, aa, a',
+    Z.unop.hom.property.1, Z.unop.hom.property.2, haa, ha1, ha2, ?_⟩
+  calc f = 𝟙 X ≫ f := (Category.id_comp f).symm
+    _ = (a' ≫ aa) ≫ f := by rw [ha2]
+    _ = a' ≫ (aa ≫ f) := Category.assoc _ _ _
+    _ = a' ≫ (toBiratCat P G).map φ := congrArg (fun t => a' ≫ t) hkey
+
+include P G in
+/-- ★★**`[·]⁻¹` を左へ寄せる** —— `Proposition 1.11, (vii)` そのもの。
+
+原文 (FrdI p.84):
+> where α′ [hence also α◦α′] is a co-angular pre-step. Then we take the composite of
+
+★`g : A₁ ⟶ U` と co-angular pre-step `b : B₁ ⟶ U` に対し、
+`g₁ ≫ g = k₁ ≫ b`(`g₁` は co-angular pre-step)が取れる。
+★★これが `𝒞^birat` で `[g] ≫ [b]⁻¹ = [g₁]⁻¹ ≫ [k₁]` を与える。 -/
+theorem birat_move_inv {A₁ U B₁ : C} (g : A₁ ⟶ U) (b : B₁ ⟶ U)
+    (hbc : IsCoAngular P b) (hbs : IsPreStep P b) :
+    ∃ (E : C) (g₁ : E ⟶ A₁) (k₁ : E ⟶ B₁),
+      IsCoAngular P g₁ ∧ IsPreStep P g₁ ∧ g₁ ≫ g = k₁ ≫ b := by
+  exact prop_1_11_vii P G.core G g b hbc hbs
 
 end ABC3.Found.FrdI
