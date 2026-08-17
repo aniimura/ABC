@@ -1,5 +1,7 @@
 import ABC3.Interface.GaloisRep.Representation
 import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.GroupTheory.QuotientGroup.Basic
 
 /-!
 # Galois 表現のスケルトン(3/3)—— **還元・Tate 曲線・Faltings 高さ**
@@ -35,26 +37,40 @@ open ABC3.Meta WeierstrassCurve NumberField
 > Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
 
 ★★★**原文の `Definition 3.3` そのものである。**
-★`Lemma 3.2`(局所の階数 1 部分群)がこの上で述べられる。 -/
+★`Lemma 3.2`(局所の階数 1 部分群)がこの上で述べられる。
+
+★★★**2026-08-17: 退化検査で作り直した。**以前は `LocalField : Type` /
+`Curve : LocalField → Type` と**世界ごと posit** していたので、
+`PUnit` と定数 `1` で埋まってしまった(実測済)。
+★**mathlib の `WeierstrassCurve` と `Valuation` に接地し**、
+**Tate 一意化そのもの**を要求する形に改めた。 -/
 structure TateCurveData where
-  /-- 局所体。 -/
-  LocalField : Type
-  /-- 付値。 -/
-  val : LocalField → ℤ → ℤ
-  /-- `E` が(悪い)乗法還元をもつこと。 -/
-  HasMultRed : (K : LocalField) → Type → Prop
-  /-- 曲線の型。 -/
-  Curve : LocalField → Type
-  /-- ★★**Tate 母数** `q_E`——乗法還元のとき定まる。 -/
-  tateParam : (K : LocalField) → (E : Curve K) → HasMultRed K (Curve K) → ℤ
-  /-- ★★★**局所高さ** `v_K(q_E) ∈ ℤ_{>0}`(原文 `Definition 3.3`)。 -/
-  localHeight : (K : LocalField) → (E : Curve K) → HasMultRed K (Curve K) → ℕ
+  /-- `W` が **分裂乗法還元**をもつこと(原文の「[bad] multiplicative reduction」)。 -/
+  HasSplitMultRed : {K : Type} → [Field K] → WeierstrassCurve K → Prop
+  /-- ★★**Tate 母数** `q_E ∈ Kˣ`——分裂乗法還元のとき定まる。 -/
+  tateParam : {K : Type} → [Field K] → (W : WeierstrassCurve K) → HasSplitMultRed W → Kˣ
+  /-- ★★★**Tate 一意化** `E(K) ≅ Kˣ / q^ℤ`。
+
+  ★★★**これが退化を殺す。**`q` が実際に一意化していることを要求するので、
+  「曲線も体も 1 点」という witness は通らない。 -/
+  uniformization : ∀ {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+    (h : HasSplitMultRed W),
+    Nonempty (W.toAffine.Point ≃+ Additive (Kˣ ⧸ Subgroup.zpowers (tateParam W h : Kˣ)))
+  /-- ★★★**局所高さ** `v_K(q_E) ∈ ℤ_{>0}`(原文 `Definition 3.3`)。
+
+  ★★**付値を引数に取る**——「どの付値での高さか」は原文でも `v_K` と明示されている。
+  ★乗法群上の付値 `Kˣ →* Multiplicative ℤ` として受ける(型クラスが軽い)。 -/
+  localHeight : {K : Type} → [Field K] → (v : Kˣ →* Multiplicative ℤ) →
+    (W : WeierstrassCurve K) → HasSplitMultRed W → ℕ
+  /-- ★★★**局所高さは Tate 母数の付値そのもの**——定義を型に出す。
+
+  ★これがあるので `localHeight := 1` のような定数 witness は通らない。 -/
+  localHeight_eq : ∀ {K : Type} [Field K] (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K)
+    (h : HasSplitMultRed W),
+    (localHeight v W h : ℤ) = Multiplicative.toAdd (v (tateParam W h))
   /-- ★局所高さは正(原文が `∈ Z_{>0}` と書いている)。 -/
-  localHeight_pos : ∀ (K : LocalField) (E : Curve K) (h : HasMultRed K (Curve K)),
-    0 < localHeight K E h
-  /-- ★★**Tate 一意化** `E(K̄) ≅ K̄^× / q^ℤ` の帰結として使う形——
-  `l` が局所高さと素なら、`l`-捩れの中に**円分的な**階数 1 部分群がただ一つある。 -/
-  UniqueCyclotomicLine : (K : LocalField) → (E : Curve K) → ℕ → Prop
+  localHeight_pos : ∀ {K : Type} [Field K] (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K)
+    (h : HasSplitMultRed W), 0 < localHeight v W h
 
 def TateCurveData.waiting : WaitingFor :=
   { what := "(G6) Tate 曲線 E(K̄) ≅ K̄^x/q^Z、Tate 母数 q_E、および局所高さ v_K(q_E)(= [GenEll] Definition 3.3)"
