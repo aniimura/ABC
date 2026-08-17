@@ -148,11 +148,11 @@ theorem isReducedDivisor_radical {X : Scheme} (I : X.IdealSheafData) :
 def isEffectiveCartierStalk_radical.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Definition 1.5, (ii)(茎が UFD であることを仮定した形——正則性からの含意は未取得)",
-    sectionId := "genell-def-1-5-ii" }
+    sectionId := "genell-def-1-5" }
 
 def stalk_radical_le.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Definition 1.5, (ii)(茎と根基の交換の片側のみ)",
-    sectionId := "genell-def-1-5-ii" }
+    sectionId := "genell-def-1-5" }
 
 end ABC3.Found.GenEll
