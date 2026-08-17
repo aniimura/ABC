@@ -46,6 +46,7 @@ import ABC3.Found.FrdI.HomColim
 import ABC3.Found.FrdI.Prop32
 import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop33UnTr
+import ABC3.Found.FrdI.Prop33Classes
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
