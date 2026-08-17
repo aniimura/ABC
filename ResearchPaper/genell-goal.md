@@ -2080,3 +2080,63 @@ IUT そのものを要求する。**
 1985 年のフランス語スキャンや 7654 頁の Stacks を無検証で構造化すると、
 **壊れた逐語が `.src` に固定される**。
 ★★**実際に引く箇所だけを目視 → その節だけ構造化**、という順が正しい。
+
+---
+
+## §9-22 ★★★`mathlib4_fork` を実測した——依存には加えられないが、参照先になる
+
+**2026-08-17。**arXiv 2510.24818 の PDF から GitHub の所在を抽出し
+(本文はハイパーリンクなので PDF の圧縮ストリームから URL を復元した)、
+**clone せず raw ファイルを取って計数**した。
+
+**`https://github.com/Thmoas-Guan/mathlib4_fork`**(公開・Apache-2.0・2026-08-03 更新)
+
+### ★★★得られたもの: `isRegularLocalRing_localization` が sorry 無しで在る
+
+ブランチ `ABS-Criterion-Project-new` の
+`Mathlib/RingTheory/RegularLocalRing/` に 5 ファイル・**1313 行・sorry 0**:
+
+| ファイル | 行 | 中身 |
+|---|---|---|
+| `Defs.lean` | 121 | 手元 mathlib にもあるが拡張されている |
+| `Basic.lean` | 329 | ★手元 mathlib に**無い** |
+| `GlobalDimension.lean` | 122 | ★手元 mathlib に**無い** |
+| `AuslanderBuchsbaumSerre.lean` | 694 | `IsRegularLocalRing.of_globalDimension_lt_top` / `generate_by_regular` |
+| `Localization.lean` | 47 | ★★★`Auslander_Buchsbaum_Serre` / **`isRegularLocalRing_localization`** |
+
+★★★**`isRegularLocalRing_localization` は Stacks 10.110.6 そのもの**であり、
+§9-21 で「`Definition 1.5, (ii)` の最難の依存」と測ったものである。**それが sorry 無しで在る。**
+
+### ★★★依存には加えられない(技術的に不可能)
+
+**これは mathlib の*フォーク*である。**mathlib と同時に `require` すると
+`Mathlib.*` のモジュール名が衝突する。★`PrimeNumberTheoremAnd` のように
+「別ライブラリとして足す」ことはできない。
+
+★★したがって道は **(a) 参照して自分で書く** か **(b) 該当ファイルを移植する** の 2 つ。
+
+### ★移植する場合の実測
+
+- toolchain: fork は **`v4.26.0-rc2`**、我々は **`v4.31.0`** —— ★**5 版の drift** を吸収する必要がある。
+- ライセンス: Apache-2.0。★移植するなら `Copyright (c) 2025 Nailin Guan` の表示を残すこと。
+- 最短は `Localization.lean`(47 行)だが、`AuslanderBuchsbaumSerre.lean`(694 行)に依存する。
+
+### ★★★それでも `Definition 1.5, (ii)` は埋まらない
+
+186 本のブランチ名を全部見たが、**UFD / factorization 系は 0 件**。
+論文本文も「正則局所 ⇒ UFD は含まない」と述べている。★残る 3 本は依然として無い:
+
+| Stacks | 内容 | mathlib | fork |
+|---|---|---|---|
+| 10.110.6 | 局所化が正則 | ✗ | ★★★**在る(sorry 0)** |
+| 10.106.2 | 正則局所環は整域 | ✗ | ✗ |
+| 10.120.6 | Noether 整域: UFD ⟺ 高さ1素が単項 | ✗ | ✗ |
+| 15.123.2 | **正則局所環は UFD** | ✗ | ✗ |
+
+★★★**「最難の 1 本が他人によって済んでいる」段であって、「終わっている」段ではない。**
+
+### ★保存した場所
+
+`ResearchPaper/0_Source/mathlib4_fork-ABS/`(5 ファイル + `LICENSE` + `lean-toolchain`)。
+実測は `ResearchPaper/lean-ecosystem.json` の
+`mathlib4_fork (ABS-Criterion-Project)` に登録した。

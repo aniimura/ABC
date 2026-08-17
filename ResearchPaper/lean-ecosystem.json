@@ -5,7 +5,7 @@
   "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
   "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。"
  ],
- "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定)",
+ "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定) / 2026-08-17(mathlib4_fork ABS を追加)",
  "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
  "projects": {
   "ClassFieldTheory": {
@@ -112,6 +112,45 @@
     "★GaloisRepresentation は **Frey 曲線の 3 進表現に特化**しており、[GenEll] Theorem 3.8 が要る一般の `Gal(ℚ̄/L) → GL₂(ℤ_l)` ではない"
    ],
    "conclusionForS3": "★**drop-in では使えない。** [GenEll] §3 の形式化は、FLT の進捗を待つか、独立に作るかの二択である。ただし独立に作ると重複投資になるので、**着手前に FLT 側の予定と突き合わせること**"
+  },
+  "mathlib4_fork (ABS-Criterion-Project)": {
+   "url": "https://github.com/Thmoas-Guan/mathlib4_fork",
+   "paper": "Nailin Guan, Yongle Hu, *Formalization of Auslander--Buchsbaum--Serre Criterion in Lean4*, arXiv:2510.24818 (2025-10 投稿 / 2025-12 改訂)。★PDF は 0_Source に取得済み",
+   "what": "Auslander–Buchsbaum–Serre 判定法(正則局所 ⟺ 有限大域次元)の Lean4 形式化。★**mathlib のフォーク**であり、186 本のブランチに分割されている(Koszul 複体・Ischebeck・Gorenstein・Cohen–Macaulay・Hilbert syzygy・大域次元 等)",
+   "license": "Apache-2.0(mathlib と同じ)",
+   "toolchain": "leanprover/lean4:v4.26.0-rc2",
+   "toolchainGap": "★**我々より 5 版古い**(v4.26.0-rc2 → 我々は v4.31.0)",
+   "lastCommit": "2026-08-03",
+   "status": "進行中(mathlib への upstream を意図したフォーク構成)",
+   "measuredBranch": "ABS-Criterion-Project-new",
+   "measuredAt": "2026-08-17",
+   "leanFiles": 5,
+   "lines": 1313,
+   "sorries": 0,
+   "structure": {
+    "Mathlib/RingTheory/RegularLocalRing/Defs.lean": "121 行。手元 mathlib にもあるが 6077B と拡張されている",
+    "Mathlib/RingTheory/RegularLocalRing/Basic.lean": "329 行。★手元 mathlib に**無い**",
+    "Mathlib/RingTheory/RegularLocalRing/GlobalDimension.lean": "122 行。★手元 mathlib に**無い**",
+    "Mathlib/RingTheory/RegularLocalRing/AuslanderBuchsbaumSerre.lean": "694 行。★主定理 `IsRegularLocalRing.of_globalDimension_lt_top` / `generate_by_regular`",
+    "Mathlib/RingTheory/RegularLocalRing/Localization.lean": "47 行。★★★`Auslander_Buchsbaum_Serre` / **`isRegularLocalRing_localization`** / `IsRegularLocalRing.of_isLocalization`"
+   },
+   "findings": [
+    "★★★**`isRegularLocalRing_localization` が sorry 無しで存在する**——これは Stacks 10.110.6(正則局所環の局所化は正則)であり、我々が `Definition 1.5, (ii)`(Auslander–Buchsbaum)の**最難の依存**と測ったものである",
+    "★5 ファイル 1313 行すべて **sorry 0**(2026-08-17 実測、raw ファイルを取得して計数)",
+    "★★**「正則局所環は UFD」は無い**——186 本のブランチ名を全部見たが UFD / factorization 系のブランチは 0 件。論文本文も『含まない』と述べている",
+    "★★★**lake の依存には加えられない**——これは **mathlib のフォーク**なので、mathlib と同時に require すると `Mathlib.*` のモジュール名が衝突する。**技術的に不可能**である",
+    "★toolchain が v4.26.0-rc2 で我々(v4.31.0)より 5 版古い。移植するなら API の drift を吸収する必要がある"
+   ],
+   "notFound": [
+    "正則局所環は UFD(Auslander–Buchsbaum の結論そのもの)",
+    "Noether 整域: UFD ⟺ 高さ 1 の素イデアルが単項(Stacks 10.120.6)",
+    "正則局所環は整域(Stacks 10.106.2)"
+   ],
+   "howToUse": [
+    "★★★**参照先として使う**(依存には加えられない)。5 ファイルの写しを `ResearchPaper/0_Source/mathlib4_fork-ABS/` に置いた(Apache-2.0、著作権表示つき)",
+    "★`Definition 1.5, (ii)` に着手するときは、`Localization.lean` の `isRegularLocalRing_localization` を**移植**するのが最短である(v4.26 → v4.31 の drift 吸収が要る)",
+    "★★移植する場合は Apache-2.0 の要求どおり `Copyright (c) 2025 Nailin Guan` の表示を残すこと"
+   ]
   }
  },
  "conclusionForUs": {
