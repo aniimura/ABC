@@ -373,6 +373,32 @@ theorem thm_3_4_i_isotropic (h₁ : IsOfQuasiIsotropicType C P₁)
   rw [← not_iff_not, h₁ A, h₂ (Ψ.obj A)]
   exact isIsoSubanchor_map_iff Ψ
 
+/-- ★★★★**[FrdI] Theorem 3.4, (i) の第 2 主張** —— `Ψ` は **isotropic hull を保つ**。
+
+原文 (FrdI p.63):
+> mainder of assertion (i) follows formally from [the definitions and] Proposition
+
+★★鍵は `Proposition 1.9, (vi)` の**圏論的な特徴づけ**
+
+  `IsIsotropicHull φ ↔ (終域が isotropic) ∧ (isotropic 始域の射に関して minimal-coadjoint)`
+
+である。★**右辺は「isotropic 対象」という語彙だけで書けている**ので、
+第 1 主張(`thm_3_4_i_isotropic`)がそのまま効く。 -/
+theorem isotropicHull_map (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (h₁ : IsOfQuasiIsotropicType C P₁) (h₂ : IsOfQuasiIsotropicType D P₂)
+    {A B : C} {φ : A ⟶ B} (h : IsIsotropicHull P₁ φ) :
+    IsIsotropicHull P₂ (Ψ.map φ) := by
+  rw [prop_1_9_vi P₂ F₂]
+  rw [prop_1_9_vi P₁ F₁] at h
+  refine ⟨(thm_3_4_i_isotropic Ψ P₁ P₂ h₁ h₂ B).mp h.1, ?_⟩
+  intro X α β hfac hX
+  obtain ⟨X₀, α₀, β₀, e, hfac₀, hα, hβ⟩ := exists_factor_of_map_factor Ψ φ α β hfac
+  have hX₀ : IsIsotropic P₂ (Ψ.obj X₀) := isIsotropic_of_iso P₂ e hX
+  have hX₀' : IsIsotropic P₁ X₀ := (thm_3_4_i_isotropic Ψ P₁ P₂ h₁ h₂ X₀).mpr hX₀
+  haveI : IsIso β₀ := h.2 X₀ α₀ β₀ hfac₀ hX₀'
+  rw [hβ]
+  infer_instance
+
 end Isotropic
 
 end ABC3.Found.FrdI
