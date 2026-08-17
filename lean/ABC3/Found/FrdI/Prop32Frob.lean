@@ -374,4 +374,50 @@ theorem compRoot_rep {X Y Z : PfRootObj P F} (f : X ⟶ Y) (g : Y ⟶ Z) :
   unfold compRoot
   rw [hφ, hψ, compPf_mk]
 
+/-! ## ★10. (ii) —— 各次数の Frobenius 型射
+
+★★`𝒞^pf` では `(A, m)` から `(A^n, m)` への次数 `n` の Frobenius 型射を取る。
+★その代表元は `𝒞` の中の `rtObj A m ⟶ rtObj (rtObj A n) m` であり、
+`frobDegSurj` ＋ `frobDegUniq` で作れる。 -/
+
+variable {P F} in
+/-- ★`rtObj A d` から `rtObj (rtObj A n) d` への次数 `n` の Frobenius 型射。 -/
+theorem exists_rt_frob (A : C) (d n : ℕ+) :
+    ∃ θ : rtObj P F A d ⟶ rtObj P F (rtObj P F A n) d,
+      IsFrobeniusType P θ ∧ P.degFr θ = n := by
+  obtain ⟨B', θ₀, hθ₀, hθ₀d⟩ := F.frobDegSurj (rtObj P F A d) n
+  have h1 : IsFrobeniusType P (rtExt P F A d ≫ θ₀) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A d) hθ₀
+  have h2 : IsFrobeniusType P (rtExt P F A n ≫ rtExt P F (rtObj P F A n) d) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A n) (rtExt_frobType P F (rtObj P F A n) d)
+  have hdeg : P.degFr (rtExt P F A d ≫ θ₀)
+      = P.degFr (rtExt P F A n ≫ rtExt P F (rtObj P F A n) d) := by
+    rw [P.degFr_comp, P.degFr_comp, hθ₀d, rtExt_degFr, rtExt_degFr, rtExt_degFr, mul_comm]
+  obtain ⟨β, hβ, hβe⟩ := F.frobDegUniq A B' _ _ _ h1 h2 hdeg
+  haveI : IsIso β := hβ
+  refine ⟨θ₀ ≫ β, IsFrobeniusType.comp P F hθ₀ (isFrobeniusType_of_isIso P β), ?_⟩
+  rw [P.degFr_comp, show P.degFr β = 1 from isLinear_of_isIso P β, one_mul, hθ₀d]
+
+set_option maxHeartbeats 1600000 in
+variable {P F} in
+/-- ★★**(ii) の存在** —— `𝒞^pf` にも各次数の Frobenius 型射がある。 -/
+theorem pfRoot_frobDegSurj (hfi : IsOfFrobeniusIsotropicType P) (X : PfRootObj P F) (n : ℕ+) :
+    ∃ (Y : PfRootObj P F) (φ : X ⟶ Y),
+      IsFrobeniusType (pfRootPre P F) φ ∧ (pfRootPre P F).degFr φ = n := by
+  obtain ⟨θ, hθ, hθd⟩ := exists_rt_frob (F := F) X.obj X.root n
+  refine ⟨⟨rtObj P F X.obj n, X.root⟩, ?_⟩
+  refine ⟨HomPf.mk (idxOne P F (rtObj P F X.obj X.root)
+    (rtObj P F (rtObj P F X.obj n) X.root)) θ, ?_⟩
+  refine ⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · exact pfRoot_isCoAngular hfi _
+  · exact (isIsometric_mk_iff (X := X) (Y := ⟨rtObj P F X.obj n, X.root⟩)
+      (idxOne P F (rtObj P F X.obj X.root)
+        (rtObj P F (rtObj P F X.obj n) X.root)) θ).mpr hθ.1.2
+  · exact (isBaseIsomorphism_mk_iff (X := X) (Y := ⟨rtObj P F X.obj n, X.root⟩)
+      (idxOne P F (rtObj P F X.obj X.root)
+        (rtObj P F (rtObj P F X.obj n) X.root)) θ).mpr hθ.2
+  · exact (degFr_mk_iff (X := X) (Y := ⟨rtObj P F X.obj n, X.root⟩)
+      (idxOne P F (rtObj P F X.obj X.root)
+        (rtObj P F (rtObj P F X.obj n) X.root)) θ n).mpr hθd
+
 end ABC3.Found.FrdI
