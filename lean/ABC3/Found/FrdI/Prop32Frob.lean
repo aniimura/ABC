@@ -3581,4 +3581,13 @@ pull-back)の 1 本だった。これで `arbFactor` / `arbFactorUniq` / `plBkEq
 3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
 -/
 
+/-- ★**locator** —— `Proposition 3.2, (iii)` の**中核**(`Definition 1.3` の 21 条)。
+
+★★**条つき**(命題全体の完全実装の主張ではない)。残るのは
+`Frobenioid` の 2 本の圏同値((iii)(d))、(ii) の辞書の残り、
+「perfect 型」、`𝒞^pf ≃ (𝒞^pf)^pf` である。 -/
+def pfRootCore.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 58, item := "Proposition 3.2, (iii) — Definition 1.3 の 21 条",
+    sectionId := "frdi-prop-3-2" }
+
 end ABC3.Found.FrdI
