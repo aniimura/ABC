@@ -62,6 +62,7 @@ import ABC3.Found.FrdI.Remark491
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Core
 import ABC3.Found.FrdI.Prop44Otri
+import ABC3.Found.FrdI.Prop44Ore
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -164,6 +165,7 @@ import ABC3.Found.Arakelov.PicPushLax
 import ABC3.Found.Arakelov.PicPullOplax
 import ABC3.Found.Arakelov.PicSchemePullback
 import ABC3.Found.Arakelov.PicSchemeDelta
+import ABC3.Found.Arakelov.PicDeltaColimit
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
