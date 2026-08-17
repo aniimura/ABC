@@ -152,11 +152,141 @@ theorem isOpenMap_comp_of_isAffine {W X : Scheme.{0}} [IsAffine W] (g : X ⟶ W)
   exact (isOpenMap_comp_iso_hom W.isoSpec.symm).comp
     (isOpenMap_comp_of_affine (g ≫ W.isoSpec.hom))
 
+/-! ## ★★★★手順 5 —— 一般のスキームへ
+
+★★★機構は「**`U ⊓ O` を経由する**」ことである。
+chart `U` から見た `(· ≫ O.ι)` の像は、`U ⊓ O` からの像に一致する。 -/
+
+/-- ★★★★**chart から見た像の逆像は `U ⊓ O` からの像である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    (· ≫ U.ι) ⁻¹' ((· ≫ O.ι) '' V) = (· ≫ homOfLE) '' ((· ≫ homOfLE) ⁻¹' V)
+
+★★★これが段 B の核心である——右辺は**アフィンな `U` の上での段 A** で開になる。
+
+★機構は `openLift`(像の点が `U ⊓ O` に落ちるから持ち上がる)と
+`Scheme.homOfLE_ι`(三角形の可換性)。 -/
+theorem preimage_image_comp_ι {Y : Scheme.{0}} (U O : Y.Opens)
+    (V : Set (Spec (CommRingCat.of ℂ) ⟶ O.toScheme)) :
+    (fun p : Spec (CommRingCat.of ℂ) ⟶ U.toScheme => p ≫ U.ι) ⁻¹'
+        ((fun q : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => q ≫ O.ι) '' V)
+      = (fun r : Spec (CommRingCat.of ℂ) ⟶ (U ⊓ O).toScheme =>
+            r ≫ Y.homOfLE (inf_le_left : U ⊓ O ≤ U)) ''
+          ((fun r : Spec (CommRingCat.of ℂ) ⟶ (U ⊓ O).toScheme =>
+              r ≫ Y.homOfLE (inf_le_right : U ⊓ O ≤ O)) ⁻¹' V) := by
+  ext p
+  constructor
+  · rintro ⟨q, hqV, hq⟩
+    have hq' : q ≫ O.ι = p ≫ U.ι := hq
+    have h1 : (p ≫ U.ι).base default ∈ U := by
+      rw [Scheme.Hom.comp_apply]
+      exact (p.base default).2
+    have h2 : (p ≫ U.ι).base default ∈ O := by
+      rw [← hq', Scheme.Hom.comp_apply]
+      exact (q.base default).2
+    have hmem : (p ≫ U.ι).base default ∈ Set.range (U ⊓ O).ι.base := by
+      rw [Scheme.Opens.range_ι]
+      exact ⟨h1, h2⟩
+    refine ⟨openLift (U ⊓ O).ι (p ≫ U.ι) hmem, ?_, ?_⟩
+    · show openLift (U ⊓ O).ι (p ≫ U.ι) hmem ≫ Y.homOfLE inf_le_right ∈ V
+      have hqe : openLift (U ⊓ O).ι (p ≫ U.ι) hmem ≫ Y.homOfLE inf_le_right = q := by
+        refine comp_openImmersion_injective O.ι ?_
+        show (openLift (U ⊓ O).ι (p ≫ U.ι) hmem ≫ Y.homOfLE inf_le_right) ≫ O.ι = q ≫ O.ι
+        rw [Category.assoc, Scheme.homOfLE_ι, openLift_comp, hq']
+      rw [hqe]
+      exact hqV
+    · show openLift (U ⊓ O).ι (p ≫ U.ι) hmem ≫ Y.homOfLE inf_le_left = p
+      refine comp_openImmersion_injective U.ι ?_
+      show (openLift (U ⊓ O).ι (p ≫ U.ι) hmem ≫ Y.homOfLE inf_le_left) ≫ U.ι = p ≫ U.ι
+      rw [Category.assoc, Scheme.homOfLE_ι, openLift_comp]
+  · rintro ⟨r, hrV, rfl⟩
+    refine ⟨r ≫ Y.homOfLE inf_le_right, hrV, ?_⟩
+    show (r ≫ Y.homOfLE inf_le_right) ≫ O.ι = (r ≫ Y.homOfLE inf_le_left) ≫ U.ι
+    rw [Category.assoc, Category.assoc, Scheme.homOfLE_ι, Scheme.homOfLE_ι]
+
+/-- ★★★★★**一般のスキームで `(· ≫ O.ι)` は開写像である**(段 B)。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★機構は `arcTopology = ⨆`(アフィン chart)なので、
+開性を chart ごとに `isOpen_iSup_iff` で降ろし、各 chart では
+`preimage_image_comp_ι` + `isOpenMap_comp_of_isAffine` を使う。 -/
+theorem isOpenMap_comp_ι {Y : Scheme.{0}} (O : Y.Opens) :
+    @IsOpenMap _ _ (arcTopology O.toScheme) (arcTopology Y)
+      (fun p : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => p ≫ O.ι) := by
+  letI := arcTopology O.toScheme
+  intro V hV
+  refine isOpen_iSup_iff.2 fun U => ?_
+  refine isOpen_coinduced.2 ?_
+  rw [arcTopologyOpen_eq_arcTopology, preimage_image_comp_ι U.1 O V]
+  letI := arcTopology U.1.toScheme
+  letI := arcTopology (U.1 ⊓ O).toScheme
+  haveI : IsAffine U.1.toScheme := U.2
+  exact isOpenMap_comp_of_isAffine (Y.homOfLE (inf_le_left : U.1 ⊓ O ≤ U.1)) _
+    ((continuous_comp_openImmersion
+      (Y.homOfLE (inf_le_right : U.1 ⊓ O ≤ O))).isOpen_preimage _ hV)
+
+/-- ★★★★★**一般のスキームでの chart 埋め込み**(段 B の帰結)。
+
+    arcTopology O.toScheme = induced (· ≫ O.ι) (arcTopology Y)
+
+★★★これで `topology_openImmersion` が任意の開部分スキームに対して閉じた。 -/
+theorem arcTopology_opens {Y : Scheme.{0}} (O : Y.Opens) :
+    arcTopology O.toScheme
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => p ≫ O.ι) (arcTopology Y) := by
+  letI := arcTopology O.toScheme
+  letI := arcTopology Y
+  refine le_antisymm (continuous_iff_le_induced.1 (continuous_comp_openImmersion O.ι)) ?_
+  intro V hV
+  refine isOpen_induced_iff.2
+    ⟨(fun q : Spec (CommRingCat.of ℂ) ⟶ O.toScheme => q ≫ O.ι) '' V, isOpenMap_comp_ι O V hV, ?_⟩
+  exact (comp_openImmersion_injective O.ι).preimage_image V
+
+/-- ★★★★★**任意の開埋め込みに対する `topology_openImmersion`**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    arcTopology X = induced (· ≫ f) (arcTopology Y)   (f 開埋め込み)
+
+★★★これが C1 の 7 要求のうち最後の 1 本である。 -/
+theorem arcTopology_openImmersion {X Y : Scheme.{0}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    arcTopology X
+      = TopologicalSpace.induced
+          (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f) (arcTopology Y) := by
+  have hcomp : (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ f)
+      = (fun q : Spec (CommRingCat.of ℂ) ⟶ f.opensRange.toScheme => q ≫ f.opensRange.ι)
+        ∘ (fun p : Spec (CommRingCat.of ℂ) ⟶ X => p ≫ (opensRangeIso f).hom) := by
+    funext p
+    show p ≫ f = (p ≫ (opensRangeIso f).hom) ≫ f.opensRange.ι
+    rw [Category.assoc, opensRangeIso_fac]
+  rw [hcomp, ← induced_compose, ← arcTopology_opens f.opensRange,
+    ← arcTopology_iso (opensRangeIso f)]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isOpen_range_comp_ι.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——一般のスキームで chart の像が開であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def preimage_image_comp_ι.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——chart から見た像の逆像が U ⊓ O からの像であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def isOpenMap_comp_ι.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——一般のスキームで chart 埋め込みが開写像)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcTopology_openImmersion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——開埋め込みに沿う位相の誘導)",
     sectionId := "genell-def-1-1-i" }
 
 def isOpenMap_comp_of_isAffine.src : ABC3.Meta.Source :=
