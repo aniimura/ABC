@@ -1658,6 +1658,93 @@ theorem exists_ore_square (h : Hyp M) {E A : Obj M} (a f : E ⟶ A)
     simp only [PNat.one_coe, one_smul, smul_zero, add_zero]
     rw [← add_assoc, add_comm a.u f.u, add_assoc, add_bneg, add_zero]
 
+
+/-- ★★**因子分解** —— `a` が pre-step、`Base f = Base a`、`Div a + d = Div f` なら
+`t ≫ a = f` なる `t : E ⟶ E`(底 `𝟙`、次数 `deg f`)が取れる。
+
+★★これが `𝒞^birat` で **`φ = [a]⁻¹ ≫ [f]` が `[t]` の `[a]` による共役**である
+ことを与える(`[f] = [t] ≫ [a]`)。 -/
+theorem exists_factor (h : Hyp M) {E A : Obj M} (a f : E ⟶ A)
+    (had : a.deg = 1) (hbase : f.base = a.base) (d : M.phi.val E.base)
+    (hd : a.div + d = f.div) :
+    ∃ t : E ⟶ E, t.base = 𝟙 E.base ∧ t.div = d ∧ t.deg = f.deg ∧
+      t.u = f.u + bneg h a.u ∧ t ≫ a = f := by
+  have hac := a.cond
+  have hfc := f.cond
+  rw [had] at hac
+  simp only [PNat.one_coe, one_smul] at hac
+  rw [hbase] at hfc
+  have hdg : toGpHom (M.phi.val E.base) a.div + toGpHom _ d = toGpHom _ f.div := by
+    rw [← map_add, hd]
+  have hcond : ((f.deg : ℕ)) • E.cls + toGpHom _ d
+      = M.phi.gpMapOn (𝟙 E.base) E.cls + M.divB _ (f.u + bneg h a.u) := by
+    rw [MonoidOn.gpMapOn_id, map_add, divB_bneg]
+    have hkey : ((f.deg : ℕ)) • E.cls
+        = M.phi.gpMapOn a.base A.cls + M.divB _ f.u - toGpHom _ f.div :=
+      eq_sub_of_add_eq hfc
+    have hkey2 : M.phi.gpMapOn a.base A.cls
+        = E.cls + toGpHom _ a.div - M.divB _ a.u :=
+      eq_sub_of_add_eq hac.symm
+    have hdd : toGpHom (M.phi.val E.base) d = toGpHom _ f.div - toGpHom _ a.div :=
+      eq_sub_of_add_eq (by rw [add_comm]; exact hdg)
+    rw [hkey, hkey2, hdd]
+    abel
+  refine ⟨⟨𝟙 E.base, d, f.deg, f.u + bneg h a.u, hcond⟩, rfl, rfl, rfl, rfl, ?_⟩
+  refine Hom.ext ?_ ?_ ?_ ?_
+  · show 𝟙 E.base ≫ a.base = f.base
+    rw [hbase, Category.id_comp]
+  · show M.phi.map (𝟙 E.base) a.div + (a.deg : ℕ) • d = f.div
+    rw [had, MonoidOn.map_id]
+    simp only [PNat.one_coe, one_smul]
+    exact hd
+  · show a.deg * f.deg = f.deg
+    rw [had, one_mul]
+  · show M.bmon.map (𝟙 E.base) a.u + (a.deg : ℕ) • (f.u + bneg h a.u) = f.u
+    rw [had, MonoidOn.map_id]
+    simp only [PNat.one_coe, one_smul]
+    rw [← add_assoc, add_comm a.u f.u, add_assoc, add_bneg, add_zero]
+
+/-! ## ★20. ★★残る「birationally Frobenius-normalized 型」の測定(2026-08-18)
+
+★`Theorem 5.2, (ii)` の残りは **model 型のもう半分**、すなわち
+`IsFrobeniusNormalized (biratPre) (A^birat)` である。ここまでで**道具は揃った**が、
+**まだ閉じていない**。測定の結果を残す。
+
+### ★道具と、どこまで行けるか
+
+`𝒞^birat` の射は `birat_hom_repr` により `[a]⁻¹ ≫ [f]`(`a` は co-angular pre-step)。
+共通の添字は `HomBirat.exists_rep_pair` で取れるので、
+`φ = [a]⁻¹ ≫ [f]`(次数 `n`)・`α = [a]⁻¹ ≫ [g]`(次数 1)、`Base f = Base g = Base a` と書ける。
+
+1. ★**`Div a ≼ Div f` なら `φ` は `[t]` の `[a]` 共役**(`exists_factor`)。
+   ★このとき目標 `φ ≫ α^n = α ≫ φ` は `𝒞` の `model_frobNormalizedType` に落ちる。
+2. ★添字を `preStepDown E K` で下げると `Div a ↦ Div a + K`、`Div f ↦ Div f + n·K` となるので、
+   ★★**`n ≥ 2` なら `K := Div a` で 1 の条件を満たせる**。
+3. ★★**`n = 1`(すなわち `α` 自身)では 2 が効かない** ——
+   `Div a + K ≼ Div g + K` は `Div a ≼ Div g` と同値で、これは
+   `biratDivGp α` が `toGp(Φ)` に入ることと同値。**一般には成り立たない**。
+
+### ★n = 1 の側は Ore の四角形で片づく(紙の上では確認済み)
+
+`exists_ore_square` を `K := Div a` で `f` と `g` の両方に当てると、**同じ `p`** で
+
+  `[f] ≫ [a]⁻¹ = [p]⁻¹ ≫ [m]`、`[g] ≫ [a]⁻¹ = [p]⁻¹ ≫ [m']`
+
+が出る(`Div m = Div f + (n−1)·Div a`、`Div m' = Div g`)。
+`n = 1` のとき `m ≫ g = m' ≫ f` が `𝒞` で成り立つ(4 成分を計算すれば一致する)ので、
+`𝒪^▷(A^birat)` の可換性が出る。
+
+### ★★残っているのは「一般の `n` での帰納」
+
+`[f] ≫ α^k` を `[P_k]⁻¹ ≫ [F_k]` の形に保つ帰納(各段で Ore の四角形を 1 つ使う)を
+Lean で回すこと。★添字の合成が段ごとに伸びるので、
+**`HomBirat.sound` で共通の下界に落とす道具立て**が要る。
+
+★★これが閉じれば同時に 2 つ閉じる:
+`Theorem 5.2, (ii)` の model 型と、`Proposition 4.4, (ii)`(model について、
+`birat_frobenioidCore_of_frobNormalized` 経由)。
+-/
+
 end ModelData
 
 end ABC3.Found.FrdI
