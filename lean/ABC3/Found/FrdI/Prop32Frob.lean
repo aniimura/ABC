@@ -2772,6 +2772,118 @@ theorem pfRoot_pullBackLB (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj 
   show (pfRootPre P F).Div α = 0
   exact (Φ.pfOn (phiSharp P)).map_injective _ (h1.trans (map_zero _).symm)
 
+/-! ## ★45. pull-back を `Hom^pf` の中で消す
+
+★★残る 3 条(`arbFactor` / `arbFactorUniq` / `plBkEquiv`)はすべて
+**「`𝒞` の pull-back は `𝒞^pf` でも pull-back」**に帰する。
+★その普遍性のうち**一意性の側**をここで用意する ——
+`homPf_cancel_preStep` と同じ形で、`Mono` の代わりに
+`IsPullBack.hom_ext`(底の一致も要る)を使う。 -/
+
+variable {P F} in
+/-- ★★**pull-back 性は Frobenius 遷移で戻せる**(co-angular が要る)。
+
+★`prop_1_10_i_pullBack_of` の逆向き。★`Proposition 1.4, (ii)` を両向きに使う:
+linear と等長は四角形から**両向きに**出るが、co-angular だけは仮定に置く
+(`𝒞^pf` の側では始域を isotropic に取れるので、そこはただで手に入る)。 -/
+theorem pullBack_of_transport_back (Fc : FrobenioidCore P) {A B A' B' : C}
+    {φ : A ⟶ B} {a : A ⟶ A'} {b : B ⟶ B'} {φ' : A' ⟶ B'}
+    (ha : IsFrobeniusType P a) (hb : IsFrobeniusType P b)
+    (hd : P.degFr a = P.degFr b) (hsq : φ ≫ b = a ≫ φ')
+    (hφ' : IsPullBack P φ') (hco : IsCoAngular P φ) : IsPullBack P φ := by
+  obtain ⟨hlb', hlin'⟩ := Fc.pullBackLB φ' hφ'
+  have hlin : IsLinear P φ := by
+    have h0 := congrArg P.degFr hsq
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr φ' = 1 from hlin', one_mul, hd] at h0
+    show P.degFr φ = 1
+    exact mul_left_cancel (h0.trans (mul_one _).symm)
+  refine prop_1_4_ii_mpr P Fc φ ⟨hco, ?_⟩ hlin
+  have h0 := congrArg P.Div hsq
+  rw [P.Div_comp, P.Div_comp, show P.Div b = 0 from hb.1.2,
+    show P.Div a = 0 from ha.1.2, show P.Div φ' = 0 from hlb'.2,
+    map_zero, map_zero, zero_add, smul_zero, add_zero] at h0
+  exact nsmul_eq_zero_of_isSharp (P.divisorial _).2 h0
+
+variable {P F} in
+/-- ★遷移は底の一致を保つ。 -/
+theorem idxTransport_Base_eq {A B : C} {Z W : IdxPf P F A B} (u : Z ⟶ W)
+    (φ φ' : Z.right.obj.1 ⟶ Z.right.obj.2) (h : P.Base φ = P.Base φ') :
+    P.Base (idxTransport P F u φ) = P.Base (idxTransport P F u φ') := by
+  haveI : IsIso (P.Base u.right.hom.1) := u.right.property.1.2
+  refine (cancel_epi (P.Base u.right.hom.1)).mp ?_
+  rw [← P.Base_comp, ← P.Base_comp, ← idxTransport_spec, ← idxTransport_spec,
+    P.Base_comp, P.Base_comp, h]
+
+variable {P F} in
+/-- ★3 脚添字を「**第 2 脚**が isotropic」な所まで押し上げる。 -/
+theorem exists_idx3_isotropic2 (hfi : IsOfFrobeniusIsotropicType P) {A B E : C}
+    (V : IdxPf3 P F A B E) :
+    ∃ (W : IdxPf3 P F A B E) (u : V ⟶ W), IsIsotropic P W.right.obj.2.1 := by
+  obtain ⟨Dd, a, ha, hDd⟩ := hfi V.right.obj.2.1
+  obtain ⟨A₂, p, hp, hpd⟩ := F.frobDegSurj V.right.obj.1 (P.degFr a)
+  obtain ⟨E₂, e, he, hed⟩ := F.frobDegSurj V.right.obj.2.2 (P.degFr a)
+  obtain ⟨hva, hvb, hve, hvab, hvbe⟩ := V.hom.property
+  refine ⟨Under.mk (Y := (⟨(A₂, Dd, E₂)⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(V.hom.hom.1 ≫ p, V.hom.hom.2.1 ≫ a, V.hom.hom.2.2 ≫ e),
+          IsFrobeniusType.comp P F hva hp, IsFrobeniusType.comp P F hvb ha,
+          IsFrobeniusType.comp P F hve he, ?_, ?_⟩),
+    Under.homMk (show V.right ⟶ (⟨(A₂, Dd, E₂)⟩ : TriFr P F) from
+      ⟨(p, a, e), hp, ha, he, hpd, hed.symm⟩)
+      (WideSubcategory.hom_ext _ rfl), hDd⟩
+  · rw [P.degFr_comp, P.degFr_comp, hpd, hvab]
+  · rw [P.degFr_comp, P.degFr_comp, hed, hvbe]
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★**`Hom^pf` の中で pull-back は消せる**(底の一致つき)。 -/
+theorem homPf_cancel_pullBack {A B E : C} (V : IdxPf3 P F A B E)
+    (φ φ' : V.right.obj.1 ⟶ V.right.obj.2.1) (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2)
+    (hψ : IsPullBack P ψ) (hb : P.Base φ = P.Base φ')
+    (h : HomPf.mk ((idx13 P F A B E).obj V) (φ ≫ ψ)
+      = HomPf.mk ((idx13 P F A B E).obj V) (φ' ≫ ψ)) :
+    HomPf.mk ((idx12 P F A B E).obj V) φ = HomPf.mk ((idx12 P F A B E).obj V) φ' := by
+  obtain ⟨V', t, t', ht⟩ := HomPf.eq_iff.mp h
+  rw [idx_hom_ext t' t] at ht
+  obtain ⟨V'', ⟨k⟩⟩ := exists_hom_of_final (idx13 P F A B E) V'
+  set s : V ⟶ IsFiltered.max V V'' := IsFiltered.leftToMax V V'' with hs
+  set r : V'' ⟶ IsFiltered.max V V'' := IsFiltered.rightToMax V V'' with hr
+  have hm : t ≫ k ≫ (idx13 P F A B E).map r = (idx13 P F A B E).map s :=
+    idx_hom_ext _ _
+  have hA : idxTransport P F ((idx13 P F A B E).map s) (φ ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map r)
+          (idxTransport P F k (idxTransport P F t (φ ≫ ψ))) := by
+    rw [← hm, idxTransport_comp, idxTransport_comp]
+  have hB : idxTransport P F ((idx13 P F A B E).map s) (φ' ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map r)
+          (idxTransport P F k (idxTransport P F t (φ' ≫ ψ))) := by
+    rw [← hm, idxTransport_comp, idxTransport_comp]
+  have key : idxTransport P F ((idx13 P F A B E).map s) (φ ≫ ψ)
+      = idxTransport P F ((idx13 P F A B E).map s) (φ' ≫ ψ) := by
+    rw [hA, hB, ht]
+  have e1 := idxTransport_comp_pair (F := F) s φ ψ
+  have e2 := idxTransport_comp_pair (F := F) s φ' ψ
+  have hcan : idxTransport P F ((idx12 P F A B E).map s) φ
+      ≫ idxTransport P F ((idx23 P F A B E).map s) ψ
+      = idxTransport P F ((idx12 P F A B E).map s) φ'
+      ≫ idxTransport P F ((idx23 P F A B E).map s) ψ := by
+    rw [e1, e2]
+    exact key
+  have hψ' : IsPullBack P (idxTransport P F ((idx23 P F A B E).map s) ψ) :=
+    prop_1_10_i_pullBack_of P F
+      ((idx23 P F A B E).map s).right.property.1
+      ((idx23 P F A B E).map s).right.property.2.1
+      ((idx23 P F A B E).map s).right.property.2.2
+      (idxTransport_spec ((idx23 P F A B E).map s) ψ) hψ
+  have hb' : P.Base (idxTransport P F ((idx12 P F A B E).map s) φ)
+      = P.Base (idxTransport P F ((idx12 P F A B E).map s) φ') :=
+    idxTransport_Base_eq ((idx12 P F A B E).map s) φ φ' hb
+  have hφφ' : idxTransport P F ((idx12 P F A B E).map s) φ
+      = idxTransport P F ((idx12 P F A B E).map s) φ' :=
+    IsPullBack.hom_ext P hψ' _ _ hcan hb'
+  rw [← HomPf.mk_map ((idx12 P F A B E).map s) φ, ← HomPf.mk_map ((idx12 P F A B E).map s) φ',
+    hφφ']
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
 ### 埋まった 18 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
