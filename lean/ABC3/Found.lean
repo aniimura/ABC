@@ -86,6 +86,7 @@ import ABC3.Found.GenEll.ArchPoint
 import ABC3.Found.GenEll.HeightConstruction
 import ABC3.Found.GenEll.HeightNonneg
 import ABC3.Found.GenEll.HeightClass
+import ABC3.Found.GenEll.RadicalCartier
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
