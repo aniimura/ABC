@@ -1428,7 +1428,7 @@ noncomputable def otimesEquiv (h : Hyp M) (A : Obj M) :
 /-! ## ★18. pre-model 型 —— base-Frobenius pair
 
 原文 (FrdI p.101):
-> that the objects A = (AD, ) such that  = 0 are Frobenius-trivial, and that these
+> are Frobenius-trivial, and that these
 
 ★★**`α = 0` の対象**と、**零因子 0・次数 1・`u = 0` の射**が base-section をなし、
 `(𝟙, 0, n, 0)` が Frobenius-section を与える。
