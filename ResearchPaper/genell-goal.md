@@ -2300,3 +2300,60 @@ IUT そのものを要求する。**
 (a) 局所化の延長の連続性(上記 1 文)、(b) それを開被覆で貼る段、の 2 つである。
 
 ★★★見積りの更新: **100〜200 行**のうち、(a) が 40〜60 行、(b) が 60〜140 行。
+
+---
+
+## §9-25 ★★★★C1 の基底事例が閉じた —— 一般の場合の手順を精密化した
+
+`Found/Arakelov/` は **12 ファイル・全ファイル sorry 0**。
+
+### ★★★★取れた基底事例
+
+    arcTopologyAffine (Localization.Away s)
+      = induced (· ≫ awayι A s) (arcTopologyAffine A)
+
+★★★これは `topology_openImmersion` の**アフィン(基本開集合)の場合そのもの**である。
+★4 条件が揃った帰結:
+
+| 条件 | 定理 |
+|---|---|
+| `awayLift → 合成` でもとに戻る | `awayLift_comp_awayι` |
+| `合成 → awayLift` でもとに戻る | `awayLift_comp_awayι_self` |
+| `awayLift` は連続 | `continuous_awayLift` |
+| 合成は連続 | `continuous_comp_affine` |
+
+★★**両向き連続な全単射なので部分空間位相になる。**
+
+### ★★★★一般の場合の手順(次のセッションはここから、機械的に実行できる)
+
+示すべきは、`V` が `arcTopology X` で開のとき `W := (· ≫ f) '' V` が
+`arcTopology Y` で開であること。`isOpen_iSup_iff` で `V' ∈ Y.affineOpens` ごとに落とす。
+
+1. **`V' ⊓ f.opensRange` を基本開集合に分解する。**
+   `V'` はアフィンなので `isoSpec` で `Spec Γ(Y,V')` に移し、
+   `PrimeSpectrum.isTopologicalBasis_basic_opens` で `⋃ D(gᵢ)` と書く。
+2. **各 `D(gᵢ)` は `X` のアフィン開の像である。**
+   `D(gᵢ) ≤ f.opensRange` なので `exists_imageAffineOpen` により
+   `∃ Uᵢ ∈ X.affineOpens, f ''ᵁ Uᵢ = D(gᵢ)`。
+3. **`{r ∈ Arc V' ǀ r が D(gᵢ) に落ちる}` の上で基底事例を当てる。**
+   ★この集合は `isOpen_landsIn`(アフィン、`isoSpec` で輸送)により**開**。
+   ★★その上では `arcTopologyAffine (Away gᵢ) = induced …`(基底事例)により
+   位相が一致するので、`chart_{V'}⁻¹ W` は
+   `chart^X_{Uᵢ}⁻¹ V`(`V` が開だから開)の像に一致する。
+4. **合併を取る。** `chart_{V'}⁻¹ W = ⋃ᵢ (上の開集合)` なので開。
+
+★★★**新たな数学は無く、既存 14 定理の組み合わせである。**
+見積り **150〜250 行**、うち手順 1 の分解と手順 3 の輸送が主な作業。
+
+### ★★使える定理の一覧(すべて `Found/Arakelov/`、sorry 0)
+
+`evalHom_injective` / `evalAffine_comp` / `continuous_comp_affine` /
+`continuous_evalAffine` / `t2Space_arcAffine` / `conjPoint_conjPoint` /
+`evalAffine_conjPoint` / `continuous_conjPoint` / `arcTopology_spec` /
+`continuous_chart_affine` / `imageAffineOpenIso_fac` / `exists_imageAffineOpen` /
+`comp_openImmersion_injective` / `continuous_comp_openImmersion` /
+`isOpen_arcBasicOpen` / `continuousOn_div_pow_evalAffine` /
+`mem_basicOpen_base_iff` / `continuous_base_default` / `isOpen_landsIn` /
+`mem_range_comp_iff_base_default` / `continuous_base_default_scheme` /
+`isOpen_landsIn_scheme` / `awayLiftHom_mk` / `continuous_awayLift` /
+`awayLift_comp_awayι` / `awayLift_comp_awayι_self` / `arcTopologyAffine_away`
