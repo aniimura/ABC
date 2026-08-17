@@ -29,10 +29,33 @@ Galois 接続を通すと `comap I f ≤ K`、すなわち逆向きの包含に�
 **`Ideal.map_mul` から `comap_mul` が出る**——
 `Proposition 1.4, (i)`(高さの加法性)のアフィンの場合が閉じる。
 
-## ★一般の場合に残るもの
+## ★★一般の場合に残るもの —— 構造を測った(2026-08-17 深夜)
 
-`X`, `Y` が一般のスキームのときは、アフィン開集合への制限を経由する必要がある
-(`comap_comp` + 開埋め込みへの制限 + `resLE`)。
+★部品はすべて mathlib にある:
+
+| 部品 | 内容 |
+|---|---|
+| `Scheme.Hom.resLE f W U e : U.toScheme ⟶ W.toScheme` | アフィン開集合への制限 |
+| `resLE_comp_ι : f.resLE W U e ≫ W.ι = U.ι ≫ f` | 制限と包含の両立 |
+| `resLE_app_top : (f.resLE W U e).app ⊤ = topIso.hom ≫ f.appLE W U e ≫ topIso.inv` | 切断の水準 |
+| `comap_comp` | `comap I (f ≫ g) = (I.comap g).comap f` |
+| `ideal_comap_of_isOpenImmersion` | 開埋め込みへの制限 |
+
+★★筋道: `U.ι ≫ f = f.resLE W U e ≫ W.ι` の両辺に `comap` を当て、
+`U.toScheme`, `W.toScheme` が**アフィンスキーム**であることから
+本ファイルの `ideal_comap_eq_map_of_isAffine` を適用する。
+
+## ★★★しかし本当の障害はそこではない
+
+★★**任意のアフィン開集合 `U ⊆ X` に対し、`f(U)` を含むアフィン開集合 `W ⊆ Y`
+が存在するとは限らない。**
+
+★実際、本プロジェクトの用途(`x_F : Spec 𝓞_F ⟶ X`、`X` は非アフィン)では
+像が 1 次元なので、1 つのアフィン開集合に収まらない。
+
+★★★**したがって一般の場合には `U` を細かく取り直す(被覆する)段と、
+そこから貼り合わせる段が要る。** それが残っている本当の穴である。
+
 ★本ファイルは**アフィンの場合だけ**を取る。
 -/
 
