@@ -44,6 +44,7 @@ import ABC3.Found.FrdI.Prop41
 import ABC3.Found.FrdI.Def31Pf
 import ABC3.Found.FrdI.HomColim
 import ABC3.Found.FrdI.Prop32
+import ABC3.Found.FrdI.Prop32Frob
 import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop33UnTr
 import ABC3.Found.FrdI.Prop33Classes
