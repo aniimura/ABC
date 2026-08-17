@@ -178,6 +178,33 @@ structure FaltingsHeightData where
   toSemistableModelData : SemistableModelData
   /-- ★★**Faltings 高さ** `ht^Falt(E) = deg(ω_E)`。 -/
   htFalt : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
+  /-- ★★★★★**`ht^Falt` は `ω_E` の同型類だけで決まる**。
+
+  ★★★**2026-08-18 に見つかった穴を塞ぐ 1 本である。**
+  docstring は「`ht^Falt(E) = deg(ω_E)`」と書いていたが、
+  **`htFalt` と `omega` を結ぶ条件が 1 つも無かった**。
+  ★同時に `omega` 側も `omega_rank_one`(階数 1)しか縛られておらず、
+  `omega L W := 𝓞 L`(曲線を無視する定数)が通っていた
+  (`Check/GaloisRep/OmegaNondegenerate.lean` で機械的に確認)。
+
+  ★★★**この 1 本が両方を塞ぐ**:
+
+  - `htFalt` は `ω_E` を経由する(`deg` は同型類の関数だから)
+  - したがって `omega` が定数なら `htFalt` も定数になり、
+    `prop_3_4` が `degInf` の**一様な上界**を要求することになる。
+    ★`degInf_ge_localHeight` は `degInf` を局所高さ `v(q_E)` に縛っており、
+    それは曲線を変えれば**いくらでも大きくなる**——ゆえに定数 witness は落ちる。
+
+  ★★★★これは `→ Type` の posit に対する一般規則
+  「**その欄と入力データの両方を言及する条件を 1 本以上持て**」の適用である
+  (C1 `evalAffine`、B1 `sheafOf`、B1 `pullback` に続く 4・5 例目)。 -/
+  htFalt_congr : ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L),
+    Nonempty (@LinearEquiv (𝓞 L) (𝓞 L) _ _ (RingHom.id _) (RingHom.id _) _ _
+      (toSemistableModelData.omega L E) (toSemistableModelData.omega L E')
+      (toSemistableModelData.omegaAddCommGroup L E).toAddCommMonoid
+      (toSemistableModelData.omegaAddCommGroup L E').toAddCommMonoid
+      (toSemistableModelData.omegaModule L E) (toSemistableModelData.omegaModule L E')) →
+    htFalt L E = htFalt L E'
   /-- 無限遠因子の次数 `deg∞`。 -/
   degInf : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
   /-- ★`deg∞` は非負(局所高さの和だから)。 -/
