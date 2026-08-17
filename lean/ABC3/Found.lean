@@ -82,6 +82,7 @@ import ABC3.Found.GenEll.ProjTopology
 import ABC3.Found.GenEll.IdealStalk
 import ABC3.Found.GenEll.StalkPullback
 import ABC3.Found.GenEll.DegMul
+import ABC3.Found.GenEll.ArchPoint
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
