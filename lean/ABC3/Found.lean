@@ -134,6 +134,7 @@ import ABC3.Found.Arakelov.ArcOpenImmersion
 import ABC3.Found.Arakelov.ArcBasicOpen
 import ABC3.Found.Arakelov.ArcLandsIn
 import ABC3.Found.Arakelov.ArcLift
+import ABC3.Found.Arakelov.ArcLandsInScheme
 import ABC3.Found.Arakelov.ArcAwayLift
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
