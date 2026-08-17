@@ -151,6 +151,45 @@ theorem comp_awayι_mem_arcBasicOpen (A : CommRingCat.{0}) (s : A)
   intro hzero
   exact (isUnit_iff_ne_zero.1 (hunit.map (evalHom _ q).hom)) hzero
 
+/-! ## ★★★逆向き —— 持ち上げの一意性 -/
+
+/-- ★★★**構造射との合成を持ち上げるともとに戻る**。
+
+    `awayLift A s ⟨q ≫ awayι A s, _⟩ = q`
+
+★機構は**局所化からの準同型は基底での値で決まる**こと
+(`IsLocalization.ringHom_ext`)。 -/
+theorem awayLift_comp_awayι_self (A : CommRingCat.{0}) (s : A)
+    (q : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s))) :
+    awayLift A s ⟨q ≫ awayι A s, comp_awayι_mem_arcBasicOpen A s q⟩ = q := by
+  refine evalHom_injective (CommRingCat.of (Localization.Away s)) ?_
+  rw [awayLift, evalHom_Spec_map]
+  ext x
+  refine congrFun (congrArg (fun (r : Localization.Away s →+* ℂ) => (r : _ → _)) ?_) x
+  refine IsLocalization.ringHom_ext (Submonoid.powers s) ?_
+  ext a
+  have h1 : awayLiftHom A s (q ≫ awayι A s)
+        (comp_awayι_mem_arcBasicOpen A s q) (algebraMap _ _ a)
+      = evalAffine A (q ≫ awayι A s) a :=
+    awayLiftHom_algebraMap A s _ _ a
+  have h2 : evalAffine A (q ≫ awayι A s) a
+      = (evalHom (CommRingCat.of (Localization.Away s)) q).hom (algebraMap _ _ a) := by
+    rw [evalAffine_comp, awayι, Spec.preimage_map]
+    rfl
+  exact h1.trans h2
+
+/-- ★★**したがって `(· ≫ awayι)` は単射である**。 -/
+theorem comp_awayι_injective (A : CommRingCat.{0}) (s : A) :
+    Function.Injective
+      (fun q : Spec (CommRingCat.of ℂ) ⟶ Spec (CommRingCat.of (Localization.Away s)) =>
+        q ≫ awayι A s) := by
+  intro q₁ q₂ h
+  have h1 := awayLift_comp_awayι_self A s q₁
+  have h2 := awayLift_comp_awayι_self A s q₂
+  rw [← h1, ← h2]
+  congr 1
+  exact Subtype.ext h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def awayLiftHom.src : ABC3.Meta.Source :=
