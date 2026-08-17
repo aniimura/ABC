@@ -48,9 +48,10 @@ theorem isCocontinuous_overForget :
 
 /-- ★★★**制限は局所全射性を保つ**。 -/
 theorem isLocallySurjective_restrict {F G : (X.Opens)ᵒᵖ ⥤ AddCommGrpCat.{u}} (f : F ⟶ G)
-    [Presheaf.IsLocallySurjective (Opens.grothendieckTopology X) f] :
+    (hf : Presheaf.IsLocallySurjective (Opens.grothendieckTopology X) f) :
     Presheaf.IsLocallySurjective ((Opens.grothendieckTopology X).over V)
       (Functor.whiskerLeft (Over.forget V).op f) :=
+  haveI := hf
   Presheaf.isLocallySurjective_whisker
     ((Opens.grothendieckTopology X).over V) (Opens.grothendieckTopology X) (Over.forget V) f
 
@@ -62,9 +63,10 @@ theorem isLocallySurjective_restrict {F G : (X.Opens)ᵒᵖ ⥤ AddCommGrpCat.{u
 ★★★これと前定理で「層化の単位を制限しても局所全単射」が言え、
 **層どうしの局所全単射は同型**なので壁が破れる。 -/
 theorem isLocallyInjective_restrict {F G : (X.Opens)ᵒᵖ ⥤ AddCommGrpCat.{u}} (f : F ⟶ G)
-    [Presheaf.IsLocallyInjective (Opens.grothendieckTopology X) f] :
+    (hf : Presheaf.IsLocallyInjective (Opens.grothendieckTopology X) f) :
     Presheaf.IsLocallyInjective ((Opens.grothendieckTopology X).over V)
       (Functor.whiskerLeft (Over.forget V).op f) :=
+  haveI := hf
   Presheaf.isLocallyInjective_whisker
     ((Opens.grothendieckTopology X).over V) (Opens.grothendieckTopology X) (Over.forget V) f
 
