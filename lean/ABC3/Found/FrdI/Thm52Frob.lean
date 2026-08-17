@@ -6,6 +6,7 @@ import ABC3.Found.FrdI.Prop15
 import ABC3.Found.FrdI.Prop17
 import ABC3.Found.FrdI.Remark311
 import ABC3.Found.FrdI.Def31
+import ABC3.Found.FrdI.Def27
 
 /-!
 # [FrdI] Theorem 5.2, (ii) —— model Frobenioid は Frobenioid である
@@ -1423,6 +1424,142 @@ noncomputable def otimesEquiv (h : Hyp M) (A : Obj M) :
       rw [MonoidOn.map_id]
       simp only [PNat.one_coe, one_smul]
       rfl
+
+/-! ## ★18. pre-model 型 —— base-Frobenius pair
+
+原文 (FrdI p.101):
+> that the objects A = (AD, ) such that  = 0 are Frobenius-trivial, and that these
+
+★★**`α = 0` の対象**と、**零因子 0・次数 1・`u = 0` の射**が base-section をなし、
+`(𝟙, 0, n, 0)` が Frobenius-section を与える。
+
+★★**逸脱の記録**: `BaseSection` の `skeletal`(§0 の skeleton)を満たすため、
+**`𝒟` が skeletal であること**を仮定に置いた。原文は `Theorem 5.1, (iv)` で
+`(𝒞^Fr-tr)^pl-bk` の **skeletal な部分圏**を選ぶ(選択公理で取れる)が、
+`BaseSection.objP` は `𝒞` の対象上の**述語**なので、代表元の選択を
+`𝒟` 側の仮定に移した。★消費側(`Theorem 5.2, (iv)`)も原文で
+「`𝒞` は skeleton としてよい」と述べているので、影響しない。 -/
+
+/-- ★`α = 0` の対象の、次数 `n` の base-identity Frobenius 自己射。 -/
+def secFrob (A : Obj M) (hA : A.cls = 0) (n : ℕ+) : End A :=
+  ⟨𝟙 A.base, 0, n, 0, by rw [hA]; simp⟩
+
+@[simp] theorem secFrob_base (A : Obj M) (hA : A.cls = 0) (n : ℕ+) :
+    (secFrob A hA n).base = 𝟙 A.base := rfl
+@[simp] theorem secFrob_div (A : Obj M) (hA : A.cls = 0) (n : ℕ+) :
+    (secFrob A hA n).div = 0 := rfl
+@[simp] theorem secFrob_deg (A : Obj M) (hA : A.cls = 0) (n : ℕ+) :
+    (secFrob A hA n).deg = n := rfl
+@[simp] theorem secFrob_u (A : Obj M) (hA : A.cls = 0) (n : ℕ+) :
+    (secFrob A hA n).u = 0 := rfl
+
+/-- ★★**base-section** —— `α = 0` の対象と「零因子 0・次数 1・`u = 0`」の射。 -/
+noncomputable def modelBaseSection (h : Hyp M) (hskel : Skeletal D) :
+    BaseSection (modelPre h) where
+  objP A := A.cls = 0
+  homP {A B} f := A.cls = 0 ∧ B.cls = 0 ∧ f.div = 0 ∧ f.deg = 1 ∧ f.u = 0
+  id_mem := by
+    intro A hA
+    exact ⟨hA, hA, rfl, rfl, rfl⟩
+  comp_mem := by
+    intro A B E f g hf hg
+    obtain ⟨hA, -, hfd, hfn, hfu⟩ := hf
+    obtain ⟨-, hE, hgd, hgn, hgu⟩ := hg
+    refine ⟨hA, hE, ?_, ?_, ?_⟩
+    · show M.phi.map f.base g.div + (g.deg : ℕ) • f.div = 0
+      rw [hgd, hfd]
+      simp
+    · show g.deg * f.deg = 1
+      rw [hgn, hfn, one_mul]
+    · show M.bmon.map f.base g.u + (g.deg : ℕ) • f.u = 0
+      rw [hgu, hfu]
+      simp
+  isPullBack := by
+    intro A B f hf
+    exact (model_isPullBack_iff h f).mpr ⟨hf.2.2.2.1, hf.2.2.1⟩
+  skeletal := by
+    intro A B f g hf hg hfg hgf
+    haveI hiso : IsIso f := ⟨g, hfg, hgf⟩
+    haveI hb : IsIso f.base := ((model_isIso_iff h f).mp hiso).1
+    have hbe : A.base = B.base := hskel ⟨asIso f.base⟩
+    obtain ⟨a, ca⟩ := A
+    obtain ⟨b, cb⟩ := B
+    have hca : ca = 0 := hf.1
+    have hcb : cb = 0 := hf.2.1
+    cases hbe
+    rw [hca, hcb]
+  frobTrivial := by
+    intro A hA
+    obtain ⟨a, ca⟩ := A
+    have : ca = 0 := hA
+    cases this
+    exact model_frobTrivial_zero h a
+  essSurjP := fun Y => ⟨(⟨Y, 0⟩ : Obj M), rfl, ⟨Iso.refl Y⟩⟩
+  fullP := by
+    intro A B hA hB ψ
+    refine ⟨⟨ψ, 0, 1, 0, ?_⟩, ⟨hA, hB, rfl, rfl, rfl⟩, rfl⟩
+    rw [hA, hB]
+    simp
+  faithfulP := by
+    intro A B f g hf hg hbase
+    exact Hom.ext hbase (hf.2.2.1.trans hg.2.2.1.symm)
+      (hf.2.2.2.1.trans hg.2.2.2.1.symm) (hf.2.2.2.2.trans hg.2.2.2.2.symm)
+
+/-- ★★**Frobenius-section** —— `(𝟙, 0, n, 0)`。 -/
+noncomputable def modelFrobSection (h : Hyp M) (hskel : Skeletal D) :
+    ℕ+ →* SectionEnd (modelBaseSection h hskel) where
+  toFun n :=
+    { app := fun A => secFrob A.1 A.2 n
+      naturality := by
+        intro A B f
+        obtain ⟨-, -, hfd, hfn, hfu⟩ := f.2
+        refine Hom.ext ?_ ?_ ?_ ?_
+        · show f.1.base ≫ 𝟙 B.1.base = 𝟙 A.1.base ≫ f.1.base
+          rw [Category.comp_id, Category.id_comp]
+        · show M.phi.map f.1.base 0 + (n : ℕ) • f.1.div
+            = M.phi.map (𝟙 A.1.base) f.1.div + (f.1.deg : ℕ) • (0 : M.phi.val A.1.base)
+          rw [hfd]
+          simp
+        · show n * f.1.deg = f.1.deg * n
+          rw [hfn, one_mul, mul_one]
+        · show M.bmon.map f.1.base 0 + (n : ℕ) • f.1.u
+            = M.bmon.map (𝟙 A.1.base) f.1.u + (f.1.deg : ℕ) • (0 : M.bmon.val A.1.base)
+          rw [hfu]
+          simp }
+  map_one' := by
+    ext A
+    exact Hom.ext rfl rfl rfl rfl
+  map_mul' m n := by
+    ext A
+    refine Hom.ext ?_ ?_ ?_ ?_
+    · show 𝟙 A.1.base = 𝟙 A.1.base ≫ 𝟙 A.1.base
+      rw [Category.id_comp]
+    · show (0 : M.phi.val A.1.base) = M.phi.map (𝟙 A.1.base) 0 + (m : ℕ) • 0
+      simp
+    · show m * n = m * n
+      rfl
+    · show (0 : M.bmon.val A.1.base) = M.bmon.map (𝟙 A.1.base) 0 + (m : ℕ) • 0
+      simp
+
+theorem modelFrobSection_isFrobSection (h : Hyp M) (hskel : Skeletal D) :
+    haveI := h.connectedD
+    IsFrobeniusSection (modelBaseSection h hskel) (modelFrobSection h hskel) := by
+  haveI := h.connectedD
+  refine ⟨fun n => ?_, fun n A => rfl, fun n A => ?_⟩
+  · obtain ⟨d₀⟩ := (inferInstance : Nonempty D)
+    rw [SectionEnd.deg_eq _ (⟨(⟨d₀, 0⟩ : Obj M), rfl⟩ : (modelBaseSection h hskel).Obj)]
+    rfl
+  · exact (model_frobeniusType_iff h _).mpr ⟨rfl, by
+      show IsIso (𝟙 A.1.base)
+      infer_instance⟩
+
+/-- ★★★**model Frobenioid は pre-model 型**(`𝒟` が skeletal のとき)。 -/
+theorem model_isPreModelType (h : Hyp M) (hskel : Skeletal D) :
+    haveI := h.connectedD
+    IsPreModelType (modelPre h) :=
+  haveI := h.connectedD
+  ⟨⟨modelBaseSection h hskel, modelFrobSection h hskel,
+    modelFrobSection_isFrobSection h hskel⟩⟩
 
 end ModelData
 
