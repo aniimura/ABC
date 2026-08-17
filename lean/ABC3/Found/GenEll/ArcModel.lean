@@ -122,6 +122,34 @@ theorem ArcModel.exists_bound (M : ArcModel X V) [Nonempty (complexPoints X)]
   · exact le_trans (neg_le_neg (le_max_left C₁ C₂)) (hlo p)
   · exact le_trans (hhi p (Set.mem_univ p)) (le_max_right _ _)
 
+/-! ## ★★★compactly bounded subset の上で一様に抑えられる -/
+
+/-- ★★★**射影モデルがあれば、compactly bounded subset の上で
+アルキメデス側の寄与は「すべての数体について一様に」抑えられる**。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★★★**定数 `C` は `F` にも `x_F` にも依らない。**
+`K` と `g` だけで決まる——これが `Theorem 2.1` が
+compactly bounded subset の上で述べられる理由である。
+
+★★2 つを繋いだもの:
+`CompactBound.lean`(囲われた点では寄与が `C` で抑えられる)と
+本ファイル(`X^arc` がコンパクトなので連続関数は有界)。 -/
+theorem ArcModel.exists_uniform_arch_bound (M : ArcModel X V) (g : GreenFn X)
+    (hg : @Continuous _ _ M.topology _ g)
+    (K : Set (complexPoints X)) (hK : @IsCompact _ M.topology K) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (F : Type) [Field F] [NumberField F] (xF : specRingOfIntegers F ⟶ X),
+        BoundedByArch F K xF →
+        (archADiv F g xF).sum (fun _ r => r) / (Module.finrank ℚ F : ℝ) ≤ C := by
+  obtain ⟨C, hC, hbound⟩ :=
+    @exists_upper_bound_on_compact _ M.topology K hK g hg
+  refine ⟨C, hC, ?_⟩
+  intro F _ _ xF hb
+  exact archADiv_sum_le_of_boundedBy F g K xF hb C hC hbound
+
 /-! ## ★出典の紐付け(`.src`)
 
 ★条つきである。射影埋め込みの構成(`X` が ℤ-固有だから `ℙⁿ` に入る)は
