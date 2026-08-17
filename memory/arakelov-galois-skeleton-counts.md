@@ -74,12 +74,48 @@ metadata:
 ★例: `localHeight := 1` → `⊢ False`、`omega := PUnit` → 階数 0 で矛盾、
 `logMetric := 0` → `⊢ 0 = c`、`Pic := PUnit` → `Unique (CommRing.Pic R)` が無い。
 
-## ★★C1 の実装は残り 1 文まで来た(`Found/Arakelov/` 11 ファイル、sorry 0)
+## ★★★★★C1 は達成した(2026-08-17)——Arakelov **1/9**
 
-7 要求のうち 6 完成。残るのは `topology_openImmersion` の 1 向きで、
-★★★**底は「局所化の延長 `B_g → ℂ` が `φ` について連続」の 1 文**である
-(`{φ ǀ φ(g) ≠ 0}` の上、`b/gⁿ ↦ φ(b)/φ(g)ⁿ`)。
-★詳細は `ResearchPaper/genell-goal.md` §9-23・§9-24。
+`ArcSpaceData.nonvacuous` が取れた(`Found/Arakelov/` 14 ファイル、sorry 0、標準 3 公理のみ)。
+★`check.mjs` の「Interface 実装待ち」は **26 → 25 件**。
+
+### ★3 段で落ちた
+
+| 段 | 定理 |
+|---|---|
+| A | `arcTopology_opens_of_affine`——`Spec A` の**任意の**開部分スキーム |
+| B 前半 | `isOpenMap_comp_of_isAffine`——任意のアフィン標的 |
+| B 後半 | `arcTopology_openImmersion`——一般の開埋め込み |
+
+★★★段 B の核心は「**`U ⊓ O` を経由する**」ことだった:
+
+    (· ≫ U.ι) ⁻¹' ((· ≫ O.ι) '' V) = (· ≫ homOfLE) '' ((· ≫ homOfLE) ⁻¹' V)
+
+`arcTopology = ⨆`(アフィン chart)なので開性は chart ごとに降ろせ(`isOpen_iSup_iff`)、
+各 chart は**アフィン**だから段 A が効く。
+
+### ★★★GAGA は要らなかった
+
+当初「複素解析空間と GAGA が要る」と見積もったのは**誤り**だった。
+実際に要ったのは**商位相と多項式の連続性**だけである。
+
+## ★★★★退化封じの見落とし——「型を固定する」だけでは足りない
+
+★★★C1 は当初、次の退化 witness を**通してしまっていた**:
+
+    evalAffine := fun _ _ _ => 0
+    topology   := fun _ => ⊤        -- 密着位相
+
+理由: `induced (fun _ _ => 0) Pi = ⊤` なので `topology_affine` は
+「`topology = ⊤`」を要求するだけになり、`topology_openImmersion` も
+`induced g ⊤ = ⊤` で自明に成り立つ。
+
+★`equivComplexPoints` は**台の型**を固定するが、**`evalAffine` の値**は固定しない。
+★塞ぎ方: `evalAffine_spec`(評価は `Spec.preimage` が与える環準同型)を足した。
+実装側では **`rfl`** で通る。
+
+★★★**教訓: 退化封じでは「その構造で値が自由に選べるフィールド」を列挙すること。**
+型を固定しただけで満足しない。
 
 ## ★★★Lean 実装で 4 度かかった罠
 
@@ -92,9 +128,18 @@ metadata:
 4. `Spec ℂ` の点の型は **`↥(Spec (CommRingCat.of ℂ))`** で
    `PrimeSpectrum (…)` と**構文的に別**(defeq だが `rw` は噛まない)。
 
+## ★★グラフにも 28 件が出るようになった(2026-08-17)
+
+`dependency-graph.html` の節点語彙は**原文の項目番号**なので、
+`GenEll Definition 1.1` に 8 本ぶら下がっていても **1 節点に潰れて見えなかった**。
+★`tools/graph-html.mjs` に `Interface` タグの義務節点を足した(28 件、埋まった 3)。
+★★被覆率(節点 1015 / 着地 10 / 張った 54)は**汚していない**——義務は統計から除く。
+
 **How to apply:**
 - ★**件数は `node tools/check.mjs` の「Interface 実装待ち」が数える。**
-  2026-08-17 時点で 26 件(Arakelov 9 + Galois 8 + 既存 9)。
+  2026-08-17 時点で **25 件**(C1 達成で 26 から 1 減った)。
+  ★`node tools/graph-html.mjs` の「Interface の義務: 3 / 28」も同じ単位である
+  (28 = 25 待ち + 3 埋まった)。
   ★★増えて見えるのは**後退ではない**——畳まれていたものが数えられるようになっただけ。
 - ★★**posit は最小にする。** `E[n]` は mathlib の `W.toAffine.Point`
   (`AddCommGroup`、★`[DecidableEq K]` が要る)から**今すぐ書ける**ので

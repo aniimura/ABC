@@ -7,7 +7,7 @@
 - [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
 - [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
 - [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで **5/24**。★2026-08-17 に残作業を**条ごと**に測り直し、見積り 2 件を訂正。単一障害で 1 件動くのは Def 1.5 と Prop 1.6 だけ。
-- [Arakelov と Galois 表現のスケルトンは 9+8 件](arakelov-galois-skeleton-counts.md) — 律速は B1 層のテンソル積・C2 ℙⁿ・G1 E[n]≅(ℤ/n)²。★2026-08-17 に **17 件すべて退化不能**にし、C1 を残り 1 文まで実装。件数は check.mjs が数える。
+- [Arakelov と Galois 表現のスケルトンは 9+8 件](arakelov-galois-skeleton-counts.md) — ★2026-08-17 に **C1 達成(Arakelov 1/9)**。律速は B1 層のテンソル積・C2 ℙⁿ・G1 E[n]≅(ℤ/n)²。★退化封じは「型の固定」だけでは足りず `evalAffine_spec` を後から足した。件数は check.mjs(25 件)とグラフ(3/28)が数える。
 - [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
 - [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
 - [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
@@ -17,3 +17,4 @@
 - [1-一意性と rigidity は 2 つの型で落ちる](frdi-1uniqueness-rigidity-patterns.md) — 1-一意性は「恒等になる合成を 1 つ見つける」、rigidity は「その操作が圏同値であることを言う」。手で共役を組むと詰まる(2 度実測)。
 - [圏同値の3性質は別々の道具で落ちる](frdi-equivalence-three-properties.md) — 行き先が前順序圏なので充満性は「射が1本あればよい」。忠実性はコスライスがepi・スライスがmono。持ち上げは対象を先に分解して subst。
 - [F.map g は平の射へ束縛し直す](lean-rebind-morphisms-clean-types.md) — `(F.obj A)` と `A` は構文が違うので `≫` の型検査が落ち、巻き添えで `IsIso (𝟙 X)` すら合成できなくなる。`obtain ⟨aa, haa⟩ : ∃ aa : X ⟶ Y, aa = F.map g := ⟨_, rfl⟩`。
+- [heredoc はバックスラッシュを 1 段食う](heredoc-eats-backslash.md) — `<<'EOF'` でも。`` がバックスペース文字(0x08)になり、正規表現が静かに一致しなくなる。器具が嘘の測定値を出した。Write/Edit を使う。
