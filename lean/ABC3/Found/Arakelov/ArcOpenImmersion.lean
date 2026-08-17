@@ -190,6 +190,29 @@ theorem arcTopology_iso {X Y : Scheme.{0}} (e : X ≅ Y) :
   · ext p
     simp only [Set.mem_preimage, Category.assoc, Iso.hom_inv_id, Category.comp_id]
 
+/-! ## ★★★★chart の位相は内在的である -/
+
+/-- ★★★★**アフィン開の上の位相は、その開部分スキーム自身の `arcTopology` に等しい**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    arcTopologyOpen U = arcTopology U.1.toScheme
+
+★★★**これは重要な同一視である**——`arcTopologyOpen` は `isoSpec` で
+輸送して定義したものだが、それが**開部分スキーム自身の位相**に一致する。
+★したがって
+
+    arcTopology X = ⨆ U, coinduced (chart U) (arcTopology U.toScheme)
+
+と書き直せる。★★これが `topology_openImmersion` の一般の場合への還元の骨である。
+
+★機構は 2 つ: `arcTopology_spec`(アフィンでは各点収束)と
+`arcTopology_iso`(同型に沿って誘導される)。 -/
+theorem arcTopologyOpen_eq_arcTopology {X : Scheme.{0}} (U : X.affineOpens) :
+    arcTopologyOpen U = arcTopology U.1.toScheme := by
+  rw [arcTopology_iso U.2.isoSpec, arcTopology_spec]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def imageAffineOpen.src : ABC3.Meta.Source :=
@@ -210,6 +233,11 @@ def continuous_comp_openImmersion.src : ABC3.Meta.Source :=
 def comp_openImmersion_injective.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開埋め込みとの合成が単射であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcTopologyOpen_eq_arcTopology.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——chart の位相が内在的であること)",
     sectionId := "genell-def-1-1-i" }
 
 def arcTopology_iso.src : ABC3.Meta.Source :=
