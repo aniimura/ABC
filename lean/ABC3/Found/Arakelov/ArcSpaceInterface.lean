@@ -23,6 +23,7 @@ import ABC3.Interface.Arakelov.ArcSpace
 | `conj_continuous` | `continuous_conjPoint` |
 | `equivComplexPoints` | `Equiv.refl`(★台がまさに複素点だから) |
 | `evalAffine` | `evalAffine`(`Spec.preimage` の環準同型を切断に当てる) |
+| `evalAffine_spec` | ★`rfl`(定義がまさにそれだから) |
 | `topology_affine` | `arcTopology_spec`(★`⨆` がアフィンで各点収束位相に潰れる) |
 | `map` | `· ≫ f` |
 | `topology_openImmersion` | ★★★★★`arcTopology_openImmersion`(段 A + 段 B) |
@@ -30,6 +31,7 @@ import ABC3.Interface.Arakelov.ArcSpace
 ## ★★退化していないことの根拠
 
 ★★★`equivComplexPoints` が `Arc` を**複素点の集合に固定**し、
+`evalAffine_spec` が評価を**`Spec` の充満忠実性が与える環準同型に固定**し、
 `topology_affine` がアフィンでの位相を**各点収束位相に固定**し、
 `topology_openImmersion` が貼り合わせでの位相を**固定する**。
 ★したがって離散位相・密着位相・1 点集合はいずれもこの構造を満たさない
@@ -51,6 +53,7 @@ noncomputable def arcSpaceDataImpl : ArcSpaceData where
   conj_continuous := fun _ => continuous_conjPoint
   equivComplexPoints := fun _ => Equiv.refl _
   evalAffine := fun A p a => evalAffine A p a
+  evalAffine_spec := fun _ _ _ => rfl
   topology_affine := fun A => arcTopology_spec A
   map := fun f p => p ≫ f
   topology_openImmersion := fun f hf => @arcTopology_openImmersion _ _ f hf

@@ -74,6 +74,16 @@ structure ArcSpaceData where
   equivComplexPoints : (X : Scheme.{0}) → Arc X ≃ (Spec (CommRingCat.of ℂ) ⟶ X)
   /-- ★アフィン `Spec A` の点における、切断 `a : A` の**評価** `a(p) ∈ ℂ`。 -/
   evalAffine : (A : CommRingCat.{0}) → Arc (Spec A) → A → ℂ
+  /-- ★★★★**評価を固定する**——`evalAffine` は `Spec` の充満忠実性が与える
+  環準同型 `A → ℂ` そのものでなければならない。
+
+  ★★★**これが無いと `evalAffine := 0` が通り、`topology_affine` が
+  「密着位相」を要求するだけになってしまう**(2026-08-17 実測。
+  負の対照は `Check/Arakelov/ArcSpaceNondegenerate.lean`)。
+  ★`Interface/` は `Found/` を import できないが、この式は mathlib だけで書ける
+  (`AlgebraicGeometry.Spec.preimage`)。 -/
+  evalAffine_spec : ∀ (A : CommRingCat.{0}) (p : Arc (Spec A)) (a : A),
+    evalAffine A p a = (Spec.preimage (equivComplexPoints (Spec A) p)).hom a
   /-- ★★★**位相を固定する(その 1)**——アフィンでは**各点収束の位相**である。
 
   ★★★これが無いと**離散位相で埋まってしまう**

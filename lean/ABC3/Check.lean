@@ -14,6 +14,7 @@ import ABC3.Check.PGC.RefutationAttempts
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
 import ABC3.Check.FrdI.Prop21QuantifierGap
+import ABC3.Check.Arakelov.ArcSpaceNondegenerate
 /-!
 # Check — 我々のモデルについての検査
 
