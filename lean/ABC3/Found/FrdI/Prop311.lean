@@ -22,9 +22,20 @@ import Mathlib.CategoryTheory.Products.Basic
 |---|---|---|---|
 | (i) | 1 | `𝒞ᵢ → 𝔽_{Φᵢ}` は圏同値 | ★**実装** (`prop_3_11_i`) |
 | (ii) | 2 | `Ψ` は base-isomorphism・pull-back 射・linear 射・Frobenius 型射を保つ | ★★**実装** (`prop_3_11_ii`) |
-| (iii) | 3 | `Ψ_Base : 𝒟₁ → 𝒟₂` が 1-一意に存在し、図式が 1-可換 | 未 |
-| (iii) | 4 | 両方が圏同値 | 未 |
-| (iii) | 5 | `𝒟ᵢ` が slim なら合成関手は rigid | 未 |
+| (iii) | 3 | `Ψ_Base : 𝒟₁ → 𝒟₂` が 1-一意に存在し、図式が 1-可換 | ★★**実装** (`psiBase` / `psiBaseCommute` / `psiBaseUniq`) |
+| (iii) | 4 | 両方が圏同値 | ★★**実装** (`psiBaseEquivalence`) |
+| (iii) | 5 | `𝒟ᵢ` が slim なら合成関手は rigid | ★★**実装** (`psiBase_rigid`) |
+
+★★★**5 主張すべてを原文の仮定の下で実装した**(`prop_3_11_iii` が総括)。
+
+## ★★(iii) の証明は **4 手**だった(原文は 12 行)
+
+| 手 | 内容 | 要点 |
+|---|---|---|
+| 1 | `Φ` が零なら `𝔽_Φ ≌ 𝒟 × 𝒩` | ★合成則まで一致し `map_id`/`map_comp` が `rfl` |
+| 2 | `Ψ_Base` の構成と 1-可換性 | ★★**`𝒩` 成分だけの自己射が base-identity になる**——原文の仮定がここで効く |
+| 3 | 1-一意性 | ★★**`toProdN ⋙ fst = 𝟭` が `rfl`**、あとは `E₁` の逆で剥がす |
+| 4 | 圏同値・rigidity | ★擬逆は `Ψ⁻¹` から同じ形。rigidity は `Prop 1.13, (i)` ＋ 圏同値との合成 |
 
 ## ★★(ii) の証明は **7 手**だった(原文は 6 行、2026-08-17 に実装)
 
@@ -834,6 +845,119 @@ noncomputable def psiBaseUniq (G : D₁ ⥤ D₂)
     (hG : P₁.proj ⋙ G ≅ Ψ ⋙ P₂.proj) : G ≅ psiBase Ψ P₁ P₂ :=
   projPrecompIso P₁ (hG ≪≫ (psiBaseCommute Ψ P₁ P₂ hbi).symm)
 
+/-! ### ★★「両方が圏同値」 —— `Ψ_Base` の擬逆は `Ψ⁻¹` から同じ形で作れる
+
+原文 (FrdI p.74):
+> Finally, we consider assertion (iii). Write N for the one-object category whose
+
+★★**擬逆は `psiBase Ψ⁻¹ P₂ P₁`**である。単位・余単位は
+**1-可換性を 2 回使って `P.proj` の前合成の形に持ち込み、`projPrecompIso` で剥がす**。
+★原文が (iii) で「`Ψ` **とその擬逆**が base-identity 自己射を保つ」と
+**両方**を仮定する理由がここでも効く —— 擬逆側の 1-可換性に要る。 -/
+
+variable [Ψ.IsEquivalence] [hE₂ : (toProdCat P₂).IsEquivalence]
+  (hbi' : ∀ {X : C₂} (u : X ⟶ X), IsBaseIdentity P₂ u → IsBaseIdentity P₁ (Ψ.inv.map u))
+
+include hbi hbi' in
+/-- ★**`Ψ_Base ⋙ Ψ_Base⁻¹ ≅ 𝟭`** —— 1-可換性 2 回 ＋ `Ψ` の単位同型。 -/
+noncomputable def psiBaseUnitIso :
+    𝟭 D₁ ≅ psiBase Ψ P₁ P₂ ⋙ psiBase Ψ.inv P₂ P₁ :=
+  (projPrecompIso P₁
+    ((Functor.associator P₁.proj (psiBase Ψ P₁ P₂) (psiBase Ψ.inv P₂ P₁)).symm ≪≫
+      Functor.isoWhiskerRight (psiBaseCommute Ψ P₁ P₂ hbi) (psiBase Ψ.inv P₂ P₁) ≪≫
+      Functor.associator Ψ P₂.proj (psiBase Ψ.inv P₂ P₁) ≪≫
+      Functor.isoWhiskerLeft Ψ (psiBaseCommute Ψ.inv P₂ P₁ hbi') ≪≫
+      (Functor.associator Ψ Ψ.inv P₁.proj).symm ≪≫
+      Functor.isoWhiskerRight Ψ.asEquivalence.unitIso.symm P₁.proj ≪≫
+      Functor.leftUnitor P₁.proj ≪≫
+      (Functor.rightUnitor P₁.proj).symm)).symm
+
+include hbi hbi' in
+/-- ★**`Ψ_Base⁻¹ ⋙ Ψ_Base ≅ 𝟭`** —— 同じ形を `𝒟₂` 側で。 -/
+noncomputable def psiBaseCounitIso :
+    psiBase Ψ.inv P₂ P₁ ⋙ psiBase Ψ P₁ P₂ ≅ 𝟭 D₂ :=
+  projPrecompIso P₂
+    ((Functor.associator P₂.proj (psiBase Ψ.inv P₂ P₁) (psiBase Ψ P₁ P₂)).symm ≪≫
+      Functor.isoWhiskerRight (psiBaseCommute Ψ.inv P₂ P₁ hbi') (psiBase Ψ P₁ P₂) ≪≫
+      Functor.associator Ψ.inv P₁.proj (psiBase Ψ P₁ P₂) ≪≫
+      Functor.isoWhiskerLeft Ψ.inv (psiBaseCommute Ψ P₁ P₂ hbi) ≪≫
+      (Functor.associator Ψ.inv Ψ P₂.proj).symm ≪≫
+      Functor.isoWhiskerRight Ψ.asEquivalence.counitIso P₂.proj ≪≫
+      Functor.leftUnitor P₂.proj ≪≫
+      (Functor.rightUnitor P₂.proj).symm)
+
+include hbi hbi' in
+/-- ★★★★★**[FrdI] Proposition 3.11, (iii) の「両方が圏同値」** ——
+`Ψ_Base : 𝒟₁ ⥤ 𝒟₂` は**圏同値**である。 -/
+noncomputable def psiBaseEquivalence : D₁ ≌ D₂ :=
+  CategoryTheory.Equivalence.mk (psiBase Ψ P₁ P₂) (psiBase Ψ.inv P₂ P₁)
+    (psiBaseUnitIso Ψ P₁ P₂ hbi hbi') (psiBaseCounitIso Ψ P₁ P₂ hbi hbi')
+
 end BaseFunctor
+
+/-! ## ★★★総括 —— 仮定が**原文どおり**であることを明示する
+
+★上の `psiBase` 系は `[(toProdCat Pᵢ).IsEquivalence]` を instance として取るが、
+★★**それは (i) の結論そのもの**である(`toElem_comp_prod_isEquivalence`)。
+したがって**原文の仮定を超えるものは無い**。ここでそれを明示的に組み立てる。
+-/
+
+section Summary
+
+universe v₁₂ u₁₂ v₁₃ u₁₃ w₁₂ w₁₃ v₁₄ u₁₄ v₁₅ u₁₅
+
+variable {C₁ : Type u₁₂} [Category.{v₁₂} C₁] {C₂ : Type u₁₃} [Category.{v₁₃} C₂]
+  (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+  {D₁ : Type u₁₄} [Category.{v₁₄} D₁] {Φ₁ : MonoidOn.{v₁₄, u₁₄, w₁₂} D₁}
+  (P₁ : PreFrobenioid C₁ Φ₁)
+  {D₂ : Type u₁₅} [Category.{v₁₅} D₂] {Φ₂ : MonoidOn.{v₁₅, u₁₅, w₁₃} D₂}
+  (P₂ : PreFrobenioid C₂ Φ₂)
+
+/-- ★★★★★**[FrdI] Proposition 3.11, (iii)** —— **原文の仮定だけから**、
+`Ψ_Base : 𝒟₁ ⥤ 𝒟₂` が **1-一意に存在し、図式が 1-可換で、両方が圏同値**であり、
+`𝒟ᵢ` が slim なら**合成関手はどちらも rigid** である。
+
+原文 (FrdI p.74):
+> Finally, we consider assertion (iii). Write N for the one-object category whose
+
+★★`(toProdCat Pᵢ).IsEquivalence` は **(i) の結論**(`toElem_comp_prod_isEquivalence`)
+なので、ここで導出する ——**原文の仮定を超えるものは無い**。 -/
+theorem prop_3_11_iii
+    (Fc₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (Fc₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₁ : IsOfIsotropicType P₁) (hut₁ : IsOfUnitTrivialType P₁)
+    (hgl₁ : IsOfGroupLikeType P₁)
+    (hiso₂ : IsOfIsotropicType P₂) (hut₂ : IsOfUnitTrivialType P₂)
+    (hgl₂ : IsOfGroupLikeType P₂)
+    (hbi : ∀ {A : C₁} (u : A ⟶ A), IsBaseIdentity P₁ u → IsBaseIdentity P₂ (Ψ.map u))
+    (hbi' : ∀ {X : C₂} (u : X ⟶ X), IsBaseIdentity P₂ u → IsBaseIdentity P₁ (Ψ.inv.map u))
+    (hslim : IsSlimCat D₂) :
+    ∃ ΨB : D₁ ⥤ D₂,
+      Nonempty (P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj) ∧
+      Nonempty (D₁ ≌ D₂) ∧
+      (∀ G : D₁ ⥤ D₂, (P₁.proj ⋙ G ≅ Ψ ⋙ P₂.proj) → Nonempty (G ≅ ΨB)) ∧
+      IsRigidFunctor (Ψ ⋙ P₂.proj) ∧ IsRigidFunctor (P₁.proj ⋙ ΨB) := by
+  haveI := toElem_comp_prod_isEquivalence P₁ Fc₁ G₁ hiso₁ hut₁ hgl₁
+  haveI := toElem_comp_prod_isEquivalence P₂ Fc₂ G₂ hiso₂ hut₂ hgl₂
+  refine ⟨psiBase Ψ P₁ P₂, ⟨psiBaseCommute Ψ P₁ P₂ hbi⟩,
+    ⟨psiBaseEquivalence Ψ P₁ P₂ hbi hbi'⟩,
+    fun G hG => ⟨psiBaseUniq Ψ P₁ P₂ hbi G hG⟩, ?_, ?_⟩
+  · exact (psiBase_rigid Ψ P₁ P₂ hbi Fc₂ hslim).1
+  · exact (psiBase_rigid Ψ P₁ P₂ hbi Fc₂ hslim).2
+
+/-! ## ★★★`Proposition 3.11` 全体の `.src`(2026-08-17)
+
+| 条 | 主張 | 実装 |
+|---|---|---|
+| (i) | `𝒞ᵢ → 𝔽_{Φᵢ}` は圏同値 | `prop_3_11_i` |
+| (ii) | base-iso・pull-back・linear・Frobenius 型の保存 | `prop_3_11_ii` |
+| (iii) | `Ψ_Base` の 1-一意存在・1-可換・両方が圏同値・rigidity | `prop_3_11_iii` |
+
+★**5 主張すべてを原文の仮定の下で実装した。** -/
+def prop_3_11.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 73, item := "Proposition 3.11",
+    sectionId := "frdi-prop-3-11" }
+
+end Summary
 
 end ABC3.Found.FrdI
