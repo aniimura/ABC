@@ -154,20 +154,45 @@ structure HermitianMetricData where
   toPicardData : PicardData
   /-- 台となる `X^arc`。 -/
   toArcSpaceData : ArcSpaceData
-  /-- 可逆層 `L` の点 `p ∈ X^arc` における計量の対数(Green 関数)。 -/
-  logMetric : (X : Scheme.{0}) → toPicardData.Pic X → toArcSpaceData.Arc X → ℝ
+  /-- ★★★**可逆層 `L` の上の計量の全体**。
+
+  ★★★**2026-08-17 の設計修正**: 以前は計量を `L` ごとに **1 つ固定**していたので、
+  「すべて 0」で埋まった(実測)。★**1 つの直線束には計量が多数ある**——
+  それを型に出さないと `APic`(層と計量の**対**)の意味が消える。 -/
+  Metric : (X : Scheme.{0}) → toPicardData.Pic X → Type
+  /-- ★計量は存在する。 -/
+  metric_nonempty : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X), Nonempty (Metric X L)
+  /-- 計量の対数(Green 関数)。 -/
+  logMetric : (X : Scheme.{0}) → (L : toPicardData.Pic X) → Metric X L →
+    toArcSpaceData.Arc X → ℝ
   /-- ★連続であること(原文の「continuous function `|s|_L`」)。 -/
-  logMetric_continuous : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X),
-    @Continuous (toArcSpaceData.Arc X) ℝ (toArcSpaceData.topology X) inferInstance (logMetric X L)
-  /-- ★★**`ι_X` と両立する**。 -/
-  logMetric_conj : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (p : toArcSpaceData.Arc X),
-    logMetric X L (toArcSpaceData.conj X p) = logMetric X L p
-  /-- ★テンソル積で足し算になる(高さの加法性の源)。 -/
-  logMetric_mul : ∀ (X : Scheme.{0}) (L M : toPicardData.Pic X) (p : toArcSpaceData.Arc X),
-    logMetric X
-      (@HMul.hMul _ _ _
-        (@instHMul _ (toPicardData.group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M) p
-      = logMetric X L p + logMetric X M p
+  logMetric_continuous : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L),
+    @Continuous (toArcSpaceData.Arc X) ℝ (toArcSpaceData.topology X) inferInstance
+      (logMetric X L m)
+  /-- ★★**定数倍による作用**——計量は正の定数倍で動かせる。 -/
+  scale : (X : Scheme.{0}) → (L : toPicardData.Pic X) → ℝ → Metric X L → Metric X L
+  /-- ★★★**定数倍は Green 関数を平行移動する**。
+
+  ★★★**これが退化を殺す。**`logMetric ≡ 0` だと `0 = 0 + c` を全 `c` で要求し、矛盾する。 -/
+  logMetric_scale : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (c : ℝ) (m : Metric X L)
+    (p : toArcSpaceData.Arc X),
+    logMetric X L (scale X L c m) p = logMetric X L m p + c
+  /-- ★★**`ι_X` と両立する計量**であること。 -/
+  IsConjCompatible : (X : Scheme.{0}) → (L : toPicardData.Pic X) → Metric X L → Prop
+  /-- ★その意味——共役で値が変わらない。 -/
+  isConjCompatible_iff : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L),
+    IsConjCompatible X L m ↔
+      ∀ p : toArcSpaceData.Arc X,
+        logMetric X L m (toArcSpaceData.conj X p) = logMetric X L m p
+  /-- ★テンソル積で計量は掛かる(Green 関数は足される)——高さの加法性の源。 -/
+  tensorMetric : (X : Scheme.{0}) → (L M : toPicardData.Pic X) → Metric X L → Metric X M →
+    Metric X (@HMul.hMul _ _ _
+      (@instHMul _ (toPicardData.group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
+  /-- ★★Green 関数の加法性。 -/
+  logMetric_tensor : ∀ (X : Scheme.{0}) (L M : toPicardData.Pic X)
+    (mL : Metric X L) (mM : Metric X M) (p : toArcSpaceData.Arc X),
+    logMetric X _ (tensorMetric X L M mL mM) p
+      = logMetric X L mL p + logMetric X M mM p
 
 def HermitianMetricData.waiting : WaitingFor :=
   { what := "(C3) 可逆層の解析化 L^arc と、その上の ι_X-両立な hermitian 計量"
