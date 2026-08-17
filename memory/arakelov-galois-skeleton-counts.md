@@ -40,6 +40,58 @@ metadata:
 ★Arakelov 側は **B1(層のテンソル積)と C2(`ℙⁿ` の点の関手)の 2 本**が律速で、
 それ以外はすべて従属か既に構成済みである。
 
+
+## ★★★2026-08-17 追記: 17 件すべてを**退化不能**にした
+
+★★★**最初のスケルトンは「中身ゼロの witness」で埋まった**(実測):
+
+| obligation | 退化 witness |
+|---|---|
+| B1 | `Pic := PUnit`(自明群) |
+| B2 | `𝒪(D) := 1` |
+| C1 | `logMetric`/位相を離散に |
+| C3 | `logMetric := 0` |
+| D1 | `APic := PUnit` |
+| D2・D3 | `degF := 0` / `height := 0` |
+| G3 | `rep := 1`(自明表現) |
+| G6・G7・G8 | `LocalField := PUnit` / `SemiStable := True` / `htFalt = degInf = 0` |
+
+★★**このままでは「9/9 達成」が数学をせずに書けてしまう。**全件を塞いだ。
+
+### ★塞ぐ 2 つの手
+
+1. ★★★**posit を mathlib の対象に接地する**——自前の型は 1 点に潰せるが、
+   mathlib の型は潰せない。G6 を `HasSplitMultiplicativeReduction` に、
+   B1 を `CommRing.Pic` に置き換えた(**どちらも mathlib に在った**)。
+2. ★**値を別の場に縛る公理を足す**——
+   `localHeight = v(q)` / `omega` の階数 = 1 / `logMetric(scale c m) = logMetric m + c` /
+   `forgetMetric (ofMetric L m) = L` / `degF(scale c m) = degF m − c` /
+   `deg∞ ≥ 局所高さ·log2` / `det ∘ rep` が全射。
+
+### ★★★必ず負の対照を取る
+
+退化 witness を**実際に書いて落ちることを確認**した。
+★例: `localHeight := 1` → `⊢ False`、`omega := PUnit` → 階数 0 で矛盾、
+`logMetric := 0` → `⊢ 0 = c`、`Pic := PUnit` → `Unique (CommRing.Pic R)` が無い。
+
+## ★★C1 の実装は残り 1 文まで来た(`Found/Arakelov/` 11 ファイル、sorry 0)
+
+7 要求のうち 6 完成。残るのは `topology_openImmersion` の 1 向きで、
+★★★**底は「局所化の延長 `B_g → ℂ` が `φ` について連続」の 1 文**である
+(`{φ ǀ φ(g) ≠ 0}` の上、`b/gⁿ ↦ φ(b)/φ(g)ⁿ`)。
+★詳細は `ResearchPaper/genell-goal.md` §9-23・§9-24。
+
+## ★★★Lean 実装で 4 度かかった罠
+
+1. ★★**`simp only [Function.comp_def]` は `Scheme.Hom.mk` まで展開して壊す**。
+   `rw [h]` を使い、**`h` を「合成の形」で述べる**(ゴールが既に合成形)。
+2. 位相のインスタンスは `letI` で**明示的に**入れる(`⨆` の成分は自動で決まらない)。
+3. ★★★**`TopologicalSpace` の `≤` は「細かい」**。`le_def` の表示は
+   `IsOpen ≤ IsOpen` で**左右が読めない**——**`⊥` が離散かを試して**確定させる。
+   ★一度これで `⨅`/`⨆` を逆にした。
+4. `Spec ℂ` の点の型は **`↥(Spec (CommRingCat.of ℂ))`** で
+   `PrimeSpectrum (…)` と**構文的に別**(defeq だが `rw` は噛まない)。
+
 **How to apply:**
 - ★**件数は `node tools/check.mjs` の「Interface 実装待ち」が数える。**
   2026-08-17 時点で 26 件(Arakelov 9 + Galois 8 + 既存 9)。
@@ -48,6 +100,8 @@ metadata:
   (`AddCommGroup`、★`[DecidableEq K]` が要る)から**今すぐ書ける**ので
   `torsionPoints` は `def` にし、**構造定理だけ** posit した。同じ判断を他でもすること。
 - ★★★**`ℤ_[l]` は `[Fact l.Prime]` を要求する**——構造体のフィールドでも束縛子が要る。
-- 詳細は `ResearchPaper/genell-goal.md` §9-20。
+- 詳細は `ResearchPaper/genell-goal.md` §9-20 / §9-23 / §9-24。
+- ★★★**退化封じは実装の前に必ずやる**——後だと「埋めた」ものが無内容になる。
+- ★★**負の対照(退化 witness を書いて落ちることの確認)を省かない。**
 - 関連: [[genell-track-b]] / [[lean-build-check-discipline]] /
   [[parallel-session-sweeps-my-files]]
