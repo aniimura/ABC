@@ -1443,4 +1443,201 @@ theorem pfRoot_otriBwd_sameRoot (hfi : IsOfFrobeniusIsotropicType P)
     unfold compRoot
     rw [hfW, hbW, Iso.hom_inv_id_apply, e1, e2, e3]
 
+/-! ## ★29. 同じ添字の 2 射の底が一致すれば、代表元の底も一致する -/
+
+variable {P F} in
+/-- ★**同じ添字なら `rootBase` の一致から `Base` の一致が出る**。 -/
+theorem base_eq_of_rootBase_eq {X Y : PfRootObj P F}
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (f f' : Z.right.obj.1 ⟶ Z.right.obj.2)
+    (h : rootBase (show HomRoot P F X Y from HomPf.mk Z f)
+      = rootBase (show HomRoot P F X Y from HomPf.mk Z f')) :
+    P.Base f = P.Base f' := by
+  haveI h1 : IsIso (P.Base Z.hom.hom.1) := Z.hom.property.1.2
+  haveI he : IsIso (P.Base (rtExt P F X.obj Y.root)) :=
+    (rtExt_frobType P F X.obj Y.root).2
+  have s1 := rootBase_spec (show HomRoot P F X Y from HomPf.mk Z f)
+  have s2 := rootBase_spec (show HomRoot P F X Y from HomPf.mk Z f')
+  rw [pfBase_mk] at s1 s2
+  have e1 : P.Base (rtExt P F X.obj Y.root) ≫ repBase Z f
+      = P.Base (rtExt P F X.obj Y.root) ≫ repBase Z f' := by
+    rw [← s1, ← s2, h]
+  have e2 : repBase Z f = repBase Z f' :=
+    (cancel_epi (P.Base (rtExt P F X.obj Y.root))).mp e1
+  have r1 := repBase_spec Z f
+  have r2 := repBase_spec Z f'
+  rw [e2] at r1
+  exact (cancel_epi (P.Base Z.hom.hom.1)).mp (r1.symm.trans r2)
+
+/-! ## ★30. (iii)(c) の「底にしか依らない」条(根が等しい場合) -/
+
+set_option maxHeartbeats 4000000 in
+variable {P F} in
+/-- ★★★**(iii)(c) の第 3 条**(根が等しい場合)。 -/
+theorem pfRoot_otriBase_sameRoot (hfi : IsOfFrobeniusIsotropicType P)
+    {A B : C} {r : ℕ+} (φ φ' : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩)
+    (hφs : IsPreStep (pfRootPre P F) φ) (hφ's : IsPreStep (pfRootPre P F) φ')
+    (hbase : (pfRootPre P F).Base φ = (pfRootPre P F).Base φ')
+    (α : End (⟨A, r⟩ : PfRootObj P F)) (hα : α ∈ OTri (pfRootPre P F) ⟨A, r⟩)
+    (β : End (⟨B, r⟩ : PfRootObj P F)) (_hβ : β ∈ OTri (pfRootPre P F) ⟨B, r⟩)
+    (heq : (φ ≫ (β : (⟨B, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩))
+      = ((α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩) ≫ φ)) :
+    (φ' ≫ (β : (⟨B, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩))
+      = ((α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩) ≫ φ') := by
+  obtain ⟨V, a₀, f₀, f₀', ha₀, hf₀, hf₀'⟩ := exists_rep3_pair (P := P) (F := F)
+    ((rtRootIso P F A A (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv
+      (α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩))
+    ((rtRootIso P F A B (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv φ)
+    ((rtRootIso P F A B (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv φ')
+  obtain ⟨Dd, E₃, l, hl, m, hm, hdlm, hDd, ⟨u⟩⟩ := exists_idx3_diag (F := F) hfi V
+  obtain ⟨a₁, ha₁⟩ : ∃ t : Dd ⟶ Dd,
+      t = idxTransport P F ((idx12 P F _ _ _).map u) a₀ := ⟨_, rfl⟩
+  obtain ⟨f₁, hf₁⟩ : ∃ t : Dd ⟶ E₃,
+      t = idxTransport P F ((idx23 P F _ _ _).map u) f₀ := ⟨_, rfl⟩
+  obtain ⟨f₁', hf₁'⟩ : ∃ t : Dd ⟶ E₃,
+      t = idxTransport P F ((idx23 P F _ _ _).map u) f₀' := ⟨_, rfl⟩
+  have haW : (rtRootIso P F A A (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).inv (α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩)
+      = HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) a₁ := by
+    rw [ha₁]
+    exact ha₀.trans (HomPf.mk_map (P := P) (F := F) ((idx12 P F _ _ _).map u) a₀).symm
+  have hfW : (rtRootIso P F A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).inv φ
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁ := by
+    rw [hf₁]
+    exact hf₀.trans (HomPf.mk_map (P := P) (F := F) ((idx23 P F _ _ _).map u) f₀).symm
+  have hfW' : (rtRootIso P F A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).inv φ'
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁' := by
+    rw [hf₁']
+    exact hf₀'.trans (HomPf.mk_map (P := P) (F := F) ((idx23 P F _ _ _).map u) f₀').symm
+  have hφmk : φ = HomPf.mk (idxMk (P := P) (F := F)
+      (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+      (rtLift P F B (show r * r = r * r from rfl) ≫ m)
+      (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+      (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hm)
+      (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr, hdlm])) f₁ :=
+    ((Iso.inv_hom_id_apply _ _).symm.trans
+      (congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) hfW)).trans
+      (rtRootIso_hom_mk (F := F) A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl) (idxMk (P := P) (F := F) l m hl hm hdlm) f₁)
+  have hφ'mk : φ' = HomPf.mk (idxMk (P := P) (F := F)
+      (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+      (rtLift P F B (show r * r = r * r from rfl) ≫ m)
+      (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+      (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hm)
+      (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr, hdlm])) f₁' :=
+    ((Iso.inv_hom_id_apply _ _).symm.trans
+      (congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) hfW')).trans
+      (rtRootIso_hom_mk (F := F) A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl) (idxMk (P := P) (F := F) l m hl hm hdlm) f₁')
+  have hαmk : (α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩)
+      = HomPf.mk (idxMk (P := P) (F := F)
+        (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+        (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl) rfl) a₁ :=
+    ((Iso.inv_hom_id_apply _ _).symm.trans
+      (congrArg (ConcreteCategory.hom (rtRootIso P F A A
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) haW)).trans
+      (rtRootIso_hom_mk (F := F) A A (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl) (idxMk (P := P) (F := F) l l hl hl rfl) a₁)
+  rw [hφmk, hφ'mk] at hbase
+  have hbf : P.Base f₁ = P.Base f₁' :=
+    base_eq_of_rootBase_eq (X := (⟨A, r⟩ : PfRootObj P F))
+      (Y := (⟨B, r⟩ : PfRootObj P F))
+      (idxMk (P := P) (F := F)
+        (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+        (rtLift P F B (show r * r = r * r from rfl) ≫ m)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hm)
+        (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr, hdlm])) f₁ f₁' hbase
+  have ha₁O : P.Base a₁ = P.Base (𝟙 Dd) ∧ P.degFr a₁ = 1 := by
+    refine (oTri_mk_diag (X := (⟨A, r⟩ : PfRootObj P F))
+      (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+      (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl) a₁).mp ?_
+    rw [← hαmk]; exact hα
+  have hidx : IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)) :=
+    idxMk (P := P) (F := F) l m hl hm hdlm
+  have hf₁s : IsPreStep P f₁ := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F))
+      (Y := (⟨B, r⟩ : PfRootObj P F))
+      (idxMk (P := P) (F := F)
+        (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+        (rtLift P F B (show r * r = r * r from rfl) ≫ m)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hm)
+        (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr, hdlm]))
+      f₁).mp ?_
+    rw [← hφmk]; exact hφs
+  have hf₁'s : IsPreStep P f₁' := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F))
+      (Y := (⟨B, r⟩ : PfRootObj P F))
+      (idxMk (P := P) (F := F)
+        (rtLift P F A (show r * r = r * r from rfl) ≫ l)
+        (rtLift P F B (show r * r = r * r from rfl) ≫ m)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F A _) hl)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hm)
+        (by rw [P.degFr_comp, P.degFr_comp, rtLift_degFr, rtLift_degFr, hdlm]))
+      f₁').mp ?_
+    rw [← hφ'mk]; exact hφ's
+  have hf₁c : IsCoAngular P f₁ :=
+    prop_1_4_i P f₁ (fun _ g => F.isotropicClosed g hDd)
+  have hf₁'c : IsCoAngular P f₁' :=
+    prop_1_4_i P f₁' (fun _ g => F.isotropicClosed g hDd)
+  obtain ⟨b₁, ⟨hb₁O, hb₁e⟩, -⟩ :=
+    F.otriFwd f₁ hf₁c hf₁s (a₁ : End Dd) ⟨ha₁O.1, ha₁O.2⟩
+  have hb₁e' : (f₁' ≫ ((b₁ : End E₃) : E₃ ⟶ E₃))
+      = ((a₁ : End Dd) : Dd ⟶ Dd) ≫ f₁' :=
+    F.otriBase f₁ f₁' hf₁c hf₁s hf₁'c hf₁'s hbf (a₁ : End Dd) ⟨ha₁O.1, ha₁O.2⟩
+      (b₁ : End E₃) hb₁O hb₁e
+  have e1 : compPf P F (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁)
+      (HomPf.mk (idxMk (P := P) (F := F) m m hm hm rfl) ((b₁ : End E₃) : E₃ ⟶ E₃))
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm)
+        (f₁ ≫ ((b₁ : End E₃) : E₃ ⟶ E₃)) :=
+    compPf_mk (idxMk3 (F := F) l m m hl hm hm hdlm rfl) f₁ _
+  have e1' : compPf P F (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁')
+      (HomPf.mk (idxMk (P := P) (F := F) m m hm hm rfl) ((b₁ : End E₃) : E₃ ⟶ E₃))
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm)
+        (f₁' ≫ ((b₁ : End E₃) : E₃ ⟶ E₃)) :=
+    compPf_mk (idxMk3 (F := F) l m m hl hm hm hdlm rfl) f₁' _
+  have e2 : compPf P F (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) a₁)
+      (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁)
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) (a₁ ≫ f₁) :=
+    compPf_mk (idxMk3 (F := F) l l m hl hl hm rfl hdlm) a₁ f₁
+  have e2' : compPf P F (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) a₁)
+      (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) f₁')
+      = HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm) (a₁ ≫ f₁') :=
+    compPf_mk (idxMk3 (F := F) l l m hl hl hm rfl hdlm) a₁ f₁'
+  have heq0 : (φ ≫ (rtRootIso P F B B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).hom
+      (HomPf.mk (idxMk (P := P) (F := F) m m hm hm rfl) ((b₁ : End E₃) : E₃ ⟶ E₃)))
+      = ((α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩) ≫ φ) := by
+    show compRoot P F φ _ = compRoot P F _ φ
+    unfold compRoot
+    rw [hfW, Iso.hom_inv_id_apply, haW, e1, e2]
+    exact congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom)
+      (congrArg (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm)) hb₁e)
+  have heq0' : (φ' ≫ (rtRootIso P F B B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).hom
+      (HomPf.mk (idxMk (P := P) (F := F) m m hm hm rfl) ((b₁ : End E₃) : E₃ ⟶ E₃)))
+      = ((α : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A, r⟩) ≫ φ') := by
+    show compRoot P F φ' _ = compRoot P F _ φ'
+    unfold compRoot
+    rw [hfW', Iso.hom_inv_id_apply, haW, e1', e2']
+    exact congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom)
+      (congrArg (HomPf.mk (idxMk (P := P) (F := F) l m hl hm hdlm)) hb₁e')
+  haveI : Epi φ := pfRoot_totEpi P F _ _ φ
+  have hββ : (β : (⟨B, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩)
+      = (rtRootIso P F B B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).hom
+      (HomPf.mk (idxMk (P := P) (F := F) m m hm hm rfl) ((b₁ : End E₃) : E₃ ⟶ E₃)) :=
+    (cancel_epi φ).mp (heq.trans heq0.symm)
+  rw [hββ]
+  exact heq0'
+
 end ABC3.Found.FrdI
