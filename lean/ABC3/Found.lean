@@ -115,6 +115,7 @@ import ABC3.Found.GenEll.HeightBaseChange
 import ABC3.Found.GenEll.PullbackNatural
 import ABC3.Found.GenEll.ArchCompat
 import ABC3.Found.GenEll.HeightInvariant
+import ABC3.Found.GenEll.AlgPoint
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
