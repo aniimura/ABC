@@ -1695,3 +1695,52 @@ mathlib の重複度公式は `emultiplicity` で述べられている。
 
 ★★どちらも `Definition 1.2` の**名前づけ**(`ht_M̄ : X(ℚ̄) → ℝ` と呼ぶこと)には
 必要だが、★**`Proposition 1.6` や `Theorem 2.1` が使う範囲では要らない**。
+
+---
+
+## §9-17 2026-08-17 深夜 —— **`Definition 1.2, (i)` が `U_X(ℚ̄)` の上で完成した**
+
+### ★★★到達点
+
+    `htU : U_X(ℚ̄) → ℝ`   (`Found/GenEll/UPoint.lean`)
+
+原文の高さ関数そのものである。★仮定は原文自身のもの 2 つだけ:
+
+- `IsConjInvariant D.green` —— 原文の「計量は `ι_X` と両立する」(`Definition 1.1`)
+- 各点の `x_F^* D ≠ 0` —— 型 `AlgPointOff` に組み込まれている
+
+### ★★★積み上げた鎖(すべて本日、すべて sorry 0)
+
+| 段 | ファイル |
+|---|---|
+| ℂ-点と Green 関数 | `ArchPoint.lean` |
+| 高さの構成 | `HeightConstruction.lean` |
+| `comap` は積を保つ | `ComapLocal` → `ComapAffine` → `ComapMul` |
+| `Prop 1.4, (i)` が無条件に | `HeightAdditive.lean` |
+| 引き戻しの底変換(有限側) | `PullbackBase` → `PullbackNatural` |
+| 複素共役との両立 | `ArchConj` → `ArchBaseChange` → `ArchCompat` |
+| `ADiv` への翻訳 | `IdealADivBase` / `ArchADivBase` |
+| 高さの底変換不変性 | `HeightBaseChange` → `HeightInvariant` |
+| 型と商 | `AlgPoint` → `UPoint` |
+
+### ★★なぜ指標が動かないのか(正直に)
+
+原文の `Definition 1.2, (i)` は **`X(ℚ̄)` 全体**で高さを定める。
+★因子表示では「`x` が `D` を通らない」が要るので、
+取れたのは **`U_X(ℚ̄) = X(ℚ̄) \ D`** の上である。
+
+★★全域化には 2 つの道があり、**どちらも別規模**である:
+
+1. **可逆層で表す** —— 可逆層はいつでも引き戻せるので条件が要らない。
+   ★mathlib に `SheafOfModules` のテンソル積が無いので迂回が要る
+2. **移動補題** —— `D` を線形同値で動かして `x` を避ける。
+   ★主因子(`X` 上の有理関数)の理論が要る
+
+★★★**`.src` は条つきに留めた。** 条なしにすれば 5/24 → 6/24 に動くが、
+**原文が定める範囲を狭めて数えるのは B5 である。**
+
+### ★原文が実際に使う範囲では完成している
+
+`Proposition 1.6` は `U_X(ℚ̄)` の上で述べられている。
+`Theorem 2.1` は compactly bounded subset の上で述べられている。
+★★**どちらも本日の構成がそのまま使える。**
