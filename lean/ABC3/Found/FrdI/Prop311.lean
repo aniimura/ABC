@@ -802,6 +802,38 @@ theorem psiBase_rigid [Ψ.IsEquivalence] (Fc₂ : FrobenioidCore P₂) (hslim : 
     isRigidFunctor_comp_of_isEquivalence Ψ P₂.proj (prop_1_13_i_global P₂ Fc₂ hslim)
   exact ⟨h1, isRigidFunctor_of_iso (psiBaseCommute Ψ P₁ P₂ hbi) h1⟩
 
+/-! ### ★1-一意性 —— `𝒞₁ → 𝒟₁` との前合成は関手の同型を反射する
+
+★★**要点は `toProdN ⋙ fst = 𝟭 𝒟₁` が `rfl` であること**である ——
+`𝒟₁ → 𝒟₁ × 𝒩 → 𝒟₁` は恒等なので、`𝒟₁ ⥤ 𝒟₂` の関手は
+`fst` との合成から**そのまま復元できる**。
+★あとは `E₁ = 𝒞₁ ≌ 𝒟₁ × 𝒩` の逆で剥がすだけ。 -/
+
+/-- ★★★**`P₁.proj` との前合成は関手の同型を反射する**。
+
+★★これが `Proposition 3.11, (iii)` の **1-一意性**の中身である。 -/
+noncomputable def projPrecompIso {G G' : D₁ ⥤ D₂}
+    (h : P₁.proj ⋙ G ≅ P₁.proj ⋙ G') : G ≅ G' :=
+  Functor.isoWhiskerLeft toProdN
+    (((toProdCat P₁).asEquivalence.invFunIdAssoc
+        (CategoryTheory.Prod.fst D₁ (SingleObj ℕ+) ⋙ G)).symm ≪≫
+      Functor.isoWhiskerLeft (toProdCat P₁).inv h ≪≫
+      (toProdCat P₁).asEquivalence.invFunIdAssoc
+        (CategoryTheory.Prod.fst D₁ (SingleObj ℕ+) ⋙ G'))
+
+include hbi in
+/-- ★★★★**[FrdI] Proposition 3.11, (iii) の 1-一意性** ——
+図式に入る関手は `Ψ_Base` と同型である。
+
+原文 (FrdI p.74):
+> Finally, we consider assertion (iii). Write N for the one-object category whose
+
+★1-可換性(`psiBaseCommute`)と合わせて `P₁.proj ⋙ G ≅ P₁.proj ⋙ Ψ_Base` を作り、
+`projPrecompIso` で剥がす。 -/
+noncomputable def psiBaseUniq (G : D₁ ⥤ D₂)
+    (hG : P₁.proj ⋙ G ≅ Ψ ⋙ P₂.proj) : G ≅ psiBase Ψ P₁ P₂ :=
+  projPrecompIso P₁ (hG ≪≫ (psiBaseCommute Ψ P₁ P₂ hbi).symm)
+
 end BaseFunctor
 
 end ABC3.Found.FrdI
