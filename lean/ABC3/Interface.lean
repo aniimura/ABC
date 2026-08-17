@@ -1,6 +1,8 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.PGC.LocalFieldData
 import ABC3.Interface.IUTchIII.PilotObjects
+import ABC3.Interface.Arakelov.APic
+import ABC3.Interface.GaloisRep.Reduction
 import ABC3.Interface.GenEll.ArithLineBundle
 import ABC3.Interface.GenEll.GaloisRep
 import ABC3.Interface.GenEll.HeightTheory

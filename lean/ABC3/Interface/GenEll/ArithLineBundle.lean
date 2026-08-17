@@ -59,11 +59,13 @@ namespace ABC3.Interface.GenEll
 
 open ABC3.Meta NumberField
 
+universe u v
+
 /-- **算術直線束から高さを作る操作**を受ける `Interface`。
 
 ★これは「算術直線束そのもの」ではなく、**高さの定義が実際に使うものだけ**である。
 `X` や `M̄` の中身(層 B・C)は型に出さない——出すには解析化と可逆層が要り、それは無い。 -/
-structure PulledBackClassData.{u, v} where
+structure PulledBackClassData where
   /-- `X(ℚ̄)` の点を表す型。
 
   ★**宇宙は多相にしてある。**`Found/` の witness では点の型が
