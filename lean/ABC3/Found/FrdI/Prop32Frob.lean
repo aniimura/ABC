@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Prop32
+import ABC3.Found.FrdI.Prop25
 
 /-!
 # [FrdI] Proposition 3.2, (iii) —— `𝒞^pf` が Frobenioid であること(道具立て)
@@ -1781,9 +1782,258 @@ theorem pfRoot_otriBase (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P 
   simp only [Category.assoc]
   exact hres
 
+/-! ## ★33. 単系の補題 —— divisorial なら `n • a = n • b → a = b`
+
+★★`Φ(A)` は divisorial(integral ＋ saturated ＋ sharp)。
+`n • (a − b) = 0` は像に入るので **saturated** で `a − b` 自身が像に入り、
+`b ≼ a` が出る。対称に `a ≼ b`。**integral の簡約**と **sharp** で `a = b`。
+
+★これが `MetricallyEquivalent` を `Pf` から代表元へ降ろす鍵である。 -/
+
+theorem eq_of_nsmul_eq_of_divisorial {M : Type w} [AddCommMonoid M]
+    (hdiv : IsDivisorial M) {a b : M} {n : ℕ} (hn : 0 < n) (hab : n • a = n • b) : a = b := by
+  obtain ⟨⟨hint, hsat, -⟩, hsharp⟩ := hdiv
+  haveI : IsCancelAdd M := isCancelAdd_of_isIntegralMonoid (M := M) hint
+  have key : ∀ x y : M, n • x = n • y → ∃ c : M, y + c = x := by
+    intro x y hxy
+    have h1 : n • (toGp M x - toGp M y) = 0 := by
+      rw [smul_sub, ← toGp_nsmul, ← toGp_nsmul, hxy, sub_self]
+    have h2 : n • (toGp M x - toGp M y) ∈ Set.range (toGp M) := by
+      rw [h1]; exact ⟨0, toGp_zero M⟩
+    obtain ⟨c, hc⟩ := hsat _ n hn h2
+    refine ⟨c, hint ?_⟩
+    rw [toGp_add, hc]
+    abel
+  obtain ⟨c, hc⟩ := key a b hab
+  obtain ⟨d, hd⟩ := key b a hab.symm
+  have h3 : b + (c + d) = b + 0 := by
+    rw [← add_assoc, hc, hd, add_zero]
+  have h4 : c + d = 0 := add_left_cancel h3
+  have h5 : c = 0 := hsharp c ⟨⟨c, d, h4, by rw [add_comm]; exact h4⟩, rfl⟩
+  rw [← hc, h5, add_zero]
+
+/-- ★**`Pf` の同じ分母どうしは分子で決まる**(divisorial なら)。 -/
+theorem Pf.mk_inj_of_divisorial {M : Type w} [AddCommMonoid M] (hdiv : IsDivisorial M)
+    {a b : M} {n : ℕ+} (h : Pf.mk a n = Pf.mk b n) : a = b := by
+  obtain ⟨k, hk⟩ := Quotient.exact h
+  exact eq_of_nsmul_eq_of_divisorial hdiv (Nat.mul_pos k.pos n.pos) hk
+
+variable {P F} in
+/-- ★★**同じ添字なら `rootDiv` の一致から `Div` の一致が出る**。 -/
+theorem div_eq_of_rootDiv_eq {X Y : PfRootObj P F}
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (f f' : Z.right.obj.1 ⟶ Z.right.obj.2)
+    (h : rootDiv (show HomRoot P F X Y from HomPf.mk Z f)
+      = rootDiv (show HomRoot P F X Y from HomPf.mk Z f')) :
+    P.Div f = P.Div f' := by
+  replace h : Pf.divBy (X.root * Y.root)
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root))) (pfDiv (HomPf.mk Z f)))
+    = Pf.divBy (X.root * Y.root)
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root))) (pfDiv (HomPf.mk Z f'))) := h
+  rw [pfDiv_mk, pfDiv_mk] at h
+  replace h : Pf.divBy (X.root * Y.root)
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root)))
+        (Pf.mk (Φ.map (P.Base Z.hom.hom.1) (P.Div f)) (repRoot Z)))
+    = Pf.divBy (X.root * Y.root)
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root)))
+        (Pf.mk (Φ.map (P.Base Z.hom.hom.1) (P.Div f')) (repRoot Z))) := h
+  rw [Pf.map_mk, Pf.map_mk, Pf.divBy_mk, Pf.divBy_mk] at h
+  have h1 := Pf.mk_inj_of_divisorial (P.divisorial _) h
+  exact Φ.map_injective (P.Base Z.hom.hom.1)
+    (Φ.map_injective (P.Base (rtExt P F X.obj Y.root)) h1)
+
+/-! ## ★34. (vi) 単元を除く忠実性(根が等しい場合) -/
+
+variable {P F} in
+/-- ★平行 2 射を共通の添字へ。 -/
+theorem exists_rep_par {A B : C} (f g : HomPf P F A B) :
+    ∃ (Z : IdxPf P F A B) (φ ψ : Z.right.obj.1 ⟶ Z.right.obj.2),
+      f = HomPf.mk Z φ ∧ g = HomPf.mk Z ψ := by
+  obtain ⟨Zf, φ₀, hf⟩ := HomPf.exists_rep (P := P) (F := F) f
+  obtain ⟨Zg, ψ₀, hg⟩ := HomPf.exists_rep (P := P) (F := F) g
+  exact ⟨IsFiltered.max Zf Zg,
+    idxTransport P F (IsFiltered.leftToMax Zf Zg) φ₀,
+    idxTransport P F (IsFiltered.rightToMax Zf Zg) ψ₀,
+    (by rw [HomPf.mk_map]; exact hf.symm),
+    (by rw [HomPf.mk_map]; exact hg.symm)⟩
+
+set_option maxHeartbeats 2000000 in
+variable {P F} in
+/-- ★★★**(vi)**(根が等しい場合)。 -/
+theorem pfRoot_faithfulUpToUnits_sameRoot (hfi : IsOfFrobeniusIsotropicType P)
+    {A B : C} {r : ℕ+} (φ ψ : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩)
+    (hbe : BaseEquivalent (pfRootPre P F) φ ψ)
+    (hme : MetricallyEquivalent (pfRootPre P F) φ ψ)
+    (hφs : IsPreStep (pfRootPre P F) φ) (hψs : IsPreStep (pfRootPre P F) ψ) :
+    ∃ α : End (⟨B, r⟩ : PfRootObj P F), α ∈ OTimes (pfRootPre P F) ⟨B, r⟩ ∧
+      φ = (ψ ≫ ((α : (⟨B, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩))) := by
+  obtain ⟨Z₀, φ₀, ψ₀, hφ0, hψ0⟩ := exists_rep_par (P := P) (F := F)
+    ((rtRootIso P F A B (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv φ)
+    ((rtRootIso P F A B (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv ψ)
+  obtain ⟨W, u, hW⟩ := exists_idx_isotropic (F := F) hfi Z₀
+  obtain ⟨φ₁, hφ₁⟩ : ∃ t : W.right.obj.1 ⟶ W.right.obj.2,
+      t = idxTransport P F u φ₀ := ⟨_, rfl⟩
+  obtain ⟨ψ₁, hψ₁⟩ : ∃ t : W.right.obj.1 ⟶ W.right.obj.2,
+      t = idxTransport P F u ψ₀ := ⟨_, rfl⟩
+  obtain ⟨hw1, hw2, hwd⟩ := W.hom.property
+  have hφW : (rtRootIso P F A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).inv φ = HomPf.mk W φ₁ := by
+    rw [hφ₁, HomPf.mk_map]; exact hφ0
+  have hψW : (rtRootIso P F A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).inv ψ = HomPf.mk W ψ₁ := by
+    rw [hψ₁, HomPf.mk_map]; exact hψ0
+  have hφmk : φ = HomPf.mk ((pushIdx (F := F)
+      (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+      (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj W) φ₁ :=
+    ((Iso.inv_hom_id_apply _ _).symm.trans
+      (congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) hφW)).trans
+      (rtRootIso_hom_mk (F := F) A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl) W φ₁)
+  have hψmk : ψ = HomPf.mk ((pushIdx (F := F)
+      (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+      (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+      (by rw [rtLift_degFr, rtLift_degFr])).obj W) ψ₁ :=
+    ((Iso.inv_hom_id_apply _ _).symm.trans
+      (congrArg (ConcreteCategory.hom (rtRootIso P F A B
+        (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) hψW)).trans
+      (rtRootIso_hom_mk (F := F) A B (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl) W ψ₁)
+  rw [hφmk, hψmk] at hbe hme
+  have hbe' : BaseEquivalent P φ₁ ψ₁ :=
+    base_eq_of_rootBase_eq (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B, r⟩ : PfRootObj P F))
+      ((pushIdx (F := F)
+        (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+        (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj W) φ₁ ψ₁ hbe
+  have hme' : MetricallyEquivalent P φ₁ ψ₁ :=
+    div_eq_of_rootDiv_eq (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B, r⟩ : PfRootObj P F))
+      ((pushIdx (F := F)
+        (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+        (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj W) φ₁ ψ₁ hme
+  have hφ₁s : IsPreStep P φ₁ := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F))
+      (Y := (⟨B, r⟩ : PfRootObj P F)) ((pushIdx (F := F)
+        (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+        (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj W) φ₁).mp ?_
+    rw [← hφmk]; exact hφs
+  have hψ₁s : IsPreStep P ψ₁ := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F))
+      (Y := (⟨B, r⟩ : PfRootObj P F)) ((pushIdx (F := F)
+        (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+        (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+        (by rw [rtLift_degFr, rtLift_degFr])).obj W) ψ₁).mp ?_
+    rw [← hψmk]; exact hψs
+  have hφ₁c : IsCoAngular P φ₁ :=
+    prop_1_4_i P φ₁ (fun _ g => F.isotropicClosed g hW)
+  have hψ₁c : IsCoAngular P ψ₁ :=
+    prop_1_4_i P ψ₁ (fun _ g => F.isotropicClosed g hW)
+  obtain ⟨α₀, hα₀U, hα₀e⟩ :=
+    F.faithfulUpToUnits φ₁ ψ₁ hbe' hme' hφ₁c hφ₁s hψ₁c hψ₁s
+  refine ⟨(rtRootIso P F B B (show r * r = r * r from rfl)
+      (show r * r = r * r from rfl)).hom
+    (HomPf.mk (idxMk (P := P) (F := F) W.hom.hom.2 W.hom.hom.2 hw2 hw2 rfl)
+      ((α₀ : End W.right.obj.2) : W.right.obj.2 ⟶ W.right.obj.2)), ?_, ?_⟩
+  · refine ⟨?_, ?_⟩
+    · rw [rtRootIso_hom_mk]
+      exact (oTri_mk_diag (X := (⟨B, r⟩ : PfRootObj P F))
+        (rtLift P F B (show r * r = r * r from rfl) ≫ W.hom.hom.2)
+        (IsFrobeniusType.comp P F (rtLift_frobType P F B _) hw2) _).mpr
+        ⟨hα₀U.1.1, hα₀U.1.2⟩
+    · refine (CategoryTheory.isUnit_iff_isIso _).mpr ?_
+      rw [rtRootIso_hom_mk]
+      exact pfRoot_isIso_mk _ _ ((CategoryTheory.isUnit_iff_isIso _).mp hα₀U.2)
+  · have e1 : compPf P F (HomPf.mk W ψ₁)
+        (HomPf.mk (idxMk (P := P) (F := F) W.hom.hom.2 W.hom.hom.2 hw2 hw2 rfl)
+          ((α₀ : End W.right.obj.2) : W.right.obj.2 ⟶ W.right.obj.2))
+        = HomPf.mk W (ψ₁ ≫ ((α₀ : End W.right.obj.2) : W.right.obj.2 ⟶ W.right.obj.2)) :=
+      compPf_mk (idxMk3 (F := F) W.hom.hom.1 W.hom.hom.2 W.hom.hom.2 hw1 hw2 hw2 hwd rfl)
+        ψ₁ _
+    show φ = compRoot P F ψ _
+    unfold compRoot
+    rw [hψW, Iso.hom_inv_id_apply]
+    refine Eq.trans ?_ (congrArg (ConcreteCategory.hom (rtRootIso P F A B
+      (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom) e1).symm
+    refine Eq.trans ?_ (congrArg (fun t => ConcreteCategory.hom (rtRootIso P F A B
+      (show r * r = r * r from rfl) (show r * r = r * r from rfl)).hom
+      (HomPf.mk W t)) hα₀e)
+    rw [← hφW, Iso.inv_hom_id_apply]
+
+/-! ## ★35. (vi) を一般の根へ -/
+
+/-- ★同型で挟んでも `Div` の一致は保たれる。 -/
+theorem metricallyEquivalent_conj {C3 : Type u3} [Category.{v3} C3]
+    {Φ3 : MonoidOn.{v, u, w} D} (Q : PreFrobenioid C3 Φ3) {X X' Y Y' : C3}
+    (a : X' ⟶ X) (b : Y ⟶ Y') (ha : IsIso a) (hb : IsIso b) {f g : X ⟶ Y}
+    (h : MetricallyEquivalent Q f g) :
+    MetricallyEquivalent Q (a ≫ f ≫ b) (a ≫ g ≫ b) := by
+  haveI := ha
+  haveI := hb
+  show Q.Div (a ≫ f ≫ b) = Q.Div (a ≫ g ≫ b)
+  rw [Q.Div_comp, Q.Div_comp, Q.Div_comp, Q.Div_comp,
+    show Q.Div a = 0 from isIsometric_of_isIso Q a,
+    show Q.Div b = 0 from isIsometric_of_isIso Q b,
+    show Q.Div f = Q.Div g from h]
+  simp
+
+/-- ★同型で挟んでも `Base` の一致は保たれる。 -/
+theorem baseEquivalent_conj {C3 : Type u3} [Category.{v3} C3]
+    {Φ3 : MonoidOn.{v, u, w} D} (Q : PreFrobenioid C3 Φ3) {X X' Y Y' : C3}
+    (a : X' ⟶ X) (b : Y ⟶ Y') {f g : X ⟶ Y} (h : BaseEquivalent Q f g) :
+    BaseEquivalent Q (a ≫ f ≫ b) (a ≫ g ≫ b) := by
+  show Q.Base (a ≫ f ≫ b) = Q.Base (a ≫ g ≫ b)
+  rw [Q.Base_comp, Q.Base_comp, Q.Base_comp, Q.Base_comp,
+    show Q.Base f = Q.Base g from h]
+
+set_option maxHeartbeats 1000000 in
+variable {P F} in
+/-- ★★★★**[FrdI] Definition 1.3, (vi)** —— `𝒞^pf` 版。 -/
+theorem pfRoot_faithfulUpToUnits (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (φ ψ : X ⟶ Y)
+    (hbe : BaseEquivalent (pfRootPre P F) φ ψ)
+    (hme : MetricallyEquivalent (pfRootPre P F) φ ψ)
+    (_hφc : IsCoAngular (pfRootPre P F) φ) (hφs : IsPreStep (pfRootPre P F) φ)
+    (_hψc : IsCoAngular (pfRootPre P F) ψ) (hψs : IsPreStep (pfRootPre P F) ψ) :
+    ∃ α : End Y, α ∈ OTimes (pfRootPre P F) Y ∧ φ = (ψ ≫ ((α : Y ⟶ Y))) := by
+  obtain ⟨eX, hXiso⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root Y.root
+    (X.root * Y.root) rfl
+  obtain ⟨eY, hYiso⟩ := pfRoot_exists_iso_root (F := F) Y.obj Y.root X.root
+    (X.root * Y.root) (mul_comm _ _)
+  haveI := hXiso
+  haveI := hYiso
+  have hφ' : IsPreStep (pfRootPre P F) (inv eX ≫ φ ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφs (isPreStep_of_isIso (pfRootPre P F) eY))
+  have hψ' : IsPreStep (pfRootPre P F) (inv eX ≫ ψ ≫ eY) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hψs (isPreStep_of_isIso (pfRootPre P F) eY))
+  obtain ⟨α', hα'U, hα'e⟩ := pfRoot_faithfulUpToUnits_sameRoot (F := F) hfi
+    (inv eX ≫ φ ≫ eY) (inv eX ≫ ψ ≫ eY)
+    (baseEquivalent_conj (pfRootPre P F) (inv eX) eY hbe)
+    (metricallyEquivalent_conj (pfRootPre P F) (inv eX) eY inferInstance inferInstance hme)
+    hφ' hψ'
+  refine ⟨eY ≫ ((α' : _ ⟶ _) ≫ inv eY), ⟨?_, ?_⟩, ?_⟩
+  · exact (oTri_conj (F := F) (inv eY) eY (IsIso.inv_hom_id eY) (IsIso.hom_inv_id eY)
+      α' hα'U.1)
+  · refine (CategoryTheory.isUnit_iff_isIso _).mpr ?_
+    haveI : IsIso ((α' : _ ⟶ _)) := (CategoryTheory.isUnit_iff_isIso _).mp hα'U.2
+    show IsIso (eY ≫ ((α' : _ ⟶ _) ≫ inv eY))
+    infer_instance
+  · have h := hα'e
+    simp only [Category.assoc] at h ⊢
+    have h2 : eX ≫ inv eX ≫ φ ≫ eY = eX ≫ inv eX ≫ ψ ≫ eY ≫ (α' : _ ⟶ _) := by
+      rw [h]
+    simp only [IsIso.hom_inv_id_assoc] at h2
+    have h3 : (φ ≫ eY) ≫ inv eY = (ψ ≫ eY ≫ (α' : _ ⟶ _)) ≫ inv eY :=
+      congrArg (fun t => t ≫ inv eY) h2
+    simpa only [Category.assoc, IsIso.hom_inv_id, Category.comp_id] using h3
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
-### 埋まった 16 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
+### 埋まった 17 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
 
 | 条 | 宣言 | 手 |
 |---|---|---|
@@ -1801,22 +2051,30 @@ theorem pfRoot_otriBase (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P 
 | (v)(b) `preStepFactorUniq` | `pfRoot_preStepFactorUniq` | isometric pre-step は同型 |
 | (v)(c) `preStepFactor'` | `pfRoot_preStepFactor'` | `φ = 𝟙 ≫ φ` |
 | (v)(c) `preStepFactorUniq'` | `pfRoot_preStepFactorUniq'` | 同上 |
+| (vi) `faithfulUpToUnits` | `pfRoot_faithfulUpToUnits` | ★根を揃える ＋ `rootDiv` を `Div` に降ろす(divisorial) |
 | (vii)(a) `isotropicHullExists` | `pfRoot_isotropicHullExists` | `𝟙` |
 | (vii)(b) `isotropicClosed` | `pfRoot_isotropicClosed` | 全対象 isotropic |
 
 ★土台は `pfRoot_isOfIsotropicType`(`𝒞` が Frobenius-isotropic 型 ⟹ `𝒞^pf` は isotropic 型)。
 
-### 残る 5 条と、それぞれの**具体的な**残り作業
+### 残る 4 条と、それぞれの**具体的な**残り作業
 
-**(vi) `faithfulUpToUnits`** ——
-`𝒞` の `faithfulUpToUnits` は `MetricallyEquivalent`(`Div φ = Div ψ`)を要る。
-`𝒞^pf` 側の `rootDiv` は `Pf` 値なので、代表元へ降ろすには
-★**`n • a = n • b → a = b`(`a b : Φ(A)`、`n ≥ 1`)**が要る。
-★★これは **divisorial から出る**(紙の上で確認、未実装):
-`n • (toGp a − toGp b) = 0 ∈ range (toGp)` ⟹ **saturated** で
-`toGp a − toGp b ∈ range (toGp)` ⟹ `b ≼ a`;対称に `a ≼ b`;
-**integral**(`toGp` 単射 ⟹ 簡約)と **sharp** で `a = b`。
-★`toGp_add` / `toGp_nsmul` は `Found/FrdI/Prop44Gp.lean` にある。
+★**(vi) は 2026-08-17 に埋まった**(`pfRoot_faithfulUpToUnits`)。
+鍵は 2 つだった:
+
+1. ★**根を揃える** —— `pfRoot_exists_iso_root` で `X ≅ (X.obj^{Y.root}, r)`、
+   `Y ≅ (Y.obj^{X.root}, r)`(`r = X.root * Y.root`)と取ると
+   `compRoot` の 3 つの `rtRootIso` がすべて `r*r = r*r` の証明になり、
+   証明無関係で同一の射になる(`pfRoot_faithfulUpToUnits_sameRoot`)。
+   ★同型で挟んでも `Base`・`Div` の一致は保たれる
+   (`baseEquivalent_conj` / `metricallyEquivalent_conj`、pre-Frobenioid 一般)。
+2. ★★**`rootDiv` の一致を `Div` の一致へ降ろす** —— `rootDiv` は `Pf Φ` 値なので、
+   代表元へ戻すには `n • a = n • b → a = b`(`n ≥ 1`)が要る。
+   ★これは **divisorial から出る**(`eq_of_nsmul_eq_of_divisorial`):
+   `n • (toGp a − toGp b) = 0 ∈ range (toGp)` ⟹ **saturated** で
+   `toGp a − toGp b ∈ range (toGp)` ⟹ `b ≼ a`;対称に `a ≼ b`;
+   **integral**(`toGp` 単射 ⟹ 簡約)と **sharp** で `a = b`。
+   ★これで `Pf.mk_inj_of_divisorial` / `div_eq_of_rootDiv_eq` が出る。
 
 **(iv)(a) `arbFactor` / (iv)(b) `pullBackLB` / (i)(c) `plBkEquiv` / (iv)(a) `arbFactorUniq`**
 —— どれも **`𝒞^pf` の pull-back の辞書**が要る。
@@ -1834,7 +2092,7 @@ theorem pfRoot_otriBase (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P 
 
 ### `Proposition 3.2` 全体として残るもの
 
-1. 上の 5 条(＋ `Frobenioid` の 2 本の圏同値 `coaPreUnderEquiv` / `coaPreOverEquiv`)
+1. 上の 4 条(＋ `Frobenioid` の 2 本の圏同値 `coaPreUnderEquiv` / `coaPreOverEquiv`)
 2. **(ii) の辞書の残り** —— Frobenius 型・pull-back・co-angular・
    base-identity 自己射・同型(`isPreStep` など 5 項は `Prop32.lean` で済み)
 3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
