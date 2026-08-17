@@ -443,6 +443,39 @@ theorem psiIstr_faithful (h₁ : IsOfQuasiIsotropicType C P₁)
     refine InducedCategory.hom_ext (Ψ.map_injective ?_)
     exact congrArg (fun m : (psiIstr Ψ P₁ P₂ h₁ h₂).obj _ ⟶ _ => m.hom) h
 
+/-- ★**`Ψ^istr` は充満**(`Ψ` が充満で、`𝒞^istr` が充満部分圏だから)。 -/
+theorem psiIstr_full (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) :
+    (psiIstr Ψ P₁ P₂ h₁ h₂).Full where
+  map_surjective {A B} g := by
+    obtain ⟨f, hf⟩ := Ψ.map_surjective (g.hom : Ψ.obj A.obj ⟶ Ψ.obj B.obj)
+    exact ⟨ObjectProperty.homMk f, InducedCategory.hom_ext hf⟩
+
+/-- ★★**`Ψ^istr` は本質的全射** —— `Ψ` の本質的全射性 ＋
+**isotropy が反射される**こと(第 1 主張の `mpr`)。 -/
+theorem psiIstr_essSurj (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) :
+    (psiIstr Ψ P₁ P₂ h₁ h₂).EssSurj where
+  mem_essImage Z := by
+    obtain ⟨A₀, ⟨ε⟩⟩ : ∃ A₀ : C, Nonempty (Ψ.obj A₀ ≅ Z.obj) :=
+      ⟨Ψ.objPreimage Z.obj, ⟨Ψ.objObjPreimageIso Z.obj⟩⟩
+    have hiso₂ : IsIsotropic P₂ (Ψ.obj A₀) := isIsotropic_of_iso P₂ ε Z.property
+    have hiso₁ : IsIsotropic P₁ A₀ :=
+      (thm_3_4_i_isotropic Ψ P₁ P₂ h₁ h₂ A₀).mpr hiso₂
+    exact ⟨⟨A₀, hiso₁⟩, ⟨ObjectProperty.isoMk _ ε⟩⟩
+
+/-- ★★★★**[FrdI] Theorem 3.4, (i)** —— `Ψ^istr` は**圏同値**。
+
+原文 (FrdI p.62):
+> the horizontal arrows are equivalences of categories]. Finally, if D -/
+theorem psiIstr_isEquivalence (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) :
+    (psiIstr Ψ P₁ P₂ h₁ h₂).IsEquivalence := by
+  haveI := psiIstr_faithful Ψ P₁ P₂ h₁ h₂
+  haveI := psiIstr_full Ψ P₁ P₂ h₁ h₂
+  haveI := psiIstr_essSurj Ψ P₁ P₂ h₁ h₂
+  exact { }
+
 end Isotropic
 
 end ABC3.Found.FrdI
