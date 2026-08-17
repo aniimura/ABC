@@ -1577,3 +1577,33 @@ Green 関数に条件を付けていない。
 ★本日の指標が動かなかったのは、この 4 段が残っているためである。
 ★★**数学の穴は 1 だけ**(一般のイデアルの拡大の重複度公式)であり、
 2 は部品あり、3 は取得済、4 は設計である。
+
+### ★★★§9-15 の即時訂正 —— 「数学の穴」は無かった
+
+★直前に「一般のイデアルの拡大の重複度公式は mathlib に無い(実測)」と書いた。
+★★★**誤りである。取り消す。**
+
+    `NumberField/RamificationInertia/Ramification.lean:310`
+    theorem emultiplicity_map_eq_ramificationIdx_mul
+      [IsDedekindDomain R] [FaithfulSMul R S]
+      {v : Ideal R} {w : Ideal S} {I : Ideal R} (h : I ≠ ⊥)
+      (hv : Irreducible v) (hw : Irreducible w) (hw_bot : w ≠ ⊥) [w.LiesOver v] :
+      emultiplicity w (I.map (algebraMap R S))
+        = v.ramificationIdx w * emultiplicity v I
+
+★★**`I` は一般のイデアルである。** 私は `ramificationIdx` を素イデアルの語で検索し、
+`emultiplicity` の語で検索しなかった。
+
+★★★**測り方の誤り**である——「名前で測って『無い』と結論した」の再発。
+本日の午前に `Cartier` で同じ誤りをして訂正したばかりである。
+
+### ★★これで `Definition 1.2` に数学の穴は無い
+
+| 段 | 状態 |
+|---|---|
+| 1. 有限素点側を `ADiv` に繋ぐ | ★**部品は mathlib にあった**(`emultiplicity_map_…`)。`Associates.count` との橋が要る |
+| 2. アルキメデス側を `ADiv` に繋ぐ | 部品は `InfinitePlaceRel.lean` |
+| 3. `degNormalized_baseChange` | 取得済 |
+| 4. `X(ℚ̄)` の型 | 設計 |
+
+★★★**4 段すべてが配線と設計であり、未知の数学は無い。**
