@@ -3062,3 +3062,31 @@ coherence を実際に書く必要がある。**mathlib PR 規模(100–200 行)
 ★`(F.op ⋙ R) ⋙ forget₂` と `F.op ⋙ (R ⋙ forget₂)` は **defeq だが構文が違う**
 ——型注釈つきの別名を置くと暗黙引数が決まる。
 ★★`simp` は `Functor.LaxMonoidal.μ` を展開しない——`show` で適用形にする。
+
+
+---
+
+## §9-40 (2026-08-17) ★★★引き戻しの最後の 1 歩
+
+### ★mathlib の在庫(実測)
+
+    Functor.Monoidal.ofOplaxMonoidal [F.OplaxMonoidal] [IsIso (η F)] [∀ X Y, IsIso (δ F X Y)]
+
+★★**oplax から strong へ上げる道具が在る**(`Monoidal/Functor.lean` 731)。
+
+### ★★★ただし `δ` が全対象で同型なのは**偽**
+
+★一般の加群では `f^*(M ⊗ N) → f^*M ⊗ f^*N` は同型でない(平坦性が要る)。
+★★**可逆層に限れば**局所的に恒等なので同型になる。
+
+### ★★残る 1 歩
+
+    theorem isIso_delta_of_trivial (L M) (hL hM : IsLocallyTrivial ..) :
+        IsIso (Functor.OplaxMonoidal.δ (pullback ..) L M)
+
+★機構は第 8(局所性)・第 15(テンソル閉性)・第 16(層化での保存)ブロック
+——「局所的に同型なら同型」を `δ` に当てる。
+
+★★★これが出れば `f^*(L ⊗ M) ≅ f^*L ⊗ f^*M` となり、
+`PicardData` の `pullback` / `pullback_mul` が書ける
+(`pullback_id` / `pullback_comp` は mathlib の `pullbackId` / `pullbackComp` から)。
