@@ -15,6 +15,7 @@ import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
 import ABC3.Check.FrdI.Prop21QuantifierGap
 import ABC3.Check.Arakelov.ArcSpaceNondegenerate
+import ABC3.Check.Arakelov.PicNondegenerate
 /-!
 # Check — 我々のモデルについての検査
 
