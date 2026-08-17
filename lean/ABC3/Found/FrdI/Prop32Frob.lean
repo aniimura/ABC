@@ -2031,6 +2031,402 @@ theorem pfRoot_faithfulUpToUnits (hfi : IsOfFrobeniusIsotropicType P)
       congrArg (fun t => t ≫ inv eY) h2
     simpa only [Category.assoc, IsIso.hom_inv_id, Category.comp_id] using h3
 
+/-! ## ★36. ★★★★`k` 乗根の高さへの持ち上げ `Λ_k`
+
+★★**動機**(2026-08-17): 残る 4 条(`pullBackLB` / `arbFactor` / `arbFactorUniq` /
+`plBkEquiv`)はどれも「`𝒞` の射を `𝒞^pf` へ**根つきで**送る」道具を要る。
+★`toRootHom` は根 `1` にしか送れないが、必要なのは**任意の根 `k`** である。
+
+★★**構成**: `rtExt A k : A ⟶ A^{(k)}` と `rtExt B k : B ⟶ B^{(k)}` は
+同じ次数 `k` の Frobenius 型射なので、`Proposition 1.10, (i)` の遷移
+(`frobTransport`)が `φ : A ⟶ B` を `A^{(k)} ⟶ B^{(k)}` へ一意に持ち上げる。 -/
+
+variable {P F} in
+/-- ★★`φ : A ⟶ B` を **`k` 乗根の高さへ持ち上げた射** `A^{(k)} ⟶ B^{(k)}`。 -/
+noncomputable def rtMap (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    rtObj P F A k ⟶ rtObj P F B k :=
+  frobTransport (F := F) (rtExt P F A k) (rtExt_frobType P F A k)
+    (rtExt P F B k) (rtExt_frobType P F B k)
+    (by rw [rtExt_degFr, rtExt_degFr]) φ
+
+variable {P F} in
+/-- ★持ち上げの特徴づけ(四角形)。 -/
+theorem rtMap_spec (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    φ ≫ rtExt P F B k = rtExt P F A k ≫ rtMap (F := F) k φ :=
+  frobTransport_spec _ _ _ _ _ φ
+
+variable {P F} in
+/-- ★持ち上げの一意性。 -/
+theorem rtMap_eq (k : ℕ+) {A B : C} (φ : A ⟶ B) (ψ : rtObj P F A k ⟶ rtObj P F B k)
+    (h : φ ≫ rtExt P F B k = rtExt P F A k ≫ ψ) : rtMap (F := F) k φ = ψ :=
+  frobTransport_eq _ _ _ _ _ φ ψ h
+
+variable {P F} in
+/-- ★★**次数は変わらない**。 -/
+theorem rtMap_degFr (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    P.degFr (rtMap (F := F) k φ) = P.degFr φ := by
+  have h := congrArg P.degFr (rtMap_spec (F := F) k φ)
+  rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, rtExt_degFr] at h
+  have h2 : P.degFr φ * k = P.degFr (rtMap (F := F) k φ) * k := (mul_comm _ _).trans h
+  exact (mul_right_cancel h2).symm
+
+variable {P F} in
+/-- ★★**零因子は `k` 倍で写る** —— `(Base ext)^*(Div (Λφ)) = k • Div φ`。 -/
+theorem rtMap_Div (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    Φ.map (P.Base (rtExt P F A k)) (P.Div (rtMap (F := F) k φ))
+      = ((k : ℕ+) : ℕ) • P.Div φ := by
+  have h := congrArg P.Div (rtMap_spec (F := F) k φ)
+  rw [P.Div_comp, P.Div_comp, show P.Div (rtExt P F B k) = 0 from (rtExt_frobType P F B k).1.2,
+    show P.Div (rtExt P F A k) = 0 from (rtExt_frobType P F A k).1.2,
+    rtExt_degFr, map_zero, zero_add, smul_zero, add_zero] at h
+  exact h.symm
+
+variable {P F} in
+/-- ★★**等長性は行き来する**。 -/
+theorem rtMap_isIsometric_iff (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    IsIsometric P (rtMap (F := F) k φ) ↔ IsIsometric P φ := by
+  constructor
+  · intro h
+    have h1 : ((k : ℕ+) : ℕ) • P.Div φ = 0 := by
+      rw [← rtMap_Div (F := F) k φ, show P.Div (rtMap (F := F) k φ) = 0 from h, map_zero]
+    exact nsmul_eq_zero_of_isSharp (P.divisorial _).2 h1
+  · intro h
+    refine Φ.map_injective (P.Base (rtExt P F A k)) ?_
+    rw [rtMap_Div, show P.Div φ = 0 from h, smul_zero, map_zero]
+
+variable {P F} in
+/-- ★★**底の同型性も行き来する**。 -/
+theorem rtMap_isBaseIso_iff (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    IsBaseIsomorphism P (rtMap (F := F) k φ) ↔ IsBaseIsomorphism P φ := by
+  haveI hA : IsIso (P.Base (rtExt P F A k)) := (rtExt_frobType P F A k).2
+  haveI hB : IsIso (P.Base (rtExt P F B k)) := (rtExt_frobType P F B k).2
+  refine (isIso_iff_of_sq (P.Base φ) (P.Base (rtExt P F B k))
+    (P.Base (rtExt P F A k)) (P.Base (rtMap (F := F) k φ)) ?_).symm
+  rw [← P.Base_comp, ← P.Base_comp, rtMap_spec]
+
+variable {P F} in
+/-- ★恒等射の持ち上げは恒等射。 -/
+@[simp] theorem rtMap_id (k : ℕ+) (A : C) :
+    rtMap (F := F) k (𝟙 A) = 𝟙 (rtObj P F A k) :=
+  rtMap_eq k _ _ (by rw [Category.id_comp, Category.comp_id])
+
+variable {P F} in
+/-- ★★**持ち上げは合成を保つ**。 -/
+theorem rtMap_comp (k : ℕ+) {A B E : C} (φ : A ⟶ B) (ψ : B ⟶ E) :
+    rtMap (F := F) k (φ ≫ ψ) = rtMap (F := F) k φ ≫ rtMap (F := F) k ψ := by
+  refine rtMap_eq k _ _ ?_
+  rw [Category.assoc, rtMap_spec, ← Category.assoc, rtMap_spec, Category.assoc]
+
+variable {P F} in
+/-- ★同型の持ち上げは同型。 -/
+theorem rtMap_isIso (k : ℕ+) {A B : C} (u : A ⟶ B) [IsIso u] :
+    IsIso (rtMap (F := F) k u) :=
+  ⟨rtMap (F := F) k (inv u),
+    by rw [← rtMap_comp, IsIso.hom_inv_id, rtMap_id],
+    by rw [← rtMap_comp, IsIso.inv_hom_id, rtMap_id]⟩
+
+/-! ### ★`Λ_k` —— `𝒞` の射から `𝒞^pf` の根 `k` の射へ -/
+
+variable {P F} in
+/-- ★★★**`φ : A ⟶ B` の根 `k` での像** `(A,k) ⟶ (B,k)`。 -/
+noncomputable def lamHom (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    (⟨A, k⟩ : PfRootObj P F) ⟶ (⟨B, k⟩ : PfRootObj P F) :=
+  HomPf.mk (idxOne P F (rtObj P F A k) (rtObj P F B k)) (rtMap (F := F) k φ)
+
+variable {P F} in
+@[simp] theorem lamHom_degFr (k : ℕ+) {A B : C} (φ : A ⟶ B) :
+    (pfRootPre P F).degFr (lamHom (F := F) k φ) = P.degFr φ := by
+  show rootDeg (show HomRoot P F ⟨A, k⟩ ⟨B, k⟩ from
+    HomPf.mk (idxOne P F (rtObj P F A k) (rtObj P F B k)) (rtMap (F := F) k φ)) = _
+  rw [rootDeg_mk]
+  exact rtMap_degFr (F := F) k φ
+
+variable {P F} in
+theorem lamHom_isLinear (k : ℕ+) {A B : C} (φ : A ⟶ B) (h : IsLinear P φ) :
+    IsLinear (pfRootPre P F) (lamHom (F := F) k φ) := by
+  show (pfRootPre P F).degFr (lamHom (F := F) k φ) = 1
+  rw [lamHom_degFr]; exact h
+
+variable {P F} in
+theorem lamHom_isIsometric (k : ℕ+) {A B : C} (φ : A ⟶ B) (h : IsIsometric P φ) :
+    IsIsometric (pfRootPre P F) (lamHom (F := F) k φ) :=
+  (isIsometric_mk_iff (X := (⟨A, k⟩ : PfRootObj P F)) (Y := (⟨B, k⟩ : PfRootObj P F))
+    (idxOne P F (rtObj P F A k) (rtObj P F B k)) (rtMap (F := F) k φ)).mpr
+    ((rtMap_isIsometric_iff (F := F) k φ).mpr h)
+
+variable {P F} in
+theorem lamHom_isBaseIso (k : ℕ+) {A B : C} (φ : A ⟶ B) (h : IsBaseIsomorphism P φ) :
+    IsBaseIsomorphism (pfRootPre P F) (lamHom (F := F) k φ) :=
+  (isBaseIsomorphism_mk_iff (X := (⟨A, k⟩ : PfRootObj P F)) (Y := (⟨B, k⟩ : PfRootObj P F))
+    (idxOne P F (rtObj P F A k) (rtObj P F B k)) (rtMap (F := F) k φ)).mpr
+    ((rtMap_isBaseIso_iff (F := F) k φ).mpr h)
+
+variable {P F} in
+theorem lamHom_isPreStep (k : ℕ+) {A B : C} (φ : A ⟶ B) (h : IsPreStep P φ) :
+    IsPreStep (pfRootPre P F) (lamHom (F := F) k φ) :=
+  ⟨lamHom_isLinear k φ h.1, lamHom_isBaseIso k φ h.2⟩
+
+variable {P F} in
+/-- ★★同型の像は同型。 -/
+theorem lamHom_isIso (k : ℕ+) {A B : C} (u : A ⟶ B) (hu : IsIso u) :
+    IsIso (lamHom (F := F) k u) := by
+  haveI := hu
+  exact pfRoot_isIso_mk _ _ (rtMap_isIso (F := F) k u)
+
+variable {P F} in
+/-- ★★**Frobenius 型の像は Frobenius 型**(`𝒞^pf` が isotropic 型のとき)。 -/
+theorem lamHom_isFrobeniusType (hfi : IsOfFrobeniusIsotropicType P) (k : ℕ+)
+    {A B : C} (φ : A ⟶ B) (h : IsFrobeniusType P φ) :
+    IsFrobeniusType (pfRootPre P F) (lamHom (F := F) k φ) :=
+  ⟨⟨pfRoot_isCoAngular hfi _, lamHom_isIsometric k φ h.1.2⟩, lamHom_isBaseIso k φ h.2⟩
+
+/-! ## ★37. 根を上げる同型の一般形と、根が等しいときの合成則 -/
+
+variable {P F} in
+/-- ★★**任意の Frobenius 型射で根を上げられる** —— `pfRoot_exists_iso_root` の一般形。
+
+★`z : A ⟶ U` が次数 `d` の Frobenius 型射なら `(A, k) ≅ (U, k*d)`。
+★`pfRoot_exists_iso_root` は `z = rtExt A d` の場合であった。 -/
+theorem pfRoot_iso_of_frobType {A U : C} (z : A ⟶ U) (hz : IsFrobeniusType P z)
+    {d k t : ℕ+} (hzd : P.degFr z = d) (ht : t = k * d) :
+    ∃ e : (⟨A, k⟩ : PfRootObj P F) ⟶ ⟨U, t⟩, IsIso e := by
+  obtain ⟨e₀, he₀⟩ := pfRoot_exists_iso_root (F := F) A k d t ht
+  obtain ⟨θ, hθ, -⟩ := F.frobDegUniq A U (rtObj P F A d) z (rtExt P F A d) hz
+    (rtExt_frobType P F A d) (by rw [hzd, rtExt_degFr])
+  haveI := hθ
+  haveI := he₀
+  haveI : IsIso (lamHom (F := F) t (@inv _ _ _ _ θ hθ)) :=
+    lamHom_isIso t _ (@IsIso.inv_isIso _ _ _ _ θ hθ)
+  exact ⟨e₀ ≫ lamHom (F := F) t (@inv _ _ _ _ θ hθ), inferInstance⟩
+
+/-- ★**根 `r` の対象どうしの `Hom` を `r·r` 乗の高さで書くときの添字の押し出し**。 -/
+noncomputable def pushRt (A B : C) (r : ℕ+) :
+    IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)) ⥤
+      IdxPf P F (rtObj P F A r) (rtObj P F B r) :=
+  pushIdx (F := F) (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+    (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+    (by rw [rtLift_degFr, rtLift_degFr])
+
+/-- ★**根が等しいときの、`Hom` の同一視** ——
+`Hom^pf(A^{(r·r)}, B^{(r·r)}) ≅ ((A,r) ⟶ (B,r))`。 -/
+noncomputable def rtJ (A B : C) (r : ℕ+) :
+    HomPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r))
+      ≅ HomPf P F (rtObj P F A r) (rtObj P F B r) :=
+  rtRootIso P F A B (show r * r = r * r from rfl) (show r * r = r * r from rfl)
+
+variable {P F} in
+/-- ★★**根が等しいときの合成則** —— `compRoot` は `rtJ` で共役した `compPf` である。
+
+★★3 つの `rtRootIso` の添字はすべて `(dA, dB, e, tA, tB) = (r, r, r, r·r, r·r)` で、
+命題の証明部分は証明無関係で潰れる。★これが (iii)(c) や (vi) で効いた仕掛けと同じもの。 -/
+theorem compRoot_sameRoot {A B E : C} {r : ℕ+}
+    (f : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) (g : (⟨B, r⟩ : PfRootObj P F) ⟶ ⟨E, r⟩) :
+    f ≫ g = (rtJ P F A E r).hom
+      (compPf P F ((rtJ P F A B r).inv f) ((rtJ P F B E r).inv g)) := rfl
+
+variable {P F} in
+/-- ★★**`rtJ` は合成を移す**。 -/
+theorem rtJ_comp {A B E : C} {r : ℕ+}
+    (x : HomPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)))
+    (y : HomPf P F (rtObj P F B (r * r)) (rtObj P F E (r * r))) :
+    (show ((⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) from (rtJ P F A B r).hom x)
+        ≫ (show ((⟨B, r⟩ : PfRootObj P F) ⟶ ⟨E, r⟩) from (rtJ P F B E r).hom y)
+      = (rtJ P F A E r).hom (compPf P F x y) := by
+  rw [compRoot_sameRoot, Iso.hom_inv_id_apply, Iso.hom_inv_id_apply]
+
+variable {P F} in
+/-- ★`rtJ` の代表元での計算則。 -/
+theorem rtJ_hom_mk {A B : C} (r : ℕ+)
+    (V : IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)))
+    (φ : V.right.obj.1 ⟶ V.right.obj.2) :
+    (rtJ P F A B r).hom (HomPf.mk V φ)
+      = HomPf.mk ((pushRt P F A B r).obj V) φ :=
+  rtRootIso_hom_mk (F := F) A B _ _ V φ
+
+variable {P F} in
+/-- ★★**根が等しいときの辞書** —— 次数。 -/
+theorem rtJ_degFr {A B : C} (r : ℕ+)
+    (V : IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)))
+    (φ : V.right.obj.1 ⟶ V.right.obj.2) :
+    (pfRootPre P F).degFr
+        (show ((⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) from
+          (rtJ P F A B r).hom (HomPf.mk V φ))
+      = P.degFr φ := by
+  rw [rtJ_hom_mk]
+  exact rootDeg_mk (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B, r⟩ : PfRootObj P F))
+    ((pushRt P F A B r).obj V) φ
+
+variable {P F} in
+/-- ★★**根が等しいときの辞書** —— 等長性。 -/
+theorem rtJ_isIsometric_iff {A B : C} (r : ℕ+)
+    (V : IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)))
+    (φ : V.right.obj.1 ⟶ V.right.obj.2) :
+    IsIsometric (pfRootPre P F)
+        (show ((⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) from
+          (rtJ P F A B r).hom (HomPf.mk V φ))
+      ↔ IsIsometric P φ := by
+  rw [rtJ_hom_mk]
+  exact isIsometric_mk_iff (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B, r⟩ : PfRootObj P F))
+    ((pushRt P F A B r).obj V) φ
+
+variable {P F} in
+/-- ★★**根が等しいときの辞書** —— 底の同型性。 -/
+theorem rtJ_isBaseIso_iff {A B : C} (r : ℕ+)
+    (V : IdxPf P F (rtObj P F A (r * r)) (rtObj P F B (r * r)))
+    (φ : V.right.obj.1 ⟶ V.right.obj.2) :
+    IsBaseIsomorphism (pfRootPre P F)
+        (show ((⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B, r⟩) from
+          (rtJ P F A B r).hom (HomPf.mk V φ))
+      ↔ IsBaseIsomorphism P φ := by
+  rw [rtJ_hom_mk]
+  exact isBaseIsomorphism_mk_iff (X := (⟨A, r⟩ : PfRootObj P F))
+    (Y := (⟨B, r⟩ : PfRootObj P F)) ((pushRt P F A B r).obj V) φ
+
+/-! ## ★38. ★★★★`Hom^pf` の Frobenius 分解
+
+★★**これが `pullBackLB` / `arbFactor` の共通の足場**である。
+`𝒞` の `arbFactor` を代表元に当て、**Frobenius 型の部分を添字の脚へ吸収する**。
+★吸収先は **`A₀` の次数 `n` の標準拡大 `A₀^{(n)}`** に取る —— そうすると
+`𝒞^pf` 側で中間対象を `(A^{(n)}, r)` の形に書ける。 -/
+
+variable {P F} in
+/-- ★添字の始対象から `idxMk` への遷移射。 -/
+noncomputable def idxOneHom {A B A' B' : C} (a : A ⟶ A') (b : B ⟶ B')
+    (ha : IsFrobeniusType P a) (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) :
+    idxOne P F A B ⟶ idxMk (P := P) (F := F) a b ha hb hd :=
+  Under.homMk (show (⟨(A, B)⟩ : BiFr P F) ⟶ (⟨(A', B')⟩ : BiFr P F) from
+    ⟨(a, b), ha, hb, hd⟩)
+    (WideSubcategory.hom_ext _ (Prod.ext (Category.id_comp _) (Category.id_comp _)))
+
+variable {P F} in
+/-- ★★**`𝒞` の射の像を、脚を伸ばした代表元で書く**。 -/
+theorem toHomPf_eq_mk {A B A' B' : C} (a : A ⟶ A') (b : B ⟶ B')
+    (ha : IsFrobeniusType P a) (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b)
+    (φ : A ⟶ B) (ψ : A' ⟶ B') (h : φ ≫ b = a ≫ ψ) :
+    toHomPf (F := F) φ = HomPf.mk (idxMk (P := P) (F := F) a b ha hb hd) ψ := by
+  have h1 : idxTransport P F (idxOneHom (F := F) a b ha hb hd) φ = ψ :=
+    frobTransport_eq a ha b hb hd φ ψ h
+  rw [← h1]
+  exact (HomPf.mk_map (idxOneHom (F := F) a b ha hb hd) φ).symm
+
+variable {P F} in
+/-- ★★★★**`Hom^pf` の Frobenius 分解** ——
+`x : A₀ ⟶ B₀`(`Hom^pf` の元、次数 `n`)は
+**標準の Frobenius 拡大 `A₀ → A₀^{(n)}` の像**と**次数 `1` の射**の合成になる。 -/
+theorem homPf_frobSplit {A₀ B₀ : C} (x : HomPf P F A₀ B₀) {n : ℕ+} (hn : pfDeg x = n) :
+    ∃ z : HomPf P F (rtObj P F A₀ n) B₀,
+      pfDeg z = 1 ∧ compPf P F (toHomPf (F := F) (rtExt P F A₀ n)) z = x := by
+  obtain ⟨V, χ, hx⟩ := HomPf.exists_rep (P := P) (F := F) x
+  have hχ : P.degFr χ = n := by rw [← hn, ← hx, pfDeg_mk]; rfl
+  obtain ⟨hv1, hv2, hvd⟩ := V.hom.property
+  obtain ⟨G, H, γ, β, a, hfac, hγ, hβ, ha⟩ := F.arbFactor χ
+  have haLin : P.degFr a = 1 := (F.pullBackLB a ha).2
+  have hρ : P.degFr (β ≫ a) = 1 := by
+    rw [P.degFr_comp, haLin, show P.degFr β = 1 from hβ.1, mul_one]
+  have hγn : P.degFr γ = n := by
+    have h0 := congrArg P.degFr hfac
+    rw [P.degFr_comp, hρ, one_mul, hχ] at h0
+    exact h0.symm
+  -- ★`A₀^{(n)}` の `d` 次拡大と `G` を合わせる
+  have h1 : IsFrobeniusType P (rtExt P F A₀ n ≫
+      rtExt P F (rtObj P F A₀ n) (P.degFr V.hom.hom.1)) :=
+    IsFrobeniusType.comp P F (rtExt_frobType P F A₀ n)
+      (rtExt_frobType P F (rtObj P F A₀ n) (P.degFr V.hom.hom.1))
+  have h2 : IsFrobeniusType P (V.hom.hom.1 ≫ γ) := IsFrobeniusType.comp P F hv1 hγ
+  have hdeg : P.degFr (rtExt P F A₀ n ≫
+        rtExt P F (rtObj P F A₀ n) (P.degFr V.hom.hom.1))
+      = P.degFr (V.hom.hom.1 ≫ γ) := by
+    rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, rtExt_degFr, hγn, mul_comm]
+  obtain ⟨θ, hθ, hθe⟩ := F.frobDegUniq A₀ _ G _ _ h1 h2 hdeg
+  haveI := hθ
+  obtain ⟨a₂, ha₂eq⟩ : ∃ t : rtObj P F A₀ n ⟶ G,
+      t = rtExt P F (rtObj P F A₀ n) (P.degFr V.hom.hom.1) ≫ θ := ⟨_, rfl⟩
+  have ha₂F : IsFrobeniusType P a₂ := by
+    rw [ha₂eq]
+    exact IsFrobeniusType.comp P F
+      (rtExt_frobType P F (rtObj P F A₀ n) (P.degFr V.hom.hom.1))
+      (isFrobeniusType_of_isIso P θ)
+  have ha₂d : P.degFr a₂ = P.degFr V.hom.hom.1 := by
+    rw [ha₂eq, P.degFr_comp, show P.degFr θ = 1 from isLinear_of_isIso P θ, rtExt_degFr,
+      one_mul]
+  have hsq : rtExt P F A₀ n ≫ a₂ = V.hom.hom.1 ≫ γ := by
+    rw [ha₂eq, ← Category.assoc]
+    exact hθe
+  -- ★2 つの代表元
+  have hy : toHomPf (F := F) (rtExt P F A₀ n)
+      = HomPf.mk (idxMk (P := P) (F := F) V.hom.hom.1 a₂ hv1 ha₂F ha₂d.symm) γ :=
+    toHomPf_eq_mk V.hom.hom.1 a₂ hv1 ha₂F ha₂d.symm _ γ hsq
+  refine ⟨HomPf.mk (idxMk (P := P) (F := F) a₂ V.hom.hom.2 ha₂F hv2 (ha₂d.trans hvd))
+      (β ≫ a), ?_, ?_⟩
+  · rw [pfDeg_mk]; exact hρ
+  · rw [hy]
+    exact (compPf_mk_pair (P := P) (F := F) V.hom.hom.1 a₂ V.hom.hom.2
+      hv1 ha₂F hv2 ha₂d.symm (ha₂d.trans hvd) γ (β ≫ a)).trans
+      ((congrArg (HomPf.mk V) hfac.symm).trans hx)
+
+/-! ## ★39. ★★★★`Λ_k` は関手である
+
+★★`lamHom` を `rtJ` で書き直すと、合成則が `rtJ_comp` ＋ `toHomPf_comp` ＋
+`rtMap_comp` の 3 本から出る。 -/
+
+variable {P F} in
+/-- ★添字の始対象から「押し出した始対象」への遷移射。 -/
+noncomputable def idxPushOneHom {A B A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : B ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) :
+    idxOne P F A B ⟶ (pushIdx (F := F) a ha b hb hd).obj (idxOne P F A' B') :=
+  Under.homMk (show (⟨(A, B)⟩ : BiFr P F) ⟶ (⟨(A', B')⟩ : BiFr P F) from
+    ⟨(a, b), ha, hb, hd⟩)
+    (WideSubcategory.hom_ext _ (Prod.ext
+      ((Category.id_comp _).trans (Category.comp_id _).symm)
+      ((Category.id_comp _).trans (Category.comp_id _).symm)))
+
+variable {P F} in
+/-- ★★**根の不変性で `𝒞` の射の像がどう写るか**。 -/
+theorem toHomPf_rootIso {A B A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : B ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b)
+    (φ : A ⟶ B) (ψ : A' ⟶ B') (h : φ ≫ b = a ≫ ψ) :
+    (rootIso (F := F) a ha b hb hd).hom (toHomPf (F := F) ψ) = toHomPf (F := F) φ := by
+  have h1 : idxTransport P F (idxPushOneHom (F := F) a ha b hb hd) φ = ψ :=
+    frobTransport_eq a ha b hb hd φ ψ h
+  refine Eq.trans (rootIso_hom_mk a ha b hb hd (idxOne P F A' B') ψ) ?_
+  rw [← h1]
+  exact HomPf.mk_map (idxPushOneHom (F := F) a ha b hb hd) φ
+
+variable {P F} in
+/-- ★★**`rtMap` は 1 段上げても四角形で繋がる**。 -/
+theorem rtMap_rtLift (r : ℕ+) {A B : C} (φ : A ⟶ B) :
+    rtMap (F := F) r φ ≫ rtLift P F B (show r * r = r * r from rfl)
+      = rtLift P F A (show r * r = r * r from rfl) ≫ rtMap (F := F) (r * r) φ := by
+  haveI : Epi (rtExt P F A r) := P.totEpiC _ _ _
+  refine (cancel_epi (rtExt P F A r)).mp ?_
+  rw [← Category.assoc, ← rtMap_spec, Category.assoc, rtLift_ext, rtMap_spec,
+    ← Category.assoc, rtLift_ext]
+
+variable {P F} in
+/-- ★★★**`Λ_r` を `rtJ` で書く**。 -/
+theorem lamHom_eq_rtJ (r : ℕ+) {A B : C} (φ : A ⟶ B) :
+    lamHom (F := F) r φ
+      = (rtJ P F A B r).hom (toHomPf (F := F) (rtMap (F := F) (r * r) φ)) :=
+  (toHomPf_rootIso (rtLift P F A (show r * r = r * r from rfl)) (rtLift_frobType P F A _)
+    (rtLift P F B (show r * r = r * r from rfl)) (rtLift_frobType P F B _)
+    (by rw [rtLift_degFr, rtLift_degFr]) (rtMap (F := F) r φ)
+    (rtMap (F := F) (r * r) φ) (rtMap_rtLift (F := F) r φ)).symm
+
+variable {P F} in
+/-- ★★★**`Λ_k` は合成を保つ**。 -/
+theorem lamHom_comp (k : ℕ+) {A B E : C} (φ : A ⟶ B) (ψ : B ⟶ E) :
+    lamHom (F := F) k φ ≫ lamHom (F := F) k ψ = lamHom (F := F) k (φ ≫ ψ) := by
+  rw [lamHom_eq_rtJ, lamHom_eq_rtJ, lamHom_eq_rtJ, rtJ_comp, ← toHomPf_comp, rtMap_comp]
+
+variable {P F} in
+/-- ★★★**`Λ_k` は恒等射を保つ**。 -/
+theorem lamHom_id (k : ℕ+) (A : C) :
+    lamHom (F := F) k (𝟙 A) = 𝟙 (⟨A, k⟩ : PfRootObj P F) := by
+  show HomPf.mk (idxOne P F (rtObj P F A k) (rtObj P F A k)) (rtMap (F := F) k (𝟙 A))
+    = idRoot P F ⟨A, k⟩
+  rw [rtMap_id]
+  rfl
+
 /-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
 
 ### 埋まった 17 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
