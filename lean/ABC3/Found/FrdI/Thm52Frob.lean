@@ -1358,6 +1358,72 @@ def model_standardType_iff.src : ABC3.Meta.Source :=
     item := "Theorem 5.2, (iii) — standard 型の判定",
     sectionId := "frdi-thm-5-2" }
 
+/-! ## ★17. `𝒪^×(A)` の記述 —— `Div_B` の核
+
+★★`Φ` は sharp なので `𝒪^▷(A)` の元が可逆であることは **零因子が 0** と同値。
+その `(a, u) = (0, u)` に残る条件は `Div_B(u) = 0` だけなので、
+
+  **`𝒪^×(A) ≅ ker(Div_B : B(A) → Φ(A)^gp)`**
+
+である。★これは `Proposition 4.4, (iii)` が `𝒞^birat` の核として書くものの、
+model Frobenioid における姿である。 -/
+
+theorem model_mem_otimes_iff (h : Hyp M) {A : Obj M} (x : End A) :
+    x ∈ OTimes (modelPre h) A ↔ (x.base = 𝟙 A.base ∧ x.deg = 1 ∧ x.div = 0) := by
+  constructor
+  · rintro ⟨hx, hu⟩
+    obtain ⟨hb, hd⟩ := (mem_otri_iff h x).mp hx
+    have hiso : IsIso (x : A ⟶ A) := (isUnit_iff_isIso _).mp hu
+    exact ⟨hb, hd, ((model_isIso_iff h _).mp hiso).2.1⟩
+  · rintro ⟨hb, hd, hdiv⟩
+    refine ⟨(mem_otri_iff h x).mpr ⟨hb, hd⟩, (isUnit_iff_isIso _).mpr ?_⟩
+    refine (model_isIso_iff h x).mpr ⟨?_, hdiv, hd⟩
+    rw [hb]
+    infer_instance
+
+/-- ★`Div_B` の核の元から作る `𝒪^×(A)` の元。 -/
+def otimesOf (A : Obj M) (u : M.bmon.val A.base) (hu : M.divB _ u = 0) : End A :=
+  otriOf A 0 u (by rw [hu, map_zero])
+
+theorem otimesOf_mem (h : Hyp M) (A : Obj M) (u : M.bmon.val A.base)
+    (hu : M.divB _ u = 0) : otimesOf A u hu ∈ OTimes (modelPre h) A :=
+  (model_mem_otimes_iff h _).mpr ⟨rfl, rfl, rfl⟩
+
+/-- ★★★**`𝒪^×(A) ≅ ker(Div_B)`**。 -/
+noncomputable def otimesEquiv (h : Hyp M) (A : Obj M) :
+    Multiplicative (AddMonoidHom.mker (M.divB A.base)) ≃* OTimes (modelPre h) A where
+  toFun u := ⟨otimesOf A (u.toAdd : M.bmon.val A.base) (AddMonoidHom.mem_mker.mp u.toAdd.2),
+    otimesOf_mem h A _ _⟩
+  invFun x := Multiplicative.ofAdd
+    (⟨(x : End A).u, AddMonoidHom.mem_mker.mpr (by
+      have hgp := otri_gp_eq h x.2.1
+      have hdiv : (x : End A).div = 0 := ((model_mem_otimes_iff h _).mp x.2).2.2
+      rw [hdiv, map_zero] at hgp
+      exact hgp.symm)⟩ : AddMonoidHom.mker (M.divB A.base))
+  left_inv u := by
+    refine Multiplicative.toAdd.injective (Subtype.ext ?_)
+    rfl
+  right_inv x := by
+    obtain ⟨hb, hd, hdiv⟩ := (model_mem_otimes_iff h (x : End A)).mp x.2
+    refine Subtype.ext (Hom.ext ?_ ?_ ?_ rfl)
+    · rw [hb]; rfl
+    · rw [hdiv]; rfl
+    · rw [hd]; rfl
+  map_mul' u v := by
+    refine Subtype.ext (Hom.ext ?_ ?_ ?_ ?_)
+    · show 𝟙 A.base = 𝟙 A.base ≫ 𝟙 A.base
+      rw [Category.id_comp]
+    · show (0 : M.phi.val A.base) = M.phi.map (𝟙 A.base) 0 + ((1 : ℕ+) : ℕ) • 0
+      simp
+    · show (1 : ℕ+) = 1 * 1
+      rw [one_mul]
+    · show ((u * v).toAdd : M.bmon.val A.base)
+        = M.bmon.map (𝟙 A.base) (u.toAdd : M.bmon.val A.base)
+          + ((1 : ℕ+) : ℕ) • (v.toAdd : M.bmon.val A.base)
+      rw [MonoidOn.map_id]
+      simp only [PNat.one_coe, one_smul]
+      rfl
+
 end ModelData
 
 end ABC3.Found.FrdI
