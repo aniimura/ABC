@@ -2451,3 +2451,63 @@ B1 は 6 件を解くので投資先として最も効く。★2026-08-17 の実
 
 ★★★**道 2 の第 1 ブロック**:「局所自由階数 1 の層 2 つの前層テンソル積は層である」。
 ★これが取れれば `Pic X` の群構造が書け、B1 の 6 件が動き出す。
+
+
+---
+
+## §9-28 (2026-08-17) ★★★★B1 の本丸は **内部 Hom** だと確定した
+
+### ★取れたもの(累計、いずれも sorry 0)
+
+| `CommGroup (Pic X)` の公理 | 状態 | 与えるもの |
+|---|---|---|
+| 乗法 `⊗` | ✅ | `tensorModules`(前層でテンソル → 層化) |
+| 可換 | ✅ | `tensorModulesComm`(前層の braiding を層化で送る) |
+| 単位元 | ✅ | `tensorUnitLeft` / `tensorUnitRight`(`λ_` / `ρ_` + counit iso) |
+| **結合律** | ★★★**残** | 内部 Hom が要る |
+| **逆元** | ★★★**残** | 内部 Hom が要る(双対 `Hom(L, 𝒪)`) |
+
+### ★★★★なぜ内部 Hom なのか(mathlib の証明を読んで判明)
+
+結合律は `sheafify (sheafify (A ⊗ B).val ⊗ C) ≅ sheafify ((A ⊗ B) ⊗ C)` に帰着し、
+これは単位 `η : (A ⊗ B) ⟶ sheafify(A ⊗ B).val` について
+
+    η ▷ C ∈ W        (W = 層化が反転させる射のクラス)
+
+を言うことである。★これは `MorphismProperty.IsMonoidal` の whiskering 条件そのもの。
+
+★★★**mathlib は同じ命題を `Sites/Monoidal.lean` で証明しているが、
+その道具は「モノイダル閉性」である**(2026-08-17 に証明本文を読んで確認):
+
+    W.whiskerLeft : Hom(F ⊗ G, H) ≅ Hom(G, [F, H]) と
+                    「H が層なら [F, H] も層」(isSheaf_functorEnrichedHom)
+
+★★しかしそれは **値が固定のモノイダル圏 `A` に値をとる前層** `Cᵒᵖ ⥤ A` の話で、
+**`PresheafOfModules`(係数が環の層)には適用できない**
+——テンソルが `ℤ` 上でなく `R` 上だから。
+
+### ★★★実測: 内部 Hom は mathlib に無い
+
+    Algebra/Category/ModuleCat/Presheaf/  に Closed.lean 無し
+    internalHom / MonoidalClosed / ihom / homObj  いずれも 0 件(Presheaf/ と Sheaf/ 全走査)
+
+★逆元(双対 `L^∨ = Hom(L, 𝒪)`)にも同じものが要る。
+★★★**したがって「`Hom_R(F, G)` の前層版とその随伴」の構築が B1 の本丸である。**
+
+### ★次にやること(3 段)
+
+1. `homObj F G : PresheafOfModules R₀` —— 切断は `Hom(F|_U, G|_U)`
+2. 随伴 `Hom(F ⊗ G, H) ≅ Hom(G, homObj F H)`
+3. 「`H` が層なら `homObj F H` も層」
+
+★これが取れれば `W.IsMonoidal` → `LocalizedMonoidal` → `MonoidalCategory X.Modules`
+→ `Pic X` の `CommGroup` → **B1 とそれに従属する 6 件**(B2 B3 C3 D1 D3)。
+
+★★規模の見積り: mathlib の `Sites/Monoidal.lean` + `Enriched/FunctorCategory` に
+相当する量。**mathlib PR 級**であり、1 セッションでは終わらない。
+
+### ★★★Galois 側(G1-G8)の状況は変わらず
+
+G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT にも無い(FLT は sorry)。
+★`TorsionStructureData` は 2 条(`structure_eq` と `torsion_finite`)からなり、
+**witness には両方が要る**ので、片方だけでは件数は動かない。
