@@ -2140,3 +2140,64 @@ IUT そのものを要求する。**
 `ResearchPaper/0_Source/mathlib4_fork-ABS/`(5 ファイル + `LICENSE` + `lean-toolchain`)。
 実測は `ResearchPaper/lean-ecosystem.json` の
 `mathlib4_fork (ABS-Criterion-Project)` に登録した。
+
+---
+
+## §9-23 ★★★C1 の実装 —— 穴は 1 点まで絞れた(次はここから)
+
+**2026-08-17。**退化封じ(§9-22 の後)に続き、**実際に埋める作業**として C1
+(`Interface/Arakelov/ArcSpace.lean` の `ArcSpaceData`)を実装した。
+`Found/Arakelov/` に **9 ファイル・すべて sorry 0**。
+
+### ★★C1 の 7 要求の状態
+
+| 場 | 実装 | 場所 |
+|---|---|---|
+| `Arc X` | ✅ | `complexPoints`(既存) |
+| `equivComplexPoints` | ✅ | `Equiv.refl` |
+| `evalAffine` | ✅ | `ArcEval.lean`(`Spec.preimage`) |
+| `conj` / `conj_involutive` | ✅ | `ArcConjInvol.lean` |
+| `conj_continuous` | ✅ | `ArcTopology.lean` |
+| `topology` | ✅ | `ArcTopology.lean`(`⨆` over affine opens) |
+| `topology_affine` | ✅ | `ArcTopologyAffineEq.lean` |
+| `topology_openImmersion` | ★**前半のみ** | `ArcOpenImmersion.lean` |
+
+### ★★★残る穴は 1 点である
+
+    induced (· ≫ f) (arcTopology Y) ≤ arcTopology X
+
+すなわち「**`(· ≫ f)` が開写像**」。★手元にある部品:
+
+| 部品 | 場所 |
+|---|---|
+| `continuous_comp_openImmersion`(前半) | `ArcOpenImmersion.lean` |
+| `comp_openImmersion_injective` | 同 |
+| `preimage_image_comp_openImmersion` | 同 |
+| `isOpen_arcBasicOpen`(`{p ǀ g(p) ≠ 0}` が開) | `ArcBasicOpen.lean` |
+| `imageAffineOpen` と mathlib の `affineOpensEquiv` の一致 | `ArcOpenImmersion.lean` |
+
+### ★★★★次のセッションの 3 段(ここから始める)
+
+1. **`W := (· ≫ f) '' V` が `arcTopology Y` で開**であることを示す。
+   `arcTopology Y = ⨆` なので、各アフィン開 `V' ⊆ Y` について
+   `chart_{V'}⁻¹ W` が `arcTopologyOpen V'` で開であることに帰着する。
+2. `chart_{V'}⁻¹ W = {r : Arc V' ǀ r ≫ V'.ι が f を経由し、その因子が V に入る}`。
+   ★★**「`f` を経由する」は「像の点が `f.opensRange` に入る」**であり、
+   `V' ∩ f.opensRange` は `V'` の開集合。
+   ★アフィン `V'` では基本開集合の合併なので **`isOpen_arcBasicOpen` で開**。
+3. その開集合の上で**逆写像 `ψ : {r ǀ …} → Arc X`** を作り
+   (`r ≫ V'.ι = ψ(r) ≫ f`、一意性は `comp_openImmersion_injective`)、
+   **`ψ` の連続性**を示す。★★`chart_{V'}⁻¹ W = ψ⁻¹ V` となって終わる。
+
+★★**鍵は `IsOpenImmersion.affineOpensEquiv`**(mathlib、順序同型)——
+`X` のアフィン開被覆と `Y` の被覆のうち像に入るものが 1 対 1 に対応する。
+
+### ★実装で 2 度かかった罠(記録)
+
+★★★**`simp only [Function.comp_def]` は `Scheme.Hom.mk` まで展開して壊す。**
+`rw [h]` を使い、**`h` を「合成の形」で述べる**(ゴールが既に合成形なので)。
+
+★位相のインスタンスは `letI` で**明示的に**入れる(`⨆` の各成分は自動で決まらない)。
+
+★★★**`TopologicalSpace` の `≤` は「細かい」**。`le_def` の表示は対称で読めないので、
+**`⊥` が離散かを試して**確定させること(2026-08-17 に一度誤った)。
