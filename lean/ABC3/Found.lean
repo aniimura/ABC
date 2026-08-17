@@ -150,10 +150,6 @@ import ABC3.Found.Arakelov.PicWhiskerW
 import ABC3.Found.Arakelov.PicAssoc
 import ABC3.Found.Arakelov.PicType
 import ABC3.Found.Arakelov.PicLocalTrivial
-import ABC3.Found.Arakelov.PicGroup
-import ABC3.Found.Arakelov.PicQuotient
-import ABC3.Found.Arakelov.PicInterface
-import ABC3.Found.Arakelov.PicAffine
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
