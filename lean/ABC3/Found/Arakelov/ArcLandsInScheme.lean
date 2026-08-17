@@ -1,5 +1,6 @@
 import ABC3.Found.Arakelov.ArcLandsIn
 import ABC3.Found.Arakelov.ArcTopology
+import ABC3.Found.Arakelov.ArcLift
 
 /-!
 # Arakelov (C1) の配管 —— **一般スキームでの「点が開集合に落ちる」**(`Found`)
@@ -105,11 +106,50 @@ theorem isOpen_landsIn_inter {X : Scheme.{0}} (U U' : X.affineOpens) :
         p.base default ∈ (U'.1.ι ⁻¹ᵁ U.1)} :=
   isOpen_landsIn_open U' _
 
+/-! ## ★★★chart の像は開である -/
+
+/-- ★★★**アフィン chart の像は `X^arc` の開集合である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+    Set.range (· ≫ U.ι) = {q ǀ q の像の点が U に入る}
+
+★★機構は `mem_range_comp_iff_base_default`(像への所属 = 点の条件)と
+`isOpen_landsIn_scheme`(点が開集合に落ちる条件は開)。
+
+★★★**これが「chart が開埋め込みである」の半分**である
+(残り半分は位相が部分空間位相であること)。 -/
+theorem isOpen_range_chart {X : Scheme.{0}} (U : X.affineOpens) :
+    @IsOpen _ (arcTopology X)
+      (Set.range (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.1.ι)) := by
+  letI := arcTopology X
+  have hset : Set.range (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.1.ι)
+      = {q : Spec (CommRingCat.of ℂ) ⟶ X | q.base default ∈ U.1} := by
+    ext q
+    rw [mem_range_comp_iff_base_default U.1.ι q, Set.mem_setOf_eq]
+    constructor
+    · intro h
+      have := Scheme.Opens.range_ι U.1
+      rw [this] at h
+      exact h
+    · intro h
+      have := Scheme.Opens.range_ι U.1
+      rw [this]
+      exact h
+  rw [hset]
+  exact isOpen_landsIn_scheme U.1
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def continuous_base_default_scheme.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——像の点を取る写像の連続性、一般のスキーム)",
+    sectionId := "genell-def-1-1-i" }
+
+def isOpen_range_chart.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——アフィン chart の像が開であること)",
     sectionId := "genell-def-1-1-i" }
 
 def isOpen_landsIn_open.src : ABC3.Meta.Source :=
