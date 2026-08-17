@@ -6,12 +6,12 @@
 - [完成宣言は文脈を持たない子に監査させる](challenger-audit-without-context.md) — 自分の文脈を継いだ検証は自分の誤読も継ぐ。Prop 1.10 の .src 6 個が全滅した実例。
 - [委譲が文脈を節約する条件](delegation-saves-context-only-when-output-is-small.md) — 「依頼+返答 << 作業」のときだけ。Lean の証明書きは該当しない。長期の器はリポジトリのファイル。
 - [FrdI §1 の残り2件は原文の仮定から出ない](frdi-s1-two-blockers.md) — 13/15 で停止。Gap/ に記録。捻れ積 𝔽_Φ⋉G が反例の道で、mono が破れることまで証明済み。
-- [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで 0/24。律速は Arakelov 理論と l 捩れ Galois 表現の不在。Lemma 3.1 (iv) は 9 段中 6 段が済。
+- [GenEll トラック(B)の長期ゴール](genell-track-b.md) — ABC3b 担当。Cor 4.4 まで **5/24**。★2026-08-17 に「§1 の律速は Arakelov 理論」判定を**撤回**し、高さを構成した。残るは mathlib の在庫 3 本。
 - [GenEll Def 1.2 (ii) の ≲ は向きが逆](genell-bd-class-direction.md) — 同じ論文の Thm 2.1 と IUTchIV Cor 2.3 と食い違う。3 箇所 PDF 目視、子が独立確認。abc を書くときは BDge を使う。
 - [FrdI Prop 2.1 (iii) は「d 固定」だと偽](frdi-prop21-quantifier-false.md) — 機械検証済み。d=1 で全 Frobenioid が反例、d=3・Φ=ℤ/2 でも。意図された「すべての d」版は証明済みなのでそちらを引く。
 - [逐語引用は ASCII だけの断片に切る](frdi-verbatim-ascii-only.md) — ▷ ′ ⪯ ∈ ± は抽出と layout で食い違う。txt から splice しても落ちる。ページ番号は物理ページ。
 - [Lean の合否は lake build で判定する](lean-build-check-discipline.md) — `cd` を必ず絶対パスで書く。`lake env lean` が通っても build は落ちうる。ゲートはパイプせず終了コードを読む。
 - [並行セッションが自分のファイルを巻き込む](parallel-session-sweeps-my-files.md) — 相手が git add -A を使うのでパス限定 add では守れない。1 ファイル通るごとに即コミット。git add -p は対話に入るので使わない。
-- [「導けない」と書く前に在庫を検索する](frdi-split-nonisotropic-not-derivable.md) — [FrdI] の分裂の非 isotropic 拡張で一度誤った。補題は既に `Prop18.lean` にあった。
+- [「導けない」と書く前に在庫を検索する](frdi-split-nonisotropic-not-derivable.md) — 自分の在庫で 4 回、★**mathlib の在庫でも 2 回**外した。mathlib は概念名でなく「量の名前」で索引されている。
 - [1-一意性と rigidity は 2 つの型で落ちる](frdi-1uniqueness-rigidity-patterns.md) — 1-一意性は「恒等になる合成を 1 つ見つける」、rigidity は「その操作が圏同値であることを言う」。手で共役を組むと詰まる(2 度実測)。
 - [圏同値の3性質は別々の道具で落ちる](frdi-equivalence-three-properties.md) — 行き先が前順序圏なので充満性は「射が1本あればよい」。忠実性はコスライスがepi・スライスがmono。持ち上げは対象を先に分解して subst。
