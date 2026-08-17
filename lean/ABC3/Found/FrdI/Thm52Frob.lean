@@ -480,6 +480,523 @@ theorem model_frobDegUniq (h : Hyp M) (A B E : Obj M) (φ : A ⟶ B) (ψ : A ⟶
     simp only [PNat.one_coe, one_smul]
     rw [add_assoc, bneg_add, add_zero]
 
+/-! ## ★6. `𝒪^▷(A)` の記述
+
+★★**`𝔽_Φ` との違いがはっきり出るところ** —— `𝔽_Φ` では `𝒪^▷(A) ≅ Φ(A)` だったが、
+model Frobenioid では
+
+  `𝒪^▷(A) ≅ {(a, u) ∈ Φ(A) × B(A) : toGp a = Div_B(u)}`
+
+である(`α` を動かさないための縛りが入る)。 -/
+
+/-- ★`(a, u)` から作る `𝒪^▷(A)` の元。 -/
+def otriOf (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : End A :=
+  ⟨𝟙 A.base, a, 1, u, by simp [hau]⟩
+
+@[simp] theorem otriOf_base (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : (otriOf A a u hau).base = 𝟙 A.base := rfl
+@[simp] theorem otriOf_div (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : (otriOf A a u hau).div = a := rfl
+@[simp] theorem otriOf_deg (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : (otriOf A a u hau).deg = 1 := rfl
+@[simp] theorem otriOf_u (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : (otriOf A a u hau).u = u := rfl
+
+theorem otriOf_mem (h : Hyp M) (A : Obj M) (a : M.phi.val A.base) (u : M.bmon.val A.base)
+    (hau : toGpHom _ a = M.divB _ u) : otriOf A a u hau ∈ OTri (modelPre h) A :=
+  ⟨((modelPre h).Base_id A).symm, rfl⟩
+
+/-- ★`𝒪^▷(A)` の元は「底が `𝟙`・次数 1」に他ならない。 -/
+theorem mem_otri_iff (h : Hyp M) {A : Obj M} (x : End A) :
+    x ∈ OTri (modelPre h) A ↔ (x.base = 𝟙 A.base ∧ x.deg = 1) := by
+  constructor
+  · rintro ⟨hb, hl⟩
+    exact ⟨hb.trans ((modelPre h).Base_id A), hl⟩
+  · rintro ⟨hb, hl⟩
+    refine ⟨?_, hl⟩
+    show (modelPre h).Base x = (modelPre h).Base (𝟙 A)
+    rw [(modelPre h).Base_id A]
+    exact hb
+
+/-- ★`𝒪^▷(A)` の元は `Div` と `u` で決まる。 -/
+theorem otri_ext (h : Hyp M) {A : Obj M} {x y : End A}
+    (hx : x ∈ OTri (modelPre h) A) (hy : y ∈ OTri (modelPre h) A)
+    (hd : x.div = y.div) (hu : x.u = y.u) : x = y := by
+  obtain ⟨hxb, hxl⟩ := (mem_otri_iff h x).mp hx
+  obtain ⟨hyb, hyl⟩ := (mem_otri_iff h y).mp hy
+  exact Hom.ext (hxb.trans hyb.symm) hd (hxl.trans hyl.symm) hu
+
+/-- ★`𝒪^▷(A)` の元は `toGp (Div) = Div_B(u)` を満たす。 -/
+theorem otri_gp_eq (h : Hyp M) {A : Obj M} {x : End A} (hx : x ∈ OTri (modelPre h) A) :
+    toGpHom _ x.div = M.divB _ x.u := by
+  obtain ⟨hxb, hxl⟩ := (mem_otri_iff h x).mp hx
+  have hc := x.cond
+  rw [hxb, hxl] at hc
+  simp only [PNat.one_coe, one_smul, MonoidOn.gpMapOn_id] at hc
+  exact add_left_cancel hc
+
+/-- ★★**可換条件の判定** —— `𝔽_Φ` と同じ形の式が `Div` と `u` の 2 本になる。 -/
+theorem otri_comm_iff (h : Hyp M) {A B : Obj M} (φ : A ⟶ B)
+    {α : End A} (hα : α ∈ OTri (modelPre h) A)
+    {β : End B} (hβ : β ∈ OTri (modelPre h) B) :
+    (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ ↔
+      (M.phi.map φ.base β.div = (φ.deg : ℕ) • α.div ∧
+        M.bmon.map φ.base β.u = (φ.deg : ℕ) • α.u) := by
+  obtain ⟨hαb, hαl⟩ := (mem_otri_iff h α).mp hα
+  obtain ⟨hβb, hβl⟩ := (mem_otri_iff h β).mp hβ
+  letI := isCancelAdd_of_isIntegralMonoid _ (h.divisorial A.base).1.1
+  constructor
+  · intro heq
+    have hd := congrArg Hom.div heq
+    have hu := congrArg Hom.u heq
+    rw [comp_div, comp_div, hβl, hαb] at hd
+    rw [comp_u, comp_u, hβl, hαb] at hu
+    simp only [PNat.one_coe, one_smul, MonoidOn.map_id] at hd hu
+    refine ⟨add_right_cancel (by rw [add_comm ((φ.deg : ℕ) • α.div)]; exact hd), ?_⟩
+    exact groupLike_add_right_cancel (h.bmonGroupLike A.base) (c := φ.u)
+      (by rw [add_comm ((φ.deg : ℕ) • α.u)]; exact hu)
+  · rintro ⟨hd, hu⟩
+    refine Hom.ext ?_ ?_ ?_ ?_
+    · rw [comp_base, comp_base, hβb, hαb, Category.comp_id, Category.id_comp]
+    · rw [comp_div, comp_div, hβl, hαb]
+      simp only [PNat.one_coe, one_smul, MonoidOn.map_id]
+      rw [hd, add_comm]
+    · rw [comp_deg, comp_deg, hβl, hαl, one_mul, mul_one]
+    · rw [comp_u, comp_u, hβl, hαb]
+      simp only [PNat.one_coe, one_smul, MonoidOn.map_id]
+      rw [hu, add_comm]
+
+/-! ## ★7. (iii)(c) の 3 条 -/
+
+theorem phi_map_roundtrip {A B : D} (f : A ⟶ B) [IsIso f] (x : M.phi.val A) :
+    M.phi.map f (M.phi.map (inv f) x) = x := by
+  rw [← MonoidOn.map_comp, IsIso.hom_inv_id, MonoidOn.map_id]
+
+theorem bmon_map_roundtrip {A B : D} (f : A ⟶ B) [IsIso f] (x : M.bmon.val A) :
+    M.bmon.map f (M.bmon.map (inv f) x) = x := by
+  rw [← MonoidOn.map_comp, IsIso.hom_inv_id, MonoidOn.map_id]
+
+/-- **(iii)(c)** 順方向。 -/
+theorem model_otriFwd (h : Hyp M) {A B : Obj M} (φ : A ⟶ B)
+    (_hca : IsCoAngular (modelPre h) φ) (hst : IsPreStep (modelPre h) φ)
+    (α : End A) (hα : α ∈ OTri (modelPre h) A) :
+    ∃! β : End B, β ∈ OTri (modelPre h) B ∧
+      (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  haveI hbi : IsIso φ.base := hst.2
+  have hdeg : φ.deg = 1 := hst.1
+  have hαgp := otri_gp_eq h hα
+  have hb : toGpHom _ (M.phi.map (inv φ.base) α.div)
+      = M.divB _ (M.bmon.map (inv φ.base) α.u) := by
+    rw [← MonoidOn.gpMapOn_toGpHom, hαgp, ← M.divB_nat (inv φ.base) α.u]
+  refine ⟨otriOf B (M.phi.map (inv φ.base) α.div) (M.bmon.map (inv φ.base) α.u) hb,
+    ⟨otriOf_mem h B _ _ hb, ?_⟩, ?_⟩
+  · refine (otri_comm_iff h φ hα (otriOf_mem h B _ _ hb)).mpr ?_
+    rw [hdeg]
+    simp only [PNat.one_coe, one_smul, otriOf_div, otriOf_u]
+    exact ⟨phi_map_roundtrip φ.base α.div, bmon_map_roundtrip φ.base α.u⟩
+  · rintro β ⟨hβ, hβe⟩
+    obtain ⟨hd, hu⟩ := (otri_comm_iff h φ hα hβ).mp hβe
+    rw [hdeg] at hd hu
+    simp only [PNat.one_coe, one_smul] at hd hu
+    refine otri_ext h hβ (otriOf_mem h B _ _ hb) ?_ ?_
+    · rw [otriOf_div, ← hd, ← MonoidOn.map_comp, IsIso.inv_hom_id, MonoidOn.map_id]
+    · rw [otriOf_u, ← hu, ← MonoidOn.map_comp, IsIso.inv_hom_id, MonoidOn.map_id]
+
+/-- **(iii)(c)** 逆方向。 -/
+theorem model_otriBwd (h : Hyp M) {A B : Obj M} (φ : A ⟶ B)
+    (_hca : IsCoAngular (modelPre h) φ) (hst : IsPreStep (modelPre h) φ)
+    (β : End B) (hβ : β ∈ OTri (modelPre h) B) :
+    ∃! α : End A, α ∈ OTri (modelPre h) A ∧
+      (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ := by
+  haveI hbi : IsIso φ.base := hst.2
+  have hdeg : φ.deg = 1 := hst.1
+  have hβgp := otri_gp_eq h hβ
+  have ha : toGpHom _ (M.phi.map φ.base β.div) = M.divB _ (M.bmon.map φ.base β.u) := by
+    rw [← MonoidOn.gpMapOn_toGpHom, hβgp, ← M.divB_nat φ.base β.u]
+  refine ⟨otriOf A (M.phi.map φ.base β.div) (M.bmon.map φ.base β.u) ha,
+    ⟨otriOf_mem h A _ _ ha, ?_⟩, ?_⟩
+  · refine (otri_comm_iff h φ (otriOf_mem h A _ _ ha) hβ).mpr ?_
+    rw [hdeg]
+    simp
+  · rintro α ⟨hα, hαe⟩
+    obtain ⟨hd, hu⟩ := (otri_comm_iff h φ hα hβ).mp hαe
+    rw [hdeg] at hd hu
+    simp only [PNat.one_coe, one_smul] at hd hu
+    exact otri_ext h hα (otriOf_mem h A _ _ ha) hd.symm hu.symm
+
+/-- **(iii)(c)** 全単射は `Base(φ)` にしか依らない。 -/
+theorem model_otriBase (h : Hyp M) {A B : Obj M} (φ φ' : A ⟶ B)
+    (_hca : IsCoAngular (modelPre h) φ) (hst : IsPreStep (modelPre h) φ)
+    (_hca' : IsCoAngular (modelPre h) φ') (hst' : IsPreStep (modelPre h) φ')
+    (hbase : (modelPre h).Base φ = (modelPre h).Base φ')
+    (α : End A) (hα : α ∈ OTri (modelPre h) A)
+    (β : End B) (hβ : β ∈ OTri (modelPre h) B)
+    (heq : (φ ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ) :
+    (φ' ≫ β : A ⟶ B) = (α : A ⟶ A) ≫ φ' := by
+  obtain ⟨hd, hu⟩ := (otri_comm_iff h φ hα hβ).mp heq
+  rw [show φ.deg = 1 from hst.1] at hd hu
+  refine (otri_comm_iff h φ' hα hβ).mpr ?_
+  rw [show φ'.deg = 1 from hst'.1, show φ'.base = φ.base from hbase.symm]
+  exact ⟨hd, hu⟩
+
+/-! ## ★8. (v)(b)(c) の一意性に共通する同型
+
+★`𝔽_Φ` と同じく **1 つの構成が (b)(c) 両方を与える**。
+★★`Φ` は sharp なので「可逆元だけ違う」は「**等しい**」になり、
+`𝔽_Φ` の証明より短くなる。代わりに `u` 成分の合わせが要る。 -/
+
+theorem model_preStepIso (h : Hyp M) {A B X X' : Obj M}
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B)
+    (heq : (β ≫ α : A ⟶ B) = β' ≫ α')
+    (hβ : IsPreStep (modelPre h) β) (hα : IsLinear (modelPre h) α)
+    (hβ' : IsPreStep (modelPre h) β') (hα' : IsLinear (modelPre h) α')
+    (hdiv : β'.div = β.div) :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  haveI hbβ : IsIso β.base := hβ.2
+  haveI hbβ' : IsIso β'.base := hβ'.2
+  have hdβ : β.deg = 1 := hβ.1
+  have hdβ' : β'.deg = 1 := hβ'.1
+  have hdα : α.deg = 1 := hα
+  have hdα' : α'.deg = 1 := hα'
+  have hbase : β.base ≫ α.base = β'.base ≫ α'.base := congrArg Hom.base heq
+  have hueq : M.bmon.map β.base α.u + β.u = M.bmon.map β'.base α'.u + β'.u := by
+    have hh := congrArg Hom.u heq
+    rw [comp_u, comp_u, hdα, hdα'] at hh
+    simpa using hh
+  have hdeq : M.phi.map β.base α.div = M.phi.map β'.base α'.div := by
+    have hh := congrArg Hom.div heq
+    rw [comp_div, comp_div, hdα, hdα', hdiv] at hh
+    simp only [PNat.one_coe, one_smul] at hh
+    letI := isCancelAdd_of_isIntegralMonoid _ (h.divisorial A.base).1.1
+    exact add_right_cancel hh
+  -- ★`γ` の関係式
+  have hcond : ((1 : ℕ+) : ℕ) • X.cls + toGpHom _ (0 : M.phi.val X.base)
+      = M.phi.gpMapOn (inv β.base ≫ β'.base) X'.cls
+        + M.divB _ (M.bmon.map (inv β.base) (β'.u + bneg h β.u)) := by
+    have hb := β.cond
+    have hb' := β'.cond
+    rw [hdβ] at hb
+    rw [hdβ', hdiv] at hb'
+    simp only [PNat.one_coe, one_smul] at hb hb'
+    have hkey : M.phi.gpMapOn β.base X.cls + M.divB _ β.u
+        = M.phi.gpMapOn β'.base X'.cls + M.divB _ β'.u := by rw [← hb, ← hb']
+    have h2 := congrArg (M.phi.gpMapOn (inv β.base)) hkey
+    rw [(M.phi.gpMapOn (inv β.base)).map_add, (M.phi.gpMapOn (inv β.base)).map_add,
+      ← MonoidOn.gpMapOn_comp, IsIso.inv_hom_id, MonoidOn.gpMapOn_id,
+      ← MonoidOn.gpMapOn_comp, ← M.divB_nat (inv β.base) β.u,
+      ← M.divB_nat (inv β.base) β'.u] at h2
+    rw [map_add, map_bneg, (M.divB X.base).map_add, divB_bneg]
+    simp only [PNat.one_coe, one_smul, map_zero, add_zero]
+    rw [eq_sub_of_add_eq h2]
+    abel
+  obtain ⟨g, hgb, hgd, hgdeg, hgu⟩ :
+      ∃ g : X ⟶ X', g.base = inv β.base ≫ β'.base ∧ g.div = 0 ∧ g.deg = 1 ∧
+        g.u = M.bmon.map (inv β.base) (β'.u + bneg h β.u) :=
+    ⟨⟨inv β.base ≫ β'.base, 0, 1,
+      M.bmon.map (inv β.base) (β'.u + bneg h β.u), hcond⟩, rfl, rfl, rfl, rfl⟩
+  haveI hgiso : IsIso g :=
+    (model_isIso_iff h g).mpr ⟨by rw [hgb]; infer_instance, hgd, hgdeg⟩
+  refine ⟨asIso g, ?_, ?_⟩
+  · -- `α' = γ.inv ≫ α` ⟺ `γ.hom ≫ α' = α`
+    rw [Iso.eq_inv_comp]
+    show (g ≫ α' : X ⟶ B) = α
+    refine Hom.ext ?_ ?_ ?_ ?_
+    · show g.base ≫ α'.base = α.base
+      rw [hgb, Category.assoc, ← hbase, ← Category.assoc, IsIso.inv_hom_id,
+        Category.id_comp]
+    · show M.phi.map g.base α'.div + (α'.deg : ℕ) • g.div = α.div
+      rw [hgb, hgd, MonoidOn.map_comp, ← hdeq, ← MonoidOn.map_comp, IsIso.inv_hom_id,
+        MonoidOn.map_id]
+      simp
+    · show α'.deg * g.deg = α.deg
+      rw [hgdeg, mul_one, hdα, hdα']
+    · show M.bmon.map g.base α'.u + (α'.deg : ℕ) • g.u = α.u
+      rw [hdα', hgb, hgu]
+      simp only [PNat.one_coe, one_smul]
+      rw [MonoidOn.map_comp, ← map_add, ← add_assoc, ← hueq, add_assoc, add_bneg,
+        add_zero, ← MonoidOn.map_comp, IsIso.inv_hom_id, MonoidOn.map_id]
+  · show β' = β ≫ g
+    refine Hom.ext ?_ ?_ ?_ ?_
+    · show β'.base = β.base ≫ g.base
+      rw [hgb, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+    · show β'.div = M.phi.map β.base g.div + (g.deg : ℕ) • β.div
+      rw [hgd, hgdeg, map_zero, zero_add]
+      simp [hdiv]
+    · show β'.deg = g.deg * β.deg
+      rw [hgdeg, one_mul, hdβ, hdβ']
+    · show β'.u = M.bmon.map β.base g.u + (g.deg : ℕ) • β.u
+      rw [hgu, hgdeg, bmon_map_roundtrip]
+      simp only [PNat.one_coe, one_smul]
+      rw [add_assoc, bneg_add, add_zero]
+
+/-- **(v)(b)** の一意性。 -/
+theorem model_preStepFactorUniq (h : Hyp M) {A B : Obj M} (X X' : Obj M)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (_hcβ : IsCoAngular (modelPre h) β) (hβ : IsPreStep (modelPre h) β)
+    (hiα : IsIsometric (modelPre h) α) (hα : IsPreStep (modelPre h) α)
+    (_hcβ' : IsCoAngular (modelPre h) β') (hβ' : IsPreStep (modelPre h) β')
+    (hiα' : IsIsometric (modelPre h) α') (hα' : IsPreStep (modelPre h) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  refine model_preStepIso h β α β' α' heq hβ hα.1 hβ' hα'.1 ?_
+  have hh := congrArg Hom.div heq
+  rw [comp_div, comp_div, show α.deg = 1 from hα.1, show α'.deg = 1 from hα'.1,
+    show α.div = 0 from hiα, show α'.div = 0 from hiα'] at hh
+  simp only [PNat.one_coe, one_smul, map_zero, zero_add] at hh
+  exact hh.symm
+
+/-- **(v)(c)** の一意性。 -/
+theorem model_preStepFactorUniq' (h : Hyp M) {A B : Obj M} (X X' : Obj M)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (hiβ : IsIsometric (modelPre h) β) (hβ : IsPreStep (modelPre h) β)
+    (_hcα : IsCoAngular (modelPre h) α) (hα : IsPreStep (modelPre h) α)
+    (hiβ' : IsIsometric (modelPre h) β') (hβ' : IsPreStep (modelPre h) β')
+    (_hcα' : IsCoAngular (modelPre h) α') (hα' : IsPreStep (modelPre h) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom :=
+  model_preStepIso h β α β' α' heq hβ hα.1 hβ' hα'.1
+    (by rw [show β.div = 0 from hiβ, show β'.div = 0 from hiβ'])
+
+/-! ## ★9. (vi) 単元を除く忠実性
+
+★`Φ` は sharp なので零因子の差は **0**。ずれは `u` にしか出ない。 -/
+
+theorem model_faithfulUpToUnits (h : Hyp M) {A B : Obj M} (φ ψ : A ⟶ B)
+    (hb : BaseEquivalent (modelPre h) φ ψ) (hm : MetricallyEquivalent (modelPre h) φ ψ)
+    (hφ : IsPreStep (modelPre h) φ) (hψ : IsPreStep (modelPre h) ψ) :
+    ∃ α : End B, α ∈ OTimes (modelPre h) B ∧ φ = ψ ≫ (α : B ⟶ B) := by
+  haveI hbψ : IsIso ψ.base := hψ.2
+  have hbe : φ.base = ψ.base := hb
+  have hme : φ.div = ψ.div := hm
+  have hdφ : φ.deg = 1 := hφ.1
+  have hdψ : ψ.deg = 1 := hψ.1
+  -- ★`Div_B(φ.u) = Div_B(ψ.u)`
+  have hgp : M.divB _ φ.u = M.divB _ ψ.u := by
+    have hc1 := φ.cond
+    have hc2 := ψ.cond
+    rw [hdφ, hme, hbe] at hc1
+    rw [hdψ] at hc2
+    exact add_left_cancel (hc1.symm.trans hc2)
+  have hcond : toGpHom _ (0 : M.phi.val B.base)
+      = M.divB _ (M.bmon.map (inv ψ.base) (φ.u + bneg h ψ.u)) := by
+    rw [M.divB_nat (inv ψ.base) (φ.u + bneg h ψ.u), map_add, divB_bneg, hgp]
+    simp
+  refine ⟨otriOf B 0 (M.bmon.map (inv ψ.base) (φ.u + bneg h ψ.u)) hcond,
+    ⟨otriOf_mem h B _ _ hcond, ?_⟩, ?_⟩
+  · refine (isUnit_iff_isIso _).mpr ((model_isIso_iff h _).mpr ⟨?_, rfl, rfl⟩)
+    show IsIso (𝟙 B.base)
+    infer_instance
+  · refine Hom.ext ?_ ?_ ?_ ?_
+    · show φ.base = ψ.base ≫ 𝟙 B.base
+      rw [Category.comp_id]
+      exact hbe
+    · show φ.div = M.phi.map ψ.base (0 : M.phi.val B.base) + ((1 : ℕ+) : ℕ) • ψ.div
+      rw [map_zero, zero_add]
+      simp [hme]
+    · show φ.deg = 1 * ψ.deg
+      rw [one_mul, hdφ, hdψ]
+    · show φ.u = M.bmon.map ψ.base (M.bmon.map (inv ψ.base) (φ.u + bneg h ψ.u))
+        + ((1 : ℕ+) : ℕ) • ψ.u
+      rw [bmon_map_roundtrip]
+      simp only [PNat.one_coe, one_smul]
+      rw [add_assoc, bneg_add, add_zero]
+
+/-! ## ★10. (i)(b) span
+
+★★`𝔽_Φ` では `X := A` で済んだが、model では **`α` を下げた対象**を作らねばならない。
+`Gp` の元は `toGp a − toGp b` と書けるので、
+`X := (A_𝒟, −toGp(b₁ + b₂))` と取れば `A` にも `B` にも pre-step が入る。 -/
+
+theorem model_preStepSpan (h : Hyp M) (A B : Obj M)
+    (α : ((modelPre h).toElem.obj A).base ⟶ ((modelPre h).toElem.obj B).base)
+    (hα : IsIso α) :
+    ∃ (X : Obj M) (φ : X ⟶ A) (ψ : X ⟶ B) (hφ : IsPreStep (modelPre h) φ),
+      IsPreStep (modelPre h) ψ ∧
+        α = @inv _ _ _ _ ((modelPre h).Base φ) hφ.2 ≫ (modelPre h).Base ψ := by
+  obtain ⟨a, rfl⟩ : ∃ a : A.base ⟶ B.base, a = α := ⟨α, rfl⟩
+  obtain ⟨a₁, b₁, h1⟩ := gp_sub_repr A.cls
+  obtain ⟨a₂, b₂, h2⟩ := gp_sub_repr (M.phi.gpMapOn a B.cls)
+  have hc1 : ((1 : ℕ+) : ℕ) • (-(toGpHom (M.phi.val A.base) (b₁ + b₂)))
+      + toGpHom _ (a₁ + b₂)
+      = M.phi.gpMapOn (𝟙 A.base) A.cls + M.divB _ (0 : M.bmon.val A.base) := by
+    rw [h1, MonoidOn.gpMapOn_id, map_zero, add_zero, map_add, map_add]
+    simp only [PNat.one_coe, one_smul]
+    abel
+  have hc2 : ((1 : ℕ+) : ℕ) • (-(toGpHom (M.phi.val A.base) (b₁ + b₂)))
+      + toGpHom _ (a₂ + b₁)
+      = M.phi.gpMapOn a B.cls + M.divB _ (0 : M.bmon.val A.base) := by
+    rw [h2, map_zero, add_zero, map_add, map_add]
+    simp only [PNat.one_coe, one_smul]
+    abel
+  refine ⟨(⟨A.base, -(toGpHom _ (b₁ + b₂))⟩ : Obj M),
+    (⟨𝟙 A.base, a₁ + b₂, 1, 0, hc1⟩ :
+      (⟨A.base, -(toGpHom _ (b₁ + b₂))⟩ : Obj M) ⟶ A),
+    (⟨a, a₂ + b₁, 1, 0, hc2⟩ :
+      (⟨A.base, -(toGpHom _ (b₁ + b₂))⟩ : Obj M) ⟶ B),
+    ⟨rfl, ?_⟩, ⟨rfl, hα⟩, ?_⟩
+  · show IsIso (𝟙 A.base)
+    infer_instance
+  · haveI hii : IsIso ((modelPre h).Base
+        (⟨𝟙 A.base, a₁ + b₂, 1, 0, hc1⟩ :
+          (⟨A.base, -(toGpHom _ (b₁ + b₂))⟩ : Obj M) ⟶ A)) := by
+      show IsIso (𝟙 A.base)
+      infer_instance
+    exact (@IsIso.eq_inv_comp _ _ _ _ _ _ hii _ _).mpr (by
+      show 𝟙 A.base ≫ a = a
+      rw [Category.id_comp])
+
+/-! ## ★11. (iv)(a) の一意性 -/
+
+/-- ★`α` に要るのは **linear + isometric** だけ(pre-step まで要らない)。 -/
+theorem model_preStepFactorUniq_lin (h : Hyp M) {A B : Obj M} (X X' : Obj M)
+    (β : A ⟶ X) (α : X ⟶ B) (β' : A ⟶ X') (α' : X' ⟶ B) (heq : β ≫ α = β' ≫ α')
+    (hβ : IsPreStep (modelPre h) β) (hiα : IsIsometric (modelPre h) α)
+    (hlα : IsLinear (modelPre h) α)
+    (hβ' : IsPreStep (modelPre h) β') (hiα' : IsIsometric (modelPre h) α')
+    (hlα' : IsLinear (modelPre h) α') :
+    ∃ γ : X ≅ X', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  refine model_preStepIso h β α β' α' heq hβ hlα hβ' hlα' ?_
+  have hh := congrArg Hom.div heq
+  rw [comp_div, comp_div, show α.deg = 1 from hlα, show α'.deg = 1 from hlα',
+    show α.div = 0 from hiα, show α'.div = 0 from hiα'] at hh
+  simp only [PNat.one_coe, one_smul, map_zero, zero_add] at hh
+  exact hh.symm
+
+theorem model_arbFactorUniq (h : Hyp M) {A B : Obj M} (X Y X' Y' : Obj M)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (heq : (γ ≫ β ≫ α : A ⟶ B) = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType (modelPre h) γ) (hβ : IsPreStep (modelPre h) β)
+    (hα : IsPullBack (modelPre h) α)
+    (hγ' : IsFrobeniusType (modelPre h) γ') (hβ' : IsPreStep (modelPre h) β')
+    (hα' : IsPullBack (modelPre h) α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  obtain ⟨hαl, hαi⟩ := (model_isPullBack_iff h α).mp hα
+  obtain ⟨hαl', hαi'⟩ := (model_isPullBack_iff h α').mp hα'
+  have hdegγ : (modelPre h).degFr γ = (modelPre h).degFr γ' := by
+    have hh := congrArg Hom.deg heq
+    rw [comp_deg, comp_deg, comp_deg, comp_deg,
+      show β.deg = 1 from hβ.1, show α.deg = 1 from hαl,
+      show β'.deg = 1 from hβ'.1, show α'.deg = 1 from hαl'] at hh
+    simpa using hh
+  obtain ⟨εm, hεiso, hγε⟩ := model_frobDegUniq h A X X' γ γ' hγ hγ' hdegγ
+  obtain ⟨hεb, -, hεn⟩ := (model_isIso_iff h εm).mp hεiso
+  haveI := hεiso
+  haveI : Epi γ := model_totEpi h _ _ γ
+  have hcancel : (β ≫ α : X ⟶ B) = (εm ≫ β') ≫ α' := by
+    refine (cancel_epi γ).mp ?_
+    rw [heq, ← hγε]
+    simp
+  have hβ'' : IsPreStep (modelPre h) (εm ≫ β') := by
+    refine ⟨?_, ?_⟩
+    · show (εm ≫ β').deg = 1
+      rw [comp_deg, hεn, show β'.deg = 1 from hβ'.1, mul_one]
+    · haveI hb1 : IsIso εm.base := hεb
+      haveI hb2 : IsIso β'.base := hβ'.2
+      show IsIso ((εm ≫ β').base)
+      rw [comp_base]
+      infer_instance
+  obtain ⟨δ, hδ1, hδ2⟩ := model_preStepFactorUniq_lin h Y Y' β α (εm ≫ β') α'
+    hcancel hβ hαi hαl hβ'' hαi' hαl'
+  refine ⟨δ, asIso εm, hδ1, ?_, hγε.symm⟩
+  rw [← hδ2]
+  simp
+
+/-! ## ★12. (i)(c) —— `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` は圏同値
+
+★★pull-back は「次数 1・零因子 0」なので、`𝒞^pl-bk` の射は
+**底の射と `u` だけ**で決まる。その `u` は `B` が group-like なので一意に定まり、
+**底の圏そのもの**が復元される。 -/
+
+theorem model_plBkEquiv (h : Hyp M) (A : Obj M) :
+    (plBkOverFunctor (modelPre h) A).IsEquivalence := by
+  haveI hfaith : (plBkOverFunctor (modelPre h) A).Faithful := by
+    constructor
+    intro Z W f g hfg
+    have hb : f.left.hom.base = g.left.hom.base := congrArg CommaMorphism.left hfg
+    obtain ⟨hWl, hWi⟩ := (model_isPullBack_iff h W.hom.hom).mp W.hom.property
+    obtain ⟨hfl, hfi⟩ := (model_isPullBack_iff h f.left.hom).mp f.left.property
+    obtain ⟨hgl, hgi⟩ := (model_isPullBack_iff h g.left.hom).mp g.left.property
+    have hwf : (f.left.hom ≫ W.hom.hom) = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have hwg : (g.left.hom ≫ W.hom.hom) = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    have hu : f.left.hom.u = g.left.hom.u := by
+      have h1 := congrArg Hom.u (hwf.trans hwg.symm)
+      rw [comp_u, comp_u, hb, hWl] at h1
+      simp only [PNat.one_coe, one_smul] at h1
+      exact groupLike_add_right_cancel (h.bmonGroupLike _)
+        (c := M.bmon.map g.left.hom.base W.hom.hom.u)
+        (by rw [add_comm f.left.hom.u, add_comm g.left.hom.u]; exact h1)
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      (Hom.ext hb (hfi.trans hgi.symm) (hfl.trans hgl.symm) hu))
+  haveI hfull : (plBkOverFunctor (modelPre h) A).Full := by
+    constructor
+    intro Z W hh
+    obtain ⟨hWl, hWi⟩ := (model_isPullBack_iff h W.hom.hom).mp W.hom.property
+    obtain ⟨hZl, hZi⟩ := (model_isPullBack_iff h Z.hom.hom).mp Z.hom.property
+    obtain ⟨f₀, hf₀⟩ := (W.hom.property Z.left.obj).2
+      ⟨(Z.hom.hom, hh.left), (Over.w hh).symm⟩
+    have hp := Subtype.ext_iff.mp hf₀
+    have h1 : (f₀ ≫ W.hom.hom) = Z.hom.hom := congrArg Prod.fst hp
+    have h2 : f₀.base = hh.left := congrArg Prod.snd hp
+    have hdeg : f₀.deg = 1 := by
+      have hx := congrArg Hom.deg h1
+      rw [comp_deg, hWl, one_mul, hZl] at hx
+      exact hx
+    have hdiv : f₀.div = 0 := by
+      have hx := congrArg Hom.div h1
+      rw [comp_div, hWl, hWi, hZi] at hx
+      simpa using hx
+    exact ⟨Over.homMk (⟨f₀, (model_isPullBack_iff h f₀).mpr ⟨hdeg, hdiv⟩⟩ : Z.left ⟶ W.left)
+      (InducedWideCategory.Hom.ext h1), Over.OverMorphism.ext h2⟩
+  haveI hess : (plBkOverFunctor (modelPre h) A).EssSurj := by
+    constructor
+    intro Y
+    obtain ⟨q, hq⟩ : ∃ q : Y.left ⟶ ((modelPre h).toElem.obj A).base, q = Y.hom :=
+      ⟨Y.hom, rfl⟩
+    have hcond : ((1 : ℕ+) : ℕ) • (M.phi.gpMapOn q A.cls)
+        + toGpHom _ (0 : M.phi.val Y.left)
+        = M.phi.gpMapOn q A.cls + M.divB _ (0 : M.bmon.val Y.left) := by simp
+    refine ⟨Over.mk (show (⟨(⟨Y.left, M.phi.gpMapOn q A.cls⟩ : Obj M)⟩ : PlBk (modelPre h))
+        ⟶ (⟨A⟩ : PlBk (modelPre h)) from
+      ⟨(⟨q, 0, 1, 0, hcond⟩ : (⟨Y.left, M.phi.gpMapOn q A.cls⟩ : Obj M) ⟶ A),
+        (model_isPullBack_iff h _).mpr ⟨rfl, rfl⟩⟩), ⟨?_⟩⟩
+    refine Over.isoMk (Iso.refl _) ?_
+    show 𝟙 Y.left ≫ Y.hom = q
+    rw [Category.id_comp, hq]
+  exact ⟨hfaith, hfull, hess⟩
+
+/-! ## ★13. `Definition 1.3` の core 21 条
+
+原文 (FrdI p.101):
+> (ii) The category C is a Frobenioid [with respect to the functor C
+-/
+
+/-- ★★★★**model Frobenioid は `FrobenioidCore` の 21 条をすべて満たす**。 -/
+theorem model_frobenioidCore (h : Hyp M) : FrobenioidCore (modelPre h) where
+  baseSurj := model_baseSurj h
+  preStepSpan := model_preStepSpan h
+  plBkEquiv := model_plBkEquiv h
+  frobDegSurj := model_frobDegSurj h
+  frobDegUniq := model_frobDegUniq h
+  coAngularComp := model_coAngularComp h
+  coAngularOfPreStep := model_coAngularOfPreStep h
+  otriFwd := fun φ hca hst => model_otriFwd h φ hca hst
+  otriBwd := fun φ hca hst => model_otriBwd h φ hca hst
+  otriBase := fun φ φ' hca hst hca' hst' => model_otriBase h φ φ' hca hst hca' hst'
+  arbFactor := model_arbFactor h
+  arbFactorUniq := model_arbFactorUniq h
+  pullBackLB := model_pullBackLB h
+  preStepMono := model_preStepMono h
+  preStepFactor := model_preStepFactor h
+  preStepFactorUniq := model_preStepFactorUniq h
+  preStepFactor' := model_preStepFactor' h
+  preStepFactorUniq' := model_preStepFactorUniq' h
+  faithfulUpToUnits := fun φ ψ hb hm _hcφ hφ _hcψ hψ =>
+    model_faithfulUpToUnits h φ ψ hb hm hφ hψ
+  isotropicHullExists := model_isotropicHullExists h
+  isotropicClosed := model_isotropicClosed h
+
 end ModelData
 
 end ABC3.Found.FrdI
