@@ -349,6 +349,95 @@ theorem isIsoSubanchor_map_iff {A : C} :
   have h' : IsIsoSubanchor C (Ψ.inv.obj (Ψ.obj A)) := isIsoSubanchor_map Ψ.inv h
   exact isIsoSubanchor_of_iso ((Ψ.asEquivalence.unitIso).app A) h'
 
+/-! ## ★isotropic hull の一意性(一般の圏で) -/
+
+section HullUniq
+
+universe v₅ u₅ v₆ u₆ w₆
+
+variable {K : Type u₅} [Category.{v₅} K] {E : Type u₆} [Category.{v₆} E]
+  {Φ : MonoidOn.{v₆, u₆, w₆} E} (P : PreFrobenioid K Φ)
+
+/-- ★★**hull の下では射が一意に決まる** —— `h : X ⟶ H` が isotropic hull なら、
+isotropic な `Y` への 2 射 `u, v : H ⟶ Y` は `h ≫ u = h ≫ v` から等しい。
+
+★`IsIsotropicHull` の `∃!` の**一意性の部分だけ**を取り出したもの。
+★★これが以下すべて(hull 間の同型、その自然性)の**唯一の道具**である。 -/
+theorem isotropicHull_hom_ext {X H : K} {h : X ⟶ H} (hh : IsIsotropicHull P h)
+    {Y : K} (hY : IsIsotropic P Y) {u v : H ⟶ Y} (huv : h ≫ u = h ≫ v) : u = v := by
+  obtain ⟨w, -, wuniq⟩ := hh.2.2.2 Y hY (h ≫ u)
+  rw [wuniq u rfl, wuniq v huv]
+
+/-- `h` が hull のとき、isotropic な `Y` への射 `γ : X ⟶ Y` を持ち上げた射。 -/
+noncomputable def hullLift {X H : K} {h : X ⟶ H} (hh : IsIsotropicHull P h)
+    {Y : K} (hY : IsIsotropic P Y) (γ : X ⟶ Y) : H ⟶ Y :=
+  (hh.2.2.2 Y hY γ).choose
+
+@[simp] theorem hullLift_spec {X H : K} {h : X ⟶ H} (hh : IsIsotropicHull P h)
+    {Y : K} (hY : IsIsotropic P Y) (γ : X ⟶ Y) : h ≫ hullLift P hh hY γ = γ :=
+  ((hh.2.2.2 Y hY γ).choose_spec.1).symm
+
+/-- ★★**isotropic hull は一意** —— 同じ対象の 2 つの hull の間には
+**その対象の下で**一意な同型がある。
+
+★普遍性を両向きに使い、合成が恒等射であることを `isotropicHull_hom_ext` で出す。
+★★これは `Theorem 3.4, (i)` の図式の 1-可換性で使う
+(`Ψ` が hull を保つので、`Ψ(A の hull)` と `Ψ(A) の hull` が両方 hull になる)。 -/
+noncomputable def isotropicHullIso {X H H' : K} {h : X ⟶ H} {h' : X ⟶ H'}
+    (hh : IsIsotropicHull P h) (hh' : IsIsotropicHull P h') : H ≅ H' where
+  hom := hullLift P hh hh'.2.2.1 h'
+  inv := hullLift P hh' hh.2.2.1 h
+  hom_inv_id := by
+    refine isotropicHull_hom_ext P hh hh.2.2.1 ?_
+    rw [← Category.assoc, hullLift_spec, hullLift_spec, Category.comp_id]
+  inv_hom_id := by
+    refine isotropicHull_hom_ext P hh' hh'.2.2.1 ?_
+    rw [← Category.assoc, hullLift_spec, hullLift_spec, Category.comp_id]
+
+@[simp] theorem isotropicHullIso_hom {X H H' : K} {h : X ⟶ H} {h' : X ⟶ H'}
+    (hh : IsIsotropicHull P h) (hh' : IsIsotropicHull P h') :
+    h ≫ (isotropicHullIso P hh hh').hom = h' :=
+  hullLift_spec P hh hh'.2.2.1 h'
+
+/-! ### ★`isotropification` の射を hull の四角形として読む
+
+★★`isotropification` は `Adjunction.leftAdjointOfEquiv` が **hom 同値から自動生成**した
+関手なので、`map` は `(e X (F_obj X')).symm (f ≫ e X' (F_obj X') (𝟙 _))` という
+**Equiv の裏返し**である。★そのままでは扱えないので、
+**`Equiv.apply_symm_apply` を 1 回使って四角形に翻訳する**。 -/
+
+variable (F : FrobenioidCore P)
+
+/-! ★★**`dsimp` 用の `rfl` 補題**。
+
+★これが無いと、射の**暗黙の対象引数**が `((isotropification P F).obj B).obj` の形で残り、
+`hullObj P F B` と**表示は同じなのに `rw` が噛まない**(defeq だが構文が違う)。
+★★実測(2026-08-17): `Category.assoc` すら「パターンが見つからない」と落ちる。 -/
+
+theorem isotropification_obj (A : K) : (isotropification P F).obj A = hullIstr P F A := rfl
+
+theorem hullIstr_obj (A : K) : (hullIstr P F A).obj = hullObj P F A := rfl
+
+/-- ★`hullHomEquiv` の値は**定義的に** `hullMap ≫ (射の下地)` である。 -/
+theorem hullHomEquiv_apply (A : K) (Y : Istr P) (g : hullIstr P F A ⟶ Y) :
+    hullHomEquiv P F A Y g = hullMap P F A ≫ g.hom := rfl
+
+/-- ★★**`isotropification` の射は hull の四角形を可換にする**。
+
+  `hullMap A ≫ (A^istr ⟶ B^istr) = f ≫ hullMap B`
+
+★★これが `isotropification` について**我々が必要とする唯一の情報**である
+——以下の 1-可換性の自然性は、すべてこの四角形と `isotropicHull_hom_ext` から出る。 -/
+theorem isotropification_map_comp {A B : K} (f : A ⟶ B) :
+    hullMap P F A ≫ ((isotropification P F).map f).hom = f ≫ hullMap P F B := by
+  have h := (hullHomEquiv P F A (hullIstr P F B)).apply_symm_apply
+    (f ≫ (hullHomEquiv P F B (hullIstr P F B)) (𝟙 _))
+  rw [hullHomEquiv_apply, hullHomEquiv_apply] at h
+  refine Eq.trans ?_ (congrArg (fun g => f ≫ g) (Category.comp_id (hullMap P F B)))
+  exact h
+
+end HullUniq
+
 section Isotropic
 
 universe v₃ u₃ w₃ v₄ u₄ w₄
@@ -435,6 +524,10 @@ def psiIstr (h₁ : IsOfQuasiIsotropicType C P₁) (h₂ : IsOfQuasiIsotropicTyp
   map_id _ := InducedCategory.hom_ext (Ψ.map_id _)
   map_comp _ _ := InducedCategory.hom_ext (Ψ.map_comp _ _)
 
+@[simp] theorem psiIstr_map_hom (h₁ : IsOfQuasiIsotropicType C P₁)
+    (h₂ : IsOfQuasiIsotropicType D P₂) {A B : Istr P₁} (f : A ⟶ B) :
+    ((psiIstr Ψ P₁ P₂ h₁ h₂).map f).hom = Ψ.map f.hom := rfl
+
 /-- ★**`Ψ^istr` は忠実**(`Ψ` が忠実だから)。 -/
 theorem psiIstr_faithful (h₁ : IsOfQuasiIsotropicType C P₁)
     (h₂ : IsOfQuasiIsotropicType D P₂) :
@@ -506,13 +599,18 @@ def psiIstr_comp_iota (h₁ : IsOfQuasiIsotropicType C P₁)
 **右随伴どうしの同型 `Ψ^istr⁻¹ ⋙ ι₁ ≅ ι₂ ⋙ Ψ⁻¹` の構成**である
 ——`psiIstr ⋙ ι₂ = ι₁ ⋙ Ψ` は**定義的に等しい**のに、
 そこから逆関手側の同型を作るには単位・余単位の whisker 計算が要る。
-★**次段の候補 2 つ**:
-1. 上の随伴の筋を、whisker 計算を丁寧に書いて通す
-2. ★**hull の一意性から直接** `NatIso.ofComponents` で作る
-   —— どちらの対象も `Ψ.obj A` の hull だから(`isotropicHull_map`)。
-   自然性は hull の普遍性の一意性から出る。**こちらの方が短い見込み**
 
-★**1-一意性**も同じ随伴の一意性から出る。
+★★★**決着(2026-08-17)**: 随伴を経由せず、**hull の一意性から直接**
+`NatIso.ofComponents` で作った(下の `isotropificationCommute`)。
+★実測で**構成 5 行・自然性 8 行**——随伴の筋より短い。
+
+★★**実装で 1 つ測ったこと**: 対象の暗黙引数が
+`((isotropification₁ ⋙ Ψ^istr).obj B).obj` の形で残るため、
+**`Category.assoc` すら `rw` の構文照合を通らない**(defeq だが構文が違う)。
+`dsimp only [Functor.comp_obj, …]` でも落ちない。`erw`(default 透過度)で通した。
+★充満部分圏を跨ぐ図式では**この形の詰まりが既定で起きる**と考えてよい。
+
+★**1-一意性**は随伴の一意性から出る(未実装)。
 
 ★★残る `rigidity` は別筋である。原文 (FrdI p.63):
 `Proposition 1.13, (ii)` を使い、**Frobenius-trivial 対象の
@@ -521,32 +619,47 @@ base-identity 自己射(任意の Frobenius 次数)に関する関手性**から
 ★Frobenius-normalized 型が効く箇所である。
 -/
 
-/-- ★★**isotropic hull は一意** —— 同じ対象の 2 つの hull の間には
-**その対象の下で**一意な同型がある。
+/-- ★★★★★**[FrdI] Theorem 3.4, (i) の図式の 1-可換性** ——
 
-★普遍性を両向きに使い、合成が恒等射であることを**同じ普遍性の一意性**で出す。
-★★これは `Theorem 3.4, (i)` の図式の 1-可換性で使う
-(`Ψ` が hull を保つので、`Ψ(A の hull)` と `Ψ(A) の hull` が両方 hull になる)。 -/
-noncomputable def isotropicHullIso {X H H' : C} {h : X ⟶ H} {h' : X ⟶ H'}
-    (hh : IsIsotropicHull P₁ h) (hh' : IsIsotropicHull P₁ h') : H ≅ H' where
-  hom := (hh.2.2.2 H' hh'.2.2.1 h').choose
-  inv := (hh'.2.2.2 H hh.2.2.1 h).choose
-  hom_inv_id := by
-    have hθ : h' = h ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose :=
-      (hh.2.2.2 H' hh'.2.2.1 h').choose_spec.1
-    have hθ' : h = h' ≫ (hh'.2.2.2 H hh.2.2.1 h).choose :=
-      (hh'.2.2.2 H hh.2.2.1 h).choose_spec.1
-    obtain ⟨w, -, wuniq⟩ := hh.2.2.2 H hh.2.2.1 h
-    exact (wuniq ((hh.2.2.2 H' hh'.2.2.1 h').choose ≫ (hh'.2.2.2 H hh.2.2.1 h).choose)
-        (by simp only []; rw [← Category.assoc, ← hθ, ← hθ'])).trans (wuniq (𝟙 H) (by simp)).symm
-  inv_hom_id := by
-    have hθ : h' = h ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose :=
-      (hh.2.2.2 H' hh'.2.2.1 h').choose_spec.1
-    have hθ' : h = h' ≫ (hh'.2.2.2 H hh.2.2.1 h).choose :=
-      (hh'.2.2.2 H hh.2.2.1 h).choose_spec.1
-    obtain ⟨w, -, wuniq⟩ := hh'.2.2.2 H' hh'.2.2.1 h'
-    exact (wuniq ((hh'.2.2.2 H hh.2.2.1 h).choose ≫ (hh.2.2.2 H' hh'.2.2.1 h').choose)
-        (by simp only []; rw [← Category.assoc, ← hθ', ← hθ])).trans (wuniq (𝟙 H') (by simp)).symm
+  `Ψ^istr ∘ isotropification₁ ≅ isotropification₂ ∘ Ψ`
+
+原文 (FrdI p.62):
+> [where the vertical arrows are the natural "isotropification functors" of Proposition
+
+★★**筋**: `A` での両辺の値は、どちらも **`Ψ.obj A` の isotropic hull** である
+——左は `Ψ(A の hull)`(`isotropicHull_map`、これが `Theorem 3.4, (i)` の第 2 主張)、
+右は `Ψ(A) の hull`(`hullMap_spec`)。★hull は同型を除いて一意なので
+成分は `isotropicHullIso` から取れる。
+
+★★★**自然性は普遍性の一意性 1 本で出る**(`isotropicHull_hom_ext`)——
+四角形を `Ψ.map (hullMap A)` で前合成すると、**両辺とも
+`Ψ.map f ≫ hullMap (Ψ.obj B)` に落ちる**。
+
+★**設計の記録(2026-08-17)**: 随伴の一意性(`Adjunction.leftAdjointUniq`)を
+経由する筋も正しいが、**右随伴どうしの同型 `Ψ^istr⁻¹ ⋙ ι₁ ≅ ι₂ ⋙ Ψ⁻¹`**
+を作る所で単位・余単位の whisker 計算が要る。★★hull の一意性から直接
+`NatIso.ofComponents` で作る**こちらの方が短い**——実測で 15 行である。 -/
+noncomputable def isotropificationCommute (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (h₁ : IsOfQuasiIsotropicType C P₁) (h₂ : IsOfQuasiIsotropicType D P₂) :
+    isotropification P₁ F₁ ⋙ psiIstr Ψ P₁ P₂ h₁ h₂ ≅ Ψ ⋙ isotropification P₂ F₂ :=
+  NatIso.ofComponents
+    (fun A => ObjectProperty.isoMk _
+      (isotropicHullIso P₂
+        (isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ (hullMap_spec P₁ F₁ A))
+        (hullMap_spec P₂ F₂ (Ψ.obj A))))
+    (fun {A B} f => by
+      refine InducedCategory.hom_ext ?_
+      simp only [Functor.comp_map, ObjectProperty.FullSubcategory.comp_hom,
+        ObjectProperty.isoMk_hom, ObjectProperty.homMk_hom, psiIstr_map_hom]
+      -- ★★対象の暗黙引数が `((𝒞 ⥤ 𝒞₂^istr).obj B).obj` の形で残り、`rw` の
+      -- 構文照合が通らない(defeq だが構文が違う)。★`erw` は default 透過度で照合する。
+
+      refine isotropicHull_hom_ext P₂
+        (isotropicHull_map Ψ P₁ P₂ F₁ F₂ h₁ h₂ (hullMap_spec P₁ F₁ A))
+        (hullMap_spec P₂ F₂ (Ψ.obj B)).2.2.1 ?_
+      erw [← Category.assoc, ← Ψ.map_comp, isotropification_map_comp, Ψ.map_comp,
+        Category.assoc, isotropicHullIso_hom, ← Category.assoc, isotropicHullIso_hom,
+        isotropification_map_comp])
 
 end Isotropic
 
