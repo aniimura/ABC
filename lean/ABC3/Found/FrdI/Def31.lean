@@ -18,12 +18,14 @@ import ABC3.Found.FrdI.Prop110
 | (i) | 1 | `quasi-isotropic 型` | ★**ここで実装** |
 | (i) | 2 | `standard 型`((a)–(e)) | ★**ここで実装** |
 | (i) | 3 | `Frobenius-slim` な圏 | ★**ここで実装** |
-| (ii) | 4 | `𝒞^Fr-tp` / `𝒞^bi-Fr` と `Hom^pf_𝒞(A,B)`(**帰納極限**) | 未 |
-| (iii) | 5 | `𝒞^pf`(Frobenioid の**完備化**)と `𝒞 → 𝒞^pf` | 未 |
-| (iv) | 6 | `unit-equivalent` と `Hom^un-tr` | ★**関係の定義はここ**。`Hom^un-tr` は `Proposition 3.3, (ii)` 待ち |
-| (iv) | 7 | `𝒞^un-tr` | 未 |
+| (ii) | 4 | `𝒞^Fr-tp` / `𝒞^bi-Fr` と `Hom^pf_𝒞(A,B)`(**帰納極限**) | ★**`Def31Pf.lean`** |
+| (iii) | 5 | `𝒞^pf`(Frobenioid の**完備化**)と `𝒞 → 𝒞^pf` | ★**`Def31Pf.lean`** |
+| (iv) | 6 | `unit-equivalent` と `Hom^un-tr` | ★**関係の定義はここ**、`Hom^un-tr` は `UnTr.lean` |
+| (iv) | 7 | `𝒞^un-tr` | ★**`UnTr.lean`** |
 
-★**(ii)(iii) と (iv) の `Hom^un-tr` / `ᶜ^un-tr` が入るまで `.src` は付けない。**
+★★**7 主張すべてが揃った(2026-08-17)。**
+★条なしの `.src`(`definition_3_1.src`)は **`Def31Pf.lean` に 1 つ**置いてある ——
+実装が 3 ファイルに分かれているので、対応表と一緒に 1 か所へ集約した。
 
 ## ★`Frobenius-slim` の `F` について
 

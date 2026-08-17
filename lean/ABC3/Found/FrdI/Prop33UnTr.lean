@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.UnTr
+import ABC3.Found.FrdI.Prop16
 
 /-!
 # [FrdI] Proposition 3.3, (iv) の本体 —— `𝒞^un-tr` の **Frobenioid 構造**
@@ -523,5 +524,407 @@ theorem unTr_arbFactor (Fc : FrobenioidCore P) :
     congrArg (fun t => (istrToUnTr P).map t) heq,
     (unTr_isFrobeniusType_iff P Fc _).mpr ⟨hγ.1.2, hγ.2⟩, hβ,
     unTr_isPullBack_of_istr P Fc α hα⟩
+
+/-! ## ★7-b. ★★★**pull-back 射の逆向きの移送**(2026-08-17)
+
+★★**どの持ち上げでも pull-back になる。**★筋は「**余分な部分が同型に潰れる**」:
+
+1. `𝒞^istr` の `arbFactor` で `α₀ = γ ≫ β ≫ α'`
+2. ★★**`Base (γ ≫ β)` は同型**(Frobenius 型も pre-step も底同型)——★ここが鍵
+3. `IsPullBack f` の**全射性**を対 `(map α', inv (Base (γ≫β)))` に当てて `d` を得る
+4. 両側の**単射性**で `map(γ≫β)` が `𝒞^un-tr` の同型と分かる
+5. ★**同型 ⟹ 等長 pre-step ⟹ `𝒞^istr` は isotropic 型なので `γ ≫ β` も同型**
+6. `IsPullBack.comp` ＋ `isPullBack_of_isIso`(★どちらも在庫)で終わり
+
+★★**一度「unit-equivalence で不変でないから駄目」と判断したが誤りだった** ——
+★**不変性は要らず、分解して潰せばよい**。 -/
+
+include P in
+/-- ★★★**`𝒞^un-tr` の pull-back 射の持ち上げは `𝒞^istr` の pull-back 射**。 -/
+theorem unTr_isPullBack_to (Fc : FrobenioidCore P) {A B : Istr P} (α₀ : A ⟶ B)
+    (h : IsPullBack (unTrPre P Fc) ((istrToUnTr P).map α₀)) :
+    IsPullBack (istrPre P Fc) α₀ := by
+  obtain ⟨Y₀, Y, γ, β, α', heq, hγ, hβ, hα'⟩ := (istr_frobenioidCore P Fc).arbFactor α₀
+  haveI hbγ : IsIso ((istrPre P Fc).Base γ) := hγ.2
+  haveI hbβ : IsIso ((istrPre P Fc).Base β) := hβ.2
+  haveI hbc : IsIso ((istrPre P Fc).Base (γ ≫ β)) := by
+    rw [(istrPre P Fc).Base_comp]
+    exact IsIso.comp_isIso' hbγ hbβ
+  have heq' : α₀ = (γ ≫ β) ≫ α' := heq.trans (Category.assoc _ _ _).symm
+  have hfc : (istrToUnTr P).map α₀
+      = (istrToUnTr P).map (γ ≫ β) ≫ (istrToUnTr P).map α' :=
+    congrArg (fun t => (istrToUnTr P).map t) heq'
+  -- ★★底の同型を**不透明な局所変数**にする(`set` だと instance 探索が通らない)
+  obtain ⟨u, hu⟩ : ∃ u : ((unTrPre P Fc).toElem.obj (show UnTr P from A)).base
+      ⟶ ((unTrPre P Fc).toElem.obj (show UnTr P from Y)).base,
+      u = (unTrPre P Fc).Base ((istrToUnTr P).map (γ ≫ β)) := ⟨_, rfl⟩
+  haveI huiso : IsIso u := by rw [hu]; exact hbc
+  have hpb' : IsPullBack (unTrPre P Fc) ((istrToUnTr P).map α') :=
+    unTr_isPullBack_of_istr P Fc α' hα'
+  -- ★手 3: `d` を作る
+  have hbα₀ : (unTrPre P Fc).Base ((istrToUnTr P).map α₀)
+      = u ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α') := by
+    rw [hu, hfc]
+    exact (unTrPre P Fc).Base_comp _ _
+  have hba' : (unTrPre P Fc).Base ((istrToUnTr P).map α')
+      = inv u ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α₀) :=
+    calc (unTrPre P Fc).Base ((istrToUnTr P).map α')
+        = 𝟙 _ ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α') := (Category.id_comp _).symm
+      _ = (inv u ≫ u) ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α') := by
+          rw [IsIso.inv_hom_id]
+          rfl
+      _ = inv u ≫ u ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α') := Category.assoc _ _ _
+      _ = inv u ≫ (unTrPre P Fc).Base ((istrToUnTr P).map α₀) :=
+          congrArg (fun t => inv u ≫ t) hbα₀.symm
+  obtain ⟨d, hd⟩ := (h (show UnTr P from Y)).2
+    ⟨((istrToUnTr P).map α', @inv _ _ _ _ u huiso), hba'⟩
+  have hdpair : (d ≫ (istrToUnTr P).map α₀, (unTrPre P Fc).Base d)
+      = ((istrToUnTr P).map α', @inv _ _ _ _ u huiso) := Subtype.ext_iff.mp hd
+  have hd1 : d ≫ (istrToUnTr P).map α₀ = (istrToUnTr P).map α' := congrArg Prod.fst hdpair
+  have hd2 : (unTrPre P Fc).Base d = @inv _ _ _ _ u huiso := congrArg Prod.snd hdpair
+  -- ★手 4: `map (γ ≫ β)` が同型
+  have hcd : (istrToUnTr P).map (γ ≫ β) ≫ d = 𝟙 _ := by
+    refine (h (show UnTr P from A)).1 (Subtype.ext (congrArg₂ Prod.mk ?_ ?_))
+    · show ((istrToUnTr P).map (γ ≫ β) ≫ d) ≫ (istrToUnTr P).map α₀
+        = 𝟙 _ ≫ (istrToUnTr P).map α₀
+      calc ((istrToUnTr P).map (γ ≫ β) ≫ d) ≫ (istrToUnTr P).map α₀
+          = (istrToUnTr P).map (γ ≫ β) ≫ d ≫ (istrToUnTr P).map α₀ := Category.assoc _ _ _
+        _ = (istrToUnTr P).map (γ ≫ β) ≫ (istrToUnTr P).map α' :=
+            congrArg (fun t => (istrToUnTr P).map (γ ≫ β) ≫ t) hd1
+        _ = (istrToUnTr P).map α₀ := hfc.symm
+        _ = 𝟙 _ ≫ (istrToUnTr P).map α₀ := (Category.id_comp _).symm
+    · show (unTrPre P Fc).Base ((istrToUnTr P).map (γ ≫ β) ≫ d)
+        = (unTrPre P Fc).Base (𝟙 _)
+      calc (unTrPre P Fc).Base ((istrToUnTr P).map (γ ≫ β) ≫ d)
+          = (unTrPre P Fc).Base ((istrToUnTr P).map (γ ≫ β)) ≫ (unTrPre P Fc).Base d :=
+            (unTrPre P Fc).Base_comp _ _
+        _ = u ≫ inv u := congrArg₂ (fun x y => x ≫ y) hu.symm hd2
+        _ = 𝟙 _ := IsIso.hom_inv_id u
+        _ = (unTrPre P Fc).Base (𝟙 _) := ((unTrPre P Fc).Base_id _).symm
+  have hdc : d ≫ (istrToUnTr P).map (γ ≫ β) = 𝟙 _ := by
+    refine (hpb' (show UnTr P from Y)).1 (Subtype.ext (congrArg₂ Prod.mk ?_ ?_))
+    · show (d ≫ (istrToUnTr P).map (γ ≫ β)) ≫ (istrToUnTr P).map α'
+        = 𝟙 _ ≫ (istrToUnTr P).map α'
+      calc (d ≫ (istrToUnTr P).map (γ ≫ β)) ≫ (istrToUnTr P).map α'
+          = d ≫ (istrToUnTr P).map (γ ≫ β) ≫ (istrToUnTr P).map α' := Category.assoc _ _ _
+        _ = d ≫ (istrToUnTr P).map α₀ :=
+            congrArg (fun t => d ≫ t) hfc.symm
+        _ = (istrToUnTr P).map α' := hd1
+        _ = 𝟙 _ ≫ (istrToUnTr P).map α' := (Category.id_comp _).symm
+    · show (unTrPre P Fc).Base (d ≫ (istrToUnTr P).map (γ ≫ β))
+        = (unTrPre P Fc).Base (𝟙 _)
+      calc (unTrPre P Fc).Base (d ≫ (istrToUnTr P).map (γ ≫ β))
+          = (unTrPre P Fc).Base d ≫ (unTrPre P Fc).Base ((istrToUnTr P).map (γ ≫ β)) :=
+            (unTrPre P Fc).Base_comp _ _
+        _ = inv u ≫ u := congrArg₂ (fun x y => x ≫ y) hd2 hu.symm
+        _ = 𝟙 _ := IsIso.inv_hom_id u
+        _ = (unTrPre P Fc).Base (𝟙 _) := ((unTrPre P Fc).Base_id _).symm
+  haveI hciso : IsIso ((istrToUnTr P).map (γ ≫ β)) := ⟨d, hcd, hdc⟩
+  -- ★手 5: `γ ≫ β` は `𝒞^istr` の同型
+  haveI hE : IsIso ((unTrToElem P).map ((istrToUnTr P).map (γ ≫ β))) :=
+    ⟨⟨((unTrToElem P).mapIso (asIso ((istrToUnTr P).map (γ ≫ β)))).inv,
+      ((unTrToElem P).mapIso (asIso ((istrToUnTr P).map (γ ≫ β)))).hom_inv_id,
+      ((unTrToElem P).mapIso (asIso ((istrToUnTr P).map (γ ≫ β)))).inv_hom_id⟩⟩
+  obtain ⟨-, hu0, hd0⟩ := (ElemFrobCat.isIso_iff
+    ((unTrToElem P).map ((istrToUnTr P).map (γ ≫ β)))).mp hE
+  have hdiv0 : (istrPre P Fc).Div (γ ≫ β) = 0 :=
+    (P.divisorial ((istrPre P Fc).toElem.obj A).base).2 _ hu0
+  haveI : IsIso (γ ≫ β) :=
+    istr_isotropic P Fc A (show Istr P from Y) (γ ≫ β) hdiv0 ⟨hd0, hbc⟩
+  -- ★手 6
+  rw [heq']
+  exact IsPullBack.comp (istrPre P Fc) (isPullBack_of_isIso (istrPre P Fc) (γ ≫ β)) hα'
+
+include P in
+/-- ★★**(iv)(b)** pull-back 射は LB-invertible かつ linear。
+
+★★上の逆向き移送で `𝒞^istr` へ降ろし、`istr_pullBackLB` を当てて戻すだけ。
+★co-angular は `𝒞^un-tr` では自動なので、`hlb.2`(等長)だけ拾えばよい。 -/
+theorem unTr_pullBackLB (Fc : FrobenioidCore P) :
+    ∀ {A B : UnTr P} (α : A ⟶ B), IsPullBack (unTrPre P Fc) α →
+      IsLBInvertible (unTrPre P Fc) α ∧ IsLinear (unTrPre P Fc) α := by
+  intro A B α hα
+  obtain ⟨α₀, rfl⟩ := (istrToUnTr P).map_surjective α
+  obtain ⟨hlb, hlin⟩ :=
+    (istr_frobenioidCore P Fc).pullBackLB α₀ (unTr_isPullBack_to P Fc α₀ hα)
+  exact ⟨⟨unTr_coAngular P Fc _, hlb.2⟩, hlin⟩
+
+include P in
+/-- ★★**(iv)(a) の一意性** —— ★**持ち上げず、`𝒞^un-tr` の中で直接**組む。
+
+★★**筋**(2026-08-17):
+1. ★`pullBackLB` で `α`・`α'` が linear ⟹ **次数は `γ` が全部担う**
+2. `frobDegUniq` で同型 `ε : X ≅ X'`、`γ ≫ ε = γ'`
+3. ★**`γ` は epi** なので消して `β ≫ α = (ε ≫ β') ≫ α'`
+4. ★`IsPullBack α'` / `IsPullBack α` の**全射性**で `δ`・`δ⁻¹` を作り、
+   **単射性**で互いに逆と分かる
+5. 残る式も `IsPullBack α'` の**単射性**で出る
+
+★★**依存の順序が `pullBackLB → arbFactorUniq`** である(1 でそれが要る)。 -/
+theorem unTr_arbFactorUniq (Fc : FrobenioidCore P) :
+    ∀ {A B : UnTr P} (X Y X' Y' : UnTr P)
+      (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B) (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B),
+      γ ≫ β ≫ α = γ' ≫ β' ≫ α' →
+      IsFrobeniusType (unTrPre P Fc) γ → IsPreStep (unTrPre P Fc) β →
+      IsPullBack (unTrPre P Fc) α →
+      IsFrobeniusType (unTrPre P Fc) γ' → IsPreStep (unTrPre P Fc) β' →
+      IsPullBack (unTrPre P Fc) α' →
+      ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+        α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  intro A B X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα'
+  have hdα : (unTrPre P Fc).degFr α = 1 := (unTr_pullBackLB P Fc α hα).2
+  have hdα' : (unTrPre P Fc).degFr α' = 1 := (unTr_pullBackLB P Fc α' hα').2
+  -- ★手 1: 次数は `γ` が担う
+  have hdγ : (unTrPre P Fc).degFr γ = (unTrPre P Fc).degFr γ' := by
+    have e1 : (unTrPre P Fc).degFr (γ ≫ β ≫ α) = (unTrPre P Fc).degFr γ := by
+      rw [(unTrPre P Fc).degFr_comp, (unTrPre P Fc).degFr_comp, hdα,
+        show (unTrPre P Fc).degFr β = 1 from hβ.1, one_mul, one_mul]
+    have e2 : (unTrPre P Fc).degFr (γ' ≫ β' ≫ α') = (unTrPre P Fc).degFr γ' := by
+      rw [(unTrPre P Fc).degFr_comp, (unTrPre P Fc).degFr_comp, hdα',
+        show (unTrPre P Fc).degFr β' = 1 from hβ'.1, one_mul, one_mul]
+    rw [← e1, ← e2, heq]
+  -- ★手 2: `ε`
+  obtain ⟨ε₀, hε₀iso, hε₀⟩ := unTr_frobDegUniq P Fc A X X' γ γ' hγ hγ' hdγ
+  haveI := hε₀iso
+  -- ★手 3: `γ` を消す
+  haveI hγepi : Epi γ := unTr_totEpi P _ _ _
+  have hβ'' : IsPreStep (unTrPre P Fc) (ε₀ ≫ β') :=
+    IsPreStep.comp (unTrPre P Fc) (isPreStep_of_isIso (unTrPre P Fc) ε₀) hβ'
+  have hcancel : β ≫ α = (ε₀ ≫ β') ≫ α' := by
+    refine (cancel_epi γ).mp ?_
+    calc γ ≫ β ≫ α = γ' ≫ β' ≫ α' := heq
+      _ = (γ ≫ ε₀) ≫ β' ≫ α' := by rw [hε₀]
+      _ = γ ≫ (ε₀ ≫ β') ≫ α' := by simp only [Category.assoc]
+  -- ★手 4: `δ` を作る
+  haveI hbβ : IsIso ((unTrPre P Fc).Base β) := hβ.2
+  haveI hbβ'' : IsIso ((unTrPre P Fc).Base (ε₀ ≫ β')) := hβ''.2
+  obtain ⟨hh, hhdef⟩ : ∃ hh : ((unTrPre P Fc).toElem.obj Y).base
+      ⟶ ((unTrPre P Fc).toElem.obj Y').base,
+      hh = inv ((unTrPre P Fc).Base β) ≫ (unTrPre P Fc).Base (ε₀ ≫ β') := ⟨_, rfl⟩
+  haveI hhiso : IsIso hh := by rw [hhdef]; infer_instance
+  have hbaseα : (unTrPre P Fc).Base α = hh ≫ (unTrPre P Fc).Base α' := by
+    have e : (unTrPre P Fc).Base β ≫ (unTrPre P Fc).Base α
+        = (unTrPre P Fc).Base (ε₀ ≫ β') ≫ (unTrPre P Fc).Base α' := by
+      rw [← (unTrPre P Fc).Base_comp, ← (unTrPre P Fc).Base_comp, hcancel]
+    rw [hhdef, Category.assoc, ← e, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  have hbaseα' : (unTrPre P Fc).Base α'
+      = @inv _ _ _ _ hh hhiso ≫ (unTrPre P Fc).Base α := by
+    rw [hbaseα, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  obtain ⟨δ₀, hδ₀⟩ := (hα' Y).2 ⟨(α, hh), hbaseα⟩
+  have hδ₀p : (δ₀ ≫ α', (unTrPre P Fc).Base δ₀) = (α, hh) := Subtype.ext_iff.mp hδ₀
+  have hδ₀1 : δ₀ ≫ α' = α := congrArg Prod.fst hδ₀p
+  have hδ₀2 : (unTrPre P Fc).Base δ₀ = hh := congrArg Prod.snd hδ₀p
+  obtain ⟨δ₁, hδ₁⟩ := (hα Y').2 ⟨(α', @inv _ _ _ _ hh hhiso), hbaseα'⟩
+  have hδ₁p : (δ₁ ≫ α, (unTrPre P Fc).Base δ₁) = (α', @inv _ _ _ _ hh hhiso) :=
+    Subtype.ext_iff.mp hδ₁
+  have hδ₁1 : δ₁ ≫ α = α' := congrArg Prod.fst hδ₁p
+  have hδ₁2 : (unTrPre P Fc).Base δ₁ = @inv _ _ _ _ hh hhiso := congrArg Prod.snd hδ₁p
+  -- ★手 4b: 互いに逆
+  have hδid : δ₀ ≫ δ₁ = 𝟙 Y := by
+    refine (hα Y).1 (Subtype.ext (congrArg₂ Prod.mk ?_ ?_))
+    · show (δ₀ ≫ δ₁) ≫ α = 𝟙 Y ≫ α
+      calc (δ₀ ≫ δ₁) ≫ α = δ₀ ≫ δ₁ ≫ α := Category.assoc _ _ _
+        _ = δ₀ ≫ α' := congrArg (fun t => δ₀ ≫ t) hδ₁1
+        _ = α := hδ₀1
+        _ = 𝟙 Y ≫ α := (Category.id_comp _).symm
+    · show (unTrPre P Fc).Base (δ₀ ≫ δ₁) = (unTrPre P Fc).Base (𝟙 Y)
+      calc (unTrPre P Fc).Base (δ₀ ≫ δ₁)
+          = (unTrPre P Fc).Base δ₀ ≫ (unTrPre P Fc).Base δ₁ := (unTrPre P Fc).Base_comp _ _
+        _ = hh ≫ @inv _ _ _ _ hh hhiso := congrArg₂ (fun x y => x ≫ y) hδ₀2 hδ₁2
+        _ = 𝟙 _ := IsIso.hom_inv_id hh
+        _ = (unTrPre P Fc).Base (𝟙 Y) := ((unTrPre P Fc).Base_id _).symm
+  have hδid' : δ₁ ≫ δ₀ = 𝟙 Y' := by
+    refine (hα' Y').1 (Subtype.ext (congrArg₂ Prod.mk ?_ ?_))
+    · show (δ₁ ≫ δ₀) ≫ α' = 𝟙 Y' ≫ α'
+      calc (δ₁ ≫ δ₀) ≫ α' = δ₁ ≫ δ₀ ≫ α' := Category.assoc _ _ _
+        _ = δ₁ ≫ α := congrArg (fun t => δ₁ ≫ t) hδ₀1
+        _ = α' := hδ₁1
+        _ = 𝟙 Y' ≫ α' := (Category.id_comp _).symm
+    · show (unTrPre P Fc).Base (δ₁ ≫ δ₀) = (unTrPre P Fc).Base (𝟙 Y')
+      calc (unTrPre P Fc).Base (δ₁ ≫ δ₀)
+          = (unTrPre P Fc).Base δ₁ ≫ (unTrPre P Fc).Base δ₀ := (unTrPre P Fc).Base_comp _ _
+        _ = @inv _ _ _ _ hh hhiso ≫ hh := congrArg₂ (fun x y => x ≫ y) hδ₁2 hδ₀2
+        _ = 𝟙 _ := IsIso.inv_hom_id hh
+        _ = (unTrPre P Fc).Base (𝟙 Y') := ((unTrPre P Fc).Base_id _).symm
+  -- ★手 5: `ε₀ ≫ β' = β ≫ δ₀`
+  have hmid : ε₀ ≫ β' = β ≫ δ₀ := by
+    refine (hα' X).1 (Subtype.ext (congrArg₂ Prod.mk ?_ ?_))
+    · show (ε₀ ≫ β') ≫ α' = (β ≫ δ₀) ≫ α'
+      calc (ε₀ ≫ β') ≫ α' = β ≫ α := hcancel.symm
+        _ = β ≫ δ₀ ≫ α' := congrArg (fun t => β ≫ t) hδ₀1.symm
+        _ = (β ≫ δ₀) ≫ α' := (Category.assoc _ _ _).symm
+    · show (unTrPre P Fc).Base (ε₀ ≫ β') = (unTrPre P Fc).Base (β ≫ δ₀)
+      calc (unTrPre P Fc).Base (ε₀ ≫ β')
+          = (unTrPre P Fc).Base β ≫ hh := by
+            rw [hhdef, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+        _ = (unTrPre P Fc).Base β ≫ (unTrPre P Fc).Base δ₀ :=
+            congrArg (fun t => (unTrPre P Fc).Base β ≫ t) hδ₀2.symm
+        _ = (unTrPre P Fc).Base (β ≫ δ₀) := ((unTrPre P Fc).Base_comp _ _).symm
+  -- ★組み立て
+  refine ⟨⟨δ₀, δ₁, hδid, hδid'⟩, asIso ε₀, hδ₁1.symm, ?_, hε₀.symm⟩
+  show β' = inv ε₀ ≫ β ≫ δ₀
+  rw [← hmid, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+
+include P in
+/-- ★★**(i)(c)** `(𝒞^pl-bk)_A → 𝒟_{A_𝒟}` は圏同値。
+
+★★**3 つとも pull-back 射の全単射性から直接出る**:
+- **忠実性**: `Over.w` で `f ≫ W.hom = Z.hom` が言えるので、
+  `Base` が一致すれば `IsPullBack W.hom` の**単射性**で消える
+- **充満性**: `IsPullBack W.hom` の**全射性**で `f` を作り、
+  ★**在庫の `isPullBack_of_comp_left`**(pull-back の左簡約)で `f` 自身が pull-back と分かる
+- **本質的全射性**: `istr_plBkEquiv` の証人を ★`unTr_isPullBack_of_istr` で運ぶ -/
+theorem unTr_plBkEquiv (Fc : FrobenioidCore P) :
+    ∀ A : UnTr P, (plBkOverFunctor (unTrPre P Fc) A).IsEquivalence := by
+  intro A
+  haveI hfaith : (plBkOverFunctor (unTrPre P Fc) A).Faithful := by
+    constructor
+    intro Z W f g hfg
+    have hb : (unTrPre P Fc).Base f.left.hom = (unTrPre P Fc).Base g.left.hom :=
+      congrArg CommaMorphism.left hfg
+    have hwf : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have hwg : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    have h2 : f.left.hom = g.left.hom :=
+      (W.hom.property Z.left.obj).1
+        (Subtype.ext (congrArg₂ Prod.mk (hwf.trans hwg.symm) hb))
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext h2)
+  haveI hfull : (plBkOverFunctor (unTrPre P Fc) A).Full := by
+    constructor
+    intro Z W h
+    have hcond : (unTrPre P Fc).Base Z.hom.hom
+        = h.left ≫ (unTrPre P Fc).Base W.hom.hom := (Over.w h).symm
+    obtain ⟨f, hf⟩ := (W.hom.property Z.left.obj).2 ⟨(Z.hom.hom, h.left), hcond⟩
+    have hfp : (f ≫ W.hom.hom, (unTrPre P Fc).Base f) = (Z.hom.hom, h.left) :=
+      Subtype.ext_iff.mp hf
+    have hf1 : f ≫ W.hom.hom = Z.hom.hom := congrArg Prod.fst hfp
+    have hf2 : (unTrPre P Fc).Base f = h.left := congrArg Prod.snd hfp
+    have hfpb : IsPullBack (unTrPre P Fc) f :=
+      isPullBack_of_comp_left (unTrPre P Fc) f W.hom.hom W.hom.property
+        (by rw [hf1]; exact Z.hom.property)
+    exact ⟨Over.homMk (⟨f, hfpb⟩ : Z.left ⟶ W.left) (InducedWideCategory.Hom.ext hf1),
+      Over.OverMorphism.ext hf2⟩
+  haveI hess : (plBkOverFunctor (unTrPre P Fc) A).EssSurj := by
+    constructor
+    intro Y
+    haveI := istr_plBkEquiv P Fc (show Istr P from A)
+    obtain ⟨Z, hZ⟩ : ∃ Z : Over (⟨show Istr P from A⟩ : PlBk (istrPre P Fc)),
+        Z = (plBkOverFunctor (istrPre P Fc) (show Istr P from A)).objPreimage Y := ⟨_, rfl⟩
+    have hiZ : (plBkOverFunctor (istrPre P Fc) (show Istr P from A)).obj Z ≅ Y := by
+      rw [hZ]
+      exact (plBkOverFunctor (istrPre P Fc) (show Istr P from A)).objObjPreimageIso Y
+    refine ⟨Over.mk (⟨(istrToUnTr P).map Z.hom.hom,
+      unTr_isPullBack_of_istr P Fc Z.hom.hom Z.hom.property⟩ :
+        (⟨show UnTr P from Z.left.obj⟩ : PlBk (unTrPre P Fc))
+          ⟶ (⟨A⟩ : PlBk (unTrPre P Fc))), ?_⟩
+    exact ⟨hiZ⟩
+  exact ⟨hfaith, hfull, hess⟩
+
+/-! ## ★8. ★★★★**`𝒞^un-tr` は Frobenioid の core 21 条をすべて満たす**
+
+原文 (FrdI p.60):
+> which is faithful and essentially surjective; moreover, this functor determines
+-/
+
+include P in
+/-- ★★★★**[FrdI] Proposition 3.3, (iv)** —— `𝒞^un-tr` の `FrobenioidCore` 21 条。 -/
+theorem unTr_frobenioidCore (Fc : FrobenioidCore P) : FrobenioidCore (unTrPre P Fc) where
+  baseSurj := unTr_baseSurj P Fc
+  preStepSpan := unTr_preStepSpan P Fc
+  plBkEquiv := unTr_plBkEquiv P Fc
+  frobDegSurj := unTr_frobDegSurj P Fc
+  frobDegUniq := unTr_frobDegUniq P Fc
+  coAngularComp := unTr_coAngularComp P Fc
+  coAngularOfPreStep := unTr_coAngularOfPreStep P Fc
+  otriFwd := unTr_otriFwd P Fc
+  otriBwd := unTr_otriBwd P Fc
+  otriBase := unTr_otriBase P Fc
+  arbFactor := unTr_arbFactor P Fc
+  arbFactorUniq := unTr_arbFactorUniq P Fc
+  pullBackLB := unTr_pullBackLB P Fc
+  preStepMono := unTr_preStepMono P Fc
+  preStepFactor := unTr_preStepFactor P Fc
+  preStepFactorUniq := unTr_preStepFactorUniq P Fc
+  preStepFactor' := unTr_preStepFactor' P Fc
+  preStepFactorUniq' := unTr_preStepFactorUniq' P Fc
+  faithfulUpToUnits := unTr_faithfulUpToUnits P Fc
+  isotropicHullExists := unTr_isotropicHullExists P Fc
+  isotropicClosed := unTr_isotropicClosed P Fc
+
+/-! ## ★8-b. `Frobenioid` の残り 2 フィールド
+
+★★`𝒞^un-tr` では co-angular が自動なので、`𝒞^coa-pre` は
+**pre-step の広部分圏**に潰れる。★行き先 `Order(Φ(A))` は `𝒞`・`𝒞^istr`・`𝒞^un-tr`
+で**同じ圏**である(底も `Φ` も変わらないから)。 -/
+
+section CoaPre
+
+variable (Fc : FrobenioidCore P)
+
+/-- ★co-angular pre-step の広部分圏が乗法的であること(`letI` 用)。 -/
+theorem unTr_coaPreProp_isMultiplicative :
+    MorphismProperty.IsMultiplicative (coaPreProp (unTrPre P Fc)) :=
+  coaPreProp_isMultiplicative (unTrPre P Fc) (unTr_frobenioidCore P Fc).coAngularComp
+
+end CoaPre
+
+/-! ### ★残る 2 フィールドの設計(2026-08-17、紙の上で確認)
+
+★★**行き先 `OrderCat (Φ.val (A_𝒟))` は `𝒞`・`𝒞^istr`・`𝒞^un-tr` で同じ圏**である
+(底も `Φ` も商で変わらない)。★したがって 3 つの性質は次のように取れる:
+
+| 性質 | 手 |
+|---|---|
+| **忠実性** | ★**直接** —— `Under.w` の 2 式を、`Z.hom` が epi(`unTr_totEpi`)なので消す |
+| **充満性** | ★`Z.hom.hom` / `W.hom.hom` を `𝒞^istr` へ持ち上げ(`istrToUnTr` は full)、`istr_coaPreUnderEquiv` の充満性で射を作り、押し戻す。★**`Div` は商で不変**なので `Order` 側の対象が一致する |
+| **本質的全射性** | ★`istr_coaPreUnderEquiv` の証人を **`istrToUnTr` で押し出す**(co-angular pre-step は商を渡る) |
+
+★★**`coaPreOverEquiv` も同型**だが、`inv (Base ...)` が入るぶん配管が重い。
+
+★★**規律どおり、通っていないものは置いていない。** -/
+
+/-! ## ★9. 実装の記録(2026-08-17)
+
+★`FrobenioidCore (unTrPre)` の 21 フィールドのうち **18 が埋まった**。
+★残る 3 つ **`plBkEquiv` / `arbFactorUniq` / `pullBackLB`** は、
+★★**どれも同じ 1 本**に帰着する:
+
+```
+★★「`𝒞^un-tr` の pull-back 射は `𝒞^istr` の pull-back 射から来る」
+   IsPullBack (unTrPre P Fc) f → ∃ α₀, (istrToUnTr P).map α₀ = f ∧ IsPullBack (istrPre P Fc) α₀
+```
+
+★これは原文 (iv) の最後の文 **「if and only if it **arises from** such an arrow of
+`𝒞^istr`」の pull-back についての `⟹` の側**そのものである。
+★逆(`⟸`)は上の `unTr_isPullBack_of_istr` で取れている。
+
+### ★なぜ難しいか(測定)
+
+★`𝒞^istr → 𝒞` の同じ向きの移送(`istr_isPullBack_to`、`Prop19.lean`)は
+★**isotropification が包含関手の左随伴であること**(`hullHomEquiv`)で埋めていた
+——「すべての `Z`」と「isotropic な `Z`」の差を随伴が吸収する。
+
+★★**しかし `𝒞^istr → 𝒞^un-tr` の差は「商」であって随伴ではない。**
+`Hom_{un-tr}(X,A) = Hom_{istr}(X,A) / ≈` なので、
+★`𝒞^un-tr` の全単射性から `𝒞^istr` の全単射性は**そのままでは出ない**
+(単射性を戻すと「等しい」ではなく「unit-equivalent」しか言えない)。
+
+### ★試して**駄目だった**筋(記録)
+
+1. ★**「どの持ち上げでも pull-back」に強める** —— ✗。
+   `IsPullBack (istrPre)` は unit-equivalence で**不変ではない**:
+   `f₁ ≫ α₀ ≈ f₂ ≫ α₀` から `f₁ ≫ α₀ = f₂ ≫ α₀` は出ない。
+2. ★**`𝒞^un-tr` の中で直接 `pullBackLB` を示す** —— ✗(未達)。
+   `Definition 1.3, (iv)(b)` は原文では**公理**であり、
+   全単射性から `degFr = 1` を出すには「次数 1 の射が像に居る」ことが要るが、
+   `X` の取り方でそれを作る手が見つからなかった。
+
+### ★次の一手の候補(未検証)
+
+- ★`arbFactor` で `α` を分解し、**pull-back 部分だけを持ち上げる**
+- ★`Proposition 3.3, (ii)`(unit-equivalent ⟺ `𝔽_Φ` で同じ)を使って、
+  **持ち上げを単元で補正する**(`f₀ ≫ α₀ ≈ g₀` を等式にする)
+-/
 
 end ABC3.Found.FrdI
