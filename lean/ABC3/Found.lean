@@ -48,6 +48,7 @@ import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop33UnTr
 import ABC3.Found.FrdI.Prop33Classes
 import ABC3.Found.FrdI.Prop33i
+import ABC3.Found.FrdI.Prop33Coa
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
