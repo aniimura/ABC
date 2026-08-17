@@ -62,32 +62,45 @@ open ABC3.Meta AlgebraicGeometry CategoryTheory NumberField
 ★`Interface/` は `Found/` を import できないので、テンソル積を
 mathlib の前層テンソル(`PresheafOfModules.Monoidal.tensorObj`)+ 層化で書き下す。 -/
 
-/-- ★層加群のテンソル積(前層でテンソルしてから層化する)。 -/
-noncomputable def modTensor (X : Scheme.{0}) (F G : X.Modules) : X.Modules :=
-  (PresheafOfModules.sheafification (R := X.ringCatSheaf) (𝟙 X.ringCatSheaf.obj)).obj
-    (PresheafOfModules.Monoidal.tensorObj (R := X.presheaf) F.val G.val)
+/-- ★**前層加群のテンソル積**(mathlib の前層モノイダル構造)。
 
-/-- ★★**可逆層(直線束)** —— 「テンソル積の逆を持つ」かつ「局所的に階数 1 自由」。
+★★★層化を通さない——`Found/Arakelov/PicGroup.lean` が示したように、
+**前層の段では結合律・単位律・可換律が mathlib から無料で出る**。
+★局所自明な前層は自動的に層なので、可逆層の同型類としての `Pic` と一致する。 -/
+noncomputable def preTensor (X : Scheme.{0}) (F G : X.PresheafOfModules) :
+    X.PresheafOfModules :=
+  PresheafOfModules.Monoidal.tensorObj (R := X.presheaf) F G
 
-★★★**2 条を課すのは、どちらも直線束の性質であり、どちらも使うからである**:
+/-- ★前層加群の単位(構造層)。 -/
+noncomputable abbrev preUnit (X : Scheme.{0}) : X.PresheafOfModules :=
+  PresheafOfModules.unit X.ringCatSheaf.obj
+
+/-- ★**開集合 `V` への制限**(mathlib の押し出し関手)。 -/
+noncomputable abbrev preRestrict (X : Scheme.{0}) (V : X.Opens) :
+    X.PresheafOfModules ⥤
+      PresheafOfModules.{0} (((Over.forget V).op ⋙ X.presheaf) ⋙ forget₂ CommRingCat RingCat) :=
+  PresheafOfModules.pushforward₀OfCommRingCat (Over.forget V) X.presheaf
+
+/-- ★★**可逆前層(直線束)** —— 逆を持ち、**局所的に構造層と同型**。
+
+★★★**2 条を課すのは、どちらも直線束の性質でどちらも使うからである**:
 
 | 条 | 何に効くか |
 |---|---|
 | 逆の存在 | `Pic X` の**逆元** |
-| 局所自由性 | 結合律の**局所論法**(`Found/Arakelov/PicLocalBasis.lean`) |
+| 局所自明性 | **結合律**と**テンソル閉性**(`Found/Arakelov/` 第 15 ブロック) |
 
-★数学的には 2 条は同値である(片方から他方は Nakayama 型の議論で出る)。
-★★したがって**内容は変わらない**——Lean で両方を使えるようにしただけである。
+★数学的には同値である(片方から他方は Nakayama 型の議論)。
+★★★したがって**内容は変わらない**——Lean で両方を使えるようにしただけである。
 
-★局所自由性は「各開集合が、階数 1 自由な開集合で覆われる」と述べる。
-これは `Found/Arakelov/PicLocalBasis.lean` の
-`isLocallyInjective_whiskerRight_of_basis` の仮定そのものである。 -/
-def IsInvertibleSheaf {X : Scheme.{0}} (F : X.Modules) : Prop :=
-  (∃ G : X.Modules, Nonempty (modTensor X F G ≅ SheafOfModules.unit X.ringCatSheaf)) ∧
+★★★★これは**非アフィンでも `Pic` を完全に固定する**
+——`Pic X := CommRing.Pic Γ(X, ⊤)` のような誤った witness は
+`Pic(ℙ¹)` の可逆前層をすべて拾えないので落ちる。 -/
+def IsInvertiblePre {X : Scheme.{0}} (F : X.PresheafOfModules) : Prop :=
+  (∃ G : X.PresheafOfModules, Nonempty (preTensor X F G ≅ preUnit X)) ∧
   (∀ U : X.Opens, ∃ S : Sieve U, S ∈ (Opens.grothendieckTopology X) U ∧
     ∀ ⦃V : X.Opens⦄ (i : V ⟶ U), S i →
-      Nonempty ((X.presheaf.obj (Opposite.op V) : Type)
-        ≃ₗ[(X.presheaf.obj (Opposite.op V) : Type)] F.val.obj (Opposite.op V)))
+      Nonempty ((preRestrict X V).obj F ≅ PresheafOfModules.unit _))
 
 /-- **(B1)** スキーム上の**可逆層の群** `Pic(X)`。
 
@@ -121,31 +134,31 @@ structure PicardData where
   `ClassGroup.equivPic` があるので、これは**書ける条件**である。 -/
   equivPicRing : (R : CommRingCat.{0}) →
     letI := (group (Spec R)); Pic (Spec R) ≃* CommRing.Pic R
-  /-- ★★★★**`Pic X` の元は可逆層である**——下にある層を持たせる。
+  /-- ★★★★**`Pic X` の元は可逆前層である**——下にある前層を持たせる。
 
   ★★★**これが「非アフィンで自由」の穴を塞ぐ。**
   これが無いと `Pic X := CommRing.Pic Γ(X, ⊤)` が通ってしまい、
-  `Pic(ℙ¹) = ℤ` を `0` と主張する witness が「達成」と数えられる。 -/
-  sheafOf : (X : Scheme.{0}) → Pic X → X.Modules
-  /-- ★下にある層は可逆である。 -/
-  sheafOf_invertible : ∀ (X : Scheme.{0}) (L : Pic X), IsInvertibleSheaf (sheafOf X L)
+  `Pic(ℙ¹) = ℤ` を `0` と主張する witness が「達成」と数えられる
+  (負の対照: `Check/Arakelov/PicNondegenerate.lean`)。 -/
+  carrier : (X : Scheme.{0}) → Pic X → X.PresheafOfModules
+  /-- ★下にある前層は可逆である。 -/
+  carrier_invertible : ∀ (X : Scheme.{0}) (L : Pic X), IsInvertiblePre (carrier X L)
   /-- ★単位元の下にあるのは構造層。 -/
-  sheafOf_one : ∀ (X : Scheme.{0}),
-    Nonempty (sheafOf X (group X).toDivInvMonoid.toMonoid.toOne.one
-      ≅ SheafOfModules.unit X.ringCatSheaf)
+  carrier_one : ∀ (X : Scheme.{0}),
+    Nonempty (carrier X (group X).toDivInvMonoid.toMonoid.toOne.one ≅ preUnit X)
   /-- ★★積はテンソル積に移る。 -/
-  sheafOf_mul : ∀ (X : Scheme.{0}) (L M : Pic X),
-    Nonempty (sheafOf X (@HMul.hMul _ _ _
+  carrier_mul : ∀ (X : Scheme.{0}) (L M : Pic X),
+    Nonempty (carrier X (@HMul.hMul _ _ _
         (@instHMul _ (group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
-      ≅ modTensor X (sheafOf X L) (sheafOf X M))
-  /-- ★★★**同型な層は同じ元を与える**(`Pic` は同型類の集合)。 -/
-  sheafOf_injective : ∀ (X : Scheme.{0}) (L M : Pic X),
-    Nonempty (sheafOf X L ≅ sheafOf X M) → L = M
-  /-- ★★★**可逆層はすべて現れる**(`Pic` に足りない元が無い)。
+      ≅ preTensor X (carrier X L) (carrier X M))
+  /-- ★★★**同型な前層は同じ元を与える**(`Pic` は同型類の集合)。 -/
+  carrier_injective : ∀ (X : Scheme.{0}) (L M : Pic X),
+    Nonempty (carrier X L ≅ carrier X M) → L = M
+  /-- ★★★**可逆前層はすべて現れる**(`Pic` に足りない元が無い)。
 
-  ★★これと `sheafOf_injective` を合わせて「`Pic X` = 可逆層の同型類」が確定する。 -/
-  sheafOf_surjective : ∀ (X : Scheme.{0}) (F : X.Modules), IsInvertibleSheaf F →
-    ∃ L : Pic X, Nonempty (sheafOf X L ≅ F)
+  ★★これと `carrier_injective` を合わせて「`Pic X` = 可逆前層の同型類」が確定する。 -/
+  carrier_surjective : ∀ (X : Scheme.{0}) (F : X.PresheafOfModules), IsInvertiblePre F →
+    ∃ L : Pic X, Nonempty (carrier X L ≅ F)
 
 /-- Track B は何を作らねばならないか。 -/
 def PicardData.waiting : WaitingFor :=
