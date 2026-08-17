@@ -107,6 +107,29 @@ structure CartierPicData where
   /-- ★★**引き戻しと両立する**——これが高さの底変換不変性を出す段である。 -/
   ofDivisor_pullback : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (D : Y.IdealSheafData),
     toPicardData.pullback f (ofDivisor Y D) = ofDivisor X (D.comap f)
+  /-- ★★★**`𝒪(D)` が自明になるのは `D` が主因子のときに限る**。
+
+  ★★★**これが `ofDivisor := 1` の退化を殺す。**
+  ★`Pic` は (B1) の `equivPicRing` で非自明が強制されているので、
+  「全部自明」だと**すべての因子が主因子**になってしまい、
+  `Pic (Spec R) ≃* CommRing.Pic R` と矛盾する。
+
+  ★原文の `Definition 1.5, (ii)` が `(−)_red` を Cartier 因子として扱えるのは、
+  この対応があるからである。 -/
+  IsPrincipalDivisor : (X : Scheme.{0}) → X.IdealSheafData → Prop
+  ofDivisor_eq_one_iff : ∀ (X : Scheme.{0}) (D : X.IdealSheafData),
+    ofDivisor X D
+        = (toPicardData.group X).toDivInvMonoid.toMonoid.toOne.one
+      ↔ IsPrincipalDivisor X D
+  /-- ★★主因子は積で閉じている(主因子のなす部分モノイド)。 -/
+  isPrincipalDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
+    IsPrincipalDivisor X D → IsPrincipalDivisor X E → IsPrincipalDivisor X (D * E)
+  /-- ★★★**`Spec R` では主因子は単項イデアルに対応する**——意味を固定する。
+
+  ★これが無いと `IsPrincipalDivisor := True` で逃げられる。 -/
+  isPrincipalDivisor_affine : ∀ (R : CommRingCat.{0}) (D : (Spec R).IdealSheafData),
+    IsPrincipalDivisor (Spec R) D ↔
+      ((Scheme.IdealSheafData.equivOfIsAffine D).IsPrincipal)
 
 def CartierPicData.waiting : WaitingFor :=
   { what := "(B2) 有効 Cartier 因子 D から可逆層 𝒪_X(D) を作る操作と、それが積・引き戻しと両立すること"
@@ -128,6 +151,16 @@ structure PicSpecData where
   /-- `Pic(Spec 𝓞_F) ≃ ClassGroup 𝓞_F`。 -/
   equivClassGroup : (F : Type) → [Field F] → [NumberField F] →
     toPicardData.Pic (Spec (CommRingCat.of (𝓞 F))) ≃ ClassGroup (𝓞 F)
+  /-- ★★★**その同型は (B1) の `equivPicRing` と整合する**。
+
+  ★★★**これが自由な posit を殺す。**mathlib には
+  `ClassGroup.equivPic : ClassGroup R ≃* CommRing.Pic R` があるので、
+  本条件は `equivClassGroup` を**完全に決めてしまう**——
+  すなわち **(B3) は独立の難所ではなく、(B1) の系である**。 -/
+  equivClassGroup_compat : ∀ (F : Type) [Field F] [NumberField F]
+    (L : toPicardData.Pic (Spec (CommRingCat.of (𝓞 F)))),
+    ClassGroup.equivPic (𝓞 F) (equivClassGroup F L)
+      = toPicardData.equivPicRing (CommRingCat.of (𝓞 F)) L
 
 def PicSpecData.waiting : WaitingFor :=
   { what := "(B3) Pic(Spec 𝓞_F) ≅ ClassGroup 𝓞_F —— 数体の整数環上の可逆層が類群で書けること"
