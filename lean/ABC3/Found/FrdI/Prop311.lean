@@ -18,13 +18,33 @@ import ABC3.Found.FrdI.Thm34
 
 | 条 | # | 内容 | 状態 |
 |---|---|---|---|
-| (i) | 1 | `𝒞ᵢ → 𝔽_{Φᵢ}` は圏同値 | ★**ここで実装** |
-| (ii) | 2 | `Ψ` は base-isomorphism・pull-back 射・linear 射・Frobenius 型射を保つ | 未 |
+| (i) | 1 | `𝒞ᵢ → 𝔽_{Φᵢ}` は圏同値 | ★**実装** (`prop_3_11_i`) |
+| (ii) | 2 | `Ψ` は base-isomorphism・pull-back 射・linear 射・Frobenius 型射を保つ | ★★**実装** (`prop_3_11_ii`) |
 | (iii) | 3 | `Ψ_Base : 𝒟₁ → 𝒟₂` が 1-一意に存在し、図式が 1-可換 | 未 |
 | (iii) | 4 | 両方が圏同値 | 未 |
 | (iii) | 5 | `𝒟ᵢ` が slim なら合成関手は rigid | 未 |
 
-★**(ii)(iii) は `Theorem 3.4` と同じ道具(FSMI 射の圏論的特徴づけ)を要する**ので別途。
+## ★★(ii) の証明は **7 手**だった(原文は 6 行、2026-08-17 に実装)
+
+| 手 | 内容 | 実装 |
+|---|---|---|
+| 1 | FSMI 自己射 ⟹ prime-Frobenius 自己射 | `isPrimeFrobenius_of_isFSMI_endo` |
+| 2 | prime-Frobenius 自己射 ⟹ FSMI(★**`𝔽_Φ` で計算**) | `isFSMI_of_isPrimeFrobenius_endo` |
+| 3 | `Ψ` は prime-Frobenius 射を保つ(★自己射に帰着) | `isPrimeFrobenius_map` |
+| 4 | `Ψ` は Frobenius 型射を保つ(`Prop 1.10, (v)` の帰納法) | `isFrobeniusType_map_of_groupLike` |
+| 5 | `Ψ` は底同型を保つ(`Prop 1.7, (ii)` ＋ pre-step は同型) | `isBaseIsomorphism_map_of_groupLike` |
+| 6 | `Ψ` は linear 射を保つ(`Prop 1.7, (iii)` の minimal-adjoint) | `isLinear_map_of_groupLike` |
+| 7 | `Ψ` は pull-back 射を保つ(`Prop 1.7, (ii)` の minimal-adjoint) | `isPullBack_map_of_groupLike` |
+
+★★**手 2 が要**である。`𝔽_Φ` の射は `(base, div, deg)` の 3 つ組で、
+`Φ` は group-like ＋ sharp なので `div` はつねに零 ——**実質 2 つ組**になり、
+FSM 性が**明示的に計算できる**。★(i) の圏同値と FSMI の圏論性(`isFSMI_map_iff`)が
+それを `𝒞` へ運ぶ。
+
+★★**`Remark 3.4.1` は「次数を保つ」を仮定した。ここでは仮定しない** ——
+(i) の圏同値があるので、FSMI の圏論性だけで次数の情報が回復する。
+
+★**(iii) は別途**(`Ψ_Base` の構成・1-可換性・rigidity)。
 
 ## ★(i) の証明(原文どおり)
 
@@ -383,6 +403,136 @@ theorem isBaseIsomorphism_map_of_groupLike
     (isFrobeniusType_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
       hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ hγ).2 ?_
   exact isBaseIsomorphism_of_isIso P₂ (Ψ.map β)
+
+/-! ### ★保存の**反射** —— linear と pull-back に要る
+
+★`Proposition 1.7` の特徴づけ(`linear ⟺ Frobenius 型に minimal-adjoint`、
+`pull-back ⟺ 底同型に minimal-adjoint`)を運ぶには、分解を反射したあとで
+**`𝒞₂` 側の因子が `𝒞₁` の因子から来ている**ことを言う必要がある。
+★★そこで**保存を擬逆に当てて反射を作る**。 -/
+
+variable (Fc₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+  (Fc₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+  (hF₁ : IsOfFSMFFType D₁) (hF₂ : IsOfFSMFFType D₂)
+  (hiso₁ : IsOfIsotropicType P₁) (hut₁ : IsOfUnitTrivialType P₁)
+  (hgl₁ : IsOfGroupLikeType P₁)
+  (hiso₂ : IsOfIsotropicType P₂) (hut₂ : IsOfUnitTrivialType P₂)
+  (hgl₂ : IsOfGroupLikeType P₂)
+
+include Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ in
+/-- ★★**Frobenius 型は保存かつ反射される**。 -/
+theorem isFrobeniusType_map_iff_of_groupLike {A B : C₁} (φ : A ⟶ B) :
+    IsFrobeniusType P₁ φ ↔ IsFrobeniusType P₂ (Ψ.map φ) := by
+  refine ⟨isFrobeniusType_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+    hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂, fun h => ?_⟩
+  have h' : IsFrobeniusType P₁ (Ψ.inv.map (Ψ.map φ)) :=
+    isFrobeniusType_map_of_groupLike Ψ.inv P₂ P₁ Fc₂ G₂ Fc₁ G₁ hF₂ hF₁
+      hiso₂ hut₂ hgl₂ hiso₁ hut₁ hgl₁ h
+  set eA := Ψ.asEquivalence.unitIso.app A with hEA
+  set eB := Ψ.asEquivalence.unitIso.app B with hEB
+  have hnat : φ ≫ eB.hom = eA.hom ≫ Ψ.inv.map (Ψ.map φ) :=
+    Ψ.asEquivalence.unitIso.hom.naturality φ
+  have h1 : IsFrobeniusType P₁ (φ ≫ eB.hom) := by
+    rw [hnat]
+    exact IsFrobeniusType.comp P₁ Fc₁ (isFrobeniusType_of_isIso P₁ eA.hom) h'
+  have h2 := IsFrobeniusType.comp P₁ Fc₁ h1 (isFrobeniusType_of_isIso P₁ eB.inv)
+  simpa using h2
+
+include Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ in
+/-- ★★**底同型は保存かつ反射される**。 -/
+theorem isBaseIsomorphism_map_iff_of_groupLike {A B : C₁} (φ : A ⟶ B) :
+    IsBaseIsomorphism P₁ φ ↔ IsBaseIsomorphism P₂ (Ψ.map φ) := by
+  refine ⟨isBaseIsomorphism_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+    hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂, fun h => ?_⟩
+  have h' : IsBaseIsomorphism P₁ (Ψ.inv.map (Ψ.map φ)) :=
+    isBaseIsomorphism_map_of_groupLike Ψ.inv P₂ P₁ Fc₂ G₂ Fc₁ G₁ hF₂ hF₁
+      hiso₂ hut₂ hgl₂ hiso₁ hut₁ hgl₁ h
+  set eA := Ψ.asEquivalence.unitIso.app A with hEA
+  set eB := Ψ.asEquivalence.unitIso.app B with hEB
+  have hnat : φ ≫ eB.hom = eA.hom ≫ Ψ.inv.map (Ψ.map φ) :=
+    Ψ.asEquivalence.unitIso.hom.naturality φ
+  have h1 : IsBaseIsomorphism P₁ (φ ≫ eB.hom) := by
+    rw [hnat]
+    exact isBaseIsomorphism_comp P₁ (isBaseIsomorphism_of_isIso P₁ eA.hom) h'
+  have h2 := isBaseIsomorphism_comp P₁ h1 (isBaseIsomorphism_of_isIso P₁ eB.inv)
+  simpa using h2
+
+include Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ in
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 6 歩** —— **圏同値は linear 射を保つ**。
+
+原文 (FrdI p.73):
+> type [cf. Proposition 1.10, (v)], hence also the linear morphisms [cf. Proposition
+
+★★鍵は `Proposition 1.7, (iii)` の**圏論的な特徴づけ**
+`IsLinear φ ↔ IsMinimalAdjoint (frobTypeProp) φ`。
+★分解を反射し(`exists_factor_of_map_factor`)、因子の Frobenius 型性を
+上の反射で `𝒞₁` へ戻してから、`𝒞₁` の minimal-adjoint 性を当てる。 -/
+theorem isLinear_map_of_groupLike {A B : C₁} {φ : A ⟶ B} (h : IsLinear P₁ φ) :
+    IsLinear P₂ (Ψ.map φ) := by
+  rw [prop_1_7_iii_linear_minimalAdjoint P₂ Fc₂]
+  rw [prop_1_7_iii_linear_minimalAdjoint P₁ Fc₁] at h
+  intro X β α hfac hβ
+  obtain ⟨X₀, β₀, α₀, e, hfac₀, hβe, hαe⟩ := exists_factor_of_map_factor Ψ φ β α hfac
+  have hmapβ₀ : IsFrobeniusType P₂ (Ψ.map β₀) := by
+    have : Ψ.map β₀ = β ≫ e.inv := by rw [hβe]; simp
+    rw [this]
+    exact IsFrobeniusType.comp P₂ Fc₂ hβ (isFrobeniusType_of_isIso P₂ e.inv)
+  haveI : IsIso β₀ :=
+    h X₀ β₀ α₀ hfac₀
+      ((isFrobeniusType_map_iff_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+        hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ β₀).mpr hmapβ₀)
+  rw [hβe]
+  infer_instance
+
+include Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ in
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 7 歩** —— **圏同値は pull-back 射を保つ**。
+
+原文 (FrdI p.74):
+> (iii)], it thus follows that Ψ preserves the pull-back morphisms [cf. Proposition 1.7,
+
+★★鍵は `Proposition 1.7, (ii)` の**圏論的な特徴づけ**
+`IsPullBack φ ↔ IsMinimalAdjoint (baseIsoProp) φ`。★第 6 歩と同じ骨格で、
+`Frobenius 型`の代わりに`底同型`の反射を使う。 -/
+theorem isPullBack_map_of_groupLike {A B : C₁} {φ : A ⟶ B} (h : IsPullBack P₁ φ) :
+    IsPullBack P₂ (Ψ.map φ) := by
+  rw [prop_1_7_ii_pullBack_minimalAdjoint P₂ Fc₂]
+  rw [prop_1_7_ii_pullBack_minimalAdjoint P₁ Fc₁] at h
+  intro X β α hfac hβ
+  obtain ⟨X₀, β₀, α₀, e, hfac₀, hβe, hαe⟩ := exists_factor_of_map_factor Ψ φ β α hfac
+  have hmapβ₀ : IsBaseIsomorphism P₂ (Ψ.map β₀) := by
+    have : Ψ.map β₀ = β ≫ e.inv := by rw [hβe]; simp
+    rw [this]
+    exact isBaseIsomorphism_comp P₂ hβ (isBaseIsomorphism_of_isIso P₂ e.inv)
+  haveI : IsIso β₀ :=
+    h X₀ β₀ α₀ hfac₀
+      ((isBaseIsomorphism_map_iff_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+        hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ β₀).mpr hmapβ₀)
+  rw [hβe]
+  infer_instance
+
+include Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ in
+/-- ★★★★★**[FrdI] Proposition 3.11, (ii)** —— `Ψ` は **base-isomorphism・
+pull-back 射・linear 射・Frobenius 型射**を保つ。
+
+原文 (FrdI p.73):
+> (ii) Ψ preserves base-isomorphisms, pull-back morphisms, linear mor-
+
+★★**4 主張が揃った。** 原文の証明の 7 手をすべて開いた:
+FSMI 自己射の同定(第 1・2 歩)→ prime-Frobenius 射の保存(第 3 歩)→
+Frobenius 型(第 4 歩)→ 底同型(第 5 歩)→ linear(第 6 歩)→ pull-back(第 7 歩)。 -/
+theorem prop_3_11_ii {A B : C₁} (φ : A ⟶ B) :
+    (IsBaseIsomorphism P₁ φ → IsBaseIsomorphism P₂ (Ψ.map φ)) ∧
+      (IsPullBack P₁ φ → IsPullBack P₂ (Ψ.map φ)) ∧
+      (IsLinear P₁ φ → IsLinear P₂ (Ψ.map φ)) ∧
+      (IsFrobeniusType P₁ φ → IsFrobeniusType P₂ (Ψ.map φ)) :=
+  ⟨isBaseIsomorphism_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+     hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂,
+   isPullBack_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+     hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂,
+   isLinear_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+     hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂,
+   isFrobeniusType_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+     hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂⟩
 
 end Preserve
 
