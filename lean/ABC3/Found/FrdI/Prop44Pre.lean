@@ -493,4 +493,46 @@ theorem birat_isIso_iff {A B : C} (φ : A ⟶ B) :
     IsIso ((toBiratCat P G).map φ) ↔ (IsCoAngular P φ ∧ IsPreStep P φ) :=
   ⟨birat_coaPre_of_isIso φ, fun h => birat_isIso_of_coaPre φ h.1 h.2⟩
 
+/-! ## ★12. ★★★★★次の一手 —— `𝒞^birat` の co-angular pre-step はすべて同型
+
+原文 (FrdI p.85):
+> exercise to check that Cbirat is, in fact, a Frobenioid of group-like type. Moreover, it
+
+★★★**これが `𝒞^birat` の Frobenioid 構造の要**である ——
+`Definition 1.3` の (iii)(c)(d)・(v)(b) はどれも co-angular pre-step についての条件なので、
+**それがすべて同型に潰れる**と一気に軽くなる。
+
+## ★★紙の上では通っている(2026-08-17 に確認)
+
+`f : X ⟶ Y` を `𝒞^birat` の co-angular pre-step とする。
+
+1. `f = [a, φ]` の `φ` は `𝒞` の pre-step(`birat_preStep_rep`)
+2. `Definition 1.3, (v), (b)`(`preStepFactor`)で `φ = β ≫ α`
+   (`β` co-angular pre-step、`α` **等長** pre-step)
+3. `[a]` と `[β]` は **同型**(`birat_isIso_of_coaPre`)なので
+   `f = [a]⁻¹ ≫ [β] ≫ [α]`
+4. ★★★**`f` の co-angular 性をこの分解に当てる** —— 真ん中 `[α]` は
+   `𝒞^birat` で等長(自動)かつ pre-step(`birat_isPreStep_iff`)、
+   最後は `𝟙`(線型・底同型)なので、**`[α]` は同型**
+5. よって `f = [a]⁻¹ ≫ [β] ≫ [α]` は同型の合成
+
+## ★★★Lean で止まった所(2026-08-17 に実測、実装は差し戻した)
+
+★★**`IsIso` のインスタンス探索が `BiratCat` の射で通らない** ——
+`haveI : IsIso ((toBiratCat P G).map a) := …` を置いても、
+その直後の `inv ((toBiratCat P G).map a)` で
+「failed to synthesize IsIso …」になる。
+★★★**`IsIso (𝟙 X)` すら合成できない**(`IsIso.id` は大域インスタンスなのに)。
+★`maxHeartbeats` / `synthInstance.maxHeartbeats` を上げても変わらない。
+
+★したがって原因は**探索の深さではなく、`Category (BiratCat P G)` の
+インスタンスの取り回し**だと見ている(`biratCategory` は `noncomputable instance` で
+`P G` を明示引数に取る)。
+
+★★**次の一手**: `inv` を使わず、`IsIso.out` で逆射を**平の射として取り出して**
+すべての等式を平の射で書く(`Prop44Gp.lean` の `sliceDivGpOf` で
+「`IsIso` を仮引数に割る」のと同じ発想)。★そのうえで最後の `IsIso f` は
+`⟨⟨逆射, _, _⟩⟩` を**手で組む**。
+-/
+
 end ABC3.Found.FrdI
