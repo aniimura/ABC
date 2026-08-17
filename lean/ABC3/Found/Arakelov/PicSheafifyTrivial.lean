@@ -36,7 +36,7 @@ universe u
 
 namespace ABC3.Found.Arakelov
 
-open AlgebraicGeometry CategoryTheory Opposite
+open AlgebraicGeometry CategoryTheory MonoidalCategory Opposite
 
 variable (X : Scheme.{u}) (V : X.Opens)
 
@@ -125,11 +125,38 @@ theorem isLocallyTrivial_sheafify (P : X.PresheafOfModules)
   haveI := isIso_restrictMap_sheafifyUnit X V P hP
   exact ⟨(asIso ((restrictPresheafFunctor X V).map (sheafifyUnit X P))).symm ≪≫ e⟩
 
+/-! ## ★★★★★★★壁の配当 —— `Pic X` の乗法が閉じる -/
+
+/-- ★★★★★★★**可逆層のテンソル積は再び可逆層である**(局所自明性の側)。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これが壁の直接の配当である——`Pic X` の**乗法が閉じる**。
+
+★機構は 2 本の合成:
+第 15 ブロック(前層テンソルは局所自明性を保つ)+ 本ファイル(層化も保つ)。 -/
+theorem isLocallyTrivial_tensorModules (L M : X.Modules)
+    (hL : IsLocallyTrivial X L.val) (hM : IsLocallyTrivial X M.val) :
+    IsLocallyTrivial X (tensorModules L M).val :=
+  isLocallyTrivial_sheafify X (L.val ⊗ M.val) (hL.tensor hM)
+
+/-- ★★構造層は局所自明である(`Pic X` の単位元の側)。 -/
+theorem isLocallyTrivial_unitModules :
+    IsLocallyTrivial X (unitModules X).val := fun U =>
+  ⟨⊤, (Opens.grothendieckTopology X).top_mem U,
+    fun V _ _ => ⟨(restrictPresheafUnit (X := X) (U := V)).symm⟩⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isSheaf_restrict.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 B——層の制限は層であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def isLocallyTrivial_tensorModules.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 B——可逆層のテンソル積は再び可逆層)",
     sectionId := "genell-def-1-1-i" }
 
 def isLocallyTrivial_sheafify.src : ABC3.Meta.Source :=
