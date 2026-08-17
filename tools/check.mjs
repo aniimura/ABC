@@ -462,7 +462,10 @@ function checkStructured({ files = null, papersPath = PAPERS_JSON, quiet = false
 //   が保証する——check.mjs はその存在しか見ていない。この限界を明示する。
 // ────────────────────────────────────────────────────────────────
 
-const DECL_RE = /^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*(theorem|lemma|def|abbrev|instance|structure|inductive|example)\s+([A-Za-z_][\w.'!?₀-₉]*)/;
+// ★宣言名。ドットは**後ろに識別子が続くときだけ**認める。
+//   `structure Foo.{u, v}` の `.` を名前に含めてしまい、G2 が
+//   `Foo..nonvacuous` を探して偽陽性を出した（2026-08-17 実測）。
+const DECL_RE = /^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*(theorem|lemma|def|abbrev|instance|structure|inductive|example)\s+([A-Za-z_][\w'!?₀-₉]*(?:\.[\w'!?₀-₉]+)*)/;
 
 /** Lean ソース木を走査して、宣言名の集合と structure 一覧を作る。 */
 function scanLeanTree(dir) {
@@ -649,7 +652,9 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
         ng(where, `引用照合: p.${page} が範囲外(1..${paper.pdfPages})`); continue;
       }
       const quoted = body.split('\n')
-        .map((l) => l.replace(/^[^>]*>\s?/, ''))
+      // ★引用行の末尾に docstring 終端 `-/` が乗ることがある。
+      //   落とさないと本文に混ざり、照合が末尾 2 文字で落ちる（2026-08-17 実測）。
+        .map((l) => l.replace(/^[^>]*>\s?/, '').replace(/\s*-\/\s*$/, ''))
         .join(' ');
       const proj = leanQuoteProjection(quoted);
       const pdfPath = join(SOURCE_DIR, `${paper.file}.pdf`);
@@ -1136,6 +1141,10 @@ function selftest() {
     ['D34 Found/ の宣言に .src が無くても通る(任意である)', 'Found',
       'd34-found-no-src.lean', false],
     ['D35 Found/ の正しい .src は通る', 'Found', 'd35-found-src-ok.lean', false],
+    ['D36 宇宙注釈つき structure の witness を見つけられる', 'Interface',
+      'd36-universe-structure.lean', false],
+    ['D37 引用行の末尾に docstring 終端があっても照合できる', 'Skeleton',
+      'd37-quote-ends-docstring.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

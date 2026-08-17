@@ -111,7 +111,8 @@ structure FaltingsHeightData where
     0 ≤ degInf L E
   /-- ★★★**`Proposition 3.4`** —— `deg∞` は `ht^Falt` で上から抑えられる。
 
-  ★逐語は本 `structure` の docstring にある(引用は字下げすると照合器が読めない)。 -/
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any -/
   prop_3_4 : ∀ ε : ℝ, 0 < ε → ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L]
     (E : WeierstrassCurve L),
     toSemistableModelData.SemiStable L E →
