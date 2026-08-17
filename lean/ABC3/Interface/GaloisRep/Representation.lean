@@ -1,6 +1,8 @@
 import ABC3.Interface.GaloisRep.Torsion
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 import Mathlib.FieldTheory.Galois.Basic
+import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.NumberTheory.Padics.RingHoms
 
 /-!
@@ -26,7 +28,7 @@ import Mathlib.NumberTheory.Padics.RingHoms
 
 namespace ABC3.Interface.GaloisRep
 
-open ABC3.Meta WeierstrassCurve
+open ABC3.Meta WeierstrassCurve NumberField
 
 /-! ## ★★G3 —— `l` 進表現 -/
 
@@ -50,6 +52,21 @@ structure GaloisRepData where
   /-- ★★**行列式は円分指標**(Weil 対から出る)。 -/
   det_eq_cyclotomic : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [Algebra K L] →
     (W : WeierstrassCurve K) → (l : ℕ) → [Fact l.Prime] → ((L ≃ₐ[K] L) → ℤ_[l]ˣ)
+  /-- ★★★**それが実際に `rep` の行列式であること**。 -/
+  det_rep : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
+    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ : L ≃ₐ[K] L),
+    (rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det = (det_eq_cyclotomic W l σ : ℤ_[l])
+  /-- ★★★**円分指標は全射である**(数体の絶対 Galois 群の上で)。
+
+  ★★★**これが `rep := 1`(自明表現)の退化を殺す。**
+  自明表現だと行列式は恒等的に `1` になるが、`ℤ_[l]ˣ` は `l ≥ 3` で 1 元でない。
+
+  ★これは原文が `Theorem 3.8` の前提として使う事実である
+  ——`SL₂` を像に含むと言うためには、まず `det` が全射でなければならない。 -/
+  det_surjective : ∀ {K L : Type} [Field K] [NumberField K] [DecidableEq K] [Field L]
+    [Algebra K L] (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime],
+    W.IsElliptic → IsAlgClosed L →
+    Function.Surjective (fun σ : L ≃ₐ[K] L => det_eq_cyclotomic W l σ)
 
 def GaloisRepData.waiting : WaitingFor :=
   { what := "(G3) l 進 Galois 表現 rho_{E,l} : Gal(K̄/K) → GL_2(Z_l) と、その行列式が円分指標であること"
