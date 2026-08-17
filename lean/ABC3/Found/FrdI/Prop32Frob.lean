@@ -1781,4 +1781,63 @@ theorem pfRoot_otriBase (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P 
   simp only [Category.assoc]
   exact hres
 
+/-! ## ★32. ★★★★現在地と残り(2026-08-17 の測定)
+
+### 埋まった 16 条(`FrobenioidCore (pfRootPre P F)` の 21 条のうち)
+
+| 条 | 宣言 | 手 |
+|---|---|---|
+| (i)(a) `baseSurj` | `pfRoot_baseSurj` | `(A,1)` として送るだけ |
+| (i)(b) `preStepSpan` | `pfRoot_preStepSpan` | ★span を `A^m`・`B^n` の間で取り `W := (V₀, n*m)` |
+| (ii) `frobDegSurj` | `pfRoot_frobDegSurj` | `exists_rt_frob` |
+| (ii) `frobDegUniq` | `pfRoot_frobDegUniq` | co-span を揃え、isotropic に押し上げる |
+| (iii)(a) `coAngularComp` | `pfRoot_coAngularComp` | ★isotropic 型ゆえ全射が co-angular |
+| (iii)(b) `coAngularOfPreStep` | `pfRoot_coAngularOfPreStep` | 同上 |
+| (iii)(c) `otriFwd` | `pfRoot_otriFwd` | 根を揃える ＋ 対角 ＋ `𝒞` の `otriFwd` |
+| (iii)(c) `otriBwd` | `pfRoot_otriBwd` | 同上 |
+| (iii)(c) `otriBase` | `pfRoot_otriBase` | 同上 |
+| (v)(a) `preStepMono` | `pfRoot_preStepMono` | `homPf_cancel_preStep` |
+| (v)(b) `preStepFactor` | `pfRoot_preStepFactor` | `φ = φ ≫ 𝟙` |
+| (v)(b) `preStepFactorUniq` | `pfRoot_preStepFactorUniq` | isometric pre-step は同型 |
+| (v)(c) `preStepFactor'` | `pfRoot_preStepFactor'` | `φ = 𝟙 ≫ φ` |
+| (v)(c) `preStepFactorUniq'` | `pfRoot_preStepFactorUniq'` | 同上 |
+| (vii)(a) `isotropicHullExists` | `pfRoot_isotropicHullExists` | `𝟙` |
+| (vii)(b) `isotropicClosed` | `pfRoot_isotropicClosed` | 全対象 isotropic |
+
+★土台は `pfRoot_isOfIsotropicType`(`𝒞` が Frobenius-isotropic 型 ⟹ `𝒞^pf` は isotropic 型)。
+
+### 残る 5 条と、それぞれの**具体的な**残り作業
+
+**(vi) `faithfulUpToUnits`** ——
+`𝒞` の `faithfulUpToUnits` は `MetricallyEquivalent`(`Div φ = Div ψ`)を要る。
+`𝒞^pf` 側の `rootDiv` は `Pf` 値なので、代表元へ降ろすには
+★**`n • a = n • b → a = b`(`a b : Φ(A)`、`n ≥ 1`)**が要る。
+★★これは **divisorial から出る**(紙の上で確認、未実装):
+`n • (toGp a − toGp b) = 0 ∈ range (toGp)` ⟹ **saturated** で
+`toGp a − toGp b ∈ range (toGp)` ⟹ `b ≼ a`;対称に `a ≼ b`;
+**integral**(`toGp` 単射 ⟹ 簡約)と **sharp** で `a = b`。
+★`toGp_add` / `toGp_nsmul` は `Found/FrdI/Prop44Gp.lean` にある。
+
+**(iv)(a) `arbFactor` / (iv)(b) `pullBackLB` / (i)(c) `plBkEquiv` / (iv)(a) `arbFactorUniq`**
+—— どれも **`𝒞^pf` の pull-back の辞書**が要る。
+★★`𝒞^birat` では同じことを `Prop44Core.lean` で両方向やってある:
+
+| 向き | `𝒞^birat` での宣言 | 手 |
+|---|---|---|
+| pull-back ⟹ 代表元が co-angular linear | `birat_pullBack_repr` | `arbFactor` の残りを `IsPullBack.lift` で持ち上げ `1 = n * d` |
+| `𝒞` の pull-back ⟹ 押し出しても pull-back | `birat_isPullBack_map` | `isPullBack_of_lift` ＋ 底は `biratBase_mk` の公式 |
+
+★汎用の道具 `isPullBack_of_lift` / `isPullBack_of_comp_right` は
+`Prop44Core.lean` にあり、**そのまま `pfRootPre` に使える**(pre-Frobenioid 一般)。
+★`arbFactorUniq` は `𝒞^birat` と同じく
+`frobDegUniq` ＋ 全射性 ＋ `IsPullBack.lift` の 3 点で出る。
+
+### `Proposition 3.2` 全体として残るもの
+
+1. 上の 5 条(＋ `Frobenioid` の 2 本の圏同値 `coaPreUnderEquiv` / `coaPreOverEquiv`)
+2. **(ii) の辞書の残り** —— Frobenius 型・pull-back・co-angular・
+   base-identity 自己射・同型(`isPreStep` など 5 項は `Prop32.lean` で済み)
+3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
+-/
+
 end ABC3.Found.FrdI
