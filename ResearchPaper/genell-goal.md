@@ -1923,3 +1923,77 @@ IUT そのものを要求する。**
 `Quot` の上で well-defined であることは自動である。
 
 ★これは `Lemma 3.7`(Galois-finite な例外集合 `Exc`)が直接要求するものである。
+
+---
+
+## §9-20 ★★★Arakelov 理論・Galois 表現のスケルトン——**個数を数えられるようにした**
+
+**2026-08-17。**ユーザーの問い:
+> S1からS4で現在、0/3，0/9，0/9，0/3という進捗ですか?
+> これらを前にArakelov, Galois表現が存在しているのですか?
+> Arakelov, Galois表現での形式化すべき個数は把握(スケルトン作成)できていますか?
+
+★★★**3 つ目への答えは「できていなかった」である。**
+`Interface/GenEll/` の `waiting` は**大きな文字列 1 本**で待っており、
+「何本作れば埋まるか」が数えられなかった。★本節はそれを割った記録である。
+
+### ★★★Arakelov 理論 —— **9 件**
+
+`Interface/Arakelov/{LineBundle,ArcSpace,APic}.lean`
+
+| # | obligation | 我々の到達点 | mathlib(2026-08-17 実測) |
+|---|---|---|---|
+| B1 | `Pic(X)`(可逆層の群) | — | ★`IsLocallyFree` は**ある**。**階数**と**層のテンソル積**が無い(前層版は有る) |
+| B2 | `𝒪_X(D)`(Cartier → 可逆層) | ★`comap_mul` 証明済 | `IdealSheafData` / `comap` は有る |
+| B3 | `Pic(Spec 𝓞_F) ≅ ClassGroup` | — | `ClassGroup` は有る。橋が無い |
+| C1 | `X^arc` の位相・`ι_X`・コンパクト性 | ★★**構成済**(`ArcModel`) | ——(GAGA は**不要**と判明) |
+| C2 | ℤ-固有 ⇒ 射影埋め込み | — | ★★★**層 C の律速**。`ℙⁿ` の点の関手が無い |
+| C3 | 解析化 `L^arc` と hermitian 計量 | ★`IsConjInvariant` 定式化済 | (B1) に従属 |
+| D1 | `APic(X)` | ★因子表示で対応物あり | (B1)+(C3) に従属 |
+| D2 | `APic(Spec 𝓞_F)` と `deg_F` | ★★**`ADiv`/`deg_F`/`APrc` 実装済**、底変換不変性も証明済 | 橋が無い |
+| D3 | `ht_L̄ : X(ℚ̄) → ℝ` と `Prop 1.4` | ★★★**`U_X(ℚ̄)` では構成済** | (B2) が入れば全域化される |
+
+★★★**律速は B1(層のテンソル積)と C2(`ℙⁿ` の点の関手)の 2 本である。**
+
+### ★★★Galois 表現 —— **8 件**
+
+`Interface/GaloisRep/{Torsion,Representation,Reduction}.lean`
+
+| # | obligation | mathlib / FLT(2026-08-17 実測) |
+|---|---|---|
+| G1 | `E[n] ≅ (ℤ/n)²` | ★★★**両方に無い**(FLT は sorry)。**S3 の最初の壁** |
+| G2 | Tate 加群 `T_l E ≅ ℤ_l²` | 0 件。(G1) に従属し、入れば機械的 |
+| G3 | `ρ_{E,l} : Gal → GL₂(ℤ_l)` | 行き先(`GeneralLinearGroup`)と定義域(`AlgEquiv`)は**書ける**。★**Weil 対**が無い |
+| G4 | `mod l` 表現 | `PadicInt.toZMod` は有る。★`Lemma 3.1` は**我々が実装済** |
+| G5 | 像が `SL₂` を含む(`Theorem 3.8`) | S3 の最後の段 |
+| G6 | Tate 曲線と局所高さ(`Definition 3.3`) | ★★両方に無い。典拠 [FC] III, Cor 7.3 |
+| G7 | 半安定還元と `𝓞_L` 上のモデル | `Reduction.lean` は有るが Néron モデルは無い |
+| G8 | Faltings 高さ `ht^Falt = deg(ω_E)` | ★★★**Arakelov 側との合流点**((D2) が要る) |
+
+★★★**`E[n] ≅ (ℤ/n)²` が入口である**——これが無いと `GL₂` の **`2`** が書けない。
+
+### ★★捩れ部分群は posit しなかった
+
+`E[n]` そのものは mathlib の `W.toAffine.Point`(`AddCommGroup`、`[DecidableEq K]` が要る)から
+**今すぐ書ける**ので、`torsionPoints` は **`def` として定義**した。
+★posit したのは**構造定理の方だけ**である。★★**posit を最小にする**という規律の適用である。
+
+### ★★★数え方
+
+`node tools/check.mjs` の「Interface 実装待ち」の行が**そのまま件数**になる。
+2026-08-17 時点で **26 件**(Arakelov 9 + Galois 表現 8 + 既存 9)。
+
+★★**増えたように見えるが、これは後退ではない**——
+これまで 1 本の文字列に畳まれていたものが、**個別に埋められる形で数えられるようになった**。
+★1 件埋めるごとにキューが減る。
+
+### ★器具の穴を 3 つ見つけた
+
+| # | 症状 | 原因 |
+|---|---|---|
+| 1 | `lake env lean` は通るのに `lake build` が落ちる | ★**auto-bound universe の設定が違う**。`universe u v` を明示して解決 |
+| 2 | G2 が `PulledBackClassData..nonvacuous` を探す | ★宣言名の正規表現が `.{u, v}` を名前の一部として拾う |
+| 3 | 逐語照合が 67/69 文字で止まる | ★引用を**字下げして**フィールドの docstring に置いた |
+
+★★★**1 は規律への影響が大きい**——「`lake env lean` を通ったら即コミット」だけでは
+`lake build` の失敗を取り逃す。★**コミット後に `lake build` を回し、落ちたら次のコミットで直す。**

@@ -15,6 +15,27 @@ Lean の合否は **`cd /d/Math_ABC3/lean && lake build`** で判定する。ゲ
 2. `lake env lean FILE` は通るのに `lake build` が落ちた
    (セクション変数 `F` が仮定の型に現れて自動で含まれる、という差が出た)。
 
+★★★**3 例目(2026-08-17): auto-bound universe。**
+`structure Foo where Point : Type u` と書いたとき、
+`lake env lean` は **`u` を自動で束縛して通す**が、`lake build` は
+`unknown universe level u` で落ちた。★**`universe u v` を明示する**こと。
+
+★★これで「`lake env lean` と `lake build` が食い違う」実例は **3 種**になった:
+セクション変数の自動包含 / auto-bound universe / `cd` の欠落。
+**共通点は「`lake env lean` の方が緩い」**である。
+
+## ★★★[[parallel-session-sweeps-my-files]] との調停
+
+あちらは「`lake env lean` が通ったら**即コミット**」と言う(共有ワークツリーで
+巻き込まれないため)。★★両立させる順番は:
+
+1. `lake env lean FILE` が通る → ★**すぐコミットする**
+2. その後 `lake build` を回す
+3. 落ちたら **次のコミットで直す**
+
+★★★**「build まで確かめてから 1 回で綺麗にコミット」を狙ってはならない**——
+その間に並行セッションに巻き込まれる(2026-08-17 に実際に起きた)。
+
 **How to apply:**
 - 各コマンドの先頭に **絶対パスの `cd` を必ず書く**(`cd` の効果は次の呼び出しに残るので、
   前の呼び出しの cwd に依存しない)。
