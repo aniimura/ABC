@@ -1,6 +1,5 @@
 import ABC3.Meta.Claim
-import Mathlib.Topology.Algebra.Category.ProfiniteGrp.Limits
-import Mathlib.GroupTheory.PGroup
+import ABC3.Found.ProL.Defs
 
 /-!
 # [FrdI] Definition 2.8, (ii) —— 副有限アーベル群の pro-`l` 分解(`Skeleton`)
@@ -29,7 +28,7 @@ CLAUDE.md の**姿勢**——「工数の山を『壁』と呼ばない。既知
 | 有限アーベル群の `l`-準素分解 | `Ideal.iSup_primaryComponent_eq_top` / `Ideal.iSupIndep_primaryComponent`(`Algebra/Module/Torsion/PrimaryComponent.lean:140,175`) | ★**ある**(`[IsDedekindDomain A]`、`A = ℤ` で使う) |
 | その関手性 | `Ideal.primaryComponent.map`(同 :76) | ★**ある** |
 | 極限と積の交換 | `CategoryTheory.Limits.limitFlipCompLimIsoLimitCompLim`(`CategoryTheory/Limits/Fubini.lean:545`) | ★**ある** |
-| **pro-`l` 群の定義** | `Mathlib/` 全体を `IsProPGroup|ProPGroup|pro-p group` で grep して **0 件**(2026-08-18) | ★**無い**(下で我々が定義する) |
+| **pro-`l` 群の定義** | `Mathlib/` 全体を `IsProPGroup|ProPGroup|pro-p group` で grep して **0 件**(2026-08-18) | ★**無い**(`Found/ProL/Defs.lean` で我々が定義した) |
 
 ★★**すなわち、部品は 4/5 が既に在庫にある。**足りないのは pro-`l` の語彙と、
 それらを繋ぐ我々の作業である。分解の DAG は
@@ -50,12 +49,9 @@ open CategoryTheory ABC3.Meta
 
 universe u
 
-/-- ★**pro-`l` 群** —— すべての有限商が `l` 群であるような副有限群。
-
-★mathlib に無いので我々が定義する(上の測定表)。
-`OpenNormalSubgroup` による有限商が `IsPGroup l` であること、と書く。 -/
-def IsProL (l : ℕ) (M : ProfiniteGrp.{u}) : Prop :=
-  ∀ U : OpenNormalSubgroup M, IsPGroup l (M ⧸ U.toSubgroup)
+/-- ★**pro-`l` 群**は `Found/ProL/Defs.lean` で実装した(負の対照つき)。
+ここではその述語を使う。 -/
+abbrev IsProLGrp (l : ℕ) (M : ProfiniteGrp.{u}) : Prop := ABC3.Found.ProL.IsProL l M
 
 /-- ★★★**[FrdI] Definition 2.8, (ii)** —— 副有限アーベル群の pro-`l` 分解。
 
@@ -71,13 +67,13 @@ def IsProL (l : ℕ) (M : ProfiniteGrp.{u}) : Prop :=
 `ContinuousMulEquiv`(位相群の同型)である。 -/
 theorem def_2_8_ii (M : ProfiniteGrp.{u}) (_hcomm : ∀ a b : M, a * b = b * a) :
     ∃ N : Nat.Primes → ProfiniteGrp.{u},
-      (∀ l : Nat.Primes, IsProL l.1 (N l)) ∧
+      (∀ l : Nat.Primes, IsProLGrp l.1 (N l)) ∧
       Nonempty (M ≃ₜ* ((l : Nat.Primes) → N l)) := by
   sorry
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
-def IsProL.src : Source :=
+def IsProLGrp.src : Source :=
   { paper := "FrdI", pdfPage := 52, item := "Definition 2.8, (ii)",
     sectionId := "frdi-def-2-8" }
 
