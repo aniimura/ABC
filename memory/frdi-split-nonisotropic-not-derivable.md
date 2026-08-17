@@ -44,8 +44,27 @@ metadata:
 ★★★**このリポジトリの在庫は日本語の docstring で索引されている** ——
 `FSMI 自己射` で引けば 1 発で当たった。
 
+**★★★2026-08-17、同じ誤りが mathlib に対しても 2 回起きた。**
+
+これまでは「**自分たちの**在庫を検索しない」という症状だった。
+★★同じ日に、**mathlib の在庫**に対しても 2 回外した:
+
+| # | 何を書いたか | mathlib に実際にあったもの | なぜ外したか |
+|---|---|---|---|
+| 5 | 「`Cartier` は mathlib に 0 件だから底が抜けている」 | `IdealSheafData.comap` で足りた | ★**名前で測った**(`Cartier` の語で検索) |
+| 6 | 「一般のイデアルの拡大の重複度公式は無い」 | `emultiplicity_map_eq_ramificationIdx_mul` | ★★`ramificationIdx` で検索し、**`emultiplicity` で検索しなかった** |
+
+★★★**mathlib は「数学の概念名」ではなく「形式化された補題の名前」で索引されている。**
+`Cartier` という語が 0 件でも、**その中身**(イデアル層の引き戻し)は在る。
+`ramificationIdx` を含む補題を全部見ても、**同じ内容が `emultiplicity` の語で**述べられている。
+
 **How to apply:**
 - ★**補題を書き始める前に `grep` する**。「導けないと書く前」だけでは足りない。
+- ★★★**mathlib を検索するときは「概念名」と「量の名前」の両方で引く**:
+  - 概念名(`Cartier`, `Arakelov`, `moving lemma`)—— ★**当たらないことが多い**
+  - 量の名前(`emultiplicity`, `ramificationIdx`, `comap`, `map`)—— ★★こちらが本体
+  - ★**ディレクトリを直接見る**(`ls Mathlib/AlgebraicGeometry/IdealSheaf/`)——
+    ファイル名は概念で切られているので、これが一番速い
 - ★★★**検索語は 3 種類を必ず併用する**:
   1. **Lean の識別子**(`degFr`, `≫ hullMap`)
   2. **主張の形**(`IsIso (P.Base`, `≫ ?f = ?g ≫`)
