@@ -2690,3 +2690,60 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 ★対処: 条件を `[..]` でなく `(h : ..)` で受ける。
 ★`Nonempty` から `obtain` して**データ**は返せない——結論も `Nonempty` にする。
 ★依存を書き換えたら `lake build` で先に olean を作り直す。
+
+
+---
+
+## §9-32 (2026-08-17) ★★★★★★B1 —— 18 ブロック、Interface と直結。残り 2 点の材料を実測した
+
+### ★第 18 ブロック: Interface を**前層の語彙**に直した
+
+| 旧 | 新 |
+|---|---|
+| `modTensor`(前層テンソル → 層化) | ★`preTensor`(前層テンソルのみ) |
+| `IsInvertibleSheaf` | ★`IsInvertiblePre` |
+| `sheafOf : Pic X → X.Modules` | ★`carrier : Pic X → X.PresheafOfModules` |
+
+★★**局所自明な前層は自動的に層**なので「可逆前層の同型類」=「可逆層の同型類」であり、
+**退化封じの強さは変わらない**。★★★これで `Found` 側と対応が付いた:
+
+| Interface の要求 | `Found/Arakelov/` |
+|---|---|
+| `carrier` / `carrier_invertible` | `InvertiblePresheaf`(第 16) |
+| `carrier_one` / `carrier_mul` | ★**rfl**(`one_carrier` / `mul_carrier`) |
+| `carrier_injective` / `_surjective` | `PicPre` の商(第 17) |
+| `group` | ★`CommGroup (PicPre X)`(第 17) |
+
+### ★★★★残り 2 点の材料(2026-08-17 実測)
+
+#### (1) `equivPicRing` —— **材料はほぼ揃っている**
+
+`AlgebraicGeometry/Modules/Tilde.lean` に:
+
+| 在庫 | 内容 |
+|---|---|
+| `tilde.adjunction.fullyFaithfulLOfIsIsoUnit` | ★★**`tilde` は充満忠実**(`IsIso unit` が instance) |
+| `isIso_fromTildeΓ_iff` | `IsIso fromTildeΓ ↔ essImage` |
+| `isIso_fromTildeΓ_of_presentation` | ★**表示を持てば `fromTildeΓ` は同型** |
+| `instance : (tilde M).IsQuasicoherent` | `tilde` の像は準連接 |
+| `LocallyFree.lean` の `IsLocallyFree → IsQuasicoherent` | ★**局所自由 ⟹ 準連接**(priority 100) |
+
+★★★したがって「`Spec R` 上の可逆層は `tilde M` の形」は**出せる**。
+★★残るのは **`tilde` がモノイダルであること**(`tilde (M ⊗_R N) ≅ tilde M ⊗ tilde N`)
+——これは mathlib に無い。
+
+#### (2) 引き戻し `f^* : Pic Y → Pic X`
+
+★mathlib は `Scheme.Modules.pullback f` / `pullbackId` / `pullbackComp` /
+`pullbackObjFreeIso`(`f^*(free I) ≅ free I`)を持つ。
+★★★無いのは **`f^*` のモノイダル性**と**局所自明性の保存**。
+
+### ★★★★★残り 2 点は同じ形の欠落である
+
+    (1) tilde がモノイダル
+    (2) f^* がモノイダル
+
+★★どちらも「**関手がテンソル積を保つ**」——mathlib の
+`Functor.Monoidal` / `CoreMonoidal` を作る仕事である。
+★`pushforward₀OfCommRingCat` については mathlib が既に作っている
+(`PushforwardZeroMonoidal.lean`)ので、**同じ型の仕事**であり見通しは立っている。
