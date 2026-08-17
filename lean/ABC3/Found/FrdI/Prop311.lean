@@ -544,7 +544,7 @@ end Preserve
 > Finally, we consider assertion (iii). Write N for the one-object category whose
 
 原文 (FrdI p.74):
-> of categories  Ci  Fi  Di  N
+> morphisms of Ci, where two morphisms of Ci are regarded as equivalent if they
 
 ★★**`Φ` が零モノイドなら `𝔽_Φ` の射 `(base, div, deg)` は `div` が消えて
 `(base, deg)` の 2 つ組になる**——これはちょうど `𝒟 × 𝒩` の射である
@@ -583,7 +583,7 @@ theorem elemFrobToProd_essSurj : (elemFrobToProd (Φ := Φ)).EssSurj where
 **`𝔽_Φ` は `𝒟 × 𝒩` と圏同値**である。
 
 原文 (FrdI p.74):
-> of categories  Ci  Fi  Di  N
+> Finally, we consider assertion (iii). Write N for the one-object category whose
 
 ★★**(i) と合わせると `𝒞 ≌ 𝒟 × 𝒩`** になる。★原文はこの分解を使って
 「`𝒟` は `𝒞` から圏論的に復元できる」(base-identity 自己射との合成が等しい射を同一視する)
