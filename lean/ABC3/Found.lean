@@ -60,6 +60,7 @@ import ABC3.Found.FrdI.Thm52Frob
 import ABC3.Found.FrdI.Remark491
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Core
+import ABC3.Found.FrdI.Prop44Otri
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog

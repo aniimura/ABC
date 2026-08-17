@@ -52,6 +52,22 @@ import ABC3.Found.FrdI.Prop44Core
 (`preStepSpan` は `X ⟶ A`・`X ⟶ E` の span を与えるだけで、
 必要な `A ⟶ E` 向きの co-angular pre-step は与えない)。
 
+## ★★★2026-08-18 の測定 —— 穴は「birat-Frobenius-normalized でない `𝒞`」だけに絞れた
+
+★`Prop25iii.lean` の `otri_mul_comm` は
+**「`A` が Frobenius-normalized ⟹ `𝒪^▷(A)` は可換」**を与える。
+上で測ったとおり `otriBase` ⟺ `𝒪^▷(A^birat)` が可換なので、
+
+  ★★★**`𝒞` が birationally Frobenius-normalized 型 ⟹ `𝒞^birat` は 21 条をすべて満たす**
+
+(`Found/FrdI/Prop44Otri.lean` の `birat_frobenioidCore_of_frobNormalized`)。
+
+★したがって**穴が残るのは birationally Frobenius-normalized でない `𝒞` だけ**である。
+原文 `Example 4.6` はそういう `𝒞` が実在することを示しているので**穴は空虚ではない**が、
+`Theorem 5.2` の model Frobenioid・`Example 6.1`・`6.3` はすべて model 型
+(したがって birationally Frobenius-normalized 型)なので、
+★★**下流で実際に要る場面では本条は埋まっている**。
+
 ## ★影響範囲
 
 ★`Proposition 4.4, (ii)` が閉じないので、
