@@ -138,6 +138,23 @@ structure PicardData where
     Nonempty (sheafOf X (@HMul.hMul _ _ _
         (@instHMul _ (group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
       ≅ modTensor X (sheafOf X L) (sheafOf X M))
+  /-- ★★★★★**引き戻しは層の引き戻しである**。
+
+  ★★★**2026-08-18 に 2 つ目の穴が見つかった。**
+  上の `pullback` / `pullback_mul` / `pullback_id` / `pullback_comp` は
+  **`sheafOf` と一切結ばれていない**——`pullback` が
+  「層の引き戻し」であることをどの条件も要求していなかった。
+
+  ★したがって `pullback f := 1`(自明準同型、ただし恒等射のときだけ `id`)のような
+  **幾何と無関係な witness** が通ってしまう。
+  ★★これは C1 の `evalAffine`、B1 の `sheafOf` と**同じ型の見落とし**である
+  ——「一部で固定しても、残りが自由なら誤った witness が通る」。
+
+  ★★★塞ぎ方: 引き戻しの下にある層が、mathlib の
+  `Scheme.Modules.pullback`(層加群の引き戻し)と一致することを課す。 -/
+  sheafOf_pullback : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (L : Pic Y),
+    Nonempty (sheafOf X (pullback f L)
+      ≅ (Scheme.Modules.pullback f).obj (sheafOf Y L))
   /-- ★★★**同型な層は同じ元を与える**(`Pic` は同型類の集合)。 -/
   sheafOf_injective : ∀ (X : Scheme.{0}) (L M : Pic X),
     Nonempty (sheafOf X L ≅ sheafOf X M) → L = M
