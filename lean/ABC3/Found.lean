@@ -102,6 +102,7 @@ import ABC3.Found.GenEll.ArcModel
 import ABC3.Found.GenEll.ComapLocal
 import ABC3.Found.GenEll.ComapStalk
 import ABC3.Found.GenEll.ComapAffine
+import ABC3.Found.GenEll.ComapMul
 import ABC3.Found.GenEll.NorthcottClassical
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
