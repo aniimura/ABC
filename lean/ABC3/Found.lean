@@ -70,6 +70,7 @@ import ABC3.Found.ProL.ProfiniteLimit
 import ABC3.Found.ProL.LimitPi
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
+import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
 import ABC3.Found.IUTchIII.PowerSeriesLog
@@ -180,6 +181,7 @@ import ABC3.Found.Arakelov.PicPullTensorFree
 import ABC3.Found.Arakelov.PicColimitLift
 import ABC3.Found.Arakelov.PicFreeYonedaLift
 import ABC3.Found.Arakelov.PicDeltaLift
+import ABC3.Found.Arakelov.PicUnitFree
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
