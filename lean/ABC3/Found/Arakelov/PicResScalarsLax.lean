@@ -83,6 +83,22 @@ noncomputable def resScalarsEps :
       congrArg (fun g : R.obj X ⟶ R'.obj Y => CommRingCat.Hom.hom g r) (α.naturality f)
     exact h
 
+/-! ## ★★残り 5 条(2026-08-17 実測: `cat_disch` では落ちない)
+
+    μ_natural_left / μ_natural_right / associativity /
+    left_unitality / right_unitality
+
+★★★いずれも `μ` / `ε` と**同じ手**で落ちる見込みである:
+
+1. 成分に落とす(`PresheafOfModules` の射の等式 → 各 `X` での `ModuleCat` の射の等式)
+2. `TensorProduct.ext'` で純テンソルへ
+3. ★**`show` で両辺を明示的に書き下す**(片側だけでは駄目——本 turn で 8 回試して確定)
+4. `ModuleCat.restrictScalars_μ_tmul` / `restrictScalars_η` で書き換え
+5. `rfl`
+
+★これが揃えば `Adjunction.leftAdjointOplaxMonoidal` で
+`pullback` が oplax monoidal になり、`PicardData.pullback` が書ける。 -/
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def resScalarsEps.src : ABC3.Meta.Source :=
