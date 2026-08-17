@@ -15,11 +15,17 @@ import ABC3.Found.Arakelov.ArcTopologyAffine
 1. アフィン開 `U ⊆ X` に対し、`U ≅ Spec Γ(X,U)`(`IsAffineOpen.isoSpec`)で
    アフィンの位相を**輸送**する(`arcTopologyOpen`)。
 2. 各 `U` の chart `Arc U → Arc X`(`p ↦ p ≫ U.ι`)で **coinduced** を取り、
-   すべての `U` について **`⨅`(共通部分)** を取る(`arcTopology`)。
+   すべての `U` について **`⨆`** を取る(`arcTopology`)。
 
-★★★**`⨅` である理由**: mathlib では `t ≤ s ⟺ t の開集合が少ない`(粗い)なので、
-`⨅` は**開集合の共通部分**を取る。★「`V` が開 ⟺ どの chart でも `V∩U` が開」
-という貼り合わせの条件が、ちょうどこれである。
+★★★**`⨆` である理由(2026-08-17 に実測して訂正した)**:
+mathlib の `TopologicalSpace` の順序は **`a ≤ b ⟺ a が細かい`** である
+——`⊥` が離散(全集合が開)であることで確定する。
+★★したがって**開集合の共通部分**を取るのは `⨆` の側である。
+「`V` が開 ⟺ どの chart でも引き戻しが開」という貼り合わせの条件が、ちょうどこれ。
+
+★★★**最初 `⨅` と書いていた。**`TopologicalSpace.le_def` の
+`IsOpen ≤ IsOpen` という表示は**どちらが左辺か分からない**ため誤読した
+——`⊥` が離散かどうかを試して確定させるべきだった。
 
 ## ★★本ファイルが取るもの
 
@@ -54,17 +60,18 @@ open AlgebraicGeometry CategoryTheory ABC3.Found.GenEll TopologicalSpace
 ★★`V` が開 ⟺ どのアフィン chart に引き戻しても開、という条件である。 -/
 @[reducible] noncomputable def arcTopology (X : Scheme.{0}) :
     TopologicalSpace (Spec (CommRingCat.of ℂ) ⟶ X) :=
-  ⨅ U : X.affineOpens,
+  ⨆ U : X.affineOpens,
     TopologicalSpace.coinduced (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.1.ι)
       (arcTopologyOpen U)
 
-/-- ★各 chart の coinduced は `arcTopology` より細かい(上にある)。 -/
-theorem arcTopology_le {X : Scheme.{0}} (U : X.affineOpens) :
-    arcTopology X ≤
-      TopologicalSpace.coinduced
+/-- ★各 chart の coinduced は `arcTopology` より細かい。 -/
+theorem le_arcTopology {X : Scheme.{0}} (U : X.affineOpens) :
+    TopologicalSpace.coinduced
         (fun p : Spec (CommRingCat.of ℂ) ⟶ U.1.toScheme => p ≫ U.1.ι)
-        (arcTopologyOpen U) :=
-  iInf_le _ U
+        (arcTopologyOpen U)
+      ≤ arcTopology X :=
+  le_iSup (fun V : X.affineOpens => TopologicalSpace.coinduced
+    (fun p : Spec (CommRingCat.of ℂ) ⟶ V.1.toScheme => p ≫ V.1.ι) (arcTopologyOpen V)) U
 
 /-! ## ★★★複素共役は一般でも連続 -/
 
@@ -94,8 +101,8 @@ theorem continuous_conjPoint_open {X : Scheme.{0}} (U : X.affineOpens) :
 (`conjPoint_comp`)である。 -/
 theorem continuous_conjPoint {X : Scheme.{0}} :
     @Continuous _ _ (arcTopology X) (arcTopology X) (conjPoint (X := X)) := by
-  refine continuous_iInf_rng.2 fun U => ?_
-  refine continuous_iInf_dom (i := U) ?_
+  refine continuous_iSup_dom.2 fun U => ?_
+  refine continuous_iSup_rng (i := U) ?_
   letI := arcTopologyOpen U
   letI : TopologicalSpace (Spec (CommRingCat.of ℂ) ⟶ X) :=
     TopologicalSpace.coinduced
