@@ -106,7 +106,7 @@ theorem pullbackADiv_tensor_unconditional {X : Scheme.{0}} (D E : ArithCartier X
 
 def htArith_tensor_unconditional.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
-    item := "Proposition 1.4, (i)",
+    item := "Proposition 1.4, (i)(因子表示の範囲——x が D を通らない場合。原文は可逆層で X(ℚ̄) 全体)",
     sectionId := "genell-prop-1-4" }
 
 end ABC3.Found.GenEll

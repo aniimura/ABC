@@ -164,7 +164,7 @@ theorem isEffectiveCartierAt_stalkPullback_mul
 
 def stalkPullback_mul.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
-    item := "Proposition 1.4(i)(引き戻しが積を保つことのみ)",
+    item := "Proposition 1.4, (i)(茎の水準で引き戻しが積を保つことのみ)",
     sectionId := "genell-prop-1-4" }
 
 end ABC3.Found.GenEll
