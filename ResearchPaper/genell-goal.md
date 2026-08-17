@@ -2627,3 +2627,66 @@ G1(`E[n] ≅ (ℤ/n)²`)が 5 件を閉ざしている。mathlib にも FLT に�
 ★**対処: 局所単射性・局所全射性は `[..]` ではなく `(h : ..)` で受ける。**
 ★もう 1 つ: **依存を書き換えたら `lake build` で先に olean を作り直す**
 ——さもないと名前付き引数が古い署名で解決される。
+
+
+---
+
+## §9-31 (2026-08-17) ★★★★★★★B1 —— 17 ブロック、`Pic X` が可換群になった
+
+### ★取れたもの(`Found/Arakelov/` 10 ファイル、すべて sorry 0)
+
+| # | ファイル | 内容 |
+|---|---|---|
+| 1 | `PicPresheafTensor` | 前層加群の対称モノイダル構造(橋渡し) |
+| 2–3 | `PicSheafTensor` | 層加群のテンソル積・可換・単位律 |
+| 4–5 | `PicRestrict` / `PicRestrictTensor` | 開集合への制限・制限とテンソルの両立 |
+| 6 | `PicLocalSurj` | 局所全射性はテンソルで保たれる |
+| 7–8 | `PicLocalInj` / `PicLocality` | 局所単射性の基底・輸送・局所性 |
+| 9 | `PicLocalBasis` | 局所基底から局所単射性 |
+| 10–13 | `PicWhiskerW` / `PicAssoc` | `W` → `IsIso` → **結合律** |
+| 14 | `PicType` | 可逆層の型・逆元 |
+| 15 | `PicLocalTrivial` | **局所自明性のテンソル閉性** |
+| 16 | `PicGroup` | ★**可逆前層の群構造**(層化を通さない道) |
+| 17 | `PicQuotient` | ★★**`PicPre X` と `CommGroup`** |
+
+### ★★★★★層化を通さない道が決定打だった
+
+第 13 ブロックまでは「前層でテンソル → 層化」で組んでいた。
+★★★**層化を通すたびに「局所自明性が保たれるか」を示さねばならない**。
+
+★★★★第 16 ブロックで**前層の段に移した**ところ:
+
+| 何 | 前層の段 | 層化を通す段 |
+|---|---|---|
+| モノイダル構造 | ★mathlib が持っている | 無い(13 ブロックかけて作った) |
+| 結合律・単位律・可換律 | ★★**無料**(`α_` / `λ_` / `ρ_` / `β_`) | 局所論法が要る |
+
+★**局所自明な前層は自動的に層**(層条件は局所的)なので数学的に一致する。
+
+### ★★★★B1 の残り 3 点
+
+#### (1) 引き戻し `f^* : Pic Y → Pic X`
+
+★mathlib は `Scheme.Modules.pullback f`(**層**の側)と
+`pullbackId` / `pullbackComp` / `PullbackFree.lean` を持つ(2026-08-17 実測)。
+★★★**しかしモノイダル性(`f^*(A ⊗ B) ≅ f^*A ⊗ f^*B`)は未登録**である。
+★また我々の `Pic` は**前層**の側にあるので、まず層の側へ渡す必要がある。
+
+#### (2) 局所自明な前層は層である
+
+★`Interface` の `sheafOf` に繋ぐのに 1 回だけ要る。
+「層条件は局所的」を site の言葉で言う必要がある。
+
+#### (3) `equivPicRing` —— アフィンで `CommRing.Pic` と一致
+
+★`AlgebraicGeometry/Modules/Tilde.lean` の `tilde` /
+`SpecModulesToSheafFullyFaithful` / `fromTildeΓ` が材料。
+
+### ★★★この turn の教訓(5 度踏んだ)
+
+★★**インスタンス束縛子は「型の書き方の違い」をまたげない。**
+`X.PresheafOfModules` と `PresheafOfModules (X.presheaf ⋙ forget₂ _ _)` は
+`rfl` で等しいが探索は片方でしか成功しない。
+★対処: 条件を `[..]` でなく `(h : ..)` で受ける。
+★`Nonempty` から `obtain` して**データ**は返せない——結論も `Nonempty` にする。
+★依存を書き換えたら `lake build` で先に olean を作り直す。
