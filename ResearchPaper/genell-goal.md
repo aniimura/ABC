@@ -1199,3 +1199,52 @@ mathlib の `HeightOneSpectrum.valuation_liesOver`(`ord_w(x) = e·ord_v(x)`)が
 ★★**研究規模ではなく、数週間〜数か月規模である。**
 ★これは本日 3 度出た「名前で測って『無い』と結論した」誤りと同じ型の訂正である
 (`Cartier` / `scheme 論的像` に続く 4 例目)。
+
+## §9-10 2026-08-17 —— 可逆層は正面から作らない:**Arakelov 因子の提示**
+
+### ★★mathlib 実測: `SheafOfModules` にテンソル積も引き戻しも無い
+
+| 要るもの | mathlib |
+|---|---|
+| `X.Modules = SheafOfModules X.ringCatSheaf`(圏・極限・余極限・自由加群) | ★**ある** |
+| **テンソル積**(モノイダル構造) | ★★**無い**(`tensorObj` / `MonoidalCategory` で 0 件) |
+| **引き戻し `f^*`** | ★★**無い**(`ChangeOfRings.lean` は `restrictScalars` のみで逆向き) |
+
+★★**したがって可逆層を正面から作ると、先に「加群層のモノイダル構造」
+(前層のテンソル積の層化)を作ることになる——mathlib 規模の仕事である。**
+
+### ★★★迂回路 —— Cartier 因子で提示する
+
+正規整スキーム `X` について **`Pic(X) ≅ CaCl(X)`**(Cartier 因子を主因子で割ったもの)。
+★**この提示を取れば層のテンソル積は要らない**:
+
+| 演算 | 層で書くと | 因子で書くと |
+|---|---|---|
+| `L ⊗ M` | ★モノイダル構造(無い) | ★**因子の和**(自明) |
+| `x_F^* L` | ★層の引き戻し(無い) | ★**因子の引き戻し**——`CartierPullback.lean` に**実装済み** |
+| `Pic(X)` | 同型類 | ★**因子 / 主因子** |
+
+★★★**これは `ADiv(F)` と同じ形である**——有限側が因子、アルキメデス側が実数。
+`APic(X) ≝ (Cartier 因子) × (X(ℂ) 上の Green 関数) / (主因子)`。
+
+### ★既に手元にある部品
+
+| 部品 | 場所 |
+|---|---|
+| `IsEffectiveCartier` / `pullbackIdeal` / `conductorADiv` | `Found/GenEll/CartierPullback.lean` |
+| `ADiv F` / `deg` / `degNormalized` / `APicOF F` | `ArithDiv.lean` / `ProductFormula.lean` |
+| `degNormalized` の底変換不変性 | `BaseChange.lean` |
+| **`ℙ(V)` の位相とコンパクト性** | `ProjTopology.lean` |
+| 射影空間の Northcott / 高さの拡大公式 / 絶対高さ | `NorthcottProj.lean` / `HeightExtension.lean` |
+
+★★**`Definition 1.1` を構成するのに新たに要るのは:**
+
+1. Cartier 因子の**群**(有効なものの差)—— `IdealSheafData` の上で
+2. **主因子**(有理関数から)
+3. **Green 関数**(= `X(ℂ)` 上の計量。`-log‖s_D‖` の形)
+4. `x_F` による引き戻し(1〜3 を通す)—— 有限側は**実装済み**
+
+### ★これが本日 5 例目の「正面は要らなかった」になる可能性
+
+`Cartier` / scheme 論的像 / NCBelyi の逐語 / 複素解析空間 に続く。
+★★**まだ確認していない**——上の 1〜4 を実際に取るまでは仮説である。
