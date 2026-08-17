@@ -244,4 +244,85 @@ theorem isFSMI_endo_iff_isPrimeFrobenius (Fc : FrobenioidCore P) (G : Frobenioid
   ⟨isPrimeFrobenius_of_isFSMI_endo P Fc G hFSMFF hgl (fun X => hiso X),
    isFSMI_of_isPrimeFrobenius_endo P Fc G hiso hut hgl⟩
 
+include P in
+/-- ★★**prime-Frobenius 射は prime-Frobenius 自己射に abstractly equivalent** ——
+group-like ＋ isotropic 型では **base-trivial** なので、終域を域に戻せる。
+
+原文 (FrdI p.73):
+> phisms [since every prime-Frobenius morphism is abstractly equivalent to a prime-
+
+★Frobenius 型射は底同型なので域と終域は base-isomorphic、
+base-trivial 型ならそれらは同型である。 -/
+theorem exists_primeFrobenius_endo (Fc : FrobenioidCore P) (hgl : IsOfGroupLikeType P)
+    (hiso : IsOfIsotropicType P) {A B : C} {φ : A ⟶ B} (h : IsPrimeFrobenius P φ) :
+    ∃ k : B ≅ A, IsPrimeFrobenius P (φ ≫ k.hom) := by
+  haveI : IsIso (P.Base φ) := h.1.2
+  obtain ⟨k⟩ := isOfBaseTrivialType_of_groupLike P Fc hgl hiso A B ⟨asIso (P.Base φ)⟩
+  refine ⟨k, IsFrobeniusType.comp P Fc h.1 (isFrobeniusType_of_isIso P k.hom), ?_⟩
+  rw [P.degFr_comp, degFr_of_isIso, one_mul]
+  exact h.2
+
+/-! ## ★(ii) の第 3 歩 —— **圏同値は prime-Frobenius 射を保つ**
+
+原文 (FrdI p.73):
+> phisms [since every prime-Frobenius morphism is abstractly equivalent to a prime-
+
+★★**自己射の場合に帰着してから FSMI で運ぶ** ——
+FSMI は純粋に圏論的(`isFSMI_map_iff`)なので圏同値で移り、
+第 1・第 2 歩の同値(`isFSMI_endo_iff_isPrimeFrobenius`)で両端を prime-Frobenius に翻訳する。
+-/
+
+section Preserve
+
+universe v₃ u₃ v₄ u₄ w₃ w₄ v₅ u₅ v₆ u₆
+
+variable {C₁ : Type u₃} [Category.{v₃} C₁] {C₂ : Type u₄} [Category.{v₄} C₂]
+  (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+  {D₁ : Type u₅} [Category.{v₅} D₁] {Φ₁ : MonoidOn.{v₅, u₅, w₃} D₁}
+  (P₁ : PreFrobenioid C₁ Φ₁)
+  {D₂ : Type u₆} [Category.{v₆} D₂] {Φ₂ : MonoidOn.{v₆, u₆, w₄} D₂}
+  (P₂ : PreFrobenioid C₂ Φ₂)
+
+/-- ★★★★**[FrdI] Proposition 3.11, (ii) の第 3 歩** ——
+**圏同値は prime-Frobenius 射を保つ**。
+
+★★**筋は 3 手**:
+1. `exists_primeFrobenius_endo` で **prime-Frobenius 自己射に戻す**(base-trivial 型)
+2. `isFSMI_endo_iff_isPrimeFrobenius` で **FSMI に翻訳**し、`isFSMI_map` で運ぶ
+3. `𝒞₂` 側で同じ同値を逆向きに使い、最後に同型 `Ψ(k)` を剥がす
+
+★**原文の「hence also prime-Frobenius morphisms」の 1 行が、この 3 手である。** -/
+theorem isPrimeFrobenius_map
+    (Fc₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (Fc₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hF₁ : IsOfFSMFFType D₁) (hF₂ : IsOfFSMFFType D₂)
+    (hiso₁ : IsOfIsotropicType P₁) (hut₁ : IsOfUnitTrivialType P₁)
+    (hgl₁ : IsOfGroupLikeType P₁)
+    (hiso₂ : IsOfIsotropicType P₂) (hut₂ : IsOfUnitTrivialType P₂)
+    (hgl₂ : IsOfGroupLikeType P₂)
+    {A B : C₁} {φ : A ⟶ B} (h : IsPrimeFrobenius P₁ φ) :
+    IsPrimeFrobenius P₂ (Ψ.map φ) := by
+  -- ★手 1: 自己射に戻す
+  obtain ⟨k, hk⟩ := exists_primeFrobenius_endo P₁ Fc₁ hgl₁ hiso₁ h
+  -- ★手 2: FSMI にして運ぶ
+  have h2 : IsFSMI (Ψ.map (φ ≫ k.hom)) :=
+    isFSMI_map Ψ
+      ((isFSMI_endo_iff_isPrimeFrobenius P₁ Fc₁ G₁ hF₁ hiso₁ hut₁ hgl₁ _).mpr hk)
+  -- ★手 3: `𝒞₂` 側で翻訳し、同型を剥がす
+  have h3 : IsPrimeFrobenius P₂ (Ψ.map (φ ≫ k.hom)) :=
+    (isFSMI_endo_iff_isPrimeFrobenius P₂ Fc₂ G₂ hF₂ hiso₂ hut₂ hgl₂ _).mp h2
+  have hsplit : Ψ.map (φ ≫ k.hom) = Ψ.map φ ≫ Ψ.map k.hom := Ψ.map_comp _ _
+  rw [hsplit] at h3
+  haveI : IsIso (Ψ.map k.hom) := inferInstance
+  have hback : Ψ.map φ = (Ψ.map φ ≫ Ψ.map k.hom) ≫ inv (Ψ.map k.hom) := by simp
+  refine ⟨?_, ?_⟩
+  · rw [hback]
+    exact IsFrobeniusType.comp P₂ Fc₂ h3.1 (isFrobeniusType_of_isIso P₂ _)
+  · have hd : P₂.degFr (Ψ.map φ ≫ Ψ.map k.hom) = P₂.degFr (Ψ.map φ) := by
+      rw [P₂.degFr_comp, degFr_of_isIso, one_mul]
+    rw [← hd]
+    exact h3.2
+
+end Preserve
+
 end ABC3.Found.FrdI
