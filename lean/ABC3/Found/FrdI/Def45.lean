@@ -1,4 +1,6 @@
-import ABC3.Found.FrdI.Prop44Pre
+import ABC3.Found.FrdI.Prop44Gp
+import ABC3.Found.FrdI.Prop33Coa
+import ABC3.Found.FrdI.Def24
 import ABC3.Found.FrdI.Def27
 import ABC3.Found.FrdI.Prop113
 
@@ -110,22 +112,104 @@ variable (C) in
 def IsOfModelType [IsConnected D] : Prop :=
   IsPreModelType P ∧ IsOfBirationallyFrobeniusNormalizedType C P G
 
-/-! ## ★待っている 2 条 —— (ii) と (iii)
+/-! ## ★(ii) —— `strictly rational` / `rational`
 
 原文 (FrdI p.86):
 > (ii) Suppose that Φ is perf-factorial; A ∈Ob(C). Then we shall say that A
 
-★★(ii) の `strictly rational` は **`Φ^birat(A) ⊆ Φ^gp(A)`** の元
-`a - b`(`a, b ∈ Φ(A)`、`p ∈ Supp(a)`、`p ∉ Supp(b)`)の存在を言う。
-★`Φ^birat` は `Proposition 4.4, (iii)` が与えるもので、**未実装**である。
+★★`Φ^birat(A)` は `Prop44Gp.lean` の `phiBiratAt`(`𝒪^×(A^birat)` の `Div^gp` 像)。
+★`Supp` は `Definition 2.4, (i), (d)`(`Def24.lean`)のもので、
+**`M^pf` の元に対して**定義されているので、`M` の元は `Pf.mk a 1` で持ち上げる。 -/
 
-★★**測定**: `Prop44.lean` は `𝒞^birat → 𝔽_{0_𝒟}` までを作っており、
-原文の図式の中段 **`𝒞^birat → 𝔽_{Φ^gp}`** は無い。
-★`Φ^birat` はその中段の像として定まるので、**中段を作るのが先**である。
-★中段の `Div` は代表元 `(a : A′ → A, φ : A′ → B)` に対し
-`(Base a)^{-1}(Div φ) − (Base a)^{-1}(Div a) ∈ Φ^gp(A)` で与えられる(紙の上)。
+open scoped NNReal
 
-★(iii) は (ii) に加えて `(𝒞^un-tr)^birat` と `Frobenius-compact` 対象が要る。
+/-- ★**単系の元の台** —— `Definition 2.4, (i), (d)` の `Supp` を `M` の元に当てたもの。 -/
+noncomputable def SuppElt {M : Type w} [AddCommMonoid M]
+    (ι : Prime M → Pf M → ℝ≥0) (a : M) : Set (Prime M) :=
+  Supp (factorMap ι (Pf.mk a 1))
+
+/-- ★★★**[FrdI] Definition 4.5, (ii)** —— `A` が **strictly rational**。
+
+原文 (FrdI p.86):
+> is strictly rational if, for every prime p ∈Prime(Φ(A)), there exists an element
+
+★各素点 `p` について、`Φ^birat(A)` の元 `a − b`(`a, b ∈ Φ(A)`)で
+`p ∈ Supp(a)`、`p ∉ Supp(b)` となるものが取れること。 -/
+def IsStrictlyRational (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0) (A : C) : Prop :=
+  ∀ p : Prime (Φ.val (P.toElem.obj A).base),
+    ∃ a b : Φ.val (P.toElem.obj A).base,
+      toGp _ a - toGp _ b ∈ phiBiratAt P G (show BiratCat P G from A) ∧
+      p ∈ SuppElt (ι _) a ∧ p ∉ SuppElt (ι _) b
+
+/-- ★★★**[FrdI] Definition 4.5, (ii)** —— `A` が **rational**。
+
+原文 (FrdI p.86):
+> Definition 2.4, (i), (d)]. We shall say that A is rational if there exists a pull-back
+
+★strictly rational な対象からの **pull-back 射**が入ること。 -/
+def IsRational (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0) (A : C) : Prop :=
+  ∃ (B : C) (φ : B ⟶ A), IsPullBack P φ ∧ IsStrictlyRational P G ι B
+
+variable (C) in
+/-- ★★**[FrdI] Definition 4.5, (ii)** —— `𝒞` が **rational 型**。 -/
+def IsOfRationalType (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0) : Prop :=
+  ∀ A : C, IsRational P G ι A
+
+variable (C) in
+/-- ★★**[FrdI] Definition 4.5, (ii)** —— `𝒞` が **strictly rational 型**。 -/
+def IsOfStrictlyRationalType (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0) : Prop :=
+  ∀ A : C, IsStrictlyRational P G ι A
+
+/-! ## ★(iii) —— `rationally standard type`
+
+原文 (FrdI p.86):
+> (iii) We shall say that C is of rationally standard type if the following conditions
+
+★★**`(𝒞^un-tr)^birat` が書けるようになった**のが要点である ——
+`𝒞^un-tr` が Frobenioid であること(`unTr_frobenioid`、`Prop33Coa.lean`)と、
+Frobenioid の birationalization(`biratPre`)が揃ったので、
+**そのまま合成できる**。 -/
+
+/-- ★`(𝒞^un-tr)^birat` の pre-Frobenioid 構造。 -/
+noncomputable def unTrBiratPre (Fc : FrobenioidCore P) (G' : Frobenioid P) :=
+  biratPre (unTrPre P Fc) (unTr_frobenioid P Fc G')
+
+/-- ★★★**[FrdI] Definition 4.5, (iii)** —— `𝒞` が **rationally standard 型**。
+
+原文 (FrdI p.86):
+> (iii) We shall say that C is of rationally standard type if the following conditions
+
+| 原文 | フィールド |
+|---|---|
+| (a) birationally Frobenius-normalized 型 | `biratFrobNormalized` |
+| (a) rational 型 | `rational` |
+| (a) standard 型 | `standard` |
+| (b) `(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つ | `unTrBiratCompact` | -/
+structure IsOfRationallyStandardType
+    (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0) : Prop where
+  /-- **(a)** birationally Frobenius-normalized 型。 -/
+  biratFrobNormalized : IsOfBirationallyFrobeniusNormalizedType C P G
+  /-- **(a)** rational 型。 -/
+  rational : IsOfRationalType C P G ι
+  /-- **(a)** standard 型。 -/
+  standard : IsOfStandardType D C P G.core
+  /-- **(b)** `(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つ。 -/
+  unTrBiratCompact : ∃ X : BiratCat (unTrPre P G.core) (unTr_frobenioid P G.core G),
+    IsFrobeniusCompact (unTrBiratPre P G.core G) X
+
+/-! ## ★`Definition 4.5` の 4 条がすべて実装された
+
+| 条 | 実装 |
+|---|---|
+| (i) | `IsBirationallyFrobeniusNormalized` / `IsOfBirationallyFrobeniusNormalizedType` / `IsOfModelType` |
+| (ii) | `IsStrictlyRational` / `IsRational` / `IsOfRationalType` / `IsOfStrictlyRationalType` |
+| (iii) | `IsOfRationallyStandardType` |
+| (iv) | `IsDivSlim`(＋ `isDivSlim_of_isSlim`) |
 -/
+
+/-- ★★★★**[FrdI] Definition 4.5** —— 4 条がすべて実装された。 -/
+def IsDivSlim.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86, item := "Definition 4.5",
+    sectionId := "frdi-def-4-5" }
 
 end ABC3.Found.FrdI
