@@ -244,4 +244,134 @@ theorem pfRoot_isOfIsotropicType (hfi : IsOfFrobeniusIsotropicType P) :
   haveI : IsIso ψ' := hW _ _ his hps
   exact pfRoot_isIso_of_rep f W ψ' hfW
 
+/-! ## ★8. isotropic 型から**ただで出る** 7 条
+
+★★`Proposition 1.4, (i)` により **isotropic 型の Frobenioid ではすべての射が co-angular**
+であり、★**isometric pre-step はすべて同型**である。
+★これで `Definition 1.3` の (iii)(a)(b)・(v)(b)(c)・(vii)(a)(b) が落ちる。 -/
+
+variable {P F} in
+/-- ★★**`𝒞^pf` のすべての射は co-angular**(`Proposition 1.4, (i)`)。 -/
+theorem pfRoot_isCoAngular (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (f : X ⟶ Y) : IsCoAngular (pfRootPre P F) f :=
+  fun _ _ _ β _ _ _ hβi hβs _ =>
+    pfRoot_isOfIsotropicType (F := F) hfi _ _ β hβi hβs
+
+variable {P F} in
+/-- ★**(vii)(b)** —— 全対象が isotropic なので自明。 -/
+theorem pfRoot_isotropicClosed (hfi : IsOfFrobeniusIsotropicType P) {X Y : PfRootObj P F}
+    (_f : X ⟶ Y) (_hX : IsIsotropic (pfRootPre P F) X) : IsIsotropic (pfRootPre P F) Y :=
+  pfRoot_isOfIsotropicType (F := F) hfi Y
+
+variable {P F} in
+/-- ★**(vii)(a)** —— `𝟙` が isotropic hull。 -/
+theorem pfRoot_isotropicHullExists (hfi : IsOfFrobeniusIsotropicType P) (X : PfRootObj P F) :
+    ∃ (Y : PfRootObj P F) (φ : X ⟶ Y), IsIsotropicHull (pfRootPre P F) φ := by
+  refine ⟨X, 𝟙 X, isIsometric_id _ X, isPreStep_id _ X,
+    pfRoot_isOfIsotropicType (F := F) hfi X, ?_⟩
+  intro Cc _ γ
+  exact ⟨γ, (Category.id_comp γ).symm, fun y hy => by simpa using hy.symm⟩
+
+variable {P F} in
+/-- ★**(iii)(a)** —— 全射が co-angular なので自明。 -/
+theorem pfRoot_coAngularComp (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y Z : PfRootObj P F} (ψ : X ⟶ Y) (φ : Y ⟶ Z)
+    (_hψ : IsCoAngular (pfRootPre P F) ψ) (_hφ : IsCoAngular (pfRootPre P F) φ) :
+    IsCoAngular (pfRootPre P F) (ψ ≫ φ) :=
+  pfRoot_isCoAngular hfi _
+
+variable {P F} in
+/-- ★**(iii)(b)** —— 同上。 -/
+theorem pfRoot_coAngularOfPreStep (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (α : X ⟶ Y) (_hc : IsCoAngular (pfRootPre P F) α)
+    (_hs : IsPreStep (pfRootPre P F) α) (φ : X ⟶ Y) : IsCoAngular (pfRootPre P F) φ :=
+  pfRoot_isCoAngular hfi φ
+
+variable {P F} in
+/-- ★**(v)(b)** —— `φ = φ ≫ 𝟙`。 -/
+theorem pfRoot_preStepFactor (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (φ : X ⟶ Y) (hφ : IsPreStep (pfRootPre P F) φ) :
+    ∃ (M : PfRootObj P F) (β : X ⟶ M) (α : M ⟶ Y),
+      φ = β ≫ α ∧ IsCoAngular (pfRootPre P F) β ∧ IsPreStep (pfRootPre P F) β ∧
+        IsIsometric (pfRootPre P F) α ∧ IsPreStep (pfRootPre P F) α :=
+  ⟨Y, φ, 𝟙 Y, (Category.comp_id φ).symm, pfRoot_isCoAngular hfi φ, hφ,
+    isIsometric_id _ Y, isPreStep_id _ Y⟩
+
+variable {P F} in
+/-- ★**(v)(c)** —— `φ = 𝟙 ≫ φ`。 -/
+theorem pfRoot_preStepFactor' (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (φ : X ⟶ Y) (hφ : IsPreStep (pfRootPre P F) φ) :
+    ∃ (M : PfRootObj P F) (β : X ⟶ M) (α : M ⟶ Y),
+      φ = β ≫ α ∧ IsIsometric (pfRootPre P F) β ∧ IsPreStep (pfRootPre P F) β ∧
+        IsCoAngular (pfRootPre P F) α ∧ IsPreStep (pfRootPre P F) α :=
+  ⟨X, 𝟙 X, φ, (Category.id_comp φ).symm, isIsometric_id _ X, isPreStep_id _ X,
+    pfRoot_isCoAngular hfi φ, hφ⟩
+
+variable {P F} in
+/-- ★**(v)(b) の一意性** —— `α`・`α'` は isometric pre-step ゆえ同型。 -/
+theorem pfRoot_preStepFactorUniq (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (M M' : PfRootObj P F) (β : X ⟶ M) (α : M ⟶ Y)
+    (β' : X ⟶ M') (α' : M' ⟶ Y) (heq : β ≫ α = β' ≫ α')
+    (_hβc : IsCoAngular (pfRootPre P F) β) (_hβs : IsPreStep (pfRootPre P F) β)
+    (hαi : IsIsometric (pfRootPre P F) α) (hαs : IsPreStep (pfRootPre P F) α)
+    (_hβ'c : IsCoAngular (pfRootPre P F) β') (_hβ's : IsPreStep (pfRootPre P F) β')
+    (hα'i : IsIsometric (pfRootPre P F) α') (hα's : IsPreStep (pfRootPre P F) α') :
+    ∃ γ : M ≅ M', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  haveI : IsIso α := pfRoot_isOfIsotropicType (F := F) hfi M _ α hαi hαs
+  haveI : IsIso α' := pfRoot_isOfIsotropicType (F := F) hfi M' _ α' hα'i hα's
+  refine ⟨⟨α ≫ inv α', α' ≫ inv α, by simp, by simp⟩, by simp, ?_⟩
+  show β' = β ≫ (α ≫ inv α')
+  rw [← Category.assoc, heq, Category.assoc]
+  simp
+
+variable {P F} in
+/-- ★**(v)(c) の一意性** —— `β`・`β'` は isometric pre-step ゆえ同型。 -/
+theorem pfRoot_preStepFactorUniq' (hfi : IsOfFrobeniusIsotropicType P)
+    {X Y : PfRootObj P F} (M M' : PfRootObj P F) (β : X ⟶ M) (α : M ⟶ Y)
+    (β' : X ⟶ M') (α' : M' ⟶ Y) (heq : β ≫ α = β' ≫ α')
+    (hβi : IsIsometric (pfRootPre P F) β) (hβs : IsPreStep (pfRootPre P F) β)
+    (_hαc : IsCoAngular (pfRootPre P F) α) (_hαs : IsPreStep (pfRootPre P F) α)
+    (hβ'i : IsIsometric (pfRootPre P F) β') (hβ's : IsPreStep (pfRootPre P F) β')
+    (_hα'c : IsCoAngular (pfRootPre P F) α') (_hα's : IsPreStep (pfRootPre P F) α') :
+    ∃ γ : M ≅ M', α' = γ.inv ≫ α ∧ β' = β ≫ γ.hom := by
+  haveI : IsIso β := pfRoot_isOfIsotropicType (F := F) hfi X _ β hβi hβs
+  haveI : IsIso β' := pfRoot_isOfIsotropicType (F := F) hfi X _ β' hβ'i hβ's
+  refine ⟨⟨inv β ≫ β', inv β' ≫ β, by simp, by simp⟩, ?_, by simp⟩
+  show α' = (inv β' ≫ β) ≫ α
+  rw [Category.assoc, heq, ← Category.assoc]
+  simp
+
+/-! ## ★9. ★★★★合成の代表元 —— これが残り 13 条の共通の足場
+
+★★`compRoot` の定義そのものが使う根の取り方
+(`rfl` / `rfl`、`mul_comm` / `mul_comm`、`mul_comm` / `rfl`)で
+`exists_rep3` を当てるだけでよい。★`compRoot_eq_lift` は要らない。 -/
+
+variable {P F} in
+/-- ★★★★**`𝒞^pf` の合成を `𝒞` の合成へ落とす**。 -/
+theorem compRoot_rep {X Y Z : PfRootObj P F} (f : X ⟶ Y) (g : Y ⟶ Z) :
+    ∃ (V : IdxPf3 P F (rtObj P F X.obj (Z.root * Y.root))
+        (rtObj P F Y.obj (Z.root * X.root)) (rtObj P F Z.obj (Y.root * X.root)))
+      (φ : V.right.obj.1 ⟶ V.right.obj.2.1) (ψ : V.right.obj.2.1 ⟶ V.right.obj.2.2),
+      (rtRootIso P F X.obj Y.obj (show Z.root * Y.root = Z.root * Y.root from rfl)
+          (show Z.root * X.root = Z.root * X.root from rfl)).inv f
+        = HomPf.mk ((idx12 P F _ _ _).obj V) φ ∧
+      (rtRootIso P F Y.obj Z.obj (show Z.root * X.root = X.root * Z.root from mul_comm _ _)
+          (show Y.root * X.root = X.root * Y.root from mul_comm _ _)).inv g
+        = HomPf.mk ((idx23 P F _ _ _).obj V) ψ ∧
+      compRoot P F f g
+        = (rtRootIso P F X.obj Z.obj
+            (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+            (show Y.root * X.root = Y.root * X.root from rfl)).hom
+          (HomPf.mk ((idx13 P F _ _ _).obj V) (φ ≫ ψ)) := by
+  obtain ⟨V, φ, ψ, hφ, hψ⟩ := exists_rep3 (P := P) (F := F)
+    ((rtRootIso P F X.obj Y.obj (show Z.root * Y.root = Z.root * Y.root from rfl)
+        (show Z.root * X.root = Z.root * X.root from rfl)).inv f)
+    ((rtRootIso P F Y.obj Z.obj (show Z.root * X.root = X.root * Z.root from mul_comm _ _)
+        (show Y.root * X.root = X.root * Y.root from mul_comm _ _)).inv g)
+  refine ⟨V, φ, ψ, hφ, hψ, ?_⟩
+  show compRoot P F f g = _
+  unfold compRoot
+  rw [hφ, hψ, compPf_mk]
+
 end ABC3.Found.FrdI
