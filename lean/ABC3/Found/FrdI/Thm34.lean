@@ -467,7 +467,8 @@ theorem psiIstr_essSurj (h₁ : IsOfQuasiIsotropicType C P₁)
 /-- ★★★★**[FrdI] Theorem 3.4, (i)** —— `Ψ^istr` は**圏同値**。
 
 原文 (FrdI p.62):
-> the horizontal arrows are equivalences of categories]. Finally, if D -/
+> the horizontal arrows are equivalences of categories]. Finally, if D
+-/
 theorem psiIstr_isEquivalence (h₁ : IsOfQuasiIsotropicType C P₁)
     (h₂ : IsOfQuasiIsotropicType D P₂) :
     (psiIstr Ψ P₁ P₂ h₁ h₂).IsEquivalence := by
