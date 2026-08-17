@@ -80,10 +80,45 @@ theorem prop_1_6_bdge (M : ArcModel X V) [Nonempty (complexPoints X)]
   obtain ⟨C, hC, hlo, -⟩ := M.exists_bound D.green hg
   exact logCond_bdge_htArith_of_bddBelow F D C hC hlo h
 
+/-! ## ★★★`Proposition 1.4, (ii)` の一様形 -/
+
+/-- ★★★**[GenEll] Proposition 1.4, (ii)** —— 高さは下に一様に有界。
+
+原文 (GenEll p.6):
+> Proposition 1.4. (Basic Properties of Heights) In the notation of the above
+
+★★★**定数 `C` は `F` にも `x` にも依らない**——`Prop 1.6` と同じ機構である。
+
+★`HeightNonneg.lean` の `htArith_nonneg` は `g ≥ 0` を仮定していたが、
+本定理は**射影モデルと連続性**だけでよい——それが原文の仮定である。 -/
+theorem prop_1_4_ii (M : ArcModel X V) [Nonempty (complexPoints X)]
+    (D : ArithCartier X) (hg : @Continuous _ _ M.topology _ D.green) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (F : Type) [Field F] [NumberField F] (xF : specRingOfIntegers F ⟶ X),
+        -C ≤ htArith F D xF := by
+  obtain ⟨C, hC, hlo, -⟩ := M.exists_bound D.green hg
+  refine ⟨C, hC, fun F _ _ xF => ?_⟩
+  have h1 : (0:ℝ) ≤ degNormalized (idealADiv F (pullbackIdeal F D.divisor xF)) :=
+    degNormalized_nonneg_of_isEffective F _ (idealADiv_isEffective F _)
+  have h2 : -C ≤ (archADiv F D.green xF).sum (fun _ r => r)
+      / (Module.finrank ℚ F : ℝ) :=
+    archADiv_sum_div_finrank_ge F D.green xF C hC hlo
+  have h3 : htArith F D xF
+      = degNormalized (idealADiv F (pullbackIdeal F D.divisor xF))
+        + (archADiv F D.green xF).sum (fun _ r => r) / (Module.finrank ℚ F : ℝ) := by
+    rw [htArith, degNormalized, degNormalized, deg_pullbackADiv]
+    ring
+  rw [h3]; linarith
+
 /-! ## ★出典の紐付け(`.src`)
 
 ★条つきである。原文は `X` が ℤ-固有であることから射影埋め込みを得るが、
 本ファイルは `ArcModel` として**与えられたものとして受けている**。 -/
+
+def prop_1_4_ii.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (ii)(射影モデルを与えられたものとして——一様な定数つき)",
+    sectionId := "genell-prop-1-4" }
 
 def prop_1_6.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 9,
