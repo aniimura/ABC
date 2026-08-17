@@ -685,6 +685,28 @@ theorem psiBase_obj (A : C₁) :
     (psiBase Ψ P₁ P₂).obj (P₁.proj.obj A)
       = ((toProdCat P₂).obj (Ψ.obj ((toProdCat P₁).inv.obj ((toProdCat P₁).obj A)))).1 := rfl
 
+/-- ★★★**`𝒩` 成分だけの自己射は `E₁⁻¹` で base-identity 自己射に写る**。
+
+★★これが `Ψ_Base` の 1-可換性の**要**である ——
+`toProdN` が射を次数 `1` に潰すぶんの食い違いは、ちょうどこの形の自己射だから。
+
+★`Functor.fun_inv_map`(counit で挟む)の**第 1 成分**を取ると
+`𝟙` を同型で挟んだものになり、`𝟙` に戻る。 -/
+theorem isBaseIdentity_inv_map_nComp (Z : D₁ × SingleObj ℕ+) (n : ℕ+) :
+    IsBaseIdentity P₁ ((toProdCat P₁).inv.map ((𝟙 Z.1, n) : Z ⟶ Z)) := by
+  have h1 := congrArg Prod.fst
+    (Functor.fun_inv_map (toProdCat P₁) Z Z ((𝟙 Z.1, n) : Z ⟶ Z))
+  have hc : ((toProdCat P₁).asEquivalence.counit.app Z).1 ≫
+      ((toProdCat P₁).asEquivalence.counitInv.app Z).1
+      = 𝟙 ((toProdCat P₁).obj ((toProdCat P₁).inv.obj Z)).1 :=
+    congrArg Prod.fst ((toProdCat P₁).asEquivalence.counitIso.hom_inv_id_app Z)
+  show P₁.Base _ = P₁.Base (𝟙 _)
+  rw [P₁.Base_id]
+  show ((toProdCat P₁).map ((toProdCat P₁).inv.map ((𝟙 Z.1, n) : Z ⟶ Z))).1 = 𝟙 _
+  refine h1.trans (Eq.trans ?_ hc)
+  exact congrArg (fun g => ((toProdCat P₁).asEquivalence.counit.app Z).1 ≫ g)
+    (Category.id_comp _)
+
 end BaseFunctor
 
 end ABC3.Found.FrdI
