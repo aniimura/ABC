@@ -21,12 +21,25 @@ import Mathlib.Analysis.Complex.Basic
 
 | # | 受けるもの | 現状(2026-08-17 実測) |
 |---|---|---|
-| C1 | `X^arc` の位相・`ι_X`・コンパクト性 | ★★**`ArcModel` を与えれば構成済み**(`Found/GenEll/ArcModel.lean`) |
-| C2 | ℤ-固有 ⇒ 射影埋め込み(`ArcModel` の構成) | ★**未取得**。`Proj` の点の関手が要る |
+| C1 | `X^arc` の位相と `ι_X` | ★★**`ArcModel` を与えれば構成済み**(`Found/GenEll/ArcModel.lean`) |
+| C2 | **ℤ-固有 ⇒ `X^arc` コンパクト** | ★**未取得**。★★★固有は射影を含意しないので Chow の補題が要る |
 | C3 | 可逆層の解析化 `L^arc` と hermitian 計量 | ★**未取得**。(B1) に従属 |
 
 ★★★**C2 が層 C の律速である**——`X^arc` そのものではなく、
-**`X` が ℙⁿ に入ることを言う段**が残っている。
+**固有性からコンパクト性を出す段**が残っている。
+
+## ★★★2026-08-17: 自分の定式化の誤りを 2 つ直した
+
+1. C1 に `compact : ∀ X, CompactSpace (Arc X)` と書いていた。
+   ★★**`X = 𝔸¹` で偽である。**コンパクト性は固有性の帰結であって、
+   `X^arc` の定義の一部ではない。C2 へ移した。
+2. C2 を「ℤ-固有 ⇒ **射影埋め込み**」と書いていた。
+   ★★★**固有は射影を含意しない。**原文は
+   > Let X be a normal scheme which is proper and flat over Spec(Z)
+
+   と書いているだけである(物理 p.3、実測)。
+   ★正しい結論は「コンパクト」であり、射影の場合は**その一つの道**にすぎない
+   (一般には Chow の補題を経る)。
 -/
 
 namespace ABC3.Interface.Arakelov
@@ -48,8 +61,6 @@ structure ArcSpaceData where
   Arc : Scheme.{0} → Type
   /-- その位相。 -/
   topology : (X : Scheme.{0}) → TopologicalSpace (Arc X)
-  /-- ★★**コンパクト**——原文が `Proposition 1.6` の証明で使う性質。 -/
-  compact : (X : Scheme.{0}) → @CompactSpace (Arc X) (topology X)
   /-- 複素共役 `ι_X`。 -/
   conj : (X : Scheme.{0}) → Arc X → Arc X
   /-- ★`ι_X` は対合。 -/
@@ -58,36 +69,50 @@ structure ArcSpaceData where
   conj_continuous : ∀ (X : Scheme.{0}), @Continuous _ _ (topology X) (topology X) (conj X)
 
 def ArcSpaceData.waiting : WaitingFor :=
-  { what := "(C1) X^arc(複素点のなす位相空間)とその複素共役 ι_X、およびコンパクト性"
+  { what := "(C1) X^arc(複素点のなす位相空間)とその複素共役 ι_X"
     trackB := "Found/Arakelov — ★★**射影モデル(ArcModel)を与えれば構成済み**(`Found/GenEll/ArcModel.lean` の `topology` / `compactSpace`、`ProjClosed.lean` の `isCompact_projZeroSet`。すべて sorry 0、2026-08-17)。★★★2026-08-16 に書いた『複素解析空間と GAGA が要る』という判定は**撤回した**——要るのは商位相と多項式の連続性だけである。★残るのは (C2)" }
 
-/-! ## ★★★C2 —— ℤ-固有から射影モデルへ(層 C の律速) -/
+/-! ## ★★★C2 —— ℤ-固有からコンパクト性へ(層 C の律速) -/
 
-/-- **(C2)** `X` が ℤ 上固有であることから**射影埋め込み**を作る段。
+/-- **(C2)** `X` が ℤ 上固有・平坦であることから **`X^arc` のコンパクト性**を出す段。
 
 原文 (GenEll p.3):
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
 
 ★★★**これが層 C の律速である。**
 `Found/GenEll/ArcModel.lean` の `ArcModel` は埋め込みを**データとして受けている**——
-原文はそれを `X` の ℤ-固有性から**導いている**。
+原文はコンパクト性を `X` の ℤ-固有性から**導いている**。
 
-★具体的には `ℙⁿ` の**点の関手** `Hom(Spec ℂ, ℙⁿ) ≅ ℙ(ℂ^{n+1})` が要る。 -/
+★★★**「射影埋め込みを作る」と書いてはならない**——原文の仮定は
+`proper and flat over Spec(Z)` であって、**固有は射影を含意しない**。
+★射影の場合は道の一つであり(`projectiveCase`、`ArcModel` で証明済)、
+一般へ渡すには Chow の補題が要る。 -/
 structure ProjectiveModelData where
   /-- 台となる `X^arc`。 -/
   toArcSpaceData : ArcSpaceData
-  /-- `X` が ℤ 上固有であること(原文の仮定)。 -/
-  ProperOverZ : Scheme.{0} → Prop
-  /-- ★★★**ℤ-固有なら `X^arc` はコンパクトな射影モデルを持つ**。
+  /-- `X` が ℤ 上固有・平坦であること(原文の仮定、物理 p.3)。 -/
+  ProperFlatOverZ : Scheme.{0} → Prop
+  /-- ★★★**原文が実際に使う結論**——ℤ-固有なら `X^arc` はコンパクト。
 
-  ★これを埋めるには `ℙⁿ` の点の関手が要る(`ResearchPaper/genell-goal.md` §9-18)。 -/
-  hasProjectiveModel : ∀ X : Scheme.{0}, ProperOverZ X →
-    ∃ (n : ℕ) (emb : toArcSpaceData.Arc X → (Fin (n + 1) → ℂ)),
+  ★★★**「射影的」ではない。**原文は
+  > Let X be a normal scheme which is proper and flat over Spec(Z)
+
+  と書いており、**固有は射影を含意しない**。 -/
+  properFlat_compact : ∀ X : Scheme.{0}, ProperFlatOverZ X →
+    @CompactSpace (toArcSpaceData.Arc X) (toArcSpaceData.topology X)
+  /-- ★★**射影的な場合**——`ℙⁿ` への埋め込みからコンパクト性が出る道。
+
+  ★`Found/GenEll/ArcModel.lean` は**この形の入力からコンパクト性を証明済み**である。
+  ★★一般の固有 `X` へは Chow の補題(固有 → 射影的な変更を持つ)を経る。 -/
+  projectiveCase : ∀ X : Scheme.{0}, ∀ n : ℕ,
+    ∀ emb : toArcSpaceData.Arc X → (Fin (n + 1) → ℂ),
       @Continuous (toArcSpaceData.Arc X) (Fin (n + 1) → ℂ) (toArcSpaceData.topology X)
-        inferInstance emb ∧ Function.Injective emb
+        inferInstance emb → Function.Injective emb →
+      IsClosed (Set.range emb) → Bornology.IsBounded (Set.range emb) →
+      @CompactSpace (toArcSpaceData.Arc X) (toArcSpaceData.topology X)
 
 def ProjectiveModelData.waiting : WaitingFor :=
-  { what := "(C2) X が ℤ 上固有であることから射影埋め込み X^arc ↪ ℙⁿ(ℂ) を得る段"
+  { what := "(C2) X が ℤ 上固有・平坦であることから X^arc のコンパクト性を得る段。★固有は射影を含意しないので、射影の場合(ArcModel、実装済)から一般へ渡すには Chow の補題が要る"
     trackB := "Found/Arakelov — ★★★**これが層 C の律速**。要るのは `ℙⁿ` の**点の関手** `Hom(Spec ℂ, Proj 𝒜) ≅ ℙ(ℂ^{n+1})`。★mathlib は `ProjectiveSpectrum/Basic.lean` に `Proj.awayι`(開埋め込み)と `basicOpenIsoSpec`、`ProjectiveSpectrum/Functor.lean` に次数付き環準同型からの関手性を持つが、**点の関手は無い**(2026-08-17 実測)。★構成 5 段は `ResearchPaper/genell-goal.md` §9-18 に記録済み" }
 
 /-! ## ★★C3 —— 可逆層の解析化と hermitian 計量 -/
@@ -132,7 +157,7 @@ def ArcSpaceData.src : Source :=
     sectionId := "genell-def-1-1-i" }
 
 def ProjectiveModelData.src : Source :=
-  { paper := "GenEll", pdfPage := 3, item := "Definition 1.1, (i)(層 C——ℤ-固有から射影モデルへ)",
+  { paper := "GenEll", pdfPage := 3, item := "Definition 1.1, (i)(層 C——ℤ-固有からコンパクト性へ)",
     sectionId := "genell-def-1-1-i" }
 
 def HermitianMetricData.src : Source :=
