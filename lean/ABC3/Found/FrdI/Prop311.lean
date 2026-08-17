@@ -323,6 +323,67 @@ theorem isPrimeFrobenius_map
     rw [← hd]
     exact h3.2
 
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 4 歩** —— **圏同値は Frobenius 型射を保つ**。
+
+原文 (FrdI p.73):
+> Frobenius endomorphism]. But this implies that Ψ preserves the morphisms of Frobenius
+
+★★鍵は `Proposition 1.10, (v)`(**Frobenius 型 ⟺ prime-Frobenius の合成**)。
+★合成の**帰納法**をそのまま運ぶ: 基底(同型)は関手が保ち、
+各因子は第 3 歩(`isPrimeFrobenius_map`)で保たれる。 -/
+theorem isFrobeniusType_map_of_groupLike
+    (Fc₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (Fc₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hF₁ : IsOfFSMFFType D₁) (hF₂ : IsOfFSMFFType D₂)
+    (hiso₁ : IsOfIsotropicType P₁) (hut₁ : IsOfUnitTrivialType P₁)
+    (hgl₁ : IsOfGroupLikeType P₁)
+    (hiso₂ : IsOfIsotropicType P₂) (hut₂ : IsOfUnitTrivialType P₂)
+    (hgl₂ : IsOfGroupLikeType P₂)
+    {A B : C₁} {φ : A ⟶ B} (h : IsFrobeniusType P₁ φ) :
+    IsFrobeniusType P₂ (Ψ.map φ) := by
+  have hcomp : IsPrimeFrobComposite P₁ φ :=
+    (prop_1_10_v P₁ Fc₁ φ).mp h
+  refine isFrobeniusType_of_isPrimeFrobComposite P₂ Fc₂ ?_
+  clear h
+  induction hcomp with
+  | iso ψ hψ =>
+    haveI := hψ
+    exact IsPrimeFrobComposite.iso _ inferInstance
+  | cons hφ _ ih =>
+    rw [Ψ.map_comp]
+    exact IsPrimeFrobComposite.cons
+      (isPrimeFrobenius_map Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂ hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ hφ)
+      ih
+
+/-- ★★★**[FrdI] Proposition 3.11, (ii) の第 5 歩** —— **圏同値は底同型を保つ**。
+
+原文 (FrdI p.74):
+> (iii)], it thus follows that Ψ preserves the pull-back morphisms [cf. Proposition 1.7,
+
+★★`Proposition 1.7, (ii)` で底同型を `(Frobenius 型) ≫ (pre-step)` に分け、
+★**group-like ＋ isotropic では pre-step はすべて同型**((i) の手 2)なので、
+残るのは Frobenius 型の因子だけ。★第 4 歩がそれを運ぶ。
+
+★★**`Remark 3.4.1` と同じ骨格**だが、あちらは「次数を保つ」を仮定した。
+ここでは (i) の圏同値と FSMI の圏論性から**次数の仮定なしで**出る。 -/
+theorem isBaseIsomorphism_map_of_groupLike
+    (Fc₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (Fc₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hF₁ : IsOfFSMFFType D₁) (hF₂ : IsOfFSMFFType D₂)
+    (hiso₁ : IsOfIsotropicType P₁) (hut₁ : IsOfUnitTrivialType P₁)
+    (hgl₁ : IsOfGroupLikeType P₁)
+    (hiso₂ : IsOfIsotropicType P₂) (hut₂ : IsOfUnitTrivialType P₂)
+    (hgl₂ : IsOfGroupLikeType P₂)
+    {A B : C₁} {φ : A ⟶ B} (h : IsBaseIsomorphism P₁ φ) :
+    IsBaseIsomorphism P₂ (Ψ.map φ) := by
+  obtain ⟨X, γ, β, rfl, hγ, hβ⟩ := (prop_1_7_ii_baseIso_factor P₁ Fc₁ _).mp h
+  haveI : IsIso β := isIso_of_preStep_of_groupLike P₁ hgl₁ hiso₁ β hβ
+  rw [Ψ.map_comp]
+  refine isBaseIsomorphism_comp P₂
+    (isFrobeniusType_map_of_groupLike Ψ P₁ P₂ Fc₁ G₁ Fc₂ G₂ hF₁ hF₂
+      hiso₁ hut₁ hgl₁ hiso₂ hut₂ hgl₂ hγ).2 ?_
+  exact isBaseIsomorphism_of_isIso P₂ (Ψ.map β)
+
 end Preserve
 
 end ABC3.Found.FrdI
