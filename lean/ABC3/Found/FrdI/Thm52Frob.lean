@@ -1315,6 +1315,49 @@ theorem model_quasiIsotropicType (h : Hyp M) :
 theorem model_frobIsotropicType (h : Hyp M) : IsOfFrobeniusIsotropicType (modelPre h) :=
   fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (modelPre h) (𝟙 A), model_isotropic h A⟩
 
+/-! ## ★16. (iii) standard 型の判定
+
+原文 (FrdI p.101):
+> (iii) C is of standard type if and only if the following conditions are satisfied:
+
+★★**model Frobenioid は quasi-isotropic・Frobenius-isotropic・Frobenius-normalized を
+無条件に満たす**ので、`standard 型`に残るのは原文の (a)(b)(c) の 3 条だけになる。
+
+★原文 (a) の「`Φ` が零モノイド」は、`Φ` が divisorial(したがって sharp)なので
+**`Φ` が group-like であること**と同値であり、我々の `groupLikeCompact` の前件そのもの。 -/
+
+theorem model_standardType_iff (h : Hyp M) :
+    IsOfStandardType D (Obj M) (modelPre h) (model_frobenioidCore h) ↔
+      ((IsOfGroupLikeType (modelPre h) → ∃ A : Istr (modelPre h),
+          IsFrobeniusCompact (istrPre (modelPre h) (model_frobenioidCore h)) A) ∧
+        IsOfFSMFFType D ∧ MonoidOn.IsNonDilatingOn M.phi) := by
+  constructor
+  · intro hs
+    exact ⟨hs.groupLikeCompact, hs.baseFSMFF, hs.phiNonDilating⟩
+  · rintro ⟨h1, h2, h3⟩
+    exact
+      { quasiIsotropic := model_quasiIsotropicType h
+        frobIsotropic := model_frobIsotropicType h
+        groupLikeCompact := h1
+        frobNormalized := model_frobNormalizedType h
+        baseFSMFF := h2
+        phiNonDilating := h3 }
+
+/-! ## ★出典 -/
+
+/-- ★★★★★**[FrdI] Theorem 5.2, (ii)** —— model Frobenioid は
+**isotropic 型の Frobenioid** である。 -/
+def model_frobenioid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 101,
+    item := "Theorem 5.2, (ii) — Frobenioid かつ isotropic 型",
+    sectionId := "frdi-thm-5-2" }
+
+/-- ★★★**[FrdI] Theorem 5.2, (iii)** —— standard 型の判定(前半)。 -/
+def model_standardType_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 101,
+    item := "Theorem 5.2, (iii) — standard 型の判定",
+    sectionId := "frdi-thm-5-2" }
+
 end ModelData
 
 end ABC3.Found.FrdI
