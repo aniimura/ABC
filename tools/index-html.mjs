@@ -55,6 +55,8 @@ const now = sh('git log -1 --date=short --format=%ad').trim();
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const graphExists = existsSync(join(ROOT, 'dependency-graph.html'));
 // 層0の仕分け(手で数字を書かないため JSON から読む)
+const GLP = join(ROOT, 'ResearchPaper', 'graph-layers-stats.json');
+const GL = existsSync(GLP) ? JSON.parse(readFileSync(GLP, 'utf8')) : null;
 const L0P = join(ROOT, 'ResearchPaper', 'layer0-startable.json');
 const L0 = existsSync(L0P) ? JSON.parse(readFileSync(L0P, 'utf8')) : null;
 
@@ -149,9 +151,11 @@ ${F.sections.map((s) => {
 
 <h2>見る</h2>
 ${graphExists ? `<a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 664 節点を、強連結成分で潰して 55 層に並べたもの。
+<span>原文の参照から機械抽出した ${GL ? GL.nodes : '—'} 節点を、強連結成分で潰して ${GL ? GL.boxes : '—'} 個の箱・${GL ? GL.layers : '—'} 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
-ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。</span></a>` : ''}
+ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
+${GL ? `<b>我々が触れている節点 ${GL.ours} 件・Interface の義務 ${GL.obligDone}/${GL.oblig} 件。</b>` : ''}
+生成は <code>node tools/graph-layers.mjs</code>。</span></a>` : ''}
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
 <a class="big" href="ResearchPaper/dependency-scale.md"><b>規模の実測 →</b>

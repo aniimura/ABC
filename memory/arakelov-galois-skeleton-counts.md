@@ -272,13 +272,13 @@ metadata:
 
 `dependency-graph.html` の節点語彙は**原文の項目番号**なので、
 `GenEll Definition 1.1` に 8 本ぶら下がっていても **1 節点に潰れて見えなかった**。
-★`tools/graph-html.mjs` に `Interface` タグの義務節点を足した(28 件、埋まった 3)。
+★`tools/graph-layers.mjs` に `Interface` タグの義務節点を足した(28 件、埋まった 3)。
 ★★被覆率(節点 1015 / 着地 10 / 張った 54)は**汚していない**——義務は統計から除く。
 
 **How to apply:**
 - ★**件数は `node tools/check.mjs` の「Interface 実装待ち」が数える。**
   2026-08-17 時点で **25 件**(C1 達成で 26 から 1 減った)。
-  ★`node tools/graph-html.mjs` の「Interface の義務: 3 / 28」も同じ単位である
+  ★`node tools/graph-layers.mjs` の「Interface の義務: 3 / 28」も同じ単位である
   (28 = 25 待ち + 3 埋まった)。
   ★★増えて見えるのは**後退ではない**——畳まれていたものが数えられるようになっただけ。
 - ★★**posit は最小にする。** `E[n]` は mathlib の `W.toAffine.Point`

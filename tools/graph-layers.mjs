@@ -442,6 +442,10 @@ const data = {
 };
 const html = readFileSync(join(ROOT, 'tools', 'graph-layers.template.html'), 'utf8').replace('/*__DATA__*/', JSON.stringify(data));
 writeFileSync(OUT, html, 'utf8');
+// ★統計を JSON でも出す——index.html がこれを読む。
+// ★数字を手で書かないためである。手で書くと古びて、古びた数字は嘘になる。
+writeFileSync(join(ROOT, 'ResearchPaper', 'graph-layers-stats.json'),
+  JSON.stringify({ ...data.stats, maxLayer: maxL }, null, 2), 'utf8');
 console.log(`書き出し: ${OUT}`);
 console.log(`  節点 ${data.stats.nodes} / SCC ${data.stats.sccs}(サイズ>1 は ${data.stats.bigSccs})`);
 console.log(`  ボックス ${data.stats.boxes} / 層 ${data.stats.layers}(左 0 = 依存なし、右 ${maxL} = 根)`);

@@ -5061,3 +5061,27 @@ mathlib の証明を写経できる。
 |---|---|
 | 90 | 基本開集合で全単射 ⟹ 茎で同型 ⟹ `tildeTensorDesc` が同型 |
 | 91 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-93 —— 基底と茎を繋いだ(第 90 ブロック、2026-08-18)
+
+    基底の上で全単射  ⟹  茎で全単射  ⟹  茎で同型
+
+★★これが第 89(基本開集合で全単射)と第 77(茎で同型なら同型)を繋ぐ器具である。
+
+| 向き | 在庫 |
+|---|---|
+| 単射 | ★mathlib `stalkFunctor_map_injective_of_isBasis` |
+| 全射 | ★★**本ブロック**——`exists_mem_germ_eq_of_isBasis` から**一発** |
+
+★`include hB` が要った(仮定が結論の型に現れないため)。
+
+### ★★★残り —— 組み立てだけ
+
+    比較射が基本開集合で全単射(第 89)
+      + 基本開集合は基底(mathlib `isBasis_basic_opens`)
+      + 基底で全単射 ⟹ 茎で同型(第 90)
+      + 層化は茎を変えない(mathlib)
+      + 茎で同型なら同型(第 77)
+      ⟹ **tildeTensorDesc は同型**
+
+★★あとは `tilde M` を `InvSheaf` にして `equivPicRing` を組むだけである。
