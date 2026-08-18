@@ -6,7 +6,7 @@ import ABC3.Found.Arakelov.PicWitness
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.4。
 
 原文 (GenEll p.4):
-> (i) We shall write ADiv(F) for the group of arithmetic divisors on F
+> as is well-known, there is a natural isomorphism
 
 ## ★★★★★★B1 が入ったら **1 ブロック**で出た
 
@@ -40,7 +40,7 @@ open AlgebraicGeometry CategoryTheory NumberField
 /-- ★★★★★★**B3 の witness**——`Pic(Spec 𝓞_F) ≅ ClassGroup 𝓞_F`。
 
 原文 (GenEll p.4):
-> (i) We shall write ADiv(F) for the group of arithmetic divisors on F
+> as is well-known, there is a natural isomorphism
 
 ★★★B1(第 146)と mathlib の `ClassGroup.equivPic` の合成である。 -/
 noncomputable def picSpecDataWitness : ABC3.Interface.Arakelov.PicSpecData where
