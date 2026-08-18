@@ -399,13 +399,23 @@
         },
         {
           "id": "phibirat-samebase",
-          "title": "同じ底の対象は 𝒞^birat で同型",
           "size": "中",
           "status": "todo",
           "deps": [
             "phibirat-iso-transport"
           ],
-          "note": "★★**これが `𝒟` 上の部分関手化の真の要**(2026-08-18 測定)。★`Definition 1.3, (i)(b)` の **`preStepSpan`** が、`Base A ≅ Base B` ならpre-step の span `φ : X → A`, `ψ : X → B` を与える。★★未解決の点: **この `φ`,`ψ` が co-angular か**。co-angular pre-step にならないと `𝒞^birat` で同型にならない。★`coAngularOfPreStep` は「1 本あれば全部」なので、**1 本見つける**か、`arbFactor` で分解して回避するかのどちらか。"
+          "title": "同じ底の対象は 𝒞^birat で同型か —— ★測定: 素朴な形は偽の公算が大きい",
+          "note": "★★★**負の測定(2026-08-18)——記録して先の無駄を防ぐ**。\n手順はこう考えた: `preStepSpan` で pre-step の span `φ : X → A`, `ψ : X → B` を取り、`isIso_of_preStep_of_isGroupLikeObj` で両方を同型にする。\n★**しかしその補題は `isotropic` を要求する**(co-angular を `Proposition 1.4, (i)` から取るため)。`𝒞^birat` の対象は (iv) の辞書(`birat_isIsotropic_iff`)より**`𝒞` 側が isotropic なときに限って** isotropic なので、一般には供給されない。\n★★★**決め手**: (iv) の辞書は「`𝒞` の射が `𝒞^birat` で**同型** ⇔ `𝒞` で **co-angular** pre-step」と言う。つまり **co-angular でない step は `𝒞^birat` でも同型にならない**。その両端は同じ底を持つので、「同じ底⇒`𝒞^birat` で同型」は**一般には言えない**。\n★閉じるなら、`𝒪^×(A^birat)` の像がそれでも一致することを**別の手で**示すか、下の `phibirat-dfunct-lift` に乗り換える。\n★副産: `IsCoAngular` の定義に `γ=𝟙, β=φ, α=𝟙` を入れると**co-angular な isometric pre-step は同型**が直ちに出る。"
+        },
+        {
+          "id": "phibirat-dfunct-lift",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "phibirat-iso-transport"
+          ],
+          "title": "baseSurj の持ち上げで Φ^birat を 𝒟 上に定義する(代替経路)",
+          "note": "★`Definition 1.3, (i)(a)` の **`baseSurj`** は、各 `Y : 𝒟` に対し**Frobenius-trivial** な `A` と `Base A ≅ Y` を与える。\n★選択で持ち上げを固定して `Φ^birat(Y) := Φ^birat(A)` と定義すれば、**定義には独立性が要らない**。★同型による輸送(`phiBiratAt_map_le`、済)で `Base A ≅ Y` の差は吸収できる。\n★★残るのは、任意の `A` で `𝒪^×(A^birat) ↠ Φ^birat(Base A)` が全射になることで、これは `phibirat-factor` と**同じ内容**になる見込み。★Frobenius-trivial を使えることが利き、co-angular 性が取りやすい可能性がある。"
         },
         {
           "id": "phibirat-dfunct",
@@ -413,7 +423,7 @@
           "size": "小",
           "status": "todo",
           "deps": [
-            "phibirat-samebase"
+            "phibirat-dfunct-lift"
           ],
           "note": "★輸送(済)＋同じ底なら同型から、`Base A` にしか依らないことが出る。★そのあと `Φ^gp` の射で保たれることを確かめて部分関手にする。"
         },
