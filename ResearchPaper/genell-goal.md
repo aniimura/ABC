@@ -4654,3 +4654,30 @@ A が短い。
 | 83 | `equivPicRing` |
 
 ★★残り 5 ブロック。
+
+## §9-79 —— 局所化とテンソルの交換(第 79 ブロック、2026-08-18)
+
+    M_S ⊗_{R_S} N_S  ≅  (M ⊗_R N)_S
+
+★これが `tilde` の比較射が茎で同型であることの**中身**である。
+
+★★mathlib の在庫 2 つの合成で済んだ:
+
+| 段 | 在庫 |
+|---|---|
+| `M_S ⊗_{R_S} N_S ≅ M_S ⊗_R N_S` | `IsLocalization.moduleTensorEquiv` |
+| `M_S ⊗_R N_S ≅ (M ⊗_R N)_S` | ★★**instance** `IsLocalizedModule S (TensorProduct.map f g)`(`Localization/BaseChange.lean` 行 113) |
+
+★★★係数を上げるのは `LinearEquiv.extendScalarsOfIsLocalization`。**一発で通った。**
+
+### ★★★残り 4 ブロック
+
+| # | 内容 |
+|---|---|
+| 80 | `tilde` の明示的切断で前層射 ψ を作る(局所分数条件は積で閉じる) |
+| 81 | ψ が茎で同型 → 層化した射が同型(第 77 の器具) |
+| 82 | `tilde M` が `InvSheaf` |
+| 83 | `equivPicRing` |
+
+★第 80 の局所分数条件は `s x = mk r ⟨a⟩`・`t x = mk r' ⟨b⟩` に対し
+`mk (r ⊗ r') ⟨a·b⟩` で閉じる——`sectionsSubmodule` の `add_mem'` と同じ形である。
