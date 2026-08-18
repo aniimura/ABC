@@ -7840,3 +7840,33 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 | 171 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 | 4 |
 | 172 | `InvSheaf` と `ofDivisor` | 2 |
 | 173+ | 3 法則と `isCartierDivisor_affine` | 6 |
+
+## §9-191 —— 双対が層であること——mathlib に近いものがある(2026-08-18、実測)
+
+    Mathlib/CategoryTheory/Sites/SheafHom.lean :
+      presheafHom F G : Cᵒᵖ ⥤ Type _
+      Presheaf.IsSheaf.hom (hG : IsSheaf J G) : IsSheaf J (presheafHom F G)   ★有る
+      sheafHom (F G : Sheaf J A) : Sheaf J (Type _)
+
+★`sheafHom'` は `J.overPullback A X.unop`(= 我々の `restrictPresheafFunctor`)を使っており、
+**形は我々の双対と同じ**である。
+
+### ★★ただし直接は使えない
+
+| 項目 | mathlib | 我々 |
+|---|---|---|
+| Hom の種類 | **前層の射**(台の圏 `A`) | **層加群の射**(`PresheafModulesOn`) |
+| 値 | `Type _` | `ModuleCat` |
+
+★したがって `Presheaf.IsSheaf.hom` の**証明の構造**を真似ることになる:
+
+    presheafHom_isSheafFor(局所的に貼れる)→ isSheaf_iff_isSheaf_of_type
+
+★★見積もり **3–5 ブロック**(mathlib の証明が 200 行なので、
+`PresheafOfModules` 版も同程度)。
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–169 の 22 ブロック(フルビルド成功・ゲート PASS)
+      残り: 双対が層 → 評価射の同型 → InvSheaf → ofDivisor → 3 法則

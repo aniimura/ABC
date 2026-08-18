@@ -858,4 +858,24 @@ def nsmul_mle_nsmul_iff.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F3) — 次数の大小の単系版",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F3) の順序の特徴づけ**。
+
+★`prop_1_14_v_mp` が作る step の `Div` は `d • Div α`(d は Frobenius 次数)なので、
+**step の分解可能性 ⇔ 次数の大小**となる。 -/
+theorem step_mle_iff_degFr_le (hiso : ∀ X : C₁, IsIsotropic P₁ X)
+    {A B B₁ B₂ : C₁} {p q : ℕ}
+    (α : A ⟶ B) (hαs : IsStep P₁ α)
+    (α₁ : A ⟶ B₁) (α₂ : A ⟶ B₂)
+    (hd₁ : P₁.Div α₁ = p • P₁.Div α) (hd₂ : P₁.Div α₂ = q • P₁.Div α) :
+    MLe (P₁.Div α₁) (P₁.Div α₂) ↔ p ≤ q := by
+  have hdα : P₁.Div α ≠ 0 := fun h => hαs.2 (hiso A B α h hαs.1)
+  rw [hd₁, hd₂]
+  exact nsmul_mle_nsmul_iff (P₁.divisorial (P₁.toElem.obj A).base).1.1
+    (P₁.divisorial (P₁.toElem.obj A).base).2 hdα p q
+
+def step_mle_iff_degFr_le.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F3) — step の分解可能性 ⇔ 次数の大小",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
