@@ -3866,3 +3866,43 @@ mathlib には無い。★★**我々が作る**。
 1. 右辺の最内層をもう 1 枚剥がす(`hpm` / `comp_apply` の適用箇所を特定する)
 2. 左辺も `freeYonedaEquiv_comp` で分解し、**両辺を同じ深さに揃える**
 3. 補助補題を 1 本切って段数を減らす(第 39 ブロックと同じ発想)
+
+
+---
+
+## §9-58 (2026-08-18) ★★★mate の要素計算 —— 剥がす順序の問題に絞られた
+
+### ★★通っている手順(2026-08-18 実測、`sorry` 1 個を残すのみ)
+
+    refine (adjOn.homEquiv _ _).injective ?_
+    erw [Adjunction.homEquiv_naturality_left]
+    show _ ≫ homEquiv (homEquiv.symm _) = _ ; rw [Equiv.apply_symm_apply]
+    erw [Adjunction.homEquiv_naturality_right]
+    rw [Adjunction.homEquiv_unit]
+    refine freeYonedaEquiv.injective ?_
+    simp only [freeYonedaEquiv_comp]
+    have h := freeYonedaEquivUnitGen (phiOn f V) (objOn V W) ; erw [h]
+    have hpm : ∀ .., (pushforward (phiOn f V)).map g |>.app (op Z) x
+                  = g.app (op (overPost Z)) x := fun _ _ _ => rfl
+    erw [hpm, comp_apply, hpm, comp_apply]
+    -- ★★★残り 1 歩
+
+### ★★★残っている形(実測)
+
+    左辺: freeYonedaEquiv ((restrictFreeYonedaIso V W).inv ≫ restrict_V.map (unit))
+    右辺: restrict.map (pullbackFreeYonedaIso.inv) |>.app
+            ((eqToIso ..).inv.app ((free.map ..) .. ))
+
+★★`restrictFreeYonedaIso` は `eqToIso ≪≫ free.mapIso (yonedaRestrictIso)` で作ったので、
+右辺で**その内部構造が展開されてしまっている**。
+
+### ★★★★次の一手 —— **剥がす順序を変える**
+
+| # | 手 | 理由 |
+|---|---|---|
+| 1 | 左辺を先に `freeYonedaEquiv_comp` で分解し、**両辺を同じ深さに揃えてから** `erw` | いま右辺だけ深く剥がれている |
+| 2 | `restrictFreeYonedaIso` の `.inv` の**生成元での値**を先に補題として切る | 第 37 ブロック(`freeYonedaEquiv_freeYonedaInfIso_inv`)と同じ発想 |
+| 3 | `eqToIso` を `Iso.refl` に潰す補題を用意する | `restrict_freeObj` は `rfl` なので `eqToIso rfl = Iso.refl` |
+
+★★★**2 が本命**である——`δ` のときも第 37 ブロックで
+「同型の生成元での値」を先に切ったら最終段が通った。
