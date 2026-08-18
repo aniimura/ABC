@@ -7442,3 +7442,39 @@ B2 の在庫を実測した結果:
 | 167 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 | 4 |
 | 168 | `InvSheaf` と `ofDivisor` | 2 |
 | 169+ | 積・引き戻し・自明性の 3 法則、`isCartierDivisor_affine` | 6 |
+
+## §9-178 —— `unitEnd` の `map_mul'` で詰まっている点(2026-08-18、記録)
+
+    unitEnd : End (𝟙_ (PresheafModulesOn X U)) →+* Γ(X, U)
+
+★`map_one'` / `map_zero'` / `map_add'` は **`rfl`**。★★`map_mul'` だけが残る。
+
+### 状況
+
+`hc : (RingCat 綴りの環)` を `have` で作れば
+
+    hsm : f (hc • 1) = hc • f 1     ← ★これは**通る**
+
+まで来る。ゴールは `f (g 1) = f 1 * g 1`。
+
+★残るのは `hc • 1 = hc` と `hc • f 1 = hc * f 1` の 2 つで、
+どちらも「環がそれ自身に作用する = 掛け算」だが、
+**`simp [smul_eq_mul]` が `instances` 透明度で型検査に落ちる**。
+
+### ★★試した逃げ道(すべて不成立)
+
+| 手 | 結果 |
+|---|---|
+| `LinearMap.mul` で書く | `HMul` が無い |
+| `LinearMap.lsmul` で書く | `HSMul` が無い |
+| 型注釈で綴りを合わせる | ★注釈は推論型を変えない |
+| `have` で型を固定(`hc`) | ★**ここまでは通った** |
+| `simp only [smul_eq_mul, mul_one] at hsm` | 型検査で落ちる |
+
+### ★★★次に試すこと
+
+    letI : CommRing ((𝟙_ (PresheafModulesOn X U)).obj (op (Over.mk (𝟙 U))) : Type u) :=
+      inferInstanceAs (CommRing (Γ(X, U) : Type u))
+
+を**ファイル冒頭の instance として**置き、以降すべてその綴りで書く。
+★本 session の教訓(§9-173)——**綴りの橋は定義の近くに 1 箇所置く**——の適用である。
