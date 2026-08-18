@@ -4857,3 +4857,41 @@ mathlib の証明を写経できる。
 - `ModuleCat.hom_ext` の後に `LinearMap.ext` を挟んでから induction する
 - `PresheafOfModules.Hom.ext` 系の補題を探す
 - `tensorObj` の定義域を `ModuleCat.of _ (TensorProduct ..)` へ `show` で書き換える
+
+## §9-86 —— ★★★★★★自然性が閉じた(第 83 ブロック完成、2026-08-18)
+
+    tildeTensorPre : tilde M ⊗ tilde N ⟶ tilde (M ⊗_R N)   (前層射)
+
+### ★★★決め手は 2 つ
+
+| # | 手 |
+|---|---|
+| 1 | ★**`rfl` 補題で `letI` を剥がす**——`tildeTensorApp_apply` |
+| 2 | ★★★**`map_zero` / `map_add` を「項」で当てる**——`exact (map_zero _).trans (map_zero _).symm` |
+
+★★2 が本質だった。`rw [map_zero]` も `simp [map_zero]` も**発火しない**が、
+`exact` は**定義的等価まで見る**ので通る。
+
+★★★これは [[ring-instance-two-paths]] と同型の症状である
+——`rw`/`simp` は構文一致を要求し、インスタンスの二経路で止まる。
+★**`exact` に落とせば抜けられる**、が本 session で 3 度確認された回避法である
+(第 55・第 77・本ブロック)。
+
+### ★★試した手と結果(記録)
+
+| 手 | 結果 |
+|---|---|
+| `cat_disch`(既定) | ✗ |
+| `hom_ext` + `TensorProduct.ext'`(底を明示しても) | ✗ メタ変数で止まる |
+| `ext a b` | ✗ `ext` が 1 変数しか出さない |
+| `ext s` + `induction ... TensorProduct.induction_on` | ★`tmul` は `rfl` で通る |
+| `zero`/`add` を `simp` / `simp only` / `rw` | ✗ 発火しない |
+| `zero`/`add` を **`exact` の項**で | ★★★**通った** |
+
+### ★★★★残り
+
+| # | 内容 |
+|---|---|
+| 84 | 層化の普遍性で `tensorModules (tilde M) (tilde N) ⟶ tilde (M ⊗ N)` |
+| 85 | 茎で同型(第 77・78・79 の器具)→ 同型 |
+| 86 | `tilde M` が `InvSheaf` / `equivPicRing` |

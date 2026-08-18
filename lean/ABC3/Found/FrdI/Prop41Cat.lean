@@ -1115,6 +1115,39 @@ theorem prop_4_1_v (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
 
 end Cat6
 
+/-! ## ★11. ★★逸脱の記録 —— **原文より弱い仮定で述べたこと**(安全側)
+
+原文 (FrdI p.75):
+> isotropic type, and that Φ is perf-factorial. Let A ∈ Ob(C) be Div-Frobenius-
+
+★★上の (i)〜(v) は、原文の仮定
+「`𝒞` は **perfect 型**かつ **isotropic 型**」「`Φ` は **perf-factorial**」のうち、
+**perfect 型**と **perf-factorial** を、**その命題が実際に触る 1 個の対象の底**についてだけ
+仮定している(`hperf : IsPerfectMonoid (Φ.val …)`、`H : IsPerfFactorialWith (Φ.val …) ι`)。
+
+★**逸脱の向きは安全側**である —— 原文の仮定はこれらを**含意する**ので、
+原文の主張は上の各条の**系**になる。下の `isPerfectMonoid_of_perfectType` が
+その含意を機械で確かめたものである(`Proposition 1.10, (iii)` そのもの)。
+
+★もう 1 点。(iii) の「cartesian diagram **in the category of pre-steps**」は、
+pre-step のなす圏を新たに定義せず、**その普遍性を具体的に書いた**
+(`prop_4_1_iii_cartesian`: 任意の `V` からの 2 本に対する `∃!`)。
+★スライスが前順序なので一意性まで出ており、内容は落ちていない。 -/
+
+section Deviation
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★★**原文の仮定「`𝒞` は perfect 型」は、上の各条が使う `hperf` を与える**。
+
+★これが `Proposition 4.1` を原文より弱い仮定で述べてよい根拠である。 -/
+theorem isPerfectMonoid_of_perfectType (G : Frobenioid P) (hpt : IsOfPerfectType P) (A : C) :
+    IsPerfectMonoid (Φ.val (P.toElem.obj A).base) :=
+  prop_1_10_iii_image_perfect P G hpt A
+
+end Deviation
+
 
 /-! ## ★出典の紐付け(条つき) -/
 

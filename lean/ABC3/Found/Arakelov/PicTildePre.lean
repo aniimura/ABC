@@ -56,6 +56,29 @@ noncomputable def tildeTensorApp (U : (Opens ↥(Spec R))ᵒᵖ) :
       ((structureSheafInType (R : Type u) (M ⊗[(R : Type u)] N)).1.obj U : Type u))
   ModuleCat.ofHom (tensorSectionMap (R : Type u) M N U.unop)
 
+/-- ★**`letI` を剥がす `rfl` 補題**——これが無いと `map_add` が発火しない
+(第 25 ブロックで効いたのと同じ手)。 -/
+@[simp] theorem tildeTensorApp_apply (U : (Opens ↥(Spec R))ᵒᵖ)
+    (z : ((tilde M).val ⊗ (tilde N).val).obj U) :
+    (tildeTensorApp R M N U).hom z = tensorSectionMap (R : Type u) M N U.unop z := rfl
+
+/-- ★★★★**前層射** `tilde M ⊗ tilde N ⟶ tilde (M ⊗_R N)`。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★純テンソルでは `rfl`、加法性は上の `rfl` 補題で `map_add` を発火させる。 -/
+noncomputable def tildeTensorPre :
+    (tilde M).val ⊗ (tilde N).val
+      ⟶ (tilde (ModuleCat.of (R : Type u) (M ⊗[(R : Type u)] N))).val where
+  app := tildeTensorApp R M N
+  naturality {X Y} f := by
+    ext s
+    induction s using TensorProduct.induction_on with
+    | zero => exact (map_zero _).trans (map_zero _).symm
+    | tmul a b => rfl
+    | add x y hx hy => exact ((map_add _ _ _).trans (by rw [hx, hy])).trans (map_add _ _ _).symm
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tildeTensorApp.src : ABC3.Meta.Source :=
