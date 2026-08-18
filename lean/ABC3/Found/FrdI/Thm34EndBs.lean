@@ -873,4 +873,38 @@ def proj_inverts_baseIso.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — P.proj は base-isomorphism を反転させる",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★`v-loc` —— calculus of fractions の 2 公理を測る
+
+原文 (FrdI p.68):
+> φD = Base(ψ) ◦ Base(γ) ◦ Base(α)−1
+
+★★mathlib の `MorphismProperty.HasLeftCalculusOfFractions W` は
+`W.IsMultiplicative` に加えて 2 条件を要求する:
+
+| 公理 | 中身 | 状態 |
+|---|---|---|
+| `ext` | `s ≫ f₁ = s ≫ f₂`(`W s`)ならば、ある `W t` で `f₁ ≫ t = f₂ ≫ t` | ★**下で取る** |
+| `exists_leftFraction` | 右分数を左分数へ移す(四角形の補完) | ★★未 |
+
+★★★`ext` は **`𝒞` が totally epimorphic**(すべての射が epi)なので
+`t = 𝟙` で足りる —— `s` を消去すれば `f₁ = f₂` そのものになる。 -/
+
+/-- ★★★★**左分数の `ext` 公理** —— `𝒞` が totally epimorphic なので `t = 𝟙` で足りる。 -/
+theorem baseIso_leftFraction_ext {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {X' X Y : Cc} (f₁ f₂ : X ⟶ Y) (s : X' ⟶ X) (_hs : baseIsoProp P s)
+    (h : s ≫ f₁ = s ≫ f₂) :
+    ∃ (Y' : Cc) (t : Y ⟶ Y'), baseIsoProp P t ∧ f₁ ≫ t = f₂ ≫ t := by
+  haveI : Epi s := P.totEpiC _ _ s
+  refine ⟨Y, 𝟙 Y, ?_, ?_⟩
+  · show IsIso (P.Base (𝟙 Y))
+    rw [P.Base_id]
+    infer_instance
+  · rw [(cancel_epi s).mp h]
+
+def baseIso_leftFraction_ext.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — 左分数の ext 公理",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
