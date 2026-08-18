@@ -806,13 +806,13 @@
         },
         {
           "id": "psiN-F2",
-          "size": "小",
+          "size": "中",
           "status": "todo",
           "deps": [
             "psiN-F2-frobtype"
           ],
           "title": "(F2) 全体——一般の射へ広げる",
-          "note": "★★★**`arbFactor` の 3 成分がすべて揃った**(2026-08-18):\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square`\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。"
+          "note": "★★★**`arbFactor` の 3 成分がすべて揃った**(2026-08-18):\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square`\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。\n\n## ★★★束ねる段で見つかった向きの問題(2026-08-18)\n`arbFactor` は `ζ = γ ≫ β ≫ α`(γ Frobenius 型、β pre-step、α pull-back)で、道は `A → X → Y → B` の順である。\n★★しかし `exists_square_of_pullBack` は **pull-back `ζ : B ⟶ A` から A の自己射を B へ引き戻す**形であり、`admissible_of_square` は **admissible A ⇒ admissible B**を与える。\n★つまり pull-back の成分では向きが**逆**になる(Y → B が欲しいが B → Y が出る)。\n\n★次の一手の 2 つ:\n(a) `admissible_of_square` の**逆向き**を作る(四角形は対称なので `hA` を B 側に置き換えれば良い見込み)。\n(b) 原典の道(`Definition 1.3, (i)(a)(b)(c)` で pull-back に帰着)に戻る。\n★★(F2) はもともと**同値**(iff)なので、両向きを作れば向きの問題は消える。"
         },
         {
           "id": "psiN-F3",
