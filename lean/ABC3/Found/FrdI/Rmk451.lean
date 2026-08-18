@@ -40,7 +40,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w v2 u2
+universe v u w v2 u2 v3 u3 w3 v4 u4
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
@@ -235,19 +235,151 @@ theorem istr_standardType (h : IsOfStandardType D C P F) :
   baseFSMFF := h.baseFSMFF
   phiNonDilating := h.phiNonDilating
 
-/-! ## ★6. 残り —— rationally standard 型の側
+/-! ## ★6. ★★★`Frobenius-compact` の一般移送
+
+★`IsFrobeniusCompact` は `End A`・`OTimes P A`・`A ≅ A` の 3 つだけで書かれている。
+★★したがって**圏も単系も違ってよい** —— その 3 つが対応すれば移る。
+★上の `istr2_frobeniusCompact` はこの補題の特別な場合である。 -/
+
+/-- ★★★**`Frobenius-compact` は「`End`・`OTimes`・自己同型」の 3 つの対応で移送できる**。 -/
+theorem isFrobeniusCompact_transport
+    {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+    {Φ₁ : MonoidOn.{v, u, w} D₁} (P₁ : PreFrobenioid C₁ Φ₁)
+    {D₂ : Type u3} [Category.{v3} D₂] {C₂ : Type u4} [Category.{v4} C₂]
+    {Φ₂ : MonoidOn.{v3, u3, w3} D₂} (P₂ : PreFrobenioid C₂ Φ₂)
+    {A₁ : C₁} {A₂ : C₂}
+    (e : End A₁ ≃* End A₂) (t : (A₁ ≅ A₁) ≃ (A₂ ≅ A₂))
+    (hot : ∀ u : End A₁, u ∈ OTimes P₁ A₁ ↔ e u ∈ OTimes P₂ A₂)
+    (hconj : ∀ (θ : A₁ ≅ A₁) (u : End A₁), e (endConj θ u) = endConj (t θ) (e u))
+    (h : IsFrobeniusCompact P₁ A₁) : IsFrobeniusCompact P₂ A₂ := by
+  obtain ⟨hcomm, ⟨u₀, hu₀mem, hu₀pow⟩, hconjc⟩ := h
+  have hot' : ∀ v : End A₂, v ∈ OTimes P₂ A₂ ↔ e.symm v ∈ OTimes P₁ A₁ := by
+    intro v
+    rw [hot (e.symm v), MulEquiv.apply_symm_apply]
+  refine ⟨?_, ⟨e u₀, (hot u₀).mp hu₀mem, ?_⟩, ?_⟩
+  · intro x y hx hy
+    have h1 := hcomm _ _ ((hot' x).mp hx) ((hot' y).mp hy)
+    have h2 := congrArg e h1
+    rwa [map_mul, map_mul, MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply] at h2
+  · intro k hk
+    refine hu₀pow k ?_
+    exact e.injective (by rw [map_pow, hk, map_one])
+  · intro θ c d H v hv
+    have H₁ : ∀ u : End A₁, u ∈ OTimes P₁ A₁ → ∃ k : ℕ+,
+        ((endConj (t.symm θ) u) ^ (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A₁)
+          = (u ^ (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A₁) := by
+      intro u hu
+      obtain ⟨k, hk⟩ := H (e u) ((hot u).mp hu)
+      refine ⟨k, e.injective ?_⟩
+      rw [map_pow, map_pow, hconj, Equiv.apply_symm_apply]
+      exact hk
+    obtain ⟨k, hk⟩ := hconjc (t.symm θ) c d H₁ (e.symm v) ((hot' v).mp hv)
+    refine ⟨k, ?_⟩
+    have h2 := congrArg e hk
+    rwa [map_pow, map_pow, hconj, Equiv.apply_symm_apply, MulEquiv.apply_symm_apply] at h2
+
+/-! ## ★7. ★★★`𝒞^un-tr ≌ (𝒞^istr)^un-tr`
+
+原文 (FrdI p.86):
+> that if C is of rationally standard type (respectively, of standard type), then so is
+
+★★**要点**: 我々の実装では `UnTr P := Istr P` である —— すなわち
+**`𝒞^un-tr` はもともと `𝒞^istr` から作られている**。
+★そして `(𝒞^istr)^istr` は `𝒞^istr` の**全対象**からなる(`istr_isotropic`)。
+★★したがって `(𝒞^istr)^un-tr` と `𝒞^un-tr` は**圏として同型**であり、
+`Base`・`degFr`・`Div` はいずれも `rfl` で一致する。
+
+★これが `Definition 4.5, (iii), (b)`(`(𝒞^un-tr)^birat` の Frobenius-compact 対象)を
+`𝒞^istr` へ移すための土台である。 -/
+
+/-- ★★`𝒞^un-tr → (𝒞^istr)^un-tr` —— 対象は `istr2`、射は代表元を `Istr P` の射に包むだけ。 -/
+def unTr2 : UnTr P ⥤ UnTr (istrPre P F) where
+  obj A := show UnTr (istrPre P F) from istr2 (F := F) (A : Istr P)
+  map {A B} f :=
+    show HomUnTr (istrPre P F) (A : Istr P) (B : Istr P) from
+      Quotient.liftOn f (fun α => toHomUnTr (istrPre P F) (ObjectProperty.homMk α))
+        (fun _ _ h => (toHomUnTr_eq_iff (istrPre P F) _ _).mpr h)
+  map_id _ := rfl
+  map_comp {A B E} f g := by
+    refine Quotient.inductionOn₂ f g (fun α β => ?_)
+    rfl
+
+/-- ★★逆向き `(𝒞^istr)^un-tr → 𝒞^un-tr` —— 代表元を `.hom` で剥がすだけ。 -/
+def unTr2Inv : UnTr (istrPre P F) ⥤ UnTr P where
+  obj A := show UnTr P from ((A : Istr (istrPre P F)).obj)
+  map {A B} f :=
+    show HomUnTr P ((A : Istr (istrPre P F)).obj).obj ((B : Istr (istrPre P F)).obj).obj from
+      Quotient.liftOn f (fun g => toHomUnTr P g.hom)
+        (fun _ _ h => (toHomUnTr_eq_iff P _ _).mpr h)
+  map_id _ := rfl
+  map_comp {A B E} f g := by
+    refine Quotient.inductionOn₂ f g (fun α β => ?_)
+    rfl
+
+theorem unTr2_roundTrip {A B : UnTr P} (f : A ⟶ B) :
+    (unTr2 (P := P) (F := F) ⋙ unTr2Inv).map f = f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+theorem unTr2Inv_roundTrip {A B : UnTr (istrPre P F)} (f : A ⟶ B) :
+    (unTr2Inv (P := P) (F := F) ⋙ unTr2).map f = f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+/-- ★★★**`𝒞^un-tr ≌ (𝒞^istr)^un-tr`**(実は圏の同型)。 -/
+def unTr2Equiv : UnTr P ≌ UnTr (istrPre P F) where
+  functor := unTr2 (P := P) (F := F)
+  inverse := unTr2Inv (P := P) (F := F)
+  unitIso := NatIso.ofComponents (fun A => Iso.refl A) (by
+    intro A B f
+    show f ≫ 𝟙 _ = 𝟙 _ ≫ (unTr2 (P := P) (F := F) ⋙ unTr2Inv).map f
+    rw [Category.comp_id, Category.id_comp, unTr2_roundTrip])
+  counitIso := NatIso.ofComponents (fun A => Iso.refl A) (by
+    intro A B f
+    show (unTr2Inv (P := P) (F := F) ⋙ unTr2).map f ≫ 𝟙 _ = 𝟙 _ ≫ f
+    rw [Category.comp_id, Category.id_comp, unTr2Inv_roundTrip])
+  functor_unitIso_comp A := by
+    show (unTr2 (P := P) (F := F)).map (𝟙 A) ≫ 𝟙 _ = 𝟙 _
+    rw [CategoryTheory.Functor.map_id, Category.comp_id]
+
+/-! ### ★`unTr2` は pre-Frobenioid 構造を保つ(3 つとも `rfl`) -/
+
+theorem unTr2_Base {A B : UnTr P} (f : A ⟶ B) :
+    (unTrPre (istrPre P F) (istr_frobenioidCore P F)).Base
+        ((unTr2 (P := P) (F := F)).map f) = (unTrPre P F).Base f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+theorem unTr2_degFr {A B : UnTr P} (f : A ⟶ B) :
+    (unTrPre (istrPre P F) (istr_frobenioidCore P F)).degFr
+        ((unTr2 (P := P) (F := F)).map f) = (unTrPre P F).degFr f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+theorem unTr2_Div {A B : UnTr P} (f : A ⟶ B) :
+    (unTrPre (istrPre P F) (istr_frobenioidCore P F)).Div
+        ((unTr2 (P := P) (F := F)).map f) = (unTrPre P F).Div f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+/-! ## ★8. 残り —— rationally standard 型の側
 
 ★★**未実装**。`Definition 4.5, (iii)` の 4 条:
 
 | 条 | 内容 | 状態 |
 |---|---|---|
-| (a) | birationally Frobenius-normalized 型 | 未 |
-| (a) | rational 型 | 未 |
+| (a) | birationally Frobenius-normalized 型 | 未(birat の比較待ち) |
+| (a) | rational 型 | 未(birat の比較待ち) |
 | (a) | standard 型 | ★**済**(`istr_standardType`) |
-| (b) | `(𝒞^un-tr)^birat` に Frobenius-compact 対象 | 未 |
+| (b) | `(𝒞^un-tr)^birat` に Frobenius-compact 対象 | ★**土台は済**(下記) |
 
-★いずれも `𝒞^istr` の birationalization / unit-trivialization を経由するので、
-`Prop33UnTr.lean` / `Prop44Pre.lean` の語彙を `𝒞^istr` へ持ち上げる作業になる。
+★★**2026-08-18 に土台が 2 つ揃った**。
+
+1. `isFrobeniusCompact_transport` —— `Frobenius-compact` は
+   **`End`・`OTimes`・自己同型の 3 つの対応**だけで移る(圧も単系も違ってよい)。
+2. `unTr2Equiv` —— **`𝒞^un-tr ≅ (𝒞^istr)^un-tr`**。
+   `Base`・`degFr`・`Div` はいずれも `rfl` で一致する。
+
+★★**残るのは birationalization の比較 1 本だけである** ——
+`HomBirat` は `SliceA`(co-angular pre-step のスライス)上の filtered 帰納極限なので、
+`unTr2Equiv` から `SliceA` の対応を作り、極限を移す。
+★`IsCoAngular` / `IsPreStep` は `Base`・`degFr`・`Div` だけで書かれており、
+それらは上の 3 本で `rfl` 一致しているので、**数学の障害は無い**。
 -/
 
 /-! ## ★出典の紐付け(条つき) -/
