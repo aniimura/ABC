@@ -4681,3 +4681,30 @@ A が短い。
 
 ★第 80 の局所分数条件は `s x = mk r ⟨a⟩`・`t x = mk r' ⟨b⟩` に対し
 `mk (r ⊗ r') ⟨a·b⟩` で閉じる——`sectionsSubmodule` の `add_mem'` と同じ形である。
+
+## §9-80 —— 比較射の値が計算できた(第 79 追補、2026-08-18)
+
+    localizedTensorEquiv (mk m 1 ⊗ₜ mk n 1) = mk (m ⊗ₜ n) 1
+
+★機構: `moduleTensorEquiv` は純テンソルで**恒等**(`mapOfCompatibleSMul_tmul`)、
+残りは `IsLocalizedModule.iso_symm_apply`(`(iso S f).symm (f x) = mk x 1`)。
+
+★★一般の分母版(`mk m a ⊗ₜ mk n b = mk (m ⊗ₜ n) (a*b)`)は
+`a*b` を掛けて `LocalizedModule.mk_cancel` に帰着させる筋が立った
+——`S` の元による作用が単射であること(`IsLocalizedModule.map_units`)を使う。
+★次ブロックで書く。
+
+### ★★★第 80 ブロックの設計(確定)
+
+`tilde` の切断は**明示的**である:
+
+    (tilde M)(U) = { f : Π x : U, M_x // isLocallyFraction f }
+
+★前層射 ψ の `app U` は `(s, t) ↦ ⟨x ↦ localizedTensorEquiv (s x ⊗ₜ t x), _⟩`。
+
+★★局所分数条件は**積で閉じる**:
+
+    s x = mk r ⟨a⟩,  t x = mk r' ⟨b⟩   ⟹   結果 = mk (r ⊗ₜ r') ⟨a·b⟩
+
+★★★`sectionsSubmodule` の `add_mem'`(`sb • ra + sa • rb` / `sa * sb`)と**同じ形**なので、
+mathlib の証明を写経できる。

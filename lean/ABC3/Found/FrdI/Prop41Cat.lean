@@ -711,6 +711,120 @@ theorem prop_4_1_ii (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
 end Cat2
 
 
+/-! ## ★7. ★★★★★`Proposition 4.1, (iii)` -/
+
+section Cat3
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★`ε = ε' ≫ ζ` なら `x_ζ ≼ x_ε`。 -/
+theorem mle_preStepVal_of_factor {E Z F : C} (ε : E ⟶ F) (ε' : E ⟶ Z) (ζ : Z ⟶ F)
+    (hsε : IsPreStep P ε) (hsε' : IsPreStep P ε') (hsζ : IsPreStep P ζ)
+    (hfac : ε = ε' ≫ ζ) : MLe (preStepVal P ζ hsζ) (preStepVal P ε hsε) := by
+  have key : ∀ (f : E ⟶ F) (hf : IsPreStep P f), f = ε' ≫ ζ →
+      preStepVal P f hf = preStepVal P ζ hsζ
+        + Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div ε') := by
+    rintro f hf rfl
+    exact preStepVal_comp ε' ζ hsε' hsζ hf
+  exact ⟨_, (key ε hsε hfac).symm⟩
+
+/-- ★★**任意の値を持つ co-angular pre-step が取れる**(後置の圏同値の本質的全射性)。 -/
+theorem exists_preStep_of_val (G : Frobenioid P) (F : C)
+    (a : Φ.val (P.toElem.obj F).base) :
+    ∃ (U : C) (w : U ⟶ F) (hw : IsPreStep P w), IsCoAngular P w ∧ preStepVal P w hw = a := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreOverEquiv F
+  let W := (coaPreOverFunctor P F).objPreimage (Opposite.op (toOrderCat a))
+  have hiso2 : (coaPreOverFunctor P F).obj W ≅ Opposite.op (toOrderCat a) :=
+    (coaPreOverFunctor P F).objObjPreimageIso _
+  haveI hWb : IsIso (P.Base W.hom.hom) := W.hom.property.2.2
+  exact ⟨W.left.obj, W.hom.hom, W.hom.property.2, W.hom.property.1,
+    mle_antisymm (P.divisorial _).1.1 (P.divisorial _).2
+      (leOfHom hiso2.inv.unop) (leOfHom hiso2.hom.unop)⟩
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**[FrdI] Proposition 4.1, (iii) の前半** ——
+**台が交わらない ⟺ 共通の pre-step はすべて同型**。
+
+原文 (FrdI p.75):
+> (iii) ϵ∗(Div(ϵ)), ι∗(Div(ι)) ∈Φ(F) [where we write ϵ∗, ι∗for the respective
+
+★単系層は `suppElt_disjoint_iff`、圏層は後置の圏同値の充満性と本質的全射性。
+★「同型 ⟺ 値が 0」は isotropic 型から。 -/
+theorem prop_4_1_iii (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {E I F : C} (ε : E ⟶ F) (κ : I ⟶ F) (hsε : IsPreStep P ε) (hsκ : IsPreStep P κ)
+    {ι : Prime (Φ.val (P.toElem.obj F).base) → Pf (Φ.val (P.toElem.obj F).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj F).base) ι)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj F).base)) :
+    SuppElt ι (preStepVal P ε hsε) ∩ SuppElt ι (preStepVal P κ hsκ) = ∅ ↔
+      ∀ (Z : C) (ζ : Z ⟶ F), IsPreStep P ζ →
+        (∃ ε' : E ⟶ Z, IsPreStep P ε' ∧ ε = ε' ≫ ζ) →
+        (∃ κ' : I ⟶ Z, IsPreStep P κ' ∧ κ = κ' ≫ ζ) → IsIso ζ := by
+  rw [suppElt_disjoint_iff H hperf (P.divisorial _)]
+  constructor
+  · intro hmono Z ζ hsζ ⟨ε', hsε', hfacε⟩ ⟨κ', hsκ', hfacκ⟩
+    refine hiso Z F ζ ?_ hsζ
+    show P.Div ζ = 0
+    rw [← preStepVal_eq_zero_iff ζ hsζ]
+    exact hmono _ (mle_preStepVal_of_factor ε ε' ζ hsε hsε' hsζ hfacε)
+      (mle_preStepVal_of_factor κ κ' ζ hsκ hsκ' hsζ hfacκ)
+  · intro hcat d hdε hdκ
+    have hcε : IsCoAngular P ε := isCoAngular_of_isotropic_dom (P := P) G.core (hiso E) ε
+    obtain ⟨Z, ε', ζ, hsε', hsζ, hcε', hcζ, hfacε, hζval⟩ :=
+      exists_factor_of_mle' G ε hcε hsε hdε
+    have hdζ : MLe (preStepVal P ζ hsζ) (preStepVal P κ hsκ) := by
+      rw [hζval]; exact hdκ
+    have hcκ : IsCoAngular P κ := isCoAngular_of_isotropic_dom (P := P) G.core (hiso I) κ
+    obtain ⟨κ', -, hsκ', hfacκ⟩ := exists_factor_through G ζ κ hcζ hsζ hcκ hsκ hdζ
+    haveI := hcat Z ζ hsζ ⟨ε', hsε', hfacε⟩ ⟨κ', hsκ', hfacκ⟩
+    rw [← hζval, preStepVal_eq_zero_iff]
+    exact isIsometric_of_isIso P ζ
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★**[FrdI] Proposition 4.1, (iii) の後半** —— **pre-step の圏での四角形**。
+
+原文 (FrdI p.75):
+> ι satisfying ϵ = ζ ◦ϵ′, ι = ζ ◦ι′ is, in fact, an isomorphism. In this case, we shall
+
+★値は `x_ε + x_κ` に取る。★原文の 2 本の等式
+`ε∗(ε′∗(Div ε′)) = ι∗(Div ι)`・`ι∗(ι′∗(Div ι′)) = ε∗(Div ε)` はその和の分解である。 -/
+theorem prop_4_1_iii_square (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {E I F : C} (ε : E ⟶ F) (κ : I ⟶ F) (hsε : IsPreStep P ε) (hsκ : IsPreStep P κ) :
+    ∃ (U : C) (ε' : U ⟶ E) (κ' : U ⟶ I) (_ : IsPreStep P ε') (_ : IsPreStep P κ')
+      (_ : ε' ≫ ε = κ' ≫ κ) (hw : IsPreStep P (ε' ≫ ε)),
+      Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hw.2) (P.Div ε') = preStepVal P κ hsκ ∧
+      Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hw.2) (P.Div κ') = preStepVal P ε hsε := by
+  letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj F).base).1.1
+  obtain ⟨U, w, hsw, hcw, hwval⟩ :=
+    exists_preStep_of_val G F (preStepVal P ε hsε + preStepVal P κ hsκ)
+  have hcε : IsCoAngular P ε := isCoAngular_of_isotropic_dom (P := P) G.core (hiso E) ε
+  have hcκ : IsCoAngular P κ := isCoAngular_of_isotropic_dom (P := P) G.core (hiso I) κ
+  obtain ⟨ε', hcε', hsε', hfacε⟩ := exists_factor_through G ε w hcε hsε hcw hsw
+    (by rw [hwval]; exact ⟨preStepVal P κ hsκ, rfl⟩)
+  obtain ⟨κ', hcκ', hsκ', hfacκ⟩ := exists_factor_through G κ w hcκ hsκ hcw hsw
+    (by rw [hwval]; exact ⟨preStepVal P ε hsε, add_comm _ _⟩)
+  subst hfacε
+  have h1 : preStepVal P (ε' ≫ ε) hsw = preStepVal P ε hsε
+      + Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hsw.2) (P.Div ε') :=
+    preStepVal_comp ε' ε hsε' hsε hsw
+  rw [hwval] at h1
+  have h2 : Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hsw.2) (P.Div ε') = preStepVal P κ hsκ :=
+    (add_left_cancel (a := preStepVal P ε hsε) h1).symm
+  have key : ∀ (f : U ⟶ F) (hf : IsPreStep P f), f = κ' ≫ κ →
+      preStepVal P f hf = preStepVal P κ hsκ
+        + Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div κ') := by
+    rintro f hf rfl
+    exact preStepVal_comp κ' κ hsκ' hsκ hf
+  have h3 := key (ε' ≫ ε) hsw hfacκ
+  rw [hwval, add_comm (preStepVal P ε hsε)] at h3
+  have h4 : Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hsw.2) (P.Div κ') = preStepVal P ε hsε :=
+    (add_left_cancel (a := preStepVal P κ hsκ) h3).symm
+  exact ⟨U, ε', κ', hsε', hsκ', hfacκ, hsw, h2, h4⟩
+
+end Cat3
+
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def prop_4_1_ii.src : ABC3.Meta.Source :=

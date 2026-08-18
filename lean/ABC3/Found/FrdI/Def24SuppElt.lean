@@ -221,6 +221,120 @@ theorem isPrimaryElt_iff_suppElt_singleton (H : IsPerfFactorialWith M ι)
   ⟨suppElt_singleton_of_primary H hperf hdiv,
     fun ⟨_, hP⟩ => isPrimaryElt_of_suppElt_singleton H hdiv ha hP⟩
 
+/-! ## ★4. 同じ 1 点の台を持つ 2 元 —— `Proposition 4.1, (iii)` の「disjoint supports」 -/
+
+/-- ★★**台が 1 点なら `M^pf` の像は `p` の担い手に入る**。 -/
+theorem of_mem_pCarrierPf_of_suppElt_singleton (H : IsPerfFactorialWith M ι)
+    (hdiv : IsDivisorial M) {a : M} {P : Prime M} (hsupp : SuppElt ι a = {P}) :
+    Pf.of a ∈ pCarrierPf M P := by
+  have hP : factorMap ι (Pf.of a) P ≠ 0 := by
+    have h : P ∈ SuppElt ι a := by rw [hsupp]; rfl
+    exact h
+  obtain ⟨x, hxmem, hxval⟩ := H.factorMem (Pf.of a) P
+  have heq : factorMap ι x = factorMap ι (Pf.of a) := by
+    funext Q
+    by_cases hQ : Q = P
+    · subst hQ
+      rw [factorMap_pCarrier_self H hxmem, hxval]
+    · rw [factorMap_pCarrier_other H hdiv.2 hQ hxmem]
+      by_contra hc
+      refine hQ ?_
+      have h : Q ∈ SuppElt ι a := fun h0 => hc h0.symm
+      rw [hsupp] at h
+      exact h
+  rw [← H.factorInj heq]
+  exact hxmem
+
+/-- ★★**同じ 1 点の台を持つ 2 元は `⪯`-同値**。
+
+★どちらも `p` の担い手に入るので、`n • z` と `m • w` が類 `p` の primary 元になり、
+`toPrime_eq_iff` で繋がる。 -/
+theorem mprec_of_suppElt_eq_singleton (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {z w : M} {P : Prime M} (hzs : SuppElt ι z = {P}) (hws : SuppElt ι w = {P}) :
+    MPrec z w := by
+  rcases of_mem_pCarrierPf_of_suppElt_singleton H hdiv hzs with ⟨n, bz, hbz, hnz⟩ | hz0
+  · rcases of_mem_pCarrierPf_of_suppElt_singleton H hdiv hws with ⟨m, bw, hbw, hmw⟩ | hw0
+    · obtain ⟨hbzp, hbze⟩ := hbz
+      obtain ⟨hbwp, hbwe⟩ := hbw
+      have hcls : MPrec bz bw := (toPrime_eq_iff hbzp hbwp).mp (by rw [hbze, hbwe])
+      have h1 : MPrec (Pf.of z) (Pf.of bz) := by
+        refine ⟨1, one_pos, ?_⟩
+        rw [one_smul, ← hnz]
+        exact mle_nsmul_self' n.2
+      have h2 : MPrec (Pf.of bz) (Pf.of bw) := mprec_pf_of_iff.mpr hcls
+      have h3 : MPrec (Pf.of bw) (Pf.of w) :=
+        ⟨((m : ℕ+) : ℕ), m.2, ⟨0, by rw [add_zero]; exact hmw.symm⟩⟩
+      exact mprec_pf_of_iff.mp (mprec_trans h1 (mprec_trans h2 h3))
+    · exfalso
+      have hemp : SuppElt ι w = ∅ := by
+        show Supp (factorMap ι (Pf.of w)) = ∅
+        rw [hw0, factorMap_zero H]
+        ext p; simp [Supp]
+      rw [hws] at hemp
+      exact absurd hemp.symm (by simp)
+  · exfalso
+    have hemp : SuppElt ι z = ∅ := by
+      show Supp (factorMap ι (Pf.of z)) = ∅
+      rw [hz0, factorMap_zero H]
+      ext p; simp [Supp]
+    rw [hzs] at hemp
+    exact absurd hemp.symm (by simp)
+
+/-- ★★**`z ⪯ w` なら共通の非零下界がある**(perfect で `n` 割り)。 -/
+theorem exists_common_lower_of_mprec (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M)
+    {z w : M} (hz : z ≠ 0) (h : MPrec z w) :
+    ∃ d : M, d ≠ 0 ∧ MLe d z ∧ MLe d w := by
+  obtain ⟨n, hn, c, hc⟩ := h
+  obtain ⟨d, hd⟩ := (hperf ⟨n, hn⟩).2 z
+  have hnd : n • d = z := hd
+  refine ⟨d, ?_, ?_, ?_⟩
+  · intro h0
+    exact hz (by rw [← hnd, h0, smul_zero])
+  · exact ⟨(n - 1) • d, by rw [← hnd, ← succ_nsmul']; congr 1; omega⟩
+  · obtain ⟨c', hc'⟩ := (hperf ⟨n, hn⟩).2 c
+    have hnc' : n • c' = c := hc'
+    refine ⟨c', nsmul_inj_of_divisorial hdiv hn ?_⟩
+    rw [smul_add, hnd, hnc']
+    exact hc
+
+/-- ★★★**台が交わらない ⟺ 共通の非零下界が無い**。
+
+★★これが `Proposition 4.1, (iii)` の「disjoint supports」の単系層である。 -/
+theorem suppElt_disjoint_iff (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) (a b : M) :
+    SuppElt ι a ∩ SuppElt ι b = ∅ ↔ ∀ d : M, MLe d a → MLe d b → d = 0 := by
+  constructor
+  · intro hdisj d hda hdb
+    exact eq_zero_of_mle_of_suppElt_disjoint H hdiv hda hdb hdisj
+  · intro hcond
+    refine Set.eq_empty_iff_forall_notMem.mpr (fun P hP => ?_)
+    obtain ⟨y, z, hsum, hy, hz⟩ := exists_split_suppElt H hperf hdiv a {P}
+    obtain ⟨y', z', hsum', hy', hz'⟩ := exists_split_suppElt H hperf hdiv b {P}
+    have hzs : SuppElt ι y = {P} := by
+      rw [hy]
+      ext Q
+      simp only [Set.mem_inter_iff, Set.mem_singleton_iff]
+      constructor
+      · exact fun h => h.1
+      · rintro rfl
+        exact ⟨rfl, hP.1⟩
+    have hws : SuppElt ι y' = {P} := by
+      rw [hy']
+      ext Q
+      simp only [Set.mem_inter_iff, Set.mem_singleton_iff]
+      constructor
+      · exact fun h => h.1
+      · rintro rfl
+        exact ⟨rfl, hP.2⟩
+    have hy0 : y ≠ 0 := by
+      intro h0
+      rw [h0, suppElt_zero H] at hzs
+      exact absurd hzs.symm (by simp)
+    obtain ⟨d, hd0, hdy, hdy'⟩ := exists_common_lower_of_mprec hperf hdiv hy0
+      (mprec_of_suppElt_eq_singleton H hdiv hzs hws)
+    exact hd0 (hcond d (mle_trans hdy ⟨z, hsum.symm⟩) (mle_trans hdy' ⟨z', hsum'.symm⟩))
+
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def Pf.of_injective_of_divisorial.src : ABC3.Meta.Source :=
