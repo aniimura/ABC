@@ -135,7 +135,139 @@ theorem biratMap_mk (G : Frobenioid P) (A B : UnTr P)
     (colimit.desc _ (biratMapCocone (F := F) G A B)), colimit.ι_desc]
   rfl
 
-/-! ## ★4. 残り —— 関手性・全単射・`Base`/`degFr` の保存
+
+/-! ## ★4. ★★★★比較関手 —— 恒等と合成の保存
+
+★★合成の保存が要点である。`compBirat` は `Proposition 1.11, (vii)` の**引き戻しの選択**を
+使うので、両側の選択は**独立**であり、定義的には一致しない。
+★★★しかし添字圏は**細い**(`idxBirat_hom_ext`)ので、
+**共通の上界を取れば図式は自動的に可換**になり、選択の違いが消える。
+★これが `compBirat_natural_right` と同じ骨である。 -/
+
+/-- ★★`biratMap` は `𝒞 → 𝒞^birat` の像と可換(`toHomBirat` を保つ)。 -/
+theorem biratMap_toHomBirat (G : Frobenioid P) {A B : UnTr P} (φ : A ⟶ B) :
+    biratMap (F := F) G A B (toHomBirat φ)
+      = toHomBirat ((unTr2 (P := P) (F := F)).map φ) := by
+  show biratMap (F := F) G A B
+      (HomBirat.mk (idxBiratOne (unTrPre P F) (unTr_frobenioid P F G) A) φ) = _
+  rw [biratMap_mk]
+  rfl
+
+/-- ★`biratMap` は恒等を保つ。 -/
+theorem biratMap_id (G : Frobenioid P) (A : UnTr P) :
+    biratMap (F := F) G A A (𝟙 (show BiratCat (unTrPre P F) (unTr_frobenioid P F G) from A))
+      = 𝟙 (show BiratCat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) from
+          (unTr2 (P := P) (F := F)).obj A) := by
+  show biratMap (F := F) G A A (toHomBirat (𝟙 A)) = _
+  rw [biratMap_toHomBirat]
+  rfl
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★**引き戻しの `α` は共通の上界の上で移送される**。
+
+★`W₂` の構造射が **mono**(pre-step)なので消約でき、
+`biratPull_sq` を両側で使うと `γ` の等式(`hkey`、細さから)に帰着する。 -/
+theorem biratPull_alpha_transport (G : Frobenioid P) {A B : UnTr P}
+    (Z : IdxBirat (unTrPre P F) (unTr_frobenioid P F G) A) (φ : Z.unop.left.obj ⟶ B)
+    (W : IdxBirat (unTrPre P F) (unTr_frobenioid P F G) B)
+    {V : IdxBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)
+      ((unTr2 (P := P) (F := F)).obj A)}
+    (c : (idx2 (F := F) G A).obj (biratPullIdx (unTr_frobenioid P F G).core Z φ W) ⟶ V)
+    (c' : biratPullIdx (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+        ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W) ⟶ V)
+    (hkey : c.unop.left.hom ≫ (unTr2 (P := P) (F := F)).map
+          (biratPullGamma (unTr_frobenioid P F G).core Z φ W)
+        = c'.unop.left.hom ≫ biratPullGamma (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+          ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W)) :
+    c.unop.left.hom ≫ (unTr2 (P := P) (F := F)).map
+        (biratPullAlpha (unTr_frobenioid P F G).core Z φ W)
+      = c'.unop.left.hom ≫ biratPullAlpha (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+          ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W) := by
+  haveI hb : Mono ((idx2 (F := F) G B).obj W).unop.hom.hom :=
+    (unTr2G G).core.preStepMono _ ((idx2 (F := F) G B).obj W).unop.hom.property.2
+  refine (cancel_mono ((idx2 (F := F) G B).obj W).unop.hom.hom).mp ?_
+  have h1 := biratPull_sq (unTr_frobenioid P F G).core Z φ W
+  have h2 := biratPull_sq (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+    ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W)
+  have e1 : (unTr2 (P := P) (F := F)).map
+        (biratPullAlpha (unTr_frobenioid P F G).core Z φ W)
+      ≫ ((idx2 (F := F) G B).obj W).unop.hom.hom
+      = (unTr2 (P := P) (F := F)).map
+          (biratPullGamma (unTr_frobenioid P F G).core Z φ W)
+        ≫ (unTr2 (P := P) (F := F)).map φ := by
+    have h := congrArg (unTr2 (P := P) (F := F)).map h1
+    rw [CategoryTheory.Functor.map_comp] at h
+    exact (h.trans (CategoryTheory.Functor.map_comp _ _ _)).symm
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (fun t => c.unop.left.hom ≫ t) e1) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (fun t => t ≫ (unTr2 (P := P) (F := F)).map φ) hkey) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (fun t => c'.unop.left.hom ≫ t) h2) ?_
+  exact (Category.assoc _ _ _).symm
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★代表元での合成の保存。★細さ(`idxBirat_hom_ext`)がすべてを潰す。 -/
+theorem biratMap_comp_mk (G : Frobenioid P) {A B E : UnTr P}
+    (Z : IdxBirat (unTrPre P F) (unTr_frobenioid P F G) A) (φ : Z.unop.left.obj ⟶ B)
+    (W : IdxBirat (unTrPre P F) (unTr_frobenioid P F G) B) (ψ : W.unop.left.obj ⟶ E) :
+    HomBirat.mk ((idx2 (F := F) G A).obj
+        (biratPullIdx (unTr_frobenioid P F G).core Z φ W))
+      ((unTr2 (P := P) (F := F)).map
+        (biratPullAlpha (unTr_frobenioid P F G).core Z φ W ≫ ψ))
+    = HomBirat.mk
+        (biratPullIdx (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+          ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W))
+        (biratPullAlpha (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+          ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W)
+          ≫ (unTr2 (P := P) (F := F)).map ψ) := by
+  refine HomBirat.sound _
+    (IsFiltered.leftToMax ((idx2 (F := F) G A).obj
+      (biratPullIdx (unTr_frobenioid P F G).core Z φ W))
+      (biratPullIdx (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+        ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W)))
+    (IsFiltered.rightToMax ((idx2 (F := F) G A).obj
+      (biratPullIdx (unTr_frobenioid P F G).core Z φ W))
+      (biratPullIdx (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+        ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W))) ?_
+  have hkey := congrArg (fun t => t.unop.left.hom)
+    (idxBirat_hom_ext
+      ((idx2 (F := F) G A).map (biratPullHom (unTr_frobenioid P F G).core Z φ W)
+        ≫ IsFiltered.leftToMax _ _)
+      (biratPullHom (unTr2G G).core ((idx2 (F := F) G A).obj Z)
+        ((unTr2 (P := P) (F := F)).map φ) ((idx2 (F := F) G B).obj W)
+        ≫ IsFiltered.rightToMax _ _))
+  have hmid := biratPull_alpha_transport (F := F) G Z φ W _ _ hkey
+  simp only [CategoryTheory.Functor.map_comp, ← Category.assoc]
+  exact Eq.trans (Category.assoc _ _ _).symm
+    (congrArg (fun t => t ≫ (unTr2 (P := P) (F := F)).map ψ) hmid)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★`biratMap` は合成を保つ。 -/
+theorem biratMap_comp (G : Frobenioid P) {A B E : UnTr P}
+    (f : HomBirat (unTrPre P F) (unTr_frobenioid P F G) A B)
+    (g : HomBirat (unTrPre P F) (unTr_frobenioid P F G) B E) :
+    biratMap (F := F) G A E
+        (compBirat (unTrPre P F) (unTr_frobenioid P F G) (unTr_frobenioid P F G).core f g)
+      = compBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)
+          (unTr2G G).core (biratMap (F := F) G A B f) (biratMap (F := F) G B E g) := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratMap_mk, biratMap_mk, biratMap_mk, compBirat_mk]
+  exact biratMap_comp_mk (F := F) G Z φ W ψ
+
+/-- ★★★★**段4** —— **birationalization の比較関手**。
+
+★★これで `(𝒞^un-tr)^birat` から `((𝒞^istr)^un-tr)^birat` へ渡れる。 -/
+noncomputable def biratFunctor (G : Frobenioid P) :
+    BiratCat (unTrPre P F) (unTr_frobenioid P F G) ⥤
+      BiratCat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) where
+  obj A := (unTr2 (P := P) (F := F)).obj A
+  map {A B} f := biratMap (F := F) G A B f
+  map_id A := biratMap_id (F := F) G A
+  map_comp f g := biratMap_comp (F := F) G f g
+
+/-! ## ★5. 残り —— 全単射と `Base`/`degFr` の保存
 
 ★`biratMap` が関手をなすこと(恒等と合成)、全単射であること
 (`unTr2Inv` から逆向きを作り、往復が恒等であることを `HomBirat.eq_iff` で見る)、

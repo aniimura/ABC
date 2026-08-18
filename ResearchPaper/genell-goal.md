@@ -5724,3 +5724,30 @@ mathlib の証明を写経できる。
 | 4 | 基底の像が自由生成 ⟺ 全単射(第 103 の `bijective_smul_generator`) |
 
 ★★★**「1 を計算する」のではなく「基底の像を見る」**——§9-113 と同じ型の言い換えである。
+
+## §9-115 —— 一点添字の自由加群(第 105 ブロック、2026-08-24)
+
+    (Finsupp.uniqueLinearEquiv A A default).symm c = c • Finsupp.single default 1
+
+### ★★★詰まりの回避 —— 表示を書き直す
+
+★`ModuleCat.freeMk x` のままだと `LinearEquiv.map_smul` が**当たらない**
+(`ModuleCat` の `•` と `Finsupp` の `•` が別経路)。
+★★**`Finsupp.single x 1` に書き直すと `simp` が通る**。★★★両者は **`rfl`**。
+
+★★★★**この session 4 度目の「言い換えで抜ける」**:
+
+| # | 場面 | 言い換え |
+|---|---|---|
+| 1 | §9-100 | 積閉集合を取り替える |
+| 2 | §9-104 | 基底変換の言葉に移す |
+| 3 | §9-113 | 新しく作らず既存の値を計算する |
+| 4 | §9-115 | **`ModuleCat` の表示を `Finsupp` に書き直す** |
+
+### ★★残り
+
+| # | 内容 |
+|---|---|
+| 106 | `free(一点) → P(W)` の全単射性(第 103・104・105 の合成) |
+| 107 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 108 | `tilde M` が `InvSheaf` / `equivPicRing` |
