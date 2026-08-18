@@ -878,4 +878,26 @@ def step_mle_iff_degFr_le.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F3) — step の分解可能性 ⇔ 次数の大小",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★(F3) の順序の保存
+
+★★`step_mle_iff_degFr_le` で「次数の大小」が
+**step の分解可能性**として圧倒的に書けたので、
+`Ψ` が step を保てば順序も保たれる。 -/
+
+/-- ★★★★**step の分解可能性は関手で移る**。
+
+★これが (F3) の「Ψ が順序を保つ」の中核である。 -/
+theorem stepDecomp_map (Ψ : C₁ ⥤ C₂)
+    (hstep : ∀ {X Y : C₁} (f : X ⟶ Y), IsStep P₁ f → IsStep P₂ (Ψ.map f))
+    {A B₁ B₂ : C₁} (α₁ : A ⟶ B₁) (α₂ : A ⟶ B₂)
+    (h : ∃ γ : B₁ ⟶ B₂, IsStep P₁ γ ∧ α₁ ≫ γ = α₂) :
+    ∃ γ : Ψ.obj B₁ ⟶ Ψ.obj B₂, IsStep P₂ γ ∧ Ψ.map α₁ ≫ γ = Ψ.map α₂ := by
+  obtain ⟨γ, hγ, hcomp⟩ := h
+  exact ⟨Ψ.map γ, hstep γ hγ, by rw [← Ψ.map_comp, hcomp]⟩
+
+def stepDecomp_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F3) — step の分解可能性の移送",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

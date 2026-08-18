@@ -7870,3 +7870,18 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–169 の 22 ブロック(フルビルド成功・ゲート PASS)
       残り: 双対が層 → 評価射の同型 → InvSheaf → ofDivisor → 3 法則
+
+## §9-192 —— 層の仮定なしの同型判定(第 170 ブロック、2026-08-18)
+
+    isIso_unitHomOfSection' / trivialIsoOfSection'
+      すべての W で「s の倍」が全単射 ⟹ 𝟙_ ≅ P(層の仮定なし)
+
+★第 110・115 は `P` が**層である**ことを要求するが、
+双対 `F^∨`(第 169)はまだ層であることを示していない。
+
+★★双対の場合は**すべての `W` で**全単射が言える
+(自明化 `e : F|_V ≅ 𝟙_` が `Hom(F|_W, 𝟙_) ≅ End(𝟙_) ≅ Γ(X,W)` を与える)ので、
+**層の仮定は要らない**——成分ごとに同型なら射も同型。
+
+★★★これで双対の局所自明性が**層であることを示す前に**言える。
+第 55 の `isIso_of_reflects_iso _ (PresheafOfModules.toPresheaf _)` の型を再利用した。
