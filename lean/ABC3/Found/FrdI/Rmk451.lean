@@ -100,24 +100,42 @@ theorem istr_frobNormalizedType (h : IsOfFrobeniusNormalizedType P) :
   rw [hd]
   exact Eq.trans (congrArg (fun t : A.obj ⟶ A.obj => (φ : A ⟶ A).hom ≫ t) hpow) hcore
 
-/-! ## ★3. 残り —— (b) の Frobenius-compact 対象
+/-! ## ★3. (b) の第 1 段 —— group-like 型の降下 -/
 
-★★**未実装**。(b) は
+/-- ★`IsGroupLike` は全射準同型に沿って移る。 -/
+theorem isGroupLike_of_surjective {M N : Type w} [AddCommMonoid M] [AddCommMonoid N]
+    (f : M →+ N) (hf : Function.Surjective f) (h : IsGroupLike M) : IsGroupLike N := by
+  refine (isGroupLike_iff N).mpr ?_
+  intro b
+  obtain ⟨a, rfl⟩ := hf b
+  exact ((isGroupLike_iff M).mp h a).map f
 
-  `𝒞^istr` が group-like 型 ⟹ `(𝒞^istr)^istr` に Frobenius-compact 対象がある
+/-- ★★**`𝒞^istr` が group-like 型なら `𝒞` も group-like 型**。
 
-であり、2 段の移送が要る:
+★isotropic hull `A ⟶ A^istr` は pre-step、したがって**底同型**なので
+`Φ(base A^istr) → Φ(base A)` は全単射(`MonoidOn.map_bijective_of_iso`)。
+group-like 性はその全射に沿って移る。 -/
+theorem istr_groupLikeType_down (h : IsOfGroupLikeType (istrPre P F)) :
+    IsOfGroupLikeType P := by
+  intro A
+  obtain ⟨B, φ, _, hstep, hisoB, _⟩ := F.isotropicHullExists A
+  haveI hb : IsIso (P.Base φ) := hstep.2
+  exact isGroupLike_of_surjective (Φ.map (P.Base φ))
+    (MonoidOn.map_bijective_of_iso Φ (asIso (P.Base φ))).2 (h ⟨B, hisoB⟩)
 
-1. `IsOfGroupLikeType (istrPre P F) → IsOfGroupLikeType P`
-   —— 各 `A : C` の isotropic hull `A ⟶ A^istr` は**底同型**なので
-   `Φ(base A) ≅ Φ(base A^istr)`、group-like 性はその同型に沿って移る。
-2. `IsFrobeniusCompact (istrPre P F) A → IsFrobeniusCompact (istrPre (istrPre P F) _) A'`
-   —— `Istr (istrPre P F)` は `Istr P` の**全対象**からなる充満部分圏
-   (`istr_isotropic`)なので、`End` も `OTimes` も一致する。
+/-! ## ★4. 残り —— (b) の第 2 段(Frobenius-compact 対象の移送)
 
-★この 2 段が済めば `Definition 3.1, (i)` の 5 条が揃い、
+★★**未実装**。残るのは
+
+  `IsFrobeniusCompact (istrPre P F) A → IsFrobeniusCompact (istrPre (istrPre P F) _) A'`
+
+である。★`Istr (istrPre P F)` は `Istr P` の**全対象**からなる充満部分圏
+(`istr_isotropic` により条件が空虚に真)なので、`End` も `OTimes` も一致する
+——`InducedCategory.Hom` の包みを剥がす定型作業になる。
+
+★この 1 段が済めば `Definition 3.1, (i)` の 5 条が揃い、
 `Remark 4.5.1` の **standard 型の半分**が閉じる。
-★rationally standard 型の側((a) の 3 条 ＋ (b))はさらに
+★rationally standard 型の側はさらに
 `(𝒞^istr)^un-tr,birat` の Frobenius-compact 対象を要する。
 -/
 
