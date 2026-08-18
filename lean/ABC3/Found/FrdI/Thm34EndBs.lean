@@ -830,4 +830,25 @@ def thm_3_4_v_rigid.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 合成関手の rigidity",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★`Theorem 3.4, (iv)` —— 条として揃った
+
+原文 (FrdI p.62):
+> (iv) Suppose that: (a) C1, C2 are of standard type; (b) if C1, C2 are of
+
+★条の 4 主張がすべて実装された:
+
+| 主張 | 宣言 |
+|---|---|
+| `Ψ` は `𝒪^▷(−)` を保つ | `thm_3_4_iv_otri_map'` |
+| `Ψ` は `𝒪^×(−)` を保つ(unit-equivalence) | `isUnitEquivalent_map` |
+| `Ψ^un-tr` が 1-一意に存在し図式が 1-可換 | `psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` |
+| `𝒞^un-tr` は unit-trivial 型なので rigid | `psiUnTr_rigid` |
+| `Ψ_{N≥1}` は恒等 | `psiN_eq_id_of_orderPreserve`(非 group-like)／`admissible_deg_eq_of_frobeniusCompact`(group-like) |
+
+★★`𝒪^▷` の圏論的特徴づけ(`OTriEndCond`)と
+`End(𝒞^pl-bk_A → 𝒞)^bs-iso` の移送(`otriGenCond_map`)が本条の芯だった。 -/
+def thm_3_4_iv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62, item := "Theorem 3.4, (iv)",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
