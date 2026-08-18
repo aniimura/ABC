@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Prop41
 import ABC3.Found.FrdI.Prop110
 import ABC3.Found.FrdI.Prop32Equiv
+import ABC3.Found.FrdI.Def24SuppElt
 
 /-!
 # [FrdI] `Proposition 4.1` の**圏層** —— `Definition 1.3, (iii)(d)` による翻訳
@@ -54,6 +55,7 @@ B --φ_B--> B' --φ_A--> A
 namespace ABC3.Found.FrdI
 
 open CategoryTheory
+open scoped NNReal
 
 universe v u w v2 u2 w'
 
@@ -380,7 +382,90 @@ theorem prop_4_1_i_of_divFrobTrivial (G : Frobenioid P) (hiso : ∀ X : C, IsIso
 
 end Cat
 
+/-! ## ★5. `Proposition 4.1, (ii)` の単系層 -/
+
+/-- ★★★★**[FrdI] Proposition 4.1, (ii) の単系層**。
+
+`q` が primary のとき、
+
+  `p + q` が primary ⟺ どの分解 `p + q = a + b`(`a, b ≠ 0`)にも
+  **`d ≼ q` かつ `d ≼ b` なる `d ≠ 0`** がある。
+
+★★`⟹` は **perfect で `n` 割り**するだけ(`d := q/n`)——
+`p+q` の primary 性から `p+q ≼ n·b` が出るので `q ≼ n·b`、
+両辺を `n` で割ると `d ≼ b` になる。
+★★`⟸` は ★**primary ⟺ 台が 1 点**(`isPrimaryElt_iff_suppElt_singleton`)を使う ——
+台に別の素点 `P'` があれば `P'` だけを取り出す分解(`exists_split_suppElt`)が
+条件を破る(`eq_zero_of_mle_of_suppElt_disjoint`)。 -/
+theorem prop_4_1_ii_monoid {M : Type w'} [AddCommMonoid M] {ι : Prime M → Pf M → ℝ≥0}
+    (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) {p q : M} (hq : IsPrimaryElt q) :
+    IsPrimaryElt (p + q) ↔
+      ∀ a b : M, p + q = a + b → a ≠ 0 → b ≠ 0 →
+        ∃ d : M, d ≠ 0 ∧ MLe d q ∧ MLe d b := by
+  have hqle : MLe q (p + q) := ⟨p, add_comm q p⟩
+  constructor
+  · intro hpq a b hab ha0 hb0
+    obtain ⟨n, hn, c, hc⟩ :=
+      hpq.2 b hb0 ⟨1, one_pos, a, by rw [one_smul, add_comm]; exact hab.symm⟩
+    obtain ⟨d, hd⟩ := (hperf ⟨n, hn⟩).2 q
+    have hnd : n • d = q := hd
+    refine ⟨d, ?_, ?_, ?_⟩
+    · intro h0
+      exact hq.1 (by rw [← hnd, h0, smul_zero])
+    · exact ⟨(n - 1) • d, by
+        rw [← hnd, ← succ_nsmul']
+        congr 1
+        omega⟩
+    · obtain ⟨e, he⟩ : MLe q (n • b) := mle_trans hqle ⟨c, hc⟩
+      obtain ⟨e', he'⟩ := (hperf ⟨n, hn⟩).2 e
+      have hne' : n • e' = e := he'
+      refine ⟨e', nsmul_inj_of_divisorial hdiv hn ?_⟩
+      rw [smul_add, hnd, hne']
+      exact he
+  · intro hcond
+    obtain ⟨P, hP⟩ := suppElt_singleton_of_primary H hperf hdiv hq
+    have hqsub : SuppElt ι q ⊆ SuppElt ι (p + q) := suppElt_mono_of_mle H hqle
+    have hPmem : P ∈ SuppElt ι (p + q) := hqsub (by rw [hP]; rfl)
+    have hsingle : SuppElt ι (p + q) = {P} := by
+      refine Set.eq_singleton_iff_unique_mem.mpr ⟨hPmem, fun P' hP' => ?_⟩
+      by_contra hne
+      obtain ⟨y, z, hsum, hy, hz⟩ := exists_split_suppElt H hperf hdiv (p + q) {P'}ᶜ
+      have hzsub : SuppElt ι z ⊆ {P'} := by
+        rw [hz]
+        intro x hx
+        simpa using hx.1
+      have hzP' : P' ∈ SuppElt ι z := by
+        rw [hz]
+        exact ⟨by simp, hP'⟩
+      have hz0 : z ≠ 0 := by
+        intro h0
+        rw [h0, suppElt_zero H] at hzP'
+        exact hzP'
+      by_cases hy0 : y = 0
+      · rw [hy0, suppElt_zero H] at hy
+        have hmem : P ∈ ({P'}ᶜ : Set (Prime M)) ∩ SuppElt ι (p + q) := by
+          refine ⟨?_, hPmem⟩
+          simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+          exact fun h => hne h.symm
+        rw [← hy] at hmem
+        exact hmem
+      · obtain ⟨d, hd0, hdq, hdz⟩ := hcond y z hsum hy0 hz0
+        refine hd0 (eq_zero_of_mle_of_suppElt_disjoint H hdiv hdq hdz ?_)
+        refine Set.eq_empty_iff_forall_notMem.mpr (fun x hx => ?_)
+        have h1 : x = P := by rw [hP] at hx; exact hx.1
+        have h2 : x = P' := by simpa using hzsub hx.2
+        exact hne (h2.symm.trans h1)
+    refine isPrimaryElt_of_suppElt_singleton H hdiv ?_ hsingle
+    intro h0
+    rw [h0, suppElt_zero H] at hsingle
+    exact absurd hsingle.symm (by simp)
+
 /-! ## ★出典の紐付け(条つき) -/
+
+def prop_4_1_ii_monoid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 76, item := "Proposition 4.1, (ii) — モノイド層",
+    sectionId := "frdi-prop-4-1" }
 
 def prop_4_1_i.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1, (i)",
