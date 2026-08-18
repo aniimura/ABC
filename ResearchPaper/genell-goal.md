@@ -4149,3 +4149,50 @@ mathlib には無い。★★**我々が作る**。
 
 ★★★★★**山は既に越えている**——`δ` と Beck–Chevalley で作った器具が
 そのまま 3 度目・4 度目に効いている。
+
+---
+
+## §9-65 (2026-08-18) ★★★`Γ` の形を測った —— 比較射だけでよい
+
+### ★★★★測った結果(2026-08-18)
+
+    moduleSpecΓFunctor = modulesSpecToSheaf ⋙ Sheaf.forget ⋙ evaluation (op ⊤)
+
+★すなわち **`⊤` での評価**である(ただし `ΓSpecIso.inv` による係数制限つき)。
+
+### ★★★★★**完全な lax monoidal 性は要らない**
+
+比較射 `tilde (M ⊗ N) ⟶ tilde M ⊗ tilde N` は随伴で
+
+    M ⊗ N  ⟶  Γ(tilde M ⊗ tilde N)
+
+に対応する。★★右辺へは
+
+    M ⊗ N ≅ Γ(tilde M) ⊗ Γ(tilde N)  →  Γ(tilde M ⊗ tilde N)
+
+で行ける(前者は第 63 の `toTildeΓNatIso`)。
+
+★★★**要るのは `Γ(F) ⊗ Γ(G) → Γ(F ⊗ G)` という 1 本の射だけ**であり、
+5 条の coherence は**要らない**——同型性は生成元(第 65)+ 第 29 で出るからである。
+
+★★★★これは第 18 ブロック(7 フィールド手書き)より**ずっと軽い**。
+
+### ★★残り(B1)
+
+| # | 主張 | 重さ |
+|---|---|---|
+| 1 | `Γ(F) ⊗ Γ(G) → Γ(F ⊗ G)` の 1 本 | ★軽い(coherence 不要) |
+| 2 | `tilde` がテンソルを保つ | ★★第 64・65 + 第 29 |
+| 3 | 可逆層は `tilde` の本質像に入る | ★`isIso_fromTildeΓ_iff` |
+| 4 | `equivPicRing` / 5 `PicardData` の組み立て | ★★1–3 から |
+
+### ★★★★★★この session の到達(第 21–65、45 ブロック、すべて sorry 0)
+
+| mathlib に無く作ったもの |
+|---|
+| `(restrictScalars α).LaxMonoidal` |
+| 余極限で同型を持ち上げる器具(**3 度の出番**) |
+| ★★★**引き戻しが strong monoidal**(`δ` が同型) |
+| ★★★**Beck–Chevalley** |
+| 局所自明性が引き戻しで保たれること |
+| `PicSheaf` の引き戻しと 3 公理 |
