@@ -388,14 +388,34 @@
           "note": "★実測(2026-08-18): **`phibirat-funct` には依存しなかった**。`phiBiratAt` の定義(= `𝒪^×(A^birat)` の像)だけで核は言える。`otriDivGp_eq_zero_iff` ＋ `phiBiratAt_ker`。"
         },
         {
-          "id": "phibirat-dfunct",
-          "title": "Φ^birat が 𝒟 上の部分関手であること",
+          "id": "phibirat-iso-transport",
+          "title": "Φ^birat は 𝒞^birat の同型で輸送される",
           "size": "中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "phibirat-ker"
           ],
-          "note": "★★測定(2026-08-18): `phiBiratAt` は今 `𝒞^birat` の**対象**で添字付けされているが、原文の `Φ^birat` は **`𝒟` 上の部分関手**である。★要るのは (a) `Base A` にしか依らないこと、(b) `Φ^gp` の射で保たれること。★(a) は `Definition 1.3, (iii)(c)`(`otriBase`——`𝒪^▷` の全単射が `Base(φ)` にしか依らない)が使える見込み。"
+          "note": "★済(2026-08-18): `phiBiratAt_map_le`。`δ ∈ 𝒪^×(B)` を `e ≫ δ ≫ e⁻¹` へ共役し、`biratDivGp_comp'` を 2 回。★鍵は `Div^gp(𝟙)=0` から得る `Φ^gp(Base e)(Div^gp e⁻¹) + Div^gp e = 0`。"
+        },
+        {
+          "id": "phibirat-samebase",
+          "title": "同じ底の対象は 𝒞^birat で同型",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "phibirat-iso-transport"
+          ],
+          "note": "★★**これが `𝒟` 上の部分関手化の真の要**(2026-08-18 測定)。★`Definition 1.3, (i)(b)` の **`preStepSpan`** が、`Base A ≅ Base B` ならpre-step の span `φ : X → A`, `ψ : X → B` を与える。★★未解決の点: **この `φ`,`ψ` が co-angular か**。co-angular pre-step にならないと `𝒞^birat` で同型にならない。★`coAngularOfPreStep` は「1 本あれば全部」なので、**1 本見つける**か、`arbFactor` で分解して回避するかのどちらか。"
+        },
+        {
+          "id": "phibirat-dfunct",
+          "title": "Φ^birat を 𝒟 上の部分関手として組む",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "phibirat-samebase"
+          ],
+          "note": "★輸送(済)＋同じ底なら同型から、`Base A` にしか依らないことが出る。★そのあと `Φ^gp` の射で保たれることを確かめて部分関手にする。"
         },
         {
           "id": "phibirat-factor",
