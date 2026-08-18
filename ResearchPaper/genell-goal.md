@@ -5189,3 +5189,33 @@ mathlib の証明を写経できる。
 | 8 | `equivPicRing` | 残り |
 
 ★★**残り 5 ブロック**(§9-95 の 5–7 の範囲内)。
+
+## §9-98 —— 局所化の足場(第 95 ブロック、2026-08-18)
+
+    Algebra R_g R_{t·g}  +  IsScalarTower R R_g R_{t·g}
+
+★`IsScalarTower.of_algebraMap_eq` + `IsLocalization.lift_eq` で**一発**。
+★★`awayToAwayMul` は `Away.lift` なので、`algebraMap` との合成が元に戻ることは
+**普遍性の等式そのもの**である。
+
+### ★★★残り(局所自明性の 8 段のうち 4 段完了)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | `D(r)` で `M_r ≅ R_r` | ★第 76 |
+| 2 | 切断から `𝟙_ ⟶ P` | ★第 93 |
+| 3 | `R_g → R_{t·g}` | ★第 94 |
+| 4 | 足場 | ★第 95 |
+| 5 | `IsLocalization.Away (algebraMap R R_g t) R_{t·g}` | 残り |
+| 6 | `M_g` 自由 ⟹ `M_{t·g}` 自由 | 残り |
+| 7 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` | 残り |
+| 8 | `tilde M` が `InvSheaf` / `equivPicRing` | 残り |
+
+★★第 5 段が要点である——`IsLocalization.Away.mul` は**逆向き**
+(`Away x S` と `Away (algebraMap y) T` から `Away (y*x) T`)なので、
+我々が欲しい向きは `IsLocalization.mk` で手で建てる必要がある(実測)。
+
+### ★★★★下方修正した理由の記録
+
+★§9-95 で「残り 5–7」と見たが、局所化の推移だけで既に 3 ブロック(第 94・95 +第 5 段)
+を使っている。★★**残り 4 ブロック**と見る。
