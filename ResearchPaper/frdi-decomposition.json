@@ -956,15 +956,25 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isPrimeFrobComposite_map` と `isFrobeniusType_map_of_primeFrob`。\n★原文 (FrdI p.64): > tion 1.10, (v), the condition of the claim implies that Ψistr\n★prime-Frobenius の保存から `prop_1_10_v`(Frobenius 型 ⇔ prime-Frobenius の合成)を両側で使うだけ。"
         },
         {
+          "id": "iii-linear",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "iii-frobtype"
+          ],
+          "title": "(iii) linear と pre-step の保存(次数経由)",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isLinear_map_iff_of_degMap` と `isPreStep_map_iff_of_degMap`。\n★★次数の対応 `degFr (Ψ f) = Ψ_N (degFr f)` と `Ψ_N` が**単系同型**であることから直ちに出た。\n★`Ψ_N(1) = 1` と単射性だけで両向きになる。"
+        },
+        {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "iii-frobtype"
+            "iii-linear"
           ],
           "status": "todo",
           "size": "中",
           "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。",
-          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。"
+          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。\n\n★★linear と pre-step は `iii-linear` で取った(2026-08-18)。\n★残るのは底同型・pull-back・isometry・co-angular・LB-invertible。\n★在庫: `prop_1_7_iii_linear_factor`(linear ⇔ pre-step ≫ pull-back)、`prop_1_10_i_four_types` の 7 タイプ。"
         },
         {
           "id": "iii-psipf",

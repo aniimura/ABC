@@ -1169,4 +1169,42 @@ def isFrobeniusType_map_of_primeFrob.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Frobenius 型の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**Ψ は linear を(両向きに)保つ**。
+
+原文 (FrdI p.64):
+> follows formally from the portion of assertion (iv) concerning co-angular morphisms,
+
+★次数の対応 `degFr (Ψ f) = Ψ_N (degFr f)` と
+`Ψ_N` が**単系同型**であることから直ちに出る。 -/
+theorem isLinear_map_iff_of_degMap (Ψ : C₁ ⥤ C₂) (ΨN : ℕ+ ≃* ℕ+)
+    (hdeg : ∀ {X Y : C₁} (f : X ⟶ Y), P₂.degFr (Ψ.map f) = ΨN (P₁.degFr f))
+    {A B : C₁} (φ : A ⟶ B) : IsLinear P₁ φ ↔ IsLinear P₂ (Ψ.map φ) := by
+  constructor
+  · intro h
+    show P₂.degFr (Ψ.map φ) = 1
+    rw [hdeg, show P₁.degFr φ = 1 from h, map_one]
+  · intro h
+    show P₁.degFr φ = 1
+    have h1 : ΨN (P₁.degFr φ) = 1 := by rw [← hdeg]; exact h
+    have h2 : ΨN (P₁.degFr φ) = ΨN 1 := by rw [h1, map_one]
+    exact ΨN.injective h2
+
+def isLinear_map_iff_of_degMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — linear の保存",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★**Ψ は pre-step を保つ**(linear ＋ 底同型)。 -/
+theorem isPreStep_map_iff_of_degMap (Ψ : C₁ ⥤ C₂) (ΨN : ℕ+ ≃* ℕ+)
+    (hdeg : ∀ {X Y : C₁} (f : X ⟶ Y), P₂.degFr (Ψ.map f) = ΨN (P₁.degFr f))
+    (hbiso : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f ↔ IsBaseIsomorphism P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) : IsPreStep P₁ φ ↔ IsPreStep P₂ (Ψ.map φ) :=
+  and_congr (isLinear_map_iff_of_degMap Ψ ΨN hdeg φ) (hbiso φ)
+
+def isPreStep_map_iff_of_degMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — pre-step の保存(次数経由)",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
