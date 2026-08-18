@@ -114,4 +114,48 @@ def idxTransport_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Ψ は遷移写像と可換",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★段 2 —— 余錐と、射の写像 -/
+
+/-- ★★★★**余錐** —— 各添字で `Ψ` を当て、添字は `idxPfMap` で送る。
+
+★naturality はちょうど `idxTransport_map` ＋ `HomPf.mk_map` の 2 本。 -/
+noncomputable def homPfCocone (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    (A B : C₁) : Limits.Cocone (homFunctorPf P₁ F₁ A B) where
+  pt := HomPf P₂ F₂ (Ψ.obj A) (Ψ.obj B)
+  ι :=
+    { app := fun Z => TypeCat.ofHom fun φ =>
+        HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj Z) (Ψ.map φ.down)
+      naturality := by
+        intro Z W u
+        ext φ
+        show HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj W)
+            (Ψ.map (idxTransport P₁ F₁ u φ.down))
+          = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj Z) (Ψ.map φ.down)
+        rw [← idxTransport_map F₁ F₂ Ψ hFT hdegEq u φ.down]
+        exact HomPf.mk_map ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).map u) (Ψ.map φ.down) }
+
+/-- ★★★★★**射の写像** —— 余極限の普遍性で降ろす。 -/
+noncomputable def homPfMap (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    (A B : C₁) : HomPf P₁ F₁ A B → HomPf P₂ F₂ (Ψ.obj A) (Ψ.obj B) :=
+  (Limits.colimit.desc (homFunctorPf P₁ F₁ A B) (homPfCocone F₁ F₂ Ψ hFT hdegEq A B)).hom
+
+/-- ★**代表元での計算則** —— `mk` は `mk` に写る。 -/
+@[simp] theorem homPfMap_mk (Ψ : C₁ ⥤ C₂) (hFT) (hdegEq) {A B : C₁}
+    (Z : IdxPf P₁ F₁ A B) (φ : Z.right.obj.1 ⟶ Z.right.obj.2) :
+    homPfMap F₁ F₂ Ψ hFT hdegEq A B (HomPf.mk Z φ)
+      = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj Z) (Ψ.map φ) :=
+  congrFun (congrArg (fun t => t.hom)
+    (Limits.colimit.ι_desc (homPfCocone F₁ F₂ Ψ hFT hdegEq A B) Z)) (ULift.up φ)
+
+def homPfMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ^pf の射の写像",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
