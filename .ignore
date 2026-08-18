@@ -1,12 +1,12 @@
-# ripgrep 専用の無視設定(git は読まない)。
-# ★.gitignore より優先される。
+# ripgrep 専用の無視設定(git は読まない)。★.gitignore より優先される。
 #
-# 目的: external/ は「再配布しない」ため .gitignore で外しているが、
-#       **既存数学の検索対象からは外したくない**。
-#       ここで打ち消して、既定の grep に入るようにする。
+# 目的: external/ は「第三者の著作物を再配布しない」ため .gitignore で外しているが、
+#       **既存数学の検索対象からは外したくない**。ここで打ち消して既定の grep に入れる。
 #   (2026-08-19 実測: これが無いと rg も Grep ツールも external/ を見ない)
 !external/
 
-# ★mathlib はここでは打ち消さない —— 5000 ファイル超で既定検索が重くなるため。
-#   mathlib を見るときは明示的にパスを渡すこと:
-#     lean/.lake/packages/mathlib/Mathlib/...
+# ★mathlib / batteries / PrimeNumberTheoremAnd は external/_refs/ に
+#   **.lean だけを複製**してある(tools/sync-external-refs.sh)。
+#   lean/.lake/ は親ごと除外されているため、gitignore の意味論で
+#   中身を再包含できない —— ジャンクションも ripgrep は辿らない(どちらも実測済み)。
+#   複製が唯一の手段だった。ズレ検出は tools/check-external-refs.sh。

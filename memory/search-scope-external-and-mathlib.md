@@ -1,35 +1,52 @@
 ---
 name: search-scope-external-and-mathlib
-description: 既定の grep は external/ を .ignore で拾うが mathlib は拾わない。mathlib は必ず明示パスで検索する。
+description: 既定の grep で mathlib まで届く。external/_refs に .lean を複製し .ignore で打ち消してある。ズレ検出は check-external-refs.sh。
 metadata:
   type: feedback
 ---
 
-★2026-08-19 実測。`D:\Math_ABC3` の検索範囲は 3 層に分かれる。
+★2026-08-19 に整備。`D:\Math_ABC3` のルートから普通に grep すると、
+**自前コード・第三者 Lean プロジェクト・mathlib のすべてに届く**。
 
-| 対象 | 既定の `Grep` / `rg` | 理由 |
+| 対象 | 場所 | 既定の `Grep` / `rg` |
 |---|---|---|
-| `lean/ABC3/`(自前) | **入る** | 追跡されている |
-| `external/`(第三者 Lean) | **入る** | `.gitignore` で外し、`.ignore` の `!external/` で打ち消した |
-| `lean/.lake/packages/mathlib/` | **入らない** | `lean/.lake/` がディレクトリごと無視されている |
+| 自前 | `lean/ABC3/` | 入る |
+| 第三者プロジェクト | `external/{FLT,formal-conjectures,LeanBridge,iut-lean,lean-poly-abc}` | 入る |
+| mathlib / batteries / PrimeNumberTheoremAnd | `external/_refs/` | 入る(**複製**) |
+| ビルド成果物・原典 PDF | `lean/.lake/`, `ResearchPaper/0_Source/` | 入らない |
 
-★★**mathlib を再包含することはできない**。gitignore の意味論で
-「親ディレクトリが除外されていると中身は再包含できない」ため、
-`!lean/.lake/packages/*/Mathlib/` は効かない(実測済み)。
-`!lean/.lake/` まで戻すとビルド成果物が数 GB 入るので、やってはいけない。
+## ★仕組みと、そこに至るまでに潰した選択肢
+
+`.gitignore` で外したものは rg も見ない。そこで **ripgrep 専用の `.ignore`**
+(git は読まない)に `!external/` を書いて打ち消してある。
+
+★★mathlib は `lean/.lake/` が**親ごと**除外されているため、
+gitignore の意味論で「親が除外されていると中身は再包含できない」。以下は実測で全部駄目だった:
+
+- `.ignore` に `!lean/.lake/packages/*/Mathlib/` —— 効かない
+- ジャンクション `mklink /J` —— ripgrep は `--follow` なしで辿らない
+- `!lean/.lake/` まで戻す —— ビルド成果物が数 GB 入るので不可
+
+★残ったのは**複製**だけ。`tools/sync-external-refs.sh` が `.lean` だけを
+`external/_refs/` へ複製する(8173+175+210 ファイル、111MB)。
+`external/` は `.gitignore` のままなので、**git には入らず再配布もしない**。
+
+## ★★陳腐化への備え(ここが要点)
+
+複製は必ず古くなる。`sync-external-refs.sh` は `lake-manifest.json` の rev を
+`external/_refs/STAMP.json` に焼く。**`tools/check-external-refs.sh` が rev を比較**し、
+ズレていたら NG を返す(数秒)。
 
 **How to apply:**
 
-- mathlib を調べるときは**必ず明示パスを渡す**:
-  `Grep(pattern, path: "lean/.lake/packages/mathlib/Mathlib/…")`
-- `external/` は既定で入るので、「この定理は既に誰かが書いていないか」は
-  ルートから普通に grep すればよい。
-- 逆に**自前のコードだけを見たいとき**は `path: "lean/ABC3"` を渡す。
-  そうしないと `external/` の同名宣言が混ざる。
+1. `lake update` をした直後、あるいは mathlib の有無を根拠に判断する前に
+   `bash tools/check-external-refs.sh` を走らせる。ズレていたら sync を実行する。
+2. **自前のコードだけを見たいときは `path: "lean/ABC3"` を渡す**。
+   渡さないと mathlib や FLT の同名宣言が混ざる。
+3. 検索コストは気にしなくてよい —— 122MB / 10600 ファイルで **0.1〜0.2 秒**(実測)。
 
 **Why:** `external/` を落としても検索に入らなければ意味がない。
-`.gitignore` だけだと入らず、`.ignore`(ripgrep 専用、git は読まない)で
-打ち消して初めて既定検索に入る。★git 側は無視のままなので、
-ABC3b の `git add -A` にも巻き込まれない。
+そして「mathlib に無い」という判断こそ最も高くつく間違いなので、
+mathlib が既定で入ることの価値が複製のコストを上回る。
 
 関連: [[measure-mathlib-before-skeleton]] [[parallel-session-sweeps-my-files]]

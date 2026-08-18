@@ -34,4 +34,4 @@
 - [𝒞^birat の 3 つの構造的事実](frdi-birat-structural-facts.md) — 自己射は必ず co-angular。★𝒟 上の関手性は自分で作らず Prop 2.2 から取る。群化は行き先が群なら構成不要。
 - [mathlib 在庫を実測してからスケルトンを作る](measure-mathlib-before-skeleton.md) — 引用先があると仮定して見積もると膨らむ。B1 で 27 ブロック分の誤差が出た。
 - [型付き恒等関数を橋にする](typed-identity-bridge.md) — 綴り違いの型の間は instance を足すより恒等関数。instance は経路を増やして新しい問題を作る。
-- [検索範囲は 3 層](search-scope-external-and-mathlib.md) — external/ は入る、mathlib は明示パスが要る。
+- [既定の grep が mathlib まで届く](search-scope-external-and-mathlib.md) — external/_refs に複製＋.ignore。ズレ検出は check-external-refs.sh。
