@@ -280,6 +280,45 @@ const adj = new Map(), page = new Map();
     `(錨の無いもの ${unanchored} 件)`);
 }
 
+// ── ★★★Arakelov / Galois の義務の**木**を展開する ──────────────
+//   ★2026-08-24 追加。動機の実測: Arakelov と Galois は `foundations.json` では
+//   **1 行ずつ**しか無く、`義務 /` 節点も出辺を持たないので**孤立した葉**だった。
+//   ★★実際は **Arakelov 9 obligation・76 条件**、**Galois 8 obligation・39 条件**の
+//   **2 本の木**である(`ResearchPaper/obligation-tree.json`、2026-08-24 実測)。
+//   ★★★ここで (a) 義務どうしの依存辺 (b) 未実装の条件の節点 を足し、
+//   **本来の大きさ**で出す。
+//
+//   ★辺の向き: 「A が B を要する」= A → B(既存の合流と同じ向き)。
+//   ★限界: 条件の節点は**個数だけ**が実測で、中身は Interface の
+//   フィールド名に対応する(名前は出さない——長すぎるため)。
+{
+  const OJ = join(ROOT, 'ResearchPaper', 'obligation-tree.json');
+  if (existsSync(OJ)) {
+    const O = JSON.parse(readFileSync(OJ, 'utf8'));
+    const byName = new Map((O.obligations ?? []).map((o) => [o.name, o]));
+    const key = (o) => `義務 / ${o.name} [${o.fieldsDone >= o.fieldsTotal ? '埋まった' : '実装待ち'}]`;
+    let edged = 0, fadded = 0;
+    for (const o of O.obligations ?? []) {
+      const nk = key(o);
+      if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, 0); }
+      for (const dn of o.deps ?? []) {
+        const d = byName.get(dn); if (!d) continue;
+        const dk = key(d);
+        if (!adj.has(dk)) { adj.set(dk, []); page.set(dk, 0); }
+        if (!adj.get(nk).includes(dk)) { adj.get(nk).push(dk); edged++; }
+      }
+      const rem = Math.max(0, (o.fieldsTotal ?? 0) - (o.fieldsDone ?? 0));
+      for (let i = 0; i < rem; i++) {
+        const fk = `${o.track}:${o.code} ${o.ja} / 条件 ${(o.fieldsDone ?? 0) + i + 1} of ${o.fieldsTotal}`;
+        if (!adj.has(fk)) { adj.set(fk, []); page.set(fk, 0); fadded++; }
+        if (!adj.get(nk).includes(fk)) { adj.get(nk).push(fk); }
+      }
+    }
+    console.log(`  義務の木を展開: 義務→義務の辺 ${edged} / 未実装の条件の節点 ${fadded}`);
+  }
+}
+
+
 // ── Tarjan SCC(反復版) ────────────────────────────────────
 const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
 let idx = 0, nc = 0;

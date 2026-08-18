@@ -435,6 +435,205 @@
           "evidence": "★分類 (B) を index.html で開示すること。"
         }
       ]
+    },
+    {
+      "id": "thm34",
+      "title": "Theorem 3.4 を閉じる —— §3 の主定理(底と Frobenius 次数の圏論性)",
+      "serves": {
+        "paper": "FrdI",
+        "item": "Theorem 3.4",
+        "page": 62
+      },
+      "unblocks": [
+        "Theorem 4.2",
+        "Corollary 4.11"
+      ],
+      "★位置づけ": "★★グラフ上では 1 箱だが、**(i) だけで 1,100 行**ある。★分類 (B)(2026-08-18 の利用者の判断で (B) も数える)で進める——`Proposition 1.14, (iii)` の `⟸` が原典から出ないので`hFrobMono` / `hFrobFS` を明示の仮定に置く(`Gap_1_14_iii`)。",
+      "nodes": [
+        {
+          "id": "i",
+          "title": "(i) isotropic 対象・包・等長 pre-step の保存と Ψ^istr",
+          "deps": [],
+          "status": "done",
+          "size": "★大",
+          "evidence": "`Thm34.lean` ＋ `Thm34Rigid.lean`(1,100 行)。`thm_3_4_i.src` あり。"
+        },
+        {
+          "id": "ii-prestep",
+          "title": "(ii) pre-step の保存と反射",
+          "deps": [],
+          "status": "done",
+          "size": "★大",
+          "evidence": "`Thm34Pre.lean` の `isPreStep_map_iff`。★鍵は `irredNonPreStep = irredBounded`。"
+        },
+        {
+          "id": "ii-grouplike",
+          "title": "(ii) group-like 対象の保存",
+          "deps": [
+            "ii-prestep"
+          ],
+          "status": "done",
+          "size": "★中",
+          "evidence": "`isGroupLikeObj_map_iff`(`Proposition 1.8, (iii)` 経由)。"
+        },
+        {
+          "id": "ii-quasi",
+          "title": "(ii) を quasi-isotropic 型へ一般化する",
+          "deps": [
+            "ii-prestep",
+            "i"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "★現在は isotropic 型を直接仮定している。原文は `Proposition 1.7, (iv)` と (i) で帰着させる。"
+        },
+        {
+          "id": "iii-primefrob",
+          "title": "(iii) prime-Frobenius の圧論的条件の移送",
+          "deps": [
+            "ii-prestep"
+          ],
+          "status": "done",
+          "size": "★中",
+          "evidence": "`Thm34Pre.lean` の `PrimeFrobCond` / `primeFrobCond_map_iff`。"
+        },
+        {
+          "id": "iii-primefrob-full",
+          "title": "(iii) `IsPrimeFrobenius ∧ IsDivIdentity` の保存",
+          "deps": [
+            "iii-primefrob"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "`prop_1_14_v` と繋ぐだけ。仮定の受け渡しが主な作業。"
+        },
+        {
+          "id": "iii-psiN",
+          "title": "(iii) Ψ_{N≥1} の構成(素数の対応 → 単系自己同型)",
+          "deps": [
+            "iii-primefrob-full"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "原文 p.64。擬逆を見て自己同型だと言う。"
+        },
+        {
+          "id": "iii-morclasses",
+          "title": "(iii) 7 種の射クラスの保存",
+          "deps": [
+            "iii-psiN",
+            "ii-prestep"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。"
+        },
+        {
+          "id": "iii-psipf",
+          "title": "(iii) Ψ^pf の構成と 1-可換図式",
+          "deps": [
+            "iii-morclasses"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "`Proposition 3.2, (i)` の関手を使う。`Prop32Perfect.lean` に土台あり。"
+        },
+        {
+          "id": "iii-rigid",
+          "title": "(iii) rigidity(𝒟 が slim のとき)",
+          "deps": [
+            "iii-psipf"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "(i) の rigidity の手(`Thm34Rigid.lean`)が型として使える見込み。"
+        },
+        {
+          "id": "iii-src",
+          "title": "(iii) の条つき .src",
+          "deps": [
+            "iii-morclasses",
+            "iii-psipf",
+            "iii-rigid"
+          ],
+          "status": "todo",
+          "size": "★小"
+        },
+        {
+          "id": "iv-otimes",
+          "title": "(iv) 𝒪^▷ / 𝒪^× の保存と Ψ_{N≥1} が恒等であること",
+          "deps": [
+            "iii-morclasses"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "𝒟 が Frobenius-slim を仮定する条。"
+        },
+        {
+          "id": "iv-psiuntr",
+          "title": "(iv) Ψ^un-tr の構成と 1-可換図式・rigidity",
+          "deps": [
+            "iv-otimes"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "`Proposition 3.3, (iii)` の関手を使う。`UnTr.lean` に土台あり。"
+        },
+        {
+          "id": "iv-src",
+          "title": "(iv) の条つき .src",
+          "deps": [
+            "iv-otimes",
+            "iv-psiuntr"
+          ],
+          "status": "todo",
+          "size": "★小"
+        },
+        {
+          "id": "v-baseid",
+          "title": "(v) base-identity 自己射と base-equivalent 対の保存",
+          "deps": [
+            "iii-morclasses"
+          ],
+          "status": "todo",
+          "size": "★中"
+        },
+        {
+          "id": "v-psibase",
+          "title": "(v) Ψ_Base : 𝒟₁ → 𝒟₂ の構成と 1-可換図式・rigidity",
+          "deps": [
+            "v-baseid"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "★これが `Theorem 4.2` が直接引く条。"
+        },
+        {
+          "id": "v-src",
+          "title": "(v) の条つき .src",
+          "deps": [
+            "v-baseid",
+            "v-psibase"
+          ],
+          "status": "todo",
+          "size": "★小"
+        },
+        {
+          "id": "thm34-src",
+          "title": "★Theorem 3.4 の**条なし** .src(計数が動き §3 が 9/9 になる)",
+          "deps": [
+            "i",
+            "ii-quasi",
+            "ii-grouplike",
+            "iii-src",
+            "iv-src",
+            "v-src"
+          ],
+          "status": "todo",
+          "size": "★小",
+          "evidence": "★分類 (B) を index.html で開示すること。"
+        }
+      ]
     }
   ]
 }
