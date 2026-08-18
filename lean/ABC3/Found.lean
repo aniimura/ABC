@@ -218,6 +218,7 @@ import ABC3.Found.Arakelov.PicLTPull
 import ABC3.Found.Arakelov.PicPullTensorFinal
 import ABC3.Found.Arakelov.PicInvPull
 import ABC3.Found.Arakelov.PicPullGroup
+import ABC3.Found.Arakelov.PicTildeStock
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
