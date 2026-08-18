@@ -7192,3 +7192,20 @@ B2 の在庫を実測した結果:
 ★★`localized'_eq_span` と `Ideal.map = span (f '' I)` が同じものなので `rfl` で閉じた。
 
 ★★★これで「`D.ideal A` が可逆 ⟹ 局所自由」を**第 92・130 の再利用**で書ける。
+
+## §9-169 —— 第 154・155 ブロック(2026-08-18)
+
+| # | 内容 |
+|---|---|
+| 154 | `mem_basicOpen_iff_primeIdealOf` / `exists_basicOpen_free` |
+| 155 | `affineBasicOpenSieve_mem` / `overAffineBasicPresieve_mem` |
+
+★第 154 は第 92(`exists_away_linearEquiv`、`PrimeSpectrum R` の話)を
+一般のスキームのアフィン開で使うための翻訳:
+
+    x ∈ X.basicOpen g  ↔  A.2.primeIdealOf x ∈ PrimeSpectrum.basicOpen g
+
+★★第 155 は第 117・122(`Spec R` 専用)の一般化。
+第 116(`symm_mem_over`)は**もともと一般**だったのでそのまま使えた。
+
+★★★残るのは「`c ↦ c • s` が基本開集合上で全単射」——第 130 の再利用である。
