@@ -1107,16 +1107,29 @@
           "deps": [
             "iv-otimes-cond"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
           "evidence": "𝒟 が Frobenius-slim を仮定する条。",
-          "note": "\n\n★★四角形の部分は `iv-otimes-cond` で取った(2026-08-18)。\n★残るのは条件の最後の節(α が `F → End((P_i)_A → C_i)^bs-iso` の像から来ること)と、それが `𝒪^▷` と同値であること(`Proposition 3.3, (i)`＋`Definition 1.3, (i)(a)(b)`＋`(iii)(c)`)。"
+          "note": "\n\n★★四角形の部分は `iv-otimes-cond` で取った(2026-08-18)。\n★残るのは条件の最後の節(α が `F → End((P_i)_A → C_i)^bs-iso` の像から来ること)と、それが `𝒪^▷` と同値であること(`Proposition 3.3, (i)`＋`Definition 1.3, (i)(a)(b)`＋`(iii)(c)`)。\n\n## ★★閉じた(2026-08-19)\n残っていた「条件の最後の節」は `OTriGenCond` —— `α` が\n`𝔽 → End(C^pl-bk_A → C)^bs-iso` の `1` の像であること。\n★★それと `O^▷` の同値は**両向きとも在庫**だった ——\n`prop_3_3_i_mem_oTri`(主張 1)と `prop_3_3_i_converse`(主張 2)。\n★測ってみると条件から `O^▷` を出すのに `φ` と `β` は**使わない**\n—— `ψ` の四角形だけで足りる(底は `Base ψ` の同型性で消去、次数は乗法性)。\n★移送のうち `OTriGenCond` の分だけを新しい葉 `iv-endbsiso` として切り出した。",
+          "lean": "ABC3/Found/FrdI/Thm34Quasi.lean",
+          "decl": "OTriGenCond / OTriEndCond / oTri_of_otriEndCond / otriEndCond_of_oTri / thm_3_4_iv_otri_map"
+        },
+        {
+          "id": "iv-endbsiso",
+          "title": "(iv) End(C^pl-bk_A → C)^bs-iso の Ψ に沿った移送",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "iii-morclasses"
+          ],
+          "note": "★★**切り出した理由**(2026-08-19)\n`otriEndCond_map` は `OTriGenCond` の移送を**仮定として受ける**形で実装した。\n残るのはその仮定 1 本 ——\n`A ↦ End(C^pl-bk_A → C)^bs-iso` が `Ψ` に沿って関手的であること。\n\n## ★材料はすべて在庫\n- `isPullBack_map_of_equiv` —— `Ψ` は pull-back 射を両向きに保つ\n- `isBaseIsomorphism_map_of_classes` —— `Ψ` は base-isomorphism を保つ\n- `plBkOverToC` / `endBsIso` / `plBkIdObj`(`Prop33i.lean`)\n\n## ★★残る作業\n1. `PlBk P₁ ≌ PlBk P₂`(広い部分圏の同値)を組む\n2. `Over ⟨A⟩ ≌ Over ⟨ΨA⟩` へ落とす\n3. `plBkOverToC P₁ A ⋙ Ψ ≅ (その同値) ⋙ plBkOverToC P₂ (ΨA)` を見る\n4. `End` の共役でモノイド同型を得、`endBsIso` を対応させる\n★四角形の側は `otriSquareCond_map` / `otriEndCond_map` で既に取ってある。"
         },
         {
           "id": "iv-psiuntr",
           "title": "(iv) Ψ^un-tr の構成と 1-可換図式・rigidity",
           "deps": [
-            "iv-otimes"
+            "iv-otimes",
+            "iv-endbsiso"
           ],
           "status": "todo",
           "size": "★大",
@@ -1127,7 +1140,8 @@
           "title": "(iv) の条つき .src",
           "deps": [
             "iv-otimes",
-            "iv-psiuntr"
+            "iv-psiuntr",
+            "iv-endbsiso"
           ],
           "status": "todo",
           "size": "★小"

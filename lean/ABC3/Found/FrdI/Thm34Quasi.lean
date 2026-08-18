@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm34Pre
 import ABC3.Found.FrdI.Prop33UnTr
+import ABC3.Found.FrdI.Prop33i
 import Mathlib.Data.PNat.Factors
 
 /-!
@@ -1621,6 +1622,152 @@ theorem thm_3_4_iii_rigid (F₂ : FrobenioidCore P₂) (hslim : IsSlimCat D₂) 
 def thm_3_4_iii_rigid.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 66,
     item := "Theorem 3.4, (iii) — 図式の合成関手はすべて rigid",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★`Theorem 3.4, (iv)` —— `𝒪^▷(−)` の圏論的特徴づけ
+
+原文 (FrdI p.66) は `𝒪^▷(C)` の元を次の条件で特徴づける:
+
+> There exist pre-steps φ : A → B, ψ : A → C and endomorphisms α ∈ EndCi (A), β ∈
+
+★★条件は 3 つの部分からなる:
+
+| 部分 | 中身 | 状態 |
+|---|---|---|
+| 1 | pre-step の span と 2 つの四角形 | `OTriSquareCond`(実装済) |
+| 2 | `α` が `𝔽 → End(𝒞^pl-bk_A → 𝒞)^bs-iso` の `1` の像から来る | 下の `OTriGenCond` |
+| 3 | 全体が `𝒪^▷` と同値 | 下の 2 定理 |
+
+★★★3 の両向きは、どちらも**在庫の `Proposition 3.3, (i)`** がそのまま供給する ——
+`prop_3_3_i_mem_oTri`(主張 1)と `prop_3_3_i_converse`(主張 2)。
+★測ってみると、`iv-otimes` の数学的な中身は**すでに全部在庫にあった**。 -/
+
+/-- ★★★**原文の条件の最後の節** ——
+`α` が `𝔽 → End(𝒞^pl-bk_A → 𝒞)^bs-iso` による `1 ∈ ℤ≥0` の像として現れること。
+
+原文 (FrdI p.66):
+> homomorphism of monoids F → End((Pi)A → Ci)bs-iso. -/
+def OTriGenCond {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) (A : Cc) (α : End A) : Prop :=
+  ∃ f : ElemFrob.Standard →* endBsIso P A,
+    NatTrans.app ((f ⟨1, 1⟩ : endBsIso P A) : End (plBkOverToC P A)) (plBkIdObj P A) = α
+
+/-- ★★★★**`𝒪^▷` へ(→)** —— `Proposition 3.3, (i)` の主張 1 をそのまま当てる。 -/
+theorem oTri_of_otriGenCond {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) (Fc : FrobenioidCore P)
+    (hslim : IsFrobeniusSlim Dd) (A : Cc) {α : End A} (h : OTriGenCond P A α) :
+    α ∈ OTri P A := by
+  obtain ⟨f, hf⟩ := h
+  have hmem := prop_3_3_i_mem_oTri P Fc hslim A f (plBkIdObj P A)
+  rwa [hf] at hmem
+
+/-- ★★★★**`𝒪^▷` から(←)** —— `Proposition 3.3, (i)` の主張 2 をそのまま当てる。 -/
+theorem otriGenCond_of_oTri {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) {A : Cc}
+    (hft : IsFrobeniusTrivial P A) (hfn : IsFrobeniusNormalized P A)
+    {α : End A} (h : α ∈ OTri P A) : OTriGenCond P A α :=
+  prop_3_3_i_converse P hft hfn ⟨α, h⟩
+
+/-- ★★★★**原文の条件の全体** —— `OTriSquareCond` に最後の節を足したもの。 -/
+def OTriEndCond {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {C₀ : Cc} (γ : End C₀) : Prop :=
+  ∃ (A B : Cc) (φ : A ⟶ B) (ψ : A ⟶ C₀) (α : End A) (β : End B),
+    IsPreStep P φ ∧ IsPreStep P ψ ∧ φ ≫ (β : B ⟶ B) = (α : A ⟶ A) ≫ φ ∧
+      ψ ≫ (γ : C₀ ⟶ C₀) = (α : A ⟶ A) ≫ ψ ∧ OTriGenCond P A α
+
+/-- ★★★★★**条件を満たす自己射は `𝒪^▷` に入る**。
+
+★★測ってみると `φ` と `β` は**使わない** —— `ψ` の四角形だけで足りる:
+底は「`Base ψ` が同型」から消去でき、次数は `degFr` の乗法性から出る。 -/
+theorem oTri_of_otriEndCond {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) (Fc : FrobenioidCore P)
+    (hslim : IsFrobeniusSlim Dd) {C₀ : Cc} {γ : End C₀} (h : OTriEndCond P γ) :
+    γ ∈ OTri P C₀ := by
+  obtain ⟨A, B, φ, ψ, α, β, hφ, hψ, _hsq₁, hsq₂, hgen⟩ := h
+  have hα : α ∈ OTri P A := oTri_of_otriGenCond P Fc hslim A hgen
+  have hd := congrArg P.degFr hsq₂
+  rw [P.degFr_comp, P.degFr_comp] at hd
+  refine ⟨?_, ?_⟩
+  · have hb : P.Base ψ ≫ P.Base (γ : C₀ ⟶ C₀) = P.Base ψ := by
+      have hbb := congrArg P.Base hsq₂
+      rw [P.Base_comp, P.Base_comp] at hbb
+      rw [hbb, show P.Base (α : A ⟶ A) = P.Base (𝟙 A) from hα.1, P.Base_id, Category.id_comp]
+    haveI : IsIso (P.Base ψ) := hψ.2
+    show P.Base (γ : C₀ ⟶ C₀) = P.Base (𝟙 C₀)
+    rw [P.Base_id]
+    exact (cancel_epi (P.Base ψ)).mp (by rw [Category.comp_id]; exact hb)
+  · show P.degFr (γ : C₀ ⟶ C₀) = 1
+    rw [show P.degFr ψ = 1 from hψ.1, show P.degFr (α : A ⟶ A) = 1 from hα.2,
+      mul_one, one_mul] at hd
+    exact hd
+
+/-- ★★★★★**`𝒪^▷` の元は条件を満たす** —— `A = B = C`、`φ = ψ = 𝟙` で取れる。 -/
+theorem otriEndCond_of_oTri {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) {C₀ : Cc}
+    (hft : IsFrobeniusTrivial P C₀) (hfn : IsFrobeniusNormalized P C₀)
+    {γ : End C₀} (h : γ ∈ OTri P C₀) : OTriEndCond P γ := by
+  have hps : IsPreStep P (𝟙 C₀) := by
+    refine ⟨?_, ?_⟩
+    · show P.degFr (𝟙 C₀) = 1
+      exact degFr_of_isIso P (𝟙 C₀)
+    · show IsIso (P.Base (𝟙 C₀))
+      rw [P.Base_id]
+      infer_instance
+  exact ⟨C₀, C₀, 𝟙 C₀, 𝟙 C₀, γ, γ, hps, hps, by simp, by simp,
+    otriGenCond_of_oTri P hft hfn h⟩
+
+def OTriEndCond.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — 𝒪^▷ の圏論的特徴づけ",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ### ★★条件の移送 —— 残るのは `End(𝒞^pl-bk_A → 𝒞)^bs-iso` の移送 1 本
+
+原文 (FrdI p.66):
+> By assertions (ii), (iii), it follows that Ψ preserves pre-steps, base-isomorphisms,
+
+★四角形の部分は `otriSquareCond_map` で取った。
+★★残るのは `OTriGenCond` の移送、すなわち
+**`A ↦ End(𝒞^pl-bk_A → 𝒞)^bs-iso` が `Ψ` に沿って関手的**であること。
+★これは `Ψ` が pull-back 射(`isPullBack_map_of_equiv`)と
+base-isomorphism(`isBaseIsomorphism_map_of_classes`)を保つことから出るが、
+**スライス圏の同値を組む作業**が要る。★葉として切り出した(`iv-endbsiso`)。 -/
+
+/-- ★★★★★**条件は `Ψ` で移る** —— `OTriGenCond` の移送を仮定として受ける形。
+
+★★これに `iv-endbsiso` を入れれば、原文の
+「Ψ preserves the submonoids `𝒪^▷(−)`, `𝒪^×(−)`」がそのまま出る。 -/
+theorem otriEndCond_map (Ψ : C₁ ⥤ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hGen : ∀ (A : C₁) (α : End A), OTriGenCond P₁ A α →
+      OTriGenCond P₂ (Ψ.obj A) (Ψ.map (α : A ⟶ A)))
+    {C₀ : C₁} (γ : End C₀) (h : OTriEndCond P₁ γ) :
+    OTriEndCond P₂ (Ψ.map (γ : C₀ ⟶ C₀)) := by
+  obtain ⟨A, B, φ, ψ, α, β, hφ, hψ, hsq₁, hsq₂, hgen⟩ := h
+  refine ⟨Ψ.obj A, Ψ.obj B, Ψ.map φ, Ψ.map ψ, Ψ.map (α : A ⟶ A), Ψ.map (β : B ⟶ B),
+    hPS φ hφ, hPS ψ hψ, ?_, ?_, hGen A α hgen⟩
+  · rw [← Ψ.map_comp, ← Ψ.map_comp, hsq₁]
+  · rw [← Ψ.map_comp, ← Ψ.map_comp, hsq₂]
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iv)** の `𝒪^▷` 保存。
+
+原文 (FrdI p.66):
+> Thus, we conclude that Ψ preserves the submonoids -/
+theorem thm_3_4_iv_otri_map (Fc₂ : FrobenioidCore P₂) (hslim₂ : IsFrobeniusSlim D₂)
+    (Ψ : C₁ ⥤ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hGen : ∀ (A : C₁) (α : End A), OTriGenCond P₁ A α →
+      OTriGenCond P₂ (Ψ.obj A) (Ψ.map (α : A ⟶ A)))
+    {C₀ : C₁} (hft : IsFrobeniusTrivial P₁ C₀) (hfn : IsFrobeniusNormalized P₁ C₀)
+    (γ : End C₀) (h : γ ∈ OTri P₁ C₀) :
+    Ψ.map (γ : C₀ ⟶ C₀) ∈ OTri P₂ (Ψ.obj C₀) :=
+  oTri_of_otriEndCond P₂ Fc₂ hslim₂
+    (otriEndCond_map Ψ hPS hGen γ (otriEndCond_of_oTri P₁ hft hfn h))
+
+def thm_3_4_iv_otri_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Ψ は 𝒪^▷ / 𝒪^× を保つ",
     sectionId := "frdi-thm-3-4" }
 
 end ABC3.Found.FrdI
