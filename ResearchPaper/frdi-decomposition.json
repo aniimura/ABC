@@ -398,9 +398,9 @@
           "id": "dict-baseid",
           "title": "辞書: base-identity 自己射の特徴づけ",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
-          "evidence": "★★数学は済んでいる: `biratBase (mk Z φ) = inv (Base α) ≫ Base φ` なので、これが `1` になることと base-equivalent は同じこと。★★★2026-08-18 に実装を試みて**実例の照合で止まった** —— 目標式の `inv` は `sliceBaseOf` が抱える `IsIso` の実例を使うので、`haveI` で同じ命題を入れても `rw` / `IsIso.inv_comp_eq` が当たらない。★次の一手: `sliceBaseOf` を `asIso` で包んだ補題を立てて `Iso` の API に乗せ換える(実例引数が消える)。"
+          "evidence": "★2026-08-18 に `Prop44Gl.lean` へ `birat_isBaseIdentity_mk` / `birat_isBaseIdentity_iff` を実装した。★★罠の記録: 目標式の `inv` は `sliceBaseOf` が抱える `IsIso` の実例を使うので、`rw` / `IsIso.inv_comp_eq` / `asIso` 経由はいずれも照合しなかった。★★★**抽象補題 `inv_comp_eq_id_iff` を切り出し、`@` で実例を渡して `exact` すると defeq で通った**。"
         },
         {
           "id": "iv-src",
@@ -409,9 +409,9 @@
             "dict-pullback",
             "dict-baseid"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★小",
-          "evidence": "他の 8 項(co-angular・同型・Frobenius 型・次数・isometry・pre-step・base-iso・isotropic)は実装済。"
+          "evidence": "★2026-08-18 に `Prop44Gl.lean` へ `prop_4_4_iv.src` を追加した。★辞書の 10 項がすべて揃った。"
         },
         {
           "id": "i-src",

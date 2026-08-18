@@ -97,16 +97,25 @@ def birat_isPullBack_iff.src : ABC3.Meta.Source :=
 `rw` / `IsIso.inv_comp_eq` が照合しない。
 ★**`asIso` で包んで `Iso` の API に乗せ換える**と実例引数が消えて通る。 -/
 
-variable {P G} in
-/-- ★`sliceBaseOf` を `Iso` の形で書き直す(実例引数を消す)。 -/
-theorem sliceBaseOf_asIso {A B A' : C} (a : A' ⟶ A) (ha : IsIso (P.Base a)) (φ : A' ⟶ B) :
-    sliceBaseOf (P := P) a ha φ = (@asIso _ _ _ _ (P.Base a) ha).inv ≫ P.Base φ := rfl
+/-- ★★**抽象化した補題** —— `inv f ≫ g = 𝟙 ⇔ f = g`。
+
+★★★実例を**引数で固定**するために切り出している。
+目標式の `inv` は `sliceBaseOf` が抱える実例を使うので、
+`rw` や `IsIso.inv_comp_eq` は照合しないが、
+**`@` で実例を渡して `exact` すれば defeq で通る**。 -/
+theorem inv_comp_eq_id_iff {K : Type u} [Category.{v} K] {X Y : K}
+    (f : X ⟶ Y) [IsIso f] (g : X ⟶ Y) : inv f ≫ g = 𝟙 Y ↔ f = g := by
+  constructor
+  · intro h
+    calc f = f ≫ 𝟙 Y := (Category.comp_id f).symm
+      _ = f ≫ (inv f ≫ g) := by rw [h]
+      _ = (f ≫ inv f) ≫ g := (Category.assoc _ _ _).symm
+      _ = g := by rw [IsIso.hom_inv_id, Category.id_comp]
+  · rintro rfl
+    exact IsIso.inv_hom_id f
 
 variable {P G} in
-/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(代表元の形)。
-
-★★目標式ではなく**仮定の側で書き換える** ——
-`𝟙` の型に `show BiratCat P G from A` の痕が残るのを避けるため。 -/
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(代表元の形)。 -/
 theorem birat_isBaseIdentity_mk {A : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ A) :
     IsBaseIdentity (biratPre P G) (HomBirat.mk Z φ)
       ↔ BaseEquivalent P Z.unop.hom.hom φ := by
@@ -120,16 +129,14 @@ theorem birat_isBaseIdentity_mk {A : C} (Z : IdxBirat P G A) (φ : Z.unop.left.o
         = 𝟙 (P.toElem.obj A).base := by
       rw [← biratBase_mk]
       exact h.trans hid
-    rw [sliceBaseOf_asIso] at h1
-    show P.Base Z.unop.hom.hom = P.Base φ
-    have h2 := (Iso.inv_comp_eq _).mp h1
-    simpa using h2.symm
+    exact (@inv_comp_eq_id_iff _ _ _ _ (P.Base Z.unop.hom.hom)
+      Z.unop.hom.property.2.2 (P.Base φ)).mp h1
   · intro h
     show biratBase (HomBirat.mk Z φ) = biratBase (𝟙 (show BiratCat P G from A))
     refine Eq.trans ?_ hid.symm
-    rw [biratBase_mk, sliceBaseOf_asIso,
-      show P.Base φ = (asIso (P.Base Z.unop.hom.hom)).hom from h.symm]
-    exact Iso.inv_hom_id _
+    rw [biratBase_mk]
+    exact (@inv_comp_eq_id_iff _ _ _ _ (P.Base Z.unop.hom.hom)
+      Z.unop.hom.property.2.2 (P.Base φ)).mpr h
 
 variable {P G} in
 /-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(存在の形)。
@@ -151,6 +158,26 @@ theorem birat_isBaseIdentity_iff {A : C}
 def birat_isBaseIdentity_iff.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 83,
     item := "Proposition 4.4, (iv) — base-identity 自己射の条",
+    sectionId := "frdi-prop-4-4" }
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iv)** の locator。
+
+★辞書の 10 項がすべて揃った:
+
+| 項 | 宣言 |
+|---|---|
+| co-angular | `birat_isCoAngular_iff` |
+| 同型 ⇔ co-angular pre-step | `birat_isIso_iff` |
+| Frobenius 型 ⇔ co-angular 底同型 | `birat_isFrobeniusType_iff` |
+| pull-back ⇔ co-angular linear | `birat_isPullBack_iff` |
+| 与えられた Frobenius 次数 | `birat_degFr_iff` |
+| isometry ⇔ 任意の射 | `birat_isIsometric` |
+| pre-step | `birat_isPreStep_iff` |
+| 底同型 | `birat_isBaseIsomorphism_iff` |
+| base-identity 自己射 | `birat_isBaseIdentity_iff` |
+| isotropic 対象 | `birat_isIsotropic_iff` | -/
+def prop_4_4_iv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83, item := "Proposition 4.4, (iv)",
     sectionId := "frdi-prop-4-4" }
 
 end ABC3.Found.FrdI
