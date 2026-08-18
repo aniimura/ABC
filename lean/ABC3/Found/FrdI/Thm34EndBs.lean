@@ -851,4 +851,26 @@ def thm_3_4_iv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 62, item := "Theorem 3.4, (iv)",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★`v-loc` の第 1 条件 —— `P.proj` は base-isomorphism を反転させる
+
+原文 (FrdI p.68):
+> φD = Base(ψ) ◦ Base(γ) ◦ Base(α)−1
+
+★★mathlib の `Functor.IsLocalization` は 2 条件からなる:
+1. `inverts : W.IsInvertedBy L` —— **下でそのまま出る**(定義そのもの)
+2. `isEquivalence : IsEquivalence (Localization.Construction.lift L inverts)`
+   —— これが原典の `R_i ≌ 𝒟_i` で、`v-loc` の本体。 -/
+
+/-- ★★**`P.proj` は base-isomorphism を反転させる** —— 定義そのもの。
+
+★`IsBaseIsomorphism P f := IsIso (P.Base f)` で `P.proj.map f = P.Base f` だから。 -/
+theorem proj_inverts_baseIso {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) :
+    (baseIsoProp P).IsInvertedBy P.proj := fun _ _ _ hf => hf
+
+def proj_inverts_baseIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — P.proj は base-isomorphism を反転させる",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
