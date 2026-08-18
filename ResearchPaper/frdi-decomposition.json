@@ -1118,11 +1118,13 @@
           "id": "iv-endbsiso",
           "title": "(iv) End(C^pl-bk_A → C)^bs-iso の Ψ に沿った移送",
           "size": "★中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "iii-morclasses"
           ],
-          "note": "★★**切り出した理由**(2026-08-19)\n`otriEndCond_map` は `OTriGenCond` の移送を**仮定として受ける**形で実装した。\n残るのはその仮定 1 本 ——\n`A ↦ End(C^pl-bk_A → C)^bs-iso` が `Ψ` に沿って関手的であること。\n\n## ★材料はすべて在庫\n- `isPullBack_map_of_equiv` —— `Ψ` は pull-back 射を両向きに保つ\n- `isBaseIsomorphism_map_of_classes` —— `Ψ` は base-isomorphism を保つ\n- `plBkOverToC` / `endBsIso` / `plBkIdObj`(`Prop33i.lean`)\n\n## ★★残る作業\n1. `PlBk P₁ ≌ PlBk P₂`(広い部分圏の同値)を組む\n2. `Over ⟨A⟩ ≌ Over ⟨ΨA⟩` へ落とす\n3. `plBkOverToC P₁ A ⋙ Ψ ≅ (その同値) ⋙ plBkOverToC P₂ (ΨA)` を見る\n4. `End` の共役でモノイド同型を得、`endBsIso` を対応させる\n★四角形の側は `otriSquareCond_map` / `otriEndCond_map` で既に取ってある。"
+          "note": "★★**切り出した理由**(2026-08-19)\n`otriEndCond_map` は `OTriGenCond` の移送を**仮定として受ける**形で実装した。\n残るのはその仮定 1 本 ——\n`A ↦ End(C^pl-bk_A → C)^bs-iso` が `Ψ` に沿って関手的であること。\n\n## ★材料はすべて在庫\n- `isPullBack_map_of_equiv` —— `Ψ` は pull-back 射を両向きに保つ\n- `isBaseIsomorphism_map_of_classes` —— `Ψ` は base-isomorphism を保つ\n- `plBkOverToC` / `endBsIso` / `plBkIdObj`(`Prop33i.lean`)\n\n## ★★残る作業\n1. `PlBk P₁ ≌ PlBk P₂`(広い部分圏の同値)を組む\n2. `Over ⟨A⟩ ≌ Over ⟨ΨA⟩` へ落とす\n3. `plBkOverToC P₁ A ⋙ Ψ ≅ (その同値) ⋙ plBkOverToC P₂ (ΨA)` を見る\n4. `End` の共役でモノイド同型を得、`endBsIso` を対応させる\n★四角形の側は `otriSquareCond_map` / `otriEndCond_map` で既に取ってある。\n\n## ★★閉じた(2026-08-19)\n`Thm34EndBs.lean` に 4 段で実装した。\n\n| 段 | 宣言 |\n|---|---|\n| 1 | `plBkMap` —— pull-back を保つ関手 → `C^pl-bk` の間の関手 |\n| 2 | `plBkIsoOfIso` / `plBkEquiv` —— 圏同値の誘導 |\n| 3 | `endDescend` / `endDescend_app_post` —— `End` の降下と成分 |\n| 4 | `endDescend_mem_endBsIso` / `endDescend_app_id` / `otriGenCond_map` |\n\n★★★最大の発見: `plBkOverToC P₁ A ⋙ Ψ` と\n`Over.post (plBkMap Ψ hPB) ⋙ plBkOverToC P₂ (Ψ A)` は **`rfl` で等しい**。\n広い部分圏もスライスも射を包んでいるだけなので、合成すると包みが打ち消し合う。\n★これで段 3 は mathlib の `Functor.mapEnd` ＋ `FullyFaithful.mulEquivEnd` で済んだ。\n\n★`thm_3_4_iv_otri_map'` で `Thm34Quasi.lean` の `hGen` 仮定を解消した。",
+          "lean": "ABC3/Found/FrdI/Thm34EndBs.lean",
+          "decl": "plBkMap / plBkEquiv / plBkOverToC_comp_plBkMap / endDescend / endDescend_app_post / endDescend_mem_endBsIso / endDescend_app_id / otriGenCond_map / thm_3_4_iv_otri_map'"
         },
         {
           "id": "iv-psiuntr",

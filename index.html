@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1114 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1117 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5500</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1500</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5506</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1502</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 991 節点を、強連結成分で潰して 295 個の箱・61 層に並べたもの。
+<span>原文の参照から機械抽出した 980 節点を、強連結成分で潰して 295 個の箱・61 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 64 件・Interface の義務 5/30 件。</b>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>3c45658</code></td><td>2026-08-19</td><td>★★★★comap の核心が出た(第 194-195)——押し出しの核はイデアルの拡大</td></tr>
+<tr><td><code>fa6724a</code></td><td>2026-08-19</td><td>★LANA の中間報告が争点の場所で一致した——3 本目、しかも形式化側から</td></tr>
+<tr><td><code>273452f</code></td><td>2026-08-19</td><td>★エコシステムを 5 件 clone して測った——ABC 目標命題の照合先が見つかった</td></tr>
 <tr><td><code>e1bb2f5</code></td><td>2026-08-19</td><td>★★★★★Galois G1-G8 の在庫を初めて測った(§9-212)</td></tr>
 <tr><td><code>b352ae0</code></td><td>2026-08-19</td><td>external/ を gitignore に追加——第三者 Lean プロジェクトを調査用に clone するため</td></tr>
 <tr><td><code>40ab3da</code></td><td>2026-08-19</td><td>B2 残り 2 欄の道を測った(§9-211)——部品は全て mathlib に在り、要るのは配線</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>cf47ffb</code></td><td>2026-08-19</td><td>★★★★★★ofDivisor は準同型である(第 188-190)——CartierPicData 9/14</td></tr>
 <tr><td><code>fa0edb0</code></td><td>2026-08-19</td><td>★`iii-rigid` を閉じた——欠けていた環は「同値との合成で rigid」1 本だった</td></tr>
 <tr><td><code>6836f20</code></td><td>2026-08-19</td><td>`iii-rigid` の形を測った——「圧倒的同値との合成で rigid が保たれる」1 本</td></tr>
-<tr><td><code>353c0a5</code></td><td>2026-08-19</td><td>★★★★★★ofDivisor が書けた(第 186-187)——CartierPicData 14 欄中 7 欄</td></tr>
-<tr><td><code>97dd742</code></td><td>2026-08-19</td><td>(v) の形を測った——`Ψ_Base` は `psiIstr` と同じ形</td></tr>
-<tr><td><code>95a6d55</code></td><td>2026-08-19</td><td>★★★★★Interface の誤りを 1 件見つけて直した(§9-206)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1500 件)。</div>
+<b>すべて PDF と機械照合している</b>(1502 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
