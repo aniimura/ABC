@@ -4708,3 +4708,30 @@ A が短い。
 
 ★★★`sectionsSubmodule` の `add_mem'`(`sb • ra + sa • rb` / `sa * sb`)と**同じ形**なので、
 mathlib の証明を写経できる。
+
+## §9-81 —— ★★★★分母つきの値が出た(第 80 ブロック、2026-08-18)
+
+    localizedTensorEquiv (mk m a ⊗ₜ mk n b) = mk (m ⊗ₜ n) (a·b)
+
+★★これが「**局所分数条件が積で閉じる**」ことの中身である。**一発で通った。**
+
+### ★機構 —— `a·b` を掛けて分母を消す
+
+| 段 | 補題 |
+|---|---|
+| `S` の元の作用は単射 | ★`IsLocalizedModule.map_units` + `Module.End.isUnit_iff` |
+| `a • mk m a = mk m 1` | ★`LocalizedModule.smul'_mk` + `mk_cancel` |
+| `R` の作用が因子を通る | ★`IsScalarTower.algebraMap_smul` + `smul_tmul'` / `tmul_smul` |
+| 分母 1 の値 | ★第 79 追補 |
+
+★★`a·b` を掛けると両辺とも `mk (m ⊗ₜ n) 1` になる——**単射性で結論**。
+
+### ★★★残り 3 ブロック
+
+| # | 内容 |
+|---|---|
+| 81 | `tilde` の切断で前層射 ψ を作る(局所分数条件は本ブロックで閉じた) |
+| 82 | ψ が茎で同型 → `tilde M` が `InvSheaf` |
+| 83 | `equivPicRing` |
+
+★★★**「数学」の部分は本ブロックで終わった**——残るは切断の運搬である。
