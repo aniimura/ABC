@@ -41,4 +41,45 @@ def birat_isOfGroupLikeType.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (ii) — group-like 型",
     sectionId := "frdi-prop-4-4" }
 
+
+/-! ## ★辞書の pull-back の条
+
+原文 (FrdI p.83):
+> of a given Frobenius degree; isometry; pre-step; base-isomorphism) of
+
+★★原文の辞書は「pull-back 射 ⇔ **co-angular linear** 射」と言う。
+★`𝒞` では pull-back は **LB-invertible ＋ linear**＝
+**co-angular ＋ 等長 ＋ linear** だが、
+★★★`𝒞^birat` では**等長が自動**(`birat_isIsometric`)なので
+その 1 条が落ちる——これが「等長を忘れる」という
+birationalization の働きそのものである。 -/
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の pull-back の条** —— 辞書。
+
+★`⟹` は `birat_pullBackLB` と co-angular / linear の辞書から。
+★`⟸` は `𝒞^birat` で等長が自動なので LB-invertible になり、
+`Proposition 1.4, (ii)` を `𝒞^birat` で使う。
+
+★★**逆向きに `𝒞^birat` の `FrobenioidCore` が要る**ので、
+分類 (B)(birat-Frobenius-normalized 型を仮定)の道になる
+(`birat_frobenioidCore_of_frobNormalized`)。 -/
+theorem birat_isPullBack_iff (Fc : FrobenioidCore (biratPre P G)) {A B : C} (φ : A ⟶ B) :
+    IsPullBack (biratPre P G) ((toBiratCat P G).map φ) ↔
+      (IsCoAngular P φ ∧ IsLinear P φ) := by
+  constructor
+  · intro hpb
+    obtain ⟨hlb, hlin⟩ := birat_pullBackLB P G _ hpb
+    exact ⟨(birat_isCoAngular_iff P G φ).mp hlb.1,
+      (birat_isLinear_iff (P := P) (G := G) φ).mp hlin⟩
+  · rintro ⟨hc, hlin⟩
+    refine prop_1_4_ii_mpr (biratPre P G) Fc _ ?_ ?_
+    · exact ⟨(birat_isCoAngular_iff P G φ).mpr hc, birat_isIsometric _⟩
+    · exact (birat_isLinear_iff (P := P) (G := G) φ).mpr hlin
+
+/-- ★locator —— `Proposition 4.4, (iv)` の pull-back の条。 -/
+def birat_isPullBack_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iv) — pull-back の条",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI

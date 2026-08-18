@@ -390,9 +390,9 @@
           "id": "dict-pullback",
           "title": "辞書: pull-back ⇔ co-angular linear",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
-          "evidence": "`Prop44Core.lean` に `birat_pullBackLB` と `birat_isPullBack_map`(片向き)がある。★残りは反対向き。"
+          "evidence": "★2026-08-18 に `Prop44Gl.lean` へ `birat_isPullBack_iff` を実装した。`⟹` は `birat_pullBackLB` と辞書から、`⟸` は `𝒞^birat` で等長が自動なので `Proposition 1.4, (ii)` を使う。★逆向きに `𝒞^birat` の `FrobenioidCore` が要るので分類 (B) の道。"
         },
         {
           "id": "dict-baseid",
