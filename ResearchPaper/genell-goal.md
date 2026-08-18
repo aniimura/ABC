@@ -4412,3 +4412,38 @@ mathlib には無い。★★**我々が作る**。
 
 ★★★★したがって残りは「`tensorModules (tilde M) (tilde N)` が `IsLocalizing`」と
 「比較射が `⊤` で同型」の 2 点に落ちる。
+
+## §9-72 —— ★★★★★★残りの道が**測って**見えた(2026-08-18)
+
+### 比較射が同型であることの証明の筋
+
+★★★**基本開集合で測る。**`D(f)` の上では
+
+| 段 | 値 | 在庫 |
+|---|---|---|
+| `(tilde M)(D(f))` | `M_f` | ★mathlib `IsLocalizedModule.Away f (toOpen M (basicOpen f)).hom` |
+| 前層テンソルの `D(f)` 成分 | `M_f ⊗_{R_f} N_f` | ★定義 |
+| `M_f ⊗_{R_f} N_f ≅ M_f ⊗_R N_f` | | ★mathlib `Localization/BaseChange.lean` の `moduleTensorEquiv` |
+| `M_f ⊗_R N_f ≅ (M ⊗_R N)_f` | | ★mathlib `IsLocalizedModule.rTensor` |
+| `(tilde (M ⊗ N))(D(f))` | `(M ⊗_R N)_f` | ★同上 |
+
+★★★★したがって**前層テンソルは基本開集合の上で既に `tilde (M ⊗ N)` と一致する**。
+基本開集合は基底なので、層化を通しても一致する。
+
+### ★★これで `equivPicRing` の 4 段が全部見えた
+
+| # | 主張 | 道具 |
+|---|---|---|
+| 1 | 比較射が同型 | ★★上の基本開集合の計算 |
+| 2 | `tilde M` が可逆層 | ★1 + `tildeSelf`(`.refl`) |
+| 3 | 単射性 | ★★**`tilde.fullyFaithfulFunctor` でただで出る** |
+| 4 | 全射性(本質像) | ★`isIso_fromTildeΓ_iff_isLocalizing` |
+
+★★★**mathlib が持たないのは「準連接 ⟹ 本質像」の一般形だけ**で、
+可逆層に必要な部分は上の 4 段で埋まる。
+
+### ★見積りの更新
+
+§9-69 は `equivPicRing` を「約 20 ブロック」と見た。
+★★第 74・75 で比較射が建ち、道具の在庫も測れたので、**残り 8–12** に下がる。
+★★★B1 の総計は **約 85**(§9-69 の 95 から下方修正)。
