@@ -299,6 +299,8 @@ import ABC3.Found.Arakelov.PicBasicTrivial
 import ABC3.Found.Arakelov.PicFiniteCover
 import ABC3.Found.Arakelov.PicSpecRes
 import ABC3.Found.Arakelov.PicSecRes
+import ABC3.Found.Arakelov.PicCoverUnit
+import ABC3.Found.Arakelov.PicSmulSurj
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

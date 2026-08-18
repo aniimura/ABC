@@ -6778,3 +6778,32 @@ instance 検索が**別物として扱う**。
 
 ★どれも「各 `D(gᵢ)` で第 137 を使い、**最大値**を取り、層で貼る」である。
 ★★貼りには `TopCat.Sheaf.existsUnique_gluing'` と `eq_of_locally_eq'` を使う。
+
+## §9-152 —— `f` 倍は `D(f)` の切断上で全単射(第 138・139 ブロック、2026-08-18)
+
+| # | 内容 |
+|---|---|
+| 138 | `specD_le_iSup`(被覆)・`isUnit_smul_of_trivial`・`injective_smul_specD` |
+| 139 | `bijective_smul_of_eq`・`inf_specD_eq`・`specD_mul_le`・`surjective_smul_specD` |
+
+★★★全射性で **`TopCat.Sheaf.existsUnique_gluing'`** を初めて使った。
+
+### ★★要点——**交わりも `D(f·h)` の形**
+
+    D(f·gᵢ) ⊓ D(f·gⱼ) = D((f·gᵢ)·(f·gⱼ)) = D(f · (f·gᵢ·gⱼ))
+
+★これで「交わりでも `f` 倍が単射」が**同じ補題**で出る。
+
+### ★逃げ道 2 つ(記録)
+
+| 症状 | 逃げ道 |
+|---|---|
+| 開集合が `D(f·g)` と**等式でしか**一致しない | ★`hV : V = D(f·g)` を仮定して `subst` |
+| `choose` の結論が `(fun s => f • s) (z i)` で `rw` が当たらない | ★`have hz' : ∀ i, f • z i = … := hz` |
+
+### ★次——`IsLocalizing` の残り 2 欄
+
+    (b) surj      : ∃ n, fⁿ y が ⊤ から来る
+    (c) exists_of_eq : res x = res y ⟹ ∃ n, fⁿ x = fⁿ y
+
+★どちらも**有限**被覆(第 135)と `Finset.sup` による最大値取りが要る。
