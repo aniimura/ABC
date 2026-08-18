@@ -271,4 +271,38 @@ def plBkOverToC_comp_plBkMap.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iv) — End(𝒞^pl-bk_A → 𝒞)^bs-iso の移送(段 1・2)",
     sectionId := "frdi-thm-3-4" }
 
+
+/-! ## ★★★`Theorem 3.4, (iv)` の `𝒪^×` 側 —— unit-equivalence の保存
+
+原文 (FrdI p.66):
+> Thus, we conclude that Ψ preserves the submonoids
+
+★★`𝒞^un-tr` は `Hom` を **unit-equivalence** で割った商である
+(`UnTr.lean` の `unTrSetoid`)。したがって `Ψ^un-tr` を作るのに要るのは
+「`Ψ` が unit-equivalence を保つ」の 1 本だけである。
+
+★★★`IsUnitEquivalent` は `∃ Cc γ β δ, δ ∈ 𝒪^×(Cc) ∧ α₁ = γβ ∧ α₂ = γδβ` という
+**純粋に圏論的な**定義なので、`𝒪^×` の保存があれば関手を当てるだけで移る。
+★`𝒪^×(A) = 𝒪^▷(A) ∧ IsUnit` なので、`𝒪^▷` の保存(上の `thm_3_4_iv_otri_map'`)と
+「関手は単元を保つ」(`Functor.mapEnd` が準同型)を合わせればよい。 -/
+
+/-- ★★★★★**`Ψ` は unit-equivalence を保つ**。
+
+★`𝒪^▷` の保存を仮定として受け、`IsUnit` の側は `Functor.mapEnd` の
+準同型性から `IsUnit.map` で出す。 -/
+theorem isUnitEquivalent_map (Ψ : C₁ ⥤ C₂)
+    (hOTri : ∀ (X : C₁) (δ : End X), δ ∈ OTri P₁ X → Ψ.map (δ : X ⟶ X) ∈ OTri P₂ (Ψ.obj X))
+    {A B : C₁} {α₁ α₂ : A ⟶ B} (h : IsUnitEquivalent P₁ α₁ α₂) :
+    IsUnitEquivalent P₂ (Ψ.map α₁) (Ψ.map α₂) := by
+  obtain ⟨Cc, γ, β, δ, hδ, h₁, h₂⟩ := h
+  refine ⟨Ψ.obj Cc, Ψ.map γ, Ψ.map β, Ψ.map (δ : Cc ⟶ Cc), ⟨hOTri Cc δ hδ.1, ?_⟩, ?_, ?_⟩
+  · exact hδ.2.map (Functor.mapEnd Cc Ψ)
+  · rw [h₁, Ψ.map_comp]
+  · rw [h₂, Ψ.map_comp, Ψ.map_comp]
+
+def isUnitEquivalent_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Ψ は unit-equivalence を保つ",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
