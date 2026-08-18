@@ -1,6 +1,6 @@
 ---
 name: frdi-two-blockers-s3-s4
-description: [FrdI] §3 9/9 は Gap_1_14_iii(反例つき原典の穴)で塞がれ、§4 10/10 は pairing-vanishes(5 件の下流)で塞がれている。到達可能な残りは Prop 4.1 と Remark 4.5.1 の 2 件。
+description: [FrdI] §3 9/9 は Gap_1_14_iii(反例つき原典の穴)で塞がれ、§4 10/10 は pairing-vanishes(5 件の下流)で塞がれている。Prop 4.1 は 2026-08-18 に閉じた(§4 4/10)ので、到達可能な残りは Remark 4.5.1 の 1 件。
 metadata:
   type: project
 ---
@@ -37,13 +37,14 @@ metadata:
 一致 `α ≫ p' = β ≫ p` は出る。★残るのは `L(k≫f) ≫ g = L(k≫g) ≫ f`
 (`L` = `c` に沿った一意の持ち上げ)——これが `pairing-vanishes` の正体。
 
-## ★到達可能な 2 件(§4 3/10 → 5/10)
+## ★到達可能な残りは 1 件(§4 4/10 → 5/10)
 
-- `Proposition 4.1` —— ★(i) は済(`Prop41Cat.lean`)。(ii)–(v) は
-  perf-factorial の **primary 分解**が要る。土台は 2026-08-18 に作った
-  (`Def24Supp.lean` / `Def24SuppElt.lean`)。★**残る鍵は
-  「primary ⟺ 台が 1 点」の `⟸`**(台の等しい 2 元が `⪯`-同値であること)で、
-  そこは `IsPerfFactorialWith.bounded` と `monoprimeAt` を使う。
+- ★★`Proposition 4.1` は **2026-08-18 に (i)〜(v) 全部閉じた**。
+  ★鍵だったのは、**(iv) と (v) の単系層が同一の 1 本**だと気づいたこと
+  (`isPrimaryElt_iff_exists_prime_cond`)。原文の
+  「reversing the direction of the arrows」は、圏の側で
+  **後置(スライス)を前置(コスライス)に取り替えるだけ**になった。
+  ★素点ごとの比較の実体は `mle_of_restrict`(`Def24SuppElt.lean`)。
 - `Remark 4.5.1` —— standard 型は済(`istr_standardType`)。
   rationally standard 型の 3 条(birat Frobenius-normalized・rational・
   `(𝒞^un-tr)^birat` の Frobenius-compact 対象)が残り、いずれも
