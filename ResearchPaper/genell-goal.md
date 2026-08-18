@@ -7333,3 +7333,35 @@ B2 の在庫を実測した結果:
 |---|---|
 | 163 | `IsCartierDivisor` の定義と `ofDivisor` |
 | 164+ | 積・引き戻し・自明性の 3 法則、`isCartierDivisor_affine` |
+
+## §9-175 —— B2 の次の壁——**層の双対**(2026-08-18、実測)
+
+`ofDivisor X D : PicSheaf X` を書くには `InvSheaf X` が要り、その `inv` 欄には
+**逆層**(`tensorModules carrier inv ≅ 𝒪`)が要る。
+
+★`idealSheaf D` の逆は `I⁻¹`(分数イデアル)であって**イデアル層ではない**ので、
+`idealSheaf` だけでは作れない。
+
+### ★★在庫の実測(2026-08-18)
+
+    Mathlib/Algebra/Category/ModuleCat/Sheaf/ :
+      Abelian / ChangeOfRings / Colimits / Free / Generators / Limits /
+      Localization / LocallyFree / PullbackContinuous / PullbackFree /
+      PushforwardContinuous / Quasicoherent
+
+★**`Monoidal.lean` が無い**——`SheafOfModules` の内部 Hom も双対も**存在しない**。
+(我々の `tensorModules` も前層テンソル + 層化で自前に作ったものである。)
+
+### ★★★必要な構成(見積もり 10–15 ブロック)
+
+    F^∨(U) := Hom_{PresheafModulesOn X U}(F|_U, 𝟙_)
+
+★これは前層であり、**層である**(Hom 層)。
+★★評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` について同型であることを、
+基本開集合上で確かめる(第 115 の器具が使える)。
+
+### ★★★★到達点(2026-08-18 時点)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–162 の 15 ブロック(**局所自明性まで完了**)
+    次: 層の双対 → InvSheaf → ofDivisor → 3 法則
