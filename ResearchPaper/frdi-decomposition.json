@@ -875,16 +875,24 @@
           "note": "★**純粋に数論的な段**である。\n★素数全体は通常の順序で `ω` 型の整序集合なので、順序を保つ全単射は恒等写像しかない。\n★これと `psiN-extend`(済)を合わせると `Ψ_N = id` が出る。\n\n★★済(2026-08-18): `Thm34Quasi.lean` の `primeEquiv_eq_self`。\n★手: 最小の反例を取る。`σ p < p` なら帰納仮定と単射性で矛盾、`p < σ p` なら全射性で `p = σ q` を取って三分法で矛盾。\n★`Nat.strong_induction_on` で 1 発で通った。★★見積りを ★中 → ★小 に下げた。"
         },
         {
+          "id": "psiN-F2-iff",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "F3-order-preserve"
+          ],
+          "title": "(F2) を原典どおりの同値の形にする",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `admissible_of_hom'`(逆向き)と `admissible_iff_of_hom`(同値)。\n★原文 (FrdI p.64): > B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is.\n★★**zigzag を渡るのに両向きが要る**ので、`psiN-connected` の前提として取った。\n★逆向きは同じ四角形で `hA` を `hB` に入れ替えるだけ。"
+        },
+        {
           "id": "psiN-connected",
-          "size": "中",
+          "size": "小",
           "status": "todo",
           "deps": [
-            "psiN-F1",
-            "psiN-F2",
-            "psiN-F3"
+            "psiN-F2-iff"
           ],
           "title": "連結性で全対象へ広げ、素数の写像を定める",
-          "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。"
+          "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。\n\n★★両向きの (F2) が揃った(2026-08-18)ので、`P.connectedC` の zigzag に沿って `admissible_iff_of_hom` を繰り返すだけ。\n★見積りを ★中 → ★小 に下げた。"
         },
         {
           "id": "psiN-prime-bij",

@@ -924,4 +924,57 @@ def degFr_order_preserve.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F3) — 順序の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F2) の逆向き(任意の射)** —— zigzag を渡るのに要る。
+
+★同じ四角形を使い、`hA` を `hB` に入れ替えるだけ。 -/
+theorem admissible_of_hom' (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegmap : ∀ {X Y Z W : C₁} (f : X ⟶ Y) (g : Z ⟶ W),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : A ⟶ B)
+    (hB : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A := by
+  obtain ⟨B', β, φ', hβ, hdβ, hsq⟩ := prop_1_10_i_exists P₁ F₁ ζ α hα
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map α) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ α θ hα hθ (by rw [hdα, hdθ])
+  have hdζ : P₁.degFr ζ = P₁.degFr φ' :=
+    degFr_of_square_other P₁ ζ β α φ' hsq hdβ
+  have h2 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map α) := by
+    have hsq' : Ψ.map ζ ≫ Ψ.map β = Ψ.map α ≫ Ψ.map φ' := by
+      rw [← Ψ.map_comp, ← Ψ.map_comp, hsq]
+    exact prop_1_14_iv_degFr P₂ (Ψ.map ζ) (Ψ.map β) (Ψ.map α) (Ψ.map φ') hsq'
+      (hdegmap ζ φ' hdζ)
+  have h3 : P₂.degFr (Ψ.map β) = p₂ :=
+    (hB β hβ (by rw [hdβ, hdα])).2
+  rw [← h1, ← h2, h3]
+
+def admissible_of_hom'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) (F2) — 逆向き",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii) の (F2)** —— 原典どおりの**同値**の形。
+
+原文 (FrdI p.64):
+> B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is. -/
+theorem admissible_iff_of_hom (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegmap : ∀ {X Y Z W : C₁} (f : X ⟶ Y) (g : Z ⟶ W),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : A ⟶ B)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A ↔ IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B :=
+  ⟨fun hA => admissible_of_hom Ψ F₁ hFT hdegmap ζ hA α hα hdα,
+   fun hB => admissible_of_hom' Ψ F₁ hFT hdegmap ζ hB α hα hdα⟩
+
+def admissible_iff_of_hom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — (F2) の同値の形",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
