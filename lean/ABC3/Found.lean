@@ -47,6 +47,7 @@ import ABC3.Found.FrdI.Prop32
 import ABC3.Found.FrdI.Prop32Frob
 import ABC3.Found.FrdI.Prop32Equiv
 import ABC3.Found.FrdI.Prop32Dict
+import ABC3.Found.FrdI.Prop32Perfect
 import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop33UnTr
 import ABC3.Found.FrdI.Prop33Classes
@@ -213,6 +214,7 @@ import ABC3.Found.Arakelov.PicFreeTerm
 import ABC3.Found.Arakelov.PicUnitOn
 import ABC3.Found.Arakelov.PicResTrans
 import ABC3.Found.Arakelov.PicSieveTransport
+import ABC3.Found.Arakelov.PicLTPull
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
