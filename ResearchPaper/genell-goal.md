@@ -9241,3 +9241,46 @@ instance 解決に失敗する——係数環の綴りが `X.ringCatSheaf.obj.ob
 ★見積もり **1–2 ブロック**。転送つきで扱うので、`comap` を挟んだまま
 生成元の議論をすることになる(`Ideal.comap` は準同型の逆像なので
 「像 ⊇ 生成元」も `comap` を通して読み替えられる)。
+
+## §9-233 B2 最後の 1 歩——**転送を通した所属の読み替え**が残り(2026-08-19)
+
+第 211 で「転送を外した形は `whnf` で落ちる」と測ったので、転送つきのまま組む:
+
+    w := (fromSpec.appIso ⊤).hom (sVal z)          -- Γ(Spec Γ(X,A), ⊤) の元
+    w ∈ ((D.comap f).ideal A').comap eA            -- inv∘hom = id で z の所属から
+      = ((D.ideal B').comap eB).map e              -- ★第 211
+    ⟹ span 帰納で生成元へ ⟹ 第 208/209 で像に入る ⟹ 全射
+
+★★残るのは**転送を通した所属の読み替え**である
+——`Ideal.comap` は逆像なので、生成元の議論を `eB` を挟んだまま行う必要がある。
+★見積もり **1–2 ブロック**。
+
+## §9-234 Galois の進め方を FLT の実測に合わせて確定した(2026-08-19)
+
+§9-224 の再測定で **G1 の律速が `#E[n] = n²` 1 本**に絞れた。
+本プロジェクトの進め方(「スケルトンで依存グラフ → 葉から形式化」)に当てはめる:
+
+### ★★★Galois 側は **Interface はあるが Skeleton が無い**
+
+    lean/ABC3/Interface/GaloisRep/  ← Torsion / Representation / Reduction(3 本、posit 済)
+    lean/ABC3/Skeleton/            ← ★GaloisRep が**無い**(AbsTopIII/FrdI/GenEll/IUTchI/IUTchIII/NCBelyi/PGC のみ)
+
+★これは Arakelov 側と対照的である——Arakelov は B1 で 146 ブロック積む前に
+`Found/Arakelov/` に部品を貯めた。★★Galois は **Interface(何を仮定するか)は書いたが、
+その中身を分解した Skeleton が無い**ため、「葉」がどこか分からない状態である。
+
+### ★★次の一手 —— `#E[n] = n²` を分解する
+
+FLT の注記(「分多項式の理論が要る、David Angdinata が作業中」)と
+mathlib の在庫(`ψ_n` と次数計算は在る、`ω_n` は TODO)から、葉は:
+
+| 葉 | 内容 | 在庫 |
+|---|---|---|
+| L1 | `ω_n` の構成(乗法公式の第 3 成分) | ★mathlib の **TODO** |
+| L2 | `n • (x,y) = (φ_n/ψ_n², ω_n/ψ_n³)` | ★L1 に従属 |
+| L3 | `deg φ_n = n²`、`deg ψ_n² = n²−1` | ★mathlib に次数計算が在る |
+| L4 | 分離性(`char ∤ n`) | ★測っていない |
+| L5 | `#E[n] = deg[n] = n²` | ★L2+L3+L4 |
+
+★★★**L1(`ω_n` の構成)が真の葉**である——mathlib が TODO として残しており、
+FLT もそこで止まっている。★これが Galois 側の**最初の壁ではなく最初の道**である。
