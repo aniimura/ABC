@@ -4072,3 +4072,37 @@ mathlib には無い。★★**我々が作る**。
 | mathlib に無く作ったもの | `restrictScalars` の lax monoidal / 余極限での同型の持ち上げ / **引き戻しの strong monoidal 性** / **Beck–Chevalley** / 局所自明性の輸送 |
 | Interface の穴 | 3 つ塞いだ + 否定コントロール 2 本 |
 | 記録の訂正 | 2 件(§9-41、§9-51) |
+
+---
+
+## §9-63 (2026-08-18) ★★★★★`tilde` がテンソルを保つ——材料は mathlib に在った
+
+### ★★★測った結果(2026-08-18)
+
+第 63 ブロックで旗を立てた「`tilde` はテンソル積を保つか」の材料:
+
+| 在庫 | 場所 |
+|---|---|
+| `IsLocalizedModule.Away f (toOpen M (basicOpen f))` | ★`Modules/Tilde.lean` 175 行——**`(tilde M)(D(f)) = M_f`** |
+| `IsLocalizedModule S (TensorProduct.map f g)` | ★★`RingTheory/Localization/BaseChange.lean` 117 行——**局所化はテンソルと交換する** |
+
+★★★**両方 mathlib に在る**。
+
+### ★★★★筋
+
+    (tilde M ⊗_pre tilde N)(D(f)) = M_f ⊗ N_f ≅ (M ⊗ N)_f = (tilde (M ⊗ N))(D(f))
+
+★基本開集合は基底なので、比較射は**局所全単射**である。
+★★したがって層化すると同型になる——**第 8–11 ブロックの機構がそのまま効く**。
+
+### ★★残り(B1、第 64–)
+
+| # | 主張 | 材料 |
+|---|---|---|
+| 1 | `tilde (M ⊗ N) ≅ tensorModules (tilde M) (tilde N)` | ★上の 2 つ + 第 8–11 |
+| 2 | 可逆層は `tilde` の本質像に入る | ★`isIso_fromTildeΓ_iff` + 局所自由 ⟹ 準連接 |
+| 3 | `PicSheaf (Spec R) ≃* CommRing.Pic R` | ★★1・2 から組む |
+| 4 | `PicardData` の組み立て | ★残りの欄は構成から出る |
+
+★★★これで **B1 の全体像が見えた**——山は既に越えている
+(`δ` の同型性と Beck–Chevalley)。
