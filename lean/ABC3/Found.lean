@@ -376,6 +376,7 @@ import ABC3.Found.Arakelov.PicPullImage
 import ABC3.Found.Arakelov.PicComapImage
 import ABC3.Found.GaloisRep.OmegaNum
 import ABC3.Found.GaloisRep.OmegaMap
+import ABC3.Found.Arakelov.PicImgClosure
 import ABC3.Found.Arakelov.PicComapChain
 import ABC3.Found.Arakelov.PicUnitSurj
 import ABC3.Found.Arakelov.PicPrincipal
