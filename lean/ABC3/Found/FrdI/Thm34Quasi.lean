@@ -1172,7 +1172,7 @@ def isFrobeniusType_map_of_primeFrob.src : ABC3.Meta.Source :=
 /-- ★★★★**Ψ は linear を(両向きに)保つ**。
 
 原文 (FrdI p.64):
-> follows formally from the portion of assertion (iv) concerning co-angular morphisms,
+> preserves morphisms of Frobenius type, hence also linear morphisms [by Proposition
 
 ★次数の対応 `degFr (Ψ f) = Ψ_N (degFr f)` と
 `Ψ_N` が**単系同型**であることから直ちに出る。 -/
