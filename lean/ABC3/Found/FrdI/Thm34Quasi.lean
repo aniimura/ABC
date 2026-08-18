@@ -403,12 +403,14 @@ theorem isGroupLikeObj_of_baseIsoD {Dd : Type u} [Category.{v} Dd] {Cc : Type u2
     [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
     {A B : Cc} (α : (P.toElem.obj A).base ≅ (P.toElem.obj B).base)
     (h : IsGroupLikeObj P A) : IsGroupLikeObj P B := by
+  show IsGroupLike (Φ₀.val (P.toElem.obj B).base)
+  have h : IsGroupLike (Φ₀.val (P.toElem.obj A).base) := h
   rw [isGroupLike_iff] at h ⊢
   intro b
   have hround : Φ₀.map α.inv (Φ₀.map α.hom b) = b := by
     have hc := Φ₀.map_comp α.hom α.inv b
     rw [α.inv_hom_id] at hc
-    rw [hc]
+    rw [← hc]
     exact MonoidOn.map_id Φ₀ _ b
   rw [← hround]
   exact (h (Φ₀.map α.hom b)).map (Φ₀.map α.inv)
