@@ -293,6 +293,148 @@
           "evidence": "原文は `{log p₂, log p₄, log p₆}` と `{1, log p₃/log p₄}` に当てる。(i) は実装済み(`Found/FrdI/Lemma65.lean` の `log_primes_linearIndependent`)。"
         }
       ]
+    },
+    {
+      "id": "prop44full",
+      "title": "Proposition 4.4 を閉じる —— (B) 方針(birat-Frobenius-normalized を仮定)で otricomm を迂回する道",
+      "serves": {
+        "paper": "FrdI",
+        "item": "Proposition 4.4",
+        "page": 83
+      },
+      "unblocks": [
+        "Proposition 4.8",
+        "Corollary 4.10",
+        "Corollary 4.11",
+        "Theorem 5.1",
+        "Theorem 4.2"
+      ],
+      "★位置づけ": "★★`otricomm` は `otriBase` を**一般の `𝒞`** で解く道で、`pairing-vanishes` が未解。★本チェーンは**birat-Frobenius-normalized 型を明示の仮定に置いて迂回する**道(分類 (B)、2026-08-18 の利用者の判断で「(B) も数える」方針になった)。★下流の消費者(Theorem 5.2 の model Frobenioid、Example 6.1・6.3)はすべて model 型＝birat-Frobenius-normalized 型なので、実際に使う場面では埋まっている。",
+      "nodes": [
+        {
+          "id": "birat-core-b",
+          "title": "𝒞^birat が Frobenioid(birat-Frobenius-normalized 仮定)",
+          "deps": [],
+          "status": "done",
+          "size": "★済",
+          "evidence": "`Found/FrdI/Prop44Equiv.lean` の `birat_frobenioid_of_frobNormalized`。分類 (B)。"
+        },
+        {
+          "id": "birat-gl",
+          "title": "𝒞^birat が group-like 型",
+          "deps": [],
+          "status": "done",
+          "size": "★小",
+          "evidence": "`Found/FrdI/Prop44Gl.lean` の `birat_isOfGroupLikeType`(2026-08-18)。"
+        },
+        {
+          "id": "birat-faithful",
+          "title": "𝒞 → 𝒞^birat が忠実",
+          "deps": [],
+          "status": "done",
+          "size": "★済",
+          "evidence": "`Found/FrdI/Prop44Pre.lean` の `toBiratCat_faithful`。"
+        },
+        {
+          "id": "otri-gp-inj",
+          "title": "𝒪^▷(A)^gp ↪ 𝒪^×(A^birat) の単射性",
+          "deps": [
+            "birat-faithful"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "忠実性から `𝒪^▷(A) → End(A^birat)` が単射。群化 `^gp` へ上げるのに `Div^gp` の核が要る。"
+        },
+        {
+          "id": "ii-src",
+          "title": "(ii) の条つき .src",
+          "deps": [
+            "birat-core-b",
+            "birat-gl",
+            "birat-faithful",
+            "otri-gp-inj"
+          ],
+          "status": "todo",
+          "size": "★小"
+        },
+        {
+          "id": "phibirat-funct",
+          "title": "Φ^birat が Φ^gp の**部分関手**であること",
+          "deps": [],
+          "status": "todo",
+          "size": "★大",
+          "evidence": "`phiBiratAt`(各対象での部分群)は `Prop44Gp.lean` にある。★残るのは `𝒟` の射に沿った関手性。"
+        },
+        {
+          "id": "phibirat-ker",
+          "title": "𝒪^×(A^birat) ↠ Φ^birat(A) とその核",
+          "deps": [
+            "phibirat-funct",
+            "otri-gp-inj"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "全射は `phiBiratAt` の定義そのもの。核は `Prop44Ker.lean` の `otriDivGp_eq_zero_iff` が与える。"
+        },
+        {
+          "id": "iii-src",
+          "title": "(iii) の条つき .src",
+          "deps": [
+            "phibirat-funct",
+            "phibirat-ker"
+          ],
+          "status": "todo",
+          "size": "★小"
+        },
+        {
+          "id": "dict-pullback",
+          "title": "辞書: pull-back ⇔ co-angular linear",
+          "deps": [],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "`Prop44Core.lean` に `birat_pullBackLB` と `birat_isPullBack_map`(片向き)がある。★残りは反対向き。"
+        },
+        {
+          "id": "dict-baseid",
+          "title": "辞書: base-identity 自己射の特徴づけ",
+          "deps": [],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "原文 p.83 の「(α, φ) が base-equivalent」の形。`gpMap_biratBase_of_baseIdentity` が部分的にある。"
+        },
+        {
+          "id": "iv-src",
+          "title": "(iv) の条つき .src",
+          "deps": [
+            "dict-pullback",
+            "dict-baseid"
+          ],
+          "status": "todo",
+          "size": "★小",
+          "evidence": "他の 8 項(co-angular・同型・Frobenius 型・次数・isometry・pre-step・base-iso・isotropic)は実装済。"
+        },
+        {
+          "id": "i-src",
+          "title": "(i) の条つき .src(圏・関手・1-可換図式)",
+          "deps": [],
+          "status": "todo",
+          "size": "★小",
+          "evidence": "`BiratCat` / `toBiratCat` / `biratToElemGp` / `biratGp_square_obj` / `biratGp_square_map` は実装済。.src が無いだけ。"
+        },
+        {
+          "id": "prop44-src",
+          "title": "★Proposition 4.4 の**条なし** .src(計数が動く)",
+          "deps": [
+            "i-src",
+            "ii-src",
+            "iii-src",
+            "iv-src"
+          ],
+          "status": "todo",
+          "size": "★小",
+          "evidence": "★分類 (B) を index.html で開示すること。"
+        }
+      ]
     }
   ]
 }
