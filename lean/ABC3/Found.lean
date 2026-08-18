@@ -73,6 +73,7 @@ import ABC3.Found.FrdI.Prop44Ore
 import ABC3.Found.FrdI.Prop44Ker
 import ABC3.Found.FrdI.Prop44Equiv
 import ABC3.Found.FrdI.Prop44Gl
+import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
@@ -290,6 +291,8 @@ import ABC3.Found.Arakelov.PicAwayTransport
 import ABC3.Found.Arakelov.PicSectionEquiv
 import ABC3.Found.Arakelov.PicPointwise
 import ABC3.Found.Arakelov.PicSecLocMod
+import ABC3.Found.Arakelov.PicLiftGen
+import ABC3.Found.Arakelov.PicResGen
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

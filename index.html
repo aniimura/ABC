@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 964 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 966 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5053</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1373</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5056</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1374</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>a1afe22</code></td><td>2026-08-18</td><td>メモリの 2 番目を訂正した——「同じ底でも同型とは限らない」は行き過ぎ</td></tr>
+<tr><td><code>a44defa</code></td><td>2026-08-18</td><td>★原典の証明を読んで経路を差し替えた——𝒟 上の関手性は Prop 2.2 が供給する</td></tr>
 <tr><td><code>187ed35</code></td><td>2026-08-18</td><td>𝒞^birat の 3 つの構造的事実をメモリに残した</td></tr>
 <tr><td><code>816a0b3</code></td><td>2026-08-18</td><td>★★★負の測定を記録した——「同じ底なら 𝒞^birat で同型」は一般には言えない</td></tr>
 <tr><td><code>3feabc6</code></td><td>2026-08-18</td><td>切断に Localization 加群構造(第 129、§9-146)</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>d542d12</code></td><td>2026-08-18</td><td>★★★★★★点ごとの自明化で足りる(第 128、§9-143)</td></tr>
 <tr><td><code>cdd5c8d</code></td><td>2026-08-18</td><td>★★[FrdI] Proposition 4.4, (ii) を閉じた——群化を「構成せずに」書いた</td></tr>
 <tr><td><code>4fa8317</code></td><td>2026-08-18</td><td>★★★★★★局所自明性の全単射が出た(第 127、§9-142)</td></tr>
-<tr><td><code>5d005f1</code></td><td>2026-08-18</td><td>同型を 𝒪(D f) 係数へ移した——材料が完全に揃った(第 126、§9-141)</td></tr>
-<tr><td><code>055d810</code></td><td>2026-08-18</td><td>`𝒪^▷(A) → 𝒪^×(A^birat)` の写像と単射性(単系の層)——★測定で近道が見つかった</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1373 件)。</div>
+<b>すべて PDF と機械照合している</b>(1374 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

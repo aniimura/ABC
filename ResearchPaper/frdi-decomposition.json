@@ -400,12 +400,12 @@
         {
           "id": "phibirat-otristar",
           "size": "中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "phibirat-iso-transport"
           ],
           "title": "𝒞^birat に Prop 2.2 (ii)(iii) を適用して 𝒪^×(−) を 𝒟* 上の関手にする",
-          "note": "★★★**原典の道筋を読んで確定(2026-08-18)**。FrdI p.85:\n> Now assertion (iii) follows immediately from the existence of the functor\n★(iii) は「(i) の関手の存在」＋**`Proposition 1.5, (ii)`** から従い、核は **`Definition 1.3, (vi)`** から出ると書いてある。\n★★さらに (ii) の本文が「the functor `𝒪^×(−)` **on 𝒟** associated to the Frobenioid `𝒞^birat` [cf. Proposition 2.2, (ii), (iii)]」と言う。\n★★★つまり **`𝒟` 上の関手性は `Proposition 2.2` が供給する**のであって、「同じ底なら同型」を証明する必要はない。\n★**在庫はすでにある**: `Prop22Star.lean` の `otriStar : (InducedCategory D (istrBase P))ᵒᵖ ⥤ MonCat`(Prop 2.2 (ii))、`otimes_eq_units` / `dstarMap_otimes_mem`(同 (iii)-1、`𝒪^×` は部分関手)、`Div` が関手的準同型であること(同 (iii)-3)。\n★やること: これらを `P := biratPre P G`, `G := biratFrobenioid` に適用する。"
+          "note": "★★★**原典の道筋を読んで確定(2026-08-18)**。FrdI p.85:\n> Now assertion (iii) follows immediately from the existence of the functor\n★(iii) は「(i) の関手の存在」＋**`Proposition 1.5, (ii)`** から従い、核は **`Definition 1.3, (vi)`** から出ると書いてある。\n★★さらに (ii) の本文が「the functor `𝒪^×(−)` **on 𝒟** associated to the Frobenioid `𝒞^birat` [cf. Proposition 2.2, (ii), (iii)]」と言う。\n★★★つまり **`𝒟` 上の関手性は `Proposition 2.2` が供給する**のであって、「同じ底なら同型」を証明する必要はない。\n★**在庫はすでにある**: `Prop22Star.lean` の `otriStar : (InducedCategory D (istrBase P))ᵒᵖ ⥤ MonCat`(Prop 2.2 (ii))、`otimes_eq_units` / `dstarMap_otimes_mem`(同 (iii)-1、`𝒪^×` は部分関手)、`Div` が関手的準同型であること(同 (iii)-3)。\n★やること: これらを `P := biratPre P G`, `G := biratFrobenioid` に適用する。\n★済(2026-08-18): `Prop44Phi.lean` の `otriStarBirat`。★**新しい証明は 1 行も要らなかった** —— `otriStar` を `𝒞^birat` に当てるだけ。★宇宙は `MonCat.{max (max u2 v) v2}`(`BiratCat` の射が余極限で上がる)。"
         },
         {
           "id": "phibirat-image-subfunctor",
