@@ -4586,3 +4586,31 @@ mathlib には無い。★★**我々が作る**。
 | 83 | `equivPicRing` |
 
 ★★**残り 7 ブロック**、B1 総計 **約 83** は据え置き。
+
+## §9-77 —— ★★★★★★層化を跨ぐ器具が建った(第 77 ブロック、2026-08-18)
+
+    isIso_of_stalkIso : (∀ x, 茎で同型) → 層加群の射は同型
+
+★機構は 3 段の反射:
+
+| 段 | 道具 |
+|---|---|
+| 茎 → `app` | ★mathlib `TopCat.Presheaf.app_isIso_of_stalkFunctor_map_iso` |
+| `app` → 前層加群 | ★`NatTrans.isIso_iff_isIso_app` + `toPresheaf` |
+| 前層加群 → 層加群 | ★★`SheafOfModules.fullyFaithfulForget.isIso_of_isIso_map` |
+
+### ★★詰まった所
+
+`(SheafOfModules.forget _).ReflectsIsomorphisms` は mathlib に
+**instance として存在する**(`Sheaf.lean` 行 80)が、**instance 検索が拾わない**
+——§9-73 の `toSheaf` と同じ症状である(universe と見る)。
+
+★★★**回避法が確立した**: `isIso_of_reflects_iso` を使わず
+**`FullyFaithful.isIso_of_isIso_map` を直に当てる**。
+★これは §9-73 で詰まった所も同じ手で抜けられる可能性が高い。
+
+### ★★★これで比較射の証明が茎の計算に落ちた
+
+    比較射が同型  ⟸  ∀ p, (M ⊗_R N)_p ≅ M_p ⊗_{R_p} N_p
+
+★残るのは「前層テンソルの茎 = 茎のテンソル」——フィルタ余極限とテンソルの交換である。
