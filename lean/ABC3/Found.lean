@@ -305,6 +305,7 @@ import ABC3.Found.Arakelov.PicLocEq
 import ABC3.Found.Arakelov.PicSecMap
 import ABC3.Found.Arakelov.PicLocSurj
 import ABC3.Found.Arakelov.PicQCoh
+import ABC3.Found.Arakelov.PicGammaInv
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

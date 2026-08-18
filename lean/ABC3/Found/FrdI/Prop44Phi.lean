@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop22Star
 import ABC3.Found.FrdI.Def45
+import ABC3.Found.FrdI.Remark311
 
 /-!
 # [FrdI] Proposition 4.4, (iii) —— `Φ^birat` を `𝒟` 上の部分関手にする
@@ -562,6 +563,22 @@ theorem isOfFrobeniusIsotropicType_of_isotropic {C' : Type u2} [Category.{v2} C'
 def birat_isOfFrobeniusNormalizedType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (iii) — Frobenius-normalized 型",
+    sectionId := "frdi-prop-4-8" }
+
+/-- ★★**(a) の前半** —— `𝒞` が isotropic 型なら `𝒞^birat` は quasi-isotropic 型。
+
+★原文の `Remark 3.1.1`(実装済 `isOfQuasiIsotropicType_of_isOfIsotropicType`)を
+`𝒞^birat` に当てるだけ。 -/
+theorem birat_isOfQuasiIsotropicType
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (h : IsOfIsotropicType P) :
+    IsOfQuasiIsotropicType (BiratCat P G) (biratPre P G) :=
+  isOfQuasiIsotropicType_of_isOfIsotropicType (biratPre P G)
+    (biratFrobenioid P G hfn).core (prop_4_8_i h)
+
+def birat_isOfQuasiIsotropicType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — quasi-isotropic 型",
     sectionId := "frdi-prop-4-8" }
 
 /-! ## ★出典の紐付け(条つき) -/

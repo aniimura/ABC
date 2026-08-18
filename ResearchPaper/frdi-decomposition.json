@@ -829,12 +829,12 @@
         {
           "id": "iii-a-isotropic",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "i-src"
           ],
           "title": "(a) quasi-isotropic ＋ Frobenius-isotropic",
-          "note": "★`𝒞^istr` は全対象 isotropic なので、`birat_isIsotropic_iff` で birat も isotropic。isotropic ⇒ quasi-isotropic。"
+          "note": "★`𝒞^istr` は全対象 isotropic なので、`birat_isIsotropic_iff` で birat も isotropic。isotropic ⇒ quasi-isotropic。\n★済(2026-08-18): `birat_isOfQuasiIsotropicType`。★★**`Remark311.lean` に `isOfQuasiIsotropicType_of_isOfIsotropicType` が既にあった**ので適用だけ。★原典の `Remark 3.1.1`(iso-subanchor は決して isotropic でない)は 3 段の証明だが、実装済だった。"
         },
         {
           "id": "iii-b-compact",
@@ -844,7 +844,7 @@
             "i-src"
           ],
           "title": "(b) group-like なので Frobenius-compact 対象が要る",
-          "note": "★★`𝒞^birat` は**常に group-like**(`birat_isOfGroupLikeType`)なので、この条件は**必ず発動する**。★rationally standard の (b)「`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つ」から`(𝒞^istr)^birat` へ渡す。★在庫: `Rmk451Birat.lean` の `istr_unTrBiratCompact`。"
+          "note": "★★`𝒞^birat` は**常に group-like**(`birat_isOfGroupLikeType`)なので、この条件は**必ず発動する**。★rationally standard の (b)「`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つ」から`(𝒞^istr)^birat` へ渡す。★在庫: `Rmk451Birat.lean` の `istr_unTrBiratCompact`。\n★★**再測(2026-08-18)**: `istr_unTrBiratCompact` は `(𝒞^un-tr)^birat` → `((𝒞^istr)^un-tr)^birat` の輸送であり、欲しいのは `(𝒞^istr)^birat` である。★`UnTr P := Istr P` なので**圈は同じ**だが、pre-Frobenioid 構造が un-tr と istr で違う。★次の一手: `isFrobeniusCompact_transport`(一般形。`End`/`OTimes`/`Iso` の対応だけで足りる)を 2 つの `biratPre` の間で使う。"
         },
         {
           "id": "iii-c-frobnorm",
