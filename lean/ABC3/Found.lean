@@ -251,6 +251,7 @@ import ABC3.Found.Arakelov.PicStalkBasis
 import ABC3.Found.Arakelov.PicTildeTensorIso
 import ABC3.Found.Arakelov.PicTildeInv
 import ABC3.Found.Arakelov.PicUnitHom
+import ABC3.Found.Arakelov.PicAwayTrans
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
