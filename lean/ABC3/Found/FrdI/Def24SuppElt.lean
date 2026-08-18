@@ -335,6 +335,162 @@ theorem suppElt_disjoint_iff (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMo
     exact hd0 (hcond d (mle_trans hdy ⟨z, hsum.symm⟩) (mle_trans hdy' ⟨z', hsum'.symm⟩))
 
 
+/-! ## ★5. ★★★★`Proposition 4.1, (iv)(v)` の単系層
+
+原文 (FrdI p.77):
+> For every primary element x  ∈
+
+★原文の条件は
+「**`p` に属さない任意の primary 元 `y` について `y ≼ e ⟺ y ≼ d + e`**」
+であり、これは **`d` の台が 1 点 `{p}` である**ことと同値である。
+★★これが (iv)(v) の中身であり、圏の側では
+(iv) は**後置**の圏同値、(v) は**前置**の圏同値でこの単系の条件に翻訳される。 -/
+
+/-- ★★素点の集合 `S` での分解を、**因子の値まで込めて**取る。 -/
+theorem exists_split_factorMap (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) (a : M) (S : Set (Prime M)) :
+    ∃ y z : M, a = y + z ∧
+      factorMap ι (Pf.of y) = Set.indicator S (factorMap ι (Pf.of a)) ∧
+      factorMap ι (Pf.of z) = Set.indicator Sᶜ (factorMap ι (Pf.of a)) := by
+  obtain ⟨y₀, z₀, hsum, hy, hz⟩ := exists_split_supp H (Pf.of a) S
+  obtain ⟨y, rfl⟩ := Pf.of_surjective_of_perfect hperf y₀
+  obtain ⟨z, rfl⟩ := Pf.of_surjective_of_perfect hperf z₀
+  exact ⟨y, z, Pf.of_injective_of_divisorial hdiv (by rw [map_add]; exact hsum), hy, hz⟩
+
+/-- ★★**台が `S` に収まる元は、`x` の下にあるなら `x` の `S` 成分の下にある**。
+
+★★これが「素点ごとに比べる」ことの実体である —— 差 `c` を `S` で割り、
+`S` の上では `y` がそのまま残ることを使う。 -/
+theorem mle_of_restrict (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) {x y xS : M} {S : Set (Prime M)}
+    (hy : SuppElt ι y ⊆ S) (h : MLe y x)
+    (hxS : factorMap ι (Pf.of xS) = Set.indicator S (factorMap ι (Pf.of x))) :
+    MLe y xS := by
+  classical
+  obtain ⟨c, hc⟩ := h
+  obtain ⟨cS, cSc, hcsum, hcS, -⟩ := exists_split_factorMap H hperf hdiv c S
+  refine ⟨cS, Pf.of_injective_of_divisorial hdiv (H.factorInj ?_)⟩
+  rw [map_add, H.factorAdd, hcS, hxS, ← hc, map_add, H.factorAdd]
+  have hself : Set.indicator S (factorMap ι (Pf.of y)) = factorMap ι (Pf.of y) :=
+    Set.indicator_eq_self.mpr hy
+  have hadd := Set.indicator_add (M := ℝ≥0) S (factorMap ι (Pf.of y)) (factorMap ι (Pf.of c))
+  rw [show (fun r => factorMap ι (Pf.of y) r + factorMap ι (Pf.of c) r)
+      = factorMap ι (Pf.of y) + factorMap ι (Pf.of c) from rfl] at hadd
+  rw [hadd, hself]
+  rfl
+
+/-- ★★**`d` の台と交わらない台を持つ `y` は、`d + e` の下にあれば `e` の下にある**。 -/
+theorem mle_of_mle_add_of_suppElt_disjoint (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {d e y : M} {q : Prime M}
+    (hy : SuppElt ι y ⊆ {q}) (hq : q ∉ SuppElt ι d) (h : MLe y (d + e)) : MLe y e := by
+  classical
+  obtain ⟨u, v, hsum, hu, -⟩ :=
+    exists_split_factorMap H hperf hdiv (d + e) ({q} : Set (Prime M))
+  obtain ⟨u', v', hsum', hu', -⟩ := exists_split_factorMap H hperf hdiv e ({q} : Set (Prime M))
+  have hdq : factorMap ι (Pf.of d) q = 0 := by
+    by_contra hc
+    exact hq (show q ∈ Supp (factorMap ι (Pf.of d)) from hc)
+  have heq : factorMap ι (Pf.of u) = factorMap ι (Pf.of u') := by
+    rw [hu, hu']
+    funext r
+    by_cases hr : r ∈ ({q} : Set (Prime M))
+    · have hrq : r = q := hr
+      subst hrq
+      rw [Set.indicator_of_mem hr, Set.indicator_of_mem hr, map_add, H.factorAdd,
+        Pi.add_apply, hdq, zero_add]
+    · rw [Set.indicator_of_notMem hr, Set.indicator_of_notMem hr]
+  have huu' : u = u' := Pf.of_injective_of_divisorial hdiv (H.factorInj heq)
+  exact mle_trans (mle_of_restrict H hperf hdiv hy h hu) (huu' ▸ ⟨v', hsum'.symm⟩)
+
+/-- ★★★**原文の条件が成り立てば `d` の台は `{p}` に収まる**。
+
+★`d + e` の `q` 成分だけを残した `u` が primary になり、
+`u ≼ e` から `q` 成分で `d` の分が消えることが出る。 -/
+theorem suppElt_subset_of_cond (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) {d e : M} {p : Prime M}
+    (hcond : ∀ y : M, IsPrimaryElt y → SuppElt ι y ≠ {p} → (MLe y e ↔ MLe y (d + e))) :
+    SuppElt ι d ⊆ {p} := by
+  classical
+  intro q hq
+  by_contra hqp
+  obtain ⟨u, v, hsum, hu, -⟩ :=
+    exists_split_factorMap H hperf hdiv (d + e) ({q} : Set (Prime M))
+  have hqde : q ∈ SuppElt ι (d + e) := by
+    rw [suppElt_add H]; exact Or.inl hq
+  have hsuppu : SuppElt ι u = ({q} : Set (Prime M)) := by
+    show Supp (factorMap ι (Pf.of u)) = _
+    rw [hu, supp_indicator]
+    exact Set.inter_eq_left.mpr (fun r hr => by rw [show r = q from hr]; exact hqde)
+  have hu0 : u ≠ 0 := by
+    intro h0
+    rw [h0, suppElt_zero H] at hsuppu
+    exact absurd hsuppu.symm (by simp)
+  have hup : IsPrimaryElt u := isPrimaryElt_of_suppElt_singleton H hdiv hu0 hsuppu
+  have hne : SuppElt ι u ≠ {p} := by
+    rw [hsuppu]
+    intro hcontra
+    exact hqp (by rw [← Set.singleton_eq_singleton_iff.mp hcontra]; rfl)
+  obtain ⟨c, hc⟩ := (hcond u hup hne).mpr ⟨v, hsum.symm⟩
+  have h1 : factorMap ι (Pf.of u) q + factorMap ι (Pf.of c) q = factorMap ι (Pf.of e) q := by
+    rw [← hc, map_add, H.factorAdd, Pi.add_apply]
+  have h2 : factorMap ι (Pf.of u) q
+      = factorMap ι (Pf.of d) q + factorMap ι (Pf.of e) q := by
+    rw [hu, Set.indicator_of_mem (Set.mem_singleton q), map_add, H.factorAdd, Pi.add_apply]
+  have h3 : factorMap ι (Pf.of d) q + factorMap ι (Pf.of c) q = 0 := by
+    refine add_right_cancel (b := factorMap ι (Pf.of e) q) ?_
+    rw [zero_add, add_right_comm, ← h2, h1]
+  exact hq (add_eq_zero.mp h3).1
+
+/-- ★★★★**[FrdI] Proposition 4.1, (iv)(v) の単系層**。
+
+原文 (FrdI p.77):
+> The necessity and sufficiency of this condition then follow immediately by com-
+
+★**`d` が primary ⟺ ある素点 `p` があって、`p` に属さない primary 元 `y` については
+`y ≼ e` と `y ≼ d + e` が同値**。★(iv) と (v) は、圏の側で
+後置／前置のどちらの圏同値を使うかだけが違い、単系の内容はこの 1 本である。 -/
+theorem isPrimaryElt_iff_exists_prime_cond (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {d e : M} (hd : d ≠ 0) :
+    IsPrimaryElt d ↔ ∃ p : Prime M, ∀ y : M, IsPrimaryElt y → SuppElt ι y ≠ {p} →
+      (MLe y e ↔ MLe y (d + e)) := by
+  classical
+  constructor
+  · intro hp
+    obtain ⟨P, hP⟩ := suppElt_singleton_of_primary H hperf hdiv hp
+    refine ⟨P, fun y hy hne => ⟨fun h => mle_trans h ⟨d, add_comm _ _⟩, fun h => ?_⟩⟩
+    obtain ⟨q, hq⟩ := suppElt_singleton_of_primary H hperf hdiv hy
+    have hqP : q ≠ P := by rintro rfl; exact hne hq
+    refine mle_of_mle_add_of_suppElt_disjoint H hperf hdiv (q := q) (by rw [hq]) ?_ h
+    rw [hP]
+    exact hqP
+  · rintro ⟨p, hcond⟩
+    have hsub : SuppElt ι d ⊆ {p} := suppElt_subset_of_cond H hperf hdiv hcond
+    obtain ⟨q, hq⟩ : ∃ q, q ∈ SuppElt ι d :=
+      Set.nonempty_iff_ne_empty.mpr (suppElt_ne_empty H hdiv hd)
+    refine isPrimaryElt_of_suppElt_singleton H hdiv hd (P := p) ?_
+    exact Set.eq_singleton_iff_unique_mem.mpr ⟨hsub hq ▸ hq, fun r hr => hsub hr⟩
+
+/-- ★★★**primary な元の台は、その元の属する素点 1 点**。
+
+★★これにより、原文の条件「`x_ϵ′ ∉ p`」が
+`SuppElt ι x_ϵ′ ≠ {p}` と**同じこと**であることが分かる。 -/
+theorem suppElt_eq_singleton_toPrime (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {a : M} (ha : IsPrimaryElt a) :
+    SuppElt ι a = {toPrime M a ha} := by
+  obtain ⟨P, hP⟩ := suppElt_singleton_of_primary H hperf hdiv ha
+  obtain ⟨n, b, hb, hnb⟩ | h0 := of_mem_pCarrierPf_of_suppElt_singleton H hdiv hP
+  · obtain ⟨hbp, hbe⟩ := hb
+    rw [← map_nsmul] at hnb
+    have hnab : ((n : ℕ+) : ℕ) • a = b := Pf.of_injective_of_divisorial hdiv hnb
+    have hab : MPrec a b := by
+      refine ⟨1, one_pos, ?_⟩
+      rw [one_smul, ← hnab]
+      exact mle_nsmul_self' n.2
+    rw [hP, ← hbe, (toPrime_eq_iff ha hbp).mpr hab]
+  · exact absurd (by rw [suppElt_eq, h0, factorMap_zero H]; ext r; simp [Supp] :
+      SuppElt ι a = (∅ : Set (Prime M))) (by rw [hP]; simp)
+
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def Pf.of_injective_of_divisorial.src : ABC3.Meta.Source :=
