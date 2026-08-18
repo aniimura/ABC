@@ -603,16 +603,26 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isotropification_isPreStep_iff`。\n★在庫の `isotropification_degFr`(次数の保存)と `isotropification_baseIso_iff`(底同型の両向き保存)を組むだけで出た。\n★`istrPre_Base` / `istrPre_degFr` が `rfl` なので、定義展開だけで繋がる。\n★置き場所の罠: `Thm34Pre.lean` に入れると `w` のスコープが合わないので専用ファイルにした。"
         },
         {
+          "id": "ii-square-congr",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "ii-istr-prestep"
+          ],
+          "title": "同型四角形で pre-step 性は不変",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isPreStep_congr_iso`。\n★★`isotropificationCommute` は**自然同型**であって等式ではないので、射の性質を四角形を越えて運ぶ補題が要る。\n★次数は同型が 1(`degFr_of_isIso`)だから、底同型は同型の合成から。"
+        },
+        {
           "id": "ii-quasi",
           "title": "(ii) を quasi-isotropic 型へ一般化する",
           "deps": [
-            "ii-istr-prestep",
+            "ii-square-congr",
             "i"
           ],
           "status": "todo",
           "size": "★中",
           "evidence": "★現在は isotropic 型を直接仮定している。原文は `Proposition 1.7, (iv)` と (i) で帰着させる。",
-          "note": "★★★**経路を測った(2026-08-18)——在庫が揃っている**。\n\n現在の `thm_3_4_ii`(`Thm34Pre.lean:394`)は `hiso₁ : ∀ X, IsIsotropic P₁ X`(**isotropic 型**)を仮定しているが、原典は **quasi-isotropic 型**で十分だと言う。\n\n## ★帰着の筋\n1. quasi-isotropic から `psiIstr_isEquivalence`(`Thm34.lean:697`)で **`Ψ^istr : 𝒞₁^istr ≅ 𝒞₂^istr`** を得る。★これは既に `IsOfQuasiIsotropicType` を仮定として受けている。\n2. `𝒞ᵢ^istr` は**全対象 isotropic**なので、現行の `thm_3_4_ii` がそのまま適用できる。\n3. `isotropificationCommute`(`Thm34.lean:774`)の 1-可換図式で `Ψ` へ戻す。\n\n## ★★残る実体\n★**`𝒞` での pre-step 性と `𝒞^istr` での pre-step 性の関係**を付けること。\n★在庫: `isometricPreStep_map`(`Thm34.lean:630`)、`prop_1_9_vi`(isotropic hull の特徴づけ)、`isotropification`(`Prop19.lean:691`)。\n★group-like 対象の保存も同じ経路で渡る見込み。"
+          "note": "★★★**経路を測った(2026-08-18)——在庫が揃っている**。\n\n現在の `thm_3_4_ii`(`Thm34Pre.lean:394`)は `hiso₁ : ∀ X, IsIsotropic P₁ X`(**isotropic 型**)を仮定しているが、原典は **quasi-isotropic 型**で十分だと言う。\n\n## ★帰着の筋\n1. quasi-isotropic から `psiIstr_isEquivalence`(`Thm34.lean:697`)で **`Ψ^istr : 𝒞₁^istr ≅ 𝒞₂^istr`** を得る。★これは既に `IsOfQuasiIsotropicType` を仮定として受けている。\n2. `𝒞ᵢ^istr` は**全対象 isotropic**なので、現行の `thm_3_4_ii` がそのまま適用できる。\n3. `isotropificationCommute`(`Thm34.lean:774`)の 1-可換図式で `Ψ` へ戻す。\n\n## ★★残る実体\n★**`𝒞` での pre-step 性と `𝒞^istr` での pre-step 性の関係**を付けること。\n★在庫: `isometricPreStep_map`(`Thm34.lean:630`)、`prop_1_9_vi`(isotropic hull の特徴づけ)、`isotropification`(`Prop19.lean:691`)。\n★group-like 対象の保存も同じ経路で渡る見込み。\n\n## ★★★組み立ての手順(部品は全部揃った、2026-08-18)\n`φ : A ⟶ B` に対し:\n1. `isotropification_isPreStep_iff P₁ F₁ φ`で `𝒞₁^istr` へ落とす\n2. `thm_3_4_ii` を `(psiIstr …).asEquivalence` に適用(`Istr Pᵢ` は全対象 isotropic なので仮定が満たされる)\n3. `isotropificationCommute` の自然同型を `isPreStep_congr_iso` で渡る\n4. `isotropification_isPreStep_iff P₂ F₂ (Ψ.map φ)` で戻す\n★残るのは仮定の配線だけ(`hFrobMono`/`hFrobFS`/FSMFF を `istrPre` 側へ渡す)。"
         },
         {
           "id": "iii-primefrob",

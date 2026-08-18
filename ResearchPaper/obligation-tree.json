@@ -128,10 +128,10 @@
       "track": "Arakelov",
       "code": "B3",
       "ja": "Pic(Spec O_F) = ClassGroup",
-      "fieldsDone": 0,
+      "fieldsDone": 3,
       "fieldsTotal": 3,
-      "blocks": "5-8",
-      "note": "mathlib に ClassGroup.equivPic"
+      "blocks": "1",
+      "note": "2026-08-18 達成: Found/Arakelov/PicSpecWitness.lean の picSpecDataWitness。B1 + mathlib の ClassGroup.equivPic の合成で 1 ブロック。"
     },
     {
       "name": "TateCurveData",
@@ -255,8 +255,8 @@
     "Arakelov": {
       "obligations": 9,
       "fields": 76,
-      "done": 2,
-      "blocksDone": 146,
+      "done": 3,
+      "blocksDone": 147,
       "blocksRemaining": "約 180-260"
     },
     "Galois": {

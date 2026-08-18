@@ -6987,3 +6987,40 @@ instance 検索が**別物として扱う**。
 | `comap_mul` | ★我々が `Found/GenEll/ComapMul.lean` に証明済み |
 
 ★見積もり: **約 30–45 ブロック**。
+
+## §9-160 —— ★★★★★★**B3 達成**(第 147 ブロック、2026-08-18)
+
+    picSpecDataWitness : ABC3.Interface.Arakelov.PicSpecData
+
+★★**1 ブロック**。B1 が入ったので `PicSpecData` の 3 欄が即座に埋まった:
+
+| 欄 | witness |
+|---|---|
+| `toPicardData` | 第 146(B1) |
+| `equivClassGroup` | 第 145 と mathlib の `ClassGroup.equivPic` の合成 |
+| `equivClassGroup_compat` | `apply_symm_apply` 一発 |
+
+### 在庫の実測(2026-08-18)
+
+    ClassGroup.equivPic (R) [CommRing R] [IsDomain R] : ClassGroup R ≃* CommRing.Pic R
+      —— mathlib RingTheory/PicardGroup.lean 849 行。★有った。
+
+★★**測ってから作れば見積もりは効く**の 2 例目
+(1 例目は §9-149 の QC 群、見積もり 26 → 実績 12)。
+
+### ★★★到達
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+
+### ★次の判断——B2 は大きい
+
+B2 の在庫を実測した結果:
+
+| 項目 | 状態 |
+|---|---|
+| `Scheme.IdealSheafData` | ★有り(ただし**閉部分スキーム用**) |
+| `IdealSheafData → SheafOfModules` | ★★**無い**(接続が一切無い) |
+| Cartier 因子 | ★★**0 件** |
+
+★イデアル層を層加群として作る段(アフィン開ごとのイデアルを貼る)が要るので、
+見積もりは **40–60 ブロック**へ上方修正する。

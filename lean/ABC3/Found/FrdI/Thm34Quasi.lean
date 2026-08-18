@@ -57,4 +57,56 @@ def isotropification_isPreStep_iff.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (ii) — isotropification は pre-step を保つ",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★同型四角形で pre-step 性は不変
+
+★★`isotropificationCommute`(`Thm34.lean:774`)の自然同型を渡るのに要る。
+★`Ψ^istr ∘ istr₁` と `istr₂ ∘ Ψ` は**同型だが同一ではない**ので、
+射の性質を四角形を越えて運ぶ補題が必要である。 -/
+
+/-- ★★★★**同型の四角形を越えて pre-step 性は保たれる**。
+
+★次数は同型が 1 だから、底同型は同型の合成から出る。 -/
+theorem isPreStep_congr_iso {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A B A' B' : Cc} (f : A ⟶ B) (f' : A' ⟶ B')
+    (α : A ≅ A') (β : B ≅ B') (h : f ≫ β.hom = α.hom ≫ f') :
+    IsPreStep P f ↔ IsPreStep P f' := by
+  have hda : P.degFr α.hom = 1 := degFr_of_isIso P α.hom
+  have hdb : P.degFr β.hom = 1 := degFr_of_isIso P β.hom
+  have hd : P.degFr f = P.degFr f' := by
+    have := congrArg P.degFr h
+    rwa [P.degFr_comp, P.degFr_comp, hda, hdb, mul_one, one_mul] at this
+  have hb := congrArg P.Base h
+  rw [P.Base_comp, P.Base_comp] at hb
+  haveI : IsIso (P.Base α.hom) := ⟨P.Base α.inv, by
+    rw [← P.Base_comp, α.hom_inv_id, P.Base_id], by
+    rw [← P.Base_comp, α.inv_hom_id, P.Base_id]⟩
+  haveI : IsIso (P.Base β.hom) := ⟨P.Base β.inv, by
+    rw [← P.Base_comp, β.hom_inv_id, P.Base_id], by
+    rw [← P.Base_comp, β.inv_hom_id, P.Base_id]⟩
+  constructor
+  · rintro ⟨hl, hbi⟩
+    refine ⟨?_, ?_⟩
+    · show P.degFr f' = 1
+      rw [← hd]; exact hl
+    · show IsIso (P.Base f')
+      haveI : IsIso (P.Base f) := hbi
+      have : P.Base f' = inv (P.Base α.hom) ≫ (P.Base f ≫ P.Base β.hom) := by
+        rw [hb, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+      rw [this]; infer_instance
+  · rintro ⟨hl, hbi⟩
+    refine ⟨?_, ?_⟩
+    · show P.degFr f = 1
+      rw [hd]; exact hl
+    · show IsIso (P.Base f)
+      haveI : IsIso (P.Base f') := hbi
+      have : P.Base f = (P.Base α.hom ≫ P.Base f') ≫ inv (P.Base β.hom) := by
+        rw [← hb, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+      rw [this]; infer_instance
+
+def isPreStep_congr_iso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (ii) — 同型四角形で pre-step 性は不変",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
