@@ -288,6 +288,7 @@ import ABC3.Found.Arakelov.PicAwayScalar
 import ABC3.Found.Arakelov.PicAwayLin
 import ABC3.Found.Arakelov.PicAwayTransport
 import ABC3.Found.Arakelov.PicSectionEquiv
+import ABC3.Found.Arakelov.PicPointwise
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
