@@ -103,22 +103,40 @@ theorem sliceBaseOf_asIso {A B A' : C} (a : A' ⟶ A) (ha : IsIso (P.Base a)) (�
     sliceBaseOf (P := P) a ha φ = (@asIso _ _ _ _ (P.Base a) ha).inv ≫ P.Base φ := rfl
 
 variable {P G} in
-/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(代表元の形)。 -/
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(代表元の形)。
+
+★★目標式ではなく**仮定の側で書き換える** ——
+`𝟙` の型に `show BiratCat P G from A` の痕が残るのを避けるため。 -/
 theorem birat_isBaseIdentity_mk {A : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ A) :
     IsBaseIdentity (biratPre P G) (HomBirat.mk Z φ)
       ↔ BaseEquivalent P Z.unop.hom.hom φ := by
-  have hid : biratBase (𝟙 (A : BiratCat P G)) = 𝟙 (P.toElem.obj A).base := by
+  have hid : biratBase (𝟙 (show BiratCat P G from A))
+      = 𝟙 (P.toElem.obj A).base := by
     show biratBase (toHomBirat (P := P) (G := G) (𝟙 A)) = 𝟙 _
     rw [biratBase_toHomBirat, P.Base_id]
-  show biratBase (HomBirat.mk Z φ) = biratBase (𝟙 (A : BiratCat P G)) ↔ _
-  rw [biratBase_mk, hid, sliceBaseOf_asIso, Iso.inv_comp_eq, Category.comp_id]
-  exact eq_comm
+  constructor
+  · intro h
+    have h1 : sliceBaseOf (P := P) Z.unop.hom.hom Z.unop.hom.property.2.2 φ
+        = 𝟙 (P.toElem.obj A).base := by
+      rw [← biratBase_mk]
+      exact h.trans hid
+    rw [sliceBaseOf_asIso] at h1
+    show P.Base Z.unop.hom.hom = P.Base φ
+    have h2 := (Iso.inv_comp_eq _).mp h1
+    simpa using h2.symm
+  · intro h
+    show biratBase (HomBirat.mk Z φ) = biratBase (𝟙 (show BiratCat P G from A))
+    refine Eq.trans ?_ hid.symm
+    rw [biratBase_mk, sliceBaseOf_asIso,
+      show P.Base φ = (asIso (P.Base Z.unop.hom.hom)).hom from h.symm]
+    exact Iso.inv_hom_id _
 
 variable {P G} in
 /-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(存在の形)。
 
 ★原文の「arises from a pair (α; φ) … base-equivalent」そのもの。 -/
-theorem birat_isBaseIdentity_iff {A : C} (f : (A : BiratCat P G) ⟶ (A : BiratCat P G)) :
+theorem birat_isBaseIdentity_iff {A : C}
+    (f : (show BiratCat P G from A) ⟶ (show BiratCat P G from A)) :
     IsBaseIdentity (biratPre P G) f ↔
       ∃ (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ A),
         f = HomBirat.mk Z φ ∧ BaseEquivalent P Z.unop.hom.hom φ := by
