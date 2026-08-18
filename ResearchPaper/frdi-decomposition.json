@@ -915,14 +915,24 @@
           "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。\n\n★★well-defined 性は `psiN-welldef` で取った(2026-08-18)。\n★残るのは選択で写像を作り、quasi-inverse で逆写像を作って全単射にする束ねる作業。★見積りを ★中 → ★小 に下げた。"
         },
         {
+          "id": "psiN-deg-mul",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "psiN-welldef"
+          ],
+          "title": "像の次数の乗法性",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `degFr_map_comp`。\n★関手性と `degFr_comp` から**1 行**で出た。\n★原典の「任意の射は prime-Frobenius と linear の合成で書ける」(`prop_1_10_v`、実装済)と合わせて、任意の次数へ広げる土台。"
+        },
+        {
           "id": "psiN-degree",
-          "size": "中",
+          "size": "小",
           "status": "todo",
           "deps": [
-            "psiN-prime-bij"
+            "psiN-deg-mul"
           ],
           "title": "Ψ は次数 d の射を次数 Ψ_N(d) の射へ送る",
-          "note": "★一意分解と `psiN-extend` の乗法性から。"
+          "note": "★一意分解と `psiN-extend` の乗法性から。\n\n★★乗法性は `psiN-deg-mul` で取った(2026-08-18)。\n★残るのは `prop_1_10_v` で分解し、各 prime-Frobenius 因子にadmissible 性を当てて帰納する束ねる作業。"
         },
         {
           "id": "psiN-identity",

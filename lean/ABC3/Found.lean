@@ -336,6 +336,7 @@ import ABC3.Found.Arakelov.PicTrivialNoSheaf
 import ABC3.Found.Arakelov.PicDualTrivial
 import ABC3.Found.Arakelov.PicUnitVal
 import ABC3.Found.Arakelov.PicFVal
+import ABC3.Found.Arakelov.PicEvalBil
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

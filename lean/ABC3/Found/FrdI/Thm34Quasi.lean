@@ -1030,4 +1030,23 @@ def admissible_snd_unique.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 素数の対応の一意性",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★次数の対応を任意の次数へ広げる
+
+原文 (FrdI p.64):
+> degree ΨN≥1 (d) [i.e., since arbitrary morphisms may be written as composites of
+
+★★原典は「任意の射は prime-Frobenius と linear の合成で書ける」ことを使う。
+★在庫の `prop_1_10_v`(Frobenius 型 ⇔ prime-Frobenius の合成)がそれを与える。
+★合成で次数が掛け算になることは関手性と `degFr_comp` から直ちに出る。 -/
+
+/-- ★★★**像の次数は合成で掛け算になる**。 -/
+theorem degFr_map_comp (Ψ : C₁ ⥤ C₂) {A B E : C₁} (φ : A ⟶ B) (ψ : B ⟶ E) :
+    P₂.degFr (Ψ.map (φ ≫ ψ)) = P₂.degFr (Ψ.map ψ) * P₂.degFr (Ψ.map φ) := by
+  rw [Ψ.map_comp, P₂.degFr_comp]
+
+def degFr_map_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — 像の次数の乗法性",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
