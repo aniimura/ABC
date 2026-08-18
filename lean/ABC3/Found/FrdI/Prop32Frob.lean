@@ -3765,31 +3765,12 @@ pull-back)の 1 本だった。これで `arbFactor` / `arbFactorUniq` / `plBkEq
 
 ### `Proposition 3.2` 全体として残るもの
 
-1. **`Frobenioid` の 2 本の圏同値** `coaPreUnderEquiv` / `coaPreOverEquiv`((iii)(d))
-   —— 4 つのうち **3 つは済んだ**(2026-08-17):
-
-   | 条 | 宣言 | 状態 |
-   |---|---|---|
-   | 前置・忠実 | `coaPreUnder_faithful` | ★済(pre-Frobenioid 一般。全射性から) |
-   | 後置・忠実 | `coaPreOver_faithful` | ★済(pre-Frobenioid 一般。pre-step が mono から) |
-   | 前置・本質的全射 | `pfRoot_coaPreUnder_essSurj` | ★済 |
-   | 前置・充満 | —— | ★**未** |
-   | 後置・本質的全射 | —— | ★**未** |
-   | 後置・充満 | —— | ★**未** |
-
-   ★★**前置・本質的全射の手**: `X = (A,r)`、`x = a/n` に対し
-   `X ≅ (A^{(n)}, r·n)` で根を上げ、`𝒞` の本質的全射性を `A^{(n)}` で `r·a` に当て、
-   `Λ_{r·n}` で押し出す。`rootDiv (Λ_k ψ) = Div ψ / k`(`rootDiv_lamHom`)なので
-   出てくる零因子は `(r·a)/(r·n) = a/n` である。
-
-   ★★**充満に要るもの**(測定済み、未実装): `φ : X ⟶ Y₁`・`ψ : X ⟶ Y₂` を
-   **3 脚の添字の上で**揃える道具(`exists_rep3_span` —— `exists_rep3_cospan` の双対)。
-   ★そのうえで `Pf` の `≼` を代表元の `≼` に落とす:
-   `Pf.mk c₁ N ≼ Pf.mk c₂ N` から `k` を取り、添字を `k` 倍に上げると
-   分子が `k·c₁ ≼ k·c₂` になる(遷移は分子を `k` 倍する)。
+1. ~~**`Frobenioid` の 2 本の圏同値** `coaPreUnderEquiv` / `coaPreOverEquiv`((iii)(d))~~
+   ★★★**2026-08-18 に 6 条すべて閉じた**(`Prop32Equiv.lean` の
+   `pfRoot_frobenioid`)。表は `Prop32Equiv.lean` の冒頭にある。
 2. **(ii) の辞書の残り** —— Frobenius 型・pull-back・co-angular・
    base-identity 自己射・同型(`isPreStep` など 5 項は `Prop32.lean` で済み)
-3. **(iii) の後半** —— `𝒞^pf ≃ (𝒞^pf)^pf`
+3. **(iii) の後半** —— 「perfect 型」と `𝒞^pf ≃ (𝒞^pf)^pf`
 -/
 
 /-- ★**locator** —— `Proposition 3.2, (iii)` の**中核**(`Definition 1.3` の 21 条)。
