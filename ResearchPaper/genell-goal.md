@@ -7167,3 +7167,13 @@ B2 の在庫を実測した結果:
 
 ★これは §9-157 の「測ってから作る」の姉妹である:
 **Interface を作るときは、退化 witness が通らないことを型で確かめる。**
+
+## §9-167 —— 基本開集合での切断(第 152 ブロック、2026-08-18)
+
+    idealSections_basicOpen : idealSections D (X.basicOpen f) = (D.ideal A).map (制限)
+
+★これで「`D.ideal A` が可逆 ⟹ `idealSections` は局所自由」が
+**第 130 ブロックを再利用して**書ける——`Γ(tilde M, ·)` と同じ形だからである。
+
+★★逃げ道: `rw [D.map_ideal …]` は instances 透明度で落ちる。
+`(idealSections_affine …).trans (D.map_ideal …).symm` と**項で書く**([[exact-term-over-rw]] 5 例目)。
