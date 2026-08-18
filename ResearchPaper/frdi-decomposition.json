@@ -410,12 +410,12 @@
         {
           "id": "phibirat-image-subfunctor",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "phibirat-otristar"
           ],
           "title": "自然変換の像として Φ^birat ⊆ Φ^gp を組む",
-          "note": "★`𝒪^×(−)` も `Φ^gp(−)` も `𝒟*` 上の関手で、`Div^gp` が**自然変換**なので、像は自動的に部分関手になる。★既に取った `phiBiratAt`(各点の像)と、同型輸送 `phiBiratAt_map_le` がその材料。"
+          "note": "★`𝒪^×(−)` も `Φ^gp(−)` も `𝒟*` 上の関手で、`Div^gp` が**自然変換**なので、像は自動的に部分関手になる。★既に取った `phiBiratAt`(各点の像)と、同型輸送 `phiBiratAt_map_le` がその材料。\n★済(2026-08-18): `otriLin_biratDivGp` → `dstarMap_biratDivGp` → `phiBiratAt_map_le_dstar`。★消約は **`Gp` が群なので無償**(原型 `otriLin_Div` は `Φ` の integral 性を使っていた)。★単射性は `σ` が pre-step だから `gpMap_map_injective_of_isIso` で取れる。"
         },
         {
           "id": "phibirat-dfunct",
