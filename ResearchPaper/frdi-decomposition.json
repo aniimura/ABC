@@ -666,23 +666,34 @@
         },
         {
           "id": "psiN-F1",
-          "size": "大",
+          "size": "中",
           "status": "todo",
           "deps": [
             "psiN-admissible"
           ],
           "title": "(F1) 各素数 p₁ に admissible な対象が存在する",
-          "note": "★原文(FrdI p.64):\n> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a\n> (p1, p2)-admissible object of C1.\n★ここが (iii) の**数学的な本体**である。★`𝒞` が group-like か否かで場合分けする(非 group-like なら p₂ = p₁)。"
+          "note": "★原文(FrdI p.64):\n> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a\n> (p1, p2)-admissible object of C1.\n★ここが (iii) の**数学的な本体**である。★`𝒞` が group-like か否かで場合分けする(非 group-like なら p₂ = p₁)。\n\n## ★★★原典の証明(FrdI p.65、2026-08-18 精読)\n**group-like の場合**: pre-step はすべて同型。`Proposition 1.14, (i)` より「A₁ から出る prime-Frobenius 射」＝「A₁ から出る既約な底同型」なので、Ψ が保つ。\n**非 group-like の場合**: `Definition 1.3, (i)(a)` ＋ `Proposition 1.8, (iii)` でA₁ を **Frobenius-trivial** としてよい。そのとき **base-identity な p₁-Frobenius 自己射** φ₁ が取れ、★原文の括弧書き「base-identity [hence Div-identity]」で Div-identity になる。\n★★**これが私が探していた鍵だった**。在庫に既に `isDivIdentity_of_isBaseIdentity`(`MorphismTypes.lean:530`)がある。\n★後は (ii)(pre-step の保存、**本セッションで実装済**)と `Proposition 1.14, (v)`(= `prop_1_14_v`、**実装済**)で出る。\n★★見積りを ★大 → ★中 に下げた。"
         },
         {
           "id": "psiN-F2",
-          "size": "大",
+          "size": "中",
           "status": "todo",
           "deps": [
             "psiN-admissible"
           ],
           "title": "(F2) admissible 性は射を越えて同値",
-          "note": "★原文(FrdI p.64):\n> (F2) For every pair of primes p1, p2 ∈ Primes and every morphism ζ1 : A1 →\n> B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is.\n★`frobDegUniq` と `Proposition 1.7` の分解が効く見込み。"
+          "note": "★原文(FrdI p.64):\n> (F2) For every pair of primes p1, p2 ∈ Primes and every morphism ζ1 : A1 →\n> B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is.\n★`frobDegUniq` と `Proposition 1.7` の分解が効く見込み。\n\n## ★★★原典の証明(FrdI p.65)\nζ₁ が pre-step のとき: (ii) で Ψ が pre-step を保つので、`Proposition 1.10, (i)` の可換図式に `Proposition 1.14, (iv)` を当てる。\n一般の場合: `Definition 1.3, (i)(a)(b)(c)` で B₁ を Frobenius-trivial、ζ₁ を pull-back としてよい。\n★`Proposition 1.11, (iii)` で **ψ₁ ∘ ζ₁ = ζ₁ ∘ φ₁** となるbase-identity な p₁-Frobenius 自己射を取る。\n★像でも四角形が保たれ、`Proposition 1.14, (iv)` で「φ₂ が p₂-Frobenius ⇔ ψ₂ がそう」が出る。\n★★見積りを ★大 → ★中 に下げた。"
+        },
+        {
+          "id": "psiN-F3",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "psiN-F1",
+            "psiN-F2"
+          ],
+          "title": "(F3) 非 group-like なら (p,p)-admissible な対象がある",
+          "note": "★★**原典には 3 つ目の主張があった**(FrdI p.65、登記漏れを訂正):\n> (F3) If C1, C2 are not of group-like type, then for each prime p ∈ Primes, there\n> exist a (p, p)-admissible object of C1.\n★これが「非 group-like なら Ψ_N は恒等」の中身である。\n★(F1)(F2) から Ψ が prime-Frobenius を保つことは既に出ている。"
         },
         {
           "id": "psiN-connected",
@@ -690,7 +701,8 @@
           "status": "todo",
           "deps": [
             "psiN-F1",
-            "psiN-F2"
+            "psiN-F2",
+            "psiN-F3"
           ],
           "title": "連結性で全対象へ広げ、素数の写像を定める",
           "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。"
@@ -720,6 +732,7 @@
           "size": "中",
           "status": "todo",
           "deps": [
+            "psiN-F3",
             "psiN-degree"
           ],
           "title": "non-group-like 対象があれば Ψ_N は恒等",
