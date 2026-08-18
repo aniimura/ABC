@@ -655,21 +655,52 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `pnatMulEquivOfPrimeEquiv`。\n★mathlib の `PNat.factorMultiset` / `PrimeMultiset`(`Mathlib.Data.PNat.Factors`)を使う。\n★★**罠**: `PrimeMultiset` は `def`(`abbrev` ではない)なので、`(Multiset.map σ …).prod` は `Multiset.prod` に解釈されて `CommMonoid Nat.Primes` を要求される。`PrimeMultiset.prod (…)` と**明示に書く**こと。\n★同様に `+` も `PrimeMultiset` 側と `Multiset` 側で構文が違うので、`rw` ではなく `exact PrimeMultiset.prod_add _ _`(defeq)で締める。"
         },
         {
-          "id": "psiN-prime-map",
-          "size": "大",
-          "status": "todo",
+          "id": "psiN-admissible",
+          "size": "小",
+          "status": "done",
           "deps": [
             "psiN-extend"
           ],
-          "title": "素数 p → 像の次数 q の写像を定義し well-defined を示す",
-          "note": "★手順: (1) `frobDegSurj` で次数 p の Frobenius 型射を作る。(2) prime-Frobenius に分解する。(3) `iii-primefrob-full`(`primeFrobDivId_map_iff`)で像も prime-Frobenius になる。(4) その次数が素数であることと、**選び方に依らないこと**を示す。★(4) が本体。\n\n## ★★★构造の発見(2026-08-18)——場合分けは原典と対応する\n★`IsDivIdentity {A : C} (φ : A ⟶ A)` は**自己射のみ**に定義されている。\n★したがって `iii-primefrob-full`(`primeFrobDivId_map_iff`)は**prime-Frobenius の自己射**にしか使えない。\n★★そして `exists_primeFrobenius_endo`(`Prop311.lean:289`)は**`IsOfGroupLikeType` を仮定として取る**。\n\n★★★**これは原典の場合分けそのものである**(FrdI p.62):\n> if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity\n\n- **group-like の場合**: `exists_primeFrobenius_endo` で素数次数の自己射を作り、`primeFrobDivId_map_iff` で像も prime-Frobenius になることを出す。★こちらでは `Ψ_N` が非自明になりうる。\n- **non-group-like な対象がある場合**: `Ψ_N = id`。別の議論。\n\n★したがってこの節点は**さらに 2 つに割れる**が、割る前に「well-defined 性をどこから出すか」(`frobDegUniq` ＋ `𝒞` の連結性)を確かめること。\n\n## ★★★さらに分かったこと(2026-08-18)\n★一度「Frobenius 型なら `IsDivIdentity` は自動」と書こうとしたが**偽**である。\n★FrdI の `Div-equivalent` は `Φ(φ) = Φ(ψ)`(誘導される単項式射の一致)であって、`metrically equivalent`(`Div(φ) = Div(ψ)`)とは**別条件**である(`MorphismTypes.lean:148` の注意書きのとおり)。\n★★`IsDivIdentity φ` = `Φ.map (Base φ) = Φ.map (𝟙)` なので、**`Φ` が non-dilating であること**から出す筋になる。\n★★★これが `Theorem 3.4, (iii)` が **standard 型**を仮定する理由である(`IsOfStandardType` の (e) が `Φ` の non-dilating)。★仮定の意味が実装と紐づいた。\n\n## ★封じた道(2026-08-18)\n★`IsDivIdentity` を `Φ` の non-dilating から直に出そうとしたが、**届かない**。\n★non-dilating が与えるのは `charMap (Φ.map (Base φ)) = id`(**`MChar` レベル**)で、\n欲しいのは `Φ.map (Base φ) = Φ.map 𝟙`(**`Φ` レベル**)である。\n★`MonoidOn.charInj` は `IsCharacteristicallyInjective (Φ.map α)` = `Injective (Φ.map α) ∧ Injective (charMap (Φ.map α))` を与えるが、これは**写像自身の単射性**であって、`α ↦ charMap (Φ.map α)` の単射性ではない。\n★★したがって charMap レベルから `Φ` レベルへの橋は在庫に無い。★別の経路(原典の (iii) の証明を直に読む)が要る。"
+          "title": "(p₁,p₂)-admissible 対象の定義と射に沿う伝搬",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `IsAdmissibleObj` / `isAdmissibleObj_of_hom`。\n★原典(FrdI p.64)の骨格をそのまま置いた。"
+        },
+        {
+          "id": "psiN-F1",
+          "size": "大",
+          "status": "todo",
+          "deps": [
+            "psiN-admissible"
+          ],
+          "title": "(F1) 各素数 p₁ に admissible な対象が存在する",
+          "note": "★原文(FrdI p.64):\n> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a\n> (p1, p2)-admissible object of C1.\n★ここが (iii) の**数学的な本体**である。★`𝒞` が group-like か否かで場合分けする(非 group-like なら p₂ = p₁)。"
+        },
+        {
+          "id": "psiN-F2",
+          "size": "大",
+          "status": "todo",
+          "deps": [
+            "psiN-admissible"
+          ],
+          "title": "(F2) admissible 性は射を越えて同値",
+          "note": "★原文(FrdI p.64):\n> (F2) For every pair of primes p1, p2 ∈ Primes and every morphism ζ1 : A1 →\n> B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is.\n★`frobDegUniq` と `Proposition 1.7` の分解が効く見込み。"
+        },
+        {
+          "id": "psiN-connected",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "psiN-F1",
+            "psiN-F2"
+          ],
+          "title": "連結性で全対象へ広げ、素数の写像を定める",
+          "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。"
         },
         {
           "id": "psiN-prime-bij",
           "size": "中",
           "status": "todo",
           "deps": [
-            "psiN-prime-map"
+            "psiN-connected"
           ],
           "title": "その写像が素数全体の全単射であること",
           "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。"
