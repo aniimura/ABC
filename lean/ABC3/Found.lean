@@ -295,6 +295,8 @@ import ABC3.Found.Arakelov.PicLiftGen
 import ABC3.Found.Arakelov.PicResGen
 import ABC3.Found.Arakelov.PicTildeLocTrivial
 import ABC3.Found.Arakelov.PicInvOfModule
+import ABC3.Found.Arakelov.PicBasicTrivial
+import ABC3.Found.Arakelov.PicFiniteCover
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

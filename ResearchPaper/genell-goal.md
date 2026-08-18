@@ -6682,3 +6682,39 @@ instance 検索が**別物として扱う**。
 | 「準連接 ⟹ `fromTildeΓ` 同型」 | ★**無い**(ファイル内 TODO) |
 
 ★★★したがって「局所自明 ⟹ `IsLocalizing`」を**自前で**作る必要がある。
+
+## §9-149 —— 逆向きの測量と第 134・135 ブロック(2026-08-18)
+
+### ★★★★★mathlib の在庫を実測した(2026-08-18)
+
+| 在庫 | 状態 |
+|---|---|
+| `isIso_fromTildeΓ_iff_isLocalizing` | ★有り |
+| `isLocalizing_tilde` / `isLocalizing_of_iso` | ★有り |
+| `isIso_fromTildeΓ_of_presentation` | ★有り(**大域**表示が要る) |
+| `IsLocallyFree → IsQuasicoherent` | ★有り(`Sheaf/LocallyFree.lean`) |
+| **「準連接 ⟹ `fromTildeΓ` 同型」** | ★★**無い**(`Tilde.lean` 547 行の TODO) |
+
+★★`QuasicoherentData` は**局所**データ、`Presentation` は**大域**データであり、
+アフィン上で前者から後者を作る段が mathlib に無い。
+
+### ★★★B1 の残りを測った——**約 45〜50 ブロック**
+
+| 群 | 内容 | 見積 |
+|---|---|---|
+| **QC** | 局所自明 ⟹ `IsLocalizing` | **26** |
+| 可逆加群側 | `Γ(F)` の可逆性、`Γ` とテンソル | 7 |
+| `equivPicRing` | 群同型の組み立て | 9 |
+| `PicardData` witness | 14 欄 + `Interface` 接続 | 3–5 |
+
+★`PicardData` は **13/14 欄**が埋まっており、残るは `equivPicRing` の 1 欄である。
+
+### 第 134・135 ブロック
+
+| # | 内容 |
+|---|---|
+| 134 | `trivialOfLe` / `exists_basicOpen_trivial`(自明化を基本開集合へ) |
+| 135 | `exists_finite_basicOpen_trivial`(有限被覆、`span = ⊤`) |
+
+★★新しい逃げ道: **`beta_reduce`**——`refine ⟨n, fun i => …⟩` 後に残る
+`(fun i => …) i` で `rw`/`▸` が当たらないとき一発。
