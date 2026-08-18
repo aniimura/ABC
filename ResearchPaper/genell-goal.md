@@ -8924,3 +8924,59 @@ mathlib の `PresheafOfModules.pullback` も**押し出しの左随伴**とし�
 
 ★見積もり **3–5 ブロック**。段 1 が残りの律速で、
 `pullIdealHom` の像が生成元を含むこと(第 183 の `bcMap_range` の層版)を要する。
+
+## §9-224 ★★★★★external ライブラリが入った——Galois の測定を**全面更新**(2026-08-19)
+
+ユーザが `external/` に第三者ライブラリを導入し、`.ignore` で **既定の grep 範囲に入れた**。
+★★§9-212 の測定は「FLT 未導入」を前提にしていたので**測り直す**。
+
+| ライブラリ | 規模 | 内容 |
+|---|---|---|
+| ★**FLT** | 260 ファイル・sorry 70 | Fermat 最終定理(Buzzard) |
+| formal-conjectures | 11M | ★**ABC 予想の形式的言明**を含む |
+| iut-lean | 173K | Anabelian・Mason–Stothers |
+| lean-poly-abc | 228K | 多項式版 ABC(Mason–Stothers) |
+| LeanBridge | 1.1M | — |
+| _refs | 121M | mathlib 等の .lean 複製(検索用) |
+
+### ★★★★★G1–G5 の測定更新——**FLT が骨組みを持っていた**
+
+`FLT/EllipticCurve/Torsion.lean`(124 行、sorry 10):
+
+| 我々の欄 | FLT の対応物 | 状態 |
+|---|---|---|
+| G1 `E[n] ≅ (ℤ/n)²` | `WeierstrassCurve.nTorsion` ★**定義済**(`Submodule.torsionBy ℤ Point n`) | |
+| | `n_torsion_finite` | ★sorry |
+| | `n_torsion_card : Nat.card = n²` | ★sorry(「分多項式の理論が要る、David Angdinata が作業中」と注記) |
+| | `group_theory_lemma` | ★sorry |
+| | ★`n_torsion_dimension : nTorsion n ≃+ ZMod n × ZMod n` | ★★**証明済**(上の 2 つから) |
+| G2 Tate 加群 | 無し | ★無い |
+| G3 `Gal → GL₂` | ★`GaloisRep K A M`(`Deformations/RepresentationTheory/GaloisRep.lean`)**定義済・sorry 1** | ★★**在る** |
+| | `galoisRepresentation`(DistribMulAction) | ★sorry 4(「どれも易しいはず」と注記) |
+| | `E.galoisRep` | ★sorry |
+| G4 法 `l` 表現 | `GaloisRep K (ZMod n) (nTorsion n)` として**型は在る** | ★★型は在る |
+| G5 全射性 | 無し | ★無い |
+
+★★★**最重要**: `n_torsion_dimension`(= 我々の G1 の主張)は FLT で**証明済**であり、
+依存は `n_torsion_card`(`#E[n] = n²`)と `group_theory_lemma` の 2 つの sorry だけである。
+★つまり **G1 の律速は `#E[n] = n²` 1 本に絞られた**——§9-212 で
+「道 A(代数)/道 B(解析)の 2 本」と測ったが、**FLT の骨組みに乗るなら道 A のみ**でよい。
+
+### ★★G6–G8 は依然として無い
+
+Tate 曲線・Faltings 高さは FLT にも無い。半安定性は `FreyCurve/Basic.lean` で
+**コメントに現れるだけ**(「この方程式は 2 で半安定」)で、定義は無い。
+
+### ★★★★方針の更新
+
+★**FLT を依存に加えるか**は次の判断点である。加えると:
+
+| 得 | 損 |
+|---|---|
+| G1 の骨組み(`nTorsion`、`n_torsion_dimension`)を再利用 | ★ビルド時間・版ズレの管理 |
+| G3/G4 の `GaloisRep` 型を再利用 | ★sorry 70 個を**下流に持ち込む**危険 |
+
+★★`Found/` に sorry を持ち込まない規約があるので、**FLT の sorry に依存する定理は
+`Found/` に置けない**。したがって「FLT を読んで筋を借り、証明は自前で書く」が筋である。
+★★★とくに `#E[n] = n²` は FLT でも未完(David Angdinata が作業中)なので、
+**そこは我々が独立に作るか、待つかの判断**になる。
