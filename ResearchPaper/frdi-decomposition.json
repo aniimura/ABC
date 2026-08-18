@@ -1136,7 +1136,8 @@
             "iii-morclasses"
           ],
           "status": "todo",
-          "size": "★中"
+          "size": "★中",
+          "note": "\n\n## ★★形を測った(2026-08-18)\n原文 (FrdI p.63):\n> unique functor ΨBase : D1 → D2 that ﬁts into a 1-commutative diagram\n\n★(v) の主張は 2 つ:\n1. `Ψ` が **base-identity 自己射**と **base-equivalent な共対象射の対**を保つ\n2. `Ψ_Base : 𝒟₁ → 𝒟₂` が 1-一意に存在し図式が 1-可換\n\n★★**在庫との接続**: `OTri = IsBaseIdentity ∧ IsLinear` なので、(iv) で `𝒪^▷` の保存が取れれば、`𝒪^▷` の元についての base-identity は出る。\n★一般の自己射については、`Definition 1.3, (vi)`(`faithfulUpToUnits`、在庫)と`Proposition 1.13, (ii)` を使う筋である(原典 p.63 末尾)。\n★★`Ψ_Base` の構成は `psiIstr`(在庫、(i) で実装済)と**同じ形**(射を底へ送るだけ)。"
         },
         {
           "id": "v-psibase",
