@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-08-18(★8 葉すべてを同日に閉じた)",
+  "measuredAt": "2026-08-18(★8 葉すべて＋`𝒞^birat` の (iii)(d) 2 本を閉じた)",
   "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
   "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
   "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
@@ -92,7 +92,7 @@
         },
         {
           "id": "pairing-vanishes",
-          "title": "★★その双線形形式が消えること —— Ore の四角形で交換子を計算する",
+          "title": "★★その双線形形式が消えること —— `Proposition 4.4, (ii)` に残る**ただ 1 つ**の条",
           "deps": [
             "ore-square",
             "central-ext"
@@ -103,14 +103,23 @@
           "★反証の形": "`Definition 1.3` を満たすが `𝒪^×(A^birat)` が非可換な Frobenioid の**反例**。中心拡大なので、あるなら交換子形式が非零な例として見えるはずである。"
         },
         {
+          "id": "birat-iiid",
+          "title": "`𝒞^birat` の (iii)(d) 圏同値 2 本(`Frobenioid` の残り 2 フィールド)",
+          "deps": [],
+          "status": "done",
+          "size": "——",
+          "evidence": "★★**2026-08-18 の測定の訂正**: `Frobenioid` は `core`(21 条)＋ `coaPreUnderEquiv` ＋ `coaPreOverEquiv` の **3 フィールド**であり、(iii)(d) の 2 本は**未実装だった**(このチェーンにも入っていなかった)。★★しかし `𝒞^birat` では易しい —— `biratPre` の単系は**自明**(`trivialOn D`)なので `Order(Φ^birat(A))` は 1 対象 1 射、かつ co-angular pre-step はすべて同型なので任意の 2 対象間に射が作れる。`Found/FrdI/Prop44Equiv.lean` で**証明した**(`birat_coaPreUnderEquiv` / `birat_coaPreOverEquiv` / `birat_frobenioid_of_comm`)。"
+        },
+        {
           "id": "otribase",
           "title": "`otriBase` —— 可換性からの帰結",
           "deps": [
-            "pairing-vanishes"
+            "pairing-vanishes",
+            "birat-iiid"
           ],
           "status": "半済",
           "size": "小",
-          "evidence": "★同値性は 2026-08-18 に取得済み(Found/FrdI/Prop44Otri.lean の `birat_otriBase_of_comm` / `birat_frobenioidCore_of_comm`)。可換性が来れば 21 条が閉じる。"
+          "evidence": "★同値性は 2026-08-18 に取得済み(Found/FrdI/Prop44Otri.lean の `birat_otriBase_of_comm` / `birat_frobenioidCore_of_comm`)。可換性が来れば 21 条が閉じる。 ★2026-08-18: (iii)(d) の 2 本も閉じた(`birat-iiid`)ので、可換性が来れば `Frobenioid (biratPre P G)` が丸ごと出る(`birat_frobenioid_of_comm`)。"
         }
       ]
     },
