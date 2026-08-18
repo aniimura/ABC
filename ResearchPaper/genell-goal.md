@@ -8501,3 +8501,44 @@ Arakelov は B2 が 12/14。残り 2 欄の道は上記の通り**測り終え�
 - 道 B: `℘` の加法定理(`℘(z+w)` の公式)は mathlib に在るか
 
 ★★どちらも「1 本の橋」に見えるので、**測ってから**選ぶ。
+
+## §9-213 `comap` の核心が出た(第 194–195 ブロック)
+
+    X, Y アフィン ⟹ (D.comap f).ideal ⊤ = (D.ideal ⊤).map f.appTop
+
+★★★★在庫を 5 つ繋いだだけで出た:
+
+| 段 | 使ったもの | 出どころ |
+|---|---|---|
+| 1 | `comap = (pullback.fst f ι).ker` | mathlib(定義) |
+| 2 | `Hom.ker_apply` | ★mathlib |
+| 3 | `isPushout_appTop_of_isPullback` | ★mathlib |
+| 4 | **押し出しの核はイデアルの拡大** | ★第 194 |
+| 5 | `ker_subschemeι_app` / `subschemeι_app_surjective` | ★mathlib |
+
+★第 194 は純環論で、**テンソル積を一度も使わずに**普遍性だけで出た
+(`C ≅ A/I` と `Ideal.Quotient.lift` で `B/(I·B)` への余錐を組む)。
+
+### ★★★測り直し——残りは見積もりより 1 段深い
+
+§9-211 では「6–10 ブロック」と測ったが、**一般の `X` への持ち上げ**で
+もう 1 つ欠落が出た:
+
+    IsCartier X D := ∀ A : X.affineOpens, Module.Invertible Γ(X,A) (D.ideal A)
+
+一般の `X` では、アフィン開 `A` の像 `f(A)` が**1 つのアフィン開に入るとは限らない**。
+基本開集合で細かく取れば入るが、そこから `A` 自身へ戻すには
+
+    ★「可逆性は Zariski 局所的である」(`(g_i)` が単位イデアルを生成し、
+      各 `A_{g_i}` で可逆 ⟹ `A` で可逆)
+
+が要る。★★これは §9-203 で「mathlib に無い」と測った項目である。
+
+| 残り | 見積もり |
+|---|---|
+| 可逆性の Zariski 局所性 | 4–8 |
+| 一般 `X` への `comap` の持ち上げ | 4–6 |
+| `isCartierDivisor_comap` / `ofDivisor_pullback` | 3–4 |
+
+★★★合わせて **11–18 ブロック**。§9-211 の 6–10 は**過小**であった。
+測り直したので記録する。
