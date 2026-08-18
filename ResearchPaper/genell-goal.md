@@ -5338,3 +5338,32 @@ mathlib の証明を写経できる。
 | 98 | `M_g` 自由 ⟹ `M_{t·g}` 自由 → `(tilde M)\|_{D g} ≅ 𝟙_` |
 | 99 | `IsLocallyTrivial` → `tilde M` が `InvSheaf` |
 | 100 | `equivPicRing` |
+
+## §9-103 —— `M_g →ₗ M_{t·g}` が建った(第 98 ブロック、2026-08-18)
+
+| 定義 | 内容 |
+|---|---|
+| `awayMulModule` | ★`M_{t·g}` は `R_g` 加群(`Module.compHom`——**instance では出ない**) |
+| `awayMulModuleTower` | ★★`R → R_g → M_{t·g}` は足場 |
+| `liftAwayMap` | ★★★**`M_g →ₗ M_{t·g}`** |
+| `liftAwayMap_comp` | ★合成は `mk` に戻る |
+
+★★これで §9-101 の 5 段のうち **1・2 段が完了**した。
+
+### ★★★残り
+
+| 段 | 内容 |
+|---|---|
+| 3 | `IsBaseChange R_g mk_g` ✅ / `IsBaseChange R_{t·g} mk_{t·g}` ✅(mathlib) |
+| 4 | `IsBaseChange.comp_iff` で `IsBaseChange R_{t·g} liftAwayMap` |
+| 5 | `Module.free_of_isLocalizedModule` で `M_{t·g}` が自由 |
+
+★あと 1 ブロックで自由性の伝播が閉じる。
+
+### ★★★★局所自明性の全体(残り 3)
+
+| # | 内容 |
+|---|---|
+| 99 | 自由性の伝播(上の 3–5 段) |
+| 100 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 101 | `tilde M` が `InvSheaf` / `equivPicRing` |

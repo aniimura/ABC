@@ -57,6 +57,7 @@ import ABC3.Found.FrdI.Prop33Classes
 import ABC3.Found.FrdI.Prop33i
 import ABC3.Found.FrdI.Prop33Coa
 import ABC3.Found.FrdI.Thm34Rigid
+import ABC3.Found.FrdI.Thm34Pre
 import ABC3.Found.FrdI.Lemma65
 import ABC3.Found.FrdI.Prop44Pre
 import ABC3.Found.FrdI.Def45
@@ -255,6 +256,7 @@ import ABC3.Found.Arakelov.PicAwayTrans
 import ABC3.Found.Arakelov.PicAwayTower
 import ABC3.Found.Arakelov.PicAwayLoc
 import ABC3.Found.Arakelov.PicAwayUnit
+import ABC3.Found.Arakelov.PicAwayModule
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
