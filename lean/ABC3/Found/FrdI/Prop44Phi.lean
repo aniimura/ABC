@@ -248,6 +248,50 @@ def birat_iso_of_istr_base.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — isotropic では同じ底なら同型",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★`Div^gp` は `Φ^birat` の剰余類をなす
+
+★★★**これが `factor-src` への還元段である**。
+同じ底を持つ 2 本の同型 `f, g : A ⟶ B` の `Div^gp` の差は
+**常に `Φ^birat(A)` に入る**。
+★したがって「経由するか」は **1 本の同型で判定すればよい**。 -/
+
+/-- ★★★★**同じ底の 2 同型の `Div^gp` の差は `Φ^birat` に入る**。
+
+★手: `δ := f ≫ g⁻¹` が `𝒪^×(A)` に入ることを見、
+`biratDivGp_comp'` で `Div^gp δ = Div^gp f - Div^gp g` を出す。 -/
+theorem birat_divGp_sub_mem {A B : BiratCat P G} (f g : A ⟶ B)
+    [hf : IsIso f] [hg : IsIso g] (hb : biratBase f = biratBase g) :
+    biratDivGp f - biratDivGp g ∈ phiBiratAt P G A := by
+  have hdf : (biratPre P G).degFr f = 1 := degFr_of_isIso (biratPre P G) f
+  have hdg : (biratPre P G).degFr g = 1 := degFr_of_isIso (biratPre P G) g
+  have hdgi : (biratPre P G).degFr (inv g) = 1 := degFr_of_isIso (biratPre P G) (inv g)
+  -- ★`g ≫ inv g = 𝟙` から `Φ^gp(Base g)(Div^gp (inv g)) = - Div^gp g`
+  have hinv : gpMap _ (Φ.map (biratBase g)) (biratDivGp (inv g)) = - biratDivGp g := by
+    have h := biratDivGp_comp' g (inv g)
+    rw [IsIso.hom_inv_id, biratDivGp_id,
+      show ((biratDeg (inv g) : ℕ+) : ℕ) = 1 from by rw [show biratDeg (inv g) = 1 from hdgi]; rfl,
+      one_smul] at h
+    exact eq_neg_of_add_eq_zero_left h.symm
+  -- ★`δ := f ≫ inv g` は `𝒪^×(A)` に入る
+  have hbid : (biratPre P G).Base (f ≫ inv g) = (biratPre P G).Base (𝟙 A) := by
+    have hb' : (biratPre P G).Base f = (biratPre P G).Base g := hb
+    rw [(biratPre P G).Base_comp, hb', ← (biratPre P G).Base_comp, IsIso.hom_inv_id]
+  have hlin : (biratPre P G).degFr (f ≫ inv g) = 1 := by
+    rw [(biratPre P G).degFr_comp, hdf, hdgi, one_mul]
+  refine ⟨f ≫ inv g, ⟨⟨hbid, hlin⟩, ?_⟩, ?_⟩
+  · exact (CategoryTheory.isUnit_iff_isIso (f ≫ inv g)).mpr inferInstance
+  have h := biratDivGp_comp' f (inv g)
+  rw [show ((biratDeg (inv g) : ℕ+) : ℕ) = 1 from by
+      rw [show biratDeg (inv g) = 1 from hdgi]; rfl,
+    one_smul, hb, hinv] at h
+  rw [h, sub_eq_neg_add]
+
+/-- ★locator —— `Proposition 4.4, (iii)` の剰余類性。 -/
+def birat_divGp_sub_mem.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — Div^gp は Φ^birat の剰余類",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/

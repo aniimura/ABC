@@ -438,6 +438,16 @@
           "note": "★★★**以前「一般には言えない」と見た主張が、isotropic に制限すれば成り立つ**。`isIso_of_preStep_of_isGroupLikeObj` が isotropic を要求するのを障害だと見ていたが、★`Proposition 2.2` はそもそも **`𝒟*`(isotropic の世界)** の上の話で、`Φ^birat` もそこで定義されている。**制限した先では仮定が満たされる**。★`dstar_span` が中間対象 `Z` を**isotropic で**与えるのが効いている。★実装: `birat_isIso_of_preStep_of_isotropic` / `birat_iso_of_istr_base`。"
         },
         {
+          "id": "factor-coset",
+          "size": "中",
+          "status": "done",
+          "deps": [
+            "phibirat-istr-iso"
+          ],
+          "title": "Div^gp は Φ^birat の剰余類をなす——★還元段",
+          "note": "★済(2026-08-18): `birat_divGp_sub_mem`。★★同じ底を持つ 2 本の同型 `f, g : A ⟶ B` の `Div^gp` の差は**常に `Φ^birat(A)` に入る**。★したがって「経由するか」は **1 本の同型で判定すればよい** —— これで `factor-iso-div` が唯一の未知数になった。★手: `δ := f ≫ g⁻¹` が `𝒪^×(A)` に入ることを見るだけ。"
+        },
+        {
           "id": "factor-plbk",
           "size": "中",
           "status": "todo",
