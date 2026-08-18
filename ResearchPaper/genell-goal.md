@@ -8653,3 +8653,40 @@ B1 で 146 ブロック積んだ機構が、ここで「mathlib の TODO を 3 �
 
 ★可逆性の局所性が入ったので、アフィン開 `A` を基本開集合で細かく取って
 `f(A_{g_i}) ⊆ B_i` に収めてから `A` に戻す筋が**通る**ようになった。
+
+## §9-217 ★★★★★★Cartier 性は点ごとで足りる(第 199–200 ブロック)
+
+    ∀ x ∈ X, ∃ アフィン開 A ∋ x, D.ideal A が可逆
+      ⟹  IsCartier X D    （= ∀ アフィン開で可逆）
+
+★★★第 198 は `Spec R` の話であった。本ブロックはそれを
+**任意のスキームの任意のアフィン開**へ運ぶ。
+
+### ★★運び方
+
+アフィン開 `A` に対し `j := A.2.fromSpec : Spec Γ(X,A) ⟶ X` は開埋め込みで、
+mathlib の `ideal_comap_of_isOpenImmersion` が
+
+    (D.comap j).ideal V = (D.ideal (j ''ᵁ V)).comap ((j.appIso V).inv.hom)
+
+を与える——**環の同型に沿った引き戻し**である。★第 199 で可逆性が往復できるので、
+`Spec Γ(X,A)` の上で第 198 を使ってから `A` に戻せばよい。
+
+### ★摩擦は「依存位置の書き換え」だった
+
+`j ''ᵁ ⊤ = A.1` は `opensRange_fromSpec` で出るが、その等式は
+**`Γ(X, ·)` と `D.ideal ·` の両方に効く依存位置**にあるので `rw` も `simp` も動かない。
+★`X.affineOpens` 上の motive
+
+    fun B : X.affineOpens => Module.Invertible Γ(X, B.1) (D.ideal B)
+
+を書いて `cast` すれば通る。★★**依存位置は motive を手で書く**——
+[[ring-instance-two-paths]] と同じく「型の綴り」の問題である。
+
+### 残り(B2)——最後の 2 欄だけ
+
+    isCartierDivisor_comap:  x ごとに f(x) の近傍アフィン B を取り、
+      f⁻¹B の中にアフィン A ∋ x を取れば、第 195 + 平坦性で可逆。
+      あとは第 200 で大域へ。
+
+    ofDivisor_pullback:  f^* 𝒪(D) ≅ 𝒪(D.comap f)。

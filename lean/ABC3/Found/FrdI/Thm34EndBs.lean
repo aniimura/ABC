@@ -305,4 +305,197 @@ def isUnitEquivalent_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iv) — Ψ は unit-equivalence を保つ",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`Theorem 3.4, (iv)` の `Ψ^un-tr`
+
+原文 (FrdI p.66):
+> assertion (iv) then follows formally from the deﬁnition of
+
+★★`𝒞^un-tr` は `Hom` を `unTrSetoid`(= `𝔽_Φ` へ同じ射に写る)で割った商である。
+したがって `Ψ^un-tr` を作るのに要るのは
+「`Ψ` がこの同値関係を保つ」の 1 本だけ。
+
+★★★その 1 本は **3 段で出る**:
+1. `𝔽_Φ` で一致 ⟹ unit-equivalent(`Proposition 3.3, (ii)` の `mpr`)
+2. unit-equivalent は `Ψ` で移る(`isUnitEquivalent_map`)
+3. unit-equivalent ⟹ `𝔽_Φ` で一致(`prop_3_3_ii_toElem`)
+
+★1 と 3 は在庫、2 が本ファイルで取ったもの。 -/
+
+/-- ★★★★★**`Ψ` は `𝒞^un-tr` の同値関係を保つ** —— `Proposition 3.3, (ii)` を往復する。 -/
+theorem toElem_map_congr_of_congr (Ψ : C₁ ⥤ C₂) (Fc₁ : FrobenioidCore P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X)
+    (hOTri : ∀ (X : C₁) (δ : End X), δ ∈ OTri P₁ X → Ψ.map (δ : X ⟶ X) ∈ OTri P₂ (Ψ.obj X))
+    {A B : C₁} (α₁ α₂ : A ⟶ B) (h : P₁.toElem.map α₁ = P₁.toElem.map α₂) :
+    P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂) :=
+  prop_3_3_ii_toElem P₂ (isUnitEquivalent_map Ψ hOTri
+    ((prop_3_3_ii P₁ Fc₁ hiso₁ α₁ α₂).mpr
+      ⟨congrArg ElemFrobCat.Hom.deg h, congrArg ElemFrobCat.Hom.div h,
+        congrArg ElemFrobCat.Hom.base h⟩))
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iv)** —— `Ψ^un-tr : 𝒞₁^un-tr ⥤ 𝒞₂^un-tr`。
+
+★対象は `Ψ^istr`(在庫、(i) で実装済)、射は商へ落とすだけ。 -/
+def psiUnTr (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence] (h₁ : IsOfQuasiIsotropicType C₁ P₁)
+    (h₂ : IsOfQuasiIsotropicType C₂ P₂)
+    (hUE : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+      P₁.toElem.map α₁ = P₁.toElem.map α₂ →
+        P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂)) :
+    UnTr P₁ ⥤ UnTr P₂ where
+  obj A := (psiIstr Ψ P₁ P₂ h₁ h₂).obj A
+  map {_ _} f := Quotient.liftOn f (fun α => toHomUnTr P₂ (Ψ.map α))
+    (fun a b hab => (toHomUnTr_eq_iff P₂ _ _).mpr (hUE a b hab))
+  map_id A := by
+    show toHomUnTr P₂ (Ψ.map (𝟙 (A : Istr P₁).obj)) = toHomUnTr P₂ (𝟙 _)
+    rw [Ψ.map_id]
+  map_comp {_ _ _} f g := by
+    refine Quotient.inductionOn₂ f g (fun α β => ?_)
+    show toHomUnTr P₂ (Ψ.map (α ≫ β)) = toHomUnTr P₂ (Ψ.map α ≫ Ψ.map β)
+    rw [Ψ.map_comp]
+
+/-- ★★★★**1-可換図式** —— `𝒞^istr → 𝒞^un-tr` の四角形が**厳密に**可換。
+
+★商へ落とす前と後で `Ψ` が同じ射を与えるので `rfl` になる。 -/
+theorem psiUnTr_square (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence] (h₁ : IsOfQuasiIsotropicType C₁ P₁)
+    (h₂ : IsOfQuasiIsotropicType C₂ P₂) (hUE) :
+    psiIstr Ψ P₁ P₂ h₁ h₂ ⋙ istrToUnTr P₂ = istrToUnTr P₁ ⋙ psiUnTr Ψ h₁ h₂ hUE :=
+  rfl
+
+def psiUnTr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Ψ^un-tr の構成と 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ### ★★`Ψ^un-tr` の圏同値性と rigidity
+
+原文 (FrdI p.66):
+> are of unit-trivial type, the asserted rigidity follows formally from Proposition 1.13,
+
+★rigidity は `Proposition 1.13, (ii)`(在庫 `prop_1_13_ii_global`)に
+本セッションの `isRigidFunctor_of_equivalence_comp` を被せるだけ。
+★そのために `Ψ^un-tr` が圏同値であることが要る —— 3 性質を順に取る。 -/
+
+section UnTrEquiv
+
+variable (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence] (h₁ : IsOfQuasiIsotropicType C₁ P₁)
+  (h₂ : IsOfQuasiIsotropicType C₂ P₂)
+  (hUE : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+    P₁.toElem.map α₁ = P₁.toElem.map α₂ →
+      P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂))
+
+/-- ★★★**忠実** —— 同値関係の**反射**(逆向き)が要る。 -/
+theorem psiUnTr_faithful
+    (hUE' : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+      P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂) →
+        P₁.toElem.map α₁ = P₁.toElem.map α₂) :
+    (psiUnTr Ψ h₁ h₂ hUE).Faithful where
+  map_injective {_ _ f g} h := by
+    revert h
+    refine Quotient.inductionOn₂ f g (fun α β h => ?_)
+    exact (toHomUnTr_eq_iff P₁ _ _).mpr (hUE' α β ((toHomUnTr_eq_iff P₂ _ _).mp h))
+
+/-- ★★**充満** —— `Ψ` の充満性から代表元を取るだけ。 -/
+theorem psiUnTr_full : (psiUnTr Ψ h₁ h₂ hUE).Full where
+  map_surjective {_ _} g := by
+    refine Quotient.inductionOn g (fun β => ?_)
+    obtain ⟨α, hα⟩ := Ψ.map_surjective β
+    refine ⟨toHomUnTr P₁ α, ?_⟩
+    show toHomUnTr P₂ (Ψ.map α) = toHomUnTr P₂ β
+    rw [hα]
+    rfl
+
+/-- ★★**本質的全射** —— 対象は `Ψ^istr` と同じなので在庫から。 -/
+theorem psiUnTr_essSurj : (psiUnTr Ψ h₁ h₂ hUE).EssSurj where
+  mem_essImage Z := by
+    haveI := psiIstr_essSurj Ψ P₁ P₂ h₁ h₂
+    obtain ⟨A, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := psiIstr Ψ P₁ P₂ h₁ h₂)
+      (show Istr P₂ from Z)
+    exact ⟨A, ⟨(istrToUnTr P₂).mapIso ε⟩⟩
+
+/-- ★★★★**`Ψ^un-tr` は圏同値**。 -/
+theorem psiUnTr_isEquivalence
+    (hUE' : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+      P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂) →
+        P₁.toElem.map α₁ = P₁.toElem.map α₂) :
+    (psiUnTr Ψ h₁ h₂ hUE).IsEquivalence where
+  faithful := psiUnTr_faithful Ψ h₁ h₂ hUE hUE'
+  full := psiUnTr_full Ψ h₁ h₂ hUE
+  essSurj := psiUnTr_essSurj Ψ h₁ h₂ hUE
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iv)** の rigidity。
+
+★★`𝒞₂^un-tr` は Frobenioid(在庫 `unTr_frobenioidCore`)なので
+`Proposition 1.13, (ii)` が当たり、そこへ
+`isRigidFunctor_of_equivalence_comp` を被せる。 -/
+theorem psiUnTr_rigid (Fc₂ : FrobenioidCore P₂) (hslim : IsSlimCat D₂)
+    (hUE' : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+      P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂) →
+        P₁.toElem.map α₁ = P₁.toElem.map α₂) :
+    IsRigidFunctor (psiUnTr Ψ h₁ h₂ hUE ⋙ (unTrPre P₂ Fc₂).toElem) := by
+  haveI := psiUnTr_isEquivalence Ψ h₁ h₂ hUE hUE'
+  exact isRigidFunctor_of_equivalence_comp (psiUnTr Ψ h₁ h₂ hUE).asEquivalence _
+    (prop_1_13_ii_global (unTrPre P₂ Fc₂) (unTr_frobenioidCore P₂ Fc₂) hslim)
+
+end UnTrEquiv
+
+def psiUnTr_rigid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Ψ^un-tr の rigidity",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★**1-一意性** —— 図式を可換にする関手は 1 つしかない。
+
+★★`𝒞^istr → 𝒞^un-tr` は**対象を変えず**、射は商への全射なので、
+四角形が可換なら対象でも射でも一致する。
+★これで原文の「1-unique 1-commutative diagram」が揃う。 -/
+theorem psiUnTr_unique (F G : UnTr P₁ ⥤ UnTr P₂)
+    (hobj : ∀ A : UnTr P₁, F.obj A = G.obj A)
+    (hmap : ∀ (A B : Istr P₁) (α : A.obj ⟶ B.obj),
+      F.map (toHomUnTr P₁ α)
+        = eqToHom (hobj A) ≫ G.map (toHomUnTr P₁ α) ≫ eqToHom (hobj B).symm) :
+    F = G := by
+  refine CategoryTheory.Functor.ext hobj ?_
+  intro A B f
+  refine Quotient.inductionOn f (fun α => ?_)
+  exact hmap A B α
+
+def psiUnTr_unique.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Ψ^un-tr の 1-一意性",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★★`Theorem 3.4, (iv)` —— 条のうち保存・構成・rigidity が揃った
+
+原文 (FrdI p.62):
+> (iv) Suppose that: (a) C1, C2 are of standard type; (b) if C1, C2 are of
+
+★★**原文の仮定を測り直した**(2026-08-19、ゲート NG から) ——
+(iv) の仮定は「quasi-isotropic 型」ではなく
+**(a) standard 型、(b) group-like 型なら `Ψ` とその quasi-inverse が base-isomorphism を保つ**
+である。★下の実装はこれより弱い仮定(圏同値＋各保存を個別に受ける)で書いてあるので、
+原典の仮定からこれらを導く接続は `iv-src` の作業になる。
+
+★実装した部品:
+
+| 主張 | 宣言 | 場所 |
+|---|---|---|
+| `𝒪^▷` の圏論的特徴づけ | `OTriEndCond` / `oTri_of_otriEndCond` / `otriEndCond_of_oTri` | `Thm34Quasi.lean` |
+| `End(𝒞^pl-bk_A → 𝒞)^bs-iso` の移送 | `otriGenCond_map` | 本ファイル |
+| `𝒪^▷` の保存 | `thm_3_4_iv_otri_map'` | 本ファイル |
+| `𝒪^×` の保存(unit-equivalence) | `isUnitEquivalent_map` | 本ファイル |
+| `Ψ^un-tr` の構成 | `psiUnTr` | 本ファイル |
+| 1-可換図式 | `psiUnTr_square`(**厳密な等式**) | 本ファイル |
+| 1-一意性 | `psiUnTr_unique` | 本ファイル |
+| rigidity | `psiUnTr_rigid` | 本ファイル |
+
+★★★**残す**: `Ψ_{N≥1}` が恒等自己同型であること。
+原文はこれを (iii) と `Proposition 1.10, (vi)` ＋ Frobenius-compact 性から出す。
+群的型でない場合は (iii) から**形式的に**従い、群的型の場合は
+`Frobenius-compact` な対象を取って `p₁ = p₂` を示す議論になる。
+★本セッションではその材料(`degFr_order_preserve` / `pnatMulEquivOfPrimeEquiv_eq_self`)を
+(iii) 側で取ってあるので、接続は残作業である。 -/
+def thm_3_4_iv_part.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (iv) — 𝒪^▷ / 𝒪^× の保存・Ψ^un-tr・1-一意性・rigidity",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

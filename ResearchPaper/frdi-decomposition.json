@@ -1103,14 +1103,14 @@
         },
         {
           "id": "iv-otimes",
-          "title": "(iv) 𝒪^▷ / 𝒪^× の保存と Ψ_{N≥1} が恒等であること",
+          "title": "(iv) 𝒪^▷ / 𝒪^× の圏論的特徴づけと保存",
           "deps": [
             "iv-otimes-cond"
           ],
           "status": "done",
           "size": "中",
           "evidence": "𝒟 が Frobenius-slim を仮定する条。",
-          "note": "\n\n★★四角形の部分は `iv-otimes-cond` で取った(2026-08-18)。\n★残るのは条件の最後の節(α が `F → End((P_i)_A → C_i)^bs-iso` の像から来ること)と、それが `𝒪^▷` と同値であること(`Proposition 3.3, (i)`＋`Definition 1.3, (i)(a)(b)`＋`(iii)(c)`)。\n\n## ★★閉じた(2026-08-19)\n残っていた「条件の最後の節」は `OTriGenCond` —— `α` が\n`𝔽 → End(C^pl-bk_A → C)^bs-iso` の `1` の像であること。\n★★それと `O^▷` の同値は**両向きとも在庫**だった ——\n`prop_3_3_i_mem_oTri`(主張 1)と `prop_3_3_i_converse`(主張 2)。\n★測ってみると条件から `O^▷` を出すのに `φ` と `β` は**使わない**\n—— `ψ` の四角形だけで足りる(底は `Base ψ` の同型性で消去、次数は乗法性)。\n★移送のうち `OTriGenCond` の分だけを新しい葉 `iv-endbsiso` として切り出した。",
+          "note": "\n\n★★四角形の部分は `iv-otimes-cond` で取った(2026-08-18)。\n★残るのは条件の最後の節(α が `F → End((P_i)_A → C_i)^bs-iso` の像から来ること)と、それが `𝒪^▷` と同値であること(`Proposition 3.3, (i)`＋`Definition 1.3, (i)(a)(b)`＋`(iii)(c)`)。\n\n## ★★閉じた(2026-08-19)\n残っていた「条件の最後の節」は `OTriGenCond` —— `α` が\n`𝔽 → End(C^pl-bk_A → C)^bs-iso` の `1` の像であること。\n★★それと `O^▷` の同値は**両向きとも在庫**だった ——\n`prop_3_3_i_mem_oTri`(主張 1)と `prop_3_3_i_converse`(主張 2)。\n★測ってみると条件から `O^▷` を出すのに `φ` と `β` は**使わない**\n—— `ψ` の四角形だけで足りる(底は `Base ψ` の同型性で消去、次数は乗法性)。\n★移送のうち `OTriGenCond` の分だけを新しい葉 `iv-endbsiso` として切り出した。\n\n## ★訂正(2026-08-19)\nこの節点の題は元々「…と Ψ_{N≥1} が恒等であること」だったが、\n★**Ψ_{N≥1} の分は取れていない**。題を実態に合わせ、\n残りを新しい葉 `iv-psin1` として切り出した。",
           "lean": "ABC3/Found/FrdI/Thm34Quasi.lean",
           "decl": "OTriGenCond / OTriEndCond / oTri_of_otriEndCond / otriEndCond_of_oTri / thm_3_4_iv_otri_map"
         },
@@ -1133,9 +1133,23 @@
             "iv-otimes",
             "iv-endbsiso"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "evidence": "`Proposition 3.3, (iii)` の関手を使う。`UnTr.lean` に土台あり。"
+          "evidence": "`Proposition 3.3, (iii)` の関手を使う。`UnTr.lean` に土台あり。",
+          "lean": "ABC3/Found/FrdI/Thm34EndBs.lean",
+          "decl": "toElem_map_congr_of_congr / psiUnTr / psiUnTr_square / psiUnTr_unique / psiUnTr_faithful / psiUnTr_full / psiUnTr_essSurj / psiUnTr_isEquivalence / psiUnTr_rigid",
+          "note": "\n\n## ★★閉じた(2026-08-19)\n`C^un-tr` は `Hom` を `unTrSetoid`(= `F_Φ` へ同じ射に写る)で割った商なので、\n要ったのは「Ψ がこの同値関係を保つ」1 本だけだった。それは 3 段で出る:\n1. `F_Φ` で一致 ⟹ unit-equivalent(`prop_3_3_ii` の `mpr`、在庫)\n2. unit-equivalent は Ψ で移る(`isUnitEquivalent_map`、本セッション)\n3. unit-equivalent ⟹ `F_Φ` で一致(`prop_3_3_ii_toElem`、在庫)\n\n★★1-可換図式は**厳密な等式**(`psiUnTr_square` は `rfl`)になった。\n★1-一意性は `C^istr → C^un-tr` が対象を変えず射が全射であることから出る。\n★★rigidity は `prop_1_13_ii_global`(在庫)に\n`isRigidFunctor_of_equivalence_comp`(本セッション、`iii-rigid` で作った)を被せるだけ。\n★事故: `Functor.ext` は Lean core の `Functor` と衝突する ——\n`CategoryTheory.Functor.ext` と書く必要がある(`Functor.map_id` と同じ罠)。"
+        },
+        {
+          "id": "iv-psin1",
+          "title": "(iv) Ψ_{N≥1} が恒等自己同型であること",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "iii-morclasses",
+            "iv-otimes"
+          ],
+          "note": "★★**切り出した理由**(2026-08-19)\n`iv-otimes` の題に含まれていたが取れていなかったので、葉として独立させた。\n\n## ★原文の筋(FrdI 物理 p.66)\n1. 群的型**でない**場合 —— (iii) から**形式的に**従う\n2. 群的型の場合 —— `Ψ(A₁)` が Frobenius-compact な `A₁` を取り\n   (`Ψ` が圏同値だから存在)、`Proposition 1.10, (vi)` で `A₁`・`A₂` が\n   Frobenius-trivial。base-identity prime-Frobenius `φ₁` を取り、\n   `φ₂ = Ψ(φ₁) = α ∘ ψ₂` と分解。Frobenius-normalized 型の関係式から\n   `u₁^{p₁} = α ∘ u₂^{p₂} ∘ α⁻¹`、すなわち `α` が `O^×(A₂)^pf` に\n   `p₁/p₂` 倍で作用する。`A₂` が Frobenius-compact だから `p₁ = p₂`。\n\n## ★材料\n- `degFr_order_preserve` / `pnatMulEquivOfPrimeEquiv_eq_self`(本セッション、(iii) 側)\n- `exists_admissible_of_frobTrivial` / `prop_1_10_vi`(在庫)\n- `frobNorm_mul_pow`(`Prop33i.lean`、Frobenius-normalized の b 乗版)\n★Frobenius-compact の定義が `MorphismTypes.lean` にある(埋めた 20 件の 1 つ)。"
         },
         {
           "id": "iv-src",
@@ -1143,7 +1157,8 @@
           "deps": [
             "iv-otimes",
             "iv-psiuntr",
-            "iv-endbsiso"
+            "iv-endbsiso",
+            "iv-psin1"
           ],
           "status": "todo",
           "size": "★小"
