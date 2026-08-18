@@ -7914,3 +7914,24 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 | 173 | 評価射が局所自明な `F` で同型 | 3 |
 | 174 | `InvSheaf` と `ofDivisor` | 2 |
 | 175+ | 3 法則と `isCartierDivisor_affine` | 6 |
+
+## §9-194 —— `unitMul` の終対象での値(第 172 ブロック、2026-08-18)
+
+    unitVal ((unitMul U c).app t y) = unitVal y * c
+
+★「`c` 倍」自己射が**本当に掛け算である**ことを言う。
+★★評価射 `F ⊗ F^∨ → 𝟙_` の双線型性(第 2 変数)がこれで出る。
+
+### ★★逃げ道——**項で書く**([[exact-term-over-rw]] 6 例目)
+
+| 手 | 結果 |
+|---|---|
+| `show … ; rw [unitVal_smul]` | パターン不一致 |
+| `simp only [unitVal_smul]` | `X.presheaf` の型検査で落ちる |
+| **`Eq.trans` の連鎖を項で書く** | ★★**通った** |
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–172 の 25 ブロック
+      残り: 評価射(3)→ 同型性(3)→ InvSheaf・ofDivisor(2)→ 3 法則(6)
