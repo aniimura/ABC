@@ -3776,3 +3776,47 @@ mathlib には無い。★★**我々が作る**。
 
 ★★これは**リファクタであって新しい数学ではない**——`δ` のときに作った道具が
 そのまま 2 度目の出番を得る。
+
+
+---
+
+## §9-56 (2026-08-18) ★★★★第 50・51 —— 道具の一般化は済んだ。mate の要素計算だけが残る
+
+### ★★★★★★一般化は一発で通った(第 50・51)
+
+第 31–35 ブロック(`unit` を生成元の上で書き下す)を **`φ` について**述べ直した。
+
+| 検証 | 結果 |
+|---|---|
+| `pullbackFreeIsoGen (pullbackPhi f) W = pullbackFreeYonedaIso f W` | ★★**`rfl`**——結果は変わっていない |
+| 制限した site `phiOn f V` でも使えるか | ★★通った |
+| 制限した site で「`unit` は生成元を生成元に送る」 | ★★★通った |
+
+★★★★**`δ` のために作った道具が、そのまま Beck–Chevalley に効く形になった。**
+
+### ★★残り —— mate の要素計算
+
+骨組みは通っている(§9-55):
+
+    refine (adjOn.homEquiv _ _).injective ?_
+    erw [homEquiv_naturality_left]
+    show _ ≫ homEquiv (homEquiv.symm _) = _ ; rw [Equiv.apply_symm_apply]
+    erw [homEquiv_naturality_right]
+    rw [Adjunction.homEquiv_unit]
+    refine freeYonedaEquiv.injective ?_
+    simp only [freeYonedaEquiv_comp]
+    -- ★★★ここから要素の等式
+
+★★★★**実測(2026-08-18): この先で `erw [freeYonedaEquivUnitGen]` が
+`isDefEq` でタイムアウトする**(2,000,000 heartbeats)。
+
+### ★★★次に試すこと
+
+| # | 手 | 理由 |
+|---|---|---|
+| 1 | `have h := freeYonedaEquivUnitGen (φ := ..) ..` で**項として**作り `erw [h]` | 第 38 ブロックで同じ罠を抜けた手口 |
+| 2 | LHS/RHS を `conv` で分けて当てる | `erw` が両辺を探すのを防ぐ |
+| 3 | 補助補題を切って段数を減らす | 第 39 ブロックの `tensor_mu_app_tmul` と同じ発想 |
+
+★★1 が本命である——第 38 ブロックで
+「`erw` は補題を両辺に当ててしまうので `have` で項として作る」と記録した。
