@@ -400,7 +400,7 @@
           "deps": [],
           "status": "todo",
           "size": "★中",
-          "evidence": "原文 p.83 の「(α, φ) が base-equivalent」の形。`gpMap_biratBase_of_baseIdentity` が部分的にある。"
+          "evidence": "★★数学は済んでいる: `biratBase (mk Z φ) = inv (Base α) ≫ Base φ` なので、これが `1` になることと base-equivalent は同じこと。★★★2026-08-18 に実装を試みて**実例の照合で止まった** —— 目標式の `inv` は `sliceBaseOf` が抱える `IsIso` の実例を使うので、`haveI` で同じ命題を入れても `rw` / `IsIso.inv_comp_eq` が当たらない。★次の一手: `sliceBaseOf` を `asIso` で包んだ補題を立てて `Iso` の API に乗せ換える(実例引数が消える)。"
         },
         {
           "id": "iv-src",

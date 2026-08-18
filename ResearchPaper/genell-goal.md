@@ -6221,3 +6221,19 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 | 119 | `tildeAwayEquiv` どうしが制限で対応する(`IsLocalizedModule` の一意性) |
 | 120 | `IsLocallyTrivial (tilde M).val` |
 | 121 | `tilde M` が `InvSheaf` / `equivPicRing` → **B1 達成** |
+
+## §9-133 —— `powers g` は切断に可逆に作用する(第 119 ブロック、2026-08-24)
+
+    Scheme.Modules.isUnit_algebraMap_end_of_le_basicOpen (f) (hf : U ≤ basicOpen f)
+
+★mathlib が**そのまま持っていた**(実測)。`D(h·g) ≤ D(g)` を入れるだけ。**一発。**
+
+★★これで `IsLocalizedModule.ext` が使え、
+`restriction ∘ tildeAwayEquiv_g = tildeAwayEquiv_{h·g} ∘ (局所化)` が言える。
+
+### ★★★残り 2 ブロック
+
+| # | 内容 |
+|---|---|
+| 120 | 制限の両立(`IsLocalizedModule.ext`)→ `IsLocallyTrivial` |
+| 121 | `InvSheaf` / `equivPicRing` → **B1 達成** |
