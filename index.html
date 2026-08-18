@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 1083 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 1084 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5351</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5356</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1462</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">22</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 982 節点を、強連結成分で潰して 295 個の箱・61 層に並べたもの。
+<span>原文の参照から機械抽出した 983 節点を、強連結成分で潰して 295 個の箱・61 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 64 件・Interface の義務 5/30 件。</b>
@@ -281,6 +281,7 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>f19b046</code></td><td>2026-08-18</td><td>底同型の保存を取った——`Proposition 1.7, (ii)` を両側で使う</td></tr>
 <tr><td><code>52b2846</code></td><td>2026-08-18</td><td>逐語引用を p.64 の実在の行に直した</td></tr>
 <tr><td><code>d2ae43c</code></td><td>2026-08-18</td><td>linear と pre-step の保存を次数経由で取った</td></tr>
 <tr><td><code>1bef30e</code></td><td>2026-08-18</td><td>Frobenius 型の保存を取った——射クラスの保存の入口</td></tr>
@@ -292,7 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>8f209b8</code></td><td>2026-08-18</td><td>★★★★次数の対応を任意の次数へ広げた——`psiN-degree` を閉じた</td></tr>
 <tr><td><code>fa087b3</code></td><td>2026-08-18</td><td>★★★★★★評価の双線型写像(第 174、§9-197)</td></tr>
 <tr><td><code>0175cfc</code></td><td>2026-08-18</td><td>素数の対応の well-defined 性を取った</td></tr>
-<tr><td><code>d7fef38</code></td><td>2026-08-18</td><td>評価射のための両側の橋(第 173、§9-196)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない

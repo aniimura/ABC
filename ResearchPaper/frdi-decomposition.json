@@ -976,15 +976,25 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isBaseIsomorphism_map_of_classes`。\n★原文 (FrdI p.64):\n> (i), (ii), Ψ preserves isometric pre-steps and pre-steps, hence base-isomorphisms [i.e.,\n★在庫の `prop_1_7_ii_baseIso_factor`(底同型 ⇔ Frobenius 型 ≫ pre-step)を両側で使うだけ。"
         },
         {
+          "id": "iii-pullback",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "iii-baseiso"
+          ],
+          "title": "(iii) pull-back と LB-invertible の保存",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isLBInvertible_map_of_classes` と `isPullBack_map_of_classes`。\n★在庫の `prop_1_4_ii`(pull-back ⇔ LB-invertible ∧ linear)を両側で使う。\n★★これで射クラスの残りは **co-angular と isometric の 2 つの原始的なもの**だけになった。"
+        },
+        {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "iii-baseiso"
+            "iii-pullback"
           ],
           "status": "todo",
           "size": "小",
           "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。",
-          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。\n\n★★linear と pre-step は `iii-linear` で取った(2026-08-18)。\n★残るのは底同型・pull-back・isometry・co-angular・LB-invertible。\n★在庫: `prop_1_7_iii_linear_factor`(linear ⇔ pre-step ≫ pull-back)、`prop_1_10_i_four_types` の 7 タイプ。\n\n★★底同型も `iii-baseiso` で取った(2026-08-18)。\n★残るのは pull-back・isometry・co-angular・LB-invertible。\n★いずれも原典は「formally」としか書いておらず、`Proposition 1.7` の分解を両側で使う同じ手になる見込み。\n★見積りを ★中 → ★小 に下げた。"
+          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。\n\n★★linear と pre-step は `iii-linear` で取った(2026-08-18)。\n★残るのは底同型・pull-back・isometry・co-angular・LB-invertible。\n★在庫: `prop_1_7_iii_linear_factor`(linear ⇔ pre-step ≫ pull-back)、`prop_1_10_i_four_types` の 7 タイプ。\n\n★★底同型も `iii-baseiso` で取った(2026-08-18)。\n★残るのは pull-back・isometry・co-angular・LB-invertible。\n★いずれも原典は「formally」としか書いておらず、`Proposition 1.7` の分解を両側で使う同じ手になる見込み。\n★見積りを ★中 → ★小 に下げた。\n\n★★★**残りは co-angular と isometric の 2 つだけ**(2026-08-18)。\n★他はすべてこの 2 つから導ける:\n- LB-invertible = co-angular ∧ isometric\n- pull-back = LB-invertible ∧ linear(`prop_1_4_ii`)\n- 底同型 = Frobenius 型 ≫ pre-step(`prop_1_7_ii_baseIso_factor`、済)\n- linear・pre-step は次数経由(済)\n\n★co-angular の見込み: 定義が「分解の中の isometric pre-step が同型」なので、(i) の isometric pre-step の保存(`isometricPreStep_map`、実装済)と圧倒的同値の充満性から出る。"
         },
         {
           "id": "iii-psipf",

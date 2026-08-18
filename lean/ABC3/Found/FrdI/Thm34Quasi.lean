@@ -1231,4 +1231,32 @@ def isBaseIsomorphism_map_of_classes.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 底同型の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★**LB-invertible の保存**は co-angular と isometric の保存から直ちに出る。
+
+`IsLBInvertible = IsCoAngular ∧ IsIsometric` なので定義の展開だけ。 -/
+theorem isLBInvertible_map_of_classes (Ψ : C₁ ⥤ C₂)
+    (hCA : ∀ {X Y : C₁} (f : X ⟶ Y), IsCoAngular P₁ f → IsCoAngular P₂ (Ψ.map f))
+    (hIs : ∀ {X Y : C₁} (f : X ⟶ Y), IsIsometric P₁ f → IsIsometric P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsLBInvertible P₁ φ) :
+    IsLBInvertible P₂ (Ψ.map φ) :=
+  ⟨hCA φ h.1, hIs φ h.2⟩
+
+/-- ★★★★**Ψ は pull-back 射を保つ**。
+
+★在庫の `prop_1_4_ii`(pull-back ⇔ LB-invertible ∧ linear)を両側で使う。 -/
+theorem isPullBack_map_of_classes (Ψ : C₁ ⥤ C₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hCA : ∀ {X Y : C₁} (f : X ⟶ Y), IsCoAngular P₁ f → IsCoAngular P₂ (Ψ.map f))
+    (hIs : ∀ {X Y : C₁} (f : X ⟶ Y), IsIsometric P₁ f → IsIsometric P₂ (Ψ.map f))
+    (hLin : ∀ {X Y : C₁} (f : X ⟶ Y), IsLinear P₁ f → IsLinear P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsPullBack P₁ φ) : IsPullBack P₂ (Ψ.map φ) := by
+  obtain ⟨hlb, hlin⟩ := (prop_1_4_ii P₁ F₁ φ).mp h
+  exact (prop_1_4_ii P₂ F₂ (Ψ.map φ)).mpr
+    ⟨isLBInvertible_map_of_classes Ψ hCA hIs φ hlb, hLin φ hlin⟩
+
+def isPullBack_map_of_classes.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — pull-back 射の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
