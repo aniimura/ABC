@@ -810,7 +810,8 @@
           "size": "★小",
           "evidence": "★分類 (B) を index.html で開示すること。"
         }
-      ]
+      ],
+      "★(iii) の証明構造(FrdI p.64、2026-08-18 精読)": "原典は (iii) 全体を**素数の対応 1 点**に帰着させる:\n> it suffices to prove that, for each prime p1 ∈ Primes, there exists a prime p2 ∈ Primes,\n> which is equal to p1 if C1, C2 are not of group-like type, such that Ψistr maps p1-\n> Frobenius morphisms to p2-Frobenius morphisms.\n\n★そこから先は機械的である:\n1. p1 ↦ p2 が単系準同型 `Ψ_{N≥1}` を与え、quasi-inverse で自己同型になる\n   → 我々は **`pnatMulEquivOfPrimeEquiv`(済)** でこの段を持っている\n2. **`Proposition 1.10, (v)`**(= `prop_1_10_v`、**実装済**: `IsFrobeniusType ⇔ IsPrimeFrobComposite`)で Frobenius 型の保存\n3. `Proposition 1.7, (iii)` で linear の保存\n4. 任意の射 = prime-Frobenius と linear の合成 → 次数の対応\n5. isotropification が次数を保つので `Ψ` へ戻る\n6. 残りの射クラスは (i)(ii) と `Proposition 1.7` から順に出る\n\n★★**そして (ii) と同じく isotropic 型へ帰着できる**:\n> Thus, to complete the proof of assertion (iii), we may assume … that C1, C2 are of isotropic type\n★我々の `ii-quasi` で使った帰着(`psiIstr` ＋ `isotropificationCommute`)が**そのまま再利用できる**。\n\n★★★したがって (iii) の**真の本体は `psiN-prime-map`のみ**であり、`iii-morclasses` 以降は 2〜6 の手順をなぞる作業になる。"
     },
     {
       "id": "prop48",
