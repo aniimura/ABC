@@ -7711,3 +7711,33 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
       - 局所自明性(第 162)まで完了
       - 双対の加群構造(第 166)、制限の半線型性(第 168)まで完了
       - 残り: 双対の前層 → 層 → 評価射の同型 → InvSheaf → ofDivisor → 3 法則
+
+## §9-187 —— 双対の前層——instance を 3 本立てれば型は通る(2026-08-18)
+
+§9-186 の選択肢 2(RingCat 綴りで固定)を実装したところ、
+**`letI` を 3 本**立てれば `ModuleCat.ofHom` の型検査は通ることが分かった:
+
+    letI : Module (ring at U) (双対 at U) := inferInstanceAs (…Γ(X,U)…)
+    letI : Module (ring at V) (双対 at V) := inferInstanceAs (…Γ(X,V)…)
+    letI : Module (ring at U) (dualObj F V) := Module.compHom _ (ring map)
+
+★残るのは `map_smul'` の中身:
+
+    (restrictOnFunctor h).map (c • φ) = (res c) • ((restrictOnFunctor h).map φ)
+
+で、`rw [dual_smul_eq]` が**当たらない**——`dual_smul_eq` は
+`Γ(X,U)` 綴りの作用で述べてあり、ここの `c` は RingCat 綴りだからである。
+
+### ★★次の一手
+
+`dual_smul_eq` を **RingCat 綴りでも**述べる(第 167 のファイルに 1 行足す):
+
+    theorem dual_smul_eq' (c : ((X.presheaf ⋙ forget₂ …).obj U : Type u)) (φ) :
+        c • φ = φ ≫ unitMul U c
+
+★★★あるいは §9-180 の教訓に従い、**型付き恒等関数**で `c` を渡す。
+
+### 現状(2026-08-18 時点)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–168 の 21 ブロック
