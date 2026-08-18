@@ -477,17 +477,129 @@ theorem biratFunctor_base (G : Frobenioid P) {A B : BiratCat (unTrPre P F)
       = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).Base f :=
   biratMap_base (F := F) G A B f
 
-/-! ## ★8. 残り —— `Frobenius-compact` 対象の移送
 
-★`biratFunctor` は**充満忠実**(`biratMap_bijective`)で、対象については `unTr2` が
-全単射なので**本質的全射**、すなわち**圏同値**である。
-★さらに `Base`・`degFr` を保つ(上の 2 本)。
+/-! ## ★8. ★★★★★`Frobenius-compact` 対象の移送 —— `Definition 4.5, (iii), (b)`
 
-★★残るのは `isFrobeniusCompact_transport`(`Rmk451.lean`)の 4 つの材料を組むこと:
-`End X ≃* End (biratFunctor.obj X)`(全単射 ＋ `biratMap_comp` ＋ `biratMap_id` から)、
-自己同型の対応、`OTimes` の対応(`IsBaseIdentity` と `IsLinear` は上の 2 本で移る)、
-共役との両立(関手から自動)。
-★それが済めば `Definition 4.5, (iii), (b)` が `𝒞^istr` へ移り、`Remark 4.5.1` が閉じる。
+★`isFrobeniusCompact_transport`(`Rmk451.lean`)の 4 材料を、
+充満忠実性と構造保存から組む。 -/
+
+instance biratFunctor_full (G : Frobenioid P) : (biratFunctor (F := F) G).Full where
+  map_surjective {A B} f := (biratMap_bijective (F := F) G A B).2 f
+
+instance biratFunctor_faithful (G : Frobenioid P) : (biratFunctor (F := F) G).Faithful where
+  map_injective {A B} {_ _} h := (biratMap_bijective (F := F) G A B).1 h
+
+/-- ★★材料 1 —— `End` の単系同型。 -/
+noncomputable def biratEndEquiv (G : Frobenioid P)
+    (X : BiratCat (unTrPre P F) (unTr_frobenioid P F G)) :
+    End X ≃* End ((biratFunctor (F := F) G).obj X) :=
+  MulEquiv.ofBijective (CategoryTheory.Functor.mapEnd X (biratFunctor (F := F) G))
+    (biratMap_bijective (F := F) G X X)
+
+/-- ★★材料 2 —— 自己同型の対応。 -/
+noncomputable def biratIsoEquiv (G : Frobenioid P)
+    (X : BiratCat (unTrPre P F) (unTr_frobenioid P F G)) :
+    (X ≅ X) ≃ ((biratFunctor (F := F) G).obj X ≅ (biratFunctor (F := F) G).obj X) where
+  toFun θ := (biratFunctor (F := F) G).mapIso θ
+  invFun θ' := (Functor.FullyFaithful.ofFullyFaithful (biratFunctor (F := F) G)).preimageIso θ'
+  left_inv θ := by
+    refine Iso.ext ?_
+    exact (biratFunctor (F := F) G).map_injective
+      (by simp [Functor.FullyFaithful.preimageIso])
+  right_inv θ' := by
+    refine Iso.ext ?_
+    simp [Functor.FullyFaithful.preimageIso]
+
+theorem bf_base (G : Frobenioid P) {A B : BiratCat (unTrPre P F) (unTr_frobenioid P F G)}
+    (f : A ⟶ B) :
+    (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)).Base
+        ((biratFunctor (F := F) G).map f)
+      = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).Base f :=
+  biratMap_base (F := F) G A B f
+
+theorem bf_degFr (G : Frobenioid P) {A B : BiratCat (unTrPre P F) (unTr_frobenioid P F G)}
+    (f : A ⟶ B) :
+    (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)).degFr
+        ((biratFunctor (F := F) G).map f)
+      = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).degFr f :=
+  biratMap_degFr (F := F) G A B f
+
+/-- ★★材料 3 —— `OTimes` の対応。★`IsBaseIdentity`・`IsLinear` は構造保存から。 -/
+theorem birat_otimes_iff (G : Frobenioid P)
+    (X : BiratCat (unTrPre P F) (unTr_frobenioid P F G)) (u : End X) :
+    u ∈ OTimes (biratPre (unTrPre P F) (unTr_frobenioid P F G)) X ↔
+      biratEndEquiv (F := F) G X u
+        ∈ OTimes (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G))
+          ((biratFunctor (F := F) G).obj X) := by
+  have hid : (biratFunctor (F := F) G).map (𝟙 X) = 𝟙 ((biratFunctor (F := F) G).obj X) :=
+    CategoryTheory.Functor.map_id _ _
+  constructor
+  · rintro ⟨⟨hb, hl⟩, hu⟩
+    refine ⟨⟨?_, ?_⟩, hu.map (biratEndEquiv (F := F) G X).toMonoidHom⟩
+    · show (biratPre _ (unTr2G G)).Base ((biratFunctor (F := F) G).map (u : X ⟶ X))
+        = (biratPre _ (unTr2G G)).Base (𝟙 ((biratFunctor (F := F) G).obj X))
+      rw [bf_base, ← hid, bf_base]
+      exact hb
+    · show (biratPre _ (unTr2G G)).degFr ((biratFunctor (F := F) G).map (u : X ⟶ X)) = 1
+      rw [bf_degFr]
+      exact hl
+  · rintro ⟨⟨hb, hl⟩, hu⟩
+    refine ⟨⟨?_, ?_⟩, ?_⟩
+    · show (biratPre (unTrPre P F) (unTr_frobenioid P F G)).Base (u : X ⟶ X)
+        = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).Base (𝟙 X)
+      rw [← bf_base (F := F) G (u : X ⟶ X), ← bf_base (F := F) G (𝟙 X), hid]
+      exact hb
+    · show (biratPre (unTrPre P F) (unTr_frobenioid P F G)).degFr (u : X ⟶ X) = 1
+      rw [← bf_degFr (F := F) G (u : X ⟶ X)]
+      exact hl
+    · have h2 := hu.map (biratEndEquiv (F := F) G X).symm.toMonoidHom
+      simpa using h2
+
+/-- ★★材料 4 —— 共役との両立(関手性から)。 -/
+theorem birat_endConj (G : Frobenioid P)
+    (X : BiratCat (unTrPre P F) (unTr_frobenioid P F G)) (θ : X ≅ X) (u : End X) :
+    biratEndEquiv (F := F) G X (endConj θ u)
+      = endConj (biratIsoEquiv (F := F) G X θ) (biratEndEquiv (F := F) G X u) := by
+  show (biratFunctor (F := F) G).map (θ.inv ≫ (u : X ⟶ X) ≫ θ.hom)
+    = ((biratFunctor (F := F) G).mapIso θ).inv
+      ≫ (biratFunctor (F := F) G).map (u : X ⟶ X)
+      ≫ ((biratFunctor (F := F) G).mapIso θ).hom
+  rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp]
+  rfl
+
+/-- ★★★★★**[FrdI] Definition 4.5, (iii), (b) が `𝒞^istr` へ移る** ——
+`(𝒞^un-tr)^birat` の Frobenius-compact 対象から
+`((𝒞^istr)^un-tr)^birat` の Frobenius-compact 対象が得られる。
+
+原文 (FrdI p.86):
+> that if C is of rationally standard type (respectively, of standard type), then so is
+
+★★これが `Remark 4.5.1` の 4 条のうち (b) である。 -/
+theorem istr_unTrBiratCompact (G : Frobenioid P)
+    (h : ∃ X : BiratCat (unTrPre P F) (unTr_frobenioid P F G),
+      IsFrobeniusCompact (biratPre (unTrPre P F) (unTr_frobenioid P F G)) X) :
+    ∃ X : BiratCat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G),
+      IsFrobeniusCompact
+        (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)) X := by
+  obtain ⟨X, hX⟩ := h
+  refine ⟨(biratFunctor (F := F) G).obj X, ?_⟩
+  exact isFrobeniusCompact_transport _ _ (biratEndEquiv (F := F) G X)
+    (biratIsoEquiv (F := F) G X) (birat_otimes_iff (F := F) G X)
+    (birat_endConj (F := F) G X) hX
+
+/-! ## ★9. 残り —— `Remark 4.5.1` の (a) の 2 条
+
+★★**測定の訂正(2026-08-18)**: `Remark 4.5.1` の 4 条のうち
+**(b) と standard 型は済んだ**が、(a) の残り 2 条
+(**birationally Frobenius-normalized 型**・**rational 型**)は
+**別の比較**を要する。
+
+★これらは `𝒞^birat` と `(𝒞^istr)^birat` の比較であって、本ファイルで作った
+`𝒞^un-tr` と `(𝒞^istr)^un-tr` の比較ではない。
+★★★**そして `𝒞^istr` は `𝒞` の真の充満部分圏なので、その比較は圏同値ではない。**
+`A` が isotropic でも `A′ → A` が pre-step のとき `A′` が isotropic とは限らないため、
+添字圏 `SliceA` が一致しない。
+★したがって (a) の 2 条は本ファイルの手法をそのまま流用できず、別立ての作業になる。
 -/
 
 end ABC3.Found.FrdI

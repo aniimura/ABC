@@ -5870,3 +5870,33 @@ Lean は `⟶` の形を要求する(実測)。
 
 ★数学は第 100・102・103・104・105・106 で**完全に済んでいる**。
 ★★残るのは `Inhabited` インスタンスの経路を揃える**戦術 1 点**である。
+
+## §9-120 —— ★★★★★★★20 手超の壁を抜けた(第 107 ブロック、2026-08-24)
+
+    bijective_freeYonedaEquiv_symm_app :
+      生成元の乗法が全単射 ⟹ 単位からの射の app が全単射
+
+### ★★★正体は `Inhabited` の二経路
+
+    @default (W ⟶ T) (@Unique.instInhabited _ _)   ← ゴール側
+    @default (W ⟶ T) (@Unique.toInhabited _ _)     ← 補助定義側
+
+★**解決**: 補助定義を **`[Unique ((yoneda.obj T).obj (op W))]` で引数化**する
+——ゴール側(第 106)と**同じ class** なので `default` が一致する。
+
+★★★★これは [[ring-instance-two-paths]] の **3 例目**である
+(環・加群に続いて `Inhabited`)。**メモリに追記した。**
+
+### ★★証明は 4 行になった
+
+    rw [freeYonedaEquiv_symm_eq_desc, freeObjDesc_app]
+    refine bijective_freeDesc_of_unique _ ?_
+    convert hb using 2 with c
+    congr 1
+
+★20 手以上かけて**4 行**である。★★詰まりの正体が分かれば短い。
+
+### ★★★残り 2 ブロック
+
+| 108 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 109 | `tilde M` が `InvSheaf` / `equivPicRing` |
