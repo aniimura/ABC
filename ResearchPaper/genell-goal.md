@@ -8325,3 +8325,41 @@ mathlib で `(D * E).ideal A = D.ideal A * E.ideal A` は **`rfl`**、
 | `IsPrincipalDivisor` 系 3 欄 | 残 |
 
 ★★**14 欄中 7 欄が埋まった。**
+
+## §9-208 `ofDivisor` は準同型である(第 188–190 ブロック)
+
+    𝒪_X(D + E) = 𝒪_X(D) ⊗ 𝒪_X(E)
+
+★★★★★★これで `CartierPicData` は **14 欄中 9 欄**。
+
+| ブロック | 内容 |
+|---|---|
+| 188 | 積の射 `idealPresheaf D ⊗ idealPresheaf E ⟶ idealPresheaf (D*E)` とアフィン開での全単射 |
+| 189 | ★**アフィン開で全単射なら局所全単射**(再利用可能な形) |
+| 190 | 層化で同型 → `ofDivisorSheaf_mul` |
+
+### ★★第 189 を再利用可能な形に切り出したのが効いた
+
+    (∀ アフィン開 A, f.app A が全単射) ⟹ f は局所全単射
+
+★鍵は「**像の篩は下向き閉**」——篩の元がアフィンである必要は無く、
+アフィン開で覆う篩 `{ V ⟶ U | ∃ A アフィン開, V ≤ A ≤ U }` の元 `V ≤ A` に対しては
+`A` での全単射性を**制限で運べばよい**(自然性)。
+★★これで第 190 は 3 行で済んだ。イデアル層を扱う後段でも効くはずである。
+
+### ★★アフィン開では環レベルの補題がそのまま当たった
+
+`idealSections D A = D.ideal A`(第 148)なので、積の射は第 185 の `mulTensorMap`
+そのものである——単射は**平坦性**、全射は**像が `I*J`**。
+★`(D*E).ideal A = D.ideal A * E.ideal A` が mathlib で `rfl` なので繋がった。
+
+### `CartierPicData` 14 欄の現況
+
+| 欄 | 状態 |
+|---|---|
+| `toPicardData` / `IsCartierDivisor` / `isCartierDivisor_top` / `_mul` / `_affine` | ★済 |
+| `ofDivisor` / `ofDivisor_top` / `ofDivisor_mul` | ★済 |
+| `isCartierDivisor_comap`(平坦) / `ofDivisor_pullback`(平坦) | 残——`comap` のアフィン記述が要る |
+| `IsPrincipalDivisor` / `ofDivisor_eq_one_iff` / `isPrincipalDivisor_mul` / `_affine` | 残 |
+
+★★**9/14。**残りは「引き戻し 2 欄」と「主因子 4 欄」の 2 塊である。
