@@ -6268,3 +6268,27 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 
     121: IsLocallyTrivial (tilde M).val
     122: InvSheaf / equivPicRing → **B1 達成**
+
+## §9-135 —— 2 つの前層は切断も制限も同じ(第 121 ブロック、2026-08-24)
+
+第 120 の可換図式は `modulesSpecToSheaf.obj (tilde M)`(`R` 加群の前層)、
+`IsLocallyTrivial` は `(tilde M).val`(`𝒪` 加群の前層)について述べる。
+
+★★**両者は切断も制限射も `rfl` で一致する**(実測)——違うのは**加群構造だけ**。
+★★★したがって元のレベルでは自由に行き来できる。
+
+### ★★この session の Lean 累計(第 70–121、53 ブロック)
+
+| 群 | ブロック |
+|---|---|
+| Γ の構造・`sheafOf` 族 | 70–73 |
+| 比較射 | 74–75 |
+| ★**tilde はテンソルを保つ**(mathlib に無い) | 76–92 |
+| 局所自明性の器具 | 93–121(**29 ブロック**) |
+
+### ★★★残り
+
+| # | 内容 |
+|---|---|
+| 122 | 第 115 の仮定を埋めて `IsLocallyTrivial (tilde M).val` |
+| 123 | `InvSheaf` / `equivPicRing` → **B1 達成** |

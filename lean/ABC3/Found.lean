@@ -281,6 +281,7 @@ import ABC3.Found.Arakelov.PicBasicCover
 import ABC3.Found.Arakelov.PicToOpenRes
 import ABC3.Found.Arakelov.PicSecUnit
 import ABC3.Found.Arakelov.PicResSquare
+import ABC3.Found.Arakelov.PicPresheafId
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
