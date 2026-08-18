@@ -1,4 +1,3 @@
-import ABC3.Found.Arakelov.PicIdealLT
 import ABC3.Found.Arakelov.PicUnitBij
 
 /-!

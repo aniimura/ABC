@@ -7569,3 +7569,29 @@ B2 の在庫を実測した結果:
 | 3 | `freeYonedaTermIso` を `asIso` から作り直し、`asIso` の逆の定義を直接使う |
 
 ★★1 が本命——`PresheafOfModules.comp_app` が有れば一撃である。
+
+## §9-182 —— ★★事故と復旧——ファイル名の衝突(2026-08-18)
+
+第 165 ブロックを `PicUnitInv.lean` として書き出したところ、
+**同名の既存ファイル(第 38 ブロック)を上書きしていた**。
+
+★`lake build` の**import 循環エラー**で気づいた
+——`PicTensorMu.lean` が `PicUnitInv` を import しており、
+上書き後の内容には無い宣言を要求していたためである。
+
+### 復旧
+
+    git checkout HEAD -- lean/ABC3/Found/Arakelov/PicUnitInv.lean   (第 38 を復元)
+    新しい内容は PicUnitSect.lean へ                                (第 165)
+
+★★被害は無い(未 push の状態で気づき、`git` に残っていた)。
+
+### ★★★教訓——**新しいファイル名は先に存在を確認する**
+
+    ls ABC3/Found/Arakelov/<新名>.lean
+
+を書き出し前に必ず行う。★本 session は 45 個のファイルを新規作成しており、
+名前空間が埋まってきている。
+
+★★`git status` に `M`(modified)が出たら**新規のつもりが上書き**である——
+`??`(untracked)でなければ止まる。

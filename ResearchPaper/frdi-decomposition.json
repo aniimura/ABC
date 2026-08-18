@@ -786,13 +786,13 @@
         },
         {
           "id": "psiN-F2",
-          "size": "小",
+          "size": "中",
           "status": "todo",
           "deps": [
             "psiN-F2-prestep"
           ],
-          "title": "(F2) admissible 性は射を越えて同値",
-          "note": "★原文(FrdI p.64):\n> (F2) For every pair of primes p1, p2 ∈ Primes and every morphism ζ1 : A1 →\n> B1 in C1, A1 is (p1, p2)-admissible if and only if B1 is.\n★`frobDegUniq` と `Proposition 1.7` の分解が効く見込み。\n\n## ★★★原典の証明(FrdI p.65)\nζ₁ が pre-step のとき: (ii) で Ψ が pre-step を保つので、`Proposition 1.10, (i)` の可換図式に `Proposition 1.14, (iv)` を当てる。\n一般の場合: `Definition 1.3, (i)(a)(b)(c)` で B₁ を Frobenius-trivial、ζ₁ を pull-back としてよい。\n★`Proposition 1.11, (iii)` で **ψ₁ ∘ ζ₁ = ζ₁ ∘ φ₁** となるbase-identity な p₁-Frobenius 自己射を取る。\n★像でも四角形が保たれ、`Proposition 1.14, (iv)` で「φ₂ が p₂-Frobenius ⇔ ψ₂ がそう」が出る。\n★★見積りを ★大 → ★中 に下げた。\n\n★残るのは (2026-08-18):\n(a) pre-step の場合(`Proposition 1.10, (i)` の可換図式に `prop_1_14_iv`)\n(b) 一般の場合: `Definition 1.3, (i)(a)(b)(c)` で B₁ を Frobenius-trivial、ζ₁ を pull-back とし、`prop_1_11_iii`(在庫)で四角形を作る\n★次数の移送は `psiN-F2-square` で取った。\n\n★★伝搬本体は `psiN-F2-transfer` で取った。\n★残るのは**四角形を作る**段だけ:\n(a) ζ が pre-step の場合 —— `Proposition 1.10, (i)` の可換図式\n(b) 一般の場合 —— `Definition 1.3, (i)(a)(b)(c)` で pull-back に帰着させ、`prop_1_11_iii`(在庫、`Prop111.lean:96`)で四角形を作る\n\n★★四角形を作る段も取った(`psiN-F2-square-build`)。\n★残るのは (a) pre-step の場合と (b) 一般の場合を pull-back に帰着させる段。\n\n★★pre-step の場合も取った(`psiN-F2-prestep`)。\n★残るのは一般の射を pull-back に帰着させる段だけ(`Definition 1.3, (i)(a)(b)(c)`)。"
+          "title": "(F2) 全体——一般の射へ広げる",
+          "note": "★★★**測定(2026-08-18)**: 中核は 3 本とも取り終わっている。\n- `psiN-F2-transfer` —— 四角形に沿う伝搬\n- `psiN-F2-square-build` —— pull-back に沿う四角形の構成\n- `psiN-F2-prestep` —— pre-step の場合\n\n## ★残る段の 2 つの道\n**(a) 原典の道**: `Definition 1.3, (i)(a)(b)(c)` で 「B₁ を Frobenius-trivial、ζ₁ を pull-back」としてよいことを示す。\n**(b) `arbFactor` の道**: 任意の射を (Frobenius 型) ≫ (pre-step) ≫ (pull-back) に分解し、各成分で伝搬する。\n★pre-step と pull-back は取ったので、**Frobenius 型の成分だけ**が残る。\n★★(b) の方が在庫と相性が良さそうだが、Frobenius 型に沿う伝搬を別途測る必要がある。"
         },
         {
           "id": "psiN-F3",
