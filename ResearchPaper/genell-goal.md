@@ -6819,3 +6819,37 @@ instance 検索が**別物として扱う**。
 層の分離性で貼る」——**有限**被覆(第 135)がここで効く。
 
 ★残るは `surj'` の 1 欄である。
+
+## §9-154 —— ★★★★★★★★**局所自明 ⟹ `F ≅ (Γ F)~`**(第 141–143 ブロック、2026-08-18)
+
+    theorem isLocalizing_of_isLocallyTrivial
+      (h : IsLocallyTrivial (Spec R) F.val) : IsLocalizing (modulesSpecToSheaf.obj F)
+    theorem isIso_fromTildeΓ_of_isLocallyTrivial …
+    noncomputable def tildeGammaIsoOfTrivial … : tilde (Γ F) ≅ F
+
+★★**mathlib の `Tilde.lean` 547 行の TODO**(「準連接 ⟹ `fromTildeΓ` 同型」)の
+うち**局所自由な場合**を自前で埋めた。
+
+### 組み上げ(第 134–143、10 ブロック)
+
+| # | 内容 |
+|---|---|
+| 134–135 | 自明化を基本開集合へ、有限被覆 |
+| 136–137 | 制限が局所化であること(`𝒪` 側 → `F` 側) |
+| 138–139 | `f` 倍が `Γ(F,D f)` 上で全単射 |
+| 140 | `map_units` と `exists_of_eq` |
+| 141 | 制限写像の短縮記法 `secMap` |
+| 142 | ★★`surj'`——**2 段の最大値**(局所化の分母 + 貼り合わせのずれ) |
+| 143 | ★★組み立て |
+
+### ★★★新しい逃げ道——**`clear_value`**
+
+`set A2 := fun i => f^(N-kᵢ) • A i` としても `rw [map_smul]` が
+**定義を透かして**展開してしまい `rw` が空回りする。
+★`clear_value A2` で本体を消すと予定通り動く(等式は残る)。
+
+★★これは [[ring-instance-two-paths]] とは別種の「透明度」の問題である。
+
+### ★次——`Γ F` の可逆性と `equivPicRing`
+
+残り約 **16 ブロック**(可逆加群側 7 + `equivPicRing` 9)。

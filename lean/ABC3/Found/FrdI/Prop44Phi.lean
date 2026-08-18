@@ -512,6 +512,25 @@ def prop_4_8_i.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (i)",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★`Proposition 4.8, (iii)` の (d)(e) —— 底の圧と `Φ`
+
+★(d) `𝒟` の FSMFF 性は **`𝒞^birat` でも底の圧が変わらない**のでそのまま。
+★(e) `𝒞^birat` の `Φ` は `trivialOn D`(全値 `PUnit`)なので自明。 -/
+
+/-- ★★**`trivialOn D` は non-dilating** —— `Proposition 4.8, (iii)` の (e)。
+
+★値がすべて `PUnit` なので、`MChar` も subsingleton である。 -/
+theorem trivialOn_isNonDilatingOn :
+    MonoidOn.IsNonDilatingOn (trivialOn.{v, u, w} D) := by
+  intro A e _
+  ext x
+  exact Subsingleton.elim _ _
+
+def trivialOn_isNonDilatingOn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — Φ が non-dilating",
+    sectionId := "frdi-prop-4-8" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/
