@@ -1468,4 +1468,38 @@ def isCoAngular_congr_iso.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — co-angular の同型不変性",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★反射を保存に直す —— unit の自然性四角形
+
+★★`isPullBack_of_map` を `e.inverse` に当て、
+`e.unitIso` の自然性四角形を `isPullBack_congr_iso` で渡る。 -/
+
+/-- ★★★★**pull-back の保存**(圧倒的同値経由)。 -/
+theorem isPullBack_map_of_equiv (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hBI' : ∀ {X Y : C₂} (f : X ⟶ Y),
+      IsBaseIsomorphism P₂ f → IsBaseIsomorphism P₁ (e.inverse.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsPullBack P₁ φ) :
+    IsPullBack P₂ (e.functor.map φ) := by
+  refine isPullBack_of_map e.inverse F₂ F₁ hBI' (e.functor.map φ) ?_
+  exact isPullBack_congr_iso P₁ F₁ φ _ (e.unitIso.app A) (e.unitIso.app B)
+    (e.unitIso.hom.naturality φ) h
+
+/-- ★★★★**co-angular の保存**(圧倒的同値経由)。 -/
+theorem isCoAngular_map_of_equiv (e : C₁ ≌ C₂)
+    (hLin' : ∀ {X Y : C₂} (f : X ⟶ Y), IsLinear P₂ f → IsLinear P₁ (e.inverse.map f))
+    (hIs' : ∀ {X Y : C₂} (f : X ⟶ Y), IsIsometric P₂ f → IsIsometric P₁ (e.inverse.map f))
+    (hPS' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f → IsPreStep P₁ (e.inverse.map f))
+    (hBI' : ∀ {X Y : C₂} (f : X ⟶ Y),
+      IsBaseIsomorphism P₂ f → IsBaseIsomorphism P₁ (e.inverse.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsCoAngular P₁ φ) :
+    IsCoAngular P₂ (e.functor.map φ) := by
+  refine isCoAngular_of_map e.inverse hLin' hIs' hPS' hBI' (e.functor.map φ) ?_
+  exact isCoAngular_congr_iso P₁ φ _ (e.unitIso.app A) (e.unitIso.app B)
+    (e.unitIso.hom.naturality φ) h
+
+def isPullBack_map_of_equiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — pull-back の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

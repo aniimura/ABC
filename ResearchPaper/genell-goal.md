@@ -8190,3 +8190,34 @@ B2 の本丸である。
 | 「局所的に可逆 ⟹ 可逆」 | ★無い(**使わない筋にした**) |
 
 ★★★したがって欠落は **1 個**(平坦底変換とイデアルの拡大の一致)で、見積もり 2–3 ブロック。
+
+## §9-204 欠落 1 個を埋め、Cartier の定義が確定した(第 183–184 ブロック)
+
+§9-203 で測った**唯一の欠落**を埋めた:
+
+    S ⊗[R] I ≃ₗ[S] I.map (algebraMap R S)      (S が R 上平坦なら)   ← 第 183
+
+★機構は「単射(平坦)+ 像はイデアルの拡大(生成元で両包含)」の 2 点だけだった。
+
+そして第 184 で
+
+    IsCartier X D := ∀ A : X.affineOpens, Module.Invertible Γ(X,A) (D.ideal A)
+
+    ★★★★アフィンなら  IsCartier X D ↔ Module.Invertible Γ(X,⊤) (D.ideal ⊤)
+
+が出た(`isCartier_iff_top`)。これが `CartierPicData.isCartierDivisor_affine` の中身である。
+
+### ★★見積もり 2–3 に対し実測 2 ブロック
+
+★測ってから作ったので外れなかった。使った mathlib の在庫:
+
+| 部品 | 名前 |
+|---|---|
+| イデアルの拡大の推移 | `IdealSheafData.map_ideal` |
+| アフィン開の制限は平坦 | `Scheme.Hom.flat_appLE`(`𝟙 X` は開埋め込み) |
+| 底変換で可逆 | `Module.Invertible A (A ⊗[R] M)` |
+| 平坦は単射を保つ | `Module.Flat.lTensor_preserves_injective_linearMap` |
+
+### 残り(B2)
+
+    ofDivisor(1)→ ⊤・積・引き戻しの Cartier 性(3)→ 3 法則(4)→ 主因子(3)
