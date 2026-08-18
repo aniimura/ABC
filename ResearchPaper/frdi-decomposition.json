@@ -419,7 +419,7 @@
           "deps": [],
           "status": "done",
           "size": "★小",
-          "evidence": "`BiratCat` / `toBiratCat` / `biratToElemGp` / `biratGp_square_obj` / `biratGp_square_map` は実装済。.src が無いだけ。 ★2026-08-18 に  へ  を追加した。"
+          "evidence": "`BiratCat` / `toBiratCat` / `biratToElemGp` / `biratGp_square_obj` / `biratGp_square_map` は実装済。★2026-08-18 に `Prop44Gp.lean` へ `prop_4_4_i.src` を追加して閉じた。"
         },
         {
           "id": "prop44-src",
