@@ -358,6 +358,7 @@ import ABC3.Found.Arakelov.PicPrincipalRing
 import ABC3.Found.Arakelov.PicPrincipalAffine
 import ABC3.Found.Arakelov.PicPushoutKer
 import ABC3.Found.Arakelov.PicComapAffine
+import ABC3.Found.Arakelov.PicIdealLTPt
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
