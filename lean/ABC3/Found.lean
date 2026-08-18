@@ -194,6 +194,7 @@ import ABC3.Found.Arakelov.PicInfGen
 import ABC3.Found.Arakelov.PicUnitInv
 import ABC3.Found.Arakelov.PicTensorMu
 import ABC3.Found.Arakelov.PicDeltaIso
+import ABC3.Found.Arakelov.PicSheafPullTensor
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
