@@ -7134,3 +7134,36 @@ B2 の在庫を実測した結果:
 |---|---|
 | 5 | Cartier(可逆イデアル層)の定義と、そのとき `idealSheaf D` が可逆層であること——**律速** |
 | 6 | `ofDivisor` と 3 法則 |
+
+## §9-166 —— ★★★C3 の Interface にも穴がある(2026-08-18、**埋めない**)
+
+`HermitianMetricData` は `Metric : (X) → Pic X → Type` を持つが、
+**`Metric X L` と `L` を結ぶ条件が 1 つも無い**。
+
+★したがって `Metric X L := C(Arc X, ℝ)`、`logMetric := id`、`scale c m := m + c`、
+`tensorMetric := (+)` で **11 欄すべてが通ってしまう**(実測せずとも型で分かる)。
+
+### ★★これは B2 と同じ型の穴である——**空虚な witness で埋めない**
+
+★B2 では穴を見つけて Interface を修正した(§9-159)。C3 も同じ扱いにすべきだが、
+**正しい条件を書くには解析化(C2)が要る**ので、いまは**修正案の記録に留める**。
+
+### ★★★修正案(C2 が入ってから実装する)
+
+`ArcSpaceData` は `evalAffine : (A : CommRingCat) → Arc (Spec A) → A → ℂ` を持ち、
+それは `Spec` の充満忠実性が与える環準同型に**固定されている**(C1 で達成済み)。
+★これを使えば「計量が `L` の上にある」ことを**アフィンで**書ける:
+
+    normAffine : (A) → (L : Pic (Spec A)) → Metric (Spec A) L →
+                  Γ(sheafOf (Spec A) L, ⊤) → Arc (Spec A) → ℝ
+    normAffine_smul : ‖a · s‖(p) = |evalAffine A p a| · ‖s‖(p)
+
+★★★★2 つ目が**計量の定義そのもの**である——これが無いと `Metric` は
+`L` と無関係な連続関数の集合でよい。
+
+### ★★★★★方針
+
+    C3 は「空虚に達成できるが達成しない」——修正案を実装できるまで待つ。
+
+★これは §9-157 の「測ってから作る」の姉妹である:
+**Interface を作るときは、退化 witness が通らないことを型で確かめる。**
