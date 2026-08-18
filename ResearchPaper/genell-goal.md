@@ -5652,3 +5652,40 @@ mathlib の証明を写経できる。
 ★**数学はすべて済んでいる**:
 第 100(基底で `M_h ≅ R_h`)・第 102(被覆で全単射なら同型)・第 103(生成元の乗法は全単射)。
 ★★残るのは「`app` の値を計算する」という**戦術だけ**である。
+
+## §9-113 —— ★★★★★★12 手詰まってから抜けた(第 104 ブロック)
+
+    (freeYonedaEquiv.symm s).app (op W) (freeMk h) = P.map h.op s
+
+### ★★★決め手
+
+★**`freeYonedaEquiv.symm s = freeObjDesc (yonedaEquiv.symm s)` が `rfl`**(実測)。
+★★そこまで `show` で降ろせば `freeObjDesc_app`(`@[simps]`)と
+`ModuleCat.freeDesc_apply` が当たる。★★★`erw` が要る
+——第 25 ブロックで環インスタンスの二経路を抜けたのと**同じ手**である。
+
+### ★★詰まっていた理由(記録)
+
+| 誤った道 | なぜ駄目か |
+|---|---|
+| `simp [freeYonedaEquiv, freeHomEquiv, yonedaEquiv]` | 展開が深すぎて閉じない |
+| `NatTrans.naturality_apply` | ★`PresheafOfModules.Hom` は `NatTrans` ではない |
+| `mulHom` を**新しく作って**自然性を示す | `ModuleCat.hom_ofHom` が剥がれない |
+
+★★★★**「新しく作る」より「既にあるものの値を計算する」方が短かった。**
+★§9-111 の方針転換は正しかったが、**その中でさらに手を変える**必要があった。
+
+### ★★方法論(3 度目の確認)
+
+| # | 場面 | 抜け方 |
+|---|---|---|
+| 1 | §9-100 | 積閉集合を**取り替える** |
+| 2 | §9-104 | 基底変換の**言葉に移す** |
+| 3 | §9-113 | 新しく作らず**既存の値を計算する** |
+
+★★★いずれも「壁を押す」のではなく「**道を変える**」で抜けている。
+
+### ★★★残り 2 ブロック
+
+| 105 | `app` が基本開集合で全単射 → `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 106 | `tilde M` が `InvSheaf` / `equivPicRing` |
