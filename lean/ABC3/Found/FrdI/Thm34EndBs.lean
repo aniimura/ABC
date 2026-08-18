@@ -498,4 +498,124 @@ def thm_3_4_iv_part.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iv) — 𝒪^▷ / 𝒪^× の保存・Ψ^un-tr・1-一意性・rigidity",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`Theorem 3.4, (iv)` の `Ψ_{N≥1} = id` —— 群的型の場合
+
+原文 (FrdI p.66):
+> i.e., α acts on O×(A2)pf by multiplication by p1/p2. Since A2 is Frobenius-
+
+★★原文の要点は「`α` が `𝒪^×(A₂)^pf` に `p₁/p₂` 倍で作用する。
+`A₂` が Frobenius-compact だから `p₁ = p₂`」である。
+
+★★★その最後の一歩は **`Definition 1.2, (iv)` の第 3 節そのもの** ——
+「`c/d` 倍で作用するなら `1` 倍で作用する」。
+そこへ第 2 節(**無限位数の単元が存在する**)を当てると `c = d` が出る。
+★下はその純代数の部分で、Frobenioid の構造は一切使わない。 -/
+
+/-- ★★★★★**Frobenius-compact なら「`c/d` 倍作用」は `c = d` を強制する**。
+
+★★`Definition 1.2, (iv)` の第 3 節で「`1` 倍作用」に落とし、
+第 2 節の**無限位数の単元**で指数を比較する。 -/
+theorem pnat_eq_of_frobeniusCompact {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A : Cc} (hFC : IsFrobeniusCompact P A) (θ : A ≅ A) (c d : ℕ+)
+    (hact : ∀ u : End A, u ∈ OTimes P A → ∃ k : ℕ+,
+      ((endConj θ u) ^ ((d : ℕ) * (k : ℕ)) : End A)
+        = (u ^ ((c : ℕ) * (k : ℕ)) : End A)) :
+    c = d := by
+  obtain ⟨_hcomm, ⟨u, hu, hord⟩, hkey⟩ := hFC
+  obtain ⟨k₁, h₁⟩ := hact u hu
+  obtain ⟨k₂, h₂⟩ := hkey θ c d hact u hu
+  -- ★経路 1: `hact` を `k₂` 乗する。
+  have e₁ : ((endConj θ u) ^ ((d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A)
+      = (u ^ ((c : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A) := by
+    rw [pow_mul, h₁, ← pow_mul]
+  -- ★経路 2: 第 3 節が与える「1 倍作用」を `d * k₁` 乗する。
+  have e₂ : ((endConj θ u) ^ ((d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A)
+      = (u ^ ((d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A) := by
+    have hcomm : (d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ) = (k₂ : ℕ) * ((d : ℕ) * (k₁ : ℕ)) := by
+      ring
+    rw [hcomm, pow_mul, h₂, ← pow_mul]
+  have ekey : (u ^ ((c : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A)
+      = (u ^ ((d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) : End A) := e₁.symm.trans e₂
+  -- ★`u` は単元かつ無限位数なので、指数がそのまま一致する。
+  have hunit : IsUnit u := hu.2
+  have hpow : ∀ m n : ℕ, (u ^ m : End A) = (u ^ n : End A) → m ≤ n → m = n := by
+    intro m n h hmn
+    rcases eq_or_lt_of_le hmn with heq | hlt
+    · exact heq
+    · exfalso
+      have hstep : (u ^ m : End A) * (u ^ (n - m) : End A) = (u ^ m : End A) * 1 := by
+        rw [mul_one, ← pow_add, Nat.add_sub_cancel' hmn]
+        exact h.symm
+      have hcancel : (u ^ (n - m) : End A) = 1 := (hunit.pow m).mul_left_cancel hstep
+      exact hord ⟨n - m, Nat.sub_pos_of_lt hlt⟩ hcancel
+  have hK : 0 < (k₁ : ℕ) * (k₂ : ℕ) := Nat.mul_pos k₁.pos k₂.pos
+  refine PNat.coe_injective ?_
+  rcases le_total ((c : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) ((d : ℕ) * (k₁ : ℕ) * (k₂ : ℕ)) with hle | hle
+  · have hEq := hpow _ _ ekey hle
+    refine Nat.eq_of_mul_eq_mul_right hK ?_
+    rw [← mul_assoc, ← mul_assoc]
+    exact hEq
+  · have hEq := hpow _ _ ekey.symm hle
+    refine (Nat.eq_of_mul_eq_mul_right hK ?_).symm
+    rw [← mul_assoc, ← mul_assoc]
+    exact hEq
+
+def pnat_eq_of_frobeniusCompact.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — Frobenius-compact から p₁ = p₂",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★★**`α` は `p₁/p₂` 倍で作用する** —— 原文の計算そのもの。
+
+原文 (FrdI p.66):
+> hence [by the total epimorphicity of C2]
+
+★★筋: `φ = α ∘ ψ` と書けるとき、
+`φ ∘ u = α ∘ (ψ ∘ u) = α ∘ (u^{p₂} ∘ ψ) = (α ∘ u^{p₂} ∘ α⁻¹) ∘ φ`。
+これを `u^{p₁} ∘ φ = φ ∘ u` と突き合わせ、
+**`𝒞` が totally epimorphic**(= すべての射が epi)なので `φ` を消去する。 -/
+theorem otimes_conj_pow_of_frobNorm {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A : Cc} (hfn : IsFrobeniusNormalized P A) (α : A ≅ A) (ψ : End A)
+    (hψbid : IsBaseIdentity P ψ) (p₁ : ℕ)
+    (hrel : ∀ u : End A, u ∈ OTimes P A →
+      (u ^ p₁ : End A) * ((α.hom : End A) * ψ) = ((α.hom : End A) * ψ) * u)
+    (u : End A) (hu : u ∈ OTimes P A) :
+    ((endConj α u) ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) = (u ^ p₁ : End A) := by
+  have hfrob : (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * ψ = ψ * u :=
+    frobNorm_mul P hfn ψ hψbid ⟨u, hu.1⟩
+  have hih : (α.inv : End A) * (α.hom : End A) = 1 := α.hom_inv_id
+  -- ★`endConj` は `End` の積で `α.hom * x * α.inv` と書ける。
+  have hconj : ((endConj α u) ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A)
+      = (α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A) := by
+    rw [← map_pow]
+    show (α.inv ≫ ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) : A ⟶ A) ≫ α.hom) = _
+    show _ = ((α.inv : End A) ≫ ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) ≫ (α.hom : End A)))
+    rfl
+  -- ★`φ ∘ u` を 2 通りに書く。
+  have hstep : ((α.hom : End A) * ψ) * u
+      = ((α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A))
+        * ((α.hom : End A) * ψ) := by
+    have hR : ((α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A))
+        * ((α.hom : End A) * ψ)
+        = (α.hom : End A) * ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A)
+            * (((α.inv : End A) * (α.hom : End A)) * ψ)) := by
+      simp only [mul_assoc]
+    rw [hR, hih, one_mul, ← hfrob, mul_assoc]
+  -- ★`φ` を epi として消去する。
+  have hthis := hrel u hu
+  rw [hstep] at hthis
+  have hcancel : (u ^ p₁ : End A)
+      = (α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A) := by
+    haveI : Epi (((α.hom : End A) * ψ : End A) : A ⟶ A) := P.totEpiC _ _ _
+    refine (cancel_epi (((α.hom : End A) * ψ : End A) : A ⟶ A)).mp ?_
+    exact hthis
+  rw [hconj, hcancel]
+
+def otimes_conj_pow_of_frobNorm.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — α は p₁/p₂ 倍で作用する",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

@@ -8855,3 +8855,35 @@ mathlib の `PresheafOfModules.pullback` も**押し出しの左随伴**とし�
 | §9-221 | `f^*` の具体形は不要 | 迂回路を特定 |
 
 ★★**測り、外れたら記録し、測り直す**——これを 9 回繰り返した区間であった。
+
+## §9-222 `ofDivisor_pullback` の材料が揃った(第 203–204 ブロック)
+
+| ブロック | 内容 |
+|---|---|
+| 203 | ★★★イデアル層の切断は部分スキームで消える |
+| 204 | ★★★★**切断は引き戻せる**(`f^# s ∈ idealSections (D.comap f)`) |
+
+### ★★第 203 の機構——層の貼り合わせ 1 回
+
+`idealSections D V` は「アフィン開ごとに `D.ideal` に入る」と定義した(第 148)。
+`D.ideal B = ker (ι.app B)`(mathlib `ker_subschemeι_app`)なので
+`ι.app V s` は `ι⁻¹B` たちの上で消え、それらは `ι⁻¹V` を覆うから、
+`D.subscheme` の構造層の**貼り合わせの一意性**で `0` である。
+
+### ★★第 204 の機構——可換正方形 1 枚
+
+`comap = (pullback.fst f ι).ker` なので示すべきは `(pullback.fst).app A (f^# s|_A) = 0`。
+★`appLE` の合成則で左辺は `(fst ≫ f).appLE V W` に等しく、
+可換正方形 `fst ≫ f = snd ≫ ι` で `(snd ≫ ι).appLE V W` に移り、
+`ι.app V s` を経由するので第 203 で `0` である。
+
+★★mathlib の `appLE_comp_appLE` / `comp_appLE` / `app_eq_appLE` / `appLE_map` が
+**制限つきの射**を綺麗に扱わせてくれた——`Scheme.Hom.appLE` は
+「`U` の切断を `V` へ制限しながら引き戻す」を 1 語で書く道具である。
+
+### 残り
+
+前層の射を組み(第 204 の写像を `homMk` で束ねる)、
+アフィン開で全単射(第 183)→ 第 189 → 層化 → `sheafifyPullbackApp`(第 50 番台)。
+★★見積もり **3–6 ブロック**。§9-221 で見つけた迂回路(可逆層の間の全射は同型)は、
+全単射が直に出るなら**使わずに済む**。
