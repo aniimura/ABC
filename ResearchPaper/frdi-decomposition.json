@@ -907,12 +907,12 @@
         {
           "id": "psiN-prime-bij",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psiN-welldef"
           ],
           "title": "その写像が素数全体の全単射であること",
-          "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。\n\n★★well-defined 性は `psiN-welldef` で取った(2026-08-18)。\n★残るのは選択で写像を作り、quasi-inverse で逆写像を作って全単射にする束ねる作業。★見積りを ★中 → ★小 に下げた。"
+          "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。\n\n★★well-defined 性は `psiN-welldef` で取った(2026-08-18)。\n★残るのは選択で写像を作り、quasi-inverse で逆写像を作って全単射にする束ねる作業。★見積りを ★中 → ★小 に下げた。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `admissible_roundtrip`。\n★原文 (FrdI p.64):\n> which [by considering a quasi-inverse to Ψ] is easily seen to be an automorphism.\n★`Ψ` で `p₁ ↦ p₂`、`Ψ⁻¹` で `p₂ ↦ p₃` とすると `p₃ = p₁` になる。\n★実装は **4 行**。"
         },
         {
           "id": "psiN-deg-mul",
