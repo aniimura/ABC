@@ -32,3 +32,4 @@
 - [子セッションの使いどころ](child-session-usage.md) — 仕様が確定してから渡す。ABC3b とワークツリーを共有しているので子に git を触らせない。
 - [Inhabited の二経路](inhabited-two-paths.md) — Unique から default を取る道が 2 本あり項が一致しない。補助定義を [Unique ...] で引数化して揃える
 - [𝒞^birat の 3 つの構造的事実](frdi-birat-structural-facts.md) — 自己射は必ず co-angular。★𝒟 上の関手性は自分で作らず Prop 2.2 から取る。群化は行き先が群なら構成不要。
+- [mathlib 在庫を実測してからスケルトンを作る](measure-mathlib-before-skeleton.md) — 引用先があると仮定して見積もると膨らむ。B1 で 27 ブロック分の誤差が出た。

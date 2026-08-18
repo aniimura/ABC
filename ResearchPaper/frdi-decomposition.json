@@ -593,10 +593,20 @@
           "evidence": "`isGroupLikeObj_map_iff`(`Proposition 1.8, (iii)` 経由)。"
         },
         {
+          "id": "ii-istr-prestep",
+          "size": "中",
+          "status": "done",
+          "deps": [
+            "ii-prestep"
+          ],
+          "title": "isotropification は pre-step 性を両向きに保つ——★ii-quasi の欠けていた環",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isotropification_isPreStep_iff`。\n★在庫の `isotropification_degFr`(次数の保存)と `isotropification_baseIso_iff`(底同型の両向き保存)を組むだけで出た。\n★`istrPre_Base` / `istrPre_degFr` が `rfl` なので、定義展開だけで繋がる。\n★置き場所の罠: `Thm34Pre.lean` に入れると `w` のスコープが合わないので専用ファイルにした。"
+        },
+        {
           "id": "ii-quasi",
           "title": "(ii) を quasi-isotropic 型へ一般化する",
           "deps": [
-            "ii-prestep",
+            "ii-istr-prestep",
             "i"
           ],
           "status": "todo",

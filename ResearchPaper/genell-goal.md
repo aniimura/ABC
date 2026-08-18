@@ -6951,3 +6951,39 @@ instance 検索が**別物として扱う**。
     Arakelov 2/9(C1 + ★B1) · Galois 0/8
 
 ★次の的は **B2**(Cartier 因子 → 可逆層)——B1 に従属していたので、いま解けた。
+
+## §9-159 —— ★★★★B2 の Interface が**充足不可能**だった(2026-08-18)
+
+在庫測定(§9-157 の手順)の副産物として、`CartierPicData` の矛盾を見つけた。
+
+### 反例
+
+1. `ofDivisor : X.IdealSheafData → Pic X` は**任意の**イデアル層に定義されていた
+2. `ofDivisor_eq_one_iff` は**無条件**に `ofDivisor D = 1 ↔ IsPrincipalDivisor D`
+3. `isPrincipalDivisor_affine` は `IsPrincipalDivisor (Spec R) D ↔ (equivOfIsAffine D).IsPrincipal`
+4. B1 の `equivPicRing` により `Pic(Spec R) ≃* CommRing.Pic R`
+
+★`R = ℚ[x,y]`(UFD)を取ると `CommRing.Pic R = 1` なので `ofDivisor D = 1` が強制され、
+(2)(3) から **`R` のすべてのイデアルが単項**になる。`(x,y)` は単項でないので**矛盾**。
+
+★★原因: **`𝒪_X(D)` は Cartier 因子(可逆イデアル層)にしか定義できない**のに、
+`IdealSheafData` 全体に課していた。
+
+### 修正(9 欄 → 14 欄)
+
+    IsCartierDivisor / isCartierDivisor_{top,mul,comap,affine} を追加(5 欄)
+    ofDivisor_mul / ofDivisor_pullback / ofDivisor_eq_one_iff を Cartier 条件付きに
+
+★退化は依然として殺せる——`ofDivisor := 1` だと
+**すべての可逆イデアルが単項**になり、`ℤ[√-5]` の `(2, 1+√-5)` と矛盾する。
+
+### ★★★mathlib 在庫の実測(2026-08-18)
+
+| 項目 | 状態 |
+|---|---|
+| `Scheme.IdealSheafData` / `Mul` / `comap` / `equivOfIsAffine` | ★有り |
+| **Cartier 因子** | ★★**0 件**(`grep CartierDivisor\|EffectiveCartier`) |
+| `Module.Invertible` | ★有り(可逆イデアルの定義に使う) |
+| `comap_mul` | ★我々が `Found/GenEll/ComapMul.lean` に証明済み |
+
+★見積もり: **約 30–45 ブロック**。

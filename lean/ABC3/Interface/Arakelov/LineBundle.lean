@@ -190,10 +190,40 @@ def PicardData.waiting : WaitingFor :=
 structure CartierPicData where
   /-- 台となる `Pic`。 -/
   toPicardData : PicardData
+  /-- ★★★**`D` が Cartier(可逆イデアル層)であること**。
+
+  ★★★★**2026-08-18 の修正。**それ以前は `ofDivisor` を `IdealSheafData` 全体に
+  課していたが、その形は**充足不可能**であった:
+
+  `R = ℚ[x,y]` は UFD なので `CommRing.Pic R = 1`、B1 の `equivPicRing` から
+  `Pic(Spec R) = 1`。すると旧 `ofDivisor_eq_one_iff`(無条件)が
+  `IsPrincipalDivisor (Spec R) D` を**すべての** `D` に強制し、
+  `isPrincipalDivisor_affine` から `R` のすべてのイデアルが単項になる。
+  `(x,y)` は単項でないので矛盾する。
+
+  ★原因: `𝒪_X(D)` は **Cartier 因子にしか定義できない**。
+  ★★以降の欄はすべて `IsCartierDivisor` の仮定の下で述べる。 -/
+  IsCartierDivisor : (X : Scheme.{0}) → X.IdealSheafData → Prop
+  /-- ★空因子は Cartier。 -/
+  isCartierDivisor_top : ∀ (X : Scheme.{0}), IsCartierDivisor X ⊤
+  /-- ★Cartier は積で閉じる。 -/
+  isCartierDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
+    IsCartierDivisor X D → IsCartierDivisor X E → IsCartierDivisor X (D * E)
+  /-- ★Cartier は引き戻しで保たれる。 -/
+  isCartierDivisor_comap : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (D : Y.IdealSheafData),
+    IsCartierDivisor Y D → IsCartierDivisor X (D.comap f)
+  /-- ★★★**アフィンでは可逆イデアルに対応する**——`IsCartierDivisor` の意味を固定する。
+
+  ★これが無いと `IsCartierDivisor := fun _ _ => False` で全欄が空虚に成立してしまう。 -/
+  isCartierDivisor_affine : ∀ (R : CommRingCat.{0}) (D : (Spec R).IdealSheafData),
+    IsCartierDivisor (Spec R) D ↔
+      Module.Invertible (Γ(Spec R, ⊤) : Type)
+        ((Scheme.IdealSheafData.equivOfIsAffine D : Ideal (Γ(Spec R, ⊤) : Type)) : Type)
   /-- `D ↦ 𝒪_X(D)`。 -/
   ofDivisor : (X : Scheme.{0}) → X.IdealSheafData → toPicardData.Pic X
-  /-- ★因子の積は可逆層のテンソル積に移る。 -/
+  /-- ★因子の積は可逆層のテンソル積に移る(Cartier のとき)。 -/
   ofDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
+    IsCartierDivisor X D → IsCartierDivisor X E →
     ofDivisor X (D * E)
       = @HMul.hMul _ _ _
           (@instHMul _ (toPicardData.group X).toDivInvMonoid.toMonoid.toMulOneClass.toMul)
@@ -203,21 +233,23 @@ structure CartierPicData where
     ofDivisor X ⊤ = (toPicardData.group X).toDivInvMonoid.toMonoid.toOne.one
   /-- ★★**引き戻しと両立する**——これが高さの底変換不変性を出す段である。 -/
   ofDivisor_pullback : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (D : Y.IdealSheafData),
+    IsCartierDivisor Y D →
     toPicardData.pullback f (ofDivisor Y D) = ofDivisor X (D.comap f)
-  /-- ★★★**`𝒪(D)` が自明になるのは `D` が主因子のときに限る**。
+  /-- ★★★**`𝒪(D)` が自明になるのは `D` が主因子のときに限る**(Cartier のとき)。
 
   ★★★**これが `ofDivisor := 1` の退化を殺す。**
   ★`Pic` は (B1) の `equivPicRing` で非自明が強制されているので、
-  「全部自明」だと**すべての因子が主因子**になってしまい、
-  `Pic (Spec R) ≃* CommRing.Pic R` と矛盾する。
+  「全部自明」だと**すべての可逆イデアルが単項**になってしまい、
+  `ℤ[√-5]` の `(2, 1+√-5)`(可逆・非単項)と矛盾する。
 
   ★原文の `Definition 1.5, (ii)` が `(−)_red` を Cartier 因子として扱えるのは、
   この対応があるからである。 -/
   IsPrincipalDivisor : (X : Scheme.{0}) → X.IdealSheafData → Prop
   ofDivisor_eq_one_iff : ∀ (X : Scheme.{0}) (D : X.IdealSheafData),
-    ofDivisor X D
+    IsCartierDivisor X D →
+    (ofDivisor X D
         = (toPicardData.group X).toDivInvMonoid.toMonoid.toOne.one
-      ↔ IsPrincipalDivisor X D
+      ↔ IsPrincipalDivisor X D)
   /-- ★★主因子は積で閉じている(主因子のなす部分モノイド)。 -/
   isPrincipalDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
     IsPrincipalDivisor X D → IsPrincipalDivisor X E → IsPrincipalDivisor X (D * E)
@@ -228,9 +260,10 @@ structure CartierPicData where
     IsPrincipalDivisor (Spec R) D ↔
       ((Scheme.IdealSheafData.equivOfIsAffine D).IsPrincipal)
 
+
 def CartierPicData.waiting : WaitingFor :=
   { what := "(B2) 有効 Cartier 因子 D から可逆層 𝒪_X(D) を作る操作と、それが積・引き戻しと両立すること"
-    trackB := "Found/Arakelov — ★`Scheme.IdealSheafData` と `comap` は mathlib にあり、**引き戻しが積を保つこと**(`comap_mul`)は我々が `Found/GenEll/ComapMul.lean` で証明済み(2026-08-17)。★★残るのは (B1) の可逆層そのものであり、本 obligation は (B1) に従属する" }
+    trackB := "Found/Arakelov — ★**(B1) は 2026-08-18 に達成済み**(`Found/Arakelov/PicWitness.lean`)。★★mathlib 在庫を実測(2026-08-18): `Scheme.IdealSheafData` / `Mul` / `comap` / `equivOfIsAffine` は**有る**が、**Cartier 因子は 0 件**(`grep CartierDivisor|EffectiveCartier` → 該当なし)。★★★したがって「可逆イデアル層」の定義から自前で作る。`comap_mul` は `Found/GenEll/ComapMul.lean` に証明済み(2026-08-17)" }
 
 /-! ## ★★B3 —— `Spec 𝓞_F` 上での `Pic` -/
 

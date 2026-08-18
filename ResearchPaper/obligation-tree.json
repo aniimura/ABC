@@ -106,17 +106,17 @@
     {
       "name": "CartierPicData",
       "file": "Interface/Arakelov/LineBundle.lean",
-      "fields": 9,
+      "fields": 14,
       "deps": [
         "PicardData"
       ],
       "track": "Arakelov",
       "code": "B2",
       "ja": "Cartier 因子 → 可逆層 O_X(D)",
-      "fieldsDone": 0,
-      "fieldsTotal": 9,
-      "blocks": "25-35",
-      "note": ""
+      "fieldsDone": 1,
+      "fieldsTotal": 14,
+      "blocks": "約 30-45",
+      "note": "2026-08-18 Interface を修正(旧形は充足不可能だった: ℚ[x,y] で矛盾)。Cartier 条件を追加し 9 欄 → 14 欄。mathlib に Cartier 因子は 0 件。"
     },
     {
       "name": "PicSpecData",
