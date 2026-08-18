@@ -7246,3 +7246,39 @@ B2 の在庫を実測した結果:
 | 159 | 制限と局所化の可換図式(第 120 の `idealSections` 版) |
 | 160 | 局所自明性の組み立て(第 132 の版) |
 | 161+ | `ofDivisor` と 3 法則 |
+
+## §9-172 —— 第 159 ブロックと残りの 1 点(2026-08-18)
+
+| 定理 | 内容 |
+|---|---|
+| `boMul_le` | `X.basicOpen (t·g) ≤ X.basicOpen g` |
+| `idealResLin` | 制限の `Γ(X,A)` 線型版 |
+| `isUnit_res_g` | `g` は `D(t·g)` 上で可逆(mathlib の `isUnit_res_basicOpen`) |
+| `isUnit_smul_pow` | ★★`powers g` は切断に可逆に作用する |
+
+### ★★★逃げ道——**作用は `rfl` で一致する**
+
+`r • z`(`Γ(X,A)` 作用)と `(res r) • z`(`Γ(X,D f)` 作用)は
+`resAlg` が `RingHom.toAlgebra` なので **`rfl` で一致する**(実測)。
+★`algebraMap_smul` を `rw` しようとすると `Module.End` を `A` に取ってしまい当たらない。
+
+### ★★★★残っている 1 点
+
+    idealAwayEquiv_res :
+      idealResLin ∘ idealAwayEquiv_g = idealAwayEquiv_{t·g} ∘ liftAwayMap
+
+★`IsLocalizedModule.ext`(可逆性は `isUnit_smul_pow` で用意済み)で
+`mk m 1` 上の一致に帰着する。★★そこで詰まっているのは
+
+    idealAwayEquiv D A f (mk m 1) の値 = m の制限
+
+を出す段である——`idealAwayEquiv` が `≪≫ₗ` の合成なので
+`show` で分解しようとすると型が決まらない。
+
+★★★**次の一手**: 第 156 の `idealAwayEquiv` に
+`idealAwayEquiv_mk_one` を**同じファイルで**付ける(定義の直後なら型が決まる)。
+
+### 現状
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–159 の 12 ブロック(構成は完了、局所自明性の可換図式が残り)

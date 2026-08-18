@@ -378,4 +378,34 @@ def degFr_map_eq_of_sameDeg.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F1) — 同次数の Frobenius 型射は像の次数も等しい",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`Proposition 1.8, (iii)` の第 3 主張 —— group-like 性は底同型で移る
+
+原文 (FrdI p.30):
+> base-isomorphic objects, then A is group-like if and only if B is.
+
+★★**測定(2026-08-18)**: 在庫の `IsGroupLikeObj P A := IsGroupLike (Φ.val (Base A))` は
+**底にしか依らない**ので、底同型に沿って `Φ` を運ぶだけで出る。
+★原文が「follow formally from the definitions」と書くとおりである。 -/
+
+/-- ★★★★**[FrdI] Proposition 1.8, (iii)** の第 3 主張 ——
+**底同型な対象の group-like 性は一致する**。 -/
+theorem isGroupLikeObj_of_baseIso {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A B : Cc} (α : (P.toElem.obj A).base ≅ (P.toElem.obj B).base)
+    (h : IsGroupLikeObj P A) : IsGroupLikeObj P B := by
+  rw [isGroupLike_iff] at h ⊢
+  intro b
+  have hround : Φ₀.map α.inv (Φ₀.map α.hom b) = b := by
+    have hc := Φ₀.map_comp α.hom α.inv b
+    rw [α.inv_hom_id] at hc
+    rw [hc]
+    exact MonoidOn.map_id Φ₀ _ b
+  rw [← hround]
+  exact (h (Φ₀.map α.hom b)).map (Φ₀.map α.inv)
+
+def isGroupLikeObj_of_baseIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 30,
+    item := "Proposition 1.8, (iii) — 底同型なら group-like 性は一致",
+    sectionId := "frdi-prop-1-8" }
+
 end ABC3.Found.FrdI
