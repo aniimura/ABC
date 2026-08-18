@@ -31,4 +31,4 @@
 - [追記は grep -c で確認する](verify-insertion-not-just-ok.md) — Python の str.replace は黙って失敗し、検査器具は変更前のファイルを ok と言う
 - [子セッションの使いどころ](child-session-usage.md) — 仕様が確定してから渡す。ABC3b とワークツリーを共有しているので子に git を触らせない。
 - [Inhabited の二経路](inhabited-two-paths.md) — Unique から default を取る道が 2 本あり項が一致しない。補助定義を [Unique ...] で引数化して揃える
-- [𝒞^birat の 3 つの構造的事実](frdi-birat-structural-facts.md) — 自己射は必ず co-angular。同じ底でも 𝒞^birat で同型とは限らない((iv) の辞書と矛盾)。群化は行き先が群なら構成不要。
+- [𝒞^birat の 3 つの構造的事実](frdi-birat-structural-facts.md) — 自己射は必ず co-angular。★𝒟 上の関手性は自分で作らず Prop 2.2 から取る。群化は行き先が群なら構成不要。

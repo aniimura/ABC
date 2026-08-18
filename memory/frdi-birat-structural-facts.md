@@ -19,20 +19,27 @@ metadata:
 上より co-angular、よって `𝒞^birat` で**同型**になる(`otri_isIso_birat`)。
 「写像が立つか」を悩む前にこれを確認すること。
 
-## ★★2. 同じ底でも `𝒞^birat` で同型とは限らない
+## ★★2. `𝒟` 上の関手性は自分で作らない —— `Proposition 2.2` が供給する
 
-`Proposition 4.4, (iv)` の辞書は「`𝒞` の射が `𝒞^birat` で**同型** ⟺
-`𝒞` で **co-angular** pre-step」と言う。
-★したがって **co-angular でない step は `𝒞^birat` でも同型にならない**。
-その両端は同じ底を持つので、**「同じ底 ⇒ `𝒞^birat` で同型」は一般には偽**。
+`Φ^birat` を `𝒟` 上の部分関手にするのに「同じ底の対象は `𝒞^birat` で同型」を
+証明しようとして遠回りした。★**原典にはその筋は無い**。
 
-★`isIso_of_preStep_of_isGroupLikeObj` に逃げても駄目で、
-あれは `isotropic` を要求する(co-angular を `Proposition 1.4, (i)` から取るため)。
-`𝒞^birat` の対象は `birat_isIsotropic_iff` より
-**`𝒞` 側が isotropic なときに限って** isotropic。
+FrdI p.83 の `Proposition 4.4, (ii)` 本文が
+「the functor `𝒪^×(−)` **on 𝒟** associated to the Frobenioid `𝒞^birat`
+[cf. **Proposition 2.2, (ii), (iii)**]」と書いており、
+★★**`𝒟` 上の関手性は `Proposition 2.2` が供給する**。
+在庫は `Prop22Star.lean` の `otriStar` / `otimes_eq_units` / `dstarMap_otimes_mem`。
 
-★★**代替**: `Definition 1.3, (i)(a)` の `baseSurj` が各 `Y : 𝒟` に
-**Frobenius-trivial** な持ち上げを与える。選択で固定すれば定義に独立性は要らない。
+★p.85 は「(iii) は (i) の関手の存在と `Proposition 1.5, (ii)` から
+immediately に従い、核は `Definition 1.3, (vi)` から出る」と明示している。
+
+★注意した落とし穴: `isIso_of_preStep_of_isGroupLikeObj` は `isotropic` を要求する
+(co-angular を `Proposition 1.4, (i)` から取るため)。`𝒞^birat` の対象は
+`birat_isIsotropic_iff` より **`𝒞` 側が isotropic なときに限って** isotropic。
+
+★また (iv) の辞書「`𝒞` の射が `𝒞^birat` で同型 ⟺ co-angular pre-step」から
+「同じ底でも同型とは限らない」と結論するのは**行き過ぎ**である。
+言えるのは「**その射**が同型でない」ことだけで、別の射で同型になりうる。
 
 ★副産物: `IsCoAngular` の定義に `γ=𝟙, β=φ, α=𝟙` を入れると
 「co-angular な isometric pre-step は同型」が直ちに出る(= `prop_1_4_iii`)。
