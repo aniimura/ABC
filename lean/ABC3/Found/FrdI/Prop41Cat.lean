@@ -748,7 +748,7 @@ set_option maxHeartbeats 1000000 in
 **台が交わらない ⟺ 共通の pre-step はすべて同型**。
 
 原文 (FrdI p.75):
-> (iii) ϵ∗(Div(ϵ)), ι∗(Div(ι)) ∈Φ(F) [where we write ϵ∗, ι∗for the respective
+> bijections induced by the functor ] have disjoint supports [cf. Definition 2.4,
 
 ★単系層は `suppElt_disjoint_iff`、圏層は後置の圏同値の充満性と本質的全射性。
 ★「同型 ⟺ 値が 0」は isotropic 型から。 -/
@@ -785,7 +785,7 @@ set_option maxHeartbeats 1000000 in
 /-- ★★★★**[FrdI] Proposition 4.1, (iii) の後半** —— **pre-step の圏での四角形**。
 
 原文 (FrdI p.75):
-> ι satisfying ϵ = ζ ◦ϵ′, ι = ζ ◦ι′ is, in fact, an isomorphism. In this case, we shall
+> say that ,  are co-primary. If ,  are co-primary, then there exists a cartesian
 
 ★値は `x_ε + x_κ` に取る。★原文の 2 本の等式
 `ε∗(ε′∗(Div ε′)) = ι∗(Div ι)`・`ι∗(ι′∗(Div ι′)) = ε∗(Div ε)` はその和の分解である。 -/

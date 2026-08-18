@@ -338,7 +338,7 @@ theorem suppElt_disjoint_iff (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMo
 /-! ## ★5. ★★★★`Proposition 4.1, (iv)(v)` の単系層
 
 原文 (FrdI p.77):
-> For every primary element x  ∈
+> For every primary element x / p, x  x if and only if x  x + x .
 
 ★原文の条件は
 「**`p` に属さない任意の primary 元 `y` について `y ≼ e ⟺ y ≼ d + e`**」

@@ -4789,3 +4789,34 @@ mathlib の証明を写経できる。
 |---|---|
 | 82 | 切断の写像を前層射に組み、茎で同型を示す |
 | 83 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-84 —— 切断のテンソル写像(第 82 ブロック、2026-08-18)
+
+    (tilde M)(U) ⊗_{𝒪(U)} (tilde N)(U)  ⟶  (tilde (M ⊗_R N))(U)
+
+★★**切断加群の構造は点ごとである**(実測、どちらも `rfl`):
+
+    (s + s').1 x = s.1 x + s'.1 x
+    (c • s).1 x = c.1 x • s.1 x
+
+★★★したがって加法性・斉次性は**点ごとに落ちる**。
+
+### ★詰まった 1 点
+
+`TensorProduct.tmul_smul` は `CompatibleSMul R R' M N` を要求し、
+`R`(テンソルの底)が**メタ変数のまま**で instance 検索が止まる。
+★**底を明示**(`(R := Localization (x.1).asIdeal.primeCompl)`)すれば通る。
+★★左側(`smul_tmul'`)は `congr 1` だけで閉じるのに、右側だけこれが要る。
+
+### ★★確認手順を守った
+
+★[[verify-insertion-not-just-ok]] に従い、`grep -c` で**宣言数 8 件**を数えてから
+`leanfile.mjs` と `lake build` を通した。
+
+### ★★★残り
+
+| # | 内容 |
+|---|---|
+| 83 | 切断の写像を前層射に組む(自然性) |
+| 84 | 茎で同型 → 比較射が同型 |
+| 85 | `tilde M` が `InvSheaf` / `equivPicRing` |

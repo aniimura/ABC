@@ -239,6 +239,7 @@ import ABC3.Found.Arakelov.PicStalkIso
 import ABC3.Found.Arakelov.PicTildeStalk
 import ABC3.Found.Arakelov.PicLocTensor
 import ABC3.Found.Arakelov.PicTensorFrac
+import ABC3.Found.Arakelov.PicTensorSection
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
