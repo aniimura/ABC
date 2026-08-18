@@ -1049,4 +1049,31 @@ def degFr_map_comp.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 像の次数の乗法性",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii)** の次数の対応 ——
+**Ψ は次数 d の射を次数 Ψ_N(d) の射へ送る**。
+
+原文 (FrdI p.64):
+> degree ΨN≥1 (d) [i.e., since arbitrary morphisms may be written as composites of
+
+★`IsPrimeFrobComposite` の帰納法。`iso` の枝は次数 1、
+`cons` の枝は `degFr_map_comp` と `Ψ_N` の乗法性。 -/
+theorem degFr_map_of_frobComposite (Ψ : C₁ ⥤ C₂) (ΨN : ℕ+ →* ℕ+)
+    (hisomap : ∀ {X Y : C₁} (f : X ⟶ Y), IsIso f → IsIso (Ψ.map f))
+    (hprime : ∀ {X Y : C₁} (f : X ⟶ Y), IsPrimeFrobenius P₁ f →
+      P₂.degFr (Ψ.map f) = ΨN (P₁.degFr f))
+    {A B : C₁} {φ : A ⟶ B} (h : IsPrimeFrobComposite P₁ φ) :
+    P₂.degFr (Ψ.map φ) = ΨN (P₁.degFr φ) := by
+  induction h with
+  | iso f hf =>
+    haveI := hf
+    haveI := hisomap f hf
+    rw [degFr_of_isIso P₂ (Ψ.map f), degFr_of_isIso P₁ f, map_one]
+  | cons hφ _ ih =>
+    rw [degFr_map_comp, P₁.degFr_comp, map_mul, ih, hprime _ hφ]
+
+def degFr_map_of_frobComposite.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — 次数 d を Ψ_N(d) へ送る",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

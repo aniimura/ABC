@@ -927,12 +927,12 @@
         {
           "id": "psiN-degree",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psiN-deg-mul"
           ],
           "title": "Ψ は次数 d の射を次数 Ψ_N(d) の射へ送る",
-          "note": "★一意分解と `psiN-extend` の乗法性から。\n\n★★乗法性は `psiN-deg-mul` で取った(2026-08-18)。\n★残るのは `prop_1_10_v` で分解し、各 prime-Frobenius 因子にadmissible 性を当てて帰納する束ねる作業。"
+          "note": "★一意分解と `psiN-extend` の乗法性から。\n\n★★乗法性は `psiN-deg-mul` で取った(2026-08-18)。\n★残るのは `prop_1_10_v` で分解し、各 prime-Frobenius 因子にadmissible 性を当てて帰納する束ねる作業。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `degFr_map_of_frobComposite`。\n★`IsPrimeFrobComposite` の帰納法。`iso` の枝は次数 1、`cons` の枝は `degFr_map_comp` と `Ψ_N` の乗法性で出た。\n★実装は **6 行**。"
         },
         {
           "id": "psiN-identity",
