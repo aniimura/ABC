@@ -8690,3 +8690,45 @@ mathlib の `ideal_comap_of_isOpenImmersion` が
       あとは第 200 で大域へ。
 
     ofDivisor_pullback:  f^* 𝒪(D) ≅ 𝒪(D.comap f)。
+
+## §9-218 残り 2 欄の道を**mathlib の補題名まで**特定した(2026-08-19)
+
+第 200 で「Cartier 性は点ごとで足りる」が出たので、残りは
+
+    ∀ x ∈ X, ∃ アフィン開 A ∋ x, (D.comap f).ideal A が可逆
+
+を示すだけになった。`x` ごとに:
+
+| 段 | 使うもの | 状態 |
+|---|---|---|
+| `f(x)` の近傍アフィン `B`、`f⁻¹B` 内のアフィン `A ∋ x` | `isBasis_affineOpens` | ★有り |
+| `Spec.map (f.appLE B A i) ≫ hB.fromSpec = hA.fromSpec ≫ f` | ★`IsAffineOpen.SpecMap_appLE_fromSpec` | ★**有り(実測)** |
+| `D.comap (hA.fromSpec ≫ f) = (D.comap hB.fromSpec).comap (Spec.map (f.appLE))` | `comap_comp` + 上 | ★**通した(実測)** |
+| アフィンでの `comap` | ★第 195 | ★済 |
+| 開埋め込みでの `comap`(同型に沿った引き戻し) | `ideal_comap_of_isOpenImmersion` + ★第 199 | ★済 |
+| `(Spec.map φ).appTop = (ΓSpecIso).hom ≫ φ ≫ (ΓSpecIso).inv` | ★`ΓSpecIso_naturality` | ★**有り(実測)** |
+| `f.appLE B A i` は平坦 | ★`Scheme.Hom.flat_appLE` | ★有り |
+| 平坦なら拡大は可逆 | ★第 183 | ★済 |
+| 点ごと ⟹ 大域 | ★第 200 | ★済 |
+
+★★★**部品はすべて揃った。**残るのは上を繋いで
+
+    (D.comap f).ideal A = (D.ideal B).map (f.appLE B A i)
+
+を出す配線で、見積もり **2–3 ブロック**。同型に沿った `map`/`comap` の
+書き換えが依存位置に入るので、第 200 と同じく motive を手で書くことになる。
+
+### この区間(第 176–200)の要約
+
+| 山 | ブロック | 内容 |
+|---|---|---|
+| 双対 | 176–182 | ★★★★★★★局所自明な層加群は可逆層 |
+| Cartier | 183–187 | 平坦底変換・`IsCartier` 確定・`ofDivisor` |
+| 積 | 188–190 | `ofDivisor` は準同型 |
+| 主因子 | 191–193 | アフィンでは主因子 = 単項イデアル |
+| `comap` | 194–195 | 押し出しの核・アフィンでの `comap` |
+| 局所性 | 196–200 | ★★★★★★**可逆性は Zariski 局所的**(mathlib の TODO) |
+
+★Interface の誤りを **3 件**訂正(§9-146 / §9-206 / §9-209)。
+★見積もりの測り直しを **4 件**記録(§9-211 / §9-213 / §9-215 / §9-216)。
+★Galois G1–G8 の在庫を**初めて**測った(§9-212)。
