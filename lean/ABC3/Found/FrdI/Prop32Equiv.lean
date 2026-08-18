@@ -426,6 +426,74 @@ theorem pfRoot_coaPreUnder_full_sameRoot (hfi : IsOfFrobeniusIsotropicType P) (G
       V.hom.property.1 V.hom.property.2.1 V.hom.property.2.2.1
       V.hom.property.2.2.2.1 V.hom.property.2.2.2.2 f uu.right.hom
 
+/-! ## ★6. (iii)(d) 前置の充満性(一般) -/
+
+-- ★`MLe.map`(`≼` は加法準同型で保たれる)は `Prop110.lean` に既にある。
+
+/-- ★同型で挟むと `Div` は底に沿って写るだけ。 -/
+theorem rootDiv_conj {X X' Y Y' : PfRootObj P F} (e : X' ⟶ X) (h : X ⟶ Y) (e' : Y ⟶ Y')
+    [IsIso e] [IsIso e'] :
+    (pfRootPre P F).Div (e ≫ h ≫ e')
+      = (Φ.pfOn (phiSharp P)).map ((pfRootPre P F).Base e) ((pfRootPre P F).Div h) := by
+  rw [(pfRootPre P F).Div_comp, (pfRootPre P F).Div_comp,
+    show (pfRootPre P F).Div e' = 0 from isIsometric_of_isIso (pfRootPre P F) e',
+    show (pfRootPre P F).Div e = 0 from isIsometric_of_isIso (pfRootPre P F) e,
+    show (pfRootPre P F).degFr e' = 1 from isLinear_of_isIso (pfRootPre P F) e']
+  simp
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★**(iii)(d) 前置の充満性(射の形)** —— 根を揃えて同根版に落とす。
+
+★`pfRoot_faithfulUpToUnits` と同じ共役の定型:
+`X`・`Y₁`・`Y₂` の根をすべて `X.root · Y₁.root · Y₂.root` へ上げ、
+`inv eX ≫ − ≫ e_i` で移してから同根版を当て、`e₁ ≫ − ≫ inv e₂` で戻す。 -/
+theorem pfRoot_coaPreUnder_full_hom (hfi : IsOfFrobeniusIsotropicType P) (G : Frobenioid P)
+    {X Y₁ Y₂ : PfRootObj P F} (φ : X ⟶ Y₁) (ψ : X ⟶ Y₂)
+    (hφs : IsPreStep (pfRootPre P F) φ) (hψs : IsPreStep (pfRootPre P F) ψ)
+    (hle : MLe ((pfRootPre P F).Div φ) ((pfRootPre P F).Div ψ)) :
+    ∃ m : Y₁ ⟶ Y₂, IsPreStep (pfRootPre P F) m ∧ φ ≫ m = ψ := by
+  obtain ⟨eX, hX⟩ := pfRoot_exists_iso_root (F := F) X.obj X.root (Y₁.root * Y₂.root)
+    (X.root * Y₁.root * Y₂.root) (by ac_rfl)
+  obtain ⟨e1, h1⟩ := pfRoot_exists_iso_root (F := F) Y₁.obj Y₁.root (X.root * Y₂.root)
+    (X.root * Y₁.root * Y₂.root) (by ac_rfl)
+  obtain ⟨e2, h2⟩ := pfRoot_exists_iso_root (F := F) Y₂.obj Y₂.root (X.root * Y₁.root)
+    (X.root * Y₁.root * Y₂.root) (by ac_rfl)
+  haveI := hX; haveI := h1; haveI := h2
+  have hφ' : IsPreStep (pfRootPre P F) (inv eX ≫ φ ≫ e1) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hφs (isPreStep_of_isIso (pfRootPre P F) e1))
+  have hψ' : IsPreStep (pfRootPre P F) (inv eX ≫ ψ ≫ e2) :=
+    IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) (inv eX))
+      (IsPreStep.comp (pfRootPre P F) hψs (isPreStep_of_isIso (pfRootPre P F) e2))
+  have hle' : MLe ((pfRootPre P F).Div (inv eX ≫ φ ≫ e1))
+      ((pfRootPre P F).Div (inv eX ≫ ψ ≫ e2)) := by
+    rw [rootDiv_conj, rootDiv_conj]
+    exact MLe.map _ hle
+  obtain ⟨m', hm's, hm'e⟩ := pfRoot_coaPreUnder_full_sameRoot hfi G
+    (inv eX ≫ φ ≫ e1) (inv eX ≫ ψ ≫ e2) hφ' hψ' hle'
+  refine ⟨e1 ≫ m' ≫ inv e2, ?_, ?_⟩
+  · exact IsPreStep.comp (pfRootPre P F) (isPreStep_of_isIso (pfRootPre P F) e1)
+      (IsPreStep.comp (pfRootPre P F) hm's (isPreStep_of_isIso (pfRootPre P F) (inv e2)))
+  · have h3 : eX ≫ (inv eX ≫ φ ≫ e1) ≫ m' = eX ≫ (inv eX ≫ ψ ≫ e2) := by rw [hm'e]
+    simp only [Category.assoc, IsIso.hom_inv_id_assoc] at h3
+    have h4 : (φ ≫ e1 ≫ m') ≫ inv e2 = (ψ ≫ e2) ≫ inv e2 :=
+      congrArg (fun t => t ≫ inv e2) h3
+    simpa only [Category.assoc, IsIso.hom_inv_id, Category.comp_id] using h4
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★**(iii)(d) 前置の充満性**。 -/
+theorem pfRoot_coaPreUnder_full (hfi : IsOfFrobeniusIsotropicType P) (G : Frobenioid P)
+    (X : PfRootObj P F) :
+    letI := coaPreProp_isMultiplicative (pfRootPre P F) (pfRoot_coAngularComp hfi)
+    (coaPreUnderFunctor (pfRootPre P F) X).Full := by
+  letI := coaPreProp_isMultiplicative (pfRootPre P F) (pfRoot_coAngularComp hfi)
+  refine ⟨fun {Z W} h => ?_⟩
+  obtain ⟨m, hms, hme⟩ := pfRoot_coaPreUnder_full_hom hfi G Z.hom.hom W.hom.hom
+    Z.hom.property.2 W.hom.property.2 (leOfHom h)
+  refine ⟨Under.homMk (show (⟨Z.right.obj⟩ : WideSubcategory (coaPreProp (pfRootPre P F)))
+      ⟶ ⟨W.right.obj⟩ from ⟨m, pfRoot_isCoAngular hfi m, hms⟩)
+    (WideSubcategory.hom_ext _ hme), Subsingleton.elim _ _⟩
+
 end SameRoot
 
 /-! ## ★出典の紐付け(条つき) -/
