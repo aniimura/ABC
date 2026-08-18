@@ -601,7 +601,8 @@
           ],
           "status": "todo",
           "size": "★中",
-          "evidence": "★現在は isotropic 型を直接仮定している。原文は `Proposition 1.7, (iv)` と (i) で帰着させる。"
+          "evidence": "★現在は isotropic 型を直接仮定している。原文は `Proposition 1.7, (iv)` と (i) で帰着させる。",
+          "note": "★★★**経路を測った(2026-08-18)——在庫が揃っている**。\n\n現在の `thm_3_4_ii`(`Thm34Pre.lean:394`)は `hiso₁ : ∀ X, IsIsotropic P₁ X`(**isotropic 型**)を仮定しているが、原典は **quasi-isotropic 型**で十分だと言う。\n\n## ★帰着の筋\n1. quasi-isotropic から `psiIstr_isEquivalence`(`Thm34.lean:697`)で **`Ψ^istr : 𝒞₁^istr ≅ 𝒞₂^istr`** を得る。★これは既に `IsOfQuasiIsotropicType` を仮定として受けている。\n2. `𝒞ᵢ^istr` は**全対象 isotropic**なので、現行の `thm_3_4_ii` がそのまま適用できる。\n3. `isotropificationCommute`(`Thm34.lean:774`)の 1-可換図式で `Ψ` へ戻す。\n\n## ★★残る実体\n★**`𝒞` での pre-step 性と `𝒞^istr` での pre-step 性の関係**を付けること。\n★在庫: `isometricPreStep_map`(`Thm34.lean:630`)、`prop_1_9_vi`(isotropic hull の特徴づけ)、`isotropification`(`Prop19.lean:691`)。\n★group-like 対象の保存も同じ経路で渡る見込み。"
         },
         {
           "id": "iii-primefrob",
