@@ -5926,3 +5926,37 @@ Lean は `⟶` の形を要求する(実測)。
 | `unitHomOfSection` の全単射性 | ★第 108 |
 | 基底で `M_h ≅ R_h` | 第 100 |
 | 自由性の伝播 | 第 99 |
+
+## §9-122 —— ★★★★★★最後の器具が建った(第 109 ブロック、2026-08-24)
+
+    isIso_of_bijective_on_cover_mod :
+      被覆で全単射 ⟹ 制限した前層加群の射は同型
+
+★★これが `IsLocallyTrivial` の同型を作るための**最後の器具**である。
+
+### ★★機構 —— 4 段の梱包と反射
+
+| 段 | 内容 |
+|---|---|
+| 1 | `⟨P.presheaf, hP⟩` を `Sheaf ((grothendieckTopology X).over V) Ab` に梱包 |
+| 2 | 射は `⟨(toPresheaf _).map φ⟩` |
+| 3 | 第 102 ブロックで `IsIso`(層の射として) |
+| 4 | `sheafToPresheaf` と `toPresheaf` で 2 段反射 |
+
+★**一発で通った**。★★要点は **§9-73 で詰まった `SheafOfModules.toSheaf` を経由しない**こと
+——`Sheaf J Ab` へ直に梱包すれば instance が揃う。
+
+### ★★★★器具が全部揃った
+
+| # | 器具 |
+|---|---|
+| 99 | 自由性の伝播 |
+| 100 | 基底で `M_h ≅ R_h` |
+| 102 | 被覆で全単射なら同型(`Sheaf J Ab`) |
+| 103 | 生成元の乗法は全単射 |
+| 104–108 | `unitHomOfSection` の `app` の全単射性 |
+| **109** | ★**被覆で全単射なら同型(前層加群)** |
+
+### ★★残り 1 ブロック
+
+    110: (tilde M)|_{D g} ≅ 𝟙_ → IsLocallyTrivial → InvSheaf → equivPicRing
