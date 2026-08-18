@@ -820,4 +820,42 @@ def primeEquiv_eq_self.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F3) — 順序を保つ素数の全単射は恒等",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★(F3) の順序の中核 —— 単系の補題に落ちる
+
+★★★**測定(2026-08-18)**: `prop_1_14_v_mp` の中で
+**`Div α' = (degFr ψ) • Div α`**(`Prop114.lean:1499`)が作られている。
+★原典の「step `β ∘ α`」はこの `α'` であり、その `Div` は
+**次数の倍**になる。
+
+★したがって「`β_θ = γ ∘ β_ζ` となる step `γ` がある」は
+`MLe (p • a) (q • a)` に帰着し、さらに **`p ≤ q`** に帰着する。 -/
+
+/-- ★★★★**`p • a ≤ q • a ⇔ p ≤ q`**(`a ≠ 0`、sharp かつ integral)。
+
+★これが (F3) の「次数の大小」の中核である。 -/
+theorem nsmul_mle_nsmul_iff {M : Type w} [AddCommMonoid M]
+    (hint : IsIntegralMonoid M) (hsharp : IsSharp M) {a : M} (ha : a ≠ 0) (p q : ℕ) :
+    MLe (p • a) (q • a) ↔ p ≤ q := by
+  letI := isCancelAdd_of_isIntegralMonoid (M := M) hint
+  constructor
+  · rintro ⟨c, hc⟩
+    by_contra hlt
+    push Not at hlt
+    obtain ⟨r, hr⟩ : ∃ r, p = q + r + 1 := ⟨p - q - 1, by omega⟩
+    rw [hr, add_smul, add_smul, one_smul, add_assoc, add_assoc] at hc
+    have hz : r • a + (a + c) = 0 := by
+      have h0 : q • a + (r • a + (a + c)) = q • a + 0 := by rw [add_zero]; exact hc
+      exact add_left_cancel h0
+    have h1 := eq_zero_of_add_eq_zero_of_isSharp hsharp hz
+    have h2 := eq_zero_of_add_eq_zero_of_isSharp hsharp h1.2
+    exact ha h2.1
+  · intro h
+    obtain ⟨r, hr⟩ : ∃ r, q = p + r := ⟨q - p, by omega⟩
+    exact ⟨r • a, by rw [hr, add_smul]⟩
+
+def nsmul_mle_nsmul_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F3) — 次数の大小の単系版",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
