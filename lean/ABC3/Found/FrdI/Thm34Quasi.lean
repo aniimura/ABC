@@ -1426,4 +1426,46 @@ def isPullBack_congr_iso.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — pull-back の同型不変性",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**co-angular は同型の四角形を越えて保たれる**。
+
+★pull-back 版と同じ骨格: 分解を同型で延ばし、中央の `β` はそのまま残る。 -/
+theorem isCoAngular_congr_iso {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A B A' B' : Cc} (f : A ⟶ B) (f' : A' ⟶ B')
+    (αi : A ≅ A') (βi : B ≅ B') (h : f ≫ βi.hom = αi.hom ≫ f')
+    (hf : IsCoAngular P f) : IsCoAngular P f' := by
+  intro X Y γ β α hfac hlin hisom hps hbi
+  have hda : P.degFr βi.inv = 1 := degFr_of_isIso P βi.inv
+  have hdg : P.degFr αi.hom = 1 := degFr_of_isIso P αi.hom
+  haveI hbA : IsIso (P.Base αi.hom) := ⟨P.Base αi.inv, by
+    rw [← P.Base_comp, αi.hom_inv_id, P.Base_id], by
+    rw [← P.Base_comp, αi.inv_hom_id, P.Base_id]⟩
+  haveI hbB : IsIso (P.Base βi.inv) := ⟨P.Base βi.hom, by
+    rw [← P.Base_comp, βi.inv_hom_id, P.Base_id], by
+    rw [← P.Base_comp, βi.hom_inv_id, P.Base_id]⟩
+  have hfeq : f = (αi.hom ≫ γ) ≫ β ≫ (α ≫ βi.inv) := by
+    have hh : f = αi.hom ≫ f' ≫ βi.inv := by
+      rw [← Category.assoc, ← h, Category.assoc, βi.hom_inv_id, Category.comp_id]
+    rw [hh, hfac]
+    simp only [Category.assoc]
+  refine hf X Y (αi.hom ≫ γ) β (α ≫ βi.inv) hfeq ?_ hisom hps ?_
+  · show P.degFr (α ≫ βi.inv) = 1
+    rw [P.degFr_comp, hda, show P.degFr α = 1 from hlin, one_mul]
+  · rcases hbi with hb | hb
+    · refine Or.inl ?_
+      haveI : IsIso (P.Base α) := hb
+      show IsIso (P.Base (α ≫ βi.inv))
+      rw [P.Base_comp]
+      infer_instance
+    · refine Or.inr ?_
+      haveI : IsIso (P.Base γ) := hb
+      show IsIso (P.Base (αi.hom ≫ γ))
+      rw [P.Base_comp]
+      infer_instance
+
+def isCoAngular_congr_iso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — co-angular の同型不変性",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
