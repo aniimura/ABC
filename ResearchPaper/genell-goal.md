@@ -5836,3 +5836,37 @@ Lean は `⟶` の形を要求する(実測)。
 ★★構文は `(x : T)` の入れ子で詰まったので、`show` か補助定義で型を固定する。
 
 ★★★**数学は完全に済んでおり、残るのは `restrictScalars` の剥がし方 1 点である。**
+
+## §9-119 —— ★★★型の食い違いの**正体**が分かった(2026-08-24)
+
+### 大きく前進した
+
+★型を固定する補助定義 `restrictSec` を入れたら、`convert` の生む
+**`HEq` が消えて同次の等式になった**:
+
+    c • (freeYonedaEquiv.symm s).app (op W) (freeMk default) = c • restrictSec V P s W
+
+★★`congr 1` で `default` の一致だけに落ちた。
+
+### ★★★残る 1 点の正体
+
+    @default (W ⟶ T) (@Unique.instInhabited _ this)        ← ゴール側
+    @default (W ⟶ T) (@Unique.toInhabited _ (overTerminalUnique V W))  ← restrictSec 側
+
+★**`Unique` から `Inhabited` を取る道が 2 本ある**(`instInhabited` と `toInhabited`)。
+★★同じ `Unique` から来ているので**命題としては等しい**が、
+`convert` / `Subsingleton.elim` は型の深い所で止まる。
+
+### ★★★★次の一手(記録)
+
+★`restrictSec` を **`[Inhabited (W ⟶ T)]` で引数化**すれば、
+呼ぶ側と定義側で**同じ instance** が使える。
+★★ただしその場合、補題の**言明の側にも instance 束縛を通す**必要がある(実測)。
+
+★★★**これは [[ring-instance-two-paths]] の 3 例目**である
+——環・加群に続いて **`Inhabited` の二経路**。メモリに追記する価値がある。
+
+### ★★数学と戦術の切り分け(再確認)
+
+★数学は第 100・102・103・104・105・106 で**完全に済んでいる**。
+★★残るのは `Inhabited` インスタンスの経路を揃える**戦術 1 点**である。
