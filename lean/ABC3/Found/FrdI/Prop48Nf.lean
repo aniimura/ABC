@@ -207,76 +207,27 @@ def psiBiratNf.src : ABC3.Meta.Source :=
     sectionId := "frdi-prop-4-8" }
 
 
-/-! ## ★★★★★段 4 の `map_comp`
+/-! ## ★★★★★段 4 の `map_comp` —— 証明の筋は立った(2026-08-19)
 
 原文 (FrdI p.88):
 > (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
 
 ★★★**梃子は `Definition 1.3, (v), (a)`(`preStepMono`)—— pre-step は mono**。
-引き戻しの四角形 `γ ≫ φ = α ≫ W.hom` で `W.hom` は co-angular **pre-step** なので
-mono、したがって **`α` は `γ` から決まる**。
-★同じことが添字の構造射 `Z.hom` についても効き、
-**共通の上界へ送ったあと 2 回 mono を消す**だけで等式が出る。 -/
 
-/-- ★添字圏の射が満たす三角形(`Over.w` を `𝒞` の射の等式に落としたもの)。 -/
-theorem idxBirat_w {A : C} {Z V : IdxBirat P G A} (u : Z ⟶ V) :
-    u.unop.left.hom ≫ Z.unop.hom.hom = V.unop.hom.hom :=
-  congrArg (fun t : V.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w u.unop)
+両辺を代表元で書くと、どちらの添字も `nfObj A` への co-angular pre-step で、
+`HomBirat.sound` に共通の上界(`IsFiltered.max`)を渡す形になる。要求される等式は
+`u.left ≫ (nfMap α ≫ nfMap ψ) = v.left ≫ (α′ ≫ nfMap ψ)` で、これは 2 段で出る:
 
-/-- ★★★★★**`Ψ^birat` は合成を保つ**。 -/
-theorem biratNfMap_compBirat {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E) :
-    biratNfMap P d G A E (compBirat P G G.core f g)
-      = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g) := by
-  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
-  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
-  rw [compBirat_mk, biratNfMap_mk, biratNfMap_mk, biratNfMap_mk, compBirat_mk, nfMap_comp]
-  -- ★2 つの添字を共通の上界へ送る。
-  refine HomBirat.sound
-    (IsFiltered.max ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
-      (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
-        ((idxBiratNfMap P d G B).obj W)))
-    (IsFiltered.leftToMax _ _) (IsFiltered.rightToMax _ _) ?_
-  -- ★記号を短くする。
-  set u := IsFiltered.leftToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
-    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
-      ((idxBiratNfMap P d G B).obj W)) with hu
-  set v := IsFiltered.rightToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
-    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
-      ((idxBiratNfMap P d G B).obj W)) with hv
-  -- ★段 1: 構造射の三角形 ＋ `nfMap (Z.hom)` が mono で `γ` の側が一致。
-  haveI hmZ : Mono (nfMap P G.core d Z.unop.hom.hom) :=
-    G.core.preStepMono _ (nfMap_preStep P G.core d _ Z.unop.hom.property.2)
-  haveI hmW : Mono (nfMap P G.core d W.unop.hom.hom) :=
-    G.core.preStepMono _ (nfMap_preStep P G.core d _ W.unop.hom.property.2)
-  have hwu := idxBirat_w P G u
-  have hwv := idxBirat_w P G v
-  -- ★段 1: 構造射の三角形から `γ` の側が一致する(`nfMap (Z.hom)` が mono)。
-  have hgamma : u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W)
-      = v.unop.left.hom ≫ biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z)
-          (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) := by
-    refine (cancel_mono (nfMap P G.core d Z.unop.hom.hom)).mp ?_
-    rw [Category.assoc, Category.assoc, ← nfMap_comp]
-    exact hwu.trans hwv.symm
-  -- ★段 2: 四角形と `nfMap (W.hom)` が mono であることから `α` の側も一致する。
-  have halpha : u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W)
-      = v.unop.left.hom ≫ biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z)
-          (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) := by
-    refine (cancel_mono (nfMap P G.core d W.unop.hom.hom)).mp ?_
-    have hL : u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W)
-          ≫ nfMap P G.core d W.unop.hom.hom
-        = u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W)
-          ≫ nfMap P G.core d φ := by
-      rw [← nfMap_comp, ← nfMap_comp, ← biratPull_sq G.core Z φ W]
-    have hR : v.unop.left.hom ≫ (biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z)
-          (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W))
-          ≫ nfMap P G.core d W.unop.hom.hom
-        = v.unop.left.hom ≫ (biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z)
-          (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d φ := by
-      rw [← biratPull_sq G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
-        ((idxBiratNfMap P d G B).obj W)]
-    rw [Category.assoc, Category.assoc, hL, hR, ← Category.assoc, ← Category.assoc, hgamma]
-  rw [← Category.assoc, ← Category.assoc, halpha]
+1. 構造射の三角形(`Over.w`)＋ `nfMap (Z.hom)` が mono ⟹ `u.left ≫ nfMap γ = v.left ≫ γ′`
+2. 引き戻しの四角形(`biratPull_sq`)＋ `nfMap (W.hom)` が mono ⟹ `α` の側も一致
 
+★★**実装は `rw` の当たらなさで止まっている** ——
+`nfMap f ≫ nfMap g` が目に見えて在るのに `← nfMap_comp` が
+「パターンが見つからない」と言う(引数を明示しても同じ)。
+★本ファイルは `Prop21` と `Prop44` を両方 import しており、
+`≫` の解決先が食い違っている可能性がある。次はそこを `set_option pp.all` で確かめる。
+
+★★本ファイルは**緑のまま**にしておく(並行セッションの `git add -A` 対策)。 -/
 
 end Birat
 
