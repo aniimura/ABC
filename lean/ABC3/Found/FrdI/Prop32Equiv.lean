@@ -264,6 +264,32 @@ theorem pfRoot_coaPreOver_essSurj (hfi : IsOfFrobeniusIsotropicType P) (G : Frob
 
 end EssSurj
 
+/-! ## ★4. 充満性への下ごしらえ —— 同根の場合の零因子の明示式
+
+★★**同じ 3 脚添字の第 1 脚を共有する 2 本の射は、分母も分子の写像も一致する**
+——これが (iii)(d) の充満性の要である(`Prop32Frob.lean` の ★58 の測定)。
+下の式で `Θ = Φ.map (Base (rtExt A r)) ∘ Φ.map (Base Z.hom.hom.1)` と
+`N = r·r·(deg の第 1 脚)` が**添字だけで決まる**ことが見える。 -/
+
+section SameRoot
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-- ★同根の場合の `rootDiv` の明示式。 -/
+theorem rootDiv_mk_sameRoot {A B : C} {r : ℕ+}
+    (Z : IdxPf P F (rtObj P F A r) (rtObj P F B r)) (φ : Z.right.obj.1 ⟶ Z.right.obj.2) :
+    (pfRootPre P F).Div (show HomRoot P F (⟨A, r⟩ : PfRootObj P F) ⟨B, r⟩ from HomPf.mk Z φ)
+      = Pf.mk (Φ.map (P.Base (rtExt P F A r)) (Φ.map (P.Base Z.hom.hom.1) (P.Div φ)))
+          (r * r * repRoot Z) := by
+  show Pf.divBy (r * r) (Pf.map (Φ.map (P.Base (rtExt P F A r))) (pfDiv (HomPf.mk Z φ))) = _
+  rw [pfDiv_mk]
+  show Pf.divBy (r * r) (Pf.map (Φ.map (P.Base (rtExt P F A r)))
+    (Pf.mk (Φ.map (P.Base Z.hom.hom.1) (P.Div φ)) (repRoot Z))) = _
+  rw [Pf.map_mk, Pf.divBy_mk]
+
+end SameRoot
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def pfRoot_coaPreOver_essSurj.src : ABC3.Meta.Source :=
