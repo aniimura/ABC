@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 952 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 955 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5030</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1359</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5038</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1364</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">22</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>4fa8317</code></td><td>2026-08-18</td><td>★★★★★★局所自明性の全単射が出た(第 127、§9-142)</td></tr>
+<tr><td><code>5d005f1</code></td><td>2026-08-18</td><td>同型を 𝒪(D f) 係数へ移した——材料が完全に揃った(第 126、§9-141)</td></tr>
+<tr><td><code>055d810</code></td><td>2026-08-18</td><td>`𝒪^▷(A) → 𝒪^×(A^birat)` の写像と単射性(単系の層)——★測定で近道が見つかった</td></tr>
 <tr><td><code>28e4273</code></td><td>2026-08-18</td><td>★★★★★★★2 つの書き方を使い分けて抜けた(第 125、§9-140)</td></tr>
 <tr><td><code>939ad1a</code></td><td>2026-08-18</td><td>加群構造は移せた、同型の持ち上げは残った(第 124、§9-139)</td></tr>
 <tr><td><code>20c1ea8</code></td><td>2026-08-18</td><td>`otri-gp-inj` を測って 3 つに割り、うち 1 つを閉じた</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>21285ab</code></td><td>2026-08-18</td><td>被覆が over 位相で揃った(第 122、§9-136)</td></tr>
 <tr><td><code>230d7be</code></td><td>2026-08-18</td><td>2 つの前層は切断も制限も同じ(第 121、§9-135)</td></tr>
 <tr><td><code>5be4709</code></td><td>2026-08-18</td><td>★★★★★★制限と局所化の可換図式(第 120、§9-134)</td></tr>
-<tr><td><code>aeb799e</code></td><td>2026-08-18</td><td>グラフを**論文単位でハイライト**できるようにした(サイドバーの層別を置き換え)</td></tr>
-<tr><td><code>e72cac6</code></td><td>2026-08-18</td><td>powers g は切断に可逆に作用する(第 119、§9-133)</td></tr>
-<tr><td><code>4abd1f2</code></td><td>2026-08-18</td><td>切断の制限は局所化と両立する(第 118、§9-132)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1359 件)。</div>
+<b>すべて PDF と機械照合している</b>(1364 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
