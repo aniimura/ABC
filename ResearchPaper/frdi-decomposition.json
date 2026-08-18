@@ -825,15 +825,34 @@
           "note": "★★★**部品は全部揃った**(2026-08-18)。\n`arbFactor` の 3 成分とも、両向きで使える:\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square` / `admissible_of_square'`(両向き)\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。\n\n## ★★★済(2026-08-18)——場合分けは不要だった\n`Thm34Quasi.lean` の `admissible_of_hom`。\n★在庫の `prop_1_10_i_exists`(`Prop110.lean:424`)は**任意の射**に対して四角形を与える(中で `arbFactor` の 3 成分を順に使っている)。\n★★したがって (F2) は場合分けずに **1 本**で書けた。\n★先に取った 3 成分の補題(`admissible_of_frobType` / `admissible_of_preStep` / `admissible_of_square`)は測定の記録として残す。\n★★**教訓**: 3 成分に割る前に「任意の射版が在庫にないか」を検索すべきだった(在庫検索の失敗 6 件目)。"
         },
         {
-          "id": "psiN-F3",
+          "id": "F3-order-char",
+          "size": "大",
+          "status": "todo",
+          "deps": [
+            "psiN-F2"
+          ],
+          "title": "(F3) 次数の大小の圧倒的特徴づけ",
+          "note": "★★★**原典の要**(FrdI p.65、2026-08-18 精読):\n> the condition “degFr(ζ1) < degFr(θ1)” is equivalent to the following condition:\n> If we write βζ1 (respectively, βθ1) for the step “β ∘ α” of Proposition 1.14,\n> (v) … then βθ1 = γ1 ∘ βζ1, for some step γ1.\n\n★つまり「次数の大小」を `Proposition 1.14, (v)` の step `β ∘ α` の**分解可能性**として圧倒的に言い換える。\n★使うのは `Definition 1.3, (iii)(d)` の第 1 の圧倒的同値と `Proposition 1.10, (i)`。\n★在庫: `prop_1_14_v`(実装済)、`coaPreUnderEquiv`(実装済)、`prop_1_10_i_exists`(実装済)。"
+        },
+        {
+          "id": "F3-order-preserve",
           "size": "中",
           "status": "todo",
           "deps": [
-            "psiN-F1",
-            "psiN-F2"
+            "F3-order-char"
           ],
-          "title": "(F3) 非 group-like なら (p,p)-admissible な対象がある",
-          "note": "★★**原典には 3 つ目の主張があった**(FrdI p.65、登記漏れを訂正):\n> (F3) If C1, C2 are not of group-like type, then for each prime p ∈ Primes, there\n> exist a (p, p)-admissible object of C1.\n★これが「非 group-like なら Ψ_N は恒等」の中身である。\n★(F1)(F2) から Ψ が prime-Frobenius を保つことは既に出ている。"
+          "title": "(F3) Ψ が素数の順序を保つ",
+          "note": "★上の特徴づけが圧倒的なので、`Ψ` が pre-step を保つこと(本セッションで実装済)と合わせて直ちに出る見込み。"
+        },
+        {
+          "id": "F3-identity",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "F3-order-preserve"
+          ],
+          "title": "(F3) 順序を保つ素数の全単射は恒等",
+          "note": "★**純粋に数論的な段**である。\n★素数全体は通常の順序で `ω` 型の整序集合なので、順序を保つ全単射は恒等写像しかない。\n★これと `psiN-extend`(済)を合わせると `Ψ_N = id` が出る。"
         },
         {
           "id": "psiN-connected",
