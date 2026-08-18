@@ -260,6 +260,7 @@ import ABC3.Found.Arakelov.PicAwayModule
 import ABC3.Found.Arakelov.PicAwayFreeProp
 import ABC3.Found.Arakelov.PicAwayFreeIso
 import ABC3.Found.Arakelov.PicLocalBij
+import ABC3.Found.Arakelov.PicCoverIso
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

@@ -357,6 +357,50 @@ theorem unTr2_Div {A B : UnTr P} (f : A ⟶ B) :
         ((unTr2 (P := P) (F := F)).map f) = (unTrPre P F).Div f := by
   refine Quotient.inductionOn f (fun α => ?_); rfl
 
+
+/-! ### ★`unTr2` は pre-step と co-angular pre-step を保ち、反射する
+
+★★`SliceA`(birationalization の添字圏)は `coaPreProp` だけで決まるので、
+この 2 本が birationalization の比較の入口になる。 -/
+
+/-- ★`unTr2` は pre-step を保ち、反射する(`degFr`・`Base` が `rfl` 一致だから)。 -/
+theorem unTr2_isPreStep_iff {A B : UnTr P} (f : A ⟶ B) :
+    IsPreStep (unTrPre (istrPre P F) (istr_frobenioidCore P F)) ((unTr2 (P := P) (F := F)).map f)
+      ↔ IsPreStep (unTrPre P F) f := by
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨?_, ?_⟩
+    · show (unTrPre P F).degFr f = 1
+      rw [← unTr2_degFr (F := F) f]; exact h1
+    · show IsIso ((unTrPre P F).Base f)
+      rw [← unTr2_Base (F := F) f]; exact h2
+  · rintro ⟨h1, h2⟩
+    refine ⟨?_, ?_⟩
+    · show (unTrPre (istrPre P F) (istr_frobenioidCore P F)).degFr _ = 1
+      rw [unTr2_degFr (F := F) f]; exact h1
+    · show IsIso ((unTrPre (istrPre P F) (istr_frobenioidCore P F)).Base _)
+      rw [unTr2_Base (F := F) f]; exact h2
+
+/-- ★★`𝒞^un-tr` も `(𝒞^istr)^un-tr` も **isotropic 型**(`unTr_isotropic`)なので、
+`co-angular pre-step` はどちらでも **pre-step と同じこと**である。
+
+★★これで `coaPreProp` が `unTr2` で移り、`SliceA` が対応する。 -/
+theorem unTr2_coaPreProp_iff (G : Frobenioid P) {A B : UnTr P} (f : A ⟶ B) :
+    coaPreProp (unTrPre (istrPre P F) (istr_frobenioidCore P F))
+        ((unTr2 (P := P) (F := F)).map f)
+      ↔ coaPreProp (unTrPre P F) f := by
+  constructor
+  · rintro ⟨-, h⟩
+    exact ⟨isCoAngular_of_isotropic_dom (P := unTrPre P F)
+      (unTr_frobenioid P F G).core (unTr_isotropic P F A) f, (unTr2_isPreStep_iff f).mp h⟩
+  · rintro ⟨-, h⟩
+    refine ⟨isCoAngular_of_isotropic_dom
+      (P := unTrPre (istrPre P F) (istr_frobenioidCore P F))
+      (unTr_frobenioid (istrPre P F) (istr_frobenioidCore P F)
+        (istr_frobenioid P F G)).core
+      (unTr_isotropic (istrPre P F) (istr_frobenioidCore P F) _) _,
+      (unTr2_isPreStep_iff f).mpr h⟩
+
 /-! ## ★8. 残り —— rationally standard 型の側
 
 ★★**未実装**。`Definition 4.5, (iii)` の 4 条:

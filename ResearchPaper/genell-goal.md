@@ -5491,3 +5491,28 @@ mathlib の証明を写経できる。
 | 102 | `(tilde M)\|_{D g} ≅ 𝟙_` |
 | 103 | `IsLocallyTrivial (tilde M).val` |
 | 104 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-108 —— ★★★★★★構造上の 1 点が解けた(第 102 ブロック、2026-08-18)
+
+    isIso_of_bijective_on_cover :
+      各対象に被覆篩があって、その上で `f.app` が全単射  ⟹  `f` は同型
+
+★★**任意の site で使える**——`Over V` の `over` 位相でも当たる。
+これが §9-105 で特定した構造上の 1 点を解く。
+
+### ★★★機構は 3 段、すべて既存
+
+| 段 | 出典 |
+|---|---|
+| 被覆 → 局所全射 | ★第 101 |
+| 被覆 → 局所単射(自然性で移す) | ★第 101 |
+| 局所全単射 → 同型 | ★mathlib `Sheaf.isLocallyBijective_iff_isIso` |
+
+★§9-73 で「使えない」と 3 手で止めた器具が、**`Sheaf J Ab` の版なら通る**。
+★★★**止めた判断は正しく、記録が残っていたから戻れた。**
+
+### ★★残り 3 ブロック
+
+| 103 | `(tilde M)\|_{D g} ≅ 𝟙_`(第 100 の切断同型 + 第 102 の器具) |
+| 104 | `IsLocallyTrivial (tilde M).val` |
+| 105 | `tilde M` が `InvSheaf` / `equivPicRing` |
