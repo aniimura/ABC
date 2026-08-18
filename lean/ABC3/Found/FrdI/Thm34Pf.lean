@@ -80,4 +80,38 @@ def biFrMap.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Ψ^pf の添字圏の写像",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★段 2 の要 —— `Ψ` は遷移写像と可換
+
+原文 (FrdI p.64):
+> Definition 3.1, (iii)] that we obtain a 1-unique 1-commutative diagram as in the
+
+★★`idxTransport` は「四角形を可換にする**唯一の**射」として定まる
+(`frobTransport_eq`)。`Ψ` を四角形に当てれば同じ形の四角形になるので、
+**一意性 1 本**で可換性が出る。
+★★★これが段 2(余錐)の naturality そのものである。 -/
+
+/-- ★★★★★**`Ψ` は遷移写像と可換**。
+
+★`Ψ` を四角形 `φ ≫ β = α ≫ φ′` に当てると
+`Ψφ ≫ Ψβ = Ψα ≫ Ψφ′` になり、`frobTransport_eq` の一意性が効く。 -/
+theorem idxTransport_map (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {A B : C₁} {Z W : IdxPf P₁ F₁ A B} (u : Z ⟶ W)
+    (φ : Z.right.obj.1 ⟶ Z.right.obj.2) :
+    idxTransport P₂ F₂ ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).map u) (Ψ.map φ)
+      = Ψ.map (idxTransport P₁ F₁ u φ) := by
+  refine frobTransport_eq _ _ _ _ _ _ _ ?_
+  have hsq : φ ≫ u.right.hom.2 = u.right.hom.1 ≫ idxTransport P₁ F₁ u φ :=
+    idxTransport_spec u φ
+  have hmap := congrArg (fun f : Z.right.obj.1 ⟶ W.right.obj.2 => Ψ.map f) hsq
+  simp only [Ψ.map_comp] at hmap
+  exact hmap
+
+def idxTransport_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ は遷移写像と可換",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

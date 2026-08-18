@@ -9209,3 +9209,35 @@ instance 解決に失敗する——係数環の綴りが `X.ringCatSheaf.obj.ob
     ⟹ 第 209 の道具で全射 ⟹ 第 207 で同型 ⟹ ofDivisor_pullback
 
 ★見積もり **1–2 ブロック**。
+
+## §9-232 イデアルの等式が出た——ただし**転送は外せない**(第 211 ブロック)
+
+    ((D.comap f).ideal A').comap eA = ((D.ideal B').comap eB).map (ΓSpecIso.hom ≫ appLE ≫ ΓSpecIso.inv)
+
+(`A' = fromSpec ''ᵁ ⊤`、`eA = (fromSpec.appIso ⊤).inv`)
+
+★第 210 の 2 本を繋ぐだけで出た。
+
+### ★★★★★測って分かったこと —— 転送を外した形は `whnf` で落ちる
+
+    (D.comap f).ideal A' = (D.ideal B').map (eB.hom ≫ … ≫ eA.hom)
+
+という「転送を外した」形を書くと、★**`maxHeartbeats 2000000` でも `whnf` timeout** する。
+`Γ(X, fromSpec ''ᵁ ⊤)` の綴りが深く、合成の型合わせに指数的な展開が起きるためである。
+
+★★★[[ring-instance-two-paths]] の「型の綴り」問題が、
+今回は **`rw` の失敗ではなく `whnf` の timeout** という形で出た。
+★逃げ道も同じ系統である——**転送つきのまま使い、最後に motive で `cast` する**
+(第 200 で確立した形)。
+
+### 残り(B2)——全射性の組み立てだけ
+
+    A' を保ったまま:
+      imgIdeal ⊇ 生成元(第 208 + 209)
+      イデアルの等式(第 211、転送つき)
+      像は部分加群(第 209)
+    ⟹ 全射 ⟹ 第 207 で同型 ⟹ 最後に motive で `cast`
+
+★見積もり **1–2 ブロック**。転送つきで扱うので、`comap` を挟んだまま
+生成元の議論をすることになる(`Ideal.comap` は準同型の逆像なので
+「像 ⊇ 生成元」も `comap` を通して読み替えられる)。
