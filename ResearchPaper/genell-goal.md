@@ -8776,3 +8776,41 @@ mathlib には `Sheaf/Quasicoherent.lean` が在るので、そこを測るの�
 可逆性の局所性は環の側から作ると 8–15 ブロック(`(Mᵛ)_S ≅ (M_S)ᵛ` が mathlib に無い)だが、
 B1 で積んだ層機構を経由すると **3 ブロック**で出た。
 葉から積む進め方が、**別の枝の律速を溶かした**実例である。
+
+## §9-220 最後の 1 欄——**自前の橋が既に在った**(2026-08-19)
+
+`ofDivisor_pullback` の律速は「`f^*` のアフィン局所記述」だと §9-219 で測った。
+mathlib の `SheafOfModules.pullback` は**押し出しの左随伴**として定義されており
+(`PullbackContinuous.lean`)、具体的な記述は無い。`Sheaf/Quasicoherent.lean` も
+presentation 中心でこの形は持たない。
+
+### ★★★★★ところが第 50 番台で作った橋がそのまま効く
+
+`Found/Arakelov/PicSchemeDelta.lean` に
+
+    sheafifyPullbackApp :
+      (Scheme.Modules.pullback f).obj (sheafify P) ≅ sheafify ((pullbackPre f).obj P)
+
+が在る(★「層化と引き戻しは交換する」)。したがって
+
+    f^* (idealSheaf D) ≅ sheafify ((pullbackPre f).obj (idealPresheaf D))
+
+となり、**前層の段**で
+
+    (pullbackPre f).obj (idealPresheaf D)  ⟶  idealPresheaf (D.comap f)
+
+を作ってアフィン開で全単射を示せばよい——★これは**第 188–190(`ofDivisor_mul`)と
+同じ形**である(射を作る → アフィンで全単射 → 第 189 → 層化)。
+
+### ★★見積もりを 6–12 → **4–8** に更新
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 前層の射を作る | ★第 188 と同型の作業 |
+| 2 | アフィン開での全単射(= 第 183 の `bcMap`) | ★第 183 済 |
+| 3 | 第 189 + 層化 + `sheafifyPullbackApp` | ★すべて済 |
+
+★★★**B1 で作った引き戻しの機構が、また効いた。**
+第 20・50 番台(抽象の `alphaR`、`δ`、層化との交換)は
+「B1 のためだけ」に見えたが、B2 の最後の欄でそのまま使える。
+★葉から積むと、後で**どの枝から見ても部品が揃っている**状態になる。
