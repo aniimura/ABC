@@ -125,7 +125,7 @@ theorem eq_zero_of_mle_of_suppElt_disjoint (H : IsPerfFactorialWith M ι)
 
 def Pf.of_injective_of_divisorial.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 11,
-    item := "§0 Monoids — perfection の単射性",
-    sectionId := "frdi-s0-perfection" }
+    item := "§0 Monoids — perfection M^pf の単射性",
+    sectionId := "frdi-s0-perfect" }
 
 end ABC3.Found.FrdI
