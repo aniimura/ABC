@@ -224,6 +224,7 @@ import ABC3.Found.Arakelov.PicTildeUnit
 import ABC3.Found.Arakelov.PicGammaSections
 import ABC3.Found.Arakelov.PicGammaSpecIso
 import ABC3.Found.Arakelov.PicGammaUnit
+import ABC3.Found.Arakelov.PicBaseTensor
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
