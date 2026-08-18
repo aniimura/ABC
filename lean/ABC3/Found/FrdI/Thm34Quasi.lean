@@ -1011,4 +1011,23 @@ def admissible_all_of_connected.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 連結性で全対象へ",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★素数の対応の well-defined 性
+
+★(F1) は「ある `p₂`」を与えるだけなので、
+**それが一意である**ことを別に言う必要がある。 -/
+
+/-- ★★★★**admissible の `p₂` は一意**。
+
+★同じ対象が `(p₁,p₂)`と`(p₁,p₂')` の両方で admissible なら `p₂ = p₂'`。 -/
+theorem admissible_snd_unique (Ψ : C₁ ⥤ C₂) {p₁ p₂ p₂' : ℕ+} {A : C₁}
+    (h : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A) (h' : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂' A)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    p₂ = p₂' := by
+  rw [← (h α hα hdα).2, ← (h' α hα hdα).2]
+
+def admissible_snd_unique.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — 素数の対応の一意性",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

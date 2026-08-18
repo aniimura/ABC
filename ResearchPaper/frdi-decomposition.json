@@ -895,14 +895,24 @@
           "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。\n\n★★両向きの (F2) が揃った(2026-08-18)ので、`P.connectedC` の zigzag に沿って `admissible_iff_of_hom` を繰り返すだけ。\n★見積りを ★中 → ★小 に下げた。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `admissible_all_of_connected`。\n★mathlib の `CategoryTheory.induct_on_objects` に乗せるだけだった。\n★罠: `IsAdmissibleObj` の `{B}` が暗黙なので eta 展開され、`exact key A` が通らない。`intro B φ hφ hdφ` してから適用する。"
         },
         {
-          "id": "psiN-prime-bij",
-          "size": "中",
-          "status": "todo",
+          "id": "psiN-welldef",
+          "size": "小",
+          "status": "done",
           "deps": [
             "psiN-connected"
           ],
+          "title": "素数の対応の well-defined 性",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `admissible_snd_unique`。\n★(F1) は「ある `p₂`」を与えるだけなので、**一意性**を別に言う必要がある。\n★p₁-Frobenius 射を 1 本取って両方の admissible 性を当てるだけ。"
+        },
+        {
+          "id": "psiN-prime-bij",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "psiN-welldef"
+          ],
           "title": "その写像が素数全体の全単射であること",
-          "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。"
+          "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。\n\n★★well-defined 性は `psiN-welldef` で取った(2026-08-18)。\n★残るのは選択で写像を作り、quasi-inverse で逆写像を作って全単射にする束ねる作業。★見積りを ★中 → ★小 に下げた。"
         },
         {
           "id": "psiN-degree",

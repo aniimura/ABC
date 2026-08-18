@@ -7974,3 +7974,16 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–172 の 25 ブロック(フルビルド成功・ゲート PASS)
+
+## §9-196 —— 評価射のための両側の橋(第 173 ブロック、2026-08-18)
+
+    fVal : F.obj W → ((restrictPresheafFunctor X W).obj F).obj t     (値の橋)
+    rVal : X.presheaf.obj W → (RingCat 綴りの環)                      (係数の橋)
+    fVal_smul : fVal (c • x) = rVal c • fVal x                       ★rfl
+    fVal_add  : fVal (x + y) = fVal x + fVal y                       ★rfl
+
+★★教訓: **橋は片側では足りない**。値と係数の**両方**に架ける。
+([[typed-identity-bridge]] の 2 例目)
+
+★★★どちらに寄せても片側が欠ける状況では、
+**両側に恒等関数を置いて `rfl` で繋ぐ**のが最も安い。
