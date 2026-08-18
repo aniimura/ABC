@@ -6237,3 +6237,34 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 |---|---|
 | 120 | 制限の両立(`IsLocalizedModule.ext`)→ `IsLocallyTrivial` |
 | 121 | `InvSheaf` / `equivPicRing` → **B1 達成** |
+
+## §9-134 —— ★★★★★★制限と局所化の可換図式(第 120 ブロック、2026-08-24)
+
+    M_g  --tildeAwayEquiv-->  Γ(tilde M, D(g))
+     |                              |
+     | 局所化(第 98)                | 制限
+     v                              v
+    M_{h·g} --tildeAwayEquiv--> Γ(tilde M, D(h·g))
+
+★★これが「**生成元の制限は生成元**」の中身である。
+
+### ★★機構 —— `IsLocalizedModule.ext`
+
+両辺を `mk` と合成するとどちらも `toOpen M (D(h·g))` になる:
+
+| 辺 | 経路 |
+|---|---|
+| 上→右 | `iso_mk_one` → `toOpen_res'`(第 118) |
+| 左→下 | `liftAwayMap_comp`(第 98)→ `iso_mk_one` |
+
+★`powers g` が終域に可逆に作用する(第 119)ので `ext` が使える。
+
+### ★★★詰まり(1 手)
+
+`congrArg (fun f => f.hom)` が型で止まる。
+★**`DFunLike.congr_fun (congrArg ModuleCat.Hom.hom ...)`** に書き直すと通る。
+
+### ★★残り 1–2 ブロック
+
+    121: IsLocallyTrivial (tilde M).val
+    122: InvSheaf / equivPicRing → **B1 達成**
