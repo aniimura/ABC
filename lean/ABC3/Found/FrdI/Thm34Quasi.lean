@@ -900,4 +900,28 @@ def stepDecomp_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F3) — step の分解可能性の移送",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★★**(F3) の順序の保存**。
+
+★両側の `step_mle_iff_degFr_le` を繋ぐ。
+★橋渡し(`hbridge`)は `stepDecomp_map` が与える。 -/
+theorem degFr_order_preserve (Ψ : C₁ ⥤ C₂)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    {A B B₁ B₂ : C₁} {p q p' q' : ℕ}
+    (α : A ⟶ B) (hαs : IsStep P₁ α) (hΨα : IsStep P₂ (Ψ.map α))
+    (α₁ : A ⟶ B₁) (α₂ : A ⟶ B₂)
+    (hd₁ : P₁.Div α₁ = p • P₁.Div α) (hd₂ : P₁.Div α₂ = q • P₁.Div α)
+    (hd₁' : P₂.Div (Ψ.map α₁) = p' • P₂.Div (Ψ.map α))
+    (hd₂' : P₂.Div (Ψ.map α₂) = q' • P₂.Div (Ψ.map α))
+    (hbridge : MLe (P₁.Div α₁) (P₁.Div α₂) ↔
+      MLe (P₂.Div (Ψ.map α₁)) (P₂.Div (Ψ.map α₂))) :
+    p ≤ q ↔ p' ≤ q' := by
+  rw [← step_mle_iff_degFr_le hiso₁ α hαs α₁ α₂ hd₁ hd₂,
+    ← step_mle_iff_degFr_le hiso₂ (Ψ.map α) hΨα (Ψ.map α₁) (Ψ.map α₂) hd₁' hd₂']
+  exact hbridge
+
+def degFr_order_preserve.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F3) — 順序の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

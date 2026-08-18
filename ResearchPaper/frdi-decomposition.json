@@ -857,12 +857,12 @@
         {
           "id": "F3-order-preserve",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "F3-stepdecomp-map"
           ],
           "title": "(F3) Ψ が素数の順序を保つ",
-          "note": "★上の特徴づけが圧倒的なので、`Ψ` が pre-step を保つこと(本セッションで実装済)と合わせて直ちに出る見込み。\n\n★★中核は `F3-stepdecomp-map` で取った(2026-08-18)。\n★残るのは両側の `step_mle_iff_degFr_le` を繋いで`degFr ζ₁ < degFr θ₁ ⇒ degFr ζ₂ < degFr θ₂` にする束ねる作業だけ。\n★見積りを ★中 → ★小 に下げた。"
+          "note": "★上の特徴づけが圧倒的なので、`Ψ` が pre-step を保つこと(本セッションで実装済)と合わせて直ちに出る見込み。\n\n★★中核は `F3-stepdecomp-map` で取った(2026-08-18)。\n★残るのは両側の `step_mle_iff_degFr_le` を繋いで`degFr ζ₁ < degFr θ₁ ⇒ degFr ζ₂ < degFr θ₂` にする束ねる作業だけ。\n★見積りを ★中 → ★小 に下げた。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `degFr_order_preserve`。\n★両側の `step_mle_iff_degFr_le` を繋ぐだけで出た。\n★橋渡しは `stepDecomp_map` が与える。"
         },
         {
           "id": "F3-identity",
