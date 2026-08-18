@@ -1016,15 +1016,25 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isIsometric_map_of_classes`。\n★圧倒的な特徴づけ `isIsometric_iff_frobPullBack` を両側で使う。\n\n★★★**順序の注意を記録**: pull-back の保存を `prop_1_4_ii`(pull-back ⇔ LB-invertible ∧ linear)経由で出すと isometry と**循環**する。\n★在庫の `prop_1_7_iii_pullBack_minimalAdjoint`(pull-back ⇔ 底同型に対する minimal adjoint、`Prop17.lean:370`)は**底同型だけ**を使うので、こちらで循環を切る。"
         },
         {
+          "id": "iii-pullback-refl",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "iii-isometric"
+          ],
+          "title": "(iii) pull-back の反射——循環を切る道",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isPullBack_of_map`。\n★在庫の `prop_1_7_ii_pullBack_minimalAdjoint`(`Prop17.lean:369`)は\n`IsPullBack P φ ⇔ IsMinimalAdjoint (baseIsoProp P) φ` を与える。\n★右辺は**底同型だけ**を使うので isometry との循環を切れる。\n★★さらに `IsMinimalAdjoint` は `IsCoAngular` と**同じ形**(任意の分解に対し…)なので、**反射**が軽い。\n★co-angular で使った手がそのまま使えた。"
+        },
+        {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "iii-isometric"
+            "iii-pullback-refl"
           ],
           "status": "todo",
           "size": "小",
           "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。",
-          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。\n\n★★linear と pre-step は `iii-linear` で取った(2026-08-18)。\n★残るのは底同型・pull-back・isometry・co-angular・LB-invertible。\n★在庫: `prop_1_7_iii_linear_factor`(linear ⇔ pre-step ≫ pull-back)、`prop_1_10_i_four_types` の 7 タイプ。\n\n★★底同型も `iii-baseiso` で取った(2026-08-18)。\n★残るのは pull-back・isometry・co-angular・LB-invertible。\n★いずれも原典は「formally」としか書いておらず、`Proposition 1.7` の分解を両側で使う同じ手になる見込み。\n★見積りを ★中 → ★小 に下げた。\n\n★★★**残りは co-angular と isometric の 2 つだけ**(2026-08-18)。\n★他はすべてこの 2 つから導ける:\n- LB-invertible = co-angular ∧ isometric\n- pull-back = LB-invertible ∧ linear(`prop_1_4_ii`)\n- 底同型 = Frobenius 型 ≫ pre-step(`prop_1_7_ii_baseIso_factor`、済)\n- linear・pre-step は次数経由(済)\n\n★co-angular の見込み: 定義が「分解の中の isometric pre-step が同型」なので、(i) の isometric pre-step の保存(`isometricPreStep_map`、実装済)と圧倒的同値の充満性から出る。\n\n## ★★★co-angular の形を測った(2026-08-18)\n`IsCoAngular P φ` の定義は\n「任意の分解 `φ = γ ≫ β ≫ α` に対し、条件を満たす `β` は同型」である。\n★★したがって `Ψ` 側の分解を **`𝒞₁` へ引き戻す**必要があり、圧倒的同値の充満性・本質的全射性を使うことになる。\n★具体には: `X' : C₂` に対し `X := e.inverse.obj X'` を取り、counit で分解を戻す。そのとき**同型が分解に入り込む**ので、`β` の位置の同型を吸収する補題が要る。\n★在庫: `isometricPreStep_map`(`Thm34.lean:630`、(i) で実装済)、`isPreStep_congr_iso`(本セッションで実装)。\n★★isometric の保存も同じ形(原典は isotropification 経由の特徴づけを使う)。\n\n★★★**見通しが変わった**(2026-08-18):\nco-angular の**反射**を `Ψ` と `Ψ⁻¹` の両方に当てれば保存が出るので、「分解を引き戻す」重い道は不要だった。\n★残るのは isometric の保存だけ。★見積りを ★中 → ★小 に下げた。\n\n★★★**8 クラスすべての部品が揃った**(2026-08-18):\nFrobenius 型・linear・pre-step・底同型・pull-back・LB-invertible・co-angular・isometry。\n★残るのは pull-back を `prop_1_7_iii_pullBack_minimalAdjoint` 経由で底同型から出す段と、全体を束ねる作業。"
+          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。\n\n★★linear と pre-step は `iii-linear` で取った(2026-08-18)。\n★残るのは底同型・pull-back・isometry・co-angular・LB-invertible。\n★在庫: `prop_1_7_iii_linear_factor`(linear ⇔ pre-step ≫ pull-back)、`prop_1_10_i_four_types` の 7 タイプ。\n\n★★底同型も `iii-baseiso` で取った(2026-08-18)。\n★残るのは pull-back・isometry・co-angular・LB-invertible。\n★いずれも原典は「formally」としか書いておらず、`Proposition 1.7` の分解を両側で使う同じ手になる見込み。\n★見積りを ★中 → ★小 に下げた。\n\n★★★**残りは co-angular と isometric の 2 つだけ**(2026-08-18)。\n★他はすべてこの 2 つから導ける:\n- LB-invertible = co-angular ∧ isometric\n- pull-back = LB-invertible ∧ linear(`prop_1_4_ii`)\n- 底同型 = Frobenius 型 ≫ pre-step(`prop_1_7_ii_baseIso_factor`、済)\n- linear・pre-step は次数経由(済)\n\n★co-angular の見込み: 定義が「分解の中の isometric pre-step が同型」なので、(i) の isometric pre-step の保存(`isometricPreStep_map`、実装済)と圧倒的同値の充満性から出る。\n\n## ★★★co-angular の形を測った(2026-08-18)\n`IsCoAngular P φ` の定義は\n「任意の分解 `φ = γ ≫ β ≫ α` に対し、条件を満たす `β` は同型」である。\n★★したがって `Ψ` 側の分解を **`𝒞₁` へ引き戻す**必要があり、圧倒的同値の充満性・本質的全射性を使うことになる。\n★具体には: `X' : C₂` に対し `X := e.inverse.obj X'` を取り、counit で分解を戻す。そのとき**同型が分解に入り込む**ので、`β` の位置の同型を吸収する補題が要る。\n★在庫: `isometricPreStep_map`(`Thm34.lean:630`、(i) で実装済)、`isPreStep_congr_iso`(本セッションで実装)。\n★★isometric の保存も同じ形(原典は isotropification 経由の特徴づけを使う)。\n\n★★★**見通しが変わった**(2026-08-18):\nco-angular の**反射**を `Ψ` と `Ψ⁻¹` の両方に当てれば保存が出るので、「分解を引き戻す」重い道は不要だった。\n★残るのは isometric の保存だけ。★見積りを ★中 → ★小 に下げた。\n\n★★★**8 クラスすべての部品が揃った**(2026-08-18):\nFrobenius 型・linear・pre-step・底同型・pull-back・LB-invertible・co-angular・isometry。\n★残るのは pull-back を `prop_1_7_iii_pullBack_minimalAdjoint` 経由で底同型から出す段と、全体を束ねる作業。\n\n★★★**循環が切れた**(2026-08-18)。\npull-back を minimal adjoint 経由(底同型だけ)で取ったので、\nisometry → pull-back → isometry の循環がなくなった。\n★残るのは 8 クラスを束ねて一つの定理にする作業。"
         },
         {
           "id": "iii-psipf",

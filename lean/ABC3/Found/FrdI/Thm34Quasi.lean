@@ -1361,4 +1361,30 @@ def isIsometric_map_of_classes.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — isometry の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★pull-back の**反射** —— 循環を切る道
+
+★★`prop_1_7_ii_pullBack_minimalAdjoint`(在庫、`Prop17.lean:369`)は
+`IsPullBack P φ ⇔ IsMinimalAdjoint (baseIsoProp P) φ` を与える。
+★右辺は **底同型だけ**を使うので、isometry との循環を切れる。
+★さらに `IsMinimalAdjoint` は `IsCoAngular` と**同じ形**
+(任意の分解に対し…)なので、**反射**が軽い。 -/
+
+/-- ★★★★**pull-back の反射** —— 像が pull-back ならもとも pull-back。 -/
+theorem isPullBack_of_map (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hBI : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f → IsBaseIsomorphism P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsPullBack P₂ (Ψ.map φ)) : IsPullBack P₁ φ := by
+  refine (prop_1_7_ii_pullBack_minimalAdjoint P₁ F₁ φ).mpr ?_
+  intro X β α hfac hβ
+  have hmap := (prop_1_7_ii_pullBack_minimalAdjoint P₂ F₂ (Ψ.map φ)).mp h
+    (Ψ.obj X) (Ψ.map β) (Ψ.map α) (by rw [hfac, Ψ.map_comp]) (hBI β hβ)
+  haveI := hmap
+  exact isIso_of_reflects_iso β Ψ
+
+def isPullBack_of_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — pull-back の反射",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
