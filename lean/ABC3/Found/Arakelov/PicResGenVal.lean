@@ -68,6 +68,22 @@ theorem freeYonedaEquiv_restrictFreeYonedaIso_inv :
   erw [CategoryTheory.comp_apply, free_map_app_freeMk]
   rfl
 
+/-- ★★★★★**制限の同型の生成元での値(`app` 版)**。
+
+★★★`erw` は `restrictFreeYonedaIso` の**内部構造を先に展開してしまう**ので、
+`freeYonedaEquiv` 版(上)では展開後に当たらない。
+★**`app` 版を切っておくと、展開される前に当たる**。 -/
+theorem restrictFreeYonedaIso_inv_app :
+    (restrictFreeYonedaIso V W).inv.app (op (objOn V W))
+        (ModuleCat.freeMk (𝟙 (objOn V W)))
+      = (ModuleCat.freeMk (homOfLE (inf_le_left : W ⊓ V ≤ W))
+          : ((restrictPresheafFunctor Y V).obj
+              ((PresheafOfModules.free
+                (Y.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u})).obj
+                (yoneda.obj W))).obj (op (objOn V W))) := by
+  rw [← freeYonedaEquiv_apply]
+  exact freeYonedaEquiv_restrictFreeYonedaIso_inv V W
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def freeYonedaEquiv_restrictFreeYonedaIso_inv.src : ABC3.Meta.Source :=
