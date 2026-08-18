@@ -817,12 +817,12 @@
         {
           "id": "psiN-F2",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psiN-F2-rev"
           ],
           "title": "(F2) 全体——一般の射へ広げる",
-          "note": "★★★**部品は全部揃った**(2026-08-18)。\n`arbFactor` の 3 成分とも、両向きで使える:\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square` / `admissible_of_square'`(両向き)\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。"
+          "note": "★★★**部品は全部揃った**(2026-08-18)。\n`arbFactor` の 3 成分とも、両向きで使える:\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square` / `admissible_of_square'`(両向き)\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。\n\n## ★★★済(2026-08-18)——場合分けは不要だった\n`Thm34Quasi.lean` の `admissible_of_hom`。\n★在庫の `prop_1_10_i_exists`(`Prop110.lean:424`)は**任意の射**に対して四角形を与える(中で `arbFactor` の 3 成分を順に使っている)。\n★★したがって (F2) は場合分けずに **1 本**で書けた。\n★先に取った 3 成分の補題(`admissible_of_frobType` / `admissible_of_preStep` / `admissible_of_square`)は測定の記録として残す。\n★★**教訓**: 3 成分に割る前に「任意の射版が在庫にないか」を検索すべきだった(在庫検索の失敗 6 件目)。"
         },
         {
           "id": "psiN-F3",
