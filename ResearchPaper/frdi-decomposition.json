@@ -336,14 +336,33 @@
           "evidence": "`Found/FrdI/Prop44Pre.lean` の `toBiratCat_faithful`。"
         },
         {
+          "id": "otri-comm-bfn",
+          "title": "birat-Frobenius-normalized → Frobenius-normalized → `𝒪^▷(A)` が可換",
+          "deps": [],
+          "status": "todo",
+          "size": "★小",
+          "evidence": "★原文 `Definition 4.5, (i)` の括弧書き「any birationally Frobenius-normalized object of C is Frobenius-normalized」。★そのあと `Prop25iii.lean` の `otri_mul_comm` を当てるだけ。★★**測定(2026-08-18)**: `𝒪^▷(A)^gp` が意味を持つには可換性が要る——ここが (B) の仮定が効く第 2 の場所である。"
+        },
+        {
+          "id": "otri-gp-mul",
+          "title": "乗法単系 `𝒪^▷(A)` の**群化**を作る",
+          "deps": [
+            "otri-comm-bfn"
+          ],
+          "status": "todo",
+          "size": "★中",
+          "evidence": "★★**我々の `Gp` は加法可換単系用**であり、`𝒪^▷(A)` は `End A` の**乗法**部分単系である。★mathlib の `Localization`(可換モノイドの群化)に乗せるか、加法へ移して既存の `Gp` を使うかの選択がある。"
+        },
+        {
           "id": "otri-gp-inj",
           "title": "𝒪^▷(A)^gp ↪ 𝒪^×(A^birat) の単射性",
           "deps": [
+            "otri-gp-mul",
             "birat-faithful"
           ],
           "status": "todo",
           "size": "★中",
-          "evidence": "忠実性から `𝒪^▷(A) → End(A^birat)` が単射。群化 `^gp` へ上げるのに `Div^gp` の核が要る。"
+          "evidence": "忠実性(`toBiratCat_faithful`)から `𝒪^▷(A) → End(A^birat)` は単射。★群化へ上げるのに前段の 2 節点が要る。"
         },
         {
           "id": "ii-src",
