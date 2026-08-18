@@ -1538,4 +1538,89 @@ def otriSquareCond_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iv) — 𝒪^▷ の圧倒的な条件の移送",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`Theorem 3.4, (iii)` の rigidity —— 圏同値との合成
+
+原文 (FrdI p.62) は (iii) の図式について
+> each of the composite functors of this diagram is rigid
+
+と言い、その根拠として `Proposition 1.13, (ii)` を挙げる。
+★在庫の `prop_1_13_ii_global : IsRigidFunctor P.toElem` がその `Proposition 1.13, (ii)` である。
+
+★★したがって**欠けている環は 1 本だけ**である ——
+「**圏同値との合成で rigid 性が保たれる**」。
+★手筋は `η` を `e.inverse` で whisker して counit で `G ≅ G` に直し、
+`G` の rigid 性で恒等を得て、unit の自然性で元へ運び戻す。 -/
+
+/-- ★★★★★**圏同値との合成で rigid 性は保たれる**。
+
+`e : X ≌ Y` が圏同値で `G : Y ⥤ Z` が rigid ならば `e.functor ⋙ G` も rigid。
+
+★★`Theorem 3.4, (iii)` の rigidity 節が要求する唯一の一般補題であり、
+`G` の側には在庫の `prop_1_13_ii_global` を当てる。 -/
+theorem isRigidFunctor_of_equivalence_comp {X : Type*} [Category X] {Y : Type*} [Category Y]
+    {Z : Type*} [Category Z] (e : X ≌ Y) (G : Y ⥤ Z) (h : IsRigidFunctor G) :
+    IsRigidFunctor (e.functor ⋙ G) := by
+  intro η
+  -- ★1. `e.inverse` で whisker し counit で `G ≅ G` に直すと、`G` の rigid 性で恒等。
+  have hη' : ((Functor.isoWhiskerRight e.counitIso G).symm
+      ≪≫ Functor.isoWhiskerLeft e.inverse η
+      ≪≫ Functor.isoWhiskerRight e.counitIso G) = Iso.refl G := h _
+  -- ★2. よって `e.inverse` の像の上では `η` は恒等 —— counit で両側から挟んで潰す。
+  have happ : ∀ W : Y, η.hom.app (e.inverse.obj W) = 𝟙 _ := by
+    intro W
+    have h1 := congrArg (fun t : G ≅ G => t.hom.app W) hη'
+    simp only [Iso.trans_hom, Iso.symm_hom, NatTrans.comp_app,
+      Functor.isoWhiskerRight_hom, Functor.isoWhiskerRight_inv, Functor.isoWhiskerLeft_hom,
+      Functor.whiskerRight_app, Functor.whiskerLeft_app, Iso.refl_hom, NatTrans.id_app] at h1
+    -- ★`G` で送った counit を 1 個の同型として掴み、`Iso` の消去則で潰す。
+    have hκ : (G.mapIso (e.counitIso.app W)).inv ≫ η.hom.app (e.inverse.obj W)
+        ≫ (G.mapIso (e.counitIso.app W)).hom = 𝟙 (G.obj W) := h1
+    rw [Iso.inv_comp_eq] at hκ
+    have h4 := (Iso.eq_comp_inv (G.mapIso (e.counitIso.app W))).mpr hκ
+    simp at h4
+    rw [← CategoryTheory.Functor.map_comp] at h4
+    have hone : G.map (e.counitIso.hom.app W ≫ e.counitIso.inv.app W)
+        = 𝟙 (G.obj ((e.inverse ⋙ e.functor).obj W)) := by
+      rw [Iso.hom_inv_id_app]
+      exact CategoryTheory.Functor.map_id G _
+    exact h4.trans hone
+  -- ★3. unit の自然性で任意の対象へ運ぶ。
+  apply Iso.ext
+  apply NatTrans.ext
+  funext A
+  have hnat := η.hom.naturality (e.unitIso.hom.app A)
+  have hid : η.hom.app ((e.functor ⋙ e.inverse).obj A) = 𝟙 _ := happ (e.functor.obj A)
+  rw [hid, Category.comp_id] at hnat
+  haveI : IsIso ((e.functor ⋙ G).map (e.unitIso.hom.app A)) := inferInstance
+  have hcan : η.hom.app A ≫ (e.functor ⋙ G).map (e.unitIso.hom.app A)
+      = 𝟙 ((e.functor ⋙ G).obj A) ≫ (e.functor ⋙ G).map (e.unitIso.hom.app A) := by
+    rw [Category.id_comp]
+    exact hnat.symm
+  show η.hom.app A = 𝟙 _
+  exact (cancel_mono ((e.functor ⋙ G).map (e.unitIso.hom.app A))).mp hcan
+
+def isRigidFunctor_of_equivalence_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iii) — 図式の合成関手はすべて rigid",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii)** の rigidity 節。
+
+原文 (FrdI p.62) の
+> each of the composite functors of this diagram is rigid
+
+を、原典が指示するとおり `Proposition 1.13, (ii)` から出す。
+
+★★`𝒞₂ → 𝔽_{Φ₂}` の rigid 性(`prop_1_13_ii_global`)に
+`isRigidFunctor_of_equivalence_comp` を被せるだけで、
+図式の合成関手 `𝒞₁ ≌ 𝒞₂ → 𝔽_{Φ₂}` の rigid 性が出る。 -/
+theorem thm_3_4_iii_rigid (F₂ : FrobenioidCore P₂) (hslim : IsSlimCat D₂) (Ψ : C₁ ≌ C₂) :
+    IsRigidFunctor (Ψ.functor ⋙ P₂.toElem) :=
+  isRigidFunctor_of_equivalence_comp Ψ _ (prop_1_13_ii_global P₂ F₂ hslim)
+
+def thm_3_4_iii_rigid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iii) — 図式の合成関手はすべて rigid",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

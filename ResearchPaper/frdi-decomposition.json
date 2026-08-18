@@ -1073,10 +1073,12 @@
           "deps": [
             "iii-psipf"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
           "evidence": "(i) の rigidity の手(`Thm34Rigid.lean`)が型として使える見込み。",
-          "note": "\n\n## ★★形を測った(2026-08-18)\n`IsRigidFunctor F := ∀ η : F ≅ F, η = Iso.refl F`(`Prop113.lean:50`)。\n★在庫に `prop_1_13_ii_global : IsRigidFunctor P.toElem`(実装済)がある。\n\n★★要るのは「**圧倒的同値との合成で rigid が保たれる**」:\n`Ψ` が圧倒的同値で `G` が rigid なら `Ψ ⴼ G` も rigid。\n★手: `η : Ψ ⴼ G ≅ Ψ ⴼ G` に `isoWhiskerLeft e.inverse` を当て、`e.counitIso` で `G ≅ G` に直し、rigid で `refl`、本質的全射性で `η` に戻す。\n★★**mathlib の whisker と counit の計算が実体**で、本セッションの `isotropificationCommute` を使ったときと同じ種類の作業である。"
+          "note": "\n\n## ★★閉じた(2026-08-19)\n欠けていた環は 1 本だけだった ——\n`isRigidFunctor_of_equivalence_comp : (e : X ≌ Y) → IsRigidFunctor G → IsRigidFunctor (e.functor ⴼ G)`。\n★手: `η` を `e.inverse` で whisker し counit で `G ≅ G` に直し、`G` の rigid 性で恆等を得て、unit の自然性で元へ運び戻す。\n★在庫の `prop_1_13_ii_global` を被せて `thm_3_4_iii_rigid` を得た。",
+          "lean": "ABC3/Found/FrdI/Thm34Quasi.lean",
+          "decl": "isRigidFunctor_of_equivalence_comp / thm_3_4_iii_rigid"
         },
         {
           "id": "iii-src",
