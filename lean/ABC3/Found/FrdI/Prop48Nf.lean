@@ -176,6 +176,83 @@ noncomputable def psiBiratNf
   map_comp f g := hcomp f g
 
 
+/-- ★★★★**1-可換図式** —— `𝒞 → 𝒞^birat` の四角形。
+
+★対象は定義的に一致するので**成分は恒等**で済み、
+自然性がちょうど `biratNfMap_toHomBirat` である。 -/
+noncomputable def psiBiratNfSquare
+    (hcomp : ∀ {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E),
+      biratNfMap P d G A E (compBirat P G G.core f g)
+        = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g)) :
+    toBiratCat P G ⋙ psiBiratNf P d G hcomp
+      ≅ naiveFrob P G.core d ⋙ toBiratCat P G :=
+  NatIso.ofComponents (fun _ => Iso.refl _) (fun {A B} φ => by
+    show compBirat P G G.core (biratNfMap P d G A B (toHomBirat (P := P) (G := G) φ))
+        (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d B)))
+      = compBirat P G G.core (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d A)))
+          (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+    rw [biratNfMap_toHomBirat]
+    rw [show compBirat P G G.core (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+        (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d B)))
+        = toHomBirat (P := P) (G := G) (nfMap P G.core d φ) from
+      compBirat_id_right G.core _]
+    rw [show compBirat P G G.core (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d A)))
+        (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+        = toHomBirat (P := P) (G := G) (nfMap P G.core d φ) from
+      compBirat_id_left G.core _])
+
+def psiBiratNf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat の構成と 1-可換図式",
+    sectionId := "frdi-prop-4-8" }
+
+
+/-! ## ★★★★★段 4 の `map_comp`
+
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
+
+★★★**梃子は `Definition 1.3, (v), (a)`(`preStepMono`)—— pre-step は mono**。
+引き戻しの四角形 `γ ≫ φ = α ≫ W.hom` で `W.hom` は co-angular **pre-step** なので
+mono、したがって **`α` は `γ` から決まる**。
+★同じことが添字の構造射 `Z.hom` についても効き、
+**共通の上界へ送ったあと 2 回 mono を消す**だけで等式が出る。 -/
+
+/-- ★添字圏の射が満たす三角形(`Over.w` を `𝒞` の射の等式に落としたもの)。 -/
+theorem idxBirat_w {A : C} {Z V : IdxBirat P G A} (u : Z ⟶ V) :
+    u.unop.left.hom ≫ Z.unop.hom.hom = V.unop.hom.hom :=
+  congrArg (fun t : V.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w u.unop)
+
+/-- ★★★★★**`Ψ^birat` は合成を保つ**。 -/
+theorem biratNfMap_compBirat {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E) :
+    biratNfMap P d G A E (compBirat P G G.core f g)
+      = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g) := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratNfMap_mk, biratNfMap_mk, biratNfMap_mk, compBirat_mk, nfMap_comp]
+  -- ★2 つの添字を共通の上界へ送る。
+  refine HomBirat.sound
+    (IsFiltered.max ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+      (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
+        ((idxBiratNfMap P d G B).obj W)))
+    (IsFiltered.leftToMax _ _) (IsFiltered.rightToMax _ _) ?_
+  -- ★記号を短くする。
+  set u := IsFiltered.leftToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
+      ((idxBiratNfMap P d G B).obj W)) with hu
+  set v := IsFiltered.rightToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ)
+      ((idxBiratNfMap P d G B).obj W)) with hv
+  -- ★段 1: 構造射の三角形 ＋ `nfMap (Z.hom)` が mono で `γ` の側が一致。
+  haveI hmZ : Mono (nfMap P G.core d Z.unop.hom.hom) :=
+    G.core.preStepMono _ (nfMap_preStep P G.core d _ Z.unop.hom.property.2)
+  haveI hmW : Mono (nfMap P G.core d W.unop.hom.hom) :=
+    G.core.preStepMono _ (nfMap_preStep P G.core d _ W.unop.hom.property.2)
+  have hwu := idxBirat_w P d G u
+  have hwv := idxBirat_w P d G v
+  sorry
+
+
 end Birat
 
 def biratNfMap.src : ABC3.Meta.Source :=
