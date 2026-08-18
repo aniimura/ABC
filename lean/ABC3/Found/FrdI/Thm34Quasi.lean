@@ -1076,4 +1076,32 @@ def degFr_map_of_frobComposite.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 次数 d を Ψ_N(d) へ送る",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★`Ψ_N = id` —— (F3) の結論
+
+原文 (FrdI p.62):
+> if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity -/
+
+/-- ★★★★★**素数で恒等なら `Ψ_N` も恒等**。
+
+★`F3-identity`(順序を保つ素数の全単射は恒等)と
+`psiN-extend`(素数の全単射 ⇒ `ℕ≥1 ≃* ℕ≥1`)を繋ぐ。 -/
+theorem pnatMulEquivOfPrimeEquiv_eq_self (σ : Nat.Primes ≃ Nat.Primes)
+    (hσ : ∀ p, σ p = p) (n : ℕ+) : pnatMulEquivOfPrimeEquiv σ n = n := by
+  show PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset n)) = n
+  rw [show (σ : Nat.Primes → Nat.Primes) = id from funext hσ, Multiset.map_id]
+  exact PNat.prod_factorMultiset n
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii)** の「非 group-like なら `Ψ_N` は恒等」。
+
+★順序を保つことだけから出る。 -/
+theorem psiN_eq_id_of_orderPreserve (σ : Nat.Primes ≃ Nat.Primes)
+    (hmono : ∀ {p q : Nat.Primes}, (p : ℕ) < (q : ℕ) → ((σ p : ℕ)) < ((σ q : ℕ)))
+    (n : ℕ+) : pnatMulEquivOfPrimeEquiv σ n = n :=
+  pnatMulEquivOfPrimeEquiv_eq_self σ (primeEquiv_eq_self σ hmono) n
+
+def psiN_eq_id_of_orderPreserve.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (iii) — 非 group-like なら Ψ_N は恒等",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

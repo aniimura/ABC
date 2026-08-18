@@ -8012,3 +8012,28 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 | 176 | 局所自明な `F` で同型 | 3 |
 | 177 | `InvSheaf` と `ofDivisor` | 2 |
 | 178+ | 3 法則と `isCartierDivisor_affine` | 6 |
+
+## §9-198 —— ★★★★★★★**評価射**(第 175 ブロック、2026-08-18)
+
+    evHom : F ⊗ (dualPresheaf F) ⟶ 𝟙_
+      app W = TensorProduct.lift (evBil F W)
+
+★★自然性は **`φ` の自然性そのもの**——`Over.homMk (homOfLE h)` に沿って取り
+`fVal x` を代入するだけで、残りは **`congrArg … hnat` 一発**(すべて defeq)。
+
+★★★第 173 の両側の橋(`fVal`)のおかげで
+`(F ⊗ F^∨).map` と `φ.app` の合成が**定義から一致**した。
+
+### 逃げ道
+
+| 症状 | 逃げ道 |
+|---|---|
+| `rw [ConcreteCategory.comp_apply]` が型検査で落ちる | ★`erw` |
+
+### 残り(B2)
+
+| 段 | 内容 | 見積 |
+|---|---|---|
+| 176 | 局所自明な `F` で `evHom` が同型 | 3 |
+| 177 | `InvSheaf` と `ofDivisor` | 2 |
+| 178+ | 3 法則と `isCartierDivisor_affine` | 6 |
