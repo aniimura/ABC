@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop22Star
+import ABC3.Found.FrdI.Def45
 
 /-!
 # [FrdI] Proposition 4.4, (iii) —— `Φ^birat` を `𝒟` 上の部分関手にする
@@ -523,12 +524,44 @@ def prop_4_8_i.src : ABC3.Meta.Source :=
 theorem trivialOn_isNonDilatingOn :
     MonoidOn.IsNonDilatingOn (trivialOn.{v, u, w} D) := by
   intro A e _
+  haveI : Subsingleton (MChar ((trivialOn.{v, u, w} D).val A)) := ⟨fun a b => by
+    induction a using AddCon.induction_on with | _ x =>
+    induction b using AddCon.induction_on with | _ y =>
+    exact congrArg _ (Subsingleton.elim (α := PUnit.{w + 1}) x y)⟩
   ext x
   exact Subsingleton.elim _ _
 
 def trivialOn_isNonDilatingOn.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (iii) — Φ が non-dilating",
+    sectionId := "frdi-prop-4-8" }
+
+/-! ## ★`Proposition 4.8, (iii)` の (a) と (c) -/
+
+/-- ★★**(c)** birationally Frobenius-normalized 型 ⇒ `𝒞^birat` は Frobenius-normalized 型。
+
+★`IsBirationallyFrobeniusNormalized` はそのまま `biratPre` 上の
+`IsFrobeniusNormalized` として定義されており、
+`BiratCat P G := C` なので**対象は同じ**。★したがって定義の展開だけで出る。 -/
+theorem birat_isOfFrobeniusNormalizedType
+    (h : IsOfBirationallyFrobeniusNormalizedType C P G) :
+    IsOfFrobeniusNormalizedType (biratPre P G) := h
+
+/-- ★★**(a) の後半** isotropic 型 ⇒ Frobenius-isotropic 型。
+
+★`𝟙 A` を Frobenius 型射に取ればよい。 -/
+theorem isOfFrobeniusIsotropicType_of_isotropic {C' : Type u2} [Category.{v2} C']
+    {P' : PreFrobenioid C' Φ} (h : IsOfIsotropicType P') :
+    IsOfFrobeniusIsotropicType P' :=
+  fun A => ⟨A, 𝟙 A, ⟨⟨isCoAngular_id P' A, by
+      show P'.Div (𝟙 A) = 0
+      exact P'.Div_id A⟩, by
+      show IsIso (P'.Base (𝟙 A))
+      rw [P'.Base_id]; infer_instance⟩, h A⟩
+
+def birat_isOfFrobeniusNormalizedType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — Frobenius-normalized 型",
     sectionId := "frdi-prop-4-8" }
 
 /-! ## ★出典の紐付け(条つき) -/

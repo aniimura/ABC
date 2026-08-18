@@ -849,20 +849,20 @@
         {
           "id": "iii-c-frobnorm",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "i-src"
           ],
           "title": "(c) Frobenius-normalized 型",
-          "note": "★rationally standard の (a) にある birationally Frobenius-normalized 型から。★`isFrobeniusNormalized_of_birat` が使える見込み。"
+          "note": "★rationally standard の (a) にある birationally Frobenius-normalized 型から。★`isFrobeniusNormalized_of_birat` が使える見込み。\n★済(2026-08-18): `birat_isOfFrobeniusNormalizedType`。★★`IsBirationallyFrobeniusNormalized` がそのまま `biratPre` 上の `IsFrobeniusNormalized` で、`BiratCat P G := C` なので**定義の展開だけ**で出た。"
         },
         {
           "id": "iii-de",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [],
           "title": "(d) 𝒟 の FSMFF / (e) Φ の non-dilating",
-          "note": "★(d) は**底の圧が変わらない**のでそのまま。★(e) は `𝒞^birat` の `Φ` が `trivialOn D`(全値 `PUnit`)なので**自明**。"
+          "note": "★(d) は**底の圧が変わらない**のでそのまま。★(e) は `𝒞^birat` の `Φ` が `trivialOn D`(全値 `PUnit`)なので**自明**。\n★済(2026-08-18): `trivialOn_isNonDilatingOn`。★実体は `MChar PUnit` が subsingleton であること 1 本。"
         },
         {
           "id": "iii-src",
