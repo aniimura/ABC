@@ -6015,3 +6015,23 @@ Lean は `⟶` の形を要求する(実測)。
 基本開集合での `restrictSec` の同定である。
 
 ★第 85 ブロック(`(tilde M)(D f) ≅ M_f`)がその橋になる。
+
+## §9-125 —— 局所化は全単射を保つ(第 112 ブロック、2026-08-24)
+
+    Function.Bijective h  ⟹  Function.Bijective (IsLocalizedModule.map S f g h)
+
+★mathlib の `map_injective` / `map_surjective` を束ねただけ。**一発。**
+
+★★これが「**生成元は制限しても生成元**」の中身である
+——`M_g ≅ R_g`(生成元 `s` の乗法)を `D(t·g)` へ制限すると
+`M_{t·g} ≅ R_{t·g}`(`s` の制限の乗法)になる。
+
+### ★★★局所自明性の連鎖(全部揃った)
+
+    第 76: M 可逆 ⟹ D(g) で M_g ≅ R_g
+      → 第 112: 局所化して M_h ≅ R_h(生成元の像で)
+      → 第 103: 生成元の乗法は全単射
+      → 第 108: unitHomOfSection の app が全単射
+      → 第 109/110/111: 被覆で全単射 ⟹ 𝟙_ ≅ (restrict V).obj M.val
+
+★★★★**残るのは `tilde M` の切断を取り出して当てはめる 1 ブロック**である。
