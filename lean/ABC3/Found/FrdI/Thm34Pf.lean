@@ -204,4 +204,123 @@ def homPfMap_toHomPf.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Ψ^pf は 𝒞 → 𝒞^pf と可換",
     sectionId := "frdi-thm-3-4" }
 
+/-! ### ★★3 脚版 —— `map_comp` のために -/
+
+/-- ★★★**`𝒞^{tri-Fr}` の間の関手** —— `biFrMap` の 3 脚版。 -/
+def triFrMap (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g)) :
+    TriFr P₁ F₁ ⥤ TriFr P₂ F₂ where
+  obj X := ⟨(Ψ.obj X.obj.1, Ψ.obj X.obj.2.1, Ψ.obj X.obj.2.2)⟩
+  map f := ⟨(Ψ.map f.hom.1, Ψ.map f.hom.2.1, Ψ.map f.hom.2.2),
+    hFT _ f.property.1, hFT _ f.property.2.1, hFT _ f.property.2.2.1,
+    hdegEq _ _ f.property.2.2.2.1, hdegEq _ _ f.property.2.2.2.2⟩
+  map_id X := WideSubcategory.hom_ext _
+    (Prod.ext (Ψ.map_id X.obj.1) (Prod.ext (Ψ.map_id X.obj.2.1) (Ψ.map_id X.obj.2.2)))
+  map_comp f g := WideSubcategory.hom_ext _
+    (Prod.ext (Ψ.map_comp f.hom.1 g.hom.1)
+      (Prod.ext (Ψ.map_comp f.hom.2.1 g.hom.2.1) (Ψ.map_comp f.hom.2.2 g.hom.2.2)))
+
+/-- ★★★**3 つ組の添字圏の間の関手**。 -/
+def idxPf3Map (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    (A B E : C₁) :
+    IdxPf3 P₁ F₁ A B E ⥤ IdxPf3 P₂ F₂ (Ψ.obj A) (Ψ.obj B) (Ψ.obj E) :=
+  Under.post (X := triFrObj P₁ F₁ A B E) (triFrMap F₁ F₂ Ψ hFT hdegEq)
+
+/-- ★★★★★**`map_comp`** —— 3 脚の共通代表元を取って `compPf_mk` を 2 回当てる。
+
+★★`idx12`/`idx23`/`idx13` はすべて `Under.post` なので、
+`biFrMap` との可換性は**成分ごとに `rfl`** である。 -/
+theorem homPfMap_compPf (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {A B E : C₁} (f : HomPf P₁ F₁ A B) (g : HomPf P₁ F₁ B E) :
+    homPfMap F₁ F₂ Ψ hFT hdegEq A E (compPf P₁ F₁ f g)
+      = compPf P₂ F₂ (homPfMap F₁ F₂ Ψ hFT hdegEq A B f)
+          (homPfMap F₁ F₂ Ψ hFT hdegEq B E g) := by
+  obtain ⟨V, φ, ψ, rfl, rfl⟩ := exists_rep3 f g
+  rw [compPf_mk V φ ψ, homPfMap_mk, homPfMap_mk, homPfMap_mk, Ψ.map_comp]
+  exact (compPf_mk ((idxPf3Map F₁ F₂ Ψ hFT hdegEq A B E).obj V) (Ψ.map φ) (Ψ.map ψ)).symm
+
+def homPfMap_compPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ^pf は合成を保つ",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★★★`Ψ^pf` —— 組み上げ
+
+原文 (FrdI p.64):
+> Definition 3.1, (iii)] that we obtain a 1-unique 1-commutative diagram as in the
+-/
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii)** —— `Ψ^pf : 𝒞₁^pf ⥤ 𝒞₂^pf`。
+
+★対象は `𝒞^pf` が `𝒞` と同じ型なのでそのまま、射は `homPfMap`。
+★関手則は `homPfMap_toHomPf`(単位)と `homPfMap_compPf`(合成)。 -/
+noncomputable def psiPf (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g)) :
+    PfCat P₁ F₁ ⥤ PfCat P₂ F₂ where
+  obj A := Ψ.obj (pfDown P₁ F₁ A)
+  map {A B} f := homPfMap F₁ F₂ Ψ hFT hdegEq (pfDown P₁ F₁ A) (pfDown P₁ F₁ B) f
+  map_id A := by
+    have h := homPfMap_toHomPf F₁ F₂ Ψ hFT hdegEq (𝟙 (pfDown P₁ F₁ A))
+    rw [Ψ.map_id] at h
+    exact h
+  map_comp f g := homPfMap_compPf F₁ F₂ Ψ hFT hdegEq f g
+
+/-- ★★★★**1-可換図式** —— `𝒞 → 𝒞^pf` の四角形。
+
+★★対象は定義的に一致するので**成分は恒等**で済み、
+自然性がちょうど `homPfMap_toHomPf` である。
+★原文の「1-commutative」は自然同型のことなので、これがその形。 -/
+noncomputable def psiPfSquare (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g)) :
+    toPfCat P₁ F₁ ⋙ psiPf F₁ F₂ Ψ hFT hdegEq ≅ Ψ ⋙ toPfCat P₂ F₂ :=
+  NatIso.ofComponents (fun _ => Iso.refl _) (fun {A B} φ => by
+    show compPf P₂ F₂ (homPfMap F₁ F₂ Ψ hFT hdegEq A B (toHomPf (F := F₁) φ))
+        (toHomPf (F := F₂) (𝟙 (Ψ.obj B)))
+      = compPf P₂ F₂ (toHomPf (F := F₂) (𝟙 (Ψ.obj A))) (toHomPf (F := F₂) (Ψ.map φ))
+    rw [homPfMap_toHomPf]
+    rw [show compPf P₂ F₂ (toHomPf (F := F₂) (Ψ.map φ)) (toHomPf (F := F₂) (𝟙 (Ψ.obj B)))
+        = toHomPf (F := F₂) (Ψ.map φ) from compPf_id_right _]
+    rw [show compPf P₂ F₂ (toHomPf (F := F₂) (𝟙 (Ψ.obj A))) (toHomPf (F := F₂) (Ψ.map φ))
+        = toHomPf (F := F₂) (Ψ.map φ) from compPf_id_left _])
+
+def psiPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ^pf の構成と 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★★★`Theorem 3.4, (iii)` —— 条として揃った
+
+原文 (FrdI p.62):
+> (iii) Suppose that: (a) C1, C2 are of standard type; (b) if C1, C2 are of group-
+
+★実装した部品(場所は `Thm34Quasi.lean` / `Thm34Pre.lean` / `Thm34EndBs.lean` / 本ファイル):
+
+| 主張 | 宣言 |
+|---|---|
+| `Ψ_{N≥1}` の存在((F1)(F2)(F3)＋連結性) | `exists_admissible_F1` / `admissible_of_hom` / `degFr_order_preserve` / `admissible_all_of_connected` |
+| 8 つの射のクラスの保存 | `isPrimeFrobComposite_map` / `isFrobeniusType_map_of_primeFrob` / `isLinear_map_iff_of_degMap` / `isBaseIsomorphism_map_of_classes` / `isCoAngular_map_of_equiv` / `isPullBack_map_of_equiv` / `isIsometric_map_of_classes` / `isLBInvertible_map_of_classes` |
+| 非 group-like なら `Ψ_{N≥1}` は恒等 | `psiN_eq_id_of_orderPreserve` |
+| `Ψ^pf` の構成 | `psiPf`(本ファイル) |
+| 1-可換図式 | `psiPfSquare`(本ファイル) |
+| 図式の合成関手は rigid | `isRigidFunctor_of_equivalence_comp` / `thm_3_4_iii_rigid` |
+
+★★★**`Ψ^pf` の構成が最後の 1 本**だった。余極限の移送は
+「`Ψ` が遷移写像と可換」(`idxTransport_map`)1 本に帰着し、
+それは `frobTransport_eq` の**一意性**から出た。 -/
+def thm_3_4_iii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62, item := "Theorem 3.4, (iii)",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
