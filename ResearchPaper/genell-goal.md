@@ -8065,3 +8065,31 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
     3. 局所条件で切り出した部分層は層(★第 150 と同じ形)
 
 ★★★★第 150(`idealSections_of_local`)で使った「局所条件 ⟹ 層」の型が再利用できる。
+
+## §9-200 —— B2 の残り 1 塊の設計を確定(2026-08-18)
+
+`InvSheaf.isInv`(`tensorModules carrier inv ≅ 𝒪`)に至る道は 2 本ある:
+
+| 道 | 内容 | 見積 |
+|---|---|---|
+| A | **双対が層であることを示す**(`inv := ⟨dualPresheaf F, 証明⟩`) | 4–8 |
+| B | 層化が局所同型を同型にすることを使う(`inv := sheafify dual`) | 3–4 |
+
+★**A を採る**——後段(評価射の層化、同型性)が素直になり、
+「Hom 前層は層」は**再利用できる結果**だからである。
+
+### A の筋
+
+    1. 型の Hom 前層は層(mathlib `Presheaf.IsSheaf.hom`、有る)
+    2. 加群の Hom は「線型性」という**局所条件**で切り出した部分前層
+    3. 局所条件で切り出した部分層は層(★第 150 と同じ形)
+
+★★あるいは `isSheafUniqueGluing` で直接:各 `W : Over U` について
+`W.left ⊓ Uᵢ` 上の値を `X.sheaf.existsUnique_gluing'` で貼る。
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–175 の 28 ブロック(フルビルド成功・ゲート PASS)
+      完了: イデアル層 → 層加群、Cartier ⟹ 局所自明、双対の前層、双対も局所自明、評価射
+      残り: 双対が層(4–8)→ 評価射の同型(3)→ InvSheaf・ofDivisor(2)→ 3 法則(6)

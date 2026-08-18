@@ -1104,4 +1104,30 @@ def psiN_eq_id_of_orderPreserve.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 非 group-like なら Ψ_N は恒等",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★素数の対応の全単射性 —— quasi-inverse で往復する
+
+原文 (FrdI p.64):
+> which [by considering a quasi-inverse to Ψ] is easily seen to be an automorphism.
+
+★★`Ψ` で `p₁ ↦ p₂`、`Ψ⁻¹` で `p₂ ↦ p₃` とすると `p₃ = p₁` になる。 -/
+
+/-- ★★★★**往復すると元に戻る**。
+
+★これが素数の対応が**全単射**であることの中核である。 -/
+theorem admissible_roundtrip (e : C₁ ≌ C₂) {p₁ p₂ p₃ : ℕ+} {A : C₁}
+    (h₁ : IsAdmissibleObj P₁ P₂ e.functor p₁ p₂ A)
+    (h₂ : IsAdmissibleObj P₂ P₁ e.inverse p₂ p₃ (e.functor.obj A))
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁)
+    (hdeg : P₁.degFr (e.inverse.map (e.functor.map α)) = P₁.degFr α) :
+    p₃ = p₁ := by
+  have hb := h₁ α hα hdα
+  have h := (h₂ (e.functor.map α) hb.1 hb.2).2
+  rw [hdeg, hdα] at h
+  exact h.symm
+
+def admissible_roundtrip.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — quasi-inverse で往復すると元に戻る",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
