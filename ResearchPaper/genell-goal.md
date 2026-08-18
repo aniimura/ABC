@@ -6521,3 +6521,38 @@ instance 検索が**別物として扱う**。
 
 ★第 57 で「制限の推移律は `rfl`」を測っておいたことが、
 **71 ブロック後**にここで効いた。★★旗を立てて測る方針の配当である。
+
+## §9-144 —— 組み立ての骨格は通った、切断の型で止まった(2026-08-24)
+
+### 通ったもの
+
+    refine isLocallyTrivial_of_pointwise _ (fun x => ?_)
+    obtain ⟨g, hxg, ⟨e⟩⟩ := exists_away_linearEquiv R M x
+    refine ⟨D g, hxg, ⟨?_⟩⟩
+
+★第 76 の `g ∉ x.asIdeal` が **`x ∈ D(g)` としてそのまま通る**(実測)。
+★★`trivialIsoOfSectionPresieve` の他の引数(層の仮定 2 つ)も通る。
+★★★`maxHeartbeats 2000000` が要る。
+
+### 止めた所
+
+切断 `generatorOf (sectionEquivScalar R M g e)` は
+`Γ(tilde M, D g)` 型だが、`trivialIsoOfSectionPresieve` は
+`((restrict (D g)).obj (tilde M).val).obj (op (Over.mk (𝟙 (D g))))` 型を要求する。
+
+★台は `rfl` で一致する(第 121)が、**`Module 𝒪(D g)` インスタンスが拾われない**。
+
+★★これは [[ring-instance-two-paths]] の **5 例目**である
+(環・加群・`Inhabited`・前層の 2 表示・**制限した前層の切断**)。
+
+### ★★★次の一手(記録)
+
+★第 125 で効いた手——**`letI` で `Module` と `IsScalarTower` を別々の経路から取る**
+——をここでも使う。
+★★具体的には `((restrict V).obj P).obj (op (Over.mk (𝟙 V)))` の
+`Module 𝒪(V)` を `P.obj (op V)` 側から `inferInstanceAs` で供給する。
+
+### ★★★★この session の到達(第 70–128、60 ブロック)
+
+★数学は**すべて済んでいる**。残るのは型の運搬で、
+その層を本 session で **5 枚**剥がした(うち 4 枚は完全に抜けた)。
