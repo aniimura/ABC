@@ -33,6 +33,20 @@ const S = {
   implicit: pick(/暗黙の段\(Gap 候補\)\s+(\d+) 件/),
 };
 
+// [FrdI] の原文項目の実装率。★ここも手で書かず tools/frdi-progress.mjs の出力から読む。
+const prog = sh('node tools/frdi-progress.mjs 2>&1 || true');
+const ppick = (re, d = '—') => { const m = prog.match(re); return m ? m[1].trim() : d; };
+const F = {
+  done: ppick(/必要分 (\d+) \/ \d+ 件/),
+  need: ppick(/必要分 \d+ \/ (\d+) 件/),
+  pct: ppick(/必要分 \d+ \/ \d+ 件 \((\d+)%\)/),
+  named: ppick(/直接名指し (\d+) 件/),
+  all: ppick(/FrdI 全 (\d+) 件/),
+  partial: ppick(/命題全体の `?\.src`? が無いもの (\d+) 件/),
+  sections: [...prog.matchAll(/^ {2}§(\d)\s+(\d+)\/\s*(\d+)/gm)]
+    .map((m) => ({ n: m[1], done: +m[2], need: +m[3] })),
+};
+
 const commits = sh('git log --pretty=format:%h%x09%ad%x09%s --date=short -n 12').trim().split('\n')
   .map((l) => { const [h, d, s] = l.split('\t'); return { h, d, s }; });
 const total = sh('git rev-list --count HEAD').trim();
@@ -96,6 +110,31 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 進捗として読むべきは<b>「着地した葉」と「暗黙の段」</b>の側。
 <code>Found/</code> と <code>Interface/</code> の <code>sorry</code> は 0 件、<code>axiom</code> は較正用の1ファイルを除き 0 件。</div>
 
+${F.sections.length ? `<h2>原文項目の実装率 —— [FrdI]「The Geometry of Frobenioids I」</h2>
+<div class="grid">
+  <div class="card ok"><div class="k">必要分の実装</div><div class="v">${F.done}/${F.need}</div></div>
+  <div class="card"><div class="k">達成率</div><div class="v">${F.pct}%</div></div>
+  <div class="card"><div class="k">直接名指し</div><div class="v">${F.named}</div></div>
+  <div class="card"><div class="k">FrdI 全項目</div><div class="v">${F.all}</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">${F.partial}</div></div>
+</div>
+<table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
+${F.sections.map((s) => {
+  const w = s.need ? Math.round((s.done / s.need) * 100) : 0;
+  const col = w === 100 ? '#1e7a52' : w >= 50 ? '#2f6fd0' : w > 0 ? '#c98a00' : '#c0392b';
+  return `<tr><td><b>§${s.n}</b></td><td style="font-variant-numeric:tabular-nums">${s.done}/${s.need}</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:${col};height:9px;border-radius:4px;width:${w}%"></div></div></td></tr>`;
+}).join('\n')}
+</table>
+<div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする ${F.named} 件の<u>推移閉包</u>である</b>
+(FrdI 全 ${F.all} 件のうち ${F.need} 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
+(i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
+(いま ${F.partial} 件が条つきのみ)。<br>
+<b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
+§3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
+<code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
+<code>node tools/frdi-blocked.mjs</code> で再現できる。</div>` : ''}
+
 <h2>依存グラフ(我々が写した範囲)</h2>
 <div class="grid">
   <div class="card"><div class="k">節点</div><div class="v">${S.nodes}</div></div>
@@ -143,13 +182,17 @@ ${esc(L0.notComplete.detail)}<br><br>
 <b>次:</b> ${esc(L0.notComplete.next)}</div>` : ''}
 
 <h2>原文の記載不備と、我々が足した前提</h2>
-<div class="note"><b>★この節は「原文をそのままでは形式化できなかった箇所」の一覧である。</b><br>
-3 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）、
+<div class="note"><b>★この節は「原文をそのままでは形式化できなかった箇所」と「原文から逸脱した箇所」の一覧である。</b><br>
+4 種類ある。<b>(A) 原文の記載が不備で、訂正が必要なもの</b>（我々は意図された主張を証明した）、
 <b>(B) 我々が前提を足したもの</b>（原文の主張そのものは未決着のまま）、
-<b>(C) 数学は標準的だが mathlib に在庫が無く、未実装のもの</b>（原典に瑕疵は無い）。
-<b>(A) だけを指標に数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。
+<b>(C) 数学は標準的だが mathlib に在庫が無く、未実装のもの</b>（原典に瑕疵は無い）、
+<b>(D) 原文より<u>弱い</u>仮定で述べたもの</b>（＝<b>安全側</b>の逸脱。原文の主張は我々の主張の<b>系</b>になる）。<br>
+<b>(A) と (D) を数えている。</b>(B) は数えていない——足した前提の下でしか証明できていないからである。
 (C) も数えていない——証明が無いからである。<b>★(C) を隠さず出すのは、
-「進捗が止まっている理由」が原典側なのか在庫側なのかを、読む側が判定できるようにするためである。</b></div>
+「進捗が止まっている理由」が原典側なのか在庫側なのかを、読む側が判定できるようにするためである。</b><br>
+★★<b>(D) を別立てにしたのは、(B) と向きが逆だからである</b>——(B) は原文を証明できていない、
+(D) は原文<b>より強いこと</b>を証明している。同じ「仮定をいじった」でも、
+読む側が引き受けるリスクが正反対なので、同じ欄に混ぜてはいけない。</div>
 <table><tr><th style="width:26%">項目</th><th style="width:52px">種別</th><th style="width:56px">数えたか</th><th>中身</th></tr>
 <tr><td><b>[FrdI] Proposition 2.1, (iii)</b></td><td><b style="color:#b3261e">A</b></td><td><b style="color:#1e7a52">数えた</b></td><td style="font-size:12px">
 <b>★原文の訂正が必要。</b>原文 p.44 は「Let d ∈N≥1.」で <code>d</code> を先に固定してから
@@ -173,14 +216,22 @@ ${esc(L0.notComplete.detail)}<br><br>
 律速は <code>plBkEquiv</code>（<code>(𝒞′^pl-bk)_A → 𝒟′_{A_𝒟}</code> が圏同値）の本質的全射性で、
 <b>数学は片付いている</b>（循環しないことも確認済み）が Lean の書き換えで打ち切った。
 したがって Prop 1.6 は「前提を足した」だけでなく<b>未実装の条を持つ</b>。</td></tr>
-<tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+<tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#b3261e">A</b>／<b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+<b>★★これが §3 を 8/9 で止めている唯一の原因である。</b>
 「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
 （<code>mono_of_frobType_of_unitTrivial</code>）。原文が課すのは
 「Φ は divisorial」「𝒟 は連結・totally epimorphic・FSMFF 型」「𝒞 は isotropic 型の Frobenioid」だけで、
 <b>unit-trivial は我々が足したものである</b>。<code>Definition 1.3, (vi)</code> が与えるのは
-<b>単元を除いた</b>忠実性だけで、unit-trivial はその単元をちょうど潰す。
-<b>★さらに (iii) にはもう 1 つ穴がある</b>——<code>hFrobFS</code> の側は
-<b>𝒪^× にどんな仮定を置いても埋まらず</b>、Φ の <code>d</code> 可除性（perfect 型）が要ると見ている（未証明）。</td></tr>
+<b>単元を除いた</b>忠実性だけで、unit-trivial はその単元をちょうど潰す。<br>
+★★<b>(iii) の <code>⟸</code> は <u>Definition 1.3 から出ない</u>ことを機械で確かめた</b>——
+捻れ積 <code>𝔽_ℕ ⋉ ∏ ℤ/n</code> が反例で、<code>Check/FrdI/TwistedFrobenioid.lean</code> にある。
+したがって分類は <b>③ sourceGap</b>（<code>Gap/FrdI/Section1.lean</code> の <code>Gap_1_14_iii</code>）。
+埋めるには原典の語彙 2 語が要る——<b>unit-trivial 型</b>（mono 用）と <b>Φ が perfect</b>（fiberwise 全射用）。<br>
+★<b>迂回路は 3 本とも塞がった</b>（2026-08-18 に検討）——<code>Prop 1.7, (iv)</code> 経由・準逆関手経由・
+既約 pre-step で鎖を作る。FSMI 鎖を<b>非有界</b>にできるのは<b>大きな素数次数の prime-Frobenius 射</b>だけで、
+そこがまさに穴である。<br>
+★これを消費するのが <code>Theorem 3.4, (ii)</code>（(i) は実装済み：<code>thm_3_4_i.src</code>）。
+<b>ゆえに §3 9/9 は、原典に忠実なままでは届かない。</b></td></tr>
 <tr><td><b>[FrdI] Proposition 4.4, (ii)</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
 <code>𝒞^birat</code> が Frobenioid であることを、<code>Definition 1.3</code> の 21 条のうち
 <b>20 条＋圏同値 <code>plBkEquiv</code> まで証明した</b>（<code>Found/FrdI/Prop44Core.lean</code>）。
@@ -189,7 +240,15 @@ ${esc(L0.notComplete.detail)}<br><br>
 原文 p.85 はここを「routine exercise」と書いて証明を置かない。
 <code>Remark 1.3.1</code> は可換性を (iii)(b),(c) から導くが、<b>その (c) が <code>otriBase</code> 自身なので循環している</b>。
 我々は <b><code>𝒪^▷(A)_𝒞</code> の像が中心に入るところまでは証明した</b>——
-足りないのは「その像と逆元が全体を生成する」ことだけである。
+足りないのは「その像と逆元が全体を生成する」ことだけである。<br>
+★★<b>2026-08-18 の前進</b>：スライス <code>(𝒞^coa-pre)_A</code> は<b>前順序</b>である
+（<code>coaPreOverFunctor</code> が忠実で、行き先 <code>Order</code> の hom が subsingleton）。
+ゆえに<b>持ち上げは一意</b>で、Ore の脚の一致 <code>α ≫ p&#39; = β ≫ p</code> は出る。
+<b>残る 1 段は <code>L(k≫f) ≫ g = L(k≫g) ≫ f</code></b>（<code>L</code> は <code>c</code> に沿った一意の持ち上げ）——
+これが <code>pairing-vanishes</code> の正体である。<br>
+★★<b>これが §4 を止めている</b>——<code>Theorem 4.2</code>／<code>Proposition 4.4</code>／
+<code>Proposition 4.8</code>／<code>Corollary 4.10</code>／<code>Corollary 4.11</code> の <b>5 件</b>が
+この 1 段の下流にある（<code>node tools/frdi-blocked.mjs</code>）。
 記録: <code>Gap/FrdI/Prop44.lean</code> の <code>Gap_4_4_ii_otriBase</code>（分類 ② missingMath、③ へ上がる条件つき）。</td></tr>
 <tr><td><b>[FrdI] Definition 2.8, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 <b>位相的有限生成な副有限アーベル群の pro-<code>l</code> 分解</b>（<code>M ≅ ∏_l M[l]</code>）が要る。
@@ -228,6 +287,28 @@ model Frobenioid が <b>pre-model 型</b>（base-Frobenius pair を持つ）で�
 ★分類は今のところ <b>① modelError</b>（我々の読み違いの線がまだ消えていない）。
 [IUTchIV] を含む他論文で同じ <code>≲</code> の用例を数えれば ③ sourceGap へ上がる。
 記録: <code>Gap/GenEll/BDDirection.lean</code> の <code>bdDirection</code>。</td></tr>
+<tr><td><b>[FrdI] Proposition 4.1, (i)〜(v)</b></td><td><b style="color:#1e7a52">D</b></td><td><b style="color:#1e7a52">数えた</b></td><td style="font-size:12px">
+<b>★原文より弱い仮定で述べた（安全側）。</b>原文 p.75 は「<code>𝒞</code> は perfect かつ isotropic 型」
+「<code>Φ</code> は perf-factorial」を<b>圏全体に</b>課すが、我々は各条が実際に触る
+<b>1 個の対象の底についてだけ</b>課している
+（<code>hperf : IsPerfectMonoid (Φ.val …)</code>、<code>H : IsPerfFactorialWith (Φ.val …) ι</code>）。
+<b>原文の主張は我々の主張の系になる</b>——含意を機械で確かめたのが
+<code>Found/FrdI/Prop41Cat.lean</code> の <code>isPerfectMonoid_of_perfectType</code>
+（中身は <code>Proposition 1.10, (iii)</code> そのもの）。<br>
+★もう 1 点。(iii) の「cartesian diagram <b>in the category of pre-steps</b>」は、
+pre-step のなす圏を新たに定義せず<b>その普遍性を具体的に書いた</b>
+（<code>prop_4_1_iii_cartesian</code>：任意の <code>V</code> からの 2 本に対する <code>∃!</code>）。
+スライスが前順序なので<b>一意性まで出ており、内容は落ちていない</b>。<br>
+★(iv)(v) の「<code>x ∉ p</code>」は「台 <code>≠ {p}</code>」と書いた。<b>同値であることは証明済み</b>
+（<code>Def24SuppElt.lean</code> の <code>suppElt_eq_singleton_toPrime</code>）。</td></tr>
+<tr><td><b>[FrdI] Definition 2.8, (ii)（スケルトン）</b></td><td><b style="color:#1e7a52">D</b></td><td>数えていない</td><td style="font-size:12px">
+<b>★原文より弱い仮定で述べた（安全側）。</b>原文は「topologically finitely generated」を仮定に置くが、
+pro-<code>l</code> 分解<b>そのもの</b>は可換な副有限群なら成り立つ（位相的有限生成は
+<code>Definition 2.8</code> の<b>他の部分</b>で効く）。そこで
+<code>Skeleton/FrdI/Def28ProL.lean</code> の <code>def_2_8_ii</code> は<b>可換性だけ</b>を仮定している。
+★<b>ただし証明は付いていない</b>（<code>sorry</code>）——上の (C) の行のとおり、
+mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数えていないのはそのため</b>で、
+弱めたこと自体が理由ではない。</td></tr>
 </table>
 
 <h2>いま分かっていること</h2>

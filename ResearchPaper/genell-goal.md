@@ -4895,3 +4895,25 @@ mathlib の証明を写経できる。
 | 84 | 層化の普遍性で `tensorModules (tilde M) (tilde N) ⟶ tilde (M ⊗ N)` |
 | 85 | 茎で同型(第 77・78・79 の器具)→ 同型 |
 | 86 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-87 —— 層の射になった(第 84 ブロック、2026-08-18)
+
+    tensorModules (tilde M) (tilde N)  ⟶  tilde (M ⊗_R N)
+
+★第 83 の前層射を `PresheafOfModules.sheafificationHomEquiv` で降ろした。**一発。**
+★★`restrictScalars (𝟙 _)` は**何もしない**(`rfl`、実測)ので余計な運搬は要らなかった。
+
+### ★★★残り 2 ブロック
+
+| # | 内容 | 器具 |
+|---|---|---|
+| 85 | 茎で同型 ⟹ `tildeTensorDesc` は同型 | ★第 77(茎で同型なら同型)・第 78(`tilde` の茎)・第 79(局所化とテンソル) |
+| 86 | `tilde M` が `InvSheaf` / `equivPicRing` | ★第 76(基本開集合で自由)・`tilde.fullyFaithfulFunctor` |
+
+★★★**第 85 の中身**:
+
+    茎(左) = 層化の茎 = 前層テンソルの茎     ← mathlib `stalkFunctor_map_unit_toSheafify_isIso`
+    茎(右) = (M ⊗_R N)_p                      ← 第 78
+    一致                                       ← 第 79 の `localizedTensorEquiv`
+
+★前層テンソルの茎が `M_p ⊗_{R_p} N_p` であることは、基本開集合が共終であることから出る。
