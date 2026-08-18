@@ -7209,3 +7209,18 @@ B2 の在庫を実測した結果:
 第 116(`symm_mem_over`)は**もともと一般**だったのでそのまま使えた。
 
 ★★★残るのは「`c ↦ c • s` が基本開集合上で全単射」——第 130 の再利用である。
+
+## §9-170 —— 切断と局所化加群の同型(第 156 ブロック、2026-08-18)
+
+★★★★★`tilde M` のときは第 118–127 の **10 ブロック**で `Γ(tilde M, D f) ≅ M_f` を作った。
+イデアル層では **mathlib の `Submodule.toLocalized'`** が同じ役割を果たすので、
+第 153 と合わせて **1 ブロック**で出た。
+
+| 宣言 | 内容 | `tilde` 版 |
+|---|---|---|
+| `idealAwayEquiv` | `I_f ≅ idealSections D (D f)` | 第 118 |
+| `awayRingEquivX` | `Γ(X,D f) ≃ₐ Localization (powers f)` | 第 124 |
+| `modOnLocalizedX` | `I_f` への `Γ(X,D f)` 作用 | 第 124 |
+
+★★これが §9-157 の「測ってから作る」の 3 例目である——
+`Submodule.toLocalized'` を先に探したので 9 ブロック節約できた。

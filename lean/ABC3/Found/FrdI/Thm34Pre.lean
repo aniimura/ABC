@@ -632,6 +632,43 @@ theorem primeFrobDivId_map_iff (e : C₁ ≌ C₂)
   exact primeFrobCond_map_iff P₁ P₂ e hps hps' φ
 
 include P₁ P₂ in
+/-! ## ★★(F1) の非 group-like の場合の中核
+
+原文 (FrdI p.65):
+> exists a base-identity [hence Div-identity] p1-Frobenius endomorphism φ
+
+★原典は base-identity な p₁-Frobenius 自己射を取って、
+`Proposition 1.14, (v)` の特徴づけで像も prime-Frobenius になることを出す。 -/
+
+/-- ★★★★**base-identity な prime-Frobenius 自己射は像も prime-Frobenius**。
+
+★`¬ IsPreStep` は**次数が素数だから**自動で出る(1 は素数でない)。 -/
+theorem primeFrob_baseId_map (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    {A : C₁} (hA : ¬ IsGroupLikeObj P₁ A)
+    (hA₂ : ¬ IsGroupLikeObj P₂ (e.functor.obj A))
+    (φ : A ⟶ A) (hirr : IsIrreducibleMor φ)
+    (hpf : IsPrimeFrobenius P₁ φ) (hbid : IsBaseIdentity P₁ φ) :
+    IsPrimeFrobenius P₂ (e.functor.map φ) := by
+  have hnps : ¬ IsPreStep P₁ φ := by
+    intro h
+    have h1 : P₁.degFr φ = 1 := h.1
+    have h2 := hpf.2
+    rw [h1] at h2
+    exact Nat.not_prime_one (by simpa using h2)
+  exact ((primeFrobDivId_map_iff P₁ P₂ e F₁ G₁ hiso₁ hnd₁ F₂ G₂ hiso₂ hnd₂
+    hps hps' hA hA₂ φ hirr hnps).mp ⟨hpf, isDivIdentity_of_isBaseIdentity P₁ hbid⟩).1
+
+def primeFrob_baseId_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F1) — base-identity な prime-Frobenius 自己射の像",
+    sectionId := "frdi-thm-3-4" }
+
 /-- ★★`hA₂` を `isGroupLikeObj_map_iff` から導いた形。 -/
 theorem primeFrobDivId_map_iff' (e : C₁ ≌ C₂)
     (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
