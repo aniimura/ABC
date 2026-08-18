@@ -836,13 +836,13 @@
         },
         {
           "id": "F3-order-char",
-          "size": "中",
-          "status": "todo",
+          "size": "小",
+          "status": "done",
           "deps": [
             "F3-order-monoid"
           ],
           "title": "(F3) 次数の大小の圧倒的特徴づけ",
-          "note": "★★★**原典の要**(FrdI p.65、2026-08-18 精読):\n> the condition “degFr(ζ1) < degFr(θ1)” is equivalent to the following condition:\n> If we write βζ1 (respectively, βθ1) for the step “β ∘ α” of Proposition 1.14,\n> (v) … then βθ1 = γ1 ∘ βζ1, for some step γ1.\n\n★つまり「次数の大小」を `Proposition 1.14, (v)` の step `β ∘ α` の**分解可能性**として圧倒的に言い換える。\n★使うのは `Definition 1.3, (iii)(d)` の第 1 の圧倒的同値と `Proposition 1.10, (i)`。\n★在庫: `prop_1_14_v`(実装済)、`coaPreUnderEquiv`(実装済)、`prop_1_10_i_exists`(実装済)。\n\n## ★★形を測った(2026-08-18)\n`prop_1_14_v`(実装済、`Prop114.lean:1648`)の右辺は:\n> ∀ (B) (α : A ⟶ B), IsStep α → ∃ (B') (ψ β : B ⟶ B'), … ∧ IsStep β ∧ α ≫ ψ = φ ≫ α ≫ β\n★原典の「step `β ∘ α`」はこの **`α ≫ β : A ⟶ B'`** のことである。\n\n★★★**実体は `Div` の計算**である: 次数 d の Frobenius 型 `φ` と `Div α = a` なる step に対し、誘導される step の `Div` が **d に依存して単調に増える**ことを示す必要がある。\n★それが「`β_θ = γ ∘ β_ζ` となる step `γ` がある」という**分解可能性**として圧倒的に見える。\n★使えそうな在庫: `Div_comp`(`Remark 1.1.1`)、`coaPreUnderEquiv`(`Definition 1.3, (iii)(d)` の第 1 の圧倒的同値)。\n★★**ここが (iii) の最後の大きな块**である。\n\n★★**中核は `F3-order-monoid` で取った**(2026-08-18)。\n★残るのは `prop_1_14_v_mp` から `Div α' = d • Div α` を取り出し、`coaPre_factor_under_of_mle`(`prop_1_14_v_mp` が使っている)でstep の分解に戻す段である。★見積りを ★大 → ★中 に下げた。"
+          "note": "★★★**原典の要**(FrdI p.65、2026-08-18 精読):\n> the condition “degFr(ζ1) < degFr(θ1)” is equivalent to the following condition:\n> If we write βζ1 (respectively, βθ1) for the step “β ∘ α” of Proposition 1.14,\n> (v) … then βθ1 = γ1 ∘ βζ1, for some step γ1.\n\n★つまり「次数の大小」を `Proposition 1.14, (v)` の step `β ∘ α` の**分解可能性**として圧倒的に言い換える。\n★使うのは `Definition 1.3, (iii)(d)` の第 1 の圧倒的同値と `Proposition 1.10, (i)`。\n★在庫: `prop_1_14_v`(実装済)、`coaPreUnderEquiv`(実装済)、`prop_1_10_i_exists`(実装済)。\n\n## ★★形を測った(2026-08-18)\n`prop_1_14_v`(実装済、`Prop114.lean:1648`)の右辺は:\n> ∀ (B) (α : A ⟶ B), IsStep α → ∃ (B') (ψ β : B ⟶ B'), … ∧ IsStep β ∧ α ≫ ψ = φ ≫ α ≫ β\n★原典の「step `β ∘ α`」はこの **`α ≫ β : A ⟶ B'`** のことである。\n\n★★★**実体は `Div` の計算**である: 次数 d の Frobenius 型 `φ` と `Div α = a` なる step に対し、誘導される step の `Div` が **d に依存して単調に増える**ことを示す必要がある。\n★それが「`β_θ = γ ∘ β_ζ` となる step `γ` がある」という**分解可能性**として圧倒的に見える。\n★使えそうな在庫: `Div_comp`(`Remark 1.1.1`)、`coaPreUnderEquiv`(`Definition 1.3, (iii)(d)` の第 1 の圧倒的同値)。\n★★**ここが (iii) の最後の大きな块**である。\n\n★★**中核は `F3-order-monoid` で取った**(2026-08-18)。\n★残るのは `prop_1_14_v_mp` から `Div α' = d • Div α` を取り出し、`coaPre_factor_under_of_mle`(`prop_1_14_v_mp` が使っている)でstep の分解に戻す段である。★見積りを ★大 → ★中 に下げた。\n\n## ★★★済(2026-08-18)\n`Thm34Quasi.lean` の `step_mle_iff_degFr_le` ——\n**step の分解可能性 ⇔ 次数の大小**。\n★`nsmul_mle_nsmul_iff`(単系の中核)と `Div α ≠ 0`(step かつ isotropic)だけで出た。\n★★見積りの推移: ★大 → ★中 → ★小。"
         },
         {
           "id": "F3-order-preserve",

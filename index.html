@@ -33,14 +33,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 1059 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 1062 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5282</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5285</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1442</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>2d0b272</code></td><td>2026-08-18</td><td>双対が層であることの在庫を実測(§9-191)</td></tr>
+<tr><td><code>60e2caf</code></td><td>2026-08-18</td><td>★★★★★★★★双対の前層(第 169、§9-190)</td></tr>
+<tr><td><code>fb95289</code></td><td>2026-08-18</td><td>★★★(F3) の順序の中核を取った——`Div α' = d • Div α` が鍵だった</td></tr>
 <tr><td><code>18c4c3e</code></td><td>2026-08-18</td><td>双対の前層——eta の壁と索引付けの設計(§9-189)</td></tr>
 <tr><td><code>33cc997</code></td><td>2026-08-18</td><td>`F3-order-char` の形を測った——実体は `Div` の計算</td></tr>
 <tr><td><code>2cc4c4e</code></td><td>2026-08-18</td><td>(F3) の数論的な段を閉じた——順序を保つ素数の全単射は恒等</td></tr>
@@ -290,9 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>08f9fdb</code></td><td>2026-08-18</td><td>★★★★★[FrdI] Theorem 3.4, (iii) の (F2) を閉じた——場合分けは不要だった</td></tr>
 <tr><td><code>d81a1c6</code></td><td>2026-08-18</td><td>双対の前層で詰まっている点を記録(§9-186)</td></tr>
 <tr><td><code>dcfd633</code></td><td>2026-08-18</td><td>★★★★★★制限の半線型性(第 168、§9-185)</td></tr>
-<tr><td><code>f7648a2</code></td><td>2026-08-18</td><td>双対の作用は合成(第 167、§9-184)</td></tr>
-<tr><td><code>ade0d5e</code></td><td>2026-08-18</td><td>(F2) を束ねる段で向きの問題を見つけた——両向きを作れば消える</td></tr>
-<tr><td><code>e4087b2</code></td><td>2026-08-18</td><td>★★★★(F2) の 3 成分がすべて揃った——残るは束ねる作業だけ</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
