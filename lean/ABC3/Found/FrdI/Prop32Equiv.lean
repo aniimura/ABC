@@ -288,6 +288,144 @@ theorem rootDiv_mk_sameRoot {A B : C} {r : ℕ+}
     (Pf.mk (Φ.map (P.Base Z.hom.hom.1) (P.Div φ)) (repRoot Z))) = _
   rw [Pf.map_mk, Pf.divBy_mk]
 
+/-! ## ★5. (iii)(d) 前置の充満性(同根の場合)
+
+★★**手**(4 段):
+
+1. `rtRootIso` で根 `r` を `r·r` へ上げ、`exists_rep3_span_isotropic` で
+   **2 射を同じ 3 脚添字の上に**、しかも**第 1 脚が isotropic** になるように揃える。
+   ★isotropic にしておくと `𝒞` の側で **pre-step が自動的に co-angular** になる
+   (`isCoAngular_of_isotropic_dom`)——`𝒞` の (iii)(d) に渡すのにこれが要る。
+2. 因子は**分母も分子の写像も一致する**(`rootDiv_rtRootIso_mk`)ので、
+   `Pf` の `≼` から代表元の `≼` へ降りる(`mle_div_of_mle_pf`)。
+3. `𝒞` の (iii)(d) の**充満性**を第 1 脚の対象で当てて `m₀` を得る。
+4. `compRoot_mk3` で `𝒞^pf` へ戻す。 -/
+
+-- ★`exists_idx3_isotropic`(3 脚添字を isotropic な代表へ押し上げる)は
+-- `Prop32Frob.lean` に既にある。ここではそれを使う。
+
+/-- ★★**始域を共有する 2 射を、isotropic な代表を持つ同じ 3 脚添字へ**。 -/
+theorem exists_rep3_span_isotropic (hfi : IsOfFrobeniusIsotropicType P) {A B E : C}
+    (f : HomPf P F A B) (g : HomPf P F A E) :
+    ∃ (V : IdxPf3 P F A B E) (φ : V.right.obj.1 ⟶ V.right.obj.2.1)
+      (ψ : V.right.obj.1 ⟶ V.right.obj.2.2),
+      IsIsotropic P V.right.obj.1 ∧
+      f = HomPf.mk ((idx12 P F A B E).obj V) φ ∧
+      g = HomPf.mk ((idx13 P F A B E).obj V) ψ := by
+  obtain ⟨V₀, φ₀, ψ₀, hf₀, hg₀⟩ := exists_rep3_span (P := P) (F := F) f g
+  obtain ⟨V, u, hV⟩ := exists_idx3_isotropic (F := F) hfi V₀
+  refine ⟨V, idxTransport P F ((idx12 P F A B E).map u) φ₀,
+    idxTransport P F ((idx13 P F A B E).map u) ψ₀, hV, ?_, ?_⟩
+  · rw [hf₀]
+    exact (HomPf.mk_map ((idx12 P F A B E).map u) φ₀).symm
+  · rw [hg₀]
+    exact (HomPf.mk_map ((idx13 P F A B E).map u) ψ₀).symm
+
+set_option maxHeartbeats 1000000 in
+/-- ★★**充満性の算術** —— `Pf` の `≼` を代表元の `≼` に降ろす。
+
+★3 段: `Pf.mle_num_of_mle`(分子の `k` 倍まで)→ `mle_of_map_mle` を 2 回
+(2 つの底はいずれも Frobenius 型射の底なので同型)→ `mle_of_nsmul_mle`
+(divisorial の saturated ＋ integral)。 -/
+theorem mle_div_of_mle_pf {A B₁ B₂ : C} {r : ℕ+}
+    (V : IdxPf3 P F (rtObj P F A (r*r)) (rtObj P F B₁ (r*r)) (rtObj P F B₂ (r*r)))
+    (f : V.right.obj.1 ⟶ V.right.obj.2.1) (g : V.right.obj.1 ⟶ V.right.obj.2.2)
+    (hle : MLe
+      (Pf.mk (Φ.map (P.Base (rtExt P F A (r * r))) (Φ.map (P.Base V.hom.hom.1) (P.Div f)))
+        (r * r * (P.degFr V.hom.hom.1 * r)))
+      (Pf.mk (Φ.map (P.Base (rtExt P F A (r * r))) (Φ.map (P.Base V.hom.hom.1) (P.Div g)))
+        (r * r * (P.degFr V.hom.hom.1 * r)))) :
+    MLe (P.Div f) (P.Div g) := by
+  haveI h1 : IsIso (P.Base (rtExt P F A (r*r))) := (rtExt_frobType P F A (r*r)).2
+  haveI h2 : IsIso (P.Base V.hom.hom.1) := V.hom.property.1.2
+  obtain ⟨k, hk⟩ := Pf.mle_num_of_mle hle
+  rw [← map_nsmul, ← map_nsmul] at hk
+  have hk2 := mle_of_map_mle Φ (P.Base (rtExt P F A (r*r))) h1 hk
+  have hk2' : MLe (Φ.map (P.Base V.hom.hom.1) (((k : ℕ+) : ℕ) • P.Div f))
+      (Φ.map (P.Base V.hom.hom.1) (((k : ℕ+) : ℕ) • P.Div g)) := by
+    rw [map_nsmul, map_nsmul]
+    exact hk2
+  exact mle_of_nsmul_mle (P.divisorial _).1.2.1 (P.divisorial _).1.1 k.2
+    (mle_of_map_mle Φ (P.Base V.hom.hom.1) h2 hk2')
+
+set_option maxHeartbeats 2000000 in
+/-- ★★★**(iii)(d) 前置の充満性(同根の場合)**。 -/
+theorem pfRoot_coaPreUnder_full_sameRoot (hfi : IsOfFrobeniusIsotropicType P) (G : Frobenioid P)
+    {A B₁ B₂ : C} {r : ℕ+}
+    (φ : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B₁, r⟩) (ψ : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨B₂, r⟩)
+    (hφs : IsPreStep (pfRootPre P F) φ) (hψs : IsPreStep (pfRootPre P F) ψ)
+    (hle : MLe ((pfRootPre P F).Div φ) ((pfRootPre P F).Div ψ)) :
+    ∃ m : (⟨B₁, r⟩ : PfRootObj P F) ⟶ ⟨B₂, r⟩,
+      IsPreStep (pfRootPre P F) m ∧ φ ≫ m = ψ := by
+  obtain ⟨V, f, g, hViso, hf, hg⟩ := exists_rep3_span_isotropic (F := F) hfi
+    ((rtRootIso P F A B₁ (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv φ)
+    ((rtRootIso P F A B₂ (show r * r = r * r from rfl) (show r * r = r * r from rfl)).inv ψ)
+  have hφmk : φ = (rtRootIso P F A B₁ (show r * r = r * r from rfl)
+      (show r * r = r * r from rfl)).hom (HomPf.mk ((idx12 P F _ _ _).obj V) f) := by
+    rw [← hf, Iso.inv_hom_id_apply]
+  have hψmk : ψ = (rtRootIso P F A B₂ (show r * r = r * r from rfl)
+      (show r * r = r * r from rfl)).hom (HomPf.mk ((idx13 P F _ _ _).obj V) g) := by
+    rw [← hg, Iso.inv_hom_id_apply]
+  have hfs : IsPreStep P f := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B₁, r⟩ : PfRootObj P F))
+      ((pushIdx (F := F) (rtLift P F A (show r * r = r * r from rfl))
+        (rtLift_frobType P F A _) (rtLift P F B₁ (show r * r = r * r from rfl))
+        (rtLift_frobType P F B₁ _) (by rw [rtLift_degFr, rtLift_degFr])).obj
+          ((idx12 P F _ _ _).obj V)) f).mp ?_
+    rw [hφmk, rtRootIso_hom_mk] at hφs
+    exact hφs
+  have hgs : IsPreStep P g := by
+    refine (isPreStep_mk_iff (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B₂, r⟩ : PfRootObj P F))
+      ((pushIdx (F := F) (rtLift P F A (show r * r = r * r from rfl))
+        (rtLift_frobType P F A _) (rtLift P F B₂ (show r * r = r * r from rfl))
+        (rtLift_frobType P F B₂ _) (by rw [rtLift_degFr, rtLift_degFr])).obj
+          ((idx13 P F _ _ _).obj V)) g).mp ?_
+    rw [hψmk, rtRootIso_hom_mk] at hψs
+    exact hψs
+  have hfc : IsCoAngular P f := isCoAngular_of_isotropic_dom (P := P) F hViso f
+  have hgc : IsCoAngular P g := isCoAngular_of_isotropic_dom (P := P) F hViso g
+  have hdivφ : (pfRootPre P F).Div φ
+      = Pf.mk (Φ.map (P.Base (rtExt P F A (r * r))) (Φ.map (P.Base V.hom.hom.1) (P.Div f)))
+          (r * r * (P.degFr V.hom.hom.1 * r)) := by
+    rw [hφmk]
+    exact rootDiv_rtRootIso_mk (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B₁, r⟩ : PfRootObj P F))
+      (show r * r = r * r from rfl) (show r * r = r * r from rfl) ((idx12 P F _ _ _).obj V) f
+  have hdivψ : (pfRootPre P F).Div ψ
+      = Pf.mk (Φ.map (P.Base (rtExt P F A (r * r))) (Φ.map (P.Base V.hom.hom.1) (P.Div g)))
+          (r * r * (P.degFr V.hom.hom.1 * r)) := by
+    rw [hψmk]
+    exact rootDiv_rtRootIso_mk (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B₂, r⟩ : PfRootObj P F))
+      (show r * r = r * r from rfl) (show r * r = r * r from rfl) ((idx13 P F _ _ _).obj V) g
+  rw [hdivφ, hdivψ] at hle
+  have hmle : MLe (P.Div f) (P.Div g) := mle_div_of_mle_pf V f g hle
+  letI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv V.right.obj.1
+  obtain ⟨uu, -⟩ := (coaPreUnderFunctor P V.right.obj.1).map_surjective
+    (show (coaPreUnderFunctor P V.right.obj.1).obj
+        (Under.mk (show (⟨V.right.obj.1⟩ : WideSubcategory (coaPreProp P))
+          ⟶ ⟨V.right.obj.2.1⟩ from ⟨f, hfc, hfs⟩))
+      ⟶ (coaPreUnderFunctor P V.right.obj.1).obj
+        (Under.mk (show (⟨V.right.obj.1⟩ : WideSubcategory (coaPreProp P))
+          ⟶ ⟨V.right.obj.2.2⟩ from ⟨g, hgc, hgs⟩))
+      from homOfLE hmle)
+  have hcomp : f ≫ uu.right.hom = g := congrArg InducedWideCategory.Hom.hom (Under.w uu)
+  refine ⟨(rtRootIso P F B₁ B₂ (show r * r = r * r from rfl)
+      (show r * r = r * r from rfl)).hom (HomPf.mk ((idx23 P F _ _ _).obj V) uu.right.hom), ?_, ?_⟩
+  · rw [rtRootIso_hom_mk]
+    exact (isPreStep_mk_iff (X := (⟨B₁, r⟩ : PfRootObj P F)) (Y := (⟨B₂, r⟩ : PfRootObj P F))
+      ((pushIdx (F := F) (rtLift P F B₁ (show r * r = r * r from rfl))
+        (rtLift_frobType P F B₁ _) (rtLift P F B₂ (show r * r = r * r from rfl))
+        (rtLift_frobType P F B₂ _) (by rw [rtLift_degFr, rtLift_degFr])).obj
+          ((idx23 P F _ _ _).obj V)) uu.right.hom).mpr uu.right.property.2
+  · rw [hφmk, hψmk]
+    refine Eq.trans ?_ (congrArg (fun t : V.right.obj.1 ⟶ V.right.obj.2.2 =>
+      (rtRootIso P F A B₂ (show r * r = r * r from rfl)
+        (show r * r = r * r from rfl)).hom (HomPf.mk ((idx13 P F _ _ _).obj V) t)) hcomp)
+    exact compRoot_mk3 (X := (⟨A, r⟩ : PfRootObj P F)) (Y := (⟨B₁, r⟩ : PfRootObj P F))
+      (Z := (⟨B₂, r⟩ : PfRootObj P F)) V.hom.hom.1 V.hom.hom.2.1 V.hom.hom.2.2
+      V.hom.property.1 V.hom.property.2.1 V.hom.property.2.2.1
+      V.hom.property.2.2.2.1 V.hom.property.2.2.2.2 f uu.right.hom
+
 end SameRoot
 
 /-! ## ★出典の紐付け(条つき) -/
