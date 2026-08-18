@@ -7400,3 +7400,45 @@ B2 の在庫を実測した結果:
 
 ★★その後、制限(第 57 の `restrict_trans` が `rfl` なのでそのまま)、
 層であること、評価射 `F ⊗ F^∨ → 𝒪` の同型性(第 115 の器具)。
+
+## §9-177 —— 双対の加群構造への道筋(2026-08-18、実測)
+
+★★★★★mathlib に **`CategoryTheory.Preadditive.moduleEndRight : Module (End Y) (X ⟶ Y)`** があった。
+
+★したがって `Hom(F|_U, 𝟙_)` は `End(𝟙_)` 加群である。
+あとは環同型 `End(𝟙_) ≃+* Γ(X,U)` を作って `Module.compHom` を通せばよい。
+
+### 評価環準同型の状況
+
+    unitEnd : End (𝟙_ (PresheafModulesOn X U)) →+* Γ(X, U)
+      φ ↦ (φ.app (op (Over.mk (𝟙 U)))).hom 1
+
+| 欄 | 状態 |
+|---|---|
+| `map_one'` / `map_zero'` / `map_add'` | ★**`rfl`** |
+| `map_mul'` | ★**綴りの橋が要る**(下記) |
+
+### ★★★詰まっている点——`(𝟙_).obj t` の環構造
+
+`(𝟙_ (PresheafModulesOn X U)).obj (op (Over.mk (𝟙 U)))` の台は `Γ(X,U)` だが、
+**`Mul` も `HSMul` も `CommRingCat` 綴りでは見つからない**
+——`ModuleCat` の係数環が `RingCat` 綴りだからである。
+
+★[[ring-instance-two-paths]] の 9 例目。逃げ道の候補:
+
+    letI : CommRing ((𝟙_ (PresheafModulesOn X U)).obj (op (Over.mk (𝟙 U))) : Type u) :=
+      inferInstanceAs (CommRing (Γ(X, U) : Type u))
+
+★★これを **1 箇所に置いて**以降の証明で使い回すのが良い(本 session の教訓:
+綴りの橋は**定義の近く**に置くと効く、§9-173)。
+
+### 残りの工程(B2)
+
+| 段 | 内容 | 見積 |
+|---|---|---|
+| 164 | `unitEnd` の `map_mul'` と `RingEquiv` | 2 |
+| 165 | 双対の前層(`Module.compHom` + 制限) | 3 |
+| 166 | 双対が層であること | 2 |
+| 167 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 | 4 |
+| 168 | `InvSheaf` と `ofDivisor` | 2 |
+| 169+ | 積・引き戻し・自明性の 3 法則、`isCartierDivisor_affine` | 6 |

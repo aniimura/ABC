@@ -47,7 +47,7 @@ variable {X : Scheme.{u}} (U : X.Opens)
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
 
 ★第 108 の `unitHomOfSection` を `P := 𝟙_` に当てたものである。 -/
-noncomputable def unitMul (c : ((𝟙_ (PresheafModulesOn X U)).obj (op (Over.mk (𝟙 U))) : Type u)) :
+noncomputable def unitMul (c : (Γ(X, U) : Type u)) :
     𝟙_ (PresheafModulesOn X U) ⟶ 𝟙_ (PresheafModulesOn X U) :=
   unitHomOfSection U (𝟙_ (PresheafModulesOn X U)) c
 

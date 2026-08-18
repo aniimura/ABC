@@ -492,4 +492,46 @@ def exists_admissible_of_groupLike.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F1) — group-like の場合",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★(F1) 全体
+
+原文 (FrdI p.64):
+> (p1, p2)-admissible object of C1. -/
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii) の (F1)** ——
+**各素数 `p₁` に対し、ある素数 `p₂` と `(p₁,p₂)-admissible` な対象がある**。
+
+★group-like か否かで場分けする。非 group-like 側では
+`baseSurj` で Frobenius-trivial な対象を作り、
+`isGroupLikeObj_of_baseIsoD` で非 group-like 性を運ぶ。 -/
+theorem exists_admissible_F1 (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    (hbiso : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f → IsBaseIsomorphism P₂ (e.functor.map f))
+    (hglmap : ∀ X : C₁, IsGroupLikeObj P₁ X ↔ IsGroupLikeObj P₂ (e.functor.obj X))
+    (hglty : IsOfGroupLikeType P₁ → IsOfGroupLikeType P₂)
+    (A₀ : C₁) {p₁ : ℕ+} (hp₁ : Nat.Prime ((p₁ : ℕ+) : ℕ)) :
+    ∃ (p₂ : ℕ+) (A : C₁), IsAdmissibleObj P₁ P₂ e.functor p₁ p₂ A := by
+  by_cases hgl : ∀ X : C₁, IsGroupLikeObj P₁ X
+  · obtain ⟨p₂, hp₂⟩ := exists_admissible_of_groupLike e F₁ G₁ hiso₁ hgl G₂ hiso₂
+      (hglty hgl) hbiso A₀ hp₁
+    exact ⟨p₂, A₀, hp₂⟩
+  · push Not at hgl
+    obtain ⟨X₀, hX₀⟩ := hgl
+    obtain ⟨A, hft, ⟨α⟩⟩ := F₁.baseSurj (P₁.toElem.obj X₀).base
+    have hA : ¬ IsGroupLikeObj P₁ A := fun h =>
+      hX₀ (isGroupLikeObj_of_baseIsoD P₁ α h)
+    obtain ⟨p₂, hp₂⟩ := exists_admissible_of_frobTrivial e F₁ G₁ hiso₁ hnd₁
+      F₂ G₂ hiso₂ hnd₂ hps hps' hft hA (fun h => hA ((hglmap A).mpr h)) hp₁
+    exact ⟨p₂, A, hp₂⟩
+
+def exists_admissible_F1.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — (F1)",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
