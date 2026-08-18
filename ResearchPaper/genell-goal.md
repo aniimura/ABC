@@ -4447,3 +4447,21 @@ mathlib には無い。★★**我々が作る**。
 §9-69 は `equivPicRing` を「約 20 ブロック」と見た。
 ★★第 74・75 で比較射が建ち、道具の在庫も測れたので、**残り 8–12** に下がる。
 ★★★B1 の総計は **約 85**(§9-69 の 95 から下方修正)。
+
+## §9-73 —— ★★局所全単射の器具は**universe で詰まった**(2026-08-18 実測)
+
+`Sheaf.isLocallyBijective_iff_isIso`(局所単射 ∧ 局所全射 ⟺ 同型)は mathlib にある。
+★これを `SheafOfModules` に持ち込むには `SheafOfModules.toSheaf` が
+同型を反射することが要る。
+
+★★**その instance は mathlib の `Presheaf/Sheafification.lean` の中にあり、
+`[Presheaf.IsLocallyInjective J α]` 等の仮定つきの `variable` ブロックの内側にある**
+——外からは見えない。
+
+★★★手で作り直した(`reflectsIsomorphisms_of_comp` 経由、証明自体は通る)が、
+**instance 検索が拾わない**。3 度試して同じ失敗——`toSheaf.{v}` の universe が
+`isLocallyBijective_iff_isIso` が要求するものと違うと見る(未確定)。
+
+★★★★**深追いを止める。**同じ結論は我々の第 15–17 ブロック
+(`isIso_restrictMap_sheafifyUnit`——制限が層なら層化の unit は同型)で出せる。
+★次はそちらで組む——器具は既に 3 度動いている。
