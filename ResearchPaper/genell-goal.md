@@ -5219,3 +5219,37 @@ mathlib の証明を写経できる。
 
 ★§9-95 で「残り 5–7」と見たが、局所化の推移だけで既に 3 ブロック(第 94・95 +第 5 段)
 を使っている。★★**残り 4 ブロック**と見る。
+
+## §9-99 —— 第 5 段は mathlib の向きと逆だった(2026-08-18 実測)
+
+欲しいのは
+
+    IsLocalization.Away (algebraMap R R_g t) R_{t·g}
+
+だが、mathlib の在庫は**すべて逆向き**である:
+
+| 在庫 | 向き |
+|---|---|
+| `IsLocalization.Away.mul` | `Away x S` ∧ `Away (algebraMap y) T` **⟹** `Away (y·x) T` |
+| `IsLocalization.of_le` | 小さい積閉集合 **⟹** 大きい積閉集合 |
+| `IsLocalization.isLocalization_of_submonoid_le` | `M ≤ N` を要求(`powers g ≤ powers (t·g)` は**偽**) |
+
+★★**`inferInstance` では出ない**(実測)。
+
+### ★★★通る道(測って確定した 3 手)
+
+| 手 | 内容 |
+|---|---|
+| 1 | `N := Submonoid.closure {t, g}` を取る。`powers (t·g) ≤ N` かつ `N` の元は `R_{t·g}` で可逆 → `IsLocalization.of_le` で `IsLocalization N R_{t·g}` |
+| 2 | `powers g ≤ N` なので `isLocalization_of_submonoid_le` で `IsLocalization (N.map (algebraMap R R_g)) R_{t·g}` |
+| 3 | `R_g` の中で `g` は既に可逆なので `N.map` は `powers (algebraMap t)` と**単元倍しか違わない**——これを詰める |
+
+★第 3 手が残る。`of_le` は小→大なので、大→小の補題(単元倍の非感受性)を探すか手で建てる。
+
+### ★★★★見積り
+
+★§9-98 で「残り 4」と見たが、第 5 段だけで **2–3 手**かかる。
+★★**残り 5–6 ブロック**と見直す。
+
+★★★**深追いを止める判断はしない**——道は測って確定しており、
+各手は mathlib の在庫で書ける。次の turn で第 1・2 手を建てる。
