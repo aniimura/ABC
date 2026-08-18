@@ -5617,3 +5617,38 @@ mathlib の証明を写経できる。
 | 4 | その下で写像は `c ↦ c • (s\|_W)`——第 103 ブロックで全単射 |
 
 ★★★★**第 55 の器具(6 度目の出番)がここでも効く。**
+
+## §9-112 —— 方針転換先でも詰まった(2026-08-18)
+
+§9-111 の方針(`unitHomOfSection` の全単射性)でも 2 手試して止めた。
+
+| 手 | 結果 |
+|---|---|
+| `simp [freeYonedaEquiv, freeHomEquiv, yonedaEquiv]` で `app` の値を出す | ✗ 展開が深すぎて閉じない |
+| `NatTrans.naturality_apply` で `freeYonedaEquiv_symm_app` から移す | ✗ **`PresheafOfModules.Hom` は `NatTrans` ではない**(型不一致) |
+
+★★**合計 12 手**。2 つの方針(`mulHom` の自然性 / `unitHomOfSection` の `app` の値)が
+**どちらも同じ層(`ModuleCat` の `ofHom`/`hom` の剥がれなさ)で止まっている**。
+
+### ★★★分かったこと(次に効く)
+
+★`PresheafOfModules.Hom` の自然性は `NatTrans` のそれとは**別物**である
+——`Hom.naturality` は `restrictScalars` を挟む形をしている(§9-110 の実測)。
+★★したがって `NatTrans` 用の補題(`naturality_apply` など)は**当たらない**。
+
+### ★★★★次の一手(候補、記録)
+
+| # | 案 |
+|---|---|
+| 1 | `PresheafOfModules.Hom.naturality_apply` 系の補題を mathlib で探す |
+| 2 | `toPresheaf` で `Ab` の `NatTrans` に落としてから naturality を使う |
+| 3 | `freeObjDesc` の `app` の値の補題(`ModuleCat.freeDesc_apply`——第 25 で使用)を直に当てる |
+
+★★★**案 3 が有望**——第 25 ブロックで `erw [ModuleCat.freeDesc_apply]` が効いた実績がある。
+★`freeYonedaEquiv.symm` は `freeObjDesc` で書けるはずなので、そこまで展開できれば当たる。
+
+### ★★数学と戦術の切り分け(記録)
+
+★**数学はすべて済んでいる**:
+第 100(基底で `M_h ≅ R_h`)・第 102(被覆で全単射なら同型)・第 103(生成元の乗法は全単射)。
+★★残るのは「`app` の値を計算する」という**戦術だけ**である。
