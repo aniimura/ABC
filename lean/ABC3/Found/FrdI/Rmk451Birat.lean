@@ -267,13 +267,107 @@ noncomputable def biratFunctor (G : Frobenioid P) :
   map_id A := biratMap_id (F := F) G A
   map_comp f g := biratMap_comp (F := F) G f g
 
-/-! ## ★5. 残り —— 全単射と `Base`/`degFr` の保存
 
-★`biratMap` が関手をなすこと(恒等と合成)、全単射であること
-(`unTr2Inv` から逆向きを作り、往復が恒等であることを `HomBirat.eq_iff` で見る)、
-`Base`・`degFr` を保つことを示せば、
-`isFrobeniusCompact_transport`(`Rmk451.lean`)がそのまま当たり、
-`Definition 4.5, (iii), (b)` が `𝒞^istr` へ移る。
+/-! ## ★5. 逆向きの写像
+
+★★`unTr2` は**圏の同型**である —— 対象も射も `rfl` で往復する
+(`unTr2Inv.obj (unTr2.obj A) = A` および `unTr2Inv.map (unTr2.map f) = f`)。
+★そこで逆向きの比較も同じ手順で組める。 -/
+
+/-- ★逆向きの `coaPreProp` の対応。 -/
+theorem unTr2Inv_coaPreProp (G : Frobenioid P) {X Y : UnTr (istrPre P F)}
+    (f : X ⟶ Y) (hf : coaPreProp (unTrPre (istrPre P F) (istr_frobenioidCore P F)) f) :
+    coaPreProp (unTrPre P F) ((unTr2Inv (P := P) (F := F)).map f) := by
+  refine (unTr2_coaPreProp_iff (F := F) G ((unTr2Inv (P := P) (F := F)).map f)).mp ?_
+  have h : (unTr2 (P := P) (F := F)).map ((unTr2Inv (P := P) (F := F)).map f) = f := by
+    refine Quotient.inductionOn f (fun α => ?_); rfl
+  rw [h]
+  exact hf
+
+/-- ★★逆向きの `𝒞^{coa-pre}` の対応。 -/
+noncomputable def coaPre2Inv (G : Frobenioid P) :
+    CoaPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) ⥤
+      CoaPre (unTrPre P F) (unTr_frobenioid P F G) where
+  obj X := ⟨(unTr2Inv (P := P) (F := F)).obj X.obj⟩
+  map {X Y} f := ⟨(unTr2Inv (P := P) (F := F)).map f.hom,
+    unTr2Inv_coaPreProp (F := F) G f.hom f.property⟩
+  map_id X := by
+    refine WideSubcategory.hom_ext _ ?_
+    show (unTr2Inv (P := P) (F := F)).map (𝟙 X.obj) = 𝟙 _
+    exact CategoryTheory.Functor.map_id _ _
+  map_comp {X Y Z} f g := by
+    refine WideSubcategory.hom_ext _ ?_
+    show (unTr2Inv (P := P) (F := F)).map (f.hom ≫ g.hom)
+      = (unTr2Inv (P := P) (F := F)).map f.hom ≫ (unTr2Inv (P := P) (F := F)).map g.hom
+    exact CategoryTheory.Functor.map_comp _ _ _
+
+/-- ★★逆向きの添字圏の対応。 -/
+noncomputable abbrev idx2Inv (G : Frobenioid P) (X : UnTr (istrPre P F)) :
+    IdxBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) X ⥤
+      IdxBirat (unTrPre P F) (unTr_frobenioid P F G)
+        ((unTr2Inv (P := P) (F := F)).obj X) :=
+  (Over.post (coaPre2Inv (F := F) G)).op
+
+/-- ★逆向きの余錐。 -/
+noncomputable def biratMapInvCocone (G : Frobenioid P) (X Y : UnTr (istrPre P F)) :
+    Cocone (homFunctorBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F))
+      (unTr2G G) X Y) :=
+  Cocone.mk (HomBirat (unTrPre P F) (unTr_frobenioid P F G)
+      ((unTr2Inv (P := P) (F := F)).obj X) ((unTr2Inv (P := P) (F := F)).obj Y))
+    { app := fun Z => TypeCat.ofHom fun φ =>
+        HomBirat.mk ((idx2Inv (F := F) G X).obj Z) ((unTr2Inv (P := P) (F := F)).map φ.down)
+      naturality := fun Z W u => by
+        ext φ
+        show HomBirat.mk ((idx2Inv (F := F) G X).obj W)
+              ((unTr2Inv (P := P) (F := F)).map (u.unop.left.hom ≫ φ.down))
+          = HomBirat.mk ((idx2Inv (F := F) G X).obj Z)
+              ((unTr2Inv (P := P) (F := F)).map φ.down)
+        rw [CategoryTheory.Functor.map_comp]
+        exact HomBirat.mk_map ((idx2Inv (F := F) G X).map u)
+          ((unTr2Inv (P := P) (F := F)).map φ.down) }
+
+/-- ★★逆向きの `Hom^birat` の写像。 -/
+noncomputable def biratMapInv (G : Frobenioid P) (X Y : UnTr (istrPre P F)) :
+    HomBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) X Y →
+      HomBirat (unTrPre P F) (unTr_frobenioid P F G)
+        ((unTr2Inv (P := P) (F := F)).obj X) ((unTr2Inv (P := P) (F := F)).obj Y) :=
+  fun z => colimit.desc _ (biratMapInvCocone (F := F) G X Y) z
+
+/-- ★代表元での値。 -/
+theorem biratMapInv_mk (G : Frobenioid P) (X Y : UnTr (istrPre P F))
+    (Z : IdxBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) X)
+    (φ : Z.unop.left.obj ⟶ Y) :
+    biratMapInv (F := F) G X Y (HomBirat.mk Z φ)
+      = HomBirat.mk ((idx2Inv (F := F) G X).obj Z)
+          ((unTr2Inv (P := P) (F := F)).map φ) := by
+  show colimit.desc _ (biratMapInvCocone (F := F) G X Y)
+      (colimit.ι (homFunctorBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F))
+        (unTr2G G) X Y) Z (ULift.up φ)) = _
+  rw [← types_comp_apply
+    (colimit.ι (homFunctorBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F))
+      (unTr2G G) X Y) Z)
+    (colimit.desc _ (biratMapInvCocone (F := F) G X Y)), colimit.ι_desc]
+  rfl
+
+/-! ## ★6. 残り —— 全単射と `Base`/`degFr` の保存
+
+★★**数学は済んでいる。残りは構造の畳み込み(eta)である。**
+
+★往復を代表元で計算すると
+`biratMapInv (biratMap (mk Z φ)) = mk ((idx2Inv).obj ((idx2).obj Z)) (unTr2Inv.map (unTr2.map φ))`
+になる。射の側は `rfl`(`unTr2` が圏の同型だから)。★**添字対象の側が `rfl` にならない**:
+
+| 部分 | 状態 |
+|---|---|
+| `((idx2Inv).obj ((idx2).obj Z)).unop.left = Z.unop.left` | ★`rfl` |
+| `((idx2Inv).obj ((idx2).obj Z)).unop.hom.hom = Z.unop.hom.hom` | ★**`rfl` にならない** |
+
+★`Over.post` の合成が `Over.mk` を作り直すため、`Over`(= `Comma`)の構造 eta を
+Lean が畳まない。★★**次の一手**: 恒等射を左成分に持つ射
+`Z ⟶ (idx2Inv).obj ((idx2).obj Z)` を `Over.homMk (𝟙 _)` で作り、
+`HomBirat.mk_map` と `Category.id_comp` で潰す(添字圏は細いので射の一意性は自動)。
+★これが済めば `biratMap_bijective` が出て、`Base`/`degFr` の保存(代表元で `rfl` の見込み)と
+併せて `isFrobeniusCompact_transport` が当たり、`Remark 4.5.1` が閉じる。
 -/
 
 end ABC3.Found.FrdI
