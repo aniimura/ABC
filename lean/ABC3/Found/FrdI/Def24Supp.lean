@@ -7,7 +7,7 @@ import ABC3.Found.FrdI.Def24
 # [FrdI] `Definition 2.4, (i)` —— **台(`Supp`)の基本性質**
 
 原文 (FrdI p.48):
-> in the image of the natural inclusion Mpf ֒→Mrlf
+> Now suppose that M is perf-factorial. Then we shall refer to the [subset which is
 
 ★`Def24.lean` は `perf-factorial` の**定義**(`IsPerfFactorialWith` の 11 フィールド)を
 置いたが、**台の理論**は無かった。★★このファイルがそれを作る。
