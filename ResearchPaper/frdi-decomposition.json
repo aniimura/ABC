@@ -662,7 +662,7 @@
             "psiN-extend"
           ],
           "title": "素数 p → 像の次数 q の写像を定義し well-defined を示す",
-          "note": "★手順: (1) `frobDegSurj` で次数 p の Frobenius 型射を作る。(2) prime-Frobenius に分解する。(3) `iii-primefrob-full`(`primeFrobDivId_map_iff`)で像も prime-Frobenius になる。(4) その次数が素数であることと、**選び方に依らないこと**を示す。★(4) が本体。"
+          "note": "★手順: (1) `frobDegSurj` で次数 p の Frobenius 型射を作る。(2) prime-Frobenius に分解する。(3) `iii-primefrob-full`(`primeFrobDivId_map_iff`)で像も prime-Frobenius になる。(4) その次数が素数であることと、**選び方に依らないこと**を示す。★(4) が本体。\n\n## ★★★构造の発見(2026-08-18)——場合分けは原典と対応する\n★`IsDivIdentity {A : C} (φ : A ⟶ A)` は**自己射のみ**に定義されている。\n★したがって `iii-primefrob-full`(`primeFrobDivId_map_iff`)は**prime-Frobenius の自己射**にしか使えない。\n★★そして `exists_primeFrobenius_endo`(`Prop311.lean:289`)は**`IsOfGroupLikeType` を仮定として取る**。\n\n★★★**これは原典の場合分けそのものである**(FrdI p.62):\n> if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity\n\n- **group-like の場合**: `exists_primeFrobenius_endo` で素数次数の自己射を作り、`primeFrobDivId_map_iff` で像も prime-Frobenius になることを出す。★こちらでは `Ψ_N` が非自明になりうる。\n- **non-group-like な対象がある場合**: `Ψ_N = id`。別の議論。\n\n★したがってこの節点は**さらに 2 つに割れる**が、割る前に「well-defined 性をどこから出すか」(`frobDegUniq` ＋ `𝒞` の連結性)を確かめること。"
         },
         {
           "id": "psiN-prime-bij",
