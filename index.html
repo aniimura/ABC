@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 939 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 942 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">4996</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1341</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5004</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1348</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>e72cac6</code></td><td>2026-08-18</td><td>powers g は切断に可逆に作用する(第 119、§9-133)</td></tr>
+<tr><td><code>4abd1f2</code></td><td>2026-08-18</td><td>切断の制限は局所化と両立する(第 118、§9-132)</td></tr>
+<tr><td><code>0341d73</code></td><td>2026-08-18</td><td>`thm34` の葉を 1 つ閉じた——`iii-primefrob-full`</td></tr>
 <tr><td><code>7b76c04</code></td><td>2026-08-18</td><td>D(h·g) の生成族は覆う(第 117、§9-131)</td></tr>
 <tr><td><code>aef1d89</code></td><td>2026-08-18</td><td>★★グラフの棚卸——分解チェーンを**木のまま**展開した(1 箱 → 本来の大きさ)</td></tr>
 <tr><td><code>fb8e407</code></td><td>2026-08-18</td><td>★★★★★★Arakelov と Galois を本来の大きさでグラフに展開した(§9-129)</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>1b5795b</code></td><td>2026-08-18</td><td>`Proposition 4.4` を閉じる道を**木にした**——チェーン `prop44full` を登記</td></tr>
 <tr><td><code>535ec4a</code></td><td>2026-08-18</td><td>★★★★★★生成族だけで足りる——基底 vs すべての本当の解(第 114、§9-127)</td></tr>
 <tr><td><code>a45e295</code></td><td>2026-08-18</td><td>生成元を切断へ運んだ(第 113、§9-126)</td></tr>
-<tr><td><code>16ee060</code></td><td>2026-08-18</td><td>局所化は全単射を保つ(第 112、§9-125)</td></tr>
-<tr><td><code>75a1389</code></td><td>2026-08-18</td><td>層加群版の局所自明性の同型(第 111、§9-124)</td></tr>
-<tr><td><code>468af33</code></td><td>2026-08-18</td><td>★★★★★★★器具が全部繋がった——切断から局所自明性の同型(第 110、§9-123)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1341 件)。</div>
+<b>すべて PDF と機械照合している</b>(1348 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

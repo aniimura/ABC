@@ -48,7 +48,7 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
       ★「the discussion of …」型の<b>案内</b>と前方参照(<code>below</code>)は<b>辺から除いた</b>が、
       <code>cf.</code>(元の 36%)は両義的なので残っている。<b>桁を見るためだけに使うこと。</b></div>
     <div class="sec"><h2>規模</h2><div id="stats"></div></div>
-    <div class="sec"><h2>層ごとの節点数(クリックで移動)</h2><div id="layers"></div></div>
+    <div class="sec"><h2>論文(クリックで部分グラフをハイライト)</h2><div id="papers"></div><p style="font-size:11px;color:#777;margin-top:6px;line-height:1.6">★もう一度押すと解除する。★ボックスは複数の出典を含むことがある(循環している塊は論文をまたぐ)ので、ハイライトは<b>その論文を 1 つでも含むボックス</b>である。</p></div>
     <div class="sec"><h2>凡例</h2>
       <div style="font-size:11.5px;line-height:1.9;color:#555">
         <b>ボックス</b> = 中期ゴールの単位。<br>
@@ -102,7 +102,11 @@ function setHighlight(i){
   hlUsers=closure(i,bwd);         // これを使うもの(右へ)
   hlDirect=new Set([...(fwd.get(i)||[]),...(bwd.get(i)||[])]);
 }
-const C_DEP='#1e7a52', C_USE='#a05fd0';
+const C_DEP='#1e7a52', C_USE='#a05fd0', C_TAG='#e07b39';
+// ★論文での選択状態(null = 未選択)。ボックス選択とは独立に動く。
+let selTag=null;
+const boxTags=B.map(b=>new Set(b.tags.map(t=>t[0])));
+const inTag=i=>selTag===null||boxTags[i].has(selTag);
 function fitAll(){sc=Math.min((innerWidth-360)/D.width,(innerHeight-80)/D.height,1);vx=340-0*sc;vy=30;}
 function fit(){if(!fitted){fitted=true;fitAll();}cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);draw();}
 addEventListener('resize',fit);
@@ -132,7 +136,8 @@ function draw(){
     if(kind===1){ctx.strokeStyle=C_DEP;ctx.lineWidth=Math.min(5,1.4+w*.1);ctx.globalAlpha=.85;}
     else if(kind===2){ctx.strokeStyle=C_USE;ctx.lineWidth=Math.min(5,1.4+w*.1);ctx.globalAlpha=.8;}
     else{ctx.strokeStyle=`rgba(120,128,140,${Math.min(.28,.05+w*.012)})`;ctx.lineWidth=Math.min(4,.5+w*.09);
-         ctx.globalAlpha=sel===null?1:.22;}
+         const bothTag=selTag===null||(inTag(a)&&inTag(b));
+         ctx.globalAlpha=(sel===null?1:.22)*(bothTag?1:.15);}
     // A(依存元/右) ← Bb(依存先/左)。左から右へ流れる線を描く
     const x1=Bb.x+Bb.w, y1=Bb.y+Bb.h/2, x2=A.x, y2=A.y+A.h/2;
     ctx.beginPath();ctx.moveTo(x1,y1);
@@ -147,14 +152,15 @@ function draw(){
     const b=B[i],c=color(b.tags[0][0]);
     // ハイライト状態
     const isDep=sel!==null&&hlDeps.has(i), isUse=sel!==null&&hlUsers.has(i);
-    const dim=sel!==null&&i!==sel&&!isDep&&!isUse;
+    const isTag=selTag!==null&&inTag(i);
+    const dim=(sel!==null&&i!==sel&&!isDep&&!isUse)||(selTag!==null&&!isTag);
     ctx.globalAlpha=dim?.2:1;
     const isC=b.tags[0][0]==='CONCEPT';
     // ★Lean 形式化の状態。`done` は `Found/` に `.src` がある項目数(完全実装の主張)。
     const nd=b.done||0, allDone=b.n>0&&nd>=b.n, someDone=nd>0&&nd<b.n;
     ctx.fillStyle=allDone?'#d5d8dd':(isC?'#fffdf5':'#fff');
-    ctx.strokeStyle=isDep?C_DEP:(isUse?C_USE:(allDone?'#9aa0a8':(b.scc?'#c0392b':(isC?'#c99a2e':'#c8ccd2'))));
-    ctx.lineWidth=(isDep||isUse)?2.2:(b.scc?2.4:(isC?2:1.1));
+    ctx.strokeStyle=isTag?C_TAG:(isDep?C_DEP:(isUse?C_USE:(allDone?'#9aa0a8':(b.scc?'#c0392b':(isC?'#c99a2e':'#c8ccd2')))));
+    ctx.lineWidth=(isTag||isDep||isUse)?2.4:(b.scc?2.4:(isC?2:1.1));
     if(isC){ctx.setLineDash([5,3]);}
     ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();ctx.setLineDash([]);
     if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.2:.09;
@@ -241,14 +247,33 @@ document.getElementById('stats').innerHTML=
   `<p style="font-size:11px;color:#777;margin-top:6px;line-height:1.6">
    ★<b>義務は「触れた節点」に含めていない</b>——語彙が違う(原文の項目番号 対 我々の構造体)。
    ★義務は<b>出辺を持たない葉</b>なので層 0(左端)に出る——「これを作らないと右へ進めない」ものだから。</p>`;
-const mx=Math.max(...D.layerStats.map(l=>l.nodes));
-document.getElementById('layers').innerHTML=D.layerStats.map(l=>
-  `<div class="lr" data-l="${l.L}"><span style="min-width:44px">層 ${l.L}</span>
-   <span class="bar" style="width:${Math.max(3,l.nodes/mx*135)}px;${l.L===0?'background:#1e7a52':''}${l.L===D.maxL?'background:#c0392b':''}"></span>
-   <span class="n">${l.nodes}</span><span style="color:#1e7a52;min-width:26px">${l.ours?'●'+l.ours:''}</span></div>`).join('');
-document.querySelectorAll('.lr').forEach(el=>el.onclick=()=>{
-  const L=+el.dataset.l;const b=B.find(x=>x.layer===L);if(!b)return;
-  vx=innerWidth/2-(b.x+b.w/2)*sc;vy=80;draw();});
+// ★★論文一覧 —— クリックでその論文の部分グラフをハイライトする。
+//   ★ボックスの tags は [[出典, 節点数], …]。循環している塊は
+//   複数の論文をまたぐので、**含むボックスをすべて**出す。
+const tagCount=new Map(), tagBoxes=new Map();
+for(let i=0;i<B.length;i++){for(const [t,n] of B[i].tags){
+  tagCount.set(t,(tagCount.get(t)||0)+(n||1));
+  if(!tagBoxes.has(t))tagBoxes.set(t,new Set());tagBoxes.get(t).add(i);}}
+const tagList=[...tagCount.entries()].sort((a,b)=>b[1]-a[1]);
+const mxT=Math.max(...tagList.map(t=>t[1]));
+document.getElementById('papers').innerHTML=tagList.map(([t,n])=>
+  `<div class="lr" data-t="${t}"><span style="min-width:96px;overflow:hidden;text-overflow:ellipsis">
+   <span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${color(t)};vertical-align:-1px"></span>
+   ${t}</span>
+   <span class="bar" style="width:${Math.max(3,n/mxT*90)}px;background:${color(t)}"></span>
+   <span class="n">${n}</span></div>`).join('');
+function paintTags(){document.querySelectorAll('#papers .lr').forEach(el=>{
+  el.style.background=(el.dataset.t===selTag)?'#eef4ff':'';
+  el.style.fontWeight=(el.dataset.t===selTag)?'700':'';});}
+document.querySelectorAll('#papers .lr').forEach(el=>el.onclick=()=>{
+  const t=el.dataset.t;
+  selTag=(selTag===t)?null:t;
+  paintTags();
+  if(selTag){const ids=[...tagBoxes.get(selTag)];
+    const xs=ids.map(i=>B[i].x), ys=ids.map(i=>B[i].y);
+    const cx=(Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2;
+    vx=innerWidth/2-cx*sc; vy=innerHeight/2-cy*sc;}
+  draw();});
 document.getElementById("rf").onclick=e=>{e.preventDefault();fitAll();draw();};
 fit();
 </script></body></html>
