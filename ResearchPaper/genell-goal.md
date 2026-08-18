@@ -6650,3 +6650,35 @@ instance 検索が**別物として扱う**。
 ### ★★★★★★★★到達点
 
 第 93 ブロックから **40 ブロック**かけた局所自明性の道具立てが、ここで**閉じた**。
+
+## §9-148 —— 可逆加群から可逆層へ(第 133 ブロック、2026-08-18)
+
+    invSheafOfModule (R) (M) [Module.Invertible R M] : InvSheaf (Spec R)
+
+★**一発**。第 132(局所自明性)と第 91(`tilde` はテンソルを保つ)が揃ったので
+5 欄すべてがその場で埋まった。
+
+| 欄 | 中身 |
+|---|---|
+| `carrier` | `tilde M` |
+| `inv` | `tilde (Mᵛ)` |
+| `isInv` | 第 91 + `Module.Invertible.linearEquiv` + 第 82 |
+| `trivial` / `invTrivial` | ★第 132 |
+
+### ★★次の的——`equivPicRing` の**逆向き**
+
+    可逆層 F on Spec R  ⟹  Γ(F) は可逆加群
+
+★これには `IsLocalizing (modulesSpecToSheaf.obj F)`
+(= 「`Γ(F,⊤) → Γ(F,D f)` が局所化」)が要る。
+
+★★mathlib の在庫を実測した:
+
+| 在庫 | 状態 |
+|---|---|
+| `isIso_fromTildeΓ_iff_isLocalizing` | ★有り |
+| `isLocalizing_tilde` | ★有り |
+| `isIso_fromTildeΓ_of_presentation` | ★有り(表示が要る) |
+| 「準連接 ⟹ `fromTildeΓ` 同型」 | ★**無い**(ファイル内 TODO) |
+
+★★★したがって「局所自明 ⟹ `IsLocalizing`」を**自前で**作る必要がある。
