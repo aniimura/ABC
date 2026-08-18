@@ -3906,3 +3906,44 @@ mathlib には無い。★★**我々が作る**。
 
 ★★★**2 が本命**である——`δ` のときも第 37 ブロックで
 「同型の生成元での値」を先に切ったら最終段が通った。
+
+
+---
+
+## §9-59 (2026-08-18) ★★★mate の最終段 —— 両辺が「生成元での値」に落ちた
+
+### ★★★★★通っている手順(`sorry` 1 個を残すのみ、2026-08-18 実測)
+
+    refine (adjOn.homEquiv _ _).injective ?_
+    erw [Adjunction.homEquiv_naturality_left]
+    show _ ≫ homEquiv (homEquiv.symm _) = _ ; rw [Equiv.apply_symm_apply]
+    erw [Adjunction.homEquiv_naturality_right]
+    rw [Adjunction.homEquiv_unit]
+    refine freeYonedaEquiv.injective ?_
+    simp only [freeYonedaEquiv_comp]
+    have hL := freeYonedaEquiv_restrictFreeYonedaIso_inv V W ; erw [hL]   ★第 52
+    have h  := freeYonedaEquivUnitGen (phiOn f V) (objOn V W) ; erw [h]   ★第 50
+    have hpm : .. := fun _ _ _ => rfl
+    erw [hpm, comp_apply, hpm, comp_apply]
+    erw [Functor.mapIso_inv]
+    -- ★★★残り 1 歩
+
+### ★★残っている等式(実測)
+
+    左辺: (restrict_V.map (unit)).app (op (objOn V W)) (freeMk (W ⊓ V ⟶ W))
+    右辺: (restrict.map (pullbackFreeYonedaIso.inv)).app (..)
+            ((eqToIso ..).inv.app ((free.map ..).app ..))
+
+★★**左辺は第 38 ブロック(`unit_app_eq_inv_app`)がそのまま使える形**である。
+★右辺は `free.map` を生成元に当てれば `freeMk (包含射)` になる。
+
+### ★★★次の一手
+
+| # | 手 |
+|---|---|
+| 1 | 右辺の最内層が `freeMk` の形か確かめる(`free_map_app_freeMk` がまだ当たらない) |
+| 2 | 左辺に第 38 を当て、両辺を `pullbackFreeYonedaIso.inv.app (freeMk ..)` に揃える |
+| 3 | 補助補題を 1 本切る(`restrictFreeYonedaIso.inv.app (freeMk 𝟙) = freeMk (包含)`) |
+
+★★★**3 が本命**——第 52 ブロックの `freeYonedaEquiv` 版ではなく
+**`app` 版**を切れば、`erw` が展開する前に当たる。
