@@ -40,7 +40,6 @@ theorem idealSections_basicOpen {A : X.affineOpens} (f : (Γ(X, A.1) : Type u)) 
   exact (idealSections_affine D (X.affineBasicOpen f)).trans
     (D.map_ideal (U := X.affineBasicOpen f) (V := A) (X.basicOpen_le f)).symm
 
-end ABC3.Skeleton.ProbeIdBO
 
 /-! ## ★出典の紐付け(`.src`) -/
 

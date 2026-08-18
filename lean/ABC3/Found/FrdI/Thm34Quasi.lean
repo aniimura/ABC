@@ -235,4 +235,46 @@ def isPrimeFrobenius_of_degFr_prime.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — 素数次数の Frobenius 型射",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`(p₁, p₂)-admissible` —— 原典の (iii) の骨格
+
+原文 (FrdI p.64):
+> (p1, p2)-admissible if Ψ maps every p1-Frobenius morphism with domain A1 to a
+
+★★原典は素数の対応を次の 2 つで出す:
+- **(F1)** 各素数 `p₁` に対し、ある素数 `p₂` と `(p₁,p₂)-admissible` な対象がある。
+- **(F2)** 任意の射 `ζ₁ : A₁ ⟶ B₁` に対し、`A₁` が admissible ⇔ `B₁` が admissible。
+
+★そして **`𝒞₁` の連結性**から全対象が admissible になる。 -/
+
+variable {D₃ : Type u} [Category.{v} D₃] {C₃ : Type u2} [Category.{v2} C₃]
+  {Φ₃ : MonoidOn.{v, u, w} D₃} {P₃ : PreFrobenioid C₃ Φ₃}
+  {D₄ : Type u} [Category.{v} D₄] {C₄ : Type u2} [Category.{v2} C₄]
+  {Φ₄ : MonoidOn.{v, u, w} D₄} {P₄ : PreFrobenioid C₄ Φ₄}
+
+/-- ★★★★**[FrdI] Theorem 3.4, (iii)** の `(p₁, p₂)-admissible`。
+
+`A₁` から出るすべての `p₁`-Frobenius 射を `Ψ` が `p₂`-Frobenius 射へ送ること。 -/
+def IsAdmissibleObj (P₁ : PreFrobenioid C₃ Φ₃) (P₂ : PreFrobenioid C₄ Φ₄)
+    (Ψ : C₃ ⥤ C₄) (p₁ p₂ : ℕ+) (A : C₃) : Prop :=
+  ∀ {B : C₃} (φ : A ⟶ B), IsFrobeniusType P₁ φ → P₁.degFr φ = p₁ →
+    IsFrobeniusType P₂ (Ψ.map φ) ∧ P₂.degFr (Ψ.map φ) = p₂
+
+/-- ★★★**連結性で (F1)＋(F2) から全対象へ広がる**。
+
+★原典が (F1)(F2) を置いた後に使う歩みを、射の連の形で書いた。
+★実際の連結性(`P.connectedC`)は zigzag を与えるので、
+この補題を zigzag に沿って繰り返すことになる。 -/
+theorem isAdmissibleObj_of_hom (P₁ : PreFrobenioid C₃ Φ₃) (P₂ : PreFrobenioid C₄ Φ₄)
+    (Ψ : C₃ ⥤ C₄) (p₁ p₂ : ℕ+)
+    (hF2 : ∀ {X Y : C₃} (_ : X ⟶ Y),
+      IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ X ↔ IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ Y)
+    {A B : C₃} (ζ : A ⟶ B) (hA : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B :=
+  (hF2 ζ).mp hA
+
+def IsAdmissibleObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — (p₁,p₂)-admissible 対象",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
