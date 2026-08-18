@@ -8281,3 +8281,47 @@ B2 の本丸である。
 
 ★★どちらも**充足しようとして初めて**見つかった。
 Interface を書くだけでは分からず、**埋める作業が検算になっている**。
+
+## §9-207 `ofDivisor` が書けた(第 186–187 ブロック)
+
+    D  ↦  idealSheaf D  ↦  InvSheaf X  ↦  PicSheaf X
+
+★★★★★★3 本の合流である:
+
+| 部品 | ブロック |
+|---|---|
+| `idealSheaf D`(イデアル層は層加群) | 第 151 |
+| `IsCartier ⟹ IsLocallyTrivial` | 第 162 |
+| **局所自明 ⟹ 可逆層** | ★第 182 |
+
+Cartier でないときは `1` を返す(`dite`)——`ofDivisor` は全域でなければならず、
+かつ Interface の法則はすべて Cartier 条件つきだから整合する。
+
+### ★★環レベルの補題がそのまま上がった
+
+mathlib で `(D * E).ideal A = D.ideal A * E.ideal A` は **`rfl`**、
+`(⊤).ideal A = ⊤` も **`rfl`** なので、第 185 の `invertible_mul` / `invertible_top` が
+**そのまま**当たり、`isCartier_top` / `isCartier_mul` は 1 行で出た。
+
+### ★`ofDivisor_top` も出た
+
+`idealSections ⊤ U = ⊤` の 1 行と、包含射が各点で全単射であることだけ。
+★包含射も第 178 と同じく `PresheafOfModules.homMk` で組んだ
+——部分加群の包含 `s ↦ ↑s` を書くだけで、加法も線型性も `rfl` である。
+
+### `CartierPicData` 14 欄の現況
+
+| 欄 | 状態 |
+|---|---|
+| `toPicardData` | ★済(B1) |
+| `IsCartierDivisor` | ★済(第 184) |
+| `isCartierDivisor_top` / `_mul` | ★済(第 186) |
+| `isCartierDivisor_affine` | ★済(第 184 `isCartier_iff_top`) |
+| `ofDivisor` | ★済(第 186) |
+| `ofDivisor_top` | ★済(第 187) |
+| `isCartierDivisor_comap`(平坦) | 残——`comap` のアフィン記述が要る |
+| `ofDivisor_mul` | 残——`idealSheaf (D*E) ≅ idealSheaf D ⊗ idealSheaf E` |
+| `ofDivisor_pullback`(平坦) | 残 |
+| `IsPrincipalDivisor` 系 3 欄 | 残 |
+
+★★**14 欄中 7 欄が埋まった。**
