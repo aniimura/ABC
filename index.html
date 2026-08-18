@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 883 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 891 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">4797</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1264</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">4821</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1277</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -95,9 +95,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 664 節点を、強連結成分で潰して 55 層に並べたもの。
+<span>原文の参照から機械抽出した 777 節点を、強連結成分で潰して 258 個の箱・59 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
-ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。</span></a>
+ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
+<b>我々が触れている節点 63 件・Interface の義務 3/28 件。</b>
+生成は <code>node tools/graph-layers.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
 <a class="big" href="ResearchPaper/dependency-scale.md"><b>規模の実測 →</b>
@@ -279,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>d3018cb</code></td><td>2026-08-18</td><td>基底と茎を繋いだ(第 90、§9-93)</td></tr>
+<tr><td><code>b148505</code></td><td>2026-08-18</td><td>★★★★★★基本開集合で比較射が全単射になった(第 89、§9-92)</td></tr>
+<tr><td><code>4d83926</code></td><td>2026-08-18</td><td>★★橋渡しが架かった——恒等式込みで一発(第 88、§9-91)</td></tr>
+<tr><td><code>43efdc4</code></td><td>2026-08-18</td><td>★★核心の恒等式が通った(第 87、§9-90)</td></tr>
+<tr><td><code>279109d</code></td><td>2026-08-18</td><td>テンソル局所化の一意性を器具にした(第 86、§9-89)</td></tr>
+<tr><td><code>faa12bc</code></td><td>2026-08-18</td><td>★可逆性が要らないと分かった(第 85、§9-88)</td></tr>
+<tr><td><code>7ded1c4</code></td><td>2026-08-18</td><td>記録を実績に合わせた——Prop 4.1 が閉じ、残る到達可能分は Remark 4.5.1 の 1 件</td></tr>
+<tr><td><code>b6666b5</code></td><td>2026-08-18</td><td>層化の普遍性で層の射にした(第 84、§9-87)</td></tr>
 <tr><td><code>8fcfdde</code></td><td>2026-08-18</td><td>★★★★★★前層射が完成した——自然性は exact の項で抜けた(第 83、§9-86)</td></tr>
 <tr><td><code>84757aa</code></td><td>2026-08-18</td><td>前層射の app まで通し、自然性で止めた(第 83、§9-85)</td></tr>
 <tr><td><code>a271a1a</code></td><td>2026-08-18</td><td>切断のテンソル写像を組んだ(第 82、§9-84)</td></tr>
 <tr><td><code>fccbe4c</code></td><td>2026-08-18</td><td>追記の確認手順をメモリに落とした</td></tr>
-<tr><td><code>ef0a588</code></td><td>2026-08-18</td><td>★訂正——§9-80/81 は虚偽だった。実際に入れて第 81 まで通した(§9-82/83)</td></tr>
-<tr><td><code>84d7390</code></td><td>2026-08-18</td><td>★★分母つきの値——局所分数条件が積で閉じる(第 80、§9-81)</td></tr>
-<tr><td><code>bc14b8d</code></td><td>2026-08-18</td><td>比較射の値を計算し、第 80 の設計を確定した(§9-80)</td></tr>
-<tr><td><code>728ce87</code></td><td>2026-08-18</td><td>局所化とテンソルの交換——比較射の茎の中身(第 79、§9-79)</td></tr>
-<tr><td><code>eef3b84</code></td><td>2026-08-18</td><td>比較射の左辺の茎を固め、残る 1 点を特定した(第 78、§9-78)</td></tr>
-<tr><td><code>2bb6950</code></td><td>2026-08-18</td><td>★★層化を跨ぐ器具が建った(第 77、§9-77)</td></tr>
-<tr><td><code>4ab6ba5</code></td><td>2026-08-18</td><td>★★★★★★§4 `Proposition 4.1, (ii)` が**完全に閉じた**(単系層 ＋ 圏層)</td></tr>
-<tr><td><code>cfe37fd</code></td><td>2026-08-18</td><td>★★茎で測れば層化が消える——局所自由性が不要になった(§9-76)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1264 件)。</div>
+<b>すべて PDF と機械照合している</b>(1277 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
