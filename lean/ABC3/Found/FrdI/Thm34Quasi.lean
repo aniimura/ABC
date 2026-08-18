@@ -712,4 +712,31 @@ def admissible_of_frobType.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — Frobenius 型の場合",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F2) の伝搬の逆向き** —— 四角形は対称だから同じ手で出る。
+
+★原典の (F2) は「**⇔**」なので、両向きが必要である。
+★`arbFactor` で束ねるとき pull-back の成分だけ向きが逆になるので、これで埋める。 -/
+theorem admissible_of_square' (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : B ⟶ A) (φ : A ⟶ A) (ψ : B ⟶ B)
+    (hsq : ζ ≫ φ = ψ ≫ ζ)
+    (hφ : IsFrobeniusType P₁ φ) (hdφ : P₁.degFr φ = p₁)
+    (hψ : IsFrobeniusType P₁ ψ) (hdψ : P₁.degFr ψ = p₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hB : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A := by
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map φ) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ φ θ hφ hθ (by rw [hdφ, hdθ])
+  have h2 : P₂.degFr (Ψ.map φ) = P₂.degFr (Ψ.map ψ) :=
+    degFr_map_eq_of_square Ψ ζ φ ψ hsq
+  have h3 : P₂.degFr (Ψ.map ψ) = p₂ := (hB ψ hψ hdψ).2
+  rw [← h1, h2, h3]
+
+def admissible_of_square'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — 伝搬の逆向き",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

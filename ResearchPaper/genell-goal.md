@@ -7653,3 +7653,29 @@ B2 の在庫を実測した結果:
 
 ★★材料: 第 107 の `freeYonedaEquiv_symm_eq_desc` と
 mathlib の `PresheafOfModules.freeObjDesc_app`。
+
+## §9-185 —— ★★★★★★制限の半線型性(第 168 ブロック、2026-08-18)
+
+    unitMul_res : (restrictOnFunctor h).map (unitMul U c) = unitMul V (c|_V)
+
+### ★★逃げ道——**`unitMul` を展開しない**
+
+各成分の具体形(`x ↦ x · c|_W`)を出そうとすると `freeYonedaEquiv.symm` の
+展開が要って重い。★★**自然性を使う**と展開が要らない:
+
+    unitMul U c の自然性を Over.homMk (homOfLE h) に沿って取り unitOne U を代入
+      左辺 → (unitMul U c).app (Over.mk (homOfLE h)) (unitOne V)   (res 1 = 1)
+      右辺 → (unitEnd U (unitMul U c))|_V = c|_V                   (★第 165)
+
+★★★**自然性 1 本で済んだ。**これは本 session で繰り返し効いている手である
+(第 137 の四角形、第 160 の可換図式も同じ)。
+
+### 残り(B2)
+
+| 段 | 内容 |
+|---|---|
+| 169 | 双対の前層(`dualPresheaf`) |
+| 170 | 双対が層であること |
+| 171 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 |
+| 172 | `InvSheaf` と `ofDivisor` |
+| 173+ | 3 法則と `isCartierDivisor_affine` |

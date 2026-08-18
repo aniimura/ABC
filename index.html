@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 1048 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 1050 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5269</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1438</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5273</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1439</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 971 節点を、強連結成分で潰して 305 個の箱・70 層に並べたもの。
+<span>原文の参照から機械抽出した 972 節点を、強連結成分で潰して 306 個の箱・71 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 64 件・Interface の義務 5/30 件。</b>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>f7648a2</code></td><td>2026-08-18</td><td>双対の作用は合成(第 167、§9-184)</td></tr>
+<tr><td><code>ade0d5e</code></td><td>2026-08-18</td><td>(F2) を束ねる段で向きの問題を見つけた——両向きを作れば消える</td></tr>
 <tr><td><code>e4087b2</code></td><td>2026-08-18</td><td>★★★★(F2) の 3 成分がすべて揃った——残るは束ねる作業だけ</td></tr>
 <tr><td><code>067da39</code></td><td>2026-08-18</td><td>★★★★★★★双対の加群構造(第 166、§9-183)</td></tr>
 <tr><td><code>bf8a44c</code></td><td>2026-08-18</td><td>(F2) の残る 1 段に 2 つの道を測って記録した</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>71b0dfc</code></td><td>2026-08-18</td><td>型付き恒等関数の橋を記憶に追加</td></tr>
 <tr><td><code>dffdace</code></td><td>2026-08-18</td><td>★★★★★★単位対象の自己射環——型付き恒等写像を橋に(第 164、§9-180)</td></tr>
 <tr><td><code>a49ce20</code></td><td>2026-08-18</td><td>(F2) の伝搬本体を閉じた——残るは四角形を作る段だけ</td></tr>
-<tr><td><code>0c3db56</code></td><td>2026-08-18</td><td>unitEnd.map_mul の詰まりの正体を特定(§9-179)</td></tr>
-<tr><td><code>1dca21f</code></td><td>2026-08-18</td><td>(F2) の次数移送を取った——在庫の `prop_1_14_iv_degFr` で 3 行</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1438 件)。</div>
+<b>すべて PDF と機械照合している</b>(1439 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
