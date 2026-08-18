@@ -421,11 +421,21 @@
           "id": "phibirat-dfunct",
           "title": "Φ^birat を 𝒟 上の部分関手として組む",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "phibirat-image-subfunctor"
           ],
-          "note": "★`phibirat-image-subfunctor` が済めば、これは包装だけになる見込み。"
+          "note": "★`phibirat-image-subfunctor` が済めば、これは包装だけになる見込み。\n★済(2026-08-18): `phiBiratStar` / `phiBiratStar_map_le` / `mem_phiBiratStar_iff`。"
+        },
+        {
+          "id": "phibirat-istr-iso",
+          "size": "中",
+          "status": "done",
+          "deps": [
+            "phibirat-dfunct"
+          ],
+          "title": "isotropic なら同じ底で 𝒞^birat 同型——★解錠",
+          "note": "★★★**以前「一般には言えない」と見た主張が、isotropic に制限すれば成り立つ**。`isIso_of_preStep_of_isGroupLikeObj` が isotropic を要求するのを障害だと見ていたが、★`Proposition 2.2` はそもそも **`𝒟*`(isotropic の世界)** の上の話で、`Φ^birat` もそこで定義されている。**制限した先では仮定が満たされる**。★`dstar_span` が中間対象 `Z` を**isotropic で**与えるのが効いている。★実装: `birat_isIso_of_preStep_of_isotropic` / `birat_iso_of_istr_base`。"
         },
         {
           "id": "phibirat-factor",
@@ -433,7 +443,7 @@
           "size": "大",
           "status": "todo",
           "deps": [
-            "phibirat-dfunct"
+            "phibirat-istr-iso"
           ],
           "note": "★★★**測定で分かった重い点**(2026-08-18): 原文は `Φ^birat` を「経由するような最小の部分関手」として定め、**`𝒪^×(A^birat) ↠ Φ^birat(A^birat)` の全射性を定理として主張**する。★我々は逆に `Φ^birat` を**像として定義**したので全射性は無償になるが、その分**「経由する」側を証明する必要がある** —— 内容は同じで、場所が移っただけ。★要は「任意の `f : A → B` に対し `biratDivGp f` が像に入る」。★未確定の点: `A ≠ B` のときどの対象の `Φ^birat` に入れるのかを、`𝔽_Φ` の射の定義に戻って確かめるところから始める。\n★★**2026-08-18 再測**: 原典はここを「immediately」としており、`Proposition 1.5, (ii)`(`𝒪^▷(A) ≅ Φ(A)`、**実装済**)で `Φ^gp(X)` を `𝔽_{Φ^gp}` の `𝒪^▷(X)` と同一視できることが鍵らしい。★サイズは `phibirat-otristar` を通してから再評価する。"
         },

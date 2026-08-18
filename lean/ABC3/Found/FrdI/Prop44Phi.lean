@@ -194,6 +194,60 @@ def phiBiratStar.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — 部分関手 Φ^birat ⊆ Φ^gp",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★★isotropic に制限すると pre-step が同型になる
+
+★★★**測定(2026-08-18)——これが `phibirat-factor` の解錠である**。
+
+以前「`𝒞^birat` で pre-step が同型になるか」で詰まったが、
+そのとき `isIso_of_preStep_of_isGroupLikeObj` が **isotropic を要求する**のが
+障害だと見ていた。
+★★しかし `Proposition 2.2` はそもそも **`𝒟*`(= isotropic の世界)** の上の話であり、
+`Φ^birat` もそこで定義されている。★**制限した先では仮定が満たされる**。
+
+★揃うもの:
+- group-like 型 —— `birat_isOfGroupLikeType`(済)
+- isotropic の下方閉じさ —— `Definition 1.3, (vii)(b)` の `isotropicClosed`
+- co-angular —— `Proposition 1.4, (i)`(isotropic な定義域から) -/
+
+/-- ★★★★**isotropic な対象から出る pre-step は `𝒞^birat` で同型**。
+
+★`𝒞^birat` は group-like 型なので isometric は自動、
+co-angular は isotropic な定義域から出る。 -/
+theorem birat_isIso_of_preStep_of_isotropic
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    {A B : BiratCat P G} (hA : IsIsotropic (biratPre P G) A)
+    {φ : A ⟶ B} (hφ : IsPreStep (biratPre P G) φ) : IsIso φ :=
+  isIso_of_preStep_of_isGroupLikeObj (biratPre P G) (biratFrobenioid P G hfn).core
+    (fun _ f => (biratFrobenioid P G hfn).core.isotropicClosed f hA)
+    (birat_isOfGroupLikeType P G A) φ hφ
+
+/-- ★★★**同じ底の isotropic 対象は `𝒞^birat` で同型**。
+
+★以前「一般には言えない」と見た主張は、
+**isotropic に制限すれば成り立つ**。
+★`dstar_span` は中間対象 `Z` を**isotropic で**与えるのが効いている。 -/
+theorem birat_iso_of_istr_base
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (A B : Istr (biratPre P G))
+    (ψ : ((biratPre P G).toElem.obj A.obj).base ⟶ ((biratPre P G).toElem.obj B.obj).base)
+    (hψ : IsIso ψ) : Nonempty (A.obj ≅ B.obj) := by
+  obtain ⟨Z, hZ, σ, hσ, ρ, hρ, hb⟩ :=
+    dstar_span (biratPre P G) (biratFrobenioid P G hfn).core A B ψ
+  haveI : IsIso σ := birat_isIso_of_preStep_of_isotropic P G hfn hZ hσ
+  have hbρ : IsIso ((biratPre P G).Base ρ) := by
+    haveI : IsIso ((biratPre P G).Base σ) := hσ.2
+    haveI := hψ
+    rw [hb]
+    infer_instance
+  haveI : IsIso ρ := birat_isIso_of_preStep_of_isotropic P G hfn hZ ⟨hρ, hbρ⟩
+  exact ⟨(asIso σ).symm ≪≫ asIso ρ⟩
+
+/-- ★locator —— `Proposition 4.4, (iii)` の解錠。 -/
+def birat_iso_of_istr_base.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — isotropic では同じ底なら同型",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/
