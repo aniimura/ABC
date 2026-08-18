@@ -49,6 +49,14 @@ universe w
 
 variable {M : Type w} [AddCommMonoid M] {ι : Prime M → Pf M → ℝ≥0}
 
+/-! ## ★0. 小道具 -/
+
+/-- ★`n ≥ 1` なら `a ⪯ n • a`。 -/
+theorem mle_nsmul_self' {N : Type*} [AddCommMonoid N] {a : N} {n : ℕ} (hn : 0 < n) :
+    MLe a (n • a) := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  exact ⟨m • a, (succ_nsmul' a m).symm⟩
+
 /-! ## ★1. `ι p 0 = 0` -/
 
 /-- ★`ι p` は `0` を `0` に送る(`p` 成分での加法性から)。 -/
@@ -150,6 +158,56 @@ theorem eq_zero_of_mle_of_supp_disjoint (H : IsPerfFactorialWith M ι) {x y d : 
   refine eq_zero_of_supp_empty H (Set.eq_empty_iff_forall_notMem.mpr fun p hp => ?_)
   exact absurd (Set.eq_empty_iff_forall_notMem.mp hdisj p)
     (by simp only [not_not]; exact ⟨supp_mono_of_mle H hdx hp, supp_mono_of_mle H hdy hp⟩)
+
+/-! ## ★4. 素点の担い手 `p ∪ {0}` の上での `factorMap`
+
+★★**`p` の担い手の元の台は `{p}` に収まる** —— これが
+「primary ⟺ 台が 1 点」の `⟸` の芯である。 -/
+
+/-- ★`p` の担い手の上では `factorMap` は `ι p` そのもの。 -/
+theorem factorMap_pCarrier_self (H : IsPerfFactorialWith M ι) {P : Prime M} {x : Pf M}
+    (hx : x ∈ pCarrierPf M P) : factorMap ι x P = ι P x := by
+  refine le_antisymm ?_ ?_
+  · refine boundSup_le (ι P) (zero_mem_pCarrierPf P) x (fun y hy => ?_)
+    exact H.embedMono P hy.1 hx hy.2
+  · exact le_boundSup (ι P) _ x (H.bounded x P) ⟨hx, mle_refl x⟩
+
+/-- ★★**別の素点の担い手は `p` の担い手の下に無い**。
+
+★`b'`(類 `q`)と `b`(類 `p`)について `b' ⪯ b` が出てしまうので、
+`toPrime_eq_iff` で `q = p` になり矛盾する。 -/
+theorem eq_zero_of_bound_pCarrier_other (hsharp : IsSharp M) {P Q : Prime M} (hPQ : Q ≠ P)
+    {x : Pf M} (hx : x ∈ pCarrierPf M P) {y : Pf M}
+    (hy : y ∈ Bound (Pf M) (pCarrierPf M Q) x) : y = 0 := by
+  obtain ⟨hyQ, hyle⟩ := hy
+  rcases hyQ with ⟨m, b', hb', hmy⟩ | hy0
+  · rcases hx with ⟨n, b, hb, hnx⟩ | hx0
+    · exfalso
+      obtain ⟨c, hc⟩ := hyle
+      have h1 : MLe (Pf.of b') (((m : ℕ+) : ℕ) • x) := by
+        refine ⟨((m : ℕ+) : ℕ) • c, ?_⟩
+        rw [← hmy, ← smul_add, hc]
+      have h2 : MPrec (Pf.of b') x := ⟨((m : ℕ+) : ℕ), m.2, h1⟩
+      have h3 : MPrec x (Pf.of b) := by
+        refine ⟨1, one_pos, ?_⟩
+        rw [one_smul, ← hnx]
+        exact mle_nsmul_self' n.2
+      have h4 : MPrec b' b := mprec_pf_of_iff.mp (mprec_trans h2 h3)
+      obtain ⟨hb'p, hb'e⟩ := hb'
+      obtain ⟨hbp, hbe⟩ := hb
+      exact hPQ (by rw [← hb'e, ← hbe]; exact (toPrime_eq_iff hb'p hbp).mpr h4)
+    · rw [hx0] at hyle
+      obtain ⟨c, hc⟩ := hyle
+      exact Pf.isSharp_pf hsharp y ⟨⟨y, c, hc, by rw [add_comm]; exact hc⟩, rfl⟩
+  · exact hy0
+
+/-- ★★**`p` の担い手の元の台は `{p}` に収まる**。 -/
+theorem factorMap_pCarrier_other (H : IsPerfFactorialWith M ι) (hsharp : IsSharp M)
+    {P Q : Prime M} (hPQ : Q ≠ P) {x : Pf M} (hx : x ∈ pCarrierPf M P) :
+    factorMap ι x Q = 0 := by
+  refine le_antisymm ?_ bot_le
+  refine boundSup_le (ι Q) (zero_mem_pCarrierPf Q) x (fun y hy => ?_)
+  rw [eq_zero_of_bound_pCarrier_other hsharp hPQ hx hy, iota_zero H]
 
 /-! ## ★出典の紐付け(条つき) -/
 

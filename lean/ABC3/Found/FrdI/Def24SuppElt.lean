@@ -121,6 +121,106 @@ theorem eq_zero_of_mle_of_suppElt_disjoint (H : IsPerfFactorialWith M ι)
     (by simp only [not_not]
         exact ⟨suppElt_mono_of_mle H hda hp, suppElt_mono_of_mle H hdb hp⟩)
 
+/-! ## ★3. ★★★**primary ⟺ 台が 1 点**
+
+★★これが原文の「the structure of the `Φ(A)_p`」の中身であり、
+`Proposition 4.1, (ii)–(v)` の単系層はすべてここに帰着する。 -/
+
+theorem suppElt_zero (H : IsPerfFactorialWith M ι) : SuppElt ι (0 : M) = ∅ := by
+  rw [suppElt_eq, map_zero, factorMap_zero H]
+  ext p
+  simp [Supp]
+
+theorem suppElt_nsmul (H : IsPerfFactorialWith M ι) (a : M) {n : ℕ} (hn : 0 < n) :
+    SuppElt ι (n • a) = SuppElt ι a := by
+  induction n with
+  | zero => omega
+  | succ m ih =>
+    rcases Nat.eq_zero_or_pos m with hm | hm
+    · subst hm; simp
+    · rw [succ_nsmul, suppElt_add H, ih hm, Set.union_self]
+
+theorem suppElt_mono_of_mprec (H : IsPerfFactorialWith M ι) {a b : M} (h : MPrec a b) :
+    SuppElt ι a ⊆ SuppElt ι b := by
+  obtain ⟨n, hn, c, hc⟩ := h
+  have h1 : SuppElt ι a ⊆ SuppElt ι (n • b) := suppElt_mono_of_mle H ⟨c, hc⟩
+  rwa [suppElt_nsmul H b hn] at h1
+
+theorem suppElt_ne_empty (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {a : M} (ha : a ≠ 0) : SuppElt ι a ≠ ∅ :=
+  fun h => ha (eq_zero_of_suppElt_empty H hdiv h)
+
+/-- ★★★**primary な元の台は 1 点**。
+
+★2 点あれば片方だけを残す分解 `a = y + z` が取れ、`y ⪯ a ⪯ y` から
+`Supp a ⊆ Supp y = {P}` になって矛盾する。 -/
+theorem suppElt_singleton_of_primary (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {a : M} (hp : IsPrimaryElt a) :
+    ∃ P : Prime M, SuppElt ι a = {P} := by
+  obtain ⟨P, hP⟩ : ∃ P, P ∈ SuppElt ι a :=
+    Set.nonempty_iff_ne_empty.mpr (suppElt_ne_empty H hdiv hp.1)
+  refine ⟨P, Set.eq_singleton_iff_unique_mem.mpr ⟨hP, fun P' hP' => ?_⟩⟩
+  by_contra hne
+  obtain ⟨y, z, hsum, hy, hz⟩ := exists_split_suppElt H hperf hdiv a {P}
+  have hyP : P ∈ SuppElt ι y := by rw [hy]; exact ⟨rfl, hP⟩
+  have hy0 : y ≠ 0 := by
+    intro h0
+    rw [h0, suppElt_zero H] at hyP
+    exact hyP
+  have hay : MPrec a y := hp.2 y hy0 ⟨1, one_pos, z, by rw [one_smul]; exact hsum.symm⟩
+  have hsub : SuppElt ι a ⊆ SuppElt ι y := suppElt_mono_of_mprec H hay
+  rw [hy] at hsub
+  exact hne (hsub hP').1
+
+/-- ★`n • a` が primary なら `a` も primary(`a ⪯ n•a ⪯ a` だから)。 -/
+theorem isPrimaryElt_of_nsmul {a : M} {n : ℕ} (hn : 0 < n) (ha : a ≠ 0)
+    (h : IsPrimaryElt (n • a)) : IsPrimaryElt a := by
+  have h1 : MPrec a (n • a) := ⟨1, one_pos, by rw [one_smul]; exact mle_nsmul_self' hn⟩
+  exact ⟨ha, fun c hc hca => mprec_trans h1 (h.2 c hc (mprec_trans hca h1))⟩
+
+/-- ★★★**台が 1 点なら primary**(`suppElt_singleton_of_primary` の逆)。
+
+★★手: `factorMem` で `p` 成分を実現する `x ∈ pCarrierPf M P` を取り、
+`factorMap_pCarrier_self` / `factorMap_pCarrier_other` で
+**`factorMap x = factorMap (of a)`** を出し、`factorInj` で `x = of a`。
+すると `n • a` が(類 `P` の)primary な元になり、`isPrimaryElt_of_nsmul` で降りる。 -/
+theorem isPrimaryElt_of_suppElt_singleton (H : IsPerfFactorialWith M ι)
+    (hdiv : IsDivisorial M) {a : M} (ha : a ≠ 0) {P : Prime M}
+    (hsupp : SuppElt ι a = {P}) : IsPrimaryElt a := by
+  have hP : factorMap ι (Pf.of a) P ≠ 0 := by
+    have h : P ∈ SuppElt ι a := by rw [hsupp]; rfl
+    exact h
+  obtain ⟨x, hxmem, hxval⟩ := H.factorMem (Pf.of a) P
+  have heq : factorMap ι x = factorMap ι (Pf.of a) := by
+    funext Q
+    by_cases hQ : Q = P
+    · subst hQ
+      rw [factorMap_pCarrier_self H hxmem, hxval]
+    · rw [factorMap_pCarrier_other H hdiv.2 hQ hxmem]
+      by_contra hc
+      refine hQ ?_
+      have h : Q ∈ SuppElt ι a := fun h0 => hc h0.symm
+      rw [hsupp] at h
+      exact h
+  have hxa : x = Pf.of a := H.factorInj heq
+  have hx0 : x ≠ 0 := by
+    intro h0
+    rw [h0, factorMap_zero H] at heq
+    exact hP (by rw [← congrFun heq P]; rfl)
+  rcases hxmem with ⟨n, b, hb, hnx⟩ | hx0'
+  · obtain ⟨hbp, -⟩ := hb
+    rw [hxa, ← map_nsmul] at hnx
+    have hnab : ((n : ℕ+) : ℕ) • a = b := Pf.of_injective_of_divisorial hdiv hnx
+    exact isPrimaryElt_of_nsmul n.2 ha (hnab ▸ hbp)
+  · exact absurd hx0' hx0
+
+/-- ★★★★**primary ⟺ 台が 1 点**。 -/
+theorem isPrimaryElt_iff_suppElt_singleton (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {a : M} (ha : a ≠ 0) :
+    IsPrimaryElt a ↔ ∃ P : Prime M, SuppElt ι a = {P} :=
+  ⟨suppElt_singleton_of_primary H hperf hdiv,
+    fun ⟨_, hP⟩ => isPrimaryElt_of_suppElt_singleton H hdiv ha hP⟩
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def Pf.of_injective_of_divisorial.src : ABC3.Meta.Source :=
