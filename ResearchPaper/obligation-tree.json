@@ -113,10 +113,10 @@
    "track": "Arakelov",
    "code": "B2",
    "ja": "Cartier 因子 → 可逆層 O_X(D)",
-   "fieldsDone": 12,
+   "fieldsDone": 13,
    "fieldsTotal": 14,
-   "blocks": "148-195 済 + 残り 11-18",
-   "note": "2026-08-19: 14 欄中 12 欄。第 148-195 の 48 ブロック。残りは isCartierDivisor_comap / ofDivisor_pullback の 2 欄で、comap のアフィン記述(第 195 で出た)を一般の X へ持ち上げるのに「可逆性の Zariski 局所性」(mathlib の TODO)が要る。見積もり 11-18 ブロック。Interface は 3 回修正した(§9-146 / §9-206 / §9-209)——いずれも充足しようとして誤りが見つかった。"
+   "blocks": "148-202 済 + 残り 6-12",
+   "note": "2026-08-19: 14 欄中 13 欄。第 148-202 の 55 ブロック。残りは ofDivisor_pullback のみで、f^* 𝒪(D) ≅ 𝒪(D.comap f) を要する。道: 随伴で射を作り、アフィンの対で f^*(idealSheaf D) = Γ(X,A) ⊗_{Γ(Y,B)} D.ideal B と同定して第 183(平坦なら底変換は拡大と一致)で全単射。見積もり 6-12 ブロック。副産物として mathlib の TODO『可逆性は Zariski 局所的』を第 196-200 で埋めた。"
   },
   {
    "name": "PicSpecData",
@@ -256,7 +256,7 @@
    "obligations": 9,
    "fields": 76,
    "done": 3,
-   "blocksDone": 195,
+   "blocksDone": 202,
    "blocksRemaining": "約 180-260"
   },
   "Galois": {
