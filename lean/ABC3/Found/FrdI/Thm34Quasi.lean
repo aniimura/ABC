@@ -560,4 +560,31 @@ def degFr_map_eq_of_square.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — 四角形を越えた次数の移送",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F2) の伝搬本体** —— 四角形があれば admissible 性が移る。
+
+★`A` が admissible で、`ζ ≫ φ = ψ ≫ ζ` となる同次数の Frobenius 型自己射があれば、
+`B` も admissible である。 -/
+theorem admissible_of_square (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : B ⟶ A) (φ : A ⟶ A) (ψ : B ⟶ B)
+    (hsq : ζ ≫ φ = ψ ≫ ζ)
+    (hφ : IsFrobeniusType P₁ φ) (hdφ : P₁.degFr φ = p₁)
+    (hψ : IsFrobeniusType P₁ ψ) (hdψ : P₁.degFr ψ = p₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hA : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B := by
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map ψ) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ ψ θ hψ hθ (by rw [hdψ, hdθ])
+  have h2 : P₂.degFr (Ψ.map φ) = P₂.degFr (Ψ.map ψ) :=
+    degFr_map_eq_of_square Ψ ζ φ ψ hsq
+  have h3 : P₂.degFr (Ψ.map φ) = p₂ := (hA φ hφ hdφ).2
+  rw [← h1, ← h2, h3]
+
+def admissible_of_square.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — 四角形に沿う admissible 性の伝搬",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
