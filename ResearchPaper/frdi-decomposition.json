@@ -821,18 +821,58 @@
         {
           "id": "standard-type-def",
           "size": "中",
-          "status": "todo",
+          "status": "done",
           "deps": [],
           "title": "standard 型 / rationally standard 型 の定義を入れる",
-          "note": "★★**在庫に無い**(2026-08-18 実測。`IsPreModelType` はあるが `standard` / `rationally standard` は無い)。★`Definition 4.6` / `4.7` を先に入れる必要がある。"
+          "note": "★★**測定の訂正(2026-08-18)**: 「在庫に無い」と書いたが、**両方とも既にあった** —— `Def31.lean:105` の `IsOfStandardType`(6 フィールド)と `Def45.lean:188` の `IsOfRationallyStandardType`(4 フィールド)。★grep のパターンが外れていただけである(メモリの「「導けない」と書く前に在庫を検索する」に該当)。"
+        },
+        {
+          "id": "iii-a-isotropic",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "i-src"
+          ],
+          "title": "(a) quasi-isotropic ＋ Frobenius-isotropic",
+          "note": "★`𝒞^istr` は全対象 isotropic なので、`birat_isIsotropic_iff` で birat も isotropic。isotropic ⇒ quasi-isotropic。"
+        },
+        {
+          "id": "iii-b-compact",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "i-src"
+          ],
+          "title": "(b) group-like なので Frobenius-compact 対象が要る",
+          "note": "★★`𝒞^birat` は**常に group-like**(`birat_isOfGroupLikeType`)なので、この条件は**必ず発動する**。★rationally standard の (b)「`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つ」から`(𝒞^istr)^birat` へ渡す。★在庫: `Rmk451Birat.lean` の `istr_unTrBiratCompact`。"
+        },
+        {
+          "id": "iii-c-frobnorm",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "i-src"
+          ],
+          "title": "(c) Frobenius-normalized 型",
+          "note": "★rationally standard の (a) にある birationally Frobenius-normalized 型から。★`isFrobeniusNormalized_of_birat` が使える見込み。"
+        },
+        {
+          "id": "iii-de",
+          "size": "小",
+          "status": "todo",
+          "deps": [],
+          "title": "(d) 𝒟 の FSMFF / (e) Φ の non-dilating",
+          "note": "★(d) は**底の圧が変わらない**のでそのまま。★(e) は `𝒞^birat` の `Φ` が `trivialOn D`(全値 `PUnit`)なので**自明**。"
         },
         {
           "id": "iii-src",
           "size": "小",
           "status": "todo",
           "deps": [
-            "standard-type-def",
-            "i-src"
+            "iii-a-isotropic",
+            "iii-b-compact",
+            "iii-c-frobnorm",
+            "iii-de"
           ],
           "title": "(iii) rationally standard ⇒ (𝒞^istr)^birat が standard",
           "note": ""
