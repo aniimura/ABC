@@ -79,3 +79,21 @@ metadata:
   与えているため、この対応を `IsCharacteristicSplitting` の条件として書く必要がある。
   これが済めば `Prop25iii.lean` の `IsOfIsotropicType` を外す道が開く。
 - 関連: [[frdi-prop21-quantifier-false]] / [[lean-build-check-discipline]]。
+
+## ★★★2026-08-18: 同じセッションで **5 回**外した
+
+FrdI §3/§4 を進める 1 セッションで、「無い」と見積もったものが
+在庫にあった例が 5 件出た:
+
+1. `endo_isCoAngular`(`Prop110.lean`)—— 自己射の co-angular 性
+2. `IsOfStandardType` / `IsOfRationallyStandardType`(`Def31`/`Def45`)
+3. `Remark 3.1.1`(`Remark311.lean` に丸ごとあった)
+4. `isDivIdentity_of_isBaseIdentity`(`MorphismTypes.lean:530`)
+5. `isGroupLikeObj_of_baseIso`(`Prop110.lean:2733`)
+
+★★**共通する失敗の形**: grep のパターンを
+「自分が付けそうな名前」で探している。
+★★★**対策**: 実装する前に、目標の命題を
+ の**複数の語彙**で grep する。
+それでも見つからなければ**書いてみて Lean の重複エラーに聞く**のが確実である
+(5 件中 2 件は重複エラーで気づいた)。
