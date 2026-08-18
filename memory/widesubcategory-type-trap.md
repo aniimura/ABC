@@ -30,3 +30,16 @@ metadata:
 違って見えるだけ**だった。
 
 関連: [[lean-build-check-discipline]]
+
+★★★**2026-08-19、同じ罠の別の顔**: `BiratCat P G := C`(型シノニム)への関手を
+`where` で組むとき、`obj A := nfObj P G.core d (biratDown P G A)` と書くと
+**`nfObj` の暗黙の `{C}` が期待型 `BiratCat P G` に統一され**、
+`[Category.{v2} (BiratCat P G)]` が要求されて落ちる。
+★エラーは `failed to synthesize Category.{v2, u2} (BiratCat P G)` と出るので
+**universe の問題に見えるが、実際は暗黙引数の統一**である。
+
+**対策**: `obj A := (nfObj … : C)` と**素の型で型注釈する**。
+★4 回別の手(universe 明示・`@Functor`・`show … from`・section 移動)を試して
+全部外れ、型注釈 1 つで通った。
+★★「universe が合わない」と見えたら、**先に「暗黙引数がどちらの型に
+統一されたか」を疑う**こと。
