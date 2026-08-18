@@ -537,7 +537,7 @@ def exists_admissible_F1.src : ABC3.Meta.Source :=
 /-! ## ★★★(F2) の次数移送
 
 原文 (FrdI p.65):
-> and ψ are irreducible. Thus, by Proposition 1.14, (iv), we obtain that φ
+> applying Proposition 1.14, (iv), to commutative diagrams such as the one given in
 
 ★★原典は `Proposition 1.11, (iii)` で四角形
 `ψ₁ ∘ ζ₁ = ζ₁ ∘ φ₁` を作り、像でも四角形が保たれることから

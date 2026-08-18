@@ -7507,3 +7507,38 @@ B2 の在庫を実測した結果:
 | 3 | `unitEnd` の**行き先を `S`(RingCat 綴り)にする**——`Module.compHom` は後で綴りを合わせる |
 
 ★★★★3 が本命——**綴りを混ぜないのが一番安い**。
+
+## §9-180 —— ★★★★★★**単位対象の自己射環**(第 164 ブロック、2026-08-18)
+
+    unitEnd : End (𝟙_ (PresheafModulesOn X U)) →+* Γ(X, U)
+
+### ★★★★逃げ道——**型付き恒等写像を橋にする**
+
+`(𝟙_).obj t` の台は `Γ(X,U)` だが `One` も `Mul` も `SMul` も綴りが違うと見つからない。
+★**5 通り試して全滅**した後、
+
+    def unitVal (x : ((𝟙_ …).obj t : Type u)) : (Γ(X,U) : Type u) := x
+
+という**型付き恒等写像**を置いたら
+
+    unitVal (a • b) = unitVal a * unitVal b     ★★ rfl
+    unitVal (unitOne) = 1                       ★★ rfl
+
+が**両方 `rfl`** で通った。
+
+### 試して全滅した手
+
+| 手 | 結果 |
+|---|---|
+| `LinearMap.mul` / `lsmul` | `HMul` / `HSMul` が無い |
+| **型注釈**で綴りを合わせる | ★注釈は推論型を**変えない**(本 session 3 例目) |
+| `inferInstanceAs` で `CommRing` を足す | ★★**`SMul` の経路が 2 本になり `rw` が当たらなくなった** |
+| RingCat 綴りに統一 | `One` が見つからない |
+| **型付き恒等写像** | ★★★**通った** |
+
+### ★★★★教訓
+
+    instance を足すより、型付き恒等関数で橋を架ける方が安全。
+    instance は既存の経路と競合しうるが、恒等関数は競合しない。
+
+★これは [[ring-instance-two-paths]] の**逃げ道そのものの改良**である。
