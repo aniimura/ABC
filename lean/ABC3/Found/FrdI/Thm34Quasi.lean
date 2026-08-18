@@ -418,12 +418,12 @@ theorem isGroupLikeObj_of_baseIsoD {Dd : Type u} [Category.{v} Dd] {Cc : Type u2
 def isGroupLikeObj_of_baseIsoD.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 30,
     item := "Proposition 1.8, (iii) — 底の同型を越えた group-like 性",
-    sectionId := "frdi-prop-1-8" }
+    sectionId := "frdi-prop-1-8-iii" }
 
 /-! ## ★★★★(F1) の非 group-like の場合を束ねる
 
-原文 (FrdI p.65):
-> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a
+原文 (FrdI p.64):
+> (p1, p2)-admissible object of C1.
 
 ★部品は全部揃っているので、ここで束ねる。 -/
 
