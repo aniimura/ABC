@@ -398,24 +398,24 @@
           "note": "★済(2026-08-18): `phiBiratAt_map_le`。`δ ∈ 𝒪^×(B)` を `e ≫ δ ≫ e⁻¹` へ共役し、`biratDivGp_comp'` を 2 回。★鍵は `Div^gp(𝟙)=0` から得る `Φ^gp(Base e)(Div^gp e⁻¹) + Div^gp e = 0`。"
         },
         {
-          "id": "phibirat-samebase",
+          "id": "phibirat-otristar",
           "size": "中",
           "status": "todo",
           "deps": [
             "phibirat-iso-transport"
           ],
-          "title": "同じ底の対象は 𝒞^birat で同型か —— ★測定: 素朴な形は偽の公算が大きい",
-          "note": "★★★**負の測定(2026-08-18)——記録して先の無駄を防ぐ**。\n手順はこう考えた: `preStepSpan` で pre-step の span `φ : X → A`, `ψ : X → B` を取り、`isIso_of_preStep_of_isGroupLikeObj` で両方を同型にする。\n★**しかしその補題は `isotropic` を要求する**(co-angular を `Proposition 1.4, (i)` から取るため)。`𝒞^birat` の対象は (iv) の辞書(`birat_isIsotropic_iff`)より**`𝒞` 側が isotropic なときに限って** isotropic なので、一般には供給されない。\n★★★**決め手**: (iv) の辞書は「`𝒞` の射が `𝒞^birat` で**同型** ⇔ `𝒞` で **co-angular** pre-step」と言う。つまり **co-angular でない step は `𝒞^birat` でも同型にならない**。その両端は同じ底を持つので、「同じ底⇒`𝒞^birat` で同型」は**一般には言えない**。\n★閉じるなら、`𝒪^×(A^birat)` の像がそれでも一致することを**別の手で**示すか、下の `phibirat-dfunct-lift` に乗り換える。\n★副産: `IsCoAngular` の定義に `γ=𝟙, β=φ, α=𝟙` を入れると**co-angular な isometric pre-step は同型**が直ちに出る。"
+          "title": "𝒞^birat に Prop 2.2 (ii)(iii) を適用して 𝒪^×(−) を 𝒟* 上の関手にする",
+          "note": "★★★**原典の道筋を読んで確定(2026-08-18)**。FrdI p.85:\n> Now assertion (iii) follows immediately from the existence of the functor\n★(iii) は「(i) の関手の存在」＋**`Proposition 1.5, (ii)`** から従い、核は **`Definition 1.3, (vi)`** から出ると書いてある。\n★★さらに (ii) の本文が「the functor `𝒪^×(−)` **on 𝒟** associated to the Frobenioid `𝒞^birat` [cf. Proposition 2.2, (ii), (iii)]」と言う。\n★★★つまり **`𝒟` 上の関手性は `Proposition 2.2` が供給する**のであって、「同じ底なら同型」を証明する必要はない。\n★**在庫はすでにある**: `Prop22Star.lean` の `otriStar : (InducedCategory D (istrBase P))ᵒᵖ ⥤ MonCat`(Prop 2.2 (ii))、`otimes_eq_units` / `dstarMap_otimes_mem`(同 (iii)-1、`𝒪^×` は部分関手)、`Div` が関手的準同型であること(同 (iii)-3)。\n★やること: これらを `P := biratPre P G`, `G := biratFrobenioid` に適用する。"
         },
         {
-          "id": "phibirat-dfunct-lift",
-          "size": "中",
+          "id": "phibirat-image-subfunctor",
+          "size": "小",
           "status": "todo",
           "deps": [
-            "phibirat-iso-transport"
+            "phibirat-otristar"
           ],
-          "title": "baseSurj の持ち上げで Φ^birat を 𝒟 上に定義する(代替経路)",
-          "note": "★`Definition 1.3, (i)(a)` の **`baseSurj`** は、各 `Y : 𝒟` に対し**Frobenius-trivial** な `A` と `Base A ≅ Y` を与える。\n★選択で持ち上げを固定して `Φ^birat(Y) := Φ^birat(A)` と定義すれば、**定義には独立性が要らない**。★同型による輸送(`phiBiratAt_map_le`、済)で `Base A ≅ Y` の差は吸収できる。\n★★残るのは、任意の `A` で `𝒪^×(A^birat) ↠ Φ^birat(Base A)` が全射になることで、これは `phibirat-factor` と**同じ内容**になる見込み。★Frobenius-trivial を使えることが利き、co-angular 性が取りやすい可能性がある。"
+          "title": "自然変換の像として Φ^birat ⊆ Φ^gp を組む",
+          "note": "★`𝒪^×(−)` も `Φ^gp(−)` も `𝒟*` 上の関手で、`Div^gp` が**自然変換**なので、像は自動的に部分関手になる。★既に取った `phiBiratAt`(各点の像)と、同型輸送 `phiBiratAt_map_le` がその材料。"
         },
         {
           "id": "phibirat-dfunct",
@@ -423,9 +423,9 @@
           "size": "小",
           "status": "todo",
           "deps": [
-            "phibirat-dfunct-lift"
+            "phibirat-image-subfunctor"
           ],
-          "note": "★輸送(済)＋同じ底なら同型から、`Base A` にしか依らないことが出る。★そのあと `Φ^gp` の射で保たれることを確かめて部分関手にする。"
+          "note": "★`phibirat-image-subfunctor` が済めば、これは包装だけになる見込み。"
         },
         {
           "id": "phibirat-factor",
@@ -435,7 +435,7 @@
           "deps": [
             "phibirat-dfunct"
           ],
-          "note": "★★★**測定で分かった重い点**(2026-08-18): 原文は `Φ^birat` を「経由するような最小の部分関手」として定め、**`𝒪^×(A^birat) ↠ Φ^birat(A^birat)` の全射性を定理として主張**する。★我々は逆に `Φ^birat` を**像として定義**したので全射性は無償になるが、その分**「経由する」側を証明する必要がある** —— 内容は同じで、場所が移っただけ。★要は「任意の `f : A → B` に対し `biratDivGp f` が像に入る」。★未確定の点: `A ≠ B` のときどの対象の `Φ^birat` に入れるのかを、`𝔽_Φ` の射の定義に戻って確かめるところから始める。"
+          "note": "★★★**測定で分かった重い点**(2026-08-18): 原文は `Φ^birat` を「経由するような最小の部分関手」として定め、**`𝒪^×(A^birat) ↠ Φ^birat(A^birat)` の全射性を定理として主張**する。★我々は逆に `Φ^birat` を**像として定義**したので全射性は無償になるが、その分**「経由する」側を証明する必要がある** —— 内容は同じで、場所が移っただけ。★要は「任意の `f : A → B` に対し `biratDivGp f` が像に入る」。★未確定の点: `A ≠ B` のときどの対象の `Φ^birat` に入れるのかを、`𝔽_Φ` の射の定義に戻って確かめるところから始める。\n★★**2026-08-18 再測**: 原典はここを「immediately」としており、`Proposition 1.5, (ii)`(`𝒪^▷(A) ≅ Φ(A)`、**実装済**)で `Φ^gp(X)` を `𝔽_{Φ^gp}` の `𝒪^▷(X)` と同一視できることが鍵らしい。★サイズは `phibirat-otristar` を通してから再評価する。"
         },
         {
           "id": "phibirat-uniq",
