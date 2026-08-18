@@ -158,4 +158,50 @@ def homPfMap.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Ψ^pf の射の写像",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★段 3 —— 関手則 -/
+
+/-- ★★**添字圏の始対象は始対象に写る** —— `Ψ.map 𝟙 = 𝟙` の分だけの話。 -/
+theorem idxPfMap_idxOne (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    (A B : C₁) :
+    (idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj (idxOne P₁ F₁ A B)
+      = idxOne P₂ F₂ (Ψ.obj A) (Ψ.obj B) :=
+  congrArg Under.mk (WideSubcategory.hom_ext _ (Prod.ext (Ψ.map_id A) (Ψ.map_id B)))
+
+/-- ★★★★**`𝒞 → 𝒞^pf` と可換** —— `toHomPf` は `toHomPf` に写る。
+
+★これがそのまま `map_id`(`𝟙 = toHomPf 𝟙`)を与える。 -/
+theorem homPfMap_toHomPf (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {A B : C₁} (φ : A ⟶ B) :
+    homPfMap F₁ F₂ Ψ hFT hdegEq A B (toHomPf (F := F₁) φ)
+      = toHomPf (F := F₂) (Ψ.map φ) := by
+  -- ★対象の等式で `rw` すると motive が壊れるので、
+  --   **添字圏の射を 1 本作って `HomPf.mk_map` で移す**。
+  let hv : idxOne P₂ F₂ (Ψ.obj A) (Ψ.obj B)
+      ⟶ (idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj (idxOne P₁ F₁ A B) :=
+    Under.homMk (𝟙 _) (by
+      refine (Category.comp_id _).trans ?_
+      exact (WideSubcategory.hom_ext _ (Prod.ext (Ψ.map_id A) (Ψ.map_id B))).symm)
+  have ht : idxTransport P₂ F₂ hv (Ψ.map φ) = Ψ.map φ :=
+    frobTransport_eq _ _ _ _ _ _ _ (by
+      show Ψ.map φ ≫ 𝟙 _ = 𝟙 _ ≫ Ψ.map φ
+      rw [Category.comp_id, Category.id_comp])
+  calc homPfMap F₁ F₂ Ψ hFT hdegEq A B (HomPf.mk (idxOne P₁ F₁ A B) φ)
+      = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj (idxOne P₁ F₁ A B)) (Ψ.map φ) :=
+        homPfMap_mk F₁ F₂ Ψ hFT hdegEq (idxOne P₁ F₁ A B) φ
+    _ = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj (idxOne P₁ F₁ A B))
+          (idxTransport P₂ F₂ hv (Ψ.map φ)) :=
+        congrArg (HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj (idxOne P₁ F₁ A B))) ht.symm
+    _ = HomPf.mk (idxOne P₂ F₂ (Ψ.obj A) (Ψ.obj B)) (Ψ.map φ) := HomPf.mk_map hv (Ψ.map φ)
+
+def homPfMap_toHomPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ^pf は 𝒞 → 𝒞^pf と可換",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

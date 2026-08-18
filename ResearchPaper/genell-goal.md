@@ -9284,3 +9284,44 @@ mathlib の在庫(`ψ_n` と次数計算は在る、`ω_n` は TODO)から、葉
 
 ★★★**L1(`ω_n` の構成)が真の葉**である——mathlib が TODO として残しており、
 FLT もそこで止まっている。★これが Galois 側の**最初の壁ではなく最初の道**である。
+
+## §9-235 ★★★★★L1(`ω_n`)の障害は**半分消えていた**(2026-08-19 実測)
+
+§9-234 で「L1(`ω_n` の構成)が真の葉、mathlib の TODO」と書いた。
+★★external の `_refs` で mathlib を直に読んだところ、**障害の 1 つは既に解決済**であった。
+
+### `ω_n` の定義に要る 2 つの障害(mathlib の docstring より)
+
+    ωₙ := (ψ₂ₙ / ψₙ - ψₙ ⬝ (a₁φₙ + a₃ψₙ²)) / 2
+
+| 障害 | docstring の説明 | ★実測 |
+|---|---|---|
+| (1) `ψₙ ∣ ψ₂ₙ` | 「帰納法で示せる」 | ★★**mathlib に既に在る** |
+| (2) `2 ∣ (…)` | 「標数 0 の普遍環で示し、普遍射で降ろす」 | ★無い |
+
+★★★**(1) は `NumberTheory/EllipticDivisibilitySequence.lean` に在る**:
+
+    complEDS₂ b c d k          -- 「2-補完列」
+    normEDS_mul_complEDS₂ :  normEDS k * complEDS₂ k = normEDS (2 * k)
+    normEDS_dvd_normEDS_two_mul : normEDS k ∣ normEDS (2 * k)
+
+★docstring(`DivisionPolynomial/Basic.lean`)は「示せる」と書いてあるが、
+**別ファイルで既に示されている**——`ψ₂ₙ / ψₙ` は `complEDS₂` **そのもの**である。
+
+### ★★したがって L1 は「2 で割る」1 点に絞られた
+
+    ωₙ := (complEDS₂(n) - ψₙ ⬝ (a₁φₙ + a₃ψₙ²)) / 2
+
+残るのは `2 ∣ (complEDS₂(n) - ψₙ ⬝ (a₁φₙ + a₃ψₙ²))` を示すことだけである。
+★普遍環 `ℤ[A₁,…,A₆][X,Y]`(標数 0、整域)で示して普遍射で降ろす筋は
+mathlib の docstring が明示している。
+
+★★★見積もりを **40–80 → 15–30 ブロック**に更新する(G1 全体)。
+内訳: `ω_n`(8–15)+ 乗法公式(4–8)+ 次数と分離性(3–7)。
+
+### ★★★★★測定の教訓 —— **docstring の「TODO」を額面で受け取らない**
+
+`DivisionPolynomial/Basic.lean` は `ωₙ` を TODO と書き、FLT も
+「分多項式の理論が要る」と書いている。★しかし**依存の半分は別ファイルで既に済んでいた**。
+★★`external/_refs` で mathlib 全体を grep できるようにしたことが、
+**この 1 回で 25–50 ブロックぶんの見積もり差**を生んだ。
