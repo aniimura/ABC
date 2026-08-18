@@ -461,4 +461,35 @@ def exists_admissible_of_frobTrivial.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F1) — 非 group-like の場合",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F1) の group-like の場合** —— 任意の対象が admissible。
+
+★`psiN-F1-gl`(prime-Frobenius ＝ 既約な底同型)と
+`degFr_map_eq_of_sameDeg`(1 本から全部へ)を組む。 -/
+theorem exists_admissible_of_groupLike (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hgl₁ : IsOfGroupLikeType P₁)
+    (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hgl₂ : IsOfGroupLikeType P₂)
+    (hbiso : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f → IsBaseIsomorphism P₂ (e.functor.map f))
+    (A : C₁) {p₁ : ℕ+} (hp₁ : Nat.Prime ((p₁ : ℕ+) : ℕ)) :
+    ∃ p₂ : ℕ+, IsAdmissibleObj P₁ P₂ e.functor p₁ p₂ A := by
+  obtain ⟨B₀, ψ₀, hft₀, hd₀⟩ := F₁.frobDegSurj A p₁
+  have hpf₀ : IsPrimeFrobenius P₁ ψ₀ := ⟨hft₀, by rw [hd₀]; exact hp₁⟩
+  refine ⟨P₂.degFr (e.functor.map ψ₀), ?_⟩
+  intro B ψ hψ hdψ
+  have hsame : P₁.degFr ψ₀ = P₁.degFr ψ := by rw [hd₀, hdψ]
+  have hpf : IsPrimeFrobenius P₁ ψ := ⟨hψ, by rw [hdψ]; exact hp₁⟩
+  have hirr : IsIrreducibleMor ψ :=
+    ((isPrimeFrobenius_iff_irred_baseIso_of_groupLike P₁ G₁ hiso₁ hgl₁ ψ).mp hpf).1
+  refine ⟨?_, (degFr_map_eq_of_sameDeg F₁ e.functor ψ₀ ψ hft₀ hψ hsame).symm⟩
+  exact ((isPrimeFrobenius_iff_irred_baseIso_of_groupLike P₂ G₂ hiso₂ hgl₂
+    (e.functor.map ψ)).mpr
+      ⟨isIrreducibleMor_map e.functor hirr, hbiso ψ hψ.2⟩).1
+
+def exists_admissible_of_groupLike.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) (F1) — group-like の場合",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

@@ -7365,3 +7365,38 @@ B2 の在庫を実測した結果:
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–162 の 15 ブロック(**局所自明性まで完了**)
     次: 層の双対 → InvSheaf → ofDivisor → 3 法則
+
+## §9-176 —— 単位対象の「`c` 倍」自己射(第 163 ブロック、2026-08-18)
+
+    unitMul c = unitHomOfSection U (𝟙_) c
+
+★★**既にあった。**手で `app` と `naturality` を書こうとして 4 回失敗した後に気づいた
+——**単位対象の切断は `Γ(X,U)` そのもの**だから、第 108 がそのまま使える。
+
+### ★★★失敗の記録([[ring-instance-two-paths]] の 9 例目)
+
+| 試み | 落ちた理由 |
+|---|---|
+| `LinearMap.mul` で書く | `HMul Γ(X,W.left) ((𝟙_).obj W)` が無い |
+| `LinearMap.lsmul` で書く | `HSMul` も同様に無い |
+| 型注釈で綴りを合わせる | ★**型注釈は推論された型を変えない**(本 session 3 例目) |
+| `letI` + `inferInstanceAs` | 未着手(`unitHomOfSection` で解決したため) |
+
+★★★`𝟙_` の切断への作用は `CommRingCat` 綴りでは見つからず `RingCat` 綴りでのみ見つかる。
+`unitHomOfSection` はその差を**吸収している**。
+
+### 残りの設計(層の双対)
+
+    dualObj F U := ModuleCat.of _ ((restrictPresheafFunctor X U).obj F ⟶ 𝟙_)
+    c • φ := φ ≫ unitMul c
+
+★加群公理には `unitMul` の 3 補題が要る:
+
+| 補題 | 用途 |
+|---|---|
+| `unitMul (c + c') = unitMul c + unitMul c'` | 分配則 |
+| `unitMul (c * c') = unitMul c' ≫ unitMul c` | 結合則 |
+| `unitMul 1 = 𝟙` | 単位則 |
+
+★★その後、制限(第 57 の `restrict_trans` が `rfl` なのでそのまま)、
+層であること、評価射 `F ⊗ F^∨ → 𝒪` の同型性(第 115 の器具)。
