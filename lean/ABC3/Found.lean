@@ -65,6 +65,7 @@ import ABC3.Found.FrdI.Prop44Core
 import ABC3.Found.FrdI.Prop44Otri
 import ABC3.Found.FrdI.Prop44Ore
 import ABC3.Found.FrdI.Prop44Ker
+import ABC3.Found.FrdI.Prop44Equiv
 import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
