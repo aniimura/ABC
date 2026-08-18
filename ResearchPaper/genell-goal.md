@@ -5429,3 +5429,35 @@ mathlib の証明を写経できる。
 | 101 | 上の (a)/(b)/(c) のいずれか |
 | 102 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 103 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-106 —— `Over V` の site の在庫を測った(2026-08-18)
+
+★§9-105 の候補 (c)(`Over V` と開部分空間の site 同値)を測った。
+
+| 在庫 | 場所 | 内容 |
+|---|---|---|
+| `Opens.overEquivalence : Over U ≌ Opens ↥U` | `Topology/Sheaves/Over.lean` | ★**圏同値はある**(全 59 行、位相の比較は**無い**) |
+| `overEquiv (Y : Over X) : Sieve Y ≃ Sieve Y.left` | `CategoryTheory/Sites/Over.lean` | ★★**篩の対応はある** |
+| `(Over.forget X).IsContinuous (J.over X) J` | 同上 行 265 | ★★連続性の instance |
+| `(Over.forget X).IsCocontinuous (J.over X) J` | 同上 行 262 | ★★余連続性の instance |
+| `overEquiv_generate` / `overEquiv_ofArrows` | 同上 | ★被覆の生成の対応 |
+
+★★★**位相の比較(`(Opens.grothendieckTopology X).over V` と
+`Opens.grothendieckTopology ↥V` の一致)は mathlib に無い**が、
+`overEquiv` で**篩が対応する**ので、必要な議論は `Over V` の site で直接書ける。
+
+### ★★方針(確定)
+
+★候補 (c) は「位相の一致」を建てる分だけ遠い。
+★★**候補 (a) を採る**——第 90 ブロックの議論(基底で全単射 ⟹ 全体で同型)を
+`Over V` の site で書き直す。`overEquiv` があるので被覆篩の対応は取れる。
+
+### ★★★見積り
+
+| # | 内容 | 見積 |
+|---|---|---|
+| 101 | `Over V` の site で「基底で同型 ⟹ 同型」 | 2–3 |
+| 102 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` | 1–2 |
+| 103 | `tilde M` が `InvSheaf` / `equivPicRing` | 2 |
+
+★★**残り 5–7 ブロック**。B1 総計は **約 106**。
