@@ -240,4 +240,43 @@ def isFrobeniusNormalized_of_birat.src : ABC3.Meta.Source :=
     item := "Definition 4.5, (i) — birat-Frobenius-normalized なら Frobenius-normalized",
     sectionId := "frdi-def-4-5" }
 
+/-! ## ★`𝒪^▷(A)` から `𝒪^×(A^birat)` へ
+
+原文 (FrdI p.83):
+> determines an injection of groups O (A)gp →O×(Abirat). We shall refer to the
+
+★★★**測定(2026-08-18)**: `Definition 1.3, (iii)(b)`(`coAngularOfPreStep`)は
+「**co-angular pre-step が 1 本でもあれば、その 2 対象間の射はすべて co-angular**」
+と言う。★`𝟙 A` がそれなので、**`A` の自己射はすべて co-angular** である。
+★★これで `𝒪^▷(A)` の元は co-angular pre-step になり、
+`𝒞^birat` で**同型**になる(`birat_isIso_iff`)。
+★自己射の co-angular 性は既に `Prop110.lean` の `endo_isCoAngular` にある。 -/
+
+variable {P G} in
+/-- ★★`𝒪^▷(A)` の元は `𝒞^birat` で同型になる。 -/
+theorem otri_isIso_birat {A : C} (α : OTri P A) :
+    IsIso ((toBiratCat P G).map ((α : End A) : A ⟶ A)) :=
+  birat_isIso_of_coaPre _ (endo_isCoAngular P G.core _)
+    ⟨α.2.2, by
+      show IsIso (P.Base ((α : End A) : A ⟶ A))
+      rw [show P.Base ((α : End A) : A ⟶ A) = P.Base (𝟙 A) from α.2.1, P.Base_id]
+      infer_instance⟩
+
+variable {P G} in
+/-- ★★★**`𝒪^▷(A) → End(A^birat)` は単射**(忠実性から)。
+
+★これが原文の「an injection of groups」の**単系の層**である。 -/
+theorem otri_toBirat_injective {A : C} :
+    Function.Injective (fun α : OTri P A =>
+      (toBiratCat P G).map ((α : End A) : A ⟶ A)) := by
+  haveI : (toBiratCat P G).Faithful := toBiratCat_faithful
+  intro x y h
+  exact Subtype.ext ((toBiratCat P G).map_injective h)
+
+/-- ★locator —— `Proposition 4.4, (ii)` の単射の条(単系の層)。 -/
+def otri_toBirat_injective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (ii) — 𝒪^▷(A) の像への単射性",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI
