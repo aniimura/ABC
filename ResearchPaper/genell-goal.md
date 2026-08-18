@@ -9183,3 +9183,29 @@ instance 解決に失敗する——係数環の綴りが `X.ringCatSheaf.obj.ob
 | Interface の訂正 | ★**3 件**(いずれも反例つき) |
 | 測定 | ★**14 回**、外れ 2 件も記録 |
 | Galois | ★FLT 導入で**全面再測定**、G1 の律速を `#E[n]=n²` 1 本に特定 |
+
+## §9-231 §9-230 の教訓を**その場で回収した**(第 210 ブロック)
+
+第 202 の証明の中で使っていた連鎖を、**可逆性を経由せず**イデアルの等式として取り出した:
+
+| 定理 | 内容 |
+|---|---|
+| `comap_ideal_chain` | ★★★`Spec` の ⊤ で見た連鎖 |
+| `comap_fromSpec_top` | ★★`fromSpec` の ⊤ での `comap` |
+
+★★どちらも**既存の補題の並べ替え**で出た(`comap_decomp` + `comap_ideal_top`
++ `appTop_decomp`、および `ideal_comap_of_isOpenImmersion`)。
+
+★★★§9-230 で「中間結果を汎用の形で残すかどうかも設計判断」と書いた**直後に回収**できた
+——第 202 を書き直す必要はなく、**同じ部品を別の順で並べる**だけでよかった。
+★これは「証明を汎用化するコストは、部品が揃っていれば小さい」ことの実例である。
+
+### 残り(B2)——2 本の合成だけ
+
+    comap_ideal_chain(⊤ で見た等式)
+      + comap_fromSpec_top(両端の転送)
+      + comap_inv_eq_map / Ideal.map_map(合成の collapse)
+    ⟹ (D.comap f).ideal A = (D.ideal B).map appLE
+    ⟹ 第 209 の道具で全射 ⟹ 第 207 で同型 ⟹ ofDivisor_pullback
+
+★見積もり **1–2 ブロック**。
