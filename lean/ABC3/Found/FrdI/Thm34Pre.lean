@@ -544,5 +544,68 @@ theorem primeFrobCond_map (e : C₁ ≌ C₂)
 
 end PrimeFrob
 
+/-! ### ★共役不変性と両向きの移送 -/
+
+section Conj
+
+universe w7
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w7} D} (P : PreFrobenioid C Φ)
+
+include P in
+/-- ★★`PrimeFrobCond` は同型による共役で不変。
+
+★`θ.hom ≫ α` に条件を当て、`θ.inv` を前から掛けて戻すだけ。 -/
+theorem primeFrobCond_conj {A A' : C} (θ : A ≅ A') {φ : A ⟶ A}
+    (h : PrimeFrobCond C P φ) : PrimeFrobCond C P (θ.inv ≫ φ ≫ θ.hom) := by
+  intro B α hα
+  obtain ⟨B', ψ, β, hirr, hnps, hstβ, heq⟩ :=
+    h B (θ.hom ≫ α) (isStep_isIso_comp P θ.hom hα)
+  refine ⟨B', ψ, β, hirr, hnps, hstβ, ?_⟩
+  have h1 : θ.inv ≫ ((θ.hom ≫ α) ≫ ψ) = α ≫ ψ := by
+    rw [← Category.assoc, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  rw [← h1, heq]
+  simp only [Category.assoc]
+
+end Conj
+
+section PrimeFrob2
+
+universe w8 v9 u9 v10 u10
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w8} D₁} (P₁ : PreFrobenioid C₁ Φ₁)
+  {D₂ : Type u9} [Category.{v9} D₂] {C₂ : Type u10} [Category.{v10} C₂]
+  {Φ₂ : MonoidOn.{v9, u9, w8} D₂} (P₂ : PreFrobenioid C₂ Φ₂)
+
+include P₁ P₂ in
+/-- ★★★★**prime-Frobenius の圏論的条件は圏同値で移り、かつ反射する**。
+
+★`⟸` は擬逆に同じ補題を当て、単位同型による共役を `primeFrobCond_conj` で剥がす。 -/
+theorem primeFrobCond_map_iff (e : C₁ ≌ C₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    {A : C₁} (φ : A ⟶ A) :
+    PrimeFrobCond C₁ P₁ φ ↔ PrimeFrobCond C₂ P₂ (e.functor.map φ) := by
+  refine ⟨primeFrobCond_map P₁ P₂ e hps φ, fun h => ?_⟩
+  have h1 : PrimeFrobCond C₁ P₁ (e.inverse.map (e.functor.map φ)) :=
+    primeFrobCond_map P₂ P₁ e.symm hps' _ h
+  have hnat : φ ≫ e.unit.app A = e.unit.app A ≫ e.inverse.map (e.functor.map φ) :=
+    e.unit.naturality φ
+  have h2 := primeFrobCond_conj P₁ (e.unitIso.app A).symm h1
+  have heq : (e.unitIso.app A).symm.inv ≫ e.inverse.map (e.functor.map φ)
+      ≫ (e.unitIso.app A).symm.hom = φ := by
+    show e.unit.app A ≫ e.inverse.map (e.functor.map φ) ≫ (e.unitIso.app A).inv = φ
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    rw [← hnat]
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    exact Eq.trans (congrArg (fun t => φ ≫ t) ((e.unitIso.app A).hom_inv_id))
+      (Category.comp_id φ)
+  exact heq ▸ h2
+
+end PrimeFrob2
+
+
 
 end ABC3.Found.FrdI
