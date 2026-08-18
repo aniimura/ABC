@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 1018 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 1020 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5205</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1420</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5215</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1423</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 960 節点を、強連結成分で潰して 288 個の箱・59 層に並べたもの。
+<span>原文の参照から機械抽出した 961 節点を、強連結成分で潰して 289 個の箱・59 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 64 件・Interface の義務 5/30 件。</b>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>2c7781d</code></td><td>2026-08-18</td><td>B2 第 157-158——係数拡大と基本開集合での全単射性(§9-171)</td></tr>
+<tr><td><code>200739e</code></td><td>2026-08-18</td><td>(F1) の非 group-like の中核を閉じた——既存 2 本の組み合わせで出た</td></tr>
 <tr><td><code>bc813b2</code></td><td>2026-08-18</td><td>切断と局所化加群の同型(第 156、§9-170)</td></tr>
 <tr><td><code>4561887</code></td><td>2026-08-18</td><td>B2 第 154-155——点と素イデアルの対応、アフィン基本開集合の被覆(§9-169)</td></tr>
 <tr><td><code>f0b6a91</code></td><td>2026-08-18</td><td>(F1) の group-like の場合を閉じた——右辺が圧倒的な条件だけになる</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>9cc8b6c</code></td><td>2026-08-18</td><td>基本開集合での切断(第 152、§9-167)</td></tr>
 <tr><td><code>0b5a116</code></td><td>2026-08-18</td><td>★★★原典の (iii) の証明を精読した——真の本体は「素数の対応」1 点だけ</td></tr>
 <tr><td><code>eb2d26d</code></td><td>2026-08-18</td><td>C3 の Interface の穴を記録(空虚な witness で埋めない、§9-166)</td></tr>
-<tr><td><code>5c97a7b</code></td><td>2026-08-18</td><td>`IsDivIdentity` を non-dilating から出す道を測って封じた</td></tr>
-<tr><td><code>d84672c</code></td><td>2026-08-18</td><td>★★★`Div-equivalent` は `Div` ではなく `Φ` の条件だった——standard 型の理由が判明</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1420 件)。</div>
+<b>すべて PDF と機械照合している</b>(1423 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

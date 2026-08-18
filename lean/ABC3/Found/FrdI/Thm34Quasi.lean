@@ -325,4 +325,29 @@ def isPrimeFrobenius_iff_irred_baseIso_of_groupLike.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F1) — group-like での prime-Frobenius の圧倒的特徴づけ",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★(F1) の (b) —— Frobenius-trivial 対象の base-identity な p-Frobenius 自己射
+
+原文 (FrdI p.65):
+> exists a base-identity [hence Div-identity] p1-Frobenius endomorphism φ
+
+★★**定義から直ちに出る**。`IsFrobeniusTrivial A` は
+「各次数の base-identity な Frobenius 型自己射の族」そのものだからである。 -/
+
+/-- ★★★**Frobenius-trivial 対象には各素数次数の
+base-identity な prime-Frobenius 自己射がある**。 -/
+theorem exists_baseId_primeFrob_of_frobTrivial {Dd : Type u} [Category.{v} Dd]
+    {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd}
+    (P : PreFrobenioid Cc Φ₀) {A : Cc} (h : IsFrobeniusTrivial P A)
+    {p : ℕ+} (hp : Nat.Prime ((p : ℕ+) : ℕ)) :
+    ∃ φ : A ⟶ A, IsPrimeFrobenius P φ ∧ IsBaseIdentity P φ ∧ P.degFr φ = p := by
+  obtain ⟨ζ, hdeg, hprop⟩ := h
+  refine ⟨((ζ p : End A) : A ⟶ A), ⟨(hprop p).2, ?_⟩, (hprop p).1, hdeg p⟩
+  rw [hdeg p]
+  exact hp
+
+def exists_baseId_primeFrob_of_frobTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F1) — Frobenius-trivial 対象の p-Frobenius 自己射",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
