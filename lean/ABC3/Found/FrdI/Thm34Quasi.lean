@@ -109,4 +109,57 @@ def isPreStep_congr_iso.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (ii) — 同型四角形で pre-step 性は不変",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★`Theorem 3.4, (ii)` の quasi-isotropic 版
+
+原文 (FrdI p.62):
+> (ii) Suppose that C1, C2 are of quasi-isotropic type, and that D1, D2 are of
+
+★★**帰着で出す**: `𝒞^istr` へ落として既存の isotropic 版を使う。 -/
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (ii)** の **quasi-isotropic 版**(pre-step の条)。
+
+★手: `isotropification_isPreStep_iff` で `𝒞^istr` へ落とし、
+`thm_3_4_ii` を `Ψ^istr` に適用し、
+`isotropificationCommute` の自然同型を `isPreStep_congr_iso` で渡る。 -/
+theorem thm_3_4_ii_quasi_preStep (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hq₁ : IsOfQuasiIsotropicType C₁ P₁) (hFSMFF₁ : IsOfFSMFFType D₁)
+    (hFrobMono₁ : ∀ {X Y : Istr P₁} (ε : X ⟶ Y),
+      IsFrobeniusType (istrPre P₁ F₁) ε → Mono ε)
+    (hFrobFS₁ : ∀ {X Y : Istr P₁} (ε : X ⟶ Y),
+      IsFrobeniusType (istrPre P₁ F₁) ε → IsFiberwiseSurjective ε)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hq₂ : IsOfQuasiIsotropicType C₂ P₂) (hFSMFF₂ : IsOfFSMFFType D₂)
+    (hFrobMono₂ : ∀ {X Y : Istr P₂} (ε : X ⟶ Y),
+      IsFrobeniusType (istrPre P₂ F₂) ε → Mono ε)
+    (hFrobFS₂ : ∀ {X Y : Istr P₂} (ε : X ⟶ Y),
+      IsFrobeniusType (istrPre P₂ F₂) ε → IsFiberwiseSurjective ε)
+    {A B : C₁} (φ : A ⟶ B) :
+    IsPreStep P₁ φ ↔ IsPreStep P₂ (Ψ.map φ) := by
+  haveI := psiIstr_isEquivalence Ψ P₁ P₂ hq₁ hq₂
+  have key : ∀ {X Y : Istr P₁} (f : X ⟶ Y),
+      IsPreStep (istrPre P₁ F₁) f ↔
+        IsPreStep (istrPre P₂ F₂) ((psiIstr Ψ P₁ P₂ hq₁ hq₂).map f) :=
+    fun f => (thm_3_4_ii (istrPre P₁ F₁) (istrPre P₂ F₂)
+      (psiIstr Ψ P₁ P₂ hq₁ hq₂).asEquivalence
+      (istr_frobenioidCore P₁ F₁) (istr_frobenioid P₁ F₁ G₁)
+      (istr_isotropic P₁ F₁) hFSMFF₁ hFrobMono₁ hFrobFS₁
+      (istr_frobenioidCore P₂ F₂) (istr_frobenioid P₂ F₂ G₂)
+      (istr_isotropic P₂ F₂) hFSMFF₂ hFrobMono₂ hFrobFS₂).1 f
+  have hcom := isotropificationCommute Ψ P₁ P₂ F₁ F₂ hq₁ hq₂
+  rw [isotropification_isPreStep_iff P₁ F₁ φ, isotropification_isPreStep_iff P₂ F₂ (Ψ.map φ)]
+  refine (key ((isotropification P₁ F₁).map φ)).trans ?_
+  exact isPreStep_congr_iso (istrPre P₂ F₂) _ _ (hcom.app A) (hcom.app B)
+    (hcom.hom.naturality φ)
+
+def thm_3_4_ii_quasi_preStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (ii) — quasi-isotropic 型での pre-step の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
