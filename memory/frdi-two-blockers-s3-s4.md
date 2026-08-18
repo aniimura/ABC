@@ -1,6 +1,6 @@
 ---
 name: frdi-two-blockers-s3-s4
-description: [FrdI] §3 9/9 は Gap_1_14_iii(反例つき原典の穴)で塞がれ、§4 10/10 は pairing-vanishes(5 件の下流)で塞がれている。Prop 4.1 は 2026-08-18 に閉じた(§4 4/10)ので、到達可能な残りは Remark 4.5.1 の 1 件。
+description: [FrdI] §3 9/9 は Gap_1_14_iii(反例つき原典の穴)で塞がれたまま。★§4 は pairing-vanishes を**(B) 仮定で迂回**できることが 2026-08-18 に分かり、現在の律速は Prop 4.4 (iii) の全射性である。
 metadata:
   type: project
 ---
@@ -22,7 +22,25 @@ metadata:
   **大きな素数次数の prime-Frobenius 射**だけで、そこがまさに穴である。
 - ★★したがって §3 9/9 は**原典に忠実なままでは届かない**。
 
-## ★★§4 10/10 —— 5 件が `pairing-vanishes` の下流
+## ★★★訂正(2026-08-18 後半)—— `pairing-vanishes` は迂回できた
+
+★当初「§4 10/10 は `pairing-vanishes` で塞がれている」と書いたが、**不正確になった**。
+
+★★`pairing-vanishes` は「**一般の `𝒞`** で `𝒪^▷(A)` の可換性を出す」道であり、
+今も**未解**(`central-ext` ★中 → `pairing-vanishes` ★大)。
+
+★★★しかし **birat-Frobenius-normalized 型を明示の仮定に置けば迂回できる**。
+- `isFrobeniusNormalized_of_birat` / `otri_mul_comm_of_birat` がその要
+  (`Definition 4.5, (i)` の括弧書きそのもの)
+- 逸脱分類は **(B)**。利用者の判断で「(B) も数える」方針になっている
+- ★**下流の消費者はすべて model 型**(`Theorem 5.2`、`Example 6.1`・`6.3`)＝
+  birat-Frobenius-normalized 型なので、**実際に使う場面では埋まっている**
+
+★現在 `Proposition 4.4` を止めているのは `pairing-vanishes` ではなく、
+**(iii) の全射性 `phiBiratGen = phiBiratAt`** である。
+(i)(ii)(iv) は閉じた。
+
+## ★以下は当初(2026-08-18 前半)の測定 —— 一般の `𝒞` で解く道の記録
 
 `node tools/frdi-blocked.mjs`: §4 で**チェーンに依らず届くのは 5/10**。
 `Thm 4.2` / `Prop 4.4` / `Prop 4.8` / `Cor 4.10` / `Cor 4.11` は

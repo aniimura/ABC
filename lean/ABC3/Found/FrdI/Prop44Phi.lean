@@ -370,6 +370,60 @@ def phiBiratAt_eq_top_of_divSurj.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — 仮定が強すぎることの記録",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★★`Φ^birat` を**生成される部分関手**として定義し直す
+
+原文 (FrdI p.83):
+> (iii) There exists a unique subfunctor of groups Φbirat ⊆Φgp such that
+
+★★★**原典の論理構造に合わせる**(2026-08-18 の測定による設計変更):
+原典は `Φ^birat` を「経由するような部分関手の**一意なもの**」として定め、
+**その上で全射 `𝒪^×(A^birat) ↠ Φ^birat` を主張**する。
+
+★だからこちらも
+- **生成される部分群** `phiBiratGen` を定義し(「経由する」は構成から自明)、
+- 全射 `phiBiratGen = phiBiratAt` を**定理**として残す
+
+という形にする。
+★★前の設計(`Φ^birat := 𝒪^×` の像)だと「経由する」側に内容が集まり、
+そこを埋める仮定が主張を退化させた(`phiBiratAt_eq_top_of_divSurj`)。 -/
+
+variable {P G} in
+/-- ★★★★**`Φ^birat`(生成版)** —— `A` から出る射の `Div^gp` が生成する部分群。 -/
+noncomputable def phiBiratGen (A : BiratCat P G) :
+    AddSubgroup (Gp (Φ.val (P.toElem.obj (biratDown P G A)).base)) :=
+  AddSubgroup.closure {x | ∃ (B : BiratCat P G) (f : A ⟶ B), biratDivGp f = x}
+
+variable {P G} in
+/-- ★★★★**「経由する」—— ★構成から自明**。
+
+`𝒞^birat → 𝔽_{Φ^gp}` の各射の `Div^gp` は `Φ^birat` に入る。 -/
+theorem biratDivGp_mem_phiBiratGen {A B : BiratCat P G} (f : A ⟶ B) :
+    biratDivGp f ∈ phiBiratGen A :=
+  AddSubgroup.subset_closure ⟨B, f, rfl⟩
+
+variable {P G} in
+/-- ★★★★**一意性(最小性)** —— 経由する部分群はすべて `Φ^birat` を含む。
+
+★原文の「unique subfunctor」の内容である。 -/
+theorem phiBiratGen_le {A : BiratCat P G}
+    (S : AddSubgroup (Gp (Φ.val (P.toElem.obj (biratDown P G A)).base)))
+    (hS : ∀ (B : BiratCat P G) (f : A ⟶ B), biratDivGp f ∈ S) :
+    phiBiratGen A ≤ S :=
+  AddSubgroup.closure_le S |>.mpr (by rintro _ ⟨B, f, rfl⟩; exact hS B f)
+
+variable {P G} in
+/-- ★★**容易な向き** —— `𝒪^×(A^birat)` の像は生成版に入る。 -/
+theorem phiBiratAt_le_phiBiratGen (A : BiratCat P G) :
+    phiBiratAt P G A ≤ phiBiratGen A := by
+  rintro _ ⟨δ, _, rfl⟩
+  exact biratDivGp_mem_phiBiratGen (((δ : End A) : A ⟶ A))
+
+/-- ★locator —— `Proposition 4.4, (iii)` の存在と一意性。 -/
+def phiBiratGen.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — Φ^birat の存在と一意性",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/

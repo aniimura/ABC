@@ -27,7 +27,7 @@
 - [Ring インスタンスの二重路](ring-instance-two-paths.md) —— 前層加群で simp/rw が発火しなくなる罠。構成は通るが証明が詰まる。
 - [ゲートはシェルで結果が変わる](gate-shell-pdftotext-differs.md) — check.mjs の引用照合は pdftotext を呼ぶ。PowerShell は poppler 25 を拾い正しい引用まで落とす。★Bash で回すこと。
 - [Frobenius 型射は添字の遷移に吸収できる](pf-frobenius-absorbed-by-transition.md) — 𝒞 で偽(mono・右から割れる)が 𝒞^pf では真。perfection の冪等性の中身。
-- [§3/§4 の残りを塞ぐ 2 つの障害](frdi-two-blockers-s3-s4.md) — §3 9/9 は Gap_1_14_iii(反例つき原典の穴)、§4 10/10 は pairing-vanishes。到達可能な残りは Prop 4.1 と Remark 4.5.1。
+- [§3/§4 の残りを塞ぐ障害](frdi-two-blockers-s3-s4.md) — §3 は Gap_1_14_iii(反例つき原典の穴)で塞がれたまま。★§4 の pairing-vanishes は **(B) 仮定で迂回済**で、律速は Prop 4.4 (iii) の全射性に移った。
 - [追記は grep -c で確認する](verify-insertion-not-just-ok.md) — Python の str.replace は黙って失敗し、検査器具は変更前のファイルを ok と言う
 - [子セッションの使いどころ](child-session-usage.md) — 仕様が確定してから渡す。ABC3b とワークツリーを共有しているので子に git を触らせない。
 - [Inhabited の二経路](inhabited-two-paths.md) — Unique から default を取る道が 2 本あり項が一致しない。補助定義を [Unique ...] で引数化して揃える

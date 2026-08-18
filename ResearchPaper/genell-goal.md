@@ -6750,3 +6750,31 @@ instance 検索が**別物として扱う**。
     𝒪(D g)   --res--> 𝒪(D(t·g))
 
 ★可換性は `e.hom.naturality` そのもの(`Over.homMk (homOfLE h)` に沿って)。
+
+## §9-151 —— 自明な開集合での制限は局所化(第 137 ブロック、2026-08-18)
+
+    isLocalizedModule_secRes :
+      F が D(g) 上で自明 ⟹ Γ(F, D g) → Γ(F, D(t·g)) は powers t の局所化
+
+★★可換性は **`e.hom.naturality`** 一発
+(`Over.homMk (homOfLE h) : Over.mk (homOfLE h) ⟶ Over.mk (𝟙 (D g))` に沿って)。
+
+### ★★★型の 2 経路——[[ring-instance-two-paths]] の 6・7 例目
+
+| 症状 | 逃げ道 |
+|---|---|
+| `(modulesSpecToSheaf.obj F).obj.obj (op U)` に `𝒪(U)` 作用が無い | `inferInstanceAs` |
+| `ModuleCat.of Γ Γ` に `ringCatSheaf` 側の作用が無い | ★**証明の中で** `letI` + `inferInstanceAs` |
+| `r • y = algebraMap r * y` が `rfl` で**ない** | `Algebra.smul_def` |
+| `IsScalarTower` の `smul_assoc` が `rfl` で**ない** | ★`IsScalarTower.of_algebraMap_smul` なら `rfl` |
+
+★★★★4 つ目が効いた——**同じ命題でも述べ方を変えると `rfl` で通る**。
+
+### ★次——`f^n` 論法(残り 12〜18 ブロック)
+
+    (a) map_units : f は Γ(F,D f) に可逆に作用
+    (b) surj      : ∃ n, fⁿ y が ⊤ から来る
+    (c) exists_of_eq : res x = res y ⟹ ∃ n, fⁿ x = fⁿ y
+
+★どれも「各 `D(gᵢ)` で第 137 を使い、**最大値**を取り、層で貼る」である。
+★★貼りには `TopCat.Sheaf.existsUnique_gluing'` と `eq_of_locally_eq'` を使う。

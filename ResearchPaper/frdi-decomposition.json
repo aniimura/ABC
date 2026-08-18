@@ -468,34 +468,34 @@
           "note": "★★**測定(2026-08-18)**: (iv) の辞書より、`𝒞^birat` の pull-back 射は `𝒞` の **co-angular linear** 射の像である。★したがって `Div = 0` とは限らない。\n★`Proposition 1.7, (iii)` で co-angular linear は (co-angular pre-step) ≫ (pull-back) に分解する。★後者は `pullBackLB` より **isometric**(`Div = 0`)、前者は `𝒞^birat` で**同型**になる。\n★つまり pull-back の `Div^gp` は**同型の `Div^gp`** に帰着する。"
         },
         {
-          "id": "factor-iso-div",
+          "id": "phibirat-surj",
           "size": "大",
           "status": "todo",
           "deps": [
             "factor-plbk"
           ],
-          "title": "𝒞^birat の同型の Div^gp——★設計を変えることになった",
-          "note": "★★★**機械的に確かめた負の結果(2026-08-18)**。\n一度は「`Div : 𝒪^▷(X) → Φ(Base X)` は全射」を逸脱 (B) の仮定として置こうとしたが、それだと **`Φ^birat(X) = Φ^gp(X)`(全体)に退化する**。\n★実際に `phiBiratAt_eq_top_of_divSurj` として**証明して残した**ので、この仮定を置いてはいけないことが機械的に残る。\n理由: `Gp M` の任意の元は `toGp a - toGp b` と書け、全射性で `a = Div u`, `b = Div v` と取れば `toGp_div_sub_mem_phiBiratAt` で即座に入る。\n\n## ★★★正しい設計(次の一手)\n`Φ^birat` を**「𝒞^birat の全射の `Div^gp` が生成する部分関手」として定義**し直す。\n★こうすると「経由する」は**構成から自明**になり、全射 `𝒪^×(A^birat) ↠ Φ^birat` の方が**定理**になる。★★**原典の論理構造もそうなっている**(「There exists a unique subfunctor … such that … factors through …, and, moreover, … induces … a surjection」)。\n★現在の `phiBiratAt`(= `𝒪^×` の像)はその全射の**行き先**になる。\n★揃っている材料: `toGp_div_sub_mem_phiBiratAt`(仮定不要)、`birat_divGp_sub_mem`(剰余類)、`phiBiratAt_map_le`/`_dstar`(部分関手性)。"
+          "title": "全射 𝒪^×(A^birat) ↠ Φ^birat——★(iii) の唯一の残り",
+          "note": "★★★**再定義後の形(2026-08-18)**: `phiBiratGen A ≤ phiBiratAt A` を示すこと。逆向き `phiBiratAt ≤ phiBiratGen` は `phiBiratAt_le_phiBiratGen` で済。\n★★**前の設計ではここが「経由する」側にあり、そこを埋める仮定が主張を退化させた**(`phiBiratAt_eq_top_of_divSurj` として証明済)。\n★揃っている材料: `birat_divGp_sub_mem`(剰余類——同型 1 本で判定すればよい)、`toGp_div_sub_mem_phiBiratAt`(除数の差、仮定不要)、`birat_iso_of_istr_base`(isotropic なら同じ底で同型)。"
         },
         {
           "id": "factor-src",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
-            "factor-iso-div"
+            "phibirat-surj"
           ],
           "title": "𝒞^birat → 𝔽_{Φ^gp} が 𝔽_{Φ^birat} を経由することを束ねる",
-          "note": "★`arbFactor`(Frobenius 型 ≫ pre-step ≫ pull-back)の 3 成分を並べるだけ。"
+          "note": "★`arbFactor`(Frobenius 型 ≫ pre-step ≫ pull-back)の 3 成分を並べるだけ。\n★済(2026-08-18): ★★**再定義で自明になった**。`phiBiratGen` を「`𝒞^birat` の全射の `Div^gp` が生成する部分群」として定義したので、「経由する」は `biratDivGp_mem_phiBiratGen`、一意性は `phiBiratGen_le`(閉包の最小性)で出る。"
         },
         {
           "id": "phibirat-uniq",
           "title": "Φ^birat の一意性",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "factor-src"
           ],
-          "note": "★原文の「unique subfunctor」。★経由する部分関手はすべて全 `biratDivGp` を含み、最小のものが像と一致することから従う。★`phibirat-factor` が済めば形式的。"
+          "note": "★原文の「unique subfunctor」。★経由する部分関手はすべて全 `biratDivGp` を含み、最小のものが像と一致することから従う。★`phibirat-factor` が済めば形式的。\n★済(2026-08-18): ★★**再定義で自明になった**。`phiBiratGen` を「`𝒞^birat` の全射の `Div^gp` が生成する部分群」として定義したので、「経由する」は `biratDivGp_mem_phiBiratGen`、一意性は `phiBiratGen_le`(閉包の最小性)で出る。"
         },
         {
           "id": "iii-src",
