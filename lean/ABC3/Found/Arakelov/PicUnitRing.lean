@@ -93,7 +93,7 @@ noncomputable def unitEndEquiv :
 
 /-- ★★★★双対の `Γ(X,U)` 加群構造。 -/
 noncomputable instance dualModule (F : X.PresheafOfModules) :
-    Module (Γ(X, U) : Type u)
+    Module (((X.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u}).obj (op U)) : Type u)
       ((restrictPresheafFunctor X U).obj F ⟶ 𝟙_ (PresheafModulesOn X U)) :=
   Module.compHom _ (unitEndEquiv U).symm.toRingHom
 

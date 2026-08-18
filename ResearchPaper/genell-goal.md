@@ -7768,3 +7768,39 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
     「後で橋を架ける」は、instance の経路を増やして高くつく。
 
 ★これは §9-180(型付き恒等関数)と §9-179(経路が 2 本になる)の続きである。
+
+## §9-189 —— ★★★★双対の前層——**eta の壁**(2026-08-18、実測)
+
+第 166 の `dualModule` を RingCat 綴りに直し(§9-188)、
+第 167 の `dual_smul_eq` も合わせたところ、**両方とも通る**ようになった。
+
+★しかし前層に組む段で新しい壁に当たった:
+
+    obj U := ModuleCat.of ((… ).obj (op U.unop)) (双対 at U.unop)
+    map f には Module ((… ).obj V) (双対 at V) が要る    ← ★V であって op V.unop ではない
+
+★★`(op V.unop) = V` は **eta で等しい**が、**instance 探索は逆向きに解けない**
+——`op ?U =?= V` は高階単一化になる。
+
+### ★★★2 つの索引付けのどちらも片側で落ちる
+
+| 索引 | `dual_smul_eq`(`U : X.Opens`) | 前層の `map`(`V : (X.Opens)ᵒᵖ`) |
+|---|---|---|
+| `U : X.Opens`、環 `(…).obj (op U)` | ★通る | ★**落ちる** |
+| `W : (X.Opens)ᵒᵖ`、環 `(…).obj W` | ★落ちる | ★通る |
+
+### ★★★★次の一手——**両方 instance にする**
+
+    instance dualModule  (U : X.Opens)      -- 環 (…).obj (op U)
+    instance dualModuleOp (W : (X.Opens)ᵒᵖ) -- 環 (…).obj W、本体は dualModule W.unop
+
+★★2 本目は 1 本目を `W.unop` に当てただけなので**中身が同じ**——
+§9-179 の「経路が 2 本」問題は起きない(同じ項に簡約される)。
+
+★★★これが本 session で**4 度目**の綴り問題であり、
+毎回「下流の要求に合わせる」で解決している。
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–168 の 21 ブロック(フルビルド成功・ゲート PASS)

@@ -43,7 +43,8 @@ theorem unitEndEquiv_symm_apply (U : X.Opens) (c : (Γ(X, U) : Type u)) :
   exact (unitEnd_unitMul U c).symm
 
 /-- ★★作用は合成である。 -/
-theorem dual_smul_eq (U : X.Opens) (c : (Γ(X, U) : Type u))
+theorem dual_smul_eq (U : X.Opens)
+    (c : ((X.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u}).obj (op U) : Type u))
     (φ : (restrictPresheafFunctor X U).obj F ⟶ 𝟙_ (PresheafModulesOn X U)) :
     c • φ = φ ≫ unitMul U c := by
   show ((unitEndEquiv U).symm c) • φ = _
