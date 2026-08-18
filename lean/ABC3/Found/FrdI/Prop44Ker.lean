@@ -181,6 +181,40 @@ theorem otriDivGp_eq_zero_iff (X : BiratCat P G) (u : OTri (biratPre P G) X) :
   rw [hu]
   exact divGp_map_eq_zero_of_mem_otimes hα
 
+/-! ## ★★`Proposition 4.4, (iii)` の「全射 ＋ 核」
+
+原文 (FrdI p.83):
+> induces, for each Abirat ∈Ob(Cbirat), a surjection O×(Abirat)  Φbirat(Abirat),
+
+★`phiBiratAt A` を**`𝒪^×(A^birat)` の像**として定義してあるので、
+**全射性は定義そのもの**である。★核の方が内容を持つ。 -/
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iii)** の全射——**定義そのもの**。 -/
+theorem mem_phiBiratAt_iff (A : BiratCat P G)
+    (x : Gp (Φ.val (P.toElem.obj (biratDown P G A)).base)) :
+    x ∈ phiBiratAt P G A ↔
+      ∃ δ ∈ OTimes (biratPre P G) A, biratDivGp ((δ : End A) : A ⟶ A) = x := Iff.rfl
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iii)** の**核**。
+
+原文の「whose kernel is the image, via the injection `𝒪^▷(A)^gp → 𝒪^×(A^birat)`
+of (ii), of `𝒪^×(A) ⊆ 𝒪^▷(A)^gp`」そのもの。
+
+★(ii) の単射は `otri_toBirat_injective` / `otri_gp_injective`で取ってあるので、
+ここでは「像に入る」ことを直接述べる。 -/
+theorem phiBiratAt_ker (A : BiratCat P G) {u : End A}
+    (hu : u ∈ OTimes (biratPre P G) A) :
+    biratDivGp ((u : A ⟶ A)) = 0 ↔
+      ∃ α ∈ OTimes P (biratDown P G A),
+        (u : A ⟶ A) = (toBiratCat P G).map ((α : _ ⟶ _)) :=
+  otriDivGp_eq_zero_iff A ⟨u, OTimes_le_OTri _ _ hu⟩
+
+/-- ★locator —— `Proposition 4.4, (iii)` の全射＋核の条。 -/
+def phiBiratAt_ker.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — 𝒪^×(A^birat) ↠ Φ^birat の核",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def otriDivGp_eq_zero_iff.src : ABC3.Meta.Source :=

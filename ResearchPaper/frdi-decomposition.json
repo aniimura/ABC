@@ -377,29 +377,53 @@
           "size": "★小"
         },
         {
-          "id": "phibirat-funct",
-          "title": "Φ^birat が Φ^gp の**部分関手**であること",
-          "deps": [],
-          "status": "todo",
-          "size": "★大",
-          "evidence": "`phiBiratAt`(各対象での部分群)は `Prop44Gp.lean` にある。★残るのは `𝒟` の射に沿った関手性。"
-        },
-        {
           "id": "phibirat-ker",
           "title": "𝒪^×(A^birat) ↠ Φ^birat(A) とその核",
           "deps": [
-            "phibirat-funct",
             "otri-gp-inj"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
-          "evidence": "全射は `phiBiratAt` の定義そのもの。核は `Prop44Ker.lean` の `otriDivGp_eq_zero_iff` が与える。"
+          "evidence": "全射は `phiBiratAt` の定義そのもの。核は `Prop44Ker.lean` の `otriDivGp_eq_zero_iff` が与える。",
+          "note": "★実測(2026-08-18): **`phibirat-funct` には依存しなかった**。`phiBiratAt` の定義(= `𝒪^×(A^birat)` の像)だけで核は言える。`otriDivGp_eq_zero_iff` ＋ `phiBiratAt_ker`。"
+        },
+        {
+          "id": "phibirat-dfunct",
+          "title": "Φ^birat が 𝒟 上の部分関手であること",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "phibirat-ker"
+          ],
+          "note": "★★測定(2026-08-18): `phiBiratAt` は今 `𝒞^birat` の**対象**で添字付けされているが、原文の `Φ^birat` は **`𝒟` 上の部分関手**である。★要るのは (a) `Base A` にしか依らないこと、(b) `Φ^gp` の射で保たれること。★(a) は `Definition 1.3, (iii)(c)`(`otriBase`——`𝒪^▷` の全単射が `Base(φ)` にしか依らない)が使える見込み。"
+        },
+        {
+          "id": "phibirat-factor",
+          "title": "𝒞^birat → 𝔽_{Φ^gp} が 𝔽_{Φ^birat} を経由する",
+          "size": "大",
+          "status": "todo",
+          "deps": [
+            "phibirat-dfunct"
+          ],
+          "note": "★★★**測定で分かった重い点**(2026-08-18): 原文は `Φ^birat` を「経由するような最小の部分関手」として定め、**`𝒪^×(A^birat) ↠ Φ^birat(A^birat)` の全射性を定理として主張**する。★我々は逆に `Φ^birat` を**像として定義**したので全射性は無償になるが、その分**「経由する」側を証明する必要がある** —— 内容は同じで、場所が移っただけ。★要は「任意の `f : A → B` に対し `biratDivGp f` が像に入る」。★未確定の点: `A ≠ B` のときどの対象の `Φ^birat` に入れるのかを、`𝔽_Φ` の射の定義に戻って確かめるところから始める。"
+        },
+        {
+          "id": "phibirat-uniq",
+          "title": "Φ^birat の一意性",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "phibirat-factor"
+          ],
+          "note": "★原文の「unique subfunctor」。★経由する部分関手はすべて全 `biratDivGp` を含み、最小のものが像と一致することから従う。★`phibirat-factor` が済めば形式的。"
         },
         {
           "id": "iii-src",
           "title": "(iii) の条つき .src",
           "deps": [
-            "phibirat-funct",
+            "phibirat-dfunct",
+            "phibirat-factor",
+            "phibirat-uniq",
             "phibirat-ker"
           ],
           "status": "todo",

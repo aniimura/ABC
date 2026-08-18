@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 955 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 957 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5038</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1364</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5043</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1367</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">22</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 924 節点を、強連結成分で潰して 290 個の箱・59 層に並べたもの。
+<span>原文の参照から機械抽出した 926 節点を、強連結成分で潰して 290 個の箱・59 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 63 件・Interface の義務 3/28 件。</b>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>d542d12</code></td><td>2026-08-18</td><td>★★★★★★点ごとの自明化で足りる(第 128、§9-143)</td></tr>
+<tr><td><code>cdd5c8d</code></td><td>2026-08-18</td><td>★★[FrdI] Proposition 4.4, (ii) を閉じた——群化を「構成せずに」書いた</td></tr>
 <tr><td><code>4fa8317</code></td><td>2026-08-18</td><td>★★★★★★局所自明性の全単射が出た(第 127、§9-142)</td></tr>
 <tr><td><code>5d005f1</code></td><td>2026-08-18</td><td>同型を 𝒪(D f) 係数へ移した——材料が完全に揃った(第 126、§9-141)</td></tr>
 <tr><td><code>055d810</code></td><td>2026-08-18</td><td>`𝒪^▷(A) → 𝒪^×(A^birat)` の写像と単射性(単系の層)——★測定で近道が見つかった</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>b547431</code></td><td>2026-08-18</td><td>局所化した生成元の乗法は全単射(第 123、§9-137)</td></tr>
 <tr><td><code>78ba804</code></td><td>2026-08-18</td><td>`prop44full` の葉を 2 つ閉じた——`dict-baseid` と `iv-src`(★(iv) が完成)</td></tr>
 <tr><td><code>21285ab</code></td><td>2026-08-18</td><td>被覆が over 位相で揃った(第 122、§9-136)</td></tr>
-<tr><td><code>230d7be</code></td><td>2026-08-18</td><td>2 つの前層は切断も制限も同じ(第 121、§9-135)</td></tr>
-<tr><td><code>5be4709</code></td><td>2026-08-18</td><td>★★★★★★制限と局所化の可換図式(第 120、§9-134)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1364 件)。</div>
+<b>すべて PDF と機械照合している</b>(1367 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
