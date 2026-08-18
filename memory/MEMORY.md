@@ -26,3 +26,4 @@
 - [「壁」と呼ばず、割って葉を出す](no-wall-decompose-instead.md) — 到達不能と報告する前に塊を小目標の DAG に割る。★absent の searched は**実在するパス**か確かめること(存在しないディレクトリの grep 0 件は測定ではない)。
 - [Ring インスタンスの二重路](ring-instance-two-paths.md) —— 前層加群で simp/rw が発火しなくなる罠。構成は通るが証明が詰まる。
 - [ゲートはシェルで結果が変わる](gate-shell-pdftotext-differs.md) — check.mjs の引用照合は pdftotext を呼ぶ。PowerShell は poppler 25 を拾い正しい引用まで落とす。★Bash で回すこと。
+- [Frobenius 型射は添字の遷移に吸収できる](pf-frobenius-absorbed-by-transition.md) — 𝒞 で偽(mono・右から割れる)が 𝒞^pf では真。perfection の冪等性の中身。
