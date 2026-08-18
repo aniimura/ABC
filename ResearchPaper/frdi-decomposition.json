@@ -1089,14 +1089,25 @@
           "size": "★小"
         },
         {
-          "id": "iv-otimes",
-          "title": "(iv) 𝒪^▷ / 𝒪^× の保存と Ψ_{N≥1} が恒等であること",
+          "id": "iv-otimes-cond",
+          "size": "小",
+          "status": "done",
           "deps": [
             "iii-morclasses"
           ],
+          "title": "(iv) 𝒪^▷ の圧倒的な条件の移送",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `OTriSquareCond` と `otriSquareCond_map`。\n★原文 (FrdI p.66):\n> There exist pre-steps φ : A → B, ψ : A → C and endomorphisms α ∈\n★★原典は `𝒪^▷(C)` を**圧倒的な条件**で特徴づけ、「By assertions (ii), (iii), … Ψ preserves pre-steps, base-isomorphisms…」と述べて保存を出す。\n★本セッションで pre-step・底同型・pull-back の保存を全部取ったので、この条件の移送は **pre-step の保存だけ**で出た。"
+        },
+        {
+          "id": "iv-otimes",
+          "title": "(iv) 𝒪^▷ / 𝒪^× の保存と Ψ_{N≥1} が恒等であること",
+          "deps": [
+            "iv-otimes-cond"
+          ],
           "status": "todo",
-          "size": "★大",
-          "evidence": "𝒟 が Frobenius-slim を仮定する条。"
+          "size": "中",
+          "evidence": "𝒟 が Frobenius-slim を仮定する条。",
+          "note": "\n\n★★四角形の部分は `iv-otimes-cond` で取った(2026-08-18)。\n★残るのは条件の最後の節(α が `F → End((P_i)_A → C_i)^bs-iso` の像から来ること)と、それが `𝒪^▷` と同値であること(`Proposition 3.3, (i)`＋`Definition 1.3, (i)(a)(b)`＋`(iii)(c)`)。"
         },
         {
           "id": "iv-psiuntr",

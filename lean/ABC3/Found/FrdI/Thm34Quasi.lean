@@ -1502,4 +1502,40 @@ def isPullBack_map_of_equiv.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — pull-back の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★(iv) の `𝒪^▷` の圧倒的な条件
+
+原文 (FrdI p.66):
+> There exist pre-steps φ : A → B, ψ : A → C and endomorphisms α ∈
+
+★★原典は `𝒪^▷(C)` の元を**圧倒的な条件**で特徴づけ、
+> By assertions (ii), (iii), it follows that Ψ preserves pre-steps, base-isomorphisms,
+と述べて保存を出す。
+★本セッションで pre-step・底同型・pull-back の保存はすべて取ったので、
+この条件の移送が直ちに出る。 -/
+
+/-- ★★★**(iv) の圧倒的な条件**(四角形の部分)。
+
+★原典の条件のうち、**pre-step の span と 2 つの四角形**の部分。 -/
+def OTriSquareCond {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {C₀ : Cc} (γ : C₀ ⟶ C₀) : Prop :=
+  ∃ (A B : Cc) (φ : A ⟶ B) (ψ : A ⟶ C₀) (α : A ⟶ A) (β : B ⟶ B),
+    IsPreStep P φ ∧ IsPreStep P ψ ∧ φ ≫ β = α ≫ φ ∧ ψ ≫ γ = α ≫ ψ
+
+/-- ★★★★**条件は関手で移る** —— pre-step の保存だけで出る。 -/
+theorem otriSquareCond_map (Ψ : C₁ ⥤ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    {C₀ : C₁} (γ : C₀ ⟶ C₀) (h : OTriSquareCond P₁ γ) :
+    OTriSquareCond P₂ (Ψ.map γ) := by
+  obtain ⟨A, B, φ, ψ, α, β, hφ, hψ, hsq₁, hsq₂⟩ := h
+  refine ⟨Ψ.obj A, Ψ.obj B, Ψ.map φ, Ψ.map ψ, Ψ.map α, Ψ.map β,
+    hPS φ hφ, hPS ψ hψ, ?_, ?_⟩
+  · rw [← Ψ.map_comp, ← Ψ.map_comp, hsq₁]
+  · rw [← Ψ.map_comp, ← Ψ.map_comp, hsq₂]
+
+def otriSquareCond_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 66,
+    item := "Theorem 3.4, (iv) — 𝒪^▷ の圧倒的な条件の移送",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
