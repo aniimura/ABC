@@ -371,6 +371,7 @@ import ABC3.Found.Arakelov.PicSectionPull
 import ABC3.Found.Arakelov.PicPullIdealHom
 import ABC3.Found.Arakelov.PicSurjIso
 import ABC3.Found.Arakelov.PicPushAdj
+import ABC3.Found.Arakelov.PicPullImage
 import ABC3.Found.Arakelov.PicUnitSurj
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint

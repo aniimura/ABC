@@ -9111,3 +9111,36 @@ Tate 曲線・Faltings 高さは FLT にも無い。半安定性は `FreyCurve/B
       (D.comap f).ideal A = (D.ideal B).map appLE   ★第 202 の連鎖
       像は部分加群                          ★線型写像の像
     ⟹ 像 = 全体 ⟹ 局所全射 ⟹ 第 207 で同型 ⟹ ofDivisor_pullback
+
+## §9-229 比較射の像を扱う道具が揃った(第 209 ブロック)
+
+| 事実 | 根拠 |
+|---|---|
+| 像は引き戻した切断を含む | ★第 208 |
+| 像は制限で運べる | ★自然性 |
+| 像は掛け算で閉じる | ★線型性 |
+
+★★★これで「像 ⊇ 生成元 かつ 像は部分加群 ⟹ 像 = 全体」が言える。
+**`f^*` の具体形は最後まで使わない**。
+
+### ★★`Submodule` でなく `Set` で扱った
+
+`LinearMap.range` を使おうとすると `RingHomSurjective (RingHom.id …)` の
+instance 解決に失敗する——係数環の綴りが `X.ringCatSheaf.obj.obj` 経由になるためである。
+★`Set.range` と `Set.image` で扱い、必要な閉性だけ**手で**示すほうが短かった。
+★★[[ring-instance-two-paths]] の逃げ道が**また 1 つ増えた**:
+
+| 逃げ道 | 使う場面 |
+|---|---|
+| `homMk` | 前層加群の射を組む(第 178) |
+| 型付き恒等関数 | 値・係数・逆向きの橋(第 173/181/206) |
+| `letI` + `inferInstanceAs` | 局所化の係数(第 157) |
+| ★**`Set` で扱い閉性を手で示す** | 部分加群の instance が届かないとき(本ブロック) |
+
+### 残り(B2)——最後の 1 ブロック
+
+    アフィン開 A ⊆ f⁻¹B で
+      imgIdeal ⊇ { f^#(s)|_A の値 : s ∈ D.ideal B }    ★第 208 + 第 209
+      (D.comap f).ideal A = (D.ideal B).map appLE      ★第 202 の連鎖
+      imgIdeal は掛け算で閉じ、加法でも閉じる           ★第 209
+    ⟹ imgIdeal = 全体 ⟹ app A は全射 ⟹ 第 207 で同型

@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm34Quasi
+import Mathlib.CategoryTheory.Localization.Predicate
 
 /-!
 # [FrdI] Theorem 3.4, (iv) —— `End(𝒞^pl-bk_A → 𝒞)^bs-iso` の移送
@@ -742,6 +743,74 @@ theorem baseEquivalent_map_of_baseSquare (Ψ : C₁ ⥤ C₂) (ΨBase : D₁ ⥤
 def isBaseIdentity_map_of_baseSquare.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 62,
     item := "Theorem 3.4, (v) — base-identity 自己射と base-equivalent な対の保存",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★★★`Theorem 3.4, (v)` の `Ψ_Base` —— **局所化として読み替える**
+
+原文 (FrdI p.68):
+> which is clearly an equivalence of categories.
+
+★★★**測って分かった読み替え**(2026-08-19)。
+原典は `Q_i`(スライスの 2-圏の coarsification)を base-isomorphism が誘導する
+「新しい関手」で広げて `R_i` を作り、**`R_i ≌ 𝒟_i`** を示す。
+
+原文 (FrdI p.68):
+> φD = Base(ψ) ◦ Base(γ) ◦ Base(α)−1
+
+★★この分解(pre-step 2 本と pull-back 1 本、うち 1 本は逆向き)は、
+**`𝒟` が `𝒞` の base-isomorphism による局所化である**と言っている。
+★したがって `Ψ_Base` は **2-圏を組まずに、局所化の普遍性**で作れる。
+
+★★★これが本セッション最大の設計判断である ——
+`Definition A.1` の 2-圏を Lean で組む代わりに、
+mathlib の `CategoryTheory.Localization` に載せる。
+★付録側で確かめた「coarsification の hom は元の hom と一対一」
+(`coarseHomEquiv`)が、この読み替えが正しいことの裏づけになっている。 -/
+
+section PsiBase
+
+variable (Ψ : C₁ ⥤ C₂)
+
+/-- ★★**`Ψ` が base-isomorphism を保つ**ことの、局所化の言葉での言い換え。 -/
+theorem isInvertedBy_of_baseIso_map
+    (hBI : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f → IsBaseIsomorphism P₂ (Ψ.map f)) :
+    (baseIsoProp P₁).IsInvertedBy (Ψ ⋙ P₂.proj) := by
+  intro X Y f hf
+  exact hBI f hf
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (v)** の `Ψ_Base : 𝒟₁ ⥤ 𝒟₂`。
+
+★`𝒟₁` が `𝒞₁` の base-isomorphism による局所化であるとき、
+`Ψ ⋙ P₂.proj` が base-isomorphism を反転させることから普遍性で得られる。 -/
+noncomputable def psiBase [P₁.proj.IsLocalization (baseIsoProp P₁)]
+    (hinv : (baseIsoProp P₁).IsInvertedBy (Ψ ⋙ P₂.proj)) : D₁ ⥤ D₂ :=
+  Localization.lift (Ψ ⋙ P₂.proj) hinv P₁.proj
+
+/-- ★★★★★**1-可換図式** —— 局所化の `Lifting.iso` そのもの。
+
+★これがちょうど `v-baseid` の `isBaseIdentity_map_of_baseSquare` が受ける仮定である。 -/
+noncomputable def psiBaseSquare [P₁.proj.IsLocalization (baseIsoProp P₁)]
+    (hinv : (baseIsoProp P₁).IsInvertedBy (Ψ ⋙ P₂.proj)) :
+    P₁.proj ⋙ psiBase Ψ hinv ≅ Ψ ⋙ P₂.proj :=
+  haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBase Ψ hinv) :=
+    Localization.liftingLift (Ψ ⋙ P₂.proj) hinv P₁.proj
+  Localization.Lifting.iso P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBase Ψ hinv)
+
+/-- ★★★★**1-一意性** —— 図式を可換にする `𝒟₁ ⥤ 𝒟₂` は同型を除いて一意。
+
+★局所化に沿った前合成が**充満忠実**であることから出る。 -/
+noncomputable def psiBaseUniq [P₁.proj.IsLocalization (baseIsoProp P₁)]
+    (F G : D₁ ⥤ D₂) (e : P₁.proj ⋙ F ≅ P₁.proj ⋙ G) : F ≅ G :=
+  haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (P₁.proj ⋙ F) F := ⟨Iso.refl _⟩
+  haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (P₁.proj ⋙ G) G := ⟨Iso.refl _⟩
+  Localization.liftNatIso P₁.proj (baseIsoProp P₁) (P₁.proj ⋙ F) (P₁.proj ⋙ G) F G e
+
+end PsiBase
+
+def psiBase.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (v) — Ψ_Base の構成と 1-可換図式・1-一意性",
     sectionId := "frdi-thm-3-4" }
 
 end ABC3.Found.FrdI
