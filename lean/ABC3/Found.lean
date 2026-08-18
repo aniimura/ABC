@@ -49,6 +49,7 @@ import ABC3.Found.FrdI.Prop32Equiv
 import ABC3.Found.FrdI.Prop32Dict
 import ABC3.Found.FrdI.Prop32Perfect
 import ABC3.Found.FrdI.Prop41Cat
+import ABC3.Found.FrdI.Def24Supp
 import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop33UnTr
 import ABC3.Found.FrdI.Prop33Classes
@@ -228,6 +229,8 @@ import ABC3.Found.Arakelov.PicGammaUnit
 import ABC3.Found.Arakelov.PicBaseTensor
 import ABC3.Found.Arakelov.PicGammaStruct
 import ABC3.Found.Arakelov.PicSectionTrivial
+import ABC3.Found.Arakelov.PicInvTrivial
+import ABC3.Found.Arakelov.PicInterface
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
