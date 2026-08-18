@@ -9831,3 +9831,42 @@ mathlib の `appIso_hom'` が `(g.appIso U).hom = g.appLE (g ''ᵁ U) U _` を�
 
 ★★★4 つとも「**等しいが綴りが違う**」の変種である。
 [[ring-instance-two-paths]] に**依存位置**の欄を足すべきである。
+
+## §9-250 `hcompat` の道を**mathlib の補題名まで**特定した(2026-08-19)
+
+§9-249 で「依存位置の転送が残り、逃げ道は未解決」と書いた。★測り直して**道が見えた**。
+
+### ★★★★★要るのは mathlib の 2 本
+
+    (appIso ⊤).hom ≫ ΓSpecIso.hom = X.presheaf.map (eqToHom (fromSpec ''ᵁ ⊤ = U).symm).op
+
+| 補題 | 内容 | 場所 |
+|---|---|---|
+| ★`Scheme.Hom.app_appIso_inv` | `f.app U ≫ (f.appIso (f⁻¹U)).inv = Y.presheaf.map (homOfLE …).op` | `OpenImmersion.lean:210` |
+| ★`IsAffineOpen.fromSpec_app_self` | `fromSpec.app U = ΓSpecIso.inv ≫ (転送)` | `AffineScheme.lean:569` |
+
+★★筋:
+
+    fromSpec.app U ≫ (appIso ⊤).inv = X.presheaf.map (homOfLE …).op      ★app_appIso_inv
+    fromSpec.app U = ΓSpecIso.inv ≫ (転送)                                ★fromSpec_app_self
+      ⟹ ΓSpecIso.inv ≫ (転送) ≫ (appIso ⊤).inv = 制限 Γ(X,U) → Γ(X,B')
+      ⟹ 逆を取って  (appIso ⊤).hom ≫ ΓSpecIso.hom = その逆写像
+
+★★★`fromSpec ⁻¹ᵁ U = ⊤`(`fromSpec_preimage_self`)と
+`fromSpec ''ᵁ ⊤ = U`(第 216)で両端が繋がる。
+
+### ★見積もり 2–4 → **2–3 ブロック**
+
+★★§9-249 では「逃げ道未解決」と書いたが、**mathlib を読み直したら 2 本とも在った**。
+★★★これで**この区間 3 度目**である——
+「無い」と思ったものが `external/_refs` を grep すると在る:
+
+| 節 | 「無い」と思ったもの | 実際 |
+|---|---|---|
+| §9-235 | `ψₙ ∣ ψ₂ₙ` | ★`complEDS₂` に在った |
+| §9-237 | `ω_n` 周りの写像可換性 | ★全部在った |
+| ★§9-250 | `appIso` と `ΓSpecIso` の関係 | ★`app_appIso_inv` + `fromSpec_app_self` |
+
+★★★★**mathlib は「TODO」と書いてある所の周りが完成していることが多い**。
+docstring を額面で受け取らず、**関連ファイルまで grep する**のが効く
+——external ライブラリを検索範囲に入れた効果がここでも出た。

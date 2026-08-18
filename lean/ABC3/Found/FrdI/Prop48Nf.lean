@@ -155,6 +155,27 @@ def biratNfMap_toHomBirat.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (ii) — Ψ^birat は 𝒞 → 𝒞^birat と可換",
     sectionId := "frdi-prop-4-8" }
 
+/-- ★★★★★**[FrdI] Proposition 4.8, (ii)** の `Ψ^birat : 𝒞^birat ⥤ 𝒞^birat`。
+
+★★`section Birat` の中(`G` が section 変数)で宣言する ——
+先行例 `Rmk451Birat.lean` の `biratFunctor` と同じ形。
+★`map_id` は `biratNfMap_toHomBirat`(実装済)、`map_comp` は仮定として受ける。 -/
+noncomputable def psiBiratNf
+    (hcomp : ∀ {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E),
+      biratNfMap P d G A E (compBirat P G G.core f g)
+        = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g)) :
+    BiratCat P G ⥤ BiratCat P G where
+  obj A := (nfObj P G.core d (biratDown P G A) : C)
+  map {_ _} f := biratNfMap P d G _ _ f
+  map_id A := by
+    have h := biratNfMap_toHomBirat P d G (𝟙 (biratDown P G A))
+    have hid : nfMap P G.core d (𝟙 (biratDown P G A)) = 𝟙 _ :=
+      (naiveFrob P G.core d).map_id (biratDown P G A)
+    rw [hid] at h
+    exact h
+  map_comp f g := hcomp f g
+
+
 end Birat
 
 def biratNfMap.src : ABC3.Meta.Source :=
