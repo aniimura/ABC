@@ -66,4 +66,67 @@ def nfMap_coaPreStep.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (ii) — naive Frobenius 関手は co-angular pre-step を保つ",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★★★段 2 —— 添字圏の写像
+
+★`IdxBirat P G A = (Over (coaPreObj P G A))ᵒᵖ` なので、
+`coaPreProp` を保つ関手から `Over.post` ＋ `.op` で降ろすだけ。
+★★これは `iii-psipf` の `idxPfMap`(`Under.post`)と**同じ形**で、
+向きが反対圏になるだけである。 -/
+
+section Birat
+
+variable (G : Frobenioid P)
+
+/-- ★★★★**`naiveFrob` は `𝒞^{coa-pre}` の間の関手を誘導する**。 -/
+noncomputable def coaPreNfMap : CoaPre P G ⥤ CoaPre P G where
+  obj X := ⟨nfObj P G.core d X.obj⟩
+  map f := ⟨nfMap P G.core d f.hom, nfMap_coaPreProp P G.core d f.hom f.property⟩
+  map_id X := WideSubcategory.hom_ext _ ((naiveFrob P G.core d).map_id X.obj)
+  map_comp f g := WideSubcategory.hom_ext _ ((naiveFrob P G.core d).map_comp f.hom g.hom)
+
+/-- ★★**添字圏の写像** —— スライスへ降ろして反対圏を取る。 -/
+noncomputable def idxBiratNfMap (A : C) :
+    IdxBirat P G A ⥤ IdxBirat P G (nfObj P G.core d A) :=
+  (Over.post (X := coaPreObj P G A) (coaPreNfMap P d G)).op
+
+/-! ## ★★★段 3 —— 余錐と射の写像
+
+★遷移は**前合成**なので、naturality は `nfMap` の関手性(`nfMap_comp`)そのもの。
+★★`Ψ^pf` のときの `idxTransport_map` に当たる補題が**要らない**。 -/
+
+/-- ★★★★**余錐** —— 各添字で `nfMap` を当てるだけ。 -/
+noncomputable def biratNfCocone (A B : C) :
+    Limits.Cocone (homFunctorBirat P G A B) where
+  pt := HomBirat P G (nfObj P G.core d A) (nfObj P G.core d B)
+  ι :=
+    { app := fun Z => TypeCat.ofHom fun φ =>
+        HomBirat.mk ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ.down)
+      naturality := by
+        intro Z W u
+        ext φ
+        show HomBirat.mk ((idxBiratNfMap P d G A).obj W)
+            (nfMap P G.core d (u.unop.left.hom ≫ φ.down))
+          = HomBirat.mk ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ.down)
+        rw [nfMap_comp]
+        exact HomBirat.mk_map ((idxBiratNfMap P d G A).map u) (nfMap P G.core d φ.down) }
+
+/-- ★★★★★**射の写像** —— 余極限の普遍性で降ろす。 -/
+noncomputable def biratNfMap (A B : C) :
+    HomBirat P G A B → HomBirat P G (nfObj P G.core d A) (nfObj P G.core d B) :=
+  (Limits.colimit.desc (homFunctorBirat P G A B) (biratNfCocone P d G A B)).hom
+
+/-- ★**代表元での計算則**。 -/
+@[simp] theorem biratNfMap_mk {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) :
+    biratNfMap P d G A B (HomBirat.mk Z φ)
+      = HomBirat.mk ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) :=
+  congrFun (congrArg (fun t => t.hom)
+    (Limits.colimit.ι_desc (biratNfCocone P d G A B) Z)) (ULift.up φ)
+
+end Birat
+
+def biratNfMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — naive Frobenius を 𝒞^birat の射へ降ろす",
+    sectionId := "frdi-prop-4-8" }
+
 end ABC3.Found.FrdI
