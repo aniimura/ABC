@@ -946,15 +946,25 @@
           "note": "★原文の「if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity」。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `pnatMulEquivOfPrimeEquiv_eq_self` と `psiN_eq_id_of_orderPreserve`。\n★`F3-identity`(順序を保つ素数の全単射は恒等)と `psiN-extend`(素数の全単射 ⇒ `ℕ≥1 ≃* ℕ≥1`)を繋ぐだけだった。"
         },
         {
+          "id": "iii-frobtype",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "psiN-prime-bij"
+          ],
+          "title": "(iii) Frobenius 型の保存",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isPrimeFrobComposite_map` と `isFrobeniusType_map_of_primeFrob`。\n★原文 (FrdI p.64): > tion 1.10, (v), the condition of the claim implies that Ψistr\n★prime-Frobenius の保存から `prop_1_10_v`(Frobenius 型 ⇔ prime-Frobenius の合成)を両側で使うだけ。"
+        },
+        {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "psiN-identity",
-            "ii-prestep"
+            "iii-frobtype"
           ],
           "status": "todo",
-          "size": "★大",
-          "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。"
+          "size": "中",
+          "evidence": "Frobenius 型・linear・底同型・co-angular・pull-back・等長・LB-invertible。",
+          "note": "\n\n★★Frobenius 型の保存は `iii-frobtype` で取った(2026-08-18)。\n★原典はそこから順に: linear(`Proposition 1.7, (iii)`)→ 底同型(pre-step と Frobenius 型の合成、`Proposition 1.7, (ii)`)→ pull-back → isometry → co-angular → LB-invertible。\n★見積りを ★大 → ★中 に下げた。"
         },
         {
           "id": "iii-psipf",

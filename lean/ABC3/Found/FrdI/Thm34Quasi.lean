@@ -1130,4 +1130,43 @@ def admissible_roundtrip.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — quasi-inverse で往復すると元に戻る",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★射クラスの保存 —— まず Frobenius 型
+
+原文 (FrdI p.64):
+> tion 1.10, (v), the condition of the claim implies that Ψistr
+
+★★prime-Frobenius の保存から、`prop_1_10_v`
+(Frobenius 型 ⇔ prime-Frobenius の合成)で Frobenius 型の保存が出る。 -/
+
+/-- ★★★**prime-Frobenius の合成は関手で保たれる**。 -/
+theorem isPrimeFrobComposite_map (Ψ : C₁ ⥤ C₂)
+    (hisomap : ∀ {X Y : C₁} (f : X ⟶ Y), IsIso f → IsIso (Ψ.map f))
+    (hprime : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsPrimeFrobenius P₁ f → IsPrimeFrobenius P₂ (Ψ.map f))
+    {A B : C₁} {φ : A ⟶ B} (h : IsPrimeFrobComposite P₁ φ) :
+    IsPrimeFrobComposite P₂ (Ψ.map φ) := by
+  induction h with
+  | iso f hf => exact IsPrimeFrobComposite.iso _ (hisomap f hf)
+  | cons hφ _ ih =>
+    rw [Ψ.map_comp]
+    exact IsPrimeFrobComposite.cons (hprime _ hφ) ih
+
+/-- ★★★★**Ψ は Frobenius 型を保つ**。
+
+★`prop_1_10_v` を両側で使う。 -/
+theorem isFrobeniusType_map_of_primeFrob (Ψ : C₁ ⥤ C₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hisomap : ∀ {X Y : C₁} (f : X ⟶ Y), IsIso f → IsIso (Ψ.map f))
+    (hprime : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsPrimeFrobenius P₁ f → IsPrimeFrobenius P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsFrobeniusType P₁ φ) :
+    IsFrobeniusType P₂ (Ψ.map φ) :=
+  (prop_1_10_v P₂ F₂ (Ψ.map φ)).mpr
+    (isPrimeFrobComposite_map Ψ hisomap hprime ((prop_1_10_v P₁ F₁ φ).mp h))
+
+def isFrobeniusType_map_of_primeFrob.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Frobenius 型の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
