@@ -8137,3 +8137,56 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 ### 残り(B2)
 
     評価射の同型(3)→ InvSheaf・ofDivisor(2)→ 3 法則 + isCartierDivisor_affine(6)
+
+## §9-202 局所自明な層加群は可逆層である(第 180–182 ブロック)
+
+    IsLocallyTrivial X F.val  ⟹  InvSheaf X        (`InvSheaf.ofLocallyTrivial`)
+
+★★★★★★★これは第 133 の `invSheafOfModule`(`Spec R` 限定)の**一般スキーム版**であり、
+B2 の本丸である。
+
+| ブロック | 内容 |
+|---|---|
+| 180 | 双対は層加群であり局所自明 |
+| 181 | ★自明な所では評価射は全単射(逆写像を手で書き `induction_on`) |
+| 182 | ★★局所全単射 → 層化で同型 → `InvSheaf` |
+
+### ★★第 182 は mathlib の実測が効いた
+
+`Mathlib/Algebra/Category/ModuleCat/Sheaf/Localization.lean` に
+
+    J.W.inverseImage (toPresheaf R₀) = (isomorphisms _).inverseImage (sheafification α)
+
+が在った(**層化は局所全単射を同型に送る**の morphism property 版)。
+★これが無ければ層化の普遍性から手で組む羽目になっていた(見積もり +6 ブロック)。
+
+### ★★第 181 の設計判断——同型の合成でなく逆写像を直書き
+
+`F(V) ⊗ 𝒪(V) ≅ F(V) ≅ 𝒪(V)` と合成で組むと**係数環の綴りが 3 通り**現れる。
+★逆写像 `a ↦ e⁻¹(a) ⊗ e.hom` を直に書き、`TensorProduct.induction_on` で
+3 場合を潰す方が短かった(実測 1 ブロック)。
+
+## §9-203 残り(B2)の設計を測った
+
+`CartierPicData` の 14 欄のうち、土台(`toPicardData`)は B1 済み。残りの筋:
+
+    IsCartierDivisor X D := ∀ A : X.affineOpens, Module.Invertible Γ(X,A) (D.ideal A)
+
+★この定義なら `isLocallyTrivial_idealSheaf`(第 162)がそのまま当たり、
+`ofDivisor X D := ⟦InvSheaf.ofLocallyTrivial (idealSheaf D) …⟧` が書ける。
+
+### ★★★律速は `isCartierDivisor_affine` の ⟸ 向き
+
+    Module.Invertible Γ(Spec R,⊤) (D.ideal ⊤)  ⟹  ∀ A, Module.Invertible Γ(A) (D.ideal A)
+
+**測った結果(2026-08-19)**:
+
+| 部品 | 在庫 |
+|---|---|
+| `IdealSheafData.map_ideal` (`A ≤ B` で `D.ideal A = (D.ideal B).map res`) | ★mathlib 有り |
+| `Scheme.Hom.flat_appLE`(**アフィン開の制限は平坦**) | ★mathlib 有り |
+| `Module.Invertible A (A ⊗[R] M)`(**底変換で可逆**) | ★mathlib 有り |
+| `S ⊗[R] I ≃ₗ[S] I.map (algebraMap R S)`(平坦なら) | ★**無い**——作る |
+| 「局所的に可逆 ⟹ 可逆」 | ★無い(**使わない筋にした**) |
+
+★★★したがって欠落は **1 個**(平坦底変換とイデアルの拡大の一致)で、見積もり 2–3 ブロック。
