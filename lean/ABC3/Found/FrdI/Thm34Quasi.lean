@@ -289,4 +289,40 @@ def IsAdmissibleObj.src : ABC3.Meta.Source :=
 `Base φ = Base 𝟙` に `congrArg` を当てるだけで出る。
 ★実は**既に在庫にあった** —— `MorphismTypes.lean:530` の `isDivIdentity_of_isBaseIdentity`。 -/
 
+/-! ## ★★★(F1) の group-like の場合
+
+原文 (FrdI p.65):
+> with domain A1 are precisely the irreducible base-isomorphisms with domain A1 [cf.
+
+★★group-like 型では **prime-Frobenius 射 ＝ 既約な底同型**である。
+★右辺は**圧倒的な条件だけ**で書けるので、`Ψ` が保つことが直ちに出る。 -/
+
+/-- ★★★★**group-like 型では prime-Frobenius ⇔ 既約な底同型**。
+
+★手: `prop_1_14_i` の三分法で、
+- step の枝は group-like だから pre-step が同型になり矛盾
+- pull-back の枝は `Base φ` が同型なので既約になりえず矛盾 -/
+theorem isPrimeFrobenius_iff_irred_baseIso_of_groupLike
+    {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+    {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀) (G : Frobenioid P)
+    (hiso : ∀ X : Cc, IsIsotropic P X) (hgl : IsOfGroupLikeType P)
+    {A B : Cc} (φ : A ⟶ B) :
+    IsPrimeFrobenius P φ ↔ (IsIrreducibleMor φ ∧ IsBaseIsomorphism P φ) := by
+  constructor
+  · intro h
+    exact ⟨prop_1_10_iv_mp P G.core (hiso A) φ h, h.1.2⟩
+  · rintro ⟨hirr, hb⟩
+    rcases (prop_1_14_i P G hiso φ).mp hirr with hpf | ⟨hst, _⟩ | ⟨_, hbirr⟩
+    · exact hpf
+    · exact absurd (isIso_of_preStep_of_isGroupLikeObj P G.core
+        (fun X _ => hiso X) (hgl A) φ hst.1) hst.2
+    · haveI : IsIso (P.Base φ) := hb
+      exact absurd hbirr (by
+        simpa using not_isIrreducibleMor_of_isIso (P.Base φ))
+
+def isPrimeFrobenius_iff_irred_baseIso_of_groupLike.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F1) — group-like での prime-Frobenius の圧倒的特徴づけ",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
