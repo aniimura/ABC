@@ -4949,3 +4949,25 @@ mathlib の証明を写経できる。
 | 88 | `tilde M` が `InvSheaf` / `equivPicRing` |
 
 ★§9-87 では「残り 2」と書いたが、`D(f)` 成分の突き合わせを独立させるので **3** に改める。
+
+## §9-89 —— テンソル局所化の一意性(第 86 ブロック、2026-08-18)
+
+★比較射の `D(f)` 成分を**直接計算せず**、局所化の一意性で押す器具を建てた。
+
+| 器具 | 内容 |
+|---|---|
+| `isLocalizedModule_tensorMap` | ★テンソルは局所化を保つ(mathlib instance の名付け) |
+| `tensorLocalization_ext` | ★★局所化からの写像は**像で決まる** |
+| `tensorLocalizationEquiv` | ★★★★2 つの局所化の間の線型同値 |
+
+★★★これで「純テンソルで一致する」ことだけ見れば `D(f)` 成分の同型が出る。
+
+### ★★残り 2 ブロック
+
+| # | 内容 |
+|---|---|
+| 87 | 前層射の `D(f)` 成分を上の器具で同定し、茎で同型を出す |
+| 88 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+★第 87 の要点は「`tensorSectionMap ∘ (toOpen ⊗ toOpen) = toOpen`」——
+純テンソルでの計算で、第 80 の `localizedTensorEquiv_mk` と同じ形になる。
