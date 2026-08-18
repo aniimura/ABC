@@ -162,4 +162,65 @@ def biratNfMap.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (ii) — naive Frobenius を 𝒞^birat の射へ降ろす",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★★★★`Ψ^birat` の組み上げ —— `map_comp` を仮定として受ける形
+
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
+
+★★`map_comp` だけが残っているので、本プロジェクトの慣行どおり
+**それを仮定として受ける形で関手を組み上げ**、仮定を新しい葉として切り出す。
+★これで下流(`psi-birat-equiv` / `ii-src`)が先に進める。
+
+## ★`map_comp` の梃子(2026-08-19 に測った)
+
+`FrobenioidCore.preStepMono`(`Definition 1.3, (v), (a)`)—— **pre-step は mono**。
+引き戻しの四角形 `γ ≫ φ = α ≫ W.unop.hom.hom` で `W.unop.hom.hom` は
+co-angular **pre-step** なので mono、したがって **`α` は `γ` から一意に決まる**。
+★★これで比較は「添字(= `γ` の側)だけ」に落ちる。 -/
+
+/-- ★★★★★**[FrdI] Proposition 4.8, (ii)** の `Ψ^birat : 𝒞^birat ⥤ 𝒞^birat`。
+
+★対象は `𝒞^birat` が `𝒞` と同じ型なのでそのまま `nfObj`、射は `biratNfMap`。
+★`map_id` は `biratNfMap_toHomBirat`(実装済)、`map_comp` は仮定。 -/
+noncomputable def psiBiratNf (G : Frobenioid P)
+    (hcomp : ∀ {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E),
+      biratNfMap P d G A E (compBirat P G G.core f g)
+        = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g)) :
+    BiratCat P G ⥤ BiratCat P G where
+  obj A := nfObj P G.core d (biratDown P G A)
+  map {_ _} f := biratNfMap P d G _ _ f
+  map_id A := by
+    have h := biratNfMap_toHomBirat P d G (𝟙 (biratDown P G A))
+    rw [(naiveFrob P G.core d).map_id (biratDown P G A)] at h
+    exact h
+  map_comp f g := hcomp f g
+
+/-- ★★★★**1-可換図式** —— `𝒞 → 𝒞^birat` の四角形。
+
+★成分は恒等で、自然性がちょうど `biratNfMap_toHomBirat` である。 -/
+noncomputable def psiBiratNfSquare (G : Frobenioid P)
+    (hcomp : ∀ {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E),
+      biratNfMap P d G A E (compBirat P G G.core f g)
+        = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g)) :
+    toBiratCat P G ⋙ psiBiratNf P d G hcomp ≅ naiveFrob P G.core d ⋙ toBiratCat P G :=
+  NatIso.ofComponents (fun _ => Iso.refl _) (fun {A B} φ => by
+    show compBirat P G G.core (biratNfMap P d G A B (toHomBirat (P := P) (G := G) φ))
+        (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d B)))
+      = compBirat P G G.core (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d A)))
+          (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+    rw [biratNfMap_toHomBirat]
+    rw [show compBirat P G G.core (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+        (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d B)))
+        = toHomBirat (P := P) (G := G) (nfMap P G.core d φ) from
+      compBirat_id_right G.core _]
+    rw [show compBirat P G G.core (toHomBirat (P := P) (G := G) (𝟙 (nfObj P G.core d A)))
+        (toHomBirat (P := P) (G := G) (nfMap P G.core d φ))
+        = toHomBirat (P := P) (G := G) (nfMap P G.core d φ) from
+      compBirat_id_left G.core _])
+
+def psiBiratNf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat の構成と 1-可換図式",
+    sectionId := "frdi-prop-4-8" }
+
 end ABC3.Found.FrdI
