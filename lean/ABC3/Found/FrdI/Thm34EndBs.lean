@@ -748,7 +748,7 @@ def isBaseIdentity_map_of_baseSquare.src : ABC3.Meta.Source :=
 /-! ## ★★★★★`Theorem 3.4, (v)` の `Ψ_Base` —— **局所化として読み替える**
 
 原文 (FrdI p.68):
-> which is clearly an equivalence of categories.
+> sition A.2, hence, in particular, is an equivalence of categories. Thus, since the nat-
 
 ★★★**測って分かった読み替え**(2026-08-19)。
 原典は `Q_i`(スライスの 2-圏の coarsification)を base-isomorphism が誘導する
@@ -783,24 +783,24 @@ theorem isInvertedBy_of_baseIso_map
 
 ★`𝒟₁` が `𝒞₁` の base-isomorphism による局所化であるとき、
 `Ψ ⋙ P₂.proj` が base-isomorphism を反転させることから普遍性で得られる。 -/
-noncomputable def psiBase [P₁.proj.IsLocalization (baseIsoProp P₁)]
+noncomputable def psiBaseLoc [P₁.proj.IsLocalization (baseIsoProp P₁)]
     (hinv : (baseIsoProp P₁).IsInvertedBy (Ψ ⋙ P₂.proj)) : D₁ ⥤ D₂ :=
   Localization.lift (Ψ ⋙ P₂.proj) hinv P₁.proj
 
 /-- ★★★★★**1-可換図式** —— 局所化の `Lifting.iso` そのもの。
 
 ★これがちょうど `v-baseid` の `isBaseIdentity_map_of_baseSquare` が受ける仮定である。 -/
-noncomputable def psiBaseSquare [P₁.proj.IsLocalization (baseIsoProp P₁)]
+noncomputable def psiBaseLocSquare [P₁.proj.IsLocalization (baseIsoProp P₁)]
     (hinv : (baseIsoProp P₁).IsInvertedBy (Ψ ⋙ P₂.proj)) :
-    P₁.proj ⋙ psiBase Ψ hinv ≅ Ψ ⋙ P₂.proj :=
-  haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBase Ψ hinv) :=
+    P₁.proj ⋙ psiBaseLoc Ψ hinv ≅ Ψ ⋙ P₂.proj :=
+  haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBaseLoc Ψ hinv) :=
     Localization.liftingLift (Ψ ⋙ P₂.proj) hinv P₁.proj
-  Localization.Lifting.iso P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBase Ψ hinv)
+  Localization.Lifting.iso P₁.proj (baseIsoProp P₁) (Ψ ⋙ P₂.proj) (psiBaseLoc Ψ hinv)
 
 /-- ★★★★**1-一意性** —— 図式を可換にする `𝒟₁ ⥤ 𝒟₂` は同型を除いて一意。
 
 ★局所化に沿った前合成が**充満忠実**であることから出る。 -/
-noncomputable def psiBaseUniq [P₁.proj.IsLocalization (baseIsoProp P₁)]
+noncomputable def psiBaseLocUniq [P₁.proj.IsLocalization (baseIsoProp P₁)]
     (F G : D₁ ⥤ D₂) (e : P₁.proj ⋙ F ≅ P₁.proj ⋙ G) : F ≅ G :=
   haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (P₁.proj ⋙ F) F := ⟨Iso.refl _⟩
   haveI : Localization.Lifting P₁.proj (baseIsoProp P₁) (P₁.proj ⋙ G) G := ⟨Iso.refl _⟩
@@ -808,7 +808,7 @@ noncomputable def psiBaseUniq [P₁.proj.IsLocalization (baseIsoProp P₁)]
 
 end PsiBase
 
-def psiBase.src : ABC3.Meta.Source :=
+def psiBaseLoc.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 62,
     item := "Theorem 3.4, (v) — Ψ_Base の構成と 1-可換図式・1-一意性",
     sectionId := "frdi-thm-3-4" }

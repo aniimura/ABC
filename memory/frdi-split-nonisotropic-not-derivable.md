@@ -105,3 +105,14 @@ FrdI §3/§4 を進める 1 セッションで、「無い」と見積もった�
 も探すこと。
 それでも見つからなければ**書いてみて Lean の重複エラーに聞く**のが確実である
 (5 件中 2 件は重複エラーで気づいた)。
+
+★2026-08-19、**8 件目と 9 件目**:
+8. `Definition A.1` / `Proposition A.2`(FrdI 付録)—— 逆に**在庫に無かった**ことを
+   grep で確認してから書いた。これは正しい手順。
+9. `psiBase` / `psiBaseUniq` —— `Prop311.lean` に既にあった
+   (`Proposition 3.11, (iii)` の `Φ = 0` の特別な場合)。
+   ★★**単一ファイルの `lake build` では衝突が出ない**。
+   `lake build`(全体)まで走らせて初めて
+   「environment already contains」で落ちた。
+   ★対策に追記: **新しい名前を作る前に `Grep(pattern: "def <name>\b", path: "lean/ABC3")`**、
+   かつ**節点を閉じる前に全体ビルドを 1 回通す**こと。
