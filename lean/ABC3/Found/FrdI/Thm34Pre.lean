@@ -312,6 +312,112 @@ theorem isPreStep_map_iff (e : C₁ ≌ C₂)
       (e.functor.map φ)]
   exact and_congr (isFSMMorphism_map_iff e.functor φ) (isMidAdjoint_irredBounded_map_iff e φ)
 
+
+/-! ## ★7. ★★★★★`Theorem 3.4, (ii)` —— 3 主張 -/
+
+include P₁ in
+/-- ★`A` から出る co-angular step の存在は、対象の同型で移る(isotropic 型のとき)。 -/
+theorem exists_coaStep_of_iso (F₁ : FrobenioidCore P₁) (hiso : ∀ X : C₁, IsIsotropic P₁ X)
+    {A A' : C₁} (k : A ≅ A')
+    (h : ∃ (B : C₁) (φ : A ⟶ B), IsCoAngular P₁ φ ∧ IsStep P₁ φ) :
+    ∃ (B : C₁) (φ : A' ⟶ B), IsCoAngular P₁ φ ∧ IsStep P₁ φ := by
+  obtain ⟨B, φ, -, hst⟩ := h
+  refine ⟨B, k.inv ≫ φ, isCoAngular_of_isotropic_dom (P := P₁) F₁ (hiso A') _, ?_, ?_⟩
+  · exact IsPreStep.comp P₁ (isPreStep_of_isIso P₁ k.inv) hst.1
+  · intro hi
+    haveI := hi
+    refine hst.2 ?_
+    have hk : φ = k.hom ≫ (k.inv ≫ φ) := by
+      rw [← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+    rw [hk]
+    infer_instance
+
+include P₁ P₂ in
+/-- ★★**pre-step の保存から、出ていく co-angular step の存在が移る**。 -/
+theorem exists_coaStep_map (e : C₁ ≌ C₂)
+    (F₂ : FrobenioidCore P₂) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    {A : C₁} (h : ∃ (B : C₁) (φ : A ⟶ B), IsCoAngular P₁ φ ∧ IsStep P₁ φ) :
+    ∃ (B : C₂) (φ : e.functor.obj A ⟶ B), IsCoAngular P₂ φ ∧ IsStep P₂ φ := by
+  obtain ⟨B, φ, -, hst⟩ := h
+  refine ⟨e.functor.obj B, e.functor.map φ,
+    isCoAngular_of_isotropic_dom (P := P₂) F₂ (hiso₂ _) _, (hps φ).mp hst.1, ?_⟩
+  intro hi
+  haveI := hi
+  exact hst.2 ((Functor.FullyFaithful.ofFullyFaithful e.functor).isIso_of_isIso_map φ)
+
+include P₁ P₂ in
+/-- ★★★★**[FrdI] Theorem 3.4, (ii)** —— **圏同値は group-like 対象を保つ**。
+
+原文 (FrdI p.64):
+> also Proposition 1.4, (i)], that Ψ preserves group-like objects. This completes the
+
+★`Proposition 1.8, (iii)` が「non-group-like ⟺ 出ていく co-angular step がある」を
+与えるので、pre-step の保存からそのまま出る。 -/
+theorem isGroupLikeObj_map_iff (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    (A : C₁) :
+    IsGroupLikeObj P₁ A ↔ IsGroupLikeObj P₂ (e.functor.obj A) := by
+  letI := coaPreProp_isMultiplicative P₁ G₁.core.coAngularComp
+  letI := coaPreProp_isMultiplicative P₂ G₂.core.coAngularComp
+  rw [← not_iff_not, prop_1_8_iii_out P₁ (fun X => G₁.coaPreUnderEquiv X) A,
+    prop_1_8_iii_out P₂ (fun X => G₂.coaPreUnderEquiv X) (e.functor.obj A)]
+  constructor
+  · exact exists_coaStep_map P₁ P₂ e F₂ hiso₂ hps
+  · intro h
+    have h1 := exists_coaStep_map P₂ P₁ e.symm F₁ hiso₁ hps' h
+    exact exists_coaStep_of_iso P₁ F₁ hiso₁ (e.unitIso.app A).symm h1
+
+set_option maxHeartbeats 1000000 in
+include P₁ P₂ in
+/-- ★★★★★**[FrdI] Theorem 3.4, (ii)** —— **3 主張をまとめた形**。
+
+原文 (FrdI p.62):
+> (ii) Suppose that C1, C2 are of quasi-isotropic type, and that D1, D2 are of
+
+★★**逸脱の記録(分類 (B))** —— 2 点ある。
+
+1. `Proposition 1.14, (iii)` の `⟸` が `Definition 1.3` から出ない
+   (反例 `𝔽_ℕ ⋉ ∏ℤ/n`、`Gap_1_14_iii`)ので、原典に無い 2 条
+   `hFrobMono`(Frobenius 型は mono)と `hFrobFS`(同 fiberwise 全射)を
+   **両側で**仮定に置いた。
+2. 原文は **quasi-isotropic 型**で述べ、`Proposition 1.7, (iv)` と (i) で
+   **isotropic 型へ帰着**させる。★我々は**isotropic 型を直接仮定している**
+   (帰着の側は未実装)。したがって原文より**狭い**主張である。
+
+★内容は 3 つ: pre-step の保存・co-angular pre-step の保存・group-like 対象の保存。
+★isotropic 型では co-angular はすべての射について自動なので、2 番目は 1 番目に帰着する。 -/
+theorem thm_3_4_ii (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hFSMFF₁ : IsOfFSMFFType D₁)
+    (hFrobMono₁ : ∀ {X Y : C₁} (ε : X ⟶ Y), IsFrobeniusType P₁ ε → Mono ε)
+    (hFrobFS₁ : ∀ {X Y : C₁} (ε : X ⟶ Y), IsFrobeniusType P₁ ε → IsFiberwiseSurjective ε)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hFSMFF₂ : IsOfFSMFFType D₂)
+    (hFrobMono₂ : ∀ {X Y : C₂} (ε : X ⟶ Y), IsFrobeniusType P₂ ε → Mono ε)
+    (hFrobFS₂ : ∀ {X Y : C₂} (ε : X ⟶ Y), IsFrobeniusType P₂ ε → IsFiberwiseSurjective ε) :
+    (∀ {A B : C₁} (φ : A ⟶ B), IsPreStep P₁ φ ↔ IsPreStep P₂ (e.functor.map φ)) ∧
+    (∀ {A B : C₁} (φ : A ⟶ B),
+      (IsCoAngular P₁ φ ∧ IsPreStep P₁ φ) ↔
+        (IsCoAngular P₂ (e.functor.map φ) ∧ IsPreStep P₂ (e.functor.map φ))) ∧
+    (∀ A : C₁, IsGroupLikeObj P₁ A ↔ IsGroupLikeObj P₂ (e.functor.obj A)) := by
+  have hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f) :=
+    fun f => isPreStep_map_iff P₁ P₂ e F₁ G₁ hiso₁ hFSMFF₁ hFrobMono₁ hFrobFS₁
+      F₂ G₂ hiso₂ hFSMFF₂ hFrobMono₂ hFrobFS₂ f
+  have hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f) :=
+    fun f => isPreStep_map_iff P₂ P₁ e.symm F₂ G₂ hiso₂ hFSMFF₂ hFrobMono₂ hFrobFS₂
+      F₁ G₁ hiso₁ hFSMFF₁ hFrobMono₁ hFrobFS₁ f
+  refine ⟨hps, fun φ => ?_, isGroupLikeObj_map_iff P₁ P₂ e F₁ G₁ F₂ G₂ hiso₁ hiso₂ hps hps'⟩
+  constructor
+  · rintro ⟨-, h⟩
+    exact ⟨isCoAngular_of_isotropic_dom (P := P₂) F₂ (hiso₂ _) _, (hps φ).mp h⟩
+  · rintro ⟨-, h⟩
+    exact ⟨isCoAngular_of_isotropic_dom (P := P₁) F₁ (hiso₁ _) _, (hps φ).mpr h⟩
+
 end PreStep
 
 end ABC3.Found.FrdI

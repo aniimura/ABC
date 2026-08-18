@@ -5461,3 +5461,33 @@ mathlib の証明を写経できる。
 | 103 | `tilde M` が `InvSheaf` / `equivPicRing` | 2 |
 
 ★★**残り 5–7 ブロック**。B1 総計は **約 106**。
+
+## §9-107 —— ★★★★★★§9-73 の詰まりが解けた(第 101 ブロック、2026-08-18)
+
+### 実測: `Sheaf.isLocallyBijective_iff_isIso` は **`over` 位相でも使える**
+
+★§9-73 で「instance が拾えない」と 3 手試して止めたが、
+**詰まっていたのは `SheafOfModules.toSheaf` 固有**であって、
+`Sheaf J AddCommGrpCat` の版は**そのまま通る**(2026-08-18 実測)。
+
+★★★**止めた判断は正しかったが、原因の切り分けが足りていなかった**
+——「器具が使えない」ではなく「その持ち込み方が使えない」だった。
+
+### ★★本ブロックの器具
+
+| 定理 | 内容 |
+|---|---|
+| `isLocallySurjective_of_cover` | ★★★被覆の上で持ち上がれば局所全射 |
+| `isLocallyInjective_of_coverSieve` | ★★★被覆の上で一致すれば局所単射 |
+
+★機構は `imageSieve` / `equalizerSieve` に被覆篩を含めて `J.superset_covering`。**一発。**
+
+### ★★★これで「基底で同型 ⟹ `Over V` で同型」が書ける
+
+    基底で同型 → 局所全単射(本ブロック) → 同型(`isLocallyBijective_iff_isIso`)
+
+### ★★残り 3–4 ブロック
+
+| 102 | `(tilde M)\|_{D g} ≅ 𝟙_` |
+| 103 | `IsLocallyTrivial (tilde M).val` |
+| 104 | `tilde M` が `InvSheaf` / `equivPicRing` |
