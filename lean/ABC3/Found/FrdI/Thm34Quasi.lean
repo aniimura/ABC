@@ -1287,4 +1287,53 @@ def isCoAngular_of_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — co-angular の反射",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★isometry の圧倒的な特徴づけ(isotropic 型)
+
+原文 (FrdI p.64):
+> and a pull-back morphism — cf. Propositions 1.4, (i), (v); 1.9, (v)], co-angular
+
+★★isotropic 型では **isometry ⇔ (Frobenius 型) ≫ (pull-back)** となる。
+★右辺は圧倒的なクラスだけなので、関手での保存が直ちに出る。 -/
+
+/-- ★★★★**isotropic 型では isometry は (Frobenius 型) ≫ (pull-back) と同値**。
+
+★`⇐` は両方が isometric で合成も isometric。
+★`⇒` は `arbFactor` で分解し、pre-step の部分の `Div` が 0 になることから
+  それが同型となり、pull-back に吸収される。 -/
+theorem isIsometric_iff_frobPullBack {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    (F : FrobenioidCore P) (hiso : ∀ X : Cc, IsIsotropic P X)
+    {A B : Cc} (φ : A ⟶ B) :
+    IsIsometric P φ ↔ ∃ (X : Cc) (γ : A ⟶ X) (α : X ⟶ B),
+      φ = γ ≫ α ∧ IsFrobeniusType P γ ∧ IsPullBack P α := by
+  constructor
+  · intro hm
+    obtain ⟨X, Y, γ, β, α, hfac, hγ, hβ, hα⟩ := F.arbFactor φ
+    have hdγ : P.Div γ = 0 := hγ.1.2
+    have hdα : P.Div α = 0 := (F.pullBackLB α hα).1.2
+    have hda : P.degFr α = 1 := (F.pullBackLB α hα).2
+    have hdba : P.Div (β ≫ α) = P.Div β := by
+      rw [P.Div_comp, hdα, map_zero, zero_add,
+        show ((P.degFr α : ℕ+) : ℕ) = 1 from by rw [hda]; rfl, one_smul]
+    have hdphi : Φ₀.map (P.Base γ) (P.Div β) = 0 := by
+      have h := congrArg P.Div hfac
+      rw [P.Div_comp, hdba, hdγ, smul_zero, add_zero] at h
+      rw [← h]
+      exact hm
+    haveI : IsIso (P.Base γ) := hγ.2
+    have hdβ : P.Div β = 0 := by
+      refine (Φ₀.charInj (P.Base γ)).1 ?_
+      exact hdphi.trans (map_zero _).symm
+    haveI : IsIso β := hiso X Y β hdβ hβ
+    exact ⟨X, γ, β ≫ α, hfac, hγ, IsPullBack.comp P (isPullBack_of_isIso P β) hα⟩
+  · rintro ⟨X, γ, α, rfl, hγ, hα⟩
+    show P.Div (γ ≫ α) = 0
+    rw [P.Div_comp, (F.pullBackLB α hα).1.2, map_zero, zero_add,
+      show P.Div γ = 0 from hγ.1.2, smul_zero]
+
+def isIsometric_iff_frobPullBack.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — isometry の圧倒的な特徴づけ",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
