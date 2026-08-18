@@ -5318,3 +5318,23 @@ mathlib の証明を写経できる。
 | 98 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 99 | `tilde M` が `InvSheaf` |
 | 100 | `equivPicRing` |
+
+## §9-102 —— 可逆な作用(第 97 ブロック、2026-08-18)
+
+    powers g は M_{t·g} に可逆に作用する
+
+★`g ∣ t·g` なので `g` は `R_{t·g}` で可逆であり、**単元によるスカラー倍は全単射**
+(`MulAction.toPerm`)。★★足場(第 95)で `R` の作用に直せる。
+
+### ★★これで `IsLocalizedModule.lift` が使える
+
+    M_g →ₗ M_{t·g}
+
+が作れる。★あとは `IsBaseChange.comp_iff`(§9-101)で局所化性を移し、
+`Module.free_of_isLocalizedModule` で自由性が運べる。
+
+### ★★★残り 3 ブロック
+
+| 98 | `M_g` 自由 ⟹ `M_{t·g}` 自由 → `(tilde M)\|_{D g} ≅ 𝟙_` |
+| 99 | `IsLocallyTrivial` → `tilde M` が `InvSheaf` |
+| 100 | `equivPicRing` |
