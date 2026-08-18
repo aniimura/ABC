@@ -996,10 +996,20 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `isCoAngular_of_map`。\n★★★**測定の収穫**: `IsCoAngular` は「任意の分解に対し…」なので、**保存**を直に示すには分解を引き戻す必要があり重い。\n★しかし**反射**(像が co-angular ならもとも co-angular)は分解を**前へ送る**だけなので軽い。\n★★圧倒的同値なら `Ψ` と `Ψ⁻¹` の両方に当てられるので、**反射が両方向で取れれば保存も出る**。\n★鍵: 圧倒的同値は同型を**反射**する(`isIso_of_reflects_iso`)。"
         },
         {
+          "id": "prop-1-4-v",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "iii-coangular-refl"
+          ],
+          "title": "[FrdI] Proposition 1.4, (v) —— isometry の圧倒的な特徴づけ(在庫に無い)",
+          "note": "★★★**測定(2026-08-18)**: `iii-morclasses` の残りは isometry の保存だけで、原典はそれを次のように言う(FrdI p.64):\n> isometries [i.e., morphisms that map via the isotropification functor to composites of\n> a morphism of Frobenius type and a pull-back morphism — cf. Propositions 1.4, (i), (v); 1.9, (v)]\n\n★★**`Proposition 1.4, (v)` は在庫に無い**(`Prop14.lean` に (i)(ii)(iii)(iv) はあるが (v) が無い)。\n★`IsIsometric φ := Div φ = 0` は**圧倒的でない**ので、圧倒的な特徴づけが無いと関手での保存が言えない。\n★使える在庫: `isotropification`(`Prop19.lean:691`)、`isotropification_isometric_iff`(`Prop19.lean:827`、両向き)、`prop_1_4_ii`(pull-back ⇔ LB-invertible ∧ linear)。\n★★これが `Theorem 3.4, (iii)` の**真の残り**である。"
+        },
+        {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "iii-coangular-refl"
+            "prop-1-4-v"
           ],
           "status": "todo",
           "size": "小",
