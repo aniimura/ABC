@@ -459,13 +459,13 @@
         },
         {
           "id": "factor-iso-div",
-          "size": "大",
+          "size": "中",
           "status": "todo",
           "deps": [
             "factor-plbk"
           ],
           "title": "𝒞^birat の同型の Div^gp が Φ^birat に入るか —— ★真の残り",
-          "note": "★★★**ここが (iii) の残り全部である**(2026-08-18 測定)。\n★同型 `h : A ≅ B`(同じ底)に対し `Div^gp(h) ∈ Φ^birat(Base A)` か。\n★注意: `Div^gp(h) + Div^gp(h⁻¹) = 0` は**自動で成り立つ**ので、同型であることだけからは何も出ない。\n★★原典はここを `Proposition 1.5, (ii)`(`𝒪^▷(A) ≅ Φ(A)`、**実装済**)に預けていると読める —— `𝔽_{Φ^gp}` 側で `Φ^gp(X)` が `𝒪^▷(X)` そのものになるので、射の分類が `𝒪` の言葉に戻る。\n★次の一手: `Prop15.lean` の `otriEquiv` を `Φ.gpOn` に当て、`biratToElemGp` と合成して `𝒪^×(A^birat) → 𝒪^▷(X)_{𝔽}` を見る。"
+          "note": "★★★**設計確定(2026-08-18)——追加仮定 1 本で閉じる**。\n\n## ★分かったこと\n在庫に `Div : 𝒪^▷(A) → Φ(Base A)` の**全射性は無い**。一般の Frobenioid の公理にも無い。★しかし **`𝔽_Φ` では `Proposition 1.5, (ii)`(`otriEquiv`)がそれを与える**(`Φ(A) ≃ 𝒪^▷(A)` のモノイド同型)。\n\n## ★★採用する仮定(逸脱 **(B)**)\n「isotropic な `A` に対し `Div : 𝒪^▷(A) → Φ(Base A)` は全射」。\n★これは `𝔽_Φ` では `otriEquiv` より**自動的に成り立つ**ので、「隠れた除数が無い」という自然な条件である。\n\n## ★仮定からの導出(測定済)\n同型 `h : A ≅ B` は `(α : A' → A, φ : A' → B)` で代表され、★(iv) の辞書より **`φ` も co-angular pre-step** になる。\n`biratDivGp h = toGp(Div φ) - toGp(Div α)`。仮定を `A'` で使うと `Div φ = Div u`, `Div α = Div v`(`u,v ∈ 𝒪^▷(A')`)と書け、`biratDivGp h = biratDivGp(T u) - biratDivGp(T v) ∈ phiBiratAt A'`。\n★`α` は `𝒞^birat` で同型なので `phiBiratAt A' = phiBiratAt A`(`phiBiratAt_map_le` を両向きに使う)。\n\n## ★★なぜ仮定が要るのか(反例の方向)\n算術的なモデルで `𝒪^▷(A)` の `Div` の像は**主除数**、co-angular pre-step の `Div` は**任意の有効除数**になる。★両者が一致するのは類群が自明なときだけである。★★したがってこれは**真に追加すべき仮定**であり、index.html の逸脱表に (B) として開示する。\n★注: `Div^gp(h) + Div^gp(h⁻¹) = 0` は自動なので、同型性だけからは何も出ない。"
         },
         {
           "id": "factor-src",

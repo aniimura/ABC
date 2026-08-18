@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 972 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 974 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5077</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1382</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5079</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1384</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>45a06b6</code></td><td>2026-08-18</td><td>逆向きの測量と有限被覆(第 134-135、§9-149)</td></tr>
+<tr><td><code>db20dd8</code></td><td>2026-08-18</td><td>還元段を取った——「経由するか」は同型 1 本で判定できる</td></tr>
 <tr><td><code>6bf7ae1</code></td><td>2026-08-18</td><td>`phibirat-factor` を測って 3 つに割った——残りが 1 点に絞れた</td></tr>
 <tr><td><code>58c5124</code></td><td>2026-08-18</td><td>可逆加群から可逆層へ(第 133、§9-148)</td></tr>
 <tr><td><code>7998ca0</code></td><td>2026-08-18</td><td>★★★以前「一般には言えない」と見た主張が、isotropic に制限すると成り立った</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>a44defa</code></td><td>2026-08-18</td><td>★原典の証明を読んで経路を差し替えた——𝒟 上の関手性は Prop 2.2 が供給する</td></tr>
 <tr><td><code>187ed35</code></td><td>2026-08-18</td><td>𝒞^birat の 3 つの構造的事実をメモリに残した</td></tr>
 <tr><td><code>816a0b3</code></td><td>2026-08-18</td><td>★★★負の測定を記録した——「同じ底なら 𝒞^birat で同型」は一般には言えない</td></tr>
-<tr><td><code>3feabc6</code></td><td>2026-08-18</td><td>切断に Localization 加群構造(第 129、§9-146)</td></tr>
-<tr><td><code>e2a772c</code></td><td>2026-08-18</td><td>`Φ^birat` の同型による輸送を取り、𝒟 上の部分関手化の「真の要」を特定した</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1382 件)。</div>
+<b>すべて PDF と機械照合している</b>(1384 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
