@@ -347,6 +347,7 @@ import ABC3.Found.Arakelov.PicEvalBij
 import ABC3.Found.Arakelov.PicEvalIso
 import ABC3.Found.Arakelov.PicIdealBase
 import ABC3.Found.Arakelov.PicIdealFlat
+import ABC3.Found.Arakelov.PicIdealMul
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

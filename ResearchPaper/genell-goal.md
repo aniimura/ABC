@@ -8221,3 +8221,63 @@ B2 の本丸である。
 ### 残り(B2)
 
     ofDivisor(1)→ ⊤・積・引き戻しの Cartier 性(3)→ 3 法則(4)→ 主因子(3)
+
+## §9-205 可逆イデアルは積で閉じる(第 185 ブロック)
+
+第 183 と**同じ形**で出た:
+
+    I ⊗[R] J --(1 ⊗ J↪R)--> I ⊗[R] R ≅ I ⊆ R
+
+★像は `I * J`、単射性は **`I` の平坦性**(可逆 ⟹ 射影的 ⟹ 平坦)。
+
+### ★★mathlib の `tensorEquivMul` は当たらなかった
+
+`Submodule.tensorEquivMul` は `(Submodule R A)ˣ`(**単元**)を要求する。
+★`Module.Invertible R ↥I` は「`I` が `Submodule R R` の単元」を**意味しない**
+——可逆イデアルの逆は `R` の中には無く `Frac R` にある——ので直に当たらない。
+そこで平坦性の筋を採った。★測って初めて分かる型のずれである。
+
+## §9-206 ★★★★★逸脱の記録(2026-08-19)——`isCartierDivisor_comap` は偽だった
+
+### 見つけた誤り
+
+`Interface/Arakelov/LineBundle.lean` の `CartierPicData` に
+
+    isCartierDivisor_comap : ∀ (f : X ⟶ Y) (D : Y.IdealSheafData),
+      IsCartierDivisor Y D → IsCartierDivisor X (D.comap f)
+
+と**平坦性なし**で書いてあった(2026-08-18 の版)。★これは**偽**である。
+
+### 反例
+
+| 対象 | 中身 |
+|---|---|
+| `Y` | `Spec k[x]` |
+| `D` | `(x)`——`x` は非零因子なので `(x) ≅ k[x]`、可逆 ✓ |
+| `f` | `Spec k ⟶ Spec k[x]`(原点) |
+
+`D.comap f` は mathlib の定義では `(pullback.fst f D.subschemeι).ker` である。
+`Spec k ×_{Spec k[x]} Spec k = Spec k` で `pullback.fst` は同型だから、その核は `⊥`。
+★`Module.Invertible k (⊥ : Ideal k)` は**偽**(階数 0)。
+
+### なぜ古典的にも偽か
+
+「Cartier 因子の引き戻しが Cartier」は `f(X) ⊄ Supp D` か `f` が平坦のときに限る。
+★★可逆**層** `𝒪(D)` の引き戻しは常に可逆だが、**イデアル層**の引き戻しは
+`f^* I → 𝒪_X` の**像**であり、可逆とは限らない。
+
+### 直し方と下流への影響
+
+`isCartierDivisor_comap` と `ofDivisor_pullback` に **`[Flat f]`** を課した。
+★下流(高さの底変換不変性)が使うのは `Spec 𝓞_L ⟶ Spec 𝓞_K` で、
+これは平坦(Dedekind 環上の捩れ無し加群)なので**影響しない**。
+
+### ★★★これで Interface の誤りは 2 件目
+
+| # | 場所 | 誤り | 直し |
+|---|---|---|---|
+| 1 | `ofDivisor_eq_one_iff`(§9-146) | 無条件だと ℚ[x,y] の全イデアルが単項になる | Cartier 条件を付けた |
+| 2 | `isCartierDivisor_comap`(本節) | 平坦性なしだと反例がある | `[Flat f]` を付けた |
+
+★★どちらも**充足しようとして初めて**見つかった。
+Interface を書くだけでは分からず、**埋める作業が検算になっている**。

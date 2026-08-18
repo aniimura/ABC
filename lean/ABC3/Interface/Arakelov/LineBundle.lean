@@ -1,5 +1,6 @@
 import ABC3.Meta.Claim
 import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.RingTheory.ClassGroup.Basic
 import Mathlib.RingTheory.PicardGroup
 import Mathlib.NumberTheory.NumberField.Basic
@@ -209,8 +210,23 @@ structure CartierPicData where
   /-- ★Cartier は積で閉じる。 -/
   isCartierDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
     IsCartierDivisor X D → IsCartierDivisor X E → IsCartierDivisor X (D * E)
-  /-- ★Cartier は引き戻しで保たれる。 -/
-  isCartierDivisor_comap : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (D : Y.IdealSheafData),
+  /-- ★Cartier は**平坦**な引き戻しで保たれる。
+
+  ★★★★**2026-08-19 の修正。**それ以前は平坦性を課していなかったが、その形は
+  **偽**である:
+
+  `Y = Spec k[x]`、`D = (x)`(`x` は非零因子なので `(x) ≅ k[x]`、可逆)、
+  `f : Spec k ⟶ Spec k[x]` を原点とすると、`D.comap f`(= 概型論的逆像の定義イデアル)は
+  `Spec k ×_{Spec k[x]} Spec k = Spec k` の恒等射の核、すなわち `⊥` である。
+  `Module.Invertible k (⊥ : Ideal k)` は**偽**(階数 0)。
+
+  ★★★古典的にも「Cartier 因子の引き戻しが Cartier」は `f(X) ⊄ Supp D` か
+  `f` が平坦のときに限る。可逆**層** `𝒪(D)` の引き戻しは常に可逆だが、
+  イデアル層の引き戻しは可逆とは限らない。
+
+  ★下流(高さの底変換不変性)が使うのは `Spec 𝓞_L ⟶ Spec 𝓞_K` で、これは平坦なので
+  平坦性を課しても影響しない。 -/
+  isCartierDivisor_comap : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) [Flat f] (D : Y.IdealSheafData),
     IsCartierDivisor Y D → IsCartierDivisor X (D.comap f)
   /-- ★★★**アフィンでは可逆イデアルに対応する**——`IsCartierDivisor` の意味を固定する。
 
@@ -231,8 +247,10 @@ structure CartierPicData where
   /-- ★空因子は単位元。 -/
   ofDivisor_top : ∀ (X : Scheme.{0}),
     ofDivisor X ⊤ = (toPicardData.group X).toDivInvMonoid.toMonoid.toOne.one
-  /-- ★★**引き戻しと両立する**——これが高さの底変換不変性を出す段である。 -/
-  ofDivisor_pullback : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) (D : Y.IdealSheafData),
+  /-- ★★**平坦な引き戻しと両立する**——これが高さの底変換不変性を出す段である。
+
+  ★平坦性は `isCartierDivisor_comap` と同じ理由(2026-08-19 の修正)。 -/
+  ofDivisor_pullback : ∀ {X Y : Scheme.{0}} (f : X ⟶ Y) [Flat f] (D : Y.IdealSheafData),
     IsCartierDivisor Y D →
     toPicardData.pullback f (ofDivisor Y D) = ofDivisor X (D.comap f)
   /-- ★★★**`𝒪(D)` が自明になるのは `D` が主因子のときに限る**(Cartier のとき)。
