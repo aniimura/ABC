@@ -7741,3 +7741,30 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–168 の 21 ブロック
+
+## §9-188 —— ★★★★設計の結論——**綴りを 1 本に決めてから加群構造を入れる**(2026-08-18)
+
+`dual_smul_eq'`(RingCat 綴りの係数版)を足そうとしたが、
+**その綴りでの `HSMul` instance が無い**ので文が書けない。
+
+★根本原因: 第 166 の `dualModule` を **`Γ(X,U)`(CommRingCat 綴り)**で入れたこと。
+双対を前層に組む段では係数が **RingCat 綴り**で現れるので合わない。
+
+### ★★正しい設計(次にやること)
+
+    第 166 の dualModule を **RingCat 綴り**で入れ直す:
+
+      instance : Module ((X.presheaf ⋙ forget₂ CommRingCat RingCat).obj (op U) : Type u)
+          ((restrictPresheafFunctor X U).obj F ⟶ 𝟙_ (PresheafModulesOn X U))
+
+    その上で unitEndEquiv も RingCat 綴りの環へ作る(第 164–166 の小改修)。
+
+★★これで第 167・168 の補題も自然に RingCat 綴りになり、
+第 169(前層)の `map_smul'` が素直に通る。
+
+### ★★★教訓(本 session 3 度目)
+
+    綴りが混ざる場所では、**下流が要求する綴りに上流を合わせる**。
+    「後で橋を架ける」は、instance の経路を増やして高くつく。
+
+★これは §9-180(型付き恒等関数)と §9-179(経路が 2 本になる)の続きである。
