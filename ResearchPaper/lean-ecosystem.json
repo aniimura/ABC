@@ -3,9 +3,10 @@
   "mathlib 以外の公開 Lean プロジェクトの調査記録。",
   "「mathlib に無い」は Lean エコシステム全体では偽でありうる——2026-08-14 の調査で確認した。",
   "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
-  "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。"
+  "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。",
+  "★2026-08-19 から external/ に浅い clone を置く(gitignore 済み・再配布しない)。測定は clone に対する grep であり、sorries は「sorry を含む行数」の概数である。"
  ],
- "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定) / 2026-08-17(mathlib4_fork ABS を追加)",
+ "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定) / 2026-08-17(mathlib4_fork ABS を追加) / 2026-08-19(iut-lean / lean-poly-abc / formal-conjectures / LeanBridge を追加、FLT を再測定。今回は external/ に clone 済みで再現可能)",
  "ourToolchain": "leanprover/lean4:v4.31.0-rc2",
  "projects": {
   "ClassFieldTheory": {
@@ -95,10 +96,10 @@
    "what": "Fermat 予想の Lean 形式化(Buzzard、EPSRC EP/Y022904/1、2029-09 まで)。★[GenEll] §3 が要る Galois 表現・Tate 曲線と重なる",
    "measuredAt": "2026-08-17",
    "toolchain": "leanprover/lean4:v4.34.0-rc1",
-   "toolchainGap": "★我々より新しい(v4.31.0-rc2 → v4.34.0-rc1)。差は PNT より大きい",
-   "leanFiles": 260,
+   "toolchainGap": "我々より新しい(v4.31.0-rc2 → v4.34.0-rc1)",
+   "leanFiles": 271,
    "sorries": 70,
-   "lastCommit": "2026-08-15",
+   "lastCommit": "2026-08-18",
    "status": "進行中",
    "structure": {
     "FLT/EllipticCurve/Torsion.lean": "★**124 行中 sorry 10 件**。`n_torsion_finite` / `n_torsion_card` / `n_torsion_dimension` がいずれも sorry",
@@ -111,7 +112,24 @@
     "★`TateCurve.lean` は 20 行——[GenEll] §3 が要求する Tate 母数 `q_E`・半安定還元・`M_l(E)` の完全列は無い",
     "★GaloisRepresentation は **Frey 曲線の 3 進表現に特化**しており、[GenEll] Theorem 3.8 が要る一般の `Gal(ℚ̄/L) → GL₂(ℤ_l)` ではない"
    ],
-   "conclusionForS3": "★**drop-in では使えない。** [GenEll] §3 の形式化は、FLT の進捗を待つか、独立に作るかの二択である。ただし独立に作ると重複投資になるので、**着手前に FLT 側の予定と突き合わせること**"
+   "conclusionForS3": "★**drop-in では使えない。** [GenEll] §3 の形式化は、FLT の進捗を待つか、独立に作るかの二択である。ただし独立に作ると重複投資になるので、**着手前に FLT 側の予定と突き合わせること**",
+   "clone": "external/FLT",
+   "theorems": 2019,
+   "sorryLines": 72,
+   "remeasuredAt": "2026-08-19",
+   "structure2026_08_19": {
+    "FLT/Mathlib/": "mathlib へ上げる予定の補題群(891K)。Algebra / AlgebraicGeometry / NumberTheory / RingTheory など",
+    "FLT/Slop/": "732K",
+    "FLT/KnownIn1980s/": "308K",
+    "FLT/Patching/": "228K —— Taylor-Wiles patching",
+    "FLT/Deformations/": "変形環",
+    "FLT/TateCurve/TateCurve.lean": "★**20 行のスタブ**。Tate 曲線は名前だけ",
+    "FLT/EllipticCurve/Torsion.lean": "捩れ点"
+   },
+   "findings2026_08_19": [
+    "★IUT で効きそうな **Tate 曲線は 20 行のスタブ**で、中身は無い",
+    "★`FLT/Mathlib/` は mathlib 上流化待ちの棚で、ここは**将来 mathlib に入る**ので独自実装は避けるべき"
+   ]
   },
   "mathlib4_fork (ABS-Criterion-Project)": {
    "url": "https://github.com/Thmoas-Guan/mathlib4_fork",
@@ -151,6 +169,91 @@
     "★`Definition 1.5, (ii)` に着手するときは、`Localization.lean` の `isRegularLocalRing_localization` を**移植**するのが最短である(v4.26 → v4.31 の drift 吸収が要る)",
     "★★移植する場合は Apache-2.0 の要求どおり `Copyright (c) 2025 Nailin Guan` の表示を残すこと"
    ]
+  },
+  "iut-lean": {
+   "url": "https://github.com/com-junkawasaki/iut-lean",
+   "clone": "external/iut-lean",
+   "what": "IUT / 遠アーベル幾何の独立形式化(from scratch)。LANA・anabelian.org とは無関係と自称",
+   "toolchain": "leanprover/lean4:v4.33.0-rc1",
+   "toolchainGap": "我々より新しい(v4.31.0-rc2 → v4.33.0-rc1)",
+   "leanFiles": 7,
+   "theorems": 42,
+   "sorryLines": 1,
+   "lastCommit": "2026-07-20",
+   "status": "スケルトン段階",
+   "structure": {
+    "IutLean/MasonStothers.lean": "mathlib の `Polynomial.abc` の系(`abc_of_ne_const`)。sorry なし",
+    "IutLean/Anabelian/CurveType.lean": "双曲型 (g,n) の数値的分類・Euler 標数・モジュライ次元",
+    "IutLean/Anabelian/AbsoluteGaloisGroup.lean": "絶対 Galois 群",
+    "IutLean/Anabelian/FiniteFieldFrobenius.lean": "有限体の Frobenius"
+   },
+   "findings": [
+    "★**Frobenioid は 1 件も無い**。我々の [FrdI] 形式化と**重複しない**",
+    "内容は「双曲型 (g,n) の数値的事実」と「Mason-Stothers の系」で、IUT 本体には未到達",
+    "★7 ファイル・42 定理は、我々の Found/FrdI 単独(5000 超の宣言)より 2 桁小さい"
+   ],
+   "relevanceToUs": "低。重複投資の心配は無い。ただし遠アーベル側の語彙選択の参考にはなる"
+  },
+  "formal-conjectures": {
+   "url": "https://github.com/google-deepmind/formal-conjectures",
+   "clone": "external/formal-conjectures",
+   "what": "Google DeepMind。未解決予想を Lean の**命題として**書き下すプロジェクト(証明はしない)",
+   "toolchain": "leanprover/lean4:v4.27.0",
+   "toolchainGap": "我々より古い(v4.27.0)",
+   "leanFiles": 1279,
+   "theorems": 4794,
+   "sorryLines": 3820,
+   "lastCommit": "2026-08-18",
+   "status": "活発(前日にコミット)",
+   "findings": [
+    "★★`FormalConjectures/Wikipedia/ABC.lean` に **abc 予想の 3 変種**が sorry 付きで書かれている:",
+    "  (1) `abc` —— {(a,b,c) | 互いに素・a+b=c・rad(abc)^(1+ε) < c} が有限",
+    "  (2) `abc.variants.lt_constant_mul` —— ∃K, c < K·rad(abc)^(1+ε)",
+    "  (3) `abc.variants.quality` —— q(a,b,c) = log c / log rad(abc) が 1+ε を超えるものは有限",
+    "★`radical n := n.primeFactors.prod id` という素直な定義を採り、`radical 12 = 6` 等の test 定理を付けている",
+    "★我々の側には**まだ ABC の目標命題そのものが無い**(radical 機構は Found/GenEll に有る)"
+   ],
+   "relevanceToUs": "★★高。**我々の ABC 目標命題を書くときの照合先**になる。3 変種のどれを最終目標に据えるかを決められる"
+  },
+  "lean-poly-abc": {
+   "url": "https://github.com/seewoo5/lean-poly-abc",
+   "paper": "https://arxiv.org/abs/2408.15180",
+   "clone": "external/lean-poly-abc",
+   "what": "Mason-Stothers 定理(多項式版 ABC)とその系(Fermat-Catalan・多項式 FLT・Davenport)",
+   "toolchain": "leanprover/lean4:v4.9.0-rc2",
+   "toolchainGap": "我々よりかなり古い(v4.9.0-rc2)",
+   "leanFiles": 11,
+   "theorems": 81,
+   "sorryLines": 1,
+   "lastCommit": "2026-05-21",
+   "status": "完成。**本体は mathlib4 に取り込み済み**(#15706 / #18882)",
+   "findings": [
+    "★Mason-Stothers と多項式 FLT は **mathlib の `Mathlib.NumberTheory.FLT.MasonStothers`** にあるので、clone は不要だった",
+    "★mathlib に入っていないのは Davenport 定理と楕円曲線の非パラメトリゼーション"
+   ],
+   "relevanceToUs": "低〜中。関数体版は整数版 ABC の証明には直結しないが、`radical` の扱いの先例になる"
+  },
+  "LeanBridge": {
+   "url": "https://github.com/CBirkbeck/LeanBridge",
+   "clone": "external/LeanBridge(sparse: Spec / Mathlib / ForMathlib の一部のみ。QExpansion 1.5GB を除外)",
+   "what": "LMFDB(L 関数・保型形式データベース)と Lean をつなぐ。数体・楕円曲線・保型形式",
+   "toolchain": "leanprover/lean4:v4.31.0",
+   "toolchainGap": "★★**我々と同じ v4.31.0**",
+   "leanFiles": 33,
+   "theorems": 194,
+   "sorryLines": 37,
+   "lastCommit": "2026-06-29",
+   "status": "進行中",
+   "structure": {
+    "LeanBridge/Spec/": "ModularCurve.lean / ShimuraCurve.lean / HilbertModularSurface.lean —— **定義そのものではなく「定義が満たすべき仕様」**を書く方式",
+    "LeanBridge/ForMathlib/QExpansion": "q 展開(1.5GB の生成データ。clone から除外した)",
+    "LeanBridge/ForMathlib/Irreduciblepolys": "既約多項式"
+   },
+   "findings": [
+    "★★**方法論が我々と同じ**: `IsOpenModularCurve` / `IsModularCurve` のように「定義が満たすべき仕様」を先に書き、構成は後回しにする —— 我々の Interface/ と同じ思想",
+    "★toolchain が一致しているので、必要なら**依存として足せる**唯一の候補"
+   ],
+   "relevanceToUs": "中。[GenEll] のモジュラー曲線・楕円曲線側で当たる可能性がある"
   }
  },
  "conclusionForUs": {
@@ -229,5 +332,19 @@
    "valueComputed": "【2026-08-14】residueCard の値を初めて計算した: residueCard (selfField p) = p(= ℚ_[p] の剰余体は p 元体)。lean/ABC3/Found/PGC/QpResidueField.lean、sorry 無し。これで realResidueCardinality は「型が付くだけ」の対象ではなくなった。ただし Check/PGC/DischargeFiresNothing.lean の real_eq_degenerate_at_base が示すとおり、我々が名指しできる唯一の実例 base の上では本物と退化版は同じ値を返すので、両者の区別には依然 f ≥ 2 の実例が要る。",
    "lesson3": "★打ち切り時に『障害』と呼んだものが迂回可能な配線だった、が **3件目**(1: round-trip 補題、2: charP_iff_prime_eq_zero の探索範囲、3: 今回の『障害A ノルムのダイヤモンド / 障害B IsLocalRing ↥(PadicInt.subring p)』)。3件とも、正面から解く必要は無く別経路があった。今回の迂回は (a) ノルム構造の一致を示さず algebraMap 経由の等式だけ使う (b) 付値環の集合としての一致まで来たらノルムを置き去りにする (c) 中間型 ↥(PadicInt.subring p) を型として書かず ℤ_[p] へ直接繋ぐ。PLAN §8-3 の『無いと判断した実例が既に2件』は 3件に更新できる。"
   }
+ },
+ "notFound2026_08_19": {
+  "Project LANA (anabelian.org / ZMC)": [
+   "★**公開リポジトリが見つからない**。anabelian.org は「詳細は後日」とだけ書く",
+   "2026-07 の中間報告(ncatlab.org/nlab/files/LANAProject-Report-July2026.pdf)は公開されているが、コードへのリンクは無い",
+   "報告の要旨は「IUT III の Theorem 3.11 → Corollary 3.12 の通過部分を圧縮して記述し、最終段の compatibility 問題を特定した。**その compatibility の証明は再構成できていない**」",
+   "★我々の abc3-disputed-locus-cor312 と**同じ箇所**を指している"
+  ],
+  "AddCombi / PhysLib / CSLib": [
+   "会話履歴に挙がっていたが、本プロジェクトとの関連は薄いので取得しなかった"
+  ],
+  "etale cohomology / p-adic Hodge theory の Lean 実装": [
+   "GitHub 検索で該当リポジトリ無し(2026-08-19)"
+  ]
  }
 }
