@@ -1,8 +1,8 @@
 {
-  "nodes": 930,
-  "sccs": 897,
+  "nodes": 932,
+  "sccs": 899,
   "bigSccs": 8,
-  "boxes": 296,
+  "boxes": 298,
   "layers": 59,
   "ours": 63,
   "oblig": 28,

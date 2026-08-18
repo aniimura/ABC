@@ -438,14 +438,34 @@
           "note": "★★★**以前「一般には言えない」と見た主張が、isotropic に制限すれば成り立つ**。`isIso_of_preStep_of_isGroupLikeObj` が isotropic を要求するのを障害だと見ていたが、★`Proposition 2.2` はそもそも **`𝒟*`(isotropic の世界)** の上の話で、`Φ^birat` もそこで定義されている。**制限した先では仮定が満たされる**。★`dstar_span` が中間対象 `Z` を**isotropic で**与えるのが効いている。★実装: `birat_isIso_of_preStep_of_isotropic` / `birat_iso_of_istr_base`。"
         },
         {
-          "id": "phibirat-factor",
-          "title": "𝒞^birat → 𝔽_{Φ^gp} が 𝔽_{Φ^birat} を経由する",
-          "size": "大",
+          "id": "factor-plbk",
+          "size": "中",
           "status": "todo",
           "deps": [
             "phibirat-istr-iso"
           ],
-          "note": "★★★**測定で分かった重い点**(2026-08-18): 原文は `Φ^birat` を「経由するような最小の部分関手」として定め、**`𝒪^×(A^birat) ↠ Φ^birat(A^birat)` の全射性を定理として主張**する。★我々は逆に `Φ^birat` を**像として定義**したので全射性は無償になるが、その分**「経由する」側を証明する必要がある** —— 内容は同じで、場所が移っただけ。★要は「任意の `f : A → B` に対し `biratDivGp f` が像に入る」。★未確定の点: `A ≠ B` のときどの対象の `Φ^birat` に入れるのかを、`𝔽_Φ` の射の定義に戻って確かめるところから始める。\n★★**2026-08-18 再測**: 原典はここを「immediately」としており、`Proposition 1.5, (ii)`(`𝒪^▷(A) ≅ Φ(A)`、**実装済**)で `Φ^gp(X)` を `𝔽_{Φ^gp}` の `𝒪^▷(X)` と同一視できることが鍵らしい。★サイズは `phibirat-otristar` を通してから再評価する。"
+          "title": "𝒞^birat の pull-back 射の Div^gp を測る",
+          "note": "★★**測定(2026-08-18)**: (iv) の辞書より、`𝒞^birat` の pull-back 射は `𝒞` の **co-angular linear** 射の像である。★したがって `Div = 0` とは限らない。\n★`Proposition 1.7, (iii)` で co-angular linear は (co-angular pre-step) ≫ (pull-back) に分解する。★後者は `pullBackLB` より **isometric**(`Div = 0`)、前者は `𝒞^birat` で**同型**になる。\n★つまり pull-back の `Div^gp` は**同型の `Div^gp`** に帰着する。"
+        },
+        {
+          "id": "factor-iso-div",
+          "size": "大",
+          "status": "todo",
+          "deps": [
+            "factor-plbk"
+          ],
+          "title": "𝒞^birat の同型の Div^gp が Φ^birat に入るか —— ★真の残り",
+          "note": "★★★**ここが (iii) の残り全部である**(2026-08-18 測定)。\n★同型 `h : A ≅ B`(同じ底)に対し `Div^gp(h) ∈ Φ^birat(Base A)` か。\n★注意: `Div^gp(h) + Div^gp(h⁻¹) = 0` は**自動で成り立つ**ので、同型であることだけからは何も出ない。\n★★原典はここを `Proposition 1.5, (ii)`(`𝒪^▷(A) ≅ Φ(A)`、**実装済**)に預けていると読める —— `𝔽_{Φ^gp}` 側で `Φ^gp(X)` が `𝒪^▷(X)` そのものになるので、射の分類が `𝒪` の言葉に戻る。\n★次の一手: `Prop15.lean` の `otriEquiv` を `Φ.gpOn` に当て、`biratToElemGp` と合成して `𝒪^×(A^birat) → 𝒪^▷(X)_{𝔽}` を見る。"
+        },
+        {
+          "id": "factor-src",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "factor-iso-div"
+          ],
+          "title": "𝒞^birat → 𝔽_{Φ^gp} が 𝔽_{Φ^birat} を経由することを束ねる",
+          "note": "★`arbFactor`(Frobenius 型 ≫ pre-step ≫ pull-back)の 3 成分を並べるだけ。"
         },
         {
           "id": "phibirat-uniq",
@@ -453,7 +473,7 @@
           "size": "小",
           "status": "todo",
           "deps": [
-            "phibirat-factor"
+            "factor-src"
           ],
           "note": "★原文の「unique subfunctor」。★経由する部分関手はすべて全 `biratDivGp` を含み、最小のものが像と一致することから従う。★`phibirat-factor` が済めば形式的。"
         },
