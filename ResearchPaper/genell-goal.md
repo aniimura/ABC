@@ -7063,3 +7063,31 @@ B2 の在庫を実測した結果:
 ★★律速は第 5 段——`X|_U ≅ Spec Γ(X,U)` に沿った輸送である。
 
 ★見積もり **40–60 ブロック**。
+
+## §9-163 —— B2 の第 1・2 段(第 148・149 ブロック、2026-08-18)
+
+| # | 内容 |
+|---|---|
+| 148 | `idealSections` / `idealSections_res` / `idealSections_affine` |
+| 149 | `idealPresheaf`(`PresheafOfModules` に組む) |
+
+★`idealSections D U := {s ∈ Γ(X,U) | ∀ アフィン開 V ≤ U, s|_V ∈ D.ideal V}`。
+★★アフィン開では元のデータと一致する(`idealSections_affine`)——
+これが無いと `IdealSheafData` の情報を保っていることが言えない。
+
+### ★★★逃げ道——`letI` + `Module.compHom`([[ring-instance-two-paths]] の 8 例目)
+
+`PresheafOfModules.map` は `obj U ⟶ (restrictScalars (R.map f)).obj (obj V)` という
+**係数制限つき**の射で、`ModuleCat.ofHom` を素直に書くと制限前の対象で instance を探す。
+
+    letI : Module Γ(X,U) (idealSections D V) := Module.compHom _ (X.presheaf.map f).hom
+
+★これで通る。★★`map_id` / `map_comp` は **`cat_disch` が自動で片付けた**。
+
+### 次
+
+| 段 | 内容 |
+|---|---|
+| 3 | 層であること(局所条件なので `IdealSheafData` の貼り合わせから) |
+| 4 | Cartier なら局所自明(★第 132 をアフィン開へ輸送)——**律速** |
+| 5 | `ofDivisor` と 3 法則 |

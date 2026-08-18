@@ -645,20 +645,60 @@
           "evidence": "★2026-08-18 に `Thm34Pre.lean` へ `primeFrobDivId_map_iff` / `primeFrobDivId_map_iff'` を実装した。`Proposition 1.14, (v)` を両側で使って圏論的な条件に直し、`primeFrobCond_map_iff` で運ぶだけだった。"
         },
         {
-          "id": "iii-psiN",
-          "title": "(iii) Ψ_{N≥1} の構成(素数の対応 → 単系自己同型)",
+          "id": "psiN-extend",
+          "size": "中",
+          "status": "done",
           "deps": [
             "iii-primefrob-full"
           ],
+          "title": "素数の全単射 ⇒ ℕ≥1 の単系自己同型——★拡張段",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `pnatMulEquivOfPrimeEquiv`。\n★mathlib の `PNat.factorMultiset` / `PrimeMultiset`(`Mathlib.Data.PNat.Factors`)を使う。\n★★**罠**: `PrimeMultiset` は `def`(`abbrev` ではない)なので、`(Multiset.map σ …).prod` は `Multiset.prod` に解釈されて `CommMonoid Nat.Primes` を要求される。`PrimeMultiset.prod (…)` と**明示に書く**こと。\n★同様に `+` も `PrimeMultiset` 側と `Multiset` 側で構文が違うので、`rw` ではなく `exact PrimeMultiset.prod_add _ _`(defeq)で締める。"
+        },
+        {
+          "id": "psiN-prime-map",
+          "size": "大",
           "status": "todo",
-          "size": "★大",
-          "evidence": "原文 p.64。擬逆を見て自己同型だと言う。"
+          "deps": [
+            "psiN-extend"
+          ],
+          "title": "素数 p → 像の次数 q の写像を定義し well-defined を示す",
+          "note": "★手順: (1) `frobDegSurj` で次数 p の Frobenius 型射を作る。(2) prime-Frobenius に分解する。(3) `iii-primefrob-full`(`primeFrobDivId_map_iff`)で像も prime-Frobenius になる。(4) その次数が素数であることと、**選び方に依らないこと**を示す。★(4) が本体。"
+        },
+        {
+          "id": "psiN-prime-bij",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "psiN-prime-map"
+          ],
+          "title": "その写像が素数全体の全単射であること",
+          "note": "★`Ψ⁻¹` で逆写像を作り、両向きの合成が恒等になることを示す。"
+        },
+        {
+          "id": "psiN-degree",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "psiN-prime-bij"
+          ],
+          "title": "Ψ は次数 d の射を次数 Ψ_N(d) の射へ送る",
+          "note": "★一意分解と `psiN-extend` の乗法性から。"
+        },
+        {
+          "id": "psiN-identity",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "psiN-degree"
+          ],
+          "title": "non-group-like 対象があれば Ψ_N は恒等",
+          "note": "★原文の「if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity」。"
         },
         {
           "id": "iii-morclasses",
           "title": "(iii) 7 種の射クラスの保存",
           "deps": [
-            "iii-psiN",
+            "psiN-identity",
             "ii-prestep"
           ],
           "status": "todo",

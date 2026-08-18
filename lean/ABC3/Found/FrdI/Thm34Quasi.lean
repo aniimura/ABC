@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm34Pre
 import ABC3.Found.FrdI.Prop33UnTr
+import Mathlib.Data.PNat.Factors
 
 /-!
 # [FrdI] Theorem 3.4, (ii) を quasi-isotropic 型へ
@@ -160,6 +161,50 @@ theorem thm_3_4_ii_quasi_preStep (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
 def thm_3_4_ii_quasi_preStep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 62,
     item := "Theorem 3.4, (ii) — quasi-isotropic 型での pre-step の保存",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★素数の全単射から `ℕ≥1 ≃* ℕ≥1` を作る
+
+★★`Theorem 3.4, (iii)` の `Ψ_{N≥1}` の**拡張段**である。
+
+原文 (FrdI p.62):
+> such that Ψ maps morphisms of Frobenius degree d to morphisms of Frobenius
+
+★`ℕ≥1` は素数の自由可換単系なので、素数の全単射がそのまま単系自己同型を与える。
+★mathlib の `PNat.factorMultiset` / `PrimeMultiset` を使う。 -/
+
+/-- ★★★★**素数の全単射 ⇒ `ℕ≥1` の単系自己同型**。 -/
+def pnatMulEquivOfPrimeEquiv (σ : Nat.Primes ≃ Nat.Primes) : ℕ+ ≃* ℕ+ where
+  toFun n := PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset n))
+  invFun n := PrimeMultiset.prod (Multiset.map σ.symm (PNat.factorMultiset n))
+  left_inv n := by
+    show PrimeMultiset.prod (Multiset.map σ.symm (PNat.factorMultiset
+      (PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset n))))) = n
+    rw [PrimeMultiset.factorMultiset_prod, Multiset.map_map,
+      show (σ.symm ∘ σ) = id from funext σ.symm_apply_apply, Multiset.map_id]
+    exact PNat.prod_factorMultiset n
+  right_inv n := by
+    show PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset
+      (PrimeMultiset.prod (Multiset.map σ.symm (PNat.factorMultiset n))))) = n
+    rw [PrimeMultiset.factorMultiset_prod, Multiset.map_map,
+      show (σ ∘ σ.symm) = id from funext σ.apply_symm_apply, Multiset.map_id]
+    exact PNat.prod_factorMultiset n
+  map_mul' m n := by
+    show PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset (m * n)))
+      = PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset m))
+        * PrimeMultiset.prod (Multiset.map σ (PNat.factorMultiset n))
+    rw [PNat.factorMultiset_mul]
+    show PrimeMultiset.prod (Multiset.map σ
+        (PNat.factorMultiset m + PNat.factorMultiset n)) = _
+    have hma : Multiset.map σ (PNat.factorMultiset m + PNat.factorMultiset n)
+        = Multiset.map σ (PNat.factorMultiset m) + Multiset.map σ (PNat.factorMultiset n) :=
+      Multiset.map_add _ _ _
+    rw [hma]
+    exact PrimeMultiset.prod_add _ _
+
+def pnatMulEquivOfPrimeEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (iii) — Ψ_{N≥1} の拡張段",
     sectionId := "frdi-thm-3-4" }
 
 end ABC3.Found.FrdI

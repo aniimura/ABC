@@ -310,6 +310,8 @@ import ABC3.Found.Arakelov.PicGammaInv
 import ABC3.Found.Arakelov.PicEquivRing
 import ABC3.Found.Arakelov.PicWitness
 import ABC3.Found.Arakelov.PicSpecWitness
+import ABC3.Found.Arakelov.PicIdealSec
+import ABC3.Found.Arakelov.PicIdealPre
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
