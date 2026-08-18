@@ -221,6 +221,7 @@ import ABC3.Found.Arakelov.PicPullGroup
 import ABC3.Found.Arakelov.PicTildeStock
 import ABC3.Found.Arakelov.PicTildeAdj
 import ABC3.Found.Arakelov.PicTildeUnit
+import ABC3.Found.Arakelov.PicGammaSections
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
