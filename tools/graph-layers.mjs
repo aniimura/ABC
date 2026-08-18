@@ -309,7 +309,9 @@ const adj = new Map(), page = new Map();
       }
       const rem = Math.max(0, (o.fieldsTotal ?? 0) - (o.fieldsDone ?? 0));
       for (let i = 0; i < rem; i++) {
-        const fk = `${o.track}:${o.code} ${o.ja} / 条件 ${(o.fieldsDone ?? 0) + i + 1} of ${o.fieldsTotal}`;
+        // ★追分類(`D1` 等)は**論文ではない**ので、タグはトラック名までにする。
+        //   ★以前は `Arakelov:D1 …` をタグにしていたため、論文一覧が分裂して見えていた。
+        const fk = `${o.track} / ${o.code} ${o.ja} 条件 ${(o.fieldsDone ?? 0) + i + 1} of ${o.fieldsTotal}`;
         if (!adj.has(fk)) { adj.set(fk, []); page.set(fk, 0); fadded++; }
         if (!adj.get(nk).includes(fk)) { adj.get(nk).push(fk); }
       }
@@ -318,6 +320,10 @@ const adj = new Map(), page = new Map();
   }
 }
 
+
+// ★**現在作業中**の節点(分解チェーンの現在の葉 = 未着手で依存が全て済)。
+//   ★ボックスの左上に ☆ を出すために使う。
+const WIP = new Set();
 
 // ── ★★★分解チェーンを**木のまま**展開する ──────────────
 //   ★2026-08-18 追加。動機の実測: `ResearchPaper/frdi-decomposition.json` に
@@ -342,6 +348,14 @@ const adj = new Map(), page = new Map();
       for (const n of c.nodes ?? []) {
         const nk = key(n.id);
         if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, pg); added++; }
+      }
+      // ★現在の葉(未着手かつ依存が全て済)を WIP に入れる
+      {
+        const doneIds = new Set((c.nodes ?? []).filter((n) => n.status === 'done').map((n) => n.id));
+        for (const n of c.nodes ?? []) {
+          if (n.status === 'done') continue;
+          if ((n.deps ?? []).every((d) => !st.has(d) || doneIds.has(d))) WIP.add(key(n.id));
+        }
       }
       for (const n of c.nodes ?? []) for (const dep of n.deps ?? []) {
         if (!st.has(dep)) continue;
@@ -501,6 +515,7 @@ const B = [...boxes.entries()].map(([id, b]) => ({
   done: b.items.filter((k) => ours.get(k)?.kind === 'done').length,   // ★Lean 形式化が完了した項目数
   landed: b.items.filter((k) => ours.get(k)?.kind === 'landed').length,
   root: b.items.includes(ROOTK) ? 1 : 0,
+  wip: b.items.filter((k) => WIP.has(k)).length,   // ★現在作業中の節点数
   items: b.items.slice(0, 400).map((k) => ({ k, p: page.get(k) ?? 0, o: ours.get(k)?.kind ?? null })),
 }));
 const bidx = new Map(B.map((b, i) => [b.id, i]));

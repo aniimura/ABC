@@ -6718,3 +6718,35 @@ instance 検索が**別物として扱う**。
 
 ★★新しい逃げ道: **`beta_reduce`**——`refine ⟨n, fun i => …⟩` 後に残る
 `(fun i => …) i` で `rw`/`▸` が当たらないとき一発。
+
+## §9-150 —— 構造層の制限は局所化(第 136 ブロック、2026-08-18)
+
+★★★★★mathlib に在庫があった:
+
+    IsAffineOpen.isLocalization_of_eq_basicOpen
+      : U アフィン開、V = X.basicOpen f ⟹ Γ(X,V) は Γ(X,U) の f での局所化
+
+★これを `U := D(g)`、`f := algebraMap R Γ(D g) t`、`V := D(t·g)` に当てるだけで
+
+    IsLocalizedModule (powers t) (Γ(Spec R, D g) →ₗ[R] Γ(Spec R, D(t·g)))
+
+が出た。★★**7 宣言すべて一発**。
+
+| 宣言 | 内容 |
+|---|---|
+| `specD` / `specDle` | `(Spec R).Opens` に固定した基本開集合 |
+| `specD_eq_basicOpen` | `D(t·g) = (Spec R).basicOpen (algebraMap t)` |
+| `specResAlgHom` | 制限は `R` 代数射 |
+| `isLocalizationAway_specRes` | `Away` 局所化 |
+| `isLocalizedModule_specRes` | ★★★★`powers t` の局所化加群 |
+
+★★★要点は `algebraMap_Spec_obj` が **`rfl`** だったこと——
+`algebraMap R Γ(Spec R,U) = ΓSpecIso.inv ≫ 制限` なので `show` で通る。
+
+### ★次——自明化の四角形で `F` 側へ運ぶ
+
+    Γ(F, D g) --res--> Γ(F, D(t·g))
+        ≅                  ≅
+    𝒪(D g)   --res--> 𝒪(D(t·g))
+
+★可換性は `e.hom.naturality` そのもの(`Over.homMk (homOfLE h)` に沿って)。

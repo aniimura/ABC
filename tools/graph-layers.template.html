@@ -155,6 +155,7 @@ function draw(){
     const isTag=selTag!==null&&inTag(i);
     const dim=(sel!==null&&i!==sel&&!isDep&&!isUse)||(selTag!==null&&!isTag);
     ctx.globalAlpha=dim?.2:1;
+    const da=dim?.2:1;   // ★以降、アルファを 1 に戻すときは da へ
     const isC=b.tags[0][0]==='CONCEPT';
     // ★Lean 形式化の状態。`done` は `Found/` に `.src` がある項目数(完全実装の主張)。
     const nd=b.done||0, allDone=b.n>0&&nd>=b.n, someDone=nd>0&&nd<b.n;
@@ -163,23 +164,28 @@ function draw(){
     ctx.lineWidth=(isTag||isDep||isUse)?2.4:(b.scc?2.4:(isC?2:1.1));
     if(isC){ctx.setLineDash([5,3]);}
     ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.stroke();ctx.setLineDash([]);
-    if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.2:.09;
-      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.globalAlpha=1;}
+    if(isDep||isUse){ctx.fillStyle=isDep?C_DEP:C_USE;ctx.globalAlpha=dim?.02:.09;
+      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,7);ctx.fill();ctx.globalAlpha=da;}
     // 触れている割合(完了していないぶん)
-    if(b.ours>0&&!allDone){ctx.fillStyle=c;ctx.globalAlpha=.2;
-      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w*Math.min(1,b.ours/b.n),b.h,7);ctx.fill();ctx.globalAlpha=1;}
+    if(b.ours>0&&!allDone){ctx.fillStyle=c;ctx.globalAlpha=da*.2;
+      ctx.beginPath();ctx.roundRect(b.x,b.y,b.w*Math.min(1,b.ours/b.n),b.h,7);ctx.fill();ctx.globalAlpha=da;}
     // ★一部だけ形式化が完了している場合: そのぶんを薄い灰色の網掛けで示す
     if(someDone){ctx.save();ctx.beginPath();
       ctx.roundRect(b.x,b.y,b.w*(nd/b.n),b.h,7);ctx.clip();
-      ctx.strokeStyle='rgba(120,128,140,.42)';ctx.lineWidth=1;
+      ctx.strokeStyle=dim?'rgba(120,128,140,.08)':'rgba(120,128,140,.42)';ctx.lineWidth=1;
       for(let g=-b.h;g<b.w;g+=6){ctx.beginPath();ctx.moveTo(b.x+g,b.y+b.h);ctx.lineTo(b.x+g+b.h,b.y);ctx.stroke();}
-      ctx.restore();}
+      ctx.restore();ctx.globalAlpha=da;}
     // 上端の色帯
     ctx.fillStyle=allDone?'#9aa0a8':c;ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
     if(i===sel||i===hov){ctx.strokeStyle='#111';ctx.lineWidth=2.4;ctx.beginPath();ctx.roundRect(b.x-3,b.y-3,b.w+6,b.h+6,9);ctx.stroke();}
+    // ★現在作業中のボックスは左上に ☆
+    const wip=b.wip||0;
+    if(wip){ctx.fillStyle='#d9822b';ctx.font='bold 13px -apple-system,Segoe UI,sans-serif';
+      ctx.fillText('☆',b.x+4,b.y+21);}
     ctx.fillStyle='#1c1e21';ctx.font='bold 12px -apple-system,Segoe UI,sans-serif';
     const ttl=isC?'語彙(概念)':b.tags.map(([t,n])=>b.scc?`${t}:${n}`:t).join(' ');
-    ctx.fillText(ttl.length>21?ttl.slice(0,20)+'…':ttl,b.x+9,b.y+21);
+    const tx=b.x+(wip?20:9), tlim=wip?18:21;
+    ctx.fillText(ttl.length>tlim?ttl.slice(0,tlim-1)+'…':ttl,tx,b.y+21);
     ctx.font='11px -apple-system,Segoe UI,sans-serif';ctx.fillStyle='#6b7280';
     ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}${nd?`  ■ ${nd}`:''}`,b.x+9,b.y+36);
     if(b.scc){ctx.fillStyle='#c0392b';ctx.fillText('循環(分割不可)',b.x+9,b.y+50);}
