@@ -76,6 +76,7 @@ import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
+import ABC3.Found.FrdI.AppA
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
@@ -368,6 +369,7 @@ import ABC3.Found.Arakelov.PicCartierComap
 import ABC3.Found.Arakelov.PicSubschemeVanish
 import ABC3.Found.Arakelov.PicSectionPull
 import ABC3.Found.Arakelov.PicPullIdealHom
+import ABC3.Found.Arakelov.PicUnitSurj
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface

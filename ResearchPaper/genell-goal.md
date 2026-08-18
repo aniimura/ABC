@@ -9027,3 +9027,31 @@ Tate 曲線・Faltings 高さは FLT にも無い。半安定性は `FreyCurve/B
 
 ★★**外れを 2 件とも記録した**(過小 1・過大 1)。
 見積もりが動いたことを隠さないのが、工数を「壁」ではなく「道の長さ」として扱う要である。
+
+## §9-226 補題 A の核が出た(第 206 ブロック)
+
+    φ : 𝟙_ ⟶ 𝟙_ が終対象で全射  ⟹  unitEndEquiv φ は単元
+
+★★★これで「局所自明どうしの局所全射は同型」の**山場が越えた**。
+共通の自明化開の上では射は係数の掛け算(第 166)であり、全射なら係数は単元だからである。
+
+### ★★[[typed-identity-bridge]] の 4 例目
+
+単位対象の切断は「値」としても「係数」としても読める。
+★**両方の恒等写像**(`unitVal` と `unitScal`)を用意しておくと `rw` が素直に通る:
+
+| 橋 | 型 | 法則 |
+|---|---|---|
+| `unitVal` | 切断 → `Γ(X,U)` | `unitVal (a • b) = unitVal a * unitVal b` ★`rfl` |
+| ★`unitScal` | 切断 → 係数環 | `unitScal x • 1 = x` ★第 164 から |
+| 両者の関係 | | `unitVal x = unitScal x` ★`rfl` |
+
+★★★型付き恒等写像は**片方向だけでは足りない**ことがある——
+第 173(`fVal`/`rVal`)も両側だった。
+
+### ★★external の `_refs` が早速効いた
+
+`isUnit_of_mul_eq_one` という名前で書いたら通らず、`external/_refs/` を grep して
+**`IsUnit.of_mul_eq_one`**(`Algebra/Group/Units/Defs.lean:392`)だと分かった。
+★ユーザが `.ignore` で `!external/` を打ち消し、mathlib の `.lean` を複製してくれたので、
+**既定の grep が mathlib まで届く**——名前の当てずっぽうが 1 回で片付いた。
