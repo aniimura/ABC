@@ -5772,3 +5772,34 @@ Lean は `⟶` の形を要求する(実測)。
 
 ★★局所自明性のために建てた器具は **14 ブロック**(第 76・93〜106)になった。
 §9-95 の「2–3」から大きく上振れたが、**理由はすべて記録済み**である。
+
+## §9-117 —— 第 107 の詰まりと迂回路(2026-08-24)
+
+### 通ったもの
+
+★`Unique ((yoneda.obj (Over.mk (𝟙 V))).obj (op W))` は
+第 55 の `overTerminalUnique` で**そのまま出る**(実測)。
+
+### 止めた所
+
+`(yonedaEquiv.symm s).app (op W) h = P.map h.op s` が `simp [yonedaEquiv]` で当たらない
+——`instances` 透明度の型正当性(§9-110 と同じ)。★暗黙引数の名前も `F` ではない。
+
+### ★★★★迂回路(次の一手、確定)
+
+★**`yonedaEquiv` を計算する必要は無い。**第 104 ブロックが既に
+
+    (freeYonedaEquiv.symm s).app (op W) (freeMk h) = P.map h.op s
+
+を与えている。★★第 106 が要求する `φ default`(`φ = (yonedaEquiv.symm s).app (op W)`)は
+
+    ModuleCat.freeDesc φ (freeMk default) = φ default      (`freeDesc_apply`)
+
+の左辺が**まさに第 104 の左辺**である。★★★したがって
+
+    φ default = P.map default.op s
+
+が第 104 + `freeDesc_apply` から出る——**`yonedaEquiv` を一度も触らない**。
+
+★★★★**この session 5 度目の「言い換えで抜ける」**である
+(§9-100・§9-104・§9-113・§9-115・本項)。
