@@ -5287,3 +5287,34 @@ mathlib の証明を写経できる。
 | 98 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 99 | `tilde M` が `InvSheaf` |
 | 100 | `equivPicRing` |
+
+## §9-101 —— 第 97 の道が測れた(2026-08-18)
+
+★加群版の「局所化の推移」は mathlib に**直接は無い**が、
+**基底変換(`IsBaseChange`)経由で抜けられる**:
+
+    IsBaseChange.comp_iff (hf : IsBaseChange S f) {h : N →ₗ[S] O} :
+      IsBaseChange T (h ∘ₗ f) ↔ IsBaseChange T h
+
+★★`isLocalizedModule_iff_isBaseChange`(`Localization/BaseChange.lean` 行 47)で
+`IsLocalizedModule` と `IsBaseChange` は行き来できる。
+
+### ★★★手順(5 段)
+
+| 段 | 内容 |
+|---|---|
+| 1 | `h : M_g →ₗ[R_g] M_{t·g}` を `IsLocalizedModule.lift` で作る |
+| 2 | `h ∘ₗ mk_g = mk_{t·g}`(構成から) |
+| 3 | `IsBaseChange R_g mk_g` ✅・`IsBaseChange R_{t·g} mk_{t·g}` ✅ |
+| 4 | `comp_iff` で `IsBaseChange R_{t·g} h` |
+| 5 | `Module.free_of_isLocalizedModule` で `M_{t·g}` が自由 |
+
+★★★★**「無い」ではなく「別の言葉なら在る」**——第 96 の「積閉集合を取り替える」と
+同じ型の抜け方である。
+
+### ★★残り 4 ブロック(据え置き)
+
+| 97 | 上の 5 段 |
+| 98 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 99 | `tilde M` が `InvSheaf` |
+| 100 | `equivPicRing` |
