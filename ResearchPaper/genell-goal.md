@@ -8421,3 +8421,38 @@ instance の経路が合わない。★型付き恒等関数 `gammaVal` / `gamma
 `isCartierDivisor_comap` と `ofDivisor_pullback`(どちらも平坦)。
 どちらも `comap` の**アフィン記述**(`(D.comap f).ideal A = (D.ideal B).map (f.appLE)`)が要る。
 ★mathlib には開埋め込みの場合しか無いので、そこが次の測定点である。
+
+## §9-211 残り 2 欄の道を測った(2026-08-19)
+
+`isCartierDivisor_comap` と `ofDivisor_pullback`(どちらも平坦)に要るのは 1 本:
+
+    (D.comap f).ideal A = (D.ideal B).map (f.appLE B A e)     (A, B アフィン開、f(A) ⊆ B)
+
+### ★★測った結果——**部品はすべて mathlib に在る**、要るのは配線
+
+| 部品 | 在庫 |
+|---|---|
+| `Hom.ker_apply` (`[QuasiCompact f]` で `f.ker.ideal U = RingHom.ker (f.app U)`) | ★**有り**(`@[simp]`) |
+| `ker_fst_of_isClosedImmersion`(`comap` の定義) | ★有り |
+| `subschemeι.app` は全射、`ker_subschemeι_app` | ★有り |
+| `pullbackSpecIso`(アフィンの引き戻し = テンソルの `Spec`) | ★有り |
+| `S ⊗[R] (R/I) ≅ S/(I·S)`(`TensorProduct/Quotient.lean`) | ★有り |
+| `ker_ideal_of_isPullback_of_isOpenImmersion`(開集合への還元) | ★有り |
+| **上を繋いだ `comap` のアフィン記述** | ★**無い** |
+
+★`comap` は `(pullback.fst f D.subschemeι).ker` と定義されており、
+`Hom.ker_apply` が当たる(`D.subschemeι` は準コンパクトな閉埋め込みで、
+準コンパクト性は底変換で保たれる)。したがって
+
+    (D.comap f).ideal A = RingHom.ker ((pullback.fst f D.subschemeι).app A)
+
+まで**1 行で降りる**。残るのは右辺を `Γ(A) ⊗_{Γ(B)} (Γ(B)/D.ideal B) = Γ(A)/(D.ideal B)Γ(A)`
+と同定する配線で、★見積もり **6–10 ブロック**。
+
+### ★★ここで一旦 Galois 側を測る
+
+Arakelov は B2 が 12/14。残り 2 欄の道は上記の通り**測り終えた**ので、
+いつでも再開できる。★一方 Galois は **G1–G8 が 8 欄すべて未測定**であり、
+本プロジェクトの進め方(「列挙 → mathlib/FLT 実測 → 欠落だけスケルトン化」)を
+まだ一度も当てていない。★★測っていない側を測るほうが、
+同じ工数で得られる情報が大きい。
