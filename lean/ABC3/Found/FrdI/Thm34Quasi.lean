@@ -1387,4 +1387,43 @@ def isPullBack_of_map.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — pull-back の反射",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★pull-back の同型不変性 —— 束ねる段の実体
+
+★圧倒的同値で往復すると unit/counit の同型が入るので、
+`IsMinimalAdjoint` 型のクラスには**同型不変性**が別途要る。 -/
+
+/-- ★★★★**pull-back は同型の四角形を越えて保たれる**。 -/
+theorem isPullBack_congr_iso {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    (F : FrobenioidCore P) {A B A' B' : Cc} (f : A ⟶ B) (f' : A' ⟶ B')
+    (α : A ≅ A') (β : B ≅ B') (h : f ≫ β.hom = α.hom ≫ f')
+    (hf : IsPullBack P f) : IsPullBack P f' := by
+  refine (prop_1_7_ii_pullBack_minimalAdjoint P F f').mpr ?_
+  intro X β₀ α₀ hfac hβ₀
+  have hma := (prop_1_7_ii_pullBack_minimalAdjoint P F f).mp hf
+  have hfeq : f = (α.hom ≫ β₀) ≫ (α₀ ≫ β.inv) := by
+    have : f = α.hom ≫ f' ≫ β.inv := by
+      rw [← Category.assoc, ← h, Category.assoc, β.hom_inv_id, Category.comp_id]
+    rw [this, hfac]
+    simp only [Category.assoc]
+  have hbi : IsBaseIsomorphism P (α.hom ≫ β₀) := by
+    haveI : IsIso (P.Base α.hom) := ⟨P.Base α.inv, by
+      rw [← P.Base_comp, α.hom_inv_id, P.Base_id], by
+      rw [← P.Base_comp, α.inv_hom_id, P.Base_id]⟩
+    haveI : IsIso (P.Base β₀) := hβ₀
+    show IsIso (P.Base (α.hom ≫ β₀))
+    rw [P.Base_comp]
+    infer_instance
+  have hiso := hma X (α.hom ≫ β₀) (α₀ ≫ β.inv) hfeq hbi
+  haveI := hiso
+  have : β₀ = inv α.hom ≫ (α.hom ≫ β₀) := by
+    rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  rw [this]
+  infer_instance
+
+def isPullBack_congr_iso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — pull-back の同型不変性",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
