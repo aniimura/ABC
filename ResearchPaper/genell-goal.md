@@ -7595,3 +7595,41 @@ B2 の在庫を実測した結果:
 
 ★★`git status` に `M`(modified)が出たら**新規のつもりが上書き**である——
 `??`(untracked)でなければ止まる。
+
+## §9-183 —— ★★★★★★★**双対の加群構造**(第 166 ブロック、2026-08-18)
+
+    unitEndEquiv : End (𝟙_ (PresheafModulesOn X U)) ≃+* Γ(X, U)
+    dualModule   : Module Γ(X,U) ((restrictPresheafFunctor X U).obj F ⟶ 𝟙_)
+
+★★**双対層への道が開いた。**mathlib の `Preadditive.moduleEndRight` を
+`Module.compHom` で `Γ(X,U)` へ移すだけ。
+
+### 環同型の筋
+
+| 段 | 内容 |
+|---|---|
+| `freeYonedaEquiv_apply'` | `freeYonedaEquiv m = m.app t (freeMk 𝟙)` |
+| `termIso_hom_gen` | `freeYonedaTermIso.hom` は生成元を `1` に送る |
+| `unitEnd_unitMul` | 第 165(全射) |
+| `unitMul_unitEnd` | ★★**単射**——`hom ≫ −` で消去 |
+
+★要点は `hom ≫ unitMul c = freeYonedaEquiv.symm c`
+(`unitMul` の定義中の `inv` が `hom` と消える)。
+
+### ★★★逃げ道 3 つ
+
+| 症状 | 逃げ道 |
+|---|---|
+| `NatTrans.comp_app` が無い | ★`PresheafOfModules.comp_app` |
+| `exact … _ _ c` が `whnf` タイムアウト | ★★**明示引数**で一瞬 |
+| `rw` が当たらない | ★**関手合成の括弧**を `((… ⋙ …) ⋙ …)` に合わせる |
+
+### 残り(B2)
+
+| 段 | 内容 |
+|---|---|
+| 167 | 双対の前層(制限は第 57 の `restrict_trans` が `rfl`) |
+| 168 | 双対が層であること |
+| 169 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 |
+| 170 | `InvSheaf` と `ofDivisor` |
+| 171+ | 3 法則と `isCartierDivisor_affine` |

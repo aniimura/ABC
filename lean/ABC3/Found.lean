@@ -328,6 +328,7 @@ import ABC3.Found.Arakelov.PicIdealLT
 import ABC3.Found.Arakelov.PicUnitMul
 import ABC3.Found.Arakelov.PicUnitEnd
 import ABC3.Found.Arakelov.PicUnitSect
+import ABC3.Found.Arakelov.PicUnitRing
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

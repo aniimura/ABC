@@ -656,4 +656,60 @@ def admissible_of_preStep.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — pre-step の場合",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★(F2) の Frobenius 型の成分
+
+★★`prop_1_10_i_exists_frobType`(在庫)は pre-step 版と**同じ形の四角形**を与えるが、
+`degFr φ' = degFr φ` を主張に含まない。
+★しかし `degFr β = degFr α` と四角形から、**`ℕ+` の消約性**で導ける。 -/
+
+/-- ★★★**四角形の残りの辺の次数も一致する**。
+
+`β ≫ α = α' ≫ β'` で `degFr α = degFr α'` なら `degFr β = degFr β'`。 -/
+theorem degFr_of_square_other {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {X Y W Z : Cc} (β : X ⟶ Y) (α : Y ⟶ Z) (α' : X ⟶ W) (β' : W ⟶ Z)
+    (hsq : β ≫ α = α' ≫ β') (hdeg : P.degFr α = P.degFr α') :
+    P.degFr β = P.degFr β' := by
+  have h := congrArg P.degFr hsq
+  rw [P.degFr_comp, P.degFr_comp, hdeg, mul_comm (P.degFr β') (P.degFr α')] at h
+  exact mul_left_cancel h
+
+def degFr_of_square_other.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — 四角形の残りの辺の次数",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★**(F2) の Frobenius 型の場合**。
+
+★pre-step 版と同じ手だが、`hdeg` を `degFr_of_square_other` で作る。 -/
+theorem admissible_of_frobType (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegmap : ∀ {X Y Z W : C₁} (f : X ⟶ Y) (g : Z ⟶ W),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : A ⟶ B) (hζ : IsFrobeniusType P₁ ζ)
+    (hA : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B := by
+  obtain ⟨B', β, φ', hβ, hdβ, hφ', hsq⟩ :=
+    prop_1_10_i_exists_frobType P₁ F₁ ζ hζ α hα
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ β θ hβ hθ (by rw [hdβ, hdα, hdθ])
+  have hdφ' : P₁.degFr ζ = P₁.degFr φ' :=
+    degFr_of_square_other P₁ ζ β α φ' hsq hdβ
+  have h2 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map α) := by
+    have hsq' : Ψ.map ζ ≫ Ψ.map β = Ψ.map α ≫ Ψ.map φ' := by
+      rw [← Ψ.map_comp, ← Ψ.map_comp, hsq]
+    exact prop_1_14_iv_degFr P₂ (Ψ.map ζ) (Ψ.map β) (Ψ.map α) (Ψ.map φ') hsq'
+      (hdegmap ζ φ' hdφ')
+  rw [← h1, h2]
+  exact (hA α hα hdα).2
+
+def admissible_of_frobType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — Frobenius 型の場合",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

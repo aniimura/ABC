@@ -785,14 +785,34 @@
           "note": "★済(2026-08-18): `Thm34Quasi.lean` の `admissible_of_preStep`。\n★在庫の `prop_1_10_i_exists_preStep`(`Prop110.lean:314`)が四角形 `ζ ≫ β = α ≫ φ'` を与える。\n★両辺の pre-step は次数 1 なので `prop_1_14_iv_degFr` の `hdeg` が直ちに満たされる。"
         },
         {
-          "id": "psiN-F2",
-          "size": "中",
-          "status": "todo",
+          "id": "psiN-F2-degsq",
+          "size": "小",
+          "status": "done",
           "deps": [
             "psiN-F2-prestep"
           ],
+          "title": "四角形の残りの辺の次数を導く",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `degFr_of_square_other`。\n★`β ≫ α = α' ≫ β'` で `degFr α = degFr α'` なら `degFr β = degFr β'`。\n★**`ℕ+` の消約性**(`mul_left_cancel`)で出る。"
+        },
+        {
+          "id": "psiN-F2-frobtype",
+          "size": "小",
+          "status": "done",
+          "deps": [
+            "psiN-F2-degsq"
+          ],
+          "title": "(F2) ζ が Frobenius 型の場合",
+          "note": "★済(2026-08-18): `Thm34Quasi.lean` の `admissible_of_frobType`。\n★在庫の `prop_1_10_i_exists_frobType`(`Prop110.lean:174`)が pre-step 版と**同じ形の四角形**を与える。\n★ただし `degFr φ' = degFr ζ` は主張に含まれないので、`degFr_of_square_other` で導いた。"
+        },
+        {
+          "id": "psiN-F2",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "psiN-F2-frobtype"
+          ],
           "title": "(F2) 全体——一般の射へ広げる",
-          "note": "★★★**測定(2026-08-18)**: 中核は 3 本とも取り終わっている。\n- `psiN-F2-transfer` —— 四角形に沿う伝搬\n- `psiN-F2-square-build` —— pull-back に沿う四角形の構成\n- `psiN-F2-prestep` —— pre-step の場合\n\n## ★残る段の 2 つの道\n**(a) 原典の道**: `Definition 1.3, (i)(a)(b)(c)` で 「B₁ を Frobenius-trivial、ζ₁ を pull-back」としてよいことを示す。\n**(b) `arbFactor` の道**: 任意の射を (Frobenius 型) ≫ (pre-step) ≫ (pull-back) に分解し、各成分で伝搬する。\n★pre-step と pull-back は取ったので、**Frobenius 型の成分だけ**が残る。\n★★(b) の方が在庫と相性が良さそうだが、Frobenius 型に沿う伝搬を別途測る必要がある。"
+          "note": "★★★**`arbFactor` の 3 成分がすべて揃った**(2026-08-18):\n- Frobenius 型 —— `admissible_of_frobType`\n- pre-step —— `admissible_of_preStep`\n- pull-back —— `exists_square_of_pullBack` ＋ `admissible_of_square`\n\n★残るのは `arbFactor` で分解して 3 成分を順に適用する**束ねる作業**だけである。"
         },
         {
           "id": "psiN-F3",
