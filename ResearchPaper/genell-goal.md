@@ -7885,3 +7885,32 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 
 ★★★これで双対の局所自明性が**層であることを示す前に**言える。
 第 55 の `isIso_of_reflects_iso _ (PresheafOfModules.toPresheaf _)` の型を再利用した。
+
+## §9-193 —— ★★★★★★★**双対も局所自明**(第 171 ブロック、2026-08-18)
+
+    F|_V ≅ 𝟙_  ⟹  (dualPresheaf F)|_V ≅ 𝟙_
+
+★★切断として **`e.hom` 自身**を取るのが要点
+——`e.hom : F|_V ⟶ 𝟙_` は**双対の切断そのもの**だからである。
+
+### 全単射性の筋
+
+    c ↦ c • (e.hom|_W) = (e.hom|_W) ≫ unitMul W c
+
+は 2 つの全単射の合成:
+
+| 段 | 全単射 |
+|---|---|
+| `c ↦ unitMul W c` | ★第 166(`unitEndEquiv`) |
+| `ψ ↦ (e.hom|_W) ≫ ψ` | ★`Iso.homCongr` |
+
+★★★層の仮定は要らない(第 170)。
+
+### 残り(B2)
+
+| 段 | 内容 | 見積 |
+|---|---|---|
+| 172 | 評価射 `F ⊗ F^∨ → 𝟙_` の構成 | 3 |
+| 173 | 評価射が局所自明な `F` で同型 | 3 |
+| 174 | `InvSheaf` と `ofDivisor` | 2 |
+| 175+ | 3 法則と `isCartierDivisor_affine` | 6 |
