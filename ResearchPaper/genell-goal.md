@@ -5545,3 +5545,42 @@ mathlib の証明を写経できる。
 
 ★★**11 ブロック**を要した。§9-95 で「2–3」と見たものである。
 ★★★上振れの理由はすべて記録済み(§9-99 の向きの不一致、§9-105 の site の違い)。
+
+## §9-110 —— 第 104 の自然性で止めた(2026-08-18)
+
+### 通ったもの(部品として確認済み)
+
+| 部品 | 状態 |
+|---|---|
+| `𝟙_ (PresheafModulesOn X V)` の切断は `𝒪(W)` | ★`rfl`(実測) |
+| `app W := ofHom (toSpanSingleton _ _ (P.map d.op s))` | ★型が通る |
+| `hd : d' = f.unop ≫ d`(終対象への射の一意性) | ★`Subsingleton.elim` |
+| `h1 : P.map d'.op s = P.map f (P.map d.op s)` | ★`rw [hd, op_comp, P.map_comp]` で通る |
+
+### 止めた所 —— 最後の 1 行
+
+残る等式は本質的に
+
+    (𝟙_.map f c) • (P.map f x)  =  P.map f (c • x)
+
+であり、**mathlib の `PresheafOfModules.map_smul` そのもの**である。
+★しかし `simp` / `rw` / `show` のいずれも
+`restrictScalars` と `ofHom` の層を剥がせず当たらない。
+
+| 手 | 結果 |
+|---|---|
+| `ext c` | ✗ 1 変数しか出ない |
+| `ModuleCat.hom_ext` + `LinearMap.ext` | ★ゴールは出る |
+| `simp only [hom_comp, coe_comp, hom_ofHom, toSpanSingleton_apply, map_smul, h1]` | ✗ 右辺に当たらない |
+| `rw [← ConcreteCategory.comp_apply]` | ✗ 型正当性で止まる |
+| `show _ • _ = _` | ✗ スカラー型がメタ変数 |
+
+★★**8 手試して止めた**——§9-73・§9-85 と同じ判断である。
+
+### ★★★次の一手(候補、記録)
+
+- `show` に**スカラー型を明示**して書く(`(c : ↑(𝟙_ ...).obj W) • _`)
+- `PresheafOfModules.Hom.mk` ではなく `ofPresheaf` 系で作る
+- `LinearMap.toSpanSingleton` を使わず `P.map` の semilinear 性から直接組む
+
+★数学は完成しており、残るのは**戦術の 1 行**である。
