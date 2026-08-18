@@ -7804,3 +7804,39 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–168 の 21 ブロック(フルビルド成功・ゲート PASS)
+
+## §9-190 —— ★★★★★★★★**双対の前層**(第 169 ブロック、2026-08-18)
+
+    dualPresheaf F : X.PresheafOfModules
+      obj U = ((restrictPresheafFunctor X U).obj F ⟶ 𝟙_)
+
+★★mathlib に**層加群の内部 Hom も双対も無い**(実測)ので自前で作った。
+
+### 組み上げに要った 4 部品
+
+| 部品 | 出所 |
+|---|---|
+| `Hom` は `End(𝟙_)` 加群 | mathlib `Preadditive.moduleEndRight` |
+| `End(𝟙_) ≃+* Γ(X,U)` | ★第 164–166 |
+| `c • φ = φ ≫ unitMul c` | ★第 167 |
+| 制限の半線型性 | ★第 168 |
+
+### ★★★逃げ道 4 つ(すべて綴りの問題)
+
+| 症状 | 逃げ道 |
+|---|---|
+| `Module ((…).obj V) (双対 at V)` が無い | ★**反対圏索引の instance をもう 1 本**(`dualModuleOp`) |
+| `Functor.map_add` の `Additive` が無い | ★**`rfl`** |
+| `show` で型が合わない | ★`have h1` で先に書き換える |
+| 最後の `•` が `compHom` 経由で `rw` が当たらない | ★★**`exact (… ).symm`**(defeq) |
+
+★★★★本 session で **5 度目**の綴り問題。毎回「下流に合わせる」「項で手渡す」で解決。
+
+### 残り(B2)
+
+| 段 | 内容 | 見積 |
+|---|---|---|
+| 170 | 双対が層であること | 2 |
+| 171 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 | 4 |
+| 172 | `InvSheaf` と `ofDivisor` | 2 |
+| 173+ | 3 法則と `isCartierDivisor_affine` | 6 |

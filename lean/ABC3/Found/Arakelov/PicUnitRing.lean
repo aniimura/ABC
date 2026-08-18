@@ -98,6 +98,21 @@ noncomputable instance dualModule (F : X.PresheafOfModules) :
   Module.compHom _ (unitEndEquiv U).symm.toRingHom
 
 
+/-- ★★★★双対の加群構造(**反対圏の索引版**)。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★前層に組む段では係数環が `(…).obj W`(`W : (X.Opens)ᵒᵖ`)の形で現れる。
+★★`(op W.unop) = W` は eta で等しいが **instance 探索は `op ?U =?= W` を解けない**ので、
+索引を変えた同じ instance をもう 1 本置く。
+
+★★★中身は同じ項に簡約されるので、経路が 2 本になる問題は起きない。 -/
+noncomputable instance dualModuleOp (F : X.PresheafOfModules) (W : (X.Opens)ᵒᵖ) :
+    Module (((X.presheaf ⋙ forget₂ CommRingCat.{u} RingCat.{u}).obj W) : Type u)
+      ((restrictPresheafFunctor X W.unop).obj F ⟶ 𝟙_ (PresheafModulesOn X W.unop)) :=
+  dualModule W.unop F
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def unitEndEquiv.src : ABC3.Meta.Source :=
