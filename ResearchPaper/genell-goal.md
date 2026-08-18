@@ -5027,3 +5027,37 @@ mathlib の証明を写経できる。
 |---|---|
 | 89 | `toOpenTensor` が `D(f)` で局所化 ⟹ `tensorSectionMap` が同型 ⟹ 茎で同型 |
 | 90 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-92 —— ★★★★★★**基本開集合で比較射が全単射になった**(第 89 ブロック、2026-08-18)
+
+    tensorSectionMap_bijective :
+      Function.Bijective (tensorSectionMap R M N (D f))
+
+★★★これが「**`tilde` はテンソルを保つ**」ことの中核である。
+★★★★**`M`・`N` の可逆性は要らない**——任意の加群で成り立つ。
+
+### ★★機構 —— 局所化の一意性で押し切った
+
+| 段 | 内容 |
+|---|---|
+| 1 | `toOpenTensor` は `map(toOpenₗ, toOpenₗ)` と `moduleTensorEquiv.symm` の合成(**純テンソルで `rfl`**) |
+| 2 | 前半は mathlib の instance、後半は線型同値 → `of_linearEquiv` で局所化性が伝わる |
+| 3 | `tensorSectionMap ∘ toOpenTensor = toOpenₗ (M ⊗ N)`(第 88) |
+| 4 | 両辺とも局所化 → `linearMap_ext` で `tensorSectionMap = linearEquiv` |
+| 5 | 線型同値だから全単射 |
+
+★`maxHeartbeats 1000000` が要った(既定の 200000 では whnf が尽きる)。
+
+### ★★★★これで第 40 ブロックの型の計算を回避できた
+
+★第 40(`pullbackDelta` が同型)は随伴で作った射の `app` に具体形が無く、
+**20 ブロック**を要した。
+★★今回は `tilde` の切断が明示的なので、**局所化の一意性**で押し切れた
+——第 83 から第 89 まで **7 ブロック**である。
+
+### ★★残り
+
+| # | 内容 |
+|---|---|
+| 90 | 基本開集合で全単射 ⟹ 茎で同型 ⟹ `tildeTensorDesc` が同型 |
+| 91 | `tilde M` が `InvSheaf` / `equivPicRing` |
