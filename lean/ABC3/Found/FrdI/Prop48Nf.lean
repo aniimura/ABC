@@ -122,6 +122,39 @@ noncomputable def biratNfMap (A B : C) :
   congrFun (congrArg (fun t => t.hom)
     (Limits.colimit.ι_desc (biratNfCocone P d G A B) Z)) (ULift.up φ)
 
+/-! ## ★★段 4 —— 関手則の `map_id` -/
+
+/-- ★★**添字圏の頂点は頂点に写る** —— `coaPreNfMap` の `map_id` だけ。 -/
+theorem idxBiratNfMap_one (A : C) :
+    (idxBiratNfMap P d G A).obj (idxBiratOne P G A)
+      = idxBiratOne P G (nfObj P G.core d A) :=
+  congrArg Opposite.op (congrArg Over.mk ((coaPreNfMap P d G).map_id (coaPreObj P G A)))
+
+/-- ★★★★**`𝒞 → 𝒞^birat` と可換** —— これが `map_id` を与える。
+
+★対象の等式で `rw` すると motive が壊れるので、
+`iii-psipf` と同じく**添字圏の射を 1 本作って `HomBirat.mk_map` で移す**。 -/
+theorem biratNfMap_toHomBirat {A B : C} (φ : A ⟶ B) :
+    biratNfMap P d G A B (toHomBirat (P := P) (G := G) φ)
+      = toHomBirat (P := P) (G := G) (nfMap P G.core d φ) := by
+  let u : idxBiratOne P G (nfObj P G.core d A)
+      ⟶ (idxBiratNfMap P d G A).obj (idxBiratOne P G A) :=
+    Quiver.Hom.op (Over.homMk (𝟙 _) (by
+      refine (Category.comp_id _).trans ?_
+      exact ((coaPreNfMap P d G).map_id (coaPreObj P G A)).symm))
+  have h1 : biratNfMap P d G A B (HomBirat.mk (idxBiratOne P G A) φ)
+      = HomBirat.mk ((idxBiratNfMap P d G A).obj (idxBiratOne P G A))
+          (nfMap P G.core d φ) :=
+    biratNfMap_mk P d G (idxBiratOne P G A) φ
+  refine h1.trans (Eq.trans ?_ (HomBirat.mk_map u (nfMap P G.core d φ)))
+  exact congrArg (HomBirat.mk ((idxBiratNfMap P d G A).obj (idxBiratOne P G A)))
+    (Category.id_comp (nfMap P G.core d φ)).symm
+
+def biratNfMap_toHomBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat は 𝒞 → 𝒞^birat と可換",
+    sectionId := "frdi-prop-4-8" }
+
 end Birat
 
 def biratNfMap.src : ABC3.Meta.Source :=
