@@ -448,6 +448,16 @@
           "note": "★済(2026-08-18): `birat_divGp_sub_mem`。★★同じ底を持つ 2 本の同型 `f, g : A ⟶ B` の `Div^gp` の差は**常に `Φ^birat(A)` に入る**。★したがって「経由するか」は **1 本の同型で判定すればよい** —— これで `factor-iso-div` が唯一の未知数になった。★手: `δ := f ≫ g⁻¹` が `𝒪^×(A)` に入ることを見るだけ。"
         },
         {
+          "id": "factor-divdiff",
+          "size": "中",
+          "status": "done",
+          "deps": [
+            "factor-coset"
+          ],
+          "title": "除数の差は Φ^birat に入る(仮定不要)",
+          "note": "★済(2026-08-18): `toGp_div_sub_mem_phiBiratAt`。★追加仮定なしで通る。"
+        },
+        {
           "id": "factor-plbk",
           "size": "中",
           "status": "todo",
@@ -459,13 +469,13 @@
         },
         {
           "id": "factor-iso-div",
-          "size": "中",
+          "size": "大",
           "status": "todo",
           "deps": [
             "factor-plbk"
           ],
-          "title": "𝒞^birat の同型の Div^gp が Φ^birat に入るか —— ★真の残り",
-          "note": "★★★**設計確定(2026-08-18)——追加仮定 1 本で閉じる**。\n\n## ★分かったこと\n在庫に `Div : 𝒪^▷(A) → Φ(Base A)` の**全射性は無い**。一般の Frobenioid の公理にも無い。★しかし **`𝔽_Φ` では `Proposition 1.5, (ii)`(`otriEquiv`)がそれを与える**(`Φ(A) ≃ 𝒪^▷(A)` のモノイド同型)。\n\n## ★★採用する仮定(逸脱 **(B)**)\n「isotropic な `A` に対し `Div : 𝒪^▷(A) → Φ(Base A)` は全射」。\n★これは `𝔽_Φ` では `otriEquiv` より**自動的に成り立つ**ので、「隠れた除数が無い」という自然な条件である。\n\n## ★仮定からの導出(測定済)\n同型 `h : A ≅ B` は `(α : A' → A, φ : A' → B)` で代表され、★(iv) の辞書より **`φ` も co-angular pre-step** になる。\n`biratDivGp h = toGp(Div φ) - toGp(Div α)`。仮定を `A'` で使うと `Div φ = Div u`, `Div α = Div v`(`u,v ∈ 𝒪^▷(A')`)と書け、`biratDivGp h = biratDivGp(T u) - biratDivGp(T v) ∈ phiBiratAt A'`。\n★`α` は `𝒞^birat` で同型なので `phiBiratAt A' = phiBiratAt A`(`phiBiratAt_map_le` を両向きに使う)。\n\n## ★★なぜ仮定が要るのか(反例の方向)\n算術的なモデルで `𝒪^▷(A)` の `Div` の像は**主除数**、co-angular pre-step の `Div` は**任意の有効除数**になる。★両者が一致するのは類群が自明なときだけである。★★したがってこれは**真に追加すべき仮定**であり、index.html の逸脱表に (B) として開示する。\n★注: `Div^gp(h) + Div^gp(h⁻¹) = 0` は自動なので、同型性だけからは何も出ない。"
+          "title": "𝒞^birat の同型の Div^gp——★設計を変えることになった",
+          "note": "★★★**機械的に確かめた負の結果(2026-08-18)**。\n一度は「`Div : 𝒪^▷(X) → Φ(Base X)` は全射」を逸脱 (B) の仮定として置こうとしたが、それだと **`Φ^birat(X) = Φ^gp(X)`(全体)に退化する**。\n★実際に `phiBiratAt_eq_top_of_divSurj` として**証明して残した**ので、この仮定を置いてはいけないことが機械的に残る。\n理由: `Gp M` の任意の元は `toGp a - toGp b` と書け、全射性で `a = Div u`, `b = Div v` と取れば `toGp_div_sub_mem_phiBiratAt` で即座に入る。\n\n## ★★★正しい設計(次の一手)\n`Φ^birat` を**「𝒞^birat の全射の `Div^gp` が生成する部分関手」として定義**し直す。\n★こうすると「経由する」は**構成から自明**になり、全射 `𝒪^×(A^birat) ↠ Φ^birat` の方が**定理**になる。★★**原典の論理構造もそうなっている**(「There exists a unique subfunctor … such that … factors through …, and, moreover, … induces … a surjection」)。\n★現在の `phiBiratAt`(= `𝒪^×` の像)はその全射の**行き先**になる。\n★揃っている材料: `toGp_div_sub_mem_phiBiratAt`(仮定不要)、`birat_divGp_sub_mem`(剰余類)、`phiBiratAt_map_le`/`_dstar`(部分関手性)。"
         },
         {
           "id": "factor-src",

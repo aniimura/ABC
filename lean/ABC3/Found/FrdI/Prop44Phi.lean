@@ -292,6 +292,84 @@ def birat_divGp_sub_mem.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — Div^gp は Φ^birat の剰余類",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★除数の**差**は常に `Φ^birat` に入る
+
+★★★これは**追加仮定不要**である。
+`𝒪^▷(X)` の 2 元の除数の差は、`𝒞^birat` では
+`T u ≫ (T v)⁻¹ ∈ 𝒪^×(X^birat)` の除数になる。 -/
+
+/-- ★★★★**`𝒪^▷(X)` の除数の差は `Φ^birat(X)` に入る**。
+
+★`u, v ∈ 𝒪^▷(X)` は `𝒞^birat` で同型になる(`otri_isIso_birat`)ので、
+`birat_divGp_sub_mem` がそのまま使える。 -/
+theorem toGp_div_sub_mem_phiBiratAt {X : C} (u v : OTri P X) :
+    toGp _ (P.Div (((u : End X) : X ⟶ X))) - toGp _ (P.Div (((v : End X) : X ⟶ X)))
+      ∈ phiBiratAt P G X := by
+  haveI := otri_isIso_birat (G := G) u
+  haveI := otri_isIso_birat (G := G) v
+  have hb : biratBase ((toBiratCat P G).map (((u : End X) : X ⟶ X)))
+      = biratBase ((toBiratCat P G).map (((v : End X) : X ⟶ X))) := by
+    show biratBase (toHomBirat (P := P) (G := G) _) = biratBase (toHomBirat (P := P) (G := G) _)
+    rw [biratBase_toHomBirat, biratBase_toHomBirat]
+    exact (u.2.1).trans (v.2.1).symm
+  have h := birat_divGp_sub_mem P G
+    ((toBiratCat P G).map (((u : End X) : X ⟶ X)))
+    ((toBiratCat P G).map (((v : End X) : X ⟶ X))) hb
+  have hu : biratDivGp ((toBiratCat P G).map (((u : End X) : X ⟶ X)))
+      = toGp _ (P.Div (((u : End X) : X ⟶ X))) := biratDivGp_toHomBirat _
+  have hv : biratDivGp ((toBiratCat P G).map (((v : End X) : X ⟶ X)))
+      = toGp _ (P.Div (((v : End X) : X ⟶ X))) := biratDivGp_toHomBirat _
+  rwa [hu, hv] at h
+
+/-- ★locator —— `Proposition 4.4, (iii)` の除数の差。 -/
+def toGp_div_sub_mem_phiBiratAt.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — 除数の差は Φ^birat に入る",
+    sectionId := "frdi-prop-4-4" }
+
+/-! ## ★★★追加仮定の**帰結**を測る —— ★強すぎることの証拠
+
+★★**測定(2026-08-18)**: 「`Div : 𝒪^▷(X) → Φ(Base X)` は全射」という仮定を置くと、
+★★★**`Φ^birat(X) = Φ^gp(X)`(全体)になってしまう**。
+
+理由: `Gp M` の任意の元は `toGp a - toGp b` と書けるので、
+全射性で `a = Div u`, `b = Div v` と取れば、上の
+`toGp_div_sub_mem_phiBiratAt` で即座に `Φ^birat` に入る。
+
+★★★**これは形式化の設計への重要な帰結である**:
+原典の `Φ^birat` は一般に**真の**部分関手なので、
+この仮定の下では主張が退化する。
+★したがって正しい設計は、`Φ^birat` を
+**「`𝒞^birat` の全射の `Div^gp` が生成する部分関手」として定義**し、
+「経由する」を**構成から自明**にし、
+全射 `𝒪^×(A^birat) ↠ Φ^birat` の方を**定理**にすることである
+(原典の論理構造もそうなっている)。 -/
+
+/-- ★★★★**仮定の帰結** —— `Div` が全射なら `Φ^birat(X) = Φ^gp(X)`。
+
+★これを実際に証明しておくことで、
+「この仮定を置いてはいけない」ことが**機械的に**残る。 -/
+theorem phiBiratAt_eq_top_of_divSurj
+    (hdiv : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (X : C) : phiBiratAt P G X = ⊤ := by
+  refine eq_top_iff.mpr (fun x _ => ?_)
+  induction x using AddLocalization.induction_on with | _ y =>
+    obtain ⟨u, hu⟩ := hdiv X y.1
+    obtain ⟨v, hv⟩ := hdiv X y.2.val
+    have hmk : AddLocalization.mk y.1 y.2
+        = toGp _ (P.Div (((u : End X) : X ⟶ X))) - toGp _ (P.Div (((v : End X) : X ⟶ X))) := by
+      rw [hu, hv]
+      exact eq_sub_of_add_eq (mk_add_toGp _ y.1 y.2)
+    rw [hmk]
+    exact toGp_div_sub_mem_phiBiratAt P G u v
+
+/-- ★locator —— 仮定の帰結(退化することの記録)。 -/
+def phiBiratAt_eq_top_of_divSurj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — 仮定が強すぎることの記録",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/
