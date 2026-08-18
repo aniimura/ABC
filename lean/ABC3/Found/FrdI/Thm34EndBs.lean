@@ -130,22 +130,32 @@ noncomputable def plBkOverEquiv :
 `𝒞₁^pl-bk_A → 𝒞₁` の自己射を `𝒞₂^pl-bk_{ΨA} → 𝒞₂` の自己射へ送る。
 
 ★★`plBkOverToC_comp_plBkMap` で合成が**定義的に一致**するので、
-`Ψ` で whisker してから、圏同値に沿った前合成の**充満忠実性**で引き戻すだけ。 -/
+`Ψ` で whisker してから、圏同値に沿った前合成の**充満忠実性**で引き戻すだけ。
+★モノイド準同型性は mathlib の `Functor.mapEnd` と
+`FullyFaithful.mulEquivEnd` が両方とも供給する。 -/
 noncomputable def endDescend :
-    End (plBkOverToC P₁ A) →* End (plBkOverToC P₂ (e.functor.obj A)) where
-  toFun η :=
-    (Equivalence.congrLeft (E := C₂) (plBkOverEquiv e hPB hPB' A)).inverse.preimage
-      (Functor.whiskerRight η e.functor)
-  map_one' := by
-    show (Equivalence.congrLeft (E := C₂) (plBkOverEquiv e hPB hPB' A)).inverse.preimage
-        (Functor.whiskerRight (𝟙 (plBkOverToC P₁ A)) e.functor) = 𝟙 _
-    rw [Functor.whiskerRight_id']
-    exact Functor.preimage_id _
-  map_mul' x y := by
-    show (Equivalence.congrLeft (E := C₂) (plBkOverEquiv e hPB hPB' A)).inverse.preimage
-        (Functor.whiskerRight (y ≫ x) e.functor) = _
-    rw [Functor.whiskerRight_comp]
-    exact Functor.preimage_comp _ _ _
+    End (plBkOverToC P₁ A) →* End (plBkOverToC P₂ (e.functor.obj A)) :=
+  (((Equivalence.congrLeft (E := C₂)
+        (plBkOverEquiv e hPB hPB' A)).fullyFaithfulInverse.mulEquivEnd
+      (plBkOverToC P₂ (e.functor.obj A))).symm : _ ≃* _).toMonoidHom.comp
+    (Functor.mapEnd (plBkOverToC P₁ A)
+      ((Functor.whiskeringRight (Over (⟨A⟩ : PlBk P₁)) C₁ C₂).obj e.functor))
+
+/-- ★★★★**降下の定義式** —— 前合成で戻すと元の whisker に一致する。 -/
+theorem endDescend_whisker (η : End (plBkOverToC P₁ A)) :
+    (Equivalence.congrLeft (E := C₂) (plBkOverEquiv e hPB hPB' A)).inverse.map
+        (endDescend e hPB hPB' A η)
+      = Functor.whiskerRight η e.functor :=
+  (Equivalence.congrLeft (E := C₂)
+    (plBkOverEquiv e hPB hPB' A)).fullyFaithfulInverse.map_preimage _
+
+/-- ★★★★★**降下の成分**(`Over.post` の像の上)——
+これが段 3 の要で、ここから `endBsIso` の保存も `plBkIdObj` での値も出る。 -/
+theorem endDescend_app_post (η : End (plBkOverToC P₁ A)) (Z : Over (⟨A⟩ : PlBk P₁)) :
+    NatTrans.app (endDescend e hPB hPB' A η)
+        ((Over.post (X := (⟨A⟩ : PlBk P₁)) (plBkMap e.functor hPB)).obj Z)
+      = e.functor.map (NatTrans.app η Z) :=
+  congrArg (fun t => NatTrans.app t Z) (endDescend_whisker e hPB hPB' A η)
 
 end Descent
 
