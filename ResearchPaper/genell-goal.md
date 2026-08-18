@@ -6198,3 +6198,26 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 |---|---|
 | 118 | `restrictSec` が局所化の生成元と一致する |
 | 119 | `IsLocallyTrivial (tilde M).val` → `InvSheaf` → `equivPicRing` |
+
+## §9-132 —— 切断の制限は局所化と両立する(第 118 ブロック、2026-08-24)
+
+    tilde.toOpen M U ≫ (制限) = tilde.toOpen M W       (mathlib、**`rfl`**)
+
+★これが「生成元の制限は生成元」の土台である。
+
+### ★★この session の Lean 累計(第 70–118、50 ブロック)
+
+| 群 | ブロック | 内容 |
+|---|---|---|
+| Γ の構造・`sheafOf` 族 | 70–73 | `PicardData` の 7 フィールド |
+| 比較射 | 74–75 | |
+| ★**tilde はテンソルを保つ** | 76–92 | **mathlib に無い**(第 91 が核心) |
+| 局所自明性の器具 | 93–118 | **26 ブロック** |
+
+### ★★★残り(局所自明性)
+
+| # | 内容 |
+|---|---|
+| 119 | `tildeAwayEquiv` どうしが制限で対応する(`IsLocalizedModule` の一意性) |
+| 120 | `IsLocallyTrivial (tilde M).val` |
+| 121 | `tilde M` が `InvSheaf` / `equivPicRing` → **B1 達成** |

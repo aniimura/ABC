@@ -82,4 +82,50 @@ def birat_isPullBack_iff.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iv) — pull-back の条",
     sectionId := "frdi-prop-4-4" }
 
+
+/-! ## ★辞書の base-identity 自己射の条
+
+原文 (FrdI p.83):
+> a pair (α : A → A; φ : A → A), where α is a co-angular pre-step in the in-
+
+★★原文は「`𝒞^birat` の射が base-identity 自己射 ⇔
+**帰納極限の添字圧の co-angular pre-step `α` と `φ` が base-equivalent**」と言う。
+★★★代表元で計算すればこれは**そのまま出る** ——
+`biratBase (mk Z φ) = inv (Base α) ≫ Base φ` なので、
+これが `𝟙` になることと `Base α = Base φ` は同じことである。 -/
+
+variable {P G} in
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(代表元の形)。 -/
+theorem birat_isBaseIdentity_mk {A : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ A) :
+    IsBaseIdentity (biratPre P G) (HomBirat.mk Z φ)
+      ↔ BaseEquivalent P Z.unop.hom.hom φ := by
+  haveI hz : IsIso (P.Base Z.unop.hom.hom) := Z.unop.hom.property.2.2
+  have hid : biratBase (𝟙 (show BiratCat P G from A)) = 𝟙 _ := by
+    show biratBase (toHomBirat (P := P) (G := G) (𝟙 A)) = 𝟙 _
+    rw [biratBase_toHomBirat, P.Base_id]
+  show biratBase (HomBirat.mk Z φ) = biratBase (𝟙 (show BiratCat P G from A)) ↔ _
+  rw [biratBase_mk, sliceBaseOf_eq, hid, IsIso.inv_comp_eq, Category.comp_id]
+  exact eq_comm
+
+variable {P G} in
+/-- ★★★★**[FrdI] Proposition 4.4, (iv) の base-identity の条**(存在の形)。
+
+★原文の「arises from a pair (α; φ) … base-equivalent」そのもの。 -/
+theorem birat_isBaseIdentity_iff {A : C} (f : (show BiratCat P G from A) ⟶ A) :
+    IsBaseIdentity (biratPre P G) f ↔
+      ∃ (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ A),
+        f = HomBirat.mk Z φ ∧ BaseEquivalent P Z.unop.hom.hom φ := by
+  constructor
+  · intro h
+    obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+    exact ⟨Z, φ, rfl, (birat_isBaseIdentity_mk Z φ).mp h⟩
+  · rintro ⟨Z, φ, rfl, hbe⟩
+    exact (birat_isBaseIdentity_mk Z φ).mpr hbe
+
+/-- ★locator —— `Proposition 4.4, (iv)` の base-identity 自己射の条。 -/
+def birat_isBaseIdentity_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iv) — base-identity 自己射の条",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI
