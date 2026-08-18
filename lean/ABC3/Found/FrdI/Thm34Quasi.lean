@@ -1207,4 +1207,28 @@ def isPreStep_map_iff_of_degMap.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — pre-step の保存(次数経由)",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**Ψ は底同型を保つ**。
+
+原文 (FrdI p.64):
+> (i), (ii), Ψ preserves isometric pre-steps and pre-steps, hence base-isomorphisms [i.e.,
+
+★在庫の `prop_1_7_ii_baseIso_factor`
+(底同型 ⇔ Frobenius 型 ≫ pre-step)を両側で使う。 -/
+theorem isBaseIsomorphism_map_of_classes (Ψ : C₁ ⥤ C₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsBaseIsomorphism P₁ φ) :
+    IsBaseIsomorphism P₂ (Ψ.map φ) := by
+  obtain ⟨X, γ, β, hfac, hγ, hβ⟩ := (prop_1_7_ii_baseIso_factor P₁ F₁ φ).mp h
+  refine (prop_1_7_ii_baseIso_factor P₂ F₂ (Ψ.map φ)).mpr
+    ⟨Ψ.obj X, Ψ.map γ, Ψ.map β, ?_, hFT γ hγ, hPS β hβ⟩
+  rw [hfac, Ψ.map_comp]
+
+def isBaseIsomorphism_map_of_classes.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — 底同型の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
