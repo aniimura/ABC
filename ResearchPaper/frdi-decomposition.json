@@ -887,12 +887,12 @@
         {
           "id": "psiN-connected",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psiN-F2-iff"
           ],
           "title": "連結性で全対象へ広げ、素数の写像を定める",
-          "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。\n\n★★両向きの (F2) が揃った(2026-08-18)ので、`P.connectedC` の zigzag に沿って `admissible_iff_of_hom` を繰り返すだけ。\n★見積りを ★中 → ★小 に下げた。"
+          "note": "★`P.connectedC` は zigzag を与えるので、`isAdmissibleObj_of_hom`(済)を zigzag に沿って繰り返す。★その上で well-defined な `素数 → 素数` を定める。\n\n★★両向きの (F2) が揃った(2026-08-18)ので、`P.connectedC` の zigzag に沿って `admissible_iff_of_hom` を繰り返すだけ。\n★見積りを ★中 → ★小 に下げた。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `admissible_all_of_connected`。\n★mathlib の `CategoryTheory.induct_on_objects` に乗せるだけだった。\n★罠: `IsAdmissibleObj` の `{B}` が暗黙なので eta 展開され、`exact key A` が通らない。`intro B φ hφ hdφ` してから適用する。"
         },
         {
           "id": "psiN-prime-bij",

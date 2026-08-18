@@ -7935,3 +7935,42 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
     Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
     B2: 第 148–172 の 25 ブロック
       残り: 評価射(3)→ 同型性(3)→ InvSheaf・ofDivisor(2)→ 3 法則(6)
+
+## §9-195 —— 評価射の双線型性——**両側に橋が要る**(2026-08-18、記録)
+
+    evBil W : F.obj W →ₗ (dualPresheaf F).obj W →ₗ (𝟙_).obj W
+      x ↦ φ ↦ unitVal ((φ.app t).hom x)
+
+| 欄 | 状態 |
+|---|---|
+| 内側 `map_add'` | ★`rfl` |
+| 内側 `map_smul'`(φ について) | ★**通った**(第 172 の `unitMul_app_apply` + `mul_comm`) |
+| 外側 `map_add'` | ★通った(`congrArg (unitVal …)`) |
+| 外側 `map_smul'`(x について) | ★**残り** |
+
+### ★★詰まっている点——**両側の綴りが違う**
+
+`(φ.app t).hom` は `PresheafModulesOn X W` の環(**RingCat 綴り、終対象での値**)上で線型。
+一方 `x : F.obj W` は `X.presheaf.obj W`(**CommRingCat 綴り**)上の加群。
+
+★`map_smul ((φ.app t).hom) c x` は
+- `c` を RingCat 綴りにすると `SMul (RingCat) (F.obj W)` が無い
+- `c` を CommRingCat 綴りにすると `SMul (CommRingCat) ((𝟙_ …).obj t)` が無い
+
+★★**どちらに寄せても片側が欠ける。**
+
+### ★★★次の一手——**両側に型付き恒等関数**
+
+    def fVal (W) (x : (F.obj W : Type u)) :
+        ((restrictPresheafFunctor X W.unop).obj F).obj (op (Over.mk (𝟙 W.unop))) := x
+
+を置き、`(φ.app t).hom (fVal x)` の形で書く。
+★これで `φ.app t` の定義域が `PresheafModulesOn` 側に揃い、
+`map_smul` が RingCat 綴りだけで済む。
+
+★★[[typed-identity-bridge]] の 2 例目——**橋は両側に架ける**。
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–172 の 25 ブロック(フルビルド成功・ゲート PASS)

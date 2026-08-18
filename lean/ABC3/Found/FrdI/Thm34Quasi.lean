@@ -977,4 +977,38 @@ def admissible_iff_of_hom.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — (F2) の同値の形",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★連結性で全対象へ広げる
+
+原文 (FrdI p.65):
+> Observe, moreover, that since C1 is connected, to complete the proof of assertion
+
+★★両向きの (F2)(`admissible_iff_of_hom`)が揃ったので、
+mathlib の `induct_on_objects` に乗せるだけ。 -/
+
+/-- ★★★★★**連結性で admissible 性が全対象へ広がる**。 -/
+theorem admissible_all_of_connected (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegmap : ∀ {X Y Z W : C₁} (f : X ⟶ Y) (g : Z ⟶ W),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {p₁ p₂ : ℕ+} {A₀ : C₁} (hA₀ : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A₀)
+    (hex : ∀ X : C₁, ∃ (X' : C₁) (α : X ⟶ X'),
+      IsFrobeniusType P₁ α ∧ P₁.degFr α = p₁)
+    (A : C₁) : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A := by
+  haveI := P₁.connectedC
+  have key : ∀ X : C₁, X ∈ {X : C₁ | IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ X} := by
+    intro X
+    refine CategoryTheory.induct_on_objects {X : C₁ | IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ X}
+      (show A₀ ∈ {X : C₁ | IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ X} from hA₀) ?_ X
+    intro j₁ j₂ f
+    obtain ⟨X', α, hα, hdα⟩ := hex j₁
+    exact admissible_iff_of_hom Ψ F₁ hFT hdegmap f α hα hdα
+  intro B φ hφ hdφ
+  exact key A φ hφ hdφ
+
+def admissible_all_of_connected.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) — 連結性で全対象へ",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
