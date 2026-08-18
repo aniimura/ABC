@@ -4614,3 +4614,43 @@ mathlib には無い。★★**我々が作る**。
     比較射が同型  ⟸  ∀ p, (M ⊗_R N)_p ≅ M_p ⊗_{R_p} N_p
 
 ★残るのは「前層テンソルの茎 = 茎のテンソル」——フィルタ余極限とテンソルの交換である。
+
+## §9-78 —— 比較射の左辺の茎(第 78 ブロック、2026-08-18)
+
+`tilde M` の茎は `M_p` である——mathlib が
+
+    instance (x) : IsLocalizedModule x.asIdeal.primeCompl (tilde.toStalk M x).hom
+
+を持つので、`IsLocalizedModule.iso` で `M_p ≃ₗ[R] (tilde M)_p` が出る。
+
+### ★★★残りの 1 点を特定した
+
+★比較射の**右辺の茎**が要る。層化は茎を変えないので前層テンソルの茎を求めれば良く、
+基本開集合が共終なので
+
+    茎 = colim_{f ∉ p} (M_f ⊗_{R_f} N_f) ≅ colim_{f ∉ p} (M ⊗_R N)_f = (M ⊗_R N)_p
+
+★★**ただし `tildeTensorCmp` は随伴で作ったので `app` に具体的な記述が無い**
+——第 40 ブロック(`pullbackDelta`)で踏んだのと**同じ壁**である。
+
+★★★2 つの道がある:
+
+| 道 | 内容 | 見積 |
+|---|---|---|
+| A | `tilde` の**明示的な切断**(`StructureSheaf` の局所分数)で前層射 ψ を直に作る | 2–3 ブロック |
+| B | 第 40 ブロックと同様、随伴の naturality で `tildeTensorCmp` の茎を計算する | 5–8 ブロック |
+
+★★★★**A を採る。**第 40 は生成元が `free (yoneda V)` しか無かったので B しか無かったが、
+今回は `tilde` の切断が**明示的**(`StructureSheaf.toOpenₗ`・局所分数条件)なので
+A が短い。
+
+### ★見積り
+
+| ブロック | 内容 |
+|---|---|
+| 79–80 | 前層射 ψ を明示的に作る(道 A) |
+| 81 | ψ が茎で同型 → 層化した射が同型 |
+| 82 | `tilde M` が `InvSheaf` |
+| 83 | `equivPicRing` |
+
+★★残り 5 ブロック。
