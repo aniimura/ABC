@@ -706,13 +706,13 @@
         },
         {
           "id": "psiN-F1",
-          "size": "小",
+          "size": "中",
           "status": "todo",
           "deps": [
             "psiN-F1-onetoall"
           ],
           "title": "(F1) 全体の束ね——Frobenius-trivial への帰着と場合分け",
-          "note": "★原文(FrdI p.64):\n> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a\n> (p1, p2)-admissible object of C1.\n★ここが (iii) の**数学的な本体**である。★`𝒞` が group-like か否かで場合分けする(非 group-like なら p₂ = p₁)。\n\n## ★★★原典の証明(FrdI p.65、2026-08-18 精読)\n**group-like の場合**: pre-step はすべて同型。`Proposition 1.14, (i)` より「A₁ から出る prime-Frobenius 射」＝「A₁ から出る既約な底同型」なので、Ψ が保つ。\n**非 group-like の場合**: `Definition 1.3, (i)(a)` ＋ `Proposition 1.8, (iii)` でA₁ を **Frobenius-trivial** としてよい。そのとき **base-identity な p₁-Frobenius 自己射** φ₁ が取れ、★原文の括弧書き「base-identity [hence Div-identity]」で Div-identity になる。\n★★**これが私が探していた鍵だった**。在庫に既に `isDivIdentity_of_isBaseIdentity`(`MorphismTypes.lean:530`)がある。\n★後は (ii)(pre-step の保存、**本セッションで実装済**)と `Proposition 1.14, (v)`(= `prop_1_14_v`、**実装済**)で出る。\n★★見積りを ★大 → ★中 に下げた。\n\n★残るのは: (a) 非 group-like な対象から **Frobenius-trivial** な底同型な対象を取る(`Definition 1.3, (i)(a)` ＋ `Proposition 1.8, (iii)`)、(b) Frobenius-trivial 対象に base-identity な p₁-Frobenius 自己射があること、(c) 両ケースを束ねる。★中核は `psiN-F1-ngl-core` で取った。\n\n★残るのは (a) 非 group-like な対象から Frobenius-trivial な底同型対象を取ることと、(c) 両ケースを束ねることだけ。★★中核は全部取ったので ★小 に下げた。"
+          "note": "★原文(FrdI p.64):\n> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a\n> (p1, p2)-admissible object of C1.\n★ここが (iii) の**数学的な本体**である。★`𝒞` が group-like か否かで場合分けする(非 group-like なら p₂ = p₁)。\n\n## ★★★原典の証明(FrdI p.65、2026-08-18 精読)\n**group-like の場合**: pre-step はすべて同型。`Proposition 1.14, (i)` より「A₁ から出る prime-Frobenius 射」＝「A₁ から出る既約な底同型」なので、Ψ が保つ。\n**非 group-like の場合**: `Definition 1.3, (i)(a)` ＋ `Proposition 1.8, (iii)` でA₁ を **Frobenius-trivial** としてよい。そのとき **base-identity な p₁-Frobenius 自己射** φ₁ が取れ、★原文の括弧書き「base-identity [hence Div-identity]」で Div-identity になる。\n★★**これが私が探していた鍵だった**。在庫に既に `isDivIdentity_of_isBaseIdentity`(`MorphismTypes.lean:530`)がある。\n★後は (ii)(pre-step の保存、**本セッションで実装済**)と `Proposition 1.14, (v)`(= `prop_1_14_v`、**実装済**)で出る。\n★★見積りを ★大 → ★中 に下げた。\n\n★残るのは: (a) 非 group-like な対象から **Frobenius-trivial** な底同型な対象を取る(`Definition 1.3, (i)(a)` ＋ `Proposition 1.8, (iii)`)、(b) Frobenius-trivial 対象に base-identity な p₁-Frobenius 自己射があること、(c) 両ケースを束ねる。★中核は `psiN-F1-ngl-core` で取った。\n\n★残るのは (a) 非 group-like な対象から Frobenius-trivial な底同型対象を取ることと、(c) 両ケースを束ねることだけ。★★中核は全部取ったので ★小 に下げた。\n\n## ★★残りの実体(2026-08-18 測定)\n★(a) 非 group-like な対象から **Frobenius-trivial な底同型対象**を取る段で、\n原典は `Definition 1.3, (i)(a)` ＋ **`Proposition 1.8, (iii)`** を引く。\n★★**`prop_1_8_iii` は在庫に無い**(`Prop18.lean` にあるのは (i)(ii) だけ)。\n★`baseSurj`(= `Definition 1.3, (i)(a)`)は Frobenius-trivial 対象を与えるが、\nそれが**非 group-like であること**は別途要る。\n★★つまり残るのは「group-like 性が底同型で移る」という の実装であり、これが (F1) の真の残り。\n★中核(admissible 性の中身)はすべて取り終わっている。"
         },
         {
           "id": "psiN-F2",
