@@ -315,6 +315,7 @@ import ABC3.Found.Arakelov.PicIdealPre
 import ABC3.Found.Arakelov.PicIdealLocal
 import ABC3.Found.Arakelov.PicIdealSheaf
 import ABC3.Found.Arakelov.PicIdealBO
+import ABC3.Found.Arakelov.PicIdealLoc
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

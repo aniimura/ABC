@@ -7177,3 +7177,18 @@ B2 の在庫を実測した結果:
 
 ★★逃げ道: `rw [D.map_ideal …]` は instances 透明度で落ちる。
 `(idealSections_affine …).trans (D.map_ideal …).symm` と**項で書く**([[exact-term-over-rw]] 5 例目)。
+
+## §9-168 —— 切断は元のイデアルの局所化(第 153 ブロック、2026-08-18)
+
+★★★★★mathlib に `Submodule.toLocalized'` があった:
+
+    Submodule.localized' S p f M' : Submodule S N
+    instance : IsLocalizedModule p (M'.toLocalized' S p f)
+
+★これと `IsAffineOpen.isLocalization_basicOpen` を繋ぐと
+
+    idealSections D (X.basicOpen h) = (D.ideal A).localized' Γ(X,D(h)) (powers h) …
+
+★★`localized'_eq_span` と `Ideal.map = span (f '' I)` が同じものなので `rfl` で閉じた。
+
+★★★これで「`D.ideal A` が可逆 ⟹ 局所自由」を**第 92・130 の再利用**で書ける。

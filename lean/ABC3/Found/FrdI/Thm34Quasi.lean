@@ -277,4 +277,16 @@ def IsAdmissibleObj.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — (p₁,p₂)-admissible 対象",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★base-identity ⇒ Div-identity
+
+原文 (FrdI p.65):
+> exists a base-identity [hence Div-identity] p1-Frobenius endomorphism φ
+
+★★★**この括弧書きが鍵である**。一度 `IsDivIdentity` を
+**Frobenius 型**から出そうとして詰まったが、原典は
+**base-identity** から出している。
+★`IsDivIdentity φ = Φ.map (Base φ) = Φ.map (Base 𝟙)` なので、
+`Base φ = Base 𝟙` に `congrArg` を当てるだけで出る。
+★実は**既に在庫にあった** —— `MorphismTypes.lean:530` の `isDivIdentity_of_isBaseIdentity`。 -/
+
 end ABC3.Found.FrdI
