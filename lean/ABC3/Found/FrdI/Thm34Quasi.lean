@@ -1336,4 +1336,29 @@ def isIsometric_iff_frobPullBack.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — isometry の圧倒的な特徴づけ",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**Ψ は isometry を保つ**(isotropic 型)。
+
+★圧倒的な特徴づけ `isIsometric_iff_frobPullBack` を両側で使う。
+
+★★**順序の注意**: pull-back の保存を `prop_1_4_ii` 経由で出すと
+isometry と**循環**する。★在庫の
+`prop_1_7_iii_pullBack_minimalAdjoint`(pull-back ⇔ 底同型に対する minimal adjoint)
+は**底同型だけ**を使うので、こちらで循環を切る。 -/
+theorem isIsometric_map_of_classes (Ψ : C₁ ⥤ C₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hPB : ∀ {X Y : C₁} (f : X ⟶ Y), IsPullBack P₁ f → IsPullBack P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsIsometric P₁ φ) : IsIsometric P₂ (Ψ.map φ) := by
+  obtain ⟨X, γ, α, hfac, hγ, hα⟩ := (isIsometric_iff_frobPullBack P₁ F₁ hiso₁ φ).mp h
+  refine (isIsometric_iff_frobPullBack P₂ F₂ hiso₂ (Ψ.map φ)).mpr
+    ⟨Ψ.obj X, Ψ.map γ, Ψ.map α, ?_, hFT γ hγ, hPB α hα⟩
+  rw [hfac, Ψ.map_comp]
+
+def isIsometric_map_of_classes.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — isometry の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
