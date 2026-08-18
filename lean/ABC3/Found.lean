@@ -319,6 +319,8 @@ import ABC3.Found.Arakelov.PicIdealLoc
 import ABC3.Found.Arakelov.PicIdealFree
 import ABC3.Found.Arakelov.PicAffCover
 import ABC3.Found.Arakelov.PicIdealAway
+import ABC3.Found.Arakelov.PicIdealScal
+import ABC3.Found.Arakelov.PicIdealBij
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
