@@ -458,24 +458,15 @@
           "note": "★済(2026-08-18): `toGp_div_sub_mem_phiBiratAt`。★追加仮定なしで通る。"
         },
         {
-          "id": "factor-plbk",
-          "size": "中",
-          "status": "todo",
-          "deps": [
-            "phibirat-istr-iso"
-          ],
-          "title": "𝒞^birat の pull-back 射の Div^gp を測る",
-          "note": "★★**測定(2026-08-18)**: (iv) の辞書より、`𝒞^birat` の pull-back 射は `𝒞` の **co-angular linear** 射の像である。★したがって `Div = 0` とは限らない。\n★`Proposition 1.7, (iii)` で co-angular linear は (co-angular pre-step) ≫ (pull-back) に分解する。★後者は `pullBackLB` より **isometric**(`Div = 0`)、前者は `𝒞^birat` で**同型**になる。\n★つまり pull-back の `Div^gp` は**同型の `Div^gp`** に帰着する。"
-        },
-        {
           "id": "phibirat-surj",
           "size": "大",
           "status": "todo",
           "deps": [
-            "factor-plbk"
+            "factor-divdiff",
+            "phibirat-istr-iso"
           ],
           "title": "全射 𝒪^×(A^birat) ↠ Φ^birat——★(iii) の唯一の残り",
-          "note": "★★★**再定義後の形(2026-08-18)**: `phiBiratGen A ≤ phiBiratAt A` を示すこと。逆向き `phiBiratAt ≤ phiBiratGen` は `phiBiratAt_le_phiBiratGen` で済。\n★★**前の設計ではここが「経由する」側にあり、そこを埋める仮定が主張を退化させた**(`phiBiratAt_eq_top_of_divSurj` として証明済)。\n★揃っている材料: `birat_divGp_sub_mem`(剰余類——同型 1 本で判定すればよい)、`toGp_div_sub_mem_phiBiratAt`(除数の差、仮定不要)、`birat_iso_of_istr_base`(isotropic なら同じ底で同型)。"
+          "note": "★★★**(iii) の唯一の残り**。`phiBiratGen A ≤ phiBiratAt A` を示すこと。\n逆向きは `phiBiratAt_le_phiBiratGen` で済。\n\n## ★★★還元し尽くした形(2026-08-18 測定)\n★`birat_divGp_sub_mem`(剰余類)と `birat_isIso_of_preStep_of_isotropic` により、\n**`B` ごとに同型 `h_B : A ≅ B` を 1 本取って `Div^gp(h_B) ∈ phiBiratAt A` を示せば十分**。\n★したがって残りは「**同じ底の別対象への同型の `Div^gp` が `Aut(A)` の像に入るか**」1 点である。\n\n## ★★封じられた道(記録)\n- ★`Div^gp(h) + Div^gp(h⁻¹) = 0` は**自動**なので、同型性だけからは何も出ない。\n- ★`𝔽_{Φ^gp}` は**底 1 つに対象 1 つ**なので `T(h)` は `𝒪^×(X)_𝔽` の元になるが、**`𝒪^×(A^birat)` の像に入るとは限らない**ので `Proposition 1.5, (ii)` だけでは出ない。\n- ★`Div : 𝒪^▷ → Φ` の全射性を仮定するのは**不可**(`phiBiratAt_eq_top_of_divSurj` で退化を証明済)。\n\n## ★次の選択肢\n(a) 原典の他の条(`Definition 1.3, (vi)` の使い方)をもう一度読む。\n(b) **消費される場面に合わせて model 型に限定**して全射を述べる(下流は `Theorem 5.2`・`Example 6.1`・`6.3` ですべて model 型)。★これなら退化しない。"
         },
         {
           "id": "factor-src",
