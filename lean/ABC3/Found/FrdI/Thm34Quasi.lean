@@ -394,4 +394,28 @@ def degFr_map_eq_of_sameDeg.src : ABC3.Meta.Source :=
 - `preStepSpan` が底同型を pre-step の span に直す
 -/
 
+/-- ★★★★**group-like 性は底の同型を越えて両向きに移る**。
+
+★在庫の `isGroupLikeObj_of_baseIso` は `𝒞` の射を取るので**片向き**だが、
+`IsGroupLikeObj P A := IsGroupLike (Φ.val (Base A))` は**底にしか依らない**ので、
+底の同型から両向きに出る。 -/
+theorem isGroupLikeObj_of_baseIsoD {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A B : Cc} (α : (P.toElem.obj A).base ≅ (P.toElem.obj B).base)
+    (h : IsGroupLikeObj P A) : IsGroupLikeObj P B := by
+  rw [isGroupLike_iff] at h ⊢
+  intro b
+  have hround : Φ₀.map α.inv (Φ₀.map α.hom b) = b := by
+    have hc := Φ₀.map_comp α.hom α.inv b
+    rw [α.inv_hom_id] at hc
+    rw [hc]
+    exact MonoidOn.map_id Φ₀ _ b
+  rw [← hround]
+  exact (h (Φ₀.map α.hom b)).map (Φ₀.map α.inv)
+
+def isGroupLikeObj_of_baseIsoD.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 30,
+    item := "Proposition 1.8, (iii) — 底の同型を越えた group-like 性",
+    sectionId := "frdi-prop-1-8" }
+
 end ABC3.Found.FrdI

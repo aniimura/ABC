@@ -44,6 +44,21 @@ noncomputable def idealAwayEquiv (f : (Γ(X, A.1) : Type u)) :
     ≪≫ₗ (LinearEquiv.ofEq _ _ (idealSections_eq_localized D A f).symm).restrictScalars
         (Γ(X, A.1) : Type u)
 
+/-- ★`mk m 1` での値——`m` の制限そのもの。 -/
+theorem idealAwayEquiv_mk_one (f : (Γ(X, A.1) : Type u)) (m : (D.ideal A)) :
+    ((idealAwayEquiv D A f (LocalizedModule.mk m 1)) : (Γ(X, X.basicOpen f) : Type u))
+      = (X.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom (m : (Γ(X, A.1) : Type u)) := by
+  letI := resAlg A f
+  haveI := isLocalizationAway_bo A f
+  show (((LinearEquiv.ofEq _ _ (idealSections_eq_localized D A f).symm).restrictScalars
+      (Γ(X, A.1) : Type u))
+      (IsLocalizedModule.iso (Submonoid.powers f)
+        ((D.ideal A).toLocalized' (Γ(X, X.basicOpen f) : Type u) (Submonoid.powers f)
+          (Algebra.linearMap (Γ(X, A.1) : Type u) (Γ(X, X.basicOpen f) : Type u)))
+        (LocalizedModule.mk m 1)) : (Γ(X, X.basicOpen f) : Type u)) = _
+  rw [IsLocalizedModule.iso_mk_one]
+  rfl
+
 /-- ★`Γ(X, D(f)) ≃ₐ Localization (powers f)`。 -/
 noncomputable def awayRingEquivX (f : (Γ(X, A.1) : Type u)) :
     letI := resAlg A f
