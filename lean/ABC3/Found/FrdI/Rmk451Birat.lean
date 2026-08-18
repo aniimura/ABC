@@ -349,25 +349,98 @@ theorem biratMapInv_mk (G : Frobenioid P) (X Y : UnTr (istrPre P F))
     (colimit.desc _ (biratMapInvCocone (F := F) G X Y)), colimit.ι_desc]
   rfl
 
-/-! ## ★6. 残り —— 全単射と `Base`/`degFr` の保存
 
-★★**数学は済んでいる。残りは構造の畳み込み(eta)である。**
+/-! ## ★6. ★★★★全単射
 
-★往復を代表元で計算すると
-`biratMapInv (biratMap (mk Z φ)) = mk ((idx2Inv).obj ((idx2).obj Z)) (unTr2Inv.map (unTr2.map φ))`
-になる。射の側は `rfl`(`unTr2` が圏の同型だから)。★**添字対象の側が `rfl` にならない**:
+★★**罠の記録**: `unTr2Inv.map (unTr2.map f) = f` は **`rfl` にならない**。
+`Quotient.liftOn` は**変数のままでは簡約しない**ので、代表元での場合分けが要る
+(`unTr2_round`)。★対象の側(`unTr2Inv.obj (unTr2.obj A) = A`)は `rfl` である。
 
-| 部分 | 状態 |
-|---|---|
-| `((idx2Inv).obj ((idx2).obj Z)).unop.left = Z.unop.left` | ★`rfl` |
-| `((idx2Inv).obj ((idx2).obj Z)).unop.hom.hom = Z.unop.hom.hom` | ★**`rfl` にならない** |
+★そのため添字対象の往復も `rfl` にならず、
+**恒等射を左成分に持つ射**(`idxRoundHom`)を作って `HomBirat.mk_map` で潰す。
+★添字圏は細いので、この射の取り方に任意性は無い。 -/
 
-★`Over.post` の合成が `Over.mk` を作り直すため、`Over`(= `Comma`)の構造 eta を
-Lean が畳まない。★★**次の一手**: 恒等射を左成分に持つ射
-`Z ⟶ (idx2Inv).obj ((idx2).obj Z)` を `Over.homMk (𝟙 _)` で作り、
-`HomBirat.mk_map` と `Category.id_comp` で潰す(添字圏は細いので射の一意性は自動)。
-★これが済めば `biratMap_bijective` が出て、`Base`/`degFr` の保存(代表元で `rfl` の見込み)と
-併せて `isFrobeniusCompact_transport` が当たり、`Remark 4.5.1` が閉じる。
+/-- ★往復(合成関手を経由しない形。`rw` / `congrArg` で使うにはこちらが要る)。 -/
+theorem unTr2_round {A B : UnTr P} (f : A ⟶ B) :
+    (unTr2Inv (P := P) (F := F)).map ((unTr2 (P := P) (F := F)).map f) = f := by
+  refine Quotient.inductionOn f (fun α => ?_); rfl
+
+/-- ★逆向きの往復。 -/
+theorem unTr2Inv_round {X Y : UnTr (istrPre P F)} (g : X ⟶ Y) :
+    (unTr2 (P := P) (F := F)).map ((unTr2Inv (P := P) (F := F)).map g) = g := by
+  refine Quotient.inductionOn g (fun α => ?_); rfl
+
+/-- ★★往復した添字対象への射(左成分は恒等)。 -/
+noncomputable def idxRoundHom (G : Frobenioid P) (A : UnTr P)
+    (Z : IdxBirat (unTrPre P F) (unTr_frobenioid P F G) A) :
+    Z ⟶ (idx2Inv (F := F) G ((unTr2 (P := P) (F := F)).obj A)).obj
+        ((idx2 (F := F) G A).obj Z) :=
+  Quiver.Hom.op (Over.homMk
+    (𝟙 (show CoaPre (unTrPre P F) (unTr_frobenioid P F G) from Z.unop.left))
+    ((Category.id_comp Z.unop.hom).trans
+      (WideSubcategory.hom_ext (coaPrePropOf (unTrPre P F) (unTr_frobenioid P F G))
+        (unTr2_round (F := F) Z.unop.hom.hom).symm)))
+
+/-- ★★逆向きの往復射。 -/
+noncomputable def idxRoundHom' (G : Frobenioid P) (X : UnTr (istrPre P F))
+    (Z : IdxBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) X) :
+    Z ⟶ (idx2 (F := F) G ((unTr2Inv (P := P) (F := F)).obj X)).obj
+        ((idx2Inv (F := F) G X).obj Z) :=
+  Quiver.Hom.op (Over.homMk
+    (𝟙 (show CoaPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) from
+      Z.unop.left))
+    ((Category.id_comp Z.unop.hom).trans
+      (WideSubcategory.hom_ext
+        (coaPrePropOf (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G))
+        (unTr2Inv_round (F := F) Z.unop.hom.hom).symm)))
+
+/-- ★★★往復は恒等(`𝒞^un-tr` 側)。 -/
+theorem biratMapInv_biratMap (G : Frobenioid P) (A B : UnTr P)
+    (z : HomBirat (unTrPre P F) (unTr_frobenioid P F G) A B) :
+    biratMapInv (F := F) G _ _ (biratMap (F := F) G A B z) = z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratMap_mk, biratMapInv_mk]
+  have h2 := HomBirat.mk_map (idxRoundHom (F := F) G A Z) φ
+  rw [show (idxRoundHom (F := F) G A Z).unop.left.hom = 𝟙 Z.unop.left.obj from rfl] at h2
+  have h3 := (congrArg (HomBirat.mk
+      ((idx2Inv (F := F) G ((unTr2 (P := P) (F := F)).obj A)).obj
+        ((idx2 (F := F) G A).obj Z))) (Category.id_comp φ)).symm.trans h2
+  exact (congrArg (HomBirat.mk
+      ((idx2Inv (F := F) G ((unTr2 (P := P) (F := F)).obj A)).obj
+        ((idx2 (F := F) G A).obj Z))) (unTr2_round (F := F) φ)).trans h3
+
+/-- ★★★往復は恒等(`(𝒞^istr)^un-tr` 側)。 -/
+theorem biratMap_biratMapInv (G : Frobenioid P) (X Y : UnTr (istrPre P F))
+    (z : HomBirat (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G) X Y) :
+    biratMap (F := F) G _ _ (biratMapInv (F := F) G X Y z) = z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratMapInv_mk, biratMap_mk]
+  have h2 := HomBirat.mk_map (idxRoundHom' (F := F) G X Z) φ
+  rw [show (idxRoundHom' (F := F) G X Z).unop.left.hom = 𝟙 Z.unop.left.obj from rfl] at h2
+  have h3 := (congrArg (HomBirat.mk
+      ((idx2 (F := F) G ((unTr2Inv (P := P) (F := F)).obj X)).obj
+        ((idx2Inv (F := F) G X).obj Z))) (Category.id_comp φ)).symm.trans h2
+  exact (congrArg (HomBirat.mk
+      ((idx2 (F := F) G ((unTr2Inv (P := P) (F := F)).obj X)).obj
+        ((idx2Inv (F := F) G X).obj Z))) (unTr2Inv_round (F := F) φ)).trans h3
+
+/-- ★★★★**`biratMap` は全単射** —— これで比較関手は充満忠実になる。 -/
+theorem biratMap_bijective (G : Frobenioid P) (A B : UnTr P) :
+    Function.Bijective (biratMap (F := F) G A B) := by
+  constructor
+  · intro z z' h
+    have h1 := congrArg (biratMapInv (F := F) G _ _) h
+    rwa [biratMapInv_biratMap, biratMapInv_biratMap] at h1
+  · intro z
+    exact ⟨biratMapInv (F := F) G _ _ z, biratMap_biratMapInv (F := F) G _ _ z⟩
+
+/-! ## ★7. 残り —— `Base` / `degFr` の保存
+
+★`biratFunctor` は**充満忠実**(`biratMap_bijective`)であり、対象については
+`unTr2` が全単射なので**本質的全射**でもある。したがって**圏同値**である。
+★残りは `Base`・`degFr` の保存(代表元で計算すれば出る見込み)で、
+それが済めば `isFrobeniusCompact_transport`(`Rmk451.lean`)が当たり、
+`Definition 4.5, (iii), (b)` が `𝒞^istr` へ移って `Remark 4.5.1` が閉じる。
 -/
 
 end ABC3.Found.FrdI

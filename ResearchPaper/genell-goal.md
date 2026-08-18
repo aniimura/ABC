@@ -5803,3 +5803,36 @@ Lean は `⟶` の形を要求する(実測)。
 
 ★★★★**この session 5 度目の「言い換えで抜ける」**である
 (§9-100・§9-104・§9-113・§9-115・本項)。
+
+## §9-118 —— 第 107 は「型の食い違い」1 点まで絞れた(2026-08-24)
+
+### 通ったもの
+
+| 部品 | 状態 |
+|---|---|
+| `rw [freeYonedaEquiv_symm_eq_desc, freeObjDesc_app]` でゴールが `freeDesc` の形になる | ★通る |
+| `Unique ((yoneda.obj T).obj (op W))` | ★第 55 で出る |
+| `bijective_freeDesc_of_unique` を当てる | ★通る |
+| `convert hb using 2` の第 1 ゴール(型の等式) | ★`rfl` で閉じる |
+
+### ★★★止めた所 —— `restrictScalars` の層
+
+★**`P.map f s` は `restrictScalars (R.map f) (P.obj (op W))` に住む**——
+`P.obj (op W)` **ではない**(2026-08-24 実測)。
+★★台は同じだが `ModuleCat` の対象として別物なので、
+`convert` が `HEq` を出し、スカラーの型が揃わない。
+
+| `using` | 残るゴール |
+|---|---|
+| 2 | `a • x ≍ a' • y`(HEq——スカラーの型が違う) |
+| 3 | 同上 |
+| 4 | `SMul` インスタンスの等式(深すぎる) |
+
+### ★★★★次の一手(記録)
+
+★**仮定 `hb` の側を `P.obj (op W)` で書く**のが筋である
+——`P.map f s` の型を `restrictScalars` のままにせず、
+`(... : (P.obj (op W) : Type u))` と書く。
+★★構文は `(x : T)` の入れ子で詰まったので、`show` か補助定義で型を固定する。
+
+★★★**数学は完全に済んでおり、残るのは `restrictScalars` の剥がし方 1 点である。**
