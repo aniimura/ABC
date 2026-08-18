@@ -5689,3 +5689,38 @@ mathlib の証明を写経できる。
 
 | 105 | `app` が基本開集合で全単射 → `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 106 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-114 —— 第 105 で 7 手、あと 1 歩(2026-08-24)
+
+### 通ったもの
+
+| 部品 | 状態 |
+|---|---|
+| `freeYonedaTermHom.app (freeMk h) = 1` | ★通った(第 104 と同じ手) |
+| `map_smul` を `show ... from map_smul _ _ _` で当てる | ★通った |
+| ゴールが `hom(iso.inv.app W) c = c • 1` まで下りた | ★**あと 1 歩** |
+
+### 止めた所
+
+`c • (1 : 𝟙_.obj W) = c` が `smul_eq_mul` / `simp` で**当たらない**
+——`instances` 透明度で型正当性が崩れる(§9-110 と同じ症状)。
+
+★★**合計 19 手**(第 104 の 12 手 + 本ブロックの 7 手)。
+
+### ★★★★次の一手(有望、記録)
+
+★★**`iso.inv` の値を計算する必要は無い。**
+
+    (unitHomOfSection s).app W = (iso.inv.app W) ≫ ((freeYonedaEquiv.symm s).app W)
+
+★`iso.inv.app W` は**同型だから全単射**である。
+★★したがって `(freeYonedaEquiv.symm s).app W` の全単射性だけ見れば良い。
+
+| 段 | 内容 |
+|---|---|
+| 1 | `free(Hom(W,T))` は `Hom(W,T)` が一点なので**階数 1 の自由加群** |
+| 2 | 基底は `freeMk default` |
+| 3 | 第 104 で `app (freeMk default) = P.map default.op s` |
+| 4 | 基底の像が自由生成 ⟺ 全単射(第 103 の `bijective_smul_generator`) |
+
+★★★**「1 を計算する」のではなく「基底の像を見る」**——§9-113 と同じ型の言い換えである。
