@@ -7542,3 +7542,30 @@ B2 の在庫を実測した結果:
     instance は既存の経路と競合しうるが、恒等関数は競合しない。
 
 ★これは [[ring-instance-two-paths]] の**逃げ道そのものの改良**である。
+
+## §9-181 —— `unitEnd` の全単射性——残り 1 点(2026-08-18)
+
+`unitEnd ∘ unitMul = id` の証明は**あと 1 歩**である:
+
+| 段 | 状態 |
+|---|---|
+| `h1 : freeYonedaTermIso.hom.app t (freeMk 𝟙) = unitOne` | ★**通った**(`erw [ModuleCat.freeDesc_apply]`) |
+| `h2 : freeYonedaTermIso.inv.app t (unitOne) = freeMk 𝟙` | ★**残り**(`hom_inv_id` を成分に落とす段) |
+| `freeYonedaEquiv_symm_app` で締める | ★通る |
+
+### ★★詰まっている点
+
+`(iso.hom ≫ iso.inv).app t = iso.hom.app t ≫ iso.inv.app t` を使いたいが:
+
+- `NatTrans.comp_app` は**使えない**——`PresheafOfModules.Hom` は `NatTrans` ではない
+- `congrArg` で落とすと**motive が決まらない**(束縛子の型を明示しても綴りが合わない)
+
+### ★★★次に試すこと
+
+| 手 | 狙い |
+|---|---|
+| 1 | `PresheafOfModules` の `comp_app` 補題を mathlib で探す |
+| 2 | 成分の `IsIso` を作って `ModuleCat` の `Iso.hom_inv_id_apply` を使う |
+| 3 | `freeYonedaTermIso` を `asIso` から作り直し、`asIso` の逆の定義を直接使う |
+
+★★1 が本命——`PresheafOfModules.comp_app` が有れば一撃である。

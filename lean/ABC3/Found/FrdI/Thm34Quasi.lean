@@ -587,4 +587,41 @@ def admissible_of_square.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — 四角形に沿う admissible 性の伝搬",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★(F2) の四角形を作る
+
+原文 (FrdI p.65):
+> that for every p1 ∈Primes, there exist base-identity p1-Frobenius endomorphisms
+
+★★`Proposition 1.11, (iii)`(在庫、`prop_1_11_iii`)を
+**base-identity** な自己射に当てると、`βD = 𝟙` で四角形が作れる。 -/
+
+/-- ★★★★**pull-back に沿って base-identity 自己射が四角形を作る**。
+
+★次数も一致する(`prop_1_14_iv_degFr`)。 -/
+theorem exists_square_of_pullBack
+    {A B : C₁} (ζ : B ⟶ A) (hpb : IsPullBack P₁ ζ)
+    (α : End A) (hbid : IsBaseIdentity P₁ ((α : A ⟶ A))) :
+    ∃ β : End B, IsBaseIdentity P₁ ((β : B ⟶ B)) ∧
+      ζ ≫ ((α : A ⟶ A)) = ((β : B ⟶ B)) ≫ ζ ∧
+      P₁.degFr ((β : B ⟶ B)) = P₁.degFr ((α : A ⟶ A)) := by
+  have hbα : P₁.Base ((α : A ⟶ A)) = 𝟙 _ := by
+    have h : P₁.Base ((α : A ⟶ A)) = P₁.Base (𝟙 A) := hbid
+    rwa [P₁.Base_id] at h
+  have hsq : P₁.Base ζ ≫ P₁.Base ((α : A ⟶ A))
+      = ((1 : End ((P₁.toElem.obj B).base)) : _ ⟶ _) ≫ P₁.Base ζ := by
+    rw [hbα, Category.comp_id]
+    show P₁.Base ζ = 𝟙 _ ≫ P₁.Base ζ
+    rw [Category.id_comp]
+  obtain ⟨β, ⟨hbβ, hsqβ⟩, -⟩ := prop_1_11_iii P₁ ζ hpb α 1 hsq
+  refine ⟨β, ?_, hsqβ, ?_⟩
+  · show P₁.Base ((β : B ⟶ B)) = P₁.Base (𝟙 B)
+    rw [P₁.Base_id, hbβ]
+    rfl
+  · exact (prop_1_14_iv_degFr P₁ ζ ((α : A ⟶ A)) ((β : B ⟶ B)) ζ hsqβ rfl).symm
+
+def exists_square_of_pullBack.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — pull-back に沿う四角形",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
