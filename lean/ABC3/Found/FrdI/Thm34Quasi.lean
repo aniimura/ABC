@@ -420,4 +420,45 @@ def isGroupLikeObj_of_baseIsoD.src : ABC3.Meta.Source :=
     item := "Proposition 1.8, (iii) — 底の同型を越えた group-like 性",
     sectionId := "frdi-prop-1-8" }
 
+/-! ## ★★★★(F1) の非 group-like の場合を束ねる
+
+原文 (FrdI p.65):
+> (F1) For each prime p1 ∈ Primes, there exist a prime p2 ∈ Primes and a
+
+★部品は全部揃っているので、ここで束ねる。 -/
+
+/-- ★★★★**Frobenius-trivial かつ非 group-like な対象は admissible**。
+
+★(F1) の非 group-like の場合そのもの。 -/
+theorem exists_admissible_of_frobTrivial (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    {A : C₁} (hft : IsFrobeniusTrivial P₁ A)
+    (hA : ¬ IsGroupLikeObj P₁ A) (hA₂ : ¬ IsGroupLikeObj P₂ (e.functor.obj A))
+    {p₁ : ℕ+} (hp₁ : Nat.Prime ((p₁ : ℕ+) : ℕ)) :
+    ∃ p₂ : ℕ+, IsAdmissibleObj P₁ P₂ e.functor p₁ p₂ A := by
+  obtain ⟨φ₁, hpf₁, hbid₁, hdeg₁⟩ := exists_baseId_primeFrob_of_frobTrivial P₁ hft hp₁
+  have hirr₁ : IsIrreducibleMor φ₁ := prop_1_10_iv_mp P₁ F₁ (hiso₁ A) φ₁ hpf₁
+  have hmap := primeFrob_baseId_map P₁ P₂ e F₁ G₁ hiso₁ hnd₁ F₂ G₂ hiso₂ hnd₂
+    hps hps' hA hA₂ φ₁ hirr₁ hpf₁ hbid₁
+  refine ⟨P₂.degFr (e.functor.map φ₁), ?_⟩
+  intro B ψ hψ hdψ
+  have hsame : P₁.degFr φ₁ = P₁.degFr ψ := by rw [hdeg₁, hdψ]
+  obtain ⟨β, hβiso, hβ⟩ := F₁.frobDegUniq A _ B φ₁ ψ hpf₁.1 hψ hsame
+  haveI := hβiso
+  refine ⟨?_, ?_⟩
+  · rw [← hβ, e.functor.map_comp]
+    exact IsFrobeniusType.comp P₂ F₂ hmap.1
+      (isFrobeniusType_of_isIso P₂ (e.functor.map β))
+  · exact (degFr_map_eq_of_sameDeg P₁ P₂ F₁ e.functor φ₁ ψ hpf₁.1 hψ hsame).symm
+
+def exists_admissible_of_frobTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F1) — 非 group-like の場合",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
