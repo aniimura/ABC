@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 990 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 992 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5155</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1398</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5157</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1399</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>896cbc5</code></td><td>2026-08-18</td><td>★★★★★★★★★★Pic(Spec R) ≃* Pic R(第 145、§9-156・§9-157)</td></tr>
+<tr><td><code>63a7773</code></td><td>2026-08-18</td><td>`iii-b-compact` を再測して★大に上げた——輸送の向きに問題がある</td></tr>
 <tr><td><code>76cd67f</code></td><td>2026-08-18</td><td>Prop 4.8 (iii)(a) を閉じた——Remark 3.1.1 は既に実装されていた</td></tr>
 <tr><td><code>ce3ce60</code></td><td>2026-08-18</td><td>可逆層の大域切断は可逆加群(第 144、§9-155)</td></tr>
 <tr><td><code>fa9d96d</code></td><td>2026-08-18</td><td>Prop 4.8 (iii) の ★小 の葉を 2 つ閉じた——(c) は定義の展開だけで出た</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>679eb1d</code></td><td>2026-08-18</td><td>IsLocalizing の第 1・3 欄(第 140、§9-153)</td></tr>
 <tr><td><code>f391ca2</code></td><td>2026-08-18</td><td>f 倍は D(f) の切断上で全単射(第 138-139、§9-152)</td></tr>
 <tr><td><code>7f2943b</code></td><td>2026-08-18</td><td>Prop 4.4 (iii) の律速と、封じられた 3 本の道をメモリに定着させた</td></tr>
-<tr><td><code>1129ef5</code></td><td>2026-08-18</td><td>`factor-plbk` を落とし、残りを 1 点に確定した——(iii) の未着手は `phibirat-surj` のみ</td></tr>
-<tr><td><code>43faf7b</code></td><td>2026-08-18</td><td>自明な開集合での制限は局所化(第 137、§9-151)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1398 件)。</div>
+<b>すべて PDF と機械照合している</b>(1399 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
