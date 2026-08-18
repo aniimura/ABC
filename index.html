@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1175 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1184 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5688</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1571</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5697</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1576</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>74f9353</code></td><td>2026-08-19</td><td>★★★§9-252 の逃げ道(b)が効いた(第 223)——等しい開集合の間の制限は同型</td></tr>
+<tr><td><code>dfd5a6e</code></td><td>2026-08-19</td><td>hcompat の最後は転送が各段に伝播すると測った(§9-252)</td></tr>
+<tr><td><code>d6f91a5</code></td><td>2026-08-19</td><td>★★★ΓSpecIso と appIso の関係が出た(第 222)——§9-249 の「未解決」が 1 ブロックで済んだ</td></tr>
+<tr><td><code>ac5a25c</code></td><td>2026-08-19</td><td>★★★`Ψ^birat` が通った——「universe エラー」の正体は暗黙引数の統一だった</td></tr>
+<tr><td><code>256f9e9</code></td><td>2026-08-19</td><td>hcompat の道を mathlib の補題名まで特定した(§9-250)</td></tr>
+<tr><td><code>0d3367e</code></td><td>2026-08-19</td><td>B2 最後の hcompat は依存位置の転送が残ると測った(§9-249)</td></tr>
+<tr><td><code>e083db7</code></td><td>2026-08-19</td><td>★`Ψ^birat` の universe 詰まりの本当の原因が見えた——2 つの候補</td></tr>
+<tr><td><code>388b67c</code></td><td>2026-08-19</td><td>★`Ψ^birat` の universe を測った——先行例の宣言の形を写すのが次の手</td></tr>
+<tr><td><code>2dbcb7f</code></td><td>2026-08-19</td><td>★★★★★★全射性の接続が通った(第 221)——この区間 48 ブロックの総括</td></tr>
 <tr><td><code>4e61bd5</code></td><td>2026-08-19</td><td>★★★★★転送なしのイデアルの等式が出た(第 220)</td></tr>
 <tr><td><code>c3b35c6</code></td><td>2026-08-19</td><td>★並行セッションの掃き込みで初めて実害が出たことを記録</td></tr>
 <tr><td><code>cd7af8a</code></td><td>2026-08-19</td><td>★修復——ビルドの壊れた `Prop48Nf.lean` を緑に戻した</td></tr>
-<tr><td><code>5db1870</code></td><td>2026-08-19</td><td>★★★第 211 と第 218 を繋ぐ変換が出た(第 219)</td></tr>
-<tr><td><code>3347c85</code></td><td>2026-08-19</td><td>★★`map_comp` の梃子を見つけた——pre-step が mono だから α は γ から決まる</td></tr>
-<tr><td><code>a7e74dc</code></td><td>2026-08-19</td><td>★`naive-frob-birat` の `map_comp` の形を最後まで測った</td></tr>
-<tr><td><code>d3d4e8f</code></td><td>2026-08-19</td><td>★★★★★★補題 B が出た(第 218)——比較射はアフィン開で全射</td></tr>
-<tr><td><code>4c56218</code></td><td>2026-08-19</td><td>★`naive-frob-birat` の `map_id` を取った——残るは `map_comp` 1 本</td></tr>
-<tr><td><code>fef3e14</code></td><td>2026-08-19</td><td>★★★★appIso を元のレベルで開いた(第 217)——射の等式を諦めたら 1 ブロック</td></tr>
-<tr><td><code>83ce616</code></td><td>2026-08-19</td><td>★`naive-frob-birat` の段 4 の形を測った——`map_comp` は `rfl` にならない</td></tr>
-<tr><td><code>6e384b6</code></td><td>2026-08-19</td><td>★★`naive-frob-birat` の段 2-3 を取った——`Ψ^pf` より易しかった</td></tr>
-<tr><td><code>c985414</code></td><td>2026-08-19</td><td>fromSpec の切断レベル(第 216)——最後の同定の重さを測った</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1571 件)。</div>
+<b>すべて PDF と機械照合している</b>(1576 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
