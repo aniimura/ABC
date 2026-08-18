@@ -159,6 +159,41 @@ def phiBiratAt_map_le_dstar.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — Φ^birat ⊆ Φ^gp は部分関手",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★★`Φ^birat` を `𝒟*` 上の部分関手として束ねる
+
+原文 (FrdI p.83):
+> (iii) There exists a unique subfunctor of groups Φbirat ⊆Φgp such that
+
+★★**部分関手とは「各点の部分群＋遷移で保たれること」**である。
+★前者は `phiBiratAt`、後者は `phiBiratAt_map_le_dstar`で既に取れている。
+★`prop_2_2_i`(`𝒟* ≃ 𝒟` の圧倒的同値)で `𝒟` へ移せる。 -/
+
+/-- ★★★★**[FrdI] Proposition 4.4, (iii)** の `Φ^birat` —— `𝒟*` 上の部分群族。 -/
+noncomputable def phiBiratStar (A : Istr (biratPre P G)) :
+    AddSubgroup (Gp (Φ.val (P.toElem.obj (biratDown P G A.obj)).base)) :=
+  phiBiratAt P G A.obj
+
+/-- ★★★★**部分関手であること** —— `𝒟*` の遷移で保たれる。 -/
+theorem phiBiratStar_map_le
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (A B : Istr (biratPre P G))
+    (ψ : ((biratPre P G).toElem.obj A.obj).base ⟶ ((biratPre P G).toElem.obj B.obj).base) :
+    (phiBiratStar P G B).map (gpMap _ (Φ.map ψ)) ≤ phiBiratStar P G A :=
+  phiBiratAt_map_le_dstar P G hfn A B ψ
+
+/-- ★★**全射** —— `𝒪^×(A^birat) ↠ Φ^birat(A^birat)`。★像として定義してあるので定義そのもの。 -/
+theorem mem_phiBiratStar_iff (A : Istr (biratPre P G))
+    (x : Gp (Φ.val (P.toElem.obj (biratDown P G A.obj)).base)) :
+    x ∈ phiBiratStar P G A ↔
+      ∃ δ ∈ OTimes (biratPre P G) A.obj,
+        biratDivGp (((δ : End A.obj) : A.obj ⟶ A.obj)) = x := Iff.rfl
+
+/-- ★locator —— `Proposition 4.4, (iii)` の `Φ^birat`。 -/
+def phiBiratStar.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — 部分関手 Φ^birat ⊆ Φ^gp",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/
