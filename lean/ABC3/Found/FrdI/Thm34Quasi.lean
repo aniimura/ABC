@@ -777,4 +777,47 @@ def admissible_of_hom.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — (F2)",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★(F3) の数論的な段 —— 順序を保つ素数の全単射は恒等
+
+原文 (FrdI p.65):
+> are prime-Frobenius base-identity endomorphisms such that degFr
+
+★★原典は「Ψ が素数次数の**大小**を保つ」ことから `Ψ_N = id` を出す。
+★その最後の段は**純粋に数論的**である。 -/
+
+/-- ★★★★**順序を保つ素数の全単射は恒等**。
+
+★手: 最小の反例を取る。`σ p < p` なら帰納仮定と単射性で矛盾、
+`p < σ p` なら全射性で `p = σ q` を取って三分法で矛盾。 -/
+theorem primeEquiv_eq_self (σ : Nat.Primes ≃ Nat.Primes)
+    (hmono : ∀ {p q : Nat.Primes}, (p : ℕ) < (q : ℕ) → ((σ p : ℕ)) < ((σ q : ℕ))) :
+    ∀ p : Nat.Primes, σ p = p := by
+  have key : ∀ n : ℕ, ∀ p : Nat.Primes, (p : ℕ) = n → σ p = p := by
+    intro n
+    induction n using Nat.strong_induction_on with
+    | _ n ih =>
+      intro p hpn
+      rcases lt_trichotomy ((σ p : ℕ)) ((p : ℕ)) with h | h | h
+      · have h1 : σ (σ p) = σ p := ih ((σ p : ℕ)) (hpn ▸ h) (σ p) rfl
+        have h2 : σ p = p := σ.injective h1
+        exact absurd (congrArg (fun x : Nat.Primes => (x : ℕ)) h2) (ne_of_lt h)
+      · exact Subtype.ext h
+      · obtain ⟨q, hq⟩ := σ.surjective p
+        rcases lt_trichotomy ((q : ℕ)) ((p : ℕ)) with hq1 | hq1 | hq1
+        · have : σ q = q := ih ((q : ℕ)) (hpn ▸ hq1) q rfl
+          rw [hq] at this
+          exact absurd (congrArg (fun x : Nat.Primes => (x : ℕ)) this.symm) (ne_of_lt hq1)
+        · have : q = p := Subtype.ext hq1
+          rw [this] at hq
+          exact absurd (congrArg (fun x : Nat.Primes => (x : ℕ)) hq) (ne_of_gt h)
+        · have := hmono hq1
+          rw [hq] at this
+          exact absurd this (not_lt.mpr (le_of_lt h))
+  exact fun p => key (p : ℕ) p rfl
+
+def primeEquiv_eq_self.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F3) — 順序を保つ素数の全単射は恒等",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

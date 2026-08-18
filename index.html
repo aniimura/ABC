@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 1054 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 1056 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5275</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1439</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5278</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1440</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>e4b5548</code></td><td>2026-08-18</td><td>設計の結論——綴りを 1 本に決めてから加群構造を入れる(§9-188)</td></tr>
+<tr><td><code>4af9328</code></td><td>2026-08-18</td><td>(F3) を精読して 3 つに割った——本体は「順序の圧倒的な特徴づけ」</td></tr>
 <tr><td><code>bcbc50a</code></td><td>2026-08-18</td><td>双対の前層——instance 3 本で型は通る(§9-187)</td></tr>
 <tr><td><code>08f9fdb</code></td><td>2026-08-18</td><td>★★★★★[FrdI] Theorem 3.4, (iii) の (F2) を閉じた——場合分けは不要だった</td></tr>
 <tr><td><code>d81a1c6</code></td><td>2026-08-18</td><td>双対の前層で詰まっている点を記録(§9-186)</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>067da39</code></td><td>2026-08-18</td><td>★★★★★★★双対の加群構造(第 166、§9-183)</td></tr>
 <tr><td><code>bf8a44c</code></td><td>2026-08-18</td><td>(F2) の残る 1 段に 2 つの道を測って記録した</td></tr>
 <tr><td><code>4ab8254</code></td><td>2026-08-18</td><td>unitEnd ∘ unitMul = id(第 165、§9-181・§9-182)</td></tr>
-<tr><td><code>8049671</code></td><td>2026-08-18</td><td>(F2) の pre-step の場合を閉じた——在庫の四角形がそのまま効く</td></tr>
-<tr><td><code>4d7c59e</code></td><td>2026-08-18</td><td>(F2) の四角形を作る段を閉じた——`prop_1_11_iii` を base-identity に当てる</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1439 件)。</div>
+<b>すべて PDF と機械照合している</b>(1440 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
