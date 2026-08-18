@@ -4025,3 +4025,50 @@ mathlib には無い。★★**我々が作る**。
 | 59 | `PicSheaf` の `pullback` と 3 公理(`pullback_id`/`comp` は mathlib から) |
 | 60 | `equivPicRing`(アフィン比較、`Tilde.lean`) |
 | 61 | `PicardData` の組み立て(`sheafOf` 系は構成から出る) |
+
+---
+
+## §9-62 (2026-08-18) ★★★★★★★★★★B1 の `pullback` 系が全部埋まった
+
+### ★★★★★★★★★★第 59–62 で埋まったもの
+
+| 欄 | ブロック |
+|---|---|
+| `pullback` | ★第 62 |
+| `pullback_id` | ★第 62(mathlib `pullbackId` から**ただで**) |
+| `pullback_comp` | ★第 62(mathlib `pullbackComp` から**ただで**) |
+| `pullback_mul` | ★★★★**第 60**(第 18–60 の 43 ブロック) |
+| `sheafOf_pullback`(2026-08-18 に追加した穴塞ぎ) | ★第 62 の構成から出る |
+
+★★`id` と `comp` は mathlib から**ただで**出た。
+★★★**山は `mul` だけ**であり、それが `δ` の同型性 + Beck–Chevalley であった。
+
+### ★★★B1 の残り —— `equivPicRing`
+
+    PicSheaf (Spec R) ≃* CommRing.Pic R
+
+★mathlib の在庫(2026-08-18 実測):
+
+| 在庫 | 場所 |
+|---|---|
+| `tilde M : (Spec R).Modules` | ★`AlgebraicGeometry/Modules/Tilde.lean` |
+| `Scheme.Modules.fromTildeΓ` / `isIso_fromTildeΓ_of_presentation` | ★同上 |
+| `modulesSpecToSheaf` は**充満忠実** | ★★同上 |
+| `Module.Invertible R M` / `CommRing.Pic R` | ★`RingTheory/PicardGroup.lean` |
+
+★★要るのは 3 点:
+
+1. `tilde` が可逆加群を可逆層に送る
+2. `Γ` が可逆層を可逆加群に送る
+3. 互いに逆
+
+★★★**`isIso_fromTildeΓ_of_presentation` が 2・3 の鍵**である
+——可逆層は局所自由 ⟹ 準連接 ⟹ 表示を持つ。
+
+### ★★★★この session の到達(第 21–62、42 ブロック、すべて sorry 0)
+
+| 分類 | 内容 |
+|---|---|
+| mathlib に無く作ったもの | `restrictScalars` の lax monoidal / 余極限での同型の持ち上げ / **引き戻しの strong monoidal 性** / **Beck–Chevalley** / 局所自明性の輸送 |
+| Interface の穴 | 3 つ塞いだ + 否定コントロール 2 本 |
+| 記録の訂正 | 2 件(§9-41、§9-51) |
