@@ -66,6 +66,7 @@ import ABC3.Found.FrdI.Prop44Otri
 import ABC3.Found.FrdI.Prop44Ore
 import ABC3.Found.FrdI.Prop44Ker
 import ABC3.Found.FrdI.Prop44Equiv
+import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
@@ -192,6 +193,7 @@ import ABC3.Found.Arakelov.PicFreeNat
 import ABC3.Found.Arakelov.PicInfGen
 import ABC3.Found.Arakelov.PicUnitInv
 import ABC3.Found.Arakelov.PicTensorMu
+import ABC3.Found.Arakelov.PicDeltaIso
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
