@@ -33,14 +33,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 983 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 984 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5131</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5132</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1394</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">194</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
@@ -95,7 +95,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 933 節点を、強連結成分で潰して 285 個の箱・59 層に並べたもの。
+<span>原文の参照から機械抽出した 942 節点を、強連結成分で潰して 285 個の箱・59 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 64 件・Interface の義務 3/28 件。</b>
@@ -281,6 +281,7 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>446dd52</code></td><td>2026-08-18</td><td>Prop 4.4 の下流に入った——Proposition 4.8, (i) を閉じた</td></tr>
 <tr><td><code>679eb1d</code></td><td>2026-08-18</td><td>IsLocalizing の第 1・3 欄(第 140、§9-153)</td></tr>
 <tr><td><code>f391ca2</code></td><td>2026-08-18</td><td>f 倍は D(f) の切断上で全単射(第 138-139、§9-152)</td></tr>
 <tr><td><code>7f2943b</code></td><td>2026-08-18</td><td>Prop 4.4 (iii) の律速と、封じられた 3 本の道をメモリに定着させた</td></tr>
@@ -292,7 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>9a4147f</code></td><td>2026-08-18</td><td>★★★`factor-iso-div` の設計が決まった——追加仮定 1 本で閉じる(逸脱 (B))</td></tr>
 <tr><td><code>45a06b6</code></td><td>2026-08-18</td><td>逆向きの測量と有限被覆(第 134-135、§9-149)</td></tr>
 <tr><td><code>db20dd8</code></td><td>2026-08-18</td><td>還元段を取った——「経由するか」は同型 1 本で判定できる</td></tr>
-<tr><td><code>6bf7ae1</code></td><td>2026-08-18</td><td>`phibirat-factor` を測って 3 つに割った——残りが 1 点に絞れた</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない

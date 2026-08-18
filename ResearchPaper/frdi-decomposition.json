@@ -750,6 +750,107 @@
           "evidence": "★分類 (B) を index.html で開示すること。"
         }
       ]
+    },
+    {
+      "id": "prop48",
+      "serves": {
+        "paper": "FrdI",
+        "item": "Proposition 4.8",
+        "page": 88
+      },
+      "★位置づけ": "★`Proposition 4.4` を閉じたことで依存が外れた最初の項目。★★**原典は 4 条とも「follows formally」と書くが、実測すると重みが違う**。",
+      "nodes": [
+        {
+          "id": "i-src",
+          "size": "小",
+          "status": "done",
+          "deps": [],
+          "title": "(i) isotropic 型は birat で保たれる",
+          "note": "★済(2026-08-18): `prop_4_8_i`。(iv) の辞書 `birat_isIsotropic_iff` で**証明 1 行**。"
+        },
+        {
+          "id": "naive-frob-birat",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "i-src"
+          ],
+          "title": "naive Frobenius 関手 Ψ を 𝒞^birat へ降ろす",
+          "note": "★原文の 1-可換図式 `𝒞 → 𝒞` / `𝒞^birat → 𝒞^birat`。★使うのは `Proposition 4.4, (ii)`(忠実性)と `(iv)`(辞書)。★`Proposition 2.1` の naive Frobenius 関手が在庫にあるかを先に確かめる。"
+        },
+        {
+          "id": "psi-birat-equiv",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "naive-frob-birat"
+          ],
+          "title": "Ψ^birat が圧倒的同値であること",
+          "note": "★原文: 「Ψ and any quasi-inverse to Ψ preserve … pre-steps」から従う。★isotropic 型なので pre-step は自動的に co-angular(`Proposition 1.4, (i)`)で、`𝒞^birat` の定義がそのまま使える見込み。"
+        },
+        {
+          "id": "ii-src",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "psi-birat-equiv"
+          ],
+          "title": "(ii) perfect ＋ isotropic 型は birat で保たれる",
+          "note": "★`Proposition 2.1, (iii)`(perfect 型 ⇔ Ψ が圧倒的同値)で締める。"
+        },
+        {
+          "id": "basesection-birat",
+          "size": "中",
+          "status": "todo",
+          "deps": [
+            "i-src"
+          ],
+          "title": "base-section / base-Frobenius pair を 𝒞^birat へ移す",
+          "note": "★★**測定(2026-08-18)**: 原典は (iv) を「follows formally」と書くが、`IsPreModelType P := Nonempty (BaseFrobeniusPair P)` であり、`BaseFrobeniusPair` は `BaseSection` ＋ Frobenius-section の組である。★したがって**`BaseSection` の移送が実体**で、1 行ではない。"
+        },
+        {
+          "id": "iv-src",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "basesection-birat"
+          ],
+          "title": "(iv) isotropic ＋ pre-model 型は birat で保たれる",
+          "note": ""
+        },
+        {
+          "id": "standard-type-def",
+          "size": "中",
+          "status": "todo",
+          "deps": [],
+          "title": "standard 型 / rationally standard 型 の定義を入れる",
+          "note": "★★**在庫に無い**(2026-08-18 実測。`IsPreModelType` はあるが `standard` / `rationally standard` は無い)。★`Definition 4.6` / `4.7` を先に入れる必要がある。"
+        },
+        {
+          "id": "iii-src",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "standard-type-def",
+            "i-src"
+          ],
+          "title": "(iii) rationally standard ⇒ (𝒞^istr)^birat が standard",
+          "note": ""
+        },
+        {
+          "id": "prop48-src",
+          "size": "小",
+          "status": "todo",
+          "deps": [
+            "i-src",
+            "ii-src",
+            "iii-src",
+            "iv-src"
+          ],
+          "title": "Proposition 4.8 全体の条",
+          "note": ""
+        }
+      ]
     }
   ]
 }
