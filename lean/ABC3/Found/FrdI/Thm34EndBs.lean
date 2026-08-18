@@ -500,8 +500,8 @@ def thm_3_4_iv_part.src : ABC3.Meta.Source :=
 
 /-! ## ★★★`Theorem 3.4, (iv)` の `Ψ_{N≥1} = id` —— 群的型の場合
 
-原文 (FrdI p.66):
-> i.e., α acts on O×(A2)pf by multiplication by p1/p2. Since A2 is Frobenius-
+原文 (FrdI p.67):
+> by multiplication by p1/p2. Since A2 is Frobenius-
 
 ★★原文の要点は「`α` が `𝒪^×(A₂)^pf` に `p₁/p₂` 倍で作用する。
 `A₂` が Frobenius-compact だから `p₁ = p₂`」である。
@@ -568,7 +568,7 @@ def pnat_eq_of_frobeniusCompact.src : ABC3.Meta.Source :=
 
 /-- ★★★★★**`α` は `p₁/p₂` 倍で作用する** —— 原文の計算そのもの。
 
-原文 (FrdI p.66):
+原文 (FrdI p.67):
 > hence [by the total epimorphicity of C2]
 
 ★★筋: `φ = α ∘ ψ` と書けるとき、
@@ -577,45 +577,44 @@ def pnat_eq_of_frobeniusCompact.src : ABC3.Meta.Source :=
 **`𝒞` が totally epimorphic**(= すべての射が epi)なので `φ` を消去する。 -/
 theorem otimes_conj_pow_of_frobNorm {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
     [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
-    {A : Cc} (hfn : IsFrobeniusNormalized P A) (α : A ≅ A) (ψ : End A)
-    (hψbid : IsBaseIdentity P ψ) (p₁ : ℕ)
-    (hrel : ∀ u : End A, u ∈ OTimes P A →
-      (u ^ p₁ : End A) * ((α.hom : End A) * ψ) = ((α.hom : End A) * ψ) * u)
+    {A : Cc} (hfn : IsFrobeniusNormalized P A) (a a' : End A) (ha'a : a' * a = 1)
+    (ψ : End A) (hψbid : IsBaseIdentity P ψ) (p₁ : ℕ)
+    (hrel : ∀ u : End A, u ∈ OTimes P A → (u ^ p₁ : End A) * (a * ψ) = (a * ψ) * u)
     (u : End A) (hu : u ∈ OTimes P A) :
-    ((endConj α u) ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) = (u ^ p₁ : End A) := by
+    a * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * a' = (u ^ p₁ : End A) := by
   have hfrob : (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * ψ = ψ * u :=
     frobNorm_mul P hfn ψ hψbid ⟨u, hu.1⟩
-  have hih : (α.inv : End A) * (α.hom : End A) = 1 := α.hom_inv_id
-  -- ★`endConj` は `End` の積で `α.hom * x * α.inv` と書ける。
-  have hconj : ((endConj α u) ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A)
-      = (α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A) := by
-    rw [← map_pow]
-    show (α.inv ≫ ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) : A ⟶ A) ≫ α.hom) = _
-    show _ = ((α.inv : End A) ≫ ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) ≫ (α.hom : End A)))
-    rfl
   -- ★`φ ∘ u` を 2 通りに書く。
-  have hstep : ((α.hom : End A) * ψ) * u
-      = ((α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A))
-        * ((α.hom : End A) * ψ) := by
-    have hR : ((α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A))
-        * ((α.hom : End A) * ψ)
-        = (α.hom : End A) * ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A)
-            * (((α.inv : End A) * (α.hom : End A)) * ψ)) := by
+  have hstep : (a * ψ) * u
+      = (a * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * a') * (a * ψ) := by
+    have hR : (a * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * a') * (a * ψ)
+        = a * ((u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * ((a' * a) * ψ)) := by
       simp only [mul_assoc]
-    rw [hR, hih, one_mul, ← hfrob, mul_assoc]
-  -- ★`φ` を epi として消去する。
+    rw [hR, ha'a, one_mul, hfrob, mul_assoc]
+  -- ★`φ` を epi として消去する(`𝒞` は totally epimorphic)。
   have hthis := hrel u hu
   rw [hstep] at hthis
-  have hcancel : (u ^ p₁ : End A)
-      = (α.hom : End A) * (u ^ (P.degFr (ψ : A ⟶ A) : ℕ) : End A) * (α.inv : End A) := by
-    haveI : Epi (((α.hom : End A) * ψ : End A) : A ⟶ A) := P.totEpiC _ _ _
-    refine (cancel_epi (((α.hom : End A) * ψ : End A) : A ⟶ A)).mp ?_
-    exact hthis
-  rw [hconj, hcancel]
+  haveI : Epi ((a * ψ : End A) : A ⟶ A) := P.totEpiC _ _ _
+  exact ((cancel_epi ((a * ψ : End A) : A ⟶ A)).mp hthis).symm
 
 def otimes_conj_pow_of_frobNorm.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 66,
     item := "Theorem 3.4, (iv) — α は p₁/p₂ 倍で作用する",
     sectionId := "frdi-thm-3-4" }
+
+/-- ★★**橋渡し** —— `endConj` は `End` の積で `α.hom * x * α.inv` と書ける。
+
+★これで `otimes_conj_pow_of_frobNorm`(積の形)と
+`pnat_eq_of_frobeniusCompact`(`endConj` の形)が繋がる。 -/
+theorem endConj_eq_mul {Cc : Type u2} [Category.{v2} Cc] {A : Cc} (α : A ≅ A) (x a a' : End A)
+    (ha : a = α.hom) (ha' : a' = α.inv) : endConj α x = a * x * a' := by
+  subst ha
+  subst ha'
+  rfl
+
+def endConj_eq_mul.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — endConj は End の積で書ける",
+    sectionId := "frdi-def-1-2-iv" }
 
 end ABC3.Found.FrdI
