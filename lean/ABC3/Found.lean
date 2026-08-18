@@ -197,6 +197,7 @@ import ABC3.Found.Arakelov.PicDeltaIso
 import ABC3.Found.Arakelov.PicSheafPullTensor
 import ABC3.Found.Arakelov.PicFreeTop
 import ABC3.Found.Arakelov.PicRestrictColimit
+import ABC3.Found.Arakelov.PicRestrictedPull
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
