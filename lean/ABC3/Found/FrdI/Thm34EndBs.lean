@@ -617,4 +617,77 @@ def endConj_eq_mul.src : ABC3.Meta.Source :=
     item := "Definition 1.2, (iv) — endConj は End の積で書ける",
     sectionId := "frdi-def-1-2-iv" }
 
+/-- ★★★★★**両端を繋いだ形** —— `p₁ = degFr ψ`。
+
+原文 (FrdI p.67):
+> compact, we thus conclude that p1 = p2. This completes the proof of assertion
+
+★★`otimes_conj_pow_of_frobNorm`(`p₁/p₂` 倍作用)を
+`pnat_eq_of_frobeniusCompact`(compact なら等しい)へ `k = 1` で流し込むだけ。 -/
+theorem degFr_eq_of_frobeniusCompact_of_frobNorm {Dd : Type u} [Category.{v} Dd]
+    {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A : Cc} (hFC : IsFrobeniusCompact P A) (hfn : IsFrobeniusNormalized P A)
+    (α : A ≅ A) (a a' : End A) (ha : a = α.hom) (ha' : a' = α.inv)
+    (ψ : End A) (hψbid : IsBaseIdentity P ψ) (p₁ : ℕ+)
+    (hrel : ∀ u : End A, u ∈ OTimes P A →
+      (u ^ (p₁ : ℕ) : End A) * (a * ψ) = (a * ψ) * u) :
+    P.degFr (ψ : A ⟶ A) = p₁ := by
+  have ha'a : a' * a = 1 := by
+    subst ha
+    subst ha'
+    exact α.hom_inv_id
+  refine (pnat_eq_of_frobeniusCompact P hFC α p₁ (P.degFr (ψ : A ⟶ A)) ?_).symm
+  intro u hu
+  refine ⟨1, ?_⟩
+  rw [PNat.one_coe, mul_one, mul_one, ← map_pow, endConj_eq_mul α _ a a' ha ha']
+  exact otimes_conj_pow_of_frobNorm P hfn a a' ha'a ψ hψbid (p₁ : ℕ) hrel u hu
+
+def degFr_eq_of_frobeniusCompact_of_frobNorm.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 67,
+    item := "Theorem 3.4, (iv) — Frobenius-compact から p₁ = p₂(両端の接続)",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★**`hrel` を `𝒞₁` から移送する** ——
+`Ψ` が `𝒪^×` を**全射に**移すことから、`𝒞₂` 側の関係式が出る。
+
+★★`Ψ` の充満性で代表元を取り、`𝒪^×` の**反射**(quasi-inverse 側の保存)で
+その代表元が `𝒪^×(A₁)` に入ることを言う。あとは `Ψ` を関係式に当てるだけ。 -/
+theorem frobNorm_rel_map (Ψ : C₁ ⥤ C₂) {A₁ : C₁} (hfn₁ : IsFrobeniusNormalized P₁ A₁)
+    (φ₁ : End A₁) (hφbid : IsBaseIdentity P₁ φ₁) (p₁ : ℕ+)
+    (hd₁ : P₁.degFr (φ₁ : A₁ ⟶ A₁) = p₁)
+    (f₂ : End (Ψ.obj A₁)) (hf₂ : f₂ = Functor.mapEnd A₁ Ψ φ₁)
+    (hrefl : ∀ u : End (Ψ.obj A₁), u ∈ OTimes P₂ (Ψ.obj A₁) →
+      ∃ u₁ : End A₁, u₁ ∈ OTimes P₁ A₁ ∧ Functor.mapEnd A₁ Ψ u₁ = u)
+    (u : End (Ψ.obj A₁)) (hu : u ∈ OTimes P₂ (Ψ.obj A₁)) :
+    (u ^ (p₁ : ℕ) : End (Ψ.obj A₁)) * f₂ = f₂ * u := by
+  obtain ⟨u₁, hu₁, hmap⟩ := hrefl u hu
+  have h₁ : (u₁ ^ (p₁ : ℕ) : End A₁) * φ₁ = φ₁ * u₁ := by
+    have h := frobNorm_mul P₁ hfn₁ φ₁ hφbid ⟨u₁, hu₁.1⟩
+    rwa [hd₁] at h
+  have hmapped := congrArg (Functor.mapEnd A₁ Ψ) h₁
+  rw [map_mul, map_mul, map_pow, hmap, ← hf₂] at hmapped
+  exact hmapped
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iv)** の群的型の結論 —— `p₁ = p₂`。
+
+原文 (FrdI p.67):
+> compact, we thus conclude that p1 = p2. This completes the proof of assertion
+
+★`degFr_eq_of_frobeniusCompact_of_frobNorm` に次数の仮定を当てるだけ。 -/
+theorem admissible_deg_eq_of_frobeniusCompact {Dd : Type u} [Category.{v} Dd]
+    {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A : Cc} (hFC : IsFrobeniusCompact P A) (hfn : IsFrobeniusNormalized P A)
+    (p₁ p₂ : ℕ+) (α : A ≅ A) (a a' : End A) (ha : a = α.hom) (ha' : a' = α.inv)
+    (ψ : End A) (hψbid : IsBaseIdentity P ψ) (hdψ : P.degFr (ψ : A ⟶ A) = p₂)
+    (hrel : ∀ u : End A, u ∈ OTimes P A →
+      (u ^ (p₁ : ℕ) : End A) * (a * ψ) = (a * ψ) * u) :
+    p₂ = p₁ := by
+  rw [← hdψ]
+  exact degFr_eq_of_frobeniusCompact_of_frobNorm P hFC hfn α a a' ha ha' ψ hψbid p₁ hrel
+
+def admissible_deg_eq_of_frobeniusCompact.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 67,
+    item := "Theorem 3.4, (iv) — 群的型でも p₁ = p₂",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
