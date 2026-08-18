@@ -336,4 +336,18 @@ def otri_gp_injective.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (ii) — 𝒪^▷(A)^gp ↪ 𝒪^×(A^birat)",
     sectionId := "frdi-prop-4-4" }
 
+/-- ★★★★★**[FrdI] Proposition 4.4, (ii)** が揃った。
+
+| 主張 | 補題 |
+|---|---|
+| `𝒞 → 𝒞^birat` は忠実 | `toBiratCat_faithful` |
+| `𝒞^birat` は group-like 型 | `birat_isOfGroupLikeType` |
+| `𝒞^birat` は Frobenioid 構造を持つ | `biratCore` |
+| `𝒪^▷(A)` は可換 | `otri_mul_comm_of_birat` |
+| `𝒪^▷(A)` の元は birat で同型 | `otri_isIso_birat` |
+| `𝒪^▷(A)^gp ↪ 𝒪^×(A^birat)` | `otri_gp_injective` | -/
+def prop_4_4_ii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83, item := "Proposition 4.4, (ii)",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI

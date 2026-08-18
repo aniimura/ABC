@@ -349,7 +349,7 @@
           "deps": [
             "otri-comm-bfn"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
           "evidence": "★★**我々の `Gp` は加法可換単系用**であり、`𝒪^▷(A)` は `End A` の**乗法**部分単系である。★mathlib の `Localization`(可換モノイドの群化)に乗せるか、加法へ移して既存の `Gp` を使うかの選択がある。"
         },
@@ -360,7 +360,7 @@
             "otri-gp-mul",
             "birat-faithful"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
           "evidence": "忠実性(`toBiratCat_faithful`)から `𝒪^▷(A) → End(A^birat)` は単射。★群化へ上げるのに前段の 2 節点が要る。"
         },
@@ -373,7 +373,7 @@
             "birat-faithful",
             "otri-gp-inj"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★小"
         },
         {
