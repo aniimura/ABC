@@ -271,6 +271,7 @@ import ABC3.Found.Arakelov.PicUnitBij
 import ABC3.Found.Arakelov.PicUnitSecBij
 import ABC3.Found.Arakelov.PicModCoverIso
 import ABC3.Found.Arakelov.PicTrivialIso
+import ABC3.Found.Arakelov.PicTrivialSheaf
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
