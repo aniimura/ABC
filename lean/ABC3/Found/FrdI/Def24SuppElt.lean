@@ -338,7 +338,7 @@ theorem suppElt_disjoint_iff (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMo
 /-! ## ★5. ★★★★`Proposition 4.1, (iv)(v)` の単系層
 
 原文 (FrdI p.77):
-> For every primary element x / p, x  x if and only if x  x + x .
+> For every primary element x ∈/ p, x ≤ x if and only if x ≤ xδ + x .
 
 ★原文の条件は
 「**`p` に属さない任意の primary 元 `y` について `y ≼ e ⟺ y ≼ d + e`**」
@@ -489,6 +489,34 @@ theorem suppElt_eq_singleton_toPrime (H : IsPerfFactorialWith M ι)
     rw [hP, ← hbe, (toPrime_eq_iff ha hbp).mpr hab]
   · exact absurd (by rw [suppElt_eq, h0, factorMap_zero H]; ext r; simp [Supp] :
       SuppElt ι a = (∅ : Set (Prime M))) (by rw [hP]; simp)
+
+
+/-! ## ★6. 和の下界 —— `Proposition 4.1, (iii)` の cartesian 性
+
+原文 (FrdI p.77):
+> follows from the fact that "for xU ∈ Φ(F ), x + xι ≤ xU if and only if x ≤ xU ,
+
+★原文が cartesian 性の理由として挙げるのがこの 1 行である。 -/
+
+/-- ★★★**台が交わらない 2 元では、和が下にあることと両方が下にあることが同値**。
+
+★`c` を `Supp a` とその補集合で割り、それぞれに `a`, `b` が収まることを使う。 -/
+theorem mle_add_iff_of_suppElt_disjoint (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M) {a b c : M}
+    (hdisj : SuppElt ι a ∩ SuppElt ι b = ∅) :
+    MLe (a + b) c ↔ MLe a c ∧ MLe b c := by
+  classical
+  refine ⟨fun h => ⟨mle_trans ⟨b, rfl⟩ h, mle_trans ⟨a, add_comm b a⟩ h⟩, fun ⟨ha, hb⟩ => ?_⟩
+  obtain ⟨cS, cSc, hsum, hcS, hcSc⟩ :=
+    exists_split_factorMap H hperf hdiv c (SuppElt ι a)
+  have h1 : MLe a cS := mle_of_restrict H hperf hdiv (subset_refl _) ha hcS
+  have h2 : MLe b cSc := by
+    refine mle_of_restrict H hperf hdiv (fun r hr => ?_) hb hcSc
+    intro hra
+    exact Set.eq_empty_iff_forall_notMem.mp hdisj r ⟨hra, hr⟩
+  obtain ⟨d1, hd1⟩ := h1
+  obtain ⟨d2, hd2⟩ := h2
+  exact ⟨d1 + d2, by rw [hsum, ← hd1, ← hd2]; abel⟩
 
 
 /-! ## ★出典の紐付け(条つき) -/

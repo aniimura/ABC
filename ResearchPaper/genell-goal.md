@@ -4820,3 +4820,40 @@ mathlib の証明を写経できる。
 | 83 | 切断の写像を前層射に組む(自然性) |
 | 84 | 茎で同型 → 比較射が同型 |
 | 85 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-85 —— 第 83 ブロックは**半分で止めた**(2026-08-18)
+
+### 通ったもの
+
+    tildeTensorApp U : (tilde M ⊗ tilde N)(U) ⟶ (tilde (M ⊗_R N))(U)
+
+★★詰まりは**加群インスタンスの二経路**だった。`ModuleCat.ofHom` が要求する
+
+    Module 𝒪(U) ((structurePresheafInModuleCat R (M⊗N) ⋙ forget₂ _ Ab).obj U)
+
+は mathlib の `moduleStructurePresheaf` の中で `letI` として与えられており、**外から見えない**。
+★★★**回避法**: `letI` で**エラーが要求した型そのまま**に書き `inferInstanceAs` で渡す。
+★`(tilde ..).val.obj U` と書いても**通らない**——展開形で書く必要がある(実測)。
+
+### 止めたもの —— 自然性
+
+`PresheafOfModules.Hom` の `naturality` が閉じない。
+
+| 試した手 | 結果 |
+|---|---|
+| `cat_disch`(既定) | aesop 失敗 |
+| `ModuleCat.hom_ext` + `TensorProduct.ext'` | **unify しない**(定義域が `tensorObj` で `TensorProduct` と構文的に違う) |
+| `ext s` + `induction ... using TensorProduct.induction_on` | ★**`tmul` の場合は `rfl` で通る** |
+| 同上の `zero` / `add` | `map_zero` / `map_add` が発火しない(`ConcreteCategory.hom` 越し) |
+
+★★★**純テンソルでは `rfl`** なので数学は合っている。★残るのは
+`ConcreteCategory.hom` 越しの加法性を出す補題を見つけることだけである。
+
+★★★★**5 手試して止めた**——§9-73 と同じ判断である。
+半端な `def` を `Found/` に置かず、`tildeTensorApp` だけを残した(`sorry` 0)。
+
+### ★次の一手(候補)
+
+- `ModuleCat.hom_ext` の後に `LinearMap.ext` を挟んでから induction する
+- `PresheafOfModules.Hom.ext` 系の補題を探す
+- `tensorObj` の定義域を `ModuleCat.of _ (TensorProduct ..)` へ `show` で書き換える

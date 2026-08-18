@@ -748,7 +748,7 @@ set_option maxHeartbeats 1000000 in
 **台が交わらない ⟺ 共通の pre-step はすべて同型**。
 
 原文 (FrdI p.75):
-> bijections induced by the functor ] have disjoint supports [cf. Definition 2.4,
+> bijections induced by the functor Φ] have disjoint supports [cf. Definition 2.4,
 
 ★単系層は `suppElt_disjoint_iff`、圏層は後置の圏同値の充満性と本質的全射性。
 ★「同型 ⟺ 値が 0」は isotropic 型から。 -/
@@ -785,7 +785,7 @@ set_option maxHeartbeats 1000000 in
 /-- ★★★★**[FrdI] Proposition 4.1, (iii) の後半** —— **pre-step の圏での四角形**。
 
 原文 (FrdI p.75):
-> say that ,  are co-primary. If ,  are co-primary, then there exists a cartesian
+> say that , ι are co-primary. If , ι are co-primary, then there exists a cartesian
 
 ★値は `x_ε + x_κ` に取る。★原文の 2 本の等式
 `ε∗(ε′∗(Div ε′)) = ι∗(Div ι)`・`ι∗(ι′∗(Div ι′)) = ε∗(Div ε)` はその和の分解である。 -/
@@ -825,6 +825,297 @@ theorem prop_4_1_iii_square (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P 
 end Cat3
 
 
+/-! ## ★8. `Proposition 4.1, (iii)` の cartesian 性と primary 性の遺伝 -/
+
+section Cat4
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★★**「`ϵ` が `ϵ'` を通って分解する ⟺ 後置の値が `≼`」**(後置の圏同値)。 -/
+theorem exists_factor_iff_mle (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {E E' F : C} (ϵ : E ⟶ F) (ϵ' : E' ⟶ F) (hsϵ : IsPreStep P ϵ) (hsϵ' : IsPreStep P ϵ') :
+    (∃ ζ : E ⟶ E', IsPreStep P ζ ∧ ϵ = ζ ≫ ϵ') ↔
+      MLe (preStepVal P ϵ' hsϵ') (preStepVal P ϵ hsϵ) := by
+  constructor
+  · rintro ⟨ζ, hsζ, hfac⟩
+    exact mle_preStepVal_of_factor ϵ ζ ϵ' hsϵ hsζ hsϵ' hfac
+  · intro hle
+    obtain ⟨ζ, -, hsζ, hfac⟩ := exists_factor_through G ϵ' ϵ
+      (isCoAngular_of_isotropic_dom (P := P) G.core (hiso E') ϵ') hsϵ'
+      (isCoAngular_of_isotropic_dom (P := P) G.core (hiso E) ϵ) hsϵ hle
+    exact ⟨ζ, hsζ, hfac⟩
+
+/-- ★★**`F` の上のスライスは前順序** —— 同じ 2 対象を結ぶ pre-step は 1 本しかない。
+
+★★これが `Definition 1.3, (iii)(d)` の後置の圏同値の**忠実性**の使い道である。 -/
+theorem eq_of_comp_eq_over (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {V E F : C} (v : V ⟶ F) (ε : E ⟶ F) (hsv : IsPreStep P v) (hsε : IsPreStep P ε)
+    (f g : V ⟶ E) (hsf : IsPreStep P f) (hsg : IsPreStep P g)
+    (hf : f ≫ ε = v) (hg : g ≫ ε = v) : f = g := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreOverEquiv F
+  let Zv : Over (⟨F⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨V⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨F⟩ from
+      ⟨v, isCoAngular_of_isotropic_dom (P := P) G.core (hiso V) v, hsv⟩)
+  let Zε : Over (⟨F⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨E⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨F⟩ from
+      ⟨ε, isCoAngular_of_isotropic_dom (P := P) G.core (hiso E) ε, hsε⟩)
+  let F1 : Zv ⟶ Zε := Over.homMk
+    (show (⟨V⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨E⟩ from
+      ⟨f, isCoAngular_of_isotropic_dom (P := P) G.core (hiso V) f, hsf⟩)
+    (WideSubcategory.hom_ext _ hf)
+  let F2 : Zv ⟶ Zε := Over.homMk
+    (show (⟨V⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨E⟩ from
+      ⟨g, isCoAngular_of_isotropic_dom (P := P) G.core (hiso V) g, hsg⟩)
+    (WideSubcategory.hom_ext _ hg)
+  have h12 : F1 = F2 := (coaPreOverFunctor P F).map_injective (Subsingleton.elim _ _)
+  exact congrArg (fun t : Zv ⟶ Zε => t.left.hom) h12
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**[FrdI] Proposition 4.1, (iii)** —— **四角形は cartesian**。
+
+原文 (FrdI p.77):
+> fact that Φ(A) is perfect]. The cartesian diagram [with the desired properties] then
+
+★★存在は `mle_add_iff_of_suppElt_disjoint`(和が下にある ⟺ 両方が下にある)、
+★一意性はスライスが前順序であること(`eq_of_comp_eq_over`)から。 -/
+theorem prop_4_1_iii_cartesian (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {E I F U V : C} (ε : E ⟶ F) (κ : I ⟶ F) (hsε : IsPreStep P ε) (hsκ : IsPreStep P κ)
+    (ε' : U ⟶ E) (κ' : U ⟶ I) (hsε' : IsPreStep P ε') (hsκ' : IsPreStep P κ')
+    (hcomm : ε' ≫ ε = κ' ≫ κ) (hw : IsPreStep P (ε' ≫ ε))
+    (hval : preStepVal P (ε' ≫ ε) hw = preStepVal P ε hsε + preStepVal P κ hsκ)
+    {ι : Prime (Φ.val (P.toElem.obj F).base) → Pf (Φ.val (P.toElem.obj F).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj F).base) ι)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj F).base))
+    (hdisj : SuppElt ι (preStepVal P ε hsε) ∩ SuppElt ι (preStepVal P κ hsκ) = ∅)
+    (a : V ⟶ E) (b : V ⟶ I) (hsa : IsPreStep P a) (hsb : IsPreStep P b)
+    (hab : a ≫ ε = b ≫ κ) :
+    ∃! t : V ⟶ U, IsPreStep P t ∧ t ≫ ε' = a ∧ t ≫ κ' = b := by
+  have hsv : IsPreStep P (a ≫ ε) := IsPreStep.comp P hsa hsε
+  have hle : MLe (preStepVal P (ε' ≫ ε) hw) (preStepVal P (a ≫ ε) hsv) := by
+    rw [hval]
+    exact (mle_add_iff_of_suppElt_disjoint H hperf (P.divisorial _) hdisj).mpr
+      ⟨mle_preStepVal_of_factor (a ≫ ε) a ε hsv hsa hsε rfl,
+       mle_preStepVal_of_factor (a ≫ ε) b κ hsv hsb hsκ hab⟩
+  obtain ⟨t, hst, hfac⟩ :=
+    (exists_factor_iff_mle G hiso (a ≫ ε) (ε' ≫ ε) hsv hw).mpr hle
+  have hte : t ≫ ε' = a :=
+    eq_of_comp_eq_over G hiso (a ≫ ε) ε hsv hsε (t ≫ ε') a
+      (IsPreStep.comp P hst hsε') hsa (by rw [Category.assoc]; exact hfac.symm) rfl
+  have htk : t ≫ κ' = b :=
+    eq_of_comp_eq_over G hiso (b ≫ κ) κ (hab ▸ hsv) hsκ (t ≫ κ') b
+      (IsPreStep.comp P hst hsκ') hsb
+      (by rw [Category.assoc, ← hcomm, ← hfac, hab]) rfl
+  refine ⟨t, ⟨hst, hte, htk⟩, fun t' ⟨hst', hte', htk'⟩ => ?_⟩
+  refine eq_of_comp_eq_over G hiso (a ≫ ε) (ε' ≫ ε) hsv hw t' t hst' hst ?_ hfac.symm
+  rw [← Category.assoc, hte']
+
+/-- ★底の逆射で押しても primary 性は変わらない。 -/
+theorem isPrimaryElt_map_inv_base_iff {A B : C} (φ : B ⟶ A) (h : IsIso (P.Base φ))
+    (x : Φ.val (P.toElem.obj B).base) :
+    IsPrimaryElt (Φ.map (@inv _ _ _ _ (P.Base φ) h) x) ↔ IsPrimaryElt x := by
+  refine ⟨fun hp => ?_, isPrimaryElt_of_bijective _ (Φ.map_bijective_of_iso
+    (@asIso _ _ _ _ (P.Base φ) h).symm)⟩
+  have h2 := isPrimaryElt_of_bijective (Φ.map (P.Base φ))
+    (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base φ) h)) hp
+  rwa [MonoidOn.map_inv_map Φ (P.Base φ) h] at h2
+
+/-- ★★**[FrdI] Proposition 4.1, (iii)** —— `ϵ`, `ι` が primary なら `ϵ'`, `ι'` も primary。
+
+原文 (FrdI p.76):
+> such that ∗( ∗(Div( ))) = ι∗(Div(ι)), ι∗(ι∗(Div(ι ))) = ∗(Div( )); if , ι are pri-
+
+★`prop_4_1_iii_square` の 2 本の等式が、値の等式としてそのまま効く。 -/
+theorem prop_4_1_iii_primary {E I F U : C} (ε : E ⟶ F) (κ : I ⟶ F)
+    (hsκ : IsPreStep P κ) (ε' : U ⟶ E) (hw : IsPreStep P (ε' ≫ ε))
+    (hveq : Φ.map (@inv _ _ _ _ (P.Base (ε' ≫ ε)) hw.2) (P.Div ε') = preStepVal P κ hsκ)
+    (hκ : IsPrimaryElt (P.Div κ)) : IsPrimaryElt (P.Div ε') := by
+  refine (isPrimaryElt_map_inv_base_iff (ε' ≫ ε) hw.2 (P.Div ε')).mp ?_
+  rw [hveq]
+  exact (isPrimaryElt_preStepVal_iff κ hsκ).mpr hκ
+
+end Cat4
+
+/-! ## ★9. ★★★★★`Proposition 4.1, (iv)` —— 後置の圏同値の側 -/
+
+section Cat5
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**[FrdI] Proposition 4.1, (iv)**。
+
+原文 (FrdI p.76):
+> (iv) δ is primary if and only if there exists a p ∈ Prime(Φ(F )) such that the
+
+★★`δ` の零因子を `ϵ` で `Φ(F)` に押したものを `x_δ`、`x_ϵ := ϵ∗(Div ϵ)` とすると、
+2 つの分解可能性はそれぞれ `x_ϵ′ ≼ x_ϵ`、`x_ϵ′ ≼ x_δ + x_ϵ` に翻訳される。
+★★あとは単系の `isPrimaryElt_iff_exists_prime_cond` そのものである。 -/
+theorem prop_4_1_iv (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {Do E F : C} (δ : Do ⟶ E) (ϵ : E ⟶ F)
+    (hsδ : IsPreStep P δ) (hsϵ : IsPreStep P ϵ) (hδ0 : P.Div δ ≠ 0)
+    {ι : Prime (Φ.val (P.toElem.obj F).base) → Pf (Φ.val (P.toElem.obj F).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj F).base) ι)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj F).base)) :
+    IsPrimaryElt (P.Div δ) ↔
+      ∃ p : Prime (Φ.val (P.toElem.obj F).base),
+        ∀ (E' : C) (ϵ' : E' ⟶ F) (hsϵ' : IsPreStep P ϵ'),
+          IsPrimaryElt (preStepVal P ϵ' hsϵ') → SuppElt ι (preStepVal P ϵ' hsϵ') ≠ {p} →
+            ((∃ ζ : E ⟶ E', IsPreStep P ζ ∧ ϵ = ζ ≫ ϵ') ↔
+             (∃ θ : Do ⟶ E', IsPreStep P θ ∧ δ ≫ ϵ = θ ≫ ϵ')) := by
+  have hc : IsPreStep P (δ ≫ ϵ) := IsPreStep.comp P hsδ hsϵ
+  have hbij : Function.Bijective (Φ.map (@inv _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2)) :=
+    Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2).symm
+  have hx0 : Φ.map (@inv _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2) (P.Div δ) ≠ 0 := by
+    intro h0
+    exact hδ0 (hbij.1 (by rw [h0, map_zero]))
+  have hprim : IsPrimaryElt (P.Div δ)
+      ↔ IsPrimaryElt (Φ.map (@inv _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2) (P.Div δ)) :=
+    (isPrimaryElt_map_inv_base_iff (δ ≫ ϵ) hc.2 (P.Div δ)).symm
+  have hsum : preStepVal P (δ ≫ ϵ) hc
+      = Φ.map (@inv _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2) (P.Div δ) + preStepVal P ϵ hsϵ := by
+    rw [preStepVal_comp δ ϵ hsδ hsϵ hc, add_comm]
+  have hb2 : ∀ (E' : C) (ϵ' : E' ⟶ F) (hsϵ' : IsPreStep P ϵ'),
+      (∃ θ : Do ⟶ E', IsPreStep P θ ∧ δ ≫ ϵ = θ ≫ ϵ') ↔
+        MLe (preStepVal P ϵ' hsϵ')
+          (Φ.map (@inv _ _ _ _ (P.Base (δ ≫ ϵ)) hc.2) (P.Div δ) + preStepVal P ϵ hsϵ) := by
+    intro E' ϵ' hsϵ'
+    rw [← hsum]
+    exact exists_factor_iff_mle G hiso (δ ≫ ϵ) ϵ' hc hsϵ'
+  rw [hprim, isPrimaryElt_iff_exists_prime_cond H hperf (P.divisorial _) hx0]
+  constructor
+  · rintro ⟨p, hp⟩
+    refine ⟨p, fun E' ϵ' hsϵ' hpr hne => ?_⟩
+    rw [exists_factor_iff_mle G hiso ϵ ϵ' hsϵ hsϵ', hb2 E' ϵ' hsϵ']
+    exact hp _ hpr hne
+  · rintro ⟨p, hp⟩
+    refine ⟨p, fun y hpy hne => ?_⟩
+    obtain ⟨U, w, hsw, hcw, hwval⟩ := exists_preStep_of_val G F y
+    have h := hp U w hsw (by rw [hwval]; exact hpy) (by rw [hwval]; exact hne)
+    rw [exists_factor_iff_mle G hiso ϵ w hsϵ hsw, hb2 U w hsw, hwval] at h
+    exact h
+
+end Cat5
+
+/-! ## ★10. ★★★★★`Proposition 4.1, (v)` —— 前置の圏同値の側
+
+★原文の「reversing the direction of the arrows」を、
+**前置(コスライス)の圏同値**でそのまま実行する。
+★前置では不変量は `Div` そのもの(後置のような底に沿った押し出しが要らない)。 -/
+
+section Cat6
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★★**前置版の充満性** —— `Div δ' ≼ Div δ` なら `δ` は `δ'` から**出て**分解する。 -/
+theorem exists_factor_under_of_mle (G : Frobenioid P) {Do E E' : C} (δ : Do ⟶ E)
+    (δ' : Do ⟶ E') (hcδ : IsCoAngular P δ) (hsδ : IsPreStep P δ)
+    (hcδ' : IsCoAngular P δ') (hsδ' : IsPreStep P δ')
+    (hle : MLe (P.Div δ') (P.Div δ)) :
+    ∃ ζ : E' ⟶ E, IsCoAngular P ζ ∧ IsPreStep P ζ ∧ δ = δ' ≫ ζ := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv Do
+  let Zδ : Under (⟨Do⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨Do⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨E⟩ from ⟨δ, hcδ, hsδ⟩)
+  let Zδ' : Under (⟨Do⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨Do⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨E'⟩ from ⟨δ', hcδ', hsδ'⟩)
+  obtain ⟨f, -⟩ := (coaPreUnderFunctor P Do).map_surjective
+    (show (coaPreUnderFunctor P Do).obj Zδ' ⟶ (coaPreUnderFunctor P Do).obj Zδ from
+      homOfLE (show (toOrderCat (P.Div δ') : OrderCat (Φ.val (P.toElem.obj Do).base))
+        ≤ toOrderCat (P.Div δ) from hle))
+  exact ⟨f.right.hom, f.right.property.1, f.right.property.2,
+    (congrArg InducedWideCategory.Hom.hom (Under.w f)).symm⟩
+
+/-- ★★**任意の零因子を持つ co-angular pre-step が `Do` から出る**
+(前置の圏同値の本質的全射性)。 -/
+theorem exists_preStep_of_div (G : Frobenioid P) (Do : C)
+    (a : Φ.val (P.toElem.obj Do).base) :
+    ∃ (E' : C) (δ' : Do ⟶ E'), IsCoAngular P δ' ∧ IsPreStep P δ' ∧ P.Div δ' = a := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv Do
+  let W := (coaPreUnderFunctor P Do).objPreimage (toOrderCat a)
+  have hiso2 : (coaPreUnderFunctor P Do).obj W ≅ toOrderCat a :=
+    (coaPreUnderFunctor P Do).objObjPreimageIso _
+  exact ⟨W.right.obj, W.hom.hom, W.hom.property.1, W.hom.property.2,
+    mle_antisymm (P.divisorial _).1.1 (P.divisorial _).2
+      (leOfHom hiso2.hom) (leOfHom hiso2.inv)⟩
+
+/-- ★★**「`δ` が `δ'` から出て分解する ⟺ 零因子が `≼`」**(前置の圏同値)。 -/
+theorem exists_factor_under_iff_mle (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {Do E E' : C} (δ : Do ⟶ E) (δ' : Do ⟶ E') (hsδ : IsPreStep P δ) (hsδ' : IsPreStep P δ') :
+    (∃ ζ : E' ⟶ E, IsPreStep P ζ ∧ δ = δ' ≫ ζ) ↔ MLe (P.Div δ') (P.Div δ) := by
+  constructor
+  · rintro ⟨ζ, hsζ, rfl⟩
+    exact mle_div_comp δ' ζ hsζ.1
+  · intro hle
+    obtain ⟨ζ, -, hsζ, hfac⟩ := exists_factor_under_of_mle G δ δ'
+      (isCoAngular_of_isotropic_dom (P := P) G.core (hiso Do) δ) hsδ
+      (isCoAngular_of_isotropic_dom (P := P) G.core (hiso Do) δ') hsδ' hle
+    exact ⟨ζ, hsζ, hfac⟩
+
+/-- ★合成の零因子(第 2 因子が pre-step の場合)。 -/
+theorem div_comp_preStep {Do E F : C} (δ : Do ⟶ E) (ϵ : E ⟶ F) (hsϵ : IsPreStep P ϵ) :
+    P.Div (δ ≫ ϵ) = Φ.map (P.Base δ) (P.Div ϵ) + P.Div δ := by
+  rw [P.Div_comp, show P.degFr ϵ = 1 from hsϵ.1, PNat.one_coe, one_smul]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**[FrdI] Proposition 4.1, (v)**。
+
+原文 (FrdI p.76):
+> (v) is primary if and only if there exists a p ∈ Prime(Φ(D)) such that the
+
+★★`ϵ` の零因子を `δ` で `Φ(D)` に引き戻したものを `x_ϵ`、`x_δ := Div δ` とすると、
+2 つの分解可能性はそれぞれ `Div δ′ ≼ x_δ`、`Div δ′ ≼ x_ϵ + x_δ` に翻訳される。
+★★単系層は (iv) と**同一の 1 本**であり、原文の
+「reversing the direction of the arrows」がそのままの形で現れる。 -/
+theorem prop_4_1_v (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {Do E F : C} (δ : Do ⟶ E) (ϵ : E ⟶ F)
+    (hsδ : IsPreStep P δ) (hsϵ : IsPreStep P ϵ) (hϵ0 : P.Div ϵ ≠ 0)
+    {ι : Prime (Φ.val (P.toElem.obj Do).base) → Pf (Φ.val (P.toElem.obj Do).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj Do).base) ι)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj Do).base)) :
+    IsPrimaryElt (P.Div ϵ) ↔
+      ∃ p : Prime (Φ.val (P.toElem.obj Do).base),
+        ∀ (E' : C) (δ' : Do ⟶ E'), IsPreStep P δ' →
+          IsPrimaryElt (P.Div δ') → SuppElt ι (P.Div δ') ≠ {p} →
+            ((∃ ζ : E' ⟶ E, IsPreStep P ζ ∧ δ = δ' ≫ ζ) ↔
+             (∃ θ : E' ⟶ F, IsPreStep P θ ∧ δ ≫ ϵ = δ' ≫ θ)) := by
+  have hbij : Function.Bijective (Φ.map (P.Base δ)) :=
+    Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base δ) hsδ.2)
+  have hx0 : Φ.map (P.Base δ) (P.Div ϵ) ≠ 0 := by
+    intro h0
+    exact hϵ0 (hbij.1 (by rw [h0, map_zero]))
+  have hprim : IsPrimaryElt (P.Div ϵ) ↔ IsPrimaryElt (Φ.map (P.Base δ) (P.Div ϵ)) := by
+    refine ⟨isPrimaryElt_of_bijective _ hbij, fun h => ?_⟩
+    have h2 := isPrimaryElt_of_bijective (Φ.map (@inv _ _ _ _ (P.Base δ) hsδ.2))
+      (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base δ) hsδ.2).symm) h
+    rwa [show Φ.map (@inv _ _ _ _ (P.Base δ) hsδ.2) (Φ.map (P.Base δ) (P.Div ϵ)) = P.Div ϵ from
+      MonoidOn.map_map_inv Φ (P.Base δ) hsδ.2 (P.Div ϵ)] at h2
+  have hb2 : ∀ (E' : C) (δ' : Do ⟶ E'), IsPreStep P δ' →
+      ((∃ θ : E' ⟶ F, IsPreStep P θ ∧ δ ≫ ϵ = δ' ≫ θ) ↔
+        MLe (P.Div δ') (Φ.map (P.Base δ) (P.Div ϵ) + P.Div δ)) := by
+    intro E' δ' hsδ'
+    rw [← div_comp_preStep δ ϵ hsϵ]
+    exact exists_factor_under_iff_mle G hiso (δ ≫ ϵ) δ' (IsPreStep.comp P hsδ hsϵ) hsδ'
+  rw [hprim, isPrimaryElt_iff_exists_prime_cond H hperf (P.divisorial _) hx0]
+  constructor
+  · rintro ⟨p, hp⟩
+    refine ⟨p, fun E' δ' hsδ' hpr hne => ?_⟩
+    rw [exists_factor_under_iff_mle G hiso δ δ' hsδ hsδ', hb2 E' δ' hsδ']
+    exact hp _ hpr hne
+  · rintro ⟨p, hp⟩
+    refine ⟨p, fun y hpy hne => ?_⟩
+    obtain ⟨E', δ', hcδ', hsδ', hdval⟩ := exists_preStep_of_div G Do y
+    have h := hp E' δ' hsδ' (by rw [hdval]; exact hpy) (by rw [hdval]; exact hne)
+    rw [exists_factor_under_iff_mle G hiso δ δ' hsδ hsδ', hb2 E' δ' hsδ', hdval] at h
+    exact h
+
+end Cat6
+
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def prop_4_1_ii.src : ABC3.Meta.Source :=
@@ -833,6 +1124,23 @@ def prop_4_1_ii.src : ABC3.Meta.Source :=
 
 def prop_4_1_i.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1, (i)",
+    sectionId := "frdi-prop-4-1" }
+
+def prop_4_1_iii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1, (iii)",
+    sectionId := "frdi-prop-4-1" }
+
+def prop_4_1_iv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 76, item := "Proposition 4.1, (iv)",
+    sectionId := "frdi-prop-4-1" }
+
+def prop_4_1_v.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 76, item := "Proposition 4.1, (v)",
+    sectionId := "frdi-prop-4-1" }
+
+/-- ★★★★★**[FrdI] Proposition 4.1** が (i)〜(v) すべて揃った。 -/
+def prop_4_1.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1",
     sectionId := "frdi-prop-4-1" }
 
 end ABC3.Found.FrdI
