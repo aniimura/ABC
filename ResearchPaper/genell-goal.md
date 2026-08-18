@@ -6176,3 +6176,25 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 | 119 | `IsLocallyTrivial (tilde M).val` → `InvSheaf` → `equivPicRing` |
 
 ★局所自明性のために建てた器具は **24 ブロック**(第 76・93–116)になった。
+
+## §9-131 —— `D(h·g)` の生成族は覆う(第 117 ブロック、2026-08-24)
+
+    U ≤ D(g)  ⟹  D(h·g) の形の基本開集合が U を覆う
+
+★機構: `U` の点 `x` に基底から `D(h) ⊆ U` を取る。
+`D(h) ⊆ U ≤ D(g)` なので **`D(h·g) = D(h)`** である。
+
+★★これで第 99 ブロック(自由性は `D(g)` から `D(t·g)` へ運べる)が
+**そのまま当たる形**の被覆が得られた。
+
+### ★詰まり(1 手)
+
+`Opens.IsBasis.exists_subset_of_mem_open` は**集合**を返すので分解が合わない。
+★**`Opens.isBasis_iff_nbhd`** を使うと**開集合**が直に取れる(実測)。
+
+### ★★残り
+
+| # | 内容 |
+|---|---|
+| 118 | `restrictSec` が局所化の生成元と一致する |
+| 119 | `IsLocallyTrivial (tilde M).val` → `InvSheaf` → `equivPicRing` |

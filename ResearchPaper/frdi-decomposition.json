@@ -489,7 +489,7 @@
         },
         {
           "id": "iii-primefrob",
-          "title": "(iii) prime-Frobenius の圧論的条件の移送",
+          "title": "(iii) prime-Frobenius の圏論的条件の移送",
           "deps": [
             "ii-prestep"
           ],
@@ -503,9 +503,9 @@
           "deps": [
             "iii-primefrob"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★中",
-          "evidence": "`prop_1_14_v` と繋ぐだけ。仮定の受け渡しが主な作業。"
+          "evidence": "★2026-08-18 に `Thm34Pre.lean` へ `primeFrobDivId_map_iff` / `primeFrobDivId_map_iff'` を実装した。`Proposition 1.14, (v)` を両側で使って圏論的な条件に直し、`primeFrobCond_map_iff` で運ぶだけだった。"
         },
         {
           "id": "iii-psiN",

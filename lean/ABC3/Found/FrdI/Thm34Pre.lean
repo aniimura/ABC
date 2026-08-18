@@ -604,6 +604,50 @@ theorem primeFrobCond_map_iff (e : C₁ ≌ C₂)
       (Category.comp_id φ)
   exact heq ▸ h2
 
+
+include P₁ P₂ in
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii) の入口** ——
+**圧同値は prime-Frobenius な Div-identity 自己射を保ち、反射する**。
+
+原文 (FrdI p.64):
+> ces to prove that, for each prime p1 ∈Primes, there exists a prime p2 ∈Primes,
+
+★`Proposition 1.14, (v)` を両側で使って圧論的な条件に直し、
+`primeFrobCond_map_iff` で運ぶだけ。 -/
+theorem primeFrobDivId_map_iff (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    {A : C₁} (hA : ¬ IsGroupLikeObj P₁ A)
+    (hA₂ : ¬ IsGroupLikeObj P₂ (e.functor.obj A))
+    (φ : A ⟶ A) (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P₁ φ) :
+    (IsPrimeFrobenius P₁ φ ∧ IsDivIdentity P₁ φ) ↔
+      (IsPrimeFrobenius P₂ (e.functor.map φ) ∧ IsDivIdentity P₂ (e.functor.map φ)) := by
+  rw [prop_1_14_v P₁ F₁ G₁ hiso₁ hnd₁ hA φ hirr hnps,
+    prop_1_14_v P₂ F₂ G₂ hiso₂ hnd₂ hA₂ (e.functor.map φ)
+      (isIrreducibleMor_map e.functor hirr) ((hps φ).not.mp hnps)]
+  exact primeFrobCond_map_iff P₁ P₂ e hps hps' φ
+
+include P₁ P₂ in
+/-- ★★`hA₂` を `isGroupLikeObj_map_iff` から導いた形。 -/
+theorem primeFrobDivId_map_iff' (e : C₁ ≌ C₂)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    (hps' : ∀ {X Y : C₂} (f : X ⟶ Y), IsPreStep P₂ f ↔ IsPreStep P₁ (e.inverse.map f))
+    {A : C₁} (hA : ¬ IsGroupLikeObj P₁ A)
+    (φ : A ⟶ A) (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P₁ φ) :
+    (IsPrimeFrobenius P₁ φ ∧ IsDivIdentity P₁ φ) ↔
+      (IsPrimeFrobenius P₂ (e.functor.map φ) ∧ IsDivIdentity P₂ (e.functor.map φ)) :=
+  primeFrobDivId_map_iff P₁ P₂ e F₁ G₁ hiso₁ hnd₁ F₂ G₂ hiso₂ hnd₂ hps hps' hA
+    (fun h => hA ((isGroupLikeObj_map_iff P₁ P₂ e F₁ G₁ F₂ G₂ hiso₁ hiso₂ hps hps' A).mpr h))
+    φ hirr hnps
+
 end PrimeFrob2
 
 
