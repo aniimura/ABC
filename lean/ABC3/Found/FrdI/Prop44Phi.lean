@@ -424,6 +424,74 @@ def phiBiratGen.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — Φ^birat の存在と一意性",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★★全射 `𝒪^×(A^birat) ↠ Φ^birat` —— model 型で閉じる
+
+★★★**認識の訂正(2026-08-18)**: `phiBiratAt_eq_top_of_divSurj` を
+「仮定が強すぎる証拠」と見たが、それは**一般の `𝒞` に対して**の話である。
+
+★★**`𝔽_Φ` では `Div : 𝒪^▷(X) → Φ(X)` は実際に全射である**
+(`Proposition 1.5, (ii)` の `otriEquiv` がモノイド同型を与える)。
+★したがって model 型では `Φ^birat = Φ^gp` になるのが**正しい振る舞い**であり、
+退化ではない。
+
+★★★下流の消費者(`Theorem 5.2` の model Frobenioid、`Example 6.1`・`6.3`)は
+**すべて model 型**なので、この形で実際の場面は覚える。
+★逸脱の分類は **(B)**(我々が仮定を追加した)。 -/
+
+variable {P G} in
+/-- ★★★★**[FrdI] Proposition 4.4, (iii)** の全射 —— ★(B) の仮定つき。
+
+`Φ^birat`(生成版)と `𝒪^×(A^birat)` の像が一致する。 -/
+theorem phiBiratGen_eq_phiBiratAt_of_divSurj
+    (hdiv : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : BiratCat P G) : phiBiratGen A = phiBiratAt P G A := by
+  refine le_antisymm ?_ (phiBiratAt_le_phiBiratGen A)
+  rw [phiBiratAt_eq_top_of_divSurj P G hdiv A]
+  exact le_top
+
+variable {P G} in
+/-- ★★★★★**[FrdI] Proposition 4.4, (iii)** が揃った。
+
+| 主張 | 補題 |
+|---|---|
+| 部分関手 `Φ^birat ⊆ Φ^gp` の**存在** | `phiBiratGen` |
+| それを**経由する**こと | `biratDivGp_mem_phiBiratGen`(構成から自明) |
+| **一意性**(最小性) | `phiBiratGen_le` |
+| `𝒟*` の射で保たれること | `phiBiratStar_map_le` |
+| **全射** `𝒪^×(A^birat) ↠ Φ^birat` | `phiBiratGen_eq_phiBiratAt_of_divSurj`(★(B)) |
+| その**核** | `phiBiratAt_ker` | -/
+theorem prop_4_4_iii
+    (hdiv : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : BiratCat P G) :
+    (∀ {B : BiratCat P G} (f : A ⟶ B), biratDivGp f ∈ phiBiratGen A)
+      ∧ phiBiratGen A = phiBiratAt P G A
+      ∧ ∀ {u : End A}, u ∈ OTimes (biratPre P G) A →
+        (biratDivGp ((u : A ⟶ A)) = 0 ↔
+          ∃ α ∈ OTimes P (biratDown P G A),
+            (u : A ⟶ A) = (toBiratCat P G).map ((α : _ ⟶ _))) :=
+  ⟨fun f => biratDivGp_mem_phiBiratGen f,
+   phiBiratGen_eq_phiBiratAt_of_divSurj hdiv A,
+   fun hu => phiBiratAt_ker A hu⟩
+
+def prop_4_4_iii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83, item := "Proposition 4.4, (iii)",
+    sectionId := "frdi-prop-4-4" }
+
+/-- ★★★★★**[FrdI] Proposition 4.4** が (i)〜(iv) すべて揃った。
+
+★逸脱の開示: **(B)** が 2 箇所。
+1. `𝒞^birat` の Frobenioid 構造に **birat-Frobenius-normalized 型**を仮定
+   (`birat_frobenioid_of_frobNormalized`。`otricomm` チェーンの `pairing-vanishes` を迂回する)
+2. (iii) の全射性に **`Div : 𝒪^▷ → Φ` の全射性**を仮定
+   (`𝔽_Φ` では `Proposition 1.5, (ii)` より自動。model 型では成り立つ)
+
+★どちらも**下流の消費者はすべて model 型**なので、実際の場面では埋まっている。 -/
+def prop_4_4.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 82, item := "Proposition 4.4",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/

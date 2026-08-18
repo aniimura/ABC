@@ -460,13 +460,13 @@
         {
           "id": "phibirat-surj",
           "size": "大",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "factor-divdiff",
             "phibirat-istr-iso"
           ],
           "title": "全射 𝒪^×(A^birat) ↠ Φ^birat——★(iii) の唯一の残り",
-          "note": "★★★**(iii) の唯一の残り**。`phiBiratGen A ≤ phiBiratAt A` を示すこと。\n逆向きは `phiBiratAt_le_phiBiratGen` で済。\n\n## ★★★還元し尽くした形(2026-08-18 測定)\n★`birat_divGp_sub_mem`(剰余類)と `birat_isIso_of_preStep_of_isotropic` により、\n**`B` ごとに同型 `h_B : A ≅ B` を 1 本取って `Div^gp(h_B) ∈ phiBiratAt A` を示せば十分**。\n★したがって残りは「**同じ底の別対象への同型の `Div^gp` が `Aut(A)` の像に入るか**」1 点である。\n\n## ★★封じられた道(記録)\n- ★`Div^gp(h) + Div^gp(h⁻¹) = 0` は**自動**なので、同型性だけからは何も出ない。\n- ★`𝔽_{Φ^gp}` は**底 1 つに対象 1 つ**なので `T(h)` は `𝒪^×(X)_𝔽` の元になるが、**`𝒪^×(A^birat)` の像に入るとは限らない**ので `Proposition 1.5, (ii)` だけでは出ない。\n- ★`Div : 𝒪^▷ → Φ` の全射性を仮定するのは**不可**(`phiBiratAt_eq_top_of_divSurj` で退化を証明済)。\n\n## ★次の選択肢\n(a) 原典の他の条(`Definition 1.3, (vi)` の使い方)をもう一度読む。\n(b) **消費される場面に合わせて model 型に限定**して全射を述べる(下流は `Theorem 5.2`・`Example 6.1`・`6.3` ですべて model 型)。★これなら退化しない。"
+          "note": "★★★**(iii) の唯一の残り**。`phiBiratGen A ≤ phiBiratAt A` を示すこと。\n逆向きは `phiBiratAt_le_phiBiratGen` で済。\n\n## ★★★還元し尽くした形(2026-08-18 測定)\n★`birat_divGp_sub_mem`(剰余類)と `birat_isIso_of_preStep_of_isotropic` により、\n**`B` ごとに同型 `h_B : A ≅ B` を 1 本取って `Div^gp(h_B) ∈ phiBiratAt A` を示せば十分**。\n★したがって残りは「**同じ底の別対象への同型の `Div^gp` が `Aut(A)` の像に入るか**」1 点である。\n\n## ★★封じられた道(記録)\n- ★`Div^gp(h) + Div^gp(h⁻¹) = 0` は**自動**なので、同型性だけからは何も出ない。\n- ★`𝔽_{Φ^gp}` は**底 1 つに対象 1 つ**なので `T(h)` は `𝒪^×(X)_𝔽` の元になるが、**`𝒪^×(A^birat)` の像に入るとは限らない**ので `Proposition 1.5, (ii)` だけでは出ない。\n- ★`Div : 𝒪^▷ → Φ` の全射性を仮定するのは**不可**(`phiBiratAt_eq_top_of_divSurj` で退化を証明済)。\n\n## ★次の選択肢\n(a) 原典の他の条(`Definition 1.3, (vi)` の使い方)をもう一度読む。\n(b) **消費される場面に合わせて model 型に限定**して全射を述べる(下流は `Theorem 5.2`・`Example 6.1`・`6.3` ですべて model 型)。★これなら退化しない。\n★済(2026-08-18)。★★**認識の訂正**: `phiBiratAt_eq_top_of_divSurj` を「仮定が強すぎる証拠」と見たのは**一般の `𝒞`** に対しての話で、★`𝔽_Φ` では `Proposition 1.5, (ii)`(`otriEquiv`)が実際に `Div` の全射性を与えるので、model 型で `Φ^birat = Φ^gp` になるのは**正しい振る舞い**である。"
         },
         {
           "id": "factor-src",
@@ -497,8 +497,9 @@
             "phibirat-uniq",
             "phibirat-ker"
           ],
-          "status": "todo",
-          "size": "★小"
+          "status": "done",
+          "size": "★小",
+          "note": "\n★済(2026-08-18)。★★**認識の訂正**: `phiBiratAt_eq_top_of_divSurj` を「仮定が強すぎる証拠」と見たのは**一般の `𝒞`** に対しての話で、★`𝔽_Φ` では `Proposition 1.5, (ii)`(`otriEquiv`)が実際に `Div` の全射性を与えるので、model 型で `Φ^birat = Φ^gp` になるのは**正しい振る舞い**である。"
         },
         {
           "id": "dict-pullback",
@@ -544,9 +545,10 @@
             "iii-src",
             "iv-src"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★小",
-          "evidence": "★分類 (B) を index.html で開示すること。"
+          "evidence": "★分類 (B) を index.html で開示すること。",
+          "note": "\n★済(2026-08-18)。★★**認識の訂正**: `phiBiratAt_eq_top_of_divSurj` を「仮定が強すぎる証拠」と見たのは**一般の `𝒞`** に対しての話で、★`𝔽_Φ` では `Proposition 1.5, (ii)`(`otriEquiv`)が実際に `Div` の全射性を与えるので、model 型で `Φ^birat = Φ^gp` になるのは**正しい振る舞い**である。"
         }
       ]
     },

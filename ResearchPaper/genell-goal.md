@@ -6807,3 +6807,15 @@ instance 検索が**別物として扱う**。
     (c) exists_of_eq : res x = res y ⟹ ∃ n, fⁿ x = fⁿ y
 
 ★どちらも**有限**被覆(第 135)と `Finset.sup` による最大値取りが要る。
+
+## §9-153 —— `IsLocalizing` の第 1・3 欄(第 140 ブロック、2026-08-18)
+
+| 欄 | 宣言 |
+|---|---|
+| `map_units` | ★`isUnit_pow_smul_specD` |
+| `exists_of_eq` | ★★★`exists_pow_smul_eq` |
+
+★★`exists_of_eq` の筋は「各 `D(gᵢ)` で `∃ mᵢ`、**最大値** `N := Finset.univ.sup m` を取り、
+層の分離性で貼る」——**有限**被覆(第 135)がここで効く。
+
+★残るは `surj'` の 1 欄である。
