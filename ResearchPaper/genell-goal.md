@@ -5367,3 +5367,32 @@ mathlib の証明を写経できる。
 | 99 | 自由性の伝播(上の 3–5 段) |
 | 100 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 101 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-104 —— ★★★★★★自由性の伝播が閉じた(第 99 ブロック、2026-08-18)
+
+    M_g が R_g 上自由  ⟹  M_{t·g} が R_{t·g} 上自由
+
+★★これで「可逆加群は基本開集合の上で自由」(第 76)が、**その部分開集合でも**成り立つ。
+
+### ★★★§9-101 の 5 段が全部通った
+
+| 段 | 出典 |
+|---|---|
+| 1 | `M_g →ₗ M_{t·g}`(`IsLocalizedModule.lift`) | ★第 98 |
+| 2 | `R_g` 線型化(`extendScalarsOfIsLocalization`) | ★第 99 |
+| 3–4 | `IsBaseChange.comp_iff` | ★mathlib |
+| 5 | `Module.free_of_isLocalizedModule` | ★mathlib(`LocalProperties/Projective`) |
+
+★★★★**「加群版の局所化推移」は mathlib に無いが、基底変換の言葉なら在った。**
+
+### ★★局所化の推移に要した実測
+
+第 94–99 の **6 ブロック**。§9-97 で「1 ブロック」と見たものが 6 になった。
+★理由: mathlib の在庫が**すべて逆向き**(§9-99)で、
+「積閉集合を取り替える」(第 96)「基底変換の言葉に移す」(第 99)の
+**2 度の言い換え**が要った。
+
+### ★★★残り 2 ブロック
+
+| 100 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 101 | `tilde M` が `InvSheaf` / `equivPicRing` |
