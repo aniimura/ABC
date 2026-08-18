@@ -7109,3 +7109,28 @@ B2 の在庫を実測した結果:
 
 ★★`germ_res` は **`erw`** が要る——`↑(X.affineBasicOpen f)` と `X.basicOpen f` は
 `rfl` だが簡約透明度では合わない。
+
+## §9-165 —— ★★★★★★**`IdealSheafData → X.Modules`**(第 151 ブロック、2026-08-18)
+
+    isSheaf_idealPresheaf : Presheaf.IsSheaf (Opens.grothendieckTopology X) (idealPresheaf D).presheaf
+    idealSheaf (D : X.IdealSheafData) : X.Modules
+
+★★mathlib には `IdealSheafData` と `SheafOfModules` の接続が**一切無かった**。
+第 148–151 の **4 ブロック**でそれを作った。
+
+| # | 内容 |
+|---|---|
+| 148 | `idealSections`(アフィン開では元のデータと一致) |
+| 149 | `idealPresheaf`(`letI` + `Module.compHom`) |
+| 150 | `idealSections_of_local`(茎で判定) |
+| 151 | ★層であること、`X.Modules` へ |
+
+★★★逃げ道: 層の判定は `rw` ではなく **`refine (isSheaf_iff_isSheafUniqueGluing _).2 ?_`**
+——`rw` は `X.ringCatSheaf.obj` の型検査で落ちる。
+
+### 次
+
+| 段 | 内容 |
+|---|---|
+| 5 | Cartier(可逆イデアル層)の定義と、そのとき `idealSheaf D` が可逆層であること——**律速** |
+| 6 | `ofDivisor` と 3 法則 |

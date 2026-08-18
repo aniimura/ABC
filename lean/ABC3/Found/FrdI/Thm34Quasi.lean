@@ -207,4 +207,32 @@ def pnatMulEquivOfPrimeEquiv.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — Ψ_{N≥1} の拡張段",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★`psiN-prime-map` の部品
+
+★★`primeFrobDivId_map_iff`(`iii-primefrob-full`)は
+`IsPrimeFrobenius ∧ IsDivIdentity` を運ぶが、
+`IsDivIdentity` は**自己射のみ**に定義されている。
+★★★**測定の訂正(2026-08-18)**: 一度「Frobenius 型なら `IsDivIdentity` は自動」と
+書こうとしたが、**偽である**。
+★FrdI の `Div-equivalent` は `Φ(φ) = Φ(ψ)`(誘導される単項式射の一致)であって、
+`metrically equivalent`(`Div(φ) = Div(ψ)`)とは**別条件**である
+(`MorphismTypes.lean:148` の注意書きのとおり)。
+★★したがって `IsDivIdentity` は `Φ.map (Base φ) = Φ.map (𝟙)` であり、
+**`Φ` が non-dilating であること**から出る筋になる。
+★★★これが `Theorem 3.4, (iii)` が **standard 型**を仮定する理由である
+(`IsOfStandardType` の (e) が `Φ` の non-dilating)。 -/
+
+/-- ★★**素数次数の Frobenius 型射は prime-Frobenius**。 -/
+theorem isPrimeFrobenius_of_degFr_prime {Dd : Type u} [Category.{v} Dd] {Cc : Type u2}
+    [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} Dd} (P : PreFrobenioid Cc Φ₀)
+    {A B : Cc} (φ : A ⟶ B) (h : IsFrobeniusType P φ) {p : ℕ+}
+    (hd : P.degFr φ = p) (hp : Nat.Prime ((p : ℕ+) : ℕ)) :
+    IsPrimeFrobenius P φ :=
+  ⟨h, by rw [hd]; exact hp⟩
+
+def isPrimeFrobenius_of_degFr_prime.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (iii) — 素数次数の Frobenius 型射",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
