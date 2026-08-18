@@ -53,6 +53,24 @@ theorem MonoidOn.map_inv_map (Φ : MonoidOn.{v, u, w} D) {X Y : D} (g : X ⟶ Y)
   rw [← Φ.map_comp, @IsIso.hom_inv_id _ _ _ _ g hg]
   exact Φ.map_id X y
 
+/-- ★`Φ.map g⁻¹ ∘ Φ.map g = id`。 -/
+theorem MonoidOn.map_map_inv (Φ : MonoidOn.{v, u, w} D) {X Y : D} (g : X ⟶ Y) (hg : IsIso g)
+    (y : Φ.val Y) : Φ.map (@inv _ _ _ _ g hg) (Φ.map g y) = y := by
+  rw [← Φ.map_comp, @IsIso.inv_hom_id _ _ _ _ g hg]
+  exact Φ.map_id Y y
+
+/-- ★★**同型に沿った `Φ.map` は `≼` を反映する**。
+
+★充満性で「底に沿って落とした因子の `≼`」を「もとの因子の `≼`」に戻すのに使う。
+`Base` が同型なのは **Frobenius 型射**だからである。 -/
+theorem mle_of_map_mle (Φ : MonoidOn.{v, u, w} D) {X Y : D} (g : X ⟶ Y) (hg : IsIso g)
+    {x y : Φ.val Y} (h : MLe (Φ.map g x) (Φ.map g y)) : MLe x y := by
+  obtain ⟨z, hz⟩ := h
+  refine ⟨Φ.map (@inv _ _ _ _ g hg) z, ?_⟩
+  have h2 := congrArg (Φ.map (@inv _ _ _ _ g hg)) hz
+  rw [map_add, MonoidOn.map_map_inv Φ g hg, MonoidOn.map_map_inv Φ g hg] at h2
+  exact h2
+
 /-- ★同型の底の逆射。 -/
 theorem Base_inv_eq {C' : Type u2} [Category.{v2} C'] {Φ' : MonoidOn.{v, u, w} D}
     (Q : PreFrobenioid C' Φ') {X Y : C'} (e : X ⟶ Y) [IsIso e]
@@ -92,6 +110,36 @@ theorem overVal_comp_iso {C' : Type u2} [Category.{v2} C'] {Φ' : MonoidOn.{v, u
   exact Φ'.map_comp _ _ _
 
 end Abstract
+
+/-! ## ★1b. モノイドの側の descent —— `k` 倍の `≼` から `≼` へ
+
+★★これが充満性の算術の核である。`Pf` の `≼` は分子の `k` 倍でしか降りない
+(`Pf.mle_num_of_mle`)ので、そこから `k` を落とす段が要る。 -/
+
+section MonoidDescent
+
+universe w'
+
+/-- ★★**divisorial なモノイドでは `k • a ≼ k • b ⟹ a ≼ b`**。
+
+★**saturated**(`k` 倍が像に入るなら本人も像に入る)と
+**integral**(`toGp` が単射)の**両方**が要る。
+`Definition 1.1, (i)` の `pre-divisorial` はこの 2 つを含んでいる。 -/
+theorem mle_of_nsmul_mle {M : Type w'} [AddCommMonoid M] (hsat : IsSaturatedMonoid M)
+    (hint : IsIntegralMonoid M) {a b : M} {k : ℕ} (hk : 0 < k)
+    (h : MLe (k • a) (k • b)) : MLe a b := by
+  obtain ⟨z, hz⟩ := h
+  have hgp : ((k : ℕ) • (toGp M b - toGp M a)) = toGp M z := by
+    have h1 := congrArg (toGp M) hz
+    rw [toGp_add] at h1
+    rw [smul_sub, ← toGp_nsmul, ← toGp_nsmul, ← h1]
+    abel
+  obtain ⟨w, hw⟩ := hsat (toGp M b - toGp M a) k hk ⟨z, hgp.symm⟩
+  refine ⟨w, hint ?_⟩
+  rw [toGp_add, hw]
+  abel
+
+end MonoidDescent
 
 /-! ## ★2. `Λ_k` は底を変えない -/
 
