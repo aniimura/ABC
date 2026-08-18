@@ -6920,3 +6920,34 @@ instance 検索が**別物として扱う**。
     2. mathlib / FLT の在庫を**実測**(grep + ファイルを開く)
     3. **欠落だけ**をスケルトン化し依存グラフに節点追加
     4. 葉から形式化
+
+## §9-158 —— ★★★★★★★★★★★**B1 達成**(第 146 ブロック、2026-08-18)
+
+    noncomputable def picardDataWitness : ABC3.Interface.Arakelov.PicardData
+
+★★**14 欄すべて、`sorry` 0。** 第 1 ブロックから 146 ブロックの到達点である。
+
+| 欄 | witness | ブロック |
+|---|---|---|
+| `Pic` / `group` | `PicSheaf` と `CommGroup` | 62 |
+| `pullback` 系 4 欄 | `picPullback*` | 63(第 18–60 の帰着先) |
+| **`equivPicRing`** | **`equivPicRingSheaf`** | ★★145 |
+| `sheafOf` 系 7 欄 | `picSheafOf_*` | 73 |
+
+### ★★★逸脱の記録(2026-08-18)
+
+`Interface` の `Pic : Scheme.{0} → Type` を **`Type 1`** に緩めた。
+
+| 項目 | 内容 |
+|---|---|
+| 場所 | `Interface/Arakelov/LineBundle.lean` の `PicardData.Pic` |
+| 理由 | `PicSheaf X = Quotient (InvSheaf.setoid X)` は `InvSheaf X : Type 1` の商 |
+| 代替案 | `Small.{0} (PicSheaf X)` を示して `Shrink`——それ自体が別の仕事 |
+| 影響 | ★**無し**——`PicardData` を消費するコードは 2026-08-18 時点で存在しない |
+| 数学的内容 | ★変わらない(`Pic X` がどの宇宙に住むかは ABC の議論に影響しない) |
+
+### ★★★★★到達
+
+    Arakelov 2/9(C1 + ★B1) · Galois 0/8
+
+★次の的は **B2**(Cartier 因子 → 可逆層)——B1 に従属していたので、いま解けた。

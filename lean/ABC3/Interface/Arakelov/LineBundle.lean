@@ -104,7 +104,7 @@ def IsInvertibleSheaf {X : Scheme.{0}} (F : X.Modules) : Prop :=
 高さの加法性(`Proposition 1.4, (i)`)がテンソル積の上で述べられるからである。 -/
 structure PicardData where
   /-- `Pic(X)` の台。 -/
-  Pic : Scheme.{0} → Type
+  Pic : Scheme.{0} → Type 1
   /-- テンソル積による群構造。 -/
   group : (X : Scheme.{0}) → CommGroup (Pic X)
   /-- 射に沿った引き戻し `f^* : Pic(Y) → Pic(X)`。 -/

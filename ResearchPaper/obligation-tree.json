@@ -1,270 +1,270 @@
 {
- "measuredAt": "2026-08-24",
- "obligations": [
-  {
-   "name": "APicData",
-   "file": "Interface/Arakelov/APic.lean",
-   "fields": 10,
-   "deps": [
-    "HermitianMetricData"
-   ],
-   "track": "Arakelov",
-   "code": "D1",
-   "ja": "算術 Picard 群 APic",
-   "fieldsDone": 0,
-   "fieldsTotal": 10,
-   "blocks": "25-35",
-   "note": ""
-  },
-  {
-   "name": "APicSpecData",
-   "file": "Interface/Arakelov/APic.lean",
-   "fields": 5,
-   "deps": [
-    "APicData"
-   ],
-   "track": "Arakelov",
-   "code": "D2",
-   "ja": "APic(Spec O_F)",
-   "fieldsDone": 0,
-   "fieldsTotal": 5,
-   "blocks": "15-25",
-   "note": ""
-  },
-  {
-   "name": "ArakelovHeightData",
-   "file": "Interface/Arakelov/APic.lean",
-   "fields": 8,
-   "deps": [
-    "APicSpecData"
-   ],
-   "track": "Arakelov",
-   "code": "D3",
-   "ja": "Arakelov 高さ・Northcott",
-   "fieldsDone": 0,
-   "fieldsTotal": 8,
-   "blocks": "30-45",
-   "note": ""
-  },
-  {
-   "name": "ArcSpaceData",
-   "file": "Interface/Arakelov/ArcSpace.lean",
-   "fields": 11,
-   "deps": [],
-   "track": "Arakelov",
-   "code": "C1",
-   "ja": "X^arc(アルキメデス点の空間)",
-   "fieldsDone": 11,
-   "fieldsTotal": 11,
-   "blocks": "達成",
-   "note": "★達成済"
-  },
-  {
-   "name": "ProjectiveModelData",
-   "file": "Interface/Arakelov/ArcSpace.lean",
-   "fields": 4,
-   "deps": [
-    "ArcSpaceData"
-   ],
-   "track": "Arakelov",
-   "code": "C2",
-   "ja": "射影モデル(P^n の点の関手)",
-   "fieldsDone": 0,
-   "fieldsTotal": 4,
-   "blocks": "15-25",
-   "note": ""
-  },
-  {
-   "name": "HermitianMetricData",
-   "file": "Interface/Arakelov/ArcSpace.lean",
-   "fields": 12,
-   "deps": [
-    "PicardData",
-    "ArcSpaceData"
-   ],
-   "track": "Arakelov",
-   "code": "C3",
-   "ja": "hermitian 計量",
-   "fieldsDone": 0,
-   "fieldsTotal": 12,
-   "blocks": "40-60",
-   "note": "在庫が薄い"
-  },
-  {
-   "name": "PicardData",
-   "file": "Interface/Arakelov/LineBundle.lean",
-   "fields": 14,
-   "deps": [],
-   "track": "Arakelov",
-   "code": "B1",
-   "ja": "Pic(X)(可逆層の群)",
-   "fieldsDone": 13,
-   "fieldsTotal": 14,
-   "blocks": "約 118",
-   "note": "第 1-115 実測。残りは equivPicRing"
-  },
-  {
-   "name": "CartierPicData",
-   "file": "Interface/Arakelov/LineBundle.lean",
-   "fields": 9,
-   "deps": [
-    "PicardData"
-   ],
-   "track": "Arakelov",
-   "code": "B2",
-   "ja": "Cartier 因子 → 可逆層 O_X(D)",
-   "fieldsDone": 0,
-   "fieldsTotal": 9,
-   "blocks": "25-35",
-   "note": ""
-  },
-  {
-   "name": "PicSpecData",
-   "file": "Interface/Arakelov/LineBundle.lean",
-   "fields": 3,
-   "deps": [
-    "PicardData"
-   ],
-   "track": "Arakelov",
-   "code": "B3",
-   "ja": "Pic(Spec O_F) = ClassGroup",
-   "fieldsDone": 0,
-   "fieldsTotal": 3,
-   "blocks": "5-8",
-   "note": "mathlib に ClassGroup.equivPic"
-  },
-  {
-   "name": "TateCurveData",
-   "file": "Interface/GaloisRep/Reduction.lean",
-   "fields": 5,
-   "deps": [],
-   "track": "Galois",
-   "code": "G6",
-   "ja": "Tate 曲線",
-   "fieldsDone": 0,
-   "fieldsTotal": 5,
-   "blocks": "40-60",
-   "note": ""
-  },
-  {
-   "name": "SemistableModelData",
-   "file": "Interface/GaloisRep/Reduction.lean",
-   "fields": 7,
-   "deps": [
-    "TateCurveData"
-   ],
-   "track": "Galois",
-   "code": "G7",
-   "ja": "半安定還元",
-   "fieldsDone": 0,
-   "fieldsTotal": 7,
-   "blocks": "40-60",
-   "note": ""
-  },
-  {
-   "name": "FaltingsHeightData",
-   "file": "Interface/GaloisRep/Reduction.lean",
-   "fields": 7,
-   "deps": [
-    "SemistableModelData"
-   ],
-   "track": "Galois",
-   "code": "G8",
-   "ja": "Faltings 高さ",
-   "fieldsDone": 0,
-   "fieldsTotal": 7,
-   "blocks": "40-60",
-   "note": ""
-  },
-  {
-   "name": "GaloisRepData",
-   "file": "Interface/GaloisRep/Representation.lean",
-   "fields": 6,
-   "deps": [
-    "TateModuleData"
-   ],
-   "track": "Galois",
-   "code": "G3",
-   "ja": "Galois 表現 Gal → GL_2(Z_l)",
-   "fieldsDone": 0,
-   "fieldsTotal": 6,
-   "blocks": "15-25",
-   "note": ""
-  },
-  {
-   "name": "ModLRepData",
-   "file": "Interface/GaloisRep/Representation.lean",
-   "fields": 4,
-   "deps": [
-    "GaloisRepData"
-   ],
-   "track": "Galois",
-   "code": "G4",
-   "ja": "法 l 表現",
-   "fieldsDone": 0,
-   "fieldsTotal": 4,
-   "blocks": "10-20",
-   "note": ""
-  },
-  {
-   "name": "FullImageData",
-   "file": "Interface/GaloisRep/Representation.lean",
-   "fields": 3,
-   "deps": [
-    "ModLRepData"
-   ],
-   "track": "Galois",
-   "code": "G5",
-   "ja": "全射性(SL_2 全像)",
-   "fieldsDone": 0,
-   "fieldsTotal": 3,
-   "blocks": "30-50",
-   "note": ""
-  },
-  {
-   "name": "TorsionStructureData",
-   "file": "Interface/GaloisRep/Torsion.lean",
-   "fields": 2,
-   "deps": [],
-   "track": "Galois",
-   "code": "G1",
-   "ja": "E[n] = (Z/n)^2",
-   "fieldsDone": 0,
-   "fieldsTotal": 2,
-   "blocks": "40-70",
-   "note": "★律速。mathlib にも FLT にも無い"
-  },
-  {
-   "name": "TateModuleData",
-   "file": "Interface/GaloisRep/Torsion.lean",
-   "fields": 5,
-   "deps": [
-    "TorsionStructureData"
-   ],
-   "track": "Galois",
-   "code": "G2",
-   "ja": "Tate 加群 T_l E",
-   "fieldsDone": 0,
-   "fieldsTotal": 5,
-   "blocks": "20-30",
-   "note": ""
+  "measuredAt": "2026-08-24",
+  "obligations": [
+    {
+      "name": "APicData",
+      "file": "Interface/Arakelov/APic.lean",
+      "fields": 10,
+      "deps": [
+        "HermitianMetricData"
+      ],
+      "track": "Arakelov",
+      "code": "D1",
+      "ja": "算術 Picard 群 APic",
+      "fieldsDone": 0,
+      "fieldsTotal": 10,
+      "blocks": "25-35",
+      "note": ""
+    },
+    {
+      "name": "APicSpecData",
+      "file": "Interface/Arakelov/APic.lean",
+      "fields": 5,
+      "deps": [
+        "APicData"
+      ],
+      "track": "Arakelov",
+      "code": "D2",
+      "ja": "APic(Spec O_F)",
+      "fieldsDone": 0,
+      "fieldsTotal": 5,
+      "blocks": "15-25",
+      "note": ""
+    },
+    {
+      "name": "ArakelovHeightData",
+      "file": "Interface/Arakelov/APic.lean",
+      "fields": 8,
+      "deps": [
+        "APicSpecData"
+      ],
+      "track": "Arakelov",
+      "code": "D3",
+      "ja": "Arakelov 高さ・Northcott",
+      "fieldsDone": 0,
+      "fieldsTotal": 8,
+      "blocks": "30-45",
+      "note": ""
+    },
+    {
+      "name": "ArcSpaceData",
+      "file": "Interface/Arakelov/ArcSpace.lean",
+      "fields": 11,
+      "deps": [],
+      "track": "Arakelov",
+      "code": "C1",
+      "ja": "X^arc(アルキメデス点の空間)",
+      "fieldsDone": 11,
+      "fieldsTotal": 11,
+      "blocks": "達成",
+      "note": "★達成済"
+    },
+    {
+      "name": "ProjectiveModelData",
+      "file": "Interface/Arakelov/ArcSpace.lean",
+      "fields": 4,
+      "deps": [
+        "ArcSpaceData"
+      ],
+      "track": "Arakelov",
+      "code": "C2",
+      "ja": "射影モデル(P^n の点の関手)",
+      "fieldsDone": 0,
+      "fieldsTotal": 4,
+      "blocks": "15-25",
+      "note": ""
+    },
+    {
+      "name": "HermitianMetricData",
+      "file": "Interface/Arakelov/ArcSpace.lean",
+      "fields": 12,
+      "deps": [
+        "PicardData",
+        "ArcSpaceData"
+      ],
+      "track": "Arakelov",
+      "code": "C3",
+      "ja": "hermitian 計量",
+      "fieldsDone": 0,
+      "fieldsTotal": 12,
+      "blocks": "40-60",
+      "note": "在庫が薄い"
+    },
+    {
+      "name": "PicardData",
+      "file": "Interface/Arakelov/LineBundle.lean",
+      "fields": 14,
+      "deps": [],
+      "track": "Arakelov",
+      "code": "B1",
+      "ja": "Pic(X)(可逆層の群)",
+      "fieldsDone": 14,
+      "fieldsTotal": 14,
+      "blocks": "約 118",
+      "note": "2026-08-18 達成: Found/Arakelov/PicWitness.lean の picardDataWitness (14/14 欄、sorry 0)。第 1-146 ブロック。"
+    },
+    {
+      "name": "CartierPicData",
+      "file": "Interface/Arakelov/LineBundle.lean",
+      "fields": 9,
+      "deps": [
+        "PicardData"
+      ],
+      "track": "Arakelov",
+      "code": "B2",
+      "ja": "Cartier 因子 → 可逆層 O_X(D)",
+      "fieldsDone": 0,
+      "fieldsTotal": 9,
+      "blocks": "25-35",
+      "note": ""
+    },
+    {
+      "name": "PicSpecData",
+      "file": "Interface/Arakelov/LineBundle.lean",
+      "fields": 3,
+      "deps": [
+        "PicardData"
+      ],
+      "track": "Arakelov",
+      "code": "B3",
+      "ja": "Pic(Spec O_F) = ClassGroup",
+      "fieldsDone": 0,
+      "fieldsTotal": 3,
+      "blocks": "5-8",
+      "note": "mathlib に ClassGroup.equivPic"
+    },
+    {
+      "name": "TateCurveData",
+      "file": "Interface/GaloisRep/Reduction.lean",
+      "fields": 5,
+      "deps": [],
+      "track": "Galois",
+      "code": "G6",
+      "ja": "Tate 曲線",
+      "fieldsDone": 0,
+      "fieldsTotal": 5,
+      "blocks": "40-60",
+      "note": ""
+    },
+    {
+      "name": "SemistableModelData",
+      "file": "Interface/GaloisRep/Reduction.lean",
+      "fields": 7,
+      "deps": [
+        "TateCurveData"
+      ],
+      "track": "Galois",
+      "code": "G7",
+      "ja": "半安定還元",
+      "fieldsDone": 0,
+      "fieldsTotal": 7,
+      "blocks": "40-60",
+      "note": ""
+    },
+    {
+      "name": "FaltingsHeightData",
+      "file": "Interface/GaloisRep/Reduction.lean",
+      "fields": 7,
+      "deps": [
+        "SemistableModelData"
+      ],
+      "track": "Galois",
+      "code": "G8",
+      "ja": "Faltings 高さ",
+      "fieldsDone": 0,
+      "fieldsTotal": 7,
+      "blocks": "40-60",
+      "note": ""
+    },
+    {
+      "name": "GaloisRepData",
+      "file": "Interface/GaloisRep/Representation.lean",
+      "fields": 6,
+      "deps": [
+        "TateModuleData"
+      ],
+      "track": "Galois",
+      "code": "G3",
+      "ja": "Galois 表現 Gal → GL_2(Z_l)",
+      "fieldsDone": 0,
+      "fieldsTotal": 6,
+      "blocks": "15-25",
+      "note": ""
+    },
+    {
+      "name": "ModLRepData",
+      "file": "Interface/GaloisRep/Representation.lean",
+      "fields": 4,
+      "deps": [
+        "GaloisRepData"
+      ],
+      "track": "Galois",
+      "code": "G4",
+      "ja": "法 l 表現",
+      "fieldsDone": 0,
+      "fieldsTotal": 4,
+      "blocks": "10-20",
+      "note": ""
+    },
+    {
+      "name": "FullImageData",
+      "file": "Interface/GaloisRep/Representation.lean",
+      "fields": 3,
+      "deps": [
+        "ModLRepData"
+      ],
+      "track": "Galois",
+      "code": "G5",
+      "ja": "全射性(SL_2 全像)",
+      "fieldsDone": 0,
+      "fieldsTotal": 3,
+      "blocks": "30-50",
+      "note": ""
+    },
+    {
+      "name": "TorsionStructureData",
+      "file": "Interface/GaloisRep/Torsion.lean",
+      "fields": 2,
+      "deps": [],
+      "track": "Galois",
+      "code": "G1",
+      "ja": "E[n] = (Z/n)^2",
+      "fieldsDone": 0,
+      "fieldsTotal": 2,
+      "blocks": "40-70",
+      "note": "★律速。mathlib にも FLT にも無い"
+    },
+    {
+      "name": "TateModuleData",
+      "file": "Interface/GaloisRep/Torsion.lean",
+      "fields": 5,
+      "deps": [
+        "TorsionStructureData"
+      ],
+      "track": "Galois",
+      "code": "G2",
+      "ja": "Tate 加群 T_l E",
+      "fieldsDone": 0,
+      "fieldsTotal": 5,
+      "blocks": "20-30",
+      "note": ""
+    }
+  ],
+  "_comment": "Arakelov(9)と Galois(8)の obligation の木。fields は Interface の structure のフィールド数(実測)、deps は to<X>Data フィールドから読んだ依存。blocks は見積り(B1 のみ実測)。",
+  "summary": {
+    "Arakelov": {
+      "obligations": 9,
+      "fields": 76,
+      "done": 2,
+      "blocksDone": 146,
+      "blocksRemaining": "約 180-260"
+    },
+    "Galois": {
+      "obligations": 8,
+      "fields": 39,
+      "done": 0,
+      "blocksDone": 0,
+      "blocksRemaining": "約 235-375"
+    }
   }
- ],
- "_comment": "Arakelov(9)と Galois(8)の obligation の木。fields は Interface の structure のフィールド数(実測)、deps は to<X>Data フィールドから読んだ依存。blocks は見積り(B1 のみ実測)。",
- "summary": {
-  "Arakelov": {
-   "obligations": 9,
-   "fields": 76,
-   "done": 1,
-   "blocksDone": 115,
-   "blocksRemaining": "約 180-260"
-  },
-  "Galois": {
-   "obligations": 8,
-   "fields": 39,
-   "done": 0,
-   "blocksDone": 0,
-   "blocksRemaining": "約 235-375"
-  }
- }
 }
