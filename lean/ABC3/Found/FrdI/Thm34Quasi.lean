@@ -454,7 +454,7 @@ theorem exists_admissible_of_frobTrivial (e : C₁ ≌ C₂)
   · rw [← hβ, e.functor.map_comp]
     exact IsFrobeniusType.comp P₂ F₂ hmap.1
       (isFrobeniusType_of_isIso P₂ (e.functor.map β))
-  · exact (degFr_map_eq_of_sameDeg P₁ P₂ F₁ e.functor φ₁ ψ hpf₁.1 hψ hsame).symm
+  · exact (degFr_map_eq_of_sameDeg F₁ e.functor φ₁ ψ hpf₁.1 hψ hsame).symm
 
 def exists_admissible_of_frobTrivial.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 65,
