@@ -359,6 +359,8 @@ import ABC3.Found.Arakelov.PicPrincipalAffine
 import ABC3.Found.Arakelov.PicPushoutKer
 import ABC3.Found.Arakelov.PicComapAffine
 import ABC3.Found.Arakelov.PicIdealLTPt
+import ABC3.Found.Arakelov.PicBaseChange
+import ABC3.Found.Arakelov.PicLocalGlobal
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
