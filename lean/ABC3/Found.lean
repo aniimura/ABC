@@ -75,6 +75,7 @@ import ABC3.Found.FrdI.Prop44Equiv
 import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
+import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
@@ -353,6 +354,9 @@ import ABC3.Found.Arakelov.PicDivisorTop
 import ABC3.Found.Arakelov.PicIdealMulHom
 import ABC3.Found.Arakelov.PicAffineSieve
 import ABC3.Found.Arakelov.PicDivisorMul
+import ABC3.Found.Arakelov.PicPrincipalRing
+import ABC3.Found.Arakelov.PicPrincipalAffine
+import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

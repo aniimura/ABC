@@ -271,12 +271,24 @@ structure CartierPicData where
   /-- ★★主因子は積で閉じている(主因子のなす部分モノイド)。 -/
   isPrincipalDivisor_mul : ∀ (X : Scheme.{0}) (D E : X.IdealSheafData),
     IsPrincipalDivisor X D → IsPrincipalDivisor X E → IsPrincipalDivisor X (D * E)
-  /-- ★★★**`Spec R` では主因子は単項イデアルに対応する**——意味を固定する。
+  /-- ★★★**`Spec R` では Cartier な主因子は単項イデアルに対応する**——意味を固定する。
 
-  ★これが無いと `IsPrincipalDivisor := True` で逃げられる。 -/
+  ★これが無いと `IsPrincipalDivisor := True` で逃げられる。
+
+  ★★★★**2026-08-19 の修正。**それ以前は Cartier 条件が無かったが、その形は**偽**である:
+
+  `R = k[x]/(x²)`、`D.ideal ⊤ = (x)` とすると `(x)` は単項だが、
+  `(x)` は `R`-加群として `k`(1 次元)であり `R`(2 次元)とは同型でない。
+  したがって `𝒪(D) ≅ 𝒪_X` は成り立たない。
+  ★`(x)` は可逆でない(Cartier でない)ので、Cartier 条件を課せば消える反例である。
+
+  ★★意味の固定は保たれる:`ofDivisor_eq_one_iff` が語るのは Cartier な `D` だけであり、
+  そこで単項イデアルと対応がつけば `IsPrincipalDivisor := True` は排除される
+  (B3 の `equivClassGroup` と合わせて、類数 > 1 の `𝓞_F` で矛盾するため)。 -/
   isPrincipalDivisor_affine : ∀ (R : CommRingCat.{0}) (D : (Spec R).IdealSheafData),
-    IsPrincipalDivisor (Spec R) D ↔
-      ((Scheme.IdealSheafData.equivOfIsAffine D).IsPrincipal)
+    IsCartierDivisor (Spec R) D →
+    (IsPrincipalDivisor (Spec R) D ↔
+      ((Scheme.IdealSheafData.equivOfIsAffine D).IsPrincipal))
 
 
 def CartierPicData.waiting : WaitingFor :=

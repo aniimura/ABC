@@ -8363,3 +8363,61 @@ mathlib で `(D * E).ideal A = D.ideal A * E.ideal A` は **`rfl`**、
 | `IsPrincipalDivisor` / `ofDivisor_eq_one_iff` / `isPrincipalDivisor_mul` / `_affine` | 残 |
 
 ★★**9/14。**残りは「引き戻し 2 欄」と「主因子 4 欄」の 2 塊である。
+
+## §9-209 ★★★★★逸脱の記録(2026-08-19、2 件目)——`isPrincipalDivisor_affine` も偽だった
+
+`isPrincipalDivisor_affine` に Cartier 条件が無かったが、これは**偽**である。
+
+### 反例
+
+`R = k[x]/(x²)`、`D.ideal ⊤ = (x)` とすると `(x)` は**単項**だが、
+`(x)` は `R`-加群として `k`(1 次元)であり `R`(2 次元)とは同型でない。
+したがって `𝒪(D) ≅ 𝒪_X` は成り立たない。
+
+★`(x)` は可逆でない(Cartier でない)ので、**Cartier 条件を課せば消える**反例である。
+
+### 意味の固定は保たれる
+
+`ofDivisor_eq_one_iff` が語るのは Cartier な `D` だけであり、そこで単項イデアルと
+対応がつけば `IsPrincipalDivisor := True` は排除される
+(B3 の `equivClassGroup` と合わせて、類数 > 1 の `𝓞_F` で矛盾するため)。
+
+### ★★★これで Interface の誤りは 3 件目
+
+| # | 場所 | 誤り | 直し |
+|---|---|---|---|
+| 1 | `ofDivisor_eq_one_iff`(§9-146) | 無条件だと ℚ[x,y] の全イデアルが単項になる | Cartier 条件 |
+| 2 | `isCartierDivisor_comap`(§9-206) | 平坦性なしだと反例 | `[Flat f]` |
+| 3 | `isPrincipalDivisor_affine`(本節) | Cartier なしだと反例 | Cartier 条件 |
+
+★★★**3 件とも「充足しようとして初めて」見つかった。**
+Interface を書くだけでは分からず、**埋める作業が検算になっている**。
+
+## §9-210 主因子の 4 欄が埋まった(第 191–193 ブロック)
+
+★★★★★★これで `CartierPicData` は **14 欄中 12 欄**。
+
+| ブロック | 内容 |
+|---|---|
+| 191 | 可逆な単項イデアルは自由(mathlib `bijective_of_surjective`) |
+| 192 | ★`IsPrincipalDivisor := Nonempty (idealSheaf D ≅ 𝒪)` と定義 → `ofDivisor_eq_one_iff` は 2 行 |
+| 193 | ★★アフィンでは主因子 = 単項イデアル |
+
+### ★★★第 192 は「設計で消せる仕事」だった
+
+`IsPrincipalDivisor` を**同型の存在**として定義すれば、`Pic` が同型類の商である
+ことから `ofDivisor D = 1 ⟺ IsPrincipalDivisor D` は `Quotient.exact` / `mk_eq_mk`
+の 2 行で出る。★定義を選ぶ前に「どちらが後段を短くするか」を見たのが効いた。
+
+### ★★第 193 の律速は係数環の綴りだった
+
+`Γ(Spec R, ⊤)` と `R` は**同型だが等しくない**。`restrictScalars` で繋ごうとすると
+instance の経路が合わない。★型付き恒等関数 `gammaVal` / `gammaValInv` を置くと
+作用・加法・両側合成が**すべて `rfl`** になり、線型同値を手で組めた
+——第 173 と同じ手である([[typed-identity-bridge]])。
+
+### 残り 2 欄
+
+`isCartierDivisor_comap` と `ofDivisor_pullback`(どちらも平坦)。
+どちらも `comap` の**アフィン記述**(`(D.comap f).ideal A = (D.ideal B).map (f.appLE)`)が要る。
+★mathlib には開埋め込みの場合しか無いので、そこが次の測定点である。
