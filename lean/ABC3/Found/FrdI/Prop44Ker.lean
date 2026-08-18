@@ -215,6 +215,70 @@ def phiBiratAt_ker.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (iii) — 𝒪^×(A^birat) ↠ Φ^birat の核",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★★`Φ^birat` は `𝒞^birat` の同型で移り合う
+
+★★★これが `(iii)` の「**`𝒟` 上の**部分関手」の要である。
+`phiBiratAt` は `𝒞` の対象で添字付けされているが、
+原文の `Φ^birat` は `𝒟` 上の関手なので、**持ち上げ方に依らない**ことが要る。 -/
+
+/-- ★★★★**`Φ^birat` は同型で輸送される**。
+
+★手: `δ ∈ 𝒪^×(B)` を `e ≫ δ ≫ e⁻¹ ∈ 𝒪^×(A)` へ共役し、
+`biratDivGp_comp'` を 2 回使って
+`Div^gp(e ≫ δ ≫ e⁻¹) = Φ^gp(Base e)(Div^gp δ)` を出す。
+★鍵は `Div^gp(𝟙) = 0` から得る `Φ^gp(Base e)(Div^gp e⁻¹) + Div^gp e = 0`。 -/
+theorem phiBiratAt_map_le {A B : BiratCat P G} (e : A ≅ B) :
+    (phiBiratAt P G B).map (gpMap _ (Φ.map (biratBase e.hom))) ≤ phiBiratAt P G A := by
+  rintro _ ⟨_, ⟨δ, hδ, rfl⟩, rfl⟩
+  have hd1 : (biratPre P G).degFr e.hom = 1 := degFr_of_isIso (biratPre P G) e.hom
+  have hd2 : (biratPre P G).degFr e.inv = 1 := degFr_of_isIso (biratPre P G) e.inv
+  have hbe : (biratPre P G).Base e.hom ≫ (biratPre P G).Base e.inv
+      = (biratPre P G).Base (𝟙 A) := by
+    rw [← (biratPre P G).Base_comp, e.hom_inv_id]
+  -- ★共役
+  refine ⟨e.hom ≫ ((δ : End B) : B ⟶ B) ≫ e.inv, ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · show (biratPre P G).Base _ = (biratPre P G).Base (𝟙 A)
+    rw [(biratPre P G).Base_comp, (biratPre P G).Base_comp,
+      show (biratPre P G).Base ((δ : End B) : B ⟶ B) = (biratPre P G).Base (𝟙 B) from hδ.1.1,
+      (biratPre P G).Base_id, Category.id_comp]
+    exact hbe
+  · show (biratPre P G).degFr _ = 1
+    rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp, hd1, hd2,
+      show (biratPre P G).degFr ((δ : End B) : B ⟶ B) = 1 from hδ.1.2, one_mul, mul_one]
+  · haveI : IsIso ((δ : End B) : B ⟶ B) :=
+      (CategoryTheory.isUnit_iff_isIso ((δ : End B) : B ⟶ B)).mp hδ.2
+    exact (CategoryTheory.isUnit_iff_isIso
+      (e.hom ≫ ((δ : End B) : B ⟶ B) ≫ e.inv)).mpr inferInstance
+  · -- ★Div^gp の計算
+    have hone : gpMap _ (Φ.map (biratBase e.hom)) (biratDivGp e.inv) + biratDivGp e.hom = 0 := by
+      have h := biratDivGp_comp' e.hom e.inv
+      rw [e.hom_inv_id, biratDivGp_id,
+        show ((biratDeg e.inv : ℕ+) : ℕ) = 1 from by rw [show biratDeg e.inv = 1 from hd2]; rfl,
+        one_smul] at h
+      exact h.symm
+    have h2 : biratDivGp (((δ : End B) : B ⟶ B) ≫ e.inv)
+        = biratDivGp e.inv + biratDivGp ((δ : End B) : B ⟶ B) := by
+      have h := biratDivGp_comp' ((δ : End B) : B ⟶ B) e.inv
+      rw [gpMap_biratBase_of_baseIdentity hδ.1.1,
+        show ((biratDeg e.inv : ℕ+) : ℕ) = 1 from by rw [show biratDeg e.inv = 1 from hd2]; rfl,
+        one_smul] at h
+      exact h
+    have h3 := biratDivGp_comp' e.hom (((δ : End B) : B ⟶ B) ≫ e.inv)
+    rw [h2, map_add,
+      show ((biratDeg (((δ : End B) : B ⟶ B) ≫ e.inv) : ℕ+) : ℕ) = 1 from by
+        rw [show biratDeg (((δ : End B) : B ⟶ B) ≫ e.inv) = 1 from by
+          show (biratPre P G).degFr (((δ : End B) : B ⟶ B) ≫ e.inv) = 1
+          rw [(biratPre P G).degFr_comp,
+            show (biratPre P G).degFr ((δ : End B) : B ⟶ B) = 1 from hδ.1.2, hd2, one_mul]]; rfl,
+      one_smul] at h3
+    rw [h3, add_assoc, add_left_comm, hone, add_zero]
+
+/-- ★locator —— `Proposition 4.4, (iii)` の部分関手性(同型による輸送)。 -/
+def phiBiratAt_map_le.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iii) — Φ^birat の同型による輸送",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 def otriDivGp_eq_zero_iff.src : ABC3.Meta.Source :=

@@ -6556,3 +6556,38 @@ instance 検索が**別物として扱う**。
 
 ★数学は**すべて済んでいる**。残るのは型の運搬で、
 その層を本 session で **5 枚**剥がした(うち 4 枚は完全に抜けた)。
+
+## §9-145 —— ★★★★★★組み立て全体が型検査を通った(2026-08-24)
+
+    noncomputable example : IsLocallyTrivial (Spec R) (tilde M).val := by
+      refine isLocallyTrivial_of_pointwise _ (fun x => ?_)
+      obtain ⟨g, hxg, ⟨e⟩⟩ := exists_away_linearEquiv R M x
+      refine ⟨D g, hxg, ⟨?_⟩⟩
+      letI : Module 𝒪(D g) (((restrict (D g)).obj (tilde M).val).obj (op (Over.mk (𝟙 (D g))))) :=
+        inferInstanceAs (Module 𝒪(D g) ((tilde M).val.obj (op (D g))))
+      have s0 : (... : Type u) := generatorOf (sectionEquivScalar R M g e)
+      exact (trivialIsoOfSectionPresieve (X := Spec R) (D g) _
+        (isSheaf_restrictModules _ (tilde M)) (isSheaf_unitOn _) (s := s0) (h := by sorry)).symm
+
+★★**`sorry` は 1 つだけ**——被覆の上の全単射 `h` である。
+
+### ★★★通すのに要った 3 手(記録)
+
+| # | 詰まり | 手 |
+|---|---|---|
+| 1 | `Module 𝒪(D g)` が拾われない | ★`letI` + `inferInstanceAs`(第 125 と同じ) |
+| 2 | 切断の型が合わない | ★`have s0 : (展開形) := generatorOf ...` で**先に型を固定** |
+| 3 | `X` が推論されない | ★★**`(X := Spec R)` を明示**——`Opens (PrimeSpectrum R)` と `(Spec R).Opens` は defeq だが推論できない |
+| — | 全体 | `maxHeartbeats 2000000` |
+
+### ★★★★残る `sorry` の中身
+
+    ∀ W : Over (D g), ∃ 生成族 R', 被覆 ∧ ∀ Z ∈ R', Bijective (c ↦ c • restrictSec _ _ s0 Z)
+
+| 材料 | ブロック | 状態 |
+|---|---|---|
+| 生成族と被覆 | 122 | ★済 |
+| `Bijective (c ↦ c • 生成元)` | 127 | ★済 |
+| **`restrictSec s0 Z` = `Z` での生成元** | 120 | ★可換図式は済、**同定が残る** |
+
+★★★**残りは 1 点**——「制限した生成元が生成元である」ことの**同定**だけである。
