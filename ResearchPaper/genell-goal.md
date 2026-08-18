@@ -5000,3 +5000,30 @@ mathlib の証明を写経できる。
 第 86 の `tensorLocalization_ext` が使える。
 
 ★★★**これは数学ではなく型の運搬である**(§9-66 と同じ状況)。
+
+## §9-91 —— ★★★★★★橋渡しが架かった(第 88 ブロック、2026-08-18)
+
+    toOpenTensor : M ⊗_R N ⟶ (tilde M)(U) ⊗_{𝒪(U)} (tilde N)(U)
+    tensorSectionMap ∘ toOpenTensor = toOpenₗ (M ⊗_R N)
+
+★★§9-90 で「数学ではなく型の運搬」と旗を立てたものである。**恒等式込みで一発で通った。**
+
+★双線型性は `IsScalarTower R 𝒪(U) (tilde M)(U)`(mathlib の instance)を通し、
+`algebraMap_smul` で `𝒪(U)` の作用に直してから `smul_tmul'` / `tmul_smul` を当てる
+——第 80 ブロックと**同じ形**である。
+
+### ★★★これで第 86 の器具が繋がった
+
+    tensorSectionMap ∘ toOpenTensor = toOpenₗ (M ⊗_R N)
+
+★両辺とも `M ⊗_R N` からの写像である。★★`U = D(f)` のとき
+**右辺は局所化**(mathlib `IsLocalizedModule.Away`)であり、
+**左辺の `toOpenTensor` も局所化**(第 79 の連鎖)である。
+★★★したがって `tensorLocalization_ext` で `tensorSectionMap` が同型と決まる。
+
+### ★★残り 2 ブロック
+
+| # | 内容 |
+|---|---|
+| 89 | `toOpenTensor` が `D(f)` で局所化 ⟹ `tensorSectionMap` が同型 ⟹ 茎で同型 |
+| 90 | `tilde M` が `InvSheaf` / `equivPicRing` |
