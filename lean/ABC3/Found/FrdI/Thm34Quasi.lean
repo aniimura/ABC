@@ -534,4 +534,30 @@ def exists_admissible_F1.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — (F1)",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★(F2) の次数移送
+
+原文 (FrdI p.65):
+> and ψ are irreducible. Thus, by Proposition 1.14, (iv), we obtain that φ
+
+★★原典は `Proposition 1.11, (iii)` で四角形
+`ψ₁ ∘ ζ₁ = ζ₁ ∘ φ₁` を作り、像でも四角形が保たれることから
+`Proposition 1.14, (iv)` で次数を移す。
+★在庫の `prop_1_14_iv_degFr` がそのまま使える。 -/
+
+/-- ★★★★**四角形を越えて次数が移る** —— (F2) の中核。
+
+`ζ ≫ φ = ψ ≫ ζ` なら、像でも `degFr (Ψφ) = degFr (Ψψ)`。 -/
+theorem degFr_map_eq_of_square (Ψ : C₁ ⥤ C₂)
+    {A B : C₁} (ζ : B ⟶ A) (φ : A ⟶ A) (ψ : B ⟶ B)
+    (hsq : ζ ≫ φ = ψ ≫ ζ) :
+    P₂.degFr (Ψ.map φ) = P₂.degFr (Ψ.map ψ) := by
+  have hsq' : Ψ.map ζ ≫ Ψ.map φ = Ψ.map ψ ≫ Ψ.map ζ := by
+    rw [← Ψ.map_comp, ← Ψ.map_comp, hsq]
+  exact prop_1_14_iv_degFr P₂ (Ψ.map ζ) (Ψ.map φ) (Ψ.map ψ) (Ψ.map ζ) hsq' rfl
+
+def degFr_map_eq_of_square.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — 四角形を越えた次数の移送",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
