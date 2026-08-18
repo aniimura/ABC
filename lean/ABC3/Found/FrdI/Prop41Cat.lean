@@ -380,6 +380,91 @@ theorem prop_4_1_i_of_divFrobTrivial (G : Frobenioid P) (hiso : ∀ X : C, IsIso
     prop_4_1_i G hiso (fun n => ζ n) hζd (fun n => (hζp n).1) (fun n => (hζp n).2) hperf
       φ hcφ hst⟩
 
+
+/-! ## ★4b. (ii) のための追加の道具 -/
+
+/-- ★★★**零因子が等しい 2 本の co-angular pre-step は `B` の上で同型**。
+
+★`Definition 1.3, (iii)(d)` の**前置**の圏同値(コスライス)から。
+行き先が前順序圏なので射は高々 1 本であり、両向きの射が自動的に互いに逆になる。 -/
+theorem exists_iso_of_div_eq (G : Frobenioid P) {B A A' : C} (φ : B ⟶ A) (φ' : B ⟶ A')
+    (hcφ : IsCoAngular P φ) (hsφ : IsPreStep P φ)
+    (hcφ' : IsCoAngular P φ') (hsφ' : IsPreStep P φ')
+    (h : P.Div φ = P.Div φ') :
+    ∃ θ : A ⟶ A', IsIso θ ∧ φ ≫ θ = φ' := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreUnderEquiv B
+  let Z : Under (⟨B⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨B⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨A⟩ from ⟨φ, hcφ, hsφ⟩)
+  let W : Under (⟨B⟩ : WideSubcategory (coaPreProp P)) :=
+    Under.mk (show (⟨B⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨A'⟩ from ⟨φ', hcφ', hsφ'⟩)
+  have hobj : (coaPreUnderFunctor P B).obj Z = (coaPreUnderFunctor P B).obj W := by
+    show toOrderCat (P.Div φ) = toOrderCat (P.Div φ')
+    rw [h]
+  obtain ⟨f, -⟩ := (coaPreUnderFunctor P B).map_surjective (eqToHom hobj)
+  obtain ⟨g, -⟩ := (coaPreUnderFunctor P B).map_surjective (eqToHom hobj.symm)
+  have hfg : f ≫ g = 𝟙 Z :=
+    (coaPreUnderFunctor P B).map_injective (Subsingleton.elim _ _)
+  have hgf : g ≫ f = 𝟙 W :=
+    (coaPreUnderFunctor P B).map_injective (Subsingleton.elim _ _)
+  refine ⟨f.right.hom, ⟨g.right.hom, ?_, ?_⟩, ?_⟩
+  · exact congrArg (fun t : Z ⟶ Z => t.right.hom) hfg
+  · exact congrArg (fun t : W ⟶ W => t.right.hom) hgf
+  · exact congrArg InducedWideCategory.Hom.hom (Under.w f)
+
+/-- ★底の逆射の合成。 -/
+theorem inv_base_comp {A B B' : C} (ψ : B ⟶ B') (χ : B' ⟶ A)
+    (hψ : IsIso (P.Base ψ)) (hχ : IsIso (P.Base χ)) (hc : IsIso (P.Base (ψ ≫ χ))) :
+    @inv _ _ _ _ (P.Base (ψ ≫ χ)) hc
+      = @inv _ _ _ _ (P.Base χ) hχ ≫ @inv _ _ _ _ (P.Base ψ) hψ := by
+  refine IsIso.inv_eq_of_hom_inv_id ?_
+  rw [P.Base_comp, Category.assoc, ← Category.assoc (P.Base χ), IsIso.hom_inv_id,
+    Category.id_comp]
+  exact @IsIso.hom_inv_id _ _ _ _ (P.Base ψ) hψ
+
+/-- ★★**第 1 因子の値は、`Φ(A)` の値を `ψ` で押したもの**。 -/
+theorem yVal_eq {A B Cc : C} (φ : B ⟶ A) (ψ : A ⟶ Cc)
+    (hsφ : IsPreStep P φ) (hsψ : IsPreStep P ψ) (hc : IsPreStep P (φ ≫ ψ)) :
+    Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hc.2) (P.Div φ)
+      = Φ.map (@inv _ _ _ _ (P.Base ψ) hsψ.2) (preStepVal P φ hsφ) := by
+  rw [inv_base_comp φ ψ hsφ.2 hsψ.2 hc.2, Φ.map_comp]
+  rfl
+
+/-- ★第 1 因子の零因子は合成の零因子以下。 -/
+theorem mle_div_comp {A B B' : C} (ψ : B ⟶ B') (χ : B' ⟶ A) (hlin : P.degFr χ = 1) :
+    MLe (P.Div ψ) (P.Div (ψ ≫ χ)) := by
+  refine ⟨Φ.map (P.Base ψ) (P.Div χ), ?_⟩
+  rw [P.Div_comp, hlin]
+  simp [add_comm]
+
+theorem map_base_comp_apply {A B Cc : C} (φ : B ⟶ A) (ψ : A ⟶ Cc)
+    (d : Φ.val (P.toElem.obj Cc).base) :
+    Φ.map (P.Base φ) (Φ.map (P.Base ψ) d) = Φ.map (P.Base (φ ≫ ψ)) d := by
+  rw [P.Base_comp, Φ.map_comp]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★**値 `dA` を持つ第 1 因子を取り出す**。 -/
+theorem exists_first_factor_of_mle (G : Frobenioid P) {A B : C} (φ : B ⟶ A)
+    (hcφ : IsCoAngular P φ) (hsφ : IsPreStep P φ)
+    {dA : Φ.val (P.toElem.obj A).base} (hle : MLe dA (preStepVal P φ hsφ)) :
+    ∃ (A'' : C) (φ'' : B ⟶ A'') (ζ : A'' ⟶ A), IsCoAngular P φ'' ∧ IsPreStep P φ'' ∧
+      IsCoAngular P ζ ∧ IsPreStep P ζ ∧ φ = φ'' ≫ ζ ∧ P.Div φ'' = Φ.map (P.Base φ) dA := by
+  letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj A).base).1.1
+  obtain ⟨e, he⟩ := hle
+  obtain ⟨A'', φ'', ζ, hsφ'', hsζ, hcφ'', hcζ, hfac, hζval⟩ :=
+    exists_factor_of_mle' G φ hcφ hsφ (⟨dA, by rw [add_comm]; exact he⟩ : MLe e _)
+  have key : ∀ (f : B ⟶ A) (hf : IsPreStep P f), f = φ'' ≫ ζ →
+      preStepVal P f hf = e + Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div φ'') := by
+    rintro f hf rfl
+    rw [← hζval]
+    exact preStepVal_comp φ'' ζ hsφ'' hsζ hf
+  have hv := key φ hsφ hfac
+  have hda : Φ.map (@inv _ _ _ _ (P.Base φ) hsφ.2) (P.Div φ'') = dA := by
+    refine add_left_cancel (a := e) ?_
+    rw [← hv, ← he, add_comm]
+  refine ⟨A'', φ'', ζ, hcφ'', hsφ'', hcζ, hsζ, hfac, ?_⟩
+  rw [← hda, MonoidOn.map_inv_map Φ (P.Base φ) hsφ.2]
+
 end Cat
 
 /-! ## ★5. `Proposition 4.1, (ii)` の単系層 -/
