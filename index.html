@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1156 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1158 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5650</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1552</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5658</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1557</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>a6e286c</code></td><td>2026-08-19</td><td>★★★B2 最後の 1 点が出た(第 213)——可換正方形の切断版</td></tr>
+<tr><td><code>1741a23</code></td><td>2026-08-19</td><td>★★`v-loc` の材料はすべて `FrobenioidCore` のフィールドだった</td></tr>
 <tr><td><code>f1b2a4b</code></td><td>2026-08-19</td><td>★★★span 帰納の枠が閉じた(第 212)——B2 最後の 1 点を特定</td></tr>
 <tr><td><code>d2554f1</code></td><td>2026-08-19</td><td>★★`iv-src` を閉じた——(iv) が条として揃い、残りは 3 節点</td></tr>
 <tr><td><code>0209329</code></td><td>2026-08-19</td><td>★★★★ω_n の「降ろす」段ができた(G1 第 2 ブロック)</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>3635564</code></td><td>2026-08-19</td><td>Galois の進め方を FLT の実測に合わせて確定した(§9-233, §9-234)</td></tr>
 <tr><td><code>b32a955</code></td><td>2026-08-19</td><td>★★`iii-psipf` の段 2 を取った——要は「Ψ が遷移写像と可換」1 本だった</td></tr>
 <tr><td><code>80b4406</code></td><td>2026-08-19</td><td>★★★★イデアルの等式が出た(第 211)——ただし転送は外せない</td></tr>
-<tr><td><code>2755aee</code></td><td>2026-08-19</td><td>★`iii-psipf` の段 1 を取った——添字圏は `plBkMap` と同じ形だった</td></tr>
-<tr><td><code>86d6147</code></td><td>2026-08-19</td><td>★★★comap のイデアルの連鎖を取り出した(第 210)——§9-230 の教訓をその場で回収</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1552 件)。</div>
+<b>すべて PDF と機械照合している</b>(1557 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
