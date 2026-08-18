@@ -162,4 +162,21 @@ def biratNfMap.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (ii) — naive Frobenius を 𝒞^birat の射へ降ろす",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★★★`Ψ^birat` の組み上げ —— universe の測定(2026-08-19)
+
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
+
+★★`BiratCat P G ⥤ BiratCat P G` を書こうとすると
+**`Category.{v2, u2} (BiratCat P G)` の合成に失敗する** ——
+`biratCategory` が与えるのは `Category.{max v u2 v2}` だからである。
+
+★`CategoryTheory.Functor.{max v u2 v2, max v u2 v2, u2, u2}` と明示しても
+`obj` フィールドの位置で同じ要求が出る(2 回試して同じ)。
+
+★★★**先行例 `Rmk451Birat.lean` の `biratFunctor` は通っている**ので、
+そちらの宣言の形(`variable` の並び・`section` の切り方)を写すのが次の手である。
+★★本ファイルは**ここまでを緑のまま**にしておく ——
+並行セッション(ABC3b)の `git add -A` が赤い状態を巻き込むため。 -/
+
 end ABC3.Found.FrdI
