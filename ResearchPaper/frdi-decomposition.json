@@ -339,9 +339,9 @@
           "id": "otri-comm-bfn",
           "title": "birat-Frobenius-normalized → Frobenius-normalized → `𝒪^▷(A)` が可換",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "★小",
-          "evidence": "★原文 `Definition 4.5, (i)` の括弧書き「any birationally Frobenius-normalized object of C is Frobenius-normalized」。★そのあと `Prop25iii.lean` の `otri_mul_comm` を当てるだけ。★★**測定(2026-08-18)**: `𝒪^▷(A)^gp` が意味を持つには可換性が要る——ここが (B) の仮定が効く第 2 の場所である。"
+          "evidence": "★2026-08-18 に `Prop44Gl.lean` へ `isFrobeniusNormalized_of_birat` / `otri_mul_comm_of_birat` を実装した。★手: 両辺を `𝒞^birat` へ送り、そこで仮定を使ってから**忠実性**で `𝒞` へ戻す。`α ^ n` と関手の交換は `mapEnd` の `map_pow`。★罠: `show` は `T.map` ではなく `toHomBirat` の形で書かないと `rw` が照合しない。"
         },
         {
           "id": "otri-gp-mul",

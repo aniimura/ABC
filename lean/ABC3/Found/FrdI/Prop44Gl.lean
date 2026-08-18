@@ -180,4 +180,64 @@ def prop_4_4_iv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 83, item := "Proposition 4.4, (iv)",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★birat-Frobenius-normalized なら Frobenius-normalized
+
+原文 (FrdI p.86):
+> normalized object of C is Frobenius-normalized — cf. Proposition 4.4, (ii), (iv).]
+
+★★原文はこれを `Proposition 4.4, (ii), (iv)` に送る。
+★実際に使うのは (ii) の**忠実性**と (iv) の**辞書**だけである。
+
+★★これが要るのは、`𝒪^▷(A)^gp` が意味を持つには
+`𝒪^▷(A)` の**可換性**が要り(`otri_mul_comm`)、
+それが Frobenius-normalized から出るからである。 -/
+
+variable {P G} in
+/-- ★★★★**birationally Frobenius-normalized な対象は Frobenius-normalized**。
+
+★手: 両辺を `𝒞^birat` へ送り、そこで仮定を使ってから
+**忠実性**で `𝒞` へ戻す。★`α ^ n` と関手の交換は `mapEnd` の `map_pow`。 -/
+theorem isFrobeniusNormalized_of_birat {A : C}
+    (h : IsFrobeniusNormalized (biratPre P G) ((toBiratCat P G).obj A)) :
+    IsFrobeniusNormalized P A := by
+  haveI : (toBiratCat P G).Faithful := toBiratCat_faithful
+  intro φ hφ α hα
+  set T := toBiratCat P G with hT
+  set e := CategoryTheory.Functor.mapEnd A T with he
+  have hb : ∀ δ : End A, IsBaseIdentity P δ →
+      IsBaseIdentity (biratPre P G) (e δ) := by
+    intro δ hδ
+    show biratBase (toHomBirat (P := P) (G := G) (δ : A ⟶ A))
+      = biratBase (toHomBirat (P := P) (G := G) (𝟙 A))
+    rw [biratBase_toHomBirat, biratBase_toHomBirat]
+    exact hδ
+  have hd : ∀ δ : End A, (biratPre P G).degFr (e δ) = P.degFr δ := by
+    intro δ
+    show biratDeg (toHomBirat (P := P) (G := G) (δ : A ⟶ A)) = P.degFr δ
+    rw [biratDeg_toHomBirat]
+  have hα2 : e α ∈ OTri (biratPre P G) (T.obj A) :=
+    ⟨hb α hα.1, by
+      show (biratPre P G).degFr (e α) = 1
+      rw [hd]
+      exact hα.2⟩
+  have hres := h (e φ) (hb φ hφ) (e α) hα2
+  rw [hd] at hres
+  refine T.map_injective ?_
+  have hp : (e α ^ ((P.degFr φ : ℕ+) : ℕ) : End (T.obj A))
+      = e ((α ^ ((P.degFr φ : ℕ+) : ℕ) : End A)) := (map_pow e α _).symm
+  rw [hp] at hres
+  exact (T.map_comp (φ : A ⟶ A) _).trans (hres.trans (T.map_comp _ _).symm)
+
+/-- ★★**その帰結** —— birat-Frobenius-normalized なら `𝒪^▷(A)` は可換。 -/
+theorem otri_mul_comm_of_birat {A : C}
+    (h : IsFrobeniusNormalized (biratPre P G) ((toBiratCat P G).obj A))
+    (x y : OTri P A) : x * y = y * x :=
+  otri_mul_comm P (isFrobeniusNormalized_of_birat h) x y
+
+/-- ★locator —— `Definition 4.5, (i)` の括弧書き。 -/
+def isFrobeniusNormalized_of_birat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Definition 4.5, (i) — birat-Frobenius-normalized なら Frobenius-normalized",
+    sectionId := "frdi-def-4-5" }
+
 end ABC3.Found.FrdI
