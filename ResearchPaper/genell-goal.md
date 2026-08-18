@@ -5900,3 +5900,29 @@ Lean は `⟶` の形を要求する(実測)。
 
 | 108 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 109 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-121 —— `unitHomOfSection` の全単射性(第 108 ブロック、2026-08-24)
+
+    unitHomOfSection s = (freeYonedaTermIso).inv ≫ freeYonedaEquiv.symm s   (`rfl`)
+
+★前者は同型(`PresheafOfModules.evaluation` で `app` へ移す)、
+★★後者は第 107 で全単射。合成して閉じた。
+
+### ★詰まり(1 手)
+
+`Function.Bijective.comp` が合成射の `hom` を**関数合成と見てくれない**。
+★**`(f := ...) (g := ...)` で関数を明示**すると通る。
+
+### ★★★残り 1 ブロック(核心)
+
+| 109 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` → `InvSheaf` → `equivPicRing` |
+
+★★器具はすべて揃った:
+
+| 器具 | ブロック |
+|---|---|
+| 被覆で全単射なら同型 | 第 102 |
+| 生成元の乗法は全単射 | 第 103 |
+| `unitHomOfSection` の全単射性 | ★第 108 |
+| 基底で `M_h ≅ R_h` | 第 100 |
+| 自由性の伝播 | 第 99 |

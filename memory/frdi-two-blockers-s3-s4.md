@@ -50,6 +50,31 @@ metadata:
   `(𝒞^un-tr)^birat` の Frobenius-compact 対象)が残り、いずれも
   `𝒞^istr` の birationalization / unit-trivialization を経由する。
 
+
+## ★★2026-08-18 の再測定 —— 残りはいずれも**長い道**
+
+★★**§3 9/9 の実体は `Theorem 3.4` 全体**であり、Gap_1_14_iii は (ii) の入口にすぎない。
+- (i) は実装済(1,100 行)。(ii) も 2026-08-18 に閉じた(`Thm34Pre.lean`)。
+- ★(ii) の鍵: **`irredNonPreStep` = `irredBounded`**(irreducible かつ `BoundedFSMIFactor`)。
+  右辺は `Definition 1.3` を見ないので循環せずに圧同値で運べる。
+- ★★残る (iii)(iv)(v) は (i) を上回る規模。(iii) だけで
+  7 種の射クラスの保存 ＋ `Ψ_{N≥1}` ＋ `Ψ^pf` ＋ rigidity。
+- ★(iii) の入口は **prime-Frobenius 射の保存**で、
+  `prop_1_14_v` がその圧論的特徴づけを与える。(ii) の pre-step 保存がそのまま効く。
+
+★★**`Remark 4.5.1` は 4 条のうち 2 条しか閉じていない**。
+- ★済: standard 型(`istr_standardType`)と (b) の Frobenius-compact 対象
+  (`istr_unTrBiratCompact`、`Rmk451Birat.lean`)。
+- ★★残り (a) の 2 条(birationally Frobenius-normalized 型・rational 型)は
+  **`𝒞^birat` と `(𝒞^istr)^birat` の比較**を要し、
+  ★★★**これは圧同値にならない**。`𝒞^istr` は真の充満部分圧で、
+  `A` が isotropic でも pre-step `A′ → A` の `A′` が isotropic とは限らず、
+  添字圧 `SliceA` が一致しない。★別立ての作業になる。
+
+★★**方針変更(2026-08-18、利用者の判断)**: 分類 (B)(我々が前提を足したもの)も
+**開示のうえ数える**。したがって `Theorem 3.4` を `hFrobMono` / `hFrobFS` を
+明示の仮定に置いて実装し、`.src` を付けてよい。
+
 **How to apply:** §3/§4 の残りを見積もるときは、まずこの 2 つの障害を確認する。
 数字は `node tools/frdi-progress.mjs` と `node tools/frdi-blocked.mjs`。
 関連: [[frdi-three-chains]] [[pf-frobenius-absorbed-by-transition]]

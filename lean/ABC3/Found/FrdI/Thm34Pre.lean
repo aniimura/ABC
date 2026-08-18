@@ -420,4 +420,129 @@ theorem thm_3_4_ii (e : C₁ ≌ C₂)
 
 end PreStep
 
+/-! ## ★8. ★★★★`Theorem 3.4, (iii)` の入口 —— prime-Frobenius 射の保存
+
+原文 (FrdI p.64):
+> ces to prove that, for each prime p1 ∈Primes, there exists a prime p2 ∈Primes,
+
+★★原文は「(iii) を示すには、**`Ψ^istr` が p₁-Frobenius 射を p₂-Frobenius 射に写す**
+ことだけ示せばよい」と書く。★その入口が本節である。
+
+★★**`Proposition 1.14, (v)`** が
+`IsPrimeFrobenius ∧ IsDivIdentity` の**圏論的特徴づけ**を与える。
+★その右辺は `IsStep`・`IsIrreducibleMor`・`IsPreStep` だけで書かれており、
+**(ii) で得た pre-step の保存がそのまま効く**。 -/
+
+section Step
+
+universe w
+
+variable {C : Type u2} [Category.{v2} C] {D : Type u} [Category.{v} D]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+
+include P in
+theorem isStep_isIso_comp {A A' B : C} (u : A ⟶ A') [IsIso u] {f : A' ⟶ B}
+    (h : IsStep P f) : IsStep P (u ≫ f) := by
+  refine ⟨IsPreStep.comp P (isPreStep_of_isIso P u) h.1, fun hi => ?_⟩
+  haveI := hi
+  refine h.2 ?_
+  have hf : f = inv u ≫ (u ≫ f) := by
+    rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  rw [hf]; infer_instance
+
+include P in
+theorem isStep_comp_isIso {A B E : C} {f : A ⟶ B} (h : IsStep P f) (v : B ⟶ E) [IsIso v] :
+    IsStep P (f ≫ v) := by
+  refine ⟨IsPreStep.comp P h.1 (isPreStep_of_isIso P v), fun hi => ?_⟩
+  haveI := hi
+  refine h.2 ?_
+  have hf : f = (f ≫ v) ≫ inv v := by
+    rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+  rw [hf]; infer_instance
+
+include P in
+theorem not_isPreStep_isIso_comp {A A' B : C} (u : A ⟶ A') [IsIso u] {f : A' ⟶ B}
+    (h : ¬ IsPreStep P f) : ¬ IsPreStep P (u ≫ f) := by
+  intro hc
+  refine h ?_
+  have hf : f = inv u ≫ (u ≫ f) := by
+    rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  rw [hf]
+  exact IsPreStep.comp P (isPreStep_of_isIso P (inv u)) hc
+
+end Step
+
+section PrimeFrob
+
+universe w w4 v5 u5 v6 u6
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} (P₁ : PreFrobenioid C₁ Φ₁)
+  {D₂ : Type u5} [Category.{v5} D₂] {C₂ : Type u6} [Category.{v6} C₂]
+  {Φ₂ : MonoidOn.{v5, u5, w4} D₂} (P₂ : PreFrobenioid C₂ Φ₂)
+
+include P₁ P₂ in
+/-- ★★**step も圏同値で移り、反射する** —— `step = pre-step ＋ 非同型`。 -/
+theorem isStep_map_iff (e : C₁ ≌ C₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    {A B : C₁} (φ : A ⟶ B) :
+    IsStep P₁ φ ↔ IsStep P₂ (e.functor.map φ) := by
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨(hps φ).mp h1, fun hi => ?_⟩
+    haveI := hi
+    exact h2 ((Functor.FullyFaithful.ofFullyFaithful e.functor).isIso_of_isIso_map φ)
+  · rintro ⟨h1, h2⟩
+    refine ⟨(hps φ).mpr h1, fun hi => ?_⟩
+    haveI := hi
+    exact h2 inferInstance
+
+variable (C₁) in
+include P₁ in
+/-- ★★`Proposition 1.14, (v)` の右辺 —— **純粋に圏論的な条件**
+(`IsStep`・`IsIrreducibleMor`・`IsPreStep` だけで書かれている)。
+
+★★これが `IsPrimeFrobenius ∧ IsDivIdentity` と同値であることが `prop_1_14_v`。 -/
+def PrimeFrobCond {A : C₁} (φ : A ⟶ A) : Prop :=
+  ∀ (B : C₁) (α : A ⟶ B), IsStep P₁ α →
+    ∃ (B' : C₁) (ψ : B ⟶ B') (β : B ⟶ B'),
+      IsIrreducibleMor ψ ∧ ¬ IsPreStep P₁ ψ ∧ IsStep P₁ β ∧ α ≫ ψ = φ ≫ α ≫ β
+
+include P₁ P₂ in
+/-- ★★★★**prime-Frobenius の圏論的条件は圏同値で移る**。
+
+★★`Theorem 3.4, (iii)` は「`Ψ^istr` が p-Frobenius 射を保つ」ことに帰着するので、
+`prop_1_14_v` と本補題を組めば、(ii) の pre-step 保存から (iii) の入口が出る。
+
+★手: 余単位で `α₂` を `C₁` へ引き戻し(`ff.preimage`)、
+そこで条件を使ってから像を余単位で戻す。★`step` / `irreducible` / `非 pre-step` は
+いずれも同型との合成で保たれるので、余単位の付け外しは無害である。 -/
+theorem primeFrobCond_map (e : C₁ ≌ C₂)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f ↔ IsPreStep P₂ (e.functor.map f))
+    {A : C₁} (φ : A ⟶ A) (h : PrimeFrobCond C₁ P₁ φ) :
+    PrimeFrobCond C₂ P₂ (e.functor.map φ) := by
+  intro B₂ α₂ hα₂
+  set ff := Functor.FullyFaithful.ofFullyFaithful e.functor with hff
+  set ε := e.counitIso.app B₂ with hε
+  set α₀ := ff.preimage (α₂ ≫ ε.inv) with hα₀
+  have hmap : e.functor.map α₀ = α₂ ≫ ε.inv := ff.map_preimage _
+  have hst₀ : IsStep P₁ α₀ := by
+    refine (isStep_map_iff P₁ P₂ e hps α₀).mpr ?_
+    rw [hmap]
+    exact isStep_comp_isIso P₂ hα₂ ε.inv
+  obtain ⟨B'₀, ψ₀, β₀, hirr, hnps, hstβ, heq⟩ := h _ α₀ hst₀
+  refine ⟨e.functor.obj B'₀, ε.inv ≫ e.functor.map ψ₀, ε.inv ≫ e.functor.map β₀,
+    (isIrreducibleMor_map e.functor hirr).isIso_comp ε.inv,
+    not_isPreStep_isIso_comp P₂ ε.inv ((hps ψ₀).not.mp hnps),
+    isStep_isIso_comp P₂ ε.inv ((isStep_map_iff P₁ P₂ e hps β₀).mp hstβ), ?_⟩
+  have hE := congrArg e.functor.map heq
+  rw [e.functor.map_comp, e.functor.map_comp, e.functor.map_comp, hmap] at hE
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans hE ?_
+  exact congrArg (fun t => e.functor.map φ ≫ t)
+    (Category.assoc α₂ ε.inv (e.functor.map β₀))
+
+end PrimeFrob
+
+
 end ABC3.Found.FrdI
