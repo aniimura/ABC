@@ -3730,3 +3730,49 @@ mathlib には無い。★★**我々が作る**。
       ≅ free (yoneda (f⁻¹W ⊓ f⁻¹V))                ★第 24 + 第 47
 
 ★`f⁻¹(W ⊓ V) = f⁻¹W ⊓ f⁻¹V`(第 23 `opensMap_inf`)なので**同じ対象**である。
+
+
+---
+
+## §9-55 (2026-08-18) ★★★★★mate の同型性 —— 骨組みは通った。残りは「一般化して再利用」
+
+### ★★★★骨組み(型検査済み、2026-08-18)
+
+    (pullbackPreOn f V).map (restrictFreeYonedaIso V W).inv ≫ (bcMate f V).app (freeY W)
+      = (pullbackOnFreeYonedaIso f V (objOn V W)).hom
+        ≫ (restrictFreeYonedaIso (f⁻¹V) (f⁻¹W)).inv
+        ≫ (restrictPresheafFunctor X (f⁻¹V)).map (pullbackFreeYonedaIso f W).inv
+
+★★**右辺は同型の合成**なので、この等式から mate が生成元の上で同型であることが出る。
+★`overPost (objOn V W) = objOn (f⁻¹V) (f⁻¹W)` は **`rfl`** である(実測)。
+
+### ★★★通っている手順(第 40 ブロックと同じ)
+
+    refine (adjOn.homEquiv _ _).injective ?_
+    erw [Adjunction.homEquiv_naturality_left]
+    show _ ≫ homEquiv (homEquiv.symm _) = _ ; rw [Equiv.apply_symm_apply]
+    erw [Adjunction.homEquiv_naturality_right]
+    rw [Adjunction.homEquiv_unit]
+    refine freeYonedaEquiv.injective ?_
+    simp only [freeYonedaEquiv_comp]
+    -- ★★★残り: 要素の等式
+
+### ★★★★★残りに要るもの —— **第 31・33・34・35 の一般化**
+
+第 31–35 ブロック(`unit` を生成元の上で書き下す)は
+**スキームの射 `f` について**述べてある。★★mate の計算には
+**制限した `f|` についても同じもの**が要る。
+
+★★★どのブロックも証明は `φ` に何も仮定していない
+(`CorepresentableBy` の一意性と `freeYonedaEquiv` だけ)。
+★★★★**したがって `φ` について一般に述べ直せば、両方に効く。**
+
+| ブロック | 現在の形 | 一般化後 |
+|---|---|---|
+| 31 `pullbackUnit_app_free` | `f` について | `φ` について |
+| 33 `mathlibCorep_homEquiv` | `f` について | `φ` について |
+| 34 `freeYonedaEquiv_unit_free` | `f` について | `φ` について |
+| 35 `pullbackIso_hom_unit_gen` | `f` について | `φ` について |
+
+★★これは**リファクタであって新しい数学ではない**——`δ` のときに作った道具が
+そのまま 2 度目の出番を得る。
