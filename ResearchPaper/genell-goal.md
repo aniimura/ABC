@@ -4233,3 +4233,96 @@ mathlib には無い。★★**我々が作る**。
 | 局所自明性が引き戻しで保たれること |
 | `PicSheaf` の引き戻しと 3 公理 |
 | 係数環を上げるテンソルの射 |
+
+## §9-67 —— Γ の R 加群構造の在り処(第 70 ブロック、2026-08-18 実測)
+
+★§9-66 で「`Γ(F)` の `R` 加群構造と `F.val(⊤)` の `𝒪(⊤)` 加群構造を
+`IsScalarTower` で繋ぐ必要がある」と旗を立てた。
+
+★★**測った結果、杞憂だった。**`modulesSpecToSheaf` の中に
+`ModuleCat.restrictScalars (ΓSpecIso R).inv` が**既に入っている**ので
+
+    Γ(F) = (modulesSpecToSheaf.obj F).val.obj (op ⊤)      (`rfl`、しかも `ModuleCat R`)
+
+★★★`IsScalarTower` を自分で繋ぐ必要は無かった。第 57 ブロックと同じ型の杞憂である
+——★**だが旗を立てたから測ったのであり、測ったから短く済んだ。**
+
+## §9-68 —— ★★★`Interface` の局所自由性を**強めた**(第 71 ブロック、2026-08-18)
+
+★`Interface/Arakelov/LineBundle.lean` の `IsInvertibleSheaf` の第 2 条は
+
+    ∀ V, Nonempty (𝒪(V) ≃ₗ[𝒪(V)] F.val(V))          ← 切断ごと(弱い)
+
+と書いてあった。★★これは**層論の標準の定義より弱い**——制限射との両立を
+要求しないからである。`Found` 側の `IsLocallyTrivial` はもともと
+
+    ∀ V, Nonempty ((restrict V).obj F.val ≅ 𝟙_)      ← 層として(標準)
+
+と書いてある。
+
+★★★**弱いままだと `sheafOf_surjective` が過大な要求になる**——
+「切断ごとに階数 1」だけを満たす層まで `Pic X` が拾わねばならなくなる。
+
+★したがって `Interface` 側を**標準の定義に強めた**。強める方向なので
+退化 witness が増えることは無い(むしろ減る)。
+
+★★`restrictPresheafFunctor` は `PresheafOfModules.pushforward₀OfCommRingCat` の
+別名にすぎないので、`Interface` が `Found` を import せずに書ける
+——★`𝟙_` の記法だけは `MonoidalCategory` が open でないので
+`MonoidalCategory.tensorUnit` と綴る必要がある(実測)。
+
+## §9-69 —— ★★★★★**残作業を数えた**(2026-08-18)
+
+### 原典のページ数(`ResearchPaper/papers.json` の実測値)
+
+| 対象 | ページ |
+|---|---|
+| [GenEll] §1 "Generalities on Heights"(Arakelov の該当節) | ★**約 8**(物理 p.3–11 / 全 25) |
+| [GenEll] §3 "Full Special Linear Galois Actions"(Galois の該当節) | ★約 8(物理 p.13.7–21.5) |
+| Szpiro, *Degrés, intersections, hauteurs* | 19 |
+| Moret-Bailly, *Métriques permises* | 60 |
+| Elkik, *Fonctions de Green* | 25 |
+| Moret-Bailly, *Compactifications, hauteurs et finitude* | 18 |
+| Gillet–Soulé, *Arithmetic intersection theory* | 83 |
+| Soulé, *Arithmetic Intersection*(講義録) | 26 |
+| **Arakelov 基礎文献 小計** | ★**231** |
+| EGA I + EGA II(スキームの言語) | 446 |
+
+★★★**原典 16 ページ(§1 + §3)の下に、基礎文献 231 ページが敷いてある。**
+
+### ブロック数(B1 のみ実測、他は測った材料からの見積り)
+
+| obligation | フィールド数 | 済 | 残(見積) | 総(見積) |
+|---|---|---|---|---|
+| **B1** `PicardData` | 14 | ★**71 実測** | ★**約 25** | ★**約 95** |
+| B2 `CartierPicData` | 9 | 0 | 25–35 | 25–35 |
+| B3 `PicSpecData` | 3 | 0 | 5–8 | 5–8 |
+| **C1** `ArcSpaceData` | 11 | ★**達成** | 0 | ★達成済 |
+| C2 `ProjectiveModelData` | 4 | 0 | 15–25 | 15–25 |
+| C3 `HermitianMetricData` | 12 | 0 | 40–60 | 40–60 |
+| D1 `APicData` | 10 | 0 | 25–35 | 25–35 |
+| D2 `APicSpecData` | 5 | 0 | 15–25 | 15–25 |
+| D3 `ArakelovHeightData` | 8 | 0 | 30–45 | 30–45 |
+| **Arakelov 小計(9 件)** | **76** | | ★**約 180–260** | |
+| G1 `TorsionStructureData` | 2 | 0 | ★40–70 | ★律速 |
+| G2 `TateModuleData` | 5 | 0 | 20–30 | |
+| G3 `GaloisRepData` | 6 | 0 | 15–25 | |
+| G4 `ModLRepData` | 4 | 0 | 10–20 | |
+| G5 `FullImageData` | 3 | 0 | 30–50 | |
+| G6 `TateCurveData` | 5 | 0 | 40–60 | |
+| G7 `SemistableModelData` | 7 | 0 | 40–60 | |
+| G8 `FaltingsHeightData` | 7 | 0 | 40–60 | |
+| **Galois 小計(8 件)** | **39** | | ★**約 235–375** | |
+| **合計(17 件)** | **115** | ★**71** | ★**約 415–635** | ★**約 490–710** |
+
+★★**見積りの根拠**: B1 の実測 71 ブロック / 6 フィールド完了 ≈ **12 ブロック/フィールド**。
+★ただし B1 は**最悪ケース**である——層の圏のモノイド構造を mathlib に無い所から
+建てたからで、B2・D1 はその器具を**そのまま使える**。
+★★逆に C3(エルミート計量)と G6・G7・G8 は mathlib の在庫が薄く、B1 と同格かそれ以上。
+
+### ★★★1 ページあたり
+
+    原典 16 ページ ÷ 約 550 ブロック ≒ **1 ページ 34 ブロック**
+
+★★★★これは**壁ではない**。71 ブロックを実測で積んだ実績があり、
+残りは同じ単位が並んでいるだけである。

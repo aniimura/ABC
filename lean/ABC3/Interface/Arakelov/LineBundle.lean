@@ -79,15 +79,21 @@ noncomputable def modTensor (X : Scheme.{0}) (F G : X.Modules) : X.Modules :=
 ★数学的には 2 条は同値である(片方から他方は Nakayama 型の議論で出る)。
 ★★したがって**内容は変わらない**——Lean で両方を使えるようにしただけである。
 
-★局所自由性は「各開集合が、階数 1 自由な開集合で覆われる」と述べる。
-これは `Found/Arakelov/PicLocalBasis.lean` の
-`isLocallyInjective_whiskerRight_of_basis` の仮定そのものである。 -/
+★局所自由性は**層論の標準の定義**で述べる——「各開集合が、
+`F|_V ≅ 𝒪_V`(**層として**)となる開集合で覆われる」。
+
+★★★**2026-08-18 に強めた。**それまでは「切断ごとに `𝒪(V) ≃ₗ F(V)`」と
+書いてあったが、これは標準の定義より**弱い**(制限射との両立を要求しない)。
+`Found` 側の `IsLocallyTrivial` はもともと層論の定義で書いてあり、
+弱い版のままでは `sheafOf_surjective` が**過大な要求**になっていた。 -/
 def IsInvertibleSheaf {X : Scheme.{0}} (F : X.Modules) : Prop :=
   (∃ G : X.Modules, Nonempty (modTensor X F G ≅ SheafOfModules.unit X.ringCatSheaf)) ∧
   (∀ U : X.Opens, ∃ S : Sieve U, S ∈ (Opens.grothendieckTopology X) U ∧
     ∀ ⦃V : X.Opens⦄ (i : V ⟶ U), S i →
-      Nonempty ((X.presheaf.obj (Opposite.op V) : Type)
-        ≃ₗ[(X.presheaf.obj (Opposite.op V) : Type)] F.val.obj (Opposite.op V)))
+      Nonempty ((PresheafOfModules.pushforward₀OfCommRingCat
+            (Over.forget V) X.presheaf).obj F.val
+          ≅ MonoidalCategory.tensorUnit (C := PresheafOfModules.{0}
+            (((Over.forget V).op ⋙ X.presheaf) ⋙ forget₂ CommRingCat.{0} RingCat.{0}))))
 
 /-- **(B1)** スキーム上の**可逆層の群** `Pic(X)`。
 
