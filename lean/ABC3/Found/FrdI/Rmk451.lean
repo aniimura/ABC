@@ -371,7 +371,7 @@ theorem unTr2_Div {A B : UnTr P} (f : A ⟶ B) :
 ★★**2026-08-18 に土台が 2 つ揃った**。
 
 1. `isFrobeniusCompact_transport` —— `Frobenius-compact` は
-   **`End`・`OTimes`・自己同型の 3 つの対応**だけで移る(圧も単系も違ってよい)。
+   **`End`・`OTimes`・自己同型の 3 つの対応**だけで移る(圏も単系も違ってよい)。
 2. `unTr2Equiv` —— **`𝒞^un-tr ≅ (𝒞^istr)^un-tr`**。
    `Base`・`degFr`・`Div` はいずれも `rfl` で一致する。
 
