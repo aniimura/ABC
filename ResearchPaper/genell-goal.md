@@ -4359,3 +4359,56 @@ mathlib には無い。★★**我々が作る**。
 ★★★**B1 の残りは `equivPicRing` ただ 1 つになった。**
 §9-69 の見積り「残り約 25 ブロック」のうち、`sheafOf` 族に見ていた 3–4 は
 **2 ブロックで済んだ**。残りは `equivPicRing` の約 20 である。
+
+## §9-71 —— ★★★★★比較射が建った(第 74・75 ブロック、2026-08-18)
+
+### §9-66 の旗もまた杞憂だった
+
+「`IsScalarTower` で繋ぐのが残りの作業」と書いたが、mathlib の
+`AlgebraicGeometry/Modules/Tilde.lean` に
+
+    instance : Module R Γ(M, U)
+    instance : IsScalarTower R Γ(Spec R, U) Γ(M, U)
+
+が**既にある**(実測)。★★★これで**杞憂は 3 連続**である(第 57・第 70・本ブロック)。
+★★★★だが 3 度とも**旗を立てたから測った**のであり、測ったから短く済んだ。
+
+### ★★要素を捨てたら 2 行になった
+
+★要素で書くと `Module 𝒪(⊤) Γ(G,⊤)` が**見つからない**——`Γ(G,U)` は `Ab` の対象で、
+`ModuleCat` の構造とは別経路だからである([[ring-instance-two-paths]] と同型の罠)。
+
+★★★`moduleSpecΓFunctor.obj F = (restrictScalars ι).obj (F.val(⊤))` が **`rfl`** なので、
+比較射は
+
+    restrictScalars の μ(mathlib)  ≫  restrictScalars.map (第 68 の gammaSheafifyUnit)
+
+の**合成 2 段**で済む。要素は 1 つも要らない。
+
+### ★★★随伴で `tilde` 側へ
+
+    tilde (M ⊗_R N)  ⟶  tensorModules (tilde M) (tilde N)
+
+★`(Spec R).Modules` は**モノイド圏では無い**(mathlib に構造が無く、我々の
+`tensorModules` も結合律に局所階数 1 が要る)ので
+`Adjunction.leftAdjointOplaxMonoidal` は使えない——**手で転置した**。
+
+### ★★★★測って分かった残りの難所
+
+★**mathlib は「準連接 ⟹ `fromTildeΓ` 同型」を持たない**——ファイル内に
+
+> TODO: Once `IsIso M.fromTildeΓ` is shown to be equivalent to `M` being quasicoherent, ...
+
+と**明記されている**(2026-08-18 実測)。★★これは mathlib 自身の未完部分である。
+
+★★★だが在庫はある:
+
+| 在庫 | 使い道 |
+|---|---|
+| `isIso_fromTildeΓ_iff_isLocalizing` | ★本質像の判定を `IsLocalizing` に落とす |
+| `isLocalizing_of_isIso_app_top` | ★★**2 つの `IsLocalizing` 層の間の射は、`⊤` で同型なら同型** |
+| `tilde.fullyFaithfulFunctor` | ★単射性は**ただで出る** |
+| `tildeSelf`(**`.refl`**)・`tildeFinsupp` | ★単位と自由層 |
+
+★★★★したがって残りは「`tensorModules (tilde M) (tilde N)` が `IsLocalizing`」と
+「比較射が `⊤` で同型」の 2 点に落ちる。
