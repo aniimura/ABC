@@ -244,6 +244,7 @@ import ABC3.Found.Arakelov.PicTildePre
 import ABC3.Found.Arakelov.PicTildeDesc
 import ABC3.Found.Arakelov.PicAwaySection
 import ABC3.Found.Arakelov.PicTensorUniq
+import ABC3.Found.Arakelov.PicConstSection
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
