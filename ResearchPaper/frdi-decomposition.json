@@ -1063,8 +1063,9 @@
             "iii-morclasses"
           ],
           "status": "todo",
-          "size": "★大",
-          "evidence": "`Proposition 3.2, (i)` の関手を使う。`Prop32Perfect.lean` に土台あり。"
+          "size": "中",
+          "evidence": "`Proposition 3.2, (i)` の関手を使う。`Prop32Perfect.lean` に土台あり。",
+          "note": "\n\n## ★★形を測った(2026-08-18)\n原文 (FrdI p.64):\n> Deﬁnition 3.1, (iii)] that we obtain a 1-unique 1-commutative diagram as in the\n\n★`𝒞^pf` は `Def31Pf.lean` で**余極限**として構成されている(`IdxPf` / `homFunctorPf` / `idxTransport`)。\n★★したがって `Ψ^pf` の構成は、本セッションで `Φ^birat` に対して\n行った `biratFunctor` の構成と**同じ形**になる:\n1. 添字圈の写像(`idxRoundHom` 相当)\n2. 余錐を組む(`biratMapCocone` 相当)\n3. 合成と恒等を確かめる(`biratMap_comp` / `biratMap_id` 相当)\n\n★★★**先行例があるのが利き**。本セッションの `Rmk451Birat.lean` が同じ問題を 1 回解いているので、その骨格を写す作業になる。\n★罠も引き継げる: `Quotient.liftOn` は変数では還元しない、`Over.post` の合成は structure eta で失敗する、など。"
         },
         {
           "id": "iii-rigid",
