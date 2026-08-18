@@ -204,6 +204,7 @@ import ABC3.Found.Arakelov.PicResFree
 import ABC3.Found.Arakelov.PicOnFree
 import ABC3.Found.Arakelov.PicResFreeIso
 import ABC3.Found.Arakelov.PicUnitGen
+import ABC3.Found.Arakelov.PicGenConsistent
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
