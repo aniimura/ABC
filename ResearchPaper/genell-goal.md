@@ -5085,3 +5085,37 @@ mathlib の証明を写経できる。
       ⟹ **tildeTensorDesc は同型**
 
 ★★あとは `tilde M` を `InvSheaf` にして `equivPicRing` を組むだけである。
+
+## §9-94 —— ★★★★★★★**`tilde` はテンソルを保つ**(第 91 ブロック、2026-08-18)
+
+    tildeTensorIso : tensorModules (tilde M) (tilde N)  ≅  tilde (M ⊗_R N)
+
+★★★**mathlib に無いものである**——`SheafOfModules` にモノイド構造が無いので
+そもそも述べられていない。★★★★**`M`・`N` の可逆性は要らない**。
+
+### ★★機構 —— 5 段の合成
+
+| 段 | 出典 |
+|---|---|
+| 比較射は基本開集合で全単射 | ★第 89(局所化の一意性) |
+| 基本開集合は基底 | ★mathlib `PrimeSpectrum.isBasis_basic_opens` |
+| 基底で全単射 ⟹ 茎で同型 | ★第 90 |
+| 層化の unit は茎で同型 | ★mathlib `stalkFunctor_map_unit_toSheafify_isIso` |
+| 茎で同型 ⟹ 同型 | ★第 77 |
+
+### ★★★詰まった所(7 手)
+
+★最後の `IsIso.of_isIso_comp_left` が **instance 検索で `hc` を拾わない**。
+★★`@` で**インスタンス引数を明示**して通した——`exact @IsIso.of_isIso_comp_left _ _ _ _ _ f g hsh hc`。
+
+★★★これで本 session の回避法は 3 つになった:
+
+| 症状 | 回避法 |
+|---|---|
+| `rw`/`simp` が発火しない | ★**`exact` の項に落とす** |
+| `letI` が邪魔で `map_add` が出ない | ★**`rfl` 補題で剥がす** |
+| instance 検索が仮定を拾わない | ★★**`@` で明示的に渡す** |
+
+### ★★★★残り 1 ブロック
+
+    第 92: tilde M が InvSheaf / equivPicRing
