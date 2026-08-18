@@ -7633,3 +7633,23 @@ B2 の在庫を実測した結果:
 | 169 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 |
 | 170 | `InvSheaf` と `ofDivisor` |
 | 171+ | 3 法則と `isCartierDivisor_affine` |
+
+## §9-184 —— 双対の作用は合成(第 167 ブロック、2026-08-18)
+
+    unitEndEquiv_symm_apply : (unitEndEquiv U).symm c = unitMul U c
+    dual_smul_eq            : c • φ = φ ≫ unitMul U c
+
+★`RingEquiv.ofBijective` の `symm` は `Function.surjInv` なので
+**定義からは `unitMul` と一致しない**——単射性で示す必要があった。
+
+### ★★次の 1 点——制限の半線型性
+
+双対を前層に組むには
+
+    (restrictOnFunctor h).map (unitMul U c) = unitMul V (c|_V)
+
+が要る。★両辺に `unitEnd V`(単射)を当てて比較する筋だが、
+`(unitMul U c).app W'` の**具体形**(`x ↦ x · c|_{W'}`)が要る。
+
+★★材料: 第 107 の `freeYonedaEquiv_symm_eq_desc` と
+mathlib の `PresheafOfModules.freeObjDesc_app`。
