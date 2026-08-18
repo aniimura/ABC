@@ -5253,3 +5253,37 @@ mathlib の証明を写経できる。
 
 ★★★**深追いを止める判断はしない**——道は測って確定しており、
 各手は mathlib の在庫で書ける。次の turn で第 1・2 手を建てる。
+
+## §9-100 —— ★★★★★★回り道で抜けた(第 96 ブロック、2026-08-18)
+
+    R_{t·g} は R_g の局所化である
+
+### ★★★回り道 —— `powers (t·g)` を `closure {t, g}` に取り替える
+
+★§9-99 で「mathlib の在庫はすべて逆向き」と測った。
+★★**`powers g ≤ powers (t·g)` は偽**だが、**`powers g ≤ closure {t,g}` は真**である。
+
+| 手 | 内容 |
+|---|---|
+| 1 | `powers (t·g) ≤ closure {t,g}` かつ `closure` の元は `R_{t·g}` で可逆 → `IsLocalization.of_le` |
+| 2 | `powers g ≤ closure {t,g}` → `isLocalization_of_submonoid_le` |
+
+★★★**第 3 手は不要だった**——`Module.free_of_isLocalizedModule` は
+**任意の積閉集合**で使えるので、`powers (algebraMap t)` へ絞る必要が無い。
+
+★§9-99 で「3 手」と見たが **2 手**で済んだ。
+
+### ★★方法論
+
+★★**「積閉集合を取り替える」**という一手で、mathlib の向きの不一致が消えた。
+★★★これは §9-74(反例で誤りを潰した)と同じ型の勝ちである
+——**定義を少し変えると壁が道になる**。
+
+### ★★★残り
+
+| # | 内容 |
+|---|---|
+| 97 | `M_g` 自由 ⟹ `M_{t·g}` 自由(`free_of_isLocalizedModule`) |
+| 98 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 99 | `tilde M` が `InvSheaf` |
+| 100 | `equivPicRing` |

@@ -1366,6 +1366,32 @@ iff はその系である(検証役の測定と一致する)。
 -/
 
 include P in
+/-- ★★★★**[FrdI] Proposition 1.14, (iii)** —— **両方向**。
+
+★★**逸脱の記録(分類 (B))**: `⟸`(`prop_1_14_iii_mpr`)は
+**`Definition 1.3` から出ない**。反例は `Check/FrdI/TwistedFrobenioid.lean` の
+捻れ積 `𝔽_ℕ ⋉ ∏ ℤ/n`(機械検証済み)であり、`Gap/FrdI/Section1.lean` の
+`Gap_1_14_iii` に登録してある。
+★そこで**原典に無い 2 つの仮定**を明示のパラメータとして足した:
+
+| 仮定 | 何のために要るか |
+|---|---|
+| `hFrobMono` | Frobenius 型射が **mono** であること |
+| `hFrobFS` | Frobenius 型射が **fiberwise 全射**であること |
+
+★どちらも原典の語彙で書ける(前者は **unit-trivial 型**、後者は **`Φ` が perfect**
+から従う)が、`Definition 1.3` の 21 条には無い。
+★★**足した仮定の下でのみ成り立つ**ので、原文の主張そのものは未決着のままである。 -/
+theorem prop_1_14_iii (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hFSMFF : IsOfFSMFFType D)
+    (hFrobMono : ∀ {X Y : C} (ε : X ⟶ Y), IsFrobeniusType P ε → Mono ε)
+    (hFrobFS : ∀ {X Y : C} (ε : X ⟶ Y), IsFrobeniusType P ε → IsFiberwiseSurjective ε)
+    {A B : C} (φ : A ⟶ B) (hirr : IsIrreducibleMor φ) :
+    BoundedFSMIFactor φ ↔ ¬ IsPreStep P φ :=
+  ⟨fun hb hps => prop_1_14_iii_mpr P F G hiso hFSMFF hFrobMono hFrobFS φ hirr hps hb,
+   fun hnps => prop_1_14_iii_mp P F G hiso hFSMFF φ hirr hnps⟩
+
+include P in
 /-- ★★**(i) の系 —— 次数が 1 でない irreducible 射は prime-Frobenius**。
 
 ★(i) の 3 種類のうち step と pull-back はどちらも次数 1 だから。
