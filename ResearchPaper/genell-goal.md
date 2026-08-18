@@ -5396,3 +5396,36 @@ mathlib の証明を写経できる。
 
 | 100 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
 | 101 | `tilde M` が `InvSheaf` / `equivPicRing` |
+
+## §9-105 —— 切断側が揃った(第 100 ブロック、2026-08-18)
+
+    D(g) の基底 {D(t·g)} の全体で  M_{t·g} ≅ R_{t·g}
+
+★第 76(近傍で自由)+ 第 99(自由性の伝播)の合成。**一発。**
+
+### ★★★残る構造上の 1 点(正確に記録する)
+
+`IsLocallyTrivial` は `(restrict V).obj P ≅ 𝟙_`
+——**`Over V` 上の前層加群としての同型**を要求する。
+
+★切断ごとの同型は**基底の上では**出た(本ブロック)。
+★★しかし `Over V` の対象は `V` 以下の**すべての開集合**である。
+
+★★★**「基底で同型 ⟹ 全体で同型」を `Over V` の site で言う器具が要る。**
+第 90 ブロックは `TopCat.Presheaf`(空間の上)の版であり、そのままでは当たらない。
+
+| 候補 | 内容 | 見積 |
+|---|---|---|
+| (a) | 第 90 を `Over V` の site へ移す | 2–3 |
+| (b) | 茎で言う(第 77 の `Over V` 版) | 2–3 |
+| (c) | `Over V` と開部分空間 `V` の site 同値を使う | 1–2 |
+
+★★★★**(c) が最短と見る**——`Opens.grothendieckTopology` の `over` は
+開部分空間の位相と一致するので、mathlib の `Over.forget` 系の補題で移せる可能性がある。
+次の turn で測る。
+
+### ★★残り 3–4 ブロック
+
+| 101 | 上の (a)/(b)/(c) のいずれか |
+| 102 | `(tilde M)\|_{D g} ≅ 𝟙_` → `IsLocallyTrivial` |
+| 103 | `tilde M` が `InvSheaf` / `equivPicRing` |
