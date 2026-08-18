@@ -1259,4 +1259,32 @@ def isPullBack_map_of_classes.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) — pull-back 射の保存",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★co-angular の**反射**方向
+
+★★`IsCoAngular` は「任意の分解に対し…」なので、
+**保存**を示すには分解を引き戻す必要がある(重い)。
+★しかし**反射**(像が co-angular ならもとも co-angular)は、
+分解を**前へ送る**だけなので軽い。
+★圧倒的同値なら両方向に使えるので、これを `Ψ` と `Ψ⁻¹` に当てれば保存も出る。 -/
+
+/-- ★★★★**co-angular の反射** —— 像が co-angular ならもとも co-angular。 -/
+theorem isCoAngular_of_map (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+    (hLin : ∀ {X Y : C₁} (f : X ⟶ Y), IsLinear P₁ f → IsLinear P₂ (Ψ.map f))
+    (hIs : ∀ {X Y : C₁} (f : X ⟶ Y), IsIsometric P₁ f → IsIsometric P₂ (Ψ.map f))
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hBI : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsBaseIsomorphism P₁ f → IsBaseIsomorphism P₂ (Ψ.map f))
+    {A B : C₁} (φ : A ⟶ B) (h : IsCoAngular P₂ (Ψ.map φ)) : IsCoAngular P₁ φ := by
+  intro X Y γ β α hfac hlin hisom hps hbi
+  have hmap := h (Ψ.obj X) (Ψ.obj Y) (Ψ.map γ) (Ψ.map β) (Ψ.map α)
+    (by rw [hfac, Ψ.map_comp, Ψ.map_comp]) (hLin α hlin) (hIs β hisom) (hPS β hps)
+    (hbi.imp (fun hh => hBI α hh) (fun hh => hBI γ hh))
+  haveI := hmap
+  exact isIso_of_reflects_iso β Ψ
+
+def isCoAngular_of_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — co-angular の反射",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

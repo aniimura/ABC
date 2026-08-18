@@ -338,6 +338,10 @@ import ABC3.Found.Arakelov.PicUnitVal
 import ABC3.Found.Arakelov.PicFVal
 import ABC3.Found.Arakelov.PicEvalBil
 import ABC3.Found.Arakelov.PicEvalHom
+import ABC3.Found.Arakelov.PicDualGlue
+import ABC3.Found.Arakelov.PicDualVal
+import ABC3.Found.Arakelov.PicDualHom
+import ABC3.Found.Arakelov.PicDualSheaf
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

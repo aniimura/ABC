@@ -8093,3 +8093,47 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
     B2: 第 148–175 の 28 ブロック(フルビルド成功・ゲート PASS)
       完了: イデアル層 → 層加群、Cartier ⟹ 局所自明、双対の前層、双対も局所自明、評価射
       残り: 双対が層(4–8)→ 評価射の同型(3)→ InvSheaf・ofDivisor(2)→ 3 法則(6)
+
+## §9-201 双対が層であることを示した(第 176–179 ブロック)
+
+§9-200 で採った **A の道**が**完走した**。
+
+    Presheaf.IsSheaf (Opens.grothendieckTopology X) (dualPresheaf F).presheaf
+
+| ブロック | 内容 | 山場 |
+|---|---|---|
+| 176 | 局所値が貼り合わせ可能 | `dual_app_res` が `naturality` 1 行 |
+| 177 | 貼り合わせた値が加法的・線型・自然 | すべて「一意性で殴る」 |
+| 178 | 束ねて**射**にする | ★`homMk` |
+| 179 | ★★★★★★★**貼り合わせ性と一意性** | 制限 → 局所値 |
+
+### ★★測った結果、見積もり 4–8 に対し **4 ブロック**
+
+★§9-200 の見積もりが当たった。**測ってから設計した**からである
+(`Presheaf.IsSheaf.hom` と `Subfunctor.isSheaf_iff` の在庫を先に確認し、
+結局どちらも使わず `isSheafUniqueGluing` で直接組む方が短いと判断した)。
+
+### ★★★[[ring-instance-two-paths]] の新しい逃げ道 —— `homMk`
+
+第 178 で、構造体 `PresheafOfModules.Hom` を直接組むと
+
+    Module ((Over.forget V).op ⋙ 𝒪 ⋙ forget₂ ...).obj Z  (F.obj ...)
+
+の instance が見つからない(`𝒪 ⋙ forget₂` 経由の instance はあるのに、
+**綴りが違う**ので探索が届かない)。`letI` で橋渡ししても、
+今度は `F.obj ((Over.forget V).op.obj Z)` の綴りが合わず届かない。
+
+★★**mathlib の `PresheafOfModules.homMk`**——「アーベル群の前層の射 + 線型性」から
+作る補助構成子——を使うと、**`Module` が現れない**(`AddCommGrpCat.ofHom` と
+`AddMonoidHom.mk'` だけ)ので一発で通った。
+
+| 逃げ道 | 使う場面 |
+|---|---|
+| ★`homMk` | **前層加群の射を組むとき**(新規) |
+| 型付き恒等関数 | 値の橋(第 173) |
+| `letI` + `inferInstanceAs` | 局所化の係数(第 157) |
+| `erw` / 項で手渡す | `rw` が綴りで止まるとき |
+
+### 残り(B2)
+
+    評価射の同型(3)→ InvSheaf・ofDivisor(2)→ 3 法則 + isCartierDivisor_affine(6)
