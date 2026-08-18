@@ -937,13 +937,13 @@
         {
           "id": "psiN-identity",
           "size": "中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psiN-F3",
             "psiN-degree"
           ],
           "title": "non-group-like 対象があれば Ψ_N は恒等",
-          "note": "★原文の「if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity」。"
+          "note": "★原文の「if C1, C2 admit a non-group-like object, then ΨN≥1 is the identity」。\n\n★★★済(2026-08-18): `Thm34Quasi.lean` の `pnatMulEquivOfPrimeEquiv_eq_self` と `psiN_eq_id_of_orderPreserve`。\n★`F3-identity`(順序を保つ素数の全単射は恒等)と `psiN-extend`(素数の全単射 ⇒ `ℕ≥1 ≃* ℕ≥1`)を繋ぐだけだった。"
         },
         {
           "id": "iii-morclasses",

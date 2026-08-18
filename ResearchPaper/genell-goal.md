@@ -8037,3 +8037,31 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 | 176 | 局所自明な `F` で `evHom` が同型 | 3 |
 | 177 | `InvSheaf` と `ofDivisor` | 2 |
 | 178+ | 3 法則と `isCartierDivisor_affine` | 6 |
+
+## §9-199 —— ★★★★設計の分岐——**双対は層だと示す方が安い**(2026-08-18)
+
+`InvSheaf.inv` を「双対の**層化**」にすると、
+
+    tensorModules carrier inv = sheafify (F ⊗ (sheafify dual).val)
+
+となり、第 175 の `evHom : F ⊗ dualPresheaf F ⟶ 𝟙_` が**そのままでは使えない**
+——`dual` と `(sheafify dual).val` が違うからである。
+
+★橋を架けるには「層化は局所同型を同型にする」を通す必要があり 3–5 ブロック。
+
+### ★★結論——**双対が層であることを示す**(§9-191 で先送りした段)
+
+そうすれば `inv := ⟨dualPresheaf F, 層である証明⟩` となり
+
+    tensorModules carrier inv = sheafify (F ⊗ dualPresheaf F)
+
+で `evHom` がそのまま層化できる。★★見積もりは同じ 3–5 ブロックだが、
+**後段が素直になる**(層化の可換性を扱わずに済む)。
+
+### ★★★筋(mathlib の `Presheaf.IsSheaf.hom` を真似る)
+
+    1. 型の Hom 前層は層(mathlib `Presheaf.IsSheaf.hom`)
+    2. 加群の Hom は「線型性」という**局所条件**で切り出した部分前層
+    3. 局所条件で切り出した部分層は層(★第 150 と同じ形)
+
+★★★★第 150(`idealSections_of_local`)で使った「局所条件 ⟹ 層」の型が再利用できる。
