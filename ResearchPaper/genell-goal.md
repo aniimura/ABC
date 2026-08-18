@@ -7091,3 +7091,21 @@ B2 の在庫を実測した結果:
 | 3 | 層であること(局所条件なので `IdealSheafData` の貼り合わせから) |
 | 4 | Cartier なら局所自明(★第 132 をアフィン開へ輸送)——**律速** |
 | 5 | `ofDivisor` と 3 法則 |
+
+## §9-164 —— イデアル層の切断は局所的(第 150 ブロック、2026-08-18)
+
+    idealSections_of_local :
+      U を Wᵢ が覆い、各 s|_{Wᵢ} ∈ idealSections D (Wᵢ) ⟹ s ∈ idealSections D U
+
+★**茎で判定する**のが筋(mathlib の `IsAffineOpen.mem_ideal_iff`):
+
+| 段 | 内容 |
+|---|---|
+| 1 | アフィン開 `A ≤ U` と点 `x ∈ A` を取り、`x ∈ Wᵢ` なる `i` を選ぶ |
+| 2 | `exists_basicOpen_le` で `B := D(f) ∋ x`、`B ≤ Wᵢ ⊓ A` |
+| 3 | `s|_B ∈ D.ideal B`(`B` はアフィン開で `B ≤ Wᵢ`) |
+| 4 | `map_ideal` で `D.ideal B = (D.ideal A).map (制限)` |
+| 5 | `germ_res` で茎が `B` を経由する |
+
+★★`germ_res` は **`erw`** が要る——`↑(X.affineBasicOpen f)` と `X.basicOpen f` は
+`rfl` だが簡約透明度では合わない。
