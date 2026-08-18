@@ -6375,3 +6375,35 @@ Arakelov と Galois の大きさが**そのまま見える**ようになった�
 
 ★★★**B1 の残りは `IsLocallyTrivial` の組み立て 1 本**であり、
 そこに至る器具は 31 ブロック分すべて建っている。
+
+## §9-139 —— 加群構造は移せた、同型の持ち上げは残った(第 124 ブロック、2026-08-24)
+
+### 通ったもの
+
+| 宣言 | 内容 |
+|---|---|
+| `awayRingEquiv` | ★`𝒪(D f) ≃ₐ[R] Localization (powers f)`(mathlib の `IsLocalization.algEquiv`) |
+| `modOnLocalized` | ★★`M_f` は `𝒪(D f)` 加群(`Module.compHom`) |
+| `towerOnLocalized` | ★★`R → 𝒪(D f) → M_f` は足場 |
+| `modOnSection` / `towerOnSection` | ★切断の側も同様 |
+
+★これは第 95・98 で使ったのと**同じ手**である。
+
+### 止めた所(5 手)
+
+`tildeAwayEquiv` を `extendScalarsOfIsLocalization` で `𝒪(D f)` 線型に上げようとすると、
+**終域の `Module 𝒪(D f)` インスタンスが拾われない**——
+`inferInstanceAs` で明示的に置いても**同じ**(実測)。
+
+★★終域は `(modulesSpecToSheaf.obj (tilde M)).presheaf.obj` と
+`(tilde M).val.obj` の**2 通りの書き方**があり、台は `rfl` で一致する(第 121)のに
+instance 検索が**別物として扱う**。
+
+★★★これは [[ring-instance-two-paths]] の **4 例目**である
+(環・加群・`Inhabited`・本項の**前層の 2 通りの書き方**)。
+
+### ★★★★次の一手(記録)
+
+★`extendScalarsOfIsLocalization` を使わず、**`LinearEquiv` を手で作る**
+(`toFun`/`map_smul'` を明示)ほうが早いかもしれない。
+★★あるいは `tildeAwayEquiv` を最初から `(tilde M).val.obj` 側で建て直す。
