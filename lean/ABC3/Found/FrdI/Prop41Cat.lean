@@ -546,10 +546,175 @@ theorem prop_4_1_ii_monoid {M : Type w'} [AddCommMonoid M] {ι : Prime M → Pf 
     rw [h0, suppElt_zero H] at hsingle
     exact absurd hsingle.symm (by simp)
 
+/-! ## ★6. ★★★★★`Proposition 4.1, (ii)` -/
+
+section Cat2
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★**(ii) の圏層** —— 圏の条件から単系の条件へ。 -/
+theorem prop_4_1_ii_bridge_mpr (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B Cc : C} (φ : B ⟶ A) (ψ : A ⟶ Cc)
+    (hstφ : IsStep P φ) (hstψ : IsStep P ψ)
+    (hcat : ∀ (A' : C) (φ' : B ⟶ A') (ψ' : A' ⟶ Cc), IsStep P φ' → IsStep P ψ' →
+          φ ≫ ψ = φ' ≫ ψ' →
+        ∃ (A'' : C) (φ'' : B ⟶ A'') (ζ : A'' ⟶ A) (ζ' : A'' ⟶ A'),
+          IsStep P φ'' ∧ IsPreStep P ζ ∧ IsPreStep P ζ' ∧ φ = φ'' ≫ ζ ∧ φ' = φ'' ≫ ζ')
+    (a b : Φ.val (P.toElem.obj Cc).base)
+    (hab : preStepVal P (φ ≫ ψ) (IsPreStep.comp P hstφ.1 hstψ.1) = a + b)
+    (ha0 : a ≠ 0) (hb0 : b ≠ 0) :
+    ∃ d : Φ.val (P.toElem.obj Cc).base, d ≠ 0 ∧
+      MLe d (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ))
+        (IsPreStep.comp P hstφ.1 hstψ.1).2) (P.Div φ)) ∧ MLe d b := by
+  have hsc : IsPreStep P (φ ≫ ψ) := IsPreStep.comp P hstφ.1 hstψ.1
+  have hcc : IsCoAngular P (φ ≫ ψ) := isCoAngular_of_isotropic_dom (P := P) G.core (hiso B) _
+  letI := isCancelAdd_of_isIntegralMonoid _ (P.divisorial (P.toElem.obj Cc).base).1.1
+  obtain ⟨A', u, v, hsu, hsv, hcu, hcv, hfac2, hva⟩ :=
+    exists_factor_of_mle' G (φ ≫ ψ) hcc hsc (⟨b, hab.symm⟩ : MLe a _)
+  have key : ∀ (f : B ⟶ Cc) (hf : IsPreStep P f), f = u ≫ v →
+      preStepVal P f hf = a + Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div u) := by
+    rintro f hf rfl
+    rw [← hva]
+    exact preStepVal_comp u v hsu hsv hf
+  have hval2 := key (φ ≫ ψ) hsc hfac2
+  have hyu : Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div u) = b :=
+    add_left_cancel (a := a) (hval2.symm.trans hab)
+  have hstv : IsStep P v := (isStep_iff_preStepVal_ne_zero hiso v hsv).mpr (hva ▸ ha0)
+  have hstu : IsStep P u := by
+    refine (isStep_iff_preStepVal_ne_zero hiso u hsu).mpr ?_
+    rw [Ne, preStepVal_eq_zero_iff]
+    intro h0
+    exact hb0 (by rw [← hyu, h0, map_zero])
+  obtain ⟨A'', φ'', ζ, ζ', hstφ'', hζs, hζ's, hfacφ, hfacu⟩ := hcat A' u v hstu hstv hfac2
+  refine ⟨Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div φ''), ?_, ?_, ?_⟩
+  · intro h0
+    refine ((isStep_iff_preStepVal_ne_zero hiso φ'' hstφ''.1).mp hstφ'') ?_
+    rw [preStepVal_eq_zero_iff]
+    exact Φ.map_injective (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (h0.trans (map_zero _).symm)
+  · refine map_mle (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2)) ?_
+    rw [hfacφ]
+    exact mle_div_comp φ'' ζ hζs.1
+  · rw [← hyu]
+    refine map_mle (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2)) ?_
+    rw [hfacu]
+    exact mle_div_comp φ'' ζ' hζ's.1
+
+set_option maxHeartbeats 1000000 in
+/-- ★★**(ii) の圏層** —— 単系の条件から圏の条件へ。
+
+★★2 つの第 1 因子 `φ''`(`φ` 側)と `φ'''`(`φ'` 側)は**零因子が等しい**ので、
+`exists_iso_of_div_eq`(前置の圏同値)で同型になり、1 本にまとまる。 -/
+theorem prop_4_1_ii_bridge_mp (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B Cc : C} (φ : B ⟶ A) (ψ : A ⟶ Cc)
+    (hstφ : IsStep P φ) (hstψ : IsStep P ψ)
+    (hmono : ∀ a b : Φ.val (P.toElem.obj Cc).base,
+        preStepVal P (φ ≫ ψ) (IsPreStep.comp P hstφ.1 hstψ.1) = a + b → a ≠ 0 → b ≠ 0 →
+        ∃ d : Φ.val (P.toElem.obj Cc).base, d ≠ 0 ∧
+          MLe d (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ))
+            (IsPreStep.comp P hstφ.1 hstψ.1).2) (P.Div φ)) ∧ MLe d b)
+    (A' : C) (φ' : B ⟶ A') (ψ' : A' ⟶ Cc) (hstφ' : IsStep P φ') (hstψ' : IsStep P ψ')
+    (hfac : φ ≫ ψ = φ' ≫ ψ') :
+    ∃ (A'' : C) (φ'' : B ⟶ A'') (ζ : A'' ⟶ A) (ζ' : A'' ⟶ A'),
+      IsStep P φ'' ∧ IsPreStep P ζ ∧ IsPreStep P ζ' ∧ φ = φ'' ≫ ζ ∧ φ' = φ'' ≫ ζ' := by
+  have hsc : IsPreStep P (φ ≫ ψ) := IsPreStep.comp P hstφ.1 hstψ.1
+  have hcφ : IsCoAngular P φ := isCoAngular_of_isotropic_dom (P := P) G.core (hiso B) φ
+  have hcφ' : IsCoAngular P φ' := isCoAngular_of_isotropic_dom (P := P) G.core (hiso B) φ'
+  have key2 : ∀ (f : B ⟶ Cc) (hf : IsPreStep P f), f = φ' ≫ ψ' →
+      preStepVal P f hf = preStepVal P ψ' hstψ'.1
+        + Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div φ') := by
+    rintro f hf rfl
+    exact preStepVal_comp φ' ψ' hstφ'.1 hstψ'.1 hf
+  have hval2 := key2 (φ ≫ ψ) hsc hfac
+  have ha0 : preStepVal P ψ' hstψ'.1 ≠ 0 :=
+    (isStep_iff_preStepVal_ne_zero hiso ψ' hstψ'.1).mp hstψ'
+  have hb0 : Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div φ') ≠ 0 := by
+    intro h0
+    refine ((isStep_iff_preStepVal_ne_zero hiso φ' hstφ'.1).mp hstφ') ?_
+    rw [preStepVal_eq_zero_iff]
+    exact Φ.map_injective (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (h0.trans (map_zero _).symm)
+  obtain ⟨d, hd0, hdq, hdb⟩ := hmono _ _ hval2 ha0 hb0
+  rw [yVal_eq φ ψ hstφ.1 hstψ.1 hsc] at hdq
+  have hdA : MLe (Φ.map (P.Base ψ) d) (preStepVal P φ hstφ.1) := by
+    have h := map_mle (Φ.map (P.Base ψ)) hdq
+    rwa [MonoidOn.map_inv_map Φ (P.Base ψ) hstψ.1.2] at h
+  obtain ⟨A'', φ'', ζ, hcφ'', hsφ'', hcζ, hsζ, hfacφ, hdivφ''⟩ :=
+    exists_first_factor_of_mle G φ hcφ hstφ.1 hdA
+  have key3 : ∀ (f : B ⟶ Cc) (hf : IsPreStep P f), f = φ' ≫ ψ' →
+      Φ.map (@inv _ _ _ _ (P.Base f) hf.2) (P.Div φ')
+        = Φ.map (@inv _ _ _ _ (P.Base ψ') hstψ'.1.2) (preStepVal P φ' hstφ'.1) := by
+    rintro f hf rfl
+    exact yVal_eq φ' ψ' hstφ'.1 hstψ'.1 hf
+  rw [key3 (φ ≫ ψ) hsc hfac] at hdb
+  have hdA' : MLe (Φ.map (P.Base ψ') d) (preStepVal P φ' hstφ'.1) := by
+    have h := map_mle (Φ.map (P.Base ψ')) hdb
+    rwa [MonoidOn.map_inv_map Φ (P.Base ψ') hstψ'.1.2] at h
+  obtain ⟨A''', φ''', ζ', hcφ''', hsφ''', hcζ', hsζ', hfacφ', hdivφ'''⟩ :=
+    exists_first_factor_of_mle G φ' hcφ' hstφ'.1 hdA'
+  have hdiveq : P.Div φ'' = P.Div φ''' := by
+    rw [hdivφ'', hdivφ''', map_base_comp_apply, map_base_comp_apply, hfac]
+  obtain ⟨θ, hθiso, hθ⟩ := exists_iso_of_div_eq G φ'' φ''' hcφ'' hsφ'' hcφ''' hsφ''' hdiveq
+  haveI := hθiso
+  refine ⟨A'', φ'', ζ, θ ≫ ζ', ?_, hsζ,
+    IsPreStep.comp P (isPreStep_of_isIso P θ) hsζ', hfacφ, ?_⟩
+  · refine (isStep_iff_preStepVal_ne_zero hiso φ'' hsφ'').mpr ?_
+    rw [Ne, preStepVal_eq_zero_iff, hdivφ'']
+    intro h0
+    refine hd0 ?_
+    refine Φ.map_injective (P.Base ψ) ?_
+    refine Φ.map_injective (P.Base φ) ?_
+    rw [map_zero, map_zero]
+    exact h0
+  · rw [hfacφ', ← hθ, Category.assoc]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**[FrdI] Proposition 4.1, (ii)**。
+
+原文 (FrdI p.75):
+> (ii) Suppose that φ is primary. Then the composite ψ ◦φ : B →C, hence
+
+★単系層(`prop_4_1_ii_monoid`)と圏層(`prop_4_1_ii_bridge_*`)を繋ぐだけ。 -/
+theorem prop_4_1_ii (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+    {A B Cc : C} (φ : B ⟶ A) (ψ : A ⟶ Cc)
+    (hstφ : IsStep P φ) (hstψ : IsStep P ψ)
+    {ι : Prime (Φ.val (P.toElem.obj Cc).base) → Pf (Φ.val (P.toElem.obj Cc).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj Cc).base) ι)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj Cc).base))
+    (hprim : IsPrimaryElt (P.Div φ)) :
+    IsPrimaryElt (P.Div (φ ≫ ψ)) ↔
+      (∀ (A' : C) (φ' : B ⟶ A') (ψ' : A' ⟶ Cc), IsStep P φ' → IsStep P ψ' →
+          φ ≫ ψ = φ' ≫ ψ' →
+        ∃ (A'' : C) (φ'' : B ⟶ A'') (ζ : A'' ⟶ A) (ζ' : A'' ⟶ A'),
+          IsStep P φ'' ∧ IsPreStep P ζ ∧ IsPreStep P ζ' ∧ φ = φ'' ≫ ζ ∧ φ' = φ'' ≫ ζ') := by
+  have hsc : IsPreStep P (φ ≫ ψ) := IsPreStep.comp P hstφ.1 hstψ.1
+  have hval : preStepVal P (φ ≫ ψ) hsc
+      = preStepVal P ψ hstψ.1 + Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div φ) :=
+    preStepVal_comp φ ψ hstφ.1 hstψ.1 hsc
+  have hq : IsPrimaryElt (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div φ)) := by
+    rw [yVal_eq φ ψ hstφ.1 hstψ.1 hsc]
+    exact isPrimaryElt_of_bijective (Φ.map (@inv _ _ _ _ (P.Base ψ) hstψ.1.2))
+      (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base ψ) hstψ.1.2).symm)
+      ((isPrimaryElt_preStepVal_iff φ hstφ.1).mpr hprim)
+  have hmonoiff : IsPrimaryElt (preStepVal P (φ ≫ ψ) hsc) ↔
+      (∀ a b : Φ.val (P.toElem.obj Cc).base, preStepVal P (φ ≫ ψ) hsc = a + b →
+        a ≠ 0 → b ≠ 0 → ∃ d : Φ.val (P.toElem.obj Cc).base, d ≠ 0 ∧
+          MLe d (Φ.map (@inv _ _ _ _ (P.Base (φ ≫ ψ)) hsc.2) (P.Div φ)) ∧ MLe d b) := by
+    rw [hval]
+    exact prop_4_1_ii_monoid H hperf (P.divisorial _) hq
+  refine (isPrimaryElt_preStepVal_iff (φ ≫ ψ) hsc).symm.trans (hmonoiff.trans ⟨?_, ?_⟩)
+  · intro hm A' φ' ψ' h1 h2 h3
+    exact prop_4_1_ii_bridge_mp G hiso φ ψ hstφ hstψ hm A' φ' ψ' h1 h2 h3
+  · intro hc a b hab ha0 hb0
+    exact prop_4_1_ii_bridge_mpr G hiso φ ψ hstφ hstψ hc a b hab ha0 hb0
+
+end Cat2
+
+
 /-! ## ★出典の紐付け(条つき) -/
 
-def prop_4_1_ii_monoid.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 76, item := "Proposition 4.1, (ii) — モノイド層",
+def prop_4_1_ii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 75, item := "Proposition 4.1, (ii)",
     sectionId := "frdi-prop-4-1" }
 
 def prop_4_1_i.src : ABC3.Meta.Source :=
