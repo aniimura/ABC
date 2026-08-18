@@ -813,4 +813,21 @@ def psiBase.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — Ψ_Base の構成と 1-可換図式・1-一意性",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★★**[FrdI] Theorem 3.4, (v)** の rigidity。
+
+原文 (FrdI p.69):
+> asserted rigidity follows formally from Proposition 1.13, (i). This completes the
+
+★在庫の `prop_1_13_i_global : IsRigidFunctor P.proj` に
+`isRigidFunctor_of_equivalence_comp`(`iii-rigid` で作ったもの)を被せるだけ。
+★★**同じ道具が 3 個目の節点で効いた**((iii)・(iv)・(v))。 -/
+theorem thm_3_4_v_rigid (Fc₂ : FrobenioidCore P₂) (hslim₂ : IsSlimCat D₂) (e : C₁ ≌ C₂) :
+    IsRigidFunctor (e.functor ⋙ P₂.proj) :=
+  isRigidFunctor_of_equivalence_comp e _ (prop_1_13_i_global P₂ Fc₂ hslim₂)
+
+def thm_3_4_v_rigid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 69,
+    item := "Theorem 3.4, (v) — 合成関手の rigidity",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

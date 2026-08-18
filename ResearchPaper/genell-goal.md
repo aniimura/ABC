@@ -9144,3 +9144,42 @@ instance 解決に失敗する——係数環の綴りが `X.ringCatSheaf.obj.ob
       (D.comap f).ideal A = (D.ideal B).map appLE      ★第 202 の連鎖
       imgIdeal は掛け算で閉じ、加法でも閉じる           ★第 209
     ⟹ imgIdeal = 全体 ⟹ app A は全射 ⟹ 第 207 で同型
+
+## §9-230 最後の 1 歩——**イデアル版の連鎖**が要ると分かった(2026-08-19)
+
+第 209 までで補題 B の道具は揃い、全射性の証明を組んだところ、
+**1 つだけ足りない**ことが分かった:
+
+    (D.comap f).ideal A = (D.ideal B).map (f.appLE B A i)        ★イデアルの等式
+
+★第 202(`invertible_comap_pair`)は**可逆性**をこの連鎖で運ぶが、
+**イデアルの等式そのもの**は途中で `fromSpec` の転送に埋もれていて取り出せない:
+
+    (D.comap f).ideal A
+      ≅(fromSpec で転送)  ((D.comap f).comap A.fromSpec).ideal ⊤
+      = ((D.comap hB.fromSpec).comap (Spec.map appLE)).ideal ⊤   ★comap_decomp
+      = ((D.comap hB.fromSpec).ideal ⊤).map (Spec.map appLE).appTop  ★comap_ideal_top
+      = … .map (ΓSpecIso.hom ≫ appLE ≫ ΓSpecIso.inv)            ★appTop_decomp
+
+★★これを両端の `fromSpec` 転送(`Ideal.map`/`comap` の往復)まで含めて
+**イデアルの等式として**書き下すのが残りである。見積もり **2–3 ブロック**。
+
+### ★★第 202 の設計を今なら変える
+
+★可逆性だけを運ぶのでなく、**イデアルの等式を先に出して**から
+可逆性はそこに第 183 を当てる、という順にすれば本ブロックは要らなかった。
+★★「可逆性が欲しい」という**目的に最短で寄せた**ため、
+より基本的な等式が副産物として残らなかったのである。
+★★★[[measure-mathlib-before-skeleton]] の裏面——
+**中間結果を汎用の形で残すかどうか**も設計判断である。
+
+### この区間(第 176–209、34 ブロック)の最終状態
+
+| 項目 | 状態 |
+|---|---|
+| B2 `CartierPicData` | ★**13/14**、最後の 1 欄も道具が揃い残り 2–3 ブロック |
+| mathlib の TODO | ★**可逆性は Zariski 局所的**を埋めた(第 196–200) |
+| 再利用可能な結果 | ★**直線束の間の全射は同型**(第 206–207) |
+| Interface の訂正 | ★**3 件**(いずれも反例つき) |
+| 測定 | ★**14 回**、外れ 2 件も記録 |
+| Galois | ★FLT 導入で**全面再測定**、G1 の律速を `#E[n]=n²` 1 本に特定 |
