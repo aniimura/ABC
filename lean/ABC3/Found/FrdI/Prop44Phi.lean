@@ -492,6 +492,26 @@ def prop_4_4.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 82, item := "Proposition 4.4",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★[FrdI] Proposition 4.8 —— 平方化 II
+
+原文 (FrdI p.88):
+> Proposition 4.8. (Birationalization of a Frobenioid II)
+
+原文 (FrdI p.88):
+> (i) If C is of isotropic type, then so is Cbirat.
+
+★原典の証明は「Assertion (i) follows formally from Proposition 4.4, (iv)」であり、
+★(iv) の辞書 `birat_isIsotropic_iff` がそのまま使える。 -/
+
+variable {P G} in
+/-- ★★★★**[FrdI] Proposition 4.8, (i)** —— isotropic 型は birat で保たれる。 -/
+theorem prop_4_8_i (h : IsOfIsotropicType P) : IsOfIsotropicType (biratPre P G) :=
+  fun X => (birat_isIsotropic_iff P G X).mpr (h X)
+
+def prop_4_8_i.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (i)",
+    sectionId := "frdi-prop-4-8" }
+
 /-! ## ★出典の紐付け(条つき) -/
 
 /-- ★locator —— `Proposition 4.4, (iii)` の `𝒟` 上の関手性。 -/
