@@ -3820,3 +3820,49 @@ mathlib には無い。★★**我々が作る**。
 
 ★★1 が本命である——第 38 ブロックで
 「`erw` は補題を両辺に当ててしまうので `have` で項として作る」と記録した。
+
+
+---
+
+## §9-57 (2026-08-18) ★★★mate の要素計算 —— タイムアウトは抜けた。残りは項の対応付け
+
+### ★★★★★タイムアウトは抜けた(2026-08-18 実測)
+
+§9-56 で「`erw [freeYonedaEquivUnitGen]` が `isDefEq` でタイムアウトする」と記録した。
+★★**第 38 ブロックの教訓どおり `have` で項として作ったら通った**:
+
+    have h := freeYonedaEquivUnitGen (phiOn f V) (objOn V W)
+    erw [h]
+
+★★★これで**タイムアウトは消えた**。
+
+### ★★通っている手順(ここまで)
+
+    refine (adjOn.homEquiv _ _).injective ?_
+    erw [Adjunction.homEquiv_naturality_left]
+    show _ ≫ homEquiv (homEquiv.symm _) = _ ; rw [Equiv.apply_symm_apply]
+    erw [Adjunction.homEquiv_naturality_right]
+    rw [Adjunction.homEquiv_unit]
+    refine freeYonedaEquiv.injective ?_
+    simp only [freeYonedaEquiv_comp]
+    have h := freeYonedaEquivUnitGen (phiOn f V) (objOn V W) ; erw [h]
+    have hpm : ∀ .., (pushforward (phiOn f V)).map g |>.app (op Z) x = g.app (op (overPost Z)) x
+      := fun _ _ _ => rfl
+    erw [hpm, CategoryTheory.comp_apply]
+    -- ★★★残り
+
+### ★★★残っている形
+
+    左辺: freeYonedaEquiv ((restrictFreeYonedaIso V W).inv ≫ restrict_V.map (unit))
+    右辺: restrict.map (pullbackFreeYonedaIso.inv) |>.app
+            (restrictFreeYonedaIso.inv.app (…))
+
+★★両辺とも「生成元での値」に落ちる形になっている。
+★★★残るのは **`Iso.inv_hom_id` を当てる位置を合わせること**である
+——`erw [← freeYonedaEquiv_comp, Iso.inv_hom_id]` がまだ当たらない。
+
+### ★次に試すこと
+
+1. 右辺の最内層をもう 1 枚剥がす(`hpm` / `comp_apply` の適用箇所を特定する)
+2. 左辺も `freeYonedaEquiv_comp` で分解し、**両辺を同じ深さに揃える**
+3. 補助補題を 1 本切って段数を減らす(第 39 ブロックと同じ発想)
