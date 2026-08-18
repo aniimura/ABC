@@ -624,4 +624,36 @@ def exists_square_of_pullBack.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — pull-back に沿う四角形",
     sectionId := "frdi-thm-3-4" }
 
+/-- ★★★★**(F2) の pre-step の場合**。
+
+★`prop_1_10_i_exists_preStep`(在庫)が四角形 `ζ ≫ β = α ≫ φ'` を与え、
+両辺の pre-step は次数 1 なので `prop_1_14_iv_degFr` がそのまま効く。 -/
+theorem admissible_of_preStep (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hps : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : A ⟶ B) (hζ : IsPreStep P₁ ζ)
+    (hA : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B := by
+  obtain ⟨B', β, φ', hβ, hdβ, hφ', hsq⟩ :=
+    prop_1_10_i_exists_preStep P₁ F₁ ζ hζ α hα
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ β θ hβ hθ (by rw [hdβ, hdα, hdθ])
+  have h2 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map α) := by
+    have hsq' : Ψ.map ζ ≫ Ψ.map β = Ψ.map α ≫ Ψ.map φ' := by
+      rw [← Ψ.map_comp, ← Ψ.map_comp, hsq]
+    refine prop_1_14_iv_degFr P₂ (Ψ.map ζ) (Ψ.map β) (Ψ.map α) (Ψ.map φ') hsq' ?_
+    rw [show P₂.degFr (Ψ.map ζ) = 1 from (hps ζ hζ).1,
+      show P₂.degFr (Ψ.map φ') = 1 from (hps φ' hφ').1]
+  rw [← h1, h2]
+  exact (hA α hα hdα).2
+
+def admissible_of_preStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F2) — pre-step の場合",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
