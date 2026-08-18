@@ -176,6 +176,19 @@ def biratNfMap.src : ABC3.Meta.Source :=
 
 ★★★**先行例 `Rmk451Birat.lean` の `biratFunctor` は通っている**ので、
 そちらの宣言の形(`variable` の並び・`section` の切り方)を写すのが次の手である。
+★★★**3 回目の試行で本当の原因が見えた(2026-08-19)**:
+`biratNfObj (G : Frobenioid P) (A : BiratCat P G) : BiratCat P G` と
+**対象の写像に名前を付けた瞬間**、同じ `Category.{v2, u2}` 要求が出た。
+★同時に「`biratNfObj P d` の `d` が `Frobenioid P`(sort `Prop`)を期待される」
+というエラーも出た —— ★★**`d` は statement に現れないので `variable` の
+自動包含に入らない**(`include hPB hPB' in` と同じ罠)。
+
+★★したがって手は 2 つ:
+1. `d` を `include d in` で明示的に包含する
+2. `BiratCat` の universe を `Rmk451Birat.lean` と同じ形に揃える
+   —— そちらは `universe v u w v2 u2`(**`v2` が `u2` の前**)で宣言している。
+   本ファイルは `universe v u w u2 v2` である。★この順序差を先に潰すこと。
+
 ★★本ファイルは**ここまでを緑のまま**にしておく ——
 並行セッション(ABC3b)の `git add -A` が赤い状態を巻き込むため。 -/
 
