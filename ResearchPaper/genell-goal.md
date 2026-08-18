@@ -5584,3 +5584,36 @@ mathlib の証明を写経できる。
 - `LinearMap.toSpanSingleton` を使わず `P.map` の semilinear 性から直接組む
 
 ★数学は完成しており、残るのは**戦術の 1 行**である。
+
+## §9-111 —— ★★★方針転換: 自然性を**避ける**(2026-08-18)
+
+### さらに 2 手試して同じ壁
+
+| 手 | 結果 |
+|---|---|
+| `conv_rhs => rw [hom_comp, coe_comp, comp_apply, hom_ofHom, toSpanSingleton_apply, map_smul]` | ★前 3 つは当たるが `hom_ofHom` で止まる |
+| `conv_lhs` 同様 | ★同じ |
+
+★**合計 10 手**。`ModuleCat.hom_ofHom` が**構文的には一致しているのに当たらない**
+——[[ring-instance-two-paths]] と同型の症状である。
+
+### ★★★★方針転換 —— そもそも自然性は要らない
+
+★**第 93 ブロックの `unitHomOfSection` は既に建っている**(自然性込み、`sorry` 0)。
+★★新しく `mulHom` を作る必要は**無い**。要るのは
+
+    (unitHomOfSection V P s).app W  が基本開集合で全単射
+
+だけである。★★★`unitHomOfSection = (freeYonedaTermIso).inv ≫ freeYonedaEquiv.symm s` で、
+**前者は同型**だから、後者の全単射性だけ見れば良い。
+
+### ★★次の一手(確定)
+
+| 段 | 内容 |
+|---|---|
+| 1 | `(freeYonedaEquiv.symm s).app W` は `ModuleCat.freeDesc (fun h => P.map h.op s)` |
+| 2 | 添字集合 `Hom(W, T)` は**一点**(`overTerminalUnique`) |
+| 3 | 第 55 ブロックの `freeTermSectionIso` で `free(一点) ≅ 𝒪(W)` |
+| 4 | その下で写像は `c ↦ c • (s\|_W)`——第 103 ブロックで全単射 |
+
+★★★★**第 55 の器具(6 度目の出番)がここでも効く。**
