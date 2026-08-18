@@ -136,6 +136,12 @@ noncomputable def freeTensorIso :
     isIso_of_reflects_iso _ (PresheafOfModules.toPresheaf _)
   asIso (freeTensorHom (R := R) F G)
 
+/-- ★**同型の `hom` は比較射そのものである**(`asIso` の定義、`rfl`)。
+
+★★★これが無いと `erw` が `whnf` で**タイムアウト**する(2026-08-18 実測)。 -/
+theorem freeTensorIso_hom :
+    (freeTensorIso (R := R) F G).hom = freeTensorHom F G := rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def freeTensorIso.src : ABC3.Meta.Source :=
