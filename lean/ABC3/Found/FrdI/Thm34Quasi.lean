@@ -350,4 +350,32 @@ def exists_baseId_primeFrob_of_frobTrivial.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F1) — Frobenius-trivial 対象の p-Frobenius 自己射",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★「1 本から全部へ」—— `frobDegUniq` が効く
+
+★★(F1) の admissible 性は「**すべての** p₁-Frobenius 射」についての主張だが、
+原典は base-identity な自己射 **1 本**しか作らない。
+★隔たりを埋めるのが `Definition 1.3, (ii)` の **`frobDegUniq`**
+(同じ対象から出る同次数の Frobenius 型射は同型を除いて一意)である。 -/
+
+/-- ★★★★**同じ対象から出る同次数の Frobenius 型射は、像の次数も等しい**。
+
+★これで「1 本で判定すれば全部に及ぶ」となる。 -/
+theorem degFr_map_eq_of_sameDeg
+    (F₁ : FrobenioidCore P₁) (Ψ : C₁ ⥤ C₂)
+    {A B E : C₁} (φ : A ⟶ B) (ψ : A ⟶ E)
+    (hφ : IsFrobeniusType P₁ φ) (hψ : IsFrobeniusType P₁ ψ)
+    (hd : P₁.degFr φ = P₁.degFr ψ) :
+    P₂.degFr (Ψ.map φ) = P₂.degFr (Ψ.map ψ) := by
+  obtain ⟨β, hβiso, hβ⟩ := F₁.frobDegUniq A B E φ ψ hφ hψ hd
+  haveI := hβiso
+  haveI : IsIso (Ψ.map β) := Ψ.map_isIso β
+  have h : P₂.degFr (Ψ.map (φ ≫ β)) = P₂.degFr (Ψ.map ψ) := by rw [hβ]
+  rw [Ψ.map_comp, P₂.degFr_comp, degFr_of_isIso P₂ (Ψ.map β), one_mul] at h
+  exact h
+
+def degFr_map_eq_of_sameDeg.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 65,
+    item := "Theorem 3.4, (iii) (F1) — 同次数の Frobenius 型射は像の次数も等しい",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
