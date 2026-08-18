@@ -78,6 +78,7 @@ import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.AppA
 import ABC3.Found.FrdI.Thm34Pf
+import ABC3.Found.FrdI.Prop48Nf
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
@@ -378,6 +379,7 @@ import ABC3.Found.GaloisRep.OmegaNum
 import ABC3.Found.GaloisRep.OmegaMap
 import ABC3.Found.Arakelov.PicImgClosure
 import ABC3.Found.Arakelov.PicAppLESec
+import ABC3.Found.Arakelov.PicAppTopSplit
 import ABC3.Found.Arakelov.PicAppLEApply
 import ABC3.Found.Arakelov.PicComapChain
 import ABC3.Found.Arakelov.PicUnitSurj
