@@ -384,6 +384,17 @@ theorem biratGp_square_map {A B : C} (φ : A ⟶ B) :
   ElemFrobCat.Hom.ext (biratBase_toHomBirat φ) (biratDivGp_toHomBirat φ)
     (biratDeg_toHomBirat φ)
 
+/-- ★locator —— **`Proposition 4.4, (i)`**。
+
+★(i) の 3 つの主張はいずれも実装済である:
+合成写像と圧 `𝒞^birat`(`BiratCat` / `biratCategory` / `compBirat`)、
+自然な関手 `𝒞 → 𝒞^birat`(`toBiratCat`)、
+そして **1-可換図式**(`biratToElemGp` と
+`biratGp_square_obj` / `biratGp_square_map`)。 -/
+def prop_4_4_i.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83, item := "Proposition 4.4, (i)",
+    sectionId := "frdi-prop-4-4" }
+
 /-! ## ★6. ★★★★`Φ^birat` —— `𝒪^×(A^birat)` の `Div^gp` による像
 
 原文 (FrdI p.83):

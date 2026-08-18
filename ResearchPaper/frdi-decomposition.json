@@ -417,9 +417,9 @@
           "id": "i-src",
           "title": "(i) の条つき .src(圏・関手・1-可換図式)",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "★小",
-          "evidence": "`BiratCat` / `toBiratCat` / `biratToElemGp` / `biratGp_square_obj` / `biratGp_square_map` は実装済。.src が無いだけ。"
+          "evidence": "`BiratCat` / `toBiratCat` / `biratToElemGp` / `biratGp_square_obj` / `biratGp_square_map` は実装済。.src が無いだけ。 ★2026-08-18 に  へ  を追加した。"
         },
         {
           "id": "prop44-src",
