@@ -434,13 +434,60 @@ theorem biratMap_bijective (G : Frobenioid P) (A B : UnTr P) :
   · intro z
     exact ⟨biratMapInv (F := F) G _ _ z, biratMap_biratMapInv (F := F) G _ _ z⟩
 
-/-! ## ★7. 残り —— `Base` / `degFr` の保存
 
-★`biratFunctor` は**充満忠実**(`biratMap_bijective`)であり、対象については
-`unTr2` が全単射なので**本質的全射**でもある。したがって**圏同値**である。
-★残りは `Base`・`degFr` の保存(代表元で計算すれば出る見込み)で、
-それが済めば `isFrobeniusCompact_transport`(`Rmk451.lean`)が当たり、
-`Definition 4.5, (iii), (b)` が `𝒞^istr` へ移って `Remark 4.5.1` が閉じる。
+/-! ## ★7. ★★★★`Base` と `degFr` の保存
+
+★これで比較関手は **pre-Frobenioid の構造まで保つ圏同値**になる。 -/
+
+/-- ★★`biratMap` は Frobenius 次数を保つ。 -/
+theorem biratMap_degFr (G : Frobenioid P) (A B : UnTr P)
+    (z : HomBirat (unTrPre P F) (unTr_frobenioid P F G) A B) :
+    biratDeg (biratMap (F := F) G A B z) = biratDeg z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratMap_mk, biratDeg_mk, biratDeg_mk]
+  exact unTr2_degFr (F := F) φ
+
+/-- ★★`biratMap` は底を保つ。
+
+★`sliceBaseOf = inv (Base a) ≫ Base φ` に開いてから `congr` で 2 成分に分け、
+どちらも `unTr2_Base` で閉じる(`inv` の側はさらに 1 段 `congr` する)。 -/
+theorem biratMap_base (G : Frobenioid P) (A B : UnTr P)
+    (z : HomBirat (unTrPre P F) (unTr_frobenioid P F G) A B) :
+    biratBase (biratMap (F := F) G A B z) = biratBase z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratMap_mk, biratBase_mk, biratBase_mk, sliceBaseOf_eq, sliceBaseOf_eq]
+  congr 1
+  · congr 1
+    exact unTr2_Base (F := F) Z.unop.hom.hom
+  · exact unTr2_Base (F := F) φ
+
+/-- ★★`biratFunctor` は `degFr` を保つ(pre-Frobenioid の言葉で)。 -/
+theorem biratFunctor_degFr (G : Frobenioid P) {A B : BiratCat (unTrPre P F)
+    (unTr_frobenioid P F G)} (f : A ⟶ B) :
+    (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)).degFr
+        ((biratFunctor (F := F) G).map f)
+      = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).degFr f :=
+  biratMap_degFr (F := F) G A B f
+
+/-- ★★`biratFunctor` は `Base` を保つ。 -/
+theorem biratFunctor_base (G : Frobenioid P) {A B : BiratCat (unTrPre P F)
+    (unTr_frobenioid P F G)} (f : A ⟶ B) :
+    (biratPre (unTrPre (istrPre P F) (istr_frobenioidCore P F)) (unTr2G G)).Base
+        ((biratFunctor (F := F) G).map f)
+      = (biratPre (unTrPre P F) (unTr_frobenioid P F G)).Base f :=
+  biratMap_base (F := F) G A B f
+
+/-! ## ★8. 残り —— `Frobenius-compact` 対象の移送
+
+★`biratFunctor` は**充満忠実**(`biratMap_bijective`)で、対象については `unTr2` が
+全単射なので**本質的全射**、すなわち**圏同値**である。
+★さらに `Base`・`degFr` を保つ(上の 2 本)。
+
+★★残るのは `isFrobeniusCompact_transport`(`Rmk451.lean`)の 4 つの材料を組むこと:
+`End X ≃* End (biratFunctor.obj X)`(全単射 ＋ `biratMap_comp` ＋ `biratMap_id` から)、
+自己同型の対応、`OTimes` の対応(`IsBaseIdentity` と `IsLinear` は上の 2 本で移る)、
+共役との両立(関手から自動)。
+★それが済めば `Definition 4.5, (iii), (b)` が `𝒞^istr` へ移り、`Remark 4.5.1` が閉じる。
 -/
 
 end ABC3.Found.FrdI
