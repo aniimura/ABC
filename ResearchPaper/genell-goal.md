@@ -9085,3 +9085,29 @@ Tate 曲線・Faltings 高さは FLT にも無い。半安定性は `FreyCurve/B
 ### 残り —— 補題 B(比較射は局所全射)のみ
 
 ★見積もり **2 ブロック**。像が部分加群であることだけで足りる(§9-225)。
+
+## §9-228 補題 B の第 1 歩(第 208 ブロック)
+
+    f^# s  =  pullIdealHom.app (f⁻¹V) (unit.app V s)
+
+★★★これが「比較射の像が生成元を含む」ことの根拠であり、
+**`f^*` の具体形を一度も使わない**。随伴の関係式
+
+    homEquiv g = unit ≫ pushforward.map g
+
+だけで出る——§9-221 で「具体形は塞がっている」と測った所の**迂回が実際に効いた**。
+
+### ★★`pullIdealHom := homEquiv.symm (pushHom)` という定義の選び方が効いた
+
+第 205 で「押し出し側で書いてから随伴で移す」と決めたので、
+本ブロックは `Equiv.apply_symm_apply` 1 発である
+(mathlib の `homEquiv_apply` が `unit ≫ map` に**定義的に等しい**ため)。
+★★定義を選ぶ段で後段を見ておくと、後で 1 行で済む——第 192 と同じ形の得である。
+
+### 残り(B2)——最後の 1 ブロック
+
+    アフィン開 A ⊆ f⁻¹B で
+      像 ⊇ { f^#(s)|_A : s ∈ D.ideal B }   ★第 208 + 自然性
+      (D.comap f).ideal A = (D.ideal B).map appLE   ★第 202 の連鎖
+      像は部分加群                          ★線型写像の像
+    ⟹ 像 = 全体 ⟹ 局所全射 ⟹ 第 207 で同型 ⟹ ofDivisor_pullback

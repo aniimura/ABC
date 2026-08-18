@@ -690,4 +690,58 @@ def admissible_deg_eq_of_frobeniusCompact.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iv) — 群的型でも p₁ = p₂",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★`Theorem 3.4, (v)` の第 1 主張 —— 1-可換図式から出る
+
+原文 (FrdI p.69):
+> (v), which is clearly 1-unique [cf. Definition 1.3, (i), (a), (b), (c)]. Finally, the
+
+★★★**依存の向きを測り直した**(2026-08-19、原典 p.67-69) ——
+(v) の第 1 主張(base-identity 自己射と base-equivalent な対の保存)は
+**独立に証明されていない**。原典は `Q_i` / `R_i` を作って `Ψ_Base` を得た**後**、
+1-可換図式からまとめて出している。
+★したがって `v-baseid` は `v-psibase` に**依存する**(以前の台帳は逆に書いていた)。
+
+★★下は「1-可換図式があれば第 1 主張が出る」部分で、
+`Ψ_Base` の構成(`v-psibase`)とは独立に取れる。 -/
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (v) の第 1 主張(base-identity)** ——
+1-可換図式 `𝒞₁ →Ψ 𝒞₂` / `𝒟₁ →Ψ_Base 𝒟₂` があれば、
+`Ψ` は base-identity 自己射を保つ。
+
+★底の四角形の自然性を `φ` に当て、`Base₁ φ = 𝟙` を入れて同型を消去するだけ。 -/
+theorem isBaseIdentity_map_of_baseSquare (Ψ : C₁ ⥤ C₂) (ΨBase : D₁ ⥤ D₂)
+    (sq : P₁.proj ⋙ ΨBase ≅ Ψ ⋙ P₂.proj)
+    {A : C₁} (φ : End A) (h : IsBaseIdentity P₁ φ) :
+    IsBaseIdentity P₂ (Ψ.map (φ : A ⟶ A)) := by
+  have hnat : ΨBase.map (P₁.Base (φ : A ⟶ A)) ≫ sq.hom.app A
+      = sq.hom.app A ≫ P₂.Base (Ψ.map (φ : A ⟶ A)) := sq.hom.naturality (φ : A ⟶ A)
+  have hb : ΨBase.map (P₁.Base (φ : A ⟶ A)) = 𝟙 (ΨBase.obj ((P₁.toElem.obj A).base)) := by
+    rw [show P₁.Base (φ : A ⟶ A) = P₁.Base (𝟙 A) from h, P₁.Base_id]
+    exact ΨBase.map_id _
+  rw [hb, Category.id_comp] at hnat
+  show P₂.Base (Ψ.map (φ : A ⟶ A)) = P₂.Base (𝟙 (Ψ.obj A))
+  rw [P₂.Base_id]
+  refine (cancel_epi (sq.hom.app A)).mp ?_
+  refine hnat.symm.trans ?_
+  exact (Category.comp_id (sq.hom.app A)).symm
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (v) の第 1 主張(base-equivalent な対)** ——
+同じ四角形から、共対象射の base-equivalence も保たれる。 -/
+theorem baseEquivalent_map_of_baseSquare (Ψ : C₁ ⥤ C₂) (ΨBase : D₁ ⥤ D₂)
+    (sq : P₁.proj ⋙ ΨBase ≅ Ψ ⋙ P₂.proj)
+    {A B : C₁} (φ ψ : A ⟶ B) (h : BaseEquivalent P₁ φ ψ) :
+    BaseEquivalent P₂ (Ψ.map φ) (Ψ.map ψ) := by
+  have hφ : ΨBase.map (P₁.Base φ) ≫ sq.hom.app B
+      = sq.hom.app A ≫ P₂.Base (Ψ.map φ) := sq.hom.naturality φ
+  have hψ : ΨBase.map (P₁.Base ψ) ≫ sq.hom.app B
+      = sq.hom.app A ≫ P₂.Base (Ψ.map ψ) := sq.hom.naturality ψ
+  rw [show P₁.Base φ = P₁.Base ψ from h] at hφ
+  show P₂.Base (Ψ.map φ) = P₂.Base (Ψ.map ψ)
+  exact (cancel_epi (sq.hom.app A)).mp (hφ.symm.trans hψ)
+
+def isBaseIdentity_map_of_baseSquare.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62,
+    item := "Theorem 3.4, (v) — base-identity 自己射と base-equivalent な対の保存",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI

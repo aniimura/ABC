@@ -98,4 +98,62 @@ def overMap_injective.src : ABC3.Meta.Source :=
     item := "Proposition A.2 — slim exponentiation は忠実",
     sectionId := "frdi-app-a" }
 
+/-! ## ★★`Definition A.1, (ii)` —— coarsification `|D|`
+
+原文 (FrdI p.118):
+> are isomorphism classes of morphisms of D [cf. [Mzk7], Definition 1.2.4, (iv)]. We
+
+★★`|D|` の対象は `D` の対象(＝スライス `𝒞_A`、すなわち `𝒞` の対象で添字づけられる)、
+射は `D` の射の**同型類**である。
+
+★★★`Proposition A.2` の `D` では 1-射がちょうど `f_! = Over.map f` なので、
+`|D|` の hom は「`A ⟶ B` を `f_! ≅ g_!` で割ったもの」になる。
+★そして `overMap_injective` により**この同値関係は自明**である ——
+つまり `|D|` の hom は元の hom そのものであり、`E` は圏同値になる。 -/
+
+/-- ★★**`f_!` どうしが同型である**という同値関係(`Definition A.1, (ii)` の「同型類」)。 -/
+def overMapSetoid {C₁ : Type u} [Category.{v} C₁] (A B : C₁) : Setoid (A ⟶ B) where
+  r f g := Nonempty (Over.map f ≅ Over.map g)
+  iseqv :=
+    { refl := fun _ => ⟨Iso.refl _⟩
+      symm := fun ⟨e⟩ => ⟨e.symm⟩
+      trans := fun ⟨e⟩ ⟨e'⟩ => ⟨e ≪≫ e'⟩ }
+
+/-- ★★★**[FrdI] Definition A.1, (ii)** —— coarsification `|D|` の hom。 -/
+def CoarseHom {C₁ : Type u} [Category.{v} C₁] (A B : C₁) : Type v :=
+  Quotient (overMapSetoid A B)
+
+/-- ★★★★★**[FrdI] Proposition A.2 の結論** ——
+**coarsification の hom は元の hom と一対一**。
+
+原文 (FrdI p.118):
+> determines an equivalence of categories C
+
+★★`E : 𝒞 → |D|` は対象でも射でも構成から全射なので、
+圏同値であることの中身は「hom が一対一」、すなわちこの全単射である。
+★★★`overMap_injective` により**商が自明**なので、逆写像は商への射影そのもの。 -/
+def coarseHomEquiv {C₁ : Type u} [Category.{v} C₁] (hslim : IsSlimCat C₁) (A B : C₁) :
+    CoarseHom A B ≃ (A ⟶ B) where
+  toFun := Quotient.lift id (fun _ _ ⟨e⟩ => overMap_injective hslim e)
+  invFun f := Quotient.mk (overMapSetoid A B) f
+  left_inv q := by
+    refine Quotient.inductionOn q (fun f => ?_)
+    rfl
+  right_inv _ := rfl
+
+/-- ★**`E` の hom への作用**は商への射影そのもの —— `rfl`。 -/
+theorem coarseHomEquiv_symm_apply {C₁ : Type u} [Category.{v} C₁] (hslim : IsSlimCat C₁)
+    {A B : C₁} (f : A ⟶ B) :
+    (coarseHomEquiv hslim A B).symm f = Quotient.mk (overMapSetoid A B) f := rfl
+
+def CoarseHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 118,
+    item := "Definition A.1, (ii) — coarsification",
+    sectionId := "frdi-app-a" }
+
+def coarseHomEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 118,
+    item := "Proposition A.2 — coarsification の hom は元の hom と一対一",
+    sectionId := "frdi-app-a" }
+
 end ABC3.Found.FrdI
