@@ -7679,3 +7679,35 @@ mathlib の `PresheafOfModules.freeObjDesc_app`。
 | 171 | 評価射 `F ⊗ F^∨ → 𝒪` が局所自明な `F` で同型 |
 | 172 | `InvSheaf` と `ofDivisor` |
 | 173+ | 3 法則と `isCartierDivisor_affine` |
+
+## §9-186 —— 双対の前層で詰まっている点(2026-08-18、記録)
+
+`dualPresheaf` の `map` は
+
+    obj U ⟶ (ModuleCat.restrictScalars (R.map f)).obj (obj V)
+
+という係数制限つきの射で、`Module.compHom` を `letI` で足す必要がある(第 149 と同じ)。
+★ところが `Module.compHom` の**土台**として
+
+    Module (X.ringCatSheaf.obj.obj V) (双対 at V)      ← ★RingCat 綴り
+
+が要る。第 166 の `dualModule` は **`Γ(X,V)`(CommRingCat 綴り)**で入れてあるので合わない。
+
+### ★★選択肢
+
+| 手 | 懸念 |
+|---|---|
+| 1. `dualModule` を RingCat 綴りでも足す | ★経路が 2 本になる(§9-179 で踏んだ) |
+| 2. `obj` を RingCat 綴りで書き、`inferInstanceAs` で 1 本に統一 | ★★**本命** |
+| 3. `unitEndEquiv` を RingCat 綴りの環へ作る | 第 164–166 の書き直し |
+
+★★★2 が良い——**綴りを 1 本に決めてから加群構造を入れる**。
+第 164 の教訓(型付き恒等関数の橋)と同じ方向である。
+
+### 現状(2026-08-18)
+
+    Arakelov 3/9(C1 + B1 + B3) · Galois 0/8
+    B2: 第 148–168 の 21 ブロック
+      - 局所自明性(第 162)まで完了
+      - 双対の加群構造(第 166)、制限の半線型性(第 168)まで完了
+      - 残り: 双対の前層 → 層 → 評価射の同型 → InvSheaf → ofDivisor → 3 法則

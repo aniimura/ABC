@@ -739,4 +739,42 @@ def admissible_of_square'.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (iii) (F2) — 伝搬の逆向き",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★(F2) 全体 —— 場合分けは不要だった
+
+★★★**測定(2026-08-18)**: 在庫の `prop_1_10_i_exists`(`Prop110.lean:424`)は
+**任意の射**に対して四角形を与える(中で `arbFactor` の 3 成分を順に使っている)。
+★したがって (F2) は**場合分けずに 1 本で書ける**。
+★先に取った 3 成分の補題は、測定の記録として残す。 -/
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (iii) の (F2)** ——
+**admissible 性は任意の射を越えて伝わる**。 -/
+theorem admissible_of_hom (Ψ : C₁ ⥤ C₂) (F₁ : FrobenioidCore P₁)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y),
+      IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegmap : ∀ {X Y Z W : C₁} (f : X ⟶ Y) (g : Z ⟶ W),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {p₁ p₂ : ℕ+} {A B : C₁} (ζ : A ⟶ B)
+    (hA : IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ A)
+    {A' : C₁} (α : A ⟶ A') (hα : IsFrobeniusType P₁ α) (hdα : P₁.degFr α = p₁) :
+    IsAdmissibleObj P₁ P₂ Ψ p₁ p₂ B := by
+  obtain ⟨B', β, φ', hβ, hdβ, hsq⟩ := prop_1_10_i_exists P₁ F₁ ζ α hα
+  intro E θ hθ hdθ
+  refine ⟨hFT θ hθ, ?_⟩
+  have h1 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map θ) :=
+    degFr_map_eq_of_sameDeg F₁ Ψ β θ hβ hθ (by rw [hdβ, hdα, hdθ])
+  have hdζ : P₁.degFr ζ = P₁.degFr φ' :=
+    degFr_of_square_other P₁ ζ β α φ' hsq hdβ
+  have h2 : P₂.degFr (Ψ.map β) = P₂.degFr (Ψ.map α) := by
+    have hsq' : Ψ.map ζ ≫ Ψ.map β = Ψ.map α ≫ Ψ.map φ' := by
+      rw [← Ψ.map_comp, ← Ψ.map_comp, hsq]
+    exact prop_1_14_iv_degFr P₂ (Ψ.map ζ) (Ψ.map β) (Ψ.map α) (Ψ.map φ') hsq'
+      (hdegmap ζ φ' hdζ)
+  rw [← h1, h2]
+  exact (hA α hα hdα).2
+
+def admissible_of_hom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — (F2)",
+    sectionId := "frdi-thm-3-4" }
+
 end ABC3.Found.FrdI
