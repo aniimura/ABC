@@ -276,6 +276,7 @@ import ABC3.Found.Arakelov.PicMapBij
 import ABC3.Found.Arakelov.PicGenSection
 import ABC3.Found.Arakelov.PicPresieveBij
 import ABC3.Found.Arakelov.PicPresieveIso
+import ABC3.Found.Arakelov.PicOverCover
 import ABC3.Found.GenEll.UPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset

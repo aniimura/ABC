@@ -155,7 +155,7 @@ ${graphExists ? `<a class="big" href="dependency-graph.html"><b>依存の層 —
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 ${GL ? `<b>我々が触れている節点 ${GL.ours} 件・Interface の義務 ${GL.obligDone}/${GL.oblig} 件。</b>` : ''}
-生成は <code>node tools/graph-layers.mjs</code>。</span></a>` : ''}
+生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>` : ''}
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
 <a class="big" href="ResearchPaper/dependency-scale.md"><b>規模の実測 →</b>

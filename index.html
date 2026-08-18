@@ -33,7 +33,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-18 ・ コミット 936 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-18 ・ コミット 937 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
@@ -95,11 +95,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 868 節点を、強連結成分で潰して 281 個の箱・59 層に並べたもの。
+<span>原文の参照から機械抽出した 922 節点を、強連結成分で潰して 290 個の箱・59 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
 <b>我々が触れている節点 63 件・Interface の義務 3/28 件。</b>
-生成は <code>node tools/graph-layers.mjs</code>。</span></a>
+生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
 <a class="big" href="ResearchPaper/dependency-scale.md"><b>規模の実測 →</b>
@@ -281,6 +281,7 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>fb8e407</code></td><td>2026-08-18</td><td>★★★★★★Arakelov と Galois を本来の大きさでグラフに展開した(§9-129)</td></tr>
 <tr><td><code>bb3d99e</code></td><td>2026-08-18</td><td>`prop44full` の葉をもう 1 つ閉じた——`dict-pullback`</td></tr>
 <tr><td><code>572390a</code></td><td>2026-08-18</td><td>チェーン `prop44full` の葉を 1 つ閉じた——`i-src`</td></tr>
 <tr><td><code>c41c10b</code></td><td>2026-08-18</td><td>★★★★★★生成族版で実際に使える形にした(第 115、§9-128)</td></tr>
@@ -292,7 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>468af33</code></td><td>2026-08-18</td><td>★★★★★★★器具が全部繋がった——切断から局所自明性の同型(第 110、§9-123)</td></tr>
 <tr><td><code>5b0e463</code></td><td>2026-08-18</td><td>`Proposition 4.4, (ii)` —— `𝒞^birat` が group-like 型であることを示した</td></tr>
 <tr><td><code>9e9344c</code></td><td>2026-08-18</td><td>★★★★★★最後の器具が建った(第 109、§9-122)</td></tr>
-<tr><td><code>11d85d3</code></td><td>2026-08-18</td><td>`Theorem 3.4, (iii)` の入口が両向きになった</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない

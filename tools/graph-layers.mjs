@@ -319,6 +319,51 @@ const adj = new Map(), page = new Map();
 }
 
 
+// ── ★★★分解チェーンを**木のまま**展開する ──────────────
+//   ★2026-08-18 追加。動機の実測: `ResearchPaper/frdi-decomposition.json` に
+//   分解を登記しても、**このグラフはそれを読んでいなかった**。
+//   ★そのため `Theorem 3.4`(実際は 18 節点・9 層)や
+//   `Proposition 4.4`(13 節点・5 層)が **1 箱に潰れて見えていた**。
+//   ★★★ここで展開し、**本来の大きさ**で出す。
+//
+//   ★辺の向き: 「A が B を要する」= A → B(既存の合流と同じ向き)。
+//   ★奉じる項目 → チェーンの**終端節点**(他が依存していないもの)へ張る。
+//   ★限界: 登記は**人手**であり、節点の粒度も我々の設計である。
+//   機械が原典から抽出したものではない。**下界**として見ること。
+{
+  const DJ = join(ROOT, 'ResearchPaper', 'frdi-decomposition.json');
+  if (existsSync(DJ)) {
+    const D = JSON.parse(readFileSync(DJ, 'utf8'));
+    let added = 0, edged = 0, unreached = 0, chains = 0;
+    for (const c of D.chains ?? []) {
+      const st = new Map((c.nodes ?? []).map((n) => [n.id, n.status]));
+      const key = (id) => `分解 / ${c.id} / ${id} [${st.get(id) === 'done' ? '済' : '未'}]`;
+      const pg = c.serves?.page ?? 0;
+      for (const n of c.nodes ?? []) {
+        const nk = key(n.id);
+        if (!adj.has(nk)) { adj.set(nk, []); page.set(nk, pg); added++; }
+      }
+      for (const n of c.nodes ?? []) for (const dep of n.deps ?? []) {
+        if (!st.has(dep)) continue;
+        const a = key(n.id), b = key(dep);
+        if (!adj.get(a).includes(b)) { adj.get(a).push(b); edged++; }
+      }
+      const depended = new Set((c.nodes ?? []).flatMap((n) => n.deps ?? []));
+      const tops = (c.nodes ?? []).filter((n) => !depended.has(n.id)).map((n) => key(n.id));
+      // ★条つきの項目名(例「Proposition 4.4, (ii)」)はグラフの節点語彙ではないので、番号までで切る。
+      const base = c.serves ? c.serves.item.split(',')[0].trim() : null;
+      const sk = base ? `${c.serves.paper} / ${base}` : null;
+      if (sk && adj.has(sk)) {
+        for (const t of tops) if (!adj.get(sk).includes(t)) { adj.get(sk).push(t); edged++; }
+        chains++;
+      } else unreached++;
+    }
+    console.log(`  分解チェーンを展開: ${added} 節点 / 辺 ${edged}` +
+      `(連結したチェーン ${chains} 本、奉じる項目が未到達 ${unreached} 件)`);
+  }
+}
+
+
 // ── Tarjan SCC(反復版) ────────────────────────────────────
 const index = new Map(), low = new Map(), onstk = new Set(), stk = [], comp = new Map();
 let idx = 0, nc = 0;
