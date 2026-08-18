@@ -7,8 +7,8 @@ import ABC3.Found.FrdI.Prop44
 /-!
 # [FrdI] Proposition 4.8, (ii) —— naive Frobenius 関手を `𝒞^birat` へ降ろす準備
 
-原文 (FrdI p.85):
-> naive Frobenius functor
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
 
 ★★`𝒞^birat` の射は `HomBirat A B = HomColim (homFunctorBirat P G A B)` で、
 添字は `IdxBirat P G A`(`A` への **co-angular pre-step** の反対圏)、
@@ -62,7 +62,7 @@ theorem nfMap_coaPreProp {A B : C} (φ : A ⟶ B) (h : coaPreProp P φ) :
   nfMap_coaPreStep P F d φ h.1 h.2
 
 def nfMap_coaPreStep.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 85,
+  { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (ii) — naive Frobenius 関手は co-angular pre-step を保つ",
     sectionId := "frdi-prop-4-8" }
 

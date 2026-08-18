@@ -116,3 +116,16 @@ FrdI §3/§4 を進める 1 セッションで、「無い」と見積もった�
    「environment already contains」で落ちた。
    ★対策に追記: **新しい名前を作る前に `Grep(pattern: "def <name>\b", path: "lean/ABC3")`**、
    かつ**節点を閉じる前に全体ビルドを 1 回通す**こと。
+
+★2026-08-19、**10 件目**: `nfMap` が linear / base-iso / pre-step を保つことを
+手で書き下したが、`Prop21.lean` に `nfMap_preStep` / `nfMap_frobType` /
+`nfMap_pullBack` / `prop_2_1_ii_degFr` があり、さらに `Prop110.lean` に
+**`prop_1_10_i_coAngular_of`** まであった(全部で 5 本の重複)。
+★★**検索語を `naiveFrob` / `prop_2_1` に限ったのが原因**。
+`nfMap_*` という実際の名前で引いていれば 1 回で当たった。
+
+**対策の追記**: 「性質 P が構成 X で保たれる」を書く前に、**2 通りで引く**:
+1. `prop_<原典番号>_.*_of`(原典由来の移送補題の命名規則)
+2. `<構成の接頭辞>_<性質>`(例: `nfMap_preStep`、`biratMap_comp`)
+★構成の接頭辞は定義の名前(`nfMap`・`biratMap`・`istrMap` など)であって、
+論文の名前(`naiveFrob`)ではない。
