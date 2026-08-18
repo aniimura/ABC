@@ -279,4 +279,61 @@ def otri_toBirat_injective.src : ABC3.Meta.Source :=
     item := "Proposition 4.4, (ii) — 𝒪^▷(A) の像への単射性",
     sectionId := "frdi-prop-4-4" }
 
+/-! ## ★群化への持ち上げ —— **構成せずに書く**
+
+★★**測定(2026-08-18)**: 行き先 `𝒪^×(A^birat)` は**既に群**なので、
+`𝒪^▷(A)^gp → 𝒪^×(A^birat)` の**単射性**は
+群化を構成せずに**たすき掛けの等式**として書ける:
+
+  `αβ⁻¹ = γδ⁻¹` なら `δα = βγ`
+
+★★★これにより **mathlib の可換モノイドの群化(`Localization`)を使わずに済む**。
+★我々の `Gp` は加法可換単系用で、`𝒪^▷(A)` は乗法部分単系なので、
+その不一致を回避できる。 -/
+
+variable {P G} in
+/-- ★★★★**[FrdI] Proposition 4.4, (ii)** の「an injection of groups」。
+
+★群化を構成せずに、**たすき掛けの形**で単射性を述べる。
+★手: 両辺に `Tδ` と `Tβ` を掛け、**可換性**で `Tβ ≫ Tδ ≫ inv(Tβ) = Tδ` にしてから、
+**忠実性**で `𝒞` へ戻す。 -/
+theorem otri_gp_injective {A : C} (α β γ δ : OTri P A)
+    (hcomm : ((β : End A) : A ⟶ A) ≫ ((δ : End A) : A ⟶ A)
+      = ((δ : End A) : A ⟶ A) ≫ ((β : End A) : A ⟶ A))
+    (h : @inv _ _ _ _ ((toBiratCat P G).map ((β : End A) : A ⟶ A)) (otri_isIso_birat β)
+          ≫ (toBiratCat P G).map ((α : End A) : A ⟶ A)
+        = @inv _ _ _ _ ((toBiratCat P G).map ((δ : End A) : A ⟶ A)) (otri_isIso_birat δ)
+          ≫ (toBiratCat P G).map ((γ : End A) : A ⟶ A)) :
+    ((δ : End A) : A ⟶ A) ≫ ((α : End A) : A ⟶ A)
+      = ((β : End A) : A ⟶ A) ≫ ((γ : End A) : A ⟶ A) := by
+  haveI : (toBiratCat P G).Faithful := toBiratCat_faithful
+  haveI hβ := otri_isIso_birat (G := G) β
+  haveI hδ := otri_isIso_birat (G := G) δ
+  set T := toBiratCat P G with hT
+  set a := T.map ((α : End A) : A ⟶ A) with ha
+  set b := T.map ((β : End A) : A ⟶ A) with hb
+  set c := T.map ((γ : End A) : A ⟶ A) with hc
+  set dd := T.map ((δ : End A) : A ⟶ A) with hdd
+  have hbd : b ≫ dd = dd ≫ b := by
+    rw [hb, hdd, ← T.map_comp, ← T.map_comp, hcomm]
+  -- ★`dd ≫ a = b ≫ c` を `𝒞^birat` で出す
+  have key : dd ≫ a = b ≫ c := by
+    have h1 : b ≫ (dd ≫ (inv b ≫ a)) = b ≫ (dd ≫ (inv dd ≫ c)) := by rw [h]
+    have h2 : b ≫ dd ≫ (inv b ≫ a) = dd ≫ a := by
+      rw [← Category.assoc b dd, hbd, Category.assoc, ← Category.assoc b (inv b),
+        IsIso.hom_inv_id, Category.id_comp]
+    have h3 : b ≫ dd ≫ (inv dd ≫ c) = b ≫ c := by
+      rw [← Category.assoc dd (inv dd), IsIso.hom_inv_id, Category.id_comp]
+    rw [← h2, ← h3]
+    exact h1
+  refine T.map_injective ?_
+  rw [T.map_comp, T.map_comp]
+  exact key
+
+/-- ★locator —— `Proposition 4.4, (ii)` の「an injection of groups」。 -/
+def otri_gp_injective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (ii) — 𝒪^▷(A)^gp ↪ 𝒪^×(A^birat)",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI
