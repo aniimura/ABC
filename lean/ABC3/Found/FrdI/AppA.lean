@@ -81,9 +81,17 @@ theorem overMap_injective {C₁ : Type u} [Category.{v} C₁] (hslim : IsSlimCat
       = Iso.refl _ := hslim A _
   have hleft : (ε.hom.app (Over.mk (𝟙 A))).left = 𝟙 A :=
     congrArg (fun t : Over.forget A ≅ Over.forget A => t.hom.app (Over.mk (𝟙 A))) hw
-  have htri := Over.w (ε.hom.app (Over.mk (𝟙 A)))
-  rw [hleft] at htri
-  simpa using htri.symm
+  -- ★型を言い直してから書き換える(そうしないと `𝟙 A` の型が `.left` の形になり
+  --   `Category.id_comp` のパターンが合わない)。
+  have htri : (ε.hom.app (Over.mk (𝟙 A))).left ≫ ((𝟙 A : A ⟶ A) ≫ g)
+      = (𝟙 A : A ⟶ A) ≫ f := Over.w (ε.hom.app (Over.mk (𝟙 A)))
+  -- ★`rw [hleft]` は `𝟙 A` の型を汚すので、`congrArg` で**きれいな型のまま**移す。
+  have h3 : (ε.hom.app (Over.mk (𝟙 A))).left ≫ ((𝟙 A : A ⟶ A) ≫ g)
+      = (𝟙 A : A ⟶ A) ≫ ((𝟙 A : A ⟶ A) ≫ g) :=
+    congrArg (fun t : A ⟶ A => t ≫ ((𝟙 A : A ⟶ A) ≫ g)) hleft
+  have h4 : (𝟙 A : A ⟶ A) ≫ f = (𝟙 A : A ⟶ A) ≫ ((𝟙 A : A ⟶ A) ≫ g) := htri.symm.trans h3
+  rw [Category.id_comp, Category.id_comp, Category.id_comp] at h4
+  exact h4
 
 def overMap_injective.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 118,

@@ -1176,10 +1176,32 @@
           "note": "\n\n## ★★形を測った(2026-08-18)\n原文 (FrdI p.63):\n> unique functor ΨBase : D1 → D2 that ﬁts into a 1-commutative diagram\n\n★(v) の主張は 2 つ:\n1. `Ψ` が **base-identity 自己射**と **base-equivalent な共対象射の対**を保つ\n2. `Ψ_Base : 𝒟₁ → 𝒟₂` が 1-一意に存在し図式が 1-可換\n\n★★**在庫との接続**: `OTri = IsBaseIdentity ∧ IsLinear` なので、(iv) で `𝒪^▷` の保存が取れれば、`𝒪^▷` の元についての base-identity は出る。\n★一般の自己射については、`Definition 1.3, (vi)`(`faithfulUpToUnits`、在庫)と`Proposition 1.13, (ii)` を使う筋である(原典 p.63 末尾)。\n★★`Ψ_Base` の構成は `psiIstr`(在庫、(i) で実装済)と**同じ形**(射を底へ送るだけ)。\n\n## ★★形を測り直した(2026-08-19、原文を layout 抽出で確認)\n\n★**(v) の仮定は前の note と違っていた**。原典 (物理 p.62) は:\n> (v) Suppose that: (a) C1, C2 are of standard type; (b) if C1, C2 are of group-\n> like type, then both Ψ and some quasi-inverse to Ψ preserve base-isomorphisms;\n> (c) D1, D2 are slim. Then Ψ preserves the base-identity endomorphisms and\n> base-equivalent pairs of co-objective morphisms.\n\n★つまり **standard 型 ＋ 𝒟 が slim**(quasi-isotropic ではない)。(iv) と同じ仮定である。\n\n## ★★欠けている環は 1 つ —— `BaseEquivalent` の圏論的特徴づけ\n\n`OTri = IsBaseIdentity ∧ IsLinear` なので、**linear な base-identity 自己射**は\n(iv) の `thm_3_4_iv_otri_map'` で既に保存が取れている。\n\n★★残るのは (a) **一般の次数の** base-identity 自己射、(b) **base-equivalent な対**。\n在庫を検索したが `BaseEquivalent` の圏論的特徴づけは**存在しない**\n(`divEquivalent_of_baseEquivalent` / `baseEquivalent_conj` だけ)。\n\n★原典の筋(物理 p.67):\n> the natural projection functor Ci → Di determines a natural equivalence of categories\n> (Pi)A →∼ (Di)AD [cf. Definition 1.3, (i), (c)]\n\nつまり **スライス `(Pi)_A` と `(Di)_{A_𝒟}` の圏同値**を通す。\n`Ψ` は pull-back 射を保つので `(P₁)_{A} ≌ (P₂)_{ΨA}` を誘導し\n(★本セッションの `plBkEquiv` / `Over.post` が使える)、\nそこから底の側の対応が出る、という順序である。\n\n★★★**先に `v-psibase` の `Q_i / E_i / R_i` を組む方が早い可能性がある** ——\n原典も (v) の 2 主張を、その 2-圏の構成の**後で**まとめて出している。"
         },
         {
+          "id": "appa-2slim",
+          "title": "[付録] Definition A.1 (i) / Proposition A.2 の 2 主張(2-slim・忠実)",
+          "size": "★中",
+          "status": "done",
+          "deps": [],
+          "lean": "ABC3/Found/FrdI/AppA.lean",
+          "decl": "isRigidFunctor_overMap / overMap_injective",
+          "note": "★★**切り出した理由**(2026-08-19)\n`v-psibase` の `Ψ_Base` の構成が FrdI 付録に依存するのに、\n`Definition A.1` も `Proposition A.2` も**在庫に 1 件も無かった**(grep で確認)。\n\n## ★★★測って分かったこと\n**`Definition A.1, (i)` の `2-slim` は、我々の `IsRigidFunctor` そのもの**だった ——\n「2-圏の 1-射(＝関手)が非自明な自己同型を持たない」。\n\n★`Proposition A.2` が扱う 2-圏は**具体的**で、対象はスライス `C_A`、\n1-射は `f_! = Over.map f`、2-射はそれらの間の同型。\n\n## ★実装\n| 主張 | 宣言 |\n|---|---|\n| D は 2-slim | `isRigidFunctor_overMap`(slim ⟹ `Over.map f` は rigid) |\n| E は忠実 | `overMap_injective`(`f_! ≅ g_!` ⟹ `f = g`) |\n\n★どちらも「`Over.map f ⋙ Over.forget B = Over.forget A` が**定義的に等しい**」ことを使い、\nwhisker して slim 性を当てるだけ。★`E` は対象でも射でも構成から全射なので、\n圏同値の中身はこの忠実性である。\n\n## ★事故\n`Over` の対象を経由すると `𝟙 A` の型が `((Over.map f).obj X).left ⟶ …` になり、\n`Category.id_comp` のパターンが合わない。★`congrArg` で**きれいな型のまま**移すと通る。"
+        },
+        {
+          "id": "appa-coarse",
+          "title": "[付録] Definition A.1 (ii) —— coarsification |D| の構成",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "appa-2slim"
+          ],
+          "note": "★`|D|` は「対象は D の対象、射は D の射の同型類」。\n★`appa-2slim` で数学的な中身(2-slim・忠実)は取ってあるので、\n残るのは**商圏としての構成**である。\n★`Quotient` で `Over.map f` の同型類を作るのではなく、\n`overMap_injective` から **`|D|` の hom は `A ⟶ B` と一対一**なので、\n★★`|D|` を `C` そのものとして実現し、`E` を恒等関手として書ける可能性がある ——\n着手前にそれを測ること。"
+        },
+        {
           "id": "v-psibase",
           "title": "(v) Ψ_Base : 𝒟₁ → 𝒟₂ の構成と 1-可換図式・rigidity",
           "deps": [
-            "v-baseid"
+            "v-baseid",
+            "appa-2slim",
+            "appa-coarse"
           ],
           "status": "todo",
           "size": "★大",

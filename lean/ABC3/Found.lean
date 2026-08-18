@@ -369,6 +369,7 @@ import ABC3.Found.Arakelov.PicCartierComap
 import ABC3.Found.Arakelov.PicSubschemeVanish
 import ABC3.Found.Arakelov.PicSectionPull
 import ABC3.Found.Arakelov.PicPullIdealHom
+import ABC3.Found.Arakelov.PicSurjIso
 import ABC3.Found.Arakelov.PicUnitSurj
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
