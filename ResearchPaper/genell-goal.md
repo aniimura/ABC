@@ -4511,3 +4511,35 @@ mathlib には無い。★★**我々が作る**。
 
 ★★**測る前に書かなくてよかった。**反例を 1 つ作るだけで 1 ブロック分の誤りが消えた。
 ★★★これは §9-41・§9-51 に続く **3 度目の自己訂正**である。
+
+## §9-75 —— ★★★★★★道が端から端まで測れた(2026-08-18)
+
+§9-74 で筋を訂正したあと、**5 段すべてに在庫があること**を実測した。
+
+| 段 | 主張 | 在庫(2026-08-18 実測) |
+|---|---|---|
+| 1 | `M` 可逆 ⟹ 有限表示 | ★`Module.Finite` + `Projective`(`RingTheory/PicardGroup.lean` の instance) |
+| 2 | 各素点で `M_p ≅ R_p` | ★mathlib instance `Free Rp (LocalizedModule p.primeCompl M)` |
+| 3 | ★★★**素点から基本開集合へ広げる** | ★★★`Module.FinitePresentation.exists_lift_equiv_of_isLocalizedModule`(`Algebra/Module/FinitePresentation.lean` 行 504) |
+| 4 | `(tilde M)(D(f)) = M_f` | ★`IsLocalizedModule.Away f (tilde.toOpen M (basicOpen f)).hom` |
+| 5 | `M_f ⊗_{R_f} N_f ≅ (M ⊗_R N)_f` | ★`Localization/BaseChange.lean` の `moduleTensorEquiv` + `IsLocalizedModule.rTensor` |
+| 6 | 基底で同型なら同型 | ★`TopCat.Sheaf.isIso_iff_isIso_basis` + `isBasis_basic_opens` |
+| 7 | 層化の unit は自明な開集合で同型 | ★★**我々の第 17 ブロック**(4 度目の出番) |
+
+★★★**mathlib に無いのは「準連接 ⟹ 本質像」の一般形だけ**で、
+可逆層に要る部分は上の 7 段で埋まる。
+
+### ★★見積り(確定的になった)
+
+| ブロック | 内容 |
+|---|---|
+| 76 | 素点から基本開集合へ——`M_f ≅ R_f` となる `f` が被覆をなす |
+| 77 | その `D(f)` の上で前層テンソルの制限が単位と同型 |
+| 78 | 層化の unit が `D(f)` で同型(第 17 の 4 度目) |
+| 79 | `tilde (M ⊗ N)(D(f)) ≅ M_f ⊗_{R_f} N_f` |
+| 80 | 比較射が `D(f)` で同型 |
+| 81 | 基底判定で比較射が同型 |
+| 82 | `tilde M` が `InvSheaf` |
+| 83 | `equivPicRing`(単射は `tilde.fullyFaithfulFunctor` でただ) |
+
+★★★★**残り 8 ブロック。**B1 総計は **約 83** に確定した。
