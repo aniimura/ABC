@@ -123,20 +123,131 @@ theorem istr_groupLikeType_down (h : IsOfGroupLikeType (istrPre P F)) :
   exact isGroupLike_of_surjective (Φ.map (P.Base φ))
     (MonoidOn.map_bijective_of_iso Φ (asIso (P.Base φ))).2 (h ⟨B, hisoB⟩)
 
-/-! ## ★4. 残り —— (b) の第 2 段(Frobenius-compact 対象の移送)
+/-! ## ★4. (b) の第 2 段 —— Frobenius-compact 対象の移送
 
-★★**未実装**。残るのは
+★`Istr (istrPre P F)` は `Istr P` の**全対象**からなる充満部分圏
+(`istr_isotropic` により条件が空虚に真)なので、`End` も `OTimes` も一致する。
+★`IsFrobeniusCompact` は `End` と `OTimes` と自己同型だけで書かれているので、
+その 3 つの対応を作れば移送できる。 -/
 
-  `IsFrobeniusCompact (istrPre P F) A → IsFrobeniusCompact (istrPre (istrPre P F) _) A'`
+/-- ★二重 `Istr` の対象(全対象が isotropic なので誰でも入る)。 -/
+abbrev istr2 (A : Istr P) : Istr (istrPre P F) := ⟨A, istr_isotropic P F A⟩
 
-である。★`Istr (istrPre P F)` は `Istr P` の**全対象**からなる充満部分圏
-(`istr_isotropic` により条件が空虚に真)なので、`End` も `OTimes` も一致する
-——`InducedCategory.Hom` の包みを剥がす定型作業になる。
+/-- ★二重 `Istr` の自己射モノイドは `Istr P` のそれと同型。 -/
+def istr2EndEquiv (A : Istr P) : End (istr2 (F := F) A) ≃* End A where
+  toFun f := f.hom
+  invFun g := ⟨g⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+  map_mul' _ _ := rfl
 
-★この 1 段が済めば `Definition 3.1, (i)` の 5 条が揃い、
-`Remark 4.5.1` の **standard 型の半分**が閉じる。
-★rationally standard 型の側はさらに
-`(𝒞^istr)^un-tr,birat` の Frobenius-compact 対象を要する。
+/-- ★`OTimes` は二重 `Istr` と行き来する。 -/
+theorem istr2_mem_otimes_iff (A : Istr P) (f : End (istr2 (F := F) A)) :
+    f ∈ OTimes (istrPre (istrPre P F) (istr_frobenioidCore P F)) (istr2 (F := F) A)
+      ↔ (istr2EndEquiv (F := F) A) f ∈ OTimes (istrPre P F) A := by
+  constructor
+  · rintro ⟨⟨hb, hl⟩, hu⟩
+    refine ⟨⟨?_, ?_⟩, hu.map (istr2EndEquiv (F := F) A).toMonoidHom⟩
+    · show (istrPre P F).Base (f.hom) = (istrPre P F).Base (𝟙 A)
+      have h1 : (istrPre (istrPre P F) (istr_frobenioidCore P F)).Base f
+          = (istrPre (istrPre P F) (istr_frobenioidCore P F)).Base (𝟙 (istr2 (F := F) A)) := hb
+      rw [istrPre_Base _ f, istrPre_Base _ (𝟙 (istr2 (F := F) A))] at h1
+      exact h1
+    · show (istrPre P F).degFr (f.hom) = 1
+      have h2 : (istrPre (istrPre P F) (istr_frobenioidCore P F)).degFr f = 1 := hl
+      rw [istrPre_degFr _ f] at h2
+      exact h2
+  · rintro ⟨⟨hb, hl⟩, hu⟩
+    refine ⟨⟨?_, ?_⟩, hu.map (istr2EndEquiv (F := F) A).symm.toMonoidHom⟩
+    · show (istrPre (istrPre P F) (istr_frobenioidCore P F)).Base f
+        = (istrPre (istrPre P F) (istr_frobenioidCore P F)).Base (𝟙 (istr2 (F := F) A))
+      rw [istrPre_Base _ f, istrPre_Base _ (𝟙 (istr2 (F := F) A))]
+      exact hb
+    · show (istrPre (istrPre P F) (istr_frobenioidCore P F)).degFr f = 1
+      rw [istrPre_degFr _ f]
+      exact hl
+
+/-- ★二重 `Istr` の自己同型は `Istr P` の自己同型と 1 対 1。 -/
+def istr2IsoEquiv (A : Istr P) : ((istr2 (F := F) A) ≅ (istr2 (F := F) A)) ≃ (A ≅ A) where
+  toFun θ := Iso.mk θ.hom.hom θ.inv.hom
+    (congrArg InducedCategory.Hom.hom θ.hom_inv_id)
+    (congrArg InducedCategory.Hom.hom θ.inv_hom_id)
+  invFun θ := Iso.mk ⟨θ.hom⟩ ⟨θ.inv⟩
+    (InducedCategory.Hom.ext θ.hom_inv_id)
+    (InducedCategory.Hom.ext θ.inv_hom_id)
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-- ★共役は対応と交換する。 -/
+theorem istr2_endConj (A : Istr P) (θ : (istr2 (F := F) A) ≅ (istr2 (F := F) A))
+    (u : End (istr2 (F := F) A)) :
+    (istr2EndEquiv (F := F) A) (endConj θ u)
+      = endConj (istr2IsoEquiv (F := F) A θ) ((istr2EndEquiv (F := F) A) u) := rfl
+
+/-- ★★**(b) 第 2 段** —— Frobenius-compact 対象は二重 `Istr` へ移る。 -/
+theorem istr2_frobeniusCompact (A : Istr P) (h : IsFrobeniusCompact (istrPre P F) A) :
+    IsFrobeniusCompact (istrPre (istrPre P F) (istr_frobenioidCore P F)) (istr2 (F := F) A) := by
+  obtain ⟨hcomm, ⟨u₀, hu₀mem, hu₀pow⟩, hconj⟩ := h
+  set e := istr2EndEquiv (F := F) A with he
+  refine ⟨?_, ⟨e.symm u₀, ?_, ?_⟩, ?_⟩
+  · intro x y hx hy
+    refine e.injective ?_
+    rw [map_mul, map_mul]
+    exact hcomm _ _ ((istr2_mem_otimes_iff A x).mp hx) ((istr2_mem_otimes_iff A y).mp hy)
+  · exact (istr2_mem_otimes_iff A (e.symm u₀)).mpr
+      (by rw [MulEquiv.apply_symm_apply]; exact hu₀mem)
+  · intro k hk
+    refine hu₀pow k ?_
+    have h1 := congrArg e hk
+    rw [map_pow, MulEquiv.apply_symm_apply, map_one] at h1
+    exact h1
+  · intro θ c d H u hu
+    have H' : ∀ v : End A, v ∈ OTimes (istrPre P F) A → ∃ k : ℕ+,
+        ((endConj (istr2IsoEquiv (F := F) A θ) v) ^ (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)
+          = (v ^ (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A) := by
+      intro v hv
+      obtain ⟨k, hk⟩ := H (e.symm v)
+        ((istr2_mem_otimes_iff A (e.symm v)).mpr (by rw [MulEquiv.apply_symm_apply]; exact hv))
+      refine ⟨k, ?_⟩
+      have h2 := congrArg e hk
+      rw [map_pow, map_pow, istr2_endConj, MulEquiv.apply_symm_apply] at h2
+      exact h2
+    obtain ⟨k, hk⟩ := hconj (istr2IsoEquiv (F := F) A θ) c d H' (e u)
+      ((istr2_mem_otimes_iff A u).mp hu)
+    refine ⟨k, e.injective ?_⟩
+    rw [map_pow, map_pow, istr2_endConj]
+    exact hk
+
+/-! ## ★5. `Remark 4.5.1` の standard 型の側 -/
+
+/-- ★★★★**[FrdI] Remark 4.5.1(standard 型の側)** ——
+`𝒞` が standard 型なら `𝒞^istr` も standard 型。
+
+★`Definition 3.1, (i)` の 5 条がすべて移った。 -/
+theorem istr_standardType (h : IsOfStandardType D C P F) :
+    IsOfStandardType D (Istr P) (istrPre P F) (istr_frobenioidCore P F) where
+  quasiIsotropic := istr_quasiIsotropicType
+  frobIsotropic := istr_frobIsotropicType
+  groupLikeCompact := fun hgl => by
+    obtain ⟨A, hA⟩ := h.groupLikeCompact (istr_groupLikeType_down hgl)
+    exact ⟨istr2 (F := F) A, istr2_frobeniusCompact A hA⟩
+  frobNormalized := istr_frobNormalizedType h.frobNormalized
+  baseFSMFF := h.baseFSMFF
+  phiNonDilating := h.phiNonDilating
+
+/-! ## ★6. 残り —— rationally standard 型の側
+
+★★**未実装**。`Definition 4.5, (iii)` の 4 条:
+
+| 条 | 内容 | 状態 |
+|---|---|---|
+| (a) | birationally Frobenius-normalized 型 | 未 |
+| (a) | rational 型 | 未 |
+| (a) | standard 型 | ★**済**(`istr_standardType`) |
+| (b) | `(𝒞^un-tr)^birat` に Frobenius-compact 対象 | 未 |
+
+★いずれも `𝒞^istr` の birationalization / unit-trivialization を経由するので、
+`Prop33UnTr.lean` / `Prop44Pre.lean` の語彙を `𝒞^istr` へ持ち上げる作業になる。
 -/
 
 /-! ## ★出典の紐付け(条つき) -/
