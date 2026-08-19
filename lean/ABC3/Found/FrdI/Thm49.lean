@@ -256,6 +256,50 @@ def divMapNat_all.src : ABC3.Meta.Source :=
     item := "Theorem 4.9 — Ψ_Φ の自然性",
     sectionId := "frdi-thm-4-9" }
 
+/-! ## ★4. **`Ψ` は Div-equivalence を保つ** —— `Corollary 4.11, (ii)` が要る形 -/
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Theorem 4.9 の系** —— `Ψ` は平行射の Div-equivalence を保つ。
+
+★★これが `Corollary 4.11, (ii)` の要である ——
+原文 (物理 p.93) が `Theorem 4.2, (ii)` に送る段。
+
+★手筋: `divMap` は**全射**なので、`Φ₂.map (Base Ψf)` の値は
+`divMap` の像の上で決まる。そこで `divMapNat_all` を両側に当てればよい。 -/
+theorem divEquivalent_map (Ψ : C ≌ C₂) (G : Frobenioid P) (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f g : W ⟶ A) (h : DivEquivalent P f g) :
+    DivEquivalent P₂ (Ψ.functor.map f) (Ψ.functor.map g) := by
+  show Φ₂.map (P₂.Base (Ψ.functor.map f)) = Φ₂.map (P₂.Base (Ψ.functor.map g))
+  refine AddMonoidHom.ext (fun y => ?_)
+  obtain ⟨x, hx⟩ := divMap_surjective Ψ G hiso hdivS hdivS₂ hOTri hOTri' A y
+  rw [← hx]
+  have hf := divMapNat_all (Ψ := Ψ) (G := G) (hiso := hiso) (hdivS := hdivS)
+    (hOTri := hOTri) F hperfM hdeg f x
+  have hg := divMapNat_all (Ψ := Ψ) (G := G) (hiso := hiso) (hdivS := hdivS)
+    (hOTri := hOTri) F hperfM hdeg g x
+  rw [← hf, ← hg]
+  have hxy : Φ.map (P.Base f) x = Φ.map (P.Base g) x :=
+    congrArg (fun t : Φ.val _ →+ Φ.val _ => t x) h
+  rw [hxy]
+
+def divEquivalent_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Theorem 4.9 — Ψ は Div-equivalence を保つ",
+    sectionId := "frdi-thm-4-9" }
+
 end PsiPhi
 
 end ABC3.Found.FrdI
