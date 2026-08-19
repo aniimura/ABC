@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.FrdI.Prop44Core
+import Mathlib.CategoryTheory.Limits.Final
 
 /-!
 # [FrdI] `Remark 4.5.1` の (a) —— `𝒞^istr` の双有理化は `𝒞` のそれと同じ
@@ -35,7 +36,7 @@ import ABC3.Found.FrdI.Prop44Core
 
 namespace ABC3.Found.FrdI
 
-open CategoryTheory
+open CategoryTheory CategoryTheory.Limits
 
 universe v u w u2 v2
 
@@ -195,5 +196,108 @@ def sliceIstr_isEquivalence.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 83,
     item := "Proposition 4.4, (iv) — 双有理化の添字圏は 𝒞^istr と 𝒞 で一致する",
     sectionId := "frdi-prop-4-4" }
+
+/-! ## ★5. `Hom^birat` の写像 —— `Rmk451Birat.lean` の手法をなぞる
+
+★★`homFunctorBirat` の対象は `ULift (Z.unop.left.obj ⟶ B)` であり、
+`Istr P` の hom は `C` の hom と**定義的に同じ**(`InducedCategory`)なので、
+余錐の成分は `.hom` を取るだけである。 -/
+
+/-- ★★降ろすための余錐。自然性は `HomBirat.mk_map` 1 本。 -/
+noncomputable def biratIstrCocone (A B : Istr P) :
+    Cocone (homFunctorBirat (istrPre P F) (istr_frobenioid P F G) A B) :=
+  Cocone.mk (HomBirat P G A.obj B.obj)
+    { app := fun Z => TypeCat.ofHom fun φ =>
+        HomBirat.mk ((idxIstr P G F A).obj Z) φ.down.hom
+      naturality := fun Z W u => by
+        ext φ
+        show HomBirat.mk ((idxIstr P G F A).obj W) (u.unop.left.hom ≫ φ.down).hom
+          = HomBirat.mk ((idxIstr P G F A).obj Z) φ.down.hom
+        exact HomBirat.mk_map ((idxIstr P G F A).map u) φ.down.hom }
+
+/-- ★★★`Hom^birat` の写像。 -/
+noncomputable def biratIstrMap (A B : Istr P) :
+    HomBirat (istrPre P F) (istr_frobenioid P F G) A B → HomBirat P G A.obj B.obj :=
+  fun z => colimit.desc _ (biratIstrCocone P G F A B) z
+
+/-- ★代表元での値 —— 以後の計算の入口。 -/
+theorem biratIstrMap_mk (A B : Istr P)
+    (Z : IdxBirat (istrPre P F) (istr_frobenioid P F G) A) (φ : Z.unop.left.obj ⟶ B) :
+    biratIstrMap P G F A B (HomBirat.mk Z φ)
+      = HomBirat.mk ((idxIstr P G F A).obj Z) φ.hom := by
+  show colimit.desc _ (biratIstrCocone P G F A B)
+      (colimit.ι (homFunctorBirat (istrPre P F) (istr_frobenioid P F G) A B) Z
+        (ULift.up φ)) = _
+  rw [← types_comp_apply
+    (colimit.ι (homFunctorBirat (istrPre P F) (istr_frobenioid P F G) A B) Z)
+    (colimit.desc _ (biratIstrCocone P G F A B)), colimit.ι_desc]
+  rfl
+
+/-! ## ★6. 余錐が余極限であること —— 添字圏の同値から
+
+★★`idxIstr` は同値なので **final** であり、
+`colimit.cocone` を whisker したものは余極限のままである。 -/
+
+include F G in
+/-- ★`idxIstr` は final(同値だから)。 -/
+theorem idxIstr_final (A : Istr P) : (idxIstr P G F A).Final := by
+  haveI := idxIstr_isEquivalence P G F A
+  infer_instance
+
+/-! ## ★6. 全単射 —— 添字圏の同値から直に出す
+
+★★`HomBirat.exists_rep` / `HomBirat.mk_map` / `HomBirat.eq_iff` の 3 本で足りる。
+★余極限の一般論(`Functor.Final`)を経由するより、**代表元で書く方が短い**。 -/
+
+include F G in
+/-- ★★★**全射** —— 添字を `idxIstr` の原像へ引き戻し、`mk_map` で移す。 -/
+theorem biratIstrMap_surjective (A B : Istr P) :
+    Function.Surjective (biratIstrMap P G F A B) := by
+  haveI := idxIstr_isEquivalence P G F A
+  intro z
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  let Z' := (idxIstr P G F A).objPreimage Z
+  let e : (idxIstr P G F A).obj Z' ≅ Z := (idxIstr P G F A).objObjPreimageIso Z
+  refine ⟨HomBirat.mk Z' (InducedCategory.homMk (e.inv.unop.left.hom ≫ φ)), ?_⟩
+  rw [biratIstrMap_mk]
+  exact HomBirat.mk_map e.inv φ
+
+include F G in
+/-- ★★★**単射** —— 共通の下界を `idxIstr` の原像へ引き戻し、充満性で射を持ち上げる。 -/
+theorem biratIstrMap_injective (A B : Istr P) :
+    Function.Injective (biratIstrMap P G F A B) := by
+  haveI := idxIstr_isEquivalence P G F A
+  intro z₁ z₂ h
+  obtain ⟨Z₁, φ₁, rfl⟩ := HomBirat.exists_rep z₁
+  obtain ⟨Z₂, φ₂, rfl⟩ := HomBirat.exists_rep z₂
+  rw [biratIstrMap_mk, biratIstrMap_mk] at h
+  obtain ⟨V, u, v, hV⟩ := HomBirat.eq_iff.mp h
+  let V' := (idxIstr P G F A).objPreimage V
+  let e : (idxIstr P G F A).obj V' ≅ V := (idxIstr P G F A).objObjPreimageIso V
+  obtain ⟨u', hu'⟩ := (idxIstr P G F A).map_surjective (u ≫ e.inv)
+  obtain ⟨v', hv'⟩ := (idxIstr P G F A).map_surjective (v ≫ e.inv)
+  refine HomBirat.sound V' u' v' (InducedCategory.hom_ext ?_)
+  have hu := congrArg (fun t : (idxIstr P G F A).obj Z₁ ⟶ (idxIstr P G F A).obj V' =>
+    t.unop.left.hom) hu'
+  have hv := congrArg (fun t : (idxIstr P G F A).obj Z₂ ⟶ (idxIstr P G F A).obj V' =>
+    t.unop.left.hom) hv'
+  show u'.unop.left.hom.hom ≫ φ₁.hom = v'.unop.left.hom.hom ≫ φ₂.hom
+  rw [show u'.unop.left.hom.hom = (u ≫ e.inv).unop.left.hom from hu,
+    show v'.unop.left.hom.hom = (v ≫ e.inv).unop.left.hom from hv]
+  show (e.inv.unop.left.hom ≫ u.unop.left.hom) ≫ φ₁.hom
+    = (e.inv.unop.left.hom ≫ v.unop.left.hom) ≫ φ₂.hom
+  rw [Category.assoc, Category.assoc, hV]
+
+include F G in
+/-- ★★★★★**`Hom^birat` は `𝒞^istr` と `𝒞` で一致する**。 -/
+theorem biratIstrMap_bijective (A B : Istr P) :
+    Function.Bijective (biratIstrMap P G F A B) :=
+  ⟨biratIstrMap_injective P G F A B, biratIstrMap_surjective P G F A B⟩
+
+def biratIstrMap_bijective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — Hom^birat は 𝒞^istr と 𝒞 で一致する",
+    sectionId := "frdi-remark-4-5-1" }
+
 
 end ABC3.Found.FrdI
