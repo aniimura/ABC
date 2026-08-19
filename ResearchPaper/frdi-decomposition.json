@@ -2486,11 +2486,11 @@
      "id": "p56-unitprofinite",
      "title": "unit-profinite 型の定義と在庫確認",
      "deps": [],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "note": "`Definition 2.8` 系の語彙。`𝒪^×(A)` が位相的に有限生成な副有限アーベル群であること。★`prol` チェーン(実装済み)の `M ≅ ∏_l M[l]` がここで効く。",
-     "lean": "",
-     "decl": ""
+     "note": "`Definition 2.8` 系の語彙。`𝒪^×(A)` が位相的に有限生成な副有限アーベル群であること。★`prol` チェーン(実装済み)の `M ≅ ∏_l M[l]` がここで効く。\n\n★2026-08-20 の在庫確認: **定義は既に在る**(`Def28.lean` の `IsOfUnitProfiniteType`)。`𝒪^×(A)` が群であること(`otimesGroup`)も在庫。鎖 `prol` の `M ≅ ∏_l M[l]` も実装済み。★したがってこの節点は測定として閉じる。",
+     "lean": "ABC3/Found/FrdI/Def28.lean",
+     "decl": "IsOfUnitProfiniteType"
     },
     {
      "id": "p56-cosets",
@@ -2498,11 +2498,11 @@
      "deps": [
       "p56-unitprofinite"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "note": "原文 p.105 の「for any `m ∈ M`, `f ∈ E`, there exists `m' ∈ M` such that `f·m = m'·f`」を満たす部分群について、剰余類の集合に単系構造が入ること。",
-     "lean": "",
-     "decl": ""
+     "note": "原文 p.105 の「for any `m ∈ M`, `f ∈ E`, there exists `m' ∈ M` such that `f·m = m'·f`」を満たす部分群について、剰余類の集合に単系構造が入ること。\n\n★★閉じた(2026-08-20): 純粋な単系の代数として実装した。`IsShiftStable E M`(`M ⊆ E`・`M` は群・`f · m = m' · f`)から左剰余類 `M \\ E` に単系構造が入り、全射準同型 `E ↠ E_M` が定まる。★原文の「部分群」は `End A` が単系なので「可逆で逆元も入る部分単系」として書いた。",
+     "lean": "ABC3/Found/FrdI/Prop56Cos.lean",
+     "decl": "IsShiftStable / IsShiftStable.Cos / cosHom"
     },
     {
      "id": "p56-Mp",

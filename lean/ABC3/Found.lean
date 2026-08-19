@@ -99,6 +99,7 @@ import ABC3.Found.FrdI.Thm52ModelType
 import ABC3.Found.FrdI.Prop53Birat
 import ABC3.Found.FrdI.Prop56Sec
 import ABC3.Found.FrdI.Def24Rlf
+import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
