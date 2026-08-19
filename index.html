@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1213 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1216 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5774</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1605</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5782</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1608</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>5b77da0</code></td><td>2026-08-19</td><td>★★Galois が 6 ブロックに——標数 2 での計算(G1 第 6 ブロック)</td></tr>
+<tr><td><code>7029524</code></td><td>2026-08-19</td><td>★★★Galois が 5 ブロックに——ZMod 2 への還元(G1 第 5 ブロック)</td></tr>
+<tr><td><code>dae597d</code></td><td>2026-08-19</td><td>★`std-istr` の形を測った——残るは 6 フィールド中 2 つだけ</td></tr>
 <tr><td><code>4832655</code></td><td>2026-08-19</td><td>★★★★§4 の未分解 4 命題をスケルトンに分解した——17 節点を追加</td></tr>
 <tr><td><code>7b9fe69</code></td><td>2026-08-19</td><td>★★Galois が 4 ブロックに——ω_n の初期値(G1 第 4 ブロック)</td></tr>
 <tr><td><code>1a420ad</code></td><td>2026-08-19</td><td>★★`iii-b-compact` の段 1 を取った——`𝒪^▷` の全射性はほぼ `rfl` だった</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>55aa133</code></td><td>2026-08-19</td><td>★★★`iii-b-compact` の隔たりが 3 条のうち 1 条に縮んだ</td></tr>
 <tr><td><code>96fea21</code></td><td>2026-08-19</td><td>両辺を app ≫ 制限 に開いた(第 233)——摩擦 #3' のもう 1 つの逃げ道</td></tr>
 <tr><td><code>2cc3e8c</code></td><td>2026-08-19</td><td>★★★★★`Proposition 4.8, (iv)` を閉じた——pre-model 型は birat で保たれる</td></tr>
-<tr><td><code>4378457</code></td><td>2026-08-19</td><td>appIso を appLE の言葉に直した(第 232)——座標も言葉も揃った</td></tr>
-<tr><td><code>9110edc</code></td><td>2026-08-19</td><td>★★★★★★hcompat を ⊤ 座標で出した(第 231)——座標変更コストが 0 だった</td></tr>
-<tr><td><code>12e0c01</code></td><td>2026-08-19</td><td>★`iv-src` の残りを測った——Frobenius-section の移送 1 本だけ</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1605 件)。</div>
+<b>すべて PDF と機械照合している</b>(1608 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
