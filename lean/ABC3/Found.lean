@@ -388,6 +388,7 @@ import ABC3.Found.Arakelov.PicComapPair
 import ABC3.Found.Arakelov.PicSurjPair
 import ABC3.Found.Arakelov.PicGammaAppIso
 import ABC3.Found.Arakelov.PicResIso
+import ABC3.Found.Arakelov.PicAppIsoInv
 import ABC3.Found.Arakelov.PicAppLEApply
 import ABC3.Found.Arakelov.PicComapChain
 import ABC3.Found.Arakelov.PicUnitSurj
