@@ -304,6 +304,93 @@ def isPrimaryElt_div_extend.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — primary 性の一段の拡張",
     sectionId := "frdi-thm-4-2" }
 
+/-- ★★同型を前置しても `SamePrimeCat` は変わらない(第 2 引数側)。 -/
+theorem samePrimeCat_iso_comp_right {A B B' X : C} (e : X ⟶ B') [IsIso e]
+    {ϵ : B ⟶ A} {ϵ' : B' ⟶ A} :
+    SamePrimeCat P ϵ (e ≫ ϵ') ↔ SamePrimeCat P ϵ ϵ' := by
+  constructor
+  · rintro ⟨Z, ζ, hζc, hζst, hl, ⟨ψ', hψ's, hfac'⟩⟩
+    refine ⟨Z, ζ, hζc, hζst, hl, ⟨inv e ≫ ψ',
+      IsPreStep.comp P (isPreStep_of_isIso P (inv e)) hψ's, ?_⟩⟩
+    rw [Category.assoc, ← hfac', ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  · rintro ⟨Z, ζ, hζc, hζst, hl, ⟨ψ', hψ's, hfac'⟩⟩
+    refine ⟨Z, ζ, hζc, hζst, hl, ⟨e ≫ ψ',
+      IsPreStep.comp P (isPreStep_of_isIso P e) hψ's, ?_⟩⟩
+    rw [Category.assoc, ← hfac']
+
+/-- ★★★★**`SamePrimeCat` は `Ψ` で戻る**。 -/
+theorem samePrimeCat_map_rev (Ψ : C ≌ C₂)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST' : ∀ {X Y : C} (f : X ⟶ Y), IsStep P₂ (Ψ.functor.map f) → IsStep P f)
+    {A B B' : C} {ϵ : B ⟶ A} {ϵ' : B' ⟶ A}
+    (h : SamePrimeCat P₂ (Ψ.functor.map ϵ) (Ψ.functor.map ϵ')) :
+    SamePrimeCat P ϵ ϵ' := by
+  obtain ⟨Z₂, ζ₂, hζc, hζst, ⟨ψ₂, hψs, hfac⟩, ⟨ψ'₂, hψ's, hfac'⟩⟩ := h
+  obtain ⟨Z₀, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) Z₂
+  obtain ⟨ζ₀, hζ₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ζ₂)
+  obtain ⟨ψ₀, hψ₀⟩ := Ψ.functor.map_surjective (ψ₂ ≫ e.inv)
+  obtain ⟨ψ'₀, hψ'₀⟩ := Ψ.functor.map_surjective (ψ'₂ ≫ e.inv)
+  refine ⟨Z₀, ζ₀, prop_1_4_i P _ (fun Y _ => hiso Y), ?_,
+    ⟨ψ₀, hPS' ψ₀ (by rw [hψ₀]; exact IsPreStep.comp P₂ hψs (isPreStep_of_isIso P₂ e.inv)), ?_⟩,
+    ⟨ψ'₀, hPS' ψ'₀ (by rw [hψ'₀]; exact IsPreStep.comp P₂ hψ's (isPreStep_of_isIso P₂ e.inv)),
+      ?_⟩⟩
+  · refine hST' ζ₀ ?_
+    rw [hζ₀]
+    refine ⟨IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hζst.1, fun hi => hζst.2 ?_⟩
+    haveI := hi
+    have hz : ζ₂ = inv e.hom ≫ (e.hom ≫ ζ₂) := by
+      rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    rw [hz]; infer_instance
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hψ₀, hζ₀, Category.assoc, ← Category.assoc e.inv,
+      e.inv_hom_id, Category.id_comp, hfac]
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hψ'₀, hζ₀, Category.assoc, ← Category.assoc e.inv,
+      e.inv_hom_id, Category.id_comp, hfac']
+
+/-- ★★★★★★**`Proposition 4.1, (iv)` の右辺は `Ψ` で戻る**。 -/
+theorem prop41ivRhsCat_map_rev (Ψ : C ≌ C₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST' : ∀ {X Y : C} (f : X ⟶ Y), IsStep P₂ (Ψ.functor.map f) → IsStep P f)
+    {Do E F : C} {δ : Do ⟶ E} {ϵ : E ⟶ F}
+    (hFwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P.Div ϵ') → IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')))
+    (hBwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')) → IsPrimaryElt (P.Div ϵ'))
+    (h : Prop41ivRhsCat P₂ (Ψ.functor.map δ) (Ψ.functor.map ϵ)) :
+    Prop41ivRhsCat P δ ϵ := by
+  obtain ⟨E₀₂, ϵ₀₂, hc₀, hs₀, hp₀, hcond⟩ := h
+  obtain ⟨E₀, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) E₀₂
+  obtain ⟨ϵ₀, hϵ₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ϵ₀₂)
+  have hs₀' : IsPreStep P ϵ₀ := by
+    refine hPS' ϵ₀ ?_
+    rw [hϵ₀]
+    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hs₀
+  have hp₀' : IsPrimaryElt (P.Div ϵ₀) := by
+    refine hBwd E₀ ϵ₀ hs₀' ?_
+    rw [hϵ₀]
+    exact (isPrimaryElt_div_iso_comp e.hom ϵ₀₂ hs₀).mpr hp₀
+  refine ⟨E₀, ϵ₀, prop_1_4_i P _ (fun Y _ => hiso Y), hs₀', hp₀', ?_⟩
+  intro E' ϵ' hcϵ' hsϵ' hpϵ' hns
+  have hns₂ : ¬ SamePrimeCat P₂ (Ψ.functor.map ϵ') ϵ₀₂ := by
+    intro hc
+    have he : ϵ₀₂ = inv e.hom ≫ Ψ.functor.map ϵ₀ := by
+      rw [hϵ₀, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    rw [he] at hc
+    exact hns (samePrimeCat_map_rev Ψ hiso hPS' hST'
+      ((samePrimeCat_iso_comp_right (P := P₂) (inv e.hom)).mp hc))
+  have hiff := hcond (Ψ.functor.obj E') (Ψ.functor.map ϵ')
+    (prop_1_4_i P₂ _ (fun Y _ => hiso₂ Y)) (hPS ϵ' hsϵ') (hFwd E' ϵ' hsϵ' hpϵ') hns₂
+  have hL : FactorsPre P ϵ ϵ' ↔ FactorsPre P₂ (Ψ.functor.map ϵ) (Ψ.functor.map ϵ') :=
+    factorsPre_map_iff Ψ hPS hPS' ϵ ϵ'
+  have hR : FactorsPre P (δ ≫ ϵ) ϵ'
+      ↔ FactorsPre P₂ (Ψ.functor.map δ ≫ Ψ.functor.map ϵ) (Ψ.functor.map ϵ') := by
+    rw [factorsPre_map_iff Ψ hPS hPS' (δ ≫ ϵ) ϵ', Ψ.functor.map_comp]
+  exact hL.trans (hiff.trans hR.symm)
+
 end MainTransport
 
 end ABC3.Found.FrdI

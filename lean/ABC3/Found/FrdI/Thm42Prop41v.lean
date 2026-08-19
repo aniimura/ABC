@@ -511,6 +511,110 @@ def primaryOut_iff_of_primaryIn.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — 入る/出る primary の橋（両向き）",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★両向きの「一段の拡張」 -/
+
+/-- ★★★★★★**`F` で両向きなら、`F` へ pre-step を持つ `E` でも両向き**。 -/
+theorem primaryInIff_extend (Ψ : C ≌ C₂)
+    (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hCA : ∀ {X Y : C} (f : X ⟶ Y), IsCoAngular P f → IsCoAngular P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST : ∀ {X Y : C} (f : X ⟶ Y), IsStep P f → IsStep P₂ (Ψ.functor.map f))
+    (hST' : ∀ {X Y : C} (f : X ⟶ Y), IsStep P₂ (Ψ.functor.map f) → IsStep P f)
+    {E F : C} (ϵ : E ⟶ F) (hsϵ : IsPreStep P ϵ)
+    {ι₀ : Prime (Φ.val (P.toElem.obj F).base) → Pf (Φ.val (P.toElem.obj F).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj F).base) ι₀)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj F).base))
+    (hdivM : IsDivisorial (Φ.val (P.toElem.obj F).base))
+    {ι₂ : Prime (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) →
+      Pf (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) → ℝ≥0}
+    (H₂ : IsPerfFactorialWith (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) ι₂)
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base))
+    (hdivM₂ : IsDivisorial (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base))
+    (hIff : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      (IsPrimaryElt (P.Div ϵ') ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ'))))
+    {Do : C} (δ : Do ⟶ E) (hsδ : IsPreStep P δ) :
+    IsPrimaryElt (P.Div δ) ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map δ)) := by
+  classical
+  by_cases hst : IsStep P δ
+  · have hst₂ : IsStep P₂ (Ψ.functor.map δ) := hST δ hst
+    have hδ0 : P.Div δ ≠ 0 := (isStep_iff_div_ne_zero hiso δ hsδ).mp hst
+    have hδ0₂ : P₂.Div (Ψ.functor.map δ) ≠ 0 :=
+      (isStep_iff_div_ne_zero hiso₂ (Ψ.functor.map δ) (hPS δ hsδ)).mp hst₂
+    rw [prop_4_1_iv_cat G hiso hdivS δ ϵ hsδ hsϵ hδ0 H hperf hdivM,
+      prop_4_1_iv_cat G₂ hiso₂ hdivS₂ (Ψ.functor.map δ) (Ψ.functor.map ϵ)
+        (hPS δ hsδ) (hPS ϵ hsϵ) hδ0₂ H₂ hperf₂ hdivM₂]
+    exact ⟨prop41ivRhsCat_map Ψ hiso hCA hPS hPS' hST
+        (fun E' ϵ' h' hp' => (hIff E' ϵ' h').mp hp')
+        (fun E' ϵ' h' hp' => (hIff E' ϵ' h').mpr hp'),
+      prop41ivRhsCat_map_rev Ψ hiso hiso₂ hPS hPS' hST'
+        (fun E' ϵ' h' hp' => (hIff E' ϵ' h').mp hp')
+        (fun E' ϵ' h' hp' => (hIff E' ϵ' h').mpr hp')⟩
+  · haveI hi : IsIso δ := by
+      by_contra hc
+      exact hst ⟨hsδ, hc⟩
+    haveI : IsIso (Ψ.functor.map δ) := Ψ.functor.map_isIso δ
+    rw [show P.Div δ = 0 from isIsometric_of_isIso P δ,
+      show P₂.Div (Ψ.functor.map δ) = 0 from isIsometric_of_isIso P₂ _]
+    exact ⟨fun hp => absurd rfl hp.1, fun hp => absurd rfl hp.1⟩
+
+def primaryInIff_extend.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — 両向きの一段の拡張",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★★★★★v 側の逆向き移送 -/
+
+/-- ★★同型を後置しても `SamePrimeCatOut` は変わらない(第 2 引数側)。 -/
+theorem samePrimeCatOut_iso_comp_right {A B B' X : C} (e : B' ⟶ X) [IsIso e]
+    {ϵ : A ⟶ B} {ϵ' : A ⟶ B'} :
+    SamePrimeCatOut P ϵ (ϵ' ≫ e) ↔ SamePrimeCatOut P ϵ ϵ' := by
+  constructor
+  · rintro ⟨Z, ζ, hζc, hζst, hl, ⟨ψ', hψ's, hfac'⟩⟩
+    refine ⟨Z, ζ, hζc, hζst, hl, ⟨ψ' ≫ inv e,
+      IsPreStep.comp P hψ's (isPreStep_of_isIso P (inv e)), ?_⟩⟩
+    rw [← Category.assoc, ← hfac', Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+  · rintro ⟨Z, ζ, hζc, hζst, hl, ⟨ψ', hψ's, hfac'⟩⟩
+    refine ⟨Z, ζ, hζc, hζst, hl, ⟨ψ' ≫ e,
+      IsPreStep.comp P hψ's (isPreStep_of_isIso P e), ?_⟩⟩
+    rw [← Category.assoc, ← hfac']
+
+/-- ★★★★**`SamePrimeCatOut` は `Ψ` で戻る**。 -/
+theorem samePrimeCatOut_map_rev (Ψ : C ≌ C₂)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST' : ∀ {X Y : C} (f : X ⟶ Y), IsStep P₂ (Ψ.functor.map f) → IsStep P f)
+    {A B B' : C} {ϵ : A ⟶ B} {ϵ' : A ⟶ B'}
+    (h : SamePrimeCatOut P₂ (Ψ.functor.map ϵ) (Ψ.functor.map ϵ')) :
+    SamePrimeCatOut P ϵ ϵ' := by
+  obtain ⟨Z₂, ζ₂, hζc, hζst, ⟨ψ₂, hψs, hfac⟩, ⟨ψ'₂, hψ's, hfac'⟩⟩ := h
+  obtain ⟨Z₀, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) Z₂
+  obtain ⟨ζ₀, hζ₀⟩ := Ψ.functor.map_surjective (ζ₂ ≫ e.inv)
+  obtain ⟨ψ₀, hψ₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ψ₂)
+  obtain ⟨ψ'₀, hψ'₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ψ'₂)
+  refine ⟨Z₀, ζ₀, prop_1_4_i P _ (fun Y _ => hiso Y), ?_,
+    ⟨ψ₀, hPS' ψ₀ (by rw [hψ₀]; exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hψs), ?_⟩,
+    ⟨ψ'₀, hPS' ψ'₀ (by rw [hψ'₀];
+      exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hψ's), ?_⟩⟩
+  · refine hST' ζ₀ ?_
+    rw [hζ₀]
+    refine ⟨IsPreStep.comp P₂ hζst.1 (isPreStep_of_isIso P₂ e.inv), fun hi => hζst.2 ?_⟩
+    haveI := hi
+    have hz : ζ₂ = (ζ₂ ≫ e.inv) ≫ e.hom := by
+      rw [Category.assoc, e.inv_hom_id, Category.comp_id]
+    rw [hz]; infer_instance
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hψ₀, hζ₀, Category.assoc, ← Category.assoc e.hom,
+      ← Category.assoc, hfac, Category.assoc, e.inv_hom_id, Category.comp_id]
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hψ'₀, hζ₀, Category.assoc, ← Category.assoc e.hom,
+      ← Category.assoc, hfac', Category.assoc, e.inv_hom_id, Category.comp_id]
+
 end Bridge
 
 end ABC3.Found.FrdI
