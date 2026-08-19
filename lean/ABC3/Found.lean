@@ -77,6 +77,7 @@ import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.Cor411Untr
+import ABC3.Found.FrdI.Cor411Base
 import ABC3.Found.FrdI.Def24SuppIntr
 import ABC3.Found.FrdI.MonoidTransport
 import ABC3.Found.FrdI.Rmk451Ratstd
@@ -458,6 +459,7 @@ import ABC3.Found.GaloisRep.OmegaDef
 import ABC3.Found.GaloisRep.OmegaCurve
 import ABC3.Found.GaloisRep.Psi2Eval
 import ABC3.Found.GaloisRep.Doubling
+import ABC3.Found.GaloisRep.TwoTorsion
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

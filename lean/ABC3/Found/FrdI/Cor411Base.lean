@@ -8,7 +8,7 @@ import ABC3.Found.FrdI.Def45
 # [FrdI] Corollary 4.11 —— **Div-slim による剛性**
 
 原文 (FrdI p.93):
-> determined by α maps [under composition with Φi : Di → Mon] to the identity element
+> Thus, since Di is Div-slim, it follows that every automorphism [of an object of
 
 ## ★★★★★測って分かった —— `Proposition 1.13, (i)` の骨がそのまま使える
 
@@ -163,7 +163,7 @@ include P in
 `𝒞_A → 𝒟` の自己同型で「`Φ` が恒等へ送る」ものは**恒等**。
 
 原文 (FrdI p.93):
-> determined by α maps [under composition with Φi : Di → Mon] to the identity element -/
+> Thus, since Di is Div-slim, it follows that every automorphism [of an object of -/
 theorem divSlim_over_aut_eq_id (F : FrobenioidCore P) (hds : IsDivSlim Φ) (A : C)
     (η : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj))
     (hdiv : ∀ (Y : Over A) (x : Φ.val (P.proj.obj Y.left)),
