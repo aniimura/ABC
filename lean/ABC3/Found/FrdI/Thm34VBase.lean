@@ -81,6 +81,33 @@ def base_three_factor.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 底の射の 3 分解",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★10. 任意の対象は Frobenius-trivial な対象と pre-step の span で繋がる
+
+原文 (FrdI p.24):
+> (i) (Surjectivity to the Base Category via Pull-back Morphisms) (a) Every iso-
+
+★★★`𝒪^▷` の保存(`thm_3_4_iv_otri_map'`)は
+**Frobenius-trivial な対象にしか効かない**。
+★原典 (物理 p.66) はそこを `Definition 1.3, (i), (a)` で還元する。
+★本補題がその還元の第 1 段である —— `baseSurj` と `preStepSpan` を繋ぐだけ。 -/
+
+include F in
+/-- ★★★★**任意の対象は Frobenius-trivial な対象と pre-step の span で繋がる**。
+
+★`baseSurj` で底が同型な Frobenius-trivial 対象を取り、
+`preStepSpan` でその同型を span に開く。 -/
+theorem exists_frobTrivial_span (A : C) :
+    ∃ (A₀ X : C) (α : X ⟶ A₀) (γ : X ⟶ A),
+      IsFrobeniusTrivial P A₀ ∧ IsPreStep P α ∧ IsPreStep P γ := by
+  obtain ⟨A₀, hft, ⟨e⟩⟩ := F.baseSurj ((P.toElem.obj A).base)
+  obtain ⟨X, α, γ, hα, hγ, -⟩ := F.preStepSpan A₀ A e.hom (by infer_instance)
+  exact ⟨A₀, X, α, γ, hft, hα, hγ⟩
+
+def exists_frobTrivial_span.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 24,
+    item := "Definition 1.3, (i), (a) — 任意の対象は Frobenius-trivial な対象と span で繋がる",
+    sectionId := "frdi-def-1-3-i" }
+
 /-! ## ★3. 自然性は `Base` の像から `𝒟` 全体へ延びる
 
 ★★★3 分解があるので、**`Base` の像で自然なら `𝒟` のすべての射で自然**になる ——

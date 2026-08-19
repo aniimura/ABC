@@ -21,7 +21,7 @@ import ABC3.Found.Arakelov.ArcSemilinear
     q : Spec ℂ ⟶ V.toScheme   ↦   q ≫ V.ι : Spec ℂ ⟶ X
 
 ★このとき `(q ≫ V.ι) ⁻¹ᵁ V = ⊤` は**自動**である(`comp_preimage_eq_top`)。
-★★逆に `p ⁻¹ᵁ V = ⊤` なら `p` は `V.ι` を経由して分解する(`liftToOpen`)。
+★★逆に `p ⁻¹ᵁ V = ⊤` なら `p` は `V.ι` を経由して分解する(`liftToOpenOfTop`)。
 
 ★★★★これで連続性は `arcTopology V.toScheme` の上の話になり、
 第 252(大域の正則関数は連続)を `V.toScheme` に適用すればよい。
@@ -29,7 +29,7 @@ import ABC3.Found.Arakelov.ArcSemilinear
 | 定理 | 内容 |
 |---|---|
 | `range_subset` | ★`p⁻¹V = ⊤` なら像は `V` に入る |
-| `liftToOpen` / `liftToOpen_fac` | ★★分解(mathlib `IsOpenImmersion.lift`) |
+| `liftToOpenOfTop` / `liftToOpen_fac` | ★★分解(mathlib `IsOpenImmersion.lift`) |
 | `comp_preimage_eq_top` | ★★経由する点は自動的に条件を満たす |
 -/
 
@@ -47,10 +47,10 @@ theorem range_subset (h : p ⁻¹ᵁ V = ⊤) : Set.range p.base ⊆ Set.range V
   exact this
 
 /-- ★★`p` は `V` を経由して分解する。 -/
-noncomputable def liftToOpen (h : p ⁻¹ᵁ V = ⊤) : Spec (CommRingCat.of ℂ) ⟶ V.toScheme :=
+noncomputable def liftToOpenOfTop (h : p ⁻¹ᵁ V = ⊤) : Spec (CommRingCat.of ℂ) ⟶ V.toScheme :=
   IsOpenImmersion.lift V.ι p (range_subset V p h)
 
-theorem liftToOpen_fac (h : p ⁻¹ᵁ V = ⊤) : liftToOpen V p h ≫ V.ι = p :=
+theorem liftToOpen_fac (h : p ⁻¹ᵁ V = ⊤) : liftToOpenOfTop V p h ≫ V.ι = p :=
   IsOpenImmersion.lift_fac _ _ _
 
 
@@ -66,7 +66,7 @@ theorem comp_preimage_eq_top (q : Spec (CommRingCat.of ℂ) ⟶ V.toScheme) :
 
 /-! ## ★出典の紐付け(`.src`) -/
 
-def liftToOpen.src : ABC3.Meta.Source :=
+def liftToOpenOfTop.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(層 C——開集合を経由する点の分解)",
     sectionId := "genell-def-1-1-i" }
