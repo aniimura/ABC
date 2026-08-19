@@ -1521,12 +1521,12 @@
         {
           "id": "psi-untr",
           "title": "(i) Ψ^un-tr の 1-一意な存在と 1-可換図式",
-          "size": "★中",
+          "size": "★大",
           "status": "todo",
           "deps": [
             "hyp"
           ],
-          "note": "★★★**本セッションで `Theorem 3.4, (iv)` として実装済**\n(`psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` / `psiUnTr_rigid`、`Thm34EndBs.lean`)。\n★仮定の対応を確かめれば**そのまま使える見込み**。"
+          "note": "★★★**本セッションで `Theorem 3.4, (iv)` として実装済**\n(`psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` / `psiUnTr_rigid`、`Thm34EndBs.lean`)。\n★仮定の対応を確かめれば**そのまま使える見込み**。\n\n## ★★★形を測り直した(2026-08-19)—— **★中ではなく★大**\n\n`psiUnTr` を **`istrPre` の層で instantiate すれば `hUE` の量化子問題は消える**\n(`UnTr (istrPre P F)` の対象はすべて isotropic なので\n`toElem_map_congr_of_congr` の `hiso : ∀ X, IsIsotropic` がただで出る)。\n★材料は `istr_quasiIsotropicType` / `istr_isotropic` / `istr_frobenioidCore` /\n`unTr2Equiv`(`UnTr P ≌ UnTr (istrPre P F)`)——すべて在庫。\n\n★★★**残る障害はただ 1 つ**: `hOTri`(`Ψ` が `𝒪^▷` を保つ)。\n在庫の `thm_3_4_iv_otri_map'` は\n`hft : IsFrobeniusTrivial P₁ C₀` と `hfn : IsFrobeniusNormalized P₁ C₀` を要求し、\n★**Frobenius-trivial な対象にしか効かない**。\nstandard 型では全対象が Frobenius-trivial とは限らない。\n\n★★したがって本節点の本体は\n「**`baseSurj` で Frobenius-trivial 対象へ降ろす**」段である ——\n原典 (物理 p.66) が `Definition 1.3, (i), (a)` を使って行う還元。\n\n## ★もう 1 つの新しさ —— rigidity は `Div-slim` から出す\n`psiUnTr_rigid` は `IsSlimCat D₂` を使うが、`Corollary 4.11` の仮定は\n**`Div-slim` だけ**である(`isDivSlim_of_isSlim` は一方向)。\n★★ここは `Theorem 3.4, (iv)` の単なる引用ではなく**真に新しい内容**である。"
         },
         {
           "id": "psi-elem",

@@ -415,6 +415,8 @@ import ABC3.Found.GaloisRep.Psi3Char2
 import ABC3.Found.GaloisRep.PreP4Char2
 import ABC3.Found.GaloisRep.OmegaTwo
 import ABC3.Found.Arakelov.PicUnfoldLE
+import ABC3.Found.Arakelov.PicSquareGen
+import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply
 import ABC3.Found.Arakelov.PicComapChain
