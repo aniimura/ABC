@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop33UnTr
+import ABC3.Found.FrdI.Prop44Otri
 
 /-!
 # [FrdI] Proposition 4.8, (iii) —— Frobenius-compact 対象の移送(下ごしらえ)
@@ -85,5 +86,42 @@ def otri_unTr_surjective.src : ABC3.Meta.Source :=
 ★測ったこと自体は無駄ではなく、
 `frobIsotropic` が **`𝒞^istr` では自明**(`Dd := A`、`φ := 𝟙 A`)であることは
 在庫の `istr_frobIsotropicType` の中身と一致していた。 -/
+
+/-! ## ★`Frobenius-compact` の第 1 条は `𝒞^birat` では**ただで出る**
+
+原文 (FrdI p.23):
+> shall say that A is Frobenius-compact if the following conditions are satisfied:
+
+★★`IsFrobeniusCompact` の 3 条のうち**第 1 条(`𝒪^×` の可換性)**は、
+`birationally Frobenius-normalized` 型のとき `otri_mul_comm` から直ちに出る ——
+`𝒪^▷(A^birat)` が可換なら、その部分単系 `𝒪^×(A^birat)` も可換である。
+
+★★★`Proposition 4.8, (iii)` の仮定は `rationally standard` 型であり、
+そこに **`biratFrobNormalized` が入っている**(`Definition 4.5, (iii), (a)`)ので、
+**この条は仮定から直接出る**。 -/
+
+variable {P} {G : Frobenioid P}
+
+/-- ★★★★**`𝒪^×(A^birat)` は可換**(birationally Frobenius-normalized 型のとき)。 -/
+theorem birat_otimes_comm
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (A : BiratCat P G) (x y : End A)
+    (hx : x ∈ OTimes (biratPre P G) A) (hy : y ∈ OTimes (biratPre P G) A) :
+    x * y = y * x :=
+  congrArg Subtype.val
+    (otri_mul_comm (biratPre P G) (hfn A) ⟨x, hx.1⟩ ⟨y, hy.1⟩)
+
+/-- ★★`Frobenius-compact` の第 1 条は仮定から出る。 -/
+theorem birat_frobeniusCompact_cond1
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (A : BiratCat P G) :
+    ∀ x y : End A, x ∈ OTimes (biratPre P G) A → y ∈ OTimes (biratPre P G) A →
+      x * y = y * x :=
+  fun x y hx hy => birat_otimes_comm hfn A x y hx hy
+
+def birat_otimes_comm.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-compact の第 1 条は 𝒞^birat で自動",
+    sectionId := "frdi-def-1-2-iv" }
 
 end ABC3.Found.FrdI
