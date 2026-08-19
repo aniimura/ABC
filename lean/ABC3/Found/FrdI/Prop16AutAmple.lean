@@ -71,6 +71,6 @@ theorem cfp_baseTrivial_mpr_of_isotropic (G : Frobenioid P)
 def cfp_baseTrivial_mpr_of_isotropic.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 28,
     item := "Proposition 1.6, (v) — base-trivial の ⟸(isotropic 型)",
-    sectionId := "frdi-prop-1-6" }
+    sectionId := "frdi-prop-1-6-v" }
 
 end ABC3.Found.FrdI
