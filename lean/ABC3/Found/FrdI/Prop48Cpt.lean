@@ -62,4 +62,46 @@ def otri_unTr_surjective.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (iii) — 𝒪^▷ は 𝒞^istr → 𝒞^un-tr で全射",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★★★`Remark 4.5.1` —— standard 型は `𝒞^istr` で保たれる
+
+原文 (FrdI p.86):
+> that if C is of rationally standard type (respectively, of standard type), then so is
+
+★★`IsOfStandardType` は**フィールド 6 個**の構造体。
+`𝒟` も `Φ` も変わらないので 2 つは**そのまま**、
+`quasiIsotropic` は在庫、`groupLikeCompact` は
+`Istr (istrPre P F)` が `Istr P` の全対象であることから元の条が効く。
+★残る 2 つを本節で取る。 -/
+
+/-- ★★★★**`𝒞^istr` は Frobenius-isotropic 型** —— **自明に成り立つ**。
+
+★★`𝒞^istr` の対象はすべて isotropic なので、`Dd := A`、`φ := 𝟙 A` で足りる。
+★元の `𝒞` の条件は要らない。 -/
+theorem istr_isOfFrobeniusIsotropicType (F : FrobenioidCore P) :
+    IsOfFrobeniusIsotropicType (istrPre P F) := fun A =>
+  ⟨A, 𝟙 A, isFrobeniusType_of_isIso (istrPre P F) (𝟙 A), istr_isotropic P F A⟩
+
+/-- ★★★★**`Frobenius-normalized` は `𝒞^istr` へ移る**。
+
+★`istr_compat_Base` / `istr_compat_degFr` が `rfl` なので、
+条件は `𝒞` のものと**定義的に同じ形**になる。 -/
+theorem istr_isFrobeniusNormalized (F : FrobenioidCore P) (A : Istr P)
+    (h : IsFrobeniusNormalized P A.obj) : IsFrobeniusNormalized (istrPre P F) A := by
+  intro φ hφ α hα
+  refine InducedCategory.hom_ext ?_
+  have hb : IsBaseIdentity P (Functor.mapEnd A ((isotropicProp P).ι) φ) := hφ
+  have hmem : (Functor.mapEnd A ((isotropicProp P).ι) α) ∈ OTri P A.obj := ⟨hα.1, hα.2⟩
+  have hkey := h (Functor.mapEnd A ((isotropicProp P).ι) φ) hb _ hmem
+  show ((isotropicProp P).ι).map (φ ≫ _) = ((isotropicProp P).ι).map (_ ≫ φ)
+  refine (((isotropicProp P).ι).map_comp _ _).trans ?_
+  refine Eq.trans ?_ ((((isotropicProp P).ι).map_comp _ _).symm)
+  refine Eq.trans ?_ hkey
+  exact congrArg (fun t => ((isotropicProp P).ι).map φ ≫ t)
+    ((Functor.mapEnd A ((isotropicProp P).ι)).map_pow α _)
+
+def istr_isOfFrobeniusIsotropicType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — 𝒞^istr は Frobenius-isotropic 型",
+    sectionId := "frdi-remark-4-5-1" }
+
 end ABC3.Found.FrdI
