@@ -265,6 +265,77 @@ theorem otriPfMk_mem (hiso : ∀ X : C, IsIsotropic P X) {A : C}
   show rootBase (otriPfMk (F := F) hiso hζ α) = rootBase (idRoot P F ⟨A, 1⟩)
   rw [otriPfMk_base hiso hζ α hα, rootBase_id]
 
+/-! ## ★6. `Pf` の関係が `𝒞^pf` の中で成り立つこと
+
+★`Pf (Additive (𝒪^▷(A)))` の元は「`α` の `m` 乗根」であり、
+その同値関係は「`α^{c}` の `m·c` 乗根と同じ」である。
+★★それが `𝒞^pf` の余極限の中で実際に成り立つ、というのが本節である。 -/
+
+theorem conjRt_comp {A : C} (f g : A ⟶ A) :
+    conjRt (F := F) (f ≫ g) = conjRt (F := F) f ≫ conjRt (F := F) g := by
+  haveI := isIso_rtExt_one P F A
+  show inv (rtExt P F A 1) ≫ (f ≫ g) ≫ rtExt P F A 1
+    = (inv (rtExt P F A 1) ≫ f ≫ rtExt P F A 1) ≫ (inv (rtExt P F A 1) ≫ g ≫ rtExt P F A 1)
+  simp only [Category.assoc]
+  rw [← Category.assoc (rtExt P F A 1) (inv (rtExt P F A 1)), IsIso.hom_inv_id,
+    Category.id_comp]
+
+/-- ★★★**`rtObj A 1` の上でも遷移写像は `α ↦ α^m`** ——
+共役で `A` の計算(`frobTransport_otri_pow`)に帰着する。
+
+★`frobTransport` の**一意性**に、`hfn` を共役で移した四角形を渡すだけ。 -/
+theorem frobTransport_conjRt_pow (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn : IsFrobeniusNormalized P A) {ζ : End A}
+    (hζ : IsFrobeniusType P ((ζ : A ⟶ A))) (hζb : IsBaseIdentity P ζ)
+    (α : End A) (hα : α ∈ OTri P A) :
+    frobTransport (F := F) (conjRt (F := F) ((ζ : A ⟶ A))) (conjRt_frobType hiso hζ)
+        (conjRt (F := F) ((ζ : A ⟶ A))) (conjRt_frobType hiso hζ) rfl
+        (conjRt (F := F) ((α : A ⟶ A)))
+      = conjRt (F := F) (((α ^ ((P.degFr ((ζ : A ⟶ A)) : ℕ+) : ℕ) : End A) : A ⟶ A)) := by
+  refine frobTransport_eq _ _ _ _ rfl _ _ ?_
+  have h := congrArg (conjRt (F := F)) (hfn ζ hζb α hα)
+  rw [conjRt_comp, conjRt_comp] at h
+  exact h.symm
+
+/-- ★添字 `Z_ζ ⟶ Z_{ζ≫ξ}`(`ξ` を右から足す)。
+
+★`BiFr` の射は「等次数の Frobenius 型射の対」なので `(conjRt ξ, conjRt ξ)` が使え、
+`Under` の条件は `conjRt` の関手性(`conjRt_comp`)そのもの。 -/
+noncomputable def idxZetaStep (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ ξ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (hξ : IsFrobeniusType P ξ)
+    (hcomp : IsFrobeniusType P (ζ ≫ ξ)) :
+    (idxZeta (F := F) hiso hζ) ⟶ (idxZeta (F := F) hiso hcomp) :=
+  Under.homMk (⟨(conjRt (F := F) ξ, conjRt (F := F) ξ),
+      conjRt_frobType hiso hξ, conjRt_frobType hiso hξ, rfl⟩ :
+      (⟨(rtObj P F A 1, rtObj P F A 1)⟩ : BiFr P F) ⟶ ⟨(rtObj P F A 1, rtObj P F A 1)⟩)
+    (by
+      refine WideSubcategory.hom_ext _ ?_
+      exact Prod.ext (conjRt_comp ζ ξ).symm (conjRt_comp ζ ξ).symm)
+
+/-- ★★★★**`Pf` の関係が `𝒞^pf` の中で成り立つ** ——
+「`α` の `deg ζ` 乗根」と「`α^{deg ξ}` の `deg(ζ≫ξ)` 乗根」は**同じ元**である。
+
+★★これが `Proposition 5.5, (i)` の同型の **well-defined 性**の中身である。 -/
+theorem otriPfMk_step (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn : IsFrobeniusNormalized P A) {ζ ξ : A ⟶ A}
+    (hζ : IsFrobeniusType P ζ) (hξ : IsFrobeniusType P ξ) (hξb : IsBaseIdentity P ξ)
+    (hcomp : IsFrobeniusType P (ζ ≫ ξ))
+    (α : End A) (hα : α ∈ OTri P A) :
+    otriPfMk (F := F) hiso hcomp ((α ^ ((P.degFr ξ : ℕ+) : ℕ) : End A))
+      = otriPfMk (F := F) hiso hζ α := by
+  have h := HomPf.mk_map (idxZetaStep (F := F) hiso hζ hξ hcomp)
+    (conjRt (F := F) ((α : A ⟶ A)))
+  refine Eq.trans ?_ h
+  show HomPf.mk (idxZeta hiso hcomp) (conjRt (F := F) ((α ^ ((P.degFr ξ : ℕ+) : ℕ) : End A)))
+    = HomPf.mk (idxZeta hiso hcomp)
+      (idxTransport P F (idxZetaStep (F := F) hiso hζ hξ hcomp)
+        (conjRt (F := F) ((α : A ⟶ A))))
+  congr 1
+  show conjRt (F := F) ((α ^ ((P.degFr ξ : ℕ+) : ℕ) : End A))
+    = frobTransport (F := F) (conjRt (F := F) ξ) _ (conjRt (F := F) ξ) _ _
+        (conjRt (F := F) ((α : A ⟶ A)))
+  exact (frobTransport_conjRt_pow hiso hfn hξ hξb α hα).symm
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -293,6 +364,13 @@ def otriToPfRoot.src : ABC3.Meta.Source :=
 def otriPfMk_mem.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — α^{1/m} は 𝒪^▷(A^pf) の元",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の同型の well-defined 性
+(`Pf` の関係が `𝒞^pf` の中で成り立つこと)。 -/
+def otriPfMk_step.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — Pf の関係が 𝒞^pf の中で成り立つ",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI

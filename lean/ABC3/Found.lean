@@ -581,6 +581,7 @@ import ABC3.Found.GaloisRep.Transcendence
 import ABC3.Found.GaloisRep.TranslateAut
 import ABC3.Found.GaloisRep.PointHom
 import ABC3.Found.GaloisRep.FieldHomExt
+import ABC3.Found.GaloisRep.TranslateEquiv
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

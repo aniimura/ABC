@@ -16120,3 +16120,45 @@ Weil 対の残りの葉——**合成則** `τ_{Q+Q'} = τ_Q ∘ τ_{Q'}`、**�
 ——`(G − Q) + Q = G` という mathlib の群法則の帰結になる。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-426 平行移動は関数体の自己同型である(第 120 ブロック)
+
+第 119 の `functionField_algHom_ext` により、`τ_{−Q} ∘ τ_Q = id` は
+**生成元 `x`・`y` での等式**に落ちた。★それを群法則で片付けた。
+
+### ★★★★★橋は「生成点 + 定数点」
+
+    G + Q = Point.some (translateX) (translateY)      (`genericPoint_add_const`)
+
+★mathlib の `add_of_X_ne` が使える条件(`x` 座標が異なる)は
+第 116 の `coordX_transcendental` から出る。★★すると
+
+    (G + Z) + Q = G + (Z + Q) = G + 0 = G      (`Z = −Q`、mathlib の結合則)
+
+であり、これを座標で読むと `τ_Z(τ_Q(x)) = x`、`τ_Z(τ_Q(y)) = y` になる。
+★★★`add_of_X_ne` の 2 回目の適用条件は第 117 の**超越性**から出る
+(`translateX_ne_const`)。
+
+### ★★★★★★取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `map_translateX` / `map_translateY` | `F` 代数射は加法公式と可換 |
+| `genericPoint_add_const` | ★★★★★生成点 + 定数点 = 平行移動した点 |
+| `translate_neg_add'` | ★★★★★★`(G + Z) + Q = G` |
+| `translateAlgHom_comp` | ★★★★★★合成が恒等 |
+| `translateAlgEquiv` | ★★★★★★**平行移動の自己同型** |
+| `exists_translateAut_of_not_twoTorsion` | ★★★★★★**葉が閉じた**(2 等分点以外) |
+
+### ★(G5) の残り
+
+| 葉 | 見積もり |
+|---|---|
+| 2 等分点での単射性(と、そこから自己同型) | 5-15 |
+| 生成点が捩れ点でないこと | 10-25 |
+| `x([n]P) = Φ_n/ΨSq_n` | 10-25 |
+
+★★平行移動の側は **2 等分点を除いて完全に閉じた**。
+当初の見積もり(20-60 ブロック)に対し、第 114-120 の 7 ブロックで済んだ。
+
+★義務の数は動いていない(Galois 4/8)。

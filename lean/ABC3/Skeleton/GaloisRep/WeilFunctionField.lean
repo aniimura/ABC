@@ -1,3 +1,4 @@
+import ABC3.Found.GaloisRep.TranslateEquiv
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -21,9 +22,10 @@ import ABC3.Found.GaloisRep.PointHom
 | **`translateX` の超越性**(`Q` が 2 等分点でない) | `Found/GaloisRep/TranslateAut.lean`(第 117) | ✅ |
 | **関数体の自己準同型 `translateFieldHom`** | 同上 | ✅ |
 | `Q` が **2 等分点**のときの単射性 | 本ファイル | ★**葉** |
-| **全単射性**(自己同型であること) | 本ファイル | ★**葉** |
+| **全単射性**(2 等分点以外) | `Found/GaloisRep/TranslateEquiv.lean`(第 120) | ✅ |
+| 2 等分点での自己同型 | 本ファイル | ★**葉** |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
-| **生成点が捽れ点でないこと** | 本ファイル | ★**葉** |
+| **生成点が捻れ点でないこと** | 本ファイル | ★**葉** |
 | **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
 
 ★超越性の証明は **`−Q` での 1 点評価**だけで済んだ——
@@ -63,14 +65,17 @@ theorem translateHom_injective_twoTorsion (W : WeierstrassCurve.Affine F) [W.IsE
     Function.Injective (translateHom W hQ) := by
   sorry
 
-/-! ## ★★★★★葉 1b —— 全単射性 -/
+/-! ## ★★★★★葉 1b —— 2 等分点での自己同型 -/
 
-/-- ★★★★★★**平行移動 `τ_Q` は関数体の `F` 自己同型である**。
+/-- ★★★★★★**平行移動 `τ_Q` は関数体の `F` 自己同型である**(`Q` が 2 等分点のとき)。
 
-★自己準同型 `translateFieldHom` は第 117 ブロックで `Found` に入っている。
-★★逆は `τ_{−Q}` であり、合成が恒等であることは**生成元での計算**に帰着する。 -/
-theorem exists_translateAut (W : WeierstrassCurve.Affine F) [W.IsElliptic]
-    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) :
+★★★★★★2 等分点でない場合は **`Found` に入った**(第 120 ブロック
+`exists_translateAut_of_not_twoTorsion`)——逆は `τ_{−Q}` で、合成が恒等であることは
+`functionField_algHom_ext` により生成元での計算に落ち、`(G + Z) + Q = G` という
+mathlib の群法則で片付いた。
+★2 等分点では単射性がまだ無いので、ここだけが残っている。 -/
+theorem exists_translateAut_twoTorsion (W : WeierstrassCurve.Affine F) [W.IsElliptic]
+    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) (h2 : W.negY x₀ y₀ = y₀) :
     ∃ τ : W.FunctionField ≃ₐ[F] W.FunctionField,
       τ (coordX W) = translateX W x₀ y₀ ∧ τ (coordY W) = translateY W x₀ y₀ := by
   sorry
@@ -126,21 +131,21 @@ def translateHom_injective_twoTorsion.needs : List ProofObligation :=
     .implicitStep
       "★分解の存在——体が無限なら 2 等分点でない点は十分ある。`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²` から)(3-8 ブロック)" 19 ]
 
-def exists_translateAut.src : Source :=
+def exists_translateAut_twoTorsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(Weil 対の構成——平行移動の関数体への引き戻し)",
     sectionId := "genell-thm-3-8" }
 
-def exists_translateAut.needs : List ProofObligation :=
+def exists_translateAut_twoTorsion.needs : List ProofObligation :=
   [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3(平行移動が関数体の F 自己同型を誘導すること)"
       (.absent "mathlib に平行移動の関数体への引き戻しは 0 件(2026-08-20、EllipticCurve/ 配下を `translat|mulByN|scalarMul` で全文検索して 0 件)") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——2 等分点での平行移動の単射性)" 19,
     .implicitStep
       "★★★★★★**環準同型・単射性・分数体への延長はすべて Found に入った**(第 114-117)。生成点が曲線の非特異点であることから mathlib の `nonsingular_add` が効き、超越性は `−Q` での 1 点評価で決まった。当初の見積もり(20-60 ブロック)は**大きく下方修正**される(0 ブロック)" 19,
     .implicitStep
-      "★★全単射性——逆は `τ_{−Q}`。合成 `τ_{−Q} ∘ τ_Q` が恒等であることは、生成元 `x`・`y` での計算(mathlib の群法則の結合則)に帰着する(5-15 ブロック)" 19,
+      "★★★★★★**2 等分点以外の全単射性は Found に入った**(第 120 ブロック `translateAlgEquiv`)。`functionField_algHom_ext`(第 119)で生成元の計算に落ち、`(G + Z) + Q = G` という mathlib の群法則で片付いた(0 ブロック)" 19,
     .implicitStep
-      "★`F` 代数射であること——`translateHom` が `F` 代数射なので延長も `F` を固定する(2-5 ブロック)" 19 ]
+      "★残るのは 2 等分点の場合だけであり、それは単射性(上の辺)が出れば同じ道で閉じる(3-8 ブロック)" 19 ]
 
 def genericPoint_not_torsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,
@@ -167,7 +172,7 @@ def exists_mulByNPullback.needs : List ProofObligation :=
       (.absent "mathlib に [n] の関数体への引き戻しは 0 件(2026-08-20、同上の検索)") 19,
     .implicitStep
       "★分点多項式 `Φ_n` / `ΨSq_n` は mathlib にある(`WeierstrassCurve.Φ`・`WeierstrassCurve.ΨSq`、2026-08-20 実測)。**足場はある**(0 ブロック)" 19,
-    .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——生成点が捽れ点でないこと)" 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——生成点が捻れ点でないこと)" 19,
     .implicitStep
       "★★★★★★**環準同型は Found に入った**(第 118 ブロック `exists_mulByNHom`)。`pointHom`(点 ⇒ 環準同型)として一般化したところ、平行移動と**完全に同じ道**が `[n]` にも効いた。単射性も `pointHom_injective_of_transcendental` に帰着済み(0 ブロック)" 19,
     .implicitStep
