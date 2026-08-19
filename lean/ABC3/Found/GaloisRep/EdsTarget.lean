@@ -79,6 +79,50 @@ theorem edsTarget_one : EdsTarget b c d A 1 := by
     show (-1 : ℤ) = -(1 : ℤ) by norm_num, preNormEDS_neg]
   linear_combination -h2
 
+include hd in
+theorem edsTarget_two : EdsTarget b c d A 2 := by
+  show _ = edsEps b 2 * _ + _
+  rw [edsEps, if_pos (by decide : Even (2 : ℤ))]
+  norm_num [edsP, show (2 : ℤ) - 1 = 1 by norm_num, show (2 : ℤ) - 2 = 0 by norm_num,
+    show (2 : ℤ) + 2 = 4 by norm_num, show (2 : ℤ) + 1 = 3 by norm_num]
+  linear_combination hd
+
+include hd in
+theorem edsTarget_three : EdsTarget b c d A 3 := by
+  have h2 := two_eq_zero (R := R)
+  have h5 : edsP b c d 5 = d * b ^ 4 - c ^ 3 := by
+    have h := preNormEDS_odd (b ^ 4) c d 2
+    norm_num at h
+    exact h
+  show _ = edsEps b 3 * _ + _
+  rw [edsEps, if_neg (by decide : ¬ Even (3 : ℤ))]
+  norm_num [edsP, show (3 : ℤ) - 1 = 2 by norm_num, show (3 : ℤ) - 2 = 1 by norm_num,
+    show (3 : ℤ) + 2 = 5 by norm_num, show (3 : ℤ) + 1 = 4 by norm_num]
+  rw [show preNormEDS (b ^ 4) c d 5 = d * b ^ 4 - c ^ 3 from h5]
+  rw [hd]
+  linear_combination (A * b ^ 5 * c + b ^ 8 - c ^ 3) * h2
+
+include hd in
+theorem edsTarget_four : EdsTarget b c d A 4 := by
+  have h2 := two_eq_zero (R := R)
+  have h5 : edsP b c d 5 = d * b ^ 4 - c ^ 3 := by
+    have h := preNormEDS_odd (b ^ 4) c d 2
+    norm_num at h
+    exact h
+  have h6 : edsP b c d 6 = c * edsP b c d 5 - c * d ^ 2 := by
+    have h := preNormEDS_even (b ^ 4) c d 3
+    norm_num at h
+    exact h
+  show _ = edsEps b 4 * _ + _
+  rw [edsEps, if_pos (by decide : Even (4 : ℤ))]
+  norm_num [edsP, show (4 : ℤ) - 1 = 3 by norm_num, show (4 : ℤ) - 2 = 2 by norm_num,
+    show (4 : ℤ) + 2 = 6 by norm_num, show (4 : ℤ) + 1 = 5 by norm_num]
+  rw [show preNormEDS (b ^ 4) c d 6 = c * preNormEDS (b ^ 4) c d 5 - c * d ^ 2 from h6,
+    show preNormEDS (b ^ 4) c d 5 = d * b ^ 4 - c ^ 3 from h5]
+  rw [hd]
+  linear_combination (-(A ^ 3 * b ^ 7 * c ^ 3) - 2 * A ^ 2 * b ^ 10 * c ^ 2
+    - A * b ^ 13 * c - A * b ^ 5 * c ^ 4 - b ^ 8 * c ^ 3) * h2
+
 end Base
 
 end ABC3.Found.GaloisRep

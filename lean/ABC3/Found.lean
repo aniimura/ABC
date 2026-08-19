@@ -447,6 +447,7 @@ import ABC3.Found.GaloisRep.OmegaThree
 import ABC3.Found.GaloisRep.UniversalF2
 import ABC3.Found.GaloisRep.OmegaFour
 import ABC3.Found.GaloisRep.OmegaDescent
+import ABC3.Found.GaloisRep.EdsTarget
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
