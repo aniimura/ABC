@@ -104,4 +104,23 @@ def istr_isOfFrobeniusIsotropicType.src : ABC3.Meta.Source :=
     item := "Remark 4.5.1 — 𝒞^istr は Frobenius-isotropic 型",
     sectionId := "frdi-remark-4-5-1" }
 
+/-- ★★★★★**group-like 型は `𝒞^istr` から `𝒞` へ落ちる**。
+
+原文 (FrdI p.22):
+> Definition 1.2, (iv) — isotropic hull
+
+★★`IsGroupLikeObj` は**底だけに依る**(`IsGroupLike (Φ.val (Base A))`)。
+★どの対象にも isotropic hull(pre-step、したがって base-isomorphism)があるので、
+`𝒞^istr` で group-like なら `𝒞` でも group-like。 -/
+theorem isOfGroupLikeType_of_istr (F : FrobenioidCore P)
+    (h : IsOfGroupLikeType (istrPre P F)) : IsOfGroupLikeType P := by
+  intro A
+  obtain ⟨B, φ, hiso, hps, hBiso, -⟩ := F.isotropicHullExists A
+  exact isGroupLikeObj_of_baseIso P φ hps.2 (h (⟨B, hBiso⟩ : Istr P))
+
+def isOfGroupLikeType_of_istr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — group-like 型は 𝒞^istr から 𝒞 へ落ちる",
+    sectionId := "frdi-remark-4-5-1" }
+
 end ABC3.Found.FrdI
