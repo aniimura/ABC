@@ -1416,6 +1416,202 @@
           "note": ""
         }
       ]
+    },
+    {
+      "id": "rmk451",
+      "title": "Remark 4.5.1 —— rationally standard / standard は istr で保たれる",
+      "paper": "FrdI",
+      "pdfPage": 86,
+      "nodes": [
+        {
+          "id": "std-istr",
+          "title": "standard 型は 𝒞^istr で保たれる",
+          "size": "★中",
+          "status": "todo",
+          "deps": [],
+          "note": "原文 (物理 p.86): 「it is immediate from the definitions that if C is of rationally standard\ntype (respectively, of standard type), then so is C^istr」。\n★★`standard` は 5 条(a)-(e)の連言(`IsOfStandardType`、在庫)。\n★条ごとに `𝒞^istr` へ移す —— `Prop19.lean` の `istrPre` / `istr_frobenioidCore` と\n`Prop33UnTr.lean` の `istr_*` 群が材料。"
+        },
+        {
+          "id": "ratstd-istr",
+          "title": "rationally standard 型は 𝒞^istr で保たれる",
+          "size": "★中",
+          "status": "todo",
+          "deps": [],
+          "note": "★`rationally standard` は `(𝒞^un-tr)^birat` が standard であること。\n★★`Rmk451Birat.lean` の `biratFunctor`(在庫、`(𝒞^un-tr)^birat` から\n`((𝒞^istr)^un-tr)^birat` への比較関手)が実体。"
+        },
+        {
+          "id": "rmk451-src",
+          "title": "Remark 4.5.1 の条なし .src",
+          "size": "★小",
+          "status": "todo",
+          "deps": [
+            "std-istr",
+            "ratstd-istr"
+          ],
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "cor410",
+      "title": "Corollary 4.10 —— birationalization の圏論性",
+      "paper": "FrdI",
+      "pdfPage": 90,
+      "nodes": [
+        {
+          "id": "hyp",
+          "title": "仮定の型を置く(FSMFF 型の 𝒟、quasi-isotropic 型の 𝒞)",
+          "size": "★小",
+          "status": "todo",
+          "deps": [],
+          "note": "原文 (物理 p.90): 「For i = 1, 2, let Φi be a divisorial monoid on a connected, totally\nepimorphic category Di of FSMFF-type; Ci → FΦi a Frobenioid of quasi-isotropic type」。\n★仮定はすべて在庫(`IsOfFSMFFType` / `IsOfQuasiIsotropicType`)。"
+        },
+        {
+          "id": "psi-birat-exists",
+          "title": "Ψ^birat : 𝒞₁^birat ⥤ 𝒞₂^birat の 1-一意な存在と 1-可換図式",
+          "size": "★大",
+          "status": "todo",
+          "deps": [
+            "hyp"
+          ],
+          "note": "★★本セッションの `Prop 4.8, (ii)` で **naive Frobenius に対する** `Ψ^birat` を作った\n(`psiBirat` / `psiBiratSquare` / `psiBirat_isEquivalence`、`Prop48Nf.lean`)。\n★★★**同じ骨格が一般の `Ψ` に対しても使えるはず** ——\n要るのは「`Ψ` が co-angular pre-step を保つ／反射する」で、\nこれは `Theorem 3.4, (ii)(iii)` から出る(`isCoAngular_of_map` など、在庫)。\n★着手前に `Prop48Nf.lean` の 4 段を**一般の `Ψ` に書き直せるか**を測ること。"
+        },
+        {
+          "id": "psi-birat-equiv2",
+          "title": "Ψ^birat が圏同値であること",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "psi-birat-exists"
+          ],
+          "note": "★`Prop48Nf.lean` の `psiBirat_isEquivalence` と同じ 3 性質。\n★添字圏の圏同値(`idxBiratNfMap_isEquivalence` の一般版)が要点。"
+        },
+        {
+          "id": "cor410-src",
+          "title": "Corollary 4.10 の条なし .src",
+          "size": "★小",
+          "status": "todo",
+          "deps": [
+            "psi-birat-equiv2"
+          ],
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "cor411",
+      "title": "Corollary 4.11 —— 初等 Frobenioid への関手の圏論性 I",
+      "paper": "FrdI",
+      "pdfPage": 91,
+      "nodes": [
+        {
+          "id": "hyp",
+          "title": "仮定の型を置く(Div-slim な 𝒟、standard 型の 𝒞)",
+          "size": "★中",
+          "status": "todo",
+          "deps": [],
+          "note": "原文 (物理 p.91): 「let Φi be a perf-factorial divisorial monoid on a connected, totally\nepimorphic category Di which is Div-slim [with respect to Φi]; Ci → FΦi a Frobenioid of\nstandard type」。\n★**`Div-slim` が在庫にあるかを先に検索**すること(`IsSlimCat` とは別の概念)。"
+        },
+        {
+          "id": "psi-untr",
+          "title": "(i) Ψ^un-tr の 1-一意な存在と 1-可換図式",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "hyp"
+          ],
+          "note": "★★★**本セッションで `Theorem 3.4, (iv)` として実装済**\n(`psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` / `psiUnTr_rigid`、`Thm34EndBs.lean`)。\n★仮定の対応を確かめれば**そのまま使える見込み**。"
+        },
+        {
+          "id": "psi-elem",
+          "title": "初等 Frobenioid への関手との 1-可換性",
+          "size": "★大",
+          "status": "todo",
+          "deps": [
+            "psi-untr"
+          ],
+          "note": "★`𝒞^un-tr → 𝔽_Φ` は忠実(`Proposition 3.3, (iv)`、在庫)。\n★★これと `Ψ^un-tr` を繋いで `𝔽_{Φ₁} → 𝔽_{Φ₂}` を得る。"
+        },
+        {
+          "id": "cor411-src",
+          "title": "Corollary 4.11 の条なし .src",
+          "size": "★小",
+          "status": "todo",
+          "deps": [
+            "psi-elem"
+          ],
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "thm42",
+      "title": "Theorem 4.2 —— primary step の圏論性",
+      "paper": "FrdI",
+      "pdfPage": 77,
+      "nodes": [
+        {
+          "id": "hyp",
+          "title": "仮定の型を置く(perf-factorial、standard ＋ isotropic、非 group-like)",
+          "size": "★中",
+          "status": "todo",
+          "deps": [],
+          "note": "原文 (物理 p.77): 「let Φi be a perf-factorial divisorial monoid on a connected, totally\nepimorphic category Di; Ci → FΦi a Frobenioid of standard and isotropic type, which is\nnot of group-like type」。\n★**`perf-factorial` が在庫にあるかを先に検索**すること。"
+        },
+        {
+          "id": "i-primary",
+          "title": "(i) Ψ は primary step を保つ",
+          "size": "★大",
+          "status": "todo",
+          "deps": [
+            "hyp"
+          ],
+          "note": "★`primary step` の定義(`Definition 4.1` 近辺)を先に在庫確認。\n★★`Theorem 3.4, (iii)` の射のクラスの保存(在庫)が土台になる。"
+        },
+        {
+          "id": "i-divid",
+          "title": "(i) Ψ は Div-identity 自己射を保つ",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "hyp"
+          ],
+          "note": "★★`IsDivIdentity` は在庫(`MorphismTypes.lean`)。\n★`isDivIdentity_of_isBaseIdentity`(在庫)と\n`Theorem 3.4, (v)` の base-identity 保存(本セッション、`isBaseIdentity_map_of_baseSquare`)が効く見込み。"
+        },
+        {
+          "id": "i-divfrob",
+          "title": "(i) Ψ は (universally) Div-Frobenius-trivial 対象を保つ",
+          "size": "★中",
+          "status": "todo",
+          "deps": [
+            "i-divid"
+          ],
+          "note": "★`IsDivFrobeniusTrivial` / `universally` 版が在庫にあるか先に検索。"
+        },
+        {
+          "id": "ii-prime",
+          "title": "(ii) Ψ_Prime —— Prime(Φ(A)) の間の一意な同型",
+          "size": "★大",
+          "status": "todo",
+          "deps": [
+            "i-primary"
+          ],
+          "note": "★原文は `Ob(𝒞^bs-iso) ∋ A ↦ Prime(Φ(A))` という関手の間の同型を主張する。\n★★`Order(Φ(A)_p)` との圏同値 2 本も条に入っている。"
+        },
+        {
+          "id": "thm42-src",
+          "title": "Theorem 4.2 の条なし .src",
+          "size": "★小",
+          "status": "todo",
+          "deps": [
+            "i-primary",
+            "i-divid",
+            "i-divfrob",
+            "ii-prime"
+          ],
+          "note": ""
+        }
+      ]
     }
   ]
 }

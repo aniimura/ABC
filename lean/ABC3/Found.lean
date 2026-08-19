@@ -399,6 +399,7 @@ import ABC3.Found.Arakelov.PicPreCoord
 import ABC3.Found.Arakelov.PicHcompatTop
 import ABC3.Found.Arakelov.PicAppIsoAsLE
 import ABC3.Found.GaloisRep.UniversalCurve
+import ABC3.Found.GaloisRep.OmegaBase
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply
