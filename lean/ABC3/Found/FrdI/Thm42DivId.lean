@@ -148,7 +148,6 @@ theorem divIdCat_of_isDivIdentity (F : FrobenioidCore P) (G : Frobenioid P)
       = ((P.degFr γ : ℕ+) : ℕ) • P.Div ((((v₃ : End A)) : A ⟶ A)) := by
     rw [hbase, ← e3, e4, ← e2, ← e1]
     rw [Φ.map_comp, Φ.map_comp]
-    rfl
   -- ★`IsDivIdentity` から `= Div v`
   have hid : Φ.map (P.Base α) (P.Div ((((v : End A)) : A ⟶ A)))
       = P.Div ((((v : End A)) : A ⟶ A)) := by
@@ -167,6 +166,93 @@ theorem divIdCat_of_isDivIdentity (F : FrobenioidCore P) (G : Frobenioid P)
 def divIdCat_of_isDivIdentity.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 81,
     item := "Theorem 4.2, (i) — IsDivIdentity ⟹ 圏論的条件",
+    sectionId := "frdi-thm-4-2" }
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`DivIdCat` ⟹ `IsDivIdentity`**。 -/
+theorem isDivIdentity_of_divIdCat (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    {A : C} (α : A ⟶ A) (h : DivIdCat P α) : IsDivIdentity P α := by
+  obtain ⟨X, Y, γ, pre, plb, hfac, hγ, hpre, hplb, hcond⟩ := h
+  have hplbl : P.degFr plb = 1 := (F.pullBackLB plb hplb).2
+  haveI hγi : IsIso (P.Base γ) := hγ.2
+  have hbase : P.Base α = P.Base γ ≫ P.Base pre ≫ P.Base plb := by
+    rw [hfac, P.Base_comp, P.Base_comp]
+  show Φ.map (P.Base α) = Φ.map (P.Base (𝟙 A))
+  rw [P.Base_id]
+  refine AddMonoidHom.ext (fun x => ?_)
+  rw [show Φ.map (𝟙 ((P.toElem.obj A).base)) x = x from Φ.map_id _ _]
+  obtain ⟨v, hvx⟩ := hdivS A x
+  have hv : (v : End A) ∈ OTri P A := v.2
+  subst hvx
+  obtain ⟨v₁, hv₁, hsq1⟩ := otriPullBack P plb hplb hv
+  have hprec : IsCoAngular P pre := prop_1_4_i P _ (fun Z _ => hiso Z)
+  set v₂ := otriPull P F pre hprec hpre.1 ⟨v₁, hv₁⟩ with hv₂def
+  have hv₂ : (v₂ : End X) ∈ OTri P X := v₂.2
+  have hsq2 : pre ≫ (((v₁ : End Y)) : Y ⟶ Y) = (((v₂ : End X)) : X ⟶ X) ≫ pre :=
+    otriPull_spec P F pre hprec hpre.1 ⟨v₁, hv₁⟩
+  obtain ⟨d, hdd⟩ := (hperfM A (P.degFr γ)).2
+    (Φ.map (P.Base γ) (P.Div ((((v₂ : End X)) : X ⟶ X))))
+  have hddb : ((P.degFr γ : ℕ+) : ℕ) • d
+      = Φ.map (P.Base γ) (P.Div ((((v₂ : End X)) : X ⟶ X))) := hdd
+  obtain ⟨v₃, hv₃d⟩ := hdivS A d
+  have hv₃ : (v₃ : End A) ∈ OTri P A := v₃.2
+  obtain ⟨u₀, hsq0, -⟩ :=
+    prop_1_10_i_exists_given P F ((((v₃ : End A)) : A ⟶ A)) γ hγ γ hγ rfl
+  have hb0 : P.Base ((((v₃ : End A)) : A ⟶ A)) ≫ P.Base γ = P.Base γ ≫ P.Base u₀ := by
+    rw [← P.Base_comp, ← P.Base_comp, hsq0]
+  have hu₀b : IsBaseIdentity P u₀ := by
+    show P.Base u₀ = P.Base (𝟙 X)
+    rw [P.Base_id]
+    rw [show P.Base ((((v₃ : End A)) : A ⟶ A)) = P.Base (𝟙 A) from hv₃.1, P.Base_id,
+      Category.id_comp] at hb0
+    exact ((cancel_epi (P.Base γ)).mp (by rw [Category.comp_id]; exact hb0)).symm
+  have hu₀l : IsLinear P u₀ := by
+    have hdd2 : P.degFr ((((v₃ : End A)) : A ⟶ A) ≫ γ) = P.degFr (γ ≫ u₀) := by rw [hsq0]
+    rw [P.degFr_comp, P.degFr_comp,
+      show P.degFr ((((v₃ : End A)) : A ⟶ A)) = 1 from hv₃.2, mul_one] at hdd2
+    show P.degFr u₀ = 1
+    exact (mul_right_cancel (b := P.degFr γ) (by rw [one_mul]; exact hdd2)).symm
+  have hu₀m : u₀ ∈ OTri P X := ⟨hu₀b, hu₀l⟩
+  have hdiv0 : Φ.map (P.Base γ) (P.Div u₀)
+      = ((P.degFr γ : ℕ+) : ℕ) • P.Div ((((v₃ : End A)) : A ⟶ A)) :=
+    div_square_frob P γ hv₃ hu₀m hsq0
+  have hdu : P.Div u₀ = P.Div ((((v₂ : End X)) : X ⟶ X)) := by
+    refine (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base γ) hγi)).1 ?_
+    show Φ.map (P.Base γ) (P.Div u₀)
+      = Φ.map (P.Base γ) (P.Div ((((v₂ : End X)) : X ⟶ X)))
+    rw [hdiv0, hv₃d]
+    exact hdd
+  obtain ⟨ε, hεm, hεeq⟩ := F.faithfulUpToUnits u₀ ((((v₂ : End X)) : X ⟶ X))
+    (show P.Base u₀ = P.Base ((((v₂ : End X)) : X ⟶ X)) by
+      rw [show P.Base u₀ = P.Base (𝟙 X) from hu₀b,
+        show P.Base ((((v₂ : End X)) : X ⟶ X)) = P.Base (𝟙 X) from hv₂.1])
+    hdu (prop_1_4_i P _ (fun Z _ => hiso Z)) (isPreStep_of_otri _ hu₀m)
+    (prop_1_4_i P _ (fun Z _ => hiso Z)) (isPreStep_of_otri _ hv₂)
+  have hsq3 : ((((v₃ : End A)) : A ⟶ A)) ≫ γ
+      = γ ≫ (((((v₂ : End X)) : X ⟶ X)) ≫ ((((ε : End X)) : X ⟶ X))) := by
+    rw [hsq0, ← hεeq]
+  obtain ⟨θ, hθiso, hθ⟩ := hcond (v : End A) v₁ (v₂ : End X) (v₃ : End A) ε
+    hv hv₁ hv₂ hv₃ hεm hsq1 hsq2 hsq3
+  haveI := hθiso
+  have hdvv : P.Div ((((v : End A)) : A ⟶ A))
+      = ((P.degFr γ : ℕ+) : ℕ) • P.Div ((((v₃ : End A)) : A ⟶ A)) := by
+    rw [← div_pow_otri P hv₃, ← hθ]
+    exact div_comp_iso (P₂ := P) ((((v₃ ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A)) θ
+  have e1 : Φ.map (P.Base plb) (P.Div ((((v : End A)) : A ⟶ A)))
+      = P.Div ((((v₁ : End Y)) : Y ⟶ Y)) :=
+    div_square_pullBack P plb hplbl hv₁ hv hsq1
+  have e2 : Φ.map (P.Base pre) (P.Div ((((v₁ : End Y)) : Y ⟶ Y)))
+      = P.Div ((((v₂ : End X)) : X ⟶ X)) :=
+    map_base_div_otri P pre hpre.1 hv₁ hv₂ hsq2
+  rw [hbase, Φ.map_comp, Φ.map_comp, e1, e2, ← hddb, ← hv₃d, ← hdvv]
+
+def isDivIdentity_of_divIdCat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 81,
+    item := "Theorem 4.2, (i) — 圏論的条件 ⟹ IsDivIdentity",
     sectionId := "frdi-thm-4-2" }
 
 end PullBackOtri
