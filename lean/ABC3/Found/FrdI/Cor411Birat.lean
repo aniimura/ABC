@@ -81,16 +81,19 @@ theorem biratPsi_baseId_divTrivial
       = Φ₂.map (P₂.Base (Ψ.map φ)) := hDivEq _ _ hde
   refine Eq.trans (congrArg (fun t => Φ₂.map t x)
     (biratPsi_base_mk G₁ G₂ Ψ hfwd Z φ hz)) ?_
-  have h1 : Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom)) ≫ P₂.Base (Ψ.map φ)) x
-      = Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom)))
-          (Φ₂.map (P₂.Base (Ψ.map φ)) x) := Φ₂.map_comp _ _ x
-  rw [h1, ← hde₂]
-  have h2 : Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom)))
-      (Φ₂.map (P₂.Base (Ψ.map Z.unop.hom.hom)) x)
-      = Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom))
-          ≫ P₂.Base (Ψ.map Z.unop.hom.hom)) x :=
-    (Φ₂.map_comp _ _ x).symm
-  rw [h2, IsIso.inv_hom_id, Φ₂.map_id]
+  have step1 : Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom)) ≫ P₂.Base (Ψ.map φ)) x
+      = Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom))) (Φ₂.map (P₂.Base (Ψ.map φ)) x) :=
+    Φ₂.map_comp _ _ x
+  have step2 : Φ₂.map (P₂.Base (Ψ.map φ)) x
+      = Φ₂.map (P₂.Base (Ψ.map Z.unop.hom.hom)) x :=
+    congrArg (fun t : Φ₂.val _ →+ Φ₂.val _ => t x) hde₂.symm
+  have step3 : Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom)))
+      (Φ₂.map (P₂.Base (Ψ.map Z.unop.hom.hom)) x) = x :=
+    (Φ₂.map_comp (P₂.Base (Ψ.map Z.unop.hom.hom))
+      (inv (P₂.Base (Ψ.map Z.unop.hom.hom))) x).symm.trans (by
+        rw [IsIso.inv_hom_id]; exact Φ₂.map_id _ x)
+  exact step1.trans
+    ((congrArg (fun t => Φ₂.map (inv (P₂.Base (Ψ.map Z.unop.hom.hom))) t) step2).trans step3)
 
 include hfwd in
 /-- ★★`Ψ^birat` が base-identity 自己射に与える底の射は**同型**。 -/
@@ -109,8 +112,10 @@ theorem biratPsi_baseId_isIso
     rw [← show P₁.Base Z.unop.hom.hom = P₁.Base φ from hbe]
     exact hζs.2
   haveI : IsIso (P₂.Base (Ψ.map φ)) := hBIso _ hφb
-  rw [biratPsi_base_mk G₁ G₂ Ψ hfwd Z φ hz]
-  infer_instance
+  have hbm := biratPsi_base_mk G₁ G₂ Ψ hfwd Z φ hz
+  have hii : IsIso (inv (P₂.Base (Ψ.map Z.unop.hom.hom)) ≫ P₂.Base (Ψ.map φ)) :=
+    inferInstance
+  exact hbm ▸ hii
 
 def biratPsi_baseId_divTrivial.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 93,
