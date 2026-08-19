@@ -89,6 +89,7 @@ import ABC3.Found.FrdI.Thm42Primary
 import ABC3.Found.FrdI.Thm42Prime
 import ABC3.Found.FrdI.Thm42PrimeCat
 import ABC3.Found.FrdI.Thm42Prop41iv
+import ABC3.Found.FrdI.Thm42Prop41v
 import ABC3.Found.FrdI.Cor410Birat
 import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.Thm34Slice
@@ -183,6 +184,7 @@ import ABC3.Found.Arakelov.ArcConjInvol
 import ABC3.Found.Arakelov.ArcTopologyAffine
 import ABC3.Found.Arakelov.ArcMapToAffine
 import ABC3.Found.Arakelov.ArcMapCont
+import ABC3.Found.Arakelov.APicWitness
 import ABC3.Found.Arakelov.ArcTopology
 import ABC3.Found.Arakelov.ArcFunctorial
 import ABC3.Found.Arakelov.ArcTopologyAffineEq

@@ -38,8 +38,14 @@ open ABC3.Meta AlgebraicGeometry CategoryTheory NumberField
 structure APicData where
   /-- 台となる計量(その中に `Pic` も入っている)。 -/
   toHermitianMetricData : HermitianMetricData
-  /-- `APic(X)` の台。 -/
-  APic : Scheme.{0} → Type
+  /-- `APic(X)` の台。
+
+  ★★★★2026-08-19 の修正——**宇宙が `Pic` と合っていなかった**。
+  それまで `Type`(= `Type 0`)と書いてあったが、(B1) の `Pic : Scheme.{0} → Type 1` と
+  `forgetMetric` / `forgetMetric_mk` で結ばれる以上、`APic` も `Type 1` でなければならない
+  ——`Metric X L` は常に空でないので `L ↦ ofMetric X L m` は `Pic X ↪ APic X` を与え、
+  `Type 1 ↪ Type 0` を要求してしまう。★これは型の誤記であって数学の変更ではない。 -/
+  APic : Scheme.{0} → Type 1
   /-- テンソル積による群構造。 -/
   group : (X : Scheme.{0}) → CommGroup (APic X)
   /-- 下にある可逆層を忘れる写像。 -/
