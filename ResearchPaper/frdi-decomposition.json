@@ -1599,7 +1599,7 @@
           "deps": [
             "hyp"
           ],
-          "note": "★`primary step` の定義(`Definition 4.1` 近辺)を先に在庫確認。\n★★`Theorem 3.4, (iii)` の射のクラスの保存(在庫)が土台になる。"
+          "note": "★`primary step` の定義(`Definition 4.1` 近辺)を先に在庫確認。\n★★`Theorem 3.4, (iii)` の射のクラスの保存(在庫)が土台になる。\n\n## ★★★測った(2026-08-19)—— `i-divid` と違って**純粋に圏論的ではない**\n\n`i-divid` は `prop_1_14_v` の右辺に `Div` も `Φ` も現れないので\nそのまま移せた(`prop114vRhs_map`、実装済み)。\n\n★★しかし `prop_4_1_iv`(`Prop41Cat.lean:956`)の右辺は\n```\n∃ p : Prime (Φ(F)), ∀ E' ϵ' , IsPrimaryElt (preStepVal ϵ') →\n  SuppElt ι (preStepVal ϵ') ≠ {p} → (… ↔ …)\n```\nであり、**`Prime` と `SuppElt` を含む** —— 純粋に圏論的ではない。\n\n★★★したがって `i-primary` は **`Ψ_Prime`(= `ii-prime`)と相互依存**しており、\n原典が `Theorem 4.2, (ii)` で `Ψ_Prime` を構成するのはそのためである。\n★2 つを**同時に**組む必要がある(原典 p.77 の構成)。\n\n★在庫の `mem_supp_map`(`MonoidTransport.lean`、本セッションで実装)が\n`SuppElt` の移送を与えるので、`Ψ_Prime` が立てば右辺は移る見込み。"
         },
         {
           "id": "i-divid",
@@ -1633,7 +1633,7 @@
           "deps": [
             "i-primary"
           ],
-          "note": "★原文は `Ob(𝒞^bs-iso) ∋ A ↦ Prime(Φ(A))` という関手の間の同型を主張する。\n★★`Order(Φ(A)_p)` との圏同値 2 本も条に入っている。"
+          "note": "★原文は `Ob(𝒞^bs-iso) ∋ A ↦ Prime(Φ(A))` という関手の間の同型を主張する。\n★★`Order(Φ(A)_p)` との圏同値 2 本も条に入っている。\n\n## ★`i-primary` と相互依存(2026-08-19 に測った)\n`prop_4_1_iv` の右辺が `Prime` と `SuppElt` を含むので、\n`i-primary` は `Ψ_Prime` なしには移せない。★2 つを同時に組む。\n★`mem_supp_map`(`MonoidTransport.lean`、本セッション)が `SuppElt` の移送を与える。"
         },
         {
           "id": "thm42-src",
