@@ -5,6 +5,7 @@ import ABC3.Found.FrdI.Prop48Cpt
 import ABC3.Found.FrdI.Prop114
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop44Phi
+import ABC3.Found.FrdI.MonoidTransport
 
 /-!
 # [FrdI] Proposition 4.8, (iii), (b) —— `Frobenius-compact` の第 3 条
@@ -61,6 +62,37 @@ theorem addMonoidHom_eq_id_of_forall_mprec (hsharp : IsSharp M) (f : M →+ M)
 def addMonoidHom_eq_id_of_forall_mprec.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 19,
     item := "Definition 1.1, (i) — non-dilating から恒等（一般形）",
+    sectionId := "frdi-def-1-1-i" }
+
+/-- ★★★★**`non-dilating` から「恒等」を出す(primary 元だけで十分な版)**。
+
+★sharp なら `toChar : M → M^char` は**全単射**なので、
+`M^char` の primary 元は `M` の primary 元から来る。
+★★したがって `addMonoidHom_eq_id_of_forall_mprec` の仮定は
+**primary 元についてだけ**課せばよい。 -/
+theorem addMonoidHom_eq_id_of_forall_mprec_primary (hsharp : IsSharp M) (f : M →+ M)
+    (hnd : IsNonDilating f) (h : ∀ x : M, IsPrimaryElt x → MPrec (f x) x) :
+    f = AddMonoidHom.id M := by
+  have hbij : Function.Bijective (toChar : M → MChar M) :=
+    ⟨toChar_injective_of_isSharp hsharp, toChar_surjective M⟩
+  set e : M ≃+ MChar M := AddEquiv.ofBijective (toChar (M := M)) hbij with he
+  have hchar : charMap f = AddMonoidHom.id (MChar M) := by
+    refine hnd (fun a ha => ?_)
+    obtain ⟨x, rfl⟩ := toChar_surjective _ a
+    have hx : IsPrimaryElt x := by
+      have h1 : IsPrimaryElt (e.symm (e x)) := isPrimaryElt_map e.symm ha
+      rwa [e.symm_apply_apply] at h1
+    rw [charMap_toChar]
+    exact MPrec.map toChar (h x hx)
+  refine AddMonoidHom.ext (fun x => ?_)
+  refine toChar_injective_of_isSharp hsharp ?_
+  have h2 := congrArg (fun g : MChar M →+ MChar M => g (toChar x)) hchar
+  rw [charMap_toChar] at h2
+  exact h2
+
+def addMonoidHom_eq_id_of_forall_mprec_primary.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19,
+    item := "Definition 1.1, (i) — non-dilating から恒等（primary 版）",
     sectionId := "frdi-def-1-1-i" }
 
 end MonoidGen
