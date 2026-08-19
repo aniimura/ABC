@@ -86,9 +86,12 @@
             "image-central"
           ],
           "size": "中",
-          "status": "todo",
+          "status": "半済",
           "evidence": "中心拡大 `1 → Z → G → Λ → 1`(`Λ ⊆ Φ(A)^gp` はアーベル)では `[·,·] : Λ × Λ → Z` が well-defined な交代双線形形式になる。★これは純群論で、原典にも mathlib にも依存しない。",
-          "★意味": "★★これで**可換性 ⟺ 1 つの双線形形式が消えること**に落ちる。穴の形が『圏論の条件』から『1 本の等式』に変わる。"
+          "★意味": "★★これで**可換性 ⟺ 1 つの双線形形式が消えること**に落ちる。穴の形が『圏論の条件』から『1 本の等式』に変わる。",
+          "lean": "ABC3/Found/FrdI/Prop44Pair.lean",
+          "decl": "commutatorElement_mul_left / commutatorElement_mul_right / commutatorElement_congr / biratDivGp_otimes_comm",
+          "note": "## ★★半済(2026-08-19)—— 一般論はすべて取り、残るは 1 本\n\n★★★**交換子が交代双線形形式を誘導する**のは**純粋な群論**なので、\nFrobenioid と切り離して先に取った(`Prop44Pair.lean`)。\n\n| 段 | 宣言 |\n|---|---|\n| 可換群への準同型の交換子は核に落ちる | `commutatorElement_mem_ker` |\n| `Div^gp` は `𝒪^×` の積の順序を見ない | `biratDivGp_otimes_comm` |\n| 第 1 変数の乗法性 | `commutatorElement_mul_left` |\n| 第 2 変数の乗法性 | `commutatorElement_mul_right` |\n| 交代性 | `commutatorElement_alternating` |\n| 商の上で well-defined | `commutatorElement_congr` |\n\n★どれも `hZ : f.ker ≤ Subgroup.center G` を仮定として受ける形にしてある。\n\n## ★★★台帳の綻びを見つけた —— `image-central` に Lean のポインタが無い\n\n★台帳は `image-central`(核が中心に入る)を「済」としているが、\n`lean` / `decl` が **両方 None** で、grep でも実体が見つからない。\n★`Prop44Ker.lean` の docstring は「2026-08-17 に取得済み」と書いているが、\n**それが何の宣言を指すのか特定できない**。\n\n★★近いのは `otri_comm_upToUnit`(`Prop110.lean:2053`)だが、これは\n「`𝒪^▷(A)` が `𝒪^×(A)` を法として可換」であって\n「`𝒪^×(A)` の像が `𝒪^×(A^birat)` の中心に入る」ではない。\n\n★★★**次の一手**: `image-central` を再検証し、実体があれば `decl` を記録、\n無ければ `todo` に戻す。それが決まれば `central-ext` は\n`hZ` を埋めるだけで閉じる。"
         },
         {
           "id": "pairing-vanishes",

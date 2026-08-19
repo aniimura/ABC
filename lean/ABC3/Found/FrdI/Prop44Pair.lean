@@ -10,7 +10,7 @@ import Mathlib.Tactic.Group
 # [FrdI] `Proposition 4.4, (ii)` —— 中心拡大の交換子が誘導する交代形式
 
 原文 (FrdI p.83):
-> is a commutative monoid, and that the natural homomorphism
+> whose kernel is the image, via the injection O (A)gp 
 
 ★★`Proposition 4.4, (ii)` は `𝒪^×(A^birat)` が**可換**であることを言う。
 在庫で次の形まで来ている(`Prop44Ker.lean`):
@@ -178,6 +178,46 @@ theorem commutatorElement_mem_ker' (a b : G) : ⁅a, b⁆ ∈ f.ker :=
   commutatorElement_mem_ker f a b
 
 end CentralPairing
+
+/-! ## ★2. Frobenioid 側 —— 交換子は `Div^gp` に見えない
+
+★★`biratDivGp` は `𝒪^×(A^birat)` の上で**加法的**(`biratDivGp_mul_otimes`)であり、
+行き先 `Gp (Φ.val …)` は**可換**である。★したがって積の順序は `Div^gp` に見えない。
+これが `commutatorElement_mem_ker` の Frobenioid 側の実体である。 -/
+
+section Birat
+
+universe v u w u2 v2
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {G : Frobenioid P}
+
+/-- ★★★**`Div^gp` は積の順序を見ない** —— `𝒪^×(A^birat)` の交換子が核に落ちること。 -/
+theorem biratDivGp_otimes_comm {A : BiratCat P G} {δ ε : End A}
+    (hδ : δ ∈ OTimes (biratPre P G) A) (hε : ε ∈ OTimes (biratPre P G) A) :
+    biratDivGp ((δ * ε : End A) : A ⟶ A) = biratDivGp ((ε * δ : End A) : A ⟶ A) := by
+  rw [biratDivGp_mul_otimes hδ hε, biratDivGp_mul_otimes hε hδ, add_comm]
+
+def biratDivGp_otimes_comm.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (ii) — Div^gp は 𝒪^× の積の順序を見ない",
+    sectionId := "frdi-prop-4-4" }
+
+end Birat
+
+/-! ## ★★★残っているもの(2026-08-19 時点)
+
+| 段 | 状態 |
+|---|---|
+| 交換子が核に落ちる | ★**済**(`commutatorElement_mem_ker` / `biratDivGp_otimes_comm`) |
+| 交換子が交代双線形 | ★**済**(核が中心という 1 本を仮定として受ける形) |
+| 商の上で well-defined | ★**済**(`commutatorElement_congr`) |
+| **核が中心に入る** | ★★**Lean のポインタ無し** —— 台帳は済としているが実体が見つからない |
+| 形式が消えること | ★★`pairing-vanishes`(原典が「routine exercise」と書いた所) |
+
+★★★**「核が中心に入る」を `hZ : f.ker ≤ Subgroup.center G` として
+明示的に受ける形にしてある**ので、実体が確定した時点でそのまま繋がる。
+★仮定として持ち上げておくのは、**どこが未証明かを型から読めるようにする**ためである。 -/
 
 def commutatorElement_congr.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 83,
