@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1226 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1227 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5816</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1624</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5837</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1641</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -56,7 +56,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
   <div class="card"><div class="k">達成率</div><div class="v">61%</div></div>
   <div class="card"><div class="k">直接名指し</div><div class="v">25</div></div>
   <div class="card"><div class="k">FrdI 全項目</div><div class="v">83</div></div>
-  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">5</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">8</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
 <tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">13/15</td>
@@ -75,7 +75,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 5 件が条つきのみ)。<br>
+(いま 8 件が条つきのみ)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
@@ -98,7 +98,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <span>原文の参照から機械抽出した 1000 節点を、強連結成分で潰して 296 個の箱・61 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
-<b>我々が触れている節点 64 件・Interface の義務 5/30 件。</b>
+<b>我々が触れている節点 67 件・Interface の義務 5/30 件。</b>
 生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
@@ -281,6 +281,7 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>43a0894</code></td><td>2026-08-19</td><td>★★★★★★自分の設計判断を反証した——𝒟 は 𝒞 の局所化ではない</td></tr>
 <tr><td><code>e706c18</code></td><td>2026-08-19</td><td>標数 2 での preΨ₄(G1 第 14 ブロック)——恒等式の材料が揃った</td></tr>
 <tr><td><code>a50c69d</code></td><td>2026-08-19</td><td>標数 2 での Ψ₃(G1 第 13 ブロック)</td></tr>
 <tr><td><code>32ea1c5</code></td><td>2026-08-19</td><td>★★★★★手計算で鍵の関係を特定した(G1 第 12 ブロック)</td></tr>
@@ -292,14 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>75fbbbb</code></td><td>2026-08-19</td><td>★★★Galois が 7 ブロックに——psiComp × ψ₂ の公式(G1 第 7 ブロック)</td></tr>
 <tr><td><code>a7f2f8c</code></td><td>2026-08-19</td><td>★★`std-istr` の 2 フィールドを取った——`frobIsotropic` は自明だった</td></tr>
 <tr><td><code>5b77da0</code></td><td>2026-08-19</td><td>★★Galois が 6 ブロックに——標数 2 での計算(G1 第 6 ブロック)</td></tr>
-<tr><td><code>7029524</code></td><td>2026-08-19</td><td>★★★Galois が 5 ブロックに——ZMod 2 への還元(G1 第 5 ブロック)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1624 件)。</div>
+<b>すべて PDF と機械照合している</b>(1641 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

@@ -76,6 +76,9 @@ import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
+import ABC3.Found.FrdI.Thm42
+import ABC3.Found.FrdI.Cor410
+import ABC3.Found.FrdI.Cor411
 import ABC3.Found.FrdI.AppA
 import ABC3.Found.FrdI.Thm34Pf
 import ABC3.Found.FrdI.Prop48Nf
@@ -410,6 +413,7 @@ import ABC3.Found.GaloisRep.OmegaIdentity
 import ABC3.Found.GaloisRep.BInvChar2
 import ABC3.Found.GaloisRep.Psi3Char2
 import ABC3.Found.GaloisRep.PreP4Char2
+import ABC3.Found.GaloisRep.OmegaTwo
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply
