@@ -159,6 +159,38 @@ def biratPsi_baseIdentity_map.src : ABC3.Meta.Source :=
     item := "Corollary 4.11, (ii) — Ψ^birat は base-identity 自己射を保つ",
     sectionId := "frdi-cor-4-11" }
 
+include hfwd in
+/-- ★★★★★**[FrdI] Corollary 4.11, (ii) の段 2** —— `Ψ^birat` は `𝒪^×` を保つ。
+
+原文 (FrdI p.93):
+> preserves the base-identity endomorphisms [hence, in particular, that -/
+theorem biratPsi_otimes_map [Ψ.IsEquivalence]
+    (Fc₂ : FrobenioidCore (biratPre P₂ G₂)) (hds₂ : IsDivSlim Φ₂)
+    (hbwd : ∀ {X Y : C₁} (f : X ⟶ Y), coaPreProp P₂ (Ψ.map f) → coaPreProp P₁ f)
+    (hPBb : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y), IsPullBack (biratPre P₁ G₁) f →
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f))
+    (hPBb' : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y),
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f) →
+        IsPullBack (biratPre P₁ G₁) f)
+    (hDivEq : ∀ {X Y : C₁} (f g : X ⟶ Y), DivEquivalent P₁ f g →
+      DivEquivalent P₂ (Ψ.map f) (Ψ.map g))
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hBIso : ∀ {X Y : C₁} (f : X ⟶ Y), IsBaseIsomorphism P₁ f →
+      IsBaseIsomorphism P₂ (Ψ.map f))
+    (X : BiratCat P₁ G₁) (δ : End X) (h : δ ∈ OTimes (biratPre P₁ G₁) X) :
+    (((psiBiratCor G₁ G₂ Ψ hfwd).map ((δ : X ⟶ X)))
+      : End ((psiBiratCor G₁ G₂ Ψ hfwd).obj X))
+      ∈ OTimes (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).obj X) :=
+  (mem_otimes_iff (biratPre P₂ G₂) _).mpr
+    ⟨h.2.map (Functor.mapEnd X (psiBiratCor G₁ G₂ Ψ hfwd)),
+     biratPsi_baseIdentity_map G₁ G₂ Ψ hfwd Fc₂ hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso
+       ((δ : X ⟶ X)) h.1.1⟩
+
+def biratPsi_otimes_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 93,
+    item := "Corollary 4.11, (ii) — Ψ^birat は 𝒪^× を保つ",
+    sectionId := "frdi-cor-4-11" }
+
 end BiratBaseId
 
 end ABC3.Found.FrdI

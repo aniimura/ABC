@@ -81,6 +81,7 @@ import ABC3.Found.FrdI.Cor411Base
 import ABC3.Found.FrdI.Cor411Otimes
 import ABC3.Found.FrdI.Cor411Rigid
 import ABC3.Found.FrdI.Cor411Bid
+import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Def24SuppIntr
 import ABC3.Found.FrdI.MonoidTransport
 import ABC3.Found.FrdI.Rmk451Ratstd
