@@ -12631,3 +12631,45 @@ mathlib の
 ### この区間の集計
 
 ★**114 ブロック**(Arakelov 99 + Galois 15)。
+
+## §9-318 ★★★★開埋め込みに沿った連続性の移送(第 275 ブロック)
+
+`(· ≫ V.ι) : V^arc → X^arc` は**開埋め込み**である:
+
+| 条件 | 出どころ |
+|---|---|
+| inducing | ★C1 `arcTopology_openImmersion` |
+| injective | ★C1 `comp_openImmersion_injective` |
+| 像が開 | ★第 274 |
+
+★★したがって `ContinuousOn g (range (· ≫ V.ι))` は
+`Continuous (g ∘ (· ≫ V.ι))` から出る(mathlib `IsOpenEmbedding.continuousAt_iff`)。
+
+★★★これで第 273 の仮定 `hg` を落とす器具が揃った
+——あとは第 270 の連続性を `g` の形に合わせるだけである。
+
+### ★摩擦 —— 「import したのに見えない」の**別の原因**
+
+`IsOpenEmbedding` は import を 2 つ足しても `unknownIdentifier` のままだった。
+★原因は **`namespace Topology` の中**にあったこと。`open Topology` で通る。
+
+★★本セッションで「名前が見えない」原因は **2 種類**あった:
+
+| 原因 | 対処 | 例 |
+|---|---|---|
+| import が推移しない | ★直接 import | `IsProper` / `PartitionOfUnity` |
+| 名前空間の中 | ★★`open` する | ★`IsOpenEmbedding` |
+
+★★★**`grep` で宣言を見つけたら、その行の上にある `namespace` も見る。**
+
+### 残り(C3)
+
+| 段 | 内容 |
+|---|---|
+| 第 270 の連続性を `hg` の形へ | ★あと 1–2 |
+| `Interface` の他の欄 | ★★`logMetric` / `IsConjCompatible` / `tensorMetric` |
+| witness | ★★★最後 |
+
+### この区間の集計
+
+★**115 ブロック**(Arakelov 100 + Galois 15)。

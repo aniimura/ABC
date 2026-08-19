@@ -37,6 +37,20 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
+/-! ## ★同値による簡約 -/
+
+section Cancel
+
+universe v9 u9 v8 u8 v7 u7
+
+/-- ★★**同値で前合成した同型は、元の同型を与える**。 -/
+noncomputable def cancelLeftEquiv {J : Type u9} [Category.{v9} J] {K : Type u8}
+    [Category.{v8} K] {L : Type u7} [Category.{v7} L]
+    (e : J ≌ K) {X Y : K ⥤ L} (iso : e.functor ⋙ X ≅ e.functor ⋙ Y) : X ≅ Y :=
+  (e.invFunIdAssoc X).symm ≪≫ Functor.isoWhiskerLeft e.inverse iso ≪≫ e.invFunIdAssoc Y
+
+end Cancel
+
 section SlicePush
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
@@ -473,6 +487,36 @@ noncomputable def slicePushPsi (f : A ⟶ A') :
 def slicePushPsi.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 68,
     item := "Theorem 3.4, (v) — Ψ とスライス関手の 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★★★★★共役関手の自然性 —— `Ψ_Base` の中核 -/
+
+/-- ★★★★★**共役関手 `basePsiSlice` は `Over.map (Base f)` と可換**。
+
+★★これが原典の `R_i` の「新しい関手」の 1-可換性にあたる。
+★3 つの四角形(底・`Ψ`・`𝒞₂` 側の底)を貼り合わせ、
+`Definition 1.3, (i), (c)` の圏同値で前合成を簡約する。 -/
+noncomputable def basePsiSliceSquare (f : A ⟶ A') :
+    Over.map (P.Base f) ⋙ basePsiSlice P F P₂ Ψ hPB A'
+      ≅ basePsiSlice P F P₂ Ψ hPB A ⋙ Over.map (P₂.Base (Ψ.map f)) :=
+  haveI := F.plBkEquiv A
+  haveI := F.plBkEquiv A'
+  cancelLeftEquiv (plBkOverFunctor P A).asEquivalence
+    (Functor.isoWhiskerRight (slicePushSquare P F f).symm (basePsiSlice P F P₂ Ψ hPB A')
+      ≪≫ Functor.isoWhiskerLeft (slicePush P F f)
+          (Equivalence.funInvIdAssoc (plBkOverFunctor P A').asEquivalence
+            (plBkSlicePsi P P₂ Ψ hPB A' ⋙ plBkOverFunctor P₂ (Ψ.obj A')))
+      ≪≫ Functor.isoWhiskerRight (slicePushPsi P F P₂ F₂ Ψ hPB hFT hPS f)
+          (plBkOverFunctor P₂ (Ψ.obj A'))
+      ≪≫ Functor.isoWhiskerLeft (plBkSlicePsi P P₂ Ψ hPB A)
+          (slicePushSquare P₂ F₂ (Ψ.map f))
+      ≪≫ (Equivalence.funInvIdAssoc (plBkOverFunctor P A).asEquivalence
+            (plBkSlicePsi P P₂ Ψ hPB A ⋙ plBkOverFunctor P₂ (Ψ.obj A)
+              ⋙ Over.map (P₂.Base (Ψ.map f)))).symm)
+
+def basePsiSliceSquare.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — 共役関手と Over.map の 1-可換図式",
     sectionId := "frdi-thm-3-4" }
 
 end Psi
