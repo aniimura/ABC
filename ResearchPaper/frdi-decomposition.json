@@ -2002,6 +2002,18 @@
      "note": "(i)(ii)(iii) は既に .src つき。(iv) が付けば条なしにできる。\n★interface を仮定に置いた分はクラス (B) の逸脱として開示する。\n\n## ★★★★★★閉じた(2026-08-20 夜)\n`thm_5_2_iv : C ≌ ModelData.Obj R.model` —— `𝒞̃ ⥤ 𝒞^model` が\n充満・忠実・本質的全射で、`𝒞̃ ⥤ 𝒞` が圏同値(`pathForget_isEquivalence`)。\n★`𝔽_Φ` への 1-両立性は `pathToModel_toElem` が **rfl**。\n★sorry 0、公理は標準 3 つのみ。",
      "lean": "ABC3/Found/FrdI/Thm52Model.lean",
      "decl": "thm_5_2_iv / pathToModel_isEquivalence / thm_5_2_iv.src"
+    },
+    {
+     "id": "thm52ii-natiso",
+     "title": "★Theorem 5.2, (ii) の「Moreover」—— model Frobenioid で 𝒪^×(−^birat) ≅ B",
+     "size": "★大",
+     "status": "todo",
+     "deps": [
+      "ratfn-iface"
+     ],
+     "note": "原文 (FrdI p.101) の (ii) の後半:\n> Moreover, there is a natural isomorphism of functors between the functor “O×(−)” on D\n> associated to the Frobenioid Cbirat ... and the functor B; this isomorphism is\n> compatible with the homomorphisms O×(−) → Φgp, DivB : B → Φgp.\n\n★★**これがちょうど `RatFnData`(`Thm52Model.lean`)を model Frobenioid について\n**構成する**ことである。(iv) では原文どおり仮定に置いたので、(ii) の側で作れば\ninterface が空でないことも同時に示せる。\n\n## ★★2026-08-20 の現在地\n* (ii) の前半(Frobenioid かつ isotropic 型)は `model_frobenioid` 等で済み。\n* ★**後半が未実装**であり、これが `Theorem 5.2` の条なし `.src` を止めている\n  ((i)(ii)(iii)(iv) の条つき `.src` はすべて在る)。\n\n## ★設計(見積り)\n`x ∈ ᵒ×(A^birat)` を代表元 `(a : E → A, f : E → A)`(`a` は co-angular pre-step)で書くと\n```\nκ(x) := B(inv(Base a))(u_f - u_a) ∈ B(Base A)\n```\n★**代表元によらないこと**が主要な手間で、`HomBirat` の余極限の構造\n(`Prop44Ore.lean` の Ore の四角形、`Thm52Frob.lean` の `exists_ore_square`)を使う。\n★逆写像は `Div_B y = toGp d₁ - toGp d₂` と分解して `preStepDown` で作る。\n★`B` が group-like であること(`RatFnData.bneg`)は原文の仮定なので `Hyp M` に足す。",
+     "lean": "",
+     "decl": ""
     }
    ]
   }
