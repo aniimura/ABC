@@ -68,6 +68,56 @@ def otriPullBack.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — pull-back に沿った 𝒪^▷ の引き戻し",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★`Div-identity` の圏論的特徴づけ -/
+
+/-- ★★★★**`Div-identity` の圏論版** ——
+`Definition 1.3, (iv), (a)` の 3 分解に沿って `𝒪^▷` を運び、
+最後に `n = degFr γ` 乗と同型で一致することを要求する。 -/
+def DivIdCat (P : PreFrobenioid C Φ) {A : C} (α : A ⟶ A) : Prop :=
+  ∃ (X Y : C) (γ : A ⟶ X) (pre : X ⟶ Y) (plb : Y ⟶ A),
+    α = γ ≫ pre ≫ plb ∧ IsFrobeniusType P γ ∧ IsPreStep P pre ∧ IsPullBack P plb ∧
+    ∀ (v : End A) (v₁ : End Y) (v₂ : End X) (v₃ : End A) (ε : End X),
+      v ∈ OTri P A → v₁ ∈ OTri P Y → v₂ ∈ OTri P X → v₃ ∈ OTri P A → ε ∈ OTimes P X →
+      plb ≫ (((v : End A)) : A ⟶ A) = (((v₁ : End Y)) : Y ⟶ Y) ≫ plb →
+      pre ≫ (((v₁ : End Y)) : Y ⟶ Y) = (((v₂ : End X)) : X ⟶ X) ≫ pre →
+      (((v₃ : End A)) : A ⟶ A) ≫ γ
+        = γ ≫ ((((v₂ : End X)) : X ⟶ X) ≫ (((ε : End X)) : X ⟶ X)) →
+        ∃ θ : A ⟶ A, IsIso θ ∧
+          ((((v₃ ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A)) ≫ θ
+            = (((v : End A)) : A ⟶ A)
+
+/-- ★★`𝒪^▷` の冪の `Div` は倍数。 -/
+theorem div_pow_otri (Q : PreFrobenioid C Φ) {A : C} {v : End A} (hv : v ∈ OTri Q A) (n : ℕ) :
+    Q.Div ((((v ^ n : End A)) : A ⟶ A)) = n • Q.Div ((((v : End A)) : A ⟶ A)) := by
+  induction n with
+  | zero =>
+    show Q.Div ((1 : End A) : A ⟶ A) = (0 : ℕ) • _
+    rw [zero_nsmul]
+    exact Q.Div_id A
+  | succ m ih =>
+    have hvm : (v ^ m) ∈ OTri Q A := pow_mem hv m
+    show Q.Div ((((v ^ (m + 1) : End A)) : A ⟶ A)) = _
+    rw [pow_succ]
+    show Q.Div ((((v ^ m : End A)) : A ⟶ A) ≫ (((v : End A)) : A ⟶ A)) = _
+    rw [Q.Div_comp, show Q.Base ((((v ^ m : End A)) : A ⟶ A)) = Q.Base (𝟙 A) from hvm.1,
+      Q.Base_id, show Q.degFr ((((v : End A)) : A ⟶ A)) = 1 from hv.2]
+    have h3 : Φ.map (𝟙 ((Q.toElem.obj A).base)) (Q.Div ((((v : End A)) : A ⟶ A)))
+      = Q.Div ((((v : End A)) : A ⟶ A)) := Φ.map_id _ _
+    rw [h3, show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul, ih, succ_nsmul, add_comm]
+
+/-- ★`𝒪^×` を後置しても `Div` は変わらない。 -/
+theorem div_otimes_comp (Q : PreFrobenioid C Φ) {A : C} {v : End A} (hv : v ∈ OTri Q A)
+    {ε : End A} (hε : ε ∈ OTimes Q A) :
+    Q.Div ((((v : End A)) : A ⟶ A) ≫ (((ε : End A)) : A ⟶ A))
+      = Q.Div ((((v : End A)) : A ⟶ A)) := by
+  haveI : IsIso ((((ε : End A)) : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso ε).mp hε.2
+  exact div_comp_iso ((((v : End A)) : A ⟶ A)) ((((ε : End A)) : A ⟶ A))
+
+def DivIdCat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 81,
+    item := "Theorem 4.2, (i) — Div-identity の圏論的特徴づけ",
+    sectionId := "frdi-thm-4-2" }
+
 end PullBackOtri
 
 end ABC3.Found.FrdI
