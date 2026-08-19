@@ -257,4 +257,101 @@ def isDivIdentity_of_divIdCat.src : ABC3.Meta.Source :=
 
 end PullBackOtri
 
+/-! ## ★★★★★★★`Ψ` に沿った移送 -/
+
+section Transport
+
+variable {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`DivIdCat` は `Ψ` で移る** —— 右辺が純粋に圏論的だから。 -/
+theorem divIdCat_map (Ψ : C ≌ C₂)
+    (hFT : ∀ {X Y : C} (f : X ⟶ Y), IsFrobeniusType P f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.functor.map f))
+    (hdeg : ∀ {X Y : C} (f : X ⟶ Y), P₂.degFr (Ψ.functor.map f) = P.degFr f)
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (hOTimes' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTimes P₂ (Ψ.functor.obj Z) → δ ∈ OTimes P Z)
+    {A : C} (α : A ⟶ A) (h : DivIdCat P α) :
+    DivIdCat P₂ (Ψ.functor.map α) := by
+  obtain ⟨X, Y, γ, pre, plb, hfac, hγ, hpre, hplb, hcond⟩ := h
+  refine ⟨Ψ.functor.obj X, Ψ.functor.obj Y, Ψ.functor.map γ, Ψ.functor.map pre,
+    Ψ.functor.map plb, ?_, hFT γ hγ, hPS pre hpre, hPB plb hplb, ?_⟩
+  · rw [hfac, Ψ.functor.map_comp, Ψ.functor.map_comp]
+  intro v v₁ v₂ v₃ ε hv hv₁ hv₂ hv₃ hε hsq1 hsq2 hsq3
+  obtain ⟨v', hv'⟩ := Ψ.functor.map_surjective ((v : Ψ.functor.obj A ⟶ Ψ.functor.obj A))
+  obtain ⟨v₁', hv₁'⟩ := Ψ.functor.map_surjective ((v₁ : Ψ.functor.obj Y ⟶ Ψ.functor.obj Y))
+  obtain ⟨v₂', hv₂'⟩ := Ψ.functor.map_surjective ((v₂ : Ψ.functor.obj X ⟶ Ψ.functor.obj X))
+  obtain ⟨v₃', hv₃'⟩ := Ψ.functor.map_surjective ((v₃ : Ψ.functor.obj A ⟶ Ψ.functor.obj A))
+  obtain ⟨ε', hε'⟩ := Ψ.functor.map_surjective ((ε : Ψ.functor.obj X ⟶ Ψ.functor.obj X))
+  have mv : v' ∈ OTri P A := hOTri' A v' (by rw [hv']; exact hv)
+  have mv₁ : v₁' ∈ OTri P Y := hOTri' Y v₁' (by rw [hv₁']; exact hv₁)
+  have mv₂ : v₂' ∈ OTri P X := hOTri' X v₂' (by rw [hv₂']; exact hv₂)
+  have mv₃ : v₃' ∈ OTri P A := hOTri' A v₃' (by rw [hv₃']; exact hv₃)
+  have mε : ε' ∈ OTimes P X := hOTimes' X ε' (by rw [hε']; exact hε)
+  have s1 : plb ≫ (((v' : End A)) : A ⟶ A) = (((v₁' : End Y)) : Y ⟶ Y) ≫ plb := by
+    refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, Ψ.functor.map_comp, hv', hv₁']
+    exact hsq1
+  have s2 : pre ≫ (((v₁' : End Y)) : Y ⟶ Y) = (((v₂' : End X)) : X ⟶ X) ≫ pre := by
+    refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, Ψ.functor.map_comp, hv₁', hv₂']
+    exact hsq2
+  have s3 : (((v₃' : End A)) : A ⟶ A) ≫ γ
+      = γ ≫ ((((v₂' : End X)) : X ⟶ X) ≫ (((ε' : End X)) : X ⟶ X)) := by
+    refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, Ψ.functor.map_comp, Ψ.functor.map_comp, hv₃', hv₂', hε']
+    exact hsq3
+  obtain ⟨θ, hθiso, hθ⟩ := hcond v' v₁' v₂' v₃' ε' mv mv₁ mv₂ mv₃ mε s1 s2 s3
+  refine ⟨Ψ.functor.map θ, Ψ.functor.map_isIso θ, ?_⟩
+  have hpow : ((Ψ.functor.map ((((v₃' ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A)))
+      : End (Ψ.functor.obj A))
+      = ((v₃ ^ (((P₂.degFr (Ψ.functor.map γ) : ℕ+) : ℕ)) : End (Ψ.functor.obj A))) := by
+    rw [hdeg]
+    show (CategoryTheory.Functor.mapEnd A Ψ.functor) (v₃' ^ _) = _
+    rw [map_pow]
+    show ((Ψ.functor.map ((((v₃' : End A)) : A ⟶ A))) : End _) ^ _ = _
+    rw [hv₃']
+  have h2 := congrArg Ψ.functor.map hθ
+  rw [Ψ.functor.map_comp, hpow, hv'] at h2
+  exact h2
+
+/-- ★★★★★★★**[FrdI] Theorem 4.2, (i)** —— `Ψ` は `Div-identity` 自己射を保つ。 -/
+theorem isDivIdentity_map (Ψ : C ≌ C₂)
+    (F : FrobenioidCore P) (G : Frobenioid P)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hperfM₂ : ∀ Y : C₂, IsPerfectMonoid (Φ₂.val (P₂.toElem.obj Y).base))
+    (hFT : ∀ {X Y : C} (f : X ⟶ Y), IsFrobeniusType P f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.functor.map f))
+    (hdeg : ∀ {X Y : C} (f : X ⟶ Y), P₂.degFr (Ψ.functor.map f) = P.degFr f)
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (hOTimes' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTimes P₂ (Ψ.functor.obj Z) → δ ∈ OTimes P Z)
+    {A : C} (α : A ⟶ A) (h : IsDivIdentity P α) :
+    IsDivIdentity P₂ (Ψ.functor.map α) :=
+  isDivIdentity_of_divIdCat F₂ G₂ hiso₂ hdivS₂ hperfM₂ (Ψ.functor.map α)
+    (divIdCat_map Ψ hFT hPS hPB hdeg hOTri' hOTimes' α
+      (divIdCat_of_isDivIdentity F G hiso α h))
+
+def isDivIdentity_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 81,
+    item := "Theorem 4.2, (i) — Ψ は Div-identity 自己射を保つ",
+    sectionId := "frdi-thm-4-2" }
+
+end Transport
+
 end ABC3.Found.FrdI
