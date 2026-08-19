@@ -33,14 +33,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1186 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1189 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5700</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5707</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1578</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>8b92b7b</code></td><td>2026-08-19</td><td>最終組み立ては座標系 ⊤ を捨てると通ると測った(§9-256)</td></tr>
+<tr><td><code>400ed61</code></td><td>2026-08-19</td><td>★★★★★★hcompat の核が出た(第 224)——摩擦 6 例すべてに逃げ道がついた</td></tr>
+<tr><td><code>f02966f</code></td><td>2026-08-19</td><td>★修復＋`map_comp` の残り 1 点を特定——calc の型合わせ</td></tr>
 <tr><td><code>3267ec0</code></td><td>2026-08-19</td><td>hcompat の組み立ては射の整合が残ると測った(§9-254)</td></tr>
 <tr><td><code>630fb5e</code></td><td>2026-08-19</td><td>★★★`Ψ^birat` が組み上がった——残るは `map_comp` 1 本、筋は立っている</td></tr>
 <tr><td><code>74f9353</code></td><td>2026-08-19</td><td>★★★§9-252 の逃げ道(b)が効いた(第 223)——等しい開集合の間の制限は同型</td></tr>
@@ -290,9 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>256f9e9</code></td><td>2026-08-19</td><td>hcompat の道を mathlib の補題名まで特定した(§9-250)</td></tr>
 <tr><td><code>0d3367e</code></td><td>2026-08-19</td><td>B2 最後の hcompat は依存位置の転送が残ると測った(§9-249)</td></tr>
 <tr><td><code>e083db7</code></td><td>2026-08-19</td><td>★`Ψ^birat` の universe 詰まりの本当の原因が見えた——2 つの候補</td></tr>
-<tr><td><code>388b67c</code></td><td>2026-08-19</td><td>★`Ψ^birat` の universe を測った——先行例の宣言の形を写すのが次の手</td></tr>
-<tr><td><code>2dbcb7f</code></td><td>2026-08-19</td><td>★★★★★★全射性の接続が通った(第 221)——この区間 48 ブロックの総括</td></tr>
-<tr><td><code>4e61bd5</code></td><td>2026-08-19</td><td>★★★★★転送なしのイデアルの等式が出た(第 220)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
