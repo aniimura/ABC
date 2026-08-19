@@ -13262,3 +13262,81 @@ D1 に着手して**すぐに矛盾が出た**:
 | 4 | `embPoint K τ ≫ φ = embPoint F (τ ∘ ψ_F)` | `Spec.map` の関手性 |
 | 5 | 各ファイバーの濃度 = `[K:F]` | ★★mathlib `AlgHom.card`(`FieldTheory/PrimitiveElement.lean:364`) |
 | 6 | `[K:ℚ] = [F:ℚ]·[K:F]` で約分 | `Module.finrank_mul_finrank` |
+
+## §9-346 —— ★★★★★★★D2 達成(第 300–301 ブロック)
+
+    APicSpecData.nonvacuous : Nonempty APicSpecData
+
+★底変換不変性は**埋め込みの数え上げ**で出た:
+
+    Σ_{τ : K →+* ℂ} f(τ|_F) = [K:F] · Σ_{σ : F →+* ℂ} f(σ)
+
+★★各 `σ` の上のファイバーは `K →ₐ[F] ℂ`(ℂ を `σ` で `F`-代数と見る)であり、
+その濃度は mathlib の **`AlgHom.card`** で `[K:F]`。
+★★★`[K:ℚ] = [F:ℚ]·[K:F]` が正規化の分母をちょうど約分する。
+
+### ★Interface の誤記を 1 つ直した
+
+`degF_baseChange` は**任意の**射 `φ : Spec 𝓞_K ⟶ Spec 𝓞_F` について述べており、
+同時に宣言されている `[Algebra F K]` が**一切使われていなかった**。
+★原文 p.4 が言っているのは「`F ⊆ K` に沿った制限で次数が変わらない」であって
+任意の射ではない。★★代数写像に沿った形に揃えた。
+
+## §9-347 —— ★★★★★★★D3 達成、および `IsPointOf` の穴(第 302 ブロック)
+
+    ArakelovHeightData.nonvacuous : Nonempty ArakelovHeightData
+
+### ★★★★塞いだ穴——`IsPointOf` が空でもよかった
+
+それまで Interface は `IsPointOf` が**空である**ことを禁じていなかった。
+★したがって `AlgPoint := PUnit`、`IsPointOf := False`、`height := 0` が
+**すべての欄を満たしてしまう**(`height_eq_degF` が空虚に成り立つ)。
+
+★★`isPointOf_exists`(どの射も点を定める)を足して塞いだ。
+これで高さは `deg_F` の引き戻しに**強制される**。
+
+### ★★★★★残っている穴——`IsEffective` は縛られていない
+
+`Prop 1.4, (ii)` の `IsEffective` は Interface のどの欄も切断と結んでいない。
+★本 witness は `IsEffective` を「下に有界であること」そのものと定義しており、
+`height_bddBelow` は**恒真**である。
+
+★★★塞ぐには「切断 `s` で `|s| ≤ 1` なるものが在る」と結ぶ欄が要り、
+そのためには `deg` の**有限素点側**(余核の位数の対数)を作らねばならない。
+★**未達として記録する。**
+
+## §9-348 —— ★★★★★★★B3 達成、そして**残るは C2 のみ**(第 303 ブロック)
+
+    PicSpecData.nonvacuous : Nonempty PicSpecData
+
+★Interface 自身が「(B3) は独立の難所ではなく (B1) の系である」と書いていたとおりで、
+
+    equivClassGroup F := equivPicRing (𝓞 F) ≫ (ClassGroup.equivPic (𝓞 F))⁻¹
+
+と取れば `equivClassGroup_compat` は **`apply_symm_apply`** で出た。
+
+### ★★★★★★数え直した——(C2) には witness が無かった
+
+本区間の最後に 9 件すべてを機械的に数え直したところ、
+
+| 義務 | witness |
+|---|---|
+| B1 `PicardData` | ★`picardDataWitness`(本区間で `nonvacuous` を明示) |
+| B2 `CartierPicData` | ★`cartierPicData_nonvacuous` |
+| B3 `PicSpecData` | ★★本区間 |
+| C1 `ArcSpaceData` | ★`ArcSpaceData.nonvacuous` |
+| **C2 `ProjectiveModelData`** | ★★★**無い**——`waiting` のみ |
+| C3 `HermitianMetricData` | ★本区間 |
+| D1 `APicData` | ★本区間 |
+| D2 `APicSpecData` | ★本区間 |
+| D3 `ArakelovHeightData` | ★本区間 |
+
+★★**Arakelov 8/9**。★★★(C2) だけが残っている。
+
+### ★C2 に要るもの
+
+`properFlat_compact`(ℤ 上固有 ⟹ `X^arc` コンパクト)。
+★射影の場合は `Found/GenEll/ArcModel.lean` で実装済みだが、
+**固有は射影を含意しない**ので Chow の補題を経る必要があり、
+その手前に **`ℙⁿ` の点の関手** `Hom(Spec ℂ, Proj 𝒜) ≅ ℙ(ℂ^{n+1})` が要る
+——mathlib に無い(§9-18 に構成 5 段を記録済み)。
