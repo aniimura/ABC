@@ -1429,7 +1429,7 @@
           "size": "★中",
           "status": "todo",
           "deps": [],
-          "note": "原文 (物理 p.86): 「it is immediate from the definitions that if C is of rationally standard\ntype (respectively, of standard type), then so is C^istr」。\n★★`standard` は 5 条(a)-(e)の連言(`IsOfStandardType`、在庫)。\n★条ごとに `𝒞^istr` へ移す —— `Prop19.lean` の `istrPre` / `istr_frobenioidCore` と\n`Prop33UnTr.lean` の `istr_*` 群が材料。"
+          "note": "原文 (物理 p.86): 「it is immediate from the definitions that if C is of rationally standard\ntype (respectively, of standard type), then so is C^istr」。\n★★`standard` は 5 条(a)-(e)の連言(`IsOfStandardType`、在庫)。\n★条ごとに `𝒞^istr` へ移す —— `Prop19.lean` の `istrPre` / `istr_frobenioidCore` と\n`Prop33UnTr.lean` の `istr_*` 群が材料。\n\n## ★★形を測った(2026-08-19)\n`IsOfStandardType C D P F` は**フィールド 6 個**の構造体:\n`quasiIsotropic` / `frobIsotropic` / `groupLikeCompact` /\n`frobNormalized` / `baseFSMFF` / `phiNonDilating`。\n\n| フィールド | `𝒞^istr` への移送 |\n|---|---|\n| `baseFSMFF` | ★**そのまま**(`𝒟` が変わらない) |\n| `phiNonDilating` | ★**そのまま**(`Φ` が変わらない) |\n| `quasiIsotropic` | ★在庫 `isOfQuasiIsotropicType_of_isOfIsotropicType`(`Remark311.lean`)|\n| `groupLikeCompact` | ★★`Istr (istrPre P F)` は `Istr P` の全対象(`Rmk451.lean` の `istr2` / `istr_isotropic`)なので**元の条がそのまま効く** |\n| `frobIsotropic` | 未 —— `IsFrobeniusIsotropic` の移送 |\n| `frobNormalized` | 未 —— `IsFrobeniusNormalized` の移送 |\n\n★★★**残るのは 2 フィールドだけ**。どちらも `End A` 上の条件で、\n`istrPre_Base` / `istrPre_degFr` / `istrPre_Div`(`Prop33UnTr.lean`、在庫)が\n`P` と `istrPre P F` の一致を与えるので、ほぼ `rfl` で移る見込み。"
         },
         {
           "id": "ratstd-istr",
