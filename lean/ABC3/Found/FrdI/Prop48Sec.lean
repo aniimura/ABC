@@ -48,16 +48,20 @@ noncomputable def BaseSection.toBirat (Fc : FrobenioidCore (biratPre P G))
   objP A := S.objP (biratDown P G A)
   homP {A B} f := ∃ f₀ : biratDown P G A ⟶ biratDown P G B,
     S.homP f₀ ∧ (toBiratCat P G).map f₀ = f
-  id_mem {A} hA := ⟨𝟙 _, S.id_mem hA, (toBiratCat P G).map_id _⟩
+  id_mem {A} hA := by
+    refine ⟨𝟙 (biratDown P G A), S.id_mem hA, ?_⟩
+    exact (toBiratCat P G).map_id (biratDown P G A)
   comp_mem {_ _ _} {f g} hf hg := by
     obtain ⟨f₀, hf₀, hfe⟩ := hf
     obtain ⟨g₀, hg₀, hge⟩ := hg
     refine ⟨f₀ ≫ g₀, S.comp_mem hf₀ hg₀, ?_⟩
-    rw [(toBiratCat P G).map_comp, hfe, hge]
+    exact ((toBiratCat P G).map_comp f₀ g₀).trans
+      ((congrArg (fun t => t ≫ (toBiratCat P G).map g₀) hfe).trans
+        (congrArg (fun t => f ≫ t) hge))
   isPullBack {_ _} {f} hf := by
     obtain ⟨f₀, hf₀, hfe⟩ := hf
     rw [← hfe]
-    refine (birat_isPullBack_iff G Fc f₀).mpr ?_
+    refine (birat_isPullBack_iff P G Fc f₀).mpr ?_
     obtain ⟨hlb, hlin⟩ := G.core.pullBackLB f₀ (S.isPullBack hf₀)
     exact ⟨hlb.1, hlin⟩
   skeletal {_ _} {f g} hf hg hfg hgf := by
@@ -66,44 +70,44 @@ noncomputable def BaseSection.toBirat (Fc : FrobenioidCore (biratPre P G))
     obtain ⟨g₀, hg₀, hge⟩ := hg
     refine S.skeletal hf₀ hg₀ ?_ ?_
     · refine (toBiratCat P G).map_injective ?_
-      rw [(toBiratCat P G).map_comp, hfe, hge, hfg, (toBiratCat P G).map_id]
+      exact (((toBiratCat P G).map_comp f₀ g₀).trans
+        ((congrArg (fun t => t ≫ (toBiratCat P G).map g₀) hfe).trans
+          (congrArg (fun t => f ≫ t) hge))).trans
+        (hfg.trans ((toBiratCat P G).map_id _).symm)
     · refine (toBiratCat P G).map_injective ?_
-      rw [(toBiratCat P G).map_comp, hge, hfe, hgf, (toBiratCat P G).map_id]
+      exact (((toBiratCat P G).map_comp g₀ f₀).trans
+        ((congrArg (fun t => t ≫ (toBiratCat P G).map f₀) hge).trans
+          (congrArg (fun t => g ≫ t) hfe))).trans
+        (hgf.trans ((toBiratCat P G).map_id _).symm)
   frobTrivial {A} hA := by
     obtain ⟨ζ, hζd, hζb⟩ := S.frobTrivial hA
     refine ⟨(Functor.mapEnd (biratDown P G A) (toBiratCat P G)).comp ζ, ?_, ?_⟩
     · intro n
       show (biratPre P G).degFr ((toBiratCat P G).map ((ζ n : End (biratDown P G A)))) = n
-      rw [show (biratPre P G).degFr ((toBiratCat P G).map ((ζ n : End (biratDown P G A))))
-        = P.degFr ((ζ n : End (biratDown P G A))) from biratDeg_toHomBirat _]
-      exact hζd n
+      exact (biratDeg_toHomBirat (P := P) (G := G) _).trans (hζd n)
     · intro n
       refine ⟨?_, ?_⟩
       · show (biratPre P G).Base ((toBiratCat P G).map ((ζ n : End (biratDown P G A))))
           = (biratPre P G).Base (𝟙 _)
-        rw [(biratPre P G).Base_id,
-          show (biratPre P G).Base ((toBiratCat P G).map ((ζ n : End (biratDown P G A))))
-            = P.Base ((ζ n : End (biratDown P G A))) from biratBase_toHomBirat _,
-          show P.Base ((ζ n : End (biratDown P G A))) = P.Base (𝟙 _) from (hζb n).1,
-          P.Base_id]
-      · exact (birat_isFrobeniusType_iff G _).mpr ⟨(hζb n).2.1.1, (hζb n).2.2⟩
+        exact ((biratBase_toHomBirat (P := P) (G := G) _).trans
+          (((hζb n).1).trans (P.Base_id _))).trans ((biratPre P G).Base_id _).symm
+      · exact (birat_isFrobeniusType_iff P G _).mpr ⟨(hζb n).2.1.1, (hζb n).2.2⟩
   essSurjP X := by
     obtain ⟨A, hA, hiso⟩ := S.essSurjP X
     exact ⟨A, hA, hiso⟩
   fullP {A B} hA hB ψ := by
     obtain ⟨f₀, hf₀, hfe⟩ := S.fullP hA hB ψ
     refine ⟨(toBiratCat P G).map f₀, ⟨f₀, hf₀, rfl⟩, ?_⟩
-    rw [show (biratPre P G).Base ((toBiratCat P G).map f₀) = P.Base f₀ from
-      biratBase_toHomBirat f₀]
-    exact hfe
+    exact (biratBase_toHomBirat (P := P) (G := G) f₀).trans hfe
   faithfulP {_ _} {f g} hf hg hb := by
     obtain ⟨f₀, hf₀, hfe⟩ := hf
     obtain ⟨g₀, hg₀, hge⟩ := hg
     rw [← hfe, ← hge]
     refine congrArg (toBiratCat P G).map (S.faithfulP hf₀ hg₀ ?_)
-    rw [← biratBase_toHomBirat (P := P) (G := G) f₀,
-      ← biratBase_toHomBirat (P := P) (G := G) g₀, hfe, hge]
-    exact hb
+    exact (biratBase_toHomBirat (P := P) (G := G) f₀).symm.trans
+      ((congrArg (biratPre P G).Base hfe).trans
+        (hb.trans ((congrArg (biratPre P G).Base hge).symm.trans
+          (biratBase_toHomBirat (P := P) (G := G) g₀))))
 
 def BaseSection.toBirat.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
