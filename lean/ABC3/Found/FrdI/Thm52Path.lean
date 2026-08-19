@@ -97,12 +97,16 @@ theorem pathForget_isEquivalence (G : Frobenioid P) (S : BaseSection P) :
 
 /-- ★★`F-𝒫-path` が定める **`Φ^gp(Base X)` の類** —— model Frobenioid の `α`。
 
-★模型で読むと: `X = (d, α)`、`ref = (d, 0)`、`vertex = (d, w)` で
-`Div(toObj) = w − α`、`Div(toRef) = w` なので
-`Φ(Base toObj)⁻¹(Div(toRef) − Div(toObj)) = α`。 -/
+★★模型で検算すると: `X = (d, α)`、`ref = (d, 0)`、`vertex = (d, w)` のとき
+model Frobenioid の射の条件 `deg·α_A + Div = Φ(Base)(α_B) + Div_B(u)` から
+`Div(toObj) = α − w`、`Div(toRef) = −w` なので
+`Φ(Base toObj)⁻¹(Div(toRef) − Div(toObj)) = −α`。
+★**したがって `α` は `spanCls` の符号を反転したもの**である
+(この符号は模型 `𝒟 = pt`, `Φ = ℕ`, `B = 0` で `birat_divGp_sub_mem` と
+突き合わせて確定した)。 -/
 noncomputable def FPPath.cls {S : BaseSection P} {X : C} (p : FPPath S X) :
     Gp (Φ.val (P.toElem.obj X).base) :=
-  spanCls p.toObj p.toObj_preStep.2 p.toRef
+  -spanCls p.toObj p.toObj_preStep.2 p.toRef
 
 /-- ★`[δ₁]⁻¹ ≫ [δ₂]` は `𝒞^birat` の同型(終域が違ってもよい版)。 -/
 theorem birat_mk_isIso' (G : Frobenioid P) {W A B : C}
@@ -132,11 +136,13 @@ theorem FPPath.biratIso_isIso (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic 
   birat_mk_isIso' G p.toObj p.toRef (prop_1_4_i P _ (fun Y _ => hiso Y)) p.toObj_preStep
     (prop_1_4_i P _ (fun Y _ => hiso Y)) p.toRef_preStep
 
-/-- ★★★**その `Div^gp` はちょうど類**。 -/
+/-- ★★★**その `Div^gp` はちょうど類の符号反転**。
+
+★model の `α` は `−Div^gp(π_X)` である。 -/
 theorem FPPath.biratDivGp_biratIso (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
     {S : BaseSection P} {X : C} (p : FPPath S X) :
-    biratDivGp (p.biratIso G hiso) = p.cls := by
-  rw [FPPath.biratIso, biratDivGp_mk, FPPath.cls,
+    biratDivGp (p.biratIso G hiso) = -p.cls := by
+  rw [FPPath.biratIso, biratDivGp_mk, FPPath.cls, neg_neg,
     spanCls_eq_sliceDivGpOf _ _ _ p.toRef_preStep.1]
   exact sliceDivGpOf_congr rfl _ _ _
 
