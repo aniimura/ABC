@@ -121,6 +121,87 @@ def prop_4_1_iv_cat.src : ABC3.Meta.Source :=
     item := "Proposition 4.1, (iv) — 右辺の圏論版",
     sectionId := "frdi-prop-4-1" }
 
+/-! ## ★同型の前置に対する不変性 -/
+
+/-- ★★同型を前置しても `Div` の primary 性は変わらない。 -/
+theorem isPrimaryElt_div_iso_comp {X Y Z : C} (e : X ⟶ Y) [IsIso e] (f : Y ⟶ Z)
+    (hf : IsPreStep P f) :
+    IsPrimaryElt (P.Div (e ≫ f)) ↔ IsPrimaryElt (P.Div f) := by
+  have hd : P.Div (e ≫ f) = Φ.map (P.Base e) (P.Div f) := by
+    rw [P.Div_comp, show P.Div e = 0 from isIsometric_of_isIso P e, smul_zero, add_zero]
+  rw [hd]
+  haveI : IsIso (P.Base e) := by
+    rw [show P.Base e = P.Base e from rfl]
+    exact ⟨⟨P.Base (inv e), by rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id],
+      by rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]⟩⟩
+  constructor
+  · intro hp
+    have hbij : Function.Bijective (Φ.map (@inv _ _ _ _ (P.Base e) inferInstance)) :=
+      Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base e) inferInstance).symm
+    have h2 := isPrimaryElt_of_bijective _ hbij hp
+    rwa [MonoidOn.map_map_inv Φ (P.Base e) inferInstance (P.Div f)] at h2
+  · exact isPrimaryElt_of_bijective (Φ.map (P.Base e))
+      (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base e) inferInstance))
+
+/-- ★★同型を前置しても `SamePrimeCat` は変わらない。 -/
+theorem samePrimeCat_iso_comp {A B B' X : C} (e : X ⟶ B) [IsIso e] {ϵ : B ⟶ A} {ϵ' : B' ⟶ A} :
+    SamePrimeCat P (e ≫ ϵ) ϵ' ↔ SamePrimeCat P ϵ ϵ' := by
+  constructor
+  · rintro ⟨Z, ζ, hζc, hζst, ⟨ψ, hψs, hfac⟩, hr⟩
+    refine ⟨Z, ζ, hζc, hζst, ⟨inv e ≫ ψ, IsPreStep.comp P (isPreStep_of_isIso P (inv e)) hψs,
+      ?_⟩, hr⟩
+    rw [Category.assoc, ← hfac, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  · rintro ⟨Z, ζ, hζc, hζst, ⟨ψ, hψs, hfac⟩, hr⟩
+    refine ⟨Z, ζ, hζc, hζst, ⟨e ≫ ψ, IsPreStep.comp P (isPreStep_of_isIso P e) hψs, ?_⟩, hr⟩
+    rw [Category.assoc, ← hfac]
+
+/-! ## ★「pre-step を通る分解」の移送 -/
+
+/-- ★`f` が `g` を通って pre-step で分解する。 -/
+def FactorsPre (P : PreFrobenioid C Φ) {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) : Prop :=
+  ∃ ζ : X ⟶ Y, IsPreStep P ζ ∧ f = ζ ≫ g
+
+/-- ★同型を前置しても変わらない。 -/
+theorem factorsPre_iso_comp {X Y Y' Z : C} (e : Y ⟶ Y') [IsIso e] (f : X ⟶ Z) (g : Y' ⟶ Z) :
+    FactorsPre P f (e ≫ g) ↔ FactorsPre P f g := by
+  constructor
+  · rintro ⟨ζ, hζ, hfac⟩
+    exact ⟨ζ ≫ e, IsPreStep.comp P hζ (isPreStep_of_isIso P e), by rw [hfac, Category.assoc]⟩
+  · rintro ⟨ζ, hζ, hfac⟩
+    refine ⟨ζ ≫ inv e, IsPreStep.comp P hζ (isPreStep_of_isIso P (inv e)), ?_⟩
+    rw [hfac, Category.assoc, ← Category.assoc (inv e), IsIso.inv_hom_id, Category.id_comp]
+
 end Cat41iv
+
+section Transport41iv
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★★「pre-step を通る分解」は圏同値で行き来する。 -/
+theorem factorsPre_map_iff (Ψ : C ≌ C₂)
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
+    FactorsPre P f g ↔ FactorsPre P₂ (Ψ.functor.map f) (Ψ.functor.map g) := by
+  constructor
+  · rintro ⟨ζ, hζ, hfac⟩
+    exact ⟨Ψ.functor.map ζ, hPS ζ hζ, by rw [hfac, Ψ.functor.map_comp]⟩
+  · rintro ⟨ζ', hζ', hfac⟩
+    obtain ⟨ζ, hζeq⟩ := Ψ.functor.map_surjective ζ'
+    refine ⟨ζ, hPS' ζ (by rw [hζeq]; exact hζ'), ?_⟩
+    refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hζeq, hfac]
+
+end Transport41iv
+
+section Cat41ivEnd
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+end Cat41ivEnd
 
 end ABC3.Found.FrdI
