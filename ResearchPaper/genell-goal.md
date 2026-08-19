@@ -11775,3 +11775,68 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**95 ブロック**(Arakelov 80 + Galois 15)。
+
+## §9-297 橋のスカラー両立を測り直した —— **1–3 → 5–15 ブロック**(過小、5 件目)
+
+§9-295 で「橋の自然性・スカラー両立は 1–3 ブロック」と測ったが、**過小だった**。
+
+### ★★★★★障害の正体 —— 加群構造が 2 つあり、`•` がどちらか一方でしか解決しない
+
+`(F.restrict V.ι).val.obj W` は
+- `Γ(V.toScheme, W)` 加群(mathlib の `restrictFunctor`、`appIso.inv` で捻ってある)
+- `Γ(X, V.ι ''ᵁ W)` 加群(我々の `Over V` 側)
+
+の**両方**である(台は同じ)。★`homMk` が生成するゴールは前者、
+`e.hom.app` の線形性(`map_smul`)は後者を要求する。
+
+★★試して落ちたもの(**5 手**):
+
+| 手 | 結果 |
+|---|---|
+| `hlin : e.app (c • x) = (appIso.inv c) • e.app x` を `have` | ★右辺の `•` が解決しない |
+| 同上を `*` で | ★同じ |
+| 適用側に型上書き `(e.app … : Γ(X,…))` | ★`*` の右項に伝播しない |
+| `homMk` にゴールを生成させる | ★★**ゴールは出た**が `rw [map_smul]` が噛まない |
+| `map_smul` を `have` で型推論させる | ★`SMul Γ(X,…) ((F.restrict V.ι).val.obj W)` が無い |
+
+★★★`homMk` に生成させる手(§9-296 の「5 つ目の逃げ道」)は**ゴールを出すところまで**は
+効いたが、**その先が塞がっている**——生成されたゴール自体が
+「解決しない側の綴り」を要求するからである。
+
+### ★★★★★★正しい道は**関手レベルの比較**である
+
+要するに、2 つの押し出しを比べればよい:
+
+    mathlib: SheafOfModules.pushforward (F := V.ι.opensFunctor) ⟨whiskerRight (appIso.inv) _⟩
+    我々:    PresheafOfModules.pushforward₀OfCommRingCat (Over.forget V) X.presheaf
+
+★底の関手 `V.Opens ⥤ X.Opens` と `Over V ⥤ X.Opens` は
+**同値 `V.Opens ≌ Over V`** で移り合う。
+★★環の射のずれ(`appIso.inv`)は `pushforwardCongr` が吸収する。
+
+| 要る道具 | 在庫 |
+|---|---|
+| `V.Opens ≌ Over V` | ★**自作**(mathlib に無い) |
+| `SheafOfModules.pushforwardCongr` | ★在る |
+| `pushforwardNatIso` | ★在る |
+| `SheafOfModules.pushforwardComp` | ★在る |
+
+★★★見積もり **5–15 ブロック**。★元素レベルで押すのをやめ、関手レベルで組む。
+
+### ★★測定の記録(5 件目の過小)
+
+| 見積もり | 実績 |
+|---|---|
+| G1 の葉 6–12 | ★15–40 に再測定 |
+| B2 の hcompat | ★当たり |
+| C3 全体 20–40 | ★継続中 |
+| 橋 3–8 → 実は切断は `rfl` | ★**過大**(良い方向) |
+| ★橋のスカラー両立 1–3 | ★★**5–15 に再測定** |
+
+★★★**「切断が `rfl` で一致する」ことと「加群として同型」は別である**——
+台が同じでも**構造が 2 つ**あれば、元素レベルの証明は書けない。
+★これは[[ring-instance-two-paths]]の最も強い形である。
+
+### この区間の集計
+
+★**95 ブロック**(Arakelov 80 + Galois 15)。測定のみの節。

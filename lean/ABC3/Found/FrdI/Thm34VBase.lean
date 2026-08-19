@@ -285,6 +285,32 @@ def basePsiSlice.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 𝒟 のスライスの間の共役関手",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★7. ★★★★★同型の同定は**終対象**から出る —— 選択が要らない
+
+★★★`Over X` の対象 `f : Y ⟶ X` は **`f` が同型 ⟺ 終対象**である。
+★`basePsiSlice` は圏同値 2 つと `Over.post` の合成なので**終対象を保つ**。
+★★★したがって `θ : Base B ≅ Base A` を `Over (Base A)` の対象と見ると、
+その像の構造射は**自動的に同型**になり、
+`Base (ΨB) ≅ Base (ΨA)` の同定が**選択なしで**得られる。
+
+★★これが `preStepSpan` の取り方への依存を消す鍵である。 -/
+
+/-- ★`Over X` の対象は構造射が同型なら `Over.mk (𝟙 X)` と同型。 -/
+noncomputable def overIsoMkId {X : D} (Z : Over X) (h : IsIso Z.hom) : Z ≅ Over.mk (𝟙 X) :=
+  Over.isoMk (@asIso _ _ _ _ Z.hom h) (Category.comp_id Z.hom)
+
+/-- ★★逆に `Over.mk (𝟙 X)` と同型なら構造射は同型。 -/
+theorem over_isIso_hom_of_iso {X : D} {Z : Over X} (e : Z ≅ Over.mk (𝟙 X)) :
+    IsIso Z.hom := by
+  have h2 : Z.hom = e.hom.left := (Over.w e.hom).symm.trans (Category.comp_id _)
+  rw [h2]
+  exact (Over.forget X).map_isIso e.hom
+
+def overIsoMkId.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Over X で構造射が同型 ⟺ 終対象と同型",
+    sectionId := "frdi-thm-3-4" }
+
 end PlBkPsi
 
 end ABC3.Found.FrdI
