@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.FrdI.Prop44Core
 import ABC3.Found.FrdI.Prop44Phi
+import ABC3.Found.FrdI.MonoidTransport
 import Mathlib.CategoryTheory.Limits.Final
 
 /-!
@@ -38,6 +39,7 @@ import Mathlib.CategoryTheory.Limits.Final
 namespace ABC3.Found.FrdI
 
 open CategoryTheory CategoryTheory.Limits
+open scoped NNReal
 
 universe v u w u2 v2
 
@@ -872,6 +874,116 @@ theorem phiBiratAt_hull
 def phiBiratAt_hull.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 86,
     item := "Remark 4.5.1 — Φ^birat は等長化 hull を通って移る",
+    sectionId := "frdi-remark-4-5-1" }
+
+/-! ## ★16. 組み上げ —— `Definition 4.5, (iii), (a)` の第 2 条
+
+原文 (FrdI p.86):
+> Definition 2.4, (i), (d)]. We shall say that A is rational if there exists a pull-back
+-/
+
+/-- ★単系同型から `Gp` の全単射。 -/
+theorem gpMap_bijective_of_addEquiv {M₁ N₁ : Type w} [AddCommMonoid M₁] [AddCommMonoid N₁]
+    (e : M₁ ≃+ N₁) : Function.Bijective (gpMap M₁ e.toAddMonoidHom) := by
+  have h1 : (e.symm.toAddMonoidHom).comp (e.toAddMonoidHom) = AddMonoidHom.id M₁ :=
+    AddMonoidHom.ext fun z => e.symm_apply_apply z
+  have h2 : (e.toAddMonoidHom).comp (e.symm.toAddMonoidHom) = AddMonoidHom.id N₁ :=
+    AddMonoidHom.ext fun z => e.apply_symm_apply z
+  have key : (gpMap N₁ e.symm.toAddMonoidHom).comp (gpMap M₁ e.toAddMonoidHom)
+      = AddMonoidHom.id (Gp M₁) := by rw [← gpMap_comp, h1, gpMap_id]
+  have key2 : (gpMap M₁ e.toAddMonoidHom).comp (gpMap N₁ e.symm.toAddMonoidHom)
+      = AddMonoidHom.id (Gp N₁) := by rw [← gpMap_comp, h2, gpMap_id]
+  exact Function.bijective_iff_has_inverse.mpr ⟨gpMap N₁ e.symm.toAddMonoidHom,
+    fun z => congrArg (fun f : Gp M₁ →+ Gp M₁ => f z) key,
+    fun z => congrArg (fun f : Gp N₁ →+ Gp N₁ => f z) key2⟩
+
+include F G in
+/-- ★★★★★**(a) の第 2 条** —— rational 型は `𝒞^istr` へ移る。
+
+★引き戻しは `istr_rational_pullBack`、`Φ^birat` は `phiBiratAt_hull` ＋
+`mem_phiBiratAt_istr_of`、`Supp` は `mem_supp_map` で運ぶ。 -/
+theorem istr_rationalType
+    {ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0}
+    (Hperf : ∀ Y : D, IsPerfFactorialWith (Φ.val Y) (ι Y))
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (h : IsOfRationalType C P G ι) :
+    IsOfRationalType (Istr P) (istrPre P F) (istr_frobenioid P F G) ι := by
+  intro A
+  obtain ⟨B, φ, hpb, hsr⟩ := h A.obj
+  obtain ⟨ψ, hψ⟩ := istr_rational_pullBack P G F φ hpb
+  refine ⟨hullIstr P F B, ψ, hψ, ?_⟩
+  haveI hbi : IsIso (P.Base (hullMap P F B)) := (hullMap_spec P F B).2.1.2
+  set eiso : (P.toElem.obj B).base ≅ (P.toElem.obj (hullObj P F B)).base :=
+    asIso (P.Base (hullMap P F B)) with heiso
+  set e : Φ.val (P.toElem.obj (hullObj P F B)).base ≃+ Φ.val (P.toElem.obj B).base :=
+    AddEquiv.ofBijective (Φ.map eiso.hom) (Φ.map_bijective_of_iso eiso) with he
+  intro p
+  obtain ⟨a₁, b₁, hmem, hpa, hpb'⟩ := hsr (primeEquiv e p)
+  refine ⟨e.symm a₁, e.symm b₁, ?_, ?_, ?_⟩
+  · -- `Φ^birat` の元であること
+    obtain ⟨y, hy, hxy⟩ := phiBiratAt_hull P G F hfn B hmem
+    have hgb : biratBase ((toBiratCat P G).map (hullMap P F B)) = P.Base (hullMap P F B) :=
+      biratBase_toHomBirat (P := P) (G := G) (hullMap P F B)
+    rw [hgb] at hxy
+    have hey : gpMap _ e.toAddMonoidHom y = toGp _ a₁ - toGp _ b₁ := hxy.symm
+    have hinj := (gpMap_bijective_of_addEquiv e).1
+    have hgoal : y = toGp _ (e.symm a₁) - toGp _ (e.symm b₁) := by
+      refine hinj ?_
+      rw [hey, map_sub, gpMap_toGp, gpMap_toGp]
+      show toGp _ a₁ - toGp _ b₁ = toGp _ (e (e.symm a₁)) - toGp _ (e (e.symm b₁))
+      rw [e.apply_symm_apply, e.apply_symm_apply]
+    have hres := mem_phiBiratAt_istr_of P G F (hullIstr P F B) hy
+    rw [hgoal] at hres
+    exact hres
+  · -- `Supp` の条件(正)
+    refine (mem_supp_map (Hperf _) (Hperf _) e (Pf.mk (e.symm a₁) 1) p).mpr ?_
+    show primeEquiv e p ∈ Supp (factorMap (ι _) (Pf.mk (e (e.symm a₁)) 1))
+    rw [e.apply_symm_apply]
+    exact hpa
+  · -- `Supp` の条件(負)
+    intro hcon
+    refine hpb' ?_
+    have := (mem_supp_map (Hperf _) (Hperf _) e (Pf.mk (e.symm b₁) 1) p).mp hcon
+    show primeEquiv e p ∈ Supp (factorMap (ι _) (Pf.mk b₁ 1))
+    rw [← e.apply_symm_apply b₁]
+    exact this
+
+def istr_rationalType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — rational 型は 𝒞^istr で保たれる",
+    sectionId := "frdi-remark-4-5-1" }
+
+/-! ## ★17. ★★★★★★`Remark 4.5.1` —— rationally standard 型が `𝒞^istr` で保たれる
+
+原文 (FrdI p.86):
+> that if C is of rationally standard type (respectively, of standard type), then so is
+-/
+
+include G in
+/-- ★★★★★★**[FrdI] Remark 4.5.1** —— `𝒞` が rationally standard 型なら `𝒞^istr` もそうである。
+
+★4 条の内訳:
+
+| 条 | 宣言 |
+|---|---|
+| (a) birationally Frobenius-normalized 型 | `istr_biratFrobNormalizedType` |
+| (a) rational 型 | `istr_rationalType` |
+| (a) standard 型 | `istr_standardType`(在庫) |
+| (b) `(𝒞^un-tr)^birat` の Frobenius-compact 対象 | `istr_unTrBiratCompact`(在庫) |
+-/
+theorem istr_rationallyStandardType
+    {ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → ℝ≥0}
+    (Hperf : ∀ Y : D, IsPerfFactorialWith (Φ.val Y) (ι Y))
+    (h : IsOfRationallyStandardType P G ι) :
+    IsOfRationallyStandardType (istrPre P G.core)
+      (istr_frobenioid P G.core G) ι where
+  biratFrobNormalized := istr_biratFrobNormalizedType P G G.core h.biratFrobNormalized
+  rational := istr_rationalType P G G.core Hperf h.biratFrobNormalized h.rational
+  standard := istr_standardType (F := G.core) h.standard
+  unTrBiratCompact := istr_unTrBiratCompact (F := G.core) G h.unTrBiratCompact
+
+def istr_rationallyStandardType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86, item := "Remark 4.5.1",
     sectionId := "frdi-remark-4-5-1" }
 
 end ABC3.Found.FrdI
