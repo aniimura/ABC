@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TranslateAutAll
+import ABC3.Found.GaloisRep.GenericNotTorsion
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -29,7 +29,7 @@ import ABC3.Found.GaloisRep.PointHom
 | **全単射性**(2 等分点以外) | `Found/GaloisRep/TranslateEquiv.lean`(第 120) | ✅ |
 | **2 等分点での自己同型** | `Found/GaloisRep/TranslateAutAll.lean`(第 124) | ✅ |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
-| **生成点が捻れ点でないこと** | 本ファイル | ★**葉** |
+| **生成点が捻れ点でないこと** | `Found/GaloisRep/GenericNotTorsion.lean`(第 125) | ✅ |
 | **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
 
 ★超越性の証明は **`−Q` での 1 点評価**だけで済んだ——
@@ -54,23 +54,6 @@ noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : 
   algebraMap W.CoordinateRing W.FunctionField
     (CoordinateRing.mk W (Polynomial.C p))
 
-/-! ## ★★★★★葉 2a —— 生成点は捩れ点でない -/
-
-/-- ★★★★★★**生成点は捩れ点ではない**。
-
-原文 (GenEll p.19):
-> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
-
-★第 118 ブロックの `exists_mulByNHom` はこれを仮定として受けている。
-★★証明の道: `n` 等分点の `x` 座標は **`F` の代数閉包の元**である
-(曲線が `F` 上定義されているから)。★★★我々は `E[n] ≃ (ℤ/n)²`(第 65-72、**Found に済**)を
-持つので、`E[n](F̄)` と `E[n](F(W)‾)` がどちらも `n²` 個であり、
-`Point.map` の単射性から**両者は一致する**。
-★★★★すると `coordX` が `F` 上代数的になり、第 116 の `coordX_transcendental` に矛盾する。 -/
-theorem genericPoint_not_torsion (W : WeierstrassCurve.Affine F) [W.IsElliptic]
-    (n : ℕ) (hn : 1 ≤ n) : n • genericPoint W ≠ 0 := by
-  sorry
-
 /-! ## ★★★★★葉 2b —— 乗法 `[n]` -/
 
 /-- ★★★★★**乗法 `[n]` の関数体への引き戻し**。
@@ -91,21 +74,6 @@ def polyToFF.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(F[X] の元を関数体に送る写像)",
     sectionId := "genell-thm-3-8" }
-
-def genericPoint_not_torsion.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(Weil 対の構成——生成点が捩れ点でないこと)",
-    sectionId := "genell-thm-3-8" }
-
-def genericPoint_not_torsion.needs : List ProofObligation :=
-  [ .implicitStep
-      "★★★★`E[n] ≃+ (ℤ/n)²`(第 65-72 ブロック、**Found に済**)がそのまま使える。代数閉体上で `#E[n] = n²` であることが両側で効く(0 ブロック)" 19,
-    .implicitStep
-      "★★`Point.map` が単射であること(mathlib の `Point.map_injective`)と、有限集合の間の単射が同数なら全単射であること(5-10 ブロック)" 19,
-    .implicitStep
-      "★★★`coordX` が `F` 上超越的であること(第 116 `coordX_transcendental`、**Found に済**)が矛盾を出す(0 ブロック)" 19,
-    .implicitStep
-      "★代数閉包の取り扱い——`F(W)` の代数閉包の中で `F̄` を見る。mathlib の `AlgebraicClosure` と `IsAlgClosed` の橋が要る(5-15 ブロック)" 19 ]
 
 def exists_mulByNPullback.src : Source :=
   { paper := "GenEll", pdfPage := 19,
