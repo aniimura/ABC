@@ -300,6 +300,61 @@ def divEquivalent_map.src : ABC3.Meta.Source :=
     item := "Theorem 4.9 — Ψ は Div-equivalence を保つ",
     sectionId := "frdi-thm-4-9" }
 
+/-! ## ★5. `Theorem 4.9` 本体 —— 関手の同型 -/
+
+variable (P) in
+/-- ★`Φ` を `𝒞` の上の関手と見たもの。
+
+原文 (FrdI p.88):
+> [where we regard, for i = 1, 2, the functor Φi : Di → Mon as a functor on Ci, by -/
+def phiOnC : Cᵒᵖ ⥤ AddCommMonCat.{w} := P.proj.op ⋙ Φ.functor
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Theorem 4.9** —— `Ψ_Φ : Φ₁ ≅ Φ₂`(`Ψ` の上に乗る関手の同型)。 -/
+noncomputable def psiPhi (Ψ : C ≌ C₂) (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g) :
+    phiOnC P ≅ Ψ.functor.op ⋙ phiOnC P₂ :=
+  NatIso.ofComponents
+    (fun X =>
+      { hom := AddCommMonCat.ofHom (divMap Ψ G hiso hdivS hOTri X.unop)
+        inv := AddCommMonCat.ofHom
+          (divEquiv Ψ G G₂ hiso hiso₂ hdivS hdivS₂ hOTri hOTri' X.unop).symm.toAddMonoidHom
+        hom_inv_id := AddCommMonCat.hom_ext (AddMonoidHom.ext (fun x =>
+          (divEquiv Ψ G G₂ hiso hiso₂ hdivS hdivS₂ hOTri hOTri' X.unop).symm_apply_apply x))
+        inv_hom_id := AddCommMonCat.hom_ext (AddMonoidHom.ext (fun y =>
+          (divEquiv Ψ G G₂ hiso hiso₂ hdivS hdivS₂ hOTri hOTri' X.unop).apply_symm_apply y)) })
+    (fun {_X _Y} f => AddCommMonCat.hom_ext (AddMonoidHom.ext (fun x =>
+      divMapNat_all (Ψ := Ψ) (G := G) (hiso := hiso) (hdivS := hdivS) (hOTri := hOTri)
+        F hperfM hdeg f.unop x)))
+
+/-- ★★★★★★**[FrdI] Theorem 4.9** —— 条なしの locator。
+
+| 主張 | 実装 |
+|---|---|
+| `Ψ_Φ : Φ₁ ≅ Φ₂`(関手の同型) | `psiPhi` |
+| `Ψ` の上に乗る(自然性) | `divMapNat_all` |
+| `Ψ_Prime`(`Theorem 4.2, (ii)`)との両立 | ★`psiPrime_eq_primeEquiv`(`Thm42Order.lean`) |
+
+★★逸脱 (B)(`hdivS`: `Div : 𝒪^▷(A) ↠ Φ(A)`、`prop_4_4.src` で開示済)を使う。
+そのおかげで原文が twin-primary steps で示す
+「right-hand ＝ left-hand」が**自明**になっている。 -/
+def psiPhi.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Theorem 4.9",
+    sectionId := "frdi-thm-4-9" }
+
 end PsiPhi
 
 end ABC3.Found.FrdI
