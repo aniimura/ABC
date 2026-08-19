@@ -188,6 +188,7 @@ import ABC3.Found.Arakelov.APicWitness
 import ABC3.Found.Arakelov.ADegEmb
 import ABC3.Found.Arakelov.ADegBase
 import ABC3.Found.Arakelov.AHeightWitness
+import ABC3.Found.Arakelov.PicSpecWitness
 import ABC3.Found.Arakelov.ArcTopology
 import ABC3.Found.Arakelov.ArcFunctorial
 import ABC3.Found.Arakelov.ArcTopologyAffineEq

@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm42Prop41iv
+import ABC3.Found.FrdI.Thm42Primary
 
 /-!
 # [FrdI] Theorem 4.2, (i) —— `Proposition 4.1, (v)` の側(コスライス)
@@ -716,6 +717,88 @@ theorem primaryOutIff_extend (Ψ : C ≌ C₂)
 def primaryOutIff_extend.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 79,
     item := "Theorem 4.2, (i) — 両向きの一段の拡張（v 側）",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★★★★★★★連鎖 —— すべての対象へ届かせる
+
+原文 (FrdI p.79):
+> in the case of a primary step from B1, D1 = B1; in the case of a primary step to B1,
+
+★`A₁`(Frobenius-trivial、入る)→〔(iv)〕→ `B`(入る)→〔橋〕→ `B`(出る)
+→〔(v)〕→ `C`(出る)→〔橋〕→ `C`(入る)。 -/
+
+/-- ★★★★★★★**[FrdI] Theorem 4.2, (i)** ——
+`Ψ` は **すべての対象へ入る pre-step** について primary 性を両向きに移す。 -/
+theorem primaryInIff_all (Ψ : C ≌ C₂)
+    (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (F₁ : FrobenioidCore P) (F₂ : FrobenioidCore P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hpf : ∀ Y : C, ∃ ι, IsPerfFactorialWith (Φ.val (P.toElem.obj Y).base) ι)
+    (hpf₂ : ∀ Y : C₂, ∃ ι, IsPerfFactorialWith (Φ₂.val (P₂.toElem.obj Y).base) ι)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hperfM₂ : ∀ Y : C₂, IsPerfectMonoid (Φ₂.val (P₂.toElem.obj Y).base))
+    (hCA : ∀ {X Y : C} (f : X ⟶ Y), IsCoAngular P f → IsCoAngular P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hFT : ∀ {X Y : C} (f : X ⟶ Y), IsFrobeniusType P f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hFT' : ∀ {X Y : C} (f : X ⟶ Y), IsFrobeniusType P₂ (Ψ.functor.map f) →
+      IsFrobeniusType P f)
+    (hST : ∀ {X Y : C} (f : X ⟶ Y), IsStep P f → IsStep P₂ (Ψ.functor.map f))
+    (hST' : ∀ {X Y : C} (f : X ⟶ Y), IsStep P₂ (Ψ.functor.map f) → IsStep P f)
+    (hdeg : ∀ {X Y : C} (f : X ⟶ Y), P₂.degFr (Ψ.functor.map f) = P.degFr f)
+    (hnd : MonoidOn.IsNonDilatingOn Φ) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    (hngl : ∀ X : C, ¬ IsGroupLikeObj P X) (hngl₂ : ∀ X : C₂, ¬ IsGroupLikeObj P₂ X)
+    (Cc : C) {E : C} (ϵ : E ⟶ Cc) (hsϵ : IsPreStep P ϵ) :
+    IsPrimaryElt (P.Div ϵ) ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ)) := by
+  obtain ⟨A₁, hft, ⟨eiso⟩⟩ := F₁.baseSurj ((P.toElem.obj Cc).base)
+  obtain ⟨ζ, hζd, hζb⟩ := hft
+  obtain ⟨B, α, γ, hα, hγ, -⟩ := F₁.preStepSpan A₁ Cc eiso.hom inferInstance
+  obtain ⟨ι₁, H₁⟩ := hpf A₁
+  obtain ⟨ι₁₂, H₁₂⟩ := hpf₂ (Ψ.functor.obj A₁)
+  obtain ⟨ιB, HB⟩ := hpf B
+  obtain ⟨ιB₂, HB₂⟩ := hpf₂ (Ψ.functor.obj B)
+  -- ★段 1: `A₁` で基底
+  have hbase : ∀ (E' : C) (ϵ' : E' ⟶ A₁), IsPreStep P ϵ' →
+      (IsPrimaryElt (P.Div ϵ') ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ'))) := by
+    intro E' ϵ' h'
+    exact primaryInIff_base G G₂ F₂ Ψ hPS hPS' hFT hFT' hiso hiso₂
+      (fun n => ((ζ n : End A₁) : A₁ ⟶ A₁)) hζd
+      (fun n => isDivIdentity_of_isBaseIdentity P (hζb n).1)
+      (fun n => (hζb n).2)
+      (fun n => by rw [hdeg]; exact hζd n)
+      (fun n => divIdentity_map_of_family Ψ hPS hPS' F₁ G hiso hnd F₂ G₂ hiso₂ hnd₂
+        (hngl A₁) (hngl₂ _) ζ hζd
+        (fun m => ⟨isDivIdentity_of_isBaseIdentity P (hζb m).1, (hζb m).2⟩) n)
+      (hperfM A₁) (hperfM₂ _) E' ϵ' h'
+  -- ★段 2: (iv) で `B` へ
+  have hBin : ∀ (E' : C) (ϵ' : E' ⟶ B), IsPreStep P ϵ' →
+      (IsPrimaryElt (P.Div ϵ') ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ'))) := by
+    intro E' ϵ' h'
+    exact primaryInIff_extend Ψ G G₂ hiso hiso₂ hdivS hdivS₂ hCA hPS hPS' hST hST'
+      α hα H₁ (hperfM A₁) (P.divisorial _) H₁₂ (hperfM₂ _) (P₂.divisorial _)
+      hbase ϵ' h'
+  -- ★段 3: 橋で `B` の出る側へ
+  have hBout : ∀ (B' : C) (δ' : B ⟶ B'), IsPreStep P δ' →
+      (IsPrimaryElt (P.Div δ') ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map δ'))) :=
+    fun B' δ' h' => primaryOut_iff_of_primaryIn Ψ.functor G hiso hdivS hBin δ' h'
+  -- ★段 4: (v) で `Cc` の出る側へ
+  have hCout : ∀ (B' : C) (δ' : Cc ⟶ B'), IsPreStep P δ' →
+      (IsPrimaryElt (P.Div δ') ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map δ'))) := by
+    intro B' δ' h'
+    exact primaryOutIff_extend Ψ G G₂ hiso hiso₂ hdivS hdivS₂ hCA hPS hPS' hST hST'
+      γ hγ HB (hperfM B) (P.divisorial _) HB₂ (hperfM₂ _) (P₂.divisorial _)
+      hBout δ' h'
+  -- ★段 5: 橋で `Cc` の入る側へ
+  exact primaryIn_iff_of_primaryOut Ψ.functor G hiso hdivS hPS hCout ϵ hsϵ
+
+def primaryInIff_all.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — Ψ は primary step を保つ（すべての対象）",
     sectionId := "frdi-thm-4-2" }
 
 end Bridge
