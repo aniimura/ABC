@@ -204,6 +204,29 @@ structure HermitianMetricData where
     logMetric X _ (tensorMetric X L M mL mM) p
       = logMetric X L mL p + logMetric X M mM p
 
+/-! ### ★★★★★2026-08-19 の測定——**上の 9 欄では計量と直線束が結び付かない**
+
+`Check/Arakelov/MetricNondegenerate.lean` で**機械確認**した:
+
+    Metric X L := { g : X^arc → ℝ // g は連続 }        (★`L` が現れない)
+
+が 9 欄すべてを満たす。★★しかもこれは**嘘の witness ではない**
+——「`L` 上の連続計量全体は `C(X^arc, ℝ)` 上の捻れ集合」は真であり、
+各 `L` に基準計量を 1 つ選べば `Metric X L ≃ C(X^arc, ℝ)` は成り立つ。
+
+★★★したがって `scale` / `tensorMetric` / `IsConjCompatible` の形の欄を
+**いくら足しても検出できない**——どの欄も基準の選択と両立するからである。
+
+★★★★★**結び付けるには「`L` の切断 `s` のノルム `|s|_L`」が要る**。
+それには `X^arc` の点で切断を**評価**できなければならず
+（`|f·s| = |f|·|s|`、かつ `s(p) ≠ 0` なら `|s|(p) ≠ 0`）、
+これは可逆層の**解析化**そのものである。
+
+★★★★★★つまり「(C3) は複素解析空間で塞がれている」は
+**推測ではなく測定結果**である。★欄を足すのは解析化が入ってからにする
+（今足すと、満たせない欄を抱えたまま Interface が設計不能になる）。
+-/
+
 def HermitianMetricData.waiting : WaitingFor :=
   { what := "(C3) 可逆層の解析化 L^arc と、その上の ι_X-両立な hermitian 計量"
     trackB := "Found/Arakelov — ★(B1) の可逆層に従属する。★★**ι_X との両立**は我々が既に定式化し(`Found/GenEll/ArchConj.lean` の `IsConjInvariant`)、**それが要る理由も測った**——`v.embedding` は `w.embedding|_F` **またはその共役**なので、両立を課さないと高さが X(ℚ̄) 上で well-defined にならない(`ArchBaseChange.lean`、2026-08-17)。★連続性と加法性は因子表示では既に扱えている" }

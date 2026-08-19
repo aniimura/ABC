@@ -300,4 +300,147 @@ def biratIstrMap_bijective.src : ABC3.Meta.Source :=
     sectionId := "frdi-remark-4-5-1" }
 
 
+/-! ## ★7. 合成の保存 —— `Rmk451Birat.lean` の `biratPull_alpha_transport` と同型
+
+★★`BiratCat` の合成は Ore 四角形(`biratPull*`)を `choose` で取るので、
+**両側で選択が違いうる**。★しかし添字圏が**細い**(`idxBirat_hom_ext`)ので、
+共通の上界へ送れば 2 つの選択は一致する。 -/
+
+set_option maxHeartbeats 1000000 in
+include F G in
+/-- ★★★引き戻しの `α` 成分の移送 —— `γ` 成分の一致から `α` 成分の一致が出る。
+
+★`W` の構造射が **mono**(pre-step)なので消約できる。 -/
+theorem biratPullAlpha_transport {A B : Istr P}
+    (Z : IdxBirat (istrPre P F) (istr_frobenioid P F G) A) (φ : Z.unop.left.obj ⟶ B)
+    (W : IdxBirat (istrPre P F) (istr_frobenioid P F G) B)
+    {V : IdxBirat P G A.obj}
+    (c : (idxIstr P G F A).obj (biratPullIdx (istr_frobenioid P F G).core Z φ W) ⟶ V)
+    (c' : biratPullIdx G.core ((idxIstr P G F A).obj Z) φ.hom
+      ((idxIstr P G F B).obj W) ⟶ V)
+    (hkey : c.unop.left.hom ≫ (biratPullGamma (istr_frobenioid P F G).core Z φ W).hom
+        = c'.unop.left.hom ≫ biratPullGamma G.core ((idxIstr P G F A).obj Z) φ.hom
+            ((idxIstr P G F B).obj W)) :
+    c.unop.left.hom ≫ (biratPullAlpha (istr_frobenioid P F G).core Z φ W).hom
+      = c'.unop.left.hom ≫ biratPullAlpha G.core ((idxIstr P G F A).obj Z) φ.hom
+            ((idxIstr P G F B).obj W) := by
+  haveI hb : Mono ((idxIstr P G F B).obj W).unop.hom.hom :=
+    G.core.preStepMono _ ((idxIstr P G F B).obj W).unop.hom.property.2
+  refine (cancel_mono ((idxIstr P G F B).obj W).unop.hom.hom).mp ?_
+  have h1 := biratPull_sq (istr_frobenioid P F G).core Z φ W
+  have h2 := biratPull_sq G.core ((idxIstr P G F A).obj Z) φ.hom ((idxIstr P G F B).obj W)
+  have e1 : (biratPullAlpha (istr_frobenioid P F G).core Z φ W).hom
+      ≫ ((idxIstr P G F B).obj W).unop.hom.hom
+      = (biratPullGamma (istr_frobenioid P F G).core Z φ W).hom ≫ φ.hom :=
+    (congrArg (fun t : biratPullObj (istr_frobenioid P F G).core Z φ W ⟶ B =>
+      t.hom) h1).symm
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (fun t => c.unop.left.hom ≫ t) e1) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (fun t => t ≫ φ.hom) hkey) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (fun t => c'.unop.left.hom ≫ t) h2) ?_
+  exact (Category.assoc _ _ _).symm
+
+set_option maxHeartbeats 1000000 in
+include F G in
+/-- ★★★代表元での合成の保存。★細さ(`idxBirat_hom_ext`)がすべてを潰す。 -/
+theorem biratIstrMap_comp_mk {A B E : Istr P}
+    (Z : IdxBirat (istrPre P F) (istr_frobenioid P F G) A) (φ : Z.unop.left.obj ⟶ B)
+    (W : IdxBirat (istrPre P F) (istr_frobenioid P F G) B) (ψ : W.unop.left.obj ⟶ E) :
+    HomBirat.mk ((idxIstr P G F A).obj
+        (biratPullIdx (istr_frobenioid P F G).core Z φ W))
+      ((biratPullAlpha (istr_frobenioid P F G).core Z φ W ≫ ψ).hom)
+    = HomBirat.mk
+        (biratPullIdx G.core ((idxIstr P G F A).obj Z) φ.hom ((idxIstr P G F B).obj W))
+        (biratPullAlpha G.core ((idxIstr P G F A).obj Z) φ.hom
+          ((idxIstr P G F B).obj W) ≫ ψ.hom) := by
+  refine HomBirat.sound _
+    (IsFiltered.leftToMax ((idxIstr P G F A).obj
+      (biratPullIdx (istr_frobenioid P F G).core Z φ W))
+      (biratPullIdx G.core ((idxIstr P G F A).obj Z) φ.hom ((idxIstr P G F B).obj W)))
+    (IsFiltered.rightToMax ((idxIstr P G F A).obj
+      (biratPullIdx (istr_frobenioid P F G).core Z φ W))
+      (biratPullIdx G.core ((idxIstr P G F A).obj Z) φ.hom ((idxIstr P G F B).obj W))) ?_
+  have hkey := congrArg (fun t => t.unop.left.hom)
+    (idxBirat_hom_ext
+      ((idxIstr P G F A).map (biratPullHom (istr_frobenioid P F G).core Z φ W)
+        ≫ IsFiltered.leftToMax _ _)
+      (biratPullHom G.core ((idxIstr P G F A).obj Z) φ.hom ((idxIstr P G F B).obj W)
+        ≫ IsFiltered.rightToMax _ _))
+  have hmid := biratPullAlpha_transport P G F Z φ W _ _ hkey
+  simp only [← Category.assoc]
+  exact Eq.trans (Category.assoc _ _ _).symm
+    (congrArg (fun t => t ≫ ψ.hom) hmid)
+
+set_option maxHeartbeats 1000000 in
+include F G in
+/-- ★★★★`biratIstrMap` は合成を保つ。 -/
+theorem biratIstrMap_comp {A B E : Istr P}
+    (f : HomBirat (istrPre P F) (istr_frobenioid P F G) A B)
+    (g : HomBirat (istrPre P F) (istr_frobenioid P F G) B E) :
+    biratIstrMap P G F A E
+        (compBirat (istrPre P F) (istr_frobenioid P F G)
+          (istr_frobenioid P F G).core f g)
+      = compBirat P G G.core (biratIstrMap P G F A B f) (biratIstrMap P G F B E g) := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratIstrMap_mk, biratIstrMap_mk, biratIstrMap_mk, compBirat_mk]
+  exact biratIstrMap_comp_mk P G F Z φ W ψ
+
+include F G in
+/-- ★`biratIstrMap` は恒等を保つ。 -/
+theorem biratIstrMap_id (A : Istr P) :
+    biratIstrMap P G F A A (toHomBirat (𝟙 A)) = toHomBirat (𝟙 A.obj) := by
+  show biratIstrMap P G F A A
+      (HomBirat.mk (idxBiratOne (istrPre P F) (istr_frobenioid P F G) A) (𝟙 A)) = _
+  rw [biratIstrMap_mk]
+  rfl
+
+def biratIstrMap_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — 双有理化の比較は合成を保つ",
+    sectionId := "frdi-remark-4-5-1" }
+
+/-! ## ★8. 比較関手 —— `(𝒞^istr)^birat ⥤ 𝒞^birat`
+
+★★これは**充満忠実**であり(`biratIstrMap_bijective`)、
+`Base`・`degFr` を保つ。★対象は isotropic なものに限られるので圏同値ではないが、
+**`End` の単系同型**が立つので ∀ 条件も ∃ 条件も両向きに降りる。 -/
+
+/-- ★★★★**比較関手** —— `(𝒞^istr)^birat ⥤ 𝒞^birat`。 -/
+noncomputable def biratIstrFunctor :
+    BiratCat (istrPre P F) (istr_frobenioid P F G) ⥤ BiratCat P G where
+  obj X := (show Istr P from X).obj
+  map {A B} f := biratIstrMap P G F A B f
+  map_id A := biratIstrMap_id P G F A
+  map_comp f g := biratIstrMap_comp P G F f g
+
+instance biratIstrFunctor_full : (biratIstrFunctor P G F).Full where
+  map_surjective {A B} f := (biratIstrMap_bijective P G F A B).2 f
+
+instance biratIstrFunctor_faithful : (biratIstrFunctor P G F).Faithful where
+  map_injective {A B} {_ _} h := (biratIstrMap_bijective P G F A B).1 h
+
+include F G in
+/-- ★★`biratIstrMap` は Frobenius 次数を保つ。 -/
+theorem biratIstrMap_degFr (A B : Istr P)
+    (z : HomBirat (istrPre P F) (istr_frobenioid P F G) A B) :
+    biratDeg (biratIstrMap P G F A B z) = biratDeg z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratIstrMap_mk, biratDeg_mk, biratDeg_mk]
+
+include F G in
+/-- ★★`biratIstrMap` は底を保つ。 -/
+theorem biratIstrMap_base (A B : Istr P)
+    (z : HomBirat (istrPre P F) (istr_frobenioid P F G) A B) :
+    biratBase (biratIstrMap P G F A B z) = biratBase z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratIstrMap_mk, biratBase_mk, biratBase_mk, sliceBaseOf_eq, sliceBaseOf_eq]
+
+def biratIstrFunctor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — (𝒞^istr)^birat ⥤ 𝒞^birat は充満忠実で構造を保つ",
+    sectionId := "frdi-remark-4-5-1" }
+
 end ABC3.Found.FrdI
