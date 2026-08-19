@@ -547,6 +547,7 @@ import ABC3.Found.GaloisRep.AdicEval
 import ABC3.Found.GaloisRep.TateSpecialize
 import ABC3.Found.GaloisRep.TateDelta
 import ABC3.Found.GaloisRep.TateUnit
+import ABC3.Found.GaloisRep.TateJ
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
