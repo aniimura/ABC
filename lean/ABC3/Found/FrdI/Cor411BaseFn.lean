@@ -287,4 +287,60 @@ def cor_4_11_ii_square.src : ABC3.Meta.Source :=
 
 end ChainSquare
 
+/-! ## ★6. 前合成が関手の同型を反射する(一般補題) -/
+
+section Precomp
+
+universe v₃ u₃
+
+/-- ★★★★**本質的全射かつ充満な関手との前合成は関手の同型を反射する**。
+
+★★`Proposition 3.11, (iii)` の `projPrecompIso` は
+`𝒞 ≌ 𝒟 × 𝒩`(group-like 型)を要求するが、
+`Corollary 4.11, (ii)` の 1-一意性は**一般の `𝒞`** で要る。
+★`P.proj` は `baseSurj` で本質的全射、`Proposition 1.11, (i)` で充満なので、
+この一般補題で足りる。 -/
+noncomputable def natIsoOfWhiskerLeft {Cc : Type u2} [Category.{v2} Cc]
+    {Dd : Type u} [Category.{v} Dd] {Ee : Type u₃} [Category.{v₃} Ee]
+    (F : Cc ⥤ Dd) [F.EssSurj] [F.Full] {G G' : Dd ⥤ Ee}
+    (h : F ⋙ G ≅ F ⋙ G') : G ≅ G' := by
+  -- ★綴りを固定した成分族(`(F ⋙ G).obj` と `G.obj (F.obj _)` の食い違いを避ける)
+  let h₀ : ∀ Z : Cc, G.obj (F.obj Z) ≅ G'.obj (F.obj Z) := fun Z => h.app Z
+  have hh₀ : ∀ Z, (h₀ Z).hom = h.hom.app Z := fun _ => rfl
+  have hn : ∀ {Z W : Cc} (g : Z ⟶ W),
+      G.map (F.map g) ≫ (h₀ W).hom = (h₀ Z).hom ≫ G'.map (F.map g) := by
+    intro Z W g
+    rw [hh₀ W, hh₀ Z]
+    exact h.hom.naturality g
+  refine NatIso.ofComponents
+    (fun X => (G.mapIso (F.objObjPreimageIso X)).symm ≪≫ h₀ (F.objPreimage X)
+      ≪≫ G'.mapIso (F.objObjPreimageIso X)) (fun {X Y} f => ?_)
+  set pX := F.objPreimage X with hpX
+  set pY := F.objPreimage Y with hpY
+  set eX := F.objObjPreimageIso X with heX
+  set eY := F.objObjPreimageIso Y with heY
+  have hnat : G.map (eX.hom ≫ f ≫ eY.inv) ≫ (h₀ pY).hom
+      = (h₀ pX).hom ≫ G'.map (eX.hom ≫ f ≫ eY.inv) := by
+    have hg := hn (F.preimage (eX.hom ≫ f ≫ eY.inv))
+    rwa [F.map_preimage] at hg
+  rw [G.map_comp, G.map_comp, G'.map_comp, G'.map_comp] at hnat
+  show G.map f ≫ (G.map eY.inv ≫ (h₀ pY).hom ≫ G'.map eY.hom)
+    = (G.map eX.inv ≫ (h₀ pX).hom ≫ G'.map eX.hom) ≫ G'.map f
+  have hEY : G'.map eY.inv ≫ G'.map eY.hom = 𝟙 (G'.obj Y) := by
+    rw [← Functor.map_comp, eY.inv_hom_id, G'.map_id]
+  have hEX : G.map eX.hom ≫ G.map eX.inv = 𝟙 (G.obj (F.obj pX)) := by
+    rw [← Functor.map_comp, eX.hom_inv_id, G.map_id]
+  refine (cancel_epi (G.map eX.hom)).mp ?_
+  simp only [← Category.assoc] at hnat ⊢
+  rw [hnat]
+  simp only [Category.assoc, hEY, hEX, Category.comp_id]
+  exact (Category.id_comp _).symm
+
+def natIsoOfWhiskerLeft.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 94,
+    item := "Corollary 4.11, (ii) — 前合成が関手の同型を反射する",
+    sectionId := "frdi-cor-4-11" }
+
+end Precomp
+
 end ABC3.Found.FrdI
