@@ -2219,9 +2219,9 @@
      "id": "pf-qmodule",
      "title": "`Pf M` が ℚ≥0-半加群であること",
      "deps": [],
-     "status": "todo",
+     "status": "不要",
      "size": "中",
-     "note": "`Pf M`(perfection)は可除なので `q • x` が定義できる。`Module ℚ≥0 (Pf M)`(半環上の半加群)を入れる。★mathlib は `Semiring R` + `AddCommMonoid M` の `Module` を許すので型は通る。",
+     "note": "`Pf M`(perfection)は可除なので `q • x` が定義できる。`Module ℚ≥0 (Pf M)`(半環上の半加群)を入れる。★mathlib は `Semiring R` + `AddCommMonoid M` の `Module` を許すので型は通る。\n\n★★2026-08-20: **この節点は不要になった**。`Pf M ⊗_{ℚ≥0} ℝ≥0` を経由せず、**`ℕ` 上のテンソル** `ℝ≥0 ⊗_ℕ M` で直接書ける(`ℕ` 上なら任意の可換単系に対してテンソルが取れ、`Algebra ℕ ℝ≥0` から `Module ℝ≥0` が自動で付く)。",
      "lean": "",
      "decl": ""
     },
@@ -2231,11 +2231,11 @@
      "deps": [
       "pf-qmodule"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "note": "★**関手性が無料で付く**(`TensorProduct.map`)のが要点。`M → Pf M → M^rlf` の自然な射も付く。",
-     "lean": "",
-     "decl": ""
+     "note": "★**関手性が無料で付く**(`TensorProduct.map`)のが要点。`M → Pf M → M^rlf` の自然な射も付く。\n\n★★閉じた(2026-08-20): `RlfT M := ℝ≥0 ⊗_ℕ M`。関手性(`rlfMap` / `rlfMap_id` / `rlfMap_comp` / `rlfFunctor`)と全射の保存(`rlfMap_surjective`)まで。★`Module ℝ≥0` は基底変換で自動。",
+     "lean": "ABC3/Found/FrdI/Def24Rlf.lean",
+     "decl": "RlfT / rlfMap / rlfFunctor"
     },
     {
      "id": "rlf-agree",
@@ -2255,7 +2255,7 @@
      "deps": [],
      "status": "todo",
      "size": "★大",
-     "note": "`MonoidOn` の条件 (a) に要る。`f : M ↪ N` から `f ⊗ id : M^rlf ↪ N^rlf`。★半環上の平坦性は mathlib に無い可能性が高い。★迂回: perf-factorial なら両者とも自由なので、基底の像で直接示せるかもしれない。",
+     "note": "`MonoidOn` の条件 (a) に要る。`f : M ↪ N` から `f ⊗ id : M^rlf ↪ N^rlf`。★半環上の平坦性は mathlib に無い可能性が高い。★迂回: perf-factorial なら両者とも自由なので、基底の像で直接示せるかもしれない。\n\n★★2026-08-20 に**言明が確定した**: `∀ {A B : D} (α : B ⟶ A), IsCharacteristicallyInjective (rlfMap (Φ.map α))`。★第 1 成分は「`f : M ↪ N` なら `id ⊗ f : ℝ≥0 ⊗_ℕ M → ℝ≥0 ⊗_ℕ N` も単射」、第 2 成分は `charMap` の単射性。★`Φ` が divisorial(integral・saturated・characteristic 型)であることを使う。★perf-factorial なら両側とも自由単系なので、基底の像で直接示せる見込み。",
      "lean": "",
      "decl": ""
     },
@@ -2266,11 +2266,11 @@
       "rlf-tensor",
       "rlf-flat"
      ],
-     "status": "todo",
+     "status": "半済",
      "size": "中",
-     "note": "`functor` は `rlf-tensor` の関手性、`charInj` は `rlf-flat`(第 2 成分は群なら無料)、`fsmIso` は `Φ.fsmIso` を `⊗ ℝ≥0` で移す。",
-     "lean": "",
-     "decl": ""
+     "note": "`functor` は `rlf-tensor` の関手性、`charInj` は `rlf-flat`(第 2 成分は群なら無料)、`fsmIso` は `Φ.fsmIso` を `⊗ ℝ≥0` で移す。\n\n★★2026-08-20: **条件 (b) は証明した**(単射性は (a) から、全射性は `rlfMap_surjective` と `Φ.fsmIso`)。★残るのは条件 (a) だけで、それを仮定として受け取る形 `phiRlfOn Φ hcharInj` にした —— すなわち `Φ^rlf : MonoidOn 𝒟` は **`rlf-flat` ただ 1 つ**に還元されている。",
+     "lean": "ABC3/Found/FrdI/Def24Rlf.lean",
+     "decl": "phiRlfOn"
     },
     {
      "id": "r-phibirat",
@@ -2576,9 +2576,9 @@
      "id": "mathlib-normal-variety",
      "title": "在庫測定: proper normal variety と函数体",
      "deps": [],
-     "status": "todo",
+     "status": "半済",
      "size": "中",
-     "note": "mathlib の `AlgebraicGeometry` に `IsIntegral`/`IsNormal` スキームはある。「proper」「geometrically integral」「函数体 `K(V)`」がどこまで在るかを測る。",
+     "note": "mathlib の `AlgebraicGeometry` に `IsIntegral`/`IsNormal` スキームはある。「proper」「geometrically integral」「函数体 `K(V)`」がどこまで在るかを測る。\n\n★★2026-08-20 の在庫測定(mathlib、`lean/.lake/packages/mathlib`):\n* `AlgebraicGeometry/FunctionField.lean` —— **`Scheme.functionField` は在る**(既約スキームに対し、整なら体)。\n* `AlgebraicGeometry/Morphisms/Proper.lean` —— **proper は在る**。\n* `AlgebraicGeometry/Geometrically/Integral.lean` —— **geometrically integral は在る**。\n* `AlgebraicGeometry/Normalization.lean` —— **相対正規化 `f.normalization` が在る**(`f.toNormalization` / `f.fromNormalization` つき)。★これが `V[L]` の作り方そのもの。\n* ★**「正規スキーム」という述語(`Scheme.IsNormal` 等)は見つからなかった**(`grep` で 0 件)。局所環が整閉であることとして自分で書く必要がある。\n★結論: **函数体・proper・geometrically integral・正規化は在る。「正規」という述語だけ自作**。ここは小さい。",
      "lean": "",
      "decl": ""
     },
@@ -2586,9 +2586,9 @@
      "id": "mathlib-weil-divisor",
      "title": "在庫測定: Weil 因子 / Cartier 因子 / Q-Cartier",
      "deps": [],
-     "status": "todo",
+     "status": "半済",
      "size": "★大",
-     "note": "★正規多様体上の素因子(余次元 1 の既約閉部分多様体)と、その自由アーベル群。`Q`-Cartier(ある `n` 倍が Cartier)。★mathlib には**因子の一般論が実質不在**と見込まれる(要測定)。",
+     "note": "★正規多様体上の素因子(余次元 1 の既約閉部分多様体)と、その自由アーベル群。`Q`-Cartier(ある `n` 倍が Cartier)。★mathlib には**因子の一般論が実質不在**と見込まれる(要測定)。\n\n★★2026-08-20 の在庫測定 —— ★**因子論は実質不在**である。\n* `WeilDivisor` / `CartierDivisor` / `PrimeDivisor` は **`grep` で 0 件**。\n* `Mathlib/Analysis/Meromorphic/Divisor.lean` は**解析的**な因子(ℂ 上の有理型関数)で、スキーム論の因子ではない。\n* `Mathlib/RingTheory/PicardGroup.lean` は**環の**可逆加群の群で、スキームの `Pic` ではない。\n* `Mathlib/RingTheory/DedekindDomain/` の `HeightOneSpectrum` / `ClassGroup` は**次元 1 の場合のみ**。\n★結論: **`Example 6.1` を止めているのはここ 1 点である**。余次元 1 の既約閉部分多様体(素因子)の自由アーベル群、Cartier 性、`Q`-Cartier 性を一から作る必要がある。★規模は mathlib の PR 数本ではなく、**一分野**に近い。\n★迂回の可能性: `Example 6.1` の `Φ(L)` は「台が `D_L` に入る Cartier 有効因子」なので、**`D_L` を添字集合として `Φ(L) := ℕ[D_L]` の形で公理的に置き**、幾何的な実現は別途にする道はある(ただし `Theorem 6.2` 以降は幾何を使う)。",
      "lean": "",
      "decl": ""
     },
@@ -2620,9 +2620,9 @@
      "id": "galois-cat-B0",
      "title": "Galois 圏 `B(G)` とその連結対象 `B(G)^0`",
      "deps": [],
-     "status": "todo",
+     "status": "半済",
      "size": "中",
-     "note": "★§0 の語彙。`G = Gal(K̄/K)` の連続作用を持つ有限集合の圏。★これが `Example 6.1` の `𝒟` になる。★`𝒟` が連結・totally epimorphic・of FSM-type であることもここで出る(→ `phibirat-monoidon` の `birat-fsmiso` の仮定が幾何では成り立つ根拠)。",
+     "note": "★§0 の語彙。`G = Gal(K̄/K)` の連続作用を持つ有限集合の圏。★これが `Example 6.1` の `𝒟` になる。★`𝒟` が連結・totally epimorphic・of FSM-type であることもここで出る(→ `phibirat-monoidon` の `birat-fsmiso` の仮定が幾何では成り立つ根拠)。\n\n★2026-08-20 の測定: mathlib に Galois 圏(`GaloisCategory`)の一般論は無いが、`B(G)` は「`G` の連続作用を持つ有限離散集合の圏」なので、`ContinuousMulAction` + `Finite` で**直接作れる**。★連結対象 = 推移的作用の集合。★`𝒟 = B(G)⁰` が連結・totally epimorphic・**of FSM-type** であることもここで出る —— ★これが `phibirat-monoidon` の `birat-fsmiso` で足した仮定が本来の応用では成り立つ根拠である。",
      "lean": "",
      "decl": ""
     },
