@@ -261,7 +261,9 @@ end PullBackOtri
 
 section Transport
 
-variable {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
   {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
 
 set_option maxHeartbeats 1000000 in
@@ -288,7 +290,9 @@ theorem divIdCat_map (Ψ : C ≌ C₂)
   obtain ⟨v', hv'⟩ := Ψ.functor.map_surjective ((v : Ψ.functor.obj A ⟶ Ψ.functor.obj A))
   obtain ⟨v₁', hv₁'⟩ := Ψ.functor.map_surjective ((v₁ : Ψ.functor.obj Y ⟶ Ψ.functor.obj Y))
   obtain ⟨v₂', hv₂'⟩ := Ψ.functor.map_surjective ((v₂ : Ψ.functor.obj X ⟶ Ψ.functor.obj X))
-  obtain ⟨v₃', hv₃'⟩ := Ψ.functor.map_surjective ((v₃ : Ψ.functor.obj A ⟶ Ψ.functor.obj A))
+  obtain ⟨v₃', hv₃'⟩ : ∃ t : End A, Ψ.functor.map (((t : End A)) : A ⟶ A)
+      = ((v₃ : Ψ.functor.obj A ⟶ Ψ.functor.obj A)) :=
+    Ψ.functor.map_surjective ((v₃ : Ψ.functor.obj A ⟶ Ψ.functor.obj A))
   obtain ⟨ε', hε'⟩ := Ψ.functor.map_surjective ((ε : Ψ.functor.obj X ⟶ Ψ.functor.obj X))
   have mv : v' ∈ OTri P A := hOTri' A v' (by rw [hv']; exact hv)
   have mv₁ : v₁' ∈ OTri P Y := hOTri' Y v₁' (by rw [hv₁']; exact hv₁)
@@ -310,16 +314,16 @@ theorem divIdCat_map (Ψ : C ≌ C₂)
     exact hsq3
   obtain ⟨θ, hθiso, hθ⟩ := hcond v' v₁' v₂' v₃' ε' mv mv₁ mv₂ mv₃ mε s1 s2 s3
   refine ⟨Ψ.functor.map θ, Ψ.functor.map_isIso θ, ?_⟩
-  have hpow : ((Ψ.functor.map ((((v₃' ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A)))
-      : End (Ψ.functor.obj A))
-      = ((v₃ ^ (((P₂.degFr (Ψ.functor.map γ) : ℕ+) : ℕ)) : End (Ψ.functor.obj A))) := by
-    rw [hdeg]
-    show (CategoryTheory.Functor.mapEnd A Ψ.functor) (v₃' ^ _) = _
-    rw [map_pow]
-    show ((Ψ.functor.map ((((v₃' : End A)) : A ⟶ A))) : End _) ^ _ = _
-    rw [hv₃']
   have h2 := congrArg Ψ.functor.map hθ
-  rw [Ψ.functor.map_comp, hpow, hv'] at h2
+  rw [Ψ.functor.map_comp, hv'] at h2
+  rw [hdeg]
+  have hp : (CategoryTheory.Functor.mapEnd A Ψ.functor)
+        ((v₃' : End A) ^ (((P.degFr γ : ℕ+) : ℕ)))
+      = (v₃ : End (Ψ.functor.obj A)) ^ (((P.degFr γ : ℕ+) : ℕ)) := by
+    rw [map_pow]
+    congr 1
+    exact hv₃'
+  rw [← hp]
   exact h2
 
 /-- ★★★★★★★**[FrdI] Theorem 4.2, (i)** —— `Ψ` は `Div-identity` 自己射を保つ。 -/
