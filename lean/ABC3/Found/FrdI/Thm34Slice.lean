@@ -316,6 +316,14 @@ theorem cmpHom_isPullBack {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ
   isPullBack_of_comp_left P (cmpHom P t t' h) t'.plb t'.hplb
     (by rw [cmpHom_comp]; exact t.hplb)
 
+/-- ★比較同型を `𝒞^pl-bk` の同型へ持ち上げる。 -/
+noncomputable def cmpIsoPlBk {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    (⟨t.top⟩ : PlBk P) ≅ ⟨t'.top⟩ where
+  hom := ⟨cmpHom P t t' h, cmpHom_isPullBack P t t' h⟩
+  inv := ⟨cmpHom P t' t h.symm, cmpHom_isPullBack P t' t h.symm⟩
+  hom_inv_id := WideSubcategory.hom_ext _ (cmpIso P t t' h).hom_inv_id
+  inv_hom_id := WideSubcategory.hom_ext _ (cmpIso P t t' h).inv_hom_id
+
 def cmpIso.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 25,
     item := "Definition 1.3, (iv), (a) — 3 分解の pull-back 部分の canonical 比較",
@@ -346,12 +354,109 @@ theorem slPush_ladder (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ 
         ≫ (slPushFac P F f W).plb = Z.hom.hom ≫ f := by
       rw [Category.assoc, Category.assoc, ← (slPushFac P F f W).fac, ← Category.assoc, hu]
     exact e1.trans e2.symm
-  · rw [← Category.assoc, P.Base_comp, P.Base_comp, slPushHom_base]
-    show P.Base ((slPushFac P F f Z).frb ≫ (slPushFac P F f Z).pre)
+  · have hL : P.Base ((slPushFac P F f Z).frb ≫ (slPushFac P F f Z).pre
+          ≫ slPushHom P F f u)
+        = ((slPushFac P F f Z).baseEquiv P).hom ≫ slPushBase P F f u := by
+      rw [← Category.assoc, P.Base_comp, slPushHom_base]
+      rfl
+    have hR : P.Base (u.left.hom ≫ (slPushFac P F f W).frb ≫ (slPushFac P F f W).pre)
+        = P.Base u.left.hom ≫ ((slPushFac P F f W).baseEquiv P).hom := by
+      rw [P.Base_comp]
+      rfl
+    rw [hL, hR]
+    show ((slPushFac P F f Z).baseEquiv P).hom
         ≫ (((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
           ≫ ((slPushFac P F f W).baseEquiv P).hom)
-      = P.Base u.left.hom ≫ P.Base ((slPushFac P F f W).frb ≫ (slPushFac P F f W).pre)
-    exact Iso.hom_inv_id_assoc ((slPushFac P F f Z).baseEquiv P) _
+      = P.Base u.left.hom ≫ ((slPushFac P F f W).baseEquiv P).hom
+    exact Iso.hom_inv_id_assoc _ _
+
+/-! ## ★★★★★`Ψ` とスライス関手の 1-可換図式
+
+原文 (FrdI p.68):
+> back morphisms, and factorizations as in Deﬁnition 1.3, (iv), (a), it follows that Ψ
+
+★★`Ψ` は 3 分解を 3 分解へ移すので、`Ψ` を当てた分解と
+`𝒞₂` 側で選んだ分解が **canonical に比較できる**(`cmpIso`)。 -/
+
+section Psi
+
+variable {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} (P₂ : PreFrobenioid C₂ Φ₂) (F₂ : FrobenioidCore P₂)
+  (Ψ : C ⥤ C₂)
+  (hPB : ∀ {X Y : C} (g : X ⟶ Y), IsPullBack P g → IsPullBack P₂ (Ψ.map g))
+  (hFT : ∀ {X Y : C} (g : X ⟶ Y), IsFrobeniusType P g → IsFrobeniusType P₂ (Ψ.map g))
+  (hPS : ∀ {X Y : C} (g : X ⟶ Y), IsPreStep P g → IsPreStep P₂ (Ψ.map g))
+
+/-- ★★`Ψ` は `Definition 1.3, (iv), (a)` の 3 分解を移す。 -/
+def ArbFac.mapPsi {X Y : C} {φ : X ⟶ Y} (t : ArbFac P φ) : ArbFac P₂ (Ψ.map φ) where
+  mid := Ψ.obj t.mid
+  top := Ψ.obj t.top
+  frb := Ψ.map t.frb
+  pre := Ψ.map t.pre
+  plb := Ψ.map t.plb
+  fac := by
+    rw [← Ψ.map_comp, ← Ψ.map_comp]
+    exact congrArg Ψ.map t.fac
+  hfrb := hFT _ t.hfrb
+  hpre := hPS _ t.hpre
+  hplb := hPB _ t.hplb
+
+/-- ★左辺の分解(`Ψ` を当てたもの)。 -/
+noncomputable abbrev psiFacL (f : A ⟶ A') (Z : Over (⟨A⟩ : PlBk P)) :
+    ArbFac P₂ (Ψ.map (Z.hom.hom ≫ f)) :=
+  (slPushFac P F f Z).mapPsi P P₂ Ψ hPB hFT hPS
+
+/-- ★右辺の分解(`𝒞₂` 側で選んだもの)。 -/
+noncomputable abbrev psiFacR (f : A ⟶ A') (Z : Over (⟨A⟩ : PlBk P)) :
+    ArbFac P₂ (Ψ.map Z.hom.hom ≫ Ψ.map f) :=
+  slPushFac P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).obj Z)
+
+/-- ★★★★★**`Ψ` とスライス関手の 1-可換図式**。 -/
+noncomputable def slicePushPsi (f : A ⟶ A') :
+    slicePush P F f ⋙ plBkSlicePsi P P₂ Ψ hPB A'
+      ≅ plBkSlicePsi P P₂ Ψ hPB A ⋙ slicePush P₂ F₂ (Ψ.map f) :=
+  NatIso.ofComponents
+    (fun Z => Over.isoMk
+      (cmpIsoPlBk P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f Z)
+        (psiFacR P P₂ F₂ Ψ hPB f Z) (Ψ.map_comp _ _))
+      (WideSubcategory.hom_ext _
+        (cmpIso_comp P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f Z)
+          (psiFacR P P₂ F₂ Ψ hPB f Z) (Ψ.map_comp _ _))))
+    (fun {Z W} u => by
+      refine Over.OverMorphism.ext (WideSubcategory.hom_ext _ ?_)
+      show Ψ.map (slPushHom P F f u)
+          ≫ cmpHom P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f W)
+            (psiFacR P P₂ F₂ Ψ hPB f W) (Ψ.map_comp _ _)
+        = cmpHom P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f Z)
+            (psiFacR P P₂ F₂ Ψ hPB f Z) (Ψ.map_comp _ _)
+          ≫ slPushHom P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).map u)
+      refine pullBack_hom_ext P₂ (psiFacR P P₂ F₂ Ψ hPB f W).hplb ?_ ?_
+      · simp only [Category.assoc, cmpHom_comp, slPushHom_comp]
+        show Ψ.map (slPushHom P F f u) ≫ Ψ.map (slPushFac P F f W).plb
+          = Ψ.map (slPushFac P F f Z).plb
+        rw [← Ψ.map_comp, slPushHom_comp]
+      · rw [P₂.Base_comp, P₂.Base_comp, cmpHom_base, cmpHom_base, slPushHom_base]
+        have key : ((psiFacL P F P₂ Ψ hPB hFT hPS f Z).baseEquiv P₂).hom
+              ≫ P₂.Base (Ψ.map (slPushHom P F f u))
+            = P₂.Base (Ψ.map u.left.hom)
+              ≫ ((psiFacL P F P₂ Ψ hPB hFT hPS f W).baseEquiv P₂).hom := by
+          show P₂.Base (Ψ.map (slPushFac P F f Z).frb ≫ Ψ.map (slPushFac P F f Z).pre)
+              ≫ P₂.Base (Ψ.map (slPushHom P F f u))
+            = P₂.Base (Ψ.map u.left.hom)
+              ≫ P₂.Base (Ψ.map (slPushFac P F f W).frb ≫ Ψ.map (slPushFac P F f W).pre)
+          rw [← P₂.Base_comp, ← P₂.Base_comp, ← Ψ.map_comp, ← Ψ.map_comp, ← Ψ.map_comp,
+            ← Ψ.map_comp, Category.assoc]
+          exact congrArg (fun g => P₂.Base (Ψ.map g)) (slPush_ladder P F f u)
+        simp only [cmpBase, slPushBase, Category.assoc, Iso.hom_inv_id_assoc]
+        trace_state
+        sorry)
+
+def slicePushPsi.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Ψ とスライス関手の 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
+end Psi
 
 end SlicePush
 

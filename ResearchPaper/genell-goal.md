@@ -12555,3 +12555,44 @@ promote 時の改名が反映されない。
 ### この区間の集計
 
 ★**112 ブロック**(Arakelov 97 + Galois 15)。
+
+## §9-316 ★★★★★貼り合わせたノルムは連続(第 273 ブロック)
+
+mathlib の
+
+    PartitionOfUnity.IsSubordinate.continuous_finsum_smul
+
+がそのまま効いた——`E = ℝ` では `•` が `*` なので `gluedNormX` の形に合う。
+
+★★§9-285 で「コンパクト Hausdorff ⟹ `NormalSpace` ∧ `ParacompactSpace` は無料」と
+実測してあるので、1 の分割の**存在**も在庫で出る。
+
+### ★残る 2 つの仮定(いま仮定として受けている)
+
+| 仮定 | 内容 |
+|---|---|
+| `ho` | ★`arcOpenSet (U i)` が `X^arc` で開 |
+| `hg` | ★★局所ノルムが `U i` 上で連続(第 270 を `X` の点へ移す) |
+
+★★★どちらも C1 の `topology_openImmersion` と第 271 の同型から出る見込み。
+
+### ★摩擦(3 例目)—— import は**推移しない**
+
+`PartitionOfUnity` が `unknownIdentifier` になった。
+★`Mathlib.Topology.PartitionOfUnity` を**直接 import** すると通る。
+★★本セッションで 3 例目である(`IsProper` / `liftToOpenOfTop` の周辺 / 本件)。
+★★★**mathlib の名前が見つからないときは、まず直接 import を疑う**——
+`grep` で在庫を確認しても、import していなければ見えない。
+
+### 残り(C3)
+
+| 段 | 内容 |
+|---|---|
+| `arcOpenSet` の開性 | ★C1 の `topology_openImmersion` |
+| 局所連続性の移送 | ★★第 270 → 第 271 |
+| `Interface` の他の欄 | ★★★`logMetric` / `IsConjCompatible` / `tensorMetric` |
+| witness | ★★★★最後 |
+
+### この区間の集計
+
+★**113 ブロック**(Arakelov 98 + Galois 15)。
