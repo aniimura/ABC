@@ -84,6 +84,68 @@ noncomputable def otriPowHom {A : C} (hfn : IsFrobeniusNormalized P A) (m : ℕ)
     show ((x : End A) * (y : End A)) ^ m = ((x : End A) ^ m) * ((y : End A) ^ m)
     exact (otri_comm_end' hfn x.2 y.2).mul_pow m)
 
+/-! ## ★1b. 同型による共役(一般形)
+
+★`rtObj A 1` は `A` と同型だが等しくない。そこで `End` の共役を単系準同型として
+一度だけ作り、必要な性質(base-identity・次数・`𝒪^▷`・Frobenius-normalized)が
+すべて移ることを示しておく。 -/
+
+/-- ★同型による共役 `End B →* End A`。 -/
+noncomputable def conjEnd {A B : C} (u : A ⟶ B) [IsIso u] : End B →* End A where
+  toFun x := u ≫ ((x : B ⟶ B)) ≫ inv u
+  map_one' := by
+    show u ≫ (𝟙 B) ≫ inv u = 𝟙 A
+    rw [Category.id_comp, IsIso.hom_inv_id]
+  map_mul' x y := by
+    show u ≫ (((y : B ⟶ B)) ≫ ((x : B ⟶ B))) ≫ inv u
+      = (u ≫ ((y : B ⟶ B)) ≫ inv u) ≫ (u ≫ ((x : B ⟶ B)) ≫ inv u)
+    simp only [Category.assoc]
+    rw [← Category.assoc (inv u) u, IsIso.inv_hom_id, Category.id_comp]
+
+@[simp] theorem conjEnd_apply {A B : C} (u : A ⟶ B) [IsIso u] (x : End B) :
+    ((conjEnd u x : End A) : A ⟶ A) = u ≫ ((x : B ⟶ B)) ≫ inv u := rfl
+
+theorem conjEnd_baseIdentity {A B : C} (u : A ⟶ B) [IsIso u] {x : End B}
+    (hx : IsBaseIdentity P x) : IsBaseIdentity P (conjEnd u x) := by
+  haveI : IsIso (P.Base u) := isIso_Base_of_isIso u
+  show P.Base (u ≫ ((x : B ⟶ B)) ≫ inv u) = P.Base (𝟙 A)
+  rw [P.Base_comp, P.Base_comp, P.Base_id]
+  have h1 : P.Base ((x : B ⟶ B)) = P.Base (𝟙 B) := hx
+  rw [h1, P.Base_id, Category.id_comp, ← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+
+theorem conjEnd_degFr {A B : C} (u : A ⟶ B) [IsIso u] (hu1 : P.degFr u = 1) (x : End B) :
+    P.degFr (((conjEnd u x : End A)) : A ⟶ A) = P.degFr ((x : B ⟶ B)) := by
+  show P.degFr (u ≫ ((x : B ⟶ B)) ≫ inv u) = _
+  rw [P.degFr_comp, P.degFr_comp, hu1, degFr_inv_eq_one u hu1]
+  simp
+
+theorem conjEnd_otri {A B : C} (u : A ⟶ B) [IsIso u] (hu1 : P.degFr u = 1) {x : End B}
+    (hx : x ∈ OTri P B) : (conjEnd u x) ∈ OTri P A :=
+  ⟨conjEnd_baseIdentity u hx.1, (conjEnd_degFr u hu1 x).trans hx.2⟩
+
+theorem conjEnd_inv_conjEnd {A B : C} (u : A ⟶ B) [IsIso u] (x : End B) :
+    conjEnd (inv u) (conjEnd u x) = x := by
+  show inv u ≫ (u ≫ ((x : B ⟶ B)) ≫ inv u) ≫ inv (inv u) = x
+  rw [IsIso.inv_inv]
+  simp only [Category.assoc]
+  rw [← Category.assoc (inv u) u, IsIso.inv_hom_id, Category.id_comp]
+  exact Category.comp_id _
+
+/-- ★★**Frobenius-normalized は同型で移る**。
+
+★共役 `conjEnd` が単系準同型であることと、`map_pow` だけで出る。 -/
+theorem frobNormalized_of_iso {A B : C} (u : A ⟶ B) [IsIso u] (hu1 : P.degFr u = 1)
+    (hfn : IsFrobeniusNormalized P A) : IsFrobeniusNormalized P B := by
+  intro φ hφ β hβ
+  have h := hfn (conjEnd u φ) (conjEnd_baseIdentity u hφ) (conjEnd u β)
+    (conjEnd_otri u hu1 hβ)
+  rw [conjEnd_degFr u hu1 φ] at h
+  set d := ((P.degFr ((φ : B ⟶ B)) : ℕ+) : ℕ) with hd
+  have h' : (conjEnd u β ^ d) * (conjEnd u φ) = (conjEnd u φ) * (conjEnd u β) := h
+  have hback := congrArg (conjEnd (inv u)) h'
+  rw [map_mul, map_mul, map_pow, conjEnd_inv_conjEnd, conjEnd_inv_conjEnd] at hback
+  exact hback
+
 /-! ## ★2. 添字を `ℕ≥1` に落とす —— cofinality の中身 -/
 
 /-- ★★★**Frobenius-trivial 対象から出る Frobenius 型射の終域は、その対象自身と同型**。
