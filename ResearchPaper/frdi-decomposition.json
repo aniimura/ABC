@@ -2347,11 +2347,23 @@
      "id": "untr-pf",
      "title": "`(𝒞^un-tr)^pf` は `(Φ^pf, ℚ·Φ^birat)` の model Frobenioid",
      "deps": [],
-     "status": "todo",
+     "status": "半済",
      "size": "★大",
-     "note": "`Proposition 5.3` の第 2 文の残り半分。★`Φ^pf` は `ℚ≥0 ⊗_ℕ Φ` で `Def24Rlf.lean` と同じ形に書ける見込み。★`ℚ·Φ^birat = (Φ^birat)^pf` も同様。★ただし `(𝒞^un-tr)^pf` が model 型であること(鎖 `prop55` の `p55iii-pf`)が要る。",
-     "lean": "",
-     "decl": ""
+     "note": "`Proposition 5.3` の第 2 文の残り半分。★`Φ^pf` は `ℚ≥0 ⊗_ℕ Φ` で `Def24Rlf.lean` と同じ形に書ける見込み。★`ℚ·Φ^birat = (Φ^birat)^pf` も同様。★ただし `(𝒞^un-tr)^pf` が model 型であること(鎖 `prop55` の `p55iii-pf`)が要る。\n\n★★2026-08-20: **行き先は作れた**。係数 `S` を引数に出したので `S = ℚ≥0` で `(Φ^pf, ℚ·Φ^birat)` の model Frobenioid `CuntrPf` がそのまま出る(`S = ℝ≥0` が実化)。縦の矢印 `untrToSc` も同じ形。\n★残るのは **`(𝒞^un-tr)^pf` が実際にその model Frobenioid と同値**であること —— これは鎖 `prop55` の `p55iii-pf` / `p55iv-pf` である。\n★また原文の `ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ = (Φ^birat)^pf` の**3 通りの一致は未証明**(我々は 1 つめの形だけを採った)。",
+     "lean": "ABC3/Found/FrdI/Prop53Rlf.lean",
+     "decl": "CuntrPf / untrToSc"
+    },
+    {
+     "id": "sc-generalize",
+     "title": "係数 `S` を引数に出す —— 実化と完全化を 1 度に作る",
+     "deps": [
+      "rlf-tensor"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "★★`M ⊗_S := S ⊗_ℕ M` と書けば、`S = ℝ≥0` が実化、`S = ℚ≥0` が完全化になる。`Module S (S ⊗_ℕ M)` は `Algebra ℕ S` から自動で付くので、**両方の構成が 1 つのコードで済む**。",
+     "lean": "ABC3/Found/FrdI/Def24Rlf.lean",
+     "decl": "ScT / scMap / phiScOn / scModel"
     }
    ],
    "unblocks": [
