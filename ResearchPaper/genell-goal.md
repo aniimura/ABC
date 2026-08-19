@@ -15680,3 +15680,42 @@ G7(Néron モデル、mathlib 0 件)、G8(Faltings 高さ)。
 一意化そのもの——(a) 級数の収束、(b) Weierstrass 方程式、(c) 準同型性、
 (d) 核が `q^ℤ`、(e) 全射性。★★**(d) は本ブロックで実質半分が済んだ**
 (`q^ℤ` による商の側の構造が確定したから)。
+
+## §9-412 `I` 進級数の和(第 104 ブロック)
+
+`evalAdic`(第 95)は項が `c_n·qⁿ` の形の級数しか扱えなかった。
+★Tate 一意化の `X(u,q)` はその形ではないので、一般化した:
+
+    a : ℕ → R,  a n ∈ I^n  ⟹  ∑ a n は I 進収束する      (adicSum)
+
+`Found/GaloisRep/AdicSeries.lean`。★★`evalAdic` は
+`a n = c_n·qⁿ` の場合として**系になる**(`evalAdic_eq_adicSum`)。
+★★★`adicSum_shift`(`∑ a = a 0 + ∑ a(·+1)`)が尾の漸化式を出す。
+
+## §9-413 Tate 級数の項と尾(第 105 ブロック)
+
+`Found/GaloisRep/TateXY.lean`。
+
+### ★★★★完備 adic 環では `1 − x` が単元
+
+分母 `(1 − qⁿu)` の可逆性が要る。**mathlib に無かった**(2026-08-20 実測)ので、
+等比級数 `∑ xⁿ` を `adicSum` で作って積んだ:
+
+    x ∈ I,  IsAdicComplete I R  ⟹  IsUnit (1 − x)      (isUnit_one_sub)
+
+### ★★★★★両側和を片側 2 本に畳んだ
+
+`f(t) = t/(1−t)²` と置くと **`f(1/t) = f(t)`**(`tateXterm_inv`)なので
+
+    ∑_{n∈ℤ} f(qⁿu) = f(u) + ∑_{m≥1} f(qᵐu) + ∑_{m≥1} f(qᵐu⁻¹)
+
+★`qᵐu` も `qᵐu⁻¹` も `I^m` に入るので、片側 2 本はどちらも `adicSum` で定義できる
+(`tateXtail`, `tateYtail`)。★★漸化式 `T(u) = f(qu) + T(qu)` も取れた。
+
+★★★`g(t) + g(1/t) = −f(t)`(`tateYterm_add_inv`)——原典の `Y(u)+Y(1/u) = −X(u)`。
+
+### ★残っている葉
+
+(a) の**残り**は「`u` の付値を `0 ≤ v(u) < v(q)` に正規化して `u⁻¹` 側も `I` に入れる」段。
+(b) Weierstrass 方程式、(c) 準同型性、(d) 核、(e) 全射性は手つかず。
+★★義務の数は動いていない——(G6) は `uniformization` 本体が要る。
