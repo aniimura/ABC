@@ -4,41 +4,42 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.Data.NNReal.Defs
+import Mathlib.Data.NNRat.Defs
 
 /-!
-# [FrdI] 実化 `Φ^rlf` の**関手的な**模型
+# [FrdI] 係数拡大 `S ⊗_ℕ Φ` —— 実化 `Φ^rlf` と完全化 `Φ^pf` の**関手的**模型
 
 `Def24.lean` は `Definition 2.4, (i)` の実化 `M^rlf` を、原文どおり
 **素点分解** `M^rlf ⊆ ∏_{p ∈ Prime(M)} ℝ≥0` として作った。
 ★そこには**素点ごとの同一視 `ι`(選択)**が入るので、`𝒟` 上の**関手**にするのが難しい。
 
-★★`Theorem 5.2` は有理関数の単系 `B` を「`𝒟` 上の単系」として要求し、
-`Proposition 5.3` の第 1 文は `𝒞^rlf` を `(Φ^rlf, ℝ·Φ^birat)` の model Frobenioid と
-**定義する**。したがって `Φ^rlf` を `MonoidOn 𝒟` として立てる必要がある。
+★★`Theorem 5.2` は因子の単系・有理関数の単系をどちらも「`𝒟` 上の単系」として要求し、
+`Proposition 5.3` は `𝒞^rlf` を `(Φ^rlf, ℝ·Φ^birat)` の、
+`(𝒞^un-tr)^pf` を `(Φ^pf, ℚ·Φ^birat)` の model Frobenioid と**定義する**。
+したがって `Φ^rlf` と `Φ^pf` を `MonoidOn 𝒟` として立てる必要がある。
 
-## ★設計 —— テンソルで関手性を無料にする
+## ★設計 —— `ℕ` 上のテンソルで関手性を無料にする
 
-原文自身が `M^rlf` を「`M^pf ⊗ ℝ`」の一言で述べている。そこで
+原文自身が `M^rlf` を「`M^pf ⊗ ℝ`」の一言で述べている。そこで**係数を引数に出して**
 
-  `M^rlf := ℝ≥0 ⊗_ℕ M`
+  `M ⊗_S := S ⊗_ℕ M`   (`S` は可換半環)
 
 と置く。★`ℕ` 上のテンソルなので**任意の可換単系に対して定義でき**、
-* `Module ℝ≥0 (ℝ≥0 ⊗_ℕ M)` が**自動で付く**(`Algebra ℕ ℝ≥0` からの基底変換)、
-* 関手性 `rlfMap` が `TensorProduct.map` から**無料で出る**、
-* 全射性の保存(`rlfMap_surjective`)も直ちに出る。
+* `Module S (S ⊗_ℕ M)` が**自動で付く**(`Algebra ℕ S` からの基底変換)、
+* 関手性 `scMap` が `TensorProduct.map` から**無料で出る**、
+* 全射性の保存(`scMap_surjective`)も直ちに出る。
 
-★`M^pf` も同じ形(`ℚ≥0 ⊗_ℕ M`)で書ける —— 本ファイルでは実化だけを扱う。
+★`S := ℝ≥0` が実化(`RlfT`)、`S := ℚ≥0` が完全化(`PfT`)である。
 
 ## ★★逸脱(記録)
 
 ★これは `Def24.lean` の `Rlf`(素点分解版)と**別の定義**である。
 perf-factorial な `M` では `M^pf ≅ ⊕_p ℚ≥0` なので両者は一致するはずだが、
 **その一致はまだ証明していない**(依存グラフの鎖 `rlf` の節点 `rlf-agree`)。
-★したがって現時点では「実化の 2 つの模型」が並立している。
 
 ★もう 1 つ、`MonoidOn` の条件 (a)(characteristic injectivity)は
 **テンソルの平坦性**にあたり、一般の可換単系では成り立たない。
-本ファイルは**それを仮定として受け取る**形(`phiRlfOn` の `hcharInj`)にしてある
+本ファイルは**それを仮定として受け取る**形(`phiScOn` の `hcharInj`)にしてある
 —— すなわち `Φ^rlf : MonoidOn 𝒟` は**ただ 1 つの言明**に還元されている
 (鎖 `rlf` の節点 `rlf-flat`)。
 -/
@@ -50,48 +51,59 @@ open scoped TensorProduct
 
 universe v u w
 
-/-! ## ★1. `M^rlf = ℝ≥0 ⊗_ℕ M` -/
+/-! ## ★1. `M ⊗_S = S ⊗_ℕ M` -/
 
-/-- ★★**実化の関手的模型** —— `M^rlf := ℝ≥0 ⊗_ℕ M`。 -/
-abbrev RlfT (M : Type w) [AddCommMonoid M] : Type w := NNReal ⊗[ℕ] M
+variable (S : Type) [CommSemiring S]
 
-/-- ★`M → M^rlf`(`m ↦ 1 ⊗ m`)。 -/
-noncomputable def toRlf {M : Type w} [AddCommMonoid M] : M →+ RlfT M where
-  toFun m := (1 : NNReal) ⊗ₜ m
+/-- ★★**係数拡大の関手的模型** —— `S ⊗_ℕ M`。 -/
+abbrev ScT (M : Type w) [AddCommMonoid M] : Type w := S ⊗[ℕ] M
+
+/-- ★★**実化** `M^rlf = ℝ≥0 ⊗_ℕ M`。 -/
+abbrev RlfT (M : Type w) [AddCommMonoid M] : Type w := ScT NNReal M
+
+/-- ★★**完全化** `M^pf = ℚ≥0 ⊗_ℕ M`。 -/
+abbrev PfT (M : Type w) [AddCommMonoid M] : Type w := ScT NNRat M
+
+variable {S}
+
+/-- ★`M → M ⊗_S`(`m ↦ 1 ⊗ m`)。 -/
+noncomputable def toSc {M : Type w} [AddCommMonoid M] : M →+ ScT S M where
+  toFun m := (1 : S) ⊗ₜ m
   map_zero' := by simp
   map_add' _ _ := by rw [TensorProduct.tmul_add]
 
 /-- ★★**関手性** —— `TensorProduct.map` から無料で出る。 -/
-noncomputable def rlfMap {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N) :
-    RlfT M →+ RlfT N :=
-  (TensorProduct.map (LinearMap.id (R := ℕ) (M := NNReal)) f.toNatLinearMap).toAddMonoidHom
+noncomputable def scMap {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N) :
+    ScT S M →+ ScT S N :=
+  (TensorProduct.map (LinearMap.id (R := ℕ) (M := S)) f.toNatLinearMap).toAddMonoidHom
 
-@[simp] theorem rlfMap_tmul {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
-    (r : NNReal) (m : M) : rlfMap f (r ⊗ₜ m) = r ⊗ₜ f m := rfl
+@[simp] theorem scMap_tmul {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
+    (r : S) (m : M) : scMap f (r ⊗ₜ m) = r ⊗ₜ f m := rfl
 
-theorem rlfMap_id {M : Type w} [AddCommMonoid M] :
-    rlfMap (AddMonoidHom.id M) = AddMonoidHom.id (RlfT M) := by
+theorem scMap_id {M : Type w} [AddCommMonoid M] :
+    scMap (S := S) (AddMonoidHom.id M) = AddMonoidHom.id (ScT S M) := by
   ext x
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul r m => rfl
   | add x y hx hy => simp [map_add, hx, hy]
 
-theorem rlfMap_comp {M N O : Type w} [AddCommMonoid M] [AddCommMonoid N] [AddCommMonoid O]
-    (f : M →+ N) (g : N →+ O) : rlfMap (g.comp f) = (rlfMap g).comp (rlfMap f) := by
+theorem scMap_comp {M N O : Type w} [AddCommMonoid M] [AddCommMonoid N] [AddCommMonoid O]
+    (f : M →+ N) (g : N →+ O) :
+    scMap (S := S) (g.comp f) = (scMap g).comp (scMap f) := by
   ext x
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul r m => rfl
   | add x y hx hy => simp [map_add, hx, hy]
 
-/-- ★`toRlf` の自然性。 -/
-@[simp] theorem rlfMap_toRlf {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
-    (m : M) : rlfMap f (toRlf m) = toRlf (f m) := rfl
+/-- ★`toSc` の自然性。 -/
+@[simp] theorem scMap_toSc {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
+    (m : M) : scMap (S := S) f (toSc m) = toSc (f m) := rfl
 
 /-- ★★**全射は保たれる**(テンソルの右完全性のうち易しい方)。 -/
-theorem rlfMap_surjective {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] {f : M →+ N}
-    (hf : Function.Surjective f) : Function.Surjective (rlfMap f) := by
+theorem scMap_surjective {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] {f : M →+ N}
+    (hf : Function.Surjective f) : Function.Surjective (scMap (S := S) f) := by
   intro y
   induction y using TensorProduct.induction_on with
   | zero => exact ⟨0, map_zero _⟩
@@ -107,37 +119,39 @@ theorem rlfMap_surjective {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] {f 
 
 variable {D : Type u} [Category.{v} D]
 
-/-- ★`Φ^rlf` の台となる反変関手。 -/
-noncomputable def rlfFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMonCat.{w} where
-  obj X := AddCommMonCat.of (RlfT (Φ.val X.unop))
-  map f := AddCommMonCat.ofHom (rlfMap (Φ.map f.unop))
+variable (S) in
+/-- ★`Φ ⊗_S` の台となる反変関手。 -/
+noncomputable def scFunctor (Φ : MonoidOn.{v, u, w} D) : Dᵒᵖ ⥤ AddCommMonCat.{w} where
+  obj X := AddCommMonCat.of (ScT S (Φ.val X.unop))
+  map f := AddCommMonCat.ofHom (scMap (Φ.map f.unop))
   map_id X := by
     refine AddCommMonCat.ext (fun x => ?_)
     have h : Φ.map (𝟙 X.unop) = AddMonoidHom.id _ := by ext a; exact Φ.map_id _ a
-    show rlfMap (Φ.map (𝟙 X.unop)) x = _
-    rw [h, rlfMap_id]
+    show scMap (Φ.map (𝟙 X.unop)) x = _
+    rw [h, scMap_id]
     rfl
   map_comp {X Y Z} f g := by
     refine AddCommMonCat.ext (fun x => ?_)
     have h : Φ.map (g.unop ≫ f.unop) = (Φ.map g.unop).comp (Φ.map f.unop) := by
       ext a; exact Φ.map_comp _ _ a
-    show rlfMap (Φ.map (g.unop ≫ f.unop)) x = _
-    rw [h, rlfMap_comp]
+    show scMap (Φ.map (g.unop ≫ f.unop)) x = _
+    rw [h, scMap_comp]
     rfl
 
-/-- ★★★★**`Φ^rlf` を `𝒟` 上の単系として立てる**。
+variable (S) in
+/-- ★★★★**`Φ ⊗_S` を `𝒟` 上の単系として立てる**。
 
 ★`hcharInj`(条件 (a))だけを仮定に置く —— これが**テンソルの平坦性**にあたる
 唯一の残りである(鎖 `rlf` の節点 `rlf-flat`)。
 ★条件 (b)(FSM 射なら同型)は `Φ.fsmIso` から**証明できる**:
-単射性は `hcharInj` の第 1 成分、全射性は `rlfMap_surjective`。 -/
-noncomputable def phiRlfOn (Φ : MonoidOn.{v, u, w} D)
+単射性は `hcharInj` の第 1 成分、全射性は `scMap_surjective`。 -/
+noncomputable def phiScOn (Φ : MonoidOn.{v, u, w} D)
     (hcharInj : ∀ {A B : D} (α : B ⟶ A),
-      IsCharacteristicallyInjective (rlfMap (Φ.map α))) :
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α))) :
     MonoidOn.{v, u, w} D where
-  functor := rlfFunctor Φ
+  functor := scFunctor S Φ
   charInj α := hcharInj α
-  fsmIso α hα := ⟨(hcharInj α).1, rlfMap_surjective (Φ.fsmIso α hα).2⟩
+  fsmIso α hα := ⟨(hcharInj α).1, scMap_surjective (Φ.fsmIso α hα).2⟩
 
 /-! ### ★出典の紐付け -/
 

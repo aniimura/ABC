@@ -15882,3 +15882,58 @@ Tate 曲線は `a₁ = 1`, `a₃ = 0` なので mathlib の `negY x y = −y −
 道具は揃った(展開・積・符号・定数)。★★残るのは**各 `qⁿ` 係数の恒等式**
 ——`u` の Laurent 多項式としての等式であり、これが古典的な計算そのものである。
 ★★★義務の数は動いていない。
+
+## §9-421 (G5) の部分グラフを展開した(第 113 ブロック + スケルトン 3 枚)
+
+`Skeleton/GaloisRep/WeilPairing.lean` の `.needs` は (a)–(d) の 4 行だったが、
+**それは節点であって葉ではなかった**。展開して層に分けた。
+
+### ★★★★★在庫調査で見積もりが下方修正された
+
+mathlib は**楕円曲線の群法則を類群経由で証明している**:
+
+| mathlib | 内容 |
+|---|---|
+| `Point.toClass` | `W.Point →+ Additive (ClassGroup W.CoordinateRing)`、**単射** |
+| `Point.toClass_some` | `= ClassGroup.mk (XYIdeal' h)` |
+| `ClassGroup.mk_eq_one_iff` | `mk I = 1 ↔ I が単項` |
+| `WeierstrassCurve.Φ` / `ΨSq` | 分点多項式 |
+
+★したがって Weil 対の第一段 `div(f_P) = n(P) − n(O)` は
+**イデアル類群の言葉でそのまま出る**——`Found/GaloisRep/TorsionIdeal.lean`(第 113 ブロック):
+
+    n • P = 0  ⟹  (XYIdeal' P)^n は単項          (`xyIdeal_pow_isPrincipal`)
+
+★★当初「因子の層から積む(20-60 ブロック)」と見積もっていたものが **0 ブロック**になった。
+★★★見積もりが外れた向きを記録する——**足場の有無は実測しないと分からない**。
+
+### ★★★★展開した層
+
+| 層 | 節点 | 場所 | 状態 |
+|---|---|---|---|
+| 0 | `toClass` / `XYIdeal'` / `Φ` / `ΨSq` | mathlib | ✅ |
+| 1 | `xyIdeal_pow_isPrincipal`(= `f_P`) | `Found/GaloisRep/TorsionIdeal.lean` | ✅ **証明済** |
+| 2 | `exists_translateAut`(平行移動 τ_Q) | `Skeleton/GaloisRep/WeilFunctionField.lean` | ★**葉** |
+| 2 | `exists_mulByNPullback`(乗法 [n]) | 同上 | ★**葉** |
+| 3 | `exists_nthRoot_comp_mulByN`(`g_P`) | `Skeleton/GaloisRep/WeilRoot.lean` | 層 1・2 待ち |
+| 4 | `weilPairing`(`e_n` の定義) | `Skeleton/GaloisRep/WeilPairingDef.lean` | 層 3 待ち |
+| 5 | `_pow_eq_one` / `_add_left` / `_self` / `_nondeg` / `_galois` | 同上 | 層 4 待ち |
+| 6 | `det_galRep_eq_cyclotomic` | `Skeleton/GaloisRep/WeilPairing.lean` | 層 5 待ち |
+
+### ★★空虚を避けるため、葉は「式」で固定した
+
+- `τ_Q`: 座標関数の像を **加法公式**(mathlib の `addX`・`addY`)で指定。
+- `[n]^*`: `x([n]P) = Φ_n(x)/Ψ_n(x)²` で指定(mathlib の分点多項式)。
+
+★存在するとだけ言って中身が空、という退化は起きない形にしてある。
+
+### ★ゲートの数字の動き
+
+    Skeleton の出典照合: 64 → 77 件
+    辺:                  44 → 55 本
+    暗黙の段(Gap 候補):  70 → 87 件
+
+★★★**増えたのは前進である**——辺の先を張ると、その先の辺が新たに現れる。
+減ったことを進捗と読まない、という §9 の注意はここでも効く。
+
+★義務の数は動いていない(Galois 4/8)。

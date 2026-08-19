@@ -73,14 +73,16 @@ def det_galRep_eq_cyclotomic.src : Source :=
 def det_galRep_eq_cyclotomic.needs : List ProofObligation :=
   [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8(Weil 対の構成と性質)"
       (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の Galois 同変性)" 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の双線型性)" 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の非退化性)" 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対が 1 の n 乗根に値を取ること)" 19,
     .implicitStep
-      "★(a) `E[n]` 上の Weil 対 e_n : E[n] × E[n] → μ_n の構成。古典的には div(f) = n(P) − n(O) なる関数 f と g^n = f∘[n] を使う(20-60 ブロック)" 19,
+      "★★★★2026-08-20 の展開: 本節点の下に部分グラフを立てた。葉は `Skeleton/GaloisRep/WeilFunctionField.lean` の 2 件——平行移動 τ_Q と乗法 [n] の関数体への引き戻しである" 19,
     .implicitStep
-      "★★(b)(c) 双線型性・交代性・非退化性(15-40 ブロック)" 19,
+      "★★★★★`f_P`(div(f_P) = n(P) − n(O))は **Found に入った**(第 113 ブロック `xyIdeal_pow_isPrincipal`)。mathlib が群法則を類群経由で証明しているため `Point.toClass` と `ClassGroup.mk_eq_one_iff` がそのまま使えた。当初の「因子の層から積む」という見積もりは**下方修正**される(0 ブロック)" 19,
     .implicitStep
-      "★(d) Galois 同変性 e_n(σP, σQ) = σ(e_n(P,Q))。関手的な構成なら自動だが、明示式からだと計算が要る(5-15 ブロック)" 19,
-    .implicitStep
-      "★★★mathlib は CoordinateRing・ClassGroup・toClass を持つが、**平行移動 τ_Q と乗法 [n] の関数体への引き戻し**が無い——そこから作ることになる(2026-08-20 実測)" 19,
+      "★★★mathlib は CoordinateRing・ClassGroup・toClass・分点多項式(Φ・ΨSq)を持つが、**平行移動 τ_Q と乗法 [n] の関数体への引き戻し**が無い(2026-08-20 実測)" 19,
     .implicitStep
       "★★★★E[n] ≃+ (ℤ/n)²(第 65-72)と T_l E ≃+ ℤ_l²(第 73-77)は Found/ に済んでいる。Weil 対はその上の独立した層である" 19 ]
 

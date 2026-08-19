@@ -569,6 +569,7 @@ import ABC3.Found.GaloisRep.AdicFubini
 import ABC3.Found.GaloisRep.TateQExp
 import ABC3.Found.GaloisRep.TateSigma
 import ABC3.Found.GaloisRep.AdicMul
+import ABC3.Found.GaloisRep.TorsionIdeal
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
