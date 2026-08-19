@@ -512,6 +512,7 @@ import ABC3.Found.GaloisRep.TorsionCard
 import ABC3.Found.GaloisRep.TorsionGroup
 import ABC3.Found.GaloisRep.PrimePowerStep
 import ABC3.Found.GaloisRep.PrimePowerEquiv
+import ABC3.Found.GaloisRep.CrtStep
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

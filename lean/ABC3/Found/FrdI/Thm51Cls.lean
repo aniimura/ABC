@@ -133,10 +133,11 @@ theorem span_class_sub_mem (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y
 `μ ≫ φ₂ = φ ≫ κ` となる pre-step `φ₂ : Y → A'` が取れる。
 
 ★`Definition 1.3, (iv)` の分解と `(ii)` の一意性から。 -/
-theorem frobShift (G : Frobenioid P) {X A' Y : C} (φ : X ⟶ A') (hsφ : IsPreStep P φ)
-    (κ : A' ⟶ A') (hκb : P.Base κ = P.Base (𝟙 A'))
+theorem frobShift (G : Frobenioid P) {X A' A'' Y : C} (φ : X ⟶ A') (hsφ : IsPreStep P φ)
+    (κ : A' ⟶ A'') (hκb : IsIso (P.Base κ))
     (μ : X ⟶ Y) (hμ : IsFrobeniusType P μ) (hdeg : P.degFr μ = P.degFr κ) :
-    ∃ φ₂ : Y ⟶ A', IsPreStep P φ₂ ∧ μ ≫ φ₂ = φ ≫ κ := by
+    ∃ φ₂ : Y ⟶ A'', IsPreStep P φ₂ ∧ μ ≫ φ₂ = φ ≫ κ := by
+  haveI := hκb
   obtain ⟨U, V, γ, β, α, hfac, hγ, hβ, hα⟩ := G.core.arbFactor (φ ≫ κ)
   have hdegα : P.degFr α = 1 := (G.core.pullBackLB α hα).2
   have hdegc : P.degFr (φ ≫ κ) = P.degFr κ := by
@@ -148,9 +149,8 @@ theorem frobShift (G : Frobenioid P) {X A' Y : C} (φ : X ⟶ A') (hsφ : IsPreS
   obtain ⟨ρ, hρ, hργ⟩ := G.core.frobDegUniq X U Y γ μ hγ hμ hdegγ
   haveI := hρ
   refine ⟨inv ρ ≫ β ≫ α, ?_, ?_⟩
-  · haveI hbφκ : IsIso (P.Base (φ ≫ κ)) := by
-      rw [P.Base_comp, hκb, P.Base_id, Category.comp_id]
-      exact hsφ.2
+  · haveI hbφ : IsIso (P.Base φ) := hsφ.2
+    haveI hbφκ : IsIso (P.Base (φ ≫ κ)) := by rw [P.Base_comp]; infer_instance
     haveI hbγ : IsIso (P.Base γ) := hγ.2
     haveI hbβ : IsIso (P.Base β) := hβ.2
     haveI hbα : IsIso (P.Base α) := by
@@ -167,15 +167,15 @@ theorem frobShift (G : Frobenioid P) {X A' Y : C} (φ : X ⟶ A') (hsφ : IsPreS
     exact hfac.symm
 
 /-- ★ずらした pre-step の底と零因子。 -/
-theorem frobShift_data {X A' Y : C} (φ : X ⟶ A')
-    (κ : A' ⟶ A') (hκb : P.Base κ = P.Base (𝟙 A')) (hκd : P.Div κ = 0)
+theorem frobShift_data {X A' A'' Y : C} (φ : X ⟶ A')
+    (κ : A' ⟶ A'') (hκd : P.Div κ = 0)
     (μ : X ⟶ Y) (hμd : P.Div μ = 0)
-    (φ₂ : Y ⟶ A') (heq : μ ≫ φ₂ = φ ≫ κ) :
-    P.Base μ ≫ P.Base φ₂ = P.Base φ ∧
+    (φ₂ : Y ⟶ A'') (heq : μ ≫ φ₂ = φ ≫ κ) :
+    P.Base μ ≫ P.Base φ₂ = P.Base φ ≫ P.Base κ ∧
       Φ.map (P.Base μ) (P.Div φ₂) = ((P.degFr κ : ℕ+) : ℕ) • P.Div φ := by
   constructor
   · have h := congrArg P.Base heq
-    rw [P.Base_comp, P.Base_comp, hκb, P.Base_id, Category.comp_id] at h
+    rw [P.Base_comp, P.Base_comp] at h
     exact h
   · have h := congrArg P.Div heq
     rw [P.Div_comp, P.Div_comp, hκd, hμd, map_zero, smul_zero, add_zero, zero_add] at h
