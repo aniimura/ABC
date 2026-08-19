@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1295 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-20 ・ コミット 1512 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
+  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">6170</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1706</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">22</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">7538</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">2018</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">197</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">23</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -52,30 +52,30 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>原文項目の実装率 —— [FrdI]「The Geometry of Frobenioids I」</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">必要分の実装</div><div class="v">35/54</div></div>
-  <div class="card"><div class="k">達成率</div><div class="v">65%</div></div>
+  <div class="card ok"><div class="k">必要分の実装</div><div class="v">41/54</div></div>
+  <div class="card"><div class="k">達成率</div><div class="v">76%</div></div>
   <div class="card"><div class="k">直接名指し</div><div class="v">25</div></div>
   <div class="card"><div class="k">FrdI 全項目</div><div class="v">83</div></div>
-  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">6</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">3</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
 <tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">13/15</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:87%"></div></div></td></tr>
-<tr><td><b>§2</b></td><td style="font-variant-numeric:tabular-nums">7/8</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:88%"></div></div></td></tr>
-<tr><td><b>§3</b></td><td style="font-variant-numeric:tabular-nums">8/9</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:89%"></div></div></td></tr>
-<tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">7/10</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:70%"></div></div></td></tr>
-<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">0/7</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c0392b;height:9px;border-radius:4px;width:0%"></div></div></td></tr>
+<tr><td><b>§2</b></td><td style="font-variant-numeric:tabular-nums">8/8</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
+<tr><td><b>§3</b></td><td style="font-variant-numeric:tabular-nums">9/9</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
+<tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">10/10</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
+<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">1/7</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:14%"></div></div></td></tr>
 <tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">0/5</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c0392b;height:9px;border-radius:4px;width:0%"></div></div></td></tr>
 </table>
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 6 件が条つきのみ)。<br>
+(いま 3 件が条つきのみ)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
@@ -89,16 +89,16 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
   <div class="card ok"><div class="k">循環</div><div class="v">0</div></div>
   <div class="card ok"><div class="k">着地した葉</div><div class="v">11</div></div>
   <div class="card"><div class="k">未展開の葉</div><div class="v">6</div></div>
-  <div class="card"><div class="k">暗黙の段</div><div class="v">59</div></div>
-  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">25</div></div>
+  <div class="card"><div class="k">暗黙の段</div><div class="v">70</div></div>
+  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">14</div></div>
 </div>
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 1001 節点を、強連結成分で潰して 296 個の箱・61 層に並べたもの。
+<span>原文の参照から機械抽出した 1005 節点を、強連結成分で潰して 294 個の箱・61 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
-<b>我々が触れている節点 67 件・Interface の義務 5/30 件。</b>
+<b>我々が触れている節点 67 件・Interface の義務 9/32 件。</b>
 生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
@@ -281,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>033621a</code></td><td>2026-08-19</td><td>自明化から生成切断を取る(第 264 ブロック、§9-307)</td></tr>
-<tr><td><code>7734c75</code></td><td>2026-08-19</td><td>★任意の対象は Frobenius-trivial な対象と pre-step の span で繋がる（＋ビルド復旧）</td></tr>
-<tr><td><code>bba1096</code></td><td>2026-08-19</td><td>貼り合わせたノルムの非退化(第 263 ブロック、§9-306)</td></tr>
-<tr><td><code>cef641f</code></td><td>2026-08-19</td><td>★★★`i-primary` は `ii-prime` と相互依存することを測った</td></tr>
-<tr><td><code>3511714</code></td><td>2026-08-19</td><td>★★★★★★`Theorem 4.2, (i)` の Div-Frobenius-trivial 対象の保存を取った</td></tr>
-<tr><td><code>79956b3</code></td><td>2026-08-19</td><td>1 の分割で貼る——代数の段(第 262 ブロック、§9-305)</td></tr>
-<tr><td><code>55808dc</code></td><td>2026-08-19</td><td>★`Div-identity` は合成で閉じる——`i-divfrob` の土台</td></tr>
-<tr><td><code>ac184ee</code></td><td>2026-08-19</td><td>C3 の局所の段が完成した(第 261 ブロック、§9-304)</td></tr>
-<tr><td><code>0d18e89</code></td><td>2026-08-19</td><td>★★★★★★`Theorem 4.2, (i)` の Div-identity 保存を取った</td></tr>
-<tr><td><code>a32bbfd</code></td><td>2026-08-19</td><td>開集合上の評価が連続になった——genNorm の連続性が完成(第 260 ブロック、§9-303)</td></tr>
-<tr><td><code>0886894</code></td><td>2026-08-19</td><td>★★★★★`Proposition 1.14, (v)` の右辺は `Ψ` で移る——`Theorem 4.2, (i)` の芯</td></tr>
-<tr><td><code>a588440</code></td><td>2026-08-19</td><td>開集合を経由する点の分解——連続性の足場(第 259 ブロック、§9-302)</td></tr>
+<tr><td><code>9e0173b</code></td><td>2026-08-20</td><td>G5 の残り(Weil 対=行列式が円分指標)をスケルトンとして固定</td></tr>
+<tr><td><code>e7adda6</code></td><td>2026-08-20</td><td>G6 の残り(Tate 一意化)をスケルトンとして固定——葉を可視化した</td></tr>
+<tr><td><code>361b4be</code></td><td>2026-08-20</td><td>G6 の臨界路——E_q の非退化性と局所高さの正値性(第 101 ブロック)</td></tr>
+<tr><td><code>7b68f81</code></td><td>2026-08-20</td><td>★★★★★G6 の臨界路——Tate 母数の存在(j 反転)(第 100 ブロック)</td></tr>
+<tr><td><code>f1bdf19</code></td><td>2026-08-20</td><td>G6 の臨界路——1/j = q·(単元)(第 99 ブロック)</td></tr>
+<tr><td><code>8d970c9</code></td><td>2026-08-20</td><td>G6 の臨界路——局所高さは判別式の付値(第 98 ブロック)</td></tr>
+<tr><td><code>a424e4f</code></td><td>2026-08-20</td><td>G6 の臨界路——Tate 曲線の判別式は q + O(q^2)(第 97 ブロック)</td></tr>
+<tr><td><code>9c495d0</code></td><td>2026-08-20</td><td>★★★★Theorem 5.2, (iv) —— 本質的全射性と忠実性を取った(残るは充満性 1 点)</td></tr>
+<tr><td><code>474acac</code></td><td>2026-08-20</td><td>G6 の臨界路——完備環上の Tate 曲線(第 96 ブロック)</td></tr>
+<tr><td><code>1e7594b</code></td><td>2026-08-20</td><td>G6 の臨界路——完備環での冪級数の値(第 95 ブロック)</td></tr>
+<tr><td><code>cf70a56</code></td><td>2026-08-20</td><td>G6 の臨界路——Tate 曲線の q 展開(第 94 ブロック)</td></tr>
+<tr><td><code>367c538</code></td><td>2026-08-20</td><td>負の対照を 2 件追加——旧 projectiveCase は偽、旧 structure_eq は数え上げで埋まる</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1706 件)。</div>
+<b>すべて PDF と機械照合している</b>(2018 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
