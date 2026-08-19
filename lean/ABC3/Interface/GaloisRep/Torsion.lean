@@ -49,8 +49,18 @@ open ABC3.Meta WeierstrassCurve
 
 ★★**これは今すぐ書ける**——mathlib の `W.toAffine.Point` が
 `AddCommGroup` を持つからである。★posit するのは**構造定理の方だけ**である。 -/
-def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (n : ℕ) : Type :=
-  {P : W.toAffine.Point // n • P = 0}
+def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (n : ℕ) :
+    AddSubgroup W.toAffine.Point where
+  carrier := {P : W.toAffine.Point | n • P = 0}
+  add_mem' := by
+    intro a b ha hb
+    simp only [Set.mem_setOf_eq] at *
+    rw [smul_add, ha, hb, add_zero]
+  zero_mem' := by simp
+  neg_mem' := by
+    intro a ha
+    simp only [Set.mem_setOf_eq] at *
+    rw [smul_neg, ha, neg_zero]
 
 /-! ## ★★★G1 —— `E[n] ≅ (ℤ/n)²` -/
 
@@ -66,8 +76,8 @@ def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) 
 structure TorsionStructureData where
   /-- ★★**代数閉体上、`n` が可逆なら `(ℤ/n)²` と同型**。 -/
   structure_eq : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K),
-    W.IsElliptic → ∀ n : ℕ, 0 < n → (n : K) ≠ 0 →
-    Nonempty (torsionPoints W n ≃ (ZMod n × ZMod n))
+    W.IsElliptic → ∀ n : ℕ, 0 < n → (∀ k : ℕ, 1 ≤ k → k ≤ n → (k : K) ≠ 0) →
+    Nonempty (torsionPoints W n ≃+ (ZMod n × ZMod n))
   /-- ★`n` 捩れは有限。 -/
   torsion_finite : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K),
     W.IsElliptic → ∀ n : ℕ, 0 < n → (n : K) ≠ 0 → Finite (torsionPoints W n)
