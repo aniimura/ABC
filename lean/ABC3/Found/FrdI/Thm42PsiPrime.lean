@@ -489,6 +489,80 @@ def psiPrime_naturality_frobType.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (ii) — Ψ_Prime の関手性（Frobenius 型）",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★★一般の base-isomorphism へ -/
+
+/-- ★`primeMap` は合成と両立する(`Φ.map` の反変性ぶん順序が入れ替わる)。 -/
+theorem primeMap_baseEquivOf_comp (Q : PreFrobenioid C Φ) {A X B : C}
+    (γ : B ⟶ X) (β : X ⟶ A) (hγ : IsIso (Q.Base γ)) (hβ : IsIso (Q.Base β))
+    (hc : IsIso (Q.Base (γ ≫ β))) (x : Prime (Φ.val (Q.toElem.obj A).base)) :
+    primeMap (baseEquivOf Q (γ ≫ β) hc) x
+      = primeMap (baseEquivOf Q γ hγ) (primeMap (baseEquivOf Q β hβ) x) := by
+  refine Quotient.inductionOn x (fun a => ?_)
+  show toPrime _ (Φ.map (Q.Base (γ ≫ β)) a.1) _
+    = toPrime _ (Φ.map (Q.Base γ) (Φ.map (Q.Base β) a.1)) _
+  exact toPrime_congr (by rw [Q.Base_comp, Φ.map_comp])
+
+/-- ★`primeMap ∘ baseEquivOf` は射の等式で移る。 -/
+theorem primeMap_baseEquivOf_congr (Q : PreFrobenioid C Φ) {A B : C} {f g : B ⟶ A}
+    (h : f = g) (hf : IsIso (Q.Base f)) (hg : IsIso (Q.Base g))
+    (x : Prime (Φ.val (Q.toElem.obj A).base)) :
+    primeMap (baseEquivOf Q f hf) x = primeMap (baseEquivOf Q g hg) x := by
+  subst h; rfl
+
+/-- ★`Ψ` は base-isomorphism を保つ(`Proposition 1.7, (ii)` の分解から)。 -/
+theorem isBaseIso_map (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : FrobenioidCore P)
+    (hFT : ∀ {X Y : C} (g : X ⟶ Y), IsFrobeniusType P g →
+      IsFrobeniusType P₂ (Ψ.functor.map g))
+    {A B : C} (f : B ⟶ A) (hf : IsBaseIsomorphism P f) :
+    IsBaseIsomorphism P₂ (Ψ.functor.map f) := by
+  obtain ⟨X, γ, β, hfac, hγ, hβ⟩ := (prop_1_7_ii_baseIso_factor P F f).mp hf
+  subst hfac
+  haveI : IsIso (P₂.Base (Ψ.functor.map γ)) := (hFT γ hγ).2
+  haveI : IsIso (P₂.Base (Ψ.functor.map β)) := (ctx.PS β hβ).2
+  show IsIso (P₂.Base (Ψ.functor.map (γ ≫ β)))
+  rw [Ψ.functor.map_comp, P₂.Base_comp]
+  infer_instance
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Theorem 4.2, (ii)** —— `Ψ_Prime` は
+**任意の base-isomorphism について関手的**。
+
+★`Proposition 1.7, (ii)`(base-iso = Frobenius 型 ∘ pre-step)で 2 場合に分ける。 -/
+theorem psiPrime_naturality (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : FrobenioidCore P)
+    (hOTri : ∀ (X : C) (δ : End X), δ ∈ OTri P X →
+      ((Ψ.functor.map (((δ : End X)) : X ⟶ X)) : End (Ψ.functor.obj X))
+        ∈ OTri P₂ (Ψ.functor.obj X))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    (hFT : ∀ {X Y : C} (g : X ⟶ Y), IsFrobeniusType P g →
+      IsFrobeniusType P₂ (Ψ.functor.map g))
+    {A B : C} (f : B ⟶ A) (hf : IsBaseIsomorphism P f)
+    (p : Prime (Φ.val (P.toElem.obj A).base)) :
+    psiPrime ctx B (primeMap (baseEquivOf P f hf) p)
+      = primeMap (baseEquivOf P₂ (Ψ.functor.map f)
+          (isBaseIso_map ctx F hFT f hf)) (psiPrime ctx A p) := by
+  obtain ⟨X, γ, β, hfac, hγ, hβ⟩ := (prop_1_7_ii_baseIso_factor P F f).mp hf
+  subst hfac
+  have hγb : IsIso (P.Base γ) := hγ.2
+  have hβb : IsIso (P.Base β) := hβ.2
+  have hγb₂ : IsIso (P₂.Base (Ψ.functor.map γ)) := (hFT γ hγ).2
+  have hβb₂ : IsIso (P₂.Base (Ψ.functor.map β)) := (ctx.PS β hβ).2
+  rw [primeMap_baseEquivOf_comp P γ β hγb hβb hf,
+    psiPrime_naturality_frobType ctx F hOTri hdeg hFT γ hγ,
+    psiPrime_naturality_preStep ctx F hOTri hdeg β
+      (prop_1_4_i P _ (fun Y _ => ctx.iso Y)) hβ]
+  have hmc : Ψ.functor.map (γ ≫ β) = Ψ.functor.map γ ≫ Ψ.functor.map β :=
+    Ψ.functor.map_comp _ _
+  have hcb₂ : IsIso (P₂.Base (Ψ.functor.map γ ≫ Ψ.functor.map β)) := by
+    rw [P₂.Base_comp]; infer_instance
+  rw [primeMap_baseEquivOf_congr P₂ hmc _ hcb₂]
+  exact (primeMap_baseEquivOf_comp P₂ (Ψ.functor.map γ) (Ψ.functor.map β)
+    hγb₂ hβb₂ hcb₂ (psiPrime ctx A p)).symm
+
+def psiPrime_naturality.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — Ψ_Prime の関手性",
+    sectionId := "frdi-thm-4-2" }
+
 end PsiPrime
 
 end ABC3.Found.FrdI
