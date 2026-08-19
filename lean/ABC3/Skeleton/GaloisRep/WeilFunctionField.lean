@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TranslateAut
+import ABC3.Found.GaloisRep.PointHom
 
 /-!
 # スケルトン —— **関数体への引き戻し(Weil 対の葉)**(`Skeleton`)
@@ -22,7 +22,9 @@ import ABC3.Found.GaloisRep.TranslateAut
 | **関数体の自己準同型 `translateFieldHom`** | 同上 | ✅ |
 | `Q` が **2 等分点**のときの単射性 | 本ファイル | ★**葉** |
 | **全単射性**(自己同型であること) | 本ファイル | ★**葉** |
-| **乗法 `[n]` の引き戻し** | 本ファイル | ★**葉** |
+| `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
+| **生成点が捽れ点でないこと** | 本ファイル | ★**葉** |
+| **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
 
 ★超越性の証明は **`−Q` での 1 点評価**だけで済んだ——
 `u = x − x₀` は `−Q` で消えるが `A = (x−x₀)²·X(τ_Q)` は消えない、という一点で決まる。
@@ -73,7 +75,24 @@ theorem exists_translateAut (W : WeierstrassCurve.Affine F) [W.IsElliptic]
       τ (coordX W) = translateX W x₀ y₀ ∧ τ (coordY W) = translateY W x₀ y₀ := by
   sorry
 
-/-! ## ★★★★★葉 2 —— 乗法 `[n]` -/
+/-! ## ★★★★★葉 2a —— 生成点は捩れ点でない -/
+
+/-- ★★★★★★**生成点は捩れ点ではない**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★第 118 ブロックの `exists_mulByNHom` はこれを仮定として受けている。
+★★証明の道: `n` 等分点の `x` 座標は **`F` の代数閉包の元**である
+(曲線が `F` 上定義されているから)。★★★我々は `E[n] ≃ (ℤ/n)²`(第 65-72、**Found に済**)を
+持つので、`E[n](F̄)` と `E[n](F(W)‾)` がどちらも `n²` 個であり、
+`Point.map` の単射性から**両者は一致する**。
+★★★★すると `coordX` が `F` 上代数的になり、第 116 の `coordX_transcendental` に矛盾する。 -/
+theorem genericPoint_not_torsion (W : WeierstrassCurve.Affine F) [W.IsElliptic]
+    (n : ℕ) (hn : 1 ≤ n) : n • genericPoint W ≠ 0 := by
+  sorry
+
+/-! ## ★★★★★葉 2b —— 乗法 `[n]` -/
 
 /-- ★★★★★**乗法 `[n]` の関数体への引き戻し**。
 
@@ -123,6 +142,21 @@ def exists_translateAut.needs : List ProofObligation :=
     .implicitStep
       "★`F` 代数射であること——`translateHom` が `F` 代数射なので延長も `F` を固定する(2-5 ブロック)" 19 ]
 
+def genericPoint_not_torsion.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Weil 対の構成——生成点が捩れ点でないこと)",
+    sectionId := "genell-thm-3-8" }
+
+def genericPoint_not_torsion.needs : List ProofObligation :=
+  [ .implicitStep
+      "★★★★`E[n] ≃+ (ℤ/n)²`(第 65-72 ブロック、**Found に済**)がそのまま使える。代数閉体上で `#E[n] = n²` であることが両側で効く(0 ブロック)" 19,
+    .implicitStep
+      "★★`Point.map` が単射であること(mathlib の `Point.map_injective`)と、有限集合の間の単射が同数なら全単射であること(5-10 ブロック)" 19,
+    .implicitStep
+      "★★★`coordX` が `F` 上超越的であること(第 116 `coordX_transcendental`、**Found に済**)が矛盾を出す(0 ブロック)" 19,
+    .implicitStep
+      "★代数閉包の取り扱い——`F(W)` の代数閉包の中で `F̄` を見る。mathlib の `AlgebraicClosure` と `IsAlgClosed` の橋が要る(5-15 ブロック)" 19 ]
+
 def exists_mulByNPullback.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(Weil 対の構成——乗法 [n] の関数体への引き戻し)",
@@ -133,8 +167,13 @@ def exists_mulByNPullback.needs : List ProofObligation :=
       (.absent "mathlib に [n] の関数体への引き戻しは 0 件(2026-08-20、同上の検索)") 19,
     .implicitStep
       "★分点多項式 `Φ_n` / `ΨSq_n` は mathlib にある(`WeierstrassCurve.Φ`・`WeierstrassCurve.ΨSq`、2026-08-20 実測)。**足場はある**(0 ブロック)" 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——生成点が捽れ点でないこと)" 19,
     .implicitStep
-      "★★★★**平行移動と同じ道が使える**——`[n]`(生成点)が曲線の点であること(第 114 の `genericPoint` に mathlib の `nsmul` を当てる)を言えば `AdjoinRoot.lift` に流せる。単射性も同様に 1 点評価で出るはずである(10-25 ブロック、当初 15-40 から下方修正)" 19,
+      "★★★★★★**環準同型は Found に入った**(第 118 ブロック `exists_mulByNHom`)。`pointHom`(点 ⇒ 環準同型)として一般化したところ、平行移動と**完全に同じ道**が `[n]` にも効いた。単射性も `pointHom_injective_of_transcendental` に帰着済み(0 ブロック)" 19,
+    .implicitStep
+      "★★`x([n]P)` が `Φ_n/ΨSq_n` と一致すること——mathlib の分点多項式と群法則を結ぶ段。mathlib にはこのリンクが無い(2026-08-20 実測)(10-25 ブロック)" 19,
+    .implicitStep
+      "★`x([n]P)` の超越性——`n` 等分点での 1 点評価(`ΨSq_n` が消えて `Φ_n` が消えない)で出る見込み。第 117 と同じ型(5-15 ブロック)" 19,
     .implicitStep
       "★★`y([n]P)` の側の式(`ω_n/ψ_n³` 型)——mathlib の在庫は未測定(5-15 ブロック)" 19 ]
 
