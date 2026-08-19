@@ -164,6 +164,42 @@ noncomputable def chosenIso (Y : D) :
   ((F.baseSurj Y).choose_spec.2).some
 
 include F in
+/-- ★★★★成分の自然性 —— `naturality_of_base` を同型で挟むだけ。 -/
+theorem projPrecompIso_naturality {G G' : D ⥤ D₂} (h : P.proj ⋙ G ≅ P.proj ⋙ G')
+    {A A' : C} {Y Y' : D}
+    (eY : (P.toElem.obj A).base ≅ Y) (eY' : (P.toElem.obj A').base ≅ Y') (φ : Y ⟶ Y') :
+    G.map φ ≫ (G.map eY'.inv ≫ h.hom.app A' ≫ G'.map eY'.hom)
+      = (G.map eY.inv ≫ h.hom.app A ≫ G'.map eY.hom) ≫ G'.map φ := by
+  have key := naturality_of_base P F (fun Z => h.hom.app Z)
+    (fun {_ _} f => h.hom.naturality f) (A := A) (A' := A') (eY.hom ≫ φ ≫ eY'.inv)
+  haveI : IsIso (G.map eY.hom) := G.map_isIso _
+  refine (cancel_epi (G.map eY.hom)).mp ?_
+  have hL : G.map eY.hom ≫ (G.map φ ≫ (G.map eY'.inv ≫ h.hom.app A' ≫ G'.map eY'.hom))
+      = h.hom.app A ≫ G'.map eY.hom ≫ G'.map φ := by
+    have s1 : G.map eY.hom ≫ (G.map φ ≫ (G.map eY'.inv ≫ h.hom.app A' ≫ G'.map eY'.hom))
+        = (G.map (eY.hom ≫ φ ≫ eY'.inv) ≫ h.hom.app A') ≫ G'.map eY'.hom := by
+      rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp]
+      simp only [Category.assoc]
+    have hc : G'.map eY'.inv ≫ G'.map eY'.hom = 𝟙 _ := by
+      rw [← CategoryTheory.Functor.map_comp, eY'.inv_hom_id, CategoryTheory.Functor.map_id]
+    have s2inner : (G'.map eY.hom ≫ G'.map φ ≫ G'.map eY'.inv) ≫ G'.map eY'.hom
+        = G'.map eY.hom ≫ G'.map φ := by
+      rw [Category.assoc, Category.assoc, hc, Category.comp_id]
+    have s2 : (h.hom.app A ≫ G'.map (eY.hom ≫ φ ≫ eY'.inv)) ≫ G'.map eY'.hom
+        = h.hom.app A ≫ G'.map eY.hom ≫ G'.map φ := by
+      rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp, Category.assoc]
+      exact congrArg (fun t => h.hom.app A ≫ t) s2inner
+    exact s1.trans ((congrArg (fun t => t ≫ G'.map eY'.hom) key).trans s2)
+  have hc2 : G.map eY.hom ≫ G.map eY.inv = 𝟙 _ := by
+    rw [← CategoryTheory.Functor.map_comp, eY.hom_inv_id, CategoryTheory.Functor.map_id]
+  have hR : G.map eY.hom ≫ ((G.map eY.inv ≫ h.hom.app A ≫ G'.map eY.hom) ≫ G'.map φ)
+      = h.hom.app A ≫ G'.map eY.hom ≫ G'.map φ := by
+    rw [Category.assoc, ← Category.assoc (G.map eY.hom) (G.map eY.inv), hc2,
+      Category.id_comp, Category.assoc]
+    rfl
+  rw [hL, hR]
+
+include F in
 /-- ★★★★★**一般の 1-一意性** —— `P.proj` との前合成は関手の同型を反射する。 -/
 noncomputable def projPrecompIsoGen {G G' : D ⥤ D₂}
     (h : P.proj ⋙ G ≅ P.proj ⋙ G') : G ≅ G' :=
@@ -171,38 +207,8 @@ noncomputable def projPrecompIsoGen {G G' : D ⥤ D₂}
     (fun Y => (G.mapIso (chosenIso P F Y)).symm
       ≪≫ h.app (chosenObj P F Y)
       ≪≫ G'.mapIso (chosenIso P F Y))
-    (fun {Y Y'} φ => by
-      have hnat : ∀ {A A' : C} (f : A ⟶ A'),
-          G.map (P.Base f) ≫ h.hom.app A' = h.hom.app A ≫ G'.map (P.Base f) :=
-        fun f => h.hom.naturality f
-      have key := naturality_of_base P F (fun A => h.hom.app A) (fun {_ _} f => hnat f)
-        (A := chosenObj P F Y) (A' := chosenObj P F Y')
-        ((chosenIso P F Y).hom ≫ φ ≫ (chosenIso P F Y').inv)
-      rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp,
-        CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp] at key
-      simp only [Category.assoc] at key
-      show G.map φ ≫ (G.map (chosenIso P F Y').inv ≫ h.hom.app (chosenObj P F Y')
-            ≫ G'.map (chosenIso P F Y').hom)
-        = (G.map (chosenIso P F Y).inv ≫ h.hom.app (chosenObj P F Y)
-            ≫ G'.map (chosenIso P F Y).hom) ≫ G'.map φ
-      haveI : IsIso (G.map (chosenIso P F Y).hom) := G.map_isIso _
-      refine (cancel_epi (G.map (chosenIso P F Y).hom)).mp ?_
-      have hR : G.map (chosenIso P F Y).hom ≫ ((G.map (chosenIso P F Y).inv
-            ≫ h.hom.app (chosenObj P F Y) ≫ G'.map (chosenIso P F Y).hom) ≫ G'.map φ)
-          = h.hom.app (chosenObj P F Y) ≫ G'.map (chosenIso P F Y).hom ≫ G'.map φ := by
-        simp only [Category.assoc]
-        rw [← Category.assoc (G.map (chosenIso P F Y).hom),
-          ← CategoryTheory.Functor.map_comp, (chosenIso P F Y).hom_inv_id,
-          CategoryTheory.Functor.map_id, Category.id_comp]
-      rw [hR]
-      simp only [Category.assoc]
-      rw [← Category.assoc (G.map φ), ← Category.assoc (G.map (chosenIso P F Y).hom)]
-      simp only [Category.assoc]
-      rw [key]
-      simp only [Category.assoc]
-      rw [← CategoryTheory.Functor.map_comp G' (chosenIso P F Y').inv
-        (chosenIso P F Y').hom, (chosenIso P F Y').inv_hom_id,
-        CategoryTheory.Functor.map_id, Category.comp_id])
+    (fun {Y Y'} φ =>
+      projPrecompIso_naturality P F h (chosenIso P F Y) (chosenIso P F Y') φ)
 
 def projPrecompIsoGen.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 68,
