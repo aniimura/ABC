@@ -151,11 +151,17 @@ structure ProjectiveModelData where
   /-- ★★**射影的な場合**——`ℙⁿ` への埋め込みからコンパクト性が出る道。
 
   ★`Found/GenEll/ArcModel.lean` は**この形の入力からコンパクト性を証明済み**である。
-  ★★一般の固有 `X` へは Chow の補題(固有 → 射影的な変更を持つ)を経る。 -/
+
+  ## ★★★★2026-08-20 の訂正(§9-406)
+
+  以前は「連続かつ単射」だけを要求していたが、★**それでは強すぎる(偽)**。
+  連続単射の像がコンパクトでも、定義域がコンパクトとは限らない
+  (例: `[0,1) → 円周`)。★★**埋め込み(`IsInducing`)** が要る
+  ——`Found/GenEll/ArcModel.lean` が実際に持っているのもそれである。 -/
   projectiveCase : ∀ X : Scheme.{0}, ∀ n : ℕ,
     ∀ emb : toArcSpaceData.Arc X → (Fin (n + 1) → ℂ),
-      @Continuous (toArcSpaceData.Arc X) (Fin (n + 1) → ℂ) (toArcSpaceData.topology X)
-        inferInstance emb → Function.Injective emb →
+      @Topology.IsInducing (toArcSpaceData.Arc X) (Fin (n + 1) → ℂ) (toArcSpaceData.topology X)
+        inferInstance emb →
       IsClosed (Set.range emb) → Bornology.IsBounded (Set.range emb) →
       @CompactSpace (toArcSpaceData.Arc X) (toArcSpaceData.topology X)
 
