@@ -360,7 +360,7 @@ noncomputable def cmpIsoPlBk {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P
 def cmpIso.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 25,
     item := "Definition 1.3, (iv), (a) — 3 分解の pull-back 部分の canonical 比較",
-    sectionId := "frdi-def-1-3-iva" }
+    sectionId := "frdi-def-1-3-iv" }
 
 end Compare
 
@@ -692,7 +692,7 @@ include F₂ hFT hPS in
 
 ★対象は `Definition 1.3, (i), (a)` が選ぶ `𝒞` の対象を経由し、
 射は `psiBaseHom`(存在は 3 分解、一意性は `𝒟₂` の slim 性)で送る。 -/
-noncomputable def psiBase [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+noncomputable def psiBaseFn [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
     (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
     D ⥤ D₂ where
   obj Y := (P₂.toElem.obj (Ψ.obj (chosenObj P F Y))).base
@@ -714,9 +714,9 @@ noncomputable def psiBase [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
 
 include F₂ hFT hPS in
 /-- ★1-可換図式の成分。 -/
-noncomputable def psiBaseSqApp [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+noncomputable def psiBaseFnSqApp [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
     (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) (A : C) :
-    (P.proj ⋙ psiBase P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB').obj A
+    (P.proj ⋙ psiBaseFn P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB').obj A
       ≅ (Ψ ⋙ P₂.proj).obj A where
   hom := psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
     ((chosenIso P F ((P.toElem.obj A).base)).hom)
@@ -738,10 +738,10 @@ noncomputable def psiBaseSqApp [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
 include F₂ hFT hPS in
 set_option maxHeartbeats 2000000 in
 /-- ★★★★★★**[FrdI] Theorem 3.4, (v)** —— `Ψ_Base` の **1-可換図式**。 -/
-noncomputable def psiBaseSquare [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+noncomputable def psiBaseFnSquare [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
     (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
-    P.proj ⋙ psiBase P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' ≅ Ψ ⋙ P₂.proj :=
-  NatIso.ofComponents (psiBaseSqApp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB')
+    P.proj ⋙ psiBaseFn P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' ≅ Ψ ⋙ P₂.proj :=
+  NatIso.ofComponents (psiBaseFnSqApp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB')
     (fun {X Y} f => by
       show psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
             ((chosenIso P F ((P.toElem.obj X).base)).hom ≫ P.Base f
@@ -757,7 +757,7 @@ noncomputable def psiBaseSquare [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
       refine congrArg (psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS) ?_
       simp)
 
-def psiBase.src : ABC3.Meta.Source :=
+def psiBaseFn.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 68,
     item := "Theorem 3.4, (v) — Ψ_Base の構成と 1-可換図式",
     sectionId := "frdi-thm-3-4" }
