@@ -1,5 +1,5 @@
 {
- "measuredAt": "2026-08-18(★8 葉すべて＋`𝒞^birat` の (iii)(d) 2 本を閉じた)",
+ "measuredAt": "2026-08-20",
  "whatThisIs": "[FrdI] の残りを止めている 3 つの塊を、**それぞれ内部の小目標の DAG に分解した**台帳。CLAUDE.md の『進め方』——「形式化の中で必要なものが出現したら、そのスケルトンを追加し、依存グラフを更新し、新しい葉から形式化を行うことで工数の大きな塊を壁のように認識しない」——を、原典の項目より下の粒度で実行するためのもの。tools/frdi-newleaves.mjs がこれを読んで層と葉を印字する。",
  "★なぜ作ったか": "2026-08-18 の朝まで、この 3 つを『壁』と呼んで到達不能と報告していた。CLAUDE.md に『姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。』が加わったので、3 つとも**内部を割って葉を出す**ことにした。★割ってみると、うち 2 つは在庫の測り違いが混じっていた(下記 ★訂正 を見ること)。",
  "★限界": "ここに書いた分解は**我々の設計であって、原典にも mathlib にも無い**。節点の粒度・依存の向きは作業のための仮説であり、実装すると変わりうる。★『葉』は依存が無いという意味であって、易しいという意味ではない。大きさは各節点の size に書く。",
@@ -1742,6 +1742,239 @@
      "note": "## ★★★★★★★閉じた(2026-08-19)\n\n★条なし `.src` を付ける前に、原文 (ii) の「**一意な** `Ψ_Prime`」の\n**一意性**が欠けていたので `psiPrime_unique` を足した ——\nどの素点も primary pre-step で実現される(`realizeIn`)ので、\n原文の特徴づけが写像を完全に決める。\n\n| 主張 | 実装 |\n|---|---|\n| (i) primary step | `primaryInIff_all` |\n| (i) Div-identity 自己射 | `isDivIdentity_map` |\n| (i) (universally) Div-Frobenius-trivial 対象 | `divFrobeniusTrivial_map` |\n| (ii) `Ψ_Prime` の存在・全単射・関手性 | `psiPrime` / `psiPrimeEquiv` / `psiPrime_naturality` |\n| (ii) **一意性** | ★`psiPrime_unique` |\n| (ii) `Order` の圏同値(＋反対圏) | `thm_4_2_ii_order` / `_op` |\n| (iii) 単系同型 | `thm_4_2_iii_monoid` |\n\n★逸脱 (B) を使う旨は `thm_4_2.src` の doc に明記した。",
      "file": "lean/ABC3/Found/FrdI/Thm42Order.lean",
      "decl": "thm_4_2.src / psiPrime_unique"
+    }
+   ]
+  },
+  {
+   "id": "thm51",
+   "title": "Theorem 5.1 —— 除数による記述(§5 の門)",
+   "paper": "FrdI",
+   "pdfPage": 96,
+   "nodes": [
+    {
+     "id": "slice",
+     "title": "Definition 1.3, (iii), (d) の圏同値を使い切る(切片・余切片の充満忠実性と本質的全射性)",
+     "size": "★中",
+     "status": "done",
+     "deps": [],
+     "note": "余切片は「Div が等しければ余域が同型」、切片は「Φ(Base)⁻¹(Div) が等しければ域が同型」。\n★Cor411Rigid.lean には本質的全射性だけがあった。",
+     "lean": "ABC3/Found/FrdI/Thm51Slice.lean",
+     "decl": "coaPreStep_iso_of_div_eq / exists_coaPreStep_into / coaPreStep_into_iso_of_div_eq"
+    },
+    {
+     "id": "birat-dict",
+     "title": "Φ^birat の 2 方向の辞書と輸送",
+     "size": "★中",
+     "status": "done",
+     "deps": [
+      "slice"
+     ],
+     "note": "base-equivalent な pre-step の対 ⟷ 𝒪^×(A^birat) の元。\n★原文が p.97–98 で長く展開する議論が、𝒞^birat の同型 1 本に置き換わる。",
+     "lean": "ABC3/Found/FrdI/Thm51Span.lean",
+     "decl": "mem_phiBiratAt_of_preStepPair / exists_preStepPair_of_mem_phiBiratAt / mem_phiBiratAt_transport"
+    },
+    {
+     "id": "span-iff",
+     "title": "★span の判定条件(Theorem 5.1, (i) の心臓)",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "birat-dict"
+     ],
+     "note": "φ : X → A'、ψ : X → A を pre-step とすると\n(底で整合する同型 A' ≅ A がある) ⟺ Div(ψ) − Div(φ) ∈ Φ^birat(X)。",
+     "lean": "ABC3/Found/FrdI/Thm51Span.lean",
+     "decl": "span_iso_iff"
+    },
+    {
+     "id": "well-def",
+     "title": "類の well-defined 性(span の取り方に依らない)",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "span-iff"
+     ],
+     "note": "2 つの span を preStepSpan で共通細分し、差が Φ^birat に入ることを見る。",
+     "lean": "ABC3/Found/FrdI/Thm51Cls.lean",
+     "decl": "span_class_sub_mem"
+    },
+    {
+     "id": "frtr-core",
+     "title": "★Theorem 5.1, (iii) の中心(base-isomorphic な Frobenius-trivial 対象は同型／Aut-ample)",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "well-def"
+     ],
+     "note": "Frobenius 型で span をずらすと類が 2 倍になり、well-defined 性から ξ = 2ξ ⟹ ξ = 0。",
+     "lean": "ABC3/Found/FrdI/Thm51Cls.lean",
+     "decl": "frobTrivial_iso_of_baseIso / isAutAmple_of_frobTrivial"
+    },
+    {
+     "id": "pic",
+     "title": "Theorem 5.1, (i) —— Pic_𝒞(A) ≃ Pic_Φ(A)",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "well-def"
+     ],
+     "note": "PicObj / PicC を対の商として直接作る(ファイバー積の圏は作らない)。\n後半の「Frobenius 型で類は次数倍」も取得。",
+     "lean": "ABC3/Found/FrdI/Thm51Pic.lean",
+     "decl": "picEquiv / PicObj.hasCls_frobType"
+    },
+    {
+     "id": "hom",
+     "title": "Theorem 5.1, (ii) —— 射の存在条件",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "pic",
+      "frtr-core"
+     ],
+     "note": "底変換(picPullBack)＋ 同底の場合(Definition 1.3, (iv) の 3 段分解)。\n★pull-back に沿って Frobenius-trivial 性が引き戻されることが前提として要った。",
+     "lean": "ABC3/Found/FrdI/Thm51Hom.lean",
+     "decl": "thm_5_1_ii / thm_5_1_ii_uniq"
+    },
+    {
+     "id": "sec",
+     "title": "Theorem 5.1, (iv) —— unit-trivial 型は model 型",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "frtr-core"
+     ],
+     "note": "base-section(同型類の代表元)・Frobenius-section(次数で一意なので自然性が自動)・\nbirat-Frobenius-normalized 性(𝒞 → 𝔽_Φ の忠実性を 𝒞^birat へ持ち上げる)。",
+     "lean": "ABC3/Found/FrdI/Thm51Sec.lean",
+     "decl": "thm_5_1_iv"
+    },
+    {
+     "id": "frtr-cat",
+     "title": "Theorem 5.1, (iii) —— 𝒞^Fr-tr が Frobenioid であること(21 + 2 条件)",
+     "size": "★大",
+     "status": "done",
+     "deps": [
+      "frtr-core"
+     ],
+     "note": "射がすべて等長 ⟹ 単系は 0_𝒟 ⟹ pre-step は同型 ⟹ すべての射が co-angular。\npull-back は 𝒞 の pull-back と一致(両向き)。",
+     "lean": "ABC3/Found/FrdI/Thm51FrTr.lean",
+     "decl": "thm_5_1_iii / frTr_frobenioid"
+    },
+    {
+     "id": "thm51-src",
+     "title": "条なしの .src(Theorem 5.1)",
+     "size": "★小",
+     "status": "done",
+     "deps": [
+      "pic",
+      "hom",
+      "frtr-cat",
+      "sec"
+     ],
+     "note": "逸脱の開示: Pic_𝒞 の作り方、Φ^birat の由来(Proposition 4.4, (iii) のクラス (B) を継承)。",
+     "lean": "ABC3/Found/FrdI/Thm51FrTr.lean",
+     "decl": "thm_5_1.src"
+    }
+   ]
+  },
+  {
+   "id": "thm52iv",
+   "title": "Theorem 5.2, (iv) —— model 型の Frobenioid は model Frobenioid と同値(§5 の第 2 の門)",
+   "paper": "FrdI",
+   "pdfPage": 101,
+   "nodes": [
+    {
+     "id": "ratfn-iface",
+     "title": "★有理関数のモノイド B の interface(B ≅ 𝒪^×(−^birat)、Div_B ≅ Div^gp)",
+     "size": "★大",
+     "status": "todo",
+     "deps": [],
+     "note": "原文は (iv) の仮定として「B は 𝒞 に伴う有理関数のモノイド」と置くので、\n★Lean でも **interface(構造)として仮定に置くのが忠実**である。\n必要なのは各 A : 𝒞 について\n  (a) 加法同型 M.bmon.val (Base A) ≃+ Additive (𝒪^×(A^birat))\n  (b) M.divB と biratDivGp の両立\n  (c) 𝒟 の射に沿った自然性\nの 3 点。\n★構成する場合は otriStarBirat(Prop44Phi.lean)を 𝒟* ≃ 𝒟 で 𝒟 へ移し、\nMonoidOn の charInj / fsmIso を示す必要がある(そちらは別ノード)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "ratfn-build",
+     "title": "(任意)B を MonoidOn D として構成する —— Proposition 4.4, (ii) の残り",
+     "size": "★特大",
+     "status": "todo",
+     "deps": [
+      "ratfn-iface"
+     ],
+     "note": "otriStarBirat は (InducedCategory D (istrBase (biratPre P G)))ᵒᵖ ⥤ MonCat。\n𝒟* ≃ 𝒟(prop_2_2_i)で移し、乗法 → 加法(Additive)に変え、\nMonoidOn の charInj / fsmIso を示す。★interface だけで (iv) は書けるので後回しでよい。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "cls-functor",
+     "title": "対象の対応 X ↦ (Base X, cls X)",
+     "size": "★中",
+     "status": "todo",
+     "deps": [
+      "ratfn-iface"
+     ],
+     "note": "底 d ごとに Frobenius-trivial な持ち上げ A_d を選び(ftLift)、\nPicObj P A_d の類を Φ^gp(Base X) へ輸送する。\n★strictification は要らない —— 同型 ρ_d : Base A_d ≅ d で輸送するだけ。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "hom-functor",
+     "title": "射の対応 f ↦ (degFr f, Base f, Div f, u_f)",
+     "size": "★大",
+     "status": "todo",
+     "deps": [
+      "cls-functor"
+     ],
+     "note": "u_f は Div_B(u_f) = degFr(f)·cls X + Div f − Φ(Base f)(cls Y) で決まる。\n★右辺が Φ^birat に入ることは Theorem 5.1, (ii)(thm_5_1_ii)そのもの。\n★u_f が一意に決まる(= 関手性)ためには ker(Div_B) ≅ 𝒪^×(A) を使う。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "ff",
+     "title": "充満忠実性",
+     "size": "★大",
+     "status": "todo",
+     "deps": [
+      "hom-functor"
+     ],
+     "note": "充満性は Theorem 5.1, (ii) の ⟸、忠実性は Proposition 3.3, (ii)(単元を除く忠実性)＋\nker(Div_B) ≅ 𝒪^× から。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "esssurj",
+     "title": "本質的全射性",
+     "size": "★中",
+     "status": "todo",
+     "deps": [
+      "cls-functor"
+     ],
+     "note": "Theorem 5.1, (i) の全射性(PicObj.exists_hasCls)から直ちに。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "compat",
+     "title": "𝔽_Φ への関手との 1-両立性",
+     "size": "★中",
+     "status": "todo",
+     "deps": [
+      "ff",
+      "esssurj"
+     ],
+     "note": "degFr・Base・Div が定義どおり一致するので、自然同型は恒等で取れるはず。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "thm52-src",
+     "title": "条なしの .src(Theorem 5.2)",
+     "size": "★小",
+     "status": "todo",
+     "deps": [
+      "compat"
+     ],
+     "note": "(i)(ii)(iii) は既に .src つき。(iv) が付けば条なしにできる。\n★interface を仮定に置いた分はクラス (B) の逸脱として開示する。",
+     "lean": "",
+     "decl": ""
     }
    ]
   }
