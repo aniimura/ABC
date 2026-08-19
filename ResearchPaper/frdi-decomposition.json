@@ -505,7 +505,7 @@
      "title": "(iii) の条つき .src",
      "deps": [
       "phibirat-dfunct",
-      "phibirat-factor",
+      "factor-src",
       "phibirat-uniq",
       "phibirat-ker"
      ],
@@ -840,9 +840,7 @@
      "id": "F3-order-monoid",
      "size": "小",
      "status": "done",
-     "deps": [
-      "F3-identity"
-     ],
+     "deps": [],
      "title": "(F3) 次数の大小の単系版——p•a ≤ q•a ⇔ p ≤ q",
      "note": "★済(2026-08-18): `Thm34Quasi.lean` の `nsmul_mle_nsmul_iff`。\n★★★**測定の収穫**: `prop_1_14_v_mp` の中で**`Div α' = (degFr ψ) • Div α`**(`Prop114.lean:1499`)が作られている。\n★原典の「step `β ∘ α`」はこの `α'` で、その `Div` は**次数の倍**。\n★したがって「分解可能性」は `MLe (p•a) (q•a)` に、さらに **`p ≤ q`** に帰着する。\n★証明: `⇐` は `add_smul`。`⇒` は integral から消約し、sharp で `a = 0` を導いて矛盾。"
     },
@@ -951,7 +949,7 @@
      "size": "中",
      "status": "done",
      "deps": [
-      "psiN-F3",
+      "F3-identity",
       "psiN-degree"
      ],
      "title": "non-group-like 対象があれば Ψ_N は恒等",
@@ -1189,8 +1187,7 @@
      "id": "v-baseid",
      "title": "(v) base-identity 自己射と base-equivalent 対の保存",
      "deps": [
-      "iii-morclasses",
-      "v-psibase"
+      "iii-morclasses"
      ],
      "status": "done",
      "size": "★大",
@@ -1433,6 +1430,9 @@
      "note": "",
      "file": "lean/ABC3/Found/FrdI/Prop48Gl.lean"
     }
+   ],
+   "unblocks": [
+    "Proposition 4.8"
    ]
   },
   {
@@ -1486,6 +1486,14 @@
      "lean": "ABC3/Found/FrdI/Def24SuppIntr.lean, ABC3/Found/FrdI/MonoidTransport.lean",
      "decl": "mem_supp_factorMap_iff / pfAddEquiv / primeEquiv / mem_supp_map"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Remark 4.5.1",
+    "page": 87
+   },
+   "unblocks": [
+    "Remark 4.5.1"
    ]
   },
   {
@@ -1540,6 +1548,14 @@
      "lean": "ABC3/Found/FrdI/Cor410Birat.lean",
      "decl": "Cor410Birat.cor_4_10.src"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Corollary 4.10",
+    "page": 92
+   },
+   "unblocks": [
+    "Corollary 4.10"
    ]
   },
   {
@@ -1564,25 +1580,28 @@
      "size": "★特大",
      "status": "done",
      "deps": [
-      "hyp",
-      "cor410-done",
-      "thm42-ii-done"
+      "hyp"
      ],
      "note": "原文 (物理 p.93-94、実測):\n> Next, we consider assertion (ii). First, let us observe that we obtain a 1-\n\n★★★**これが `Corollary 4.11` の要**である。原文の道(実測):\n\n| 段 | 内容 | 在庫 |\n|---|---|---|\n| 1 | `Ψ^birat : 𝒞₁^birat ≌ 𝒞₂^birat` と 1-可換図式 | ★済(`psiBiratCor_isEquivalence` / `psiBiratCor_square`) |\n| 2 | `Ψ^birat` は base-isomorphism を保つ(`Prop 4.4, (iv)`) | 辞書は済(`birat_isBaseIsomorphism_iff`) |\n| 3 | ★**Div-slim による base-identity 自己射の特徴づけ** | **未** |\n| 4 | `Theorem 4.2, (ii)` で「`Φ` が恒等へ送る自己同型」の保存 | 済(`psiPrime` 一式) |\n| 5 | ⟹ `Ψ^birat` は `𝒪^×` を保つ ⟹ `(Ψ^birat)^un-tr` | `psiUnTr` は在庫 |\n| 6 | `(𝒞ᵢ^birat)^un-tr` は isotropic ＋ unit-trivial ＋ group-like | **未** |\n| 7 | `Proposition 3.11, (iii)` で `Ψ_Base` | ★済(`prop_3_11_iii`) |\n| 8 | 図式の合成 `𝒞 → 𝒞^birat → (𝒞^birat)^un-tr → 𝒟` ≅ `proj` | **未** |\n\n★rigidity は `𝒟ᵢ` が slim のときだけの主張(原文どおり)で、`prop_3_11_iii` が供給する。\n\n★★`Remark 4.11.2`(原文 p.94)が言うとおり、**Div-slim は落とせない** ——\n`Example 3.9`/`3.10` が反例である。\n\n## ★★★★★測って**否定**した道(2026-08-19)—— `Theorem 3.4, (v)` は Div-slim へ移らない\n\n本セッションで作った `Theorem 3.4, (v)` の機構(`Thm34Slice.lean`)は\n`realizesBase_unique` で **`overMap_injective hslim₂`**(`𝒟₂` の slim 性)を使う。\n★Div-slim 版を作るには `Over.map ξ ≅ Over.map ξ'` の witness の成分が\n**`Φ`-自明**であることが要る。\n\n★★しかし `RealizesBase` の witness は**存在量化されているだけ**で、\nどこから来たかを制御できない ⟹ **`Φ`-自明性を言えない**。\n★★★したがって原文どおり **`𝒞^birat` 経由**で進むしかない。\n(原文 `Remark 4.11.1` が「(ii) は `Theorem 3.4, (v)` の substantial strengthening」と\n書くとおり、真に新しい内容である。)\n\n## ★★★★段 3 の道具が入った(2026-08-19、`Cor411Base.lean`、`lake build` 緑)\n\n| 宣言 | 中身 |\n|---|---|\n| `eq_refl_of_conj_eq_refl` | 在庫の `isRigidFunctor_comp_of_equivalence` の骨を**条件つき**に一般化 |\n| `overPhiAut_one` / ★`overPhiAut_eq_one` | `overPhiAut` の成分は `Φ.map (η.hom.app Y)` |\n| ★`divSlim_pullBack_trivial` | `Definition 1.3, (i), (c)` の圏同値で `𝒟_{A_𝒟}` へ共役し、**Div-slim の単射性**を当てる |\n| ★★`divSlim_over_aut_eq_id` | **Div-slim 版の `Proposition 1.13, (i)`** —— 「`Φ` が恒等へ送る自己同型は恒等」 |\n\n★これは `P` が**任意の pre-Frobenioid** で成り立つので、\n`P := biratPre P G`(在庫の `biratCore` が `FrobenioidCore` を供給)にも当たる。\n\n★残るのは段 2(`Ψ^birat` が `𝒪^×` を保つ)・段 4・段 6・段 8。\n\n## ★★★★★★段 1・2 が閉じた(2026-08-19)\n\n★★測った還元: `Proposition 4.4, (iv)` の辞書で\n`IsBaseIdentity (biratPre P G) (HomBirat.mk Z φ) ↔ Base ζ = Base φ` であり、\n`biratBase (HomBirat.mk Z φ) = inv (Base ζ) ≫ Base φ` なので、\n「`Φ₂` がこれを恒等へ送る」＝**`Ψ` が Div-equivalence を保つ**\n(`Theorem 4.9` の系 `divEquivalent_map`)。\n\n| 段 | 宣言 | 状態 |\n|---|---|---|\n| 1 | ★`biratPsi_baseIdentity_map`(一般形 `baseIdentity_map_of_divSlim` を `Φ₀ := Φ₂` で当てる) | ★済 |\n| 2 | ★`biratPsi_otimes_map` | ★済 |\n| 3 | `(Ψ^birat)^un-tr`(`psiUnTr` ＋ `birat_isOfQuasiIsotropicType`) | 未 |\n| 4 | `(𝒞^birat)^un-tr` が isotropic ＋ unit-trivial ＋ group-like | 未 |\n| 5 | `psiBase` / `psiBaseCommute` / `psiBaseUniq`(`Prop311.lean`、slim 不要) | 未 |\n| 6 | 図式の合成 `𝒞 → 𝒞^birat → (𝒞^birat)^un-tr → 𝒟` ≅ `P.proj` | 未 |\n\n★★段 5 で `prop_3_11_iii` を丸ごと使うと `IsSlimCat D₂` を要求されるが、\n**存在・1-可換・1-一意の部分は `psiBase` / `psiBaseCommute` / `psiBaseUniq` で\nslim 無しに取れる**(rigidity だけが slim を要る ——原文どおり)。\n\n★段 3 の材料はすべて在庫: `birat_isOfIsotropicType`(`Prop44Pre.lean`)、\n`birat_isOfQuasiIsotropicType`(`Prop48Gl.lean`)、`toElem_map_congr_of_otimes`。\n\n## ★★段 3・4 も閉じた(2026-08-19)\n\n| 段 | 宣言 | 状態 |\n|---|---|---|\n| 3 | ★`psiBiratUnTr`(`Cor411Birat.lean`) | ★済 |\n| 4 | ★`untrBirat_isOfIsotropicType` / `_isOfUnitTrivialType` / `_isOfGroupLikeType`(`Cor411BaseFn.lean`) | ★済 |\n| 5 | `psiBase` / `psiBaseCommute` / `psiBaseUniq` を当てる | 未 |\n| 6 | 図式の合成 `𝒞 → 𝒞^birat → (𝒞^birat)^un-tr → 𝒟` ≅ `P.proj` | 未 |\n\n★段 3 で分かったこと: **isotropic 型 ⟹ quasi-isotropic 型** は在庫にあった\n(`isOfQuasiIsotropicType_of_isOfIsotropicType`)ので新しい数学は要らなかった。\n★段 4 で分かったこと: `𝒞^birat` の単系は **`0_𝒟`(1 元)** なので group-like は\n`isOfGroupLikeType_of_phiTrivial` に `Subsingleton.elim` を渡すだけ。\n\n## ★★★★★★段 5・6 が閉じた —— **1-可換図式が出た**(2026-08-19)\n\n★`cor_4_11_ii_square : P₁.proj ⋙ Ψ_Base ≅ Ψ ⋙ P₂.proj`。\n\n★★測って分かったこと: **鎖と `Ψ^birat`／`Ψ^un-tr` の合成は `rfl` で通り抜ける** ——\n`biratToIstr` は対象に isotropic の証明を付けるだけなので、\n`psiBiratCor_square` と `psiUnTr_square`(どちらも**等式**)を貼り合わせれば\n`biratUnTrChain_square` は 2 回の `rw` と `rfl` で出る。\n\n## ★★★★★測って**否定**した道 —— `P.proj` は充満でない\n\n1-一意性には「`P₁.proj` との前合成が関手の同型を反射する」ことが要る。\nそのための一般補題 `natIsoOfWhiskerLeft`(本質的全射 ＋ **充満**)は作った。\n\n★★しかし **`P.proj` は充満ではない** ——`Definition 1.3, (i), (c)` が与えるのは\n`φD : Base A ⟶ Base B` に対する **pull-back `ζ : W ⟶ B` と同型 `u : Base W ≅ Base A`** で\n`φD = u⁻¹ ≫ Base ζ` という形であって、`W ≅ A` は言えない。\n★同じ理由で鎖 `chain₁ : 𝒞₁ ⥤ (𝒞₁^birat)^un-tr` も充満でない。\n\n## ★★★★★★残る道(測定済)\n**`𝒟₁` のどの射も `Base` の像と(`Base` の像である)同型の逆の合成で書ける**:\n- `Definition 1.3, (i), (c)` で `φD = u⁻¹ ≫ Base ζ`(`ζ` は pull-back)\n- `Definition 1.3, (i), (b)`(`preStepSpan`)で `u = (Base φ)⁻¹ ≫ Base ψ`(`φ`・`ψ` は pre-step)\n\n★したがって「`Base` の像すべてで自然」から**`𝒟₁` のすべての射で自然**へ延びる。\nこれが 1-一意性の残りである。\n\n## ★★★★★★★閉じた(2026-08-19) —— (ii) の 5 要素\n\n| 主張 | 実装 |\n|---|---|\n| 存在 | `psiBaseBirat` |\n| 1-可換図式 | ★`cor_4_11_ii_square` |\n| 1-一意性 | ★`cor_4_11_ii_uniq` |\n| 両方が圏同値 | ★`cor_4_11_ii_equivalence` |\n| rigidity(`𝒟₂` slim のとき) | ★`cor_4_11_ii_rigid` |\n\n★★1-一意性は**在庫の `projPrecompIsoGen`**(`Thm34VBase.lean`、`Theorem 3.4, (v)` 用に\n作ったもの)がそのまま効いた —— `base_three_factor` の 3 分解が\n「`Base` の像で自然 ⟹ `𝒟` 全体で自然」を担う。\n★自作した一般補題 `natIsoOfWhiskerLeft`(充満版)は結局使わなかったが、\n`P.proj` が充満でないことを測る過程で得た正しい一般補題なので残す。",
      "file": "lean/ABC3/Found/FrdI/Cor411Bid.lean, lean/ABC3/Found/FrdI/Cor411Birat.lean",
-     "decl": "baseIdPull / baseIdSliceIso / baseIdentity_map_of_divSlim / biratPsi_baseId_divTrivial / biratPsi_baseIdentity_map / biratPsi_otimes_map / psiBiratUnTr / untrBirat_isOfIsotropicType / untrBirat_isOfUnitTrivialType / untrBirat_isOfGroupLikeType / biratUnTrChain / cor_4_11_ii_square / natIsoOfWhiskerLeft / cor_4_11_ii_uniq / cor_4_11_ii_equivalence / cor_4_11_ii_rigid"
+     "decl": "baseIdPull / baseIdSliceIso / baseIdentity_map_of_divSlim / biratPsi_baseId_divTrivial / biratPsi_baseIdentity_map / biratPsi_otimes_map / psiBiratUnTr / untrBirat_isOfIsotropicType / untrBirat_isOfUnitTrivialType / untrBirat_isOfGroupLikeType / biratUnTrChain / cor_4_11_ii_square / natIsoOfWhiskerLeft / cor_4_11_ii_uniq / cor_4_11_ii_equivalence / cor_4_11_ii_rigid",
+     "crossDeps": [
+      "cor410-done",
+      "thm42-ii-done"
+     ]
     },
     {
      "id": "thm49",
      "title": "[新規] Theorem 4.9 —— 除数単系の圏論性(Ψ_Φ)",
      "size": "★特大",
      "status": "done",
-     "deps": [
-      "thm42-iii-done"
-     ],
+     "deps": [],
      "note": "★★**形式化の中で現れた新しい葉**(CLAUDE.md の「進め方」どおり台帳へ追加)。\n`Corollary 4.11, (iii)` が `Theorem 4.9` を引くが、自動生成の needed 一覧\n(`frdi-needed.json`、`[FrdI], Kind N.M` の形の引用の推移閉包)には入っていない。\n\n原文 (物理 p.88):\n> Theorem 4.9. (Category-theoreticity of Divisor Monoids)\n\n## ★★★★★★測って分かった —— **我々は最難関の段を既に持っている**\n\n原文の証明は\n「`Theorem 4.9` を示すには **`Theorem 4.2, (iii)` の right-hand と left-hand の\n同型が一致する**ことを示せば十分」と言い、そこに twin-primary steps の議論\n(原文 p.89-90)を費やす。\n\n★★★**我々の `Theorem 4.2, (iii)` は最初から 1 本しかない** ——\n`divEquiv` は `𝒪^▷(A)` の**自己射**の `Div` で作るので、\n「`A` から出る」と「`A` へ入る」の区別が無い。\nしたがって **right-hand ＝ left-hand は自明**である(逸脱 (B) `hdivS` のおかげ)。\n\n★残るのは\n(1) `divEquiv` の `A` についての**関手性**(base-iso は `psiPrime_naturality` の手筋、\n    pull-back は `Proposition 1.11, (v)` の「pre-step の引き戻し」)\n(2) `Φ₁ ≅ Φ₂`(関手の同型)へ束ねる段\n\n## ★★★★★★★核が通った(2026-08-19、`Thm49.lean`、`lake build` 緑)\n\n★★測って分かった —— **場合分けが要らない**。\n在庫の `div_square_frob` は `f` の型を問わず\n`Φ.map (Base f) (Div u) = (degFr f) • Div w`(四角形 `w ≫ f = f ≫ u`)を与える。\n★`divEquiv` は加法的なので `ℕ` 倍と交換する ⟹ 両側で同じ計算をすれば閉じる。\n\n| 宣言 | 中身 |\n|---|---|\n| `divMap_div_otri` | `divMap (Div u) = Div (Ψ u)` |\n| ★`divMap_naturality_of_square` | 四角形があれば自然性(**射の型を問わない**) |\n| ★★`otriPull_frobType` | Frobenius 型に沿った `𝒪^▷` の引き戻し(`Thm42DivId` の中の構成を補題に切り出した) |\n| `DivMapNat` / `divMapNat_comp` | 自然性は**合成で閉じる** |\n| `divMapNat_pullBack` / `_preStep` / `_frobType` | 3 つの類型 |\n| ★★`divMapNat_all` | **`arbFactor` の 3 分解で任意の射へ** |\n| ★★★`divEquivalent_map` | **`Ψ` は Div-equivalence を保つ** —— `Corollary 4.11, (ii)` の要 |\n\n★残るのは `Φ₁ ≅ Φ₂` を**関手の同型**として束ねる段(`AddCommMonCat` の `NatIso`)と\n`Ψ_Prime` との両立(★これは `psiPrime_eq_primeEquiv` で既に在庫)。\n\n## ★★★★★★★閉じた(2026-08-19) —— `psiPhi`\n\n`phiOnC P := P.proj.op ⋙ Φ.functor`(原文の「regard Φi as a functor on Ci」)として\n★**`psiPhi : phiOnC P ≅ Ψ.functor.op ⋙ phiOnC P₂`**(`AddCommMonCat` の `NatIso`)を構成した。\n\n| 主張 | 実装 |\n|---|---|\n| `Ψ_Φ : Φ₁ ≅ Φ₂`(関手の同型) | ★`psiPhi` |\n| `Ψ` の上に乗る(自然性) | ★`divMapNat_all` |\n| `Ψ_Prime` との両立 | `psiPrime_eq_primeEquiv`(`Thm42Order.lean`、既存) |\n\n★★自動生成の needed 一覧(`frdi-needed.json`)には `Theorem 4.9` は入っていない\n(`[FrdI], Kind N.M` の形の引用の推移閉包で拾えない)ので §4 の分母は 10 のまま。",
      "file": "lean/ABC3/Found/FrdI/Thm49.lean",
-     "decl": "divMap_div_otri / divMap_naturality_of_square / otriPull_frobType / DivMapNat / divMapNat_all / divEquivalent_map / phiOnC / psiPhi"
+     "decl": "divMap_div_otri / divMap_naturality_of_square / otriPull_frobType / DivMapNat / divMapNat_all / divEquivalent_map / phiOnC / psiPhi",
+     "crossDeps": [
+      "thm42-iii-done"
+     ]
     },
     {
      "id": "psi-untr",
@@ -1638,6 +1657,15 @@
      "file": "lean/ABC3/Found/FrdI/Cor411Phi.lean",
      "decl": "cor_4_11.src"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Corollary 4.11",
+    "page": 94
+   },
+   "unblocks": [
+    "Corollary 4.11",
+    "Theorem 4.9"
    ]
   },
   {
@@ -1743,6 +1771,14 @@
      "file": "lean/ABC3/Found/FrdI/Thm42Order.lean",
      "decl": "thm_4_2.src / psiPrime_unique"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Theorem 4.2",
+    "page": 76
+   },
+   "unblocks": [
+    "Theorem 4.2"
    ]
   },
   {
@@ -1873,6 +1909,14 @@
      "lean": "ABC3/Found/FrdI/Thm51FrTr.lean",
      "decl": "thm_5_1.src"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Theorem 5.1",
+    "page": 97
+   },
+   "unblocks": [
+    "Theorem 5.1"
    ]
   },
   {
@@ -1895,13 +1939,13 @@
      "id": "ratfn-build",
      "title": "(任意)B を MonoidOn D として構成する —— Proposition 4.4, (ii) の残り",
      "size": "★特大",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "ratfn-iface"
      ],
-     "note": "otriStarBirat は (InducedCategory D (istrBase (biratPre P G)))ᵒᵖ ⥤ MonCat。\n𝒟* ≃ 𝒟(prop_2_2_i)で移し、乗法 → 加法(Additive)に変え、\nMonoidOn の charInj / fsmIso を示す。★interface だけで (iv) は書けるので後回しでよい。\n\n## ★★2026-08-20 夜 の現在地\n★**単系の同型そのものは取れた**: unit-trivial 型では `𝒪^×(A^birat) ≅ Φ^birat(A)`\n(`otimesBiratEquivPhiBirat`, `Thm52ModelType.lean`)。核が `𝒪^×(A)_𝒞` の像で、\nunit-trivial ならそれが自明だから。\n\n★★**残るのは「`Φ^birat` を `MonoidOn D` として立てる」ことだけ**である:\n* `phiBiratAt` は `𝒞` の対象で添字づけられている。`𝒟` の対象 `d` へ移すには\n  `baseSurj` で `Base A ≅ d` なる `A` を選び、`phiBiratAt_map_le` /\n  `mem_phiBiratAt_transport` で選択によらないことを示す。\n* そのうえで `MonoidOn` の 3 フィールド(`functor` / `charInj` / `fsmIso`)を埋める。\n  `Φ^gp` の `MonoidOn`(`Φ.gpOn`)は在庫にあるので、その**部分関手**として作る。\n★これができれば `Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の\nmodel Frobenioid)と `Proposition 5.5, (iv)` の第 2 の場合が `modelType_equiv` で出る。",
-     "lean": "",
-     "decl": ""
+     "note": "otriStarBirat は (InducedCategory D (istrBase (biratPre P G)))ᵒᵖ ⥤ MonCat。\n𝒟* ≃ 𝒟(prop_2_2_i)で移し、乗法 → 加法(Additive)に変え、\nMonoidOn の charInj / fsmIso を示す。★interface だけで (iv) は書けるので後回しでよい。\n\n## ★★2026-08-20 夜 の現在地\n★**単系の同型そのものは取れた**: unit-trivial 型では `𝒪^×(A^birat) ≅ Φ^birat(A)`\n(`otimesBiratEquivPhiBirat`, `Thm52ModelType.lean`)。核が `𝒪^×(A)_𝒞` の像で、\nunit-trivial ならそれが自明だから。\n\n★★**残るのは「`Φ^birat` を `MonoidOn D` として立てる」ことだけ**である:\n* `phiBiratAt` は `𝒞` の対象で添字づけられている。`𝒟` の対象 `d` へ移すには\n  `baseSurj` で `Base A ≅ d` なる `A` を選び、`phiBiratAt_map_le` /\n  `mem_phiBiratAt_transport` で選択によらないことを示す。\n* そのうえで `MonoidOn` の 3 フィールド(`functor` / `charInj` / `fsmIso`)を埋める。\n  `Φ^gp` の `MonoidOn`(`Φ.gpOn`)は在庫にあるので、その**部分関手**として作る。\n★これができれば `Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の\nmodel Frobenioid)と `Proposition 5.5, (iv)` の第 2 の場合が `modelType_equiv` で出る。\n\n## ★★★★閉じた(2026-08-20)—— 新しい鎖 `phibirat-monoidon` に分解した\n`Φ^birat` を `𝒟` の対象で添字づけ(`phiBiratOn`)、選び方によらないことを\n`Definition 1.3, (i)(b)` の pre-step の span から出し、部分関手性を\n`plBk_baseChange` ＋ `𝒞^birat` での `otimesPull` から出した。\n★条件 (b)(FSM-morphism なら同型)だけは `𝒟` が of FSM-type であることを\n**追加の仮定**に置いた —— 逸脱として `index.html` に開示済み。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "phiBiratMonoidOn / biratRatFnData"
     },
     {
      "id": "cls-functor",
@@ -2025,7 +2069,635 @@
      "lean": "ABC3/Found/FrdI/Thm52NatIso.lean",
      "decl": "model_birat_frobNormalized / model_isOfBiratFrobNormalizedType / model_isOfModelType"
     }
+   ],
+   "serves": {
+    "paper": "FrdI",
+    "item": "Theorem 5.2, (iv)",
+    "page": 101
+   },
+   "unblocks": [
+    "Theorem 5.2"
+   ]
+  },
+  {
+   "id": "phibirat-monoidon",
+   "title": "Φ^birat を 𝒟 上の単系(monoid on 𝒟)として立てる —— Proposition 5.3 第 2 文の律速",
+   "paper": "FrdI",
+   "pdfPage": 83,
+   "serves": {
+    "paper": "FrdI",
+    "item": "Proposition 4.4, (iii) / Proposition 5.3",
+    "page": 83
+   },
+   "★位置づけ": "原文 `Proposition 4.4, (iii)` は `Φ^birat ⊆ Φ^gp` を「subfunctor of groups」としか呼ばないが、`Theorem 5.2` の有理関数の単系 `B` は「group-like monoid on 𝒟」でなければならない。★この差が `Proposition 5.3` を止めていた。2026-08-20 に (a) を証明し、(b) は `𝒟` が of FSM-type であることを**追加の仮定**に置いて閉じた。",
+   "nodes": [
+    {
+     "id": "birat-baseiso",
+     "title": "Φ^birat は底の同型に沿って移る",
+     "deps": [],
+     "status": "done",
+     "size": "中",
+     "note": "`Definition 1.3, (i)(b)` の pre-step の span で挟み、`mem_phiBiratAt_transport` を 2 回。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "mem_phiBiratAt_baseIso"
+    },
+    {
+     "id": "birat-square",
+     "title": "四角形 φ ≫ δ = ε ≫ φ から Div^gp の関係",
+     "deps": [],
+     "status": "done",
+     "size": "小",
+     "note": "`biratDivGp` の合成則の両辺が `Div^gp(φ)` を 1 つずつ含み、消去できる。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "biratDivGp_of_square"
+    },
+    {
+     "id": "birat-pullback",
+     "title": "Φ^birat は pull-back 射に沿って引き戻る",
+     "deps": [
+      "birat-square"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "`otimesPull` を `𝒞^birat` で行う(`birat_isPullBack_iff` で pull-back に移す)。★birat-Frobenius-normalized 型を仮定する(`𝒞^birat` の 21 条に要る)。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "mem_phiBiratAt_pullBack"
+    },
+    {
+     "id": "birat-on-d",
+     "title": "Φ^birat を 𝒟 の対象で添字づける(選び方によらない)",
+     "deps": [
+      "birat-baseiso"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "`baseSurj` で各 `d` の上の対象を選び、`birat-baseiso` で独立性を出す。`𝒞` の対象の上では `phiBiratAt` と**等しい**(`phiBiratOn_base`)。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "phiBiratOn / mem_phiBiratOn_iff / phiBiratOn_base"
+    },
+    {
+     "id": "birat-subfunctor",
+     "title": "Φ^birat が 𝒟 上の部分関手であること",
+     "deps": [
+      "birat-on-d",
+      "birat-pullback"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "`plBk_baseChange`(`Definition 1.3, (i)(c)` の本質的全射性)で 𝒟 の射をpull-back 射の底に持ち上げ、`birat-pullback` を当てる。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "phiBiratOn_map / phiBiratFunctor"
+    },
+    {
+     "id": "birat-charinj",
+     "title": "MonoidOn の条件 (a) characteristic injectivity",
+     "deps": [
+      "birat-subfunctor"
+     ],
+     "status": "done",
+     "size": "小",
+     "note": "`Φ^gp` の単射性の制限。第 2 成分(`charMap` の単射性)は**群なので無料**。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "phiBiratMonoidOn"
+    },
+    {
+     "id": "birat-fsmiso",
+     "title": "★MonoidOn の条件 (b) FSM-morphism なら同型",
+     "deps": [
+      "birat-subfunctor"
+     ],
+     "status": "半済",
+     "size": "★大",
+     "note": "★★**原文にない仮定を足して閉じた**: `𝒟` が **of FSM-type**(§0、FSM 射はすべて同型)。★外すには「FSM 射に沿って Φ^birat が降りる」——`ν : A₁ → A₀` が pull-back で `Base ν` が FSM のとき `Φ^gp(Base ν)(z) ∈ Φ^birat(A₁) ⟹ z ∈ Φ^birat(A₀)`——が要る。これは幾何では `ker(Pic(A₀) → Pic(A₁)) = 0` に相当し、**一般の連結・全射的圏では期待できない**。★反例を作れれば ③ sourceGap に上がり、原文の「monoid on 𝒟」という語法の側に問題があることになる。★逆に `Definition 1.3` から出せれば仮定は消える。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "phiBiratMonoidOn (hfsmD)"
+    },
+    {
+     "id": "birat-ratfn",
+     "title": "unit-trivial 型の有理関数の単系が Φ^birat であること",
+     "deps": [
+      "birat-charinj",
+      "birat-fsmiso"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "`κ` は `Proposition 4.4, (iii)` の全射(unit-trivial 型なので全単射)、`Div_B` は包含そのもの、`κ` の pull-back 自然性は `birat-square`。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "biratRatFnData"
+    },
+    {
+     "id": "untr-model-frob",
+     "title": "★Proposition 5.3 第 2 文 —— 𝒞^un-tr は (Φ, Φ^birat) の model Frobenioid",
+     "deps": [
+      "birat-ratfn"
+     ],
+     "status": "done",
+     "size": "小",
+     "note": "`unTr_isOfModelType`(`Theorem 5.1, (iv)`)と `modelType_equiv`(`Theorem 5.2, (iv)`)の合成。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "unTr_ratFnData / unTr_modelFrobenioid"
+    }
+   ],
+   "unblocks": [
+    "Proposition 5.3",
+    "Proposition 5.5"
+   ]
+  },
+  {
+   "id": "rlf",
+   "title": "実化 Φ^rlf を 𝒟 上の単系として立てる —— Proposition 5.3 第 1 文と Corollary 5.4 の律速",
+   "paper": "FrdI",
+   "pdfPage": 103,
+   "serves": {
+    "paper": "FrdI",
+    "item": "Proposition 5.3(第 1 文、実化の定義)",
+    "page": 103
+   },
+   "★位置づけ": "`Proposition 5.3` の第 1 文は **定義**である —— `𝒞^rlf` := 因子の単系 `Φ^rlf`、有理関数の単系 `ℝ·Φ^birat ⊆ (Φ^rlf)^gp` の model Frobenioid。★したがって証明すべきものは無く、**`Φ^rlf` を `MonoidOn 𝒟` として立てられるか**だけが問題。★在庫: `Def24.lean` の `Rlf ι` は `∏_{p ∈ Prime M} ℝ≥0` の部分集合として作ってあり、**素点の族 `ι` の選択に依存する**ので、`𝒟` 上の関手性が見えない。★これが `Corollary 5.4`(IUTchI が直接引く)も止めている。",
+   "nodes": [
+    {
+     "id": "pf-qmodule",
+     "title": "`Pf M` が ℚ≥0-半加群であること",
+     "deps": [],
+     "status": "todo",
+     "size": "中",
+     "note": "`Pf M`(perfection)は可除なので `q • x` が定義できる。`Module ℚ≥0 (Pf M)`(半環上の半加群)を入れる。★mathlib は `Semiring R` + `AddCommMonoid M` の `Module` を許すので型は通る。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "rlf-tensor",
+     "title": "`M^rlf := Pf M ⊗_{ℚ≥0} ℝ≥0` を立てる",
+     "deps": [
+      "pf-qmodule"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "★**関手性が無料で付く**(`TensorProduct.map`)のが要点。`M → Pf M → M^rlf` の自然な射も付く。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "rlf-agree",
+     "title": "原文の `M^rlf`(素点分解版)と一致すること",
+     "deps": [
+      "rlf-tensor"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "perf-factorial なら `Pf M ≅ ⊕_p ℚ≥0`、`M^rlf ≅ ⊕_p ℝ≥0` で両者は一致する。★これを示さないと `Def24.lean` の `Rlf` との**二重定義**になる(逸脱として記録が要る)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "rlf-flat",
+     "title": "ℝ≥0 は ℚ≥0 上平坦 —— 単射性の保存",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "`MonoidOn` の条件 (a) に要る。`f : M ↪ N` から `f ⊗ id : M^rlf ↪ N^rlf`。★半環上の平坦性は mathlib に無い可能性が高い。★迂回: perf-factorial なら両者とも自由なので、基底の像で直接示せるかもしれない。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "rlf-monoidon",
+     "title": "`Φ^rlf : MonoidOn 𝒟` の 3 フィールド",
+     "deps": [
+      "rlf-tensor",
+      "rlf-flat"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "`functor` は `rlf-tensor` の関手性、`charInj` は `rlf-flat`(第 2 成分は群なら無料)、`fsmIso` は `Φ.fsmIso` を `⊗ ℝ≥0` で移す。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "r-phibirat",
+     "title": "`ℝ·Φ^birat ⊆ (Φ^rlf)^gp` を group-like monoid on 𝒟 として立てる",
+     "deps": [
+      "rlf-monoidon"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "`Φ^birat(A_𝒟)` が生成する ℝ-部分ベクトル空間。★`phibirat-monoidon` の `birat-on-d` / `birat-subfunctor` を `⊗ ℝ` で移せばよい。★`Div_B : ℝ·Φ^birat → (Φ^rlf)^gp` は包含。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "crlf-def",
+     "title": "★`𝒞^rlf` の定義(Proposition 5.3 第 1 文)",
+     "deps": [
+      "r-phibirat"
+     ],
+     "status": "todo",
+     "size": "小",
+     "note": "`ModelData` を組んで `ModelData.Obj` を取るだけ。★`Theorem 5.2, (ii)` が「これは Frobenioid である」を与える(実装済み)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "cor54",
+     "title": "`Corollary 5.4` —— Ψ^rlf の 1-一意存在と rigidity",
+     "deps": [
+      "crlf-def"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。",
+     "lean": "",
+     "decl": ""
+    }
+   ],
+   "unblocks": [
+    "Proposition 5.3",
+    "Corollary 5.4",
+    "Proposition 5.5"
+   ]
+  },
+  {
+   "id": "prop55",
+   "title": "Proposition 5.5 —— perfection / unit-trivialization / realification と型の関係",
+   "paper": "FrdI",
+   "pdfPage": 104,
+   "serves": {
+    "paper": "FrdI",
+    "item": "Proposition 5.5",
+    "page": 104
+   },
+   "★位置づけ": "(iii) の「`𝒞^un-tr` はつねに model 型」と (iv) の `𝒞^un-tr` の場合は 2026-08-20 に閉じた(`unTr_isOfModelType` / `unTr_modelFrobenioid`)。★残るのは **perfection がらみ**((i)(ii)(iii) の `𝒞^pf`、(iv) の `𝒞^pf`)と**実化がらみ**((iii)(iv) の `𝒞^rlf`、`rlf` チェーン待ち)。",
+   "nodes": [
+    {
+     "id": "p55i",
+     "title": "(i) `𝒪^▷(A)^pf ≅ 𝒪^▷(A^pf)`",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文の証明: Frobenius-trivial `A` では base-identity な Frobenius 型自己射とFrobenius-normalized 型から直ちに。一般の `A` は `Theorem 5.1, (i)` の「pre-step の対」で降りる。★在庫: `Def31Pf.lean` の `PfRootObj` / `HomRoot`、`Prop32Frob.lean` の `pfRootCore`。★`𝒪^▷(A)` は**乗法**単系なので、`Pf` を `Additive` 経由で当てる必要がある。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55ii-untr",
+     "title": "(ii) `(𝒞^pf)^un-tr ≃ (𝒞^un-tr)^pf`",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文: isotropic 型としてよく、`Definition 3.1, (iii)` から「2 対象の像のあいだの射の集合の自然な全単射」を作れば済む。道具は `Proposition 3.2, (ii)` を pre-step と単元に当てること。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55ii-birat",
+     "title": "(ii) `(𝒞^pf)^birat ≃ (𝒞^birat)^pf`",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "同上。★`Cor411BaseFn.lean` に `unTr(birat)` の対応があるので流用できる可能性。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55iii-pf",
+     "title": "(iii) `𝒞` が standard/rationally standard/model 型なら `𝒞^pf` もそう",
+     "deps": [
+      "p55i",
+      "p55ii-untr",
+      "p55ii-birat"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文は (i)(ii) と `Proposition 3.2, (ii), (iii)` から。`(𝒞^un-tr)^birat` が Frobenius-normalized 型であることを使う。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55iii-untr",
+     "title": "(iii) `𝒞^un-tr` はつねに model 型",
+     "deps": [],
+     "status": "done",
+     "size": "——",
+     "note": "`Theorem 5.1, (iv)` から。",
+     "lean": "ABC3/Found/FrdI/Thm52ModelType.lean",
+     "decl": "unTr_isOfModelType"
+    },
+    {
+     "id": "p55iii-rlf",
+     "title": "(rlf 待ち) (iii) `𝒞^rlf` はつねに model 型",
+     "deps": [],
+     "status": "todo",
+     "size": "小",
+     "note": "model Frobenioid として定義するので `Theorem 5.2, (ii)` から直ちに。",
+     "lean": "",
+     "decl": "",
+     "crossDeps": [
+      "crlf-def"
+     ]
+    },
+    {
+     "id": "p55iii-std",
+     "title": "(iii) 非 group-like のとき standard 性が `𝒞^un-tr`, `𝒞^rlf` へ移る",
+     "deps": [
+      "p55iii-rlf"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つこと、および `𝒞^un-tr`, `𝒞^rlf` の pull-back 射がちょうど linear isometry であること(`Proposition 1.4, (ii)`)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55iv-untr",
+     "title": "(iv) `𝒞^un-tr ≃ (Φ, Φ^birat)` の model Frobenioid",
+     "deps": [],
+     "status": "done",
+     "size": "——",
+     "note": "★原文は「`𝒞` が model Frobenioid のとき」と仮定するが、我々の `unTr_modelFrobenioid` は**任意の Frobenioid**について与える(原文より強い)。",
+     "lean": "ABC3/Found/FrdI/Prop53Birat.lean",
+     "decl": "unTr_modelFrobenioid",
+     "crossDeps": [
+      "untr-model-frob"
+     ]
+    },
+    {
+     "id": "p55iv-pf",
+     "title": "(iv) `𝒞^pf ≃ (Φ^pf, B^pf)` の model Frobenioid",
+     "deps": [
+      "p55i",
+      "p55ii-untr"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "`pfOn Φ` は在庫にある(`ElementaryFrobenioid.lean`)。`B^pf → (Φ^gp)^pf` と `(Φ^pf)^gp` の比較が要る。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p55iv-rlf",
+     "title": "(rlf 待ち) (iv) `𝒞^rlf ≃ (Φ^rlf, ℝ·Φ^birat)` の model Frobenioid",
+     "deps": [],
+     "status": "todo",
+     "size": "小",
+     "note": "定義そのもの。",
+     "lean": "",
+     "decl": "",
+     "crossDeps": [
+      "crlf-def"
+     ]
+    }
+   ],
+   "unblocks": [
+    "Proposition 5.5"
+   ]
+  },
+  {
+   "id": "prop56",
+   "title": "Proposition 5.6 / Corollary 5.7 —— Frobenius-trivial 対象の base-Frobenius pair",
+   "paper": "FrdI",
+   "pdfPage": 105,
+   "serves": {
+    "paper": "FrdI",
+    "item": "Proposition 5.6",
+    "page": 105
+   },
+   "★位置づけ": "原文の証明は 2 段: (1) 「素数 `p` で `u φ_p u⁻¹ = φ'_p` なる `u ∈ 𝒪^×(A)` があれば十分」という**還元**、(2) unit-profinite 型を使う **pro-`p` の議論**で `u` を作る。★2026-08-20 に (1) を閉じた(`prop_5_6_sigma_conj`)。残りは (2)。",
+   "nodes": [
+    {
+     "id": "p56-claim",
+     "title": "★claim(還元) —— σ は φ と同じ u の共役で移る",
+     "deps": [],
+     "status": "done",
+     "size": "中",
+     "note": "`v_α := σ'_α (u σ_α u⁻¹)⁻¹ ∈ 𝒪^×(A)` と置き、`F`,`F'` の自然性・Frobenius-normalized(`φ_p x = x^p φ_p`)・`𝒪^▷(A)` の可換性で整理して `v_α = v_α^p` を出し、全射性(totally epimorphic)と `p = 2` で `v_α = 1`。",
+     "lean": "ABC3/Found/FrdI/Prop56Sec.lean",
+     "decl": "prop_5_6_v_pow / prop_5_6_sigma_conj"
+    },
+    {
+     "id": "p56-primes",
+     "title": "素数上で一致する 2 つの単系準同型 `ℕ≥1 →* M` は一致する",
+     "deps": [],
+     "status": "todo",
+     "size": "小",
+     "note": "`ℕ≥1` は素数で生成される。`Nat.recOnPrimeFactors` 系の帰納で出る。★これで claim の `φ` 側が全次数に広がる。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p56-unitprofinite",
+     "title": "unit-profinite 型の定義と在庫確認",
+     "deps": [],
+     "status": "todo",
+     "size": "中",
+     "note": "`Definition 2.8` 系の語彙。`𝒪^×(A)` が位相的に有限生成な副有限アーベル群であること。★`prol` チェーン(実装済み)の `M ≅ ∏_l M[l]` がここで効く。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p56-cosets",
+     "title": "`M ⊆ 𝒪^×(A)` から商単系 `E_M = M\\E` を作る",
+     "deps": [
+      "p56-unitprofinite"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "原文 p.105 の「for any `m ∈ M`, `f ∈ E`, there exists `m' ∈ M` such that `f·m = m'·f`」を満たす部分群について、剰余類の集合に単系構造が入ること。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p56-Mp",
+     "title": "`M_p ⊆ 𝒪^×(A)` の構成",
+     "deps": [
+      "p56-cosets"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p56-limit",
+     "title": "逆極限で `u` を作る",
+     "deps": [
+      "p56-Mp"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "各段で `u_n` を選び、副有限性(コンパクト性)で極限を取る。★ここが原文の「unit-profinite 型」を実際に消費する所。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "p56",
+     "title": "`Proposition 5.6` 本体",
+     "deps": [
+      "p56-claim",
+      "p56-primes",
+      "p56-limit"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "(1) と (2) を束ねる。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "cor57",
+     "title": "`Corollary 5.7`",
+     "deps": [
+      "p56"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.107。★IUTchI が直接引く。",
+     "lean": "",
+     "decl": ""
+    }
+   ],
+   "unblocks": [
+    "Proposition 5.6",
+    "Corollary 5.7"
+   ]
+  },
+  {
+   "id": "sec6geom",
+   "title": "§6 の幾何的前提 —— 正規多様体の因子論(Example 6.1 / Theorem 6.2 / Example 6.3 / Theorem 6.4)",
+   "paper": "FrdI",
+   "pdfPage": 109,
+   "serves": {
+    "paper": "FrdI",
+    "item": "Example 6.1",
+    "page": 109
+   },
+   "★位置づけ": "§6 は 0/5 である。★止めているのは Frobenioid の理論ではなく、**因子論の在庫**である。原文 `Example 6.1` は「proper normal variety `V`」「函数体 `K`」「`L` における `V` の正規化 `V[L]`」「`Q`-Cartier 素因子」「Galois 圏 `B(G)`」を**前提として**使う。★★したがって §6 の葉は FrdI の項目ではなく、**mathlib 側の対象**である。ここに並べたのは「何が要るか」の測定であって、我々が全部作るという意味ではない(在庫が出来れば `ex61` 以降は組み立てになる)。",
+   "nodes": [
+    {
+     "id": "mathlib-normal-variety",
+     "title": "在庫測定: proper normal variety と函数体",
+     "deps": [],
+     "status": "todo",
+     "size": "中",
+     "note": "mathlib の `AlgebraicGeometry` に `IsIntegral`/`IsNormal` スキームはある。「proper」「geometrically integral」「函数体 `K(V)`」がどこまで在るかを測る。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "mathlib-weil-divisor",
+     "title": "在庫測定: Weil 因子 / Cartier 因子 / Q-Cartier",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "★正規多様体上の素因子(余次元 1 の既約閉部分多様体)と、その自由アーベル群。`Q`-Cartier(ある `n` 倍が Cartier)。★mathlib には**因子の一般論が実質不在**と見込まれる(要測定)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "normalization-in-ext",
+     "title": "有限拡大 `L/K` における `V` の正規化 `V[L]`",
+     "deps": [
+      "mathlib-normal-variety"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "`V[L]` も proper normal variety であること。`D_L`(`D_K` の素因子に落ちる `V[L]` の素因子)の定義。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "div-of-rational-fn",
+     "title": "有理関数の因子 `div(f) = (f)_0 - (f)_∞`",
+     "deps": [
+      "mathlib-weil-divisor"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "`B(L) ⊆ L^×` を「零点・極がすべて `D_L` に属する」有理関数の群として定義し、`B(L) → Φ(L)^gp` が `L` について関手的であることを言う。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "galois-cat-B0",
+     "title": "Galois 圏 `B(G)` とその連結対象 `B(G)^0`",
+     "deps": [],
+     "status": "todo",
+     "size": "中",
+     "note": "★§0 の語彙。`G = Gal(K̄/K)` の連続作用を持つ有限集合の圏。★これが `Example 6.1` の `𝒟` になる。★`𝒟` が連結・totally epimorphic・of FSM-type であることもここで出る(→ `phibirat-monoidon` の `birat-fsmiso` の仮定が幾何では成り立つ根拠)。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "ex61-phi-perffact",
+     "title": "`Φ(L)` が perf-factorial で `Prime(Φ(L)) ≅ D_L`",
+     "deps": [
+      "mathlib-weil-divisor",
+      "normalization-in-ext"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "原文が「one verifies immediately」と書く所。`Φ(L)^pf = ℚ≥0[D_L]`。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "ex61",
+     "title": "`Example 6.1` —— 幾何由来の Frobenioid `C_{V,K̄,D_K}`",
+     "deps": [
+      "div-of-rational-fn",
+      "galois-cat-B0",
+      "ex61-phi-perffact"
+     ],
+     "status": "todo",
+     "size": "中",
+     "note": "★`Φ`, `B`, `Div_B` が揃えば **`Theorem 5.2, (ii)`(実装済み)を当てるだけ**。★これが「§6 は Frobenioid 理論ではなく因子論で止まっている」の意味である。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "thm62",
+     "title": "`Theorem 6.2`",
+     "deps": [
+      "ex61"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.110。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "ex63",
+     "title": "`Example 6.3`",
+     "deps": [
+      "ex61"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.112。★IUTchI,II,III が直接引く。非同型性の所で `Lemma 6.5, (ii)`(six exponentials)を消費する。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "thm64",
+     "title": "`Theorem 6.4`",
+     "deps": [
+      "thm62",
+      "ex63"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "原文 p.114。★IUTchI,II,III が直接引く。",
+     "lean": "",
+     "decl": ""
+    }
+   ],
+   "unblocks": [
+    "Example 6.1",
+    "Theorem 6.2",
+    "Example 6.3",
+    "Theorem 6.4"
    ]
   }
- ]
+ ],
+ "★2026-08-20 の拡張": "`Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の model Frobenioid)を閉じた際に、§5・§6 で**まだ在庫が無いもの**が具体的に見えたので、CLAUDE.md の「進め方」に従って**5 本の鎖を新設した**: `phibirat-monoidon`(閉じた)・`rlf`・`prop55`・`prop56`・`sec6geom`。★あわせて `tools/frdi-newleaves.mjs` を止めていたグラフ側の不備 3 件(宙づりの依存 5 本・`F3` の循環・`v-baseid ↔ v-psibase` の循環)を直し、鎖をまたぐ依存は `crossDeps` に分離した(この道具は鎖ごとに層を出すため)。★★測定の結論: **§6 を止めているのは Frobenioid の理論ではなく因子論の在庫である**。`Example 6.1` は `Φ`・`B`・`Div_B` さえ作れれば `Theorem 5.2, (ii)`(実装済み)を当てるだけになる。"
 }

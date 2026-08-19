@@ -203,6 +203,23 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <code>Proposition 4.8</code>／<code>Corollary 4.10</code>／<code>Corollary 4.11</code> の <b>5 件</b>が
 この 1 段の下流にある（<code>node tools/frdi-blocked.mjs</code>）。
 記録: <code>Gap/FrdI/Prop44.lean</code> の <code>Gap_4_4_ii_otriBase</code>（分類 ② missingMath、③ へ上がる条件つき）。</td></tr>
+<tr><td><b>[FrdI] Proposition 4.4, (iii) ／ Proposition 5.3</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+<b>★<code>Φ^birat</code> を「<code>𝒟</code> 上の単系」にするために、<code>𝒟</code> が <u>of FSM-type</u>（§0：FSM 射はすべて同型）であることを足した</b>（<code>phiBiratMonoidOn</code> の <code>hfsmD</code>）。
+原文 <code>Proposition 4.4, (iii)</code> は <code>Φ^birat ⊆ Φ^gp</code> を <b>「subfunctor of groups」としか呼ばず</b>、<code>Definition 1.1</code> の
+(a) characteristic injectivity・(b) FSM 射なら同型 を<b>主張していない</b>。
+ところが <code>Theorem 5.2</code> の有理関数の単系 <code>B</code> は「group-like <b>monoid on 𝒟</b>」でなければならないので、
+<code>Proposition 5.3</code>（<code>𝒞^un-tr</code> は <code>(Φ, Φ^birat)</code> の model Frobenioid）を言うには (a)(b) が要る。<br>
+<b>(a) は無料で出る</b>——<code>Φ^gp</code> の単射性の制限で、第 2 成分（<code>charMap</code> の単射性）は群なので自動。<br>
+<b>★(b) が足した所である。</b>外すには「FSM 射に沿って <code>Φ^birat</code> が<b>降りる</b>」——
+<code>Base ν</code> が FSM の pull-back <code>ν : A₁ → A₀</code> について
+<code>Φ^gp(Base ν)(z) ∈ Φ^birat(A₁) ⟹ z ∈ Φ^birat(A₀)</code>——が要る。
+これは幾何では <code>ker(Pic(A₀) → Pic(A₁)) = 0</code> に相当し、<b>一般の連結・全射的圏では期待できない</b>。<br>
+★<b>足した仮定は本来の応用では成り立つ</b>——<code>Example 6.1</code> の <code>𝒟 = B(G)⁰</code>（連結有限次被覆の Galois 圏）では
+FSM 射は同型である。★逆に反例を作れれば分類は ③ sourceGap に上がり、原文の「monoid on 𝒟」という語法の側の問題になる。<br>
+★<b>足した前提の下では <code>Proposition 5.3</code> の第 2 文は完全に証明できている</b>
+（<code>Found/FrdI/Prop53Birat.lean</code> の <code>unTr_modelFrobenioid</code>、sorry 0・公理は標準 3 つ）。
+記録: 同ファイル冒頭の「逸脱」節、および <code>ResearchPaper/frdi-decomposition.json</code> の鎖
+<code>phibirat-monoidon</code> の節点 <code>birat-fsmiso</code>。</td></tr>
 <tr><td><b>[FrdI] Definition 2.8, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 <b>位相的有限生成な副有限アーベル群の pro-<code>l</code> 分解</b>（<code>M ≅ ∏_l M[l]</code>）が要る。
 mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極限表示と有限アーベル群の準素分解は<b>ある</b>が、
