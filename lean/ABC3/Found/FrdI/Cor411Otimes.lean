@@ -244,8 +244,8 @@ theorem otimes_map_of_divSlim (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
   haveI : (plBkSlicePsi P P₂ Ψ.functor hPB A).IsEquivalence :=
     inferInstanceAs (Functor.IsEquivalence (Over.post (X := (⟨A⟩ : PlBk P))
       (plBkPsi P P₂ Ψ.functor hPB)))
-  haveI : (plBkSlicePsi P P₂ Ψ.functor hPB A ⋙ plBkOverFunctor P₂ (Ψ.functor.obj A))
-      .IsEquivalence := inferInstance
+  haveI : Functor.IsEquivalence (plBkSlicePsi P P₂ Ψ.functor hPB A
+      ⋙ plBkOverFunctor P₂ (Ψ.functor.obj A)) := inferInstance
   set δ' : OTimes P A := ⟨δ, h⟩ with hδ'
   set e := (plBkSlicePsi P P₂ Ψ.functor hPB A
     ⋙ plBkOverFunctor P₂ (Ψ.functor.obj A)).asEquivalence with he
@@ -296,13 +296,14 @@ theorem otimes_map_of_divSlim (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
   set Z₀ : Over (⟨A⟩ : PlBk P) := Over.mk (𝟙 (⟨A⟩ : PlBk P)) with hZ₀
   have hZ₀c : θ.hom.app Z₀ = 𝟙 ((e.functor ⋙ Gf).obj Z₀) :=
     congrArg (fun t : (e.functor ⋙ Gf) ≅ (e.functor ⋙ Gf) => t.hom.app Z₀) hθrefl
-  have hpull : ((otimesPull P F hiso Z₀.hom.hom Z₀.hom.property δ' : End A) : A ⟶ A)
-      = (δ : A ⟶ A) := by
+  have hpull : ((otimesPull P F hiso Z₀.hom.hom Z₀.hom.property δ' : End Z₀.left.obj)
+      : Z₀.left.obj ⟶ Z₀.left.obj) = (δ : A ⟶ A) := by
     have hs := otimesPull_spec P F hiso Z₀.hom.hom Z₀.hom.property δ'
-    show _ = ((δ' : End A) : A ⟶ A)
-    have hid : Z₀.hom.hom = 𝟙 A := rfl
-    rw [hid, Category.id_comp, Category.comp_id] at hs
-    exact hs.symm
+    have hs2 : (𝟙 Z₀.left.obj) ≫ ((δ' : End A) : A ⟶ A)
+        = (((otimesPull P F hiso Z₀.hom.hom Z₀.hom.property δ' : End Z₀.left.obj)
+            : Z₀.left.obj ⟶ Z₀.left.obj)) ≫ (𝟙 Z₀.left.obj) := hs
+    rw [Category.id_comp, Category.comp_id] at hs2
+    exact hs2.symm
   refine (mem_otimes_iff P₂ _).mpr ⟨?_, ?_⟩
   · have hu : IsIso ((δ : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso _).mp h.2
     haveI := hu
@@ -318,5 +319,59 @@ def otimes_map_of_divSlim.src : ABC3.Meta.Source :=
     sectionId := "frdi-cor-4-11" }
 
 end PsiOtimes
+
+/-! ## ★4. `Ψ^un-tr` —— `Corollary 4.11, (i)` の関手 -/
+
+section PsiUnTr
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★★★★★★**[FrdI] Corollary 4.11, (i)** —— `Ψ^un-tr` の構成。
+
+原文 (FrdI p.91):
+> (i) There exists a 1-unique functor Ψun-tr : C1un-tr
+
+★★**底の 1-可換図式を経由しない** ——`Div-slim` ＋ `Theorem 4.2, (i)` から
+直に `𝒪^×` の保存が出るので、`Corollary 4.11, (ii)` に依存しない。 -/
+noncomputable def psiUnTrOfDivSlim (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (P₂ : PreFrobenioid C₂ Φ₂) (F₂ : FrobenioidCore P₂)
+    (Ψ : C ≌ C₂)
+    (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.functor.map f))
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.functor.map f) → IsPullBack P f)
+    (hds₂ : IsDivSlim Φ₂)
+    (hDivId : ∀ {X : C} (α : X ⟶ X), IsDivIdentity P α →
+      IsDivIdentity P₂ (Ψ.functor.map α))
+    (h₁ : IsOfQuasiIsotropicType C P) (h₂ : IsOfQuasiIsotropicType C₂ P₂) :
+    UnTr P ⥤ UnTr P₂ :=
+  haveI := Ψ.isEquivalence_functor
+  psiUnTr Ψ.functor h₁ h₂
+    (fun α₁ α₂ hh => toElem_map_congr_of_otimes Ψ.functor F hiso
+      (fun X δ hδ => otimes_map_of_divSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId δ hδ)
+      α₁ α₂ hh)
+
+/-- ★★★★**1-可換図式**(`rfl`)。 -/
+theorem psiUnTrOfDivSlim_square (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (P₂ : PreFrobenioid C₂ Φ₂) (F₂ : FrobenioidCore P₂)
+    (Ψ : C ≌ C₂)
+    (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.functor.map f))
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.functor.map f) → IsPullBack P f)
+    (hds₂ : IsDivSlim Φ₂)
+    (hDivId : ∀ {X : C} (α : X ⟶ X), IsDivIdentity P α →
+      IsDivIdentity P₂ (Ψ.functor.map α))
+    (h₁ : IsOfQuasiIsotropicType C P) (h₂ : IsOfQuasiIsotropicType C₂ P₂) :
+    haveI := Ψ.isEquivalence_functor
+    psiIstr Ψ.functor P P₂ h₁ h₂ ⋙ istrToUnTr P₂
+      = istrToUnTr P ⋙ psiUnTrOfDivSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId h₁ h₂ :=
+  rfl
+
+def psiUnTrOfDivSlim.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 91,
+    item := "Corollary 4.11, (i) — Ψ^un-tr（Div-slim からの構成）",
+    sectionId := "frdi-cor-4-11" }
+
+end PsiUnTr
 
 end ABC3.Found.FrdI
