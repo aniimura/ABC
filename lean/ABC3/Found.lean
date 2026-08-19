@@ -76,6 +76,7 @@ import ABC3.Found.FrdI.Prop44Gl
 import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
+import ABC3.Found.FrdI.Rmk451Ratstd
 import ABC3.Found.FrdI.Prop44Pair
 import ABC3.Found.FrdI.Thm42
 import ABC3.Found.FrdI.Cor410
@@ -418,6 +419,10 @@ import ABC3.Found.GaloisRep.OmegaTwo
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
+import ABC3.Found.Arakelov.PicTrivRestrict
+import ABC3.Found.Arakelov.PicBijGood
+import ABC3.Found.Arakelov.PicGoodOpen
+import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply

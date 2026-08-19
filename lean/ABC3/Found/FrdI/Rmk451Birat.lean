@@ -596,10 +596,23 @@ theorem istr_unTrBiratCompact (G : Frobenioid P)
 
 ★これらは `𝒞^birat` と `(𝒞^istr)^birat` の比較であって、本ファイルで作った
 `𝒞^un-tr` と `(𝒞^istr)^un-tr` の比較ではない。
-★★★**そして `𝒞^istr` は `𝒞` の真の充満部分圏なので、その比較は圏同値ではない。**
-`A` が isotropic でも `A′ → A` が pre-step のとき `A′` が isotropic とは限らないため、
-添字圏 `SliceA` が一致しない。
-★したがって (a) の 2 条は本ファイルの手法をそのまま流用できず、別立ての作業になる。
+
+## ★★★★★上の見立てを覆した(2026-08-19)
+
+★かつてここには
+「`𝒞^istr` は `𝒞` の真の充満部分圏なので比較は圏同値ではない ——
+`A` が isotropic でも `A′ → A` が pre-step のとき `A′` が isotropic とは限らない」
+と書いていた。★★**pre-step 一般については正しいが、
+双有理化の添字圏が使うのは co-angular pre-step であり、そちらでは成り立つ。**
+
+★★★`isIsotropic_dom_of_coaPreStep`(`Rmk451Ratstd.lean`)——
+`A` が isotropic で `φ : Z ⟶ A` が **co-angular** pre-step なら `Z` も isotropic。
+筋は在庫 3 本を繋ぐだけ:
+`birat_isIsotropic_iff` → `birat_isIso_of_coaPre`(birat で同型になる)
+→ `isIsotropic_of_iso` → `birat_isIsotropic_iff` を戻す。
+
+★したがって **`SliceA` は `𝒞` と `𝒞^istr` で一致し**、(a) の 2 条も
+本ファイルの手法(`coaPre2` / `idx2` / `biratMap`)がそのまま流用できる。
 -/
 
 end ABC3.Found.FrdI
