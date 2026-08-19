@@ -11428,3 +11428,41 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**88 ブロック**(Arakelov 73 + Galois 15)。
+
+## §9-289 連続性の欄と、その判定(第 249 ブロック)
+
+### ★★★★`Interface` に `normSection_continuous` を足した
+
+原文は `|s|_L` を **continuous function** と書いている。★それ以前は連続性が
+`logMetric`(基準相対の Green 関数)にだけ掛かっており、**ノルムそのものには掛かっていなかった**。
+
+★★これが無いと、**各点で勝手に自明化を選んだ「計量」**が通ってしまう
+——第 248 の `arcMetricOf` がまさにそれである。
+★★★したがってこの欄が **1 の分割を強制する**。
+
+### ★★★★★連続性は chart ごとに落ちる(第 249)
+
+`arcTopology X` は **`⨆`(coinduced)**で定義してあるので、
+`⨆` から**出る**写像の連続性は各成分に落ちる:
+
+    Continuous[⨆ tᵢ] g  ⟺  ∀ i, Continuous[tᵢ] g          (`continuous_iSup_dom`)
+    Continuous[coinduced f t] g  ⟺  Continuous[t] (g ∘ f)  (`continuous_coinduced_dom`)
+
+★さらに `arcTopologyOpen U = induced (· ≫ isoSpec.hom) (arcTopologyAffine …)` なので、
+**アフィンの上の連続関数への分解**を与えれば済む(`continuous_of_charts_factor`)。
+
+★★`continuous_evalAffine`(切断は各点収束の位相で連続)は**第 5 ブロックで既に取ってある**
+——アフィンの側の材料は揃っている。
+
+### ★残り(C3)
+
+| 段 | 状態 |
+|---|---|
+| 評価・ノルムの型・一点での自明化・計量(連続性なし) | ★第 244・246・247・248 |
+| ★連続性の判定 | ★第 249(本ブロック) |
+| chart 上の自明化から連続なノルムを作る | ★次 |
+| 1 の分割で貼る | ★その次(コンパクト Hausdorff の仮定つき) |
+
+### この区間の集計
+
+★**89 ブロック**(Arakelov 74 + Galois 15)。

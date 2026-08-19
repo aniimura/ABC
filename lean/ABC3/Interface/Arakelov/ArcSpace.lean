@@ -253,6 +253,19 @@ structure HermitianMetricData where
     (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type))
     (p : toArcSpaceData.Arc X),
     normSection X L (scale X L c m) s p = Real.exp (-c) * normSection X L m s p
+  /-- ★★★**ノルムは連続である**——原文の「continuous function `|s|_L`」。
+
+  ★★★★2026-08-19 の追加。それ以前は連続性が `logMetric`
+  （基準相対の Green 関数）にだけ掛かっており、
+  **ノルムそのものには掛かっていなかった**。
+
+  ★★これが無いと、**各点で勝手に自明化を選んだ「計量」**が通ってしまう
+  （`Found/Arakelov/ArcTrivNorm.lean` の `arcMetricOf` がまさにそれである）。
+  ★★★したがってこの欄が **1 の分割を強制する**。 -/
+  normSection_continuous : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L)
+    (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type)),
+    @Continuous (toArcSpaceData.Arc X) ℝ (toArcSpaceData.topology X) inferInstance
+      (normSection X L m s)
   /-- ★テンソル積で計量は掛かる(Green 関数は足される)——高さの加法性の源。 -/
   tensorMetric : (X : Scheme.{0}) → (L M : toPicardData.Pic X) → Metric X L → Metric X M →
     Metric X (@HMul.hMul _ _ _

@@ -429,6 +429,7 @@ import ABC3.Found.Arakelov.ArcFiber
 import ABC3.Found.Arakelov.ArcMetric
 import ABC3.Found.Arakelov.ArcPointScheme
 import ABC3.Found.Arakelov.ArcTrivNorm
+import ABC3.Found.Arakelov.ArcContCriterion
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
