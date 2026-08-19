@@ -2453,13 +2453,13 @@
     },
     {
      "id": "p55iii-rlf",
-     "title": "(rlf 待ち) (iii) `𝒞^rlf` はつねに model 型",
+     "title": "(iii) `𝒞^rlf` はつねに model 型",
      "deps": [],
-     "status": "todo",
+     "status": "done",
      "size": "小",
-     "note": "model Frobenioid として定義するので `Theorem 5.2, (ii)` から直ちに。",
-     "lean": "",
-     "decl": "",
+     "note": "model Frobenioid として定義するので `Theorem 5.2, (ii)` から直ちに。\n\n★★閉じた(2026-08-20): `𝒞^rlf` は定義からして model Frobenioid なので `model_isOfModelType`(`Theorem 5.2, (ii)`)を当てるだけ。★実際に効くのは `Hyp` の 4 条で、そのうち **`B` が group-like は無料**(`S·Φ^birat` は部分群だから)。★残り 3 条(`Φ^rlf` が divisorial・`𝒟` が totally epimorphic・connected)と `Skeletal 𝒟` は仮定として受け取っている。",
+     "lean": "ABC3/Found/FrdI/Prop55Rlf.lean",
+     "decl": "sPhiBiratOn_isGroupLike / scModel_hyp / scModel_isOfModelType",
      "crossDeps": [
       "crlf-def"
      ]
@@ -2504,13 +2504,13 @@
     },
     {
      "id": "p55iv-rlf",
-     "title": "(rlf 待ち) (iv) `𝒞^rlf ≃ (Φ^rlf, ℝ·Φ^birat)` の model Frobenioid",
+     "title": "(iv) `𝒞^rlf ≃ (Φ^rlf, ℝ·Φ^birat)` の model Frobenioid",
      "deps": [],
-     "status": "todo",
+     "status": "done",
      "size": "小",
-     "note": "定義そのもの。",
-     "lean": "",
-     "decl": "",
+     "note": "定義そのもの。\n\n★★閉じた(2026-08-20): 我々は `Proposition 5.3` の第 1 文(定義)をそのまま採ったので、実化の場合は**等式**である(`rfl`)。★原文自身が第 1 文で `𝒞^rlf` を model Frobenioid と**定義**しているので、これは逃げではない。★内容が残るのは `𝒞^pf` の場合(`p55iv-pf`)。",
+     "lean": "ABC3/Found/FrdI/Prop55Rlf.lean",
+     "decl": "crlf_eq_model",
      "crossDeps": [
       "crlf-def"
      ]
