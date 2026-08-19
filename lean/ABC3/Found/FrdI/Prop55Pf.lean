@@ -83,6 +83,43 @@ noncomputable def otriPowHom {A : C} (hfn : IsFrobeniusNormalized P A) (m : ℕ)
     show ((x : End A) * (y : End A)) ^ m = ((x : End A) ^ m) * ((y : End A) ^ m)
     exact (otri_comm_end' hfn x.2 y.2).mul_pow m)
 
+/-! ## ★2. 添字を `ℕ≥1` に落とす —— cofinality の中身 -/
+
+/-- ★★★**Frobenius-trivial 対象から出る Frobenius 型射の終域は、その対象自身と同型**。
+
+★`Definition 1.3, (ii)` の**本質的一意性**(`frobDegUniq`)1 本で出る。 -/
+theorem frobType_cod_iso_of_frobTrivial (F : FrobenioidCore P) {A A' : C}
+    (hA : IsFrobeniusTrivial P A) (a : A ⟶ A') (ha : IsFrobeniusType P a) :
+    ∃ (e : A' ⟶ A), IsIso e ∧ ∃ ζ : End A,
+      IsBaseIdentity P ζ ∧ IsFrobeniusType P ((ζ : A ⟶ A)) ∧
+      P.degFr ((ζ : A ⟶ A)) = P.degFr a ∧ a ≫ e = ((ζ : A ⟶ A)) := by
+  obtain ⟨ζ, hdeg, hprop⟩ := hA
+  obtain ⟨e, he, hcomp⟩ :=
+    F.frobDegUniq A A' A a ((ζ (P.degFr a) : End A) : A ⟶ A) ha (hprop _).2 (hdeg _).symm
+  exact ⟨e, he, ζ (P.degFr a), (hprop _).1, (hprop _).2, hdeg _, hcomp⟩
+
+/-- ★★★★**`𝒞^pf` の添字はすべて「`ζ_m` の対」と同型** ——
+`IdxPf A A` の任意の対象 `(A', B', a, b)` に対し、同型 `e : A' ≅ A`, `e' : B' ≅ A` が
+あって `a ≫ e = b ≫ e' = ζ_m`(`m = deg_Fr a`)。
+
+★★これが `Proposition 5.5, (i)` の余極限を **`ℕ≥1` へ落とす**ための cofinality の中身。
+★`BiFr` の射は「等次数の Frobenius 型射の対」であり、同型は次数 1 の Frobenius 型射
+なので、`(e, e')` はちょうど添字圏の射になる。 -/
+theorem idxPf_iso_zeta (F : FrobenioidCore P) {A : C} (hA : IsFrobeniusTrivial P A)
+    {A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : A ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) :
+    ∃ (e : A' ⟶ A) (e' : B' ⟶ A), IsIso e ∧ IsIso e' ∧ ∃ ζ : End A,
+      IsBaseIdentity P ζ ∧ IsFrobeniusType P ((ζ : A ⟶ A)) ∧
+      P.degFr ((ζ : A ⟶ A)) = P.degFr a ∧
+      a ≫ e = ((ζ : A ⟶ A)) ∧ b ≫ e' = ((ζ : A ⟶ A)) := by
+  obtain ⟨ζ, hdeg, hprop⟩ := hA
+  obtain ⟨e, he, hcomp⟩ :=
+    F.frobDegUniq A A' A a ((ζ (P.degFr a) : End A) : A ⟶ A) ha (hprop _).2 (hdeg _).symm
+  obtain ⟨e', he', hcomp'⟩ :=
+    F.frobDegUniq A B' A b ((ζ (P.degFr a) : End A) : A ⟶ A) hb (hprop _).2
+      (by rw [hdeg, hd])
+  exact ⟨e, e', he, he', ζ (P.degFr a), (hprop _).1, (hprop _).2, hdeg _, hcomp, hcomp'⟩
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -90,6 +127,13 @@ noncomputable def otriPowHom {A : C} (hfn : IsFrobeniusNormalized P A) (m : ℕ)
 def frobTransport_otri_pow.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒞^pf の遷移写像は 𝒪^▷(A) の上で α ↦ α^m",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の cofinality の中身
+(添字がすべて `ζ_m` の対と同型であること)。 -/
+def idxPf_iso_zeta.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒞^pf の添字はすべて ζ_m の対と同型",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
