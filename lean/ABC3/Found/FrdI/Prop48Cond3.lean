@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Prop48Cpt
 import ABC3.Found.FrdI.Prop114
 import ABC3.Found.FrdI.Prop44Gp
+import ABC3.Found.FrdI.Prop44Phi
 
 /-!
 # [FrdI] Proposition 4.8, (iii), (b) —— `Frobenius-compact` の第 3 条
@@ -118,6 +119,120 @@ def biratDivGp_endConj.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 83,
     item := "Proposition 4.4, (iii) — 共役の Div^gp",
     sectionId := "frdi-prop-4-4" }
+
+/-- ★`𝒪^×` の冪の `Div^gp` は倍数。 -/
+theorem biratDivGp_pow {A : BiratCat P G} {v : End A}
+    (hv : v ∈ OTimes (biratPre P G) A) (n : ℕ) :
+    biratDivGp (((v ^ n : End A)) : A ⟶ A) = n • biratDivGp ((v : A ⟶ A)) := by
+  induction n with
+  | zero =>
+    show biratDivGp ((1 : End A) : A ⟶ A) = (0 : ℕ) • _
+    rw [zero_nsmul]
+    exact biratDivGp_id A
+  | succ m ih =>
+    have hvm : (v ^ m) ∈ OTimes (biratPre P G) A := pow_mem hv m
+    show biratDivGp (((v ^ (m + 1) : End A)) : A ⟶ A) = _
+    rw [pow_succ, biratDivGp_mul_otimes hvm hv, ih, succ_nsmul]
+
+/-! ## ★3. `c = d` -/
+
+/-- ★群では `m • y = n • y`(`m ≤ n`)なら `(n - m) • y = 0`。 -/
+theorem nsmul_sub_eq_zero_of_eq {A : Type*} [AddCommGroup A] {y : A} {m n : ℕ}
+    (hle : m ≤ n) (heq : m • y = n • y) : (n - m) • y = 0 := by
+  have hsplit : (n - m) • y + m • y = n • y := by
+    rw [← add_nsmul, Nat.sub_add_cancel hle]
+  have h : (n - m) • y + m • y = 0 + m • y := by rw [hsplit, ← heq, zero_add]
+  exact add_right_cancel h
+
+/-- ★★★★★★**`c = d`** —— `Frobenius-compact` の第 3 条の本体。
+
+★段は 3 つ:
+1. 仮定に `Div^gp` を当て、`𝒪^×(A^birat) ↠ Φ^gp`(`Proposition 4.4, (iii)`)で
+   **すべての** `x` について `(d*k) • σ(x) = (c*k) • x` を得る
+2. `d*k ≥ 1` から `MPrec (σ x) x` が出るので、
+   `non-dilating` で **`σ = id`**(`addMonoidHom_eq_id_of_forall_mprec`)
+3. torsion でない `x₀` を 1 つ取れば `d*k = c*k`、したがって `c = d` -/
+theorem birat_cd_eq
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : BiratCat P G) (θ : A ≅ A) (c d : ℕ+)
+    (hnd : IsNonDilating (Φ.map (biratBase θ.inv)))
+    (x₀ : Φ.val (P.toElem.obj (biratDown P G A)).base)
+    (hx₀ : ∀ n : ℕ, 0 < n →
+      n • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀ ≠ 0)
+    (hyp : ∀ u : End A, u ∈ OTimes (biratPre P G) A → ∃ k : ℕ+,
+      ((endConj θ u) ^ (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)
+        = (u ^ (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)) :
+    c = d := by
+  classical
+  -- ★段 1
+  have hkey : ∀ x : Φ.val (P.toElem.obj (biratDown P G A)).base,
+      ∃ k : ℕ+, (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ))
+          • gpMap _ (Φ.map (biratBase θ.inv))
+              (toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x)
+        = (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ))
+          • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x := by
+    intro x
+    have hmem : toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x ∈ phiBiratAt P G A := by
+      rw [phiBiratAt_eq_top_of_divSurj P G hdivS A]
+      exact AddSubgroup.mem_top _
+    obtain ⟨u, hu, hux⟩ := hmem
+    obtain ⟨k, hk⟩ := hyp u hu
+    refine ⟨k, ?_⟩
+    have hcj : (endConj θ u) ∈ OTimes (biratPre P G) A :=
+      endConj_mem_otimes (biratPre P G) θ hu
+    have h := congrArg (fun t : End A => biratDivGp ((t : A ⟶ A))) hk
+    rw [biratDivGp_pow hcj, biratDivGp_pow hu, biratDivGp_endConj θ hu, hux] at h
+    exact h
+  -- ★段 2
+  have hsharp : IsSharp (Φ.val (P.toElem.obj (biratDown P G A)).base) :=
+    (P.divisorial _).2
+  have hint : IsIntegralMonoid (Φ.val (P.toElem.obj (biratDown P G A)).base) :=
+    (P.divisorial _).1.1
+  have hσ : Φ.map (biratBase θ.inv) = AddMonoidHom.id _ := by
+    refine addMonoidHom_eq_id_of_forall_mprec hsharp _ hnd (fun x _ => ?_)
+    obtain ⟨k, hk⟩ := hkey x
+    have hmono : (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) • (Φ.map (biratBase θ.inv) x)
+        = (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) • x := by
+      refine hint ?_
+      rw [toGp_nsmul, toGp_nsmul, ← gpMap_toGp _ (Φ.map (biratBase θ.inv)) x]
+      exact hk
+    refine ⟨((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ), Nat.mul_pos c.2 k.2, ?_⟩
+    refine ⟨(((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) - 1) • (Φ.map (biratBase θ.inv) x), ?_⟩
+    have hpos : 0 < ((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) := Nat.mul_pos d.2 k.2
+    have h1 : Φ.map (biratBase θ.inv) x
+          + (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) - 1) • (Φ.map (biratBase θ.inv) x)
+        = (1 + (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) - 1)) • (Φ.map (biratBase θ.inv) x) := by
+      rw [add_nsmul, one_nsmul]
+    rw [h1, show 1 + (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) - 1)
+        = ((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) from by omega]
+    exact hmono
+  -- ★段 3
+  obtain ⟨k, hk⟩ := hkey x₀
+  rw [hσ] at hk
+  have hk' : (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ))
+        • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀
+      = (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ))
+        • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀ := by
+    have hid : gpMap _ (AddMonoidHom.id (Φ.val (P.toElem.obj (biratDown P G A)).base))
+        = AddMonoidHom.id _ := gpMap_id _
+    rw [hid] at hk
+    exact hk
+  by_contra hne
+  have hkpos : 0 < ((k : ℕ+) : ℕ) := k.2
+  have hne' : ((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) ≠ ((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) := by
+    intro h
+    exact hne (PNat.coe_injective (Nat.eq_of_mul_eq_mul_right hkpos h)).symm
+  rcases Nat.lt_or_ge (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ))
+      (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) with hlt | hge
+  · exact hx₀ _ (by omega) (nsmul_sub_eq_zero_of_eq (le_of_lt hlt) hk')
+  · have hgt : ((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) < ((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) := by omega
+    exact hx₀ _ (by omega) (nsmul_sub_eq_zero_of_eq (le_of_lt hgt) hk'.symm)
+
+def birat_cd_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-compact の第 3 条: c = d",
+    sectionId := "frdi-def-1-2-iv" }
 
 end BiratConj
 
