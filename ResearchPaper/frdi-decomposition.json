@@ -1592,12 +1592,14 @@
      "id": "psi-phi",
      "title": "(iii) Ψ_Φ —— Ψ_Base の上に乗る Φ₁ ≅ Φ₂",
      "size": "★中",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "psi-base",
       "thm49"
      ],
-     "note": "原文 (物理 p.94、実測):\n> Next, we observe that assertion (iii) follows formally from assertion (ii); Theorem\n\n★`Theorem 4.9` は `Ψ` の上に乗る `Ψ_Φ` を与える。(iii) はそれを\n**`Ψ_Base` の上に乗る**形へ持ち上げる —— (ii) の 1-可換図式で移せばよい。\n★`rationally standard type` の仮定が (iii)(iv) で追加される。"
+     "note": "原文 (物理 p.94、実測):\n> Next, we observe that assertion (iii) follows formally from assertion (ii); Theorem\n\n★`Theorem 4.9` は `Ψ` の上に乗る `Ψ_Φ` を与える。(iii) はそれを\n**`Ψ_Base` の上に乗る**形へ持ち上げる —— (ii) の 1-可換図式で移せばよい。\n★`rationally standard type` の仮定が (iii)(iv) で追加される。\n\n## ★★★★★★閉じた(2026-08-19)\n\n`Theorem 4.9` の `psiPhi` は **`𝒞ᵢ` の上**の関手の同型。(iii) が要るのは **`𝒟ᵢ` の上**。\n★(ii) の 1-可換図式で書き換えると\n`P₁.proj.op ⋙ Φ₁ ≅ P₁.proj.op ⋙ (Ψ_Base.op ⋙ Φ₂)` になるので、\n★★**`P.proj.op` との前合成が同型を反射する**ことを示せば降りる。\n\n| 宣言 | 中身 |\n|---|---|\n| ★★`projOpPrecompIsoGen` | `P.proj.op` 版の反射補題(`base_three_factor` を `Dᵒᵖ` で使う) |\n| ★★`psiPhiOnBase` | **`Ψ_Φ : Φ₁ ≅ Ψ_Base.op ⋙ Φ₂`** |\n| ★`elemFrobMapOver` ＋ `_proj` | `Ψ_Base` に沿った `𝔽_Φ` の関手(在庫の `elemFrobMap` は同じ `𝒟` 用) |",
+     "file": "lean/ABC3/Found/FrdI/Cor411Phi.lean",
+     "decl": "projOpPrecompIsoGen / psiPhiOnBase / elemFrobMapOver"
     },
     {
      "id": "psi-elem",
@@ -1608,7 +1610,7 @@
       "psi-base",
       "psi-phi"
      ],
-     "note": "★`𝒞^un-tr → 𝔽_Φ` は忠実(`Proposition 3.3, (iv)`、在庫)。\n★★これと `Ψ^un-tr` を繋いで `𝔽_{Φ₁} → 𝔽_{Φ₂}` を得る。\n\n## ★測り直した(2026-08-19)—— これは **(iv)** である\n原文 (物理 p.94):\n> Finally, we consider assertion (iv). In light of the structure of an elementary\n\n★初等 Frobenioid の構造(`Definition 1.1, (iii)`)から、\n**(ii) と (iii) を繋ぎ、`Ψ` が Frobenius 次数を保つ**ことを足せば図式が出る。\n★rigidity は (i) と同じ議論。"
+     "note": "★`𝒞^un-tr → 𝔽_Φ` は忠実(`Proposition 3.3, (iv)`、在庫)。\n★★これと `Ψ^un-tr` を繋いで `𝔽_{Φ₁} → 𝔽_{Φ₂}` を得る。\n\n## ★測り直した(2026-08-19)—— これは **(iv)** である\n原文 (物理 p.94):\n> Finally, we consider assertion (iv). In light of the structure of an elementary\n\n★初等 Frobenioid の構造(`Definition 1.1, (iii)`)から、\n**(ii) と (iii) を繋ぎ、`Ψ` が Frobenius 次数を保つ**ことを足せば図式が出る。\n★rigidity は (i) と同じ議論。\n\n## ★★★★★測った残り(2026-08-19)\n\n`elemFrobMapOver`(`Cor411Phi.lean`)で `Ψ_𝔽` は立った。\n★(iv) の 1-可換図式 `P₁.toElem ⋙ Ψ_𝔽 ≅ Ψ ⋙ P₂.toElem` に残るのは\n**`div` 成分の一致**、すなわち\n```\ndivMap_A (P₁.Div φ) = P₂.Div (Ψ φ)   （すべての φ : A ⟶ B）\n```\nである(`base` 成分は (ii) の図式、`deg` 成分は `Ψ` が次数を保つことから出る)。\n\n★★測った道: `arbFactor` の 3 分解 `φ = γ ≫ pre ≫ plb` で\n- co-angular pre-step の場合は `exists_iso_of_div_eq`(コスライスの圏同値)で出る\n- 一般の場合は `divMapNat_all`(`Theorem 4.9`)と `Div γ = 0`・`Div plb = 0` で降りる\n\n★これが (iv) の残りである。"
     },
     {
      "id": "cor411-src",
