@@ -2,10 +2,10 @@
   "nodes": 1003,
   "sccs": 965,
   "bigSccs": 10,
-  "boxes": 296,
+  "boxes": 294,
   "layers": 61,
   "ours": 67,
   "oblig": 32,
-  "obligDone": 7,
+  "obligDone": 9,
   "maxLayer": 60
 }
