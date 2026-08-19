@@ -2580,11 +2580,11 @@
      "deps": [
       "p56-cosets"
      ],
-     "status": "todo",
+     "status": "半済",
      "size": "★大",
-     "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。",
-     "lean": "",
-     "decl": ""
+     "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。\n\n★★2026-08-20: **`shift` 条件が「M が自己同型による共役で閉じている」に帰着することを証明した**。原文 p.106 の 2 段:\n1. `Theorem 5.1, (iii)`(Aut-ample)で `f = f₀ · f₁`(`f₀` 自己同型・`f₁` base-identity)に分解(`baseIsoEnd_factor`)\n2. Frobenius-normalized で `f₁ · m = m^d · f₁`、よって `m' = f₀ · m^d · f₀⁻¹`(`baseIsoEnd_shift`)\n★これで `IsShiftStable`(`Prop56Cos.lean`)が Frobenioid の側で立つ(`isShiftStable_baseIsoEnd`)。\n★残るのは `M_p` そのものの構成 —— `l ≠ p` の pro-`l` 部分が位相的に生成する閉部分群(鎖 `prol` が在庫)。",
+     "lean": "ABC3/Found/FrdI/Prop56Mp.lean",
+     "decl": "baseIsoEnd / baseIsoEnd_factor / baseIsoEnd_shift / isShiftStable_baseIsoEnd"
     },
     {
      "id": "p56-limit",
