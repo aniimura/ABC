@@ -358,7 +358,7 @@ include F hPB in
 /-- ★★★★★**共役関手は圏同値** —— 圏同値 3 つの合成。 -/
 theorem basePsiSlice_isEquivalence [Ψ.IsEquivalence] (F₂ : FrobenioidCore P₂)
     (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) (A : C) :
-    (basePsiSlice P P₂ Ψ hPB F A).IsEquivalence := by
+    (basePsiSlice P F P₂ Ψ hPB A).IsEquivalence := by
   haveI := F.plBkEquiv A
   haveI := F₂.plBkEquiv (Ψ.obj A)
   haveI := plBkPsi_isEquivalence P P₂ Ψ hPB hPB'

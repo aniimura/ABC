@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1273 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1275 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">6092</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1692</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">6103</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1694</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,8 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>f6ae114</code></td><td>2026-08-19</td><td>§9-297 の壁を迂回した——単位射を V で評価する(第 256 ブロック、§9-298)</td></tr>
+<tr><td><code>32e3645</code></td><td>2026-08-19</td><td>★★★★同型の同定は**終対象**から出る——選択が要らない</td></tr>
 <tr><td><code>94fcd44</code></td><td>2026-08-19</td><td>橋のスカラー両立を測り直した——元素レベルでは書けない(§9-297)</td></tr>
 <tr><td><code>99b4dfe</code></td><td>2026-08-19</td><td>橋の加法性まで——スカラー両立は homMk に生成させる方針に(§9-296)</td></tr>
 <tr><td><code>8ae7c3e</code></td><td>2026-08-19</td><td>★★★★`Ψ_Base` の共役関手を取った——原典 `R_i` の「新しい関手」</td></tr>
@@ -291,15 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>241e204</code></td><td>2026-08-19</td><td>自明な直線束には連続な計量が入った(第 253 ブロック、§9-293)</td></tr>
 <tr><td><code>148f04e</code></td><td>2026-08-19</td><td>★原典の逐語を突き合わせ、隔たりと分解の筋を確定した</td></tr>
 <tr><td><code>c14212e</code></td><td>2026-08-19</td><td>大域の正則関数は X^arc 上連続(第 252 ブロック、§9-292)</td></tr>
-<tr><td><code>46c13bb</code></td><td>2026-08-19</td><td>構造層のファイバー評価は関数の値だった(第 251 ブロック、§9-291)</td></tr>
-<tr><td><code>a0e0b18</code></td><td>2026-08-19</td><td>★★★★`Frobenius-compact` の第 1 条は `𝒞^birat` でただで出た</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1692 件)。</div>
+<b>すべて PDF と機械照合している</b>(1694 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
