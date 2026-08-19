@@ -28,6 +28,7 @@ import ABC3.Found.FrdI.Prop17
 import ABC3.Found.FrdI.Prop18
 import ABC3.Found.FrdI.Prop19
 import ABC3.Found.FrdI.Prop110
+import ABC3.Found.FrdI.Def28
 import ABC3.Found.FrdI.Prop111
 import ABC3.Found.FrdI.Prop113
 import ABC3.Found.FrdI.Prop114
@@ -122,6 +123,7 @@ import ABC3.Found.ProL.ProfiniteLimit
 import ABC3.Found.ProL.LimitPi
 import ABC3.Found.ProL.LPart
 import ABC3.Found.ProL.Decomposition
+import ABC3.Found.ProL.ZetaPow
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.AuxFunction
@@ -497,6 +499,7 @@ import ABC3.Found.GaloisRep.EdsLambda
 import ABC3.Found.GaloisRep.EdsIdentity
 import ABC3.Found.GaloisRep.EdsWard
 import ABC3.Found.GaloisRep.Coprime23
+import ABC3.Found.GaloisRep.ZeroSet
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
