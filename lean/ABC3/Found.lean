@@ -396,6 +396,7 @@ import ABC3.Found.Arakelov.PicHcompat
 import ABC3.Found.Arakelov.PicSpecMapLE
 import ABC3.Found.Arakelov.PicPreCoord
 import ABC3.Found.Arakelov.PicHcompatTop
+import ABC3.Found.Arakelov.PicAppIsoAsLE
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply
 import ABC3.Found.Arakelov.PicComapChain

@@ -128,25 +128,27 @@ def BaseSection.toBirat.src : ABC3.Meta.Source :=
 variable {G}
 
 /-- ★★**`SectionEnd` の移送** —— 各成分を `toBiratCat` で送る。 -/
-def SectionEnd.toBirat (Fc : FrobenioidCore (biratPre P G)) {S : BaseSection P}
-    (ε : SectionEnd S) : SectionEnd (S.toBirat G Fc) where
+noncomputable def SectionEnd.toBirat (Fc : FrobenioidCore (biratPre P G))
+    {S : BaseSection P} (ε : SectionEnd S) : SectionEnd (S.toBirat G Fc) where
   app A := (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩)
   naturality {A B} f := by
     obtain ⟨f₀, hf₀, hfe⟩ := f.2
-    have hnat := ε.naturality (⟨f₀, hf₀⟩ : (⟨biratDown P G A.1, A.2⟩ : S.Obj) ⟶
-      ⟨biratDown P G B.1, B.2⟩)
-    have h1 : (toBiratCat P G).map (f₀ ≫ ε.app ⟨biratDown P G B.1, B.2⟩)
-        = (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩ ≫ f₀) :=
-      congrArg (toBiratCat P G).map hnat
-    exact (((toBiratCat P G).map_comp f₀ _).symm.trans h1).trans
-      (((toBiratCat P G).map_comp _ f₀).trans
-        (congrArg (fun t => (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩) ≫ t) hfe))
-      |>.trans (congrArg (fun t => t ≫ (toBiratCat P G).map
-        (ε.app ⟨biratDown P G B.1, B.2⟩)) hfe) |>.symm |>.symm
+    let A' : S.Obj := ⟨biratDown P G A.1, A.2⟩
+    let B' : S.Obj := ⟨biratDown P G B.1, B.2⟩
+    have hnat : f₀ ≫ ε.app B' = ε.app A' ≫ f₀ :=
+      ε.naturality (⟨f₀, hf₀⟩ : A' ⟶ B')
+    show f.1 ≫ (toBiratCat P G).map (ε.app B')
+      = (toBiratCat P G).map (ε.app A') ≫ f.1
+    exact (congrArg (fun t => t ≫ (toBiratCat P G).map (ε.app B')) hfe.symm).trans
+      (((toBiratCat P G).map_comp f₀ (ε.app B')).symm.trans
+        ((congrArg (toBiratCat P G).map hnat).trans
+          (((toBiratCat P G).map_comp (ε.app A') f₀).trans
+            (congrArg (fun t => (toBiratCat P G).map (ε.app A') ≫ t) hfe))))
 
 /-- ★★★**`ℕ+ →* SectionEnd` の移送**。 -/
-def frobSectionToBirat (Fc : FrobenioidCore (biratPre P G)) {S : BaseSection P}
-    (Fs : ℕ+ →* SectionEnd S) : ℕ+ →* SectionEnd (S.toBirat G Fc) where
+noncomputable def frobSectionToBirat (Fc : FrobenioidCore (biratPre P G))
+    {S : BaseSection P} (Fs : ℕ+ →* SectionEnd S) :
+    ℕ+ →* SectionEnd (S.toBirat G Fc) where
   toFun n := SectionEnd.toBirat Fc (Fs n)
   map_one' := by
     refine SectionEnd.ext ?_
@@ -165,6 +167,56 @@ def frobSectionToBirat (Fc : FrobenioidCore (biratPre P G)) {S : BaseSection P}
 def frobSectionToBirat.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (iv) — Frobenius-section を 𝒞^birat へ移す",
+    sectionId := "frdi-prop-4-8" }
+
+/-! ## ★★★★★`Proposition 4.8, (iv)` —— pre-model 型は birat で保たれる -/
+
+/-- ★★★★**Frobenius-section の 3 条も移る**。
+
+★`degSection` は `biratDeg_toHomBirat`、`baseIdentity` は `biratBase_toHomBirat`、
+`frobType` は `birat_isFrobeniusType_iff`(すべて在庫)。 -/
+theorem isFrobeniusSection_toBirat [IsConnected D] (Fc : FrobenioidCore (biratPre P G))
+    {S : BaseSection P} {Fs : ℕ+ →* SectionEnd S} (h : IsFrobeniusSection S Fs) :
+    IsFrobeniusSection (S.toBirat G Fc) (frobSectionToBirat Fc Fs) where
+  degSection n := by
+    haveI := S.isConnected_obj
+    let A₀ : S.Obj := Classical.arbitrary S.Obj
+    let A : (S.toBirat G Fc).Obj := ⟨A₀.1, A₀.2⟩
+    refine (SectionEnd.deg_eq (frobSectionToBirat Fc Fs n) A).trans ?_
+    show (biratPre P G).degFr ((toBiratCat P G).map ((Fs n).app _)) = n
+    exact (biratDeg_toHomBirat (P := P) (G := G) _).trans
+      ((SectionEnd.deg_eq (Fs n) _).symm.trans (h.degSection n))
+  baseIdentity n A := by
+    show (biratPre P G).Base ((toBiratCat P G).map ((Fs n).app _))
+      = (biratPre P G).Base (𝟙 _)
+    exact ((biratBase_toHomBirat (P := P) (G := G) _).trans
+      ((h.baseIdentity n _).trans (P.Base_id _))).trans ((biratPre P G).Base_id _).symm
+  frobType n A :=
+    (birat_isFrobeniusType_iff P G _).mpr ⟨(h.frobType n _).1.1, (h.frobType n _).2⟩
+
+/-- ★★★★★**`BaseFrobeniusPair` の移送**。 -/
+noncomputable def BaseFrobeniusPair.toBirat [IsConnected D]
+    (Fc : FrobenioidCore (biratPre P G)) (BF : BaseFrobeniusPair P) :
+    BaseFrobeniusPair (biratPre P G) where
+  sec := BF.sec.toBirat G Fc
+  frob := frobSectionToBirat Fc BF.frob
+  isFrobSection := isFrobeniusSection_toBirat Fc BF.isFrobSection
+
+/-- ★★★★★**[FrdI] Proposition 4.8, (iv)** —— **pre-model 型は birat で保たれる**。
+
+原文 (FrdI p.88):
+> (iv) If C is of isotropic and pre-model type, then so is Cbirat.
+
+★isotropic の側は `prop_4_8_i`(在庫)。本定理は pre-model の側。
+★★逸脱の開示(**分類 B**): `Fc : FrobenioidCore (biratPre P G)` を要求する
+(`BaseSection` の `isPullBack` の条で使う)。
+`Proposition 4.4` と同じ birat-Frobenius-normalized 型の仮定である。 -/
+theorem isPreModelType_birat [IsConnected D] (Fc : FrobenioidCore (biratPre P G))
+    (h : IsPreModelType P) : IsPreModelType (biratPre P G) :=
+  h.elim fun BF => ⟨BaseFrobeniusPair.toBirat Fc BF⟩
+
+def prop_4_8_iv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (iv)",
     sectionId := "frdi-prop-4-8" }
 
 end ABC3.Found.FrdI

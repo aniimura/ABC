@@ -1332,12 +1332,14 @@
         {
           "id": "iv-src",
           "size": "小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "basesection-birat"
           ],
           "title": "(iv) isotropic ＋ pre-model 型は birat で保たれる",
-          "note": "\n\n## ★★残りを測った(2026-08-19)\n`BaseSection` の移送は済(`BaseSection.toBirat`)。\n★残るのは **Frobenius-section の移送**、すなわち\n`frob : ℕ+ →* SectionEnd S` を `ℕ+ →* SectionEnd (S.toBirat Fc)` へ送ること。\n\n## ★設計\n`SectionEnd S` は `app : ∀ A : S.Obj, End A.1` ＋ 自然性。\n`(S.toBirat Fc).Obj = {A : BiratCat P G // S.objP (biratDown P G A)}` は\n`S.Obj` と**台が同じ**なので:\n- `app A := (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩)`\n- 自然性 —— `homP f.1` から代表元 `f₀` を取り、`ε` の自然性 ＋ 関手性\n\n★`IsFrobeniusSection` の 3 条もすべて在庫で移る:\n| 条 | 在庫 |\n|---|---|\n| `degSection` | `biratDeg_toHomBirat` |\n| `baseIdentity` | `biratBase_toHomBirat` |\n| `frobType` | `birat_isFrobeniusType_iff` |\n\n★★★**新しい数学は無い** —— `BaseSection.toBirat` と同じ形の作業が\nもう 1 回あるだけである。"
+          "note": "\n\n## ★★残りを測った(2026-08-19)\n`BaseSection` の移送は済(`BaseSection.toBirat`)。\n★残るのは **Frobenius-section の移送**、すなわち\n`frob : ℕ+ →* SectionEnd S` を `ℕ+ →* SectionEnd (S.toBirat Fc)` へ送ること。\n\n## ★設計\n`SectionEnd S` は `app : ∀ A : S.Obj, End A.1` ＋ 自然性。\n`(S.toBirat Fc).Obj = {A : BiratCat P G // S.objP (biratDown P G A)}` は\n`S.Obj` と**台が同じ**なので:\n- `app A := (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩)`\n- 自然性 —— `homP f.1` から代表元 `f₀` を取り、`ε` の自然性 ＋ 関手性\n\n★`IsFrobeniusSection` の 3 条もすべて在庫で移る:\n| 条 | 在庫 |\n|---|---|\n| `degSection` | `biratDeg_toHomBirat` |\n| `baseIdentity` | `biratBase_toHomBirat` |\n| `frobType` | `birat_isFrobeniusType_iff` |\n\n★★★**新しい数学は無い** —— `BaseSection.toBirat` と同じ形の作業が\nもう 1 回あるだけである。\n\n## ★★★閉じた(2026-08-19)\n`isPreModelType_birat` —— **pre-model 型は birat で保たれる**。\n\n★測ったとおり **`BaseSection.toBirat` と同じ形の作業がもう 1 回**あるだけだった:\n`SectionEnd.toBirat`(成分を `toBiratCat` で送る)→\n`frobSectionToBirat`(モノイド準同型)→ `isFrobeniusSection_toBirat`(3 条)→\n`BaseFrobeniusPair.toBirat` → `isPreModelType_birat`。\n\n★3 条はすべて在庫 1 本ずつ:\n`degSection` ← `biratDeg_toHomBirat` / `baseIdentity` ← `biratBase_toHomBirat` /\n`frobType` ← `birat_isFrobeniusType_iff`。\n\n## ★逸脱の開示(分類 B)\n`Fc : FrobenioidCore (biratPre P G)` を要求する(`BaseSection` の `isPullBack` の条で使う)。\n★`Proposition 4.4` と同じ birat-Frobenius-normalized 型の仮定である。",
+          "lean": "ABC3/Found/FrdI/Prop48Sec.lean",
+          "decl": "BaseSection.toBirat / SectionEnd.toBirat / frobSectionToBirat / isFrobeniusSection_toBirat / BaseFrobeniusPair.toBirat / isPreModelType_birat"
         },
         {
           "id": "standard-type-def",
