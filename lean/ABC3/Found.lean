@@ -465,6 +465,7 @@ import ABC3.Found.Arakelov.ArcEmbedding
 import ABC3.Found.Arakelov.ArcContTransport
 import ABC3.Found.Arakelov.ArcXNormVia
 import ABC3.Found.Arakelov.ArcUnitComp
+import ABC3.Found.Arakelov.ArcGammaEval
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
