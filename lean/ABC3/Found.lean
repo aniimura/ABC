@@ -457,6 +457,7 @@ import ABC3.Found.Arakelov.ArcBridgeNat
 import ABC3.Found.Arakelov.ArcBridgeIso
 import ABC3.Found.Arakelov.ArcLocalDirect
 import ABC3.Found.Arakelov.ArcXNorm
+import ABC3.Found.Arakelov.ArcGlueX
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre

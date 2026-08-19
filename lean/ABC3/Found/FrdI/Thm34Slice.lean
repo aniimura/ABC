@@ -245,6 +245,114 @@ def slicePushSquare.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — スライス関手と底の Over.map の 1-可換図式",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★2 つの 3 分解の canonical な比較
+
+★★`arbFactorUniq`(原文の一意性)は**使わない** ——
+pull-back の普遍性だけで比較同型が**canonical に**作れる。
+★これで「選択に依存しない」ことが `Definition 1.2, (ii)` だけから出る。 -/
+
+section Compare
+
+variable {A B : C}
+
+/-- ★比較射の底の成分。 -/
+noncomputable def cmpBase {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') :
+    (P.toElem.obj t.top).base ⟶ (P.toElem.obj t'.top).base :=
+  (t.baseEquiv P).inv ≫ (t'.baseEquiv P).hom
+
+theorem cmpBase_compat {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    P.Base t.plb = cmpBase P t t' ≫ P.Base t'.plb := by
+  have hZ := t.base_fac P
+  have hW := t'.base_fac P
+  have key : (t.baseEquiv P).hom ≫ P.Base t.plb = (t'.baseEquiv P).hom ≫ P.Base t'.plb := by
+    rw [← hZ, ← hW, h]
+  show P.Base t.plb = ((t.baseEquiv P).inv ≫ (t'.baseEquiv P).hom) ≫ P.Base t'.plb
+  rw [Category.assoc]
+  exact (Iso.eq_inv_comp _).mpr key
+
+/-- ★比較射(片道)。 -/
+noncomputable def cmpHom {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    t.top ⟶ t'.top :=
+  (pullBack_lift P t'.hplb t.plb (cmpBase P t t') (cmpBase_compat P t t' h)).choose
+
+theorem cmpHom_comp {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    cmpHom P t t' h ≫ t'.plb = t.plb :=
+  (pullBack_lift P t'.hplb t.plb (cmpBase P t t') (cmpBase_compat P t t' h)).choose_spec.1
+
+theorem cmpHom_base {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    P.Base (cmpHom P t t' h) = cmpBase P t t' :=
+  (pullBack_lift P t'.hplb t.plb (cmpBase P t t') (cmpBase_compat P t t' h)).choose_spec.2
+
+/-- ★★★★**比較同型** —— 逆向きの比較射と合わせると恒等になる(一意性)。 -/
+noncomputable def cmpIso {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    t.top ≅ t'.top where
+  hom := cmpHom P t t' h
+  inv := cmpHom P t' t h.symm
+  hom_inv_id := by
+    refine pullBack_hom_ext P t.hplb ?_ ?_
+    · rw [Category.assoc, cmpHom_comp, cmpHom_comp, Category.id_comp]
+    · rw [P.Base_comp, cmpHom_base, cmpHom_base, P.Base_id]
+      show ((t.baseEquiv P).inv ≫ (t'.baseEquiv P).hom)
+        ≫ ((t'.baseEquiv P).inv ≫ (t.baseEquiv P).hom) = 𝟙 _
+      rw [Category.assoc, ← Category.assoc (t'.baseEquiv P).hom, Iso.hom_inv_id,
+        Category.id_comp, Iso.inv_hom_id]
+  inv_hom_id := by
+    refine pullBack_hom_ext P t'.hplb ?_ ?_
+    · rw [Category.assoc, cmpHom_comp, cmpHom_comp, Category.id_comp]
+    · rw [P.Base_comp, cmpHom_base, cmpHom_base, P.Base_id]
+      show ((t'.baseEquiv P).inv ≫ (t.baseEquiv P).hom)
+        ≫ ((t.baseEquiv P).inv ≫ (t'.baseEquiv P).hom) = 𝟙 _
+      rw [Category.assoc, ← Category.assoc (t.baseEquiv P).hom, Iso.hom_inv_id,
+        Category.id_comp, Iso.inv_hom_id]
+
+/-- ★比較同型は pull-back 部分と可換。 -/
+theorem cmpIso_comp {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    (cmpIso P t t' h).hom ≫ t'.plb = t.plb :=
+  cmpHom_comp P t t' h
+
+/-- ★比較同型は pull-back なので `𝒞^pl-bk` の同型を与える。 -/
+theorem cmpHom_isPullBack {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
+    IsPullBack P (cmpHom P t t' h) :=
+  isPullBack_of_comp_left P (cmpHom P t t' h) t'.plb t'.hplb
+    (by rw [cmpHom_comp]; exact t.hplb)
+
+def cmpIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 25,
+    item := "Definition 1.3, (iv), (a) — 3 分解の pull-back 部分の canonical 比較",
+    sectionId := "frdi-def-1-3-iva" }
+
+end Compare
+
+/-! ## ★★★★「はしご」の等式 —— `Ψ` との両立の要 -/
+
+/-- ★★★★★**はしごの等式** ——
+`frb_Z ≫ pre_Z ≫ slPushHom u = u ≫ frb_W ≫ pre_W`。
+
+★★これも **pull-back の一意性だけ**から出る。
+★★★これが「`Ψ` を当てても関係が保たれる」ことの土台である ——
+`P₂.Base (Ψ g)` を `P.Base g` で書く手段は無い(それこそ `Ψ_Base` である)が、
+**`𝒞₁` の中の射の等式**なら `Ψ` を当てるだけで移る。 -/
+theorem slPush_ladder (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    (slPushFac P F f Z).frb ≫ (slPushFac P F f Z).pre ≫ slPushHom P F f u
+      = u.left.hom ≫ (slPushFac P F f W).frb ≫ (slPushFac P F f W).pre := by
+  have hu : u.left.hom ≫ W.hom.hom = Z.hom.hom :=
+    congrArg InducedWideCategory.Hom.hom (Over.w u)
+  refine pullBack_hom_ext P (slPushFac P F f W).hplb ?_ ?_
+  · have e1 : ((slPushFac P F f Z).frb ≫ (slPushFac P F f Z).pre ≫ slPushHom P F f u)
+        ≫ (slPushFac P F f W).plb = Z.hom.hom ≫ f := by
+      rw [Category.assoc, Category.assoc, slPushHom_comp]
+      exact (slPushFac P F f Z).fac.symm
+    have e2 : (u.left.hom ≫ (slPushFac P F f W).frb ≫ (slPushFac P F f W).pre)
+        ≫ (slPushFac P F f W).plb = Z.hom.hom ≫ f := by
+      rw [Category.assoc, Category.assoc, ← (slPushFac P F f W).fac, ← Category.assoc, hu]
+    exact e1.trans e2.symm
+  · rw [← Category.assoc, P.Base_comp, P.Base_comp, slPushHom_base]
+    show P.Base ((slPushFac P F f Z).frb ≫ (slPushFac P F f Z).pre)
+        ≫ (((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+          ≫ ((slPushFac P F f W).baseEquiv P).hom)
+      = P.Base u.left.hom ≫ P.Base ((slPushFac P F f W).frb ≫ (slPushFac P F f W).pre)
+    exact Iso.hom_inv_id_assoc ((slPushFac P F f Z).baseEquiv P) _
+
 end SlicePush
 
 end ABC3.Found.FrdI
