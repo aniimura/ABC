@@ -45,8 +45,7 @@ noncomputable def hermitianMetricDataWitness : HermitianMetricData where
   toPicardData := picardDataWitness
   toArcSpaceData := arcSpaceDataImpl
   Metric := fun X L => TorsorMetric X (picardDataWitness.sheafOf X L)
-  metric_nonempty := fun X L hc ht =>
-    nonempty_torsorMetric (picSheaf_locallyTrivial X L) (hasContMetrics_of_compact hc ht)
+  metric_nonempty := fun X L _ _ => nonempty_torsorMetric (picSheaf_locallyTrivial X L)
   logMetric := fun _ _ m p => m.green p
   logMetric_continuous := fun _ _ m => m.green_cont
   scale := fun _ _ c m => TorsorMetric.scale c m
@@ -57,7 +56,8 @@ noncomputable def hermitianMetricDataWitness : HermitianMetricData where
   normSection_nonneg := fun _ _ m s p => TorsorMetric.norm_nonneg m s p
   normSection_eq_zero_iff := fun _ _ m s p => TorsorMetric.norm_eq_zero_iff m s p
   normSection_scale := fun _ _ c m s p => TorsorMetric.norm_scale c m s p
-  normSection_continuous := fun _ _ m s => TorsorMetric.norm_continuous m s
+  normSection_continuous := fun _ _ m s hc ht =>
+    TorsorMetric.norm_continuous m s (hasContMetrics_of_compact hc ht)
   tensorMetric := fun X _ _ mL mM =>
     TorsorMetric.tensor mL mM (picSheaf_locallyTrivial X _)
   logMetric_tensor := fun _ _ _ _ _ _ => rfl

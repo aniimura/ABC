@@ -261,9 +261,26 @@ structure HermitianMetricData where
 
   ★★これが無いと、**各点で勝手に自明化を選んだ「計量」**が通ってしまう
   （`Found/Arakelov/ArcTrivNorm.lean` の `arcMetricOf` がまさにそれである）。
-  ★★★したがってこの欄が **1 の分割を強制する**。 -/
+  ★★★したがってこの欄が **1 の分割を強制する**。
+
+  ★★★★★2026-08-19（同日、2 度目）の修正——**仮定を `metric_nonempty` と揃えた**。
+
+  それ以前は無条件だったが、★★**(D1) と矛盾する**ことが分かった:
+
+  * (D1) の `group : CommGroup (APic X)` は `APic X` が**空でない**ことを要求し、
+  * (D1) の `mk_surjective` は `APic X` が `Σ L, Metric X L` に他ならないことを要求する。
+
+  ★したがって **`Metric X L` はすべての `X` で空でない**——連続計量が常に存在する——
+  ことになるが、それは**偽**である。連続計量の存在には `X^arc` のパラコンパクト性が要り、
+  `topology_affine` の積位相（`A` の**全元**にわたる）はそれを保証しない。
+
+  ★★★塞ぎ方: この欄を `metric_nonempty` と**同じ仮定**の下に置く。
+  ★原文の `X` は ℤ 上固有・平坦なので (C2) からこの仮定は得られる——**逸脱ではない**。
+  ★★退化の検出力も失われない——原文のスキームの上では従来どおり 1 の分割を強制する。 -/
   normSection_continuous : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L)
     (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type)),
+    @CompactSpace (toArcSpaceData.Arc X) (toArcSpaceData.topology X) →
+    @T2Space (toArcSpaceData.Arc X) (toArcSpaceData.topology X) →
     @Continuous (toArcSpaceData.Arc X) ℝ (toArcSpaceData.topology X) inferInstance
       (normSection X L m s)
   /-- ★テンソル積で計量は掛かる(Green 関数は足される)——高さの加法性の源。 -/

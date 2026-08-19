@@ -88,6 +88,7 @@ import ABC3.Found.FrdI.Thm42Div
 import ABC3.Found.FrdI.Thm42Primary
 import ABC3.Found.FrdI.Thm42Prime
 import ABC3.Found.FrdI.Thm42PrimeCat
+import ABC3.Found.FrdI.Thm42Prop41iv
 import ABC3.Found.FrdI.Cor410Birat
 import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.Thm34Slice

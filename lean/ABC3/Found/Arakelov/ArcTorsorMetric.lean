@@ -1,4 +1,5 @@
 import ABC3.Found.Arakelov.ArcGreenConj
+import ABC3.Found.Arakelov.ArcTrivNorm
 
 /-!
 # Arakelov (C3) 第 294 ブロック —— **★★★★★★★計量は C(X^arc, ℝ) 上の捻れ集合**(`Found`)
@@ -54,6 +55,8 @@ namespace ABC3.Found.Arakelov
 
 open AlgebraicGeometry CategoryTheory MonoidalCategory Opposite ABC3.Found.GenEll
 
+open scoped Classical
+
 variable {X : Scheme.{0}}
 
 /-- ★**`X` の上で連続計量が存在すること**(`Prop`)。 -/
@@ -73,23 +76,32 @@ structure TorsorMetric (X : Scheme.{0}) (F : X.Modules) where
   green : (Spec (CommRingCat.of ℂ) ⟶ X) → ℝ
   /-- ★Green 関数は連続である。 -/
   green_cont : @Continuous _ ℝ (arcTopology X) _ green
-  /-- ★`X` の上で連続計量が存在する。 -/
-  has : HasContMetrics X
-  /-- ★`F` は局所自明である。 -/
   triv : IsLocallyTrivial X F.val
 
 namespace TorsorMetric
 
 variable {F : X.Modules}
 
-/-- ★★**正準な基準計量**——`Prop` からの選択なので `(X, F)` だけで決まる。 -/
-noncomputable def base (m : TorsorMetric X F) : ContArcMetric X F :=
-  Classical.choice (m.has F m.triv)
+/-- ★★**正準な基準計量**——`(X, F)` だけで決まる。
 
-/-- ★★基準計量は `green` に依らない——`has` も `triv` も `Prop` だから。 -/
-theorem base_eq (m m' : TorsorMetric X F) : m.base = m'.base := by
-  show Classical.choice (m.has F m.triv) = Classical.choice (m'.has F m'.triv)
-  congr 1
+★★★連続計量が在るならそれを取り、無ければ第 246 の点ごとの計量に落ちる
+（3 法則は常に成り立ち、連続性だけが条件付きになる）。 -/
+noncomputable def base (m : TorsorMetric X F) : ArcMetric X F :=
+  if h : HasContMetrics X then (Classical.choice (h F m.triv)).toArcMetric
+  else arcMetricOf F m.triv
+
+/-- ★★基準計量は `green` に依らない——`triv` は `Prop` だから。 -/
+theorem base_eq (m m' : TorsorMetric X F) : m.base = m'.base := rfl
+
+/-- ★★★連続計量が在るなら基準計量は連続である。 -/
+theorem base_cont (m : TorsorMetric X F) (h : HasContMetrics X)
+    (s : (F.val.obj (op ⊤) : Type)) :
+    @Continuous _ ℝ (arcTopology X) _ (fun p => m.base.nrm p (arcEval p F s)) := by
+  show @Continuous _ ℝ (arcTopology X) _
+    (fun p => (if h' : HasContMetrics X then (Classical.choice (h' F m.triv)).toArcMetric
+      else arcMetricOf F m.triv).nrm p (arcEval p F s))
+  rw [dif_pos h]
+  exact (Classical.choice (h F m.triv)).cont s
 
 /-- ★**切断のノルム** `|s|`。 -/
 noncomputable def norm (m : TorsorMetric X F) (s : (F.val.obj (op ⊤) : Type))
@@ -112,10 +124,10 @@ theorem norm_eq_zero_iff (m : TorsorMetric X F) (s : (F.val.obj (op ⊤) : Type)
     fun h => Or.inr ((m.base.eq_zero_iff p _).2 h)⟩
 
 /-- ★★★ノルムは連続である。 -/
-theorem norm_continuous (m : TorsorMetric X F) (s : (F.val.obj (op ⊤) : Type)) :
-    @Continuous _ ℝ (arcTopology X) _ (m.norm s) := by
+theorem norm_continuous (m : TorsorMetric X F) (s : (F.val.obj (op ⊤) : Type))
+    (h : HasContMetrics X) : @Continuous _ ℝ (arcTopology X) _ (m.norm s) := by
   letI := arcTopology X
-  exact (Real.continuous_exp.comp m.green_cont.neg).mul (m.base.cont s)
+  exact (Real.continuous_exp.comp m.green_cont.neg).mul (m.base_cont h s)
 
 /-- ★**定数倍**。 -/
 def scale (c : ℝ) (m : TorsorMetric X F) : TorsorMetric X F where
@@ -123,7 +135,6 @@ def scale (c : ℝ) (m : TorsorMetric X F) : TorsorMetric X F where
   green_cont := by
     letI := arcTopology X
     exact m.green_cont.add continuous_const
-  has := m.has
   triv := m.triv
 
 @[simp] theorem scale_green (c : ℝ) (m : TorsorMetric X F) (p : Spec (CommRingCat.of ℂ) ⟶ X) :
@@ -145,7 +156,6 @@ def tensor {G H : X.Modules} (mG : TorsorMetric X G) (mH : TorsorMetric X H)
   green_cont := by
     letI := arcTopology X
     exact mG.green_cont.add mH.green_cont
-  has := mG.has
   triv := hGH
 
 /-- ★★★★**Green 関数の加法性**——高さの加法性の源。 -/
@@ -162,10 +172,10 @@ theorem isConjCompatible_iff (m : TorsorMetric X F) :
 end TorsorMetric
 
 /-- ★★★★存在——Green 関数を 0 に取ればよい。 -/
-theorem nonempty_torsorMetric {F : X.Modules} (hF : IsLocallyTrivial X F.val)
-    (h : HasContMetrics X) : Nonempty (TorsorMetric X F) := by
+theorem nonempty_torsorMetric {F : X.Modules} (hF : IsLocallyTrivial X F.val) :
+    Nonempty (TorsorMetric X F) := by
   letI := arcTopology X
-  exact ⟨⟨fun _ => 0, continuous_const, h, hF⟩⟩
+  exact ⟨⟨fun _ => 0, continuous_const, hF⟩⟩
 
 /-! ## ★出典の紐付け(`.src`) -/
 
