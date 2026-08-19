@@ -108,6 +108,42 @@ def exists_frobTrivial_span.src : ABC3.Meta.Source :=
     item := "Definition 1.3, (i), (a) — 任意の対象は Frobenius-trivial な対象と span で繋がる",
     sectionId := "frdi-def-1-3-i" }
 
+/-! ## ★11. `base-identity` は pre-step に沿って**上げる**こともできる
+
+★★在庫の `prop_1_10_vi_descend`(`Prop110.lean:1348`)は
+四角形 `φB ≫ γ = γ ≫ φC` で **`φC` から `φB` へ降ろす**。
+★★★`Base γ` が同型(pre-step)なので**両側から消せる** ——
+したがって**逆向き(`φB` から `φC` へ上げる)も同じ証明で通る**。
+
+★`Corollary 4.11, (i)` の `hOTri` の還元では、
+Frobenius-trivial な `A₀` で得た結論を `A` へ**上げる**必要があるので、
+こちらの向きが要る。 -/
+
+include P in
+/-- ★★★★**`base-identity` と次数は pre-step に沿って上げられる**。 -/
+theorem baseIdentity_ascend {B Cc : C} (γ : B ⟶ Cc) (hγ : IsPreStep P γ)
+    (φC : Cc ⟶ Cc) (φB : B ⟶ B) (hbB : IsBaseIdentity P φB)
+    {d : ℕ+} (hdB : P.degFr φB = d)
+    (hsq : φB ≫ γ = γ ≫ φC) :
+    IsBaseIdentity P φC ∧ P.degFr φC = d := by
+  haveI : IsIso (P.Base γ) := hγ.2
+  constructor
+  · have h := congrArg P.Base hsq
+    rw [P.Base_comp, P.Base_comp, show P.Base φB = P.Base (𝟙 B) from hbB,
+      P.Base_id, Category.id_comp] at h
+    show P.Base φC = P.Base (𝟙 Cc)
+    rw [P.Base_id]
+    exact ((cancel_epi (P.Base γ)).mp ((Category.comp_id (P.Base γ)).trans h)).symm
+  · have h := congrArg P.degFr hsq
+    rw [P.degFr_comp, P.degFr_comp, hdB, show P.degFr γ = 1 from hγ.1,
+      one_mul, mul_one] at h
+    exact h.symm
+
+def baseIdentity_ascend.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 34,
+    item := "Proposition 1.10, (vi) — base-identity は pre-step に沿って上げられる",
+    sectionId := "frdi-prop-1-10-vi" }
+
 /-! ## ★3. 自然性は `Base` の像から `𝒟` 全体へ延びる
 
 ★★★3 分解があるので、**`Base` の像で自然なら `𝒟` のすべての射で自然**になる ——
