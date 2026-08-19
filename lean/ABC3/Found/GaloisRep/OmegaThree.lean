@@ -42,13 +42,13 @@ variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
 
 /-- ★**`ψ₄ = preΨ₄ · ψ₂`**。 -/
 theorem psi_four : W.ψ 4 = C W.preΨ₄ * W.ψ₂ := by
-  simp [WeierstrassCurve.ψ, normEDS]
+  norm_num [WeierstrassCurve.ψ, normEDS, Int.odd_iff, Int.even_iff]
 
 /-- ★★**`psiComp 3` の明示形**。 -/
 theorem psiComp_three :
     psiComp W 3 = W.ψ 5 * W.ψ₂ - C W.preΨ₄ ^ 2 * W.ψ₂ := by
   have h5 : W.ψ 5 = preNormEDS (W.ψ₂ ^ 4) (C W.Ψ₃) (C W.preΨ₄) 5 := by
-    simp [WeierstrassCurve.ψ, normEDS]
+    norm_num [WeierstrassCurve.ψ, normEDS, Int.odd_iff, Int.even_iff]
   rw [psiComp, complEDS₂_three, h5]
 
 end General
@@ -67,18 +67,18 @@ theorem omegaNum_three_char_two : omegaNum W 3 = 0 := by
   have hR : (2 : R) = 0 := CharP.cast_eq_zero R 2
   have h2 : (2 : R[X][Y]) = 0 := by
     rw [show (2 : R[X][Y]) = C (C (2 : R)) by rw [map_ofNat, map_ofNat], hR, map_zero, map_zero]
-  have hd : C W.preΨ₄ = W.ψ₂ ^ 4 + C (C W.a₁) * W.ψ 3 * W.ψ₂ := by
-    rw [psi_three, psi2_char_two]
-    rw [← map_pow, ← map_mul, ← map_mul, ← map_add]
+  have hd : C W.preΨ₄ = W.ψ₂ ^ 4 + C (C W.a₁) * C W.Ψ₃ * W.ψ₂ := by
+    rw [psi2_char_two, ← map_pow, ← map_mul, ← map_mul, ← map_add]
     exact congrArg C (preP4_frob_char_two W)
-  rw [omegaNum_eq_zero_iff_char_two, psiComp_three]
-  have h5 : W.ψ 5 = W.ψ 4 * W.ψ 2 ^ 3 - W.ψ 1 * W.ψ 3 ^ 3 := by
-    have := psi_odd W 2
-    norm_num at this
-    exact this
-  rw [h5, psi_one, psi_two, psi_four, psi_four]
-  linear_combination (C W.preΨ₄ * W.ψ₂) * hd
-    + (W.ψ₂ ^ 5 * C W.preΨ₄) * h2
+  have h5 : W.ψ 5 = C W.preΨ₄ * W.ψ₂ * W.ψ₂ ^ 3 - C W.Ψ₃ ^ 3 := by
+    have h := psi_odd W 2
+    norm_num at h
+    exact h
+  rw [omegaNum_eq_zero_iff_char_two]
+  rw [show (3 : ℤ) + 1 = 4 by norm_num, show (3 : ℤ) - 1 = 2 by norm_num]
+  rw [psiComp_three, h5, psi_three, psi_four, psi_two]
+  linear_combination (-(C W.preΨ₄ * W.ψ₂)) * hd
+    + (-(C W.Ψ₃ ^ 3 * W.ψ₂) - C (C W.a₁) * C W.preΨ₄ * W.ψ₂ ^ 2 * C W.Ψ₃) * h2
 
 end CharTwo
 
