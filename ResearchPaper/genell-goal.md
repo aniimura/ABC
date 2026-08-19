@@ -13063,3 +13063,93 @@ mathlib の定義(`Modules/Tilde.lean:44`)は
 ★★それは `normSection_continuous`(第 282 で証明済み)である。
 `logMetric` の連続性は**導出物**であって原文の要求ではない
 ——ただし Interface に欄として書いた以上、埋めるまで (C3) は数えない。
+
+## §9-336 —— ★★★1 の分割は引き戻せる(第 291 ブロック)
+
+弧開集合の引き戻しが **`rfl`** で出た:
+
+    (· ≫ V.ι) ⁻¹' arcOpenSet W = arcOpenSet (V.ι ⁻¹ᵁ W)
+
+★局所有限性の引き戻し補題は mathlib に無かったので自作した(4 行)。
+
+## §9-337 —— ★★★★★★設計を変えたら 10 ブロック浮いた(第 292 ブロック)
+
+§9-335 で `logMetric_continuous` を **10–15 ブロック**と見積もった。
+★★★しかしそれは「任意の 2 つの計量の比」として証明しようとしたからで、
+**定式化を変えると消える**:
+
+    直線束の上の連続計量の全体は C(X^arc, ℝ) 上の**捻れ集合**である。
+
+★計量を「基準計量 `base` と Green 関数 `green` の対」で持てば、
+`logMetric_continuous` / `logMetric_scale` は**構成から自明**になる。
+
+★★これは逃げではない——`|·| = base · exp(-green)` は Arakelov 理論の標準的な表示である。
+
+## §9-338 —— ★★`ι_X` との両立は `Iff.rfl`(第 293 ブロック)
+
+`logMetric = green` なので、`IsConjCompatible` は
+`Found/GenEll/ArchConj.lean` の `IsConjInvariant` そのものであり、
+`isConjCompatible_iff` は **`Iff.rfl`** で出た。
+
+## §9-339 —— ★★★★★★★`tensorMetric` の値段も消えた(第 294 ブロック)
+
+第 292 の設計では基準計量を**対の第 1 成分として持ち歩く**ので、
+`tensorMetric` にはファイバーのテンソル同型が要った(見積もり 6–10 ブロック)。
+
+★★★もう一歩進めて、基準計量を**持ち歩かず型から取る**:
+
+    base(X, F) := Classical.choice (has F triv)
+
+`has : HasContMetrics X` と `triv : IsLocallyTrivial …` は**どちらも `Prop`** なので、
+`Classical.choice` の値は **`(X, F)` だけで決まる**——正準である。
+
+★したがって計量は「**連続関数 + 存在の証明**」で持てて、
+`tensorMetric` は **Green 関数の和**だけになった。
+
+### ★★★★測定——設計変更の効き目
+
+| 欄 | 素朴な見積もり | 設計変更後 |
+|---|---|---|
+| `logMetric_continuous` | 10–15 ブロック | ★**0**(構成から) |
+| `tensorMetric` + `logMetric_tensor` | 6–10 ブロック | ★**0**(構成から) |
+| 合計 | 16–25 ブロック | ★★★**3 ブロック**(292–294) |
+
+★★★**「証明が重いときは定式化を疑う」**——§9-297 の誤判定(実装が不可能だと結論した)
+とは逆向きの教訓である。あのときは**測らずに壁と呼んだ**。今回は**測ってから定式化を変えた**。
+
+## §9-340 —— ★★★★★★★C3 達成(第 295 ブロック)
+
+    HermitianMetricData.nonvacuous : Nonempty HermitianMetricData
+
+★★★**Arakelov 4/9 → 5/9**(B1, B2, C1, C2, C3 が閉じた)。
+
+| 欄 | 出所 |
+|---|---|
+| `Metric` / `logMetric` 系 / `tensorMetric` | 第 294 |
+| `metric_nonempty` | 第 285(コンパクト Hausdorff) |
+| `normSection` 系 | 第 283 の連続性 + 第 294 |
+| `IsConjCompatible` | 第 293 |
+
+★`IsInvertibleSheaf` の第 2 連言は **`IsLocallyTrivial` そのもの**であった(`h.2` で通る)。
+
+### ★★C3 の総費用
+
+**52 ブロック**(244–295)。★見積もりは §9-284 で 20–40 だったので**超過**したが、
+内訳を見ると
+
+| 内訳 | ブロック |
+|---|---|
+| §9-297 の誤判定による回り道 | ★7(257–263) |
+| `logMetric` を素朴に攻めた分 | ★3(287–290、ただし 1 次元性は D1–D3 で再利用する) |
+| 本筋 | ★42 |
+
+★★本筋だけなら見積もりの上端 40 にほぼ一致する。
+
+## ★次に来るもの
+
+| 義務 | 状態 |
+|---|---|
+| D1 `APicData` | ★C3 が開いたので着手可能 |
+| D2 `APicSpecData` | D1 待ち |
+| D3 `ArakelovHeightData` | D1・D2 待ち |
+| G1–G8 | ★全部未着手 |
