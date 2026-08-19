@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TwoTorsionDecomp
+import ABC3.Found.GaloisRep.NotTwoTorsionPoint
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -23,9 +23,11 @@ import ABC3.Found.GaloisRep.PointHom
 | **関数体の自己準同型 `translateFieldHom`** | 同上 | ✅ |
 | 合成則 `τ_{Q₁} ∘ τ_{Q₂} = τ_{Q₁+Q₂}` | `Found/GaloisRep/TranslateComp.lean`(第 121) | ✅ |
 | 2 等分点の単射性(**分解があれば**) | 同上 | ✅ |
-| **2 等分点の分解の存在** | 本ファイル | ★**葉** |
+| 2 等分点の分解の存在 | `Found/GaloisRep/TwoTorsionDecomp.lean`(第 122) | ✅ |
+| 2 等分点でない点の存在(代数閉・標数≠2) | `Found/GaloisRep/NotTwoTorsionPoint.lean`(第 123) | ✅ |
+| **平行移動の単射性(仮定なし)** | 同上 | ✅ |
 | **全単射性**(2 等分点以外) | `Found/GaloisRep/TranslateEquiv.lean`(第 120) | ✅ |
-| 2 等分点での自己同型 | 本ファイル | ★**葉** |
+| 2 等分点での自己同型(単射性は済、包装のみ) | 本ファイル | ★**葉** |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
 | **生成点が捻れ点でないこと** | 本ファイル | ★**葉** |
 | **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
@@ -51,21 +53,6 @@ variable {F : Type} [Field F]
 noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : W.FunctionField :=
   algebraMap W.CoordinateRing W.FunctionField
     (CoordinateRing.mk W (Polynomial.C p))
-
-/-! ## ★★★★★葉 1a —— 2 等分点の場合 -/
-
-/-- ★★★★**2 等分点でないアフィン点が 1 つ存在すること**。
-
-原文 (GenEll p.19):
-> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
-
-★★★★★★平行移動の単射性はこれだけになった——第 122 ブロック
-`translateHom_injective_all` がこれを仮定として受けている。
-★`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²`)なので、
-体が十分大きければ取れる。 -/
-theorem exists_notTwoTorsion_point (W : WeierstrassCurve.Affine F) [W.IsElliptic] :
-    ∃ (x₁ y₁ : F) (_ : W.Nonsingular x₁ y₁), W.negY x₁ y₁ ≠ y₁ := by
-  sorry
 
 /-! ## ★★★★★葉 1b —— 2 等分点での自己同型 -/
 
@@ -119,19 +106,6 @@ def polyToFF.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(F[X] の元を関数体に送る写像)",
     sectionId := "genell-thm-3-8" }
-
-def exists_notTwoTorsion_point.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(Weil 対の構成——2 等分点での平行移動の単射性)",
-    sectionId := "genell-thm-3-8" }
-
-def exists_notTwoTorsion_point.needs : List ProofObligation :=
-  [ .implicitStep
-      "★★★★★★**平行移動の単射性はこれだけになった**——2 等分点でない場合は第 117(`−Q` での 1 点評価)、2 等分点の場合は第 121-122(分解して合成)で **Found に入った**(0 ブロック)" 19,
-    .implicitStep
-      "★★`E[2]` は高々 4 点である(第 65-72 の `E[n] ≃ (ℤ/n)²`、**Found に済**)。体が代数閉なら `E[3]` が 9 点あるので、その非零元は 2 等分点でない(3-8 ブロック)" 19,
-    .implicitStep
-      "★一般の体では成り立たない——`E(F)` が `E[2] ∪ {0}` に含まれることがあり得る。Weil 対の文脈では代数閉体上で作業するので問題にならない(0 ブロック)" 19 ]
 
 def exists_translateAut_twoTorsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,
