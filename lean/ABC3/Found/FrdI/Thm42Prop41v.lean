@@ -449,6 +449,68 @@ def isPrimaryElt_div_extend_v.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — primary 性の一段の拡張（v 側）",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★橋の **↔** 版(保存かつ反射) -/
+
+/-- ★★★★★★**「`A` へ入る primary が両向きに移る」⟹「`A` から出る primary も両向きに移る」**。 -/
+theorem primaryOut_iff_of_primaryIn (Ψ : C ⥤ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    {A : C}
+    (hIn : ∀ (E' : C) (ϵ' : E' ⟶ A), IsPreStep P ϵ' →
+      (IsPrimaryElt (P.Div ϵ') ↔ IsPrimaryElt (P₂.Div (Ψ.map ϵ'))))
+    {B : C} (δ : A ⟶ B) (hsδ : IsPreStep P δ) :
+    IsPrimaryElt (P.Div δ) ↔ IsPrimaryElt (P₂.Div (Ψ.map δ)) := by
+  obtain ⟨u, hu⟩ := hdivS A (P.Div δ)
+  have hcu : IsCoAngular P (((u : End A)) : A ⟶ A) := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hsu : IsPreStep P (((u : End A)) : A ⟶ A) := isPreStep_of_otri _ u.2
+  have hcδ : IsCoAngular P δ := prop_1_4_i P _ (fun Y _ => hiso Y)
+  obtain ⟨θ, hθiso, hθ⟩ :=
+    exists_iso_of_div_eq G (((u : End A)) : A ⟶ A) δ hcu hsu hcδ hsδ hu
+  haveI := hθiso
+  have h2 : P₂.Div (Ψ.map δ) = P₂.Div (Ψ.map (((u : End A)) : A ⟶ A)) := by
+    rw [← hθ, Ψ.map_comp]
+    haveI : IsIso (Ψ.map θ) := Ψ.map_isIso θ
+    exact div_comp_iso (Ψ.map (((u : End A)) : A ⟶ A)) (Ψ.map θ)
+  rw [h2, ← hu]
+  exact hIn A _ hsu
+
+/-- ★★★★★★**「`A` から出る primary が両向きに移る」⟹「`A` へ入る primary も両向きに移る」**。 -/
+theorem primaryIn_iff_of_primaryOut (Ψ : C ⥤ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.map f))
+    {A : C}
+    (hOut : ∀ (B' : C) (δ' : A ⟶ B'), IsPreStep P δ' →
+      (IsPrimaryElt (P.Div δ') ↔ IsPrimaryElt (P₂.Div (Ψ.map δ'))))
+    {E : C} (ϵ : E ⟶ A) (hsϵ : IsPreStep P ϵ) :
+    IsPrimaryElt (P.Div ϵ) ↔ IsPrimaryElt (P₂.Div (Ψ.map ϵ)) := by
+  obtain ⟨u, hu⟩ := hdivS A (preStepVal P ϵ hsϵ)
+  have hsu : IsPreStep P (((u : End A)) : A ⟶ A) := isPreStep_of_otri _ u.2
+  have hcu : IsCoAngular P (((u : End A)) : A ⟶ A) := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hcϵ : IsCoAngular P ϵ := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hvu : preStepVal P (((u : End A)) : A ⟶ A) hsu = preStepVal P ϵ hsϵ := by
+    rw [preStepVal_of_otri _ u.2]; exact hu
+  obtain ⟨θ, hθiso, hθ⟩ :=
+    exists_iso_of_preStepVal_eq G (((u : End A)) : A ⟶ A) ϵ hcu hsu hcϵ hsϵ hvu
+  haveI := hθiso
+  have hleft : IsPrimaryElt (P.Div ϵ)
+      ↔ IsPrimaryElt (P.Div (((u : End A)) : A ⟶ A)) := by
+    rw [hu]
+    exact (isPrimaryElt_preStepVal_iff ϵ hsϵ).symm
+  have hright : IsPrimaryElt (P₂.Div (Ψ.map (((u : End A)) : A ⟶ A)))
+      ↔ IsPrimaryElt (P₂.Div (Ψ.map ϵ)) := by
+    rw [← hθ, Ψ.map_comp]
+    haveI : IsIso (Ψ.map θ) := Ψ.map_isIso θ
+    exact isPrimaryElt_div_iso_comp (Ψ.map θ) (Ψ.map ϵ) (hPS ϵ hsϵ)
+  exact hleft.trans ((hOut A _ hsu).trans hright)
+
+def primaryOut_iff_of_primaryIn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — 入る/出る primary の橋（両向き）",
+    sectionId := "frdi-thm-4-2" }
+
 end Bridge
 
 end ABC3.Found.FrdI
