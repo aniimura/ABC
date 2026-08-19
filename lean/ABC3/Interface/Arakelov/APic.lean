@@ -160,11 +160,28 @@ def APicSpecData.waiting : WaitingFor :=
 structure ArakelovHeightData where
   /-- 台となる `APic`。 -/
   toAPicSpecData : APicSpecData
-  /-- `X(ℚ̄)` の点。 -/
-  AlgPoint : Scheme.{0} → Type
+  /-- `X(ℚ̄)` の点。
+
+  ★★2026-08-19 の修正——宇宙を `Type 1` にした。`IsPointOf` が数体 `F : Type` に
+  わたって量化するので、`AlgPoint` が `Type 0` だと代表元を保持できない
+  ((D1) の `APic` と同じ誤記)。 -/
+  AlgPoint : Scheme.{0} → Type 1
   /-- `x ∈ X(ℚ̄)` が射 `x_F : Spec 𝓞_F → X` で表されること。 -/
   IsPointOf : (X : Scheme.{0}) → (F : Type) → [Field F] → [NumberField F] →
     (Spec (CommRingCat.of (𝓞 F)) ⟶ X) → AlgPoint X → Prop
+  /-- ★★★★★**どの射も点を定める**。
+
+  原文 (GenEll p.5):
+  > as the height function associated to the arithmetic line bundle M.
+
+  ★★★★**2026-08-19 に見つけた穴。**それまで `IsPointOf` が**空でもよかった**ので、
+  `AlgPoint := PUnit`、`IsPointOf := fun _ _ _ _ _ => False`、`height := 0` が
+  すべての欄を満たしてしまった(`height_eq_degF` が空虚に成り立つ)。
+
+  ★★★塞ぎ方: **`Spec 𝓞_F ⟶ X` はすべて `X(ℚ̄)` の点を定める**ことを課す。
+  これで `height_eq_degF` が効き、高さは `deg_F` の引き戻しに**強制される**。 -/
+  isPointOf_exists : ∀ (X : Scheme.{0}) (F : Type) [Field F] [NumberField F]
+    (xF : Spec (CommRingCat.of (𝓞 F)) ⟶ X), ∃ x : AlgPoint X, IsPointOf X F xF x
   /-- ★★**高さ** `ht_L̄`。 -/
   height : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → AlgPoint X → ℝ
   /-- ★★**`Proposition 1.4, (i)`** —— 加法性(`X(ℚ̄)` **全体**で)。 -/

@@ -277,4 +277,42 @@ def divFrobeniusTrivial_map.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — Div-Frobenius-trivial 対象の保存",
     sectionId := "frdi-thm-4-2" }
 
+
+/-- ★★★★★**族そのものについての Div-identity 保存** ——
+`divFrobeniusTrivial_map` の中身を、証人の族を隠さずに取り出したもの。
+
+★連鎖の基底(`prop_4_1_i` を `𝒞₂` 側で `Ψ ∘ ζ` に当てる)に要る。 -/
+theorem divIdentity_map_of_family (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    {A : C₁} (hA₁ : ¬ IsGroupLikeObj P₁ A)
+    (hA₂ : ¬ IsGroupLikeObj P₂ (Ψ.functor.obj A))
+    (ζ : ℕ+ →* End A) (hdegζ : ∀ n, P₁.degFr (((ζ n : End A)) : A ⟶ A) = n)
+    (hcond : ∀ n, IsDivIdentity P₁ (((ζ n : End A)) : A ⟶ A) ∧
+      IsFrobeniusType P₁ (((ζ n : End A)) : A ⟶ A)) (n : ℕ+) :
+    IsDivIdentity P₂ (Ψ.functor.map (((ζ n : End A)) : A ⟶ A)) := by
+  refine isDivIdentity_of_primes (P₂ := P₂)
+    ((CategoryTheory.Functor.mapEnd A Ψ.functor).comp ζ) (fun q hq => ?_) n
+  have hpf : IsPrimeFrobenius P₁ ((ζ q : End A) : A ⟶ A) := by
+    refine ⟨(hcond q).2, ?_⟩
+    rw [hdegζ q]
+    exact hq
+  have hnps : ¬ IsPreStep P₁ ((ζ q : End A) : A ⟶ A) := by
+    intro hc
+    have h1 : P₁.degFr ((ζ q : End A) : A ⟶ A) = 1 := hc.1
+    rw [hdegζ q] at h1
+    exact hq.one_lt.ne' (congrArg (fun t : ℕ+ => (t : ℕ)) h1)
+  exact (primeFrobenius_divIdentity_map Ψ hPS hPS' F₁ G₁ hiso₁ hnd₁ F₂ G₂ hiso₂ hnd₂
+    hA₁ hA₂ _ (prop_1_14_i_of_primeFrob P₁ F₁ hiso₁ _ hpf) hnps
+    ⟨hpf, (hcond q).1⟩).2
+
+def divIdentity_map_of_family.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (i) — Div-identity 族の保存",
+    sectionId := "frdi-thm-4-2" }
+
 end ABC3.Found.FrdI
