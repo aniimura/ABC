@@ -45,9 +45,9 @@ theorem rem_2_7_2_factor_isometric (Fc : FrobenioidCore P)
     (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
     {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
     {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) :
-    ∃ (n : ℕ+) (β : A ⟶ A) (α : A ⟶ B),
-      φ = (((Fs n).app ⟨A, hA⟩ : End A) : A ⟶ A) ≫ β ≫ α ∧
-      IsBaseIdentity P β ∧ IsPreStep P β ∧ S.homP α := by
+    ∃ β : A ⟶ A, IsBaseIdentity P β ∧ IsPreStep P β ∧
+      φ = (((Fs (P.degFr φ)).app ⟨A, hA⟩ : End A) : A ⟶ A) ≫ β
+            ≫ S.lift hA hB (P.Base φ) := by
   have hαP := S.lift_homP hA hB (P.Base φ)
   have hαpb := S.isPullBack hαP
   have hdegα : P.degFr (S.lift hA hB (P.Base φ)) = 1 := (Fc.pullBackLB _ hαpb).2
@@ -76,11 +76,11 @@ theorem rem_2_7_2_factor_isometric (Fc : FrobenioidCore P)
     have h := congrArg P.Base hβ
     rw [P.Base_comp, hFnb, Category.id_comp, hgb] at h
     exact h
-  refine ⟨P.degFr φ, β, S.lift hA hB (P.Base φ), ?_, ?_, ?_, hαP⟩
-  · rw [← Category.assoc, hβ, hg1]
+  refine ⟨β, ?_, ?_, ?_⟩
   · show P.Base β = P.Base (𝟙 A)
     rw [P.Base_id]; exact hbβ
   · exact ⟨degFr_of_isIso P β, by show IsIso (P.Base β); rw [hbβ]; infer_instance⟩
+  · rw [← Category.assoc, hβ, hg1]
 
 /-- ★★★**3 分解の `β` は `𝒪^×(A)` の元**(等長な場合)。
 
