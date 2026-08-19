@@ -93,6 +93,7 @@ import ABC3.Found.FrdI.Thm52Path
 import ABC3.Found.FrdI.Thm52Ref
 import ABC3.Found.FrdI.Thm52Rem272
 import ABC3.Found.FrdI.Thm52BiratSec
+import ABC3.Found.FrdI.Thm52Model
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
@@ -541,6 +542,7 @@ import ABC3.Found.GaloisRep.PadicLinear
 import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GaloisRep.GalRepWitness
 import ABC3.Found.GaloisRep.ModLWitness
+import ABC3.Found.GaloisRep.TateSeries
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
