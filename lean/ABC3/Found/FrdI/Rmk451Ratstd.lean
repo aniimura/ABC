@@ -776,4 +776,102 @@ theorem biratDivGp_hull_transport {B H : BiratCat P G} (k : B ⟶ H)
   rw [add_comm (biratDivGp k)] at hcomp
   exact add_right_cancel hcomp
 
+/-! ## ★15. 比較関手は `Div^gp` を保つ —— `Φ^birat` が両側で一致する
+
+★★`sliceDivGpOf` は `P.Div` と `P.Base` と `P.degFr` だけで書かれており、
+`istr_compat_Div` / `istr_compat_Base` / `istr_compat_degFr` がすべて `rfl` なので、
+**そのまま一致する**。 -/
+
+include F G in
+/-- ★★★★`biratIstrMap` は `Div^gp` を保つ。 -/
+theorem biratIstrMap_divGp (A B : Istr P)
+    (z : HomBirat (istrPre P F) (istr_frobenioid P F G) A B) :
+    biratDivGp (biratIstrMap P G F A B z) = biratDivGp z := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
+  rw [biratIstrMap_mk, biratDivGp_mk, biratDivGp_mk, sliceDivGpOf_eq, sliceDivGpOf_eq]
+  rfl
+
+def biratIstrMap_divGp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — Φ^birat は 𝒞^istr と 𝒞 で一致する",
+    sectionId := "frdi-remark-4-5-1" }
+
+/-- ★全単射な単系準同型は単元性を反射する。 -/
+theorem isUnit_of_bijective_map {M₀ N₀ : Type*} [Monoid M₀] [Monoid N₀] (f : M₀ →* N₀)
+    (hf : Function.Bijective f) {a : M₀} (h : IsUnit (f a)) : IsUnit a := by
+  obtain ⟨u, hu⟩ := h
+  obtain ⟨b, hb⟩ := hf.2 (↑u⁻¹ : N₀)
+  refine ⟨⟨a, b, ?_, ?_⟩, rfl⟩
+  · exact hf.1 (by rw [map_mul, hb, ← hu, u.mul_inv, map_one])
+  · exact hf.1 (by rw [map_mul, hb, ← hu, u.inv_mul, map_one])
+
+include F G in
+/-- ★★★★★**`Φ^birat` の元は `𝒞^istr` 側へ持ち上がる** ——
+比較関手が充満忠実で `Base`・`degFr`・`Div^gp` を保つから。 -/
+theorem mem_phiBiratAt_istr_of (A : Istr P)
+    {x : Gp (Φ.val (P.toElem.obj A.obj).base)}
+    (hx : x ∈ phiBiratAt P G ((toBiratCat P G).obj A.obj)) :
+    x ∈ phiBiratAt (istrPre P F) (istr_frobenioid P F G)
+        ((toBiratCat (istrPre P F) (istr_frobenioid P F G)).obj A) := by
+  set X : BiratCat (istrPre P F) (istr_frobenioid P F G) :=
+    (toBiratCat (istrPre P F) (istr_frobenioid P F G)).obj A with hX
+  obtain ⟨ε, hε, hεx⟩ := hx
+  obtain ⟨δ, hδeq⟩ := (biratIstrFunctor P G F).map_surjective (ε : _ ⟶ _)
+  have hmap : (CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) δ = ε := hδeq
+  refine ⟨δ, ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+  · show (biratPre (istrPre P F) (istr_frobenioid P F G)).Base (δ : X ⟶ X)
+      = (biratPre (istrPre P F) (istr_frobenioid P F G)).Base (𝟙 X)
+    rw [(biratPre (istrPre P F) (istr_frobenioid P F G)).Base_id,
+      ← biratIstrFunctor_Base P G F (δ : X ⟶ X), hδeq]
+    have h1 : (biratPre P G).Base (ε : _ ⟶ _) = (biratPre P G).Base (𝟙 _) := hε.1.1
+    rw [(biratPre P G).Base_id] at h1
+    exact h1
+  · show (biratPre (istrPre P F) (istr_frobenioid P F G)).degFr (δ : X ⟶ X) = 1
+    rw [← biratIstrFunctor_degFr P G F (δ : X ⟶ X), hδeq]
+    exact hε.1.2
+  · refine isUnit_of_bijective_map (CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F))
+      (biratIstrMap_bijective P G F A A) ?_
+    rw [hmap]
+    exact hε.2
+  · have h2 : biratDivGp (biratIstrMap P G F A A (δ : X ⟶ X)) = biratDivGp (δ : X ⟶ X) :=
+      biratIstrMap_divGp P G F A A (δ : X ⟶ X)
+    refine h2.symm.trans ?_
+    rw [show biratIstrMap P G F A A (δ : X ⟶ X) = (ε : _ ⟶ _) from hδeq]
+    exact hεx
+
+include F G in
+/-- ★★★★★**`Φ^birat(B)` の元は `B^istr` 側から底の同型で来る**。
+
+★`hull_transport_end` で自己射を移し、`hull_transport_mem_otri` /
+`hull_transport_isUnit` で `𝒪^×` に入ることを見て、
+`biratDivGp_hull_transport` で `Div^gp` を運ぶ。 -/
+theorem phiBiratAt_hull
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X) (B : C)
+    {x : Gp (Φ.val (P.toElem.obj B).base)}
+    (hx : x ∈ phiBiratAt P G ((toBiratCat P G).obj B)) :
+    ∃ y ∈ phiBiratAt P G ((toBiratCat P G).obj (hullObj P F B)),
+      x = gpMap _ (Φ.map (biratBase ((toBiratCat P G).map (hullMap P F B)))) y := by
+  obtain ⟨δ, hδ, rfl⟩ := hx
+  have hk := birat_map_hullMap_isIsotropicHull P G F hfn B
+  obtain ⟨δ', hδ'k, -⟩ := hull_transport_end (biratPre P G) hk δ
+  have hotri := hull_transport_mem_otri (biratPre P G) hk hδ.1 hδ'k
+  obtain ⟨u, hu⟩ := hδ.2
+  obtain ⟨ε', hε'k, -⟩ := hull_transport_end (biratPre P G) hk ((↑u⁻¹ : End _))
+  have hde : ((δ : _ ⟶ _) ≫ ((↑u⁻¹ : End _) : _ ⟶ _)) = 𝟙 _ := by
+    have h1 := u.inv_val
+    rw [hu] at h1
+    exact h1
+  have hed : (((↑u⁻¹ : End _) : _ ⟶ _) ≫ (δ : _ ⟶ _)) = 𝟙 _ := by
+    have h1 := u.val_inv
+    rw [hu] at h1
+    exact h1
+  have hunit := hull_transport_isUnit (biratPre P G) hk hde hed hδ'k hε'k
+  refine ⟨biratDivGp ((δ' : _ ⟶ _)), ⟨δ', ⟨hotri, hunit⟩, rfl⟩, ?_⟩
+  exact biratDivGp_hull_transport _ hk.2.1.1 hδ.1 hotri hδ'k
+
+def phiBiratAt_hull.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — Φ^birat は等長化 hull を通って移る",
+    sectionId := "frdi-remark-4-5-1" }
+
 end ABC3.Found.FrdI
