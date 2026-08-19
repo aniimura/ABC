@@ -15631,3 +15631,52 @@ G7(Néron モデル、mathlib 0 件)、G8(Faltings 高さ)。
 
 ★残る 4 件が立つ **Tate 一意化・Faltings 高さ・Weil 対**には足場が無い。
 ★★第 94–101 ブロックは、その足場を**自分で積んだ 8 層**である。
+
+## §9-410 汎用の縮小写像定理(第 102 ブロック)
+
+第 100 ブロックで Tate 母数を作ったときの不動点反復を、道具として切り出した。
+
+    F : R → R,  x, y ∈ I,  x − y ∈ I^k  ⟹  F(x) − F(y) ∈ I^{k+1}
+      ⟹  F は I の中に不動点を持つ                    (IsAdicComplete I R)
+
+`Found/GaloisRep/AdicContraction.lean` の `exists_fixedPoint_of_contraction`。
+★位相を使わない——`IsPrecomplete` で極限、`IsHausdorff` で一意性を出す。
+★★形式群の `w(z)`・Hensel 型の引き上げ・一意化の全射性(葉 (e))で繰り返し要る。
+
+## §9-411 Tate 一意化の**右辺**を先に固めた(第 103 ブロック)
+
+一意化 `E_q(K) ≅ Kˣ/q^ℤ` のうち、**左辺**(級数 `X(u,q)`, `Y(u,q)`)は
+葉 (a)–(e) として残るが、**右辺 `Kˣ/q^ℤ` は純粋な群論**なので今すぐ全部やれる。
+
+`Found/GaloisRep/QTorsion.lean`:
+
+| 定理 | 内容 |
+|---|---|
+| `qTorsHom` | `(a,b) ↦ ζ^a·π^b` : `(ℤ/N)² → Kˣ/q^ℤ` |
+| `qTorsHom_injective` | 単射(`q` が 1 の冪根でないことだけを使う) |
+| `qTorsHom_ker_le_range` | 全射(体の `N` 乗根が原始根 `ζ` で生成されること) |
+| `qQuot_torsion_addEquiv` | ★★★★★**`(Kˣ/q^ℤ)[N] ≃+ (ℤ/N)²`** |
+| `zpow_eq_zero_of_val` | 付値が自明でなければ 1 の冪根でない |
+| `qQuot_torsion_card` | 代数閉・標数 0 では**すべての `m ≥ 1`** で成立 |
+| `tateModule_qQuot` | ★★★★★★**`T_l(Kˣ/q^ℤ) ≃+ ℤ_l²`** |
+
+### ★★★★第 73–77 ブロックがそのまま効いた
+
+`addEquiv_limTors`(「すべての `m ≥ 1` で `A[m] ≃ (ℤ/m)²` ⟹ `T_l A ≃ ℤ_l²`」)は
+楕円曲線に固有の装置ではなく**アーベル群一般の装置**として作ってあったので、
+`Kˣ/q^ℤ` に何も変更せず流し込めた。
+
+### ★★足場の記録
+
+| 使った mathlib | 役割 |
+|---|---|
+| `ZMod.lift` | `ℤ →+ A` が `N ↦ 0` を満たすとき `ZMod N →+ A` |
+| `IsPrimitiveRoot.zpowers_eq` | 整域では `N` 乗根の群 = `⟨ζ⟩` |
+| `IsAlgClosed.exists_pow_nat_eq` | `π^m = q` の存在 |
+| `HasEnoughRootsOfUnity`(分離閉体の instance) | 原始 `m` 乗根の存在 |
+
+### ★残っている葉(変わらず)
+
+一意化そのもの——(a) 級数の収束、(b) Weierstrass 方程式、(c) 準同型性、
+(d) 核が `q^ℤ`、(e) 全射性。★★**(d) は本ブロックで実質半分が済んだ**
+(`q^ℤ` による商の側の構造が確定したから)。
