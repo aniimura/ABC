@@ -500,6 +500,7 @@ import ABC3.Found.GaloisRep.EdsIdentity
 import ABC3.Found.GaloisRep.EdsWard
 import ABC3.Found.GaloisRep.Coprime23
 import ABC3.Found.GaloisRep.ZeroSet
+import ABC3.Found.GaloisRep.CoprimePhiPSq
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
