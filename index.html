@@ -220,6 +220,15 @@ FSM 射は同型である。★逆に反例を作れれば分類は ③ sourceGa
 （<code>Found/FrdI/Prop53Birat.lean</code> の <code>unTr_modelFrobenioid</code>、sorry 0・公理は標準 3 つ）。
 記録: 同ファイル冒頭の「逸脱」節、および <code>ResearchPaper/frdi-decomposition.json</code> の鎖
 <code>phibirat-monoidon</code> の節点 <code>birat-fsmiso</code>。</td></tr>
+<tr><td><b>[FrdI] Definition 2.4, (i) ／ Proposition 5.3</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
+<b>★実化 <code>Φ^rlf</code> を「<code>𝒟</code> 上の単系」にするために、条件 (a)（characteristic injectivity）を仮定に置いた</b>（<code>phiScOn</code> の <code>hcharInj</code>）。
+我々は実化を <b>関手的な模型</b> <code>M^rlf := ℝ≥0 ⊗_ℕ M</code> で作った（<code>Def24.lean</code> の素点分解版は素点ごとの同一視 <code>ι</code> の選択に依存し、<code>𝒟</code> 上の関手にできないため）。
+★<b>条件 (b)（FSM 射なら同型）は証明した</b>——単射性は (a) から、全射性はテンソルの右完全性（<code>scMap_surjective</code>）から。
+したがって <code>Φ^rlf : MonoidOn 𝒟</code> は<b>ただ 1 つの言明</b>に還元されている。<br>
+★★<b>その言明は perf-factorial なら真である</b>と測った——<code>f : M ↪ N</code> の <code>ℝ≥0</code> 係数拡大が非単射なら、<code>ℝ</code> 上の線形従属が出て、係数が有理数なので<b>有理係数の関係</b>、分母を払って<b>整数係数の関係</b>、正負に分ければ <code>f</code> 自身が非単射になる。
+実装には <code>ℚ ⊆ ℝ</code> の核の底変換が要る（未着手）。<br>
+★あわせて、原文の <code>ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ = (Φ^birat)^pf</code> の <b>3 通りの表示が一致することも未証明</b>である（我々は 1 つめ＝スカラー倍で生成した部分群だけを採った）。
+記録: <code>Found/FrdI/Def24Rlf.lean</code> / <code>Prop53Rlf.lean</code> 冒頭、および <code>frdi-decomposition.json</code> の鎖 <code>rlf</code>（節点 <code>rlf-flat</code> / <code>rlf-agree</code>）。</td></tr>
 <tr><td><b>[FrdI] Definition 2.8, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 <b>位相的有限生成な副有限アーベル群の pro-<code>l</code> 分解</b>（<code>M ≅ ∏_l M[l]</code>）が要る。
 mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極限表示と有限アーベル群の準素分解は<b>ある</b>が、
