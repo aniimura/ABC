@@ -13220,3 +13220,45 @@ D1 に着手して**すぐに矛盾が出た**:
 | D2 `APicSpecData` | ★着手可能(`Found/GenEll/ArithDiv.lean` に `ADiv`/`deg_F` が実装済み) |
 | D3 `ArakelovHeightData` | D2 待ち |
 | G1–G8 | ★全部未着手 |
+
+## §9-345 —— ★★★★★★D2 の `deg_F` は「埋め込みの平均」でなければならない(第 300 ブロック)
+
+### ★★★まず `deg_F` は純アルキメデスでよい
+
+`deg_F : APic(Spec 𝓞_F) → ℝ` は群準同型であり、`Pic(Spec 𝓞_F) ≅ Cl(F)` は**有限**、
+`ℝ` は捻れを持たない。★したがって**幾何部分の寄与は 0 に強制される**
+——`deg_F` は Green 関数だけで書ける。
+
+### ★★★★素点で和を取ると底変換が落ちる(反例つき)
+
+在庫の `archADiv`(`Found/GenEll/ArchPoint.lean`)は**無限素点** `v` にわたる和で、
+`archADiv_baseChange` は **`IsConjInvariant g` を仮定している**。
+
+★★理由は明快で、複素素点では 2 つの共役埋め込みのうち `archSpecMap` が**一方だけ**を選ぶ。
+
+★★★**反例**: `F = K = ℚ(i)`、`φ = Spec(複素共役)`。
+`[K:F] = 1` だが `φ` は 2 つの埋め込みを入れ替えるので、
+共役不変でない `g` に対し `deg_K(φ^* L̄) ≠ deg_F(L̄)`。
+
+★しかし D2 の `degF_baseChange` は**仮定を一切置いていない**——このままでは witness が作れない。
+
+### ★★★★★塞ぎ方——**埋め込みで和を取る**
+
+    deg_F(L̄) = -(1/[F:ℚ]) Σ_{σ : F →+* ℂ} g(p_σ)
+
+★共役の対がそのまま両方入るので**無条件に共役対称**であり、反例は消える。
+★★`Fintype.card (F →+* ℂ) = [F:ℚ]`(mathlib `NumberField.Embeddings.card`)が
+正規化の分母をちょうど消すので、`degF_scale` も出る。
+
+★★★これは Interface の変更ではない——**witness の取り方**の問題である。
+
+## ★★残る 1 欄——`degF_baseChange` の道筋(見積もり 5–8 ブロック)
+
+| 段 | 内容 | 道具 |
+|---|---|---|
+| 1 | `φ` から環準同型 `ψ : 𝓞F → 𝓞K` | `Spec.preimage` |
+| 2 | `ψ` は単射 | 標数 0 の域への準同型の核は素、剰余体は有限体になり矛盾 |
+| 3 | `ψ` を体の埋め込み `F →+* K` へ延長 | `IsFractionRing.lift` |
+| 4 | `embPoint K τ ≫ φ = embPoint F (τ ∘ ψ_F)` | `Spec.map` の関手性 |
+| 5 | 各ファイバーの濃度 = `[K:F]` | ★★mathlib `AlgHom.card`(`FieldTheory/PrimitiveElement.lean:364`) |
+| 6 | `[K:ℚ] = [F:ℚ]·[K:F]` で約分 | `Module.finrank_mul_finrank` |
