@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm42Prop41v
+import ABC3.Found.FrdI.MonoidTransport
 
 /-!
 # [FrdI] Theorem 4.2, (ii) —— `Ψ_Prime` の構成
@@ -217,6 +218,112 @@ noncomputable def psiPrimeEquiv (ctx : PrimeCtx P P₂ G G₂ Ψ) (A : C) :
 def psiPrimeEquiv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 77,
     item := "Theorem 4.2, (ii) — Ψ_Prime は全単射",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★★★★★★関手性の下ごしらえ -/
+
+/-- ★base-isomorphism が定める `Φ` の同型。 -/
+noncomputable def baseEquivOf (Q : PreFrobenioid C Φ) {A B : C} (f : B ⟶ A)
+    (hf : IsIso (Q.Base f)) :
+    Φ.val (Q.toElem.obj A).base ≃+ Φ.val (Q.toElem.obj B).base :=
+  AddEquiv.ofBijective (Φ.map (Q.Base f))
+    (Φ.map_bijective_of_iso (@asIso _ _ _ _ (Q.Base f) hf))
+
+@[simp] theorem baseEquivOf_apply (Q : PreFrobenioid C Φ) {A B : C} (f : B ⟶ A)
+    (hf : IsIso (Q.Base f)) (x : Φ.val (Q.toElem.obj A).base) :
+    baseEquivOf Q f hf x = Φ.map (Q.Base f) x := rfl
+
+/-- ★`primeMap` の `toPrime` での計算。 -/
+theorem primeMap_toPrime {M N : Type w} [AddCommMonoid M] [AddCommMonoid N]
+    (e : M ≃+ N) {a : M} (ha : IsPrimaryElt a) :
+    primeMap e (toPrime M a ha) = toPrime N (e a) (isPrimaryElt_map e ha) := rfl
+
+/-- ★★★**`𝒪^▷` の四角形の `Div`** —— `f` が linear なら `Φ.map (Base f) (Div u) = Div u'`。 -/
+theorem map_base_div_otri (Q : PreFrobenioid C Φ) {A B : C} (f : B ⟶ A)
+    (hfl : Q.degFr f = 1)
+    {u : End A} (hu : u ∈ OTri Q A) {u' : End B} (hu' : u' ∈ OTri Q B)
+    (hsq : f ≫ (((u : End A)) : A ⟶ A) = (((u' : End B)) : B ⟶ B) ≫ f) :
+    Φ.map (Q.Base f) (Q.Div (((u : End A)) : A ⟶ A)) = Q.Div (((u' : End B)) : B ⟶ B) := by
+  haveI := isCancelAdd_of_isIntegralMonoid _ (Q.divisorial (Q.toElem.obj B).base).1.1
+  have h := congrArg Q.Div hsq
+  rw [Q.Div_comp, Q.Div_comp,
+    show Q.degFr (((u : End A)) : A ⟶ A) = 1 from hu.2,
+    show Q.Base (((u' : End B)) : B ⟶ B) = Q.Base (𝟙 B) from hu'.1, Q.Base_id, hfl] at h
+  have h2 : Φ.map (Q.Base f) (Q.Div (((u : End A)) : A ⟶ A)) + Q.Div f
+      = Q.Div (((u' : End B)) : B ⟶ B) + Q.Div f := by
+    have h3 : Φ.map (𝟙 ((Q.toElem.obj B).base)) (Q.Div f) = Q.Div f := Φ.map_id _ _
+    rw [show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul, one_smul, h3] at h
+    rw [h, add_comm]
+  exact add_right_cancel h2
+
+def map_base_div_otri.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — 𝒪^▷ の四角形の Div",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★★★★★★関手性 —— pre-step の場合 -/
+
+/-- ★★★★★★**`Ψ_Prime` の関手性(co-angular pre-step の場合)**。
+
+★`otriPull`(`Proposition 1.11, (iv)`)が `f ≫ u = u' ≫ f` を与え、
+`Div` を当てると `Φ.map (Base f) (Div u) = Div u'`(`f` が linear だから)。
+★★同じ計算を `𝒞₂` 側にも当てればよい。 -/
+theorem psiPrime_naturality_preStep (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : FrobenioidCore P)
+    (hOTri : ∀ (X : C) (δ : End X), δ ∈ OTri P X →
+      ((Ψ.functor.map (((δ : End X)) : X ⟶ X)) : End (Ψ.functor.obj X))
+        ∈ OTri P₂ (Ψ.functor.obj X))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {A B : C} (f : B ⟶ A) (hfc : IsCoAngular P f) (hfs : IsPreStep P f)
+    (p : Prime (Φ.val (P.toElem.obj A).base)) :
+    psiPrime ctx B (primeMap (baseEquivOf P f hfs.2) p)
+      = primeMap (baseEquivOf P₂ (Ψ.functor.map f) (ctx.PS f hfs).2) (psiPrime ctx A p) := by
+  have hu : realizeIn ctx A p ∈ OTri P A := realizeIn_mem ctx A p
+  set u' := otriPull P F f hfc hfs.1 ⟨realizeIn ctx A p, hu⟩ with hu'def
+  have hsq : f ≫ (((realizeIn ctx A p) : A ⟶ A)) = (((u' : End B)) : B ⟶ B) ≫ f :=
+    otriPull_spec P F f hfc hfs.1 ⟨realizeIn ctx A p, hu⟩
+  have hdiv : Φ.map (P.Base f) (P.Div (((realizeIn ctx A p) : A ⟶ A)))
+      = P.Div (((u' : End B)) : B ⟶ B) :=
+    map_base_div_otri P f hfs.1 hu u'.2 hsq
+  have hsu' : IsPreStep P (((u' : End B)) : B ⟶ B) := isPreStep_of_otri _ u'.2
+  have hsu : IsPreStep P (((realizeIn ctx A p) : A ⟶ A)) := realizeIn_preStep ctx A p
+  -- ★左辺の素点を `u'` で書き直す
+  have hpu' : IsPrimaryElt (preStepVal P (((u' : End B)) : B ⟶ B) hsu') := by
+    rw [preStepVal_of_otri _ u'.2 hsu', ← hdiv, ← preStepVal_of_otri _ hu hsu]
+    exact isPrimaryElt_map (baseEquivOf P f hfs.2) (realizeIn_primary ctx A p)
+  have hLp : primeMap (baseEquivOf P f hfs.2) p
+      = toPrime _ (preStepVal P (((u' : End B)) : B ⟶ B) hsu') hpu' := by
+    rw [← realizeIn_toPrime ctx A p, primeMap_toPrime]
+    refine toPrime_congr ?_
+    show Φ.map (P.Base f) (preStepVal P (((realizeIn ctx A p) : A ⟶ A)) hsu)
+      = preStepVal P (((u' : End B)) : B ⟶ B) hsu'
+    rw [preStepVal_of_otri _ hu hsu, preStepVal_of_otri _ u'.2 hsu']
+    exact hdiv
+  rw [hLp, psiPrime_spec ctx _ hsu' hpu']
+  -- ★右辺
+  rw [← realizeIn_toPrime ctx A p, psiPrime_spec ctx _ hsu (realizeIn_primary ctx A p),
+    primeMap_toPrime]
+  refine (toPrime_congr ?_).symm
+  -- ★`𝒞₂` 側の同じ計算
+  have hsq₂ : Ψ.functor.map f ≫ (((Ψ.functor.map (((realizeIn ctx A p) : A ⟶ A)))
+        : End (Ψ.functor.obj A)) : Ψ.functor.obj A ⟶ Ψ.functor.obj A)
+      = (((Ψ.functor.map ((((u' : End B)) : B ⟶ B))) : End (Ψ.functor.obj B))
+        : Ψ.functor.obj B ⟶ Ψ.functor.obj B) ≫ Ψ.functor.map f := by
+    rw [← Ψ.functor.map_comp, ← Ψ.functor.map_comp, hsq]
+  have hdiv₂ : Φ₂.map (P₂.Base (Ψ.functor.map f))
+        (P₂.Div (Ψ.functor.map (((realizeIn ctx A p) : A ⟶ A))))
+      = P₂.Div (Ψ.functor.map ((((u' : End B)) : B ⟶ B))) :=
+    map_base_div_otri P₂ (Ψ.functor.map f) (by rw [hdeg]; exact hfs.1)
+      (hOTri A _ hu) (hOTri B _ u'.2) hsq₂
+  show Φ₂.map (P₂.Base (Ψ.functor.map f))
+      (preStepVal P₂ (Ψ.functor.map (((realizeIn ctx A p) : A ⟶ A))) (ctx.PS _ hsu))
+    = preStepVal P₂ (Ψ.functor.map ((((u' : End B)) : B ⟶ B))) (ctx.PS _ hsu')
+  rw [preStepVal_of_otri _ (hOTri A _ hu) (ctx.PS _ hsu),
+    preStepVal_of_otri _ (hOTri B _ u'.2) (ctx.PS _ hsu')]
+  exact hdiv₂
+
+def psiPrime_naturality_preStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — Ψ_Prime の関手性（pre-step）",
     sectionId := "frdi-thm-4-2" }
 
 end PsiPrime
