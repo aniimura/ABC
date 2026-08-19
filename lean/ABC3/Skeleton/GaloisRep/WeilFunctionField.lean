@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TranslateEquiv
+import ABC3.Found.GaloisRep.TranslateComp
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -21,7 +21,9 @@ import ABC3.Found.GaloisRep.PointHom
 | 単射性を超越性に帰着 | `Found/GaloisRep/Transcendence.lean`(第 116) | ✅ |
 | **`translateX` の超越性**(`Q` が 2 等分点でない) | `Found/GaloisRep/TranslateAut.lean`(第 117) | ✅ |
 | **関数体の自己準同型 `translateFieldHom`** | 同上 | ✅ |
-| `Q` が **2 等分点**のときの単射性 | 本ファイル | ★**葉** |
+| 合成則 `τ_{Q₁} ∘ τ_{Q₂} = τ_{Q₁+Q₂}` | `Found/GaloisRep/TranslateComp.lean`(第 121) | ✅ |
+| 2 等分点の単射性(**分解があれば**) | 同上 | ✅ |
+| **2 等分点の分解の存在** | 本ファイル | ★**葉** |
 | **全単射性**(2 等分点以外) | `Found/GaloisRep/TranslateEquiv.lean`(第 120) | ✅ |
 | 2 等分点での自己同型 | 本ファイル | ★**葉** |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
@@ -127,9 +129,9 @@ def translateHom_injective_twoTorsion.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★2 等分点でない場合は **Found に済**(第 117 `translateHom_injective`)。`−Q` での 1 点評価で決まった(0 ブロック)" 19,
     .implicitStep
-      "★★2 等分点では `−Q = Q` なので `ev_{−Q}(A) = 0` になり、第 117 の議論が使えない。分解 `Q = Q' + Q''`(どちらも 2 等分点でない)を取って合成で回す(5-15 ブロック)" 19,
+      "★★★★★★**分解があれば単射性は出る**——第 121 ブロック `translateHom_injective_of_decomp` が **Found に入った**。合成則 `τ_{Q₁} ∘ τ_{Q₂} = τ_{Q₁+Q₂}` と「体の自己準同型は単射」から出る(0 ブロック)" 19,
     .implicitStep
-      "★分解の存在——体が無限なら 2 等分点でない点は十分ある。`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²` から)(3-8 ブロック)" 19 ]
+      "★★**残るのは分解の存在だけ**—— 2 等分点 `Q₃` に対し `Q₃ = Q₁ + Q₂`(どちらも 2 等分点でなく、どちらもアフィン点)を取る。`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²` から)なので、体が無限なら取れる(3-8 ブロック)" 19 ]
 
 def exists_translateAut_twoTorsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,

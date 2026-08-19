@@ -336,6 +336,84 @@ theorem otriPfMk_step (hiso : ∀ X : C, IsIsotropic P X) {A : C}
         (conjRt (F := F) ((α : A ⟶ A)))
   exact (frobTransport_conjRt_pow hiso hfn hξ hξb α hα).symm
 
+/-! ## ★7. 全射性の核 —— どの自己射も「`ζ` の添字」で代表される -/
+
+/-- ★同型は Frobenius 型(isotropic 型のとき)。 -/
+theorem frobType_of_isIso (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (u : A ⟶ B) [IsIso u] :
+    IsFrobeniusType P u :=
+  (prop_1_4_i_frobeniusType P u (fun X _ => hiso X)).mpr
+    ⟨isIsometric_of_isIso P u, isIso_Base_of_isIso u⟩
+
+/-- ★base-identity は共役で保たれる。 -/
+theorem conjRt_baseIdentity {A : C} {f : End A} (hf : IsBaseIdentity P f) :
+    IsBaseIdentity P (conjRt (F := F) ((f : A ⟶ A))) := by
+  haveI := isIso_rtExt_one P F A
+  haveI : IsIso (P.Base (rtExt P F A 1)) := isIso_Base_of_isIso (rtExt P F A 1)
+  show P.Base (inv (rtExt P F A 1) ≫ ((f : A ⟶ A)) ≫ rtExt P F A 1) = P.Base (𝟙 _)
+  rw [P.Base_comp, P.Base_comp, P.Base_id]
+  have h1 : P.Base ((f : A ⟶ A)) = P.Base (𝟙 A) := hf
+  rw [h1, P.Base_id, Category.id_comp, ← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+
+/-- ★Frobenius 次数は共役で保たれる。 -/
+theorem conjRt_degFr {A : C} (f : A ⟶ A) :
+    P.degFr (conjRt (F := F) f) = P.degFr f := by
+  haveI := isIso_rtExt_one P F A
+  show P.degFr (inv (rtExt P F A 1) ≫ f ≫ rtExt P F A 1) = P.degFr f
+  rw [P.degFr_comp, P.degFr_comp, rtExt_degFr,
+    degFr_inv_eq_one (rtExt P F A 1) (rtExt_degFr P F A 1)]
+  simp
+
+/-- ★★`rtObj A 1` も Frobenius-trivial(`A` と同型だから)。 -/
+theorem frobTrivial_rtObj (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A) : IsFrobeniusTrivial P (rtObj P F A 1) := by
+  obtain ⟨ζ, hdeg, hprop⟩ := hA
+  haveI := isIso_rtExt_one P F A
+  refine ⟨{ toFun := fun n => conjRt (F := F) ((ζ n : End A) : A ⟶ A)
+            map_one' := by
+              show conjRt (F := F) ((ζ 1 : End A) : A ⟶ A) = 𝟙 _
+              rw [map_one ζ]
+              show inv (rtExt P F A 1) ≫ (𝟙 A) ≫ rtExt P F A 1 = 𝟙 _
+              rw [Category.id_comp, IsIso.inv_hom_id]
+            map_mul' := fun m n => by
+              show conjRt (F := F) ((ζ (m * n) : End A) : A ⟶ A)
+                = conjRt (F := F) ((ζ n : End A) : A ⟶ A)
+                  ≫ conjRt (F := F) ((ζ m : End A) : A ⟶ A)
+              rw [← conjRt_comp]
+              exact congrArg (conjRt (F := F)) (map_mul ζ m n) },
+    fun n => (conjRt_degFr _).trans (hdeg n),
+    fun n => ⟨conjRt_baseIdentity (hprop n).1, conjRt_frobType hiso (hprop n).2⟩⟩
+
+/-- ★`rtObj A 1` の Frobenius 型自己射から作る添字(`idxZeta` の一般形)。 -/
+noncomputable def idxZeta' {A : C} {z : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz : IsFrobeniusType P z) : IdxPf P F (rtObj P F A 1) (rtObj P F A 1) :=
+  idxMk z z hz hz rfl
+
+/-- ★★★★**全射性の核** —— `𝒞^pf` の自己射はすべて「`ζ` の添字」で代表される。
+
+★`HomPf.exists_rep` で任意の代表を取り、`idxPf_iso_zeta`(cofinality)で
+その添字を `ζ` の添字へ移す。同型は次数 1 の Frobenius 型射なので、
+`(e, e')` はちょうど添字圏の射になる。 -/
+theorem homPf_exists_zeta_rep (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A) (f : HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A, 1⟩) :
+    ∃ (z : rtObj P F A 1 ⟶ rtObj P F A 1) (hz : IsFrobeniusType P z)
+      (φ : rtObj P F A 1 ⟶ rtObj P F A 1), HomPf.mk (idxZeta' hz) φ = f := by
+  obtain ⟨Z, φ₀, hZ⟩ := HomPf.exists_rep f
+  obtain ⟨e, e', he, he', z, hzb, hzf, hzdeg, hae, hbe⟩ :=
+    idxPf_iso_zeta F (frobTrivial_rtObj hiso hA) Z.hom.hom.1 Z.hom.property.1
+      Z.hom.hom.2 Z.hom.property.2.1 Z.hom.property.2.2
+  haveI := he
+  haveI := he'
+  have hu : Z ⟶ idxZeta' (F := F) hzf :=
+    Under.homMk (⟨(e, e'), frobType_of_isIso hiso e, frobType_of_isIso hiso e',
+        (degFr_of_isIso P e).trans (degFr_of_isIso P e').symm⟩ :
+        Z.right ⟶ (⟨(rtObj P F A 1, rtObj P F A 1)⟩ : BiFr P F))
+      (by
+        refine WideSubcategory.hom_ext _ ?_
+        exact Prod.ext hae hbe)
+  refine ⟨z, hzf, idxTransport P F hu φ₀, ?_⟩
+  rw [HomPf.mk_map hu φ₀]
+  exact hZ
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -371,6 +449,12 @@ def otriPfMk_mem.src : ABC3.Meta.Source :=
 def otriPfMk_step.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — Pf の関係が 𝒞^pf の中で成り立つ",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の全射性の核。 -/
+def homPf_exists_zeta_rep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒞^pf の自己射はすべて ζ の添字で代表される",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
