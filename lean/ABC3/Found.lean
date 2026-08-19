@@ -487,6 +487,7 @@ import ABC3.Found.Arakelov.ArcPouPull
 import ABC3.Found.Arakelov.ArcGreenMetric
 import ABC3.Found.Arakelov.ArcGreenConj
 import ABC3.Found.Arakelov.ArcTorsorMetric
+import ABC3.Found.Arakelov.ArcMetricWitness
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre

@@ -111,6 +111,62 @@ def samePrimeCat_map.src : ABC3.Meta.Source :=
 
 end Transport
 
+/-! ## ★★★★★★`Prime` そのものへ —— `Prime M` は primary 元の商である
+
+★`Prime M := Quotient (precSetoid M)` であり、`toPrime_eq_iff` が
+`toPrime a = toPrime b ↔ MPrec a b` を与える。
+★★`suppElt_eq_singleton_toPrime`(在庫)で台と `toPrime` が繋がるので、
+上の判定はそのまま **`Prime` の等式の判定**になる。 -/
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (ii)** ——
+2 つの primary な co-angular pre-step が **`Prime(Φ(A))` で同じ元**を定める
+ことの圏論的判定。 -/
+theorem toPrime_preStepVal_eq_iff (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ι₀ : Prime (Φ.val (P.toElem.obj A).base) → Pf (Φ.val (P.toElem.obj A).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj A).base) ι₀)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj A).base))
+    (hdivM : IsDivisorial (Φ.val (P.toElem.obj A).base))
+    {B B' : C} (ϵ : B ⟶ A) (hcϵ : IsCoAngular P ϵ) (hsϵ : IsPreStep P ϵ)
+    (hpϵ : IsPrimaryElt (preStepVal P ϵ hsϵ))
+    (ϵ' : B' ⟶ A) (hcϵ' : IsCoAngular P ϵ') (hsϵ' : IsPreStep P ϵ')
+    (hpϵ' : IsPrimaryElt (preStepVal P ϵ' hsϵ')) :
+    toPrime _ (preStepVal P ϵ hsϵ) hpϵ = toPrime _ (preStepVal P ϵ' hsϵ') hpϵ'
+      ↔ SamePrimeCat P ϵ ϵ' := by
+  rw [← suppElt_preStepVal_eq_iff_samePrimeCat G hiso H hperf hdivM ϵ hcϵ hsϵ hpϵ
+      ϵ' hcϵ' hsϵ' hpϵ',
+    suppElt_eq_singleton_toPrime H hperf hdivM hpϵ,
+    suppElt_eq_singleton_toPrime H hperf hdivM hpϵ']
+  exact ⟨fun h => by rw [h], fun h => Set.singleton_injective h⟩
+
+/-- ★★`𝒪^▷` の元を pre-step と見たときの「後置の値」は零因子そのもの。
+
+★底が恒等なので `Φ.map` の輸送が消える。 -/
+theorem preStepVal_of_otri {A : C} (u : End A) (hu : u ∈ OTri P A)
+    (h : IsPreStep P ((u : A ⟶ A))) :
+    preStepVal P ((u : A ⟶ A)) h = P.Div ((u : A ⟶ A)) := by
+  have hb : P.Base ((u : A ⟶ A)) = 𝟙 _ := by
+    rw [show P.Base ((u : A ⟶ A)) = P.Base (𝟙 A) from hu.1, P.Base_id]
+  have hinv : (@inv _ _ _ _ (P.Base ((u : A ⟶ A))) h.2) = 𝟙 _ :=
+    @IsIso.inv_eq_of_hom_inv_id _ _ _ _ (P.Base ((u : A ⟶ A))) h.2 (𝟙 _)
+      (by rw [hb, Category.id_comp])
+  show Φ.map (@inv _ _ _ _ (P.Base ((u : A ⟶ A))) h.2) (P.Div ((u : A ⟶ A))) = _
+  rw [hinv]
+  exact Φ.map_id _ _
+
+/-- ★`𝒪^▷` の元は pre-step。 -/
+theorem isPreStep_of_otri {A : C} (u : End A) (hu : u ∈ OTri P A) :
+    IsPreStep P ((u : A ⟶ A)) := by
+  refine ⟨hu.2, ?_⟩
+  show IsIso (P.Base ((u : A ⟶ A)))
+  rw [show P.Base ((u : A ⟶ A)) = P.Base (𝟙 A) from hu.1, P.Base_id]
+  infer_instance
+
+def toPrime_preStepVal_eq_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — Prime の等式の圏論的判定",
+    sectionId := "frdi-thm-4-2" }
+
 end Cat
 
 end ABC3.Found.FrdI
