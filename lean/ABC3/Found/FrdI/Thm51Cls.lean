@@ -181,6 +181,35 @@ theorem frobShift_data {X A' A'' Y : C} (φ : X ⟶ A')
     rw [P.Div_comp, P.Div_comp, hκd, hμd, map_zero, smul_zero, add_zero, zero_add] at h
     exact h
 
+/-- ★`Base φ₂` の逆射。 -/
+theorem base_inv_frobShift {X A' Y : C} (φ : X ⟶ A') (hsφ : IsPreStep P φ)
+    (μ : X ⟶ Y) (hμb : IsIso (P.Base μ)) (φ₂ : Y ⟶ A') (hsφ₂ : IsPreStep P φ₂)
+    (hbφ₂ : P.Base μ ≫ P.Base φ₂ = P.Base φ) :
+    @inv _ _ _ _ (P.Base φ₂) hsφ₂.2 = @inv _ _ _ _ (P.Base φ) hsφ.2 ≫ P.Base μ := by
+  haveI := hμb
+  haveI hbφ : IsIso (P.Base φ) := hsφ.2
+  haveI hbφ2 : IsIso (P.Base φ₂) := hsφ₂.2
+  have hbφ₂' : P.Base φ₂ = inv (P.Base μ) ≫ P.Base φ := by
+    rw [← hbφ₂, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+  refine IsIso.inv_eq_of_hom_inv_id ?_
+  rw [hbφ₂', Category.assoc, ← Category.assoc (P.Base φ), IsIso.hom_inv_id,
+    Category.id_comp, IsIso.inv_hom_id]
+
+/-- ★★★**ずらした span の類は `n` 倍**(底の条件は `φ` 側だけでよい)。 -/
+theorem spanCls_frobShift_cls {X A' A A'' Y : C} (φ : X ⟶ A') (ψ : X ⟶ A)
+    (hsφ : IsPreStep P φ)
+    (μ : X ⟶ Y) (hμb : IsIso (P.Base μ))
+    (φ₂ : Y ⟶ A') (ψ₂ : Y ⟶ A'') (hsφ₂ : IsPreStep P φ₂)
+    (n : ℕ)
+    (hbφ₂ : P.Base μ ≫ P.Base φ₂ = P.Base φ)
+    (hdφ₂ : Φ.map (P.Base μ) (P.Div φ₂) = n • P.Div φ)
+    (hdψ₂ : Φ.map (P.Base μ) (P.Div ψ₂) = n • P.Div ψ) :
+    spanCls φ₂ hsφ₂.2 ψ₂ = n • spanCls φ hsφ.2 ψ := by
+  haveI := hμb
+  rw [spanCls_eq, spanCls_eq, base_inv_frobShift φ hsφ μ hμb φ₂ hsφ₂ hbφ₂, ← gpMap_phi_comp]
+  rw [map_sub, gpMap_toGp, gpMap_toGp, hdφ₂, hdψ₂, toGp_nsmul, toGp_nsmul, ← smul_sub]
+  rw [← map_nsmul]
+
 /-- ★★★**ずらした span の類は `n` 倍、`α` は同じ**。 -/
 theorem spanCls_frobShift {X A' A Y : C} (φ : X ⟶ A') (ψ : X ⟶ A)
     (hsφ : IsPreStep P φ)
@@ -194,20 +223,8 @@ theorem spanCls_frobShift {X A' A Y : C} (φ : X ⟶ A') (ψ : X ⟶ A)
     spanCls φ₂ hsφ₂.2 ψ₂ = n • spanCls φ hsφ.2 ψ ∧
       (@inv _ _ _ _ (P.Base φ₂) hsφ₂.2 ≫ P.Base ψ₂
         = @inv _ _ _ _ (P.Base φ) hsφ.2 ≫ P.Base ψ) := by
-  haveI := hμb
-  haveI hbφ : IsIso (P.Base φ) := hsφ.2
-  haveI hbφ2 : IsIso (P.Base φ₂) := hsφ₂.2
-  have hbφ₂' : P.Base φ₂ = inv (P.Base μ) ≫ P.Base φ := by
-    rw [← hbφ₂, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
-  have hinv : inv (P.Base φ₂) = inv (P.Base φ) ≫ P.Base μ := by
-    refine IsIso.inv_eq_of_hom_inv_id ?_
-    rw [hbφ₂', Category.assoc, ← Category.assoc (P.Base φ), IsIso.hom_inv_id,
-      Category.id_comp, IsIso.inv_hom_id]
-  constructor
-  · rw [spanCls_eq, spanCls_eq, hinv, ← gpMap_phi_comp]
-    rw [map_sub, gpMap_toGp, gpMap_toGp, hdφ₂, hdψ₂, toGp_nsmul, toGp_nsmul, ← smul_sub]
-    rw [← map_nsmul]
-  · rw [hinv, Category.assoc, hbψ₂]
+  refine ⟨spanCls_frobShift_cls φ ψ hsφ μ hμb φ₂ ψ₂ hsφ₂ n hbφ₂ hdφ₂ hdψ₂, ?_⟩
+  rw [base_inv_frobShift φ hsφ μ hμb φ₂ hsφ₂ hbφ₂, Category.assoc, hbψ₂]
 
 /-! ## ★3. ★★★★`Theorem 5.1, (iii)` の中心 -/
 
@@ -235,12 +252,16 @@ theorem frobTrivial_iso_of_baseIso (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotr
   obtain ⟨Y, μ, hμ, hμdeg⟩ := G.core.frobDegSurj X 2
   have hμd : P.Div μ = 0 := hμ.1.2
   haveI hμb : IsIso (P.Base μ) := hμ.2
-  obtain ⟨φ₂, hsφ₂, heqφ⟩ := frobShift G φ hsφ κ' hκ'b μ hμ (by rw [hμdeg, hκ'deg])
-  obtain ⟨ψ₂, hsψ₂, heqψ⟩ := frobShift G ψ hsψ κ hκb μ hμ (by rw [hμdeg, hκdeg])
-  obtain ⟨hbφ₂, hdφ₂⟩ := frobShift_data φ κ' hκ'b hκ'd μ hμd φ₂ heqφ
-  obtain ⟨hbψ₂, hdψ₂⟩ := frobShift_data ψ κ hκb hκd μ hμd ψ₂ heqψ
+  haveI hbκ' : IsIso (P.Base κ') := by rw [hκ'b, P.Base_id]; infer_instance
+  haveI hbκ : IsIso (P.Base κ) := by rw [hκb, P.Base_id]; infer_instance
+  obtain ⟨φ₂, hsφ₂, heqφ⟩ := frobShift G φ hsφ κ' hbκ' μ hμ (by rw [hμdeg, hκ'deg])
+  obtain ⟨ψ₂, hsψ₂, heqψ⟩ := frobShift G ψ hsψ κ hbκ μ hμ (by rw [hμdeg, hκdeg])
+  obtain ⟨hbφ₂, hdφ₂⟩ := frobShift_data φ κ' hκ'd μ hμd φ₂ heqφ
+  obtain ⟨hbψ₂, hdψ₂⟩ := frobShift_data ψ κ hκd μ hμd ψ₂ heqψ
   rw [hκ'deg] at hdφ₂
   rw [hκdeg] at hdψ₂
+  rw [hκ'b, P.Base_id, Category.comp_id] at hbφ₂
+  rw [hκb, P.Base_id, Category.comp_id] at hbψ₂
   obtain ⟨hcls, hαeq⟩ := spanCls_frobShift φ ψ hsφ μ hμb φ₂ ψ₂ hsφ₂ 2
     hbφ₂ hbψ₂ hdφ₂ hdψ₂
   have hsub := span_class_sub_mem G hiso φ ψ φ₂ ψ₂ hsφ hsψ hsφ₂ hsψ₂ hαeq.symm

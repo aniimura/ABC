@@ -84,6 +84,7 @@ import ABC3.Found.FrdI.Cor411Rigid
 import ABC3.Found.FrdI.Thm51Slice
 import ABC3.Found.FrdI.Thm51Span
 import ABC3.Found.FrdI.Thm51Cls
+import ABC3.Found.FrdI.Thm51Pic
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
