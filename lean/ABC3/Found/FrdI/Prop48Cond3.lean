@@ -59,9 +59,9 @@ theorem addMonoidHom_eq_id_of_forall_mprec (hsharp : IsSharp M) (f : M →+ M)
   exact this
 
 def addMonoidHom_eq_id_of_forall_mprec.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 41,
-    item := "Proposition 1.14, (v) — non-dilating から恒等（一般形）",
-    sectionId := "frdi-prop-1-14" }
+  { paper := "FrdI", pdfPage := 19,
+    item := "Definition 1.1, (i) — non-dilating から恒等（一般形）",
+    sectionId := "frdi-def-1-1-i" }
 
 end MonoidGen
 
