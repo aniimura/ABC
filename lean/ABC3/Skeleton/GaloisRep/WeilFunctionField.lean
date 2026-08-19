@@ -30,7 +30,8 @@ import ABC3.Found.GaloisRep.PointHom
 | **2 等分点での自己同型** | `Found/GaloisRep/TranslateAutAll.lean`(第 124) | ✅ |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
 | **生成点が捻れ点でないこと** | `Found/GaloisRep/GenericNotTorsion.lean`(第 125) | ✅ |
-| **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
+| `[n]` の引き戻し(群法則で固定) | `Found/GaloisRep/GenericNotTorsion.lean`(第 125) | ✅ |
+| `x([n]P) = Φ_n/ΨSq_n`(式の側) | 本ファイル | ★臨界路外 |
 
 ★超越性の証明は **`−Q` での 1 点評価**だけで済んだ——
 `u = x − x₀` は `−Q` で消えるが `A = (x−x₀)²·X(τ_Q)` は消えない、という一点で決まる。
@@ -54,15 +55,18 @@ noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : 
   algebraMap W.CoordinateRing W.FunctionField
     (CoordinateRing.mk W (Polynomial.C p))
 
-/-! ## ★★★★★葉 2b —— 乗法 `[n]` -/
+/-! ## ★臨界路外 —— `x([n]P) = Φ_n/ΨSq_n`(式の側) -/
 
-/-- ★★★★★**乗法 `[n]` の関数体への引き戻し**。
+/-- ★**`x([n]P) = Φ_n/ΨSq_n`**——古典的な式。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★Weil 対の構成の `g_P^n = f_P ∘ [n]` の「`∘ [n]`」がこれである。
-★★`x([n]P) = Φ_n(x)/Ψ_n(x)²` で固定してある——mathlib の分点多項式を使う。 -/
+★★★★**2026-08-20: この節点は臨界路から外れた。**
+Weil 対の構成が実際に消費するのは `f_P ∈ F[W]` への作用だけであり、
+それは第 118・125 ブロックで**群法則によって固定された形で Found に入った**
+(`exists_mulByNHom_charZero`)。
+★式の側は真であるが、現在の道では消費されない——将来の層が要求したときのために残す。 -/
 theorem exists_mulByNPullback (W : WeierstrassCurve.Affine F) (n : ℤ) :
     ∃ μ : W.FunctionField →ₐ[F] W.FunctionField,
       μ (coordX W) = polyToFF W (W.Φ n) / polyToFF W (W.ΨSq n) := by
