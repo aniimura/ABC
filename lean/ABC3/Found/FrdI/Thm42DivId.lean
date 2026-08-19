@@ -98,12 +98,12 @@ theorem div_pow_otri (Q : PreFrobenioid C Φ) {A : C} {v : End A} (hv : v ∈ OT
     have hvm : (v ^ m) ∈ OTri Q A := pow_mem hv m
     show Q.Div ((((v ^ (m + 1) : End A)) : A ⟶ A)) = _
     rw [pow_succ]
-    show Q.Div ((((v ^ m : End A)) : A ⟶ A) ≫ (((v : End A)) : A ⟶ A)) = _
-    rw [Q.Div_comp, show Q.Base ((((v ^ m : End A)) : A ⟶ A)) = Q.Base (𝟙 A) from hvm.1,
-      Q.Base_id, show Q.degFr ((((v : End A)) : A ⟶ A)) = 1 from hv.2]
-    have h3 : Φ.map (𝟙 ((Q.toElem.obj A).base)) (Q.Div ((((v : End A)) : A ⟶ A)))
-      = Q.Div ((((v : End A)) : A ⟶ A)) := Φ.map_id _ _
-    rw [h3, show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul, ih, succ_nsmul, add_comm]
+    show Q.Div ((((v : End A)) : A ⟶ A) ≫ (((v ^ m : End A)) : A ⟶ A)) = _
+    rw [Q.Div_comp, show Q.Base ((((v : End A)) : A ⟶ A)) = Q.Base (𝟙 A) from hv.1,
+      Q.Base_id, show Q.degFr ((((v ^ m : End A)) : A ⟶ A)) = 1 from hvm.2]
+    have h3 : Φ.map (𝟙 ((Q.toElem.obj A).base)) (Q.Div ((((v ^ m : End A)) : A ⟶ A)))
+      = Q.Div ((((v ^ m : End A)) : A ⟶ A)) := Φ.map_id _ _
+    rw [h3, show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul, ih, succ_nsmul]
 
 /-- ★`𝒪^×` を後置しても `Div` は変わらない。 -/
 theorem div_otimes_comp (Q : PreFrobenioid C Φ) {A : C} {v : End A} (hv : v ∈ OTri Q A)
@@ -116,6 +116,57 @@ theorem div_otimes_comp (Q : PreFrobenioid C Φ) {A : C} {v : End A} (hv : v ∈
 def DivIdCat.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 81,
     item := "Theorem 4.2, (i) — Div-identity の圏論的特徴づけ",
+    sectionId := "frdi-thm-4-2" }
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`IsDivIdentity` ⟹ `DivIdCat`**。 -/
+theorem divIdCat_of_isDivIdentity (F : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    {A : C} (α : A ⟶ A) (h : IsDivIdentity P α) : DivIdCat P α := by
+  obtain ⟨X, Y, γ, pre, plb, hfac, hγ, hpre, hplb⟩ := F.arbFactor α
+  refine ⟨X, Y, γ, pre, plb, hfac, hγ, hpre, hplb, ?_⟩
+  intro v v₁ v₂ v₃ ε hv hv₁ hv₂ hv₃ hε hsq1 hsq2 hsq3
+  have hplbl : P.degFr plb = 1 := (F.pullBackLB plb hplb).2
+  have e1 : Φ.map (P.Base plb) (P.Div ((((v : End A)) : A ⟶ A)))
+      = P.Div ((((v₁ : End Y)) : Y ⟶ Y)) :=
+    div_square_pullBack P plb hplbl hv₁ hv hsq1
+  have e2 : Φ.map (P.Base pre) (P.Div ((((v₁ : End Y)) : Y ⟶ Y)))
+      = P.Div ((((v₂ : End X)) : X ⟶ X)) :=
+    map_base_div_otri P pre hpre.1 hv₁ hv₂ hsq2
+  set v₂' : End X := (ε : End X) * (v₂ : End X) with hv₂'def
+  have hv₂'m : v₂' ∈ OTri P X := (OTri P X).mul_mem (OTimes_le_OTri P X hε) hv₂
+  have hsq3' : (((v₃ : End A)) : A ⟶ A) ≫ γ = γ ≫ (((v₂' : End X)) : X ⟶ X) := hsq3
+  have e3 : Φ.map (P.Base γ) (P.Div ((((v₂' : End X)) : X ⟶ X)))
+      = ((P.degFr γ : ℕ+) : ℕ) • P.Div ((((v₃ : End A)) : A ⟶ A)) :=
+    div_square_frob P γ hv₃ hv₂'m hsq3'
+  have e4 : P.Div ((((v₂' : End X)) : X ⟶ X)) = P.Div ((((v₂ : End X)) : X ⟶ X)) :=
+    div_otimes_comp P hv₂ hε
+  -- ★合成して `Φ.map (Base α) (Div v) = n • Div v₃`
+  have hbase : P.Base α = P.Base γ ≫ P.Base pre ≫ P.Base plb := by
+    rw [hfac, P.Base_comp, P.Base_comp]
+  have ekey : Φ.map (P.Base α) (P.Div ((((v : End A)) : A ⟶ A)))
+      = ((P.degFr γ : ℕ+) : ℕ) • P.Div ((((v₃ : End A)) : A ⟶ A)) := by
+    rw [hbase, ← e3, e4, ← e2, ← e1]
+    rw [Φ.map_comp, Φ.map_comp]
+    rfl
+  -- ★`IsDivIdentity` から `= Div v`
+  have hid : Φ.map (P.Base α) (P.Div ((((v : End A)) : A ⟶ A)))
+      = P.Div ((((v : End A)) : A ⟶ A)) := by
+    have h1 : Φ.map (P.Base α) = Φ.map (P.Base (𝟙 A)) := h
+    rw [h1, P.Base_id]
+    exact Φ.map_id _ _
+  have hdvv : P.Div ((((v₃ ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A))
+      = P.Div ((((v : End A)) : A ⟶ A)) := by
+    rw [div_pow_otri P hv₃, ← ekey, hid]
+  obtain ⟨θ, hθiso, hθ⟩ := exists_iso_of_div_eq G
+    ((((v₃ ^ (((P.degFr γ : ℕ+) : ℕ)) : End A)) : A ⟶ A)) ((((v : End A)) : A ⟶ A))
+    (prop_1_4_i P _ (fun Z _ => hiso Z)) (isPreStep_of_otri _ (pow_mem hv₃ _))
+    (prop_1_4_i P _ (fun Z _ => hiso Z)) (isPreStep_of_otri _ hv) hdvv
+  exact ⟨θ, hθiso, hθ⟩
+
+def divIdCat_of_isDivIdentity.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 81,
+    item := "Theorem 4.2, (i) — IsDivIdentity ⟹ 圏論的条件",
     sectionId := "frdi-thm-4-2" }
 
 end PullBackOtri
