@@ -103,4 +103,47 @@ def istr_frobeniusCompact.src : ABC3.Meta.Source :=
 
 end IstrLift
 
+/-! ## ★★★★★★`Proposition 4.8, (iii)` の組み立て -/
+
+section Assemble
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {G : Frobenioid P}
+
+/-- ★★★★★★**[FrdI] Proposition 4.8, (iii)** ——
+`𝒞` が isotropic 型で、birationally Frobenius-normalized 型で、
+`Φ` に 0 でない値が 1 つあるなら、`𝒞^birat` は **standard 型**。
+
+★★★(b) の Frobenius-compact 対象が `Prop48Cond3.lean` で埋まったので組み上がった。
+
+★仮定 `hex`(0 でない `x₀` の存在)は「`Φ` が自明でない」ということであり、
+`Φ` が全対象で自明な場合は `𝒞` 自身が group-like なので
+`IsOfStandardType` の `groupLikeCompact` が別途効く(★その枝は未)。 -/
+theorem prop_4_8_iii
+    (hiso : IsOfIsotropicType P)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hndOn : MonoidOn.IsNonDilatingOn Φ)
+    (hFSMFF : IsOfFSMFFType D)
+    (hex : ∃ (A₀ : BiratCat P G)
+      (x₀ : Φ.val (P.toElem.obj (biratDown P G A₀)).base), x₀ ≠ 0) :
+    IsOfStandardType D (BiratCat P G) (biratPre P G) (biratFrobenioid P G hfn).core where
+  quasiIsotropic := birat_isOfQuasiIsotropicType P G hfn hiso
+  frobIsotropic := isOfFrobeniusIsotropicType_of_isotropic (prop_4_8_i hiso)
+  groupLikeCompact := fun _ => by
+    obtain ⟨A₀, x₀, hx₀⟩ := hex
+    exact ⟨istrObj (biratPre P G) (prop_4_8_i hiso A₀),
+      istr_frobeniusCompact (biratPre P G) _ (prop_4_8_i hiso A₀)
+        (birat_isFrobeniusCompact_of_ne_zero hdivS hfn hndOn A₀ x₀ hx₀)⟩
+  frobNormalized := hfn
+  baseFSMFF := hFSMFF
+  phiNonDilating := trivialOn_isNonDilatingOn
+
+def prop_4_8_iii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (iii)",
+    sectionId := "frdi-prop-4-8" }
+
+end Assemble
+
 end ABC3.Found.FrdI

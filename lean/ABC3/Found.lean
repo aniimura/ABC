@@ -97,6 +97,7 @@ import ABC3.Found.FrdI.Prop48Nf
 import ABC3.Found.FrdI.Prop48Sec
 import ABC3.Found.FrdI.Prop48Cpt
 import ABC3.Found.FrdI.Prop48Cond3
+import ABC3.Found.FrdI.Prop48Std
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
