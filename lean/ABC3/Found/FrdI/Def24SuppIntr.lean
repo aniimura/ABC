@@ -7,7 +7,7 @@ import ABC3.Found.FrdI.Def24Supp
 # [FrdI] `Definition 2.4, (i), (d)` —— `Supp` は `ι` を含まない形に書ける
 
 原文 (FrdI p.48):
-> Supp(a) def = {p ∈Prime(M) | ap = 0} ⊆Prime(M)
+> Prime(M ), as a ranges over the elements of M pf; if a, b
 
 ## ★★なぜ要るか(2026-08-19)
 
@@ -45,7 +45,7 @@ variable {M : Type w} [AddCommMonoid M] {ι : Prime M → Pf M → ℝ≥0}
 /-- ★★★★★**`Supp` は `ι` を含まない形に書ける**。
 
 原文 (FrdI p.48):
-> Supp(a) def = {p ∈Prime(M) | ap = 0} ⊆Prime(M)
+> Prime(M ), as a ranges over the elements of M pf; if a, b
 
 ★★`ι p` が `pCarrierPf M p` 上で単射で `0 ↦ 0` であることだけを使う。 -/
 theorem mem_supp_factorMap_iff (H : IsPerfFactorialWith M ι) (a : Pf M) (p : Prime M) :

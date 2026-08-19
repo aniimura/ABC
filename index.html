@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1245 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1249 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5936</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1666</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5960</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1669</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,10 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>07bcce1</code></td><td>2026-08-19</td><td>C3 の Interface を直した——normSection で退化を殺し、存在を条件付きに(§9-286)</td></tr>
+<tr><td><code>9e12ae7</code></td><td>2026-08-19</td><td>★★★★★`Supp` は `ι` を含まない形に書けることを取った</td></tr>
+<tr><td><code>9c51bef</code></td><td>2026-08-19</td><td>C3 の道筋を最後まで測った——C2 に依存しない(§9-285)</td></tr>
+<tr><td><code>cd6c890</code></td><td>2026-08-19</td><td>★`Supp` の内在性を葉として切り出した（`supp-intrinsic`）</td></tr>
 <tr><td><code>a7e65dc</code></td><td>2026-08-19</td><td>§9-282 を訂正——複素点での切断の評価は代数的だった(第 244 ブロック)</td></tr>
 <tr><td><code>92b2347</code></td><td>2026-08-19</td><td>★★★★isotropic hull に沿った移送を一般形で取った</td></tr>
 <tr><td><code>4388ca2</code></td><td>2026-08-19</td><td>★循環が外れた—— で hull を同定できる</td></tr>
@@ -289,17 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>961f996</code></td><td>2026-08-19</td><td>C2 の posit を mathlib の IsProper に接地した(§9-283)</td></tr>
 <tr><td><code>eee0f8a</code></td><td>2026-08-19</td><td>C3 を測った——9 欄では計量と直線束が結び付かない(§9-282)</td></tr>
 <tr><td><code>6a22527</code></td><td>2026-08-19</td><td>★★★★★`Hom^birat` が 𝒞^istr と 𝒞 で一致することを取った</td></tr>
-<tr><td><code>3215cf1</code></td><td>2026-08-19</td><td>★★★★双有理化の添字圏が 𝒞^istr と 𝒞 で同値であることを取った</td></tr>
-<tr><td><code>a0a6d9b</code></td><td>2026-08-19</td><td>★★★★★★★★★★B2 が閉じた——Arakelov 4/9(第 241 ブロック)</td></tr>
-<tr><td><code>4c91672</code></td><td>2026-08-19</td><td>★★`coaPreProp` の辞書——𝒞^istr と 𝒞 で一致することを取った</td></tr>
-<tr><td><code>03e4e60</code></td><td>2026-08-19</td><td>★★★★★見立てを覆した——isotropic 対象への co-angular pre-step の域は isotropic</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1666 件)。</div>
+<b>すべて PDF と機械照合している</b>(1669 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

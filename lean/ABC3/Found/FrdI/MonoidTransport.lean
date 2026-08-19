@@ -7,7 +7,7 @@ import ABC3.Found.FrdI.Def24SuppIntr
 # 単系の同型に沿った `M^pf` / `Prime(M)` / `Supp` の移送
 
 原文 (FrdI p.48):
-> Supp(a) def = {p ∈Prime(M) | ap = 0} ⊆Prime(M)
+> Prime(M ), as a ranges over the elements of M pf; if a, b
 
 ★★`Remark 4.5.1` の `rational` 型の移送に要る ——
 `B` と `B^istr` の底は**同型だが等しくない**ので、
