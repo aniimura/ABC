@@ -90,6 +90,7 @@ import ABC3.Found.FrdI.Thm51Sec
 import ABC3.Found.FrdI.Thm51FrTr
 import ABC3.Found.FrdI.Prop16AutAmple
 import ABC3.Found.FrdI.Thm52Path
+import ABC3.Found.FrdI.Thm52Ref
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
@@ -225,6 +226,7 @@ import ABC3.Found.Arakelov.ArcLandsInScheme
 import ABC3.Found.Arakelov.ArcAwayLift
 import ABC3.Found.Arakelov.ArcOpenMap
 import ABC3.Found.Arakelov.ArcSpaceInterface
+import ABC3.Found.Arakelov.UltraValuation
 import ABC3.Found.Arakelov.PicPresheafTensor
 import ABC3.Found.Arakelov.PicSheafTensor
 import ABC3.Found.Arakelov.PicRestrict
