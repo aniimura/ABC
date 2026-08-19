@@ -474,6 +474,7 @@ import ABC3.Found.Arakelov.ArcFactorEval
 import ABC3.Found.Arakelov.ArcSectionCont
 import ABC3.Found.Arakelov.ArcContMetric
 import ABC3.Found.Arakelov.ArcCoverPou
+import ABC3.Found.Arakelov.ArcMetricExists
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
