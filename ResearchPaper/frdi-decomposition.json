@@ -1325,7 +1325,7 @@
             "i-src"
           ],
           "title": "base-section / base-Frobenius pair を 𝒞^birat へ移す",
-          "note": "★★**測定(2026-08-18)**: 原典は (iv) を「follows formally」と書くが、`IsPreModelType P := Nonempty (BaseFrobeniusPair P)` であり、`BaseFrobeniusPair` は `BaseSection` ＋ Frobenius-section の組である。★したがって**`BaseSection` の移送が実体**で、1 行ではない。"
+          "note": "★★**測定(2026-08-18)**: 原典は (iv) を「follows formally」と書くが、`IsPreModelType P := Nonempty (BaseFrobeniusPair P)` であり、`BaseFrobeniusPair` は `BaseSection` ＋ Frobenius-section の組である。★したがって**`BaseSection` の移送が実体**で、1 行ではない。\n\n## ★★形を測った(2026-08-19)\n`IsPreModelType P := Nonempty (BaseFrobeniusPair P)` で、\n`BaseFrobeniusPair` = `sec : BaseSection P` ＋ `frob : ℕ+ →* SectionEnd sec`\n＋ `isFrobSection`。\n\n★`BaseSection P`(`Def27.lean`)は**フィールド 8 個の構造体**:\n`objP` / `homP` / `id_mem` / `comp_mem` / **`isPullBack`** /\n**`skeletal`** / **`frobTrivial`** / `essSurjP`・`fullP`・`faithfulP`\n(最後の 3 つが `toD : 𝒫 ⥤ 𝒟` の圏同値を与える)。\n\n## ★★移送の設計\n`BiratCat P G` は対象が `𝒞` と同じ型なので:\n- `objP` —— そのまま\n- `homP f` —— `∃ f₀, S.homP f₀ ∧ toHomBirat f₀ = f`\n- `id_mem` / `comp_mem` —— `toHomBirat_comp`(在庫)から\n- **`isPullBack`** —— `IsPullBack P f₀ ⟹ IsPullBack (biratPre P G) (toHomBirat f₀)`。\n  ★`Prop44Core.lean` に `birat_*` の移送が多数あるので**先に検索**すること\n- **`skeletal`** —— `𝒞^birat` で同型なら `𝒞` でも同型か? ★★`Proposition 4.4, (iv)` の辞書(co-angular pre-step ⟺ birat で同型)に注意\n- **`frobTrivial`** —— `IsFrobeniusTrivial (biratPre P G) A`。\n  ★`biratPre` の `degFr` は `P` のものと一致するはずなので移りやすい\n- `toD` の圏同値 —— `biratPre` の底は同じ `𝒟` なので、`toD` も同じ\n\n★★★**山は `skeletal` と `isPullBack`** の 2 つ。\n他は「同じ `𝒟`・同じ対象」から機械的に移る。"
         },
         {
           "id": "iv-src",
