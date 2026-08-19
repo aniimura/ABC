@@ -506,6 +506,7 @@ import ABC3.Found.GaloisRep.AlgClosedPoint
 import ABC3.Found.GaloisRep.SepRoots
 import ABC3.Found.GaloisRep.GoodBase
 import ABC3.Found.GaloisRep.TorsionCount
+import ABC3.Found.GaloisRep.TorsionCard
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
