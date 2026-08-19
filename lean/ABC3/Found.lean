@@ -79,6 +79,7 @@ import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.AppA
 import ABC3.Found.FrdI.Thm34Pf
 import ABC3.Found.FrdI.Prop48Nf
+import ABC3.Found.FrdI.Prop48Sec
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
