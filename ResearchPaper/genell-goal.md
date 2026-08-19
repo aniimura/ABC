@@ -12979,3 +12979,21 @@ Interface の 6 欄(`scale` / `normSection` + 4 法則)を `Found` 側で用意�
 
 ★★★(b) は実は近い——`trivFiberIso` が既に `arcFiber p L ≅ ℂ` を与えているので、
 **1 次元性は自明化がある点では在庫**である。次はここを測る。
+
+### ★★★次の 1 歩——`moduleSpecΓFunctor` のスカラー作用を測った(2026-08-19)
+
+mathlib の定義(`Modules/Tilde.lean:44`)は
+
+    modulesSpecToSheaf = … ⋙ sheafCompose _ (ModuleCat.restrictScalars (Scheme.ΓSpecIso R).inv.hom)
+
+★★したがって `c • x` は **`(ΓSpecIso).inv.hom c • x`(Γ 側の作用)**である。
+`unitModules` では Γ 側の作用は環の掛け算なので、
+
+    ΓSpecIso.hom (c • x) = c * ΓSpecIso.hom x
+
+が出るはず——★**ただし担い手の綴りが違うので `*` が直接書けない**
+(`HMul Γ(Spec ℂ,⊤) (moduleSpecΓFunctor.obj …)` が無い)。
+★★逃げ道 7(**型付き恒等関数の橋**)を 1 本足せば通る見込み。**見積もり 2–4 ブロック**。
+
+★★★これが通れば `Metric X L` のファイバーが 1 次元だと言えて、
+`logMetric` を案 (b)(選択公理で基準計量を固定)で honest に定義できる。
