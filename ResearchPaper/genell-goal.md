@@ -11133,3 +11133,47 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**82 ブロック**(Arakelov 67 + Galois 15)。
+
+## §9-283 C2 の posit を mathlib に接地した(第 243 ブロック)——`False` の抜け道を塞いだ
+
+(C2) `ProjectiveModelData` の `ProperFlatOverZ` は**自前の posit** だった。
+
+★★★したがって
+
+    ProperFlatOverZ := fun _ => False
+
+と置けば `properFlat_compact` が**空虚に成立**し、残る `projectiveCase`
+(`Found/GenEll/ArcModel.lean` で実装済)だけで **(C2) が「達成」になってしまう**。
+
+### ★★塞いだ手——mathlib の `IsProper` に縛る
+
+    properFlatOverZ_iff : ∀ X, ProperFlatOverZ X ↔
+      (IsProper (specZIsTerminal.from X) ∧ Flat (specZIsTerminal.from X))
+
+★`Check/Arakelov/ProperFlatNondegenerate.lean` で**効くことを確認**した
+——`Spec ℤ` は自分自身の上で固有かつ平坦なので、`False` では同値が破れる。
+
+### ★在庫を測り直した(mathlib、2026-08-19)
+
+| 探したもの | 結果 |
+|---|---|
+| `IsProper`(射の性質) | ★**有る**(`Morphisms/Proper.lean`) |
+| `specZIsTerminal` | ★**有る**(`AlgebraicGeometry/Limits.lean`) |
+| `IsProper (Proj.toSpecZero 𝒜)` | ★★**有る**(`ProjectiveSpectrum/Proper.lean`、有限型のとき) |
+| `ℙⁿ` の**点の関手** | ★**無い**(2026-08-17 の測定と同じ) |
+
+★★★`Proj` の固有性が mathlib に在ったのは収穫だが、C2 の律速は
+依然として**点の関手**(`Hom(Spec ℂ, Proj 𝒜) ≅ ℙ(ℂ^{n+1})`)である。
+
+### ★★★★この 2 節(§9-282・§9-283)は「達成数を増やさない仕事」である
+
+★C3 は**測って不可能と分かった**、C2 は**塞いで難しくした**。
+★★どちらも `4/9` を動かさないが、**動かないことを確かめた**——
+数えられる形にしておかないと、後で「埋まっていた」と誤読する。
+
+★★★★**posit の監査は達成宣言の前にやる**(§9-44 の 20 件超の `→ Type` posit)。
+本セッションで 2 件片付いた(C3 の `Metric`、C2 の `ProperFlatOverZ`)。
+
+### この区間の集計
+
+★**83 ブロック**(Arakelov 68 + Galois 15)。

@@ -1,5 +1,7 @@
 import ABC3.Interface.Arakelov.LineBundle
 import Mathlib.Analysis.Complex.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.Proper
+import Mathlib.AlgebraicGeometry.Limits
 
 /-!
 # Arakelov 理論のスケルトン(2/3)—— **アルキメデス側: `X^arc` と計量**
@@ -125,6 +127,18 @@ structure ProjectiveModelData where
   toArcSpaceData : ArcSpaceData
   /-- `X` が ℤ 上固有・平坦であること(原文の仮定、物理 p.3)。 -/
   ProperFlatOverZ : Scheme.{0} → Prop
+  /-- ★★★**posit を mathlib に接地する**。
+
+  ★★★★2026-08-19 の追加。それ以前は `ProperFlatOverZ` が自前の posit だったので、
+  `ProperFlatOverZ := fun _ => False` と置けば `properFlat_compact` が**空虚に成立**し、
+  残る `projectiveCase`——`Found/GenEll/ArcModel.lean` で実装済——だけで
+  (C2) が「達成」になってしまう。
+
+  ★mathlib の `IsProper`（`Morphisms/Proper.lean`）と `Flat` に縛ると、
+  `False` ではこの同値性が成り立たない——`Spec ℤ` 自身が反例である。 -/
+  properFlatOverZ_iff : ∀ X : Scheme.{0},
+    ProperFlatOverZ X ↔
+      (IsProper (specZIsTerminal.from X) ∧ Flat (specZIsTerminal.from X))
   /-- ★★★**原文が実際に使う結論**——ℤ-固有なら `X^arc` はコンパクト。
 
   ★★★**「射影的」ではない。**原文は

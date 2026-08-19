@@ -429,6 +429,7 @@ theorem biratIstrMap_degFr (A B : Istr P)
     biratDeg (biratIstrMap P G F A B z) = biratDeg z := by
   obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
   rw [biratIstrMap_mk, biratDeg_mk, biratDeg_mk]
+  exact (istr_compat_degFr P F φ).symm
 
 include F G in
 /-- ★★`biratIstrMap` は底を保つ。 -/
@@ -437,10 +438,98 @@ theorem biratIstrMap_base (A B : Istr P)
     biratBase (biratIstrMap P G F A B z) = biratBase z := by
   obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
   rw [biratIstrMap_mk, biratBase_mk, biratBase_mk, sliceBaseOf_eq, sliceBaseOf_eq]
+  rfl
 
 def biratIstrFunctor.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 86,
     item := "Remark 4.5.1 — (𝒞^istr)^birat ⥤ 𝒞^birat は充満忠実で構造を保つ",
+    sectionId := "frdi-remark-4-5-1" }
+
+/-! ## ★9. `Definition 4.5, (iii), (a)` の第 1 条 —— birationally Frobenius-normalized 型
+
+原文 (FrdI p.86):
+> that if C is of rationally standard type (respectively, of standard type), then so is
+
+★★`IsFrobeniusNormalized` は **∀ 条件**なので、
+充満忠実で `Base`・`degFr` を保つ関手があれば**そのまま降りる**。 -/
+
+include F G in
+/-- ★`biratIstrFunctor` は `(biratPre _).Base` を保つ。 -/
+theorem biratIstrFunctor_Base {X Y : BiratCat (istrPre P F) (istr_frobenioid P F G)}
+    (f : X ⟶ Y) :
+    (biratPre P G).Base ((biratIstrFunctor P G F).map f)
+      = (biratPre (istrPre P F) (istr_frobenioid P F G)).Base f :=
+  biratIstrMap_base P G F X Y f
+
+include F G in
+/-- ★`biratIstrFunctor` は `(biratPre _).degFr` を保つ。 -/
+theorem biratIstrFunctor_degFr {X Y : BiratCat (istrPre P F) (istr_frobenioid P F G)}
+    (f : X ⟶ Y) :
+    (biratPre P G).degFr ((biratIstrFunctor P G F).map f)
+      = (biratPre (istrPre P F) (istr_frobenioid P F G)).degFr f :=
+  biratIstrMap_degFr P G F X Y f
+
+include F G in
+/-- ★★`𝒪^▷` は `biratIstrFunctor` で移る。 -/
+theorem biratIstrFunctor_mem_otri {X : BiratCat (istrPre P F) (istr_frobenioid P F G)}
+    {α : End X} (h : α ∈ OTri (biratPre (istrPre P F) (istr_frobenioid P F G)) X) :
+    (CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) α
+      ∈ OTri (biratPre P G) ((biratIstrFunctor P G F).obj X) := by
+  refine ⟨?_, ?_⟩
+  · show (biratPre P G).Base ((biratIstrFunctor P G F).map (α : X ⟶ X))
+      = (biratPre P G).Base (𝟙 _)
+    rw [biratIstrFunctor_Base, (biratPre P G).Base_id, h.1,
+      (biratPre (istrPre P F) (istr_frobenioid P F G)).Base_id]
+    rfl
+  · show (biratPre P G).degFr ((biratIstrFunctor P G F).map (α : X ⟶ X)) = 1
+    rw [biratIstrFunctor_degFr]
+    exact h.2
+
+include F G in
+/-- ★★★★★**(a) の第 1 条** —— birationally Frobenius-normalized 型は `𝒞^istr` へ移る。
+
+★★`IsFrobeniusNormalized` は ∀ 条件なので、
+**充満忠実性 ＋ `Base`・`degFr` の保存**だけで降りる。 -/
+theorem istr_biratFrobNormalizedType
+    (h : IsOfBirationallyFrobeniusNormalizedType C P G) :
+    IsOfBirationallyFrobeniusNormalizedType (Istr P) (istrPre P F)
+      (istr_frobenioid P F G) := by
+  intro A
+  set X : BiratCat (istrPre P F) (istr_frobenioid P F G) :=
+    (toBiratCat (istrPre P F) (istr_frobenioid P F G)).obj A with hX
+  intro φ hφ α hα
+  have hΘ := h A.obj
+  have hbi : IsBaseIdentity (biratPre P G)
+      ((CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) φ) := by
+    show (biratPre P G).Base ((biratIstrFunctor P G F).map (φ : X ⟶ X))
+      = (biratPre P G).Base (𝟙 _)
+    rw [biratIstrFunctor_Base, (biratPre P G).Base_id, hφ,
+      (biratPre (istrPre P F) (istr_frobenioid P F G)).Base_id]
+    rfl
+  have hmain := hΘ _ hbi _ (biratIstrFunctor_mem_otri P G F hα)
+  have hd : (biratPre P G).degFr
+      ((CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) φ)
+      = (biratPre (istrPre P F) (istr_frobenioid P F G)).degFr φ :=
+    biratIstrFunctor_degFr P G F _
+  have hpow := congrArg (fun n : ℕ+ =>
+    (((CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) α ^ ((n : ℕ+) : ℕ)
+      : End ((biratIstrFunctor P G F).obj X)) :
+        (biratIstrFunctor P G F).obj X ⟶ (biratIstrFunctor P G F).obj X)) hd
+  have hmain2 := (congrArg (fun t =>
+    (((CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) φ) :
+      (biratIstrFunctor P G F).obj X ⟶ (biratIstrFunctor P G F).obj X) ≫ t)
+      hpow).symm.trans hmain
+  refine (biratIstrFunctor P G F).map_injective ?_
+  rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp]
+  refine Eq.trans ?_ hmain2
+  exact congrArg (fun t =>
+    (((CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) φ) :
+      (biratIstrFunctor P G F).obj X ⟶ (biratIstrFunctor P G F).obj X) ≫ t)
+    (map_pow (CategoryTheory.Functor.mapEnd X (biratIstrFunctor P G F)) α _)
+
+def istr_biratFrobNormalizedType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — birationally Frobenius-normalized 型は 𝒞^istr で保たれる",
     sectionId := "frdi-remark-4-5-1" }
 
 end ABC3.Found.FrdI

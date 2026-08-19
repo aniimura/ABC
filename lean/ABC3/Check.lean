@@ -19,6 +19,7 @@ import ABC3.Check.Arakelov.ArcSpaceNondegenerate
 import ABC3.Check.Arakelov.PicNondegenerate
 import ABC3.Check.Arakelov.PullbackNondegenerate
 import ABC3.Check.Arakelov.MetricNondegenerate
+import ABC3.Check.Arakelov.ProperFlatNondegenerate
 import ABC3.Check.GaloisRep.OmegaNondegenerate
 /-!
 # Check — 我々のモデルについての検査
