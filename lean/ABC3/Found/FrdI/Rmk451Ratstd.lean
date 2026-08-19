@@ -615,4 +615,33 @@ def hull_transport_end.src : ABC3.Meta.Source :=
     item := "Definition 1.2, (iv) — isotropic hull に沿った自己射の移送",
     sectionId := "frdi-def-1-2-iv" }
 
+/-! ## ★11. `Definition 4.5, (iii), (a)` の第 2 条 —— rational 型の引き戻しの側
+
+原文 (FrdI p.86):
+> Definition 2.4, (i), (d)]. We shall say that A is rational if there exists a pull-back
+
+★★`IsRational A := ∃ B (φ : B ⟶ A), IsPullBack φ ∧ IsStrictlyRational B` であり、
+**`B` が isotropic とは限らない**のが `𝒞^istr` へ移すときの障害だった。
+★★★等長化 `B^istr` を取れば引き戻しの側は**在庫だけで立つ**。 -/
+
+include F G in
+/-- ★★★★**引き戻しの側** —— `B^istr` から `A` への pull-back が立つ。
+
+★`isotropification_pullBack`(`Prop19.lean`)＋ `hullMap_isIso`(`A` が isotropic)
+＋ `IsPullBack.comp` の 3 本。 -/
+theorem istr_rational_pullBack {A : Istr P} {B : C} (φ : B ⟶ A.obj)
+    (hpb : IsPullBack P φ) :
+    ∃ ψ : hullIstr P F B ⟶ A, IsPullBack (istrPre P F) ψ := by
+  haveI : IsIso (hullMap P F A.obj) := hullMap_isIso P F A.obj A.property
+  have h1 : IsPullBack P (istrMap P F φ) := isotropification_pullBack P F φ hpb
+  have h2 : IsPullBack P (inv (hullMap P F A.obj)) :=
+    isPullBack_of_isIso P (inv (hullMap P F A.obj))
+  refine ⟨InducedCategory.homMk (istrMap P F φ ≫ inv (hullMap P F A.obj)), ?_⟩
+  exact istr_isPullBack_of P F _ (IsPullBack.comp P h1 h2)
+
+def istr_rational_pullBack.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 86,
+    item := "Remark 4.5.1 — rational 型の引き戻しの側",
+    sectionId := "frdi-remark-4-5-1" }
+
 end ABC3.Found.FrdI
