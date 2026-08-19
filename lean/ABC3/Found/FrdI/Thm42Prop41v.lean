@@ -188,4 +188,118 @@ def prop_4_1_v_cat.src : ABC3.Meta.Source :=
 
 end Under
 
+/-! ## ★★★★★★「入る primary」と「出る primary」の橋
+
+★★`Div : 𝒪^▷ ↠ Φ` により、`A` の零因子はすべて **`A` の自己射**で実現される。
+★自己射は「`A` へ入る pre-step」でも「`A` から出る pre-step」でもあるので、
+これが 2 つの側をつなぐ。 -/
+
+section Bridge
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★同型を後置しても `Div` は変わらない(pre-step のとき)。 -/
+theorem div_comp_iso {X Y Z : C₂} (f : X ⟶ Y) (e : Y ⟶ Z) [IsIso e] :
+    P₂.Div (f ≫ e) = P₂.Div f := by
+  rw [P₂.Div_comp, show P₂.Div e = 0 from isIsometric_of_isIso P₂ e, map_zero, zero_add,
+    show P₂.degFr e = 1 from degFr_of_isIso P₂ e]
+  exact one_smul _ _
+
+/-- ★★★★★**「`A` へ入る primary の保存」⟹「`A` から出る primary の保存」**。 -/
+theorem primaryOut_of_primaryIn (Ψ : C ⥤ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    {A : C}
+    (hIn : ∀ (E' : C) (ϵ' : E' ⟶ A), IsPreStep P ϵ' → IsPrimaryElt (P.Div ϵ') →
+      IsPrimaryElt (P₂.Div (Ψ.map ϵ')))
+    {B : C} (δ : A ⟶ B) (hsδ : IsPreStep P δ) (hpδ : IsPrimaryElt (P.Div δ)) :
+    IsPrimaryElt (P₂.Div (Ψ.map δ)) := by
+  obtain ⟨u, hu⟩ := hdivS A (P.Div δ)
+  have hcu : IsCoAngular P (((u : End A)) : A ⟶ A) := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hsu : IsPreStep P (((u : End A)) : A ⟶ A) := isPreStep_of_otri _ u.2
+  have hcδ : IsCoAngular P δ := prop_1_4_i P _ (fun Y _ => hiso Y)
+  obtain ⟨θ, hθiso, hθ⟩ :=
+    exists_iso_of_div_eq G (((u : End A)) : A ⟶ A) δ hcu hsu hcδ hsδ hu
+  haveI := hθiso
+  have hpu : IsPrimaryElt (P.Div (((u : End A)) : A ⟶ A)) := by rw [hu]; exact hpδ
+  have h1 : IsPrimaryElt (P₂.Div (Ψ.map (((u : End A)) : A ⟶ A))) := hIn A _ hsu hpu
+  have h2 : P₂.Div (Ψ.map δ) = P₂.Div (Ψ.map (((u : End A)) : A ⟶ A)) := by
+    rw [← hθ, Ψ.map_comp]
+    haveI : IsIso (Ψ.map θ) := Ψ.map_isIso θ
+    exact div_comp_iso (Ψ.map (((u : End A)) : A ⟶ A)) (Ψ.map θ)
+  rw [h2]
+  exact h1
+
+def primaryOut_of_primaryIn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — 入る primary と出る primary の橋",
+    sectionId := "frdi-thm-4-2" }
+
+/-- ★★★**「後置の値」が等しい 2 本の co-angular pre-step は始域の上で同型**。
+
+★`exists_iso_of_div_eq` のスライス版(`Definition 1.3, (iii), (d)` の**後置**の圏同値)。 -/
+theorem exists_iso_of_preStepVal_eq (G : Frobenioid P) {A B B' : C} (φ : B ⟶ A) (φ' : B' ⟶ A)
+    (hcφ : IsCoAngular P φ) (hsφ : IsPreStep P φ)
+    (hcφ' : IsCoAngular P φ') (hsφ' : IsPreStep P φ')
+    (h : preStepVal P φ hsφ = preStepVal P φ' hsφ') :
+    ∃ θ : B ⟶ B', IsIso θ ∧ θ ≫ φ' = φ := by
+  haveI := coaPreProp_isMultiplicative P G.core.coAngularComp
+  haveI := G.coaPreOverEquiv A
+  let Z : Over (⟨A⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨B⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨A⟩ from ⟨φ, hcφ, hsφ⟩)
+  let W : Over (⟨A⟩ : WideSubcategory (coaPreProp P)) :=
+    Over.mk (show (⟨B'⟩ : WideSubcategory (coaPreProp P)) ⟶ ⟨A⟩ from ⟨φ', hcφ', hsφ'⟩)
+  have hobj : (coaPreOverFunctor P A).obj Z = (coaPreOverFunctor P A).obj W := by
+    show Opposite.op (toOrderCat (preStepVal P φ hsφ))
+      = Opposite.op (toOrderCat (preStepVal P φ' hsφ'))
+    rw [h]
+  obtain ⟨f, -⟩ := (coaPreOverFunctor P A).map_surjective (eqToHom hobj)
+  obtain ⟨g, -⟩ := (coaPreOverFunctor P A).map_surjective (eqToHom hobj.symm)
+  have hfg : f ≫ g = 𝟙 Z :=
+    (coaPreOverFunctor P A).map_injective (Subsingleton.elim _ _)
+  have hgf : g ≫ f = 𝟙 W :=
+    (coaPreOverFunctor P A).map_injective (Subsingleton.elim _ _)
+  refine ⟨f.left.hom, ⟨g.left.hom, ?_, ?_⟩, ?_⟩
+  · exact congrArg (fun t : Z ⟶ Z => t.left.hom) hfg
+  · exact congrArg (fun t : W ⟶ W => t.left.hom) hgf
+  · exact congrArg InducedWideCategory.Hom.hom (Over.w f)
+
+/-- ★★★★★**「`A` から出る primary の保存」⟹「`A` へ入る primary の保存」**。 -/
+theorem primaryIn_of_primaryOut (Ψ : C ⥤ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.map f))
+    {A : C}
+    (hOut : ∀ (B' : C) (δ' : A ⟶ B'), IsPreStep P δ' → IsPrimaryElt (P.Div δ') →
+      IsPrimaryElt (P₂.Div (Ψ.map δ')))
+    {E : C} (ϵ : E ⟶ A) (hsϵ : IsPreStep P ϵ) (hpϵ : IsPrimaryElt (P.Div ϵ)) :
+    IsPrimaryElt (P₂.Div (Ψ.map ϵ)) := by
+  obtain ⟨u, hu⟩ := hdivS A (preStepVal P ϵ hsϵ)
+  have hsu : IsPreStep P (((u : End A)) : A ⟶ A) := isPreStep_of_otri _ u.2
+  have hcu : IsCoAngular P (((u : End A)) : A ⟶ A) := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hcϵ : IsCoAngular P ϵ := prop_1_4_i P _ (fun Y _ => hiso Y)
+  have hvu : preStepVal P (((u : End A)) : A ⟶ A) hsu = preStepVal P ϵ hsϵ := by
+    rw [preStepVal_of_otri _ u.2]; exact hu
+  obtain ⟨θ, hθiso, hθ⟩ :=
+    exists_iso_of_preStepVal_eq G (((u : End A)) : A ⟶ A) ϵ hcu hsu hcϵ hsϵ hvu
+  haveI := hθiso
+  have hpu : IsPrimaryElt (P.Div (((u : End A)) : A ⟶ A)) := by
+    rw [hu]; exact (isPrimaryElt_preStepVal_iff ϵ hsϵ).mpr hpϵ
+  have h1 : IsPrimaryElt (P₂.Div (Ψ.map (((u : End A)) : A ⟶ A))) := hOut A _ hsu hpu
+  rw [← hθ, Ψ.map_comp] at h1
+  haveI : IsIso (Ψ.map θ) := Ψ.map_isIso θ
+  exact (isPrimaryElt_div_iso_comp (Ψ.map θ) (Ψ.map ϵ) (hPS ϵ hsϵ)).mp h1
+
+def primaryIn_of_primaryOut.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — 出る primary と入る primary の橋",
+    sectionId := "frdi-thm-4-2" }
+
+end Bridge
+
 end ABC3.Found.FrdI
