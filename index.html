@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1233 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1236 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5879</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1661</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5895</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1663</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>a0a6d9b</code></td><td>2026-08-19</td><td>★★★★★★★★★★B2 が閉じた——Arakelov 4/9(第 241 ブロック)</td></tr>
+<tr><td><code>4c91672</code></td><td>2026-08-19</td><td>★★`coaPreProp` の辞書——𝒞^istr と 𝒞 で一致することを取った</td></tr>
+<tr><td><code>03e4e60</code></td><td>2026-08-19</td><td>★★★★★見立てを覆した——isotropic 対象への co-angular pre-step の域は isotropic</td></tr>
 <tr><td><code>c184a4c</code></td><td>2026-08-19</td><td>★★★★★★★★B2 の 14 欄目——𝒪(D) の引き戻し(第 236–240 ブロック)</td></tr>
 <tr><td><code>ddb6375</code></td><td>2026-08-19</td><td>★★★中心拡大の交換子が交代双線形形式を誘導することを一般の群論として取った</td></tr>
 <tr><td><code>f0158df</code></td><td>2026-08-19</td><td>★★★★★★★hcompat が閉じた——B2 の最後の 1 点(第 234–235 ブロック)</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>43a0894</code></td><td>2026-08-19</td><td>★★★★★★自分の設計判断を反証した——𝒟 は 𝒞 の局所化ではない</td></tr>
 <tr><td><code>e706c18</code></td><td>2026-08-19</td><td>標数 2 での preΨ₄(G1 第 14 ブロック)——恒等式の材料が揃った</td></tr>
 <tr><td><code>a50c69d</code></td><td>2026-08-19</td><td>標数 2 での Ψ₃(G1 第 13 ブロック)</td></tr>
-<tr><td><code>32ea1c5</code></td><td>2026-08-19</td><td>★★★★★手計算で鍵の関係を特定した(G1 第 12 ブロック)</td></tr>
-<tr><td><code>34f8150</code></td><td>2026-08-19</td><td>★★★Galois が 11 ブロックに——ψ だけの恒等式に落ちた(G1 第 11 ブロック)</td></tr>
-<tr><td><code>e928107</code></td><td>2026-08-19</td><td>★★★★★標数 2 で omegaNum 1 = 0(G1 第 10 ブロック)——帰納の基底が揃った</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1661 件)。</div>
+<b>すべて PDF と機械照合している</b>(1663 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
