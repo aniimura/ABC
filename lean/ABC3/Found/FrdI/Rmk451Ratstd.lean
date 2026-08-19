@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.FrdI.Prop44Core
+import ABC3.Found.FrdI.Prop44Phi
 import Mathlib.CategoryTheory.Limits.Final
 
 /-!
@@ -687,5 +688,92 @@ def isIsotropicHull_unique.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 22,
     item := "Definition 1.2, (iv) — isotropic hull は同型を除いて一意",
     sectionId := "frdi-def-1-2-iv" }
+
+/-! ## ★13. 等長化 hull は `𝒞^birat` でも isotropic hull
+
+原文 (FrdI p.83):
+> An object of C maps to an isotropic object of Cbirat if and only if
+
+★★在庫の `birat_isotropicHullExists` は **`G.core` が選んだ** hull を与えるが、
+引き戻しに使うのは **`F` が選んだ `hullMap P F B`** である。
+★★★両者の差は `isIsotropicHull_unique` ではなく、
+**`𝒞^birat` で pre-step が同型になる**こと(`birat_isIso_of_preStep_of_isotropic`)で潰れる。 -/
+
+include F G in
+/-- ★★★★★**`hullMap` の birat 化は `𝒞^birat` の isotropic hull**。
+
+★`G.core` の hull `k₀` から降ろした `β` が
+「isotropic 対象から出る pre-step」なので**同型**になり、
+`isIsotropicHull_comp_iso`(在庫)で閉じる。 -/
+theorem birat_map_hullMap_isIsotropicHull
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X) (B : C) :
+    IsIsotropicHull (biratPre P G) ((toBiratCat P G).map (hullMap P F B)) := by
+  obtain ⟨H₀, k₀, hk₀⟩ := birat_isotropicHullExists (P := P) (G := G) ((toBiratCat P G).obj B)
+  obtain ⟨β, hβ, -⟩ := hk₀.2.2.2 ((toBiratCat P G).obj (hullObj P F B))
+    (birat_isotropic_up (P := P) (G := G) (hullMap_spec P F B).2.2.1)
+    ((toBiratCat P G).map (hullMap P F B))
+  have hd0 : (biratPre P G).degFr ((toBiratCat P G).map (hullMap P F B)) = 1 :=
+    (birat_isLinear_iff (P := P) (G := G) (hullMap P F B)).mpr (hullMap_spec P F B).2.1.1
+  have hb0 : IsIso ((biratPre P G).Base ((toBiratCat P G).map (hullMap P F B))) :=
+    (birat_isBaseIsomorphism_iff (P := P) (G := G) (hullMap P F B)).mpr (hullMap_spec P F B).2.1.2
+  have hdβ : (biratPre P G).degFr β = 1 := by
+    have h1 := congrArg (biratPre P G).degFr hβ
+    rw [hd0, (biratPre P G).degFr_comp,
+      show (biratPre P G).degFr k₀ = 1 from hk₀.2.1.1, mul_one] at h1
+    exact h1.symm
+  have hbβ : IsBaseIsomorphism (biratPre P G) β := by
+    have h2 := congrArg (biratPre P G).Base hβ
+    rw [(biratPre P G).Base_comp] at h2
+    haveI : IsIso ((biratPre P G).Base k₀) := hk₀.2.1.2
+    haveI : IsIso ((biratPre P G).Base k₀ ≫ (biratPre P G).Base β) := by
+      rw [← h2]; exact hb0
+    exact IsIso.of_isIso_comp_left ((biratPre P G).Base k₀) ((biratPre P G).Base β)
+  haveI : IsIso β :=
+    birat_isIso_of_preStep_of_isotropic P G hfn hk₀.2.2.1 ⟨hdβ, hbβ⟩
+  have hfin := isIsotropicHull_comp_iso (biratPre P G) k₀ β hk₀
+  rwa [← hβ] at hfin
+
+def birat_map_hullMap_isIsotropicHull.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iv) — 等長化 hull は 𝒞^birat でも isotropic hull",
+    sectionId := "frdi-prop-4-4" }
+
+/-! ## ★14. `Div^gp` の hull に沿った移送
+
+★★★**測ったこと**: `biratPre P G` の単系は `trivialOn D`(自明)なので、
+`hull_transport_Div` は `𝒞^birat` では**何も言わない**。
+★`phiBiratAt` が使うのは `biratDivGp`(`Gp (Φ.val ...)` へ行く別の写像)であり、
+そちらの合成則(`biratDivGp_comp'`)で書き直す必要がある。 -/
+
+variable {P G} in
+/-- ★★★★★**`Div^gp` は hull で底の同型に沿って移る**。
+
+★`biratDivGp (f ≫ g) = Φ^gp(Base f)(Div^gp g) + deg(g) • Div^gp f` を
+`δ ≫ k = k ≫ δ'` の両辺に当て、`Div^gp k` を消約する。 -/
+theorem biratDivGp_hull_transport {B H : BiratCat P G} (k : B ⟶ H)
+    (hkd : biratDeg k = 1)
+    {δ : End B} (hδ : δ ∈ OTri (biratPre P G) B)
+    {δ' : End H} (hδ' : δ' ∈ OTri (biratPre P G) H)
+    (h : ((δ : B ⟶ B) ≫ k) = k ≫ (δ' : H ⟶ H)) :
+    biratDivGp ((δ : B ⟶ B)) = gpMap _ (Φ.map (biratBase k)) (biratDivGp ((δ' : H ⟶ H))) := by
+  have hbδ : biratBase ((δ : B ⟶ B)) = 𝟙 _ := by
+    have h1 : (biratPre P G).Base ((δ : B ⟶ B)) = (biratPre P G).Base (𝟙 B) := hδ.1
+    rw [(biratPre P G).Base_id] at h1
+    exact h1
+  have hdδ' : biratDeg ((δ' : H ⟶ H)) = 1 := hδ'.2
+  have hcomp := congrArg (biratDivGp (P := P) (G := G)) h
+  rw [biratDivGp_comp', biratDivGp_comp', hbδ, hkd, hdδ'] at hcomp
+  have hmapid : (gpMap (Φ.val (P.toElem.obj (biratDown P G B)).base)
+      (Φ.map (𝟙 (P.toElem.obj (biratDown P G B)).base))) (biratDivGp k) = biratDivGp k := by
+    have hmid : Φ.map (𝟙 (P.toElem.obj (biratDown P G B)).base)
+        = AddMonoidHom.id (Φ.val (P.toElem.obj (biratDown P G B)).base) :=
+      AddMonoidHom.ext fun z => Φ.map_id _ z
+    rw [hmid, gpMap_id]
+    rfl
+  simp only [one_smul, PNat.one_coe] at hcomp
+  rw [hmapid] at hcomp
+  -- `Div^gp k + Div^gp δ = Φ^gp(Base k)(Div^gp δ') + Div^gp k`
+  rw [add_comm (biratDivGp k)] at hcomp
+  exact add_right_cancel hcomp
 
 end ABC3.Found.FrdI
