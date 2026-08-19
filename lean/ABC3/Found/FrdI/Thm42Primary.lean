@@ -117,4 +117,61 @@ def prop41iRhs_map.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — Proposition 4.1, (i) の右辺は Ψ で移る",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★`primary step` の保存 -/
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (i)** —— `Ψ` は
+Div-Frobenius-trivial な対象への co-angular step の **primary 性**を保つ。
+
+★両側で `Proposition 4.1, (i)` を当て、間を `prop41iRhs_map` で繋ぐだけ。 -/
+theorem isPrimaryElt_div_map (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (F₂ : FrobenioidCore P₂) (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    {A B : C₁} (α : ℕ+ → (A ⟶ A))
+    (hαd : ∀ n, P₁.degFr (α n) = n) (hαD : ∀ n, IsDivIdentity P₁ (α n))
+    (hαF : ∀ n, IsFrobeniusType P₁ (α n))
+    (hαd₂ : ∀ n, P₂.degFr (Ψ.functor.map (α n)) = n)
+    (hαD₂ : ∀ n, IsDivIdentity P₂ (Ψ.functor.map (α n)))
+    (hperf₁ : IsPerfectMonoid (Φ₁.val (P₁.toElem.obj A).base))
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base))
+    (φ : B ⟶ A) (hcφ : IsCoAngular P₁ φ) (hst : IsStep P₁ φ)
+    (hcφ₂ : IsCoAngular P₂ (Ψ.functor.map φ)) (hst₂ : IsStep P₂ (Ψ.functor.map φ))
+    (h : IsPrimaryElt (P₁.Div φ)) :
+    IsPrimaryElt (P₂.Div (Ψ.functor.map φ)) :=
+  (prop_4_1_i G₂ hiso₂ (fun n => Ψ.functor.map (α n)) hαd₂ hαD₂
+      (fun n => hFT (α n) (hαF n)) hperf₂ (Ψ.functor.map φ) hcφ₂ hst₂).mpr
+    (prop41iRhs_map F₂ Ψ hPS hPS' hFT φ α
+      ((prop_4_1_i G₁ hiso₁ α hαd hαD hαF hperf₁ φ hcφ hst).mp h))
+
+def isPrimaryElt_div_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (i) — Ψ は primary step を保つ",
+    sectionId := "frdi-thm-4-2" }
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (i)** —— `primary pre-step` の保存(語彙どおりの形)。 -/
+theorem isPrimaryPreStep_map (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (F₂ : FrobenioidCore P₂) (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    {A B : C₁} (α : ℕ+ → (A ⟶ A))
+    (hαd : ∀ n, P₁.degFr (α n) = n) (hαD : ∀ n, IsDivIdentity P₁ (α n))
+    (hαF : ∀ n, IsFrobeniusType P₁ (α n))
+    (hαd₂ : ∀ n, P₂.degFr (Ψ.functor.map (α n)) = n)
+    (hαD₂ : ∀ n, IsDivIdentity P₂ (Ψ.functor.map (α n)))
+    (hperf₁ : IsPerfectMonoid (Φ₁.val (P₁.toElem.obj A).base))
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base))
+    (φ : B ⟶ A) (hcφ : IsCoAngular P₁ φ) (hst : IsStep P₁ φ)
+    (hcφ₂ : IsCoAngular P₂ (Ψ.functor.map φ)) (hst₂ : IsStep P₂ (Ψ.functor.map φ))
+    (h : IsPrimaryPreStep P₁ φ) :
+    IsPrimaryPreStep P₂ (Ψ.functor.map φ) :=
+  ⟨hPS φ h.1,
+   isPrimaryElt_div_map G₁ G₂ F₂ Ψ hPS hPS' hFT hiso₁ hiso₂ α hαd hαD hαF hαd₂ hαD₂
+     hperf₁ hperf₂ φ hcφ hst hcφ₂ hst₂ h.2⟩
+
 end ABC3.Found.FrdI
