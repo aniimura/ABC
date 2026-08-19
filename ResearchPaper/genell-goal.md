@@ -12793,3 +12793,122 @@ mathlib の
 ### この区間の集計
 
 ★**117 ブロック**(Arakelov 102 + Galois 15)。
+
+## §9-322 —— ★★★★随伴の単位が合成と両立する(第 278 ブロック)
+
+§9-320 で残した「`arcEval` の整合性」を開けにかかった。★見積もりは **3–6 ブロック**。
+
+★★**先に mathlib を探した**——そして 3 つの鍵が見つかった:
+
+| 補題 | 場所 |
+|---|---|
+| `Adjunction.comp_unit_app` | `Adjunction/Basic.lean:593` |
+| `unit_conjugateEquiv` | `Adjunction/Mates.lean:302`(名前空間は `CategoryTheory` 直下) |
+| `Scheme.Modules.conjugateEquiv_pullbackComp_inv` | `Modules/Sheaf.lean` |
+
+★★★これを繋ぐと `unit_conj_compat` が**一発**で出た。
+
+### ★`𝟭` の壁
+
+`comp_unit_app` を展開した形を**定理の主張として書こうとすると通らない**:
+
+    unit.app ((𝟭 U.Modules).obj M) と unit.app M が
+    `instances` 透明度では等しくならない
+
+★`Functor.id` は semireducible なので、`instances` 透明度では展開されない。
+★★**回避**——展開形は主張に書かず、**証明の中で `rw [Adjunction.comp_unit_app]`** する。
+`rw` は `default` 透明度で動くので通る。
+
+★★★これは「等しいが綴りが違う」逃げ道カタログの **9 番目**である:
+**`𝟭` を跨ぐ綴りは主張に書かず、証明の中で `rw` する**。
+
+## §9-323 —— ★★★★Γ レベルの評価の自然性(第 279 ブロック)
+
+`unit_conj_compat` を `⊤` の切断へ落とすには 3 つの橋が要る。
+★★どれも**射としては `rfl` にならない**——`ModuleCat` の係数環が違うからである:
+
+    moduleSpecΓFunctor.obj M : ModuleCat ℂ
+    M.val.obj (op ⊤)         : ModuleCat Γ(Spec ℂ, ⊤)
+
+★★★しかし **`.hom` を噛ませて元のレベルに落とすと 3 つとも `rfl`** であった。
+
+| 橋 | 射として | 元として |
+|---|---|---|
+| `Γ` と `⊤` での評価 | ✗ | ★`rfl` |
+| 押し出しの `⊤` | ✗ | ★`rfl` |
+| `pushforwardComp` の `⊤` | ✗ | ★★`rfl`(恒等) |
+
+★これは §9-309 の型——**担い手が `rfl` で一致するなら元のレベルで書け**——の再演である。
+★★§9-297 で同じ状況を「関手レベルの比較が要る、5–15 ブロック」と誤判定した。
+**今回は最初から元のレベルに降りた**——学習が効いた。
+
+## §9-324 —— ★★★★★制限の同型と随伴の単位(第 280 ブロック)
+
+残った**唯一の非自明な等式**:
+
+    (restrictFunctorIsoPullback j).inv ∘ (j の随伴の単位) = 制限写像
+
+★★鍵は mathlib の定義そのものであった:
+
+    restrictFunctorIsoPullback j
+      = (restrictAdjunction j).leftAdjointUniq (pullbackPushforwardAdjunction j)
+
+★`Adjunction.unit_leftAdjointUniq_hom_app` が
+
+    (restrictAdjunction j).unit ≫ (pushforward j).map iso.hom = (pullback の随伴).unit
+
+を与えるので、`iso.inv` を掛けると `iso.hom ≫ iso.inv = 𝟙` で消え、
+★★★残るのは `restrictAdjunction` の単位——それは `restrictAdjunction_unit_app_app` により
+**制限写像そのもの**(しかも `rfl`)である。
+
+### ★`rfl` 補題は `rw` できない(再確認)
+
+`rw [hsplit]` が「パターンが見つからない」で落ちた。★`hsplit` は `rfl` 補題である。
+★★**逃げ道 2**(`have` で主張し `exact` で defeq に頼る)に切り替えて通した。
+
+## §9-325 —— ★★★★★★★評価は開集合への制限と両立する(第 281 ブロック)
+
+    (arcFiberFactor j L p).hom (arcEval (p ≫ j) L s)
+      = arcEval p (restrict L j) (restrictSection j L s)
+
+★★★**§9-320 の穴が閉じた**。
+
+| 段 | 使うもの |
+|---|---|
+| A | 第 278 + `Adjunction.comp_unit_app` |
+| B | 第 279 `gamma_arcEval_naturality` |
+| C | 第 280 `restrictIso_unit_apply` |
+
+★`arcFiberFactor` の分解そのもの(`hg`)は **`rfl`** であった
+——`moduleSpecΓFunctor` の `map_comp` が `rfl` だからである。
+
+### ★★★測定——見積もりが当たった
+
+| 見積もり | 実測 |
+|---|---|
+| 3–6 ブロック | ★**4 ブロック**(278–281) |
+
+★★これまで 4 回続けて過小評価していた(§9-44 の記録)。今回当たった理由は明確で、
+★★★**見積もる前に mathlib を探して鍵の在処を確かめた**からである。
+★「探してから見積もる」——手順そのものが精度を上げる。
+
+## §9-326 —— ★★★★★★★切断のノルムは連続である(第 282 ブロック)
+
+`hcompat` を**仮定していた**組み立てから、仮定が消えた。
+
+    continuous_gluedNorm_section
+      : Continuous (fun p => gluedNormX F U e ρ p (arcEval p F s))
+
+★5 段(第 277 → 第 281 → 第 270 → 第 276 → 第 273)を繋いで**一発**で通った。
+
+★★★これで Interface `HermitianMetricData` の `normSection_continuous` が満たせる。
+
+### ★残っている C3 の Interface 場
+
+| 場 | 状態 |
+|---|---|
+| `normSection` + 4 法則 | ★★★連続性まで揃った |
+| `metric_nonempty` | ★自明化被覆と 1 の分割の存在が要る |
+| `logMetric` + 4 法則 | ★未着手 |
+| `IsConjCompatible` + `isConjCompatible_iff` | ★未着手 |
+| `tensorMetric` + `logMetric_tensor` | ★未着手 |
