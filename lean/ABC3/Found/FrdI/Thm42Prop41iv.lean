@@ -204,4 +204,106 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 
 end Cat41ivEnd
 
+section MainTransport
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★★★★★★**`Proposition 4.1, (iv)` の右辺は `Ψ` で移る**。 -/
+theorem prop41ivRhsCat_map (Ψ : C ≌ C₂)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hCA : ∀ {X Y : C} (f : X ⟶ Y), IsCoAngular P f → IsCoAngular P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST : ∀ {X Y : C} (f : X ⟶ Y), IsStep P f → IsStep P₂ (Ψ.functor.map f))
+    {Do E F : C} {δ : Do ⟶ E} {ϵ : E ⟶ F}
+    (hFwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P.Div ϵ') → IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')))
+    (hBwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')) → IsPrimaryElt (P.Div ϵ'))
+    (h : Prop41ivRhsCat P δ ϵ) :
+    Prop41ivRhsCat P₂ (Ψ.functor.map δ) (Ψ.functor.map ϵ) := by
+  obtain ⟨E₀, ϵ₀, hc₀, hs₀, hp₀, hcond⟩ := h
+  refine ⟨Ψ.functor.obj E₀, Ψ.functor.map ϵ₀, hCA ϵ₀ hc₀, hPS ϵ₀ hs₀,
+    hFwd E₀ ϵ₀ hs₀ hp₀, ?_⟩
+  intro E' ϵ' hcϵ' hsϵ' hpϵ' hns
+  obtain ⟨E'₀, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) E'
+  obtain ⟨ϵ'₀, hϵ'₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ϵ')
+  have hsϵ'₀ : IsPreStep P ϵ'₀ := by
+    refine hPS' ϵ'₀ ?_
+    rw [hϵ'₀]
+    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hsϵ'
+  have hpϵ'₀ : IsPrimaryElt (P.Div ϵ'₀) := by
+    refine hBwd E'₀ ϵ'₀ hsϵ'₀ ?_
+    rw [hϵ'₀]
+    exact (isPrimaryElt_div_iso_comp e.hom ϵ' hsϵ').mpr hpϵ'
+  have hns₀ : ¬ SamePrimeCat P ϵ'₀ ϵ₀ := by
+    intro hc
+    refine hns ?_
+    have h1 := samePrimeCat_map Ψ.functor hCA hPS hST hc
+    rw [hϵ'₀] at h1
+    exact (samePrimeCat_iso_comp e.hom).mp h1
+  have hiff := hcond E'₀ ϵ'₀ (prop_1_4_i P _ (fun Y _ => hiso Y)) hsϵ'₀ hpϵ'₀ hns₀
+  have hL : FactorsPre P₂ (Ψ.functor.map ϵ) ϵ' ↔ FactorsPre P ϵ ϵ'₀ := by
+    rw [factorsPre_map_iff Ψ hPS hPS' ϵ ϵ'₀, hϵ'₀]
+    exact (factorsPre_iso_comp e.hom (Ψ.functor.map ϵ) ϵ').symm
+  have hR : FactorsPre P₂ (Ψ.functor.map δ ≫ Ψ.functor.map ϵ) ϵ'
+      ↔ FactorsPre P (δ ≫ ϵ) ϵ'₀ := by
+    rw [factorsPre_map_iff Ψ hPS hPS' (δ ≫ ϵ) ϵ'₀, hϵ'₀, Ψ.functor.map_comp]
+    exact (factorsPre_iso_comp e.hom (Ψ.functor.map δ ≫ Ψ.functor.map ϵ) ϵ').symm
+  exact hL.trans (hiff.trans hR.symm)
+
+def prop41ivRhsCat_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — Proposition 4.1, (iv) の右辺は Ψ で移る",
+    sectionId := "frdi-thm-4-2" }
+
+/-- ★★★★★★**primary 性の「一段の拡張」** ——
+`F` へ入る pre-step について primary 性が両向きに移るなら、
+`F` へ pre-step `ϵ : E ⟶ F` を持つ `E` へ入る pre-step についても移る。
+
+★★これが原文 p.79 の「`A₁` → `B₁` → `C₁`」の各段である。 -/
+theorem isPrimaryElt_div_extend (Ψ : C ≌ C₂)
+    (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hCA : ∀ {X Y : C} (f : X ⟶ Y), IsCoAngular P f → IsCoAngular P₂ (Ψ.functor.map f))
+    (hPS : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P f)
+    (hST : ∀ {X Y : C} (f : X ⟶ Y), IsStep P f → IsStep P₂ (Ψ.functor.map f))
+    {Do E F : C} (δ : Do ⟶ E) (ϵ : E ⟶ F)
+    (hsδ : IsPreStep P δ) (hsϵ : IsPreStep P ϵ)
+    (hδ0 : P.Div δ ≠ 0) (hδ0₂ : P₂.Div (Ψ.functor.map δ) ≠ 0)
+    {ι₀ : Prime (Φ.val (P.toElem.obj F).base) → Pf (Φ.val (P.toElem.obj F).base) → ℝ≥0}
+    (H : IsPerfFactorialWith (Φ.val (P.toElem.obj F).base) ι₀)
+    (hperf : IsPerfectMonoid (Φ.val (P.toElem.obj F).base))
+    (hdivM : IsDivisorial (Φ.val (P.toElem.obj F).base))
+    {ι₂ : Prime (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) →
+      Pf (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) → ℝ≥0}
+    (H₂ : IsPerfFactorialWith (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base) ι₂)
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base))
+    (hdivM₂ : IsDivisorial (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj F)).base))
+    (hFwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P.Div ϵ') → IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')))
+    (hBwd : ∀ (E' : C) (ϵ' : E' ⟶ F), IsPreStep P ϵ' →
+      IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ')) → IsPrimaryElt (P.Div ϵ'))
+    (h : IsPrimaryElt (P.Div δ)) :
+    IsPrimaryElt (P₂.Div (Ψ.functor.map δ)) :=
+  (prop_4_1_iv_cat G₂ hiso₂ hdivS₂ (Ψ.functor.map δ) (Ψ.functor.map ϵ)
+      (hPS δ hsδ) (hPS ϵ hsϵ) hδ0₂ H₂ hperf₂ hdivM₂).mpr
+    (prop41ivRhsCat_map Ψ hiso hCA hPS hPS' hST hFwd hBwd
+      ((prop_4_1_iv_cat G hiso hdivS δ ϵ hsδ hsϵ hδ0 H hperf hdivM).mp h))
+
+def isPrimaryElt_div_extend.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 79,
+    item := "Theorem 4.2, (i) — primary 性の一段の拡張",
+    sectionId := "frdi-thm-4-2" }
+
+end MainTransport
+
 end ABC3.Found.FrdI
