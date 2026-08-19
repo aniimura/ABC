@@ -476,6 +476,7 @@ import ABC3.Found.GaloisRep.PhiCases
 import ABC3.Found.GaloisRep.PhiDegenerate
 import ABC3.Found.GaloisRep.PhiCaseB
 import ABC3.Found.GaloisRep.XDiff
+import ABC3.Found.GaloisRep.PsiDouble
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

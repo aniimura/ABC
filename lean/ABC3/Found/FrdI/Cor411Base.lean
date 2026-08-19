@@ -121,10 +121,11 @@ include P in
 
 ★★手筋は同じ ——`Definition 1.3, (i), (c)` の圏同値 `(𝒞^pl-bk)_A ≌ 𝒟_{A_𝒟}` で
 `𝒟_{A_𝒟} → 𝒟` の自己同型へ共役し、そこで **Div-slim の単射性**を当てる。 -/
-theorem divSlim_pullBack_trivial (F : FrobenioidCore P) (hds : IsDivSlim Φ) (A : C)
+theorem divSlim_pullBack_trivial (F : FrobenioidCore P) {Φ₀ : MonoidOn.{v, u, w} D}
+    (hds : IsDivSlim Φ₀) (A : C)
     (η : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj))
-    (hdiv : ∀ (Y : Over A) (x : Φ.val (P.proj.obj Y.left)),
-      Φ.map (η.hom.app Y) x = x)
+    (hdiv : ∀ (Y : Over A) (x : Φ₀.val (P.proj.obj Y.left)),
+      Φ₀.map (η.hom.app Y) x = x)
     (Y : Over A) (hpb : IsPullBack P Y.hom) :
     η.hom.app Y = 𝟙 ((Over.forget A ⋙ P.proj).obj Y) := by
   haveI := F.plBkEquiv A
@@ -136,24 +137,24 @@ theorem divSlim_pullBack_trivial (F : FrobenioidCore P) (hds : IsDivSlim Φ) (A 
       ≅ Over.forget ((P.toElem.obj A).base) :=
     e.invFunIdAssoc (Over.forget ((P.toElem.obj A).base)) with hX
   -- ★共役した自己同型を `Φ` が恒等へ送ることを見る
-  have hconj : overPhiAut Φ ((P.toElem.obj A).base)
+  have hconj : overPhiAut Φ₀ ((P.toElem.obj A).base)
       (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse θ ≪≫ X) = 1 := by
-    refine overPhiAut_eq_one Φ _ (fun Z x => ?_)
-    show Φ.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x = x
-    have hkey := hdiv ((plBkToOver P A).obj (e.inverse.obj Z)) (Φ.map (X.hom.app Z) x)
-    calc Φ.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x
-        = Φ.map (X.inv.app Z) (Φ.map (θ.hom.app (e.inverse.obj Z))
-            (Φ.map (X.hom.app Z) x)) := by
-            rw [Φ.map_comp, Φ.map_comp]
+    refine overPhiAut_eq_one Φ₀ _ (fun Z x => ?_)
+    show Φ₀.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x = x
+    have hkey := hdiv ((plBkToOver P A).obj (e.inverse.obj Z)) (Φ₀.map (X.hom.app Z) x)
+    calc Φ₀.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x
+        = Φ₀.map (X.inv.app Z) (Φ₀.map (θ.hom.app (e.inverse.obj Z))
+            (Φ₀.map (X.hom.app Z) x)) := by
+            rw [Φ₀.map_comp, Φ₀.map_comp]
             rfl
-      _ = Φ.map (X.inv.app Z) (Φ.map (X.hom.app Z) x) :=
-            congrArg (fun t => Φ.map (X.inv.app Z) t) hkey
-      _ = Φ.map (X.inv.app Z ≫ X.hom.app Z) x :=
-            (Φ.map_comp (X.hom.app Z) (X.inv.app Z) x).symm
-      _ = x := by rw [X.inv_hom_id_app, Φ.map_id]
+      _ = Φ₀.map (X.inv.app Z) (Φ₀.map (X.hom.app Z) x) :=
+            congrArg (fun t => Φ₀.map (X.inv.app Z) t) hkey
+      _ = Φ₀.map (X.inv.app Z ≫ X.hom.app Z) x :=
+            (Φ₀.map_comp (X.hom.app Z) (X.inv.app Z) x).symm
+      _ = x := by rw [X.inv_hom_id_app, Φ₀.map_id]
   have h1 : (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse θ ≪≫ X)
       = (1 : Aut (Over.forget ((P.toElem.obj A).base))) :=
-    hds _ (hconj.trans (overPhiAut_one Φ _).symm)
+    hds _ (hconj.trans (overPhiAut_one Φ₀ _).symm)
   have hθrefl : θ = Iso.refl _ := eq_refl_of_conj_eq_refl e θ h1
   exact congrArg (fun t => t.hom.app (Over.mk (⟨Y.hom, hpb⟩ : (⟨Y.left⟩ : PlBk P) ⟶ ⟨A⟩)))
     hθrefl
@@ -164,10 +165,11 @@ include P in
 
 原文 (FrdI p.93):
 > Thus, since Di is Div-slim, it follows that every automorphism [of an object of -/
-theorem divSlim_over_aut_eq_id (F : FrobenioidCore P) (hds : IsDivSlim Φ) (A : C)
+theorem divSlim_over_aut_eq_id (F : FrobenioidCore P) {Φ₀ : MonoidOn.{v, u, w} D}
+    (hds : IsDivSlim Φ₀) (A : C)
     (η : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj))
-    (hdiv : ∀ (Y : Over A) (x : Φ.val (P.proj.obj Y.left)),
-      Φ.map (η.hom.app Y) x = x) :
+    (hdiv : ∀ (Y : Over A) (x : Φ₀.val (P.proj.obj Y.left)),
+      Φ₀.map (η.hom.app Y) x = x) :
     η = Iso.refl _ :=
   prop_1_13_i_from_pullBack P F A η
     (fun Y hpb => divSlim_pullBack_trivial P F hds A η hdiv Y hpb)
