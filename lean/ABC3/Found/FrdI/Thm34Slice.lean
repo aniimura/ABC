@@ -208,6 +208,43 @@ def slicePush.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 任意射が誘導する (𝒞^pl-bk)_A ⥤ (𝒞^pl-bk)_A'",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★底との 1-可換図式
+
+原文 (FrdI p.67):
+> that this functor ﬁts into a natural 1-commutative diagram
+-/
+
+/-- ★成分 —— `Base Z ≅ Base (top)` の逆。 -/
+noncomputable def slicePushSqApp (f : A ⟶ A') (Z : Over (⟨A⟩ : PlBk P)) :
+    (slicePush P F f ⋙ plBkOverFunctor P A').obj Z
+      ≅ (plBkOverFunctor P A ⋙ Over.map (P.Base f)).obj Z :=
+  Over.isoMk (((slPushFac P F f Z).baseEquiv P).symm) (by
+    show ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base Z.hom.hom ≫ P.Base f
+      = P.Base (slPushFac P F f Z).plb
+    have h := (slPushFac P F f Z).base_fac P
+    rw [P.Base_comp] at h
+    rw [h, Iso.inv_hom_id_assoc])
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (v)** —— スライス関手は底の `Over.map` と 1-可換。 -/
+noncomputable def slicePushSquare (f : A ⟶ A') :
+    slicePush P F f ⋙ plBkOverFunctor P A'
+      ≅ plBkOverFunctor P A ⋙ Over.map (P.Base f) :=
+  NatIso.ofComponents (slicePushSqApp P F f) (fun {Z W} u => by
+    refine Over.OverMorphism.ext ?_
+    show P.Base (slPushHom P F f u) ≫ ((slPushFac P F f W).baseEquiv P).inv
+      = ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+    rw [slPushHom_base]
+    show (((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+        ≫ ((slPushFac P F f W).baseEquiv P).hom)
+        ≫ ((slPushFac P F f W).baseEquiv P).inv
+      = ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+    rw [Category.assoc, Category.assoc, Iso.hom_inv_id, Category.comp_id])
+
+def slicePushSquare.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 67,
+    item := "Theorem 3.4, (v) — スライス関手と底の Over.map の 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
 end SlicePush
 
 end ABC3.Found.FrdI
