@@ -597,6 +597,93 @@ def exists_realizesBase.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — Base の任意の射は Ψ 側で実現される",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★★一意性と `psiBaseHom` -/
+
+include F₂ in
+set_option maxHeartbeats 2000000 in
+/-- ★★★★★**実現する `ξ` は一意** —— `𝒟₂` の slim 性(`Proposition A.2`)から。 -/
+theorem realizesBase_unique [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f)
+    {X Y : C} {φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base}
+    {ξ ξ' : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base}
+    (h : RealizesBase P F P₂ Ψ hPB φD ξ) (h' : RealizesBase P F P₂ Ψ hPB φD ξ') :
+    ξ = ξ' := by
+  obtain ⟨e⟩ := h
+  obtain ⟨e'⟩ := h'
+  haveI := basePsiSlice_isEquivalence P F P₂ Ψ hPB F₂ hPB' X
+  exact overMap_injective hslim₂
+    (cancelLeftEquiv (basePsiSlice P F P₂ Ψ hPB X).asEquivalence (e.symm ≪≫ e'))
+
+/-- ★恒等射は恒等射で実現される。 -/
+theorem realizesBase_id (X : C) :
+    RealizesBase P F P₂ Ψ hPB (𝟙 ((P.toElem.obj X).base))
+      (𝟙 ((P₂.toElem.obj (Ψ.obj X)).base)) :=
+  ⟨Functor.isoWhiskerRight (Over.mapId _) (basePsiSlice P F P₂ Ψ hPB X)
+    ≪≫ (basePsiSlice P F P₂ Ψ hPB X).leftUnitor
+    ≪≫ (basePsiSlice P F P₂ Ψ hPB X).rightUnitor.symm
+    ≪≫ Functor.isoWhiskerLeft (basePsiSlice P F P₂ Ψ hPB X) (Over.mapId _).symm⟩
+
+include F₂ hFT hPS in
+/-- ★★★★★★**`Ψ_Base` の射** —— 選択で取り出すが、一意性で決まっている。 -/
+noncomputable def psiBaseHom {X Y : C}
+    (φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base) :
+    (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base :=
+  (exists_realizesBase P F P₂ F₂ Ψ hPB hFT hPS φD).choose
+
+include F₂ hFT hPS in
+theorem psiBaseHom_realizes {X Y : C}
+    (φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base) :
+    RealizesBase P F P₂ Ψ hPB φD (psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS φD) :=
+  (exists_realizesBase P F P₂ F₂ Ψ hPB hFT hPS φD).choose_spec
+
+include F₂ hFT hPS in
+/-- ★実現する射は `psiBaseHom` に一致する。 -/
+theorem psiBaseHom_eq [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f)
+    {X Y : C} {φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base}
+    {ξ : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base}
+    (h : RealizesBase P F P₂ Ψ hPB φD ξ) :
+    psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS φD = ξ :=
+  realizesBase_unique P F P₂ F₂ Ψ hPB hslim₂ hPB'
+    (psiBaseHom_realizes P F P₂ F₂ Ψ hPB hFT hPS φD) h
+
+include F₂ hFT hPS in
+/-- ★★`psiBaseHom` は恒等射を保つ。 -/
+theorem psiBaseHom_id [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) (X : C) :
+    psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS (𝟙 ((P.toElem.obj X).base))
+      = 𝟙 ((P₂.toElem.obj (Ψ.obj X)).base) :=
+  psiBaseHom_eq P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'
+    (realizesBase_id P F P₂ Ψ hPB X)
+
+include F₂ hFT hPS in
+/-- ★★`psiBaseHom` は合成を保つ。 -/
+theorem psiBaseHom_comp [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f)
+    {X Y Z : C} (φ₁ : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base)
+    (φ₂ : (P.toElem.obj Y).base ⟶ (P.toElem.obj Z).base) :
+    psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS (φ₁ ≫ φ₂)
+      = psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS φ₁
+        ≫ psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS φ₂ :=
+  psiBaseHom_eq P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'
+    (realizesBase_comp P F P₂ Ψ hPB
+      (psiBaseHom_realizes P F P₂ F₂ Ψ hPB hFT hPS φ₁)
+      (psiBaseHom_realizes P F P₂ F₂ Ψ hPB hFT hPS φ₂))
+
+include F₂ hFT hPS in
+/-- ★★★★★**`psiBaseHom (Base f) = Base (Ψ f)`** —— 1-可換図式の中身。 -/
+theorem psiBaseHom_base [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f)
+    {X Y : C} (f : X ⟶ Y) :
+    psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS (P.Base f) = P₂.Base (Ψ.map f) :=
+  psiBaseHom_eq P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'
+    (realizesBase_of_map P F P₂ F₂ Ψ hPB hFT hPS f)
+
+def psiBaseHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Ψ_Base の射（存在と一意性）",
+    sectionId := "frdi-thm-3-4" }
+
 end Psi
 
 end SlicePush

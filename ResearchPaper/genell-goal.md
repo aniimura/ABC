@@ -12673,3 +12673,40 @@ mathlib の
 ### この区間の集計
 
 ★**115 ブロック**(Arakelov 100 + Galois 15)。
+
+## §9-319 ★★★★局所連続性を `X^arc` へ移した(第 276 ブロック)
+
+    ContinuousOn (fun p => extNormX … i p (φ p)) (arcOpenSet (U i))
+      ⟸ Continuous (fun q => xNorm … (q ≫ (U i).ι) … (φ (q ≫ (U i).ι)))
+
+★機構は第 274(`arcOpenSet = range`)と第 275(開埋め込みでの移送)。
+★★`extNormX` の `dite` は `comp_preimage_eq_top` で `dif_pos` に潰れる。
+★★★`liftToOpenOfTop V (q ≫ V.ι) h = q`(`V.ι` が mono)で `xNorm` の中の `lift` が戻る。
+
+### ★摩擦 —— 「名前・記法が読めない」の**3 原因目**
+
+`𝟙_ (PresheafModulesOn X (U i))` が **`unexpected token '_'`** で落ちた
+——`𝟙` と `_` に分かれて読まれていた。★`open MonoidalCategory` が要る。
+
+★★本セッションで「読めない」原因は **3 種類**出た:
+
+| 原因 | 症状 | 対処 |
+|---|---|---|
+| import 非推移 | `unknownIdentifier` | ★直接 import |
+| 名前空間 | `unknownIdentifier`(import しても) | ★★`open` する |
+| ★記法 | ★★★**パースエラー**(`unexpected token`) | ★`open`(記法を持つ名前空間) |
+
+★★★**症状で切り分けられる**——`unknownIdentifier` なら前 2 つ、
+パースエラーなら記法である。
+
+### 残り(C3)
+
+| 段 | 内容 |
+|---|---|
+| 第 270 と `hg` を繋ぐ(`arcEval` の整合) | ★1–3 |
+| `Interface` の他の欄 | ★★`logMetric` / `IsConjCompatible` / `tensorMetric` |
+| witness | ★★★最後 |
+
+### この区間の集計
+
+★**116 ブロック**(Arakelov 101 + Galois 15)。
