@@ -14,6 +14,7 @@ import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
 import ABC3.Skeleton.FrdI.Def28ProL
 import ABC3.Skeleton.FrdI.Lemma65SixExp
+import ABC3.Skeleton.GaloisRep.TateUniformization
 /-!
 # Skeleton — 論文の主張(証明しない)
 
