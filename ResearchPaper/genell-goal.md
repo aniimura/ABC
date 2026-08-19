@@ -12710,3 +12710,43 @@ mathlib の
 ### この区間の集計
 
 ★**116 ブロック**(Arakelov 101 + Galois 15)。
+
+## §9-320 C3 の連続性の組み上げ —— 残る 2 つを特定した(測定)
+
+`normSection_continuous`(`Interface` の欄)に相当する
+
+    Continuous (fun p => gluedNormX F U e ρ p (arcEval p F s))
+
+を、第 273(貼り合わせの連続性)+ 第 274(開性)+ 第 276(移送)+ 第 270(局所連続性)で
+組み上げた。★**組み上げ自体は通った**が、最後の 2 点が残った。
+
+### ★★残り(1)—— `arcEval` の整合性
+
+    (arcFiberFactor j L p).hom (arcEval (p ≫ j) L s)
+      = arcEval p (restrict L j) (restrictSection j L s)
+
+★`rfl` では出ない。★★両辺は `p` と `p ≫ j` の**随伴の単位**であり、
+`pullbackComp` と `restrictFunctorIsoPullback` を経由する。
+
+★★★mathlib に **`conjugateEquiv_pullbackComp_inv`**(`pullbackComp` と随伴の両立)が在る
+——これを元素レベルに落とせば出る見込み。見積もり **3–6 ブロック**。
+
+### ★★残り(2)—— `lift (q ≫ ι) = q` が**依存書き換え**になる
+
+`localNorm V F e (lift (q ≫ ι)) w` の `w` の型が
+`arcFiber (lift (q ≫ ι)) (restrict F ι)` で**点に依存する**ので、
+`rw [liftToOpenOfTop_comp]` が **motive is not type correct** で落ちる。
+
+★逃げ道の候補: `generalize` してから `subst`、または
+`xNorm` を `lift` を使わない形(`q` を直接受ける)で定義し直す。
+★★見積もり **1–2 ブロック**。
+
+### ★★★★教訓 —— 「点で添字づけたファイバー」は依存書き換えを呼ぶ
+
+`arcFiber p F` は `p` に依存する型なので、**`p` を書き換える操作はすべて依存書き換え**になる。
+★★第 271 では `eqToIso` で吸収したが、等式の**両側**に現れると motive が壊れる。
+★★★**点を書き換えるのではなく、点を固定して同型を合成する**のが定石である。
+
+### この区間の集計
+
+★**116 ブロック**(Arakelov 101 + Galois 15)。測定のみの節。
