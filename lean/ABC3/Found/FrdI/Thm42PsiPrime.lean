@@ -396,7 +396,7 @@ theorem psiPrime_naturality_frobType (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : Frob
     rw [P.degFr_comp, P.degFr_comp, show P.degFr (((w : End B) : B ⟶ B)) = 1 from hwm.2,
       mul_one] at hdd
     show P.degFr u₀ = 1
-    exact (mul_left_cancel (a := P.degFr v) (by rw [mul_one]; exact hdd)).symm
+    exact (mul_right_cancel (b := P.degFr v) (by rw [one_mul]; exact hdd)).symm
   have hu₀m : u₀ ∈ OTri P A := ⟨hu₀b, hu₀l⟩
   have hsu₀ : IsPreStep P u₀ := isPreStep_of_otri _ hu₀m
   -- ★`Div u₀ = Div u`
@@ -405,7 +405,10 @@ theorem psiPrime_naturality_frobType (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : Frob
     div_square_frob P v hwm hu₀m hsq
   have hdivu : P.Div u₀ = P.Div (((realizeIn ctx A p) : A ⟶ A)) := by
     refine (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base v) hvi)).1 ?_
-    rw [hdiv0, hwd, hd]
+    show Φ.map (P.Base v) (P.Div u₀)
+      = Φ.map (P.Base v) (P.Div (((realizeIn ctx A p) : A ⟶ A)))
+    rw [hdiv0, hwd]
+    exact hd
   -- ★単元でずれるだけ
   obtain ⟨ε, hεm, hεeq⟩ := F.faithfulUpToUnits (((realizeIn ctx A p) : A ⟶ A)) u₀
     (show P.Base (((realizeIn ctx A p) : A ⟶ A)) = P.Base u₀ by
