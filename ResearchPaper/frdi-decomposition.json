@@ -2476,11 +2476,11 @@
      "id": "p56-primes",
      "title": "素数上で一致する 2 つの単系準同型 `ℕ≥1 →* M` は一致する",
      "deps": [],
-     "status": "todo",
+     "status": "done",
      "size": "小",
-     "note": "`ℕ≥1` は素数で生成される。`Nat.recOnPrimeFactors` 系の帰納で出る。★これで claim の `φ` 側が全次数に広がる。",
-     "lean": "",
-     "decl": ""
+     "note": "`ℕ≥1` は素数で生成される。`Nat.recOnPrimeFactors` 系の帰納で出る。★これで claim の `φ` 側が全次数に広がる。\n★閉じた(2026-08-20): `PNat.strongInductionOn` と `Nat.exists_prime_and_dvd` で素因子を 1 つ剥がす帰納。★あわせて `prop_5_6_claim`(σ と φ の両方)を束ねた。",
+     "lean": "ABC3/Found/FrdI/Prop56Sec.lean",
+     "decl": "eq_on_pnat_of_primes / prop_5_6_phi_conj / prop_5_6_claim"
     },
     {
      "id": "p56-unitprofinite",
