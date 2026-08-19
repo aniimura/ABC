@@ -207,35 +207,111 @@ def psiBiratNf.src : ABC3.Meta.Source :=
     sectionId := "frdi-prop-4-8" }
 
 
-/-! ## ★★★★★段 4 の `map_comp` —— 証明は全部書けたが calc の型合わせで止まっている
+/-! ## ★★★★★段 4 の `map_comp`
 
 原文 (FrdI p.88):
 > (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
 
 ★★★**梃子は `Definition 1.3, (v), (a)`(`preStepMono`)—— pre-step は mono**。
+共通の上界へ送ったあと **2 回 mono を消す**だけで等式が出る。
+★`calc` は型合わせで詰まるので、**各段を独立の `have` にして `.trans` で繋ぐ**。 -/
 
-## ★筋(全部立っている)
+/-- ★添字圏の射が満たす三角形(`Over.w` を `𝒞` の射の等式に落としたもの)。 -/
+theorem idxBirat_w {A : C} {Z V : IdxBirat P G A} (u : Z ⟶ V) :
+    u.unop.left.hom ≫ Z.unop.hom.hom = V.unop.hom.hom :=
+  congrArg (fun t : V.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w u.unop)
 
-`HomBirat.sound` に `IsFiltered.max` の共通上界 `V` と
-`u = leftToMax`, `v = rightToMax` を渡す。要求される等式は
-`u.left ≫ (nfMap α ≫ nfMap ψ) = v.left ≫ (α′ ≫ nfMap ψ)` で、2 段で出る:
+/-- ★★★★★**`Ψ^birat` は合成を保つ**。 -/
+theorem biratNfMap_compBirat {A B E : C} (f : HomBirat P G A B) (g : HomBirat P G B E) :
+    biratNfMap P d G A E (compBirat P G G.core f g)
+      = compBirat P G G.core (biratNfMap P d G A B f) (biratNfMap P d G B E g) := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratNfMap_mk, biratNfMap_mk, biratNfMap_mk, compBirat_mk, nfMap_comp]
+  refine HomBirat.sound
+    (IsFiltered.max ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+      (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)))
+    (IsFiltered.leftToMax _ _) (IsFiltered.rightToMax _ _) ?_
+  set u := IsFiltered.leftToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) with hu
+  set v := IsFiltered.rightToMax ((idxBiratNfMap P d G A).obj (biratPullIdx G.core Z φ W))
+    (biratPullIdx G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) with hv
+  haveI hmZ : Mono (nfMap P G.core d Z.unop.hom.hom) :=
+    G.core.preStepMono _ (nfMap_preStep P G.core d _ Z.unop.hom.property.2)
+  haveI hmW : Mono (nfMap P G.core d W.unop.hom.hom) :=
+    G.core.preStepMono _ (nfMap_preStep P G.core d _ W.unop.hom.property.2)
+  have hwu := idxBirat_w P G u
+  have hwv := idxBirat_w P G v
+  -- ★段 1: `γ` の側。
+  have hgamma : u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W) = v.unop.left.hom ≫ biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) := by
+    refine (cancel_mono (nfMap P G.core d Z.unop.hom.hom)).mp ?_
+    have e1 : (u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W)) ≫ nfMap P G.core d Z.unop.hom.hom
+        = u.unop.left.hom ≫ (nfMap P G.core d (biratPullGamma G.core Z φ W) ≫ nfMap P G.core d Z.unop.hom.hom) := Category.assoc _ _ _
+    have e2 : u.unop.left.hom ≫ (nfMap P G.core d (biratPullGamma G.core Z φ W) ≫ nfMap P G.core d Z.unop.hom.hom)
+        = u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W ≫ Z.unop.hom.hom) :=
+      congrArg (fun t => u.unop.left.hom ≫ t) (nfMap_comp P G.core d _ _).symm
+    have e3 : u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W ≫ Z.unop.hom.hom)
+        = v.unop.left.hom ≫ (biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d Z.unop.hom.hom) := hwu.trans hwv.symm
+    have e4 : v.unop.left.hom ≫ (biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d Z.unop.hom.hom)
+        = (v.unop.left.hom ≫ biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d Z.unop.hom.hom := (Category.assoc _ _ _).symm
+    exact e1.trans (e2.trans (e3.trans e4))
+  -- ★段 2: `α` の側。
+  have halpha : u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W) = v.unop.left.hom ≫ biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) := by
+    refine (cancel_mono (nfMap P G.core d W.unop.hom.hom)).mp ?_
+    have f1 : (u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W)) ≫ nfMap P G.core d W.unop.hom.hom
+        = u.unop.left.hom ≫ (nfMap P G.core d (biratPullAlpha G.core Z φ W) ≫ nfMap P G.core d W.unop.hom.hom) := Category.assoc _ _ _
+    have f2 : u.unop.left.hom ≫ (nfMap P G.core d (biratPullAlpha G.core Z φ W) ≫ nfMap P G.core d W.unop.hom.hom)
+        = u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W ≫ W.unop.hom.hom) :=
+      congrArg (fun t => u.unop.left.hom ≫ t) (nfMap_comp P G.core d _ _).symm
+    have f3 : u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W ≫ W.unop.hom.hom)
+        = u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W ≫ φ) :=
+      congrArg (fun t => u.unop.left.hom ≫ nfMap P G.core d t) (biratPull_sq G.core Z φ W).symm
+    have f4 : u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W ≫ φ)
+        = u.unop.left.hom ≫ (nfMap P G.core d (biratPullGamma G.core Z φ W) ≫ nfMap P G.core d φ) :=
+      congrArg (fun t => u.unop.left.hom ≫ t) (nfMap_comp P G.core d _ _)
+    have f5 : u.unop.left.hom ≫ (nfMap P G.core d (biratPullGamma G.core Z φ W) ≫ nfMap P G.core d φ)
+        = (u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W)) ≫ nfMap P G.core d φ := (Category.assoc _ _ _).symm
+    have f6 : (u.unop.left.hom ≫ nfMap P G.core d (biratPullGamma G.core Z φ W)) ≫ nfMap P G.core d φ = (v.unop.left.hom ≫ biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d φ :=
+      congrArg (fun t => t ≫ nfMap P G.core d φ) hgamma
+    have f7 : (v.unop.left.hom ≫ biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d φ = v.unop.left.hom ≫ (biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d φ) := Category.assoc _ _ _
+    have f8 : v.unop.left.hom ≫ (biratPullGamma G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d φ)
+        = v.unop.left.hom ≫ (biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d W.unop.hom.hom) :=
+      congrArg (fun t => v.unop.left.hom ≫ t)
+        (biratPull_sq G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W))
+    have f9 : v.unop.left.hom ≫ (biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d W.unop.hom.hom)
+        = (v.unop.left.hom ≫ biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d W.unop.hom.hom := (Category.assoc _ _ _).symm
+    exact f1.trans (f2.trans (f3.trans (f4.trans (f5.trans
+      (f6.trans (f7.trans (f8.trans f9)))))))
+  have g1 : u.unop.left.hom ≫ (nfMap P G.core d (biratPullAlpha G.core Z φ W) ≫ nfMap P G.core d ψ)
+      = (u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W)) ≫ nfMap P G.core d ψ := (Category.assoc _ _ _).symm
+  have g2 : (u.unop.left.hom ≫ nfMap P G.core d (biratPullAlpha G.core Z φ W)) ≫ nfMap P G.core d ψ = (v.unop.left.hom ≫ biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d ψ :=
+    congrArg (fun t => t ≫ nfMap P G.core d ψ) halpha
+  have g3 : (v.unop.left.hom ≫ biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W)) ≫ nfMap P G.core d ψ = v.unop.left.hom ≫ (biratPullAlpha G.core ((idxBiratNfMap P d G A).obj Z) (nfMap P G.core d φ) ((idxBiratNfMap P d G B).obj W) ≫ nfMap P G.core d ψ) := Category.assoc _ _ _
+  exact g1.trans (g2.trans g3)
 
-1. **`γ` の側**: 構造射の三角形(`idxBirat_w`)を両側に取り、
-   `nfMap (Z.hom)` が mono なので `u.left ≫ nfMap γ = v.left ≫ γ′`
-2. **`α` の側**: 引き戻しの四角形(`biratPull_sq`)を両側に取り、
-   `nfMap (W.hom)` が mono なので `α` の側も一致
+def biratNfMap_compBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat は合成を保つ",
+    sectionId := "frdi-prop-4-8" }
 
-★どちらの mono も `nfMap_preStep`(在庫)＋ `preStepMono` から出る。
+/-! ## ★★★★★`naive-frob-birat` 完了 —— 仮定なしの `Ψ^birat` -/
 
-## ★★止まっている点
+/-- ★★★★★**[FrdI] Proposition 4.8, (ii)** の `Ψ^birat : 𝒞^birat ⥤ 𝒞^birat`(**仮定なし**)。
 
-`calc` の最後の 2 段で `Trans Eq Eq ?m` の合成に失敗する ——
-`((idxBiratNfMap P d G B).obj W).unop.hom.hom` と `nfMap (W.unop.hom.hom)` は
-**defeq だが calc は型で合わせる**ため、途中の項の型が決まらない。
-★次の手: `show` で両端の型を**素の形に言い直してから** calc に入る
-(本セッションで 5 回効いた「型を言い直す」手)。
+★`map_comp` が `biratNfMap_compBirat` で証明できたので、仮定を外した版。 -/
+noncomputable def psiBirat : BiratCat P G ⥤ BiratCat P G :=
+  psiBiratNf P d G (fun f g => biratNfMap_compBirat P d G f g)
 
-★★本ファイルは**緑のまま**にしておく(並行セッションの `git add -A` 対策)。 -/
+/-- ★★★★**1-可換図式**(仮定なし版)。 -/
+noncomputable def psiBiratSquare :
+    toBiratCat P G ⋙ psiBirat P d G ≅ naiveFrob P G.core d ⋙ toBiratCat P G :=
+  psiBiratNfSquare P d G (fun f g => biratNfMap_compBirat P d G f g)
+
+def psiBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat(仮定なし)と 1-可換図式",
+    sectionId := "frdi-prop-4-8" }
+
 
 end Birat
 
