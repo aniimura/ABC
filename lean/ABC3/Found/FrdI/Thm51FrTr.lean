@@ -461,7 +461,6 @@ theorem frTr_frobenioidCore : FrobenioidCore (frTrPre G hiso) where
         simpa using hβ.symm⟩⟩
   isotropicClosed _ _ := frTr_isIsotropic _
 
-end ABC3.Found.FrdI
 
 /-! ## ★5. `Definition 1.3, (iii), (d)` の 2 つの圏同値 -/
 
@@ -494,9 +493,9 @@ theorem frTr_frobenioid : Frobenioid (frTrPre G hiso) where
            by
             show IsIso ((frTrPre G hiso).Base (inv Z.hom.hom ≫ W.hom.hom))
             rw [(frTrPre G hiso).Base_comp]
-            haveI := W.hom.property.2.2
+            haveI : IsIso ((frTrPre G hiso).Base W.hom.hom) := W.hom.property.2.2
             haveI : IsIso ((frTrPre G hiso).Base (inv Z.hom.hom)) := by
-              haveI := Z.hom.property.2.2
+              haveI : IsIso ((frTrPre G hiso).Base Z.hom.hom) := Z.hom.property.2.2
               have h : (frTrPre G hiso).Base (inv Z.hom.hom)
                   ≫ (frTrPre G hiso).Base Z.hom.hom = 𝟙 _ := by
                 rw [← (frTrPre G hiso).Base_comp, IsIso.inv_hom_id]
@@ -505,7 +504,7 @@ theorem frTr_frobenioid : Frobenioid (frTrPre G hiso) where
                   ≫ (frTrPre G hiso).Base (inv Z.hom.hom) = 𝟙 _ := by
                 rw [← (frTrPre G hiso).Base_comp, IsIso.hom_inv_id]
                 exact (frTrPre G hiso).Base_id _
-              exact ⟨_, h2, h⟩
+              exact ⟨_, h, h2⟩
             infer_instance⟩⟩)
         (WideSubcategory.hom_ext _ (by
           show Z.hom.hom ≫ inv Z.hom.hom ≫ W.hom.hom = W.hom.hom
@@ -536,9 +535,9 @@ theorem frTr_frobenioid : Frobenioid (frTrPre G hiso) where
            by
             show IsIso ((frTrPre G hiso).Base (Z.hom.hom ≫ inv W.hom.hom))
             rw [(frTrPre G hiso).Base_comp]
-            haveI := Z.hom.property.2.2
+            haveI : IsIso ((frTrPre G hiso).Base Z.hom.hom) := Z.hom.property.2.2
             haveI : IsIso ((frTrPre G hiso).Base (inv W.hom.hom)) := by
-              haveI := W.hom.property.2.2
+              haveI : IsIso ((frTrPre G hiso).Base W.hom.hom) := W.hom.property.2.2
               have h : (frTrPre G hiso).Base (inv W.hom.hom)
                   ≫ (frTrPre G hiso).Base W.hom.hom = 𝟙 _ := by
                 rw [← (frTrPre G hiso).Base_comp, IsIso.inv_hom_id]
@@ -547,13 +546,14 @@ theorem frTr_frobenioid : Frobenioid (frTrPre G hiso) where
                   ≫ (frTrPre G hiso).Base (inv W.hom.hom) = 𝟙 _ := by
                 rw [← (frTrPre G hiso).Base_comp, IsIso.hom_inv_id]
                 exact (frTrPre G hiso).Base_id _
-              exact ⟨_, h2, h⟩
+              exact ⟨_, h, h2⟩
             infer_instance⟩⟩)
         (WideSubcategory.hom_ext _ (by
           show (Z.hom.hom ≫ inv W.hom.hom) ≫ W.hom.hom = Z.hom.hom
           rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id])), Subsingleton.elim _ _⟩
     · exact ⟨Over.mk (𝟙 (⟨A⟩ : WideSubcategory (coaPreProp (frTrPre G hiso)))),
-        ⟨eqToIso (Subsingleton.elim (α := (OrderCat PUnit.{w + 1})ᵒᵖ) _ _)⟩⟩
+        ⟨eqToIso (Opposite.unop_injective
+          (Subsingleton.elim (α := PUnit.{w + 1}) _ _))⟩⟩
 
 /-! ## ★6. `Theorem 5.1, (iii)` の型 -/
 
@@ -573,3 +573,31 @@ theorem thm_5_1_iii :
 def thm_5_1_iii.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 97, item := "Theorem 5.1, (iii)",
     sectionId := "frdi-thm-5-1" }
+
+/-- ★★★★★**[FrdI] Theorem 5.1** が (i)〜(iv) すべて揃った。
+
+| 条 | 実装 |
+|---|---|
+| (i) | `picEquiv`(全単射)＋ `PicObj.hasCls_frobType`(Frobenius 次数倍) |
+| (ii) | `thm_5_1_ii` ＋ `thm_5_1_ii_uniq`(単元同値類の一意性) |
+| (iii) | `thm_5_1_iii`(`𝒞^Fr-tr` は 4 つの型を持つ Frobenioid) |
+| (iv) | `thm_5_1_iv`(base-section・Frobenius-section・model 型) |
+
+★逸脱の開示:
+
+1. **`Pic_𝒞(A)` の作り方** —— 原文は圏のファイバー積 `𝒞 ×_𝒟 𝒟^iso_{A_𝒟}` の
+   同型類として書くが、我々は対 `(C, ζ : C_𝒟 ≅ A_𝒟)` の型を
+   「`A_𝒟` の上の同型」で割った商として直接作った(`PicObj` / `PicC`)。
+   ★同型類の集合としては同じものである(圏の骨格を作らなくてよいぶん軽い)。
+2. **`Φ^birat` の由来** —— `Proposition 4.4, (iii)` の `phiBiratAt` を使う。
+   同命題は**クラス (B) の逸脱を 2 つ開示している**
+   (`𝒞^birat` の Frobenioid 構造に birat-Frobenius-normalized 型を仮定、
+   および `Div : 𝒪^▷ → Φ` の全射性を仮定)。本定理はそれを継承する。
+   ★ただし `(iv)` はその一方(birat-Frobenius-normalized 型)を
+   **unit-trivial 型から証明している**(`birat_frobNormalized_of_unitTrivial`)。 -/
+def thm_5_1.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 96, item := "Theorem 5.1",
+    sectionId := "frdi-thm-5-1" }
+
+
+end ABC3.Found.FrdI
