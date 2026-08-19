@@ -18,7 +18,7 @@
 //   * 「項目に属する」の判定は**直前の見出し**で行う近似である。
 //   * 原文 txt は gitignore 下にあるので、無ければ静かに終わる(CI で落とさない)。
 //
-// 使い方: node tools/hedge-index.mjs [--paper FrdI] [--json] [--item "Proposition 1.10"]
+// 使い方: node tools/hedge-index.mjs [--paper FrdI] [--json] [--cite] [--item "Proposition 1.10"]
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
@@ -166,6 +166,29 @@ const undone = rows.filter((r) => r.state === '未' || r.state.startsWith('条�
 const sum = undone.reduce((a, r) => a + r.total, 0);
 console.log(`\n-- 未実装(条つき含む)の項目に残る合図: ${sum} 件 / ${undone.length} 項目`);
 console.log('   ★これが「まだ開いていない省略」の下界である(合図の無い省略は写らない)。');
+
+// ★--cite: 合図の文が抱えている「[cf. …]」と番号つき参照を、候補の依存として出す。
+//   ★経験則: **合図の文に括弧の引用があれば、それが手順書である**。
+//   引用が無い合図は、公理の向きが合っていない可能性を先に疑うこと。
+if (args.includes('--cite')) {
+  const REF = /\b(Proposition|Theorem|Definition|Corollary|Lemma|Example|Remark)s?\s+([0-9]+\.[0-9]+(?:\.[0-9]+)?)/g;
+  console.log('\n-- 合図の文が抱えている引用(候補の依存)');
+  for (const r of rows) {
+    if (onlyItem === null && r.state === '済') continue;
+    const seen = new Set();
+    let noCite = 0;
+    for (const h of r.hits) {
+      const ctx = lines.slice(Math.max(0, h.line - 3), h.line + 2).join(' ');
+      const refs = [...ctx.matchAll(REF)].map((m) => `${m[1]} ${m[2]}`);
+      if (refs.length === 0) noCite += 1;
+      for (const x of refs) seen.add(x);
+    }
+    console.log(`   ${r.item}(合図 ${r.total}、うち引用なし ${noCite})`);
+    if (seen.size) console.log(`      → ${[...seen].join(' / ')}`);
+    if (noCite) console.log('      ★引用の無い合図がある —— 公理の向きを先に確かめること');
+  }
+}
+
 console.log('\n★使い方: 項目に着手する前に `--item "Proposition 1.10"` で内訳を見て、');
 console.log('  合図 1 つを分解(frdi-decomposition.json)の節点 1 つに対応させると、');
 console.log('  「畳まれた量」を最初に見積もれる。');
