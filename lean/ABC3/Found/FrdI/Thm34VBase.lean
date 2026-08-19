@@ -311,6 +311,69 @@ def overIsoMkId.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — Over X で構造射が同型 ⟺ 終対象と同型",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★8. `plBkPsi` と `basePsiSlice` は圏同値
+
+★★`Cor410Birat.lean` の `coaPrePsi_isEquivalence` と**同じ形**である ——
+`Ψ` の忠実・充満・本質的全射を `WideSubcategory` に包み直すだけ。 -/
+
+include hPB in
+/-- ★忠実。 -/
+theorem plBkPsi_faithful [Ψ.Faithful] : (plBkPsi P P₂ Ψ hPB).Faithful where
+  map_injective {_ _ f g} h :=
+    WideSubcategory.hom_ext _ (Ψ.map_injective
+      (congrArg (fun t : (plBkPsi P P₂ Ψ hPB).obj _ ⟶ _ => t.hom) h))
+
+include hPB in
+/-- ★★充満 —— `Ψ` の充満性 ＋ pull-back の**反射**。 -/
+theorem plBkPsi_full [Ψ.Full]
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
+    (plBkPsi P P₂ Ψ hPB).Full where
+  map_surjective {X Y} g := by
+    obtain ⟨f₀, hf₀⟩ := Ψ.map_surjective g.hom
+    refine ⟨⟨f₀, hPB' f₀ ?_⟩, WideSubcategory.hom_ext _ hf₀⟩
+    rw [hf₀]
+    exact g.property
+
+include hPB in
+/-- ★本質的全射。 -/
+theorem plBkPsi_essSurj [Ψ.EssSurj] : (plBkPsi P P₂ Ψ hPB).EssSurj where
+  mem_essImage Y := by
+    obtain ⟨A, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ) Y.obj
+    refine ⟨(⟨A⟩ : PlBk P), ⟨?_⟩⟩
+    exact { hom := ⟨ε.hom, isPullBack_of_isIso P₂ ε.hom⟩,
+            inv := ⟨ε.inv, isPullBack_of_isIso P₂ ε.inv⟩,
+            hom_inv_id := WideSubcategory.hom_ext _ ε.hom_inv_id,
+            inv_hom_id := WideSubcategory.hom_ext _ ε.inv_hom_id }
+
+include hPB in
+/-- ★★★★`plBkPsi` は圏同値。 -/
+theorem plBkPsi_isEquivalence [Ψ.IsEquivalence]
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
+    (plBkPsi P P₂ Ψ hPB).IsEquivalence where
+  faithful := plBkPsi_faithful P P₂ Ψ hPB
+  full := plBkPsi_full P P₂ Ψ hPB hPB'
+  essSurj := plBkPsi_essSurj P P₂ Ψ hPB
+
+include F hPB in
+/-- ★★★★★**共役関手は圏同値** —— 圏同値 3 つの合成。 -/
+theorem basePsiSlice_isEquivalence [Ψ.IsEquivalence] (F₂ : FrobenioidCore P₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) (A : C) :
+    (basePsiSlice P P₂ Ψ hPB F A).IsEquivalence := by
+  haveI := F.plBkEquiv A
+  haveI := F₂.plBkEquiv (Ψ.obj A)
+  haveI := plBkPsi_isEquivalence P P₂ Ψ hPB hPB'
+  haveI : (plBkSlicePsi P P₂ Ψ hPB A).IsEquivalence :=
+    inferInstanceAs (Functor.IsEquivalence (Over.post (X := (⟨A⟩ : PlBk P))
+      (plBkPsi P P₂ Ψ hPB)))
+  exact inferInstanceAs (Functor.IsEquivalence
+    ((plBkOverFunctor P A).inv ⋙ plBkSlicePsi P P₂ Ψ hPB A
+      ⋙ plBkOverFunctor P₂ (Ψ.obj A)))
+
+def basePsiSlice_isEquivalence.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — 共役関手は圏同値",
+    sectionId := "frdi-thm-3-4" }
+
 end PlBkPsi
 
 end ABC3.Found.FrdI

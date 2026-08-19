@@ -438,6 +438,7 @@ import ABC3.Found.Arakelov.ArcEvalGlobal
 import ABC3.Found.Arakelov.ArcTrivMetric
 import ABC3.Found.Arakelov.ArcRestrNorm
 import ABC3.Found.Arakelov.ArcOverBridge
+import ABC3.Found.Arakelov.ArcEvalOn
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
