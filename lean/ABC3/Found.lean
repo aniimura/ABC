@@ -432,6 +432,7 @@ import ABC3.Found.Arakelov.ArcPointScheme
 import ABC3.Found.Arakelov.ArcTrivNorm
 import ABC3.Found.Arakelov.ArcContCriterion
 import ABC3.Found.Arakelov.ArcEvalNat
+import ABC3.Found.Arakelov.ArcUnitEval
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre

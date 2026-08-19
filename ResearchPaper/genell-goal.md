@@ -11513,3 +11513,47 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**90 ブロック**(Arakelov 75 + Galois 15)。
+
+## §9-291 ★★★★★構造層のファイバー評価は関数の値だった(第 251 ブロック)
+
+自明化 `t : L|_V ≅ 𝒪_V` を使うとノルムは `‖s‖(p) = |(t s)(p)|` になる。
+★右辺が**正則関数の点での値**であることを言うのが本ブロックである:
+
+    (unitFiberIso p).hom (arcEval p 𝒪_X f) = p^♯(f)
+
+★★これで `continuous_evalAffine`(第 5 ブロック)に繋がる——**連続性の最後の橋**である。
+
+### ★★★機構は mathlib の随伴の特徴づけだけ
+
+| 段 | 在庫 |
+|---|---|
+| `pullbackObjUnitToUnit` の特徴づけ | ★`pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit` |
+| `homEquiv f = η ≫ G.map f` | ★`Adjunction.homEquiv_unit` |
+| `unitToPushforwardObjUnit` の切断レベル | ★`unitToPushforwardObjUnit_val_app_apply` |
+| 押し出しは `⊤` では何もしない | ★`rfl`(`p ⁻¹ᵁ ⊤ = ⊤`) |
+
+★★★**3 つとも mathlib の `Sheaf/PullbackFree.lean` に在った。**
+★在庫を測ってから書いたので証明は **4 行**である。
+★★「無いと決める前に測る」が **10 回目**の当たりになった。
+
+### ★摩擦 —— `rfl` な補題は `rw` してはいけない
+
+合成の分解(第 250 の `hsplit`)は `rfl` なので、`rw [hsplit]` は
+**「パターンが見つからない」で落ちる**。★消したら通った。
+
+★★第 250 の教訓(`Eq.trans` は reducible 透過性しか使わない)の**裏返し**である:
+- `trans` で繋ぐときは**綴りを揃える**(構文照合)
+- `exact` で閉じるときは**綴りを揃えなくてよい**(定義的等しさ)
+- ★★★**`rfl` な等式を `rw` するのは、この 2 つを取り違えた形**である
+
+### 残り(C3)
+
+| 段 | 状態 |
+|---|---|
+| 第 244–251 | ★取得済 |
+| 自明化開の上の連続なノルム | ★次(材料は揃った) |
+| 1 の分割で貼る | ★その次 |
+
+### この区間の集計
+
+★**91 ブロック**(Arakelov 76 + Galois 15)。
