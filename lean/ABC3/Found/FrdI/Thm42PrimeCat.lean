@@ -7,7 +7,7 @@ import ABC3.Found.FrdI.Prop41Cat
 /-!
 # [FrdI] Theorem 4.2, (ii) —— `Prime(Φ(A))` を **primary step の同値類**として復元する
 
-原文 (FrdI p.79):
+原文 (FrdI p.80):
 > class of primary steps to or from Ai [where the correspondence between elements of
 
 ★★`Thm42Prime.lean` の `suppElt_eq_iff_exists_common` は
