@@ -554,6 +554,97 @@ theorem homPf_zeta_eq (hiso : ∀ X : C, IsIsotropic P X) {A : C}
     exact e1.trans e2.symm
   · exact h1.symm.trans (hmid.trans h2)
 
+/-! ## ★9. `𝒪^▷` の層での全射性
+
+★★`Proposition 5.5, (i)` の同型の**全射性**を、`𝒪^▷` の元として述べる:
+`𝒪^▷(A^pf)` の元はすべて「`𝒪^▷` の元の `m` 乗根」である。 -/
+
+/-- ★`ζ` 添字での代表(型を `HomRoot` に固定したもの)。 -/
+noncomputable def zetaMk {A : C} {z : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz : IsFrobeniusType P z) (φ : rtObj P F A 1 ⟶ rtObj P F A 1) :
+    HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A, 1⟩ :=
+  HomPf.mk (idxZeta' (F := F) hz) φ
+
+theorem rootDeg_zetaMk {A : C} {z : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz : IsFrobeniusType P z) (φ : rtObj P F A 1 ⟶ rtObj P F A 1) :
+    rootDeg (zetaMk (F := F) hz φ) = P.degFr φ := by
+  show pfDeg (HomPf.mk (idxZeta' (F := F) hz) φ) = _
+  rw [pfDeg_mk]
+  rfl
+
+theorem baseIdentity_of_zetaMk {A : C} {z : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz : IsFrobeniusType P z) (hzb : IsBaseIdentity P z)
+    (φ : rtObj P F A 1 ⟶ rtObj P F A 1)
+    (h : rootBase (zetaMk (F := F) hz φ) = 𝟙 _) :
+    P.Base φ = 𝟙 _ := by
+  haveI := isIso_rtExt_one P F A
+  haveI hbr : IsIso (P.Base (rtExt P F A 1)) := isIso_Base_of_isIso (rtExt P F A 1)
+  haveI hbz : IsIso (P.Base z) := hz.2
+  have hzid : P.Base z = 𝟙 _ := by
+    rw [show P.Base z = P.Base (𝟙 (rtObj P F A 1)) from hzb, P.Base_id]
+  have hinv : inv (P.Base z) = 𝟙 _ :=
+    IsIso.inv_eq_of_hom_inv_id (by rw [hzid, Category.id_comp])
+  have hrep : pfBase (HomPf.mk (idxZeta' (F := F) hz) φ) = P.Base φ := by
+    rw [pfBase_mk]
+    show P.Base z ≫ P.Base φ ≫ inv (P.Base z) = P.Base φ
+    rw [hinv, Category.comp_id, hzid, Category.id_comp]
+  have h2 : P.Base (rtExt P F A 1) ≫ pfBase (HomPf.mk (idxZeta' (F := F) hz) φ)
+      ≫ inv (P.Base (rtExt P F A 1)) = 𝟙 _ := h
+  rw [hrep] at h2
+  have h3 := congrArg (fun t => t ≫ P.Base (rtExt P F A 1)) h2
+  simp only [Category.assoc, IsIso.inv_hom_id, Category.comp_id, Category.id_comp] at h3
+  have h4 : P.Base (rtExt P F A 1) ≫ P.Base φ
+      = P.Base (rtExt P F A 1) ≫ 𝟙 (P.toElem.obj (rtObj P F A 1)).base := by
+    rw [Category.comp_id]; exact h3
+  exact (cancel_epi (P.Base (rtExt P F A 1))).mp h4
+
+/-- ★添字の射が等しければ同じ元(束ね上げで使う)。 -/
+theorem otriPfMk_congr (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ ζ' : A ⟶ A} (hζ : IsFrobeniusType P ζ) (hζ' : IsFrobeniusType P ζ')
+    (h : ζ = ζ') {α α' : End A} (hα : α = α') :
+    otriPfMk (F := F) hiso hζ α = otriPfMk (F := F) hiso hζ' α' := by
+  subst h
+  subst hα
+  rfl
+
+/-- ★★★★★**`𝒪^▷(A^pf)` の元はすべて「`𝒪^▷` の元の `m` 乗根」** ——
+`Proposition 5.5, (i)` の同型の**全射性**(`𝒪^▷` の層で述べたもの)。
+
+★`HomPf.exists_rep` ＋ `idxPf_iso_zeta`(cofinality)で代表を `ζ` 添字に移し、
+`rootDeg` と `rootBase` の計算で代表が `𝒪^▷` に入ることを見る。 -/
+theorem otri_pfRoot_exists_rep (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A) {f : End (⟨A, 1⟩ : PfRootObj P F)}
+    (hf : f ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    ∃ (z : rtObj P F A 1 ⟶ rtObj P F A 1) (hz : IsFrobeniusType P z),
+      IsBaseIdentity P z ∧ ∃ φ : rtObj P F A 1 ⟶ rtObj P F A 1,
+        (φ : End (rtObj P F A 1)) ∈ OTri P (rtObj P F A 1) ∧ zetaMk (F := F) hz φ = f := by
+  obtain ⟨Z, φ₀, hZ⟩ := HomPf.exists_rep f
+  obtain ⟨e, e', he, he', z, hzb, hzf, hzdeg, hae, hbe⟩ :=
+    idxPf_iso_zeta F (frobTrivial_rtObj hiso hA) Z.hom.hom.1 Z.hom.property.1
+      Z.hom.hom.2 Z.hom.property.2.1 Z.hom.property.2.2
+  haveI := he
+  haveI := he'
+  have ww : Z ⟶ idxZeta' (F := F) hzf :=
+    Under.homMk (⟨(e, e'), frobType_of_isIso hiso e, frobType_of_isIso hiso e',
+        (degFr_of_isIso P e).trans (degFr_of_isIso P e').symm⟩ :
+        Z.right ⟶ (⟨(rtObj P F A 1, rtObj P F A 1)⟩ : BiFr P F))
+      (by
+        refine WideSubcategory.hom_ext _ ?_
+        exact Prod.ext hae hbe)
+  have hmk : zetaMk (F := F) hzf (idxTransport P F ww φ₀) = f := by
+    show HomPf.mk (idxZeta' (F := F) hzf) (idxTransport P F ww φ₀) = f
+    rw [HomPf.mk_map ww φ₀]
+    exact hZ
+  refine ⟨z, hzf, hzb, idxTransport P F ww φ₀, ⟨?_, ?_⟩, hmk⟩
+  · have hb : rootBase (zetaMk (F := F) hzf (idxTransport P F ww φ₀)) = 𝟙 _ := by
+      rw [hmk]
+      have : rootBase f = rootBase (idRoot P F (⟨A, 1⟩ : PfRootObj P F)) := hf.1
+      rw [this, rootBase_id]
+    exact (baseIdentity_of_zetaMk hzf hzb _ hb).trans (P.Base_id _).symm
+  · have hd : rootDeg (zetaMk (F := F) hzf (idxTransport P F ww φ₀)) = 1 := by
+      rw [hmk]; exact hf.2
+    exact (rootDeg_zetaMk hzf _).symm.trans hd
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -601,6 +692,12 @@ def homPf_exists_zeta_rep.src : ABC3.Meta.Source :=
 def homPf_zeta_eq.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — ζ 添字の 2 代表が等しければ Pf の関係が成り立つ",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の全射性(`𝒪^▷` の層)。 -/
+def otri_pfRoot_exists_rep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒪^▷(A^pf) の元はすべて 𝒪^▷ の元の m 乗根",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
