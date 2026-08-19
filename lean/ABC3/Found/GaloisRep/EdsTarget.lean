@@ -63,21 +63,21 @@ variable (hd : d = b ^ 4 + A * c * b)
 private theorem two_eq_zero : (2 : R) = 0 := CharP.cast_eq_zero R 2
 
 theorem edsTarget_zero : EdsTarget b c d A 0 := by
-  have h2 := two_eq_zero (R := R)
   show _ = edsEps b 0 * _ + _
   rw [edsEps, if_pos (by decide : Even (0 : ℤ))]
   norm_num [edsP, show (0 : ℤ) - 1 = -1 by norm_num, show (0 : ℤ) - 2 = -2 by norm_num,
     show (0 : ℤ) + 2 = 2 by norm_num, show (0 : ℤ) + 1 = 1 by norm_num,
     show (-1 : ℤ) = -(1 : ℤ) by norm_num, show (-2 : ℤ) = -(2 : ℤ) by norm_num,
     preNormEDS_neg]
-  linear_combination (-1 : R) * h2
 
 theorem edsTarget_one : EdsTarget b c d A 1 := by
+  have h2 := two_eq_zero (R := R)
   show _ = edsEps b 1 * _ + _
   rw [edsEps, if_neg (by decide : ¬ Even (1 : ℤ))]
   norm_num [edsP, show (1 : ℤ) - 1 = 0 by norm_num, show (1 : ℤ) - 2 = -1 by norm_num,
     show (1 : ℤ) + 2 = 3 by norm_num, show (1 : ℤ) + 1 = 2 by norm_num,
     show (-1 : ℤ) = -(1 : ℤ) by norm_num, preNormEDS_neg]
+  linear_combination -h2
 
 end Base
 
