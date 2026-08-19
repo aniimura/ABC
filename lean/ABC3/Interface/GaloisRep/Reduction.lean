@@ -52,6 +52,7 @@ structure TateCurveData where
   `WeierstrassCurve.HasSplitMultiplicativeReduction` に接地する。
   ★これで「`HasSplitMultRed := False`」という**空虚 witness も不可能**になる。 -/
   tateParam : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R] →
     {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
     (W : WeierstrassCurve K) → [W.IsMinimal R] →
     W.HasSplitMultiplicativeReduction R → Kˣ
@@ -59,6 +60,7 @@ structure TateCurveData where
 
   ★★★**これが内容の本体である。**`q` が実際に一意化していることを要求する。 -/
   uniformization : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [DecidableEq K] [Algebra R K] [IsFractionRing R K]
     (W : WeierstrassCurve K) [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R),
@@ -68,6 +70,7 @@ structure TateCurveData where
 
   ★付値は `Kˣ →* Multiplicative ℤ`(正規化離散付値)として受ける。 -/
   localHeight : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R] →
     {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
     (v : Kˣ →* Multiplicative ℤ) → (W : WeierstrassCurve K) → [W.IsMinimal R] →
     W.HasSplitMultiplicativeReduction R → ℕ
@@ -75,12 +78,14 @@ structure TateCurveData where
 
   ★これがあるので `localHeight := 1` のような定数 witness は通らない。 -/
   localHeight_eq : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
     (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R),
     (localHeight v W h : ℤ) = Multiplicative.toAdd (v (tateParam W h))
   /-- ★局所高さは正(原文が `∈ Z_{>0}` と書いている)。 -/
   localHeight_pos : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
     (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R), 0 < localHeight v W h
@@ -178,33 +183,28 @@ structure FaltingsHeightData where
   toSemistableModelData : SemistableModelData
   /-- ★★**Faltings 高さ** `ht^Falt(E) = deg(ω_E)`。 -/
   htFalt : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
-  /-- ★★★★★**`ht^Falt` は `ω_E` の同型類だけで決まる**。
+  /-- ★★★★★**`ht^Falt` は変数変換で変わらない**。
 
-  ★★★**2026-08-18 に見つかった穴を塞ぐ 1 本である。**
-  docstring は「`ht^Falt(E) = deg(ω_E)`」と書いていたが、
-  **`htFalt` と `omega` を結ぶ条件が 1 つも無かった**。
-  ★同時に `omega` 側も `omega_rank_one`(階数 1)しか縛られておらず、
-  `omega L W := 𝓞 L`(曲線を無視する定数)が通っていた
-  (`Check/GaloisRep/OmegaNondegenerate.lean` で機械的に確認)。
+  ## ★★★★2026-08-20 の訂正(§9-404)
 
-  ★★★**この 1 本が両方を塞ぐ**:
+  以前は `htFalt_congr`——「omega_E と omega_E' が加群として同型なら
+  `ht^Falt(E) = ht^Falt(E')`」——を課していたが、
+  ★**これは本物の Neron 微分を排除していた**。
 
-  - `htFalt` は `ω_E` を経由する(`deg` は同型類の関数だから)
-  - したがって `omega` が定数なら `htFalt` も定数になり、
-    `prop_3_4` が `degInf` の**一様な上界**を要求することになる。
-    ★`degInf_ge_localHeight` は `degInf` を局所高さ `v(q_E)` に縛っており、
-    それは曲線を変えれば**いくらでも大きくなる**——ゆえに定数 witness は落ちる。
+  ★★`L = Q` では整数環が `Z` なので omega_E は**常に階数 1 の自由加群**であり、
+  どの 2 つの曲線でも同型になる。★★★したがって旧条件は
+  「`Q` 上の Faltings 高さは定数」を強制するが、
+  `degInf_ge_localHeight`(局所高さは非有界)と `prop_3_4` に**矛盾**する。
 
-  ★★★★これは `→ Type` の posit に対する一般規則
-  「**その欄と入力データの両方を言及する条件を 1 本以上持て**」の適用である
-  (C1 `evalAffine`、B1 `sheafOf`、B1 `pullback` に続く 4・5 例目)。 -/
-  htFalt_congr : ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L),
-    Nonempty (@LinearEquiv (𝓞 L) (𝓞 L) _ _ (RingHom.id _) (RingHom.id _) _ _
-      (toSemistableModelData.omega L E) (toSemistableModelData.omega L E')
-      (toSemistableModelData.omegaAddCommGroup L E).toAddCommMonoid
-      (toSemistableModelData.omegaAddCommGroup L E').toAddCommMonoid
-      (toSemistableModelData.omegaModule L E) (toSemistableModelData.omegaModule L E')) →
-    htFalt L E = htFalt L E'
+  ★★★★真の原因:**`deg` は計量込みの算術直線束の次数**であり、
+  加群としての同型だけでは `ht^Falt` は決まらない。
+  ★`ht^Falt = deg(omega_E)` を正しく固めるには **(D3) の計量**が要る
+  ——未塗りの穴として §9-404 に記録する。
+
+  ★★代わりに課すのは**真であり、かつ効く**条件である。
+  ★★★例えば `htFalt := log|Delta|`(変数変換で `u^12` 倍される)を落とす。 -/
+  htFalt_variableChange : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
+    (C : WeierstrassCurve.VariableChange L), htFalt L (C • E) = htFalt L E
   /-- 無限遠因子の次数 `deg∞`。 -/
   degInf : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → ℝ
   /-- ★`deg∞` は非負(局所高さの和だから)。 -/
@@ -218,11 +218,15 @@ structure FaltingsHeightData where
   ★★★**これが「全部 0」の退化を殺す。**乗法還元をもつ素点が 1 つでもあれば
   `deg∞ > 0` が強制される。★`d = [L:ℚ]` の正規化は原文どおり。 -/
   degInf_ge_localHeight : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
+    (Lv : Type) [Field Lv] [Algebra L Lv]
     (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
-    [Algebra R L] [IsFractionRing R L] [E.IsMinimal R]
-    (v : Lˣ →* Multiplicative ℤ) (h : E.HasSplitMultiplicativeReduction R),
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    [Algebra R Lv] [IsFractionRing R Lv] [(E.baseChange Lv).IsMinimal R]
+    (v : Lvˣ →* Multiplicative ℤ)
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R),
     (Module.finrank ℚ L : ℝ) * degInf L E
-      ≥ (toSemistableModelData.toTateCurveData.localHeight v E h : ℝ) * Real.log 2
+      ≥ (toSemistableModelData.toTateCurveData.localHeight v (E.baseChange Lv) h : ℝ)
+        * Real.log 2
   /-- ★★★**`Proposition 3.4`** —— `deg∞` は `ht^Falt` で上から抑えられる。
 
 原文 (GenEll p.17):

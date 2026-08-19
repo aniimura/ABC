@@ -330,9 +330,36 @@ co-angular pre-step 自己射の底)と置くと、上の道具から
 ★したがって反例があるとすれば ★★**`Aut_𝒞(A)` の底が `Φ(A)` に非自明に作用する**
 ところにしかない。★**探索範囲がさらに狭まった。**(★未決着)
 
+## ★★★2026-08-20 —— 穴が **`metrically trivial` の枝だけ**に縮んだ
+
+★★`Theorem 5.1, (iii)` を取得したことで、
+
+  **isotropic 型 ＋ base-trivial ⟹ Aut-ample**
+
+が出た(`Found/FrdI/Prop16AutAmple.lean` の `isAutAmple_of_baseTrivial`)。
+道筋は 2 段:
+1. `isFrobeniusTrivial_of_baseTrivial` —— base-trivial なら Frobenius-trivial
+2. `isAutAmple_of_frobTrivial`(`Theorem 5.1, (iii)`)—— isotropic 型なら
+   Frobenius-trivial は Aut-ample
+
+★したがって `cfp_baseTrivial_mpr` の `Aut-ample` 仮定は **isotropic 型の下で消える**
+(`cfp_baseTrivial_mpr_of_isotropic`)。
+
+★★**残るのは `cfp_metricallyTrivial_mpr` の枝だけ**である。
+metrically trivial から Frobenius-trivial を出そうとすると、
+「`Div = y` の pre-step 自己射を base-identity に直す」ところで
+★**`htwist` に戻ってしまう**(`Φ(Base s)` が `Div s` を固定するか)。
+★これは上の解析で特定した障害そのものである。
+
+★また `Theorem 5.1, (iii)` の道筋は **isotropic 型**を使うので、
+`Proposition 1.6` が isotropic 型を仮定しない以上、
+★**一般の Frobenioid については穴は開いたまま**である。
+
 ## ★分類
 
 ★**`missingMath`(②)のままとする。** ③ を名乗るには反例が要る。
+★ただし穴の範囲は「isotropic 型でない Frobenioid」ないし
+「metrically trivial の枝」に縮んだ。
 -/
 
 /-- ★**`Proposition 1.6, (v)` の 2 件の `⟸` に不足しているもの**。
@@ -361,6 +388,9 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
       "★`htwist` が `Definition 1.3` から導かれれば ① に落ち、`Proposition 1.6, (v)` は" ++
       "完全に実装できる。逆に `Γ/H` に捻れを持つ反例を構成できれば ③ に上がる" ++
       "(解析により、反例があるなら `Φ(β_d)` の作用の位数と同じ捻れが `Γ/H` に要る)。" ++
-      "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" }
+      "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" ++
+      "★2026-08-20: `Theorem 5.1, (iii)` により **isotropic 型 ＋ base-trivial ⟹ Aut-ample**" ++
+      "が出たので、`base-trivial` の枝は埋まった(`cfp_baseTrivial_mpr_of_isotropic`)。" ++
+      "残るのは `metrically trivial` の枝と、isotropic 型を仮定しない一般の場合である。" }
 
 end ABC3.Gap.FrdI
