@@ -326,6 +326,100 @@ def psiPrime_naturality_preStep.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (ii) — Ψ_Prime の関手性（pre-step）",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★関手性 —— Frobenius 型の場合 -/
+
+/-- ★★★**Frobenius 型の四角形の `Div`** —— `n = degFr v` として
+`Φ.map (Base v) (Div u) = n • Div w`。 -/
+theorem div_square_frob (Q : PreFrobenioid C Φ) {A B : C} (v : B ⟶ A)
+    {w : End B} (hw : w ∈ OTri Q B) {u : End A} (hu : u ∈ OTri Q A)
+    (hsq : (((w : End B)) : B ⟶ B) ≫ v = v ≫ (((u : End A)) : A ⟶ A)) :
+    Φ.map (Q.Base v) (Q.Div (((u : End A)) : A ⟶ A))
+      = ((Q.degFr v : ℕ+) : ℕ) • Q.Div (((w : End B)) : B ⟶ B) := by
+  haveI := isCancelAdd_of_isIntegralMonoid _ (Q.divisorial (Q.toElem.obj B).base).1.1
+  have h := congrArg Q.Div hsq
+  rw [Q.Div_comp, Q.Div_comp,
+    show Q.Base (((w : End B)) : B ⟶ B) = Q.Base (𝟙 B) from hw.1, Q.Base_id,
+    show Q.degFr (((u : End A)) : A ⟶ A) = 1 from hu.2] at h
+  have h3 : Φ.map (𝟙 ((Q.toElem.obj B).base)) (Q.Div v) = Q.Div v := Φ.map_id _ _
+  rw [h3, show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul] at h
+  exact (add_left_cancel (a := Q.Div v)
+    (by rw [h, add_comm (Φ.map (Q.Base v) (Q.Div (((u : End A)) : A ⟶ A)))])).symm
+
+def div_square_frob.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — Frobenius 型の四角形の Div",
+    sectionId := "frdi-thm-4-2" }
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`Ψ_Prime` の関手性(Frobenius 型の場合)**。
+
+★`Φ` が perfect なので `Φ.map (Base v) (Div u)` を `n = degFr v` で割れる。
+その商を `Div` に持つ `w ∈ 𝒪^▷(B)` を取り、
+`Proposition 1.10, (i)` で四角形 `w ≫ v = v ≫ u₀` を立てる。
+★★`Div u₀ = Div u` が出るので `faithfulUpToUnits` で `u = u₀ ≫ ε`(単元)。
+★★★`Prime` は `MPrec` の商なので `n •` は素点を変えない。 -/
+theorem psiPrime_naturality_frobType (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : FrobenioidCore P)
+    (hOTri : ∀ (X : C) (δ : End X), δ ∈ OTri P X →
+      ((Ψ.functor.map (((δ : End X)) : X ⟶ X)) : End (Ψ.functor.obj X))
+        ∈ OTri P₂ (Ψ.functor.obj X))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    (hFT : ∀ {X Y : C} (g : X ⟶ Y), IsFrobeniusType P g →
+      IsFrobeniusType P₂ (Ψ.functor.map g))
+    {A B : C} (v : B ⟶ A) (hv : IsFrobeniusType P v)
+    (p : Prime (Φ.val (P.toElem.obj A).base)) :
+    psiPrime ctx B (primeMap (baseEquivOf P v hv.2) p)
+      = primeMap (baseEquivOf P₂ (Ψ.functor.map v) (hFT v hv).2) (psiPrime ctx A p) := by
+  classical
+  have hu : realizeIn ctx A p ∈ OTri P A := realizeIn_mem ctx A p
+  have hsu : IsPreStep P (((realizeIn ctx A p) : A ⟶ A)) := realizeIn_preStep ctx A p
+  haveI hvi : IsIso (P.Base v) := hv.2
+  -- ★perfect 除法
+  obtain ⟨d, hd⟩ := (ctx.perfM B (P.degFr v)).2
+    (Φ.map (P.Base v) (P.Div (((realizeIn ctx A p) : A ⟶ A))))
+  obtain ⟨w, hwd⟩ := ctx.divS B d
+  have hwm : (w : End B) ∈ OTri P B := w.2
+  have hsw : IsPreStep P (((w : End B) : B ⟶ B)) := isPreStep_of_otri _ hwm
+  -- ★四角形
+  obtain ⟨u₀, hsq, -⟩ :=
+    prop_1_10_i_exists_given P F (((w : End B) : B ⟶ B)) v hv v hv rfl
+  -- ★`u₀ ∈ 𝒪^▷(A)`
+  have hb : P.Base (((w : End B) : B ⟶ B)) ≫ P.Base v = P.Base v ≫ P.Base u₀ := by
+    rw [← P.Base_comp, ← P.Base_comp, hsq]
+  have hu₀b : IsBaseIdentity P u₀ := by
+    show P.Base u₀ = P.Base (𝟙 A)
+    rw [P.Base_id]
+    rw [show P.Base (((w : End B) : B ⟶ B)) = P.Base (𝟙 B) from hwm.1, P.Base_id,
+      Category.id_comp] at hb
+    exact ((cancel_epi (P.Base v)).mp (by rw [Category.comp_id]; exact hb)).symm
+  have hu₀l : IsLinear P u₀ := by
+    have hdd : P.degFr (((w : End B) : B ⟶ B) ≫ v) = P.degFr (v ≫ u₀) := by rw [hsq]
+    rw [P.degFr_comp, P.degFr_comp, show P.degFr (((w : End B) : B ⟶ B)) = 1 from hwm.2,
+      mul_one] at hdd
+    show P.degFr u₀ = 1
+    exact (mul_left_cancel (a := P.degFr v) (by rw [mul_one]; exact hdd)).symm
+  have hu₀m : u₀ ∈ OTri P A := ⟨hu₀b, hu₀l⟩
+  have hsu₀ : IsPreStep P u₀ := isPreStep_of_otri _ hu₀m
+  -- ★`Div u₀ = Div u`
+  have hdiv0 : Φ.map (P.Base v) (P.Div u₀)
+      = ((P.degFr v : ℕ+) : ℕ) • P.Div (((w : End B) : B ⟶ B)) :=
+    div_square_frob P v hwm hu₀m hsq
+  have hdivu : P.Div u₀ = P.Div (((realizeIn ctx A p) : A ⟶ A)) := by
+    refine (Φ.map_bijective_of_iso (@asIso _ _ _ _ (P.Base v) hvi)).1 ?_
+    rw [hdiv0, hwd, hd]
+  -- ★単元でずれるだけ
+  obtain ⟨ε, hεm, hεeq⟩ := F.faithfulUpToUnits (((realizeIn ctx A p) : A ⟶ A)) u₀
+    (show P.Base (((realizeIn ctx A p) : A ⟶ A)) = P.Base u₀ by
+      rw [show P.Base (((realizeIn ctx A p) : A ⟶ A)) = P.Base (𝟙 A) from hu.1,
+        show P.Base u₀ = P.Base (𝟙 A) from hu₀b])
+    hdivu.symm (prop_1_4_i P _ (fun Y _ => ctx.iso Y)) hsu
+    (prop_1_4_i P _ (fun Y _ => ctx.iso Y)) hsu₀
+  sorry
+
+def psiPrime_naturality_frobType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 80,
+    item := "Theorem 4.2, (ii) — Ψ_Prime の関手性（Frobenius 型）",
+    sectionId := "frdi-thm-4-2" }
+
 end PsiPrime
 
 end ABC3.Found.FrdI
