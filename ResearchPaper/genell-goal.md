@@ -11331,3 +11331,47 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**85 ブロック**(Arakelov 70 + Galois 15)。
+
+## §9-287 C3 の実装に着手した(第 246–247 ブロック)
+
+### ★★★★第 246 —— 正直な `Metric` の型
+
+    ArcMetric X L := 各複素点 p でのファイバー `arcFiber p L` 上のノルムの族
+                     (非負・`0 ↔ v = 0`・`‖c·v‖ = |c|‖v‖`)
+
+★`normOf m s p := nrm p (arcEval p L s)` と置けば、`Interface` の
+`normSection_eq_zero_iff` は **`eq_zero_iff` そのもの**になる(`normOf_eq_zero_iff`)。
+★★`scale c` は全ノルムを `exp (-c)` 倍する——`normSection_scale` は `rfl`。
+
+### ★摩擦 —— `(e : Type)` の型上書きは `∀` 束縛の中で潰れる
+
+`arcEval` の署名では `(arcFiber p L : Type)` と書けたが、構造体フィールドの
+`∀` 束縛の中では **`nrm p : Type → ℝ`** と読まれて落ちた。
+★`↥(arcFiber p L)` と書けば通る。★★[[type-spelling-two-paths]]の新しい顔である。
+
+### ★★★第 247 —— 一点スキームでは局所自明 = 自明
+
+ファイバーにノルムを入れるには、それが **1 次元 `ℂ` 加群**であることが要る。
+★根拠は「`Spec ℂ` は**一点**である」ことだけである:
+
+    S が ⊤ の被覆篩  ⟹  S は 𝟙 を含む      (点が入る開集合は ⊤ しか無い)
+
+★★3 つの補題(`opens_eq_top` / `coverSieve_top` / `trivial_of_locallyTrivial`)は
+**すべて初回で通った**。mathlib の `instance {K} [Field K] : Unique (Spec (.of K))` を使う。
+
+★★★また `↥(arcFiber p L) = ((pullback p).obj L).val.obj (op ⊤)` が **`rfl`** であることも実測した。
+
+### ★残り(C3)
+
+| 段 | 状態 |
+|---|---|
+| 評価 `arcEval` | ★取得済(第 244) |
+| ノルムの型 `ArcMetric` | ★取得済(第 246) |
+| 一点での自明化 | ★取得済(第 247) |
+| ファイバーの `ℂ`-線形同型 | ★次(係数環の二重路が出る見込み) |
+| 連続性の欄を `Interface` に足す | ★原文は「continuous function `|s|_L`」と書いている |
+| 1 の分割で貼る | ★mathlib 在庫あり |
+
+### この区間の集計
+
+★**87 ブロック**(Arakelov 72 + Galois 15)。

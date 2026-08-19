@@ -644,4 +644,48 @@ def istr_rational_pullBack.src : ABC3.Meta.Source :=
     item := "Remark 4.5.1 — rational 型の引き戻しの側",
     sectionId := "frdi-remark-4-5-1" }
 
+/-! ## ★12. isotropic hull の一意性と同型による移送 —— 一般の pre-Frobenioid で
+
+★★`𝒞^birat` の hull(`birat_isotropicHullExists`)は **`G.core` が選んだ** hull の像であり、
+`F` が選んだ `hullMap P F B` とは選択が違いうる。
+★★★しかし **isotropic hull は同型を除いて一意**なので、その差は同型に吸収される。 -/
+
+section HullUniq
+
+universe v'' u'' w'' u2'' v2''
+
+variable {D'' : Type u''} [Category.{v''} D''] {C'' : Type u2''} [Category.{v2''} C'']
+  {Φ'' : MonoidOn.{v'', u'', w''} D''} (Q : PreFrobenioid C'' Φ'')
+
+/-! ### ★在庫にあった(見落とし 12 件目)
+
+`isIsotropicHull_comp_iso`(`Prop19.lean:238`)——
+**isotropic hull に同型を後置しても isotropic hull**。
+★`isotropification_*` の名前でしか検索しておらず見落とした。
+★★`Proposition 1.9` は等長化そのものなので、
+**hull まわりはまず `Prop19.lean` を通しで読むべき**である。 -/
+
+/-- ★★★**isotropic hull は同型を除いて一意** —— 2 つの hull の間に構造射を保つ同型がある。 -/
+theorem isIsotropicHull_unique {A B B' : C''} {φ : A ⟶ B} {φ' : A ⟶ B'}
+    (h : IsIsotropicHull Q φ) (h' : IsIsotropicHull Q φ') :
+    ∃ θ : B ≅ B', φ ≫ θ.hom = φ' := by
+  obtain ⟨-, -, hiso, hlift⟩ := h
+  obtain ⟨-, -, hiso', hlift'⟩ := h'
+  obtain ⟨u, hu, huq⟩ := hlift B' hiso' φ'
+  obtain ⟨v, hv, hvq⟩ := hlift' B hiso φ
+  have h1 : u ≫ v = 𝟙 B := by
+    refine (hlift B hiso φ).unique ?_ (Category.comp_id φ).symm
+    rw [← Category.assoc, ← hu]; exact hv
+  have h2 : v ≫ u = 𝟙 B' := by
+    refine (hlift' B' hiso' φ').unique ?_ (Category.comp_id φ').symm
+    rw [← Category.assoc, ← hv]; exact hu
+  exact ⟨⟨u, v, h1, h2⟩, hu.symm⟩
+
+end HullUniq
+
+def isIsotropicHull_unique.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22,
+    item := "Definition 1.2, (iv) — isotropic hull は同型を除いて一意",
+    sectionId := "frdi-def-1-2-iv" }
+
 end ABC3.Found.FrdI
