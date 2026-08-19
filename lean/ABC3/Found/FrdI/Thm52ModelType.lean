@@ -54,6 +54,47 @@ theorem unTr_isOfModelType (Fc : FrobenioidCore P) (G : Frobenioid P) :
   thm_5_1_iv (unTr_frobenioid P Fc G) (fun B => unTr_isotropic P Fc B)
     (fun A => unTr_unitTrivial P Fc A)
 
+/-! ## ★`𝒞^un-tr` の有理関数の単系は `Φ^birat`
+
+原文 (FrdI p.103):
+> monoid Φbirat (respectively, Q · Φbirat = Φbirat ⊗Z Q = (Φbirat)pf). In particular, if
+
+★★`Proposition 4.4, (iii)` は `𝒪^×(A^birat) ↠ Φ^birat(A)` を与え、その**核は
+`𝒪^×(A)_𝒞` の像**である。★unit-trivial 型ならその核は自明なので、**全単射**になる。 -/
+
+/-- ★`𝒪^×(A^birat) → Φ^birat(A)`(`Proposition 4.4, (iii)` の全射)。 -/
+noncomputable def otimesBiratToPhiBirat (G : Frobenioid P) (A : BiratCat P G) :
+    Additive ↥(OTimes (biratPre P G) A) →+ ↥(phiBiratAt P G A) where
+  toFun δ :=
+    ⟨biratDivGp (((Additive.toMul δ : OTimes (biratPre P G) A) : End A) : A ⟶ A),
+      ⟨(Additive.toMul δ : OTimes (biratPre P G) A),
+        (Additive.toMul δ : OTimes (biratPre P G) A).2, rfl⟩⟩
+  map_zero' := Subtype.ext (biratDivGp_id A)
+  map_add' x y := Subtype.ext
+    (biratDivGp_mul_otimes (Additive.toMul x : OTimes (biratPre P G) A).2
+      (Additive.toMul y : OTimes (biratPre P G) A).2)
+
+/-- ★★★★**unit-trivial 型では `𝒪^×(A^birat) ≅ Φ^birat(A)`**。
+
+★これが「`𝒞^un-tr` に伴う有理関数の単系は `Φ^birat` である」の中身である。
+★単射性は `Proposition 4.4, (iii)` の核が `𝒪^×(A)_𝒞` の像であること
+(unit-trivial 型なら自明)—— 実装では `birat_faithful_of_unitTrivial` を使う。
+★全射性は `phiBiratAt` の定義そのもの。 -/
+noncomputable def otimesBiratEquivPhiBirat (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hut : IsOfUnitTrivialType P)
+    (A : BiratCat P G) :
+    Additive ↥(OTimes (biratPre P G) A) ≃+ ↥(phiBiratAt P G A) :=
+  AddEquiv.ofBijective (otimesBiratToPhiBirat G A)
+    ⟨fun x y hxy => Additive.toMul.injective (Subtype.ext
+        (birat_faithful_of_unitTrivial G hiso hut _ _
+          ((Additive.toMul x : OTimes (biratPre P G) A).2.1.1.trans
+            (Additive.toMul y : OTimes (biratPre P G) A).2.1.1.symm)
+          ((Additive.toMul x : OTimes (biratPre P G) A).2.1.2.trans
+            (Additive.toMul y : OTimes (biratPre P G) A).2.1.2.symm)
+          (congrArg Subtype.val hxy))),
+     fun y => ⟨Additive.ofMul ⟨y.2.choose, y.2.choose_spec.1⟩,
+       Subtype.ext y.2.choose_spec.2⟩⟩
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 /-- ★locator —— `Proposition 5.5, (iii)` の「`𝒞^un-tr` はつねに model 型」の条。 -/
