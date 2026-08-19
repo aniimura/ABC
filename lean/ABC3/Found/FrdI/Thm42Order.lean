@@ -8,7 +8,7 @@ import ABC3.Found.FrdI.Thm42PsiPrime
 # [FrdI] Theorem 4.2, (ii) の `Order` と (iii) の単系同型
 
 原文 (FrdI p.77):
-> Order(Φ1(A1)p1 ) →∼ Order(Φ2(A2)p2 ); Order(Φ1(A1)p1 )opp →∼ Order(Φ2(A2)p2 )opp
+> for the respective full subcategories and restricted equivalences of categories
 
 原文 (FrdI p.78):
 > then the last two equivalences of categories of (ii) arise from isomorphisms of

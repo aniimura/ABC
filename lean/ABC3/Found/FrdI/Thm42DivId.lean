@@ -7,7 +7,7 @@ import ABC3.Found.FrdI.Thm42PsiPrime
 # [FrdI] Theorem 4.2, (i) —— `Div-identity` 自己射の一般形へ
 
 原文 (FrdI p.81):
-> is a Div-identity endomorphism if and only if it admits a factorization
+> is a Div-identity endomorphism if and only if
 
 ★★測って立てた**圏論的特徴づけ**(原文の 2 段可換図式の中身):
 
