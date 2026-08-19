@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop114
 import ABC3.Found.FrdI.Thm34Pre
+import Mathlib.Data.PNat.Factors
 
 /-!
 # [FrdI] Theorem 4.2, (i) —— `Div-identity` 自己射の保存
@@ -199,5 +200,33 @@ theorem isDivIdentity_comp {A : C₂} {φ ψ : A ⟶ A}
 
 /-- ★`𝟙` は `Div-identity`。 -/
 theorem isDivIdentity_id (A : C₂) : IsDivIdentity P₂ (𝟙 A) := rfl
+
+/-- ★★★★`Div-identity` な自己射のなす部分単系(`ℕ≥1` 側)。 -/
+def divIdSubmonoid {A : C₂} (ζ : ℕ+ →* End A) : Submonoid ℕ+ where
+  carrier := {n : ℕ+ | IsDivIdentity P₂ ((ζ n : End A) : A ⟶ A)}
+  one_mem' := by
+    show IsDivIdentity P₂ ((ζ 1 : End A) : A ⟶ A)
+    rw [map_one]
+    exact isDivIdentity_id A
+  mul_mem' {m n} hm hn := by
+    show IsDivIdentity P₂ ((ζ (m * n) : End A) : A ⟶ A)
+    rw [map_mul]
+    exact isDivIdentity_comp hn hm
+
+/-- ★★★★★**素数の所だけ言えば全体へ延びる** —— `ℕ≥1` は素数で生成される。 -/
+theorem isDivIdentity_of_primes {A : C₂} (ζ : ℕ+ →* End A)
+    (hp : ∀ q : ℕ+, (q : ℕ).Prime → IsDivIdentity P₂ ((ζ q : End A) : A ⟶ A))
+    (n : ℕ+) : IsDivIdentity P₂ ((ζ n : End A) : A ⟶ A) := by
+  have hn : n ∈ divIdSubmonoid ζ := by
+    rw [← PNat.prod_factorMultiset n]
+    show ((PNat.factorMultiset n : Multiset ℕ+).prod) ∈ divIdSubmonoid ζ
+    refine Submonoid.multiset_prod_mem _ _ (fun x hx => ?_)
+    exact hp x (PrimeMultiset.coePNat_prime _ x hx)
+  exact hn
+
+def isDivIdentity_of_primes.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77,
+    item := "Theorem 4.2, (i) — Div-identity は素数の所から全体へ延びる",
+    sectionId := "frdi-thm-4-2" }
 
 end ABC3.Found.FrdI

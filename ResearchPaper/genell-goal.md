@@ -12146,3 +12146,37 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**101 ブロック**(Arakelov 86 + Galois 15)。
+
+## §9-305 1 の分割で貼る —— 代数の段(第 262 ブロック)
+
+局所ノルムを **0 で延長**して足す:
+
+    extNorm i p w  := if p⁻¹(U i) = ⊤ then genNorm … else 0
+    gluedNorm p w  := ∑ᶠ i, ρ i p * extNorm i p w
+
+★代数的法則(非負・`‖c·v‖ = |c|‖v‖`)は**各項ごとに成り立つ**ので、
+`finsum` の線形性(mathlib `finsum_nonneg` / `mul_finsum`)でそのまま上がる。
+
+### ★摩擦 —— `dite` には `split` が効かない
+
+依存 `if`(`if h : … then … else …`)は `split` で場合分けできない。
+★`by_cases` + `simp only [dif_pos h]` / `[dif_neg h]` を使う。
+★★`Decidable` が要るので `open scoped Classical` を先に置く。
+
+### 残り(C3)
+
+| 段 | 内容 |
+|---|---|
+| `gluedNorm p w = 0 → w = 0` | ★どこかで `ρ i p > 0` かつ `p ∈ U i` |
+| 連続性 | ★★mathlib `PartitionOfUnity.IsSubordinate.continuous_finsum_smul` |
+| 生成切断の非消滅 | ★★★第 261 で仮定として受けたもの |
+
+★★在庫の確認: mathlib の `PartitionOfUnity` は
+`continuous_finsum_smul`(**貼り合わせの連続性**)と
+`exists_isSubordinate`(**存在**、`[NormalSpace] [ParacompactSpace]`)を持つ。
+★§9-285 で「コンパクト Hausdorff ⟹ 両方無料」を実測済みなので、
+仮定は `metric_nonempty` の欄(§9-286 で条件付きにしたもの)から来る。
+
+### この区間の集計
+
+★**102 ブロック**(Arakelov 87 + Galois 15)。
