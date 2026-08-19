@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1250 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1253 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5969</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1672</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5975</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1674</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>66a42a8</code></td><td>2026-08-19</td><td>C3 の実装に着手した記録(§9-287)</td></tr>
+<tr><td><code>82d67d2</code></td><td>2026-08-19</td><td>C3 の実装に着手——ファイバーのノルムと一点スキームの自明化(第 246–247 ブロック)</td></tr>
+<tr><td><code>309e12a</code></td><td>2026-08-19</td><td>★★引き戻しの側を取った——`B^istr` から `A` への pull-back</td></tr>
 <tr><td><code>d7a157a</code></td><td>2026-08-19</td><td>★★★★★`supp-intrinsic` を閉じた——`Supp` は単系同型で移る</td></tr>
 <tr><td><code>07bcce1</code></td><td>2026-08-19</td><td>C3 の Interface を直した——normSection で退化を殺し、存在を条件付きに(§9-286)</td></tr>
 <tr><td><code>9e12ae7</code></td><td>2026-08-19</td><td>★★★★★`Supp` は `ι` を含まない形に書けることを取った</td></tr>
@@ -290,16 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>92b2347</code></td><td>2026-08-19</td><td>★★★★isotropic hull に沿った移送を一般形で取った</td></tr>
 <tr><td><code>4388ca2</code></td><td>2026-08-19</td><td>★循環が外れた—— で hull を同定できる</td></tr>
 <tr><td><code>1fe6a51</code></td><td>2026-08-19</td><td>★残り 1 条（rational 型）の筋を測った——hull の ∃!-lift を 𝒞^birat で使う</td></tr>
-<tr><td><code>43ae4fd</code></td><td>2026-08-19</td><td>★★★★★比較関手が立ち、Remark 4.5.1 の (a) 第 1 条を取った</td></tr>
-<tr><td><code>961f996</code></td><td>2026-08-19</td><td>C2 の posit を mathlib の IsProper に接地した(§9-283)</td></tr>
-<tr><td><code>eee0f8a</code></td><td>2026-08-19</td><td>C3 を測った——9 欄では計量と直線束が結び付かない(§9-282)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1672 件)。</div>
+<b>すべて PDF と機械照合している</b>(1674 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
