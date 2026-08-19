@@ -1931,13 +1931,13 @@
      "id": "birat-section",
      "title": "★`𝒞^birat` の base-section(`𝒫` の像)と Frobenius-section",
      "size": "★中",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "skeleton"
      ],
-     "note": "`objP` は同じ、`homP` は `𝒫` の射の像。\nskeletal / faithfulP は `toBiratCat` の忠実性(`toBiratCat_faithful`)から、\nessSurjP / fullP / frobTrivial は `𝒞` 側から降りる。\n★**残る 1 点は `isPullBack`** —— 「`𝒞` の pull-back 射の像は `𝒞^birat` の pull-back 射」。\nこれは在庫に無く、`𝒞^birat` の射を代表元へ持ち上げて普遍性を確かめる必要がある。",
-     "lean": "",
-     "decl": ""
+     "note": "`objP` は同じ、`homP` は `𝒫` の射の像。\nskeletal / faithfulP は `toBiratCat` の忠実性(`toBiratCat_faithful`)から、\nessSurjP / fullP / frobTrivial は `𝒞` 側から降りる。\n★**残る 1 点は `isPullBack`** —— 「`𝒞` の pull-back 射の像は `𝒞^birat` の pull-back 射」。\nこれは在庫に無く、`𝒞^birat` の射を代表元へ持ち上げて普遍性を確かめる必要がある。\n\n## ★★閉じた(2026-08-20)\n`birat_isPullBack_of` —— 代表元 `(a, φ)` に落として `𝒞` の pull-back の普遍性を使う。\nそのために `compBirat_mk_toHomBirat`(`𝒞` の射との合成は代表元の合成)も取得。\n★これで `Remark 2.7.2`(等長版)を `𝒞^birat` に当てられる。",
+     "lean": "ABC3/Found/FrdI/Thm52Rem272.lean",
+     "decl": "biratBaseSection / birat_isPullBack_of / compBirat_mk_toHomBirat"
     },
     {
      "id": "hom-functor",
