@@ -32,12 +32,62 @@ open ABC3.Meta WeierstrassCurve NumberField
 
 /-! ## ★★G3 —— `l` 進表現 -/
 
+/-- ★**`σ ∈ Gal(L/K)` の `E(L)` への作用**——mathlib の `Point.map` そのもの。
+
+★★これは posit ではない(定義できる)。 -/
+noncomputable def galPoint {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
+    [Algebra K L] (W : WeierstrassCurve K) (σ : L ≃ₐ[K] L) :
+    (W.baseChange L).toAffine.Point →+ (W.baseChange L).toAffine.Point :=
+  WeierstrassCurve.Affine.Point.map (σ.toAlgHom)
+
+/-- ★★**`σ` の `T_l E` への作用**——捩れを保ち、塔と両立するので逆極限に降りる。
+
+★★★これも posit ではない。 -/
+noncomputable def galTate {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
+    [Algebra K L] (W : WeierstrassCurve K) (l : ℕ) (σ : L ≃ₐ[K] L) :
+    tateModule (W.baseChange L) l →+ tateModule (W.baseChange L) l where
+  toFun := fun f =>
+    ⟨fun n => ⟨galPoint W σ ((f : ∀ m : ℕ, torsionPoints (W.baseChange L) (l ^ m)) n), by
+      have h : (l ^ n) • (((f : ∀ m : ℕ, torsionPoints (W.baseChange L) (l ^ m)) n :
+          (W.baseChange L).toAffine.Point)) = 0 :=
+        ((f : ∀ m : ℕ, torsionPoints (W.baseChange L) (l ^ m)) n).2
+      show (l ^ n) • (galPoint W σ _) = 0
+      rw [← map_nsmul, h, map_zero]⟩, by
+    intro n
+    show l • (galPoint W σ _) = galPoint W σ _
+    rw [← map_nsmul]
+    exact congrArg (galPoint W σ) (f.2 n)⟩
+  map_zero' := by
+    refine Subtype.ext (funext fun n => Subtype.ext ?_)
+    exact map_zero _
+  map_add' := by
+    intro x y
+    refine Subtype.ext (funext fun n => Subtype.ext ?_)
+    exact map_add _ _ _
+
 /-- **(G3)** `l` 進 Galois 表現 `ρ_{E,l} : Gal(K̄/K) → GL₂(ℤ_l)`。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★★★**原文が名指ししているのはこれである。** -/
+★★★**原文が名指ししているのはこれである。**
+
+## ★★★★2026-08-20 の訂正(§9-403)
+
+それ以前の版は次の 2 つの欠陥を持っていた。
+
+1. **`rep` が本物の Galois 作用に縛られていなかった**——
+   `rep` は素の関数の posit で、条件は `rep_mul`(準同型)と
+   `det_rep`(`det_eq_cyclotomic` は同時に posit される)だけだった。
+   ★したがって**作用と無関係な準同型で埋まる**。
+2. **`det_surjective` は偽であった**——
+   `K = ℚ(ζ_l)` を取ると、`σ ∈ Gal(K̄/K)` は `ζ_l` を固定するので
+   円分指標の像は `1 + lℤ_l` に含まれ、`ℤ_l^×`(`l ≥ 3` で指数 `l−1`)を
+   覆わない。★★数体一般では円分指標は**有限指数の開部分群**にしか落ちない。
+
+★★★訂正:(1) `rep` が `T_l E` への**本物の作用**を表現していることを課し、
+(2) 偽の `det_surjective` を落として、代わりに
+**`det ρ` が 1 の `l` 冪根に円分指標として作用すること**を課す(= Weil 対の内容、真)。 -/
 structure GaloisRepData where
   /-- 台となる Tate 加群。 -/
   toTateModuleData : TateModuleData
@@ -49,28 +99,31 @@ structure GaloisRepData where
   rep_mul : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
     (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ τ : L ≃ₐ[K] L),
     rep W l (σ * τ) = rep W l σ * rep W l τ
-  /-- ★★**行列式は円分指標**(Weil 対から出る)。 -/
-  det_eq_cyclotomic : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [Algebra K L] →
-    (W : WeierstrassCurve K) → (l : ℕ) → [Fact l.Prime] → ((L ≃ₐ[K] L) → ℤ_[l]ˣ)
-  /-- ★★★**それが実際に `rep` の行列式であること**。 -/
-  det_rep : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
-    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ : L ≃ₐ[K] L),
-    (rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det = (det_eq_cyclotomic W l σ : ℤ_[l])
-  /-- ★★★**円分指標は全射である**(数体の絶対 Galois 群の上で)。
+  /-- ★★★★**`rep` は `T_l E` への本物の作用の行列表示である**。
 
-  ★★★**これが `rep := 1`(自明表現)の退化を殺す。**
-  自明表現だと行列式は恒等的に `1` になるが、`ℤ_[l]ˣ` は `l ≥ 3` で 1 元でない。
+  ★★これが無いと `rep` は作用と無関係でよい——空虚に埋まる。 -/
+  rep_action : ∀ (K L : Type) [Field K] [DecidableEq K] [CharZero K] [Field L] [DecidableEq L]
+    [Algebra K L] [IsAlgClosed L] (W : WeierstrassCurve K), W.IsElliptic →
+    ∀ (l : ℕ), ∀ _ : Fact l.Prime,
+    ∃ e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l]),
+      ∀ (σ : L ≃ₐ[K] L) (x : tateModule (W.baseChange L) l),
+        e (galTate W l σ x)
+          = Matrix.mulVec (rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]) (e x)
+  /-- ★★★★**行列式は円分指標である**(Weil 対の内容)。
 
-  ★これは原文が `Theorem 3.8` の前提として使う事実である
-  ——`SL₂` を像に含むと言うためには、まず `det` が全射でなければならない。 -/
-  det_surjective : ∀ {K L : Type} [Field K] [NumberField K] [DecidableEq K] [Field L]
-    [Algebra K L] (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime],
-    W.IsElliptic → IsAlgClosed L →
-    Function.Surjective (fun σ : L ≃ₐ[K] L => det_eq_cyclotomic W l σ)
+  `det ρ(σ)` は 1 の `l^n` 乗根への `σ` の作用の指数である。
+
+  ★★これは真であり、かつ **`rep := 1` を殺す**——
+  `K = ℚ`、`l ≥ 3` なら `ζ_l` を動かす `σ` があるので `det ρ(σ) ≠ 1`。 -/
+  det_cyclotomic : ∀ (K L : Type) [Field K] [DecidableEq K] [CharZero K] [Field L] [DecidableEq L]
+    [Algebra K L] [IsAlgClosed L] (W : WeierstrassCurve K), W.IsElliptic →
+    ∀ (l : ℕ), ∀ _ : Fact l.Prime, ∀ (σ : L ≃ₐ[K] L) (n : ℕ) (ζ : L), ζ ^ (l ^ n) = 1 →
+      σ ζ = ζ ^ ((PadicInt.toZModPow n
+        ((rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det)).val)
 
 def GaloisRepData.waiting : WaitingFor :=
-  { what := "(G3) l 進 Galois 表現 rho_{E,l} : Gal(K̄/K) → GL_2(Z_l) と、その行列式が円分指標であること"
-    trackB := "Found/GaloisRep — ★(G2) の Tate 加群に従属する。★★mathlib は `Matrix.GeneralLinearGroup` と `AlgEquiv`(Galois 群)を持つので、**行き先と定義域は書ける**——無いのは Tate 加群と、その上の Galois 作用である。★★★行列式が円分指標であることには **Weil 対**が要る(mathlib に 0 件、2026-08-17 実測)" }
+  { what := "(G3) l 進 Galois 表現 rho_{E,l} : Gal(K̄/K) → GL_2(Z_l) が T_l E への本物の作用の行列表示であることと、その行列式が円分指標であること"
+    trackB := "Found/GaloisRep — ★作用そのものは mathlib の `Affine.Point.map`(関手性つき)で**定義済み**(`galTate`)。★★残るのは (i) 作用が Z_l 線型で行列に書けること((G2) の基底を層ごとに使う)と、(ii) **`det = 円分指標`**——これには **Weil 対**が要る(mathlib に 0 件、2026-08-17 実測)" }
 
 /-! ## ★★G4 —— `mod l` 表現 -/
 
