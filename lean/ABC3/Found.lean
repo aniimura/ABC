@@ -79,6 +79,7 @@ import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.Cor411Untr
 import ABC3.Found.FrdI.Cor411Base
 import ABC3.Found.FrdI.Cor411Otimes
+import ABC3.Found.FrdI.Cor411Rigid
 import ABC3.Found.FrdI.Def24SuppIntr
 import ABC3.Found.FrdI.MonoidTransport
 import ABC3.Found.FrdI.Rmk451Ratstd
@@ -468,6 +469,7 @@ import ABC3.Found.GaloisRep.FiniteTorsion
 import ABC3.Found.GaloisRep.ThreeTorsion
 import ABC3.Found.GaloisRep.CoprimeTorsion
 import ABC3.Found.GaloisRep.TorsionMul
+import ABC3.Found.GaloisRep.FourTorsion
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

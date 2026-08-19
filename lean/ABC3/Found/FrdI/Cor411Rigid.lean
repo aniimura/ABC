@@ -166,12 +166,17 @@ theorem untrAut_app_eq_id (Fc : FrobenioidCore P)
     rw [(unTrPre P Fc).Base_id]
     exact hZ₀
   haveI := untrAut_app_isIso η A
-  have hmem : ((η.hom.app A : End A)) ∈ OTimes (unTrPre P Fc) A :=
-    (mem_otimes_iff (unTrPre P Fc) _).mpr
-      ⟨(CategoryTheory.isUnit_iff_isIso _).mpr inferInstance, hbi⟩
+  obtain ⟨α, hα⟩ : ∃ α : End A, ((α : A ⟶ A)) = η.hom.app A := ⟨η.hom.app A, rfl⟩
+  have hbi' : IsBaseIdentity (unTrPre P Fc) ((α : A ⟶ A)) := by rw [hα]; exact hbi
+  have hu' : IsUnit α := by
+    haveI : IsIso ((α : A ⟶ A)) := by rw [hα]; exact untrAut_app_isIso η A
+    exact (CategoryTheory.isUnit_iff_isIso α).mpr inferInstance
+  have hmem : α ∈ OTimes (unTrPre P Fc) A :=
+    (mem_otimes_iff (unTrPre P Fc) α).mpr ⟨hu', hbi'⟩
   rw [unTr_unitTrivial P Fc A] at hmem
-  have hh := Submonoid.mem_bot.mp hmem
-  exact hh
+  have hh : α = 1 := Submonoid.mem_bot.mp hmem
+  rw [← hα, hh]
+  rfl
 
 /-- ★★★★★★**[FrdI] Corollary 4.11, (i) の rigidity** —— `𝒞 → 𝒞^un-tr` は rigid。 -/
 theorem isRigidFunctor_istrToUnTr_of_divSlim (Fc : FrobenioidCore P)
@@ -189,5 +194,95 @@ def isRigidFunctor_istrToUnTr_of_divSlim.src : ABC3.Meta.Source :=
     sectionId := "frdi-cor-4-11" }
 
 end RigidUnTr
+
+/-! ## ★3. 合成関手の rigidity -/
+
+section CompRigid
+
+/-- ★★★★**右から充満忠実な関手を合成しても rigid 性は保たれる**。
+
+★在庫の `isRigidFunctor_of_equivalence_comp` は**左から**圏同値を合成する版。
+ここは**右から**の版で、`Corollary 4.11` の「合成関手はどれも rigid」に要る。 -/
+theorem isRigidFunctor_comp_fullyFaithful {X : Type*} [Category X] {Y : Type*} [Category Y]
+    {Z : Type*} [Category Z] (F : X ⥤ Y) (E : Y ⥤ Z) [E.Full] [E.Faithful]
+    (h : IsRigidFunctor F) : IsRigidFunctor (F ⋙ E) := by
+  intro η
+  have hex : ∀ W : X, ∃ t : F.obj W ⟶ F.obj W, E.map t = η.hom.app W :=
+    fun W => E.map_surjective _
+  choose t ht using hex
+  have hnat : ∀ {W V : X} (f : W ⟶ V), F.map f ≫ t V = t W ≫ F.map f := by
+    intro W V f
+    refine E.map_injective ?_
+    rw [E.map_comp, E.map_comp, ht, ht]
+    exact η.hom.naturality f
+  have hiso : ∀ W : X, IsIso (t W) := by
+    intro W
+    haveI : IsIso (E.map (t W)) := by rw [ht]; exact ⟨η.inv.app W,
+      η.hom_inv_id_app W, η.inv_hom_id_app W⟩
+    exact isIso_of_reflects_iso (t W) E
+  have hrefl : (NatIso.ofComponents (fun W => @asIso _ _ _ _ (t W) (hiso W))
+      (fun {W V} f => hnat f)) = Iso.refl F := h _
+  apply Iso.ext
+  apply NatTrans.ext
+  funext W
+  have htW : t W = 𝟙 (F.obj W) :=
+    congrArg (fun u : F ≅ F => u.hom.app W) hrefl
+  show η.hom.app W = 𝟙 ((F ⋙ E).obj W)
+  rw [← ht W, htW]
+  exact E.map_id _
+
+def isRigidFunctor_comp_fullyFaithful.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 93,
+    item := "Corollary 4.11, (i) — 合成関手の rigidity",
+    sectionId := "frdi-cor-4-11" }
+
+end CompRigid
+
+/-! ## ★4. `Corollary 4.11, (i)` の組み立て -/
+
+section Assemble
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+/-- ★★★★★★**[FrdI] Corollary 4.11, (i) の rigidity(合成関手)**。
+
+原文 (FrdI p.91):
+> where the vertical arrows are the natural projection functors; the horizontal
+
+★`𝒞₁^istr → 𝒞₁^un-tr` が rigid(`isRigidFunctor_istrToUnTr_of_divSlim`)で、
+`Ψ^un-tr` は圏同値(充満忠実)なので、合成も rigid。 -/
+theorem cor_4_11_i_comp_rigid (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (P₂ : PreFrobenioid C₂ Φ₂) (F₂ : FrobenioidCore P₂)
+    (Ψ : C ≌ C₂)
+    (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.functor.map f))
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.functor.map f) → IsPullBack P f)
+    (hds₂ : IsDivSlim Φ₂)
+    (hDivId : ∀ {X : C} (α : X ⟶ X), IsDivIdentity P α →
+      IsDivIdentity P₂ (Ψ.functor.map α))
+    (h₁ : IsOfQuasiIsotropicType C P) (h₂ : IsOfQuasiIsotropicType C₂ P₂)
+    (hUE' : ∀ {A B : C} (α₁ α₂ : A ⟶ B),
+      P₂.toElem.map (Ψ.functor.map α₁) = P₂.toElem.map (Ψ.functor.map α₂) →
+        P.toElem.map α₁ = P.toElem.map α₂)
+    (G' : Frobenioid (unTrPre P F)) (hds : IsDivSlim Φ) :
+    IsRigidFunctor (istrToUnTr P
+      ⋙ psiUnTrOfDivSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId h₁ h₂) := by
+  haveI := Ψ.isEquivalence_functor
+  haveI : (psiUnTrOfDivSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId h₁ h₂).IsEquivalence :=
+    psiUnTr_isEquivalence Ψ.functor h₁ h₂
+      (fun α₁ α₂ hh => toElem_map_congr_of_otimes Ψ.functor F hiso
+        (fun _X δ hδ => otimes_map_of_divSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId δ hδ)
+        α₁ α₂ hh) hUE'
+  exact isRigidFunctor_comp_fullyFaithful _ _
+    (isRigidFunctor_istrToUnTr_of_divSlim F G' hds)
+
+def cor_4_11_i_comp_rigid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 91,
+    item := "Corollary 4.11, (i) — 合成関手はどれも rigid",
+    sectionId := "frdi-cor-4-11" }
+
+end Assemble
 
 end ABC3.Found.FrdI
