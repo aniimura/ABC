@@ -234,6 +234,101 @@ def birat_cd_eq.src : ABC3.Meta.Source :=
     item := "Definition 1.2, (iv) — Frobenius-compact の第 3 条: c = d",
     sectionId := "frdi-def-1-2-iv" }
 
+/-! ## ★4. 3 条をまとめる -/
+
+/-- ★★**第 2 条**(無限位数の単元)も、同じ「torsion でない `x₀`」から出る。 -/
+theorem birat_frobeniusCompact_cond2
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : BiratCat P G)
+    (x₀ : Φ.val (P.toElem.obj (biratDown P G A)).base)
+    (hx₀ : ∀ n : ℕ, 0 < n →
+      n • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀ ≠ 0) :
+    ∃ u : End A, u ∈ OTimes (biratPre P G) A ∧
+      ∀ k : ℕ+, (u ^ ((k : ℕ+) : ℕ) : End A) ≠ 1 := by
+  have hmem : toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀ ∈ phiBiratAt P G A := by
+    rw [phiBiratAt_eq_top_of_divSurj P G hdivS A]
+    exact AddSubgroup.mem_top _
+  obtain ⟨u, hu, hux⟩ := hmem
+  refine ⟨u, hu, fun k hk => ?_⟩
+  have h := congrArg (fun t : End A => biratDivGp ((t : A ⟶ A))) hk
+  rw [biratDivGp_pow hu, hux] at h
+  refine hx₀ ((k : ℕ+) : ℕ) k.2 ?_
+  rw [h]
+  exact biratDivGp_id A
+
+/-- ★★★★★★**[FrdI] Proposition 4.8, (iii), (b)** ——
+`(𝒞^istr)^birat` の対象が **Frobenius-compact** であること。
+
+★3 条すべてが揃った:
+1. `𝒪^×` の可換性 —— `birat_frobeniusCompact_cond1`(birat-Frobenius-normalized 型から)
+2. 無限位数の単元 —— `birat_frobeniusCompact_cond2`(torsion でない `x₀` から)
+3. `ℚ>0` 倍の作用は自明 —— `birat_cd_eq` ＋ `frobeniusCompact_cond3_of_eq` -/
+theorem birat_isFrobeniusCompact
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hndOn : MonoidOn.IsNonDilatingOn Φ)
+    (A : BiratCat P G)
+    (x₀ : Φ.val (P.toElem.obj (biratDown P G A)).base)
+    (hx₀ : ∀ n : ℕ, 0 < n →
+      n • toGp (Φ.val (P.toElem.obj (biratDown P G A)).base) x₀ ≠ 0) :
+    IsFrobeniusCompact (biratPre P G) A :=
+  ⟨birat_frobeniusCompact_cond1 hfn A,
+   birat_frobeniusCompact_cond2 hdivS A x₀ hx₀,
+   fun θ c d hyp =>
+     frobeniusCompact_cond3_of_eq (biratPre P G) θ c d
+       (birat_cd_eq hdivS A θ c d (hndOn _ (biratBase θ.inv)) x₀ hx₀ hyp) hyp⟩
+
+def birat_isFrobeniusCompact.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — (𝒞^istr)^birat の Frobenius-compact 対象",
+    sectionId := "frdi-prop-4-8" }
+
+/-! ## ★5. 「torsion でない元」は **0 でないだけでよい** -/
+
+/-- ★★★**divisorial なモノイドでは 0 でない元は `M^gp` で torsion にならない**。
+
+★`n • x = 0` なら `x` は加法単元、sharp なので `x = 0`。 -/
+theorem toGp_nsmul_ne_zero_of_ne_zero {M : Type w} [AddCommMonoid M]
+    (hint : IsIntegralMonoid M) (hsharp : IsSharp M) {x : M} (hx : x ≠ 0)
+    (n : ℕ) (hn : 0 < n) : n • toGp M x ≠ 0 := by
+  intro h
+  have h0 : toGp M (n • x) = toGp M 0 := by
+    rw [toGp_nsmul, h]
+    exact toGp_zero.symm
+  have hnx : n • x = 0 := hint h0
+  refine hx (hsharp x ⟨⟨x, (n - 1) • x, ?_, ?_⟩, rfl⟩)
+  · have h1 : x + (n - 1) • x = (1 + (n - 1)) • x := by rw [add_nsmul, one_nsmul]
+    rw [h1, show 1 + (n - 1) = n from by omega]
+    exact hnx
+  · have h1 : (n - 1) • x + x = ((n - 1) + 1) • x := by rw [add_nsmul, one_nsmul]
+    rw [h1, show (n - 1) + 1 = n from by omega]
+    exact hnx
+
+/-- ★★★★★★**[FrdI] Proposition 4.8, (iii), (b)**(仕上げ) ——
+`Φ(A_𝒟)` に 0 でない元が 1 つあれば `A^birat` は **Frobenius-compact**。
+
+★★★★以前の台帳は「核が torsion でないので閉じない」と書いていたが、
+それは**遠回りの筋を追っていたため**であった。
+実際には `c = d` さえ出れば仮定の式がそのまま結論であり、
+`c = d` は `non-dilating` と「0 でない元」だけから出る。 -/
+theorem birat_isFrobeniusCompact_of_ne_zero
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hndOn : MonoidOn.IsNonDilatingOn Φ)
+    (A : BiratCat P G)
+    (x₀ : Φ.val (P.toElem.obj (biratDown P G A)).base) (hx₀ : x₀ ≠ 0) :
+    IsFrobeniusCompact (biratPre P G) A :=
+  birat_isFrobeniusCompact hdivS hfn hndOn A x₀
+    (toGp_nsmul_ne_zero_of_ne_zero (P.divisorial _).1.1 (P.divisorial _).2 hx₀)
+
+def birat_isFrobeniusCompact_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — Frobenius-compact 対象の存在",
+    sectionId := "frdi-prop-4-8" }
+
 end BiratConj
 
 end ABC3.Found.FrdI
