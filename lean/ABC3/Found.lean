@@ -550,6 +550,7 @@ import ABC3.Found.GaloisRep.TateUnit
 import ABC3.Found.GaloisRep.TateJ
 import ABC3.Found.GaloisRep.TateInvert
 import ABC3.Found.GaloisRep.TateNonDeg
+import ABC3.Found.GaloisRep.AdicContraction
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

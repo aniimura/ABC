@@ -1958,13 +1958,13 @@
      "id": "ff",
      "title": "充満忠実性",
      "size": "★大",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "hom-functor"
      ],
-     "note": "充満性は Theorem 5.1, (ii) の ⟸、忠実性は Proposition 3.3, (ii)(単元を除く忠実性)＋\nker(Div_B) ≅ 𝒪^× から。\n\n## ★★2026-08-20 —— **忠実性は閉じた**、充満性が残る\n忠実性: `u_f` から `β_f` が復元され(`κ` と `B(piBase)` が全単射)、\n3 分解の一意性(`eq_of_rem272Beta_eq`)で `w_f` が定まり、\n`toBiratCat` の忠実性で `f` が定まる。\n\n★★**充満性に残る 1 点**: `Theorem 5.1, (ii)`(`thm_5_1_ii`)は\n`(Base, Div, degFr)` を指定した射の**存在**を与えるが、\n`u` 成分までは指定できない。`Div_B` の核は `𝒪^×(𝒞)` で 0 でないので、\n同じ `(Base, Div, degFr)` を持つ model の射は `ker(Div_B)` のトルソルをなす。\n★単元を左から掛けると `u ↦ u + n·u_ε`、右から掛けると `u ↦ u + B(θ)(u_ε')` で、\nどちらも一般には `ker(Div_B)` 全体を走らない。\n★したがって `thm_5_1_ii` を**単元の証人つき**に精密化する必要がある\n(`picHom_sameBase_of_mem` が `phiBiratAt` の所属証人から射を作っているので、\nその証人を追跡すれば `u` が指定できるはず)。",
+     "note": "充満性は Theorem 5.1, (ii) の ⟸、忠実性は Proposition 3.3, (ii)(単元を除く忠実性)＋\nker(Div_B) ≅ 𝒪^× から。\n\n## ★★2026-08-20 —— **忠実性は閉じた**、充満性が残る\n忠実性: `u_f` から `β_f` が復元され(`κ` と `B(piBase)` が全単射)、\n3 分解の一意性(`eq_of_rem272Beta_eq`)で `w_f` が定まり、\n`toBiratCat` の忠実性で `f` が定まる。\n\n★★**充満性に残る 1 点**: `Theorem 5.1, (ii)`(`thm_5_1_ii`)は\n`(Base, Div, degFr)` を指定した射の**存在**を与えるが、\n`u` 成分までは指定できない。`Div_B` の核は `𝒪^×(𝒞)` で 0 でないので、\n同じ `(Base, Div, degFr)` を持つ model の射は `ker(Div_B)` のトルソルをなす。\n★単元を左から掛けると `u ↦ u + n·u_ε`、右から掛けると `u ↦ u + B(θ)(u_ε')` で、\nどちらも一般には `ker(Div_B)` 全体を走らない。\n★したがって `thm_5_1_ii` を**単元の証人つき**に精密化する必要がある\n(`picHom_sameBase_of_mem` が `phiBiratAt` の所属証人から射を作っているので、\nその証人を追跡すれば `u` が指定できるはず)。\n\n## ★★★★閉じた(2026-08-20 夜)——**充満性の鍵は「単元を中間に挿す」こと**\n先の分析(単元を左右から掛ける道が塞がっている)は正しかったが、**第三の道**があった。\n\n`Definition 1.3, (iv)(a)` の 3 分解 `f₀ = γ ≫ β₀ ≫ α` の\n**Frobenius 部分 `γ` の終域 `U`** に単元 `δ ∈ 𝒪^×(U)` を挿すと\n```\nu_{γ≫δ≫(β₀≫α)} = u_{f₀} + B(Base γ)(κ_U(δ^birat))\n```\nとなる(`pathUC_insert`)。★`γ` は Frobenius 型なので **`Base γ` は同型**であり、\n`B(Base γ)` は全単射。したがって `ker(Div_B)` の**任意の**元が実現できる\n(`exists_hom_shift`)。\n★左から掛けると `u ↦ u + deg(f)·u_ε`、右から掛けると `u ↦ u + B(Base f)(u_ε)` で、\nどちらも一般には核全体を走らない —— **中間に挿すのが要点**である。\n\n★`δ` の存在は `Proposition 4.4, (iii)` の核(`phiBiratAt_ker`)から。\n★`u_ε = κ(ε^birat)` は `κ` の `π_X` に沿った自然性から(`pathU_otimes`)。\n★`RatFnData` に **`bneg`(`B` が group-like)** の 2 フィールドを追加した\n—— 原文の「B : D → Mon a group-like monoid on D」そのもの。",
      "lean": "ABC3/Found/FrdI/Thm52Model.lean",
-     "decl": "pathToModel_faithful(忠実性のみ)"
+     "decl": "pathToModel_faithful / pathToModel_full / exists_hom_shift"
     },
     {
      "id": "esssurj",
@@ -1995,13 +1995,13 @@
      "id": "thm52-src",
      "title": "条なしの .src(Theorem 5.2)",
      "size": "★小",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "compat"
      ],
-     "note": "(i)(ii)(iii) は既に .src つき。(iv) が付けば条なしにできる。\n★interface を仮定に置いた分はクラス (B) の逸脱として開示する。",
-     "lean": "",
-     "decl": ""
+     "note": "(i)(ii)(iii) は既に .src つき。(iv) が付けば条なしにできる。\n★interface を仮定に置いた分はクラス (B) の逸脱として開示する。\n\n## ★★★★★★閉じた(2026-08-20 夜)\n`thm_5_2_iv : C ≌ ModelData.Obj R.model` —— `𝒞̃ ⥤ 𝒞^model` が\n充満・忠実・本質的全射で、`𝒞̃ ⥤ 𝒞` が圏同値(`pathForget_isEquivalence`)。\n★`𝔽_Φ` への 1-両立性は `pathToModel_toElem` が **rfl**。\n★sorry 0、公理は標準 3 つのみ。",
+     "lean": "ABC3/Found/FrdI/Thm52Model.lean",
+     "decl": "thm_5_2_iv / pathToModel_isEquivalence / thm_5_2_iv.src"
     }
    ]
   }
