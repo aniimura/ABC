@@ -374,6 +374,32 @@ def basePsiSlice_isEquivalence.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 共役関手は圏同値",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★9. `plBkOverFunctor` は `Over.map` と可換(pull-back の場合)
+
+★★★`Ψ_Base` の組み上げでは
+`conj(Base ψ) ≅ Over.map (Base (Ψψ))`(`ψ` は pull-back)を示す必要がある。
+★その芯が本補題である —— `plBkOverFunctor` は構造射に `Base` を当てるだけなので、
+`Base` の合成則がそのまま自然性になる。 -/
+
+include hPB in
+/-- ★★★★**`plBkOverFunctor` は pull-back による `Over.map` と可換**。
+
+★どちらも `Z ↦ Over.mk (Base Z.hom.hom ≫ Base ψ)` になる(`Base_comp`)。 -/
+theorem plBkOverFunctor_over_map_obj {A A' : C} (ψ : A ⟶ A')
+    (Z : Over (⟨A⟩ : PlBk P)) :
+    (Over.map (P.Base ψ)).obj ((plBkOverFunctor P A).obj Z)
+      = Over.mk (P.Base (Z.hom.hom ≫ ψ)) :=
+  congrArg Over.mk (P.Base_comp Z.hom.hom ψ).symm
+
+/-! ### ★関手としての可換性は `eqToHom` の処理が残る(2026-08-19 実測)
+
+★対象の側(`plBkOverFunctor_over_map_obj`)は `Base_comp` そのもので出るが、
+`Functor.ext` の射の側は `Over.Hom.left (eqToHom _)` を潰す補題が要る。
+★`Comma.eqToHom_left` では `simp` が閉じなかった。
+★★**object 版があれば `Ψ_Base` の組み上げには足りる見込み**なので、
+関手版は必要になった時点で書く。 -/
+
+
 end PlBkPsi
 
 end ABC3.Found.FrdI
