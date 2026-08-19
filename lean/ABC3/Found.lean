@@ -89,6 +89,7 @@ import ABC3.Found.FrdI.Thm51Hom
 import ABC3.Found.FrdI.Thm51Sec
 import ABC3.Found.FrdI.Thm51FrTr
 import ABC3.Found.FrdI.Prop16AutAmple
+import ABC3.Found.FrdI.Thm52Path
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
