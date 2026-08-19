@@ -343,4 +343,98 @@ def natIsoOfWhiskerLeft.src : ABC3.Meta.Source :=
 
 end Precomp
 
+
+/-! ## ★7. `Corollary 4.11, (ii)` の 1-一意性 -/
+
+section Uniq
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁} (G₁ : Frobenioid P₁)
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂} (G₂ : Frobenioid P₂)
+  (Ψ : C₁ ⥤ C₂)
+  (hfwd : ∀ {X Y : C₁} (f : X ⟶ Y), coaPreProp P₁ f → coaPreProp P₂ (Ψ.map f))
+  (Fc₁ : FrobenioidCore (biratPre P₁ G₁)) (Fc₂ : FrobenioidCore (biratPre P₂ G₂))
+  (hiso₁ : IsOfIsotropicType P₁) (hiso₂ : IsOfIsotropicType P₂)
+  (hfn₁ : ∀ X : BiratCat P₁ G₁, IsFrobeniusNormalized (biratPre P₁ G₁) X)
+  (hfn₂ : ∀ X : BiratCat P₂ G₂, IsFrobeniusNormalized (biratPre P₂ G₂) X)
+  (hds₂ : IsDivSlim Φ₂)
+  (hbwd : ∀ {X Y : C₁} (f : X ⟶ Y), coaPreProp P₂ (Ψ.map f) → coaPreProp P₁ f)
+  (hPBb : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y), IsPullBack (biratPre P₁ G₁) f →
+    IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f))
+  (hPBb' : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y),
+    IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f) →
+      IsPullBack (biratPre P₁ G₁) f)
+  (hDivEq : ∀ {X Y : C₁} (f g : X ⟶ Y), DivEquivalent P₁ f g →
+    DivEquivalent P₂ (Ψ.map f) (Ψ.map g))
+  (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+  (hBIso : ∀ {X Y : C₁} (f : X ⟶ Y), IsBaseIsomorphism P₁ f →
+    IsBaseIsomorphism P₂ (Ψ.map f))
+
+include hfwd hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (ii) の 1-一意性** ——
+図式に入る関手は `Ψ_Base` と同型である。
+
+★★在庫の `projPrecompIsoGen`(`Thm34VBase.lean`、`Theorem 3.4, (v)` の 1-一意性で作った
+「`P.proj` との前合成は関手の同型を反射する」)がそのまま効く ——
+★`base_three_factor` の 3 分解が「`Base` の像で自然 ⟹ `𝒟` 全体で自然」を担う。 -/
+noncomputable def cor_4_11_ii_uniq [Ψ.IsEquivalence] (F₁ : FrobenioidCore P₁)
+    (Gf : D₁ ⥤ D₂) (hG : P₁.proj ⋙ Gf ≅ Ψ ⋙ P₂.proj) :
+    Gf ≅ psiBaseBirat G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb'
+      hDivEq hPS hBIso :=
+  projPrecompIsoGen P₁ F₁
+    (hG ≪≫ (cor_4_11_ii_square G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb
+      hPBb' hDivEq hPS hBIso).symm)
+
+def cor_4_11_ii_uniq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 91,
+    item := "Corollary 4.11, (ii) — Ψ_Base の 1-一意性",
+    sectionId := "frdi-cor-4-11" }
+
+include hfwd hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso in
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (ii) の「両方が圏同値」** ——
+`Ψ_Base : 𝒟₁ ⥤ 𝒟₂` は圏同値。
+
+★`hUE'`・`hbi'` は擬逆側の条(原文が (ii) で `Ψ` **とその擬逆**に課すもの)。 -/
+noncomputable def cor_4_11_ii_equivalence [Ψ.IsEquivalence]
+    [(psiBiratUnTr G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb'
+      hDivEq hPS hBIso).IsEquivalence]
+    (hbi' : ∀ {X : UnTr (biratPre P₂ G₂)} (u : X ⟶ X),
+      IsBaseIdentity (unTrPre (biratPre P₂ G₂) Fc₂) u →
+        IsBaseIdentity (unTrPre (biratPre P₁ G₁) Fc₁)
+          ((psiBiratUnTr G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb'
+            hDivEq hPS hBIso).inv.map u)) :
+    D₁ ≌ D₂ := by
+  haveI := untrBirat_toProdCat_isEquivalence G₁ Fc₁ hfn₁
+  haveI := untrBirat_toProdCat_isEquivalence G₂ Fc₂ hfn₂
+  exact psiBaseEquivalence _ (unTrPre (biratPre P₁ G₁) Fc₁) (unTrPre (biratPre P₂ G₂) Fc₂)
+    (fun {A} u hu => psiBiratUnTr_baseIdentity G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂
+      hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso u hu) hbi'
+
+include hfwd hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso in
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (ii) の rigidity** ——
+`𝒟₂` が slim なら図式の**両方の合成関手**が rigid。
+
+原文 (FrdI p.92):
+> [where the vertical arrows are the natural projection functors; the horizontal -/
+theorem cor_4_11_ii_rigid [Ψ.IsEquivalence] (F₂ : FrobenioidCore P₂)
+    (hslim : IsSlimCat D₂) :
+    IsRigidFunctor (Ψ ⋙ P₂.proj) ∧
+      IsRigidFunctor (P₁.proj ⋙ psiBaseBirat G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂
+        hds₂ hbwd hPBb hPBb' hDivEq hPS hBIso) := by
+  have h1 : IsRigidFunctor (Ψ ⋙ P₂.proj) :=
+    isRigidFunctor_comp_of_isEquivalence Ψ P₂.proj (prop_1_13_i_global P₂ F₂ hslim)
+  exact ⟨h1, isRigidFunctor_of_iso
+    (cor_4_11_ii_square G₁ G₂ Ψ hfwd Fc₁ Fc₂ hiso₁ hiso₂ hfn₁ hfn₂ hds₂ hbwd hPBb hPBb'
+      hDivEq hPS hBIso) h1⟩
+
+def cor_4_11_ii_equivalence.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 92,
+    item := "Corollary 4.11, (ii) — Ψ_Base は圏同値・合成関手は rigid",
+    sectionId := "frdi-cor-4-11" }
+
+end Uniq
+
 end ABC3.Found.FrdI
