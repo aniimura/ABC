@@ -143,6 +143,65 @@ noncomputable def idxBiratNfMap (A : C) :
     IdxBirat P G A ⥤ IdxBirat P G (nfObj P G.core d A) :=
   (Over.post (X := coaPreObj P G A) (coaPreNfMap P d G)).op
 
+/-! ## ★★★★`𝒞^{coa-pre}` の圏同値
+
+★★保存(`nfMap_coaPreProp`)と反射(`nfMap_coaPreProp_of`)が揃ったので、
+`coaPreNfMap` は**充満忠実**になる。★本質的全射性は同型を包むだけ。 -/
+
+/-- ★**同型は `𝒞^{coa-pre}` の同型に包める** —— 同型は co-angular pre-step だから。 -/
+def coaPreIsoOfIso {X Y : C} (θ : X ≅ Y) :
+    (⟨X⟩ : CoaPre P G) ≅ (⟨Y⟩ : CoaPre P G) where
+  hom := ⟨θ.hom, isCoAngular_of_isIso P θ.hom, isPreStep_of_isIso P θ.hom⟩
+  inv := ⟨θ.inv, isCoAngular_of_isIso P θ.inv, isPreStep_of_isIso P θ.inv⟩
+  hom_inv_id := WideSubcategory.hom_ext _ θ.hom_inv_id
+  inv_hom_id := WideSubcategory.hom_ext _ θ.inv_hom_id
+
+/-- ★★**忠実** —— `naiveFrob` の忠実性そのもの。 -/
+theorem coaPreNfMap_faithful (hpt : IsOfPerfectType P) :
+    (coaPreNfMap P d G).Faithful where
+  map_injective {_ _ f g} h := by
+    haveI := naiveFrob_faithful P G.core d hpt
+    refine WideSubcategory.hom_ext _ ((naiveFrob P G.core d).map_injective ?_)
+    exact congrArg (fun t : (coaPreNfMap P d G).obj _ ⟶ _ => t.hom) h
+
+/-- ★★★**充満** —— `naiveFrob` の充満性 ＋ `coaPreProp` の**反射**。 -/
+theorem coaPreNfMap_full (hpt : IsOfPerfectType P) : (coaPreNfMap P d G).Full where
+  map_surjective {X Y} g := by
+    haveI := naiveFrob_full P G.core d hpt
+    obtain ⟨f₀, hf₀⟩ := (naiveFrob P G.core d).map_surjective g.hom
+    refine ⟨⟨f₀, nfMap_coaPreProp_of P G.core d hpt f₀ ?_⟩,
+      WideSubcategory.hom_ext _ hf₀⟩
+    show coaPreProp P (nfMap P G.core d f₀)
+    rw [show nfMap P G.core d f₀ = g.hom from hf₀]
+    exact g.property
+
+/-- ★★**本質的全射** —— `naiveFrob` の本質的全射性を同型ごと包む。 -/
+theorem coaPreNfMap_essSurj (hpt : IsOfPerfectType P) :
+    (coaPreNfMap P d G).EssSurj where
+  mem_essImage Y := by
+    haveI := naiveFrob_essSurj P G.core d hpt
+    obtain ⟨A, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := naiveFrob P G.core d) Y.obj
+    exact ⟨(⟨A⟩ : CoaPre P G), ⟨coaPreIsoOfIso P G ε⟩⟩
+
+/-- ★★★★★**`𝒞^{coa-pre}` の間の関手は圏同値**(perfect 型)。 -/
+theorem coaPreNfMap_isEquivalence (hpt : IsOfPerfectType P) :
+    (coaPreNfMap P d G).IsEquivalence where
+  faithful := coaPreNfMap_faithful P d G hpt
+  full := coaPreNfMap_full P d G hpt
+  essSurj := coaPreNfMap_essSurj P d G hpt
+
+/-- ★★★★**添字圏の写像も圏同値** —— `Over.post` と `.op` が圏同値を保つ。 -/
+theorem idxBiratNfMap_isEquivalence (hpt : IsOfPerfectType P) (A : C) :
+    (idxBiratNfMap P d G A).IsEquivalence := by
+  haveI := coaPreNfMap_isEquivalence P d G hpt
+  exact inferInstanceAs
+    (Functor.IsEquivalence (Over.post (X := coaPreObj P G A) (coaPreNfMap P d G)).op)
+
+def coaPreNfMap_isEquivalence.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — 𝒞^{coa-pre} の間の関手は圏同値",
+    sectionId := "frdi-prop-4-8" }
+
 /-! ## ★★★段 3 —— 余錐と射の写像
 
 ★遷移は**前合成**なので、naturality は `nfMap` の関手性(`nfMap_comp`)そのもの。
