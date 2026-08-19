@@ -49,7 +49,9 @@ namespace ABC3.Found.GaloisRep
 
 open WeierstrassCurve Polynomial
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
+universe u
+
+variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
 
 /-- ★★★★★**交叉恒等式の一般形**——`Φ_{n+1}ΨSq_{n−1} = Φ_{n−1}ΨSq_{n+1} − preΨ_{2n}Ψ₂Sq`。
 

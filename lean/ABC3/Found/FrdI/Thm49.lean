@@ -448,6 +448,27 @@ def divMap_div_all.src : ABC3.Meta.Source :=
     item := "Corollary 4.11, (iv) — Ψ_Φ は Div を Div へ送る",
     sectionId := "frdi-cor-4-11" }
 
+/-- ★`psiPhi` の成分は `divMap` そのもの(定義から)。 -/
+theorem psiPhi_app_apply (Ψ : C ≌ C₂) (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (F : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    (A : C) (x : Φ.val (P.toElem.obj A).base) :
+    ((psiPhi Ψ G G₂ F hiso hiso₂ hdivS hdivS₂ hOTri hOTri' hperfM hdeg).hom.app
+        (Opposite.op A)).hom x
+      = divMap Ψ G hiso hdivS hOTri A x := rfl
+
 end PsiPhi
 
 end ABC3.Found.FrdI

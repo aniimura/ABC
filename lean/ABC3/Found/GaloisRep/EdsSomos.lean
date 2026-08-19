@@ -56,7 +56,9 @@ Python(sympy)で測ったところ:
 
 namespace ABC3.Found.GaloisRep
 
-variable {R : Type} [CommRing R] (b c d : R)
+universe u
+
+variable {R : Type u} [CommRing R] (b c d : R)
 
 /-! ## ★Somos-4 の主張 -/
 

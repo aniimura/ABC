@@ -313,6 +313,43 @@ def cor_4_11_iv_square.src : ABC3.Meta.Source :=
     item := "Corollary 4.11, (iv) — 𝒞ᵢ → 𝔽_{Φᵢ} の 1-可換図式",
     sectionId := "frdi-cor-4-11" }
 
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**(iv) の `div` 成分の一致** ——
+`Ψ_Φ` の成分は `divMap` を `sq` でずらしたもの(`psiPhiOnBase_app_apply`)で、
+`divMap` は `Div` を `Div` へ送る(`divMap_div_all`)。 -/
+theorem cor_4_11_iv_hdivc (Ψe : C₁ ≌ C₂) (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hiso : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C₁) (a : Φ₁.val (P₁.toElem.obj Y).base),
+      ∃ u : OTri P₁ Y, P₁.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C₁) (δ : End Z), δ ∈ OTri P₁ Z →
+      ((Ψe.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψe.functor.obj Z))
+        ∈ OTri P₂ (Ψe.functor.obj Z))
+    (hOTri' : ∀ (Z : C₁) (δ : End Z),
+      ((Ψe.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψe.functor.obj Z))
+        ∈ OTri P₂ (Ψe.functor.obj Z) → δ ∈ OTri P₁ Z)
+    (hperfM : ∀ Y : C₁, IsPerfectMonoid (Φ₁.val (P₁.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C₁} (g : X ⟶ Y), P₂.degFr (Ψe.functor.map g) = P₁.degFr g)
+    (hFT : ∀ {X Y : C₁} (g : X ⟶ Y), IsFrobeniusType P₁ g →
+      IsFrobeniusType P₂ (Ψe.functor.map g))
+    (hPS : ∀ {X Y : C₁} (g : X ⟶ Y), IsPreStep P₁ g → IsPreStep P₂ (Ψe.functor.map g))
+    (hPB : ∀ {X Y : C₁} (g : X ⟶ Y), IsPullBack P₁ g → IsPullBack P₂ (Ψe.functor.map g))
+    (ΨB : D₁ ⥤ D₂) (sq : P₁.proj ⋙ ΨB ≅ Ψe.functor ⋙ P₂.proj)
+    {A B : C₁} (φ : A ⟶ B) :
+    ((psiPhiOnBase Ψe.functor F₁ ΨB sq
+        (psiPhi Ψe G₁ G₂ F₁ hiso hiso₂ hdivS hdivS₂ hOTri hOTri' hperfM hdeg)).hom.app
+      (Opposite.op ((P₁.toElem.obj A).base))).hom (P₁.Div φ)
+      = Φ₂.map (sq.hom.app A) (P₂.Div (Ψe.functor.map φ)) := by
+  rw [psiPhiOnBase_app_apply, psiPhi_app_apply,
+    divMap_div_all Ψe G₁ F₁ F₂ hiso hdivS hOTri hperfM hdeg hFT hPS hPB φ]
+
+def cor_4_11_iv_hdivc.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 92,
+    item := "Corollary 4.11, (iv) — div 成分の一致",
+    sectionId := "frdi-cor-4-11" }
+
 end CorIV
 
 end ABC3.Found.FrdI

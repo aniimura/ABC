@@ -48,7 +48,9 @@ namespace ABC3.Found.GaloisRep
 
 open WeierstrassCurve Polynomial
 
-variable {R : Type} [CommRing R] (W : WeierstrassCurve R)
+universe u
+
+variable {R : Type u} [CommRing R] (W : WeierstrassCurve R)
 
 /-- ★★★**曲線版の (★)**。
 

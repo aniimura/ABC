@@ -485,6 +485,11 @@ import ABC3.Found.GaloisRep.MulFormula
 import ABC3.Found.GaloisRep.EdsSomos
 import ABC3.Found.GaloisRep.PhiCross
 import ABC3.Found.GaloisRep.YSide
+import ABC3.Found.GaloisRep.NonDegen
+import ABC3.Found.GaloisRep.XYStep
+import ABC3.Found.GaloisRep.MulPoint
+import ABC3.Found.GaloisRep.MulOrder
+import ABC3.Found.GaloisRep.TorsionAll
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
