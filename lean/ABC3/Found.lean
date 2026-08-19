@@ -83,6 +83,7 @@ import ABC3.Found.FrdI.Prop44Pair
 import ABC3.Found.FrdI.Thm42
 import ABC3.Found.FrdI.Cor410
 import ABC3.Found.FrdI.Cor411
+import ABC3.Found.FrdI.Thm42Div
 import ABC3.Found.FrdI.Cor410Birat
 import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.AppA

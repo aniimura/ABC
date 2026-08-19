@@ -50,58 +50,32 @@ def Prop114vRhs' (P : PreFrobenioid C₂ Φ₂) {A : C₂} (φ : A ⟶ A) : Prop
     ∃ (B' : C₂) (ψ : B ⟶ B') (β : B ⟶ B'),
       IsIrreducibleMor ψ ∧ ¬ IsPreStep P ψ ∧ IsStep P β ∧ α ≫ ψ = φ ≫ α ≫ β
 
-/-- ★★★★★**右辺は `Ψ` で移る**。
+/-- ★★★★★**右辺は `Ψ` で移る**(像の中の対象について)。
 
 ★`IsStep` / `IsPreStep` の保存と反射、`IsIrreducibleMor` の保存(圏論的)だけを使う。 -/
-theorem prop114vRhs_map (Ψ : C₁ ≌ C₂)
+theorem prop114vRhs_map_image (Ψ : C₁ ≌ C₂)
     (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
     (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
-    {A : C₁} (φ : A ⟶ A) (h : Prop114vRhs P₁ φ) :
-    Prop114vRhs' P₂ (Ψ.functor.map φ) := by
-  intro B α hα
-  -- `B` を像の中へ取り直す
-  obtain ⟨B₀, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) B
-  obtain ⟨α₀, hα₀⟩ := Ψ.functor.map_surjective (α ≫ ε.inv)
+    {A : C₁} (φ : A ⟶ A) (h : Prop114vRhs P₁ φ)
+    (B₀ : C₁) (α : Ψ.functor.obj A ⟶ Ψ.functor.obj B₀) (hα : IsStep P₂ α) :
+    ∃ (B' : C₂) (ψ : Ψ.functor.obj B₀ ⟶ B') (β : Ψ.functor.obj B₀ ⟶ B'),
+      IsIrreducibleMor ψ ∧ ¬ IsPreStep P₂ ψ ∧ IsStep P₂ β ∧
+        α ≫ ψ = Ψ.functor.map φ ≫ α ≫ β := by
+  obtain ⟨α₀, rfl⟩ := Ψ.functor.map_surjective α
   have hstep₀ : IsStep P₁ α₀ := by
-    refine ⟨hPS' α₀ ?_, ?_⟩
-    · rw [hα₀]
-      exact IsPreStep.comp P₂ hα.1 (isPreStep_of_isIso P₂ ε.inv)
-    · intro hiso
-      haveI : IsIso α₀ := hiso
-      haveI : IsIso (Ψ.functor.map α₀) := Ψ.functor.map_isIso α₀
-      rw [hα₀] at *
-      exact hα.2 (by
-        haveI : IsIso (α ≫ ε.inv) := ‹IsIso (Ψ.functor.map α₀)›
-        have : α = (α ≫ ε.inv) ≫ ε.hom := by
-          rw [Category.assoc, ε.inv_hom_id, Category.comp_id]
-        rw [this]; infer_instance)
+    refine ⟨hPS' α₀ hα.1, fun hiso => hα.2 ?_⟩
+    haveI := hiso
+    exact Ψ.functor.map_isIso α₀
   obtain ⟨B'₀, ψ₀, β₀, hirr, hnps, hstepβ, hsq⟩ := h B₀ α₀ hstep₀
-  refine ⟨Ψ.functor.obj B'₀, ε.inv ≫ Ψ.functor.map ψ₀, ε.inv ≫ Ψ.functor.map β₀,
-    ?_, ?_, ?_, ?_⟩
-  · exact isIrreducibleMor_comp_iso_left ε.inv (isIrreducibleMor_map Ψ.functor hirr)
-  · intro hc
-    refine hnps (hPS' ψ₀ ?_)
-    have h1 : Ψ.functor.map ψ₀ = ε.hom ≫ (ε.inv ≫ Ψ.functor.map ψ₀) := by
-      rw [← Category.assoc, ε.hom_inv_id, Category.id_comp]
-    rw [h1]
-    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ ε.hom) hc
-  · refine ⟨IsPreStep.comp P₂ (isPreStep_of_isIso P₂ ε.inv) (hPS β₀ hstepβ.1), ?_⟩
-    intro hiso
-    haveI : IsIso (ε.inv ≫ Ψ.functor.map β₀) := hiso
-    haveI : IsIso (Ψ.functor.map β₀) := by
-      have : Ψ.functor.map β₀ = ε.hom ≫ (ε.inv ≫ Ψ.functor.map β₀) := by
-        rw [← Category.assoc, ε.hom_inv_id, Category.id_comp]
-      rw [this]; infer_instance
-    exact hstepβ.2 (Ψ.functor.isIso_of_map_isIso β₀)
-  · have hΨ := congrArg Ψ.functor.map hsq
-    rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp,
-      CategoryTheory.Functor.map_comp] at hΨ
-    rw [← hα₀]
-    calc Ψ.functor.map α₀ ≫ ε.inv ≫ Ψ.functor.map ψ₀
-        = (Ψ.functor.map α₀ ≫ ε.inv) ≫ Ψ.functor.map ψ₀ := (Category.assoc _ _ _).symm
-      _ = _ := by sorry
+  refine ⟨Ψ.functor.obj B'₀, Ψ.functor.map ψ₀, Ψ.functor.map β₀,
+    isIrreducibleMor_map Ψ.functor hirr, fun hc => hnps (hPS' ψ₀ hc),
+    ⟨hPS β₀ hstepβ.1, fun hiso => hstepβ.2 ?_⟩, ?_⟩
+  · haveI := hiso
+    exact isIso_of_reflects_iso β₀ Ψ.functor
+  · rw [← CategoryTheory.Functor.map_comp, ← CategoryTheory.Functor.map_comp,
+      ← CategoryTheory.Functor.map_comp, hsq]
 
-def prop114vRhs_map.src : ABC3.Meta.Source :=
+def prop114vRhs_map_image.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 77,
     item := "Theorem 4.2, (i) — Proposition 1.14, (v) の右辺は Ψ で移る",
     sectionId := "frdi-thm-4-2" }
