@@ -32,9 +32,21 @@ import ABC3.Found.Arakelov.ADegBase
 したがって本 witness は `IsEffective` を「下に有界であること」そのものと定義しており、
 ★★`height_bddBelow` は**恒真**になる。
 
-★★★これは**残っている穴として記録する**——塞ぐには
-「切断 `s` で `|s| ≤ 1` なるものが在る」と結ぶ欄が要り、
-そのためには `deg` の**有限素点側**(余核の位数の対数)を作らねばならない。
+★★★2026-08-20 の訂正(§9-405)——**上の「塞ぎ方」は間違っていた**。
+
+原文 `Proposition 1.4, (ii)` の前提は「有効」ではなく
+**「`L_Q` のある正のテンソル冪が大域切断で生成される」**である
+(目視確認済、例として ample を挙げている)。
+
+★★★★**「有効」で塞ぐと偽の obligation になる**——反例は膨らみ上げ:
+`X = Bl_p(P^2)`、`L = O(E)`(`E` は例外因子)は有効だが、
+`L|_E = O_{P^1}(-1)` なので `E` 上で高さは `-∞` へ行く。
+★大域生成(⇒ nef)ならこの現象は起きない。
+
+★★★★★mathlib には **ample も大域生成も無い**(2026-08-20 実測)ので、
+前提を接地するにはその定義から作ることになる。
+★それまでの間、Interface は `isEffective_one`(自明束は入る)と
+`height_bddBelow`(`True` を落とす)で **上下から挟む**形にしてある。
 -/
 
 namespace ABC3.Interface.Arakelov
@@ -59,6 +71,14 @@ noncomputable def htOf (X : Scheme.{0})
     (L : picardDataWitness.Pic X × Multiplicative (arcCM X)) (x : NFPoint X) : ℝ :=
   degFOf x.F (aPicDataWitness.pullback x.xF L)
 
+/-- ★**自明束の高さは 0** —— `isEffective_one` の中身。 -/
+theorem htOf_one_eq_zero (X : Scheme.{0}) (x : NFPoint X) :
+    htOf X (1 : picardDataWitness.Pic X × Multiplicative (arcCM X)) x = 0 := by
+  have hz : ∀ i : (x.F →+* ℂ),
+      (arcCMPullback x.xF (1 : picardDataWitness.Pic X × Multiplicative (arcCM X)).2).fn
+        (embPoint x.F i) = 0 := fun _ => rfl
+  simp only [htOf, degFOf, aPicDataWitness, hz, Finset.sum_const_zero, neg_zero, zero_div]
+
 /-- ★★★★★★★**`ArakelovHeightData` の実装**。 -/
 noncomputable def arakelovHeightDataWitness : ArakelovHeightData where
   toAPicSpecData := aPicSpecDataWitness
@@ -70,6 +90,10 @@ noncomputable def arakelovHeightDataWitness : ArakelovHeightData where
     (congrArg (degFOf x.F) (aPicDataWitness.pullback_mul x.xF L M)).trans
       (degFOf_mul x.F _ _)
   IsEffective := fun X L => ∃ C : ℝ, ∀ x : NFPoint X, -C ≤ htOf X L x
+  isEffective_one := fun X => ⟨0, fun x => by
+    have h := htOf_one_eq_zero X x
+    simp only [neg_zero]
+    exact le_of_eq h.symm⟩
   height_bddBelow := fun _ _ h => h
   height_eq_degF := fun X L F _ _ xF x hx => by
     subst hx

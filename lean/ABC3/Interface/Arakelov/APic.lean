@@ -192,6 +192,23 @@ structure ArakelovHeightData where
       = height X L x + height X M x
   /-- ★★**`Proposition 1.4, (ii)`** —— 有効な算術直線束の高さは下に一様有界。 -/
   IsEffective : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → Prop
+  /-- ★★★★★2026-08-20 の追加(§9-405)——**自明束はこの類に入る**。
+
+  ★これが無いと `IsEffective := fun _ _ => False` で
+  `height_bddBelow` が**空虚に成立**してしまう。
+  ★★逆に `IsEffective := True` は `height_bddBelow` 自身が落とす
+  (任意の算術直線束の高さは下に有界でない)。
+  ★★★この 2 本で `IsEffective` は上下から挟まれる。
+
+  ★★★★**未塗りの穴**:原文の前提は「有効」ではなく
+  「`L_Q` のある正のテンソル冪が大域切断で生成される」である。
+  ★★★★★**「有効」では偽になる**——反例は膨らみ上げ:
+  `L = O(E)`(`E` は例外因子)は有効だが、
+  `L|_E = O_{P^1}(-1)` なので `E` 上で高さは `-∞` へ行く。
+  ★§9-405 に記録。 -/
+  isEffective_one : ∀ (X : Scheme.{0}),
+    IsEffective X (@One.one _
+      (toAPicSpecData.toAPicData.group X).toDivInvMonoid.toMonoid.toOne)
   height_bddBelow : ∀ (X : Scheme.{0}) (L : toAPicSpecData.toAPicData.APic X),
     IsEffective X L → ∃ C : ℝ, ∀ x : AlgPoint X, -C ≤ height X L x
   /-- ★★★**高さは `deg_F` の引き戻しである**——原文 p.4 の定義そのもの。
