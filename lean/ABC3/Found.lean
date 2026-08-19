@@ -77,6 +77,7 @@ import ABC3.Found.FrdI.Prop44Phi
 import ABC3.Found.FrdI.Thm34Quasi
 import ABC3.Found.FrdI.Thm34EndBs
 import ABC3.Found.FrdI.Def24SuppIntr
+import ABC3.Found.FrdI.MonoidTransport
 import ABC3.Found.FrdI.Rmk451Ratstd
 import ABC3.Found.FrdI.Prop44Pair
 import ABC3.Found.FrdI.Thm42
