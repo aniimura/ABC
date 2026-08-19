@@ -1301,7 +1301,9 @@
             "naive-frob-birat"
           ],
           "title": "Ψ^birat が圧倒的同値であること",
-          "note": "★原文: 「Ψ and any quasi-inverse to Ψ preserve … pre-steps」から従う。★isotropic 型なので pre-step は自動的に co-angular(`Proposition 1.4, (i)`)で、`𝒞^birat` の定義がそのまま使える見込み。"
+          "note": "★原文: 「Ψ and any quasi-inverse to Ψ preserve … pre-steps」から従う。★isotropic 型なので pre-step は自動的に co-angular(`Proposition 1.4, (i)`)で、`𝒞^birat` の定義がそのまま使える見込み。\n\n## ★★形を測った(2026-08-19)\n★在庫: `prop_2_1_iii_mp`(perfect 型なら `naiveFrob` は圏同値)。\n\n| 性質 | 状態 |\n|---|---|\n| **essSurj** | ★**済**(`psiBirat_essSurj`)—— 対象が同じ型なので`naiveFrob_essSurj` を `toBiratCat` で送るだけ |\n| full | 未 |\n| faithful | 未 |\n\n## ★★full / faithful の筋\n`HomBirat A B = HomColim` の添字は `IdxBirat P G A`(`A` への co-angular pre-step の反対圏)。\n★★`naiveFrob` が **`coaPreProp` を保ち、かつ反射する**なら\n`CoaPre P G ≌ CoaPre P G` が誘導され、添字圏が対応して余極限も対応する。\n\n★保存は `nfMap_coaPreProp`(済)。**反射**の材料も揃っている:\n- pre-step の反射 —— `nfMap_preStep_of`(在庫、`Prop21.lean`)\n- co-angular の反射 —— **`isCoAngular_of_map`**(本セッションの `Thm34Quasi.lean`)。要る仮定 4 つはすべて在庫:\n  `prop_2_1_ii_degFr`(linear)/ `prop_2_1_ii_Div`(isometric)/\n  `nfMap_preStep`(pre-step)/ `prop_1_10_i_baseIso_of`(base-iso)\n★★★**新しい数学は要らない —— 接続だけである。**",
+          "lean": "ABC3/Found/FrdI/Prop48Nf.lean",
+          "decl": "psiBirat_essSurj (full / faithful は未)"
         },
         {
           "id": "ii-src",
