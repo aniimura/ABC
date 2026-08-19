@@ -476,6 +476,84 @@ theorem homPf_exists_zeta_rep (hiso : ∀ X : C, IsIsotropic P X) {A : C}
   rw [HomPf.mk_map hu φ₀]
   exact hZ
 
+/-! ## ★8. 単射性の核 -/
+
+/-- ★★`ζ` 添字どうしの射に沿う遷移は `φ ↦ φ^{deg}`。
+
+★2 つの脚が一致することは `z₁` の epi 性(`𝒞` は totally epimorphic)から出る。
+★そのあとは `frobTransport` の一意性に Frobenius-normalized の等式を渡すだけ。 -/
+theorem idxTransport_zeta {A : C} (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    {z₁ z : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz₁ : IsFrobeniusType P z₁) (hz₁b : IsBaseIdentity P z₁)
+    (hz : IsFrobeniusType P z) (hzb : IsBaseIdentity P z)
+    (t : (idxZeta' (F := F) hz₁) ⟶ (idxZeta' (F := F) hz))
+    {φ : End (rtObj P F A 1)} (hφ : φ ∈ OTri P (rtObj P F A 1)) :
+    idxTransport P F t ((φ : rtObj P F A 1 ⟶ rtObj P F A 1))
+      = ((φ ^ ((P.degFr (t.right.hom.1) : ℕ+) : ℕ) : End (rtObj P F A 1))
+          : rtObj P F A 1 ⟶ rtObj P F A 1) := by
+  have hw := Under.w t
+  have hw1 : z₁ ≫ t.right.hom.1 = z :=
+    congrArg (fun s : (idxZeta' (F := F) hz₁).right ⟶ _ => s.hom.1) hw
+  have hw2 : z₁ ≫ t.right.hom.2 = z :=
+    congrArg (fun s : (idxZeta' (F := F) hz₁).right ⟶ _ => s.hom.2) hw
+  haveI : Epi z₁ := P.totEpiC _ _ _
+  have heq12 : t.right.hom.1 = t.right.hom.2 := (cancel_epi z₁).mp (hw1.trans hw2.symm)
+  have hkb : IsBaseIdentity P (t.right.hom.1) := by
+    have h0 : P.Base z₁ ≫ P.Base (t.right.hom.1) = P.Base z := by
+      rw [← P.Base_comp]; exact congrArg P.Base hw1
+    have hb1 : P.Base z₁ = P.Base (𝟙 (rtObj P F A 1)) := hz₁b
+    rw [hb1, P.Base_id, Category.id_comp] at h0
+    exact h0.trans hzb
+  refine frobTransport_eq _ _ _ _ _ _ _ ?_
+  rw [← heq12]
+  exact (hfn' (t.right.hom.1) hkb φ hφ).symm
+
+/-- ★★★★**単射性の核** —— `ζ` 添字での 2 つの代表が `𝒞^pf` で等しければ、
+`Pf` の同値関係(`k₁ · deg z₁ = k₂ · deg z₂` かつ `φ₁^{k₁} = φ₂^{k₂}`)が成り立つ。
+
+★`HomPf.eq_iff` で共通の上界 `V` を取り、`idxPf_iso_zeta` でそれを `ζ` 添字へ移す。
+そこへの 2 本の射に `idxTransport_zeta` を当てると、両辺が冪になる。 -/
+theorem homPf_zeta_eq (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    {z₁ z₂ : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz₁ : IsFrobeniusType P z₁) (hz₁b : IsBaseIdentity P z₁)
+    (hz₂ : IsFrobeniusType P z₂) (hz₂b : IsBaseIdentity P z₂)
+    {φ₁ φ₂ : End (rtObj P F A 1)}
+    (hφ₁ : φ₁ ∈ OTri P (rtObj P F A 1)) (hφ₂ : φ₂ ∈ OTri P (rtObj P F A 1))
+    (heq : HomPf.mk (idxZeta' (F := F) hz₁) ((φ₁ : rtObj P F A 1 ⟶ rtObj P F A 1))
+      = HomPf.mk (idxZeta' (F := F) hz₂) ((φ₂ : rtObj P F A 1 ⟶ rtObj P F A 1))) :
+    ∃ k₁ k₂ : ℕ+, k₁ * P.degFr z₁ = k₂ * P.degFr z₂ ∧
+      ((φ₁ ^ ((k₁ : ℕ+) : ℕ) : End (rtObj P F A 1)))
+        = ((φ₂ ^ ((k₂ : ℕ+) : ℕ) : End (rtObj P F A 1))) := by
+  obtain ⟨V, uu, vv, hUV⟩ := HomPf.eq_iff.mp heq
+  obtain ⟨e, e', he, he', z, hzb, hzf, hzdeg, hae, hbe⟩ :=
+    idxPf_iso_zeta F (frobTrivial_rtObj hiso hA) V.hom.hom.1 V.hom.property.1
+      V.hom.hom.2 V.hom.property.2.1 V.hom.property.2.2
+  haveI := he
+  haveI := he'
+  have ww : V ⟶ idxZeta' (F := F) hzf :=
+    Under.homMk (⟨(e, e'), frobType_of_isIso hiso e, frobType_of_isIso hiso e',
+        (degFr_of_isIso P e).trans (degFr_of_isIso P e').symm⟩ :
+        V.right ⟶ (⟨(rtObj P F A 1, rtObj P F A 1)⟩ : BiFr P F))
+      (by
+        refine WideSubcategory.hom_ext _ ?_
+        exact Prod.ext hae hbe)
+  have h1 := idxTransport_zeta (F := F) hfn' hz₁ hz₁b hzf hzb (uu ≫ ww) hφ₁
+  have h2 := idxTransport_zeta (F := F) hfn' hz₂ hz₂b hzf hzb (vv ≫ ww) hφ₂
+  have hmid : idxTransport P F (uu ≫ ww) ((φ₁ : rtObj P F A 1 ⟶ rtObj P F A 1))
+      = idxTransport P F (vv ≫ ww) ((φ₂ : rtObj P F A 1 ⟶ rtObj P F A 1)) := by
+    rw [idxTransport_comp, idxTransport_comp, hUV]
+  refine ⟨P.degFr ((uu ≫ ww).right.hom.1), P.degFr ((vv ≫ ww).right.hom.1), ?_, ?_⟩
+  · have e1 : P.degFr (z₁ ≫ (uu ≫ ww).right.hom.1) = P.degFr z :=
+      congrArg P.degFr (congrArg (fun s : (idxZeta' (F := F) hz₁).right ⟶ _ => s.hom.1)
+        (Under.w (uu ≫ ww)))
+    have e2 : P.degFr (z₂ ≫ (vv ≫ ww).right.hom.1) = P.degFr z :=
+      congrArg P.degFr (congrArg (fun s : (idxZeta' (F := F) hz₂).right ⟶ _ => s.hom.1)
+        (Under.w (vv ≫ ww)))
+    rw [P.degFr_comp] at e1 e2
+    exact e1.trans e2.symm
+  · exact h1.symm.trans (hmid.trans h2)
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -517,6 +595,12 @@ def otriPfMk_step.src : ABC3.Meta.Source :=
 def homPf_exists_zeta_rep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒞^pf の自己射はすべて ζ の添字で代表される",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の単射性の核。 -/
+def homPf_zeta_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — ζ 添字の 2 代表が等しければ Pf の関係が成り立つ",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
