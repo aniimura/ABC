@@ -1887,7 +1887,7 @@
      "size": "★大",
      "status": "todo",
      "deps": [],
-     "note": "原文は (iv) の仮定として「B は 𝒞 に伴う有理関数のモノイド」と置くので、\n★Lean でも **interface(構造)として仮定に置くのが忠実**である。\n必要なのは各 A : 𝒞 について\n  (a) 加法同型 M.bmon.val (Base A) ≃+ Additive (𝒪^×(A^birat))\n  (b) M.divB と biratDivGp の両立\n  (c) 𝒟 の射に沿った自然性\nの 3 点。\n★構成する場合は otriStarBirat(Prop44Phi.lean)を 𝒟* ≃ 𝒟 で 𝒟 へ移し、\nMonoidOn の charInj / fsmIso を示す必要がある(そちらは別ノード)。",
+     "note": "原文は (iv) の仮定として「B は 𝒞 に伴う有理関数のモノイド」と置くので、\n★Lean でも **interface(構造)として仮定に置くのが忠実**である。\n必要なのは各 A : 𝒞 について\n  (a) 加法同型 M.bmon.val (Base A) ≃+ Additive (𝒪^×(A^birat))\n  (b) M.divB と biratDivGp の両立\n  (c) 𝒟 の射に沿った自然性\nの 3 点。\n★構成する場合は otriStarBirat(Prop44Phi.lean)を 𝒟* ≃ 𝒟 で 𝒟 へ移し、\nMonoidOn の charInj / fsmIso を示す必要がある(そちらは別ノード)。\n\n## ★★2026-08-20 の解析\n\n`Div_B` の像は `Φ^birat` で、核は `𝒪^×(A)`(`phiBiratAt_ker`)。\n★interface に要るのは (a)(b)(c) の 3 点だが、\n**(c) の自然性は `𝒞^birat` の側の `dstarMap`(`Proposition 2.2, (ii)`)で書ける**:\n`ν : A ⟶ 𝒞 の射` に対し `ν^b ≫ (iso B x) = (iso A (bmon.map (Base ν) x)) ≫ ν^b`。",
      "lean": "",
      "decl": ""
     },
@@ -1907,11 +1907,23 @@
      "id": "cls-functor",
      "title": "対象の対応 X ↦ (Base X, cls X)",
      "size": "★中",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "ratfn-iface"
      ],
-     "note": "底 d ごとに Frobenius-trivial な持ち上げ A_d を選び(ftLift)、\nPicObj P A_d の類を Φ^gp(Base X) へ輸送する。\n★strictification は要らない —— 同型 ρ_d : Base A_d ≅ d で輸送するだけ。",
+     "note": "底 d ごとに Frobenius-trivial な持ち上げ A_d を選び(ftLift)、\nPicObj P A_d の類を Φ^gp(Base X) へ輸送する。\n★strictification は要らない —— 同型 ρ_d : Base A_d ≅ d で輸送するだけ。\n\n## ★★閉じた(2026-08-20)\n★path を対象の一部にすれば選択が消える(`PathCat` と `pathForget_isEquivalence`)。\n★★**符号に注意**: `α = −Div^gp(π_X)` である\n(模型 `𝒟 = pt`, `Φ = ℕ`, `B = 0` で `birat_divGp_sub_mem` と突き合わせて確定した)。\n★参照射 `r(θ,n) = lift(θ) ≫ F_n` とその関手性も取得(`Thm52Ref.lean`)。",
+     "lean": "ABC3/Found/FrdI/Thm52Path.lean",
+     "decl": "FPPath.cls / FPPath.biratIso / FPPath.biratDivGp_biratIso"
+    },
+    {
+     "id": "skeleton",
+     "title": "★`𝒞^Fr-tr` の skeleton 化(Remark 2.7.2 の前提)",
+     "size": "★大",
+     "status": "todo",
+     "deps": [
+      "cls-functor"
+     ],
+     "note": "`Remark 2.7.2` は「`𝒞` が skeleton」を要求する。原文は WLOG で済ませるが、\nLean では `CategoryTheory.Skeleton` で同値な skeletal 圏を作り、\npre-Frobenioid / Frobenioid 構造を移す必要がある。\n★`𝒞^Fr-tr` が base-trivial 型・isotropic 型であることは `Theorem 5.1, (iii)` で取得済み。",
      "lean": "",
      "decl": ""
     },
@@ -1921,9 +1933,11 @@
      "size": "★大",
      "status": "todo",
      "deps": [
-      "cls-functor"
+      "ratfn-iface",
+      "cls-functor",
+      "skeleton"
      ],
-     "note": "u_f は Div_B(u_f) = degFr(f)·cls X + Div f − Φ(Base f)(cls Y) で決まる。\n★右辺が Φ^birat に入ることは Theorem 5.1, (ii)(thm_5_1_ii)そのもの。\n★u_f が一意に決まる(= 関手性)ためには ker(Div_B) ≅ 𝒪^×(A) を使う。",
+     "note": "`u_f` の取り方が (iv) の**核心**である。\n\n## ★★★2026-08-20 の解析 —— 素朴な道は塞がっている\n\n`q_f := π_X ≫ r_f^b ≫ π_Y⁻¹ : X^b → Y^b` は `f^b` と**底と次数が一致**し、\n`Div^gp` の差はちょうど `Div_B(u_f)` になる(模型で検算済み)。しかし:\n\n* `f^b = q_f ≫ u'`(`u' ∈ 𝒪^×(Y^b)`)—— `Div_B(u_f) = Φ(Base f)(Div^gp u')` は合うが、\n  **右作用は推移的でない**(`bmon.map (Base f)` が全射とは限らない)ので `u'` が取れない。\n* `f^b = u'' ≫ q_f`(`u'' ∈ 𝒪^×(X^b)`)—— こちらは取れるが\n  `Div_B(u_f) = n_f · Div^gp(u'')` となり、model の合成則(`u_ψ + deg(ψ)·u_φ`)と合わない。\n\n★★**正解は `Remark 2.7.2` の 3 分解**である(原文がそう書いている):\n> Remark 2.7.2's unique factorization φ = φ_P ∘ φ_{𝒪^×} ∘ φ_F\n\nすなわち `φ = γ ≫ β ≫ α`(`γ` は `F`-distinguished、`β` は base-identity な\npre-step 自己射、`α` は `P`-distinguished)の**厳密な一意性**から `u` を取り出す。\n★**`Remark 2.7.2` は在庫にある**(`Def27.lean` の第 1〜第 3 主張)。\n\n★★ただし `Remark 2.7.2` は **base-trivial 型**かつ **`𝒞` が skeleton** を要求する。\n原文は「WLOG `𝒞`(したがって `𝒞^Fr-tr`)は skeleton としてよい」と書く。\n★`𝒞^Fr-tr` が base-trivial 型であることは `Theorem 5.1, (iii)` で取得済み。\n★**残る前提は skeleton 化**である —— `CategoryTheory.Skeleton` で\n`𝒞^Fr-tr` と同値な skeletal 圏を作り、Frobenioid 構造を移す必要がある(別ノード)。",
      "lean": "",
      "decl": ""
     },
