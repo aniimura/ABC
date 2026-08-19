@@ -443,6 +443,7 @@ import ABC3.Found.Arakelov.ArcEvalOn
 import ABC3.Found.Arakelov.ArcGenNorm
 import ABC3.Found.Arakelov.ArcSemilinear
 import ABC3.Found.Arakelov.ArcLiftOpen
+import ABC3.Found.Arakelov.ArcEvalCont
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre

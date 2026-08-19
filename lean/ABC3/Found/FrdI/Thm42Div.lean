@@ -80,4 +80,93 @@ def prop114vRhs_map_image.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — Proposition 1.14, (v) の右辺は Ψ で移る",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★2. 像の外へ広げる —— 本質的全射性で `B` を取り直す -/
+
+/-- ★同型を前置しても irreducible。 -/
+theorem isIrreducibleMor_iso_comp {X Y Z : C₂} (e : X ⟶ Y) [IsIso e] {f : Y ⟶ Z}
+    (h : IsIrreducibleMor f) : IsIrreducibleMor (e ≫ f) := by
+  refine ⟨fun hiso => h.1 ?_, ?_⟩
+  · haveI := hiso
+    have : f = inv e ≫ (e ≫ f) := by rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    rw [this]; infer_instance
+  · intro W β α hfac
+    have hfac' : f = (inv e ≫ β) ≫ α := by
+      rw [Category.assoc, ← hfac, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+    rcases h.2 W (inv e ≫ β) α hfac' with hβ | hα
+    · left
+      haveI := hβ
+      have : β = e ≫ (inv e ≫ β) := by
+        rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+      rw [this]; infer_instance
+    · right; exact hα
+
+/-- ★★★★★**右辺は `𝒞₂` の全対象について移る** —— 本質的全射性で `B` を像へ引き戻す。 -/
+theorem prop114vRhs_map (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    {A : C₁} (φ : A ⟶ A) (h : Prop114vRhs P₁ φ) :
+    Prop114vRhs' P₂ (Ψ.functor.map φ) := by
+  intro B α hα
+  obtain ⟨B₀, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) B
+  have hstep : IsStep P₂ (α ≫ ε.inv) := by
+    refine ⟨IsPreStep.comp P₂ hα.1 (isPreStep_of_isIso P₂ ε.inv), fun hiso => hα.2 ?_⟩
+    haveI := hiso
+    have : α = (α ≫ ε.inv) ≫ ε.hom := by
+      rw [Category.assoc, ε.inv_hom_id, Category.comp_id]
+    rw [this]; infer_instance
+  obtain ⟨B', ψ, β, hirr, hnps, hstepβ, hsq⟩ :=
+    prop114vRhs_map_image Ψ hPS hPS' φ h B₀ (α ≫ ε.inv) hstep
+  refine ⟨B', ε.inv ≫ ψ, ε.inv ≫ β, isIrreducibleMor_iso_comp ε.inv hirr, ?_, ?_, ?_⟩
+  · intro hc
+    refine hnps ?_
+    have h1 : ψ = ε.hom ≫ (ε.inv ≫ ψ) := by
+      rw [← Category.assoc, ε.hom_inv_id, Category.id_comp]
+    rw [h1]
+    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ ε.hom) hc
+  · refine ⟨IsPreStep.comp P₂ (isPreStep_of_isIso P₂ ε.inv) hstepβ.1, fun hiso => hstepβ.2 ?_⟩
+    haveI := hiso
+    have : β = ε.hom ≫ (ε.inv ≫ β) := by
+      rw [← Category.assoc, ε.hom_inv_id, Category.id_comp]
+    rw [this]; infer_instance
+  · calc α ≫ ε.inv ≫ ψ = (α ≫ ε.inv) ≫ ψ := (Category.assoc _ _ _).symm
+      _ = Ψ.functor.map φ ≫ (α ≫ ε.inv) ≫ β := hsq
+      _ = Ψ.functor.map φ ≫ α ≫ ε.inv ≫ β := by simp only [Category.assoc]
+
+def prop114vRhs_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77,
+    item := "Theorem 4.2, (i) — 右辺は 𝒞₂ の全対象について移る",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★3. ★★★★★★`Theorem 4.2, (i)` の `Div-identity` 保存
+
+原文 (FrdI p.77):
+> preserves primary steps, Div-identity endomorphisms, Div-Frobenius-
+
+★★`Proposition 1.14, (v)` を**両側で適用する**だけ ——
+`Div` も `Φ` も現れない右辺が `Ψ` で移るから。 -/
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (i)** —— `Ψ` は
+`prime-Frobenius かつ Div-identity` な自己射を保つ。 -/
+theorem primeFrobenius_divIdentity_map (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    {A : C₁} (hA₁ : ¬ IsGroupLikeObj P₁ A)
+    (hA₂ : ¬ IsGroupLikeObj P₂ (Ψ.functor.obj A))
+    (φ : A ⟶ A) (hirr : IsIrreducibleMor φ) (hnps : ¬ IsPreStep P₁ φ)
+    (h : IsPrimeFrobenius P₁ φ ∧ IsDivIdentity P₁ φ) :
+    IsPrimeFrobenius P₂ (Ψ.functor.map φ) ∧ IsDivIdentity P₂ (Ψ.functor.map φ) :=
+  (prop_1_14_v P₂ F₂ G₂ hiso₂ hnd₂ hA₂ (Ψ.functor.map φ)
+      (isIrreducibleMor_map Ψ.functor hirr) (fun hc => hnps (hPS' φ hc))).mpr
+    (prop114vRhs_map Ψ hPS hPS' φ
+      ((prop_1_14_v P₁ F₁ G₁ hiso₁ hnd₁ hA₁ φ hirr hnps).mp h))
+
+def primeFrobenius_divIdentity_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77,
+    item := "Theorem 4.2, (i) — Div-identity 自己射の保存",
+    sectionId := "frdi-thm-4-2" }
+
 end ABC3.Found.FrdI

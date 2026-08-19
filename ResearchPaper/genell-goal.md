@@ -12068,3 +12068,41 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**99 ブロック**(Arakelov 84 + Galois 15)。
+
+## §9-303 ★★★★★開集合上の評価が連続になった(第 260 ブロック)——`genNorm` の連続性が完成
+
+### ★★機構 —— `appLE` に直すと合成則が使える
+
+    evalOn p V h c = ΓSpecIso ((p.appLE V ⊤ _) c)          ★`rfl`
+
+★これで mathlib の `appLE_comp_appLE` が使え、`p = q ≫ V.ι` のとき
+
+    evalOn (q ≫ V.ι) V _ c = evalGlobal q ((V.ι.appLE V ⊤ _) c)
+
+★★右辺は第 252 でそのまま連続——**`genNorm` の連続性が閉じた**
+(第 258 の `genNorm (arcEvalOnTop (c·g)) = ‖evalOn c‖` と合わせて)。
+
+★★★`V.ι.appLE V ⊤ _` は mathlib で **`IsIso`** と登録されている
+——`V` 上の関数と `V.toScheme` 上の関数の対応そのものである。
+
+### ★摩擦 —— 環の合成の適用も**明示束縛子の `rfl` 補題**が要る
+
+`(f ≫ g).hom c = g.hom (f.hom c)`(CommRingCat)は `rfl` だが、
+**`have` の型として書くと受理されない**(透過性)。
+★第 250 の `hsplit`(ModuleCat 版)と同じで、**明示束縛子の補題にすると通る**。
+
+★★★これで「明示束縛子の `rfl` 補題」は **3 例目**である
+(`hsplit` / `pushforward_at_top` / `ringSplit`)。
+★★**圏の合成を元素レベルで割るときは、毎回この補題を先に置く**——定石として書いてよい。
+
+### 残り(C3)
+
+| 段 | 状態 |
+|---|---|
+| 第 244–253・256–260 | ★取得済(**連続性まで完成**) |
+| 生成切断の非消滅 | ★次 |
+| 1 の分割で貼る | ★最後 |
+
+### この区間の集計
+
+★**100 ブロック**(Arakelov 85 + Galois 15)。
