@@ -1605,11 +1605,13 @@
           "id": "i-divid",
           "title": "(i) Ψ は Div-identity 自己射を保つ",
           "size": "★中",
-          "status": "todo",
+          "status": "半済",
           "deps": [
             "hyp"
           ],
-          "note": "★★`IsDivIdentity` は在庫(`MorphismTypes.lean`)。\n★`isDivIdentity_of_isBaseIdentity`(在庫)と\n`Theorem 3.4, (v)` の base-identity 保存(本セッション、`isBaseIdentity_map_of_baseSquare`)が効く見込み。\n\n## ★★★★在庫が直接効く(2026-08-19)\n\n`isDivIdentity_of_forall_mprec`(`Prop114.lean:1552`)——\n**`non-dilating` ＋ `MPrec` の条件 ⟹ `Div-identity`**。\n★`Theorem 4.2` の仮定(standard 型)に `phiNonDilating` が入っているので、\n`Ψ` が `Div-identity` 自己射を保つことは\n「`Ψ` を経由しても `MPrec` の条件が保たれる」に帰着する。\n★`MPrec.map`(`Prop110.lean`)と `Ψ_Φ`(`Theorem 4.9`)の関係を測ること。\n★★`Proposition 1.14, (v)` の十分性がそのまま土台になる。"
+          "note": "★★`IsDivIdentity` は在庫(`MorphismTypes.lean`)。\n★`isDivIdentity_of_isBaseIdentity`(在庫)と\n`Theorem 3.4, (v)` の base-identity 保存(本セッション、`isBaseIdentity_map_of_baseSquare`)が効く見込み。\n\n## ★★★★在庫が直接効く(2026-08-19)\n\n`isDivIdentity_of_forall_mprec`(`Prop114.lean:1552`)——\n**`non-dilating` ＋ `MPrec` の条件 ⟹ `Div-identity`**。\n★`Theorem 4.2` の仮定(standard 型)に `phiNonDilating` が入っているので、\n`Ψ` が `Div-identity` 自己射を保つことは\n「`Ψ` を経由しても `MPrec` の条件が保たれる」に帰着する。\n★`MPrec.map`(`Prop110.lean`)と `Ψ_Φ`(`Theorem 4.9`)の関係を測ること。\n★★`Proposition 1.14, (v)` の十分性がそのまま土台になる。\n\n## ★★★★★半済(2026-08-19)—— `Proposition 1.14, (v)` を両側で当てるだけだった\n\n| 宣言 | 内容 |\n|---|---|\n| `Prop114vRhs` | `Proposition 1.14, (v)` の右辺(純粋に圏論的) |\n| `isIrreducibleMor_iso_comp` | 同型を前置しても irreducible |\n| `prop114vRhs_map_image` | 右辺は `Ψ` で移る(像の中) |\n| `prop114vRhs_map` | ★右辺は `𝒞₂` の**全対象**について移る |\n| **`primeFrobenius_divIdentity_map`** | ★★`Ψ` は prime-Frobenius かつ Div-identity な自己射を保つ |\n\n## ★★★測って効いたこと\n`prop_1_14_v`(`Prop114.lean:1648`)の右辺には\n**`Div` も `Φ` も現れない** —— `IsStep`・`IsPreStep`・`IsIrreducibleMor` だけ。\n★これらは `Theorem 3.4, (ii)(iii)` で `Ψ` が保つ/反射するので右辺がそのまま移る。\n★使ったのは `isIso_of_reflects_iso`(圏同値は同型を反射)と\n`isIrreducibleMor_map`(在庫)だけ。\n\n## ★半済の理由(範囲)\n`prop_1_14_v` が特徴づけるのは\n**`IsPrimeFrobenius ∧ IsDivIdentity`** の対であり、かつ\n`hirr`(irreducible)・`hnps`(pre-step でない)・`hA`(group-like でない)を要求する。\n★原文の「Div-identity endomorphisms」全体を覆うには、\n**その 3 条件を満たさない自己射**の扱いが要る。\n★★ただし原典自身が `Proposition 1.14, (v)` を使うので、\nこれが**意図された筋**である。",
+          "lean": "ABC3/Found/FrdI/Thm42Div.lean",
+          "decl": "Prop114vRhs / prop114vRhs_map_image / prop114vRhs_map / primeFrobenius_divIdentity_map"
         },
         {
           "id": "i-divfrob",
