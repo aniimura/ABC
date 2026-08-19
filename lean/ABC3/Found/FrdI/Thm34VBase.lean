@@ -217,4 +217,74 @@ def projPrecompIsoGen.src : ABC3.Meta.Source :=
 
 end Uniq
 
+/-! ## ★5. `Ψ` は pull-back のスライスに関手を誘導する
+
+原文 (FrdI p.68):
+> [i.e., which maps A → (Pi)A, (A → A) → {(Pi)A → (Pi)A}]. Similarly, the
+
+★★★原典の `(P_i)_A` は **`A` へ入る pull-back 射のなす圏**であり、
+`Definition 1.3, (i), (c)`(`plBkEquiv`)で `𝒟_{A_𝒟}` と同値になる。
+★`Ψ` が pull-back 射を保てば、この圏の間の関手が立つ。 -/
+
+section PlBkPsi
+
+universe v4 u4 w4 u5 v5
+
+variable {D₂ : Type u4} [Category.{v4} D₂] {C₂ : Type u5} [Category.{v5} C₂]
+  {Φ₂ : MonoidOn.{v4, u4, w4} D₂} (P₂ : PreFrobenioid C₂ Φ₂)
+  (Ψ : C ⥤ C₂)
+  (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P f → IsPullBack P₂ (Ψ.map f))
+
+include hPB in
+/-- ★★**`Ψ` が誘導する `𝒞^pl-bk` の間の関手**。 -/
+def plBkPsi : PlBk P ⥤ PlBk P₂ where
+  obj X := ⟨Ψ.obj X.obj⟩
+  map {X Y} f := ⟨Ψ.map f.hom, hPB f.hom f.property⟩
+  map_id X := by
+    refine WideSubcategory.hom_ext _ ?_
+    show Ψ.map (𝟙 X.obj) = 𝟙 _
+    exact CategoryTheory.Functor.map_id _ _
+  map_comp {X Y Z} f g := by
+    refine WideSubcategory.hom_ext _ ?_
+    show Ψ.map (f.hom ≫ g.hom) = Ψ.map f.hom ≫ Ψ.map g.hom
+    exact CategoryTheory.Functor.map_comp _ _ _
+
+include hPB in
+/-- ★★★**`(P₁)_A → (P₂)_{ΨA}`** —— 原典の「`(A → A) → {(P_i)_A → (P_i)_A}`」。 -/
+def plBkSlicePsi (A : C) :
+    Over (⟨A⟩ : PlBk P) ⥤ Over (⟨Ψ.obj A⟩ : PlBk P₂) :=
+  Over.post (plBkPsi P P₂ Ψ hPB)
+
+def plBkPsi.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Ψ が pull-back のスライスに誘導する関手",
+    sectionId := "frdi-thm-3-4" }
+
+/-! ## ★6. 共役関手 `𝒟₁_{Base A} ⥤ 𝒟₂_{Base ΨA}`
+
+原文 (FrdI p.68):
+> [i.e., by inverting the equivalence of categories induced by α and then composing
+
+★★★`plBkEquiv`(`Definition 1.3, (i), (c)`)で `𝒟_{A_𝒟}` を `(𝒞^pl-bk)_A` に置き換え、
+`Ψ` で移して戻す。★**選択を含まない**(`plBkOverFunctor` の逆関手は
+`IsEquivalence` インスタンスから来る canonical なもの)ので、
+これ自体は well-defined である。 -/
+
+include F hPB in
+/-- ★★★★★**共役関手** —— `𝒟₁` のスライスを `𝒟₂` のスライスへ移す。
+
+★これが原典の `Q_i → R_i` の「新しい関手」の実体である。 -/
+noncomputable def basePsiSlice (A : C) :
+    Over ((P.toElem.obj A).base) ⥤ Over ((P₂.toElem.obj (Ψ.obj A)).base) :=
+  haveI := F.plBkEquiv A
+  (plBkOverFunctor P A).inv ⋙ plBkSlicePsi P P₂ Ψ hPB A
+    ⋙ plBkOverFunctor P₂ (Ψ.obj A)
+
+def basePsiSlice.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — 𝒟 のスライスの間の共役関手",
+    sectionId := "frdi-thm-3-4" }
+
+end PlBkPsi
+
 end ABC3.Found.FrdI
