@@ -167,6 +167,104 @@ theorem otri_conj_iso {A B : C} (u : A ⟶ B) [IsIso u] (hu1 : P.degFr u = 1)
     rw [P.degFr_comp, P.degFr_comp, hiu1, hu1, hα.2]
     simp
 
+/-! ## ★5. 逆向きの写像の材料 —— `α^{1/m}` を `𝒞^pf` の中に作る
+
+★`HomRoot ⟨A,1⟩ ⟨A,1⟩` の添字は `IdxPf (rtObj A 1) (rtObj A 1)` にある。
+`ζ`(次数 `m` の Frobenius 型自己射)を共役で `rtObj A 1` へ移して添字を作り、
+そこに `α` を載せると、「`α` の `m` 乗根」にあたる `𝒞^pf` の自己射が得られる。 -/
+
+/-- ★★同型による共役は Frobenius 型を保つ(isotropic 型のとき)。 -/
+theorem frobType_conj_iso (hiso : ∀ X : C, IsIsotropic P X)
+    {A B : C} (u : A ⟶ B) [IsIso u] (hu0 : P.Div u = 0)
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) :
+    IsFrobeniusType P (inv u ≫ ζ ≫ u) := by
+  have hiu0 : P.Div (inv u) = 0 := Div_inv_eq_zero u hu0
+  haveI hbu : IsIso (P.Base u) := isIso_Base_of_isIso u
+  haveI hbiu : IsIso (P.Base (inv u)) := isIso_Base_of_isIso (inv u)
+  haveI hbz : IsIso (P.Base ζ) := hζ.2
+  refine ⟨⟨prop_1_4_i P _ (fun X _ => hiso X), ?_⟩, ?_⟩
+  · have h1 : P.Div (ζ ≫ u) = 0 := by
+      rw [P.Div_comp, hu0, hζ.1.2, map_zero, smul_zero, add_zero]
+    show P.Div (inv u ≫ ζ ≫ u) = 0
+    rw [P.Div_comp, h1, hiu0, map_zero, smul_zero, add_zero]
+  · show IsIso (P.Base (inv u ≫ ζ ≫ u))
+    rw [P.Base_comp, P.Base_comp]
+    infer_instance
+
+/-- ★`A` の自己射を `rtObj A 1` へ共役で移したもの。 -/
+noncomputable def conjRt {A : C} (f : A ⟶ A) : rtObj P F A 1 ⟶ rtObj P F A 1 :=
+  haveI := isIso_rtExt_one P F A
+  inv (rtExt P F A 1) ≫ f ≫ rtExt P F A 1
+
+theorem conjRt_frobType (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) :
+    IsFrobeniusType P (conjRt (F := F) ζ) := by
+  haveI := isIso_rtExt_one P F A
+  exact frobType_conj_iso hiso _ ((rtExt_frobType P F A 1).1.2) hζ
+
+theorem conjRt_base_id {A : C} {α : End A} (hα : α ∈ OTri P A) :
+    P.Base (conjRt (F := F) ((α : A ⟶ A))) = 𝟙 _ := by
+  haveI := isIso_rtExt_one P F A
+  haveI : IsIso (P.Base (rtExt P F A 1)) := isIso_Base_of_isIso (rtExt P F A 1)
+  show P.Base (inv (rtExt P F A 1) ≫ ((α : A ⟶ A)) ≫ rtExt P F A 1) = 𝟙 _
+  rw [P.Base_comp, P.Base_comp]
+  have h1 : P.Base ((α : A ⟶ A)) = P.Base (𝟙 A) := hα.1
+  rw [h1, P.Base_id, Category.id_comp, ← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+
+/-- ★`ζ` から作る `𝒞^pf` の添字。 -/
+noncomputable def idxZeta (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) :
+    IdxPf P F (rtObj P F A 1) (rtObj P F A 1) :=
+  idxMk (conjRt (F := F) ζ) (conjRt (F := F) ζ)
+    (conjRt_frobType hiso hζ) (conjRt_frobType hiso hζ) rfl
+
+/-- ★★**「`α` の `m` 乗根」にあたる `𝒞^pf` の自己射**。 -/
+noncomputable def otriPfMk (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (α : End A) :
+    HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A, 1⟩ :=
+  HomPf.mk (idxZeta hiso hζ) (conjRt (F := F) ((α : A ⟶ A)))
+
+theorem otriPfMk_deg (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (α : End A) (hα : α ∈ OTri P A) :
+    rootDeg (otriPfMk (F := F) hiso hζ α) = 1 := by
+  show pfDeg (HomPf.mk (idxZeta hiso hζ) (conjRt (F := F) ((α : A ⟶ A)))) = 1
+  rw [pfDeg_mk]
+  show P.degFr (conjRt (F := F) ((α : A ⟶ A))) = 1
+  haveI := isIso_rtExt_one P F A
+  show P.degFr (inv (rtExt P F A 1) ≫ ((α : A ⟶ A)) ≫ rtExt P F A 1) = 1
+  rw [P.degFr_comp, P.degFr_comp, rtExt_degFr,
+    degFr_inv_eq_one (rtExt P F A 1) (rtExt_degFr P F A 1), hα.2]
+  simp
+
+theorem otriPfMk_base (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (α : End A) (hα : α ∈ OTri P A) :
+    rootBase (otriPfMk (F := F) hiso hζ α) = 𝟙 _ := by
+  haveI := isIso_rtExt_one P F A
+  haveI hbr : IsIso (P.Base (rtExt P F A 1)) := isIso_Base_of_isIso (rtExt P F A 1)
+  haveI hbz : IsIso (P.Base (conjRt (F := F) ζ)) := (conjRt_frobType hiso hζ).2
+  have hrep : pfBase (otriPfMk (F := F) hiso hζ α) = 𝟙 _ := by
+    show pfBase (HomPf.mk (idxZeta hiso hζ) (conjRt (F := F) ((α : A ⟶ A)))) = _
+    rw [pfBase_mk]
+    show P.Base (conjRt (F := F) ζ) ≫ P.Base (conjRt (F := F) ((α : A ⟶ A)))
+        ≫ inv (P.Base (conjRt (F := F) ζ)) = 𝟙 _
+    rw [conjRt_base_id hα, Category.id_comp, IsIso.hom_inv_id]
+  show P.Base (rtExt P F A 1) ≫ pfBase (otriPfMk (F := F) hiso hζ α)
+      ≫ inv (P.Base (rtExt P F A 1)) = 𝟙 _
+  rw [hrep, Category.id_comp, IsIso.hom_inv_id]
+
+/-- ★★★★**`α^{1/m}` は `𝒪^▷(A^pf)` の元である**。
+
+★★これが `Proposition 5.5, (i)` の同型の**逆向きの写像の材料**である ——
+`𝒪^▷(A)` の元 `α` と Frobenius 型自己射 `ζ`(次数 `m`)の対から、
+`𝒞^pf` の base-identity かつ linear な自己射が作れる。 -/
+theorem otriPfMk_mem (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (α : End A) (hα : α ∈ OTri P A) :
+    ((otriPfMk (F := F) hiso hζ α : End (⟨A, 1⟩ : PfRootObj P F)))
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) := by
+  refine ⟨?_, otriPfMk_deg hiso hζ α hα⟩
+  show rootBase (otriPfMk (F := F) hiso hζ α) = rootBase (idRoot P F ⟨A, 1⟩)
+  rw [otriPfMk_base hiso hζ α hα, rootBase_id]
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -188,6 +286,13 @@ def idxPf_iso_zeta.src : ABC3.Meta.Source :=
 def otriToPfRoot.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒞 → 𝒞^pf が誘導する 𝒪^▷(A) → 𝒪^▷(A^pf)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の逆向きの写像の材料
+(`α` と次数 `m` の対から `𝒪^▷(A^pf)` の元を作る)。 -/
+def otriPfMk_mem.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — α^{1/m} は 𝒪^▷(A^pf) の元",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
