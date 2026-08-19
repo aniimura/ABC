@@ -519,6 +519,84 @@ def basePsiSliceSquare.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — 共役関手と Over.map の 1-可換図式",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★★`Ψ_Base` の射 —— `Base` の任意の射を実現する -/
+
+/-- ★★**`ξ` が `φD` を実現する** —— 共役関手の四角形が立つこと。 -/
+def RealizesBase {X Y : C} (φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base)
+    (ξ : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base) : Prop :=
+  Nonempty (Over.map φD ⋙ basePsiSlice P F P₂ Ψ hPB Y
+    ≅ basePsiSlice P F P₂ Ψ hPB X ⋙ Over.map ξ)
+
+include F₂ hFT hPS in
+/-- ★`Base f` は `Base (Ψ f)` で実現される。 -/
+theorem realizesBase_of_map {X Y : C} (f : X ⟶ Y) :
+    RealizesBase P F P₂ Ψ hPB (P.Base f) (P₂.Base (Ψ.map f)) :=
+  ⟨basePsiSliceSquare P F P₂ F₂ Ψ hPB hFT hPS f⟩
+
+/-- ★★実現は合成で閉じる。 -/
+theorem realizesBase_comp {X Y Z : C}
+    {φ₁ : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base}
+    {φ₂ : (P.toElem.obj Y).base ⟶ (P.toElem.obj Z).base}
+    {ξ₁ : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base}
+    {ξ₂ : (P₂.toElem.obj (Ψ.obj Y)).base ⟶ (P₂.toElem.obj (Ψ.obj Z)).base}
+    (h₁ : RealizesBase P F P₂ Ψ hPB φ₁ ξ₁) (h₂ : RealizesBase P F P₂ Ψ hPB φ₂ ξ₂) :
+    RealizesBase P F P₂ Ψ hPB (φ₁ ≫ φ₂) (ξ₁ ≫ ξ₂) := by
+  obtain ⟨e₁⟩ := h₁
+  obtain ⟨e₂⟩ := h₂
+  exact ⟨Functor.isoWhiskerRight (Over.mapComp φ₁ φ₂) (basePsiSlice P F P₂ Ψ hPB Z)
+    ≪≫ Functor.isoWhiskerLeft (Over.map φ₁) e₂
+    ≪≫ Functor.isoWhiskerRight e₁ (Over.map ξ₂)
+    ≪≫ Functor.isoWhiskerLeft (basePsiSlice P F P₂ Ψ hPB X) (Over.mapComp ξ₁ ξ₂).symm⟩
+
+/-- ★`Over.map φ ⋙ Over.map (inv φ) ≅ 𝟭`。 -/
+noncomputable def overMapInvIso {Y₁ Y₂ : D} (φ : Y₁ ⟶ Y₂) [IsIso φ] :
+    Over.map φ ⋙ Over.map (inv φ) ≅ 𝟭 (Over Y₁) :=
+  (Over.mapComp φ (inv φ)).symm ≪≫ eqToIso (congrArg Over.map (IsIso.hom_inv_id φ))
+    ≪≫ Over.mapId _
+
+/-- ★`Over.map φ ⋙ Over.map (inv φ) ≅ 𝟭`(`𝒟₂` 側)。 -/
+noncomputable def overMapInvIso₂ {Y₁ Y₂ : D₂} (φ : Y₁ ⟶ Y₂) [IsIso φ] :
+    Over.map φ ⋙ Over.map (inv φ) ≅ 𝟭 (Over Y₁) :=
+  (Over.mapComp φ (inv φ)).symm ≪≫ eqToIso (congrArg Over.map (IsIso.hom_inv_id φ))
+    ≪≫ Over.mapId _
+
+set_option maxHeartbeats 2000000 in
+/-- ★★★実現は逆射でも成り立つ。 -/
+theorem realizesBase_inv {X Y : C}
+    (φD : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base) [IsIso φD]
+    (ξ : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj Y)).base) [IsIso ξ]
+    (h : RealizesBase P F P₂ Ψ hPB φD ξ) :
+    RealizesBase P F P₂ Ψ hPB (inv φD) (inv ξ) := by
+  obtain ⟨e⟩ := h
+  refine ⟨cancelLeftEquiv (Over.map φD).asEquivalence ?_⟩
+  refine (Functor.isoWhiskerRight (overMapInvIso φD) (basePsiSlice P F P₂ Ψ hPB X)
+      ≪≫ (basePsiSlice P F P₂ Ψ hPB X).leftUnitor) ≪≫ ?_
+  refine ((Functor.isoWhiskerRight e (Over.map (inv ξ))
+      ≪≫ Functor.isoWhiskerLeft (basePsiSlice P F P₂ Ψ hPB X) (overMapInvIso₂ ξ)
+      ≪≫ (basePsiSlice P F P₂ Ψ hPB X).rightUnitor)).symm
+
+include F₂ hFT hPS in
+set_option maxHeartbeats 2000000 in
+/-- ★★★★★★**`Base` の任意の射は実現される**(原文 p.68 の 3 分解)。 -/
+theorem exists_realizesBase (φD : (P.toElem.obj A).base ⟶ (P.toElem.obj A').base) :
+    ∃ ξ, RealizesBase P F P₂ Ψ hPB φD ξ := by
+  obtain ⟨X, B, α, γ, ψ, hα, hγ, hψ, hfac⟩ := base_three_factor P F φD
+  haveI : IsIso (P.Base α) := hα.2
+  haveI : IsIso (P₂.Base (Ψ.map α)) := (hPS α hα).2
+  refine ⟨inv (P₂.Base (Ψ.map α)) ≫ P₂.Base (Ψ.map γ) ≫ P₂.Base (Ψ.map ψ), ?_⟩
+  rw [hfac]
+  exact realizesBase_comp P F P₂ Ψ hPB
+    (realizesBase_inv P F P₂ Ψ hPB (P.Base α) (P₂.Base (Ψ.map α))
+      (realizesBase_of_map P F P₂ F₂ Ψ hPB hFT hPS α))
+    (realizesBase_comp P F P₂ Ψ hPB
+      (realizesBase_of_map P F P₂ F₂ Ψ hPB hFT hPS γ)
+      (realizesBase_of_map P F P₂ F₂ Ψ hPB hFT hPS ψ))
+
+def exists_realizesBase.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Base の任意の射は Ψ 側で実現される",
+    sectionId := "frdi-thm-3-4" }
+
 end Psi
 
 end SlicePush
