@@ -316,6 +316,24 @@ theorem cmpHom_isPullBack {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ
   isPullBack_of_comp_left P (cmpHom P t t' h) t'.plb t'.hplb
     (by rw [cmpHom_comp]; exact t.hplb)
 
+/-- ★★★★★**比較同型の自然性(抽象形)** ——
+`k₁`・`k₂` が同じ底の射 `w` を持つなら、比較同型と可換。
+
+★★具体的な構成を一切含まないので、`Ψ` の側でそのまま使える。 -/
+theorem cmpHom_natural {X Y B' : C} {φ₁ φ₁' : X ⟶ B'} {φ₂ φ₂' : Y ⟶ B'}
+    (t₁ : ArbFac P φ₁) (t₁' : ArbFac P φ₁') (t₂ : ArbFac P φ₂) (t₂' : ArbFac P φ₂')
+    (h₁ : φ₁ = φ₁') (h₂ : φ₂ = φ₂')
+    (w : (P.toElem.obj X).base ⟶ (P.toElem.obj Y).base)
+    (k₁ : t₁.top ⟶ t₂.top) (hk₁c : k₁ ≫ t₂.plb = t₁.plb)
+    (hk₁b : P.Base k₁ = (t₁.baseEquiv P).inv ≫ w ≫ (t₂.baseEquiv P).hom)
+    (k₂ : t₁'.top ⟶ t₂'.top) (hk₂c : k₂ ≫ t₂'.plb = t₁'.plb)
+    (hk₂b : P.Base k₂ = (t₁'.baseEquiv P).inv ≫ w ≫ (t₂'.baseEquiv P).hom) :
+    k₁ ≫ cmpHom P t₂ t₂' h₂ = cmpHom P t₁ t₁' h₁ ≫ k₂ := by
+  refine pullBack_hom_ext P t₂'.hplb ?_ ?_
+  · rw [Category.assoc, cmpHom_comp, hk₁c, Category.assoc, hk₂c, cmpHom_comp]
+  · rw [P.Base_comp, P.Base_comp, hk₁b, hk₂b, cmpHom_base, cmpHom_base, cmpBase, cmpBase]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+
 /-- ★比較同型を `𝒞^pl-bk` の同型へ持ち上げる。 -/
 noncomputable def cmpIsoPlBk {φ φ' : A ⟶ B} (t : ArbFac P φ) (t' : ArbFac P φ') (h : φ = φ') :
     (⟨t.top⟩ : PlBk P) ≅ ⟨t'.top⟩ where
@@ -424,32 +442,33 @@ noncomputable def slicePushPsi (f : A ⟶ A') :
           (psiFacR P P₂ F₂ Ψ hPB f Z) (Ψ.map_comp _ _))))
     (fun {Z W} u => by
       refine Over.OverMorphism.ext (WideSubcategory.hom_ext _ ?_)
-      show Ψ.map (slPushHom P F f u)
-          ≫ cmpHom P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f W)
-            (psiFacR P P₂ F₂ Ψ hPB f W) (Ψ.map_comp _ _)
-        = cmpHom P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f Z)
-            (psiFacR P P₂ F₂ Ψ hPB f Z) (Ψ.map_comp _ _)
-          ≫ slPushHom P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).map u)
-      refine pullBack_hom_ext P₂ (psiFacR P P₂ F₂ Ψ hPB f W).hplb ?_ ?_
-      · simp only [Category.assoc, cmpHom_comp, slPushHom_comp]
-        show Ψ.map (slPushHom P F f u) ≫ Ψ.map (slPushFac P F f W).plb
-          = Ψ.map (slPushFac P F f Z).plb
+      have hk1c : Ψ.map (slPushHom P F f u) ≫ Ψ.map (slPushFac P F f W).plb
+          = Ψ.map (slPushFac P F f Z).plb := by
         rw [← Ψ.map_comp, slPushHom_comp]
-      · rw [P₂.Base_comp, P₂.Base_comp, cmpHom_base, cmpHom_base, slPushHom_base]
-        have key : ((psiFacL P F P₂ Ψ hPB hFT hPS f Z).baseEquiv P₂).hom
-              ≫ P₂.Base (Ψ.map (slPushHom P F f u))
-            = P₂.Base (Ψ.map u.left.hom)
-              ≫ ((psiFacL P F P₂ Ψ hPB hFT hPS f W).baseEquiv P₂).hom := by
-          show P₂.Base (Ψ.map (slPushFac P F f Z).frb ≫ Ψ.map (slPushFac P F f Z).pre)
-              ≫ P₂.Base (Ψ.map (slPushHom P F f u))
-            = P₂.Base (Ψ.map u.left.hom)
-              ≫ P₂.Base (Ψ.map (slPushFac P F f W).frb ≫ Ψ.map (slPushFac P F f W).pre)
-          rw [← P₂.Base_comp, ← P₂.Base_comp, ← Ψ.map_comp, ← Ψ.map_comp, ← Ψ.map_comp,
-            ← Ψ.map_comp, Category.assoc]
-          exact congrArg (fun g => P₂.Base (Ψ.map g)) (slPush_ladder P F f u)
-        simp only [cmpBase, slPushBase, Category.assoc, Iso.hom_inv_id_assoc]
-        trace_state
-        sorry)
+      have key : ((psiFacL P F P₂ Ψ hPB hFT hPS f Z).baseEquiv P₂).hom
+            ≫ P₂.Base (Ψ.map (slPushHom P F f u))
+          = P₂.Base (Ψ.map u.left.hom)
+            ≫ ((psiFacL P F P₂ Ψ hPB hFT hPS f W).baseEquiv P₂).hom := by
+        show P₂.Base (Ψ.map (slPushFac P F f Z).frb ≫ Ψ.map (slPushFac P F f Z).pre)
+            ≫ P₂.Base (Ψ.map (slPushHom P F f u))
+          = P₂.Base (Ψ.map u.left.hom)
+            ≫ P₂.Base (Ψ.map (slPushFac P F f W).frb ≫ Ψ.map (slPushFac P F f W).pre)
+        rw [← P₂.Base_comp, ← P₂.Base_comp, ← Ψ.map_comp, ← Ψ.map_comp, ← Ψ.map_comp,
+          ← Ψ.map_comp, Category.assoc]
+        exact congrArg (fun g => P₂.Base (Ψ.map g)) (slPush_ladder P F f u)
+      have hk1b : P₂.Base (Ψ.map (slPushHom P F f u))
+          = ((psiFacL P F P₂ Ψ hPB hFT hPS f Z).baseEquiv P₂).inv
+            ≫ P₂.Base (Ψ.map u.left.hom)
+            ≫ ((psiFacL P F P₂ Ψ hPB hFT hPS f W).baseEquiv P₂).hom :=
+        (Iso.eq_inv_comp _).mpr key
+      exact cmpHom_natural P₂ (psiFacL P F P₂ Ψ hPB hFT hPS f Z)
+        (psiFacR P P₂ F₂ Ψ hPB f Z) (psiFacL P F P₂ Ψ hPB hFT hPS f W)
+        (psiFacR P P₂ F₂ Ψ hPB f W) (Ψ.map_comp _ _) (Ψ.map_comp _ _)
+        (P₂.Base (Ψ.map u.left.hom))
+        (Ψ.map (slPushHom P F f u)) hk1c hk1b
+        (slPushHom P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).map u))
+        (slPushHom_comp P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).map u))
+        (slPushHom_base P₂ F₂ (Ψ.map f) ((plBkSlicePsi P P₂ Ψ hPB A).map u)))
 
 def slicePushPsi.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 68,
