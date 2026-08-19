@@ -423,6 +423,7 @@ import ABC3.Found.Arakelov.PicTrivRestrict
 import ABC3.Found.Arakelov.PicBijGood
 import ABC3.Found.Arakelov.PicGoodOpen
 import ABC3.Found.Arakelov.PicCartierWitness
+import ABC3.Found.Arakelov.ArcFiber
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
