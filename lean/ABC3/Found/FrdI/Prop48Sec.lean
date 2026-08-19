@@ -114,4 +114,57 @@ def BaseSection.toBirat.src : ABC3.Meta.Source :=
     item := "Proposition 4.8, (iv) — BaseSection を 𝒞^birat へ移す",
     sectionId := "frdi-prop-4-8" }
 
+/-! ## ★★★Frobenius-section の移送
+
+原文 (FrdI p.88):
+> (iv) If C is of isotropic and pre-model type, then so is Cbirat.
+
+★★`BaseFrobeniusPair` = `sec : BaseSection P` ＋ `frob : ℕ+ →* SectionEnd sec`
+＋ `isFrobSection`。★`sec` は上で移したので、残るは `frob` の移送。
+
+★`(S.toBirat Fc).Obj` は `S.Obj` と**台が同じ**なので、
+各成分を `toBiratCat` で送るだけ。 -/
+
+variable {G}
+
+/-- ★★**`SectionEnd` の移送** —— 各成分を `toBiratCat` で送る。 -/
+def SectionEnd.toBirat (Fc : FrobenioidCore (biratPre P G)) {S : BaseSection P}
+    (ε : SectionEnd S) : SectionEnd (S.toBirat G Fc) where
+  app A := (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩)
+  naturality {A B} f := by
+    obtain ⟨f₀, hf₀, hfe⟩ := f.2
+    have hnat := ε.naturality (⟨f₀, hf₀⟩ : (⟨biratDown P G A.1, A.2⟩ : S.Obj) ⟶
+      ⟨biratDown P G B.1, B.2⟩)
+    have h1 : (toBiratCat P G).map (f₀ ≫ ε.app ⟨biratDown P G B.1, B.2⟩)
+        = (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩ ≫ f₀) :=
+      congrArg (toBiratCat P G).map hnat
+    exact (((toBiratCat P G).map_comp f₀ _).symm.trans h1).trans
+      (((toBiratCat P G).map_comp _ f₀).trans
+        (congrArg (fun t => (toBiratCat P G).map (ε.app ⟨biratDown P G A.1, A.2⟩) ≫ t) hfe))
+      |>.trans (congrArg (fun t => t ≫ (toBiratCat P G).map
+        (ε.app ⟨biratDown P G B.1, B.2⟩)) hfe) |>.symm |>.symm
+
+/-- ★★★**`ℕ+ →* SectionEnd` の移送**。 -/
+def frobSectionToBirat (Fc : FrobenioidCore (biratPre P G)) {S : BaseSection P}
+    (Fs : ℕ+ →* SectionEnd S) : ℕ+ →* SectionEnd (S.toBirat G Fc) where
+  toFun n := SectionEnd.toBirat Fc (Fs n)
+  map_one' := by
+    refine SectionEnd.ext ?_
+    funext A
+    show (toBiratCat P G).map ((Fs 1).app _) = (1 : SectionEnd (S.toBirat G Fc)).app A
+    rw [Fs.map_one]
+    exact (toBiratCat P G).map_id _
+  map_mul' m n := by
+    refine SectionEnd.ext ?_
+    funext A
+    show (toBiratCat P G).map ((Fs (m * n)).app _)
+      = ((SectionEnd.toBirat Fc (Fs m)) * (SectionEnd.toBirat Fc (Fs n))).app A
+    rw [Fs.map_mul]
+    exact (toBiratCat P G).map_comp _ _
+
+def frobSectionToBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iv) — Frobenius-section を 𝒞^birat へ移す",
+    sectionId := "frdi-prop-4-8" }
+
 end ABC3.Found.FrdI
