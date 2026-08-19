@@ -235,6 +235,58 @@ def thm_4_2_ii_order.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (ii) — Order(Φ(A)_p) の圏同値",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★5. `Ψ_Prime` の一意性 -/
+
+/-- ★★★★★**[FrdI] Theorem 4.2, (ii) の「一意な」** ——
+原文の特徴づけ(primary pre-step の対応)を満たす写像は `psiPrime` に限る。
+
+★どの素点も primary pre-step で実現される(`realizeIn`)ので、
+特徴づけが写像を完全に決める。 -/
+theorem psiPrime_unique (ctx : PrimeCtx P P₂ G G₂ Ψ) (A : C)
+    (F : Prime (Φ.val (P.toElem.obj A).base) →
+      Prime (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base))
+    (hF : ∀ {E : C} (ϵ : E ⟶ A) (hsϵ : IsPreStep P ϵ)
+      (hpϵ : IsPrimaryElt (preStepVal P ϵ hsϵ))
+      (hq : IsPrimaryElt (preStepVal P₂ (Ψ.functor.map ϵ) (ctx.PS ϵ hsϵ))),
+      F (toPrime _ (preStepVal P ϵ hsϵ) hpϵ)
+        = toPrime _ (preStepVal P₂ (Ψ.functor.map ϵ) (ctx.PS ϵ hsϵ)) hq) :
+    F = psiPrime ctx A := by
+  funext p
+  have hu := realizeIn_toPrime ctx A p
+  have h2 := psiPrime_spec ctx (((realizeIn ctx A p) : A ⟶ A)) (realizeIn_preStep ctx A p)
+    (realizeIn_primary ctx A p)
+  rw [hu] at h2
+  have h3 := hF (((realizeIn ctx A p) : A ⟶ A)) (realizeIn_preStep ctx A p)
+    (realizeIn_primary ctx A p) (map_realizeIn_primary ctx A p)
+  rw [hu] at h3
+  rw [h3, h2]
+
+def psiPrime_unique.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77,
+    item := "Theorem 4.2, (ii) — Ψ_Prime の一意性",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★6. `Theorem 4.2` 全体 -/
+
+/-- ★★★★★★★**[FrdI] Theorem 4.2** —— 条なしの locator。
+
+| 主張 | 実装 |
+|---|---|
+| (i) primary step の保存 | `primaryInIff_all`(`Thm42Prop41v.lean`) |
+| (i) Div-identity 自己射の保存 | `isDivIdentity_map`(`Thm42DivId.lean`) |
+| (i) (universally) Div-Frobenius-trivial 対象の保存 | `divFrobeniusTrivial_map` |
+| (ii) `Ψ_Prime` の存在・全単射・関手性 | `psiPrime` / `psiPrimeEquiv` / `psiPrime_naturality` |
+| (ii) 一意性 | `psiPrime_unique` |
+| (ii) `Order(Φ(A)_p)` の圏同値(＋反対圏) | `thm_4_2_ii_order` / `thm_4_2_ii_order_op` |
+| (iii) 単系同型 | `thm_4_2_iii_monoid` |
+
+★★逸脱 (B)(`hdivS`: `Div : 𝒪^▷(A) ↠ Φ(A)`、`prop_4_4.src` で開示済)を使うので、
+(iii) は原文の `A_i` が Div-Frobenius-trivial という条を**要さない**
+(原文より強い結論であり、後続の消費に影響しない)。 -/
+def thm_4_2.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77, item := "Theorem 4.2",
+    sectionId := "frdi-thm-4-2" }
+
 end PsiOrder
 
 end ABC3.Found.FrdI
