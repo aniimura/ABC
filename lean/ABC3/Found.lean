@@ -98,6 +98,7 @@ import ABC3.Found.FrdI.Prop48Sec
 import ABC3.Found.FrdI.Prop48Cpt
 import ABC3.Found.FrdI.Prop48Cond3
 import ABC3.Found.FrdI.Prop48Std
+import ABC3.Found.FrdI.Prop48Gl
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.ProL.FinitePrimary
@@ -479,6 +480,7 @@ import ABC3.Found.Arakelov.ArcMetricExists
 import ABC3.Found.Arakelov.ArcScaleNorm
 import ABC3.Found.Arakelov.ArcUnitCoord
 import ABC3.Found.Arakelov.ArcFiberDim
+import ABC3.Found.Arakelov.ArcRatio
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
