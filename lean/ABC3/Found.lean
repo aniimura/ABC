@@ -406,6 +406,7 @@ import ABC3.Found.GaloisRep.PsiCompMul
 import ABC3.Found.GaloisRep.OmegaMulPsi
 import ABC3.Found.GaloisRep.PsiRec
 import ABC3.Found.GaloisRep.OmegaOne
+import ABC3.Found.GaloisRep.OmegaIdentity
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicHcompatPre
 import ABC3.Found.Arakelov.PicAppLEApply
