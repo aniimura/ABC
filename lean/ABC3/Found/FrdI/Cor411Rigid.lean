@@ -285,4 +285,73 @@ def cor_4_11_i_comp_rigid.src : ABC3.Meta.Source :=
 
 end Assemble
 
+/-! ## ★5. Div-slim 版の「`𝒞 → 𝔽_Φ` は rigid」 -/
+
+section RigidToElem
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**Div-slim なら `𝒞 → 𝔽_Φ` は rigid**。
+
+原文 (FrdI p.94):
+> the rigidity assertion follows via the same argument as was applied to prove the
+
+★★(i) の rigidity と同じ 3 段:
+1. 成分は `𝔽_Φ` の自己同型なので **`deg = 1`・`div = 0`**(`isIso_iff` / sharp)
+2. co-angular pre-step への自然性で **底の自己同型は `Φ` を恒等へ送る**
+3. **Div-slim** で底が恒等 ⟹ `⟨𝟙, 0, 1⟩ = 𝟙` -/
+theorem isRigidFunctor_toElem_of_divSlim (F : FrobenioidCore P) (G : Frobenioid P)
+    (hds : IsDivSlim Φ) : IsRigidFunctor P.toElem := by
+  intro η
+  have hI : ∀ A : C, IsIso (η.hom.app A) := fun A =>
+    ⟨η.inv.app A, η.hom_inv_id_app A, η.inv_hom_id_app A⟩
+  have hdg : ∀ A : C, (η.hom.app A).deg = 1 := fun A =>
+    ((ElemFrobCat.isIso_iff _).mp (hI A)).2.2
+  have hdv : ∀ A : C, (η.hom.app A).div = 0 := by
+    intro A
+    haveI := hI A
+    exact ElemFrobCat.div_eq_zero_of_isIso (fun X => (P.divisorial X).2) _
+  have hbI : ∀ A : C, IsIso ((η.hom.app A).base) := fun A =>
+    ((ElemFrobCat.isIso_iff _).mp (hI A)).1
+  -- ★段 2: 底の自己同型は `Φ` を恒等へ送る
+  have hDivId : ∀ (A : C) (x : Φ.val ((P.toElem.obj A).base)),
+      Φ.map ((η.hom.app A).base) x = x := by
+    intro A x
+    obtain ⟨B, ϵ, hϵc, hϵs, hdivϵ⟩ := exists_coaPreStep_div G A x
+    have h := congrArg ElemFrobCat.Hom.div (η.hom.naturality ϵ)
+    rw [ElemFrobCat.comp_div, ElemFrobCat.comp_div, hdv B, hdv A, hdg B,
+      map_zero, zero_add, smul_zero, add_zero] at h
+    have h2 : ((1 : ℕ+) : ℕ) • P.Div ϵ = Φ.map ((η.hom.app A).base) (P.Div ϵ) := h
+    rw [show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul] at h2
+    rw [← hdivϵ]
+    exact h2.symm
+  -- ★段 3: Div-slim で底が恒等
+  have hbase : ∀ A : C, (η.hom.app A).base = 𝟙 ((P.toElem.obj A).base) := by
+    intro A
+    set ζ : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj) :=
+      NatIso.ofComponents
+        (fun Z => @asIso _ _ _ _ ((η.hom.app Z.left).base) (hbI Z.left))
+        (fun {Z W} g => congrArg ElemFrobCat.Hom.base (η.hom.naturality g.left)) with hζ
+    have hdiv2 : ∀ (Z : Over A) (x : Φ.val (P.proj.obj Z.left)),
+        Φ.map (ζ.hom.app Z) x = x := fun Z x => hDivId Z.left x
+    have hrefl : ζ = Iso.refl _ := divSlim_over_aut_eq_id P F hds A ζ hdiv2
+    exact congrArg (fun t : (Over.forget A ⋙ P.proj) ≅ (Over.forget A ⋙ P.proj) =>
+      t.hom.app (Over.mk (𝟙 A))) hrefl
+  apply Iso.ext
+  apply NatTrans.ext
+  funext A
+  refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+  · rw [hbase A]; rfl
+  · rw [hdv A]; rfl
+  · rw [hdg A]; rfl
+
+def isRigidFunctor_toElem_of_divSlim.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 94,
+    item := "Corollary 4.11, (iv) — Div-slim なら 𝒞 → 𝔽_Φ は rigid",
+    sectionId := "frdi-cor-4-11" }
+
+end RigidToElem
+
 end ABC3.Found.FrdI

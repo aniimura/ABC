@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Cor411BaseFn
+import ABC3.Found.FrdI.Cor411Rigid
 
 /-!
 # [FrdI] Corollary 4.11, (iii) —— `Ψ_Φ` を `𝒟` へ降ろす
@@ -351,5 +352,119 @@ def cor_4_11_iv_hdivc.src : ABC3.Meta.Source :=
     sectionId := "frdi-cor-4-11" }
 
 end CorIV
+
+/-! ## ★5. `Ψ_𝔽` は圏同値、(iv) の rigidity -/
+
+section ElemFrobEquiv
+
+variable {D₁ : Type u} [Category.{v} D₁] {Φ₁ : MonoidOn.{v, u, w} D₁}
+  {D₂ : Type u} [Category.{v} D₂] {Φ₂ : MonoidOn.{v, u, w} D₂}
+
+/-- ★★★★★**`Ψ_𝔽` は圏同値**(`Ψ_Base` が圏同値で `Ψ_Φ` が同型なら)。 -/
+theorem elemFrobMapOver_isEquivalence (ΨB : D₁ ⥤ D₂) [ΨB.IsEquivalence]
+    (η : Φ₁.functor ≅ ΨB.op ⋙ Φ₂.functor) :
+    (elemFrobMapOver ΨB η.hom).IsEquivalence := by
+  haveI hf : (elemFrobMapOver ΨB η.hom).Faithful := by
+    constructor
+    intro A B f g hfg
+    refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+    · exact ΨB.map_injective (congrArg (fun t : (elemFrobMapOver ΨB η.hom).obj A ⟶
+        (elemFrobMapOver ΨB η.hom).obj B => ElemFrobCat.Hom.base t) hfg)
+    · have h := congrArg ElemFrobCat.Hom.div hfg
+      have hinj : Function.Injective
+          ((η.hom.app (Opposite.op A.base)).hom) := by
+        intro x y hxy
+        have := congrArg (fun t => (η.inv.app (Opposite.op A.base)).hom t) hxy
+        simpa using this
+      exact hinj h
+    · exact congrArg (fun t : (elemFrobMapOver ΨB η.hom).obj A ⟶
+        (elemFrobMapOver ΨB η.hom).obj B => ElemFrobCat.Hom.deg t) hfg
+  haveI hfl : (elemFrobMapOver ΨB η.hom).Full := by
+    constructor
+    intro A B f
+    refine ⟨⟨ΨB.preimage f.base, (η.inv.app (Opposite.op A.base)).hom f.div, f.deg⟩, ?_⟩
+    refine ElemFrobCat.Hom.ext ?_ ?_ rfl
+    · exact ΨB.map_preimage _
+    · show (η.hom.app (Opposite.op A.base)).hom
+        ((η.inv.app (Opposite.op A.base)).hom f.div) = f.div
+      have h := congrArg (fun t : (ΨB.op ⋙ Φ₂.functor).obj (Opposite.op A.base) ⟶ _ =>
+        (AddCommMonCat.Hom.hom t) f.div) (η.inv_hom_id_app (Opposite.op A.base))
+      exact h
+  haveI hes : (elemFrobMapOver ΨB η.hom).EssSurj := by
+    constructor
+    intro X
+    obtain ⟨A, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := ΨB) X.base
+    refine ⟨⟨A⟩, ⟨?_⟩⟩
+    exact { hom := ⟨e.hom, 0, 1⟩
+            inv := ⟨e.inv, 0, 1⟩
+            hom_inv_id := by refine ElemFrobCat.Hom.ext ?_ ?_ ?_ <;> simp
+            inv_hom_id := by refine ElemFrobCat.Hom.ext ?_ ?_ ?_ <;> simp }
+  exact { }
+
+def elemFrobMapOver_isEquivalence.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 92,
+    item := "Corollary 4.11, (iii) — Ψ_𝔽 は圏同値",
+    sectionId := "frdi-cor-4-11" }
+
+end ElemFrobEquiv
+
+/-! ## ★6. (iv) の rigidity と `Corollary 4.11` 全体 -/
+
+section CorIVRigid
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (iv) の rigidity** ——
+図式の**両方の合成関手**が rigid。
+
+原文 (FrdI p.94):
+> the rigidity assertion follows via the same argument as was applied to prove the
+
+★★(i) と同じ議論 ——**Div-slim** から `𝒞₂ → 𝔽_{Φ₂}` の rigidity が出る。 -/
+theorem cor_4_11_iv_rigid (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂) (hds₂ : IsDivSlim Φ₂)
+    (ΨB : D₁ ⥤ D₂) (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
+    (η : Φ₁.functor ⟶ ΨB.op ⋙ Φ₂.functor)
+    (hdivc : ∀ {A B : C₁} (φ : A ⟶ B),
+      (η.app (Opposite.op ((P₁.toElem.obj A).base))).hom (P₁.Div φ)
+        = Φ₂.map (sq.hom.app A) (P₂.Div (Ψ.map φ)))
+    (hdeg : ∀ {A B : C₁} (φ : A ⟶ B), P₂.degFr (Ψ.map φ) = P₁.degFr φ) :
+    IsRigidFunctor (Ψ ⋙ P₂.toElem) ∧
+      IsRigidFunctor (P₁.toElem ⋙ elemFrobMapOver ΨB η) := by
+  have h1 : IsRigidFunctor (Ψ ⋙ P₂.toElem) :=
+    isRigidFunctor_comp_of_isEquivalence Ψ P₂.toElem
+      (isRigidFunctor_toElem_of_divSlim F₂ G₂ hds₂)
+  exact ⟨h1, isRigidFunctor_of_iso
+    (cor_4_11_iv_square Ψ ΨB sq η hdivc hdeg) h1⟩
+
+/-- ★★★★★★★**[FrdI] Corollary 4.11** —— 条なしの locator。
+
+| 主張 | 実装 |
+|---|---|
+| (i) `Ψ^un-tr` の存在・1-可換図式 | `psiUnTrOfDivSlim` / `psiUnTrOfDivSlim_square` |
+| (i) 1-一意性 | `psiUnTr_unique`(在庫) |
+| (i) 合成関手の rigidity | `isRigidFunctor_istrToUnTr_of_divSlim` / `cor_4_11_i_comp_rigid` |
+| (ii) `Ψ_Base` の存在 | `psiBaseBirat` |
+| (ii) 1-可換図式 | `cor_4_11_ii_square` |
+| (ii) 1-一意性 | `cor_4_11_ii_uniq` |
+| (ii) 両方が圏同値 | `cor_4_11_ii_equivalence` |
+| (ii) rigidity(`𝒟` slim のとき) | `cor_4_11_ii_rigid` |
+| (iii) `Ψ_Φ : Φ₁ ≅ Ψ_Base.op ⋙ Φ₂` | `psiPhiOnBase` |
+| (iii) `Ψ_Prime` との両立 | `psiPrime_eq_primeEquiv`(`Thm42Order.lean`) |
+| (iii) `Ψ_𝔽` の誘導と圏同値 | `elemFrobMapOver` / `elemFrobMapOver_isEquivalence` |
+| (iv) 1-可換図式 | `cor_4_11_iv_square`(＋`cor_4_11_iv_hdivc`) |
+| (iv) 合成関手の rigidity | `cor_4_11_iv_rigid` |
+
+★★★逸脱 (B)(`hdivS`: `Div : 𝒪^▷(A) ↠ Φ(A)`、`prop_4_4.src` で開示済)を使う。
+★形式化中に現れた新しい葉 **`Theorem 4.9`**(`psiPhi`)も本連鎖で閉じた。 -/
+def cor_4_11.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 91, item := "Corollary 4.11",
+    sectionId := "frdi-cor-4-11" }
+
+end CorIVRigid
 
 end ABC3.Found.FrdI
