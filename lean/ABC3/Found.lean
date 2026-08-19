@@ -470,6 +470,7 @@ import ABC3.Found.GaloisRep.ThreeTorsion
 import ABC3.Found.GaloisRep.CoprimeTorsion
 import ABC3.Found.GaloisRep.TorsionMul
 import ABC3.Found.GaloisRep.FourTorsion
+import ABC3.Found.GaloisRep.CrossIdentity
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
