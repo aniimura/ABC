@@ -144,6 +144,29 @@ noncomputable def otriToPfRoot {A : C} :
   map_one' := Subtype.ext (map_one _)
   map_mul' x y := Subtype.ext (map_mul _ _ _)
 
+/-! ## ★4. 同型による共役
+
+★`HomRoot ⟨A,1⟩ ⟨A,1⟩` の添字は `rtObj A 1`(`A` と**同型**だが等しくはない)の上にある。
+そこで `𝒪^▷` を同型 `rtExt A 1 : A ≅ rtObj A 1` で移す必要がある。 -/
+
+/-- ★★同型による共役は `𝒪^▷` を移す。 -/
+theorem otri_conj_iso {A B : C} (u : A ⟶ B) [IsIso u] (hu1 : P.degFr u = 1)
+    {α : End A} (hα : α ∈ OTri P A) :
+    ((inv u ≫ ((α : End A) : A ⟶ A) ≫ u : B ⟶ B) : End B) ∈ OTri P B := by
+  have hiu1 : P.degFr (inv u) = 1 := degFr_inv_eq_one u hu1
+  haveI hbu : IsIso (P.Base u) := isIso_Base_of_isIso u
+  have hbinv : P.Base (inv u) = inv (P.Base u) := by
+    refine IsIso.eq_inv_of_hom_inv_id ?_
+    rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+  refine ⟨?_, ?_⟩
+  · show P.Base (inv u ≫ ((α : End A) : A ⟶ A) ≫ u) = P.Base (𝟙 B)
+    rw [P.Base_comp, P.Base_comp, P.Base_id, hbinv]
+    have : P.Base (((α : End A) : A ⟶ A)) = P.Base (𝟙 A) := hα.1
+    rw [this, P.Base_id, Category.id_comp, IsIso.inv_hom_id]
+  · show P.degFr (inv u ≫ ((α : End A) : A ⟶ A) ≫ u) = 1
+    rw [P.degFr_comp, P.degFr_comp, hiu1, hu1, hα.2]
+    simp
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
