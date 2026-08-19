@@ -87,4 +87,107 @@ def isDivIdentity_of_preStep_natural.src : ABC3.Meta.Source :=
 
 end DivIdOfAut
 
+/-! ## ★2. `𝒞 → 𝒞^un-tr` の rigidity -/
+
+section RigidUnTr
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★`Aut(𝒞 → 𝒞^un-tr)` の自然性は `𝒞^un-tr` の**すべての射**に及ぶ
+(`istrToUnTr` が充満だから)。 -/
+theorem untrAut_naturality (η : (istrToUnTr P) ≅ (istrToUnTr P))
+    {A B : UnTr P} (f : A ⟶ B) :
+    f ≫ η.hom.app B = η.hom.app A ≫ f := by
+  obtain ⟨f₀, hf₀⟩ := (istrToUnTr P).map_surjective f
+  rw [← hf₀]
+  exact η.hom.naturality f₀
+
+/-- ★成分は同型。 -/
+theorem untrAut_app_isIso (η : (istrToUnTr P) ≅ (istrToUnTr P)) (A : UnTr P) :
+    IsIso (η.hom.app A) :=
+  ⟨η.inv.app A, η.hom_inv_id_app A, η.inv_hom_id_app A⟩
+
+/-- ★★★**`η` が定めるスライスの自己同型** —— 成分は `Base (η_Z)`。 -/
+noncomputable def untrAutSlice (Fc : FrobenioidCore P)
+    (η : (istrToUnTr P) ≅ (istrToUnTr P)) (A : UnTr P) :
+    (Over.forget A ⋙ (unTrPre P Fc).proj) ≅ (Over.forget A ⋙ (unTrPre P Fc).proj) :=
+  NatIso.ofComponents
+    (fun Z => @asIso _ _ _ _ ((unTrPre P Fc).Base (η.hom.app Z.left))
+      ⟨(unTrPre P Fc).Base (η.inv.app Z.left),
+        ((unTrPre P Fc).Base_comp (η.hom.app Z.left) (η.inv.app Z.left)).symm.trans
+          ((congrArg (fun t => (unTrPre P Fc).Base t) (η.hom_inv_id_app Z.left)).trans
+            ((unTrPre P Fc).Base_id _)),
+        ((unTrPre P Fc).Base_comp (η.inv.app Z.left) (η.hom.app Z.left)).symm.trans
+          ((congrArg (fun t => (unTrPre P Fc).Base t) (η.inv_hom_id_app Z.left)).trans
+            ((unTrPre P Fc).Base_id _))⟩)
+    (fun {Z W} g =>
+      ((unTrPre P Fc).Base_comp g.left (η.hom.app W.left)).symm.trans
+        ((congrArg (fun t => (unTrPre P Fc).Base t) (untrAut_naturality η g.left)).trans
+          ((unTrPre P Fc).Base_comp (η.hom.app Z.left) g.left)))
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**成分は恒等** —— 原文 p.93 の 3 段。
+
+原文 (FrdI p.93):
+> hence trivial [since Ciun-tr is of unit-trivial type]. This completes the proof of
+
+★★1. 誘導される自己同型は **Div-identity**(`isDivIdentity_of_preStep_natural`)
+★★2. `𝒟` が **Div-slim** なので **base-identity**(`divSlim_over_aut_eq_id`)
+★★3. `𝒞^un-tr` は **unit-trivial** なので **恒等**(`unTr_unitTrivial`) -/
+theorem untrAut_app_eq_id (Fc : FrobenioidCore P)
+    (G' : Frobenioid (unTrPre P Fc)) (hds : IsDivSlim Φ)
+    (η : (istrToUnTr P) ≅ (istrToUnTr P)) (A : UnTr P) :
+    η.hom.app A = 𝟙 A := by
+  -- ★段 1
+  have hdivid : ∀ B : UnTr P, IsDivIdentity (unTrPre P Fc) (η.hom.app B) := by
+    intro B
+    haveI := untrAut_app_isIso η B
+    refine isDivIdentity_of_preStep_natural G' (η.hom.app B) (fun E ϵ _ _ => ?_)
+    exact ⟨η.hom.app E, untrAut_app_isIso η E, (untrAut_naturality η ϵ).symm⟩
+  -- ★段 2
+  have hdiv : ∀ (Z : Over A) (x : Φ.val ((unTrPre P Fc).proj.obj Z.left)),
+      Φ.map ((untrAutSlice Fc η A).hom.app Z) x = x := by
+    intro Z x
+    have h2 : Φ.map ((unTrPre P Fc).Base (η.hom.app Z.left))
+        = Φ.map ((unTrPre P Fc).Base (𝟙 Z.left)) := hdivid Z.left
+    have h3 := congrArg (fun t : Φ.val _ →+ Φ.val _ => t x) h2
+    refine h3.trans ?_
+    show Φ.map ((unTrPre P Fc).Base (𝟙 Z.left)) x = x
+    rw [(unTrPre P Fc).Base_id, Φ.map_id]
+  have hrefl : untrAutSlice Fc η A = Iso.refl _ :=
+    divSlim_over_aut_eq_id (unTrPre P Fc) (unTr_frobenioidCore P Fc) hds A
+      (untrAutSlice Fc η A) hdiv
+  have hZ₀ := congrArg (fun t : (Over.forget A ⋙ (unTrPre P Fc).proj)
+      ≅ (Over.forget A ⋙ (unTrPre P Fc).proj) => t.hom.app (Over.mk (𝟙 A))) hrefl
+  -- ★段 3
+  have hbi : IsBaseIdentity (unTrPre P Fc) (η.hom.app A) := by
+    show (unTrPre P Fc).Base (η.hom.app A) = (unTrPre P Fc).Base (𝟙 A)
+    rw [(unTrPre P Fc).Base_id]
+    exact hZ₀
+  haveI := untrAut_app_isIso η A
+  have hmem : ((η.hom.app A : End A)) ∈ OTimes (unTrPre P Fc) A :=
+    (mem_otimes_iff (unTrPre P Fc) _).mpr
+      ⟨(CategoryTheory.isUnit_iff_isIso _).mpr inferInstance, hbi⟩
+  rw [unTr_unitTrivial P Fc A] at hmem
+  have hh := Submonoid.mem_bot.mp hmem
+  exact hh
+
+/-- ★★★★★★**[FrdI] Corollary 4.11, (i) の rigidity** —— `𝒞 → 𝒞^un-tr` は rigid。 -/
+theorem isRigidFunctor_istrToUnTr_of_divSlim (Fc : FrobenioidCore P)
+    (G' : Frobenioid (unTrPre P Fc)) (hds : IsDivSlim Φ) :
+    IsRigidFunctor (istrToUnTr P) := by
+  intro η
+  apply Iso.ext
+  apply NatTrans.ext
+  funext A
+  exact untrAut_app_eq_id Fc G' hds η A
+
+def isRigidFunctor_istrToUnTr_of_divSlim.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 93,
+    item := "Corollary 4.11, (i) — 𝒞 → 𝒞^un-tr の rigidity",
+    sectionId := "frdi-cor-4-11" }
+
+end RigidUnTr
+
 end ABC3.Found.FrdI
