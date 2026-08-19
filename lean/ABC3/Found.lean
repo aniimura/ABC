@@ -461,6 +461,7 @@ import ABC3.Found.GaloisRep.Psi2Eval
 import ABC3.Found.GaloisRep.Doubling
 import ABC3.Found.GaloisRep.TwoTorsion
 import ABC3.Found.GaloisRep.TwoTorsionCoord
+import ABC3.Found.GaloisRep.FiniteTwoTorsion
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
