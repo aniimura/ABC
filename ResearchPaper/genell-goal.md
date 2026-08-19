@@ -13884,3 +13884,36 @@ C2 の `properFlat_compact`(ℤ 上固有 ⟹ `X^arc` コンパクト)の道を�
 ★閉じた 5 件(C3・D1・D2・D3・B3)と、Galois の `ω_n` 構成(第 16–29 の 14 ブロック)。
 ★★Interface の穴を 5 つ塞いだ(C3/D1 の矛盾・`APic` と `AlgPoint` の宇宙・
 `degF_baseChange` の射・`IsPointOf` の空虚)。
+
+## §9-366 —— ★★★★★★★mathlib の処方どおりだったことを確認した
+
+`DivisionPolynomial/Basic.lean` の module docstring は `ω_n` の構成を**こう処方している**:
+
+> In general, it can be shown that `2` always divides the polynomial
+> `ψ₂ₙ / ψₙ - ψₙ ⬝ (a₁φₙ + a₃ψₙ²)` in the characteristic `0` universal ring
+> `𝓡[X, Y] := ℤ[A₁, A₂, A₃, A₄, A₆][X, Y]` of `W` ... Then `ωₙ` can be equivalently defined as
+> the image of this division under the associated universal morphism `𝓡[X, Y] → R[X, Y]`
+> mapping `Aᵢ` to `aᵢ`.
+
+★★★**第 22–28 ブロックがやったのは、まさにこれである**:
+
+| 処方 | 我々の実装 |
+|---|---|
+| `2 ∣ ψ₂ₙ/ψₙ − ψₙ(a₁φₙ+a₃ψₙ²)` を普遍環で示す | ★第 27 `two_dvd_omegaNum` |
+| 普遍環 `ℤ[A₁,…,A₆][X,Y]` | ★第 19 以前からの `URing` |
+| 普遍射 `Aᵢ ↦ aᵢ` で像を取る | ★第 28 `uHom` / `omega` |
+
+★★**偶然の一致ではない**——mathlib の docstring を読んで道筋を決めた(§9-349)。
+★ただし「普遍環で示す」の**中身**(標数 2 で消えること、その帰納)は
+docstring には書かれておらず、**本セッションで作った**(第 22–26)。
+
+### ★★他に在庫が見つかったもの
+
+| 定義 | 場所 |
+|---|---|
+| `ΨSq n : R[X]`(`ψₙ²` は `X` だけの多項式) | ★`DivisionPolynomial/Basic.lean` |
+| `Φ n : R[X]` / `φ n : R[X][Y]` | ★同上 |
+| 加法公式の `ψ` 形式 | ★★`Affine/Formula.lean`(§9-365) |
+
+★★★`ψₙ²` が `X` だけなのは大きい——**点での評価が `x` だけで済む**。
+`E[n]` の有限性(`ψₙ(x) = 0` の根が有限)に直結する。
