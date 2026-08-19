@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm34VBase
+import ABC3.Found.FrdI.Prop16
 
 /-!
 # [FrdI] Theorem 3.4, (v) —— 任意射が誘導するスライス関手 `(𝒞^pl-bk)_A ⥤ (𝒞^pl-bk)_A'`
@@ -80,7 +81,7 @@ noncomputable def ArbFac.baseEquiv {A B : C} {φ : A ⟶ B} (t : ArbFac P φ) :
 theorem ArbFac.base_fac {A B : C} {φ : A ⟶ B} (t : ArbFac P φ) :
     P.Base φ = (t.baseEquiv P).hom ≫ P.Base t.plb := by
   show P.Base φ = P.Base (t.frb ≫ t.pre) ≫ P.Base t.plb
-  rw [← P.Base_comp, ← Category.assoc, ← t.fac]
+  rw [← P.Base_comp, Category.assoc, ← t.fac]
 
 variable (F : FrobenioidCore P)
 
@@ -108,6 +109,104 @@ theorem pullBack_lift {Y' A' : C} {α : Y' ⟶ A'} (hα : IsPullBack P α) {T : 
   obtain ⟨k, hk⟩ := (hα T).2 ⟨(g, b), hb⟩
   have hp := Subtype.ext_iff.mp hk
   exact ⟨k, congrArg Prod.fst hp, congrArg Prod.snd hp⟩
+
+/-! ## ★★スライス関手の構成 -/
+
+variable {A A' : C}
+
+/-- ★対象 `Z` について選んだ分解。 -/
+noncomputable abbrev slPushFac (f : A ⟶ A') (Z : Over (⟨A⟩ : PlBk P)) :
+    ArbFac P (Z.hom.hom ≫ f) :=
+  someArbFac P F (Z.hom.hom ≫ f)
+
+/-- ★★射 `u` が誘導する**底**の射。 -/
+noncomputable def slPushBase (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    (P.toElem.obj (slPushFac P F f Z).top).base ⟶ (P.toElem.obj (slPushFac P F f W).top).base :=
+  ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+    ≫ ((slPushFac P F f W).baseEquiv P).hom
+
+/-- ★★底の両立条件 —— これが pull-back の普遍性を起動する。 -/
+theorem slPushBase_compat (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    P.Base (slPushFac P F f Z).plb
+      = slPushBase P F f u ≫ P.Base (slPushFac P F f W).plb := by
+  have hu : u.left.hom ≫ W.hom.hom = Z.hom.hom :=
+    congrArg InducedWideCategory.Hom.hom (Over.w u)
+  have hZ := (slPushFac P F f Z).base_fac P
+  have hW := (slPushFac P F f W).base_fac P
+  have key : ((slPushFac P F f Z).baseEquiv P).hom ≫ P.Base (slPushFac P F f Z).plb
+      = P.Base u.left.hom
+        ≫ (((slPushFac P F f W).baseEquiv P).hom ≫ P.Base (slPushFac P F f W).plb) := by
+    rw [← hZ, ← hW, ← P.Base_comp, ← Category.assoc, hu]
+  show P.Base (slPushFac P F f Z).plb
+    = (((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+        ≫ ((slPushFac P F f W).baseEquiv P).hom) ≫ P.Base (slPushFac P F f W).plb
+  rw [Category.assoc, Category.assoc]
+  exact (Iso.eq_inv_comp _).mpr key
+
+/-- ★★射の像 —— **選択を含まない**(pull-back の普遍性で一意)。 -/
+noncomputable def slPushHom (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    (slPushFac P F f Z).top ⟶ (slPushFac P F f W).top :=
+  (pullBack_lift P (slPushFac P F f W).hplb (slPushFac P F f Z).plb
+    (slPushBase P F f u) (slPushBase_compat P F f u)).choose
+
+theorem slPushHom_comp (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    slPushHom P F f u ≫ (slPushFac P F f W).plb = (slPushFac P F f Z).plb :=
+  (pullBack_lift P (slPushFac P F f W).hplb (slPushFac P F f Z).plb
+    (slPushBase P F f u) (slPushBase_compat P F f u)).choose_spec.1
+
+theorem slPushHom_base (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    P.Base (slPushHom P F f u) = slPushBase P F f u :=
+  (pullBack_lift P (slPushFac P F f W).hplb (slPushFac P F f Z).plb
+    (slPushBase P F f u) (slPushBase_compat P F f u)).choose_spec.2
+
+/-- ★像も pull-back —— `isPullBack_of_comp_left`(左簡約)から。 -/
+theorem slPushHom_isPullBack (f : A ⟶ A') {Z W : Over (⟨A⟩ : PlBk P)} (u : Z ⟶ W) :
+    IsPullBack P (slPushHom P F f u) :=
+  isPullBack_of_comp_left P (slPushHom P F f u) (slPushFac P F f W).plb
+    (slPushFac P F f W).hplb
+    (by rw [slPushHom_comp]; exact (slPushFac P F f Z).hplb)
+
+/-- ★★★★★**任意射が誘導するスライス関手**(原文 p.67)。
+
+★`map_id` / `map_comp` は **pull-back への射の一意性**から出る。 -/
+noncomputable def slicePush (f : A ⟶ A') :
+    Over (⟨A⟩ : PlBk P) ⥤ Over (⟨A'⟩ : PlBk P) where
+  obj Z := Over.mk (⟨(slPushFac P F f Z).plb, (slPushFac P F f Z).hplb⟩ :
+    (⟨(slPushFac P F f Z).top⟩ : PlBk P) ⟶ ⟨A'⟩)
+  map {Z W} u := Over.homMk
+    (⟨slPushHom P F f u, slPushHom_isPullBack P F f u⟩ :
+      (⟨(slPushFac P F f Z).top⟩ : PlBk P) ⟶ ⟨(slPushFac P F f W).top⟩)
+    (WideSubcategory.hom_ext _ (slPushHom_comp P F f u))
+  map_id Z := by
+    refine Over.OverMorphism.ext (WideSubcategory.hom_ext _ ?_)
+    show slPushHom P F f (𝟙 Z) = 𝟙 (slPushFac P F f Z).top
+    refine pullBack_hom_ext P (slPushFac P F f Z).hplb ?_ ?_
+    · rw [slPushHom_comp, Category.id_comp]
+    · rw [slPushHom_base, P.Base_id]
+      show ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base (𝟙 Z.left.obj)
+        ≫ ((slPushFac P F f Z).baseEquiv P).hom = 𝟙 _
+      rw [P.Base_id, Category.id_comp, Iso.inv_hom_id]
+  map_comp {Z W V} u u' := by
+    refine Over.OverMorphism.ext (WideSubcategory.hom_ext _ ?_)
+    show slPushHom P F f (u ≫ u') = slPushHom P F f u ≫ slPushHom P F f u'
+    refine pullBack_hom_ext P (slPushFac P F f V).hplb ?_ ?_
+    · rw [slPushHom_comp, Category.assoc, slPushHom_comp, slPushHom_comp]
+    · rw [slPushHom_base, P.Base_comp, slPushHom_base, slPushHom_base]
+      show ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base (u ≫ u').left.hom
+          ≫ ((slPushFac P F f V).baseEquiv P).hom
+        = (((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base u.left.hom
+            ≫ ((slPushFac P F f W).baseEquiv P).hom)
+          ≫ (((slPushFac P F f W).baseEquiv P).inv ≫ P.Base u'.left.hom
+            ≫ ((slPushFac P F f V).baseEquiv P).hom)
+      show ((slPushFac P F f Z).baseEquiv P).inv ≫ P.Base (u.left.hom ≫ u'.left.hom)
+          ≫ ((slPushFac P F f V).baseEquiv P).hom = _
+      rw [P.Base_comp]
+      simp [Category.assoc]
+
+def slicePush.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 67,
+    item := "Theorem 3.4, (v) — 任意射が誘導する (𝒞^pl-bk)_A ⥤ (𝒞^pl-bk)_A'",
+    sectionId := "frdi-thm-3-4" }
 
 end SlicePush
 

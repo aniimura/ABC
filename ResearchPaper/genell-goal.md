@@ -12495,3 +12495,32 @@ mathlib の語彙での **`restrict F V.ι ≅ 𝒪_V`** を作った。
 ### この区間の集計
 
 ★**110 ブロック**(Arakelov 95 + Galois 15)。
+
+## §9-314 `X` の点での局所ノルム(第 271 ブロック)
+
+第 270 の `localNorm` は **`V.toScheme` の点**で添字づけられている。
+★計量は `X` のすべての点で要るので、`liftToOpenOfTop`(第 259)で降ろす。
+
+★★ファイバーの同型は 2 段(`eqToIso` で `liftToOpen_fac` を吸収 + 第 254)。
+3 法則は同型で移すだけ。
+
+### ★記録と実装の名前がずれていた
+
+§9-302 で `liftToOpen` と書いたが、実装は **`liftToOpenOfTop`** だった
+(promote のときに改名した)。★probe が `unknownIdentifier` で落ちて気づいた。
+
+★★**記録は実装の名前を写していない**——`.src` や docstring は手で書くので、
+promote 時の改名が反映されない。
+★★★対策: **記録に名前を書くときは、実装からコピーする**(手で打たない)。
+
+### 残り(C3)
+
+| 段 | 内容 |
+|---|---|
+| 貼り合わせ(`xNorm` 版) | ★第 262–263 の書き直し |
+| `Interface` の他の欄 | ★★`logMetric` / `IsConjCompatible` / `tensorMetric` |
+| witness | ★★★最後 |
+
+### この区間の集計
+
+★**111 ブロック**(Arakelov 96 + Galois 15)。
