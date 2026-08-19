@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Def24Rlf
 import ABC3.Found.FrdI.Prop53Birat
+import ABC3.Found.FrdI.Thm52Change
 
 /-!
 # [FrdI] Proposition 5.3 の第 1 文 —— 実化 `𝒞^rlf` の定義
@@ -233,7 +234,62 @@ noncomputable abbrev Crlf (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
     (hfsmD : IsOfFSMType D) : Type _ :=
   ModelData.Obj (crlfModel G hiso hfn hcharInj hint hfsmD)
 
+/-! ## ★4. `Proposition 5.3` の 1-可換図式の縦の矢印 `𝒞^un-tr ⥤ 𝒞^rlf` -/
+
+@[simp] theorem rSmulGp_one {N : Type w} [AddCommMonoid N] [Module NNReal N] (x : Gp N) :
+    rSmulGp 1 x = x := by
+  have hc : DistribSMul.toAddMonoidHom N (1 : NNReal) = AddMonoidHom.id N := by
+    ext y; exact one_smul _ y
+  rw [rSmulGp_apply, hc, gpMap_id]; rfl
+
+theorem mem_rPhiBiratOn_of_phiBiratOn (G : Frobenioid P) {d : D}
+    {y : Gp (Φ.val d)} (hy : y ∈ phiBiratOn G d) : toRlfGp y ∈ rPhiBiratOn G d := by
+  have := mem_rPhiBiratOn_gen G 1 hy
+  rwa [rSmulGp_one] at this
+
+variable [IsConnected D]
+
+/-- ★★`𝒞^un-tr` の model data から `𝒞^rlf` の model data への射
+(`Φ → Φ^rlf` と `Φ^birat → ℝ·Φ^birat`)。 -/
+noncomputable def untrToCrlfHom (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A))
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (rlfMap (Φ.map α)))
+    (hintR : ∀ A : D, IsIntegralMonoid (RlfT (Φ.val A)))
+    (hfsmD : IsOfFSMType D) :
+    ModelDataHom (unTr_ratFnData Fc G hint hfsmD).model
+      (crlfModel (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+        (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintR hfsmD) where
+  phiHom _ := toRlf
+  phiNat f x := (rlfMap_toRlf (Φ.map f) x).symm
+  bmonHom d :=
+    AddMonoidHom.codRestrict
+      ((toRlfGp : Gp (Φ.val d) →+ Gp (RlfT (Φ.val d))).comp
+        (phiBiratOn (unTr_frobenioid P Fc G) d).subtype) _
+      (fun x => mem_rPhiBiratOn_of_phiBiratOn (unTr_frobenioid P Fc G) x.2)
+  bmonNat := by
+    intro A B f x
+    refine Subtype.ext ?_
+    exact (gpMap_rlfMap_toRlfGp (Φ.map f) _).symm
+  divCompat _ _ := rfl
+
+/-- ★★★★★**`Proposition 5.3` の 1-可換図式の縦の矢印** `𝒞^un-tr ⥤ 𝒞^rlf`。
+
+★`𝒞^un-tr ≌ (Φ, Φ^birat) の model Frobenioid`(`unTr_modelFrobenioid`)と、
+`ModelData` の射が誘導する関手(`ModelDataHom.functor`)の合成である。 -/
+noncomputable def untrToCrlf (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A))
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (rlfMap (Φ.map α)))
+    (hintR : ∀ A : D, IsIntegralMonoid (RlfT (Φ.val A)))
+    (hfsmD : IsOfFSMType D) :
+    UnTr P ⥤ Crlf (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintR hfsmD :=
+  (unTr_modelFrobenioid Fc G hint hfsmD).functor ⋙
+    (untrToCrlfHom Fc G hint hcharInj hintR hfsmD).functor
+
 /-! ### ★出典の紐付け -/
+
 
 /-- ★locator —— `Proposition 5.3` の第 1 文(実化の定義)。★**条つき**:
 `Φ^rlf` の条件 (a) と `𝒟` の of FSM-type を仮定に置いている。 -/

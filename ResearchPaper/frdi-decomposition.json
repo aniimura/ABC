@@ -2307,6 +2307,51 @@
      "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。",
      "lean": "",
      "decl": ""
+    },
+    {
+     "id": "modeldata-hom",
+     "title": "model Frobenioid どうしを結ぶ関手(`ModelData` の射)",
+     "deps": [],
+     "status": "done",
+     "size": "中",
+     "note": "★★`Proposition 5.3` の 1-可換図式の縦・横の矢印は**すべて**「因子の単系と有理関数の単系の自然変換」から来る。そこで `ModelDataHom`(2 つの単系の自然変換で `Div_B` と両立するもの)を定め、それが model Frobenioid のあいだの関手を誘導することを一度だけ示した。★`Base` と `deg_Fr` はそのまま保つ。★`Corollary 5.4` の `Ψ^rlf` もこの形になる見込み。",
+     "lean": "ABC3/Found/FrdI/Thm52Change.lean",
+     "decl": "ModelDataHom / ModelDataHom.functor"
+    },
+    {
+     "id": "untr-to-crlf",
+     "title": "`Proposition 5.3` の 1-可換図式の縦の矢印 `𝒞^un-tr ⥤ 𝒞^rlf`",
+     "deps": [
+      "crlf-def",
+      "modeldata-hom"
+     ],
+     "status": "done",
+     "size": "小",
+     "note": "★`Φ → Φ^rlf`(`toRlf`)と `Φ^birat → ℝ·Φ^birat` の対から `ModelDataHom` を作り、`unTr_modelFrobenioid` と合成した。",
+     "lean": "ABC3/Found/FrdI/Prop53Rlf.lean",
+     "decl": "untrToCrlfHom / untrToCrlf"
+    },
+    {
+     "id": "diagram",
+     "title": "`Proposition 5.3` 末尾の 1-可換図式(Frobenius-isotropic 型のとき)",
+     "deps": [
+      "untr-to-crlf"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "`𝒞 → 𝒞^istr → 𝒞^pf` と `𝒞^un-tr → (𝒞^un-tr)^pf → 𝒞^rlf` の 2 段と、縦の 2 本。★横の矢印のうち perfection がらみは鎖 `prop55` の `p55i` / `p55ii-*` 待ちである。",
+     "lean": "",
+     "decl": ""
+    },
+    {
+     "id": "untr-pf",
+     "title": "`(𝒞^un-tr)^pf` は `(Φ^pf, ℚ·Φ^birat)` の model Frobenioid",
+     "deps": [],
+     "status": "todo",
+     "size": "★大",
+     "note": "`Proposition 5.3` の第 2 文の残り半分。★`Φ^pf` は `ℚ≥0 ⊗_ℕ Φ` で `Def24Rlf.lean` と同じ形に書ける見込み。★`ℚ·Φ^birat = (Φ^birat)^pf` も同様。★ただし `(𝒞^un-tr)^pf` が model 型であること(鎖 `prop55` の `p55iii-pf`)が要る。",
+     "lean": "",
+     "decl": ""
     }
    ],
    "unblocks": [
