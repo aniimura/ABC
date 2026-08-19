@@ -91,6 +91,14 @@ theorem bridgeApp_inv (W : (V.toScheme.Opens)ᵒᵖ)
   exact congrArg (fun (m : _ ⟶ _) => (m.app (op (overObj V W.unop))).hom x) e.hom_inv_id
 
 
+
+/-- ★★加法性——`bridgeApp` は加法的である。 -/
+theorem bridgeApp_add (W : (V.toScheme.Opens)ᵒᵖ)
+    (x y : ((Scheme.Modules.restrict F V.ι).val.obj W : Type)) :
+    bridgeApp F V e W (x + y) = bridgeApp F V e W x + bridgeApp F V e W y :=
+  (congrArg (fun z => (V.ι.appIso W.unop).hom.hom z)
+    (map_add (e.hom.app (op (overObj V W.unop))).hom x y)).trans (map_add _ _ _)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def bridgeApp.src : ABC3.Meta.Source :=
