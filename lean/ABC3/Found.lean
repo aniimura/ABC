@@ -543,6 +543,7 @@ import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GaloisRep.GalRepWitness
 import ABC3.Found.GaloisRep.ModLWitness
 import ABC3.Found.GaloisRep.TateSeries
+import ABC3.Found.GaloisRep.AdicEval
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
