@@ -37,11 +37,16 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 
 universe v₄ u₄
 
+variable (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
+  {Ee : Type u₄} [Category.{v₄} Ee] {G G' : Dᵒᵖ ⥤ Ee}
+  (h : P.proj.op ⋙ G ≅ P.proj.op ⋙ G')
+
+include F in
 set_option maxHeartbeats 1000000 in
-/-- ★★★★★★**`P.proj.op` との前合成は関手の同型を反射する**。 -/
-noncomputable def projOpPrecompIsoGen (P : PreFrobenioid C Φ) (F : FrobenioidCore P)
-    {Ee : Type u₄} [Category.{v₄} Ee] {G G' : Dᵒᵖ ⥤ Ee}
-    (h : P.proj.op ⋙ G ≅ P.proj.op ⋙ G') : G ≅ G' := by
+/-- ★★★★★**`Base` の像の間のどの射でも自然** ——
+`Theorem 3.4, (v)` の 3 分解(`base_three_factor`)を `Dᵒᵖ` で使う。 -/
+theorem projOp_natAll {Z W : Cᵒᵖ} (t : P.proj.op.obj Z ⟶ P.proj.op.obj W) :
+    G.map t ≫ h.hom.app W = h.hom.app Z ≫ G'.map t := by
   let h₀ : ∀ Z : Cᵒᵖ, G.obj (P.proj.op.obj Z) ≅ G'.obj (P.proj.op.obj Z) :=
     fun Z => h.app Z
   have hh₀ : ∀ Z, (h₀ Z).hom = h.hom.app Z := fun _ => rfl
@@ -76,27 +81,37 @@ noncomputable def projOpPrecompIsoGen (P : PreFrobenioid C Φ) (F : FrobenioidCo
       _ = (G.map (inv t) ≫ G.map t) ≫ (h₀ W).hom ≫ G'.map (inv t) := by
           simp only [Category.assoc]
       _ = (h₀ W).hom ≫ G'.map (inv t) := by rw [hGi, Category.id_comp]
-  have hnAll : ∀ {Z W : Cᵒᵖ} (t : P.proj.op.obj Z ⟶ P.proj.op.obj W),
-      G.map t ≫ (h₀ W).hom = (h₀ Z).hom ≫ G'.map t := by
-    intro Z W t
-    obtain ⟨X, B, a, c, ps, ha, hc, hps, hfac⟩ := base_three_factor P F t.unop
-    haveI : IsIso (P.Base a) := ha.2
-    have ht : t = (P.proj.op.map ps.op) ≫ (P.proj.op.map c.op)
-        ≫ (@inv _ _ _ _ (P.proj.op.map a.op) (by
-            show IsIso (P.Base a).op
-            infer_instance)) := by
-      refine Quiver.Hom.unop_inj ?_
-      show t.unop = _
-      rw [hfac]
-      simp
-      rfl
-    rw [ht]
-    refine hnComp _ _ (hnBase ps.op) (hnComp _ _ (hnBase c.op) ?_)
-    exact hnInv (P.proj.op.map a.op) (by show IsIso (P.Base a).op; infer_instance)
-      (hnBase a.op)
-  haveI : P.proj.op.EssSurj := ⟨fun Y => by
-    obtain ⟨A, -, ⟨e⟩⟩ := F.baseSurj Y.unop
-    exact ⟨Opposite.op A, ⟨e.op.symm⟩⟩⟩
+  rw [← hh₀ W, ← hh₀ Z]
+  obtain ⟨X, B, a, c, ps, ha, hc, hps, hfac⟩ := base_three_factor P F t.unop
+  haveI : IsIso (P.Base a) := ha.2
+  have ht : t = (P.proj.op.map ps.op) ≫ (P.proj.op.map c.op)
+      ≫ (@inv _ _ _ _ (P.proj.op.map a.op) (by
+          show IsIso (P.Base a).op
+          infer_instance)) := by
+    refine Quiver.Hom.unop_inj ?_
+    show t.unop = _
+    rw [hfac]
+    simp
+    rfl
+  rw [ht]
+  refine hnComp _ _ (hnBase ps.op) (hnComp _ _ (hnBase c.op) ?_)
+  exact hnInv (P.proj.op.map a.op) (by show IsIso (P.Base a).op; infer_instance)
+    (hnBase a.op)
+
+include F in
+/-- ★`P.proj.op` は本質的全射(`baseSurj`)。 -/
+theorem projOp_essSurj : P.proj.op.EssSurj := ⟨fun Y => by
+  obtain ⟨A, -, ⟨e⟩⟩ := F.baseSurj Y.unop
+  exact ⟨Opposite.op A, ⟨e.op.symm⟩⟩⟩
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`P.proj.op` との前合成は関手の同型を反射する**。 -/
+noncomputable def projOpPrecompIsoGen : G ≅ G' := by
+  haveI := projOp_essSurj P F
+  -- ★綴りを固定する(`(F ⋙ G).obj` と `G.obj (F.obj _)` の食い違いを避ける)
+  let h₀ : ∀ Z : Cᵒᵖ, G.obj (P.proj.op.obj Z) ≅ G'.obj (P.proj.op.obj Z) :=
+    fun Z => h.app Z
+  have hh₀ : ∀ Z, (h₀ Z).hom = h.hom.app Z := fun _ => rfl
   refine NatIso.ofComponents
     (fun X => (G.mapIso (P.proj.op.objObjPreimageIso X)).symm
       ≪≫ h₀ (P.proj.op.objPreimage X)
@@ -106,7 +121,9 @@ noncomputable def projOpPrecompIsoGen (P : PreFrobenioid C Φ) (F : FrobenioidCo
   set eX := P.proj.op.objObjPreimageIso X with heX
   set eY := P.proj.op.objObjPreimageIso Y with heY
   have hnat : G.map (eX.hom ≫ f ≫ eY.inv) ≫ (h₀ pY).hom
-      = (h₀ pX).hom ≫ G'.map (eX.hom ≫ f ≫ eY.inv) := hnAll _
+      = (h₀ pX).hom ≫ G'.map (eX.hom ≫ f ≫ eY.inv) := by
+    rw [hh₀ pY, hh₀ pX]
+    exact projOp_natAll P F h _
   rw [G.map_comp, G.map_comp, G'.map_comp, G'.map_comp] at hnat
   show G.map f ≫ (G.map eY.inv ≫ (h₀ pY).hom ≫ G'.map eY.hom)
     = (G.map eX.inv ≫ (h₀ pX).hom ≫ G'.map eX.hom) ≫ G'.map f
@@ -119,6 +136,25 @@ noncomputable def projOpPrecompIsoGen (P : PreFrobenioid C Φ) (F : FrobenioidCo
   rw [hnat]
   simp only [Category.assoc, hEY, hEX, Category.comp_id]
   exact (Category.id_comp _).symm
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**反射した同型の `Base` の像での成分は `h` そのもの**。
+
+★★これが `Corollary 4.11, (iv)` の `div` 成分の一致に要る。 -/
+theorem projOpPrecompIsoGen_app (Z : Cᵒᵖ) :
+    (projOpPrecompIsoGen P F h).hom.app (P.proj.op.obj Z) = h.hom.app Z := by
+  haveI := projOp_essSurj P F
+  set Y := P.proj.op.obj Z with hY
+  set pY := P.proj.op.objPreimage Y with hpY
+  set eY := P.proj.op.objObjPreimageIso Y with heY
+  show G.map eY.inv ≫ h.hom.app pY ≫ G'.map eY.hom = h.hom.app Z
+  have hnat : G.map eY.hom ≫ h.hom.app Z = h.hom.app pY ≫ G'.map eY.hom :=
+    projOp_natAll P F h eY.hom
+  have hEX : G.map eY.inv ≫ G.map eY.hom = 𝟙 (G.obj Y) := by
+    rw [← Functor.map_comp, eY.inv_hom_id, G.map_id]
+  have s1 : G.map eY.inv ≫ h.hom.app pY ≫ G'.map eY.hom
+      = G.map eY.inv ≫ G.map eY.hom ≫ h.hom.app Z := by rw [hnat]; rfl
+  rw [s1, ← Category.assoc, hEX, Category.id_comp]
 
 def projOpPrecompIsoGen.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 92,
@@ -148,11 +184,28 @@ set_option maxHeartbeats 1000000 in
 noncomputable def psiPhiOnBase (F₁ : FrobenioidCore P₁) (ΨB : D₁ ⥤ D₂)
     (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
     (hPhi : phiOnC P₁ ≅ Ψ.op ⋙ phiOnC P₂) :
-    Φ₁.functor ≅ ΨB.op ⋙ Φ₂.functor := by
-  refine projOpPrecompIsoGen P₁ F₁ (hPhi ≪≫ ?_)
-  refine (Functor.associator Ψ.op P₂.proj.op Φ₂.functor) ≪≫ ?_
-  refine Functor.isoWhiskerRight (NatIso.op sq) Φ₂.functor ≪≫ ?_
-  exact (Functor.associator P₁.proj.op ΨB.op Φ₂.functor).symm
+    Φ₁.functor ≅ ΨB.op ⋙ Φ₂.functor :=
+  projOpPrecompIsoGen P₁ F₁
+    (hPhi ≪≫ (Functor.associator Ψ.op P₂.proj.op Φ₂.functor).symm
+      ≪≫ Functor.isoWhiskerRight (NatIso.op sq) Φ₂.functor
+      ≪≫ Functor.associator P₁.proj.op ΨB.op Φ₂.functor)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**`Ψ_Φ` の `Base A` での成分** —— `Ψ_Φ` は `hPhi` を `sq` でずらしたもの。 -/
+theorem psiPhiOnBase_app_apply (F₁ : FrobenioidCore P₁) (ΨB : D₁ ⥤ D₂)
+    (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
+    (hPhi : phiOnC P₁ ≅ Ψ.op ⋙ phiOnC P₂) (A : C₁)
+    (x : Φ₁.val ((P₁.toElem.obj A).base)) :
+    ((psiPhiOnBase Ψ F₁ ΨB sq hPhi).hom.app
+        (Opposite.op ((P₁.toElem.obj A).base))).hom x
+      = Φ₂.map (sq.hom.app A) ((hPhi.hom.app (Opposite.op A)).hom x) := by
+  have h1 := projOpPrecompIsoGen_app P₁ F₁
+    (hPhi ≪≫ (Functor.associator Ψ.op P₂.proj.op Φ₂.functor).symm
+      ≪≫ Functor.isoWhiskerRight (NatIso.op sq) Φ₂.functor
+      ≪≫ Functor.associator P₁.proj.op ΨB.op Φ₂.functor) (Opposite.op A)
+  have h2 := congrArg (fun t : (Φ₁.functor).obj (Opposite.op ((P₁.toElem.obj A).base)) ⟶
+      _ => (AddCommMonCat.Hom.hom t) x) h1
+  exact h2
 
 def psiPhiOnBase.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 92,
@@ -202,5 +255,64 @@ def elemFrobMapOver.src : ABC3.Meta.Source :=
     sectionId := "frdi-cor-4-11" }
 
 end ElemFrobOver
+
+/-! ## ★4. `Corollary 4.11, (iv)` の 1-可換図式 -/
+
+section CorIV
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+  (Ψ : C₁ ⥤ C₂)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (iv) の 1-可換図式** ——
+`P₁.toElem ⋙ Ψ_𝔽 ≅ Ψ ⋙ P₂.toElem`。
+
+原文 (FrdI p.92):
+> (iv) Suppose further that C1, C2 are of rationally standard type. Then there exists
+
+★★3 成分に分かれる:
+- `base` 成分 …… (ii) の 1-可換図式の**自然性**
+- `deg` 成分 …… `Ψ` が Frobenius 次数を保つこと(`Theorem 3.4, (iii)`)
+- `div` 成分 …… ★`Ψ_Φ` が `Div` を `Div` へ送ること(`divMap_div_all`) -/
+noncomputable def cor_4_11_iv_square (ΨB : D₁ ⥤ D₂)
+    (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
+    (η : Φ₁.functor ⟶ ΨB.op ⋙ Φ₂.functor)
+    (hdivc : ∀ {A B : C₁} (φ : A ⟶ B),
+      (η.app (Opposite.op ((P₁.toElem.obj A).base))).hom (P₁.Div φ)
+        = Φ₂.map (sq.hom.app A) (P₂.Div (Ψ.map φ)))
+    (hdeg : ∀ {A B : C₁} (φ : A ⟶ B), P₂.degFr (Ψ.map φ) = P₁.degFr φ) :
+    P₁.toElem ⋙ elemFrobMapOver ΨB η ≅ Ψ ⋙ P₂.toElem :=
+  NatIso.ofComponents
+    (fun A =>
+      { hom := ⟨sq.hom.app A, 0, 1⟩
+        inv := ⟨sq.inv.app A, 0, 1⟩
+        hom_inv_id := by
+          refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+          · exact sq.hom_inv_id_app A
+          · simp [ElemFrobCat.Hom.comp]
+          · simp [ElemFrobCat.Hom.comp]
+        inv_hom_id := by
+          refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+          · exact sq.inv_hom_id_app A
+          · simp [ElemFrobCat.Hom.comp]
+          · simp [ElemFrobCat.Hom.comp] })
+    (fun {A B} φ => by
+      refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+      · exact sq.hom.naturality φ
+      · simp only [Functor.comp_map, ElemFrobCat.comp_div, map_zero, zero_add, smul_zero,
+          add_zero, PNat.one_coe, one_smul]
+        exact hdivc φ
+      · simp only [Functor.comp_map, ElemFrobCat.comp_deg, one_mul, mul_one]
+        exact (hdeg φ).symm)
+
+def cor_4_11_iv_square.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 92,
+    item := "Corollary 4.11, (iv) — 𝒞ᵢ → 𝔽_{Φᵢ} の 1-可換図式",
+    sectionId := "frdi-cor-4-11" }
+
+end CorIV
 
 end ABC3.Found.FrdI

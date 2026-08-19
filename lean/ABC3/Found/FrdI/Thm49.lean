@@ -355,6 +355,99 @@ def psiPhi.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88, item := "Theorem 4.9",
     sectionId := "frdi-thm-4-9" }
 
+/-! ## ★6. `Ψ_Φ` は `Div` を `Div` へ送る —— `Corollary 4.11, (iv)` の核 -/
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★**co-angular pre-step の場合** ——
+`hdivS` で `𝒪^▷` の元に取り替え、`exists_iso_of_div_eq`(コスライスの圏同値)で
+**同型でずれるだけ**にする。同型は零因子 0・次数 1 なので `Div` は変わらない。 -/
+theorem divMap_div_preStep (Ψ : C ≌ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    {A B : C} (ϵ : A ⟶ B) (hs : IsPreStep P ϵ) :
+    divMap Ψ G hiso hdivS hOTri A (P.Div ϵ) = P₂.Div (Ψ.functor.map ϵ) := by
+  obtain ⟨u, hu⟩ := hdivS A (P.Div ϵ)
+  obtain ⟨θ, hθiso, hθ⟩ := exists_iso_of_div_eq G (((u : End A)) : A ⟶ A) ϵ
+    (prop_1_4_i P _ (fun Z _ => hiso Z)) (isPreStep_of_otri _ u.2)
+    (prop_1_4_i P _ (fun Z _ => hiso Z)) hs hu
+  haveI := hθiso
+  haveI : IsIso (Ψ.functor.map θ) := Ψ.functor.map_isIso _
+  have hdiv2 : P₂.Div (Ψ.functor.map ϵ)
+      = P₂.Div (Ψ.functor.map (((u : End A)) : A ⟶ A)) := by
+    rw [← hθ, Ψ.functor.map_comp, P₂.Div_comp,
+      show P₂.Div (Ψ.functor.map θ) = 0 from isIsometric_of_isIso P₂ _,
+      degFr_of_isIso P₂ (Ψ.functor.map θ), map_zero, zero_add,
+      show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul]
+  rw [hdiv2, ← hu]
+  exact divMap_div_otri Ψ G hiso hdivS hOTri u.2
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**`Ψ_Φ` は `Div` を `Div` へ送る**(任意の射)。
+
+★`arbFactor` の 3 分解 `φ = γ ≫ pre ≫ plb` で
+**`Div γ = 0`(Frobenius 型は isometric)・`Div plb = 0`(pull-back は LB-invertible)**
+なので `Div φ = Φ.map (Base γ) (Div pre)` に潰れる。
+★あとは `divMapNat_all`(自然性)と pre-step の場合で降りる。 -/
+theorem divMap_div_all (Ψ : C ≌ C₂) (G : Frobenioid P) (F : FrobenioidCore P)
+    (F₂ : FrobenioidCore P₂)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    (hFT : ∀ {X Y : C} (g : X ⟶ Y), IsFrobeniusType P g →
+      IsFrobeniusType P₂ (Ψ.functor.map g))
+    (hPS : ∀ {X Y : C} (g : X ⟶ Y), IsPreStep P g → IsPreStep P₂ (Ψ.functor.map g))
+    (hPB : ∀ {X Y : C} (g : X ⟶ Y), IsPullBack P g → IsPullBack P₂ (Ψ.functor.map g))
+    {A B : C} (φ : A ⟶ B) :
+    divMap Ψ G hiso hdivS hOTri A (P.Div φ) = P₂.Div (Ψ.functor.map φ) := by
+  obtain ⟨Y₀, Z₀, γ, pre, plb, hfac, hγ, hpre, hplb, -⟩ :
+      ∃ (Y₀ Z₀ : C) (γ : A ⟶ Y₀) (pre : Y₀ ⟶ Z₀) (plb : Z₀ ⟶ B),
+        φ = γ ≫ pre ≫ plb ∧ IsFrobeniusType P γ ∧ IsPreStep P pre ∧ IsPullBack P plb
+          ∧ True := by
+    obtain ⟨Y₀, Z₀, γ, pre, plb, hfac, hγ, hpre, hplb⟩ := F.arbFactor φ
+    exact ⟨Y₀, Z₀, γ, pre, plb, hfac, hγ, hpre, hplb, trivial⟩
+  -- ★`Div (pre ≫ plb) = Div pre`
+  have hdplb : P.Div plb = 0 := (F.pullBackLB plb hplb).1.2
+  have hdlin : P.degFr plb = 1 := (F.pullBackLB plb hplb).2
+  have hd1 : P.Div (pre ≫ plb) = P.Div pre := by
+    rw [P.Div_comp, hdplb, hdlin, map_zero, zero_add,
+      show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul]
+  -- ★`Div φ = Φ.map (Base γ) (Div pre)`
+  have hdγ : P.Div γ = 0 := hγ.1.2
+  have hd2 : P.Div φ = Φ.map (P.Base γ) (P.Div pre) := by
+    rw [hfac, P.Div_comp, hd1, hdγ, smul_zero, add_zero]
+  -- ★`𝒞₂` 側でも同じ計算
+  have hdplb₂ : P₂.Div (Ψ.functor.map plb) = 0 :=
+    (F₂.pullBackLB _ (hPB plb hplb)).1.2
+  have hdlin₂ : P₂.degFr (Ψ.functor.map plb) = 1 := by rw [hdeg plb, hdlin]
+  have hd1₂ : P₂.Div (Ψ.functor.map pre ≫ Ψ.functor.map plb)
+      = P₂.Div (Ψ.functor.map pre) := by
+    rw [P₂.Div_comp, hdplb₂, hdlin₂, map_zero, zero_add,
+      show ((1 : ℕ+) : ℕ) = 1 from rfl, one_smul]
+  have hdγ₂ : P₂.Div (Ψ.functor.map γ) = 0 := (hFT γ hγ).1.2
+  have hd2₂ : P₂.Div (Ψ.functor.map φ)
+      = Φ₂.map (P₂.Base (Ψ.functor.map γ)) (P₂.Div (Ψ.functor.map pre)) := by
+    rw [hfac, Ψ.functor.map_comp, Ψ.functor.map_comp, P₂.Div_comp, hd1₂, hdγ₂,
+      smul_zero, add_zero]
+  rw [hd2, hd2₂]
+  rw [divMapNat_all (Ψ := Ψ) (G := G) (hiso := hiso) (hdivS := hdivS) (hOTri := hOTri)
+    F hperfM hdeg γ (P.Div pre)]
+  exact congrArg (fun t => Φ₂.map (P₂.Base (Ψ.functor.map γ)) t)
+    (divMap_div_preStep Ψ G hiso hdivS hOTri pre hpre)
+
+def divMap_div_all.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 94,
+    item := "Corollary 4.11, (iv) — Ψ_Φ は Div を Div へ送る",
+    sectionId := "frdi-cor-4-11" }
+
 end PsiPhi
 
 end ABC3.Found.FrdI
