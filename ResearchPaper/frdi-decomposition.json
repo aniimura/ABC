@@ -2470,11 +2470,11 @@
      "deps": [
       "p55iii-rlf"
      ],
-     "status": "todo",
+     "status": "半済",
      "size": "中",
-     "note": "`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つこと、および `𝒞^un-tr`, `𝒞^rlf` の pull-back 射がちょうど linear isometry であること(`Proposition 1.4, (ii)`)。",
-     "lean": "",
-     "decl": ""
+     "note": "`(𝒞^un-tr)^birat` が Frobenius-compact 対象を持つこと、および `𝒞^un-tr`, `𝒞^rlf` の pull-back 射がちょうど linear isometry であること(`Proposition 1.4, (ii)`)。\n\n★★2026-08-20: **原文が挙げる 2 つの observation のうち 1 つは済**。「pull-back 射はちょうど linear な等長射」は `𝒞^un-tr`(`unTr_isPullBack_iff`)と model Frobenioid(`ModelData.model_isPullBack_iff`)について**すでに在庫にあった**。isotropic 型一般の形に束ねた(`isPullBack_iff_linear_isometric`)。\n★残るのは (1) `(𝒞^un-tr)^birat` の Frobenius-compact 対象が `(𝒞^rlf)^birat` へ移ること、(2) そこから standard 性の移送を結ぶこと。",
+     "lean": "ABC3/Found/FrdI/Prop53Diag.lean",
+     "decl": "isPullBack_iff_linear_isometric"
     },
     {
      "id": "p55iv-untr",

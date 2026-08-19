@@ -70,6 +70,29 @@ noncomputable def cToSc (Fc : FrobenioidCore P) (G : Frobenioid P)
       (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD :=
   cToUnTr hiso ⋙ untrToSc S Fc G hint hcharInj hintS hfsmD
 
+/-! ## ★`Proposition 5.5, (iii)` の observation
+
+原文 (FrdI p.105):
+> morphisms of Cun-tr, Crlf are precisely the linear isometries [cf. Proposition 1.4,
+
+★原文が挙げる 2 つの observation の 1 つ。★`𝒞^un-tr` / model Frobenioid については
+すでに在庫がある(`unTr_isPullBack_iff` / `ModelData.model_isPullBack_iff`)ので、
+ここでは**isotropic 型の Frobenioid 一般**の形に束ねておく。 -/
+
+/-- ★★★**isotropic 型では「pull-back 射 ⟺ linear な等長射」**。
+
+★`⟹` は `Definition 1.3, (iv)` の `pullBackLB`、
+`⟸` は `Proposition 1.4, (ii)`(co-angular 性は `Proposition 1.4, (i)` から自動)。 -/
+theorem isPullBack_iff_linear_isometric (Fc : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X) {A B : C} (φ : A ⟶ B) :
+    IsPullBack P φ ↔ (IsLinear P φ ∧ IsIsometric P φ) := by
+  constructor
+  · intro h
+    obtain ⟨hlb, hlin⟩ := Fc.pullBackLB φ h
+    exact ⟨hlin, hlb.2⟩
+  · rintro ⟨hlin, hisom⟩
+    exact prop_1_4_ii_mpr P Fc φ ⟨prop_1_4_i P φ (fun Y _ => hiso Y), hisom⟩ hlin
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.3` の 1-可換図式の左の縦の矢印と、そこから実化へ抜ける道
@@ -78,5 +101,12 @@ def cToSc.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 103,
     item := "Proposition 5.3 — 1-可換図式の縦の矢印 𝒞 ⥤ 𝒞^un-tr ⥤ 𝒞^rlf",
     sectionId := "frdi-prop-5-3" }
+
+/-- ★locator —— `Proposition 5.5, (iii)` の証明が挙げる observation
+「pull-back 射はちょうど linear な等長射」。 -/
+def isPullBack_iff_linear_isometric.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — pull-back 射はちょうど linear な等長射",
+    sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
