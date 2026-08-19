@@ -59,18 +59,18 @@ theorem toHomBirat_surjective
     (A B : C) : Function.Surjective (toHomBirat (P := P) (G := G) (A := A) (B := B)) := by
   intro z
   obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep z
-  set u : idxBiratOne P G A ⟶ Z := idxOneTo P G A Z with hu
-  have hleft : u.unop.left = Z.unop.hom := idxOneTo_left (P := P) (G := G) A Z
-  haveI : IsIso (u.unop.left.hom) := by
+  have hh : (idxOneTo P G A Z).unop.left.hom = Z.unop.hom.hom :=
+    congrArg InducedWideCategory.Hom.hom (idxOneTo_left (P := P) (G := G) A Z)
+  haveI hIso : IsIso ((idxOneTo P G A Z).unop.left.hom) := by
     refine hno _ ?_
-    have hh : u.unop.left.hom = Z.unop.hom.hom :=
-      congrArg InducedWideCategory.Hom.hom hleft
     rw [hh]
     exact Z.unop.hom.property
-  refine ⟨inv (u.unop.left.hom) ≫ φ, ?_⟩
-  show HomBirat.mk (idxBiratOne P G A) (inv (u.unop.left.hom) ≫ φ) = HomBirat.mk Z φ
-  rw [← HomBirat.mk_map u (inv (u.unop.left.hom) ≫ φ), ← Category.assoc,
-    IsIso.hom_inv_id, Category.id_comp]
+  refine ⟨(@inv _ _ _ _ ((idxOneTo P G A Z).unop.left.hom) hIso) ≫ φ, ?_⟩
+  show HomBirat.mk (idxBiratOne P G A)
+    ((@inv _ _ _ _ ((idxOneTo P G A Z).unop.left.hom) hIso) ≫ φ) = HomBirat.mk Z φ
+  rw [← HomBirat.mk_map (idxOneTo P G A Z)
+      ((@inv _ _ _ _ ((idxOneTo P G A Z).unop.left.hom) hIso) ≫ φ),
+    ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
 
 /-- ★★★**`Φ` が自明なら `toHomBirat` は単射**。 -/
 theorem toHomBirat_injective
@@ -102,6 +102,86 @@ def toBiratCat_faithful_of_noStep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 82,
     item := "Proposition 4.4, (i) — step が無ければ 𝒞 → 𝒞^birat は忠実充満",
     sectionId := "frdi-prop-4-4" }
+
+/-! ## ★★★★★★`Φ` 自明の枝での Frobenius-compact 対象 -/
+
+/-- ★★`Φ` が自明なら `𝒞` は group-like 型。 -/
+theorem isOfGroupLikeType_of_phiTrivial
+    (htriv : ∀ (Y : C) (x : Φ.val (P.toElem.obj Y).base), x = 0) :
+    IsOfGroupLikeType P := by
+  intro A a
+  rw [htriv A a]
+  exact isAddUnit_zero
+
+/-- ★★★★★**`Φ` が自明なら `Frobenius-compact` は `𝒞^birat` へ移る**。
+
+★`toBiratCat` が忠実充満なので、`End`・`OTimes`・自己同型の 3 つがそのまま対応する。 -/
+theorem birat_isFrobeniusCompact_of_noStep
+    (hno : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso f)
+    (A : C) (h : IsFrobeniusCompact P A) :
+    IsFrobeniusCompact (biratPre P G) ((toBiratCat P G).obj A) := by
+  haveI := toBiratCat_faithful_of_noStep hno (G := G)
+  haveI := toBiratCat_full_of_noStep hno (G := G)
+  refine isFrobeniusCompact_transport P (biratPre P G)
+    (MulEquiv.ofBijective (Functor.mapEnd A (toBiratCat P G))
+      ⟨fun x y hxy => (toBiratCat P G).map_injective hxy,
+       fun y => (toBiratCat P G).map_surjective y⟩)
+    ((Functor.FullyFaithful.ofFullyFaithful (toBiratCat P G)).isoEquiv) ?_ ?_ h
+  · intro u
+    constructor
+    · rintro ⟨⟨hb, hl⟩, hu⟩
+      refine ⟨⟨?_, ?_⟩, ?_⟩
+      · show (biratPre P G).Base ((toBiratCat P G).map (u : A ⟶ A))
+          = (biratPre P G).Base (𝟙 ((toBiratCat P G).obj A))
+        rw [biratPre_Base, biratPre_Base]
+        show biratBase (toHomBirat (P := P) (G := G) (u : A ⟶ A))
+          = biratBase (toHomBirat (P := P) (G := G) (𝟙 A))
+        rw [biratBase_toHomBirat, biratBase_toHomBirat]
+        exact hb
+      · show (biratPre P G).degFr ((toBiratCat P G).map (u : A ⟶ A)) = 1
+        rw [biratPre_degFr]
+        show biratDeg (toHomBirat (P := P) (G := G) (u : A ⟶ A)) = 1
+        rw [biratDeg_toHomBirat]
+        exact hl
+      · exact hu.map (Functor.mapEnd A (toBiratCat P G))
+    · rintro ⟨⟨hb, hl⟩, hu⟩
+      refine ⟨⟨?_, ?_⟩, ?_⟩
+      · show P.Base (u : A ⟶ A) = P.Base (𝟙 A)
+        have hb' : biratBase (toHomBirat (P := P) (G := G) (u : A ⟶ A))
+            = biratBase (toHomBirat (P := P) (G := G) (𝟙 A)) := hb
+        rw [biratBase_toHomBirat, biratBase_toHomBirat] at hb'
+        exact hb'
+      · show P.degFr (u : A ⟶ A) = 1
+        have hl' : biratDeg (toHomBirat (P := P) (G := G) (u : A ⟶ A)) = 1 := hl
+        rw [biratDeg_toHomBirat] at hl'
+        exact hl'
+      · obtain ⟨v, hv⟩ := hu
+        refine ⟨⟨u, (toBiratCat P G).preimage ((v⁻¹ : (End _)ˣ) : End _), ?_, ?_⟩, rfl⟩
+        · refine (toBiratCat P G).map_injective ?_
+          show (toBiratCat P G).map ((u : End A) * _) = (toBiratCat P G).map (1 : End A)
+          rw [map_mul, Functor.map_preimage, CategoryTheory.Functor.map_id]
+          show ((toBiratCat P G).map (u : A ⟶ A) : End _) * _ = 1
+          rw [show ((toBiratCat P G).map (u : A ⟶ A) : End _) = (v : End _) from hv.symm]
+          exact v.mul_inv
+        · refine (toBiratCat P G).map_injective ?_
+          show (toBiratCat P G).map (_ * (u : End A)) = (toBiratCat P G).map (1 : End A)
+          rw [map_mul, Functor.map_preimage, CategoryTheory.Functor.map_id]
+          show _ * ((toBiratCat P G).map (u : A ⟶ A) : End _) = 1
+          rw [show ((toBiratCat P G).map (u : A ⟶ A) : End _) = (v : End _) from hv.symm]
+          exact v.inv_mul
+  · intro θ u
+    show (toBiratCat P G).map ((endConj θ u : End A) : A ⟶ A)
+      = endConj _ ((toBiratCat P G).map ((u : End A) : A ⟶ A))
+    show (toBiratCat P G).map (θ.inv ≫ (u : A ⟶ A) ≫ θ.hom)
+      = ((toBiratCat P G).mapIso θ).inv ≫ (toBiratCat P G).map ((u : A ⟶ A))
+        ≫ ((toBiratCat P G).mapIso θ).hom
+    rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp]
+    rfl
+
+def birat_isFrobeniusCompact_of_noStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (iii) — Φ が自明な枝の Frobenius-compact 対象",
+    sectionId := "frdi-prop-4-8" }
 
 end NoStep
 
