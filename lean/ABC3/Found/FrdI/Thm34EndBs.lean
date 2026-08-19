@@ -745,7 +745,31 @@ def isBaseIdentity_map_of_baseSquare.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — base-identity 自己射と base-equivalent な対の保存",
     sectionId := "frdi-thm-3-4" }
 
-/-! ## ★★★★★`Theorem 3.4, (v)` の `Ψ_Base` —— **局所化として読み替える**
+/-! # ★★★★★★**警告 —— 以下の局所化の枠は反証された**(2026-08-19)
+
+`ABC3/Check/FrdI/VLocFalse.lean` の `ex43_not_isLocalization` により
+**`P.proj.IsLocalization (baseIsoProp P)` は偽**である
+(`Example 4.3` の `𝒞` が反例)。
+
+★★したがって以下の `psiBaseLoc` / `psiBaseLocSquare` / `psiBaseLocUniq` /
+`thm_3_4_v_rigid` は**仮定を満たす `𝒞` が存在しないので空虚**であり、
+`Theorem 3.4, (v)` の証明としては使えない。
+
+★**読み違えの中身**: 原典 (物理 p.68) の
+`φ_𝒟 = Base(ψ) ◦ Base(γ) ◦ Base(α)^{-1}` は
+「base-iso を反転させれば `proj` は**充満**になる」と言っているだけで、
+**忠実性は言っていない**。実際 `𝒪^×(A)` の元と Frobenius 次数は
+`Base` が潰すのに局所化には残る。
+
+★原典の本当の筋は**粗化** `R_i`(`Q_i ⊂ R_i`、`R_i ≌ 𝒟_i`)であり、
+`𝒟_i ≌ E_i` は `Proposition A.2`(slim exponentiation)である。
+★土台の `appa-2slim` / `appa-coarse` は `AppA.lean` に在る。
+
+★★**以下を消さずに残す理由**: 逸脱の記録として、
+「どこで・なぜ間違えたか」を後から特定できるようにするため
+(`CLAUDE.md` の「逸脱」方針)。 -/
+
+/-! ## ★★★★★`Theorem 3.4, (v)` の `Ψ_Base` —— **局所化として読み替える**(★反証済み)
 
 原文 (FrdI p.68):
 > sition A.2, hence, in particular, is an equivalence of categories. Thus, since the nat-

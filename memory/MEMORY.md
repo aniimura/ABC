@@ -35,3 +35,4 @@
 - [mathlib 在庫を実測してからスケルトンを作る](measure-mathlib-before-skeleton.md) — 引用先があると仮定して見積もると膨らむ。B1 で 27 ブロック分の誤差が出た。
 - [型付き恒等関数を橋にする](typed-identity-bridge.md) — 綴り違いの型の間は instance を足すより恒等関数。instance は経路を増やして新しい問題を作る。
 - [既定の grep が mathlib まで届く](search-scope-external-and-mathlib.md) — external/_refs に複製＋.ignore。ズレ検出は check-external-refs.sh。
+- [𝒟 は局所化ではない——v-loc は反証された](frdi-vloc-refuted.md) — 「充満」を「同値」と読んだ事故。反例は Example 4.3 で機械検証済み。
