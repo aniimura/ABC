@@ -10,7 +10,7 @@ import ABC3.Found.FrdI.Thm34VBase
 # [FrdI] Corollary 4.11, (i) —— `𝒪^×` は pull-back に沿って持ち上がる
 
 原文 (FrdI p.92):
-> an element f ∈ O×(A) determines an automorphism [cf. the proof of Proposition
+> determines an automorphism [cf. the proof of Proposition
 
 ## ★★★★★測って分かった道(2026-08-19)
 
@@ -332,7 +332,7 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 /-- ★★★★★★**[FrdI] Corollary 4.11, (i)** —— `Ψ^un-tr` の構成。
 
 原文 (FrdI p.91):
-> (i) There exists a 1-unique functor Ψun-tr : C1un-tr
+> (i) There exists a 1-unique functor
 
 ★★**底の 1-可換図式を経由しない** ——`Div-slim` ＋ `Theorem 4.2, (i)` から
 直に `𝒪^×` の保存が出るので、`Corollary 4.11, (ii)` に依存しない。 -/
@@ -349,7 +349,7 @@ noncomputable def psiUnTrOfDivSlim (P : PreFrobenioid C Φ) (F : FrobenioidCore 
   haveI := Ψ.isEquivalence_functor
   psiUnTr Ψ.functor h₁ h₂
     (fun α₁ α₂ hh => toElem_map_congr_of_otimes Ψ.functor F hiso
-      (fun X δ hδ => otimes_map_of_divSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId δ hδ)
+      (fun _X δ hδ => otimes_map_of_divSlim P F hiso P₂ F₂ Ψ hPB hPB' hds₂ hDivId δ hδ)
       α₁ α₂ hh)
 
 /-- ★★★★**1-可換図式**(`rfl`)。 -/
