@@ -37,3 +37,4 @@
 - [既定の grep が mathlib まで届く](search-scope-external-and-mathlib.md) — external/_refs に複製＋.ignore。ズレ検出は check-external-refs.sh。
 - [𝒟 は局所化ではない——v-loc は反証された](frdi-vloc-refuted.md) — 「充満」を「同値」と読んだ事故。反例は Example 4.3 で機械検証済み。
 - [座標・型・仮定は要るまで固定しない](defer-fixing-coordinates.md) — B2 で 5 回当たった。固定しすぎた補題は使えなくなり、パラメータ化すると証明を 1 文字も変えずに通る。
+- [FrdI §5・§6 の残りは在庫不足 2 群に帰着](frdi-s5-s6-blockers.md) — Prop 5.6 は Nikolov–Segal、§6 は因子論と six exponentials。それ以外は残り 1〜2 段。
