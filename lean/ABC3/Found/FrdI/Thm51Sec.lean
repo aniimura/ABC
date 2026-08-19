@@ -83,7 +83,7 @@ theorem birat_faithful_of_unitTrivial (G : Frobenioid P)
 /-! ## ★2. birationally Frobenius-normalized 性 -/
 
 /-- ★`𝒪^▷` の元のべきの `Div^gp` は次数倍。 -/
-theorem biratDivGp_pow (G : Frobenioid P) {X : BiratCat P G} {α : End X}
+theorem biratDivGp_pow_otri (G : Frobenioid P) {X : BiratCat P G} {α : End X}
     (hα : α ∈ OTri (biratPre P G) X) (n : ℕ) :
     biratDivGp (((α ^ n : End X) : X ⟶ X)) = n • biratDivGp ((α : X ⟶ X)) := by
   induction n with
@@ -123,7 +123,7 @@ theorem birat_frobNormalized_of_unitTrivial (G : Frobenioid P)
       gpMap_biratBase_of_baseIdentity hα.1,
       show ((biratDeg (((α ^ d : End X)) : X ⟶ X) : ℕ+) : ℕ) = 1 from by
         rw [show biratDeg (((α ^ d : End X)) : X ⟶ X) = 1 from hβmem.2]; rfl,
-      one_smul, biratDivGp_pow G hα d,
+      one_smul, biratDivGp_pow_otri G hα d,
       show ((biratDeg ((φ : End X) : X ⟶ X) : ℕ+) : ℕ) = d from rfl]
     abel
 
