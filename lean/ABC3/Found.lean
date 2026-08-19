@@ -466,6 +466,7 @@ import ABC3.Found.GaloisRep.FiniteTwoTorsion
 import ABC3.Found.GaloisRep.FiniteY
 import ABC3.Found.GaloisRep.FiniteTorsion
 import ABC3.Found.GaloisRep.ThreeTorsion
+import ABC3.Found.GaloisRep.CoprimeTorsion
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
