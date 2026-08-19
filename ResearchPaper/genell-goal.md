@@ -10470,3 +10470,35 @@ mathlib が `app` と `appLE` を両方持っているのはこのためだろ�
 
 ★★§9-248 で「B2 の 1 欄より逃げ道の表のほうが成果物かもしれない」と書いたが、
 **その判断は正しかった**——21 ブロックぶんの経験が 8 行の表に凝縮されている。
+
+## §9-268 ★★Galois が 3 ブロックになった —— 普遍 Weierstrass 曲線(G1 第 3 ブロック)
+
+`2 ∣ omegaNum` を示す舞台を用意した:
+
+| 定義 | 内容 |
+|---|---|
+| `URing` | ★普遍環 `ℤ[A₁,…,A₆]`(`MvPolynomial (Fin 5) ℤ`) |
+| `uCurve` | ★★普遍 Weierstrass 曲線(係数が不定元) |
+| `charZero_URing` | ★標数 0 |
+
+### ★★★測って分かった —— `CharZero (MvPolynomial …)` の instance が**無い**
+
+`Polynomial.charZero`(1 変数)は mathlib に在るが、★**`MvPolynomial` 版は無い**。
+★★`constantCoeff` で `ℤ` に落とせば **3 行**で作れるので自前で置いた。
+
+★★★`Polynomial` と `MvPolynomial` で**整備の粗密がある**——
+1 変数版が在るときは「多変数版も在るはず」と思わず、**両方 grep する**。
+
+### Galois 側の現況
+
+| ブロック | 内容 |
+|---|---|
+| 1 | `ω_n` の分子(`psiComp` = mathlib の `complEDS₂`) |
+| 2 | `ω_n` の分子は底変換と可換(降ろす段) |
+| ★3 | ★普遍環と普遍曲線(示す舞台) |
+
+★残るのは **`2 ∣ omegaNum uCurve n`** 1 本である。見積もり **5–10 ブロック**。
+
+### この区間の集計
+
+★**61 ブロック**(Arakelov 58 + Galois 3)。
