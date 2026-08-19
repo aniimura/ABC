@@ -109,11 +109,24 @@ structure APicSpecData where
     degF F (@HMul.hMul _ _ _
         (@instHMul _ (toAPicData.group _).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
       = degF F L + degF F M
-  /-- ★★**底変換で値が変わらない**(原文 p.4 の `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`)。 -/
+  /-- ★★**底変換で値が変わらない**(原文 p.4 の `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`)。
+
+  ★★★★2026-08-19 の修正——**射を代数構造に結んだ**。
+
+  それまで `φ` は**任意の**射 `Spec 𝓞_K ⟶ Spec 𝓞_F` であり、
+  同時に宣言されている `[Algebra F K]` は**一切使われていなかった**
+  ——これは書き落としである。★原文 p.4 が言っているのは
+  「`F ⊆ K` に沿った制限で次数が変わらない」であって、任意の射ではない。
+
+  ★★任意の `φ` 版も**真ではある**(どの環準同型 `𝓞_F → 𝓞_K` も体の埋め込みに延び、
+  各埋め込みがちょうど `[K:F]` 回現れる)が、
+  **原文に無い強い主張**であり、証明には分数体への延長の機構が要る。
+  ★★★下流(D3)が使うのは代数写像に沿った場合だけなので、そちらに揃える。 -/
   degF_baseChange : ∀ (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
-    [Algebra F K] (φ : Spec (CommRingCat.of (𝓞 K)) ⟶ Spec (CommRingCat.of (𝓞 F)))
+    [Algebra F K] [IsScalarTower (𝓞 F) (𝓞 K) K]
     (L : toAPicData.APic (Spec (CommRingCat.of (𝓞 F)))),
-    degF K (toAPicData.pullback φ L) = degF F L
+    degF K (toAPicData.pullback
+        (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))) L) = degF F L
   /-- ★★★**計量を定数倍すると次数が動く**——アルキメデス側の寄与そのもの。
 
   原文 (GenEll p.4):

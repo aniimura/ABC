@@ -174,4 +174,128 @@ theorem isPrimaryPreStep_map (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
    isPrimaryElt_div_map G₁ G₂ F₂ Ψ hPS hPS' hFT hiso₁ hiso₂ α hαd hαD hαF hαd₂ hαD₂
      hperf₁ hperf₂ φ hcφ hst hcφ₂ hst₂ h.2⟩
 
+
+/-! ## ★★★★★逆向きの移送(反射) -/
+
+/-- ★★★★★**右辺は `Ψ` で戻る** —— `prop41iRhs_map` の逆向き。
+
+★手筋は同じ ——`𝒞₂` の側で得た `Y`・`β'`・`ζ`・`ζ'` を
+本質的全射性と充満性で `𝒞₁` へ引き戻し、忠実性で等式を移す。 -/
+theorem prop41iRhs_map_rev (F₂ : FrobenioidCore P₂) (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT' : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₂ (Ψ.functor.map f) →
+      IsFrobeniusType P₁ f)
+    {A B : C₁} (φ : B ⟶ A) (α : ℕ+ → (A ⟶ A))
+    (h : Prop41iRhs' P₂ (Ψ.functor.map φ) (fun n => Ψ.functor.map (α n))) :
+    Prop41iRhs P₁ φ α := by
+  intro B' φB φA hstB hstA hfac
+  have hstB₂ : IsStep P₂ (Ψ.functor.map φB) := by
+    refine ⟨hPS φB hstB.1, fun hiso => hstB.2 ?_⟩
+    haveI := hiso
+    exact isIso_of_reflects_iso φB Ψ.functor
+  have hstA₂ : IsStep P₂ (Ψ.functor.map φA) := by
+    refine ⟨hPS φA hstA.1, fun hiso => hstA.2 ?_⟩
+    haveI := hiso
+    exact isIso_of_reflects_iso φA Ψ.functor
+  obtain ⟨Y₂, n, β'₂, ζ₂, ζ'₂, hβF, hζ, hζ', hζeq, hsq⟩ :=
+    h (Ψ.functor.obj B') (Ψ.functor.map φB) (Ψ.functor.map φA) hstB₂ hstA₂
+      (by rw [hfac, Ψ.functor.map_comp])
+  obtain ⟨Y₀, ⟨e⟩⟩ := Functor.EssSurj.mem_essImage (F := Ψ.functor) Y₂
+  obtain ⟨β'₀, hβ'₀⟩ := Ψ.functor.map_surjective (β'₂ ≫ e.inv)
+  obtain ⟨ζ₀, hζ₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ζ₂)
+  obtain ⟨ζ'₀, hζ'₀⟩ := Ψ.functor.map_surjective (e.hom ≫ ζ'₂)
+  refine ⟨Y₀, n, β'₀, ζ₀, ζ'₀, ?_, ?_, ?_, ?_, ?_⟩
+  · refine hFT' β'₀ ?_
+    rw [hβ'₀]
+    exact IsFrobeniusType.comp P₂ F₂ hβF (isFrobeniusType_of_isIso P₂ e.inv)
+  · refine hPS' ζ₀ ?_
+    rw [hζ₀]
+    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hζ
+  · refine hPS' ζ'₀ ?_
+    rw [hζ'₀]
+    exact IsPreStep.comp P₂ (isPreStep_of_isIso P₂ e.hom) hζ'
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hζ₀, hζ'₀, Category.assoc, ← hζeq]
+  · refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, Ψ.functor.map_comp, hβ'₀, hζ₀, Category.assoc,
+      ← Category.assoc e.inv, e.inv_hom_id, Category.id_comp, hsq]
+
+def prop41iRhs_map_rev.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (i) — Proposition 4.1, (i) の右辺は Ψ で戻る",
+    sectionId := "frdi-thm-4-2" }
+
+
+/-! ## ★★★★★★基底 —— Div-Frobenius-trivial な対象へ入る primary の両向き移送 -/
+
+/-- ★★★★★★**基底(step 版)** —— 両側で `Proposition 4.1, (i)` を当てる。 -/
+theorem isPrimaryElt_div_map_iff (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (F₂ : FrobenioidCore P₂) (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hFT' : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₂ (Ψ.functor.map f) →
+      IsFrobeniusType P₁ f)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    {A B : C₁} (α : ℕ+ → (A ⟶ A))
+    (hαd : ∀ n, P₁.degFr (α n) = n) (hαD : ∀ n, IsDivIdentity P₁ (α n))
+    (hαF : ∀ n, IsFrobeniusType P₁ (α n))
+    (hαd₂ : ∀ n, P₂.degFr (Ψ.functor.map (α n)) = n)
+    (hαD₂ : ∀ n, IsDivIdentity P₂ (Ψ.functor.map (α n)))
+    (hperf₁ : IsPerfectMonoid (Φ₁.val (P₁.toElem.obj A).base))
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base))
+    (φ : B ⟶ A) (hcφ : IsCoAngular P₁ φ) (hst : IsStep P₁ φ)
+    (hcφ₂ : IsCoAngular P₂ (Ψ.functor.map φ)) (hst₂ : IsStep P₂ (Ψ.functor.map φ)) :
+    IsPrimaryElt (P₁.Div φ) ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map φ)) :=
+  ⟨fun h => isPrimaryElt_div_map G₁ G₂ F₂ Ψ hPS hPS' hFT hiso₁ hiso₂ α hαd hαD hαF
+      hαd₂ hαD₂ hperf₁ hperf₂ φ hcφ hst hcφ₂ hst₂ h,
+   fun h => (prop_4_1_i G₁ hiso₁ α hαd hαD hαF hperf₁ φ hcφ hst).mpr
+      (prop41iRhs_map_rev F₂ Ψ hPS hPS' hFT' φ α
+        ((prop_4_1_i G₂ hiso₂ (fun n => Ψ.functor.map (α n)) hαd₂ hαD₂
+          (fun n => hFT (α n) (hαF n)) hperf₂ (Ψ.functor.map φ) hcφ₂ hst₂).mp h))⟩
+
+/-- ★★★★★★**基底(pre-step 版)** —— 同型の場合は両辺とも偽なので自明。 -/
+theorem primaryInIff_base (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (F₂ : FrobenioidCore P₂) (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hFT' : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₂ (Ψ.functor.map f) →
+      IsFrobeniusType P₁ f)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    {A : C₁} (α : ℕ+ → (A ⟶ A))
+    (hαd : ∀ n, P₁.degFr (α n) = n) (hαD : ∀ n, IsDivIdentity P₁ (α n))
+    (hαF : ∀ n, IsFrobeniusType P₁ (α n))
+    (hαd₂ : ∀ n, P₂.degFr (Ψ.functor.map (α n)) = n)
+    (hαD₂ : ∀ n, IsDivIdentity P₂ (Ψ.functor.map (α n)))
+    (hperf₁ : IsPerfectMonoid (Φ₁.val (P₁.toElem.obj A).base))
+    (hperf₂ : IsPerfectMonoid (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base))
+    (E : C₁) (ϵ : E ⟶ A) (hsϵ : IsPreStep P₁ ϵ) :
+    IsPrimaryElt (P₁.Div ϵ) ↔ IsPrimaryElt (P₂.Div (Ψ.functor.map ϵ)) := by
+  classical
+  by_cases hst : IsStep P₁ ϵ
+  · have hst₂ : IsStep P₂ (Ψ.functor.map ϵ) := by
+      refine ⟨hPS ϵ hsϵ, fun hiso => hst.2 ?_⟩
+      haveI := hiso
+      exact isIso_of_reflects_iso ϵ Ψ.functor
+    exact isPrimaryElt_div_map_iff G₁ G₂ F₂ Ψ hPS hPS' hFT hFT' hiso₁ hiso₂ α
+      hαd hαD hαF hαd₂ hαD₂ hperf₁ hperf₂ ϵ (prop_1_4_i P₁ _ (fun Y _ => hiso₁ Y)) hst
+      (prop_1_4_i P₂ _ (fun Y _ => hiso₂ Y)) hst₂
+  · haveI hi : IsIso ϵ := by
+      by_contra hc
+      exact hst ⟨hsϵ, hc⟩
+    haveI : IsIso (Ψ.functor.map ϵ) := Ψ.functor.map_isIso ϵ
+    have h1 : P₁.Div ϵ = 0 := isIsometric_of_isIso P₁ ϵ
+    have h2 : P₂.Div (Ψ.functor.map ϵ) = 0 := isIsometric_of_isIso P₂ _
+    rw [h1, h2]
+    exact ⟨fun hp => absurd rfl hp.1, fun hp => absurd rfl hp.1⟩
+
+def primaryInIff_base.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (i) — Div-Frobenius-trivial な対象での基底",
+    sectionId := "frdi-thm-4-2" }
+
 end ABC3.Found.FrdI
