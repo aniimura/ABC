@@ -392,6 +392,7 @@ import ABC3.Found.Arakelov.PicAppIsoInv
 import ABC3.Found.Arakelov.PicCongrApp
 import ABC3.Found.Arakelov.PicSquareLE
 import ABC3.Found.Arakelov.PicHcompat
+import ABC3.Found.Arakelov.PicSpecMapLE
 import ABC3.Found.Arakelov.PicAppLEApply
 import ABC3.Found.Arakelov.PicComapChain
 import ABC3.Found.Arakelov.PicUnitSurj

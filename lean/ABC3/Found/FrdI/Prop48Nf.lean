@@ -445,6 +445,70 @@ theorem psiBirat_essSurj (hpt : IsOfPerfectType P) : (psiBirat P d G).EssSurj :=
     (biratDown P G B)
   exact ⟨A, ⟨(toBiratCat P G).mapIso ε⟩⟩
 
+/-- ★★★★★**`Ψ^birat` は忠実**。
+
+★★添字圏が圏同値なので、共通の上界を**像の中に取り直せる** ——
+そのあとは `naiveFrob` の忠実性 1 本。 -/
+theorem psiBirat_faithful (hpt : IsOfPerfectType P) : (psiBirat P d G).Faithful where
+  map_injective {X Y} {x y} h := by
+    haveI := idxBiratNfMap_isEquivalence P d G hpt (biratDown P G X)
+    haveI := naiveFrob_faithful P G.core d hpt
+    obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep x
+    obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep y
+    have h' : HomBirat.mk ((idxBiratNfMap P d G (biratDown P G X)).obj Z) (nfMap P G.core d φ)
+        = HomBirat.mk ((idxBiratNfMap P d G (biratDown P G X)).obj W) (nfMap P G.core d ψ) :=
+      (biratNfMap_mk P d G Z φ).symm.trans (h.trans (biratNfMap_mk P d G W ψ))
+    obtain ⟨V, u, v, hV⟩ := HomBirat.eq_iff.mp h'
+    obtain ⟨V₀, ⟨θ⟩⟩ := Functor.EssSurj.mem_essImage (F := (idxBiratNfMap P d G (biratDown P G X))) V
+    obtain ⟨u₀, hu₀⟩ := (idxBiratNfMap P d G (biratDown P G X)).map_surjective (u ≫ θ.inv)
+    obtain ⟨v₀, hv₀⟩ := (idxBiratNfMap P d G (biratDown P G X)).map_surjective (v ≫ θ.inv)
+    have hu : nfMap P G.core d u₀.unop.left.hom = θ.inv.unop.left.hom ≫ u.unop.left.hom :=
+      congrArg (fun t : (idxBiratNfMap P d G (biratDown P G X)).obj Z ⟶ (idxBiratNfMap P d G (biratDown P G X)).obj V₀ => t.unop.left.hom) hu₀
+    have hv : nfMap P G.core d v₀.unop.left.hom = θ.inv.unop.left.hom ≫ v.unop.left.hom :=
+      congrArg (fun t : (idxBiratNfMap P d G (biratDown P G X)).obj W ⟶ (idxBiratNfMap P d G (biratDown P G X)).obj V₀ => t.unop.left.hom) hv₀
+    refine HomBirat.eq_iff.mpr ⟨V₀, u₀, v₀, (naiveFrob P G.core d).map_injective ?_⟩
+    show nfMap P G.core d (u₀.unop.left.hom ≫ φ) = nfMap P G.core d (v₀.unop.left.hom ≫ ψ)
+    have e3 : nfMap P G.core d (u₀.unop.left.hom ≫ φ)
+        = nfMap P G.core d u₀.unop.left.hom ≫ nfMap P G.core d φ := nfMap_comp P G.core d _ _
+    have e4 : nfMap P G.core d (v₀.unop.left.hom ≫ ψ)
+        = nfMap P G.core d v₀.unop.left.hom ≫ nfMap P G.core d ψ := nfMap_comp P G.core d _ _
+    have g1 : nfMap P G.core d u₀.unop.left.hom ≫ nfMap P G.core d φ
+        = (θ.inv.unop.left.hom ≫ u.unop.left.hom) ≫ nfMap P G.core d φ :=
+      congrArg (fun t => t ≫ nfMap P G.core d φ) hu
+    have g2 : (θ.inv.unop.left.hom ≫ u.unop.left.hom) ≫ nfMap P G.core d φ
+        = θ.inv.unop.left.hom ≫ (u.unop.left.hom ≫ nfMap P G.core d φ) := Category.assoc _ _ _
+    have g3 : θ.inv.unop.left.hom ≫ (u.unop.left.hom ≫ nfMap P G.core d φ)
+        = θ.inv.unop.left.hom ≫ (v.unop.left.hom ≫ nfMap P G.core d ψ) :=
+      congrArg (fun t => θ.inv.unop.left.hom ≫ t) hV
+    have g4 : θ.inv.unop.left.hom ≫ (v.unop.left.hom ≫ nfMap P G.core d ψ)
+        = (θ.inv.unop.left.hom ≫ v.unop.left.hom) ≫ nfMap P G.core d ψ := (Category.assoc _ _ _).symm
+    have g5 : (θ.inv.unop.left.hom ≫ v.unop.left.hom) ≫ nfMap P G.core d ψ
+        = nfMap P G.core d v₀.unop.left.hom ≫ nfMap P G.core d ψ :=
+      congrArg (fun t => t ≫ nfMap P G.core d ψ) hv.symm
+    exact e3.trans (g1.trans (g2.trans (g3.trans (g4.trans (g5.trans e4.symm)))))
+
+/-- ★★★★★**`Ψ^birat` は充満**。
+
+★添字を像の中へ取り直し、`naiveFrob` の充満性で射を持ち上げる。 -/
+theorem psiBirat_full (hpt : IsOfPerfectType P) : (psiBirat P d G).Full where
+  map_surjective {X Y} h := by
+    haveI := idxBiratNfMap_isEquivalence P d G hpt (biratDown P G X)
+    haveI := naiveFrob_full P G.core d hpt
+    obtain ⟨V, χ, rfl⟩ := HomBirat.exists_rep h
+    obtain ⟨V₀, ⟨θ⟩⟩ := Functor.EssSurj.mem_essImage (F := (idxBiratNfMap P d G (biratDown P G X))) V
+    obtain ⟨χ₀, hχ₀⟩ := (naiveFrob P G.core d).map_surjective (θ.inv.unop.left.hom ≫ χ)
+    refine ⟨HomBirat.mk V₀ χ₀, ?_⟩
+    refine (biratNfMap_mk P d G V₀ χ₀).trans ?_
+    have e2 : nfMap P G.core d χ₀ = θ.inv.unop.left.hom ≫ χ := hχ₀
+    exact (congrArg (HomBirat.mk ((idxBiratNfMap P d G (biratDown P G X)).obj V₀)) e2).trans (HomBirat.mk_map θ.inv χ)
+
+/-- ★★★★★**[FrdI] Proposition 4.8, (ii)** —— `Ψ^birat` は**圏同値**。 -/
+theorem psiBirat_isEquivalence (hpt : IsOfPerfectType P) :
+    (psiBirat P d G).IsEquivalence where
+  faithful := psiBirat_faithful P d G hpt
+  full := psiBirat_full P d G hpt
+  essSurj := psiBirat_essSurj P d G hpt
+
 def psiBirat_essSurj.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (ii) — Ψ^birat は本質的全射",
@@ -487,5 +551,25 @@ def biratNfMap.src : ABC3.Meta.Source :=
 
 ★★本ファイルは**ここまでを緑のまま**にしておく ——
 並行セッション(ABC3b)の `git add -A` が赤い状態を巻き込むため。 -/
+
+/-! ## ★★★★★`Proposition 4.8, (ii)` —— 条として揃った
+
+原文 (FrdI p.88):
+> (ii) If C is of perfect and isotropic type, then so is Cbirat.
+
+★実装した部品:
+
+| 主張 | 宣言 |
+|---|---|
+| naive Frobenius が co-angular pre-step を保つ／反射する | `nfMap_coaPreProp` / `nfMap_coaPreProp_of` |
+| `𝒞^{coa-pre}` と添字圏の圏同値 | `coaPreNfMap_isEquivalence` / `idxBiratNfMap_isEquivalence` |
+| `Ψ^birat` の構成と 1-可換図式 | `psiBirat` / `psiBiratSquare` |
+| `Ψ^birat` が圏同値 | `psiBirat_isEquivalence` |
+
+★★★原文が「the naive Frobenius functor determines a natural 1-commutative diagram」
+と一行で書く部分が、余極限の移送 4 段＋圏同値 3 性質になった。 -/
+def prop_4_8_ii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (ii)",
+    sectionId := "frdi-prop-4-8" }
 
 end ABC3.Found.FrdI
