@@ -161,4 +161,46 @@ def psiPhiOnBase.src : ABC3.Meta.Source :=
 
 end PsiPhiDescend
 
+/-! ## ★3. `Ψ_𝔽 : 𝔽_{Φ₁} ⥤ 𝔽_{Φ₂}` -/
+
+section ElemFrobOver
+
+variable {D₁ : Type u} [Category.{v} D₁] {Φ₁ : MonoidOn.{v, u, w} D₁}
+  {D₂ : Type u} [Category.{v} D₂] {Φ₂ : MonoidOn.{v, u, w} D₂}
+
+/-- ★★★★★**`Ψ_Base` に沿った `𝔽_Φ` の関手** ——
+在庫の `elemFrobMap` は**同じ `𝒟` の上**の 2 つの単系のためのものなので、
+底の関手 `Ψ_Base : 𝒟₁ ⥤ 𝒟₂` に沿った版を作る。
+
+原文 (FrdI p.92):
+> In particular, ΨBase, ΨΦ induce an equivalence of categories -/
+def elemFrobMapOver (ΨB : D₁ ⥤ D₂) (η : Φ₁.functor ⟶ ΨB.op ⋙ Φ₂.functor) :
+    ElemFrobCat Φ₁ ⥤ ElemFrobCat Φ₂ where
+  obj A := ⟨ΨB.obj A.base⟩
+  map {A B} φ := ⟨ΨB.map φ.base, (η.app (Opposite.op A.base)).hom φ.div, φ.deg⟩
+  map_id A := by
+    refine ElemFrobCat.Hom.ext ?_ ?_ rfl
+    · exact ΨB.map_id A.base
+    · show (η.app (Opposite.op A.base)).hom 0 = 0
+      exact map_zero _
+  map_comp {A B E} φ ψ := by
+    refine ElemFrobCat.Hom.ext ?_ ?_ rfl
+    · exact ΨB.map_comp φ.base ψ.base
+    · show (η.app (Opposite.op A.base)).hom
+        (Φ₁.map φ.base ψ.div + ((ψ.deg : ℕ+) : ℕ) • φ.div) = _
+      rw [map_add, map_nsmul]
+      congr 1
+      exact congrArg (fun t => (AddCommMonCat.Hom.hom t) ψ.div) (η.naturality φ.base.op)
+
+/-- ★★`Ψ_𝔽` は底の射影と可換(`rfl`)。 -/
+theorem elemFrobMapOver_proj (ΨB : D₁ ⥤ D₂) (η : Φ₁.functor ⟶ ΨB.op ⋙ Φ₂.functor) :
+    elemFrobMapOver ΨB η ⋙ ElemFrobCat.proj = ElemFrobCat.proj ⋙ ΨB := rfl
+
+def elemFrobMapOver.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 92,
+    item := "Corollary 4.11, (iii) — Ψ_Base と Ψ_Φ が誘導する 𝔽_Φ の関手",
+    sectionId := "frdi-cor-4-11" }
+
+end ElemFrobOver
+
 end ABC3.Found.FrdI
