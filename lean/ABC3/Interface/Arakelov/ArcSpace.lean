@@ -2,6 +2,7 @@ import ABC3.Interface.Arakelov.LineBundle
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.Limits
+import Mathlib.Analysis.SpecialFunctions.Exp
 
 /-!
 # Arakelov 理論のスケルトン(2/3)—— **アルキメデス側: `X^arc` と計量**
@@ -184,8 +185,21 @@ structure HermitianMetricData where
   「すべて 0」で埋まった(実測)。★**1 つの直線束には計量が多数ある**——
   それを型に出さないと `APic`(層と計量の**対**)の意味が消える。 -/
   Metric : (X : Scheme.{0}) → toPicardData.Pic X → Type
-  /-- ★計量は存在する。 -/
-  metric_nonempty : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X), Nonempty (Metric X L)
+  /-- ★計量は存在する——**`X^arc` がコンパクト Hausdorff なとき**。
+
+  ★★★★2026-08-19 の修正。それ以前は無条件だったが、その形は
+  正直な `Metric`（ファイバーごとのノルムの族）の下で**偽になりうる**:
+  連続計量の存在は局所自明性 + **1 の分割**で示すので、
+  `X^arc` のパラコンパクト性が要る。★`X` が有限型でないと
+  `topology_affine` の積位相（`A` の**全元**にわたる）は局所コンパクトでない。
+
+  ★★コンパクト Hausdorff なら `NormalSpace` と `ParacompactSpace` は
+  mathlib の instance で**無料に出る**（実測、§9-285）。
+  ★原文の `X` は ℤ 上固有・平坦なので (C2) からこの仮定は得られる——**逸脱ではない**。 -/
+  metric_nonempty : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X),
+    @CompactSpace (toArcSpaceData.Arc X) (toArcSpaceData.topology X) →
+    @T2Space (toArcSpaceData.Arc X) (toArcSpaceData.topology X) →
+    Nonempty (Metric X L)
   /-- 計量の対数(Green 関数)。 -/
   logMetric : (X : Scheme.{0}) → (L : toPicardData.Pic X) → Metric X L →
     toArcSpaceData.Arc X → ℝ
@@ -208,6 +222,37 @@ structure HermitianMetricData where
     IsConjCompatible X L m ↔
       ∀ p : toArcSpaceData.Arc X,
         logMetric X L m (toArcSpaceData.conj X p) = logMetric X L m p
+  /-- ★★★★**切断のノルム** `|s|_L`。
+
+  ★★★★2026-08-19 の追加。これが**計量と直線束を結ぶ唯一の欄**である。
+  ★それ以前は `Metric X L` が `L` を無視する witness を通していた
+  （`Check/Arakelov/MetricNondegenerate.lean` で機械確認、§9-282）。 -/
+  normSection : (X : Scheme.{0}) → (L : toPicardData.Pic X) → Metric X L →
+    (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type) →
+    toArcSpaceData.Arc X → ℝ
+  /-- ★ノルムは非負。 -/
+  normSection_nonneg : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L)
+    (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type))
+    (p : toArcSpaceData.Arc X), 0 ≤ normSection X L m s p
+  /-- ★★★★**切断が点で消えることとノルムが 0 になることは同値**。
+
+  ★★★**これが退化を殺す**——右辺は `L` の切断を複素点で評価したものであり、
+  `Metric X L` が `L` を無視していると満たせない。
+
+  ★`Interface/` は `Found/` を import できないので、評価（引き戻しの単位射）を
+  mathlib だけで書き下す——中身は `Found/Arakelov/ArcFiber.lean` の `arcEval` と同じである。 -/
+  normSection_eq_zero_iff : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (m : Metric X L)
+    (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type))
+    (p : toArcSpaceData.Arc X),
+    normSection X L m s p = 0 ↔
+      (((Scheme.Modules.pullbackPushforwardAdjunction
+          (toArcSpaceData.equivComplexPoints X p)).unit.app
+          (toPicardData.sheafOf X L)).val.app (Opposite.op ⊤)).hom s = 0
+  /-- ★★`scale` はノルムを一様に `exp (-c)` 倍する——`logMetric_scale` と整合する。 -/
+  normSection_scale : ∀ (X : Scheme.{0}) (L : toPicardData.Pic X) (c : ℝ) (m : Metric X L)
+    (s : (((toPicardData.sheafOf X L).val.obj (Opposite.op ⊤)) : Type))
+    (p : toArcSpaceData.Arc X),
+    normSection X L (scale X L c m) s p = Real.exp (-c) * normSection X L m s p
   /-- ★テンソル積で計量は掛かる(Green 関数は足される)——高さの加法性の源。 -/
   tensorMetric : (X : Scheme.{0}) → (L M : toPicardData.Pic X) → Metric X L → Metric X M →
     Metric X (@HMul.hMul _ _ _

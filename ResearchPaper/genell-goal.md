@@ -11280,3 +11280,54 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**84 ブロック**(Arakelov 69 + Galois 15)。測定のみの節。
+
+## §9-286 ★★★★★C3 の Interface を直した(第 245 ブロック)——退化を殺し、存在を条件付きにした
+
+§9-282(退化 witness が通る)と §9-285(道筋の測定)を受けて、
+`HermitianMetricData` を 2 点直した。**実装の前に直す**という規則どおりである。
+
+### ★★★★足した欄 —— `normSection`(切断のノルム)
+
+    normSection      : (X) → (L) → Metric X L → Γ(sheafOf X L, ⊤) → Arc X → ℝ
+    normSection_nonneg
+    ★normSection_eq_zero_iff : |s|(p) = 0  ↔  s を p で評価したものが 0
+    normSection_scale        : |s|_{scale c m}(p) = exp(-c) · |s|_m(p)
+
+★★★`normSection_eq_zero_iff` の右辺は **`L` の切断を複素点で評価したもの**なので、
+`Metric X L` が `L` を無視していると**満たせない**——これで §9-282 の穴が塞がる。
+
+★`Interface/` は `Found/` を import できないので、評価(引き戻しの単位射)を
+**mathlib だけで書き下した**。中身は `Found/Arakelov/ArcFiber.lean` の `arcEval` と同じである。
+
+### ★★★★直した欄 —— `metric_nonempty` を条件付きにした
+
+    metric_nonempty : ∀ X L, (X^arc がコンパクト) → (X^arc が Hausdorff) → Nonempty (Metric X L)
+
+★★無条件の形は、**正直な `Metric` の下では偽になりうる**:
+連続計量の存在は 1 の分割で示すのでパラコンパクト性が要り、
+`X` が有限型でないと `topology_affine` の積位相(`A` の**全元**にわたる)は
+局所コンパクトでない。
+
+★★★これは**逸脱の記録**である: 原文の `X` は ℤ 上固有・平坦なので
+(C2) からこの仮定は得られる。★下流(高さ)は原文の設定でしか使わないので影響しない。
+
+### ★負の対照は残した
+
+`Check/Arakelov/MetricNondegenerate.lean` を書き換え、
+**旧 9 欄を `WeakMetricData` として局所に再現**したうえで
+退化 witness が通ることを示す形にした。★測定の記録は消さない。
+
+### ★★これで (C3) の残りは「実装」だけになった
+
+| 段 | 状態 |
+|---|---|
+| 評価(`arcEval`) | ★取得済(第 244) |
+| ファイバーのノルムの型 | ★これから |
+| 局所自明性 ⟹ 局所でのノルム | ★これから |
+| 1 の分割で貼る | ★mathlib 在庫あり |
+
+★見積もり **20–40 ブロック**。★★(C2) には依存しない。
+
+### この区間の集計
+
+★**85 ブロック**(Arakelov 70 + Galois 15)。
