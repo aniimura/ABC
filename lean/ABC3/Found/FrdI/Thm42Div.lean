@@ -169,4 +169,35 @@ def primeFrobenius_divIdentity_map.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (i) — Div-identity 自己射の保存",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★4. `Div-Frobenius-trivial` 対象の保存
+
+原文 (FrdI p.77):
+> trivial objects, and universally Div-Frobenius-trivial objects.
+
+★★`IsDivFrobeniusTrivial A := ∃ ζ : ℕ≥1 →* End A, 次数が `n` で、各 `ζ n` が
+`Div-identity` かつ Frobenius 型`。
+★`ζ` は**単系準同型**なので、`Div-identity` を**素数の所だけ**言えば
+素因数分解の帰納で全体へ延びる。 -/
+
+/-- ★`Div-identity` は合成で閉じる。 -/
+theorem isDivIdentity_comp {A : C₂} {φ ψ : A ⟶ A}
+    (hφ : IsDivIdentity P₂ φ) (hψ : IsDivIdentity P₂ ψ) :
+    IsDivIdentity P₂ (φ ≫ ψ) := by
+  have h1 : Φ₂.map (P₂.Base φ) = Φ₂.map (P₂.Base (𝟙 A)) := hφ
+  have h2 : Φ₂.map (P₂.Base ψ) = Φ₂.map (P₂.Base (𝟙 A)) := hψ
+  rw [P₂.Base_id] at h1 h2
+  show Φ₂.map (P₂.Base (φ ≫ ψ)) = Φ₂.map (P₂.Base (𝟙 A))
+  rw [P₂.Base_id, P₂.Base_comp]
+  refine AddMonoidHom.ext (fun x => ?_)
+  rw [Φ₂.map_comp]
+  have e2 : Φ₂.map (P₂.Base ψ) x = Φ₂.map (𝟙 ((P₂.toElem.obj A).base)) x :=
+    congrArg (fun t : Φ₂.val _ →+ Φ₂.val _ => t x) h2
+  rw [e2, Φ₂.map_id]
+  have e1 : Φ₂.map (P₂.Base φ) x = Φ₂.map (𝟙 ((P₂.toElem.obj A).base)) x :=
+    congrArg (fun t : Φ₂.val _ →+ Φ₂.val _ => t x) h1
+  rw [e1, Φ₂.map_id]
+
+/-- ★`𝟙` は `Div-identity`。 -/
+theorem isDivIdentity_id (A : C₂) : IsDivIdentity P₂ (𝟙 A) := rfl
+
 end ABC3.Found.FrdI
