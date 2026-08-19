@@ -179,9 +179,12 @@
       "prol-def",
       "M-limit"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。 ★2026-08-18: 依存する 3 葉(finite-primary / prol-def / M-limit)がすべて閉じたので着手可能。"
+     "evidence": "`finite-primary` の関手性(`Ideal.primaryComponent.map`)で図式を作り、`M-limit` の極限に沿って取る。 ★2026-08-18: 依存する 3 葉(finite-primary / prol-def / M-limit)がすべて閉じたので着手可能。",
+     "file": "lean/ABC3/Found/ProL/LPart.lean",
+     "decl": "lPart / lPartCarrier_isClosed / lPartGrp / isProL_lPartGrp",
+     "note": "## ★★★★★閉じた(2026-08-19)\n\n★★台帳は `M[l] := lim_U (M/U)[l]` と書いていたが、**測り直して閉部分群として取った** ——\n`ProfiniteGrp.ofClosedSubgroup` / `ProfiniteGrp.of` が在庫にあるので極限より軽い。\n\n`M[l] := {x | すべての有限商 M/U で x の像が l-準素}`\n\n| 段 | 使うもの |\n|---|---|\n| 部分群 | 商の可換性 ＋ `mul_pow` |\n| 閉 | `M/U` は離散 ⟹ 各条件は閉集合、その共通部分 |\n| pro-`l` | ★`exist_openNormalSubgroup_sub_open_nhds_of_one` で `M[l]` の開正規部分群 `V` に対し `M` の `U` を取り `M[l] ∩ U ⊆ V` |\n\n★**可換性は型クラスで持つ**(`[CommGroup M]`)——`hcomm` の形だと下流で `primProj` を使うたび\n`letI` が要り、同じ instance を作り直す羽目になるため。"
     },
     {
      "id": "decomposition",
@@ -190,9 +193,12 @@
       "M-l-part",
       "limit-pi-comm"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "evidence": "`M ≅ lim_U M/U ≅ lim_U ∏_l (M/U)[l] ≅ ∏_l lim_U (M/U)[l] = ∏_l M[l]`。"
+     "evidence": "`M ≅ lim_U M/U ≅ lim_U ∏_l (M/U)[l] ≅ ∏_l lim_U (M/U)[l] = ∏_l M[l]`。",
+     "file": "lean/ABC3/Found/ProL/Decomposition.lean",
+     "decl": "lComp / prodFam / prodToM / primProj_prodFam / prodToM_injective / prodToM_surjective / prodToM_continuous / decompEquiv",
+     "note": "## ★★★★★★閉じた(2026-08-19)\n\n★**逆向き `Φ : ∏_l M[l] → M` を先に作った** —— `Φ y` は\n「各有限商で `∏_{p ∣ |M/U|} y_p`」という整合族の一意な持ち上げ。\n\n| 段 | 中身 |\n|---|---|\n| 整合性 | `|M/V| ∣ |M/U|` で素因数集合が縮み、落ちる項は `p ∤ |M/V|` から自明 |\n| 単射 | ★`primProj_prodFam` —— `primProj l` を当てると `l`-成分だけ残る |\n| 全射 | `lComp`(各商で `primProj`、整合性は `primProj_naturality`)＋ `prod_primProj` |\n| ★連続 | **圏論を経由しない** —— 剰余類が開基、`y ↦ prodFam y U` は**有限**積で離散への写像 |\n| 同相 | `Continuous.homeoOfEquivCompactToT2`(コンパクト→Hausdorff) |"
     },
     {
      "id": "def28",
