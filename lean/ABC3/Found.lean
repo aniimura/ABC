@@ -450,6 +450,7 @@ import ABC3.Found.Arakelov.ArcGlueZero
 import ABC3.Found.Arakelov.ArcGenSection
 import ABC3.Found.Arakelov.ArcOverCoef
 import ABC3.Found.Arakelov.ArcBridgeSmul
+import ABC3.Found.Arakelov.ArcAppIsoNat
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
