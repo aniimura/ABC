@@ -139,6 +139,9 @@ structure RatFnData (P : PreFrobenioid C Φ) (G : Frobenioid P) where
     φ ≫ ((δ : End ((toBiratCat P G).obj B)) : _ ⟶ _)
       = ((ε : End ((toBiratCat P G).obj A)) : _ ⟶ _) ≫ φ →
     kappa A (Additive.ofMul ε) = bmon.map θ (kappa B (Additive.ofMul δ))
+  /-- `B` は **group-like**(原文: "B : D -> Mon a group-like monoid on D")。 -/
+  bneg : ∀ A : D, bmon.val A → bmon.val A
+  bneg_add : ∀ (A : D) (x : bmon.val A), bneg A x + x = 0
 
 /-- ★interface から `ModelData` を作る(`Φ` はそのまま)。 -/
 def RatFnData.model {G : Frobenioid P} (R : RatFnData P G) : ModelData.{v, u, w} D where
