@@ -72,6 +72,159 @@ def div_map_eq_of_div_eq.src : ABC3.Meta.Source :=
     item := "Theorem 4.2, (iii) — Ψ が誘導する Div の対応の well-defined 性",
     sectionId := "frdi-thm-4-2" }
 
+/-! ## ★★★★★★`Ψ_Φ` の対象ごとの成分 -/
+
+variable (P) in
+/-- ★`Div` の値を実現する `𝒪^▷` の自己射(選択)。 -/
+noncomputable def realizeDiv
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : C) (x : Φ.val (P.toElem.obj A).base) : End A :=
+  (((hdivS A x).choose : End A))
+
+theorem realizeDiv_mem
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : C) (x : Φ.val (P.toElem.obj A).base) : realizeDiv P hdivS A x ∈ OTri P A :=
+  (hdivS A x).choose.2
+
+theorem realizeDiv_div
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (A : C) (x : Φ.val (P.toElem.obj A).base) :
+    P.Div (((realizeDiv P hdivS A x) : A ⟶ A)) = x :=
+  (hdivS A x).choose_spec
+
+/-- ★★★★★★**`Ψ` が誘導する `Φ(A) → Φ₂(ΨA)`** —— 加法準同型。 -/
+noncomputable def divMap (Ψ : C ≌ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (A : C) :
+    Φ.val (P.toElem.obj A).base →+ Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base where
+  toFun x := P₂.Div (Ψ.functor.map (((realizeDiv P hdivS A x) : A ⟶ A)))
+  map_zero' := by
+    have h0 : P.Div (((realizeDiv P hdivS A 0) : A ⟶ A))
+        = P.Div ((((1 : End A)) : A ⟶ A)) := by
+      rw [realizeDiv_div]
+      exact (P.Div_id A).symm
+    rw [div_map_eq_of_div_eq Ψ G hiso (realizeDiv_mem hdivS A 0) (OTri P A).one_mem h0]
+    show P₂.Div (Ψ.functor.map (𝟙 A)) = 0
+    rw [CategoryTheory.Functor.map_id]
+    exact P₂.Div_id _
+  map_add' x y := by
+    have hmx := realizeDiv_mem hdivS A x
+    have hmy := realizeDiv_mem hdivS A y
+    have hxy : P.Div (((realizeDiv P hdivS A (x + y)) : A ⟶ A))
+        = P.Div ((((realizeDiv P hdivS A x * realizeDiv P hdivS A y : End A)) : A ⟶ A)) := by
+      rw [realizeDiv_div, div_mul_otri P hmx hmy, realizeDiv_div, realizeDiv_div]
+    rw [div_map_eq_of_div_eq Ψ G hiso (realizeDiv_mem hdivS A (x + y))
+      ((OTri P A).mul_mem hmx hmy) hxy]
+    have hmul := map_mul (CategoryTheory.Functor.mapEnd A Ψ.functor)
+      (realizeDiv P hdivS A x) (realizeDiv P hdivS A y)
+    show P₂.Div ((((CategoryTheory.Functor.mapEnd A Ψ.functor)
+        (realizeDiv P hdivS A x * realizeDiv P hdivS A y))
+        : Ψ.functor.obj A ⟶ Ψ.functor.obj A)) = _
+    rw [hmul]
+    exact div_mul_otri P₂ (hOTri A _ hmx) (hOTri A _ hmy)
+
+def divMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (iii) — Ψ が誘導する Φ(A) → Φ₂(ΨA)",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★★★★★★全単射 -/
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**`divMap` は単射**。 -/
+theorem divMap_injective (Ψ : C ≌ C₂) (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (A : C) : Function.Injective (divMap Ψ G hiso hdivS hOTri A) := by
+  intro x y hxy
+  have hmx := realizeDiv_mem hdivS A x
+  have hmy := realizeDiv_mem hdivS A y
+  obtain ⟨θ₂, hθ₂iso, hθ₂⟩ := exists_iso_of_div_eq G₂
+    (Ψ.functor.map (((realizeDiv P hdivS A x) : A ⟶ A)))
+    (Ψ.functor.map (((realizeDiv P hdivS A y) : A ⟶ A)))
+    (prop_1_4_i P₂ _ (fun Z _ => hiso₂ Z)) (isPreStep_of_otri _ (hOTri A _ hmx))
+    (prop_1_4_i P₂ _ (fun Z _ => hiso₂ Z)) (isPreStep_of_otri _ (hOTri A _ hmy)) hxy
+  obtain ⟨θ, hθ⟩ := Ψ.functor.map_surjective θ₂
+  haveI := hθ₂iso
+  haveI : IsIso θ := by
+    haveI : IsIso (Ψ.functor.map θ) := by rw [hθ]; infer_instance
+    exact isIso_of_reflects_iso θ Ψ.functor
+  have heq : (((realizeDiv P hdivS A x) : A ⟶ A)) ≫ θ
+      = (((realizeDiv P hdivS A y) : A ⟶ A)) := by
+    refine Ψ.functor.map_injective ?_
+    rw [Ψ.functor.map_comp, hθ]
+    exact hθ₂
+  have h2 : P.Div (((realizeDiv P hdivS A x) : A ⟶ A))
+      = P.Div (((realizeDiv P hdivS A y) : A ⟶ A)) := by
+    rw [← heq]
+    exact (div_comp_iso (P₂ := P) (((realizeDiv P hdivS A x) : A ⟶ A)) θ).symm
+  rw [realizeDiv_div, realizeDiv_div] at h2
+  exact h2
+
+/-- ★★★★★**`divMap` は全射**。 -/
+theorem divMap_surjective (Ψ : C ≌ C₂) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (A : C) : Function.Surjective (divMap Ψ G hiso hdivS hOTri A) := by
+  intro y
+  obtain ⟨v, hvy⟩ := hdivS₂ (Ψ.functor.obj A) y
+  obtain ⟨w, hw⟩ : ∃ t : End A, Ψ.functor.map (((t : End A)) : A ⟶ A)
+      = (((v : End (Ψ.functor.obj A))) : Ψ.functor.obj A ⟶ Ψ.functor.obj A) :=
+    Ψ.functor.map_surjective _
+  have hwm : w ∈ OTri P A := hOTri' A w (by rw [hw]; exact v.2)
+  refine ⟨P.Div (((w : End A)) : A ⟶ A), ?_⟩
+  show P₂.Div (Ψ.functor.map (((realizeDiv P hdivS A
+    (P.Div (((w : End A)) : A ⟶ A))) : A ⟶ A))) = y
+  rw [div_map_eq_of_div_eq Ψ G hiso
+    (realizeDiv_mem hdivS A (P.Div (((w : End A)) : A ⟶ A))) hwm
+    (by rw [realizeDiv_div]), hw]
+  exact hvy
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (iii)** —— `Ψ` は単系同型 `Φ(A) ≅ Φ₂(ΨA)` を誘導する。 -/
+noncomputable def divEquiv (Ψ : C ≌ C₂) (G : Frobenioid P) (G₂ : Frobenioid P₂)
+    (hiso : ∀ X : C, IsIsotropic P X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hdivS₂ : ∀ (Y : C₂) (a : Φ₂.val (P₂.toElem.obj Y).base),
+      ∃ u : OTri P₂ Y, P₂.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z))
+    (hOTri' : ∀ (Z : C) (δ : End Z),
+      ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+        ∈ OTri P₂ (Ψ.functor.obj Z) → δ ∈ OTri P Z)
+    (A : C) :
+    Φ.val (P.toElem.obj A).base ≃+ Φ₂.val (P₂.toElem.obj (Ψ.functor.obj A)).base :=
+  AddEquiv.ofBijective (divMap Ψ G hiso hdivS hOTri A)
+    ⟨divMap_injective Ψ G G₂ hiso hiso₂ hdivS hOTri A,
+     divMap_surjective Ψ G hiso hdivS hdivS₂ hOTri hOTri' A⟩
+
+def divEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 78,
+    item := "Theorem 4.2, (iii) — Ψ が誘導する単系同型 Φ(A) ≅ Φ₂(ΨA)",
+    sectionId := "frdi-thm-4-2" }
+
 end DivMap
 
 end ABC3.Found.FrdI
