@@ -239,6 +239,18 @@ mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極
 「分解を仮定に置く」形では下流が posit に依ることになる。
 <b>★これが §2 を 7/8 で止めている唯一の原因である。</b>
 記録: <code>Gap/FrdI/Section2.lean</code> の <code>Gap_2_8_ii</code>（分類 ② missingMath）。</td></tr>
+<tr><td><b>[FrdI] Proposition 5.6（<code>M_p</code> の段）</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
+<b>★★<code>Proposition 5.6</code> の証明は <code>Definition 2.8, (i)</code> の角括弧「[uniquely determined]」を<u>そのまま消費している</u>——すなわち <b>Nikolov–Segal</b> の定理に依る。</b><br>
+2026-08-20 に穴を 1 点に絞った。<code>Found/FrdI/Prop56Mp.lean</code> の <code>isShiftStable_baseIsoEnd</code> により、残る入力は
+<b>「<code>M_p ⊆ 𝒪^×(A)</code> が <code>Aut_𝒞(A)</code> による共役で閉じていること」</b>だけである。<br>
+★<code>θ ∈ Aut_𝒞(A)</code> による共役は <code>𝒪^×(A)</code> の<b>抽象群としての</b>自己同型を与えるが、
+<code>M_p</code> は<b>位相</b>（pro-<code>l</code> 部分、<code>OpenNormalSubgroup</code> を走る）で定義されているので、
+保たれるには自己同型が<b>連続</b>でなければならない。
+位相的有限生成な副有限群で抽象自己同型がすべて連続であることが Nikolov–Segal（同値な形：有限指数部分群はすべて開）である。<br>
+★在庫測定（2026-08-20）：mathlib で <code>Nikolov</code> は <b>0 件</b>。<code>Topology/Algebra/Group/ClosedSubgroup.lean</code> にあるのは閉部分群の一般論のみ。<br>
+★<b>迂回路</b>：(a) pro-<code>l</code> 部分の<b>抽象群としての</b>特徴づけが見つかれば Nikolov–Segal を使わずに閉じる、
+(b) 位相の <code>Aut</code> 不変性を仮定に置く（その場合は分類 (B) に移る）。<br>
+記録: <code>Gap/FrdI/Section5.lean</code> の <code>Gap_5_6_Mp</code>（分類 ② missingMath、falsifier つき）。</td></tr>
 <tr><td><b>[FrdI] Lemma 6.5, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 (i)「<code>log p</code>（<code>p</code> は素数）は <code>ℚ</code> 上一次独立」は<b>実装済み</b>
 （<code>Found/FrdI/Lemma65.lean</code> の <code>log_primes_linearIndependent</code>）。

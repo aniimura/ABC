@@ -2582,7 +2582,7 @@
      ],
      "status": "半済",
      "size": "★大",
-     "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。\n\n★★2026-08-20: **`shift` 条件が「M が自己同型による共役で閉じている」に帰着することを証明した**。原文 p.106 の 2 段:\n1. `Theorem 5.1, (iii)`(Aut-ample)で `f = f₀ · f₁`(`f₀` 自己同型・`f₁` base-identity)に分解(`baseIsoEnd_factor`)\n2. Frobenius-normalized で `f₁ · m = m^d · f₁`、よって `m' = f₀ · m^d · f₀⁻¹`(`baseIsoEnd_shift`)\n★これで `IsShiftStable`(`Prop56Cos.lean`)が Frobenioid の側で立つ(`isShiftStable_baseIsoEnd`)。\n★残るのは `M_p` そのものの構成 —— `l ≠ p` の pro-`l` 部分が位相的に生成する閉部分群(鎖 `prol` が在庫)。",
+     "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。\n\n★★2026-08-20: **`shift` 条件が「M が自己同型による共役で閉じている」に帰着することを証明した**。原文 p.106 の 2 段:\n1. `Theorem 5.1, (iii)`(Aut-ample)で `f = f₀ · f₁`(`f₀` 自己同型・`f₁` base-identity)に分解(`baseIsoEnd_factor`)\n2. Frobenius-normalized で `f₁ · m = m^d · f₁`、よって `m' = f₀ · m^d · f₀⁻¹`(`baseIsoEnd_shift`)\n★これで `IsShiftStable`(`Prop56Cos.lean`)が Frobenioid の側で立つ(`isShiftStable_baseIsoEnd`)。\n★残るのは `M_p` そのものの構成 —— `l ≠ p` の pro-`l` 部分が位相的に生成する閉部分群(鎖 `prol` が在庫)。\n\n★★★2026-08-20 の測定 —— **ここで `Definition 2.8` の角括弧を消費する**。残る入力は「`M_p` が `Aut_𝒞(A)` による共役で閉じていること」だけだが、`M_p` は位相(pro-`l` 部分)で定義されるので、共役が**連続**でなければ保たれない。位相的有限生成な副有限群で抽象自己同型がすべて連続であることは**Nikolov–Segal** の定理で、mathlib に在庫が無い(`Nikolov` は 0 件)。★記録: `Gap/FrdI/Section5.lean` の `Gap_5_6_Mp`(② missingMath)。★迂回路は (a) pro-`l` 部分の抽象群としての特徴づけ、(b) 位相の `Aut` 不変性を仮定に置く((B) の逸脱になる)。",
      "lean": "ABC3/Found/FrdI/Prop56Mp.lean",
      "decl": "baseIsoEnd / baseIsoEnd_factor / baseIsoEnd_shift / isShiftStable_baseIsoEnd"
     },
