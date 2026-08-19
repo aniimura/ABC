@@ -395,4 +395,29 @@ def cor_4_10.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 90, item := "Corollary 4.10",
     sectionId := "frdi-cor-4-10" }
 
+/-! ## ★7. 忠実性を使わない全射性
+
+★★`psiBiratCor_full` の証明本体は **`Ψ` の充満性と添字圏の本質的全射性しか使っていない**
+(実測)。★`Ψ` が忠実でない場合(たとえば `istrToUnTr` のような商)でも
+**`Hom^birat` の全射性だけは出る**ので、切り出しておく。 -/
+
+include hfwd in
+/-- ★★★★**`Hom^birat` の全射性** —— `Ψ` の充満性と添字圏の本質的全射性だけで出る。
+
+★`Proposition 4.8, (iii)` の `Frobenius-compact` 第 2 条(無限位数の単元)を
+`𝒞^un-tr` の側から引き上げるのに使う。 -/
+theorem biratPsiMap_surjective [Ψ.Full]
+    (hidx : ∀ A : C₁, (idxBiratPsi G₁ G₂ Ψ hfwd A).EssSurj) (A B : C₁) :
+    Function.Surjective (biratPsiMap G₁ G₂ Ψ hfwd A B) := by
+  intro h
+  haveI := hidx A
+  obtain ⟨V, χ, rfl⟩ := HomBirat.exists_rep h
+  obtain ⟨V₀, ⟨θ⟩⟩ := Functor.EssSurj.mem_essImage (F := idxBiratPsi G₁ G₂ Ψ hfwd A) V
+  obtain ⟨χ₀, hχ₀⟩ := Ψ.map_surjective (θ.inv.unop.left.hom ≫ χ)
+  refine ⟨HomBirat.mk V₀ χ₀, ?_⟩
+  refine (biratPsiMap_mk G₁ G₂ Ψ hfwd A B V₀ χ₀).trans ?_
+  exact (congrArg (HomBirat.mk ((idxBiratPsi G₁ G₂ Ψ hfwd A).obj V₀)) hχ₀).trans
+    (HomBirat.mk_map θ.inv χ)
+
+
 end ABC3.Found.FrdI
