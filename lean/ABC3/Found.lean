@@ -232,6 +232,7 @@ import ABC3.Found.Arakelov.UltraPoint
 import ABC3.Found.Arakelov.ChartHom
 import ABC3.Found.Arakelov.UltraTransfer
 import ABC3.Found.Arakelov.UltraBasic
+import ABC3.Found.Arakelov.UltraCoord
 import ABC3.Found.Arakelov.PicPresheafTensor
 import ABC3.Found.Arakelov.PicSheafTensor
 import ABC3.Found.Arakelov.PicRestrict
