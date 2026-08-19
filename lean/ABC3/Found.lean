@@ -87,6 +87,7 @@ import ABC3.Found.FrdI.Cor411
 import ABC3.Found.FrdI.Thm42Div
 import ABC3.Found.FrdI.Thm42Primary
 import ABC3.Found.FrdI.Thm42Prime
+import ABC3.Found.FrdI.Thm42PrimeCat
 import ABC3.Found.FrdI.Cor410Birat
 import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.Thm34Slice
@@ -482,6 +483,7 @@ import ABC3.Found.Arakelov.ArcUnitCoord
 import ABC3.Found.Arakelov.ArcFiberDim
 import ABC3.Found.Arakelov.ArcRatio
 import ABC3.Found.Arakelov.ArcLogMetric
+import ABC3.Found.Arakelov.ArcPouPull
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
