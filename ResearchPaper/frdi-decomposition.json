@@ -2413,11 +2413,11 @@
      "id": "p55i",
      "title": "(i) `𝒪^▷(A)^pf ≅ 𝒪^▷(A^pf)`",
      "deps": [],
-     "status": "todo",
+     "status": "半済",
      "size": "★大",
-     "note": "原文の証明: Frobenius-trivial `A` では base-identity な Frobenius 型自己射とFrobenius-normalized 型から直ちに。一般の `A` は `Theorem 5.1, (i)` の「pre-step の対」で降りる。★在庫: `Def31Pf.lean` の `PfRootObj` / `HomRoot`、`Prop32Frob.lean` の `pfRootCore`。★`𝒪^▷(A)` は**乗法**単系なので、`Pf` を `Additive` 経由で当てる必要がある。",
-     "lean": "",
-     "decl": ""
+     "note": "原文の証明: Frobenius-trivial `A` では base-identity な Frobenius 型自己射とFrobenius-normalized 型から直ちに。一般の `A` は `Theorem 5.1, (i)` の「pre-step の対」で降りる。★在庫: `Def31Pf.lean` の `PfRootObj` / `HomRoot`、`Prop32Frob.lean` の `pfRootCore`。★`𝒪^▷(A)` は**乗法**単系なので、`Pf` を `Additive` 経由で当てる必要がある。\n\n★★★2026-08-20: **原文の「immediately」の中身を証明した** ——\n`𝒞^pf` の遷移写像は `𝒪^▷(A)` の上で **`α ↦ α^m`** である(`frobTransport_otri_pow`)。\n★証明は `frobTransport` の**一意性**(`Proposition 1.10, (i)`)1 本:\nFrobenius-normalized が `ζ ≫ α^m = α ≫ ζ` を与えるので、`α^m` が遷移写像に一致する。\n★あわせて `α ↦ α^m` が単系準同型であること(`otriPowHom`、`𝒪^▷(A)` の可換性から)も示した。\n★★残るのは**余極限そのものの同定**: `ℕ≥1` で添字づけた族 `(ζ_m, ζ_m)` が `IdxPf A A` の中で **cofinal** であること、および `Pf (Additive (𝒪^▷(A)))` との突き合わせ(節点 `p55i-colim`)。",
+     "lean": "ABC3/Found/FrdI/Prop55Pf.lean",
+     "decl": "frobTransport_otri_pow / otriPowHom"
     },
     {
      "id": "p55ii-untr",
@@ -2526,6 +2526,18 @@
      "crossDeps": [
       "crlf-def"
      ]
+    },
+    {
+     "id": "p55i-colim",
+     "title": "(i) の余極限の同定 —— `ℕ≥1` 族の cofinality と `Pf` との突き合わせ",
+     "deps": [
+      "p55i"
+     ],
+     "status": "todo",
+     "size": "★大",
+     "note": "★`A` が Frobenius-trivial なら `(ζ_m, ζ_m)`(base-identity な Frobenius 型自己射)の族が `IdxPf A A` の中で cofinal であることを示し、`HomPf` の余極限を `ℕ≥1` 上の余極限に落とす。\n★そのうえで `Pf (Additive (𝒪^▷(A)))`(遷移 `α ↦ α^m`)と突き合わせる。\n★★遷移写像の計算(`frobTransport_otri_pow`)は済んでいるので、残るのは**添字圏の仕事だけ**である。\n★一般の `A` は原文どおり `Theorem 5.1, (i)` の「pre-step の対」で降ろす。",
+     "lean": "",
+     "decl": ""
     }
    ],
    "unblocks": [
