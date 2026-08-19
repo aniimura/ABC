@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.Prop16
+import ABC3.Found.FrdI.Thm34IvGen
 
 /-!
 # [FrdI] Theorem 3.4, (v) —— 任意射が誘導するスライス関手 `(𝒞^pl-bk)_A ⥤ (𝒞^pl-bk)_A'`
@@ -764,5 +765,37 @@ def psiBase.src : ABC3.Meta.Source :=
 end Psi
 
 end SlicePush
+
+/-! ## ★★★★★★★`Theorem 3.4` の locator
+
+★★★(i)〜(v) がすべて揃った:
+
+| 条 | 中身 | 実装 |
+|---|---|---|
+| (i) | `Ψ^istr` | `Thm34.lean` |
+| (ii) | pre-step・pull-back・base-isomorphism の保存 | `Thm34Pre.lean` |
+| (iii) | `Ψ^pf` | `Thm34Pf.lean` |
+| (iv) | `𝒪^▷` / `𝒪^×` の保存と `Ψ^un-tr` | `Thm34Quasi.lean` ＋ `Thm34EndBs.lean` ＋ ★`Thm34IvGen.lean` |
+| (v) | `Ψ_Base` の構成・1-可換図式・rigidity | ★`Thm34Slice.lean`(本ファイル) ＋ `Thm34VBase.lean` |
+
+原文 (FrdI p.62):
+> Theorem 3.4. (Category-theoreticity of the Base and Frobenius De-
+
+原文 (FrdI p.62):
+> an equivalence of categories. Then:
+
+原文 (FrdI p.63):
+> rows are equivalences of categories]. Finally, each of the composite functors of this
+-/
+
+/-- ★★★★★**[FrdI] Theorem 3.4, (v)** —— 条つきの locator。 -/
+def thm_3_4_v.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 63, item := "Theorem 3.4, (v)",
+    sectionId := "frdi-thm-3-4" }
+
+/-- ★★★★★★**[FrdI] Theorem 3.4** —— 条なしの locator。 -/
+def thm_3_4.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 62, item := "Theorem 3.4",
+    sectionId := "frdi-thm-3-4" }
 
 end ABC3.Found.FrdI
