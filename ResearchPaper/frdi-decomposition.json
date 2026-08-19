@@ -2300,13 +2300,14 @@
      "id": "cor54",
      "title": "`Corollary 5.4` —— Ψ^rlf の 1-一意存在と rigidity",
      "deps": [
-      "crlf-def"
+      "crlf-def",
+      "modeldata-hom-over"
      ],
-     "status": "todo",
+     "status": "半済",
      "size": "★大",
-     "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。",
-     "lean": "",
-     "decl": ""
+     "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。\n\n★★2026-08-20: **`Ψ^rlf` は作れた**(`psiSc`)。入力は `Corollary 4.11, (iii)` が与えるもの —— 底の関手 `Ψ_𝒟`、因子の単系の同型 `η : Φ₁ ≅ Ψ_𝒟^* Φ₂`(`psiPhiOnBase` が在庫にある)、そして `η` が `Φ^birat` を `Φ^birat` へ移すこと(`hbirat`、いまは仮定)。\n★残りは 4 条: (1) `hbirat` を `Corollary 4.11` から導く、(2) 1-一意性、(3) rigidity、(4) `Proposition 5.3` の縦の矢印との 1-可換性。",
+     "lean": "ABC3/Found/FrdI/Cor54.lean",
+     "decl": "scModelHomOver / psiSc"
     },
     {
      "id": "modeldata-hom",
@@ -2364,6 +2365,18 @@
      "note": "★★`M ⊗_S := S ⊗_ℕ M` と書けば、`S = ℝ≥0` が実化、`S = ℚ≥0` が完全化になる。`Module S (S ⊗_ℕ M)` は `Algebra ℕ S` から自動で付くので、**両方の構成が 1 つのコードで済む**。",
      "lean": "ABC3/Found/FrdI/Def24Rlf.lean",
      "decl": "ScT / scMap / phiScOn / scModel"
+    },
+    {
+     "id": "modeldata-hom-over",
+     "title": "底の圏が違う場合の `ModelData` の射(`Corollary 5.4` の形)",
+     "deps": [
+      "modeldata-hom"
+     ],
+     "status": "done",
+     "size": "中",
+     "note": "★底の関手 `Ψ_𝒟 : 𝒟₁ ⥤ 𝒟₂` の上で `ModelDataHom` を一般化した。`Ψ_𝒟 = 𝟭` が同じ底の場合。★`deg_Fr` はそのまま、`Base` は `Ψ_𝒟` で送る。",
+     "lean": "ABC3/Found/FrdI/Thm52Change.lean",
+     "decl": "ModelDataHomOver / ModelDataHomOver.functor"
     }
    ],
    "unblocks": [
