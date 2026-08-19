@@ -86,6 +86,7 @@ import ABC3.Found.FrdI.Thm51Span
 import ABC3.Found.FrdI.Thm51Cls
 import ABC3.Found.FrdI.Thm51Pic
 import ABC3.Found.FrdI.Thm51Hom
+import ABC3.Found.FrdI.Thm51Sec
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
@@ -520,6 +521,8 @@ import ABC3.Found.GaloisRep.TorsionStructure
 import ABC3.Found.GaloisRep.TowerLift
 import ABC3.Found.GaloisRep.IndepTower
 import ABC3.Found.GaloisRep.PadicLimit
+import ABC3.Found.GaloisRep.TateLimit
+import ABC3.Found.GaloisRep.TateWitness
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
