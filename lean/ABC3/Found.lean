@@ -101,6 +101,7 @@ import ABC3.Found.FrdI.Prop53Birat
 import ABC3.Found.FrdI.Prop56Sec
 import ABC3.Found.FrdI.Def24Rlf
 import ABC3.Found.FrdI.Prop56Cos
+import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop53Rlf
 import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Prop55Rlf
@@ -573,6 +574,8 @@ import ABC3.Found.GaloisRep.TateQExp
 import ABC3.Found.GaloisRep.TateSigma
 import ABC3.Found.GaloisRep.AdicMul
 import ABC3.Found.GaloisRep.TorsionIdeal
+import ABC3.Found.GaloisRep.GenericPoint
+import ABC3.Found.GaloisRep.Translate
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

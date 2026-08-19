@@ -15937,3 +15937,58 @@ mathlib は**楕円曲線の群法則を類群経由で証明している**:
 減ったことを進捗と読まない、という §9 の注意はここでも効く。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-422 (G5) 葉 1 の本体が取れた(第 114・115 ブロック)
+
+`Skeleton/GaloisRep/WeilFunctionField.lean` の葉「平行移動 τ_Q の関数体への引き戻し」
+について、**環準同型そのものが `Found` に入った**。
+
+### ★★★★★★鍵は「生成点が曲線の点である」こと
+
+座標環は `F[W] = AdjoinRoot(W.polynomial)` なので、生成元 `(ξ, η)` について
+`AdjoinRoot.mk_self` がそのまま Weierstrass 方程式になる
+(`Found/GaloisRep/GenericPoint.lean`、第 114):
+
+    (W.map (algebraMap F F[W])).Equation (genX W) (genY W)
+
+★楕円曲線なら `equation_iff_nonsingular` で**非特異点**になり、
+`Point.some` が作れて **mathlib の群法則が生成点にそのまま効く**。
+
+### ★★★★★平行移動は「点の加法」になった
+
+`Found/GaloisRep/Translate.lean`(第 115):
+
+| 定理 | 内容 |
+|---|---|
+| `genX_ne_const` | 生成点の `x` は定数でない(`smul_basis_eq_zero` から) |
+| `slopeFF_eq` | 傾きが mathlib の `slope` と一致(`slope_of_X_ne`) |
+| `nonsingular_translate` | ★★★★★★**平行移動した座標も非特異点**(`nonsingular_add`) |
+| `translateHom` | ★★★★★★**環準同型 `τ_Q : F[W] →+* F(W)`**(`AdjoinRoot.lift`) |
+| `translateHom_genX` / `_genY` | 生成元の像は加法公式そのもの |
+
+★★当初「平行移動は座標環の自己同型ではないので段が要る(5-15 ブロック)」と
+記録していた部分は、**生成点が点だと分かったことで解消**した。
+
+### ★足場の記録(2026-08-20 実測)
+
+| mathlib | 役割 |
+|---|---|
+| `nonsingular_add` | 和の座標が非特異点であること |
+| `slope_of_X_ne` | `x` 座標が違うときの傾き |
+| `CoordinateRing.smul_basis_eq_zero` | 生成点の `x` が定数でないこと |
+| `AdjoinRoot.lift` | 座標環からの環準同型 |
+| `Polynomial.eval₂_eval₂RingHom_apply` | `eval₂` と `evalEval` の橋 |
+| `Affine.map_polynomial` | 底変換した曲線の多項式 |
+
+### ★★葉が細くなった
+
+葉 1 に残るのは **`translateHom` の単射性**だけである(`translateHom_injective`)。
+`F[W]` は `F[X]` 上階数 2 の自由加群なので整拡大であり、
+「整拡大で (0) の上の素イデアルは (0)」から出るはずだが、
+**mathlib での経路は未特定**——`.needs` に記録した。
+
+★★★葉 2([n] の引き戻し)も見積もりを下方修正した(15-40 → 10-30)。
+**同じ道が使えるはず**である——`[n]`(生成点)が曲線の点であることを言えば
+`AdjoinRoot.lift` に流せる。
+
+★義務の数は動いていない(Galois 4/8)。

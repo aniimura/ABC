@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TorsionIdeal
+import ABC3.Found.GaloisRep.Translate
 
 /-!
 # スケルトン —— **関数体への引き戻し(Weil 対の葉)**(`Skeleton`)
@@ -8,71 +8,62 @@ import ABC3.Found.GaloisRep.TorsionIdeal
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-## ★★★★★(G5) の**葉**はここである
+## ★★★★★葉は 2 件に絞れた
 
-第 113 ブロックで `f_P`(`div(f_P) = n(P) − n(O)`)は `Found` に入った。
-★Weil 対の残りの構成が要求するのは、**関数体への 2 つの引き戻し**である:
+Weil 対の残りの構成が要求するのは、**関数体への 2 つの引き戻し**である。
+★2026-08-20 の作業で、平行移動の側は**本体が `Found` に入った**:
 
-| 節点 | 内容 | mathlib |
+| 段 | 場所 | 状態 |
 |---|---|---|
-| `exists_translateAut` | 平行移動 `τ_Q : f ↦ f∘(·+Q)` | ★**0 件**(2026-08-20 実測) |
-| `exists_mulByNPullback` | 乗法 `[n]^* : f ↦ f∘[n]` | ★**0 件**(同上) |
+| 生成点が曲線の非特異点であること | `Found/GaloisRep/GenericPoint.lean`(第 114) | ✅ |
+| 平行移動した座標も非特異点であること | `Found/GaloisRep/Translate.lean`(第 115) | ✅ |
+| 環準同型 `τ_Q : F[W] →+* F(W)` | 同上 | ✅ |
+| **`τ_Q` が単射であること** | 本ファイル | ★**葉** |
+| **乗法 `[n]` の引き戻し** | 本ファイル | ★**葉** |
 
-★★どちらも**層番号最小の葉**である——`Found` と mathlib だけに依存する。
+★★平行移動の側は「分数体へ延ばすための単射性」だけになった
+——`nonsingular_add` が効いて、環準同型そのものは mathlib から出た。
 
 ## ★★★★どちらも「式」で固定してある
 
-空虚な posit を避けるため、両方とも**値を明示式で固定**した:
+空虚な posit を避けるため、値を明示式で固定している:
 
-- `τ_Q` は加法公式そのもの——`addX`・`addY`(mathlib にある)で座標関数の像を指定。
+- `τ_Q` は加法公式そのもの——`Found` の `translateX`・`translateY`。
 - `[n]^*` は**分点多項式**——`x([n]P) = Φ_n(x)/Ψ_n(x)²`。
   `WeierstrassCurve.Φ` と `WeierstrassCurve.ΨSq` は mathlib にある。
-
-★★★したがって「存在するとだけ言って中身が空」という退化は起きない。
 -/
 
 namespace ABC3.Skeleton.GaloisRep
 
-open ABC3.Meta WeierstrassCurve WeierstrassCurve.Affine
+open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve WeierstrassCurve.Affine
 
-variable {F : Type} [Field F] [DecidableEq F]
-
-/-! ## ★座標関数 -/
-
-/-- ★座標関数 `x`。 -/
-noncomputable def coordX (W : WeierstrassCurve.Affine F) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField (CoordinateRing.mk W (Polynomial.C Polynomial.X))
-
-/-- ★座標関数 `y`。 -/
-noncomputable def coordY (W : WeierstrassCurve.Affine F) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField (CoordinateRing.mk W Polynomial.X)
+variable {F : Type} [Field F]
 
 /-- ★`F[X]` の元を関数体に送る。 -/
 noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField (CoordinateRing.mk W (Polynomial.C p))
+  algebraMap W.CoordinateRing W.FunctionField
+    (CoordinateRing.mk W (Polynomial.C p))
 
-/-- ★点 `(x₀, y₀)` を通る割線の傾き(関数体の元として)。 -/
-noncomputable def slopeFF (W : WeierstrassCurve.Affine F) (x₀ y₀ : F) : W.FunctionField :=
-  (coordY W - algebraMap F W.FunctionField y₀) / (coordX W - algebraMap F W.FunctionField x₀)
+/-! ## ★★★★★葉 1 —— 平行移動を分数体へ延ばす -/
 
-/-! ## ★★★★★葉 1 —— 平行移動 -/
-
-/-- ★★★★★**平行移動 `τ_Q` の関数体への引き戻し**。
+/-- ★★★★★**平行移動の環準同型は単射である**。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★Weil 対 `e_n(P,Q) = g_P(·+Q)/g_P(·)` の「`·+Q`」がこれである。
-★★座標関数の像を**加法公式で固定**してあるので、空虚な存在主張ではない。 -/
-theorem exists_translateAut (W : WeierstrassCurve.Affine F) (x₀ y₀ : F)
-    (hQ : W.Nonsingular x₀ y₀) :
+★これが言えれば `IsFractionRing.lift` で `F(W) →ₐ[F] F(W)` に延び、
+逆写像は `τ_{−Q}` で与えられるので**自己同型**になる。
+★★環準同型そのものは第 115 ブロックで `Found` に入っている。 -/
+theorem translateHom_injective (W : WeierstrassCurve.Affine F) [W.IsElliptic]
+    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) :
+    Function.Injective (translateHom W hQ) := by
+  sorry
+
+/-- ★★★★★★**平行移動 `τ_Q` は関数体の `F` 自己同型を誘導する**。 -/
+theorem exists_translateAut (W : WeierstrassCurve.Affine F) [W.IsElliptic]
+    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) :
     ∃ τ : W.FunctionField ≃ₐ[F] W.FunctionField,
-      τ (coordX W)
-        = (W.map (algebraMap F W.FunctionField)).toAffine.addX (coordX W)
-            (algebraMap F W.FunctionField x₀) (slopeFF W x₀ y₀)
-      ∧ τ (coordY W)
-        = (W.map (algebraMap F W.FunctionField)).toAffine.addY (coordX W)
-            (algebraMap F W.FunctionField x₀) (coordY W) (slopeFF W x₀ y₀) := by
+      τ (coordX W) = translateX W x₀ y₀ ∧ τ (coordY W) = translateY W x₀ y₀ := by
   sorry
 
 /-! ## ★★★★★葉 2 —— 乗法 `[n]` -/
@@ -91,25 +82,21 @@ theorem exists_mulByNPullback (W : WeierstrassCurve.Affine F) (n : ℤ) :
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
-def coordX.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(関数体の座標関数 x)",
-    sectionId := "genell-thm-3-8" }
-
-def coordY.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(関数体の座標関数 y)",
-    sectionId := "genell-thm-3-8" }
-
 def polyToFF.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(F[X] の元を関数体に送る写像)",
     sectionId := "genell-thm-3-8" }
 
-def slopeFF.src : Source :=
+def translateHom_injective.src : Source :=
   { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(割線の傾きの関数体版)",
+    item := "Theorem 3.8(Weil 対の構成——平行移動の環準同型が単射であること)",
     sectionId := "genell-thm-3-8" }
+
+def translateHom_injective.needs : List ProofObligation :=
+  [ .implicitStep
+      "★★★`F[W]` は `F[X]` 上**階数 2 の自由加群**(mathlib の `CoordinateRing.basis`)なので整拡大である。整拡大では (0) の上にある素イデアルは (0) しかないので核は 0 になる——**mathlib での経路は未特定**(2026-08-20)(5-15 ブロック)" 19,
+    .implicitStep
+      "★別解: `translateX` が `F` 上超越的であることを直接示す。`genX_ne_const`(第 115、**Found に済**)の一般化になる(10-25 ブロック)" 19 ]
 
 def exists_translateAut.src : Source :=
   { paper := "GenEll", pdfPage := 19,
@@ -119,12 +106,13 @@ def exists_translateAut.src : Source :=
 def exists_translateAut.needs : List ProofObligation :=
   [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3(平行移動が関数体の F 自己同型を誘導すること)"
       (.absent "mathlib に平行移動の関数体への引き戻しは 0 件(2026-08-20、EllipticCurve/ 配下を `translat|mulByN|scalarMul` で全文検索して 0 件)") 19,
+    .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——平行移動の環準同型が単射であること)" 19,
     .implicitStep
-      "★平行移動は**座標環の**自己同型ではない(無限遠点を動かす)。関数体の側でしか定義できず、その事実自体が段である(5-15 ブロック)" 19,
+      "★★★★**環準同型そのものは Found に入った**(第 115 ブロック `translateHom`)。生成点が曲線の非特異点であること(第 114)から mathlib の `nonsingular_add` がそのまま効き、`AdjoinRoot.lift` で構成できた。当初「平行移動は座標環の自己同型ではないので段が要る」と見積もっていた部分は**これで解消**(0 ブロック)" 19,
     .implicitStep
-      "★★加法公式が関数体の元として well-defined であること——分母 `x − x₀` が 0 でないこと(座標環が整域であることは mathlib にある: `instIsDomainCoordinateRing`)(5-10 ブロック)" 19,
+      "★★単射性から `IsFractionRing.lift` で `F(W) →ₐ[F] F(W)` へ延ばす(3-8 ブロック)" 19,
     .implicitStep
-      "★★★τ が全単射であること(逆は `τ_{−Q}`)。群作用 `τ_{Q+Q'} = τ_Q ∘ τ_{Q'}` は下流の双線型性で消費される(5-15 ブロック)" 19 ]
+      "★★★全単射性——逆は `τ_{−Q}`。合成が恒等であることは生成元での計算に帰着する(5-15 ブロック)" 19 ]
 
 def exists_mulByNPullback.src : Source :=
   { paper := "GenEll", pdfPage := 19,
@@ -139,6 +127,6 @@ def exists_mulByNPullback.needs : List ProofObligation :=
     .implicitStep
       "★★`y([n]P)` の側の式(`ω_n/ψ_n³` 型)——mathlib の在庫は未測定(5-15 ブロック)" 19,
     .implicitStep
-      "★★★引き戻しが**環準同型である**こと、すなわち Weierstrass 多項式を殺すこと。これが本体の計算である(15-40 ブロック)" 19 ]
+      "★★★引き戻しが**環準同型である**こと、すなわち Weierstrass 多項式を殺すこと。★★★★平行移動の側と同じ道が使えるはずである——`[n]`(生成点)が曲線の点であることを言えば `AdjoinRoot.lift` に流せる。mathlib の `Point` の `nsmul` を生成点に適用する形になる(10-30 ブロック、当初 15-40 から下方修正)" 19 ]
 
 end ABC3.Skeleton.GaloisRep

@@ -34,7 +34,7 @@ import ABC3.Skeleton.GaloisRep.WeilRoot
 
 namespace ABC3.Skeleton.GaloisRep
 
-open ABC3.Meta WeierstrassCurve WeierstrassCurve.Affine
+open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve WeierstrassCurve.Affine
 
 variable {F : Type} [Field F] [DecidableEq F]
 
