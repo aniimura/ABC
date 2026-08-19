@@ -12997,3 +12997,69 @@ mathlib の定義(`Modules/Tilde.lean:44`)は
 
 ★★★これが通れば `Metric X L` のファイバーが 1 次元だと言えて、
 `logMetric` を案 (b)(選択公理で基準計量を固定)で honest に定義できる。
+
+## §9-331 —— ★★★★★単位加群のファイバーは 1 次元(第 287 ブロック)
+
+`moduleSpecΓFunctor` のスカラー作用が `restrictScalars (ΓSpecIso).inv` であることを使い、
+**型付き恒等関数の橋** `specΓVal` を 1 本足して
+
+    unitCoord : arcFiber の元 → ℂ    (全単射、スカラー倍と両立)
+
+を作った。★★★したがって **0 でない元は生成元**である。
+
+## §9-332 —— ★★★★★★どの複素点でもファイバーは 1 次元(第 288 ブロック)
+
+同型で運ぶ一般形 `exists_smul_eq_of_iso` を作り、
+`arcFiberAt`(第 271)+ `bridgeIso`(第 269)+ `trivFiberIso`(第 253)で
+**局所自明な層の任意の複素点**へ運んだ。
+
+### ★Lean の細目——instance を二重に置くと壊れる
+
+`haveI : Unique (Spec ℂ)` を書いたら、mathlib に既に
+`Scheme.instUniqueCarrierCarrierCommRingCatSpecOf` が在って**別物として衝突**した。
+★**在庫を確かめてから `haveI` を書く**。
+
+## §9-333 —— ★★★★★計量の比はベクトルに依らない(第 289 ブロック)
+
+    w' = c • w  ⟹  m(w')/m'(w') = m(w)/m'(w)
+
+★★これで Green 関数が well-defined になる。
+
+## §9-334 —— ★★★★★Green 関数と平行移動則(第 290 ブロック)
+
+    logMetricOf m₀ m p := - log (m(w_p) / m₀(w_p))
+    logMetricOf m₀ (scale c m) p = logMetricOf m₀ m p + c
+
+★★★**基準 `m₀` を引数に出した**——`logMetric` を絶対量として定義することはできない。
+★witness では `Nonempty` が Prop であることを使い、
+**型だけで決まる基準**(`Classical.choice`)を取ればよい。
+
+## §9-335 —— ★★★★★`logMetric_continuous` の値段を測った
+
+残る欄のうち `logMetric_continuous` だけが**構造的に重い**。理由を書いておく。
+
+★`gRatio m m₀ p` の連続性は、局所自明化の**枠(frame)**で計算すれば出る:
+
+    arcOpenSet V の上で  gRatio m m₀ (q ≫ V.ι) = m|_V(frame q) / m₀|_V(frame q)
+
+★★しかし枠は **`V` の上の切断**であって `X` の大域切断ではない。
+`ContArcMetric.cont` は**大域切断にしか掛かっていない**ので、そのままでは使えない。
+
+### ★★★逃げ道の比較(測定済み)
+
+| 案 | 内容 | 見積もり |
+|---|---|---|
+| (a) `cont` を任意の開集合の切断へ拡張 | `arcEvalOn`(第 256)を使う | ★★重い——貼り合わせの各段に `ContinuousOn` 版が要る |
+| (b) `cont` を**制限した層の大域切断**へ拡張 | `restrict F V.ι` の大域切断 = `F` の `V` 上の切断 | ★★★**軽い** |
+
+★★★(b) が軽い理由は決定的で、**`continuous_gluedNorm_section`(第 282)は
+任意の `X` について述べてある**——`X := V.toScheme` で**そのまま適用できる**。
+★要るのは「貼り合わせ計量の `V` への制限 = 制限したデータの貼り合わせ計量」だけである。
+**見積もり 5–8 ブロック**。
+
+### ★原典との照合
+
+原文 Definition 1.1 (i) が要求するのは「`|s|_L` が連続関数であること」であり、
+★★それは `normSection_continuous`(第 282 で証明済み)である。
+`logMetric` の連続性は**導出物**であって原文の要求ではない
+——ただし Interface に欄として書いた以上、埋めるまで (C3) は数えない。
