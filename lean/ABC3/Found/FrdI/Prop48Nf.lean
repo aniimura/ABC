@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop21
 import ABC3.Found.FrdI.Prop44
+import ABC3.Found.FrdI.Thm34Quasi
 
 /-!
 # [FrdI] Proposition 4.8, (ii) —— naive Frobenius 関手を `𝒞^birat` へ降ろす準備
@@ -64,6 +65,59 @@ theorem nfMap_coaPreProp {A B : C} (φ : A ⟶ B) (h : coaPreProp P φ) :
 def nfMap_coaPreStep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (ii) — naive Frobenius 関手は co-angular pre-step を保つ",
+    sectionId := "frdi-prop-4-8" }
+
+/-! ## ★★★`naiveFrob` の反射 —— `full` / `faithful` の下ごしらえ
+
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
+
+★★添字圏 `IdxBirat` は co-angular pre-step のなす圏なので、
+`Ψ^birat` の `full` / `faithful` には
+**`naiveFrob` が `coaPreProp` を反射する**ことが要る。
+
+★★★材料はすべて在庫だった:
+- pre-step の反射 —— `nfMap_preStep_of`(`Prop21.lean`)
+- co-angular の反射 —— `isCoAngular_of_map`(`Thm34Quasi.lean`、本セッション)
+  が要求する 4 つの保存も、`prop_1_10_i_*_of` を `nfMap` の四角形に当てるだけ。 -/
+
+/-- ★**`naiveFrob` は linear を保つ**。 -/
+theorem nfMap_linear {A B : C} (φ : A ⟶ B) (h : IsLinear P φ) :
+    IsLinear P (nfMap P F d φ) :=
+  prop_1_10_i_linear_of P (by rw [nfHom_degFr, nfHom_degFr]) (nfMap_sq P F d φ) h
+
+/-- ★**`naiveFrob` は isometric を保つ** —— Frobenius 型射は isometric だから。 -/
+theorem nfMap_isometric {A B : C} (φ : A ⟶ B) (h : IsIsometric P φ) :
+    IsIsometric P (nfMap P F d φ) :=
+  prop_1_10_i_isometric_of P (nfHom_frobType P F d A).1.2 (nfHom_frobType P F d B).1.2
+    (nfMap_sq P F d φ) h
+
+/-- ★**`naiveFrob` は base-isomorphism を保つ**。 -/
+theorem nfMap_baseIso {A B : C} (φ : A ⟶ B) (h : IsBaseIsomorphism P φ) :
+    IsBaseIsomorphism P (nfMap P F d φ) :=
+  prop_1_10_i_baseIso_of P (nfHom_frobType P F d A).2 (nfHom_frobType P F d B).2
+    (nfMap_sq P F d φ) h
+
+/-- ★★★★**`naiveFrob` は co-angular を反射する**(perfect 型)。
+
+★`isCoAngular_of_map` に 4 つの保存を渡すだけ。 -/
+theorem nfMap_coAngular_of (hpt : IsOfPerfectType P) {A B : C} (φ : A ⟶ B)
+    (h : IsCoAngular P (nfMap P F d φ)) : IsCoAngular P φ := by
+  haveI := prop_2_1_iii_mp P F d hpt
+  exact isCoAngular_of_map (P₁ := P) (P₂ := P) (naiveFrob P F d)
+    (fun f hf => nfMap_linear P F d f hf) (fun f hf => nfMap_isometric P F d f hf)
+    (fun f hf => nfMap_preStep P F d f hf) (fun f hf => nfMap_baseIso P F d f hf) φ h
+
+/-- ★★★★★**`naiveFrob` は `coaPreProp` を反射する**(perfect 型)。
+
+★★これで `𝒞^{coa-pre}` の間の関手が**充満忠実**になる下ごしらえが揃う。 -/
+theorem nfMap_coaPreProp_of (hpt : IsOfPerfectType P) {A B : C} (φ : A ⟶ B)
+    (h : coaPreProp P (nfMap P F d φ)) : coaPreProp P φ :=
+  ⟨nfMap_coAngular_of P F d hpt φ h.1, nfMap_preStep_of P F d φ h.2⟩
+
+def nfMap_coaPreProp_of.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — naive Frobenius は co-angular pre-step を反射する",
     sectionId := "frdi-prop-4-8" }
 
 /-! ## ★★★段 2 —— 添字圏の写像
