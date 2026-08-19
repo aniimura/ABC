@@ -645,6 +645,78 @@ theorem otri_pfRoot_exists_rep (hiso : ∀ X : C, IsIsotropic P X) {A : C}
       rw [hmk]; exact hf.2
     exact (rootDeg_zetaMk hzf _).symm.trans hd
 
+/-! ## ★10. 束ね上げ —— `𝒪^▷(A)^pf → 𝒪^▷(A^pf)`
+
+★★`Pf (Additive (𝒪^▷(A)))` と書くには `CommMonoid (𝒪^▷(A))` の instance が要るが、
+それは `hfn`(Frobenius-normalized)からしか出ない(`Proposition 2.5, (iii)`)ので
+**大域 instance にできない**。そこで instance を明示的に運ぶ。 -/
+
+/-- ★`𝒪^▷(A)` は Frobenius-normalized なら可換単系。 -/
+@[reducible] noncomputable def otriCommMonoid {A : C} (hfn : IsFrobeniusNormalized P A) :
+    CommMonoid (OTri P A) :=
+  { (inferInstance : Monoid (OTri P A)) with mul_comm := fun x y => otri_mul_comm P hfn x y }
+
+@[reducible] noncomputable def otriAddCommMonoid {A : C} (hfn : IsFrobeniusNormalized P A) :
+    AddCommMonoid (Additive (OTri P A)) :=
+  @Additive.addCommMonoid _ (otriCommMonoid hfn)
+
+/-- ★★★★**well-defined 性(`Pf` の関係の側から)** ——
+`α^{k·b} = β^{k·a}` なら `α` の `a` 乗根と `β` の `b` 乗根は同じ元。 -/
+theorem otriPfMk_wd (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn : IsFrobeniusNormalized P A)
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    {α β : OTri P A} {a b k : ℕ+}
+    (hk : ((α : End A)) ^ ((k : ℕ) * (b : ℕ)) = ((β : End A)) ^ ((k : ℕ) * (a : ℕ))) :
+    otriPfMk (F := F) hiso (hprop a).2 ((α : End A))
+      = otriPfMk (F := F) hiso (hprop b).2 ((β : End A)) := by
+  have hc1 : IsFrobeniusType P (((ζ a : End A) : A ⟶ A) ≫ ((ζ (k * b) : End A) : A ⟶ A)) := by
+    have he : ((ζ a : End A) : A ⟶ A) ≫ ((ζ (k * b) : End A) : A ⟶ A)
+        = ((ζ (k * b * a) : End A) : A ⟶ A) := by
+      show ((ζ (k * b) : End A) * (ζ a : End A) : End A) = _
+      rw [← map_mul]
+    rw [he]; exact (hprop _).2
+  have hc2 : IsFrobeniusType P (((ζ b : End A) : A ⟶ A) ≫ ((ζ (k * a) : End A) : A ⟶ A)) := by
+    have he : ((ζ b : End A) : A ⟶ A) ≫ ((ζ (k * a) : End A) : A ⟶ A)
+        = ((ζ (k * a * b) : End A) : A ⟶ A) := by
+      show ((ζ (k * a) : End A) * (ζ b : End A) : End A) = _
+      rw [← map_mul]
+    rw [he]; exact (hprop _).2
+  have e1 := otriPfMk_step (F := F) hiso hfn (hprop a).2 (hprop (k * b)).2
+    (hprop (k * b)).1 hc1 ((α : End A)) α.2
+  have e2 := otriPfMk_step (F := F) hiso hfn (hprop b).2 (hprop (k * a)).2
+    (hprop (k * a)).1 hc2 ((β : End A)) β.2
+  rw [hdeg] at e1 e2
+  refine e1.symm.trans (Eq.trans ?_ e2)
+  refine otriPfMk_congr hiso hc1 hc2 ?_ ?_
+  · show ((ζ (k * b) : End A) * (ζ a : End A) : End A)
+      = ((ζ (k * a) : End A) * (ζ b : End A) : End A)
+    rw [← map_mul, ← map_mul]
+    congr 1
+    ring
+  · exact hk
+
+/-- ★★★★★**`𝒪^▷(A)^pf → 𝒪^▷(A^pf)`** —— `Proposition 5.5, (i)` の同型の写像。
+
+★`Pf` の同値関係が `𝒞^pf` の余極限の中で成り立つ(`otriPfMk_wd`)ので、
+商から well-defined に落ちる。 -/
+noncomputable def otriPfMap (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn : IsFrobeniusNormalized P A)
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A)) :
+    @Pf (Additive (OTri P A)) (otriAddCommMonoid hfn)
+      → OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) :=
+  Quotient.lift
+    (fun x : Additive (OTri P A) × ℕ+ =>
+      (⟨otriPfMk (F := F) hiso (hprop x.2).2
+          (((Additive.toMul x.1 : OTri P A) : End A)),
+        otriPfMk_mem hiso (hprop x.2).2 _ (Additive.toMul x.1).2⟩ :
+        OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)))
+    (by
+      rintro x y ⟨k, hk⟩
+      exact Subtype.ext (otriPfMk_wd hiso hfn ζ hdeg hprop
+        (congrArg Subtype.val hk)))
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -698,6 +770,12 @@ def homPf_zeta_eq.src : ABC3.Meta.Source :=
 def otri_pfRoot_exists_rep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒪^▷(A^pf) の元はすべて 𝒪^▷ の元の m 乗根",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の写像 `𝒪^▷(A)^pf → 𝒪^▷(A^pf)`。 -/
+def otriPfMap.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒪^▷(A)^pf → 𝒪^▷(A^pf) の写像",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
