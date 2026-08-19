@@ -1,8 +1,8 @@
-import ABC3.Found.Arakelov.ArcMapAffine
+import ABC3.Found.Arakelov.ArcFunctorial
 import ABC3.Found.Arakelov.ArcContCriterion
 
 /-!
-# Arakelov (D1) 第 298 ブロック —— **アフィンへの射は弧空間で連続**(`Found`)
+# Arakelov (D1) 第 297 ブロック —— **アフィンへの射は弧空間で連続**(`Found`)
 
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.3。
 
@@ -11,15 +11,16 @@ import ABC3.Found.Arakelov.ArcContCriterion
 
 ## ★★★弧空間の関手性——第 2 歩
 
-第 297 は `Spec A ⟶ Spec B` の場合だった。本ブロックでは**始域を一般のスキームに広げる**:
+★★**在庫を確かめたら第 1 歩は既に在った**——`ArcFunctorial.lean` の
+`continuous_comp_affine`(アフィン間の射)。本ブロックでは**始域を一般のスキームに広げる**:
 
     g : X ⟶ Spec B  ⟹  (· ≫ g) : X^arc ⟶ (Spec B)^arc  は連続
 
 ★★第 279 の `continuous_of_charts`(「各アフィン chart で連続なら連続」)で
-アフィン chart に落とし、第 297 を当てるだけである。
+アフィン chart に落とし、在庫の `continuous_comp_affine` を当てるだけである。
 
 ★`arcTopologyOpen U = induced (· ≫ isoSpec.hom) (arcTopologyAffine Γ(X,U))` なので、
-chart の上では `isoSpec` を挟んで第 297 の形になる。
+chart の上では `isoSpec` を挟んで在庫の形になる。
 
 ## ★★本ブロックで取れるもの
 

@@ -181,8 +181,8 @@ import ABC3.Found.GenEll.AlgPoint
 import ABC3.Found.Arakelov.ArcEval
 import ABC3.Found.Arakelov.ArcConjInvol
 import ABC3.Found.Arakelov.ArcTopologyAffine
-import ABC3.Found.Arakelov.ArcMapAffine
 import ABC3.Found.Arakelov.ArcMapToAffine
+import ABC3.Found.Arakelov.ArcMapCont
 import ABC3.Found.Arakelov.ArcTopology
 import ABC3.Found.Arakelov.ArcFunctorial
 import ABC3.Found.Arakelov.ArcTopologyAffineEq
