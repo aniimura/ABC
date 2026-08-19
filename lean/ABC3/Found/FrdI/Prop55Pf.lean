@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Def31Pf
 import ABC3.Found.FrdI.Prop25iii
+import ABC3.Found.FrdI.Prop32
 
 /-!
 # [FrdI] Proposition 5.5, (i) の中身 —— `𝒞^pf` の遷移写像は `α ↦ α^m`
@@ -120,6 +121,29 @@ theorem idxPf_iso_zeta (F : FrobenioidCore P) {A : C} (hA : IsFrobeniusTrivial P
       (by rw [hdeg, hd])
   exact ⟨e, e', he, he', ζ (P.degFr a), (hprop _).1, (hprop _).2, hdeg _, hcomp, hcomp'⟩
 
+/-! ## ★3. 写像の側 —— `𝒪^▷(A) → 𝒪^▷(A^pf)` -/
+
+/-- ★★★**自然な関手 `𝒞 → 𝒞^pf` は `𝒪^▷(A) → 𝒪^▷(A^pf)` を誘導する**。
+
+★★これが `Proposition 5.5, (i)` の「the natural functor `𝒞 → 𝒞^pf` determines
+a natural isomorphism `𝒪^▷(A)^pf ≅ 𝒪^▷(A^pf)`」の**写像の側**である。
+★同型であることは余極限の同定を要する(鎖 `prop55` の `p55i-colim`)が、
+その材料(遷移写像 `α ↦ α^m` と添字の cofinality)は本ファイルで揃っている。 -/
+noncomputable def otriToPfRoot {A : C} :
+    OTri P A →* OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) where
+  toFun α := ⟨(Functor.mapEnd A (toPfRoot (P := P) (F := F))) (α : End A), by
+    refine ⟨?_, ?_⟩
+    · show rootBase (toRootHom (F := F) (((α : End A) : A ⟶ A)))
+        = rootBase (idRoot P F ⟨A, 1⟩)
+      rw [rootBase_toRootHom, rootBase_id]
+      have : P.Base (((α : End A) : A ⟶ A)) = P.Base (𝟙 A) := α.2.1
+      rw [this, P.Base_id]
+    · show rootDeg (toRootHom (F := F) (((α : End A) : A ⟶ A))) = 1
+      rw [rootDeg_toRootHom]
+      exact α.2.2⟩
+  map_one' := Subtype.ext (map_one _)
+  map_mul' x y := Subtype.ext (map_mul _ _ _)
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -134,6 +158,13 @@ def frobTransport_otri_pow.src : ABC3.Meta.Source :=
 def idxPf_iso_zeta.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒞^pf の添字はすべて ζ_m の対と同型",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の写像の側
+(`𝒞 → 𝒞^pf` が `𝒪^▷(A) → 𝒪^▷(A^pf)` を誘導すること)。 -/
+def otriToPfRoot.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒞 → 𝒞^pf が誘導する 𝒪^▷(A) → 𝒪^▷(A^pf)",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
