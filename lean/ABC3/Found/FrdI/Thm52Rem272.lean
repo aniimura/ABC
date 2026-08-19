@@ -101,4 +101,137 @@ def rem_2_7_2_factor_isometric.src : ABC3.Meta.Source :=
     item := "Remark 2.7.2 — 3 分解の存在(等長な場合、skeleton 不要)",
     sectionId := "frdi-def-2-7" }
 
+/-! ## ★2. `𝒞^birat` の base-section
+
+★`Remark 2.7.2`(等長版)を `𝒞^birat` に当てるには `𝒞^birat` の base-section が要る。
+`𝒫` の像で取れる —— 唯一の非自明な点は
+**「`𝒞` の pull-back 射の像は `𝒞^birat` の pull-back 射」**である。 -/
+
+/-- ★`𝒞` の射との合成は代表元の合成。 -/
+theorem compBirat_mk_toHomBirat {G : Frobenioid P} (F : FrobenioidCore P) {A B E : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (π : B ⟶ E) :
+    compBirat P G F (HomBirat.mk Z φ) (toHomBirat (P := P) (G := G) π)
+      = HomBirat.mk Z (φ ≫ π) := by
+  rw [toHomBirat, compBirat_mk]
+  have hsq2 : biratPullGamma F Z φ (idxBiratOne P G B) ≫ φ
+      = biratPullAlpha F Z φ (idxBiratOne P G B) :=
+    (biratPull_sq F Z φ (idxBiratOne P G B)).trans (Category.comp_id _)
+  rw [← hsq2]
+  exact (congrArg (HomBirat.mk (biratPullIdx F Z φ (idxBiratOne P G B)))
+      (Category.assoc _ _ _)).trans
+    (HomBirat.mk_map (biratPullHom F Z φ (idxBiratOne P G B)) (φ ≫ π))
+
+/-- ★★★**`𝒞` の pull-back 射の像は `𝒞^birat` の pull-back 射**。 -/
+theorem birat_isPullBack_of (G : Frobenioid P) {A B : C} (π : A ⟶ B) (hπ : IsPullBack P π) :
+    IsPullBack (biratPre P G) ((toBiratCat P G).map π) := by
+  intro Z
+  constructor
+  · intro g g' heq
+    obtain ⟨W, φ, φ', hφ, hφ'⟩ := HomBirat.exists_rep_pair g g'
+    subst hφ; subst hφ'
+    haveI hba : IsIso (P.Base W.unop.hom.hom) := W.unop.hom.property.2.2
+    have h1 := congrArg (fun t => t.1) heq
+    have hb : biratBase (HomBirat.mk W φ) = biratBase (HomBirat.mk W φ') :=
+      congrArg Prod.snd h1
+    rw [biratBase_mk, biratBase_mk, sliceBaseOf_eq, sliceBaseOf_eq] at hb
+    have hbase : P.Base φ = P.Base φ' := (cancel_epi (inv (P.Base W.unop.hom.hom))).mp hb
+    have e1 := compBirat_mk_toHomBirat (G := G) G.core W φ π
+    have e2 := compBirat_mk_toHomBirat (G := G) G.core W φ' π
+    have hc : HomBirat.mk W (φ ≫ π) = HomBirat.mk W (φ' ≫ π) :=
+      e1.symm.trans ((congrArg Prod.fst h1).trans e2)
+    obtain ⟨V, u, hu⟩ := HomBirat.eq_iff_same.mp hc
+    refine HomBirat.eq_iff_same.mpr ⟨V, u, ?_⟩
+    refine pullBack_uniq hπ ?_ ?_
+    · exact (Category.assoc _ _ _).trans (hu.trans (Category.assoc _ _ _).symm)
+    · exact (P.Base_comp _ _).trans
+        ((congrArg (fun t => P.Base u.unop.left.hom ≫ t) hbase).trans (P.Base_comp _ _).symm)
+  · rintro ⟨⟨h, k⟩, hcomm⟩
+    obtain ⟨W, ψ, hψ⟩ := HomBirat.exists_rep h
+    subst hψ
+    haveI hba : IsIso (P.Base W.unop.hom.hom) := W.unop.hom.property.2.2
+    have hb : inv (P.Base W.unop.hom.hom) ≫ P.Base ψ = k ≫ P.Base π := by
+      have h2 : biratBase (HomBirat.mk W ψ) = k ≫ P.Base π :=
+        hcomm.trans (congrArg (fun t => k ≫ t) (biratBase_toHomBirat (P := P) (G := G) π))
+      rw [biratBase_mk, sliceBaseOf_eq] at h2
+      exact h2
+    have hb2 : P.Base ψ = (P.Base W.unop.hom.hom ≫ k) ≫ P.Base π := by
+      have h3 := congrArg (fun t => P.Base W.unop.hom.hom ≫ t) hb
+      simp only [← Category.assoc, IsIso.hom_inv_id, Category.id_comp] at h3
+      exact h3.trans (Category.assoc _ _ _).symm
+    obtain ⟨φ, hφ1, hφ2⟩ := pullBack_lift hπ ψ (P.Base W.unop.hom.hom ≫ k) hb2
+    refine ⟨HomBirat.mk W φ, Subtype.ext (Prod.ext ?_ ?_)⟩
+    · exact (compBirat_mk_toHomBirat (G := G) G.core W φ π).trans
+        (congrArg (HomBirat.mk W) hφ1)
+    · show biratBase (HomBirat.mk W φ) = k
+      rw [biratBase_mk, sliceBaseOf_eq, hφ2]
+      rw [← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+
+/-- ★★★**`𝒞^birat` の base-section**(`𝒫` の像)。 -/
+noncomputable def biratBaseSection (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    (S : BaseSection P) : BaseSection (biratPre P G) where
+  objP A := S.objP (biratDown P G A)
+  homP {A B} f := ∃ f₀ : biratDown P G A ⟶ biratDown P G B,
+    S.homP f₀ ∧ f = (toBiratCat P G).map f₀
+  id_mem h := ⟨𝟙 _, S.id_mem h, ((toBiratCat P G).map_id _).symm⟩
+  comp_mem := by
+    rintro A B E f g ⟨f₀, hf, rfl⟩ ⟨g₀, hg, rfl⟩
+    exact ⟨f₀ ≫ g₀, S.comp_mem hf hg, ((toBiratCat P G).map_comp _ _).symm⟩
+  isPullBack := by
+    rintro A B f ⟨f₀, hf, rfl⟩
+    exact birat_isPullBack_of G f₀ (S.isPullBack hf)
+  skeletal := by
+    rintro A B f g ⟨f₀, hf, rfl⟩ ⟨g₀, hg, rfl⟩ h1 h2
+    haveI := toBiratCat_faithful (P := P) (G := G)
+    refine S.skeletal hf hg ((toBiratCat P G).map_injective ?_) ((toBiratCat P G).map_injective ?_)
+    · rw [(toBiratCat P G).map_comp, (toBiratCat P G).map_id]; exact h1
+    · rw [(toBiratCat P G).map_comp, (toBiratCat P G).map_id]; exact h2
+  frobTrivial := by
+    intro A hA
+    obtain ⟨ζ, hdeg, hprop⟩ := S.frobTrivial hA
+    have hid : biratBase (𝟙 A) = P.Base (𝟙 (biratDown P G A)) := by
+      rw [show (𝟙 A) = toHomBirat (𝟙 (biratDown P G A)) from
+        ((toBiratCat P G).map_id _).symm, biratBase_toHomBirat]
+    refine ⟨{ toFun := fun n =>
+        (((toBiratCat P G).map (((ζ n : End (biratDown P G A))) : _ ⟶ _)) : End A),
+              map_one' := ?_, map_mul' := ?_ }, ?_, ?_⟩
+    · show (toBiratCat P G).map (((ζ 1 : End (biratDown P G A))) : _ ⟶ _) = 𝟙 _
+      rw [map_one]
+      exact (toBiratCat P G).map_id _
+    · intro m n
+      show (toBiratCat P G).map (((ζ (m * n) : End (biratDown P G A))) : _ ⟶ _)
+        = (toBiratCat P G).map (((ζ n : End (biratDown P G A))) : _ ⟶ _)
+          ≫ (toBiratCat P G).map (((ζ m : End (biratDown P G A))) : _ ⟶ _)
+      rw [← (toBiratCat P G).map_comp, map_mul]
+      rfl
+    · intro n
+      exact (biratDeg_toHomBirat (G := G) ((ζ n : End (biratDown P G A)) : _ ⟶ _)).trans (hdeg n)
+    · intro n
+      refine ⟨?_, ⟨⟨prop_1_4_i (biratPre P G) _ (fun Y _ => birat_isOfIsotropicType hiso Y),
+        birat_isIsometric _⟩, ?_⟩⟩
+      · exact ((biratBase_toHomBirat (G := G) ((ζ n : End (biratDown P G A)) : _ ⟶ _)).trans
+          ((hprop n).1)).trans hid.symm
+      · show IsIso (biratBase ((toBiratCat P G).map
+            (((ζ n : End (biratDown P G A))) : _ ⟶ _)))
+        exact (biratBase_toHomBirat (G := G)
+          ((ζ n : End (biratDown P G A)) : _ ⟶ _)).symm ▸ (hprop n).2.2
+  essSurjP X := by
+    obtain ⟨A, hA, ⟨e⟩⟩ := S.essSurjP X
+    exact ⟨A, hA, ⟨e⟩⟩
+  fullP := by
+    intro A B hA hB ψ
+    refine ⟨(toBiratCat P G).map (S.lift hA hB ψ), ⟨_, S.lift_homP hA hB ψ, rfl⟩, ?_⟩
+    exact (biratBase_toHomBirat (G := G) (S.lift hA hB ψ)).trans (S.lift_base hA hB ψ)
+  faithfulP := by
+    rintro A B f g ⟨f₀, hf, rfl⟩ ⟨g₀, hg, rfl⟩ hbase
+    have h : P.Base f₀ = P.Base g₀ :=
+      ((biratBase_toHomBirat (G := G) f₀).symm.trans hbase).trans
+        (biratBase_toHomBirat (G := G) g₀)
+    rw [S.faithfulP hf hg h]
+
+/-- ★locator —— `𝒞^birat` の base-section(`Theorem 5.2, (iv)` の準備)。 -/
+def biratBaseSection.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 101,
+    item := "Theorem 5.2, (iv) — 𝒞^birat の base-section",
+    sectionId := "frdi-thm-5-2" }
+
 end ABC3.Found.FrdI
