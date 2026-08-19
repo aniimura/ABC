@@ -13153,3 +13153,70 @@ mathlib の定義(`Modules/Tilde.lean:44`)は
 | D2 `APicSpecData` | D1 待ち |
 | D3 `ArakelovHeightData` | D1・D2 待ち |
 | G1–G8 | ★全部未着手 |
+
+## §9-341 —— ★★★★★C3 と D1 の矛盾を見つけて塞いだ(第 296 ブロック)
+
+D1 に着手して**すぐに矛盾が出た**:
+
+* (D1) の `group : CommGroup (APic X)` は `APic X` が**空でない**ことを要求し、
+* (D1) の `mk_surjective` は `APic X` が `Σ L, Metric X L` に他ならないことを要求する。
+
+★★したがって **`Metric X L` はすべての `X` で空でない**——連続計量が常に存在する——
+ことになるが、それは**偽**である(パラコンパクト性が要る)。
+
+### ★★★塞ぎ方
+
+`normSection_continuous` を `metric_nonempty` と**同じ仮定**の下に置いた。
+★★計量の型は無条件に空でなくし(基準計量は連続なものが在ればそれ、無ければ第 246 の
+点ごとの計量に落ちる——3 法則は常に成り立つ)、**連続性だけを条件付き**にした。
+
+★原文の `X` は ℤ 上固有・平坦なので (C2) からこの仮定は得られる——**逸脱ではない**。
+★★退化の検出力も失われない——原文のスキームの上では従来どおり 1 の分割を強制する。
+
+★★★これは「Interface を先に書いて後で埋める」進め方が**矛盾を先に見つける**例である。
+
+## §9-342〜§9-343 —— ★★★★★★弧空間は関手的である(第 297–298 ブロック)
+
+(D1) の `pullback` は Green 関数も引き戻すので、
+
+    (· ≫ f) : X^arc ⟶ Y^arc  が連続
+
+が要る。★今まで**開埋め込みの場合しか無かった**。
+
+| 段 | 内容 |
+|---|---|
+| アフィン間 | ★**在庫に在った**(`ArcFunctorial.lean` の `continuous_comp_affine`) |
+| 第 297 | ★★始域を一般化(`continuous_of_charts` で chart に落とす) |
+| 第 298 | ★★★★終域を一般化(`morphismRestrict_ι` で `V` に落とし、局所性で押し切る) |
+
+### ★★★失敗の記録——在庫を見落とした
+
+アフィン間の場合を**書いてしまってから**、`ArcFunctorial.lean` に同名の定理が
+既に在ることに気づいた(`import` が名前衝突で落ちて発覚)。★削除して積み直した。
+
+★★原因は grep の掛け方で、`arcTopologyAffine` で絞ったが**定理の主張が複数行に跨って**
+いたため引っかからなかった。★★★**概念の名前(`continuous_comp`)で引くこと**。
+
+## §9-344 —— ★★★★★★★D1 達成(第 299 ブロック)
+
+    APicData.nonvacuous : Nonempty APicData
+
+★★★**Arakelov 5/9 → 6/9**(B1, B2, C1, C2, C3, D1)。
+
+    APic(X) = Pic(X) × C(X^arc, ℝ)     (群構造は Pic の積と Green 関数の和)
+
+★捻れ集合の表示(第 294)がそのまま効いた。
+
+### ★Interface の誤記を 1 つ直した
+
+`APic : Scheme.{0} → Type` と書いてあったが、(B1) の `Pic : Scheme.{0} → Type 1` と
+`forgetMetric` / `forgetMetric_mk` で結ばれる以上、`APic` も `Type 1` でなければならない。
+★`Type 1 ↪ Type 0` を要求してしまう。これは型の誤記であって数学の変更ではない。
+
+## ★次に来るもの
+
+| 義務 | 状態 |
+|---|---|
+| D2 `APicSpecData` | ★着手可能(`Found/GenEll/ArithDiv.lean` に `ADiv`/`deg_F` が実装済み) |
+| D3 `ArakelovHeightData` | D2 待ち |
+| G1–G8 | ★全部未着手 |
