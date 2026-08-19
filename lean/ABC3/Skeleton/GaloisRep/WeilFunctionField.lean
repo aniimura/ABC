@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.TranslateComp
+import ABC3.Found.GaloisRep.TwoTorsionDecomp
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -54,17 +54,17 @@ noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : 
 
 /-! ## ★★★★★葉 1a —— 2 等分点の場合 -/
 
-/-- ★★★★★**`Q` が 2 等分点のときの単射性**。
+/-- ★★★★**2 等分点でないアフィン点が 1 つ存在すること**。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★第 117 ブロックの `−Q` 評価は `−Q = Q` になるので使えない。
-★★別解: 2 等分点 `Q` を `Q = Q' + Q''`(どちらも 2 等分点でない)と分解し、
-`τ_Q = τ_{Q'} ∘ τ_{Q''}` として単射性を合成で得る。 -/
-theorem translateHom_injective_twoTorsion (W : WeierstrassCurve.Affine F) [W.IsElliptic]
-    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) (h2 : W.negY x₀ y₀ = y₀) :
-    Function.Injective (translateHom W hQ) := by
+★★★★★★平行移動の単射性はこれだけになった——第 122 ブロック
+`translateHom_injective_all` がこれを仮定として受けている。
+★`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²`)なので、
+体が十分大きければ取れる。 -/
+theorem exists_notTwoTorsion_point (W : WeierstrassCurve.Affine F) [W.IsElliptic] :
+    ∃ (x₁ y₁ : F) (_ : W.Nonsingular x₁ y₁), W.negY x₁ y₁ ≠ y₁ := by
   sorry
 
 /-! ## ★★★★★葉 1b —— 2 等分点での自己同型 -/
@@ -120,18 +120,18 @@ def polyToFF.src : Source :=
     item := "Theorem 3.8(F[X] の元を関数体に送る写像)",
     sectionId := "genell-thm-3-8" }
 
-def translateHom_injective_twoTorsion.src : Source :=
+def exists_notTwoTorsion_point.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(Weil 対の構成——2 等分点での平行移動の単射性)",
     sectionId := "genell-thm-3-8" }
 
-def translateHom_injective_twoTorsion.needs : List ProofObligation :=
+def exists_notTwoTorsion_point.needs : List ProofObligation :=
   [ .implicitStep
-      "★★★★2 等分点でない場合は **Found に済**(第 117 `translateHom_injective`)。`−Q` での 1 点評価で決まった(0 ブロック)" 19,
+      "★★★★★★**平行移動の単射性はこれだけになった**——2 等分点でない場合は第 117(`−Q` での 1 点評価)、2 等分点の場合は第 121-122(分解して合成)で **Found に入った**(0 ブロック)" 19,
     .implicitStep
-      "★★★★★★**分解があれば単射性は出る**——第 121 ブロック `translateHom_injective_of_decomp` が **Found に入った**。合成則 `τ_{Q₁} ∘ τ_{Q₂} = τ_{Q₁+Q₂}` と「体の自己準同型は単射」から出る(0 ブロック)" 19,
+      "★★`E[2]` は高々 4 点である(第 65-72 の `E[n] ≃ (ℤ/n)²`、**Found に済**)。体が代数閉なら `E[3]` が 9 点あるので、その非零元は 2 等分点でない(3-8 ブロック)" 19,
     .implicitStep
-      "★★**残るのは分解の存在だけ**—— 2 等分点 `Q₃` に対し `Q₃ = Q₁ + Q₂`(どちらも 2 等分点でなく、どちらもアフィン点)を取る。`E[2]` は高々 4 点(第 65-72 の `E[n] ≃ (ℤ/n)²` から)なので、体が無限なら取れる(3-8 ブロック)" 19 ]
+      "★一般の体では成り立たない——`E(F)` が `E[2] ∪ {0}` に含まれることがあり得る。Weil 対の文脈では代数閉体上で作業するので問題にならない(0 ブロック)" 19 ]
 
 def exists_translateAut_twoTorsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,
