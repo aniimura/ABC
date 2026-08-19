@@ -1550,27 +1550,62 @@
      "decl": "Cor411.Hyp / Cor411.HypPair"
     },
     {
+     "id": "psi-base",
+     "title": "(ii) Ψ_Base —— 𝒟₁ ⥤ 𝒟₂ の 1-一意な存在と 1-可換図式",
+     "size": "★特大",
+     "status": "todo",
+     "deps": [
+      "hyp",
+      "cor410-done",
+      "thm42-ii-done"
+     ],
+     "note": "原文 (物理 p.93-94、実測):\n> Next, we consider assertion (ii). First, let us observe that we obtain a 1-\n\n★★★**これが `Corollary 4.11` の要**である。原文の道(実測):\n\n| 段 | 内容 | 在庫 |\n|---|---|---|\n| 1 | `Ψ^birat : 𝒞₁^birat ≌ 𝒞₂^birat` と 1-可換図式 | ★済(`psiBiratCor_isEquivalence` / `psiBiratCor_square`) |\n| 2 | `Ψ^birat` は base-isomorphism を保つ(`Prop 4.4, (iv)`) | 辞書は済(`birat_isBaseIsomorphism_iff`) |\n| 3 | ★**Div-slim による base-identity 自己射の特徴づけ** | **未** |\n| 4 | `Theorem 4.2, (ii)` で「`Φ` が恒等へ送る自己同型」の保存 | 済(`psiPrime` 一式) |\n| 5 | ⟹ `Ψ^birat` は `𝒪^×` を保つ ⟹ `(Ψ^birat)^un-tr` | `psiUnTr` は在庫 |\n| 6 | `(𝒞ᵢ^birat)^un-tr` は isotropic ＋ unit-trivial ＋ group-like | **未** |\n| 7 | `Proposition 3.11, (iii)` で `Ψ_Base` | ★済(`prop_3_11_iii`) |\n| 8 | 図式の合成 `𝒞 → 𝒞^birat → (𝒞^birat)^un-tr → 𝒟` ≅ `proj` | **未** |\n\n★rigidity は `𝒟ᵢ` が slim のときだけの主張(原文どおり)で、`prop_3_11_iii` が供給する。\n\n★★`Remark 4.11.2`(原文 p.94)が言うとおり、**Div-slim は落とせない** ——\n`Example 3.9`/`3.10` が反例である。"
+    },
+    {
+     "id": "thm49",
+     "title": "[新規] Theorem 4.9 —— 除数単系の圏論性(Ψ_Φ)",
+     "size": "★特大",
+     "status": "todo",
+     "deps": [
+      "thm42-iii-done"
+     ],
+     "note": "★★**形式化の中で現れた新しい葉**(CLAUDE.md の「進め方」どおり台帳へ追加)。\n`Corollary 4.11, (iii)` が `Theorem 4.9` を引くが、自動生成の needed 一覧\n(`frdi-needed.json`、`[FrdI], Kind N.M` の形の引用の推移閉包)には入っていない。\n\n原文 (物理 p.88):\n> Theorem 4.9. (Category-theoreticity of Divisor Monoids)\n\n## ★★★★★★測って分かった —— **我々は最難関の段を既に持っている**\n\n原文の証明は\n「`Theorem 4.9` を示すには **`Theorem 4.2, (iii)` の right-hand と left-hand の\n同型が一致する**ことを示せば十分」と言い、そこに twin-primary steps の議論\n(原文 p.89-90)を費やす。\n\n★★★**我々の `Theorem 4.2, (iii)` は最初から 1 本しかない** ——\n`divEquiv` は `𝒪^▷(A)` の**自己射**の `Div` で作るので、\n「`A` から出る」と「`A` へ入る」の区別が無い。\nしたがって **right-hand ＝ left-hand は自明**である(逸脱 (B) `hdivS` のおかげ)。\n\n★残るのは\n(1) `divEquiv` の `A` についての**関手性**(base-iso は `psiPrime_naturality` の手筋、\n    pull-back は `Proposition 1.11, (v)` の「pre-step の引き戻し」)\n(2) `Φ₁ ≅ Φ₂`(関手の同型)へ束ねる段"
+    },
+    {
      "id": "psi-untr",
      "title": "(i) Ψ^un-tr の 1-一意な存在と 1-可換図式",
      "size": "★大",
      "status": "半済",
      "deps": [
-      "hyp"
+      "hyp",
+      "psi-base"
      ],
-     "note": "★★★**本セッションで `Theorem 3.4, (iv)` として実装済**\n(`psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` / `psiUnTr_rigid`、`Thm34EndBs.lean`)。\n★仮定の対応を確かめれば**そのまま使える見込み**。\n\n## ★★★形を測り直した(2026-08-19)—— **★中ではなく★大**\n\n`psiUnTr` を **`istrPre` の層で instantiate すれば `hUE` の量化子問題は消える**\n(`UnTr (istrPre P F)` の対象はすべて isotropic なので\n`toElem_map_congr_of_congr` の `hiso : ∀ X, IsIsotropic` がただで出る)。\n★材料は `istr_quasiIsotropicType` / `istr_isotropic` / `istr_frobenioidCore` /\n`unTr2Equiv`(`UnTr P ≌ UnTr (istrPre P F)`)——すべて在庫。\n\n★★★**残る障害はただ 1 つ**: `hOTri`(`Ψ` が `𝒪^▷` を保つ)。\n在庫の `thm_3_4_iv_otri_map'` は\n`hft : IsFrobeniusTrivial P₁ C₀` と `hfn : IsFrobeniusNormalized P₁ C₀` を要求し、\n★**Frobenius-trivial な対象にしか効かない**。\nstandard 型では全対象が Frobenius-trivial とは限らない。\n\n★★したがって本節点の本体は\n「**`baseSurj` で Frobenius-trivial 対象へ降ろす**」段である ——\n原典 (物理 p.66) が `Definition 1.3, (i), (a)` を使って行う還元。\n\n## ★もう 1 つの新しさ —— rigidity は `Div-slim` から出す\n`psiUnTr_rigid` は `IsSlimCat D₂` を使うが、`Corollary 4.11` の仮定は\n**`Div-slim` だけ**である(`isDivSlim_of_isSlim` は一方向)。\n★★ここは `Theorem 3.4, (iv)` の単なる引用ではなく**真に新しい内容**である。\n\n## ★★還元の道具を 2 本入れた(2026-08-19)\n\n| 宣言 | 内容 |\n|---|---|\n| `exists_frobTrivial_span` | 任意の対象は Frobenius-trivial な対象と pre-step の **span** で繋がる |\n| `baseIdentity_ascend` | `base-identity` と次数は pre-step に沿って**上げられる**(在庫の `descend` の逆向き) |\n\n## ★★★測った隔たり —— **span では足りない**\n`OTriEndCond P (γ : End C₀)` は\n```\n∃ A B φ ψ α β, IsPreStep φ ∧ IsPreStep ψ ∧ φ ≫ β = α ≫ φ ∧ ψ ≫ γ = α ≫ ψ ∧ OTriGenCond P A α\n```\nであり、`OTriGenCond P A α` の生成(`otriEndCond_of_oTri`)は\n**`A` が Frobenius-trivial かつ Frobenius-normalized** であることを要求する。\n\n★`exists_frobTrivial_span` が与えるのは `X → A₀`(Frobenius-trivial)と `X → A` の**span**で、\n`OTriEndCond` が要るのは **Frobenius-trivial な対象からの直接の pre-step `A' → A`** である。\n\n★★★したがって残る問いは\n**「`X` は Frobenius-trivial か」**(あるいは `A` へ pre-step を持つ\nFrobenius-trivial 対象が常に取れるか)である。\n★在庫には `isFrobeniusTrivial_of_iso` と `isFrobeniusTrivial_of_baseTrivial` しかなく、\n**pre-step に沿った降下は無い**(実測)。\n★`prop_1_10_ii`(pre-step ≫ Frobenius 型 → Frobenius 型 ≫ pre-step)は\n中間対象 `Y ≠ X` を出すので直には使えない。\n\n## ★★★★★★原文を読み直して分かった —— **我々の仮定が原典より強い**(2026-08-19)\n\n原文 (物理 p.66、実測):\n> of O (C) are precisely the endomorphisms\n\n★★★原文は\n「for i = 1, 2, it follows formally [in light of our assumption that Di is\n**Frobenius-slim**] from **Proposition 3.3, (i)** [cf. also **Definition 1.3, (i), (a), (b);\n(iii), (c)**], that **if C ∈ Ob(Ci)**, then the endomorphisms of `𝒪^▷(C)` are\nprecisely the endomorphisms γ ∈ End(C) such that [`OTriEndCond`]」\nと書く。\n\n★★**「if C ∈ Ob(Ci)」——すべての対象について**であり、\nFrobenius-trivial への制限は**無い**。\n\n## ★★★したがって障害は「数学が足りない」ではなく\n**我々の `otriEndCond_of_oTri` の仮定が強すぎる**ことである。\n\n| | 我々 | 原典 |\n|---|---|---|\n| 仮定 | `IsFrobeniusTrivial A` ＋ `IsFrobeniusNormalized A` | 無し(全対象) |\n| 使う道具 | —— | `Proposition 3.3, (i)` ＋ `Definition 1.3, (i), (a), (b)` ＋ (iii), (c) ＋ `𝒟` Frobenius-slim |\n\n★★★★**次の一手は `otriEndCond_of_oTri` の仮定を落とすこと**である ——\n`Definition 1.3, (i), (a), (b)` は `baseSurj` ＋ `preStepSpan`(＝本セッションで\n`exists_frobTrivial_span` として束ねたもの)であり、\n`(iii), (c)` は `coAngularOfPreStep`、`Proposition 3.3, (i)` は在庫(`Prop33i.lean`)。\n★**材料はすべて在庫にある。**\n\n## ★★★★★★依存が変わった —— `psi-untr` に `𝒪^▷` の一般化は要らない(2026-08-19)\n\n★★測り直したところ、在庫の `toElem_map_congr_of_congr` が要求していた\n`hOTri`(`𝒪^▷` 全体の保存)は**強すぎた** ——\n`IsUnitEquivalent` の定義に現れる `δ` は**つねに `𝒪^×` の元**である。\n\n★★★そして `𝒪^×` については **`IsLinear` が自動**である:\n単元は圏の同型(`CategoryTheory.isUnit_iff_isIso`)、\n同型の Frobenius 次数は 1(`degFr_of_isIso`)。\nしたがって `𝒪^×` の保存に要るのは **`IsBaseIdentity` の保存だけ**であり、\nそれは在庫の `isBaseIdentity_map_of_baseSquare` が\n**底の 1-可換図式だけ**から与える。\n\n## ★実装(`Cor411Untr.lean`、`lake env lean` 緑)\n\n| 宣言 | 中身 |\n|---|---|\n| `isLinear_of_isUnit` | 単元 ⟹ `IsLinear` |\n| `mem_otimes_iff` | `δ ∈ 𝒪^×(A) ↔ IsUnit δ ∧ IsBaseIdentity δ` |\n| `otimes_map_of_baseSquare` | 底の四角形だけで `Ψ` は `𝒪^×` を保つ |\n| `isUnitEquivalent_map_of_otimes` | 在庫版の仮定を `𝒪^×` に弱めた |\n| `toElem_map_congr_of_otimes` | `Ψ` は `𝒞^un-tr` の同値関係を保つ |\n| ★`psiUnTrOfBaseSquare` | **`Ψ^un-tr` を底の 1-可換図式だけから構成** |\n\n## ★★★★★したがって残る依存は **`v-psibase` ただ 1 本**である。\n★以前記録した「Frobenius-trivial 対象からの直接の pre-step が要る」は\n**`𝒪^▷` の一般対象での特徴づけ**(`Theorem 3.4, (iv)` の別の主張)の話であって、\n**`Ψ^un-tr` の構成には要らなかった**。\n\n## ★★★★★★原文を読み直した —— `Corollary 4.11` は **Div-slim 版**が要る(2026-08-19)\n\n原文 (物理 p.91、実測):\n> Ψ preserves \"O×(−)\" [cf. the proof of Theorem 3.4, (iv)]. But observe that, for\n\n★`Theorem 3.4, (iv)`/(v) は `𝒟` の **Frobenius-slim / slim** を仮定するが、\n`Corollary 4.11` が仮定するのは **Div-slim**(＋ `Φ` perf-factorial)で、\n★`isDivSlim_of_isSlim` があるとおり **Div-slim の方が弱い**。\nしたがって `psiUnTrFull`(本セッションで作った `Theorem 3.4, (iv)` の完全版)は\n**そのままでは使えない**。\n\n★★原文の道(p.91、実測):\n`f ∈ 𝒪^×(A)` は `φ_f ∈ Aut((𝒞^pl-bk)_A → 𝒞)` を定め、これは\n`Aut((𝒟)_{A_𝒟} → 𝒟)` の恒等へ、したがって `Aut((𝒟)_{A_𝒟} → Mon)` の恒等へ写る。\n★**`𝒟` が Div-slim なので逆も言える** —— `Φ` 側で恒等なら `𝒟` 側でも恒等。\n\n## ★★★★★測って分かった依存\n`Φ.map (Base (φ.app Z)) = 𝟙` は、我々の語彙では **`IsDivIdentity (φ.app Z)`** そのもの\n(`DivEquivalent φ ψ := Φ.map (Base φ) = Φ.map (Base ψ)`)。\n★★したがって `Corollary 4.11, (i)` は **`Theorem 4.2, (i)` の\n`Div-identity` 自己射の保存(`i-divid`、現在「半済」)に依存する**。\n★★★これは `group-like でない`場合の話で、group-like の場合は\n原文どおり「Div-slim = slim」なので `Theorem 3.4, (iv), (v)` がそのまま効く。",
+     "note": "★★★**本セッションで `Theorem 3.4, (iv)` として実装済**\n(`psiUnTr` / `psiUnTr_square` / `psiUnTr_unique` / `psiUnTr_rigid`、`Thm34EndBs.lean`)。\n★仮定の対応を確かめれば**そのまま使える見込み**。\n\n## ★★★形を測り直した(2026-08-19)—— **★中ではなく★大**\n\n`psiUnTr` を **`istrPre` の層で instantiate すれば `hUE` の量化子問題は消える**\n(`UnTr (istrPre P F)` の対象はすべて isotropic なので\n`toElem_map_congr_of_congr` の `hiso : ∀ X, IsIsotropic` がただで出る)。\n★材料は `istr_quasiIsotropicType` / `istr_isotropic` / `istr_frobenioidCore` /\n`unTr2Equiv`(`UnTr P ≌ UnTr (istrPre P F)`)——すべて在庫。\n\n★★★**残る障害はただ 1 つ**: `hOTri`(`Ψ` が `𝒪^▷` を保つ)。\n在庫の `thm_3_4_iv_otri_map'` は\n`hft : IsFrobeniusTrivial P₁ C₀` と `hfn : IsFrobeniusNormalized P₁ C₀` を要求し、\n★**Frobenius-trivial な対象にしか効かない**。\nstandard 型では全対象が Frobenius-trivial とは限らない。\n\n★★したがって本節点の本体は\n「**`baseSurj` で Frobenius-trivial 対象へ降ろす**」段である ——\n原典 (物理 p.66) が `Definition 1.3, (i), (a)` を使って行う還元。\n\n## ★もう 1 つの新しさ —— rigidity は `Div-slim` から出す\n`psiUnTr_rigid` は `IsSlimCat D₂` を使うが、`Corollary 4.11` の仮定は\n**`Div-slim` だけ**である(`isDivSlim_of_isSlim` は一方向)。\n★★ここは `Theorem 3.4, (iv)` の単なる引用ではなく**真に新しい内容**である。\n\n## ★★還元の道具を 2 本入れた(2026-08-19)\n\n| 宣言 | 内容 |\n|---|---|\n| `exists_frobTrivial_span` | 任意の対象は Frobenius-trivial な対象と pre-step の **span** で繋がる |\n| `baseIdentity_ascend` | `base-identity` と次数は pre-step に沿って**上げられる**(在庫の `descend` の逆向き) |\n\n## ★★★測った隔たり —— **span では足りない**\n`OTriEndCond P (γ : End C₀)` は\n```\n∃ A B φ ψ α β, IsPreStep φ ∧ IsPreStep ψ ∧ φ ≫ β = α ≫ φ ∧ ψ ≫ γ = α ≫ ψ ∧ OTriGenCond P A α\n```\nであり、`OTriGenCond P A α` の生成(`otriEndCond_of_oTri`)は\n**`A` が Frobenius-trivial かつ Frobenius-normalized** であることを要求する。\n\n★`exists_frobTrivial_span` が与えるのは `X → A₀`(Frobenius-trivial)と `X → A` の**span**で、\n`OTriEndCond` が要るのは **Frobenius-trivial な対象からの直接の pre-step `A' → A`** である。\n\n★★★したがって残る問いは\n**「`X` は Frobenius-trivial か」**(あるいは `A` へ pre-step を持つ\nFrobenius-trivial 対象が常に取れるか)である。\n★在庫には `isFrobeniusTrivial_of_iso` と `isFrobeniusTrivial_of_baseTrivial` しかなく、\n**pre-step に沿った降下は無い**(実測)。\n★`prop_1_10_ii`(pre-step ≫ Frobenius 型 → Frobenius 型 ≫ pre-step)は\n中間対象 `Y ≠ X` を出すので直には使えない。\n\n## ★★★★★★原文を読み直して分かった —— **我々の仮定が原典より強い**(2026-08-19)\n\n原文 (物理 p.66、実測):\n> of O (C) are precisely the endomorphisms\n\n★★★原文は\n「for i = 1, 2, it follows formally [in light of our assumption that Di is\n**Frobenius-slim**] from **Proposition 3.3, (i)** [cf. also **Definition 1.3, (i), (a), (b);\n(iii), (c)**], that **if C ∈ Ob(Ci)**, then the endomorphisms of `𝒪^▷(C)` are\nprecisely the endomorphisms γ ∈ End(C) such that [`OTriEndCond`]」\nと書く。\n\n★★**「if C ∈ Ob(Ci)」——すべての対象について**であり、\nFrobenius-trivial への制限は**無い**。\n\n## ★★★したがって障害は「数学が足りない」ではなく\n**我々の `otriEndCond_of_oTri` の仮定が強すぎる**ことである。\n\n| | 我々 | 原典 |\n|---|---|---|\n| 仮定 | `IsFrobeniusTrivial A` ＋ `IsFrobeniusNormalized A` | 無し(全対象) |\n| 使う道具 | —— | `Proposition 3.3, (i)` ＋ `Definition 1.3, (i), (a), (b)` ＋ (iii), (c) ＋ `𝒟` Frobenius-slim |\n\n★★★★**次の一手は `otriEndCond_of_oTri` の仮定を落とすこと**である ——\n`Definition 1.3, (i), (a), (b)` は `baseSurj` ＋ `preStepSpan`(＝本セッションで\n`exists_frobTrivial_span` として束ねたもの)であり、\n`(iii), (c)` は `coAngularOfPreStep`、`Proposition 3.3, (i)` は在庫(`Prop33i.lean`)。\n★**材料はすべて在庫にある。**\n\n## ★★★★★★依存が変わった —— `psi-untr` に `𝒪^▷` の一般化は要らない(2026-08-19)\n\n★★測り直したところ、在庫の `toElem_map_congr_of_congr` が要求していた\n`hOTri`(`𝒪^▷` 全体の保存)は**強すぎた** ——\n`IsUnitEquivalent` の定義に現れる `δ` は**つねに `𝒪^×` の元**である。\n\n★★★そして `𝒪^×` については **`IsLinear` が自動**である:\n単元は圏の同型(`CategoryTheory.isUnit_iff_isIso`)、\n同型の Frobenius 次数は 1(`degFr_of_isIso`)。\nしたがって `𝒪^×` の保存に要るのは **`IsBaseIdentity` の保存だけ**であり、\nそれは在庫の `isBaseIdentity_map_of_baseSquare` が\n**底の 1-可換図式だけ**から与える。\n\n## ★実装(`Cor411Untr.lean`、`lake env lean` 緑)\n\n| 宣言 | 中身 |\n|---|---|\n| `isLinear_of_isUnit` | 単元 ⟹ `IsLinear` |\n| `mem_otimes_iff` | `δ ∈ 𝒪^×(A) ↔ IsUnit δ ∧ IsBaseIdentity δ` |\n| `otimes_map_of_baseSquare` | 底の四角形だけで `Ψ` は `𝒪^×` を保つ |\n| `isUnitEquivalent_map_of_otimes` | 在庫版の仮定を `𝒪^×` に弱めた |\n| `toElem_map_congr_of_otimes` | `Ψ` は `𝒞^un-tr` の同値関係を保つ |\n| ★`psiUnTrOfBaseSquare` | **`Ψ^un-tr` を底の 1-可換図式だけから構成** |\n\n## ★★★★★したがって残る依存は **`v-psibase` ただ 1 本**である。\n★以前記録した「Frobenius-trivial 対象からの直接の pre-step が要る」は\n**`𝒪^▷` の一般対象での特徴づけ**(`Theorem 3.4, (iv)` の別の主張)の話であって、\n**`Ψ^un-tr` の構成には要らなかった**。\n\n## ★★★★★★原文を読み直した —— `Corollary 4.11` は **Div-slim 版**が要る(2026-08-19)\n\n原文 (物理 p.91、実測):\n> Ψ preserves \"O×(−)\" [cf. the proof of Theorem 3.4, (iv)]. But observe that, for\n\n★`Theorem 3.4, (iv)`/(v) は `𝒟` の **Frobenius-slim / slim** を仮定するが、\n`Corollary 4.11` が仮定するのは **Div-slim**(＋ `Φ` perf-factorial)で、\n★`isDivSlim_of_isSlim` があるとおり **Div-slim の方が弱い**。\nしたがって `psiUnTrFull`(本セッションで作った `Theorem 3.4, (iv)` の完全版)は\n**そのままでは使えない**。\n\n★★原文の道(p.91、実測):\n`f ∈ 𝒪^×(A)` は `φ_f ∈ Aut((𝒞^pl-bk)_A → 𝒞)` を定め、これは\n`Aut((𝒟)_{A_𝒟} → 𝒟)` の恒等へ、したがって `Aut((𝒟)_{A_𝒟} → Mon)` の恒等へ写る。\n★**`𝒟` が Div-slim なので逆も言える** —— `Φ` 側で恒等なら `𝒟` 側でも恒等。\n\n## ★★★★★測って分かった依存\n`Φ.map (Base (φ.app Z)) = 𝟙` は、我々の語彙では **`IsDivIdentity (φ.app Z)`** そのもの\n(`DivEquivalent φ ψ := Φ.map (Base φ) = Φ.map (Base ψ)`)。\n★★したがって `Corollary 4.11, (i)` は **`Theorem 4.2, (i)` の\n`Div-identity` 自己射の保存(`i-divid`、現在「半済」)に依存する**。\n★★★これは `group-like でない`場合の話で、group-like の場合は\n原文どおり「Div-slim = slim」なので `Theorem 3.4, (iv), (v)` がそのまま効く。\n\n## ★★★★★★測り直した(2026-08-19)—— **(i) は (ii) から出る**\n\n原文の (i) の証明は独立だが、我々には `psiUnTrOfBaseSquare`(`Cor411Untr.lean`)があり、\n**底の 1-可換図式さえあれば `Ψ^un-tr` が立つ**。★その図式が (ii) そのものである。\nしたがって依存を `psi-base` に付け替えた ——★原文と違う道だが結論は同じ。\n\n★残るのは **rigidity**(原文 p.93):\n`α ∈ Aut(𝒞ᵢ → 𝒞ᵢ^un-tr)` が誘導する自己同型は\n(a) co-angular pre-step への関手性から **Div-identity 自己同型**、\n(b) `𝒟ᵢ` が **Div-slim** なので **base-identity 自己同型**、\n(c) `𝒞ᵢ^un-tr` は unit-trivial 型なので **恒等**。\n★(a) の材料は `Definition 1.3, (iii), (d)` の第 2 圏同値(在庫)。",
      "lean": "ABC3/Found/FrdI/Thm34VBase.lean",
      "decl": "exists_frobTrivial_span / baseIdentity_ascend",
      "file": "lean/ABC3/Found/FrdI/Cor411Untr.lean"
     },
     {
+     "id": "psi-phi",
+     "title": "(iii) Ψ_Φ —— Ψ_Base の上に乗る Φ₁ ≅ Φ₂",
+     "size": "★中",
+     "status": "todo",
+     "deps": [
+      "psi-base",
+      "thm49"
+     ],
+     "note": "原文 (物理 p.94、実測):\n> Next, we observe that assertion (iii) follows formally from assertion (ii); Theorem\n\n★`Theorem 4.9` は `Ψ` の上に乗る `Ψ_Φ` を与える。(iii) はそれを\n**`Ψ_Base` の上に乗る**形へ持ち上げる —— (ii) の 1-可換図式で移せばよい。\n★`rationally standard type` の仮定が (iii)(iv) で追加される。"
+    },
+    {
      "id": "psi-elem",
-     "title": "初等 Frobenioid への関手との 1-可換性",
+     "title": "(iv) 𝒞ᵢ → 𝔽_{Φᵢ} との 1-可換図式(Ψ_𝔽)",
      "size": "★大",
      "status": "todo",
      "deps": [
-      "psi-untr"
+      "psi-base",
+      "psi-phi"
      ],
-     "note": "★`𝒞^un-tr → 𝔽_Φ` は忠実(`Proposition 3.3, (iv)`、在庫)。\n★★これと `Ψ^un-tr` を繋いで `𝔽_{Φ₁} → 𝔽_{Φ₂}` を得る。"
+     "note": "★`𝒞^un-tr → 𝔽_Φ` は忠実(`Proposition 3.3, (iv)`、在庫)。\n★★これと `Ψ^un-tr` を繋いで `𝔽_{Φ₁} → 𝔽_{Φ₂}` を得る。\n\n## ★測り直した(2026-08-19)—— これは **(iv)** である\n原文 (物理 p.94):\n> Finally, we consider assertion (iv). In light of the structure of an elementary\n\n★初等 Frobenioid の構造(`Definition 1.1, (iii)`)から、\n**(ii) と (iii) を繋ぎ、`Ψ` が Frobenius 次数を保つ**ことを足せば図式が出る。\n★rigidity は (i) と同じ議論。"
     },
     {
      "id": "cor411-src",
@@ -1578,9 +1613,12 @@
      "size": "★小",
      "status": "todo",
      "deps": [
+      "psi-untr",
+      "psi-base",
+      "psi-phi",
       "psi-elem"
      ],
-     "note": ""
+     "note": "★原文は (i)(ii)(iii)(iv) の 4 主張。★2026-08-19 まで台帳は (i) と「初等 Frobenioid」の\n2 節点しか写しておらず、**(ii) `Ψ_Base` と (iii) `Ψ_Φ` が欠落**していた(台帳の欠落)。\n★4 主張すべてが済むまで条なし `.src` は付けない。"
     }
    ]
   },
