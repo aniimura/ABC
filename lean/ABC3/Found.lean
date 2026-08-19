@@ -436,6 +436,7 @@ import ABC3.Found.Arakelov.ArcEvalNat
 import ABC3.Found.Arakelov.ArcUnitEval
 import ABC3.Found.Arakelov.ArcEvalGlobal
 import ABC3.Found.Arakelov.ArcTrivMetric
+import ABC3.Found.Arakelov.ArcRestrNorm
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre

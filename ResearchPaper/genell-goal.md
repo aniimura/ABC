@@ -11642,3 +11642,44 @@ B2 が閉じたので、次に埋まりそうな Arakelov の欄(C3 `HermitianMe
 ### この区間の集計
 
 ★**93 ブロック**(Arakelov 78 + Galois 15)。
+
+## §9-294 開埋め込みに沿ってノルムを運ぶ(第 254 ブロック)——貼り合わせの前段
+
+第 253 で**自明な層**の連続な計量が取れた。一般の `L` はアフィン開の上でしか
+自明にならないので、`U` の側で作ったノルムを `X` の側へ運ぶ:
+
+    arcFiber (p ≫ j) L ≅ arcFiber p ((pullback j).obj L) ≅ arcFiber p (restrict L j)
+
+★2 つの同型を繋ぐだけで、3 法則は同型で移すだけである。
+
+### ★★★★在庫を測ったら mathlib が半分持っていた
+
+`Mathlib/AlgebraicGeometry/Modules/Sheaf.lean`:
+
+| 在庫 | 内容 |
+|---|---|
+| `Scheme.Modules.restrict` | ★開埋め込みに沿った制限 |
+| `restrictAppIso` | ★★切断は `Γ(M, f ''ᵁ U)`——**`Iso.refl`** |
+| `restrictFunctorIsoPullback` | ★★★**制限 ≅ 引き戻し** |
+| `restrictAdjunction` | ★押し出しの右随伴 |
+
+★★★**「制限 = 引き戻し」を自分で作る必要は無かった。**
+★これで「無いと決める前に測る」は **11 回目**である。
+
+### ★★★残る 1 段を特定した —— `V.Opens` と `Over V` の対応
+
+`IsInvertibleSheaf`(= `Interface` の可逆層の定義)が与える自明化は
+**`Over V` 上の前層加群**の同型である:
+
+    (pushforward₀OfCommRingCat (Over.forget V) X.presheaf).obj F.val ≅ 𝟙_
+
+★★欲しいのは `restrict F V.ι ≅ 𝒪_V`(mathlib の語彙)である。
+★★★両者の切断はどちらも `F.val.obj (op W)`(`W ⊆ V`)なので**中身は同じ**だが、
+**添字圏が `Over V` と `V.Opens`** で違う。★`V.ι.opensFunctor` がその対応である。
+
+★★★★これが (C3) に残る唯一の構成上の段である。見積もり **3–8 ブロック**。
+その後は 1 の分割で貼るだけ(仮定はコンパクト Hausdorff、mathlib 在庫あり)。
+
+### この区間の集計
+
+★**94 ブロック**(Arakelov 79 + Galois 15)。
