@@ -524,6 +524,7 @@ import ABC3.Found.GaloisRep.PadicLimit
 import ABC3.Found.GaloisRep.TateLimit
 import ABC3.Found.GaloisRep.TateWitness
 import ABC3.Found.GaloisRep.PadicLinear
+import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

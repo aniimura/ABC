@@ -266,20 +266,51 @@ theorem frTr_isAutAmple (A : FrTrCat P) : IsAutAmple (frTrPre G hiso) A := by
 theorem frTr_frobenioidCore : FrobenioidCore (frTrPre G hiso) where
   baseSurj Y := ⟨ftLift G Y, frTr_isFrobeniusTrivial _, ⟨ftLiftIso G Y⟩⟩
   preStepSpan A B α hα := by
-    let α' : (P.toElem.obj A.1).base ⟶ (P.toElem.obj B.1).base := α
-    haveI : IsIso α' := hα
-    obtain ⟨θ, hθ⟩ := frobTrivial_iso_of_baseIso G hiso B.2 A.2 α'
-    refine ⟨A, 𝟙 A, ⟨θ.hom, isIsometric_of_isIso P _⟩,
-      ⟨P.degFr_id A.1, by show IsIso (P.Base (𝟙 A.1)); rw [P.Base_id]; infer_instance⟩,
-      ⟨?_, ?_⟩, ?_⟩
+    have hb : (frTrPre G hiso).Base (𝟙 A) = 𝟙 _ := (frTrPre G hiso).Base_id A
+    have hid : IsPreStep (frTrPre G hiso) (𝟙 A) := by
+      refine ⟨(frTrPre G hiso).degFr_id A, ?_⟩
+      show IsIso ((frTrPre G hiso).Base (𝟙 A))
+      rw [hb]
+      infer_instance
+    haveI hbi : IsIso ((frTrPre G hiso).Base (𝟙 A)) := hid.2
+    have hinv : inv ((frTrPre G hiso).Base (𝟙 A)) = 𝟙 _ := by
+      refine IsIso.inv_eq_of_hom_inv_id ?_
+      rw [hb, Category.id_comp]
+    obtain ⟨θ, hθ⟩ := @frobTrivial_iso_of_baseIso _ _ _ _ _ _ G hiso B.1 A.1 B.2 A.2 α hα
+    refine ⟨A, 𝟙 A, ⟨θ.hom, isIsometric_of_isIso P _⟩, hid, ⟨?_, ?_⟩, ?_⟩
     · show P.degFr θ.hom = 1; exact degFr_of_isIso P θ.hom
     · show IsIso (P.Base θ.hom); rw [hθ]; exact hα
-    · show α = inv ((frTrPre G hiso).Base (𝟙 A)) ≫ P.Base θ.hom
-      rw [hθ]
-      have : (frTrPre G hiso).Base (𝟙 A) = 𝟙 _ := (frTrPre G hiso).Base_id A
-      rw [this]
-      simp
-  plBkEquiv := by sorry
+    · rw [hinv, Category.id_comp]
+      exact hθ.symm
+  plBkEquiv A := by
+    haveI hfa : (plBkOverFunctor (frTrPre G hiso) A).Faithful := by
+      refine ⟨fun {Z W} f g h => ?_⟩
+      have hb : (frTrPre G hiso).Base f.left.hom = (frTrPre G hiso).Base g.left.hom :=
+        congrArg CommaMorphism.left h
+      have hf : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w f)
+      have hg : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w g)
+      exact CommaMorphism.ext (WideSubcategory.hom_ext _
+        (pullBack_uniq W.hom.property (hf.trans hg.symm) hb)) (Subsingleton.elim _ _)
+    haveI hfu : (plBkOverFunctor (frTrPre G hiso) A).Full := by
+      refine ⟨fun {Z W} u => ?_⟩
+      obtain ⟨g, hg1, hg2⟩ := pullBack_lift W.hom.property Z.hom.hom u.left (Over.w u).symm
+      have hgpb : IsPullBack (frTrPre G hiso) g :=
+        isPullBack_of_comp_right (frTrPre G hiso) g W.hom.hom
+          (by rw [hg1]; exact Z.hom.property) W.hom.property
+      refine ⟨Over.homMk (⟨g, hgpb⟩ : Z.left ⟶ W.left) (WideSubcategory.hom_ext _ hg1), ?_⟩
+      exact CommaMorphism.ext hg2 (Subsingleton.elim _ _)
+    haveI hes : (plBkOverFunctor (frTrPre G hiso) A).EssSurj := by
+      refine ⟨fun X => ?_⟩
+      obtain ⟨A₀, π₀, ρ, hpb, hρ⟩ := exists_pullBack_over G A.1 X.hom
+      have hA₀ : IsFrobeniusTrivial P A₀ := isFrobeniusTrivial_pullBack G hiso π₀ hpb A.2
+      let A₀' : FrTrCat P := ⟨A₀, hA₀⟩
+      let π₀' : A₀' ⟶ A := ⟨π₀, (G.core.pullBackLB π₀ hpb).1.2⟩
+      have hπpb : IsPullBack (frTrPre G hiso) π₀' := frTr_isPullBack_of π₀' hpb
+      refine ⟨Over.mk (show (⟨A₀'⟩ : PlBk (frTrPre G hiso)) ⟶ ⟨A⟩ from ⟨π₀', hπpb⟩), ⟨?_⟩⟩
+      exact Over.isoMk ρ hρ
+    exact ⟨hfa, hfu, hes⟩
   frobDegSurj A n := by
     obtain ⟨ζ, hdeg, hprop⟩ := frTr_isFrobeniusTrivial (G := G) (hiso := hiso) A
     exact ⟨A, ((ζ n : End A) : A ⟶ A), (hprop n).2, hdeg n⟩
@@ -329,7 +360,7 @@ theorem frTr_frobenioidCore : FrobenioidCore (frTrPre G hiso) where
     have := G.core.otriBase φ.1 φ'.1
       (prop_1_4_i P _ (fun Y _ => hiso Y)) ⟨hsφ.1, hsφ.2⟩
       (prop_1_4_i P _ (fun Y _ => hiso Y)) ⟨hsφ'.1, hsφ'.2⟩ hbe
-      ((α : A ⟶ A) : A.1 ⟶ A.1) ⟨hα.1, hα.2⟩ ((β : B ⟶ B) : B.1 ⟶ B.1) ⟨hβ.1, hβ.2⟩
+      (α : A ⟶ A).1 ⟨hα.1, hα.2⟩ (β : B ⟶ B).1 ⟨hβ.1, hβ.2⟩
       (congrArg Subtype.val heq)
     exact Subtype.ext this
   arbFactor {A B} φ := by
@@ -408,25 +439,16 @@ theorem frTr_frobenioidCore : FrobenioidCore (frTrPre G hiso) where
       rw [Category.assoc, heq, ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
     · show β' = β ≫ inv β ≫ β'
       rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
-  faithfulUpToUnits {A B} φ ψ hbe _ _ _ _ hsψ := by
+  faithfulUpToUnits {A B} φ ψ hbe _ _ hsφ _ hsψ := by
     haveI := frTr_isIso_of_preStep ψ hsψ
+    haveI := frTr_isIso_of_preStep φ hsφ
     refine ⟨(inv ψ ≫ φ : End B), ⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
     · show (frTrPre G hiso).Base (inv ψ ≫ φ) = (frTrPre G hiso).Base (𝟙 B)
       rw [(frTrPre G hiso).Base_comp, show (frTrPre G hiso).Base φ = (frTrPre G hiso).Base ψ
         from hbe, ← (frTrPre G hiso).Base_comp, IsIso.inv_hom_id]
     · show (frTrPre G hiso).degFr (inv ψ ≫ φ) = 1
-      have hφ1 : (frTrPre G hiso).degFr φ = 1 := by
-        have h := hbe
-        show P.degFr φ.1 = 1
-        have hd : P.degFr ψ.1 = 1 := hsψ.1
-        haveI : IsIso φ.1 := hiso A.1 B.1 φ.1 φ.2 ⟨by
-          show P.degFr φ.1 = 1
-          sorry, by
-          show IsIso (P.Base φ.1)
-          rw [show P.Base φ.1 = P.Base ψ.1 from hbe]
-          exact hsψ.2⟩
-        exact degFr_of_isIso P φ.1
-      rw [(frTrPre G hiso).degFr_comp, degFr_of_isIso (frTrPre G hiso) (inv ψ), hφ1, one_mul]
+      rw [(frTrPre G hiso).degFr_comp, degFr_of_isIso (frTrPre G hiso) (inv ψ),
+        degFr_of_isIso (frTrPre G hiso) φ, one_mul]
     · exact (isUnit_iff_isIso ((inv ψ ≫ φ : End B))).mpr inferInstance
     · rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
   isotropicHullExists A :=
@@ -436,7 +458,118 @@ theorem frTr_frobenioidCore : FrobenioidCore (frTrPre G hiso) where
         rw [(frTrPre G hiso).Base_id]; infer_instance⟩,
       frTr_isIsotropic A,
       fun Cc _ γ => ⟨γ, (Category.id_comp γ).symm, fun β hβ => by
-        rw [Category.id_comp] at hβ; exact hβ.symm⟩⟩
+        simpa using hβ.symm⟩⟩
   isotropicClosed _ _ := frTr_isIsotropic _
 
 end ABC3.Found.FrdI
+
+/-! ## ★5. `Definition 1.3, (iii), (d)` の 2 つの圏同値 -/
+
+/-- ★★★★**[FrdI] Theorem 5.1, (iii)** —— `𝒞^Fr-tr` は **Frobenioid**。
+
+★`(iii)(d)` の 2 つの圏同値は、`𝒞^Fr-tr` の co-angular pre-step が**すべて同型**で
+あることから出る —— 余切片も切片も「可縮な亜群」になり、
+`Order(0)`(1 対象 1 射)と同値になる。 -/
+theorem frTr_frobenioid : Frobenioid (frTrPre G hiso) where
+  core := frTr_frobenioidCore
+  coaPreUnderEquiv := by
+    letI := coaPreProp_isMultiplicative (frTrPre G hiso)
+      (frTr_frobenioidCore (G := G) (hiso := hiso)).coAngularComp
+    intro A
+    refine ⟨⟨fun {Z W} {f g} _ => ?_⟩, ⟨fun {Z W} _ => ?_⟩, ⟨fun X => ?_⟩⟩
+    · haveI : Epi Z.hom.hom := (frTrPre G hiso).totEpiC _ _ _
+      have hf : Z.hom.hom ≫ f.right.hom = W.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Under.w f)
+      have hg : Z.hom.hom ≫ g.right.hom = W.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Under.w g)
+      exact CommaMorphism.ext (Subsingleton.elim _ _)
+        (WideSubcategory.hom_ext _ ((cancel_epi Z.hom.hom).mp (hf.trans hg.symm)))
+    · haveI : IsIso Z.hom.hom := frTr_isIso_of_preStep _ Z.hom.property.2
+      refine ⟨Under.homMk (show Z.right ⟶ W.right from
+        ⟨inv Z.hom.hom ≫ W.hom.hom, frTr_isCoAngular _,
+          ⟨by
+            show (frTrPre G hiso).degFr (inv Z.hom.hom ≫ W.hom.hom) = 1
+            rw [(frTrPre G hiso).degFr_comp, degFr_of_isIso (frTrPre G hiso) (inv Z.hom.hom),
+              W.hom.property.2.1, one_mul],
+           by
+            show IsIso ((frTrPre G hiso).Base (inv Z.hom.hom ≫ W.hom.hom))
+            rw [(frTrPre G hiso).Base_comp]
+            haveI := W.hom.property.2.2
+            haveI : IsIso ((frTrPre G hiso).Base (inv Z.hom.hom)) := by
+              haveI := Z.hom.property.2.2
+              have h : (frTrPre G hiso).Base (inv Z.hom.hom)
+                  ≫ (frTrPre G hiso).Base Z.hom.hom = 𝟙 _ := by
+                rw [← (frTrPre G hiso).Base_comp, IsIso.inv_hom_id]
+                exact (frTrPre G hiso).Base_id _
+              have h2 : (frTrPre G hiso).Base Z.hom.hom
+                  ≫ (frTrPre G hiso).Base (inv Z.hom.hom) = 𝟙 _ := by
+                rw [← (frTrPre G hiso).Base_comp, IsIso.hom_inv_id]
+                exact (frTrPre G hiso).Base_id _
+              exact ⟨_, h2, h⟩
+            infer_instance⟩⟩)
+        (WideSubcategory.hom_ext _ (by
+          show Z.hom.hom ≫ inv Z.hom.hom ≫ W.hom.hom = W.hom.hom
+          rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp])), Subsingleton.elim _ _⟩
+    · exact ⟨Under.mk (𝟙 (⟨A⟩ : WideSubcategory (coaPreProp (frTrPre G hiso)))),
+        ⟨eqToIso (Subsingleton.elim (α := PUnit.{w + 1}) _ _)⟩⟩
+  coaPreOverEquiv := by
+    letI := coaPreProp_isMultiplicative (frTrPre G hiso)
+      (frTr_frobenioidCore (G := G) (hiso := hiso)).coAngularComp
+    intro A
+    refine ⟨⟨fun {Z W} {f g} _ => ?_⟩, ⟨fun {Z W} _ => ?_⟩, ⟨fun X => ?_⟩⟩
+    · haveI : Mono W.hom.hom := (frTr_frobenioidCore (G := G) (hiso := hiso)).preStepMono
+        _ W.hom.property.2
+      have hf : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w f)
+      have hg : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+        congrArg InducedWideCategory.Hom.hom (Over.w g)
+      exact CommaMorphism.ext
+        (WideSubcategory.hom_ext _ ((cancel_mono W.hom.hom).mp (hf.trans hg.symm)))
+        (Subsingleton.elim _ _)
+    · haveI : IsIso W.hom.hom := frTr_isIso_of_preStep _ W.hom.property.2
+      refine ⟨Over.homMk (show Z.left ⟶ W.left from
+        ⟨Z.hom.hom ≫ inv W.hom.hom, frTr_isCoAngular _,
+          ⟨by
+            show (frTrPre G hiso).degFr (Z.hom.hom ≫ inv W.hom.hom) = 1
+            rw [(frTrPre G hiso).degFr_comp, degFr_of_isIso (frTrPre G hiso) (inv W.hom.hom),
+              Z.hom.property.2.1, mul_one],
+           by
+            show IsIso ((frTrPre G hiso).Base (Z.hom.hom ≫ inv W.hom.hom))
+            rw [(frTrPre G hiso).Base_comp]
+            haveI := Z.hom.property.2.2
+            haveI : IsIso ((frTrPre G hiso).Base (inv W.hom.hom)) := by
+              haveI := W.hom.property.2.2
+              have h : (frTrPre G hiso).Base (inv W.hom.hom)
+                  ≫ (frTrPre G hiso).Base W.hom.hom = 𝟙 _ := by
+                rw [← (frTrPre G hiso).Base_comp, IsIso.inv_hom_id]
+                exact (frTrPre G hiso).Base_id _
+              have h2 : (frTrPre G hiso).Base W.hom.hom
+                  ≫ (frTrPre G hiso).Base (inv W.hom.hom) = 𝟙 _ := by
+                rw [← (frTrPre G hiso).Base_comp, IsIso.hom_inv_id]
+                exact (frTrPre G hiso).Base_id _
+              exact ⟨_, h2, h⟩
+            infer_instance⟩⟩)
+        (WideSubcategory.hom_ext _ (by
+          show (Z.hom.hom ≫ inv W.hom.hom) ≫ W.hom.hom = Z.hom.hom
+          rw [Category.assoc, IsIso.inv_hom_id, Category.comp_id])), Subsingleton.elim _ _⟩
+    · exact ⟨Over.mk (𝟙 (⟨A⟩ : WideSubcategory (coaPreProp (frTrPre G hiso)))),
+        ⟨eqToIso (Subsingleton.elim (α := (OrderCat PUnit.{w + 1})ᵒᵖ) _ _)⟩⟩
+
+/-! ## ★6. `Theorem 5.1, (iii)` の型 -/
+
+/-- ★★★★**[FrdI] Theorem 5.1, (iii)** —— `𝒞^Fr-tr` は
+**isotropic・group-like・base-trivial・Aut-ample 型**の Frobenioid。 -/
+theorem thm_5_1_iii :
+    Frobenioid (frTrPre G hiso) ∧
+      (∀ A : FrTrCat P, IsIsotropic (frTrPre G hiso) A) ∧
+      (∀ A : FrTrCat P, IsGroupLikeObj (frTrPre G hiso) A) ∧
+      (∀ A : FrTrCat P, IsBaseTrivial (frTrPre G hiso) A) ∧
+      (∀ A : FrTrCat P, IsAutAmple (frTrPre G hiso) A) :=
+  ⟨frTr_frobenioid, frTr_isIsotropic, frTr_isGroupLikeObj, frTr_isBaseTrivial, frTr_isAutAmple⟩
+
+/-! ### ★出典の紐付け(`.src`) -/
+
+/-- ★locator —— `Theorem 5.1, (iii)`。 -/
+def thm_5_1_iii.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 97, item := "Theorem 5.1, (iii)",
+    sectionId := "frdi-thm-5-1" }
