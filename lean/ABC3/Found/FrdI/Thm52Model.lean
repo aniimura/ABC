@@ -441,6 +441,147 @@ theorem pathToModel_toElem {G : Frobenioid P} (R : RatFnData P G)
     (S : BaseSection P) (Fs : ℕ+ →* SectionEnd S) (hFs : IsFrobeniusSection S Fs) :
     pathToModel R hiso hfn S Fs hFs ⋙ ModelData.toElem = pathForget S ⋙ P.toElem := rfl
 
+/-! ## ★8. 本質的全射性と忠実性 -/
+
+/-- ★★`path` の類は、`ref` 側から見た span の類を `piBase` で運んだもの。
+
+★これが `Theorem 5.1, (i)` の `PicObj.HasCls` と `FPPath.cls` を繋ぐ。 -/
+theorem FPPath.cls_eq {S : BaseSection P} {X : C} (p : FPPath S X) :
+    p.cls = Φ.gpMapOn p.piBase (spanCls p.toRef p.toRef_preStep.2 p.toObj) := by
+  haveI h1 : IsIso (P.Base p.toObj) := p.toObj_preStep.2
+  haveI h2 : IsIso (P.Base p.toRef) := p.toRef_preStep.2
+  have e1 : p.cls = Φ.gpMapOn (inv (P.Base p.toObj))
+      (toGp _ (P.Div p.toObj) - toGp _ (P.Div p.toRef)) := by
+    rw [FPPath.cls, spanCls_eq]
+    show -(Φ.gpMapOn (inv (P.Base p.toObj)))
+      (toGp _ (P.Div p.toRef) - toGp _ (P.Div p.toObj)) = _
+    rw [← map_neg, neg_sub]
+  have e2 : spanCls p.toRef p.toRef_preStep.2 p.toObj
+      = Φ.gpMapOn (inv (P.Base p.toRef))
+        (toGp _ (P.Div p.toObj) - toGp _ (P.Div p.toRef)) := by
+    rw [spanCls_eq]; rfl
+  have e3 : Φ.gpMapOn (P.Base p.toRef) (Φ.gpMapOn (inv (P.Base p.toRef))
+        (toGp _ (P.Div p.toObj) - toGp _ (P.Div p.toRef)))
+      = toGp _ (P.Div p.toObj) - toGp _ (P.Div p.toRef) := by
+    rw [← Φ.gpMapOn_comp, IsIso.hom_inv_id, Φ.gpMapOn_id]
+  rw [e1, e2, FPPath.piBase, Φ.gpMapOn_comp, e3]
+
+namespace ModelData
+
+/-- ★底の同型から model Frobenioid の同型を作る。 -/
+def isoOfBase {M : ModelData.{v, u, w} D} {A B : ModelData.Obj M}
+    (θ : A.base ≅ B.base) (h : A.cls = M.phi.gpMapOn θ.hom B.cls) : A ≅ B where
+  hom :=
+    { base := θ.hom, div := 0, deg := 1, u := 0
+      cond := by simpa using h }
+  inv :=
+    { base := θ.inv, div := 0, deg := 1, u := 0
+      cond := by
+        have : M.phi.gpMapOn θ.inv A.cls = B.cls := by
+          rw [h, ← M.phi.gpMapOn_comp, θ.inv_hom_id, M.phi.gpMapOn_id]
+        simpa using this.symm }
+  hom_inv_id := by
+    refine ModelData.Hom.ext ?_ ?_ ?_ ?_
+    · exact θ.hom_inv_id
+    · show M.phi.map θ.hom 0 + ((1 : ℕ+) : ℕ) • (0 : M.phi.val A.base) = 0
+      simp
+    · show (1 : ℕ+) * 1 = 1
+      simp
+    · show M.bmon.map θ.hom 0 + ((1 : ℕ+) : ℕ) • (0 : M.bmon.val A.base) = 0
+      simp
+  inv_hom_id := by
+    refine ModelData.Hom.ext ?_ ?_ ?_ ?_
+    · exact θ.inv_hom_id
+    · show M.phi.map θ.inv 0 + ((1 : ℕ+) : ℕ) • (0 : M.phi.val B.base) = 0
+      simp
+    · show (1 : ℕ+) * 1 = 1
+      simp
+    · show M.bmon.map θ.inv 0 + ((1 : ℕ+) : ℕ) • (0 : M.bmon.val B.base) = 0
+      simp
+
+end ModelData
+
+/-- ★★★★**本質的全射性** —— `Theorem 5.1, (i)` の全射性から。
+
+原文 (FrdI p.103):
+> C → C is faithful. Moreover, this functor C → C is manifestly essentially surjective [cf.
+-/
+theorem pathToModel_essSurj {G : Frobenioid P} (R : RatFnData P G)
+    (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ Z : BiratCat P G, IsFrobeniusNormalized (biratPre P G) Z)
+    (S : BaseSection P) (Fs : ℕ+ →* SectionEnd S) (hFs : IsFrobeniusSection S Fs) :
+    (pathToModel R hiso hfn S Fs hFs).EssSurj := by
+  refine ⟨fun M => ?_⟩
+  obtain ⟨A, hA, ⟨e⟩⟩ := S.essSurjP M.base
+  obtain ⟨Z, X₀, φ, ψ, hsφ, hsψ, hb, hspan⟩ :=
+    PicObj.exists_hasCls G (A := A) (Φ.gpMapOn e.hom M.cls)
+  let p : FPPath S Z.obj := ⟨A, hA, X₀, φ, ψ, hsφ, hsψ⟩
+  haveI hpi : IsIso p.piBase := FPPath.isIso_piBase p
+  refine ⟨⟨Z.obj, p⟩, ⟨ModelData.isoOfBase (M := R.model)
+    (A := pathObj R (⟨Z.obj, p⟩ : PathCat S)) (B := M)
+    ((@asIso _ _ _ _ p.piBase hpi) ≪≫ e) ?_⟩⟩
+  show p.cls = Φ.gpMapOn (p.piBase ≫ e.hom) M.cls
+  rw [Φ.gpMapOn_comp, ← hspan]
+  exact p.cls_eq
+
+/-- ★同型に沿った `MonoidOn.map` は単射。 -/
+theorem MonoidOn.map_injective_of_isIso (M : MonoidOn.{v, u, w} D) {A B : D} (θ : A ⟶ B)
+    [IsIso θ] : Function.Injective (M.map θ) := by
+  intro x y hxy
+  have h : M.map (inv θ) (M.map θ x) = M.map (inv θ) (M.map θ y) := congrArg _ hxy
+  rwa [← M.map_comp, IsIso.inv_hom_id, M.map_id, ← M.map_comp, IsIso.inv_hom_id,
+    M.map_id] at h
+
+/-- ★★★**3 分解の 3 成分が一致すれば射も一致する**(`Remark 2.7.2` の一意性の裏返し)。 -/
+theorem eq_of_rem272Beta_eq {S : BaseSection P} (Fc : FrobenioidCore P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ φ' : A ⟶ B)
+    (hd : P.degFr φ = P.degFr φ') (hb : P.Base φ = P.Base φ')
+    (hbeta : rem272Beta Fc hiso hmet hFs hA hB φ = rem272Beta Fc hiso hmet hFs hA hB φ') :
+    φ = φ' := by
+  conv_lhs => rw [rem272Beta_spec Fc hiso hmet hFs hA hB φ]
+  rw [hd, hb, hbeta, ← rem272Beta_spec Fc hiso hmet hFs hA hB φ']
+
+/-- ★★★★**忠実性** —— `u_f` から `β_f` が復元され、3 分解の一意性で `w_f` が定まる。
+
+原文 (FrdI p.103):
+> C → C is faithful. Moreover, this functor C → C is manifestly essentially surjective [cf.
+-/
+theorem pathToModel_faithful {G : Frobenioid P} (R : RatFnData P G)
+    (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ Z : BiratCat P G, IsFrobeniusNormalized (biratPre P G) Z)
+    (S : BaseSection P) (Fs : ℕ+ →* SectionEnd S) (hFs : IsFrobeniusSection S Fs) :
+    (pathToModel R hiso hfn S Fs hFs).Faithful := by
+  refine ⟨fun {X Y} {f g} h => ?_⟩
+  have hbase : P.Base f = P.Base g := congrArg ModelData.Hom.base h
+  have hdegf : P.degFr f = P.degFr g := congrArg ModelData.Hom.deg h
+  have hu : pathU R hiso hfn S Fs hFs f = pathU R hiso hfn S Fs hFs g :=
+    congrArg ModelData.Hom.u h
+  haveI hpi : IsIso X.path.piBase := FPPath.isIso_piBase X.path
+  have hbeta : pathBetaO G hiso hfn S Fs hFs f = pathBetaO G hiso hfn S Fs hFs g :=
+    Additive.ofMul.injective ((R.kappa X.path.ref).injective
+      (R.bmon.map_injective_of_isIso X.path.piBase hu))
+  have hth : pathTheta f = pathTheta g := by rw [pathTheta, pathTheta, hbase]
+  have hw : pathW G hiso f = pathW G hiso g :=
+    eq_of_rem272Beta_eq (biratCoreOf G hfn) (fun W => birat_isOfIsotropicType hiso W)
+      (fun {_ _} q => biratMet G q) (biratFrobSection_isFrobeniusSection G hiso S hFs)
+      X.path.ref_mem Y.path.ref_mem (pathW G hiso f) (pathW G hiso g)
+      (by show biratDeg (pathW G hiso f) = biratDeg (pathW G hiso g)
+          rw [pathW_deg, pathW_deg, hdegf])
+      (by show biratBase (pathW G hiso f) = biratBase (pathW G hiso g)
+          rw [biratBase_pathW, biratBase_pathW, hth])
+      (congrArg Subtype.val hbeta)
+  haveI hpiY : IsIso (Y.path.piHom G hiso) := Y.path.isIso_piHom G hiso
+  have hfb : (toBiratCat P G).map f = (toBiratCat P G).map g := by
+    have e1 := pathW_spec G hiso f
+    have e2 := pathW_spec G hiso g
+    rw [hw] at e1
+    exact (cancel_mono (Y.path.piHom G hiso)).mp (e1.symm.trans e2)
+  haveI := toBiratCat_faithful (P := P) (G := G)
+  exact (toBiratCat P G).map_injective hfb
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 /-- ★locator —— `Theorem 5.2, (iv)` の関手 `𝒞̃ ⥤ 𝒞^model`。 -/
