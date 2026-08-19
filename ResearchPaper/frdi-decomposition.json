@@ -1617,11 +1617,13 @@
           "id": "i-divfrob",
           "title": "(i) Ψ は (universally) Div-Frobenius-trivial 対象を保つ",
           "size": "★中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "i-divid"
           ],
-          "note": "★`IsDivFrobeniusTrivial` / `universally` 版が在庫にあるか先に検索。"
+          "note": "★`IsDivFrobeniusTrivial` / `universally` 版が在庫にあるか先に検索。\n\n## ★★★★★★閉じた(2026-08-19)\n\n`divFrobeniusTrivial_map`(`Thm42Div.lean`)。\n\n★★`IsDivFrobeniusTrivial A := ∃ ζ : ℕ≥1 →* End A, …` の `ζ` は**単系準同型**なので、\n`Div-identity` を**素数の所だけ**言えば素因数分解の帰納で全体へ延びる。\n\n| 段 | 宣言 |\n|---|---|\n| `Div-identity` は合成で閉じる | `isDivIdentity_comp` / `isDivIdentity_id` |\n| その部分単系 | `divIdSubmonoid` |\n| 素数から全体へ | `isDivIdentity_of_primes`(`PNat.factorMultiset` ＋ `Submonoid.multiset_prod_mem`) |\n| 素数の所 | `primeFrobenius_divIdentity_map`(本ファイル) |\n\n★素数の所の 3 条件はすべて自動で揃う ——\n`ζ q` は Frobenius 型で次数 `q` なので prime-Frobenius、\n`prop_1_14_i_of_primeFrob`(在庫)で irreducible、次数 `q ≠ 1` なので pre-step でない。",
+          "lean": "ABC3/Found/FrdI/Thm42Div.lean",
+          "decl": "isDivIdentity_comp / divIdSubmonoid / isDivIdentity_of_primes / divFrobeniusTrivial_map"
         },
         {
           "id": "ii-prime",

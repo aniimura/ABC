@@ -217,16 +217,64 @@ def divIdSubmonoid {A : C₂} (ζ : ℕ+ →* End A) : Submonoid ℕ+ where
 theorem isDivIdentity_of_primes {A : C₂} (ζ : ℕ+ →* End A)
     (hp : ∀ q : ℕ+, (q : ℕ).Prime → IsDivIdentity P₂ ((ζ q : End A) : A ⟶ A))
     (n : ℕ+) : IsDivIdentity P₂ ((ζ n : End A) : A ⟶ A) := by
-  have hn : n ∈ divIdSubmonoid ζ := by
+  have hn : n ∈ divIdSubmonoid (P₂ := P₂) ζ := by
     rw [← PNat.prod_factorMultiset n]
-    show ((PNat.factorMultiset n : Multiset ℕ+).prod) ∈ divIdSubmonoid ζ
-    refine Submonoid.multiset_prod_mem _ _ (fun x hx => ?_)
+    show ((PNat.factorMultiset n : Multiset ℕ+).prod) ∈ divIdSubmonoid (P₂ := P₂) ζ
+    refine Submonoid.multiset_prod_mem (divIdSubmonoid (P₂ := P₂) ζ) _ (fun x hx => ?_)
     exact hp x (PrimeMultiset.coePNat_prime _ x hx)
   exact hn
 
 def isDivIdentity_of_primes.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 77,
     item := "Theorem 4.2, (i) — Div-identity は素数の所から全体へ延びる",
+    sectionId := "frdi-thm-4-2" }
+
+/-! ## ★5. ★★★★★★`Div-Frobenius-trivial` 対象の保存 -/
+
+/-- ★★★★★★**[FrdI] Theorem 4.2, (i)** —— `Ψ` は `Div-Frobenius-trivial` 対象を保つ。
+
+★`ζ` が単系準同型なので、素数の所を `primeFrobenius_divIdentity_map` で言い、
+`isDivIdentity_of_primes` で全体へ延ばす。 -/
+theorem divFrobeniusTrivial_map (Ψ : C₁ ≌ C₂)
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.functor.map f))
+    (hPS' : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₂ (Ψ.functor.map f) → IsPreStep P₁ f)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f →
+      IsFrobeniusType P₂ (Ψ.functor.map f))
+    (hdeg : ∀ {X Y : C₁} (f : X ⟶ Y), P₂.degFr (Ψ.functor.map f) = P₁.degFr f)
+    (F₁ : FrobenioidCore P₁) (G₁ : Frobenioid P₁)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hnd₁ : MonoidOn.IsNonDilatingOn Φ₁)
+    (F₂ : FrobenioidCore P₂) (G₂ : Frobenioid P₂)
+    (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) (hnd₂ : MonoidOn.IsNonDilatingOn Φ₂)
+    {A : C₁} (hA₁ : ¬ IsGroupLikeObj P₁ A)
+    (hA₂ : ¬ IsGroupLikeObj P₂ (Ψ.functor.obj A))
+    (h : IsDivFrobeniusTrivial P₁ A) :
+    IsDivFrobeniusTrivial P₂ (Ψ.functor.obj A) := by
+  obtain ⟨ζ, hdegζ, hcond⟩ := h
+  refine ⟨(CategoryTheory.Functor.mapEnd A Ψ.functor).comp ζ, ?_, ?_⟩
+  · intro n
+    show P₂.degFr (Ψ.functor.map ((ζ n : End A) : A ⟶ A)) = n
+    rw [hdeg]
+    exact hdegζ n
+  · intro n
+    refine ⟨?_, hFT _ (hcond n).2⟩
+    refine isDivIdentity_of_primes (P₂ := P₂)
+      ((CategoryTheory.Functor.mapEnd A Ψ.functor).comp ζ) (fun q hq => ?_) n
+    have hpf : IsPrimeFrobenius P₁ ((ζ q : End A) : A ⟶ A) := by
+      refine ⟨(hcond q).2, ?_⟩
+      rw [hdegζ q]
+      exact hq
+    have hnps : ¬ IsPreStep P₁ ((ζ q : End A) : A ⟶ A) := by
+      intro hc
+      have h1 : P₁.degFr ((ζ q : End A) : A ⟶ A) = 1 := hc.1
+      rw [hdegζ q] at h1
+      exact hq.one_lt.ne' (congrArg (fun t : ℕ+ => (t : ℕ)) h1)
+    exact (primeFrobenius_divIdentity_map Ψ hPS hPS' F₁ G₁ hiso₁ hnd₁ F₂ G₂ hiso₂ hnd₂
+      hA₁ hA₂ _ (prop_1_14_i_of_primeFrob P₁ F₁ hiso₁ _ hpf) hnps
+      ⟨hpf, (hcond q).1⟩).2
+
+def divFrobeniusTrivial_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 77,
+    item := "Theorem 4.2, (i) — Div-Frobenius-trivial 対象の保存",
     sectionId := "frdi-thm-4-2" }
 
 end ABC3.Found.FrdI
