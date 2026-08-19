@@ -2007,23 +2007,23 @@
      "id": "thm52ii-natiso",
      "title": "★Theorem 5.2, (ii) の「Moreover」—— model Frobenioid で 𝒪^×(−^birat) ≅ B",
      "size": "★大",
-     "status": "todo",
+     "status": "done",
      "deps": [
       "ratfn-iface"
      ],
-     "note": "原文 (FrdI p.101) の (ii) の後半:\n> Moreover, there is a natural isomorphism of functors between the functor “O×(−)” on D\n> associated to the Frobenioid Cbirat ... and the functor B; this isomorphism is\n> compatible with the homomorphisms O×(−) → Φgp, DivB : B → Φgp.\n\n★★**これがちょうど `RatFnData`(`Thm52Model.lean`)を model Frobenioid について\n**構成する**ことである。(iv) では原文どおり仮定に置いたので、(ii) の側で作れば\ninterface が空でないことも同時に示せる。\n\n## ★★2026-08-20 の現在地\n* (ii) の前半(Frobenioid かつ isotropic 型)は `model_frobenioid` 等で済み。\n* ★**後半が未実装**であり、これが `Theorem 5.2` の条なし `.src` を止めている\n  ((i)(ii)(iii)(iv) の条つき `.src` はすべて在る)。\n\n## ★設計(見積り)\n`x ∈ ᵒ×(A^birat)` を代表元 `(a : E → A, f : E → A)`(`a` は co-angular pre-step)で書くと\n```\nκ(x) := B(inv(Base a))(u_f - u_a) ∈ B(Base A)\n```\n★**代表元によらないこと**が主要な手間で、`HomBirat` の余極限の構造\n(`Prop44Ore.lean` の Ore の四角形、`Thm52Frob.lean` の `exists_ore_square`)を使う。\n★逆写像は `Div_B y = toGp d₁ - toGp d₂` と分解して `preStepDown` で作る。\n★`B` が group-like であること(`RatFnData.bneg`)は原文の仮定なので `Hyp M` に足す。",
-     "lean": "",
-     "decl": ""
+     "note": "原文 (FrdI p.101) の (ii) の後半:\n> Moreover, there is a natural isomorphism of functors between the functor “O×(−)” on D\n> associated to the Frobenioid Cbirat ... and the functor B; this isomorphism is\n> compatible with the homomorphisms O×(−) → Φgp, DivB : B → Φgp.\n\n★★**これがちょうど `RatFnData`(`Thm52Model.lean`)を model Frobenioid について\n**構成する**ことである。(iv) では原文どおり仮定に置いたので、(ii) の側で作れば\ninterface が空でないことも同時に示せる。\n\n## ★★2026-08-20 の現在地\n* (ii) の前半(Frobenioid かつ isotropic 型)は `model_frobenioid` 等で済み。\n* ★**後半が未実装**であり、これが `Theorem 5.2` の条なし `.src` を止めている\n  ((i)(ii)(iii)(iv) の条つき `.src` はすべて在る)。\n\n## ★設計(見積り)\n`x ∈ ᵒ×(A^birat)` を代表元 `(a : E → A, f : E → A)`(`a` は co-angular pre-step)で書くと\n```\nκ(x) := B(inv(Base a))(u_f - u_a) ∈ B(Base A)\n```\n★**代表元によらないこと**が主要な手間で、`HomBirat` の余極限の構造\n(`Prop44Ore.lean` の Ore の四角形、`Thm52Frob.lean` の `exists_ore_square`)を使う。\n★逆写像は `Div_B y = toGp d₁ - toGp d₂` と分解して `preStepDown` で作る。\n★`B` が group-like であること(`RatFnData.bneg`)は原文の仮定なので `Hyp M` に足す。\n\n## ★★★★★閉じた(2026-08-20 夜)\n`κ := gpEquiv ∘ biratU`。★`B` が group-like(`Hyp.bmonGroupLike`、原文の仮定)なので\n`Gp (B(A)) ≅ B(A)`(`gpEquivOfGroupLike`)であり、`biratU` を `B` へ降ろせる。\n* 単射性 —— `Div_B ∘ κ = Div^gp`(`divBGp_biratU_otri`)で `Div^gp` が復元され、\n  4 不変量の忠実性に落ちる。\n* 全射性 —— `Div_B y = toGp d₁ − toGp d₂` と分解し、`preStepDown X d₂` と\n  `uHom`(`Div = d₁`, `u = y`)の対で `[a]⁻¹ ≫ [f]` を作る。\n* 自然性 —— 四角形 `φ ≫ δ = ε ≫ φ` に `biratU` を当てて `biratU φ` を消去する。\n★これで `RatFnData`(`Thm52Model.lean`)が model Frobenioid について**構成**できた\n—— (iv) の interface が空でないことも同時に分かる。",
+     "lean": "ABC3/Found/FrdI/Thm52NatIso.lean",
+     "decl": "modelKappa / modelKappa_divB / modelKappa_pull / modelRatFnData"
     },
     {
      "id": "thm52ii-biratfn",
      "title": "Theorem 5.2, (ii) の残り —— model Frobenioid が birationally Frobenius-normalized 型",
      "size": "★大",
-     "status": "todo",
+     "status": "done",
      "deps": [],
-     "note": "Thm52Frob.lean の ★19 節が「`Theorem 5.2, (ii)` の残り」として明記しているもの。\n`IsOfModelType = IsPreModelType ∧ IsOfBirationallyFrobeniusNormalizedType` のうち、\n前者は `model_isPreModelType`(`D` が skeletal のとき)で済み、**後者が未実装**。\n\n★★model Frobenioid 自身が Frobenius-normalized であることは `model_frobNormalizedType`\nで済んでいる(4 成分の計算で両辺とも `div_φ + n·div_α`、`u_φ + n·u_α` になる)。\n★残るのは**同じ計算を `C^birat` の射 `[a]⁻¹ ≫ [f]` で行う**こと。\n道具は在庫にある: `preStepDown`、`exists_ore_square`、`model_birat_otri_comm`。\n\n★★これと `thm52ii-natiso` の 2 つが `Theorem 5.2` の条なし `.src` を止めている。",
-     "lean": "",
-     "decl": ""
+     "note": "Thm52Frob.lean の ★19 節が「`Theorem 5.2, (ii)` の残り」として明記しているもの。\n`IsOfModelType = IsPreModelType ∧ IsOfBirationallyFrobeniusNormalizedType` のうち、\n前者は `model_isPreModelType`(`D` が skeletal のとき)で済み、**後者が未実装**。\n\n★★model Frobenioid 自身が Frobenius-normalized であることは `model_frobNormalizedType`\nで済んでいる(4 成分の計算で両辺とも `div_φ + n·div_α`、`u_φ + n·u_α` になる)。\n★残るのは**同じ計算を `C^birat` の射 `[a]⁻¹ ≫ [f]` で行う**こと。\n道具は在庫にある: `preStepDown`、`exists_ore_square`、`model_birat_otri_comm`。\n\n★★これと `thm52ii-natiso` の 2 つが `Theorem 5.2` の条なし `.src` を止めている。\n\n## ★★★★閉じた(2026-08-20 夜)\n★★鍵は **`Hom^birat` の第 4 の不変量 `u`** を作ったことである:\n```\nbiratU ([a]⁻¹ ≫ [f]) := B(Base a)⁻¹ (u_f − deg(f)·u_a) ∈ B(Base A)^gp\n```\nmodel Frobenioid では `u` の合成則が `Div` の合成則と**まったく同じ形**なので、\n`Prop44Gp.lean` の `sliceDivGpOf` → `biratDivGp` の機械をそのまま `B` に写せた。\n★そのうえで **4 不変量 `(Base, deg, Div^gp, u)` による忠実性**\n(`model_birat_faithful`)が出る —— `𝒞^model` の射は 4 成分そのものだから。\n★あとは `birat_frobNormalized_of_unitTrivial`(`Thm51Sec.lean`)と同じ 4 行の計算。",
+     "lean": "ABC3/Found/FrdI/Thm52NatIso.lean",
+     "decl": "model_birat_frobNormalized / model_isOfBiratFrobNormalizedType / model_isOfModelType"
     }
    ]
   }

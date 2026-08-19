@@ -772,4 +772,18 @@ def ModelData.model_isOfModelType.src : ABC3.Meta.Source :=
     item := "Theorem 5.2, (ii) — model 型 と 𝒪^×(−^birat) ≅ B の自然同型",
     sectionId := "frdi-thm-5-2" }
 
+/-- ★★★★★★★**[FrdI] Theorem 5.2** —— 4 条がすべて実装された。
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i) | 圏の構成と `F_Phi` への関手 | `ModelData.Obj` / `ModelData.toElem` |
+| (ii) | Frobenioid・isotropic 型 | `ModelData.model_frobenioid` |
+| (ii) | model 型 | `ModelData.model_isOfModelType` |
+| (ii) | `O^x(-^birat) = B`(`Div_B` と両立) | `ModelData.modelRatFnData` |
+| (iii) | standard 型の判定 | `ModelData.model_standardType_iff` |
+| (iii) | rationally standard 型の判定 | `ModelData.model_ratStandardType_iff` |
+| (iv) | model 型の Frobenioid は model Frobenioid と圏同値 | `thm_5_2_iv` | -/
+def thm_5_2.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 100, item := "Theorem 5.2", sectionId := "frdi-thm-5-2" }
+
 end ABC3.Found.FrdI
