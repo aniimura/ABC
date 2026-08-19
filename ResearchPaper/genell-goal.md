@@ -15142,3 +15142,46 @@ Ward の定理があれば `W(n) = 0` のとき
     E[n] ≅ ℤ/d₁ ⊕ ℤ/d₂,  d₁ ∣ d₂ ∣ n,  d₁d₂ = n²  ⟹  d₁ = d₂ = n
 
 ★★これで `structure_eq` が閉じ、**G1 が完成**する。
+
+## §9-400 —— ★★★★★★`structure_eq` の posit が弱すぎることを見つけた(第 67 ブロック)
+
+### ★★★★★★実測——`Equiv` は `Nat.card` だけで埋まる
+
+`Interface/GaloisRep/Torsion.lean` の `structure_eq` は
+
+    Nonempty (torsionPoints W n ≃ (ZMod n × ZMod n))
+
+と書いてあるが、`≃` は **`Equiv`(型の全単射)**である。
+★第 66 ブロックの `Nat.card E[n] = n²` と `Nat.card (ZMod n × ZMod n) = n²` だけで
+**即座に埋まってしまう**。
+
+★★しかし原典 Theorem 3.8 が主張するのは**群同型**である
+——`GL₂(ℤ_l)` が出るのは `T_l E` が階数 2 の**加群**だからで、
+全単射だけでは表現の行き先が書けない。
+
+### ★★★したがって Interface を強める
+
+    Nonempty (torsionPoints W n ≃+ (ZMod n × ZMod n))     ← `AddEquiv` に変更
+
+★**理由**: 弱い posit を埋めても消費側(G2 の Tate 加群、G3 の `GL₂`)が使えない。
+★★同じ理由で `TateModuleData.freeRankTwo` も `≃` から `≃+` へ強める必要がある(記録)。
+
+### ★★易しい半分は通った(第 67)
+
+    n•a = n•b = 0,  独立(i•a + j•b = 0 ⟹ n ∣ i ∧ n ∣ j),  #A = n²
+      ⟹  (ℤ/n)² ≃+ A
+
+★`ZMod.lift` で `(ℤ/n)² →+ A` を作り、単射性と個数から全単射 ✅
+
+### ★★★残る半分——独立な 2 元の存在
+
+| 段 | 内容 | 見積 |
+|---|---|---|
+| (A) | 素数冪 `n = p^k` で数え上げ | 4 |
+| (B) | 互いに素な分解 `E[mk] ≃+ E[m] × E[k]` | 2 |
+| (C) | `(ℤ/m)² × (ℤ/k)² ≃+ (ℤ/mk)²` | 1 |
+| (D) | 素因数分解による帰納 | 2 |
+
+★(A) の数え上げ: 位数 `p^k` の元は `p^{2k} − p^{2k−2}` 個、
+`⟨a⟩ ∩ ⟨b⟩ ≠ 0` となる `b` は高々 `p^{2k−1}` 個。
+★★**`p² − 1 > p`** なので前者が大きい ✅
