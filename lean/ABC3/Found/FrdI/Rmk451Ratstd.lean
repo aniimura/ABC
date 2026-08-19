@@ -83,4 +83,44 @@ theorem coaPreProp_dom_isotropic {Z A : C} (hA : IsIsotropic P A) {φ : Z ⟶ A}
     (h : coaPreProp P φ) : IsIsotropic P Z :=
   isIsotropic_dom_of_coaPreStep P G φ h.1 h.2 hA
 
+/-! ## ★3. `coaPreProp` の辞書 —— `𝒞^istr` と `𝒞` で一致する
+
+★★`𝒞^istr` では co-angular が**自動**(`istr_coAngular`)であり、
+`𝒞` の側でも **isotropic 対象から出る射は co-angular**
+(`isCoAngular_of_isotropic_dom`)。★したがって両側で co-angular 性は消え、
+残るのは `IsPreStep`(= linear ∧ base-isomorphism)だけで、
+これは `degFr` と `Base` が一致するので `Iff.rfl` である。 -/
+
+variable (F : FrobenioidCore P)
+
+include F in
+/-- ★`𝒞^istr` の pre-step は `𝒞` の pre-step —— `degFr` と `Base` が一致するので定義的。 -/
+theorem istr_isPreStep_iff {X Y : Istr P} (g : X ⟶ Y) :
+    IsPreStep (istrPre P F) g ↔ IsPreStep P g.hom := Iff.rfl
+
+include F in
+/-- ★★★**`coaPreProp` の辞書** —— 双有理化の添字圏が両側で一致する根拠。 -/
+theorem istr_coaPreProp_iff {X Y : Istr P} (g : X ⟶ Y) :
+    coaPreProp (istrPre P F) g ↔ coaPreProp P g.hom :=
+  ⟨fun h => ⟨isCoAngular_of_isotropic_dom P F X.property g.hom, h.2⟩,
+   fun h => ⟨istr_coAngular P F g, h.2⟩⟩
+
+include F G in
+/-- ★★★★★**添字圏が一致する** —— `A` が isotropic なら、`A` への co-angular pre-step は
+**域まで込めて `𝒞^istr` の中で尽きる**。
+
+★★`IdxBirat P G A.obj` の対象は `A.obj` への co-angular pre-step であり、
+本定理よりその**域はすべて isotropic**。したがって
+`IdxBirat (istrPre P F) _ A` と対象が一対一に対応する。
+★これが `ratstd-istr` の残り 2 条(birationally Frobenius-normalized 型・rational 型)を
+`Rmk451Birat.lean` の手法で取れる根拠である。 -/
+theorem coaPre_into_istr {A : Istr P} {Z : C} (φ : Z ⟶ A.obj) (h : coaPreProp P φ) :
+    IsIsotropic P Z :=
+  isIsotropic_dom_of_coaPreStep P G φ h.1 h.2 A.property
+
+def istr_coaPreProp_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 83,
+    item := "Proposition 4.4, (iv) — coaPreProp は 𝒞^istr と 𝒞 で一致する",
+    sectionId := "frdi-prop-4-4" }
+
 end ABC3.Found.FrdI
