@@ -6,11 +6,11 @@ import ABC3.Found.FrdI.Thm51Pic
 /-!
 # [FrdI] Theorem 5.1, (ii) —— 射の存在条件
 
-原文 (FrdI p.96):
-> in C of Frobenius degree d such that Base(φ) = (λ )−1 ◦ θ ◦ λ, where θ : AD → AD
+原文 (FrdI p.97):
+> in C of Frobenius degree d such that Base(
 
 原文 (FrdI p.97):
-> d · β + z|AD = (Φ(θ))(β ) ∈ PicΦ(A)
+> [where, by abuse of notation, we denote by z|AD the image of
 
 ★証明は 2 段に分かれる:
 
@@ -140,7 +140,7 @@ theorem isFrobeniusTrivial_pullBack (G : Frobenioid P) (hiso : ∀ Y : C, IsIsot
 /-- ★★★**Frobenius-trivial 対象の間では、底の任意の射が pull-back 射に持ち上がる**。
 
 原文 (FrdI p.99):
-> lows immediately that if A, B ∈ Ob(CFr-tr), then any morphism Base(A) → Base(B)
+> tion to D (respectively, by its Frobenius degree). Moreover, by assertion (iii), it fol-
 -/
 theorem exists_pullBack_frobTrivial (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
     {A A' : C} (hA : IsFrobeniusTrivial P A) (hA' : IsFrobeniusTrivial P A')
@@ -341,7 +341,7 @@ theorem picHom_sameBase_mem_of (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic
 /-- ★★★★**[FrdI] Theorem 5.1, (ii)** —— 射の存在と類の関係式は同値。
 
 原文 (FrdI p.97):
-> d · β + z|AD = (Φ(θ))(β ) ∈ PicΦ(A)
+> [where, by abuse of notation, we denote by z|AD the image of
 -/
 theorem thm_5_1_ii (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
     {A A' : C} (hA : IsFrobeniusTrivial P A) (hA' : IsFrobeniusTrivial P A')
