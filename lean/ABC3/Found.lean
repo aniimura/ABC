@@ -82,6 +82,7 @@ import ABC3.Found.FrdI.Cor411Base
 import ABC3.Found.FrdI.Cor411Otimes
 import ABC3.Found.FrdI.Cor411Rigid
 import ABC3.Found.FrdI.Thm51Slice
+import ABC3.Found.FrdI.Thm51Span
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn
@@ -507,6 +508,7 @@ import ABC3.Found.GaloisRep.SepRoots
 import ABC3.Found.GaloisRep.GoodBase
 import ABC3.Found.GaloisRep.TorsionCount
 import ABC3.Found.GaloisRep.TorsionCard
+import ABC3.Found.GaloisRep.TorsionGroup
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
