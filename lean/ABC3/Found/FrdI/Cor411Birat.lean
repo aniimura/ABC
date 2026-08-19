@@ -5,6 +5,7 @@ import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor410Birat
 import ABC3.Found.FrdI.Thm49
 import ABC3.Found.FrdI.Prop44Gl
+import ABC3.Found.FrdI.Prop44Phi
 
 /-!
 # [FrdI] Corollary 4.11, (ii) —— `Ψ^birat` は base-identity 自己射を保つ
@@ -189,6 +190,46 @@ theorem biratPsi_otimes_map [Ψ.IsEquivalence]
 def biratPsi_otimes_map.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 93,
     item := "Corollary 4.11, (ii) — Ψ^birat は 𝒪^× を保つ",
+    sectionId := "frdi-cor-4-11" }
+
+/-! ## ★3. `(Ψ^birat)^un-tr` -/
+
+include hfwd in
+/-- ★★★★★**[FrdI] Corollary 4.11, (ii) の段 3** —— `(Ψ^birat)^un-tr` の構成。
+
+原文 (FrdI p.93):
+> preserves the base-identity endomorphisms [hence, in particular, that -/
+noncomputable def psiBiratUnTr [Ψ.IsEquivalence]
+    (Fc₁ : FrobenioidCore (biratPre P₁ G₁)) (Fc₂ : FrobenioidCore (biratPre P₂ G₂))
+    (hiso₁ : IsOfIsotropicType P₁) (hiso₂ : IsOfIsotropicType P₂)
+    (hfn₁ : ∀ X : BiratCat P₁ G₁, IsFrobeniusNormalized (biratPre P₁ G₁) X)
+    (hfn₂ : ∀ X : BiratCat P₂ G₂, IsFrobeniusNormalized (biratPre P₂ G₂) X)
+    (hds₂ : IsDivSlim Φ₂)
+    (hbwd : ∀ {X Y : C₁} (f : X ⟶ Y), coaPreProp P₂ (Ψ.map f) → coaPreProp P₁ f)
+    (hPBb : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y), IsPullBack (biratPre P₁ G₁) f →
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f))
+    (hPBb' : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y),
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f) →
+        IsPullBack (biratPre P₁ G₁) f)
+    (hDivEq : ∀ {X Y : C₁} (f g : X ⟶ Y), DivEquivalent P₁ f g →
+      DivEquivalent P₂ (Ψ.map f) (Ψ.map g))
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hBIso : ∀ {X Y : C₁} (f : X ⟶ Y), IsBaseIsomorphism P₁ f →
+      IsBaseIsomorphism P₂ (Ψ.map f)) :
+    UnTr (biratPre P₁ G₁) ⥤ UnTr (biratPre P₂ G₂) :=
+  haveI := psiBiratCor_isEquivalence G₁ G₂ Ψ hfwd hbwd
+  psiUnTr (psiBiratCor G₁ G₂ Ψ hfwd)
+    (birat_isOfQuasiIsotropicType P₁ G₁ hfn₁ hiso₁)
+    (birat_isOfQuasiIsotropicType P₂ G₂ hfn₂ hiso₂)
+    (fun α₁ α₂ hh => toElem_map_congr_of_otimes (psiBiratCor G₁ G₂ Ψ hfwd) Fc₁
+      (fun X => birat_isOfIsotropicType hiso₁ X)
+      (fun X δ hδ => biratPsi_otimes_map G₁ G₂ Ψ hfwd Fc₂ hds₂ hbwd hPBb hPBb'
+        hDivEq hPS hBIso X δ hδ)
+      α₁ α₂ hh)
+
+def psiBiratUnTr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 93,
+    item := "Corollary 4.11, (ii) — (Ψ^birat)^un-tr",
     sectionId := "frdi-cor-4-11" }
 
 end BiratBaseId
