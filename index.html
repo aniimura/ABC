@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1196 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1200 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">5738</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1590</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">5743</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1593</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -281,6 +281,10 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>70a4d92</code></td><td>2026-08-19</td><td>★★★座標は呼び出し側で選ぶだけだった(第 230)</td></tr>
+<tr><td><code>0003ab2</code></td><td>2026-08-19</td><td>最終接続には第 211/220 の座標変更も要ると測った(§9-262)</td></tr>
+<tr><td><code>7484b00</code></td><td>2026-08-19</td><td>★★★★★★hcompat が完成した(第 229)——8 通りの逃げ道が要った</td></tr>
+<tr><td><code>f743125</code></td><td>2026-08-19</td><td>★`basesection-birat` の形を測った——山は `skeletal` と `isPullBack` の 2 つ</td></tr>
 <tr><td><code>78a760f</code></td><td>2026-08-19</td><td>Spec.map の appLE を ΓSpecIso で書いた(第 228)——摩擦 #3 の裏返し</td></tr>
 <tr><td><code>b9161c9</code></td><td>2026-08-19</td><td>★★★添字圏の圏同値まで到達——(iii) で作った反射補題が §4 で効いた</td></tr>
 <tr><td><code>564eb5f</code></td><td>2026-08-19</td><td>★★★★★★hcompat の核が座標を揃えた形で出た(第 227)——7 つの摩擦を越えた</td></tr>
@@ -289,17 +293,13 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>29ad2c7</code></td><td>2026-08-19</td><td>★★★congr_app が依存位置を解いた(第 225)——摩擦 #4 の逃げ道が 2 つに</td></tr>
 <tr><td><code>97763e4</code></td><td>2026-08-19</td><td>★★★★`naive-frob-birat` を閉じた——`Ψ^birat` が仮定なしで立った</td></tr>
 <tr><td><code>8b92b7b</code></td><td>2026-08-19</td><td>最終組み立ては座標系 ⊤ を捨てると通ると測った(§9-256)</td></tr>
-<tr><td><code>400ed61</code></td><td>2026-08-19</td><td>★★★★★★hcompat の核が出た(第 224)——摩擦 6 例すべてに逃げ道がついた</td></tr>
-<tr><td><code>f02966f</code></td><td>2026-08-19</td><td>★修復＋`map_comp` の残り 1 点を特定——calc の型合わせ</td></tr>
-<tr><td><code>3267ec0</code></td><td>2026-08-19</td><td>hcompat の組み立ては射の整合が残ると測った(§9-254)</td></tr>
-<tr><td><code>630fb5e</code></td><td>2026-08-19</td><td>★★★`Ψ^birat` が組み上がった——残るは `map_comp` 1 本、筋は立っている</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1590 件)。</div>
+<b>すべて PDF と機械照合している</b>(1593 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
