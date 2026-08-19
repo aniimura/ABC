@@ -133,4 +133,48 @@ def birat_otimes_comm.src : ABC3.Meta.Source :=
     item := "Definition 1.2, (iv) — Frobenius-compact の第 1 条は 𝒞^birat で自動",
     sectionId := "frdi-def-1-2-iv" }
 
+
+/-! ## ★★★★★★第 3 条は **`c = d` さえ出れば終わる** —— 核の torsion 性は要らない
+
+★★以前の台帳は「`σ` が恒等 ⟹ `Div^gp` の核に入る ⟹ **核が torsion であること**が要る」
+と書いていたが、これは**遠回り**であった。
+
+★★★仮定は
+```
+∀ u ∈ 𝒪^×(A), ∃ k, (endConj θ u)^(d*k) = u^(c*k)
+```
+であり、結論は `∀ u ∈ 𝒪^×(A), ∃ k, (endConj θ u)^k = u^k` である。
+★**`c = d` なら仮定の式そのものが結論の式である**(`k' := d*k` と取ればよい)。
+★★したがって残る問いは **`c = d` を出すこと**だけであり、
+`𝒪^×(A)` が torsion かどうかは**まったく関係が無い**。
+-/
+
+section Cond3
+
+variable {Dd : Type u} [Category.{v} Dd] {Cc : Type u2} [Category.{v2} Cc]
+  {Φ₀ : MonoidOn.{v, u, w} Dd} (Q : PreFrobenioid Cc Φ₀)
+
+/-- ★★★★★★**第 3 条は `c = d` から直ちに出る**。
+
+★仮定の `k` に対し `k' := d * k` を取るだけ。 -/
+theorem frobeniusCompact_cond3_of_eq {A : Cc} (θ : A ≅ A) (c d : ℕ+) (hcd : c = d)
+    (hyp : ∀ u : End A, u ∈ OTimes Q A → ∃ k : ℕ+,
+      ((endConj θ u) ^ (((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)
+        = (u ^ (((c : ℕ+) : ℕ) * ((k : ℕ+) : ℕ)) : End A)) :
+    ∀ u : End A, u ∈ OTimes Q A → ∃ k : ℕ+,
+      ((endConj θ u) ^ ((k : ℕ+) : ℕ) : End A) = (u ^ ((k : ℕ+) : ℕ) : End A) := by
+  intro u hu
+  obtain ⟨k, hk⟩ := hyp u hu
+  refine ⟨d * k, ?_⟩
+  show ((endConj θ u) ^ (((d * k : ℕ+) : ℕ)) : End A) = (u ^ (((d * k : ℕ+) : ℕ)) : End A)
+  rw [show ((d * k : ℕ+) : ℕ) = ((d : ℕ+) : ℕ) * ((k : ℕ+) : ℕ) from rfl]
+  rw [hk, hcd]
+
+def frobeniusCompact_cond3_of_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-compact の第 3 条は c = d から出る",
+    sectionId := "frdi-def-1-2-iv" }
+
+end Cond3
+
 end ABC3.Found.FrdI
