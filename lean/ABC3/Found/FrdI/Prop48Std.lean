@@ -109,7 +109,7 @@ theorem istr_frobeniusCompact' {A : Cc} (hA : IsIsotropic Q A)
 def istr_frobeniusCompact.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 86,
     item := "Remark 4.5.1 — Frobenius-compact 対象は 𝒞^istr へ持ち上がる",
-    sectionId := "frdi-rmk-4-5-1" }
+    sectionId := "frdi-remark-4-5-1" }
 
 end IstrLift
 

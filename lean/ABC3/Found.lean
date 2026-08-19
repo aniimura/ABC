@@ -481,6 +481,7 @@ import ABC3.Found.Arakelov.ArcScaleNorm
 import ABC3.Found.Arakelov.ArcUnitCoord
 import ABC3.Found.Arakelov.ArcFiberDim
 import ABC3.Found.Arakelov.ArcRatio
+import ABC3.Found.Arakelov.ArcLogMetric
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
