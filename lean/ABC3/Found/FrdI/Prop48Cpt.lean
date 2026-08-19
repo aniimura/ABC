@@ -90,7 +90,16 @@ def otri_unTr_surjective.src : ABC3.Meta.Source :=
 /-! ## ★`Frobenius-compact` の第 1 条は `𝒞^birat` では**ただで出る**
 
 原文 (FrdI p.23):
-> shall say that A is Frobenius-compact if the following conditions are satisfied:
+> A Frobenius-compact object of C is de
+
+★★**原文の 3 条**(物理 p.23、実測):
+1. `𝒪^×(C)` が可換
+2. `𝒪^×(C)^pf ≠ 0` —— ★**抽出では `̸=` が `=` に化ける**(記憶の事故型そのもの)。
+   第 3 条が `𝒪^×(C)^pf` の上の作用を語るので、`≠` でなければ意味を成さない
+3. `Aut_𝒞(C)` の元が `𝒪^×(C)^pf` に `ℚ>0` の元の掛け算として作用するなら、実は自明に作用する
+
+★我々の `IsFrobeniusCompact` の第 2 条(無限位数の単元が存在する)は
+`𝒪^×(C)^pf ≠ 0` の言い換えであり、**読みは合っている**。
 
 ★★`IsFrobeniusCompact` の 3 条のうち**第 1 条(`𝒪^×` の可換性)**は、
 `birationally Frobenius-normalized` 型のとき `otri_mul_comm` から直ちに出る ——

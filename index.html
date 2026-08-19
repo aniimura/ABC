@@ -33,15 +33,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-19 ・ コミット 1257 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-19 ・ コミット 1264 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
+  <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">6004</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1680</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">6056</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">1685</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">195</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">21</div></div>
 </div>
@@ -52,11 +52,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>原文項目の実装率 —— [FrdI]「The Geometry of Frobenioids I」</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">必要分の実装</div><div class="v">34/54</div></div>
-  <div class="card"><div class="k">達成率</div><div class="v">63%</div></div>
+  <div class="card ok"><div class="k">必要分の実装</div><div class="v">35/54</div></div>
+  <div class="card"><div class="k">達成率</div><div class="v">65%</div></div>
   <div class="card"><div class="k">直接名指し</div><div class="v">25</div></div>
   <div class="card"><div class="k">FrdI 全項目</div><div class="v">83</div></div>
-  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">7</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">6</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
 <tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">13/15</td>
@@ -65,8 +65,8 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:88%"></div></div></td></tr>
 <tr><td><b>§3</b></td><td style="font-variant-numeric:tabular-nums">8/9</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:89%"></div></div></td></tr>
-<tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">6/10</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:60%"></div></div></td></tr>
+<tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">7/10</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:70%"></div></div></td></tr>
 <tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">0/7</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c0392b;height:9px;border-radius:4px;width:0%"></div></div></td></tr>
 <tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">0/5</td>
@@ -75,7 +75,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 7 件が条つきのみ)。<br>
+(いま 6 件が条つきのみ)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
@@ -281,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>c14212e</code></td><td>2026-08-19</td><td>大域の正則関数は X^arc 上連続(第 252 ブロック、§9-292)</td></tr>
+<tr><td><code>46c13bb</code></td><td>2026-08-19</td><td>構造層のファイバー評価は関数の値だった(第 251 ブロック、§9-291)</td></tr>
+<tr><td><code>a0e0b18</code></td><td>2026-08-19</td><td>★★★★`Frobenius-compact` の第 1 条は `𝒞^birat` でただで出た</td></tr>
+<tr><td><code>955343d</code></td><td>2026-08-19</td><td>★★★★★★`Corollary 4.10` を実装した——`Ψ^birat` の構成・1-可換図式・圏同値</td></tr>
+<tr><td><code>67c00f2</code></td><td>2026-08-19</td><td>評価は層の射と可換(第 250 ブロック、§9-290)——Eq.trans は reducible 透過性しか使わない</td></tr>
+<tr><td><code>8f823cc</code></td><td>2026-08-19</td><td>連続性の欄を足し、その判定を作った(第 249 ブロック、§9-289)</td></tr>
+<tr><td><code>e7b0c7d</code></td><td>2026-08-19</td><td>★★★★★★§4 が 6/10 に——`Remark 4.5.1` が完成した</td></tr>
 <tr><td><code>2813252</code></td><td>2026-08-19</td><td>「書き換えずに主張する」逃げ道をメモリに残した</td></tr>
 <tr><td><code>54c3ae0</code></td><td>2026-08-19</td><td>局所自明な層に計量が入った(第 248 ブロック、§9-288)</td></tr>
 <tr><td><code>48e2a35</code></td><td>2026-08-19</td><td>★★★★★hull の birat 化と `Div^gp` の移送を取った</td></tr>
 <tr><td><code>3031cb2</code></td><td>2026-08-19</td><td>★isotropic hull の一意性を取った——選択の差が同型に吸収される</td></tr>
 <tr><td><code>66a42a8</code></td><td>2026-08-19</td><td>C3 の実装に着手した記録(§9-287)</td></tr>
-<tr><td><code>82d67d2</code></td><td>2026-08-19</td><td>C3 の実装に着手——ファイバーのノルムと一点スキームの自明化(第 246–247 ブロック)</td></tr>
-<tr><td><code>309e12a</code></td><td>2026-08-19</td><td>★★引き戻しの側を取った——`B^istr` から `A` への pull-back</td></tr>
-<tr><td><code>d7a157a</code></td><td>2026-08-19</td><td>★★★★★`supp-intrinsic` を閉じた——`Supp` は単系同型で移る</td></tr>
-<tr><td><code>07bcce1</code></td><td>2026-08-19</td><td>C3 の Interface を直した——normSection で退化を殺し、存在を条件付きに(§9-286)</td></tr>
-<tr><td><code>9e12ae7</code></td><td>2026-08-19</td><td>★★★★★`Supp` は `ι` を含まない形に書けることを取った</td></tr>
-<tr><td><code>9c51bef</code></td><td>2026-08-19</td><td>C3 の道筋を最後まで測った——C2 に依存しない(§9-285)</td></tr>
-<tr><td><code>cd6c890</code></td><td>2026-08-19</td><td>★`Supp` の内在性を葉として切り出した（`supp-intrinsic`）</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(1680 件)。</div>
+<b>すべて PDF と機械照合している</b>(1685 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
