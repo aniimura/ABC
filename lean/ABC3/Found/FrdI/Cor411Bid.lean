@@ -144,7 +144,7 @@ set_option maxHeartbeats 1000000 in
 
 ★試験に使う単系 `Φ₀` は `Q₂` の単系と**別でよい** ——
 原文 (ii) が `𝒞^birat` の base-identity 自己射を `Φᵢ` で試験するのはこの形。 -/
-theorem baseIdentity_map_of_divSlim (Q : PreFrobenioid C Φ) (F : FrobenioidCore Q)
+theorem baseIdentity_map_of_divSlim (Q : PreFrobenioid C Φ)
     (Q₂ : PreFrobenioid C₂ Φ') (F₂ : FrobenioidCore Q₂) (Ψ : C ≌ C₂)
     (hPB : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack Q f → IsPullBack Q₂ (Ψ.functor.map f))
     (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack Q₂ (Ψ.functor.map f) → IsPullBack Q f)

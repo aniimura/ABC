@@ -122,6 +122,43 @@ def biratPsi_baseId_divTrivial.src : ABC3.Meta.Source :=
     item := "Corollary 4.11, (ii) — Ψ^birat と base-identity 自己射",
     sectionId := "frdi-cor-4-11" }
 
+/-! ## ★2. 組み立て —— `Ψ^birat` は base-identity 自己射を保つ -/
+
+include hfwd in
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 4.11, (ii) の段 1** ——
+`Ψ^birat` は base-identity 自己射を保つ。
+
+原文 (FrdI p.93):
+> preserves the base-identity endomorphisms [hence, in particular, that -/
+theorem biratPsi_baseIdentity_map [Ψ.IsEquivalence]
+    (Fc₂ : FrobenioidCore (biratPre P₂ G₂)) (hds₂ : IsDivSlim Φ₂)
+    (hbwd : ∀ {X Y : C₁} (f : X ⟶ Y), coaPreProp P₂ (Ψ.map f) → coaPreProp P₁ f)
+    (hPBb : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y), IsPullBack (biratPre P₁ G₁) f →
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f))
+    (hPBb' : ∀ {X Y : BiratCat P₁ G₁} (f : X ⟶ Y),
+      IsPullBack (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map f) →
+        IsPullBack (biratPre P₁ G₁) f)
+    (hDivEq : ∀ {X Y : C₁} (f g : X ⟶ Y), DivEquivalent P₁ f g →
+      DivEquivalent P₂ (Ψ.map f) (Ψ.map g))
+    (hPS : ∀ {X Y : C₁} (f : X ⟶ Y), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (hBIso : ∀ {X Y : C₁} (f : X ⟶ Y), IsBaseIsomorphism P₁ f →
+      IsBaseIsomorphism P₂ (Ψ.map f))
+    {A : C₁} (β : (show BiratCat P₁ G₁ from A) ⟶ (show BiratCat P₁ G₁ from A))
+    (hβ : IsBaseIdentity (biratPre P₁ G₁) β) :
+    IsBaseIdentity (biratPre P₂ G₂) ((psiBiratCor G₁ G₂ Ψ hfwd).map β) := by
+  haveI := psiBiratCor_isEquivalence G₁ G₂ Ψ hfwd hbwd
+  exact baseIdentity_map_of_divSlim (biratPre P₁ G₁) (biratPre P₂ G₂) Fc₂
+    (psiBiratCor G₁ G₂ Ψ hfwd).asEquivalence hPBb hPBb' hds₂
+    (fun {X} β' hβ' => biratPsi_baseId_isIso G₁ G₂ Ψ hfwd hPS hBIso β' hβ')
+    (fun {X} β' hβ' x => biratPsi_baseId_divTrivial G₁ G₂ Ψ hfwd hDivEq hPS β' hβ' x)
+    β hβ
+
+def biratPsi_baseIdentity_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 93,
+    item := "Corollary 4.11, (ii) — Ψ^birat は base-identity 自己射を保つ",
+    sectionId := "frdi-cor-4-11" }
+
 end BiratBaseId
 
 end ABC3.Found.FrdI
