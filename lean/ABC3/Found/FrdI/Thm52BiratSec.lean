@@ -73,6 +73,86 @@ theorem pathW_id (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
   show inv _ ≫ (toBiratCat P G).map (𝟙 X.obj) ≫ _ = _
   rw [(toBiratCat P G).map_id, Category.id_comp, IsIso.inv_hom_id]
 
+/-! ## ★1b. `w_f` の不変量 -/
+
+@[simp] theorem FPPath.biratDivGp_piHom (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X : C} (p : FPPath S X) :
+    biratDivGp (p.piHom G hiso) = -p.cls := p.biratDivGp_biratIso G hiso
+
+@[simp] theorem FPPath.biratDeg_piHom (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X : C} (p : FPPath S X) :
+    biratDeg (p.piHom G hiso) = 1 := p.biratDeg_biratIso G hiso
+
+@[simp] theorem biratDivGp_toBiratMap (G : Frobenioid P) {A B : C} (φ : A ⟶ B) :
+    biratDivGp ((toBiratCat P G).map φ) = toGp _ (P.Div φ) :=
+  biratDivGp_toHomBirat (P := P) (G := G) φ
+
+@[simp] theorem biratBase_toBiratMap (G : Frobenioid P) {A B : C} (φ : A ⟶ B) :
+    biratBase ((toBiratCat P G).map φ) = P.Base φ :=
+  biratBase_toHomBirat (P := P) (G := G) φ
+
+@[simp] theorem biratDeg_toBiratMap (G : Frobenioid P) {A B : C} (φ : A ⟶ B) :
+    biratDeg ((toBiratCat P G).map φ) = P.degFr φ :=
+  biratDeg_toHomBirat (P := P) (G := G) φ
+
+/-- ★★`π_X ≫ w_f = f^birat ≫ π_Y` —— `w_f` の定義そのもの。 -/
+theorem pathW_spec (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X Y : PathCat S} (f : X ⟶ Y) :
+    X.path.piHom G hiso ≫ pathW G hiso f
+      = (toBiratCat P G).map f ≫ Y.path.piHom G hiso := by
+  rw [pathW, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+
+/-- ★`w_f` の Frobenius 次数は `f` のそれ。 -/
+theorem pathW_deg (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X Y : PathCat S} (f : X ⟶ Y) :
+    biratDeg (pathW G hiso f) = P.degFr f := by
+  have h := congrArg (biratPre P G).degFr (pathW_spec G hiso f)
+  rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp] at h
+  have h1 : biratDeg (X.path.piHom G hiso) = 1 := X.path.biratDeg_biratIso G hiso
+  have h2 : biratDeg (Y.path.piHom G hiso) = 1 := Y.path.biratDeg_biratIso G hiso
+  have h3 : biratDeg ((toBiratCat P G).map f) = P.degFr f :=
+    biratDeg_toHomBirat (P := P) (G := G) f
+  simp only [biratPre_degFr, h1, h2, h3, mul_one, one_mul] at h
+  exact h
+
+/-- ★`w_f` の底は `π` で共役をとったもの。 -/
+theorem pathW_base (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X Y : PathCat S} (f : X ⟶ Y) :
+    biratBase (X.path.piHom G hiso) ≫ biratBase (pathW G hiso f)
+      = P.Base f ≫ biratBase (Y.path.piHom G hiso) := by
+  have h := congrArg (biratPre P G).Base (pathW_spec G hiso f)
+  rw [(biratPre P G).Base_comp, (biratPre P G).Base_comp] at h
+  have h3 : biratBase ((toBiratCat P G).map f) = P.Base f :=
+    biratBase_toHomBirat (P := P) (G := G) f
+  simp only [biratPre_Base, h3] at h
+  exact h
+
+/-- ★★★**`w_f` の零因子** —— これが model Frobenioid の条件式そのものになる。
+
+★`Div^gp(π_X) = −cls X`(`FPPath.biratDivGp_biratIso`)を代入すると
+```
+Φ(Base π_X)(Div^gp w_f) = deg(f)·cls X + Div(f) − Φ(Base f)(cls Y)
+```
+となり、`Def 5.2, (i)` の関係式の右辺の `Div_B(u_φ)` にちょうど一致する。 -/
+theorem pathW_divGp (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    {S : BaseSection P} {X Y : PathCat S} (f : X ⟶ Y) :
+    Φ.gpMapOn (biratBase (X.path.piHom G hiso)) (biratDivGp (pathW G hiso f))
+      = ((P.degFr f : ℕ+) : ℕ) • X.path.cls + toGp _ (P.Div f)
+        - Φ.gpMapOn (P.Base f) Y.path.cls := by
+  have h := congrArg biratDivGp (pathW_spec G hiso f)
+  rw [biratDivGp_comp', biratDivGp_comp'] at h
+  have h1 := eq_sub_of_add_eq h
+  simp only [FPPath.biratDivGp_piHom, biratDivGp_toBiratMap, biratBase_toBiratMap,
+    pathW_deg] at h1
+  have e1 : (Φ.gpMapOn (P.Base f) (-Y.path.cls)
+        + ((biratDeg (Y.path.piHom G hiso) : ℕ+) : ℕ) • toGp _ (P.Div f))
+      - ((P.degFr f : ℕ+) : ℕ) • (-X.path.cls)
+      = ((P.degFr f : ℕ+) : ℕ) • X.path.cls + toGp _ (P.Div f)
+        - Φ.gpMapOn (P.Base f) Y.path.cls := by
+    rw [Y.path.biratDeg_piHom G hiso, map_neg, smul_neg, PNat.one_coe, one_smul]
+    abel
+  exact h1.trans e1
+
 /-! ## ★2. `𝒞^birat` の Frobenius-section -/
 
 variable [IsConnected D]

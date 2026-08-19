@@ -234,4 +234,160 @@ def biratBaseSection.src : ABC3.Meta.Source :=
     item := "Theorem 5.2, (iv) — 𝒞^birat の base-section",
     sectionId := "frdi-thm-5-2" }
 
+/-! ## ★4. 3 分解の中央項を関数として取り出す -/
+
+/-- ★★**3 分解の中央項 `β_φ`**。 -/
+noncomputable def rem272Beta (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) : A ⟶ A :=
+  (rem_2_7_2_factor_isometric Fc hiso hmet hFs hA hB φ).choose
+
+theorem rem272Beta_baseId (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) :
+    IsBaseIdentity P (rem272Beta Fc hiso hmet hFs hA hB φ) :=
+  (rem_2_7_2_factor_isometric Fc hiso hmet hFs hA hB φ).choose_spec.1
+
+theorem rem272Beta_preStep (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) :
+    IsPreStep P (rem272Beta Fc hiso hmet hFs hA hB φ) :=
+  (rem_2_7_2_factor_isometric Fc hiso hmet hFs hA hB φ).choose_spec.2.1
+
+theorem rem272Beta_spec (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) :
+    φ = (((Fs (P.degFr φ)).app ⟨A, hA⟩ : End A) : A ⟶ A)
+          ≫ rem272Beta Fc hiso hmet hFs hA hB φ ≫ S.lift hA hB (P.Base φ) :=
+  (rem_2_7_2_factor_isometric Fc hiso hmet hFs hA hB φ).choose_spec.2.2
+
+/-- ★★★**中央項は一意**(`rem_2_7_2_uniq`)。 -/
+theorem rem272Beta_uniq (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B)
+    {n : ℕ+} {β : A ⟶ A} (hβ : IsBaseIdentity P β) (hβs : IsPreStep P β)
+    {α : A ⟶ B} (hαP : S.homP α)
+    (heq : φ = (((Fs n).app ⟨A, hA⟩ : End A) : A ⟶ A) ≫ β ≫ α) :
+    β = rem272Beta Fc hiso hmet hFs hA hB φ :=
+  (rem_2_7_2_uniq hFs hA hβ hβs hαP (rem272Beta_baseId Fc hiso hmet hFs hA hB φ)
+    (rem272Beta_preStep Fc hiso hmet hFs hA hB φ) (S.lift_homP hA hB (P.Base φ))
+    (heq.symm.trans (rem272Beta_spec Fc hiso hmet hFs hA hB φ))).2.1
+
+/-- ★中央項を `𝒪^×(A)` の元として取り出したもの。 -/
+noncomputable def rem272BetaO (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B : C} (hA : S.objP A) (hB : S.objP B) (φ : A ⟶ B) : OTimes P A :=
+  ⟨rem272Beta Fc hiso hmet hFs hA hB φ,
+    rem_2_7_2_beta_otimes hiso hmet _ (rem272Beta_baseId Fc hiso hmet hFs hA hB φ)
+      (rem272Beta_preStep Fc hiso hmet hFs hA hB φ)⟩
+
+omit [IsConnected D] in
+theorem baseIdentity_of_otri {A : C} {δ : End A} (h : δ ∈ OTri P A) :
+    IsBaseIdentity P (δ : A ⟶ A) := h.1
+
+omit [IsConnected D] in
+theorem isPreStep_of_otri {A : C} {δ : End A} (h : δ ∈ OTri P A) :
+    IsPreStep P (δ : A ⟶ A) := by
+  refine ⟨h.2, ?_⟩
+  show IsIso (P.Base (δ : A ⟶ A))
+  have hb : P.Base (δ : A ⟶ A) = 𝟙 _ := by
+    have h1 : P.Base (δ : A ⟶ A) = P.Base (𝟙 A) := h.1
+    rwa [P.Base_id] at h1
+  rw [hb]; infer_instance
+
+/-- ★★★★**3 分解の中央項の合成則**。
+
+原文 (FrdI p.102):
+> for the full subcategory determined by the image of the objects in P. Then observe
+
+★★原文が「`E` の射の一意分解から従う」と言う箇所の中身:
+```
+w_{f≫g} = F_{mn} ≫ (β_f^m · γ) ≫ (a_f ≫ a_g)
+```
+—— (1) `F` の自然性で `F_m` を `a_f` の左へ、
+(2) ★**Frobenius-normalized 型**で `β_f ≫ F_m = F_m ≫ β_f^m`、
+(3) `F` が単系準同型なので `F_n ≫ F_m = F_{mn}`、
+(4) `γ` は `β_g` を `a_f` に沿って引き戻したもの、
+(5) `a_f ≫ a_g = lift(Base φ ≫ Base ψ)`。 -/
+theorem rem272Beta_comp (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    (hfnA : ∀ A : C, IsFrobeniusNormalized P A)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B E : C} (hA : S.objP A) (hB : S.objP B) (hE : S.objP E)
+    (φ : A ⟶ B) (ψ : B ⟶ E) (γ : End A) (hγ : γ ∈ OTri P A)
+    (hsq : S.lift hA hB (P.Base φ)
+          ≫ ((rem272Beta Fc hiso hmet hFs hB hE ψ : End B) : B ⟶ B)
+        = (γ : A ⟶ A) ≫ S.lift hA hB (P.Base φ)) :
+    (show End A from rem272Beta Fc hiso hmet hFs hA hE (φ ≫ ψ))
+      = γ * ((show End A from rem272Beta Fc hiso hmet hFs hA hB φ)
+          ^ ((P.degFr ψ : ℕ+) : ℕ)) := by
+  have specφ := rem272Beta_spec Fc hiso hmet hFs hA hB φ
+  have specψ := rem272Beta_spec Fc hiso hmet hFs hB hE ψ
+  have hmemφ : (rem272Beta Fc hiso hmet hFs hA hB φ : End A) ∈ OTimes P A :=
+    rem_2_7_2_beta_otimes hiso hmet _ (rem272Beta_baseId Fc hiso hmet hFs hA hB φ)
+      (rem272Beta_preStep Fc hiso hmet hFs hA hB φ)
+  set βφ : End A := rem272Beta Fc hiso hmet hFs hA hB φ with hβφ
+  set βψ : End B := rem272Beta Fc hiso hmet hFs hB hE ψ with hβψ
+  set aφ := S.lift hA hB (P.Base φ) with haφ
+  set aψ := S.lift hB hE (P.Base ψ) with haψ
+  set m := P.degFr ψ with hm
+  set n := P.degFr φ with hn
+  have hnat : aφ ≫ (((Fs m).app ⟨B, hB⟩ : End B) : B ⟶ B)
+      = (((Fs m).app ⟨A, hA⟩ : End A) : A ⟶ A) ≫ aφ :=
+    (Fs m).naturality (A := (⟨A, hA⟩ : S.Obj)) (B := (⟨B, hB⟩ : S.Obj))
+      ⟨aφ, S.lift_homP hA hB _⟩
+  have hdegFm : P.degFr (((Fs m).app ⟨A, hA⟩ : End A) : A ⟶ A) = m :=
+    (SectionEnd.deg_eq (Fs m) ⟨A, hA⟩).symm.trans (hFs.degSection m)
+  have hfnstep : (((Fs m).app ⟨A, hA⟩ : End A) : A ⟶ A)
+        ≫ ((βφ ^ ((m : ℕ+) : ℕ) : End A) : A ⟶ A)
+      = (βφ : A ⟶ A) ≫ (((Fs m).app ⟨A, hA⟩ : End A) : A ⟶ A) := by
+    have h := hfnA A ((Fs m).app ⟨A, hA⟩) (hFs.baseIdentity m ⟨A, hA⟩) βφ
+      (OTimes_le_OTri P A hmemφ)
+    rwa [hdegFm] at h
+  have hFmul : (((Fs (m * n)).app ⟨A, hA⟩ : End A) : A ⟶ A)
+      = (((Fs n).app ⟨A, hA⟩ : End A) : A ⟶ A) ≫ (((Fs m).app ⟨A, hA⟩ : End A) : A ⟶ A) := by
+    rw [map_mul]; rfl
+  have hliftc : aφ ≫ aψ = S.lift hA hE (P.Base (φ ≫ ψ)) := by
+    rw [P.Base_comp, S.lift_comp hA hB hE]
+  have hmemnew : (γ * (βφ ^ ((m : ℕ+) : ℕ)) : End A) ∈ OTri P A :=
+    (OTri P A).mul_mem hγ ((OTri P A).pow_mem (OTimes_le_OTri P A hmemφ) _)
+  have key : φ ≫ ψ = (((Fs (m * n)).app ⟨A, hA⟩ : End A) : A ⟶ A)
+      ≫ ((γ * (βφ ^ ((m : ℕ+) : ℕ)) : End A) : A ⟶ A)
+      ≫ S.lift hA hE (P.Base (φ ≫ ψ)) := by
+    rw [show ((γ * (βφ ^ ((m : ℕ+) : ℕ)) : End A) : A ⟶ A)
+        = ((βφ ^ ((m : ℕ+) : ℕ) : End A) : A ⟶ A) ≫ (γ : A ⟶ A) from rfl,
+      hFmul, ← hliftc]
+    conv_lhs => rw [specφ, specψ]
+    simp only [Category.assoc]
+    rw [reassoc_of% hnat, ← reassoc_of% hfnstep, reassoc_of% hsq]
+  exact (rem272Beta_uniq Fc hiso hmet hFs hA hE (φ ≫ ψ) (baseIdentity_of_otri hmemnew)
+    (isPreStep_of_otri hmemnew) (S.lift_homP hA hE (P.Base (φ ≫ ψ))) key).symm
+
+/-- ★★合成則を `𝒪^×(A)` の中で述べたもの(`Additive` へ渡しやすい形)。 -/
+theorem rem272BetaO_comp (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (hmet : ∀ {A B : C} (f : A ⟶ B), IsIsometric P f)
+    (hfnA : ∀ A : C, IsFrobeniusNormalized P A)
+    {Fs : ℕ+ →* SectionEnd S} (hFs : IsFrobeniusSection S Fs)
+    {A B E : C} (hA : S.objP A) (hB : S.objP B) (hE : S.objP E)
+    (φ : A ⟶ B) (ψ : B ⟶ E) (γ : OTimes P A)
+    (hsq : S.lift hA hB (P.Base φ)
+          ≫ ((rem272BetaO Fc hiso hmet hFs hB hE ψ : End B) : B ⟶ B)
+        = ((γ : End A) : A ⟶ A) ≫ S.lift hA hB (P.Base φ)) :
+    rem272BetaO Fc hiso hmet hFs hA hE (φ ≫ ψ)
+      = γ * (rem272BetaO Fc hiso hmet hFs hA hB φ) ^ ((P.degFr ψ : ℕ+) : ℕ) :=
+  Subtype.ext (rem272Beta_comp Fc hiso hmet hfnA hFs hA hB hE φ ψ (γ : End A)
+    (OTimes_le_OTri P A γ.2) hsq)
+
+/-- ★locator —— `Remark 2.7.2` の中央項の合成則。 -/
+def rem272Beta_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 102,
+    item := "Theorem 5.2, (iv) — E の射の一意分解が与える u の合成則",
+    sectionId := "frdi-thm-5-2" }
+
 end ABC3.Found.FrdI

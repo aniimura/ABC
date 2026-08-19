@@ -92,11 +92,12 @@ structure GaloisRepData where
   /-- 台となる Tate 加群。 -/
   toTateModuleData : TateModuleData
   /-- `ρ_{E,l}`。 -/
-  rep : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [Algebra K L] →
+  rep : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [DecidableEq L] →
+    [Algebra K L] →
     (W : WeierstrassCurve K) → (l : ℕ) → [Fact l.Prime] → (L ≃ₐ[K] L) →
     Matrix.GeneralLinearGroup (Fin 2) ℤ_[l]
   /-- ★群準同型であること。 -/
-  rep_mul : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
+  rep_mul : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L] [Algebra K L]
     (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ τ : L ≃ₐ[K] L),
     rep W l (σ * τ) = rep W l σ * rep W l τ
   /-- ★★★★**`rep` は `T_l E` への本物の作用の行列表示である**。
@@ -109,20 +110,8 @@ structure GaloisRepData where
       ∀ (σ : L ≃ₐ[K] L) (x : tateModule (W.baseChange L) l),
         e (galTate W l σ x)
           = Matrix.mulVec (rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]) (e x)
-  /-- ★★★★**行列式は円分指標である**(Weil 対の内容)。
-
-  `det ρ(σ)` は 1 の `l^n` 乗根への `σ` の作用の指数である。
-
-  ★★これは真であり、かつ **`rep := 1` を殺す**——
-  `K = ℚ`、`l ≥ 3` なら `ζ_l` を動かす `σ` があるので `det ρ(σ) ≠ 1`。 -/
-  det_cyclotomic : ∀ (K L : Type) [Field K] [DecidableEq K] [CharZero K] [Field L] [DecidableEq L]
-    [Algebra K L] [IsAlgClosed L] (W : WeierstrassCurve K), W.IsElliptic →
-    ∀ (l : ℕ), ∀ _ : Fact l.Prime, ∀ (σ : L ≃ₐ[K] L) (n : ℕ) (ζ : L), ζ ^ (l ^ n) = 1 →
-      σ ζ = ζ ^ ((PadicInt.toZModPow n
-        ((rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det)).val)
-
 def GaloisRepData.waiting : WaitingFor :=
-  { what := "(G3) l 進 Galois 表現 rho_{E,l} : Gal(K̄/K) → GL_2(Z_l) が T_l E への本物の作用の行列表示であることと、その行列式が円分指標であること"
+  { what := "(G3) l 進 Galois 表現 rho_{E,l} : Gal(K̄/K) → GL_2(Z_l) が T_l E への本物の作用の行列表示であること"
     trackB := "Found/GaloisRep — ★作用そのものは mathlib の `Affine.Point.map`(関手性つき)で**定義済み**(`galTate`)。★★残るのは (i) 作用が Z_l 線型で行列に書けること((G2) の基底を層ごとに使う)と、(ii) **`det = 円分指標`**——これには **Weil 対**が要る(mathlib に 0 件、2026-08-17 実測)" }
 
 /-! ## ★★G4 —— `mod l` 表現 -/
@@ -137,15 +126,17 @@ structure ModLRepData where
   /-- 台となる `l` 進表現。 -/
   toGaloisRepData : GaloisRepData
   /-- `mod l` 表現。 -/
-  repMod : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [Algebra K L] →
+  repMod : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [DecidableEq L] →
+    [Algebra K L] →
     (W : WeierstrassCurve K) → (l : ℕ) → [Fact l.Prime] → (L ≃ₐ[K] L) →
     Matrix.GeneralLinearGroup (Fin 2) (ZMod l)
   /-- ★群準同型であること。 -/
-  repMod_mul : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
+  repMod_mul : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L] [Algebra K L]
     (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ τ : L ≃ₐ[K] L),
     repMod W l (σ * τ) = repMod W l σ * repMod W l τ
   /-- ★★`l` 進表現の還元であること。 -/
-  repMod_eq_reduction : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
+  repMod_eq_reduction : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
+    [Algebra K L]
     (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (σ : L ≃ₐ[K] L),
     (repMod W l σ : Matrix (Fin 2) (Fin 2) (ZMod l))
       = (toGaloisRepData.rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).map
@@ -167,15 +158,34 @@ structure FullImageData where
   /-- 台となる `mod l` 表現。 -/
   toModLRepData : ModLRepData
   /-- 像が `SL₂` を含むという述語。 -/
-  ImageContainsSL2 : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] → [Algebra K L] →
+  ImageContainsSL2 : {K L : Type} → [Field K] → [DecidableEq K] → [Field L] →
+    [DecidableEq L] → [Algebra K L] →
     WeierstrassCurve K → ℕ → Prop
   /-- ★★**述語の内容**——`SL₂(ℤ_l)` のどの元も像に入ること。 -/
-  imageContainsSL2_iff : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [Algebra K L]
+  imageContainsSL2_iff : ∀ {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
+    [Algebra K L]
     (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime],
-    @ImageContainsSL2 K L _ _ _ _ W l ↔
+    @ImageContainsSL2 K L _ _ _ _ _ W l ↔
       ∀ A : Matrix.GeneralLinearGroup (Fin 2) ℤ_[l],
         (A : Matrix (Fin 2) (Fin 2) ℤ_[l]).det = 1 →
         ∃ σ : L ≃ₐ[K] L, toModLRepData.toGaloisRepData.rep W l σ = A
+
+  /-- ★★★★**行列式は円分指標である**(Weil 対の内容)。
+
+  ## ★★★★2026-08-20 の移動(§9-407)
+
+  この条件は以前 (G3) に置いていたが、★**原文が使うのは像の主張の側**である
+  ——`det` が全射だからこそ「像が `GL_2` 全体」まで言える。
+  ★★(G3) は表現の**構成**だけを受け、こちらは像の obligation に置く。
+
+  ★★★内容は **Weil 対**である(mathlib に 0 件、2026-08-17 実測)。
+  `det ρ(σ)` は 1 の `l^n` 乗根への `σ` の作用の指数である。 -/
+  det_cyclotomic : ∀ (K L : Type) [Field K] [DecidableEq K] [CharZero K] [Field L] [DecidableEq L]
+    [Algebra K L] [IsAlgClosed L] (W : WeierstrassCurve K), W.IsElliptic →
+    ∀ (l : ℕ), ∀ _ : Fact l.Prime, ∀ (σ : L ≃ₐ[K] L) (n : ℕ) (ζ : L), ζ ^ (l ^ n) = 1 →
+      σ ζ = ζ ^ ((PadicInt.toZModPow n
+        ((toModLRepData.toGaloisRepData.rep W l σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det)).val)
+
 
 def FullImageData.waiting : WaitingFor :=
   { what := "(G5) Galois 表現の像が SL_2(Z_l) を含むこと —— [GenEll] Theorem 3.8 の結論そのもの"
