@@ -140,10 +140,17 @@ theorem divSlim_pullBack_trivial (F : FrobenioidCore P) (hds : IsDivSlim Φ) (A 
       (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse θ ≪≫ X) = 1 := by
     refine overPhiAut_eq_one Φ _ (fun Z x => ?_)
     show Φ.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x = x
-    rw [Φ.map_comp, Φ.map_comp]
-    rw [show Φ.map (θ.hom.app (e.inverse.obj Z)) (Φ.map (X.hom.app Z) x)
-        = Φ.map (X.hom.app Z) x from hdiv _ _]
-    rw [← Φ.map_comp, X.hom_inv_id_app, Φ.map_id]
+    have hkey := hdiv ((plBkToOver P A).obj (e.inverse.obj Z)) (Φ.map (X.hom.app Z) x)
+    calc Φ.map (X.inv.app Z ≫ θ.hom.app (e.inverse.obj Z) ≫ X.hom.app Z) x
+        = Φ.map (X.inv.app Z) (Φ.map (θ.hom.app (e.inverse.obj Z))
+            (Φ.map (X.hom.app Z) x)) := by
+            rw [Φ.map_comp, Φ.map_comp]
+            rfl
+      _ = Φ.map (X.inv.app Z) (Φ.map (X.hom.app Z) x) :=
+            congrArg (fun t => Φ.map (X.inv.app Z) t) hkey
+      _ = Φ.map (X.inv.app Z ≫ X.hom.app Z) x :=
+            (Φ.map_comp (X.hom.app Z) (X.inv.app Z) x).symm
+      _ = x := by rw [X.inv_hom_id_app, Φ.map_id]
   have h1 : (X.symm ≪≫ Functor.isoWhiskerLeft e.inverse θ ≪≫ X)
       = (1 : Aut (Over.forget ((P.toElem.obj A).base))) :=
     hds _ (hconj.trans (overPhiAut_one Φ _).symm)
