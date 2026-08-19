@@ -313,6 +313,31 @@ def psiBirat.src : ABC3.Meta.Source :=
     sectionId := "frdi-prop-4-8" }
 
 
+/-! ## ★★★`psi-birat-equiv` —— `Ψ^birat` が圏同値であること
+
+原文 (FrdI p.88):
+> (ii), observe that the naive Frobenius functor [cf. Proposition 2.1] determines a
+
+★★在庫の `prop_2_1_iii_mp`(perfect 型なら `naiveFrob` は圏同値)を
+`𝒞^birat` へ移す。★対象は `𝒞^birat` が `𝒞` と同じ型なので、
+**本質的全射性はそのまま移る**。 -/
+
+/-- ★★★★**`Ψ^birat` は本質的全射** —— 対象が同じ型なので `naiveFrob` の
+本質的全射性を `toBiratCat` で送るだけ。 -/
+theorem psiBirat_essSurj (hpt : IsOfPerfectType P) : (psiBirat P d G).EssSurj := by
+  haveI := naiveFrob_essSurj P G.core d hpt
+  constructor
+  intro B
+  obtain ⟨A, ⟨ε⟩⟩ := Functor.EssSurj.mem_essImage (F := naiveFrob P G.core d)
+    (biratDown P G B)
+  exact ⟨A, ⟨(toBiratCat P G).mapIso ε⟩⟩
+
+def psiBirat_essSurj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Proposition 4.8, (ii) — Ψ^birat は本質的全射",
+    sectionId := "frdi-prop-4-8" }
+
+
 end Birat
 
 def biratNfMap.src : ABC3.Meta.Source :=
