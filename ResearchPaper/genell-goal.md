@@ -12912,3 +12912,70 @@ mathlib の
 | `logMetric` + 4 法則 | ★未着手 |
 | `IsConjCompatible` + `isConjCompatible_iff` | ★未着手 |
 | `tensorMetric` + `logMetric_tensor` | ★未着手 |
+
+## §9-327 —— ★★★★★★連続な弧計量が構成できた(第 283 ブロック)
+
+第 246 の `ArcMetric`(3 法則)に連続性を足した `ContArcMetric` を、
+**自明化被覆と 1 の分割から実際に構成した**。
+
+| 法則 | 出所 |
+|---|---|
+| 非負・スカラー倍・`=0 ↔ v=0` | 第 272 `gluedNormX_*` |
+| ★★★連続性 | 第 282 `continuous_gluedNorm_section` |
+
+★`gluedNormX_eq_zero_iff` が要求する 2 つの側条件は mathlib の
+`PartitionOfUnity.exists_pos` と `LocallyFinite.point_finite` から出た。
+
+### ★Lean の細目
+
+`hsub` は**主張に現れず証明でだけ使う**ので、`include hsub in` が要る
+——しかも `include ... in` は**docstring より前**に置く。
+
+## §9-328 —— ★★★★被覆から 1 の分割が出る(第 284 ブロック)
+
+`X` の開被覆から `X^arc` の被覆が出る。★★理由は**`ℂ` は体なので `Spec ℂ` は 1 点**
+(mathlib の `instance [Field R] : Unique (PrimeSpectrum R)`)。
+
+★コンパクト + T2 から `NormalSpace` と `ParacompactSpace` が instance で無料に出るので、
+`PartitionOfUnity.exists_isSubordinate` がそのまま使える。
+
+## §9-329 —— ★★★★★★★連続な計量は存在する(第 285 ブロック)
+
+    exists_contArcMetric : IsLocallyTrivial F → CompactSpace X^arc → T2Space X^arc
+                             → Nonempty (ContArcMetric X F)
+
+★★★**これが (C3) の本当の障害だった**——Interface 自身が
+「(C3) を塞いでいるのは複素解析空間ではなく点集合位相である」と書いていた、その点である。
+
+★自明化篩の添字型 `trivIndex S := { V // S.arrows (homOfLE le_top) }` を作り、
+選択公理で自明化を選ぶ。★★`Opens` の Grothendieck 位相が**点ごと**なので
+被覆条件が直接出る。
+
+### ★★★★★見積もりの記録——C3 の主要部
+
+| 見積もり(§9-284 時点) | 実測 |
+|---|---|
+| C3 全体 20–40 ブロック | ★**42 ブロック**(244–285)で存在まで |
+
+★★ほぼ当たった。★★★ただし内訳は大きく外れており、
+**§9-297 の誤判定による回り道(257–263)が 7 ブロック**含まれる
+——それが無ければ 35 ブロックだった。
+
+## §9-330 —— ★★定数倍と切断のノルム(第 286 ブロック)
+
+Interface の 6 欄(`scale` / `normSection` + 4 法則)を `Found` 側で用意した。
+
+### ★★★残る設計上の問題——`logMetric` は絶対量ではない
+
+`logMetric : Metric X L → Arc X → ℝ` を**絶対的な関数として定義できない**。
+★Green 関数は**基準計量に対する比**でしか定まらないからである。
+
+★★逃げ道は 2 つ:
+
+| 案 | 内容 | 代償 |
+|---|---|---|
+| (a) `logMetric` を相対化 | `logRatio : Metric → Metric → Arc → ℝ` | ★Interface の手術(D1–D3 は未着手なので下流の損は無い) |
+| (b) 基準計量を選択公理で固定 | `Nonempty` は Prop なので**型だけで決まる**基準が取れる | ★★ファイバーが 1 次元であることが要る |
+
+★★★(b) は実は近い——`trivFiberIso` が既に `arcFiber p L ≅ ℂ` を与えているので、
+**1 次元性は自明化がある点では在庫**である。次はここを測る。
