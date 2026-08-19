@@ -490,6 +490,7 @@ import ABC3.Found.GaloisRep.XYStep
 import ABC3.Found.GaloisRep.MulPoint
 import ABC3.Found.GaloisRep.MulOrder
 import ABC3.Found.GaloisRep.TorsionAll
+import ABC3.Found.GaloisRep.Wronskian
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
