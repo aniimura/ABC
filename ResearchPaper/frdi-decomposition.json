@@ -206,9 +206,12 @@
      "deps": [
       "decomposition"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "evidence": "★(i) と (iii) の `co-prime type` は分解を要さない(定義だけ)。(iii) の λ 乗写像は `M[l]` ごとに `λ(l)` 乗するので `decomposition` が要る。"
+     "evidence": "★(i) と (iii) の `co-prime type` は分解を要さない(定義だけ)。(iii) の λ 乗写像は `M[l]` ごとに `λ(l)` 乗するので `decomposition` が要る。",
+     "file": "lean/ABC3/Found/ProL/ZetaPow.lean, lean/ABC3/Found/FrdI/Def28.lean",
+     "decl": "pow_bijective_of_proL / zetaPow / IsCoPrimeType / zetaPow_bijective / otimesGroup / IsOfUnitProfiniteType / def_2_8.src",
+     "note": "## ★★★★★★閉じた(2026-08-19) —— §2 が 8/8 に\n\n| 条 | 実装 |\n|---|---|\n| (i) unit-profinite 型 | `IsOfUnitProfiniteType`(＋`𝒪^×(A)` の群構造 `otimesGroup`) |\n| (ii) `M[l]` と分解 | `lPart` / `lPartGrp` / `isProL_lPartGrp` / `decompEquiv` |\n| (iii) ζ 乗写像・co-prime 型・全単射 | `zetaPow` / `IsCoPrimeType` / ★`zetaPow_bijective` |\n\n★★(iii) の括弧書き「co-prime 型なら全単射」は\n**pro-`l` 群で `l` と素な冪写像が全単射**に帰着(`pow_bijective_of_proL`)——\n単射は「位数が `l` 冪かつ `n` と素」、全射は各有限商で在庫の `powCoprime`、\n整合性は**単射性**から出る。\n\n## ★★逸脱 2 件(記録)\n(a) (i) の角括弧「**uniquely determined**」は主張しない ——\n**Nikolov–Segal**(位相的有限生成な副有限群の有限指数部分群は開)に依り mathlib に無い。\n★定義として下流が要るのは「位相を 1 つ選べること」なので消費側に影響しない。\n(b) (ii)(iii) は**位相的有限生成を仮定しない** ——\n原文より弱い仮定なので原文の主張はこれの系(安全側)。"
     }
    ]
   },

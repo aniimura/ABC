@@ -39,7 +39,7 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
 
 /-- ★`𝒪^×(A)` の元の逆射も `𝒪^×(A)` に入る。 -/
-theorem otimes_inv_mem {A : C} {δ : End A} (h : δ ∈ OTimes P A)
+theorem otimesInvMem {A : C} {δ : End A} (h : δ ∈ OTimes P A)
     (hi : IsIso ((δ : A ⟶ A))) :
     ((@inv _ _ _ _ ((δ : A ⟶ A)) hi) : End A) ∈ OTimes P A := by
   haveI := hi
@@ -57,7 +57,7 @@ theorem otimes_inv_mem {A : C} {δ : End A} (h : δ ∈ OTimes P A)
 noncomputable instance otimesGroup (A : C) : Group (OTimes P A) where
   inv x :=
     haveI : IsIso (((x : End A) : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso _).mp x.2.2
-    ⟨((inv (((x : End A)) : A ⟶ A)) : End A), otimes_inv_mem P x.2 inferInstance⟩
+    ⟨((inv (((x : End A)) : A ⟶ A)) : End A), otimesInvMem P x.2 inferInstance⟩
   inv_mul_cancel x := by
     haveI : IsIso (((x : End A) : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso _).mp x.2.2
     refine Subtype.ext ?_
