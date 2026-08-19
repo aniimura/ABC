@@ -110,8 +110,9 @@ theorem isOfGroupLikeType_of_phiTrivial
     (htriv : ∀ (Y : C) (x : Φ.val (P.toElem.obj Y).base), x = 0) :
     IsOfGroupLikeType P := by
   intro A a
-  rw [htriv A a]
-  exact isAddUnit_zero
+  obtain ⟨y, rfl⟩ := toChar_surjective _ a
+  rw [htriv A y]
+  exact map_zero _
 
 /-- ★★★★★**`Φ` が自明なら `Frobenius-compact` は `𝒞^birat` へ移る**。
 
@@ -143,7 +144,10 @@ theorem birat_isFrobeniusCompact_of_noStep
         show biratDeg (toHomBirat (P := P) (G := G) (u : A ⟶ A)) = 1
         rw [biratDeg_toHomBirat]
         exact hl
-      · exact hu.map (Functor.mapEnd A (toBiratCat P G))
+      · haveI : IsIso ((u : A ⟶ A)) := (CategoryTheory.isUnit_iff_isIso u).mp hu
+        refine (CategoryTheory.isUnit_iff_isIso _).mpr ?_
+        show IsIso ((toBiratCat P G).map (u : A ⟶ A))
+        infer_instance
     · rintro ⟨⟨hb, hl⟩, hu⟩
       refine ⟨⟨?_, ?_⟩, ?_⟩
       · show P.Base (u : A ⟶ A) = P.Base (𝟙 A)
@@ -155,20 +159,12 @@ theorem birat_isFrobeniusCompact_of_noStep
         have hl' : biratDeg (toHomBirat (P := P) (G := G) (u : A ⟶ A)) = 1 := hl
         rw [biratDeg_toHomBirat] at hl'
         exact hl'
-      · obtain ⟨v, hv⟩ := hu
-        refine ⟨⟨u, (toBiratCat P G).preimage ((v⁻¹ : (End _)ˣ) : End _), ?_, ?_⟩, rfl⟩
-        · refine (toBiratCat P G).map_injective ?_
-          show (toBiratCat P G).map ((u : End A) * _) = (toBiratCat P G).map (1 : End A)
-          rw [map_mul, Functor.map_preimage, CategoryTheory.Functor.map_id]
-          show ((toBiratCat P G).map (u : A ⟶ A) : End _) * _ = 1
-          rw [show ((toBiratCat P G).map (u : A ⟶ A) : End _) = (v : End _) from hv.symm]
-          exact v.mul_inv
-        · refine (toBiratCat P G).map_injective ?_
-          show (toBiratCat P G).map (_ * (u : End A)) = (toBiratCat P G).map (1 : End A)
-          rw [map_mul, Functor.map_preimage, CategoryTheory.Functor.map_id]
-          show _ * ((toBiratCat P G).map (u : A ⟶ A) : End _) = 1
-          rw [show ((toBiratCat P G).map (u : A ⟶ A) : End _) = (v : End _) from hv.symm]
-          exact v.inv_mul
+      · haveI : IsIso ((toBiratCat P G).map (u : A ⟶ A)) := by
+          have h1 : IsIso ((Functor.mapEnd A (toBiratCat P G)) u) :=
+            (CategoryTheory.isUnit_iff_isIso _).mp hu
+          exact h1
+        refine (CategoryTheory.isUnit_iff_isIso u).mpr ?_
+        exact isIso_of_reflects_iso (u : A ⟶ A) (toBiratCat P G)
   · intro θ u
     show (toBiratCat P G).map ((endConj θ u : End A) : A ⟶ A)
       = endConj _ ((toBiratCat P G).map ((u : End A) : A ⟶ A))
@@ -181,6 +177,59 @@ theorem birat_isFrobeniusCompact_of_noStep
 def birat_isFrobeniusCompact_of_noStep.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Proposition 4.8, (iii) — Φ が自明な枝の Frobenius-compact 対象",
+    sectionId := "frdi-prop-4-8" }
+
+/-! ## ★★★★★★`Proposition 4.8, (iii)` —— 場合分けなしの形 -/
+
+/-- ★★★★★★**[FrdI] Proposition 4.8, (iii)**(完全形) ——
+`𝒞` が isotropic 型・birationally Frobenius-normalized 型・standard 型なら
+`𝒞^birat` は **standard 型**。
+
+★★`Φ` に 0 でない値があるかどうかで場合分けする:
+- ある場合: `birat_isFrobeniusCompact_of_ne_zero`(`Prop48Cond3.lean`)
+- 無い場合: `𝒞` は group-like なので `standard` の `groupLikeCompact` が
+  compact 対象を与え、**step が無いので `𝒞 → 𝒞^birat` は忠実充満**、
+  そのまま移送できる。 -/
+theorem prop_4_8_iii_full
+    (hiso : IsOfIsotropicType P)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+      ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+    (hndOn : MonoidOn.IsNonDilatingOn Φ)
+    (hFSMFF : IsOfFSMFFType D)
+    (hstd : IsOfStandardType D C P G.core) :
+    IsOfStandardType D (BiratCat P G) (biratPre P G) (biratFrobenioid P G hfn).core := by
+  classical
+  by_cases hex : ∃ (A₀ : BiratCat P G)
+      (x₀ : Φ.val (P.toElem.obj (biratDown P G A₀)).base), x₀ ≠ 0
+  · exact prop_4_8_iii hiso hfn hdivS hndOn hFSMFF hex
+  · -- ★`Φ` はすべての対象で自明
+    have htriv : ∀ (Y : C) (x : Φ.val (P.toElem.obj Y).base), x = 0 := by
+      intro Y x
+      by_contra hx
+      exact hex ⟨Y, x, hx⟩
+    have hno : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso f :=
+      fun f hf => isIso_of_coaPre_of_phiTrivial hiso htriv f hf
+    obtain ⟨A, hA⟩ := hstd.groupLikeCompact (isOfGroupLikeType_of_phiTrivial htriv)
+    refine
+      { quasiIsotropic := birat_isOfQuasiIsotropicType P G hfn hiso
+        frobIsotropic := isOfFrobeniusIsotropicType_of_isotropic (prop_4_8_i hiso)
+        groupLikeCompact := fun _ => ?_
+        frobNormalized := hfn
+        baseFSMFF := hFSMFF
+        phiNonDilating := trivialOn_isNonDilatingOn }
+    refine ⟨istrObj (biratPre P G) (prop_4_8_i hiso A.obj), ?_⟩
+    refine istr_frobeniusCompact (biratPre P G) _ (prop_4_8_i hiso A.obj) ?_
+    exact birat_isFrobeniusCompact_of_noStep hno A.obj
+      (istr_frobeniusCompact' P G.core A.property hA)
+
+def prop_4_8_iii_full.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8, (iii)",
+    sectionId := "frdi-prop-4-8" }
+
+/-- ★★★★★★**[FrdI] Proposition 4.8** —— (i)〜(iv) がすべて揃った。 -/
+def prop_4_8.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88, item := "Proposition 4.8",
     sectionId := "frdi-prop-4-8" }
 
 end NoStep

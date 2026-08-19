@@ -96,6 +96,16 @@ theorem istr_frobeniusCompact {A : Cc} (hA : IsIsotropic Q A)
         Equiv.apply_symm_apply])
     h
 
+/-- ★★★★**逆向き** —— `Istr` で Frobenius-compact なら元でもそう。 -/
+theorem istr_frobeniusCompact' {A : Cc} (hA : IsIsotropic Q A)
+    (h : IsFrobeniusCompact (istrPre Q Fq) (istrObj Q hA)) :
+    IsFrobeniusCompact Q A :=
+  isFrobeniusCompact_transport (istrPre Q Fq) Q
+    (istrEndEquiv Q hA) (istrIsoEquiv Q hA)
+    (fun u => istr_mem_otimes_iff Q Fq hA u)
+    (fun θ u => istr_endConj Q hA θ u)
+    h
+
 def istr_frobeniusCompact.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 86,
     item := "Remark 4.5.1 — Frobenius-compact 対象は 𝒞^istr へ持ち上がる",
