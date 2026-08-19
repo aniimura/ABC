@@ -1899,7 +1899,7 @@
      "deps": [
       "ratfn-iface"
      ],
-     "note": "otriStarBirat は (InducedCategory D (istrBase (biratPre P G)))ᵒᵖ ⥤ MonCat。\n𝒟* ≃ 𝒟(prop_2_2_i)で移し、乗法 → 加法(Additive)に変え、\nMonoidOn の charInj / fsmIso を示す。★interface だけで (iv) は書けるので後回しでよい。",
+     "note": "otriStarBirat は (InducedCategory D (istrBase (biratPre P G)))ᵒᵖ ⥤ MonCat。\n𝒟* ≃ 𝒟(prop_2_2_i)で移し、乗法 → 加法(Additive)に変え、\nMonoidOn の charInj / fsmIso を示す。★interface だけで (iv) は書けるので後回しでよい。\n\n## ★★2026-08-20 夜 の現在地\n★**単系の同型そのものは取れた**: unit-trivial 型では `𝒪^×(A^birat) ≅ Φ^birat(A)`\n(`otimesBiratEquivPhiBirat`, `Thm52ModelType.lean`)。核が `𝒪^×(A)_𝒞` の像で、\nunit-trivial ならそれが自明だから。\n\n★★**残るのは「`Φ^birat` を `MonoidOn D` として立てる」ことだけ**である:\n* `phiBiratAt` は `𝒞` の対象で添字づけられている。`𝒟` の対象 `d` へ移すには\n  `baseSurj` で `Base A ≅ d` なる `A` を選び、`phiBiratAt_map_le` /\n  `mem_phiBiratAt_transport` で選択によらないことを示す。\n* そのうえで `MonoidOn` の 3 フィールド(`functor` / `charInj` / `fsmIso`)を埋める。\n  `Φ^gp` の `MonoidOn`(`Φ.gpOn`)は在庫にあるので、その**部分関手**として作る。\n★これができれば `Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の\nmodel Frobenioid)と `Proposition 5.5, (iv)` の第 2 の場合が `modelType_equiv` で出る。",
      "lean": "",
      "decl": ""
     },
