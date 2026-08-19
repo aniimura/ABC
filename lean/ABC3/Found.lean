@@ -585,6 +585,7 @@ import ABC3.Found.GaloisRep.TranslateEquiv
 import ABC3.Found.GaloisRep.TranslateComp
 import ABC3.Found.GaloisRep.TwoTorsionDecomp
 import ABC3.Found.GaloisRep.NotTwoTorsionPoint
+import ABC3.Found.GaloisRep.TranslateAutAll
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

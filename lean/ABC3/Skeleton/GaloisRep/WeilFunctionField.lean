@@ -1,4 +1,4 @@
-import ABC3.Found.GaloisRep.NotTwoTorsionPoint
+import ABC3.Found.GaloisRep.TranslateAutAll
 import ABC3.Found.GaloisRep.PointHom
 
 /-!
@@ -9,7 +9,7 @@ import ABC3.Found.GaloisRep.PointHom
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-## ★★★★★★葉 1(平行移動)は**ほぼ閉じた**
+## ★★★★★★葉 1(平行移動)は**閉じた**
 
 2026-08-20 の作業で、平行移動の側は次まで `Found` に入った:
 
@@ -27,7 +27,7 @@ import ABC3.Found.GaloisRep.PointHom
 | 2 等分点でない点の存在(代数閉・標数≠2) | `Found/GaloisRep/NotTwoTorsionPoint.lean`(第 123) | ✅ |
 | **平行移動の単射性(仮定なし)** | 同上 | ✅ |
 | **全単射性**(2 等分点以外) | `Found/GaloisRep/TranslateEquiv.lean`(第 120) | ✅ |
-| 2 等分点での自己同型(単射性は済、包装のみ) | 本ファイル | ★**葉** |
+| **2 等分点での自己同型** | `Found/GaloisRep/TranslateAutAll.lean`(第 124) | ✅ |
 | `[n]` の環準同型(`pointHom` の一般形から) | `Found/GaloisRep/PointHom.lean`(第 118) | ✅ |
 | **生成点が捻れ点でないこと** | 本ファイル | ★**葉** |
 | **`x([n]P) = Φ_n/ΨSq_n`** | 本ファイル | ★**葉** |
@@ -53,21 +53,6 @@ variable {F : Type} [Field F]
 noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : W.FunctionField :=
   algebraMap W.CoordinateRing W.FunctionField
     (CoordinateRing.mk W (Polynomial.C p))
-
-/-! ## ★★★★★葉 1b —— 2 等分点での自己同型 -/
-
-/-- ★★★★★★**平行移動 `τ_Q` は関数体の `F` 自己同型である**(`Q` が 2 等分点のとき)。
-
-★★★★★★2 等分点でない場合は **`Found` に入った**(第 120 ブロック
-`exists_translateAut_of_not_twoTorsion`)——逆は `τ_{−Q}` で、合成が恒等であることは
-`functionField_algHom_ext` により生成元での計算に落ち、`(G + Z) + Q = G` という
-mathlib の群法則で片付いた。
-★2 等分点では単射性がまだ無いので、ここだけが残っている。 -/
-theorem exists_translateAut_twoTorsion (W : WeierstrassCurve.Affine F) [W.IsElliptic]
-    {x₀ y₀ : F} (hQ : W.Nonsingular x₀ y₀) (h2 : W.negY x₀ y₀ = y₀) :
-    ∃ τ : W.FunctionField ≃ₐ[F] W.FunctionField,
-      τ (coordX W) = translateX W x₀ y₀ ∧ τ (coordY W) = translateY W x₀ y₀ := by
-  sorry
 
 /-! ## ★★★★★葉 2a —— 生成点は捩れ点でない -/
 
@@ -106,22 +91,6 @@ def polyToFF.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(F[X] の元を関数体に送る写像)",
     sectionId := "genell-thm-3-8" }
-
-def exists_translateAut_twoTorsion.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(Weil 対の構成——平行移動の関数体への引き戻し)",
-    sectionId := "genell-thm-3-8" }
-
-def exists_translateAut_twoTorsion.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3(平行移動が関数体の F 自己同型を誘導すること)"
-      (.absent "mathlib に平行移動の関数体への引き戻しは 0 件(2026-08-20、EllipticCurve/ 配下を `translat|mulByN|scalarMul` で全文検索して 0 件)") 19,
-    .otherPaper "GenEll" "Theorem 3.8(Weil 対の構成——2 等分点での平行移動の単射性)" 19,
-    .implicitStep
-      "★★★★★★**環準同型・単射性・分数体への延長はすべて Found に入った**(第 114-117)。生成点が曲線の非特異点であることから mathlib の `nonsingular_add` が効き、超越性は `−Q` での 1 点評価で決まった。当初の見積もり(20-60 ブロック)は**大きく下方修正**される(0 ブロック)" 19,
-    .implicitStep
-      "★★★★★★**2 等分点以外の全単射性は Found に入った**(第 120 ブロック `translateAlgEquiv`)。`functionField_algHom_ext`(第 119)で生成元の計算に落ち、`(G + Z) + Q = G` という mathlib の群法則で片付いた(0 ブロック)" 19,
-    .implicitStep
-      "★残るのは 2 等分点の場合だけであり、それは単射性(上の辺)が出れば同じ道で閉じる(3-8 ブロック)" 19 ]
 
 def genericPoint_not_torsion.src : Source :=
   { paper := "GenEll", pdfPage := 19,
