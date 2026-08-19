@@ -1493,31 +1493,37 @@
           "id": "psi-birat-exists",
           "title": "Ψ^birat : 𝒞₁^birat ⥤ 𝒞₂^birat の 1-一意な存在と 1-可換図式",
           "size": "★大",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "hyp"
           ],
-          "note": "★★本セッションの `Prop 4.8, (ii)` で **naive Frobenius に対する** `Ψ^birat` を作った\n(`psiBirat` / `psiBiratSquare` / `psiBirat_isEquivalence`、`Prop48Nf.lean`)。\n★★★**同じ骨格が一般の `Ψ` に対しても使えるはず** ——\n要るのは「`Ψ` が co-angular pre-step を保つ／反射する」で、\nこれは `Theorem 3.4, (ii)(iii)` から出る(`isCoAngular_of_map` など、在庫)。\n★着手前に `Prop48Nf.lean` の 4 段を**一般の `Ψ` に書き直せるか**を測ること。"
+          "note": "★★本セッションの `Prop 4.8, (ii)` で **naive Frobenius に対する** `Ψ^birat` を作った\n(`psiBirat` / `psiBiratSquare` / `psiBirat_isEquivalence`、`Prop48Nf.lean`)。\n★★★**同じ骨格が一般の `Ψ` に対しても使えるはず** ——\n要るのは「`Ψ` が co-angular pre-step を保つ／反射する」で、\nこれは `Theorem 3.4, (ii)(iii)` から出る(`isCoAngular_of_map` など、在庫)。\n★着手前に `Prop48Nf.lean` の 4 段を**一般の `Ψ` に書き直せるか**を測ること。\n\n## ★★★★★閉じた(2026-08-19)\n\n`Cor410Birat.lean` を新設し、`Prop48Nf.lean` の `psiBirat`(同じ圏の自己関手版)を\n**2 つの圏の間へ移植**した。\n\n| 段 | 宣言 |\n|---|---|\n| `𝒞^{coa-pre}` の間の関手 | `coaPrePsi`(＋ 忠実・充満・本質的全射・圏同値) |\n| 添字圏の対応 | `slicePsi` / `idxBiratPsi` / `idxBiratPsi_isEquivalence` |\n| `Hom^birat` の写像 | `biratPsiCocone` / `biratPsiMap` / `biratPsiMap_mk` |\n| 合成の保存 | `biratPsi_pullAlpha_transport` / `biratPsiMap_comp_mk` / `biratPsiMap_comp` |\n| **`Ψ^birat`** | `psiBiratCor` |\n| **1-可換図式** | `psiBiratCor_square`(★**厳密な等式**) |\n\n## ★★測って分かった制約 —— 両側の宇宙を揃える必要がある\n\n`Cocone` の頂点は関手の行き先と**同じ宇宙**でなければならず、\n`HomBirat P₁ G₁ A B : Type (max v u2 v2)` と\n`HomBirat P₂ G₂ _ _ : Type (max v' u2' v2')` が食い違うと**余錐が組めない**(実測)。\n★したがって `Cor410Birat.lean` は両側の宇宙を揃えて宣言している。\n`Corollary 4.10` の用法では両側は同じ大きさなので実害は無い。\n\n★`Ψ` が co-angular pre-step を保ち・反射することは\n`Theorem 3.4, (ii)` の内容なので**仮定として受ける**。",
+          "lean": "ABC3/Found/FrdI/Cor410Birat.lean",
+          "decl": "Cor410Birat.psiBiratCor / psiBiratCor_square"
         },
         {
           "id": "psi-birat-equiv2",
           "title": "Ψ^birat が圏同値であること",
           "size": "★中",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psi-birat-exists"
           ],
-          "note": "★`Prop48Nf.lean` の `psiBirat_isEquivalence` と同じ 3 性質。\n★添字圏の圏同値(`idxBiratNfMap_isEquivalence` の一般版)が要点。"
+          "note": "★`Prop48Nf.lean` の `psiBirat_isEquivalence` と同じ 3 性質。\n★添字圏の圏同値(`idxBiratNfMap_isEquivalence` の一般版)が要点。\n\n## ★★★★閉じた(2026-08-19)\n\n`psiBiratCor_essSurj` / `_faithful` / `_full` / `_isEquivalence`。\n★`Prop48Nf.lean` の `psiBirat_*` の写し ——\n**添字圏が圏同値なので共通の上界を像の中に取り直せる**のが要点。",
+          "lean": "ABC3/Found/FrdI/Cor410Birat.lean",
+          "decl": "Cor410Birat.psiBiratCor_isEquivalence"
         },
         {
           "id": "cor410-src",
           "title": "Corollary 4.10 の条なし .src",
           "size": "★小",
-          "status": "todo",
+          "status": "done",
           "deps": [
             "psi-birat-equiv2"
           ],
-          "note": ""
+          "note": "\n\n★条なし `.src`(`item := \"Corollary 4.10\"`)を置いた(2026-08-19)。",
+          "lean": "ABC3/Found/FrdI/Cor410Birat.lean",
+          "decl": "Cor410Birat.cor_4_10.src"
         }
       ]
     },
