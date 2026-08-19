@@ -532,4 +532,87 @@ def istr_biratFrobNormalizedType.src : ABC3.Meta.Source :=
     item := "Remark 4.5.1 — birationally Frobenius-normalized 型は 𝒞^istr で保たれる",
     sectionId := "frdi-remark-4-5-1" }
 
+/-! ## ★10. isotropic hull に沿った自己射の移送 —— 一般の pre-Frobenioid で
+
+★★`Definition 1.2, (iv)` の isotropic hull は `∃!-lift` を持つので、
+**`𝒪^▷` も `𝒪^×` もそのまま向こう側へ移る**。
+★これは Frobenioid 一般の話であり、`𝒞^birat` に当てるために先に一般形で取る。 -/
+
+section HullTransport
+
+universe v' u' w' u2' v2'
+
+variable {D' : Type u'} [Category.{v'} D'] {C' : Type u2'} [Category.{v2'} C']
+  {Φ' : MonoidOn.{v', u', w'} D'} (Q : PreFrobenioid C' Φ')
+
+/-- ★★★**isotropic hull に沿って自己射が一意に移る**。 -/
+theorem hull_transport_end {B H : C'} {k : B ⟶ H} (hk : IsIsotropicHull Q k) (δ : End B) :
+    ∃! δ' : End H, ((δ : B ⟶ B) ≫ k) = k ≫ (δ' : H ⟶ H) := by
+  obtain ⟨-, -, hHiso, hlift⟩ := hk
+  obtain ⟨β, hβ, huniq⟩ := hlift H hHiso ((δ : B ⟶ B) ≫ k)
+  exact ⟨β, hβ, fun γ hγ => huniq γ hγ⟩
+
+/-- ★★移った自己射は `𝒪^▷` に入る。 -/
+theorem hull_transport_mem_otri {B H : C'} {k : B ⟶ H} (hk : IsIsotropicHull Q k)
+    {δ : End B} (hδ : δ ∈ OTri Q B) {δ' : End H}
+    (h : ((δ : B ⟶ B) ≫ k) = k ≫ (δ' : H ⟶ H)) : δ' ∈ OTri Q H := by
+  haveI hki : IsIso (Q.Base k) := hk.2.1.2
+  refine ⟨?_, ?_⟩
+  · have hb := congrArg Q.Base h
+    rw [Q.Base_comp, Q.Base_comp,
+      show Q.Base (δ : B ⟶ B) = Q.Base (𝟙 B) from hδ.1, Q.Base_id, Category.id_comp] at hb
+    show Q.Base (δ' : H ⟶ H) = Q.Base (𝟙 H)
+    rw [Q.Base_id]
+    refine (cancel_epi (Q.Base k)).mp ?_
+    rw [Category.comp_id]
+    exact hb.symm
+  · have hd := congrArg Q.degFr h
+    rw [Q.degFr_comp, Q.degFr_comp,
+      show Q.degFr (δ : B ⟶ B) = 1 from hδ.2, mul_one] at hd
+    show Q.degFr (δ' : H ⟶ H) = 1
+    exact (mul_right_cancel (a := Q.degFr (δ' : H ⟶ H)) (b := Q.degFr k)
+      (c := 1) (by rw [one_mul]; exact hd.symm))
+
+/-- ★★★移した自己射は**単元**になる —— `∃!` の一意性から。 -/
+theorem hull_transport_isUnit {B H : C'} {k : B ⟶ H} (hk : IsIsotropicHull Q k)
+    {δ ε : End B} {δ' ε' : End H}
+    (hde : ((δ : B ⟶ B) ≫ (ε : B ⟶ B)) = 𝟙 B)
+    (hed : ((ε : B ⟶ B) ≫ (δ : B ⟶ B)) = 𝟙 B)
+    (h : ((δ : B ⟶ B) ≫ k) = k ≫ (δ' : H ⟶ H))
+    (h' : ((ε : B ⟶ B) ≫ k) = k ≫ (ε' : H ⟶ H)) :
+    IsUnit δ' := by
+  obtain ⟨-, -, hHiso, hlift⟩ := hk
+  obtain ⟨β0, -, huniq⟩ := hlift H hHiso k
+  have hid : (𝟙 H : H ⟶ H) = β0 := huniq _ (Category.comp_id k).symm
+  have e2 : k ≫ ((ε' : H ⟶ H) ≫ (δ' : H ⟶ H)) = k := by
+    rw [← Category.assoc, ← h', Category.assoc, ← h, ← Category.assoc, hed, Category.id_comp]
+  have e1 : k ≫ ((δ' : H ⟶ H) ≫ (ε' : H ⟶ H)) = k := by
+    rw [← Category.assoc, ← h, Category.assoc, ← h', ← Category.assoc, hde, Category.id_comp]
+  have hone2 : ((ε' : H ⟶ H) ≫ (δ' : H ⟶ H)) = 𝟙 H := by
+    rw [huniq _ e2.symm, ← hid]
+  have hone1 : ((δ' : H ⟶ H) ≫ (ε' : H ⟶ H)) = 𝟙 H := by
+    rw [huniq _ e1.symm, ← hid]
+  exact ⟨⟨δ', ε', hone2, hone1⟩, rfl⟩
+
+/-- ★★★★**移送は `Div` を底の同型で運ぶ** —— hull は等長なので余計な項が出ない。
+
+★`Div(δ) = Φ(Base k)(Div(δ'))`。★これが `Φ^birat` の移送の実体である。 -/
+theorem hull_transport_Div {B H : C'} {k : B ⟶ H} (hk : IsIsotropicHull Q k)
+    {δ : End B} (hδ : δ ∈ OTri Q B) {δ' : End H} (hδ' : δ' ∈ OTri Q H)
+    (h : ((δ : B ⟶ B) ≫ k) = k ≫ (δ' : H ⟶ H)) :
+    Q.Div (δ : B ⟶ B) = Φ'.map (Q.Base k) (Q.Div (δ' : H ⟶ H)) := by
+  have hdv := congrArg Q.Div h
+  rw [Q.Div_comp, Q.Div_comp] at hdv
+  rw [show Q.Base (δ : B ⟶ B) = Q.Base (𝟙 B) from hδ.1, Q.Base_id, Φ'.map_id] at hdv
+  rw [show Q.degFr k = 1 from hk.2.1.1, show Q.degFr (δ' : H ⟶ H) = 1 from hδ'.2] at hdv
+  rw [show Q.Div k = 0 from hk.1] at hdv
+  simpa using hdv
+
+end HullTransport
+
+def hull_transport_end.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22,
+    item := "Definition 1.2, (iv) — isotropic hull に沿った自己射の移送",
+    sectionId := "frdi-def-1-2-iv" }
+
 end ABC3.Found.FrdI
