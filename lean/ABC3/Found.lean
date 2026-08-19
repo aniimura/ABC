@@ -446,6 +446,7 @@ import ABC3.Found.Arakelov.ArcLiftOpen
 import ABC3.Found.Arakelov.ArcEvalCont
 import ABC3.Found.Arakelov.ArcLocalMetric
 import ABC3.Found.Arakelov.ArcGlue
+import ABC3.Found.Arakelov.ArcGlueZero
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
