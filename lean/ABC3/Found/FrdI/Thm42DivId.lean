@@ -321,8 +321,7 @@ theorem divIdCat_map (Ψ : C ≌ C₂)
         ((v₃' : End A) ^ (((P.degFr γ : ℕ+) : ℕ)))
       = (v₃ : End (Ψ.functor.obj A)) ^ (((P.degFr γ : ℕ+) : ℕ)) := by
     rw [map_pow]
-    congr 1
-    exact hv₃'
+    exact congrArg (fun t : End (Ψ.functor.obj A) => t ^ (((P.degFr γ : ℕ+) : ℕ))) hv₃'
   rw [← hp]
   exact h2
 
