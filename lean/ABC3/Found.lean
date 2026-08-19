@@ -84,6 +84,7 @@ import ABC3.Found.FrdI.Thm42
 import ABC3.Found.FrdI.Cor410
 import ABC3.Found.FrdI.Cor411
 import ABC3.Found.FrdI.Cor410Birat
+import ABC3.Found.FrdI.Thm34VBase
 import ABC3.Found.FrdI.AppA
 import ABC3.Found.FrdI.Thm34Pf
 import ABC3.Found.FrdI.Prop48Nf
@@ -434,6 +435,7 @@ import ABC3.Found.Arakelov.ArcContCriterion
 import ABC3.Found.Arakelov.ArcEvalNat
 import ABC3.Found.Arakelov.ArcUnitEval
 import ABC3.Found.Arakelov.ArcEvalGlobal
+import ABC3.Found.Arakelov.ArcTrivMetric
 import ABC3.Found.Arakelov.PicDivisorPull
 import ABC3.Found.Arakelov.PicHcompatImg
 import ABC3.Found.Arakelov.PicHcompatPre
