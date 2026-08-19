@@ -684,6 +684,83 @@ def psiBaseHom.src : ABC3.Meta.Source :=
     item := "Theorem 3.4, (v) — Ψ_Base の射（存在と一意性）",
     sectionId := "frdi-thm-3-4" }
 
+/-! ## ★★★★★★`Ψ_Base : 𝒟₁ ⥤ 𝒟₂` -/
+
+include F₂ hFT hPS in
+/-- ★★★★★★**[FrdI] Theorem 3.4, (v)** —— `Ψ_Base : 𝒟₁ ⥤ 𝒟₂` の構成。
+
+★対象は `Definition 1.3, (i), (a)` が選ぶ `𝒞` の対象を経由し、
+射は `psiBaseHom`(存在は 3 分解、一意性は `𝒟₂` の slim 性)で送る。 -/
+noncomputable def psiBase [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
+    D ⥤ D₂ where
+  obj Y := (P₂.toElem.obj (Ψ.obj (chosenObj P F Y))).base
+  map {Y Y'} g := psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+    ((chosenIso P F Y).hom ≫ g ≫ (chosenIso P F Y').inv)
+  map_id Y := by
+    have h : (chosenIso P F Y).hom ≫ 𝟙 Y ≫ (chosenIso P F Y).inv
+        = 𝟙 ((P.toElem.obj (chosenObj P F Y)).base) := by
+      rw [Category.id_comp, Iso.hom_inv_id]
+    rw [h]
+    exact psiBaseHom_id P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' _
+  map_comp {Y Y' Y''} g g' := by
+    have h : (chosenIso P F Y).hom ≫ (g ≫ g') ≫ (chosenIso P F Y'').inv
+        = ((chosenIso P F Y).hom ≫ g ≫ (chosenIso P F Y').inv)
+          ≫ ((chosenIso P F Y').hom ≫ g' ≫ (chosenIso P F Y'').inv) := by
+      simp
+    rw [h]
+    exact psiBaseHom_comp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' _ _
+
+include F₂ hFT hPS in
+/-- ★1-可換図式の成分。 -/
+noncomputable def psiBaseSqApp [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) (A : C) :
+    (P.proj ⋙ psiBase P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB').obj A
+      ≅ (Ψ ⋙ P₂.proj).obj A where
+  hom := psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+    ((chosenIso P F ((P.toElem.obj A).base)).hom)
+  inv := psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+    ((chosenIso P F ((P.toElem.obj A).base)).inv)
+  hom_inv_id := by
+    have h := psiBaseHom_comp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'
+      ((chosenIso P F ((P.toElem.obj A).base)).hom)
+      ((chosenIso P F ((P.toElem.obj A).base)).inv)
+    rw [Iso.hom_inv_id, psiBaseHom_id P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'] at h
+    exact h.symm
+  inv_hom_id := by
+    have h := psiBaseHom_comp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'
+      ((chosenIso P F ((P.toElem.obj A).base)).inv)
+      ((chosenIso P F ((P.toElem.obj A).base)).hom)
+    rw [Iso.inv_hom_id, psiBaseHom_id P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB'] at h
+    exact h.symm
+
+include F₂ hFT hPS in
+set_option maxHeartbeats 2000000 in
+/-- ★★★★★★**[FrdI] Theorem 3.4, (v)** —— `Ψ_Base` の **1-可換図式**。 -/
+noncomputable def psiBaseSquare [Ψ.IsEquivalence] (hslim₂ : IsSlimCat D₂)
+    (hPB' : ∀ {X Y : C} (f : X ⟶ Y), IsPullBack P₂ (Ψ.map f) → IsPullBack P f) :
+    P.proj ⋙ psiBase P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' ≅ Ψ ⋙ P₂.proj :=
+  NatIso.ofComponents (psiBaseSqApp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB')
+    (fun {X Y} f => by
+      show psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+            ((chosenIso P F ((P.toElem.obj X).base)).hom ≫ P.Base f
+              ≫ (chosenIso P F ((P.toElem.obj Y).base)).inv)
+          ≫ psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+            ((chosenIso P F ((P.toElem.obj Y).base)).hom)
+        = psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS
+            ((chosenIso P F ((P.toElem.obj X).base)).hom)
+          ≫ P₂.Base (Ψ.map f)
+      rw [← psiBaseHom_comp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB',
+        ← psiBaseHom_base P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB' f,
+        ← psiBaseHom_comp P F P₂ F₂ Ψ hPB hFT hPS hslim₂ hPB']
+      refine congrArg (psiBaseHom P F P₂ F₂ Ψ hPB hFT hPS) ?_
+      simp)
+
+def psiBase.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 68,
+    item := "Theorem 3.4, (v) — Ψ_Base の構成と 1-可換図式",
+    sectionId := "frdi-thm-3-4" }
+
 end Psi
 
 end SlicePush
