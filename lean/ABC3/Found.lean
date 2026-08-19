@@ -120,6 +120,8 @@ import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
 import ABC3.Found.ProL.LimitPi
+import ABC3.Found.ProL.LPart
+import ABC3.Found.ProL.Decomposition
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.AuxFunction
@@ -494,6 +496,7 @@ import ABC3.Found.GaloisRep.Wronskian
 import ABC3.Found.GaloisRep.EdsLambda
 import ABC3.Found.GaloisRep.EdsIdentity
 import ABC3.Found.GaloisRep.EdsWard
+import ABC3.Found.GaloisRep.Coprime23
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
