@@ -416,7 +416,73 @@ theorem psiPrime_naturality_frobType (ctx : PrimeCtx P P₂ G G₂ Ψ) (F : Frob
         show P.Base u₀ = P.Base (𝟙 A) from hu₀b])
     hdivu.symm (prop_1_4_i P _ (fun Y _ => ctx.iso Y)) hsu
     (prop_1_4_i P _ (fun Y _ => ctx.iso Y)) hsu₀
-  sorry
+  -- ★準備
+  have hnpos : 0 < ((P.degFr v : ℕ+) : ℕ) := (P.degFr v).2
+  have htf : IsTorsionFreeNaive (Φ.val (P.toElem.obj B).base) :=
+    isTorsionFreeNaive_of_isSharp (P.divisorial _).2
+  have htf₂ : IsTorsionFreeNaive (Φ₂.val (P₂.toElem.obj (Ψ.functor.obj B)).base) :=
+    isTorsionFreeNaive_of_isSharp (P₂.divisorial _).2
+  have hprimu : IsPrimaryElt (P.Div (((realizeIn ctx A p) : A ⟶ A))) :=
+    (isPrimaryElt_preStepVal_iff _ hsu).mp (realizeIn_primary ctx A p)
+  have hdb : ((P.degFr v : ℕ+) : ℕ) • d
+      = Φ.map (P.Base v) (P.Div (((realizeIn ctx A p) : A ⟶ A))) := hd
+  have hprimnd : IsPrimaryElt (((P.degFr v : ℕ+) : ℕ) • d) := by
+    rw [hdb]
+    exact isPrimaryElt_map (baseEquivOf P v hv.2) hprimu
+  have hprimd : IsPrimaryElt d := (isPrimaryElt_nsmul_iff htf hnpos).mp hprimnd
+  have hdw : d = preStepVal P (((w : End B) : B ⟶ B)) hsw := by
+    rw [preStepVal_of_otri _ hwm hsw, hwd]
+  have hpw : IsPrimaryElt (preStepVal P (((w : End B) : B ⟶ B)) hsw) := hdw ▸ hprimd
+  -- ★左辺を `w` で書き直す
+  have hLp : primeMap (baseEquivOf P v hv.2) p
+      = toPrime _ (preStepVal P (((w : End B) : B ⟶ B)) hsw) hpw := by
+    rw [← realizeIn_toPrime ctx A p, primeMap_toPrime]
+    refine (toPrime_congr (hb := hprimnd) (show Φ.map (P.Base v)
+        (preStepVal P (((realizeIn ctx A p) : A ⟶ A)) hsu)
+        = ((P.degFr v : ℕ+) : ℕ) • d by
+      rw [preStepVal_of_otri _ hu hsu]; exact hdb.symm)).trans ?_
+    exact (toPrime_nsmul htf hprimd hnpos).trans (toPrime_congr (hb := hpw) hdw)
+  rw [hLp, psiPrime_spec ctx _ hsw hpw]
+  -- ★右辺
+  rw [← realizeIn_toPrime ctx A p, psiPrime_spec ctx _ hsu (realizeIn_primary ctx A p),
+    primeMap_toPrime]
+  -- ★`𝒞₂` 側の四角形
+  have hsq₂ : (((Ψ.functor.map (((w : End B) : B ⟶ B))) : End (Ψ.functor.obj B))
+        : Ψ.functor.obj B ⟶ Ψ.functor.obj B) ≫ Ψ.functor.map v
+      = Ψ.functor.map v ≫ Ψ.functor.map u₀ := by
+    rw [← Ψ.functor.map_comp, ← Ψ.functor.map_comp, hsq]
+  have hdiv₂ : Φ₂.map (P₂.Base (Ψ.functor.map v)) (P₂.Div (Ψ.functor.map u₀))
+      = ((P₂.degFr (Ψ.functor.map v) : ℕ+) : ℕ)
+        • P₂.Div (Ψ.functor.map (((w : End B) : B ⟶ B))) :=
+    div_square_frob P₂ (Ψ.functor.map v) (hOTri B _ hwm) (hOTri A _ hu₀m) hsq₂
+  haveI : IsIso (Ψ.functor.map (((ε : End A)) : A ⟶ A)) := by
+    haveI : IsIso (((ε : End A)) : A ⟶ A) := (CategoryTheory.isUnit_iff_isIso ε).mp hεm.2
+    infer_instance
+  have hdivue : P₂.Div (Ψ.functor.map (((realizeIn ctx A p) : A ⟶ A)))
+      = P₂.Div (Ψ.functor.map u₀) := by
+    rw [hεeq, Ψ.functor.map_comp]
+    exact div_comp_iso (Ψ.functor.map u₀) (Ψ.functor.map (((ε : End A)) : A ⟶ A))
+  have hpw₂ : IsPrimaryElt (preStepVal P₂
+      (Ψ.functor.map (((w : End B) : B ⟶ B))) (ctx.PS _ hsw)) :=
+    (isPrimaryElt_preStepVal_iff _ (ctx.PS _ hsw)).mpr
+      ((ctx.primaryIff B B _ hsw).mp ((isPrimaryElt_preStepVal_iff _ hsw).mp hpw))
+  have hpdw₂ : IsPrimaryElt (P₂.Div (Ψ.functor.map (((w : End B) : B ⟶ B)))) :=
+    (isPrimaryElt_preStepVal_iff _ (ctx.PS _ hsw)).mp hpw₂
+  have hR1 : Φ₂.map (P₂.Base (Ψ.functor.map v))
+        (preStepVal P₂ (Ψ.functor.map (((realizeIn ctx A p) : A ⟶ A))) (ctx.PS _ hsu))
+      = ((P₂.degFr (Ψ.functor.map v) : ℕ+) : ℕ)
+        • P₂.Div (Ψ.functor.map (((w : End B) : B ⟶ B))) := by
+    rw [preStepVal_of_otri _ (hOTri A _ hu) (ctx.PS _ hsu), hdivue]
+    exact hdiv₂
+  have hR2 : P₂.Div (Ψ.functor.map (((w : End B) : B ⟶ B)))
+      = preStepVal P₂ (Ψ.functor.map (((w : End B) : B ⟶ B))) (ctx.PS _ hsw) :=
+    (preStepVal_of_otri _ (hOTri B _ hwm) (ctx.PS _ hsw)).symm
+  have hE1 := toPrime_congr (ha := isPrimaryElt_map
+      (baseEquivOf P₂ (Ψ.functor.map v) (hFT v hv).2) (map_realizeIn_primary ctx A p))
+    (hb := (isPrimaryElt_nsmul_iff htf₂ (P₂.degFr (Ψ.functor.map v)).2).mpr hpdw₂) hR1
+  have hE2 := toPrime_nsmul htf₂ hpdw₂ (P₂.degFr (Ψ.functor.map v)).2
+  have hE3 := toPrime_congr (ha := hpdw₂) (hb := hpw₂) hR2
+  exact (hE1.trans (hE2.trans hE3)).symm
 
 def psiPrime_naturality_frobType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 80,
