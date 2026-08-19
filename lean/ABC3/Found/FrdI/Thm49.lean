@@ -113,12 +113,12 @@ set_option maxHeartbeats 1000000 in
 `hdivS`(逸脱 (B))で `𝒪^▷(A)` の元 `v₃` として実現し、
 `Proposition 1.10, (i)` で四角形を立て、
 `Base γ` が同型なので `Div u₀ = Div v` が出る。 -/
-theorem otriPull_frobType (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+theorem otriPull_frobType (F : FrobenioidCore P)
     (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
       ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
     (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
     {A X : C} (γ : A ⟶ X) (hγ : IsFrobeniusType P γ)
-    {v : End X} (hv : v ∈ OTri P X) :
+    {v : End X} :
     ∃ (v₃ : End A) (u₀ : End X), v₃ ∈ OTri P A ∧ u₀ ∈ OTri P X ∧
       P.Div (((u₀ : End X)) : X ⟶ X) = P.Div (((v : End X)) : X ⟶ X) ∧
       (((v₃ : End A)) : A ⟶ A) ≫ γ = γ ≫ (((u₀ : End X)) : X ⟶ X) := by
@@ -159,6 +159,101 @@ theorem otriPull_frobType (F : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic 
 def otriPull_frobType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 88,
     item := "Theorem 4.9 — Frobenius 型に沿った 𝒪^▷ の引き戻し",
+    sectionId := "frdi-thm-4-9" }
+
+/-! ## ★3. 自然性 —— 3 つの類型から任意の射へ -/
+
+variable (Ψ : C ≌ C₂) (G : Frobenioid P) (hiso : ∀ X : C, IsIsotropic P X)
+  (hdivS : ∀ (Y : C) (a : Φ.val (P.toElem.obj Y).base),
+    ∃ u : OTri P Y, P.Div (((u : End Y) : Y ⟶ Y)) = a)
+  (hOTri : ∀ (Z : C) (δ : End Z), δ ∈ OTri P Z →
+    ((Ψ.functor.map ((((δ : End Z)) : Z ⟶ Z))) : End (Ψ.functor.obj Z))
+      ∈ OTri P₂ (Ψ.functor.obj Z))
+
+/-- ★★`Ψ_Φ` の自然性(1 本の射について)。 -/
+def DivMapNat {W A : C} (f : W ⟶ A) : Prop :=
+  ∀ x : Φ.val (P.toElem.obj A).base,
+    divMap Ψ G hiso hdivS hOTri W (Φ.map (P.Base f) x)
+      = Φ₂.map (P₂.Base (Ψ.functor.map f)) (divMap Ψ G hiso hdivS hOTri A x)
+
+variable {Ψ G hiso hdivS hOTri}
+
+/-- ★自然性は合成で閉じる。 -/
+theorem divMapNat_comp {W V A : C} {g : W ⟶ V} {h : V ⟶ A}
+    (hg : DivMapNat Ψ G hiso hdivS hOTri g) (hh : DivMapNat Ψ G hiso hdivS hOTri h) :
+    DivMapNat Ψ G hiso hdivS hOTri (g ≫ h) := by
+  intro x
+  have h1 : Φ.map (P.Base (g ≫ h)) x = Φ.map (P.Base g) (Φ.map (P.Base h) x) := by
+    rw [P.Base_comp, Φ.map_comp]
+  rw [h1, hg (Φ.map (P.Base h) x), hh x, ← Φ₂.map_comp, ← P₂.Base_comp,
+    ← Ψ.functor.map_comp]
+
+/-- ★四角形があれば自然性が出る。 -/
+theorem divMapNat_of_squares
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f : W ⟶ A)
+    (hsq : ∀ (v : End A), v ∈ OTri P A →
+      ∃ (ww : End W) (u : End A), ww ∈ OTri P W ∧ u ∈ OTri P A ∧
+        P.Div (((u : End A)) : A ⟶ A) = P.Div (((v : End A)) : A ⟶ A) ∧
+        (((ww : End W)) : W ⟶ W) ≫ f = f ≫ (((u : End A)) : A ⟶ A)) :
+    DivMapNat Ψ G hiso hdivS hOTri f := by
+  intro x
+  obtain ⟨v, hvx⟩ := hdivS A x
+  subst hvx
+  obtain ⟨ww, u, hw, hu, hdu, hsqf⟩ := hsq (v : End A) v.2
+  rw [← hdu]
+  exact divMap_naturality_of_square Ψ G hiso hdivS hOTri hdeg f hu hw hsqf
+
+/-- ★pull-back の場合。 -/
+theorem divMapNat_pullBack
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f : W ⟶ A) (hf : IsPullBack P f) :
+    DivMapNat Ψ G hiso hdivS hOTri f :=
+  divMapNat_of_squares hdeg f (fun v hv => by
+    obtain ⟨ww, hw, hsq⟩ := otriPullBack P f hf hv
+    exact ⟨ww, v, hw, hv, rfl, hsq.symm⟩)
+
+/-- ★co-angular pre-step の場合。 -/
+theorem divMapNat_preStep (F : FrobenioidCore P)
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f : W ⟶ A) (hf : IsPreStep P f) :
+    DivMapNat Ψ G hiso hdivS hOTri f :=
+  divMapNat_of_squares hdeg f (fun v hv => by
+    have hfc : IsCoAngular P f := prop_1_4_i P _ (fun Z _ => hiso Z)
+    exact ⟨((otriPull P F f hfc hf.1 ⟨v, hv⟩ : End W)),
+      v, (otriPull P F f hfc hf.1 ⟨v, hv⟩).2, hv, rfl,
+      (otriPull_spec P F f hfc hf.1 ⟨v, hv⟩).symm⟩)
+
+/-- ★Frobenius 型の場合。 -/
+theorem divMapNat_frobType (F : FrobenioidCore P)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f : W ⟶ A) (hf : IsFrobeniusType P f) :
+    DivMapNat Ψ G hiso hdivS hOTri f :=
+  divMapNat_of_squares hdeg f (fun v hv => by
+    obtain ⟨v₃, u₀, hv₃, hu₀, hdu, hsq⟩ :=
+      otriPull_frobType F hdivS hperfM f hf (v := v)
+    exact ⟨v₃, u₀, hv₃, hu₀, hdu, hsq⟩)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Theorem 4.9 の核** —— `Ψ_Φ` は**任意の射**について自然。
+
+★`Definition 1.3, (i), (d)` の 3 分解(`arbFactor`)で 3 つの類型に落とし、
+それぞれの四角形を当てる。★合成で閉じる(`divMapNat_comp`)ので貼り合わせられる。 -/
+theorem divMapNat_all (F : FrobenioidCore P)
+    (hperfM : ∀ Y : C, IsPerfectMonoid (Φ.val (P.toElem.obj Y).base))
+    (hdeg : ∀ {X Y : C} (g : X ⟶ Y), P₂.degFr (Ψ.functor.map g) = P.degFr g)
+    {W A : C} (f : W ⟶ A) :
+    DivMapNat Ψ G hiso hdivS hOTri f := by
+  obtain ⟨Y₀, Z₀, γ, β, α₀, hfac, hγ, hβ, hα₀⟩ := F.arbFactor f
+  rw [hfac]
+  exact divMapNat_comp (divMapNat_frobType F hperfM hdeg γ hγ)
+    (divMapNat_comp (divMapNat_preStep F hdeg β hβ)
+      (divMapNat_pullBack hdeg α₀ hα₀))
+
+def divMapNat_all.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 88,
+    item := "Theorem 4.9 — Ψ_Φ の自然性",
     sectionId := "frdi-thm-4-9" }
 
 end PsiPhi
