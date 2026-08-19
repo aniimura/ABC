@@ -15540,3 +15540,46 @@ Galois 群は `T_l E` に**加法的に**作用する。`GL₂(ℤ_l)` に値を
 G6(Tate 曲線、mathlib 0 件・FLT も入口宣言のみ)、
 G7(Néron モデル、mathlib 0 件)、G8(Faltings 高さ)。
 ★★いずれも**独立した工程**であり、person-years の道である——壁ではない。
+
+## §9-408 —— ★★★★★★★残る 4 件を測り直した(G5–G8)
+
+### ★★★★★★原文 `Theorem 3.8` の statement(目視確認済み)
+
+> `K_V ⊆ M_ell(ℚ)` を compactly bounded subset、`ε > 0` とする。
+> このとき `C > 0` と Galois-finite な例外集合 `Exc` が存在して、
+> `[E_L] ∉ Exc`、`d = [L:ℚ]`、素数 `l` が
+> **(a)** `l ≥ 23040·100^d·(ht_Falt([E_L]) + C·d^ε)` かつ悪い乗法還元の素点を 1 つ以上持つ、
+> または **(b)** `[E_L] ∈ K_V` かつ `l` が局所高さすべてと 30 に素、
+> のいずれかを満たすなら、`Gal(ℚ̄/L) → GL₂(ℤ_l)` の像が `SL₂(ℤ_l)` を含む。
+
+### ★★★★★★★★G5 は**結論を要求していなかった**
+
+現在の `FullImageData` は
+
+    ImageContainsSL2 : ... → Prop
+    imageContainsSL2_iff : ImageContainsSL2 W l ↔ (∀ A, det A = 1 → ∃ σ, rep σ = A)
+
+の 2 場しか持たない。★**述語を定義して `Iff.rfl` で埋まる**——
+すなわち**「像が `SL₂` を含む」という結論そのものは課されていない**。
+
+★★忠実に書くには `ht_Falt`(G8)・局所高さ(G6)・compactly bounded subset(§1)の
+語彙が要る。★★★したがって **G5 の statement は (G6)(G8) が入ってから確定する**
+——それまでは `det_cyclotomic`(Weil 対、§9-407 で移動)だけが実質である。
+
+### ★★★★★G7 も述語側は自己参照的である
+
+`SemiStable` / `semiStable_iff` は定義そのもの(`Iff.rfl` で埋まる)。
+★実質は `omega`(階数 1)だけであり、§9-404 で `htFalt_congr` を落としたので
+**`omega := 𝒪_L` で埋まる**。★★塞ぐには Néron 微分の構成が要る(mathlib 0 件)。
+
+### ★★★★★★★★★★残る 4 件が立っている 3 つの理論
+
+| 理論 | どこで要る | mathlib |
+|---|---|---|
+| **Tate 一意化** `E(K) ≅ Kˣ/q^ℤ` | G6(→ G7, G8, G5) | ★0 件(FLT も入口宣言のみ) |
+| **Faltings 高さ** `ht^Falt = deg(ω)` | G8(→ G5) | ★0 件 |
+| **Weil 対** `det ρ = 円分指標` | G5 | ★0 件 |
+
+★★いずれも**独立した理論**であり、person-years の道である。
+★★★本セッションで閉じた 5 件(C2, G1, G2, G3, G4)は
+**mathlib に足場があったもの**——足場が無いものは、その足場から作ることになる。
