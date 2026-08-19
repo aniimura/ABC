@@ -1,4 +1,5 @@
 import Mathlib.Algebra.CharP.Algebra
+import Mathlib.Algebra.Field.ZMod
 import ABC3.Found.GaloisRep.UniversalCurve
 import ABC3.Found.GaloisRep.CharTwo
 
@@ -52,6 +53,15 @@ noncomputable def uCurveF2 : WeierstrassCurve UF2Ring where
 
 instance : CharP UF2Ring 2 :=
   charP_of_injective_ringHom (MvPolynomial.C_injective (Fin 5) (ZMod 2)) 2
+
+instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+
+/-- ★**普遍環は整域である**——ここでだけ約分が使える。 -/
+instance : IsDomain UF2Ring := inferInstance
+
+instance : IsDomain (Polynomial UF2Ring) := inferInstance
+
+instance : IsDomain (Polynomial (Polynomial UF2Ring)) := inferInstance
 
 /-- ★★★★**普遍曲線では `ψ₂ ≠ 0`**——ここでだけ約分が使える。 -/
 theorem uCurveF2_psi2_ne_zero : uCurveF2.ψ₂ ≠ 0 := by

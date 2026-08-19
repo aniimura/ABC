@@ -98,10 +98,6 @@ theorem key4 :
 
 ★★★これで `normEDSRec` の基底 `P 0`〜`P 4` が揃った。 -/
 theorem omegaNum_four_char_two_univ : omegaNum uCurveF2 4 = 0 := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  haveI : IsDomain UF2Ring := inferInstance
-  haveI : IsDomain (Polynomial UF2Ring) := inferInstance
-  haveI : IsDomain (Polynomial (Polynomial UF2Ring)) := inferInstance
   rw [omegaNum_eq_zero_iff_char_two]
   rw [show (4 : ℤ) + 1 = 5 by norm_num, show (4 : ℤ) - 1 = 3 by norm_num]
   exact mul_right_cancel₀ (pow_ne_zero 2 uCurveF2_psi2_ne_zero) (key4 uCurveF2)
