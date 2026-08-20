@@ -95,6 +95,10 @@ def pullbackPrime_eq_xyIdeal_nsmul.needs : List ProofObligation :=
     .implicitStep
       "★★★★**良い還元であることは自動である**——`Δ ∈ F^×`(定数)なので `w(Δ) = 1`。悪い還元の場合分けは不要である(0 ブロック)" 19,
     .implicitStep
+      "★★★★★**剰余体の足場は mathlib にあった**(2026-08-20 実測)——`Ideal.ResidueField I := IsLocalRing.ResidueField (Localization.AtPrime I)` と `Ideal.ker_algebraMap_residueField : ker (algebraMap R I.ResidueField) = I`、さらに `IsFractionRing (R ⧸ I) I.ResidueField` の instance。★`v.asIdeal` は極大なので `R ⧸ v.asIdeal` は既に体であり、`κ(v) ≅ R ⧸ v.asIdeal ≅ F`(第 138 の `quotientXYIdealEquiv`)となる(2-5 ブロック)" 19,
+    .implicitStep
+      "★★★★**剰余体を経由しない定式化も可能である**——`t ∈ O_v` に対し `w(t − c) < 1` なる `c ∈ F` は**一意**である(`c − c' ∈ F` の付値は 1 か 0 だから)。存在は `κ(v) ≅ F` から出る。★この形なら還元写像を `FF ⊇ O_v → F` として直接書ける(3-8 ブロック)" 19,
+    .implicitStep
       "★★★残るのは加法公式の場合分けである。`x₁ ≢ x₂ mod m_v` なら傾き `(y₂−y₁)/(x₂−x₁)` は `O_v` に入り、還元は素直に可換になる。★問題は `x₁ ≡ x₂ mod m_v` の場合で、そこでは還元先で 2 倍公式に切り替わる(15-30 ブロック)" 19,
     .implicitStep
       "★★`E(F(W))₀ := {S | S = 0 または座標が O_v に入る}` が部分群であることも要る。射影モデルを使わずにやるなら、加法公式の場合分けの中で示すことになる(5-15 ブロック)" 19,
