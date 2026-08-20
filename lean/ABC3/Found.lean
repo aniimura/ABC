@@ -102,6 +102,7 @@ import ABC3.Found.FrdI.Thm52ModelType
 import ABC3.Found.FrdI.Prop53Birat
 import ABC3.Found.FrdI.Prop56Sec
 import ABC3.Found.FrdI.Def24Rlf
+import ABC3.Found.FrdI.Def24PfT
 import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop53Rlf
@@ -678,6 +679,7 @@ import ABC3.Found.GaloisRep.WeilBilinCore
 import ABC3.Found.GaloisRep.WeilMul
 import ABC3.Found.GaloisRep.CountFP
 import ABC3.Found.GaloisRep.Divisible
+import ABC3.Found.GaloisRep.CountInfty
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

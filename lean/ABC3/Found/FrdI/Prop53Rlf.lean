@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Def24Rlf
+import ABC3.Found.FrdI.Def24PfT
 import ABC3.Found.FrdI.Prop53Birat
 import ABC3.Found.FrdI.Thm52Change
 
@@ -340,6 +341,31 @@ noncomputable abbrev CuntrPf (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P
   ScModelObj NNRat G hiso hfn hcharInj hint hfsmD
 
 /-! ### ★出典の紐付け -/
+
+/-! ## ★6. ★★**`(𝒞^un-tr)^pf` の 2 条件は divisorial なら自動**
+
+★★`Def24PfT.lean` で `S = ℚ≥0` の場合の条件 (a) を証明したので、
+`CuntrPf` が受け取っていた `hcharInj` と `hint` は **`Φ` が divisorial なら不要**になった。
+★残るのは `hfsmD`(`𝒟` が of FSM-type)だけであり、これは
+`Example 6.1` の底の圈 `B(G)⁰` では**真**である(`Sec6GaloisCat.lean`)。 -/
+
+/-- ★★**divisorial なら `ℚ≥0 ⊗_ℕ Φ` は条件 (a) を満たす**。 -/
+theorem charInj_nnrat_of_divisorial (hdiv : Φ.IsDivisorialOn) {A B : D} (α : B ⟶ A) :
+    IsCharacteristicallyInjective (scMap (S := NNRat) (Φ.map α)) :=
+  isCharacteristicallyInjective_scMap_nnrat (hdiv B).2 (Φ.map_injective α)
+
+/-- ★★**divisorial なら `ℚ≥0 ⊗_ℕ Φ(A)` は integral**。 -/
+theorem isIntegralMonoid_pfT_of_divisorial (hdiv : Φ.IsDivisorialOn) (A : D) :
+    IsIntegralMonoid (PfT (Φ.val A)) :=
+  isIntegralMonoid_pfT (hdiv A).1.1
+
+/-- ★★★★**`(𝒞^un-tr)^pf` の行き先 `(Φ^pf, ℚ·Φ^birat)`** ——
+★`Φ` が divisorial なら `hfsmD` だけで済む形。 -/
+noncomputable abbrev CuntrPfOfDivisorial (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hdiv : Φ.IsDivisorialOn) (hfsmD : IsOfFSMType D) : Type _ :=
+  CuntrPf G hiso hfn (fun α => charInj_nnrat_of_divisorial hdiv α)
+    (isIntegralMonoid_pfT_of_divisorial hdiv) hfsmD
 
 /-- ★locator —— `Proposition 5.3` の「行き先」(実化と完全化の model Frobenioid)。
 ★**条つき**: `Φ ⊗_S` の条件 (a) と `𝒟` の of FSM-type を仮定に置いている。
