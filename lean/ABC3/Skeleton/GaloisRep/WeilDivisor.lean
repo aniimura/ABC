@@ -202,7 +202,13 @@ def fractionalIdeal_isPrincipal.needs : List ProofObligation :=
     .implicitStep
       "★★★★`Σ_{T ∈ E[n]} T = 0` は **第 140 ブロックで済**(`sum_univ_eq_zero_of_addEquiv`)——`E[n] ≅ (ℤ/n)²`((G1) で取得済)を当てるだけ(0 ブロック)" 19,
     .implicitStep
-      "★★★ファイバー `[n]⁻¹(P) = {Q₀ + T : T ∈ E[n]}` の記述と、`Σ_{Q ∈ ファイバー} Q = n²Q₀ + Σ_T T = n·P + 0 = 0` の計算(5-12 ブロック)" 19,
+      "★★★★★★**ファイバーの総和は第 150 ブロックで済**——`Σ_{T ∈ E[n]} T = 0`(`sum_torsion_eq_zero`)、`#E[n] = n²`(`card_torsion`)、`Σ_{T} (Q₀ + T) = n·(n·Q₀)`(`sum_fiber_eq`)。★(G1) の `E[n] ≅ (ℤ/n)²` に第 140 を当てるだけで出た。**G1 が G5 の中で初めて実際に消費された箇所である**(0 ブロック)" 19,
+    .implicitStep
+      "★★★★**残っているのは因子の台の同定である**——`count_v(μ f_P) ≠ 0` となる `v`(= 曲線上の点 `Q`)を決めること。場合 A では `count_v(μ f_P) = n·min(count_v(μ a), count_v(μ b))`(第 143)なので、`count ≠ 0 ⟺ μ a と μ b が共に `v` で消える ⟺ `[n]Q = P` である。★これを言うには**点の還元(特殊化)写像**が要る: `μ` を剰余体 `κ(v) ≅ F`(第 138)へ落として `([μ x], [μ y]) = [n]Q` を示す(8-20 ブロック)" 19,
+    .implicitStep
+      "★★★2026-08-20 実測: **mathlib の `AlgebraicGeometry/EllipticCurve/Reduction.lean` は曲線の還元**(極小モデル・good/multiplicative/additive reduction)であって、**点の還元写像ではない**。点の特殊化は自前で積む必要がある。★ただし `Point.map`(環準同型に沿った関手性)は mathlib にあるので、剰余体への環準同型を作れば流せる" 19,
+    .implicitStep
+      "★★★2026-08-20 実測: mathlib の `Point.toClass` には `toClass_injective` と **`toClass_eq_zero : toClass P = 0 ↔ P = 0`** があるが、**全射性は無い**。したがって `[J]` を `toClass(R)` の形で得るには、`J` を `XYIdeal'` の積として**明示的に構成する**必要がある(= 台の同定)。★`toClass_eq_zero` があるので、構成できれば結論は 1 行である" 19,
     .implicitStep
       "★★アフィン座標環の類群は `Pic⁰(E)` である(無限遠点 `O` を落とすと次数が消える)。`toClass` が `(R) − (O)` の類を与えることを使って、因子の類を点の和として読む(3-8 ブロック)" 19,
     .implicitStep
