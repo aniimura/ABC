@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.Divisor.SchemeCartierPull
 import ABC3.Found.Divisor.NormCodim
 import ABC3.Found.Divisor.NormKQC
+import ABC3.Found.Divisor.CartierFrobenioid
 
 /-!
 # `Φ(L)` の関手性(鎖 `normalize` の `phi-functor`)
@@ -258,6 +259,66 @@ theorem phiPull_nonneg (DK : Set (PrimeDivisorPt V))
   · rw [Finsupp.embDomain_notin_range]
     rintro ⟨y, rfl⟩
     exact hv y.2
+
+/-- ★★★★★★**`pull_inj`** —— 引き戻しは単射。
+
+★素因子の上には素因子が在り(`exists_primeDivisorPt_over`)、
+非零の位数は非零へ移る(`ordPt_ffMap_ne_zero`、茎への射が**局所射**だから)。 -/
+theorem phiPull_injective (DK : Set (PrimeDivisorPt V))
+    {L M : FinSub V.functionField Kbar} (f : L ⟶ M)
+    [IsLocallyNoetherian (normObj V L)] [IsLocallyNoetherian (normObj V M)]
+    [CompactSpace (normObj V M)] :
+    Function.Injective (phiPull V DK f) := by
+  rw [injective_iff_map_eq_zero]
+  intro d hd
+  refine Subtype.ext (Finsupp.ext fun s => ?_)
+  by_contra hne
+  obtain ⟨w, hw⟩ := exists_primeDivisorPt_over V f s.1
+  have hgw : IsCodimOnePt (normObj V L) ((normMap V f).base w.1) := by
+    rw [hw]; exact s.1.2
+  have hpteq : (⟨(normMap V f).base w.1, hgw⟩ : PrimeDivisorPt (normObj V L)) = s.1 :=
+    Subtype.ext hw
+  obtain ⟨U, hwU, q, hq, hDU⟩ := d.2 ((normMap V f).base w.1)
+  have hordne : ordPt (normObj V L) (normObj_isNormalScheme V L)
+      ⟨(normMap V f).base w.1, hgw⟩ q ≠ 0 := by
+    rw [← hDU ⟨(normMap V f).base w.1, hgw⟩ hwU, hpteq]
+    show Finsupp.embDomain (DLEmb V DK L) (d : (DLSet V DK L) →₀ ℤ) s.1 ≠ 0
+    rw [show s.1 = DLEmb V DK L s from rfl, Finsupp.embDomain_apply_self]
+    exact fun h => hne (by simpa using h)
+  have hzero : pullCoeff (normMap V f) (normObj_isNormalScheme V M)
+      (normObj_isNormalScheme V L) d.2 w = 0 := by
+    rw [← toWeilOnDL_phiPull V DK f d w, hd]
+    simp
+  rw [pullCoeff_eq (normMap V f) (normObj_isNormalScheme V M) (normObj_isNormalScheme V L)
+    d.2 w (normMap_hdim f w) hq hwU hDU] at hzero
+  exact ordPt_ffMap_ne_zero (normMap V f) (normObj_isNormalScheme V M)
+    (normObj_isNormalScheme V L) w hgw hq hordne hzero
+
+/-! ## ★4. `CartierDatum` を組む(鎖 `normalize` の `cartier-datum-geom`) -/
+
+/-- ★★★★★★★**幾何から `CartierDatum` を作る** —— `Example 6.1` の入口。
+
+原文 (FrdI p.109):
+> If for every Spec(L) ∈Ob(B(G)0) [cf. §0], every prime divisor of DL is Q-Cartier, -/
+noncomputable def cartierDatumGeom (DK : Set (PrimeDivisorPt V))
+    [∀ L : FinSub V.functionField Kbar, IsLocallyNoetherian (normObj V L)]
+    [∀ L : FinSub V.functionField Kbar, CompactSpace (normObj V L)]
+    (hkq : IsKQCartier V DK (fun (L : FinSub V.functionField Kbar) _ => normObj_isNormalScheme V L)) :
+    CartierDatum.{u, u, u} ((FinSub V.functionField Kbar)ᵒᵖ) where
+  primes A := (DLSet V DK A.unop : Type u)
+  grp A := cartierOnDL V DK A.unop (normObj_isNormalScheme V A.unop)
+  pull {_ _} α := phiPull V DK α.unop
+  pull_id A x := phiPull_id V DK A.unop x
+  pull_comp {_ _ _} α β x := phiPull_comp V DK α.unop β.unop x
+  pull_nonneg {_ _} α {x} hx := phiPull_nonneg V DK α.unop x hx
+  pull_inj {_ _} α := phiPull_injective V DK α.unop
+  qc A := isQCartierSubgroup_cartierOnDL V DK (fun (L : FinSub V.functionField Kbar) _ => normObj_isNormalScheme V L) hkq A.unop
+
+/-- ★★★★★★★locator —— `Example 6.1` の `CartierDatum`。 -/
+def cartierDatumGeom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — 幾何から CartierDatum を作る",
+    sectionId := "frdi-example-6-1" }
 
 /-! ### ★出典の紐付け -/
 

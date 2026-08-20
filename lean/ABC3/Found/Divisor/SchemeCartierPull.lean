@@ -255,6 +255,52 @@ theorem pullCoeff_nonneg (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
   rw [← ffMap_algebraMap, hr]
   exact hffne
 
+/-! ## ★7. 非零の位数は非零へ移る(`pull_inj` の要) -/
+
+/-- ★★**位数が正なら引き戻しの位数も非零** —— 茎への射が**局所射**だから。 -/
+theorem ordPt_ffMap_ne_zero_of_pos (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    (w : PrimeDivisorPt X) (hgw : IsCodimOnePt Y (g.base w.1))
+    {q : Y.functionField} (hq : q ≠ 0)
+    (hpos : 0 < ordPt Y hnormY ⟨g.base w.1, hgw⟩ q) :
+    ordPt X hnormX w (ffMap g q) ≠ 0 := by
+  obtain ⟨r, hr⟩ := exists_mem_stalk_of_ordPt_nonneg hnormY ⟨g.base w.1, hgw⟩ hq (le_of_lt hpos)
+  have hrnu : ¬ IsUnit r := by
+    intro hu
+    obtain ⟨t, ht⟩ := hu
+    have : ordPt Y hnormY ⟨g.base w.1, hgw⟩ q = 0 := by
+      rw [← hr, ← ht]
+      exact ordPt_eq_zero_of_isUnit hnormY ⟨g.base w.1, hgw⟩ t
+    omega
+  have hmapnu : ¬ IsUnit ((g.stalkMap w.1) r) := by
+    intro hu
+    exact hrnu (IsLocalHom.map_nonunit (f := (g.stalkMap w.1).hom) r hu)
+  have hffne : ffMap g q ≠ 0 := by
+    intro h
+    exact hq ((ffMap g).hom.injective (by simpa using h))
+  intro hzero
+  obtain ⟨t, ht⟩ := exists_unit_of_ordPt_eq_zero hnormX w hffne hzero
+  refine hmapnu ⟨t, ?_⟩
+  refine (IsFractionRing.injective (X.presheaf.stalk w.1) X.functionField) ?_
+  rw [ht, ← hr, ffMap_algebraMap]
+
+/-- ★★★**非零の位数は非零へ移る**。 -/
+theorem ordPt_ffMap_ne_zero (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    (w : PrimeDivisorPt X) (hgw : IsCodimOnePt Y (g.base w.1))
+    {q : Y.functionField} (hq : q ≠ 0)
+    (hne : ordPt Y hnormY ⟨g.base w.1, hgw⟩ q ≠ 0) :
+    ordPt X hnormX w (ffMap g q) ≠ 0 := by
+  rcases lt_or_gt_of_ne hne with hlt | hgt
+  · have hinv : 0 < ordPt Y hnormY ⟨g.base w.1, hgw⟩ q⁻¹ := by
+      rw [ordPt_inv hnormY _ hq]
+      omega
+    have h := ordPt_ffMap_ne_zero_of_pos g hnormX hnormY w hgw (inv_ne_zero hq) hinv
+    have hffne : ffMap g q ≠ 0 := by
+      intro h0
+      exact hq ((ffMap g).hom.injective (by simpa using h0))
+    rw [map_inv₀, ordPt_inv hnormX w hffne] at h
+    omega
+  · exact ordPt_ffMap_ne_zero_of_pos g hnormX hnormY w hgw hq hgt
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Example 6.1` の Cartier 因子の引き戻し。 -/

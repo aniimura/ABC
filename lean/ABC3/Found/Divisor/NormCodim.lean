@@ -66,6 +66,36 @@ theorem height_under_le_of_hasGoingDown {R S : Type*} [CommRing R] [CommRing S] 
   rw [← hlen, ← hlast]
   exact Order.length_le_height_last
 
+/-- ★★**整拡大では素イデアルの高さは下がらない**(incomparability)。
+
+★中身は `Ideal.comap_lt_comap_of_integral_mem_sdiff`(比較不能性)1 本 ——
+`S` の鎖を縮約すると `R` の**狭義**の鎖になる。 -/
+theorem height_le_height_under_of_isIntegral {R S : Type*} [CommRing R] [CommRing S]
+    [Algebra R S] [Algebra.IsIntegral R S] (Q : Ideal S) [hQ : Q.IsPrime] :
+    Q.height ≤ (Q.under R).height := by
+  haveI : (Q.under R).IsPrime := Ideal.IsPrime.under R Q
+  rw [PrimeSpectrum.height_eq_orderHeight (⟨Q, hQ⟩ : PrimeSpectrum S),
+    PrimeSpectrum.height_eq_orderHeight (⟨Q.under R, ‹(Q.under R).IsPrime›⟩ : PrimeSpectrum R),
+    Order.height_le_iff']
+  intro l hl
+  have hmono : StrictMono (fun i => PrimeSpectrum.comap (algebraMap R S) (l i)) := by
+    intro i j hij
+    have hlt : l i < l j := l.strictMono hij
+    haveI : (l i).asIdeal.IsPrime := (l i).isPrime
+    have hnle : ¬ ((l j).asIdeal ≤ (l i).asIdeal) := by
+      intro h
+      exact (ne_of_lt hlt) (le_antisymm hlt.le h)
+    obtain ⟨x, hxJ, hxI⟩ := SetLike.not_le_iff_exists.mp hnle
+    exact Ideal.comap_lt_comap_of_integral_mem_sdiff hlt.le ⟨hxJ, hxI⟩
+      (Algebra.IsIntegral.isIntegral x)
+  have hlast : RelSeries.last (LTSeries.mk l.length _ hmono)
+      = (⟨Q.under R, ‹(Q.under R).IsPrime›⟩ : PrimeSpectrum R) := by
+    show PrimeSpectrum.comap (algebraMap R S) l.last = _
+    rw [hl]
+    rfl
+  rw [← hlast]
+  exact Order.length_le_height_last
+
 /-! ## ★2. 茎の次元は上がらない -/
 
 variable (V : Scheme.{u}) [IsIntegral V] {Kbar : Type u} [Field Kbar]
@@ -128,6 +158,78 @@ theorem ringKrullDim_stalk_normMap_le {L M : FinSub V.functionField Kbar} (f : L
     exact congrArg PrimeSpectrum.asIdeal h
   rw [← hunder]
   exact_mod_cast height_under_le_of_hasGoingDown _
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★**整射で茎の次元は下がらない**(比較不能性)。 -/
+theorem ringKrullDim_stalk_le_normMap {L M : FinSub V.functionField Kbar} (f : L ⟶ M)
+    (x : normObj V M) :
+    ringKrullDim ((normObj V M).presheaf.stalk x)
+      ≤ ringKrullDim ((normObj V L).presheaf.stalk ((normMap V f).base x)) := by
+  obtain ⟨_, ⟨U, hUaff, rfl⟩, hxU, -⟩ := V.isBasis_affineOpens.exists_subset_of_mem_open
+    (Set.mem_univ ((normDown V M).base x)) isOpen_univ
+  have hUne : (U : Set V).Nonempty := ⟨_, hxU⟩
+  have hULaff : IsAffineOpen (normDown V L ⁻¹ᵁ U) := hUaff.preimage (normDown V L)
+  have hUMeq : (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U) = normDown V M ⁻¹ᵁ U := by
+    rw [← Scheme.Hom.comp_preimage, normMap_normDown]
+  have hUMaff : IsAffineOpen ((normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) := by
+    rw [hUMeq]; exact hUaff.preimage (normDown V M)
+  have hxUM : x ∈ (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U) := by rw [hUMeq]; exact hxU
+  have hgxUL : (normMap V f).base x ∈ normDown V L ⁻¹ᵁ U := hxUM
+  haveI : Nonempty (normDown V L ⁻¹ᵁ U) := ⟨⟨(normMap V f).base x, hgxUL⟩⟩
+  haveI : Nonempty ((normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) := ⟨⟨x, hxUM⟩⟩
+  letI : Algebra Γ(normObj V L, normDown V L ⁻¹ᵁ U)
+      Γ(normObj V M, (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) :=
+    ((normMap V f).app (normDown V L ⁻¹ᵁ U)).hom.toAlgebra
+  haveI : Algebra.IsIntegral Γ(normObj V L, normDown V L ⁻¹ᵁ U)
+      Γ(normObj V M, (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) :=
+    ⟨(normMap V f).isIntegral_app _ hULaff⟩
+  letI : Algebra Γ(normObj V L, normDown V L ⁻¹ᵁ U)
+      ((normObj V L).presheaf.stalk
+        ((⟨(normMap V f).base x, hgxUL⟩ : normDown V L ⁻¹ᵁ U) : normObj V L)) :=
+    TopCat.Presheaf.algebra_section_stalk (normObj V L).presheaf ⟨_, hgxUL⟩
+  haveI := hULaff.isLocalization_stalk ⟨(normMap V f).base x, hgxUL⟩
+  letI : Algebra Γ(normObj V M, (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U))
+      ((normObj V M).presheaf.stalk
+        ((⟨x, hxUM⟩ : (normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) : normObj V M)) :=
+    TopCat.Presheaf.algebra_section_stalk (normObj V M).presheaf ⟨x, hxUM⟩
+  haveI := hUMaff.isLocalization_stalk ⟨x, hxUM⟩
+  rw [IsLocalization.AtPrime.ringKrullDim_eq_height
+      (hUMaff.primeIdealOf ⟨x, hxUM⟩).asIdeal _,
+    IsLocalization.AtPrime.ringKrullDim_eq_height
+      (hULaff.primeIdealOf ⟨(normMap V f).base x, hgxUL⟩).asIdeal _]
+  have hunder : (hUMaff.primeIdealOf ⟨x, hxUM⟩).asIdeal.under
+        Γ(normObj V L, normDown V L ⁻¹ᵁ U)
+      = (hULaff.primeIdealOf ⟨(normMap V f).base x, hgxUL⟩).asIdeal := by
+    have h := IsAffineOpen.comap_primeIdealOf_appLE (f := normMap V f) (x := x)
+      (normDown V L ⁻¹ᵁ U) hULaff ((normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) hUMaff le_rfl hxUM
+    have happ : ((normMap V f).appLE (normDown V L ⁻¹ᵁ U)
+        ((normMap V f) ⁻¹ᵁ (normDown V L ⁻¹ᵁ U)) le_rfl)
+        = (normMap V f).app (normDown V L ⁻¹ᵁ U) := (Scheme.Hom.app_eq_appLE _).symm
+    rw [happ] at h
+    exact congrArg PrimeSpectrum.asIdeal h
+  rw [← hunder]
+  exact_mod_cast height_le_height_under_of_isIntegral _
+
+/-! ## ★2.5. 素因子の上には素因子が在る -/
+
+/-- ★**`V[M] → V[L]` は全射** —— 整射は閉写像であり、支配的だから。 -/
+instance normMap_surjective {L M : FinSub V.functionField Kbar} (f : L ⟶ M) :
+    Surjective (normMap V f) :=
+  surjective_of_isDominant_of_isClosed_range (normMap V f)
+    (by simpa using (normMap V f).isClosedMap _ isClosed_univ)
+
+/-- ★★★**素因子の上には素因子が在る** —— 次元が上がりも下がりもしないから。 -/
+theorem exists_primeDivisorPt_over {L M : FinSub V.functionField Kbar} (f : L ⟶ M)
+    (s : PrimeDivisorPt (normObj V L)) :
+    ∃ w : PrimeDivisorPt (normObj V M), (normMap V f).base w.1 = s.1 := by
+  obtain ⟨w0, hw0⟩ := (normMap V f).surjective s.1
+  refine ⟨⟨w0, ?_⟩, hw0⟩
+  have heq : ringKrullDim ((normObj V M).presheaf.stalk w0)
+      = ringKrullDim ((normObj V L).presheaf.stalk ((normMap V f).base w0)) :=
+    le_antisymm (ringKrullDim_stalk_le_normMap V f w0) (ringKrullDim_stalk_normMap_le V f w0)
+  show ringKrullDim ((normObj V M).presheaf.stalk w0) = 1
+  rw [heq, hw0]
+  exact s.2
 
 /-! ## ★3. `B(L) → B(M)`(仮定なし) -/
 
