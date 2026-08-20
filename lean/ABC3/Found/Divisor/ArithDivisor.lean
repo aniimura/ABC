@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.ProductFormula
+import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 
 /-!
 # 算術因子 —— `deg^arith` が `B(L)` の像で消えること(`Example 6.3`)
@@ -204,6 +205,47 @@ theorem arithDegree_arithDiv (x : Lˣ) : arithDegree (arithDiv x) = 0 := by
   rw [h1, h2]
   linarith [h]
 
+/-! ## ★4. 有限素点の `ord` との一致
+
+原文 (FrdI p.114):
+> the natural logarithm of the cardinality of the finite set Ov/(λ) [where Ov is the
+
+★★原文は非アルキメデスの `deg^arith` を「`log #(O_v/(λ))`」と定める。
+`#(O_v/(λ)) = (N v)^{ord_v(λ)}` なので、これは `ord_v(λ)·log(N v)` であり、
+本ファイルの `arithPlaceLog x (inl w) = −log|x|_w` と**一致する**。
+★これでファイル冗頭に記した逸脱（対数を先に取る形を採ったこと）の
+**非アルキメデス側が埋まる**（鎖 `arith` の `ord-mon` の半分）。 -/
+
+/-- ★**有限素点での `ord`** —— `v.valuation` の指数の符号を反転したもの。 -/
+noncomputable def ordFin (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) (x : L) : ℤ :=
+  if h : v.valuation L x = 0 then 0 else -(WithZero.unzero h).toAdd
+
+/-- ★★**`|x|_v = (N v)^{-ord_v(x)}`**。 -/
+theorem finitePlace_eq_absNorm_zpow (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L))
+    (x : L) (hx : x ≠ 0) :
+    ((FinitePlace.mk v) x : ℝ) = (Ideal.absNorm v.asIdeal : ℝ) ^ (-(ordFin v x)) := by
+  have hval : v.valuation L x ≠ 0 := by
+    simp only [ne_eq, Valuation.zero_iff]
+    exact hx
+  rw [FinitePlace.mk_apply, FinitePlace.norm_embedding,
+    NumberField.RingOfIntegers.HeightOneSpectrum.adicAbv_def]
+  rw [WithZeroMulInt.toNNReal_neg_apply
+    (NumberField.RingOfIntegers.HeightOneSpectrum.absNorm_ne_zero v) hval]
+  rw [ordFin, dif_neg hval, neg_neg]
+  push_cast
+  rfl
+
+/-- ★★★**原文の `log #(O_v/(λ))` との一致** ——
+`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`。 -/
+theorem arithPlaceLog_finite (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L))
+    (x : L) (hx : x ≠ 0) :
+    arithPlaceLog x (Sum.inl (FinitePlace.mk v))
+      = (ordFin v x : ℝ) * Real.log (Ideal.absNorm v.asIdeal : ℝ) := by
+  show -Real.log ((FinitePlace.mk v) x) = _
+  rw [finitePlace_eq_absNorm_zpow v x hx, Real.log_zpow]
+  push_cast
+  ring
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.3` の素点の集合 `V(F)`。 -/
@@ -224,6 +266,12 @@ def arithDegree.src : ABC3.Meta.Source :=
 /-- ★★locator —— `Example 6.3` の「`deg^arith` は `B(L)` の像で消える」(=積公式)。 -/
 def arithDegree_arithDiv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114, item := "Example 6.3 — deg^arith は B(L) の像で消える",
+    sectionId := "frdi-example-6-3" }
+
+/-- ★★locator —— `Example 6.3` の非アルキメデス成分が `log #(O_v/(λ))` と一致すること。 -/
+def arithPlaceLog_finite.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — 非アルキメデスで deg^arith = ord_v·log(Nv)",
     sectionId := "frdi-example-6-3" }
 
 end ABC3.Found.Divisor

@@ -3125,11 +3125,11 @@
           "deps": [
             "places"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。",
-          "lean": "",
-          "decl": ""
+          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。\n\n★★★★（2026-08-20）**非アルキメデス側を閉じた**。`ordFin v x`（`v.valuation` の指数の符号反転）を定義し、`|x|_v = (N v)^{-ord_v(x)}`（`finitePlace_eq_absNorm_zpow`）と **`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`**（`arithPlaceLog_finite`）を証明した。★これで原文の「`log #(O_v/(λ))`」との一致がついた。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）と、`ord(F_v) ≅ ℤ` の全射性（一次元子の存在）である。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "ordFin / finitePlace_eq_absNorm_zpow / arithPlaceLog_finite"
         },
         {
           "id": "arith-phi",
@@ -3187,7 +3187,7 @@
           ],
           "status": "半済",
           "size": "中",
-          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。\n\n★★（2026-08-20）`arithDegree`（成分の総和）として実装した。★原文の「`−[F_v:ℝ]·log λ`」「`log #(O_v/(λ))`」との一致は `ord-mon` が閉じてから書く。",
+          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。\n\n★★（2026-08-20）`arithDegree`（成分の総和）として実装した。★原文の「`−[F_v:ℝ]·log λ`」「`log #(O_v/(λ))`」との一致は `ord-mon` が閉じてから書く。\n\n★★（2026-08-20）**原文との一致の非アルキメデス側がついた** —— `arithPlaceLog_finite`。",
           "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
           "decl": "arithDegree"
         },
