@@ -1,5 +1,7 @@
 import ABC3.Skeleton.GaloisRep.WeilRoot
 import ABC3.Found.GaloisRep.WeilCharZero
+import ABC3.Found.GaloisRep.WeilGalois
+import ABC3.Found.GaloisRep.WeilGalPoint
 
 /-!
 # スケルトン —— **Weil 対 `e_n` とその 5 性質**(`Skeleton`)
@@ -17,8 +19,8 @@ import ABC3.Found.GaloisRep.WeilCharZero
 | `weilPairing_pow_eq_one` | ✅ **第 179** |
 | `weilPairing_add_left` | ✅ **第 184 + 第 191**(`O` と `P₂ = −P₁` の場合込み) |
 | `weilPairing_self` | ✅ **第 190 + 第 191** |
+| `weilPairing_galois` | ✅ **第 192-194** |
 | `weilPairing_nondeg` | ❌ 未 |
-| `weilPairing_galois` | ❌ 未 |
 
 ★対は `e_n(P, Q) := τ_Q(g_P) / g_P` で定める(`WeilRoot.lean` の `g_P`)。
 ★★値が `F` に落ちるのは `n` 乗が 1 だからで、第 176-178 で構成した。
@@ -34,7 +36,7 @@ import ABC3.Found.GaloisRep.WeilCharZero
 | `[IsAlgClosed F]` | 第 137(Dedekind 性)・第 139(定数の `n` 乗根) |
 | `[CharZero F]` | `μ` の存在(第 125)・`E[n²]` の位数(第 186)・`IsUnit (2:F)` |
 
-## ★★★残る 2 性質
+## ★★★残る 1 性質
 
 ★★★このうち **Galois 同変性が `det ρ = 円分指標` を出す**——
 `σ(e_n(P,Q)) = e_n(σP, σQ) = e_n(P,Q)^{det ρ(σ)}` が `∧²T_l E ≅ ℤ_l(1)` の内容である。
@@ -87,18 +89,19 @@ theorem weilPairing_nondeg (W : WeierstrassCurve.Affine F) [W.IsElliptic] (n : �
     ∃ Q : W.Point, n • Q = 0 ∧ weilPairing W n P Q ≠ 1 := by
   sorry
 
-/-- ★★★★**Galois 同変性** `σ(e_n(P,Q)) = e_n(σP, σQ)`。
+/-- ★★★★**Galois 同変性** `σ(e_n(P,Q)) = e_n(σP, σQ)`。★★★第 192-194 ブロックで証明された。
 
 ★★これが `det ρ = 円分指標`(`WeilPairing.lean` の `det_galRep_eq_cyclotomic`)を出す。 -/
 theorem weilPairing_galois {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
-    [Algebra K L] (W : WeierstrassCurve K) [((W.baseChange L).toAffine).IsElliptic]
-    (n : ℕ) (σ : L ≃ₐ[K] L)
+    [Algebra K L] [IsAlgClosed L] [CharZero L] (W : WeierstrassCurve K)
+    [((W.baseChange L).toAffine).IsElliptic]
+    (n : ℕ) (hn : 1 ≤ n) (σ : L ≃ₐ[K] L)
     (P Q : (W.baseChange L).toAffine.Point) :
     σ (weilPairing (W.baseChange L).toAffine n P Q)
       = weilPairing (W.baseChange L).toAffine n
           (ABC3.Interface.GaloisRep.galPoint W σ P)
-          (ABC3.Interface.GaloisRep.galPoint W σ Q) := by
-  sorry
+          (ABC3.Interface.GaloisRep.galPoint W σ Q) :=
+  ABC3.Found.GaloisRep.weilPairingVal_galPoint W n hn σ P Q
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -184,14 +187,18 @@ def weilPairing_galois.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def weilPairing_galois.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(d)(Galois 同変性)"
+  [ .implicitStep
+      "★★★★★★★★★**2026-08-20: 第 192-194 ブロックで証明された**。第 178 の `WeilSpec` は**データの存在**なので、witness を `σ` で輸送すれば良い。★`σ` は係数を固定するので `W.polynomial` を固定し、`AdjoinRoot.lift` で座標環の**半線型**自己同型 `Σ_R` が作れる(第 192)。★★関数体へは局所化で延び、`Σ_F` になる(0 ブロック)" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(d)(Galois 同変性)"
       (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
-      "★★構成が関手的なら自動だが、明示式(`τ_Q(g_P)/g_P`)からだと `σ(f_P) = f_{σP}` と `σ(g_P) = g_{σP}` を別途示すことになる(10-25 ブロック)" 19,
+      "★★★★★★★**mathlib の `Point.map` では足りなかった**(2026-08-20 実測)。`Point.map` は `f : F →ₐ[S] K` を要求するので**半線型写像を表せない**(`σ` が底体 `L` に非自明に効く)。★そこで加法公式(`negY`・`addX`・`addY`・`slope`)を直接輸送して `semiPoint` を作り、加法準同型であることを示した(第 193)。★★`slope` の場合分けは `σ` の単射性で対応が付く(0 ブロック)" 19,
     .implicitStep
-      "★★★★2026-08-20 の見通し: 第 178 の `WeilSpec` は**データの存在**として書いてあるので、`σ` で witness を輸送すれば良い。★`σ : L ≃ₐ[K] L` は `W.CoordinateRing` と `W.FunctionField` にそれぞれ環同型を誘導する(係数が `K` にあるから)。★★`WeilSpec W n P Q c` の witness に `σ` を当てると `WeilSpec W n (σP) (σQ) (σc)` の witness になる——これが本節点の中身である" 19,
+      "★★★★★★★★要は **`Σ_F` が `n·生成点` の座標を固定すること**である。`Σ_F` は `coordX`・`coordY` と係数を固定するので `semiPoint` は生成点を固定し、加法準同型だから `n·生成点` も固定する。★したがって `Σ_F ∘ μ = μ ∘ Σ_R`(第 119 の一意性)で、witness の `μ`・`xn`・`yn` は**そのまま使える**(0 ブロック)" 19,
     .implicitStep
-      "★`galPoint`(σ の点への作用)は **Interface に定義済**であり posit ではない(0 ブロック)" 19 ]
+      "★`galPoint`(σ の点への作用)は **Interface に定義済**であり posit ではない。第 194 で `semiPoint = galPoint` を確かめた(0 ブロック)" 19,
+    .implicitStep
+      "★逸脱の記録: `[IsAlgClosed L]`・`[CharZero L]`・`hn : 1 ≤ n` を仮定に足した。消費側 `det_galRep_eq_cyclotomic` は `[CharZero K]`・`[IsAlgClosed L]` の下にあり、`n = l^k` は 1 以上なので後続に影響しない" 19 ]
 
 end ABC3.Skeleton.GaloisRep

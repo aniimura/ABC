@@ -19378,3 +19378,40 @@ Galois 同変性
 | 非退化性 | ❌ |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-505 ★★★★★★★★★スケルトンの Galois 同変性が埋まった(第 194 ブロック)
+
+第 193 の半線型同変性を `galPoint` の言葉に翻訳し、
+スケルトンの `weilPairing_galois` を埋めた。
+
+| 補題 | 内容 |
+|---|---|
+| `fixesCoeffs_baseChange` | `σ : L ≃ₐ[K] L` は `W.baseChange L` の係数を固定する |
+| `semiPoint_eq_galPoint` | ★★★**`semiPoint = galPoint`**——どちらも `(x,y) ↦ (σx, σy)` |
+| `weilPairingVal_galPoint` | ★★★★★★★★★**`σ(e_n(P,Q)) = e_n(σP, σQ)`** |
+
+### ★`Skeleton/GaloisRep/WeilPairingDef.lean` の状態
+
+| 節点 | 状態 |
+|---|---|
+| `weilPairing`(定義) | ✅ 第 178 |
+| `weilPairing_pow_eq_one` | ✅ 第 179 |
+| `weilPairing_add_left` | ✅ 第 184 + 191 |
+| `weilPairing_self` | ✅ 第 190 + 191 |
+| `weilPairing_galois` | ✅ **第 192-194** |
+| `weilPairing_nondeg` | ❌ 未 |
+
+★台帳の `sorry` は **58 → 53**。
+
+### ★逸脱(記録)
+
+`weilPairing_galois` に `[IsAlgClosed L]`・`[CharZero L]`・`hn : 1 ≤ n` を足した。
+★消費側 `det_galRep_eq_cyclotomic` は `[CharZero K]`・`[IsAlgClosed L]` の下にあり、
+`n = l^k` は 1 以上なので後続に影響しない。
+
+### ★残るもの((G5))
+
+1. **非退化性**——`F(E)/[n]^*F(E)` が `E[n]` を Galois 群とする Galois 拡大であることが要る
+2. `det_galRep_eq_cyclotomic`——基底 `P, Q` を取って 4 性質を組み合わせる
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。

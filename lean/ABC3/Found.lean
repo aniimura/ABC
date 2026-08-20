@@ -167,6 +167,7 @@ import ABC3.Found.ProL.LimitPi
 import ABC3.Found.ProL.LPart
 import ABC3.Found.ProL.Decomposition
 import ABC3.Found.ProL.ZetaPow
+import ABC3.Found.ProL.DivByP
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
@@ -689,6 +690,7 @@ import ABC3.Found.GaloisRep.WeilAlt
 import ABC3.Found.GaloisRep.WeilCharZero
 import ABC3.Found.GaloisRep.SemiLinear
 import ABC3.Found.GaloisRep.WeilGalois
+import ABC3.Found.GaloisRep.WeilGalPoint
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
