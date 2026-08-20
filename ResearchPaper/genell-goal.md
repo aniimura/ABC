@@ -20384,3 +20384,48 @@ Lipschitz 公式の `k = 1` は、右辺がちょうど **`f(t) = t/(1-t)^2`**�
 ★★`lake build ABC3.Found.GaloisRep.LipschitzBridge` は通過。全体の `lake build` は
 **並行セッションの `Found/Divisor/ArithFunctor.lean`(194・204・218 行)で落ちている**
 ——こちらのファイルではない。ゲートも同じ理由で NG 1 件。
+
+
+## §9-528 ★★★★★★格子不変量 `g2, g3` の q 展開(第 215 ブロック)—— 道 β の段 4
+
+`Found/GaloisRep/LatticeInvariant.lean`。第 214 で選んだ道 β の残り 3 段のうち、段 4 を取った。
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 4 | 格子 `Z + tau*Z` の `g2, g3` を Eisenstein の q 展開に繋ぐ | ★**本ブロックで完了** |
+| 5 | `℘` の q 展開(Lipschitz 公式を `n in Z` の各段に当てる) | 未着手 |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | 未着手 |
+
+### ★★★★★mathlib は 2 つの世界を別々に持っていた
+
+| 世界 | 和のとり方 |
+|---|---|
+| `PeriodPair.G n` | `S' l : L.lattice, (l^n)^-1`(**格子の元**にわたる) |
+| `EisensteinSeries.eisSummand` | `(v0*z + v1)^{-k}`(**整数の対**にわたる) |
+
+★`tau` から周期対 `<tau, 1>` を作り、`latticeEquivProd : L.lattice ~L[Z] Z x Z` と
+`finTwoArrowEquiv : (Fin 2 -> Z) ~ Z x Z` を噛ませると**同じ和になる**。
+★★`l = 0` の項は `(0^n)^-1 = 0` なので**勝手に落ちる**——除外の細工は要らなかった。
+Lean の `0^-1 = 0` 規約がここで効いている。
+
+### ★★★★★★そこから q 展開まで一直線だった
+
+    G_k = S' v, eisSummand k v tau                        (本ブロック)
+        = zeta(k) * eisensteinSeries 0 k tau               (mathlib)
+        = 2 zeta(k) * E_k(tau)                             (E は 1/2 倍で定義されている)
+        = 2 zeta(k) * (1 - (2k/B_k) S sigma_{k-1}(n) q^n)  (mathlib)
+
+★★`g2 = 60*G_4`・`g3 = 140*G_6` なので、そのまま `sigma_3`・`sigma_5` の級数で書けた
+——**これは我々の `tateA4 = -5*sigmaSeries 3`・`tateA6` と同じ形**である。
+★★★係数の照合(`zeta(4) = pi^4/90` 等)は段 5-6 で使う。
+
+| 定理 | 内容 |
+|---|---|
+| `tauPair` | `tau` から周期対 `<tau, 1>` |
+| `G_eq_tsum_eisSummand` | ★★★★**格子和は Eisenstein 和である** |
+| `G_eq_two_zeta_mul_E` | ★★★★★`G_k = 2 zeta(k) E_k` |
+| `G_qExpansion` | ★★★★★★**`G_k` の q 展開** |
+| `g2_qExpansion` / `g3_qExpansion` | ★★★★★★**`g2, g3` の q 展開** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
