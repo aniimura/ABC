@@ -2638,11 +2638,11 @@
           "deps": [
             "p56-Mp"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "各段で `u_n` を選び、副有限性(コンパクト性)で極限を取る。★ここが原文の「unit-profinite 型」を実際に消費する所。",
-          "lean": "",
-          "decl": ""
+          "note": "各段で `u_n` を選び、副有限性(コンパクト性)で極限を取る。★ここが原文の「unit-profinite 型」を実際に消費する所。\n\n★★★★★★2026-08-20 完了、かつ**見立てを下方修正した**。原典は「各段で u_n を選び、副有限性(コンパクト性)で極限を取る」と読めるが、**逆極限の構成は要らなかった**。M ≅ ∏_l M[l](decompEquiv、既済)で成分ごとの方程式に分けると、各 M[q] で x ↦ x^{q-1} が全単射(pow_pred_bijective、既済)だから q 成分の解 u_q が一意に取れ、原文の「u_p の無限積」は **積分解の逆像 decompEquiv.symm (fun q => u_q) そのもの**である。\n★連立が解ける根拠は両立条件 v_{l1}^{1-l2} = v_{l2}^{1-l1}(φ, φ′ がともに単系準同型であることから出る)。★逸脱の記録は ABC3/Found/ProL/OneSubPow.lean の冒頭にある。",
+          "lean": "ABC3/Found/ProL/OneSubPow.lean",
+          "decl": "ABC3.Found.ProL.exists_forall_pow_one_sub"
         },
         {
           "id": "p56",
@@ -2652,11 +2652,11 @@
             "p56-primes",
             "p56-limit"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "(1) と (2) を束ねる。",
-          "lean": "",
-          "decl": ""
+          "note": "(1) と (2) を束ねる。\n\n★2026-08-20 完了。exists_conj_frobenius(u の存在)と prop_5_6_claim(u から (σ, φ) の両方へ)を束ねた。★両立条件は otimes_compat(消去に使うのは totally epimorphic 性だけ)。",
+          "lean": "ABC3/Found/FrdI/Prop56Exists.lean",
+          "decl": "ABC3.Found.FrdI.prop_5_6"
         },
         {
           "id": "cor57",

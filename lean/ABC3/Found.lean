@@ -101,6 +101,7 @@ import ABC3.Found.FrdI.Thm52NatIso
 import ABC3.Found.FrdI.Thm52ModelType
 import ABC3.Found.FrdI.Prop53Birat
 import ABC3.Found.FrdI.Prop56Sec
+import ABC3.Found.FrdI.Prop56Exists
 import ABC3.Found.FrdI.Def24Rlf
 import ABC3.Found.FrdI.Def24PfT
 import ABC3.Found.FrdI.Def24RlfCone
@@ -171,6 +172,7 @@ import ABC3.Found.ProL.LPart
 import ABC3.Found.ProL.Decomposition
 import ABC3.Found.ProL.ZetaPow
 import ABC3.Found.ProL.DivByP
+import ABC3.Found.ProL.OneSubPow
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
@@ -708,6 +710,8 @@ import ABC3.Found.GaloisRep.TateWiring
 import ABC3.Found.GaloisRep.DetWiring
 import ABC3.Found.GaloisRep.DetCyclotomic
 import ABC3.Found.GaloisRep.TowerSurj
+import ABC3.Found.GaloisRep.TateSurj
+import ABC3.Found.GaloisRep.BasisFree
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
