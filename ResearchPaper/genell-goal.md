@@ -18840,3 +18840,38 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 | `aut_div_mul` | ★★★★★★**双線型性の機構** |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-493 ★★★★★★和の点の生成元の関係式(第 182 ブロック)
+
+第 181 の `aut_div_mul` が要求する `g₁ g₂ = ζ·z·g₃` の材料
+
+    f₁ · f₂ = u · h^n · f₃        (u ∈ F^×、h ∈ F(W)^×)
+
+を出した。★これは **Abel–Jacobi の元のレベルでの言い換え**である。
+
+### ★★★★★★機構
+
+1. `toClass(P₁+P₂) = toClass P₁ + toClass P₂`(mathlib、`toClass` は `→+`)
+2. `U := XYIdeal'(P₁)·XYIdeal'(P₂)·XYIdeal'(P₁+P₂)⁻¹` の類は 1
+3. 第 140 の `isPrincipal_of_classGroup_eq_one` で `U = (h)`
+4. **`n` 乗して**元のレベルに落とす——`XYIdeal(P_i)^n = (f_i)` なので
+   `spanSingleton(f₁f₂) = spanSingleton(h^n f₃)`
+5. `spanSingleton_eq_spanSingleton` で `f₁f₂ = z·h^n·f₃`、
+   第 128 の**単元は定数**から `z = u ∈ F^×`
+
+★★D2 で使った道具(第 128・第 140)がそのまま効いた。
+
+### ★残る段
+
+`μ̃` を当てて `μf₁·μf₂ = (定数)·μ̃(h)^n·μf₃` にし、`g_i^n = μf_i` から
+`(g₁g₂/(μ̃(h) g₃))^n = 定数` ⟹ 第 177 の `const_of_pow_eq_const` で
+`g₁g₂ = ζ·μ̃(h)·g₃`。★そこに第 181 の `aut_div_mul` を当てれば双線型性が出る。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `exists_h_of_add` | ★★★★★★イデアルのレベルの関係式 |
+| `elem_relation_of_add` | ★★★★★★**元のレベルの関係式** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
