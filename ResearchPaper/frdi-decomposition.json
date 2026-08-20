@@ -3581,11 +3581,11 @@
           "id": "thm64-i-nondil",
           "title": "(i) (clearly / immediately) 数体の自己同型で全素点を固定するものは恒等 ⟹ `Φ` は non-dilating、`𝒟` は Div-slim",
           "deps": [],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "★★★★2026-08-21：**Div-slim の側の中身を取った**（`GaloisFaithful.lean`）。\n原文が「clearly」で畳んだ「数体の自己同型で全素点を固定するものは恒等」は、\n★★**完全分解する素数 1 つで足りる**：\n* `g·(e·f) = |Gal(K/ℚ)| = [K:ℚ]`（`Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn`、\n  **底 `ℤ`** で使う。`isGaloisGroup_int`（`SplitInfinite.lean`）が効く）\n* 完全分解（`g = [K:ℚ]`）⟹ `e·f = 1`\n* `#(stabilizer) = e·f`（`Ideal.card_stabilizer_eq`）⟹ **分解群は自明**\n* ⟹ `P` を固定する `σ` は恒等（`eq_one_of_fixes_prime`）\n★完全分解する素数の存在は `infinite_splitsCompletely'`（**Chebotarev を使わない**）。\n\n★★**条つき**: 剰余体拡大の分離性 `Algebra.IsSeparable (ℤ/p) (𝓞 K/P)` を instance 引数で受けている。\nこれは**真**（剰余体は有限、有限体は完全）だが、`Field (ℤ ⧸ span {p})` の instance 探索が届かず\n`PerfectField.ofFinite` をそのまま繋げなかった。★中身ではなく配線の問題である。\n\n★★残るのは **non-dilating の側**（`Φ` が non-dilating であること）である。",
+          "lean": "ABC3/Found/NumberField/GaloisFaithful.lean",
+          "decl": "ramificationIdxIn_mul_inertiaDegIn_eq_one / subsingleton_stabilizer_of_splitsCompletely / eq_one_of_fixes_prime"
         },
         {
           "id": "thm64-i-dirichlet",
