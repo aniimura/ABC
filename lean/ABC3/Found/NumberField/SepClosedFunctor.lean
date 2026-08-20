@@ -58,17 +58,105 @@ theorem primElt_adjoin (L : IntermediateField K₁ Ω) [FiniteDimensional K₁ L
   rwa [IntermediateField.lift_adjoin_simple, IntermediateField.lift_top] at h
 
 /-- ★★**対象の側** —— `L ↦ K₂(L)`。 -/
-noncomputable def compObj (L : FinSub K₁ Ω) : FinSub K₂ Ω :=
-  haveI := L.fin
-  { toIF := IntermediateField.adjoin K₂ (L.toIF : Set Ω)
-    fin := finiteDimensional_adjoin_coe (K₂ := K₂) L.toIF (primElt L.toIF)
-      (primElt_adjoin L.toIF) }
+noncomputable def compObj (L : FinSub K₁ Ω) : FinSub K₂ Ω where
+  toIF := IntermediateField.adjoin K₂ (L.toIF : Set Ω)
+  fin := by
+    haveI := L.fin
+    exact finiteDimensional_adjoin_coe (K₂ := K₂) L.toIF (primElt L.toIF)
+      (primElt_adjoin L.toIF)
+
+@[simp] theorem compObj_toIF (L : FinSub K₁ Ω) :
+    (compObj (K₂ := K₂) L).toIF = IntermediateField.adjoin K₂ (L.toIF : Set Ω) := rfl
 
 /-- ★★★**次数は保たれる**。 -/
 theorem finrank_compObj (hsc : separableClosure K₁ K₂ = ⊥) (L : FinSub K₁ Ω) :
     Module.finrank K₂ (compObj (K₂ := K₂) L).toIF = Module.finrank K₁ L.toIF := by
   haveI := L.fin
   exact finrank_adjoin_coe_eq_of_separableClosure_eq_bot hsc L.toIF
+
+/-! ## ★2. 射の側 -/
+
+/-- ★★**`f : L ⟶ M` が定める `K₂(L) →ₐ[K₂] Ω`**。 -/
+noncomputable def compHomToOmega (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M : FinSub K₁ Ω} (f : L ⟶ M) :
+    (compObj (K₂ := K₂) L).toIF →ₐ[K₂] Ω :=
+  haveI := L.fin
+  haveI := M.fin
+  (extendAlgHom hsc L.toIF ((M.toIF.val).comp (FinSub.hom f)) (primElt L.toIF)).comp
+    (IntermediateField.equivOfEq (adjoin_coe_eq_adjoin_simple (K₂ := K₂) L.toIF
+      (primElt L.toIF) (primElt_adjoin L.toIF))).toAlgHom
+
+/-- ★`L` の元の上では `f` そのもの。 -/
+theorem compHomToOmega_apply (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M : FinSub K₁ Ω} (f : L ⟶ M) (x : Ω) (hx : x ∈ L.toIF) :
+    compHomToOmega hsc f ⟨x, IntermediateField.subset_adjoin K₂ _ hx⟩
+      = ((FinSub.hom f) ⟨x, hx⟩ : Ω) := by
+  haveI := L.fin
+  haveI := M.fin
+  have heq := adjoin_coe_eq_adjoin_simple (K₂ := K₂) L.toIF (primElt L.toIF)
+    (primElt_adjoin L.toIF)
+  have h2 : (IntermediateField.equivOfEq heq)
+      ⟨x, IntermediateField.subset_adjoin K₂ _ hx⟩
+      = ⟨x, le_adjoin_K₂ L.toIF (primElt L.toIF) (primElt_adjoin L.toIF) hx⟩ := rfl
+  show extendAlgHom hsc L.toIF ((M.toIF.val).comp (FinSub.hom f)) (primElt L.toIF)
+      ((IntermediateField.equivOfEq heq)
+        ⟨x, IntermediateField.subset_adjoin K₂ _ hx⟩) = _
+  rw [h2]
+  exact extendAlgHom_restrict hsc L.toIF ((M.toIF.val).comp (FinSub.hom f))
+    (primElt L.toIF) (primElt_adjoin L.toIF) x hx
+
+/-- ★★**抽象版** —— `adjoin F s` からの代数射の像は、生成元の像で決まる。
+
+★★`compHomToOmega` を展開させないために、射を**抽象のまま**扱うのが要点である
+(具体形のまま `adjoin_induction` を回すと `whnf` が落ちる)。 -/
+theorem algHom_mem_of_mem_adjoin {F E : Type u} [Field F] [Field E] [Algebra F E]
+    (s : Set E) (g : (IntermediateField.adjoin F s) →ₐ[F] E) (T : IntermediateField F E)
+    (h : ∀ x (hx : x ∈ s), g ⟨x, IntermediateField.subset_adjoin F s hx⟩ ∈ T)
+    (x : E) (hx : x ∈ IntermediateField.adjoin F s) : g ⟨x, hx⟩ ∈ T := by
+  refine IntermediateField.adjoin_induction F
+    (p := fun y hy => g ⟨y, hy⟩ ∈ T) h ?_ ?_ ?_ ?_ hx
+  · intro c
+    have h1 : g ⟨algebraMap F E c, IntermediateField.algebraMap_mem _ _⟩ = algebraMap F E c :=
+      AlgHom.commutes _ c
+    rw [h1]
+    exact T.algebraMap_mem c
+  · intro y z hy hz hy' hz'
+    have h1 : g ⟨y + z, add_mem hy hz⟩ = g ⟨y, hy⟩ + g ⟨z, hz⟩ :=
+      map_add g ⟨y, hy⟩ ⟨z, hz⟩
+    rw [h1]
+    exact add_mem hy' hz'
+  · intro y hy hy'
+    have h1 : g ⟨y⁻¹, inv_mem hy⟩ = (g ⟨y, hy⟩)⁻¹ := map_inv₀ g ⟨y, hy⟩
+    rw [h1]
+    exact inv_mem hy'
+  · intro y z hy hz hy' hz'
+    have h1 : g ⟨y * z, mul_mem hy hz⟩ = g ⟨y, hy⟩ * g ⟨z, hz⟩ :=
+      map_mul g ⟨y, hy⟩ ⟨z, hz⟩
+    rw [h1]
+    exact mul_mem hy' hz'
+
+/-- ★★★**像は `K₂(M)` に入る** —— 生成元での値が `M` に入るから。 -/
+theorem compHomToOmega_mem (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M : FinSub K₁ Ω} (f : L ⟶ M) (x : Ω)
+    (hx : x ∈ IntermediateField.adjoin K₂ (L.toIF : Set Ω)) :
+    compHomToOmega hsc f ⟨x, hx⟩
+      ∈ IntermediateField.adjoin K₂ (M.toIF : Set Ω) := by
+  refine algHom_mem_of_mem_adjoin (L.toIF : Set Ω) (compHomToOmega hsc f) _ ?_ x hx
+  intro y hy
+  show compHomToOmega hsc f ⟨y, IntermediateField.subset_adjoin K₂ _ hy⟩ ∈ _
+  rw [compHomToOmega_apply hsc f y hy]
+  exact IntermediateField.subset_adjoin K₂ _ ((FinSub.hom f) ⟨y, hy⟩).2
+
+/-- ★★★★**射の側** —— `f : L ⟶ M` が定める `K₂(L) →ₐ[K₂] K₂(M)`。 -/
+noncomputable def compMap (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M : FinSub K₁ Ω} (f : L ⟶ M) :
+    (compObj (K₂ := K₂) L).toIF →ₐ[K₂] (compObj (K₂ := K₂) M).toIF :=
+  AlgHom.codRestrict (compHomToOmega hsc f) ((compObj (K₂ := K₂) M).toIF.toSubalgebra)
+    (fun x => compHomToOmega_mem hsc f x.1 x.2)
+
+@[simp] theorem compMap_coe (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M : FinSub K₁ Ω} (f : L ⟶ M) (x : (compObj (K₂ := K₂) L).toIF) :
+    ((compMap hsc f x : (compObj (K₂ := K₂) M).toIF) : Ω) = compHomToOmega hsc f x := rfl
 
 /-! ### ★出典の紐付け -/
 
