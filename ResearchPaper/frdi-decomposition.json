@@ -3449,11 +3449,11 @@
           "deps": [
             "ord-mon"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "\n\n★鎖 arith の ord-mon で閉じた（2026-08-20）。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean / ABC3/Found/Divisor/ArithOrd.lean",
+          "decl": "ABC3.Found.Divisor.ordFin / ABC3.Found.Divisor.ordArch"
         },
         {
           "id": "ex63-B",
@@ -3461,11 +3461,11 @@
           "deps": [
             "arith-B"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "\n\n★鎖 arith の arith-B で閉じた（2026-08-20）。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "ABC3.Found.Divisor.arithDivHom"
         },
         {
           "id": "ex63-functor",
@@ -3522,11 +3522,11 @@
           "deps": [
             "mu-units"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "\n\n★鎖 arith の mu-units で閉じた（2026-08-20）。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "ABC3.Found.Divisor.exists_pow_eq_one_of_arithDiv_eq_zero"
         },
         {
           "id": "ex63-deg",
