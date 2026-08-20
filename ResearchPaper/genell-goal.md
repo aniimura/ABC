@@ -18798,3 +18798,45 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 | スケルトンへの橋渡し | `WeilPairingDef.lean` の 6 個の `sorry` |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-492 ★★★★★★双線型性の機構(第 181 ブロック)
+
+    e_n(P₁+P₂, Q) = e_n(P₁,Q) · e_n(P₂,Q)
+
+は、`g_i^n = μ f_{P_i}` として
+
+    g₁ g₂ = ζ · z · g₃          (ζ は定数、z は τ_Q で不変)
+
+の形の関係があれば出る:
+
+    (τg₁/g₁)(τg₂/g₂) = (τg₁ τg₂)/(g₁g₂) = (ζ z τg₃)/(ζ z g₃) = τg₃/g₃
+
+★`τ` は定数を固定するので `ζ` は消える。★★**`z` が `τ` で不変なのが要点**である。
+
+### ★★★★`μ` を関数体に延ばせるようになった
+
+`μ̃ := IsFractionRing.lift hinj` は **`μ` の単射性**を要求する。★第 180 でそれが
+定理になったので、延長が取れるようになった。★★そして
+
+    τ ∘ μ̃ = μ̃        (`aut_comp_muExt`)
+
+——第 168 の `τ ∘ μ = μ` を `IsLocalization.ringHom_ext` で関数体に延ばしたもの。
+
+### ★残る段
+
+`z = μ̃(h)` を作るには、`XYIdeal(P₁)·XYIdeal(P₂)` と `XYIdeal(P₁+P₂)` が主イデアル
+`(h)` だけ違うこと(mathlib の `mk_XYIdeal'_mul_mk_XYIdeal'`)から
+
+    μf₁ · μf₂ = (定数) · μ̃(h)^n · μf₃
+
+を出し、`n` 乗根を比べる。★第 177 の `const_of_pow_eq_const` がそのまま効く見込み。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `muExt` / `muExt_algebraMap` | ★★★★`μ` の関数体への延長 |
+| `aut_comp_muExt` | ★★★★★★**`τ ∘ μ̃ = μ̃`** |
+| `aut_div_mul` | ★★★★★★**双線型性の機構** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
