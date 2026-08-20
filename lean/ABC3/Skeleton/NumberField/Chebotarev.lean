@@ -50,8 +50,25 @@ Chapter V, Theorem 3.23(声明)と Chapter VIII, §7, Theorem 7.4(証明)。
 | Artin の相互法則 | 類体論は実質不在(`Artin` の 54 件は別物) | ★**無い** |
 | Dirichlet 密度 / Frobenius 元 / 射類群 | grep 0 件 | ★**無い** |
 
-★★分解は `ResearchPaper/frdi-decomposition.json` の鎖 `cheb`(19 節点・8 層)。
-**律速は `cheb-reciprocity`(Artin の相互法則)** であり、それ単体が大きな形式化計画である。
+★★分解は `ResearchPaper/frdi-decomposition.json` の鎖 `cheb`(22 節点)。
+
+## ★★★★★★**訂正(2026-08-20)—— 律速は Artin の相互法則ではなかった**
+
+当初「(c) は密度を本当に要求し、律速は Artin の相互法則」と書いたが、
+それは**共役類つきの一般形**についてであって、
+**[FrdI] が使う 3 箇所はいずれも「完全分解」の場合に収まる**。
+
+★完全分解の場合の密度 `1/[L:K]` は **Frobenius/Dedekind の古典的な論法**で出る:
+
+1. `log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)`（`f ≥ 2` や `m ≥ 2` の項は有界）
+2. `L/K` が Galois なら `p` の上の `f` はすべて等しいので、
+   `#{𝔭 ∣ p, f=1}` は完全分解なら `[L:K]`、それ以外は `0`
+3. `ζ_L` は `s=1` で単純極（**mathlib 在庫** `dedekindZeta_residue`）なので
+   `log ζ_L(s) ~ log(1/(s-1))`
+4. ゆえに `Σ_{p ∈ Spl(L)} p^{-s} ~ (1/[L:K])·log(1/(s-1))`
+
+★★**使うのは Dedekind ζ の極だけ**で、Artin の相互法則も Hecke L 関数も要らない。
+★★★したがって **§6 に類体論は要らない**。
 
 ## ★本ファイルが置くもの
 
@@ -146,7 +163,7 @@ def chebotarev_splitsCompletely.src : Source :=
     sectionId := "frdi-thm-6-4" }
 
 /-- ★★分解は `ResearchPaper/frdi-decomposition.json` の鎖 `cheb`(19 節点・8 層)。
-★律速は **Artin の相互法則**である。 -/
+★★訂正(2026-08-20): [FrdI] が要求するのは**完全分解の場合だけ**で、それは Dedekind ζ の極（mathlib 在庫）で出る。Artin の相互法則は**共役類つきの一般形**にしか要らない。 -/
 def chebotarev_splitsCompletely.needs : List ProofObligation :=
   [ .otherPaper "[MilneCFT]" "Chapter VIII, §7, Theorem 7.4(Chebotarev の密度定理)" 274,
     .otherPaper "[MilneCFT]" "Chapter V, §3, Theorem 3.5(Artin の相互法則)" 178,
