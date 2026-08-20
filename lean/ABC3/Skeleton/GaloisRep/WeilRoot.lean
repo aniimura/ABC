@@ -35,16 +35,19 @@ mathlib は Dedekind 環の**因子機構を完備している**——
 `IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・
 adic 付値。★**「因子群が無い」という当初の記録は誤りであった。**
 
-★★欠けているのは **`IsDedekindDomain W.CoordinateRing` の instance だけ**である:
+★★★★★★**2026-08-20: `IsDedekindDomain W.CoordinateRing` が出た**(第 137 ブロック):
 
-| 条件 | mathlib |
+| 条件 | 出所 |
 |---|---|
 | `IsDomain W.CoordinateRing` | ✅ mathlib |
 | `IsNoetherianRing W.CoordinateRing` | ✅ mathlib |
-| `Ring.DimensionLEOne W.CoordinateRing` | ✅ **第 127 ブロック** |
-| `IsIntegrallyClosed W.CoordinateRing` | ❌ **これだけ** |
+| `Ring.DimensionLEOne W.CoordinateRing` | ✅ 第 127 ブロック |
+| `IsIntegrallyClosed W.CoordinateRing` | ✅ **第 137 ブロック(Dedekind の副産物)** |
+| **`IsDedekindDomain W.CoordinateRing`** | ✅ **第 137 ブロック** |
 
-★★★これが入れば `div(f)` は**主分数イデアルの素分解**としてそのまま出る。
+★★★したがって `div(f)` は**主分数イデアルの素分解**としてそのまま出る。
+★★★★残るのは **`div(f_P ∘ [n])` が `n` で割れることの因子計算**と
+**`n` 乗根の取り出し**の 2 つだけである。
 -/
 
 namespace ABC3.Skeleton.GaloisRep
@@ -88,9 +91,9 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★**2026-08-20 の再実測で見積もりが変わった**: mathlib は Dedekind 環の**因子機構を完備している**——`IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・adic 付値。「因子群が無い」は誤りであり、**欠けているのは `IsDedekindDomain W.CoordinateRing` の instance だけ**である" 19,
     .implicitStep
-      "★★★**座標環が Dedekind 環であること**を示す——`IsDomain` ✅・`IsNoetherianRing` ✅(mathlib)、`Ring.DimensionLEOne` ✅(第 127 ブロック、第 116 の整拡大から)。**残るのは `IsIntegrallyClosed` だけ**である(10-25 ブロック)" 19,
+      "★★★★★★**座標環が Dedekind 環であることは第 137 ブロックで出た**——`IsDomain` ✅・`IsNoetherianRing` ✅(mathlib)、`Ring.DimensionLEOne` ✅(第 127)、そして `IsDedekindDomainDvr`(Noether + 局所化がすべて DVR)を経由して `IsDedekindDomain` ✅。★`IsIntegrallyClosed` は副産物として付いてきた(0 ブロック)" 19,
     .implicitStep
-      "★★2026-08-20 実測: 段 (i)(極大イデアルの形)に要る**古典的零点定理は mathlib に直接の形では無い**——`Module.Finite k A`(体 `A` が体 `k` 上有限生成代数なら有限)は `exact?` で見つからない。★ただし `IsJacobsonRing` の機構はある(`isJacobsonRing_of_isIntegral`・`quotient_mk_comp_C_isIntegral_of_isJacobsonRing`)ので、そこから組み立てることになる(5-15 ブロック)" 19,
+      "★★★★★★**古典的零点定理は要らなかった**(第 134 ブロック)——極大イデアルの `x` 座標は、整拡大(第 116)+ mathlib の `Ideal.IsIntegral.comap_ne_bot` + `F[X]` が PID + `F` が代数閉、の 3 段で取れる。★さらに第 135 で `P = (x − c, y − y₀)` まで出た(`AdjoinRoot.mk` の全射性と `Polynomial.ringHom_ext` だけ。`Q` が極大であることを示す必要すら無い)(0 ブロック)" 19,
     .implicitStep
       "★★★**別解(判別式)**: `CR = F[x][z]`(`z² = Ψ₂Sq(x)`)は **Found に済**(第 129 `genZ_sq`)。`Ψ₂Sq` が squarefree なら整閉になる(0 ブロック)" 19,
     .implicitStep
@@ -98,13 +101,13 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★`discr ≠ 0` ⟹ `Squarefree Ψ₂Sq` の段。mathlib の在庫(2026-08-20 実測): `Cubic.discr_ne_zero_iff_roots_nodup` ✅、`PerfectField.separable_iff_squarefree` ✅、`Polynomial.Separable.squarefree` ✅、`UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` ✅。★★★★★★**これは第 131 ブロックで Found に入った**(`squarefree_of_roots_nodup`・`squarefree_Psi2Sq`)。分解 `p = C a·∏(X−r)` と `separable_prod_X_sub_C_iff'` から 1 ブロックで出た(0 ブロック)" 19,
     .implicitStep
-      "★★★`Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` が整閉、の段。mathlib に二次拡大の整閉性は無い(2026-08-20 実測、`IsIntegrallyClosed` を持つ 20 ファイルを列挙して確認)(10-25 ブロック)" 19,
+      "★★★★★**二次拡大の整閉性を直接示す必要は無かった**——`IsDedekindDomainDvr` 経由で局所化が DVR であることを示す方が短く、整閉性はその副産物として出る(第 136・137)。mathlib に二次拡大の整閉性が無いという実測自体は正しいが、迂回できた(0 ブロック)" 19,
     .implicitStep
       "★★★★★**より短い経路が見つかった**: mathlib の `IsDedekindDomainDvr.isDedekindDomain` は **instance** である(2026-08-20 実測)。`IsDedekindDomainDvr A` = `IsNoetherian A A` + 「零でない素イデアルでの局所化がすべて DVR」なので、**整閉性を経由せず**に Dedekind が出る。★`IsDedekindDomainDvr.isIntegrallyClosed` も instance なので整閉性は副産物として得られる" 19,
     .implicitStep
-      "★★局所化が DVR であることの内訳: 極大イデアル `m` は `XYIdeal W x y` の形(代数閉体上)で、非特異点では `x − x₀` か `y − y₀` が局所化で `m` を生成する。mathlib の `IsDiscreteValuationRing.iff_pid_with_one_nonzero_prime` / `DiscreteValuationRing.TFAE` に流す(10-25 ブロック)" 19,
+      "★★★★★★**局所化が DVR であることは第 136 ブロックで出た**——`Ψ₂Sq(c) = 0`(分岐)なら `z`、`≠ 0`(不分岐)なら `x − c` が一意化元。どちらも第 132・133 の分解の片側が局所化で単元になることによる。mathlib の `IsDiscreteValuationRing.TFAE` の項 0 ⟺ 項 4(`DVR ⟺ 極大イデアルが単項`)に流した(0 ブロック)" 19,
     .implicitStep
-      "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定は `IsIntegrallyClosed.of_localization_maximal : (∀ p ≠ ⊥, [p.IsMaximal] → IsIntegrallyClosed (Localization.AtPrime p)) → IsIntegrallyClosed R`(2026-08-20 実測)。★内訳は (i) 各極大イデアルが `XYIdeal W x y` の形であること(代数閉体上の零点定理)、(ii) 非特異点では `x − x₀` か `y − y₀` が局所化で極大イデアルを生成すること、(iii) 局所 Noether 整域で極大イデアルが単項 ⟹ DVR(mathlib の `DiscreteValuationRing.TFAE`)(10-25 ブロック)" 19,
+      "★★★★実測で効いた技法(第 136): `Localization.AtPrime P` の**具体型**で補題を述べると、文の詰め込みだけで 200000 heartbeats を超えた(8.3 秒でタイムアウト)。★`(S : Type) [IsLocalization P.primeCompl S]` と抽象化したら 0.24 秒になった。具体型のインスタンス探索が重い場合、抽象化は単なる一般化以上の効果を持つ(0 ブロック)" 19,
     .implicitStep
       "★★Dedekind の instance が入れば、`div(f)` は【主分数イデアルの素分解】として mathlib から直接出る。因子群を自分で積む必要は無い(0 ブロック)" 19,
     .implicitStep
