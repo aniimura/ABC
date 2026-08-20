@@ -16879,3 +16879,64 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 生成元が単項に落ちること)。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-447 ★★★★★★★座標環が Dedekind 環になった(第 136・137 ブロック)
+
+§9-442 で「`IsIntegrallyClosed W.CoordinateRing` **だけ**が欠けている(10-25 ブロック)」
+と測った。★**それが出た。**しかも `IsDedekindDomain` ごと出た。
+
+### ★★★★★経路
+
+    IsDedekindDomainDvr F[W]                     (mathlib の class)
+      = IsNoetherian F[W] F[W]                   ✅ mathlib
+        + 「0 でない素イデアルでの局所化がすべて DVR」
+
+DVR 判定は mathlib の `IsDiscreteValuationRing.TFAE` の**項 0 ⟺ 項 4**
+(`DVR ⟺ 極大イデアルが単項`)。★単項性が第 136 の内容である:
+
+| 場合 | 一意化元 | 使う分解 |
+|---|---|---|
+| `Ψ₂Sq(c) = 0`(分岐、`s = 0`) | `z` | 第 132 `z² = (x−c)·e(x)`、`e(c) ≠ 0` |
+| `Ψ₂Sq(c) ≠ 0`(不分岐、`s ≠ 0`) | `x − c` | 第 133 `(z−s)(z+s) = (x−c)·g(x)` |
+
+★★どちらも機構は同じ——**分解の片側が局所化で単元になる**。
+もう一方の生成元 `y − y₀` は `2(y − y₀) = (z − s) − a₁(x − c)` から従う。
+
+★★★`IsDedekindDomainDvr.isDedekindDomain` は instance なので、
+`IsIntegrallyClosed` は**副産物**として付いてくる(`isIntegrallyClosed_coordinateRing`)。
+
+### ★★★★★★第 127 から第 137 までの一本道
+
+| ブロック | 内容 |
+|---|---|
+| 127 | `Ring.DimensionLEOne F[W]`(整拡大から) |
+| 129 | 平方完成 `z² = Ψ₂Sq(x)` |
+| 130 | `Ψ₂Sq` の判別式は `16Δ`(mathlib にあった) |
+| 131 | `Ψ₂Sq` は squarefree |
+| 132 | 分岐点の局所構造 |
+| 133 | 不分岐点の局所構造 |
+| 134 | 素イデアルの `x` 座標(零点定理なし) |
+| 135 | `P = (x − c, y − y₀)` |
+| 136 | 局所化の極大イデアルが単項 |
+| **137** | **`IsDedekindDomain F[W]`** |
+
+★★★★★★★**11 ブロックで抜けた。**§9-442 の見積もり(10-25 + 5-15 + 10-25 = 25-65)
+より短い。★見積もりが過大になる癖は、当初 mathlib の在庫を測り損ねることから来ている。
+
+### ★★実測で効いた技法——具体型を避ける
+
+第 136 を `Localization.AtPrime P` の**具体型**で述べたところ、
+**文の詰め込みだけで 200000 heartbeats を超えた**(8.3 秒でタイムアウト)。
+★`(S : Type) [IsLocalization P.primeCompl S]` と抽象化したら **0.24 秒**になった。
+★★具体型のインスタンス探索が重い場合、抽象化は単なる一般化以上の効果を持つ。
+
+### ★★★次に開くもの
+
+mathlib は Dedekind 環の因子機構を完備している——
+`IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・
+adic 付値。★`div(f)` は**主分数イデアルの素分解**としてそのまま出る。
+
+★★残るのは `div(f_P ∘ [n])` が `n` で割れることの因子計算(20-50)と
+`n` 乗根の取り出し(10-25)である。
+
+★義務の数は動いていない(Galois 4/8)。
