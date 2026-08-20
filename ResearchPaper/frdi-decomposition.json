@@ -3013,7 +3013,7 @@
           "deps": [],
           "status": "半済",
           "size": "中",
-          "note": "★mathlib に **`f.normalization` が在る**(`AlgebraicGeometry/Normalization.lean`、`toNormalization`/`fromNormalization` つき)。これが `V[L]` の作り方そのもの。",
+          "note": "★mathlib に **`f.normalization` が在る**(`AlgebraicGeometry/Normalization.lean`、`toNormalization`/`fromNormalization` つき)。これが `V[L]` の作り方そのもの。\n\n★★★★2026-08-21 の実測（**設計は確定した**、実装は未）:\n* `V[L] := (Spec.map (algebraMap K L) ≫ V.fromSpecStalk (genericPoint V)).normalization`\n  —— **型検査を通ることを確認した**（`V.fromSpecStalk` は `Mathlib/AlgebraicGeometry/Stalk.lean`）。\n* 関手性 `V[M] ⟶ V[L]` は mathlib の **`Scheme.Hom.normalizationDesc`**（相対正規化の普遍性）\n  ＋ **`normalization.hom_ext`**（一意性）で出る。\n  `f₁ := Spec M → Spec L → V[L]`、`f₂ := fromNormalization`、\n  `H` は `toNormalization_fromNormalization` と `specMapOf_specToV`（体の射が `V` へ可換、\n  `AlgHom.commutes` 1 本）から。★この 2 本も型検査で確認した。\n* ★★**残る障害は 1 つだけ** —— mathlib の `normalization` 節は\n  `f` に **qcqs（quasi-compact / quasi-separated）**を要求する。\n  `Spec L ⟶ V` について、`Spec.map` の側は affine なので自動だが、\n  `V.fromSpecStalk (genericPoint V)` の qcqs 性を `V` の仮定（proper など）から出す段が要る。",
           "lean": "",
           "decl": ""
         },
