@@ -53,3 +53,33 @@ FrdI の §5（2/7）と §6（0/5）の残りを 2026-08-20 に項目ごと測�
 1. `V[L]`（相対正規化）と `D_L` のスキーム層での構成（`Γ` の実現）
 2. `L ↦ Φ(L)` / `L ↦ B(L)` の**関手性**（因子の引き戻し。`monoid on ᴰ` にする）
 底の圏は閉じているので、この 2 つが揃えば `Theorem 5.2, (ii)`（実装済み）を当てるだけである。
+
+★★★★2026-08-20 の追記 3 —— **因子論のスケルトンと部分グラフを完成させた**
+
+指摘を受けて測り直した。それまで `sec6geom` の `ex61`/`thm62`/`ex63`/`thm64` は
+**各 1 節点に畳んだまま**で、CLAUDE.md の「合図 1 つを依存グラフの節点 1 つに
+対応させる」に反していた（Lean の実装だけが先行していた）。
+
+- `tools/hedge-index.mjs --item` の実測: §6 の合図は **26 件**
+  （Example 6.1 が 4 / Theorem 6.2 が 9 / Example 6.3 が 5 / Theorem 6.4 が 8）。
+- 鎖 `sec6items`（32 節点）へ展開し、因子論の在庫側を **4 層**に分けた:
+  `weil`(7) / `cartier`(5) / `normalize`(8) / `arith`(11)。全体で 287 節点。
+- `tools/frdi-newleaves.mjs` を**鎖跨ぎの依存**に対応させた（全体で層を出す）。
+  節点 id の重複 5 件は鎖名で名前空間化した。
+- `lean/ABC3/Skeleton/Divisor/` に statement を 4 ファイル置いた
+  （`SchemeWeil` / `Cartier` / `Normalization` / `ArithDivisor`）。
+
+★★**「因子論は一分野ぶん」という以前の見立ては誤りである。**
+環の層（`Found/Divisor/HeightOneDVR.lean`）と単系の層（`Found/Divisor/Cartier*.lean`）は
+閉じており、幾何側に残るのは実質 **2 本**:
+- `affine-compat` —— 余次元 1 の点 ↔ 高さ 1 の素イデアル（スキーム層と環層の橋）
+- `cartier-pullback` —— Cartier 因子の引き戻し（`Example 6.1` の関手性の本体）
+
+★算術側（`Example 6.3`）の在庫は**良い**: 積公式 `NumberField.prod_abs_eq_one` も
+Dirichlet 単数定理 `NumberField.Units.dirichletUnitTheorem` も mathlib に在る。
+★★**§6 に残る真の在庫不足は Tchebotarev 密度定理ただ 1 つ**（`Theorem 6.4, (iv)`、
+`Chebotarev|Tchebotarev` で grep して 0 件）。
+
+★教訓: **Lean を先に書くとスケルトンが後追いになり、畳まれた量が見えなくなる。**
+`Found/Divisor/Cartier*.lean` の 5 ファイルは正しい仕事だったが、
+それを書く前に §6 の合図を数えて節点へ展開すべきだった。
