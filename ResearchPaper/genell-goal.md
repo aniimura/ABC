@@ -16630,3 +16630,36 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 | 因子計算・`n` 乗根の取り出し | ★残り |
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-440 `Ψ₂Sq` の判別式は mathlib に既にあった(第 130 ブロック)
+
+経路 2 の次の段は「`Ψ₂Sq` が squarefree」であり、そのために判別式が要る。
+★**実測すると mathlib が既に持っていた**:
+
+| mathlib | 内容 |
+|---|---|
+| `WeierstrassCurve.twoTorsionPolynomial` | 3 次式 `⟨4, b₂, 2b₄, b₆⟩` |
+| `twoTorsionPolynomial_discr` | `discr = 16·Δ` |
+| `twoTorsionPolynomial_discr_ne_zero` | `IsUnit 2` と `IsUnit Δ` から `discr ≠ 0` |
+
+★★**`Ψ₂Sq` は `twoTorsionPolynomial.toPoly` そのもの**であった。
+
+### ★手順の記録——重複を書いた
+
+一度は自分で `Cubic.discr ⟨4, b₂, 2b₄, b₆⟩ = 16Δ` を
+`Δ`・`b₂`・`b₄`・`b₆`・`b₈` を展開して `ring` で証明した(通った)。
+★**しかし mathlib の `twoTorsionPolynomial_discr` の重複だった。**
+★★§9-438 で「`Squarefree|discriminant` で DivisionPolynomial/ と Affine/ を検索して 0 件」
+と記録していたが、**`Weierstrass.lean` を見ていなかった**——探索範囲が狭かった。
+★★★§9-434 と同じ失敗である(探索範囲の狭さ)。ファイルを絞る前に、
+まず**概念名で mathlib 全体を検索する**べきであった。
+
+### ★残っている段
+
+`discr ≠ 0` から `Squarefree Ψ₂Sq` を出す段。
+★`Cubic.discr_ne_zero_iff_roots_nodup` で根が相異なることは出るが、
+★★**`roots.Nodup ⟹ Squarefree`(あるいは `Separable`)の一撃は無い**
+(2026-08-20 実測、`exact?` で 0 件)。`Polynomial.Separable.squarefree` はあるので
+`Separable` を経由することになる。
+
+★義務の数は動いていない(Galois 4/8)。
