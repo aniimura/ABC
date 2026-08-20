@@ -253,6 +253,49 @@ theorem aeval_minpoly_descend (hsc : separableClosure K₁ K₂ = ⊥)
   rw [minpoly_eq_map_of_separableClosure_eq_bot hsc hint hs, aeval_map_algebraMap] at hγ
   exact hγ
 
+open IntermediateField in
+/-- ★★**延長の一意性** —— `K₂(L)` は `K₂` と `L` で生成されるから。 -/
+theorem algHom_adjoin_ext {Ω : Type*} [Field Ω] [Algebra K₂ Ω]
+    (L : Set Ω) ⦃τ₁ τ₂ : (IntermediateField.adjoin K₂ L) →ₐ[K₂] Ω⦄
+    (h : ∀ x (hx : x ∈ L), τ₁ ⟨x, IntermediateField.subset_adjoin K₂ _ hx⟩
+      = τ₂ ⟨x, IntermediateField.subset_adjoin K₂ _ hx⟩) : τ₁ = τ₂ :=
+  IntermediateField.adjoin_algHom_ext K₂ h
+
+/-- ★**`K₁`-代数射の像は共役** —— `σβ` は `minpoly K₁ β` の根。 -/
+theorem aeval_algHom_minpoly_eq_zero {Ω : Type*} [Field Ω] [Algebra K₁ Ω]
+    (L : IntermediateField K₁ Ω) [FiniteDimensional K₁ L]
+    (σ : L →ₐ[K₁] Ω) (β : L) :
+    aeval (σ β) (minpoly K₁ ((β : Ω))) = 0 := by
+  have h1 : aeval β (minpoly K₁ ((β : Ω))) = 0 := by
+    have hm : minpoly K₁ ((IntermediateField.val L) β) = minpoly K₁ β :=
+      minpoly.algebraMap_eq (IntermediateField.val L).injective β
+    show aeval β (minpoly K₁ ((IntermediateField.val L) β)) = 0
+    rw [hm]
+    exact minpoly.aeval K₁ β
+  have h2 := congrArg σ h1
+  rw [map_zero] at h2
+  rw [aeval_algHom_apply]
+  exact h2
+
+/-- ★★★**`K₁`-代数射の像は `K₂` 上でも共役** —— `thm62-i-Dfun` の射の側の核。
+
+★これで `IntermediateField.algHomAdjoinIntegralEquiv` により
+`K₂⟮β⟯ →ₐ[K₂] Ω` が `β ↦ σβ` で定まる。 -/
+theorem aeval_algHom_minpoly_K₂_eq_zero (hsc : separableClosure K₁ K₂ = ⊥)
+    {Ω : Type*} [Field Ω] [Algebra K₁ Ω] [Algebra K₂ Ω] [IsScalarTower K₁ K₂ Ω]
+    (L : IntermediateField K₁ Ω) [FiniteDimensional K₁ L] [Algebra.IsSeparable K₁ L]
+    (σ : L →ₐ[K₁] Ω) (β : L) :
+    aeval (σ β) (minpoly K₂ ((β : Ω))) = 0 := by
+  have hint : IsIntegral K₁ ((β : Ω)) :=
+    (IsIntegral.of_finite K₁ β).map (IntermediateField.val L)
+  have hsep : IsSeparable K₁ ((β : Ω)) := by
+    have hm : minpoly K₁ ((IntermediateField.val L) β) = minpoly K₁ β :=
+      minpoly.algebraMap_eq (IntermediateField.val L).injective β
+    show (minpoly K₁ ((IntermediateField.val L) β)).Separable
+    rw [hm]
+    exact Algebra.IsSeparable.isSeparable K₁ β
+  exact aeval_minpoly_extend hsc hint hsep (aeval_algHom_minpoly_eq_zero L σ β)
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Theorem 6.2, (i)` の「`K₁` が `K₂` の中で分離閉 ⟹ 次数が保たれる」。 -/
