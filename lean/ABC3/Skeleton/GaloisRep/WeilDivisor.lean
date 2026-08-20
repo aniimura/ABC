@@ -190,7 +190,7 @@ def dvd_count_pullback.needs : List ProofObligation :=
     .implicitStep
       "★★★★★場合 A の証明の形(2026-08-20 に確定): `(f_P) = I_P^n` の生成元を `a^i b^{n−i} = f_P · s_i` と書くと、`(s_0,…,s_n) = F[W]`(整域での約去)。★`ν ≥ 0` なら `min_i ν(s_i) = 0` となり、`ν(f_P) = min_i [i·ν(a) + (n−i)·ν(b)] = n·min(ν a, ν b)`。★★**分岐指数も素点の対応も使わない**(5-10 ブロック)" 19,
     .implicitStep
-      "★★`μ` の単射性を仮定に置いた。第 118 の `pointHom_injective_of_transcendental` から出るが、`x([n]·)` の超越性を別途示す必要がある(3-8 ブロック)" 19,
+      "★★★★★★★★**2026-08-20: `μ` の単射性は定理になった**(第 180 ブロック `mulByN_injective`)。★超越性を経由せずに済んだ——核が 0 でなければ `x_n` が定数になり、第 171 の `redPoint_mulByN` から**どの点でも `n` 倍が同じ点**になってしまう。`E(F)` は無限、`E[n]` は有限で矛盾。★★D2 のために積んだ第 171・172 が、そのままこの未解決事項を解いた(見積もり 3-8 → 1)" 19,
     .implicitStep
       "★逸脱の記録: `[IsAlgClosed F]` と `IsUnit (2 : F)` を仮定に足した。第 137(Dedekind 性)と第 139(定数の `n` 乗根)が使う。消費側((G5) `det_cyclotomic`)は `[IsAlgClosed L]`・`[CharZero K]` の下で述べられているので後続に影響しない" 19 ]
 
