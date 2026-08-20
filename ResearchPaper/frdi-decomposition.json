@@ -3089,11 +3089,11 @@
             "DL-set",
             "weil-group"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★`B(L) ⊆ L^×` は部分群。`B(L) → Φ(L)^gp` は `div` の制限で、関手性は `div` の引き戻し両立から。",
-          "lean": "",
-          "decl": ""
+          "note": "★`B(L) ⊆ L^×` は部分群。`B(L) → Φ(L)^gp` は `div` の制限で、関手性は `div` の引き戻し両立から。\n\n★★★2026-08-21：**`B(L)` を部分群として置いた**（`BSubgroup`）。\n`B(L) = {u ∈ K(V[L])^× | ∀ x ∉ D_L, ord_x(u) = 0}`。\n★★中身は `ordPt_one` / `ordPt_mul` / `ordPt_inv` の 3 本だけ。\n★★★**`div(f)` の台の有限性は要らなかった** —— 台の条件を「外で消える」と書けば\n有限性を経由しないで済む（`div-finite` を待たずに `B(L)` が立つ）。\n★残るのは **`L` についての関手性**で、支配射に沿った関数体の射（`cartier-pullback` と同じ道具）が要る。",
+          "lean": "ABC3/Found/Divisor/NormB.lean",
+          "decl": "BSubgroup / mem_BSubgroup"
         },
         {
           "id": "cartier-datum-geom",
