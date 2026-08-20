@@ -67,6 +67,45 @@ theorem eq_one_of_forall_pow_pow {p : ℕ} (hp : p.Prime)
   rw [← h1, h2]
   exact (QuotientGroup.mk_one _).symm
 
+/-! ## ★★`Proposition 5.6` の `u` の構成で使う 2 本
+
+原文 (FrdI p.107):
+> — which [by the total epimorphicity of C] implies that wl
+
+★原文は `w_l ≈ w_l^p` から `w_l ≈ 1` を出し、
+`u · φ_p · u⁻¹ ≈ u^{1-p} · φ_p` を解いて `u_p` を作る。
+★どちらも「`p-1` は `p` と素」だけで出る。 -/
+
+theorem coprime_pred_self {p : ℕ} (hp : p.Prime) : Nat.Coprime (p - 1) p := by
+  have h2 := hp.two_le
+  have hs : p = (p - 1) + 1 := by omega
+  rw [hs]
+  simp [Nat.Coprime]
+
+/-- ★★pro-`p` 群では `w = w^p` なら `w = 1`。 -/
+theorem eq_one_of_eq_pow_self {p : ℕ} (hp : p.Prime)
+    (hpro : ∀ U : OpenNormalSubgroup N, IsPGroup p (N ⧸ U.toSubgroup))
+    {w : N} (hw : w = w ^ p) : w = 1 := by
+  have hinj := pow_injective_of_proL hp hpro (coprime_pred_self hp)
+  refine hinj ?_
+  show w ^ (p - 1) = (1 : N) ^ (p - 1)
+  rw [one_pow]
+  have h2 : w ^ (p - 1) * w = w ^ p := by
+    rw [← pow_succ]
+    congr 1
+    have := hp.two_le
+    omega
+  rw [← hw] at h2
+  calc w ^ (p - 1) = w ^ (p - 1) * w * w⁻¹ := by group
+    _ = w * w⁻¹ := by rw [h2]
+    _ = 1 := mul_inv_cancel w
+
+/-- ★★pro-`p` 群では `u ↦ u^{p-1}` は全単射(`p-1` は `p` と素)。 -/
+theorem pow_pred_bijective {p : ℕ} (hp : p.Prime)
+    (hpro : ∀ U : OpenNormalSubgroup N, IsPGroup p (N ⧸ U.toSubgroup)) :
+    Function.Bijective (fun x : N => x ^ (p - 1)) :=
+  pow_bijective_of_proL hp hpro (coprime_pred_self hp)
+
 variable {M : Type u} [CommGroup M] [TopologicalSpace M] [IsTopologicalGroup M]
   [CompactSpace M] [TotallyDisconnectedSpace M]
 

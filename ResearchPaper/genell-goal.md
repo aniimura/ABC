@@ -19415,3 +19415,48 @@ Galois 同変性
 2. `det_galRep_eq_cyclotomic`——基底 `P, Q` を取って 4 性質を組み合わせる
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-506 ★★★★★★★★第 2 変数の双線型性と反対称性(第 195 ブロック)
+
+`det_galRep_eq_cyclotomic` は基底 `P, Q` を取って
+
+    e_n(aP + cQ, bP + dQ) = e_n(P,Q)^{ad − bc}
+
+を出す。★これには**第 2 変数の双線型性**と**反対称性**、`k` 倍の公式が要る。
+
+### ★★★★★★第 2 変数は平行移動の合成から出る
+
+`e_n(P,Q) = τ_Q(g)/g` で、第 189 の `isTranslate_trans` と第 190 の一意性から
+**`τ_{Q₁+Q₂} = τ_{Q₁} ∘ τ_{Q₂}`**。★したがって
+
+    τ_{Q₁+Q₂}(g)/g = τ_{Q₁}(c₂·g)/g = c₂·(τ_{Q₁}(g)/g) = c₁c₂
+
+★★`τ_{Q₁}` が定数 `c₂` を固定する(`F`-代数同型だから)ことを使う。
+
+### ★★★値そのものが `τ_Q(g)/g` である
+
+`Q = O` の場合も込めて **`algebraMap(e_n(P,Q)) = τ_Q(g)/g`** を出しておくと、
+上の計算がそのまま値の等式になる(`τ_O = id` なので `Q = O` では両辺 1)。
+
+### ★★★★★★反対称性は 3 行
+
+    1 = e(P+Q, P+Q) = e(P,P)·e(P,Q)·e(Q,P)·e(Q,Q) = e(P,Q)·e(Q,P)
+
+★交代性(第 190)と両変数の双線型性から。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `translateAut_div_add` | ★★★★★★**`τ_{Q₁+Q₂}(g)/g = (τ_{Q₁}g/g)(τ_{Q₂}g/g)`** |
+| `algebraMap_weilPairingVal` | ★★★★★★★**値は `τ_Q(g)/g` そのもの** |
+| `weilPairingVal_add_right` | ★★★★★★★★**第 2 変数の双線型性** |
+| `weilPairingVal_antisymm` | ★★★★★★**反対称性** |
+| `weilPairingVal_nsmul_left` / `_right` | ★★★★★**`e_n(kP,Q) = e_n(P,Q)^k`** |
+
+### ★(G5) に残っているもの
+
+1. **非退化性**——`F(E)/[n]^*F(E)` の Galois 理論(Kummer 型)
+2. `det_galRep_eq_cyclotomic`——基底を取って組み合わせる
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
