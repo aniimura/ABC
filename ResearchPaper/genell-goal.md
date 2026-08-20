@@ -17208,3 +17208,41 @@ mathlib は `FractionalIdeal.count`(整数値)と
 | D2 | `J` が単項——Abel–Jacobi | 10-25 |
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-456 場合 B の基底計算(第 146 ブロック)
+
+### ★★★★★★mathlib が偶奇構造を持っていた
+
+場合 B の残りは「`a = p·1 + q·y` の count が `−m·deg N(a)` であること」である。
+★**2026-08-20 実測**: mathlib の
+
+    CoordinateRing.degree_norm_smul_basis :
+      deg N(p•1 + q•y) = max (2·deg p) (2·deg q + 3)
+
+が**まさに私が導いた偶奇構造そのもの**を与えていた。★★`count` 側も
+
+    min(deg p · c_x, deg q · c_x + c_y)   ただし c_x = −2m, c_y = −3m
+
+であり、偶数倍と奇数倍なので**決して一致しない**——これが
+「`ν` は `F(x)` 上への制限で一意に決まる」ことの正体である。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `count_algebraMap_poly` | **`count(μ p(x)) = deg p · count(μ x)`** |
+| `valuation_genX_lt_genZ` | `w(μ x) < w(μ z)` |
+| `valuation_genY_eq_genZ` | **`w(μ y) = w(μ z)`**(`2y = z − a₁x − a₃`、`z` の項が単独で最大) |
+
+★`valuation_genY_eq_genZ` により、mathlib の基底 `{1, y}` での計算が
+`z` での計算と一致する。**基底を取り替える必要が無くなった。**
+
+### ★残っている段
+
+| 段 | 内容 | 見積もり |
+|---|---|---|
+| B5 | `count(μ a) = −m·deg N(a)`(基底分解 + 偶奇) | 4-10 |
+| B6 | `deg N(f_P) = n` | 4-10 |
+| D2 | `J` が単項——Abel–Jacobi | 10-25 |
+
+★義務の数は動いていない(Galois 4/8)。
