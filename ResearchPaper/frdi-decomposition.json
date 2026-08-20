@@ -2666,7 +2666,7 @@
           ],
           "status": "半済",
           "size": "★大",
-          "note": "原文 p.107。★IUTchI が直接引く。\n\n★★★★2026-08-20: **(ii) を閉じた**（`Cor57Unit.lean`）。\n原文の証明は「定義を辿れば、`Ψ` が isotropic 対象・prime-Frobenius 射・pull-back 射・\nbirationalization・射影関手（したがって単元 O^×(−)）を保つことを示せば足りる」と書く。\n★**(ii) に効くのは「単元の保存」だけ**で、それは `Cor411Untr.lean` の\n`otimes_map_of_baseSquare` が**底の 1-可換図式だけ**から与える。\n★内訳: 底の四角形の逆向き（`isBaseIdentity_of_map_baseSquare`、`ΨBase` が忠実）、\n`Τimes(A) ≃* Τimes(Ψ A)`（`otimesEquivOfBaseSquare`）、対象の同型に沿った移送（`otimesCongr`）、\n位相の `coinduced` による移送（`exists_top_of_mulEquiv`）。\n★★残るのは (i)（base-section の輸送）と (iii)/(iv)（quasi-base-Frobenius 対の輸送）である。",
+          "note": "原文 p.107。★IUTchI が直接引く。\n\n★★★★2026-08-20: **(ii) を閉じた**（`Cor57Unit.lean`）。\n原文の証明は「定義を辿れば、`Ψ` が isotropic 対象・prime-Frobenius 射・pull-back 射・\nbirationalization・射影関手（したがって単元 O^×(−)）を保つことを示せば足りる」と書く。\n★**(ii) に効くのは「単元の保存」だけ**で、それは `Cor411Untr.lean` の\n`otimes_map_of_baseSquare` が**底の 1-可換図式だけ**から与える。\n★内訳: 底の四角形の逆向き（`isBaseIdentity_of_map_baseSquare`、`ΨBase` が忠実）、\n`𝒪×(A) ≃* 𝒪×(Ψ A)`（`otimesEquivOfBaseSquare`）、対象の同型に沿った移送（`otimesCongr`）、\n位相の `coinduced` による移送（`exists_top_of_mulEquiv`）。\n★★残るのは (i)（base-section の輸送）と (iii)/(iv)（quasi-base-Frobenius 対の輸送）である。",
           "lean": "ABC3/Found/FrdI/Cor57Unit.lean",
           "decl": "ABC3.Found.FrdI.isOfUnitProfiniteType_map"
         }
