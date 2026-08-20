@@ -2902,11 +2902,11 @@
           "deps": [
             "ord-pt"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "★大",
-          "note": "★環の層は `finite_support_frac`(「`(a)` 上の極小素が有限」から)で在庫。スキームでは**準コンパクト性**でアフィン被覆を有限に取る段が要る。\n\n★★★★2026-08-21：**環の層はすでに閉じていた**（`HeightOneDVR.lean` の\n`finite_heightOne_primes_containing` / `finite_support_heightOnePrime` / `divOfElem`）。\n★問題は**「高さ 1」を 2 通りに綴っていた**ことだった：\n* `HeightOneDVR.lean`（環の層）—— `p ≠ ⊥ ∧ ∀ q 素, q ≠ ⊥ → q ≤ p → q = p`\n* `SchemeWeilOrd.lean`（スキームの層）—— `Ideal.height p = 1`\n\n★★新規 `HeightOneBridge.lean` で **2 つが同値であること**を示した（`height_eq_one_iff`）。\n`Ideal.height_le_iff`（下の素はすべて高さ 0 = 極小 = ⊥）と\n`Ideal.height_eq_zero_iff` ＋ `IsDomain.minimalPrimes_eq_singleton_bot` だけ。\n★`isCodimOnePt_spec_iff_heightOne` で「`Spec R` の余次元 1 の点 ⟺ `HeightOnePrime R`」がつながった。\n\n★★★残るのは**スキームの層の 2 段**だけである：\n1. 有限個のアフィン開で被覆する（`X` が quasi-compact）。\n2. ★**茎の付値と環の付値の同一視** —— `Spec.stalkIso` を通して `ordPtVal` を\n   `Localization.AtPrime 𝔭` の付値へ運ぶ（`IsFractionRing` の両立が要る）。",
+          "note": "★環の層は `finite_support_frac`(「`(a)` 上の極小素が有限」から)で在庫。スキームでは**準コンパクト性**でアフィン被覆を有限に取る段が要る。\n\n★★★★2026-08-21：**環の層はすでに閉じていた**（`HeightOneDVR.lean` の\n`finite_heightOne_primes_containing` / `finite_support_heightOnePrime` / `divOfElem`）。\n★問題は**「高さ 1」を 2 通りに綴っていた**ことだった：\n* `HeightOneDVR.lean`（環の層）—— `p ≠ ⊥ ∧ ∀ q 素, q ≠ ⊥ → q ≤ p → q = p`\n* `SchemeWeilOrd.lean`（スキームの層）—— `Ideal.height p = 1`\n\n★★新規 `HeightOneBridge.lean` で **2 つが同値であること**を示した（`height_eq_one_iff`）。\n`Ideal.height_le_iff`（下の素はすべて高さ 0 = 極小 = ⊥）と\n`Ideal.height_eq_zero_iff` ＋ `IsDomain.minimalPrimes_eq_singleton_bot` だけ。\n★`isCodimOnePt_spec_iff_heightOne` で「`Spec R` の余次元 1 の点 ⟺ `HeightOnePrime R`」がつながった。\n\n★★★残るのは**スキームの層の 2 段**だけである：\n1. 有限個のアフィン開で被覆する（`X` が quasi-compact）。\n2. ★**茎の付値と環の付値の同一視** —— `Spec.stalkIso` を通して `ordPtVal` を\n   `Localization.AtPrime 𝔭` の付値へ運ぶ（`IsFractionRing` の両立が要る）。\n\n★★★★★★2026-08-21（決着）：**閉じた**（`Found/Divisor/SchemeDivFinite.lean`）。\n★★前の記録が「残る 2 段」と書いた第 2 段（**茎の付値と環の付値の同一視**）は\n**回避できた** —— `ordPt` の定義を開かず、\n「`ord = 0` ⟺ 茎の単元」（`SchemeOrdUnit.lean`）を経由すればよい：\n\n| 段 | 宣言 |\n|---|---|\n| アフィン開の素因子は切断環の**高さ 1** の素イデアル | `primeIdealOf_height_eq_one`（`isLocalization_stalk` ＋ `ringKrullDim_eq_height`）|\n| `f = a/b` で `a, b ∉ 𝔭_v` なら `ord_v f = 0` | ★`ordPt_eq_zero_of_notMem`（`IsLocalization.map_units` で茎の単元になる）|\n| `a` を含む高さ 1 素イデアルは有限個 | `finite_heightOne_primes_containing`（在庫）＋ `height_eq_one_iff`（綴りの橋）|\n| アフィン開の中で台は有限 | ★`finite_ordPt_ne_zero_on_affine` |\n| 準コンパクトなら大域で有限 | ★★`finite_ordPt_ne_zero`（`isCompact_univ.elim_finite_subcover`）|\n\n★`f = a/b` は `IsLocalization.surj (nonZeroDivisors Γ(X,U)) f` で取る\n（`functionField_isFractionRing_of_isAffineOpen`）。",
           "lean": "ABC3/Found/Divisor/HeightOneDVR.lean / ABC3/Found/Divisor/HeightOneBridge.lean",
-          "decl": "finite_heightOne_primes_containing / finite_support_heightOnePrime / divOfElem / height_eq_one_iff / HeightOnePrime.ofHeightEqOne / isCodimOnePt_spec_iff_heightOne"
+          "decl": "finite_heightOne_primes_containing / finite_support_heightOnePrime / divOfElem / height_eq_one_iff / HeightOnePrime.ofHeightEqOne / isCodimOnePt_spec_iff_heightOne / primeIdealOf_height_eq_one / ordPt_eq_zero_of_notMem / finite_ordPt_ne_zero_on_affine / finite_ordPt_ne_zero"
         },
         {
           "id": "weil-group",
@@ -2914,11 +2914,11 @@
           "deps": [
             "div-finite"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★環の層は `divOfFrac` / `divOfFrac_mul` で在庫。\n\n★★★★2026-08-21：**アフィンの場合は閉じた**。\n* `WeilDiv X := PrimeDivisorPt X →₀ ℤ`（`SchemeWeil.lean`、済）\n* 環の層の `div` —— `divOfFrac` / `divOfFrac_mul`（`HeightOneDVR.lean`、既に在庫にあった）\n* ★`primeDivisorPtSpecEquiv` —— `Spec R` の素因子 ≃ `HeightOnePrime R`\n  （`HeightOneBridge.lean` の `height_eq_one_iff` で 2 つの「高さ 1」が同値だと分かったので出た）\n* ★★`weilDivOfFrac` / `weilDivOfFrac_mul` —— `div : K^× → WeilDiv (Spec R)` が群準同型\n\n★残るのは**一般のスキーム**の場合（有限アフィン被覆で貼り合わせる段）だけである。",
+          "note": "★環の層は `divOfFrac` / `divOfFrac_mul` で在庫。\n\n★★★★2026-08-21：**アフィンの場合は閉じた**。\n* `WeilDiv X := PrimeDivisorPt X →₀ ℤ`（`SchemeWeil.lean`、済）\n* 環の層の `div` —— `divOfFrac` / `divOfFrac_mul`（`HeightOneDVR.lean`、既に在庫にあった）\n* ★`primeDivisorPtSpecEquiv` —— `Spec R` の素因子 ≃ `HeightOnePrime R`\n  （`HeightOneBridge.lean` の `height_eq_one_iff` で 2 つの「高さ 1」が同値だと分かったので出た）\n* ★★`weilDivOfFrac` / `weilDivOfFrac_mul` —— `div : K^× → WeilDiv (Spec R)` が群準同型\n\n★残るのは**一般のスキーム**の場合（有限アフィン被覆で貼り合わせる段）だけである。\n\n★★★★★★2026-08-21（決着）：**一般のスキームで閉じた**。\n`div-finite` が閉じたので `Finsupp.onFinset` でそのまま `WeilDiv X` の元になる：\n`weilDivOfFn` / `weilDivOfFn_mul` / ★`weilDivHom : Additive (K(X)ˣ) →+ WeilDiv X`\n（`X` は整・局所 Noether・正規・準コンパクト）。",
           "lean": "ABC3/Found/Divisor/SchemeWeil.lean / ABC3/Found/Divisor/HeightOneDVR.lean / ABC3/Found/Divisor/HeightOneBridge.lean",
-          "decl": "WeilDiv / divOfFrac / divOfFrac_mul / primeDivisorPtSpecEquiv / weilDivOfFrac / weilDivOfFrac_mul"
+          "decl": "WeilDiv / divOfFrac / divOfFrac_mul / primeDivisorPtSpecEquiv / weilDivOfFrac / weilDivOfFrac_mul / weilDivOfFn / weilDivOfFn_mul / weilDivHom"
         },
         {
           "id": "affine-compat",
