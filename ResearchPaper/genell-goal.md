@@ -16700,3 +16700,33 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 | 因子計算・`n` 乗根の取り出し | ★残り |
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-442 `Ψ₂Sq` は squarefree(第 131 ブロック)
+
+§9-441 で「欠けているのは `roots.Nodup ⟹ Squarefree` の向きだけ」と測った。
+★**それを 1 ブロックで埋めた**(見積もり 5-15)。
+
+### ★★★★機構
+
+分解可能で根が相異なるなら `p = C(lc)·∏_{r ∈ roots}(X − r)` と書ける。
+★mathlib の `separable_prod_X_sub_C_iff'` が「相異なる根の積は separable」を与え、
+`Separable.squarefree` で squarefree になる。
+★★`C(lc)` は単元なので `squarefree_mul_iff` で落ちる。
+
+    squarefree_of_roots_nodup :
+      p ≠ 0 → p.Splits → p.roots.Nodup → Squarefree p
+
+★★★これは **mathlib に無かった一般補題**である(`Polynomial.nodup_roots` の逆向き)。
+
+### ★★`Ψ₂Sq` への適用
+
+| 段 | 出所 |
+|---|---|
+| `discr = 16Δ ≠ 0` | mathlib |
+| `discr ≠ 0 ⟹ roots.Nodup` | mathlib(`Cubic.discr_ne_zero_iff_roots_nodup`) |
+| `roots.Nodup ⟹ Squarefree` | **第 131** |
+
+★★★これで `IsIntegrallyClosed` への経路 2 は
+**「`F[X][√d]`(`d` squarefree)が整閉」の 1 段を残すのみ**になった(10-25)。
+
+★義務の数は動いていない(Galois 4/8)。

@@ -592,6 +592,7 @@ import ABC3.Found.GaloisRep.CoordinateDimension
 import ABC3.Found.GaloisRep.CoordinateUnits
 import ABC3.Found.GaloisRep.SquareCompletion
 import ABC3.Found.GaloisRep.TwoTorsionDiscr
+import ABC3.Found.GaloisRep.Psi2SqSquarefree
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
