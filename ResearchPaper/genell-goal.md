@@ -17314,3 +17314,43 @@ mathlib の基底 `{1, y}` で `a = p·1 + q·y` と書くと:
 | D2 | `J` が単項——Abel–Jacobi | 10-25 |
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-459 ★★★★★★★D1' が閉じた——層 3 に残る `sorry` は D2 の 1 個だけ
+
+第 149 ブロックで
+
+    ∀ v,  n ∣ count_v((μ f_P))
+
+が証明された。★2 つの場合の合流である:
+
+| 場合 | 判定 | 内容 |
+|---|---|---|
+| A | `∀ r, w(μ r) ≤ 1` | 第 143(水準イデアルへの帰納法) |
+| B | `∃ r, 1 < w(μ r)` | 第 144-149(無限遠、偶奇、超楕円対合) |
+
+★★**分岐指数も、`deg[n] = n²` も、`#E[n] = n²` も、場所の分類定理も使っていない。**
+
+### ★★★★★場合 B の締め
+
+第 141 の `f_P · f_{−P} = c(x − x_P)^n` に `count` を当てると
+
+    count(μ f_P) + count(μ f_{−P}) = n · count(μ x)
+
+★第 147 で `ι(f_P)` と `f_{−P}` は同伴、第 148 で `count(μ ι a) = count(μ a)`。
+したがって `count(μ f_{−P}) = count(μ f_P)` となり `2·count(μ f_P) = n·count(μ x)`。
+★★第 145 で `count(μ x)` は偶数だから **`n ∣ count(μ f_P)`**。
+
+### ★★★★★★★層 3 の現状
+
+| 節点 | 状態 |
+|---|---|
+| `dvd_count_pullback` (D1') | ✅ **第 149** |
+| `exists_fractionalIdeal_pow` (D1) | ✅ D1' + 第 142 |
+| `exists_nthRoot_comp_mulByN`(`g_P` の存在) | ✅ D1 + D2 + 第 139 |
+| `fractionalIdeal_isPrincipal` (D2) | ❌ **残り 1 個**(Abel–Jacobi、10-25) |
+
+★逸脱の記録: D1・D2 と `exists_nthRoot_comp_mulByN` に
+`hμF`(`μ` が `F`-代数射)を足した。第 141 の `exists_mulByNHom_alg` が供給する。
+
+★全体ビルド成功(5109 jobs)、ゲート PASS。
+★義務の数は動いていない(Galois 4/8)。

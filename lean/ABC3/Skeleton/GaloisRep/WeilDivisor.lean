@@ -1,5 +1,5 @@
 import ABC3.Skeleton.GaloisRep.WeilFunctionField
-import ABC3.Found.GaloisRep.CountPow
+import ABC3.Found.GaloisRep.DvdCount
 
 /-!
 # スケルトン —— **`div(f_P ∘ [n])` の因子計算**(`Skeleton`)
@@ -9,18 +9,23 @@ import ABC3.Found.GaloisRep.CountPow
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-## ★★★★★★層 3 に残るのは 2 つ
+## ★★★★★★★層 3 に残る `sorry` は **D2 の 1 個だけ**
 
-第 139 ブロックで最後の一歩(`J^n = (μ f_P)` かつ `J = (g)` ⟹ `n` 乗根)、
-第 142 ブロックで **`∀ v, n ∣ count_v(I) ⟹ ∃ J, J^n = I`** が取れた。
-★したがって `g_P` の存在に残るのは:
+| 節点 | 状態 |
+|---|---|
+| `dvd_count_pullback` (D1') | ✅ **第 149 ブロックで証明された** |
+| `exists_fractionalIdeal_pow` (D1) | ✅ D1' + 第 142 から証明される |
+| `exists_nthRoot_comp_mulByN`(`WeilRoot`) | ✅ D1 + D2 + 第 139 から証明される |
+| `fractionalIdeal_isPrincipal` (D2) | ❌ **残り 1 個**(Abel–Jacobi、10-25) |
 
-| 節点 | 内容 | 見積もり |
+★D1' の証明は 2 つの場合の合流である:
+
+| 場合 | 判定 | 内容 |
 |---|---|---|
-| `dvd_count_pullback` (D1') | `∀ v, n ∣ count_v((μ f_P))` | 20-45 |
-| `fractionalIdeal_isPrincipal` (D2) | `J` が単項——Abel–Jacobi | 10-25 |
+| A | `∀ r, w(μ r) ≤ 1` | 第 143(水準イデアルへの帰納法) |
+| B | `∃ r, 1 < w(μ r)` | 第 144–149(無限遠、偶奇、超楕円対合) |
 
-★★`exists_fractionalIdeal_pow`(D1)は D1' から**証明される**。
+★★**分岐指数も、`deg[n] = n²` も、`#E[n] = n²` も、場所の分類定理も使っていない。**
 
 ## ★★★★★★不分岐性は要らない
 
@@ -75,6 +80,7 @@ theorem dvd_count_pullback [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
     (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
+    (hμF : ∀ c : F, μ (algebraMap F W.CoordinateRing c) = algebraMap F W.FunctionField c)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
@@ -84,7 +90,8 @@ theorem dvd_count_pullback [IsAlgClosed F] (h2 : IsUnit (2 : F))
     ∀ v : HeightOneSpectrum W.CoordinateRing,
       (n : ℤ) ∣ FractionalIdeal.count W.FunctionField v
         (FractionalIdeal.spanSingleton W.CoordinateRing⁰ (μ fP)) := by
-  sorry
+  haveI := isDedekindDomain_coordinateRing h2 W
+  exact ABC3.Found.GaloisRep.dvd_count_pullback W h2 μ hμinj hμF h n hP fP hfP
 
 /-- ★★★★★**D1 —— `(μ f_P)` は `n` 乗である**。
 
@@ -96,6 +103,7 @@ theorem exists_fractionalIdeal_pow [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
     (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
+    (hμF : ∀ c : F, μ (algebraMap F W.CoordinateRing c) = algebraMap F W.FunctionField c)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
@@ -105,7 +113,7 @@ theorem exists_fractionalIdeal_pow [IsAlgClosed F] (h2 : IsUnit (2 : F))
       J ^ n = FractionalIdeal.spanSingleton W.CoordinateRing⁰ (μ fP) := by
   haveI := isDedekindDomain_coordinateRing h2 W
   exact exists_pow_of_dvd_count (spanSingleton_mu_ne_zero W n fP hfP μ hμinj)
-    (dvd_count_pullback h2 W h n hn hP μ hμinj hns hμP hμx hμy fP hfP)
+    (dvd_count_pullback h2 W h n hn hP μ hμinj hμF hns hμP hμx hμy fP hfP)
 
 /-- ★★★★★**D2 —— その `J` は単項である**(Abel–Jacobi)。
 
@@ -118,6 +126,7 @@ theorem fractionalIdeal_isPrincipal [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
     (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
+    (hμF : ∀ c : F, μ (algebraMap F W.CoordinateRing c) = algebraMap F W.FunctionField c)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
@@ -136,7 +145,9 @@ def dvd_count_pullback.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def dvd_count_pullback.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1 の証明(div(f_P∘[n]) の計算)"
+  [ .implicitStep
+      "★★★★★★★**2026-08-20: 本節点は第 149 ブロックで証明された**(`Found/GaloisRep/DvdCount.lean` の `dvd_count_pullback`)。場合 A(第 143)と場合 B(第 144-149)の合流である。★**分岐指数も `deg[n] = n²` も `#E[n] = n²` も場所の分類定理も使っていない**(0 ブロック)" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1 の証明(div(f_P∘[n]) の計算)"
       (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
     .implicitStep
       "★★★★★★**不分岐性は要らない**(2026-08-20 の見通し変更)。`ord_Q(μ f) = e_Q · ord_{[n]Q}(f)` で右の因子は `div(f_P) = n(P) − n(O)` から `{n, −n, 0}` のいずれか。★`e_Q` が何であっても `n` で割れる。`deg[n] = n²` も `#E[n] = n²` も**不要**である" 19,
