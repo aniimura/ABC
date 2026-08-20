@@ -296,6 +296,68 @@ theorem aeval_algHom_minpoly_K₂_eq_zero (hsc : separableClosure K₁ K₂ = �
     exact Algebra.IsSeparable.isSeparable K₁ β
   exact aeval_minpoly_extend hsc hint hsep (aeval_algHom_minpoly_eq_zero L σ β)
 
+/-! ## ★6. 延長の構成 -/
+
+section Extend
+
+variable (hsc : separableClosure K₁ K₂ = ⊥)
+  {Ω : Type*} [Field Ω] [Algebra K₁ Ω] [Algebra K₂ Ω] [IsScalarTower K₁ K₂ Ω]
+  (L : IntermediateField K₁ Ω) [FiniteDimensional K₁ L] [Algebra.IsSeparable K₁ L]
+  (σ : L →ₐ[K₁] Ω) (β : L)
+
+omit [Algebra.IsSeparable K₁ L] in
+open IntermediateField in
+/-- ★`β` は `K₂` 上整。 -/
+theorem isIntegral_K₂_coe : IsIntegral K₂ ((β : Ω)) :=
+  ((IsIntegral.of_finite K₁ β).map (IntermediateField.val L)).tower_top
+
+open IntermediateField in
+/-- ★★★★**延長** —— `σ` が定める `K₂⟮β⟯ →ₐ[K₂] Ω`(`β ↦ σβ`)。 -/
+noncomputable def extendAlgHom : K₂⟮(β : Ω)⟯ →ₐ[K₂] Ω :=
+  (IntermediateField.algHomAdjoinIntegralEquiv K₂ (isIntegral_K₂_coe L β)).symm
+    ⟨σ β, by
+      rw [Polynomial.mem_aroots]
+      exact ⟨minpoly.ne_zero (isIntegral_K₂_coe L β),
+        aeval_algHom_minpoly_K₂_eq_zero hsc L σ β⟩⟩
+
+open IntermediateField in
+@[simp] theorem extendAlgHom_gen :
+    extendAlgHom hsc L σ β (IntermediateField.AdjoinSimple.gen K₂ ((β : Ω))) = σ β :=
+  IntermediateField.algHomAdjoinIntegralEquiv_symm_apply_gen K₂ (isIntegral_K₂_coe L β) _
+
+omit [FiniteDimensional K₁ L] [Algebra.IsSeparable K₁ L] in
+open IntermediateField in
+/-- ★`L = K₁⟮β⟯` なら `L ≤ K₂⟮β⟯`。 -/
+theorem le_adjoin_K₂ (hβ : K₁⟮(β : Ω)⟯ = L) :
+    L ≤ (K₂⟮(β : Ω)⟯).restrictScalars K₁ :=
+  le_of_eq_of_le hβ.symm (IntermediateField.adjoin_simple_le_iff.mpr
+    (IntermediateField.mem_adjoin_simple_self K₂ _))
+
+open IntermediateField in
+/-- ★★★★**延長は `σ` の延長である** —— `L` の上で一致する。
+
+★中身は「`K₁`-代数射は `β` の像で決まる」1 本。 -/
+theorem extendAlgHom_restrict (hβ : K₁⟮(β : Ω)⟯ = L) (x : Ω) (hx : x ∈ L) :
+    extendAlgHom hsc L σ β ⟨x, le_adjoin_K₂ L β hβ hx⟩ = σ ⟨x, hx⟩ := by
+  set f₂ : L →ₐ[K₁] Ω :=
+    (AlgHom.restrictScalars K₁ (extendAlgHom hsc L σ β)).comp
+      (IntermediateField.inclusion (le_adjoin_K₂ L β hβ)) with hf₂
+  have heq : σ = f₂ := by
+    refine IntermediateField.algHom_ext_of_eq_adjoin K₁ (s := {(β : Ω)}) hβ.symm ?_
+    intro y hy
+    rw [Set.mem_singleton_iff] at hy
+    subst hy
+    have h1 : (⟨(β : Ω), hβ.symm.ge (IntermediateField.subset_adjoin K₁ _ rfl)⟩ : L) = β :=
+      Subtype.ext rfl
+    rw [h1, hf₂]
+    show σ β = extendAlgHom hsc L σ β _
+    rw [← extendAlgHom_gen hsc L σ β]
+    rfl
+  have hval := congrArg (fun g : L →ₐ[K₁] Ω => g ⟨x, hx⟩) heq
+  exact hval.symm
+
+end Extend
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Theorem 6.2, (i)` の「`K₁` が `K₂` の中で分離閉 ⟹ 次数が保たれる」。 -/
