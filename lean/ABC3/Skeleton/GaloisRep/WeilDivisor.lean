@@ -153,6 +153,10 @@ def dvd_count_pullback.needs : List ProofObligation :=
     .implicitStep
       "★★★★**`f_P · f_{−P} = c·(x − x_P)^n` は第 141 ブロックで済**(mathlib の `XYIdeal_neg_mul` + 第 128)。場合 B でノルムの代わりに使うこともできる(0 ブロック)" 19,
     .implicitStep
+      "★★★★**付値側の API も実測できた**(2026-08-20)——`HeightOneSpectrum.valuation K v : Valuation K (WithZero (Multiplicative ℤ))`、`valuation_of_algebraMap`(`R` の元では `intValuation` に一致)、`intValuation_le_pow_iff_dvd : v.intValuation r ≤ WithZero.exp (-n) ↔ v.asIdeal^n ∣ span {r}`、`valuation_lt_one_iff_mem`。★**「位数 ≥ n ⟺ イデアル所属」の橋が既にある**ので、場合 A の超距離不等式は `Ideal.add_mem` に帰着できる(0 ブロック)" 19,
+    .implicitStep
+      "★★★★★場合 A の証明の形(2026-08-20 に確定): `(f_P) = I_P^n` の生成元を `a^i b^{n−i} = f_P · s_i` と書くと、`(s_0,…,s_n) = F[W]`(整域での約去)。★`ν ≥ 0` なら `min_i ν(s_i) = 0` となり、`ν(f_P) = min_i [i·ν(a) + (n−i)·ν(b)] = n·min(ν a, ν b)`。★★**分岐指数も素点の対応も使わない**(5-10 ブロック)" 19,
+    .implicitStep
       "★★`μ` の単射性を仮定に置いた。第 118 の `pointHom_injective_of_transcendental` から出るが、`x([n]·)` の超越性を別途示す必要がある(3-8 ブロック)" 19,
     .implicitStep
       "★逸脱の記録: `[IsAlgClosed F]` と `IsUnit (2 : F)` を仮定に足した。第 137(Dedekind 性)と第 139(定数の `n` 乗根)が使う。消費側((G5) `det_cyclotomic`)は `[IsAlgClosed L]`・`[CharZero K]` の下で述べられているので後続に影響しない" 19 ]
