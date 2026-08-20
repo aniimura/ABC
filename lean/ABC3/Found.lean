@@ -680,6 +680,7 @@ import ABC3.Found.GaloisRep.WeilMul
 import ABC3.Found.GaloisRep.CountFP
 import ABC3.Found.GaloisRep.Divisible
 import ABC3.Found.GaloisRep.CountInfty
+import ABC3.Found.GaloisRep.TranslateProd
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
