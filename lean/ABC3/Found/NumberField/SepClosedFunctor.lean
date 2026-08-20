@@ -158,12 +158,67 @@ noncomputable def compMap (hsc : separableClosure K₁ K₂ = ⊥)
     {L M : FinSub K₁ Ω} (f : L ⟶ M) (x : (compObj (K₂ := K₂) L).toIF) :
     ((compMap hsc f x : (compObj (K₂ := K₂) M).toIF) : Ω) = compHomToOmega hsc f x := rfl
 
+/-! ## ★3. 関手則 -/
+
+/-- ★★**合成則**(`Ω` の側で) —— 延長の一意性から。 -/
+theorem compHomToOmega_comp (hsc : separableClosure K₁ K₂ = ⊥)
+    {L M N : FinSub K₁ Ω} (f : L ⟶ M) (g : M ⟶ N) :
+    compHomToOmega hsc (f ≫ g) = (compHomToOmega hsc g).comp (compMap hsc f) := by
+  refine algHom_adjoin_ext (K₂ := K₂) (L.toIF : Set Ω) ?_
+  intro y hy
+  show compHomToOmega hsc (f ≫ g) ⟨y, IntermediateField.subset_adjoin K₂ _ hy⟩ = _
+  rw [compHomToOmega_apply hsc (f ≫ g) y hy]
+  show ((FinSub.hom (f ≫ g)) ⟨y, hy⟩ : Ω)
+    = compHomToOmega hsc g (compMap hsc f ⟨y, IntermediateField.subset_adjoin K₂ _ hy⟩)
+  have h1 : (compMap hsc f ⟨y, IntermediateField.subset_adjoin K₂ _ hy⟩
+      : (compObj (K₂ := K₂) M).toIF)
+      = ⟨((FinSub.hom f) ⟨y, hy⟩ : Ω),
+        IntermediateField.subset_adjoin K₂ _ ((FinSub.hom f) ⟨y, hy⟩).2⟩ := by
+    refine Subtype.ext ?_
+    rw [compMap_coe]
+    exact compHomToOmega_apply hsc f y hy
+  rw [h1, compHomToOmega_apply hsc g _ ((FinSub.hom f) ⟨y, hy⟩).2]
+  rfl
+
+/-- ★★**恒等則**(`Ω` の側で)。 -/
+theorem compHomToOmega_id (hsc : separableClosure K₁ K₂ = ⊥) (L : FinSub K₁ Ω) :
+    compHomToOmega hsc (𝟙 L) = (compObj (K₂ := K₂) L).toIF.val := by
+  refine algHom_adjoin_ext (K₂ := K₂) (L.toIF : Set Ω) ?_
+  intro y hy
+  show compHomToOmega hsc (𝟙 L) ⟨y, IntermediateField.subset_adjoin K₂ _ hy⟩ = _
+  rw [compHomToOmega_apply hsc (𝟙 L) y hy]
+  rfl
+
+/-- ★★★★★**`L ↦ K₂(L)` は関手** —— `𝒟₁ → 𝒟₂`(原文 `Theorem 6.2, (i)`)。 -/
+noncomputable def compFunctor (hsc : separableClosure K₁ K₂ = ⊥) :
+    FinSub K₁ Ω ⥤ FinSub K₂ Ω where
+  obj := compObj
+  map f := compMap hsc f
+  map_id L := by
+    refine AlgHom.ext fun x => Subtype.ext ?_
+    rw [compMap_coe]
+    show compHomToOmega hsc (𝟙 L) x = _
+    rw [compHomToOmega_id hsc L]
+    rfl
+  map_comp f g := by
+    refine AlgHom.ext fun x => Subtype.ext ?_
+    rw [compMap_coe]
+    show compHomToOmega hsc (f ≫ g) x = _
+    rw [compHomToOmega_comp hsc f g]
+    rfl
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Theorem 6.2, (i)` の `L ↦ K₂(L)`。 -/
 def compObj.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 110,
     item := "Theorem 6.2, (i) — L ↦ K₂(L) は次数を保つ",
+    sectionId := "frdi-thm-6-2" }
+
+/-- ★★★★★locator —— `Theorem 6.2, (i)` の関手 `𝒟₁ → 𝒟₂`。 -/
+def compFunctor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — ψ が 𝒟₁ → 𝒟₂ を定める",
     sectionId := "frdi-thm-6-2" }
 
 end ABC3.Found.NF
