@@ -3076,9 +3076,9 @@
             "KQC",
             "cartier-pullback"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "★大",
-          "note": "★★`CartierDatum` の `pull` / `pull_id` / `pull_comp` / `pull_mem` / `pull_nonneg` / `pull_inj` がちょうどこれである。",
+          "note": "★★`CartierDatum` の `pull` / `pull_id` / `pull_comp` / `pull_mem` / `pull_nonneg` / `pull_inj` がちょうどこれである。\n\n★★★★★★2026-08-21（**模型の綻びを見つけた**）：`cartier-pullback` は閉じたが、\n**`CartierDatum` の `pull` の型が幾何と合っていない**。\n\n`CartierDatum`（`CartierFrobenioid.lean`）は\n`pull : (B ⟶ A) → ((primes A →₀ ℤ) →+ (primes B →₀ ℤ))` と、\n**自由アーベル群の全体**の上に引き戻しを要求する。\n★しかし幾何の引き戻しは **Cartier 因子の上でしか定義されない**\n（局所方程式が無ければ `ord_w(g^*f)` が書けない）。\n★`D_K` が `K`-`Q`-Cartier でも、`[s]` 自身の引き戻しは\n`(1/n)·g^*(n[s])` であって、整数性は自明でない。\n\n★★**解決の道は 2 つ**（どちらも記録すること）:\n1. ★**`CartierDatum` を直す**（`pull : grp A →+ grp B` にする）。\n   `grp` を `pull` より前に移し、`pull_id` / `pull_comp` / `pull_nonneg` / `pull_inj` を\n   `grp` の上の言明に直す（`pull_mem` は型に吸収されて消える）。\n   ★使用箇所は `CartierFrobenioid.lean` の `mapHom` / `mapHom_injective` / `phiFunctor` の\n   **3 か所だけ**であり、いずれも `effSub (grp A)` の上でしか `pull` を使っていない。\n   ★★**これが正しい模型である**（原典の `Φ(L)^gp` は Cartier 因子の群だから）。\n2. 一意化元による定義 —— `pull [s] (w) := if g(w) = s then ord_w(g^*π_s) else 0`。\n   ★well-defined 性は「一意化元は単元倍を除いて一意」＋ 四角形で出る。\n   ★台の有限性は `{w | ord_w(g^*π_s) ≠ 0}` に入るので `div-finite` で出る。\n   ★★ただし `pull_comp` には「主因子の引き戻しは主因子」\n   （`g^* div(h) = div(g^*h)`）が要り、これは新しい節点になる。\n\n★★★**1 を採るべきである**。2 は `pull` を自由群全体へ延ばすためだけの遠回りで、\n原典が要求していないものを証明することになる。",
           "lean": "",
           "decl": ""
         },
