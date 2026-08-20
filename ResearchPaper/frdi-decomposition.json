@@ -2362,9 +2362,9 @@
           ],
           "status": "半済",
           "size": "★大",
-          "note": "`𝒞 → 𝒞^istr → 𝒞^pf` と `𝒞^un-tr → (𝒞^un-tr)^pf → 𝒞^rlf` の 2 段と、縦の 2 本。★横の矢印のうち perfection がらみは鎖 `prop55` の `p55i` / `p55ii-*` 待ちである。\n\n★★2026-08-20: **左の縦の矢印と下の行は通した**。isotropic 型なら `𝒞 ⥤ 𝒞^istr` は恒等的、`𝒞^istr ⥤ 𝒞^un-tr` は在庫(`istrToUnTr`、`Proposition 3.3, (iii)`)、そこへ `untrToSc` を継ぐ。\n★残るのは (1) 上の行(`𝒞^istr ⟶ 𝒞^pf`)と右の縦の矢印(perfection、鎖 `prop55` 待ち)、(2) **1-可換性そのもの**(底への射影が `P.proj` と一致すること—— `pathToModel_toElem` が `rfl` なので出る見込み)。",
+          "note": "`𝒞 → 𝒞^istr → 𝒞^pf` と `𝒞^un-tr → (𝒞^un-tr)^pf → 𝒞^rlf` の 2 段と、縦の 2 本。★横の矢印のうち perfection がらみは鎖 `prop55` の `p55i` / `p55ii-*` 待ちである。\n\n★★2026-08-20: **左の縦の矢印と下の行は通した**。isotropic 型なら `𝒞 ⥤ 𝒞^istr` は恒等的、`𝒞^istr ⥤ 𝒞^un-tr` は在庫(`istrToUnTr`、`Proposition 3.3, (iii)`)、そこへ `untrToSc` を継ぐ。\n★残るのは (1) 上の行(`𝒞^istr ⟶ 𝒞^pf`)と右の縦の矢印(perfection、鎖 `prop55` 待ち)、(2) **1-可換性そのもの**(底への射影が `P.proj` と一致すること—— `pathToModel_toElem` が `rfl` なので出る見込み)。\n\n★★★★2026-08-21：**1-可換性と上の行を取った**。\n* `cToUnTr_comp_unTrToElem` —— 左の縦の矢印は `𝔽_Φ` への射影と **1-可換**（`rfl`）。\n  中身は `istrToUnTr_comp_unTrToElem`（`UnTr.lean`）と\n  `toIstrOfIsotropic` が `ι` で戻ること（定義から）の 2 本。\n* `cToUnTr_comp_proj` —— 底 `𝒟` への射影とも 1-可換。\n* ★`cToPf` —— **図式の上の行** `𝒞 ⟶ 𝒞^istr ⟶ 𝒞^pf`（`toPfCat` は在庫）。\n* `cToPf_comp_pfToElem` —— 上の行も `𝔽_{Φ^pf}` への射影と 1-可換\n  （`Proposition 3.2, (i)` の 1-可換図式 `pfSquare` を `𝒞` から見たもの）。\n\n★★残るのは**右の縦の矢印** `𝒞^pf ⟶ 𝒞^rlf` だけで、これは `p55ii-untr` を\n**圏同値**に格上げする（射の全単射を合成と両立させる）段に帰着する。",
           "lean": "ABC3/Found/FrdI/Prop53Diag.lean",
-          "decl": "toIstrOfIsotropic / cToUnTr / cToSc"
+          "decl": "toIstrOfIsotropic / cToUnTr / cToSc / cToUnTr_comp_unTrToElem / cToUnTr_comp_proj / cToPf / cToPf_comp_pfToElem"
         },
         {
           "id": "untr-pf",
