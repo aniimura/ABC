@@ -121,6 +121,37 @@ theorem ncard_primesOver_eq_finrank_of_unramified_degOne [IsGalois K L]
   rw [IsGalois.card_aut_eq_finrank K L] at hG
   simpa using hG
 
+/-- ★★**Galois なら剰余次数は `p` の上のすべての素で等しい**。
+
+★mathlib の `Ideal.inertiaDeg_eq_of_isGaloisGroup` を `Gal(L/K)` に当てるだけ。
+★★これが鎖 `cheb` の `cheb-log-zeta` の第 2 段
+「`#{P ∣ p, f=1}` は完全分解なら `[L:K]`、それ以外は `0`」の根拠である。 -/
+theorem inertiaDeg_eq_of_isGalois [IsGalois K L] (p : HeightOneSpectrum (𝓞 K))
+    (P Q : Ideal (𝓞 L)) [P.IsPrime] [P.LiesOver p.asIdeal]
+    [Q.IsPrime] [Q.LiesOver p.asIdeal] :
+    Ideal.inertiaDeg p.asIdeal P = Ideal.inertiaDeg p.asIdeal Q := by
+  haveI : p.asIdeal.IsPrime := p.isPrime
+  exact Ideal.inertiaDeg_eq_of_isGaloisGroup p.asIdeal P Q (L ≃ₐ[K] L)
+
+/-- ★★**分岐指数も同様に等しい**。 -/
+theorem ramificationIdx_eq_of_isGalois [IsGalois K L] (p : HeightOneSpectrum (𝓞 K))
+    (P Q : Ideal (𝓞 L)) [P.IsPrime] [P.LiesOver p.asIdeal]
+    [Q.IsPrime] [Q.LiesOver p.asIdeal] :
+    Ideal.ramificationIdx p.asIdeal P = Ideal.ramificationIdx p.asIdeal Q := by
+  haveI : p.asIdeal.IsPrime := p.isPrime
+  exact Ideal.ramificationIdx_eq_of_isGaloisGroup p.asIdeal P Q (L ≃ₐ[K] L)
+
+/-- ★★★**逆向き** —— 完全分解ならどの `P` も `e_P = f_P = 1`。 -/
+theorem ramificationIdx_eq_one_and_inertiaDeg_eq_one_of_splitsCompletely
+    (p : HeightOneSpectrum (𝓞 K)) (P : Ideal (𝓞 L))
+    (hP : P ∈ IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L))
+    (hsplit : (Ideal.primesOver p.asIdeal (𝓞 L)).ncard = Module.finrank K L) :
+    Ideal.ramificationIdx p.asIdeal P = 1 ∧ Ideal.inertiaDeg p.asIdeal P = 1 := by
+  have h := (ncard_primesOver_eq_finrank_iff K L p).mp hsplit P hP
+  refine ⟨?_, ?_⟩
+  · exact Nat.eq_one_of_mul_eq_one_right h
+  · exact Nat.eq_one_of_mul_eq_one_right (by rwa [mul_comm] at h)
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Theorem 6.4, (iv)` の (b)(完全分解の判定)。 -/
@@ -133,6 +164,12 @@ def ncard_primesOver_eq_finrank_iff.src : ABC3.Meta.Source :=
 def ncard_primesOver_eq_finrank_of_unramified_degOne.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 116,
     item := "Theorem 6.4, (iv) — Galois なら 1 つの素で完全分解が決まる",
+    sectionId := "frdi-thm-6-4" }
+
+/-- ★locator —— Galois なら `e`・`f` は `p` の上で一定。 -/
+def inertiaDeg_eq_of_isGalois.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 116,
+    item := "Theorem 6.4, (iv) — Galois なら剰余次数は一定",
     sectionId := "frdi-thm-6-4" }
 
 end ABC3.Found.NF
