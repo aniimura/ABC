@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Prop56Mp
+import ABC3.Found.FrdI.Prop56MpAbs
 
 /-!
 # Gap — [FrdI] §5 で残る 1 段(`Proposition 5.6` の `M_p`)
@@ -86,5 +87,42 @@ def Gap_5_6_Mp.record : ABC3.Meta.GapRecord :=
       "★この分類が覆るのは (a) Nikolov–Segal が mathlib に入る、" ++
       "(b) pro-`l` 部分の**抽象群としての**特徴づけが見つかる、" ++
       "(c) 位相の `Aut` 不変性を仮定に置く(その場合は分類 (B) の逸脱になる)、のいずれか。" }
+
+/-! ## ★★★★★★**2026-08-20: この穴は閉じた**
+
+★上の `falsifier` が挙げていた迴回路 **(b)**
+「pro-`l` 部分の**抽象群としての**特徴づけが見つかれば」が実際に存在した:
+
+  `M_p = ⋂_{k ≥ 0} (𝒪^×(A))^{p^k}`
+
+★位相的有限生成なアーベル副有限群 `M ≅ ∏_l M[l]` では
+`M^{p^k} = ∏_{l ≠ p} M[l] × M[p]^{p^k}` であり（`l ≠ p` では `p` が `ℤ_l` で可逆）、
+`M[p]` は有限生成 `ℤ_p`-加群なので `⋂_k M[p]^{p^k} = 1`。
+したがって `⋂_k M^{p^k} = ∏_{l ≠ p} M[l]` で、これが原文の `M_p` である。
+
+★★**この記述は冪しか使わない**ので、**任意の抽象自己同型で保たれる** ——
+連続性が要らず、**Nikolov–Segal が不要**になる。
+実装は `Found/FrdI/Prop56MpAbs.lean` の `MpDiv` と 3 つの性質
+(`MpDiv_le_OTri` / `MpDiv_inv` / `MpDiv_conj`)である。
+
+★★★逸脱の記録: 位相で定めた原文の `M_p` との**一致は未証明**である
+（鎖 `prop56` の `p56-limit` がそこを消費する）。
+ただし `isShiftStable_baseIsoEnd` が要求する 3 条はこの定義から直接出る。 -/
+
+/-- ★★★★★★**`Gap_5_6_Mp` は定理になった**。
+
+★入力は `𝒪^×(A)` の可換性だけで、これは `Definition 2.8, (i)`
+（unit-profinite 型）に**含まれている**（`oTimes_comm_of_unitProfinite`）。 -/
+theorem gap_5_6_Mp_resolved {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+    {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ) (A : C)
+    (hcomm : ∀ a b : End A, a ∈ OTimes P A → b ∈ OTimes P A → a * b = b * a) :
+    Gap_5_6_Mp P A :=
+  ⟨fun p _ => ⟨MpDiv P A p hcomm, MpDiv_le_OTri, MpDiv_inv, MpDiv_conj⟩⟩
+
+/-- ★unit-profinite 型なら可換性は自動。 -/
+theorem gap_5_6_Mp_resolved_of_unitProfinite {D : Type u} [Category.{v} D]
+    {C : Type u2} [Category.{v2} C] {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+    (hup : IsOfUnitProfiniteType P) (A : C) : Gap_5_6_Mp P A :=
+  gap_5_6_Mp_resolved P A (oTimes_comm_of_unitProfinite hup A)
 
 end ABC3.Gap.FrdI
