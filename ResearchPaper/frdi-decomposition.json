@@ -3125,11 +3125,11 @@
           "deps": [
             "places"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。\n\n★★★★（2026-08-20）**非アルキメデス側を閉じた**。`ordFin v x`（`v.valuation` の指数の符号反転）を定義し、`|x|_v = (N v)^{-ord_v(x)}`（`finitePlace_eq_absNorm_zpow`）と **`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`**（`arithPlaceLog_finite`）を証明した。★これで原文の「`log #(O_v/(λ))`」との一致がついた。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）と、`ord(F_v) ≅ ℤ` の全射性（一次元子の存在）である。\n\n★★★★★（2026-08-20、第 2 弾）**`ord(F_v) ≅ ℤ` の材料が揃った** —— `ordFin_mul`（加法性。`arithPlaceLog` の加法性を `log(N v) > 0` で割る）と `exists_ordFin_eq_one`（一次元子。mathlib の `valuation_exists_uniformizer`）。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）だけである。",
-          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "ordFin / finitePlace_eq_absNorm_zpow / arithPlaceLog_finite / ordFin_mul / exists_ordFin_eq_one"
+          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。\n\n★★★★（2026-08-20）**非アルキメデス側を閉じた**。`ordFin v x`（`v.valuation` の指数の符号反転）を定義し、`|x|_v = (N v)^{-ord_v(x)}`（`finitePlace_eq_absNorm_zpow`）と **`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`**（`arithPlaceLog_finite`）を証明した。★これで原文の「`log #(O_v/(λ))`」との一致がついた。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）と、`ord(F_v) ≅ ℤ` の全射性（一次元子の存在）である。\n\n★★★★★（2026-08-20、第 2 弾）**`ord(F_v) ≅ ℤ` の材料が揃った** —— `ordFin_mul`（加法性。`arithPlaceLog` の加法性を `log(N v) > 0` で割る）と `exists_ordFin_eq_one`（一次元子。mathlib の `valuation_exists_uniformizer`）。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）だけである。\n\n★★★★★★（2026-08-20、第 3 弾）**アルキメデス側を閉じた**（`ArithOrd.lean` §1）。★要点は原文の `ord(F_v) := F_v^×/O_v^×` の**分母も分子も完備化の側**だということ —— だから `ℝ` 全体が出る（`L` 自身の絶対値の像は `ℝ_{>0}` の稠密な真部分群にすぎない）。★`ordArch v x := -log‖x‖` と置き、mathlib の `InfinitePlace.Completion` が `ℝ` か `ℂ` に同型（`surjective_extensionEmbedding*`）であることから全射性を出した（`ordArch_surjective`）。`ordArch_nonneg_iff`（`ord ≥ 0 ⟺ ‖x‖ ≤ 1`）が `ord(O_v^▷) ≅ ℝ≥0`、`ordArch_eq_zero_iff` が `O_v^×` の記述である。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean / ABC3/Found/Divisor/ArithOrd.lean",
+          "decl": "ABC3.Found.Divisor.ordFin / ABC3.Found.Divisor.ordArch"
         },
         {
           "id": "arith-phi",
@@ -3137,11 +3137,11 @@
           "deps": [
             "ord-mon"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★直和(有限台)であることが本質。\n\n★★★★（2026-08-20）**対数の模型で置いた**。`Φ(F)^gp` = 非アルキメデス成分が `log(N v)` の**整数倍**であるもの（`arithDivGroup`）、`Φ(F)` = そのうち各成分が非負なもの（`arithEff`）。★`arithDiv x ∈ Φ(F)^gp`（`arithDiv_mem_arithDivGroup`）も証明した —— `arithPlaceLog_finite` から直ちに出る。★残るのは「`Φ(F) ≅ ⊕_v ord(O_v^▷)`」の同型を明示に書くことである。",
-          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "arithDivGroup / arithEff / arithDiv_mem_arithDivGroup"
+          "note": "★直和(有限台)であることが本質。\n\n★★★★（2026-08-20）**対数の模型で置いた**。`Φ(F)^gp` = 非アルキメデス成分が `log(N v)` の**整数倍**であるもの（`arithDivGroup`）、`Φ(F)` = そのうち各成分が非負なもの（`arithEff`）。★`arithDiv x ∈ Φ(F)^gp`（`arithDiv_mem_arithDivGroup`）も証明した —— `arithPlaceLog_finite` から直ちに出る。★残るのは「`Φ(F) ≅ ⊕_v ord(O_v^▷)`」の同型を明示に書くことである。\n\n★★★★★（2026-08-20）**直和分解を明示に書いた**。`arithOfParts : (V_fin →₀ ℤ) × (V_∞ →₀ ℝ) →+ (ArithPlace →₀ ℝ)` が単射で像がちょうど `Φ(F)^gp`（`arithDivGroupEquiv`）。★一意性の根拠は `log(N v) ≠ 0` だけである。★有効部分は `arithOfParts_mem_arithEff_iff`（成分ごとの非負性）で、これが `Φ(F) = ⊕_v ord(O_v^▷)` である。",
+          "lean": "ABC3/Found/Divisor/ArithOrd.lean",
+          "decl": "ABC3.Found.Divisor.arithDivGroupEquiv / ABC3.Found.Divisor.arithOfParts_mem_arithEff_iff"
         },
         {
           "id": "arith-B",
@@ -3149,11 +3149,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★「all but a finite number of which are zero」= 有限個の素点でしか付値が非零でない。mathlib の `HeightOneSpectrum` の有限性補題に乗る。\n\n★★（2026-08-20）**台の有限性と準同型性は閉じた**（`finite_support_arithPlaceLog` / `arithDiv_mul`）。有限性は mathlib の `NumberField.FinitePlace.hasFiniteMulSupport` から出る。",
+          "note": "★「all but a finite number of which are zero」= 有限個の素点でしか付値が非零でない。mathlib の `HeightOneSpectrum` の有限性補題に乗る。\n\n★★（2026-08-20）**台の有限性と準同型性は閉じた**（`finite_support_arithPlaceLog` / `arithDiv_mul`）。有限性は mathlib の `NumberField.FinitePlace.hasFiniteMulSupport` から出る。\n\n★（2026-08-20）**閉じた** —— 準同型性（`arithDiv_mul`）・台の有限性（`finite_support_arithPlaceLog`）に加え、`arith-phi` が閉じたことで `B(F) → Φ(F)^gp` の**行き先**が確定した（`arithDiv_mem_arithDivGroup`）。",
           "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "arithDiv / arithDiv_mul / arithDivHom / arithDiv_mem_arithDivGroup"
+          "decl": "ABC3.Found.Divisor.arithDivHom / ABC3.Found.Divisor.arithDiv_mem_arithDivGroup"
         },
         {
           "id": "arith-functor",
@@ -3185,11 +3185,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。\n\n★★（2026-08-20）`arithDegree`（成分の総和）として実装した。★原文の「`−[F_v:ℝ]·log λ`」「`log #(O_v/(λ))`」との一致は `ord-mon` が閉じてから書く。\n\n★★（2026-08-20）**原文との一致の非アルキメデス側がついた** —— `arithPlaceLog_finite`。",
+          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。\n\n★★（2026-08-20）`arithDegree`（成分の総和）として実装した。★原文の「`−[F_v:ℝ]·log λ`」「`log #(O_v/(λ))`」との一致は `ord-mon` が閉じてから書く。\n\n★★（2026-08-20）**原文との一致の非アルキメデス側がついた** —— `arithPlaceLog_finite`。\n\n★（2026-08-20）**閉じた**。非アルキメデス成分が `ord_v(x)·log(N v)`（`arithPlaceLog_finite`）、アルキメデス成分が `-mult(w)·log(w x)`（`arithPlaceLog` の定義そのもの、原文の `-[F_v:ℝ]·log λ`）。★`deg^arith` が `B(L)` の像で消えること（積公式）は `arithDegree_arithDiv`。",
           "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "arithDegree"
+          "decl": "ABC3.Found.Divisor.arithDegree / ABC3.Found.Divisor.arithPlaceLog_finite"
         },
         {
           "id": "deg-vanish",
