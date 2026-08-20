@@ -3127,9 +3127,9 @@
           ],
           "status": "半済",
           "size": "中",
-          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。\n\n★★★★（2026-08-20）**非アルキメデス側を閉じた**。`ordFin v x`（`v.valuation` の指数の符号反転）を定義し、`|x|_v = (N v)^{-ord_v(x)}`（`finitePlace_eq_absNorm_zpow`）と **`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`**（`arithPlaceLog_finite`）を証明した。★これで原文の「`log #(O_v/(λ))`」との一致がついた。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）と、`ord(F_v) ≅ ℤ` の全射性（一次元子の存在）である。",
+          "note": "★非アルキメデスは `HeightOneSpectrum` の付値、アルキメデスは `InfinitePlace` の絶対値の対数。\n\n★★★★（2026-08-20）**非アルキメデス側を閉じた**。`ordFin v x`（`v.valuation` の指数の符号反転）を定義し、`|x|_v = (N v)^{-ord_v(x)}`（`finitePlace_eq_absNorm_zpow`）と **`arithPlaceLog x (inl w) = ord_v(x)·log(N v)`**（`arithPlaceLog_finite`）を証明した。★これで原文の「`log #(O_v/(λ))`」との一致がついた。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）と、`ord(F_v) ≅ ℤ` の全射性（一次元子の存在）である。\n\n★★★★★（2026-08-20、第 2 弾）**`ord(F_v) ≅ ℤ` の材料が揃った** —— `ordFin_mul`（加法性。`arithPlaceLog` の加法性を `log(N v) > 0` で割る）と `exists_ordFin_eq_one`（一次元子。mathlib の `valuation_exists_uniformizer`）。★残るのはアルキメデス側（`ord(O_v^▷) ≅ ℝ≥0`）だけである。",
           "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "ordFin / finitePlace_eq_absNorm_zpow / arithPlaceLog_finite"
+          "decl": "ordFin / finitePlace_eq_absNorm_zpow / arithPlaceLog_finite / ordFin_mul / exists_ordFin_eq_one"
         },
         {
           "id": "arith-phi",

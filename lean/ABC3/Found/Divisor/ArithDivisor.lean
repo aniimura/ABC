@@ -246,6 +246,40 @@ theorem arithPlaceLog_finite (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L))
   push_cast
   ring
 
+/-- ★`log(N v) > 0`（`N v > 1` は mathlib）。 -/
+theorem log_absNorm_pos (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) :
+    (0:ℝ) < Real.log (Ideal.absNorm v.asIdeal : ℝ) := by
+  refine Real.log_pos ?_
+  exact_mod_cast NumberField.RingOfIntegers.HeightOneSpectrum.one_lt_absNorm v
+
+/-- ★★**`ord_v` は加法的** —— `arithPlaceLog` の加法性を `log(N v)` で割る。 -/
+theorem ordFin_mul (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) {x y : L}
+    (hx : x ≠ 0) (hy : y ≠ 0) : ordFin v (x * y) = ordFin v x + ordFin v y := by
+  have hlog := log_absNorm_pos (L := L) v
+  have h := arithPlaceLog_mul hx hy (Sum.inl (FinitePlace.mk v))
+  rw [arithPlaceLog_finite v _ (mul_ne_zero hx hy), arithPlaceLog_finite v x hx,
+    arithPlaceLog_finite v y hy] at h
+  have h2 : ((ordFin v (x*y) : ℝ)) = (ordFin v x : ℝ) + (ordFin v y : ℝ) := by
+    field_simp at h
+    linarith [h]
+  exact_mod_cast h2
+
+/-- ★★★**一次元子の存在** —— `ord_v(π) = 1` なる `π` がある。
+
+★mathlib の `HeightOneSpectrum.valuation_exists_uniformizer`。
+★★これと `ordFin_mul` で **`ord(F_v) ≅ ℤ`**（鎖 `arith` の `ord-mon`）が出る。 -/
+theorem exists_ordFin_eq_one (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) :
+    ∃ π : L, π ≠ 0 ∧ ordFin v π = 1 := by
+  obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer L
+  have hne : v.valuation L π ≠ 0 := by rw [hπ]; simp
+  refine ⟨π, fun h => hne (by rw [h, map_zero]), ?_⟩
+  rw [ordFin, dif_neg hne]
+  have h2 : (WithZero.unzero hne) = Multiplicative.ofAdd (-1 : ℤ) := by
+    rw [← WithZero.coe_inj, WithZero.coe_unzero, hπ]
+    rfl
+  rw [h2]
+  rfl
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.3` の素点の集合 `V(F)`。 -/
@@ -272,6 +306,12 @@ def arithDegree_arithDiv.src : ABC3.Meta.Source :=
 def arithPlaceLog_finite.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 113,
     item := "Example 6.3 — 非アルキメデスで deg^arith = ord_v·log(Nv)",
+    sectionId := "frdi-example-6-3" }
+
+/-- ★★locator —— `Example 6.3` の `ord(F_v) ≅ ℤ`（一次元子の存在と加法性）。 -/
+def exists_ordFin_eq_one.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — ord(F_v) ≅ ℤ（非アルキメデス）",
     sectionId := "frdi-example-6-3" }
 
 end ABC3.Found.Divisor
