@@ -90,13 +90,13 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★★**座標環が Dedekind 環であること**を示す——`IsDomain` ✅・`IsNoetherianRing` ✅(mathlib)、`Ring.DimensionLEOne` ✅(第 127 ブロック、第 116 の整拡大から)。**残るのは `IsIntegrallyClosed` だけ**である(10-25 ブロック)" 19,
     .implicitStep
-      "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定 `IsIntegrallyClosed.of_localization_maximal` があるので、各極大イデアルでの局所化が DVR であることを示す形になる——非特異点なら `x − x₀` か `y − y₀` が極大イデアルを生成する(10-25 ブロック)" 19,
+      "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定は `IsIntegrallyClosed.of_localization_maximal : (∀ p ≠ ⊥, [p.IsMaximal] → IsIntegrallyClosed (Localization.AtPrime p)) → IsIntegrallyClosed R`(2026-08-20 実測)。★内訳は (i) 各極大イデアルが `XYIdeal W x y` の形であること(代数閉体上の零点定理)、(ii) 非特異点では `x − x₀` か `y − y₀` が局所化で極大イデアルを生成すること、(iii) 局所 Noether 整域で極大イデアルが単項 ⟹ DVR(mathlib の `DiscreteValuationRing.TFAE`)(10-25 ブロック)" 19,
     .implicitStep
       "★★Dedekind の instance が入れば、`div(f)` は【主分数イデアルの素分解】として mathlib から直接出る。因子群を自分で積む必要は無い(0 ブロック)" 19,
     .implicitStep
       "★因子が `n` で割れる ⟹ `n` 乗根が取れる、の段。Dedekind なら分数イデアル `J` で `J^n = (μ f_P)` なるものが取れ、`J` が単項であることを `toClass` の単射性で示す形になる(10-25 ブロック)" 19,
     .implicitStep
-      "★★★★**もう一つの道(イデアルの引き戻し)**: `[n]^* I := μ(I) が生成する分数イデアル` と定めると、`[n]^*` は乗法的で `[n]^*((f)) = (μ f)` なので、`J := [n]^* I_P` が `J^n = (μ f_P)` を満たす。★因子群を経由しない。残るのは `[J] = 0`(古典的には `[n]^*` が類群上で `n` 倍として働くこと)である(未測定)" 19,
+      "★★★★**もう一つの道(イデアルの引き戻し)と、その訂正**: 当初「`[n]^* I := μ(I) が生成する CR-部分加群` と定めれば因子群を経由せずに済む」と書いたが、★**これは誤りである**——`FF` の `CR`-加群構造は `algebraMap` によるもので `μ` によるものではないため、`μ('' (f))` の張る部分加群は `(μ f)` にならない。★★正しくは `μ` を体の埋め込みに延ばし、`μ(CR)` の `FF` における整閉包を取る必要があり、それが `CR` と一致するには**結局 `IsIntegrallyClosed CR` が要る**。★★★2 つの道は `IsIntegrallyClosed` で合流する" 19,
     .implicitStep
       "★★★★★**最終段の単元は定数である**——`g^n` と `μ(f_P)` が同じイデアルを生成することから両者は単元倍で一致するが、`isUnit_coordinateRing`(第 128 ブロック、**Found に済**)により単元は定数であり、代数閉体なら `n` 乗根が取れて吸収できる(0 ブロック)" 19 ]
 
