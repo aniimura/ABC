@@ -702,6 +702,7 @@ import ABC3.Found.GaloisRep.PhiTwo
 import ABC3.Found.GaloisRep.KummerX
 import ABC3.Found.GaloisRep.KummerPoint
 import ABC3.Found.GaloisRep.LadderThree
+import ABC3.Found.GaloisRep.WeilDet
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
