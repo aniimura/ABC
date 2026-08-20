@@ -45,6 +45,7 @@ import ABC3.Found.FrdI.Rmk341
 import ABC3.Found.FrdI.Prop41
 import ABC3.Found.FrdI.Def31Pf
 import ABC3.Found.FrdI.HomColim
+import ABC3.Found.FrdI.HomColimQuot
 import ABC3.Found.FrdI.Prop32
 import ABC3.Found.FrdI.Prop32Frob
 import ABC3.Found.FrdI.Prop32Equiv
@@ -119,6 +120,7 @@ import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Prop55Rlf
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop55PfUnit
+import ABC3.Found.FrdI.Prop55Untr
 import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.Divisor.HeightOneDVR
 import ABC3.Found.Divisor.FreeDivisorial
