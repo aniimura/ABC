@@ -16730,3 +16730,47 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 **「`F[X][√d]`(`d` squarefree)が整閉」の 1 段を残すのみ**になった(10-25)。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-443 Dedekind への**より短い経路**が見つかった
+
+`IsIntegrallyClosed W.CoordinateRing` を目標にしていたが、
+★mathlib の **`IsDedekindDomainDvr.isDedekindDomain` は instance である**
+(2026-08-20 実測):
+
+    class IsDedekindDomainDvr extends IsNoetherian A A where
+      is_dvr_at_nonzero_prime : ∀ P ≠ ⊥, ∀ _ : P.IsPrime,
+        IsDiscreteValuationRing (Localization.AtPrime P)
+
+    instance IsDedekindDomainDvr.isDedekindDomain : IsDedekindDomain A
+    instance IsDedekindDomainDvr.isIntegrallyClosed : IsIntegrallyClosed A
+
+★★すなわち**整閉性を経由せずに** Dedekind が出る——
+`IsNoetherian` ✅(mathlib)と「零でない素イデアルでの局所化がすべて DVR」だけでよい。
+★★★整閉性はその**副産物**として得られる。
+
+### ★残る内訳
+
+局所化が DVR であることの内訳:
+(i) 極大イデアル `m` は `XYIdeal W x y` の形(代数閉体上)、
+(ii) 非特異点では `x − x₀` か `y − y₀` が局所化で `m` を生成する、
+(iii) mathlib の `IsDiscreteValuationRing.iff_pid_with_one_nonzero_prime` に流す。
+
+★★見積もり 10-25 ブロック。
+
+### ★★★★本セッションの G5 の歩み(第 113-131)
+
+| 層 | 内容 | 状態 |
+|---|---|---|
+| 1 | `f_P` の存在(分数イデアル/整イデアル) | ✅ 第 113・126 |
+| 1 | 生成点が曲線の非特異点 | ✅ 第 114 |
+| 2 | 平行移動 `τ_Q : F(W) ≃ₐ[F] F(W)`(すべての Q) | ✅ 第 115-124 |
+| 2 | `[n]` の引き戻し `μ`(すべての n) | ✅ 第 118・125 |
+| 3 | 座標環の次元・単元・平方完成・`Ψ₂Sq` squarefree | ✅ 第 127-131 |
+| 3 | 局所化が DVR ⟹ Dedekind | ★残り(10-25) |
+| 3 | 因子計算・`n` 乗根の取り出し | ★残り(30-75) |
+| 4-6 | `e_n` と 4 性質 → `det_cyclotomic` | ★残り |
+
+★★★★★当初 **50-150 ブロック**と見積もった (G5) のうち、
+**19 ブロックで層 1-2 を閉じ、層 3 の半分まで来た**。
+
+★義務の数は動いていない(Galois 4/8)。

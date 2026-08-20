@@ -98,7 +98,11 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★`discr ≠ 0` ⟹ `Squarefree Ψ₂Sq` の段。mathlib の在庫(2026-08-20 実測): `Cubic.discr_ne_zero_iff_roots_nodup` ✅、`PerfectField.separable_iff_squarefree` ✅、`Polynomial.Separable.squarefree` ✅、`UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` ✅。★★★★★★**これは第 131 ブロックで Found に入った**(`squarefree_of_roots_nodup`・`squarefree_Psi2Sq`)。分解 `p = C a·∏(X−r)` と `separable_prod_X_sub_C_iff'` から 1 ブロックで出た(0 ブロック)" 19,
     .implicitStep
-      "★★★`Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` が整閉、の段。mathlib に二次拡大の整閉性は無い(2026-08-20 実測)(10-25 ブロック)" 19,
+      "★★★`Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` が整閉、の段。mathlib に二次拡大の整閉性は無い(2026-08-20 実測、`IsIntegrallyClosed` を持つ 20 ファイルを列挙して確認)(10-25 ブロック)" 19,
+    .implicitStep
+      "★★★★★**より短い経路が見つかった**: mathlib の `IsDedekindDomainDvr.isDedekindDomain` は **instance** である(2026-08-20 実測)。`IsDedekindDomainDvr A` = `IsNoetherian A A` + 「零でない素イデアルでの局所化がすべて DVR」なので、**整閉性を経由せず**に Dedekind が出る。★`IsDedekindDomainDvr.isIntegrallyClosed` も instance なので整閉性は副産物として得られる" 19,
+    .implicitStep
+      "★★局所化が DVR であることの内訳: 極大イデアル `m` は `XYIdeal W x y` の形(代数閉体上)で、非特異点では `x − x₀` か `y − y₀` が局所化で `m` を生成する。mathlib の `IsDiscreteValuationRing.iff_pid_with_one_nonzero_prime` / `DiscreteValuationRing.TFAE` に流す(10-25 ブロック)" 19,
     .implicitStep
       "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定は `IsIntegrallyClosed.of_localization_maximal : (∀ p ≠ ⊥, [p.IsMaximal] → IsIntegrallyClosed (Localization.AtPrime p)) → IsIntegrallyClosed R`(2026-08-20 実測)。★内訳は (i) 各極大イデアルが `XYIdeal W x y` の形であること(代数閉体上の零点定理)、(ii) 非特異点では `x − x₀` か `y − y₀` が局所化で極大イデアルを生成すること、(iii) 局所 Noether 整域で極大イデアルが単項 ⟹ DVR(mathlib の `DiscreteValuationRing.TFAE`)(10-25 ブロック)" 19,
     .implicitStep

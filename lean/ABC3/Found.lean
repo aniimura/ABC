@@ -104,6 +104,7 @@ import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop53Rlf
 import ABC3.Found.FrdI.Cor54
+import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Prop55Rlf
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop53Diag
