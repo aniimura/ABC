@@ -3161,11 +3161,11 @@
           "deps": [
             "arith-B"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★素点の延長。`𝒟 = B(G)⁰` 上の単系にするために要る。",
-          "lean": "",
-          "decl": ""
+          "note": "★素点の延長。`𝒟 = B(G)⁰` 上の単系にするために要る。\n\n★★★★★2026-08-20 完了（`ABC3/Found/Divisor/ArithFunctor.lean`）。\n★★**対数の模型では「局所次数倍」というただ 1 つの規則になる**:\n* 非アルキメデス `W | v`: 係数は `ord_v(x)·log(N v)`、倍率は `e(W|v)·f(W|v)`\n* アルキメデス `W | v`: 係数は `-mult(v)·log(v x)`、倍率は `mult(W)/mult(v)`\nどちらも局所次数 `[M_W : L_v]` である。したがって\n`arithExtend d := (V ↦ localDeg(V) · d(res V))` の 1 本で済む。\n★主な定理: `ordFin_extend`（`ord_W(x) = e·ord_v(x)`、mathlib の `HeightOneSpectrum.valuation_liesOver` を値群 `Multiplicative ℤ` の中で `toAdd` で読む）、\n`logAbsNorm_extend`（`log(N W) = f·log(N v)`、`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`）、\n`arithPlaceLog_extend`（上の 2 つを束ねた局所の恒等式）、\n`arithExtend_mem_arithDivGroup` / `arithExtend_mem_arithEff`、\n`arithExtend_arithDiv`（`B → Φ^gp` の関手性）。\n★台の有限性は `IsDedekindDomain.primesOver_finite`（非アルキメデス）と\n`InfinitePlace` が有限型であること（アルキメデス）から出る。\n★★これで鎖 `arith` は**全節点完了**である。",
+          "lean": "ABC3/Found/Divisor/ArithFunctor.lean",
+          "decl": "ABC3.Found.Divisor.arithExtend / ABC3.Found.Divisor.arithExtend_arithDiv"
         },
         {
           "id": "arith-perffactorial",
@@ -3473,11 +3473,11 @@
           "deps": [
             "arith-functor"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "\n\n★★★★★2026-08-20 完了（`ABC3/Found/Divisor/ArithFunctor.lean`）。\n★★**対数の模型では「局所次数倍」というただ 1 つの規則になる**:\n* 非アルキメデス `W | v`: 係数は `ord_v(x)·log(N v)`、倍率は `e(W|v)·f(W|v)`\n* アルキメデス `W | v`: 係数は `-mult(v)·log(v x)`、倍率は `mult(W)/mult(v)`\nどちらも局所次数 `[M_W : L_v]` である。したがって\n`arithExtend d := (V ↦ localDeg(V) · d(res V))` の 1 本で済む。\n★主な定理: `ordFin_extend`（`ord_W(x) = e·ord_v(x)`、mathlib の `HeightOneSpectrum.valuation_liesOver` を値群 `Multiplicative ℤ` の中で `toAdd` で読む）、\n`logAbsNorm_extend`（`log(N W) = f·log(N v)`、`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`）、\n`arithPlaceLog_extend`（上の 2 つを束ねた局所の恒等式）、\n`arithExtend_mem_arithDivGroup` / `arithExtend_mem_arithEff`、\n`arithExtend_arithDiv`（`B → Φ^gp` の関手性）。\n★台の有限性は `IsDedekindDomain.primesOver_finite`（非アルキメデス）と\n`InfinitePlace` が有限型であること（アルキメデス）から出る。\n★★これで鎖 `arith` は**全節点完了**である。",
+          "lean": "ABC3/Found/Divisor/ArithFunctor.lean",
+          "decl": "ABC3.Found.Divisor.arithExtend / ABC3.Found.Divisor.arithExtend_arithDiv"
         },
         {
           "id": "ex63-perffact",

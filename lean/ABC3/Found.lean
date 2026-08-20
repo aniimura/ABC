@@ -724,6 +724,7 @@ import ABC3.Found.GaloisRep.TateAnalytic
 import ABC3.Found.GaloisRep.TateEquationMod
 import ABC3.Found.GaloisRep.TateClassMap
 import ABC3.Found.GaloisRep.LipschitzBridge
+import ABC3.Found.GaloisRep.LatticeInvariant
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
