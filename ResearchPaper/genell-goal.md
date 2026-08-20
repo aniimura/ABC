@@ -20332,3 +20332,55 @@ Tate 一意化の写像は `u` から作るが、**`u` と `qu` は同じ点に�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-527 ★★★★★★葉 (b) の道を測って選んだ —— 解析の難所は mathlib に在った(第 214 ブロック)
+
+`Found/GaloisRep/LipschitzBridge.lean`。
+
+第 212 で Weierstrass 方程式は `I` を法として取れた。★厳密な等式には道が 2 本ある。
+
+| 道 | 中身 | 判定 |
+|---|---|---|
+| α 形式的・代数的 | `Z[u, u^-1, (1-u)^-1][[q]]` の中で `q` の係数ごとに確かめる | ★**有限の帰着が見えない**——係数ごとに別の議論が要る |
+| β 複素解析から移す | `℘` の理論で方程式を出し、係数が `Z` なので形式級数の等式に移す | ★★★★**在庫が厚い** |
+
+### ★★★★★★測ったら道 β の在庫が厚かった
+
+| 段 | 内容 | mathlib 在庫 |
+|---|---|---|
+| 1 | `℘` の構成と **`℘'^2 = 4℘^3 - g2·℘ - g3`** | ★★★★`PeriodPair.derivWeierstrassP_sq` ✓ |
+| 2 | **Lipschitz 公式** `S_{n in Z} 1/(z+n)^{k+1} = ((-2pi i)^{k+1}/k!)·S n^k q^n` | ★★★★`EisensteinSeries.qExpansion_identity` ✓ |
+| 3 | Eisenstein の q 展開 `E_k = 1 - (2k/B_k)·S sigma_{k-1}(n) q^n` | ★★★`EisensteinSeries.q_expansion_bernoulli` ✓ |
+| 4 | 格子 `Z + tau·Z` の `g2, g3` を `E4, E6` に繋ぐ | ★無い |
+| 5 | `℘` の q 展開(2 を `n in Z` の各段に当てる) | ★無い |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | ★無い |
+
+★★★**解析の難所——`℘` の構成・微分方程式・Lipschitz 公式——はすべて mathlib に在る**。
+残る 4-6 は機械的な段であり、**道 β を採る**。見積もりは 40-80 ブロック。
+
+### ★★★★★★橋を 1 本架けた
+
+Lipschitz 公式の `k = 1` は、右辺がちょうど **`f(t) = t/(1-t)^2`**——
+すなわち我々の `tateXterm`——の形になる:
+
+    S_{n in Z} 1/(z+n)^2 = (2 pi i)^2 · f(u),      u = exp(2 pi i z)
+
+★★`w := z + k·tau` に当てれば `f(q^k u)` が出る——これが `℘` の q 展開の各段である。
+★★★**解析側の `f` と形式側の `tateXterm` が同じものであることを型で確かめた**
+(`lipschitz_tateXterm`)。
+
+### ★測り方について
+
+§9-523 では測らずに新しい道を敷こうとして外した(§9-524 で訂正)。★今回は
+**2 本の道を並べて在庫を測ってから選んだ**——これが本来の手順である。
+
+| 定理 | 内容 |
+|---|---|
+| `lipschitz_two` | ★★★★★**Lipschitz 公式(`k = 1`)** |
+| `lipschitz_tateXterm` | ★★★★★★**解析側の `f` は `tateXterm` である** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build ABC3.Found.GaloisRep.LipschitzBridge` は通過。全体の `lake build` は
+**並行セッションの `Found/Divisor/ArithFunctor.lean`(194・204・218 行)で落ちている**
+——こちらのファイルではない。ゲートも同じ理由で NG 1 件。

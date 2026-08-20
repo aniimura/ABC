@@ -132,6 +132,7 @@ import ABC3.Found.Divisor.ArithPhiPrime
 import ABC3.Found.Divisor.ArithPf
 import ABC3.Found.Divisor.ArithPerfFactorial
 import ABC3.Found.Divisor.ArithPhiPerf
+import ABC3.Found.Divisor.ArithFunctor
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.FrdI.Prop53Diag
@@ -722,6 +723,7 @@ import ABC3.Found.GaloisRep.BasisFree
 import ABC3.Found.GaloisRep.TateAnalytic
 import ABC3.Found.GaloisRep.TateEquationMod
 import ABC3.Found.GaloisRep.TateClassMap
+import ABC3.Found.GaloisRep.LipschitzBridge
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
