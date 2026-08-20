@@ -97,6 +97,18 @@ theorem ordPt_ffMap_eq_zero_of_isUnit (hnormX : IsNormalScheme X) (x : PrimeDivi
       = ((hu.unit : (X.presheaf.stalk x.1)ˣ) : X.presheaf.stalk x.1) from hu.unit_spec.symm]
   exact ordPt_eq_zero_of_isUnit hnormX x hu.unit
 
+omit [IsLocallyNoetherian X] in
+/-- ★★**支配的な射の茎への射は単射** —— 四角形の左と下が単射だから。
+
+★左は `𝒪_{Y,g(x)} ↪ K(Y)`(`IsFractionRing`)、下は体の射 `K(Y) → K(X)`。 -/
+theorem stalkMap_injective (x : X) : Function.Injective (g.stalkMap x) := by
+  intro a b hab
+  have h1 : ffMap g (algebraMap (Y.presheaf.stalk (g.base x)) Y.functionField a)
+      = ffMap g (algebraMap (Y.presheaf.stalk (g.base x)) Y.functionField b) := by
+    rw [ffMap_algebraMap, ffMap_algebraMap, hab]
+  exact IsFractionRing.injective (Y.presheaf.stalk (g.base x)) Y.functionField
+    ((ffMap g).hom.injective h1)
+
 end Ord
 
 end ABC3.Found.Divisor

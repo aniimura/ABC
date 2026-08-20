@@ -83,6 +83,15 @@ instance normMap_isDominant {L M : FinSub V.functionField Kbar} (f : L ⟶ M) :
     infer_instance
   exact IsDominant.of_comp (normUp V M) (normMap V f)
 
+/-- ★★**`V[M] → V[L]` は整射** —— `normMap ≫ normDown = normDown` と
+`IsIntegralHom.of_comp`(`normDown` はアフィン射なので分離的)。 -/
+instance normMap_isIntegralHom {L M : FinSub V.functionField Kbar} (f : L ⟶ M) :
+    IsIntegralHom (normMap V f) := by
+  haveI : IsIntegralHom (normMap V f ≫ normDown V L) := by
+    rw [normMap_normDown]
+    infer_instance
+  exact IsIntegralHom.of_comp (normMap V f) (normDown V L)
+
 /-- ★**生成点は生成点へ**。 -/
 theorem normMap_genericPoint {L M : FinSub V.functionField Kbar} (f : L ⟶ M) :
     (normMap V f).base (genericPoint (normObj V M : Type u))
