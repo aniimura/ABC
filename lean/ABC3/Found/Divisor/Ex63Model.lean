@@ -131,6 +131,19 @@ theorem divBGalois_nat {A B : (FinSub F Kbar)ᵒᵖ} (f : A ⟶ B)
 
 /-! ## ★4. `Example 6.3` の model Frobenioid -/
 
+/-- ★★★★**`Example 6.3` の `ModelData`** —— `Theorem 5.2` の入力そのもの。 -/
+noncomputable def ex63ModelData : ModelData.{0, 0, 0} (FinSub F Kbar)ᵒᵖ :=
+  (arithDatumGalois F Kbar).modelData finSubOp_isOfFSMType (bmonGalois F Kbar)
+    (fun A => divBGalois A) (fun f x => divBGalois_nat f x)
+
+@[simp] theorem ex63ModelData_phi :
+    (ex63ModelData (F := F) (Kbar := Kbar)).phi
+      = (arithDatumGalois F Kbar).phi finSubOp_isOfFSMType := rfl
+
+@[simp] theorem ex63ModelData_bmon :
+    (ex63ModelData (F := F) (Kbar := Kbar)).bmon = bmonGalois F Kbar := rfl
+
+
 /-- ★★★★★★**[FrdI] `Example 6.3`** —— `C_{F̄/F}` は **Frobenioid** である。
 
 ★`Theorem 5.2, (ii)` を、`𝒟 = B(G)⁰` の上で実際に組んだデータに当てたもの。

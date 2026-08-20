@@ -3535,11 +3535,11 @@
           "deps": [
             "ex63-model"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "",
-          "lean": "",
-          "decl": ""
+          "note": "★★★2026-08-21 完了。原文が「one verifies immediately」で畳んだ\n「射は (a) `Spec L → Spec M`、(b) `d ∈ ℕ≥1`、(c) 非零元 の組」は、\n`Theorem 5.2, (i)` の `ModelData.Hom` の 4 成分そのものだった。\n\n| 原文 | `ModelData.Hom` | `Example 6.3` での中身 |\n|---|---|---|\n| (a) | `base` | `𝒟 = B(G)⁰` の射（= `F`-代数射 `M → L`）|\n| (b) | `deg` | `ℕ+` |\n| (c) | `u` | `L^×`（加法的に書いたもの）|\n| — | `div` | 有効な算術因子 |\n| — | `cond` | `d·α_A + Div(φ) = Base(φ)^*(α_B) + div(u)` |\n\n★`ex63HomEquiv` がその 1 対 1 対応。`ex63_hom_unit_ne_zero`（(c) の元は非零）と\n`ex63_hom_deg_pos`（(b) は 1 以上）も付けた。",
+          "lean": "ABC3/Found/Divisor/Ex63Model.lean / ABC3/Found/Divisor/Ex63Morph.lean",
+          "decl": "ex63ModelData / ex63HomEquiv / ex63_hom_unit_ne_zero / ex63_hom_deg_pos"
         },
         {
           "id": "ex63-units",
