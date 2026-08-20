@@ -1073,6 +1073,66 @@ theorem cfp_baseIsomorphic_of (A B : CfpCat P G)
 対処も #3 と同じ ——**綴りの決まった変数を先に導入する**。
 ★**表は 7 行のままでよい。#5 の「原因」欄を #1 と同じに直すのが正しい。** -/
 
+/-- ★底恒等な `𝒞` の自己射を `𝒞'` へ持ち上げる(`𝒟'` 成分は `𝟙`)。
+
+★★**基準の6例目**: `base-identity` は `𝒟'` 成分を `𝟙` に固定するので、
+持ち上げに選択の余地がなく、四角形も `Base φ₀ = 𝟙` だけで閉じる。 -/
+noncomputable def cfpLiftBaseId (A : CfpCat P G) {φ₀ : End A.obj.left}
+    (h : IsBaseIdentity P φ₀) : End A :=
+  InducedCategory.homMk (⟨(φ₀ : A.obj.left ⟶ A.obj.left), 𝟙 A.obj.right, by
+    have h1 : P.proj.map ((φ₀ : A.obj.left ⟶ A.obj.left)) = 𝟙 (P.proj.obj A.obj.left) :=
+      (h : P.Base _ = P.Base (𝟙 A.obj.left)).trans (P.Base_id A.obj.left)
+    show P.proj.map ((φ₀ : A.obj.left ⟶ A.obj.left)) ≫ A.obj.hom
+      = A.obj.hom ≫ G.map (𝟙 A.obj.right)
+    rw [h1, Category.id_comp, G.map_id, Category.comp_id]⟩ :
+    (A : CfpCat P G).obj ⟶ A.obj)
+
+@[simp] theorem cfpLiftBaseId_fst (A : CfpCat P G) {φ₀ : End A.obj.left}
+    (h : IsBaseIdentity P φ₀) :
+    CfpCat.fst (cfpLiftBaseId P G A h) = ((φ₀ : A.obj.left ⟶ A.obj.left)) := rfl
+
+@[simp] theorem cfpLiftBaseId_snd (A : CfpCat P G) {φ₀ : End A.obj.left}
+    (h : IsBaseIdentity P φ₀) :
+    CfpCat.snd (cfpLiftBaseId P G A h) = 𝟙 A.obj.right := rfl
+
+/-- **(v)** —— **Frobenius-normalized** は射影で決まる。
+
+★`𝒪^▷` の元も底恒等な自己射も `𝒟'` 成分が `𝟙` なので、等式は `𝒞` 成分だけの話になる
+(`𝒟'` 成分は `𝟙 ≫ 𝟙 = 𝟙 ≫ 𝟙`)。★`⟹` は `cfpLiftBaseId` で持ち上げるだけ。 -/
+theorem cfp_frobNormalized_iff (A : CfpCat P G) :
+    IsFrobeniusNormalized (cfpPreFrobenioid P G hG hD' hcC hcD') A
+      ↔ IsFrobeniusNormalized P A.obj.left := by
+  constructor
+  · intro hfn φ₀ h₀ α₀ hα₀
+    have hbα : IsBaseIdentity P ((α₀ : A.obj.left ⟶ A.obj.left)) := hα₀.1
+    have hmem : (cfpLiftBaseId P G A hbα) ∈ OTri (cfpPreFrobenioid P G hG hD' hcC hcD') A :=
+      ⟨rfl, hα₀.2⟩
+    have hL := hfn (cfpLiftBaseId P G A h₀) rfl (cfpLiftBaseId P G A hbα) hmem
+    have hL' : ((cfpLiftBaseId P G A hbα)
+          ^ ((cfpPreFrobenioid P G hG hD' hcC hcD').degFr (cfpLiftBaseId P G A h₀) : ℕ))
+        * (cfpLiftBaseId P G A h₀)
+        = (cfpLiftBaseId P G A h₀) * (cfpLiftBaseId P G A hbα) := hL
+    have h2 := congrArg (cfpEndHom P G A) hL'
+    rw [map_mul, map_mul, map_pow] at h2
+    exact h2
+  · intro hfn φ hφ α hα
+    have hfα : ((CfpCat.fst ((α : A ⟶ A)) : End A.obj.left)) ∈ OTri P A.obj.left :=
+      ⟨cfp_baseIdentity_fst P G hG hD' hcC hcD' _ hα.1, hα.2⟩
+    have hL := hfn (CfpCat.fst ((φ : A ⟶ A)))
+      (cfp_baseIdentity_fst P G hG hD' hcC hcD' _ hφ) _ hfα
+    have hleft : cfpEndHom P G A
+        ((α ^ ((cfpPreFrobenioid P G hG hD' hcC hcD').degFr ((φ : A ⟶ A)) : ℕ)) * φ)
+        = cfpEndHom P G A (φ * α) := by
+      rw [map_mul, map_mul, map_pow]
+      exact hL
+    have hright : cfpEndHomSnd P G A
+        ((α ^ ((cfpPreFrobenioid P G hG hD' hcC hcD').degFr ((φ : A ⟶ A)) : ℕ)) * φ)
+        = cfpEndHomSnd P G A (φ * α) := by
+      rw [map_mul, map_mul, map_pow,
+        show cfpEndHomSnd P G A φ = 1 from hφ, show cfpEndHomSnd P G A α = 1 from hα.1]
+      exact congrArg (fun t => t * (1 : End A.obj.right)) (one_pow _)
+    exact InducedCategory.hom_ext (CommaMorphism.ext hleft hright)
+
 /-- **(vi)** —— **End-ample** は射影から降りる(★片向き)。 -/
 theorem cfp_endAmple_of (A : CfpCat P G) (h : IsEndAmple P A.obj.left) :
     IsEndAmple (cfpPreFrobenioid P G hG hD' hcC hcD') A := by
