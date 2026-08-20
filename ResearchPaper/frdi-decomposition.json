@@ -3173,11 +3173,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★★**幾何側と同じ形**なので `Found/Divisor/Cartier*.lean` の単系論が使える見込みが高い(ただし archimedean 成分は `ℝ≥0` で `ℕ` でないので、`Mp ≃ ℕ` の段は分ける必要がある)。★原文は「one verifies immediately」。",
-          "lean": "",
-          "decl": ""
+          "note": "★★**幾何側と同じ形**なので `Found/Divisor/Cartier*.lean` の単系論が使える見込みが高い(ただし archimedean 成分は `ℝ≥0` で `ℕ` でないので、`Mp ≃ ℕ` の段は分ける必要がある)。★原文は「one verifies immediately」。\n\n★★★★★★2026-08-20 完了。**幾何版（Cartier*.lean、Example 6.1）の議論を S →₀ ℝ の上で書き直した**（5 ファイル、約 1100 行）。\n★★幾何版と違う所は 2 つだけである:\n1. **離散性が消える** —— 幾何版の （⪯ は台の包含）の ⟸ は「b s ≠ 0 かつ ≥ 0 なら ≥ 1」という ℤ の離散性を使い n = 1 + Σ a s で足りた。実係数では使えないので n = 1 + Σ_{s ∈ supp a} ⌈a s / b s⌉ と台の上の有限和で取る（台が有限であることだけが効く）。\n2. ** が空虚でない** —— 幾何版は M_p ≃+ ℕ がつねに成り立つので Definition 2.4, (i) の realScale は空虚だった（ℕ と ℝ≥0 は同型でない）。算術ではアルキメデス素点で M_p ≃+ ℝ≥0 なので**実際に確かめる**（: 局所群が ℝ 全体なら ι p の像も ℝ≥0 全体）。\n★また Φ^pf は係数拡大ではなく **Γ の ℚ 飽和化**  の有効部分として書ける（）——非アルキメデスで ℤ·log(N v) ↦ ℚ·log(N v)、アルキメデスは ℝ のまま（すでに可除）。\n★因子分解写像の同定  に要るのは「Γ が座標ごとに閉じている」こと（）だけで、arithDivGroup L は条件が座標ごとなので満たす。",
+          "lean": "ABC3/Found/Divisor/ArithPhiMonoid.lean / ArithMonoprime.lean / ArithPf.lean / ArithPerfFactorial.lean / ArithPhiPerf.lean",
+          "decl": "ABC3.Found.Divisor.isPerfFactorial_arithEff / ABC3.Found.Divisor.arithPrimeEquiv / ABC3.Found.Divisor.exists_arithEff_support_eq"
         },
         {
           "id": "deg-arith",
@@ -3485,11 +3485,11 @@
           "deps": [
             "arith-perffactorial"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "★★幾何側の `ex61-perffact2` と**同じ形**だが、アルキメデス成分が `ℝ≥0` なので `Mp ≃ ℕ` の段は別に要る(`not_isLambdaMonoprime_real` の逆側)。",
-          "lean": "",
-          "decl": ""
+          "note": "★★幾何側の `ex61-perffact2` と**同じ形**だが、アルキメデス成分が `ℝ≥0` なので `Mp ≃ ℕ` の段は別に要る(`not_isLambdaMonoprime_real` の逆側)。\n\n★鎖 arith の arith-perffactorial で閉じた（2026-08-20）。Prime(Φ(L)) ≃ V(L)（）と台 = 有限部分集合（）も同時に出た。",
+          "lean": "ABC3/Found/Divisor/ArithPhiMonoid.lean / ArithMonoprime.lean / ArithPf.lean / ArithPerfFactorial.lean / ArithPhiPerf.lean",
+          "decl": "ABC3.Found.Divisor.isPerfFactorial_arithEff / ABC3.Found.Divisor.arithPrimeEquiv / ABC3.Found.Divisor.exists_arithEff_support_eq"
         },
         {
           "id": "ex63-model",

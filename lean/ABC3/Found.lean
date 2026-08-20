@@ -129,6 +129,9 @@ import ABC3.Found.Divisor.ArithOrd
 import ABC3.Found.Divisor.ArithPhiMonoid
 import ABC3.Found.Divisor.ArithMonoprime
 import ABC3.Found.Divisor.ArithPhiPrime
+import ABC3.Found.Divisor.ArithPf
+import ABC3.Found.Divisor.ArithPerfFactorial
+import ABC3.Found.Divisor.ArithPhiPerf
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.FrdI.Prop53Diag
