@@ -2830,21 +2830,21 @@
           "id": "codim1-pt",
           "title": "余次元 1 の点の型 `PrimeDivisor X`",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "`x : X` であって `ringKrullDim (X.presheaf.stalk x) = 1` なるもの。★整スキームなら「余次元 1 の既約閉部分多様体」と生成点で 1 対 1。★mathlib に `ringKrullDim` は在る。",
-          "lean": "",
-          "decl": ""
+          "note": "`x : X` であって `ringKrullDim (X.presheaf.stalk x) = 1` なるもの。★整スキームなら「余次元 1 の既約閉部分多様体」と生成点で 1 対 1。★mathlib に `ringKrullDim` は在る。\n\n★★2026-08-21 完了。`IsCodimOnePt X x := ringKrullDim (X.presheaf.stalk x) = 1`、`PrimeDivisorPt X := {x // IsCodimOnePt X x}`、`WeilDiv X := PrimeDivisorPt X →₀ ℤ`。",
+          "lean": "ABC3/Found/Divisor/SchemeWeil.lean",
+          "decl": "ABC3.Found.Divisor.IsCodimOnePt / PrimeDivisorPt / WeilDiv"
         },
         {
           "id": "normal-scheme",
           "title": "正規スキームの述語",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "小",
-          "note": "★mathlib に `Scheme.IsNormal` は **無い**(grep 0 件、2026-08-20)。「各茎が整閉整域」として自分で書く。",
-          "lean": "",
-          "decl": ""
+          "note": "★mathlib に `Scheme.IsNormal` は **無い**(grep 0 件、2026-08-20)。「各茎が整閉整域」として自分で書く。\n\n★☆☆★2026-08-21 完了。「各茎が整閉」として置いた（mathlib に `Scheme.IsNormal` は無い）。",
+          "lean": "ABC3/Found/Divisor/SchemeWeil.lean",
+          "decl": "ABC3.Found.Divisor.IsNormalScheme"
         },
         {
           "id": "stalk-dvr",
@@ -2853,11 +2853,11 @@
             "codim1-pt",
             "normal-scheme"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★★**環の層は閉じている** —— `isDiscreteValuationRing_atPrime_of_minimal`。`IsDiscreteValuationRing.TFAE` の第 4 項「整閉 ∧ 非零素がちょうど 1 つ」を使う。残るのは茎とアフィン局所化の同一視だけ。",
-          "lean": "ABC3/Found/Divisor/HeightOneDVR.lean",
-          "decl": "isDiscreteValuationRing_atPrime_of_minimal"
+          "note": "★★**環の層は閉じている** —— `isDiscreteValuationRing_atPrime_of_minimal`。`IsDiscreteValuationRing.TFAE` の第 4 項「整閉 ∧ 非零素がちょうど 1 つ」を使う。残るのは茎とアフィン局所化の同一視だけ。\n\n★★★★★★2026-08-21 完了。**見立てを訂正した** —— スケルトンには「茎が DVR であることにはアフィン開との同一視（`affine-compat`）が要る」と書いていたが、**それは誤り**である。`IsDiscreteValuationRing.TFAE` の第 4 項「整閉 ∧ 非零素イデアルがちょうど 1 つ」は**局所 Noether 整域**についての条件で、茎はそのすべてを満たす（局所・Noether・整域は mathlib の instance、整閉は `IsNormalScheme` の定義、非零素が 1 つは `ringKrullDim = 1` ＋ 局所から）。★環の層の補題 `isDiscreteValuationRing_of_krullDim_one` を新しく立てた。★★`affine-compat` が要るのは「余次元 1 の点 ↔ 高さ 1 の素イデアル」の**対応を使う**場面だけである。",
+          "lean": "ABC3/Found/Divisor/SchemeWeil.lean",
+          "decl": "ABC3.Found.Divisor.isDiscreteValuationRing_stalk_of_codimOne"
         },
         {
           "id": "ord-pt",
