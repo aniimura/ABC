@@ -172,6 +172,7 @@ import ABC3.Found.Divisor.Ex61Model
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
 import ABC3.Found.NumberField.SepClosedIn
+import ABC3.Found.NumberField.SepClosedFunctor
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite
