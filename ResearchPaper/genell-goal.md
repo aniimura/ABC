@@ -19281,3 +19281,47 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)——(G5) は非退化性と
 Galois 同変性、そして `det_galRep_eq_cyclotomic` が残っている。
+
+## §9-503 ★★★★★★半線型輸送の土台(第 192 ブロック)
+
+Galois 同変性
+
+    σ(e_n(P, Q)) = e_n(σP, σQ)
+
+に向けて、`σ` を座標環と関数体に持ち上げた。
+
+### ★★★★★図式は「述語の輸送」
+
+第 178 の `WeilSpec` は**データの存在**として書いてある。
+★だから `WeilSpec W n P Q c` の witness に `σ` を当てれば
+`WeilSpec W n (σP) (σQ) (σc)` の witness になる——これが同変性の中身である。
+★★`weilPairingVal` は `Classical.choose` で定めてあり、第 178 の `weilSpec_unique` が
+一意性を保証するので、述語の輸送だけで値の同変性が出る。
+
+### ★★★半線型であることが要
+
+`σ : L ≃+* L` が Weierstrass 係数 `a₁ … a₆` を固定するとする(`FixesCoeffs`)。
+★このとき `σ` は `W.polynomial` を固定するので、`AdjoinRoot.lift` で
+
+    Σ : W.CoordinateRing →+* W.CoordinateRing,   Σ(x) = x,  Σ(y) = y,  Σ(c) = σ(c)
+
+が作れる。★★これは **`L`-線型ではない**(定数に `σ` が効く)——半線型である。
+★★★`σ.symm` で作った側と合成すると恒等になる(第 119 の `coordinateRing_hom_ext`)ので
+環同型になる。
+
+### ★関数体へは局所化で延びる
+
+`W.FunctionField = Frac(W.CoordinateRing)` なので
+`IsLocalization.ringEquivOfRingEquiv` がそのまま使える。
+★`Submonoid.map` の条件は `MulEquivClass.map_nonZeroDivisors` で埋まる。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `FixesCoeffs` | `σ` が `a₁ … a₆` を固定すること |
+| `map_polynomial_of_fixes` | `σ` は `W.polynomial` を固定する |
+| `semiCoordEquiv` | ★★★★★★**座標環の半線型自己同型** |
+| `semiFF` | ★★★★★★**関数体の半線型自己同型** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
