@@ -10,7 +10,7 @@ import ABC3.Found.FrdI.Prop56MpAbs
 原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.106–107。
 
 原文 (FrdI p.107):
-> Now observe that for each l ∈Primes, φ′
+> product” of the up].
 
 原文 (FrdI p.107):
 > — which [by the total epimorphicity of C] implies that wl
@@ -44,7 +44,7 @@ variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
 /-- ★★★**同じ次数の base-identity な Frobenius 型自己射は、単元だけずれる**。
 
 原文 (FrdI p.107):
-> Now observe that for each l ∈Primes, φ′
+> product” of the up].
 
 ★★これが原文の「`φ'_l ≈_p v_l · φ_l`」の中身である。
 ★`Definition 1.3, (ii)` の**本質的一意性**(`frobDegUniq`)から出る ——
