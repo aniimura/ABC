@@ -3883,11 +3883,11 @@
           "deps": [
             "cheb-spl-infinite"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★完全分解する素数が 1 つあれば `deg(L,v) = [L:ℚ]` を達成し、つねに `deg(L,v) ≤ [L:ℚ]`。\n\n★★★2026-08-21：**上界と下界の両方が在庫になった**。\n* `≤` —— `ncard_primesOver_le_finrank`（`SplitCount.lean`、基本等式）\n* `=` を達成する `v` の存在 —— `infinite_splitsCompletely`（`SplitSeparable.lean`）\n★残るのは **`deg(L,v)` の定義を我々の `ncard primesOver` に結び付ける 1 段**だけである。",
-          "lean": "",
-          "decl": "",
+          "note": "★完全分解する素数が 1 つあれば `deg(L,v) = [L:ℚ]` を達成し、つねに `deg(L,v) ≤ [L:ℚ]`。\n\n★★★2026-08-21：**上界と下界の両方が在庫になった**。\n* `≤` —— `ncard_primesOver_le_finrank`（`SplitCount.lean`、基本等式）\n* `=` を達成する `v` の存在 —— `infinite_splitsCompletely`（`SplitSeparable.lean`）\n★残るのは **`deg(L,v)` の定義を我々の `ncard primesOver` に結び付ける 1 段**だけである。\n\n★★★★★★2026-08-21 完了。原文の `deg(L,v)`（「`v` と同じ `ℚ` の付値の上にある `V(L)` の付値の個数」）を\n`V(L) = FinitePlace L ⊕ InfinitePlace L`（`ArithPlace`）に合わせて 2 通りに書いた：\n* 非アルキメデス（素数 `p` の上）—— `degAtPrime L p = #{𝔭 ∣ p}`\n* アルキメデス —— `degAtInfinity L = #(InfinitePlace L)`\n\n★上界は**基本等式だけ**：非アルキメデスは `Σ_𝔭 e_𝔭 f_𝔭 = [L:ℚ]`\n（`Ideal.sum_ramification_inertia` を**底 `ℤ`** で使う）、\nアルキメデスは `r₁ + 2r₂ = [L:ℚ]`（`InfinitePlace.card_add_two_mul_card_eq_rank`）。\n★★達成は `infinite_splitsCompletely'`（`SplitSeparable.lean`、**Chebotarev を使わない**）。\n★結論 `finrank_isGreatest_deg` : `IsGreatest (degSet L) [L:ℚ]`。\n\n★★★**原文が Tchebotarev を引く 3 箇所のうち (a) は、これで密度定理なしに閉じた。**",
+          "lean": "ABC3/Found/NumberField/MaxDeg.lean",
+          "decl": "degAtPrime / degAtInfinity / degAtPrime_le / degAtInfinity_le / exists_degAtPrime_eq_finrank / finrank_isGreatest_deg",
           "frdiNeeded": true
         },
         {
