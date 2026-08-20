@@ -2666,9 +2666,9 @@
           ],
           "status": "半済",
           "size": "★大",
-          "note": "原文 p.107。★IUTchI が直接引く。\n\n★★★★2026-08-20: **(ii) を閉じた**（`Cor57Unit.lean`）。\n原文の証明は「定義を辿れば、`Ψ` が isotropic 対象・prime-Frobenius 射・pull-back 射・\nbirationalization・射影関手（したがって単元 O^×(−)）を保つことを示せば足りる」と書く。\n★**(ii) に効くのは「単元の保存」だけ**で、それは `Cor411Untr.lean` の\n`otimes_map_of_baseSquare` が**底の 1-可換図式だけ**から与える。\n★内訳: 底の四角形の逆向き（`isBaseIdentity_of_map_baseSquare`、`ΨBase` が忠実）、\n`𝒪×(A) ≃* 𝒪×(Ψ A)`（`otimesEquivOfBaseSquare`）、対象の同型に沿った移送（`otimesCongr`）、\n位相の `coinduced` による移送（`exists_top_of_mulEquiv`）。\n★★残るのは (i)（base-section の輸送）と (iii)/(iv)（quasi-base-Frobenius 対の輸送）である。",
-          "lean": "ABC3/Found/FrdI/Cor57Unit.lean",
-          "decl": "ABC3.Found.FrdI.isOfUnitProfiniteType_map"
+          "note": "原文 p.107。★IUTchI が直接引く。\n\n★★★★2026-08-20: **(ii) を閉じた**（`Cor57Unit.lean`）。\n原文の証明は「定義を辿れば、`Ψ` が isotropic 対象・prime-Frobenius 射・pull-back 射・\nbirationalization・射影関手（したがって単元 O^×(−)）を保つことを示せば足りる」と書く。\n★**(ii) に効くのは「単元の保存」だけ**で、それは `Cor411Untr.lean` の\n`otimes_map_of_baseSquare` が**底の 1-可換図式だけ**から与える。\n★内訳: 底の四角形の逆向き（`isBaseIdentity_of_map_baseSquare`、`ΨBase` が忠実）、\n`𝒪×(A) ≃* 𝒪×(Ψ A)`（`otimesEquivOfBaseSquare`）、対象の同型に沿った移送（`otimesCongr`）、\n位相の `coinduced` による移送（`exists_top_of_mulEquiv`）。\n★★残るのは (i)（base-section の輸送）と (iii)/(iv)（quasi-base-Frobenius 対の輸送）である。\n\n★★★★2026-08-20（第 2 弾）: **(iii)(iv) も閉じた**（`Cor57Pair.lean`）。\n`Proposition 5.6` の `(σ, φ)` は**対象 1 つの上のデータ**なので、`BaseSection` を経由せず\n`BaseFrobPair P A` として切り出した（`σ : Aut_D(A_D) →* End_C(A)`、`φ : ℕ≥1 →* End_C(A)`）。\n★`Aut` と `End` はどちらも `f * g = g ≫ f` の規約なので、`σ` はそのまま単系準同型になる。\n★輸送は `autDown`（四角形で共役を取り、`ΨBase` の充満忠実性で原像を取る）と\n`Functor.mapEnd A Ψ` の合成である。\n★★★**(iv) の「quasi- が外れる」のは `phi_deg` の行**で、`Ψ` が次数を保てば `φ₂ n` の次数もちょうど `n` になる。\n★逸脱の記録: 底の四角形を**素の型**で持つ `BaseSquare` を置いた。合成関手 `P₁.proj ⋙ ΨBase` を経由すると `(P₁.proj ⋙ ΨBase).obj A` と `ΨBase.obj ((P₁.toElem.obj A).base)` が構文上別物になり、`rw`/`simp` が軍並み外れる（2026-08-20 に実測）。`BaseSquare.ofNatIso` で合成関手版から作れるので、中身は同じである。\n★★残るのは **(i)（base-section の輸送）だけ**である。",
+          "lean": "ABC3/Found/FrdI/Cor57Unit.lean / ABC3/Found/FrdI/Cor57Pair.lean",
+          "decl": "ABC3.Found.FrdI.isOfUnitProfiniteType_map / ABC3.Found.FrdI.BaseFrobPair.map"
         }
       ],
       "unblocks": [
