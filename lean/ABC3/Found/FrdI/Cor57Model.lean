@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Cor57Base
+import ABC3.Found.FrdI.Def45
 
 /-!
 # [FrdI] Corollary 5.7, (i) の後半 —— base-Frobenius 対と model 型
@@ -36,6 +37,71 @@ namespace ABC3.Found.FrdI
 open CategoryTheory
 
 universe v u w u2 v2
+
+section FrobNormIso
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★同型による共役。 -/
+def conjIso {X Y : C} (e : X ≅ Y) (α : End Y) : End X :=
+  (e.hom ≫ (α : Y ⟶ Y) ≫ e.inv : X ⟶ X)
+
+@[simp] theorem conjIso_hom {X Y : C} (e : X ≅ Y) (α : End Y) :
+    ((conjIso e α : End X) : X ⟶ X) = e.hom ≫ (α : Y ⟶ Y) ≫ e.inv := rfl
+
+/-- ★共役は冪を保つ。 -/
+theorem conjIso_pow {X Y : C} (e : X ≅ Y) (α : End Y) (n : ℕ) :
+    (conjIso e α) ^ n = conjIso e (α ^ n) := by
+  induction n with
+  | zero =>
+      show ((𝟙 X : X ⟶ X) : End X) = conjIso e 1
+      rw [conjIso]
+      show (𝟙 X : X ⟶ X) = e.hom ≫ (𝟙 Y : Y ⟶ Y) ≫ e.inv
+      simp
+  | succ n ih =>
+      show ((conjIso e α : End X) : X ⟶ X) ≫ (((conjIso e α) ^ n : End X) : X ⟶ X)
+        = ((conjIso e (α ^ (n + 1)) : End X) : X ⟶ X)
+      rw [ih]
+      show (e.hom ≫ (α : Y ⟶ Y) ≫ e.inv) ≫ (e.hom ≫ ((α ^ n : End Y) : Y ⟶ Y) ≫ e.inv)
+        = e.hom ≫ (((α : Y ⟶ Y) ≫ ((α ^ n : End Y) : Y ⟶ Y))) ≫ e.inv
+      simp
+
+/-- ★共役は base-identity を保つ。 -/
+theorem isBaseIdentity_conjIso {X Y : C} (e : X ≅ Y) (φ : End Y)
+    (hφ : IsBaseIdentity P φ) : IsBaseIdentity P (conjIso e φ) := by
+  have hb : P.Base ((φ : Y ⟶ Y)) = 𝟙 _ := by
+    rw [show P.Base ((φ : Y ⟶ Y)) = P.Base (𝟙 Y) from hφ, P.Base_id]
+  show P.Base (e.hom ≫ (φ : Y ⟶ Y) ≫ e.inv) = P.Base (𝟙 X)
+  rw [P.Base_comp, P.Base_comp, hb, Category.id_comp, ← P.Base_comp, e.hom_inv_id]
+
+/-- ★共役は次数を保つ。 -/
+theorem degFr_conjIso {X Y : C} (e : X ≅ Y) (φ : End Y) :
+    P.degFr ((conjIso e φ : End X) : X ⟶ X) = P.degFr ((φ : Y ⟶ Y)) := by
+  show P.degFr (e.hom ≫ (φ : Y ⟶ Y) ≫ e.inv) = _
+  rw [P.degFr_comp, P.degFr_comp, isLinear_of_isIso P e.hom, isLinear_of_isIso P e.inv]
+  simp
+
+/-- ★共役は `𝒪^▷` を保つ。 -/
+theorem oTri_conjIso {X Y : C} (e : X ≅ Y) (α : End Y) (hα : α ∈ OTri P Y) :
+    conjIso e α ∈ OTri P X :=
+  ⟨isBaseIdentity_conjIso e α hα.1, by
+    show P.degFr ((conjIso e α : End X) : X ⟶ X) = 1
+    rw [degFr_conjIso]
+    exact hα.2⟩
+
+/-- ★★★**Frobenius-normalized は対象の同型で保たれる**。 -/
+theorem isFrobeniusNormalized_of_iso {X Y : C} (e : X ≅ Y)
+    (h : IsFrobeniusNormalized P X) : IsFrobeniusNormalized P Y := by
+  intro φ hφ α hα
+  have key := h (conjIso e φ) (isBaseIdentity_conjIso e φ hφ)
+    (conjIso e α) (oTri_conjIso e α hα)
+  rw [degFr_conjIso, conjIso_pow] at key
+  have h2 := congrArg (fun t : X ⟶ X => e.inv ≫ t ≫ e.hom) key
+  simp only [conjIso_hom] at h2
+  simpa using h2
+
+end FrobNormIso
 
 section Cor57Model
 
@@ -254,7 +320,55 @@ theorem isPreModelType_map
   obtain ⟨p⟩ := h
   exact ⟨p.mapTo bs hpb hft F₁ F₂ hdeg⟩
 
+/-- ★★★★★★**[FrdI] Corollary 5.7, (i)** —— **model 型は圏同値で移る**。
+
+★第 1 条（pre-model 型）は `isPreModelType_map`、
+第 2 条（birationally Frobenius-normalized 型）は仮定 `hbfn`（`Corollary 4.11, (ii)` が与える）と
+`isFrobeniusNormalized_of_iso`（対象の同型で保たれる）ですべての対象に広げる。
+
+原文 (FrdI p.108):
+> to base-sections (respectively, quasi-base-Frobenius pairs) of C2. In particular, C1 is -/
+theorem isOfModelType_map [Ψ.EssSurj] (G₁ : Frobenioid P₁) (G₂ : Frobenioid P₂)
+    (bs : BaseSquare Ψ ΨBase P₁ P₂)
+    (hpb : ∀ {A B : C₁} (f : A ⟶ B), IsPullBack P₁ f → IsPullBack P₂ (Ψ.map f))
+    (hft : ∀ {A : C₁}, IsFrobeniusTrivial P₁ A → IsFrobeniusTrivial P₂ (Ψ.obj A))
+    (F₁ : FrobenioidCore P₁) (F₂ : FrobenioidCore P₂)
+    (hdeg : PreservesDegFr Ψ P₁ P₂)
+    (hbfn : ∀ A : C₁, IsBirationallyFrobeniusNormalized P₁ G₁ A →
+      IsBirationallyFrobeniusNormalized P₂ G₂ (Ψ.obj A))
+    (h : IsOfModelType C₁ P₁ G₁) : IsOfModelType C₂ P₂ G₂ := by
+  refine ⟨isPreModelType_map bs hpb hft F₁ F₂ hdeg h.1, ?_⟩
+  intro A₂
+  obtain ⟨A₁, ⟨e⟩⟩ : ∃ A₁ : C₁, Nonempty (Ψ.obj A₁ ≅ A₂) :=
+    ⟨Ψ.objPreimage A₂, ⟨Ψ.objObjPreimageIso A₂⟩⟩
+  exact isFrobeniusNormalized_of_iso ((toBiratCat P₂ G₂).mapIso e) (hbfn A₁ (h.2 A₁))
+
 /-! ### ★出典の紐付け -/
+
+/-- ★★★★★★**[FrdI] Corollary 5.7**（条なしの locator）。
+
+| 条 | 実装 |
+|---|---|
+| (i) base-section を移す | `BaseSection.map`（`Cor57Base.lean`） |
+| (i) base-Frobenius 対を移す | `BaseFrobeniusPair.mapTo` |
+| (i) model 型は移る | `isOfModelType_map` |
+| (ii) unit-profinite 型は移る | `isOfUnitProfiniteType_map`（`Cor57Unit.lean`） |
+| (iii)(iv) quasi-base-Frobenius 対を移す | `BaseFrobPair.map`（`Cor57Pair.lean`） |
+
+★★**仮定は原文が挙げるものそのまま**である —— 原文は
+「定義を辿れば、`Ψ` が isotropic 対象・prime-Frobenius 射・pull-back 射・
+birationalization・射影関手（したがって単元）を保つことを示せば足りる。
+それは `Theorem 3.4, (i), (iii)`; `Corollary 4.10`; `Corollary 4.11, (ii)` から出る」
+と書くので、底の 1-可換図式（`BaseSquare`）・pull-back 射の保存・
+Frobenius-trivial 性の保存・次数の保存・birationally Frobenius-normalized 性の保存を
+仮定として受け取る。
+
+★逸脱の記録: 底の四角形を**素の型**で持つ `BaseSquare` を置いた
+（`Cor57Pair.lean` の冒頭）。合成関手版からは `BaseSquare.ofNatIso` で作れる。 -/
+def cor_5_7.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 108,
+    item := "Corollary 5.7",
+    sectionId := "frdi-cor-5-7" }
 
 /-- ★★★★locator —— `Corollary 5.7, (i)` の後半（base-Frobenius 対と pre-model 型）。 -/
 def isPreModelType_map.src : ABC3.Meta.Source :=
