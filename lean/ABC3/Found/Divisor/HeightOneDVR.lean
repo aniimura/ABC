@@ -5,6 +5,7 @@ import Mathlib.RingTheory.DedekindDomain.Dvr
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.LocalProperties.IntegrallyClosed
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
+import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
 
 /-!
 # 正規 Noether 整域の余次元 1 の点は DVR
@@ -133,5 +134,48 @@ theorem ordAt_ne_zero {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) {x : FractionRing R}
     (hx : x ≠ 0) : ordAt p hp0 hmin x ≠ 0 :=
   (ordAt p hp0 hmin).ne_zero_iff.mpr hx
+
+/-- ★★**位数が 0 になるのは `a ∉ p` のときちょうど**。 -/
+theorem ordAt_eq_one_iff_notMem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) (a : R) :
+    ordAt p hp0 hmin (algebraMap R (FractionRing R) a) = 1 ↔ a ∉ p := by
+  haveI hdvr : IsDiscreteValuationRing (Localization.AtPrime p) :=
+    isDiscreteValuationRing_localization_atPrime_of_minimal p hp0 hmin
+  haveI : IsFractionRing (Localization.AtPrime p) (FractionRing R) :=
+    IsFractionRing.isFractionRing_of_isLocalization p.primeCompl _ _
+      p.primeCompl_le_nonZeroDivisors
+  rw [show (algebraMap R (FractionRing R) a)
+      = algebraMap (Localization.AtPrime p) (FractionRing R)
+        (algebraMap R (Localization.AtPrime p) a) from
+    (IsScalarTower.algebraMap_apply R (Localization.AtPrime p) (FractionRing R) a)]
+  show IsDedekindDomain.HeightOneSpectrum.valuation (FractionRing R) _ _ = 1 ↔ _
+  rw [IsDedekindDomain.HeightOneSpectrum.valuation_eq_one_iff_notMem]
+  exact not_congr (IsLocalization.AtPrime.to_map_mem_maximal_iff (Localization.AtPrime p) p a)
+
+/-! ## ★`div(f)` が有限和であること -/
+
+/-- ★★★★**`a` を含む高さ 1 の素イデアルは有限個**。
+
+★`a` を含む高さ 1 素イデアルはちょうど `(a)` 上の極小素イデアルであり、
+Noether 環では極小素イデアルは有限個
+(`Ideal.finite_minimalPrimes_of_isNoetherianRing`)。
+★★**これと `ordAt_eq_one_iff_notMem` を合わせると、
+`div(a) = Σ_p ord_p(a)·[p]` が有限和になる** ——
+素因子の自由アーベル群を作るのに要る唐である。 -/
+theorem finite_heightOne_primes_containing {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] {a : R} (ha : a ≠ 0) :
+    {p : Ideal R | p.IsPrime ∧
+      (∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) ∧ a ∈ p}.Finite := by
+  refine (Ideal.finite_minimalPrimes_of_isNoetherianRing R (Ideal.span {a})).subset ?_
+  rintro p ⟨hp, hmin, hap⟩
+  refine ⟨⟨hp, Ideal.span_le.mpr (Set.singleton_subset_iff.mpr hap)⟩, ?_⟩
+  rintro q ⟨hq, hqa⟩ hqp
+  have haq : a ∈ q := hqa (Ideal.mem_span_singleton_self a)
+  have hq0 : q ≠ ⊥ := by
+    intro h
+    rw [h, Ideal.mem_bot] at haq
+    exact ha haq
+  exact le_of_eq (hmin q hq hq0 hqp).symm
 
 end ABC3.Found.Divisor

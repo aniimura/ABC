@@ -615,6 +615,7 @@ import ABC3.Found.GaloisRep.ValuationBasis
 import ABC3.Found.GaloisRep.HyperInv
 import ABC3.Found.GaloisRep.HyperInvValuation
 import ABC3.Found.GaloisRep.DvdCount
+import ABC3.Found.GaloisRep.FiberSum
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
