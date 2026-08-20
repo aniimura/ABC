@@ -40,3 +40,4 @@
 - [FrdI §5・§6 の残りは在庫不足 2 群に帰着](frdi-s5-s6-blockers.md) — Prop 5.6 は Nikolov–Segal、§6 は因子論と six exponentials。それ以外は残り 1〜2 段。
 - [`rw`/`simp` が「型が正しくない」で止まる罠](lean-proj-vs-toelem-rw-trap.md) — defeq だが構文の違う 2 つの綴りが混ざると `instances` 透明度で型付かない。対処は `calc`+`congrArg` を**項として**書くこと。Prop 1.6 (ii) はこれで 1 セッション止まっていた。
 - [node -e はバックティックを食う](node-e-eats-backticks.md) — Bash ツールの `node -e "..."` はバックティックをコマンド置換として実行する。識別子が消えた JSON が静かにコミットされる。
+- [Python の open(w) はファイルを消す](python-w-truncates.md) — encode 失敗で原本が飛ぶ。空 Lean ファイルは無言で通るので検証も空回りする

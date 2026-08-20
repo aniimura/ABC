@@ -121,6 +121,7 @@ import ABC3.Found.FrdI.Prop55Rlf
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Prop55Untr
+import ABC3.Found.FrdI.Prop55UntrIdx
 import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.Divisor.HeightOneDVR
 import ABC3.Found.Divisor.FreeDivisorial
