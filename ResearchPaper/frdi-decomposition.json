@@ -2751,11 +2751,11 @@
           "deps": [
             "mathlib-weil-divisor"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "★大",
-          "note": "`B(L) ⊆ L^×` を「零点・極がすべて `D_L` に属する」有理関数の群として定義し、`B(L) → Φ(L)^gp` が `L` について関手的であることを言う。\n\n★★★★2026-08-20: **アフィンの層では出た** —— `divOfFrac` と `divOfFrac_mul`(`Found/Divisor/HeightOneDVR.lean`)が `K^× → ℤ[素因子]` の群準同型を与える。★これが原文の「By assigning to a rational function f the divisor obtained by subtracting the divisor of poles from the divisor of zeroes」である。\n★残るのは (a) 台を `D_L` に制限した部分群 `B(L)` の切り出し、(b) `L` についての関手性(引き戻し)である。\n\n★★★2026-08-21：**アフィンの場合は閉じた**。\n`HeightOneDVR.lean` の `divOfFrac` / `divOfFrac_mul`（環の層、既に在庫）に、\n`HeightOneBridge.lean` の `primeDivisorPtSpecEquiv`（`Spec R` の素因子 ≃ `HeightOnePrime R`）を\n繋いで `weilDivOfFrac : K^× → WeilDiv (Spec R)` が群準同型であることまで出した。\n★残るのは一般のスキーム（有限アフィン被覆で貼り合わせる段）。",
+          "note": "`B(L) ⊆ L^×` を「零点・極がすべて `D_L` に属する」有理関数の群として定義し、`B(L) → Φ(L)^gp` が `L` について関手的であることを言う。\n\n★★★★2026-08-20: **アフィンの層では出た** —— `divOfFrac` と `divOfFrac_mul`(`Found/Divisor/HeightOneDVR.lean`)が `K^× → ℤ[素因子]` の群準同型を与える。★これが原文の「By assigning to a rational function f the divisor obtained by subtracting the divisor of poles from the divisor of zeroes」である。\n★残るのは (a) 台を `D_L` に制限した部分群 `B(L)` の切り出し、(b) `L` についての関手性(引き戻し)である。\n\n★★★2026-08-21：**アフィンの場合は閉じた**。\n`HeightOneDVR.lean` の `divOfFrac` / `divOfFrac_mul`（環の層、既に在庫）に、\n`HeightOneBridge.lean` の `primeDivisorPtSpecEquiv`（`Spec R` の素因子 ≃ `HeightOnePrime R`）を\n繋いで `weilDivOfFrac : K^× → WeilDiv (Spec R)` が群準同型であることまで出した。\n★残るのは一般のスキーム（有限アフィン被覆で貼り合わせる段）。\n\n★★★★★★2026-08-21（決着）：**一般のスキームでも閉じた**。\n`div-finite` が閉じたので `weilDivOfFn` / `weilDivHom : Additive (K(X)ˣ) →+ WeilDiv X`\n（`X` は整・局所 Noether・正規・準コンパクト）が立つ。\n★(a) 台を `D_L` に制限した部分群 `B(L)` は `BSubgroup`（`NormB.lean`）、\n★(b) `L` についての関手性は `BSubgroupMap`（`NormCodim.lean`）で、どちらも閉じている。",
           "lean": "ABC3/Found/Divisor/HeightOneDVR.lean",
-          "decl": "divOfFrac / divOfFrac_mul"
+          "decl": "divOfFrac / divOfFrac_mul / weilDivOfFn / weilDivOfFn_mul / weilDivHom / BSubgroup / BSubgroupMap"
         },
         {
           "id": "galois-cat-B0",
@@ -3120,14 +3120,32 @@
           "decl": "cartierDatumGeom"
         },
         {
+          "id": "proper-global-sections",
+          "status": "absent",
+          "deps": [],
+          "title": "`Γ(X, 𝒪_X) = k`(proper かつ幾何的連結)",
+          "decl": "",
+          "note": "★★★2026-08-21（在庫測定）：**mathlib に無い**（`IsProper` と大域切断を結ぶ補題は grep 0 件）。\n★これは連接層のコホモロジーの有限性を要する定理で、mathlib のスキーム論の現在の到達点より先にある。\n★★これが `global-units` の第 2 段である。"
+        },
+        {
+          "id": "krull-domain-intersection",
+          "status": "absent",
+          "deps": [],
+          "title": "代数的 Hartogs —— Noether 整閉整域は `R = ⋂_{ht 1} R_𝔭`",
+          "decl": "",
+          "note": "★★★2026-08-21（在庫測定）：**mathlib に `IsKrullDomain` は無い**。\n在るのは `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり = `R`）だけで、\n**高さ 1 版ではない**。\n★古典的な証明は「`x ∉ R` なら分母イデアル `(R : x)` の随伴素因子 `𝔭` を取り、\nNoether 整閉整域は S2 なので `depth R_𝔭 = 1 ⟹ ht 𝔭 = 1`」で、\n**随伴素因子（mathlib に在る）＋ depth / S2（mathlib に薄い）**が要る。\n★★これが `global-units` の第 1 段である。"
+        },
+        {
           "id": "global-units",
           "title": "`O^×(A) = O^▷(A) = k_L^×`(proper normal ⟹ 大域函数は定数)",
           "deps": [
-            "normalization-proper-normal"
+            "normalization-proper-normal",
+            "krull-domain-intersection",
+            "proper-global-sections"
           ],
           "status": "todo",
           "size": "★大",
-          "note": "★原文が「we observe that [since `V[L]` is a proper normal variety]」で畳む段。**proper + 整 ⟹ 大域切断は `k` 上有限**(mathlib 在庫は要測定)。",
+          "note": "★原文が「we observe that [since `V[L]` is a proper normal variety]」で畳む段。**proper + 整 ⟹ 大域切断は `k` 上有限**(mathlib 在庫は要測定)。\n\n★★★★2026-08-21：**2 段に分解した** —— `krull-domain-intersection`（代数的 Hartogs）と\n`proper-global-sections`（`Γ(X,𝒪_X) = k`）。**どちらも mathlib に無い**ことを実測した。\n★★`ex61-model` は閉じたので、`𝒪^×(A)` の中身は確定している：\n`𝒪^×(A) = {u ∈ B(L) | すべての余次元 1 の点で ord_v(u) = 0}`。",
           "lean": "",
           "decl": ""
         }
