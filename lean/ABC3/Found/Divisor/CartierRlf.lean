@@ -11,7 +11,7 @@ import ABC3.Found.FrdI.Def24RlfCone
 原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.103。
 
 原文 (FrdI p.103):
-> Then the realification Φrlf of Φ [cf. Definition 2.4, (i)] determines a monoid Φrlf on D
+> Proposition 5.3. (Realifications of Frobenioids) Suppose that Φ is perf-
 
 ## ★★錐が sharp であることは「係数の総和」で出る
 
