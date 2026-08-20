@@ -16552,3 +16552,40 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 記録は書いた時点の測定であり、進むと変わる——それを残すのが `.needs` の役目である。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-438 `IsIntegrallyClosed` の 2 つの経路を実測した
+
+層 3 の唯一の入口 `IsIntegrallyClosed W.CoordinateRing` について、
+経路を 2 本測った。
+
+### ★経路 1: 局所判定(`of_localization_maximal`)
+
+    IsIntegrallyClosed.of_localization_maximal :
+      (∀ p ≠ ⊥, [p.IsMaximal] → IsIntegrallyClosed (Localization.AtPrime p))
+        → IsIntegrallyClosed R
+
+内訳 (i) 極大イデアルの形(零点定理)、(ii) 非特異点で極大イデアルが単項、
+(iii) 局所 Noether 整域 + 単項極大 ⟹ DVR。
+
+★★**段 (i) に要る古典的零点定理は mathlib に直接の形では無い**
+——`Module.Finite k A`(体 `A` が体 `k` 上有限生成代数なら有限)は `exact?` で 0 件。
+★ただし `IsJacobsonRing` の機構はある(`isJacobsonRing_of_isIntegral`・
+`quotient_mk_comp_C_isIntegral_of_isJacobsonRing`)ので、そこから組み立てる(5-15)。
+
+### ★経路 2: 判別式(平方完成)
+
+標数 ≠ 2 で `Z = 2Y + a₁X + a₃` と置くと
+
+    CR ≅ F[X][Z]/(Z² − Ψ₂Sq(X))
+
+——★**`Ψ₂Sq` の定義そのもの**である。`Ψ₂Sq` が squarefree なら整閉になる。
+★★mathlib に `Ψ₂Sq` の squarefree 性も `F[X][√d]` の整閉性も無い
+(2026-08-20 実測、`Squarefree|discriminant` で DivisionPolynomial/ と Affine/ を検索して 0 件)。
+
+### ★★★測定の意味
+
+どちらの経路も **mathlib の一撃では出ない**が、どちらも 5-25 ブロックの範囲である。
+★経路 2 の方が短い可能性がある——`Ψ₂Sq` が squarefree であることは
+`Δ ≠ 0` と同値であり、我々は `IsElliptic` を持っている。
+
+★義務の数は動いていない(Galois 4/8)。

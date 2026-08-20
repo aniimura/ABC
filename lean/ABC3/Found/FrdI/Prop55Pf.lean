@@ -717,6 +717,330 @@ noncomputable def otriPfMap (hiso : ∀ X : C, IsIsotropic P X) {A : C}
       exact Subtype.ext (otriPfMk_wd hiso hfn ζ hdeg hprop
         (congrArg Subtype.val hk)))
 
+/-! ## ★11. 逆向きの共役と、添字の取り替え
+
+★★ここから `Proposition 5.5, (i)` の**同型そのもの**を建てる。
+`𝒪^▷(A)^pf → 𝒪^▷(A^pf)`(`otriPfMap`)が全単射で、しかも積を保つことを示す。 -/
+
+/-- ★`conjRt` の逆向き —— `rtObj A 1` の自己射を `A` へ戻す。 -/
+noncomputable def conjRtInv {A : C} (φ : rtObj P F A 1 ⟶ rtObj P F A 1) : A ⟶ A :=
+  haveI := isIso_rtExt_one P F A
+  rtExt P F A 1 ≫ φ ≫ inv (rtExt P F A 1)
+
+theorem conjRt_conjRtInv {A : C} (φ : rtObj P F A 1 ⟶ rtObj P F A 1) :
+    conjRt (F := F) (conjRtInv (F := F) φ) = φ := by
+  haveI := isIso_rtExt_one P F A
+  show inv (rtExt P F A 1) ≫ (rtExt P F A 1 ≫ φ ≫ inv (rtExt P F A 1)) ≫ rtExt P F A 1 = φ
+  simp only [Category.assoc]
+  rw [← Category.assoc (inv (rtExt P F A 1)) (rtExt P F A 1), IsIso.inv_hom_id,
+    Category.id_comp]
+  exact Category.comp_id _
+
+theorem conjRtInv_conjRt {A : C} (f : A ⟶ A) :
+    conjRtInv (F := F) (conjRt (F := F) f) = f := by
+  haveI := isIso_rtExt_one P F A
+  show rtExt P F A 1 ≫ (inv (rtExt P F A 1) ≫ f ≫ rtExt P F A 1) ≫ inv (rtExt P F A 1) = f
+  simp only [Category.assoc]
+  rw [← Category.assoc (rtExt P F A 1) (inv (rtExt P F A 1)), IsIso.hom_inv_id,
+    Category.id_comp]
+  exact Category.comp_id _
+
+theorem conjRtInv_otri {A : C} {φ : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hφ : (φ : End (rtObj P F A 1)) ∈ OTri P (rtObj P F A 1)) :
+    ((conjRtInv (F := F) φ : End A)) ∈ OTri P A := by
+  haveI := isIso_rtExt_one P F A
+  exact conjEnd_otri (rtExt P F A 1) (rtExt_degFr P F A 1) hφ
+
+theorem conjRt_otri {A : C} {α : End A} (hα : α ∈ OTri P A) :
+    ((conjRt (F := F) ((α : A ⟶ A)) : End (rtObj P F A 1))) ∈ OTri P (rtObj P F A 1) :=
+  ⟨conjRt_baseIdentity hα.1, (conjRt_degFr _).trans hα.2⟩
+
+/-- ★共役 `End A →* End (A^{1/1})` を単系準同型として束ねる。 -/
+noncomputable def conjRtHom {A : C} : End A →* End (rtObj P F A 1) where
+  toFun x := conjRt (F := F) ((x : A ⟶ A))
+  map_one' := by
+    haveI := isIso_rtExt_one P F A
+    show inv (rtExt P F A 1) ≫ (𝟙 A) ≫ rtExt P F A 1 = 𝟙 _
+    rw [Category.id_comp, IsIso.inv_hom_id]
+  map_mul' x y := by
+    show conjRt (F := F) (((y : A ⟶ A)) ≫ ((x : A ⟶ A)))
+      = conjRt (F := F) ((y : A ⟶ A)) ≫ conjRt (F := F) ((x : A ⟶ A))
+    exact conjRt_comp _ _
+
+@[simp] theorem conjRtHom_apply {A : C} (x : End A) :
+    ((conjRtHom (P := P) (F := F) x : End (rtObj P F A 1)) : rtObj P F A 1 ⟶ rtObj P F A 1)
+      = conjRt (F := F) ((x : A ⟶ A)) := rfl
+
+theorem conjRtHom_injective {A : C} :
+    Function.Injective (conjRtHom (P := P) (F := F) (A := A)) := by
+  intro x y h
+  have h2 : conjRtInv (F := F) (conjRt (F := F) ((x : A ⟶ A)))
+      = conjRtInv (F := F) (conjRt (F := F) ((y : A ⟶ A))) := congrArg _ h
+  rwa [conjRtInv_conjRt, conjRtInv_conjRt] at h2
+
+/-- ★★添字の `z` は同次数の別の `z'` に取り替えてよい。
+
+★`Definition 1.3, (ii)` の本質的一意性(`frobDegUniq`)で同型 `β` を作り、
+遷移写像が `φ ↦ φ^{deg β} = φ`(同型の次数は 1)であることを使う。 -/
+theorem zetaMk_congr_z (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    {z z' : rtObj P F A 1 ⟶ rtObj P F A 1}
+    (hz : IsFrobeniusType P z) (hzb : IsBaseIdentity P z)
+    (hz' : IsFrobeniusType P z') (hz'b : IsBaseIdentity P z')
+    (hd : P.degFr z = P.degFr z')
+    {φ : End (rtObj P F A 1)} (hφ : φ ∈ OTri P (rtObj P F A 1)) :
+    zetaMk (F := F) hz ((φ : rtObj P F A 1 ⟶ rtObj P F A 1))
+      = zetaMk (F := F) hz' ((φ : rtObj P F A 1 ⟶ rtObj P F A 1)) := by
+  obtain ⟨β, hβ, hβe⟩ := F.frobDegUniq _ _ _ z z' hz hz' hd
+  haveI := hβ
+  let ww : idxZeta' (F := F) hz ⟶ idxZeta' (F := F) hz' :=
+    Under.homMk (⟨(β, β), frobType_of_isIso hiso β, frobType_of_isIso hiso β,
+        (degFr_of_isIso P β).trans (degFr_of_isIso P β).symm⟩ :
+        (idxZeta' (F := F) hz).right ⟶ (⟨(rtObj P F A 1, rtObj P F A 1)⟩ : BiFr P F))
+      (by
+        refine WideSubcategory.hom_ext _ ?_
+        exact Prod.ext hβe hβe)
+  have h1 := idxTransport_zeta (F := F) hfn' hz hzb hz' hz'b ww hφ
+  have h2 : P.degFr ((ww.right.hom.1 : rtObj P F A 1 ⟶ rtObj P F A 1)) = 1 :=
+    degFr_of_isIso P β
+  rw [h2] at h1
+  show HomPf.mk (idxZeta' (F := F) hz) _ = HomPf.mk (idxZeta' (F := F) hz') _
+  rw [← HomPf.mk_map ww ((φ : rtObj P F A 1 ⟶ rtObj P F A 1)), h1]
+  norm_num
+
+/-! ## ★12. 全単射性 -/
+
+/-- ★★★★★**全射性** —— `𝒪^▷(A)^pf → 𝒪^▷(A^pf)` は上へ。
+
+★`otri_pfRoot_exists_rep` で `f = zetaMk hz φ` と書き、添字 `z` を
+`conjRt (ζ_{deg z})` に取り替える(`zetaMk_congr_z`)だけ。 -/
+theorem otriPfMap_surjective (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A)) :
+    Function.Surjective (otriPfMap (F := F) hiso hfn ζ hdeg hprop) := by
+  intro f
+  obtain ⟨z, hz, hzb, φ, hφ, hmk⟩ := otri_pfRoot_exists_rep hiso hA f.2
+  refine ⟨@Pf.mk (Additive (OTri P A)) (otriAddCommMonoid hfn)
+      (Additive.ofMul (⟨conjRtInv (F := F) φ, conjRtInv_otri hφ⟩ : OTri P A))
+      (P.degFr z), ?_⟩
+  refine Subtype.ext ?_
+  show otriPfMk (F := F) hiso (hprop (P.degFr z)).2
+      ((⟨conjRtInv (F := F) φ, conjRtInv_otri hφ⟩ : OTri P A)) = _
+  rw [← hmk]
+  show zetaMk (F := F) (conjRt_frobType hiso (hprop (P.degFr z)).2)
+      (conjRt (F := F) (conjRtInv (F := F) φ)) = zetaMk (F := F) hz φ
+  rw [conjRt_conjRtInv]
+  refine (zetaMk_congr_z hiso hfn' hz hzb (conjRt_frobType hiso (hprop (P.degFr z)).2)
+    (conjRt_baseIdentity (hprop (P.degFr z)).1) ?_ hφ).symm
+  rw [conjRt_degFr, hdeg]
+
+/-- ★★★★**単射性の核(`𝒪^▷` の言葉)** —— `A^pf` で等しければ `Pf` の関係が成り立つ。
+
+★`homPf_zeta_eq` の出す `k₁ · a = k₂ · b`, `α^{k₁} = β^{k₂}` から、
+`k := k₁ · a` を取ると `Pf` の関係 `α^{k·b} = β^{k·a}` になる。 -/
+theorem otriPfMk_rel_of_eq (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    {α β : OTri P A} {a b : ℕ+}
+    (h : otriPfMk (F := F) hiso (hprop a).2 ((α : End A))
+      = otriPfMk (F := F) hiso (hprop b).2 ((β : End A))) :
+    ∃ k : ℕ+, ((α : End A)) ^ ((k : ℕ) * (b : ℕ))
+      = ((β : End A)) ^ ((k : ℕ) * (a : ℕ)) := by
+  obtain ⟨k₁, k₂, hk, hpow⟩ := homPf_zeta_eq (F := F) hiso hA hfn'
+      (conjRt_frobType hiso (hprop a).2) (conjRt_baseIdentity (hprop a).1)
+      (conjRt_frobType hiso (hprop b).2) (conjRt_baseIdentity (hprop b).1)
+      (conjRt_otri α.2) (conjRt_otri β.2) h
+  rw [conjRt_degFr, conjRt_degFr, hdeg, hdeg] at hk
+  have hk' : (k₁ : ℕ) * (a : ℕ) = (k₂ : ℕ) * (b : ℕ) := by
+    exact_mod_cast congrArg (fun t : ℕ+ => (t : ℕ)) hk
+  have hpow' : ((α : End A)) ^ ((k₁ : ℕ)) = ((β : End A)) ^ ((k₂ : ℕ)) := by
+    apply conjRtHom_injective (P := P) (F := F)
+    rw [map_pow, map_pow]
+    exact hpow
+  refine ⟨k₁ * a, ?_⟩
+  rw [PNat.mul_coe]
+  calc ((α : End A)) ^ ((k₁ : ℕ) * (a : ℕ) * (b : ℕ))
+      = (((α : End A)) ^ (k₁ : ℕ)) ^ ((a : ℕ) * (b : ℕ)) := by
+        rw [← pow_mul, mul_assoc]
+    _ = (((β : End A)) ^ (k₂ : ℕ)) ^ ((a : ℕ) * (b : ℕ)) := by rw [hpow']
+    _ = ((β : End A)) ^ ((k₂ : ℕ) * ((b : ℕ) * (a : ℕ))) := by
+        rw [← pow_mul, mul_comm (a : ℕ) (b : ℕ)]
+    _ = ((β : End A)) ^ ((k₁ : ℕ) * (a : ℕ) * (a : ℕ)) := by
+        rw [← mul_assoc, ← hk']
+
+/-- ★★★★★**単射性** —— `𝒪^▷(A)^pf → 𝒪^▷(A^pf)` は単射。 -/
+theorem otriPfMap_injective (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A)) :
+    Function.Injective (otriPfMap (F := F) hiso hfn ζ hdeg hprop) := by
+  intro x y
+  refine Quotient.inductionOn₂ x y ?_
+  rintro ⟨α, a⟩ ⟨β, b⟩ hxy
+  have h : otriPfMk (F := F) hiso (hprop a).2 ((Additive.toMul α : OTri P A) : End A)
+      = otriPfMk (F := F) hiso (hprop b).2 ((Additive.toMul β : OTri P A) : End A) :=
+    congrArg Subtype.val hxy
+  obtain ⟨k, hk⟩ := otriPfMk_rel_of_eq (F := F) hiso hA hfn' ζ hdeg hprop h
+  refine Quotient.sound ⟨k, ?_⟩
+  show ((k : ℕ) * (b : ℕ)) • α = ((k : ℕ) * (a : ℕ)) • β
+  exact congrArg Additive.ofMul (Subtype.ext hk)
+
+/-! ## ★13. 積を保つこと
+
+★★`𝒞^pf` の合成を**同じ添字の上で**計算する(`compPf_mk`)。
+根がすべて 1 なので `compRoot` は `compPf` そのものになる(`compRoot_one`)。 -/
+
+/-- ★根が 1 の対象どうしでは `𝒞^pf` の合成は `compPf` そのもの。 -/
+theorem compRoot_one {A : C}
+    (f g : HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A, 1⟩) :
+    compRoot P F f g = compPf P F f g := by
+  have hlift := compRoot_eq_lift (F := F) f g (c := 1) (PA := 1) (PB := 1) (PE := 1)
+    (hcA := rfl) (hcB := rfl) (hcE := rfl) (ef := 1) (eg := 1) (er := 1)
+    (hfA := rfl) (hfB := rfl) (hgA := rfl) (hgE := rfl) (hrA := rfl) (hrE := rfl)
+  rw [hlift, rtRootIso_inv_eq_self, rtRootIso_inv_eq_self, rtRootIso_hom_eq_self]
+
+/-- ★3 本の脚がすべて `conjRt ζ` の 3 つ組添字。 -/
+noncomputable def idxZeta3 (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) :
+    IdxPf3 P F (rtObj P F A 1) (rtObj P F A 1) (rtObj P F A 1) :=
+  Under.mk (Y := (⟨(rtObj P F A 1, rtObj P F A 1, rtObj P F A 1)⟩ : TriFr P F))
+    (show triFrObj P F (rtObj P F A 1) (rtObj P F A 1) (rtObj P F A 1) ⟶ _ from
+      ⟨(conjRt (F := F) ζ, conjRt (F := F) ζ, conjRt (F := F) ζ),
+        conjRt_frobType hiso hζ, conjRt_frobType hiso hζ, conjRt_frobType hiso hζ,
+        rfl, rfl⟩)
+
+/-- ★★**同じ添字の 2 元の積は、`𝒪^▷(A)` の積の像**。 -/
+theorem otriPfMk_mul (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (α β : End A) :
+    (show End (⟨A, 1⟩ : PfRootObj P F) from otriPfMk (F := F) hiso hζ α)
+        * (show End (⟨A, 1⟩ : PfRootObj P F) from otriPfMk (F := F) hiso hζ β)
+      = (show End (⟨A, 1⟩ : PfRootObj P F) from otriPfMk (F := F) hiso hζ (α * β)) := by
+  show compRoot P F (otriPfMk (F := F) hiso hζ β) (otriPfMk (F := F) hiso hζ α) = _
+  rw [compRoot_one]
+  show compPf P F (HomPf.mk (idxZeta (F := F) hiso hζ) (conjRt (F := F) ((β : A ⟶ A))))
+      (HomPf.mk (idxZeta (F := F) hiso hζ) (conjRt (F := F) ((α : A ⟶ A)))) = _
+  rw [show (HomPf.mk (idxZeta (F := F) hiso hζ) (conjRt (F := F) ((β : A ⟶ A))))
+      = HomPf.mk ((idx12 P F (rtObj P F A 1) (rtObj P F A 1) (rtObj P F A 1)).obj
+          (idxZeta3 (F := F) hiso hζ)) (conjRt (F := F) ((β : A ⟶ A))) from rfl,
+    show (HomPf.mk (idxZeta (F := F) hiso hζ) (conjRt (F := F) ((α : A ⟶ A))))
+      = HomPf.mk ((idx23 P F (rtObj P F A 1) (rtObj P F A 1) (rtObj P F A 1)).obj
+          (idxZeta3 (F := F) hiso hζ)) (conjRt (F := F) ((α : A ⟶ A))) from rfl,
+    compPf_mk (idxZeta3 (F := F) hiso hζ)]
+  exact congrArg (HomPf.mk (idxZeta (F := F) hiso hζ))
+    (conjRt_comp (F := F) ((β : A ⟶ A)) ((α : A ⟶ A))).symm
+
+/-- ★★★★**写像は積を保つ** —— `α^{1/a} · β^{1/b} = (α^b·β^a)^{1/(ab)}`。
+
+★2 つの元を `otriPfMk_step` で共通の添字 `ζ_{ab}` に持ち上げてから
+`otriPfMk_mul` を当てる。 -/
+theorem otriPfMk_mul_mk (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hfn : IsFrobeniusNormalized P A)
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (α β : OTri P A) (a b : ℕ+) :
+    (show End (⟨A, 1⟩ : PfRootObj P F) from otriPfMk (F := F) hiso (hprop a).2 ((α : End A)))
+        * (show End (⟨A, 1⟩ : PfRootObj P F) from
+            otriPfMk (F := F) hiso (hprop b).2 ((β : End A)))
+      = (show End (⟨A, 1⟩ : PfRootObj P F) from otriPfMk (F := F) hiso (hprop (a * b)).2
+          (((α : End A)) ^ ((b : ℕ)) * ((β : End A)) ^ ((a : ℕ)))) := by
+  have hc1 : IsFrobeniusType P (((ζ a : End A) : A ⟶ A) ≫ ((ζ b : End A) : A ⟶ A)) := by
+    have he : ((ζ a : End A) : A ⟶ A) ≫ ((ζ b : End A) : A ⟶ A)
+        = ((ζ (a * b) : End A) : A ⟶ A) := by
+      show ((ζ b : End A) * (ζ a : End A) : End A) = _
+      rw [← map_mul]
+      exact congrArg (fun t => ((ζ t : End A) : A ⟶ A)) (mul_comm b a)
+    rw [he]; exact (hprop _).2
+  have hc2 : IsFrobeniusType P (((ζ b : End A) : A ⟶ A) ≫ ((ζ a : End A) : A ⟶ A)) := by
+    have he : ((ζ b : End A) : A ⟶ A) ≫ ((ζ a : End A) : A ⟶ A)
+        = ((ζ (a * b) : End A) : A ⟶ A) := by
+      show ((ζ a : End A) * (ζ b : End A) : End A) = _
+      rw [← map_mul]
+    rw [he]; exact (hprop _).2
+  have e1 := otriPfMk_step (F := F) hiso hfn (hprop a).2 (hprop b).2 (hprop b).1 hc1
+    ((α : End A)) α.2
+  have e2 := otriPfMk_step (F := F) hiso hfn (hprop b).2 (hprop a).2 (hprop a).1 hc2
+    ((β : End A)) β.2
+  rw [hdeg] at e1 e2
+  have h1 : otriPfMk (F := F) hiso hc1 (((α : End A)) ^ ((b : ℕ)))
+      = otriPfMk (F := F) hiso (hprop (a * b)).2 (((α : End A)) ^ ((b : ℕ))) := by
+    refine otriPfMk_congr hiso hc1 (hprop (a * b)).2 ?_ rfl
+    show ((ζ b : End A) * (ζ a : End A) : End A) = _
+    rw [← map_mul]
+    exact congrArg (fun t => ((ζ t : End A) : A ⟶ A)) (mul_comm b a)
+  have h2 : otriPfMk (F := F) hiso hc2 (((β : End A)) ^ ((a : ℕ)))
+      = otriPfMk (F := F) hiso (hprop (a * b)).2 (((β : End A)) ^ ((a : ℕ))) := by
+    refine otriPfMk_congr hiso hc2 (hprop (a * b)).2 ?_ rfl
+    show ((ζ a : End A) * (ζ b : End A) : End A) = _
+    rw [← map_mul]
+  rw [← e1, ← e2, h1, h2]
+  exact otriPfMk_mul hiso (hprop (a * b)).2 _ _
+
+/-! ## ★14. `Proposition 5.5, (i)` の同型 -/
+
+/-- ★★★★★**[FrdI] Proposition 5.5, (i)** —— **`𝒪^▷(A)^pf ≅ 𝒪^▷(A^pf)`**。
+
+★全射性(`otriPfMap_surjective`)・単射性(`otriPfMap_injective`)・
+積の保存(`otriPfMk_mul_mk`)を束ねたもの。 -/
+noncomputable def otriPfEquiv (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A)) :
+    @Pf (Additive (OTri P A)) (otriAddCommMonoid hfn)
+      ≃+ Additive (OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :=
+  AddEquiv.mk'
+    (Equiv.ofBijective
+      (fun x => Additive.ofMul (otriPfMap (F := F) hiso hfn ζ hdeg hprop x))
+      ⟨fun x y h => otriPfMap_injective (F := F) hiso hA hfn hfn' ζ hdeg hprop h,
+        fun y => otriPfMap_surjective (F := F) hiso hA hfn hfn' ζ hdeg hprop
+          (Additive.toMul y)⟩)
+    (by
+      refine Quotient.ind₂ ?_
+      rintro ⟨α, a⟩ ⟨β, b⟩
+      exact congrArg Additive.ofMul (Subtype.ext
+        (otriPfMk_mul_mk (F := F) hiso hfn ζ hdeg hprop _ _ a b).symm))
+
+theorem homPf_mk_congr_idx {X : C} {z z' : X ⟶ X} (hz : IsFrobeniusType P z)
+    (hz' : IsFrobeniusType P z') (h : z = z') (φ : X ⟶ X) :
+    HomPf.mk (F := F) (idxMk z z hz hz rfl) φ = HomPf.mk (idxMk z' z' hz' hz' rfl) φ := by
+  subst h; rfl
+
+/-- ★★**添字 1 では自然な写像そのもの**。 -/
+theorem otriPfMk_one (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    {ζ : A ⟶ A} (hζ : IsFrobeniusType P ζ) (hζ1 : ζ = 𝟙 A) (α : End A) :
+    otriPfMk (F := F) hiso hζ α = toRootHom (F := F) ((α : A ⟶ A)) := by
+  haveI := isIso_rtExt_one P F A
+  have h1 : conjRt (F := F) ζ = 𝟙 (rtObj P F A 1) := by
+    rw [hζ1]
+    show inv (rtExt P F A 1) ≫ (𝟙 A) ≫ rtExt P F A 1 = 𝟙 _
+    rw [Category.id_comp, IsIso.inv_hom_id]
+  show HomPf.mk (idxMk (conjRt (F := F) ζ) (conjRt (F := F) ζ) _ _ rfl)
+      (conjRt (F := F) ((α : A ⟶ A))) = _
+  rw [homPf_mk_congr_idx (F := F) (conjRt_frobType hiso hζ)
+    (isFrobeniusType_of_isIso P (𝟙 (rtObj P F A 1))) h1]
+  rfl
+
+/-- ★★★**同型は「自然な関手 `𝒞 → 𝒞^pf`」が定めるもの** ——
+分母 1 の元では `otriToPfRoot`(＝関手の誘導する写像)と一致する。
+
+★★これが原文の「the natural functor `𝒞 → 𝒞^pf` **determines**」の中身。 -/
+theorem otriPfEquiv_mk_one (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (α : OTri P A) :
+    otriPfEquiv (F := F) hiso hA hfn hfn' ζ hdeg hprop
+        (@Pf.mk (Additive (OTri P A)) (otriAddCommMonoid hfn) (Additive.ofMul α) 1)
+      = Additive.ofMul (otriToPfRoot (F := F) α) :=
+  congrArg Additive.ofMul (Subtype.ext
+    (otriPfMk_one hiso (hprop 1).2
+      (congrArg (fun t : End A => (t : A ⟶ A)) (map_one ζ)) ((α : End A))))
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Proposition 5.5, (i)` の「immediately」の中身
@@ -776,6 +1100,18 @@ def otri_pfRoot_exists_rep.src : ABC3.Meta.Source :=
 def otriPfMap.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Proposition 5.5, (i) — 𝒪^▷(A)^pf → 𝒪^▷(A^pf) の写像",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の同型(全射性・単射性・積の保存を束ねたもの)。 -/
+def otriPfEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 𝒪^▷(A)^pf ≅ 𝒪^▷(A^pf)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★locator —— `Proposition 5.5, (i)` の「自然な関手が定める」の部分。 -/
+def otriPfEquiv_mk_one.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Proposition 5.5, (i) — 同型は自然な関手 𝒞 → 𝒞^pf が定める",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
