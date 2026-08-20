@@ -2891,9 +2891,9 @@
           ],
           "status": "半済",
           "size": "★大",
-          "note": "★環の層は `finite_support_frac`(「`(a)` 上の極小素が有限」から)で在庫。スキームでは**準コンパクト性**でアフィン被覆を有限に取る段が要る。",
-          "lean": "ABC3/Found/Divisor/HeightOneDVR.lean",
-          "decl": "finite_support_frac"
+          "note": "★環の層は `finite_support_frac`(「`(a)` 上の極小素が有限」から)で在庫。スキームでは**準コンパクト性**でアフィン被覆を有限に取る段が要る。\n\n★★★★2026-08-21：**環の層はすでに閉じていた**（`HeightOneDVR.lean` の\n`finite_heightOne_primes_containing` / `finite_support_heightOnePrime` / `divOfElem`）。\n★問題は**「高さ 1」を 2 通りに綴っていた**ことだった：\n* `HeightOneDVR.lean`（環の層）—— `p ≠ ⊥ ∧ ∀ q 素, q ≠ ⊥ → q ≤ p → q = p`\n* `SchemeWeilOrd.lean`（スキームの層）—— `Ideal.height p = 1`\n\n★★新規 `HeightOneBridge.lean` で **2 つが同値であること**を示した（`height_eq_one_iff`）。\n`Ideal.height_le_iff`（下の素はすべて高さ 0 = 極小 = ⊥）と\n`Ideal.height_eq_zero_iff` ＋ `IsDomain.minimalPrimes_eq_singleton_bot` だけ。\n★`isCodimOnePt_spec_iff_heightOne` で「`Spec R` の余次元 1 の点 ⟺ `HeightOnePrime R`」がつながった。\n\n★★★残るのは**スキームの層の 2 段**だけである：\n1. 有限個のアフィン開で被覆する（`X` が quasi-compact）。\n2. ★**茎の付値と環の付値の同一視** —— `Spec.stalkIso` を通して `ordPtVal` を\n   `Localization.AtPrime 𝔭` の付値へ運ぶ（`IsFractionRing` の両立が要る）。",
+          "lean": "ABC3/Found/Divisor/HeightOneDVR.lean / ABC3/Found/Divisor/HeightOneBridge.lean",
+          "decl": "finite_heightOne_primes_containing / finite_support_heightOnePrime / divOfElem / height_eq_one_iff / HeightOnePrime.ofHeightEqOne / isCodimOnePt_spec_iff_heightOne"
         },
         {
           "id": "weil-group",
