@@ -595,6 +595,7 @@ import ABC3.Found.GaloisRep.SquareCompletion
 import ABC3.Found.GaloisRep.TwoTorsionDiscr
 import ABC3.Found.GaloisRep.Psi2SqSquarefree
 import ABC3.Found.GaloisRep.LocalStructure
+import ABC3.Found.GaloisRep.UnramifiedStructure
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
