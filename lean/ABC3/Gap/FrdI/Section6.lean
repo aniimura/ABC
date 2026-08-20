@@ -87,6 +87,10 @@ def Gap_6_5_ii.record : ABC3.Meta.GapRecord :=
         sectionId := "frdi-lemma-6-5" },
     classification := ABC3.Meta.GapClass.missingMath,
     falsifier :=
+      "★★★★★2026-08-20: **解消した** —— " ++
+      "`Found/SixExp/Theorem.lean` で six exponentials theorem を**証明した**(sorry なし)。" ++
+      "`Found/FrdI/Lemma65ii.lean` の `lemma_6_5_ii` が `Lemma 6.5, (ii)` そのものである。" ++
+      "★この記録は「何が足りなかったか」の履歴として残す。 " ++
       "★**これが ① に落ちる条件**: mathlib(または我々)が six exponentials " ++
       "theorem を実装すること。★前提として Gelfond-Schneider の方法" ++
       "(Siegel の補題・補間行列式・Schwarz の補題)が要る。" ++

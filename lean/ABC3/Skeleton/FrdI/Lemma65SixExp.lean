@@ -1,4 +1,5 @@
 import ABC3.Meta.Claim
+import ABC3.Found.SixExp.Theorem
 import Mathlib.RingTheory.Algebraic.Defs
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
@@ -47,6 +48,13 @@ CLAUDE.md の**姿勢**に従い、**statement を型で固定して、そこへ
 分解の DAG は `ResearchPaper/frdi-decomposition.json` の `sixexp` チェーン
 (8 節点・6 層・葉 3 個)。
 
+## ★★★★★解決した（2026-08-20）
+
+★**`Found/SixExp/Theorem.lean` の `six_exponentials` で証明した（sorry なし）。**
+本ファイルの宣言はそこへの転送になっている。
+下の `needs` は、**着手前に測った在庫**の記録として残す。
+★実際に要ったのはここに書いたものとほぼ一致し、さらに「分母を払う」と「パラメータの選択（`L' ≈ N^{3/2}`）」が加わった。
+
 ## ★影響範囲
 
 ★`Lemma 6.5, (ii)` は `§6` の**例**(`Example 6.3` の非同型性)を言うために使われ、
@@ -66,8 +74,8 @@ open ABC3.Meta
 `{1, log p₃/log p₄}` に当てる。 -/
 theorem six_exponentials {x : Fin 2 → ℂ} {y : Fin 3 → ℂ}
     (_hx : LinearIndependent ℚ x) (_hy : LinearIndependent ℚ y) :
-    ∃ (i : Fin 2) (j : Fin 3), Transcendental ℚ (Complex.exp (x i * y j)) := by
-  sorry
+    ∃ (i : Fin 2) (j : Fin 3), Transcendental ℚ (Complex.exp (x i * y j)) :=
+  ABC3.Found.SixExp.six_exponentials _hx _hy
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
