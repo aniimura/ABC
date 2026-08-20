@@ -93,10 +93,14 @@ def exists_mulByNPullback.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★**環準同型は Found に入った**(第 118 ブロック `exists_mulByNHom`)。`pointHom`(点 ⇒ 環準同型)として一般化したところ、平行移動と**完全に同じ道**が `[n]` にも効いた。単射性も `pointHom_injective_of_transcendental` に帰着済み(0 ブロック)" 19,
     .implicitStep
-      "★★`x([n]P)` が `Φ_n/ΨSq_n` と一致すること——mathlib の分点多項式と群法則を結ぶ段。mathlib にはこのリンクが無い(2026-08-20 実測)(10-25 ブロック)" 19,
+      "★★★★★★★★**2026-08-20: 本節点は臨界路に戻った**。(G5) の非退化性が `deg[n] = n²` を要求し(第 196・197)、それが `[F(x) : F(x∘[n])] ≤ n²`、すなわち `x` が `F(x_n)` 上でモニック多項式 `Φ_n(X) − x_n·ΨSq_n(X)`(第 198 で次数ちょうど `n²`)の根であることに帰着したためである。★消費されるのは **`x` の側だけ**——`y([n]P)` の式は要らない" 19,
+    .implicitStep
+      "★★★★★★**2026-08-20 の実測(足場)**: `x(2P) = Φ₂/ΨSq₂` は第 199 で証明できた(`ΨSq₂(x) = (2y+a₁x+a₃)²` を出してから分母を払う)。★`y` を消す Kummer の 2 公式(和・積)は第 200・201 で取れた。★★`n = 3` の梯子恒等式 `Φ₃·X = Φ₂²X² − b₄Φ₂X·ΨSq₂ − …` も `ring` で通った(第 202、2.6 秒)。★★★**mathlib の `preΨ₄` の定義が群法則と噛み合っている**ことは確認済みである" 19,
+    .implicitStep
+      "★★★★★★★★**2026-08-20 の実測(壁の所在)**: `n = 4` の段(`n → 2n`)を `b₂ b₄ b₆ b₈` を自由変数にして `ring` に掛けると **124 秒かけて失敗**した——`b₂b₆ − b₄² = 4b₈` の関係が要る。★`a₁ … a₆` に展開すると既定の heartbeats を超える。★★つまり**一般の `n` を多項式展開で押すのは実際的でない**。★★★構造的には EDS 恒等式 `W(m+n)W(m−n)W(r)² = W(m+r)W(m−r)W(n)² − W(n+r)W(n−r)W(m)²` が要るが、これは **mathlib 自身の TODO** である(`Mathlib/NumberTheory/EllipticDivisibilitySequence.lean` の `TODO: prove that normEDS satisfies IsEllDivSequence`、2026-08-20 実測)。★★★★見積もりは上振れする(30-80 ブロック)。上流に入れるのが本筋である" 19,
     .implicitStep
       "★`x([n]P)` の超越性——`n` 等分点での 1 点評価(`ΨSq_n` が消えて `Φ_n` が消えない)で出る見込み。第 117 と同じ型(5-15 ブロック)" 19,
     .implicitStep
-      "★★`y([n]P)` の側の式(`ω_n/ψ_n³` 型)——mathlib の在庫は未測定(5-15 ブロック)" 19 ]
+      "★★`y([n]P)` の側の式(`ω_n/ψ_n³` 型)は **Weil 対には要らない**ことが分かった(上記)。なお mathlib も `ω_n` を持たない(docstring に `TODO: the bivariate polynomials ωₙ`、2026-08-20 実測)" 19 ]
 
 end ABC3.Skeleton.GaloisRep
