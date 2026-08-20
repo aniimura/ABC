@@ -18053,3 +18053,59 @@ D2 に残っていた最大の段——**無限遠に落ちる点の全体 `E₁
 (mathlib の `finprod_heightOneSpectrum_factorization'` が使える)。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-477 ★★★★★★`n` 乗根イデアルを明示した(第 165 ブロック)
+
+第 142 の `exists_pow_of_dvd_count` は `∃ J, J^n = I` しか返さない。★D2 は
+**`J` の類が自明であること**なので、`J` を明示しなければ先に進めない。
+
+    J  :=  ∏ᶠ v,  v ^ (count_v(I) / n)
+
+### ★★★★単元群の中で組む
+
+`ClassGroup.mk` は**単元**にしか当たらない。★Dedekind 環では 0 でない分数イデアルは
+可逆(`CommGroupWithZero (FractionalIdeal R⁰ K)` が mathlib にある)なので
+`Units.mk0` で `primeUnit` を作り、`rootUnit` をその積として定義した。
+
+### ★★★★★類は素点の類の積になる
+
+`ClassGroup.mk` が `MonoidHom` なので `MonoidHom.map_finprod` がそのまま効く:
+
+    [J] = ∏ᶠ v, [v] ^ (count_v(I) / n)
+
+★そして **`[v] = toClass(Q_v)`**——`primeUnit` は mathlib の `XYIdeal'` と
+`Units.ext` で一致し、`Point.toClass_some` に繋がる(`classGroup_primeUnit`)。
+
+### ★★★D2 は「ファイバーの総和」だけになった
+
+    [J] = 1   ⟺   Σᶠ v, e_v · Q_v = 0     (e_v := count_v / n)
+
+`e_v ≠ 0` となるのは `n·Q_v = P` のとき(第 164)。★あとは
+
+* `e_v` がファイバー上で一定であること(平行移動 `τ_T` で不変、第 120・124)
+* `Σ_{Q ∈ [n]⁻¹(P)} Q = 0`(第 150 の `sum_fiber_eq` と `n·P = 0`)
+
+の 2 つで閉じる。★★単項性への最後の一歩は第 140 の
+`isPrincipal_of_classGroup_eq_one`(単元を受け取る形)がそのまま使える。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `primeUnit` | ★★素点に対応する分数イデアルの単元 |
+| `rootUnit` | ★★★★★**明示的な `n` 乗根イデアル** |
+| `coe_rootUnit` | ★★分数イデアルとしての表示 |
+| `rootUnit_pow` | ★★★★★**本当に `n` 乗根である** |
+| `classGroup_rootUnit` | ★★★★★★**類は素点の類の積** |
+| `primeUnit_eq_xyIdeal'` | ★★★★mathlib の `XYIdeal'` と一致 |
+| `classGroup_primeUnit` | ★★★★★**`[v] = toClass(Q_v)`** |
+
+### ★D2 の残り(更新)
+
+| 段 | 内容 | 見積もり |
+|---|---|---|
+| 明示的な `J` と `[J] = ∏ [v]^{e_v}` | ✅ **第 165** | 0 |
+| `e_v` がファイバー上で一定であること(平行移動) | ❌ | 3-6 |
+| `Σᶠ v, e_v · Q_v = 0` への組み立て | ❌ | 2-5 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
