@@ -204,7 +204,11 @@ def fractionalIdeal_isPrincipal.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★**ファイバーの総和は第 150 ブロックで済**——`Σ_{T ∈ E[n]} T = 0`(`sum_torsion_eq_zero`)、`#E[n] = n²`(`card_torsion`)、`Σ_{T} (Q₀ + T) = n·(n·Q₀)`(`sum_fiber_eq`)。★(G1) の `E[n] ≅ (ℤ/n)²` に第 140 を当てるだけで出た。**G1 が G5 の中で初めて実際に消費された箇所である**(0 ブロック)" 19,
     .implicitStep
-      "★★★★**残っているのは因子の台の同定である**——`count_v(μ f_P) ≠ 0` となる `v`(= 曲線上の点 `Q`)を決めること。場合 A では `count_v(μ f_P) = n·min(count_v(μ a), count_v(μ b))`(第 143)なので、`count ≠ 0 ⟺ μ a と μ b が共に `v` で消える ⟺ `[n]Q = P` である。★これを言うには**点の還元(特殊化)写像**が要る: `μ` を剰余体 `κ(v) ≅ F`(第 138)へ落として `([μ x], [μ y]) = [n]Q` を示す(8-20 ブロック)" 19,
+      "★★★★★★**台の同定は第 151 ブロックで済んだ**(`count_ne_zero_iff`)——引き戻した素イデアル `P' := {a | w(μ a) < 1}` を使うと `count_v(μ f_P) ≠ 0 ⟺ I_P = P'` が**イデアルの等式**として書ける。剰余体も点の還元も経由しない(0 ブロック)" 19,
+    .implicitStep
+      "★★★★★**D2 に残るのは 1 段だけ**——`P'` が定める点が `n·Q_v` であること(`Skeleton/GaloisRep/PointReduction.lean` の `pullbackPrime_eq_xyIdeal_nsmul`)。これは「点の還元が群準同型である」ことの言い換えであり、(G7) 半安定モデルでも要る(20-45 ブロック)" 19,
+    .implicitStep
+      "★★★★(旧記述)因子の台の同定——`count_v(μ f_P) ≠ 0` となる `v`(= 曲線上の点 `Q`)を決めること。場合 A では `count_v(μ f_P) = n·min(count_v(μ a), count_v(μ b))`(第 143)なので、`count ≠ 0 ⟺ μ a と μ b が共に `v` で消える ⟺ `[n]Q = P` である。★これを言うには**点の還元(特殊化)写像**が要る: `μ` を剰余体 `κ(v) ≅ F`(第 138)へ落として `([μ x], [μ y]) = [n]Q` を示す(8-20 ブロック)" 19,
     .implicitStep
       "★★★2026-08-20 実測: **mathlib の `AlgebraicGeometry/EllipticCurve/Reduction.lean` は曲線の還元**(極小モデル・good/multiplicative/additive reduction)であって、**点の還元写像ではない**。点の特殊化は自前で積む必要がある。★ただし `Point.map`(環準同型に沿った関手性)は mathlib にあるので、剰余体への環準同型を作れば流せる" 19,
     .implicitStep

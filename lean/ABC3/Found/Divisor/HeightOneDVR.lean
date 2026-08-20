@@ -362,4 +362,71 @@ theorem divOfFrac_mul {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
   show ordAtPrime v (x * y) = ordAtPrime v x + ordAtPrime v y
   exact ordAtPrime_mul v hx hy
 
+/-! ## ★有効因子 -/
+
+theorem withZero_le_one_iff_toAdd_nonpos (x : WithZero (Multiplicative ℤ)) (h : x ≠ 0) :
+    x ≤ 1 ↔ Multiplicative.toAdd (WithZero.unzero h) ≤ 0 := by
+  constructor
+  · intro hx
+    rw [← WithZero.coe_unzero h] at hx
+    rw [show ((1 : WithZero (Multiplicative ℤ)))
+        = ((1 : Multiplicative ℤ) : WithZero (Multiplicative ℤ)) from rfl] at hx
+    rwa [WithZero.coe_le_coe] at hx
+  · intro hx
+    rw [← WithZero.coe_unzero h,
+      show ((1 : WithZero (Multiplicative ℤ)))
+        = ((1 : Multiplicative ℤ) : WithZero (Multiplicative ℤ)) from rfl, WithZero.coe_le_coe]
+    exact hx
+
+open scoped Classical in
+/-- ★★★**環の元の位数は非負**。 -/
+theorem ordZ_nonneg {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) (a : R) :
+    0 ≤ ordZ p hp0 hmin (algebraMap R (FractionRing R) a) := by
+  by_cases ha : a = 0
+  · simp [ordZ, ha]
+  have hne : (algebraMap R (FractionRing R) a) ≠ 0 :=
+    (IsFractionRing.to_map_eq_zero_iff (K := FractionRing R)).not.mpr ha
+  rw [ordZ, dif_neg hne, neg_nonneg,
+    ← withZero_le_one_iff_toAdd_nonpos _ (ordAt_ne_zero p hp0 hmin hne)]
+  exact ordAt_le_one p hp0 hmin a
+
+theorem ordAtPrime_nonneg {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (v : HeightOnePrime R) (a : R) :
+    0 ≤ ordAtPrime v (algebraMap R (FractionRing R) a) := by
+  haveI := v.isPrime
+  exact ordZ_nonneg v.asIdeal v.ne_bot v.minimal a
+
+/-- ★★★★**`div(a)` は有効因子**。 -/
+theorem divOfElem_nonneg {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (a : R) (ha : a ≠ 0) (v : HeightOnePrime R) :
+    0 ≤ divOfElem a ha v :=
+  ordAtPrime_nonneg v a
+
+open scoped Classical in
+/-- ★★★**台が `S` に入る有効因子のなす加法部分単系** ——
+[FrdI] `Example 6.1` の `Φ(L) ⊆ ℤ≥0[D_L]` の形である
+(Cartier 性はさらに課す条件で、ここでは入れていない)。 -/
+def effectiveOn {R : Type*} [CommRing R] (S : Set (HeightOnePrime R)) :
+    AddSubmonoid (HeightOnePrime R →₀ ℤ) where
+  carrier := {D | (∀ v, 0 ≤ D v) ∧ ∀ v ∈ D.support, v ∈ S}
+  add_mem' := by
+    rintro D E ⟨hD, hDS⟩ ⟨hE, hES⟩
+    refine ⟨fun v => by simpa using add_nonneg (hD v) (hE v), fun v hv => ?_⟩
+    rcases Finset.mem_union.mp (Finsupp.support_add hv) with h | h
+    · exact hDS v h
+    · exact hES v h
+  zero_mem' := ⟨fun v => by simp, fun v hv => by simp at hv⟩
+
+theorem mem_effectiveOn_iff {R : Type*} [CommRing R] {S : Set (HeightOnePrime R)}
+    {D : HeightOnePrime R →₀ ℤ} :
+    D ∈ effectiveOn S ↔ (∀ v, 0 ≤ D v) ∧ ∀ v ∈ D.support, v ∈ S := Iff.rfl
+
+/-- ★`div(a)` は台が `S` に入るなら `effectiveOn S` の元。 -/
+theorem divOfElem_mem_effectiveOn {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] {S : Set (HeightOnePrime R)} (a : R) (ha : a ≠ 0)
+    (hS : ∀ v ∈ (divOfElem a ha).support, v ∈ S) : divOfElem a ha ∈ effectiveOn S :=
+  mem_effectiveOn_iff.mpr ⟨divOfElem_nonneg a ha, hS⟩
+
 end ABC3.Found.Divisor
