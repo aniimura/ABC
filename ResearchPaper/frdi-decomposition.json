@@ -3692,7 +3692,7 @@
           "deps": [],
           "status": "inMathlib",
           "size": "小",
-          "note": "★★**mathlib に在る** —— `NumberField.dedekindZeta` / `dedekindZeta_residue` / `tendsto_sub_one_mul_dedekindZeta_nhdsGT`（`NumberTheory/NumberField/DedekindZeta.lean`）。",
+          "note": "★★**mathlib に在る** —— `NumberField.dedekindZeta` / `dedekindZeta_residue` / `tendsto_sub_one_mul_dedekindZeta_nhdsGT`（`NumberTheory/NumberField/DedekindZeta.lean`）。\n\n★★★2026-08-21 実測（**在庫を特定した**）：`Mathlib/NumberTheory/NumberField/DedekindZeta.lean` に\n`NumberField.dedekindZeta`（イデアルのノルムの個数を係数にした `LSeries`）と\n★**`NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT`**（Dirichlet の類数公式 ——\n`(s-1)·ζ_K(s) → dedekindZeta_residue K`、`dedekindZeta_residue_ne_zero` つき）がある。\n★これで「`s=1` での単純極」は**そのまま使える**。",
           "lean": "",
           "decl": "",
           "frdiNeeded": true
@@ -3714,7 +3714,7 @@
           "deps": [],
           "status": "todo",
           "size": "★大",
-          "note": "★在庫: `Ideal.ramificationIdx` / `inertiaDeg` / `primesOver` / `Ideal.LiesOver` は**在る**。★**Frobenius 元は 0 件**（`FrobeniusElement` で grep、2026-08-20）。分解群が剰余体の Galois 群へ同型に写ることから作る。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "note": "★在庫: `Ideal.ramificationIdx` / `inertiaDeg` / `primesOver` / `Ideal.LiesOver` は**在る**。★**Frobenius 元は 0 件**（`FrobeniusElement` で grep、2026-08-20）。分解群が剰余体の Galois 群へ同型に写ることから作る。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。\n\n★★2026-08-21 実測：**mathlib に Frobenius 元は無い**（`FrobeniusElement` は 0 件）。\n★ただし分解群は在る（`Ideal.card_stabilizer_eq`、`MulAction.stabilizer`）ので、\n剰余体の Frobenius 自己同型（`FieldTheory/Finite/`）と分解群 → 剰余体の Galois 群の\n全射（`RamificationInertia/Galois.lean` の `stabilizerQuotientInertiaEquiv`）を繋げば作れる。",
           "lean": "",
           "decl": "",
           "frdiNeeded": false
@@ -3725,7 +3725,7 @@
           "deps": [],
           "status": "todo",
           "size": "★大",
-          "note": "★イデアル群・法・合同部分群。mathlib に `RayClassGroup` は無い（`ClassGroup` は在る）。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "note": "★イデアル群・法・合同部分群。mathlib に `RayClassGroup` は無い（`ClassGroup` は在る）。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。\n\n★★2026-08-21 実測：**mathlib に射類群（ray class group）は無い**（`rayClassGroup` 0 件）。\n★イデアル類群 `ClassGroup` は在る。",
           "lean": "",
           "decl": "",
           "frdiNeeded": false
@@ -3739,7 +3739,7 @@
           ],
           "status": "todo",
           "size": "★大",
-          "note": "★不分岐素点で Frobenius を取り、乗法的に延ばす。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "note": "★不分岐素点で Frobenius を取り、乗法的に延ばす。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。\n\n★★2026-08-21 実測：**mathlib に Artin 写像は無い**（`ArtinMap` 0 件）。`cheb-frob` と `cheb-rayclass` が先。",
           "lean": "",
           "decl": "",
           "frdiNeeded": false
@@ -3765,7 +3765,7 @@
           ],
           "status": "半済",
           "size": "★大",
-          "note": "★mathlib は **ℚ 上の Dirichlet L 関数**（`LSeries` / `DirichletCharacter`）を持つが、一般の数体の Hecke L 関数は無い。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "note": "★mathlib は **ℚ 上の Dirichlet L 関数**（`LSeries` / `DirichletCharacter`）を持つが、一般の数体の Hecke L 関数は無い。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。\n\n★★2026-08-21 実測：**mathlib に Hecke L 関数は無い**（`HeckeLSeries` 0 件）。\n★Dirichlet L 関数は完備に在る（`LSeries/DirichletContinuation.lean`、`LSeries/Nonvanishing.lean`）。",
           "lean": "",
           "decl": "",
           "frdiNeeded": false
@@ -3924,7 +3924,7 @@
           ],
           "status": "todo",
           "size": "中",
-          "note": "★mathlib の `NumberField.dedekindZeta` は `LSeries` で定義されている。Euler 積は `EulerProduct` の一般論に乗る見込み。",
+          "note": "★mathlib の `NumberField.dedekindZeta` は `LSeries` で定義されている。Euler 積は `EulerProduct` の一般論に乗る見込み。\n\n★★2026-08-21 実測：**Dedekind ζ の Euler 積は mathlib に無い**（`dedekindZeta` は `LSeries` として\n定義されているだけ）。★ただし `Mathlib/NumberTheory/EulerProduct/` に Euler 積の機構があり、\nDirichlet L 関数については `LSeries_eulerProduct_exp_log` が在る。★これに乗せる形で書くこと。",
           "lean": "",
           "decl": "",
           "frdiNeeded": true
