@@ -118,6 +118,14 @@ theorem pullCoeff_eq (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
   refine ordPt_ffMap_congr g hnormX hnormY w hdim hf0 hf (fun hc => ?_)
   rw [← hDU0 ⟨g.base w.1, hc⟩ hy0, ← hDU ⟨g.base w.1, hc⟩ hw]
 
+/-- ★係数は `D` にしか依らない(証明の取り替えに依らない)。 -/
+theorem pullCoeff_congr (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D D' : WeilDiv Y} (hD : IsCartierDiv hnormY D) (hD' : IsCartierDiv hnormY D')
+    (h : D = D') (w : PrimeDivisorPt X) :
+    pullCoeff g hnormX hnormY hD w = pullCoeff g hnormX hnormY hD' w := by
+  subst h
+  rfl
+
 /-! ## ★4. 台の有限性 -/
 
 /-- ★★★★**引き戻しの係数の台は有限**(`X` は準コンパクト)。

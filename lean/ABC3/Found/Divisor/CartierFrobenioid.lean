@@ -76,17 +76,26 @@ variable (D : Type u) [Category.{v} D]
 structure CartierDatum where
   /-- `D_L` —— `V[L]` 上の素因子のうち `D_K` の上にあるもの。 -/
   primes : D → Type w
-  /-- 因子の**引き戻し**。`α : B ⟶ A` に対し `ℤ[D_A] → ℤ[D_B]`。 -/
-  pull : ∀ {A B : D}, (B ⟶ A) → ((primes A →₀ ℤ) →+ (primes B →₀ ℤ))
-  pull_id : ∀ (A : D) (x : primes A →₀ ℤ), pull (𝟙 A) x = x
-  pull_comp : ∀ {A B E : D} (α : B ⟶ A) (β : E ⟶ B) (x : primes A →₀ ℤ),
-    pull (β ≫ α) x = pull β (pull α x)
   /-- `Γ_L` —— `V[L]` 上の Cartier 因子で台が `D_L` に入るもの。 -/
   grp : ∀ A : D, AddSubgroup (primes A →₀ ℤ)
-  /-- 引き戻しは Cartier 性を保つ。 -/
-  pull_mem : ∀ {A B : D} (α : B ⟶ A) {x : primes A →₀ ℤ}, x ∈ grp A → pull α x ∈ grp B
+  /-- 因子の**引き戻し**。`α : B ⟶ A` に対し `Γ_A → Γ_B`。
+
+  ★★★**2026-08-21 の修正**: 以前は自由アーベル群の全体
+  `(primes A →₀ ℤ) → (primes B →₀ ℤ)` の上で要求していたが、
+  ★**幾何の引き戻しは Cartier 因子の上でしか定義されない**
+  (局所方程式が無ければ `ord_w(g^*f)` が書けない)。
+  ★`D_K` が `K`-`Q`-Cartier でも `[s]` 自身の引き戻しは `(1/n)·g^*(n[s])` であって、
+  整数性は自明でない。★原典の `Φ(L)^gp` は Cartier 因子の群なので、
+  **`grp` の上で要求するのが正しい模型**である。
+  (下流の `mapHom` / `phiFunctor` は `effSub (grp A)` の上でしか `pull` を使っていない。) -/
+  pull : ∀ {A B : D}, (B ⟶ A) → (grp A →+ grp B)
+  pull_id : ∀ (A : D) (x : grp A), pull (𝟙 A) x = x
+  pull_comp : ∀ {A B E : D} (α : B ⟶ A) (β : E ⟶ B) (x : grp A),
+    pull (β ≫ α) x = pull β (pull α x)
   /-- 引き戻しは有効性を保つ。 -/
-  pull_nonneg : ∀ {A B : D} (α : B ⟶ A) {x : primes A →₀ ℤ}, 0 ≤ x → 0 ≤ pull α x
+  pull_nonneg : ∀ {A B : D} (α : B ⟶ A) {x : grp A},
+    (0 : primes A →₀ ℤ) ≤ (x : primes A →₀ ℤ) →
+    (0 : primes B →₀ ℤ) ≤ ((pull α x : grp B) : primes B →₀ ℤ)
   /-- 引き戻しは**単射**(幾何では `V[L] → V[M]` が支配的であることから)。 -/
   pull_inj : ∀ {A B : D} (α : B ⟶ A), Function.Injective (pull α)
   /-- `D_K` が `K`-`Q`-Cartier であること。 -/
@@ -100,18 +109,22 @@ variable (Δ : CartierDatum.{v, u, w} D)
 
 /-- ★`Φ(A) = Γ_A ∩ ℤ≥0[D_A]` への引き戻しの制限。 -/
 noncomputable def mapHom {A B : D} (α : B ⟶ A) : effSub (Δ.grp A) →+ effSub (Δ.grp B) :=
-  AddMonoidHom.codRestrict ((Δ.pull α).comp (effSub (Δ.grp A)).subtype) _
-    (fun x => mem_effSub.mpr ⟨Δ.pull_mem α (mem_effSub.mp x.2).1,
-      fun s => Finsupp.le_def.mp (Δ.pull_nonneg α (Finsupp.le_def.mpr (mem_effSub.mp x.2).2)) s⟩)
+  AddMonoidHom.codRestrict
+    (((Δ.grp B).subtype).comp ((Δ.pull α).comp (effSubIncl (Δ.grp A)))) _
+    (fun x => mem_effSub.mpr ⟨(Δ.pull α (effSubIncl (Δ.grp A) x)).2,
+      fun s => Finsupp.le_def.mp
+        (Δ.pull_nonneg α (Finsupp.le_def.mpr (mem_effSub.mp x.2).2)) s⟩)
 
 @[simp] theorem mapHom_coe {A B : D} (α : B ⟶ A) (x : effSub (Δ.grp A)) :
     ((Δ.mapHom α x : effSub (Δ.grp B)) : Δ.primes B →₀ ℤ)
-      = Δ.pull α ((x : effSub (Δ.grp A)) : Δ.primes A →₀ ℤ) := rfl
+      = ((Δ.pull α (effSubIncl (Δ.grp A) x) : Δ.grp B) : Δ.primes B →₀ ℤ) := rfl
 
 theorem mapHom_injective {A B : D} (α : B ⟶ A) : Function.Injective (Δ.mapHom α) := by
   intro x y h
-  exact Subtype.ext (Δ.pull_inj α
-    (congrArg (fun t : effSub (Δ.grp B) => (t : Δ.primes B →₀ ℤ)) h))
+  refine Subtype.ext ?_
+  have h1 : Δ.pull α (effSubIncl (Δ.grp A) x) = Δ.pull α (effSubIncl (Δ.grp A) y) :=
+    Subtype.ext (congrArg (fun t : effSub (Δ.grp B) => (t : Δ.primes B →₀ ℤ)) h)
+  exact congrArg (fun t : Δ.grp A => (t : Δ.primes A →₀ ℤ)) (Δ.pull_inj α h1)
 
 /-- ★`Φ : 𝒟ᵒᵖ ⥤ 𝔐𝔬𝔫`。 -/
 noncomputable def phiFunctor : Dᵒᵖ ⥤ AddCommMonCat.{w} where
@@ -120,11 +133,12 @@ noncomputable def phiFunctor : Dᵒᵖ ⥤ AddCommMonCat.{w} where
   map_id A := by
     refine AddCommMonCat.hom_ext ?_
     ext x : 2
-    exact Δ.pull_id _ _
+    exact congrArg (fun t : Δ.grp A.unop => (t : Δ.primes A.unop →₀ ℤ)) (Δ.pull_id _ _)
   map_comp {A B E} f g := by
     refine AddCommMonCat.hom_ext ?_
     ext x : 2
-    exact Δ.pull_comp f.unop g.unop _
+    exact congrArg (fun t : Δ.grp E.unop => (t : Δ.primes E.unop →₀ ℤ))
+      (Δ.pull_comp f.unop g.unop _)
 
 /-! ## ★2. `monoid on 𝒟` -/
 

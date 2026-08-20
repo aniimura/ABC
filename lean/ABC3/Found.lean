@@ -167,6 +167,7 @@ import ABC3.Found.Divisor.NormBFunctor
 import ABC3.Found.Divisor.NormCodim
 import ABC3.Found.Divisor.SchemeDivFinite
 import ABC3.Found.Divisor.SchemeCartierPull
+import ABC3.Found.Divisor.NormPhiFunctor
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite
