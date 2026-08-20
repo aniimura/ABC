@@ -1,5 +1,5 @@
 import ABC3.Skeleton.GaloisRep.WeilFunctionField
-import ABC3.Found.GaloisRep.RootFromIdeal
+import ABC3.Found.GaloisRep.CountPow
 
 /-!
 # スケルトン —— **`div(f_P ∘ [n])` の因子計算**(`Skeleton`)
@@ -9,65 +9,93 @@ import ABC3.Found.GaloisRep.RootFromIdeal
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-## ★★★★★★層 3 が 2 節点に還元された
+## ★★★★★★層 3 に残るのは 2 つ
 
-第 139 ブロック(`Found`)で最後の一歩
-
-    J^n = (μ f_P)   かつ   J = (g)     ⟹   ∃ g', g'^n = μ f_P
-
-が取れた。★したがって `g_P` の存在に残るのは**この 2 つだけ**である:
+第 139 ブロックで最後の一歩(`J^n = (μ f_P)` かつ `J = (g)` ⟹ `n` 乗根)、
+第 142 ブロックで **`∀ v, n ∣ count_v(I) ⟹ ∃ J, J^n = I`** が取れた。
+★したがって `g_P` の存在に残るのは:
 
 | 節点 | 内容 | 見積もり |
 |---|---|---|
-| `exists_fractionalIdeal_pow` (D1) | `∃ J, J^n = (μ f_P)`——因子が `n` で割れる | 20-50 |
-| `fractionalIdeal_isPrincipal` (D2) | その `J` が単項——Abel–Jacobi | 10-25 |
+| `dvd_count_pullback` (D1') | `∀ v, n ∣ count_v((μ f_P))` | 20-45 |
+| `fractionalIdeal_isPrincipal` (D2) | `J` が単項——Abel–Jacobi | 10-25 |
 
-## ★★★★★★見通しが変わった——**不分岐性は要らない**
+★★`exists_fractionalIdeal_pow`(D1)は D1' から**証明される**。
 
-当初は「`[n]` は不分岐だから `ord_Q(μ f) = ord_{[n]Q}(f)`」を経由する予定で、
-不分岐性の証明(`deg[n] = n²` と `#E[n] = n²` が要る)を勘定に入れていた。
-★**それは不要である。**一般の付値論で
+## ★★★★★★不分岐性は要らない
 
-    ord_Q(μ f) = e_Q · ord_{[n]Q}(f)
+一般の付値論で `ord_Q(μ f) = e_Q · ord_{[n]Q}(f)` であり、
+`div(f_P) = n(P) − n(O)` から `ord_{[n]Q}(f_P) ∈ {n, −n, 0}`。
+★**`e_Q` が何であっても `n` で割れる**。`deg[n] = n²` も `#E[n] = n²` も不要。
 
-であり、`div(f_P) = n(P) − n(O)` から `ord_{[n]Q}(f_P) ∈ {n, −n, 0}`。
-★★したがって **`e_Q` が何であっても `n` で割れる**。これが D1 である。
+★★D2 でも `e_Q` は消える(平行移動不変性 + `Σ_{[n]Q=P} Q = 0` + `Σ_{T∈E[n]} T = 0`)。
 
-★★★D2 でも `e_Q` は消える。平行移動 `τ_T`(`T ∈ E[n]`)が `μ` を保つ
-(`[n]∘τ_T = [n]`)ので `e_Q` は各ファイバー上で一定であり、共通因子 `e` を括り出すと
+## ★★★★D1' の中身は 2 つの場合に分かれる
 
-    Σ_{Q ∈ [n]⁻¹(P)} Q = n²Q₀ = n·P = 0,      Σ_{T ∈ E[n]} T = 0
+`ν := ord_v ∘ μ̃` を `F(W)` 上の付値とし、`ν` が `F[W]` 上非負かどうかで分ける。
 
-から類は 0 になる。★★★★**`e` の値を知る必要はない。**
+* **場合 A**(`[n]Q` がアフィン点): `ν` は `F[W]` 上非負なので
+  イデアルの最小値が定義でき、`(f_P) = I_P^n` から `ν(f_P) = n·ν(I_P)`。
+* **場合 B**(`[n]Q = O`): `ν(x) < 0`。★第 129 の `z² = Ψ₂Sq(x)` と
+  `deg Ψ₂Sq = 3`(第 142、奇数)から `2ν(z) = 3ν(x)`、よって **`ν(x)` は偶数**。
+  ★★`p(x)` の付値は偶数倍、`q(x)z` の付値は奇数倍で**決して一致しない**ので
+  `ν(p + qz) = min` となり、`ν` は `F(x)` 上への制限で一意に決まる。
+  ★★★したがって超楕円対合で不変になり、ノルムを使って `ν(f_P) = −m·n`。
 
 ## ★★★★因子を幾何で読む準備は済んでいる
 
 | 材料 | ブロック |
 |---|---|
-| `IsDedekindDomain F[W]`(因子機構が開く) | 第 137 |
+| `IsDedekindDomain F[W]` | 第 137 |
 | `HeightOneSpectrum F[W] ↔ 曲線上の点` | 第 138 |
+| `J^n = (u)` かつ `J = (g)` ⟹ `n` 乗根 | 第 139 |
+| `Σ_{T ∈ E[n]} T = 0`、類が自明 ⟹ 単項 | 第 140 |
+| `f_P·f_{−P} = c(x − x_P)^n`、`μ` が `F`-代数射 | 第 141 |
+| `∀ v, n ∣ count_v ⟹ n` 乗、`deg Ψ₂Sq = 3` | 第 142 |
 | `(f_P) = XYIdeal_P^n` | 第 126 |
-| `μ`(群法則で固定された `[n]` の引き戻し) | 第 118・125 |
-| 平行移動 `τ_T`(体の自己同型) | 第 120・124 |
+| `μ`(群法則で固定) | 第 118・125 |
+| 平行移動 `τ_T` | 第 120・124 |
 | 単元は定数 | 第 128 |
 -/
 
 namespace ABC3.Skeleton.GaloisRep
 
-open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve WeierstrassCurve.Affine nonZeroDivisors
+open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve WeierstrassCurve.Affine
+open IsDedekindDomain nonZeroDivisors
 
 variable {F : Type} [Field F] [DecidableEq F]
 
-/-- ★★★★★**D1 —— `(μ f_P)` は `n` 乗である**(因子が `n` で割れる)。
+/-- ★★★★★★**D1' —— 各素点での指数は `n` で割れる**。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★`ord_Q(μ f_P) = e_Q · ord_{[n]Q}(f_P)` で右の因子が `{n, −n, 0}` のいずれかだから、
-**分岐指数 `e_Q` を知らなくても** `n` で割れる。 -/
-theorem exists_fractionalIdeal_pow (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
+★これが層 3 の残り 2 つのうちの 1 つである。★★2 つの場合(アフィン/無限遠)に分かれる。 -/
+theorem dvd_count_pullback [IsAlgClosed F] (h2 : IsUnit (2 : F))
+    (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
-    (μ : W.CoordinateRing →+* W.FunctionField)
+    (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
+    {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
+    (hμP : n • genericPoint W = Point.some xn yn hns)
+    (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
+    (fP : W.CoordinateRing)
+    (hfP : (CoordinateRing.XYIdeal W x (Polynomial.C y)) ^ n = Ideal.span {fP}) :
+    haveI := isDedekindDomain_coordinateRing h2 W
+    ∀ v : HeightOneSpectrum W.CoordinateRing,
+      (n : ℤ) ∣ FractionalIdeal.count W.FunctionField v
+        (FractionalIdeal.spanSingleton W.CoordinateRing⁰ (μ fP)) := by
+  sorry
+
+/-- ★★★★★**D1 —— `(μ f_P)` は `n` 乗である**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★D1'(指数の `n` 可除性)と第 142 ブロックから**証明される**。 -/
+theorem exists_fractionalIdeal_pow [IsAlgClosed F] (h2 : IsUnit (2 : F))
+    (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
+    (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
+    (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
@@ -75,7 +103,9 @@ theorem exists_fractionalIdeal_pow (W : WeierstrassCurve.Affine F) [W.IsElliptic
     (hfP : (CoordinateRing.XYIdeal W x (Polynomial.C y)) ^ n = Ideal.span {fP}) :
     ∃ J : FractionalIdeal W.CoordinateRing⁰ W.FunctionField,
       J ^ n = FractionalIdeal.spanSingleton W.CoordinateRing⁰ (μ fP) := by
-  sorry
+  haveI := isDedekindDomain_coordinateRing h2 W
+  exact exists_pow_of_dvd_count (spanSingleton_mu_ne_zero W n fP hfP μ hμinj)
+    (dvd_count_pullback h2 W h n hn hP μ hμinj hns hμP hμx hμy fP hfP)
 
 /-- ★★★★★**D2 —— その `J` は単項である**(Abel–Jacobi)。
 
@@ -83,10 +113,11 @@ theorem exists_fractionalIdeal_pow (W : WeierstrassCurve.Affine F) [W.IsElliptic
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
 ★`Point.toClass` の単射性(mathlib)で、類が 0 であることから単項性が出る。
-★★類の計算では `Σ_{Q ∈ [n]⁻¹(P)} Q = 0` と `Σ_{T ∈ E[n]} T = 0` を使う。 -/
-theorem fractionalIdeal_isPrincipal (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
+★★類の計算では `Σ_{Q ∈ [n]⁻¹(P)} Q = 0` と `Σ_{T ∈ E[n]} T = 0`(第 140)を使う。 -/
+theorem fractionalIdeal_isPrincipal [IsAlgClosed F] (h2 : IsUnit (2 : F))
+    (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
-    (μ : W.CoordinateRing →+* W.FunctionField)
+    (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
@@ -99,28 +130,45 @@ theorem fractionalIdeal_isPrincipal (W : WeierstrassCurve.Affine F) [W.IsEllipti
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
-def exists_fractionalIdeal_pow.src : Source :=
+def dvd_count_pullback.src : Source :=
   { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(Weil 対の構成——div(f_P ∘ [n]) が n で割れること)",
+    item := "Theorem 3.8(Weil 対の構成——div(f_P ∘ [n]) の各素点での指数が n で割れること)",
     sectionId := "genell-thm-3-8" }
 
-def exists_fractionalIdeal_pow.needs : List ProofObligation :=
+def dvd_count_pullback.needs : List ProofObligation :=
   [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1 の証明(div(f_P∘[n]) の計算)"
       (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
     .implicitStep
-      "★★★★★★**不分岐性は要らない**(2026-08-20 の見通し変更)。一般の付値論で `ord_Q(μ f) = e_Q · ord_{[n]Q}(f)` であり、`div(f_P) = n(P) − n(O)` から右の因子は `{n, −n, 0}` のいずれか。★したがって `e_Q` が何であっても `n` で割れる。`deg[n] = n²` も `#E[n] = n²` も**この節点には不要**である" 19,
+      "★★★★★★**不分岐性は要らない**(2026-08-20 の見通し変更)。`ord_Q(μ f) = e_Q · ord_{[n]Q}(f)` で右の因子は `div(f_P) = n(P) − n(O)` から `{n, −n, 0}` のいずれか。★`e_Q` が何であっても `n` で割れる。`deg[n] = n²` も `#E[n] = n²` も**不要**である" 19,
     .implicitStep
-      "★★★★因子機構は **mathlib に完備**である——`IsDedekindDomain.HeightOneSpectrum`・`intValuation`・`Ideal.finprod_heightOneSpectrum_factorization`・adic 付値。`IsDedekindDomain F[W]` は**第 137 ブロックで取れた**ので、そのまま使える(0 ブロック)" 19,
+      "★★★★★★**加法的な指数表示は mathlib にあった**(2026-08-20 実測)——`FractionalIdeal.count : FractionalIdeal R⁰ K → ℤ` と `count_pow`・`count_finprod`・`finite_factors`・`finprod_heightOneSpectrum_factorization'`。付値(`WithZero (Multiplicative ℤ)`、乗法的)を経由せずに済む(0 ブロック)" 19,
     .implicitStep
-      "★★★因子を幾何の言葉(曲線上の点)で読む対応は**第 138 ブロックで取れた**——`HeightOneSpectrum F[W] ↔ { (c,y₀) : W.Equation c y₀ }`(0 ブロック)" 19,
+      "★★★★★**最終組み立ては第 142 ブロックで済**——`∀ v, n ∣ count_v(I) ⟹ ∃ J, J^n = I`(`exists_pow_of_dvd_count`)(0 ブロック)" 19,
     .implicitStep
-      "★★★`ord_Q(μ f) = e_Q · ord_{v'}(f)` の段。`μ` を体の埋め込み `μ̃ : F(W) → F(W)` に延ばし、`v` の下にある `v' := μ̃⁻¹(m_v) ∩ F[W]` を取る。mathlib の `IsDedekindDomain.HeightOneSpectrum` と `Valuation.comap` で書けるはずだが、拡大の分岐指数 `e` を扱う API の在庫は未実測(15-40 ブロック)" 19,
+      "★★★★**場合 A(`F[W] ⊆ O_ν`、`[n]Q` がアフィン点)**: `ν := ord_v ∘ μ̃` は `F[W]` 上非負なので、イデアルの最小値 `ν(I) := min_{a ∈ I} ν(a)` が定義でき、付値だから `ν(I·J) = ν(I) + ν(J)`。★`(f_P) = I_P^n`(第 126)から **`ν(f_P) = n·ν(I_P)`** が直ちに出る。分岐指数を経由しない(8-20 ブロック)" 19,
     .implicitStep
-      "★★`(f_P) = XYIdeal_P^n` は **第 126 ブロックで済**(`xyIdeal_pow_isPrincipal_integral`)。これが `ord_{v'}(f_P) ∈ {n, 0}` を与える(0 ブロック)" 19,
+      "★★★★★**場合 B(`F[W] ⊄ O_ν`、`[n]Q = O`)**: `ν(x) < 0` となる。★第 129 の `z² = Ψ₂Sq(x)` と `deg Ψ₂Sq = 3`(第 142、**奇数**)から `2ν(z) = 3ν(x)`、`gcd(2,3) = 1` より **`2 ∣ ν(x)`**。★★`p(x) ∈ F[x]` の付値は `deg(p)·ν(x)`(偶数倍)、`q(x)z` の付値は奇数倍なので**決して一致せず**、`ν(p + qz) = min` が成り立つ。★★★したがって `ν` は `F(x)` 上への制限で一意に決まり、超楕円対合 `ι` で不変(8-20 ブロック)" 19,
     .implicitStep
-      "★`μ` は第 118・125 ブロックで**群法則によって固定された形で**得られている(`exists_mulByNHom_charZero`)(0 ブロック)" 19,
+      "★★★★★場合 B の帰結: ノルム `N(a) = a·ι(a) ∈ F[x]` に `ν` を当てると `2ν(a) = deg N(a)·ν(x)`。★`ν(x) = −2m` として **`ν(a) = −m·deg N(a)`**。★★`(f_P) = I_P^n` から `deg N(f_P) = dim_F(F[W]/I_P^n) = n` なので **`ν(f_P) = −m·n`**、`n` で割れる(8-20 ブロック)" 19,
     .implicitStep
-      "★★★因子が `n` で割れることから `J` を作る段。Dedekind 環では分数イデアルが素因子の自由アーベル群なので、指数を `n` で割ったものが `J` になる。mathlib の `FractionalIdeal` の因子分解 API の在庫は未実測(5-15 ブロック)" 19 ]
+      "★★★★**`f_P · f_{−P} = c·(x − x_P)^n` は第 141 ブロックで済**(mathlib の `XYIdeal_neg_mul` + 第 128)。場合 B でノルムの代わりに使うこともできる(0 ブロック)" 19,
+    .implicitStep
+      "★★`μ` の単射性を仮定に置いた。第 118 の `pointHom_injective_of_transcendental` から出るが、`x([n]·)` の超越性を別途示す必要がある(3-8 ブロック)" 19,
+    .implicitStep
+      "★逸脱の記録: `[IsAlgClosed F]` と `IsUnit (2 : F)` を仮定に足した。第 137(Dedekind 性)と第 139(定数の `n` 乗根)が使う。消費側((G5) `det_cyclotomic`)は `[IsAlgClosed L]`・`[CharZero K]` の下で述べられているので後続に影響しない" 19 ]
+
+def exists_fractionalIdeal_pow.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Weil 対の構成——(μ f_P) が n 乗であること)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_fractionalIdeal_pow.needs : List ProofObligation :=
+  [ .implicitStep
+      "★★★★★★**本節点の `sorry` は消えた**(2026-08-20)——`dvd_count_pullback`(D1'、各素点での指数が `n` で割れること)と第 142 ブロック(`exists_pow_of_dvd_count`)から証明される(0 ブロック)" 19,
+    .implicitStep
+      "★★`(μ f_P) ≠ 0` は第 142 ブロックで済(`spanSingleton_mu_ne_zero`)——`μ` の単射性から出る(0 ブロック)" 19,
+    .implicitStep
+      "★★★`IsDedekindDomain F[W]` は第 137 ブロックで済。`[IsAlgClosed F]` と `IsUnit (2 : F)` を仮定に置いているのはそのためである(0 ブロック)" 19 ]
 
 def fractionalIdeal_isPrincipal.src : Source :=
   { paper := "GenEll", pdfPage := 19,
@@ -133,14 +181,16 @@ def fractionalIdeal_isPrincipal.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★**分岐指数 `e_Q` はここでも消える**——平行移動 `τ_T`(`T ∈ E[n]`)は `[n]∘τ_T = [n]` により `μ` を保つので `e_Q` は各ファイバー上で一定。共通因子 `e` を括り出すと `Σ_{Q ∈ [n]⁻¹(P)} Q = n²Q₀ = n·P = 0` と `Σ_{T ∈ E[n]} T = 0` から類は 0 になる。★`e` の値を知る必要はない" 19,
     .implicitStep
-      "★★★★`Point.toClass` の**単射性は mathlib にある**(`Point.toClass_injective`、2026-08-20 実測)。類が 0 なら `J` が単項であることはここから出る(2-5 ブロック)" 19,
+      "★★★★`Point.toClass` の**単射性は mathlib にある**(`Point.toClass_injective`、2026-08-20 実測)。類が自明なら単項であることは **第 140 ブロックで済**(`isPrincipal_of_classGroup_eq_one`)(0 ブロック)" 19,
     .implicitStep
       "★★★平行移動 `τ_T` が体の自己同型であることは **第 120・124 ブロックで済**(`translateAlgEquiv`・`exists_translateAut_all`)(0 ブロック)" 19,
     .implicitStep
-      "★★`Σ_{T ∈ E[n]} T = 0` の段。`E[n] ≅ (ℤ/n)²`((G1) で取得済)から `Σ_{(a,b)} (a,b) = (n·Σa, n·Σb) = 0`。有限アーベル群の全元の和に関する mathlib の在庫は未実測(3-8 ブロック)" 19,
+      "★★★★`Σ_{T ∈ E[n]} T = 0` は **第 140 ブロックで済**(`sum_univ_eq_zero_of_addEquiv`)——`E[n] ≅ (ℤ/n)²`((G1) で取得済)を当てるだけ(0 ブロック)" 19,
     .implicitStep
       "★★★ファイバー `[n]⁻¹(P) = {Q₀ + T : T ∈ E[n]}` の記述と、`Σ_{Q ∈ ファイバー} Q = n²Q₀ + Σ_T T = n·P + 0 = 0` の計算(5-12 ブロック)" 19,
     .implicitStep
-      "★★アフィン座標環の類群は `Pic⁰(E)` である(無限遠点 `O` を落とすと次数が消える)。`toClass` が `(R) − (O)` の類を与えることを使って、因子の類を点の和として読む(3-8 ブロック)" 19 ]
+      "★★アフィン座標環の類群は `Pic⁰(E)` である(無限遠点 `O` を落とすと次数が消える)。`toClass` が `(R) − (O)` の類を与えることを使って、因子の類を点の和として読む(3-8 ブロック)" 19,
+    .implicitStep
+      "★★因子を幾何の言葉で読む対応は **第 138 ブロックで済**(`exists_point_of_heightOneSpectrum`)(0 ブロック)" 19 ]
 
 end ABC3.Skeleton.GaloisRep

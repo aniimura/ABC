@@ -17049,3 +17049,53 @@ mathlib の `CoordinateRing.XYIdeal_neg_mul` が
 スケルトンの仮定に含められるようになった。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-452 D1 が「指数の `n` 可除性」だけに縮んだ(第 142 ブロック)
+
+### ★★★★★★mathlib が加法的な指数表示を持っていた
+
+2026-08-20 実測: **`FractionalIdeal.count : FractionalIdeal R⁰ K → ℤ`** は整数値であり、
+`count_pow`・`count_finprod`・`finite_factors`・
+`finprod_heightOneSpectrum_factorization'` が揃っている。
+★付値(`WithZero (Multiplicative ℤ)`、乗法的)を経由せずに**加法的に扱える**。
+★★§9-449 で「付値の形式を実測して決める(3-8 ブロック)」と書いた件は 0 ブロックで済んだ。
+
+### ★★★★★★最終組み立てが一発で通った
+
+    ∀ v, n ∣ count_v(I)     ⟹     ∃ J, J^n = I        (`exists_pow_of_dvd_count`)
+
+証明は `exps v := count_v(I)/n` と置いて `J := ∏ᶠ v, v^(exps v)` を取るだけ。
+`finprod_pow` と `finprod_heightOneSpectrum_factorization'` で閉じる。
+
+★これにより D1(`∃ J, J^n = (μ f_P)`)は **D1'(`∀ v, n ∣ count_v((μ f_P))`)から
+証明される**ようになり、`sorry` はさらに 1 段深いところへ移った。
+
+### ★★層 3 に残る `sorry` は 2 つ
+
+| 節点 | 内容 | 見積もり |
+|---|---|---|
+| `dvd_count_pullback` (D1') | `∀ v, n ∣ count_v((μ f_P))` | 20-45 |
+| `fractionalIdeal_isPrincipal` (D2) | `J` が単項——Abel–Jacobi | 10-25 |
+
+### ★★★D1' は 2 つの場合に分かれ、両方とも初等的である
+
+* **場合 A**(`[n]Q` がアフィン点): `ν := ord_v ∘ μ̃` は `F[W]` 上非負なので
+  イデアルの最小値が定義でき、`(f_P) = I_P^n` から `ν(f_P) = n·ν(I_P)`。
+* **場合 B**(`[n]Q = O`): `ν(x) < 0`。★第 129 の `z² = Ψ₂Sq(x)` と
+  `deg Ψ₂Sq = 3`(**本ブロックで取得**、奇数)から `2ν(z) = 3ν(x)`、
+  `gcd(2,3) = 1` より **`ν(x)` は偶数**。
+  ★★`p(x)` の付値は偶数倍、`q(x)z` の付値は奇数倍で**決して一致しない**ので
+  `ν(p + qz) = min` となり、`ν` は `F(x)` 上への制限で一意に決まる。
+  ★★★したがって超楕円対合で不変になり、ノルムから `ν(f_P) = −m·n`。
+
+★これが「無限遠で分岐する」ことの**初等的な形**である。場所の分類定理は要らない。
+
+### ★逸脱の記録
+
+`exists_nthRoot_comp_mulByN` と D1・D2 に `IsUnit (2 : F)` と
+`Function.Injective μ` を足した。前者は第 137(Dedekind 性)が、
+後者は `(μ f_P) ≠ 0` が使う。★消費側((G5) `det_cyclotomic`)は
+`[IsAlgClosed L]`・`[CharZero K]` の下で述べられているので後続に影響しない。
+
+★全体ビルド成功(5100 jobs)、ゲート PASS。
+★義務の数は動いていない(Galois 4/8)。

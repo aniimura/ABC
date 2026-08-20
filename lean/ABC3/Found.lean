@@ -605,6 +605,7 @@ import ABC3.Found.GaloisRep.PointSpectrum
 import ABC3.Found.GaloisRep.RootFromIdeal
 import ABC3.Found.GaloisRep.DivisorTools
 import ABC3.Found.GaloisRep.PullbackAlg
+import ABC3.Found.GaloisRep.CountPow
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

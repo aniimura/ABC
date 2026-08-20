@@ -74,18 +74,20 @@ variable {F : Type} [Field F] [DecidableEq F]
 第 139 ブロックが「単元(= 定数)の `n` 乗根を取る」ために `F` の代数閉性を使う。
 ★消費する側((G5) `det_cyclotomic`)は `[IsAlgClosed L]` の下で述べられているので、
 後続の証明に影響は出ない。 -/
-theorem exists_nthRoot_comp_mulByN [IsAlgClosed F] (W : WeierstrassCurve.Affine F)
+theorem exists_nthRoot_comp_mulByN [IsAlgClosed F] (h2 : IsUnit (2 : F))
+    (W : WeierstrassCurve.Affine F)
     [W.IsElliptic] {x y : F}
     (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
-    (μ : W.CoordinateRing →+* W.FunctionField)
+    (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
     (hμP : n • genericPoint W = Point.some xn yn hns)
     (hμx : μ (genX W) = xn) (hμy : μ (genY W) = yn)
     (fP : W.CoordinateRing)
     (hfP : (CoordinateRing.XYIdeal W x (Polynomial.C y)) ^ n = Ideal.span {fP}) :
     ∃ g : W.FunctionField, g ^ n = μ fP := by
-  obtain ⟨J, hJ⟩ := exists_fractionalIdeal_pow W h n hn hP μ hns hμP hμx hμy fP hfP
-  obtain ⟨g, hg⟩ := fractionalIdeal_isPrincipal W h n hn hP μ hns hμP hμx hμy fP hfP J hJ
+  obtain ⟨J, hJ⟩ := exists_fractionalIdeal_pow h2 W h n hn hP μ hμinj hns hμP hμx hμy fP hfP
+  obtain ⟨g, hg⟩ :=
+    fractionalIdeal_isPrincipal h2 W h n hn hP μ hμinj hns hμP hμx hμy fP hfP J hJ
   exact exists_nthRoot_of_fractionalIdeal W hn hJ hg
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
