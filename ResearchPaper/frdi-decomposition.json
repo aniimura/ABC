@@ -50,7 +50,10 @@
           "status": "done",
           "size": "——",
           "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ore.lean` の `exists_ore_square_coaPre`(2 本版)と `exists_ore_common`(有限族版)。道具は (iii)(d) `coaPreOverEquiv` ひとつ —— `Order(Φ(A))` は前順序圏、`Φ(A)` は `δ ≼ δ+ε` で有向、ゆえにスライスは余フィルター。★model 限定ではなかった。",
-          "★model 版": "Found/FrdI/Thm52Frob.lean の `exists_ore_square`(model について実装済み)。**一般化がこの節点**である。"
+          "★model 版": "Found/FrdI/Thm52Frob.lean の `exists_ore_square`(model について実装済み)。**一般化がこの節点**である。",
+          "lean": "ABC3/Found/FrdI/Prop44Ore.lean",
+          "decl": "exists_ore_square_coaPre / exists_ore_common",
+          "note": "★2026-08-21：**台帳の穴を埋めた** —— 実体は `Prop44Ore.lean` の `exists_ore_square_coaPre`（`.src` は `Proposition 4.4, (ii)`、物理 p.85）と `exists_ore_common`。"
         },
         {
           "id": "divgp-hom",
@@ -58,15 +61,19 @@
           "deps": [],
           "status": "done",
           "size": "——",
-          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ore.lean` の `otriDivGp_mul` と `otriDivGpHom`。合成公式 `Div(f≫g) = Φ(Base f)(Div g) + deg(g)·Div f` の 2 つの補正項が、底恒等・次数 1 でどちらも消える。"
+          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ore.lean` の `otriDivGp_mul` と `otriDivGpHom`。合成公式 `Div(f≫g) = Φ(Base f)(Div g) + deg(g)·Div f` の 2 つの補正項が、底恒等・次数 1 でどちらも消える。",
+          "lean": "ABC3/Found/FrdI/Prop44Ore.lean",
+          "decl": "otriDivGpHom / otriDivGp_mul",
+          "note": "★2026-08-21：**台帳の穴を埋めた** —— 実体は `Prop44Ore.lean` の `otriDivGpHom`（`.src` は `Proposition 4.4, (ii)`、物理 p.85）と `otriDivGp_mul`。"
         },
         {
           "id": "image-central",
           "title": "`𝒪^▷(A)_𝒞` の像が `𝒪^×(A^birat)` の中心に入ること",
           "deps": [],
-          "status": "done",
+          "status": "半済",
           "size": "——",
-          "evidence": "★2026-08-17 に取得済み(Gap/FrdI/Prop44.lean の測定欄)。`𝒞` の `otriBase` を `c`・`s` に当てて `Θ_c = Θ_s` を得る。"
+          "evidence": "★2026-08-17 に取得済み(Gap/FrdI/Prop44.lean の測定欄)。`𝒞` の `otriBase` を `c`・`s` に当てて `Θ_c = Θ_s` を得る。",
+          "note": "★★★2026-08-21：**`done` を取り消して `半済` に落とした**。\n`central-ext` の note が指摘していたとおり、この節点には `lean` / `decl` が無く、\n`Prop44*.lean` を全走査しても「`𝒪^×(A) の像が 𝒪^×(A^birat) の中心に入る」に相当する宣言が**見つからない**。\n★近いのは `Prop110.lean` の `otri_comm_upToUnit`（`𝒪^▷(A)` が `𝒪^×(A)` を法として可換）だが、\n**主張が違う**。★`Prop44Gl.lean` の `otri_mul_comm_of_birat` は\n「birat-Frobenius-normalized なら `𝒪^▷(A)` は可換」で、これも中心性そのものではない。\n★★**したがって未実装として扱う**。`pairing-vanishes` はこれに依存しているので、\n先にこちらを実装するか、あるいは中心性を経由しない証明筋を立てること。"
         },
         {
           "id": "ker-eq-image",
@@ -76,7 +83,10 @@
           ],
           "status": "done",
           "size": "——",
-          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ker.lean` の `otriDivGp_eq_zero_iff`。★`Φ(A)` が **divisorial** であることの 2 条が両方向でそれぞれ効く —— **integral**(`toGp` 単射)で `Div f = Div c` を出して (vi) `faithfulUpToUnits` に渡し、**sharp** で `α ∈ 𝒪^×(A)` の `Div α = 0` を出す。"
+          "evidence": "★★2026-08-18 に**証明した**: `Found/FrdI/Prop44Ker.lean` の `otriDivGp_eq_zero_iff`。★`Φ(A)` が **divisorial** であることの 2 条が両方向でそれぞれ効く —— **integral**(`toGp` 単射)で `Div f = Div c` を出して (vi) `faithfulUpToUnits` に渡し、**sharp** で `α ∈ 𝒪^×(A)` の `Div α = 0` を出す。",
+          "lean": "ABC3/Found/FrdI/Prop44Ker.lean",
+          "decl": "otriDivGp_eq_zero_iff / phiBiratAt_ker",
+          "note": "★2026-08-21：**台帳の穴を埋めた** —— 実体は `Prop44Ker.lean` の `otriDivGp_eq_zero_iff`（`.src` は `Proposition 4.4, (ii)`）と `phiBiratAt_ker`（`Proposition 4.4, (iii)`）。"
         },
         {
           "id": "central-ext",
@@ -111,7 +121,10 @@
           "deps": [],
           "status": "done",
           "size": "——",
-          "evidence": "★★**2026-08-18 の測定の訂正**: `Frobenioid` は `core`(21 条)＋ `coaPreUnderEquiv` ＋ `coaPreOverEquiv` の **3 フィールド**であり、(iii)(d) の 2 本は**未実装だった**(このチェーンにも入っていなかった)。★★しかし `𝒞^birat` では易しい —— `biratPre` の単系は**自明**(`trivialOn D`)なので `Order(Φ^birat(A))` は 1 対象 1 射、かつ co-angular pre-step はすべて同型なので任意の 2 対象間に射が作れる。`Found/FrdI/Prop44Equiv.lean` で**証明した**(`birat_coaPreUnderEquiv` / `birat_coaPreOverEquiv` / `birat_frobenioid_of_comm`)。"
+          "evidence": "★★**2026-08-18 の測定の訂正**: `Frobenioid` は `core`(21 条)＋ `coaPreUnderEquiv` ＋ `coaPreOverEquiv` の **3 フィールド**であり、(iii)(d) の 2 本は**未実装だった**(このチェーンにも入っていなかった)。★★しかし `𝒞^birat` では易しい —— `biratPre` の単系は**自明**(`trivialOn D`)なので `Order(Φ^birat(A))` は 1 対象 1 射、かつ co-angular pre-step はすべて同型なので任意の 2 対象間に射が作れる。`Found/FrdI/Prop44Equiv.lean` で**証明した**(`birat_coaPreUnderEquiv` / `birat_coaPreOverEquiv` / `birat_frobenioid_of_comm`)。",
+          "lean": "ABC3/Found/FrdI/Prop44Gl.lean",
+          "decl": "birat_isBaseIdentity_iff / birat_isPullBack_iff / prop_4_4_iv",
+          "note": "★2026-08-21：**台帳の穴を埋めた** —— 実体は `Prop44Gl.lean` の `birat_isBaseIdentity_iff` / `birat_isPullBack_iff`（`.src` は `Proposition 4.4, (iv)`）。"
         },
         {
           "id": "otribase",
