@@ -117,6 +117,7 @@ import ABC3.Found.Divisor.CartierPrime
 import ABC3.Found.Divisor.CartierPf
 import ABC3.Found.Divisor.CartierMonoprime
 import ABC3.Found.Divisor.CartierPerfFactorial
+import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
@@ -635,6 +636,7 @@ import ABC3.Found.GaloisRep.RedZero
 import ABC3.Found.GaloisRep.RedHom
 import ABC3.Found.GaloisRep.Infinity
 import ABC3.Found.GaloisRep.InfinityKer
+import ABC3.Found.GaloisRep.RedKernel
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
