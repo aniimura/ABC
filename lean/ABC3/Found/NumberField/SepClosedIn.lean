@@ -228,6 +228,31 @@ theorem finrank_adjoin_coe_eq_of_separableClosure_eq_bot
   rw [hAeq, finrank_adjoin_eq_of_separableClosure_eq_bot hsc hint hsep]
   exact congrArg (fun M : IntermediateField K₁ Ω => Module.finrank K₁ M) hLeq.symm
 
+/-! ## ★5. 射の側の材料(`thm62-i-Dfun` が使う) -/
+
+/-- ★★★**`K₁` 上の共役は `K₂` 上でも共役** —— `minpoly K₂ β` の根は
+`minpoly K₁ β` の根と同じ。
+
+★★これが `thm62-i-Dfun`(関手 `𝒟₁ → 𝒟₂` の**射の側**)の要である ——
+`K₁`-代数射 `σ : L → M` に対し `σβ` は `minpoly K₁ β` の根なので、
+`minpoly K₂ β` の根でもあり、したがって `K₂⟮β⟯ → K₂⟮σβ⟯` が定まる。 -/
+theorem aeval_minpoly_extend (hsc : separableClosure K₁ K₂ = ⊥)
+    {Ω : Type*} [Field Ω] [Algebra K₁ Ω] [Algebra K₂ Ω] [IsScalarTower K₁ K₂ Ω]
+    {β : Ω} (hint : IsIntegral K₁ β) (hs : IsSeparable K₁ β)
+    {γ : Ω} (hγ : aeval γ (minpoly K₁ β) = 0) :
+    aeval γ (minpoly K₂ β) = 0 := by
+  rw [minpoly_eq_map_of_separableClosure_eq_bot hsc hint hs, aeval_map_algebraMap]
+  exact hγ
+
+/-- ★逆向き —— `minpoly K₂ β` の根は `minpoly K₁ β` の根。 -/
+theorem aeval_minpoly_descend (hsc : separableClosure K₁ K₂ = ⊥)
+    {Ω : Type*} [Field Ω] [Algebra K₁ Ω] [Algebra K₂ Ω] [IsScalarTower K₁ K₂ Ω]
+    {β : Ω} (hint : IsIntegral K₁ β) (hs : IsSeparable K₁ β)
+    {γ : Ω} (hγ : aeval γ (minpoly K₂ β) = 0) :
+    aeval γ (minpoly K₁ β) = 0 := by
+  rw [minpoly_eq_map_of_separableClosure_eq_bot hsc hint hs, aeval_map_algebraMap] at hγ
+  exact hγ
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Theorem 6.2, (i)` の「`K₁` が `K₂` の中で分離閉 ⟹ 次数が保たれる」。 -/

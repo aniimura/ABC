@@ -3409,11 +3409,11 @@
           "deps": [
             "thm62-i-ext"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "",
+          "note": "\n\n★★★★2026-08-21：**射の側の要を取った**（`SepClosedIn.lean`）。\n`aeval_minpoly_extend` / `aeval_minpoly_descend` ——\n★**`K₁` 上の共役は `K₂` 上でも共役**（`minpoly K₂ β` の根は `minpoly K₁ β` の根と一致）。\n`minpoly_eq_map_of_separableClosure_eq_bot`（`thm62-i-ext`）から `aeval_map_algebraMap` 1 本で出る。\n\n★★これで関手 `𝒟₁ → 𝒟₂` の**射の側**の道が開いた:\n`K₁`-代数射 `σ : L → M` に対し、`L = K₁⟮β⟯` の原始元 `β` を取ると\n`σβ` は `minpoly K₁ β` の根、したがって `minpoly K₂ β` の根なので、\n`IntermediateField.algHomAdjoinIntegralEquiv` で `K₂⟮β⟯ →ₐ[K₂] Ω` が定まり、\n像は `K₂⟮σβ⟯ ⊆ K₂(M)` に入る。\n★**対象の側**は `finrank_adjoin_coe_eq_of_separableClosure_eq_bot`（次数の保存）で済んでいる。\n★残るのは**関手則の配線**（`id`・`comp`——どちらも「`β` の像で決まる」という一意性から出る）だけである。",
           "lean": "",
-          "decl": ""
+          "decl": "aeval_minpoly_extend / aeval_minpoly_descend"
         },
         {
           "id": "thm62-i-pull",
