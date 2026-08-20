@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.CategoryVocabulary
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 import Mathlib.FieldTheory.Galois.Basic
+import Mathlib.FieldTheory.Galois.Infinite
 
 /-!
 # [FrdI] Example 6.1 の底の圏 `𝒟 = B(G)⁰`
@@ -26,13 +27,11 @@ import Mathlib.FieldTheory.Galois.Basic
 * `finSubOp_totallyEpimorphic` —— `FinSub` の射は体の射なので**すべて単射**、
   したがって mono。反対圏では epi になる。
 
-## ★残り
+## ★of FSM-type も揃った
 
-`𝒟` が **of FSM-type** であることは別途要る(`Φ^birat` を monoid on `𝒟` に
-するために足した仮定の、幾何での根拠)。★中身は
-「`FinSub` の epi は同型」——`M/f(L)` が非自明な有限分離拡大なら
-相異なる 2 つの埋め込みが取れる、という主張であり、分離性の在庫を要する。
-★節点 `galois-cat-B0` に残す。
+`𝒟` が **of FSM-type** であることも本ファイルで示す(`finSubOp_isOfFSMType`)。★これは `Φ^birat` を monoid on `𝒟` にするために
+足した仮定((B) として `index.html` に開示)が、**幾何の応用では本当に成り立つ**ことの根拠である。
+★中身は「`FinSub` の epi は同型」で、無限 Galois 理論の `fixedField (fixingSubgroup L) = L` 1 本で出る。
 -/
 
 namespace ABC3.Found.FrdI
@@ -116,12 +115,101 @@ theorem finSubOp_totallyEpimorphic :
   have h1 : g.unop ≫ f.unop = h.unop ≫ f.unop := congrArg Quiver.Hom.unop e
   exact Quiver.Hom.unop_inj ((cancel_mono f.unop).mp h1)
 
+/-! ## ★2. `of FSM-type`
+
+★★`Φ^birat` を `monoid on 𝒟` にするために足した仮定(`IsOfFSMType 𝒟`、
+`index.html` に (B) として開示)が、**幾何の応用では本当に成り立つ**ことの根拠である。
+
+★`B(G)⁰` の言葉で言えば「推移的 `G`-集合の間の単射な `G`-写像は全単射」——
+反対圏の mono は `FinSub` の epi であり、それが同型であることを示せばよい。 -/
+
+section FSM
+
+variable [IsGalois K Kbar]
+
+/-- ★★★★**`FinSub` の epi は同型**。
+
+★★`M/f(L)` が非自明なら、`K̄/K` が Galois なので `f(L)` を固定して `x` を動かす
+`σ ∈ Gal(K̄/K)` が取れる(無限 Galois 理論の
+`InfiniteGalois.fixedField_fixingSubgroup`)。
+★`M` と `σ(M)` の合成体 `N` は有限次なので `FinSub` の対象であり、
+`M ⟶ N` の相異なる 2 射が `f` の後で一致してしまう —— epi に反する。 -/
+theorem finSub_isIso_of_epi {L M : FinSub K Kbar} (f : L ⟶ M) (hepi : Epi f) : IsIso f := by
+  haveI := hepi
+  set L₁ : IntermediateField K Kbar := ((M.toIF.val).comp (FinSub.hom f)).fieldRange with hL₁
+  have hge : M.toIF ≤ L₁ := by
+    by_contra hcon
+    obtain ⟨x, hxM, hxL⟩ := SetLike.not_le_iff_exists.mp hcon
+    have hfix : IntermediateField.fixedField L₁.fixingSubgroup = L₁ :=
+      InfiniteGalois.fixedField_fixingSubgroup L₁
+    have hx : x ∉ IntermediateField.fixedField L₁.fixingSubgroup := by rw [hfix]; exact hxL
+    rw [IntermediateField.mem_fixedField_iff] at hx
+    push Not at hx
+    obtain ⟨σ, hσ, hne⟩ := hx
+    have hfixy : ∀ y ∈ L₁, σ y = y := fun y hy => by simpa using hσ ⟨y, hy⟩
+    haveI := M.fin
+    haveI : FiniteDimensional K (M.toIF.map σ.toAlgHom) :=
+      (IntermediateField.intermediateFieldMap σ M.toIF).toLinearEquiv.finiteDimensional
+    set N : FinSub K Kbar :=
+      ⟨M.toIF ⊔ M.toIF.map σ.toAlgHom, IntermediateField.finiteDimensional_sup _ _⟩ with hN
+    have hgmem : ∀ y : M.toIF, σ (y : Kbar) ∈ N.toIF := by
+      intro y
+      refine le_sup_right (α := IntermediateField K Kbar) ?_
+      exact ⟨(y : Kbar), y.2, rfl⟩
+    set g' : M ⟶ N :=
+      show M.toIF →ₐ[K] N.toIF from
+        (σ.toAlgHom.comp M.toIF.val).codRestrict N.toIF.toSubalgebra (fun y => hgmem y) with hg'
+    set h' : M ⟶ N :=
+      show M.toIF →ₐ[K] N.toIF from IntermediateField.inclusion le_sup_left with hh'
+    have hcomp : f ≫ g' = f ≫ h' := by
+      refine FinSub.hom_ext (AlgHom.ext fun y => ?_)
+      refine Subtype.ext ?_
+      show σ (((FinSub.hom f) y : M.toIF) : Kbar) = (((FinSub.hom f) y : M.toIF) : Kbar)
+      exact hfixy _ ⟨y, rfl⟩
+    have hgh : g' = h' := (cancel_epi f).mp hcomp
+    have hfixx : σ x = x := by
+      have h1 := congrArg FinSub.hom hgh
+      exact congrArg (fun t : M.toIF →ₐ[K] N.toIF => ((t ⟨x, hxM⟩ : N.toIF) : Kbar)) h1
+    exact hne hfixx
+  have hsurj : Function.Surjective (FinSub.hom f) := by
+    intro z
+    obtain ⟨y, hy⟩ := hge z.2
+    exact ⟨y, Subtype.ext hy⟩
+  let e : L.toIF ≃ₐ[K] M.toIF :=
+    AlgEquiv.ofBijective (FinSub.hom f) ⟨FinSub.hom_injective f, hsurj⟩
+  refine ⟨show M ⟶ L from (e.symm : M.toIF →ₐ[K] L.toIF), ?_, ?_⟩
+  · exact FinSub.hom_ext (AlgHom.ext fun y => e.symm_apply_apply y)
+  · exact FinSub.hom_ext (AlgHom.ext fun y => e.apply_symm_apply y)
+
+/-- ★★★★★**`𝒟 = B(G)⁰` は of FSM-type**。
+
+★FSM = fiberwise-surjective ∧ mono だが、**mono だけで足りる**。 -/
+theorem finSubOp_isOfFSMType : IsOfFSMType (FinSub K Kbar)ᵒᵖ := by
+  intro B A β hβ
+  have hmono : Mono β := hβ.2
+  have hepi : Epi β.unop := by
+    refine ⟨fun {Z} g h e => ?_⟩
+    have h1 : g.op ≫ β = h.op ≫ β := Quiver.Hom.unop_inj e
+    exact Quiver.Hom.op_inj ((cancel_mono β).mp h1)
+  haveI := finSub_isIso_of_epi β.unop hepi
+  exact ⟨(inv β.unop).op,
+    Quiver.Hom.unop_inj (IsIso.inv_hom_id β.unop),
+    Quiver.Hom.unop_inj (IsIso.hom_inv_id β.unop)⟩
+
+end FSM
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.1` の底の圏 `𝒟 = B(G)⁰`(連結・totally epimorphic)。 -/
 def finSubOp_totallyEpimorphic.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 109,
     item := "Example 6.1 — 底の圏 𝒟 = B(G)⁰ は連結かつ totally epimorphic",
+    sectionId := "frdi-example-6-1" }
+
+/-- ★locator —— `Example 6.1` の底の圧が of FSM-type であること。 -/
+def finSubOp_isOfFSMType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — 底の圧 B(G)⁰ は of FSM-type",
     sectionId := "frdi-example-6-1" }
 
 end ABC3.Found.FrdI
