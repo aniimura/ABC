@@ -200,7 +200,7 @@ theorem primePt_toPrime (hQ : IsQCartierSubgroup Γ) {a : effSub Γ} (ha : IsPri
 
 /-- ★★★★**`Prime(Φ) ≃ D_L`** —— [FrdI] `Example 6.1` の
 「there is a natural bijection `Prime(Φ(L))` `→` `D_L`」。 -/
-noncomputable def primeEquiv (hQ : IsQCartierSubgroup Γ) : Prime (effSub Γ) ≃ S where
+noncomputable def effSubPrimeEquiv (hQ : IsQCartierSubgroup Γ) : Prime (effSub Γ) ≃ S where
   toFun := primePt hQ
   invFun s := toPrime _ (qcGen hQ s) (qcGen_isPrimaryElt hQ s)
   left_inv p := by
@@ -234,7 +234,7 @@ theorem exists_effSub_support_eq (hQ : IsQCartierSubgroup Γ) (T : Finset S) :
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.1` の `Prime(Φ(L)) ≃ D_L`。 -/
-def primeEquiv.src : ABC3.Meta.Source :=
+def effSubPrimeEquiv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 109,
     item := "Example 6.1 — Prime(Φ(L)) ≃ D_L",
     sectionId := "frdi-example-6-1" }
