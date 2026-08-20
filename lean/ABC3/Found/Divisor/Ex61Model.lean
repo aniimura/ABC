@@ -319,6 +319,20 @@ theorem ex61Frobenioid_isotropicType :
     (bmonGeom V DK) (fun A => divBGeom V DK hkq A) (fun f x => divBGeom_nat V DK hkq f x)
     (bmonGeom_isGroupLike V DK) finSubOp_totallyEpimorphic finSubOp_isConnected
 
+/-- ★★★★★**`Example 6.1`** —— できた Frobenioid は
+**birationally Frobenius-normalized 型**。 -/
+theorem ex61Frobenioid_biratFrobNormalizedType :
+    IsOfBirationallyFrobeniusNormalizedType _
+      (ModelData.modelPre
+        ((cartierDatumGeom V DK hkq).modelHyp finSubOp_isOfFSMType (bmonGeom V DK)
+          (fun A => divBGeom V DK hkq A) (fun f x => divBGeom_nat V DK hkq f x)
+          (bmonGeom_isGroupLike V DK) finSubOp_totallyEpimorphic finSubOp_isConnected))
+      (ex61Frobenioid V DK hkq) :=
+  (cartierDatumGeom V DK hkq).cartierFrobenioid_biratFrobNormalizedType
+    finSubOp_isOfFSMType (bmonGeom V DK)
+    (fun A => divBGeom V DK hkq A) (fun f x => divBGeom_nat V DK hkq f x)
+    (bmonGeom_isGroupLike V DK) finSubOp_totallyEpimorphic finSubOp_isConnected
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★★locator —— `Example 6.1` の model Frobenioid の構成
