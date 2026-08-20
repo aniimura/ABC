@@ -650,6 +650,7 @@ import ABC3.Found.GaloisRep.RootUnit
 import ABC3.Found.GaloisRep.ClassSum
 import ABC3.Found.GaloisRep.CurveHomVal
 import ABC3.Found.GaloisRep.AutInvariant
+import ABC3.Found.GaloisRep.PlaceTransport
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
