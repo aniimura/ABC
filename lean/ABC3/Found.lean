@@ -120,6 +120,7 @@ import ABC3.Found.Divisor.CartierPf
 import ABC3.Found.Divisor.CartierMonoprime
 import ABC3.Found.Divisor.CartierPerfFactorial
 import ABC3.Found.Divisor.CartierFrobenioid
+import ABC3.Found.Divisor.ArithDivisor
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
@@ -681,6 +682,7 @@ import ABC3.Found.GaloisRep.CountFP
 import ABC3.Found.GaloisRep.Divisible
 import ABC3.Found.GaloisRep.CountInfty
 import ABC3.Found.GaloisRep.TranslateProd
+import ABC3.Found.GaloisRep.MuComm
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

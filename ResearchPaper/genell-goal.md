@@ -19136,3 +19136,49 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 4. `τ_{P'}^* H = H` の伸縮で `τ_P^* g / g = 1`、すなわち `e_n(P,P) = 1`
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-500 ★★★★★★★★一般の交換則が出た(第 189 ブロック)
+
+第 168 の `aut_comp_mulByN` は `n·T = O` の場合、すなわち **`τ_T ∘ [n]^* = [n]^*`** だった。
+★交代性では `n·P' = P ≠ O` の点で平行移動するので、**一般形**が要る:
+
+    τ_T ∘ [n]^*  =  [n]^* ∘ τ_{nT}
+
+### ★★★★★点の言葉に翻訳すると 1 行
+
+両辺は `F(W)` からの環準同型で、`coordX`・`coordY`・定数での値で決まる
+(`functionField_hom_ext`、`IsLocalization.ringHom_ext` + 第 119)。
+★そこで生成点の像を 2 通りに計算する:
+
+| 側 | 計算 |
+|---|---|
+| `τ_T ∘ [n]^*` | `autFF τ_T (n·generic) = n·(generic + T) = n·generic + nT` |
+| `[n]^* ∘ τ_{nT}` | `muFF (generic + S) = n·generic + S`(`S = nT`) |
+
+★★どちらも **`n·generic + toFF S`**。★★★`Point.some` の単射性で座標が一致する。
+
+### ★★★`IsTranslate` は生成点の像で特徴づけられる
+
+    IsTranslate W τ T  ⟺  autFF τ (generic) = generic + toFF T
+
+★これで**平行移動の合成が平行移動**であることが `Point.map` の関子性から出る。
+★★伸縮の段(`τ_{P'}` を `i` 回合成して `τ_{iP'}`)で要る。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `functionField_hom_ext` | ★★★★★関数体からの環準同型は座標と定数で決まる |
+| `muFF` / `muFF_toFF` / `muFF_generic` | `μ̃` を点の写像として見る |
+| `isTranslate_iff` | ★★★★★★**`IsTranslate` の特徴づけ** |
+| `isTranslate_trans` | ★★★★★★**平行移動の合成は平行移動** |
+| `aut_comp_muExt_gen` | ★★★★★★★★**一般の交換則** |
+
+### ★残る段(交代性)
+
+1. `H := ∏_{i<n} τ_{iP'}^*(g)`(`nP' = P`、第 186)
+2. `H^n = ∏_i μ̃(τ_{iP}(f_P)) = μ̃(第 188 の定数) = 定数`
+3. 第 177 `const_of_pow_eq_const` で `H` は定数
+4. `τ_{P'}^* H = H` の伸縮で `τ_P^* g / g = 1`、すなわち `e_n(P,P) = 1`
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
