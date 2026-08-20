@@ -2877,11 +2877,11 @@
           "deps": [
             "stalk-dvr"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★環の層は `ordZ` / `ordAtPrime` で在庫。スキームでは `X.functionField` と茎の分数体の同一視が要る。",
-          "lean": "ABC3/Found/Divisor/HeightOneDVR.lean",
-          "decl": "ordAtPrime"
+          "note": "★環の層は `ordZ` / `ordAtPrime` で在庫。スキームでは `X.functionField` と茎の分数体の同一視が要る。\n\n★★★★2026-08-21 完了。余次元 1 の点の茎は DVR（`isDiscreteValuationRing_stalk_of_codimOne`）で、\n関数体はその分数体（`isFractionRing_stalk`）だから、`HeightOneSpectrum.valuation` がそのまま取れる。\n★DVR の高さ 1 スペクトルは**極大イデアルただ 1 つ**（`dvrSpectrum`）。\n★`ordPt := -toAdd(unzero(v f))` で符号を正規化した（正則関数で非負）。乗法性 `ordPt_mul` まで。",
+          "lean": "ABC3/Found/Divisor/SchemeWeilOrd.lean",
+          "decl": "ABC3.Found.Divisor.dvrSpectrum / ordPtVal / ordPt / ordPt_mul / ordPt_one"
         },
         {
           "id": "div-finite",
@@ -2913,11 +2913,11 @@
           "deps": [
             "codim1-pt"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "★★これがスキーム層と環層を繋ぐ**唯一の橋**である。`Spec R` の点 = 素イデアル、茎 = 局所化、という mathlib の在庫に乗る。",
-          "lean": "",
-          "decl": ""
+          "note": "★★これがスキーム層と環層を繋ぐ**唯一の橋**である。`Spec R` の点 = 素イデアル、茎 = 局所化、という mathlib の在庫に乗る。\n\n★★★2026-08-21 完了。**mathlib に道具が揃っていた**：\n* `Spec.stalkIso R x` —— `Spec R` の茎は局所化\n* `IsLocalization.AtPrime.ringKrullDim_eq_height` —— 局所化の Krull 次元は高さ\n* `RingEquiv.ringKrullDim` —— 環同型で Krull 次元は不変\n★開埋め込みでは茎が同型（`f.stalkMap` が instance で iso）なので、\n`isCodimOnePt_iff_of_isOpenImmersion` が「どのアフィン開で見ても同じ」を与える。\n★★`SchemeWeil.lean` で訂正したとおり、**`stalk-dvr` はこれに依存しない**。\nこの節点が要るのは `div(f)` の台を環の言葉で数えるとき（`div-finite`）である。",
+          "lean": "ABC3/Found/Divisor/SchemeWeilOrd.lean",
+          "decl": "ABC3.Found.Divisor.isCodimOnePt_spec_iff / isCodimOnePt_iff_of_isOpenImmersion"
         }
       ]
     },
