@@ -19902,3 +19902,45 @@ simp に入れてから `ring` する(mathlib の `C_simp` マクロと同じ手
 | `galois_cyclotomic` | ★★★★★★★★★**`σ ζ · ζ^{bc} = ζ^{ad}`** |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-517 ★★★★★★Tate 加群から `E[l^n]` への配線(第 205 ブロック)
+
+第 204 の円分指標の段を `det_galRep_eq_cyclotomic` に繋ぐには、
+`T_l E` の基底の第 `n` 成分が `E[l^n]` でどう動くかが要る。★必要なのは 2 本である。
+
+### ★★★1 本目——射影は Galois 作用と可換
+
+    tateProj n (galTate σ f) = galPoint σ (tateProj n f)
+
+★`galTate` は成分ごとに `galPoint` を当てているので **`rfl`** で済む。
+
+### ★★★★★★2 本目——`ℤ_l` の作用は `toZModPow` に落ちる
+
+`φ := (E[l^n] への射影) ∘ e⁻¹ : (Fin 2 → ℤ_l) →+ E[l^n]` は**加法的**で、
+値は `l^n` 捧れである。★このとき
+
+    φ(α • v) = (toZModPow n α).val • φ(v)
+
+★★証明は 3 行:`α − (toZModPow n α).val` は `toZModPow n` で消えるので
+`l^n·γ`(第 78 の `padic_dvd_of_toZModPow`)、その分は `l^n` 捧れで消える。
+★★★**`limTors` に `ℤ_l` 加群の構造を入れる必要は無い**——加法性と捧れだけで足りる。
+
+### ★★これで残るのは行列成分の読み替えだけ
+
+`P := φ(Pi.single 0 1)`・`Q := φ(Pi.single 1 1)` と置くと、
+`galMat_apply`(`e (galTate σ x) = M *ᵥ e x`)から
+
+    σP = (toZModPow n (M 0 0)).val • P + (toZModPow n (M 1 0)).val • Q
+
+が出る。2 本目を `M *ᵥ Pi.single 0 1 = fun i => M i 0` に当てるだけである。
+★あとは `P, Q` が `E[l^n]` の基底であること(第 186 の全射性から)と、
+`ad − bc = det M mod l^n` を合わせれば第 204 が当たる。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `tateProj_galTate` | ★★★射影は Galois 作用と可換 |
+| `addHom_padic_smul_of_torsion` | ★★★★★★**`ℤ_l` の作用は `toZModPow` に落ちる** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
