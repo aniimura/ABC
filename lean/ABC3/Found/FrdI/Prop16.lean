@@ -1133,6 +1133,194 @@ theorem cfp_frobNormalized_iff (A : CfpCat P G) :
       exact congrArg (fun t => t * (1 : End A.obj.right)) (one_pow _)
     exact InducedCategory.hom_ext (CommaMorphism.ext hleft hright)
 
+/-! ### ★(v) の `perfect` —— 対象の持ち上げ道具
+
+★★`perfect` の主張は「`A` と底が同型な対象すべて」を量化するので、
+**`𝒞` の対象を `𝒞'` へ持ち上げる**道具が要る。底が同型な射に沿えば持ち上がる。 -/
+
+/-- ★底が同型な `𝒞` の射 `f : Z ⟶ X_𝒞` について、始域 `Z` を `𝒞'` へ持ち上げる。 -/
+noncomputable def cfpLiftDom (X : CfpCat P G) {Z : C} (f : Z ⟶ X.obj.left)
+    (hf : IsIso (P.proj.map f)) : CfpCat P G :=
+  haveI : IsIso X.obj.hom := X.property
+  haveI := hf
+  have hxi : IsIso (P.proj.map f ≫ X.obj.hom) := inferInstance
+  ⟨⟨Z, X.obj.right, P.proj.map f ≫ X.obj.hom⟩, hxi⟩
+
+/-- ★その射も `𝒞'` へ持ち上がる(`𝒟'` 成分は `𝟙`)。 -/
+noncomputable def cfpLiftHom (X : CfpCat P G) {Z : C} (f : Z ⟶ X.obj.left)
+    (hf : IsIso (P.proj.map f)) : cfpLiftDom P G X f hf ⟶ X :=
+  InducedCategory.homMk (⟨f, 𝟙 X.obj.right, by
+    show P.proj.map f ≫ X.obj.hom = (P.proj.map f ≫ X.obj.hom) ≫ G.map (𝟙 X.obj.right)
+    rw [G.map_id, Category.comp_id]⟩ : (cfpLiftDom P G X f hf).obj ⟶ X.obj)
+
+@[simp] theorem cfpLiftHom_fst (X : CfpCat P G) {Z : C} (f : Z ⟶ X.obj.left)
+    (hf : IsIso (P.proj.map f)) : CfpCat.fst (cfpLiftHom P G X f hf) = f := rfl
+
+@[simp] theorem cfpLiftHom_snd (X : CfpCat P G) {Z : C} (f : Z ⟶ X.obj.left)
+    (hf : IsIso (P.proj.map f)) : CfpCat.snd (cfpLiftHom P G X f hf) = 𝟙 X.obj.right := rfl
+
+/-- ★底が同型な `𝒞` の射 `f : X_𝒞 ⟶ Z` について、終域 `Z` を `𝒞'` へ持ち上げる。 -/
+noncomputable def cfpLiftCod (X : CfpCat P G) {Z : C} (f : X.obj.left ⟶ Z)
+    (hf : IsIso (P.proj.map f)) : CfpCat P G :=
+  haveI : IsIso X.obj.hom := X.property
+  haveI := hf
+  have hxi : IsIso (inv (P.proj.map f) ≫ X.obj.hom) := inferInstance
+  ⟨⟨Z, X.obj.right, inv (P.proj.map f) ≫ X.obj.hom⟩, hxi⟩
+
+/-- ★その射も `𝒞'` へ持ち上がる(`𝒟'` 成分は `𝟙`)。 -/
+noncomputable def cfpLiftHomCod (X : CfpCat P G) {Z : C} (f : X.obj.left ⟶ Z)
+    (hf : IsIso (P.proj.map f)) : X ⟶ cfpLiftCod P G X f hf :=
+  haveI := hf
+  InducedCategory.homMk (⟨f, 𝟙 X.obj.right, by
+    show P.proj.map f ≫ (inv (P.proj.map f) ≫ X.obj.hom)
+      = X.obj.hom ≫ G.map (𝟙 X.obj.right)
+    rw [G.map_id, Category.comp_id, ← Category.assoc, IsIso.hom_inv_id,
+      Category.id_comp]⟩ : X.obj ⟶ (cfpLiftCod P G X f hf).obj)
+
+@[simp] theorem cfpLiftHomCod_fst (X : CfpCat P G) {Z : C} (f : X.obj.left ⟶ Z)
+    (hf : IsIso (P.proj.map f)) : CfpCat.fst (cfpLiftHomCod P G X f hf) = f := rfl
+
+@[simp] theorem cfpLiftHomCod_snd (X : CfpCat P G) {Z : C} (f : X.obj.left ⟶ Z)
+    (hf : IsIso (P.proj.map f)) : CfpCat.snd (cfpLiftHomCod P G X f hf) = 𝟙 X.obj.right := rfl
+
+/-- ★`𝒞` 側で決まった pre-step を `𝒞'` へ持ち上げる。
+
+★★**`𝒟'` 成分は四角形から一意に決まる** —— `φ₂` は Frobenius 型なので
+`𝒟'` 成分が同型であり、`snd ψ = snd φ₁ ≫ snd ψ' ≫ (snd φ₂)⁻¹` しかない。 -/
+noncomputable def cfpPerfectLift {B₁ B₁' B₂ B₂' : CfpCat P G} (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂')
+    [hs2 : IsIso (CfpCat.snd φ₂)]
+    (ψ' : B₁' ⟶ B₂') (ψ₀ : B₁.obj.left ⟶ B₂.obj.left)
+    (hψ₀e : CfpCat.fst φ₁ ≫ CfpCat.fst ψ' = ψ₀ ≫ CfpCat.fst φ₂) : B₁ ⟶ B₂ :=
+  InducedCategory.homMk (⟨ψ₀, CfpCat.snd φ₁ ≫ CfpCat.snd ψ' ≫ inv (CfpCat.snd φ₂), by
+    haveI hg2 : IsIso (G.map (CfpCat.snd φ₂)) := inferInstance
+    refine (cancel_mono (G.map (CfpCat.snd φ₂))).mp ?_
+    have hL : (P.proj.map ψ₀ ≫ B₂.obj.hom) ≫ G.map (CfpCat.snd φ₂)
+        = P.proj.map (CfpCat.fst φ₁) ≫ P.proj.map (CfpCat.fst ψ') ≫ B₂'.obj.hom := by
+      rw [Category.assoc, ← cfp_square φ₂, ← Category.assoc, ← P.proj.map_comp, ← hψ₀e,
+        P.proj.map_comp, Category.assoc]
+    rw [hL, cfp_square ψ', ← Category.assoc, cfp_square φ₁, Category.assoc, ← G.map_comp,
+      Category.assoc, ← G.map_comp, Category.assoc, Category.assoc, IsIso.inv_hom_id,
+      Category.comp_id]⟩ : B₁.obj ⟶ B₂.obj)
+
+@[simp] theorem cfpPerfectLift_fst {B₁ B₁' B₂ B₂' : CfpCat P G} (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂')
+    [IsIso (CfpCat.snd φ₂)] (ψ' : B₁' ⟶ B₂') (ψ₀ : B₁.obj.left ⟶ B₂.obj.left)
+    (hψ₀e : CfpCat.fst φ₁ ≫ CfpCat.fst ψ' = ψ₀ ≫ CfpCat.fst φ₂) :
+    CfpCat.fst (cfpPerfectLift P G φ₁ φ₂ ψ' ψ₀ hψ₀e) = ψ₀ := rfl
+
+@[simp] theorem cfpPerfectLift_snd {B₁ B₁' B₂ B₂' : CfpCat P G} (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂')
+    [IsIso (CfpCat.snd φ₂)] (ψ' : B₁' ⟶ B₂') (ψ₀ : B₁.obj.left ⟶ B₂.obj.left)
+    (hψ₀e : CfpCat.fst φ₁ ≫ CfpCat.fst ψ' = ψ₀ ≫ CfpCat.fst φ₂) :
+    CfpCat.snd (cfpPerfectLift P G φ₁ φ₂ ψ' ψ₀ hψ₀e)
+      = CfpCat.snd φ₁ ≫ CfpCat.snd ψ' ≫ inv (CfpCat.snd φ₂) := rfl
+
+/-- **(v)** —— **perfect** は射影から降りる。 -/
+theorem cfp_perfect_mpr (A : CfpCat P G) (h : IsPerfectObj P A.obj.left) :
+    IsPerfectObj (cfpPreFrobenioid P G hG hD' hcC hcD') A := by
+  intro n
+  refine ⟨?_, ?_⟩
+  · intro B hB
+    obtain ⟨B₀, φ, hφ, hdeg⟩ := (h n).1 B.obj.left
+      (cfp_baseIsomorphic_of P G hG hD' hcC hcD' A B hB)
+    refine ⟨cfpLiftDom P G B φ hφ.2, cfpLiftHom P G B φ hφ.2, ?_, hdeg⟩
+    exact (cfp_frobType_iff P G hG hD' hcC hcD' _
+      (by show IsIso (𝟙 B.obj.right); infer_instance)).mpr hφ
+  · intro B₁ B₁' B₂ B₂' φ₁ φ₂ hφ₁ hd₁ hφ₂ hd₂ hb₁ hb₂ ψ' hψ'
+    haveI hs2 : IsIso (CfpCat.snd φ₂) := hφ₂.2
+    haveI hs1 : IsIso (CfpCat.snd φ₁) := hφ₁.2
+    haveI hsp : IsIso (CfpCat.snd ψ') := hψ'.2
+    obtain ⟨ψ₀, ⟨hψ₀s, hψ₀e⟩, hψ₀u⟩ := (h n).2 B₁.obj.left B₁'.obj.left B₂.obj.left B₂'.obj.left
+      (CfpCat.fst φ₁) (CfpCat.fst φ₂)
+      ((cfp_frobType_iff P G hG hD' hcC hcD' φ₁ hφ₁.2).mp hφ₁) hd₁
+      ((cfp_frobType_iff P G hG hD' hcC hcD' φ₂ hφ₂.2).mp hφ₂) hd₂
+      (cfp_baseIsomorphic_of P G hG hD' hcC hcD' B₁ A hb₁)
+      (cfp_baseIsomorphic_of P G hG hD' hcC hcD' B₂ A hb₂)
+      (CfpCat.fst ψ') ((cfp_preStep_iff P G hG hD' hcC hcD' ψ' hψ'.2).mp hψ')
+    refine ⟨cfpPerfectLift P G φ₁ φ₂ ψ' ψ₀ hψ₀e, ⟨⟨hψ₀s.1, ?_⟩, ?_⟩, ?_⟩
+    · show IsIso (CfpCat.snd φ₁ ≫ CfpCat.snd ψ' ≫ inv (CfpCat.snd φ₂))
+      infer_instance
+    · refine InducedCategory.hom_ext (CommaMorphism.ext hψ₀e ?_)
+      show CfpCat.snd φ₁ ≫ CfpCat.snd ψ'
+        = (CfpCat.snd φ₁ ≫ CfpCat.snd ψ' ≫ inv (CfpCat.snd φ₂)) ≫ CfpCat.snd φ₂
+      rw [Category.assoc, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+    · intro ψ₂ hψ₂
+      have hf : CfpCat.fst ψ₂ = ψ₀ :=
+        hψ₀u (CfpCat.fst ψ₂)
+          ⟨(cfp_preStep_iff P G hG hD' hcC hcD' ψ₂ hψ₂.1.2).mp hψ₂.1,
+            congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hψ₂.2⟩
+      have hs : CfpCat.snd ψ₂ = CfpCat.snd φ₁ ≫ CfpCat.snd ψ' ≫ inv (CfpCat.snd φ₂) := by
+        have h2 : CfpCat.snd φ₁ ≫ CfpCat.snd ψ' = CfpCat.snd ψ₂ ≫ CfpCat.snd φ₂ :=
+          congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) hψ₂.2
+        rw [← Category.assoc, h2, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+      exact InducedCategory.hom_ext (CommaMorphism.ext hf hs)
+
+/-- **(v)** —— **perfect** は射影へ上がる。
+
+★★`𝒞` の対象はすべて `𝒞'` へ持ち上がる —— 底の同型を `𝒟'` 成分 `A_𝒟'` へ運ぶだけ。
+★連鎖 `B₁ →(φ₁) B₁' →(ψ') B₂' ←(φ₂) B₂` は**すべて底同型**なので、
+`B₁'` を 1 つ持ち上げれば残りは `cfpLiftDom` / `cfpLiftCod` で決まり、
+**`𝒟'` 成分はすべて `𝟙`** になる。 -/
+theorem cfp_perfect_mp (A : CfpCat P G)
+    (h : IsPerfectObj (cfpPreFrobenioid P G hG hD' hcC hcD') A) :
+    IsPerfectObj P A.obj.left := by
+  haveI hA : IsIso A.obj.hom := A.property
+  obtain ⟨a, ha⟩ : ∃ a : (P.toElem.obj A.obj.left).base ⟶ G.obj A.obj.right,
+      a = A.obj.hom := ⟨A.obj.hom, rfl⟩
+  haveI hai : IsIso a := ha ▸ hA
+  intro n
+  refine ⟨?_, ?_⟩
+  · intro B hB
+    obtain ⟨e⟩ := hB
+    haveI hwi : IsIso (e.inv ≫ a) := inferInstance
+    obtain ⟨B₀', φ', hφ', hdeg⟩ := (h n).1 (cfpMk P G B A.obj.right (e.inv ≫ a)) ⟨Iso.refl _⟩
+    exact ⟨B₀'.obj.left, CfpCat.fst φ',
+      (cfp_frobType_iff P G hG hD' hcC hcD' φ' hφ'.2).mp hφ', hdeg⟩
+  · intro B₁ B₁' B₂ B₂' φ₁ φ₂ hφ₁ hd₁ hφ₂ hd₂ hb₁ hb₂ ψ' hψ'
+    haveI hp1 : IsIso (P.proj.map φ₁) := hφ₁.2
+    haveI hp2 : IsIso (P.proj.map φ₂) := hφ₂.2
+    haveI hpp : IsIso (P.proj.map ψ') := hψ'.2
+    obtain ⟨e₁⟩ := hb₁
+    obtain ⟨b, hb⟩ : ∃ b : P.proj.obj B₁ ⟶ G.obj A.obj.right, b = e₁.hom ≫ a := ⟨_, rfl⟩
+    haveI hbi : IsIso b := by
+      rw [hb]; haveI : IsIso (e₁.hom ≫ a) := inferInstance; exact this
+    haveI hw1 : IsIso (inv (P.proj.map φ₁) ≫ b) := inferInstance
+    set L1' : CfpCat P G := cfpMk P G B₁' A.obj.right (inv (P.proj.map φ₁) ≫ b) with hL1'
+    set L2' : CfpCat P G := cfpLiftCod P G L1' ψ' hpp with hL2'
+    set L1 : CfpCat P G := cfpLiftDom P G L1' φ₁ hp1 with hL1
+    set L2 : CfpCat P G := cfpLiftDom P G L2' φ₂ hp2 with hL2
+    obtain ⟨Ψ, ⟨hΨs, hΨe⟩, hΨu⟩ := (h n).2 L1 L1' L2 L2'
+      (cfpLiftHom P G L1' φ₁ hp1) (cfpLiftHom P G L2' φ₂ hp2)
+      ((cfp_frobType_iff P G hG hD' hcC hcD' _
+        (by show IsIso (𝟙 A.obj.right); infer_instance)).mpr hφ₁) hd₁
+      ((cfp_frobType_iff P G hG hD' hcC hcD' _
+        (by show IsIso (𝟙 A.obj.right); infer_instance)).mpr hφ₂) hd₂
+      ⟨Iso.refl _⟩ ⟨Iso.refl _⟩
+      (cfpLiftHomCod P G L1' ψ' hpp)
+      ⟨hψ'.1, by show IsIso (𝟙 A.obj.right); infer_instance⟩
+    refine ⟨CfpCat.fst Ψ, ⟨(cfp_preStep_iff P G hG hD' hcC hcD' Ψ hΨs.2).mp hΨs, ?_⟩, ?_⟩
+    · exact congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) hΨe
+    · intro ψ₂ hψ₂
+      have hcomm : P.proj.map (ψ₂ ≫ φ₂) = P.proj.map (φ₁ ≫ ψ') :=
+        congrArg P.proj.map hψ₂.2.symm
+      have hsq : P.proj.map ψ₂ ≫ L2.obj.hom = L1.obj.hom ≫ G.map (𝟙 A.obj.right) := by
+        show P.proj.map ψ₂ ≫ (P.proj.map φ₂ ≫ (inv (P.proj.map ψ')
+            ≫ (inv (P.proj.map φ₁) ≫ b)))
+          = (P.proj.map φ₁ ≫ (inv (P.proj.map φ₁) ≫ b)) ≫ G.map (𝟙 A.obj.right)
+        rw [G.map_id, Category.comp_id, ← Category.assoc, ← P.proj.map_comp, hcomm,
+          P.proj.map_comp]
+        simp only [Category.assoc]
+        rw [← Category.assoc (P.proj.map ψ') (inv (P.proj.map ψ')), IsIso.hom_inv_id,
+          Category.id_comp]
+      refine congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t))
+        (hΨu (cfpHom P G ψ₂ (𝟙 A.obj.right) hsq) ⟨⟨hψ₂.1.1, ?_⟩, ?_⟩)
+      · show IsIso (𝟙 A.obj.right)
+        infer_instance
+      · exact InducedCategory.hom_ext (CommaMorphism.ext hψ₂.2 rfl)
+
+/-- **(v)** —— **perfect** は射影で決まる(両向き)。 -/
+theorem cfp_perfect_iff (A : CfpCat P G) :
+    IsPerfectObj (cfpPreFrobenioid P G hG hD' hcC hcD') A ↔ IsPerfectObj P A.obj.left :=
+  ⟨cfp_perfect_mp P G hG hD' hcC hcD' A, cfp_perfect_mpr P G hG hD' hcC hcD' A⟩
+
 /-- **(vi)** —— **End-ample** は射影から降りる(★片向き)。 -/
 theorem cfp_endAmple_of (A : CfpCat P G) (h : IsEndAmple P A.obj.left) :
     IsEndAmple (cfpPreFrobenioid P G hG hD' hcC hcD') A := by
