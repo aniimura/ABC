@@ -43,3 +43,5 @@
 - [Python の open(w) はファイルを消す](python-w-truncates.md) — encode 失敗で原本が飛ぶ。空 Lean ファイルは無言で通るので検証も空回りする
 - [プロジェクトの namespace が mathlib を隠す](namespace-shadows-mathlib.md) — ABC3.Found.NumberField があると `open NumberField` が mathlib を指さず `𝓞` が unknown になる。`_root_.` を付けること
 - [mathlib の local instance](mathlib-local-instances.md) — `Ideal.Quotient.field` は大域 instance ではない。手で `haveI` すると diamond が立つ。`attribute [local instance]` を書くこと
+- [Lean: `open` の忘れは whnf タイムアウトに化ける](lean-missing-open-looks-like-timeout.md) — 型の途中でタイムアウトしたら、まず名前解決を疑う
+- [Lean: `Nonempty U` は 2 通りに読める](lean-opens-nonempty-two-readings.md) — `X.Opens` のコアーション経路が 2 つあり instance が噛み合わない

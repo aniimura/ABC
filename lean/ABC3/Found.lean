@@ -160,6 +160,7 @@ import ABC3.Found.Divisor.NormKQC
 import ABC3.Found.Divisor.NormB
 import ABC3.Found.Divisor.SchemeNormalCriterion
 import ABC3.Found.Divisor.NormNormal
+import ABC3.Found.Divisor.NormFF
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite

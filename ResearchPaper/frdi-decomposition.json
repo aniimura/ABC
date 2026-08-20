@@ -2990,7 +2990,7 @@
           ],
           "status": "todo",
           "size": "★大",
-          "note": "★★`Example 6.1` の**関手性の本体**である。Weil 因子は一般には引き戻せないが、**Cartier なら引き戻せる**——これが原文が Cartier に限る理由である。`Theorem 6.2, (i)` の仮定 (a) もここで効く。",
+          "note": "★★`Example 6.1` の**関手性の本体**である。Weil 因子は一般には引き戻せないが、**Cartier なら引き戻せる**——これが原文が Cartier に限る理由である。`Theorem 6.2, (i)` の仮定 (a) もここで効く。\n\n★★★2026-08-21：**前段の道具が揃った** —— `NormFF.lean` の `normFF`\n（`K(V[L]) ⟶ K(V[M])`）がある。Cartier 因子は局所的に `div(f)` なので、\n引き戻しは `f ↦ normFF f` を取って `div` を取り直すことに帰着する。\n★残るのは `ord` の引き戻しの式（`ord_x(g^*u)` を `ord_{g(x)}(u)` で書くこと）である。",
           "lean": "",
           "decl": ""
         },
@@ -3091,9 +3091,9 @@
           ],
           "status": "半済",
           "size": "中",
-          "note": "★`B(L) ⊆ L^×` は部分群。`B(L) → Φ(L)^gp` は `div` の制限で、関手性は `div` の引き戻し両立から。\n\n★★★2026-08-21：**`B(L)` を部分群として置いた**（`BSubgroup`）。\n`B(L) = {u ∈ K(V[L])^× | ∀ x ∉ D_L, ord_x(u) = 0}`。\n★★中身は `ordPt_one` / `ordPt_mul` / `ordPt_inv` の 3 本だけ。\n★★★**`div(f)` の台の有限性は要らなかった** —— 台の条件を「外で消える」と書けば\n有限性を経由しないで済む（`div-finite` を待たずに `B(L)` が立つ）。\n★残るのは **`L` についての関手性**で、支配射に沿った関数体の射（`cartier-pullback` と同じ道具）が要る。\n\n★★★2026-08-21：`BSubgroup` の `hnorm` は `normObj_isNormalScheme`（`NormNormal.lean`）で埋まるようになった。残るのは `L` についての関手性だけである。",
+          "note": "★`B(L) ⊆ L^×` は部分群。`B(L) → Φ(L)^gp` は `div` の制限で、関手性は `div` の引き戻し両立から。\n\n★★★2026-08-21：**`B(L)` を部分群として置いた**（`BSubgroup`）。\n`B(L) = {u ∈ K(V[L])^× | ∀ x ∉ D_L, ord_x(u) = 0}`。\n★★中身は `ordPt_one` / `ordPt_mul` / `ordPt_inv` の 3 本だけ。\n★★★**`div(f)` の台の有限性は要らなかった** —— 台の条件を「外で消える」と書けば\n有限性を経由しないで済む（`div-finite` を待たずに `B(L)` が立つ）。\n★残るのは **`L` についての関手性**で、支配射に沿った関数体の射（`cartier-pullback` と同じ道具）が要る。\n\n★★★2026-08-21：`BSubgroup` の `hnorm` は `normObj_isNormalScheme`（`NormNormal.lean`）で埋まるようになった。残るのは `L` についての関手性だけである。\n\n★★★★★2026-08-21：**関数体の関手性を取った**（`Found/Divisor/NormFF.lean`）。\n`normFFFunctor : FinSub K K̄ ⥤ CommRingCat`（`L ↦ K(V[L])`、共変）と\n`normFFUnits f : K(V[L])ˣ →* K(V[M])ˣ`。\n\n★中身は「**支配的な射は生成点を生成点へ送る**」（`genericPoint_eq_of_isDominant`——\nmathlib の `genericPoint_eq_of_isOpenImmersion` の筋を、開埋め込みではなく\n像の稠密性だけで書き直したもの）＋ 生成点の茎の間の `stalkMap`。\n★支配性は 2 段で出た：`Spec M → Spec L` は**体のスペクトルが 1 点**だから全射、\n`Spec L → V[L]` は mathlib の `instance : IsDominant f.toNormalization`、\nあとは `IsDominant.of_comp` を `normUp_normMap` に当てるだけである。\n★関手性は `Scheme.Hom.stalkMap_congr_hom` / `stalkMap_congr_point_assoc` /\n`stalkMap_comp` の 3 本で出る。\n\n★★残るのは「`u ∈ B(L)` ⟹ `normFF u ∈ B(M)`」、すなわち\n**`x ∉ D_M` なら `ord_x(g^*u) = 0`** の 1 段だけである。\nこれは `ord` の引き戻し（`g` に沿った分岐指数の式）を要し、`cartier-pullback` と同じ道具になる。",
           "lean": "ABC3/Found/Divisor/NormB.lean",
-          "decl": "BSubgroup / mem_BSubgroup"
+          "decl": "BSubgroup / mem_BSubgroup / genericPoint_eq_of_isDominant / normMap_isDominant / normMap_genericPoint / normFF / normFF_id / normFF_comp / normFFFunctor / normFFUnits"
         },
         {
           "id": "cartier-datum-geom",
