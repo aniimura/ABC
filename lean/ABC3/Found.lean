@@ -656,6 +656,7 @@ import ABC3.Found.GaloisRep.AutInvariant
 import ABC3.Found.GaloisRep.PlaceTransport
 import ABC3.Found.GaloisRep.TranslateCount
 import ABC3.Found.GaloisRep.FiberConst
+import ABC3.Found.GaloisRep.PointPlace
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

@@ -18438,3 +18438,24 @@ D2 の最後の道具である
 組み立てだけである。★★数学的な内容はすべて出た。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-484 素点と点の 1 対 1 対応(第 172 ブロック)
+
+D2 の残り「Σ_v e_v · Q_v = 0」を**点の側の有限和**に移すための足場を置いた。
+
+* ★ `pointOf v` —— 第 138 の `exists_point_of_heightOneSpectrum` からの選択
+* ★ `placeOf S hS` —— 第 138 の `pointSpectrum`(場合分けで定義)
+* ★★ 往復が恒等(`pointOf (placeOf S) = S`、`placeOf (pointOf v) = v`)——
+  第 164 の `xyIdeal_inj` で閉じる
+* ★★★ `[v] = toClass (pointOf v)`(第 165 の言い換え)
+
+★これで第 166 の `classGroup_rootUnit_eq_toClass` に `Q := pointOf` を渡せる。
+
+### ★D2 の残り(更新)
+
+| 段 | 内容 | 見積もり |
+|---|---|---|
+| 素点と点の対応 | ✅ **第 172** | 0 |
+| 台の分解(ファイバー / `E[n]∖{O}`)と `Finset` の総和 | ❌ | 3-6 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
