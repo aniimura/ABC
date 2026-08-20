@@ -147,6 +147,7 @@ import ABC3.Found.Divisor.SchemeWeilOrd
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite
+import ABC3.Found.NumberField.SplitSeparable
 import ABC3.Found.NumberField.DirichletDensity
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
