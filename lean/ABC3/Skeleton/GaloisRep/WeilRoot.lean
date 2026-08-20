@@ -92,7 +92,13 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★2026-08-20 実測: 段 (i)(極大イデアルの形)に要る**古典的零点定理は mathlib に直接の形では無い**——`Module.Finite k A`(体 `A` が体 `k` 上有限生成代数なら有限)は `exact?` で見つからない。★ただし `IsJacobsonRing` の機構はある(`isJacobsonRing_of_isIntegral`・`quotient_mk_comp_C_isIntegral_of_isJacobsonRing`)ので、そこから組み立てることになる(5-15 ブロック)" 19,
     .implicitStep
-      "★★★**別解(判別式)**: `CR ≅ F[X][Z]/(Z² − Ψ₂Sq(X))`(標数 ≠ 2 で平方完成)なので、`Ψ₂Sq` が squarefree なら整閉になる。★mathlib に `Ψ₂Sq` の squarefree 性も、`F[X][√d]` の整閉性も無い(2026-08-20 実測、`Squarefree|discriminant` で DivisionPolynomial/ と Affine/ を検索して 0 件)(未測定)" 19,
+      "★★★**別解(判別式)**: `CR = F[x][z]`(`z² = Ψ₂Sq(x)`)は **Found に済**(第 129 `genZ_sq`)。`Ψ₂Sq` が squarefree なら整閉になる(0 ブロック)" 19,
+    .implicitStep
+      "★★★★`Ψ₂Sq` の判別式は **mathlib に既にあった**(第 130 で確認)——`twoTorsionPolynomial_discr : discr = 16Δ`、`twoTorsionPolynomial_discr_ne_zero`。★§9-438 で「無い」と書いたのは `Weierstrass.lean` を見ていなかったためである(0 ブロック)" 19,
+    .implicitStep
+      "★★`discr ≠ 0` ⟹ `Squarefree Ψ₂Sq` の段。mathlib の在庫(2026-08-20 実測): `Cubic.discr_ne_zero_iff_roots_nodup` ✅、`PerfectField.separable_iff_squarefree` ✅、`Polynomial.Separable.squarefree` ✅、`UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` ✅。★**欠けているのは `roots.Nodup ⟹ Separable`(あるいは `Squarefree`)の向き**である(`exact?` で 0 件)——分解 `p = C a·∏(X−r)` から組むことになる(5-15 ブロック)" 19,
+    .implicitStep
+      "★★★`Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` が整閉、の段。mathlib に二次拡大の整閉性は無い(2026-08-20 実測)(10-25 ブロック)" 19,
     .implicitStep
       "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定は `IsIntegrallyClosed.of_localization_maximal : (∀ p ≠ ⊥, [p.IsMaximal] → IsIntegrallyClosed (Localization.AtPrime p)) → IsIntegrallyClosed R`(2026-08-20 実測)。★内訳は (i) 各極大イデアルが `XYIdeal W x y` の形であること(代数閉体上の零点定理)、(ii) 非特異点では `x − x₀` か `y − y₀` が局所化で極大イデアルを生成すること、(iii) 局所 Noether 整域で極大イデアルが単項 ⟹ DVR(mathlib の `DiscreteValuationRing.TFAE`)(10-25 ブロック)" 19,
     .implicitStep

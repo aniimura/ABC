@@ -16663,3 +16663,40 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 `Separable` を経由することになる。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-441 `Squarefree Ψ₂Sq` の在庫を実測した
+
+`discr ≠ 0` から `Squarefree Ψ₂Sq` を出す段について、mathlib の在庫を測った:
+
+| mathlib | 状態 |
+|---|---|
+| `Cubic.discr_ne_zero_iff_roots_nodup` | ✅ |
+| `PerfectField.separable_iff_squarefree` | ✅(代数閉体は perfect) |
+| `Polynomial.Separable.squarefree` | ✅ |
+| `UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` | ✅ |
+| `Polynomial.nodup_roots`(Separable ⟹ Nodup) | ✅ |
+| **`roots.Nodup ⟹ Separable`(逆向き)** | ❌ |
+
+★**欠けているのは逆向きだけ**である(`exact?` で 0 件)。
+`p = C a·∏(X−r)`(`eq_prod_roots_of_splits_id`)から組むことになる。見積もり 5-15。
+
+### ★今回の探索は範囲を広げた
+
+§9-434・§9-440 の失敗(探索範囲の狭さ)を受けて、今回は
+**概念名で候補を列挙してから 1 件ずつ `#check`/`exact?` で確かめた**。
+★その結果、「無い」と言えるのが 1 件に絞れた。
+★★★**「無い」は探索範囲とセットでしか意味を持たない**——`.absent` の
+`searched` 引数はそのためにある。
+
+### ★層 3 の現況(経路 2)
+
+| 段 | 状態 |
+|---|---|
+| `CR = F[x][z]`(`z² = Ψ₂Sq(x)`) | ✅ 第 129 |
+| `Ψ₂Sq` の判別式 = `16Δ` ≠ 0 | ✅ mathlib(第 130 で確認) |
+| `roots.Nodup ⟹ Separable` | ★残り(5-15) |
+| `Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` 整閉 | ★残り(10-25) |
+| `IsIntegrallyClosed` ⟹ `IsDedekindDomain` | ✅ 材料は揃っている(第 127 + mathlib) |
+| 因子計算・`n` 乗根の取り出し | ★残り |
+
+★義務の数は動いていない(Galois 4/8)。
