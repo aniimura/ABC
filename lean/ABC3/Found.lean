@@ -111,6 +111,7 @@ import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.Divisor.HeightOneDVR
 import ABC3.Found.Divisor.FreeDivisorial
+import ABC3.Found.Divisor.CartierMonoid
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
@@ -621,6 +622,7 @@ import ABC3.Found.GaloisRep.Support
 import ABC3.Found.GaloisRep.Reduction
 import ABC3.Found.GaloisRep.RedConst
 import ABC3.Found.GaloisRep.RedPoint
+import ABC3.Found.GaloisRep.RedFormula
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
