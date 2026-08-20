@@ -3866,11 +3866,11 @@
           "deps": [
             "cheb-frob"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★`Σ_{v|p} e_v f_v = [L:ℚ]` から。mathlib の `Ideal.sum_ramification_inertia` に乗る見込み。",
-          "lean": "",
-          "decl": ""
+          "note": "★`Σ_{v|p} e_v f_v = [L:ℚ]` から。mathlib の `Ideal.sum_ramification_inertia` に乗る見込み。\n\n★★★★★（2026-08-20）**閉じた** —— `ncard_primesOver_eq_finrank_iff`：`#{P ∣ p} = [L:K] ⇔ すべての `P` で `e_P·f_P = 1`。★中身は基本等式 `Σ e_P·f_P = [L:K]`（mathlib の `Ideal.sum_ramification_inertia`）と `e_P·f_P ≥ 1` だけである。★★**Tchebotarev は要らない** —— 原文が Tchebotarev を引くのは (a) と (c) であって、(b) は基本等式だけで出る。",
+          "lean": "ABC3/Found/NumberField/SplitCount.lean",
+          "decl": "ncard_primesOver_eq_finrank_iff / ncard_primesOver_le_finrank"
         }
       ]
     }
