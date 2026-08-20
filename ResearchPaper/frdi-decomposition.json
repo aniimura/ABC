@@ -2939,11 +2939,11 @@
           "deps": [
             "weil-group"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★在庫: `Found/Arakelov/PicDivisor.lean` の `IsCartier X D`(`X.IdealSheafData` 版)。Weil 因子版との橋が要る。",
-          "lean": "ABC3/Found/Arakelov/PicDivisor.lean",
-          "decl": "IsCartier"
+          "note": "★在庫: `Found/Arakelov/PicDivisor.lean` の `IsCartier X D`(`X.IdealSheafData` 版)。Weil 因子版との橋が要る。\n\n★★★2026-08-21 完了。**Weil 因子の言葉で局所主因子として書いた** ——\n`IsCartierDiv D ⟺ ∀ x, ∃ 開近傍 U と f ∈ K(X)^×, U 上で D = div(f)`。\n★`Found/Arakelov/PicDivisor.lean` の `IsCartier X D`（`IdealSheafData` 版）とは別の綴りだが、\n本鎖（単系論への供給）にはこちらが直接効く。両者の橋はまだ書いていない（記録）。",
+          "lean": "ABC3/Found/Divisor/SchemeCartier.lean",
+          "decl": "ABC3.Found.Divisor.IsCartierDiv"
         },
         {
           "id": "cartier-subgroup",
@@ -2951,11 +2951,11 @@
           "deps": [
             "cartier-def"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★★これが `Found/Divisor/CartierMonoid.lean` の `Γ : AddSubgroup (S →₀ ℤ)` に**そのまま入る**。以降の単系論はすべて `Γ` だけから出る(`isDivisorial_effSub` は `Q`-Cartier すら要らない)。",
-          "lean": "",
-          "decl": ""
+          "note": "★★これが `Found/Divisor/CartierMonoid.lean` の `Γ : AddSubgroup (S →₀ ℤ)` に**そのまま入る**。以降の単系論はすべて `Γ` だけから出る(`isDivisorial_effSub` は `Q`-Cartier すら要らない)。\n\n★★★★2026-08-21 完了。**中身は `ord` の乗法性だけ**だった：\n`0` は `f = 1`（`ordPt_one`）、和は `U₁ ⊓ U₂` の上で `f₁·f₂`（`ordPt_mul`）、\n逆元は同じ `U` の上で `f⁻¹`（`ordPt_inv`、本ファイルで新設）。\n★新しい幾何は 1 つも要らなかった。★これで `CartierMonoid.lean` の `Γ : AddSubgroup (S →₀ ℤ)` に\nそのまま入る（単系論の供給源が出来た）。",
+          "lean": "ABC3/Found/Divisor/SchemeCartier.lean",
+          "decl": "ABC3.Found.Divisor.cartierSubgroup / mem_cartierSubgroup"
         },
         {
           "id": "qcartier",
@@ -2963,11 +2963,11 @@
           "deps": [
             "cartier-subgroup"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "小",
-          "note": "★単系側の定義 `IsQCartierSubgroup Γ := ∀ s, ∃ n>0, single s n ∈ Γ` は在庫。幾何側の「ある `n` 倍が Cartier」との一致を書く。",
-          "lean": "ABC3/Found/Divisor/CartierMonoid.lean",
-          "decl": "IsQCartierSubgroup"
+          "note": "★単系側の定義 `IsQCartierSubgroup Γ := ∀ s, ∃ n>0, single s n ∈ Γ` は在庫。幾何側の「ある `n` 倍が Cartier」との一致を書く。\n\n★★★2026-08-21 完了。幾何側 `IsQCartierDiv D := ∃ n > 0, IsCartierDiv (n • D)` を置き、\n「各素因子が `Q`-Cartier ⟹ `IsQCartierSubgroup (cartierSubgroup)`」を示した。\n★単系側の定義（`CartierMonoid.lean`）にそのまま入る。",
+          "lean": "ABC3/Found/Divisor/SchemeCartier.lean",
+          "decl": "ABC3.Found.Divisor.IsQCartierDiv / isQCartierSubgroup_cartierSubgroup"
         },
         {
           "id": "cartier-pullback",
