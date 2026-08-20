@@ -193,6 +193,41 @@ theorem finrank_adjoin_eq_of_separableClosure_eq_bot (hsc : separableClosure K�
     minpoly_eq_map_of_separableClosure_eq_bot hsc hint hs,
     Polynomial.natDegree_map_eq_of_injective (FaithfulSMul.algebraMap_injective K₁ K₂)]
 
+open IntermediateField in
+/-- ★★★★★★**原文 `Theorem 6.2, (i)` の言明** —— `L₂ := L₁·K₂` は `[L₂:K₂] = [L₁:K₁]`。
+
+★原始元定理で `L₁ = K₁⟮α⟯` と書き、`finrank_adjoin_eq_of_separableClosure_eq_bot` を当てる。 -/
+theorem finrank_adjoin_coe_eq_of_separableClosure_eq_bot
+    (hsc : separableClosure K₁ K₂ = ⊥)
+    {Ω : Type*} [Field Ω] [Algebra K₁ Ω] [Algebra K₂ Ω] [IsScalarTower K₁ K₂ Ω]
+    (L : IntermediateField K₁ Ω) [FiniteDimensional K₁ L] [Algebra.IsSeparable K₁ L] :
+    Module.finrank K₂ (IntermediateField.adjoin K₂ (L : Set Ω)) = Module.finrank K₁ L := by
+  obtain ⟨β, hβ⟩ := Field.exists_primitive_element K₁ L
+  have hLeq : L = K₁⟮(β : Ω)⟯ := by
+    have h := congrArg IntermediateField.lift hβ
+    rwa [IntermediateField.lift_adjoin_simple, IntermediateField.lift_top, eq_comm] at h
+  have hmem : (β : Ω) ∈ IntermediateField.adjoin K₂ (L : Set Ω) :=
+    IntermediateField.subset_adjoin K₂ _ β.2
+  have hAeq : IntermediateField.adjoin K₂ (L : Set Ω) = K₂⟮(β : Ω)⟯ := by
+    refine le_antisymm (IntermediateField.adjoin_le_iff.mpr ?_)
+      (IntermediateField.adjoin_simple_le_iff.mpr hmem)
+    intro x hx
+    have hx' : x ∈ K₁⟮(β : Ω)⟯ := hLeq ▸ hx
+    have hle : K₁⟮(β : Ω)⟯ ≤ (K₂⟮(β : Ω)⟯).restrictScalars K₁ :=
+      IntermediateField.adjoin_simple_le_iff.mpr
+        (IntermediateField.mem_adjoin_simple_self K₂ _)
+    exact hle hx'
+  have hint : IsIntegral K₁ (β : Ω) :=
+    (IsIntegral.of_finite K₁ β).map (IntermediateField.val L)
+  have hsep : IsSeparable K₁ (β : Ω) := by
+    have h2 : minpoly K₁ ((IntermediateField.val L) β) = minpoly K₁ β :=
+      minpoly.algebraMap_eq (IntermediateField.val L).injective β
+    show (minpoly K₁ ((IntermediateField.val L) β)).Separable
+    rw [h2]
+    exact Algebra.IsSeparable.isSeparable K₁ β
+  rw [hAeq, finrank_adjoin_eq_of_separableClosure_eq_bot hsc hint hsep]
+  exact congrArg (fun M : IntermediateField K₁ Ω => Module.finrank K₁ M) hLeq.symm
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Theorem 6.2, (i)` の「`K₁` が `K₂` の中で分離閉 ⟹ 次数が保たれる」。 -/
