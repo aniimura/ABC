@@ -166,6 +166,7 @@ import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
 import ABC3.Found.SixExp.LatticeHouse
+import ABC3.Found.SixExp.Counting
 import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
