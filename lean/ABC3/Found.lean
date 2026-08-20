@@ -140,6 +140,7 @@ import ABC3.Found.Divisor.ArithFunctor
 import ABC3.Found.Divisor.ArithFrobenioid
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
+import ABC3.Found.NumberField.DirichletDensity
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat

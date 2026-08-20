@@ -3654,11 +3654,11 @@
           "id": "cheb-density",
           "title": "Dirichlet 密度の定義と基本性質",
           "deps": [],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "`i(T) = lim_{s→1+} (Σ_{𝔭∈T} N𝔭^{-s}) / log(1/(s-1))`。★有限集合は密度 0、有限直和で加法的、`f(𝔭)≥2` の素点は無視できる（[MilneCFT] VIII 4.5）。★mathlib に `DirichletDensity` は **0 件**（2026-08-20 実測）。",
-          "lean": "",
-          "decl": "",
+          "note": "`i(T) = lim_{s→1+} (Σ_{𝔭∈T} N𝔭^{-s}) / log(1/(s-1))`。★有限集合は密度 0、有限直和で加法的、`f(𝔭)≥2` の素点は無視できる（[MilneCFT] VIII 4.5）。★mathlib に `DirichletDensity` は **0 件**（2026-08-20 実測）。\n\n★★★★2026-08-20 完了。`i(T) = lim_{s→1+} (Σ_{ᵒd∈T} Nᵒd^{-s}) / log(1/(s-1))` を定義し、\n* `HasDirichletDensity.unique`（密度は一意。`ᵝ[>] 1` は自明でない）\n* `tendsto_logInv_atTop`（分母は `s → 1+` で `+∞`）\n* `hasDirichletDensity_zero_of_finite`（**有限集合の密度は 0**。分子は収束する有限和）\n* ★**`infinite_of_hasDirichletDensity_ne_zero`**（密度が 0 でなければ無限集合）\nを証明した。★★最後の 1 本が `Theorem 6.4, (iv)` の使い方そのものである\n——「完全分解する素点の密度は `1/[L:K] ≠ 0`、ゆえにそういう素点は無限個ある」。",
+          "lean": "ABC3/Found/NumberField/DirichletDensity.lean",
+          "decl": "ABC3.Found.NF.HasDirichletDensity / infinite_of_hasDirichletDensity_ne_zero",
           "frdiNeeded": true
         },
         {
