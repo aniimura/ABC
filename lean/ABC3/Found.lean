@@ -178,6 +178,8 @@ import ABC3.Found.SixExp.Params
 import ABC3.Found.SixExp.SiegelPoly
 import ABC3.Found.SixExp.GapCore
 import ABC3.Found.SixExp.ParamsGap
+import ABC3.Found.SixExp.Main
+import ABC3.Found.SixExp.Theorem
 import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
@@ -664,6 +666,7 @@ import ABC3.Found.GaloisRep.SupportSum
 import ABC3.Found.GaloisRep.D2Principal
 import ABC3.Found.GaloisRep.D2Bridge
 import ABC3.Found.GaloisRep.RootOfUnity
+import ABC3.Found.GaloisRep.WeilWellDef
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
