@@ -3498,11 +3498,11 @@
             "ex63-perffact",
             "ex63-B"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "小",
-          "note": "★`cartierFrobenioid` と同型の組み立てで済む見込み。",
-          "lean": "",
-          "decl": ""
+          "note": "★`cartierFrobenioid` と同型の組み立てで済む見込み。\n\n★★★★2026-08-20: **組み立ては閉じた**（`ArithFrobenioid.lean`）。\n幾何版の `CartierDatum`（`ℤ` 係数）を実係数にした `ArithDatum` を置き、\n`phi`（monoid on 𝒟）・`phi_isDivisorialOn`・`phi_isPerfFactorial`・\n`modelData`・`modelHyp`・`arithFrobenioid`（`Theorem 5.2, (ii)`）までを組んだ。\nisotropic 型・birationally Frobenius-normalized 型も出る。\n★★残るのは **`ArithDatum` の各フィールドを 𝒟 = B(G)⁰ の上で実現する段**\n——Galois 対応で B(G)⁰ の対象を部分体に読み替える——だけである。\n★幾何版の `ex61-model` と**同じ状態**（組み立ては閉じていて、入力のデータ待ち）。",
+          "lean": "ABC3/Found/Divisor/ArithFrobenioid.lean",
+          "decl": "ABC3.Found.Divisor.ArithDatum.arithFrobenioid"
         },
         {
           "id": "ex63-morph",
