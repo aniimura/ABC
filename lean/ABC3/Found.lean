@@ -174,6 +174,7 @@ import ABC3.Found.SixExp.Assembly
 import ABC3.Found.SixExp.DenomClear
 import ABC3.Found.SixExp.SiegelConst
 import ABC3.Found.SixExp.Setup
+import ABC3.Found.SixExp.Params
 import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
@@ -654,6 +655,7 @@ import ABC3.Found.GaloisRep.CurveHomVal
 import ABC3.Found.GaloisRep.AutInvariant
 import ABC3.Found.GaloisRep.PlaceTransport
 import ABC3.Found.GaloisRep.TranslateCount
+import ABC3.Found.GaloisRep.FiberConst
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
