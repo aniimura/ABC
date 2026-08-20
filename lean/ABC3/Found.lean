@@ -112,6 +112,7 @@ import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.Divisor.HeightOneDVR
 import ABC3.Found.Divisor.FreeDivisorial
 import ABC3.Found.Divisor.CartierMonoid
+import ABC3.Found.Divisor.CartierPrime
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
