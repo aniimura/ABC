@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import Mathlib.RingTheory.DedekindDomain.Dvr
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.LocalProperties.IntegrallyClosed
+import Mathlib.RingTheory.DedekindDomain.AdicValuation
 
 /-!
 # 正規 Noether 整域の余次元 1 の点は DVR
@@ -85,5 +86,52 @@ theorem isDiscreteValuationRing_localization_atPrime_of_minimal
     (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) :
     IsDiscreteValuationRing (Localization.AtPrime p) :=
   isDiscreteValuationRing_atPrime_of_minimal p hp0 hmin _
+
+/-! ## ★余次元 1 の点での位数 `ord`
+
+★★DVR になったので、**Dedekind 環の adic 付値の在庫がそのまま使える**。
+`Localization.AtPrime p` は DVR ゆえ Dedekind 環であり、
+その唯一の高さ 1 素点(極大イデアル)の adic 付値を分数体へ延ばせばよい。 -/
+
+open IsDedekindDomain in
+/-- ★★★**余次元 1 の点での位数** `ord_p`。 -/
+noncomputable def ordAt {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) :
+    Valuation (FractionRing R) (WithZero (Multiplicative ℤ)) := by
+  haveI hdvr : IsDiscreteValuationRing (Localization.AtPrime p) :=
+    isDiscreteValuationRing_localization_atPrime_of_minimal p hp0 hmin
+  haveI : IsFractionRing (Localization.AtPrime p) (FractionRing R) :=
+    IsFractionRing.isFractionRing_of_isLocalization p.primeCompl _ _
+      p.primeCompl_le_nonZeroDivisors
+  have hnf : ¬ IsField (Localization.AtPrime p) :=
+    IsLocalization.AtPrime.not_isField R hp0 _
+  exact HeightOneSpectrum.valuation (FractionRing R)
+    ⟨IsLocalRing.maximalIdeal (Localization.AtPrime p), inferInstance,
+      IsLocalRing.isField_iff_maximalIdeal_eq.not.mp hnf⟩
+
+/-- ★環の元の位数は非負(付値は 1 以下)。 -/
+theorem ordAt_le_one {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) (r : R) :
+    ordAt p hp0 hmin (algebraMap R (FractionRing R) r) ≤ 1 := by
+  haveI hdvr : IsDiscreteValuationRing (Localization.AtPrime p) :=
+    isDiscreteValuationRing_localization_atPrime_of_minimal p hp0 hmin
+  haveI : IsFractionRing (Localization.AtPrime p) (FractionRing R) :=
+    IsFractionRing.isFractionRing_of_isLocalization p.primeCompl _ _
+      p.primeCompl_le_nonZeroDivisors
+  show IsDedekindDomain.HeightOneSpectrum.valuation (FractionRing R) _ _ ≤ 1
+  rw [show (algebraMap R (FractionRing R) r)
+      = algebraMap (Localization.AtPrime p) (FractionRing R)
+        (algebraMap R (Localization.AtPrime p) r) from
+    (IsScalarTower.algebraMap_apply R (Localization.AtPrime p) (FractionRing R) r)]
+  exact IsDedekindDomain.HeightOneSpectrum.valuation_le_one _ _
+
+/-- ★非零元の位数は非零。 -/
+theorem ordAt_ne_zero {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) {x : FractionRing R}
+    (hx : x ≠ 0) : ordAt p hp0 hmin x ≠ 0 :=
+  (ordAt p hp0 hmin).ne_zero_iff.mpr hx
 
 end ABC3.Found.Divisor
