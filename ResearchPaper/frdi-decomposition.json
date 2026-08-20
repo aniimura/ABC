@@ -3414,11 +3414,11 @@
           "id": "thm62-iii-fsm",
           "title": "(iii) (immediately) `𝒟` の mono はすべて同型 ⟹ `𝒟` は FSM 型(ゆえに FSMFF 型)",
           "deps": [],
-          "status": "半済",
+          "status": "done",
           "size": "小",
-          "note": "★在庫: `Found/FrdI/Sec6GaloisCat.lean` が `B(G)⁰` の連結性・totally epimorphic・of FSM-type を与えている。",
-          "lean": "ABC3/Found/FrdI/Sec6GaloisCat.lean",
-          "decl": ""
+          "note": "★在庫: `Found/FrdI/Sec6GaloisCat.lean` が `B(G)⁰` の連結性・totally epimorphic・of FSM-type を与えている。\n\n★★★2026-08-21 完了。原文が「immediately」で畳んだ中身は**定義を開くだけ**だった ——\n`FSM-morphism = fiberwise surjective ∧ mono`（`§0`）なので、\n「mono ⟹ 同型」があれば `IsOfFSMType` はそのまま出る（`isOfFSMType_of_mono_isIso`）。\n`FSM 型 ⟹ FSMFF 型` は在庫（`isOfFSMFFType_of_isOfFSMType`）。\n★具体例 `𝒟 = B(G)⁰ = (FinSub K K̄)ᵒᵖ` については `finSubOp_isOfFSMType` が\nすでに与えている（中身は無限 Galois 理論の `fixedField (fixingSubgroup L) = L` 1 本）。",
+          "lean": "ABC3/Found/FrdI/Thm62Fsm.lean / ABC3/Found/FrdI/Sec6GaloisCat.lean",
+          "decl": "isOfFSMType_of_mono_isIso / isOfFSMFFType_of_mono_isIso / finSubOp_isOfFSMType"
         },
         {
           "id": "thm62-iii-nondil",
