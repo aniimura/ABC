@@ -19507,3 +19507,46 @@ Galois 同変性
 | `muExt_mem_fixedPoints` | ★★★★★★**`[n]^* F(E) ⊆ F(E)^{E[n]}`** |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-508 ★★★★★★★★★非退化性を 1 つの入力に絞った(第 197 ブロック)
+
+非退化性の古典的な証明のうち、**`F(E)^{E[n]} = [n]^* F(E)` 以外は全部埋めた**:
+
+    e_n(P, ·) ≡ 1
+      ⟹ τ_Q(g) = g (∀Q ∈ E[n])          ← 第 195 の `algebraMap_weilPairingVal`
+      ⟹ g ∈ [n]^* F(E)                   ← ★**これだけが残る**
+      ⟹ v^n = f_P                         ← `μ̃` の単射性
+      ⟹ XYIdeal(P) = (v)                  ← `count` を `n` で割る
+      ⟹ toClass P = 0 ⟹ P = O            ← mathlib の `toClass_eq_zero`
+
+★本ブロックは `hfix` という仮定の形で「`E[n]` 不変なら `[n]^*` の像に入る」を受け取り、
+**それ以外を全部証明する**。
+
+### ★★★★★★`count` を `n` で割るところ
+
+`(f_P) = (v)^n` と `(f_P) = XYIdeal(P)^n` から、各素点で
+`n·count_v(XYIdeal(P)) = n·count_v(v)`。★`n ≠ 0` で割って第 175 の `eq_of_count_eq`。
+
+### ★★★★残る 1 行の在庫測定(2026-08-20)
+
+| 必要なもの | mathlib |
+|---|---|
+| 分点多項式 `Φ_n`・`ΨSq_n` | ✅ `WeierstrassCurve.Φ`・`ΨSq` |
+| その次数(`deg Φ_n = n²`、`deg ΨSq_n = n²−1`) | ✅ `natDegree_Φ_le`・`coeff_Φ`・`natDegree_ΨSq` |
+| `K⟮ X ⟯/K⟮ f ⟯` の次数 = `max(deg num, deg denom)` | ✅ `finrank_eq_max_natDegree`(Lüroth の副産物) |
+| **`x([n]P) = Φ_n(x)/ΨSq_n(x)`** | ❌ **0 件** |
+
+★★足りないのは最後の 1 本だけである。★★★mathlib の `DivisionPolynomial/` は
+分点多項式とその次数を持つが、**群法則とのリンクを持たない**
+(`ΨSq`/`Φ` は `DivisionPolynomial/` の外に 0 件、実測)。
+★★★★docstring にも `TODO: the bivariate polynomials ωₙ` とあり、上流も未着手である。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `eq_zero_of_fP_isPow` | ★★★★★★★**`f_P` が `n` 乗なら `P = O`** |
+| `eq_zero_of_weilPairingVal_trivial` | ★★★★★★★★★**`e_n(P,·) ≡ 1 ⟹ P = O`**(`hfix` 仮定) |
+| `nondeg_of_fixedField` | ★★★★★★★★★**非退化性**(`hfix` 仮定) |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。

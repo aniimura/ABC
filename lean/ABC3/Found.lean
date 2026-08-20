@@ -694,6 +694,7 @@ import ABC3.Found.GaloisRep.WeilGalois
 import ABC3.Found.GaloisRep.WeilGalPoint
 import ABC3.Found.GaloisRep.WeilBilinFull
 import ABC3.Found.GaloisRep.TorsionAction
+import ABC3.Found.GaloisRep.NondegStep
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

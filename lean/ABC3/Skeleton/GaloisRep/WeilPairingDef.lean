@@ -175,11 +175,17 @@ def weilPairing_nondeg.needs : List ProofObligation :=
       (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
-      "★★★`e_n(P,·) ≡ 1` なら `g_P` が `[n]^*` の像に入り、`f_P` が `n` 乗になる——そこから `P = 0` を出す。Kummer 理論型の議論(20-50 ブロック)" 19,
+      "★★★★★★★★★**2026-08-20: 残る入力は 1 つだけになった**(第 196・197 ブロック)。`e_n(P,·) ≡ 1 ⟹ τ_Q(g) = g ⟹ g ∈ [n]^*F(E) ⟹ v^n = f_P ⟹ XYIdeal(P) = (v) ⟹ toClass P = 0 ⟹ P = O` のうち、**`g ∈ [n]^*F(E)` 以外は全部証明した**(`Found/GaloisRep/NondegStep.lean` の `nondeg_of_fixedField`)(0 ブロック)" 19,
     .implicitStep
-      "★★★★2026-08-20 の測定: これは `F(E)/[n]^*F(E)` が **`E[n]` を Galois 群とする Galois 拡大**であることを要求する。★`τ_Q(g) = g`(∀Q ∈ E[n])⟹ `g ∈ [n]^*F(E)` の段である。★★mathlib の `IsGalois`・`FixedPoints` は使えるが、`E[n]` の作用が忠実かつ次数 `n²` であることを別途示す必要がある" 19,
+      "★★★★★★★**2026-08-20 の測定(第 196)**: `E[n]` の `F(E)` への作用は**忠実**で、Artin(`FixedPoints.finrank_eq_card`)から `[F(E) : F(E)^{E[n]}] = n²`。★`[n]^*F(E) ⊆ F(E)^{E[n]}` も済。★★等号に要るのは **`[F(E) : [n]^*F(E)] = n²`**、すなわち `deg[n] = n²` の 1 行だけである(0 ブロック)" 19,
     .implicitStep
-      "★`E[n] ≃ (ℤ/n)²`(第 65-72 ブロック、**Found に済**)がここで消費される(0 ブロック)" 19 ]
+      "★★★★★★**残る 1 行の中身**: mathlib には分点多項式 `Φ_n`・`ΨSq_n` と**その次数**(`natDegree_Φ_le`・`coeff_Φ`・`natDegree_ΨSq`・`leadingCoeff_ΨSq`)があり、Lüroth の副産物 `finrank_eq_max_natDegree`(`K⟮X⟯/K⟮f⟯` の次数 = `max(deg num, deg denom)`)もある(2026-08-20 実測)。★足りないのは **`x([n]P) = Φ_n(x)/ΨSq_n(x)`**——分点多項式と群法則を結ぶ 1 本だけで、mathlib には無い(`ΨSq`/`Φ` は `DivisionPolynomial/` の外に 0 件)。★★`Skeleton/GaloisRep/WeilFunctionField.lean` の `exists_mulByNPullback` がその節点である(10-25 ブロック)" 19,
+    .implicitStep
+      "★★★★あわせて `Φ_n` と `ΨSq_n` が互いに素であること(`RatFunc.num`/`denom` が約分後だから)と、`[F(E) : F(x)] = 2`(mathlib の `CoordinateRing.basis`)、塔の積公式が要る(5-15 ブロック)" 19,
+    .implicitStep
+      "★★双対同種を経由する道もあるが、`deg` が 2 次形式であることの形式化が要り、こちらの方が重い(2026-08-20 の判断)" 19,
+    .implicitStep
+      "★`E[n] ≃ (ℤ/n)²`(第 65-72 ブロック、**Found に済**)と `#E[n] = n²`(`torsion_card`)がここで消費される(0 ブロック)" 19 ]
 
 def weilPairing_galois.src : Source :=
   { paper := "GenEll", pdfPage := 19,
