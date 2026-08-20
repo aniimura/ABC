@@ -135,6 +135,7 @@ import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.ArithDivisor
 import ABC3.Found.Divisor.ArithOrd
 import ABC3.Found.Divisor.ArithPhiMonoid
+import ABC3.Found.Divisor.ArithGp
 import ABC3.Found.Divisor.ArithMonoprime
 import ABC3.Found.Divisor.ArithPhiPrime
 import ABC3.Found.Divisor.ArithPf
