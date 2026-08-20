@@ -186,6 +186,68 @@ theorem rlfConeMap_comp {O : Type w} [AddCommMonoid O] (f : M →+ N) (g : N →
     rlfConeMap (g.comp f) x = rlfConeMap g (rlfConeMap f x) :=
   Subtype.ext (rlfVMap_comp f g (x : RlfV M))
 
+/-! ## ★★3. 錐が sharp であるための十分条件
+
+★★錐の sharp 性は `ModelData.Hyp` の `divisorial` がどのみち要求するものである。
+★**`M` 上で狭義正の線型汎関数があれば十分**であり、
+幾何（`Example 6.1`）では係数の総和、
+算術（`Example 6.3`）では次数がそれである。 -/
+
+/-- ★`ℓ : M^gp →+ ℝ` を `ℝ ⊗_ℤ M^gp →ₗ[ℤ] ℝ` へ延ばす。 -/
+noncomputable def rlfLift (l : Gp M →+ ℝ) : RlfV M →ₗ[ℤ] ℝ :=
+  TensorProduct.lift
+    { toFun := fun r => r • l.toIntLinearMap
+      map_add' := by intro a b; ext g; simp [add_smul]
+      map_smul' := by intro n a; ext g; simp [mul_assoc] }
+
+@[simp] theorem rlfLift_tmul (l : Gp M →+ ℝ) (r : ℝ) (g : Gp M) :
+    rlfLift l (r ⊗ₜ[ℤ] g) = r * l g := by
+  show (r • l.toIntLinearMap) g = r * l g
+  simp [smul_eq_mul]
+
+/-- ★★★★★**錐が sharp であるための十分条件** —— `M` 上で狭義正の線型汎関数。
+
+★証明は `AddSubmonoid.closure_induction` で「`0 ≤ L x` かつ `L x = 0 → x = 0`」を
+錐全体へ伸ばすだけである（この述語は和で閉じている）。 -/
+theorem isSharp_rlfCone_of_pos (l : Gp M →+ ℝ)
+    (hpos : ∀ m : M, m ≠ 0 → 0 < l (toGp M m)) : IsSharp (rlfCone M) := by
+  set L := rlfLift l with hL
+  have key : ∀ x ∈ rlfCone M, 0 ≤ L x ∧ (L x = 0 → x = 0) := by
+    intro x hx
+    refine AddSubmonoid.closure_induction ?_ ?_ ?_ hx
+    · rintro y ⟨r, hr, m, rfl⟩
+      by_cases hm : m = 0
+      · subst hm
+        rw [toGp_zero, TensorProduct.tmul_zero]
+        simp
+      · have hlm : 0 < l (toGp M m) := hpos m hm
+        refine ⟨by rw [hL, rlfLift_tmul]; positivity, ?_⟩
+        intro h0
+        rw [hL, rlfLift_tmul] at h0
+        have hr0 : r = 0 := by
+          rcases mul_eq_zero.mp h0 with h | h
+          · exact h
+          · exact absurd h hlm.ne'
+        rw [hr0, TensorProduct.zero_tmul]
+    · exact ⟨by simp, fun _ => rfl⟩
+    · rintro a b _ _ ⟨ha0, ha1⟩ ⟨hb0, hb1⟩
+      refine ⟨by rw [map_add]; linarith, ?_⟩
+      intro h
+      rw [map_add] at h
+      have hA : L a = 0 := by linarith
+      have hB : L b = 0 := by linarith
+      rw [ha1 hA, hb1 hB, add_zero]
+  intro a ha
+  obtain ⟨u, rfl⟩ := ha
+  have h1 := key ((u.val : rlfCone M) : RlfV M) u.val.2
+  have h2 := key ((u.neg : rlfCone M) : RlfV M) u.neg.2
+  have hsum : ((u.val : rlfCone M) : RlfV M) + ((u.neg : rlfCone M) : RlfV M) = 0 :=
+    congrArg (fun t : rlfCone M => (t : RlfV M)) u.val_neg
+  have h3 : L ((u.val : rlfCone M) : RlfV M) + L ((u.neg : rlfCone M) : RlfV M) = 0 := by
+    rw [← map_add, hsum, map_zero]
+  have h4 : L ((u.val : rlfCone M) : RlfV M) = 0 := by linarith [h1.1, h2.1]
+  exact Subtype.ext (h1.2 h4)
+
 variable {D : Type u} [Category.{v} D]
 
 /-- ★`Φ^rlf` の台となる反変関手。 -/
@@ -232,6 +294,18 @@ noncomputable def phiRlfConeOnOfDivisorial (Φ : MonoidOn.{v, u, w} D)
     (hdiv : Φ.IsDivisorialOn)
     (hsharp : ∀ A : D, IsSharp (rlfCone (Φ.val A))) : MonoidOn.{v, u, w} D :=
   phiRlfConeOn Φ (fun A => isCancelAdd_of_isIntegralMonoid _ (hdiv A).1.1) hsharp
+
+/-- ★★★★★★★**各 `Φ(A)` に狭義正の線型汎関数があれば、
+`Φ^rlf : MonoidOn D` は仮定なしで立つ**。
+
+★幾何（`Example 6.1`）では係数の総和、算術（`Example 6.3`）では
+次数がその汎関数である。 -/
+noncomputable def phiRlfConeOnOfPos (Φ : MonoidOn.{v, u, w} D)
+    (hdiv : Φ.IsDivisorialOn)
+    (l : ∀ A : D, Gp (Φ.val A) →+ ℝ)
+    (hpos : ∀ (A : D) (m : Φ.val A), m ≠ 0 → 0 < l A (toGp (Φ.val A) m)) :
+    MonoidOn.{v, u, w} D :=
+  phiRlfConeOnOfDivisorial Φ hdiv (fun A => isSharp_rlfCone_of_pos (l A) (hpos A))
 
 /-! ### ★出典の紐付け -/
 
