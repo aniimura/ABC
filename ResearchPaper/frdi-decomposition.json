@@ -3024,9 +3024,9 @@
             "normalization-in-ext2",
             "normal-scheme"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "★大",
-          "note": "★正規性は正規化の定義から。**proper** は「正規化射が有限 ⟹ proper、proper の合成は proper」で出る。mathlib の `Morphisms/Proper.lean`・`Morphisms/Finite.lean` に乗る。",
+          "note": "★正規性は正規化の定義から。**proper** は「正規化射が有限 ⟹ proper、proper の合成は proper」で出る。mathlib の `Morphisms/Proper.lean`・`Morphisms/Finite.lean` に乗る。\n\n★★★★2026-08-21 の実測（**在庫は全部あった。手順が確定した**）：\n`V[L]`（`NormFunctor.lean` の `normObj`）が **proper normal** であることは、\nmathlib の 3 本で出る。\n\n| 段 | mathlib の在庫 |\n|---|---|\n| 1. アフィン局所で `Γ(V[L], fromNormalization⁻¹U) ≅ integralClosure Γ(V,U) L` | `Scheme.Hom.normalizationObjIso` |\n| 2. 整閉包は**整閉** | `integralClosure.isIntegrallyClosedOfFiniteExtension K L`（`[IsFractionRing R K] [FiniteDimensional K L]`） |\n| 3. 整閉包は**加群として有限**（⟹ `V[L] → V` は有限 ⟹ proper） | ★**`IsIntegralClosure.finite`**（`RingTheory/DedekindDomain/IntegralClosure.lean`。`A` 整閉 Noether、`L/Frac A` 有限**分離**） |\n\n★分離性は `K̄/K` が分離的であることから自動（`FinSub` の doc が書いているとおり）。\n★★残るのは**繋ぎの 2 段**だけである：\n* `f ⁻¹ᵁ U = ⊤`（`Spec L` の 1 点は `V` の生成点へ行くので、空でない開集合の逆像は全体）\n* アフィン局所の整閉性 ⟹ 茎の整閉性（局所化は整閉性を保つ）＝ `IsNormalScheme (V[L])`\n\n★★★**mathlib に `Scheme.IsNormal` は無い**（2026-08-21 再測、`AlgebraicGeometry/` 全体で 0 件）ので、\n`SchemeWeil.lean` の `IsNormalScheme` を使い続けること。",
           "lean": "",
           "decl": ""
         },
