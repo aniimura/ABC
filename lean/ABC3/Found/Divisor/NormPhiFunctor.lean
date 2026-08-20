@@ -137,6 +137,128 @@ noncomputable def phiPull (DK : Set (PrimeDivisorPt V))
     exact pullCoeff_add (normMap V f) (normObj_isNormalScheme V M)
       (normObj_isNormalScheme V L) d.2 e.2 hde x.1 (normMap_hdim f x.1)
 
+/-! ## ★3. 関手則 -/
+
+/-- ★`Φ(L)^gp` の元としての引き戻しは、Weil 因子として見ても係数そのもの。 -/
+theorem toWeilOnDL_phiPull (DK : Set (PrimeDivisorPt V))
+    {L M : FinSub V.functionField Kbar} (f : L ⟶ M)
+    [IsLocallyNoetherian (normObj V L)] [IsLocallyNoetherian (normObj V M)]
+    [CompactSpace (normObj V M)]
+    (d : cartierOnDL V DK L (normObj_isNormalScheme V L))
+    (v : PrimeDivisorPt (normObj V M)) :
+    toWeilOnDL V DK M ((phiPull V DK f d : cartierOnDL V DK M _)
+        : (DLSet V DK M) →₀ ℤ) v
+      = pullCoeff (normMap V f) (normObj_isNormalScheme V M)
+        (normObj_isNormalScheme V L) d.2 v := by
+  have hsupp : ∀ z : PrimeDivisorPt (normObj V L), z ∉ DLSet V DK L →
+      toWeilOnDL V DK L (d : (DLSet V DK L) →₀ ℤ) z = 0 := by
+    intro z hz
+    show Finsupp.embDomain (DLEmb V DK L) (d : (DLSet V DK L) →₀ ℤ) z = 0
+    refine Finsupp.embDomain_notin_range _ _ _ ?_
+    rintro ⟨y, rfl⟩
+    exact hz y.2
+  have := embDomain_subtypeDomain V DK M
+    (cartierPullback (normMap V f) (normObj_isNormalScheme V M)
+      (normObj_isNormalScheme V L) d.2 (normMap_hdim f))
+    (fun w hw => by
+      rw [cartierPullback_apply]
+      exact pullCoeff_eq_zero_of_notMem_DL V DK f d.2 hsupp w hw)
+  rw [show ((phiPull V DK f d : cartierOnDL V DK M _) : (DLSet V DK M) →₀ ℤ)
+      = Finsupp.subtypeDomain (· ∈ DLSet V DK M)
+        (cartierPullback (normMap V f) (normObj_isNormalScheme V M)
+          (normObj_isNormalScheme V L) d.2 (normMap_hdim f)) from rfl, this]
+  rfl
+
+/-- ★★★**`pull_id`**。 -/
+theorem phiPull_id (DK : Set (PrimeDivisorPt V)) (L : FinSub V.functionField Kbar)
+    [IsLocallyNoetherian (normObj V L)] [CompactSpace (normObj V L)]
+    (d : cartierOnDL V DK L (normObj_isNormalScheme V L)) :
+    phiPull V DK (𝟙 L) d = d := by
+  refine Subtype.ext (Finsupp.ext fun x => ?_)
+  show pullCoeff (normMap V (𝟙 L)) (normObj_isNormalScheme V L)
+    (normObj_isNormalScheme V L) d.2 x.1 = (d : (DLSet V DK L) →₀ ℤ) x
+  have hpt : (normMap V (𝟙 L)).base x.1.1 = x.1.1 := by
+    rw [normMap_id]
+    rfl
+  obtain ⟨U, hwU, q, hq, hDU⟩ := d.2 ((normMap V (𝟙 L)).base x.1.1)
+  rw [pullCoeff_eq (normMap V (𝟙 L)) (normObj_isNormalScheme V L)
+    (normObj_isNormalScheme V L) d.2 x.1 (normMap_hdim (𝟙 L) x.1) hq hwU hDU]
+  have hff : ffMap (normMap V (𝟙 L)) q = q := by
+    have h1 := normFF_id V L
+    rw [normFF_eq_ffMap] at h1
+    rw [h1]
+    rfl
+  rw [hff, ← hDU x.1 (hpt ▸ hwU)]
+  exact Finsupp.embDomain_apply_self (DLEmb V DK L) (d : (DLSet V DK L) →₀ ℤ) x
+
+/-- ★★★★**`pull_comp`** —— `g^*f^* = (f≫g)^*`。 -/
+theorem phiPull_comp (DK : Set (PrimeDivisorPt V))
+    {L M N : FinSub V.functionField Kbar} (f : L ⟶ M) (g : M ⟶ N)
+    [IsLocallyNoetherian (normObj V L)] [IsLocallyNoetherian (normObj V M)]
+    [IsLocallyNoetherian (normObj V N)]
+    [CompactSpace (normObj V M)] [CompactSpace (normObj V N)]
+    (d : cartierOnDL V DK L (normObj_isNormalScheme V L)) :
+    phiPull V DK (f ≫ g) d = phiPull V DK g (phiPull V DK f d) := by
+  refine Subtype.ext (Finsupp.ext fun x => ?_)
+  show pullCoeff (normMap V (f ≫ g)) (normObj_isNormalScheme V N)
+      (normObj_isNormalScheme V L) d.2 x.1
+    = pullCoeff (normMap V g) (normObj_isNormalScheme V N)
+      (normObj_isNormalScheme V M) (phiPull V DK f d).2 x.1
+  obtain ⟨U, hwU, q, hq, hDU⟩ := d.2 ((normMap V (f ≫ g)).base x.1.1)
+  have hpt : (normMap V (f ≫ g)).base x.1.1
+      = (normMap V f).base ((normMap V g).base x.1.1) := by
+    rw [normMap_comp]
+    rfl
+  rw [pullCoeff_eq (normMap V (f ≫ g)) (normObj_isNormalScheme V N)
+    (normObj_isNormalScheme V L) d.2 x.1 (normMap_hdim (f ≫ g) x.1) hq hwU hDU]
+  have hmem : (normMap V g).base x.1.1 ∈ (normMap V f) ⁻¹ᵁ U := by
+    show (normMap V f).base ((normMap V g).base x.1.1) ∈ U
+    rw [← hpt]
+    exact hwU
+  have hffq : ffMap (normMap V f) q ≠ 0 := by
+    intro h
+    exact hq ((ffMap (normMap V f)).hom.injective (by simpa using h))
+  have hloc : ∀ v : PrimeDivisorPt (normObj V M), (v : normObj V M) ∈ (normMap V f) ⁻¹ᵁ U →
+      toWeilOnDL V DK M ((phiPull V DK f d : cartierOnDL V DK M _)
+          : (DLSet V DK M) →₀ ℤ) v
+        = ordPt (normObj V M) (normObj_isNormalScheme V M) v (ffMap (normMap V f) q) := by
+    intro v hv
+    rw [toWeilOnDL_phiPull V DK f d v]
+    exact pullCoeff_eq (normMap V f) (normObj_isNormalScheme V M)
+      (normObj_isNormalScheme V L) d.2 v (normMap_hdim f v) hq hv hDU
+  rw [pullCoeff_eq (normMap V g) (normObj_isNormalScheme V N)
+    (normObj_isNormalScheme V M) (phiPull V DK f d).2 x.1 (normMap_hdim g x.1)
+    hffq hmem hloc]
+  have hcomp : ffMap (normMap V (f ≫ g)) q
+      = ffMap (normMap V g) (ffMap (normMap V f) q) := by
+    have h1 := normFF_comp V f g
+    rw [normFF_eq_ffMap, normFF_eq_ffMap, normFF_eq_ffMap] at h1
+    rw [h1]
+    rfl
+  rw [hcomp]
+
+/-- ★★★**`pull_nonneg`** —— 有効因子の引き戻しは有効。 -/
+theorem phiPull_nonneg (DK : Set (PrimeDivisorPt V))
+    {L M : FinSub V.functionField Kbar} (f : L ⟶ M)
+    [IsLocallyNoetherian (normObj V L)] [IsLocallyNoetherian (normObj V M)]
+    [CompactSpace (normObj V M)]
+    (d : cartierOnDL V DK L (normObj_isNormalScheme V L))
+    (hd : (0 : (DLSet V DK L) →₀ ℤ) ≤ (d : (DLSet V DK L) →₀ ℤ)) :
+    (0 : (DLSet V DK M) →₀ ℤ)
+      ≤ ((phiPull V DK f d : cartierOnDL V DK M _) : (DLSet V DK M) →₀ ℤ) := by
+  refine Finsupp.le_def.mpr fun x => ?_
+  show 0 ≤ pullCoeff (normMap V f) (normObj_isNormalScheme V M)
+    (normObj_isNormalScheme V L) d.2 x.1
+  refine pullCoeff_nonneg (normMap V f) (normObj_isNormalScheme V M)
+    (normObj_isNormalScheme V L) d.2 x.1 (normMap_hdim f x.1) (fun v => ?_)
+  show 0 ≤ Finsupp.embDomain (DLEmb V DK L) (d : (DLSet V DK L) →₀ ℤ) v
+  by_cases hv : v ∈ DLSet V DK L
+  · rw [show v = DLEmb V DK L ⟨v, hv⟩ from rfl, Finsupp.embDomain_apply_self]
+    exact Finsupp.le_def.mp hd ⟨v, hv⟩
+  · rw [Finsupp.embDomain_notin_range]
+    rintro ⟨y, rfl⟩
+    exact hv y.2
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Example 6.1` の `Φ(L)` の関手性(台が `D_L` に入ること)。 -/

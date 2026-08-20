@@ -147,6 +147,33 @@ theorem exists_unit_of_ordPt_eq_zero (hnorm : IsNormalScheme X) (x : PrimeDiviso
   have hunit : IsUnit r := IsLocalRing.notMem_maximalIdeal.mp hnot
   exact ⟨hunit.unit, by rw [hunit.unit_spec]; exact hr⟩
 
+/-! ## ★3. `ord ≥ 0` は「茎に入る」と同値 -/
+
+/-- ★`ord_x(f) ≥ 0` は付値が `≤ 1` であることと同値。 -/
+theorem ordPt_nonneg_iff_val (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X)
+    {u : X.functionField} (hu : u ≠ 0) :
+    0 ≤ ordPt X hnorm x u ↔ ordPtVal X hnorm x u ≤ 1 := by
+  have hv : ordPtVal X hnorm x u ≠ 0 := ordPtVal_ne_zero hnorm x hu
+  rw [ordPt, dif_neg hv, withZero_le_one_iff_toAdd_nonpos _ hv, neg_nonneg]
+
+/-- ★★**茎の元は `ord_x ≥ 0`**。 -/
+theorem ordPt_nonneg_of_mem_stalk (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X)
+    (r : X.presheaf.stalk x.1)
+    (hr : algebraMap (X.presheaf.stalk x.1) X.functionField r ≠ 0) :
+    0 ≤ ordPt X hnorm x (algebraMap (X.presheaf.stalk x.1) X.functionField r) := by
+  haveI := isDiscreteValuationRing_stalk_of_codimOne X hnorm x
+  rw [ordPt_nonneg_iff_val hnorm x hr]
+  show (dvrSpectrum (X.presheaf.stalk x.1)).valuation X.functionField (algebraMap _ _ r) ≤ 1
+  exact HeightOneSpectrum.valuation_le_one _ r
+
+/-- ★★★**`ord_x ≥ 0` なら茎から来る**。 -/
+theorem exists_mem_stalk_of_ordPt_nonneg (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X)
+    {u : X.functionField} (hu : u ≠ 0) (h : 0 ≤ ordPt X hnorm x u) :
+    ∃ r : X.presheaf.stalk x.1,
+      algebraMap (X.presheaf.stalk x.1) X.functionField r = u := by
+  haveI := isDiscreteValuationRing_stalk_of_codimOne X hnorm x
+  exact exists_algebraMap_of_valuation_le_one ((ordPt_nonneg_iff_val hnorm x hu).mp h)
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Example 6.1` の `B(L)` の条件を茎の言葉に翻訳したもの。 -/

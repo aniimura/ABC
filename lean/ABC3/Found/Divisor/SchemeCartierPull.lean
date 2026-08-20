@@ -220,6 +220,41 @@ theorem pullCoeff_add (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
       (by intro h; exact hf₂ ((ffMap g).hom.injective (by simpa using h)))]
 
 
+/-! ## ★6. 有効性は引き戻しで保たれる -/
+
+/-- ★★`dim ≤ 1` のとき、`ord ≥ 0`(余次元 1 のとき)なら茎から来る。 -/
+theorem exists_mem_stalk_of_dim_le_one {Y : Scheme.{u}} [IsIntegral Y] [IsLocallyNoetherian Y]
+    (hnorm : IsNormalScheme Y) (z : Y) (hdim : ringKrullDim (Y.presheaf.stalk z) ≤ 1)
+    {u : Y.functionField} (hu : u ≠ 0)
+    (hord : ∀ hc : IsCodimOnePt Y z, 0 ≤ ordPt Y hnorm ⟨z, hc⟩ u) :
+    ∃ r : Y.presheaf.stalk z,
+      algebraMap (Y.presheaf.stalk z) Y.functionField r = u := by
+  by_cases hc : IsCodimOnePt Y z
+  · exact exists_mem_stalk_of_ordPt_nonneg hnorm ⟨z, hc⟩ hu (hord hc)
+  · obtain ⟨t, ht⟩ := exists_unit_of_ringKrullDim_le_zero
+      (withBot_le_zero_of_le_one_of_ne hdim hc) (Units.mk0 u hu)
+    exact ⟨(t : Y.presheaf.stalk z), ht⟩
+
+/-- ★★★★**有効因子の引き戻しは有効**。 -/
+theorem pullCoeff_nonneg (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) (w : PrimeDivisorPt X)
+    (hdim : ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1)
+    (hDnn : ∀ v : PrimeDivisorPt Y, 0 ≤ D v) :
+    0 ≤ pullCoeff g hnormX hnormY hD w := by
+  obtain ⟨U, hwU, q, hq, hDU⟩ := hD (g.base w.1)
+  rw [pullCoeff_eq g hnormX hnormY hD w hdim hq hwU hDU]
+  obtain ⟨r, hr⟩ := exists_mem_stalk_of_dim_le_one hnormY (g.base w.1) hdim hq (by
+    intro hc
+    rw [← hDU ⟨g.base w.1, hc⟩ hwU]
+    exact hDnn _)
+  have hffne : ffMap g q ≠ 0 := by
+    intro h
+    exact hq ((ffMap g).hom.injective (by simpa using h))
+  rw [← hr, ffMap_algebraMap]
+  refine ordPt_nonneg_of_mem_stalk hnormX w _ ?_
+  rw [← ffMap_algebraMap, hr]
+  exact hffne
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Example 6.1` の Cartier 因子の引き戻し。 -/
