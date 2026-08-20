@@ -3050,11 +3050,11 @@
             "normalization-proper-normal",
             "codim1-pt"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★「写る」は像が `D_K` の素因子に含まれること(余次元は上がってよい、と原文が括弧で明記する)。\n\n★★★2026-08-21：**定義は置いた**（`NormDL.lean`）。\n`MapsIntoDivisor x y := (normDown V L).base x ∈ closure {y}`、\n`DLSet DK L := {x | ∃ y ∈ DK, MapsIntoDivisor x y}`。\n★★原文の角括弧「[possibly subvarieties of codimension ≥1 of]」がここに効く ——\n**余次元は保たれなくてよい**ので `=` ではなく**閉包への所属**で書いた。\n★`V[L]` が proper normal であることは**定義には要らない**（因子論を回すときに要る）。\n\n★★★2026-08-21：`normalization-proper-normal` の**正規性が閉じた**ので、`DLSet` が要求する `IsNormalScheme (normObj V L)` は `normObj_isNormalScheme` で埋まる。",
+          "note": "★「写る」は像が `D_K` の素因子に含まれること(余次元は上がってよい、と原文が括弧で明記する)。\n\n★★★2026-08-21：**定義は置いた**（`NormDL.lean`）。\n`MapsIntoDivisor x y := (normDown V L).base x ∈ closure {y}`、\n`DLSet DK L := {x | ∃ y ∈ DK, MapsIntoDivisor x y}`。\n★★原文の角括弧「[possibly subvarieties of codimension ≥1 of]」がここに効く ——\n**余次元は保たれなくてよい**ので `=` ではなく**閉包への所属**で書いた。\n★`V[L]` が proper normal であることは**定義には要らない**（因子論を回すときに要る）。\n\n★★★2026-08-21：`normalization-proper-normal` の**正規性が閉じた**ので、`DLSet` が要求する `IsNormalScheme (normObj V L)` は `normObj_isNormalScheme` で埋まる。\n\n★★★★2026-08-21（決着）：**閉じた**。定義（`MapsIntoDivisor` / `DLSet`）に加えて、\n`DLSet_mono` / `DLSet_empty` と、下流で実際に使う\n**`x ∉ D_M ⟹ g(x) ∉ D_L`**（`not_mem_DLSet_of_not_mem`、`NormBFunctor.lean`）が揃った。\n中身は `normMap ≫ normDown = normDown` を底の点に当てるだけである。",
           "lean": "ABC3/Found/Divisor/NormDL.lean",
-          "decl": "MapsIntoDivisor / DLSet / DLSet_mono"
+          "decl": "MapsIntoDivisor / DLSet / DLSet_mono / not_mem_DLSet_of_not_mem"
         },
         {
           "id": "KQC",
