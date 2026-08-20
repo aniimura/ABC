@@ -3063,11 +3063,11 @@
             "DL-set",
             "qcartier"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "小",
-          "note": "★原文はこれを**仮定**に置く(「we shall assume that `D_K` is `K-Q-Cartier`」)ので、我々も仮定として書く。★これが `IsQCartierSubgroup Γ_L` を与える。",
-          "lean": "",
-          "decl": ""
+          "note": "★原文はこれを**仮定**に置く(「we shall assume that `D_K` is `K-Q-Cartier`」)ので、我々も仮定として書く。★これが `IsQCartierSubgroup Γ_L` を与える。\n\n★★★2026-08-21 完了。原文どおり**仮定として書いた**（`IsKQCartier`）。\n★その仮定が効くのは 1 か所だけ ——「台が `D_L` に入る Cartier 因子の群」（= `Φ(L)^gp`、`cartierOnDL`）が\n**`IsQCartierSubgroup`** を満たすこと（`isQCartierSubgroup_cartierOnDL`）。\n★★これで `CartierMonoid.lean` 以降の単系論（`effSub` / `isDivisorial_effSub` / perf-factorial）が\nそのまま動く。★`V[L]` の正規性は `hnorm` として引数で受けている（`normalization-proper-normal` 待ち）。",
+          "lean": "ABC3/Found/Divisor/NormKQC.lean",
+          "decl": "IsKQCartier / cartierOnDL / isQCartierSubgroup_cartierOnDL"
         },
         {
           "id": "phi-functor",
@@ -3286,9 +3286,9 @@
           ],
           "status": "半済",
           "size": "中",
-          "note": "★単系側は `effSubGpEquiv : Gp (effSub Γ) ≃+ Γ` で**閉じている**(`Q`-Cartier がここで効く)。残るのは `Γ` の幾何的実現。",
-          "lean": "ABC3/Found/Divisor/CartierMonoid.lean",
-          "decl": "effSubGpEquiv"
+          "note": "★単系側は `effSubGpEquiv : Gp (effSub Γ) ≃+ Γ` で**閉じている**(`Q`-Cartier がここで効く)。残るのは `Γ` の幾何的実現。\n\n★★2026-08-21：**`Φ(L)^gp` を「台が `D_L` に入る Cartier 因子の群」として置いた**\n（`cartierOnDL := (cartierSubgroup hnorm).comap (toWeilOnDL ...)`）。\n★`ℤ[D_L]` への埋め込みは `Finsupp.embDomain`。\n★残るのは「これが `V[L]` 上の Cartier 因子の群と同一視される」の**逆向き**\n（`Found/Arakelov/PicDivisor.lean` の `IsCartier` との橋）である。",
+          "lean": "ABC3/Found/Divisor/NormKQC.lean",
+          "decl": "cartierOnDL / mem_cartierOnDL"
         },
         {
           "id": "ex61-phipf",
