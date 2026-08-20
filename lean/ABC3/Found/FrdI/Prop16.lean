@@ -1,4 +1,5 @@
 import ABC3.Found.FrdI.Prop19
+import ABC3.Found.FrdI.PlBkShuffle
 
 /-!
 # [FrdI] Proposition 1.6 —— Categorical Fiber Products
@@ -1733,6 +1734,216 @@ theorem isPullBack_of_comp_left {Cc : Type u2} [Category.{v2} Cc] {Ψ : MonoidOn
       rw [Category.assoc]; exact h1
     · show Q.Base (h ≫ f) = Q.Base g
       rw [Q.Base_comp, h2, hcond]
+
+include F in
+/-- ★**(iv)(a) の移送に「pull-back 因子の射影がもとの pull-back である」ことを足した形**。
+
+★これが (iii) の残っていた向き(`cfp_isPullBack_to`)の入口になる。 -/
+theorem cfp_arbFactor' {A B : CfpCat P G} (φ : A ⟶ B) :
+    ∃ (X Y : CfpCat P G) (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B),
+      φ = γ ≫ β ≫ α ∧ IsFrobeniusType (cfpPreFrobenioid P G hG hD' hcC hcD') γ ∧
+        IsPreStep (cfpPreFrobenioid P G hG hD' hcC hcD') β ∧
+        IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') α ∧
+        IsPullBack P (CfpCat.fst α) := by
+  haveI hA : IsIso A.obj.hom := A.property
+  haveI hB : IsIso B.obj.hom := B.property
+  obtain ⟨X₀, Y₀, γ₀, β₀, α₀, hfac, hγ, hβ, hα⟩ := F.arbFactor (CfpCat.fst φ)
+  haveI hγb : IsIso (P.proj.map γ₀) := hγ.2
+  haveI hβb : IsIso (P.proj.map β₀) := hβ.2
+  have hxi : IsIso (inv (P.proj.map γ₀) ≫ A.obj.hom) := inferInstance
+  have hyi : IsIso (inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ A.obj.hom) := inferInstance
+  have hfacp : P.proj.map (CfpCat.fst φ)
+      = P.proj.map γ₀ ≫ P.proj.map β₀ ≫ P.proj.map α₀ := by
+    rw [hfac, P.proj.map_comp, P.proj.map_comp]
+  refine ⟨⟨⟨X₀, A.obj.right, inv (P.proj.map γ₀) ≫ A.obj.hom⟩, hxi⟩,
+    ⟨⟨Y₀, A.obj.right, inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ A.obj.hom⟩, hyi⟩,
+    InducedCategory.homMk ⟨γ₀, 𝟙 _, by simp⟩,
+    InducedCategory.homMk ⟨β₀, 𝟙 _, by simp⟩,
+    InducedCategory.homMk ⟨α₀, (CfpCat.snd φ : A.obj.right ⟶ B.obj.right), ?_⟩,
+    ?_, ?_, ?_, ?_, hα⟩
+  · show P.proj.map α₀ ≫ B.obj.hom
+      = (inv (P.proj.map β₀) ≫ inv (P.proj.map γ₀) ≫ A.obj.hom) ≫ G.map (CfpCat.snd φ)
+    rw [Category.assoc, Category.assoc, ← cfp_square φ, hfacp]
+    simp only [Category.assoc]
+    rw [← Category.assoc (inv (P.proj.map γ₀)), IsIso.inv_hom_id, Category.id_comp,
+      ← Category.assoc (inv (P.proj.map β₀)), IsIso.inv_hom_id, Category.id_comp]
+  · refine InducedCategory.hom_ext (CommaMorphism.ext hfac ?_)
+    show CfpCat.snd φ = 𝟙 _ ≫ 𝟙 _ ≫ CfpCat.snd φ
+    simp
+  · exact (cfp_frobType_iff P G hG hD' hcC hcD' _ (by show IsIso (𝟙 _); infer_instance)).mpr hγ
+  · exact ⟨hβ.1, by show IsIso (𝟙 _); infer_instance⟩
+  · exact cfp_isPullBack_of P G hG hD' hcC hcD' _ hα
+
+include F in
+/-- ★★★★**(iii) の残っていた向き** —— **`𝒞'` の pull-back は `𝒞` の pull-back**。
+
+原文 (FrdI p.28):
+> (iii) A morphism of C is a(n) isometry (respectively, morphism of a given
+
+★★**筋**: 任意射の 3 分解 `φ = γ ≫ β ≫ α`(`cfp_arbFactor'`)で
+`γ ≫ β` は base-isomorphism、`α` は pull-back。
+`φ` が pull-back なら **pull-back は左から簡約できる**(`isPullBack_of_comp_left`)ので
+`γ ≫ β` も pull-back になり、**底が同型な pull-back は同型**
+(`isIso_of_isPullBack_of_baseIso`)だから `γ ≫ β` は同型。
+★あとは `fst φ = fst (γ ≫ β) ≫ fst α`(前者は同型、後者は `𝒞` の pull-back)である。
+
+★★この向きが無かったために `pullBackLB` と `arbFactorUniq` の移送が止まっていた。 -/
+theorem cfp_isPullBack_to {X Y : CfpCat P G} (φ : X ⟶ Y)
+    (h : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') φ) :
+    IsPullBack P (CfpCat.fst φ) := by
+  obtain ⟨Z, W, γ, β, α, hfac, hγ, hβ, hα, hα₀⟩ :=
+    cfp_arbFactor' P G hG hD' hcC hcD' F φ
+  haveI hsγ : IsIso (CfpCat.snd γ) := hγ.2
+  haveI hsβ : IsIso (CfpCat.snd β) := hβ.2
+  have hbi : IsIso ((cfpPreFrobenioid P G hG hD' hcC hcD').Base (γ ≫ β)) := by
+    show IsIso (CfpCat.snd γ ≫ CfpCat.snd β)
+    infer_instance
+  have hpb : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') ((γ ≫ β) ≫ α) := by
+    rw [Category.assoc, ← hfac]; exact h
+  have h1 : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') (γ ≫ β) :=
+    isPullBack_of_comp_left _ (γ ≫ β) α hα hpb
+  haveI : IsIso (γ ≫ β) :=
+    isIso_of_isPullBack_of_baseIso (cfpPreFrobenioid P G hG hD' hcC hcD') h1 hbi
+  haveI : IsIso (CfpCat.fst (γ ≫ β)) := cfp_isIso_fst P G _ inferInstance
+  have hfst : CfpCat.fst φ = CfpCat.fst (γ ≫ β) ≫ CfpCat.fst α := by
+    rw [hfac, ← Category.assoc]; rfl
+  rw [hfst]
+  exact IsPullBack.comp P (isPullBack_of_isIso P _) hα₀
+
+/-- **(iii)** —— pull-back は射影で決まる(両向き)。 -/
+theorem cfp_isPullBack_iff (F : FrobenioidCore P) {X Y : CfpCat P G} (φ : X ⟶ Y) :
+    IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') φ ↔ IsPullBack P (CfpCat.fst φ) :=
+  ⟨cfp_isPullBack_to P G hG hD' hcC hcD' F φ, cfp_isPullBack_of P G hG hD' hcC hcD' φ⟩
+
+include F in
+/-- **(iv)(b)** の移送 —— pull-back は LB-invertible かつ linear。 -/
+theorem cfp_pullBackLB {A B : CfpCat P G} (α : A ⟶ B)
+    (h : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') α) :
+    IsLBInvertible (cfpPreFrobenioid P G hG hD' hcC hcD') α ∧
+      IsLinear (cfpPreFrobenioid P G hG hD' hcC hcD') α := by
+  obtain ⟨h1, h2⟩ := F.pullBackLB (CfpCat.fst α)
+    (cfp_isPullBack_to P G hG hD' hcC hcD' F α h)
+  exact ⟨(cfp_lbInvertible_iff P G hG hD' hcC hcD' α).mpr h1,
+    (cfp_linear_iff P G hG hD' hcC hcD' α).mpr h2⟩
+
+include F in
+/-- **(iv)(a)** の一意性の移送。
+
+★`𝒟'` 成分は `γ`(Frobenius 型)と `β`(pre-step)の `𝒟'` 成分がどちらも同型なので、
+**逆射を成分ごとに書き下せる**(分類表 #2 の回避)。 -/
+theorem cfp_arbFactorUniq {A B : CfpCat P G} (X Y X' Y' : CfpCat P G)
+    (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B)
+    (γ' : A ⟶ X') (β' : X' ⟶ Y') (α' : Y' ⟶ B)
+    (heq : γ ≫ β ≫ α = γ' ≫ β' ≫ α')
+    (hγ : IsFrobeniusType (cfpPreFrobenioid P G hG hD' hcC hcD') γ)
+    (hβ : IsPreStep (cfpPreFrobenioid P G hG hD' hcC hcD') β)
+    (hα : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') α)
+    (hγ' : IsFrobeniusType (cfpPreFrobenioid P G hG hD' hcC hcD') γ')
+    (hβ' : IsPreStep (cfpPreFrobenioid P G hG hD' hcC hcD') β')
+    (hα' : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') α') :
+    ∃ (δ : Y ≅ Y') (ε : X ≅ X'),
+      α' = δ.inv ≫ α ∧ β' = ε.inv ≫ β ≫ δ.hom ∧ γ' = γ ≫ ε.hom := by
+  haveI hA : IsIso A.obj.hom := A.property
+  haveI hX : IsIso X.obj.hom := X.property
+  haveI hX' : IsIso X'.obj.hom := X'.property
+  haveI hY : IsIso Y.obj.hom := Y.property
+  haveI hY' : IsIso Y'.obj.hom := Y'.property
+  haveI hsγ : IsIso (CfpCat.snd γ) := hγ.2
+  haveI hsγ' : IsIso (CfpCat.snd γ') := hγ'.2
+  haveI hsβ : IsIso (CfpCat.snd β) := hβ.2
+  haveI hsβ' : IsIso (CfpCat.snd β') := hβ'.2
+  have hfst : CfpCat.fst γ ≫ CfpCat.fst β ≫ CfpCat.fst α
+      = CfpCat.fst γ' ≫ CfpCat.fst β' ≫ CfpCat.fst α' :=
+    congrArg (fun t => CommaMorphism.left (InducedCategory.Hom.hom t)) heq
+  have hsnd : CfpCat.snd γ ≫ CfpCat.snd β ≫ CfpCat.snd α
+      = CfpCat.snd γ' ≫ CfpCat.snd β' ≫ CfpCat.snd α' :=
+    congrArg (fun t => CommaMorphism.right (InducedCategory.Hom.hom t)) heq
+  obtain ⟨δ₀, ε₀, e1, e2, e3⟩ := F.arbFactorUniq X.obj.left Y.obj.left X'.obj.left Y'.obj.left
+    (CfpCat.fst γ) (CfpCat.fst β) (CfpCat.fst α)
+    (CfpCat.fst γ') (CfpCat.fst β') (CfpCat.fst α') hfst
+    ((cfp_frobType_iff P G hG hD' hcC hcD' γ hγ.2).mp hγ)
+    ((cfp_preStep_iff P G hG hD' hcC hcD' β hβ.2).mp hβ)
+    (cfp_isPullBack_to P G hG hD' hcC hcD' F α hα)
+    ((cfp_frobType_iff P G hG hD' hcC hcD' γ' hγ'.2).mp hγ')
+    ((cfp_preStep_iff P G hG hD' hcC hcD' β' hβ'.2).mp hβ')
+    (cfp_isPullBack_to P G hG hD' hcC hcD' F α' hα')
+  haveI hpγ : IsIso (P.proj.map (CfpCat.fst γ)) :=
+    ((cfp_frobType_iff P G hG hD' hcC hcD' γ hγ.2).mp hγ).2
+  haveI hpγ' : IsIso (P.proj.map (CfpCat.fst γ')) :=
+    ((cfp_frobType_iff P G hG hD' hcC hcD' γ' hγ'.2).mp hγ').2
+  haveI hpβ : IsIso (P.proj.map (CfpCat.fst β)) :=
+    ((cfp_preStep_iff P G hG hD' hcC hcD' β hβ.2).mp hβ).2
+  haveI hpβ' : IsIso (P.proj.map (CfpCat.fst β')) :=
+    ((cfp_preStep_iff P G hG hD' hcC hcD' β' hβ'.2).mp hβ').2
+  have e3' : CfpCat.fst γ = CfpCat.fst γ' ≫ ε₀.inv := by
+    rw [e3, Category.assoc, ε₀.hom_inv_id, Category.comp_id]
+  have e2' : CfpCat.fst β ≫ δ₀.hom = ε₀.hom ≫ CfpCat.fst β' := by
+    rw [e2, ← Category.assoc, ε₀.hom_inv_id, Category.id_comp]
+  have e2'' : CfpCat.fst β' ≫ δ₀.inv = ε₀.inv ≫ CfpCat.fst β := by
+    rw [e2, Category.assoc, Category.assoc, δ₀.hom_inv_id, Category.comp_id]
+  have hsqε : P.proj.map ε₀.hom ≫ X'.obj.hom
+      = X.obj.hom ≫ G.map (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') := by
+    refine (cancel_epi (P.proj.map (CfpCat.fst γ))).mp ?_
+    rw [← Category.assoc, ← P.proj.map_comp, ← e3, cfp_square γ', ← Category.assoc,
+      cfp_square γ, Category.assoc, ← G.map_comp, ← Category.assoc, IsIso.hom_inv_id,
+      Category.id_comp]
+  have hsqε' : P.proj.map ε₀.inv ≫ X.obj.hom
+      = X'.obj.hom ≫ G.map (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) := by
+    refine (cancel_epi (P.proj.map (CfpCat.fst γ'))).mp ?_
+    rw [← Category.assoc, ← P.proj.map_comp, ← e3', cfp_square γ, ← Category.assoc,
+      cfp_square γ', Category.assoc, ← G.map_comp, ← Category.assoc, IsIso.hom_inv_id,
+      Category.id_comp]
+  have hsqδ : P.proj.map δ₀.hom ≫ Y'.obj.hom
+      = Y.obj.hom ≫ G.map (inv (CfpCat.snd β) ≫ (inv (CfpCat.snd γ) ≫ CfpCat.snd γ')
+          ≫ CfpCat.snd β') := by
+    refine (cancel_epi (P.proj.map (CfpCat.fst β))).mp ?_
+    rw [← Category.assoc, ← P.proj.map_comp, e2', P.proj.map_comp, Category.assoc,
+      cfp_square β', ← Category.assoc, hsqε, ← Category.assoc, cfp_square β]
+    simp only [Category.assoc, ← G.map_comp]
+    rw [← Category.assoc (CfpCat.snd β), IsIso.hom_inv_id, Category.id_comp]
+  have hsqδ' : P.proj.map δ₀.inv ≫ Y.obj.hom
+      = Y'.obj.hom ≫ G.map (inv (CfpCat.snd β') ≫ (inv (CfpCat.snd γ') ≫ CfpCat.snd γ)
+          ≫ CfpCat.snd β) := by
+    refine (cancel_epi (P.proj.map (CfpCat.fst β'))).mp ?_
+    rw [← Category.assoc, ← P.proj.map_comp, e2'', P.proj.map_comp, Category.assoc,
+      cfp_square β, ← Category.assoc, hsqε', ← Category.assoc, cfp_square β']
+    simp only [Category.assoc, ← G.map_comp]
+    rw [← Category.assoc (CfpCat.snd β'), IsIso.hom_inv_id, Category.id_comp]
+  have hsα : CfpCat.snd α'
+      = (inv (CfpCat.snd β') ≫ (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ CfpCat.snd β)
+        ≫ CfpCat.snd α := by
+    simp only [Category.assoc]
+    rw [hsnd]
+    simp
+  refine ⟨⟨InducedCategory.homMk ⟨δ₀.hom, inv (CfpCat.snd β) ≫
+      (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') ≫ CfpCat.snd β', hsqδ⟩,
+    InducedCategory.homMk ⟨δ₀.inv, inv (CfpCat.snd β') ≫
+      (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ CfpCat.snd β, hsqδ'⟩, ?_, ?_⟩,
+    ⟨InducedCategory.homMk ⟨ε₀.hom, inv (CfpCat.snd γ) ≫ CfpCat.snd γ', hsqε⟩,
+    InducedCategory.homMk ⟨ε₀.inv, inv (CfpCat.snd γ') ≫ CfpCat.snd γ, hsqε'⟩, ?_, ?_⟩,
+    ?_, ?_, ?_⟩
+  · refine InducedCategory.hom_ext (CommaMorphism.ext δ₀.hom_inv_id ?_)
+    show (inv (CfpCat.snd β) ≫ (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') ≫ CfpCat.snd β')
+      ≫ (inv (CfpCat.snd β') ≫ (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ CfpCat.snd β) = 𝟙 _
+    simp
+  · refine InducedCategory.hom_ext (CommaMorphism.ext δ₀.inv_hom_id ?_)
+    show (inv (CfpCat.snd β') ≫ (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ CfpCat.snd β)
+      ≫ (inv (CfpCat.snd β) ≫ (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') ≫ CfpCat.snd β') = 𝟙 _
+    simp
+  · refine InducedCategory.hom_ext (CommaMorphism.ext ε₀.hom_inv_id ?_)
+    show (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') ≫ (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) = 𝟙 _
+    simp
+  · refine InducedCategory.hom_ext (CommaMorphism.ext ε₀.inv_hom_id ?_)
+    show (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') = 𝟙 _
+    simp
+  · exact InducedCategory.hom_ext (CommaMorphism.ext e1 hsα)
+  · refine InducedCategory.hom_ext (CommaMorphism.ext e2 ?_)
+    show CfpCat.snd β' = (inv (CfpCat.snd γ') ≫ CfpCat.snd γ) ≫ CfpCat.snd β
+      ≫ (inv (CfpCat.snd β) ≫ (inv (CfpCat.snd γ) ≫ CfpCat.snd γ') ≫ CfpCat.snd β')
+    simp
+  · refine InducedCategory.hom_ext (CommaMorphism.ext e3 ?_)
+    show CfpCat.snd γ' = CfpCat.snd γ ≫ inv (CfpCat.snd γ) ≫ CfpCat.snd γ'
+    rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
 
 /-! ### ★`plBkEquiv` —— 数学は完了、Lean は 1 箇所で止まっている(再現手順つき)
 
