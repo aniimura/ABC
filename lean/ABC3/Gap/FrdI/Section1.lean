@@ -400,6 +400,21 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
       "(1) この `Gap_1_6_v`(metrically trivial の `⇐`)、" ++
       "(2) (vi) の `Aut^sub-ample` —— sub-automorphism の証人対象を " ++
       "`𝒞′` へ持ち上げる道は `plBk_baseChange` で作れるが、" ++
-      "その証人の自己射が**同型**であることが出ない。" }
+      "その証人の自己射が**同型**であることが出ない。" ++
+      "★★2026-08-20 に (2) を式で特定した(`Found/FrdI/SubAutInvariants.lean`): " ++
+      "sub-automorphism は `degFr = 1`(`degFr_of_isSubAutomorphism`)で、" ++
+      "証人 `β ≫ φ = φ ≫ α` は " ++
+      "`Φ(Base β)(Div φ) = Φ(Base φ)(Div α) + Div φ` を与える" ++
+      "(`div_relation_of_isSubAutomorphism`)。" ++
+      "★ファイバー積で証人を作るには、`𝒟′` 側の証人 `(e′, ψ′, β′)` " ++
+      "に沿って `A` を引き戻した `χ : B ⟶ A` を取り、" ++
+      "引き戻しの普遍性で `γ₀` を得るが、" ++
+      "`Div γ₀ = Φ(Base χ)(Div φ₀)` であり、**これが 0 になる保証が無い**。" ++
+      "★★`Div φ₀ = 0` なら済むが、**それは言えない** —— " ++
+      "`𝒟` を対象 1 個・`End = ℤ`、`Φ(d) = ℝ≥0` で `Φ.map n =` 「`2ⁿ` 倍」、" ++
+      "`B(d) = ℝ`、`Div_B = id` とすると `Theorem 5.2` の仮定をすべて満たし、" ++
+      "`Div α = (2^b − 1)·c / 2^ψ > 0` なる sub-automorphism が 4 成分とも合う。" ++
+      "★したがって残るのは「引き戻しを選べば `Φ(Base χ)(Div φ₀) = 0` " ++
+      "にできるか」という 1 点である。" }
 
 end ABC3.Gap.FrdI
