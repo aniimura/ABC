@@ -42,3 +42,4 @@
 - [node -e はバックティックを食う](node-e-eats-backticks.md) — Bash ツールの `node -e "..."` はバックティックをコマンド置換として実行する。識別子が消えた JSON が静かにコミットされる。
 - [Python の open(w) はファイルを消す](python-w-truncates.md) — encode 失敗で原本が飛ぶ。空 Lean ファイルは無言で通るので検証も空回りする
 - [プロジェクトの namespace が mathlib を隠す](namespace-shadows-mathlib.md) — ABC3.Found.NumberField があると `open NumberField` が mathlib を指さず `𝓞` が unknown になる。`_root_.` を付けること
+- [mathlib の local instance](mathlib-local-instances.md) — `Ideal.Quotient.field` は大域 instance ではない。手で `haveI` すると diamond が立つ。`attribute [local instance]` を書くこと
