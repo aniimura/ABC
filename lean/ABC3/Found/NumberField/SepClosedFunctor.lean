@@ -207,6 +207,74 @@ noncomputable def compFunctor (hsc : separableClosure K₁ K₂ = ⊥) :
     rw [compHomToOmega_comp hsc f g]
     rfl
 
+/-! ## ★4. 埋め込みに沿った移送(`Theorem 6.2, (i)` の仮定 (b))
+
+★原文の仮定 (b)「`K₁ → K₂ → K̄₂` が `K̄₁` を経由する」は、
+**`ι : K̄₁ →ₐ[K₁] K̄₂` が取れる**ということである。
+★このとき `𝒟₁ → 𝒟₂` は「`ι` に沿った移送」と `compFunctor` の**合成**に分かれる。 -/
+
+section Transport
+
+variable {K Kbar₁ Kbar₂ : Type u} [Field K] [Field Kbar₁] [Field Kbar₂]
+  [Algebra K Kbar₁] [Algebra K Kbar₂] (ι : Kbar₁ →ₐ[K] Kbar₂)
+
+/-- ★**対象の移送** —— `L ↦ ι(L)`。 -/
+noncomputable def mapObj (L : FinSub K Kbar₁) : FinSub K Kbar₂ where
+  toIF := L.toIF.map ι
+  fin := by
+    haveI := L.fin
+    exact LinearEquiv.finiteDimensional (IntermediateField.equivMap L.toIF ι).toLinearEquiv
+
+@[simp] theorem mapObj_toIF (L : FinSub K Kbar₁) :
+    (mapObj ι L).toIF = L.toIF.map ι := rfl
+
+/-- ★**射の移送** —— 同型 `L ≃ ι(L)` で共役する。 -/
+noncomputable def mapHomF {L M : FinSub K Kbar₁} (f : L ⟶ M) :
+    (mapObj ι L).toIF →ₐ[K] (mapObj ι M).toIF :=
+  ((IntermediateField.equivMap M.toIF ι).toAlgHom).comp
+    ((FinSub.hom f).comp (IntermediateField.equivMap L.toIF ι).symm.toAlgHom)
+
+/-- ★★★**`L ↦ ι(L)` は関手** —— `FinSub K K̄₁ ⥤ FinSub K K̄₂`。 -/
+noncomputable def mapFinSub : FinSub K Kbar₁ ⥤ FinSub K Kbar₂ where
+  obj := mapObj ι
+  map f := mapHomF ι f
+  map_id L := by
+    refine AlgHom.ext fun x => ?_
+    show (IntermediateField.equivMap L.toIF ι)
+      ((FinSub.hom (𝟙 L)) ((IntermediateField.equivMap L.toIF ι).symm x)) = x
+    rw [FinSub.hom_id]
+    show (IntermediateField.equivMap L.toIF ι)
+      ((IntermediateField.equivMap L.toIF ι).symm x) = x
+    rw [AlgEquiv.apply_symm_apply]
+  map_comp f g := by
+    refine AlgHom.ext fun x => ?_
+    show (IntermediateField.equivMap _ ι)
+      ((FinSub.hom (f ≫ g)) ((IntermediateField.equivMap _ ι).symm x)) = _
+    rw [FinSub.hom_comp]
+    show (IntermediateField.equivMap _ ι)
+      ((FinSub.hom g) ((FinSub.hom f) ((IntermediateField.equivMap _ ι).symm x))) = _
+    show _ = (IntermediateField.equivMap _ ι)
+      ((FinSub.hom g) ((IntermediateField.equivMap _ ι).symm
+        ((IntermediateField.equivMap _ ι) ((FinSub.hom f)
+          ((IntermediateField.equivMap _ ι).symm x)))))
+    rw [AlgEquiv.symm_apply_apply]
+
+end Transport
+
+/-! ## ★5. 原文の形の `𝒟₁ → 𝒟₂` -/
+
+/-- ★★★★★★**原文 `Theorem 6.2, (i)` の関手 `𝒟₁ → 𝒟₂`**。
+
+★仮定 (b)(`K̄₁ → K̄₂` の埋め込み `ι`)と (c)(`K₁` が `K₂` の中で分離閉)から、
+`𝒟ᵢ = B(Gᵢ)⁰ = (FinSub Kᵢ K̄ᵢ)ᵒᵖ` の間の関手が
+**「`ι` に沿った移送」と「`L ↦ K₂(L)`」の合成の反対**として出る。 -/
+noncomputable def dFunctor {K₁ K₂ Kbar₁ Kbar₂ : Type u} [Field K₁] [Field K₂]
+    [Field Kbar₁] [Field Kbar₂] [Algebra K₁ K₂] [Algebra K₁ Kbar₁] [Algebra K₁ Kbar₂]
+    [Algebra K₂ Kbar₂] [IsScalarTower K₁ K₂ Kbar₂] [Algebra.IsSeparable K₁ Kbar₂]
+    (ι : Kbar₁ →ₐ[K₁] Kbar₂) (hsc : separableClosure K₁ K₂ = ⊥) :
+    (FinSub K₁ Kbar₁)ᵒᵖ ⥤ (FinSub K₂ Kbar₂)ᵒᵖ :=
+  (mapFinSub ι ⋙ compFunctor hsc).op
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Theorem 6.2, (i)` の `L ↦ K₂(L)`。 -/
@@ -219,6 +287,12 @@ def compObj.src : ABC3.Meta.Source :=
 def compFunctor.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 110,
     item := "Theorem 6.2, (i) — ψ が 𝒟₁ → 𝒟₂ を定める",
+    sectionId := "frdi-thm-6-2" }
+
+/-- ★★★★★★locator —— `Theorem 6.2, (i)` の仮定 (b)(c) から出る `𝒟₁ → 𝒟₂`。 -/
+def dFunctor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 体の包含 K₁ → K₂ が誘導する 𝒟₁ → 𝒟₂",
     sectionId := "frdi-thm-6-2" }
 
 end ABC3.Found.NF
