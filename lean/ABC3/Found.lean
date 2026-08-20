@@ -107,6 +107,7 @@ import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Prop55Rlf
 import ABC3.Found.FrdI.Prop55Pf
+import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
@@ -596,6 +597,8 @@ import ABC3.Found.GaloisRep.TwoTorsionDiscr
 import ABC3.Found.GaloisRep.Psi2SqSquarefree
 import ABC3.Found.GaloisRep.LocalStructure
 import ABC3.Found.GaloisRep.UnramifiedStructure
+import ABC3.Found.GaloisRep.PrimeOverX
+import ABC3.Found.GaloisRep.PrimeGenerators
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
