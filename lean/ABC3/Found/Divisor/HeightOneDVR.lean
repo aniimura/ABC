@@ -178,4 +178,86 @@ theorem finite_heightOne_primes_containing {R : Type*} [CommRing R] [IsDomain R]
     exact ha haq
   exact le_of_eq (hmin q hq hq0 hqp).symm
 
+/-! ## ★整数値の位数と、環の元の因子 -/
+
+theorem withZero_eq_one_iff_toAdd_eq_zero (x : WithZero (Multiplicative ℤ)) (h : x ≠ 0) :
+    x = 1 ↔ Multiplicative.toAdd (WithZero.unzero h) = 0 := by
+  rw [toAdd_eq_zero]
+  constructor
+  · intro hx
+    apply WithZero.coe_injective
+    rw [WithZero.coe_unzero, hx]
+    rfl
+  · intro hx
+    rw [← WithZero.coe_unzero h, hx]
+    rfl
+
+open scoped Classical in
+/-- ★★**整数値の位数** `ord_p : K → ℤ`(`0` では `0` と約束する)。
+
+★`HeightOneSpectrum.valuation` は `a ∈ R` で `≤ 1` になる向きなので、
+**符号を反転**して古典的な `ord`(環の元で非負)に合わせる。 -/
+noncomputable def ordZ {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) (x : FractionRing R) : ℤ :=
+  if h : x = 0 then 0
+  else -(Multiplicative.toAdd (WithZero.unzero (ordAt_ne_zero p hp0 hmin h)))
+
+/-- ★位数が 0 になるのは `a ∉ p` のときちょうど。 -/
+theorem ordZ_eq_zero_iff_notMem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p) {a : R} (ha : a ≠ 0) :
+    ordZ p hp0 hmin (algebraMap R (FractionRing R) a) = 0 ↔ a ∉ p := by
+  have hne : (algebraMap R (FractionRing R) a) ≠ 0 :=
+    (IsFractionRing.to_map_eq_zero_iff (K := FractionRing R)).not.mpr ha
+  rw [ordZ, dif_neg hne, neg_eq_zero,
+    ← withZero_eq_one_iff_toAdd_eq_zero _ (ordAt_ne_zero p hp0 hmin hne),
+    ordAt_eq_one_iff_notMem]
+
+/-- ★★★**高さ 1 の素イデアル** —— 正規多様体の**素因子**にあたる。 -/
+structure HeightOnePrime (R : Type*) [CommRing R] where
+  /-- イデアル本体 -/
+  asIdeal : Ideal R
+  /-- 素であること -/
+  isPrime : asIdeal.IsPrime
+  /-- 非零であること -/
+  ne_bot : asIdeal ≠ ⊥
+  /-- 高さが 1(下にある非零素イデアルは自分だけ) -/
+  minimal : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ asIdeal → q = asIdeal
+
+namespace HeightOnePrime
+
+variable {R : Type*} [CommRing R]
+
+theorem asIdeal_injective : Function.Injective (HeightOnePrime.asIdeal (R := R)) := by
+  rintro ⟨a, _, _, _⟩ ⟨b, _, _, _⟩ h
+  simpa using h
+
+end HeightOnePrime
+
+/-- ★★★★`a` の位数が非零になる素因子は有限個。 -/
+theorem finite_support_heightOnePrime {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    {a : R} (ha : a ≠ 0) : {v : HeightOnePrime R | a ∈ v.asIdeal}.Finite := by
+  refine Set.Finite.of_finite_image ?_ (HeightOnePrime.asIdeal_injective.injOn)
+  refine (finite_heightOne_primes_containing ha).subset ?_
+  rintro _ ⟨v, hv, rfl⟩
+  exact ⟨v.isPrime, v.minimal, hv⟩
+
+open scoped Classical in
+/-- ★★★★★**環の非零元の因子** `div(a) = Σ_v ord_v(a)·[v]`。
+
+★台が有限(`finite_support_heightOnePrime`)で位数の消滅判定
+(`ordZ_eq_zero_iff_notMem`)があるので、**素因子の自由アーベル群の元**として組める。 -/
+noncomputable def divOfElem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (a : R) (ha : a ≠ 0) : HeightOnePrime R →₀ ℤ :=
+  Finsupp.onFinset (finite_support_heightOnePrime ha).toFinset
+    (fun v => haveI := v.isPrime; ordZ v.asIdeal v.ne_bot v.minimal
+      (algebraMap R (FractionRing R) a))
+    (by
+      intro v hv
+      haveI := v.isPrime
+      simp only [Set.Finite.mem_toFinset, Set.mem_setOf_eq]
+      by_contra hcon
+      exact hv ((ordZ_eq_zero_iff_notMem v.asIdeal v.ne_bot v.minimal ha).mpr hcon))
+
 end ABC3.Found.Divisor
