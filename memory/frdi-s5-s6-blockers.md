@@ -1,6 +1,6 @@
 ---
 name: frdi-s5-s6-blockers
-description: FrdI §5 §6 の残りの測定。★Nikolov–Segal と「因子論は一分野分」はどちらも誤りと判明し、Prop 5.6 は 2026-08-20 に閉じた
+description: FrdI §5 §6 の残りの測定。★2026-08-20 に §5 は 4/7。残る 3 項目（Prop 5.3 / Cor 5.4 / Prop 5.5）は**すべて完全化のクラスタに帰着する**
 metadata:
   type: project
 ---
@@ -117,3 +117,17 @@ Dirichlet 単数定理 `NumberField.Units.dirichletUnitTheorem` も mathlib に�
 
 ★教訓: **「在庫不足」と書いた見立ては、割って見ると下方修正されることが多い。**
 このファイルだけで 3 件（因子論・Nikolov–Segal・逆極限）。[[no-wall-decompose-instead]]
+
+★★★★★★2026-08-20 の追記 5 —— **§5 は 4/7。残り 3 項目は 1 つのクラスタに帰着する**
+
+`Corollary 5.7` を閉じた（`Cor57Unit/Pair/Base/Model.lean`）。
+* (i) の鍵は `objP_eq_of_map_eq`——`P₁` の 2 対象が `Ψ` で同じ像を持てば等しい。★対象を**厳密な等号**で取らないと skeletal が壊れ、等号で取るとこの補題なしには`comp_mem`（中間対象の一致）も `skeletal` も書けない。
+* ★★**底の 1-可換図式は「素の型」で持つこと**。合成関手 `P₁.proj ⋙ ΨBase` を経由すると`(P₁.proj ⋙ ΨBase).obj A` と `ΨBase.obj ((P₁.toElem.obj A).base)` が構文上別物になり、`rw`/`simp` が軍並み外れる（[[widesubcategory-type-trap]] と同じ症状）。`Cor57Pair.lean` の `BaseSquare` と `BaseSquare.ofNatIso` がその対処である。
+
+★★★**§5 に残る 3 項目（Prop 5.3 / Cor 5.4 / Prop 5.5）はすべて
+「完全化 `C^pf` のクラスタ」に帰着する**。具体的には
+`p55ii-untr`（`(C^pf)^un-tr ≃ (C^un-tr)^pf`）・`p55ii-birat`・`p55iii-pf`・`p55iv-pf`。
+* `Cor 5.4` は `psiSc`（関手の構成）と `cor54-hbirat` が済んでいるが、原文の最後の一文「the formation of Ψ^rlf from Ψ is 1-compatible with the 1-commutative diagram of Proposition 5.3」が `diagram` 節点を要求し、それが perfection 待ちである。
+* したがって **次に手をつけるべきは `p55ii-untr`** である。
+
+★進捗: 2026-08-20 のこのセッションで 44/54 → 46/54。§5 は 2/7 → 4/7（Prop 5.6 と Cor 5.7）。鎖 `arith` は全節点完了。
