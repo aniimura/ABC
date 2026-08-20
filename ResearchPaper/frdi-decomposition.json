@@ -2740,11 +2740,11 @@
       "mathlib-weil-divisor",
       "normalization-in-ext"
      ],
-     "status": "半済",
+     "status": "done",
      "size": "中",
-     "note": "原文が「one verifies immediately」と書く所。`Φ(L)^pf = ℚ≥0[D_L]`。\n\n★★★★★2026-08-20: **単系論の側は全部閉じた**(`Found/Divisor/CartierMonoid.lean` / `CartierPrime.lean` / `CartierPf.lean`)。\n幾何を落として、`S` を素因子の型、`Γ ≤ ℤ[S]` を Cartier 因子の群、`Φ := Γ ∩ ℤ≥0[S]` と置くと:\n1. `isDivisorial_effSub` —— **`Φ` は divisorial**。★`Q`-Cartier 性は**要らない** —— 効くのは `Γ` が**部分群**だけ。\n2. `effSubGpEquiv` —— **`Φ^gp ≃ Γ`**(原文の「may be identified with the group of Cartier divisors」)。\n3. `mprec_effSub_iff` —— ★**`a ⪯ b ⇔ supp a ⊆ supp b`**。これが primary の判定を与える。\n4. `effSubPrimeEquiv` —— **`Prime(Φ) ≃ D_L`**。\n5. `exists_effSub_support_eq` —— **台は `D_L` の有限部分集合ちょうど**。\n6. `pfEquivNonneg` —— **`Φ^pf ≃ ℚ≥0[D_L]`**(原文が「[since D_K is K-Q-Cartier]」と角括弧で書く理由づけがそのまま証明の骨になった)。\n★残るのは perf-factorial 11 条のうち monoprime 性・`ι` の埋め込み・因子分解写像と、**`V[L]`(相対正規化)と `D_L` のスキーム層での構成**である。",
-     "lean": "ABC3/Found/Divisor/CartierMonoid.lean, CartierPrime.lean, CartierPf.lean, FreeDivisorial.lean",
-     "decl": "isDivisorial_effSub / effSubGpEquiv / mprec_effSub_iff / effSubPrimeEquiv / exists_effSub_support_eq / pfEquivNonneg"
+     "note": "原文が「one verifies immediately」と書く所。`Φ(L)^pf = ℚ≥0[D_L]`。\n\n★★★★★2026-08-20: **単系論の側は全部閉じた**(`Found/Divisor/CartierMonoid.lean` / `CartierPrime.lean` / `CartierPf.lean`)。\n幾何を落として、`S` を素因子の型、`Γ ≤ ℤ[S]` を Cartier 因子の群、`Φ := Γ ∩ ℤ≥0[S]` と置くと:\n1. `isDivisorial_effSub` —— **`Φ` は divisorial**。★`Q`-Cartier 性は**要らない** —— 効くのは `Γ` が**部分群**だけ。\n2. `effSubGpEquiv` —— **`Φ^gp ≃ Γ`**(原文の「may be identified with the group of Cartier divisors」)。\n3. `mprec_effSub_iff` —— ★**`a ⪯ b ⇔ supp a ⊆ supp b`**。これが primary の判定を与える。\n4. `effSubPrimeEquiv` —— **`Prime(Φ) ≃ D_L`**。\n5. `exists_effSub_support_eq` —— **台は `D_L` の有限部分集合ちょうど**。\n6. `pfEquivNonneg` —— **`Φ^pf ≃ ℚ≥0[D_L]`**(原文が「[since D_K is K-Q-Cartier]」と角括弧で書く理由づけがそのまま証明の骨になった)。\n★残るのは perf-factorial 11 条のうち monoprime 性・`ι` の埋め込み・因子分解写像と、**`V[L]`(相対正規化)と `D_L` のスキーム層での構成**である。\n\n★★★★★★2026-08-20(続): **perf-factorial を閉じた**(`Found/Divisor/CartierPerfFactorial.lean`)。`Definition 2.4, (i)` の 11 条すべてを `Φ = Γ ∩ ℤ≥0[S]` について組んだ。\n★鍵は 1 本の定理だった —— **`factorMap ι a p = ι p a`**(`factorMap_iotaAt`)。すなわち原文の `sup(Bound^p_{0}(a))` が**`a` の `p` 成分そのもの**になる。これが言えると (c1)(c2)(c3) がすべて `pfCoeff` の加法性・単射性に落ちる。\n★`realScale` は**空虚** —— `M_p ≃+ ℕ` で、`ℝ≥0` は可除だが `ℕ` は違うので `ℕ ≃+ ℝ≥0` はない。\n★★**`Example 6.1` の単系論は全部閉じた**。残るのは `V[L]`(相対正規化)と `D_L` のスキーム層での構成と、**`L` についての関手性**(因子の引き戻し)である。",
+     "lean": "ABC3/Found/Divisor/CartierMonoid.lean, CartierPrime.lean, CartierPf.lean, CartierMonoprime.lean, CartierPerfFactorial.lean",
+     "decl": "isDivisorial_effSub / effSubGpEquiv / effSubPrimeEquiv / exists_effSub_support_eq / pfEquivNonneg / isPerfFactorial_effSub"
     },
     {
      "id": "ex61",
@@ -2756,7 +2756,7 @@
      ],
      "status": "todo",
      "size": "中",
-     "note": "★`Φ`, `B`, `Div_B` が揃えば **`Theorem 5.2, (ii)`(実装済み)を当てるだけ**。★これが「§6 は Frobenioid 理論ではなく因子論で止まっている」の意味である。",
+     "note": "★`Φ`, `B`, `Div_B` が揃えば **`Theorem 5.2, (ii)`(実装済み)を当てるだけ**。★これが「§6 は Frobenioid 理論ではなく因子論で止まっている」の意味である。\n\n★★★2026-08-20: **`Φ` 側の単系論は全部揃った**(`ex61-phi-perffact` 参照)。★残るのは (a) `V[L]` と `D_L` のスキーム層での構成、(b) `L ↦ Φ(L)` / `L ↦ B(L)` の**関手性**(`monoid on ᴰ` にすること)である。底の圏 `ᴰ = B(G)⁰` は `galois-cat-B0` で閉じている。",
      "lean": "",
      "decl": ""
     },
