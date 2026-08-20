@@ -147,6 +147,7 @@ import ABC3.Found.Divisor.ArithSurj
 import ABC3.Found.Divisor.ArithFrobenioid
 import ABC3.Found.Divisor.Ex63Datum
 import ABC3.Found.Divisor.Ex63Bmon
+import ABC3.Found.Divisor.Ex63Model
 import ABC3.Found.Divisor.SchemeWeil
 import ABC3.Found.Divisor.SchemeWeilOrd
 import ABC3.Found.Divisor.HeightOneBridge
