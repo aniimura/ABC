@@ -280,6 +280,62 @@ theorem exists_ordFin_eq_one (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) :
   rw [h2]
   rfl
 
+/-! ## ★5. `Φ(F)` と `Φ(F)^gp`（鎖 `arith` の `arith-phi`）
+
+原文 (FrdI p.113):
+> as an effective arithmetic divisor on F, and to an element of the group
+
+★★対数の模型では、`ord(O_v^▷)` は
+* 非アルキメデス: `ℕ·log(N v)`（`≅ ℕ`）
+* アルキメデス: `ℝ≥0`
+に対応する。そこで `Φ(F)` を「各成分が非負で、非アルキメデス成分は
+`log(N v)` の非負整数倍」として定める。
+★`Φ(F)^gp` は「整数倍（符号は問わない）」である。 -/
+
+/-- ★★**`Φ(F)^gp`** —— 非アルキメデス成分が `log(N v)` の整数倍であるもの。 -/
+def arithDivGroup (L : Type*) [Field L] [NumberField L] :
+    AddSubgroup (ArithPlace L →₀ ℝ) where
+  carrier := {d | ∀ w : FinitePlace L, ∃ n : ℤ,
+    d (Sum.inl w) = (n : ℝ) * Real.log (Ideal.absNorm (FinitePlace.maximalIdeal w).asIdeal : ℝ)}
+  zero_mem' := fun w => ⟨0, by simp⟩
+  add_mem' {a b} ha hb := by
+    intro w
+    obtain ⟨m, hm⟩ := ha w
+    obtain ⟨n, hn⟩ := hb w
+    refine ⟨m + n, ?_⟩
+    show a (Sum.inl w) + b (Sum.inl w) = _
+    rw [hm, hn]
+    push_cast
+    ring
+  neg_mem' {a} ha := by
+    intro w
+    obtain ⟨m, hm⟩ := ha w
+    refine ⟨-m, ?_⟩
+    show -a (Sum.inl w) = _
+    rw [hm]
+    push_cast
+    ring
+
+/-- ★★**`Φ(F)`** —— `Φ(F)^gp` のうち各成分が非負なもの（有効算術因子）。 -/
+def arithEff (L : Type*) [Field L] [NumberField L] :
+    AddSubmonoid (ArithPlace L →₀ ℝ) where
+  carrier := {d | d ∈ arithDivGroup L ∧ ∀ v, 0 ≤ d v}
+  zero_mem' := ⟨(arithDivGroup L).zero_mem, by simp⟩
+  add_mem' {a b} ha hb :=
+    ⟨(arithDivGroup L).add_mem ha.1 hb.1, fun v => by
+      rw [Finsupp.add_apply]
+      exact add_nonneg (ha.2 v) (hb.2 v)⟩
+
+/-- ★★★**`B(L) → Φ(L)^gp`** —— 有理函数の因子は実際に `Φ(L)^gp` に入る。
+
+★非アルキメデス成分が `ord_v(x)·log(N v)` であること（`arithPlaceLog_finite`）から直ちに出る。 -/
+theorem arithDiv_mem_arithDivGroup (x : Lˣ) : arithDiv x ∈ arithDivGroup L := by
+  intro w
+  refine ⟨ordFin (FinitePlace.maximalIdeal w) (x : L), ?_⟩
+  have h := arithPlaceLog_finite (FinitePlace.maximalIdeal w) (x : L) x.ne_zero
+  rw [FinitePlace.mk_maximalIdeal] at h
+  exact h
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.3` の素点の集合 `V(F)`。 -/
@@ -312,6 +368,12 @@ def arithPlaceLog_finite.src : ABC3.Meta.Source :=
 def exists_ordFin_eq_one.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 113,
     item := "Example 6.3 — ord(F_v) ≅ ℤ（非アルキメデス）",
+    sectionId := "frdi-example-6-3" }
+
+/-- ★★locator —— `Example 6.3` の `Φ(F)` と `Φ(F)^gp`。 -/
+def arithDivGroup.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — Φ(F) と Φ(F)^gp",
     sectionId := "frdi-example-6-3" }
 
 end ABC3.Found.Divisor

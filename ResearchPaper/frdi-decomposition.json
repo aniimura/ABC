@@ -3137,11 +3137,11 @@
           "deps": [
             "ord-mon"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★直和(有限台)であることが本質。",
-          "lean": "",
-          "decl": ""
+          "note": "★直和(有限台)であることが本質。\n\n★★★★（2026-08-20）**対数の模型で置いた**。`Φ(F)^gp` = 非アルキメデス成分が `log(N v)` の**整数倍**であるもの（`arithDivGroup`）、`Φ(F)` = そのうち各成分が非負なもの（`arithEff`）。★`arithDiv x ∈ Φ(F)^gp`（`arithDiv_mem_arithDivGroup`）も証明した —— `arithPlaceLog_finite` から直ちに出る。★残るのは「`Φ(F) ≅ ⊕_v ord(O_v^▷)`」の同型を明示に書くことである。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "arithDivGroup / arithEff / arithDiv_mem_arithDivGroup"
         },
         {
           "id": "arith-B",
@@ -3153,7 +3153,7 @@
           "size": "中",
           "note": "★「all but a finite number of which are zero」= 有限個の素点でしか付値が非零でない。mathlib の `HeightOneSpectrum` の有限性補題に乗る。\n\n★★（2026-08-20）**台の有限性と準同型性は閉じた**（`finite_support_arithPlaceLog` / `arithDiv_mul`）。有限性は mathlib の `NumberField.FinitePlace.hasFiniteMulSupport` から出る。",
           "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
-          "decl": "arithDiv / arithDiv_mul / arithDivHom"
+          "decl": "arithDiv / arithDiv_mul / arithDivHom / arithDiv_mem_arithDivGroup"
         },
         {
           "id": "arith-functor",
