@@ -18653,3 +18653,60 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 ★★`choose` が正しい値を拾うことは本ブロックの 3 つの補題から出る。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-489 ★★★★★★★Weil 対の値が定義できた(第 178 ブロック)
+
+スケルトンの `weilPairing` は `W.Point → W.Point → F` という**仮定なしの全域関数**
+である。★値を特徴づける性質を**存在形**で書き、`Classical.choose` で定義した。
+
+    WeilSpec W n P Q c :=
+      ∃ (f_P) (μ) (g) (τ), [P, Q がアフィン点、f_P が XYIdeal(P)^n の生成元、
+                            μ = [n]^*、g^n = μ f_P、τ が Q の平行移動]
+                           ∧ τ g / g = algebraMap c
+
+    weilPairingVal W n P Q := if h : ∃ c, WeilSpec W n P Q c then h.choose else 1
+
+### ★★★★★★存在形にしたのが要点
+
+`P` や `Q` が `n` 等分点でないときはデータが無いので**既定値 1** になる。
+★これで `e_n(P,Q)^n = 1` のような性質が**退化した場合でも成り立つ**——
+スケルトンの述べ方(仮定に `n • P = 0` はあるが `[IsAlgClosed F]` などは無い)に
+合わせられる。★★∀ 形にすると空虚に真になって値が定まらない。
+
+### ★★★★★★★値は一意である
+
+第 177 の 3 補題がここで合流した:
+
+| 選択 | 一意性の根拠 |
+|---|---|
+| `P`・`Q`・`n·生成点` の座標 | `Point.some` の単射性 |
+| `μ` | 第 119 `coordinateRing_hom_ext` |
+| `τ` | 第 177 `aut_ext` |
+| `f_P` | `span` が等しい ⟹ 同伴 ⟹ 定数倍(第 128) |
+| `g` | 第 177 `aut_div_eq_of_const_mul` |
+
+★したがって `weilPairingVal` は `WeilSpec` を満たす唯一の値を返す
+(`weilPairingVal_eq`)。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `WeilSpec` | ★★★★★★値を特徴づける性質 |
+| `weilPairingVal` | ★★★★★★**Weil 対の値**(全域関数) |
+| `weilSpec_unique` | ★★★★★★★**値は一意** |
+| `weilPairingVal_eq` | ★★★★★★★特徴づけを満たす値は Weil 対の値 |
+
+### ★次の段——存在の witness
+
+`WeilSpec` を**満たす `c` が存在すること**を示す必要がある。★材料はすべて揃っている:
+
+* `f_P` —— 第 126(`XYIdeal(P)^n` が単項)
+* `μ` —— 第 141(`exists_mulByNHom_charZero`)
+* `g` —— 第 175(D2、`exists_nthRoot_comp_mulByN`)
+* `τ` —— 第 124(`exists_translateAut_all`)
+* `τ g / g` が定数 —— 第 176(`exists_const_aut_div`、第 168 の `τ ∘ μ = μ` 経由)
+
+★★これが出れば `weilPairingVal` が「本物の」値になり、5 性質の証明に進める。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
