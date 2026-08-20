@@ -18497,3 +18497,70 @@ D2 の残りの組み立てのうち、**抽象的な部分と 2 つの総和**�
 | 素点の `Finset` を点の `Finset` に移して組み立てる | ❌ | 2-5 |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-486 ★★★★★★★★★D2 が閉じた——(G5) 層 3 の `sorry` が全部消えた(第 174・175 ブロック)
+
+`exists_nthRoot_comp_mulByN`(`g^n = μ f_P` の存在)が**完全に証明された**。
+★`#print axioms` で確かめた:
+
+    'ABC3.Skeleton.GaloisRep.exists_nthRoot_comp_mulByN' depends on axioms:
+      [propext, Classical.choice, Quot.sound]
+
+**`sorryAx` は入っていない。**
+
+### ★★★★★★★★★最後の 2 ブロック
+
+**第 174** —— 台を 2 つに分けて総和を 0 にする:
+
+* `nsmul_pointOf_dichotomy` —— `count_v ≠ 0` なら `n·Q_v = P` か `n·Q_v = 0`
+* `sum_places_eq_sum_points` —— 素点の総和を点の総和に移す(第 172 の往復 + `Finset.sum_image`)
+* `sum_eps_split_zero` —— `α·(Σ_{[n]⁻¹(P)} Q) + β·(Σ_{E[n]∖{O}} T) = α·0 + β·0 = 0`
+* `exists_spanSingleton_rootUnit_mulByN` —— **D2 本体**
+
+**第 175** —— スケルトンの形に橋渡し:
+
+* `eq_of_count_eq` / `eq_rootUnit_of_pow` —— **`n` 乗根の一意性**
+  (`n·count_v(J) = count_v(I)` と因子分解の一意性)
+* `fractionalIdeal_isPrincipal_proof`
+
+### ★★★★★★★★★不分岐性を一度も使っていない
+
+通常の証明(Silverman III.8.1)は `div(f_P ∘ [n]) = n·Σ_T((Q₀+T) − (T))` を
+**`[n]` が不分岐**であることから出す。★本形式化はそこを通っていない:
+
+| 通常 | 本形式化 |
+|---|---|
+| `[n]` の分離性・不分岐性 | 使わない |
+| `deg[n] = n²` | 使わない |
+| `#E[n] = n²` | 第 150 で `Σ_T T = 0` にだけ使う |
+| 分岐指数 `e` の値 | **知る必要がない**(α, β の一致が不要) |
+
+★★代わりに使ったのは、**平行移動 `τ_T` が `μ f_P` を固定すること**
+(第 168)と**素点の輸送**(第 169)だけである。
+★★★これで `e_v` がファイバー上・`E[n]∖{O}` 上でそれぞれ一定になり、
+2 つの総和がそれぞれ 0 なので、係数が違っても和は 0 になる。
+
+### ★逸脱の記録
+
+`hchar`(`∀ k, 1 ≤ k → k ≤ n → (k : F) ≠ 0`)を
+`fractionalIdeal_isPrincipal` と `exists_nthRoot_comp_mulByN` の仮定に足した。
+★第 150(`Σ_{T ∈ E[n]} T = 0`)が (G1) の `E[n] ≅ (ℤ/n)²` を使うためである。
+★★Weil 対 `e_n` はそもそも `char ∤ n` を要求するので、消費側
+(`det_cyclotomic`、`[CharZero K]` の下)に影響はない。
+
+### ★D2 に費やしたブロック数
+
+第 162-175 の **14 ブロック**。★§9-473 の時点での見積もりは
+「6-15 + 3-6 + 4-10 + 4-10 = 17-41」であった。★★見積もりの中央値より速い。
+
+### ★(G5) の残り
+
+| 段 | 内容 | 見積もり |
+|---|---|---|
+| 層 3(`exists_nthRoot_comp_mulByN`) | ✅ **第 175 まで** | 0 |
+| `WeilFunctionField.lean` の `sorry` 1 個 | ❌ | 未測定 |
+| `WeilPairingDef.lean`——`e_n` の定義と 4 性質(`sorry` 6 個) | ❌ | 未測定 |
+| `WeilPairing.lean`——`det_galRep_eq_cyclotomic`(`sorry` 1 個) | ❌ | 未測定 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★G5 が達成されるのは `FullImageData` の `det_cyclotomic` が閉じたときである。

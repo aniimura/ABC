@@ -1,5 +1,6 @@
 import ABC3.Skeleton.GaloisRep.WeilFunctionField
 import ABC3.Found.GaloisRep.DvdCount
+import ABC3.Found.GaloisRep.D2Bridge
 
 /-!
 # スケルトン —— **`div(f_P ∘ [n])` の因子計算**(`Skeleton`)
@@ -9,14 +10,31 @@ import ABC3.Found.GaloisRep.DvdCount
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-## ★★★★★★★層 3 に残る `sorry` は **D2 の 1 個だけ**
+## ★★★★★★★★★層 3 の `sorry` は **全部消えた**(2026-08-20)
 
 | 節点 | 状態 |
 |---|---|
 | `dvd_count_pullback` (D1') | ✅ **第 149 ブロックで証明された** |
 | `exists_fractionalIdeal_pow` (D1) | ✅ D1' + 第 142 から証明される |
 | `exists_nthRoot_comp_mulByN`(`WeilRoot`) | ✅ D1 + D2 + 第 139 から証明される |
-| `fractionalIdeal_isPrincipal` (D2) | ❌ **残り 1 個**(Abel–Jacobi、10-25) |
+| `fractionalIdeal_isPrincipal` (D2) | ✅ **第 162-175 ブロック** |
+
+★`#print axioms` で確かめた: `exists_nthRoot_comp_mulByN` は
+`[propext, Classical.choice, Quot.sound]` の 3 つにしか依存していない。
+
+### ★★D2 が閉じた道筋(第 162-175)
+
+| ブロック | 内容 |
+|---|---|
+| 162-163 | 還元の核 `E₁` が部分群、**点の還元が群準同型** |
+| 164 | **`P' = XYIdeal(n·Q_v)`**、台は `[n]⁻¹(P)` |
+| 165-166 | `n` 乗根イデアルの明示、**`[J] = toClass(Σ e_v·Q_v)`** |
+| 167 | **`hnn` は仮定でなく定理** |
+| 168-171 | **`τ ∘ μ = μ`**、**素点の輸送**、**`e_v` の一定性** |
+| 172-175 | 素点と点の対応、**台の総和が 0**、`n` 乗根の一意性 |
+
+★★★**`[n]` の不分岐性(`e = 1`)を一度も使っていない**。
+ファイバーと `E[n]∖{O}` の総和がそれぞれ独立に 0 だからである。
 
 ★D1' の証明は 2 つの場合の合流である:
 
@@ -124,7 +142,9 @@ theorem exists_fractionalIdeal_pow [IsAlgClosed F] (h2 : IsUnit (2 : F))
 ★★類の計算では `Σ_{Q ∈ [n]⁻¹(P)} Q = 0` と `Σ_{T ∈ E[n]} T = 0`(第 140)を使う。 -/
 theorem fractionalIdeal_isPrincipal [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (W : WeierstrassCurve.Affine F) [W.IsElliptic] {x y : F}
-    (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
+    (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n)
+    (hchar : ∀ k : ℕ, 1 ≤ k → k ≤ n → (k : F) ≠ 0)
+    (hP : n • (Point.some x y h) = 0)
     (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
     (hμF : ∀ c : F, μ (algebraMap F W.CoordinateRing c) = algebraMap F W.FunctionField c)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
@@ -135,7 +155,9 @@ theorem fractionalIdeal_isPrincipal [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (J : FractionalIdeal W.CoordinateRing⁰ W.FunctionField)
     (hJ : J ^ n = FractionalIdeal.spanSingleton W.CoordinateRing⁰ (μ fP)) :
     ∃ g : W.FunctionField, J = FractionalIdeal.spanSingleton W.CoordinateRing⁰ g := by
-  sorry
+  haveI := isDedekindDomain_coordinateRing h2 W
+  exact ABC3.Found.GaloisRep.fractionalIdeal_isPrincipal_proof h2 W h n hn hchar hP μ hμinj
+    hμF hns hμP hμx hμy fP hfP J hJ
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -191,7 +213,11 @@ def fractionalIdeal_isPrincipal.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def fractionalIdeal_isPrincipal.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3.5(Abel–Jacobi)"
+  [ .implicitStep
+      "★★★★★★★★★**2026-08-20: 本節点は証明された**（第 162-175 ブロック）。★道筋は次の通り: 第 162-163 で点の還元が群準同型になり、第 164 で台が `[n]⁻¹(P)` になり、第 165-166 で `[J] = toClass(Σ e_v·Q_v)` になり、第 167-171 で `e_v` がファイバー上一定になり、第 172-175 で総和が 0 になった。★★**`[n]` の不分岐性（`e = 1`）は一度も使っていない**（0 ブロック）" 19,
+    .implicitStep
+      "★逸脱の記録: `hchar`（`∀ k, 1 ≤ k → k ≤ n → (k : F) ≠ 0`）を仮定に足した。第 150（`Σ_{T ∈ E[n]} T = 0`）が (G1) の `E[n] ≅ (ℤ/n)²` を使うためである。★Weil 対 `e_n` はそもそも `char ∤ n` を要求するので、消費側（`det_cyclotomic`、`[CharZero K]`）に影響はない" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3.5(Abel–Jacobi)"
       (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20)") 19,
     .implicitStep
       "★★★★★★**分岐指数 `e_Q` はここでも消える**——平行移動 `τ_T`(`T ∈ E[n]`)は `[n]∘τ_T = [n]` により `μ` を保つので `e_Q` は各ファイバー上で一定。共通因子 `e` を括り出すと `Σ_{Q ∈ [n]⁻¹(P)} Q = n²Q₀ = n·P = 0` と `Σ_{T ∈ E[n]} T = 0` から類は 0 になる。★`e` の値を知る必要はない" 19,

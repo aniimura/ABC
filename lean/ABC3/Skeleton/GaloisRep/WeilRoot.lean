@@ -67,7 +67,13 @@ variable {F : Type} [Field F] [DecidableEq F]
 ## ★★★★★★2026-08-20: この節点自身の `sorry` は消えた
 
 本定理は `WeilDivisor.lean` の 2 節点(D1・D2)と第 139 ブロックから**証明される**。
-★`sorry` は D1・D2 に移った。
+★★★**2026-08-20: D1・D2 も閉じた**。この節点は `#print axioms` で
+`[propext, Classical.choice, Quot.sound]` の 3 つにしか依存していない。
+
+★逸脱の記録: `hchar`(`∀ k, 1 ≤ k → k ≤ n → (k : F) ≠ 0`)を仮定に足した。
+D2 が第 150(`Σ_{T ∈ E[n]} T = 0`)を使い、それが (G1) の `E[n] ≅ (ℤ/n)²` を
+要求するためである。★Weil 対 `e_n` はそもそも `char ∤ n` を要求するので、
+消費側(`det_cyclotomic`、`[CharZero K]`)に影響はない。
 
 ## ★逸脱の記録——`[IsAlgClosed F]` を足した
 
@@ -77,7 +83,9 @@ variable {F : Type} [Field F] [DecidableEq F]
 theorem exists_nthRoot_comp_mulByN [IsAlgClosed F] (h2 : IsUnit (2 : F))
     (W : WeierstrassCurve.Affine F)
     [W.IsElliptic] {x y : F}
-    (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n) (hP : n • (Point.some x y h) = 0)
+    (h : W.Nonsingular x y) (n : ℕ) (hn : 1 ≤ n)
+    (hchar : ∀ k : ℕ, 1 ≤ k → k ≤ n → (k : F) ≠ 0)
+    (hP : n • (Point.some x y h) = 0)
     (μ : W.CoordinateRing →+* W.FunctionField) (hμinj : Function.Injective μ)
     (hμF : ∀ c : F, μ (algebraMap F W.CoordinateRing c) = algebraMap F W.FunctionField c)
     {xn yn : W.FunctionField} (hns : (W.map (algebraMap F W.FunctionField)).Nonsingular xn yn)
@@ -88,7 +96,7 @@ theorem exists_nthRoot_comp_mulByN [IsAlgClosed F] (h2 : IsUnit (2 : F))
     ∃ g : W.FunctionField, g ^ n = μ fP := by
   obtain ⟨J, hJ⟩ := exists_fractionalIdeal_pow h2 W h n hn hP μ hμinj hμF hns hμP hμx hμy fP hfP
   obtain ⟨g, hg⟩ :=
-    fractionalIdeal_isPrincipal h2 W h n hn hP μ hμinj hμF hns hμP hμx hμy fP hfP J hJ
+    fractionalIdeal_isPrincipal h2 W h n hn hchar hP μ hμinj hμF hns hμP hμx hμy fP hfP J hJ
   exact exists_nthRoot_of_fractionalIdeal W hn hJ hg
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
