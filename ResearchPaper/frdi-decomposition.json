@@ -2901,11 +2901,11 @@
           "deps": [
             "div-finite"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★環の層は `divOfFrac` / `divOfFrac_mul` で在庫。",
-          "lean": "ABC3/Found/Divisor/HeightOneDVR.lean",
-          "decl": "divOfFrac / divOfFrac_mul"
+          "note": "★環の層は `divOfFrac` / `divOfFrac_mul` で在庫。\n\n★★★★2026-08-21：**アフィンの場合は閉じた**。\n* `WeilDiv X := PrimeDivisorPt X →₀ ℤ`（`SchemeWeil.lean`、済）\n* 環の層の `div` —— `divOfFrac` / `divOfFrac_mul`（`HeightOneDVR.lean`、既に在庫にあった）\n* ★`primeDivisorPtSpecEquiv` —— `Spec R` の素因子 ≃ `HeightOnePrime R`\n  （`HeightOneBridge.lean` の `height_eq_one_iff` で 2 つの「高さ 1」が同値だと分かったので出た）\n* ★★`weilDivOfFrac` / `weilDivOfFrac_mul` —— `div : K^× → WeilDiv (Spec R)` が群準同型\n\n★残るのは**一般のスキーム**の場合（有限アフィン被覆で貼り合わせる段）だけである。",
+          "lean": "ABC3/Found/Divisor/SchemeWeil.lean / ABC3/Found/Divisor/HeightOneDVR.lean / ABC3/Found/Divisor/HeightOneBridge.lean",
+          "decl": "WeilDiv / divOfFrac / divOfFrac_mul / primeDivisorPtSpecEquiv / weilDivOfFrac / weilDivOfFrac_mul"
         },
         {
           "id": "affine-compat",

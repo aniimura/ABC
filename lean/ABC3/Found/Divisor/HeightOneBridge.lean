@@ -40,6 +40,8 @@ import Mathlib.RingTheory.Ideal.MinimalPrime.Basic
 | `height_eq_one_iff` | ★★**2 つの「高さ 1」は同値** |
 | `HeightOnePrime.ofHeightEqOne` | `height = 1` から `HeightOnePrime` を作る |
 | `isCodimOnePt_spec_iff_heightOne` | ★`Spec R` の余次元 1 の点 ⟺ `HeightOnePrime` |
+| `primeDivisorPtSpecEquiv` | `Spec R` の素因子 ≃ `HeightOnePrime R` |
+| `weilDivOfFrac` / `weilDivOfFrac_mul` | ★★**`div : K^× → WeilDiv (Spec R)`**（鎖 `weil` の `weil-group` のアフィンの場合）|
 -/
 
 namespace ABC3.Found.Divisor
@@ -116,12 +118,52 @@ theorem isCodimOnePt_spec_iff_heightOne (R : CommRingCat.{u}) [IsDomain R] (x : 
   rw [isCodimOnePt_spec_iff]
   exact height_eq_one_iff x.asIdeal
 
+/-! ## ★4. `Spec R` の Weil 因子 -/
+
+/-- ★★**`Spec R` の素因子は `HeightOnePrime R` と 1 対 1**。 -/
+def primeDivisorPtSpecEquiv (R : CommRingCat.{u}) [IsDomain R] :
+    PrimeDivisorPt (Spec R) ≃ HeightOnePrime R where
+  toFun x := HeightOnePrime.ofHeightEqOne x.1.asIdeal x.1.isPrime
+    ((isCodimOnePt_spec_iff R x.1).mp x.2)
+  invFun v := ⟨⟨v.asIdeal, v.isPrime⟩,
+    (isCodimOnePt_spec_iff R ⟨v.asIdeal, v.isPrime⟩).mpr v.height_eq_one⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+open scoped Classical in
+/-- ★★★★★**`Spec R` の有理関数の Weil 因子** ——
+`HeightOneDVR.lean` の `divOfFrac` を素因子の対応で送ったもの。
+
+★★これで鎖 `weil` の `weil-group` が【アフィンの場合に限って】閉じる。 -/
+noncomputable def weilDivOfFrac (R : CommRingCat.{u}) [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (x : FractionRing R) (hx : x ≠ 0) : WeilDiv (Spec R) :=
+  Finsupp.equivMapDomain (primeDivisorPtSpecEquiv R).symm (divOfFrac x hx)
+
+theorem weilDivOfFrac_apply (R : CommRingCat.{u}) [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (x : FractionRing R) (hx : x ≠ 0) (v : PrimeDivisorPt (Spec R)) :
+    weilDivOfFrac R x hx v = divOfFrac x hx (primeDivisorPtSpecEquiv R v) := rfl
+
+/-- ★★★**`div` は乗法を加法へ移す**（`Spec R` の層）。 -/
+theorem weilDivOfFrac_mul (R : CommRingCat.{u}) [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] {x y : FractionRing R} (hx : x ≠ 0) (hy : y ≠ 0) :
+    weilDivOfFrac R (x * y) (mul_ne_zero hx hy)
+      = weilDivOfFrac R x hx + weilDivOfFrac R y hy := by
+  refine Finsupp.ext fun v => ?_
+  rw [weilDivOfFrac_apply, Finsupp.add_apply, weilDivOfFrac_apply, weilDivOfFrac_apply,
+    divOfFrac_mul hx hy, Finsupp.add_apply]
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Example 6.1` の「余次元 1 の点 = 高さ 1 の素イデアル」の 2 つの綴りの一致。 -/
 def height_eq_one_iff.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 109,
     item := "Example 6.1 — 高さ 1 の素イデアルの 2 つの綴りの一致",
+    sectionId := "frdi-example-6-1" }
+
+/-- ★★★locator —— `Example 6.1` の `div : K^× → WeilDiv`（アフィンの場合）。 -/
+def weilDivOfFrac.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — 有理関数の Weil 因子 div(f)（Spec R の層）",
     sectionId := "frdi-example-6-1" }
 
 end ABC3.Found.Divisor
