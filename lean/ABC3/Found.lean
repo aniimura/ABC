@@ -620,6 +620,7 @@ import ABC3.Found.GaloisRep.FiberSum
 import ABC3.Found.GaloisRep.Support
 import ABC3.Found.GaloisRep.Reduction
 import ABC3.Found.GaloisRep.RedConst
+import ABC3.Found.GaloisRep.RedPoint
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
