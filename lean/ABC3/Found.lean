@@ -171,6 +171,7 @@ import ABC3.Found.SixExp.Siegel
 import ABC3.Found.SixExp.LatticeGeneral
 import ABC3.Found.SixExp.LatticeBox
 import ABC3.Found.SixExp.Assembly
+import ABC3.Found.SixExp.DenomClear
 import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
