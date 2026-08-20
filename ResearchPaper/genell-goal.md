@@ -16589,3 +16589,44 @@ mathlib の `CoordinateRing.degree_norm_smul_basis`:
 `Δ ≠ 0` と同値であり、我々は `IsElliptic` を持っている。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-439 平方完成 `z² = Ψ₂Sq(x)`(第 129 ブロック)
+
+`IsIntegrallyClosed` への経路 2 の土台が入った。
+
+    z := 2y + a₁x + a₃   と置くと   z² = Ψ₂Sq(x)   in F[W]
+
+★これは mathlib の `C_Ψ₂Sq : C Ψ₂Sq = ψ₂² − 4·(Weierstrass 多項式)` と
+`AdjoinRoot.mk_self`(Weierstrass 多項式は座標環で 0)から**直ちに出た**。
+
+★★すなわち
+
+    F[W] = F[x][z]   で   z² = Ψ₂Sq(x)
+
+という**二次拡大の形**が確定した。★★★`Ψ₂Sq` が squarefree なら整閉である、
+というのが経路 2 の残りである。
+
+### ★足場
+
+| 出所 | 使ったもの |
+|---|---|
+| mathlib | `C_Ψ₂Sq`・`ψ₂ = polynomialY`・`AdjoinRoot.mk_self` |
+| 自前(第 116) | `eval₂_genX`——`F[X]` の元を生成点で評価する |
+
+★★★★`Ψ₂Sq` の定義は `4X³ + b₂X² + 2b₄X + b₆` であり、
+**平方完成の結果がそのまま定義になっている**——mathlib の設計が噛み合った。
+
+### ★層 3 の現況
+
+| 段 | 状態 |
+|---|---|
+| `f_P ∈ F[W]` | ✅ 第 126 |
+| `μ : F[W] →+* F(W)`(`[n]` の引き戻し) | ✅ 第 118・125 |
+| 座標環の単元は定数 | ✅ 第 128 |
+| `Ring.DimensionLEOne` | ✅ 第 127 |
+| 平方完成 `z² = Ψ₂Sq(x)` | ✅ **第 129** |
+| `Ψ₂Sq` が squarefree | ★残り |
+| `F[X][√d]`(d squarefree)が整閉 | ★残り |
+| 因子計算・`n` 乗根の取り出し | ★残り |
+
+★義務の数は動いていない(Galois 4/8)。
