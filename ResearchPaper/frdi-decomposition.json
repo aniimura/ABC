@@ -3842,11 +3842,11 @@
           "id": "cheb-spl-infinite",
           "title": "★迂回路 —— Galois 拡大で完全分解する素数は無限個",
           "deps": [],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★★**全 Chebotarev を使わずに出る**：`L = ℚ(θ)`、`f` を `θ` の最小多項式とすると、`p ∤ disc(f)` について「`p` が完全分解 ⟺ `f` が mod `p` で根を持つ」（`L/ℚ` が Galois のとき）。「`f` の値の素因子は無限個」は初等的（Schur の議論）。★これで `cheb-max-deg` は足りる見込みである。",
-          "lean": "",
-          "decl": ""
+          "note": "★★**全 Chebotarev を使わずに出る**：`L = ℚ(θ)`、`f` を `θ` の最小多項式とすると、`p ∤ disc(f)` について「`p` が完全分解 ⟺ `f` が mod `p` で根を持つ」（`L/ℚ` が Galois のとき）。「`f` の値の素因子は無限個」は初等的（Schur の議論）。★これで `cheb-max-deg` は足りる見込みである。\n\n★★★★★（2026-08-20）**Schur の補題を証明した** —— `infinite_primes_dvd_eval`：定数でない整数係数多項式の値を割る素数は無限個。★証明は**極限を使わない**：`f(n₀ + N·m) = c·u`、`u ≡ 1 (mod P)` とし、`u ∈ {0, ±1}` は `f(x) ∈ {0, ±c}` と同値で**有限個の `x`** でしか起きない（非零多項式の根は有限）ことを使う。★mathlib に同値の主張は見当たらなかった。★★残るのは **Dedekind–Kummer**（`𝔭 ∤ disc(f)` で「完全分解 ⇔ `f` が mod `𝔭` で根を持つ」）で、mathlib に `NumberField/Ideal/KummerDedekind.lean` がある。",
+          "lean": "ABC3/Found/NumberField/PrimeDivisorsOfValues.lean",
+          "decl": "infinite_primes_dvd_eval / finite_eval_eq"
         },
         {
           "id": "cheb-max-deg",
