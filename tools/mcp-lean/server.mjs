@@ -9,7 +9,7 @@
 //
 // 依存なし(Node 22 の標準ライブラリのみ)。MCP は stdio + 行区切り JSON-RPC 2.0。
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -34,20 +34,63 @@ const state = {
   busy: false,
   buf: [],
   pending: null,
+  checks: 0,
 };
+
+/** ★生きている `repl.exe` の物理メモリを報告する(2026-08-20 の 46 GB 事故の再発検知)。 */
+function replMemory() {
+  if (process.platform !== 'win32') return 'repl メモリ: (未計測)';
+  try {
+    const r = spawnSync(
+      'tasklist',
+      ['/FI', 'IMAGENAME eq repl.exe', '/FO', 'CSV', '/NH'],
+      { encoding: 'utf8', windowsHide: true },
+    );
+    const rows = (r.stdout ?? '')
+      .split(/\r?\n/)
+      .map((l) => l.match(/^"repl\.exe","(\d+)",[^,]*,[^,]*,"([\d,. ]+) K"$/))
+      .filter(Boolean)
+      .map((m) => ({ pid: m[1], mb: Math.round(Number(m[2].replace(/[^\d]/g, '')) / 1024) }));
+    if (rows.length === 0) return 'repl メモリ: (repl.exe は動いていない)';
+    const total = rows.reduce((a, b) => a + b.mb, 0);
+    const detail = rows.map((x) => `pid ${x.pid}: ${x.mb} MB`).join(' / ');
+    return `repl メモリ: 合計 ${total} MB (${detail})` +
+      (total > 12000 ? '  ★★危険——lean_reset して建て直すこと' : '');
+  } catch {
+    return 'repl メモリ: (計測に失敗)';
+  }
+}
 
 function log(msg) {
   process.stderr.write(`[mcp-lean] ${msg}\n`);
 }
 
-function killRepl() {
-  if (state.proc) {
+// ★2026-08-20 に踏んだ罠: Windows では `shell: true` で起こすので
+// `cmd.exe → lake.exe → lake.exe → repl.exe` の 4 段になる。
+// `proc.kill()` は先頭の `cmd.exe` しか殺さないので、**mathlib を抱えた
+// `repl.exe`(17〜22 GB)が孤児として残り続ける**。実測でコミットが
+// 104 GB / 119 GB まで来ていた。プロセスツリーごと殺すこと。
+function killTree(proc) {
+  if (!proc || proc.pid == null) return;
+  if (process.platform === 'win32') {
     try {
-      state.proc.kill();
+      spawnSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
     } catch {
-      /* already gone */
+      /* ignore */
     }
   }
+  try {
+    proc.kill();
+  } catch {
+    /* already gone */
+  }
+}
+
+function killRepl() {
+  killTree(state.proc);
   state.proc = null;
   state.baseEnv = null;
   state.pending = null;
@@ -211,7 +254,13 @@ async function callTool(name, args) {
     : DEFAULT_TIMEOUT_MS;
 
   if (name === 'lean_start') {
+    // ★2026-08-20: 以前はプロセスが生きていれば使い回していたが、
+    // **REPL は環境スナップショットを一切解放しない**ので、`import` を
+    // 呼ぶたびに mathlib 1 組分がプロセス内に積まれる(実測 46 GB)。
+    // 建て直す。温まっていれば 4〜5 秒で戻るので、使い回す利点は無い。
+    killRepl();
     const r = await loadImports(args.imports, timeoutMs);
+    state.checks = 0;
     return (
       `起動して import を読み込んだ (${r.seconds.toFixed(1)} 秒)。\n` +
       `imports: ${args.imports.join(', ')}\n基準環境 env=${r.env}`
@@ -228,6 +277,7 @@ async function callTool(name, args) {
     const t0 = Date.now();
     const text = await replSend({ cmd: args.code, env: state.baseEnv }, timeoutMs);
     const dt = ((Date.now() - t0) / 1000).toFixed(2);
+    state.checks += 1;
     let res;
     try {
       res = JSON.parse(text);
@@ -253,6 +303,8 @@ async function callTool(name, args) {
       `起動: ${state.proc ? 'あり' : 'なし'}\n` +
       `imports: ${state.imports.join(', ') || '(なし)'}\n` +
       `基準環境: ${state.baseEnv ?? '(なし)'}\n` +
+      `lean_check 回数: ${state.checks}\n` +
+      `${replMemory()}\n` +
       `LEAN_DIR: ${LEAN_DIR}\nREPL: ${REPL_BIN}`
     );
   }
