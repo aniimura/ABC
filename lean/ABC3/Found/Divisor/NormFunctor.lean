@@ -44,6 +44,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Integral
 | `normMap` | ★`V[M] → V[L]`(普遍性) |
 | `normFunctor` | ★★★**`L ↦ V[L]` は `(FinSub K K̄)ᵒᵖ ⥤ Scheme`** |
 | `normObj_isIntegral` | `V[L]` は整スキーム |
+| `specToV_preimage_eq_top` | ★空でない開集合の逆像は全体(`normalizationObjIso` を当てる前段)|
 -/
 
 namespace ABC3.Found.Divisor
@@ -93,6 +94,31 @@ theorem specMapOf_comp {L M N : FinSub V.functionField Kbar} (f : L ⟶ M) (g : 
     specMapOf V (f ≫ g) = specMapOf V g ≫ specMapOf V f := by
   rw [specMapOf, specMapOf, specMapOf, ← Spec.map_comp]
   rfl
+
+/-! ## ★1.5. 空でない開集合の逆像は全体 -/
+
+/-- ★**生成点は空でない開集合に入る**(既約空間)。 -/
+theorem genericPoint_mem_of_nonempty {U : V.Opens} (hU : (U : Set V).Nonempty) :
+    genericPoint (V : Type u) ∈ U := by
+  have hg : IsGenericPoint (genericPoint (V : Type u)) Set.univ := by
+    simpa using genericPoint_spec (V : Type u)
+  exact (hg.mem_open_set_iff U.2).mpr (by simpa using hU)
+
+/-- ★★**`Spec L → V` による空でない開集合の逆像は全体**。
+
+★`Spec L` の点はすべて `V` の生成点へ行く(`Scheme.range_fromSpecStalk`)ので、
+生成点を含む開集合の逆像は全体になる。
+★★これが `normalizationObjIso` を当てるときに要る
+(`Γ(Spec L, f ⁻¹ᵁ U) = Γ(Spec L, ⊤) ≅ L`)。 -/
+theorem specToV_preimage_eq_top (L : FinSub V.functionField Kbar)
+    {U : V.Opens} (hU : (U : Set V).Nonempty) : (specToV V L) ⁻¹ᵁ U = ⊤ := by
+  refine TopologicalSpace.Opens.ext (Set.eq_univ_iff_forall.mpr fun y => ?_)
+  show (specToV V L).base y ∈ U
+  have hmem : (specToV V L).base y
+      ∈ Set.range (V.fromSpecStalk (genericPoint (V : Type u))).base :=
+    ⟨(Spec.map (CommRingCat.ofHom (algebraMap V.functionField L.toIF))).base y, rfl⟩
+  rw [Scheme.range_fromSpecStalk] at hmem
+  exact hmem.mem_open U.2 (genericPoint_mem_of_nonempty V hU)
 
 /-! ## ★2. `V[L]` -/
 
