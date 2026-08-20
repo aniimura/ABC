@@ -41,3 +41,4 @@
 - [`rw`/`simp` が「型が正しくない」で止まる罠](lean-proj-vs-toelem-rw-trap.md) — defeq だが構文の違う 2 つの綴りが混ざると `instances` 透明度で型付かない。対処は `calc`+`congrArg` を**項として**書くこと。Prop 1.6 (ii) はこれで 1 セッション止まっていた。
 - [node -e はバックティックを食う](node-e-eats-backticks.md) — Bash ツールの `node -e "..."` はバックティックをコマンド置換として実行する。識別子が消えた JSON が静かにコミットされる。
 - [Python の open(w) はファイルを消す](python-w-truncates.md) — encode 失敗で原本が飛ぶ。空 Lean ファイルは無言で通るので検証も空回りする
+- [プロジェクトの namespace が mathlib を隠す](namespace-shadows-mathlib.md) — ABC3.Found.NumberField があると `open NumberField` が mathlib を指さず `𝓞` が unknown になる。`_root_.` を付けること
