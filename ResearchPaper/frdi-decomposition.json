@@ -3295,11 +3295,11 @@
           "deps": [
             "cartier-datum-geom"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★単系側は `effSubGpEquiv : Gp (effSub Γ) ≃+ Γ` で**閉じている**(`Q`-Cartier がここで効く)。残るのは `Γ` の幾何的実現。\n\n★★2026-08-21：**`Φ(L)^gp` を「台が `D_L` に入る Cartier 因子の群」として置いた**\n（`cartierOnDL := (cartierSubgroup hnorm).comap (toWeilOnDL ...)`）。\n★`ℤ[D_L]` への埋め込みは `Finsupp.embDomain`。\n★残るのは「これが `V[L]` 上の Cartier 因子の群と同一視される」の**逆向き**\n（`Found/Arakelov/PicDivisor.lean` の `IsCartier` との橋）である。",
+          "note": "★単系側は `effSubGpEquiv : Gp (effSub Γ) ≃+ Γ` で**閉じている**(`Q`-Cartier がここで効く)。残るのは `Γ` の幾何的実現。\n\n★★2026-08-21：**`Φ(L)^gp` を「台が `D_L` に入る Cartier 因子の群」として置いた**\n（`cartierOnDL := (cartierSubgroup hnorm).comap (toWeilOnDL ...)`）。\n★`ℤ[D_L]` への埋め込みは `Finsupp.embDomain`。\n★残るのは「これが `V[L]` 上の Cartier 因子の群と同一視される」の**逆向き**\n（`Found/Arakelov/PicDivisor.lean` の `IsCartier` との橋）である。\n\n★★★★★★2026-08-21（決着）：`cartierDatumGeom` から `Φ^gp ≃ Γ`（`effSubGpEquiv`）が立ち、\n引き戻しと両立すること（`phiGpHomC_gpMapOn`）も取れた。`Ex63Model.lean`（算術）と同じ骨組みである。",
           "lean": "ABC3/Found/Divisor/NormKQC.lean",
-          "decl": "cartierOnDL / mem_cartierOnDL"
+          "decl": "cartierOnDL / mem_cartierOnDL / phiGpHomC / phiGpHomC_toGp / phiGpHomC_gpMapOn / phiGpHomC_injective"
         },
         {
           "id": "ex61-phipf",
@@ -3308,11 +3308,11 @@
             "ex61-phigp",
             "KQC"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "中",
-          "note": "★単系側は `pfEquivNonneg : Pf (effSub Γ) ≃+ nonnegRatFs S` で閉じている。",
+          "note": "★単系側は `pfEquivNonneg : Pf (effSub Γ) ≃+ nonnegRatFs S` で閉じている。\n\n★★★★★2026-08-21（決着）：`cartierDatumGeom.phi finSubOp_isOfFSMType : MonoidOn 𝒟` が立つ。\ndivisorial 性は在庫（`phi_isDivisorialOn`）。",
           "lean": "ABC3/Found/Divisor/CartierPf.lean",
-          "decl": "pfEquivNonneg"
+          "decl": "pfEquivNonneg / CartierDatum.phi / phi_isDivisorialOn"
         },
         {
           "id": "ex61-perffact2",
@@ -3320,11 +3320,11 @@
           "deps": [
             "ex61-phipf"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "★大",
-          "note": "★★**単系側は全部閉じた**(`isPerfFactorial_effSub` 11 条 / `effSubPrimeEquiv` / `exists_effSub_support_eq`)。鍵は `factorMap_iotaAt : factorMap ι a p = ι p a`。残るのは `Γ` の幾何的実現のみ。",
+          "note": "★★**単系側は全部閉じた**(`isPerfFactorial_effSub` 11 条 / `effSubPrimeEquiv` / `exists_effSub_support_eq`)。鍵は `factorMap_iotaAt : factorMap ι a p = ι p a`。残るのは `Γ` の幾何的実現のみ。\n\n★★★★★2026-08-21（決着）：`phi_isPerfFactorial`（在庫、`isPerfFactorial_effSub` ＋ `qc`）が\n`cartierDatumGeom` にそのまま当たる。",
           "lean": "ABC3/Found/Divisor/CartierPerfFactorial.lean",
-          "decl": "isPerfFactorial_effSub"
+          "decl": "isPerfFactorial_effSub / CartierDatum.phi_isPerfFactorial"
         },
         {
           "id": "ex61-Bhom",
@@ -3332,11 +3332,11 @@
           "deps": [
             "B-functor"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★`div(f) = (f)_0 − (f)_∞`。関手性は `phi-functor` と同じ引き戻しから。",
+          "note": "★`div(f) = (f)_0 − (f)_∞`。関手性は `phi-functor` と同じ引き戻しから。\n\n★★★★★★2026-08-21（決着）：`div : B(L) → Φ(L)^gp` を作った（`divBHom`）。\n主因子が Cartier であること（`isCartierDiv_weilDivOfFn` —— 局所方程式は `f` そのもの）と\n台が `D_L` に入ること（`B(L)` の定義）で `cartierOnDL` に入る。\n★関手性 `divBHom_bHom` は「`u` 自身が大域の局所方程式である」ことから\n`pullCoeff_eq` を `U = ⊤` で当てるだけで出る。",
           "lean": "",
-          "decl": ""
+          "decl": "divBHom / divBHom_apply / divBGeom / phiGpHomC_divBGeom / divBHom_bHom / divBGeom_nat"
         },
         {
           "id": "ex61-model",
@@ -3345,11 +3345,11 @@
             "ex61-perffact2",
             "ex61-Bhom"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "小",
-          "note": "★★**組み立ては閉じている** —— `cartierFrobenioid` / `cartierFrobenioid_isotropicType` / `cartierFrobenioid_biratFrobNormalizedType`。入力の `CartierDatum` を待っているだけ。",
+          "note": "★★**組み立ては閉じている** —— `cartierFrobenioid` / `cartierFrobenioid_isotropicType` / `cartierFrobenioid_biratFrobNormalizedType`。入力の `CartierDatum` を待っているだけ。\n\n★★★★★★★2026-08-21（決着）：**`Example 6.1` の model Frobenioid ができた**。\n* `bmonGeom` —— `B(L)` は `𝒟` 上の monoid（`BSubgroupMap` を加法的に書き、\n  `charInj` の第 2 成分は群だから無料、`fsmIso` は `finSubOp_isOfFSMType`）\n* `ex61ModelData` = `cartierDatumGeom.modelData`\n* ★`ex61Frobenioid` —— `Theorem 5.2, (ii)` を当てたもの。isotropic 型も出る。\n★仮定は `∀ L, IsLocallyNoetherian (V[L])`・`∀ L, CompactSpace (V[L])`・`IsKQCartier`・\n`IsGalois K K̄` の 4 つだけである。",
           "lean": "ABC3/Found/Divisor/CartierFrobenioid.lean",
-          "decl": "cartierFrobenioid"
+          "decl": "cartierFrobenioid / bHom / bMonoidFunctor / bmonGeom / ex61ModelData / ex61Frobenioid"
         },
         {
           "id": "ex61-morph",
