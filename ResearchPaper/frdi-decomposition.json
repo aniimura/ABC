@@ -280,9 +280,12 @@
       "liouville-ineq",
       "growth"
      ],
-     "status": "todo",
+     "status": "半済",
      "size": "★大(ここが本体)",
-     "evidence": "解析側(小さい)と算術側(0 でなければ大きい)を突き合わせて 0 を強制する、超越性証明の標準の段。"
+     "evidence": "解析側(小さい)と算術側(0 でなければ大きい)を突き合わせて 0 を強制する、超越性証明の標準の段。",
+     "note": "★★★★2026-08-20: **骨組みと締めを組んだ**(`Found/SixExp/Extrapolation.lean`)。\n* `extrapolation_step` —— **解析側の小さと算術側の下界を突き合わせる 1 段**。`M·(1/2)^{|s|} < H^{-(d-1)}` の瞬間に `F w = 0`。\n* `extrapolation_induction` —— 零点集合 `T k` が段ごとに増えれば**すべての段で `F` は消える**。\n* ★**締め**: `coeff_eq_zero_of_auxFun_latticePt` —— すべての格子点で消えるなら係数はすべて 0。★**乗法的指標の一次独立性**(Dedekind–Artin、mathlib の `linearIndependent_monoidHom`)を `ℕ³` 上の指標 `m ↦ ∏ᵢ (E₀ᵢ^p E₁ᵢ^q)^{mᵢ}` に当てる。★これが Siegel の補題の「0 でない係数」と矛盾する、背理法の閉じ目である。\n★残るのは **パラメータの数え上げ**(`M`・`H k`・`|T k|` を選んで `hgap` を満たすこと)と、格子点での値が house `≤ H k` の代数的整数であることの確認(`isIntegral_auxMatrix` と Siegel の係数評価をつなぐ)である。",
+     "lean": "ABC3/Found/SixExp/Extrapolation.lean",
+     "decl": "extrapolation_step / extrapolation_induction / coeff_eq_zero_of_auxFun_latticePt"
     },
     {
      "id": "sixexp-thm",
