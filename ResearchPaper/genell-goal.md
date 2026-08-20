@@ -20162,3 +20162,47 @@ simp に入れてから `ring` する(mathlib の `C_simp` マクロと同じ手
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★(G5) の `det_galRep_eq_cyclotomic` は `sorry` のままである——非退化性が上流に残っており、
 そこを仮定に足して「証明した」と言い換えることはしない。
+
+
+## §9-523 ★★★★★(G6) の在庫を測り直した —— 解析の背骨は mathlib に在った(第 211 ブロック)
+
+`FullImageData`(G5)は `ModLRepData` を、`SemistableModelData`(G7)は `TateCurveData` を、
+`FaltingsHeightData`(G8)は G7 を台に持つ。★したがって
+**(G6) Tate 一意化が Galois 側の残り 4 欄すべての律速**である。そこで在庫を測り直した。
+
+| 段 | 内容 | mathlib 在庫 |
+|---|---|---|
+| 収束の判定 | 非アルキメデス完備群で `Summable f <-> f -> 0`(cofinite) | ★★`NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero` ✓ |
+| 級数の積 | `(Sf)(Sg) = S f_i g_j` | ★★`HasSum.mul_of_nonarchimedean` ✓ |
+| 進位相 | 完備 DVR の m 進位相は非アルキメデス | ★`AdicTopology` に `instance : NonarchimedeanRing R` ✓ |
+| **付値位相** | `Valued K G0` から非アルキメデス性 | ★**無い**(2026-08-20 実測、`infer_instance` が失敗) |
+| Tate 級数そのもの | `a4(q), a6(q)`、`X(u,q), Y(u,q)` | ★**0 件**(`Tate curve` で全文検索して 0 件) |
+| 群同型の検証 | `K^x/q^Z = E_q(K)` | ★**0 件** |
+
+### ★★★★★測って初めて分かったこと
+
+2026-08-16/17 の測定では「mathlib に Tate 曲線は無い・FLT にも無い(20 行の入口だけ)」
+とだけ書いていた。★★今回**その 1 段下**を測ると、**解析の背骨は在った**——
+非アルキメデス総和法(項が 0 に行けば総和可能)も、級数どうしの積も、
+`Mathlib/Topology/Algebra/InfiniteSum/Nonarchimedean.lean` に揃っている。
+
+★★★これは見積もりを変える。「p 進解析の基礎から積む」必要は**無い**。
+欠けているのは **Tate 級数そのもの**(`a4(q)`, `a6(q)`, `X(u,q)`, `Y(u,q)`)と
+**群同型の検証**であり、前者は級数の定義と収束、後者は加法公式の恒等式である。
+
+### ★本ブロックで埋めた穴
+
+`Valued K G0` から `NonarchimedeanAddGroup K` が**出ない**(instance が無い)。
+★付値の球 `{x | v x < g}` は開加法部分群なので、これは 10 行で埋まる。
+★★埋めたので `summable_iff_tendsto_cofinite_zero` が付値体でそのまま使える。
+★★★グローバル instance にはしていない——`Valued` を持つすべての環に当たると
+探索が重くなるため、`haveI` で局所的に入れる形にした。
+
+| 定理 | 内容 |
+|---|---|
+| `nonarchimedeanAddGroup_of_valued` | ★★★**付値位相は非アルキメデス** |
+| `summable_of_valued_tendsto_zero` | ★★★★**完備な付値体では項が 0 に行けば総和可能** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` の全体は**並行セッションの `Found/Divisor/ArithMonoprime.lean:214` で落ちている**
+(こちらのファイルではない)。自分のファイルは `lake build ABC3.Found.GaloisRep.TateAnalytic` で通っている。

@@ -126,6 +126,9 @@ import ABC3.Found.Divisor.CartierPerfFactorial
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.ArithDivisor
 import ABC3.Found.Divisor.ArithOrd
+import ABC3.Found.Divisor.ArithPhiMonoid
+import ABC3.Found.Divisor.ArithMonoprime
+import ABC3.Found.Divisor.ArithPhiPrime
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.FrdI.Prop53Diag
@@ -713,6 +716,7 @@ import ABC3.Found.GaloisRep.DetCyclotomic
 import ABC3.Found.GaloisRep.TowerSurj
 import ABC3.Found.GaloisRep.TateSurj
 import ABC3.Found.GaloisRep.BasisFree
+import ABC3.Found.GaloisRep.TateAnalytic
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
