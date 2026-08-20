@@ -260,4 +260,106 @@ noncomputable def divOfElem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianR
       by_contra hcon
       exact hv ((ordZ_eq_zero_iff_notMem v.asIdeal v.ne_bot v.minimal ha).mpr hcon))
 
+/-! ## ★有理関数(分数)の因子 -/
+
+open scoped Classical in
+/-- ★位数は乗法を加法へ移す。 -/
+theorem ordZ_mul {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p)
+    {x y : FractionRing R} (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordZ p hp0 hmin (x * y) = ordZ p hp0 hmin x + ordZ p hp0 hmin y := by
+  have hxy : x * y ≠ 0 := mul_ne_zero hx hy
+  rw [ordZ, ordZ, ordZ, dif_neg hxy, dif_neg hx, dif_neg hy]
+  rw [← neg_add]
+  congr 1
+  rw [← toAdd_mul]
+  congr 1
+  apply WithZero.coe_injective
+  rw [WithZero.coe_mul, WithZero.coe_unzero, WithZero.coe_unzero, WithZero.coe_unzero]
+  exact (ordAt p hp0 hmin).map_mul x y
+
+open scoped Classical in
+theorem ordZ_div {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (p : Ideal R) [hp : p.IsPrime] (hp0 : p ≠ ⊥)
+    (hmin : ∀ q : Ideal R, q.IsPrime → q ≠ ⊥ → q ≤ p → q = p)
+    {x y : FractionRing R} (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordZ p hp0 hmin (x / y) = ordZ p hp0 hmin x - ordZ p hp0 hmin y := by
+  have hxy : x / y ≠ 0 := div_ne_zero hx hy
+  have h := ordZ_mul p hp0 hmin hxy hy
+  rw [div_mul_cancel₀ x hy] at h
+  omega
+
+/-- ★分数体の任意の非零元は `a / b`(`a b : R`、ともに非零)と書ける。 -/
+theorem exists_frac {R : Type*} [CommRing R] [IsDomain R] {x : FractionRing R} (hx : x ≠ 0) :
+    ∃ a b : R, a ≠ 0 ∧ b ≠ 0 ∧ x = algebraMap R (FractionRing R) a /
+      algebraMap R (FractionRing R) b := by
+  obtain ⟨a, b, hb, hab⟩ := IsFractionRing.div_surjective (A := R) (K := FractionRing R) x
+  refine ⟨a, b, ?_, nonZeroDivisors.ne_zero hb, hab.symm⟩
+  intro ha
+  apply hx
+  rw [← hab, ha, map_zero, zero_div]
+
+open scoped Classical in
+/-- ★素因子での位数(`HeightOnePrime` の言葉)。 -/
+noncomputable def ordAtPrime {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (v : HeightOnePrime R) (x : FractionRing R) : ℤ :=
+  haveI := v.isPrime
+  ordZ v.asIdeal v.ne_bot v.minimal x
+
+theorem ordAtPrime_eq_zero_iff_notMem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (v : HeightOnePrime R) {a : R} (ha : a ≠ 0) :
+    ordAtPrime v (algebraMap R (FractionRing R) a) = 0 ↔ a ∉ v.asIdeal := by
+  haveI := v.isPrime
+  exact ordZ_eq_zero_iff_notMem v.asIdeal v.ne_bot v.minimal ha
+
+theorem ordAtPrime_mul {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (v : HeightOnePrime R) {x y : FractionRing R}
+    (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordAtPrime v (x * y) = ordAtPrime v x + ordAtPrime v y := by
+  haveI := v.isPrime
+  exact ordZ_mul v.asIdeal v.ne_bot v.minimal hx hy
+
+theorem ordAtPrime_div {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (v : HeightOnePrime R) {x y : FractionRing R}
+    (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordAtPrime v (x / y) = ordAtPrime v x - ordAtPrime v y := by
+  haveI := v.isPrime
+  exact ordZ_div v.asIdeal v.ne_bot v.minimal hx hy
+
+/-- ★★★★分数の位数が非零になる素因子も有限個。 -/
+theorem finite_support_frac {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] {x : FractionRing R} (hx : x ≠ 0) :
+    {v : HeightOnePrime R | ordAtPrime v x ≠ 0}.Finite := by
+  obtain ⟨a, b, ha, hb, rfl⟩ := exists_frac hx
+  have hA : (algebraMap R (FractionRing R) a) ≠ 0 :=
+    (IsFractionRing.to_map_eq_zero_iff (K := FractionRing R)).not.mpr ha
+  have hB : (algebraMap R (FractionRing R) b) ≠ 0 :=
+    (IsFractionRing.to_map_eq_zero_iff (K := FractionRing R)).not.mpr hb
+  refine ((finite_support_heightOnePrime ha).union (finite_support_heightOnePrime hb)).subset ?_
+  intro v hv
+  by_contra hcon
+  simp only [Set.mem_union, Set.mem_setOf_eq, not_or] at hcon
+  apply hv
+  rw [ordAtPrime_div v hA hB,
+    (ordAtPrime_eq_zero_iff_notMem v ha).mpr hcon.1,
+    (ordAtPrime_eq_zero_iff_notMem v hb).mpr hcon.2, sub_zero]
+
+open scoped Classical in
+/-- ★★★★★★**有理関数の因子** `div(f) = Σ_v ord_v(f)·[v]`。
+
+★★これが [FrdI] `Example 6.1` の `B(L) → Φ(L)^gp` の中身である。 -/
+noncomputable def divOfFrac {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] (x : FractionRing R) (hx : x ≠ 0) : HeightOnePrime R →₀ ℤ :=
+  Finsupp.onFinset (finite_support_frac hx).toFinset (fun v => ordAtPrime v x)
+    (by intro v hv; simpa using hv)
+
+/-- ★★★★★**`div` は乗法を加法へ移す** —— `K^× → ℤ[素因子]` は群準同型。 -/
+theorem divOfFrac_mul {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [IsIntegrallyClosed R] {x y : FractionRing R} (hx : x ≠ 0) (hy : y ≠ 0) :
+    divOfFrac (x * y) (mul_ne_zero hx hy) = divOfFrac x hx + divOfFrac y hy := by
+  refine Finsupp.ext fun v => ?_
+  show ordAtPrime v (x * y) = ordAtPrime v x + ordAtPrime v y
+  exact ordAtPrime_mul v hx hy
+
 end ABC3.Found.Divisor
