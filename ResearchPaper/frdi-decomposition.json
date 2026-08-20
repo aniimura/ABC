@@ -2988,11 +2988,11 @@
           "deps": [
             "cartier-def"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "★★`Example 6.1` の**関手性の本体**である。Weil 因子は一般には引き戻せないが、**Cartier なら引き戻せる**——これが原文が Cartier に限る理由である。`Theorem 6.2, (i)` の仮定 (a) もここで効く。\n\n★★★2026-08-21：**前段の道具が揃った** —— `NormFF.lean` の `normFF`\n（`K(V[L]) ⟶ K(V[M])`）がある。Cartier 因子は局所的に `div(f)` なので、\n引き戻しは `f ↦ normFF f` を取って `div` を取り直すことに帰着する。\n★残るのは `ord` の引き戻しの式（`ord_x(g^*u)` を `ord_{g(x)}(u)` で書くこと）である。",
+          "note": "★★`Example 6.1` の**関手性の本体**である。Weil 因子は一般には引き戻せないが、**Cartier なら引き戻せる**——これが原文が Cartier に限る理由である。`Theorem 6.2, (i)` の仮定 (a) もここで効く。\n\n★★★2026-08-21：**前段の道具が揃った** —— `NormFF.lean` の `normFF`\n（`K(V[L]) ⟶ K(V[M])`）がある。Cartier 因子は局所的に `div(f)` なので、\n引き戻しは `f ↦ normFF f` を取って `div` を取り直すことに帰着する。\n★残るのは `ord` の引き戻しの式（`ord_x(g^*u)` を `ord_{g(x)}(u)` で書くこと）である。\n\n★★★★★★2026-08-21（決着）：**閉じた**（`Found/Divisor/SchemeCartierPull.lean`）。\n`IsCartierDiv` は**定義に局所方程式を持っている**ので、\n引き戻しの係数は `ord_w(g^*f)` で定めればよい。\n\n| 段 | 宣言 |\n|---|---|\n| ★**局所方程式の取り替えに依らない** | `ordPt_ffMap_congr` —— `u := f₁/f₂` は `ord_{g(w)}(u) = 0` なので茎の単元、四角形で運べば `ord_w(g^*u) = 0` |\n| `g(w)` が余次元 1 でない場合 | `exists_unit_of_ordPt_of_dim_le_one` —— `dim ≤ 1` なら茎が体になる（`codim-preserved` の系）|\n| 係数の定義 | `pullCoeff` / `pullCoeff_eq` |\n| ★台の有限性 | `finite_pullCoeff_ne_zero` —— 各点で局所方程式が効くアフィン開を取り、そこでは `div-finite` が効く（準コンパクト性で有限被覆）|\n| ★引き戻しそのもの | `cartierPullback` |\n| **引き戻しは Cartier** | `isCartierDiv_cartierPullback` —— `g^*f` がそのまま局所方程式 |\n| **加法的** | `pullCoeff_add` —— 局所方程式は掛け算になる |\n\n★★仮定は `hdim : ∀ w, dim 𝒪_{Y,g(w)} ≤ 1`（`codim-preserved` が与える）と\n`X` の準コンパクト性だけである。",
           "lean": "",
-          "decl": ""
+          "decl": "exists_unit_of_ordPt_of_dim_le_one / ordPt_ffMap_congr / cartier_local / pullCoeff / pullCoeff_eq / finite_pullCoeff_ne_zero / cartierPullback / isCartierDiv_cartierPullback / pullCoeff_add"
         },
         {
           "id": "cartier-effmonoid",
