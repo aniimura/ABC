@@ -16,6 +16,7 @@ import ABC3.Skeleton.FrdI.Def28ProL
 import ABC3.Skeleton.FrdI.Lemma65SixExp
 import ABC3.Skeleton.GaloisRep.TateUniformization
 import ABC3.Skeleton.GaloisRep.WeilFunctionField
+import ABC3.Skeleton.GaloisRep.WeilDivisor
 import ABC3.Skeleton.GaloisRep.WeilRoot
 import ABC3.Skeleton.GaloisRep.WeilPairingDef
 import ABC3.Skeleton.GaloisRep.WeilPairing

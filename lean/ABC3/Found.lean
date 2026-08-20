@@ -602,6 +602,7 @@ import ABC3.Found.GaloisRep.PrimeGenerators
 import ABC3.Found.GaloisRep.LocalPrincipal
 import ABC3.Found.GaloisRep.Dedekind
 import ABC3.Found.GaloisRep.PointSpectrum
+import ABC3.Found.GaloisRep.RootFromIdeal
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
