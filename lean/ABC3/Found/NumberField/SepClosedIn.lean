@@ -356,6 +356,25 @@ theorem extendAlgHom_restrict (hβ : K₁⟮(β : Ω)⟯ = L) (x : Ω) (hx : x �
   have hval := congrArg (fun g : L →ₐ[K₁] Ω => g ⟨x, hx⟩) heq
   exact hval.symm
 
+omit [FiniteDimensional K₁ L] [Algebra.IsSeparable K₁ L] in
+open IntermediateField in
+/-- ★★**`K₂(L) = K₂⟮β⟯`**(`β` は `L` の原始元)。 -/
+theorem adjoin_coe_eq_adjoin_simple (hβ : K₁⟮(β : Ω)⟯ = L) :
+    IntermediateField.adjoin K₂ (L : Set Ω) = K₂⟮(β : Ω)⟯ := by
+  refine le_antisymm (IntermediateField.adjoin_le_iff.mpr ?_)
+    (IntermediateField.adjoin_simple_le_iff.mpr
+      (IntermediateField.subset_adjoin K₂ _ β.2))
+  intro x hx
+  exact le_adjoin_K₂ L β hβ hx
+
+omit [Algebra.IsSeparable K₁ L] in
+open IntermediateField in
+/-- ★★**`K₂(L)` は `K₂` 上有限次元**。 -/
+theorem finiteDimensional_adjoin_coe (hβ : K₁⟮(β : Ω)⟯ = L) :
+    FiniteDimensional K₂ (IntermediateField.adjoin K₂ (L : Set Ω)) := by
+  rw [adjoin_coe_eq_adjoin_simple L β hβ]
+  exact IntermediateField.adjoin.finiteDimensional (isIntegral_K₂_coe L β)
+
 end Extend
 
 /-! ### ★出典の紐付け -/
