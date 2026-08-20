@@ -2739,11 +2739,11 @@
           "deps": [
             "mathlib-normal-variety"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "★大",
-          "note": "`V[L]` も proper normal variety であること。`D_L`(`D_K` の素因子に落ちる `V[L]` の素因子)の定義。",
-          "lean": "",
-          "decl": ""
+          "note": "`V[L]` も proper normal variety であること。`D_L`(`D_K` の素因子に落ちる `V[L]` の素因子)の定義。★2026-08-21：鎖 `normalize` の `normalization-in-ext2` と**同じ節点**であり、そちらで閉じた（`NormFunctor.lean`）。`V[L] := (Spec L → V).normalization` と `L` についての関手性（`normalizationDesc` の普遍性 1 本）。",
+          "lean": "ABC3/Found/Divisor/NormFunctor.lean",
+          "decl": "specToV / normObj / normMap / normFunctor"
         },
         {
           "id": "div-of-rational-fn",
@@ -2814,7 +2814,7 @@
           ],
           "status": "分解済",
           "size": "★大",
-          "note": "原文 p.112。★IUTchI,II,III が直接引く。非同型性の所で `Lemma 6.5, (ii)`(six exponentials)を消費する。\n\n★★★2026-08-20: **この節点は畳んだままだった**。原文の省略の合図(5 件、`node tools/hedge-index.mjs --item` で実測)に 1 対 1 で対応する節点へ展開し、鎖 `sec6items` に移した。因子論の在庫側は鎖 `weil` / `cartier` / `normalize` / `arith` である。",
+          "note": "原文 p.112。★IUTchI,II,III が直接引く。非同型性の所で `Lemma 6.5, (ii)`(six exponentials)を消費する。\n\n★★★2026-08-20: **この節点は畳んだままだった**。原文の省略の合図(5 件、`node tools/hedge-index.mjs --item` で実測)に 1 対 1 で対応する節点へ展開し、鎖 `sec6items` に移した。因子論の在庫側は鎖 `weil` / `cartier` / `normalize` / `arith` である。\n\n★★★2026-08-21：**`ex61` への依存は実際には要らなかった** —— `Example 6.3` は `Ex63Model.lean` で `ex61` を一切使わずに閉じた（算術の因子論は `arith` 鎖で自足する）。★この辺は「機械を共有する」という意味の辺であって、論理的な依存ではない。",
           "lean": "",
           "decl": ""
         },
