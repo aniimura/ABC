@@ -1945,7 +1945,117 @@ theorem cfp_arbFactorUniq {A B : CfpCat P G} (X Y X' Y' : CfpCat P G)
     show CfpCat.snd γ' = CfpCat.snd γ ≫ inv (CfpCat.snd γ) ≫ CfpCat.snd γ'
     rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
 
-/-! ### ★`plBkEquiv` —— 数学は完了、Lean は 1 箇所で止まっている(再現手順つき)
+include F in
+/-- ★★★★★★**(i)(c) の移送** —— `(𝒞'^pl-bk)_A → 𝒟'_{A_𝒟'}` は圏同値。
+
+★★**忠実性・充満性は `𝒞'` の pull-back 性(対象の定義そのもの)を直接使う**。
+充満性で要る「pull-back の左簡約」は `isPullBack_of_comp_left`(仮定なし)なので
+**循環しない**。本質的全射性は `𝒞` 側の基底変換(`plBk_baseChange`)だけで足りる。
+
+★★★**2026-08-20: ここで止まっていた原因が分かった** ——
+`P.proj.obj X` と `(P.toElem.obj X).base` は `def proj` を展開すれば等しいが、
+★**`rw` / `simp` は書き換え後の項を `instances` 透明度で型検査するので、
+この 2 つが混ざった目標では「型が正しくない」と言って止まる。**
+(以前の記録が挙げた候補 A(`inv` のインスタンス)・候補 B(`rw` の位置)は
+どちらも原因ではなかった。)
+★**対処は `rw` を使わないこと** —— `calc` と `congrArg` / `Category.assoc` を
+**項として**書けば、既定の透明度で defeq が通る。 -/
+theorem cfp_plBkEquiv (A : CfpCat P G) :
+    (plBkOverFunctor (cfpPreFrobenioid P G hG hD' hcC hcD') A).IsEquivalence := by
+  haveI hfaith : (plBkOverFunctor (cfpPreFrobenioid P G hG hD' hcC hcD') A).Faithful := by
+    constructor
+    intro Z W f g hfg
+    have hb : (cfpPreFrobenioid P G hG hD' hcC hcD').Base f.left.hom
+        = (cfpPreFrobenioid P G hG hD' hcC hcD').Base g.left.hom :=
+      congrArg CommaMorphism.left hfg
+    have hwf : f.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w f)
+    have hwg : g.left.hom ≫ W.hom.hom = Z.hom.hom :=
+      congrArg InducedWideCategory.Hom.hom (Over.w g)
+    exact Over.OverMorphism.ext (InducedWideCategory.Hom.ext
+      (IsPullBack.hom_ext _ W.hom.property _ _ (hwf.trans hwg.symm) hb))
+  haveI hfull : (plBkOverFunctor (cfpPreFrobenioid P G hG hD' hcC hcD') A).Full := by
+    constructor
+    intro Z W h
+    obtain ⟨f₀, hf₀, -⟩ := IsPullBack.lift _ W.hom.property Z.left.obj Z.hom.hom h.left
+      (Over.w h).symm
+    have hpb : IsPullBack (cfpPreFrobenioid P G hG hD' hcC hcD') f₀ :=
+      isPullBack_of_comp_left _ f₀ W.hom.hom W.hom.property
+        (by rw [hf₀.1]; exact Z.hom.property)
+    exact ⟨Over.homMk (⟨f₀, hpb⟩ : Z.left ⟶ W.left)
+        (InducedWideCategory.Hom.ext hf₀.1),
+      Over.OverMorphism.ext hf₀.2⟩
+  haveI hess : (plBkOverFunctor (cfpPreFrobenioid P G hG hD' hcC hcD') A).EssSurj := by
+    constructor
+    intro Y
+    haveI hA : IsIso A.obj.hom := A.property
+    obtain ⟨q, hq⟩ : ∃ q : Y.left ⟶ A.obj.right, q = Y.hom := ⟨Y.hom, rfl⟩
+    obtain ⟨w, hwq⟩ : ∃ w : G.obj Y.left ⟶ (P.toElem.obj A.obj.left).base,
+        w = G.map q ≫ inv A.obj.hom := ⟨_, rfl⟩
+    have hcancel : w ≫ A.obj.hom = G.map q :=
+      calc w ≫ A.obj.hom
+          = (G.map q ≫ inv A.obj.hom) ≫ A.obj.hom :=
+            congrArg (fun t => t ≫ A.obj.hom) hwq
+        _ = G.map q ≫ (inv A.obj.hom ≫ A.obj.hom) := Category.assoc _ _ _
+        _ = G.map q ≫ 𝟙 _ := congrArg (fun t => G.map q ≫ t) (IsIso.inv_hom_id A.obj.hom)
+        _ = G.map q := Category.comp_id _
+    obtain ⟨Yt, αt, k, hpb, hw⟩ := plBk_baseChange P F A.obj.left w
+    haveI hki : IsIso k.hom := inferInstance
+    have hsq : P.proj.map αt ≫ A.obj.hom = k.hom ≫ G.map q :=
+      calc P.proj.map αt ≫ A.obj.hom
+          = (k.hom ≫ w) ≫ A.obj.hom := congrArg (fun t => t ≫ A.obj.hom) hw
+        _ = k.hom ≫ (w ≫ A.obj.hom) := Category.assoc _ _ _
+        _ = k.hom ≫ G.map q := congrArg (fun t => k.hom ≫ t) hcancel
+    refine ⟨Over.mk (show (⟨(⟨⟨Yt, Y.left, k.hom⟩, hki⟩ : CfpCat P G)⟩ :
+        PlBk (cfpPreFrobenioid P G hG hD' hcC hcD'))
+          ⟶ (⟨A⟩ : PlBk (cfpPreFrobenioid P G hG hD' hcC hcD')) from
+      ⟨InducedCategory.homMk ⟨αt, q, hsq⟩,
+        cfp_isPullBack_of P G hG hD' hcC hcD' _ hpb⟩), ⟨?_⟩⟩
+    refine Over.isoMk (Iso.refl _) ?_
+    show 𝟙 Y.left ≫ Y.hom = q
+    rw [Category.id_comp, hq]
+  exact Functor.IsEquivalence.mk
+
+include F in
+/-- ★★★★★★★**[FrdI] Proposition 1.6, (ii)** ——
+**`𝒞' = 𝒞 ×_𝒟 𝒟'` は `Definition 1.3` の 21 条をすべて満たす**。
+
+原文 (FrdI p.28):
+> equivalences, the conditions of Definition 1.3 follow via a routine verification. Thus,
+
+★原文の「routine verification」の中身がこれである。★**21 条のうち最後まで
+残っていたのは `plBkEquiv` と、それが要求する pull-back の「𝒞' ⟹ 𝒞」向き
+(`cfp_isPullBack_to`)であった。** -/
+theorem cfpFrobenioidCore : FrobenioidCore (cfpPreFrobenioid P G hG hD' hcC hcD') where
+  baseSurj := cfp_baseSurj P G hG hD' hcC hcD' F
+  preStepSpan := cfp_preStepSpan P G hG hD' hcC hcD' F
+  plBkEquiv := cfp_plBkEquiv P G hG hD' hcC hcD' F
+  frobDegSurj := cfp_frobDegSurj P G hG hD' hcC hcD' F
+  frobDegUniq := cfp_frobDegUniq P G hG hD' hcC hcD' F
+  coAngularComp := cfp_coAngularComp P G hG hD' hcC hcD' F
+  coAngularOfPreStep := fun α hca hst φ =>
+    cfp_coAngularOfPreStep P G hG hD' hcC hcD' F α hca hst φ
+  otriFwd := fun φ hca hst α hα => cfp_otriFwd P G hG hD' hcC hcD' F φ hca hst α hα
+  otriBwd := fun φ hca hst β hβ => cfp_otriBwd P G hG hD' hcC hcD' F φ hca hst β hβ
+  otriBase := fun φ φ' hca hst hca' hst' hbase α hα β hβ h =>
+    cfp_otriBase P G hG hD' hcC hcD' F φ φ' hca hst hca' hst' hbase α hα β hβ h
+  arbFactor := cfp_arbFactor P G hG hD' hcC hcD' F
+  arbFactorUniq := fun X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα' =>
+    cfp_arbFactorUniq P G hG hD' hcC hcD' F X Y X' Y' γ β α γ' β' α' heq hγ hβ hα hγ' hβ' hα'
+  pullBackLB := cfp_pullBackLB P G hG hD' hcC hcD' F
+  preStepMono := cfp_preStepMono P G hG hD' hcC hcD' F
+  preStepFactor := cfp_preStepFactor P G hG hD' hcC hcD' F
+  preStepFactorUniq := fun X X' β α β' α' heq hca hβ hαi hα hca' hβ' hαi' hα' =>
+    cfp_preStepFactorUniq P G hG hD' hcC hcD' F X X' β α β' α' heq hca hβ hαi hα hca' hβ' hαi' hα'
+  preStepFactor' := cfp_preStepFactor' P G hG hD' hcC hcD' F
+  preStepFactorUniq' := fun X X' β α β' α' heq hβi hβ hca hα hβi' hβ' hca' hα' =>
+    cfp_preStepFactorUniq' P G hG hD' hcC hcD' F X X' β α β' α' heq hβi hβ hca hα hβi' hβ' hca' hα'
+  faithfulUpToUnits := fun φ ψ hb hm hφc hφs hψc hψs =>
+    cfp_faithfulUpToUnits P G hG hD' hcC hcD' F φ ψ hb hm hφc hφs hψc hψs
+  isotropicHullExists := cfp_isotropicHullExists P G hG hD' hcC hcD' F
+  isotropicClosed := cfp_isotropicClosed P G hG hD' hcC hcD' F
+
+/-! ### ★`plBkEquiv` —— ★解決済(2026-08-20)。以下は止まっていた頃の記録である
 
 ★★**数学**: 忠実性・充満性は **`𝒞'` の pull-back 性(対象の定義そのもの)を直接使う**。
 充満性で要る「pull-back の左簡約」は **`isPullBack_of_comp_left`(仮定なし)** で証明済みなので

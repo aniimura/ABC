@@ -17026,3 +17026,26 @@ D2(`J` が単項であること)の計算に要る 2 つを先に出した。
 繋いだだけ。★2026-08-20 実測、どちらも在庫あり。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-451 `f_P · f_{−P}` は `n` 乗(第 141 ブロック)
+
+mathlib の `CoordinateRing.XYIdeal_neg_mul` が
+
+    XYIdeal(−P) · XYIdeal(P) = XIdeal(x_P) = (x − x_P)
+
+を与えていた(2026-08-20 実測)。★`n` 乗して第 128(単元は定数)を当てると
+
+    f_P · f_{−P} = c · (x − x_P)^n        (c ∈ F^×)
+
+★★幾何的には `div(f_P) + div(f_{−P}) = n(P) + n(−P) − 2n(O)` そのものである。
+
+★★★D1 で `ord_v(μ f_P) + ord_v(μ f_{−P}) = n · ord_v(μ x − x_P)` という
+拘束条件になる(右辺は `n` で割れる)。
+
+### ★`μ` は `F`-代数射である
+
+第 119 の `pointHom_algebraMap` により `exists_mulByNHom` の返す `μ` は `F`-代数射。
+★その情報も返す形に強めた(`exists_mulByNHom_alg`)。
+スケルトンの仮定に含められるようになった。
+
+★義務の数は動いていない(Galois 4/8)。
