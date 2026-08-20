@@ -3399,7 +3399,7 @@
           "deps": [],
           "status": "todo",
           "size": "中",
-          "note": "★`K₁` が `K₂` の中で分離閉であること(仮定 (c))が効く。",
+          "note": "★`K₁` が `K₂` の中で分離閉であること(仮定 (c))が効く。\n\n★★★★2026-08-21（**在庫測定と証明筋の確定**）：これは**純粋な体論**であり、\nmathlib の不在に当たらない（＝ §6 の中で数少ない「作業量だけ」の節点）。\n\n**言明**: `K₁ ⊆ K₂`、`K₁` は `K₂` の中で分離閉（`separableClosure K₁ K₂ = ⊥`）、\n`L₁/K₁` が有限分離 ⟹ `[L₁·K₂ : K₂] = [L₁ : K₁]`。\n\n**証明筋**（原始元 `θ`、`f := minpoly K₁ θ` が `K₂` 上でも既約であることを示す）:\n1. `g` を `f` の `K₂[X]` におけるモニックな既約因子とする。\n2. `f` は分離的なので、その根はすべて `K₁` 上分離的。\n   ★`f` の `K₁` 上の分解体 `Ω'` は `K₁` 上分離的\n   （`IsGalois.of_separable_splitting_field`）。\n3. `g` の根は `f` の根なので `Ω'` に入り、`g` の係数は Vieta で `Ω'` に入る。\n   ★したがって係数は `K₁` 上分離的、かつ `K₂` の元。\n4. `K₁` が `K₂` の中で分離閉なので係数は `K₁` に入り、`g ∈ K₁[X]`。\n   `f` の `K₁` 上の既約性から `g = f`。\n\n**在庫**:\n* `separableClosure F E`（`{x | IsSeparable F x}` の中間体、`mem_separableClosure_iff`）—— 在る\n* `IntermediateField.LinearDisjoint.finrank_sup` —— 在る（`[A ⊔ B : F] = [A:F]·[B:F]`）\n* ★**「分離閉 ⟹ 線型無関連」は無い**（`LinearDisjoint` の判定に分離性のものは 0 件）。\n  したがって上の 4 段を自分で書くことになる。",
           "lean": "",
           "decl": ""
         },
