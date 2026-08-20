@@ -27,3 +27,29 @@ FrdI の §5（2/7）と §6（0/5）の残りを 2026-08-20 に項目ごと測�
 - **§6 の律速の見積もりを訂正した**。「因子論は mathlib に実質不在で一分野に近い」と書いていたが、**土台は mathlib の部品だけで組めた**。鍵は `IsDiscreteValuationRing.TFAE` の第 4 項「整閉 ∧ 非零素イデアルがちょうど 1 つ」で、これに `isIntegrallyClosed_of_isLocalization` と `IsLocalization.AtPrime.orderIsoOfPrime` を合わせると **任意次元の正規 Noether 整域で DVR** が出る（mathlib は Dedekind の場合しか持たない）。
 - その上に `ord`・台の有限性・素因子の型・`div(a)`/`div(f)`・群準同型・有効因子の単系までを `Found/Divisor/HeightOneDVR.lean` に組んだ。**§6 に残るのは Cartier 性・`Q`-Cartier 性、スキーム層への持ち上げ、`V[L]` の正規化と `Φ(L)` の切り出しである。**
 - **§6 の底の圏 `𝒟 = B(G)⁰` は閉じた**（`Found/FrdI/Sec6GaloisCat.lean`）。連結・totally epimorphic・of FSM-type。副産物として、`Φ^birat` を monoid on `𝒟` にするために足した (B) の仮定が**幾何の応用では真**である根拠が得られた。
+
+★★★2026-08-20 の追記 2 —— **`Example 6.1` の単系論は全部閉じた**
+
+幾何を落とし、`S` を素因子の型、`Γ ≤ ℤ[S]` を Cartier 因子の群、
+`Φ := Γ ∩ ℤ≥0[S]` と置くと、原文の「Observe that …」「one verifies immediately …」
+はすべて単系論の定理になる（`Found/Divisor/Cartier*.lean` の 5 ファイル）。
+
+- `isDivisorial_effSub` —— **`Q`-Cartier 性は要らない**。効くのは `Γ` が部分群だけ
+- `effSubGpEquiv` —— `Φ^gp ≃ Γ`（ここで初めて `Q`-Cartier が効く）
+- `mprec_effSub_iff` —— ★**`a ⪯ b ⇔ supp a ⊆ supp b`**。これが primary の判定を与え、
+  `effSubPrimeEquiv : Prime(Φ) ≃ D_L` と台の同定が出る
+- `pfEquivNonneg` —— `Φ^pf ≃ ℚ≥0[D_L]`
+- `isPerfFactorial_effSub` —— **perf-factorial（11 条全部）**
+
+★鍵は 1 本の定理：**`factorMap ι a p = ι p a`**（`factorMap_iotaAt`）。
+原文の `sup(Bound^p_{0}(a))` が `a` の `p` 成分そのものになる。
+`≥` 向きは「`a` の `p` 成分だけを取り出した元が実際に `Φ^pf` にあり、
+`pCarrierPf p` に入る」ことから出る。
+
+★`realScale`（自分で足した条）はここでは**空虚**である —— `M_p ≃+ ℕ` で、
+`ℝ≥0` は可除だが `ℕ` は違うので `ℕ ≃+ ℝ≥0` はない。
+
+★★**`Example 6.1` に残るのは 2 つだけ**：
+1. `V[L]`（相対正規化）と `D_L` のスキーム層での構成（`Γ` の実現）
+2. `L ↦ Φ(L)` / `L ↦ B(L)` の**関手性**（因子の引き戻し。`monoid on ᴰ` にする）
+底の圏は閉じているので、この 2 つが揃えば `Theorem 5.2, (ii)`（実装済み）を当てるだけである。

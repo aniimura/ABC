@@ -59,23 +59,24 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
   <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">3</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
-<tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">13/15</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:87%"></div></div></td></tr>
+<tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">14/15</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:93%"></div></div></td></tr>
 <tr><td><b>§2</b></td><td style="font-variant-numeric:tabular-nums">8/8</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§3</b></td><td style="font-variant-numeric:tabular-nums">9/9</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">10/10</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
-<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">1/7</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:14%"></div></div></td></tr>
+<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">2/7</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:29%"></div></div></td></tr>
 <tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">0/5</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c0392b;height:9px;border-radius:4px;width:0%"></div></div></td></tr>
 </table>
+<div class="note"><b>★§6 は 0/5 のままだが、<code>Example 6.1</code> の<b>単系論は全部閉じた</b></b>（2026-08-20）。幾何を落とし、<code>S</code> を素因子の型、<code>Γ ≤ ℤ[S]</code> を Cartier 因子の群、<code>Φ := Γ ∩ ℤ≥0[S]</code> と置くと、原文の「Observe that …」「one verifies immediately …」はすべて単系論の定理になる：<code>Φ</code> は divisorial、<code>Φ^gp ≃ Γ</code>、<code>Prime(Φ) ≃ D_L</code>、台は <code>D_L</code> の有限部分集合ちょうど、<code>Φ^pf ≃ ℚ≥0[D_L]</code>、そして <b>perf-factorial</b>（<code>Definition 2.4, (i)</code> の 11 条全部）。<br>★鍵は 1 本の定理だった——<code>factorMap ι a p = ι p a</code>。原文の <code>sup(Bound^p_0(a))</code> が <code>a</code> の <code>p</code> 成分そのものになる。<br>★残るのは <b>(a)</b> <code>V[L]</code>（相対正規化）と <code>D_L</code> のスキーム層での構成、<b>(b)</b> <code>L ↦ Φ(L)</code> の<b>関手性</b>（因子の引き戻し）の 2 つである。底の圏 <code>ᴰ = B(G)⁰</code> は閉じている。</div>
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 3 件が条つきのみ)。<br>
+(いま 7 件が条つきのみ。うち <code>Example 6.1</code> は 10 個)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
