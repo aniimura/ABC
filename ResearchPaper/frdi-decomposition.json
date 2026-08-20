@@ -3210,11 +3210,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "todo",
+          "status": "done",
           "size": "中",
-          "note": "★`O_L^×` のうち全素点で付値 0 のものは 1 の冪根。mathlib の `NumberField.Units.torsion` が在る。",
-          "lean": "",
-          "decl": ""
+          "note": "★`O_L^×` のうち全素点で付値 0 のものは 1 の冪根。mathlib の `NumberField.Units.torsion` が在る。\n\n★2026-08-20 完了。`div(x)=0` から (i) 有限素点で `ordFin=0` ⟹ `v.valuation x = 1`、(ii) `x` と `x⁻¹` がともに `mem_integers_of_valuation_le_one` で整数環に入り `u : (O L)ˣ` を得る、(iii) 無限素点で `w x = 1` ⟹ mathlib の `NumberField.Units.mem_torsion` で有限位数。★★使ったのは mathlib 在庫のみで、Dirichlet 単数定理は要らない（`mem_torsion` は判定条件そのもの）。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "ABC3.Found.Divisor.exists_pow_eq_one_of_arithDiv_eq_zero"
         },
         {
           "id": "dirichlet",

@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.ProductFormula
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+import Mathlib.NumberTheory.NumberField.Units.Basic
 
 /-!
 # 算術因子 —— `deg^arith` が `B(L)` の像で消えること(`Example 6.3`)
@@ -336,6 +337,96 @@ theorem arithDiv_mem_arithDivGroup (x : Lˣ) : arithDiv x ∈ arithDivGroup L :=
   rw [FinitePlace.mk_maximalIdeal] at h
   exact h
 
+/-! ## ★6. `𝓞^×(A) = 𝓞^▷(A) = μ(L)`（鎖 `arith` の `mu-units`）
+
+原文 (FrdI p.113):
+> to Spec(L) ∈Ob(B(G)0), we have
+
+★★`div(x) = 0` ならすべての素点で `|x|_v = 1` であり、
+非アルキメデス側から `x ∈ (𝓞 L)ˣ`、アルキメデス側と mathlib の
+`NumberField.Units.mem_torsion` から `x` は 1 の冪根になる。 -/
+
+/-- ★`ord_v(x) = 0` なら `v.valuation x = 1`。 -/
+theorem valuation_eq_one_of_ordFin_eq_zero (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L))
+    {x : L} (hx : x ≠ 0) (h : ordFin v x = 0) : v.valuation L x = 1 := by
+  have hne : v.valuation L x ≠ 0 := by
+    simp only [ne_eq, Valuation.zero_iff]; exact hx
+  rw [ordFin, dif_neg hne, neg_eq_zero] at h
+  rw [← WithZero.coe_unzero hne]
+  rw [show WithZero.unzero hne = 1 from
+    Multiplicative.toAdd.injective (by simpa using h)]
+  rfl
+
+/-- ★`div(x) = 0` ならどの有限素点でも `ord_v(x) = 0`。 -/
+theorem ordFin_eq_zero_of_arithDiv_eq_zero {x : Lˣ} (h : arithDiv x = 0)
+    (v : IsDedekindDomain.HeightOneSpectrum (𝓞 L)) : ordFin v (x : L) = 0 := by
+  have h1 : arithPlaceLog (x : L) (Sum.inl (FinitePlace.mk v)) = 0 := by
+    have := congrFun (congrArg (fun d : ArithPlace L →₀ ℝ => (d : ArithPlace L → ℝ)) h)
+      (Sum.inl (FinitePlace.mk v))
+    simpa using this
+  rw [arithPlaceLog_finite v _ x.ne_zero] at h1
+  have hlog := log_absNorm_pos (L := L) v
+  have h2 : (ordFin v (x:L) : ℝ) = 0 := by
+    rcases mul_eq_zero.mp h1 with h3 | h3
+    · exact h3
+    · exact absurd h3 hlog.ne'
+  exact_mod_cast h2
+
+/-- ★`div(x) = 0` ならどの無限素点でも `|x|_w = 1`。 -/
+theorem infinitePlace_eq_one_of_arithDiv_eq_zero {x : Lˣ} (h : arithDiv x = 0)
+    (w : InfinitePlace L) : w (x : L) = 1 := by
+  have h1 : arithPlaceLog (x : L) (Sum.inr w) = 0 := by
+    have := congrFun (congrArg (fun d : ArithPlace L →₀ ℝ => (d : ArithPlace L → ℝ)) h)
+      (Sum.inr w)
+    simpa using this
+  have h2 : -(w.mult : ℝ) * Real.log (w (x : L)) = 0 := h1
+  have hm : (w.mult : ℝ) ≠ 0 := by
+    exact_mod_cast (InfinitePlace.mult_pos (w := w)).ne'
+  have h3 : Real.log (w (x : L)) = 0 := by
+    rcases mul_eq_zero.mp h2 with h4 | h4
+    · exact absurd (neg_eq_zero.mp h4) hm
+    · exact h4
+  have hpos : 0 < w (x : L) := InfinitePlace.pos_iff.mpr x.ne_zero
+  have := Real.exp_log hpos
+  rw [h3, Real.exp_zero] at this
+  exact this.symm
+
+/-- ★★★★★**[FrdI] Example 6.3** —— `𝓞^×(A) = 𝓞^▷(A) = μ(L)`。
+
+★`div(x) = 0` なら `x` は 1 の冪根である。
+★非アルキメデス側で `x ∈ (𝓞 L)ˣ` を出し、アルキメデス側と
+mathlib の `NumberField.Units.mem_torsion` で有限位数にする。 -/
+theorem exists_pow_eq_one_of_arithDiv_eq_zero (x : Lˣ) (h : arithDiv x = 0) :
+    ∃ n : ℕ, 0 < n ∧ (x : L) ^ n = 1 := by
+  have hv : ∀ v : IsDedekindDomain.HeightOneSpectrum (𝓞 L), v.valuation L (x : L) = 1 :=
+    fun v => valuation_eq_one_of_ordFin_eq_zero v x.ne_zero
+      (ordFin_eq_zero_of_arithDiv_eq_zero h v)
+  have hvi : ∀ v : IsDedekindDomain.HeightOneSpectrum (𝓞 L),
+      v.valuation L ((x : L)⁻¹) = 1 := by
+    intro v
+    rw [map_inv₀, hv v, inv_one]
+  obtain ⟨a, ha⟩ := IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one
+    (R := 𝓞 L) L (x : L) (fun v => le_of_eq (hv v))
+  obtain ⟨b, hb⟩ := IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one
+    (R := 𝓞 L) L ((x : L)⁻¹) (fun v => le_of_eq (hvi v))
+  have hinj : Function.Injective (algebraMap (𝓞 L) L) :=
+    IsFractionRing.injective (𝓞 L) L
+  have hab : a * b = 1 := by
+    refine hinj ?_
+    rw [map_mul, ha, hb, map_one]
+    field_simp
+  have hba : b * a = 1 := by rw [mul_comm]; exact hab
+  set u : (𝓞 L)ˣ := ⟨a, b, hab, hba⟩ with hu
+  have hua : algebraMap (𝓞 L) L (u : 𝓞 L) = (x : L) := ha
+  have htor : u ∈ _root_.NumberField.Units.torsion L := by
+    refine (_root_.NumberField.Units.mem_torsion (K := L) (x := u)).mpr (fun w => ?_)
+    have := infinitePlace_eq_one_of_arithDiv_eq_zero h w
+    rwa [← hua] at this
+  obtain ⟨n, hn, hpow⟩ := isOfFinOrder_iff_pow_eq_one.mp htor
+  refine ⟨n, hn, ?_⟩
+  have := congrArg (fun t : (𝓞 L)ˣ => algebraMap (𝓞 L) L (t : 𝓞 L)) hpow
+  simpa [hua, map_pow] using this
+
 /-! ### ★出典の紐付け -/
 
 /-- ★locator —— `Example 6.3` の素点の集合 `V(F)`。 -/
@@ -374,6 +465,12 @@ def exists_ordFin_eq_one.src : ABC3.Meta.Source :=
 def arithDivGroup.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 113,
     item := "Example 6.3 — Φ(F) と Φ(F)^gp",
+    sectionId := "frdi-example-6-3" }
+
+/-- ★★locator —— `Example 6.3` の `𝓞^×(A) = 𝓞^▷(A) = μ(L)`。 -/
+def exists_pow_eq_one_of_arithDiv_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — O^×(A) = O^▷(A) = μ(L)",
     sectionId := "frdi-example-6-3" }
 
 end ABC3.Found.Divisor
