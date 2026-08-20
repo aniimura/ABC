@@ -125,6 +125,7 @@ import ABC3.Found.Divisor.CartierMonoprime
 import ABC3.Found.Divisor.CartierPerfFactorial
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.ArithDivisor
+import ABC3.Found.Divisor.ArithOrd
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.FrdI.Prop53Diag
