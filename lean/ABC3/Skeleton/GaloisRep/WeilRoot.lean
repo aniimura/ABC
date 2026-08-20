@@ -29,10 +29,22 @@ import ABC3.Found.GaloisRep.TorsionIdealIntegral
 `g_P(·+Q)^n = f_P([n]·+[n]Q) = f_P([n]·)` (`[n]Q = 0` だから) `= g_P(·)^n`
 ——すなわち比の `n` 乗が 1 だからである。★**`g_P` の存在なしにはこの議論は立たない。**
 
-## ★★★mathlib の穴
+## ★★★★★★mathlib の在庫(2026-08-20 再実測)
 
-mathlib は `ClassGroup`(イデアル類群)を持つが、**因子群そのものを持たない**
-(2026-08-20 実測)。★因子の言葉での議論はそこから積むことになる。
+mathlib は Dedekind 環の**因子機構を完備している**——
+`IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・
+adic 付値。★**「因子群が無い」という当初の記録は誤りであった。**
+
+★★欠けているのは **`IsDedekindDomain W.CoordinateRing` の instance だけ**である:
+
+| 条件 | mathlib |
+|---|---|
+| `IsDomain W.CoordinateRing` | ✅ |
+| `IsNoetherianRing W.CoordinateRing` | ✅ |
+| `IsIntegrallyClosed W.CoordinateRing` | ❌ |
+| `Ring.DimensionLEOne W.CoordinateRing` | ❌ |
+
+★★★これが入れば `div(f)` は**主分数イデアルの素分解**としてそのまま出る。
 -/
 
 namespace ABC3.Skeleton.GaloisRep
@@ -74,8 +86,12 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★★`div(f_P ∘ [n])` が `n` で割れることの因子計算。`[n]` が次数 `n²` であること、および `[n]^{-1}(P)` の各点の重複度を使う(20-50 ブロック)" 19,
     .implicitStep
-      "★★★★因子が `n` で割れる ⟹ 関数が `n` 乗根を持つ、の段。関数体の乗法群と因子群の完全列(主因子の列)が要る——mathlib には `ClassGroup` はあるが**因子群そのものは無い**(2026-08-20 実測)(15-40 ブロック)" 19,
+      "★★★★★★**2026-08-20 の再実測で見積もりが変わった**: mathlib は Dedekind 環の**因子機構を完備している**——`IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・adic 付値。「因子群が無い」は誤りであり、**欠けているのは `IsDedekindDomain W.CoordinateRing` の instance だけ**である" 19,
     .implicitStep
-      "★因子群を積む代わりに、**イデアル類群で回せる可能性**がある——`f_P` の側は既にイデアルの言葉で済んでいる(第 113・126)。`μ` によるイデアルの引き戻しを類群の言葉で書けば、因子群を経由せずに済むかもしれない(未測定)" 19 ]
+      "★★★**座標環が Dedekind 環であること**を示す——`IsDomain` ✅ と `IsNoetherianRing` ✅ は mathlib にある(2026-08-20 実測)。欠けているのは `IsIntegrallyClosed`(≡ アフィン曲線の正則性)と `Ring.DimensionLEOne` の 2 件である(10-30 ブロック)" 19,
+    .implicitStep
+      "★★Dedekind の instance が入れば、`div(f)` は【主分数イデアルの素分解】として mathlib から直接出る。因子群を自分で積む必要は無い(0 ブロック)" 19,
+    .implicitStep
+      "★因子が `n` で割れる ⟹ `n` 乗根が取れる、の段。Dedekind なら分数イデアル `J` で `J^n = (μ f_P)` なるものが取れ、`J` が単項であることを `toClass` の単射性で示す形になる(10-25 ブロック)" 19 ]
 
 end ABC3.Skeleton.GaloisRep

@@ -16415,3 +16415,42 @@ Weil 対の残りの葉——**合成則** `τ_{Q+Q'} = τ_Q ∘ τ_{Q'}`、**�
 **イデアル類群で回せる可能性**を `.needs` に記録した——因子群を積まずに済むかもしれない。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-434 因子機構の在庫を再実測した——記録の訂正
+
+`Skeleton/GaloisRep/WeilRoot.lean` に「mathlib には因子群そのものが無い」と
+書いていた(§9-421 以来)。★**2026-08-20 の再実測でこれは誤りと分かった。**
+
+mathlib は **Dedekind 環の因子機構を完備している**:
+
+| mathlib | 内容 |
+|---|---|
+| `IsDedekindDomain.HeightOneSpectrum` | 高さ 1 素点(= 曲線の点) |
+| `IsDedekindDomain.HeightOneSpectrum.valuation` | adic 付値 |
+| `IsDedekindDomain.count` | 分数イデアルの素点での指数 |
+| `finprod_heightOneSpectrum_factorization` | 素分解 |
+
+★★**欠けているのは `IsDedekindDomain W.CoordinateRing` の instance だけ**である:
+
+| 条件 | mathlib |
+|---|---|
+| `IsDomain W.CoordinateRing` | ✅ |
+| `IsNoetherianRing W.CoordinateRing` | ✅ |
+| `IsIntegrallyClosed W.CoordinateRing` | ❌ |
+| `Ring.DimensionLEOne W.CoordinateRing` | ❌ |
+
+★★★これにより層 3 の見積もりが変わった:
+
+| 段 | 旧 | 新 |
+|---|---|---|
+| 因子群を積む | 15-40 | **0**(mathlib にある) |
+| `IsDedekindDomain` の instance | —— | 10-30 |
+| 因子計算(`div(f_P∘[n])` が `n` で割れる) | 20-50 | 20-50 |
+| `n` 乗根の取り出し | (上に含む) | 10-25 |
+
+★★★★**「無い」と書いた記録を訂正できたのは、実測を繰り返したからである。**
+`.needs` の `.absent` には探索範囲を書く規律があるが、
+**探索範囲が狭かった**(`WeilPairing|weil_pairing` で検索して 0 件、を
+「因子群も無い」に敷衍していた)。★記録の敷衍は誤りを生む。
+
+★義務の数は動いていない(Galois 4/8)。
