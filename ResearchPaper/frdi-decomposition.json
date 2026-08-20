@@ -2305,7 +2305,7 @@
      ],
      "status": "半済",
      "size": "★大",
-     "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。\n\n★★2026-08-20: **`Ψ^rlf` は作れた**(`psiSc`)。入力は `Corollary 4.11, (iii)` が与えるもの —— 底の関手 `Ψ_𝒟`、因子の単系の同型 `η : Φ₁ ≅ Ψ_𝒟^* Φ₂`(`psiPhiOnBase` が在庫にある)、そして `η` が `Φ^birat` を `Φ^birat` へ移すこと(`hbirat`、いまは仮定)。\n★残りは 4 条: (1) `hbirat` を `Corollary 4.11` から導く、(2) 1-一意性、(3) rigidity、(4) `Proposition 5.3` の縦の矢印との 1-可換性。\n\n★2026-08-20: `hbirat` を導く手順を節点 `cor54-hbirat` に切り出した。在庫(`biratPsi_otimes_map`)は在り、残るのは `η ∘ Div^gp = Div^gp ∘ Ψ^birat` の 1 段だけである。",
+     "note": "原文 p.103–104。証明は「`Corollary 4.10`; `4.11, (iii), (iv)` から直ちに」。★在庫: `Cor410*.lean` / `Cor411*.lean` は実装済みなので、`crlf-def` さえ出来れば**組み立てだけ**になる可能性が高い。\n\n★★2026-08-20: **`Ψ^rlf` は作れた**(`psiSc`)。入力は `Corollary 4.11, (iii)` が与えるもの —— 底の関手 `Ψ_𝒟`、因子の単系の同型 `η : Φ₁ ≅ Ψ_𝒟^* Φ₂`(`psiPhiOnBase` が在庫にある)、そして `η` が `Φ^birat` を `Φ^birat` へ移すこと(`hbirat`、いまは仮定)。\n★残りは 4 条: (1) `hbirat` を `Corollary 4.11` から導く、(2) 1-一意性、(3) rigidity、(4) `Proposition 5.3` の縦の矢印との 1-可換性。\n\n★2026-08-20: `hbirat` を導く手順を節点 `cor54-hbirat` に切り出した。在庫(`biratPsi_otimes_map`)は在り、残るのは `η ∘ Div^gp = Div^gp ∘ Ψ^birat` の 1 段だけである。\n\n★★2026-08-20: **(1) `hbirat` を `Corollary 4.11` から導いた**(節点 `cor54-hbirat`、`Cor54Birat.lean`)。★残りは 3 条: (2) 1-一意性、(3) rigidity、(4) `Proposition 5.3` の縦の矢印との 1-可換性。",
      "lean": "ABC3/Found/FrdI/Cor54.lean",
      "decl": "scModelHomOver / psiSc"
     },
@@ -2384,11 +2384,11 @@
      "deps": [
       "cor54"
      ],
-     "status": "todo",
+     "status": "done",
      "size": "中",
-     "note": "★★**手順は確定している**(2026-08-20 に在庫を確認):\n1. `y ∈ phiBiratOn G₁ d` を `mem_phiBiratOn_iff` で `biratDivGp δ`(`δ ∈ 𝒪^×(A^birat)`)の形にする。\n2. `biratPsi_otimes_map`(`Cor411Birat.lean`、`Corollary 4.11, (ii)`)が `Ψ^birat δ ∈ 𝒪^×(Ψ(A)^birat)` を与える。\n3. ★**残る 1 段**は `η ∘ Div^gp = Div^gp ∘ Ψ^birat`、すなわち `psiPhiOnBase`(`Corollary 4.11, (iii)`)が `biratDivGp` と両立すること。\n★道具: `psiPhiOnBase_app_apply` と `biratDivGp` の定義(`Prop44Gp.lean`)。",
-     "lean": "",
-     "decl": ""
+     "note": "★★**手順は確定している**(2026-08-20 に在庫を確認):\n1. `y ∈ phiBiratOn G₁ d` を `mem_phiBiratOn_iff` で `biratDivGp δ`(`δ ∈ 𝒪^×(A^birat)`)の形にする。\n2. `biratPsi_otimes_map`(`Cor411Birat.lean`、`Corollary 4.11, (ii)`)が `Ψ^birat δ ∈ 𝒪^×(Ψ(A)^birat)` を与える。\n3. ★**残る 1 段**は `η ∘ Div^gp = Div^gp ∘ Ψ^birat`、すなわち `psiPhiOnBase`(`Corollary 4.11, (iii)`)が `biratDivGp` と両立すること。\n★道具: `psiPhiOnBase_app_apply` と `biratDivGp` の定義(`Prop44Gp.lean`)。\n\n★★★★★2026-08-20(閉じた): **`Cor54Birat.lean` で実装した**。\n* `gpMap_phiIsoApp_nat` —— `η` の自然性を `Gp` の層で\n* ★**`sliceDivGpOf_transport`** —— 残っていた 1 段(`η ∘ Div^gp = Div^gp ∘ Ψ^birat` を代表元の層で)。\n  材料は 3 つだけ: `η` の自然性 / `η ∘ Div = Div ∘ Ψ`(`cor_4_11_iv_hdivc`、在庫) / `sq` の自然性。\n* `biratDivGp_transport` —— 代表元を `HomBirat.exists_rep` で取り`biratPsiMap_mk`(`Corollary 4.10`)を当てるだけ\n* ★★**`phiBiratOn_transport`** —— `hbirat` 本体。行き先の同型は `(sq A)⁻¹ ≫ Ψ_ᴰ(e)`。\n* ★★★**`phiBiratOn_transport_of_cor411`** —— `η := psiPhiOnBase`(`Corollary 4.11, (iii)`)と `cor_4_11_iv_hdivc`(`(iv)`)を入れて供給する形。\n★これで `Cor54.lean` の `hbirat` は**仮定でなくなった**。",
+     "lean": "ABC3/Found/FrdI/Cor54Birat.lean",
+     "decl": "sliceDivGpOf_transport / biratDivGp_transport / phiBiratOn_transport / phiBiratOn_transport_of_cor411"
     }
    ],
    "unblocks": [
