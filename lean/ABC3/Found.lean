@@ -153,6 +153,7 @@ import ABC3.Found.Divisor.SchemeWeilOrd
 import ABC3.Found.Divisor.HeightOneBridge
 import ABC3.Found.Divisor.SchemeCartier
 import ABC3.Found.Divisor.NormFunctor
+import ABC3.Found.Divisor.SchemeNormalCriterion
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite
