@@ -96,7 +96,7 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★★★`Ψ₂Sq` の判別式は **mathlib に既にあった**(第 130 で確認)——`twoTorsionPolynomial_discr : discr = 16Δ`、`twoTorsionPolynomial_discr_ne_zero`。★§9-438 で「無い」と書いたのは `Weierstrass.lean` を見ていなかったためである(0 ブロック)" 19,
     .implicitStep
-      "★★`discr ≠ 0` ⟹ `Squarefree Ψ₂Sq` の段。mathlib の在庫(2026-08-20 実測): `Cubic.discr_ne_zero_iff_roots_nodup` ✅、`PerfectField.separable_iff_squarefree` ✅、`Polynomial.Separable.squarefree` ✅、`UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` ✅。★**欠けているのは `roots.Nodup ⟹ Separable`(あるいは `Squarefree`)の向き**である(`exact?` で 0 件)——分解 `p = C a·∏(X−r)` から組むことになる(5-15 ブロック)" 19,
+      "★★`discr ≠ 0` ⟹ `Squarefree Ψ₂Sq` の段。mathlib の在庫(2026-08-20 実測): `Cubic.discr_ne_zero_iff_roots_nodup` ✅、`PerfectField.separable_iff_squarefree` ✅、`Polynomial.Separable.squarefree` ✅、`UniqueFactorizationMonoid.squarefree_iff_nodup_normalizedFactors` ✅。★★★★★★**これは第 131 ブロックで Found に入った**(`squarefree_of_roots_nodup`・`squarefree_Psi2Sq`)。分解 `p = C a·∏(X−r)` と `separable_prod_X_sub_C_iff'` から 1 ブロックで出た(0 ブロック)" 19,
     .implicitStep
       "★★★`Ψ₂Sq` squarefree ⟹ `F[X][√Ψ₂Sq]` が整閉、の段。mathlib に二次拡大の整閉性は無い(2026-08-20 実測)(10-25 ブロック)" 19,
     .implicitStep
