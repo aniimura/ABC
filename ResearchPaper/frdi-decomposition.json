@@ -2626,11 +2626,11 @@
           "deps": [
             "p56-cosets"
           ],
-          "status": "半済",
+          "status": "done",
           "size": "★大",
-          "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。\n\n★★2026-08-20: **`shift` 条件が「M が自己同型による共役で閉じている」に帰着することを証明した**。原文 p.106 の 2 段:\n1. `Theorem 5.1, (iii)`(Aut-ample)で `f = f₀ · f₁`(`f₀` 自己同型・`f₁` base-identity)に分解(`baseIsoEnd_factor`)\n2. Frobenius-normalized で `f₁ · m = m^d · f₁`、よって `m' = f₀ · m^d · f₀⁻¹`(`baseIsoEnd_shift`)\n★これで `IsShiftStable`(`Prop56Cos.lean`)が Frobenioid の側で立つ(`isShiftStable_baseIsoEnd`)。\n★残るのは `M_p` そのものの構成 —— `l ≠ p` の pro-`l` 部分が位相的に生成する閉部分群(鎖 `prol` が在庫)。\n\n★★★2026-08-20 の測定 —— **ここで `Definition 2.8` の角括弧を消費する**。残る入力は「`M_p` が `Aut_𝒞(A)` による共役で閉じていること」だけだが、`M_p` は位相(pro-`l` 部分)で定義されるので、共役が**連続**でなければ保たれない。位相的有限生成な副有限群で抽象自己同型がすべて連続であることは**Nikolov–Segal** の定理で、mathlib に在庫が無い(`Nikolov` は 0 件)。★記録: `Gap/FrdI/Section5.lean` の `Gap_5_6_Mp`(② missingMath)。★迂回路は (a) pro-`l` 部分の抽象群としての特徴づけ、(b) 位相の `Aut` 不変性を仮定に置く((B) の逸脱になる)。",
-          "lean": "ABC3/Found/FrdI/Prop56Mp.lean",
-          "decl": "baseIsoEnd / baseIsoEnd_factor / baseIsoEnd_shift / isShiftStable_baseIsoEnd"
+          "note": "原文 p.106。素数 `p` ごとに `𝒪^×(A)` の `p` 冪部分から作る。\n\n★★2026-08-20: **`shift` 条件が「M が自己同型による共役で閉じている」に帰着することを証明した**。原文 p.106 の 2 段:\n1. `Theorem 5.1, (iii)`(Aut-ample)で `f = f₀ · f₁`(`f₀` 自己同型・`f₁` base-identity)に分解(`baseIsoEnd_factor`)\n2. Frobenius-normalized で `f₁ · m = m^d · f₁`、よって `m' = f₀ · m^d · f₀⁻¹`(`baseIsoEnd_shift`)\n★これで `IsShiftStable`(`Prop56Cos.lean`)が Frobenioid の側で立つ(`isShiftStable_baseIsoEnd`)。\n★残るのは `M_p` そのものの構成 —— `l ≠ p` の pro-`l` 部分が位相的に生成する閉部分群(鎖 `prol` が在庫)。\n\n★★★2026-08-20 の測定 —— **ここで `Definition 2.8` の角括弧を消費する**。残る入力は「`M_p` が `Aut_𝒞(A)` による共役で閉じていること」だけだが、`M_p` は位相(pro-`l` 部分)で定義されるので、共役が**連続**でなければ保たれない。位相的有限生成な副有限群で抽象自己同型がすべて連続であることは**Nikolov–Segal** の定理で、mathlib に在庫が無い(`Nikolov` は 0 件)。★記録: `Gap/FrdI/Section5.lean` の `Gap_5_6_Mp`(② missingMath)。★迂回路は (a) pro-`l` 部分の抽象群としての特徴づけ、(b) 位相の `Aut` 不変性を仮定に置く((B) の逸脱になる)。\n\n★★★★★★★（2026-08-20）**閉じた —— Nikolov–Segal は不要だった**。Gap 記録自身が挙げていた迴回路 (b)「pro-`l` 部分の抽象群としての特徴づけ」が実際に存在する：**`M_p = ⋂_{k} (𝒪^×(A))^{p^k}`**（`p` のすべての冪で割り切れる元）。位相的有限生成なアーベル副有限群では `M^{p^k} = ∏_{l≠p} M[l] × M[p]^{p^k}` で、`⋂_k M[p]^{p^k} = 1`（有限生成 `ℤ_p`-加群）なので右辺は `∏_{l≠p} M[l]` = 原文の `M_p`。★★**冪しか使わないので任意の抽象自己同型で保たれる** —— 連続性が要らない。★`Gap_5_6_Mp` は定理になった（`gap_5_6_Mp_resolved_of_unitProfinite`）。★逸脱の記録：位相で定めた原文の `M_p` との一致は未証明（`p56-limit` が消費）。\n\n★★★★★★★★（2026-08-20、第 2 弾）**逸脱も消えた** —— `Found/ProL/DivByP.lean` で **`⋂_k M^{p^k}` と位相的な `M_p` の一致を証明した**（`forall_pow_pow_iff_pComp_eq_one`）。鍵は 2 本：(1) `eq_one_of_forall_pow_pow` —— pro-`p` 群では `⋂_k N^{p^k} = 1`（各有限商が有限 `p` 群なので位数が `p` 冪。★**位相的有限生成は要らない**）、(2) `pow_bijective_of_proL`（在庫）—— pro-`l` 群で `l` と素な冪写像は全単射。★あとは `decompEquiv` で成分ごとに読むだけである。",
+          "lean": "ABC3/Found/FrdI/Prop56MpAbs.lean",
+          "decl": "MpDiv / MpDiv_le_OTri / MpDiv_inv / MpDiv_conj / isShiftStable_MpDiv"
         },
         {
           "id": "p56-limit",
@@ -3233,9 +3233,9 @@
           "id": "chebotarev",
           "title": "Tchebotarev 密度定理",
           "deps": [],
-          "status": "absent",
+          "status": "分解済",
           "size": "★大",
-          "note": "★★**mathlib に 0 件**(`Chebotarev|Tchebotarev` で grep、2026-08-20)。`Theorem 6.4, (iv)` が 2 箇所で使う(「`[L_i:ℚ]` は `deg(L_i,v_i)` の最大値」「完全分解の判定」)。★これが §6 に残る**唯一の在庫不足**である。",
+          "note": "★★**mathlib に 0 件**(`Chebotarev|Tchebotarev` で grep、2026-08-20)。`Theorem 6.4, (iv)` が 2 箇所で使う(「`[L_i:ℚ]` は `deg(L_i,v_i)` の最大値」「完全分解の判定」)。★これが §6 に残る**唯一の在庫不足**である。\n\n★★★★（2026-08-20）**部分木へ展開した** —— 鎖 `cheb`（17 節点）。出典は [MilneCFT]（J. S. Milne, *Class Field Theory*、著者が無償公開している講義ノート）の Chapter V, Theorem 3.23（声明）と Chapter VIII, §7, Theorem 7.4（証明）。★`ResearchPaper/0_Source/` に取得済み（gitignore 済みで公開リポジトリには入らない）。",
           "lean": "",
           "decl": ""
         }
@@ -3614,11 +3614,13 @@
           "id": "thm64-iv-cheb",
           "title": "(iv) (immediately) Tchebotarev で `[L_i:ℚ] = max deg(L_i,v_i)`、完全分解の判定",
           "deps": [
-            "chebotarev"
+            "cheb-spl-det",
+            "cheb-max-deg",
+            "cheb-split-count"
           ],
-          "status": "absent",
+          "status": "分解済",
           "size": "★大",
-          "note": "★★**mathlib に Tchebotarev は 0 件**。ここが §6 に残る唯一の在庫不足である。",
+          "note": "★★**mathlib に Tchebotarev は 0 件**。ここが §6 に残る唯一の在庫不足である。\n\n★★★（2026-08-20）**依存を 3 本に分解した** —— 原文 p.116 が Tchebotarev を使うのは (a)「`[L_i:ℚ]` は `deg(L_i,v_i)` の最大値」(`cheb-max-deg`)、(b)「`p` が `L_i` で完全分解 ⟺ `deg(L_i,v_i) = [L_i:ℚ]`」(`cheb-split-count`)、(c)「完全分解する素点が包含すれば体が包含する」(`cheb-spl-det`、[MilneCFT] V, Theorem 3.25) の 3 箇所。★★(a) は**全 Chebotarev を使わずに出る見込み**である（鎖 `cheb` の `cheb-spl-infinite`）。",
           "lean": "",
           "decl": ""
         },
@@ -3635,9 +3637,305 @@
           "decl": ""
         }
       ]
+    },
+    {
+      "id": "cheb",
+      "title": "Tchebotarev の密度定理 —— §6 に残る唯一の在庫不足",
+      "paper": "FrdI",
+      "pdfPage": 116,
+      "serves": {
+        "paper": "FrdI",
+        "item": "Theorem 6.4, (iv)",
+        "page": 116
+      },
+      "★位置づけ": "★★`Theorem 6.4, (iv)` は Tchebotarev を **3 箇所**で使う（`thm64-iv-cheb` の note）。mathlib に `Chebotarev|Tchebotarev` は **0 件**である。★出典は [MilneCFT]（著者が無償公開している講義ノート）の Chapter V, Theorem 3.23（声明）／Chapter VIII, §7, Theorem 7.4（証明）。分解はその証明に 1 対 1 で対応させた。\n\n★★★★★★**2026-08-20 の訂正 —— 律速は Artin の相互法則ではなかった**。\n当初「(c) は密度を本当に要求し、律速は Artin の相互法則」と書いたが、**それは共役類つきの一般形についてであって、[FrdI] が使う 3 箇所はいずれも「完全分解」の場合に収まる**。完全分解の場合の密度 `1/[L:K]` は **Frobenius/Dedekind の古典的な論法**で出る:\n`log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)`、Galois なら `#{𝔭∣p, f=1}` は完全分解のとき `[L:K]`・それ以外は `0`、そして `ζ_L` は `s=1` で単純極 —— **使うのは mathlib 在庫の `dedekindZeta_residue` だけ**である。\n★★したがって **§6 に類体論は要らない**。残るのは解析側（Euler 積と `log ζ` の評価）とDirichlet 密度の語彙である。\n\n★★★**現在地**（2026-08-20）: 3 箇所のうち\n* (a) `[L_i:ℚ] = max deg` —— 迂回路の**前半（Schur の補題）・後半（Galois なら 1 つで決まる）は済**、残るのは Dedekind–Kummer の 1 段\n* (b) 完全分解の判定 —— ★**閉じた**（`cheb-split-count`）\n* (c) 完全分解の包含が体の包含を与える —— `cheb-split-density` 経由（類体論不要）",
+      "nodes": [
+        {
+          "id": "cheb-density",
+          "title": "Dirichlet 密度の定義と基本性質",
+          "deps": [],
+          "status": "todo",
+          "size": "中",
+          "note": "`i(T) = lim_{s→1+} (Σ_{𝔭∈T} N𝔭^{-s}) / log(1/(s-1))`。★有限集合は密度 0、有限直和で加法的、`f(𝔭)≥2` の素点は無視できる（[MilneCFT] VIII 4.5）。★mathlib に `DirichletDensity` は **0 件**（2026-08-20 実測）。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-zeta",
+          "title": "Dedekind ζ の `s=1` での単純極",
+          "deps": [],
+          "status": "inMathlib",
+          "size": "小",
+          "note": "★★**mathlib に在る** —— `NumberField.dedekindZeta` / `dedekindZeta_residue` / `tendsto_sub_one_mul_dedekindZeta_nhdsGT`（`NumberTheory/NumberField/DedekindZeta.lean`）。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-dirichlet-ap",
+          "title": "Dirichlet の算術級数定理",
+          "deps": [],
+          "status": "inMathlib",
+          "size": "小",
+          "note": "★★**mathlib に在る** —— `Nat.infinite_setOf_prime_and_eq_mod`（`LSeries/PrimesInAP.lean`）。★ただし**密度つき**の形（`1/φ(q)`）ではない。密度版は `cheb-equidist` の `K = ℚ` の場合にあたる。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-frob",
+          "title": "不分岐素点の Frobenius 元 `(𝔓, L/K)` と共役類 `(𝔭, L/K)`",
+          "deps": [],
+          "status": "todo",
+          "size": "★大",
+          "note": "★在庫: `Ideal.ramificationIdx` / `inertiaDeg` / `primesOver` / `Ideal.LiesOver` は**在る**。★**Frobenius 元は 0 件**（`FrobeniusElement` で grep、2026-08-20）。分解群が剰余体の Galois 群へ同型に写ることから作る。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-rayclass",
+          "title": "法 `m` の射類群 `C_m = I^m / i(K_{m,1})`",
+          "deps": [],
+          "status": "todo",
+          "size": "★大",
+          "note": "★イデアル群・法・合同部分群。mathlib に `RayClassGroup` は無い（`ClassGroup` は在る）。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-artin-map",
+          "title": "Artin 写像 `𝔭 ↦ (𝔭, L/K)` が `I^m → Gal(L/K)` を定める",
+          "deps": [
+            "cheb-frob",
+            "cheb-rayclass"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "note": "★不分岐素点で Frobenius を取り、乗法的に延ばす。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-reciprocity",
+          "title": "★★**Artin の相互法則**（[MilneCFT] V, Theorem 3.5）",
+          "deps": [
+            "cheb-artin-map"
+          ],
+          "status": "absent",
+          "size": "★大",
+          "note": "★★**ここが本体**である。Artin 写像が `I^m/H ≅ Gal(L/K)` を誘導する（ある法 `m` と合同部分群 `H` について）。★mathlib に類体論は**実質不在**（`Artin` の 54 件は Artin 加群・Artin 環など別物）。★これ単体が大きな形式化計画である。\n\n★★★★（2026-08-20 の訂正）**[FrdI] は相互法則を要求しない**。これが要るのは `cheb-main`（共役類つきの一般形）であって、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも**完全分解の場合**に収まる。★したがってこの節点は「一般形まで作るなら要る」ものであって、**§6 の律速ではない**。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-hecke-l",
+          "title": "Hecke L 関数 `L(s, χ)`（射類群の指標）",
+          "deps": [
+            "cheb-rayclass"
+          ],
+          "status": "半済",
+          "size": "★大",
+          "note": "★mathlib は **ℚ 上の Dirichlet L 関数**（`LSeries` / `DirichletCharacter`）を持つが、一般の数体の Hecke L 関数は無い。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-L1-ne-zero",
+          "title": "非自明指標で `L(1, χ) ≠ 0`（[MilneCFT] VIII, Theorem 7.1）",
+          "deps": [
+            "cheb-hecke-l",
+            "cheb-reciprocity"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "note": "★原文は「相互法則さえあれば VI 4.9 の証明から出る」と述べる。★実指標の場合が難所で、そこが Dedekind ζ の留数（`cheb-zeta`）を使う所である。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-equidist",
+          "title": "射類ごとの密度 `1/(I^m : H)`（[MilneCFT] VIII, Theorem 7.2）",
+          "deps": [
+            "cheb-L1-ne-zero",
+            "cheb-density"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★`L(1,χ) ≠ 0` と指標の直交性から出る。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-abelian",
+          "title": "アーベル拡大の Chebotarev（[MilneCFT] VIII, Corollary 7.3）",
+          "deps": [
+            "cheb-equidist",
+            "cheb-reciprocity"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★相互法則で `Gal(L/K)` の元を `I^m/H` の類へ引き戻し、`cheb-equidist` を当てる。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-cyclic-reduce",
+          "title": "巡回への還元 —— `σ` の位数 `f`、`M = L^{⟨σ⟩}`",
+          "deps": [
+            "cheb-frob"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★`L/M` は次数 `f` の巡回拡大。共役類 `C` は 1 元の共役類に帰着してよい。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-bij-a",
+          "title": "`T_{L,σ} ≃ T_{M,σ}`（`𝔓 ↦ 𝔓 ∩ O_M`）",
+          "deps": [
+            "cheb-cyclic-reduce"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★[MilneCFT] VIII, Theorem 7.4 の (a)。`f(𝔓/q) = 1` から単射、Frobenius の計算から全射。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-count-b",
+          "title": "`T_{L,σ} → T` は `d/(cf)` 対 1",
+          "deps": [
+            "cheb-cyclic-reduce"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★同 (b)。中心化群 `C_G(σ)` の位数が `d/c`、分解群 `⟨σ⟩` の位数が `f`。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-main",
+          "title": "★★★**Chebotarev の密度定理**（[MilneCFT] VIII, Theorem 7.4）",
+          "deps": [
+            "cheb-abelian",
+            "cheb-bij-a",
+            "cheb-count-b"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "note": "★(a)(b) を合わせて `T_{M,σ} → T` が `d/(cf)` 対 1 になり、`Nq = N𝔭` なので密度が `c/d` になる。\n\n★（2026-08-20 の訂正）**[FrdI] が必要とするのはここまでではない**。`Theorem 6.4, (iv)` は完全分解の場合（`cheb-split-density`）で足りる。\n\n★（2026-08-20 の訂正）**[FrdI] には不要**。この節点は**共役類つきの一般形**（`cheb-main`）のためのものであり、`Theorem 6.4, (iv)` が使う 3 箇所はいずれも完全分解の場合（`cheb-split-density` 経由）に収まる。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": false
+        },
+        {
+          "id": "cheb-spl-det",
+          "title": "`Spl_S(L/K) ⊇ Spl_S(M/K) ⟹ M ⊆ L`（[MilneCFT] V, Theorem 3.25）",
+          "deps": [
+            "cheb-split-density"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★★**`Theorem 6.4, (iv)` が最後に使うのはこれ**。`Spl(LM/K) = Spl(L/K) ∩ Spl(M/K)` と Chebotarev（密度から次数が読める）で `[LM:K] = [M:K]`。\n\n★★★★★★（2026-08-20 の訂正）**これは `cheb-main`（共役類つきの Chebotarev）を要求しない**。必要なのは**完全分解の場合の密度だけ**（`cheb-split-density`）で、それは Dedekind ζ の極から出る。★`Spl(LM/K) = Spl(L/K) ∩ Spl(M/K)` と密度の比較で `[LM:K] = [M:K]`。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-spl-infinite",
+          "title": "★迂回路 —— Galois 拡大で完全分解する素数は無限個",
+          "deps": [],
+          "status": "半済",
+          "size": "中",
+          "note": "★★**全 Chebotarev を使わずに出る**：`L = ℚ(θ)`、`f` を `θ` の最小多項式とすると、`p ∤ disc(f)` について「`p` が完全分解 ⟺ `f` が mod `p` で根を持つ」（`L/ℚ` が Galois のとき）。「`f` の値の素因子は無限個」は初等的（Schur の議論）。★これで `cheb-max-deg` は足りる見込みである。\n\n★★★★★（2026-08-20）**Schur の補題を証明した** —— `infinite_primes_dvd_eval`：定数でない整数係数多項式の値を割る素数は無限個。★証明は**極限を使わない**：`f(n₀ + N·m) = c·u`、`u ≡ 1 (mod P)` とし、`u ∈ {0, ±1}` は `f(x) ∈ {0, ±c}` と同値で**有限個の `x`** でしか起きない（非零多項式の根は有限）ことを使う。★mathlib に同値の主張は見当たらなかった。★★残るのは **Dedekind–Kummer**（`𝔭 ∤ disc(f)` で「完全分解 ⇔ `f` が mod `𝔭` で根を持つ」）で、mathlib に `NumberField/Ideal/KummerDedekind.lean` がある。\n\n★★★★★★（2026-08-20、第 2 弾）**後半も閉じた** —— `ncard_primesOver_eq_finrank_of_unramified_degOne`（`Found/NumberField/SplitCount.lean`）：**Galois 拡大では 1 つの不分岐で剰余次数 1 の素があれば完全分解する**。★mathlib の `Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn`（Galois の基本等式 `g·e·f = |G|`）を当てるだけである。★★**残るのは Dedekind–Kummer の 1 段だけ**：「`f` が mod `p` で根を持つ ⇒ `f_P = 1` なる `P` がある」（mathlib の `NumberField/Ideal/KummerDedekind.lean` の `primesOverSpanEquivMonicFactorsMod`）。",
+          "lean": "ABC3/Found/NumberField/PrimeDivisorsOfValues.lean",
+          "decl": "infinite_primes_dvd_eval / finite_eval_eq",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-max-deg",
+          "title": "`[L:ℚ] = max_v deg(L,v)`（原文 p.116 の (a)）",
+          "deps": [
+            "cheb-spl-infinite"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★完全分解する素数が 1 つあれば `deg(L,v) = [L:ℚ]` を達成し、つねに `deg(L,v) ≤ [L:ℚ]`。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-split-count",
+          "title": "`p` が `L` で完全分解 ⟺ `deg(L,v) = [L:ℚ]`（原文 p.116 の (b)）",
+          "deps": [
+            "cheb-frob"
+          ],
+          "status": "done",
+          "size": "中",
+          "note": "★`Σ_{v|p} e_v f_v = [L:ℚ]` から。mathlib の `Ideal.sum_ramification_inertia` に乗る見込み。\n\n★★★★★（2026-08-20）**閉じた** —— `ncard_primesOver_eq_finrank_iff`：`#{P ∣ p} = [L:K] ⇔ すべての `P` で `e_P·f_P = 1`。★中身は基本等式 `Σ e_P·f_P = [L:K]`（mathlib の `Ideal.sum_ramification_inertia`）と `e_P·f_P ≥ 1` だけである。★★**Tchebotarev は要らない** —— 原文が Tchebotarev を引くのは (a) と (c) であって、(b) は基本等式だけで出る。",
+          "lean": "ABC3/Found/NumberField/SplitCount.lean",
+          "decl": "ncard_primesOver_eq_finrank_iff / ncard_primesOver_le_finrank",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-euler",
+          "title": "Dedekind ζ の Euler 積 `ζ_L(s) = Π_𝔭 (1 − N𝔭^{-s})^{-1}`",
+          "deps": [
+            "cheb-zeta"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★mathlib の `NumberField.dedekindZeta` は `LSeries` で定義されている。Euler 積は `EulerProduct` の一般論に乗る見込み。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-log-zeta",
+          "title": "`log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)`",
+          "deps": [
+            "cheb-euler",
+            "cheb-density"
+          ],
+          "status": "todo",
+          "size": "中",
+          "note": "★`f(𝔭) ≥ 2` の項と `m ≥ 2` の項は `s → 1+` で有界。★これは初等的な評価である。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        },
+        {
+          "id": "cheb-split-density",
+          "title": "★★**Galois 拡大で完全分解する素点の密度は `1/[L:K]`** —— 類体論を使わない",
+          "deps": [
+            "cheb-log-zeta",
+            "cheb-split-count"
+          ],
+          "status": "todo",
+          "size": "★大",
+          "note": "★★★**これが 2026-08-20 の訂正である**。当初「(c) は Artin の相互法則を要求する」と書いたが、**それは共役類つきの一般形についてであって、完全分解の場合には要らない**。\n\n★根拠（Frobenius/Dedekind の古典的な密度論法）:\n1. `log ζ_L(s) = Σ_{𝔭 : f=1} N𝔭^{-s} + O(1)`（`cheb-log-zeta`）\n2. `L/K` が Galois なら `p` の上の `f` はすべて等しいので、`#{𝔭 ∣ p, f(𝔭)=1}` は `p` が完全分解なら `[L:K]`、そうでなければ `0`（分岐する `p` は有限個）\n3. `ζ_L` は `s=1` で単純極（mathlib の `dedekindZeta_residue`）だから `log ζ_L(s) ~ log(1/(s-1))`\n4. ゆえに `Σ_{p ∈ Spl(L)} p^{-s} ~ (1/[L:K])·log(1/(s-1))`、すなわち密度 `1/[L:K]`\n\n★★**使うのは Dedekind ζ の極（mathlib 在庫）だけ**で、Artin の相互法則も Hecke L 関数も要らない。",
+          "lean": "",
+          "decl": "",
+          "frdiNeeded": true
+        }
+      ]
     }
   ],
-  "★2026-08-20 の拡張": "`Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の model Frobenioid)を閉じた際に、§5・§6 で**まだ在庫が無いもの**が具体的に見えたので、CLAUDE.md の「進め方」に従って**5 本の鎖を新設した**: `phibirat-monoidon`(閉じた)・`rlf`・`prop55`・`prop56`・`sec6geom`。★あわせて `tools/frdi-newleaves.mjs` を止めていたグラフ側の不備 3 件(宙づりの依存 5 本・`F3` の循環・`v-baseid ↔ v-psibase` の循環)を直し、鎖をまたぐ依存は `crossDeps` に分離した(この道具は鎖ごとに層を出すため)。★★測定の結論: **§6 を止めているのは Frobenioid の理論ではなく因子論の在庫である**。`Example 6.1` は `Φ`・`B`・`Div_B` さえ作れれば `Theorem 5.2, (ii)`(実装済み)を当てるだけになる。\n\n★★★2026-08-20(第 2 弾) —— **因子論の部分グラフを展開した**。それまで `sec6geom` の `ex61`/`thm62`/`ex63`/`thm64` は**各 1 節点に畳んだまま**で、CLAUDE.md の「合図 1 つを依存グラフの節点 1 つに対応させる」に反していた。`tools/hedge-index.mjs --item` の実測(§6 で合計 26 件)に合わせて鎖 `sec6items`(31 節点)へ展開し、因子論の在庫側を **4 層**に分けた: `weil`(7)・`cartier`(5)・`normalize`(8)・`arith`(11)。★★測り直した結論: **因子論は「一分野」ではない**。環の層(`Found/Divisor/HeightOneDVR.lean`)と単系の層(`Found/Divisor/Cartier*.lean`)は閉じており、残るのは**スキーム層への橋**(`affine-compat`)と**Cartier 因子の引き戻し**(`cartier-pullback`)である。★算術側の在庫は良い —— 積公式も Dirichlet 単数定理も mathlib に在る。**§6 に残る真の在庫不足は Tchebotarev 密度定理ただ 1 つ**(`Theorem 6.4, (iv)`)。",
+  "★2026-08-20 の拡張": "`Proposition 5.3` の第 2 文(`𝒞^un-tr` は `(Φ, Φ^birat)` の model Frobenioid)を閉じた際に、§5・§6 で**まだ在庫が無いもの**が具体的に見えたので、CLAUDE.md の「進め方」に従って**5 本の鎖を新設した**: `phibirat-monoidon`(閉じた)・`rlf`・`prop55`・`prop56`・`sec6geom`。★あわせて `tools/frdi-newleaves.mjs` を止めていたグラフ側の不備 3 件(宙づりの依存 5 本・`F3` の循環・`v-baseid ↔ v-psibase` の循環)を直し、鎖をまたぐ依存は `crossDeps` に分離した(この道具は鎖ごとに層を出すため)。★★測定の結論: **§6 を止めているのは Frobenioid の理論ではなく因子論の在庫である**。`Example 6.1` は `Φ`・`B`・`Div_B` さえ作れれば `Theorem 5.2, (ii)`(実装済み)を当てるだけになる。\n\n★★★2026-08-20(第 2 弾) —— **因子論の部分グラフを展開した**。それまで `sec6geom` の `ex61`/`thm62`/`ex63`/`thm64` は**各 1 節点に畳んだまま**で、CLAUDE.md の「合図 1 つを依存グラフの節点 1 つに対応させる」に反していた。`tools/hedge-index.mjs --item` の実測(§6 で合計 26 件)に合わせて鎖 `sec6items`(31 節点)へ展開し、因子論の在庫側を **4 層**に分けた: `weil`(7)・`cartier`(5)・`normalize`(8)・`arith`(11)。★★測り直した結論: **因子論は「一分野」ではない**。環の層(`Found/Divisor/HeightOneDVR.lean`)と単系の層(`Found/Divisor/Cartier*.lean`)は閉じており、残るのは**スキーム層への橋**(`affine-compat`)と**Cartier 因子の引き戻し**(`cartier-pullback`)である。★算術側の在庫は良い —— 積公式も Dirichlet 単数定理も mathlib に在る。**§6 に残る真の在庫不足は Tchebotarev 密度定理ただ 1 つ**(`Theorem 6.4, (iv)`)。\n\n★★★★2026-08-20（第 3 弾）—— **Tchebotarev を部分木へ展開した**（鎖 `cheb`、19 節点）。`Theorem 6.4, (iv)` が Tchebotarev を使う 3 箇所を分けて、(a)「`[L_i:ℚ]` は `deg` の最大値」・(b)「完全分解の判定」・(c)「完全分解の包含が体の包含を与える」に対応させた。★出典 [MilneCFT]（Chapter V, Theorem 3.23 と Chapter VIII, §7, Theorem 7.4）を `papers.json` に登記し、PDF を `ResearchPaper/0_Source/` に取得した（gitignore 済み）。★★**在庫は思ったより良い**：Dirichlet の算術級数定理と Dedekind ζ の留数は mathlib に在る。欠けているのは Dirichlet 密度・Frobenius 元・射類群と Artin 写像・**Artin の相互法則**。★★★**迂回路を 1 本見つけた**：3 箇所のうち (a) は「Galois 拡大で完全分解する素数は無限個」で足り、これは初等的に出る（`cheb-spl-infinite`）。**密度を本当に要求するのは (c) だけ**である。\n\n★★★★★★2026-08-20（第 4 弾、★訂正）—— **Tchebotarev の律速の見立てを訂正した**。「(c) は Artin の相互法則を要求する」と書いたが、それは**共役類つきの一般形**についてであって、[FrdI] `Theorem 6.4, (iv)` が使う 3 箇所はいずれも**完全分解の場合**に収まる。完全分解の密度 `1/[L:K]` は Frobenius/Dedekind の古典的な論法（`log ζ_L(s) = Σ_{f=1} N𝔭^{-s} + O(1)` と`ζ_L` の `s=1` での単純極）で出て、**使うのは mathlib 在庫の `dedekindZeta_residue` だけ**である。★★**§6 に類体論は要らない**。鎖 `cheb` に `cheb-euler` / `cheb-log-zeta` / `cheb-split-density` を足し、`cheb-spl-det` の依存を `cheb-main` から `cheb-split-density` へ差し替えた（22 節点）。",
   "★省略の合図の読み方(2026-08-20、実測)": {
     "道具": "node tools/hedge-index.mjs [--item \"Proposition 1.10\"]",
     "件数(FrdI 全体)": {

@@ -303,6 +303,28 @@
       "notationRisk": "unmeasured",
       "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★公開の集大成。実測で確認した要点: **tag `0AG0` Lemma 15.123.2『正則局所環は UFD』の完全な証明**(次元の帰納。依存は Algebra 10.106.2 / 10.106.3 / 10.120.6 / 10.110.6 / 10.78.2 と More on Algebra 15.123.1)——これが `Definition 1.5, (ii)` の中身である。★また `Proj`(560 箇所)・点の関手・可逆層を網羅し、(B1)(B2)(C2) の原典側になる。",
       "verifiedPages": []
+    },
+    "MilneCFT": {
+      "title": "Class Field Theory (course notes, v4.03)",
+      "file": "Milne - Class Field Theory",
+      "author": "J. S. Milne",
+      "year": 2020,
+      "pdfPages": 296,
+      "pageOffset": -14,
+      "notationRisk": "high",
+      "notationNotes": "★pdftotext の抽出が強く壊れる。実測(2026-08-20): `≠` → `□`、`⊆` → 空白、`√` → `p`、`[` → `OE`、`σ` が落ちる、`(σ, L/K)` → `. ; L=K/`。★**locator は必ず PDF 目視で確かめること**。",
+      "note": "★著者が自サイト(jmilne.org)で無償公開している講義ノート。Chebotarev 密度定理は Chapter V, Theorem 3.23(声明)と Chapter VIII, §7, Theorem 7.4(証明)。★**`ResearchPaper/0_Source/` は gitignore 済み**で、公開リポジトリには入らない。"
+    },
+    "MilneANT": {
+      "title": "Algebraic Number Theory (course notes, v3.08)",
+      "file": "Milne - Algebraic Number Theory",
+      "author": "J. S. Milne",
+      "year": 2020,
+      "pdfPages": 166,
+      "pageOffset": -8,
+      "notationRisk": "high",
+      "notationNotes": "★`MilneCFT` と同じ抽出の壊れ方をする。locator は PDF 目視。",
+      "note": "★著者が無償公開している講義ノート。分解群・惰性群・Frobenius 元の基礎(Chapter IV)の参照先。"
     }
   }
 }

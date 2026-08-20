@@ -25,6 +25,7 @@ import ABC3.Skeleton.Divisor.SchemeWeil
 import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Skeleton.Divisor.ArithDivisor
 import ABC3.Skeleton.Divisor.Normalization
+import ABC3.Skeleton.NumberField.Chebotarev
 /-!
 # Skeleton — 論文の主張(証明しない)
 

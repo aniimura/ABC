@@ -106,6 +106,8 @@ import ABC3.Found.FrdI.Def24PfT
 import ABC3.Found.FrdI.Def24RlfCone
 import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
+import ABC3.Found.FrdI.Prop56MpAbs
+import ABC3.Found.FrdI.Prop56Limit
 import ABC3.Found.FrdI.Prop53Rlf
 import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Cor54Birat
@@ -122,6 +124,8 @@ import ABC3.Found.Divisor.CartierMonoprime
 import ABC3.Found.Divisor.CartierPerfFactorial
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.ArithDivisor
+import ABC3.Found.NumberField.PrimeDivisorsOfValues
+import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
@@ -166,6 +170,7 @@ import ABC3.Found.ProL.LimitPi
 import ABC3.Found.ProL.LPart
 import ABC3.Found.ProL.Decomposition
 import ABC3.Found.ProL.ZetaPow
+import ABC3.Found.ProL.DivByP
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
@@ -686,6 +691,18 @@ import ABC3.Found.GaloisRep.TranslateProd
 import ABC3.Found.GaloisRep.MuComm
 import ABC3.Found.GaloisRep.WeilAlt
 import ABC3.Found.GaloisRep.WeilCharZero
+import ABC3.Found.GaloisRep.SemiLinear
+import ABC3.Found.GaloisRep.WeilGalois
+import ABC3.Found.GaloisRep.WeilGalPoint
+import ABC3.Found.GaloisRep.WeilBilinFull
+import ABC3.Found.GaloisRep.TorsionAction
+import ABC3.Found.GaloisRep.NondegStep
+import ABC3.Found.GaloisRep.PhiDegree
+import ABC3.Found.GaloisRep.PhiTwo
+import ABC3.Found.GaloisRep.KummerX
+import ABC3.Found.GaloisRep.KummerPoint
+import ABC3.Found.GaloisRep.LadderThree
+import ABC3.Found.GaloisRep.WeilDet
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
