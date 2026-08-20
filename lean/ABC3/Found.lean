@@ -141,6 +141,7 @@ import ABC3.Found.Divisor.ArithPf
 import ABC3.Found.Divisor.ArithPerfFactorial
 import ABC3.Found.Divisor.ArithPhiPerf
 import ABC3.Found.Divisor.ArithFunctor
+import ABC3.Found.Divisor.ArithTower
 import ABC3.Found.Divisor.ArithFrobenioid
 import ABC3.Found.Divisor.SchemeWeil
 import ABC3.Found.Divisor.SchemeWeilOrd
