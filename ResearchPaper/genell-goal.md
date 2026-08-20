@@ -17981,3 +17981,75 @@ D2 に残っていた最大の段——**無限遠に落ちる点の全体 `E₁
 | 類の計算(`toClass_eq_zero` で 1 行) | ❌ | 4-10 |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-476 ★★★★★★★引き戻した素点が `n·Q_v` になった(第 164 ブロック)
+
+第 151 で `count_v(μ f_P) ≠ 0 ⟺ I_P = P'` まで来ていた。本ブロックで
+**`P' = XYIdeal(n·Q_v)`** が出たので、因子の台は
+
+    { v : n·Q_v = P }  =  [n]⁻¹(P)
+
+すなわち**ファイバーそのもの**になった。★見積もり 4-10 に対して **1 ブロック**である。
+
+### ★★★★★仕組みは 3 段である
+
+1. **生成点の還元は `v` に対応する点そのもの**(`redPoint_generic`)——
+   `genX − c ∈ v.asIdeal` を mathlib の `valuation_lt_one_iff_mem` で読むだけ。
+2. 第 163 の `redPoint_nsmul` で `red(n·生成点) = n·Q_v`。
+3. `n·生成点 = (μ(genX), μ(genY))` なので `redConst(μ genX) = x(n·Q_v)`。
+   ★これは `w(μ(genX − x(n·Q_v))) < 1`、すなわち **`XClass ∈ P'`** に他ならない。
+   ★★包含 `XYIdeal(n·Q_v) ⊆ P'` と極大性(第 138)から等式になる。
+
+★★★**剰余体を経由していない**——`redConst` が `F` に値を取ることが効いている。
+§9-461 で「剰余体への環準同型を作れば `Point.map` が流せる」と書いたが、
+**その道は要らなかった**。
+
+### ★★★★`hnn` があれば `n·Q_v ≠ 0` は自動
+
+場合 A の仮定 `∀ r, w(μ r) ≤ 1` から `w(μ genX) ≤ 1`、したがって
+`redPoint(n·生成点)` はアフィン点になる。★無限遠点の場合分けは要らない
+(`exists_pullbackPrime_eq_xyIdeal`)。
+
+### ★★★`XYIdeal` は点を決める
+
+`XYIdeal(x,y) = XYIdeal(x',y')` なら差 `x'−x` が定数になり、極大イデアルに
+0 でない定数は入らない(`xyIdeal_inj`)。★これで台を**点の等式**として書ける
+(`count_ne_zero_iff_nsmul`)。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `xyIdeal_inj` | ★★★★`XYIdeal` は点を決める |
+| `redConst_coordX` / `redConst_coordY` | ★★★生成点の座標の還元 |
+| `redPoint_generic` | ★★★★★**生成点の還元は `Q_v`** |
+| `pullbackPrime_eq_xyIdeal` | ★★★★★★★**`P' = XYIdeal(n·Q_v)`** |
+| `exists_pullbackPrime_eq_xyIdeal` | ★★★★★★★同上(存在形) |
+| `count_ne_zero_iff_nsmul` | ★★★★★★★**台は `[n]⁻¹(P)` そのもの** |
+
+### ★★★スケルトンの `sorry` が 1 個消えた
+
+`Skeleton/GaloisRep/PointReduction.lean` の `pullbackPrime_eq_xyIdeal_nsmul` は
+本ブロックから**証明された**。
+
+### ★見積もりの修正(17 件目)
+
+「`P' = XYIdeal(n·Q_v)` への組み立て」4-10 → **1**。
+★原因: 剰余体と `Point.map` を経由する道を想定していたが、`redConst` が
+最初から `F` に値を取るので、**イデアルの生成元の付値を見るだけ**で済んだ。
+
+### ★D2 の残り(更新)
+
+| 段 | 内容 | 見積もり |
+|---|---|---|
+| 無限遠に落ちる点の全体が部分群であること | ✅ **第 162** | 0 |
+| `redPoint` の完全な加法性・`n •` との可換性 | ✅ **第 163** | 0 |
+| `P' = XYIdeal(n·Q_v)` への組み立て | ✅ **第 164** | 0 |
+| 類の計算(`J = ∏ v^{e_v}` を明示し `toClass` を当てる) | ❌ | 4-10 |
+
+★★残るのは**類の計算 1 段だけ**である。★ただし第 142 の
+`exists_pow_of_dvd_count` は `J` を存在としてしか返さないので、
+`J = ∏_v v^{count_v/n}` を**明示的に構成し直す**必要がある
+(mathlib の `finprod_heightOneSpectrum_factorization'` が使える)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
