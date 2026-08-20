@@ -705,6 +705,7 @@ import ABC3.Found.GaloisRep.LadderThree
 import ABC3.Found.GaloisRep.WeilDet
 import ABC3.Found.GaloisRep.CyclotomicStep
 import ABC3.Found.GaloisRep.TateWiring
+import ABC3.Found.GaloisRep.DetWiring
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

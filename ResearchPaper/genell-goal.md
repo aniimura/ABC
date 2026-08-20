@@ -19944,3 +19944,49 @@ simp に入れてから `ring` する(mathlib の `C_simp` マクロと同じ手
 | `addHom_padic_smul_of_torsion` | ★★★★★★**`ℤ_l` の作用は `toZModPow` に落ちる** |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-518 ★★★★★★行列成分の読み替え(第 206 ブロック)
+
+第 205 で `φ(α·v) = (toZModPow n α).val · φ(v)` が取れたので、
+`galMat` の成分を `E[l^n]` の基底で読み替える段に進んだ。3 本取れた。
+
+### ★★★★★★1 本目——列を基底で読む
+
+`M *ᵥ Pi.single j 1 = fun i => M i j` であり、これは
+`(M 0 j)·single₀ + (M 1 j)·single₁` である。★したがって
+
+    φ(M *ᵥ single j 1) = (toZModPow n (M 0 j)).val · φ(single₀)
+                        + (toZModPow n (M 1 j)).val · φ(single₁)
+
+★★`P := φ(single₀)`・`Q := φ(single₁)` と置けば、これが
+`σP = aP + cQ`・`σQ = bP + dQ` そのものである。
+
+### ★★★★★2 本目——行列式の合同
+
+`det M = M₀₀M₁₁ − M₀₁M₁₀` に `toZModPow n`(環準同型)を当てて
+
+    (toZModPow n det).val + B·C ≡ A·D    (mod l^n)
+
+★`ZMod (l^n)` で計算してから `.val` に戻す。
+
+### ★★★3 本目——指数は `l^n` を法として効く
+
+`ζ^{l^n} = 1` なら `j ≡ k (mod l^n)` のとき `ζ^j = ζ^k`。
+★これで第 204 の `σ ζ · ζ^{bc} = ζ^{ad}` を
+`σ ζ = ζ^{(toZModPow n det).val}` に書き換えられる。
+
+### ★★残るのは基底性だけ
+
+`P, Q` が `E[l^n]` の**基底**であること——`T_l E ≅ ℤ_l²` の基底の第 `n` 成分が
+`E[l^n] ≅ (ℤ/l^n)²` の基底になること。★射影の全射性に要る `E[l^{n+1}] → E[l^n]` は
+**第 186 の `exists_nsmul_eq_point` で済んでいる**。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `addHom_mulVec_single` | ★★★★★★**列を基底で読む** |
+| `det_modEq` | ★★★★★**行列式の合同** |
+| `pow_eq_pow_of_modEq` | ★★★指数は `l^n` を法として効く |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
