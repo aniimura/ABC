@@ -663,6 +663,7 @@ import ABC3.Found.GaloisRep.PointPlace
 import ABC3.Found.GaloisRep.SupportSum
 import ABC3.Found.GaloisRep.D2Principal
 import ABC3.Found.GaloisRep.D2Bridge
+import ABC3.Found.GaloisRep.RootOfUnity
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
