@@ -20288,3 +20288,47 @@ simp に入れてから `ring` する(mathlib の `C_simp` マクロと同じ手
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-526 ★★★★★★Tate 座標は `K^x/q^Z` 上で定まる(第 213 ブロック)
+
+`Found/GaloisRep/TateClassMap.lean`。
+
+Tate 一意化の写像は `u` から作るが、**`u` と `qu` は同じ点に行かねばならない**。
+★第 106 ブロックの基本領域(`0 <= v(u) < v(q)` の正規化)を使うと、
+これは**代表元の一意性**に還元される。
+
+### ★★★★代表元を関数にした
+
+`exists_unique_normalized_rep`(第 106)は `∃!` だったので `choose` で関数にした:
+
+    normRep v q hq c : K^x        (c : K^x / q^Z)
+
+★`mk (normRep c) = c`・`0 <= v(normRep c) < v(q)`、そして
+**`eq_normRep`——同じ類の正規化元は代表元に一致する**。
+
+### ★★★★★対 `(a, w)` は類だけで決まる
+
+`R -> K` が単射で `R` が整域なら:
+
+| 段 | 内容 |
+|---|---|
+| 1 | 同じ類の正規化元は一致する(`eq_normRep`) |
+| 2 | `algebraMap a = u = u' = algebraMap a'` と単射性で `a = a'` |
+| 3 | `a*w = q = a'*w'` と `a != 0` の相殺で `w = w'` |
+
+★★`a != 0` は `algebraMap a = (u : K)` が**単元**だから出る。
+★★★したがって `tateXpair a w (a*w)`・`tateYpair a w (a*w)` は
+**類 `c` だけの関数**である。証明項は `Prop` なので、対が一致すれば `rfl` で閉じた。
+
+### ★葉の状況((G6))
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 | ★`I` 法まで(第 212)。厳密化には `adicSum_mul` が要る |
+| (c) | 準同型性 | ★手つかず |
+| (d) | 核が `q^Z` | ★**前半(商の上で定まること)が本ブロックで済んだ**。後半(単射性)は手つかず |
+| (e) | 全射性 | ★手つかず |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
