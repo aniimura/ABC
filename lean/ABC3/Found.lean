@@ -107,6 +107,7 @@ import ABC3.Found.FrdI.Def24RlfCone
 import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop56MpAbs
+import ABC3.Found.FrdI.Prop56Limit
 import ABC3.Found.FrdI.Prop53Rlf
 import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Cor54Birat
@@ -692,6 +693,7 @@ import ABC3.Found.GaloisRep.SemiLinear
 import ABC3.Found.GaloisRep.WeilGalois
 import ABC3.Found.GaloisRep.WeilGalPoint
 import ABC3.Found.GaloisRep.WeilBilinFull
+import ABC3.Found.GaloisRep.TorsionAction
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

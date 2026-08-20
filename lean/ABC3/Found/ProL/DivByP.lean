@@ -106,6 +106,24 @@ theorem pow_pred_bijective {p : ℕ} (hp : p.Prime)
     Function.Bijective (fun x : N => x ^ (p - 1)) :=
   pow_bijective_of_proL hp hpro (coprime_pred_self hp)
 
+/-- ★★★pro-`p` 群では `u · (u^l)⁻¹` を任意の値に取れる（`l-1` が `p` と素なとき）。
+
+★`u · (u^l)⁻¹ = v` ⇔ `u^{l-1} = v⁻¹`。原文 p.107 の `u^{1-p} = v_p` を解く段。 -/
+theorem exists_pow_one_sub {p l : ℕ} (hp : p.Prime)
+    (hpro : ∀ U : OpenNormalSubgroup N, IsPGroup p (N ⧸ U.toSubgroup))
+    (hcop : Nat.Coprime (l - 1) p) (hl : 1 ≤ l) (v : N) :
+    ∃ u : N, u * (u ^ l)⁻¹ = v := by
+  obtain ⟨u, hu⟩ := (pow_bijective_of_proL hp hpro hcop).2 v⁻¹
+  refine ⟨u, ?_⟩
+  have hu' : u ^ (l - 1) = v⁻¹ := hu
+  have hsplit : u ^ l = u ^ (l - 1) * u := by
+    rw [← pow_succ]
+    congr 1
+    omega
+  rw [hsplit, hu', mul_inv_rev, inv_inv]
+  calc u * (u⁻¹ * v) = (u * u⁻¹) * v := by rw [mul_assoc]
+    _ = v := by rw [mul_inv_cancel, one_mul]
+
 variable {M : Type u} [CommGroup M] [TopologicalSpace M] [IsTopologicalGroup M]
   [CompactSpace M] [TotallyDisconnectedSpace M]
 
