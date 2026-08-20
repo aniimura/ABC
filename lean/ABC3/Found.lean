@@ -588,6 +588,7 @@ import ABC3.Found.GaloisRep.NotTwoTorsionPoint
 import ABC3.Found.GaloisRep.TranslateAutAll
 import ABC3.Found.GaloisRep.GenericNotTorsion
 import ABC3.Found.GaloisRep.TorsionIdealIntegral
+import ABC3.Found.GaloisRep.CoordinateDimension
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

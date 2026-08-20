@@ -16454,3 +16454,34 @@ mathlib は **Dedekind 環の因子機構を完備している**:
 「因子群も無い」に敷衍していた)。★記録の敷衍は誤りを生む。
 
 ★義務の数は動いていない(Galois 4/8)。
+
+## §9-435 座標環は Krull 次元 ≤ 1(第 127 ブロック)
+
+Dedekind の 4 条件のうち 3 つ目が入った:
+
+| 条件 | 状態 |
+|---|---|
+| `IsDomain W.CoordinateRing` | ✅ mathlib |
+| `IsNoetherianRing W.CoordinateRing` | ✅ mathlib |
+| **`Ring.DimensionLEOne W.CoordinateRing`** | ✅ **第 127** |
+| `IsIntegrallyClosed W.CoordinateRing` | ❌ **これだけ** |
+
+★次元の側は**第 116 ブロックの整拡大**がそのまま効いた:
+
+    F[X] は PID(次元 ≤ 1)、F[W] は F[X] 上整
+      ⟹ F[W] も次元 ≤ 1        (mathlib の `DimensionLEOne.of_isIntegral`)
+
+★★単射性のために積んだ整拡大が、**因子機構の入口にも効いた**
+——第 116 は `Ideal.eq_bot_of_comap_eq_bot` のために作ったものである。
+
+### ★残る 1 条件
+
+`IsIntegrallyClosed` は**アフィン曲線の正則性**である。
+★mathlib の局所判定 `IsIntegrallyClosed.of_localization_maximal` があるので、
+各極大イデアルでの局所化が DVR であることを示す形になる
+(非特異点なら `x − x₀` か `y − y₀` が極大イデアルを生成する)。★★見積もり 10-25。
+
+★★★これが入れば **`div(f)` が mathlib からそのまま出る**——
+層 3 の残りは因子計算(20-50)と `n` 乗根の取り出し(10-25)になる。
+
+★義務の数は動いていない(Galois 4/8)。

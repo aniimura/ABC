@@ -39,10 +39,10 @@ adic 付値。★**「因子群が無い」という当初の記録は誤りで�
 
 | 条件 | mathlib |
 |---|---|
-| `IsDomain W.CoordinateRing` | ✅ |
-| `IsNoetherianRing W.CoordinateRing` | ✅ |
-| `IsIntegrallyClosed W.CoordinateRing` | ❌ |
-| `Ring.DimensionLEOne W.CoordinateRing` | ❌ |
+| `IsDomain W.CoordinateRing` | ✅ mathlib |
+| `IsNoetherianRing W.CoordinateRing` | ✅ mathlib |
+| `Ring.DimensionLEOne W.CoordinateRing` | ✅ **第 127 ブロック** |
+| `IsIntegrallyClosed W.CoordinateRing` | ❌ **これだけ** |
 
 ★★★これが入れば `div(f)` は**主分数イデアルの素分解**としてそのまま出る。
 -/
@@ -88,7 +88,9 @@ def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★**2026-08-20 の再実測で見積もりが変わった**: mathlib は Dedekind 環の**因子機構を完備している**——`IsDedekindDomain.HeightOneSpectrum`・`count`・`finprod_heightOneSpectrum_factorization`・adic 付値。「因子群が無い」は誤りであり、**欠けているのは `IsDedekindDomain W.CoordinateRing` の instance だけ**である" 19,
     .implicitStep
-      "★★★**座標環が Dedekind 環であること**を示す——`IsDomain` ✅ と `IsNoetherianRing` ✅ は mathlib にある(2026-08-20 実測)。欠けているのは `IsIntegrallyClosed`(≡ アフィン曲線の正則性)と `Ring.DimensionLEOne` の 2 件である(10-30 ブロック)" 19,
+      "★★★**座標環が Dedekind 環であること**を示す——`IsDomain` ✅・`IsNoetherianRing` ✅(mathlib)、`Ring.DimensionLEOne` ✅(第 127 ブロック、第 116 の整拡大から)。**残るのは `IsIntegrallyClosed` だけ**である(10-25 ブロック)" 19,
+    .implicitStep
+      "★★`IsIntegrallyClosed` はアフィン曲線の**正則性**である。mathlib の局所判定 `IsIntegrallyClosed.of_localization_maximal` があるので、各極大イデアルでの局所化が DVR であることを示す形になる——非特異点なら `x − x₀` か `y − y₀` が極大イデアルを生成する(10-25 ブロック)" 19,
     .implicitStep
       "★★Dedekind の instance が入れば、`div(f)` は【主分数イデアルの素分解】として mathlib から直接出る。因子群を自分で積む必要は無い(0 ブロック)" 19,
     .implicitStep
