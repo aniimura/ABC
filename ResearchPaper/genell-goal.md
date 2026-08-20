@@ -19225,3 +19225,59 @@ mathlib の `IsLocalization.ringHom_ext` で `F(W)` 全体に伸びる。
 | Galois 同変性 | ❌ |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-502 ★★★★★★★★★スケルトンの `sorry` が 4 つ消えた(第 191 ブロック)
+
+`Skeleton/GaloisRep/WeilPairingDef.lean` の 6 件の `sorry` のうち **4 件**が消えた。
+
+| 節点 | 状態 |
+|---|---|
+| `weilPairing`(定義) | ✅ 第 178 `weilPairingVal` |
+| `weilPairing_pow_eq_one` | ✅ 第 179 |
+| `weilPairing_add_left` | ✅ 第 184 + 第 191 |
+| `weilPairing_self` | ✅ 第 190 + 第 191 |
+| `weilPairing_nondeg` | ❌ 未 |
+| `weilPairing_galois` | ❌ 未 |
+
+★`#print axioms` で確かめた: 4 つとも `[propext, Classical.choice, Quot.sound]` のみ。
+★★台帳の `sorry` は **58 → 54**。
+
+### ★★★★★★標数 0 なら余計な仮定は全部消える
+
+第 179・184・190 は点が `Point.some` であることや `μ` のデータを**仮定に持っていた**。
+★スケルトンが要求するのは任意の `P Q : W.Point` についての形である。
+
+| 場合 | 扱い |
+|---|---|
+| `P = O` または `Q = O` | `WeilSpec` は `P = Point.some …` を要求するので witness が無い ⟹ 値は `1` |
+| `P₁ + P₂ = O` | 第 184 が使えない(和が `Point.some` でない)——**別に証明** |
+
+★★`P₁ + P₂ = O` の場合は第 141 の `f_P · f_{−P} = c(x − x_P)^n` から出る:
+
+    (g₁g₂/z)^n = c   (z := μ(x) − x_P)  ⟹  g₁g₂ = ζ·z
+
+★★★`τ_Q` は `μ` の像を固定する(`n·Q = O`、第 168)ので **`τ_Q z = z`**、
+よって第 181 の `aut_div_mul` で `(τg₁/g₁)(τg₂/g₂) = 1`。
+
+### ★逸脱(記録)
+
+スケルトンの 4 節点に仮定を足した。★どれも最終消費者
+`det_galRep_eq_cyclotomic`(`[CharZero K]`・`[IsAlgClosed L]`)が満たす。
+
+| 仮定 | 理由 |
+|---|---|
+| `[W.IsElliptic]` | `weilPairingVal` の構成(群法則・生成点) |
+| `[IsAlgClosed F]` | 第 137(Dedekind 性)・第 139(定数の `n` 乗根) |
+| `[CharZero F]` | `μ` の存在(第 125)・`E[n²]` の位数(第 186)・`IsUnit (2:F)` |
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `weilPairingVal_zero_left` / `_right` | `O` を入れると値は 1 |
+| `weilPairingVal_mul_neg` | ★★★★★★★**`e_n(P,Q)·e_n(−P,Q) = 1`** |
+| `weilPairingVal_add_left` | ★★★★★★★★**双線型性(完全形)** |
+| `weilPairingVal_alt` | ★★★★★★★★★**交代性(完全形)** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)——(G5) は非退化性と
+Galois 同変性、そして `det_galRep_eq_cyclotomic` が残っている。
