@@ -18109,3 +18109,61 @@ D2 に残っていた最大の段——**無限遠に落ちる点の全体 `E₁
 | `Σᶠ v, e_v · Q_v = 0` への組み立て | ❌ | 2-5 |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-478 ★★★★★★因子の類が点の和になった(第 166 ブロック)
+
+第 165 の `[J] = ∏ᶠ v, [v]^{e_v}` を有限台の `Finset` に落とし、`Point.toClass` が
+`AddMonoidHom` であることを使って**点の和**にまとめた:
+
+    [J] = toClass( Σ_{v ∈ s} e_v · Q_v )
+
+★`toClass_eq_zero`(mathlib)から **D2 は 1 つの等式だけ**になった:
+
+    J が単項  ⟸  Σ_{v ∈ s} e_v · Q_v = 0
+
+### ★★★★★Abel–Jacobi も同じ機構で無料
+
+`z ≠ 0` なら `(z)` は単項なので `[(z)] = 1`、したがって
+
+    Σ_{v ∈ s} count_v(z) · Q_v = 0        (`finsum_count_smul_eq_zero`)
+
+★これをアフィン版の Abel–Jacobi として取った。★★`(μ f_P)` に当てると
+`count_v = n·e_v`(D1'、第 149)から
+
+    n · ( Σ_v e_v · Q_v ) = 0
+
+すなわち **`S := Σ_v e_v · Q_v` は `n` 等分点**であることまでは**無料で出る**。
+
+### ★★`Additive` の扱いで 1 つ躓いた
+
+`Point.toClass` は `W.Point →+ Additive (ClassGroup F[W])` である。★`finprod` と
+`finsum` の間の `Additive` 変換補題は **mathlib に無い**(`rfl` でもない)。
+★★有限台の `Finset` に落としてから `toMul_sum`・`toMul_zsmul` を使えば済む。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `classGroup_rootUnit_prod` | ★★★有限台の積として書き直す |
+| `classGroup_rootUnit_eq_toClass` | ★★★★★★**類は点の和の類** |
+| `exists_spanSingleton_rootUnit` | ★★★★★★**和が 0 なら単項** |
+| `finsum_count_smul_eq_zero` | ★★★★★★**Abel–Jacobi(アフィン版)** |
+
+### ★★★★D2 に残るのは 1 点だけ
+
+    S := Σ_v e_v · Q_v = 0        (n·S = 0 までは済んでいる)
+
+★構造は分かっている:
+
+* `count_v > 0` となるのは `n·Q_v = P` のとき(第 164)——ファイバー
+* `count_v < 0` となるのは `Q_v ∈ E[n] \ {O}` のとき(場合 B)——`[n]⁻¹(O)` の
+  アフィン部分
+* 分岐指数 `e` は**平行移動で一定**なので `S = e·(Σ_{ファイバー} Q) − e·(Σ_{E[n]} T) = 0`
+  (どちらの総和も第 150 で 0)
+
+★★残る唯一の障害は **`e_v` が一定であること**である。平行移動 `τ_T` は
+**アフィン座標環を保たない**(`−T` が無限遠に飛ぶ)ので、素点の輸送
+`w_v ∘ τ = w_{v'}` を自前で作る必要がある。★ただし中心の同定は第 164 の
+`pullbackPrime` + `redPoint` の機構がそのまま使える見込み(5-12 ブロック)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。

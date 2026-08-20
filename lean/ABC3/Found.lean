@@ -167,6 +167,7 @@ import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
 import ABC3.Found.SixExp.LatticeHouse
 import ABC3.Found.SixExp.Counting
+import ABC3.Found.SixExp.Siegel
 import ABC3.Found.SixExp.AuxFunction
 import ABC3.Found.IUTchIII.LogShell
 import ABC3.Found.IUTchIII.PadicLog
@@ -642,6 +643,7 @@ import ABC3.Found.GaloisRep.InfinityKer
 import ABC3.Found.GaloisRep.RedKernel
 import ABC3.Found.GaloisRep.PullbackPoint
 import ABC3.Found.GaloisRep.RootUnit
+import ABC3.Found.GaloisRep.ClassSum
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
