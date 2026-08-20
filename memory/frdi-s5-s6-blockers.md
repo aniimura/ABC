@@ -1,6 +1,6 @@
 ---
 name: frdi-s5-s6-blockers
-description: FrdI §5 と §6 の残りは mathlib の在庫不足 2 群に帰着する（Nikolov–Segal / 因子論・six exponentials）
+description: FrdI §5 §6 の残りの測定。★Nikolov–Segal と「因子論は一分野分」はどちらも誤りと判明し、Prop 5.6 は 2026-08-20 に閉じた
 metadata:
   type: project
 ---
@@ -83,3 +83,37 @@ Dirichlet 単数定理 `NumberField.Units.dirichletUnitTheorem` も mathlib に�
 ★教訓: **Lean を先に書くとスケルトンが後追いになり、畳まれた量が見えなくなる。**
 `Found/Divisor/Cartier*.lean` の 5 ファイルは正しい仕事だったが、
 それを書く前に §6 の合図を数えて節点へ展開すべきだった。
+
+★★★★★★2026-08-20 の追記 4 —— **上の「在庫不足 2 群」はどちらも誤りだった**
+
+★このファイルの冒頭にある 2 群の見立ては、どちらもこの日のうちに下方修正された。**冒頭の 2 行目（Nikolov–Segal）はもはや成り立たないので、そちらを根拠に使わないこと。**
+
+- **`Proposition 5.6` は閉じた（§5 は 3/7）**。Nikolov–Segal は要らなかった ——
+  `M_p = ⋂_k (𝒪^×(A))^{p^k}` と**冪だけで書く**と抽象自己同型で保たれる
+  （`Prop56MpAbs.lean` の `MpDiv`、`ProL/DivByP.lean` の `forall_pow_pow_iff_pComp_eq_one` で
+  位相的な pro-`l` 記述との一致を証明済み）。
+- ★★**「`u_p` の無限積」も逆極限ではなかった**。`M ≅ ∏_l M[l]`（`decompEquiv`）で
+  成分ごとの方程式に分けると、各 `M[q]` で `x ↦ x^{q-1}` が全単射なので
+  解が一意に取れ、無限積は `decompEquiv.symm` そのものになる
+  （`ProL/OneSubPow.lean` の `exists_forall_pow_one_sub`）。
+  連立が解ける根拠は両立条件 `v_{l1}^{1-l2} = v_{l2}^{1-l1}` で、
+  これは `φ`、`φ′` がともに単系準同型であることから出る。
+- **`Corollary 5.7` は Nikolov–Segal の下流ではない**。残っているのは
+  「圏同値に沿った base-section の輸送」という圏論の作業だけである。
+- **§6 は 1/5**。`Example 6.3` の単系論はこの日に全部閉じた ——
+  `ord(F_v)`、`Φ(F) = ⊕_v ord(O_v^▷)`、`B(F)`、`deg^arith`、`𝒪^×(A) = μ(L)`、
+  そして **perf-factorial**（`Prime(Φ(L)) ≃ V(L)`、台 = 有限部分集合を含む）。
+  残るのは `arith-functor`（数体の拡大での関手性）と `ex63-model` / `ex63-morph` だけである。
+
+★★**`realScale` は算術では空虚でない**。冒頭の「`realScale` は空虚」は
+`Example 6.1`（幾何、`M_p ≃+ ℕ`）の話であって、`Example 6.3` の
+アルキメデス素点では `M_p ≃+ ℝ≥0` なので**実際に確かめる必要がある**
+（`ArithPerfFactorial.lean` の `image_iotaR_univ_of_full`）。
+
+★**実係数の単系論は幾何版の写し替えで済む**（5 ファイル、約 1500 行）。
+違うのは 2 つだけ: (1) `⪯` の判定で `ℤ` の離散性が使えないので
+`n = 1 + Σ_{s ∈ supp a} ⌈a s / b s⌉` と台の上の有限和で取る、
+(2) 上の `realScale`。`Φ^pf` は係数拡大ではなく `Γ` の `ℚ` 飽和化である。
+
+★教訓: **「在庫不足」と書いた見立ては、割って見ると下方修正されることが多い。**
+このファイルだけで 3 件（因子論・Nikolov–Segal・逆極限）。[[no-wall-decompose-instead]]
