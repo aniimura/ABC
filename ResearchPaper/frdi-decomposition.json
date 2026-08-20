@@ -2729,9 +2729,9 @@
      "deps": [],
      "status": "半済",
      "size": "中",
-     "note": "★§0 の語彙。`G = Gal(K̄/K)` の連続作用を持つ有限集合の圏。★これが `Example 6.1` の `𝒟` になる。★`𝒟` が連結・totally epimorphic・of FSM-type であることもここで出る(→ `phibirat-monoidon` の `birat-fsmiso` の仮定が幾何では成り立つ根拠)。\n\n★2026-08-20 の測定: mathlib に Galois 圏(`GaloisCategory`)の一般論は無いが、`B(G)` は「`G` の連続作用を持つ有限離散集合の圏」なので、`ContinuousMulAction` + `Finite` で**直接作れる**。★連結対象 = 推移的作用の集合。★`𝒟 = B(G)⁰` が連結・totally epimorphic・**of FSM-type** であることもここで出る —— ★これが `phibirat-monoidon` の `birat-fsmiso` で足した仮定が本来の応用では成り立つ根拠である。",
-     "lean": "",
-     "decl": ""
+     "note": "★§0 の語彙。`G = Gal(K̄/K)` の連続作用を持つ有限集合の圏。★これが `Example 6.1` の `𝒟` になる。★`𝒟` が連結・totally epimorphic・of FSM-type であることもここで出る(→ `phibirat-monoidon` の `birat-fsmiso` の仮定が幾何では成り立つ根拠)。\n\n★2026-08-20 の測定: mathlib に Galois 圏(`GaloisCategory`)の一般論は無いが、`B(G)` は「`G` の連続作用を持つ有限離散集合の圏」なので、`ContinuousMulAction` + `Finite` で**直接作れる**。★連結対象 = 推移的作用の集合。★`𝒟 = B(G)⁰` が連結・totally epimorphic・**of FSM-type** であることもここで出る —— ★これが `phibirat-monoidon` の `birat-fsmiso` で足した仮定が本来の応用では成り立つ根拠である。\n\n★★★★2026-08-20: **底の圧は作った**(`Found/FrdI/Sec6GaloisCat.lean`)。\n原文自身が「B(G) の連結対象は `Spec(L)`(`L` は `K` の有限拡大)と思ってよい」と書くので、その形で作った:\n* `FinSub` —— 有限部分拡大の圧(射は `K`-代数射)。`𝒟` はその**反対圧**\n* `finSub_mono` —— 体の射は単射なのですべて mono\n* ★`finSubOp_isConnected` —— `⊥`(= `K` 自身)を経由するジグザグで連結\n* ★`finSubOp_totallyEpimorphic` —— mono の反対は epi\n★これで `Theorem 5.2, (ii)` が底の圧に要求する 2 条件(連結・totally epimorphic)は揃った。\n★残るのは **of FSM-type** だけであり、「`FinSub` の epi は同型」に帰着する——`M/f(L)` が非自明な有限分離拡大なら 埋め込みの個数が次数に等しく 1 より大きいので、相異なる 2 つの埋め込みが取れ、その合成体を `N` に取れば epi に反する。★在庫: `AlgHom.card`。",
+     "lean": "ABC3/Found/FrdI/Sec6GaloisCat.lean",
+     "decl": "FinSub / finSub_mono / finSubOp_isConnected / finSubOp_totallyEpimorphic"
     },
     {
      "id": "ex61-phi-perffact",
