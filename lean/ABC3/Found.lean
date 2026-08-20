@@ -631,6 +631,7 @@ import ABC3.Found.GaloisRep.SlopeIdent
 import ABC3.Found.GaloisRep.RedAdd
 import ABC3.Found.GaloisRep.RedZero
 import ABC3.Found.GaloisRep.RedHom
+import ABC3.Found.GaloisRep.Infinity
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
