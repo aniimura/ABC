@@ -37,6 +37,7 @@ import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
 | 定理 | 中身 |
 |---|---|
 | `isNormalScheme_of_affineOpens` | ★★**アフィン開の切断が整閉なら `X` は正規** |
+| `isNormalScheme_of_exists_affine` | ★★**各点のまわりで 1 つでよい**（`V[L]` に当てる形）|
 -/
 
 namespace ABC3.Found.Divisor
@@ -58,6 +59,27 @@ theorem isNormalScheme_of_affineOpens (X : Scheme.{u}) [IsIntegral X]
     X.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ x) isOpen_univ
   haveI : Nonempty U := ⟨⟨x, hxU⟩⟩
   haveI := h ⟨U, hU⟩
+  haveI : IsDomain Γ(X, U) := inferInstance
+  letI : Algebra Γ(X, U) (X.presheaf.stalk ((⟨x, hxU⟩ : U) : X)) :=
+    TopCat.Presheaf.algebra_section_stalk X.presheaf ⟨x, hxU⟩
+  haveI := hU.isLocalization_stalk ⟨x, hxU⟩
+  exact isIntegrallyClosed_of_isLocalization (R := Γ(X, U))
+    (X.presheaf.stalk ((⟨x, hxU⟩ : U) : X)) (hU.primeIdealOf ⟨x, hxU⟩).asIdeal.primeCompl
+    (Ideal.primeCompl_le_nonZeroDivisors _)
+
+/-- ★★★★**各点のまわりで 1 つでよい** —— 各点 `x` に対して
+`x` を含むアフィン開 `U` で切断が整閉なものが 1 つあればよい。
+
+★★**これが `V[L]` に当てる形である** —— `normalizationObjIso` が与えるのは
+`fromNormalization ⁻¹ᵁ U` の形のアフィン開だけだから。 -/
+theorem isNormalScheme_of_exists_affine (X : Scheme.{u}) [IsIntegral X]
+    (h : ∀ x : X, ∃ (U : X.Opens) (_ : IsAffineOpen U) (_ : x ∈ U),
+      IsIntegrallyClosed Γ(X, U)) :
+    IsNormalScheme X := by
+  intro x
+  obtain ⟨U, hU, hxU, hcl⟩ := h x
+  haveI : Nonempty U := ⟨⟨x, hxU⟩⟩
+  haveI := hcl
   haveI : IsDomain Γ(X, U) := inferInstance
   letI : Algebra Γ(X, U) (X.presheaf.stalk ((⟨x, hxU⟩ : U) : X)) :=
     TopCat.Presheaf.algebra_section_stalk X.presheaf ⟨x, hxU⟩
