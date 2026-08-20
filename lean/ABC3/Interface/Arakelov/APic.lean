@@ -38,8 +38,14 @@ open ABC3.Meta AlgebraicGeometry CategoryTheory NumberField
 structure APicData where
   /-- 台となる計量(その中に `Pic` も入っている)。 -/
   toHermitianMetricData : HermitianMetricData
-  /-- `APic(X)` の台。 -/
-  APic : Scheme.{0} → Type
+  /-- `APic(X)` の台。
+
+  ★★★★2026-08-19 の修正——**宇宙が `Pic` と合っていなかった**。
+  それまで `Type`(= `Type 0`)と書いてあったが、(B1) の `Pic : Scheme.{0} → Type 1` と
+  `forgetMetric` / `forgetMetric_mk` で結ばれる以上、`APic` も `Type 1` でなければならない
+  ——`Metric X L` は常に空でないので `L ↦ ofMetric X L m` は `Pic X ↪ APic X` を与え、
+  `Type 1 ↪ Type 0` を要求してしまう。★これは型の誤記であって数学の変更ではない。 -/
+  APic : Scheme.{0} → Type 1
   /-- テンソル積による群構造。 -/
   group : (X : Scheme.{0}) → CommGroup (APic X)
   /-- 下にある可逆層を忘れる写像。 -/
@@ -103,11 +109,24 @@ structure APicSpecData where
     degF F (@HMul.hMul _ _ _
         (@instHMul _ (toAPicData.group _).toDivInvMonoid.toMonoid.toMulOneClass.toMul) L M)
       = degF F L + degF F M
-  /-- ★★**底変換で値が変わらない**(原文 p.4 の `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`)。 -/
+  /-- ★★**底変換で値が変わらない**(原文 p.4 の `deg_K(L̄|_{Spec 𝒪_K}) = deg_F(L̄)`)。
+
+  ★★★★2026-08-19 の修正——**射を代数構造に結んだ**。
+
+  それまで `φ` は**任意の**射 `Spec 𝓞_K ⟶ Spec 𝓞_F` であり、
+  同時に宣言されている `[Algebra F K]` は**一切使われていなかった**
+  ——これは書き落としである。★原文 p.4 が言っているのは
+  「`F ⊆ K` に沿った制限で次数が変わらない」であって、任意の射ではない。
+
+  ★★任意の `φ` 版も**真ではある**(どの環準同型 `𝓞_F → 𝓞_K` も体の埋め込みに延び、
+  各埋め込みがちょうど `[K:F]` 回現れる)が、
+  **原文に無い強い主張**であり、証明には分数体への延長の機構が要る。
+  ★★★下流(D3)が使うのは代数写像に沿った場合だけなので、そちらに揃える。 -/
   degF_baseChange : ∀ (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
-    [Algebra F K] (φ : Spec (CommRingCat.of (𝓞 K)) ⟶ Spec (CommRingCat.of (𝓞 F)))
+    [Algebra F K] [IsScalarTower (𝓞 F) (𝓞 K) K]
     (L : toAPicData.APic (Spec (CommRingCat.of (𝓞 F)))),
-    degF K (toAPicData.pullback φ L) = degF F L
+    degF K (toAPicData.pullback
+        (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))) L) = degF F L
   /-- ★★★**計量を定数倍すると次数が動く**——アルキメデス側の寄与そのもの。
 
   原文 (GenEll p.4):
@@ -141,11 +160,28 @@ def APicSpecData.waiting : WaitingFor :=
 structure ArakelovHeightData where
   /-- 台となる `APic`。 -/
   toAPicSpecData : APicSpecData
-  /-- `X(ℚ̄)` の点。 -/
-  AlgPoint : Scheme.{0} → Type
+  /-- `X(ℚ̄)` の点。
+
+  ★★2026-08-19 の修正——宇宙を `Type 1` にした。`IsPointOf` が数体 `F : Type` に
+  わたって量化するので、`AlgPoint` が `Type 0` だと代表元を保持できない
+  ((D1) の `APic` と同じ誤記)。 -/
+  AlgPoint : Scheme.{0} → Type 1
   /-- `x ∈ X(ℚ̄)` が射 `x_F : Spec 𝓞_F → X` で表されること。 -/
   IsPointOf : (X : Scheme.{0}) → (F : Type) → [Field F] → [NumberField F] →
     (Spec (CommRingCat.of (𝓞 F)) ⟶ X) → AlgPoint X → Prop
+  /-- ★★★★★**どの射も点を定める**。
+
+  原文 (GenEll p.5):
+  > as the height function associated to the arithmetic line bundle M.
+
+  ★★★★**2026-08-19 に見つけた穴。**それまで `IsPointOf` が**空でもよかった**ので、
+  `AlgPoint := PUnit`、`IsPointOf := fun _ _ _ _ _ => False`、`height := 0` が
+  すべての欄を満たしてしまった(`height_eq_degF` が空虚に成り立つ)。
+
+  ★★★塞ぎ方: **`Spec 𝓞_F ⟶ X` はすべて `X(ℚ̄)` の点を定める**ことを課す。
+  これで `height_eq_degF` が効き、高さは `deg_F` の引き戻しに**強制される**。 -/
+  isPointOf_exists : ∀ (X : Scheme.{0}) (F : Type) [Field F] [NumberField F]
+    (xF : Spec (CommRingCat.of (𝓞 F)) ⟶ X), ∃ x : AlgPoint X, IsPointOf X F xF x
   /-- ★★**高さ** `ht_L̄`。 -/
   height : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → AlgPoint X → ℝ
   /-- ★★**`Proposition 1.4, (i)`** —— 加法性(`X(ℚ̄)` **全体**で)。 -/
@@ -156,6 +192,23 @@ structure ArakelovHeightData where
       = height X L x + height X M x
   /-- ★★**`Proposition 1.4, (ii)`** —— 有効な算術直線束の高さは下に一様有界。 -/
   IsEffective : (X : Scheme.{0}) → toAPicSpecData.toAPicData.APic X → Prop
+  /-- ★★★★★2026-08-20 の追加(§9-405)——**自明束はこの類に入る**。
+
+  ★これが無いと `IsEffective := fun _ _ => False` で
+  `height_bddBelow` が**空虚に成立**してしまう。
+  ★★逆に `IsEffective := True` は `height_bddBelow` 自身が落とす
+  (任意の算術直線束の高さは下に有界でない)。
+  ★★★この 2 本で `IsEffective` は上下から挟まれる。
+
+  ★★★★**未塗りの穴**:原文の前提は「有効」ではなく
+  「`L_Q` のある正のテンソル冪が大域切断で生成される」である。
+  ★★★★★**「有効」では偽になる**——反例は膨らみ上げ:
+  `L = O(E)`(`E` は例外因子)は有効だが、
+  `L|_E = O_{P^1}(-1)` なので `E` 上で高さは `-∞` へ行く。
+  ★§9-405 に記録。 -/
+  isEffective_one : ∀ (X : Scheme.{0}),
+    IsEffective X (@One.one _
+      (toAPicSpecData.toAPicData.group X).toDivInvMonoid.toMonoid.toOne)
   height_bddBelow : ∀ (X : Scheme.{0}) (L : toAPicSpecData.toAPicData.APic X),
     IsEffective X L → ∃ C : ℝ, ∀ x : AlgPoint X, -C ≤ height X L x
   /-- ★★★**高さは `deg_F` の引き戻しである**——原文 p.4 の定義そのもの。

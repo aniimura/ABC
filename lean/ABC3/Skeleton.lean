@@ -14,6 +14,17 @@ import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
 import ABC3.Skeleton.FrdI.Def28ProL
 import ABC3.Skeleton.FrdI.Lemma65SixExp
+import ABC3.Skeleton.GaloisRep.TateUniformization
+import ABC3.Skeleton.GaloisRep.WeilFunctionField
+import ABC3.Skeleton.GaloisRep.PointReduction
+import ABC3.Skeleton.GaloisRep.WeilDivisor
+import ABC3.Skeleton.GaloisRep.WeilRoot
+import ABC3.Skeleton.GaloisRep.WeilPairingDef
+import ABC3.Skeleton.GaloisRep.WeilPairing
+import ABC3.Skeleton.Divisor.SchemeWeil
+import ABC3.Skeleton.Divisor.Cartier
+import ABC3.Skeleton.Divisor.ArithDivisor
+import ABC3.Skeleton.Divisor.Normalization
 /-!
 # Skeleton — 論文の主張(証明しない)
 

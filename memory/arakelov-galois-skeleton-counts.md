@@ -1,6 +1,6 @@
 ---
 name: arakelov-galois-skeleton-counts
-description: Arakelov 理論は 9 件、Galois 表現は 8 件に割ってある。律速は B1 層のテンソル積・C2 ℙⁿ の点の関手・G1 E[n]≅(ℤ/n)²。件数は check.mjs の「Interface 実装待ち」が数える。
+description: Arakelov 理論は 9 件、Galois 表現は 8 件。★2026-08-19 現在 Arakelov **4/9**(C1+B1+B2+B3)・Galois 0/8。残る律速は C2(ℙⁿ の点の関手)・C3(計量)・G1(EDS の一般関係式)。件数は check.mjs が数える。
 metadata:
   type: project
 ---
@@ -274,6 +274,37 @@ metadata:
 `GenEll Definition 1.1` に 8 本ぶら下がっていても **1 節点に潰れて見えなかった**。
 ★`tools/graph-layers.mjs` に `Interface` タグの義務節点を足した(28 件、埋まった 3)。
 ★★被覆率(節点 1015 / 着地 10 / 張った 54)は**汚していない**——義務は統計から除く。
+
+
+## ★★★★★2026-08-19: B2 も達成 —— Arakelov **4/9**
+
+`Found/Arakelov/PicCartierWitness.lean` に `CartierPicData` の witness（14 欄）。
+★第 176–241 ブロックの 66 ブロック。
+
+| # | 状態 |
+|---|---|
+| C1 / B1 / B3 / **B2** | ★達成 |
+| C2 | ★★★律速。`ℙⁿ` の点の関手が無い |
+| C3 | 計量。D1–D3 はこれに従属 |
+| D1–D3 | (C3) 待ち |
+
+### ★★Interface を 3 回直した（すべて「満たそうとして」見つかった）
+
+| 直した欄 | 反例 |
+|---|---|
+| `ofDivisor` を Cartier に限定 | `ℚ[x,y]` の `(x,y)` |
+| `isCartierDivisor_comap` に平坦性 | `Spec k ⟶ Spec k[x]` の原点（`comap = ⊥`） |
+| `isPrincipalDivisor_affine` に Cartier | `k[x]/(x²)` の `(x)`（単項だが可逆でない） |
+
+★★★**Interface は消費するだけでは検証できない**。
+
+### ★G1 の見積もりを上方修正した（6–12 → 15–40）
+
+残るのは `∀ n, omegaNum = 0`（標数 2）で、
+`preNormEDS` の 5 項間の EDS 関係式に帰着する。
+★★mathlib は `IsEllDivSequence` を**定義だけ**持ち、
+「normEDS が EDS であること」も「`ωₙ`」も **TODO のまま**である。
+★★★つまり G1 の葉は「mathlib の TODO を 2 つ埋める」仕事。
 
 **How to apply:**
 - ★**件数は `node tools/check.mjs` の「Interface 実装待ち」が数える。**

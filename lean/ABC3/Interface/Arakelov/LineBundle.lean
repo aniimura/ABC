@@ -292,7 +292,7 @@ structure CartierPicData where
 
 
 def CartierPicData.waiting : WaitingFor :=
-  { what := "(B2) 有効 Cartier 因子 D から可逆層 𝒪_X(D) を作る操作と、それが積・引き戻しと両立すること"
+  { what := "(B2) 有効 Cartier 因子 D から可逆層 𝒪_X(D) を作る操作と、それが積・引き戻しと両立すること——★★★★2026-08-19 に達成(Found/Arakelov/PicCartierWitness.lean)"
     trackB := "Found/Arakelov — ★**(B1) は 2026-08-18 に達成済み**(`Found/Arakelov/PicWitness.lean`)。★★mathlib 在庫を実測(2026-08-18): `Scheme.IdealSheafData` / `Mul` / `comap` / `equivOfIsAffine` は**有る**が、**Cartier 因子は 0 件**(`grep CartierDivisor|EffectiveCartier` → 該当なし)。★★★したがって「可逆イデアル層」の定義から自前で作る。`comap_mul` は `Found/GenEll/ComapMul.lean` に証明済み(2026-08-17)" }
 
 /-! ## ★★B3 —— `Spec 𝓞_F` 上での `Pic` -/

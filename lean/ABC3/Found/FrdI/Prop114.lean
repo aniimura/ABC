@@ -1657,4 +1657,39 @@ theorem prop_1_14_v (F : FrobenioidCore P) (G : Frobenioid P)
   ⟨fun h B α hα => prop_1_14_v_mp P F G hiso φ h.1.1 h.1.2 h.2 α hα,
    fun h => prop_1_14_v_mpr P F G hiso hnd hA φ hirr hnps h⟩
 
+/-! ### ★出典の紐付け(`.src`) -/
+
+/-- ★★★★★★**[FrdI] Proposition 1.14** —— 条なしの locator。
+
+| 条 | 実装 |
+|---|---|
+| (i) irreducible 射の 3 分類 | `prop_1_14_i` |
+| (ii) pre-step ⟺ FSM ∧ mid-adjoint | `prop_1_14_ii` |
+| (iii) 有界 FSMI 分解 ⟺ pre-step でない | `prop_1_14_iii` |
+| (iv) 四角形の両脇の次数と prime-Frobenius 性 | `prop_1_14_iv` |
+| (v) Div-identity な prime-Frobenius 自己射の特徴づけ | `prop_1_14_v` |
+
+★★★**逸脱 1 件(③ `sourceGap`。`Gap/FrdI/Section1.lean` の `Gap_1_14_iii`、
+`index.html` に開示済み)**:
+
+(iii) の `⟸` は **`Definition 1.3` から出ない**。機械で確かめた反例が 2 つある:
+
+* mono の側 —— 捻れ積 `𝔽_ℕ ⋉ ∏ ℤ/n`(`Check/FrdI/TwistedFrobenioid.lean` の
+  `cx2_isFrobenioid` / `cx_frobType_not_mono`)。`Definition 1.3` の全条件を満たす。
+* fiberwise-surjectivity の側 —— **捻れの無い `𝔽_ℕ`**(`ef_not_isFiberwiseSurjective`)。
+  ★しかもそれは **unit-trivial** である(`ef_unitTrivial`)から、
+  `𝒪^×` にどんな仮定を置いても回復しない。
+
+★したがって `prop_1_14_iii` は不足する 2 点を**明示の仮定** `hFrobMono` / `hFrobFS`
+として受け取る。★★**穴は原典自身の語彙 2 語で書ける**:
+mono ← **unit-trivial 型**(`Definition 1.2, (iv)`、`mono_of_frobType_of_unitTrivial`)、
+fiberwise-surjectivity ← **`Φ` が perfect**(`§0` p.11、
+`elemFrob_frobZeta_isFiberwiseSurjective_of_perfect`)。
+★`nat_not_isPerfectMonoid` が「`𝔽_ℕ` の反例が効くのは `ℕ` が perfect でないから」を示す。
+
+★これを消費する `Theorem 3.4, (ii)` が §3 を 8/9 で止めている。 -/
+def prop_1_14.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 41, item := "Proposition 1.14",
+    sectionId := "frdi-prop-1-14" }
+
 end ABC3.Found.FrdI

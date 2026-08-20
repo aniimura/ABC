@@ -35,3 +35,7 @@
 - [mathlib 在庫を実測してからスケルトンを作る](measure-mathlib-before-skeleton.md) — 引用先があると仮定して見積もると膨らむ。B1 で 27 ブロック分の誤差が出た。
 - [型付き恒等関数を橋にする](typed-identity-bridge.md) — 綴り違いの型の間は instance を足すより恒等関数。instance は経路を増やして新しい問題を作る。
 - [既定の grep が mathlib まで届く](search-scope-external-and-mathlib.md) — external/_refs に複製＋.ignore。ズレ検出は check-external-refs.sh。
+- [𝒟 は局所化ではない——v-loc は反証された](frdi-vloc-refuted.md) — 「充満」を「同値」と読んだ事故。反例は Example 4.3 で機械検証済み。
+- [座標・型・仮定は要るまで固定しない](defer-fixing-coordinates.md) — B2 で 5 回当たった。固定しすぎた補題は使えなくなり、パラメータ化すると証明を 1 文字も変えずに通る。
+- [FrdI §5・§6 の残りは在庫不足 2 群に帰着](frdi-s5-s6-blockers.md) — Prop 5.6 は Nikolov–Segal、§6 は因子論と six exponentials。それ以外は残り 1〜2 段。
+- [`rw`/`simp` が「型が正しくない」で止まる罠](lean-proj-vs-toelem-rw-trap.md) — defeq だが構文の違う 2 つの綴りが混ざると `instances` 透明度で型付かない。対処は `calc`+`congrArg` を**項として**書くこと。Prop 1.6 (ii) はこれで 1 セッション止まっていた。

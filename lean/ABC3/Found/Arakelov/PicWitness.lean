@@ -68,6 +68,15 @@ noncomputable def picardDataWitness : ABC3.Interface.Arakelov.PicardData where
   sheafOf_injective := fun X L M h => picSheafOf_injective X L M h
   sheafOf_surjective := fun X F h => picSheafOf_surjective X F h
 
+/-- ★★★★★★★**`PicardData` は非空虚である**——B1 達成。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★★これが Arakelov 理論の 9 件のうち **B1** である。 -/
+theorem PicardData.nonvacuous : Nonempty ABC3.Interface.Arakelov.PicardData :=
+  ⟨picardDataWitness⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def picardDataWitness.src : ABC3.Meta.Source :=

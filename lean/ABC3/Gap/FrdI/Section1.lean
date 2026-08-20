@@ -24,7 +24,7 @@ namespace ABC3.Gap.FrdI
 
 open CategoryTheory ABC3.Found.FrdI
 
-universe v u w u2 v2
+universe v u w u2 v2 u3 v3
 
 /-! ## ★`Proposition 1.14, (iii)` の `⟸`
 
@@ -330,9 +330,36 @@ co-angular pre-step 自己射の底)と置くと、上の道具から
 ★したがって反例があるとすれば ★★**`Aut_𝒞(A)` の底が `Φ(A)` に非自明に作用する**
 ところにしかない。★**探索範囲がさらに狭まった。**(★未決着)
 
+## ★★★2026-08-20 —— 穴が **`metrically trivial` の枝だけ**に縮んだ
+
+★★`Theorem 5.1, (iii)` を取得したことで、
+
+  **isotropic 型 ＋ base-trivial ⟹ Aut-ample**
+
+が出た(`Found/FrdI/Prop16AutAmple.lean` の `isAutAmple_of_baseTrivial`)。
+道筋は 2 段:
+1. `isFrobeniusTrivial_of_baseTrivial` —— base-trivial なら Frobenius-trivial
+2. `isAutAmple_of_frobTrivial`(`Theorem 5.1, (iii)`)—— isotropic 型なら
+   Frobenius-trivial は Aut-ample
+
+★したがって `cfp_baseTrivial_mpr` の `Aut-ample` 仮定は **isotropic 型の下で消える**
+(`cfp_baseTrivial_mpr_of_isotropic`)。
+
+★★**残るのは `cfp_metricallyTrivial_mpr` の枝だけ**である。
+metrically trivial から Frobenius-trivial を出そうとすると、
+「`Div = y` の pre-step 自己射を base-identity に直す」ところで
+★**`htwist` に戻ってしまう**(`Φ(Base s)` が `Div s` を固定するか)。
+★これは上の解析で特定した障害そのものである。
+
+★また `Theorem 5.1, (iii)` の道筋は **isotropic 型**を使うので、
+`Proposition 1.6` が isotropic 型を仮定しない以上、
+★**一般の Frobenioid については穴は開いたまま**である。
+
 ## ★分類
 
 ★**`missingMath`(②)のままとする。** ③ を名乗るには反例が要る。
+★ただし穴の範囲は「isotropic 型でない Frobenioid」ないし
+「metrically trivial の枝」に縮んだ。
 -/
 
 /-- ★**`Proposition 1.6, (v)` の 2 件の `⟸` に不足しているもの**。
@@ -361,6 +388,89 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
       "★`htwist` が `Definition 1.3` から導かれれば ① に落ち、`Proposition 1.6, (v)` は" ++
       "完全に実装できる。逆に `Γ/H` に捻れを持つ反例を構成できれば ③ に上がる" ++
       "(解析により、反例があるなら `Φ(β_d)` の作用の位数と同じ捻れが `Γ/H` に要る)。" ++
-      "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" }
+      "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" ++
+      "★2026-08-20: `Theorem 5.1, (iii)` により **isotropic 型 ＋ base-trivial ⟹ Aut-ample**" ++
+      "が出たので、`base-trivial` の枝は埋まった(`cfp_baseTrivial_mpr_of_isotropic`)。" ++
+      "残るのは `metrically trivial` の枝と、isotropic 型を仮定しない一般の場合である。" ++
+      "★★2026-08-20: `Proposition 1.6` の他の条はすべて閉じた" ++
+      "((ii) の 21 条 = `cfpFrobenioidCore`、(iii) の pull-back の両向き = " ++
+      "`cfp_isPullBack_iff`、(iv) = `cfp_pullBackLB` / `cfp_arbFactorUniq`、" ++
+      "(v) の perfect = `cfp_perfect_iff`、Frobenius-normalized = `cfp_frobNormalized_iff`)。" ++
+      "★したがって `Proposition 1.6` に残る穴は 2 点だけである: " ++
+      "(1) この `Gap_1_6_v`(metrically trivial の `⇐`)、" ++
+      "(2) (vi) の `Aut^sub-ample` —— sub-automorphism の証人対象を " ++
+      "`𝒞′` へ持ち上げる道は `plBk_baseChange` で作れるが、" ++
+      "その証人の自己射が**同型**であることが出ない。" ++
+      "★★2026-08-20 に (2) を式で特定した(`Found/FrdI/SubAutInvariants.lean`): " ++
+      "sub-automorphism は `degFr = 1`(`degFr_of_isSubAutomorphism`)で、" ++
+      "証人 `β ≫ φ = φ ≫ α` は " ++
+      "`Φ(Base β)(Div φ) = Φ(Base φ)(Div α) + Div φ` を与える" ++
+      "(`div_relation_of_isSubAutomorphism`)。" ++
+      "★ファイバー積で証人を作るには、`𝒟′` 側の証人 `(e′, ψ′, β′)` " ++
+      "に沿って `A` を引き戻した `χ : B ⟶ A` を取り、" ++
+      "引き戻しの普遍性で `γ₀` を得るが、" ++
+      "`Div γ₀ = Φ(Base χ)(Div φ₀)` であり、**これが 0 になる保証が無い**。" ++
+      "★★`Div φ₀ = 0` なら済むが、**それは言えない** —— " ++
+      "`𝒟` を対象 1 個・`End = ℤ`、`Φ(d) = ℝ≥0` で `Φ.map n =` 「`2ⁿ` 倍」、" ++
+      "`B(d) = ℝ`、`Div_B = id` とすると `Theorem 5.2` の仮定をすべて満たし、" ++
+      "`Div α = (2^b − 1)·c / 2^ψ > 0` なる sub-automorphism が 4 成分とも合う。" ++
+      "★したがって残るのは「引き戻しを選べば `Φ(Base χ)(Div φ₀) = 0` " ++
+      "にできるか」という 1 点である。" }
+
+/-! ## ★`Proposition 1.6, (vi)` の `Aut^sub-ample`
+
+原文 (FrdI p.28):
+> (vi) A object of C is Aut-ample (respectively, Autsub-ample; End-ample) if
+
+★`Aut-ample` と `End-ample` は実装済み(`cfp_autAmple_of` / `cfp_endAmple_of`)。
+★★**残るのは `Aut^sub-ample` だけ**であり、不足は下の 1 条に尽きる:
+「`𝒞` 側の sub-automorphism の**証人**を、底が `G` の像に入るように取れること」。
+
+★★★**`𝒟'` の sub-automorphism がすべて同型ならこの穴は閉じる**
+(`Found/FrdI/Prop16AutAmple.lean` の `cfp_autSubAmple_of_autSaturated`)。
+応用ではそうである —— `Example 6.1` / `Example 6.3` の底の圈 `B(G)⁰` では
+連結対象の自己射がすべて同型だからである。 -/
+
+/-- ★**`Proposition 1.6, (vi)` の `Aut^sub-ample` に不足しているもの**。
+
+★`Aut^sub-ample` は「底の sub-automorphism を `𝒞` の sub-automorphism へ持ち上げる」
+ことしか言わず、**その証人の底**には何も言わない。
+ファイバー積で証人を作るには、その底が `G` の像に入っていなければならない。 -/
+structure Gap_1_6_vi {D : Type u} [Category.{v} D] {D' : Type u3} [Category.{v3} D']
+    {C : Type u2} [Category.{v2} C] {Φ : MonoidOn.{v, u, w} D}
+    (P : PreFrobenioid C Φ) (G : D' ⥤ D) : Prop where
+  /-- 不足: **sub-automorphism の証人を、底が `G` の像に入るように取れる**こと。
+
+  ★引き戻しで作り直そうとすると、普遍性が与える一意の持ち上げ `γ₀` は
+  `Div γ₀ = Φ(Base χ)(Div φ₀)` を持ち、**0 になる保証が無い**
+  (`Found/FrdI/SubAutInvariants.lean` の `div_relation_of_isSubAutomorphism`)。 -/
+  witnessDescends :
+    ∀ (A : C) (φ₀ : End A), IsSubAutomorphism φ₀ →
+      ∀ (e : D') (ψ : G.obj e ⟶ P.proj.obj A) (b : End (G.obj e)), IsIso b →
+        b ≫ ψ = ψ ≫ P.Base φ₀ →
+        ∃ (B : C) (χ : B ⟶ A) (β : End B), IsIso β ∧ β ≫ χ = χ ≫ φ₀ ∧
+          Nonempty (P.proj.obj B ≅ G.obj e)
+
+def Gap_1_6_vi.record : ABC3.Meta.GapRecord :=
+  { source :=
+      { paper := "FrdI", pdfPage := 28, item := "Proposition 1.6, (vi)",
+        sectionId := "frdi-prop-1-6" },
+    classification := ABC3.Meta.GapClass.missingMath,
+    falsifier :=
+      "★2026-08-20 に式で特定した。`Aut-ample` と `End-ample` は閉じている" ++
+      "(`cfp_autAmple_of` / `cfp_endAmple_of`)ので、(vi) に残るのは `Aut^sub-ample` だけである。" ++
+      "★★不足は 1 条に尽きる: 「" ++
+      "証人の底が `G` の像に入るように取れる」(`witnessDescends`)。" ++
+      "★引き戻しで作り直す道はあるが、普遍性が与える一意の持ち上げ `γ₀` は" ++
+      "pre-step で `Div γ₀ = Φ(Base χ)(Div φ₀)` を持ち、これが 0 になる保証が無い。" ++
+      "★`Div φ₀ = 0` は言えない —— `𝒟` を対象 1 個・`End = ℤ`、" ++
+      "`Φ(d) = ℝ≥0` で `Φ.map n =` 「`2ⁿ` 倍」、`B(d) = ℝ`、`Div_B = id` とすると" ++
+      "`Theorem 5.2` の仮定をすべて満たし、`Div α > 0` なる sub-automorphism がある。" ++
+      "★★★**抜け道は実装した**: `𝒟' の sub-automorphism がすべて同型なら" ++
+      "`Aut-ample` から直に出る(`cfp_autSubAmple_of_autSaturated`)。" ++
+      "応用(`Example 6.1` / `Example 6.3` の底の圈 `B(G)⁰`)ではそうである。" ++
+      "★これが ① に落ちるのは `witnessDescends` が `Definition 1.3` から導かれた場合、" ++
+      "③ に上がるのは 「`𝒟' に同型でない sub-automorphism があり、" ++
+      "その持ち上げが実際に存在しない」反例を構成した場合である。" }
 
 end ABC3.Gap.FrdI

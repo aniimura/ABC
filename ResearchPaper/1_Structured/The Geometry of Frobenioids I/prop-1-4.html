@@ -127,6 +127,25 @@ characteristically injective）が効く。</p>
 （isometric pre-step は <code>(b, 0, 1)</code> で <code>b</code> が同型、したがって既に同型）ので、
 <strong>定数関手に取り替えることが必要だった</strong>。</p>
 
+<h2>Proposition 1.6</h2>
+
+<section class="statement proposition"
+         id="frdi-prop-1-6-v"
+         data-paper="FrdI"
+         data-pdf-page="28"
+         data-item="Proposition 1.6, (v)"
+         data-notation-checked="2026-08-20">
+<div class="verbatim">(v) A object of C is Frobenius-trivial (respectively, quasi-Frobenius-trivial; sub-quasi-Frobenius-trivial; metrically trivial; base-trivial; perfect; grouplike; unit-trivial; Frobenius-normalized; isotropic; Frobenius-isotropic) if and only if it projects to such an object of C.</div>
+<div class="reading"><code>𝒞' = 𝒞 ×<sub>𝒟</sub> 𝒟'</code> の対象が 11 個の type を持つことと、
+その <code>𝒞</code> 成分が持つことが<strong>同値</strong>だという主張。</div>
+<p class="open">★<strong>2 件の <code>⟸</code> に <code>Aut-ample</code> が要る</strong>
+（底を指定した同型を取り直すため）—— <code>Gap/FrdI/Section1.lean</code> の <code>Gap_1_6_v</code>。
+★<strong>2026-08-20</strong>: <code>Theorem 5.1, (iii)</code>（Frobenius-trivial ⟹ Aut-ample）により
+<strong><code>base-trivial</code> の枝は isotropic 型の下で埋まった</strong>
+（<code>cfp_baseTrivial_mpr_of_isotropic</code>）。
+残るのは <code>metrically trivial</code> の枝と、isotropic 型を仮定しない一般の場合である。</p>
+</section>
+
 <h2>Proposition 1.5</h2>
 
 <section class="statement proposition"

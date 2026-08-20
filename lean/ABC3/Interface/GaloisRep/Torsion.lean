@@ -49,8 +49,18 @@ open ABC3.Meta WeierstrassCurve
 
 ★★**これは今すぐ書ける**——mathlib の `W.toAffine.Point` が
 `AddCommGroup` を持つからである。★posit するのは**構造定理の方だけ**である。 -/
-def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (n : ℕ) : Type :=
-  {P : W.toAffine.Point // n • P = 0}
+def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (n : ℕ) :
+    AddSubgroup W.toAffine.Point where
+  carrier := {P : W.toAffine.Point | n • P = 0}
+  add_mem' := by
+    intro a b ha hb
+    simp only [Set.mem_setOf_eq] at *
+    rw [smul_add, ha, hb, add_zero]
+  zero_mem' := by simp
+  neg_mem' := by
+    intro a ha
+    simp only [Set.mem_setOf_eq] at *
+    rw [smul_neg, ha, neg_zero]
 
 /-! ## ★★★G1 —— `E[n] ≅ (ℤ/n)²` -/
 
@@ -66,8 +76,8 @@ def torsionPoints {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) 
 structure TorsionStructureData where
   /-- ★★**代数閉体上、`n` が可逆なら `(ℤ/n)²` と同型**。 -/
   structure_eq : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K),
-    W.IsElliptic → ∀ n : ℕ, 0 < n → (n : K) ≠ 0 →
-    Nonempty (torsionPoints W n ≃ (ZMod n × ZMod n))
+    W.IsElliptic → ∀ n : ℕ, 0 < n → (∀ k : ℕ, 1 ≤ k → k ≤ n → (k : K) ≠ 0) →
+    Nonempty (torsionPoints W n ≃+ (ZMod n × ZMod n))
   /-- ★`n` 捩れは有限。 -/
   torsion_finite : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K),
     W.IsElliptic → ∀ n : ℕ, 0 < n → (n : K) ≠ 0 → Finite (torsionPoints W n)
@@ -78,31 +88,69 @@ def TorsionStructureData.waiting : WaitingFor :=
 
 /-! ## ★★G2 —— Tate 加群 -/
 
-/-- **(G2)** `l` 進 Tate 加群 `T_l E = lim E[l^n]` と `T_l E ≅ ℤ_l²`。
+/-- **`T_l E = lim_n E[l^n]`** —— `l` 進 Tate 加群。
 
 原文 (GenEll p.19):
 > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
 
-★★原文の `GL₂(ℤ_l)` の `ℤ_l²` がこれである。 -/
+## ★★★これも posit ではない
+
+逆極限は `E[l^n]` の直積の**部分群**として今すぐ書ける——
+「`l` 倍で一つ下の層に落ちる列」の全体である。
+★★posit するのは **`ℤ_l²` と同型であること**だけである。
+
+★★★§9-401 の教訓: `tateModule` を素の `Type` として posit し
+`proj` に条件を課さないと、`tateModule := ℤ_l × ℤ_l`、`proj := 0` で
+**空虚に埋まってしまう**。★定義できるものは定義する。 -/
+def tateModule {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (l : ℕ) :
+    AddSubgroup (∀ n : ℕ, torsionPoints W (l ^ n)) where
+  carrier := {f | ∀ n : ℕ, l • ((f (n + 1) : W.toAffine.Point)) = (f n : W.toAffine.Point)}
+  add_mem' := by
+    intro a b ha hb n
+    simp only [Set.mem_setOf_eq, Pi.add_apply, AddSubgroup.coe_add, smul_add] at *
+    rw [ha n, hb n]
+  zero_mem' := by
+    intro n
+    simp
+  neg_mem' := by
+    intro a ha n
+    simp only [Set.mem_setOf_eq, Pi.neg_apply, AddSubgroup.coe_neg, smul_neg] at *
+    rw [ha n]
+
+/-- ★`T_l E → E[l^n]` の射影。 -/
+def tateProj {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (l n : ℕ) :
+    tateModule W l →+ torsionPoints W (l ^ n) where
+  toFun := fun f => (f : ∀ m : ℕ, torsionPoints W (l ^ m)) n
+  map_zero' := rfl
+  map_add' := fun _ _ => rfl
+
+/-- ★★射影は `l` 倍と可換である(逆極限であることの中身)。 -/
+theorem tateProj_smul {K : Type} [Field K] [DecidableEq K] (W : WeierstrassCurve K) (l n : ℕ)
+    (f : tateModule W l) :
+    l • ((tateProj W l (n + 1) f : W.toAffine.Point)) = (tateProj W l n f : W.toAffine.Point) :=
+  f.2 n
+
+/-- **(G2)** `T_l E ≅ ℤ_l²`。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★原文の `GL₂(ℤ_l)` の `ℤ_l²` がこれである。
+
+★標数 0 を要求する: (G1) の個数勘定が `∀ k ≤ n, (k : K) ≠ 0` を要るので、
+`n = l^m` を `m → ∞` で走らせるには標数 0 が要る(§9-398 の逸脱記録)。
+★★ABC は `ℚ` 上(の代数閉包)で使うので十分である。 -/
 structure TateModuleData where
   /-- 台となる捩れの構造定理。 -/
   toTorsionStructureData : TorsionStructureData
-  /-- `T_l E`。 -/
-  tateModule : {K : Type} → [Field K] → [DecidableEq K] → WeierstrassCurve K → ℕ → Type
-  /-- 加法群の構造。 -/
-  addGroup : {K : Type} → [Field K] → [DecidableEq K] → (W : WeierstrassCurve K) → (l : ℕ) →
-    AddCommGroup (tateModule W l)
-  /-- ★`E[l^n]` への射影(逆極限であること)。 -/
-  proj : {K : Type} → [Field K] → [DecidableEq K] → (W : WeierstrassCurve K) → (l n : ℕ) →
-    tateModule W l → torsionPoints W (l ^ n)
-  /-- ★★**`T_l E` は階数 2 の自由 `ℤ_l` 加群**。 -/
-  freeRankTwo : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] (W : WeierstrassCurve K),
-    W.IsElliptic → ∀ l : ℕ, ∀ _ : Fact l.Prime, (l : K) ≠ 0 →
-    Nonempty (tateModule W l ≃ (ℤ_[l] × ℤ_[l]))
+  /-- ★★**`T_l E` は階数 2 の自由 `ℤ_l` 加群**——**群同型**として。 -/
+  freeRankTwo : ∀ (K : Type) [Field K] [DecidableEq K] [IsAlgClosed K] [CharZero K]
+    (W : WeierstrassCurve K), W.IsElliptic → ∀ l : ℕ, ∀ _ : Fact l.Prime,
+    Nonempty (tateModule W l ≃+ (ℤ_[l] × ℤ_[l]))
 
 def TateModuleData.waiting : WaitingFor :=
-  { what := "(G2) l 進 Tate 加群 T_l E = lim E[l^n] と、それが階数 2 の自由 Z_l 加群であること"
-    trackB := "Found/GaloisRep — ★mathlib に `TateModule` は **0 件**(2026-08-17 実測)。★(G1) に従属する——`E[l^n] ≅ (Z/l^n)^2` の逆極限を取るだけなので、(G1) が入れば `PadicInt` の逆極限表示で機械的である" }
+  { what := "(G2) l 進 Tate 加群 T_l E = lim E[l^n] が階数 2 の自由 Z_l 加群であること"
+    trackB := "Found/GaloisRep — ★mathlib に `TateModule` は **0 件**(2026-08-17 実測)。★(G1) に従属する——`E[l^n] ≅ (Z/l^n)^2` の**両立する基底**を取り、`PadicInt.lift` で逆極限を渡る" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 

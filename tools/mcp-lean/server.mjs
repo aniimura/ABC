@@ -9,7 +9,7 @@
 //
 // 依存なし(Node 22 の標準ライブラリのみ)。MCP は stdio + 行区切り JSON-RPC 2.0。
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -25,6 +25,20 @@ const REPL_BIN =
     process.platform === 'win32' ? 'repl.exe' : 'repl');
 const DEFAULT_TIMEOUT_MS = Number(process.env.ABC3_LEAN_TIMEOUT_MS ?? 600000);
 
+// ★2026-08-20 の恒久対処: Lean REPL は **環境スナップショットを一切解放しない**。
+// `lean_check` を 1 回呼ぶたびに新しい `Environment` が REPL 内部の配列に積まれ、
+// 長いセッションでは 18〜46 GB まで膨らむ(実測)。
+// そこで **一定回数 / 一定メモリでプロセスを建て直す**。
+// `addToEnv` で積んだ宣言は `state.envLog` に控えてあるので、建て直しのあとに
+// 再生する——呼び出し側から見て基準環境は失われない。
+// ★★回数の方が**主たる歯止め**である。`tasklist` が返すのは working set なので、
+// メモリ圧が掛かって OS にトリムされると 17 GB のプロセスが 1.7 GB に見える
+// (2026-08-20 に実測)。メモリ判定は「常駐して大きいとき」にしか効かないので、
+// 決定的な回数の方を主に据える。
+const MAX_MB = Number(process.env.ABC3_LEAN_MAX_MB ?? 6000);
+const MAX_CHECKS = Number(process.env.ABC3_LEAN_MAX_CHECKS ?? 120);
+const MEM_CHECK_EVERY = Number(process.env.ABC3_LEAN_MEM_CHECK_EVERY ?? 20);
+
 /** @type {{proc: import('node:child_process').ChildProcess|null, baseEnv: number|null, imports: string[], leanPath: string|null, busy: boolean, buf: string[], pending: ((s: string) => void)|null}} */
 const state = {
   proc: null,
@@ -34,25 +48,99 @@ const state = {
   busy: false,
   buf: [],
   pending: null,
+  checks: 0,
+  /** ★`addToEnv` で基準環境に積んだコード片。建て直しのときに再生する。 */
+  envLog: [],
+  recycles: 0,
 };
+
+/** ★生きている `repl.exe` の物理メモリを報告する(2026-08-20 の 46 GB 事故の再発検知)。 */
+function replMemory() {
+  if (process.platform !== 'win32') return 'repl メモリ: (未計測)';
+  try {
+    const r = spawnSync(
+      'tasklist',
+      ['/FI', 'IMAGENAME eq repl.exe', '/FO', 'CSV', '/NH'],
+      { encoding: 'utf8', windowsHide: true },
+    );
+    const rows = (r.stdout ?? '')
+      .split(/\r?\n/)
+      .map((l) => l.match(/^"repl\.exe","(\d+)",[^,]*,[^,]*,"([\d,. ]+) K"$/))
+      .filter(Boolean)
+      .map((m) => ({ pid: m[1], mb: Math.round(Number(m[2].replace(/[^\d]/g, '')) / 1024) }));
+    if (rows.length === 0) return 'repl メモリ: (repl.exe は動いていない)';
+    const total = rows.reduce((a, b) => a + b.mb, 0);
+    const detail = rows.map((x) => `pid ${x.pid}: ${x.mb} MB`).join(' / ');
+    return `repl メモリ: 合計 ${total} MB (${detail})` +
+      (total > MAX_MB ? '  ★★閾値超——次の lean_check で自動的に建て直す' : '') +
+      '  ※working set なのでトリムされると小さく見える';
+  } catch {
+    return 'repl メモリ: (計測に失敗)';
+  }
+}
+
+/** ★生きている `repl.exe` の物理メモリ合計(MB)。数えられなければ 0。
+ * 他セッションの `repl.exe` も含む上界である——安全側に倒すためこれでよい。 */
+function replMemoryMB() {
+  if (process.platform !== 'win32') return 0;
+  try {
+    const r = spawnSync(
+      'tasklist',
+      ['/FI', 'IMAGENAME eq repl.exe', '/FO', 'CSV', '/NH'],
+      { encoding: 'utf8', windowsHide: true },
+    );
+    return (r.stdout ?? '')
+      .split(/\r?\n/)
+      .map((l) => l.match(/^"repl\.exe","(\d+)",[^,]*,[^,]*,"([\d,. ]+) K"$/))
+      .filter(Boolean)
+      .reduce((a, m) => a + Number(m[2].replace(/[^\d]/g, '')) / 1024, 0);
+  } catch {
+    return 0;
+  }
+}
 
 function log(msg) {
   process.stderr.write(`[mcp-lean] ${msg}\n`);
 }
 
-function killRepl() {
-  if (state.proc) {
+// ★2026-08-20 に踏んだ罠: Windows では `shell: true` で起こすので
+// `cmd.exe → lake.exe → lake.exe → repl.exe` の 4 段になる。
+// `proc.kill()` は先頭の `cmd.exe` しか殺さないので、**mathlib を抱えた
+// `repl.exe`(17〜22 GB)が孤児として残り続ける**。実測でコミットが
+// 104 GB / 119 GB まで来ていた。プロセスツリーごと殺すこと。
+function killTree(proc) {
+  if (!proc || proc.pid == null) return;
+  if (process.platform === 'win32') {
     try {
-      state.proc.kill();
+      spawnSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
     } catch {
-      /* already gone */
+      /* ignore */
     }
   }
+  try {
+    proc.kill();
+  } catch {
+    /* already gone */
+  }
+}
+
+function killRepl() {
+  killTree(state.proc);
   state.proc = null;
   state.baseEnv = null;
   state.pending = null;
   state.buf = [];
   state.busy = false;
+}
+
+/** ★基準環境ごと捨てる(`lean_start` / `lean_reset` 用)。 */
+function killReplHard() {
+  killRepl();
+  state.envLog = [];
+  state.checks = 0;
 }
 
 function startRepl() {
@@ -137,6 +225,45 @@ async function loadImports(imports, timeoutMs) {
   return { seconds: (Date.now() - t0) / 1000, env: state.baseEnv };
 }
 
+/** ★★★**建て直しが要るか**——回数かメモリのどちらかが閾値を超えたら。 */
+function needsRecycle() {
+  if (state.checks >= MAX_CHECKS) return `検査 ${state.checks} 回`;
+  if (state.checks > 0 && state.checks % MEM_CHECK_EVERY === 0) {
+    const mb = Math.round(replMemoryMB());
+    if (mb >= MAX_MB) return `repl.exe 合計 ${mb} MB`;
+  }
+  return null;
+}
+
+/** ★★★★**REPL を建て直し、`addToEnv` で積んだ宣言を再生する**。
+ * 呼び出し側から見て基準環境は保たれる(env の id だけが変わる)。 */
+async function recycleRepl(timeoutMs, why) {
+  const saved = state.envLog.slice();
+  log(`recycle: ${why} —— REPL を建て直す(再生 ${saved.length} 件)`);
+  killRepl();
+  state.checks = 0;
+  state.recycles += 1;
+  await loadImports(state.imports, timeoutMs);
+  for (const code of saved) {
+    const text = await replSend({ cmd: code, env: state.baseEnv }, timeoutMs);
+    let res;
+    try {
+      res = JSON.parse(text);
+    } catch {
+      throw new Error(`建て直しの再生で REPL の応答が JSON でない:\n${text.slice(0, 1000)}`);
+    }
+    const errs = (res.messages ?? []).filter((m) => m.severity === 'error');
+    if (errs.length > 0 || res.env == null) {
+      throw new Error(
+        `建て直しの再生に失敗した。lean_start をやり直すこと:\n` +
+          errs.map((m) => m.data).join('\n').slice(0, 1000),
+      );
+    }
+    state.baseEnv = res.env;
+  }
+  state.envLog = saved;
+}
+
 function fmtMessages(res) {
   const msgs = res.messages ?? [];
   if (msgs.length === 0) return null;
@@ -211,7 +338,13 @@ async function callTool(name, args) {
     : DEFAULT_TIMEOUT_MS;
 
   if (name === 'lean_start') {
+    // ★2026-08-20: 以前はプロセスが生きていれば使い回していたが、
+    // **REPL は環境スナップショットを一切解放しない**ので、`import` を
+    // 呼ぶたびに mathlib 1 組分がプロセス内に積まれる(実測 46 GB)。
+    // 建て直す。温まっていれば 4〜5 秒で戻るので、使い回す利点は無い。
+    killReplHard();
     const r = await loadImports(args.imports, timeoutMs);
+    state.checks = 0;
     return (
       `起動して import を読み込んだ (${r.seconds.toFixed(1)} 秒)。\n` +
       `imports: ${args.imports.join(', ')}\n基準環境 env=${r.env}`
@@ -225,9 +358,17 @@ async function callTool(name, args) {
       }
       await loadImports(state.imports, timeoutMs);
     }
+    // ★恒久対処: 積み上がる前に建て直す(`addToEnv` の宣言は再生される)。
+    const why = needsRecycle();
+    let recycled = '';
+    if (why) {
+      await recycleRepl(timeoutMs, why);
+      recycled = ` / ★REPL を建て直した(${why}、再生 ${state.envLog.length} 件)`;
+    }
     const t0 = Date.now();
     const text = await replSend({ cmd: args.code, env: state.baseEnv }, timeoutMs);
     const dt = ((Date.now() - t0) / 1000).toFixed(2);
+    state.checks += 1;
     let res;
     try {
       res = JSON.parse(text);
@@ -238,11 +379,12 @@ async function callTool(name, args) {
     const errs = (res.messages ?? []).filter((m) => m.severity === 'error');
     if (args.addToEnv && errs.length === 0 && res.env != null) {
       state.baseEnv = res.env;
+      state.envLog.push(args.code);
     }
     const head =
       errs.length === 0
-        ? `OK (${dt} 秒)${args.addToEnv ? ` / 基準環境を env=${state.baseEnv} に更新` : ''}`
-        : `エラー ${errs.length} 件 (${dt} 秒)`;
+        ? `OK (${dt} 秒)${args.addToEnv ? ` / 基準環境を env=${state.baseEnv} に更新` : ''}${recycled}`
+        : `エラー ${errs.length} 件 (${dt} 秒)${recycled}`;
     const sorries = (res.sorries ?? []).length;
     const tail = sorries > 0 ? `\n\n★sorry ${sorries} 件` : '';
     return msgs ? `${head}\n\n${msgs}${tail}` : `${head}${tail}`;
@@ -253,13 +395,17 @@ async function callTool(name, args) {
       `起動: ${state.proc ? 'あり' : 'なし'}\n` +
       `imports: ${state.imports.join(', ') || '(なし)'}\n` +
       `基準環境: ${state.baseEnv ?? '(なし)'}\n` +
+      `lean_check 回数: ${state.checks} / ${MAX_CHECKS}(超えたら自動で建て直す)\n` +
+      `再生用に控えた宣言: ${state.envLog.length} 件 / 建て直し ${state.recycles} 回\n` +
+      `${replMemory()}\n` +
+      `自動建て直しの閾値: ${MAX_MB} MB(${MEM_CHECK_EVERY} 回ごとに計測)\n` +
       `LEAN_DIR: ${LEAN_DIR}\nREPL: ${REPL_BIN}`
     );
   }
 
   if (name === 'lean_reset') {
-    killRepl();
-    return 'REPL を落とした。';
+    killReplHard();
+    return 'REPL を落とした(再生用の控えも捨てた)。';
   }
 
   throw new Error(`未知のツール: ${name}`);
@@ -332,8 +478,20 @@ rl.on('line', async (line) => {
   }
 });
 
-process.on('exit', killRepl);
-process.on('SIGINT', () => {
+// ★2026-08-20 の恒久対処: どの経路で終わっても `repl.exe` を孤児にしない。
+// MCP サーバは stdin が閉じたら終わる——これを拾わないと、セッションを閉じても
+// `lake.exe → repl.exe` が数十 GB を抱えたまま残る。
+function shutdown(code) {
   killRepl();
-  process.exit(0);
+  process.exit(code ?? 0);
+}
+process.on('exit', killRepl);
+process.on('SIGINT', () => shutdown(0));
+process.on('SIGTERM', () => shutdown(0));
+process.on('SIGHUP', () => shutdown(0));
+process.on('uncaughtException', (e) => {
+  log(`uncaught: ${e?.message ?? e}`);
+  shutdown(1);
 });
+rl.on('close', () => shutdown(0));
+process.stdin.on('close', () => shutdown(0));
