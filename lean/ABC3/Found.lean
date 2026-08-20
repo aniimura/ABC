@@ -608,6 +608,7 @@ import ABC3.Found.GaloisRep.PullbackAlg
 import ABC3.Found.GaloisRep.CountPow
 import ABC3.Found.GaloisRep.ValuationCount
 import ABC3.Found.GaloisRep.ValuationInfty
+import ABC3.Found.GaloisRep.ValuationEven
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
