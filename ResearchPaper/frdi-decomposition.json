@@ -3113,11 +3113,11 @@
           "id": "places",
           "title": "`V(L)` —— 有限素点と無限素点の合併",
           "deps": [],
-          "status": "inMathlib",
+          "status": "done",
           "size": "小",
-          "note": "★`NumberField.FinitePlace K`(`Completion/FinitePlace.lean`)と `NumberField.InfinitePlace K` が在る。合併型を作るだけ。",
-          "lean": "",
-          "decl": ""
+          "note": "★`NumberField.FinitePlace K`(`Completion/FinitePlace.lean`)と `NumberField.InfinitePlace K` が在る。合併型を作るだけ。\n\n★（2026-08-20）`ArithPlace L := FinitePlace L ⊕ InfinitePlace L` として置いた。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "ArithPlace"
         },
         {
           "id": "ord-mon",
@@ -3149,11 +3149,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★「all but a finite number of which are zero」= 有限個の素点でしか付値が非零でない。mathlib の `HeightOneSpectrum` の有限性補題に乗る。",
-          "lean": "",
-          "decl": ""
+          "note": "★「all but a finite number of which are zero」= 有限個の素点でしか付値が非零でない。mathlib の `HeightOneSpectrum` の有限性補題に乗る。\n\n★★（2026-08-20）**台の有限性と準同型性は閉じた**（`finite_support_arithPlaceLog` / `arithDiv_mul`）。有限性は mathlib の `NumberField.FinitePlace.hasFiniteMulSupport` から出る。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "arithDiv / arithDiv_mul / arithDivHom"
         },
         {
           "id": "arith-functor",
@@ -3185,11 +3185,11 @@
           "deps": [
             "arith-phi"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "中",
-          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。",
-          "lean": "",
-          "decl": ""
+          "note": "★アルキメデス成分は `−[F_v:ℝ]·log λ`、非アルキメデス成分は `log #(O_v/(λ))`。\n\n★★（2026-08-20）`arithDegree`（成分の総和）として実装した。★原文の「`−[F_v:ℝ]·log λ`」「`log #(O_v/(λ))`」との一致は `ord-mon` が閉じてから書く。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "arithDegree"
         },
         {
           "id": "deg-vanish",
@@ -3198,11 +3198,11 @@
             "deg-arith",
             "arith-B"
           ],
-          "status": "inMathlib",
+          "status": "done",
           "size": "小",
-          "note": "★★**mathlib に在る**: `NumberField.prod_abs_eq_one`(`NumberTheory/NumberField/ProductFormula.lean`)。対数を取れば `deg^arith ∘ B = 0` になる。",
-          "lean": "",
-          "decl": ""
+          "note": "★★**mathlib に在る**: `NumberField.prod_abs_eq_one`(`NumberTheory/NumberField/ProductFormula.lean`)。対数を取れば `deg^arith ∘ B = 0` になる。\n\n★★★★★（2026-08-20）**閉じた**。`Found/Divisor/ArithDivisor.lean` に `arithDegree_arithDiv` を sorry なしで置いた。★中身は `NumberField.prod_abs_eq_one` の**対数版**（`sum_log_place_eq_zero`）である。★逸脱を記録した：各素点の成分を `−log|x|_v`（無限素点は `mult` つき）と置いたので、`ArithPlace L →₀ ℝ` は原文の `Φ(L)^gp` を `deg^arith` で見た像に相当する。`ord(F_v) ≅ ℤ` の同一視自体は節点 `ord-mon` のままである。",
+          "lean": "ABC3/Found/Divisor/ArithDivisor.lean",
+          "decl": "arithDegree_arithDiv"
         },
         {
           "id": "mu-units",
