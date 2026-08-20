@@ -391,6 +391,15 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
       "原文が (vi) を片向きでしか述べていないことは、著者が向きを意識している証拠である。" ++
       "★2026-08-20: `Theorem 5.1, (iii)` により **isotropic 型 ＋ base-trivial ⟹ Aut-ample**" ++
       "が出たので、`base-trivial` の枝は埋まった(`cfp_baseTrivial_mpr_of_isotropic`)。" ++
-      "残るのは `metrically trivial` の枝と、isotropic 型を仮定しない一般の場合である。" }
+      "残るのは `metrically trivial` の枝と、isotropic 型を仮定しない一般の場合である。" ++
+      "★★2026-08-20: `Proposition 1.6` の他の条はすべて閉じた" ++
+      "((ii) の 21 条 = `cfpFrobenioidCore`、(iii) の pull-back の両向き = " ++
+      "`cfp_isPullBack_iff`、(iv) = `cfp_pullBackLB` / `cfp_arbFactorUniq`、" ++
+      "(v) の perfect = `cfp_perfect_iff`、Frobenius-normalized = `cfp_frobNormalized_iff`)。" ++
+      "★したがって `Proposition 1.6` に残る穴は 2 点だけである: " ++
+      "(1) この `Gap_1_6_v`(metrically trivial の `⇐`)、" ++
+      "(2) (vi) の `Aut^sub-ample` —— sub-automorphism の証人対象を " ++
+      "`𝒞′` へ持ち上げる道は `plBk_baseChange` で作れるが、" ++
+      "その証人の自己射が**同型**であることが出ない。" }
 
 end ABC3.Gap.FrdI
