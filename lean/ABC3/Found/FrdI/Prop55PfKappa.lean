@@ -346,4 +346,80 @@ def rootMap_rootStep_sq.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 根を上げた射の自然性",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★7. `Hom^pf` の代表元を「標準の `k` 乗根の添字」に揃える
+
+★★`Proposition 5.5, (ii)` の**逆写像**を作るときに要る ——
+左辺の元は「`𝒞^pf` の co-angular pre-step `ε`」と「`𝒞^pf` の射 `φ`」の組であり、
+どちらも `Hom^pf` の元なので、**共通の根に揃える**と
+`𝒞` のスパン `A^{(k)} ← X → B^{(k)}` になる。
+
+★添字 `Z` の次数を `k` とすると `Definition 1.3, (ii)` の本質的一意性
+(`frobDegUniq`)が `Z ≅ idxPow U V k` を与えるので、
+**どの元も `idxPow` の形の添字で代表できる**。 -/
+
+/-- ★★★**`Hom^pf` の元は「標準の `k` 乗根の添字」で代表できる**。 -/
+theorem HomPf.exists_rep_pow {U V : C} (z : HomPf P F U V) :
+    ∃ (k : ℕ+) (ψ : rtObj P F U k ⟶ rtObj P F V k),
+      HomPf.mk (idxPow (F := F) U V k) ψ = z := by
+  obtain ⟨Z, φ, hφ⟩ := HomPf.exists_rep z
+  obtain ⟨θ₁, hθ₁, hθ₁e⟩ := F.frobDegUniq U Z.right.obj.1
+    (rtObj P F U (P.degFr Z.hom.hom.1))
+    Z.hom.hom.1 (rtExt P F U (P.degFr Z.hom.hom.1)) Z.hom.property.1
+    (rtExt_frobType P F U _) (rtExt_degFr P F U _).symm
+  obtain ⟨θ₂, hθ₂, hθ₂e⟩ := F.frobDegUniq V Z.right.obj.2
+    (rtObj P F V (P.degFr Z.hom.hom.1))
+    Z.hom.hom.2 (rtExt P F V (P.degFr Z.hom.hom.1)) Z.hom.property.2.1
+    (rtExt_frobType P F V _)
+    (Z.hom.property.2.2.symm.trans (rtExt_degFr P F V _).symm)
+  haveI := hθ₁
+  haveI := hθ₂
+  have hd1 : P.degFr θ₁ = 1 := degFr_of_isIso P θ₁
+  have hd2 : P.degFr θ₂ = 1 := degFr_of_isIso P θ₂
+  refine ⟨P.degFr Z.hom.hom.1, idxTransport P F (Under.homMk
+    (show Z.right ⟶ (idxPow (F := F) U V (P.degFr Z.hom.hom.1)).right from
+      ⟨(θ₁, θ₂), isFrobeniusType_of_isIso P θ₁, isFrobeniusType_of_isIso P θ₂,
+        hd1.trans hd2.symm⟩)
+    (WideSubcategory.hom_ext _ (Prod.ext hθ₁e hθ₂e))) φ, ?_⟩
+  rw [← hφ]
+  exact HomPf.mk_map _ φ
+
+/-- ★添字 `idxPow U V k ⟶ idxPow U V t`(`t = e * k`)。 -/
+noncomputable def idxPowLift (U V : C) {k e t : ℕ+} (ht : t = e * k) :
+    idxPow (F := F) U V k ⟶ idxPow (F := F) U V t :=
+  Under.homMk
+    (show (idxPow (F := F) U V k).right ⟶ (idxPow (F := F) U V t).right from
+      ⟨(rtLift P F U ht, rtLift P F V ht), rtLift_frobType P F U ht,
+        rtLift_frobType P F V ht,
+        (rtLift_degFr P F U ht).trans (rtLift_degFr P F V ht).symm⟩)
+    (WideSubcategory.hom_ext _ (Prod.ext (rtLift_ext P F U ht) (rtLift_ext P F V ht)))
+
+/-- ★★**代表元は根を上げても同じ元を与える**。 -/
+theorem HomPf.mk_pow_lift {U V : C} {k e t : ℕ+} (ht : t = e * k)
+    (ψ : rtObj P F U k ⟶ rtObj P F V k) :
+    HomPf.mk (idxPow (F := F) U V t) (idxTransport P F (idxPowLift (F := F) U V ht) ψ)
+      = HomPf.mk (idxPow (F := F) U V k) ψ :=
+  HomPf.mk_map (idxPowLift (F := F) U V ht) ψ
+
+/-- ★★★**同じ始域から出る 2 つの `Hom^pf` の元は共通の根で代表できる**。
+
+★★これが逆写像の第 1 歩である。 -/
+theorem HomPf.exists_rep_pow_pair {U X Y : C} (z₁ : HomPf P F U X) (z₂ : HomPf P F U Y) :
+    ∃ (k : ℕ+) (ψ₁ : rtObj P F U k ⟶ rtObj P F X k) (ψ₂ : rtObj P F U k ⟶ rtObj P F Y k),
+      HomPf.mk (idxPow (F := F) U X k) ψ₁ = z₁ ∧
+      HomPf.mk (idxPow (F := F) U Y k) ψ₂ = z₂ := by
+  obtain ⟨k₁, ψ₁, h₁⟩ := HomPf.exists_rep_pow z₁
+  obtain ⟨k₂, ψ₂, h₂⟩ := HomPf.exists_rep_pow z₂
+  refine ⟨k₂ * k₁,
+    idxTransport P F (idxPowLift (F := F) U X (e := k₂) (t := k₂ * k₁) rfl) ψ₁,
+    idxTransport P F (idxPowLift (F := F) U Y (e := k₁) (t := k₂ * k₁)
+      (mul_comm k₂ k₁)) ψ₂, ?_, ?_⟩
+  · exact (HomPf.mk_pow_lift (F := F) rfl ψ₁).trans h₁
+  · exact (HomPf.mk_pow_lift (F := F) (mul_comm k₂ k₁) ψ₂).trans h₂
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の逆写像の第 1 歩(共通の根)。 -/
+def HomPf.exists_rep_pow_pair.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — Hom^pf の 2 元を共通の根で代表する",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
