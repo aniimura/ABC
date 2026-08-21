@@ -6,3 +6,7 @@ Github : https://github.com/aniimura/ABC
 Push : 依存グラフの更新や、形式化の進捗が出た場合はgithubを更新する
 作業効率 : lake env leanを使うような処理ではtools\mcp-lean\README.md
 姿勢 : 工数の山を「壁」と呼ばない。既知数学の person-years は壁でなく道。
+Bash : Bash にマッチするPreToolUse フックで自動書き換え・即時ブロックをしているが、コマンドとデータを区別していないため、誤爆時の逃げ道として#no-guard /#full-checkを用意している
+配管 : エラボレータとの戦い(instances 透明度・依存位置の ℕ≥1・cancel_epi のインスタンス探索 等)で同じ穴に落ちないため、失敗形と直し方を tools\lean-idioms.md に集めている。「前にも見た」と思ったらまずそこを引き、新しい失敗形に当たったら1行足す。
+在庫 : 使える補題が既にあるかは `node tools/decl-index.mjs` で `.cache/decl-index.txt`(宣言 1 万件)と `.cache/src-index.txt`(locator)を作り、そこを grep する。木全体(20 万行)を grep しない。
+検査 : `node tools/check.mjs` は pdftotext の結果を `.cache/pdf-pages.json` にキャッシュする(55 秒 → 7 秒)。鍵に check.mjs 自身のハッシュを含むので、正規化を変えれば必ず作り直される。

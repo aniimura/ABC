@@ -157,6 +157,7 @@ import {
   mkdtempSync, mkdirSync, writeFileSync, rmSync,
 } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { join, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -316,11 +317,65 @@ const PDF_MODES = [
   ['raw', ['-raw']],
 ];
 
+/**
+ * ★★**ディスク上のページキャッシュ**(2026-08-21 追加)。
+ *
+ * 実測: `pdftotext` の呼び出しが検査時間のほぼ全部だった
+ * (`--structured` 36 秒 / `--lean` 56 秒)。★ページの本文は
+ * **PDF が変わらないかぎり変わらない**ので、跨ぎのキャッシュが効く。
+ *
+ * ★★**検出力を落とさないための鍵の取り方**:
+ * * PDF の `mtime` と `size` を鍵に入れる —— 原本が差し替われば必ず外れる。
+ * * **`check.mjs` 自身のハッシュ**も鍵に入れる —— `normalize` / `squash` /
+ *   `PDF_MODES` を触ったら必ず外れる。★これを忘れると
+ *   「正規化を変えたのに古いテキストで通る」という**器具の穴**になる。
+ *
+ * キャッシュが壊れていても最悪 `pdftotext` を呼び直すだけで、
+ * 検査結果は変わらない。
+ */
+const CACHE_DIR = join(ROOT, '.cache');
+const PDF_CACHE = join(CACHE_DIR, 'pdf-pages.json');
+const SELF_HASH = (() => {
+  try {
+    return createHash('sha1')
+      .update(readFileSync(fileURLToPath(import.meta.url)))
+      .digest('hex').slice(0, 12);
+  } catch { return 'nohash'; }
+})();
+
+let diskCache = null;
+let diskDirty = false;
+function loadDiskCache() {
+  if (diskCache) return diskCache;
+  try {
+    const j = JSON.parse(readFileSync(PDF_CACHE, 'utf8'));
+    diskCache = (j && j.self === SELF_HASH && j.pages) ? j.pages : {};
+  } catch { diskCache = {}; }
+  return diskCache;
+}
+function saveDiskCache() {
+  if (!diskDirty || !diskCache) return;
+  try {
+    mkdirSync(CACHE_DIR, { recursive: true });
+    writeFileSync(PDF_CACHE, JSON.stringify({ self: SELF_HASH, pages: diskCache }), 'utf8');
+  } catch { /* キャッシュは書けなくてよい */ }
+}
+process.on('exit', saveDiskCache);
+
 const pageCache = new Map();
 /** @returns {Array<[string, string]>|null} [モード名, squash済みテキスト] の配列 */
 function pdfPageTexts(pdfPath, page) {
   const key = `${pdfPath}#${page}`;
   if (pageCache.has(key)) return pageCache.get(key);
+  let stamp = null;
+  try { const st = statSync(pdfPath); stamp = `${st.mtimeMs}#${st.size}`; } catch { /* 無い */ }
+  const dkey = stamp === null ? null : `${key}#${stamp}`;
+  const disk = loadDiskCache();
+  if (dkey !== null && Object.prototype.hasOwnProperty.call(disk, dkey)) {
+    const cached = disk[dkey];
+    pageCache.set(key, cached);
+    return cached;
+  }
   const out = [];
   for (const [name, flags] of PDF_MODES) {
     try {
@@ -331,6 +386,7 @@ function pdfPageTexts(pdfPath, page) {
   }
   const val = out.length ? out : null;
   pageCache.set(key, val);
+  if (dkey !== null) { disk[dkey] = val; diskDirty = true; }
   return val;
 }
 
