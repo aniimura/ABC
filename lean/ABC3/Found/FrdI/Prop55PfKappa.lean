@@ -550,4 +550,106 @@ def rootLiftGen.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 根つきの κ と持ち上げ",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★9. 押し出しの添字 —— `rootIso` の計算則に直結する形
+
+★★★**実務上の要点**: `idxPow U V k`(`idxMk (rtExt U k) (rtExt V k)`)と
+「押し出し」`(pushIdx (rtExt U k) … (rtExt V k) …).obj (idxOne …)` は
+**構造射が `≫ 𝟙` の分だけ違う**。★`≫ 𝟙` は一般の圏では `rfl` ではないので、
+2 つの添字対象は**定義的には等しくない**。
+
+★★`WideSubcategory` の恒等射は `.hom` 越しに簡約されないため、
+「両者を結ぶ自明な添字の射」を作る道は詰まる(実測)。
+★★★**押し出しの形をそのまま使うのが正解**である ——
+`rootIso_hom_mk`(在庫)が**そのまま**当たる。 -/
+
+/-- ★`idxPow` を「押し出し」の形で書いたもの(`rootIso` の計算則に直結する)。 -/
+noncomputable def idxPow' (U V : C) (k : ℕ+) : IdxPf P F U V :=
+  (pushIdx (F := F) (rtExt P F U k) (rtExt_frobType P F U k)
+    (rtExt P F V k) (rtExt_frobType P F V k)
+    (by rw [rtExt_degFr, rtExt_degFr])).obj (idxOne P F (rtObj P F U k) (rtObj P F V k))
+
+/-- ★★★**辞書** —— 押し出しの添字での代表元は `rootIso` で `toHomPf` に戻る。
+
+★★これが `Proposition 5.5, (ii)` の**逆向き**に要る 1 本である。 -/
+theorem HomPf.mk_idxPow' (U V : C) (k : ℕ+) (ψ : rtObj P F U k ⟶ rtObj P F V k) :
+    HomPf.mk (idxPow' (F := F) U V k) ψ
+      = (rootIso (F := F) (rtExt P F U k) (rtExt_frobType P F U k)
+          (rtExt P F V k) (rtExt_frobType P F V k)
+          (by rw [rtExt_degFr, rtExt_degFr])).hom (toHomPf (F := F) ψ) :=
+  (rootIso_hom_mk (F := F) (rtExt P F U k) (rtExt_frobType P F U k)
+    (rtExt P F V k) (rtExt_frobType P F V k)
+    (by rw [rtExt_degFr, rtExt_degFr])
+    (idxOne P F (rtObj P F U k) (rtObj P F V k)) ψ).symm
+
+/-- ★★★**`Hom^pf` の元は「押し出しの添字」で代表できる**。 -/
+theorem HomPf.exists_rep_pow' {U V : C} (z : HomPf P F U V) :
+    ∃ (k : ℕ+) (ψ : rtObj P F U k ⟶ rtObj P F V k),
+      HomPf.mk (idxPow' (F := F) U V k) ψ = z := by
+  obtain ⟨Z, φ, hφ⟩ := HomPf.exists_rep z
+  obtain ⟨θ₁, hθ₁, hθ₁e⟩ := F.frobDegUniq U Z.right.obj.1
+    (rtObj P F U (P.degFr Z.hom.hom.1))
+    Z.hom.hom.1 (rtExt P F U (P.degFr Z.hom.hom.1)) Z.hom.property.1
+    (rtExt_frobType P F U _) (rtExt_degFr P F U _).symm
+  obtain ⟨θ₂, hθ₂, hθ₂e⟩ := F.frobDegUniq V Z.right.obj.2
+    (rtObj P F V (P.degFr Z.hom.hom.1))
+    Z.hom.hom.2 (rtExt P F V (P.degFr Z.hom.hom.1)) Z.hom.property.2.1
+    (rtExt_frobType P F V _)
+    (Z.hom.property.2.2.symm.trans (rtExt_degFr P F V _).symm)
+  haveI := hθ₁
+  haveI := hθ₂
+  have hd1 : P.degFr θ₁ = 1 := degFr_of_isIso P θ₁
+  have hd2 : P.degFr θ₂ = 1 := degFr_of_isIso P θ₂
+  refine ⟨P.degFr Z.hom.hom.1, idxTransport P F (Under.homMk
+    (show Z.right ⟶ (idxPow' (F := F) U V (P.degFr Z.hom.hom.1)).right from
+      ⟨(θ₁, θ₂), isFrobeniusType_of_isIso P θ₁, isFrobeniusType_of_isIso P θ₂,
+        hd1.trans hd2.symm⟩)
+    (WideSubcategory.hom_ext _
+      (Prod.ext (hθ₁e.trans (Category.comp_id _).symm)
+        (hθ₂e.trans (Category.comp_id _).symm)))) φ, ?_⟩
+  rw [← hφ]
+  exact HomPf.mk_map _ φ
+
+/-- ★添字 `idxPow' U V k ⟶ idxPow' U V t`(`t = e * k`)。 -/
+noncomputable def idxPowLift' (U V : C) {k e t : ℕ+} (ht : t = e * k) :
+    idxPow' (F := F) U V k ⟶ idxPow' (F := F) U V t :=
+  Under.homMk
+    (show (idxPow' (F := F) U V k).right ⟶ (idxPow' (F := F) U V t).right from
+      ⟨(rtLift P F U ht, rtLift P F V ht), rtLift_frobType P F U ht,
+        rtLift_frobType P F V ht,
+        (rtLift_degFr P F U ht).trans (rtLift_degFr P F V ht).symm⟩)
+    (WideSubcategory.hom_ext _
+      (Prod.ext
+        (show (rtExt P F U k ≫ 𝟙 (rtObj P F U k)) ≫ rtLift P F U ht
+            = rtExt P F U t ≫ 𝟙 (rtObj P F U t) by
+          rw [Category.comp_id, Category.comp_id]; exact rtLift_ext P F U ht)
+        (show (rtExt P F V k ≫ 𝟙 (rtObj P F V k)) ≫ rtLift P F V ht
+            = rtExt P F V t ≫ 𝟙 (rtObj P F V t) by
+          rw [Category.comp_id, Category.comp_id]; exact rtLift_ext P F V ht)))
+
+theorem HomPf.mk_pow_lift' {U V : C} {k e t : ℕ+} (ht : t = e * k)
+    (ψ : rtObj P F U k ⟶ rtObj P F V k) :
+    HomPf.mk (idxPow' (F := F) U V t) (idxTransport P F (idxPowLift' (F := F) U V ht) ψ)
+      = HomPf.mk (idxPow' (F := F) U V k) ψ :=
+  HomPf.mk_map (idxPowLift' (F := F) U V ht) ψ
+
+/-- ★★★**同じ始域から出る 2 つの `Hom^pf` の元は共通の根で代表できる**(押し出し版)。 -/
+theorem HomPf.exists_rep_pow_pair' {U X Y : C} (z₁ : HomPf P F U X) (z₂ : HomPf P F U Y) :
+    ∃ (k : ℕ+) (ψ₁ : rtObj P F U k ⟶ rtObj P F X k) (ψ₂ : rtObj P F U k ⟶ rtObj P F Y k),
+      HomPf.mk (idxPow' (F := F) U X k) ψ₁ = z₁ ∧
+      HomPf.mk (idxPow' (F := F) U Y k) ψ₂ = z₂ := by
+  obtain ⟨k₁, ψ₁, h₁⟩ := HomPf.exists_rep_pow' z₁
+  obtain ⟨k₂, ψ₂, h₂⟩ := HomPf.exists_rep_pow' z₂
+  refine ⟨k₂ * k₁,
+    idxTransport P F (idxPowLift' (F := F) U X (e := k₂) (t := k₂ * k₁) rfl) ψ₁,
+    idxTransport P F (idxPowLift' (F := F) U Y (e := k₁) (t := k₂ * k₁)
+      (mul_comm k₂ k₁)) ψ₂, ?_, ?_⟩
+  · exact (HomPf.mk_pow_lift' (F := F) rfl ψ₁).trans h₁
+  · exact (HomPf.mk_pow_lift' (F := F) (mul_comm k₂ k₁) ψ₂).trans h₂
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の逆向きの辞書。 -/
+def HomPf.mk_idxPow'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 押し出しの添字での代表元と rootIso",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
