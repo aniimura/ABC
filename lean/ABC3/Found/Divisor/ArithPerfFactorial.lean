@@ -470,4 +470,117 @@ def isPerfFactorial_effR.src : ABC3.Meta.Source :=
     item := "Example 6.3 — Φ(L) は perf-factorial(実係数の骨格)",
     sectionId := "frdi-example-6-3" }
 
+/-! ## ★★`Φ(L)` は primary 元で生成される —— non-dilating の入力(2026-08-21)
+
+`Theorem 6.4, (i)` / `Theorem 6.2, (iii)` の non-dilating は
+`isNonDilating_of_primary_sharp`(`MonoidTransport.lean`)に 2 つ入力すれば出る:
+
+| 入力 | ここで閉じるか |
+|---|---|
+| `hgen` : primary 元で生成される | ★**本節で閉じる**(`IsCoordwiseR` から) |
+| `hfix` : 自己同型は素点を素点へ(係数 1 で)移す | ★まだ —— `Datum` に条項が無い |
+
+★★**`IsCoordwiseR` がちょうど `hgen` を与える** —— 座標ごとに閉じているので、
+`x = Σ_{s ∈ supp x} single s (x s)` の各項が `Φ(L)` に入る。
+★各項が primary であることは「台が 1 点なら primary」で、
+中身は**実数の Archimedes 性**(`exists_nat_gt`)だけである。 -/
+
+/-- ★★**台が 1 点の元は primary**。
+
+★`b ≼ a` なら `b` の台も `{s}` に入る(非負だから)。逆向きは
+`m·b ≥ a` となる `m` を Archimedes 性で取るだけ。 -/
+theorem isPrimaryElt_effR_single {s : S} {r : ℝ} (hr : 0 < r)
+    (hmem : Finsupp.single s r ∈ effR Γ) :
+    IsPrimaryElt (⟨Finsupp.single s r, hmem⟩ : effR Γ) := by
+  refine ⟨?_, ?_⟩
+  · intro h0
+    have h : Finsupp.single s r = (0 : S →₀ ℝ) := congrArg Subtype.val h0
+    rw [Finsupp.single_eq_zero] at h
+    exact hr.ne' h
+  · rintro b hb0 ⟨n, hn, c, hbc⟩
+    have hcoe : (b : S →₀ ℝ) + (c : S →₀ ℝ) = n • (Finsupp.single s r : S →₀ ℝ) :=
+      congrArg Subtype.val hbc
+    have hbnn : ∀ t, 0 ≤ (b : S →₀ ℝ) t := (mem_effR.mp b.2).2
+    have hcnn : ∀ t, 0 ≤ (c : S →₀ ℝ) t := (mem_effR.mp c.2).2
+    have hbt : ∀ t, t ≠ s → (b : S →₀ ℝ) t = 0 := by
+      intro t ht
+      have h1 := congrArg (fun f : S →₀ ℝ => f t) hcoe
+      have hz : (Finsupp.single s r : S →₀ ℝ) t = 0 := Finsupp.single_eq_of_ne ht
+      simp only [Finsupp.add_apply, Finsupp.smul_apply] at h1
+      rw [hz, smul_zero] at h1
+      linarith [hbnn t, hcnn t]
+    have hbsupp : (b : S →₀ ℝ) = Finsupp.single s ((b : S →₀ ℝ) s) := by
+      refine Finsupp.ext fun t => ?_
+      rcases eq_or_ne t s with rfl | ht
+      · rw [Finsupp.single_eq_same]
+      · have hz : (Finsupp.single s ((b : S →₀ ℝ) s) : S →₀ ℝ) t = 0 :=
+          Finsupp.single_eq_of_ne ht
+        rw [hbt t ht, hz]
+    have hbs : 0 < (b : S →₀ ℝ) s := by
+      rcases lt_or_eq_of_le (hbnn s) with h | h
+      · exact h
+      · refine absurd (Subtype.ext ?_) hb0
+        rw [hbsupp, ← h, Finsupp.single_zero]
+        rfl
+    obtain ⟨m, hm⟩ := exists_nat_gt (r / (b : S →₀ ℝ) s)
+    have hrm : r < (m : ℝ) * (b : S →₀ ℝ) s := (div_lt_iff₀ hbs).mp hm
+    have hm0 : 0 < m := by
+      rcases Nat.eq_zero_or_pos m with h | h
+      · rw [h] at hrm; norm_num at hrm; linarith
+      · exact h
+    have hmb : (m : ℕ) • (b : S →₀ ℝ) = Finsupp.single s ((m : ℝ) * (b : S →₀ ℝ) s) := by
+      rw [hbsupp, Finsupp.smul_single, Finsupp.single_eq_same, nsmul_eq_mul]
+    have hdmem : Finsupp.single s ((m : ℝ) * (b : S →₀ ℝ) s - r) ∈ effR Γ := by
+      refine mem_effR.mpr ⟨?_, ?_⟩
+      · have h1 : Finsupp.single s ((m : ℝ) * (b : S →₀ ℝ) s - r)
+            = (m : ℕ) • (b : S →₀ ℝ) - Finsupp.single s r := by
+          rw [hmb, ← Finsupp.single_sub]
+        rw [h1]
+        exact Γ.sub_mem (Γ.nsmul_mem (mem_effR.mp b.2).1 m) (mem_effR.mp hmem).1
+      · intro t
+        rcases eq_or_ne t s with rfl | ht
+        · rw [Finsupp.single_eq_same]; linarith
+        · have hz : (Finsupp.single s ((m : ℝ) * (b : S →₀ ℝ) s - r) : S →₀ ℝ) t = 0 :=
+            Finsupp.single_eq_of_ne ht
+          rw [hz]
+    refine ⟨m, hm0, ⟨⟨_, hdmem⟩, Subtype.ext ?_⟩⟩
+    show Finsupp.single s r + Finsupp.single s ((m : ℝ) * (b : S →₀ ℝ) s - r)
+      = (m : ℕ) • (b : S →₀ ℝ)
+    rw [← Finsupp.single_add, hmb]
+    congr 1
+    ring
+
+/-- ★座標ごとに切り出した元。 -/
+noncomputable def effRSingle (hc : IsCoordwiseR Γ) (x : effR Γ) (s : S) : effR Γ :=
+  ⟨Finsupp.single s ((x : S →₀ ℝ) s),
+    mem_effR.mpr ⟨hc (x : S →₀ ℝ) (mem_effR.mp x.2).1 s, by
+      intro t
+      rcases eq_or_ne t s with rfl | h
+      · rw [Finsupp.single_eq_same]; exact (mem_effR.mp x.2).2 t
+      · rw [Finsupp.single_eq_of_ne h]⟩⟩
+
+/-- ★元は座標ごとの和。 -/
+theorem effR_eq_sum_single (hc : IsCoordwiseR Γ) (x : effR Γ) :
+    x = ∑ s ∈ ((x : S →₀ ℝ)).support, effRSingle hc x s := by
+  refine Subtype.ext ?_
+  rw [AddSubmonoid.coe_finsetSum]
+  exact (Finsupp.sum_single (x : S →₀ ℝ)).symm
+
+/-- ★★★★**`Φ(L)` は primary 元で生成される** —— non-dilating の入力 `hgen`。 -/
+theorem closure_primary_effR_eq_top (hc : IsCoordwiseR Γ) :
+    AddSubmonoid.closure {a : effR Γ | IsPrimaryElt a} = ⊤ := by
+  refine eq_top_iff.mpr fun x _ => ?_
+  rw [effR_eq_sum_single hc x]
+  refine sum_mem fun s hs => AddSubmonoid.subset_closure ?_
+  have hpos : 0 < (x : S →₀ ℝ) s :=
+    lt_of_le_of_ne ((mem_effR.mp x.2).2 s) (Ne.symm (Finsupp.mem_support_iff.mp hs))
+  exact isPrimaryElt_effR_single hpos _
+
+/-- ★★★locator —— `Example 6.3` の `Φ(L)` が primary 元で生成されること
+(`Theorem 6.4, (i)` の non-dilating の入力)。 -/
+def closure_primary_effR_eq_top.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — Φ(L) は primary 元(台が 1 点の元)で生成される",
+    sectionId := "frdi-example-6-3" }
+
 end ABC3.Found.Divisor
