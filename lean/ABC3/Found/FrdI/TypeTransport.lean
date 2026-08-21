@@ -158,6 +158,104 @@ theorem isFrobeniusCompact_map (Ψ : C₁ ⥤ C₂) [Ψ.Full] [Ψ.Faithful]
 
 end MapForm
 
+/-! ## ★3. 仮定を「`𝔽_Φ` への関手との 1-可換性」1 本にまとめる
+
+★★★実務では圏同値が **`𝒞 → 𝔽_Φ` と 1-可換**な形で与えられる
+(`Theorem 5.2, (iv)` の `modelTypeEquiv_comp_toElem` がそれ)。
+★その自然同型 1 本から **`degFr` の保存も「底恒等性」の保存も出る** ——
+`Base` と `degFr` は `𝔽_Φ` の射の成分そのものだからである。
+
+★鍵は「`𝔽_Φ` の同型は Frobenius 次数 1」(`elem_deg_of_iso`)である。 -/
+
+section ToElemIso
+
+variable {C₁ : Type u2} [Category.{v2} C₁] {C₂ : Type u4} [Category.{v4} C₂]
+  {D₀ : Type u} [Category.{v} D₀] {Φ₀ : MonoidOn.{v, u, w} D₀}
+  {P₁ : PreFrobenioid C₁ Φ₀} {P₂ : PreFrobenioid C₂ Φ₀}
+
+/-- ★★**`𝔽_Φ` の同型は Frobenius 次数 1**。 -/
+theorem elem_deg_of_iso {A B : ElemFrobCat Φ₀} (e : A ≅ B) : (e.hom : A ⟶ B).deg = 1 := by
+  have h1 : ((e.hom ≫ e.inv : A ⟶ A)).deg = ((𝟙 A : A ⟶ A)).deg :=
+    congrArg (fun t : A ⟶ A => t.deg) e.hom_inv_id
+  rw [ElemFrobCat.comp_deg] at h1
+  have h2 : (e.inv : B ⟶ A).deg * (e.hom : A ⟶ B).deg = 1 := h1
+  have h3 : (((e.inv : B ⟶ A).deg : ℕ)) * (((e.hom : A ⟶ B).deg : ℕ)) = 1 := by
+    exact_mod_cast congrArg (fun n : ℕ+ => (n : ℕ)) h2
+  exact PNat.coe_injective (Nat.eq_one_of_mul_eq_one_left h3)
+
+/-- ★★★**`𝔽_Φ` への関手と 1-可換なら Frobenius 次数を保つ**。 -/
+theorem degFr_map_of_toElem_iso (Ψ : C₁ ⥤ C₂) (η : Ψ ⋙ P₂.toElem ≅ P₁.toElem)
+    {X Y : C₁} (f : X ⟶ Y) : P₂.degFr (Ψ.map f) = P₁.degFr f := by
+  have hnat := congrArg (fun t : (Ψ ⋙ P₂.toElem).obj X ⟶ P₁.toElem.obj Y => t.deg)
+    (η.hom.naturality f)
+  simp only [Functor.comp_map, ElemFrobCat.comp_deg] at hnat
+  have hY : (η.hom.app Y).deg = 1 := elem_deg_of_iso (η.app Y)
+  have hX : (η.hom.app X).deg = 1 := elem_deg_of_iso (η.app X)
+  rw [hY, hX, one_mul, mul_one] at hnat
+  exact hnat
+
+/-- ★★★**`𝔽_Φ` への関手と 1-可換なら「底恒等性」を(両向きに)保つ**。
+
+★`η` の成分の `base` は同型なので、`Base` の四角形が両向きに割れる。 -/
+theorem isBaseIdentity_map_iff_of_toElem_iso (Ψ : C₁ ⥤ C₂)
+    (η : Ψ ⋙ P₂.toElem ≅ P₁.toElem) {X : C₁} (φ : End X) :
+    IsBaseIdentity P₁ φ ↔ IsBaseIdentity P₂ (Ψ.map ((φ : X ⟶ X))) := by
+  have hnat := congrArg (fun t : (Ψ ⋙ P₂.toElem).obj X ⟶ P₁.toElem.obj X => t.base)
+    (η.hom.naturality ((φ : X ⟶ X)))
+  simp only [Functor.comp_map, ElemFrobCat.comp_base] at hnat
+  have hb : P₂.Base (Ψ.map ((φ : X ⟶ X))) ≫ (η.hom.app X).base
+      = (η.hom.app X).base ≫ P₁.Base ((φ : X ⟶ X)) := hnat
+  haveI : IsIso ((η.hom.app X).base) := by
+    refine ⟨(η.inv.app X).base, ?_, ?_⟩
+    · have h := congrArg (fun t : (Ψ ⋙ P₂.toElem).obj X ⟶ (Ψ ⋙ P₂.toElem).obj X => t.base)
+        (η.hom_inv_id_app X)
+      rw [ElemFrobCat.comp_base] at h
+      exact h
+    · have h := congrArg (fun t : P₁.toElem.obj X ⟶ P₁.toElem.obj X => t.base)
+        (η.inv_hom_id_app X)
+      rw [ElemFrobCat.comp_base] at h
+      exact h
+  constructor
+  · intro h
+    have hP₁ : P₁.Base ((φ : X ⟶ X)) = 𝟙 ((P₁.toElem.obj X).base) :=
+      (show P₁.Base ((φ : X ⟶ X)) = P₁.Base (𝟙 X) from h).trans (P₁.Base_id X)
+    refine (cancel_mono ((η.hom.app X).base)).mp ?_
+    refine hb.trans ?_
+    refine (congrArg (fun t : (P₁.toElem.obj X).base ⟶ (P₁.toElem.obj X).base =>
+      (η.hom.app X).base ≫ t) hP₁).trans ?_
+    exact (Category.comp_id _).trans
+      ((Category.id_comp _).symm.trans
+        (congrArg (fun t : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj X)).base =>
+          t ≫ (η.hom.app X).base) (P₂.Base_id (Ψ.obj X)).symm))
+  · intro h
+    have hP₂ : P₂.Base (Ψ.map ((φ : X ⟶ X))) = 𝟙 ((P₂.toElem.obj (Ψ.obj X)).base) :=
+      (show P₂.Base (Ψ.map ((φ : X ⟶ X))) = P₂.Base (𝟙 (Ψ.obj X)) from h).trans
+        (P₂.Base_id (Ψ.obj X))
+    refine (cancel_epi ((η.hom.app X).base)).mp ?_
+    refine hb.symm.trans ?_
+    refine (congrArg (fun t : (P₂.toElem.obj (Ψ.obj X)).base ⟶ (P₂.toElem.obj (Ψ.obj X)).base =>
+      t ≫ (η.hom.app X).base) hP₂).trans ?_
+    exact (Category.id_comp _).trans
+      ((Category.comp_id _).symm.trans
+        (congrArg (fun t : (P₁.toElem.obj X).base ⟶ (P₁.toElem.obj X).base =>
+          (η.hom.app X).base ≫ t) (P₁.Base_id X).symm))
+
+/-- ★★★★★**1-可換な充満忠実関手は Frobenius-normalized 性を移す**(使いやすい形)。 -/
+theorem isFrobeniusNormalized_map_of_toElem_iso (Ψ : C₁ ⥤ C₂) [Ψ.Full] [Ψ.Faithful]
+    (η : Ψ ⋙ P₂.toElem ≅ P₁.toElem) (A : C₁) (h : IsFrobeniusNormalized P₁ A) :
+    IsFrobeniusNormalized P₂ (Ψ.obj A) :=
+  isFrobeniusNormalized_map Ψ (fun f => degFr_map_of_toElem_iso Ψ η f)
+    (fun φ => isBaseIdentity_map_iff_of_toElem_iso Ψ η φ) A h
+
+/-- ★★★★★**1-可換な充満忠実関手は Frobenius-compact 性を移す**(使いやすい形)。 -/
+theorem isFrobeniusCompact_map_of_toElem_iso (Ψ : C₁ ⥤ C₂) [Ψ.Full] [Ψ.Faithful]
+    (η : Ψ ⋙ P₂.toElem ≅ P₁.toElem) (A : C₁) (h : IsFrobeniusCompact P₁ A) :
+    IsFrobeniusCompact P₂ (Ψ.obj A) :=
+  isFrobeniusCompact_map Ψ (fun f => degFr_map_of_toElem_iso Ψ η f)
+    (fun φ => isBaseIdentity_map_iff_of_toElem_iso Ψ η φ) A h
+
+end ToElemIso
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Proposition 5.5, (iii)` の standard 型の移送に要る一本
