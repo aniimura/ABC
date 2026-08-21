@@ -351,4 +351,98 @@ def arithExtend.src : ABC3.Meta.Source :=
     item := "Example 6.3 — Φ・B・B → Φ^gp が数体 F について関手的",
     sectionId := "frdi-example-6-3" }
 
+/-! ## ★★同型に沿った局所次数は 1 —— non-dilating の入力(2026-08-21)
+
+`Theorem 6.4, (i)` の non-dilating は
+`isNonDilating_of_primary_sharp`(`MonoidTransport.lean`)の入力 `hfix`
+「自己同型は素点を素点へ**係数 1 で**移す」に落ちる。
+★`arithExtend d V = localDeg V · d (resPlace V)` なので、要るのは
+**同型に沿った `localDeg V = 1`** ただ 1 つである。
+
+★★**finrank 経由は塞がっている** —— `letI := σ.toAlgebra` を置いても
+`Module.finrank L L` は標準の module 構造に解決されるので、
+`sum_ramification_inertia` に載せる筋は書けない。
+★そこで **`e` と `f` を直接**計算する:
+
+| 量 | 根拠 |
+|---|---|
+| `e = 1` | `map σ (comap σ P) = P`(全射)＋ Dedekind 環で `P² < P` |
+| `f = 1` | 剰余体の間の射が全射(商どうしなので型が違い、instance の衝突が無い) |
+| 無限素点 | `InfinitePlace.isReal_comap_iff` で `mult` が保たれる |
+-/
+
+attribute [local instance] Ideal.Quotient.field
+
+omit [NumberField L] in
+/-- ★★**全射なら分岐指数は 1**。
+
+★`P` は Dedekind 環の 0 でない素イデアルなので `P² < P`、
+したがって `P ≤ P²` は起こらない。 -/
+theorem ramIdx_eq_one_of_surjective
+    (hs : Function.Surjective (algebraMap (𝓞 L) (𝓞 M))) (W : FinitePlace M) :
+    ramIdx (L := L) W = 1 := by
+  haveI : (W.maximalIdeal.asIdeal).IsPrime := W.maximalIdeal.isPrime
+  have hne : W.maximalIdeal.asIdeal ≠ ⊥ := W.maximalIdeal.ne_bot
+  have hmap : Ideal.map (algebraMap (𝓞 L) (𝓞 M))
+      (resHOS (L := L) W.maximalIdeal).asIdeal = W.maximalIdeal.asIdeal :=
+    Ideal.map_comap_of_surjective _ hs _
+  refine Ideal.ramificationIdx_spec ?_ ?_
+  · rw [hmap, pow_one]
+  · rw [hmap]
+    intro h
+    have hlt := Ideal.pow_succ_lt_pow (P := W.maximalIdeal.asIdeal) hne 1
+    rw [pow_one] at hlt
+    exact absurd (le_antisymm hlt.le h) (ne_of_lt hlt)
+
+/-- ★★**全射なら剰余次数は 1**。
+
+★剰余体の間の射も全射で、**商どうしなので型が違い instance の衝突が無い**。 -/
+theorem inertDeg_eq_one_of_surjective
+    (hs : Function.Surjective (algebraMap (𝓞 L) (𝓞 M))) (W : FinitePlace M) :
+    inertDeg (L := L) W = 1 := by
+  haveI hpm : (resHOS (L := L) W.maximalIdeal).asIdeal.IsMaximal :=
+    Ideal.IsPrime.isMaximal (resHOS (L := L) W.maximalIdeal).isPrime
+      (resHOS (L := L) W.maximalIdeal).ne_bot
+  rw [inertDeg, Ideal.inertiaDeg_algebraMap]
+  refine (finrank_eq_one_iff_of_nonzero' (1 : _) one_ne_zero).mpr ?_
+  intro w
+  obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective w
+  obtain ⟨x, rfl⟩ := hs y
+  refine ⟨Ideal.Quotient.mk _ x, ?_⟩
+  rw [Algebra.smul_def, mul_one]
+  rfl
+
+omit [NumberField L] [NumberField M] in
+/-- ★★**同型に沿えば無限素点の `mult` は保たれる**(実素点は実素点へ)。 -/
+theorem mult_resInf_of_bijective (hb : Function.Bijective (algebraMap L M))
+    (W : InfinitePlace M) : (resInf (L := L) W).mult = W.mult := by
+  classical
+  have hiff : (resInf (L := L) W).IsReal ↔ W.IsReal :=
+    InfinitePlace.isReal_comap_iff (f := RingEquiv.ofBijective (algebraMap L M) hb) (w := W)
+  unfold InfinitePlace.mult
+  by_cases hr : W.IsReal
+  · simp [hiff.mpr hr, hr]
+  · have h2 : ¬ (resInf (L := L) W).IsReal := fun h => hr (hiff.mp h)
+    simp [h2, hr]
+
+/-- ★★★★**同型に沿った局所次数は 1**。
+
+★これが `Theorem 6.4, (i)` の non-dilating の入力 `hfix` の中身である。 -/
+theorem localDeg_eq_one_of_bijective (hb : Function.Bijective (algebraMap L M))
+    (hs : Function.Surjective (algebraMap (𝓞 L) (𝓞 M))) (V : ArithPlace M) :
+    localDeg (L := L) V = 1 := by
+  cases V with
+  | inl W => rw [localDeg_inl, ramIdx_eq_one_of_surjective hs W,
+      inertDeg_eq_one_of_surjective hs W, one_mul]
+  | inr W =>
+      rw [localDeg_inr, mult_resInf_of_bijective hb W,
+        Nat.div_self InfinitePlace.mult_pos]
+
+/-- ★★★locator —— 同型に沿った局所次数が 1 であること
+(`Theorem 6.4, (i)` の non-dilating の入力)。 -/
+def localDeg_eq_one_of_bijective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 113,
+    item := "Example 6.3 — 自己同型に沿った局所次数は 1(non-dilating の入力)",
+    sectionId := "frdi-example-6-3" }
+
 end ABC3.Found.Divisor
