@@ -869,4 +869,123 @@ def theta_A_eq.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 辞書の図式追跡の材料",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★15. ★★★★★★★辞書(i′) —— 逆向きの核心
+
+★★第 21 弾で書き下した等式を、第 14 節の材料で閉じる。
+★中身は 5 段:
+1. `compRoot_toRootHom` で `compRoot` を `compPf` に落とす（`rtRootIso` が 2 つ消える）
+2. `rtRootIso_inv_toHomPf` で残る `rtRootIso` の `.inv` を `frobTransport` に落とす
+3. `theta_A_eq` で左の `frobTransport` を `rtExt` の合成に潰す
+4. `kappaRep_eq_rtLift` ＋ `frobTransport_spec` で右を潰す
+5. `compPf_mk_final`（後合成の計算則 2 回）で両辺を突き合わせる -/
+
+theorem inv_rtExt_one_eq (B : C) :
+    @inv _ _ _ _ (rtExt P F B 1) (isIso_rtExt_one P F B) = rtOneInv (P := P) (F := F) B := rfl
+
+theorem rtRootIso_inv_toHomPf (A B : C) {dA dB e tA tB : ℕ+} (hA : tA = e * dA)
+    (hB : tB = e * dB) (φ : rtObj P F A dA ⟶ rtObj P F B dB) :
+    (rtRootIso P F A B hA hB).inv (toHomPf (F := F) φ)
+      = toHomPf (F := F) (frobTransport (F := F) (rtLift P F A hA) (rtLift_frobType P F A hA)
+          (rtLift P F B hB) (rtLift_frobType P F B hB)
+          (by rw [rtLift_degFr, rtLift_degFr]) φ) :=
+  rootIso_inv_toHomPf _ _ _ _ _ φ
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★**両辺を同じ添字に揃えて突き合わせる段**。 -/
+theorem compPf_mk_final (A'' A : C) (n k : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k)
+    (hdeg1 : P.degFr (rtExt P F (rtObj P F A'' 1) k)
+      = P.degFr (rtExt P F (rtObj P F A n) k)) :
+    compPf P F (HomPf.mk (idxMk (P := P) (F := F) (rtExt P F (rtObj P F A'' 1) k)
+          (rtExt P F (rtObj P F A n) k) (rtExt_frobType P F _ _) (rtExt_frobType P F _ _)
+          hdeg1) ψ₁)
+        (toHomPf (F := F) (rtExt P F (rtObj P F A n) k
+          ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n))
+      = toHomPf (F := F) (rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+          ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n) := by
+  have hdeg2 : P.degFr (rtExt P F (rtObj P F A n) k)
+      = P.degFr (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k) := by
+    rw [rtExt_degFr, rtExt_degFr]
+  have hdeg3 : P.degFr (rtExt P F (rtObj P F A'' 1) k)
+      = P.degFr (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k) := hdeg1.trans hdeg2
+  have hpush : toHomPf (F := F) (rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+        ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n)
+      = HomPf.mk (idxMk (P := P) (F := F) (rtExt P F (rtObj P F A'' 1) k)
+          (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k)
+          (rtExt_frobType P F _ _) (rtExt_frobType P F _ _) hdeg3)
+        (frobTransport (F := F) (rtExt P F (rtObj P F A'' 1) k) (rtExt_frobType P F _ _)
+          (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k) (rtExt_frobType P F _ _)
+          hdeg3 (rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+            ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n)) :=
+    (HomPf.mk_map (idxOneHom (F := F) _ _ (rtExt_frobType P F _ _)
+      (rtExt_frobType P F _ _) hdeg3) _).symm
+  have hfin : frobTransport (F := F) (rtExt P F (rtObj P F A'' 1) k)
+        (rtExt_frobType P F _ _)
+        (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k) (rtExt_frobType P F _ _)
+        hdeg3 (rtExt P F (rtObj P F A'' 1) k ≫ (ψ₁
+          ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n))
+      = (ψ₁ ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n)
+        ≫ rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k :=
+    frobTransport_comp_left _ _ _ _ _ _
+  rw [compPf_mk_toHomPf (P := P) (F := F) _ _ _ _ hdeg1 ψ₁ _
+    (rtExt P F (rtObj P F (rtObj P F (rtObj P F A n) k) n) k)
+    (rtExt_frobType P F _ _) hdeg2]
+  rw [frobTransport_comp_left, hpush]
+  exact congrArg (HomPf.mk _) ((Category.assoc _ _ _).symm.trans hfin.symm)
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★★**辞書(i′)** —— `Proposition 5.5, (ii)` の逆向きの核心。
+
+`idxPow` の添字での代表元に `𝒞` の Frobenius 拡大の像を後合成したものは、
+**`κ` を前合成した形**に書き換わる。 -/
+theorem compRoot_dictionary (A'' A : C) (n k : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k) :
+    compRoot P F
+        (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+          HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+        (toRootHom (F := F) (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k))
+      = compRoot P F (pfKappa (F := F) A'' n)
+        (toRootHom (F := F)
+          ((rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k) ≫ ψ₁)) := by
+  have hdeg1 : P.degFr (rtExt P F (rtObj P F A'' 1) k)
+      = P.degFr (rtExt P F (rtObj P F A n) k) := by rw [rtExt_degFr, rtExt_degFr]
+  have hAAinv : rtOneInv (P := P) (F := F) A'' ≫ rtExt P F A'' 1 = 𝟙 (rtObj P F A'' 1) :=
+    @IsIso.inv_hom_id _ _ _ _ (rtExt P F A'' 1) (isIso_rtExt_one P F A'')
+  have hinput : rtOneInv (P := P) (F := F) A''
+        ≫ ((rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k) ≫ ψ₁)
+        ≫ rtExt P F (rtObj P F (rtObj P F A n) k) 1
+      = rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+        ≫ rtExt P F (rtObj P F (rtObj P F A n) k) 1 := by
+    simp only [← Category.assoc, hAAinv]
+    simp
+  have hkappa : kappaRep (P := P) (F := F) A'' n
+        ≫ frobTransport (F := F)
+          (rtLift P F A'' (show n = n * 1 from (mul_one n).symm))
+          (rtLift_frobType P F A'' _)
+          (rtLift P F (rtObj P F (rtObj P F A n) k)
+            (show n = n * 1 from (mul_one n).symm))
+          (rtLift_frobType P F _ _) (by rw [rtLift_degFr, rtLift_degFr])
+          (rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+            ≫ rtExt P F (rtObj P F (rtObj P F A n) k) 1)
+      = rtExt P F (rtObj P F A'' 1) k ≫ ψ₁
+        ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n := by
+    rw [kappaRep_eq_rtLift]
+    rw [← frobTransport_spec (F := F)
+      (rtLift P F A'' (show n = n * 1 from (mul_one n).symm)) (rtLift_frobType P F A'' _)
+      (rtLift P F (rtObj P F (rtObj P F A n) k) (show n = n * 1 from (mul_one n).symm))
+      (rtLift_frobType P F _ _) (by rw [rtLift_degFr, rtLift_degFr]) _]
+    rw [Category.assoc, Category.assoc, rtLift_ext]
+  rw [compRoot_toRootHom, compRoot_toRootHom, toRootHom, toRootHom,
+    rtRootIso_inv_toHomPf, rtRootIso_inv_toHomPf, inv_rtExt_one_eq, inv_rtExt_one_eq,
+    theta_A_eq, hinput, show pfKappa (F := F) A'' n
+      = toHomPf (F := F) (kappaRep (P := P) (F := F) A'' n) from rfl,
+    ← toHomPf_comp, hkappa]
+  exact compPf_mk_final A'' A n k ψ₁ hdeg1
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の逆向きの辞書。 -/
+def compRoot_dictionary.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 逆向きの辞書(κ を前合成した形へ)",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
