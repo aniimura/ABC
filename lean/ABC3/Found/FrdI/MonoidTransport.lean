@@ -218,4 +218,58 @@ def mem_supp_map.src : ABC3.Meta.Source :=
     item := "Definition 2.4, (i), (d) — Supp は単系同型で移る",
     sectionId := "frdi-def-2-4" }
 
+/-! ## ★sharp なモノイドでの non-dilating —— `M^char` を `M` に置き換える
+
+★`IsNonDilating` の言明は `M^char` の上に書かれているが、**sharp なら `M ≃+ M^char`** なので
+`M` の上の条件に置き換えられる。★`Theorem 6.2, (iii)` / `Theorem 6.4, (i)` はどちらも
+sharp な `Φ(L)`(有効因子の単系)を相手にするので、この形が要る。 -/
+
+/-- ★★**sharp なら `M ≃+ M^char`**。 -/
+noncomputable def mCharEquivOfSharp (hs : IsSharp M) : M ≃+ MChar M :=
+  AddEquiv.ofBijective toChar ⟨toChar_injective_of_isSharp hs, toChar_surjective M⟩
+
+@[simp] theorem mCharEquivOfSharp_apply (hs : IsSharp M) (a : M) :
+    mCharEquivOfSharp hs a = toChar a := rfl
+
+/-- ★★★★**non-dilating の十分条件(sharp 版)** ——
+`M` が primary 元で生成され、primary 元の上で `α` が恒等なら `α` は non-dilating。
+
+★★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` が「immediately / clearly」と
+畳んだ段の骨組みである ——
+`hfix` が「自己同型は素因子を素因子へ(係数 1 で)移す」に、
+`hgen` が「`Φ(L)` は素因子で生成される」に対応する。 -/
+theorem isNonDilating_of_primary_sharp (hs : IsSharp M) (α : M →+ M)
+    (hgen : AddSubmonoid.closure {a : M | IsPrimaryElt a} = ⊤)
+    (hfix : ∀ a : M, IsPrimaryElt a → MPrec (α a) a → α a = a) :
+    IsNonDilating α := by
+  refine isNonDilating_of_primary α ?_ ?_
+  · refine eq_top_iff.mpr fun x _ => ?_
+    obtain ⟨y, rfl⟩ := toChar_surjective M x
+    have hy : y ∈ AddSubmonoid.closure {a : M | IsPrimaryElt a} := by rw [hgen]; trivial
+    refine AddSubmonoid.closure_induction ?_ ?_ ?_ hy
+    · intro a ha
+      exact AddSubmonoid.subset_closure (isPrimaryElt_map (mCharEquivOfSharp hs) ha)
+    · rw [map_zero]; exact AddSubmonoid.zero_mem _
+    · intro u v _ _ hu hv
+      rw [map_add]; exact AddSubmonoid.add_mem _ hu hv
+  · intro a ha hprec
+    obtain ⟨b, rfl⟩ := toChar_surjective M a
+    have hb : IsPrimaryElt b :=
+      (mCharEquivOfSharp hs).symm_apply_apply b ▸ isPrimaryElt_map (mCharEquivOfSharp hs).symm ha
+    rw [charMap_toChar] at hprec ⊢
+    have hp : MPrec (α b) b := by
+      have h2 := mprec_map ((mCharEquivOfSharp hs).symm : MChar M →+ M) hprec
+      have h3 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar (α b)) = α b :=
+        (mCharEquivOfSharp hs).symm_apply_apply (α b)
+      have h4 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar b) = b :=
+        (mCharEquivOfSharp hs).symm_apply_apply b
+      rwa [h3, h4] at h2
+    rw [hfix b hb hp]
+
+/-- ★★★locator —— sharp なモノイドでの non-dilating の十分条件。 -/
+def isNonDilating_of_primary_sharp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19,
+    item := "Definition 1.1, (i) — non-dilating の十分条件(sharp 版)",
+    sectionId := "frdi-def-1-1-i" }
+
 end ABC3.Found.FrdI
