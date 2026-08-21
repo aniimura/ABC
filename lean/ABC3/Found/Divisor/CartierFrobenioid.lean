@@ -239,4 +239,50 @@ def CartierDatum.cartierFrobenioid.src : ABC3.Meta.Source :=
     item := "Example 6.1 — Cartier 因子のデータから model Frobenioid",
     sectionId := "frdi-example-6-1" }
 
+/-! ## ★★★★★`Φ` は non-dilating(2026-08-21)
+
+★`Theorem 6.2, (iii)` の一条。**幾何の入力は要らない** ——
+`K`-`Q`-Cartier(`qc`)と「自己射が同型」だけで出る
+(`isNonDilating_effSub_of_bijective`、`CartierMonoid.lean`)。 -/
+
+namespace CartierDatum
+
+variable (Δ : CartierDatum.{v, u, w} D)
+
+theorem mapHom_comp {A B E : D} (α : B ⟶ A) (β : E ⟶ B) (x : effSub (Δ.grp A)) :
+    Δ.mapHom (β ≫ α) x = Δ.mapHom β (Δ.mapHom α x) :=
+  Subtype.ext (congrArg (fun t : Δ.grp E => (t : Δ.primes E →₀ ℤ))
+    (Δ.pull_comp α β (effSubIncl (Δ.grp A) x)))
+
+theorem mapHom_id (A : D) (x : effSub (Δ.grp A)) : Δ.mapHom (𝟙 A) x = x :=
+  Subtype.ext (congrArg (fun t : Δ.grp A => (t : Δ.primes A →₀ ℤ))
+    (Δ.pull_id A (effSubIncl (Δ.grp A) x)))
+
+/-- ★★自己射が同型なら引き戻しは全単射(`pull_id` と `pull_comp` だけ)。 -/
+theorem mapHom_bijective {A : D} (e : A ⟶ A) [IsIso e] :
+    Function.Bijective (Δ.mapHom e) := by
+  refine ⟨Δ.mapHom_injective e, fun y => ⟨Δ.mapHom (inv e) y, ?_⟩⟩
+  have h := Δ.mapHom_comp (inv e) e y
+  rw [IsIso.hom_inv_id] at h
+  rw [← h, Δ.mapHom_id]
+
+/-- ★★★★★★**[FrdI] Theorem 6.2, (iii)** —— **`Φ` は non-dilating**。 -/
+theorem isNonDilatingOn (hD : IsOfFSMType D)
+    (hiso : ∀ (A : D) (e : A ⟶ A), IsIso e) :
+    MonoidOn.IsNonDilatingOn (Δ.phi hD) := by
+  classical
+  intro A e
+  haveI := hiso A e
+  have hmap : (Δ.phi hD).map e = Δ.mapHom e := rfl
+  rw [hmap]
+  exact isNonDilating_effSub_of_bijective (Δ.qc A) _ (Δ.mapHom_bijective e)
+
+/-- ★★★★★locator —— `Theorem 6.2, (iii)` の non-dilating。 -/
+def isNonDilatingOn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — Φ は non-dilating",
+    sectionId := "frdi-thm-6-2" }
+
+end CartierDatum
+
 end ABC3.Found.FrdI

@@ -212,4 +212,25 @@ def finSubOp_isOfFSMType.src : ABC3.Meta.Source :=
     item := "Example 6.1 — 底の圧 B(G)⁰ は of FSM-type",
     sectionId := "frdi-example-6-1" }
 
+/-- ★★**`FinSub` の自己射は同型**(有限次元だから全単射)。
+
+★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` の non-dilating に効く。 -/
+theorem finSub_isIso_of_endo {L : FinSub K Kbar} (σ : L ⟶ L) : IsIso σ := by
+  haveI := L.fin
+  have hb : Function.Bijective (FinSub.hom σ) := AlgHom.bijective (FinSub.hom σ)
+  refine ⟨(AlgEquiv.ofBijective (FinSub.hom σ) hb).symm.toAlgHom, ?_, ?_⟩
+  · refine FinSub.hom_ext ?_
+    refine AlgHom.ext fun x => ?_
+    exact (AlgEquiv.ofBijective (FinSub.hom σ) hb).symm_apply_apply x
+  · refine FinSub.hom_ext ?_
+    refine AlgHom.ext fun x => ?_
+    exact (AlgEquiv.ofBijective (FinSub.hom σ) hb).apply_symm_apply x
+
+/-- ★反対圏でも同じ。 -/
+theorem finSubOp_isIso_of_endo {A : (FinSub K Kbar)ᵒᵖ} (e : A ⟶ A) : IsIso e := by
+  haveI := finSub_isIso_of_endo e.unop
+  refine ⟨(inv e.unop).op, ?_, ?_⟩
+  · exact Quiver.Hom.unop_inj (IsIso.inv_hom_id e.unop)
+  · exact Quiver.Hom.unop_inj (IsIso.hom_inv_id e.unop)
+
 end ABC3.Found.FrdI
