@@ -341,4 +341,34 @@ def biratPfMk_step.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — IdxPf の遷移で不変(well-definedness のもう半分)",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★4. 四角形の存在
+
+★★`u : W ⟶ W′` と代表元 `(z, ψ)` から、
+`biratPfMk_step` が要求する 2 本の四角形を作る。
+★道具は `Proposition 1.10, (ii)`(在庫、`pre-step ≫ Frobenius` を
+`Frobenius ≫ pre-step` へ組み替える)と `frobTransport`(在庫)だけである。 -/
+
+/-- ★★★★**四角形の存在** —— `Proposition 1.10, (ii)` と `frobTransport` で作る。 -/
+theorem exists_biratPf_step {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    {X : C} (z : X ⟶ W.right.obj.1) (hzc : IsCoAngular P z) (hzs : IsPreStep P z)
+    (ψ : X ⟶ W.right.obj.2) :
+    ∃ (Y : C) (β : X ⟶ Y) (_ : IsFrobeniusType P β), P.degFr β = P.degFr u.right.hom.1 ∧
+      ∃ (α : Y ⟶ W'.right.obj.1), IsCoAngular P α ∧ IsPreStep P α ∧
+        ∃ ψ' : Y ⟶ W'.right.obj.2,
+          z ≫ u.right.hom.1 = β ≫ α ∧ ψ ≫ u.right.hom.2 = β ≫ ψ' := by
+  obtain ⟨Y, β, α, hβ, hdβ, hαs, hsq⟩ :=
+    prop_1_10_ii P F z hzs u.right.hom.1 u.right.property.1
+  refine ⟨Y, β, hβ, hdβ, α,
+    prop_1_10_i_coAngular_of P F hβ u.right.property.1 hsq.symm hzc, hαs,
+    frobTransport (F := F) β hβ u.right.hom.2 u.right.property.2.1
+      (hdβ.trans u.right.property.2.2) ψ, hsq.symm, ?_⟩
+  exact frobTransport_spec (F := F) β hβ u.right.hom.2 u.right.property.2.1
+    (hdβ.trans u.right.property.2.2) ψ
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の四角形の存在。 -/
+def exists_biratPf_step.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — IdxPf の遷移が与える四角形の存在",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
