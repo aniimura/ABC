@@ -352,4 +352,30 @@ def isNonDilating_effSub_of_perm.src : ABC3.Meta.Source :=
     item := "Theorem 6.2, (iii) — 素因子の置換で誘導される引き戻しは non-dilating",
     sectionId := "frdi-thm-6-2" }
 
+/-- ★★**`K`-`Q`-Cartier から「各素因子が primary 元を持つ」が出る**。
+
+★これが `isNonDilating_effSub_of_perm` の入力 `hprim` である。 -/
+theorem exists_single_mem_effSub_of_qc {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)}
+    (hq : IsQCartierSubgroup Γ) (s : S) :
+    ∃ r : ℤ, 0 < r ∧ Finsupp.single s r ∈ effSub Γ := by
+  obtain ⟨n, hn, hmem⟩ := hq s
+  refine ⟨(n : ℤ), by exact_mod_cast hn, hmem, ?_⟩
+  refine Finsupp.le_def.mpr fun t => ?_
+  rcases eq_or_ne t s with rfl | ht
+  · simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.single_eq_same]
+    exact_mod_cast hn.le
+  · simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.single_eq_of_ne ht]
+    exact le_refl 0
+
+/-- ★★★★★**`K`-`Q`-Cartier の下で、素因子の置換で誘導される引き戻しは non-dilating**。
+
+★★これで `Theorem 6.2, (iii)` の non-dilating に残る入力は
+**「引き戻しが素因子の置換(係数 1)で誘導される」ただ 1 つ**になった。 -/
+theorem isNonDilating_effSub_of_perm_of_qc {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)}
+    (hq : IsQCartierSubgroup Γ) (σ : S ≃ S) (α : effSub Γ →+ effSub Γ)
+    (hα : ∀ x : effSub Γ, ((α x : effSub Γ) : S →₀ ℤ)
+      = Finsupp.equivMapDomain σ ((x : effSub Γ) : S →₀ ℤ)) :
+    IsNonDilating α :=
+  isNonDilating_effSub_of_perm σ (exists_single_mem_effSub_of_qc hq) α hα
+
 end ABC3.Found.FrdI
