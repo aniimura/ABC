@@ -2469,11 +2469,11 @@
       "p55ii-untr",
       "p55ii-birat"
      ],
-     "status": "todo",
+     "status": "半済(4/6 条は無料、残り 2 条)",
      "size": "★大",
-     "note": "原文は (i)(ii) と `Proposition 3.2, (ii), (iii)` から。`(𝒞^un-tr)^birat` が Frobenius-normalized 型であることを使う。",
-     "lean": "",
-     "decl": ""
+     "note": "原文は (i)(ii) と `Proposition 3.2, (ii), (iii)` から。`(𝒞^un-tr)^birat` が Frobenius-normalized 型であることを使う。\n\n★★★★★2026-08-21（**standard 型の `𝒞^pf` への移送を組み立て、3 条のうち 1 つを閉じた** —— `Found/FrdI/Prop55Std.lean`）：\n\n原文が名指しするのは「`𝒞^pf` が isotropic 型であること」と\n「assertion (i) により `𝒪^▷` の像が `𝒪^▷` の perfection であること」の 2 つで、\n前者は在庫（`pfRoot_isOfIsotropicType`）にあり、\n`IsOfStandardType` の 6 条のうち **4 条が無料で埋まる**（`pfRoot_standardType`）。\n\n★★**`Φ^pf` が non-dilating** は閉じた（`MonoidOn.pfOn_isNonDilatingOn`）。\n\n★★★**測って分かったこと（一度読み違えたので記す）**:\n`MPrec a b` は `a ≤ n·b`（**正の倍数まで許す**）ので、\n**分母は `≼` にとって見えない** —— `Pf.of c₀ = k • (c₀/k)` なので\n`c₀/k` と `c₀` は `≼` について同値である。\nしたがって「perfect だから primary 元が消える」ということは**ない**。\n（もし消えるなら `IsNonDilating` の前件が空になり、`Φ^pf` の non-dilating は\n「誘導される自己準同型がすべて恒等」という**別物**になってしまうところだった。）\n\n筋は 3 段:\n1. `M^pf` は sharp（`Pf.isSharp_pf`）なので non-dilating は `M^pf` の上の含意に降りる\n   （`isNonDilating_of_sharp`）。\n2. `Pf.of` は準素元を準素元へ送り（`Pf.of_primary`）、`≼` を**保ち反射する**\n   （`Pf.of_mprec` / `Pf.mprec_of_of`）。★反射は在庫の `Pf.mle_num_of_mle` ＋「`x ≼ k·x`」。\n3. `M` の non-dilating が `α = id` を与え、`Pf.map_id` で戻る。\n\n★★残る 2 条:\n1. **`𝒞^pf` が Frobenius-normalized 型**。\n   ★筋: `exists_idx_diag`（`Prop32Dict.lean`）で**対角の添字**へ押し上げ、\n   `φ` と `α` を同じ `idxMk l l` の代表元に揃え、`𝒞` の Frobenius-normalized 性を\n   当てて `compPf_mk_pair` で押し戻す。\n   ★要る橋渡しは「`Base` と `𝒪^▷` の代表元での判定」で、\n   `degFr_mk_iff` / `isPreStep_mk_iff` はあるが **`isBaseIdentity_mk_iff` は未**。\n2. **group-like のときの Frobenius-compact 対象**（`𝒞` が not group-like なら前件が偽）。",
+     "lean": "ABC3/Found/FrdI/Prop55Std.lean",
+     "decl": "pfRoot_standardType / Pf.isNonDilating_map / MonoidOn.pfOn_isNonDilatingOn / Pf.of_primary"
     },
     {
      "id": "p55iii-untr",
