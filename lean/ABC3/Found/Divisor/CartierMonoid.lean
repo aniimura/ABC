@@ -466,4 +466,68 @@ def eq_id_of_bijective_intNonneg.src : ABC3.Meta.Source :=
     item := "Theorem 6.2, (iii) — 素因子の成分は離散なので加法的全単射は恒等",
     sectionId := "frdi-thm-6-2" }
 
+/-! ## ★★素因子ごとの成分(幾何側 non-dilating の部品、2026-08-21) -/
+
+/-- ★素因子 `s` の成分がなす `ℤ` の部分群。 -/
+def compSubgroup {S : Type*} (Γ : AddSubgroup (S →₀ ℤ)) (s : S) : AddSubgroup ℤ where
+  carrier := {n : ℤ | Finsupp.single s n ∈ Γ}
+  add_mem' ha hb := by
+    show Finsupp.single s _ ∈ Γ
+    rw [Finsupp.single_add]
+    exact Γ.add_mem ha hb
+  zero_mem' := by
+    show Finsupp.single s (0 : ℤ) ∈ Γ
+    rw [Finsupp.single_zero]
+    exact Γ.zero_mem
+  neg_mem' ha := by
+    show Finsupp.single s _ ∈ Γ
+    rw [Finsupp.single_neg]
+    exact Γ.neg_mem ha
+
+theorem mem_compSubgroup {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)} {s : S} {n : ℤ} :
+    n ∈ compSubgroup Γ s ↔ Finsupp.single s n ∈ Γ := Iff.rfl
+
+/-- ★★**台が 1 点の元は成分の非負部分と対応する**。 -/
+theorem single_mem_effSub_iff {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)} {s : S} {n : ℤ} :
+    Finsupp.single s n ∈ effSub Γ ↔ n ∈ intNonneg (compSubgroup Γ s) := by
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨h1, ?_⟩
+    have := Finsupp.le_def.mp h2 s
+    simpa using this
+  · rintro ⟨h1, h2⟩
+    refine ⟨h1, Finsupp.le_def.mpr fun t => ?_⟩
+    rcases eq_or_ne t s with rfl | ht
+    · simpa using h2
+    · simp [Finsupp.single_eq_of_ne ht]
+
+/-- ★★**non-dilating の仮定は「台が動かない」と読める**。 -/
+theorem alpha_single_supported {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)}
+    (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    {s : S} {n : ℤ} (hn : 0 < n) (hmem : Finsupp.single s n ∈ effSub Γ) {t : S} (ht : t ≠ s) :
+    ((α ⟨Finsupp.single s n, hmem⟩ : effSub Γ) : S →₀ ℤ) t = 0 := by
+  obtain ⟨m, hm, c, hc⟩ := h _ (isPrimaryElt_effSub_single hn hmem)
+  have hcoe : ((α ⟨Finsupp.single s n, hmem⟩ : effSub Γ) : S →₀ ℤ) + (c : S →₀ ℤ)
+      = m • (Finsupp.single s n : S →₀ ℤ) := congrArg Subtype.val hc
+  have h1 := congrArg (fun f : S →₀ ℤ => f t) hcoe
+  have hz : (Finsupp.single s n : S →₀ ℤ) t = 0 := Finsupp.single_eq_of_ne ht
+  simp only [Finsupp.add_apply, Finsupp.smul_apply] at h1
+  rw [hz, smul_zero] at h1
+  have h2 : 0 ≤ ((α ⟨Finsupp.single s n, hmem⟩ : effSub Γ) : S →₀ ℤ) t := by
+    simpa using Finsupp.le_def.mp (α ⟨Finsupp.single s n, hmem⟩).2.2 t
+  have h3 : 0 ≤ (c : S →₀ ℤ) t := by simpa using Finsupp.le_def.mp c.2.2 t
+  linarith
+
+/-- ★★台が 1 点なら像も台が 1 点。 -/
+theorem alpha_single_eq {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)} (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    {s : S} {n : ℤ} (hn : 0 < n) (hmem : Finsupp.single s n ∈ effSub Γ) :
+    ((α ⟨Finsupp.single s n, hmem⟩ : effSub Γ) : S →₀ ℤ)
+      = Finsupp.single s (((α ⟨Finsupp.single s n, hmem⟩ : effSub Γ) : S →₀ ℤ) s) := by
+  refine Finsupp.ext fun t => ?_
+  rcases eq_or_ne t s with rfl | ht
+  · rw [Finsupp.single_eq_same]
+  · rw [alpha_single_supported α h hn hmem ht, Finsupp.single_eq_of_ne ht]
+
 end ABC3.Found.FrdI
