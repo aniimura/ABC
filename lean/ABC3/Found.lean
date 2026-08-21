@@ -114,6 +114,7 @@ import ABC3.Found.FrdI.Def24RlfPerf
 import ABC3.Found.FrdI.PfGp
 import ABC3.Found.FrdI.ModelRigid
 import ABC3.Found.FrdI.Cor54Rigid
+import ABC3.Found.FrdI.Thm62Psi
 import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop56MpAbs

@@ -3434,11 +3434,11 @@
           "deps": [
             "thm62-i-pull"
           ],
-          "status": "todo",
+          "status": "済",
           "size": "中",
-          "note": "★原文「it follows formally from the definition of the category underlying a model Frobenioid」。★在庫: `ModelDataHomOver`(`Found/FrdI/Thm52Change.lean`)がまさにこの形。",
-          "lean": "ABC3/Found/FrdI/Thm52Change.lean",
-          "decl": "ModelDataHomOver"
+          "note": "★原文「it follows formally from the definition of the category underlying a model Frobenioid」。★在庫: `ModelDataHomOver`(`Found/FrdI/Thm52Change.lean`)がまさにこの形。\n\n★★★★★2026-08-21（**閉じた** —— `Found/FrdI/Thm62Psi.lean`）：\n原文の「formally」の中身は **`ModelDataHomOver.hom` が 4 成分をそのまま運ぶこと**だった。\n`Ψ := F.functor` を置き、原文が主張する両立を 4 本並べた —— ★**どれも `rfl`**:\n\n| 両立 | 宣言 |\n|---|---|\n| Frobenius 次数 | `thm62Psi_degFr` |\n| 底の関手 `𝒟₁ ⥤ 𝒟₂` | `thm62Psi_comp_proj` |\n| 零因子の引き戻し `Φ₁ → Φ₂|𝒟₁` | `thm62Psi_Div` |\n| 有理函数の引き戻し `B₁ → B₂|𝒟₁` | `thm62Psi_u` |\n\n★入力（3 つの引き戻し）は仮定として受け取っている —— それを幾何から作るのが `thm62-i-pull`。",
+          "lean": "ABC3/Found/FrdI/Thm52Change.lean / ABC3/Found/FrdI/Thm62Psi.lean",
+          "decl": "ModelDataHomOver / thm62Psi / thm62Psi_degFr / thm62Psi_comp_proj / thm62Psi_Div / thm62Psi_u"
         },
         {
           "id": "thm62-ii-frob",
