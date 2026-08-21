@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop32Frob
 import ABC3.Found.FrdI.Prop44
+import ABC3.Found.FrdI.Prop55UntrIdx
 
 /-!
 # [FrdI] Proposition 5.5, (ii) の `birat` の側 —— 添字圏の出発点
@@ -150,6 +151,79 @@ noncomputable def biFrToBirat : BiFr P F ⥤ BiFr (biratPre P G) F' where
 def biFrToBirat.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (ii) — 𝒞^{bi-Fr} から (𝒞^birat)^{bi-Fr} への関手",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★★★★添字圏のあいだの**終尾関手** -/
+
+/-- ★★**添字圏のあいだの関手** —— コスライスへ持ち上げただけ。 -/
+noncomputable def idxToBirat (A B : C) :
+    IdxPf P F A B ⥤ IdxPf (biratPre P G) F' (biratUp P G A) (biratUp P G B) :=
+  Under.post (biFrToBirat P F G F')
+
+/-- ★★★★**本質的全射**。
+
+★★**pre-step 分解は要らなかった** —— `𝒞^birat` 側の Frobenius 型射
+`g : A → A″` に対し、**同じ次数の Frobenius 型射を `𝒞` の中で選び直す**
+(`F.frobDegSurj`)。★2 本は `𝒞^birat` の中で同じ次数の Frobenius 型射なので、
+**`Definition 1.3, (ii)` の本質的一意性**(`F'.frobDegUniq`)で同型が 1 本出る。
+★これが `Under` 圏の同型を与える。 -/
+instance idxToBirat_essSurj (A B : C) : (idxToBirat P F G F' A B).EssSurj where
+  mem_essImage d := by
+    have hg₁ : IsFrobeniusType (biratPre P G) d.hom.hom.1 := d.hom.property.1
+    have hg₂ : IsFrobeniusType (biratPre P G) d.hom.hom.2 := d.hom.property.2.1
+    have hdg : (biratPre P G).degFr d.hom.hom.1 = (biratPre P G).degFr d.hom.hom.2 :=
+      d.hom.property.2.2
+    obtain ⟨A₁, α, hα, hαd⟩ := F.frobDegSurj A ((biratPre P G).degFr d.hom.hom.1)
+    obtain ⟨B₁, β, hβ, hβd⟩ := F.frobDegSurj B ((biratPre P G).degFr d.hom.hom.1)
+    have hαb : IsFrobeniusType (biratPre P G) ((toBiratCat P G).map α) :=
+      (birat_isFrobeniusType_iff P G α).mpr ⟨hα.1.1, hα.2⟩
+    have hβb : IsFrobeniusType (biratPre P G) ((toBiratCat P G).map β) :=
+      (birat_isFrobeniusType_iff P G β).mpr ⟨hβ.1.1, hβ.2⟩
+    have hαdb : (biratPre P G).degFr ((toBiratCat P G).map α)
+        = (biratPre P G).degFr d.hom.hom.1 :=
+      (biratDeg_toHomBirat (P := P) (G := G) α).trans hαd
+    have hβdb : (biratPre P G).degFr ((toBiratCat P G).map β)
+        = (biratPre P G).degFr d.hom.hom.2 :=
+      ((biratDeg_toHomBirat (P := P) (G := G) β).trans hβd).trans hdg
+    obtain ⟨θ₁, hθ₁iso, hθ₁⟩ := F'.frobDegUniq (biratUp P G A) (biratUp P G A₁)
+      d.right.obj.1 ((toBiratCat P G).map α) d.hom.hom.1 hαb hg₁ hαdb
+    obtain ⟨θ₂, hθ₂iso, hθ₂⟩ := F'.frobDegUniq (biratUp P G B) (biratUp P G B₁)
+      d.right.obj.2 ((toBiratCat P G).map β) d.hom.hom.2 hβb hg₂ hβdb
+    haveI := hθ₁iso
+    haveI := hθ₂iso
+    have hd1 : (biratPre P G).degFr θ₁ = 1 := degFr_of_isIso _ θ₁
+    have hd2 : (biratPre P G).degFr θ₂ = 1 := degFr_of_isIso _ θ₂
+    have hdi1 : (biratPre P G).degFr (inv θ₁) = 1 := degFr_of_isIso _ (inv θ₁)
+    have hdi2 : (biratPre P G).degFr (inv θ₂) = 1 := degFr_of_isIso _ (inv θ₂)
+    let W : BiFr P F := ⟨(A₁, B₁)⟩
+    let u : biFrObj P F A B ⟶ W := ⟨(α, β), hα, hβ, hαd.trans hβd.symm⟩
+    let W' : BiFr (biratPre P G) F' := ⟨(biratUp P G A₁, biratUp P G B₁)⟩
+    let e : W' ≅ d.right :=
+      { hom := ⟨(θ₁, θ₂), isFrobeniusType_of_isIso _ θ₁, isFrobeniusType_of_isIso _ θ₂,
+          hd1.trans hd2.symm⟩
+        inv := ⟨(inv θ₁, inv θ₂), isFrobeniusType_of_isIso _ _, isFrobeniusType_of_isIso _ _,
+          hdi1.trans hdi2.symm⟩
+        hom_inv_id := by
+          apply InducedWideCategory.Hom.ext
+          exact Prod.ext (IsIso.hom_inv_id θ₁) (IsIso.hom_inv_id θ₂)
+        inv_hom_id := by
+          apply InducedWideCategory.Hom.ext
+          exact Prod.ext (IsIso.inv_hom_id θ₁) (IsIso.inv_hom_id θ₂) }
+    refine ⟨Under.mk u, ⟨Under.isoMk e ?_⟩⟩
+    apply InducedWideCategory.Hom.ext
+    exact Prod.ext hθ₁ hθ₂
+
+/-- ★★★★★**終尾(final)** —— 一般補題(`final_of_essSurj_of_thin`)を当てるだけ。
+
+★細さ(`idx_hom_ext`)は `𝒞^birat` が totally epimorphic であること、
+すなわち **pre-Frobenioid の定義そのもの**から来る。 -/
+instance idxToBirat_final (A B : C) : (idxToBirat P F G F' A B).Final :=
+  final_of_essSurj_of_thin _ (fun f g => idx_hom_ext f g)
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の添字圏の終尾性。 -/
+def idxToBirat_final.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 添字圏のあいだの終尾関手(birat の側)",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
