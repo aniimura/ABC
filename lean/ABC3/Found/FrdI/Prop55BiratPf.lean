@@ -472,6 +472,72 @@ def biratPf_map.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 右辺の余極限から (𝒞^pf)^birat への写像(well-defined)",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★6. 余極限から降ろす —— 右辺全体からの写像
+
+★★`idxToBirat` が**終尾**(`idxToBirat_final`、`Prop55Birat.lean`)なので、
+`colim_{W ∈ IdxPf(𝒞)(A,B)} Hom^birat(W₁,W₂) ≅ Hom^pf_{𝒞^birat}(A,B)` である。
+★`biratPf_map`(余錐性)を `colimit.desc` に渡し、その終尾同型で戻せば
+**`(𝒞^birat)^pf` の射から `(𝒞^pf)^birat` の射への写像**が得られる。 -/
+
+/-- ★★★★★★左辺への写像を与える余錐(右辺の外側の余極限から)。 -/
+noncomputable def biratPfOuterCocone (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Limits.Cocone (idxToBirat P F G F' A B ⋙
+      homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :=
+  Limits.Cocone.mk (HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩)
+    { app := fun W => TypeCat.ofHom fun z => biratPf hfi Gpf W z.down
+      naturality := fun W W' u => by
+        ext z
+        exact biratPf_map hfi Gpf F' u z.down }
+
+/-- ★★★★★★★**`(𝒞^birat)^pf` の射から `(𝒞^pf)^birat` の射への写像**。 -/
+noncomputable def biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)
+      → HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  fun z => Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)
+    ((Functor.Final.colimitIso (idxToBirat P F G F' A B)
+      (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv z)
+
+/-- ★★**代表元での計算則**。 -/
+@[simp] theorem biratPfHom_mk (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (W : IdxPf P F A B) (z : HomBirat P G W.right.obj.1 W.right.obj.2) :
+    biratPfHom hfi Gpf F' A B
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z) = biratPf hfi Gpf W z := by
+  have h2 : Limits.colimit.pre
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))
+        (idxToBirat P F G F' A B)
+        (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+          homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W (ULift.up z))
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z := by
+    rw [← types_comp_apply (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+        homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W)
+      (Limits.colimit.pre (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))
+        (idxToBirat P F G F' A B)), Limits.colimit.ι_pre]
+    rfl
+  have hinv : (Functor.Final.colimitIso (idxToBirat P F G F' A B)
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z)
+      = Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+          homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W (ULift.up z) := by
+    rw [← h2]
+    exact Iso.hom_inv_id_apply _ _
+  show Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)
+      ((Functor.Final.colimitIso (idxToBirat P F G F' A B)
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z)) = _
+  rw [hinv, ← types_comp_apply (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+      homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W)
+    (Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)), Limits.colimit.ι_desc]
+  rfl
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の右辺から左辺への写像。 -/
+def biratPfHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — (𝒞^birat)^pf の射から (𝒞^pf)^birat の射への写像",
+    sectionId := "frdi-prop-5-5" }
+
 end Cocone
 
 end ABC3.Found.FrdI
