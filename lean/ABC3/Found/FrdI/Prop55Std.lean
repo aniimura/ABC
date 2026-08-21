@@ -619,6 +619,115 @@ theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
 
 end Pf
 
+/-! ## ★6. `𝒞^pf` は model 型 —— そして model Frobenioid と圏同値
+
+★★★在庫が揃っていた:
+* `pfRoot_isOfIsotropicType`(`Prop32Frob.lean`)—— `𝒞^pf` は isotropic 型。
+* `otimes_pfRoot_eq_bot_of_root`(`Prop53UntrPf.lean`)——
+  **すべての根 `⟨A,n⟩` で `𝒞^pf` は unit-trivial**(`𝒞` が unit-trivial ほかを満たすとき)。
+
+★`Theorem 5.1, (iv)`(isotropic ＋ unit-trivial ⟹ model 型)を当てれば
+**`𝒞^pf` は model 型**になり、`Theorem 5.2, (iv)` で model Frobenioid と圏同値になる。
+
+★★`Φ^pf` の整域性は**無料**である —— `Pf.isDivisorial'` の第 1 成分がそれ。
+
+★これが `Proposition 5.3` の (c)(`(𝒞^un-tr)^pf` が model 型)と
+`Proposition 5.5, (iv)` の**圏の側**である。 -/
+
+section PfModel
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-- ★★★★**`𝒞^pf` は unit-trivial 型**(`𝒞` が unit-trivial ほかを満たすとき)。 -/
+theorem pfRoot_isOfUnitTrivialType (hiso : ∀ X : C, IsIsotropic P X)
+    (hftr : ∀ X : C, IsFrobeniusTrivial P X)
+    (hfn : ∀ X : C, IsFrobeniusNormalized P X)
+    (ζ : ∀ X : C, ℕ+ →* End X)
+    (hdeg : ∀ (X : C) (m : ℕ+), P.degFr ((ζ X m : End X) : X ⟶ X) = m)
+    (hprop : ∀ (X : C) (m : ℕ+),
+      IsBaseIdentity P (ζ X m) ∧ IsFrobeniusType P ((ζ X m : End X) : X ⟶ X))
+    (hut : ∀ X : C, IsUnitTrivial P X) :
+    IsOfUnitTrivialType (pfRootPre P F) :=
+  fun X => otimes_pfRoot_eq_bot_of_root (F := F) hiso hftr hfn ζ hdeg hprop hut X.obj X.root
+
+variable [IsConnected D]
+
+/-- ★★★★★**[FrdI] Proposition 5.3 (c) / 5.5, (iii)** —— **`𝒞^pf` は model 型**。
+
+★`Theorem 5.1, (iv)`(isotropic ＋ unit-trivial ⟹ model 型)を `𝒞^pf` に当てるだけ。 -/
+theorem pfRoot_isOfModelType (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hftr : ∀ X : C, IsFrobeniusTrivial P X)
+    (hfn : ∀ X : C, IsFrobeniusNormalized P X)
+    (ζ : ∀ X : C, ℕ+ →* End X)
+    (hdeg : ∀ (X : C) (m : ℕ+), P.degFr ((ζ X m : End X) : X ⟶ X) = m)
+    (hprop : ∀ (X : C) (m : ℕ+),
+      IsBaseIdentity P (ζ X m) ∧ IsFrobeniusType P ((ζ X m : End X) : X ⟶ X))
+    (hut : ∀ X : C, IsUnitTrivial P X)
+    (Gpf : Frobenioid (pfRootPre P F)) :
+    IsOfModelType (PfRootObj P F) (pfRootPre P F) Gpf :=
+  thm_5_1_iv Gpf (pfRoot_isOfIsotropicType (F := F) hfi)
+    (pfRoot_isOfUnitTrivialType (F := F) hiso hftr hfn ζ hdeg hprop hut)
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★**`𝒞^pf` の有理関数の単系** —— `(Φ^pf)^birat`。
+
+★`Φ^pf` の整域性は `Pf.isDivisorial'` の第 1 成分で**無料**。 -/
+noncomputable def pfRoot_ratFnData (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hftr : ∀ X : C, IsFrobeniusTrivial P X)
+    (hfn : ∀ X : C, IsFrobeniusNormalized P X)
+    (ζ : ∀ X : C, ℕ+ →* End X)
+    (hdeg : ∀ (X : C) (m : ℕ+), P.degFr ((ζ X m : End X) : X ⟶ X) = m)
+    (hprop : ∀ (X : C) (m : ℕ+),
+      IsBaseIdentity P (ζ X m) ∧ IsFrobeniusType P ((ζ X m : End X) : X ⟶ X))
+    (hut : ∀ X : C, IsUnitTrivial P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (hfsmD : IsOfFSMType D) :
+    RatFnData (pfRootPre P F) Gpf :=
+  biratRatFnData Gpf (pfRoot_isOfIsotropicType (F := F) hfi)
+    (fun Z => (pfRoot_isOfModelType (F := F) hfi hiso hftr hfn ζ hdeg hprop hut Gpf).2 Z)
+    (pfRoot_isOfUnitTrivialType (F := F) hiso hftr hfn ζ hdeg hprop hut)
+    (fun A => (Pf.isDivisorial' (P.divisorial A)).1.1) hfsmD
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★**[FrdI] Proposition 5.5, (iv) の圏の側** ——
+`𝒞^pf` は **model Frobenioid と圏同値**。
+
+原文 (FrdI p.105):
+> between Cpf (respectively, Cun-tr; Crlf) and the model Frobenioid associated to the data
+
+★`𝒞^pf` が model 型であること(`pfRoot_isOfModelType`)と
+`Theorem 5.2, (iv)`(`modelType_equiv`)の合成である。 -/
+noncomputable def pfRoot_modelFrobenioid (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hftr : ∀ X : C, IsFrobeniusTrivial P X)
+    (hfn : ∀ X : C, IsFrobeniusNormalized P X)
+    (ζ : ∀ X : C, ℕ+ →* End X)
+    (hdeg : ∀ (X : C) (m : ℕ+), P.degFr ((ζ X m : End X) : X ⟶ X) = m)
+    (hprop : ∀ (X : C) (m : ℕ+),
+      IsBaseIdentity P (ζ X m) ∧ IsFrobeniusType P ((ζ X m : End X) : X ⟶ X))
+    (hut : ∀ X : C, IsUnitTrivial P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (hfsmD : IsOfFSMType D) :
+    PfRootObj P F
+      ≌ (pfRoot_ratFnData (F := F) hfi hiso hftr hfn ζ hdeg hprop hut Gpf hfsmD).model.Obj :=
+  modelType_equiv _ (pfRoot_isOfIsotropicType (F := F) hfi)
+    (pfRoot_isOfModelType (F := F) hfi hiso hftr hfn ζ hdeg hprop hut Gpf)
+
+/-- ★★★★★★locator —— `Proposition 5.5, (iv)` の圏の側(`𝒞^pf` は model Frobenioid)。 -/
+def pfRoot_modelFrobenioid.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iv) — 𝒞^pf は model Frobenioid と圏同値",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★locator —— `Proposition 5.3` の (c)(`(𝒞^un-tr)^pf` が model 型)。 -/
+def pfRoot_isOfModelType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 103,
+    item := "Proposition 5.3 — (𝒞^un-tr)^pf は model 型",
+    sectionId := "frdi-prop-5-3" }
+
+end PfModel
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Proposition 5.5, (iii)` の「`𝒞^un-tr` は Frobenius-normalized 型」の条。 -/
