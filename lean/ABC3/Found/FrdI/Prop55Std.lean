@@ -5,6 +5,8 @@ import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.FrdI.Cor54Rigid
 import ABC3.Found.FrdI.Cor57Model
 import ABC3.Found.FrdI.Prop32Perfect
+import ABC3.Found.FrdI.MonoidTransport
+import ABC3.Found.FrdI.Prop55UntrCat
 
 /-!
 # [FrdI] Proposition 5.5, (iii) —— standard 型が `𝒞^un-tr` へ移る
@@ -230,7 +232,7 @@ end Rlf
 
 ★★残る 3 条は葉として名前をつけておく:
 
-1. **`Φ^pf` が non-dilating**(`hnd`)。
+1. ★**`Φ^pf` が non-dilating** —— ★★**閉じた**(`MonoidOn.pfOn_isNonDilatingOn`、下の節)。
    ★★測って分かったこと: `MPrec a b` は `a ≤ n·b`(**正の倍数まで許す**)なので、
    `M^pf` の元 `a` と `a/2` は `MPrec` について**同値**である。
    したがって「perfect だから primary 元が消える」ということは**ない**
@@ -242,6 +244,124 @@ end Rlf
 3. **group-like のときの Frobenius-compact 対象**(`hgl`)。
    ★`𝒞` が not group-like なら前件が偽になる(`𝒞^un-tr` の側と同じ形)。 -/
 
+/-! ### ★5-a. perfection は non-dilating 性を保つ
+
+★★これで上の 3 条のうち **1 番目が閉じる**。
+
+★★★筋は 3 段:
+1. `M^pf` は sharp(`Pf.isSharp_pf`)なので、non-dilating は
+   **`M^pf` の上の含意**に降りる(`isNonDilating_of_sharp`)。
+2. `Pf.of` は準素元を準素元へ送り(`Pf.of_primary`)、`≼` を**保ち反射する**
+   (`Pf.of_mprec` / `Pf.mprec_of_of`)。★反射は在庫の `Pf.mle_num_of_mle`
+   (「`Pf` の `≼` は分子を `k` 倍すれば `M` の `≼` に落ちる」)＋
+   「`x ≼ k·x`」で出る。
+3. したがって `M^pf` 側の仮定が `M` 側の仮定に落ち、`M` の non-dilating が
+   `α = id` を与え、`Pf.map_id` で戻る。 -/
+
+section PfMonoid
+
+variable {M : Type w} [AddCommMonoid M]
+
+theorem mLe_trans' {a b c : M} (h₁ : MLe a b) (h₂ : MLe b c) : MLe a c := by
+  obtain ⟨x, hx⟩ := h₁
+  obtain ⟨y, hy⟩ := h₂
+  exact ⟨x + y, by rw [← add_assoc, hx, hy]⟩
+
+theorem mLe_nsmul_self (x : M) (k : ℕ) (hk : 0 < k) : MLe x (k • x) := by
+  refine ⟨(k - 1) • x, ?_⟩
+  rw [← succ_nsmul' x (k - 1)]
+  congr 1
+  omega
+
+theorem mLe_nsmul {x y : M} (k : ℕ) (h : MLe x y) : MLe (k • x) (k • y) := by
+  obtain ⟨c, hc⟩ := h
+  exact ⟨k • c, by rw [← smul_add, hc]⟩
+
+theorem mPrec_of_nsmul {x y : M} {k : ℕ} (hk : 0 < k) (h : MPrec (k • x) y) : MPrec x y := by
+  obtain ⟨n, hn, hle⟩ := h
+  exact ⟨n, hn, mLe_trans' (mLe_nsmul_self x k hk) hle⟩
+
+theorem mPrec_nsmul_right {x y : M} {k : ℕ} (hk : 0 < k) (h : MPrec x (k • y)) :
+    MPrec x y := by
+  obtain ⟨n, hn, hle⟩ := h
+  exact ⟨n * k, Nat.mul_pos hn hk, by rwa [mul_smul]⟩
+
+theorem Pf.of_eq_nsmul_mk (x : M) (k : ℕ+) :
+    Pf.of x = ((k : ℕ+) : ℕ) • Pf.mk x k := by
+  rw [Pf.nsmul_mk]
+  refine (Pf.sound 1 ?_).symm
+  push_cast
+  simp [smul_smul]
+
+/-- ★`Pf.of` は `≼` を保つ。 -/
+theorem Pf.of_mprec {x y : M} (h : MPrec x y) : MPrec (Pf.of x) (Pf.of y) := by
+  obtain ⟨n, hn, c, hc⟩ := h
+  refine ⟨n, hn, Pf.of c, ?_⟩
+  rw [← map_add, hc, map_nsmul]
+
+/-- ★★`Pf.of` は `≼` を**反射する** —— 在庫の `Pf.mle_num_of_mle` がそのまま効く。 -/
+theorem Pf.mprec_of_of {x y : M} (h : MPrec (Pf.of x) (Pf.of y)) : MPrec x y := by
+  obtain ⟨n, hn, hle⟩ := h
+  have hle' : MLe (Pf.mk x 1) (Pf.mk (n • y) 1) := by simpa using hle
+  obtain ⟨k, c, hc⟩ := Pf.mle_num_of_mle hle'
+  refine mPrec_of_nsmul (k := ((k : ℕ+) : ℕ)) k.pos
+    ⟨((k : ℕ+) : ℕ) * n, Nat.mul_pos k.pos hn, c, ?_⟩
+  rw [hc, mul_smul]
+
+/-- ★★★**`Pf.of` は準素元を準素元へ送る**(`M` が divisorial なら)。
+
+★★分母は `≼` にとって**見えない** —— `Pf.of c₀ = k • (c₀/k)` なので、
+`c₀/k` と `c₀` は `≼` について同値である。 -/
+theorem Pf.of_primary (hdiv : IsDivisorial M) {b : M} (h : IsPrimaryElt b) :
+    IsPrimaryElt (Pf.of b) := by
+  refine ⟨?_, ?_⟩
+  · intro h0
+    refine h.1 ((Pf.mk_eq_mk_same_iff hdiv (r := 1)).mp ?_)
+    show Pf.mk b 1 = Pf.mk 0 1
+    exact h0
+  · intro c hc hcb
+    induction c using Pf.inductionOn with | _ c₀ k =>
+    have hc₀ : c₀ ≠ 0 := by
+      intro h0
+      exact hc (by rw [h0]; exact Pf.mk_zero k)
+    have h1 : MPrec (Pf.of c₀) (Pf.of b) := by
+      obtain ⟨n, hn, hle⟩ := hcb
+      refine ⟨((k : ℕ+) : ℕ) * n, Nat.mul_pos k.pos hn, ?_⟩
+      rw [Pf.of_eq_nsmul_mk c₀ k, mul_smul]
+      exact mLe_nsmul _ hle
+    have h4 : MPrec (Pf.of b) (Pf.of c₀) :=
+      Pf.of_mprec (h.2 c₀ hc₀ (Pf.mprec_of_of h1))
+    refine mPrec_nsmul_right (k := ((k : ℕ+) : ℕ)) k.pos ?_
+    rwa [← Pf.of_eq_nsmul_mk c₀ k]
+
+/-- ★★★★★**perfection は non-dilating 性を保つ**。 -/
+theorem Pf.isNonDilating_map (hdiv : IsDivisorial M) (α : M →+ M) (hα : IsNonDilating α) :
+    IsNonDilating (Pf.map α) := by
+  refine isNonDilating_of_sharp (Pf.isSharp_pf hdiv.2) (Pf.map α) (fun h => ?_)
+  have hM : ∀ b : M, IsPrimaryElt b → MPrec (α b) b := by
+    intro b hb
+    have hkey := h (Pf.of b) (Pf.of_primary hdiv hb)
+    refine Pf.mprec_of_of ?_
+    have he : Pf.map α (Pf.of b) = Pf.of (α b) := Pf.map_mk α b 1
+    rwa [he] at hkey
+  rw [addMonoidHom_eq_id_of_primary_mprec hdiv.2 α hα hM, Pf.map_id]
+
+end PfMonoid
+
+section PfOn
+
+variable {D : Type u} [Category.{v} D]
+
+/-- ★★★★★**`Φ^pf` は non-dilating**(`Φ` が non-dilating で各値が divisorial なら)。 -/
+theorem MonoidOn.pfOn_isNonDilatingOn (Φ : MonoidOn.{v, u, w} D)
+    (hsh : ∀ A : D, IsSharp (Φ.val A)) (hdiv : ∀ A : D, IsDivisorial (Φ.val A))
+    (h : Φ.IsNonDilatingOn) : (Φ.pfOn hsh).IsNonDilatingOn := by
+  intro A e
+  show IsNonDilating (Pf.map (Φ.map e))
+  exact Pf.isNonDilating_map (hdiv A) _ (h A e)
+
+end PfOn
+
 section Pf
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
@@ -252,14 +372,13 @@ set_option maxHeartbeats 800000 in
 
 ★6 条のうち 4 条(quasi-isotropic・Frobenius-isotropic・`𝒟` が FSMFF)は
 `pfRoot_isOfIsotropicType` と「`𝒟` が同じ」で無料。
-★残る 3 条(`Φ^pf` の non-dilating・Frobenius-normalized・group-like のときの compact 対象)は
+★残る 2 条(Frobenius-normalized・group-like のときの compact 対象)は
 仮引数で受けている(上の節に筋を記した)。 -/
 theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
     (F₂ : FrobenioidCore (pfRootPre P F))
     (hfn : IsOfFrobeniusNormalizedType (pfRootPre P F))
     (hgl : IsOfGroupLikeType (pfRootPre P F) →
       ∃ A : Istr (pfRootPre P F), IsFrobeniusCompact (istrPre (pfRootPre P F) F₂) A)
-    (hnd : (Φ.pfOn (phiSharp P)).IsNonDilatingOn)
     (hstd : IsOfStandardType D C P F) :
     IsOfStandardType D (PfRootObj P F) (pfRootPre P F) F₂ where
   quasiIsotropic :=
@@ -270,7 +389,8 @@ theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
   groupLikeCompact := hgl
   frobNormalized := hfn
   baseFSMFF := hstd.baseFSMFF
-  phiNonDilating := hnd
+  phiNonDilating :=
+    MonoidOn.pfOn_isNonDilatingOn Φ (phiSharp P) P.divisorial hstd.phiNonDilating
 
 end Pf
 
