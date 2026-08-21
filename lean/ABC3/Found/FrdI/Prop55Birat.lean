@@ -66,4 +66,60 @@ def coaPreProp_pfRoot_mk_iff.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — (𝒞^pf)^birat の添字圏は 𝒞^pf の pre-step のスライス",
     sectionId := "frdi-prop-5-5" }
 
+variable (P) (G : Frobenioid P)
+
+/-! ## ★★右の側 —— `𝒞^birat` の Frobenius 型を代表元で判定する
+
+★★**`biratUp` を置くのが実務上の要点**である ——
+`BiratCat P G` は定義上 `C` そのものだが、`show BiratCat P G from A` と書くと
+`rw` と instance 合成が「`instances` 透明度で型が合わない」と言って落ちる
+(`PfCat` のときと同じ事情、2026-08-21 に踏んだ)。★**別名の `def` を置くこと。** -/
+
+/-- ★`𝒞` の対象を `𝒞^birat` の対象として見る(`biratDown` の逆向き)。 -/
+def biratUp (A : C) : BiratCat P G := A
+
+@[simp] theorem biratDown_biratUp (A : C) : biratDown P G (biratUp P G A) = A := rfl
+
+@[simp] theorem biratUp_biratDown (A : BiratCat P G) : biratUp P G (biratDown P G A) = A := rfl
+
+/-- ★★★**`𝒞^birat` の Frobenius 型は代表元で判定できる**。
+
+★`𝒞^birat` ではすべての射が isometric(`birat_isIsometric`)なので、
+判定は **co-angular ＋ base-isomorphism** に落ちる。 -/
+theorem birat_isFrobeniusType_repr {X Y : BiratCat P G} (f : X ⟶ Y) {A' : C}
+    (φ : A' ⟶ biratDown P G Y)
+    (aa : biratUp P G A' ⟶ X) (a' : X ⟶ biratUp P G A')
+    (h1 : aa ≫ a' = 𝟙 (biratUp P G A')) (h2 : a' ≫ aa = 𝟙 X)
+    (heq : f = a' ≫ (toBiratCat P G).map φ) :
+    IsFrobeniusType (biratPre P G) f ↔ (IsCoAngular P φ ∧ IsBaseIsomorphism P φ) := by
+  haveI hiso : IsIso a' := ⟨aa, h2, h1⟩
+  haveI hba : IsIso ((biratPre P G).Base a') := isIso_Base_of_isIso a'
+  have hcomp : (biratPre P G).Base f
+      = (biratPre P G).Base a' ≫ (biratPre P G).Base ((toBiratCat P G).map φ) := by
+    rw [heq]
+    exact (biratPre P G).Base_comp _ _
+  constructor
+  · rintro ⟨⟨hc, _⟩, hb⟩
+    have hcφ : IsCoAngular P φ := (birat_isCoAngular_repr P G f φ aa a' h1 h2 heq).mp hc
+    refine ⟨hcφ, ?_⟩
+    haveI hc2 : IsIso ((biratPre P G).Base a' ≫ (biratPre P G).Base ((toBiratCat P G).map φ)) :=
+      hcomp ▸ hb
+    have hbb : IsIso ((biratPre P G).Base ((toBiratCat P G).map φ)) :=
+      IsIso.of_isIso_comp_left ((biratPre P G).Base a')
+        ((biratPre P G).Base ((toBiratCat P G).map φ))
+    exact ((birat_isFrobeniusType_iff P G φ).mp
+      ⟨⟨(birat_isCoAngular_iff P G φ).mpr hcφ, birat_isIsometric _⟩, hbb⟩).2
+  · rintro ⟨hc, hb⟩
+    have hft := (birat_isFrobeniusType_iff P G φ).mpr ⟨hc, hb⟩
+    refine ⟨⟨(birat_isCoAngular_repr P G f φ aa a' h1 h2 heq).mpr hc, birat_isIsometric _⟩, ?_⟩
+    show IsIso ((biratPre P G).Base f)
+    rw [hcomp]
+    exact @IsIso.comp_isIso _ _ _ _ _ _ _ hba hft.2
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の `birat` の側の Frobenius 型判定。 -/
+def birat_isFrobeniusType_repr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 𝒞^birat の Frobenius 型は代表元で判定できる",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
