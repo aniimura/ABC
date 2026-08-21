@@ -445,4 +445,14 @@ def localDeg_eq_one_of_bijective.src : ABC3.Meta.Source :=
     item := "Example 6.3 — 自己同型に沿った局所次数は 1(non-dilating の入力)",
     sectionId := "frdi-example-6-3" }
 
+/-- ★★★**同型に沿った引き戻しは係数を変えない** ——
+`localDeg = 1` なので `arithExtend` は「素点を引き戻す」だけになる。
+
+★これが `hfix`(自己同型は素点を素点へ係数 1 で移す)の中身である。 -/
+theorem arithExtend_single_apply (hb : Function.Bijective (algebraMap L M))
+    (hs : Function.Surjective (algebraMap (𝓞 L) (𝓞 M)))
+    (v : ArithPlace L) (r : ℝ) (V : ArithPlace M) :
+    arithExtend (Finsupp.single v r) V = (Finsupp.single v r) (resPlace (L := L) V) := by
+  rw [arithExtend_apply, localDeg_eq_one_of_bijective hb hs V, Nat.cast_one, one_mul]
+
 end ABC3.Found.Divisor
