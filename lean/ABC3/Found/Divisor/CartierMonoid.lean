@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Divisor.FreeDivisorial
 import ABC3.Found.FrdI.MonoidTransport
+import Mathlib.GroupTheory.Archimedean
 
 /-!
 # Cartier 有効因子の単系 `Φ(L) = Γ ∩ ℤ≥0[D_L]`
@@ -377,5 +378,92 @@ theorem isNonDilating_effSub_of_perm_of_qc {S : Type*} {Γ : AddSubgroup (S →�
       = Finsupp.equivMapDomain σ ((x : effSub Γ) : S →₀ ℤ)) :
     IsNonDilating α :=
   isNonDilating_effSub_of_perm σ (exists_single_mem_effSub_of_qc hq) α hα
+
+/-! ## ★★★`ℤ` の部分群の非負部分 —— 幾何側 non-dilating の核(2026-08-21)
+
+★★**幾何の引き戻しが「素因子の置換(係数 1)」であることを仮定しなくても済む道**が
+これである —— 各素因子の成分は `ℤ` の部分群の非負部分なので**離散**であり、
+★**加法的な全単射は恒等しかない**。
+(算術側でこの道が使えないのは、アルキメデス素点の成分が `ℝ≥0` そのもので
+`c ↦ 2c` という加法的全単射があるからである。) -/
+
+/-- ★`H ≤ ℤ` の非負部分。 -/
+def intNonneg (H : AddSubgroup ℤ) : AddSubmonoid ℤ where
+  carrier := {n : ℤ | n ∈ H ∧ 0 ≤ n}
+  add_mem' ha hb := ⟨H.add_mem ha.1 hb.1, add_nonneg ha.2 hb.2⟩
+  zero_mem' := ⟨H.zero_mem, le_refl 0⟩
+
+theorem mem_intNonneg {H : AddSubgroup ℤ} {n : ℤ} :
+    n ∈ intNonneg H ↔ n ∈ H ∧ 0 ≤ n := Iff.rfl
+
+/-- ★★非負部分は生成元の**自然数**倍全体(`ℤ` の部分群は巡回だから)。 -/
+theorem exists_gen_intNonneg (H : AddSubgroup ℤ) :
+    ∃ d : ℤ, 0 ≤ d ∧ d ∈ H ∧ ∀ n ∈ intNonneg H, ∃ k : ℕ, n = (k : ℤ) * d := by
+  obtain ⟨a, ha⟩ := Int.subgroup_cyclic H
+  refine ⟨|a|, abs_nonneg a, ?_, ?_⟩
+  · rw [ha]
+    rcases abs_choice a with h | h
+    · rw [h]; exact AddSubgroup.subset_closure rfl
+    · rw [h]; exact AddSubgroup.neg_mem _ (AddSubgroup.subset_closure rfl)
+  · intro n hn
+    have hnH : n ∈ H := hn.1
+    rw [ha, AddSubgroup.mem_closure_singleton] at hnH
+    obtain ⟨m, hm⟩ := hnH
+    rw [smul_eq_mul] at hm
+    rcases lt_trichotomy a 0 with hneg | rfl | hpos
+    · rw [abs_of_neg hneg]
+      refine ⟨(-m).toNat, ?_⟩
+      have hm0 : 0 ≤ -m := by nlinarith [hn.2]
+      rw [Int.toNat_of_nonneg hm0, ← hm]
+      ring
+    · refine ⟨0, ?_⟩
+      simp at hm ⊢
+      omega
+    · rw [abs_of_pos hpos]
+      refine ⟨m.toNat, ?_⟩
+      have hm0 : 0 ≤ m := by nlinarith [hn.2]
+      rw [Int.toNat_of_nonneg hm0, ← hm]
+
+/-- ★★★★**離散だから、加法的な全単射は恒等しかない**。
+
+★★これが幾何側 non-dilating の核である ——
+`k` 倍の写像が全単射なら `k = 1`。 -/
+theorem eq_id_of_bijective_intNonneg {H : AddSubgroup ℤ} (f : intNonneg H →+ intNonneg H)
+    (hbij : Function.Bijective f) (x : intNonneg H) : f x = x := by
+  obtain ⟨d, hd0, hdH, hgen⟩ := exists_gen_intNonneg H
+  have hdmem : d ∈ intNonneg H := ⟨hdH, hd0⟩
+  set D : intNonneg H := ⟨d, hdmem⟩ with hD
+  have hcoe : ∀ (k : ℕ) (y : intNonneg H), (((k • y : intNonneg H)) : ℤ) = (k : ℤ) * (y : ℤ) := by
+    intro k y; simp
+  by_cases hd : d = 0
+  · obtain ⟨k, hk⟩ := hgen (x : ℤ) x.2
+    have hx : x = 0 := Subtype.ext (by rw [hk, hd, mul_zero]; rfl)
+    rw [hx, map_zero]
+  · obtain ⟨c, hc⟩ := hgen ((f D : intNonneg H) : ℤ) (f D).2
+    obtain ⟨z, hz⟩ := hbij.2 D
+    obtain ⟨k, hk⟩ := hgen (z : ℤ) z.2
+    have hzD : z = k • D := Subtype.ext (by rw [hk, hcoe])
+    have h2 : f (k • D) = D := by rw [← hzD]; exact hz
+    have h3 := congrArg (fun y : intNonneg H => (y : ℤ)) h2
+    simp only [map_nsmul, hcoe, hc] at h3
+    have hkc : (k : ℤ) * (c : ℤ) = 1 := by
+      have h4 : ((k : ℤ) * (c : ℤ)) * d = 1 * d := by
+        rw [one_mul, mul_assoc]
+        exact h3
+      exact mul_right_cancel₀ hd h4
+    have hnat : k * c = 1 := by exact_mod_cast hkc
+    have hc1 : (c : ℤ) = 1 := by
+      have hcc : c = 1 := Nat.eq_one_of_mul_eq_one_left hnat
+      exact_mod_cast hcc
+    have hfD : f D = D := Subtype.ext (by rw [hc, hc1, one_mul])
+    obtain ⟨k', hk'⟩ := hgen (x : ℤ) x.2
+    have hxD : x = k' • D := Subtype.ext (by rw [hk', hcoe])
+    rw [hxD, map_nsmul, hfD]
+
+/-- ★★★locator —— 幾何側 non-dilating の核(離散性)。 -/
+def eq_id_of_bijective_intNonneg.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — 素因子の成分は離散なので加法的全単射は恒等",
+    sectionId := "frdi-thm-6-2" }
 
 end ABC3.Found.FrdI
