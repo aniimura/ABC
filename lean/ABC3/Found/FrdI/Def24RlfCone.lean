@@ -248,6 +248,62 @@ theorem isSharp_rlfCone_of_pos (l : Gp M →+ ℝ)
   have h4 : L ((u.val : rlfCone M) : RlfV M) = 0 := by linarith [h1.1, h2.1]
   exact Subtype.ext (h1.2 h4)
 
+/-- ★★★★★★**錐が sharp であるための十分条件(族版)** ——
+`M` 上で**非負**な線型汎関数の族であって、`M` の点を**分離する**もの。
+
+★★★これが `perf-factorial` にそのまま効く —— 素点ごとの `ord_p`
+(`factorMap ι · p`)は**非負**であり、`factorMap` の単射性がちょうど**分離**である。
+★★1 本の狭義正な汎関数(`isSharp_rlfCone_of_pos`)を要求すると
+素点が無限個のとき「係数の総和」が有限和にならないが、
+**族にすれば有限和は要らない** —— 錐の生成元 `r ⊗ toGp m` は
+1 点 `m` しか含まないので、各素点で別々に消えることを見ればよい。 -/
+theorem isSharp_rlfCone_of_family {ι : Type*} (l : ι → (Gp M →+ ℝ))
+    (hnonneg : ∀ (i : ι) (m : M), 0 ≤ l i (toGp M m))
+    (hsep : ∀ m : M, (∀ i : ι, l i (toGp M m) = 0) → m = 0) :
+    IsSharp (rlfCone M) := by
+  have key : ∀ x ∈ rlfCone M, (∀ i, 0 ≤ rlfLift (l i) x) ∧
+      ((∀ i, rlfLift (l i) x = 0) → x = 0) := by
+    intro x hx
+    refine AddSubmonoid.closure_induction ?_ ?_ ?_ hx
+    · rintro y ⟨r, hr, m, rfl⟩
+      refine ⟨fun i => ?_, ?_⟩
+      · rw [rlfLift_tmul]
+        exact mul_nonneg hr (hnonneg i m)
+      · intro h0
+        by_cases hr0 : r = 0
+        · rw [hr0, TensorProduct.zero_tmul]
+        · have hm : m = 0 := hsep m fun i => by
+            have hi := h0 i
+            rw [rlfLift_tmul] at hi
+            rcases mul_eq_zero.mp hi with h | h
+            · exact absurd h hr0
+            · exact h
+          rw [hm, toGp_zero, TensorProduct.tmul_zero]
+    · exact ⟨fun _ => by simp, fun _ => rfl⟩
+    · rintro a b _ _ ⟨ha0, ha1⟩ ⟨hb0, hb1⟩
+      refine ⟨fun i => by rw [map_add]; linarith [ha0 i, hb0 i], ?_⟩
+      intro h
+      have hA : ∀ i, rlfLift (l i) a = 0 := fun i => by
+        have hi := h i
+        rw [map_add] at hi
+        linarith [ha0 i, hb0 i]
+      have hB : ∀ i, rlfLift (l i) b = 0 := fun i => by
+        have hi := h i
+        rw [map_add] at hi
+        linarith [ha0 i, hb0 i]
+      rw [ha1 hA, hb1 hB, add_zero]
+  intro a ha
+  obtain ⟨u, rfl⟩ := ha
+  have h1 := key ((u.val : rlfCone M) : RlfV M) u.val.2
+  have h2 := key ((u.neg : rlfCone M) : RlfV M) u.neg.2
+  have hsum : ((u.val : rlfCone M) : RlfV M) + ((u.neg : rlfCone M) : RlfV M) = 0 :=
+    congrArg (fun t : rlfCone M => (t : RlfV M)) u.val_neg
+  refine Subtype.ext (h1.2 fun i => ?_)
+  have h3 : rlfLift (l i) ((u.val : rlfCone M) : RlfV M)
+      + rlfLift (l i) ((u.neg : rlfCone M) : RlfV M) = 0 := by
+    rw [← map_add, hsum, map_zero]
+  linarith [h1.1 i, h2.1 i]
+
 variable {D : Type u} [Category.{v} D]
 
 /-- ★`Φ^rlf` の台となる反変関手。 -/

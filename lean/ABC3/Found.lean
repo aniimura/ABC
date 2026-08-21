@@ -110,6 +110,7 @@ import ABC3.Found.FrdI.Cor57Model
 import ABC3.Found.FrdI.Def24Rlf
 import ABC3.Found.FrdI.Def24PfT
 import ABC3.Found.FrdI.Def24RlfCone
+import ABC3.Found.FrdI.Def24RlfPerf
 import ABC3.Found.FrdI.Prop56Cos
 import ABC3.Found.FrdI.Prop56Mp
 import ABC3.Found.FrdI.Prop56MpAbs
