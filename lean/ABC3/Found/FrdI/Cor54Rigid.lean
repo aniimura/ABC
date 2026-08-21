@@ -157,4 +157,82 @@ def thm52iv_comp_toElem.src : ABC3.Meta.Source :=
     item := "Corollary 5.4 — 縦の矢印は 𝔽_Φ への関手と 1-可換(rigidity の組み立て)",
     sectionId := "frdi-cor-5-4" }
 
+/-! ## ★4. 1-一意性の後半 —— **同型の一意性**
+
+原文 (FrdI p.104):
+> arrows are equivalences of categories]. Moreover, each of the composite functors of
+
+★★Mochizuki の「1-unique」は「**一意な**同型を除いて一意」の意味である。
+★その**後半(同型の一意性)は rigidity からただちに出る** ——
+`IsRigidFunctor F` は「`F ≅ F` は恒等だけ」なので、
+2 つの同型 `α β : G ≅ F` に対し `α.symm ≪≫ β : F ≅ F` が恒等になり `α = β`。 -/
+
+universe uu1 vv1 uu2 vv2
+
+/-- ★★★**rigid な関手への同型は一意**。 -/
+theorem iso_unique_of_rigid {E₁ : Type uu1} [Category.{vv1} E₁] {E₂ : Type uu2}
+    [Category.{vv2} E₂] {G H : E₁ ⥤ E₂} (hH : IsRigidFunctor H) (α β : G ≅ H) : α = β := by
+  have h : α.symm ≪≫ β = Iso.refl H := hH _
+  have hh : α.inv ≫ β.hom = 𝟙 H := congrArg Iso.hom h
+  refine Iso.ext ?_
+  have h2 := congrArg (fun t => α.hom ≫ t) hh
+  simp only [← Category.assoc, Iso.hom_inv_id, Category.id_comp, Category.comp_id] at h2
+  exact h2.symm
+
+/-- ★★同じく、rigid な関手**から**の同型も一意。 -/
+theorem iso_unique_of_rigid' {E₁ : Type uu1} [Category.{vv1} E₁] {E₂ : Type uu2}
+    [Category.{vv2} E₂] {G H : E₁ ⥤ E₂} (hG : IsRigidFunctor G) (α β : G ≅ H) : α = β := by
+  have h := iso_unique_of_rigid hG α.symm β.symm
+  have := congrArg Iso.symm h
+  simpa using this
+
+variable (S) in
+/-- ★★★★★★**[FrdI] Corollary 5.4 の 1-可換性の同型は一意**。
+
+★合成 `𝒞₁ ⥤ 𝒞₂ ⥤ 𝒞₂^rlf` が rigid(`isRigidFunctor_comp_cToSc`)なので、
+そこへの同型は一意である。
+
+原文 (FrdI p.104):
+> arrows are equivalences of categories]. Moreover, each of the composite functors of -/
+theorem cor54_comm_iso_unique {C₁ : Type u2} [Category.{v2} C₁] (Ψ : C₁ ⥤ C)
+    [Ψ.IsEquivalence] (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A))
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
+    (hintS : ∀ A : D, IsIntegralMonoid (ScT S (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    (hM' : ModelData.Hyp (scModel S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD))
+    (hrig : IsRigidFunctor P.proj)
+    {H : C₁ ⥤ ScModelObj S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD}
+    (α β : H ≅ Ψ ⋙ cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD) : α = β :=
+  iso_unique_of_rigid
+    (isRigidFunctor_comp_cToSc (S := S) Ψ Fc G hiso hint hcharInj hintS hfsmD hM' hrig) α β
+
+variable (S) in
+/-- ★★★★★**縦の矢印への同型も一意**(`𝒞 ⥤ 𝒞^rlf` が rigid だから)。 -/
+theorem cor54_vert_iso_unique (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A))
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
+    (hintS : ∀ A : D, IsIntegralMonoid (ScT S (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    (hM' : ModelData.Hyp (scModel S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD))
+    (hrig : IsRigidFunctor P.proj)
+    {H : C ⥤ ScModelObj S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD}
+    (α β : H ≅ cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD) : α = β :=
+  iso_unique_of_rigid
+    (isRigidFunctor_cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD hM' hrig) α β
+
+/-- ★★★★★locator —— `Corollary 5.4` の 1-一意性(同型の一意性)。 -/
+def cor54_comm_iso_unique.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Corollary 5.4 — 1-可換性の同型は一意(rigidity から)",
+    sectionId := "frdi-cor-5-4" }
+
 end ABC3.Found.FrdI
