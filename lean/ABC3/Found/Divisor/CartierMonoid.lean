@@ -530,4 +530,301 @@ theorem alpha_single_eq {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)} (α : effS
   · rw [Finsupp.single_eq_same]
   · rw [alpha_single_supported α h hn hmem ht, Finsupp.single_eq_of_ne ht]
 
+/-! ## ★★★★★幾何側 non-dilating —— 幾何の入力なしで閉じる(2026-08-21)
+
+★★★**「引き戻しが素因子の置換(係数 1)で誘導される」を仮定しなくてよい**ことが分かった。
+必要なのは **`K`-`Q`-Cartier** と **引き戻しが全単射**(自己射は `𝒟` で同型なので
+`pull_id` / `pull_comp` から出る)だけである。
+
+★筋:
+1. non-dilating の仮定 ⟹ 台が 1 点の元の像も台が 1 点(`alpha_single_supported`)
+2. 各素因子の成分は `ℤ` の部分群の非負部分 ⟹ **離散**
+   ⟹ そこでの加法的全単射は恒等(`eq_id_of_bijective_intNonneg`)
+3. `K`-`Q`-Cartier ⟹ どの元も `N` 倍すれば台が 1 点の元の**有限和**(`exists_common_mult`)
+   ⟹ 引き戻しは**座標ごと**(`alpha_coord`)
+4. 2 と 3 で `α = id`
+
+★★算術側(`Example 6.3`)でこの道が使えないのは、アルキメデス素点の成分が
+`ℝ≥0` そのもので `c ↦ 2c` という加法的全単射があるからである。 -/
+
+section GeomND
+variable {S : Type*} [DecidableEq S] {Γ : AddSubgroup (S →₀ ℤ)}
+
+/-- ★★`K`-`Q`-Cartier ⟹ どの元も `N` 倍すれば各座標が単独で `Φ(L)` に入る。 -/
+theorem exists_common_mult (hq : IsQCartierSubgroup Γ) (x : effSub Γ) :
+    ∃ N : ℕ, 0 < N ∧ ∀ t : S, Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) ∈ effSub Γ := by
+  classical
+  set n : S → ℕ := fun t => (hq t).choose with hn
+  have hnpos : ∀ t, 0 < n t := fun t => (hq t).choose_spec.1
+  have hnmem : ∀ t, Finsupp.single t ((n t : ℤ)) ∈ Γ := fun t => (hq t).choose_spec.2
+  set N : ℕ := ∏ t ∈ ((x : S →₀ ℤ)).support, n t with hN
+  have hNpos : 0 < N := Finset.prod_pos (fun t _ => hnpos t)
+  refine ⟨N, hNpos, fun t => ?_⟩
+  by_cases ht : t ∈ ((x : S →₀ ℤ)).support
+  · have hdvd : (n t : ℤ) ∣ (N : ℤ) :=
+      Int.natCast_dvd_natCast.mpr (Finset.dvd_prod_of_mem n ht)
+    obtain ⟨q, hqq⟩ := hdvd
+    refine ⟨?_, ?_⟩
+    · have heq : Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t))
+          = (q * ((x : S →₀ ℤ) t)) • Finsupp.single t ((n t : ℤ)) := by
+        rw [Finsupp.smul_single, hqq]
+        congr 1
+        ring
+      rw [heq]
+      exact Γ.zsmul_mem (hnmem t) _
+    · refine Finsupp.le_def.mpr fun u => ?_
+      rcases eq_or_ne u t with rfl | hu
+      · simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.single_eq_same]
+        have hx0 : 0 ≤ ((x : S →₀ ℤ)) u := by simpa using Finsupp.le_def.mp x.2.2 u
+        positivity
+      · have hz : (Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) : S →₀ ℤ) u = 0 :=
+          Finsupp.single_eq_of_ne hu
+        simp only [Finsupp.coe_zero, Pi.zero_apply, hz]
+        exact le_refl 0
+  · have hx0 : ((x : S →₀ ℤ)) t = 0 := by simpa using Finsupp.notMem_support_iff.mp ht
+    rw [hx0, mul_zero, Finsupp.single_zero]
+    exact (effSub Γ).zero_mem
+
+/-- ★`N` 倍は座標ごとの有限和。 -/
+theorem nsmul_eq_sum_single (x : effSub Γ) (N : ℕ)
+    (hmem : ∀ t : S, Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) ∈ effSub Γ) :
+    (N • x : effSub Γ)
+      = ∑ t ∈ ((x : S →₀ ℤ)).support,
+          (⟨Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)), hmem t⟩ : effSub Γ) := by
+  classical
+  refine Subtype.ext ?_
+  rw [AddSubmonoid.coe_finsetSum]
+  refine Finsupp.ext fun u => ?_
+  rw [Finsupp.finsetSum_apply]
+  by_cases hu : u ∈ ((x : S →₀ ℤ)).support
+  · rw [Finset.sum_eq_single u]
+    · simp
+    · intro t _ htu
+      exact Finsupp.single_eq_of_ne (Ne.symm htu)
+    · intro hcon
+      exact absurd hu hcon
+  · have hx0 : ((x : S →₀ ℤ)) u = 0 := by simpa using Finsupp.notMem_support_iff.mp hu
+    have hz : ∀ t ∈ ((x : S →₀ ℤ)).support,
+        (Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) : S →₀ ℤ) u = 0 := by
+      intro t ht
+      refine Finsupp.single_eq_of_ne ?_
+      intro hc
+      exact hu (hc ▸ ht)
+    rw [Finset.sum_eq_zero hz]
+    simp [hx0]
+
+/-- ★★★**引き戻しは座標ごと**(`N` 倍して見れば)。 -/
+theorem alpha_coord (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    (x : effSub Γ) {N : ℕ} (hN : 0 < N)
+    (hmem : ∀ t : S, Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) ∈ effSub Γ) (u : S) :
+    (N : ℤ) * (((α x : effSub Γ) : S →₀ ℤ) u)
+      = ((α ⟨Finsupp.single u ((N : ℤ) * ((x : S →₀ ℤ) u)), hmem u⟩ : effSub Γ) : S →₀ ℤ) u := by
+  classical
+  have hxnn : ∀ t, 0 ≤ ((x : S →₀ ℤ)) t := fun t => by simpa using Finsupp.le_def.mp x.2.2 t
+  have hstep : α (N • x)
+      = ∑ t ∈ ((x : S →₀ ℤ)).support,
+          α (⟨Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)), hmem t⟩ : effSub Γ) := by
+    rw [nsmul_eq_sum_single x N hmem, map_sum]
+  have hL : (((α (N • x) : effSub Γ)) : S →₀ ℤ) u
+      = (N : ℤ) * (((α x : effSub Γ) : S →₀ ℤ) u) := by
+    rw [map_nsmul]
+    simp
+  have hR := congrArg (fun y : effSub Γ => ((y : S →₀ ℤ)) u) hstep
+  rw [hL] at hR
+  rw [hR, AddSubmonoid.coe_finsetSum, Finsupp.finsetSum_apply]
+  by_cases hu : u ∈ ((x : S →₀ ℤ)).support
+  · refine Finset.sum_eq_single u ?_ ?_
+    · intro t ht htu
+      have hxt : 0 < ((x : S →₀ ℤ)) t :=
+        lt_of_le_of_ne (hxnn t) (Ne.symm (Finsupp.mem_support_iff.mp ht))
+      have hpos : 0 < (N : ℤ) * ((x : S →₀ ℤ)) t := by positivity
+      exact alpha_single_supported α h hpos (hmem t) (Ne.symm htu)
+    · intro hcon; exact absurd hu hcon
+  · have hx0 : ((x : S →₀ ℤ)) u = 0 := by simpa using Finsupp.notMem_support_iff.mp hu
+    have hz : ∀ t ∈ ((x : S →₀ ℤ)).support,
+        ((α (⟨Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)), hmem t⟩ : effSub Γ)
+          : effSub Γ) : S →₀ ℤ) u = 0 := by
+      intro t ht
+      have hxt : 0 < ((x : S →₀ ℤ)) t :=
+        lt_of_le_of_ne (hxnn t) (Ne.symm (Finsupp.mem_support_iff.mp ht))
+      have hpos : 0 < (N : ℤ) * ((x : S →₀ ℤ)) t := by positivity
+      refine alpha_single_supported α h hpos (hmem t) ?_
+      intro hc
+      exact hu (hc ▸ ht)
+    have hzero : (⟨Finsupp.single u ((N : ℤ) * ((x : S →₀ ℤ) u)), hmem u⟩ : effSub Γ) = 0 := by
+      refine Subtype.ext ?_
+      show Finsupp.single u ((N : ℤ) * ((x : S →₀ ℤ) u)) = (0 : S →₀ ℤ)
+      rw [Finsupp.single_eq_zero, hx0, mul_zero]
+    rw [Finset.sum_eq_zero hz, hzero, map_zero]
+    rfl
+
+theorem alpha_single_val_mem (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    {u : S} {n : ℤ} (hn : n ∈ intNonneg (compSubgroup Γ u)) :
+    ((α ⟨Finsupp.single u n, single_mem_effSub_iff.mpr hn⟩ : effSub Γ) : S →₀ ℤ) u
+      ∈ intNonneg (compSubgroup Γ u) := by
+  set y : effSub Γ := α ⟨Finsupp.single u n, single_mem_effSub_iff.mpr hn⟩ with hy
+  rcases eq_or_lt_of_le hn.2 with hn0 | hpos
+  · have hz : (⟨Finsupp.single u n, single_mem_effSub_iff.mpr hn⟩ : effSub Γ) = 0 := by
+      refine Subtype.ext ?_
+      show Finsupp.single u n = (0 : S →₀ ℤ)
+      rw [Finsupp.single_eq_zero, ← hn0]
+    have hy0 : y = 0 := by rw [hy, hz, map_zero]
+    rw [hy0]
+    exact (intNonneg (compSubgroup Γ u)).zero_mem
+  · have heq : ((y : effSub Γ) : S →₀ ℤ) = Finsupp.single u (((y : effSub Γ) : S →₀ ℤ) u) :=
+      alpha_single_eq α h hpos (single_mem_effSub_iff.mpr hn)
+    refine single_mem_effSub_iff.mp ?_
+    rw [← heq]
+    exact y.2
+
+/-- ★★成分ごとの写像。 -/
+noncomputable def compMap (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a) (u : S) :
+    intNonneg (compSubgroup Γ u) →+ intNonneg (compSubgroup Γ u) where
+  toFun n := ⟨((α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ)
+      : S →₀ ℤ) u, alpha_single_val_mem α h n.2⟩
+  map_zero' := by
+    refine Subtype.ext ?_
+    have hz : (⟨Finsupp.single u ((0 : intNonneg (compSubgroup Γ u)) : ℤ),
+        single_mem_effSub_iff.mpr (0 : intNonneg (compSubgroup Γ u)).2⟩ : effSub Γ) = 0 := by
+      refine Subtype.ext ?_
+      show Finsupp.single u ((0 : intNonneg (compSubgroup Γ u)) : ℤ) = (0 : S →₀ ℤ)
+      rw [Finsupp.single_eq_zero]
+      rfl
+    show ((α _ : effSub Γ) : S →₀ ℤ) u = 0
+    rw [hz, map_zero]
+    rfl
+  map_add' m n := by
+    refine Subtype.ext ?_
+    have hadd : (⟨Finsupp.single u ((m + n : intNonneg (compSubgroup Γ u)) : ℤ),
+        single_mem_effSub_iff.mpr (m + n).2⟩ : effSub Γ)
+        = ⟨Finsupp.single u (m : ℤ), single_mem_effSub_iff.mpr m.2⟩
+          + ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ := by
+      refine Subtype.ext ?_
+      show Finsupp.single u ((m : ℤ) + (n : ℤ)) = _
+      rw [Finsupp.single_add]
+      rfl
+    show ((α _ : effSub Γ) : S →₀ ℤ) u = _
+    rw [hadd, map_add]
+    rfl
+
+@[simp] theorem compMap_val (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a) (u : S)
+    (n : intNonneg (compSubgroup Γ u)) :
+    ((compMap α h u n : intNonneg (compSubgroup Γ u)) : ℤ)
+      = ((α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ) : S →₀ ℤ) u :=
+  rfl
+
+theorem alpha_single_coe (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    {u : S} (n : intNonneg (compSubgroup Γ u)) :
+    ((α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ) : S →₀ ℤ)
+      = Finsupp.single u
+        (((α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ)
+          : S →₀ ℤ) u) := by
+  rcases eq_or_lt_of_le n.2.2 with hn0 | hpos
+  · have hz : (⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ) = 0 := by
+      refine Subtype.ext ?_
+      show Finsupp.single u (n : ℤ) = (0 : S →₀ ℤ)
+      rw [Finsupp.single_eq_zero, ← hn0]
+    rw [hz, map_zero]
+    show (0 : S →₀ ℤ) = Finsupp.single u ((0 : S →₀ ℤ) u)
+    simp
+  · exact alpha_single_eq α h hpos (single_mem_effSub_iff.mpr n.2)
+
+theorem compMap_injective (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    (hinj : Function.Injective α) (u : S) : Function.Injective (compMap α h u) := by
+  intro m n hmn
+  have h1 : ((α ⟨Finsupp.single u (m : ℤ), single_mem_effSub_iff.mpr m.2⟩ : effSub Γ)
+        : S →₀ ℤ) u
+      = ((α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ : effSub Γ) : S →₀ ℤ) u :=
+    congrArg Subtype.val hmn
+  have h2 : (α ⟨Finsupp.single u (m : ℤ), single_mem_effSub_iff.mpr m.2⟩ : effSub Γ)
+      = α ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩ := by
+    refine Subtype.ext ?_
+    rw [alpha_single_coe α h m, alpha_single_coe α h n, h1]
+  have h3 := hinj h2
+  have h4 : Finsupp.single u (m : ℤ) = Finsupp.single u (n : ℤ) := congrArg Subtype.val h3
+  have h5 := congrArg (fun f : S →₀ ℤ => f u) h4
+  simp only [Finsupp.single_eq_same] at h5
+  exact Subtype.ext h5
+
+theorem compMap_surjective (hq : IsQCartierSubgroup Γ) (α : effSub Γ →+ effSub Γ)
+    (h : ∀ a : effSub Γ, IsPrimaryElt a → MPrec (α a) a)
+    (hbij : Function.Bijective α) (u : S) : Function.Surjective (compMap α h u) := by
+  intro n
+  obtain ⟨x, hx⟩ := hbij.2 ⟨Finsupp.single u (n : ℤ), single_mem_effSub_iff.mpr n.2⟩
+  obtain ⟨N, hN, hmem⟩ := exists_common_mult hq x
+  have hxnn : ∀ t, 0 ≤ ((x : S →₀ ℤ)) t := fun t => by simpa using Finsupp.le_def.mp x.2.2 t
+  have hzero : ∀ t : S, t ≠ u → ((x : S →₀ ℤ)) t = 0 := by
+    intro t ht
+    by_contra hne
+    have hpos : 0 < ((x : S →₀ ℤ)) t := lt_of_le_of_ne (hxnn t) (Ne.symm hne)
+    have hNpos : 0 < (N : ℤ) * ((x : S →₀ ℤ)) t := by positivity
+    have hc := alpha_coord α h x hN hmem t
+    have hax : ((α x : effSub Γ) : S →₀ ℤ) t = 0 := by
+      rw [hx]
+      show (Finsupp.single u (n : ℤ) : S →₀ ℤ) t = 0
+      exact Finsupp.single_eq_of_ne ht
+    rw [hax, mul_zero] at hc
+    have hsupp := alpha_single_eq α h hNpos (hmem t)
+    have hz : (α ⟨Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)), hmem t⟩ : effSub Γ) = 0 := by
+      refine Subtype.ext ?_
+      rw [hsupp, ← hc, Finsupp.single_zero]
+      rfl
+    have hne0 : (⟨Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)), hmem t⟩ : effSub Γ) ≠ 0 := by
+      intro hc2
+      have hcc : Finsupp.single t ((N : ℤ) * ((x : S →₀ ℤ) t)) = (0 : S →₀ ℤ) :=
+        congrArg Subtype.val hc2
+      rw [Finsupp.single_eq_zero] at hcc
+      exact hNpos.ne' hcc
+    exact hne0 (hbij.1 (by rw [hz, map_zero]))
+  have hxsingle : ((x : S →₀ ℤ)) = Finsupp.single u (((x : S →₀ ℤ)) u) := by
+    refine Finsupp.ext fun t => ?_
+    rcases eq_or_ne t u with rfl | ht
+    · rw [Finsupp.single_eq_same]
+    · rw [hzero t ht, Finsupp.single_eq_of_ne ht]
+  have hmemu : ((x : S →₀ ℤ)) u ∈ intNonneg (compSubgroup Γ u) :=
+    single_mem_effSub_iff.mp (by rw [← hxsingle]; exact x.2)
+  refine ⟨⟨((x : S →₀ ℤ)) u, hmemu⟩, ?_⟩
+  refine Subtype.ext ?_
+  rw [compMap_val]
+  have hxeq : (⟨Finsupp.single u (((x : S →₀ ℤ)) u), single_mem_effSub_iff.mpr hmemu⟩
+      : effSub Γ) = x := Subtype.ext hxsingle.symm
+  rw [hxeq, hx]
+  show (Finsupp.single u (n : ℤ) : S →₀ ℤ) u = (n : ℤ)
+  rw [Finsupp.single_eq_same]
+
+/-- ★★★★★★**幾何側 non-dilating** ——
+`K`-`Q`-Cartier の下で、**全単射な引き戻しは non-dilating**。
+
+★★幾何の入力(素因子の置換であること)は**要らない** ——
+各素因子の成分が離散であることだけで出る。 -/
+theorem isNonDilating_effSub_of_bijective (hq : IsQCartierSubgroup Γ)
+    (α : effSub Γ →+ effSub Γ) (hbij : Function.Bijective α) : IsNonDilating α := by
+  refine isNonDilating_of_sharp (isSharp_effSub Γ) α (fun h => ?_)
+  refine AddMonoidHom.ext fun x => Subtype.ext (Finsupp.ext fun u => ?_)
+  obtain ⟨N, hN, hmem⟩ := exists_common_mult hq x
+  have hc := alpha_coord α h x hN hmem u
+  have hmemu : ((N : ℤ) * ((x : S →₀ ℤ) u)) ∈ intNonneg (compSubgroup Γ u) :=
+    single_mem_effSub_iff.mp (hmem u)
+  have hid := eq_id_of_bijective_intNonneg (compMap α h u)
+    ⟨compMap_injective α h hbij.1 u, compMap_surjective hq α h hbij u⟩ ⟨_, hmemu⟩
+  have hval := congrArg Subtype.val hid
+  rw [compMap_val] at hval
+  rw [hval] at hc
+  have hNne : (N : ℤ) ≠ 0 := by exact_mod_cast hN.ne'
+  exact mul_left_cancel₀ hNne hc
+
+/-- ★★★★★locator —— 幾何側 non-dilating(幾何の入力なし)。 -/
+def isNonDilating_effSub_of_bijective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — K-Q-Cartier と全単射だけで non-dilating",
+    sectionId := "frdi-thm-6-2" }
+
+end GeomND
+
 end ABC3.Found.FrdI
