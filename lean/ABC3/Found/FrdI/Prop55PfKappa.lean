@@ -769,4 +769,34 @@ def HomPf.mk_idxPow_eq.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — idxPow と押し出しは同じ元を与える",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★13. 代表元に `𝒞` の射の像を後合成する
+
+★★`toHomPf θ` を添字 `idxMk b e` へ押し上げる(`idxOneHom`)と、
+`compPf_mk_pair`(在庫)がそのまま当たる。 -/
+
+/-- ★★**`toHomPf` を添字 `idxMk a e` へ押し上げる**。 -/
+theorem toHomPf_eq_mk_idxMk {A E A' E' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (e : E ⟶ E') (he : IsFrobeniusType P e) (hae : P.degFr a = P.degFr e) (ξ : A ⟶ E) :
+    toHomPf (F := F) ξ
+      = HomPf.mk (idxMk (P := P) (F := F) a e ha he hae)
+        (frobTransport (F := F) a ha e he hae ξ) :=
+  (HomPf.mk_map (idxOneHom (F := F) a e ha he hae) ξ).symm
+
+/-- ★★★**代表元に `𝒞` の射の像を後合成する計算則**。 -/
+theorem compPf_mk_toHomPf {A B E A' B' E' : C} (a : A ⟶ A') (b : B ⟶ B')
+    (ha : IsFrobeniusType P a) (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b)
+    (φ : A' ⟶ B') (θ : B ⟶ E) (e : E ⟶ E') (he : IsFrobeniusType P e)
+    (hbe : P.degFr b = P.degFr e) :
+    compPf P F (HomPf.mk (idxMk (P := P) (F := F) a b ha hb hd) φ) (toHomPf (F := F) θ)
+      = HomPf.mk (idxMk (P := P) (F := F) a e ha he (hd.trans hbe))
+        (φ ≫ frobTransport (F := F) b hb e he hbe θ) := by
+  rw [toHomPf_eq_mk_idxMk b hb e he hbe θ, compPf_mk_pair]
+  rfl
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の後合成の計算則。 -/
+def compPf_mk_toHomPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 代表元への後合成の計算則",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
