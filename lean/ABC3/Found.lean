@@ -17,7 +17,6 @@ import ABC3.Found.FrdI.Remark312
 import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
-import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.FrdI.Witness
 import ABC3.Found.FrdI.Frobenioid
 import ABC3.Found.FrdI.WitnessFrobenioid
@@ -230,6 +229,7 @@ import ABC3.Found.FrdI.Prop48Std
 import ABC3.Found.FrdI.Prop48Gl
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
+import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
