@@ -947,4 +947,69 @@ def biratPfHomEquiv.src : ABC3.Meta.Source :=
 
 end Bij
 
+section Unit
+
+/-! ## ★恒等射の保存
+
+★★★測って分かったこと: **恒等射の保存は 3 行で出る**。
+`W = idxOne`、`Z = idxBiratOne` のとき、`biratPfMk` の**添字の射と値が同じ項になる**
+(`biratPfIsoA` と `biratPfIsoB` が `idxOne` では同じ `rootLift` だから)ので、
+「co-angular pre-step をそれ自身に当てた類は恒等射」(`homBirat_mk_self`)がそのまま効く。 -/
+
+/-- ★`κ_{A,1}` は恒等射。 -/
+theorem pfKappa_one (A : C) : pfKappa (F := F) A 1 = 𝟙 (⟨A, 1⟩ : PfRootObj P F) := by
+  show toHomPf (F := F) (kappaRep (P := P) (F := F) A 1) = _
+  rw [show kappaRep (P := P) (F := F) A 1 = 𝟙 (rtObj P F A 1) from
+    @IsIso.inv_hom_id _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A)]
+  rfl
+
+/-- ★★`rootMap` は恒等射を恒等射へ送る。 -/
+theorem rootMap_id (hfi : IsOfFrobeniusIsotropicType P) (A : C) (k : ℕ+) :
+    rootMap (F := F) hfi (𝟙 A) k = 𝟙 (⟨A, k⟩ : PfRootObj P F) := by
+  refine rootMap_ext (F := F) hfi (rootMap (F := F) hfi (𝟙 A) k)
+    (𝟙 (⟨A, k⟩ : PfRootObj P F)) ?_
+  rw [rootMap_spec, toRootHom_id]
+  show pfKappa (F := F) A k ≫ 𝟙 (⟨A, 1⟩ : PfRootObj P F)
+    = 𝟙 (⟨A, k⟩ : PfRootObj P F) ≫ pfKappa (F := F) A k
+  rw [Category.comp_id, Category.id_comp]
+
+/-- ★★**co-angular pre-step をそれ自身に当てた類は恒等射**。
+
+★`Proposition 4.4, (i)` の「co-angular pre-step は `𝒞^birat` で同型になる」の
+一番使いやすい形である。 -/
+theorem homBirat_mk_self {G : Frobenioid P} {A A' : C} (e : A' ⟶ A)
+    (hc : IsCoAngular P e) (hs : IsPreStep P e) :
+    HomBirat.mk (idxBiratMk P G e hc hs) e = toHomBirat (P := P) (G := G) (𝟙 A) := by
+  have hw : e ≫ (idxBiratOne P G A).unop.hom.hom = (idxBiratMk P G e hc hs).unop.hom.hom :=
+    Category.comp_id e
+  exact ((congrArg (HomBirat.mk (idxBiratMk P G e hc hs)) (Category.comp_id e)).symm).trans
+    (HomBirat.mk_map (idxBiratHomMk (Z := idxBiratOne P G A) (W := idxBiratMk P G e hc hs)
+      e hc hs hw) (𝟙 A))
+
+section UnitConn
+
+variable [IsConnected D]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**`Proposition 5.5, (ii)` の射の写像は恒等射を保つ**。
+
+★★`W = idxOne`・`Z = idxBiratOne` では `biratPfMk` の**添字の射と値が同じ項**になる。 -/
+theorem biratPfHom_id (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C) :
+    biratPfHom hfi Gpf F' A A (toHomPf (F := F') (𝟙 (biratUp P G A)))
+      = toHomBirat (P := pfRootPre P F) (G := Gpf) (𝟙 (⟨A, 1⟩ : PfRootObj P F)) := by
+  refine (biratPfHom_mk hfi Gpf F' A A (idxOne P F A A) (𝟙 (biratUp P G A))).trans ?_
+  refine (biratPf_mk hfi Gpf (idxOne P F A A) (idxBiratOne P G A) (𝟙 A)).trans ?_
+  exact homBirat_mk_self (G := Gpf) _ _ _
+
+/-- ★★★★★locator —— `Proposition 5.5, (ii)` の射の写像は恒等射を保つ。 -/
+def biratPfHom_id.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は恒等射を保つ",
+    sectionId := "frdi-prop-5-5" }
+
+end UnitConn
+
+end Unit
+
 end ABC3.Found.FrdI
