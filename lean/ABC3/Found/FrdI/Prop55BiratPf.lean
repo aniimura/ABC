@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop32Equiv
 import ABC3.Found.FrdI.Prop55Birat
+import ABC3.Found.FrdI.Prop55PfKappa
 
 /-!
 # [FrdI] Proposition 5.5, (ii) —— 左辺 `(𝒞^pf)^birat` の側
@@ -24,22 +25,19 @@ import ABC3.Found.FrdI.Prop55Birat
 
 ## ★★★本ファイルの一歩 —— 右辺の代表元から左辺の元を作る
 
-★★鍵は **`⟨A,1⟩ ≅ ⟨A₁,k⟩`**(`pfRootIsoOfFrob`)である ——
+★★鍵は **`⟨A,1⟩ ≅ ⟨A₁,k⟩`** である ——
 `α : A ⟶ A₁` が次数 `k` の Frobenius 型なら、`𝒞^pf` では
-**`A₁` の `k` 乗根が `A`** である。★これは
-`pfRoot_exists_iso_root`(`⟨A,1⟩ ≅ ⟨A^{(k)}, k⟩`)と
-`Definition 1.3, (ii)` の本質的一意性(`frobDegUniq`、`A^{(k)} ≅ A₁`)の合成である。
-
-★これで右辺の代表元 `(W, Z, ψ)` から
-「`⟨X,k⟩ → ⟨A,1⟩` の co-angular pre-step ＋ `⟨X,k⟩ → ⟨B,1⟩`」が作れる。
+**`A₁` の `k` 乗根が `A`** である。
+★★★**その同型は方程式 `e ≫ κ = [α]` で特徴づける**(`rootLift`、`Prop55PfKappa.lean`)——
+`.choose` で取ると `W` を大きくしたときの整合性が言えないからである。
 
 | 定理 | 中身 |
 |---|---|
-| `pfRootIsoOfFrob` | ★★`⟨A,1⟩ ≅ ⟨A₁,k⟩` |
-| `lamHom_coaPre` | `lamHom` は co-angular pre-step を保つ |
-| `coaPre_comp_iso` | co-angular pre-step に同型を後合成しても co-angular pre-step |
+| `compBirat_mk_of_sq` | ★★合成は**どの引き戻しデータで計算してもよい** |
+| `biratPfIsoA` / `biratPfIsoB` | `⟨A,1⟩ ≅ ⟨W₁,k⟩`(`rootLift` で作る) |
 | `biratPfIdx` / `biratPfMk` | ★★★★右辺の代表元から左辺の元 |
 | `biratPfMk_map` | ★★`IdxBirat` の遷移で不変(well-definedness の半分) |
+| `biratPf` | ★★★★内側の余極限から降ろした写像 |
 
 ## ★★実務メモ
 
@@ -61,56 +59,70 @@ universe v u w u2 v2
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
 
-/-! ## ★1. `⟨A,1⟩ ≅ ⟨A₁,k⟩` -/
+/-! ## ★0. `𝒞^birat` の合成は引き戻しデータの取り方に依らない -/
 
-/-- ★★★**`α : A ⟶ A₁` が次数 `k` の Frobenius 型なら `⟨A,1⟩ ≅ ⟨A₁,k⟩`**。
+section CompSq
 
-★`pfRoot_exists_iso_root`(`⟨A,1⟩ ≅ ⟨A^{(k)}, k⟩`)と
-`Definition 1.3, (ii)` の本質的一意性(`frobDegUniq`、`A^{(k)} ≅ A₁`)の合成。 -/
-noncomputable def pfRootIsoOfFrob {A A₁ : C} (α : A ⟶ A₁) (hα : IsFrobeniusType P α)
-    (k : ℕ+) (hk : P.degFr α = k) :
-    (⟨A, 1⟩ : PfRootObj P F) ≅ ⟨A₁, k⟩ :=
-  haveI h₀ := (pfRoot_exists_iso_root (P := P) (F := F) A 1 k k (one_mul k).symm).choose_spec
-  haveI hθ := (F.frobDegUniq A (rtObj P F A k) A₁ (rtExt P F A k) α
-    (rtExt_frobType P F A k) hα (by rw [rtExt_degFr, hk])).choose_spec.1
-  haveI : IsIso (lamHom (F := F) k
-      (F.frobDegUniq A (rtObj P F A k) A₁ (rtExt P F A k) α
-        (rtExt_frobType P F A k) hα (by rw [rtExt_degFr, hk])).choose) :=
-    lamHom_isIso k _ hθ
-  asIso ((pfRoot_exists_iso_root (P := P) (F := F) A 1 k k (one_mul k).symm).choose
-    ≫ lamHom (F := F) k
-      (F.frobDegUniq A (rtObj P F A k) A₁ (rtExt P F A k) α
-        (rtExt_frobType P F A k) hα (by rw [rtExt_degFr, hk])).choose)
+variable {G : Frobenioid P}
 
-/-- ★`lamHom` は co-angular pre-step を co-angular pre-step へ移す。 -/
-theorem lamHom_coaPre (hfi : IsOfFrobeniusIsotropicType P) (k : ℕ+) {A B : C} (φ : A ⟶ B)
-    (h : IsPreStep P φ) :
-    IsCoAngular (pfRootPre P F) (lamHom (F := F) k φ)
-      ∧ IsPreStep (pfRootPre P F) (lamHom (F := F) k φ) :=
-  ⟨pfRoot_isCoAngular hfi _, lamHom_isPreStep k φ h⟩
+/-- ★★★**合成は「どの引き戻しデータで計算してもよい」**。
 
-/-- ★co-angular pre-step に同型を後合成しても co-angular pre-step。 -/
-theorem coaPre_comp_iso (hfi : IsOfFrobeniusIsotropicType P) {X Y Z : PfRootObj P F}
-    (f : X ⟶ Y) (hf : IsPreStep (pfRootPre P F) f) (g : Y ⟶ Z) (hg : IsIso g) :
-    IsCoAngular (pfRootPre P F) (f ≫ g) ∧ IsPreStep (pfRootPre P F) (f ≫ g) :=
-  haveI := hg
-  ⟨pfRoot_isCoAngular hfi _,
-    IsPreStep.comp (pfRootPre P F) hf (isPreStep_of_isIso (pfRootPre P F) g)⟩
+★★`Proposition 4.4` の合成は `birat_pull_exists` の `.choose` で定義されているが、
+**`W` の構造射が mono** なので `birat_lift_unique` により
+どの引き戻しデータを使っても同じ元になる。 -/
+theorem compBirat_mk_of_sq (Fc : FrobenioidCore P) {A B E : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (W : IdxBirat P G B)
+    (ψ : W.unop.left.obj ⟶ E)
+    {Dd : C} (γ : Dd ⟶ Z.unop.left.obj) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (α₀ : Dd ⟶ W.unop.left.obj) (hsq : γ ≫ φ = α₀ ≫ W.unop.hom.hom) :
+    compBirat P G Fc (HomBirat.mk Z φ) (HomBirat.mk W ψ)
+      = HomBirat.mk (idxBiratMk P G (γ ≫ Z.unop.hom.hom)
+          (G.core.coAngularComp _ _ hγc Z.unop.hom.property.1)
+          (IsPreStep.comp P hγs Z.unop.hom.property.2)) (α₀ ≫ ψ) := by
+  rw [compBirat_mk]
+  haveI hb : Mono W.unop.hom.hom := G.core.preStepMono _ W.unop.hom.property.2
+  set Z₂ : IdxBirat P G A := idxBiratMk P G (γ ≫ Z.unop.hom.hom)
+    (G.core.coAngularComp _ _ hγc Z.unop.hom.property.1)
+    (IsPreStep.comp P hγs Z.unop.hom.property.2) with hZ₂
+  set V := IsFiltered.max (biratPullIdx Fc Z φ W) Z₂ with hV
+  set cc := IsFiltered.leftToMax (biratPullIdx Fc Z φ W) Z₂ with hcc
+  set cc' := IsFiltered.rightToMax (biratPullIdx Fc Z φ W) Z₂ with hcc'
+  refine HomBirat.sound V cc cc' ?_
+  have hraw := idxBirat_left_ext ((idxBiratHomMk γ hγc hγs rfl) ≫ cc')
+    (biratPullHom Fc Z φ W ≫ cc)
+  have hc : cc'.unop.left.hom ≫ γ = cc.unop.left.hom ≫ biratPullGamma Fc Z φ W := hraw
+  have key := birat_lift_unique φ hb hsq (biratPull_sq Fc Z φ W) hc
+  simp only [← Category.assoc] at key ⊢
+  exact congrArg (fun t => t ≫ ψ) key.symm
 
-/-! ## ★2. 右辺の代表元から左辺の元へ -/
+end CompSq
+
+/-! ## ★1. 右辺の代表元から左辺の元へ -/
 
 /-- ★右辺の代表元 `W` の Frobenius 次数 `k`。 -/
 abbrev biratPfDeg {A B : C} (W : IdxPf P F A B) : ℕ+ := P.degFr W.hom.hom.1
 
-/-- ★`⟨A,1⟩ ≅ ⟨W₁,k⟩`。 -/
-noncomputable abbrev biratPfIsoA {A B : C} (W : IdxPf P F A B) :
-    (⟨A, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.1, biratPfDeg W⟩ :=
-  pfRootIsoOfFrob (F := F) W.hom.hom.1 W.hom.property.1 _ rfl
+/-- ★★`⟨A,1⟩ ≅ ⟨W₁,k⟩`(**方程式つき**の `rootLift` で作る)。 -/
+noncomputable def biratPfIsoA (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) : (⟨A, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.1, biratPfDeg W⟩ :=
+  @asIso _ _ _ _ (rootLift (F := F) hfi W.hom.hom.1 (biratPfDeg W) rfl)
+    (rootLift_isIso hfi W.hom.hom.1 W.hom.property.1 _ rfl)
 
-/-- ★`⟨B,1⟩ ≅ ⟨W₂,k⟩`(次数が揃うのは `IdxPf` の条件そのもの)。 -/
-noncomputable abbrev biratPfIsoB {A B : C} (W : IdxPf P F A B) :
-    (⟨B, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.2, biratPfDeg W⟩ :=
-  pfRootIsoOfFrob (F := F) W.hom.hom.2 W.hom.property.2.1 _ W.hom.property.2.2.symm
+@[simp] theorem biratPfIsoA_hom (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) :
+    (biratPfIsoA hfi W).hom = rootLift (F := F) hfi W.hom.hom.1 (biratPfDeg W) rfl := rfl
+
+/-- ★★`⟨B,1⟩ ≅ ⟨W₂,k⟩`(次数が揃うのは `IdxPf` の条件そのもの)。 -/
+noncomputable def biratPfIsoB (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) : (⟨B, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.2, biratPfDeg W⟩ :=
+  @asIso _ _ _ _
+    (rootLift (F := F) hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm)
+    (rootLift_isIso hfi W.hom.hom.2 W.hom.property.2.1 _ W.hom.property.2.2.symm)
+
+@[simp] theorem biratPfIsoB_hom (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) :
+    (biratPfIsoB hfi W).hom
+      = rootLift (F := F) hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm := rfl
 
 /-- ★★**左辺の添字対象** —— `⟨X,k⟩ → ⟨A,1⟩` の co-angular pre-step。 -/
 noncomputable def biratPfIdx (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
@@ -118,7 +130,7 @@ noncomputable def biratPfIdx (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioi
     {A B : C} (W : IdxPf P F A B) (Z : IdxBirat P G W.right.obj.1) :
     IdxBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) :=
   idxBiratMk (pfRootPre P F) Gpf
-    (lamHom (F := F) (biratPfDeg W) Z.unop.hom.hom ≫ (biratPfIsoA W).inv)
+    (lamHom (F := F) (biratPfDeg W) Z.unop.hom.hom ≫ (biratPfIsoA hfi W).inv)
     (pfRoot_isCoAngular hfi _)
     (IsPreStep.comp (pfRootPre P F)
       (lamHom_isPreStep _ _ Z.unop.hom.property.2)
@@ -131,7 +143,7 @@ noncomputable def biratPfMk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid
     (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
     HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
   HomBirat.mk (biratPfIdx hfi Gpf W Z)
-    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB W).inv)
+    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB hfi W).inv)
 
 /-- ★★**`IdxBirat` の遷移で不変** —— well-definedness の半分。
 
@@ -148,22 +160,22 @@ theorem biratPfMk_map (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
       = (biratPfIdx hfi Gpf W Z').unop.hom.hom :=
     (Category.assoc _ _ _).symm.trans
       (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
-          ⟶ ⟨W.right.obj.1, biratPfDeg W⟩ => t ≫ (biratPfIsoA W).inv)
+          ⟶ ⟨W.right.obj.1, biratPfDeg W⟩ => t ≫ (biratPfIsoA hfi W).inv)
         ((lamHom_comp _ _ _).trans
           (congrArg (lamHom (F := F) (biratPfDeg W)) htri)))
   have hmap := HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
     (idxBiratHomMk (Z := biratPfIdx hfi Gpf W Z) (W := biratPfIdx hfi Gpf W Z')
       (lamHom (F := F) (biratPfDeg W) u.unop.left.hom) (pfRoot_isCoAngular hfi _)
       (lamHom_isPreStep _ _ u.unop.left.property.2) hw)
-    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB W).inv)
+    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB hfi W).inv)
   refine Eq.trans ?_ hmap
   refine congrArg (HomBirat.mk (biratPfIdx hfi Gpf W Z')) ?_
   exact (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
-      ⟶ ⟨W.right.obj.2, biratPfDeg W⟩ => t ≫ (biratPfIsoB W).inv)
+      ⟶ ⟨W.right.obj.2, biratPfDeg W⟩ => t ≫ (biratPfIsoB hfi W).inv)
     (lamHom_comp (F := F) (biratPfDeg W) u.unop.left.hom ψ).symm).trans
     (Category.assoc _ _ _)
 
-/-! ## ★3. 右辺の内側の余極限からの写像 -/
+/-! ## ★2. 右辺の内側の余極限からの写像 -/
 
 /-- ★★右辺の内側の余極限 `Hom^birat(W₁,W₂)` からの余錐。 -/
 noncomputable def biratPfCocone (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
@@ -197,7 +209,6 @@ noncomputable def biratPf (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P
   rfl
 
 /-! ### ★出典の紐付け -/
-
 
 /-- ★★★locator —— `Proposition 5.5, (ii)` の左辺の側(右辺の代表元からの写像)。 -/
 def biratPfMk.src : ABC3.Meta.Source :=
