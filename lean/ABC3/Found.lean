@@ -125,6 +125,7 @@ import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Prop55Rlf
 import ABC3.Found.FrdI.Prop55Birat
+import ABC3.Found.FrdI.Prop55BiratPf
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Prop53UntrPf
