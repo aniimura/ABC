@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Cor54
 import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Prop53Base
+import ABC3.Found.FrdI.Prop53Diag
 
 /-!
 # [FrdI] Corollary 5.4 の最後の文 —— `Ψ^rlf` の作り方は完全化と 1-可換
@@ -37,6 +38,9 @@ import ABC3.Found.FrdI.Prop53Base
 1. 最後の文(**完全化・実化との 1-可換性**)—— `scBaseFunctor_comp_psiSc`。
 2. `Proposition 5.3` の**縦の矢印の `𝒞^un-tr` の段**との 1-可換性 ——
    `untrToSc_comp_psiSc`。★中身は `scMap θ (1 ⊗ m) = 1 ⊗ θ m` だけである。
+3. 縦の矢印の**いちばん上の段** `𝒞 ⥤ 𝒞^un-tr` との 1-可換性 ——
+   `cToUnTr_comp_psiUnTr`。★`psiUnTr_square`(`Theorem 3.4, (iv)`)に
+   `toIstrOfIsotropic_comp_psiIstr`(両辺が**同じ項**になるので `rfl`)を継ぐだけ。
 
 ## ★★まだ実装していない条(記録)
 
@@ -44,8 +48,14 @@ import ABC3.Found.FrdI.Prop53Base
 
 * **1-一意性**(`Ψ^rlf` が同型を除いて一意)
 * **rigidity**(図式の合成関手がすべて rigid)
-* 縦の矢印の**いちばん上の段** `𝒞 ⥤ 𝒞^un-tr` との 1-可換性
-  (`Ψ^un-tr : 𝒞₁^un-tr ⥤ 𝒞₂^un-tr` を `Corollary 4.11, (i)` から取る必要がある)
+* ★**縦の矢印を 1 本に繋ぐ最後の継ぎ目** ——
+  `𝒞^un-tr ≌ Model(Φ, Φ^birat)`(`unTr_modelFrobenioid`)が
+  `Ψ^un-tr` と `untrModelHomOver` を**取り違えない**こと、すなわち
+
+    `(unTr_modelFrobenioid Fc₁ G₁).functor ⋙ (untrModelHomOver …).functor`
+      `= psiUnTr Ψ … ⋙ (unTr_modelFrobenioid Fc₂ G₂).functor`
+
+  これは `Corollary 4.11, (iii)(iv)` の内容そのものであり、本ファイルの範囲外。
 
 ★`hbirat` は `Cor54Birat.lean` の `phiBiratOn_transport_of_cor411` で
 **すでに `Corollary 4.10`/`4.11` から導けている**(`Cor54.lean` 冒頭の記述は古い)。
@@ -252,6 +262,44 @@ theorem untrToSc_comp_psiSc (ΨB : D₁ ⥤ D₂) (η : Φ₁.functor ≅ ΨB.op
 
 end VerticalUnTr
 
+/-! ## ★縦の矢印のいちばん上の段 `𝒞 ⥤ 𝒞^un-tr` -/
+
+section VerticalTop
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+  (Ψ : C₁ ⥤ C₂) [Ψ.IsEquivalence]
+
+/-- ★★isotropic 型なら `𝒞 ⥤ 𝒞^istr` は `Ψ^istr` と**厳密に**可換。
+
+★対象は `⟨Ψ.obj A, _⟩` どうし(所属は `Prop` なので証明無関係)、
+射は `Ψ.map` どうしで、両辺は**同じ項**になる。 -/
+theorem toIstrOfIsotropic_comp_psiIstr (h₁ : IsOfQuasiIsotropicType C₁ P₁)
+    (h₂ : IsOfQuasiIsotropicType C₂ P₂)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X) :
+    toIstrOfIsotropic hiso₁ ⋙ psiIstr Ψ P₁ P₂ h₁ h₂
+      = Ψ ⋙ toIstrOfIsotropic hiso₂ := rfl
+
+/-- ★★★★★**`Proposition 5.3` の縦の矢印のいちばん上の段 `𝒞 ⥤ 𝒞^un-tr` は
+`Ψ` と 1-可換**(厳密に)。
+
+★`psiUnTr_square`(`Theorem 3.4, (iv)` の四角形)に
+`toIstrOfIsotropic_comp_psiIstr` を継ぐだけ。 -/
+theorem cToUnTr_comp_psiUnTr (h₁ : IsOfQuasiIsotropicType C₁ P₁)
+    (h₂ : IsOfQuasiIsotropicType C₂ P₂)
+    (hiso₁ : ∀ X : C₁, IsIsotropic P₁ X) (hiso₂ : ∀ X : C₂, IsIsotropic P₂ X)
+    (hUE : ∀ {A B : C₁} (α₁ α₂ : A ⟶ B),
+      P₁.toElem.map α₁ = P₁.toElem.map α₂ →
+        P₂.toElem.map (Ψ.map α₁) = P₂.toElem.map (Ψ.map α₂)) :
+    cToUnTr hiso₁ ⋙ psiUnTr Ψ h₁ h₂ hUE = Ψ ⋙ cToUnTr hiso₂ := by
+  show toIstrOfIsotropic hiso₁ ⋙ (istrToUnTr P₁ ⋙ psiUnTr Ψ h₁ h₂ hUE) = _
+  rw [← psiUnTr_square Ψ h₁ h₂ hUE]
+  rfl
+
+end VerticalTop
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Corollary 5.4` の最後の文
@@ -266,6 +314,13 @@ def scBaseFunctor_comp_psiSc.src : ABC3.Meta.Source :=
 def untrToSc_comp_psiSc.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Corollary 5.4 — 縦の矢印(𝒞^un-tr ⥤ 𝒞^rlf)は Ψ と 1-可換",
+    sectionId := "frdi-cor-5-4" }
+
+/-- ★★★★locator —— `Corollary 5.4` の 1-可換図式のうち
+`Proposition 5.3` の縦の矢印のいちばん上の段 `𝒞 ⥤ 𝒞^un-tr`。 -/
+def cToUnTr_comp_psiUnTr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Corollary 5.4 — 縦の矢印(𝒞 ⥤ 𝒞^un-tr)は Ψ と 1-可換",
     sectionId := "frdi-cor-5-4" }
 
 end ABC3.Found.FrdI
