@@ -2265,10 +2265,10 @@
      "deps": [
       "rlf-tensor"
      ],
-     "status": "todo",
+     "status": "todo(★律速——𝒞^pf ⟶ 𝒞^rlf がここ待ち)",
      "size": "★大",
-     "note": "perf-factorial なら `Pf M ≅ ⊕_p ℚ≥0`、`M^rlf ≅ ⊕_p ℝ≥0` で両者は一致する。★これを示さないと `Def24.lean` の `Rlf` との**二重定義**になる(逸脱として記録が要る)。",
-     "lean": "",
+     "note": "perf-factorial なら `Pf M ≅ ⊕_p ℚ≥0`、`M^rlf ≅ ⊕_p ℝ≥0` で両者は一致する。★これを示さないと `Def24.lean` の `Rlf` との**二重定義**になる(逸脱として記録が要る)。\n\n★★★★2026-08-21（**律速であることが確定した**）：\n`Prop53Base.lean` で下の行が通ったので、`Proposition 5.3` の図式に残るのは\n**右の縦の矢印 `𝒞^pf ⟶ 𝒞^rlf`** だけになった。そこが繋がらない理由は\n`Φ^pf` の 2 模型（`Pf M` と `ℚ≥0 ⊗_ℕ M`）の不一致であり、\n**本節点がそのまま律速**である。",
+     "lean": "ABC3/Found/FrdI/Prop53Base.lean",
      "decl": ""
     },
     {
@@ -2360,10 +2360,10 @@
      "deps": [
       "untr-to-crlf"
      ],
-     "status": "半済",
+     "status": "半済(下の行は済。残るは右の縦の矢印 𝒞^pf ⟶ 𝒞^rlf)",
      "size": "★大",
-     "note": "`𝒞 → 𝒞^istr → 𝒞^pf` と `𝒞^un-tr → (𝒞^un-tr)^pf → 𝒞^rlf` の 2 段と、縦の 2 本。★横の矢印のうち perfection がらみは鎖 `prop55` の `p55i` / `p55ii-*` 待ちである。\n\n★★2026-08-20: **左の縦の矢印と下の行は通した**。isotropic 型なら `𝒞 ⥤ 𝒞^istr` は恒等的、`𝒞^istr ⥤ 𝒞^un-tr` は在庫(`istrToUnTr`、`Proposition 3.3, (iii)`)、そこへ `untrToSc` を継ぐ。\n★残るのは (1) 上の行(`𝒞^istr ⟶ 𝒞^pf`)と右の縦の矢印(perfection、鎖 `prop55` 待ち)、(2) **1-可換性そのもの**(底への射影が `P.proj` と一致すること—— `pathToModel_toElem` が `rfl` なので出る見込み)。\n\n★★★★2026-08-21：**1-可換性と上の行を取った**。\n* `cToUnTr_comp_unTrToElem` —— 左の縦の矢印は `𝔽_Φ` への射影と **1-可換**（`rfl`）。\n  中身は `istrToUnTr_comp_unTrToElem`（`UnTr.lean`）と\n  `toIstrOfIsotropic` が `ι` で戻ること（定義から）の 2 本。\n* `cToUnTr_comp_proj` —— 底 `𝒟` への射影とも 1-可換。\n* ★`cToPf` —— **図式の上の行** `𝒞 ⟶ 𝒞^istr ⟶ 𝒞^pf`（`toPfCat` は在庫）。\n* `cToPf_comp_pfToElem` —— 上の行も `𝔽_{Φ^pf}` への射影と 1-可換\n  （`Proposition 3.2, (i)` の 1-可換図式 `pfSquare` を `𝒞` から見たもの）。\n\n★★残るのは**右の縦の矢印** `𝒞^pf ⟶ 𝒞^rlf` だけで、これは `p55ii-untr` を\n**圏同値**に格上げする（射の全単射を合成と両立させる）段に帰着する。",
-     "lean": "ABC3/Found/FrdI/Prop53Diag.lean",
+     "note": "`𝒞 → 𝒞^istr → 𝒞^pf` と `𝒞^un-tr → (𝒞^un-tr)^pf → 𝒞^rlf` の 2 段と、縦の 2 本。★横の矢印のうち perfection がらみは鎖 `prop55` の `p55i` / `p55ii-*` 待ちである。\n\n★★2026-08-20: **左の縦の矢印と下の行は通した**。isotropic 型なら `𝒞 ⥤ 𝒞^istr` は恒等的、`𝒞^istr ⥤ 𝒞^un-tr` は在庫(`istrToUnTr`、`Proposition 3.3, (iii)`)、そこへ `untrToSc` を継ぐ。\n★残るのは (1) 上の行(`𝒞^istr ⟶ 𝒞^pf`)と右の縦の矢印(perfection、鎖 `prop55` 待ち)、(2) **1-可換性そのもの**(底への射影が `P.proj` と一致すること—— `pathToModel_toElem` が `rfl` なので出る見込み)。\n\n★★★★2026-08-21：**1-可換性と上の行を取った**。\n* `cToUnTr_comp_unTrToElem` —— 左の縦の矢印は `𝔽_Φ` への射影と **1-可換**（`rfl`）。\n  中身は `istrToUnTr_comp_unTrToElem`（`UnTr.lean`）と\n  `toIstrOfIsotropic` が `ι` で戻ること（定義から）の 2 本。\n* `cToUnTr_comp_proj` —— 底 `𝒟` への射影とも 1-可換。\n* ★`cToPf` —— **図式の上の行** `𝒞 ⟶ 𝒞^istr ⟶ 𝒞^pf`（`toPfCat` は在庫）。\n* `cToPf_comp_pfToElem` —— 上の行も `𝔽_{Φ^pf}` への射影と 1-可換\n  （`Proposition 3.2, (i)` の 1-可換図式 `pfSquare` を `𝒞` から見たもの）。\n\n★★残るのは**右の縦の矢印** `𝒞^pf ⟶ 𝒞^rlf` だけで、これは `p55ii-untr` を\n**圏同値**に格上げする（射の全単射を合成と両立させる）段に帰着する。\n\n★★★★★2026-08-21（**下の行が通った** —— `Found/FrdI/Prop53Base.lean`）：\n図式\n\n    𝒞       ⟶ 𝒞^istr       ⟶ 𝒞^pf\n    ↓                          ↓\n    𝒞^un-tr ⟶ (𝒞^un-tr)^pf ⟶ 𝒞^rlf\n\nのうち**下の行の右の矢印 `(𝒞^un-tr)^pf ⟶ 𝒞^rlf`** を通した。\n★`Prop53Rlf.lean` で両端を**同じ形 `ScModelObj S`** で作ってあるので、\n要るのは**係数の拡大 `σ : S →+* S'` が誘導する関手**だけである\n（`scBase` / `scBaseHom` / `scBaseFunctor` / `pfToRlfFunctor`）。\n★★下の行の 1-可換性 `untrToSc_comp_scBaseFunctor` も出た。中身は\n`scBase σ (1 ⊗ m) = 1 ⊗ m`（`σ 1 = 1`）の 1 本だけである。\n\n★配管として `ModelDataHom.comp` / `comp_functor` / `ext'` を足した。\n`comp_functor` は **`rfl` ではない** —— 対象の側が `gpMap_comp`（群化の関手性）を\n経由するので、`eqToHom` を `ModelData.hom_eq_of_eqToHom` で潰す必要がある。\n\n★★★**残るのは右の縦の矢印 `𝒞^pf ⟶ 𝒞^rlf`** である。ここが素直に繋がらないのは、\n我々の `Φ^pf` が **2 通りの模型**を持つからである:\n* `Pf M`（`Definition 2.4` の完全化、`MonoidOn.pfOn`）—— `𝒞^pf` が使う側\n* `ScT ℚ≥0 M = ℚ≥0 ⊗_ℕ M`（関手的模型）—— `𝒞^rlf` 側が使う\n両者の一致（鎖 `rlf` の `rlf-agree` と同型の課題）が右の縦の矢印の律速である。",
+     "lean": "ABC3/Found/FrdI/Prop53Diag.lean / ABC3/Found/FrdI/Prop53Base.lean",
      "decl": "toIstrOfIsotropic / cToUnTr / cToSc / cToUnTr_comp_unTrToElem / cToUnTr_comp_proj / cToPf / cToPf_comp_pfToElem"
     },
     {
