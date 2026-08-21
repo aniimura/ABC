@@ -3446,11 +3446,11 @@
           "deps": [
             "thm62-i-psi"
           ],
-          "status": "todo",
+          "status": "済",
           "size": "中",
-          "note": "★原文「in a word, that both functors are obtained by raising to the p-th power」。",
-          "lean": "",
-          "decl": ""
+          "note": "★原文「in a word, that both functors are obtained by raising to the p-th power」。\n\n★★★★★2026-08-21（**閉じた** —— `Found/FrdI/Thm62Frob.lean`）：\n原文の一言（in a word, that both functors are obtained by raising to the p-th power）は\n2 つに割れた。\n\n**(a) 一般形** `naiveFrobIso_of_unit` —— `𝟭 𝒞 ⟶ G` の成分がすべて\n**次数 `d` の Frobenius 型**なら `G ≅ Ψ_naive`。\n★在庫の `nfCompare`（選択を 2 つ比べる議論）を**任意の関手**へ広げただけである。\n中身は `Definition 1.3, (ii)` の本質的一意性（`frobDegUniq`）と\n`Proposition 1.10, (i)` の一意性の 2 本。\n\n**(b) 当てはめ** —— model Frobenioid では Frobenius は\n`Φ` も `B` も **`p` 倍**（`frobModelHom`）、単位は `(𝟙, 0, p, 0)`（`frobUnitApp`）。\n★★**Frobenius 型であることが `model_frobeniusType_iff` で\n「`Div = 0` かつ底が同型」に落ちる**のが効いた ——\nmodel Frobenioid では**すべての射が co-angular**（`model_coAngular`、在庫）だからである。\n★自然性は 4 成分の計算で、次数の成分だけ `mul_comm` が要る。\n\n★★入力は `thm62-i-psi`（`thm62Psi`）で、幾何側の `thm62-i-pull` には依らない\n——**(ii) は `V₁ = V₂` なので `ModelData` の言葉だけで閉じた**。",
+          "lean": "ABC3/Found/FrdI/Thm62Frob.lean",
+          "decl": "frobCompare / naiveFrobIso_of_unit / frobModelHom / frobUnitApp / thm62FrobIso"
         },
         {
           "id": "thm62-iii-fsm",
