@@ -90,6 +90,74 @@ noncomputable def inverse_comp_toElem_iso (e : C₁ ≌ C₂)
 
 end InverseIso
 
+/-! ## ★1-b. 原文の「hence also not group-like」
+
+★★原文 (iii) は「suppose that `𝒞`, **hence also** `𝒞^un-tr`, `𝒞^rlf`, are not of
+group-like type」と畳む。★`𝒞^un-tr` の側は**証明できる**:
+
+* `IsGroupLikeObj` は `Φ` と**底**だけで決まる(`Φ(Base A)` が零かどうか)。
+* `𝒞^un-tr` の対象は `𝒞^istr` の対象そのもので、`𝔽_Φ` への関手も
+  `A ↦ P.toElem.obj A.obj` なので、**条件は `𝒞` のそれと同じ**。
+* 残るのは「`𝒞` の対象 `A` を isotropic な対象で代用する」段で、
+  **isotropic 包が底同型**(pre-step だから)なので `Φ(Base)` が同型になる。 -/
+
+section GroupLikeGeneric
+
+section Bij
+
+universe w2
+
+variable {M : Type w} [AddCommMonoid M] {N : Type w2} [AddCommMonoid N]
+
+/-- ★★**group-like 性は全単射な加法準同型で移り、反射される**。 -/
+theorem isGroupLike_iff_of_bijective (f : M →+ N) (hf : Function.Bijective f) :
+    IsGroupLike M ↔ IsGroupLike N := by
+  rw [isGroupLike_iff, isGroupLike_iff]
+  constructor
+  · intro h b
+    obtain ⟨a, rfl⟩ := hf.2 b
+    exact (h a).map f
+  · intro h a
+    obtain ⟨y, hy⟩ := (Pf.isAddUnit_iff_exists_add_eq_zero (f a)).mp (h (f a))
+    obtain ⟨c, rfl⟩ := hf.2 y
+    refine (Pf.isAddUnit_iff_exists_add_eq_zero a).mpr ⟨c, hf.1 ?_⟩
+    rw [map_add, hy, map_zero]
+
+end Bij
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★★**group-like 性は底同型で移る**。 -/
+theorem isGroupLikeObj_iff_of_baseIso {A B : C} (φ : A ⟶ B) (hφ : IsBaseIsomorphism P φ) :
+    IsGroupLikeObj P B ↔ IsGroupLikeObj P A := by
+  haveI hiso : IsIso (P.Base φ) := hφ
+  exact isGroupLike_iff_of_bijective (Φ.map (P.Base φ))
+    (Φ.map_bijective_of_iso (asIso (P.Base φ)))
+
+/-- ★★★★**`𝒞` が not group-like 型なら `𝒞^istr` の対象だけでも尽くせない** ——
+isotropic 包が底同型だから。 -/
+theorem istr_not_isOfGroupLikeType (F : FrobenioidCore P) (h : ¬ IsOfGroupLikeType P) :
+    ¬ (∀ A : Istr P, IsGroupLikeObj P (A : Istr P).obj) := by
+  intro hg
+  refine h (fun A => ?_)
+  obtain ⟨B, φ, hisom, hstep, hB, _⟩ := F.isotropicHullExists A
+  exact (isGroupLikeObj_iff_of_baseIso φ hstep.2).mp (hg ⟨B, hB⟩)
+
+/-- ★★★★**`𝒞` が not group-like 型なら `𝒞^un-tr` も** ——
+原文の「hence also」の `𝒞^un-tr` の側。 -/
+theorem unTr_not_isOfGroupLikeType (Fc : FrobenioidCore P) (h : ¬ IsOfGroupLikeType P) :
+    ¬ IsOfGroupLikeType (unTrPre P Fc) :=
+  fun hg => istr_not_isOfGroupLikeType Fc h (fun A => hg A)
+
+/-- ★★★★locator —— `Proposition 5.5, (iii)` の「hence also not group-like」の `𝒞^un-tr` の側。 -/
+def unTr_not_isOfGroupLikeType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞 が not group-like なら 𝒞^un-tr も",
+    sectionId := "frdi-prop-5-5" }
+
+end GroupLikeGeneric
+
 /-! ## ★2. `𝒞^un-tr` は Frobenius-normalized 型 -/
 
 section UnTr
@@ -168,13 +236,13 @@ set_option maxHeartbeats 800000 in
 theorem unTr_standardType (Fc : FrobenioidCore P) (G : Frobenioid P)
     (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D)
     (F' : FrobenioidCore (unTrPre P Fc))
-    (hngl : ¬ IsOfGroupLikeType (unTrPre P Fc))
+    (hngl : ¬ IsOfGroupLikeType P)
     (hstd : IsOfStandardType D C P Fc) :
     IsOfStandardType D (UnTr P) (unTrPre P Fc) F' where
   quasiIsotropic :=
     isOfQuasiIsotropicType_of_isOfIsotropicType (unTrPre P Fc) F' (unTr_isotropic P Fc)
   frobIsotropic := unTr_frobIsotropicType Fc
-  groupLikeCompact hg := absurd hg hngl
+  groupLikeCompact hg := absurd hg (unTr_not_isOfGroupLikeType Fc hngl)
   frobNormalized := unTr_frobNormalizedType Fc G hint hfsmD
   baseFSMFF := hstd.baseFSMFF
   phiNonDilating := hstd.phiNonDilating
