@@ -125,6 +125,55 @@ theorem unTr_frobIsotropicType (Fc : FrobenioidCore P) :
     IsOfFrobeniusIsotropicType (unTrPre P Fc) :=
   fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (unTrPre P Fc) (𝟙 A), unTr_isotropic P Fc A⟩
 
+/-! ## ★3. standard 型が `𝒞^un-tr` へ移る
+
+★★`IsOfStandardType` の 6 条のうち 5 条は上と在庫で埋まり、残る
+`groupLikeCompact` は**前件が偽**になる ——
+原文の「suppose that `𝒞`, hence also `𝒞^un-tr`, `𝒞^rlf`, are not of group-like type」が
+それである。
+
+★`𝒞^un-tr` の対象は `𝒞^istr` の対象そのもの(`UnTr P := Istr P`)で、
+`𝔽_Φ` への関手も `A ↦ P.toElem.obj A.obj` なので、
+**group-like 性は `𝒞` のそれと同じ条件**である(`IsGroupLikeObj` は `Φ` と底だけで決まる)。
+★したがって `𝒞` が group-like 型なら `𝒞^un-tr` もそう(`unTr_isOfGroupLikeType`)。
+★★逆(原文の「hence also」)は `𝒞` の各対象を isotropic 包へ送る段が要るので、
+ここでは **`¬ IsOfGroupLikeType (unTrPre P Fc)` を仮引数で受ける**。 -/
+
+omit [IsConnected D] in
+/-- ★**`𝒞` が group-like 型なら `𝒞^un-tr` も** —— 対象も底も同じだから。 -/
+theorem unTr_isOfGroupLikeType (Fc : FrobenioidCore P) (h : IsOfGroupLikeType P) :
+    IsOfGroupLikeType (unTrPre P Fc) :=
+  fun A => h (show Istr P from A).obj
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**[FrdI] Proposition 5.5, (iii)** —— **standard 型は `𝒞^un-tr` へ移る**。
+
+原文 (FrdI p.105):
+> if C is of standard (respectively, rationally standard) type, then so are Cun-tr, Crlf.
+
+★★6 条の内訳:
+| 条 | 根拠 |
+|---|---|
+| quasi-isotropic | `unTr_isotropic`(isotropic 型 ⟹ quasi-isotropic) |
+| Frobenius-isotropic | `unTr_frobIsotropicType` |
+| group-like ⟹ compact 対象 | ★**前件が偽**(`hngl`) |
+| Frobenius-normalized | `unTr_frobNormalizedType` |
+| `𝒟` が FSMFF | `𝒞` と同じ `𝒟` |
+| `Φ` が non-dilating | `𝒞` と同じ `Φ` | -/
+theorem unTr_standardType (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D)
+    (F' : FrobenioidCore (unTrPre P Fc))
+    (hngl : ¬ IsOfGroupLikeType (unTrPre P Fc))
+    (hstd : IsOfStandardType D C P Fc) :
+    IsOfStandardType D (UnTr P) (unTrPre P Fc) F' where
+  quasiIsotropic :=
+    isOfQuasiIsotropicType_of_isOfIsotropicType (unTrPre P Fc) F' (unTr_isotropic P Fc)
+  frobIsotropic := unTr_frobIsotropicType Fc
+  groupLikeCompact hg := absurd hg hngl
+  frobNormalized := unTr_frobNormalizedType Fc G hint hfsmD
+  baseFSMFF := hstd.baseFSMFF
+  phiNonDilating := hstd.phiNonDilating
+
 end UnTr
 
 /-! ### ★出典の紐付け -/
@@ -133,6 +182,13 @@ end UnTr
 def unTr_frobNormalizedType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iii) — 𝒞^un-tr は Frobenius-normalized 型",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★locator —— `Proposition 5.5, (iii)` の「standard 型が `𝒞^un-tr` へ移る」の条
+(★**条つき**: `𝒞^un-tr` が not group-like であることを仮引数で受けている)。 -/
+def unTr_standardType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — standard 型は 𝒞^un-tr へ移る",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
