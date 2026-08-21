@@ -588,6 +588,73 @@ def pfRoot_frobNormalizedType.src : ABC3.Meta.Source :=
 
 end PfFrobNorm
 
+/-! ### ★5-d. `𝒞^pf` の group-like 性は `𝒞` のそれと同値
+
+★★これで上の 3 条のうち **3 番目も閉じる** ——
+原文の「suppose that `𝒞`, hence also …, are not of group-like type」が、
+`𝒞^pf` については**証明できる**。
+
+★★★筋は「**perfection は group-like 性を保ち反射する**」の 1 点である:
+`Φ` が divisorial なら各 `Φ(A)` は sharp で、sharp なら
+「group-like ⟺ 全元が零」。`Pf M` も sharp(`Pf.isSharp_pf`)なので、
+両側とも「全元が零」に化ける。★`Pf M` の元が零 ⟺ 分子が零
+(`Pf.mk_eq_zero_iff` ＋ `nsmul_injective_of_divisorial`)。
+
+★`𝒞^pf` の対象 `⟨A,n⟩` の底は `(P.toElem.obj A).base` **そのもの**
+(`pfRootToElem` の定義)なので、根は底に効かない。 -/
+
+section GroupLike
+
+variable {M : Type w} [AddCommMonoid M]
+
+/-- ★sharp なら「group-like ⟺ 全元が零」。 -/
+theorem isGroupLike_iff_forall_eq_zero (hs : IsSharp M) :
+    IsGroupLike M ↔ ∀ a : M, a = 0 := by
+  rw [isGroupLike_iff]
+  exact ⟨fun h a => hs a (h a), fun h a => by rw [h a]; exact isAddUnit_zero⟩
+
+/-- ★★★**perfection は group-like 性を保ち反射する**(divisorial なら)。 -/
+theorem Pf.isGroupLike_iff (hdiv : IsDivisorial M) :
+    IsGroupLike (Pf M) ↔ IsGroupLike M := by
+  rw [isGroupLike_iff_forall_eq_zero (Pf.isSharp_pf hdiv.2),
+    isGroupLike_iff_forall_eq_zero hdiv.2]
+  constructor
+  · intro h a
+    obtain ⟨k, hk⟩ := (Pf.mk_eq_zero_iff a 1).mp (h (Pf.of a))
+    exact nsmul_injective_of_divisorial hdiv.1.1 hdiv.1.2.1 hdiv.2 k.pos
+      (by rw [hk, smul_zero])
+  · intro h x
+    induction x using Pf.inductionOn with | _ m a =>
+    rw [h m]
+    exact Pf.mk_zero a
+
+end GroupLike
+
+section PfGroupLike
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-- ★★★**`𝒞^pf` の group-like 性は `𝒞` のそれと同値**(底が同じで、単系が perfection だから)。 -/
+theorem pfRoot_isGroupLikeObj_iff (X : PfRootObj P F) :
+    IsGroupLikeObj (pfRootPre P F) X ↔ IsGroupLikeObj P X.obj :=
+  Pf.isGroupLike_iff (P.divisorial ((P.toElem.obj X.obj).base))
+
+/-- ★★★★**`𝒞` が not group-like 型なら `𝒞^pf` も** ——
+原文の「hence also」が `𝒞^pf` については**証明できる**。 -/
+theorem pfRoot_not_isOfGroupLikeType (h : ¬ IsOfGroupLikeType P) :
+    ¬ IsOfGroupLikeType (pfRootPre P F) := fun hg =>
+  h (fun A => (pfRoot_isGroupLikeObj_iff (F := F) (⟨A, 1⟩ : PfRootObj P F)).mp
+    (hg (⟨A, 1⟩ : PfRootObj P F)))
+
+/-- ★★★★locator —— `Proposition 5.5, (iii)` の「hence also not group-like」の `𝒞^pf` の側。 -/
+def pfRoot_not_isOfGroupLikeType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞 が not group-like なら 𝒞^pf も",
+    sectionId := "frdi-prop-5-5" }
+
+end PfGroupLike
+
 section Pf
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
@@ -602,8 +669,7 @@ set_option maxHeartbeats 800000 in
 仮引数で受けている(上の節に筋を記した)。 -/
 theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
     (F₂ : FrobenioidCore (pfRootPre P F))
-    (hgl : IsOfGroupLikeType (pfRootPre P F) →
-      ∃ A : Istr (pfRootPre P F), IsFrobeniusCompact (istrPre (pfRootPre P F) F₂) A)
+    (hngl : ¬ IsOfGroupLikeType P)
     (hstd : IsOfStandardType D C P F) :
     IsOfStandardType D (PfRootObj P F) (pfRootPre P F) F₂ where
   quasiIsotropic :=
@@ -611,7 +677,7 @@ theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
       (pfRoot_isOfIsotropicType (F := F) hfi)
   frobIsotropic := fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (pfRootPre P F) (𝟙 A),
     pfRoot_isOfIsotropicType (F := F) hfi A⟩
-  groupLikeCompact := hgl
+  groupLikeCompact hg := absurd hg (pfRoot_not_isOfGroupLikeType hngl)
   frobNormalized := pfRoot_frobNormalizedType hfi hstd.frobNormalized
   baseFSMFF := hstd.baseFSMFF
   phiNonDilating :=
