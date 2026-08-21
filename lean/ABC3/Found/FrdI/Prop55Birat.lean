@@ -122,4 +122,34 @@ def birat_isFrobeniusType_repr.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 𝒞^birat の Frobenius 型は代表元で判定できる",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★★★添字圏のあいだの関手 -/
+
+variable (F) (F' : FrobenioidCore (biratPre P G))
+
+/-- ★★**`𝒞^{bi-Fr}` から `(𝒞^birat)^{bi-Fr}` への関手**。
+
+★`𝒞` の Frobenius 型射は `𝒞^birat` でも Frobenius 型である
+(`birat_isFrobeniusType_iff`、co-angular と base-isomorphism がそのまま渡る)。
+★次数が合うのは `biratDeg_toHomBirat`。 -/
+noncomputable def biFrToBirat : BiFr P F ⥤ BiFr (biratPre P G) F' where
+  obj Z := ⟨((toBiratCat P G).obj Z.obj.1, (toBiratCat P G).obj Z.obj.2)⟩
+  map {Z W} u :=
+    ⟨((toBiratCat P G).map u.hom.1, (toBiratCat P G).map u.hom.2),
+      (birat_isFrobeniusType_iff P G _).mpr ⟨u.property.1.1.1, u.property.1.2⟩,
+      (birat_isFrobeniusType_iff P G _).mpr ⟨u.property.2.1.1.1, u.property.2.1.2⟩,
+      (biratDeg_toHomBirat (P := P) (G := G) u.hom.1).trans
+        (u.property.2.2.trans (biratDeg_toHomBirat (P := P) (G := G) u.hom.2).symm)⟩
+  map_id Z := by
+    apply InducedWideCategory.Hom.ext
+    exact Prod.ext ((toBiratCat P G).map_id _) ((toBiratCat P G).map_id _)
+  map_comp u v := by
+    apply InducedWideCategory.Hom.ext
+    exact Prod.ext ((toBiratCat P G).map_comp _ _) ((toBiratCat P G).map_comp _ _)
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の添字圏のあいだの関手。 -/
+def biFrToBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 𝒞^{bi-Fr} から (𝒞^birat)^{bi-Fr} への関手",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
