@@ -1052,4 +1052,46 @@ def kappaLift.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — κ に沿った持ち上げ(一般形)",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★17. ★★★★★★全射性の三角形
+
+★★第 22 弾の辞書と第 23 弾の持ち上げを合わせると、
+`Proposition 5.5, (ii)` の全射性に要る三角形が**ただちに出る**。
+
+★★同じ 1 本が `A` の側（構造射）にも `B` の側（値）にも当たる ——
+`e_β` は `A''`・`n`・`k` にしか依らないからである。 -/
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★**全射性の三角形** —— 辞書からただちに出る。
+
+`ε ≫ iA_W = e_β ≫ rootMap ψ₁ K`（`K = k·n`）。
+★★`κ` が mono なので、`κ` と合成した式を比べればよい:
+* 左 —— `rootLift_spec` で `[rtExt A n ≫ rtExt X k]` になり、**辞書**で
+  `pfKappa A'' n ≫ [β ≫ ψ₁]` になる。
+* 右 —— `rootMap_spec` と `kappaLift_spec` で `(pfKappa A'' n ≫ [β]) ≫ [ψ₁]` になる。 -/
+theorem surj_triangle (hfi : IsOfFrobeniusIsotropicType P) (A'' A : C) (n k : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k)
+    (hA : P.degFr (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k) = k * n)
+    (hB : (pfRootPre P F).degFr (pfKappa (F := F) A'' n
+      ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) = k * n) :
+    (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+        ≫ rootLift (F := F) hfi
+          (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k) (k * n) hA
+      = kappaLift (F := F) hfi (k * n)
+          (pfKappa (F := F) A'' n
+            ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) hB
+        ≫ rootMap (F := F) hfi ψ₁ (k * n) := by
+  refine kappaLift_ext hfi _ _ ?_
+  rw [Category.assoc, rootLift_spec, Category.assoc, rootMap_spec, ← Category.assoc,
+    kappaLift_spec, Category.assoc]
+  exact (compRoot_dictionary A'' A n k ψ₁).trans
+    (congrArg (fun t : (⟨A'', 1⟩ : PfRootObj P F) ⟶ ⟨rtObj P F (rtObj P F A n) k, 1⟩ =>
+      compRoot P F (pfKappa (F := F) A'' n) t) (toRootHom_comp _ _))
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の全射性の三角形。 -/
+def surj_triangle.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 全射性の三角形",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
