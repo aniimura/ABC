@@ -194,6 +194,7 @@ import ABC3.Found.NumberField.GaloisFaithful
 import ABC3.Found.NumberField.DirichletDensity
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Prop53Base
+import ABC3.Found.FrdI.Cor54Compat
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat
 import ABC3.Found.FrdI.Cor411BaseFn

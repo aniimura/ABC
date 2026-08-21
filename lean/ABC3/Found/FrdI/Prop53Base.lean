@@ -56,7 +56,7 @@ universe v u w u2 v2
 
 section ModelDataComp
 
-variable {D : Type u} [Category.{v} D]
+variable {D : Type u} [Category.{v} D] {D₂ : Type u} [Category.{v} D₂]
 
 /-- ★★**4 成分が `HEq` で一致すれば `eqToHom` を挟んだ形と等しい**。
 
@@ -122,6 +122,110 @@ theorem ModelDataHom.comp_functor {M M' M'' : ModelData.{v, u, w} D}
     (F.comp G).functor = F.functor ⋙ G.functor :=
   CategoryTheory.Functor.ext (fun A => F.comp_obj G A) (fun A B _ =>
     ModelData.hom_eq_of_eqToHom (F.comp_obj G A) (F.comp_obj G B) _ _
+      HEq.rfl HEq.rfl rfl HEq.rfl)
+
+/-! ### ★底の圏が違う場合(`Corollary 5.4` の形)との合成 -/
+
+theorem ModelData.hom_eq_of_eqToHom₂ {M : ModelData.{v, u, w} D₂}
+    {A B A' B' : ModelData.Obj M} (hA : A = A') (hB : B = B') (φ : A ⟶ B) (ψ : A' ⟶ B')
+    (hbase : HEq φ.base ψ.base) (hdiv : HEq φ.div ψ.div) (hdeg : φ.deg = ψ.deg)
+    (hu : HEq φ.u ψ.u) :
+    φ = eqToHom hA ≫ ψ ≫ eqToHom hB.symm := by
+  subst hA
+  subst hB
+  simp only [eqToHom_refl, Category.id_comp, Category.comp_id]
+  exact ModelData.Hom.ext (eq_of_heq hbase) (eq_of_heq hdiv) hdeg (eq_of_heq hu)
+
+/-- ★★`ModelDataHomOver` も**データ 2 本で決まる**。 -/
+theorem ModelDataHomOver.ext' {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D}
+    {M₂ : ModelData.{v, u, w} D₂} {F G : ModelDataHomOver ΨB M M₂}
+    (hphi : ∀ d, F.phiHom d = G.phiHom d) (hbmon : ∀ d, F.bmonHom d = G.bmonHom d) : F = G := by
+  cases F
+  cases G
+  congr 1
+  · exact funext hphi
+  · exact funext hbmon
+
+/-- ★★**`M ⟶ M'` の後に `M' ⟶_{Ψ_𝒟} M₂`**。 -/
+noncomputable def ModelDataHom.compOver {ΨB : D ⥤ D₂} {M M' : ModelData.{v, u, w} D}
+    {M₂ : ModelData.{v, u, w} D₂}
+    (F : ModelDataHom M M') (H : ModelDataHomOver ΨB M' M₂) : ModelDataHomOver ΨB M M₂ where
+  phiHom d := (H.phiHom d).comp (F.phiHom d)
+  phiNat f x := by
+    show H.phiHom _ (F.phiHom _ (M.phi.map f x)) = _
+    rw [F.phiNat, H.phiNat]
+    rfl
+  bmonHom d := (H.bmonHom d).comp (F.bmonHom d)
+  bmonNat f x := by
+    show H.bmonHom _ (F.bmonHom _ (M.bmon.map f x)) = _
+    rw [F.bmonNat, H.bmonNat]
+    rfl
+  divCompat d u := by
+    show M₂.divB (ΨB.obj d) (H.bmonHom d (F.bmonHom d u)) = _
+    rw [H.divCompat, F.divCompat, ← AddMonoidHom.comp_apply, ← gpMap_comp]
+
+/-- ★★**`M ⟶_{Ψ_𝒟} M₂` の後に `M₂ ⟶ M₂'`**。 -/
+noncomputable def ModelDataHomOver.compHom {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D}
+    {M₂ M₂' : ModelData.{v, u, w} D₂}
+    (H : ModelDataHomOver ΨB M M₂) (G : ModelDataHom M₂ M₂') : ModelDataHomOver ΨB M M₂' where
+  phiHom d := (G.phiHom (ΨB.obj d)).comp (H.phiHom d)
+  phiNat f x := by
+    show G.phiHom _ (H.phiHom _ (M.phi.map f x)) = _
+    rw [H.phiNat, G.phiNat]
+    rfl
+  bmonHom d := (G.bmonHom (ΨB.obj d)).comp (H.bmonHom d)
+  bmonNat f x := by
+    show G.bmonHom _ (H.bmonHom _ (M.bmon.map f x)) = _
+    rw [H.bmonNat, G.bmonNat]
+    rfl
+  divCompat d u := by
+    show M₂'.divB (ΨB.obj d) (G.bmonHom (ΨB.obj d) (H.bmonHom d u)) = _
+    rw [G.divCompat, H.divCompat, ← AddMonoidHom.comp_apply, ← gpMap_comp]
+
+@[simp] theorem ModelDataHom.compOver_phiHom {ΨB : D ⥤ D₂} {M M' : ModelData.{v, u, w} D}
+    {M₂ : ModelData.{v, u, w} D₂}
+    (F : ModelDataHom M M') (H : ModelDataHomOver ΨB M' M₂) (d : D) :
+    (F.compOver H).phiHom d = (H.phiHom d).comp (F.phiHom d) := rfl
+
+@[simp] theorem ModelDataHomOver.compHom_phiHom {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D}
+    {M₂ M₂' : ModelData.{v, u, w} D₂}
+    (H : ModelDataHomOver ΨB M M₂) (G : ModelDataHom M₂ M₂') (d : D) :
+    (H.compHom G).phiHom d = (G.phiHom (ΨB.obj d)).comp (H.phiHom d) := rfl
+
+theorem ModelDataHom.compOver_obj {ΨB : D ⥤ D₂} {M M' : ModelData.{v, u, w} D}
+    {M₂ : ModelData.{v, u, w} D₂}
+    (F : ModelDataHom M M') (H : ModelDataHomOver ΨB M' M₂) (A : ModelData.Obj M) :
+    (F.compOver H).obj A = H.obj (F.obj A) := by
+  show (⟨ΨB.obj A.base, gpMap _ ((H.phiHom A.base).comp (F.phiHom A.base)) A.cls⟩ :
+      ModelData.Obj M₂)
+    = ⟨ΨB.obj A.base, gpMap _ (H.phiHom A.base) (gpMap _ (F.phiHom A.base) A.cls)⟩
+  rw [gpMap_comp]
+  rfl
+
+theorem ModelDataHomOver.compHom_obj {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D}
+    {M₂ M₂' : ModelData.{v, u, w} D₂}
+    (H : ModelDataHomOver ΨB M M₂) (G : ModelDataHom M₂ M₂') (A : ModelData.Obj M) :
+    (H.compHom G).obj A = G.obj (H.obj A) := by
+  show (⟨ΨB.obj A.base,
+      gpMap _ ((G.phiHom (ΨB.obj A.base)).comp (H.phiHom A.base)) A.cls⟩ : ModelData.Obj M₂')
+    = ⟨ΨB.obj A.base, gpMap _ (G.phiHom (ΨB.obj A.base)) (gpMap _ (H.phiHom A.base) A.cls)⟩
+  rw [gpMap_comp]
+  rfl
+
+theorem ModelDataHom.compOver_functor {ΨB : D ⥤ D₂} {M M' : ModelData.{v, u, w} D}
+    {M₂ : ModelData.{v, u, w} D₂}
+    (F : ModelDataHom M M') (H : ModelDataHomOver ΨB M' M₂) :
+    (F.compOver H).functor = F.functor ⋙ H.functor :=
+  CategoryTheory.Functor.ext (fun A => F.compOver_obj H A) (fun A B _ =>
+    ModelData.hom_eq_of_eqToHom₂ (F.compOver_obj H A) (F.compOver_obj H B) _ _
+      HEq.rfl HEq.rfl rfl HEq.rfl)
+
+theorem ModelDataHomOver.compHom_functor {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D}
+    {M₂ M₂' : ModelData.{v, u, w} D₂}
+    (H : ModelDataHomOver ΨB M M₂) (G : ModelDataHom M₂ M₂') :
+    (H.compHom G).functor = H.functor ⋙ G.functor :=
+  CategoryTheory.Functor.ext (fun A => H.compHom_obj G A) (fun A B _ =>
+    ModelData.hom_eq_of_eqToHom₂ (H.compHom_obj G A) (H.compHom_obj G B) _ _
       HEq.rfl HEq.rfl rfl HEq.rfl)
 
 end ModelDataComp
