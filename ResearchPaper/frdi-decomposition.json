@@ -2530,11 +2530,11 @@
             "p55i",
             "p55ii-untr"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "★大",
-          "note": "`pfOn Φ` は在庫にある(`ElementaryFrobenioid.lean`)。`B^pf → (Φ^gp)^pf` と `(Φ^pf)^gp` の比較が要る。",
-          "lean": "",
-          "decl": ""
+          "note": "`pfOn Φ` は在庫にある(`ElementaryFrobenioid.lean`)。`B^pf → (Φ^gp)^pf` と `(Φ^pf)^gp` の比較が要る。\n\n★★★★★2026-08-21（**単系の比較は閉じた** —— `Found/FrdI/PfGp.lean`）：\n`B^pf → (Φ^gp)^pf` と `(Φ^pf)^gp` の比較は **`(M^pf)^gp ≅ (M^gp)^pf`** であり、\n`M` が integral なら**同型**である（`pfGpEquiv`）。自然性も取った（`pfGpHom_naturality`）。\n\n★★**逆写像を作らずに済ませた**のが要点である ——\n`Gp (Pf M)` の可除性（`n·` の全単射性）を経由すると\n逆写像の well-definedness を書く羽目になるが、\n**全単射を直接示せば要らない**:\n\n* **全射** —— `M^gp` の元は差 `toGp m − toGp m'`（`gp_eq_sub'`）なので、\n  `mk z a` の原像は `toGp (m/a) − toGp (m'/a)`（`Pf.mk_sub_mk`）。\n* **単射** —— `(M^pf)^gp` の元も差であり、像が `0` なら\n  `Pf.map_injective`（`M` が integral）で分子が一致する。\n\n★途中で「**群の完全化は群**」（`Pf.instAddCommGroup`、分子を否定するだけ）も置いた。\n\n★★残るのは**圏の側** —— `𝒞^pf ≃ model(Φ^pf, B^pf)` そのもので、\nこれは `p55iii-pf`（`𝒞^pf` が model 型）を要し、そちらは `p55ii-birat` 待ちである。",
+          "lean": "ABC3/Found/FrdI/PfGp.lean",
+          "decl": "Pf.instAddCommGroup / Pf.mk_sub_mk / gp_eq_sub' / pfGpHom / pfGpEquiv / pfGpHom_naturality"
         },
         {
           "id": "p55iv-rlf",
