@@ -652,4 +652,68 @@ def HomPf.mk_idxPow'.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 押し出しの添字での代表元と rootIso",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★10. 根がずれた合成の計算則
+
+★★`Proposition 5.5, (ii)` の逆向きでは、根 `n` の対象から根 1 の対象への射に
+`𝒞` の射の像を後合成する形が出る。
+★`compRoot_eq_lift`(在庫)に `c = 1`、`PA = 1`、`PB = PE = n` を入れると、
+**3 つの `rtRootIso` のうち 2 つが恒等になり**、残る 1 つだけが残る。 -/
+
+/-- ★★★**`𝒞` の射の像を後合成する計算則**(根 `n` → 根 1 → 根 1)。 -/
+theorem compRoot_toRootHom {A B E : C} {n : ℕ+}
+    (f : HomRoot P F (⟨A, n⟩ : PfRootObj P F) ⟨B, 1⟩) (g : B ⟶ E) :
+    compRoot P F f (toRootHom (F := F) g)
+      = compPf P F f ((rtRootIso P F B E (show n = n * 1 from (mul_one n).symm)
+          (show n = n * 1 from (mul_one n).symm)).inv (toRootHom (F := F) g)) := by
+  have h := compRoot_eq_lift (F := F) f (toRootHom (F := F) g)
+    (c := 1) (PA := 1) (PB := n) (PE := n)
+    (hcA := by rw [one_mul, one_mul])
+    (hcB := by rw [one_mul, one_mul])
+    (hcE := by rw [one_mul, one_mul])
+    (ef := 1) (eg := n) (er := 1)
+    (hfA := (one_mul 1).symm) (hfB := (one_mul n).symm)
+    (hgA := (mul_one n).symm) (hgE := (mul_one n).symm)
+    (hrA := (one_mul 1).symm) (hrE := (one_mul n).symm)
+  rw [h, rtRootIso_inv_eq_self, rtRootIso_hom_eq_self]
+
+/-! ## ★11. 根の不変性と `toHomPf`
+
+★★`rootIso` は**`frobTransport` を消す** —— これで
+`rtRootIso` の `.inv` を `𝒞` の射の言葉に落とせる。 -/
+
+/-- ★添字 `idxOne A B ⟶ (pushIdx a b).obj (idxOne A′ B′)`。 -/
+noncomputable def idxOneHomPush {A B A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : B ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) :
+    idxOne P F A B ⟶ (pushIdx (F := F) a ha b hb hd).obj (idxOne P F A' B') :=
+  Under.homMk
+    (show (⟨(A, B)⟩ : BiFr P F) ⟶ (⟨(A', B')⟩ : BiFr P F) from ⟨(a, b), ha, hb, hd⟩)
+    (WideSubcategory.hom_ext _
+      (Prod.ext
+        (show 𝟙 A ≫ a = a ≫ 𝟙 A' by rw [Category.id_comp, Category.comp_id])
+        (show 𝟙 B ≫ b = b ≫ 𝟙 B' by rw [Category.id_comp, Category.comp_id])))
+
+/-- ★★★**根の不変性の `toHomPf` での計算則** —— `.hom` は `frobTransport` を消す。 -/
+theorem rootIso_hom_toHomPf {A B A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : B ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) (φ : A ⟶ B) :
+    (rootIso (F := F) a ha b hb hd).hom
+        (toHomPf (F := F) (frobTransport (F := F) a ha b hb hd φ))
+      = toHomPf (F := F) φ := by
+  rw [toHomPf, rootIso_hom_mk]
+  exact HomPf.mk_map (idxOneHomPush (F := F) a ha b hb hd) φ
+
+/-- ★★★**`.inv` の計算則**。 -/
+theorem rootIso_inv_toHomPf {A B A' B' : C} (a : A ⟶ A') (ha : IsFrobeniusType P a)
+    (b : B ⟶ B') (hb : IsFrobeniusType P b) (hd : P.degFr a = P.degFr b) (φ : A ⟶ B) :
+    (rootIso (F := F) a ha b hb hd).inv (toHomPf (F := F) φ)
+      = toHomPf (F := F) (frobTransport (F := F) a ha b hb hd φ) := by
+  refine ((congrArg (rootIso (F := F) a ha b hb hd).inv
+    (rootIso_hom_toHomPf a ha b hb hd φ)).symm).trans ?_
+  exact Iso.hom_inv_id_apply (rootIso (F := F) a ha b hb hd) _
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の逆向きに要る合成の計算則。 -/
+def compRoot_toRootHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 根がずれた合成の計算則",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
