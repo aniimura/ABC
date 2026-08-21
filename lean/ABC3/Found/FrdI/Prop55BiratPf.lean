@@ -859,4 +859,92 @@ end InjConn
 
 end Inj
 
+section Bij
+
+variable [IsConnected D]
+
+/-! ## ★射の全単射 —— `Proposition 5.5, (ii)` の Hom の部分
+
+★★全射性は `biratPfMk_surj` を代表元に当てるだけである。要る材料は 2 つ:
+
+* `HomPf.exists_rep_pow_pair` —— **構造射 `δ` と値 `φ` を同じ `k` で代表する**
+  (`Prop55PfKappa.lean`)。
+* `isPreStep_mk_iff` / `isCoAngular_of_isotropic_dom` ——
+  `𝒞^pf` の co-angular pre-step を `𝒞` へ**降ろす**。
+
+★★**isotropic 型を仮定するのが要点**である。原典の `𝒞^pf` は
+`Definition 3.1, (iii)` により isotropic 型の `𝒞`(実際には `𝒞^istr`)に対して作るので、
+これは逸脱ではない。★isotropic 型なら `𝒞` の射は**すべて** co-angular
+(`isCoAngular_of_isotropic_dom`)なので、`ψ₁` の co-angular 性は無料である。 -/
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★全射性(代表元の形で)。
+
+★`δ` と `φ` を同じ `k` で代表し、`biratPfMk_surj` に流し込む。 -/
+theorem biratPfHom_surj_mk (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (A B A'' : C) (n : ℕ+)
+    (δ : HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩)
+    (hδc : IsCoAngular (pfRootPre P F) δ) (hδs : IsPreStep (pfRootPre P F) δ)
+    (φ : HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩) :
+    ∃ x, biratPfHom hfi Gpf F' A B x
+      = HomBirat.mk (idxBiratMk (pfRootPre P F) Gpf δ hδc hδs) φ := by
+  obtain ⟨k, ψ₁, ψ₂, hψ₁, hψ₂⟩ := HomPf.exists_rep_pow_pair (F := F) δ φ
+  subst hψ₁
+  subst hψ₂
+  have hψ₁c : IsCoAngular P ψ₁ := isCoAngular_of_isotropic_dom P F (hiso _) ψ₁
+  have hψ₁s : IsPreStep P ψ₁ :=
+    (isPreStep_mk_iff (X := (⟨A'', n⟩ : PfRootObj P F)) (Y := (⟨A, 1⟩ : PfRootObj P F))
+      (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁).mp hδs
+  refine ⟨HomPf.mk ((idxToBirat P F G F' A B).obj (surjW (P := P) (F := F) A B n k))
+    (HomBirat.mk (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂), ?_⟩
+  refine (biratPfHom_mk hfi Gpf F' A B (surjW (P := P) (F := F) A B n k) _).trans ?_
+  refine (biratPf_mk hfi Gpf (surjW (P := P) (F := F) A B n k)
+    (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂).trans ?_
+  exact biratPfMk_surj hfi Gpf A B A'' n k ψ₁ hψ₁c hψ₁s ψ₂ hδc hδs
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— 射の写像は**全射**。
+
+★★添字対象 `T` は**そのまま `idxBiratMk` の形**である(構造の eta で `rfl`)ので、
+代表元の形の全射性がそのまま効く。 -/
+theorem biratPfHom_surjective (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Surjective (biratPfHom hfi Gpf F' A B) := by
+  intro y
+  obtain ⟨T, φ, hTφ⟩ := HomBirat.exists_rep y
+  obtain ⟨x, hx⟩ := biratPfHom_surj_mk hfi hiso Gpf F' A B T.unop.left.obj.obj
+    T.unop.left.obj.root T.unop.hom.hom T.unop.hom.property.1 T.unop.hom.property.2 φ
+  exact ⟨x, hx.trans hTφ⟩
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— **射の全単射**。 -/
+theorem biratPfHom_bijective (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Bijective (biratPfHom hfi Gpf F' A B) :=
+  ⟨biratPfHom_injective hfi Gpf F' A B, biratPfHom_surjective hfi hiso Gpf F' A B⟩
+
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** ——
+**`Hom_{(𝒞^birat)^pf}(A,B) ≃ Hom_{(𝒞^pf)^birat}(A,B)`**。
+
+原文 (FrdI p.105):
+> tween the respective sets of morphisms between the images of two given objects of C -/
+noncomputable def biratPfHomEquiv (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)
+      ≃ HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  Equiv.ofBijective _ (biratPfHom_bijective hfi hiso Gpf F' A B)
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の射の全単射。 -/
+def biratPfHomEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射 Hom_{(𝒞^birat)^pf} ≃ Hom_{(𝒞^pf)^birat}",
+    sectionId := "frdi-prop-5-5" }
+
+end Bij
+
 end ABC3.Found.FrdI
