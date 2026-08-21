@@ -695,7 +695,7 @@ set_option maxHeartbeats 800000 in
 `𝒞^pf` は **model Frobenioid と圏同値**。
 
 原文 (FrdI p.105):
-> between Cpf (respectively, Cun-tr; Crlf) and the model Frobenioid associated to the data
+> Finally, assertion (iv) is immediate from the definitions [cf. also assertions (i), (ii);
 
 ★`𝒞^pf` が model 型であること(`pfRoot_isOfModelType`)と
 `Theorem 5.2, (iv)`(`modelType_equiv`)の合成である。 -/
