@@ -129,6 +129,47 @@ let e : W' ≅ d.right := { hom := …, inv := …, … }
 * `git commit -m` にバッククォートを入れない。`git commit -F -` ＋ heredoc を使う。
 * `lake build` は `lean/` から、`node tools/check.mjs` は**リポジトリ直下**から。
 
+## 11. doc コメントと宣言の間に `set_option ... in` を置けない
+
+**症状**: `unexpected token 'set_option'; expected 'lemma'`。
+MCP(`lean_check`)では通るのに `lake build` で落ちるのでたちが悪い
+——MCP へ投げる断片には doc コメントを付けないことが多いため。
+
+```lean
+/-- ★説明 -/
+set_option maxHeartbeats 1000000 in
+theorem foo : … := …          -- ✗ パースエラー
+```
+
+**直し方**: `set_option ... in` を **doc コメントより前**に書く。
+
+```lean
+set_option maxHeartbeats 1000000 in
+/-- ★説明 -/
+theorem foo : … := …          -- ✓
+```
+
+`variable (P F) in` / `omit … in` も同じ。★**属性 `@[simp]` は逆で、doc の後**である。
+
+## 12. 「包み `def` の射影」が `rw` の照合を止める
+
+**症状**: 補題は `X.obj` について述べているのに、目標には
+`(scaleRootObj k X).obj` と出ていて `rw` が当たらない。定義上は同じ
+(`scaleRootObj k X := ⟨X.obj, k * X.root⟩`)だが**構文が違う**。
+1 と同じ `instances` 透明度の注記が付くことが多い。
+
+**直し方**: 触る直前に**包みだけ `unfold`** する。
+
+```lean
+rw [hR, hL]
+unfold scaleRootHom scaleRootObj   -- ← これで (scaleRootObj k X).obj が X.obj になる
+rw [hf, hg]
+```
+
+★★`simp only [scaleRootObj]` でも同じだが、`unfold` の方が
+「包みを 1 枚剥いだだけ」であることが読み手に分かる。
+★依存位置の `ℕ≥1`(3 番)と合わせて、**包みの中の根は必ず項として書き下せる形にしておく**。
+
 ---
 
 ## 検査器のキャッシュ(2026-08-21)
