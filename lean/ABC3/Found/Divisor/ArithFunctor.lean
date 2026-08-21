@@ -490,4 +490,10 @@ theorem arithExtend_single_apply' (hb : Function.Bijective (algebraMap L M))
     arithExtend (Finsupp.single v r) V = (Finsupp.single v r) (resPlace (L := L) V) :=
   arithExtend_single_apply hb (ringOfIntegers_surjective_of_bijective hb) v r V
 
+/-- ★★★**同型に沿った引き戻しは「素点を引き戻す」だけ**。 -/
+theorem arithExtend_apply' (hb : Function.Bijective (algebraMap L M))
+    (d : ArithPlace L →₀ ℝ) (V : ArithPlace M) :
+    arithExtend d V = d (resPlace (L := L) V) := by
+  rw [arithExtend_apply, localDeg_eq_one_of_bijective' hb V, Nat.cast_one, one_mul]
+
 end ABC3.Found.Divisor

@@ -583,4 +583,49 @@ def closure_primary_effR_eq_top.src : ABC3.Meta.Source :=
     item := "Example 6.3 — Φ(L) は primary 元(台が 1 点の元)で生成される",
     sectionId := "frdi-example-6-3" }
 
+/-- ★★★**primary な元は台が 1 点**(座標ごとに閉じているから)。
+
+★★`isPrimaryElt_effR_single` の**逆向き**である。
+台に 2 点あれば、片方だけを切り出した元 `b` が `b ≼ a` を満たすのに
+`a ≼ b` を満たさない。 -/
+theorem effR_single_supported_of_primary (hc : IsCoordwiseR Γ) {a : effR Γ}
+    (ha : IsPrimaryElt a) :
+    ∃ s : S, (a : S →₀ ℝ) = Finsupp.single s ((a : S →₀ ℝ) s) := by
+  have hann : ∀ t, 0 ≤ (a : S →₀ ℝ) t := (mem_effR.mp a.2).2
+  have hane : (a : S →₀ ℝ) ≠ 0 := fun h => ha.1 (Subtype.ext h)
+  obtain ⟨s, hs⟩ := Finsupp.support_nonempty_iff.mpr hane
+  refine ⟨s, Finsupp.ext fun t => ?_⟩
+  rcases eq_or_ne t s with rfl | ht
+  · rw [Finsupp.single_eq_same]
+  · rw [Finsupp.single_eq_of_ne ht]
+    by_contra hne
+    have hpos : 0 < (a : S →₀ ℝ) t := lt_of_le_of_ne (hann t) (Ne.symm hne)
+    set b : effR Γ := effRSingle hc a s with hb
+    have hbcoe : (b : S →₀ ℝ) = Finsupp.single s ((a : S →₀ ℝ) s) := rfl
+    have hb0 : b ≠ 0 := by
+      intro h
+      have hz0 : Finsupp.single s ((a : S →₀ ℝ) s) = (0 : S →₀ ℝ) := by
+        rw [← hbcoe, h]; rfl
+      rw [Finsupp.single_eq_zero] at hz0
+      exact (Finsupp.mem_support_iff.mp hs) hz0
+    have hprec : MPrec b a := by
+      refine ⟨1, one_pos, ⟨⟨(a : S →₀ ℝ) - Finsupp.single s ((a : S →₀ ℝ) s), ?_⟩, ?_⟩⟩
+      · refine mem_effR.mpr ⟨Γ.sub_mem (mem_effR.mp a.2).1 (hc _ (mem_effR.mp a.2).1 s), ?_⟩
+        intro x
+        rcases eq_or_ne x s with rfl | hx
+        · simp
+        · rw [Finsupp.sub_apply, Finsupp.single_eq_of_ne hx, sub_zero]; exact hann x
+      · refine Subtype.ext ?_
+        show Finsupp.single s ((a : S →₀ ℝ) s)
+          + ((a : S →₀ ℝ) - Finsupp.single s ((a : S →₀ ℝ) s)) = (1 : ℕ) • (a : S →₀ ℝ)
+        rw [one_smul]; abel
+    obtain ⟨m, hm, c, hc2⟩ := ha.2 b hb0 hprec
+    have h3 : (a : S →₀ ℝ) + (c : S →₀ ℝ) = m • (b : S →₀ ℝ) := congrArg Subtype.val hc2
+    have h4 := congrArg (fun f : S →₀ ℝ => f t) h3
+    have hz : (Finsupp.single s ((a : S →₀ ℝ) s) : S →₀ ℝ) t = 0 :=
+      Finsupp.single_eq_of_ne ht
+    simp only [Finsupp.add_apply, Finsupp.smul_apply] at h4
+    rw [hbcoe, hz, smul_zero] at h4
+    linarith [(mem_effR.mp c.2).2 t]
+
 end ABC3.Found.Divisor
