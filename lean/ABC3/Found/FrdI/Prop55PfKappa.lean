@@ -1094,4 +1094,49 @@ def surj_triangle.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 全射性の三角形",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★18. 三角形の一般形と次数の計算 -/
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★**全射性の三角形**(`K` を一般にした版)。
+
+★`K` を仮引数にしておくと、`biratPfDeg W`(定義上は `P.degFr W₁`)を
+そのまま入れられる —— 添字の根がずれずに済む。 -/
+theorem surj_triangle' (hfi : IsOfFrobeniusIsotropicType P) (A'' A : C) (n k K : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k)
+    (hA : P.degFr (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k) = K)
+    (hB : (pfRootPre P F).degFr (pfKappa (F := F) A'' n
+      ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) = K) :
+    (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+        ≫ rootLift (F := F) hfi
+          (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k) K hA
+      = kappaLift (F := F) hfi K
+          (pfKappa (F := F) A'' n
+            ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) hB
+        ≫ rootMap (F := F) hfi ψ₁ K := by
+  refine kappaLift_ext hfi _ _ ?_
+  rw [Category.assoc, rootLift_spec, Category.assoc, rootMap_spec, ← Category.assoc,
+    kappaLift_spec, Category.assoc]
+  exact (compRoot_dictionary A'' A n k ψ₁).trans
+    (congrArg (fun t : (⟨A'', 1⟩ : PfRootObj P F) ⟶ ⟨rtObj P F (rtObj P F A n) k, 1⟩ =>
+      compRoot P F (pfKappa (F := F) A'' n) t) (toRootHom_comp _ _))
+
+/-- ★次数の計算 —— `K = k · n`(`A` の側)。 -/
+theorem surj_degA (A : C) (n k : ℕ+) :
+    P.degFr (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k) = k * n := by
+  rw [P.degFr_comp, rtExt_degFr, rtExt_degFr]
+
+/-- ★次数の計算 —— `K = k · n`(`κ ≫ [β]` の側)。 -/
+theorem surj_degB (A'' : C) (n k : ℕ+) :
+    (pfRootPre P F).degFr (pfKappa (F := F) A'' n
+      ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) = k * n := by
+  rw [(pfRootPre P F).degFr_comp, toRootHom_degFr', pfKappa_degFr, P.degFr_comp,
+    rtExt_degFr, rtExt_degFr, mul_one]
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の全射性の三角形(一般形)。 -/
+def surj_triangle'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 全射性の三角形(K を一般にした版)",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
