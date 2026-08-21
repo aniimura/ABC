@@ -163,7 +163,41 @@ theorem biratPfMk_map (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
     (lamHom_comp (F := F) (biratPfDeg W) u.unop.left.hom ψ).symm).trans
     (Category.assoc _ _ _)
 
+/-! ## ★3. 右辺の内側の余極限からの写像 -/
+
+/-- ★★右辺の内側の余極限 `Hom^birat(W₁,W₂)` からの余錐。 -/
+noncomputable def biratPfCocone (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) :
+    CategoryTheory.Limits.Cocone (homFunctorBirat P G W.right.obj.1 W.right.obj.2) :=
+  CategoryTheory.Limits.Cocone.mk
+    (HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩)
+    { app := fun Z => TypeCat.ofHom fun ψ => biratPfMk hfi Gpf W Z ψ.down
+      naturality := fun Z Z' u => by
+        ext ψ
+        exact biratPfMk_map hfi Gpf W u ψ.down }
+
+/-- ★★★★**`Hom^birat(W₁,W₂) → Hom^birat_{𝒞^pf}(⟨A,1⟩,⟨B,1⟩)`**。 -/
+noncomputable def biratPf (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) :
+    HomBirat P G W.right.obj.1 W.right.obj.2
+      → HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  fun z => CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W) z
+
+@[simp] theorem biratPf_mk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    biratPf hfi Gpf W (HomBirat.mk Z ψ) = biratPfMk hfi Gpf W Z ψ := by
+  show CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W)
+    (CategoryTheory.Limits.colimit.ι
+      (homFunctorBirat P G W.right.obj.1 W.right.obj.2) Z (ULift.up ψ)) = _
+  rw [← types_comp_apply (CategoryTheory.Limits.colimit.ι
+      (homFunctorBirat P G W.right.obj.1 W.right.obj.2) Z)
+    (CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W)),
+    CategoryTheory.Limits.colimit.ι_desc]
+  rfl
+
 /-! ### ★出典の紐付け -/
+
 
 /-- ★★★locator —— `Proposition 5.5, (ii)` の左辺の側(右辺の代表元からの写像)。 -/
 def biratPfMk.src : ABC3.Meta.Source :=
