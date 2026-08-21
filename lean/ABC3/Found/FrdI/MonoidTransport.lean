@@ -272,4 +272,30 @@ def isNonDilating_of_primary_sharp.src : ABC3.Meta.Source :=
     item := "Definition 1.1, (i) — non-dilating の十分条件(sharp 版)",
     sectionId := "frdi-def-1-1-i" }
 
+/-- ★★★★**non-dilating を `M` の上の含意に丸ごと降ろす**(sharp 版)。
+
+★`isNonDilating_of_primary_sharp` は「生成」＋「primary 元で恒等」に割ったが、
+★★**生成が成り立たない場合**(幾何の `Φ(L)` —— 単独の素因子は Cartier とは限らない)
+のために、**含意そのものを `M` の上へ移した形**も要る。 -/
+theorem isNonDilating_of_sharp (hs : IsSharp M) (α : M →+ M)
+    (key : (∀ a : M, IsPrimaryElt a → MPrec (α a) a) → α = AddMonoidHom.id M) :
+    IsNonDilating α := by
+  intro h
+  have hM : ∀ a : M, IsPrimaryElt a → MPrec (α a) a := by
+    intro a ha
+    have ha' : IsPrimaryElt (toChar a) := isPrimaryElt_map (mCharEquivOfSharp hs) ha
+    have h2 := h (toChar a) ha'
+    rw [charMap_toChar] at h2
+    have h3 := mprec_map ((mCharEquivOfSharp hs).symm : MChar M →+ M) h2
+    have h4 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar (α a)) = α a :=
+      (mCharEquivOfSharp hs).symm_apply_apply (α a)
+    have h5 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar a) = a :=
+      (mCharEquivOfSharp hs).symm_apply_apply a
+    rwa [h4, h5] at h3
+  rw [key hM]
+  refine AddMonoidHom.ext fun x => ?_
+  obtain ⟨y, rfl⟩ := toChar_surjective M x
+  rw [charMap_toChar]
+  rfl
+
 end ABC3.Found.FrdI

@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Divisor.FreeDivisorial
+import ABC3.Found.FrdI.MonoidTransport
 
 /-!
 # Cartier 有効因子の単系 `Φ(L) = Γ ∩ ℤ≥0[D_L]`
@@ -237,5 +238,118 @@ def effSubGpEquiv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 109,
     item := "Example 6.1 — Φ(L)^gp は V[L] 上の Cartier 因子の群",
     sectionId := "frdi-example-6-1" }
+
+/-! ## ★★幾何側の non-dilating の骨組み(2026-08-21)
+
+★★算術側(`Example 6.3`)は「primary 元で生成される」から出たが、
+**幾何側は生成が成り立たない** —— `Φ(L)` は「台が `D_L` に入る **Cartier** 因子」で、
+単独の素因子 `D` は Cartier とは限らない(`D_K` は `K`-`Q`-Cartier としか仮定していない)。
+
+★★★そこで**置換版**の骨組みを置く: 引き戻しが**素因子の置換(係数 1)**で
+誘導されるなら、non-dilating の仮定は置換が各素因子を固定することを言う。
+★各素因子が primary 元を持つことは `K`-`Q`-Cartier(`qc`)から出る。 -/
+
+/-- ★★台が 1 点の元は primary(ℤ 係数版)。 -/
+theorem isPrimaryElt_effSub_single {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)}
+    {s : S} {r : ℤ} (hr : 0 < r) (hmem : Finsupp.single s r ∈ effSub Γ) :
+    IsPrimaryElt (⟨Finsupp.single s r, hmem⟩ : effSub Γ) := by
+  refine ⟨?_, ?_⟩
+  · intro h0
+    have h : Finsupp.single s r = (0 : S →₀ ℤ) := congrArg Subtype.val h0
+    rw [Finsupp.single_eq_zero] at h
+    exact hr.ne' h
+  · rintro b hb0 ⟨n, hn, c, hbc⟩
+    have hcoe : (b : S →₀ ℤ) + (c : S →₀ ℤ) = n • (Finsupp.single s r : S →₀ ℤ) :=
+      congrArg Subtype.val hbc
+    have hbnn : ∀ t, 0 ≤ (b : S →₀ ℤ) t := fun t => by simpa using Finsupp.le_def.mp b.2.2 t
+    have hcnn : ∀ t, 0 ≤ (c : S →₀ ℤ) t := fun t => by simpa using Finsupp.le_def.mp c.2.2 t
+    have hbt : ∀ t, t ≠ s → (b : S →₀ ℤ) t = 0 := by
+      intro t ht
+      have h1 := congrArg (fun f : S →₀ ℤ => f t) hcoe
+      have hz : (Finsupp.single s r : S →₀ ℤ) t = 0 := Finsupp.single_eq_of_ne ht
+      simp only [Finsupp.add_apply, Finsupp.smul_apply] at h1
+      rw [hz, smul_zero] at h1
+      linarith [hbnn t, hcnn t]
+    have hbsupp : (b : S →₀ ℤ) = Finsupp.single s ((b : S →₀ ℤ) s) := by
+      refine Finsupp.ext fun t => ?_
+      rcases eq_or_ne t s with rfl | ht
+      · rw [Finsupp.single_eq_same]
+      · rw [hbt t ht, Finsupp.single_eq_of_ne ht]
+    have hbs : 0 < (b : S →₀ ℤ) s := by
+      rcases lt_or_eq_of_le (hbnn s) with h | h
+      · exact h
+      · refine absurd (Subtype.ext ?_) hb0
+        rw [hbsupp, ← h, Finsupp.single_zero]
+        rfl
+    obtain ⟨m, hm⟩ : ∃ m : ℕ, r ≤ (m : ℤ) * (b : S →₀ ℤ) s := ⟨r.toNat, by
+      have h1 : (r.toNat : ℤ) = r := Int.toNat_of_nonneg hr.le
+      nlinarith [hbs, h1]⟩
+    have hm0 : 0 < m := by
+      rcases Nat.eq_zero_or_pos m with h | h
+      · rw [h] at hm; simp at hm; omega
+      · exact h
+    have hdmem : Finsupp.single s ((m : ℤ) * (b : S →₀ ℤ) s - r) ∈ effSub Γ := by
+      refine ⟨?_, ?_⟩
+      · have h1 : Finsupp.single s ((m : ℤ) * (b : S →₀ ℤ) s - r)
+            = (m : ℕ) • (b : S →₀ ℤ) - Finsupp.single s r := by
+          rw [hbsupp, Finsupp.smul_single, ← Finsupp.single_sub, nsmul_eq_mul]
+          congr 1
+          rw [hbsupp, Finsupp.single_eq_same]
+        rw [h1]
+        exact Γ.sub_mem (Γ.nsmul_mem b.2.1 m) (mem_effSub.mp hmem).1
+      · refine Finsupp.le_def.mpr fun t => ?_
+        rcases eq_or_ne t s with rfl | ht
+        · simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.single_eq_same]
+          linarith
+        · simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.single_eq_of_ne ht]
+          exact le_refl 0
+    refine ⟨m, hm0, ⟨⟨_, hdmem⟩, Subtype.ext ?_⟩⟩
+    show Finsupp.single s r + Finsupp.single s ((m : ℤ) * (b : S →₀ ℤ) s - r)
+      = (m : ℕ) • (b : S →₀ ℤ)
+    rw [← Finsupp.single_add, hbsupp, Finsupp.smul_single, Finsupp.single_eq_same, nsmul_eq_mul]
+    congr 1
+    ring
+
+/-- ★★★★**素因子の置換で誘導される引き戻しは non-dilating**(幾何側の骨組み)。
+
+★入力は 2 つ:
+* `hprim` —— 各素因子 `s` に `n·s ∈ Φ(L)` となる `n > 0` がある(`K`-`Q`-Cartier から)
+* `hα` —— 引き戻しが**素因子の置換(係数 1)**で誘導される
+
+★★2 つ目は `CartierDatum` に条項が**無い**ので、
+構造に 1 条足すか幾何側で作るかが残っている(節点 `thm62-iii-nondil`)。 -/
+theorem isNonDilating_effSub_of_perm {S : Type*} {Γ : AddSubgroup (S →₀ ℤ)} (σ : S ≃ S)
+    (hprim : ∀ s : S, ∃ r : ℤ, 0 < r ∧ Finsupp.single s r ∈ effSub Γ)
+    (α : effSub Γ →+ effSub Γ)
+    (hα : ∀ x : effSub Γ, ((α x : effSub Γ) : S →₀ ℤ)
+      = Finsupp.equivMapDomain σ ((x : effSub Γ) : S →₀ ℤ)) :
+    IsNonDilating α := by
+  refine isNonDilating_of_sharp (isSharp_effSub Γ) α (fun h => ?_)
+  have hσ : ∀ s, σ s = s := by
+    intro s
+    obtain ⟨r, hr, hmem⟩ := hprim s
+    obtain ⟨n, hn, c, hc⟩ := h _ (isPrimaryElt_effSub_single hr hmem)
+    have hval : ((α ⟨Finsupp.single s r, hmem⟩ : effSub Γ) : S →₀ ℤ)
+        = Finsupp.single (σ s) r := by
+      rw [hα]
+      exact Finsupp.equivMapDomain_single σ s r
+    by_contra hne
+    have hcoe : ((α ⟨Finsupp.single s r, hmem⟩ : effSub Γ) : S →₀ ℤ) + (c : S →₀ ℤ)
+        = n • (Finsupp.single s r : S →₀ ℤ) := congrArg Subtype.val hc
+    have h1 := congrArg (fun f : S →₀ ℤ => f (σ s)) hcoe
+    simp only [Finsupp.add_apply, Finsupp.smul_apply] at h1
+    rw [hval, Finsupp.single_eq_same, Finsupp.single_eq_of_ne hne, smul_zero] at h1
+    have h2 : 0 ≤ (c : S →₀ ℤ) (σ s) := by simpa using Finsupp.le_def.mp c.2.2 (σ s)
+    linarith
+  have hid : σ = Equiv.refl S := Equiv.ext hσ
+  refine AddMonoidHom.ext fun x => Subtype.ext ?_
+  rw [hα, hid, Finsupp.equivMapDomain_refl]
+  rfl
+
+/-- ★★★locator —— 幾何側の non-dilating の骨組み。 -/
+def isNonDilating_effSub_of_perm.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — 素因子の置換で誘導される引き戻しは non-dilating",
+    sectionId := "frdi-thm-6-2" }
 
 end ABC3.Found.FrdI
