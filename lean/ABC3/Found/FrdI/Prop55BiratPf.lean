@@ -540,4 +540,128 @@ def biratPfHom.src : ABC3.Meta.Source :=
 
 end Cocone
 
+
+section Surj
+
+variable {G : Frobenioid P}
+
+/-! ## ★全射性 —— 右辺の代表元は必ず左辺から来る
+
+★★★右辺 `(𝒞^birat)^pf` の任意の元は、**添字を粗くすれば**
+`⟨A″,n⟩ → ⟨A,1⟩`(co-angular pre-step)と
+`ψ₁ : (A″)^{(k)} ⟶ A^{(n,k)}` の対で書ける。
+★このとき **`biratPfMk` がその元をちょうど返す** ——
+これが `Proposition 5.5, (ii)` の全射性の中身である。
+
+★鍵は `Prop55PfKappa.lean` の**全射性の三角形** `surj_triangle'`:
+同じ 1 本の `e_β = kappaLift` が `A` の側(構造射)にも `B` の側(値)にも当たる。
+`e_β` は `A″`・`n`・`k` にしか依らないからである。 -/
+
+/-- ★★全射性で使う添字 —— `θ_A = rtExt A n ≫ rtExt A^{(n)} k` と `θ_B` の対。 -/
+noncomputable def surjW (A B : C) (n k : ℕ+) : IdxPf P F A B :=
+  idxMk (P := P) (F := F) (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k)
+    (rtExt P F B n ≫ rtExt P F (rtObj P F B n) k)
+    (IsFrobeniusType.comp P F (rtExt_frobType P F A n) (rtExt_frobType P F _ k))
+    (IsFrobeniusType.comp P F (rtExt_frobType P F B n) (rtExt_frobType P F _ k))
+    (by rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, rtExt_degFr, rtExt_degFr, rtExt_degFr])
+
+/-- ★`surjW` の次数は `k · n`。 -/
+theorem surjW_deg (A B : C) (n k : ℕ+) :
+    biratPfDeg (P := P) (F := F) (surjW (P := P) (F := F) A B n k) = k * n :=
+  surj_degA (P := P) (F := F) A n k
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**全射性** —— `biratPfMk` は右辺の代表元をそのまま返す。
+
+★★`ε = [ψ₁]`(co-angular pre-step)と値 `[ψ₂]` を与えると、
+`surjW A B n k` を添字にした `biratPfMk` が
+**`HomBirat.mk ⟨ε⟩ [ψ₂]` に一致する**。
+
+★★証明は 3 段:
+1. `e_β := kappaLift`(`κ ≫ [β]` に沿った持ち上げ)は同型 —— `κ ≫ [β]` が Frobenius 型だから。
+2. `surj_triangle'` を `A` の側と `B` の側に 1 回ずつ当てる。
+   出てくる `e_β` は**同じ 1 本**である。
+3. `e_β⁻¹` を `IdxBirat` の射とみなし(`idxBiratHomMk`)、`HomBirat.mk_map` に流し込む。 -/
+theorem biratPfMk_surj (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (A B A'' : C) (n k : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k)
+    (hψ₁c : IsCoAngular P ψ₁) (hψ₁s : IsPreStep P ψ₁)
+    (ψ₂ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F B n) k)
+    (hεc : IsCoAngular (pfRootPre P F)
+      (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁))
+    (hεs : IsPreStep (pfRootPre P F)
+      (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)) :
+    biratPfMk hfi Gpf (surjW (P := P) (F := F) A B n k)
+        (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂
+      = HomBirat.mk (idxBiratMk (pfRootPre P F) Gpf
+          (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁) hεc hεs)
+        (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+          HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂) := by
+  have hBdeg : (pfRootPre P F).degFr (pfKappa (F := F) A'' n
+      ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k))
+      = biratPfDeg (P := P) (F := F) (surjW (P := P) (F := F) A B n k) :=
+    (surj_degB (P := P) (F := F) A'' n k).trans
+      (surj_degA (P := P) (F := F) A n k).symm
+  set eβ := kappaLift (F := F) hfi (biratPfDeg (P := P) (F := F)
+      (surjW (P := P) (F := F) A B n k)) (pfKappa (F := F) A'' n
+    ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) hBdeg with heβ
+  haveI hiso : IsIso eβ := kappaLift_isIso hfi _ _
+    (IsFrobeniusType.comp (pfRootPre P F) (pfRootCore hfi) (pfKappa_frobType hfi A'' n)
+      (toRootHom_frobType hfi _
+        (IsFrobeniusType.comp P F (rtExt_frobType P F A'' 1) (rtExt_frobType P F _ k)))) hBdeg
+  have htriA : (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+        ≫ (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k)).hom
+      = eβ ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg (P := P) (F := F)
+        (surjW (P := P) (F := F) A B n k)) :=
+    surj_triangle' (F := F) hfi A'' A n k _ ψ₁ rfl hBdeg
+  have htriB : (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂)
+        ≫ (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k)).hom
+      = eβ ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg (P := P) (F := F)
+        (surjW (P := P) (F := F) A B n k)) :=
+    surj_triangle' (F := F) hfi A'' B n k _ ψ₂
+      (surjW (P := P) (F := F) A B n k).hom.property.2.2.symm hBdeg
+  have hw : (@inv _ _ _ _ eβ hiso)
+        ≫ (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+      = rootMap (F := F) hfi ψ₁ (biratPfDeg (P := P) (F := F)
+          (surjW (P := P) (F := F) A B n k))
+        ≫ (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k)).inv :=
+    (Iso.eq_comp_inv (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k))).mpr
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun t => (@inv _ _ _ _ eβ hiso) ≫ t) htriA).trans
+          (IsIso.inv_hom_id_assoc eβ _)))
+  have hval : (@inv _ _ _ _ eβ hiso)
+        ≫ (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂)
+      = rootMap (F := F) hfi ψ₂ (biratPfDeg (P := P) (F := F)
+          (surjW (P := P) (F := F) A B n k))
+        ≫ (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k)).inv :=
+    (Iso.eq_comp_inv (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k))).mpr
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun t => (@inv _ _ _ _ eβ hiso) ≫ t) htriB).trans
+          (IsIso.inv_hom_id_assoc eβ _)))
+  refine Eq.trans ?_ (HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
+    (idxBiratHomMk (Z := idxBiratMk (pfRootPre P F) Gpf _ hεc hεs)
+      (W := biratPfIdx hfi Gpf (surjW (P := P) (F := F) A B n k)
+        (idxBiratMk P G ψ₁ hψ₁c hψ₁s))
+      (@inv _ _ _ _ eβ hiso) (pfRoot_isCoAngular hfi _)
+      (isPreStep_of_isIso (pfRootPre P F) _) hw)
+    (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+      HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂))
+  exact congrArg (HomBirat.mk (biratPfIdx hfi Gpf (surjW (P := P) (F := F) A B n k)
+    (idxBiratMk P G ψ₁ hψ₁c hψ₁s))) hval.symm
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の全射性。 -/
+def biratPfMk_surj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 全射性(右辺の代表元は biratPfMk の像)",
+    sectionId := "frdi-prop-5-5" }
+
+end Surj
+
 end ABC3.Found.FrdI
