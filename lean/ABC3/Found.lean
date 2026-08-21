@@ -17,6 +17,7 @@ import ABC3.Found.FrdI.Remark312
 import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
+import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.FrdI.Witness
 import ABC3.Found.FrdI.Frobenioid
 import ABC3.Found.FrdI.WitnessFrobenioid
