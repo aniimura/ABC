@@ -7,6 +7,8 @@ import ABC3.Found.FrdI.Cor57Model
 import ABC3.Found.FrdI.Prop32Perfect
 import ABC3.Found.FrdI.MonoidTransport
 import ABC3.Found.FrdI.Prop55UntrCat
+import ABC3.Found.FrdI.Prop53UntrPf
+import ABC3.Found.FrdI.Prop32Dict
 
 /-!
 # [FrdI] Proposition 5.5, (iii) —— standard 型が `𝒞^un-tr` へ移る
@@ -452,6 +454,140 @@ def isBaseIdentity_mk_diag_iff.src : ABC3.Meta.Source :=
 
 end Diag
 
+/-! ### ★5-c. `𝒞^pf` は Frobenius-normalized 型
+
+★★これで上の 3 条のうち **2 番目も閉じる**。
+
+★★★筋は 2 段:
+1. **`PfCat` 模型**で示す(`pf_frobNormalizedType`)——
+   `exists_idx_diag` で `φ` と `α` を同じ**対角の添字**に揃え、
+   `5-b` の判定で `𝒞` 側の仮定に落とし、`𝒞` の Frobenius-normalized 性を当てて
+   **単系の準同型 `mkDiagHom`** で押し戻す。
+   ★`End` の積が `x * y = y ≫ x` なので、`compPf_mk_pair` がそのまま `map_mul` になり、
+   `map_pow` が**冪をそのまま運ぶ**のが要点である。
+2. **根つき模型へ移す**(`pfRoot_frobNormalizedType`)——
+   在庫の `endRootMulEquiv`(`Θ : End ⟨A,n⟩ ≃* End_{𝒞^pf} A^{(n·n)}`)と
+   `mem_otri_rootSelfIso_inv` / `pfDeg_rtRootIso_inv` / `rootBase_eq_id_iff` が
+   `isFrobeniusNormalized_transport` の 3 仮定をちょうど埋める。 -/
+
+section PfFrobNorm
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-- ★対角の添字の遷移で恒等射は恒等射へ。 -/
+theorem idxTransport_diag_id {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l) :
+    idxTransport P F (idxOneToDiag (F := F) l hl rfl) (𝟙 A) = 𝟙 E :=
+  frobTransport_eq (F := F) l hl l hl rfl (𝟙 A) (𝟙 E)
+    (by rw [Category.comp_id, Category.id_comp])
+
+/-- ★★★**対角の添字は `End E` から `End_{𝒞^pf} A` への単系の準同型を与える**。
+
+★`End` の積は `x * y = y ≫ x` なので、`compPf_mk_pair` がそのまま `map_mul'` になる。 -/
+noncomputable def mkDiagHom {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l) :
+    End E →* @End (PfCat P F) _ A where
+  toFun φ := HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ
+  map_one' := by
+    show HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) (𝟙 E) = toHomPf (F := F) (𝟙 A)
+    rw [← idxTransport_diag_id (F := F) l hl]
+    exact HomPf.mk_map (idxOneToDiag (F := F) l hl rfl) (𝟙 A)
+  map_mul' x y := by
+    show HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) ((y : E ⟶ E) ≫ (x : E ⟶ E))
+      = compPf P F (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) y)
+        (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) x)
+    exact (compPf_mk_pair l l l hl hl hl rfl rfl y x).symm
+
+/-- ★★★**2 つの自己射を同じ対角の添字の代表元に揃える**。 -/
+theorem exists_diag_rep_pair (hfi : IsOfFrobeniusIsotropicType P) {A : C}
+    (f g : HomPf P F A A) :
+    ∃ (E : C) (l : A ⟶ E) (hl : IsFrobeniusType P l), IsIsotropic P E ∧
+      ∃ φ ψ : E ⟶ E, HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ = f ∧
+        HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) ψ = g := by
+  obtain ⟨Z₁, φ₁, h₁⟩ := HomPf.exists_rep f
+  obtain ⟨Z₂, φ₂, h₂⟩ := HomPf.exists_rep g
+  haveI := idxPf_isFiltered P F (A := A) (B := A)
+  obtain ⟨E, l, hl, hE, ⟨w⟩⟩ := exists_idx_diag (F := F) hfi (IsFiltered.max Z₁ Z₂)
+  refine ⟨E, l, hl, hE,
+    idxTransport P F w (idxTransport P F (IsFiltered.leftToMax Z₁ Z₂) φ₁),
+    idxTransport P F w (idxTransport P F (IsFiltered.rightToMax Z₁ Z₂) φ₂), ?_, ?_⟩
+  · rw [HomPf.mk_map w, HomPf.mk_map (IsFiltered.leftToMax Z₁ Z₂), h₁]
+  · rw [HomPf.mk_map w, HomPf.mk_map (IsFiltered.rightToMax Z₁ Z₂), h₂]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**`𝒞^pf`(`PfCat` 模型)は Frobenius-normalized 型**。 -/
+theorem pf_frobNormalizedType (hfi : IsOfFrobeniusIsotropicType P)
+    (hfn : IsOfFrobeniusNormalizedType P) : IsOfFrobeniusNormalizedType (pfPre P F) := by
+  intro A f hfb g hg
+  obtain ⟨E, l, hl, hE, φ, ψ, hφ, hψ⟩ :=
+    exists_diag_rep_pair (F := F) hfi (f : HomPf P F A A) (g : HomPf P F A A)
+  subst hφ
+  subst hψ
+  have hφb : IsBaseIdentity P φ := (isBaseIdentity_mk_diag_iff (F := F) l hl φ).mp hfb
+  have hψo : (show End E from ψ) ∈ OTri P E :=
+    (otri_cond_mk_diag_iff (F := F) l hl ψ).mp ⟨hg.1, hg.2⟩
+  have hd : (pfPre P F).degFr
+      (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ)
+      = P.degFr φ := pfDeg_mk_diag (F := F) l hl φ
+  have hkey := hfn E (show End E from φ) hφb (show End E from ψ) hψo
+  rw [← hd] at hkey
+  have hkey2 : ((show End E from ψ) ^ (((pfPre P F).degFr
+        (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ) : ℕ+) : ℕ))
+      * (show End E from φ) = (show End E from φ) * (show End E from ψ) := hkey
+  have hmul := congrArg (mkDiagHom (F := F) l hl) hkey2
+  rw [map_mul, map_mul, map_pow] at hmul
+  exact hmul
+
+/-- ★★根つき側の底恒等性は `Θ` で対応する。 -/
+theorem isBaseIdentity_rootSelfIso_inv (A : C) (n : ℕ+)
+    (f : End (⟨A, n⟩ : PfRootObj P F)) :
+    IsBaseIdentity (pfRootPre P F) f
+      ↔ IsBaseIdentity (pfPre P F) (endRootMulEquiv (F := F) A n f) := by
+  rw [isBaseIdentity_pfRoot_iff, isBaseIdentity_pf_iff (X := rtObjPf P F A n),
+    rootBase_eq_id_iff A n f]
+  exact (pfBase_rootSelfIso_inv_eq_id_iff A n f).symm
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**`𝒞^pf`(根つき模型)は Frobenius-normalized 型**。
+
+★在庫の `endRootMulEquiv` と 3 本の対応（`mem_otri_rootSelfIso_inv` /
+`pfDeg_rtRootIso_inv` / `rootBase_eq_id_iff`）が
+`isFrobeniusNormalized_transport` の仮定をちょうど埋める。 -/
+theorem pfRoot_frobNormalizedType (hfi : IsOfFrobeniusIsotropicType P)
+    (hfn : IsOfFrobeniusNormalizedType P) :
+    IsOfFrobeniusNormalizedType (pfRootPre P F) := by
+  intro X
+  have hgf : ∀ g : End (rtObjPf P F X.obj X.root),
+      endRootMulEquiv (F := F) X.obj X.root
+        ((endRootMulEquiv (F := F) X.obj X.root).symm g) = g :=
+    fun g => (endRootMulEquiv (F := F) X.obj X.root).apply_symm_apply g
+  have hgf' : ∀ g : End (rtObjPf P F X.obj X.root),
+      (rootSelfIso (F := F) X.obj X.root).inv
+        ((endRootMulEquiv (F := F) X.obj X.root).symm g) = g := hgf
+  refine isFrobeniusNormalized_transport (pfPre P F) (pfRootPre P F)
+    (endRootMulEquiv (F := F) X.obj X.root).symm (fun g => ?_) (fun g => ?_) (fun g => ?_)
+    (pf_frobNormalizedType (F := F) hfi hfn (rtObjPf P F X.obj X.root))
+  · have h1 := isBaseIdentity_rootSelfIso_inv (F := F) X.obj X.root
+      ((endRootMulEquiv (F := F) X.obj X.root).symm g)
+    rw [hgf g] at h1
+    exact h1.symm
+  · have h := pfDeg_rtRootIso_inv (P := P) (F := F) X.obj X.obj
+      (show X.root * X.root = X.root * X.root from rfl)
+      (show X.root * X.root = X.root * X.root from rfl)
+      ((endRootMulEquiv (F := F) X.obj X.root).symm g)
+    exact ((congrArg pfDeg (hgf g)).symm.trans h).symm
+  · have h2 := mem_otri_rootSelfIso_inv (F := F) X.obj X.root
+      ((endRootMulEquiv (F := F) X.obj X.root).symm g)
+    rw [hgf' g] at h2
+    exact h2.symm
+
+/-- ★★★★★locator —— `Proposition 5.5, (iii)` の「`𝒞^pf` は Frobenius-normalized 型」の条。 -/
+def pfRoot_frobNormalizedType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞^pf は Frobenius-normalized 型",
+    sectionId := "frdi-prop-5-5" }
+
+end PfFrobNorm
+
 section Pf
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
@@ -466,7 +602,6 @@ set_option maxHeartbeats 800000 in
 仮引数で受けている(上の節に筋を記した)。 -/
 theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
     (F₂ : FrobenioidCore (pfRootPre P F))
-    (hfn : IsOfFrobeniusNormalizedType (pfRootPre P F))
     (hgl : IsOfGroupLikeType (pfRootPre P F) →
       ∃ A : Istr (pfRootPre P F), IsFrobeniusCompact (istrPre (pfRootPre P F) F₂) A)
     (hstd : IsOfStandardType D C P F) :
@@ -477,7 +612,7 @@ theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
   frobIsotropic := fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (pfRootPre P F) (𝟙 A),
     pfRoot_isOfIsotropicType (F := F) hfi A⟩
   groupLikeCompact := hgl
-  frobNormalized := hfn
+  frobNormalized := pfRoot_frobNormalizedType hfi hstd.frobNormalized
   baseFSMFF := hstd.baseFSMFF
   phiNonDilating :=
     MonoidOn.pfOn_isNonDilatingOn Φ (phiSharp P) P.divisorial hstd.phiNonDilating
