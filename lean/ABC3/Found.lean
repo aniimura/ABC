@@ -230,6 +230,7 @@ import ABC3.Found.FrdI.Prop48Gl
 import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.FrdI.TypeTransport
+import ABC3.Found.FrdI.Prop55Std
 import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
