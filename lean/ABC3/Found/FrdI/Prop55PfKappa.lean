@@ -988,4 +988,68 @@ def compRoot_dictionary.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 逆向きの辞書(κ を前合成した形へ)",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★16. `κ` に沿った持ち上げ(一般形)
+
+★★`rootLift`(第 3 節)は始域が `⟨A,1⟩` の場合だったが、
+**任意の始域 `X₀` から `⟨V,1⟩` への Frobenius 型射**についても同じことが成り立つ。
+★存在は `pfRoot_frob_div`、同型性は `κ` と `g` がどちらも mono であることから。
+
+★★★これが `Proposition 5.5, (ii)` の**全射性の三角形**を作る道具である ——
+「`κ` の合成則」を別に用意しなくても、**持ち上げを方程式で直接定義すれば済む**。 -/
+
+/-- ★★★★**`κ` に沿った持ち上げ(一般形)** —— 任意の始域から。 -/
+theorem exists_kappaLift (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F} {V : C}
+    (K : ℕ+) (g : X₀ ⟶ (⟨V, 1⟩ : PfRootObj P F))
+    (hdeg : (pfRootPre P F).degFr g = K) :
+    ∃ e : X₀ ⟶ (⟨V, K⟩ : PfRootObj P F), e ≫ pfKappa (F := F) V K = g := by
+  refine pfRoot_frob_div (F := F) (n := K) (m := 1) hfi g (pfKappa (F := F) V K) ?_
+    (pfKappa_frobType hfi V K) (pfKappa_degFr V K)
+  rw [hdeg, mul_one]
+
+/-- ★★★★**持ち上げは同型**(`g` が Frobenius 型なら)。 -/
+theorem isIso_kappaLift (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F} {V : C}
+    (K : ℕ+) (g : X₀ ⟶ (⟨V, 1⟩ : PfRootObj P F))
+    (hg : IsFrobeniusType (pfRootPre P F) g) (hdeg : (pfRootPre P F).degFr g = K)
+    (e : X₀ ⟶ (⟨V, K⟩ : PfRootObj P F)) (he : e ≫ pfKappa (F := F) V K = g) : IsIso e := by
+  obtain ⟨e', he'⟩ := pfRoot_frob_div (F := F) (n := K) (m := 1) hfi
+    (pfKappa (F := F) V K) g (by rw [pfKappa_degFr, mul_one]) hg hdeg
+  haveI hm1 : Mono g := pfRoot_frobTypeMono hfi _ hg
+  haveI hm2 : Mono (pfKappa (F := F) V K) := pfKappa_mono hfi V K
+  refine ⟨e', ?_, ?_⟩
+  · refine (cancel_mono g).mp ?_
+    rw [Category.assoc, he', he, Category.id_comp]
+  · refine (cancel_mono (pfKappa (F := F) V K)).mp ?_
+    rw [Category.assoc, he, he', Category.id_comp]
+
+/-- ★★★**`κ` に沿った標準の持ち上げ**。 -/
+noncomputable def kappaLift (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F} {V : C}
+    (K : ℕ+) (g : X₀ ⟶ (⟨V, 1⟩ : PfRootObj P F))
+    (hdeg : (pfRootPre P F).degFr g = K) : X₀ ⟶ (⟨V, K⟩ : PfRootObj P F) :=
+  (exists_kappaLift hfi K g hdeg).choose
+
+@[simp] theorem kappaLift_spec (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F}
+    {V : C} (K : ℕ+) (g : X₀ ⟶ (⟨V, 1⟩ : PfRootObj P F))
+    (hdeg : (pfRootPre P F).degFr g = K) :
+    kappaLift (F := F) hfi K g hdeg ≫ pfKappa (F := F) V K = g :=
+  (exists_kappaLift hfi K g hdeg).choose_spec
+
+theorem kappaLift_isIso (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F} {V : C}
+    (K : ℕ+) (g : X₀ ⟶ (⟨V, 1⟩ : PfRootObj P F))
+    (hg : IsFrobeniusType (pfRootPre P F) g) (hdeg : (pfRootPre P F).degFr g = K) :
+    IsIso (kappaLift (F := F) hfi K g hdeg) :=
+  isIso_kappaLift hfi K g hg hdeg _ (kappaLift_spec hfi K g hdeg)
+
+/-- ★★**`κ` と合成して等しければ射そのものが等しい**。 -/
+theorem kappaLift_ext (hfi : IsOfFrobeniusIsotropicType P) {X₀ : PfRootObj P F} {V : C}
+    {K : ℕ+} (e e' : X₀ ⟶ (⟨V, K⟩ : PfRootObj P F))
+    (h : e ≫ pfKappa (F := F) V K = e' ≫ pfKappa (F := F) V K) : e = e' := by
+  haveI := pfKappa_mono (F := F) hfi V K
+  exact (cancel_mono (pfKappa (F := F) V K)).mp h
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の全射性に要る持ち上げ。 -/
+def kappaLift.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — κ に沿った持ち上げ(一般形)",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
