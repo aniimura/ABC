@@ -3481,11 +3481,11 @@
           "deps": [
             "thm62-iii-nondil"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "★大",
-          "note": "★後半は「`Φ^birat(L)^pf` の最高位の零点の位数が `α` で保たれる ⟹ `λ = 1`」。★`Definition 4.5, (ii)(iii)` は実装済み。\n\n★★★★2026-08-21（**依存が外れたので中身を測った**）：`thm62-iii-nondil` が閉じたので葉になった。\n測った結果、**「formally」の外側は組み立て（構造の 4 条＋6 条）だが、\n中身のある一条は `IsOfRationalType`** である。\n\n`IsStrictlyRational P G ι A` は「どの素点 `p` にも `a, b ∈ Φ(A)` があって\n`toGp a − toGp b ∈ Φ^birat(A)` かつ `p ∈ Supp a`、`p ∉ Supp b`」である。\n原文の追加仮定は「`D` が `B(L)` の元の像の台に入る」なので、\n`y ∈ Φ^birat(A)` で `y D ≠ 0` が得られる。\n\n★★★**ここに Cartier の壁がある**: `y = toGp a − toGp b` の `(a, b)` を\n**正部分・負部分**に取り替えれば `p ∈ Supp a`、`p ∉ Supp b` が出るが、\n★**Cartier 因子の正部分は Cartier とは限らない**（`CartierDatum` に\n`IsCoordwiseR` にあたる条項が無いのと同じ事情）。\n★したがって `q`-Cartier のスケーリングで逃げるか、`Φ^birat` の側で\n正負の分解が取れることを別に示すかの選択が要る。\n\n★★算術側（`Example 6.3`）は `coord`（座標ごとに閉じている）があるので、\n同じ段はそちらでは問題にならない。",
-          "lean": "",
-          "decl": ""
+          "note": "★後半は「`Φ^birat(L)^pf` の最高位の零点の位数が `α` で保たれる ⟹ `λ = 1`」。★`Definition 4.5, (ii)(iii)` は実装済み。\n\n★★★★2026-08-21（**依存が外れたので中身を測った**）：`thm62-iii-nondil` が閉じたので葉になった。\n測った結果、**「formally」の外側は組み立て（構造の 4 条＋6 条）だが、\n中身のある一条は `IsOfRationalType`** である。\n\n`IsStrictlyRational P G ι A` は「どの素点 `p` にも `a, b ∈ Φ(A)` があって\n`toGp a − toGp b ∈ Φ^birat(A)` かつ `p ∈ Supp a`、`p ∉ Supp b`」である。\n原文の追加仮定は「`D` が `B(L)` の元の像の台に入る」なので、\n`y ∈ Φ^birat(A)` で `y D ≠ 0` が得られる。\n\n★★★**ここに Cartier の壁がある**: `y = toGp a − toGp b` の `(a, b)` を\n**正部分・負部分**に取り替えれば `p ∈ Supp a`、`p ∉ Supp b` が出るが、\n★**Cartier 因子の正部分は Cartier とは限らない**（`CartierDatum` に\n`IsCoordwiseR` にあたる条項が無いのと同じ事情）。\n★したがって `q`-Cartier のスケーリングで逃げるか、`Φ^birat` の側で\n正負の分解が取れることを別に示すかの選択が要る。\n\n★★算術側（`Example 6.3`）は `coord`（座標ごとに閉じている）があるので、\n同じ段はそちらでは問題にならない。\n\n★★★★★2026-08-21（第 2 弾、**「Cartier の壁」は壁でなかった**——訂正）：\n上に「Cartier 因子の正部分は Cartier とは限らないので割れない」と書いたが、\n★★**`K`-`Q`-Cartier があれば割れる**（`exists_split_of_qc`、実装済み）:\n\n`y ∈ Γ` で `y p > 0` のとき、負の座標を `n_t·|y_t|`（`n_t·[t] ∈ Γ`）で埋めた\n`b := Σ_{t ∈ supp y, t ≠ p} n_t·|y_t|·[t]` を取ると\n* `b ∈ Γ`、`b ≥ 0`、`b p = 0`\n* `a := b + y ∈ Γ`、`a ≥ 0`（`n_t ≥ 1` なので `n_t|y_t| + y_t ≥ 0`）、`a p = y p > 0`\n\n★`p` の座標は `y_p > 0` なので**埋めなくてよい**のが要点である。\n\n★★残るのは (1) この分割を `SuppElt`（perf-factorial の台）の言葉へ移す段\n（`Prime(Φ(L)) ≃ D_L`、`ex61-perffact2` 済）と、\n(2) `IsOfStandardType` / `IsOfRationallyStandardType` の残りの条の組み立てである。",
+          "lean": "ABC3/Found/Divisor/CartierMonoid.lean",
+          "decl": "exists_split_of_qc"
         },
         {
           "id": "thm62-iv-slim",

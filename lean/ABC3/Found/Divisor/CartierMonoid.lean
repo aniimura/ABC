@@ -827,4 +827,84 @@ def isNonDilating_effSub_of_bijective.src : ABC3.Meta.Source :=
 
 end GeomND
 
+/-! ## ★★★`Γ` の元を「正・負」に割る —— Cartier の壁は壁でなかった(2026-08-21)
+
+★`IsStrictlyRational` は `y = toGp a − toGp b` を
+「`p` で正・`p` を含まない」形に取り替えることを要求する。
+★★**Cartier 因子の正部分は Cartier とは限らない**ので素朴には割れないが、
+★★★**`K`-`Q`-Cartier があれば割れる** —— 負の座標を
+`n_t·|y_t|`(`n_t·[t] ∈ Γ`)で埋めればよい。`p` の座標は `y_p > 0` なので埋めなくてよい。 -/
+
+section Split
+variable {S : Type*} [DecidableEq S] {Γ : AddSubgroup (S →₀ ℤ)}
+
+/-- ★★★★**`K`-`Q`-Cartier の下では、`Γ` の元は「`p` で正・`p` を含まない」差に書ける**。 -/
+theorem exists_split_of_qc (hq : IsQCartierSubgroup Γ) {y : S →₀ ℤ} (hy : y ∈ Γ)
+    {p : S} (hp : 0 < y p) :
+    ∃ a b : S →₀ ℤ, a ∈ effSub Γ ∧ b ∈ effSub Γ ∧ a = b + y ∧ 0 < a p ∧ b p = 0 := by
+  classical
+  set n : S → ℕ := fun t => (hq t).choose with hn
+  have hnpos : ∀ t, 0 < n t := fun t => (hq t).choose_spec.1
+  have hnmem : ∀ t, Finsupp.single t ((n t : ℤ)) ∈ Γ := fun t => (hq t).choose_spec.2
+  set b : S →₀ ℤ :=
+    ∑ t ∈ y.support.erase p, Finsupp.single t ((n t : ℤ) * |y t|) with hb
+  have hbmem : b ∈ Γ := by
+    refine AddSubgroup.sum_mem _ fun t _ => ?_
+    have hsm : Finsupp.single t ((n t : ℤ) * |y t|) = |y t| • Finsupp.single t ((n t : ℤ)) := by
+      rw [Finsupp.smul_single]
+      congr 1
+      ring
+    rw [hsm]
+    exact Γ.zsmul_mem (hnmem t) _
+  have hbapp : ∀ u : S, b u = if u ∈ y.support.erase p then (n u : ℤ) * |y u| else 0 := by
+    intro u
+    rw [hb, Finsupp.finsetSum_apply]
+    by_cases hu : u ∈ y.support.erase p
+    · rw [if_pos hu, Finset.sum_eq_single u]
+      · rw [Finsupp.single_eq_same]
+      · intro t _ htu
+        exact Finsupp.single_eq_of_ne (Ne.symm htu)
+      · intro hcon; exact absurd hu hcon
+    · rw [if_neg hu, Finset.sum_eq_zero]
+      intro t ht
+      refine Finsupp.single_eq_of_ne ?_
+      intro hc
+      exact hu (hc ▸ ht)
+  have hbnn : ∀ u, 0 ≤ b u := by
+    intro u
+    rw [hbapp u]
+    by_cases hu : u ∈ y.support.erase p
+    · rw [if_pos hu]
+      have hn1 : (0 : ℤ) ≤ (n u : ℤ) := Int.natCast_nonneg _
+      positivity
+    · rw [if_neg hu]
+  have hbp : b p = 0 := by
+    rw [hbapp p, if_neg (by simp)]
+  refine ⟨b + y, b, ⟨Γ.add_mem hbmem hy, ?_⟩, ⟨hbmem, Finsupp.le_def.mpr fun u => by
+      simpa using hbnn u⟩, rfl, ?_, hbp⟩
+  · refine Finsupp.le_def.mpr fun u => ?_
+    simp only [Finsupp.coe_zero, Pi.zero_apply, Finsupp.add_apply]
+    by_cases hu : u ∈ y.support.erase p
+    · rw [hbapp u, if_pos hu]
+      have h1 : (1 : ℤ) ≤ (n u : ℤ) := by exact_mod_cast hnpos u
+      nlinarith [abs_nonneg (y u), neg_abs_le (y u), le_abs_self (y u)]
+    · rw [hbapp u, if_neg hu]
+      rcases eq_or_ne u p with rfl | hup
+      · linarith
+      · have hy0 : y u = 0 := by
+          by_contra hc
+          exact hu (Finset.mem_erase.mpr ⟨hup, Finsupp.mem_support_iff.mpr hc⟩)
+        rw [hy0]
+        exact le_refl 0
+  · simp only [Finsupp.add_apply, hbp]
+    linarith
+
+/-- ★★★locator —— `Theorem 6.2, (iii)` の rationally standard に要る分割。 -/
+def exists_split_of_qc.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — K-Q-Cartier なら Γ の元は p で正・p を含まない差に割れる",
+    sectionId := "frdi-thm-6-2" }
+
+end Split
+
 end ABC3.Found.FrdI
