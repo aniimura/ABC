@@ -94,9 +94,11 @@ process.stdin.on('end', () => {
 
   // ── R2: 作業ディレクトリの前置 ──────────────────────────────────────────
   const startsWithCd = /^\s*cd\s/.test(cmd);
+  // ★リポジトリ直下のパスを触るコマンドは、cwd を動かすと壊れる(2026-08-21 に誤爆)。
+  const usesRepoRoot = /(^|[\s;&|("])(tools|ResearchPaper|lean)[/]/.test(scan);
   const usesLake = /(^|[\s;&|(])lake\s/.test(scan);
   const usesRelAbc3 = /(^|[\s;&|("])ABC3[/]/.test(scan);
-  if (!startsWithCd && (usesLake || usesRelAbc3)) {
+  if (!startsWithCd && !usesRepoRoot && (usesLake || usesRelAbc3)) {
     rewrite(
       'cd ' + LEAN_DIR_POSIX + ' && ' + cmd,
       'ABC3 ガード R2: 作業ディレクトリを ' + LEAN_DIR_POSIX + ' に固定しました(相対パスの取り違えを防ぐため)。'

@@ -3469,11 +3469,11 @@
             "thm62-iii-fsm",
             "ex61-perffact2"
           ],
-          "status": "todo",
+          "status": "半済",
           "size": "★大",
-          "note": "★「`α` が `V[L]` の自己同型を誘導するので素因子 `D` を `n·D`(`n ≥ 2`)へは移さない」が本体。",
-          "lean": "",
-          "decl": ""
+          "note": "★「`α` が `V[L]` の自己同型を誘導するので素因子 `D` を `n·D`(`n ≥ 2`)へは移さない」が本体。\n\n★★★★2026-08-21（**骨組みを取り、残りを 2 つに絞った** —— `isNonDilating_of_primary`）：\n`IsNonDilating α` は**含意**（「すべての primary `a` で `α^char(a) ≼ a`」⟹「`α^char = id`」）\nなので、次の 2 つがあれば出る:\n\n| 入力 | 中身 | 幾何での対応 |\n|---|---|---|\n| `hgen` | `M^char` が **primary 元で生成される** | `Φ(L)` が素因子で生成されること |\n| `hfix` | primary `a` で `α^char(a) ≼ a` なら `α^char(a) = a` | ★**`α` は `V[L]` の自己同型を誘導するので `D` を `n·D`(`n ≥ 2`)へ移さない** |\n\n★証明は `AddSubmonoid.closure_induction` **1 本**である（`charMap α` が加法的だから）。\n\n★★残るのはこの 2 つを `Example 6.1` の `Φ`（`cartierOnDL`）について供給する段である。\n* `hgen` —— `Φ(L) = Γ ∩ ℤ≥0[D_L]` は**そのままでは素因子で生成されない**\n  （単独の `n_D·D` が Cartier とは限らない）。`ex61-perffact2`（済）の\n  `Prime(Φ(L)) ≃ D_L` から出るはずだが、**未接続**である。\n* `hfix` —— `CartierDatum` に「自己射に沿った `pull` は素因子を素因子へ移す」\n  という条項が**無い**。★構造に 1 条足すか、幾何側（`normMap` が自己同型のとき）で作るかの選択が要る。",
+          "lean": "ABC3/Found/FrdI/MonoidVocabulary.lean",
+          "decl": "isNonDilating_of_primary"
         },
         {
           "id": "thm62-iii-ratstd",

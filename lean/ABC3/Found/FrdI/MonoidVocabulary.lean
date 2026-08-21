@@ -570,6 +570,13 @@ def IsDivisorial.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — divisorial",
     sectionId := "frdi-def-1-1-i" }
 
+/-- ★★★locator —— `Definition 1.1, (i)` の non-dilating の十分条件
+(`Theorem 6.2, (iii)` が「immediately」と畳んだ段の骨組み)。 -/
+def isNonDilating_of_primary.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19,
+    item := "Definition 1.1, (i) — non-dilating の十分条件(primary 元で生成)",
+    sectionId := "frdi-def-1-1-i" }
+
 def IsGroupLike.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 19, item := "Definition 1.1, (i) — group-like",
     sectionId := "frdi-def-1-1-i" }
@@ -1597,6 +1604,32 @@ theorem isNonDilating_id : IsNonDilating (AddMonoidHom.id M) := by
   intro _
   ext a
   rfl
+
+/-- ★★★★**non-dilating の十分条件** ——
+`M^char` が **primary 元で生成され**、primary 元の上で `charMap α` が恒等なら
+`α` は non-dilating。
+
+★★**原文が `Theorem 6.2, (iii)` で「immediately」と畳んだ段の骨組み**である ——
+幾何では「`α` が `V[L]` の自己同型を誘導するので素因子 `D` を `n·D`(`n ≥ 2`)へは
+移さない」が `hfix` にあたり、`Φ(L)` が素因子で生成されることが `hgen` にあたる。
+
+★証明は `AddSubmonoid.closure_induction` 1 本である ——
+`charMap α` は加法的なので、生成元の上で恒等なら全体で恒等。 -/
+theorem isNonDilating_of_primary (α : M →+ M)
+    (hgen : AddSubmonoid.closure {a : MChar M | IsPrimaryElt a} = ⊤)
+    (hfix : ∀ a : MChar M, IsPrimaryElt a → MPrec (charMap α a) a → charMap α a = a) :
+    IsNonDilating α := by
+  intro h
+  refine AddMonoidHom.ext fun x => ?_
+  have hx : x ∈ AddSubmonoid.closure {a : MChar M | IsPrimaryElt a} := by
+    rw [hgen]; trivial
+  refine AddSubmonoid.closure_induction ?_ ?_ ?_ hx
+  · intro a ha
+    exact hfix a ha (h a ha)
+  · exact map_zero _
+  · intro u v _ _ hu hv
+    rw [map_add, hu, hv]
+    rfl
 
 variable (M)
 
