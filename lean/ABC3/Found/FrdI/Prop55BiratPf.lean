@@ -216,4 +216,129 @@ def biratPfMk.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 右辺の代表元から (𝒞^pf)^birat の元を作る",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★3. `IdxPf` の遷移で不変 —— well-definedness のもう半分
+
+★★ここが「選択された同型」の問題が効くところである。
+`rootLift` を**方程式で特徴づけた**(`Prop55PfKappa.lean`)おかげで、
+`W` を `W′` へ大きくしたときの比較 `iA_{W′} = iA_W ≫ rootStep a` が**言える**
+(`biratPfIsoA_step`)。★あとは `rootMap` の自然性の四角形を当てるだけ。 -/
+
+theorem rootLift_congr (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} {α α' : A ⟶ A₁}
+    (h : α = α') (k : ℕ+) (hk : P.degFr α = k) (hk' : P.degFr α' = k) :
+    rootLift (F := F) hfi α k hk = rootLift (F := F) hfi α' k hk' := by
+  subst h; rfl
+
+/-- ★遷移射の次数の関係 `k′ = k · d`。 -/
+theorem biratPf_hk' {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    biratPfDeg W' = biratPfDeg W * P.degFr u.right.hom.1 := by
+  have htriA : W.hom.hom.1 ≫ u.right.hom.1 = W'.hom.hom.1 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.1) (Under.w u)
+  show P.degFr W'.hom.hom.1 = P.degFr W.hom.hom.1 * P.degFr u.right.hom.1
+  rw [← htriA, P.degFr_comp, mul_comm]
+
+/-- ★★★★**`iA_{W′} = iA_W ≫ rootStep a`** —— ここが整合性の要。 -/
+theorem biratPfIsoA_step (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    (biratPfIsoA hfi W').hom
+      = (biratPfIsoA hfi W).hom ≫ rootStep (F := F) hfi u.right.hom.1 u.right.property.1
+          (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl (biratPf_hk' u) := by
+  have htriA : W.hom.hom.1 ≫ u.right.hom.1 = W'.hom.hom.1 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.1) (Under.w u)
+  have hka : P.degFr (W.hom.hom.1 ≫ u.right.hom.1) = biratPfDeg W' := by rw [htriA]
+  show rootLift (F := F) hfi W'.hom.hom.1 (biratPfDeg W') rfl = _
+  rw [rootLift_congr hfi htriA.symm (biratPfDeg W') rfl hka]
+  exact rootLift_comp hfi W.hom.hom.1 u.right.hom.1 u.right.property.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl rfl (biratPf_hk' u) hka
+
+/-- ★★★★**`iB_{W′} = iB_W ≫ rootStep b`**。 -/
+theorem biratPfIsoB_step (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    (biratPfIsoB hfi W').hom
+      = (biratPfIsoB hfi W).hom ≫ rootStep (F := F) hfi u.right.hom.2 u.right.property.2.1
+          (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+          u.right.property.2.2.symm (biratPf_hk' u) := by
+  have htriB : W.hom.hom.2 ≫ u.right.hom.2 = W'.hom.hom.2 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.2) (Under.w u)
+  have hkb : P.degFr (W.hom.hom.2 ≫ u.right.hom.2) = biratPfDeg W' := by
+    rw [htriB]; exact W'.hom.property.2.2.symm
+  show rootLift (F := F) hfi W'.hom.hom.2 (biratPfDeg W') W'.hom.property.2.2.symm = _
+  rw [rootLift_congr hfi htriB.symm (biratPfDeg W') W'.hom.property.2.2.symm hkb]
+  exact rootLift_comp hfi W.hom.hom.2 u.right.hom.2 u.right.property.2.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+    W.hom.property.2.2.symm u.right.property.2.2.symm (biratPf_hk' u) hkb
+
+/-- ★★★★★★**`IdxPf` の遷移で不変**(四角形の形)。
+
+★★`z ≫ a = β ≫ α`(底の側)と `ψ ≫ b = β ≫ ψ′`(有理関数の側)の 2 本の四角形から、
+`(𝒞^pf)^birat` の元が一致することを言う。
+★中身は `rootMap_rootStep_sq` を 2 回と `HomBirat.mk_map` 1 回。 -/
+theorem biratPfMk_step (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F))
+    {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    {X : C} (z : X ⟶ W.right.obj.1) (hzc : IsCoAngular P z) (hzs : IsPreStep P z)
+    (ψ : X ⟶ W.right.obj.2)
+    {Y : C} (β : X ⟶ Y) (hβ : IsFrobeniusType P β)
+    (hdβ : P.degFr β = P.degFr u.right.hom.1)
+    (α : Y ⟶ W'.right.obj.1) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (hsqA : z ≫ u.right.hom.1 = β ≫ α)
+    (ψ' : Y ⟶ W'.right.obj.2) (hsqB : ψ ≫ u.right.hom.2 = β ≫ ψ') :
+    biratPfMk hfi Gpf W' (idxBiratMk P G α hαc hαs) ψ'
+      = biratPfMk hfi Gpf W (idxBiratMk P G z hzc hzs) ψ := by
+  have hk' := biratPf_hk' (F := F) u
+  set Sa := rootStep (F := F) hfi u.right.hom.1 u.right.property.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl hk' with hSa
+  set Sb := rootStep (F := F) hfi u.right.hom.2 u.right.property.2.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+    u.right.property.2.2.symm hk' with hSb
+  set Sβ := rootStep (F := F) hfi β hβ
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') hdβ hk' with hSβ
+  haveI hia : IsIso Sa := rootStep_isIso hfi _ _ _ _ _ _ _
+  haveI hib : IsIso Sb := rootStep_isIso hfi _ _ _ _ _ _ _
+  haveI hiβ : IsIso Sβ := rootStep_isIso hfi _ _ _ _ _ _ _
+  have sqA : rootMap (F := F) hfi z (biratPfDeg W) ≫ Sa
+      = Sβ ≫ rootMap (F := F) hfi α (biratPfDeg W') :=
+    rootMap_rootStep_sq hfi z u.right.hom.1 u.right.property.1 β hβ α
+      _ _ _ rfl hdβ hk' hsqA
+  have sqB : rootMap (F := F) hfi ψ (biratPfDeg W) ≫ Sb
+      = Sβ ≫ rootMap (F := F) hfi ψ' (biratPfDeg W') :=
+    rootMap_rootStep_sq hfi ψ u.right.hom.2 u.right.property.2.1 β hβ ψ'
+      _ _ _ u.right.property.2.2.symm hdβ hk' hsqB
+  have hIA : biratPfIsoA hfi W' = biratPfIsoA hfi W ≪≫ asIso Sa :=
+    Iso.ext (biratPfIsoA_step hfi u)
+  have hIB : biratPfIsoB hfi W' = biratPfIsoB hfi W ≪≫ asIso Sb :=
+    Iso.ext (biratPfIsoB_step hfi u)
+  have keyA : (@inv _ _ _ _ Sβ hiβ) ≫ rootMap (F := F) hfi z (biratPfDeg W)
+      = rootMap (F := F) hfi α (biratPfDeg W') ≫ (@inv _ _ _ _ Sa hia) := by
+    rw [IsIso.inv_comp_eq, ← Category.assoc, ← sqA, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have keyB : (@inv _ _ _ _ Sβ hiβ) ≫ rootMap (F := F) hfi ψ (biratPfDeg W)
+      = rootMap (F := F) hfi ψ' (biratPfDeg W') ≫ (@inv _ _ _ _ Sb hib) := by
+    rw [IsIso.inv_comp_eq, ← Category.assoc, ← sqB, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have hwA : (@inv _ _ _ _ Sβ hiβ)
+        ≫ (biratPfIdx hfi Gpf W (idxBiratMk P G z hzc hzs)).unop.hom.hom
+      = (biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs)).unop.hom.hom := by
+    show (@inv _ _ _ _ Sβ hiβ)
+        ≫ (rootMap (F := F) hfi z (biratPfDeg W) ≫ (biratPfIsoA hfi W).inv)
+      = rootMap (F := F) hfi α (biratPfDeg W') ≫ (biratPfIsoA hfi W').inv
+    rw [hIA, Iso.trans_inv, asIso_inv, ← Category.assoc, ← Category.assoc, keyA]
+  have hmap := HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
+    (idxBiratHomMk (Z := biratPfIdx hfi Gpf W (idxBiratMk P G z hzc hzs))
+      (W := biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs))
+      (@inv _ _ _ _ Sβ hiβ) (pfRoot_isCoAngular hfi _)
+      (isPreStep_of_isIso (pfRootPre P F) _) hwA)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+  refine Eq.trans ?_ hmap
+  refine congrArg (HomBirat.mk (biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs))) ?_
+  show rootMap (F := F) hfi ψ' (biratPfDeg W') ≫ (biratPfIsoB hfi W').inv
+    = (@inv _ _ _ _ Sβ hiβ)
+      ≫ (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+  rw [hIB, Iso.trans_inv, asIso_inv, ← Category.assoc, ← Category.assoc, keyB]
+
+/-- ★★★★★locator —— `Proposition 5.5, (ii)` の `IdxPf` 遷移での不変性。 -/
+def biratPfMk_step.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — IdxPf の遷移で不変(well-definedness のもう半分)",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
