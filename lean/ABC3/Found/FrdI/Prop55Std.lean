@@ -362,6 +362,96 @@ theorem MonoidOn.pfOn_isNonDilatingOn (Φ : MonoidOn.{v, u, w} D)
 
 end PfOn
 
+/-! ### ★5-b. 対角の添字での判定 —— `Base` と `𝒪^▷` の橋渡し
+
+★★残る「`𝒞^pf` が Frobenius-normalized 型」の筋は
+`exists_idx_diag`(`Prop32Dict.lean`)で**対角の添字** `idxMk l l` へ押し上げ、
+`φ` と `α` を同じ代表元に揃えて `𝒞` の Frobenius-normalized 性を当てることである。
+★そこで要る橋渡しが「代表元での `Base` と `𝒪^▷` の判定」で、
+在庫には `degFr_mk_iff` / `isPreStep_mk_iff` はあるが
+**`Base` が恒等かどうかの判定が無かった**。ここに置く。
+
+★★**対角の添字では `Base` は共役**(`repBase` の定義が
+`Base a ≫ Base φ ≫ (Base b)⁻¹` で、対角なら `a = b`)なので、
+恒等性はそのまま代表元の側に落ちる。 -/
+
+section Diag
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-- ★★**対角の添字での底は共役**。 -/
+theorem pfBase_mk_diag {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l) (φ : E ⟶ E) :
+    pfBase (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ)
+      = P.Base l ≫ P.Base φ ≫ @inv _ _ _ _ (P.Base l) hl.2 := by
+  rw [pfBase_mk]
+  rfl
+
+/-- ★★★**対角の添字では「底が恒等」は代表元の側と同値**(共役だから)。 -/
+theorem pfBase_mk_diag_eq_id_iff {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l)
+    (φ : E ⟶ E) :
+    pfBase (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ) = 𝟙 _
+      ↔ P.Base φ = 𝟙 _ := by
+  haveI hiso : IsIso (P.Base l) := hl.2
+  rw [pfBase_mk_diag l hl φ]
+  constructor
+  · intro h
+    have h2 : P.Base l ≫ P.Base φ = P.Base l := by
+      calc P.Base l ≫ P.Base φ
+          = P.Base l ≫ P.Base φ ≫ (inv (P.Base l) ≫ P.Base l) := by
+            rw [IsIso.inv_hom_id, Category.comp_id]
+        _ = (P.Base l ≫ P.Base φ ≫ inv (P.Base l)) ≫ P.Base l := by
+            simp only [Category.assoc]
+        _ = P.Base l := by rw [h, Category.id_comp]
+    calc P.Base φ = (inv (P.Base l) ≫ P.Base l) ≫ P.Base φ := by
+            rw [IsIso.inv_hom_id, Category.id_comp]
+      _ = inv (P.Base l) ≫ (P.Base l ≫ P.Base φ) := by rw [Category.assoc]
+      _ = inv (P.Base l) ≫ P.Base l := by rw [h2]
+      _ = 𝟙 _ := IsIso.inv_hom_id _
+  · intro h
+    rw [h, Category.id_comp, IsIso.hom_inv_id]
+
+/-- ★★★**対角の添字では「底恒等射」は代表元の側と同値**。 -/
+theorem isBaseIdentity_mk_diag_iff {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l)
+    (φ : E ⟶ E) :
+    IsBaseIdentity (pfPre P F)
+        (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ)
+      ↔ IsBaseIdentity P φ := by
+  unfold IsBaseIdentity BaseEquivalent
+  rw [(pfPre P F).Base_id, P.Base_id]
+  exact pfBase_mk_diag_eq_id_iff l hl φ
+
+/-- ★★**対角の添字での Frobenius 次数は代表元のそれ**。 -/
+theorem pfDeg_mk_diag {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l) (φ : E ⟶ E) :
+    (pfPre P F).degFr
+        (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ)
+      = P.degFr φ := by
+  show pfDeg (HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ) = _
+  rw [pfDeg_mk]
+  rfl
+
+/-- ★★★**対角の添字では `𝒪^▷` の 2 条件がそのまま代表元の側の 2 条件になる**。
+
+★`OTri` の所属はこの 2 条件の連言そのものである。 -/
+theorem otri_cond_mk_diag_iff {A E : C} (l : A ⟶ E) (hl : IsFrobeniusType P l)
+    (φ : E ⟶ E) :
+    (IsBaseIdentity (pfPre P F)
+        (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ)
+      ∧ (pfPre P F).degFr
+        (show HomPf P F A A from HomPf.mk (idxMk (P := P) (F := F) l l hl hl rfl) φ) = 1)
+      ↔ (IsBaseIdentity P φ ∧ P.degFr φ = 1) := by
+  rw [pfDeg_mk_diag l hl φ]
+  exact and_congr (isBaseIdentity_mk_diag_iff l hl φ) Iff.rfl
+
+/-- ★★★locator —— `Proposition 5.5, (iii)` の「`𝒞^pf` が Frobenius-normalized 型」に
+要る代表元での判定。 -/
+def isBaseIdentity_mk_diag_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 対角の添字での底恒等性・𝒪^▷ の判定",
+    sectionId := "frdi-prop-5-5" }
+
+end Diag
+
 section Pf
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
