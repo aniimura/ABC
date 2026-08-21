@@ -422,4 +422,132 @@ def HomPf.exists_rep_pow_pair.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — Hom^pf の 2 元を共通の根で代表する",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★8. `κ` の一般形 —— 始域も終域も根つきの場合
+
+★★`Proposition 5.5, (ii)` の**逆向き**では、始域が `⟨A″, n⟩` の形になる。
+★`A″` の `n` 乗根は `𝒞` に無いので、根 1 を終域に持つ `pfKappa` だけでは足りない。
+★★そこで **`κ` を `⟨A, k·r⟩ ⟶ ⟨A, r⟩` へ一般化する** ——
+代表元は `rtLift`(在庫、次数 `k` の Frobenius 型)そのものである。
+★これで `rootLift` / `rootStep` / `rootMap` の 3 本がそのまま一般化する。 -/
+
+/-- ★sharp な単系では `k • x = 0` から `x = 0`。 -/
+theorem eq_zero_of_nsmul_eq_zero_sharp {M : Type*} [AddCommMonoid M] (hs : IsSharp M)
+    {x : M} {k : ℕ} (hk : 0 < k) (h : k • x = 0) : x = 0 := by
+  refine hs x ⟨⟨x, (k - 1) • x, ?_, ?_⟩, rfl⟩
+  · have h1 : x + (k - 1) • x = (1 + (k - 1)) • x := by rw [add_nsmul, one_nsmul]
+    rw [h1, show 1 + (k - 1) = k from by omega]
+    exact h
+  · have h1 : (k - 1) • x + x = ((k - 1) + 1) • x := by rw [add_nsmul, one_nsmul]
+    rw [h1, show (k - 1) + 1 = k from by omega]
+    exact h
+
+/-- ★★**`κ` の一般形** `⟨A, t⟩ ⟶ ⟨A, r⟩`(`t = k * r`)。 -/
+noncomputable def pfKappaGen (A : C) {k r t : ℕ+} (ht : t = k * r) :
+    (⟨A, t⟩ : PfRootObj P F) ⟶ ⟨A, r⟩ :=
+  toHomPf (F := F) (rtLift P F A ht)
+
+theorem pfKappaGen_degFr (A : C) {k r t : ℕ+} (ht : t = k * r) :
+    (pfRootPre P F).degFr (pfKappaGen (F := F) A ht) = k := by
+  show rootDeg (show HomRoot P F ⟨A, t⟩ ⟨A, r⟩ from
+    HomPf.mk (idxOne P F (rtObj P F A r) (rtObj P F A t)) (rtLift P F A ht)) = k
+  rw [rootDeg_mk]
+  exact rtLift_degFr P F A ht
+
+theorem pfKappaGen_frobType (hfi : IsOfFrobeniusIsotropicType P) (A : C) {k r t : ℕ+}
+    (ht : t = k * r) : IsFrobeniusType (pfRootPre P F) (pfKappaGen (F := F) A ht) :=
+  (isFrobeniusType_mk_iff (X := (⟨A, t⟩ : PfRootObj P F))
+    (Y := (⟨A, r⟩ : PfRootObj P F)) hfi
+    (idxOne P F (rtObj P F A r) (rtObj P F A t)) (rtLift P F A ht)).mpr
+    ⟨(rtLift_frobType P F A ht).1.2, (rtLift_frobType P F A ht).2⟩
+
+theorem pfKappaGen_mono (hfi : IsOfFrobeniusIsotropicType P) (A : C) {k r t : ℕ+}
+    (ht : t = k * r) : Mono (pfKappaGen (F := F) A ht) :=
+  pfRoot_frobTypeMono hfi _ (pfKappaGen_frobType hfi A ht)
+
+/-- ★★**`rootMap` は Frobenius 型射に対して mono**。
+
+★`rootMap α r ≫ κ = κ ≫ [α]` の右辺が Frobenius 型(ゆえに mono)だから。 -/
+theorem rootMap_mono (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (α : A ⟶ B)
+    (hα : IsFrobeniusType P α) (r : ℕ+) : Mono (rootMap (F := F) hfi α r) := by
+  have hcomp : IsFrobeniusType (pfRootPre P F)
+      (pfKappa (F := F) A r ≫ toRootHom (F := F) α) :=
+    IsFrobeniusType.comp (pfRootPre P F) (pfRootCore hfi) (pfKappa_frobType hfi A r)
+      (toRootHom_frobType hfi α hα)
+  haveI hm : Mono (pfKappa (F := F) A r ≫ toRootHom (F := F) α) :=
+    pfRoot_frobTypeMono hfi _ hcomp
+  haveI hm2 : Mono (rootMap (F := F) hfi α r ≫ pfKappa (F := F) B r) := by
+    rw [rootMap_spec]; exact hm
+  exact mono_of_mono (rootMap (F := F) hfi α r) (pfKappa (F := F) B r)
+
+/-- ★★**`rootMap` は等長性を保つ** —— `Div_comp` と sharp から。 -/
+theorem rootMap_isometric (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (α : A ⟶ B)
+    (hα : IsFrobeniusType P α) (r : ℕ+) :
+    IsIsometric (pfRootPre P F) (rootMap (F := F) hfi α r) := by
+  have h := congrArg (pfRootPre P F).Div (rootMap_spec (F := F) hfi α r)
+  rw [(pfRootPre P F).Div_comp, (pfRootPre P F).Div_comp] at h
+  have h1 : (pfRootPre P F).Div (pfKappa (F := F) B r) = 0 :=
+    (pfKappa_frobType hfi B r).1.2
+  have h2 : (pfRootPre P F).Div (pfKappa (F := F) A r) = 0 :=
+    (pfKappa_frobType hfi A r).1.2
+  have h3 : (pfRootPre P F).Div (toRootHom (F := F) α) = 0 :=
+    (toRootHom_frobType hfi α hα).1.2
+  rw [h1, h2, h3, map_zero, map_zero, smul_zero, zero_add, add_zero] at h
+  rw [pfKappa_degFr] at h
+  exact eq_zero_of_nsmul_eq_zero_sharp ((pfRootPre P F).divisorial _).2 (k := (r : ℕ)) r.2 h
+
+/-- ★★**`rootMap` は Frobenius 型を保つ**。 -/
+theorem rootMap_frobType (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (α : A ⟶ B)
+    (hα : IsFrobeniusType P α) (r : ℕ+) :
+    IsFrobeniusType (pfRootPre P F) (rootMap (F := F) hfi α r) :=
+  ⟨⟨pfRoot_isCoAngular hfi _, rootMap_isometric hfi α hα r⟩, rootMap_baseIso hfi α r hα.2⟩
+
+/-- ★★★★**根つきの持ち上げの存在** —— `e ≫ κ_gen = rootMap α r`。 -/
+theorem exists_rootLiftGen (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    {k r t : ℕ+} (hk : P.degFr α = k) (ht : t = k * r) :
+    ∃ e : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A₁, t⟩,
+      e ≫ pfKappaGen (F := F) A₁ ht = rootMap (F := F) hfi α r := by
+  refine pfRoot_frob_div (F := F) (n := k) (m := 1) hfi (rootMap (F := F) hfi α r)
+    (pfKappaGen (F := F) A₁ ht) ?_ (pfKappaGen_frobType hfi A₁ ht) (pfKappaGen_degFr A₁ ht)
+  rw [rootMap_degFr, hk, mul_one]
+
+/-- ★★★★**根つきの持ち上げは同型**。 -/
+theorem isIso_rootLiftGen (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    (hα : IsFrobeniusType P α) {k r t : ℕ+} (hk : P.degFr α = k) (ht : t = k * r)
+    (e : (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A₁, t⟩)
+    (he : e ≫ pfKappaGen (F := F) A₁ ht = rootMap (F := F) hfi α r) : IsIso e := by
+  obtain ⟨e', he'⟩ := pfRoot_frob_div (F := F) (n := k) (m := 1) hfi
+    (pfKappaGen (F := F) A₁ ht) (rootMap (F := F) hfi α r)
+    (by rw [pfKappaGen_degFr, mul_one])
+    (rootMap_frobType hfi α hα r) (by rw [rootMap_degFr, hk])
+  haveI hm1 : Mono (rootMap (F := F) hfi α r) := rootMap_mono hfi α hα r
+  haveI hm2 : Mono (pfKappaGen (F := F) A₁ ht) := pfKappaGen_mono hfi A₁ ht
+  refine ⟨e', ?_, ?_⟩
+  · refine (cancel_mono (rootMap (F := F) hfi α r)).mp ?_
+    rw [Category.assoc, he', he, Category.id_comp]
+  · refine (cancel_mono (pfKappaGen (F := F) A₁ ht)).mp ?_
+    rw [Category.assoc, he, he', Category.id_comp]
+
+/-- ★★★**根つきの標準の持ち上げ** `⟨A,r⟩ ≅ ⟨A₁, k·r⟩`。 -/
+noncomputable def rootLiftGen (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    {k r t : ℕ+} (hk : P.degFr α = k) (ht : t = k * r) :
+    (⟨A, r⟩ : PfRootObj P F) ⟶ ⟨A₁, t⟩ :=
+  (exists_rootLiftGen hfi α hk ht).choose
+
+@[simp] theorem rootLiftGen_spec (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    {k r t : ℕ+} (hk : P.degFr α = k) (ht : t = k * r) :
+    rootLiftGen (F := F) hfi α hk ht ≫ pfKappaGen (F := F) A₁ ht
+      = rootMap (F := F) hfi α r :=
+  (exists_rootLiftGen hfi α hk ht).choose_spec
+
+theorem rootLiftGen_isIso (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    (hα : IsFrobeniusType P α) {k r t : ℕ+} (hk : P.degFr α = k) (ht : t = k * r) :
+    IsIso (rootLiftGen (F := F) hfi α hk ht) :=
+  isIso_rootLiftGen hfi α hα hk ht _ (rootLiftGen_spec hfi α hk ht)
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の逆向きに要る `κ` の一般形。 -/
+def rootLiftGen.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 根つきの κ と持ち上げ",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
