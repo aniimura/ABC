@@ -5,6 +5,7 @@ import ABC3.Found.Divisor.ArithSurj
 import ABC3.Found.Divisor.ArithPhiPerf
 import ABC3.Found.Divisor.ArithFrobenioid
 import ABC3.Found.FrdI.Sec6GaloisCat
+import ABC3.Found.FrdI.MonoidTransport
 
 /-!
 # `Example 6.3` の `ArithDatum` を `𝒟 = B(G)⁰` の上で実現する
@@ -144,5 +145,110 @@ def arithDatumGalois.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 113,
     item := "Example 6.3 — 算術因子のデータを 𝒟 = B(G)⁰ の上で実現する",
     sectionId := "frdi-example-6-3" }
+
+variable {F Kbar}
+
+/-! ## ★★★★★5. `Φ` は non-dilating —— `Theorem 6.4, (i)` の一条(2026-08-21)
+
+原文は「数体の自己同型で全素点を固定するものは恒等」を `clearly` で畳む。
+★★その non-dilating の側の中身は次の 3 つに割れた:
+
+| 段 | 宣言 |
+|---|---|
+| `𝒟` の自己射は同型 | `finSubEndo_bijective`(`AlgHom.bijective`、有限次元) |
+| 同型に沿った引き戻しは係数を変えない | `arithExtend_apply'`(`localDeg = 1`) |
+| primary 元で生成され、primary 元は台が 1 点 | `closure_primary_effR_eq_top` / `effR_single_supported_of_primary` |
+
+★★★**アルキメデス素点があるので抽象論では出ない** ——
+成分が `ℝ≥0` そのものなので `c ↦ 2c` という加法的全単射が存在する。
+「係数 1」は **`localDeg = 1`**、すなわち数論の入力である。 -/
+
+omit [NumberField F] in
+/-- ★**`FinSub` の自己射は全単射**(有限次元だから)。 -/
+theorem finSubEndo_bijective {L : FinSub F Kbar} (σ : L ⟶ L) :
+    Function.Bijective (FinSub.hom σ) := by
+  haveI := L.fin
+  exact AlgHom.bijective (FinSub.hom σ)
+
+omit [NumberField F] in
+theorem algOfHom_bijective {L : FinSub F Kbar} (σ : L ⟶ L) :
+    Function.Bijective (@algebraMap L.toIF L.toIF _ _ (algOfHom σ)) :=
+  finSubEndo_bijective σ
+
+/-- ★★**自己射に沿った引き戻しは「素点を引き戻す」だけ**。 -/
+theorem pullOf_apply {L : FinSub F Kbar} (σ : L ⟶ L) (d : ArithPlace L.toIF →₀ ℝ)
+    (V : ArithPlace L.toIF) :
+    pullOf σ d V = d (@resPlace L.toIF L.toIF _ _ _ _ (algOfHom σ) V) := by
+  letI := algOfHom σ
+  exact arithExtend_apply' (algOfHom_bijective σ) d V
+
+/-- ★★★★★★**[FrdI] Theorem 6.4, (i)** —— **`Φ` は non-dilating**。
+
+原文 (FrdI p.114):
+> group-like monoid on Di given by the multiplicative group of the field extension
+
+★★primary な元は台が 1 点(`effR_single_supported_of_primary`)なので、
+non-dilating の仮定「`α^char(a) ≼ a`」は
+**`a` の台の素点が `α` で動かない**ことを言う。
+★そこで `α` が単射であることから `resPlace v = v` が出て、
+`localDeg = 1` により係数も変わらない。 -/
+theorem arithDatumGalois_isNonDilatingOn :
+    MonoidOn.IsNonDilatingOn ((arithDatumGalois F Kbar).phi finSubOp_isOfFSMType) := by
+  intro A e
+  set Δ := arithDatumGalois F Kbar with hΔ
+  have hmap : (Δ.phi finSubOp_isOfFSMType).map e = Δ.mapHom e := rfl
+  rw [hmap]
+  refine isNonDilating_of_primary_sharp (isSharp_effR _) _
+    (closure_primary_effR_eq_top (Δ.coord A)) ?_
+  intro a ha hprec
+  obtain ⟨v, hv⟩ := effR_single_supported_of_primary (Δ.coord A) ha
+  set R : Δ.primes A → Δ.primes A :=
+    fun V => @resPlace _ _ _ _ _ _ (algOfHom e.unop) V with hR
+  have happ : ∀ (x : effR (Δ.grp A)) (V : Δ.primes A),
+      ((Δ.mapHom e x : effR (Δ.grp A)) : Δ.primes A →₀ ℝ) V
+        = ((x : effR (Δ.grp A)) : Δ.primes A →₀ ℝ) (R V) :=
+    fun x V => pullOf_apply e.unop _ V
+  obtain ⟨n, hn, c, hc⟩ := hprec
+  have hcoe : ((Δ.mapHom e a : effR (Δ.grp A)) : Δ.primes A →₀ ℝ)
+      + ((c : effR (Δ.grp A)) : Δ.primes A →₀ ℝ)
+      = n • ((a : effR (Δ.grp A)) : Δ.primes A →₀ ℝ) :=
+    congrArg Subtype.val hc
+  have hzero : ∀ V : Δ.primes A, V ≠ v →
+      ((a : effR (Δ.grp A)) : Δ.primes A →₀ ℝ) (R V) = 0 := by
+    intro V hV
+    have h1 := congrArg (fun f : Δ.primes A →₀ ℝ => f V) hcoe
+    simp only [Finsupp.add_apply, Finsupp.smul_apply] at h1
+    rw [hv, Finsupp.single_eq_of_ne hV, smul_zero] at h1
+    rw [← happ a V]
+    have h2 := (mem_effR.mp (Δ.mapHom e a).2).2 V
+    have h3 := (mem_effR.mp c.2).2 V
+    linarith
+  have hane : (Δ.mapHom e a) ≠ 0 := fun h =>
+    ha.1 (Δ.mapHom_injective e (by rw [h, map_zero]))
+  have hex : ∃ V : Δ.primes A, ((Δ.mapHom e a : effR (Δ.grp A)) : Δ.primes A →₀ ℝ) V ≠ 0 := by
+    by_contra hcon
+    push_neg at hcon
+    exact hane (Subtype.ext (Finsupp.ext hcon))
+  obtain ⟨V₀, hV₀⟩ := hex
+  have hV₀v : V₀ = v := by
+    by_contra hne
+    exact hV₀ ((happ a V₀).trans (hzero V₀ hne))
+  rw [hV₀v] at hV₀
+  have hRv : R v = v := by
+    by_contra hne
+    refine hV₀ ((happ a v).trans ?_)
+    rw [hv]
+    exact Finsupp.single_eq_of_ne hne
+  refine Subtype.ext (Finsupp.ext fun V => ?_)
+  rcases eq_or_ne V v with rfl | hV
+  · rw [happ a V, hRv]
+  · rw [happ a V, hzero V hV, hv]
+    exact (Finsupp.single_eq_of_ne hV).symm
+
+/-- ★★★★★locator —— `Theorem 6.4, (i)` の non-dilating。 -/
+def arithDatumGalois_isNonDilatingOn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — Φ は non-dilating(自己同型は素点を係数 1 で移す)",
+    sectionId := "frdi-thm-6-4" }
 
 end ABC3.Found.Divisor
