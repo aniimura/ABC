@@ -298,4 +298,88 @@ theorem isNonDilating_of_sharp (hs : IsSharp M) (α : M →+ M)
   rw [charMap_toChar]
   rfl
 
+/-! ## ★★加法同型に沿った `MLe` / `MPrec` / 準素性の移送
+
+★★**用途**: `IsNonDilating` は**準素な指標**についてしか仮定を要求しないので、
+「すべての元について `MPrec`」を仮定する `addMonoidHom_eq_id_of_forall_mprec` は**強すぎる**。
+★`M` が sharp なら `M ≃+ MChar M`(`mCharEquivOfSharp`)なので、
+**準素元だけの仮定で `f = id` が出る**。
+
+★これは `Theorem 6.2, (iii)` で効く —— 原文の追加仮定は
+「`D` が `B(L)` の元の像の**台**に入る」であって「主因子であること」ではない。 -/
+
+section CharTransport
+
+variable {M : Type*} [AddCommMonoid M] {N : Type*} [AddCommMonoid N]
+
+/-- ★加法同型に沿って `MLe` は移る。 -/
+theorem mLe_addEquiv (e : M ≃+ N) {a b : M} : MLe (e a) (e b) ↔ MLe a b := by
+  constructor
+  · rintro ⟨c, hc⟩
+    refine ⟨e.symm c, ?_⟩
+    have := congrArg e.symm hc
+    simpa using this
+  · rintro ⟨c, rfl⟩
+    exact ⟨e c, by simp⟩
+
+/-- ★加法同型に沿って `MPrec` は移る。 -/
+theorem mPrec_addEquiv (e : M ≃+ N) {a b : M} : MPrec (e a) (e b) ↔ MPrec a b := by
+  constructor
+  · rintro ⟨n, hn, hle⟩
+    refine ⟨n, hn, ?_⟩
+    refine (mLe_addEquiv e).mp ?_
+    simpa using hle
+  · rintro ⟨n, hn, hle⟩
+    refine ⟨n, hn, ?_⟩
+    have : MLe (e a) (e (n • b)) := (mLe_addEquiv e).mpr hle
+    simpa using this
+
+/-- ★加法同型に沿って準素性は移る。 -/
+theorem isPrimaryElt_addEquiv (e : M ≃+ N) {a : M} : IsPrimaryElt (e a) ↔ IsPrimaryElt a := by
+  constructor
+  · rintro ⟨h0, hmin⟩
+    refine ⟨fun h => h0 (by rw [h]; simp), fun b hb hle => ?_⟩
+    refine (mPrec_addEquiv e).mp ?_
+    exact hmin (e b) (fun h => hb (by simpa using congrArg e.symm h))
+      ((mPrec_addEquiv e).mpr hle)
+  · rintro ⟨h0, hmin⟩
+    refine ⟨fun h => h0 (by simpa using congrArg e.symm h), fun b hb hle => ?_⟩
+    obtain ⟨b₀, rfl⟩ := e.surjective b
+    refine (mPrec_addEquiv e).mpr ?_
+    exact hmin b₀ (fun h => hb (by rw [h]; simp)) ((mPrec_addEquiv e).mp hle)
+
+/-- ★★★★**準素元だけの仮定で `f = id`**(`M` が sharp なら)。
+
+★★`addMonoidHom_eq_id_of_forall_mprec` は「**すべての** `x` について `MPrec (f x) x`」を
+要求するが、`IsNonDilating` の定義がそもそも**準素な指標**しか見ていないので、
+★`M ≃+ MChar M`(`mCharEquivOfSharp`)を通せば**準素元だけで足りる**。 -/
+theorem addMonoidHom_eq_id_of_primary_mprec (hs : IsSharp M) (f : M →+ M)
+    (hnd : IsNonDilating f) (h : ∀ a : M, IsPrimaryElt a → MPrec (f a) a) :
+    f = AddMonoidHom.id M := by
+  have hchar : charMap f = AddMonoidHom.id (MChar M) := by
+    refine hnd (fun b hb => ?_)
+    obtain ⟨a, rfl⟩ : ∃ a : M, (mCharEquivOfSharp hs) a = b :=
+      ⟨(mCharEquivOfSharp hs).symm b, by simp⟩
+    have hpa : IsPrimaryElt a := (isPrimaryElt_addEquiv (mCharEquivOfSharp hs)).mp hb
+    have hkey := h a hpa
+    rw [mCharEquivOfSharp_apply, charMap_toChar]
+    rw [show (toChar (f a)) = (mCharEquivOfSharp hs) (f a) from
+        (mCharEquivOfSharp_apply hs _).symm,
+      show (toChar a) = (mCharEquivOfSharp hs) a from (mCharEquivOfSharp_apply hs _).symm]
+    exact (mPrec_addEquiv (mCharEquivOfSharp hs)).mpr hkey
+  ext a
+  have h1 : toChar (f a) = toChar a := by
+    rw [← charMap_toChar, hchar]
+    rfl
+  exact (mCharEquivOfSharp hs).injective (by
+    rw [mCharEquivOfSharp_apply, mCharEquivOfSharp_apply]; exact h1)
+
+/-- ★★★locator —— `Theorem 6.2, (iii)` で逸脱 (B) を外すための 1 本。 -/
+def addMonoidHom_eq_id_of_primary_mprec.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — 準素元だけで非膨張写像は恒等になる",
+    sectionId := "frdi-thm-6-2" }
+
+end CharTransport
+
 end ABC3.Found.FrdI
