@@ -455,4 +455,39 @@ theorem arithExtend_single_apply (hb : Function.Bijective (algebraMap L M))
     arithExtend (Finsupp.single v r) V = (Finsupp.single v r) (resPlace (L := L) V) := by
   rw [arithExtend_apply, localDeg_eq_one_of_bijective hb hs V, Nat.cast_one, one_mul]
 
+omit [NumberField L] in
+/-- ★★**体の同型なら整数環の上でも全射**。
+
+★`y` の逆像 `e⁻¹(y)` は、`e⁻¹` が `ℤ`-代数射なので整である。 -/
+theorem ringOfIntegers_surjective_of_bijective (hb : Function.Bijective (algebraMap L M)) :
+    Function.Surjective (algebraMap (𝓞 L) (𝓞 M)) := by
+  intro y
+  set e : L ≃+* M := RingEquiv.ofBijective (algebraMap L M) hb with he
+  set y' : M := algebraMap (𝓞 M) M y with hy'
+  have hy : IsIntegral ℤ y' := RingOfIntegers.isIntegral_coe y
+  have ha : IsIntegral ℤ (e.symm y') := IsIntegral.map ((e.symm : M →+* L).toIntAlgHom) hy
+  have hinj : Function.Injective (algebraMap (𝓞 M) M) := IsFractionRing.injective _ _
+  refine ⟨⟨e.symm y', ha⟩, hinj ?_⟩
+  have htower : algebraMap (𝓞 M) M (algebraMap (𝓞 L) (𝓞 M) ⟨e.symm y', ha⟩)
+      = algebraMap L M (algebraMap (𝓞 L) L ⟨e.symm y', ha⟩) := by
+    rw [← IsScalarTower.algebraMap_apply, IsScalarTower.algebraMap_apply (𝓞 L) L M]
+  rw [htower, RingOfIntegers.map_mk]
+  show (e : L →+* M) (e.symm y') = y'
+  exact e.apply_symm_apply y'
+
+/-- ★★★**同型に沿った局所次数は 1**(整数環の全射性は自動)。 -/
+theorem localDeg_eq_one_of_bijective' (hb : Function.Bijective (algebraMap L M))
+    (V : ArithPlace M) : localDeg (L := L) V = 1 :=
+  localDeg_eq_one_of_bijective hb (ringOfIntegers_surjective_of_bijective hb) V
+
+/-- ★★★★**同型に沿った引き戻しは係数を変えない**(整数環の全射性は自動)。
+
+★★これが `Theorem 6.4, (i)` の non-dilating の入力 `hfix` の**数学の中身のすべて**である。
+残るのは組み立て(`FinSub` の自己射が同型であること、および
+`isNonDilating_of_primary_sharp` への配線)だけである。 -/
+theorem arithExtend_single_apply' (hb : Function.Bijective (algebraMap L M))
+    (v : ArithPlace L) (r : ℝ) (V : ArithPlace M) :
+    arithExtend (Finsupp.single v r) V = (Finsupp.single v r) (resPlace (L := L) V) :=
+  arithExtend_single_apply hb (ringOfIntegers_surjective_of_bijective hb) v r V
+
 end ABC3.Found.Divisor
