@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.FrdI.Cor54Rigid
 import ABC3.Found.FrdI.Cor57Model
+import ABC3.Found.FrdI.Prop32Perfect
 
 /-!
 # [FrdI] Proposition 5.5, (iii) —— standard 型が `𝒞^un-tr` へ移る
@@ -217,6 +218,62 @@ theorem scModel_standardType (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P
 
 end Rlf
 
+/-! ## ★5. standard 型が `𝒞^pf` へ移る
+
+原文 (FrdI p.105):
+> assertion (iii) for Cpf follows immediately from the deﬁnitions [cf. also Proposition
+
+★★原文が名指しするのは「`𝒞^pf` が isotropic 型であること」と
+「assertion (i) により `𝒪^▷` の像が `𝒪^▷` の perfection であること」の 2 つである。
+★前者は在庫(`pfRoot_isOfIsotropicType`)にあり、`IsOfStandardType` の 6 条のうち
+**4 条が無料で埋まる**。
+
+★★残る 3 条は葉として名前をつけておく:
+
+1. **`Φ^pf` が non-dilating**(`hnd`)。
+   ★★測って分かったこと: `MPrec a b` は `a ≤ n·b`(**正の倍数まで許す**)なので、
+   `M^pf` の元 `a` と `a/2` は `MPrec` について**同値**である。
+   したがって「perfect だから primary 元が消える」ということは**ない**
+   (一度そう読み違えたので記す)。★筋は
+   `(M^pf)^char ≅ (M^char)^pf` と「`M^char → (M^pf)^char` が `MPrec` を保ち反射する」で、
+   `PfGp.lean` の `(M^pf)^gp ≅ (M^gp)^pf` と同じ形の仕事になる。
+2. **`𝒞^pf` が Frobenius-normalized 型**(`hfn`)。
+   ★`𝒞` の Frobenius-normalized 性を代表元に降ろし、共通の添字で当てて押し戻す段。
+3. **group-like のときの Frobenius-compact 対象**(`hgl`)。
+   ★`𝒞` が not group-like なら前件が偽になる(`𝒞^un-tr` の側と同じ形)。 -/
+
+section Pf
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**[FrdI] Proposition 5.5, (iii)** —— **standard 型は `𝒞^pf` へ移る**。
+
+★6 条のうち 4 条(quasi-isotropic・Frobenius-isotropic・`𝒟` が FSMFF)は
+`pfRoot_isOfIsotropicType` と「`𝒟` が同じ」で無料。
+★残る 3 条(`Φ^pf` の non-dilating・Frobenius-normalized・group-like のときの compact 対象)は
+仮引数で受けている(上の節に筋を記した)。 -/
+theorem pfRoot_standardType (hfi : IsOfFrobeniusIsotropicType P)
+    (F₂ : FrobenioidCore (pfRootPre P F))
+    (hfn : IsOfFrobeniusNormalizedType (pfRootPre P F))
+    (hgl : IsOfGroupLikeType (pfRootPre P F) →
+      ∃ A : Istr (pfRootPre P F), IsFrobeniusCompact (istrPre (pfRootPre P F) F₂) A)
+    (hnd : (Φ.pfOn (phiSharp P)).IsNonDilatingOn)
+    (hstd : IsOfStandardType D C P F) :
+    IsOfStandardType D (PfRootObj P F) (pfRootPre P F) F₂ where
+  quasiIsotropic :=
+    isOfQuasiIsotropicType_of_isOfIsotropicType (pfRootPre P F) F₂
+      (pfRoot_isOfIsotropicType (F := F) hfi)
+  frobIsotropic := fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso (pfRootPre P F) (𝟙 A),
+    pfRoot_isOfIsotropicType (F := F) hfi A⟩
+  groupLikeCompact := hgl
+  frobNormalized := hfn
+  baseFSMFF := hstd.baseFSMFF
+  phiNonDilating := hnd
+
+end Pf
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Proposition 5.5, (iii)` の「`𝒞^un-tr` は Frobenius-normalized 型」の条。 -/
@@ -230,6 +287,14 @@ def unTr_frobNormalizedType.src : ABC3.Meta.Source :=
 def unTr_standardType.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iii) — standard 型は 𝒞^un-tr へ移る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★locator —— `Proposition 5.5, (iii)` の「standard 型が `𝒞^pf` へ移る」の条
+(★**条つき**: `Φ^pf` の non-dilating・Frobenius-normalized・group-like のときの
+compact 対象の 3 条を仮引数で受けている)。 -/
+def pfRoot_standardType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — standard 型は 𝒞^pf へ移る",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
