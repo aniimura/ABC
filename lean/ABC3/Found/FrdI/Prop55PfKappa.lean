@@ -716,4 +716,57 @@ def compRoot_toRootHom.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 根がずれた合成の計算則",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★12. `idxPow` と押し出しは同じ元を与える
+
+★★第 9 節で「2 つの添字対象は定義的に等しくない」と書いたが、
+**余極限の元としては等しい**。★理由は 2 つ:
+* 添字圏が**細い**(`idx_hom_ext`) —— `idxOne` からの 2 本の合成が一致する。
+* `𝒞` が **totally epimorphic**(`rtExt` が epi) —— そこから脚が一致する。
+
+★これで `compPf_mk_pair`(在庫、`idxMk` の形を要求する)が使えるようになる。 -/
+
+/-- ★★★**`idxPow` と `idxPow'` は同じ元を与える**。 -/
+theorem HomPf.mk_idxPow_eq (U V : C) (k : ℕ+) (ψ : rtObj P F U k ⟶ rtObj P F V k) :
+    HomPf.mk (idxPow (F := F) U V k) ψ = HomPf.mk (idxPow' (F := F) U V k) ψ := by
+  have hdd : P.degFr (rtExt P F U k) = P.degFr (rtExt P F V k) := by
+    rw [rtExt_degFr, rtExt_degFr]
+  set W := IsFiltered.max (idxPow (F := F) U V k) (idxPow' (F := F) U V k) with hW
+  set u := IsFiltered.leftToMax (idxPow (F := F) U V k) (idxPow' (F := F) U V k) with hu
+  set u' := IsFiltered.rightToMax (idxPow (F := F) U V k) (idxPow' (F := F) U V k) with hu'
+  have hpar : (idxOneHom (F := F) (rtExt P F U k) (rtExt P F V k)
+        (rtExt_frobType P F U k) (rtExt_frobType P F V k) hdd) ≫ u
+      = (idxOneHomPush (F := F) (rtExt P F U k) (rtExt_frobType P F U k)
+        (rtExt P F V k) (rtExt_frobType P F V k) hdd) ≫ u' :=
+    idx_hom_ext _ _
+  have h1 : rtExt P F U k ≫ u.right.hom.1 = rtExt P F U k ≫ u'.right.hom.1 :=
+    congrArg (fun t : idxOne P F U V ⟶ W => t.right.hom.1) hpar
+  have h2 : rtExt P F V k ≫ u.right.hom.2 = rtExt P F V k ≫ u'.right.hom.2 :=
+    congrArg (fun t : idxOne P F U V ⟶ W => t.right.hom.2) hpar
+  have hq1 : u.right.hom.1 = u'.right.hom.1 :=
+    haveI := P.totEpiC U (rtObj P F U k) (rtExt P F U k)
+    (cancel_epi (rtExt P F U k)).mp h1
+  have hq2 : u.right.hom.2 = u'.right.hom.2 :=
+    haveI := P.totEpiC V (rtObj P F V k) (rtExt P F V k)
+    (cancel_epi (rtExt P F V k)).mp h2
+  refine HomColim.sound _ W u u' (congrArg ULift.up ?_)
+  refine frobTransport_eq (F := F) _ _ _ _ _ ψ _ ?_
+  exact ((congrArg (fun t => ψ ≫ t) hq2).trans
+    (frobTransport_spec (F := F) u'.right.hom.1 u'.right.property.1
+      u'.right.hom.2 u'.right.property.2.1 u'.right.property.2.2 ψ)).trans
+    (congrArg (fun t => t ≫ idxTransport P F u' ψ) hq1.symm)
+
+/-- ★★★**辞書(`idxMk` の形)** —— `idxPow` の代表元も `rootIso` で `toHomPf` に戻る。 -/
+theorem HomPf.mk_idxPow_rootIso (U V : C) (k : ℕ+) (ψ : rtObj P F U k ⟶ rtObj P F V k) :
+    HomPf.mk (idxPow (F := F) U V k) ψ
+      = (rootIso (F := F) (rtExt P F U k) (rtExt_frobType P F U k)
+          (rtExt P F V k) (rtExt_frobType P F V k)
+          (by rw [rtExt_degFr, rtExt_degFr])).hom (toHomPf (F := F) ψ) :=
+  (HomPf.mk_idxPow_eq U V k ψ).trans (HomPf.mk_idxPow' U V k ψ)
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の添字の同一視。 -/
+def HomPf.mk_idxPow_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — idxPow と押し出しは同じ元を与える",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
