@@ -1387,4 +1387,227 @@ def homRootScaleIso.src : ABC3.Meta.Source :=
 
 end Scale
 
+section RootScale
+
+/-! ## ★根の一斉倍化 `Σ_k` —— 梱包の骨
+
+★★★**測って分かった架構**(2026-08-21):
+`⟨A,n⟩ ≇ ⟨A,1⟩` なので「根を 1 に落とす」ことはできないが、
+**根を一斉に `k` 倍する対応 `Σ_k : ⟨X,r⟩ ↦ ⟨X, k·r⟩` は圏同値になる**。
+
+* 射の対応は `rtRootIso`(`Definition 3.1, (iii)` の「independent of the choice」)そのもの。
+* **本質的全射**である —— `⟨X,r⟩ ≅ ⟨X^{(k)}, k·r⟩`(在庫 `pfRoot_exists_iso_root`)だから。
+
+★★これがあると `Proposition 5.5, (ii)` の**一般の根**の場合が根 1 の場合に落ちる:
+
+```
+Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 原文の定義そのもの
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},1⟩, ⟨B^{(n)},1⟩)                     -- biratPfHomEquiv(済)
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},k⟩, ⟨B^{(n)},k⟩)                     -- Σ_k を birat へ
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A,n⟩, ⟨B,m⟩)                                 -- ⟨A,n⟩ ≅ ⟨A^{(m)},m·n⟩
+```
+
+★★★★★**本節で `Σ_k` は圏同値として閉じた**(2026-08-21):
+`scaleRootObj` / `scaleRootHom` / `scaleRootHom_id` / `scaleRootHom_comp`
+→ `scaleRootFunctor` → `Full` + `Faithful` + `EssSurj` → `scaleRootEquiv`。
+
+★`map_comp` の骨は 2 本だけである ——
+`compRoot_eq_lift`(**合成は共通倍数の根で計算してよい**)で両辺を同じ大きな根
+`(k·c)·(k·b)` 等の上に持ち上げ、`rtRootIso_trans_inv` / `rtRootIso_trans_hom_inv`
+(**2 段の根の取り替えは 1 段**、本節で新設)で 3 箇所の 2 段を 1 段に潰す。
+★★**本質的全射**は在庫 `pfRoot_exists_iso_root`(`⟨A,n⟩ ≅ ⟨A^{(m)}, n·m⟩`)で
+`X := ⟨A^{(k)}, n⟩` と取れば `Σ_k X = ⟨A^{(k)}, k·n⟩ ≅ ⟨A,n⟩` になる。 -/
+
+/-- ★★**根を一斉に `k` 倍する対応**(対象の側)。 -/
+def scaleRootObj (k : ℕ+) (X : PfRootObj P F) : PfRootObj P F := ⟨X.obj, k * X.root⟩
+
+/-- ★★★**根を一斉に `k` 倍する対応**(射の側)——
+`Definition 3.1, (iii)` の「independent of the choice」(`rtRootIso`)そのもの。 -/
+noncomputable def scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
+    HomRoot P F (scaleRootObj (F := F) k X) (scaleRootObj (F := F) k Y) :=
+  (rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).inv f
+
+/-- ★★`Σ_k` は恒等射を保つ。 -/
+theorem scaleRootHom_id (k : ℕ+) (X : PfRootObj P F) :
+    scaleRootHom (F := F) k (idRoot P F X) = idRoot P F (scaleRootObj (F := F) k X) :=
+  rtRootIso_inv_id P F X.obj (show k * X.root = k * X.root from rfl)
+
+/-- ★★`Σ_1` は恒等。 -/
+theorem scaleRootObj_one (X : PfRootObj P F) :
+    scaleRootObj (F := F) 1 X = X := by
+  show (⟨X.obj, 1 * X.root⟩ : PfRootObj P F) = X
+  rw [one_mul]
+
+/-! ### ★2 段の根の取り替えは 1 段(逆向きの版)
+
+★★在庫の `rtRootIso_trans` は `.hom` の向きだけを述べている。
+`Σ_k` の `map_comp` では `.inv` を 2 回重ねた形と、`.hom` の外側に `.inv` を掛けた形が
+出るので、その 2 つを**そのまま使える形**にしておく。 -/
+
+variable (P F) in
+/-- ★★**2 段の根の取り替えは 1 段**(`.inv` を 2 回重ねた版)。 -/
+theorem rtRootIso_trans_inv (A B : C) {dA dB e tA tB e' sA sB e'' : ℕ+}
+    (hA : tA = e * dA) (hB : tB = e * dB) (hA' : sA = e' * tA) (hB' : sB = e' * tB)
+    (hA'' : sA = e'' * dA) (hB'' : sB = e'' * dB)
+    (z : HomPf P F (rtObj P F A dA) (rtObj P F B dB)) :
+    (rtRootIso P F A B hA' hB').inv ((rtRootIso P F A B hA hB).inv z)
+      = (rtRootIso P F A B hA'' hB'').inv z := by
+  have h := rtRootIso_trans (F := F) A B hA hB hA' hB' hA'' hB''
+    ((rtRootIso P F A B hA' hB').inv ((rtRootIso P F A B hA hB).inv z))
+  rw [Iso.inv_hom_id_apply, Iso.inv_hom_id_apply] at h
+  exact ((congrArg (rtRootIso P F A B hA'' hB'').inv h).trans
+    (Iso.hom_inv_id_apply _ _)).symm
+
+variable (P F) in
+/-- ★★**2 段の根の取り替えは 1 段**(`.hom` の外側に `.inv` を掛けた版)。 -/
+theorem rtRootIso_trans_hom_inv (A B : C) {dA dB e tA tB e' sA sB e'' : ℕ+}
+    (hA : tA = e * dA) (hB : tB = e * dB) (hA' : sA = e' * tA) (hB' : sB = e' * tB)
+    (hA'' : sA = e'' * dA) (hB'' : sB = e'' * dB)
+    (w : HomPf P F (rtObj P F A sA) (rtObj P F B sB)) :
+    (rtRootIso P F A B hA hB).inv ((rtRootIso P F A B hA'' hB'').hom w)
+      = (rtRootIso P F A B hA' hB').hom w :=
+  (congrArg (rtRootIso P F A B hA hB).inv
+    (rtRootIso_trans (F := F) A B hA hB hA' hB' hA'' hB'' w)).symm.trans
+    (Iso.hom_inv_id_apply _ _)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**`Σ_k` は合成と両立する**(`map_comp`)。
+
+★**筋**: 両辺を「共通の大きな根」`PA = (k·c)·(k·b)`, `PB = (k·c)·(k·a)`, `PE = (k·b)·(k·a)`
+(`a = X.root`, `b = Y.root`, `c = Z.root`)の上で計算する(`compRoot_eq_lift`)。
+★★左辺は `𝒞^pf` の元の根で、右辺は `k` 倍した根で計算するので、
+**持ち上げの次数だけが `k` 倍ずれる**。そのずれはちょうど
+`rtRootIso_trans_inv`(内側 2 箇所)と `rtRootIso_trans_hom_inv`(外側 1 箇所)の
+「2 段 = 1 段」で吸収される。 -/
+theorem scaleRootHom_comp (k : ℕ+) {X Y Z : PfRootObj P F}
+    (f : HomRoot P F X Y) (g : HomRoot P F Y Z) :
+    scaleRootHom (F := F) k (compRoot P F f g)
+      = compRoot P F (scaleRootHom (F := F) k f) (scaleRootHom (F := F) k g) := by
+  have hL := compRoot_eq_lift (P := P) (F := F) f g
+    (c := k * k)
+    (PA := (k * Z.root) * (k * Y.root))
+    (PB := (k * Z.root) * (k * X.root))
+    (PE := (k * Y.root) * (k * X.root))
+    (hcA := by simp [mul_comm, mul_left_comm])
+    (hcB := by simp [mul_comm, mul_left_comm])
+    (hcE := by simp [mul_comm, mul_left_comm])
+    (ef := k * k * Z.root)
+    (hfA := by simp [mul_comm, mul_left_comm])
+    (hfB := by simp [mul_comm, mul_left_comm])
+    (eg := k * k * X.root)
+    (hgA := by simp [mul_comm, mul_left_comm])
+    (hgE := by simp [mul_comm, mul_left_comm])
+    (er := k * k * Y.root)
+    (hrA := by simp [mul_comm, mul_left_comm])
+    (hrE := by simp [mul_comm, mul_left_comm])
+  have hR := compRoot_eq_lift (P := P) (F := F)
+    (X := scaleRootObj (F := F) k X) (Y := scaleRootObj (F := F) k Y)
+    (Z := scaleRootObj (F := F) k Z)
+    (scaleRootHom (F := F) k f) (scaleRootHom (F := F) k g)
+    (c := 1)
+    (PA := (k * Z.root) * (k * Y.root))
+    (PB := (k * Z.root) * (k * X.root))
+    (PE := (k * Y.root) * (k * X.root))
+    (hcA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hcB := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hcE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (ef := k * Z.root)
+    (hfA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hfB := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (eg := k * X.root)
+    (hgA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hgE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (er := k * Y.root)
+    (hrA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hrE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+  have hf := rtRootIso_trans_inv P F X.obj Y.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * Y.root)) (sB := (k * Z.root) * (k * X.root))
+    (e' := k * Z.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * Z.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) f
+  have hg := rtRootIso_trans_inv P F Y.obj Z.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * X.root)) (sB := (k * Y.root) * (k * X.root))
+    (e' := k * X.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * X.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) g
+  rw [hR, hL]
+  unfold scaleRootHom scaleRootObj
+  rw [hf, hg]
+  exact rtRootIso_trans_hom_inv P F X.obj Z.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * Y.root)) (sB := (k * Y.root) * (k * X.root))
+    (e' := k * Y.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * Y.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) _
+
+/-- ★★★★★**根の一斉倍化 `Σ_k : 𝒞^pf ⥤ 𝒞^pf`**。 -/
+noncomputable def scaleRootFunctor (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (k : ℕ+) :
+    PfRootObj P F ⥤ PfRootObj P F where
+  obj X := scaleRootObj (F := F) k X
+  map f := scaleRootHom (F := F) k f
+  map_id X := scaleRootHom_id k X
+  map_comp f g := scaleRootHom_comp k f g
+
+/-- ★★`Σ_k` は射の上で単射(`rtRootIso` が同型だから)。 -/
+theorem scaleRootHom_injective (k : ℕ+) (X Y : PfRootObj P F) :
+    Function.Injective (scaleRootHom (F := F) (X := X) (Y := Y) k) := by
+  intro a b h
+  have h2 := congrArg (rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).hom h
+  unfold scaleRootHom at h2
+  rwa [Iso.inv_hom_id_apply, Iso.inv_hom_id_apply] at h2
+
+/-- ★★`Σ_k` は射の上で全射。 -/
+theorem scaleRootHom_surjective (k : ℕ+) (X Y : PfRootObj P F) :
+    Function.Surjective (scaleRootHom (F := F) (X := X) (Y := Y) k) := fun w =>
+  ⟨(rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).hom w, Iso.hom_inv_id_apply _ _⟩
+
+noncomputable instance scaleRootFunctor_faithful (k : ℕ+) :
+    (scaleRootFunctor P F k).Faithful where
+  map_injective {X Y} := scaleRootHom_injective k X Y
+
+noncomputable instance scaleRootFunctor_full (k : ℕ+) : (scaleRootFunctor P F k).Full where
+  map_surjective {X Y} := scaleRootHom_surjective k X Y
+
+/-- ★★★**本質的全射** —— `X := ⟨A^{(k)}, n⟩` と取れば
+`Σ_k X = ⟨A^{(k)}, k·n⟩ ≅ ⟨A, n⟩`(在庫 `pfRoot_exists_iso_root`)。 -/
+noncomputable instance scaleRootFunctor_essSurj (k : ℕ+) :
+    (scaleRootFunctor P F k).EssSurj where
+  mem_essImage W := by
+    obtain ⟨e, he⟩ := pfRoot_exists_iso_root (F := F) W.obj W.root k (k * W.root)
+      (mul_comm k W.root)
+    haveI := he
+    exact ⟨⟨rtObj P F W.obj k, W.root⟩, ⟨(asIso e).symm⟩⟩
+
+noncomputable instance scaleRootFunctor_isEquivalence (k : ℕ+) :
+    (scaleRootFunctor P F k).IsEquivalence where
+
+/-- ★★★★★**根の一斉倍化は圏同値** `Σ_k : 𝒞^pf ≌ 𝒞^pf`。
+
+★★これが `Proposition 5.5, (ii)` の「一般の根の場合を根 1 の場合に落とす」段である。 -/
+noncomputable def scaleRootEquiv (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (k : ℕ+) :
+    PfRootObj P F ≌ PfRootObj P F :=
+  (scaleRootFunctor P F k).asEquivalence
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の梱包に要る「根の一斉倍化」。 -/
+def scaleRootHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 根の一斉倍化 Σ_k は圏同値",
+    sectionId := "frdi-prop-5-5" }
+
+end RootScale
+
 end ABC3.Found.FrdI
