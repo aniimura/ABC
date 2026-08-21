@@ -1341,4 +1341,50 @@ end CompOuterConn
 
 end CompOuter
 
+section Scale
+
+/-! ## ★圏同値としての梱包へ —— 「同じ目盛りの Hom は根に依らない」
+
+★★★原文 `Definition 3.1, (iii)`(p.57)を読み直して分かったこと:
+**両辺の対象集合はどちらも `Ob(𝒞) × ℕ≥1`** である
+(`(𝒞^pf)^birat` は双有理化が対象を変えないから、`(𝒞^birat)^pf` は
+`Ob(𝒞^birat) = Ob(𝒞)` だから)。★関手は**対象の上で恒等**にすべきである。
+
+★★Hom の対応は
+* 右辺 `Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})`
+  —— **根 1 の場合を対象 `A^{(m)}, B^{(n)}` で読んだもの**なので `biratPfHomEquiv` が当たる。
+* 左辺 `Hom_{(𝒞^pf)^birat}(⟨A,n⟩,⟨B,m⟩)` は `𝒞^pf` の中の同型
+  `⟨A,n⟩ ≅ ⟨A^{(m)}, m·n⟩`(在庫 `pfRoot_exists_iso_root`)で
+  `Hom(⟨A^{(m)}, k⟩, ⟨B^{(n)}, k⟩)`(`k = m·n`)に移る。
+
+★★★**測って分かった注意**: `⟨A,n⟩ ≇ ⟨A,1⟩` である ——
+`Hom(⟨A,n⟩,⟨A,1⟩)` の元はどれも Frobenius 次数が `n` になる
+(`pfKappa` も `rtExt` の像もそう)。**根は「Frobenius 次数の目盛りの取り替え」を
+記録している**ので消せない。
+
+★したがって残る段は「**同じ目盛りの対象どうしの `Hom` は根に依らない**」であり、
+それが本節の `homRootScaleIso` である。 -/
+
+/-- ★★★★**同じ目盛りの対象どうしの `Hom` は根に依らない**。
+
+★★`rtExt X k` と `rtExt Y k` は**同次数の Frobenius 型射**なので、
+`Definition 3.1, (iii)` の「independent of the choice」(`rootIso`)がそのまま効く。
+★★★対象の同型ではない(`⟨X,k⟩ ≇ ⟨X,1⟩`)ことに注意 —— これは **`Hom` の集合の同型**である。 -/
+noncomputable def homRootScaleIso (X Y : C) (k : ℕ+) :
+    HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨Y, k⟩
+      ≅ HomRoot P F (⟨X, 1⟩ : PfRootObj P F) ⟨Y, 1⟩ :=
+  rootIso (F := F) (rtExt P F X k) (rtExt_frobType P F X k) (rtExt P F Y k)
+      (rtExt_frobType P F Y k) (by rw [rtExt_degFr, rtExt_degFr])
+    ≪≫ (rootIso (F := F) (rtExt P F X 1) (rtExt_frobType P F X 1) (rtExt P F Y 1)
+      (rtExt_frobType P F Y 1) (by rw [rtExt_degFr, rtExt_degFr])).symm
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の圏同値としての梱包に要る
+「同じ目盛りの `Hom` は根に依らない」。 -/
+def homRootScaleIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 同じ目盛りの対象どうしの Hom は根に依らない",
+    sectionId := "frdi-prop-5-5" }
+
+end Scale
+
 end ABC3.Found.FrdI
