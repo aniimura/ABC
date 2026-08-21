@@ -664,4 +664,199 @@ def biratPfMk_surj.src : ABC3.Meta.Source :=
 
 end Surj
 
+section Inj
+
+/-! ## ★単射性 —— 「単元のずれ」は外側の余極限で潰れる
+
+★★★測って分かった筋は 4 段である:
+
+1. ★**`κ` と co-angular pre-step は epi** —— Frobenioid は totally epimorphic なので、
+   `𝒞^pf` の側の等式は `rootMap ψ₁ K = rootMap ψ₂ K` に潰れ、
+   さらに `rootMap_spec` で `toRootHom ψ₁ = toRootHom ψ₂` になる。
+2. ★★**`𝒞 ⥤ 𝒞^pf` は忠実ではない**(単元のぶんだけずれる)。
+   ★しかし `HomPf.eq_iff` ＋ 添字圏の細さ(`idx_hom_ext`)から
+   **「Frobenius 型射 `β` を後合成すれば `𝒞` で一致する」**ところまでは降りる
+   (`toHomPf_descend`)。
+3. ★★★**その `β` がそのまま外側の添字の遷移になる** ——
+   `W₁` の側は `rtExt W₁ (deg β)` を取れば次数が揃うので
+   `W ⟶ W'` が `IdxPf` の射として作れる。
+4. ★★`𝒞^birat` も totally epimorphic なので、遷移先で 2 つの元は一致し、
+   外側の余極限で等しくなる(`biratPf_outer_eq`)。
+
+★★**「忠実でない」ことが障害にならない**のがこの節の要点である ——
+外側の余極限がちょうどそのずれを吸収する。 -/
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**同じ添字での等式は `𝒞 ⥤ 𝒞^pf` の等式に降りる**。
+
+★★`𝒞^pf` の等式 → `a` が epi → `rootMap` が一致 → `κ` が epi → `toRootHom` が一致。 -/
+theorem biratPfMk_toHomPf (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ₁ ψ₂ : Z.unop.left.obj ⟶ W.right.obj.2)
+    (h : biratPfMk hfi Gpf W Z ψ₁ = biratPfMk hfi Gpf W Z ψ₂) :
+    toHomPf (F := F) ψ₁ = toHomPf (F := F) ψ₂ := by
+  obtain ⟨T, a, ha⟩ := HomBirat.eq_iff_same.mp h
+  have h1 : (a.unop.left.hom ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg W))
+        ≫ (biratPfIsoB hfi W).inv
+      = (a.unop.left.hom ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg W))
+        ≫ (biratPfIsoB hfi W).inv :=
+    (Category.assoc _ _ _).trans (ha.trans (Category.assoc _ _ _).symm)
+  have h2 : a.unop.left.hom ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg W)
+      = a.unop.left.hom ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg W) :=
+    (cancel_mono (biratPfIsoB hfi W).inv).mp h1
+  have hep : Epi (a.unop.left.hom
+      : T.unop.left.obj ⟶ (⟨Z.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)) :=
+    (pfRootPre P F).totEpiC T.unop.left.obj
+      (⟨Z.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F) a.unop.left.hom
+  have h3 : rootMap (F := F) hfi ψ₁ (biratPfDeg W)
+      = rootMap (F := F) hfi ψ₂ (biratPfDeg W) := hep.left_cancellation _ _ h2
+  have h4 : pfKappa (F := F) Z.unop.left.obj (biratPfDeg W) ≫ toRootHom (F := F) ψ₁
+      = pfKappa (F := F) Z.unop.left.obj (biratPfDeg W) ≫ toRootHom (F := F) ψ₂ := by
+    rw [← rootMap_spec (F := F) hfi ψ₁ (biratPfDeg W),
+      ← rootMap_spec (F := F) hfi ψ₂ (biratPfDeg W), h3]
+  have hep2 : Epi (pfKappa (F := F) Z.unop.left.obj (biratPfDeg W)) :=
+    (pfRootPre P F).totEpiC _ _ _
+  have h5 : toRootHom (F := F) ψ₁ = toRootHom (F := F) ψ₂ := hep2.left_cancellation _ _ h4
+  haveI := isIso_rtExt_one P F Z.unop.left.obj
+  have h6 : (toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)
+        ≫ (toPfCat P F).map ψ₁ ≫ (toPfCat P F).map (rtExt P F W.right.obj.2 1)
+      = (toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)
+        ≫ (toPfCat P F).map ψ₂ ≫ (toPfCat P F).map (rtExt P F W.right.obj.2 1) := by
+    rw [← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp,
+      ← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp]
+    exact h5
+  haveI hA : IsIso ((toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)) := by
+    haveI : IsIso (rtOneInv (P := P) (F := F) Z.unop.left.obj) :=
+      @IsIso.inv_isIso _ _ _ _ (rtExt P F Z.unop.left.obj 1) _
+    exact (toPfCat P F).map_isIso _
+  haveI hB : IsIso ((toPfCat P F).map (rtExt P F W.right.obj.2 1)) := by
+    haveI := isIso_rtExt_one P F W.right.obj.2
+    exact (toPfCat P F).map_isIso _
+  have hmono : Mono ((toPfCat P F).map (rtExt P F W.right.obj.2 1)) := inferInstance
+  have hepi : Epi ((toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)) :=
+    inferInstance
+  exact hmono.right_cancellation _ _ (hepi.left_cancellation _ _ h6)
+
+/-- ★★★**`𝒞 ⥤ 𝒞^pf` の等号は `𝒞` の等号に「Frobenius 型射を後合成して」降りる**。
+
+★★`𝒞 ⥤ 𝒞^pf` は**忠実とは限らない**が、これだけは言える ——
+`HomPf.eq_iff` の共通上界を取り、添字圏が細い(`idx_hom_ext`)ので
+2 本の遷移射が一致し、`idxTransport_spec` の四角形が両側で同じになるからである。 -/
+theorem toHomPf_descend {X Y : C} {ψ₁ ψ₂ : X ⟶ Y}
+    (h : toHomPf (F := F) ψ₁ = toHomPf (F := F) ψ₂) :
+    ∃ (Y' : C) (β : Y ⟶ Y'), IsFrobeniusType P β ∧ ψ₁ ≫ β = ψ₂ ≫ β := by
+  obtain ⟨V, u, v, hUV⟩ := HomPf.eq_iff.mp h
+  rw [idx_hom_ext v u] at hUV
+  refine ⟨V.right.obj.2, u.right.hom.2, u.right.property.2.1, ?_⟩
+  exact (idxTransport_spec u ψ₁).trans
+    ((congrArg (fun t : V.right.obj.1 ⟶ V.right.obj.2 => u.right.hom.1 ≫ t) hUV).trans
+      (idxTransport_spec u ψ₂).symm)
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**外側の余極限では「`𝒞` の Frobenius 型射を後合成して一致」すれば等しい**。
+
+★`W₁` の側は `rtExt W₁ (deg β)` を取れば次数が揃うので、
+`β` がそのまま外側の添字の遷移 `W ⟶ W'` になる。 -/
+theorem biratPf_outer_eq {G : Frobenioid P} (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (W : IdxPf P F A B) (z₁ z₂ : HomBirat P G W.right.obj.1 W.right.obj.2)
+    {Y' : C} (β : W.right.obj.2 ⟶ Y') (hβ : IsFrobeniusType P β)
+    (hz : compBirat P G G.core z₁ (toHomBirat (P := P) (G := G) β)
+        = compBirat P G G.core z₂ (toHomBirat (P := P) (G := G) β)) :
+    HomPf.mk ((idxToBirat P F G F' A B).obj W) z₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z₂ := by
+  have hα := rtExt_frobType P F W.right.obj.1 (P.degFr β)
+  have hαd := rtExt_degFr P F W.right.obj.1 (P.degFr β)
+  have hdW : P.degFr W.hom.hom.1 = P.degFr W.hom.hom.2 := W.hom.property.2.2
+  let t : W ⟶ idxMk (W.hom.hom.1 ≫ rtExt P F W.right.obj.1 (P.degFr β))
+      (W.hom.hom.2 ≫ β) (IsFrobeniusType.comp P F W.hom.property.1 hα)
+      (IsFrobeniusType.comp P F W.hom.property.2.1 hβ)
+      (by rw [P.degFr_comp, P.degFr_comp, hαd]
+          exact congrArg (fun m : ℕ+ => P.degFr β * m) hdW) :=
+    Under.homMk (show W.right ⟶ _ from ⟨(rtExt P F W.right.obj.1 (P.degFr β), β), hα, hβ, hαd⟩)
+      (WideSubcategory.hom_ext _ rfl)
+  have s1 := idxTransport_spec ((idxToBirat P F G F' A B).map t) z₁
+  have s2 := idxTransport_spec ((idxToBirat P F G F' A B).map t) z₂
+  have hepi : Epi (((idxToBirat P F G F' A B).map t).right.hom.1) := birat_totEpi P G _ _ _
+  have hζ : idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map t) z₁
+      = idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map t) z₂ :=
+    hepi.left_cancellation _ _ (s1.symm.trans (hz.trans s2))
+  exact (HomPf.mk_map ((idxToBirat P F G F' A B).map t) z₁).symm.trans
+    ((congrArg (HomPf.mk ((idxToBirat P F G F' A B).obj _)) hζ).trans
+      (HomPf.mk_map ((idxToBirat P F G F' A B).map t) z₂))
+
+/-- ★★★右辺の元は必ず `idxToBirat` の像の添字で代表できる(`idxToBirat` が本質的全射)。 -/
+theorem homPf_birat_exists_rep {G : Frobenioid P} (F' : FrobenioidCore (biratPre P G))
+    (A B : C) (x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :
+    ∃ (W : IdxPf P F A B) (z : HomBirat P G W.right.obj.1 W.right.obj.2),
+      HomPf.mk ((idxToBirat P F G F' A B).obj W) z = x := by
+  obtain ⟨Z', zx, hzx⟩ := HomPf.exists_rep x
+  haveI := idxToBirat_essSurj P F G F' A B
+  exact ⟨(idxToBirat P F G F' A B).objPreimage Z',
+    idxTransport (biratPre P G) F'
+      ((idxToBirat P F G F' A B).objObjPreimageIso Z').inv zx,
+    (HomPf.mk_map _ zx).trans hzx⟩
+
+section InjConn
+
+variable [IsConnected D]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★**同じ外側の添字での単射性**。 -/
+theorem biratPf_inj_mk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (W : IdxPf P F A B) (z₁ z₂ : HomBirat P G W.right.obj.1 W.right.obj.2)
+    (h : biratPf hfi Gpf W z₁ = biratPf hfi Gpf W z₂) :
+    HomPf.mk ((idxToBirat P F G F' A B).obj W) z₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z₂ := by
+  obtain ⟨Z, ψ₁, ψ₂, hz₁, hz₂⟩ := HomBirat.exists_rep_pair (P := P) (G := G) z₁ z₂
+  subst hz₁
+  subst hz₂
+  have hmk : biratPfMk hfi Gpf W Z ψ₁ = biratPfMk hfi Gpf W Z ψ₂ := by
+    rw [← biratPf_mk hfi Gpf W Z ψ₁, ← biratPf_mk hfi Gpf W Z ψ₂]
+    exact h
+  obtain ⟨Y', β, hβ, hβe⟩ := toHomPf_descend (F := F)
+    (biratPfMk_toHomPf hfi Gpf W Z ψ₁ ψ₂ hmk)
+  refine biratPf_outer_eq F' W _ _ β hβ ?_
+  rw [compBirat_mk_toHomBirat G.core Z ψ₁ β, compBirat_mk_toHomBirat G.core Z ψ₂ β, hβe]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— 射の写像は**単射**。
+
+★★2 つの元を共通の外側の添字に揃え(`IdxPf` は filtered)、
+そこで `biratPf_inj_mk` を当てるだけである。 -/
+theorem biratPfHom_injective (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Injective (biratPfHom hfi Gpf F' A B) := by
+  intro x y hxy
+  obtain ⟨W₁, z₁, hx⟩ := homPf_birat_exists_rep (F := F) F' A B x
+  obtain ⟨W₂, z₂, hy⟩ := homPf_birat_exists_rep (F := F) F' A B y
+  subst hx
+  subst hy
+  haveI := idxPf_isFiltered P F (A := A) (B := B)
+  set V := IsFiltered.max W₁ W₂ with hV
+  set u := IsFiltered.leftToMax W₁ W₂ with hu
+  set v := IsFiltered.rightToMax W₁ W₂ with hv
+  set w₁ := idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map u) z₁ with hw₁
+  set w₂ := idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map v) z₂ with hw₂
+  have e1 : HomPf.mk ((idxToBirat P F G F' A B).obj V) w₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W₁) z₁ :=
+    HomPf.mk_map ((idxToBirat P F G F' A B).map u) z₁
+  have e2 : HomPf.mk ((idxToBirat P F G F' A B).obj V) w₂
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W₂) z₂ :=
+    HomPf.mk_map ((idxToBirat P F G F' A B).map v) z₂
+  have hval : biratPf hfi Gpf V w₁ = biratPf hfi Gpf V w₂ := by
+    rw [← biratPfHom_mk hfi Gpf F' A B V w₁, ← biratPfHom_mk hfi Gpf F' A B V w₂, e1, e2]
+    exact hxy
+  exact e1.symm.trans ((biratPf_inj_mk hfi Gpf F' V w₁ w₂ hval).trans e2)
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の単射性。 -/
+def biratPfHom_injective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — (𝒞^birat)^pf → (𝒞^pf)^birat は単射",
+    sectionId := "frdi-prop-5-5" }
+
+end InjConn
+
+end Inj
+
 end ABC3.Found.FrdI
