@@ -176,6 +176,47 @@ theorem unTr_standardType (Fc : FrobenioidCore P) (G : Frobenioid P)
 
 end UnTr
 
+/-! ## ★4. standard 型が `𝒞^rlf` へ移る
+
+★★`𝒞^rlf` は **model Frobenioid そのもの**(`ScModelObj S G … = ModelData.Obj (scModel …)`)
+なので、`ModelData.model_isOfStandardType` が**直接当たる** —— 移送は要らない。
+★残る入力は 3 つ:
+* `hfsmff` —— `𝒟` が FSMFF(`𝒞` と同じ `𝒟` なので `𝒞` の standard 性から)
+* `hnd` —— **係数拡大した `Φ` が non-dilating**(★実化が non-dilating を保つこと。未)
+* `hngl` —— `𝒞^rlf` が not group-like(原文の「hence also」。未)
+-/
+
+section Rlf
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {S : Type} [CommSemiring S]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**[FrdI] Proposition 5.5, (iii)** —— **standard 型は `𝒞^rlf` へ移る**。
+
+★`𝒞^rlf` は model Frobenioid そのものなので、`model_isOfStandardType` の直接適用である
+(quasi-isotropic・Frobenius-isotropic・Frobenius-normalized の 3 条は
+model Frobenioid では**無条件**)。 -/
+theorem scModel_standardType (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
+    (hint : ∀ A : D, IsIntegralMonoid (ScT S (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    (hdiv : (scModel S G hiso hfn hcharInj hint hfsmD).phi.IsDivisorialOn)
+    (htot : IsTotallyEpimorphic D) (hconn : IsConnected D)
+    (F' : FrobenioidCore (ModelData.modelPre
+      (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)))
+    (hfsmff : IsOfFSMFFType D)
+    (hnd : (scModel S G hiso hfn hcharInj hint hfsmD).phi.IsNonDilatingOn)
+    (hngl : ¬ IsOfGroupLikeType (ModelData.modelPre
+      (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn))) :
+    IsOfStandardType D (ScModelObj S G hiso hfn hcharInj hint hfsmD)
+      (ModelData.modelPre (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)) F' :=
+  ModelData.model_isOfStandardType _ F' hfsmff hnd (fun hg => absurd hg hngl)
+
+end Rlf
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Proposition 5.5, (iii)` の「`𝒞^un-tr` は Frobenius-normalized 型」の条。 -/
