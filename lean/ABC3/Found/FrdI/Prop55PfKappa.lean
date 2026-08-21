@@ -232,4 +232,118 @@ def rootLift_comp.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 𝒞^pf の根の標準射と整合性",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★6. 根を上げた射 —— こちらも方程式で特徴づける
+
+★★`lamHom`(在庫)は `⟨A,k⟩ ⟶ ⟨B,k⟩` を与えるが、
+**`κ` との自然性を直接計算しようとすると `compRoot` の展開が要る**。
+★そこで `rootMap` を**方程式 `g ≫ κ_B = κ_A ≫ [f]` で定義する** ——
+存在は `pfRoot_frob_div`、一意性は `κ_B` が mono であることから出る。
+★★これで自然性も関手性も**両辺に `κ` を合成して比べるだけ**になる。 -/
+
+theorem toRootHom_baseIso {A B : C} (f : A ⟶ B) (hf : IsBaseIsomorphism P f) :
+    IsBaseIsomorphism (pfRootPre P F) (toRootHom (F := F) f) := by
+  have hb1 : IsBaseIsomorphism P (rtOneInv (P := P) (F := F) A) :=
+    isBaseIsomorphism_of_isIso P _
+  have hb2 : IsBaseIsomorphism P (f ≫ rtExt P F B 1) :=
+    isBaseIsomorphism_comp P hf (rtExt_frobType P F B 1).2
+  exact (isBaseIsomorphism_mk_iff (X := (⟨A, 1⟩ : PfRootObj P F))
+    (Y := (⟨B, 1⟩ : PfRootObj P F))
+    (idxOne P F (rtObj P F A 1) (rtObj P F B 1))
+    (rtOneInv (P := P) (F := F) A ≫ f ≫ rtExt P F B 1)).mpr
+    (isBaseIsomorphism_comp P hb1 hb2)
+
+/-- ★★★**根を上げた射の存在** —— `g ≫ κ_B = κ_A ≫ [f]`。 -/
+theorem exists_rootMap (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+) :
+    ∃ g : (⟨A, k⟩ : PfRootObj P F) ⟶ ⟨B, k⟩,
+      g ≫ pfKappa (F := F) B k = pfKappa (F := F) A k ≫ toRootHom (F := F) f := by
+  refine pfRoot_frob_div (F := F) (n := k) (m := P.degFr f) hfi
+    (pfKappa (F := F) A k ≫ toRootHom (F := F) f) (pfKappa (F := F) B k) ?_
+    (pfKappa_frobType hfi B k) (pfKappa_degFr B k)
+  rw [(pfRootPre P F).degFr_comp, toRootHom_degFr', pfKappa_degFr, mul_comm]
+
+/-- ★★**根を上げた射**(方程式つき)。 -/
+noncomputable def rootMap (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+) :
+    (⟨A, k⟩ : PfRootObj P F) ⟶ ⟨B, k⟩ :=
+  (exists_rootMap (F := F) hfi f k).choose
+
+@[simp] theorem rootMap_spec (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B)
+    (k : ℕ+) :
+    rootMap (F := F) hfi f k ≫ pfKappa (F := F) B k
+      = pfKappa (F := F) A k ≫ toRootHom (F := F) f :=
+  (exists_rootMap (F := F) hfi f k).choose_spec
+
+/-- ★★**`⟨B,k⟩` への射は `κ_B` と合成すれば決まる**(`κ` が mono)。 -/
+theorem rootMap_ext (hfi : IsOfFrobeniusIsotropicType P) {X : PfRootObj P F} {B : C} {k : ℕ+}
+    (g g' : X ⟶ (⟨B, k⟩ : PfRootObj P F))
+    (h : g ≫ pfKappa (F := F) B k = g' ≫ pfKappa (F := F) B k) : g = g' := by
+  haveI := pfKappa_mono (F := F) hfi B k
+  exact (cancel_mono (pfKappa (F := F) B k)).mp h
+
+theorem rootMap_degFr (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+) :
+    (pfRootPre P F).degFr (rootMap (F := F) hfi f k) = P.degFr f := by
+  have h := congrArg (pfRootPre P F).degFr (rootMap_spec (F := F) hfi f k)
+  rw [(pfRootPre P F).degFr_comp, (pfRootPre P F).degFr_comp, pfKappa_degFr, pfKappa_degFr,
+    toRootHom_degFr'] at h
+  exact mul_left_cancel (a := k) (h.trans (mul_comm _ _))
+
+/-- ★★**関手性**。 -/
+theorem rootMap_comp (hfi : IsOfFrobeniusIsotropicType P) {A B E : C} (f : A ⟶ B) (g : B ⟶ E)
+    (k : ℕ+) :
+    rootMap (F := F) hfi (f ≫ g) k
+      = rootMap (F := F) hfi f k ≫ rootMap (F := F) hfi g k := by
+  refine rootMap_ext hfi _ _ ?_
+  rw [rootMap_spec, Category.assoc, rootMap_spec, ← Category.assoc, rootMap_spec,
+    Category.assoc]
+  exact congrArg (fun t => pfKappa (F := F) A k ≫ t) (toRootHom_comp f g)
+
+theorem rootMap_baseIso (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+)
+    (hf : IsBaseIsomorphism P f) :
+    IsBaseIsomorphism (pfRootPre P F) (rootMap (F := F) hfi f k) := by
+  have h := congrArg (pfRootPre P F).Base (rootMap_spec (F := F) hfi f k)
+  rw [(pfRootPre P F).Base_comp, (pfRootPre P F).Base_comp] at h
+  haveI h1 : IsIso ((pfRootPre P F).Base (pfKappa (F := F) B k)) :=
+    (pfKappa_frobType hfi B k).2
+  haveI h2 : IsIso ((pfRootPre P F).Base (pfKappa (F := F) A k)) :=
+    (pfKappa_frobType hfi A k).2
+  haveI h3 : IsIso ((pfRootPre P F).Base (toRootHom (F := F) f)) := toRootHom_baseIso f hf
+  haveI h4 : IsIso ((pfRootPre P F).Base (rootMap (F := F) hfi f k)
+      ≫ (pfRootPre P F).Base (pfKappa (F := F) B k)) := h ▸ inferInstance
+  exact IsIso.of_isIso_comp_right _ ((pfRootPre P F).Base (pfKappa (F := F) B k))
+
+/-- ★★**pre-step は保たれる**。 -/
+theorem rootMap_preStep (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+)
+    (hf : IsPreStep P f) :
+    IsPreStep (pfRootPre P F) (rootMap (F := F) hfi f k) :=
+  ⟨show (pfRootPre P F).degFr (rootMap (F := F) hfi f k) = 1 from
+    (rootMap_degFr hfi f k).trans hf.1,
+   rootMap_baseIso hfi f k hf.2⟩
+
+/-- ★★★★★**`rootMap` と `rootStep` の自然性の四角形**。
+
+★`𝒞` の可換な四角形 `z ≫ a = β ≫ α`(`a`, `β` は同次数の Frobenius 型)を
+`𝒞^pf` の根つきの四角形へ移す。★★中身は**両辺に `κ` を合成して比べるだけ**。 -/
+theorem rootMap_rootStep_sq (hfi : IsOfFrobeniusIsotropicType P) {X W₁ Y W₁' : C}
+    (z : X ⟶ W₁) (a : W₁ ⟶ W₁') (ha : IsFrobeniusType P a)
+    (β : X ⟶ Y) (hβ : IsFrobeniusType P β) (α : Y ⟶ W₁')
+    (k d k' : ℕ+) (hda : P.degFr a = d) (hdβ : P.degFr β = d) (hk' : k' = k * d)
+    (hsq : z ≫ a = β ≫ α) :
+    rootMap (F := F) hfi z k ≫ rootStep (F := F) hfi a ha k d k' hda hk'
+      = rootStep (F := F) hfi β hβ k d k' hdβ hk' ≫ rootMap (F := F) hfi α k' := by
+  refine rootMap_ext hfi _ _ ?_
+  rw [Category.assoc, rootStep_spec, ← Category.assoc, rootMap_spec, Category.assoc,
+    Category.assoc, rootMap_spec]
+  have hR : rootStep (F := F) hfi β hβ k d k' hdβ hk'
+        ≫ pfKappa (F := F) Y k' ≫ toRootHom (F := F) α
+      = (pfKappa (F := F) X k ≫ toRootHom (F := F) β) ≫ toRootHom (F := F) α := by
+    rw [← Category.assoc, rootStep_spec]
+  rw [hR, Category.assoc]
+  exact congrArg (fun t => pfKappa (F := F) X k ≫ t)
+    ((toRootHom_comp z a).symm.trans ((congrArg toRootHom hsq).trans (toRootHom_comp β α)))
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の根つきの自然性。 -/
+def rootMap_rootStep_sq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 根を上げた射の自然性",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI

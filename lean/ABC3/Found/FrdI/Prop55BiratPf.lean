@@ -130,10 +130,10 @@ noncomputable def biratPfIdx (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioi
     {A B : C} (W : IdxPf P F A B) (Z : IdxBirat P G W.right.obj.1) :
     IdxBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) :=
   idxBiratMk (pfRootPre P F) Gpf
-    (lamHom (F := F) (biratPfDeg W) Z.unop.hom.hom ≫ (biratPfIsoA hfi W).inv)
+    (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W) ≫ (biratPfIsoA hfi W).inv)
     (pfRoot_isCoAngular hfi _)
     (IsPreStep.comp (pfRootPre P F)
-      (lamHom_isPreStep _ _ Z.unop.hom.property.2)
+      (rootMap_preStep hfi _ _ Z.unop.hom.property.2)
       (isPreStep_of_isIso (pfRootPre P F) _))
 
 /-- ★★★★**右辺の代表元 `(W, Z, ψ)` から左辺 `(𝒞^pf)^birat` の元を作る**。 -/
@@ -143,11 +143,11 @@ noncomputable def biratPfMk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid
     (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
     HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
   HomBirat.mk (biratPfIdx hfi Gpf W Z)
-    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB hfi W).inv)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
 
 /-- ★★**`IdxBirat` の遷移で不変** —— well-definedness の半分。
 
-★`lamHom` が関手的であること(`lamHom_comp`)だけで出る。 -/
+★`rootMap` が関手的であること(`rootMap_comp`)だけで出る。 -/
 theorem biratPfMk_map (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
     (Gpf : Frobenioid (pfRootPre P F))
     {A B : C} (W : IdxPf P F A B) {Z Z' : IdxBirat P G W.right.obj.1} (u : Z ⟶ Z')
@@ -155,24 +155,24 @@ theorem biratPfMk_map (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
     biratPfMk hfi Gpf W Z' (u.unop.left.hom ≫ ψ) = biratPfMk hfi Gpf W Z ψ := by
   have htri : u.unop.left.hom ≫ Z.unop.hom.hom = Z'.unop.hom.hom :=
     congrArg (fun t : Z'.unop.left ⟶ (coaPreObj P G W.right.obj.1) => t.hom) (Over.w u.unop)
-  have hw : lamHom (F := F) (biratPfDeg W) u.unop.left.hom
+  have hw : rootMap (F := F) hfi u.unop.left.hom (biratPfDeg W)
         ≫ (biratPfIdx hfi Gpf W Z).unop.hom.hom
       = (biratPfIdx hfi Gpf W Z').unop.hom.hom :=
     (Category.assoc _ _ _).symm.trans
       (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
           ⟶ ⟨W.right.obj.1, biratPfDeg W⟩ => t ≫ (biratPfIsoA hfi W).inv)
-        ((lamHom_comp _ _ _).trans
-          (congrArg (lamHom (F := F) (biratPfDeg W)) htri)))
+        ((rootMap_comp hfi _ _ _).symm.trans
+          (congrArg (fun t => rootMap (F := F) hfi t (biratPfDeg W)) htri)))
   have hmap := HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
     (idxBiratHomMk (Z := biratPfIdx hfi Gpf W Z) (W := biratPfIdx hfi Gpf W Z')
-      (lamHom (F := F) (biratPfDeg W) u.unop.left.hom) (pfRoot_isCoAngular hfi _)
-      (lamHom_isPreStep _ _ u.unop.left.property.2) hw)
-    (lamHom (F := F) (biratPfDeg W) ψ ≫ (biratPfIsoB hfi W).inv)
+      (rootMap (F := F) hfi u.unop.left.hom (biratPfDeg W)) (pfRoot_isCoAngular hfi _)
+      (rootMap_preStep hfi _ _ u.unop.left.property.2) hw)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
   refine Eq.trans ?_ hmap
   refine congrArg (HomBirat.mk (biratPfIdx hfi Gpf W Z')) ?_
   exact (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
       ⟶ ⟨W.right.obj.2, biratPfDeg W⟩ => t ≫ (biratPfIsoB hfi W).inv)
-    (lamHom_comp (F := F) (biratPfDeg W) u.unop.left.hom ψ).symm).trans
+    (rootMap_comp (F := F) hfi u.unop.left.hom ψ (biratPfDeg W))).trans
     (Category.assoc _ _ _)
 
 /-! ## ★2. 右辺の内側の余極限からの写像 -/
