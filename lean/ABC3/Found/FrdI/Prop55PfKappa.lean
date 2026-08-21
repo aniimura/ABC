@@ -799,4 +799,74 @@ def compPf_mk_toHomPf.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 代表元への後合成の計算則",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★14. 残る図式追跡の材料
+
+★★第 21 弾で書き下した等式の材料をここに置く。
+★要点は 3 つ:
+* `kappaRep A n = rtLift A (n = n·1)` —— **`κ` の代表元は `rtLift` そのもの**。
+* `θ_A = rtExt X k ≫ rtExt E n` —— **`θ_A` は `rtExt` の合成そのもの**。
+* `frobTransport α β (α ≫ ξ) = ξ ≫ β` —— **前合成した射の遷移は後合成**。 -/
+
+/-- ★★**`κ` の代表元は `rtLift` そのもの**。 -/
+theorem kappaRep_eq_rtLift (A : C) (n : ℕ+) :
+    kappaRep (P := P) (F := F) A n = rtLift P F A (show n = n * 1 from (mul_one n).symm) := by
+  refine rtLift_uniq P F _ _ ?_ (rtLift_ext P F A _)
+  show rtExt P F A 1 ≫ (rtOneInv (P := P) (F := F) A ≫ rtExt P F A n) = rtExt P F A n
+  rw [← Category.assoc]
+  have h : rtExt P F A 1 ≫ rtOneInv (P := P) (F := F) A = 𝟙 A :=
+    @IsIso.hom_inv_id _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A)
+  rw [h, Category.id_comp]
+
+/-- ★★**`α` を前合成した射の遷移は「後合成」になる**。 -/
+theorem frobTransport_comp_left {A' A'' B' B'' : C} (α : A' ⟶ A'') (hα : IsFrobeniusType P α)
+    (β : B' ⟶ B'') (hβ : IsFrobeniusType P β) (hd : P.degFr α = P.degFr β)
+    (ξ : A'' ⟶ B') :
+    frobTransport (F := F) α hα β hβ hd (α ≫ ξ) = ξ ≫ β :=
+  frobTransport_eq (F := F) α hα β hβ hd (α ≫ ξ) (ξ ≫ β) (Category.assoc _ _ _)
+
+/-- ★★★**`θ_A` の正体** —— `rtExt` の合成そのもの。 -/
+theorem theta_A_eq (A : C) (n k : ℕ+) :
+    frobTransport (F := F)
+        (rtLift P F A (show n = n * 1 from (mul_one n).symm))
+        (rtLift_frobType P F A _)
+        (rtLift P F (rtObj P F (rtObj P F A n) k) (show n = n * 1 from (mul_one n).symm))
+        (rtLift_frobType P F _ _)
+        (by rw [rtLift_degFr, rtLift_degFr])
+        (rtOneInv (P := P) (F := F) A
+          ≫ (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k)
+          ≫ rtExt P F (rtObj P F (rtObj P F A n) k) 1)
+      = rtExt P F (rtObj P F A n) k ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n := by
+  refine frobTransport_eq (F := F) _ _ _ _ _ _ _ ?_
+  have hk : rtOneInv (P := P) (F := F) A ≫ rtExt P F A n
+      = rtLift P F A (show n = n * 1 from (mul_one n).symm) := kappaRep_eq_rtLift A n
+  have hE : rtExt P F (rtObj P F (rtObj P F A n) k) 1
+        ≫ rtLift P F (rtObj P F (rtObj P F A n) k) (show n = n * 1 from (mul_one n).symm)
+      = rtExt P F (rtObj P F (rtObj P F A n) k) n := rtLift_ext P F _ _
+  calc (rtOneInv (P := P) (F := F) A ≫ (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k)
+          ≫ rtExt P F (rtObj P F (rtObj P F A n) k) 1)
+        ≫ rtLift P F (rtObj P F (rtObj P F A n) k) (show n = n * 1 from (mul_one n).symm)
+      = (rtOneInv (P := P) (F := F) A ≫ rtExt P F A n) ≫ rtExt P F (rtObj P F A n) k
+          ≫ (rtExt P F (rtObj P F (rtObj P F A n) k) 1
+            ≫ rtLift P F (rtObj P F (rtObj P F A n) k)
+              (show n = n * 1 from (mul_one n).symm)) := by simp only [Category.assoc]
+    _ = rtLift P F A (show n = n * 1 from (mul_one n).symm)
+        ≫ rtExt P F (rtObj P F A n) k ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n := by
+        rw [hk, hE]
+
+/-- ★★★`θ_A` を遷移した先 —— `rtExt E n ≫ e`。 -/
+theorem frobTransport_theta_A (A : C) (n k : ℕ+) {E' : C}
+    (e : rtObj P F (rtObj P F (rtObj P F A n) k) n ⟶ E') (he : IsFrobeniusType P e)
+    (hd : P.degFr (rtExt P F (rtObj P F A n) k) = P.degFr e) :
+    frobTransport (F := F) (rtExt P F (rtObj P F A n) k)
+        (rtExt_frobType P F _ _) e he hd
+        (rtExt P F (rtObj P F A n) k ≫ rtExt P F (rtObj P F (rtObj P F A n) k) n)
+      = rtExt P F (rtObj P F (rtObj P F A n) k) n ≫ e :=
+  frobTransport_comp_left _ _ _ he hd _
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の図式追跡の材料。 -/
+def theta_A_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 辞書の図式追跡の材料",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
