@@ -3659,11 +3659,11 @@
           "deps": [
             "thm64-i-dirichlet"
           ],
-          "status": "skeleton",
-          "size": "★大",
-          "note": "★`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` が単系の同型なので順序を保つ、が本体。\n\n★★★★2026-08-25（**核を特定してスケルトンを置いた**）：\n原文は「`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` は単系の同型だから順序を保つ」と 1 行で書くが、\n★順序を保つのは**自明**（`ℝ≥0` では `a ≤ b ↔ ∃ c, a + c = b`、`monotone_of_addEquiv`）。\n★★**中身はその先**、すなわち\n\n```\n順序を保つ加法自己同型 f : ℝ≥0 ≃+ ℝ≥0  ⟹  ∃ c > 0, ∀ x, f x = c * x\n```\n\nである（`exists_smul_eq_of_addEquiv`）。加法性から `f(q·x) = q·f x`（`q : ℚ≥0`）、\n単調性と `ℚ` の稠密性で `f x = f 1 · x` に絞られる。\n★mathlib の `AddMonoidHom.toRealLinearMap` は**連続性を要求**するので直接は使えない。",
-          "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
-          "decl": "ABC3.Skeleton.Thm64.exists_smul_eq_of_addEquiv / monotone_of_addEquiv"
+          "status": "done",
+          "size": "中(閉じた)",
+          "note": "★原文は「`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` は単系の同型だから順序を保つ」と 1 行で書き、\nそこから `deg(Ψ^rlf) ∈ ℝ>0` を出す。\n\n★★★★★2026-08-25(**核を閉じた**、sorry 無し)。中身は\n\n```\n加法自己同型 f : ℝ≥0 ≃+ ℝ≥0  ⟹  ∃ c ≠ 0, ∀ x, f x = c · x\n```\n\nであり、**mathlib に無かった**(`AddMonoidHom.toRealLinearMap` は**連続性**を要求し、\n単調性から線型性を出す宣言は無い。2026-08-25 実測)。\n\n| 段 | 中身 | 在庫 |\n|---|---|---|\n| 1 | `f` は単調 | `le_iff_exists_add`(自明) |\n| 2 | `f r = f 1 · r`(`r : ℚ≥0`) | `map_nnrat_smul`(mathlib) |\n| 3 | 単調＋稠密性で全部の `x` に広げる | ★自前 |\n\n★段 2 が **`ℚ` でなく `ℚ≥0`** で済むのが `ℝ≥0` の得なところ\n(`ℝ≥0` は群でないので `ℚ`-加群にならないが、`ℚ≥0`-加群にはなる)。\n★段 3 のために「`ℚ≥0` は `ℝ≥0` で稠密」(`nnreal_exists_nnrat_btwn`)を\n`exists_rat_btwn` から作った —— これも mathlib に `ℝ≥0` 版が無かった。\n\n★★**この節点で閉じたのは「順序を保つ加法同型は正数倍」の核**である。\nFrobenioid 側の配線(`δ_A : Pic_Φ(A) ≅ ℝ` を作って合成する段)は\n依存先の `thm64-i-dirichlet` の担当で、そちらは Dirichlet 単数定理(mathlib)からの配線。",
+          "lean": "ABC3/Found/AddEquivNNReal.lean(Skeleton/FrdI/Thm64Deg.lean は委譲)",
+          "decl": "ABC3.Found.exists_smul_eq_of_addEquiv / monotone_of_addEquiv / nnreal_exists_nnrat_btwn / addEquiv_nnrat_cast"
         },
         {
           "id": "thm64-iii-q",

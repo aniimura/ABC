@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Meta.Claim
 import ABC3.Skeleton.NumberField.Chebotarev
+import ABC3.Found.AddEquivNNReal
 import Mathlib.Data.NNReal.Basic
 import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
@@ -62,16 +63,16 @@ open ABC3.Meta
 
 ★★これが `deg(Ψ^rlf) ∈ ℝ>0` の実体である。
 ★加法同型は `a ≤ b ↔ ∃ c, a + c = b` を保つので**単調**、
-単調＋加法なら有理数倍を保ち、稠密性で `f x = f 1 · x` に絞られる。 -/
+単調＋加法なら有理数倍を保ち、稠密性で `f x = f 1 · x` に絞られる。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/AddEquivNNReal.lean` にある。 -/
 theorem exists_smul_eq_of_addEquiv (f : NNReal ≃+ NNReal) :
-    ∃ c : NNReal, c ≠ 0 ∧ ∀ x : NNReal, f x = c * x := by
-  sorry
+    ∃ c : NNReal, c ≠ 0 ∧ ∀ x : NNReal, f x = c * x :=
+  ABC3.Found.exists_smul_eq_of_addEquiv f
 
 /-- ★★**加法同型は順序を保つ**(自明。原文が 1 行で書いている段)。 -/
-theorem monotone_of_addEquiv (f : NNReal ≃+ NNReal) : Monotone f := by
-  intro a b hab
-  obtain ⟨c, rfl⟩ := le_iff_exists_add.mp hab
-  simp [map_add]
+theorem monotone_of_addEquiv (f : NNReal ≃+ NNReal) : Monotone f :=
+  ABC3.Found.monotone_of_addEquiv f
 
 /-! ## ★2. `thm64-iii-q` —— `deg ∈ ℚ>0`
 
@@ -121,7 +122,9 @@ def exists_smul_eq_of_addEquiv.src : Source :=
     sectionId := "frdi-thm-6-4" }
 
 def exists_smul_eq_of_addEquiv.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "NNReal の順序と加法(le_iff_exists_add)"
+  [ .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.exists_smul_eq_of_addEquiv") 114,
+    .citation "[mathlib]" "NNReal の順序と加法(le_iff_exists_add)"
       (.inMathlib "le_iff_exists_add") 114,
     .citation "[mathlib]" "単調加法自己同型が線形であること"
       (.absent "Mathlib/Analysis/ に AddMonoidHom.toRealLinearMap(連続性を要求)しかなく、単調版・NNReal 版は無い(2026-08-25)") 114,
@@ -181,7 +184,9 @@ def monotone_of_addEquiv.src : Source :=
 
 /-- ★自明(`a ≤ b ↔ ∃ c, a + c = b`)——原文が 1 行で書いている段そのもの。 -/
 def monotone_of_addEquiv.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "le_iff_exists_add(NNReal の順序は加法で書ける)"
+  [ .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.monotone_of_addEquiv") 114,
+    .citation "[mathlib]" "le_iff_exists_add(NNReal の順序は加法で書ける)"
       (.inMathlib "le_iff_exists_add") 114 ]
 
 end ABC3.Skeleton.Thm64
