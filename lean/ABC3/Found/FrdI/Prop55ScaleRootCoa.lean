@@ -203,6 +203,54 @@ noncomputable def biratPfHomEquivRoot (hfi : IsOfFrobeniusIsotropicType P)
         ((toBiratCat (pfRootPre P F) Gpf).mapIso
           (asIso (pfRoot_exists_iso_root (F := F) B m n (k * 1) hk').choose)).symm))
 
+/-! ## ★4. `F'` の根と `F` の根を **`rootIso` で**繋ぐ -/
+
+/-- ★★★★**`F'` の根から `F` の根への同型** ——
+`rtObj (biratPre P G) F' A d` と `toBiratCat` で送った `rtObj P F A d` は
+どちらも `A` の次数 `d` の Frobenius 拡大なので、`F'.frobDegUniq` が同型を与える。
+
+★★等式は取れない(`Exists.choose` は命題だけで決まる)が、**同型で十分**である。 -/
+theorem exists_rtObj_birat_iso {G : Frobenioid P} (F' : FrobenioidCore (biratPre P G))
+    (Z : C) (d : ℕ+) :
+    ∃ β : rtObj (biratPre P G) F' (biratUp P G Z) d ⟶ biratUp P G (rtObj P F Z d),
+      IsIso β := by
+  have hfrob : IsFrobeniusType (biratPre P G) ((toBiratCat P G).map (rtExt P F Z d)) :=
+    (birat_isFrobeniusType_iff P G (rtExt P F Z d)).mpr
+      ⟨(rtExt_frobType P F Z d).1.1, (rtExt_frobType P F Z d).2⟩
+  have hdeg : (biratPre P G).degFr (rtExt (biratPre P G) F' (biratUp P G Z) d)
+      = (biratPre P G).degFr ((toBiratCat P G).map (rtExt P F Z d)) := by
+    rw [rtExt_degFr]
+    show (d : ℕ+) = biratDeg (toHomBirat (P := P) (G := G) (rtExt P F Z d))
+    rw [biratDeg_toHomBirat, rtExt_degFr]
+  obtain ⟨β, hβ, -⟩ := F'.frobDegUniq _ _ _
+    (rtExt (biratPre P G) F' (biratUp P G Z) d)
+    ((toBiratCat P G).map (rtExt P F Z d))
+    (rtExt_frobType (biratPre P G) F' (biratUp P G Z) d) hfrob hdeg
+  exact ⟨β, hβ⟩
+
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii) の射の全単射(一般の根、仮定なし)** ——
+
+`Hom_{(𝒞^birat)^pf}((A,n),(B,m)) ≃ Hom_{(𝒞^pf)^birat}(⟨A,n⟩,⟨B,m⟩)`。
+
+★`F'` の根と `F` の根の差は `rootIso`(根の不変性)で吸収する ——
+**等式は要らない**。 -/
+noncomputable def biratPfHomEquivRootFull (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (A B : C) (n m k : ℕ+) (hk : k * 1 = n * m) (hk' : k * 1 = m * n) :
+    HomRoot (biratPre P G) F'
+        (⟨biratUp P G A, n⟩ : PfRootObj (biratPre P G) F') ⟨biratUp P G B, m⟩
+      ≃ HomBirat (pfRootPre P F) Gpf (⟨A, n⟩ : PfRootObj P F) ⟨B, m⟩ :=
+  haveI hA := (exists_rtObj_birat_iso (F := F) F' A m).choose_spec
+  haveI hB := (exists_rtObj_birat_iso (F := F) F' B n).choose_spec
+  ((rootIso (F := F') (exists_rtObj_birat_iso (F := F) F' A m).choose
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (exists_rtObj_birat_iso (F := F) F' B n).choose
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (by rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _])).symm
+    |>.toEquiv).trans
+    (biratPfHomEquivRoot hfi hiso Gpf F' A B n m k hk hk')
+
 end ScaleRootCoa
 
 /-! ### ★出典の紐付け -/
@@ -219,6 +267,14 @@ def coaPreProp_scaleRootHom.src : ABC3.Meta.Source :=
 def biratPfHomEquivRoot.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (ii) — 一般の根での射の全単射(4 段の鎖)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の
+**一般の根での射の全単射(仮定なし版)** —— `F'` の根と `F` の根の差は
+`rootIso`(根の不変性)で吸収する。 -/
+def biratPfHomEquivRootFull.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 一般の根での射の全単射(F' の根は rootIso で吸収)",
     sectionId := "frdi-prop-5-5" }
 
 /-- ★★★★★★locator —— `Corollary 4.10` の `Ψ^birat` に `Σ_k` を流したもの
