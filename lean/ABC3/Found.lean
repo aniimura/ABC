@@ -210,6 +210,7 @@ import ABC3.Found.FrdI.Cor54Uniq
 import ABC3.Found.FrdI.Cor54Seam
 import ABC3.Found.FrdI.Cor54SeamUnTr
 import ABC3.Found.FrdI.Cor54SeamCls
+import ABC3.Found.FrdI.Cor54SeamSec
 import ABC3.Found.FrdI.Prop53UntrBirat
 import ABC3.Found.FrdI.Prop55UntrFun
 import ABC3.Found.FrdI.Prop53PfCatRoot
