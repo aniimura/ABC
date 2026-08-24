@@ -6,8 +6,8 @@ import ABC3.Found.FrdI.Prop44
 /-!
 # [FrdI] Proposition 4.4 —— `Hom^birat` の**普遍性**
 
-原文 (FrdI p.80):
-> Proposition 4.4. (Birationalizations) Let C be a Frobenioid. Then:
+原文 (FrdI p.82):
+> (Birationalization of a Frobenioid I) For A, B
 
 ★★在庫の `HomBirat` には `mk` / `exists_rep` / `sound` / `eq_iff`
 (帰納極限**への**射と等号判定)しかなく、**極限からの射**(普遍性)が無かった。
@@ -79,7 +79,7 @@ end BiratUniv
 
 /-- ★★★★★locator —— `Hom^birat` の普遍性(帰納極限からの降下)。 -/
 def HomBirat.desc.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 80,
+  { paper := "FrdI", pdfPage := 82,
     item := "Proposition 4.4 — Hom^birat の普遍性(代表元からの降下)",
     sectionId := "frdi-prop-4-4" }
 
