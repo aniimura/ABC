@@ -336,3 +336,57 @@ variable {E : Type uE} [Category.{uv} E]   -- ★ 1 本にする
 exact @frac_comp_aux _ _ _ _ _ _ _ _ g hγ z hZ a p w hW q gz hP aq
   (Ω.map_comp _ _) (Ω.map_comp _ _) key
 ```
+
+## 15. `calc` は defeq を渡らない —— `have` ＋ `Eq.trans` に置き換える
+
+`Prop55BiratOmega.lean` で繰り返し当たった形。
+
+```
+error: invalid 'calc' step, failed to synthesize `Trans` instance
+  Trans Eq Eq ?m.848
+```
+
+★**原因**: `calc` の各段は**型が構文的に一致**していないと `Trans` が付かない。
+`omegaObj F F' ⟨A,k⟩` と `⟨biratUp A, k⟩` のように **defeq だが構文が違う**と落ちる。
+
+★**逃げ方**: 段を `have s1 := …` で置き(型注釈を書かない)、
+最後に `(((s1.trans s2).trans s3) … )` で繋ぐ。
+`Eq.trans` は defeq で通るので、これだけで直る。
+
+```lean
+  have s1 := congrArg (compRoot Q F' _) (omegaMap_pfKappa F F' B k).symm
+  have s2 := (omegaMap_comp F F' _ _).symm
+  have s3 := congrArg (omegaMap F F') (rootMap_spec (F := F) hfi f k)
+  exact rootMap_ext (F := F') hfiB _ _ (((s1.trans s2).trans s3).trans hR.symm)
+```
+
+## 16. `IsIso.inv_eq_of_hom_inv_id` は `@` で `f` とインスタンスを明示する
+
+```
+error: failed to synthesize instance of type class IsIso (rtExt (biratPre P G) F' (biratUp P G A) 1)
+```
+
+局所インスタンスは在るのに落ちる。★**暗黙の `f` がメタ変数のうちに探索が走る**ため
+(idiom 14 の注意 2 と同じ)。
+
+★**引数の順は `{f} [IsIso f] {g}`** —— インスタンスは `g` より**前**である。
+
+```lean
+refine (@IsIso.inv_eq_of_hom_inv_id _ _ _ _
+  (rtExt (biratPre P G) F' (biratUp P G A) 1) hq1   -- ★f, インスタンスの順
+  (biratRtIso F F' A 1 ≫ (toBiratCat P G).map (rtOneInv A)) ?_).symm
+```
+
+## 17. `set_option … in` は docstring の**前**に置く
+
+`variable (F) in` と併用するときは
+
+```lean
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- doc -/
+theorem foo …
+```
+
+★docstring の中に紛れ込ませると本文の一部になって効かない
+(`sed` で行番号を数えて挿入すると起きやすい)。
