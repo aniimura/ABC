@@ -3132,19 +3132,21 @@
     },
     {
      "id": "proper-global-sections",
-     "status": "absent",
+     "status": "inMathlib",
      "deps": [],
      "title": "`Γ(X, 𝒪_X) = k`(proper かつ幾何的連結)",
-     "decl": "",
-     "note": "★★★2026-08-21（在庫測定）：**mathlib に無い**（`IsProper` と大域切断を結ぶ補題は grep 0 件）。\n★これは連接層のコホモロジーの有限性を要する定理で、mathlib のスキーム論の現在の到達点より先にある。\n★★これが `global-units` の第 2 段である。"
+     "decl": "AlgebraicGeometry.isField_of_universallyClosed / AlgebraicGeometry.finite_appTop_of_universallyClosed",
+     "note": "★★★2026-08-21（在庫測定）：**mathlib に無い**（`IsProper` と大域切断を結ぶ補題は grep 0 件）。\n★これは連接層のコホモロジーの有限性を要する定理で、mathlib のスキーム論の現在の到達点より先にある。\n★★これが `global-units` の第 2 段である。\n\n★★★★★★2026-08-25（**訂正 —— `absent` は誤りだった**）：\n\n`Mathlib/AlgebraicGeometry/Morphisms/Proper.lean` に**そのものがある**:\n\n| 宣言 | 中身 |\n|---|---|\n| `AlgebraicGeometry.isField_of_universallyClosed` | `X` が整で `Spec K` 上 universally closed なら `Γ(X, ⊤)` は**体** |\n| `AlgebraicGeometry.finite_appTop_of_universallyClosed` | さらに locally of finite type なら `Γ(X, ⊤)` は `K` 上**有限** |\n\n★`IsProper = IsSeparated ∧ UniversallyClosed ∧ LocallyOfFiniteType` なので\n**proper ならそのまま当たる**。\n\n★★★したがって `ex61-units` を止めているのは\n**`krull-domain-intersection`（代数的 Hartogs）1 本だけ**である。\n★以前の「2 本とも mathlib に無い」は**探索先が浅かった**（`Proper.lean` の\n`## Main results` に両方書いてある）。"
     },
     {
      "id": "krull-domain-intersection",
-     "status": "absent",
+     "status": "skeleton",
      "deps": [],
      "title": "代数的 Hartogs —— Noether 整閉整域は `R = ⋂_{ht 1} R_𝔭`",
-     "decl": "",
-     "note": "★★★2026-08-21（在庫測定）：**mathlib に `IsKrullDomain` は無い**。\n在るのは `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり = `R`）だけで、\n**高さ 1 版ではない**。\n★古典的な証明は「`x ∉ R` なら分母イデアル `(R : x)` の随伴素因子 `𝔭` を取り、\nNoether 整閉整域は S2 なので `depth R_𝔭 = 1 ⟹ ht 𝔭 = 1`」で、\n**随伴素因子（mathlib に在る）＋ depth / S2（mathlib に薄い）**が要る。\n★★これが `global-units` の第 1 段である。"
+     "decl": "ABC3.Skeleton.Hartogs.mem_of_forall_heightOne",
+     "note": "★★★2026-08-21（在庫測定）：**mathlib に `IsKrullDomain` は無い**。\n在るのは `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり = `R`）だけで、\n**高さ 1 版ではない**。\n★古典的な証明は「`x ∉ R` なら分母イデアル `(R : x)` の随伴素因子 `𝔭` を取り、\nNoether 整閉整域は S2 なので `depth R_𝔭 = 1 ⟹ ht 𝔭 = 1`」で、\n**随伴素因子（mathlib に在る）＋ depth / S2（mathlib に薄い）**が要る。\n★★これが `global-units` の第 1 段である。\n\n★★★★★2026-08-25（**スケルトンを置いた**）：\n`ABC3/Skeleton/Divisor/Hartogs.lean` の\n`mem_of_forall_heightOne`（と自明な向き `forall_heightOne_of_mem`）。\n\n★中身は「分母イデアル `I = {r | r·x ∈ R}` の随伴素は正規性（S2）から高さ 1」。\n★在庫: `MaximalSpectrum.iInf_localization_eq_bot`（**極大**版のみ）、\n`IsKrullDomain` は無い（`Mathlib/RingTheory/` を ls して実測、2026-08-25）。\n\n★★**相方の `proper-global-sections` は mathlib にあった**ので、\n**`Example 6.1` の条なし `.src` を止めているのは本節点 1 本だけ**である。",
+     "size": "中",
+     "lean": "ABC3/Skeleton/Divisor/Hartogs.lean"
     },
     {
      "id": "global-units",
@@ -3159,6 +3161,17 @@
      "note": "★原文が「we observe that [since `V[L]` is a proper normal variety]」で畳む段。**proper + 整 ⟹ 大域切断は `k` 上有限**(mathlib 在庫は要測定)。\n\n★★★★2026-08-21：**2 段に分解した** —— `krull-domain-intersection`（代数的 Hartogs）と\n`proper-global-sections`（`Γ(X,𝒪_X) = k`）。**どちらも mathlib に無い**ことを実測した。\n★★`ex61-model` は閉じたので、`𝒪^×(A)` の中身は確定している：\n`𝒪^×(A) = {u ∈ B(L) | すべての余次元 1 の点で ord_v(u) = 0}`。",
      "lean": "",
      "decl": ""
+    },
+    {
+     "id": "normalization-universal-normal",
+     "title": "正規スキームからの支配射は相対正規化を経由する",
+     "deps": [],
+     "status": "skeleton",
+     "size": "★大",
+     "frdiNeeded": true,
+     "note": "★★★★★2026-08-25（**節点として立てた**。`thm62-i-pull` の測定が名指ししていたもの）：\n\n`W` が正規整、`g : W ⟶ Y` が支配的、`L ⊆ K(W)` なら `W ⟶ Y[L]` が一意に定まること。\n\n★★**mathlib の `Scheme.Hom.normalizationDesc` では出ない** —— あちらは\n```\nnormalizationDesc (f : X ⟶ Y) (f₁ : X ⟶ T) (f₂ : T ⟶ Y) [IsIntegralHom f₂]\n    (H : f = f₁ ≫ f₂) : f.normalization ⟶ T\n```\nすなわち「**すでに `T` を経由する分解が与えられていれば**降りる」向きで、\n`f₁ : X ⟶ T` を先に要求するので**そのままでは循環する**（2026-08-25 に再確認）。\n\n★中身はアフィン局所で「`Γ(Y,U)` の `L` における整閉包は `Γ(W, ψ⁻¹U)` に入る」だけだが、\nmathlib の正規化は貼り合わせ（`relativeGluingData`）で作られているので、\nその貼り合わせをもう一度書くことになる。\n\n★★★**`Theorem 6.2` の (ii)(iii)(iv) は `V₁ = V₂` の場合**であり、\nそこでは `ψ` が Frobenius（＝有限射）なので `normMap` と同じ筋で出る。\n**(i) の一般形だけ**がこの節点を要求する。",
+     "lean": "ABC3/Skeleton/Divisor/NormalizationUniversal.lean",
+     "decl": "ABC3.Skeleton.Divisor.exists_toNormalizationIn / exists_normalizationIn_map"
     }
    ]
   },
@@ -3431,12 +3444,13 @@
      "title": "(i) 仮定 (a) から `Φ₁ → Φ₂|𝒟₁`、`B₁ → B₂|𝒟₁`(因子と有理函数の引き戻し)",
      "deps": [
       "thm62-i-Dfun",
-      "cartier-pullback"
+      "cartier-pullback",
+      "normalization-universal-normal"
      ],
-     "status": "todo",
+     "status": "skeleton",
      "size": "★大",
-     "note": "★★ここが `cartier-pullback` を直接消費する。\n\n★★★2026-08-21（**次の一手の測定**）：`thm62-i-Dfun` が閉じたので、\nこの節点が要求するものが確定した —— **「幾何のデータの射」という構造がまだ無い**。\n\n原文 `Theorem 6.2, (i)` は 2 つの幾何のデータ\n`(V₁, K̄₁, D_{K₁})` と `(V₂, K̄₂, D_{K₂})` の間の射（仮定 (a)(b)(c)）から\n`Ψ : C₁ → C₂` を作る。★我々の側では:\n* 底の関手 `𝒟₁ → 𝒟₂` は **`compFunctor` で在庫**（`thm62-i-Dfun`）\n* `Φ₁ → Φ₂ ∘ ψ` は **`cartierPullback`（在庫）を `V₂ → V₁` に沿って当てる**段\n* `B₁ → B₂ ∘ ψ` は **`normFFUnits`（在庫）** の対応する段\n\n★★したがって残るのは「幾何のデータの射」の**構造の定義**である:\n`V₂ → V₁` の支配射 ＋ `K̄₁ → K̄₂` の埋め込み ＋ `D_{K₁}` の引き戻しが `D_{K₂}` に入ること。\n★これを置けば `thm62-i-pull` は在庫の組み立てになる（新しい数学は無い）。\n\n★★★★★2026-08-21（第 2 弾、**在庫不足を特定した**）：原文を読み直すと `Theorem 6.2, (i)` の\n`ψ : V₂ → V₁` は**支配射であるだけ**（有限でも整でもない）。したがって因子を引き戻すには\n\n  `V₂[K₂(L)] ⟶ V₁[L]`\n\nが要る。★これは「**正規スキームからの支配射は相対正規化を経由する**」という\n正規化の普遍性であり、★★**mathlib の `Scheme.Hom.normalizationDesc` では出ない** ——\n`normalizationDesc` は正規化から**出る**射しか作らず、しかも行き先が底の上でアフィンであることを要求する。\n`V₂[K₂(L)]` は `V₁` の上でアフィンではない（`ψ` が有限でない）。\n\n★★したがって新しい節点が要る:\n**`normalization-universal-normal`** —— `W` が正規整スキーム、`W → Y` が支配的で\n`K(W) ⊇ L` なら `W → Y[L]` が一意に定まること。\n★中身はアフィン局所で「`Γ(Y,U)` の `L` における整閉包は `Γ(W, ·)` に入る」だけだが、\nmathlib の正規化は貼り合わせで作られているので、その貼り合わせをもう一度書くことになる。\n\n★★★**ただし `Theorem 6.2` の (ii)(iii)(iv) は `V₁ = V₂` の場合**であり、\nそこでは `ψ` が Frobenius（＝有限射）なので `normMap` と同じ筋で出る。\n★(i) の一般形だけがこの節点を要求する。",
-     "lean": "",
+     "note": "★★ここが `cartier-pullback` を直接消費する。\n\n★★★2026-08-21（**次の一手の測定**）：`thm62-i-Dfun` が閉じたので、\nこの節点が要求するものが確定した —— **「幾何のデータの射」という構造がまだ無い**。\n\n原文 `Theorem 6.2, (i)` は 2 つの幾何のデータ\n`(V₁, K̄₁, D_{K₁})` と `(V₂, K̄₂, D_{K₂})` の間の射（仮定 (a)(b)(c)）から\n`Ψ : C₁ → C₂` を作る。★我々の側では:\n* 底の関手 `𝒟₁ → 𝒟₂` は **`compFunctor` で在庫**（`thm62-i-Dfun`）\n* `Φ₁ → Φ₂ ∘ ψ` は **`cartierPullback`（在庫）を `V₂ → V₁` に沿って当てる**段\n* `B₁ → B₂ ∘ ψ` は **`normFFUnits`（在庫）** の対応する段\n\n★★したがって残るのは「幾何のデータの射」の**構造の定義**である:\n`V₂ → V₁` の支配射 ＋ `K̄₁ → K̄₂` の埋め込み ＋ `D_{K₁}` の引き戻しが `D_{K₂}` に入ること。\n★これを置けば `thm62-i-pull` は在庫の組み立てになる（新しい数学は無い）。\n\n★★★★★2026-08-21（第 2 弾、**在庫不足を特定した**）：原文を読み直すと `Theorem 6.2, (i)` の\n`ψ : V₂ → V₁` は**支配射であるだけ**（有限でも整でもない）。したがって因子を引き戻すには\n\n  `V₂[K₂(L)] ⟶ V₁[L]`\n\nが要る。★これは「**正規スキームからの支配射は相対正規化を経由する**」という\n正規化の普遍性であり、★★**mathlib の `Scheme.Hom.normalizationDesc` では出ない** ——\n`normalizationDesc` は正規化から**出る**射しか作らず、しかも行き先が底の上でアフィンであることを要求する。\n`V₂[K₂(L)]` は `V₁` の上でアフィンではない（`ψ` が有限でない）。\n\n★★したがって新しい節点が要る:\n**`normalization-universal-normal`** —— `W` が正規整スキーム、`W → Y` が支配的で\n`K(W) ⊇ L` なら `W → Y[L]` が一意に定まること。\n★中身はアフィン局所で「`Γ(Y,U)` の `L` における整閉包は `Γ(W, ·)` に入る」だけだが、\nmathlib の正規化は貼り合わせで作られているので、その貼り合わせをもう一度書くことになる。\n\n★★★**ただし `Theorem 6.2` の (ii)(iii)(iv) は `V₁ = V₂` の場合**であり、\nそこでは `ψ` が Frobenius（＝有限射）なので `normMap` と同じ筋で出る。\n★(i) の一般形だけがこの節点を要求する。\n\n★★★★2026-08-25（**節点を立ててスケルトンを置いた**）：\n名指ししていた `normalization-universal-normal` を鎖 `normalize` に立て、\n`ABC3/Skeleton/Divisor/NormalizationUniversal.lean` にスケルトンを置いた\n（`exists_toNormalizationIn` / `toNormalizationIn_unique` / `exists_normalizationIn_map`）。\n★これが埋まれば本節点は**在庫の組み立て**になる（新しい数学は無い）。",
+     "lean": "ABC3/Skeleton/Divisor/NormalizationUniversal.lean",
      "decl": ""
     },
     {
@@ -3502,11 +3516,11 @@
      "id": "thm62-iv-slim",
      "title": "(iv) (formally) `Z_G(H) ≃ Aut(𝒟_{Spec L} → 𝒟)` から Frobenius-slim / slim / Div-slim の判定",
      "deps": [],
-     "status": "todo",
+     "status": "skeleton",
      "size": "★大",
-     "note": "★原文は [Mzk7] `Corollary 1.1.6` を引く(**他論文**)。副有限群が residually finite であることから形式的に出る、と原文は言う。",
-     "lean": "",
-     "decl": ""
+     "note": "★原文は [Mzk7] `Corollary 1.1.6` を引く(**他論文**)。副有限群が residually finite であることから形式的に出る、と原文は言う。\n\n★★★★2026-08-25（**中身を測ってスケルトンを置いた**）：\n`ABC3/Skeleton/FrdI/Thm62Slim.lean`。中身は 2 段:\n\n| 段 | 中身 | 在庫 |\n|---|---|---|\n| (a) | 副有限群は residually finite（開正規部分群の交わりが自明） | mathlib の `ClopenNhdofOne` ほか |\n| (b) | (a) から `IsSlimCat` / `IsFrobeniusSlim` / `IsDivSlim` の 3 条 | ★**在庫の組み立て** |\n\n★★`IsSlimCat`（`Prop113.lean`）・`IsFrobeniusSlim`（`Def31.lean`）・\n`IsDivSlim`（`Def45.lean`）はすべて実装済みで、`Cor411*.lean` に消費側が揃っている。\n★★★したがって**律速は (a) だけ**である。\n\n★[Mzk7] は `0_Source/` 未取得で `papers.json` に未登記なので、\n`.needs` では `.otherPaper` ではなく `.implicitStep` で受けている。",
+     "lean": "ABC3/Skeleton/FrdI/Thm62Slim.lean",
+     "decl": "ABC3.Skeleton.Thm62Slim.exists_open_normal_notMem / slim_of_centralizer"
     },
     {
      "id": "ex63-ord",
@@ -3635,9 +3649,9 @@
      ],
      "status": "半済",
      "size": "中",
-     "note": "★★mathlib に在る。原文は「an immediate consequence of the well-known Dirichlet unit theorem」。",
+     "note": "★★mathlib に在る。原文は「an immediate consequence of the well-known Dirichlet unit theorem」。\n\n★★★2026-08-25（**在庫の宣言名を確定した**）：\n`Mathlib/NumberTheory/NumberField/Units/DirichletTheorem.lean` に\n`NumberField.Units.rank` / `unitLattice_rank` / `logEmbeddingEquiv` / `unitLattice_span_eq_top`。\n★`δ_A : Pic_Φ(A) ≅ ℝ` はこれの言い換えなので、**残るのは Frobenioid 側への配線だけ**。",
      "lean": "",
-     "decl": ""
+     "decl": "NumberField.Units.rank / NumberField.Units.unitLattice_rank / logEmbeddingEquiv"
     },
     {
      "id": "thm64-ii-deg",
@@ -3645,11 +3659,11 @@
      "deps": [
       "thm64-i-dirichlet"
      ],
-     "status": "todo",
+     "status": "skeleton",
      "size": "★大",
-     "note": "★`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` が単系の同型なので順序を保つ、が本体。",
-     "lean": "",
-     "decl": ""
+     "note": "★`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` が単系の同型なので順序を保つ、が本体。\n\n★★★★2026-08-25（**核を特定してスケルトンを置いた**）：\n原文は「`Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂)` は単系の同型だから順序を保つ」と 1 行で書くが、\n★順序を保つのは**自明**（`ℝ≥0` では `a ≤ b ↔ ∃ c, a + c = b`、`monotone_of_addEquiv`）。\n★★**中身はその先**、すなわち\n\n```\n順序を保つ加法自己同型 f : ℝ≥0 ≃+ ℝ≥0  ⟹  ∃ c > 0, ∀ x, f x = c * x\n```\n\nである（`exists_smul_eq_of_addEquiv`）。加法性から `f(q·x) = q·f x`（`q : ℚ≥0`）、\n単調性と `ℚ` の稠密性で `f x = f 1 · x` に絞られる。\n★mathlib の `AddMonoidHom.toRealLinearMap` は**連続性を要求**するので直接は使えない。",
+     "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
+     "decl": "ABC3.Skeleton.Thm64.exists_smul_eq_of_addEquiv / monotone_of_addEquiv"
     },
     {
      "id": "thm64-iii-q",
@@ -3657,11 +3671,11 @@
      "deps": [
       "thm64-ii-deg"
      ],
-     "status": "半済",
+     "status": "skeleton",
      "size": "中",
-     "note": "★★**`Lemma 6.5, (ii)` は閉じた**(`Found/FrdI/Lemma65ii.lean`、six exponentials を `Found/SixExp/` で sorry なしに証明した)。残るのは「6 素点が取れる」段。",
-     "lean": "ABC3/Found/FrdI/Lemma65ii.lean",
-     "decl": "lemma_6_5_ii"
+     "note": "★★**`Lemma 6.5, (ii)` は閉じた**(`Found/FrdI/Lemma65ii.lean`、six exponentials を `Found/SixExp/` で sorry なしに証明した)。残るのは「6 素点が取れる」段。\n\n★★★2026-08-25（**スケルトンを置いた**）：`Lemma 6.5, (ii)`（six exponentials）は\n`Found/SixExp/` で **sorry なしに閉じている**。残るのは「6 素点が取れる」段だけで、\n`Lemma 6.5, (i)`（素数の対数の ℚ 上一次独立性、実装済み）から選べる。",
+     "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
+     "decl": "ABC3.Skeleton.Thm64.exists_six_primes_for_lemma65 / deg_rat_of_six_exp"
     },
     {
      "id": "thm64-iii-places",
@@ -3695,11 +3709,11 @@
      "deps": [
       "thm64-iv-cheb"
      ],
-     "status": "todo",
+     "status": "skeleton",
      "size": "★大",
-     "note": "",
-     "lean": "",
-     "decl": ""
+     "note": "\n\n★★★★2026-08-25（**スケルトンを置いた**）：\n★★**類体論は要らない**（2026-08-20 の測定のとおり）。使うのは\n`Skeleton/NumberField/Chebotarev.lean` の\n`nonempty_algHom_of_splitsCompletely_subset`（完全分解版）だけである。",
+     "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
+     "decl": "ABC3.Skeleton.Thm64.deg_eq_one_of_galois"
     }
    ]
   },
@@ -3713,7 +3727,7 @@
     "item": "Theorem 6.4, (iv)",
     "page": 116
    },
-   "★位置づけ": "★★`Theorem 6.4, (iv)` は Tchebotarev を **3 箇所**で使う（`thm64-iv-cheb` の note）。mathlib に `Chebotarev|Tchebotarev` は **0 件**である。★出典は [MilneCFT]（著者が無償公開している講義ノート）の Chapter V, Theorem 3.23（声明）／Chapter VIII, §7, Theorem 7.4（証明）。分解はその証明に 1 対 1 で対応させた。\n\n★★★★★★**2026-08-20 の訂正 —— 律速は Artin の相互法則ではなかった**。\n当初「(c) は密度を本当に要求し、律速は Artin の相互法則」と書いたが、**それは共役類つきの一般形についてであって、[FrdI] が使う 3 箇所はいずれも「完全分解」の場合に収まる**。完全分解の場合の密度 `1/[L:K]` は **Frobenius/Dedekind の古典的な論法**で出る:\n`log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)`、Galois なら `#{𝔭∣p, f=1}` は完全分解のとき `[L:K]`・それ以外は `0`、そして `ζ_L` は `s=1` で単純極 —— **使うのは mathlib 在庫の `dedekindZeta_residue` だけ**である。\n★★したがって **§6 に類体論は要らない**。残るのは解析側（Euler 積と `log ζ` の評価）とDirichlet 密度の語彙である。\n\n★★★**現在地**（2026-08-20）: 3 箇所のうち\n* (a) `[L_i:ℚ] = max deg` —— 迂回路の**前半（Schur の補題）・後半（Galois なら 1 つで決まる）は済**、残るのは Dedekind–Kummer の 1 段\n* (b) 完全分解の判定 —— ★**閉じた**（`cheb-split-count`）\n* (c) 完全分解の包含が体の包含を与える —— `cheb-split-density` 経由（類体論不要）",
+   "★位置づけ": "★★`Theorem 6.4, (iv)` は Tchebotarev を **3 箇所**で使う（`thm64-iv-cheb` の note）。mathlib に `Chebotarev|Tchebotarev` は **0 件**である。★出典は [MilneCFT]（著者が無償公開している講義ノート）の Chapter V, Theorem 3.23（声明）／Chapter VIII, §7, Theorem 7.4（証明）。分解はその証明に 1 対 1 で対応させた。\n\n★★★★★★**2026-08-20 の訂正 —— 律速は Artin の相互法則ではなかった**。\n当初「(c) は密度を本当に要求し、律速は Artin の相互法則」と書いたが、**それは共役類つきの一般形についてであって、[FrdI] が使う 3 箇所はいずれも「完全分解」の場合に収まる**。完全分解の場合の密度 `1/[L:K]` は **Frobenius/Dedekind の古典的な論法**で出る:\n`log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)`、Galois なら `#{𝔭∣p, f=1}` は完全分解のとき `[L:K]`・それ以外は `0`、そして `ζ_L` は `s=1` で単純極 —— **使うのは mathlib 在庫の `dedekindZeta_residue` だけ**である。\n★★したがって **§6 に類体論は要らない**。残るのは解析側（Euler 積と `log ζ` の評価）とDirichlet 密度の語彙である。\n\n★★★**現在地**（2026-08-20）: 3 箇所のうち\n* (a) `[L_i:ℚ] = max deg` —— 迂回路の**前半（Schur の補題）・後半（Galois なら 1 つで決まる）は済**、残るのは Dedekind–Kummer の 1 段\n* (b) 完全分解の判定 —— ★**閉じた**（`cheb-split-count`）\n* (c) 完全分解の包含が体の包含を与える —— `cheb-split-density` 経由（類体論不要）\n\n★★★★★★2026-08-25（**[FrdI] に要るのは 4 節点だけ**と確定）：\n`frdiNeeded` で仕分けた結果、22 節点のうち **[FrdI] が要求するのは**\n`cheb-density`（済）・`cheb-zeta`（mathlib）・`cheb-spl-infinite`（済）・\n`cheb-max-deg`（済）・`cheb-split-count`（済）に加えて\n**`cheb-euler` / `cheb-log-zeta` / `cheb-split-density` / `cheb-spl-det` の 4 本だけ**である。\n★★類体論の側（`cheb-reciprocity` / `cheb-hecke-l` / `cheb-L1-ne-zero` /\n`cheb-artin-map` / `cheb-rayclass` / `cheb-abelian` / `cheb-main` /\n`cheb-cyclic-reduce` / `cheb-bij-a` / `cheb-count-b`）は**すべて `frdiNeeded: false`** ——\n共役類つきの一般形にしか要らない。\n\n★★★使うのは **Dedekind ζ の `s=1` での極（mathlib 在庫）だけ**である\n（`NumberField.dedekindZeta_residue` / `tendsto_sub_one_mul_dedekindZeta_nhdsGT`、\n後者は Dirichlet の類数公式そのもの）。",
    "nodes": [
     {
      "id": "cheb-density",

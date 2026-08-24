@@ -14,6 +14,8 @@ import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
 import ABC3.Skeleton.FrdI.Def28ProL
 import ABC3.Skeleton.FrdI.Lemma65SixExp
+import ABC3.Skeleton.FrdI.Thm64Deg
+import ABC3.Skeleton.FrdI.Thm62Slim
 import ABC3.Skeleton.GaloisRep.TateUniformization
 import ABC3.Skeleton.GaloisRep.WeilFunctionField
 import ABC3.Skeleton.GaloisRep.PointReduction
@@ -25,6 +27,8 @@ import ABC3.Skeleton.Divisor.SchemeWeil
 import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Skeleton.Divisor.ArithDivisor
 import ABC3.Skeleton.Divisor.Normalization
+import ABC3.Skeleton.Divisor.Hartogs
+import ABC3.Skeleton.Divisor.NormalizationUniversal
 import ABC3.Skeleton.NumberField.Chebotarev
 /-!
 # Skeleton — 論文の主張(証明しない)
