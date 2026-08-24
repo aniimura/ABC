@@ -6,7 +6,7 @@ import ABC3.Found.FrdI.Thm52Model
 import ABC3.Found.FrdI.Cor54Seam
 
 /-!
-# [FrdI] Corollary 5.4 の継ぎ目の本体 —— `F-𝒫-path` の類は `Ψ` で運べる
+# [FrdI] Corollary 5.4 の縦の矢印の継ぎ目 —— 基準切断を揃えれば閉じる
 
 原文 (FrdI p.104):
 > with the 1-commutative diagram of Proposition 5.3 [involving perfections, unit-
@@ -21,6 +21,9 @@ import ABC3.Found.FrdI.Cor54Seam
 |---|---|
 | `FPPath.mapAlong` | ★`F-𝒫-path` を `Ψ` で送る(`Ψ` が pre-step と `𝒫` を保てばよい) |
 | `FPPath.gpMap_cls_mapAlong` | ★★★★★**運んだ path の類は、もとの類を `η` で送ったものと一致** |
+| `pathSeamIso` | ★★★★★★`PathCat` の層の 1-可換図式(**条なし**) |
+| `conjIsoOfSquare` | ★★★★四角形を擬逆で共役する(一般補題) |
+| `cSeamIso` | ★★★★★★**`𝒞` の層の 1-可換図式(条なし)** —— 継ぎ目そのもの |
 
 ## ★★中身(記録)
 
@@ -40,16 +43,21 @@ FPPath.cls p = -spanCls p.toObj _ p.toRef
 
 という 1 本で、これは `sq` の `toObj` での自然性の**両側を逆射でずらしたもの**である。
 
-★★★これで「基準を揃えれば `γ(d) = 0`」が**計算として**確かめられた ——
-`Cor54SeamUnTr.lean` の `hex` は、`S₂ := S₁.map Ψ`(在庫 `BaseSection.map`、
-`Corollary 5.7, (i)`)と取れば `u = 0` で満たせる、というのが本ファイルの帰結である。
+★★★これで「基準を揃えれば `γ(d) = 0`」が**計算として**確かめられ、
+そのまま `pathSeamIso`(`PathCat` の層)→ `cSeamIso`(`𝒞` の層)と組み上がった。
+
+★★★★★**結論**: `Corollary 5.4` の縦の矢印の継ぎ目は、
+`modelType_equiv`(`Classical.choice` が切断を選ぶ)ではなく
+**`thm_5_2_iv` を使って切断を明示し、`S₂ := Ψ_*(S₁)`(在庫 `BaseSection.map`、
+`Corollary 5.7, (i)`)と揃えれば、仮定なしで 1-可換**である。
+`Cor54SeamUnTr.lean` の `hex` は、この形では**そもそも要らない**。
 -/
 
 namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w u2 v2
+universe v u w u2 v2 uA vA uB vB uA2 vA2 uB2 vB2
 
 section ClsMap
 
@@ -258,6 +266,106 @@ end PathSeam
 
 end ClsMap
 
+/-! ## ★4. 圏同値で `𝒞` の層へ降ろす -/
+
+section Conj
+
+variable {A : Type uA} [Category.{vA} A] {B : Type uB} [Category.{vB} B]
+  {A' : Type uA2} [Category.{vA2} A'] {B' : Type uB2} [Category.{vB2} B']
+
+/-- ★★★★**四角形を擬逆で共役する** ——
+`K ⋙ F₂ = F₁ ⋙ H` かつ `F₁` `F₂` が圏同値なら `F₁⁻¹ ⋙ K ≅ H ⋙ F₂⁻¹`。
+
+★`Theorem 5.2, (iv)` の圏同値は `𝒞̃ ⥤ 𝒞` の擬逆を経由するので、
+`PathCat` の層で作った 1-可換図式を `𝒞` の層へ降ろすのにこれが要る。 -/
+noncomputable def conjIsoOfSquare (F₁ : A ⥤ B) [F₁.IsEquivalence]
+    (F₂ : A' ⥤ B') [F₂.IsEquivalence] (K : A ⥤ A') (H : B ⥤ B')
+    (h : K ⋙ F₂ = F₁ ⋙ H) :
+    F₁.asEquivalence.inverse ⋙ K ≅ H ⋙ F₂.asEquivalence.inverse :=
+  Functor.isoWhiskerLeft F₁.asEquivalence.inverse
+      ((Functor.rightUnitor K).symm
+        ≪≫ Functor.isoWhiskerLeft K F₂.asEquivalence.unitIso
+        ≪≫ (Functor.associator K F₂ F₂.asEquivalence.inverse).symm
+        ≪≫ Functor.isoWhiskerRight (eqToIso h) F₂.asEquivalence.inverse
+        ≪≫ Functor.associator F₁ H F₂.asEquivalence.inverse)
+    ≪≫ (Functor.associator F₁.asEquivalence.inverse F₁
+          (H ⋙ F₂.asEquivalence.inverse)).symm
+    ≪≫ Functor.isoWhiskerRight F₁.asEquivalence.counitIso
+        (H ⋙ F₂.asEquivalence.inverse)
+    ≪≫ Functor.leftUnitor _
+
+end Conj
+
+section CSeam
+
+variable {D₁ : Type u} [Category.{v} D₁] {C₁ : Type u2} [Category.{v2} C₁]
+  {Φ₁ : MonoidOn.{v, u, w} D₁} {P₁ : PreFrobenioid C₁ Φ₁}
+  {D₂ : Type u} [Category.{v} D₂] {C₂ : Type u2} [Category.{v2} C₂]
+  {Φ₂ : MonoidOn.{v, u, w} D₂} {P₂ : PreFrobenioid C₂ Φ₂}
+  [IsConnected D₁] [IsConnected D₂]
+
+/-- ★★`Ψ̃` は忘却関手と**厳密に**可換(`rfl`)。 -/
+theorem pathMapAlong_pathForget (Ψ : C₁ ⥤ C₂) {S₁ : BaseSection P₁} {S₂ : BaseSection P₂}
+    (hsec : ∀ {A : C₁}, S₁.objP A → S₂.objP (Ψ.obj A))
+    (hPS : ∀ {A B : C₁} (f : A ⟶ B), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f)) :
+    pathMapAlong Ψ hsec hPS ⋙ pathForget S₂ = pathForget S₁ ⋙ Ψ := rfl
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 5.4 の縦の矢印の継ぎ目**(`𝒞` の層、**条なし**)——
+
+```
+𝒞₁ ≌ Model₁ --Ψ^model--> Model₂
+ |                         ‖
+ Ψ                         ‖
+ v                         ‖
+𝒞₂ ≌ Model₂ ═══════════════╝
+```
+
+★★`Theorem 5.2, (iv)` の圏同値(`thm_5_2_iv`)を**切断を明示して**取り、
+`S₂` を `Ψ` と揃えて取れば(`hsec`)、この四角形は**仮定なしで 1-可換**である。
+
+★★★`Cor54SeamUnTr.lean` の測定「基準切断を揃えないと帳尻が合わない」への回答が
+これである —— `modelType_equiv`(`Classical.choice` が切断を選ぶ)ではなく
+`thm_5_2_iv` を使い、`S₂ := Ψ_*(S₁)`(在庫 `BaseSection.map`、`Corollary 5.7, (i)`)
+と取れば、残っていた帳尻は**消える**。 -/
+noncomputable def cSeamIso (Ψ : C₁ ⥤ C₂) (ΨB : D₁ ⥤ D₂)
+    (η : Φ₁.functor ≅ ΨB.op ⋙ Φ₂.functor)
+    (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
+    (hdivc : ∀ {A B : C₁} (φ : A ⟶ B),
+      phiIsoApp ΨB η ((P₁.toElem.obj A).base) (P₁.Div φ)
+        = Φ₂.map (sq.hom.app A) (P₂.Div (Ψ.map φ)))
+    (hdegc : ∀ {A B : C₁} (φ : A ⟶ B), P₁.degFr φ = P₂.degFr (Ψ.map φ))
+    {G₁ : Frobenioid P₁} (R₁ : RatFnData P₁ G₁)
+    (hiso₁ : ∀ Y : C₁, IsIsotropic P₁ Y)
+    (hfn₁ : ∀ Z : BiratCat P₁ G₁, IsFrobeniusNormalized (biratPre P₁ G₁) Z)
+    {S₁ : BaseSection P₁} (Fs₁ : ℕ+ →* SectionEnd S₁) (hFs₁ : IsFrobeniusSection S₁ Fs₁)
+    {G₂ : Frobenioid P₂} (R₂ : RatFnData P₂ G₂)
+    (hiso₂ : ∀ Y : C₂, IsIsotropic P₂ Y)
+    (hfn₂ : ∀ Z : BiratCat P₂ G₂, IsFrobeniusNormalized (biratPre P₂ G₂) Z)
+    {S₂ : BaseSection P₂} (Fs₂ : ℕ+ →* SectionEnd S₂) (hFs₂ : IsFrobeniusSection S₂ Fs₂)
+    (hsec : ∀ {A : C₁}, S₁.objP A → S₂.objP (Ψ.obj A))
+    (hPS : ∀ {A B : C₁} (f : A ⟶ B), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (Fo : ModelDataHomOver ΨB R₁.model R₂.model)
+    (hphi : ∀ d : D₁, Fo.phiHom d = phiIsoApp ΨB η d)
+    (hinj : ∀ d : D₂, Function.Injective (R₂.divB d)) :
+    (thm_5_2_iv R₁ hiso₁ hfn₁ S₁ Fs₁ hFs₁).functor ⋙ Fo.functor
+      ≅ Ψ ⋙ (thm_5_2_iv R₂ hiso₂ hfn₂ S₂ Fs₂ hFs₂).functor := by
+  haveI := pathForget_isEquivalence G₁ S₁
+  haveI := pathForget_isEquivalence G₂ S₂
+  haveI := pathToModel_isEquivalence R₁ hiso₁ hfn₁ S₁ Fs₁ hFs₁
+  haveI := pathToModel_isEquivalence R₂ hiso₂ hfn₂ S₂ Fs₂ hFs₂
+  have hκ := conjIsoOfSquare (pathForget S₁) (pathForget S₂)
+    (pathMapAlong Ψ hsec hPS) Ψ (pathMapAlong_pathForget Ψ hsec hPS)
+  exact Functor.associator _ _ _
+    ≪≫ Functor.isoWhiskerLeft (pathForget S₁).asEquivalence.inverse
+        (pathSeamIso Ψ ΨB η sq hdivc hdegc R₁ hiso₁ hfn₁ Fs₁ hFs₁
+          R₂ hiso₂ hfn₂ Fs₂ hFs₂ hsec hPS Fo hphi hinj)
+    ≪≫ (Functor.associator _ _ _).symm
+    ≪≫ Functor.isoWhiskerRight hκ (pathToModel R₂ hiso₂ hfn₂ S₂ Fs₂ hFs₂)
+    ≪≫ Functor.associator _ _ _
+
+end CSeam
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★★locator —— `Corollary 5.4` の継ぎ目の本体
@@ -266,5 +374,21 @@ def FPPath.gpMap_cls_mapAlong.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
     item := "Corollary 5.4 — 継ぎ目の本体(F-𝒫-path の類は Ψ で運べる)",
     sectionId := "frdi-cor-5-4" }
+
+/-- ★★★★★★locator —— `Corollary 5.4` の縦の矢印の継ぎ目(`𝒞` の層、**条なし**)。
+
+★`Theorem 5.2, (iv)` の圏同値を切断を明示して取り、`S₂` を `Ψ` と揃えれば
+四角形は仮定なしで 1-可換になる。 -/
+def cSeamIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Corollary 5.4 — 縦の矢印の継ぎ目(𝒞 の層、基準切断を揃えた形)",
+    sectionId := "frdi-cor-5-4" }
+
+/-- ★★★★locator —— 四角形を擬逆で共役する一般補題
+(`Theorem 5.2, (iv)` の圏同値を `𝒞` の層へ降ろすのに要る)。 -/
+def conjIsoOfSquare.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 101,
+    item := "Theorem 5.2, (iv) — 四角形を擬逆で共役する(𝒞̃ から 𝒞 へ降ろす)",
+    sectionId := "frdi-thm-5-2" }
 
 end ABC3.Found.FrdI
