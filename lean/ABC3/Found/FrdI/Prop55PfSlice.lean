@@ -272,6 +272,43 @@ theorem biratDivGp_biratPfHom_toHomPf (hfi : IsOfFrobeniusIsotropicType P)
   exact biratDivGp_toRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.1
     Z.unop.hom.property.2 ψ
 
+/-- ★★★**自然な関手は底を動かさない**(代表元を取って `biratBase_toRootHom`)。 -/
+theorem biratBase_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (ε : HomBirat P G A B) :
+    biratBase (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A B (toHomPf (F := F') ε)) = biratBase ε := by
+  obtain ⟨Z, ψ, hZ⟩ := HomBirat.exists_rep ε
+  subst hZ
+  exact (congrArg (biratBase (P := pfRootPre P F) (G := Gpf))
+      (biratPfHom_toHomPf_mk hfi Gpf F' Z ψ)).trans
+    (biratBase_toRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2 ψ)
+
+/-- ★★★**自然な関手は次数を動かさない**。 -/
+theorem biratDeg_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (ε : HomBirat P G A B) :
+    biratDeg (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A B (toHomPf (F := F') ε)) = biratDeg ε := by
+  obtain ⟨Z, ψ, hZ⟩ := HomBirat.exists_rep ε
+  subst hZ
+  exact (congrArg (biratDeg (P := pfRootPre P F) (G := Gpf))
+      (biratPfHom_toHomPf_mk hfi Gpf F' Z ψ)).trans
+    (biratDeg_toRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.1
+      Z.unop.hom.property.2 ψ)
+
+/-- ★★★**自然な関手は `Div^gp` を `Pf.of` で移す**(一般の元について)。 -/
+theorem biratDivGp_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (ε : HomBirat P G A B) :
+    biratDivGp (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A B (toHomPf (F := F') ε))
+      = gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base)) (biratDivGp ε) := by
+  obtain ⟨Z, ψ, hZ⟩ := HomBirat.exists_rep ε
+  subst hZ
+  exact biratDivGp_biratPfHom_toHomPf hfi Gpf F' Z ψ
+
 end Birat
 
 /-! ### ★出典の紐付け -/
