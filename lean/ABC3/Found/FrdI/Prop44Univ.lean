@@ -73,6 +73,38 @@ theorem HomBirat.desc_ext {A B : C} {T : Type (max v u2 v2)}
       g (HomBirat.mk Z φ) = h (HomBirat.mk Z φ)) : g = h :=
   HomColim.desc_ext (homFunctorBirat P G A B) g h (fun Z x => hgh Z x.down)
 
+
+/-! ## ★1-b. 分数の基本関係 —— **分母を前合成すると分子に戻る** -/
+
+/-- ★★★★★★**`𝒞^birat` の分数の基本関係** ——
+`HomBirat.mk Z ψ` は分数 `ψ ∘ (Z.hom)⁻¹` であり、**分母を前から掛けると分子に戻る**:
+
+```
+[Z.hom] ≫ HomBirat.mk Z ψ = [ψ]
+```
+
+★★**要点は `Definition 1.3, (v)(a)`(`preStepMono`、pre-step は mono)**である ——
+`compBirat_mk` が出す引き戻しの 2 本 `γ`, `α` は
+四角形 `γ ≫ z = α ≫ z` を満たすので、`z` が mono なら `γ = α`。
+あとは在庫の遷移射 `biratPullHom` で `HomBirat.mk_map` に流すだけ。
+
+★これが `Proposition 5.5, (ii)` の橋渡し(`Θ.map` の全単射性)で要る形。 -/
+theorem toHomBirat_comp_mk {B E : C} (Z : IdxBirat P G B) (ψ : Z.unop.left.obj ⟶ E) :
+    compBirat P G G.core (toHomBirat (P := P) (G := G) Z.unop.hom.hom) (HomBirat.mk Z ψ)
+      = toHomBirat (P := P) (G := G) ψ := by
+  haveI : Mono Z.unop.hom.hom := G.core.preStepMono _ Z.unop.hom.property.2
+  have hsq := biratPull_sq G.core (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom Z
+  have hga : biratPullGamma G.core (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom Z
+      = biratPullAlpha G.core (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom Z :=
+    (cancel_mono Z.unop.hom.hom).mp hsq
+  show compBirat P G G.core
+      (HomBirat.mk (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom) (HomBirat.mk Z ψ) = _
+  rw [compBirat_mk]
+  refine Eq.trans (congrArg
+    (HomBirat.mk (biratPullIdx G.core (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom Z))
+    (congrArg (fun t => t ≫ ψ) hga.symm)) ?_
+  exact HomBirat.mk_map
+    (biratPullHom G.core (idxBiratOne P G Z.unop.left.obj) Z.unop.hom.hom Z) ψ
 /-! ## ★2. `co-angular pre-step` を同型に送る関手は `Hom^birat` を経由する -/
 
 variable {E : Type uE} [Category.{max v u2 v2} E]
