@@ -875,6 +875,111 @@ theorem mem_qPhiBiratOn_iff_nsmul_mem (hfi : IsOfFrobeniusIsotropicType P)
       (phiBiratOn_pf_le_qPhiBiratOn hfi hiso Gpf F' A hisoB hfnBirat hAB hfnB hfnB'
         ζ hdeg hprop hk)
 
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★**`(Φ^pf)^birat` は飽和(可除)** —— `ℚ·Φ^birat ⊆ (Φ^pf)^birat`。
+
+★★★筋: `k·x ∈ (Φ^pf)^birat` を `Div^gp δ'` と書き、`δ'` を `𝒞^birat` の完全化の
+`x₀` へ戻し(`Proposition 5.5, (ii)` の全単射)、`x₀` の `k` 乗根 `x₁` を取る
+(`hom_pf_root`、`Proposition 5.5, (i)` の可除性)。
+その像 `δ''` は `𝒪^×` に入り、`k · Div^gp δ'' = Div^gp δ' = k · x` となる。
+★最後に `Gp (Pf M)` の torsion-free 性(`gp_pf_isTorsionFreeNaive`)で
+`x = Div^gp δ''` が確定する。 -/
+theorem qPhiBiratOn_le_phiBiratOn_pf (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
+    (hfnPfBirat : ∀ X : BiratCat (pfRootPre P F) Gpf,
+      IsFrobeniusNormalized (biratPre (pfRootPre P F) Gpf) X) :
+    qPhiBiratOn P G ((P.toElem.obj A).base)
+      ≤ phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base) := by
+  rintro x ⟨k, hk⟩
+  have hkm : ((k : ℕ+) : ℕ) • x
+      ∈ phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base) :=
+    phiBiratPfImage_le_phiBiratOn hfi hiso Gpf F' A hk
+  rw [phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi) (⟨A, 1⟩ : PfRootObj P F)]
+    at hkm ⊢
+  obtain ⟨δ', hδ', hd⟩ := hkm
+  obtain ⟨x₀, hx₀⟩ := biratPfHom_surjective hfi hiso Gpf F' A A δ'
+  have hδ0 : biratPfEndHom hfi Gpf F' A x₀
+      ∈ OTimes (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) := by
+    show biratPfHom hfi Gpf F' A A x₀ ∈ _
+    rw [hx₀]
+    exact hδ'
+  have hxr := otri_of_otimes_biratPfHom hfi Gpf F' A hδ0
+  obtain ⟨x₁, hx₁r, hx₁p⟩ :=
+    hom_pf_root (F := F') hisoB hAB hfnB hfnB' ζ hdeg hprop x₀ hxr k
+  have hx₁u := mem_otri_endRootOneEquiv_symm_of (F := F') (biratUp P G A) x₁ hx₁r
+  -- `δ''` とその `𝒪^×` 所属
+  have hotri : (biratPfEndHom hfi Gpf F' A x₁ :
+      End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)))
+      ∈ OTri (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) := by
+    obtain ⟨hb₁, hl₁⟩ := hx₁u
+    refine ⟨?_, ?_⟩
+    · show biratBase (P := pfRootPre P F) (G := Gpf) (biratPfHom hfi Gpf F' A A x₁)
+        = biratBase (P := pfRootPre P F) (G := Gpf)
+          (𝟙 (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)))
+      rw [biratBase_biratPfHom_eq, biratBase_id]
+      exact (isBaseIdentity_pf_iff (P := biratPre P G) (F := F') x₁).mp hb₁
+    · show biratDeg (P := pfRootPre P F) (G := Gpf) (biratPfHom hfi Gpf F' A A x₁) = 1
+      rw [biratDeg_biratPfHom_eq]
+      exact hl₁
+  have hotimes := otri_mem_otimes_birat (P := pfRootPre P F) (G := Gpf) hfnPfBirat
+    (birat_isotropic_up (pfRootPre P F) Gpf (pfRoot_isOfIsotropicType (F := F) hfi _)) hotri
+  refine ⟨(biratPfEndHom hfi Gpf F' A x₁ :
+    End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))), hotimes, ?_⟩
+  -- `k · Div^gp δ'' = k · x` から torsion-free 性で結論
+  have hpow : (biratPfEndHom hfi Gpf F' A x₁) ^ ((k : ℕ+) : ℕ)
+      = biratPfEndHom hfi Gpf F' A x₀ := by
+    rw [← map_pow, hx₁p]
+  have hkey : ((k : ℕ+) : ℕ) • biratDivGp (P := pfRootPre P F) (G := Gpf)
+      ((biratPfEndHom hfi Gpf F' A x₁ :
+        End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _)
+      = ((k : ℕ+) : ℕ) • x := by
+    rw [← biratDivGp_pow_otimes hotimes ((k : ℕ+) : ℕ), hpow]
+    exact (congrArg
+      (fun t : End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) =>
+        biratDivGp (P := pfRootPre P F) (G := Gpf) ((t : _ ⟶ _))) hx₀).trans hd
+  exact eq_of_nsmul_eq_gp_pf ((k : ℕ+) : ℕ) k.pos hkey
+
+/-- ★★★★★★★**`Proposition 5.5, (iv)` の単系の同定** ——
+**`(Φ^pf)^birat = ℚ·Φ^birat`**。
+
+原文 (FrdI p.105):
+> Finally, assertion (iv) is immediate from the definitions [cf. also assertions (i), (ii);
+-/
+theorem phiBiratOn_pf_eq_qPhiBiratOn (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
+    (hfnPfBirat : ∀ X : BiratCat (pfRootPre P F) Gpf,
+      IsFrobeniusNormalized (biratPre (pfRootPre P F) Gpf) X) :
+    phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base)
+      = qPhiBiratOn P G ((P.toElem.obj A).base) :=
+  le_antisymm
+    (phiBiratOn_pf_le_qPhiBiratOn hfi hiso Gpf F' A hisoB hfnBirat hAB hfnB hfnB' ζ hdeg hprop)
+    (qPhiBiratOn_le_phiBiratOn_pf hfi hiso Gpf F' A hisoB hAB hfnB hfnB' ζ hdeg hprop hfnPfBirat)
+
 end Birat
 
 /-! ### ★出典の紐付け -/
@@ -899,6 +1004,20 @@ def phiBiratOn_pf_mem.src : ABC3.Meta.Source :=
 def biratDivGp_nsmul_mem_pfImage.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iv) — (Φ^pf)^birat の元は分母を払えば Φ^birat に戻る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★★locator —— **`Proposition 5.5, (iv)` の単系の同定**
+`(Φ^pf)^birat = ℚ·Φ^birat`(原文が「immediate from the definitions
+[cf. also assertions (i), (ii)]」と畳んだ所)。 -/
+def phiBiratOn_pf_eq_qPhiBiratOn.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iv) — (Φ^pf)^birat = ℚ·Φ^birat(単系の同定)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★locator —— `(Φ^pf)^birat` は飽和(可除)。 -/
+def qPhiBiratOn_le_phiBiratOn_pf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iv) — (Φ^pf)^birat は可除(k 乗根が中にある)",
     sectionId := "frdi-prop-5-5" }
 
 /-- ★★★★locator —— `Proposition 5.5, (ii)` の全単射を自己射の単系の準同型に束ねたもの。 -/

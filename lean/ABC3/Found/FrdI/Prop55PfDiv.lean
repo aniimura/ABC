@@ -406,6 +406,12 @@ theorem mem_otri_endRootOneEquiv_symm (A : C) (x : End (pfObjOf P F A))
   exact mem_otri_conj (pfPre P F)
     ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))) x hx
 
+/-- ★★`Gp (Pf M)` では正の整数倍は単射。 -/
+theorem eq_of_nsmul_eq_gp_pf {M : Type w} [AddCommMonoid M] {a b : Gp (Pf M)} (n : ℕ)
+    (hn : 0 < n) (h : n • a = n • b) : a = b :=
+  sub_eq_zero.mp
+    (gp_pf_isTorsionFreeNaive (M := M) (a - b) n hn (by rw [smul_sub, h, sub_self]))
+
 /-- ★★同型による共役は `𝒪^▷` を**反射**もする(`mem_otri_conj` を逆向きの同型に当てる)。 -/
 theorem mem_otri_endRootOneEquiv_symm_of (A : C) (x : End (pfObjOf P F A))
     (hx : (endRootOneEquiv (F := F) A).symm x
