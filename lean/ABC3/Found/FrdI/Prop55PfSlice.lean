@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Prop55PfDiv
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop55PfKappa
+import ABC3.Found.FrdI.Prop55BiratPf
 
 /-!
 # [FrdI] `𝒞 → 𝒞^pf` は双有理射の `Div^gp` を `Pf.of` で移す
@@ -147,6 +148,97 @@ theorem biratDivGp_toRootHom {G : Frobenioid P} (Gpf : Frobenioid (pfRootPre P F
         (biratDivGp (HomBirat.mk (idxBiratMk P G a hac has) φ)) := by
   rw [biratDivGp_mk, biratDivGp_mk]
   exact sliceDivGpOf_toRootHom a has.2 φ
+
+/-! ## ★4. 自然な関手 `𝒞^birat ⟶ (𝒞^pf)^birat` を代表元の上で計算する
+
+★★`Proposition 5.5, (ii)` の `biratPfHom` と、`𝒞^birat` の完全化(根 1)への
+標準射 `toHomPf` を合成したものが、原文の言う自然な関手である。
+★★★**その代表元での値がちょうど `toRootHom` の像になる**ことを見る ——
+これで「`Φ^birat` の像が `(Φ^pf)^birat` に入る」が閉じる。
+
+★鍵は `W := idxOne` のとき `biratPfDeg = 1` で、
+`biratPfIsoA'` / `biratPfIsoB'` が**次数 1 の `rootLift`＝恒等射**になること。 -/
+
+section Birat
+
+variable {G : Frobenioid P} [IsConnected D]
+
+/-- ★★根 1 では `rootMap` は `toRootHom` そのもの(`κ_A = 𝟙`)。 -/
+theorem rootMap_one (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) :
+    rootMap (F := F) hfi f 1 = toRootHom (F := F) f := by
+  refine rootMap_ext hfi _ _ ?_
+  rw [rootMap_spec, pfKappa_one, pfKappa_one, Category.comp_id, Category.id_comp]
+
+/-- ★★次数 1 の恒等射の `rootLift` は恒等射。 -/
+theorem rootLift_id_one (hfi : IsOfFrobeniusIsotropicType P) {A : C}
+    (h : P.degFr (𝟙 A) = 1) :
+    rootLift (F := F) hfi (𝟙 A) 1 h = 𝟙 (⟨A, 1⟩ : PfRootObj P F) := by
+  have hs := rootLift_spec (F := F) hfi (𝟙 A) 1 h
+  rw [pfKappa_one, Category.comp_id, toRootHom_id] at hs
+  exact hs
+
+theorem biratPfIsoA'_idxOne_inv (hfi : IsOfFrobeniusIsotropicType P) (A B : C)
+    (h : P.degFr (idxOne P F A B).hom.hom.1 = 1) :
+    (biratPfIsoA' (F := F) hfi (idxOne P F A B) 1 h).inv = 𝟙 (⟨A, 1⟩ : PfRootObj P F) := by
+  have hh : (biratPfIsoA' (F := F) hfi (idxOne P F A B) 1 h).hom
+      = 𝟙 (⟨A, 1⟩ : PfRootObj P F) := rootLift_id_one hfi h
+  have h2 := (biratPfIsoA' (F := F) hfi (idxOne P F A B) 1 h).hom_inv_id
+  rw [hh] at h2
+  exact (Category.id_comp _).symm.trans h2
+
+theorem biratPfIsoB'_idxOne_inv (hfi : IsOfFrobeniusIsotropicType P) (A B : C)
+    (h : P.degFr (idxOne P F A B).hom.hom.2 = 1) :
+    (biratPfIsoB' (F := F) hfi (idxOne P F A B) 1 h).inv = 𝟙 (⟨B, 1⟩ : PfRootObj P F) := by
+  have hh : (biratPfIsoB' (F := F) hfi (idxOne P F A B) 1 h).hom
+      = 𝟙 (⟨B, 1⟩ : PfRootObj P F) := rootLift_id_one hfi h
+  have h2 := (biratPfIsoB' (F := F) hfi (idxOne P F A B) 1 h).hom_inv_id
+  rw [hh] at h2
+  exact (Category.id_comp _).symm.trans h2
+
+/-- ★★★`W := idxOne` のときの `biratPfMk'` は `toRootHom` の像そのもの。 -/
+theorem biratPfMk'_idxOne (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C}
+    (hA : P.degFr (idxOne P F A B).hom.hom.1 = 1)
+    (hB : P.degFr (idxOne P F A B).hom.hom.2 = 1)
+    (Z : IdxBirat P G A) (ψ : Z.unop.left.obj ⟶ B) :
+    biratPfMk' hfi Gpf (idxOne P F A B) 1 hA hB Z ψ
+      = HomBirat.mk (idxBiratToRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.2)
+        (toRootHom (F := F) ψ) := by
+  refine homBirat_mk_congr ?_ _ _ _ _ ?_
+  · rw [rootMap_one, biratPfIsoA'_idxOne_inv]
+    exact Category.comp_id _
+  · rw [rootMap_one, biratPfIsoB'_idxOne_inv]
+    exact Category.comp_id _
+
+/-- ★★★★★**自然な関手 `𝒞^birat ⟶ (𝒞^pf)^birat` の代表元での値**。 -/
+theorem biratPfHom_toHomPf_mk (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (Z : IdxBirat P G A) (ψ : Z.unop.left.obj ⟶ B) :
+    biratPfHom hfi Gpf F' A B (toHomPf (F := F') (HomBirat.mk Z ψ))
+      = HomBirat.mk (idxBiratToRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.2)
+        (toRootHom (F := F) ψ) :=
+  (biratPfHom_mk hfi Gpf F' A B (idxOne P F A B) (HomBirat.mk Z ψ)).trans
+    (((biratPf_mk hfi Gpf (idxOne P F A B) Z ψ).trans
+      (biratPfMk'_eq hfi Gpf (idxOne P F A B) 1 (P.degFr_id A) (P.degFr_id B) Z ψ).symm).trans
+      (biratPfMk'_idxOne hfi Gpf (P.degFr_id A) (P.degFr_id B) Z ψ))
+
+/-- ★★★★★★**自然な関手は `Div^gp` を `Pf.of` で移す**(代表元の版)。
+
+★★★これが `Proposition 5.5, (iv)` の単系の同定の「片側」——
+`Φ^birat` の元 `Div^gp(δ)` は `(Φ^pf)^birat` の元 `Div^gp(Ξ δ)` に
+`Pf.of` を掛けただけで移る。 -/
+theorem biratDivGp_biratPfHom_toHomPf (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (Z : IdxBirat P G A) (ψ : Z.unop.left.obj ⟶ B) :
+    biratDivGp (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A B (toHomPf (F := F') (HomBirat.mk Z ψ)))
+      = gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base))
+        (biratDivGp (HomBirat.mk Z ψ)) := by
+  rw [biratPfHom_toHomPf_mk]
+  exact biratDivGp_toRootHom Gpf hfi Z.unop.hom.hom Z.unop.hom.property.1
+    Z.unop.hom.property.2 ψ
+
+end Birat
 
 /-! ### ★出典の紐付け -/
 
