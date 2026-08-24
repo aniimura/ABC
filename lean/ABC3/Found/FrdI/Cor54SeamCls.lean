@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Cor54Birat
 import ABC3.Found.FrdI.Thm52Model
+import ABC3.Found.FrdI.Cor54Seam
 
 /-!
 # [FrdI] Corollary 5.4 の継ぎ目の本体 —— `F-𝒫-path` の類は `Ψ` で運べる
@@ -178,6 +179,82 @@ theorem FPPath.gpMap_cls_mapAlong (Ψ : C₁ ⥤ C₂) (ΨB : D₁ ⥤ D₂)
         (-(spanCls (Ψ.map p.toObj) i₂ (Ψ.map p.toRef)))
   rw [map_neg, map_neg, hspan]
   rfl
+
+/-! ## ★3. `PathCat` の層で継ぎ目を組む -/
+
+section PathSeam
+
+variable [IsConnected D₁] [IsConnected D₂]
+
+/-- ★★**`Ψ` が誘導する `𝒞̃₁ ⥤ 𝒞̃₂`** —— 対象は path ごと送る。 -/
+def pathMapAlong (Ψ : C₁ ⥤ C₂) {S₁ : BaseSection P₁} {S₂ : BaseSection P₂}
+    (hsec : ∀ {A : C₁}, S₁.objP A → S₂.objP (Ψ.obj A))
+    (hPS : ∀ {A B : C₁} (f : A ⟶ B), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f)) :
+    PathCat S₁ ⥤ PathCat S₂ where
+  obj X := ⟨Ψ.obj X.obj, X.path.mapAlong Ψ hsec hPS⟩
+  map f := Ψ.map f
+  map_id X := Ψ.map_id X.obj
+  map_comp f g := Ψ.map_comp f g
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Corollary 5.4 の縦の矢印の継ぎ目**(`PathCat` の層、**条なし**)——
+
+```
+𝒞̃₁ ⥤ Model₁ --Ψ^model--> Model₂
+ |                          ‖
+ Ψ̃                          ‖
+ v                          ‖
+𝒞̃₂ ⥤ Model₂ ═══════════════╝
+```
+
+★★**基準切断を `S₂ := Ψ_*(S₁)` と揃えれば、この四角形は仮定なしで 1-可換**である
+(`hsec` がその「揃える」の中身)。
+
+★入力は `Corollary 4.11, (iii)(iv)` が与えるもの ——
+底の 1-可換図式 `sq`、因子の単系の同型 `η`、`Div` の対応 `hdivc`、
+Frobenius 次数の保存 `hdegc` —— と、
+`Ψ` が pre-step・`𝒫` を保つこと(`hPS` / `hsec`)だけである。
+★★★`u` の帳尻は `Div_B` の単射性(`hinj`)から**自動**であり、
+対象の類の帳尻は `FPPath.gpMap_cls_mapAlong` により **`u = 0`** で足りる。 -/
+noncomputable def pathSeamIso (Ψ : C₁ ⥤ C₂) (ΨB : D₁ ⥤ D₂)
+    (η : Φ₁.functor ≅ ΨB.op ⋙ Φ₂.functor)
+    (sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj)
+    (hdivc : ∀ {A B : C₁} (φ : A ⟶ B),
+      phiIsoApp ΨB η ((P₁.toElem.obj A).base) (P₁.Div φ)
+        = Φ₂.map (sq.hom.app A) (P₂.Div (Ψ.map φ)))
+    (hdegc : ∀ {A B : C₁} (φ : A ⟶ B), P₁.degFr φ = P₂.degFr (Ψ.map φ))
+    {G₁ : Frobenioid P₁} (R₁ : RatFnData P₁ G₁)
+    (hiso₁ : ∀ Y : C₁, IsIsotropic P₁ Y)
+    (hfn₁ : ∀ Z : BiratCat P₁ G₁, IsFrobeniusNormalized (biratPre P₁ G₁) Z)
+    {S₁ : BaseSection P₁} (Fs₁ : ℕ+ →* SectionEnd S₁) (hFs₁ : IsFrobeniusSection S₁ Fs₁)
+    {G₂ : Frobenioid P₂} (R₂ : RatFnData P₂ G₂)
+    (hiso₂ : ∀ Y : C₂, IsIsotropic P₂ Y)
+    (hfn₂ : ∀ Z : BiratCat P₂ G₂, IsFrobeniusNormalized (biratPre P₂ G₂) Z)
+    {S₂ : BaseSection P₂} (Fs₂ : ℕ+ →* SectionEnd S₂) (hFs₂ : IsFrobeniusSection S₂ Fs₂)
+    (hsec : ∀ {A : C₁}, S₁.objP A → S₂.objP (Ψ.obj A))
+    (hPS : ∀ {A B : C₁} (f : A ⟶ B), IsPreStep P₁ f → IsPreStep P₂ (Ψ.map f))
+    (Fo : ModelDataHomOver ΨB R₁.model R₂.model)
+    (hphi : ∀ d : D₁, Fo.phiHom d = phiIsoApp ΨB η d)
+    (hinj : ∀ d : D₂, Function.Injective (R₂.divB d)) :
+    pathToModel R₁ hiso₁ hfn₁ S₁ Fs₁ hFs₁ ⋙ Fo.functor
+      ≅ pathMapAlong Ψ hsec hPS ⋙ pathToModel R₂ hiso₂ hfn₂ S₂ Fs₂ hFs₂ :=
+  ModelData.squareOfBaseOfInj hinj R₂.bneg R₂.bneg_add
+    (fun X => sq.app X.obj)
+    (fun {_ _} f => sq.hom.naturality f)
+    (fun {X _} f => by
+      show Fo.phiHom _ (P₁.Div f) = Φ₂.map (sq.hom.app X.obj) (P₂.Div (Ψ.map f))
+      rw [hphi]
+      exact hdivc f)
+    (fun {_ _} f => hdegc f)
+    (fun _ => 0)
+    (fun X => by
+      simp only [map_zero, add_zero]
+      show gpMap _ (Fo.phiHom _) X.path.cls
+        = Φ₂.gpMapOn (sq.hom.app X.obj) ((X.path.mapAlong Ψ hsec hPS).cls)
+      rw [hphi]
+      exact FPPath.gpMap_cls_mapAlong Ψ ΨB η sq hdivc hsec hPS X.path)
+
+end PathSeam
 
 end ClsMap
 

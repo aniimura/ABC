@@ -217,13 +217,45 @@ noncomputable def squareOfElemIsoOfInj (hdivOn : M.phi.IsDivisorialOn)
         rw [one_mul, mul_one]
         exact hdeg)
 
+/-- ★★★★★★**底の同型を直に与える版**(`Div_B` 単射、`hu` は自動)——
+
+`ModelSquare.lean` の `squareOfBaseU` から **`hu` を落とした**もの。
+★`u` は `cond` が決めるので、`Div_B` が単射なら `base` / `div` / `deg` で足りる。
+★★`Corollary 5.4` の継ぎ目を `PathCat` の層で組むときはこちらを使う ——
+そこでは底の同型が `sq.hom.app X` として**明示的に**手に入るからである。 -/
+noncomputable def squareOfBaseOfInj (hinj : ∀ d : D, Function.Injective (M.divB d))
+    (neg : ∀ d : D, M.bmon.val d → M.bmon.val d)
+    (hneg : ∀ (d : D) (x : M.bmon.val d), neg d x + x = 0)
+    {K₁ K₂ : E ⥤ Obj M}
+    (e : ∀ X : E, (K₁.obj X).base ≅ (K₂.obj X).base)
+    (hbase : ∀ {X Y : E} (f : X ⟶ Y),
+      (K₁.map f).base ≫ (e Y).hom = (e X).hom ≫ (K₂.map f).base)
+    (hdiv : ∀ {X Y : E} (f : X ⟶ Y),
+      (K₁.map f).div = M.phi.map (e X).hom (K₂.map f).div)
+    (hdeg : ∀ {X Y : E} (f : X ⟶ Y), (K₁.map f).deg = (K₂.map f).deg)
+    (uu : ∀ X : E, M.bmon.val (K₁.obj X).base)
+    (hc : ∀ X : E, (K₁.obj X).cls
+      = M.phi.gpMapOn (e X).hom (K₂.obj X).cls + M.divB _ (uu X)) :
+    K₁ ≅ K₂ :=
+  NatIso.ofComponents (fun X => objIsoOfBaseU neg hneg (e X) (uu X) (hc X))
+    (fun {X Y} f => by
+      refine hom_ext_of_divB_inj hinj _ _ (hbase f) ?_ ?_
+      · show M.phi.map (K₁.map f).base (0 : M.phi.val _)
+            + ((1 : ℕ+) : ℕ) • (K₁.map f).div
+          = M.phi.map (e X).hom (K₂.map f).div
+            + (((K₂.map f).deg : ℕ+) : ℕ) • (0 : M.phi.val _)
+        rw [map_zero, zero_add, smul_zero, add_zero, PNat.one_coe, one_smul]
+        exact hdiv f
+      · show (1 : ℕ+) * (K₁.map f).deg = (K₂.map f).deg * (1 : ℕ+)
+        rw [one_mul, mul_one]
+        exact hdeg f)
+
 /-- ★★★★★★**[FrdI] Corollary 5.4 の縦の矢印の継ぎ目**(**残り 1 条**の形)——
 
 **`𝔽_Φ` へ落として自然同型 ＋ 対象の類の差が `Div_B` の像に入る ⟹ 2 関手は同型**。
 
 ★`uu` と `hc` は「**類の差が `Div_B(B)` に入る**」という**存在 1 条**に畳める
-(`Div_B` が包含なら文字どおり membership 1 条)。
-★★これが `Corollary 5.4` の縦の矢印に残る**すべて**である。 -/
+(`Div_B` が包含なら文字どおり membership 1 条)。 -/
 noncomputable def squareOfElemIsoOfExists (hdivOn : M.phi.IsDivisorialOn)
     (hinj : ∀ d : D, Function.Injective (M.divB d))
     (neg : ∀ d : D, M.bmon.val d → M.bmon.val d)
