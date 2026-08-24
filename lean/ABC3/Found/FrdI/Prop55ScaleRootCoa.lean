@@ -146,7 +146,30 @@ Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 
 
 ★★これが `Prop55BiratPfFun.lean` が「根 1 の場合しか無い」と書いていた所の一般化である。
 ★左辺の `A^{(m)}` は **`F` の根**で書いてある —— `F'` の根と揃える手当ては
-呼び出し側(`rtObj (biratPre P G) F' = rtObj P F`)で行う。 -/
+呼び出し側(`rtObj (biratPre P G) F' = rtObj P F`)で行う。
+
+## ★★★★関手に束ねるときの難所(2026-08-25 の測定、次に着手する人へ)
+
+★この全単射を**関手**にするには `map_id` / `map_comp` が要るが、
+第 3 段の共役に使う同型
+
+```
+⟨A,n⟩ ≅ ⟨A^{(m)}, k⟩   (k = n·m)
+```
+
+は **`k` を通して「相手の対象の根 `m`」に依存する**。
+★したがって `Hom(X,Y)` と `Hom(Y,Z)` で使う同型が**別物**になり、
+共役をそのまま合成しても `Hom(X,Z)` の共役にならない。
+
+★★**逃げ道**: 在庫の `compRoot_eq_lift`
+(「**合成は共通倍数の根で計算してよい**」、`Prop55BiratPf.lean` の ★ に記述)で
+3 対象を共通の根 `n·m·l` に揃えてから比べる。
+`scaleRootFunctor` の `map_comp` がまさにこの形で書かれているので、同じ骨が使える。
+
+★もう 1 つの手当ては `F'` の根を `F` と揃えること
+(`rtObj (biratPre P G) F' A d = rtObj P F A d`)——
+★★これは `Corollary 5.4` の継ぎ目で**基準切断を揃えた**のと同じ型の手当てである
+(`Cor54SeamCls.lean` / `Cor54SeamSec.lean` を見よ)。 -/
 noncomputable def biratPfHomEquivRoot (hfi : IsOfFrobeniusIsotropicType P)
     (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
     (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
