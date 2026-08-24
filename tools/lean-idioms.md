@@ -201,3 +201,33 @@ exact @IsIso.hom_inv_id _ _ _ _ (P.Base a) ha       -- ✓ 確実
 **`check.mjs` 自身のハッシュ**を含む —— `normalize` / `squash` / `PDF_MODES` を
 触ったら必ず外れる。これを忘れると
 「正規化を変えたのに古いテキストで通る」という**器具の穴**になる。
+
+---
+
+## 14. 型の同義語(`PfCat P F := C`)を跨ぐと `rw` が当たらない(2026-08-24)
+
+**失敗形**: `PfCat P F` は `C` の型の同義語で、`pfDiv` などは
+暗黙引数を `{A B : PfCat P F}` で取る。一方 `toHomPf ψ` は `ψ : A ⟶ B`
+(`A B : C`)から作るので、**同じ項でも暗黙引数の書かれ方が違う**。
+
+```
+-- 目標側:   pfDiv (A := pfDown P F ((toPfCat P F).obj X)) …
+-- 補題側:   pfDiv (A := rtObj P F (pfObjDown P F X) 1) …
+```
+
+`rw` は `instances` 透明度でしか合わせないので、
+**defeq なのに「パターンが見つからない」**になる。
+
+★`(toPfCat P F).obj A = A` の simp 補題を足しても、今度は逆向きに
+「`C` の項が `PfCat P F` を期待されている」でずれる。
+
+**対処(測定済み)**:
+* 同義語の**両向き**に名前付きの `abbrev` を置く(`pfObjDown` / `pfUp`)。
+* それでも駄目なら `rw` をやめて `Eq.trans` / `congrArg` の**項の側**で組む
+  (`exact` は既定透明度で合わせるので通る)。
+* 圏の合成 `≫` を `compPf` に開く橋 `pfCat_comp_eq : f ≫ g = compPf P F f g := rfl`
+  を用意しておくと `pfDiv_comp` 等が当たるようになる(ただし上のずれは別途残る)。
+
+★**2026-08-24 の未着手**: `pf_isOfIsotropicType`(`𝒞^pf` の根 1 の部分が
+isotropic 型)はこの穴で止まっている。段取りは
+`Found/FrdI/Prop53PfCatRoot.lean` の ★2 に書いてある。
