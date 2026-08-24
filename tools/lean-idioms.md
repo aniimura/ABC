@@ -390,3 +390,33 @@ theorem foo …
 
 ★docstring の中に紛れ込ませると本文の一部になって効かない
 (`sed` で行番号を数えて挿入すると起きやすい)。
+
+## 18. `rw` は「対象が関手の像の形」だと当たらない —— 項スタイルへ
+
+`Prop55BiratOmega.lean` の組み立てで**丸一日ぶんの試行を溶かした形**。測定結果:
+
+補題の側の対象が `omegaObj F F' X`(関手の対象写像を当てた形)で、
+目標の側では既に `⟨biratUp Z₀, k⟩` に簡約されているとき、`rw` は
+
+```
+omegaObj F F' ?X =?= ⟨biratUp Z₀, k⟩
+```
+
+を解こうとする。`omegaObj` は構造体リテラルを返す `def` なので、
+これは `?X.obj =?= Z₀` という**メタ変数の射影**に化けて解けない。
+★エラーは「`Did not find an occurrence of the pattern`」と出るが、**原因はこれ**。
+
+★★**対処**: 組み立ては `Eq.trans` / `congrArg` の**項スタイル**で書く。
+`≫` 版の補題を用意しても同じ理由で `rw` は当たらない(実測)。
+
+### ★付随して測ったこと
+
+* `HomRoot P F X Y` は `≫` の**左**に置けば `Quiver.Hom` に解けるが、
+  等式の**右辺**に単独で置くと解けない(メタ変数の postpone)。
+  `≫` 版の補題を書くときは型注釈
+  `(… : omegaObj F F' X ⟶ omegaObj F F' Zz)` が要る。
+* `Mono ((Ω).mapIso i).hom` の**インスタンス探索は heartbeat を使い切る**。
+  `Iso.cancel_iso_hom_right` を使うこと。
+* 文の中で `show T from e` を使うと `have this := e; this` に展開され、
+  以後の `Category.assoc` などの単一化を**全部止める**。
+  文では名前つき引数 `(X := …) (Y := …)` を使い、`show` は**戦術の側**に置く。

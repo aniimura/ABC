@@ -1043,8 +1043,20 @@ theorem pfCatToRoot_idxToBirat_comp (F' : FrobenioidCore (biratPre P G)) (A B : 
 ```
 
 となり、**`toHomBirat_comp_mk`(`Ψz ≫ v = Ψψ`)** で一致する。
-★実装上の注意: `Mono ((Ω).mapIso i).hom` の探索は heartbeat を使い切るので、
-`Iso.cancel_iso_hom_right` を使うこと(測定済み)。 -/
+★★★★**実装上の測定(2026-08-25、`rw` が使えない理由)**:
+
+1. `Mono ((Ω).mapIso i).hom` の**インスタンス探索は heartbeat を使い切る**。
+   `Iso.cancel_iso_hom_right` を使うこと。
+2. ★★**`rw` で組み立てることはできない**。部品(`omegaMap_rootMap_kappa` 等)の
+   対象は `omegaObj F F' X` の形をしており、目標の側では既に
+   `⟨biratUp …, …⟩` に簡約されている。`rw` は `omegaObj F F' ?X =?= ⟨biratUp Z₀, k⟩`
+   を解こうとして **`?X` の射影を反転できず**に失敗する
+   (「パターンが見つからない」と出るが、原因はこれ)。
+   ★したがって組み立ては **`Eq.trans` / `congrArg` の項スタイル**で書くしかない
+   (`≫` 版の補題を用意しても同じ理由で `rw` は当たらない —— 実測済み)。
+3. `HomRoot P F X Y` は `≫` の**左**に置くと `Quiver.Hom` に解けるが、
+   等式の**右辺**に置くと解けない(メタ変数の postpone)。
+   `≫` 版の補題を書くときは型注釈 `(… : omegaObj F F' X ⟶ omegaObj F F' Zz)` が要る。 -/
 
 end BiratOmega
 
