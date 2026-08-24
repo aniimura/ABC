@@ -30,7 +30,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w u2 v2
+universe v u w u2 v2 uE
 
 section BiratUniv
 
@@ -72,6 +72,62 @@ theorem HomBirat.desc_ext {A B : C} {T : Type (max v u2 v2)}
     (hgh : ∀ (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B),
       g (HomBirat.mk Z φ) = h (HomBirat.mk Z φ)) : g = h :=
   HomColim.desc_ext (homFunctorBirat P G A B) g h (fun Z x => hgh Z x.down)
+
+/-! ## ★2. `co-angular pre-step` を同型に送る関手は `Hom^birat` を経由する -/
+
+variable {E : Type uE} [Category.{max v u2 v2} E]
+
+/-! ★分数 `φ ∘ (δ)⁻¹`(`δ` は co-angular pre-step)を
+`Ω φ ∘ (Ω δ)⁻¹` に送るだけ。★well-defined 性は遷移射(前合成)との両立で、
+`Over.w` と「`Ω` が同型に送る」ことから出る。 -/
+
+/-- ★代表元での値 —— 分数 `φ ∘ δ⁻¹` を `Ω φ ∘ (Ω δ)⁻¹` に送る。 -/
+noncomputable def biratDescFun (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) : Ω.obj A ⟶ Ω.obj B :=
+  @inv _ _ _ _ (Ω.map Z.unop.hom.hom) (hΩ _ Z.unop.hom.property) ≫ Ω.map φ
+
+/-- ★遷移射(前合成)との両立。 -/
+theorem biratDescFun_compat (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} {Z W : IdxBirat P G A} (u : Z ⟶ W) (φ : Z.unop.left.obj ⟶ B) :
+    biratDescFun (G := G) Ω hΩ W (u.unop.left.hom ≫ φ)
+      = biratDescFun (G := G) Ω hΩ Z φ := by
+  haveI hZ : IsIso (Ω.map Z.unop.hom.hom) := hΩ _ Z.unop.hom.property
+  haveI hW : IsIso (Ω.map W.unop.hom.hom) := hΩ _ W.unop.hom.property
+  -- ★`Over.w` —— `u.left ≫ Z.hom = W.hom`
+  have hw : u.unop.left.hom ≫ Z.unop.hom.hom = W.unop.hom.hom :=
+    congrArg (fun t : W.unop.left ⟶ coaPreObj P G A => t.hom) (Over.w u.unop)
+  have hΩw : Ω.map u.unop.left.hom ≫ Ω.map Z.unop.hom.hom = Ω.map W.unop.hom.hom := by
+    rw [← Ω.map_comp, hw]
+  show @inv _ _ _ _ (Ω.map W.unop.hom.hom) hW ≫ Ω.map (u.unop.left.hom ≫ φ)
+    = @inv _ _ _ _ (Ω.map Z.unop.hom.hom) hZ ≫ Ω.map φ
+  refine (cancel_epi (Ω.map W.unop.hom.hom)).mp ?_
+  have hL : Ω.map W.unop.hom.hom ≫ (@inv _ _ _ _ (Ω.map W.unop.hom.hom) hW
+        ≫ Ω.map (u.unop.left.hom ≫ φ))
+      = Ω.map (u.unop.left.hom ≫ φ) := by
+    rw [← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+  have hR : Ω.map W.unop.hom.hom ≫ (@inv _ _ _ _ (Ω.map Z.unop.hom.hom) hZ ≫ Ω.map φ)
+      = Ω.map u.unop.left.hom ≫ Ω.map φ := by
+    rw [← hΩw, Category.assoc, ← Category.assoc (Ω.map Z.unop.hom.hom),
+      IsIso.hom_inv_id, Category.id_comp]
+  rw [hL, hR, Ω.map_comp]
+
+/-- ★★★★★★**`Hom^birat` の普遍性(本体)** ——
+`Ω : 𝒞 ⥤ E` が co-angular pre-step を**同型に送る**なら、
+`Hom^birat_𝒞(A,B) → Hom_E(Ω A, Ω B)` が定まる。 -/
+noncomputable def biratDescHom (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} : HomBirat P G A B → (Ω.obj A ⟶ Ω.obj B) :=
+  HomBirat.desc (biratDescFun (G := G) Ω hΩ)
+    (fun {_ _} u φ => biratDescFun_compat Ω hΩ u φ)
+
+@[simp] theorem biratDescHom_mk (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) :
+    biratDescHom (G := G) Ω hΩ (HomBirat.mk Z φ) = biratDescFun (G := G) Ω hΩ Z φ :=
+  HomBirat.desc_mk (biratDescFun (G := G) Ω hΩ)
+    (fun {_ _} u φ => biratDescFun_compat Ω hΩ u φ) Z φ
 
 end BiratUniv
 
