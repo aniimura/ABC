@@ -40,7 +40,7 @@ rtExt (𝒞^birat) F' (A^birat) d ≫ β = (toBiratCat).map (rtExt 𝒞 F A d)
 ★したがって `β` が `Exists.choose` であっても**構わない** ——
 必要なのは `β` の一意性ではなく、この三角形だけである。
 
-## ★本ファイルの内容(`Ω` の材料 —— 残るは `map_comp` 1 本)
+## ★本ファイルの内容 —— **`Ω` は関手として完成した**
 
 | | 状態 |
 |---|---|
@@ -49,7 +49,7 @@ rtExt (𝒞^birat) F' (A^birat) d ≫ β = (toBiratCat).map (rtExt 𝒞 F A d)
 | `omegaObj` / `omegaMap` …… `Ω` の対象と射 | ★済 |
 | `omegaMap_id` …… `map_id` | ★済 |
 | `biratRtIso_rtLift` …… `β` と根の持ち上げの四角形 | ★済 |
-| `omegaMap_comp` …… `map_comp` | ☆残(道具は 4 つとも揃った) |
+| `omegaMap_comp` / `omegaFunctor` …… `map_comp` と関手 | ★済 |
 
 ## ★★★★`omegaMap_comp` の手順書(2026-08-25 に測った)
 
@@ -403,6 +403,96 @@ theorem betaIso_rtRootIso (F' : FrobenioidCore (biratPre P G)) (A B : C)
   rw [step12, step4]
   exact rootIso_hom_congr F' (biratRtIso_rtLift F F' A hA).symm hcA hcA'
     (biratRtIso_rtLift F F' B hB).symm hcB hcB' hdc hdc' _
+
+variable (F) in
+/-- ★★同上、`inv` の側(同型なので両辺に `hom` を当てるだけ)。 -/
+theorem betaIso_rtRootIso_inv (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    {dA dB e tA tB : ℕ+} (hA : tA = e * dA) (hB : tB = e * dB)
+    (y : HomPf P F (rtObj P F A dA) (rtObj P F B dB)) :
+    (betaIso F F' A B tA tB).hom
+        (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _
+          ((rtRootIso P F A B hA hB).inv y))
+      = (rtRootIso (biratPre P G) F' (biratUp P G A) (biratUp P G B) hA hB).inv
+          ((betaIso F F' A B dA dB).hom
+            (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ y)) := by
+  have h := betaIso_rtRootIso F F' A B hA hB ((rtRootIso P F A B hA hB).inv y)
+  rw [Iso.inv_hom_id_apply] at h
+  rw [h, Iso.hom_inv_id_apply]
+
+/-! ## ★7. `map_comp` -/
+
+variable (F) in
+/-- ★★★★★★★**`Ω` は合成を保つ**(`map_comp`)。
+
+★★**筋**(ファイル冒頭の手順書のとおり):
+* **外側** …… `betaIso_rtRootIso` で `(rtRootIso 𝒞).hom` を `(rtRootIso 𝒞^birat).hom` に替える
+* **内側** …… `homPfMap_compPf`(`hm` は `compPf` を保つ)と
+  `rootIso_comp'`(`ρ.hom` は `compPf` に分配する)で 2 本に分け、
+  各本を `betaIso_rtRootIso_inv` で `(rtRootIso 𝒞^birat).inv (Ω –)` に替える
+
+★指数の帳簿は `compRoot` のものをそのまま写すだけ(`Prop` なので `rfl` / `mul_comm`)。 -/
+theorem omegaMap_comp (F' : FrobenioidCore (biratPre P G)) {X Y Z : PfRootObj P F}
+    (f : HomRoot P F X Y) (g : HomRoot P F Y Z) :
+    omegaMap F F' (compRoot P F f g)
+      = compRoot (biratPre P G) F' (omegaMap F F' f) (omegaMap F F' g) := by
+  have hu := betaIso_rtRootIso_inv F F' X.obj Y.obj
+    (show Z.root * Y.root = Z.root * Y.root from rfl)
+    (show Z.root * X.root = Z.root * X.root from rfl) f
+  have hv := betaIso_rtRootIso_inv F F' Y.obj Z.obj
+    (show Z.root * X.root = X.root * Z.root from mul_comm _ _)
+    (show Y.root * X.root = X.root * Y.root from mul_comm _ _) g
+  have hout := betaIso_rtRootIso F F' X.obj Z.obj
+    (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+    (show Y.root * X.root = Y.root * X.root from rfl)
+    (compPf P F
+      ((rtRootIso P F X.obj Y.obj
+        (show Z.root * Y.root = Z.root * Y.root from rfl)
+        (show Z.root * X.root = Z.root * X.root from rfl)).inv f)
+      ((rtRootIso P F Y.obj Z.obj
+        (show Z.root * X.root = X.root * Z.root from mul_comm _ _)
+        (show Y.root * X.root = X.root * Y.root from mul_comm _ _)).inv g))
+  refine Eq.trans hout ?_
+  refine congrArg (fun t => (rtRootIso (biratPre P G) F' (biratUp P G X.obj)
+      (biratUp P G Z.obj)
+      (show Z.root * Y.root = Y.root * Z.root from mul_comm _ _)
+      (show Y.root * X.root = Y.root * X.root from rfl)).hom t) ?_
+  refine Eq.trans (congrArg
+    (fun t => (betaIso F F' X.obj Z.obj (Z.root * Y.root) (Y.root * X.root)).hom t)
+    (homPfMap_compPf F F' (toBiratCat P G) biratFT biratDegEq _ _)) ?_
+  refine Eq.trans (rootIso_comp' (F := F')
+      (biratRtIso F F' X.obj (Z.root * Y.root))
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (biratRtIso F F' Y.obj (Z.root * X.root))
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (biratRtIso F F' Z.obj (Y.root * X.root))
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (by rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _])
+      (by rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _])
+      _ _).symm ?_
+  exact congr (congrArg (compPf (biratPre P G) F') hu) hv
+
+
+/-! ## ★8. 関手 `Ω` -/
+
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— **`Ω : 𝒞^pf ⥤ (𝒞^birat)^pf`**。
+
+★対象は `⟨A,n⟩ ↦ ⟨A^birat, n⟩`、射は `homPfMap` を `betaIso` で共役したもの。
+★★これを `Prop44Univ.lean` の `biratDescFunctor`(`𝒞^birat` の普遍性)に流せば
+`Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf` が**関手として出る**。 -/
+noncomputable def omegaFunctor (F' : FrobenioidCore (biratPre P G)) :
+    PfRootObj P F ⥤ PfRootObj (biratPre P G) F' where
+  obj X := omegaObj F F' X
+  map f := omegaMap F F' f
+  map_id X := omegaMap_id F F' X
+  map_comp f g := omegaMap_comp F F' f g
+
+@[simp] theorem omegaFunctor_obj (F' : FrobenioidCore (biratPre P G)) (X : PfRootObj P F) :
+    (omegaFunctor F F').obj X = omegaObj F F' X := rfl
+
+@[simp] theorem omegaFunctor_map (F' : FrobenioidCore (biratPre P G))
+    {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
+    (omegaFunctor F F').map f = omegaMap F F' f := rfl
 
 end BiratOmega
 
