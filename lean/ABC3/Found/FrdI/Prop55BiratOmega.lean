@@ -84,6 +84,42 @@ hm ((rtRootIso X Z).hom w)
 (両者が同型だから)で降ろす。
 
 ★★残る手間は**指数の帳簿**(`compRoot` の `mul_comm` 6 か所)だけである。
+
+## ★★★★★残るのは `Θ.map` の全単射性 —— 測ったこと(2026-08-25)
+
+`Θ` は組み上がり、**対象の上の全射性は無料**(`thetaFunctor_obj_surjective`)。
+残るのは `Θ.map` が全単射(＝充満忠実)であること。
+
+### ★★測定 1 —— **`Ω` から継承する道は無い**
+
+* `Ω` は**充満でない**。`Hom_{(𝒞^pf)^birat}` は `Hom_{𝒞^pf}` より真に大きく、
+  `(𝒞^birat)^pf` の射はその大きいほうと対応する(それが本命題の主張である)。
+* `Ω` は**忠実でもない**。`toBiratCat` の射の写像は局所化だから単射でない。
+
+★したがって `Θ` の充満忠実性は **在庫 `biratPfHom_bijective`** から来るしかない。
+
+### ★★★測定 2 —— **要る等式は 1 本だけ**
+
+`equiv := biratPfHomEquivRootFull : Hom_{(𝒞^birat)^pf}(ΩX,ΩY) ≃ Hom_{(𝒞^pf)^birat}(X,Y)`
+は**全単射**(在庫、仮定なし、一般の根)。`Θ.map` はその逆向きの写像である。
+
+★★**`∀ y, Θ.map (equiv y) = y` の 1 本だけ**を示せばよい ——
+`equiv` が全射なので、これだけで `Θ.map = equiv.symm` が出て**全単射**になる。
+★単射性・全射性を別々に論じる必要は**ない**。
+
+### ★橋渡しの形(根 1 の段)
+
+`biratPfMk hfi Gpf W Z ψ = HomBirat.mk (biratPfIdx hfi Gpf W Z)
+  (rootMap hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)` なので、要るのは
+
+```
+Θ.map (biratPfMk hfi Gpf W Z ψ) = HomPf.mk ((idxToBirat …).obj W) (HomBirat.mk Z ψ)
+```
+
+★左辺は `biratDescHom_mk` で `inv (Ω (biratPfIdx …).hom) ≫ Ω (rootMap … ≫ isoB⁻¹)`。
+★したがって新たに要るのは **`Ω` が `rootMap` / `rootLift` をどう写すか**の計算則で、
+`omegaMap_mk`(代表元での表示)がその入口である。
+残る 3 段(`scaleRootBiratHomEquiv` など)は `Θ` が関手であることから従う。
 -/
 
 namespace ABC3.Found.FrdI
