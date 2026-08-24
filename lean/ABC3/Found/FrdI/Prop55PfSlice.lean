@@ -490,6 +490,49 @@ theorem otri_mem_otimes_birat
   · exact IsIso.inv_hom_id _
   · exact IsIso.hom_inv_id _
 
+/-- ★★★★★★**逆向きの包含** —— `(Φ^pf)^birat` の元は**分母を払えば `Φ^birat` に戻る**。
+
+★★★これで `Proposition 5.5, (iv)` の単系の同定が両側から挟まれた:
+
+* 順向き(`phiBiratOn_pf_mem`)—— `Φ^birat` の像は `(Φ^pf)^birat` に入る。
+* 逆向き(**本定理**)—— `(Φ^pf)^birat` の元は正の整数倍で `Φ^birat` の像に入る。
+
+★筋は 3 段: `Proposition 5.5, (ii)` の全単射で `𝒞^birat` の完全化へ移し(`x`)、
+そこで `Proposition 5.5, (i)` の「正の冪で戻る」を当て(`biratPfHom_pow_eq_Xi`)、
+`Div^gp` が `𝒪^×` の上で加法的であること(`biratDivGp_pow_otimes`)で分母を払う。 -/
+theorem biratDivGp_nsmul_mem_pfImage (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
+    (x : End (pfObjOf (biratPre P G) F' (biratUp P G A)))
+    (hx : (endRootOneEquiv (F := F') (biratUp P G A)).symm x
+      ∈ OTri (pfRootPre (biratPre P G) F')
+        (⟨biratUp P G A, 1⟩ : PfRootObj (biratPre P G) F'))
+    (hδ : biratPfEndHom hfi Gpf F' A x
+      ∈ OTimes (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) :
+    ∃ k : ℕ+, ((k : ℕ+) : ℕ) • biratDivGp (P := pfRootPre P F) (G := Gpf)
+        ((biratPfEndHom hfi Gpf F' A x :
+          End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _)
+      ∈ AddSubgroup.map (gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base)))
+        (phiBiratAt P G (biratUp P G A)) := by
+  obtain ⟨k, α, hk⟩ := biratPfHom_pow_eq_Xi hfi Gpf F' A hisoB hAB hfnB hfnB' ζ hdeg hprop x hx
+  refine ⟨k, ?_⟩
+  rw [← biratDivGp_pow_otimes hδ ((k : ℕ+) : ℕ), hk]
+  refine ⟨biratDivGp ((α : End (biratUp P G A)) : biratUp P G A ⟶ biratUp P G A),
+    ⟨(α : End (biratUp P G A)), otri_mem_otimes_birat hfnBirat (hisoB _) α.2, rfl⟩, ?_⟩
+  exact (biratDivGp_biratPfHom hfi Gpf F' A A
+    ((α : End (biratUp P G A)) : biratUp P G A ⟶ biratUp P G A)).symm
+
 end Birat
 
 /-! ### ★出典の紐付け -/
