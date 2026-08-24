@@ -202,6 +202,7 @@ import ABC3.Found.FrdI.Prop55PfRatFn
 import ABC3.Found.FrdI.Prop53PfRlf
 import ABC3.Found.FrdI.Prop55PfArb
 import ABC3.Found.FrdI.Prop55PfArbStd
+import ABC3.Found.FrdI.Prop55PfArbFull
 import ABC3.Found.FrdI.Prop53UntrPfModel
 import ABC3.Found.FrdI.Cor411Bid
 import ABC3.Found.FrdI.Cor411Birat

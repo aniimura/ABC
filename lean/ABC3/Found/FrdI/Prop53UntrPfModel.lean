@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
-import ABC3.Found.FrdI.Prop55PfArbStd
+import ABC3.Found.FrdI.Prop55PfArbFull
 
 /-!
 # [FrdI] Proposition 5.3 の第 2 文 —— `(𝒞^un-tr)^pf` は model 型
@@ -94,6 +94,26 @@ noncomputable def untrPf_modelFrobenioid (Fc : FrobenioidCore P) (G : Frobenioid
       ≌ ModelData.Obj (untrPf_ratFnData P Fc G hint hfsmD).model :=
   pfRoot_modelFrobenioid_of_arb (unTr_frobIsotropicType Fc) (unTr_isotropic P Fc)
     (unTr_frobNormalizedType Fc G hint hfsmD) (unTr_unitTrivial P Fc) _ hfsmD
+
+variable (P) in
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.3 の第 2 文(`(𝒞^un-tr)^pf` の場合)の単系の側** ——
+`(𝒞^un-tr)^pf` の有理関数の単系は各 `d ∈ Ob(𝒟)` で
+**`ℚ·(Φ^birat of 𝒞^un-tr)(d)`** である。
+
+原文 (FrdI p.103):
+> tively, Φpf) and the rational function monoid Φbirat (respectively, Q · Φbirat =
+
+★★`𝒞^un-tr` は unit-trivial なので `pfRoot_ratFnData_bmon_val_full`(条なし)が
+そのまま当たる。★★`Φ^birat` を `𝒞` のものへ書き換える段
+(`(𝒞^un-tr)^birat` と `𝒞^birat` の比較)は残作業として記録する。 -/
+theorem untrPf_ratFnData_bmon_val (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D) (d : D) :
+    (untrPf_ratFnData P Fc G hint hfsmD).bmon.val d
+      = ↥(qPhiBiratOn (unTrPre P Fc) (unTr_frobenioid P Fc G) d) :=
+  pfRoot_ratFnData_bmon_val_full (unTr_frobIsotropicType Fc) (unTr_isotropic P Fc)
+    (unTr_frobNormalizedType Fc G hint hfsmD) (unTr_unitTrivial P Fc)
+    (unTr_frobenioid P Fc G) (untrPf_frobenioid P Fc G) hfsmD d
 
 end UnTrPf
 
