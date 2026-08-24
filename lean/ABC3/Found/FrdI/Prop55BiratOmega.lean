@@ -199,6 +199,46 @@ theorem omegaMap_id (F' : FrobenioidCore (biratPre P G)) (X : PfRootObj P F) :
         (biratRtIso_isIso F F' X.obj X.root))).symm ?_
   exact congrArg (toHomPf (F := F')) (IsIso.hom_inv_id _)
 
+/-! ## ★5. `map_comp` の要 —— **持ち上げとの両立** -/
+
+variable (F) in
+/-- ★★★★★★**`biratRtIso` は根の持ち上げと両立する**。
+
+```
+rtObj^birat(A,d) --rtLift^birat--> rtObj^birat(A,t)
+      |β_d                              |β_t
+      v                                 v
+ (rtObj(A,d))^birat --Ψ(rtLift)--> (rtObj(A,t))^birat
+```
+
+★★**証明は 2 行の骨**である ——
+`𝒞^birat` は totally epimorphic なので構造射 `rtExt` は epi、
+両辺に前から `rtExt` を掛けると `rtLift_ext` と**三角形** `biratRtIso_tri` で
+どちらも `Ψ(rtExt A t)` になる。
+
+★★★これが `omegaMap_comp`(`rtLift` と `homPfMap` の可換性)の要である。
+`β` が `Exists.choose` でも構わないのは、要るのが**この四角形だけ**だから。 -/
+theorem biratRtIso_rtLift (F' : FrobenioidCore (biratPre P G)) (A : C)
+    {d e t : ℕ+} (h : t = e * d) :
+    rtLift (biratPre P G) F' (biratUp P G A) h ≫ biratRtIso F F' A t
+      = biratRtIso F F' A d ≫ (toBiratCat P G).map (rtLift P F A h) := by
+  haveI hepi : Epi (rtExt (biratPre P G) F' (biratUp P G A) d) :=
+    (biratPre P G).totEpiC _ _ _
+  refine (cancel_epi (rtExt (biratPre P G) F' (biratUp P G A) d)).mp ?_
+  have hL : rtExt (biratPre P G) F' (biratUp P G A) d
+        ≫ (rtLift (biratPre P G) F' (biratUp P G A) h ≫ biratRtIso F F' A t)
+      = (toBiratCat P G).map (rtExt P F A t) := by
+    rw [← Category.assoc, rtLift_ext, biratRtIso_tri]
+  have hR : rtExt (biratPre P G) F' (biratUp P G A) d
+        ≫ (biratRtIso F F' A d ≫ (toBiratCat P G).map (rtLift P F A h))
+      = (toBiratCat P G).map (rtExt P F A t) := by
+    have hc : (toBiratCat P G).map (rtExt P F A d) ≫ (toBiratCat P G).map (rtLift P F A h)
+        = (toBiratCat P G).map (rtExt P F A d ≫ rtLift P F A h) :=
+      ((toBiratCat P G).map_comp _ _).symm
+    rw [← Category.assoc, biratRtIso_tri]
+    exact hc.trans (congrArg (toBiratCat P G).map (rtLift_ext P F A h))
+  exact hL.trans hR.symm
+
 end BiratOmega
 
 /-! ### ★出典の紐付け -/
