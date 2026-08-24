@@ -36,6 +36,25 @@ scToFactor : ℝ≥0 ⊗_ℕ M →+ (Prime M → ℝ≥0)      (r ⊗ m ↦ r �
 
 ★`Prop55RlfNd.lean` の `hrefl` は **primary な相手にしか使っていない**ので、
 本ファイルの形で十分である。
+
+## ★★★★残る `hprim` の測定(2026-08-25)—— こちらは**両向き**が要る
+
+`hrefl` が片道で足りたのに対し、残る `hprim`
+(`b` が準素元なら `toSc b` に `≼`-同値な準素元がある)は**そうはいかない**。
+
+`IsPrimaryElt a = a ≠ 0 ∧ ∀ z ≠ 0, z ⪯ a → a ⪯ z` なので、後半には
+
+* `z ≠ 0 → scToFactor z ≠ 0`(★**片道の橋の単射性**)
+* 「`p` 成分が正なら `toSc b ⪯ z`」を示すための **`c` の構成**(★**逆向き**)
+
+の**両方**が要る。★したがって `hprim` は本当に節点 `rlf-agree`
+(`ℝ≥0 ⊗_ℕ M` と素点ごとの座標の**一致**)の側にある。
+
+★★**弱めておいた**: `Prop55RlfNd.lean` の `hprim` は
+「`toSc b` **そのもの**が準素元」ではなく
+「`toSc b` に **`≼`-同値な準素元がある**」で足りる
+(`scMap f (toSc b) ⪯ scMap f z ⪯ z ⪯ toSc b` と繋がるため)。
+強い形からは `hprimWeak_of_isPrimaryElt` で降りる。
 -/
 
 namespace ABC3.Found.FrdI
@@ -161,7 +180,9 @@ theorem MonoidOn.scOn_isNonDilatingOn_of_perfFactorial (Φ : MonoidOn.{v, u, w} 
     (hsS : ∀ A : D, IsSharp (ScT ℝ≥0 (Φ.val A)))
     (hpf : ∀ A : D, IsPerfFactorial (Φ.val A))
     (hperf : ∀ A : D, IsPerfectMonoid (Φ.val A))
-    (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b → IsPrimaryElt (toSc (S := ℝ≥0) b))
+    (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b →
+      ∃ z : ScT ℝ≥0 (Φ.val A), IsPrimaryElt z
+        ∧ MPrec (toSc (S := ℝ≥0) b) z ∧ MPrec z (toSc (S := ℝ≥0) b))
     (h : Φ.IsNonDilatingOn) : (phiScOn ℝ≥0 Φ hcharInj).IsNonDilatingOn := by
   refine MonoidOn.scOn_isNonDilatingOn Φ hcharInj
     (fun A => ((hpf A).choose_spec.divisorial).2) hsS hprim ?_ h

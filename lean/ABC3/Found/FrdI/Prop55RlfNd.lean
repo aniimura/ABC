@@ -75,7 +75,8 @@ variable {S : Type} [CommSemiring S]
 2 段目(`toSc` が準素元を保ち `≼` を反射すること)を仮引数で受ける。 -/
 theorem scMap_isNonDilating {M : Type w} [AddCommMonoid M]
     (hs : IsSharp M) (hsS : IsSharp (ScT S M))
-    (hprim : ∀ b : M, IsPrimaryElt b → IsPrimaryElt (toSc (S := S) b))
+    (hprim : ∀ b : M, IsPrimaryElt b → ∃ a : ScT S M, IsPrimaryElt a
+      ∧ MPrec (toSc (S := S) b) a ∧ MPrec a (toSc (S := S) b))
     (hrefl : ∀ b : M, IsPrimaryElt b → ∀ x : M,
       MPrec (toSc (S := S) x) (toSc b) → MPrec x b)
     (f : M →+ M) (h : IsNonDilating f) :
@@ -89,7 +90,10 @@ theorem scMap_isNonDilating {M : Type w} [AddCommMonoid M]
     have hbp : IsPrimaryElt b := by
       have := isPrimaryElt_map (mCharEquivOfSharp hs).symm ha
       rwa [← hb] at this
-    have hkey := key (toSc (S := S) b) (hprim b hbp)
+    -- ★★`toSc b` そのものが準素元でなくてもよい —— **`≼`-同値な準素元があれば足りる**
+    obtain ⟨z, hzp, h1, h2⟩ := hprim b hbp
+    have hkey : MPrec (scMap (S := S) f (toSc b)) (toSc b) :=
+      mprec_trans (mprec_trans (mprec_map (scMap (S := S) f) h1) (key z hzp)) h2
     rw [scMap_toSc] at hkey
     have hMb : MPrec (f b) b := hrefl b hbp _ hkey
     have := mprec_map (toChar : M →+ MChar M) hMb
@@ -104,6 +108,16 @@ theorem scMap_isNonDilating {M : Type w} [AddCommMonoid M]
       rwa [charMap_toChar] at this
     exact toChar_injective_of_isSharp hs h1
   rw [hf, scMap_id]
+
+/-- ★**強い `hprim`(「`toSc b` が準素元」)は弱い形を含む**。
+
+★★弱い形で十分なのは、`≼`-同値な準素元 `z` があれば
+`scMap f (toSc b) ≼ scMap f z ≼ z ≼ toSc b` と繋がるからである。 -/
+theorem hprimWeak_of_isPrimaryElt {M : Type w} [AddCommMonoid M]
+    (hp : ∀ b : M, IsPrimaryElt b → IsPrimaryElt (toSc (S := S) b)) :
+    ∀ b : M, IsPrimaryElt b → ∃ z : ScT S M, IsPrimaryElt z
+      ∧ MPrec (toSc (S := S) b) z ∧ MPrec z (toSc (S := S) b) :=
+  fun b hb => ⟨toSc b, hp b hb, mprec_refl _, mprec_refl _⟩
 
 end ScNd
 
@@ -121,7 +135,9 @@ theorem MonoidOn.scOn_isNonDilatingOn (Φ : MonoidOn.{v, u, w} D)
     (hcharInj : ∀ {A B : D} (α : B ⟶ A),
       IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
     (hs : ∀ A : D, IsSharp (Φ.val A)) (hsS : ∀ A : D, IsSharp (ScT S (Φ.val A)))
-    (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b → IsPrimaryElt (toSc (S := S) b))
+    (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b →
+      ∃ z : ScT S (Φ.val A), IsPrimaryElt z
+        ∧ MPrec (toSc (S := S) b) z ∧ MPrec z (toSc (S := S) b))
     (hrefl : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b → ∀ x : Φ.val A,
       MPrec (toSc (S := S) x) (toSc b) → MPrec x b)
     (h : Φ.IsNonDilatingOn) : (phiScOn S Φ hcharInj).IsNonDilatingOn := by
