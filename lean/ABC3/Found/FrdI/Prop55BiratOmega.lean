@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55ScaleRootCoa
 import ABC3.Found.FrdI.Thm34Pf
+import ABC3.Found.FrdI.Prop55PfArbFull
+import ABC3.Found.FrdI.Prop44Univ
 
 /-!
 # [FrdI] Proposition 5.5, (ii) —— `Ω : 𝒞^pf ⥤ (𝒞^birat)^pf` の材料
@@ -493,6 +495,108 @@ noncomputable def omegaFunctor (F' : FrobenioidCore (biratPre P G)) :
 @[simp] theorem omegaFunctor_map (F' : FrobenioidCore (biratPre P G))
     {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
     (omegaFunctor F F').map f = omegaMap F F' f := rfl
+
+
+/-! ## ★9. `Ω` は co-angular pre-step を同型に送る
+
+★★★**測って分かったこと(2026-08-25)**: **co-angularity は使わない**。
+`(𝒞^birat)^pf` は
+
+* **すべての射が isometric**(`𝒞^birat` の零因子の単系が `PUnit` だから)
+* **isotropic 型**(`𝒞` が isotropic なら `𝒞^birat` もそう、
+  さらに `pfRoot_isOfIsotropicType` で `(𝒞^birat)^pf` もそう)
+
+なので、**pre-step であるだけで同型になる**。
+★したがって要るのは「`Ω` は pre-step を pre-step に送る」だけで、
+それは**代表元の判定**(`isPreStep_mk_iff`)で `𝒞` の側に落ちる。 -/
+
+variable (F) in
+/-- ★★★**`Ω` の代表元での表示** —— 射は `Ψ` を当てるだけ、添字は 2 段押し出す。 -/
+theorem omegaMap_mk (F' : FrobenioidCore (biratPre P G)) {X Y : PfRootObj P F}
+    (Z : IdxPf P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))
+    (φ : Z.right.obj.1 ⟶ Z.right.obj.2) :
+    omegaMap F F' (show HomRoot P F X Y from HomPf.mk Z φ)
+      = HomPf.mk ((pushIdx (F := F') (biratRtIso F F' X.obj Y.root)
+            (isFrobeniusType_of_isIso (biratPre P G) _)
+            (biratRtIso F F' Y.obj X.root)
+            (isFrobeniusType_of_isIso (biratPre P G) _)
+            (by rw [isLinear_of_isIso (biratPre P G) _,
+              isLinear_of_isIso (biratPre P G) _])).obj
+          ((idxPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _).obj Z))
+        ((toBiratCat P G).map φ) := by
+  show (betaIso F F' X.obj Y.obj Y.root X.root).hom
+      (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ (HomPf.mk Z φ)) = _
+  rw [homPfMap_mk]
+  exact rootIso_hom_mk _ _ _ _ _ _ _
+
+variable (F) in
+/-- ★★★★★★★**`biratDescFunctor` の入力 `hΩ`** ——
+`Ω` は `𝒞^pf` の co-angular pre-step を `(𝒞^birat)^pf` の**同型**に送る。
+
+★co-angularity は使わない(上の測定)。 -/
+theorem omegaMap_isIso_of_preStep (F' : FrobenioidCore (biratPre P G))
+    (hiso : ∀ W : C, IsIsotropic P W) {X Y : PfRootObj P F} (f : HomRoot P F X Y)
+    (h : IsPreStep (pfRootPre P F) f) :
+    IsIso (show omegaObj F F' X ⟶ omegaObj F F' Y from omegaMap F F' f) := by
+  have hisoB : ∀ W : BiratCat P G, IsIsotropic (biratPre P G) W :=
+    birat_isOfIsotropicType (G := G) hiso
+  have hfiB : IsOfFrobeniusIsotropicType (biratPre P G) := fun A =>
+    ⟨A, 𝟙 A, isFrobeniusType_of_isIso (biratPre P G) (𝟙 A), hisoB A⟩
+  obtain ⟨Z, φ, rfl⟩ := HomPf.exists_rep f
+  have hps : IsPreStep P φ := (isPreStep_mk_iff (X := X) (Y := Y) Z φ).mp h
+  rw [omegaMap_mk]
+  refine pfRoot_isOfIsotropicType (F := F') hfiB _ _ _ ?_ ?_
+  · exact (isIsometric_mk_iff _ _).mpr (birat_isIsometric_all G _)
+  · refine (isPreStep_mk_iff _ _).mpr ⟨?_, ?_⟩
+    · show (biratPre P G).degFr ((toBiratCat P G).map φ) = 1
+      rw [birat_degFr_map]
+      exact hps.1
+    · exact (birat_isBaseIsomorphism_iff (P := P) (G := G) φ).mpr hps.2
+
+variable (F) in
+/-- ★★★★★★★**`Ω` は `coaPreProp` を同型に送る**(`biratDescFunctor` の入力の形)。 -/
+theorem omegaFunctor_isIso_of_coaPre (F' : FrobenioidCore (biratPre P G))
+    (hiso : ∀ W : C, IsIsotropic P W) {X Y : PfRootObj P F} (f : X ⟶ Y)
+    (h : coaPreProp (pfRootPre P F) f) :
+    IsIso ((omegaFunctor F F').map f) :=
+  omegaMap_isIso_of_preStep F F' hiso f h.2
+
+/-! ## ★10. `Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf` -/
+
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii) の関手** ——
+
+```
+Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf
+```
+
+★★`Prop44Univ.lean` の **`𝒞^birat` の普遍性**(`biratDescFunctor`)に
+`Ω` を流すだけ —— 合成の coherence は普遍性の側で済んでいる。 -/
+noncomputable def thetaFunctor (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hiso : ∀ W : C, IsIsotropic P W) :
+    BiratCat (pfRootPre P F) Gpf ⥤ PfRootObj (biratPre P G) F' :=
+  biratDescFunctor (G := Gpf) (omegaFunctor F F')
+    (fun {_ _} f h => omegaFunctor_isIso_of_coaPre F F' hiso f h)
+
+@[simp] theorem thetaFunctor_obj (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hiso : ∀ W : C, IsIsotropic P W)
+    (X : BiratCat (pfRootPre P F) Gpf) :
+    (thetaFunctor F F' Gpf hiso).obj X
+      = omegaObj F F' (biratDown (pfRootPre P F) Gpf X) := rfl
+
+/-- ★★★★★**`Θ` は対象の上で全射** —— `⟨A,n⟩ = Θ ⟨A^birat, n⟩` の形。
+
+★★これで `Proposition 5.5, (ii)` の**本質的全射性は無料**である
+(源が `(𝒞^pf)^birat` 全体なので、根 1 に閉じ込められていた
+`biratPfFunctor` の難点が消える)。 -/
+theorem thetaFunctor_obj_surjective (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hiso : ∀ W : C, IsIsotropic P W)
+    (Y : PfRootObj (biratPre P G) F') :
+    ∃ X : BiratCat (pfRootPre P F) Gpf, (thetaFunctor F F' Gpf hiso).obj X = Y := by
+  refine ⟨show BiratCat (pfRootPre P F) Gpf from
+    ({ obj := biratDown P G Y.obj, root := Y.root } : PfRootObj P F), ?_⟩
+  rfl
+
 
 end BiratOmega
 
