@@ -33,13 +33,24 @@ import ABC3.Found.FrdI.Prop53Birat
 ★代表元の対応(`IdxBirat P G A → IdxBirat (pfRootPre P F) Gpf ⟨A,1⟩`)も通したので、
 `biratDivGp` の言葉でも言える(`biratDivGp_toRootHom`)。
 
+★★★**像が `𝒪^×` に入る**ことも通した(`otimes_biratPfHom`)——
+代表元の対応は関手ではないので、単元性は
+`Ξ := biratPfHom ∘ toHomPf : 𝒞^birat ⟶ (𝒞^pf)^birat`(`Proposition 5.5, (ii)`)が
+恒等射と合成を保つこと(`biratPfHom_unit`)を通して運ぶ。
+★★★★これで **`Φ^birat` の像 ⊆ `(Φ^pf)^birat`** が閉じた
+(`phiBiratAt_pf_mem` / `phiBiratOn_pf_mem`)。
+
 ## ★★残り(記録)
 
-* **像が `𝒪^×` に入る**こと —— 代表元の対応は関手ではないので、
-  「単元が単元へ移る」は `𝒞^birat ⥤ (𝒞^birat)^pf ⥤ (𝒞^pf)^birat` の合成関手
-  (`Proposition 5.5, (ii)` の `biratPfHom`)を通して言う必要がある。
-* 逆向き(**分母を払えば `Φ^birat` に戻る**)—— こちらが
-  `(Φ^pf)^birat ⊆ ℚ·Φ^birat` であり、やはり `Proposition 5.5, (ii)` を使う。
+逆向き(**分母を払えば `Φ^birat` に戻る**)—— こちらが
+`(Φ^pf)^birat ⊆ ℚ·Φ^birat` である。筋は測れている:
+
+1. `biratPfHom` は全単射(`biratPfHom_bijective`)なので、
+   `(𝒞^pf)^birat` の単元 `δ'` は `Ξ` 以前の元 `x ∈ Hom^pf_{𝒞^birat}` から来る。
+2. `x` は `Proposition 5.5, (i)` の完全化の構造から「`α` の `k` 乗根」であり、
+   `x^k` は `𝒞^birat` の元 `α` の像である(`otriPfEquiv` を `P := biratPre P G` で読む)。
+3. `Div^gp` は `𝒪^×` の上で加法的(`biratDivGp_mul_otimes`)なので
+   `k · Div^gp(δ') = Div^gp(δ'^k) = Pf.of (Div^gp α)` となり、分母が払える。
 -/
 
 namespace ABC3.Found.FrdI
