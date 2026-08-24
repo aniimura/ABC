@@ -41,17 +41,28 @@ import ABC3.Found.FrdI.Prop53QPhi
 ★★★★これで **`Φ^birat` の像 ⊆ `(Φ^pf)^birat`** が閉じた
 (`phiBiratAt_pf_mem` / `phiBiratOn_pf_mem`)。
 
+★★★★★**逆向きも閉じた**(`biratDivGp_nsmul_mem_pfImage`)——
+`(Φ^pf)^birat` の元は**正の整数倍で `Φ^birat` の像に入る**。筋は 3 段:
+
+1. `biratPfHom` は全単射なので、`(𝒞^pf)^birat` の単元 `δ'` は
+   `x ∈ Hom^pf_{𝒞^birat}` から来る(`biratPfEndHom`、自己射の単系の準同型)。
+2. `x` は `Proposition 5.5, (i)` の完全化の構造から「`α` の `k` 乗根」であり、
+   `x^k` は `𝒞^birat` の元 `α` の像である(`biratPfHom_pow_eq_Xi`)。
+   ★根つき/根なしの橋は `endRootOneEquiv`(`Prop55PfDiv.lean`)。
+3. `Div^gp` は `𝒪^×` の上で加法的(`biratDivGp_pow_otimes`)なので
+   `k · Div^gp(δ') = Div^gp(δ'^k) = Pf.of (Div^gp α)` となり、分母が払える。
+   ★`𝒞^birat` の isotropic 対象では `𝒪^▷ = 𝒪^×`(`otri_mem_otimes_birat`)。
+
 ## ★★残り(記録)
 
-逆向き(**分母を払えば `Φ^birat` に戻る**)—— こちらが
-`(Φ^pf)^birat ⊆ ℚ·Φ^birat` である。筋は測れている:
-
-1. `biratPfHom` は全単射(`biratPfHom_bijective`)なので、
-   `(𝒞^pf)^birat` の単元 `δ'` は `Ξ` 以前の元 `x ∈ Hom^pf_{𝒞^birat}` から来る。
-2. `x` は `Proposition 5.5, (i)` の完全化の構造から「`α` の `k` 乗根」であり、
-   `x^k` は `𝒞^birat` の元 `α` の像である(`otriPfEquiv` を `P := biratPre P G` で読む)。
-3. `Div^gp` は `𝒪^×` の上で加法的(`biratDivGp_mul_otimes`)なので
-   `k · Div^gp(δ') = Div^gp(δ'^k) = Pf.of (Div^gp α)` となり、分母が払える。
+1. 逆向きの仮定 `hx`(`x` の根つき化身が `𝒪^▷` に入る)を
+   `hδ`(`δ' ∈ 𝒪^×`)から導くこと。★次数は `rootMap_degFr` で出るが、
+   **底恒等性**には `biratPfHom` の一般の元での `Base` の明示式が要る
+   (`rootMap` / `rootLift` の `rootBase` が在庫に無い)。
+2. 両側の包含を `qPhiBiratOn`(`Prop53QPhi.lean` の飽和)の言葉で束ねて
+   **部分群の等号**にすること。★`⊆` の側には
+   「`Φ^birat` の元の `k` 乗根が `(Φ^pf)^birat` に在る」＋
+   `Gp (Pf M)` の torsion-free 性が要る。
 -/
 
 namespace ABC3.Found.FrdI
@@ -556,6 +567,27 @@ end Birat
 def sliceDivGpOf_toRootHom.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iv) — 𝒞 → 𝒞^pf は双有理射の Div^gp を Pf.of で移す",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★locator —— `Proposition 5.5, (iv)` の単系の同定の**順向き**
+(`Φ^birat` の像は `(Φ^pf)^birat` に入る)。 -/
+def phiBiratOn_pf_mem.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iv) — Φ^birat の像は (Φ^pf)^birat に入る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★locator —— `Proposition 5.5, (iv)` の単系の同定の**逆向き**
+(`(Φ^pf)^birat` の元は分母を払えば `Φ^birat` に戻る)。
+★**条つき**: `x` の根つき化身が `𝒪^▷` に入ることを仮定として受けている。 -/
+def biratDivGp_nsmul_mem_pfImage.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iv) — (Φ^pf)^birat の元は分母を払えば Φ^birat に戻る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の全単射を自己射の単系の準同型に束ねたもの。 -/
+def biratPfEndHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は自己射の単系の準同型",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
