@@ -1023,6 +1023,133 @@ theorem pfCatToRoot_idxToBirat_comp (F' : FrobenioidCore (biratPre P G)) (A B : 
   exact toPfCat_comp_pfCatToRoot_map (P := biratPre P G) (F := F')
     ((toBiratCat P G).map W.hom.hom.1 ≫ v)
 
+/-! ## ★12. 橋渡し —— `Θ.map ∘ biratPfHom = pfCatToRoot.map`(根 1) -/
+
+set_option maxHeartbeats 3200000 in
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii) の橋渡し(根 1)**。
+
+★★配管メモ(idiom 18): 組み立ては **`Eq.trans` / `congrArg` の項スタイル**で書く。
+部品の対象が `omegaObj F F' X` の形なので `rw` は当たらない(実測)。 -/
+theorem theta_biratPfHom (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) (A B : C)
+    (W : IdxPf P F A B) (Z : IdxBirat P G W.right.obj.1)
+    (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    (thetaFunctor F F' Gpf hiso).map
+        (biratPfHom hfi Gpf F' A B
+          (HomPf.mk ((idxToBirat P F G F' A B).obj W) (HomBirat.mk Z ψ)))
+      = (pfCatToRoot (biratPre P G) F').map
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) (HomBirat.mk Z ψ)) := by
+  haveI hfiB : IsOfFrobeniusIsotropicType (biratPre P G) :=
+    birat_isOfFrobeniusIsotropicType (G := G) hiso
+  haveI hmono : Mono (pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W)) :=
+    pfKappa_mono (F := F') hfiB _ _
+  rw [biratPfHom_mk]
+  refine Eq.trans (congrArg
+    (fun t : (show BiratCat (pfRootPre P F) Gpf from (⟨A, 1⟩ : PfRootObj P F))
+        ⟶ (show BiratCat (pfRootPre P F) Gpf from (⟨B, 1⟩ : PfRootObj P F)) =>
+      (thetaFunctor F F' Gpf hiso).map t) (biratPf_mk hfi Gpf W Z ψ)) ?_
+  refine biratDescHom_eq_of_spec (omegaFunctor F F')
+    (fun {_ _} f h => omegaFunctor_isIso_of_coaPre F F' hiso f h) _ _ _ ?_
+  refine (Iso.cancel_iso_hom_right _ _
+    ((omegaFunctor F F').mapIso (biratPfIsoB hfi W))).mp ?_
+  refine (cancel_mono (pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W))).mp ?_
+  -- ★部品
+  have hDD : (omegaFunctor F F').map (biratPfIdx hfi Gpf W Z).unop.hom.hom
+      = (omegaFunctor F F').map
+          (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W))
+        ≫ (omegaFunctor F F').map (biratPfIsoA hfi W).inv :=
+    (omegaFunctor F F').map_comp _ _
+  have htc : ∀ {X₁ X₂ X₃ : BiratCat P G} (a : X₁ ⟶ X₂) (b : X₂ ⟶ X₃),
+      toRootHom (F := F') (a ≫ b)
+        = (toRootHom (F := F') a ≫ toRootHom (F := F') b :
+            (⟨X₁, 1⟩ : PfRootObj (biratPre P G) F') ⟶ ⟨X₃, 1⟩) :=
+    fun a b => toRootHom_comp (F := F') a b
+  have K2 : (omegaFunctor F F').map (rootMap (F := F) hfi ψ (biratPfDeg W))
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W)
+      = pfKappa (F := F') (biratUp P G Z.unop.left.obj) (biratPfDeg W)
+        ≫ toRootHom (F := F') ((toBiratCat P G).map ψ) :=
+    omegaMap_rootMap_kappa F F' hfi ψ (biratPfDeg W)
+  have K5 : (omegaFunctor F F').map
+        (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W))
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.1) (biratPfDeg W)
+      = pfKappa (F := F') (biratUp P G Z.unop.left.obj) (biratPfDeg W)
+        ≫ toRootHom (F := F') ((toBiratCat P G).map Z.unop.hom.hom) :=
+    omegaMap_rootMap_kappa F F' hfi Z.unop.hom.hom (biratPfDeg W)
+  have L1 : (omegaFunctor F F').map (biratPfIsoB hfi W).hom
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W)
+      = toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.2) :=
+    omegaMap_rootLift_kappa F F' hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm
+  have L4 : (omegaFunctor F F').map (biratPfIsoA hfi W).hom
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.1) (biratPfDeg W)
+      = toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.1) :=
+    omegaMap_rootLift_kappa F F' hfi W.hom.hom.1 (biratPfDeg W) rfl
+  have C2 := pfCatToRoot_idxToBirat_comp F F' A B W (HomBirat.mk Z ψ)
+  have g2 : (omegaFunctor F F').map (biratPfIsoA hfi W).inv
+        ≫ toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.1)
+      = pfKappa (F := F') (biratUp P G W.right.obj.1) (biratPfDeg W) := by
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (biratPfIsoA hfi W).inv ≫ t) L4.symm) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (fun t => t
+      ≫ pfKappa (F := F') (biratUp P G W.right.obj.1) (biratPfDeg W))
+      (((omegaFunctor F F').map_comp _ _).symm.trans
+        (congrArg (omegaFunctor F F').map (Iso.inv_hom_id (biratPfIsoA hfi W))))) ?_
+    refine Eq.trans (congrArg (fun t => t
+      ≫ pfKappa (F := F') (biratUp P G W.right.obj.1) (biratPfDeg W))
+      ((omegaFunctor F F').map_id _)) ?_
+    exact Category.id_comp _
+  -- ★右辺
+  have hR : ((omegaFunctor F F').map
+        (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+        ≫ ((omegaFunctor F F').mapIso (biratPfIsoB hfi W)).hom)
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W)
+      = pfKappa (F := F') (biratUp P G Z.unop.left.obj) (biratPfDeg W)
+        ≫ toRootHom (F := F') ((toBiratCat P G).map ψ) := by
+    rw [Functor.mapIso_hom, ← Functor.map_comp, Category.assoc, Iso.inv_hom_id,
+      Category.comp_id, K2]
+  -- ★左辺(項スタイル)
+  have hL : (((omegaFunctor F F').map (biratPfIdx hfi Gpf W Z).unop.hom.hom
+        ≫ (pfCatToRoot (biratPre P G) F').map
+          (HomPf.mk ((idxToBirat P F G F' A B).obj W) (HomBirat.mk Z ψ)))
+        ≫ ((omegaFunctor F F').mapIso (biratPfIsoB hfi W)).hom)
+        ≫ pfKappa (F := F') (biratUp P G W.right.obj.2) (biratPfDeg W)
+      = pfKappa (F := F') (biratUp P G Z.unop.left.obj) (biratPfDeg W)
+        ≫ toRootHom (F := F') ((toBiratCat P G).map ψ) := by
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (biratPfIdx hfi Gpf W Z).unop.hom.hom
+      ≫ ((pfCatToRoot (biratPre P G) F').map
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) (HomBirat.mk Z ψ)) ≫ t)) L1) ?_
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (biratPfIdx hfi Gpf W Z).unop.hom.hom ≫ t) C2) ?_
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (biratPfIdx hfi Gpf W Z).unop.hom.hom ≫ t)
+      (htc ((toBiratCat P G).map W.hom.hom.1) (HomBirat.mk Z ψ))) ?_
+    refine Eq.trans (congrArg (fun t => t
+      ≫ (toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.1)
+        ≫ toRootHom (F := F') (HomBirat.mk Z ψ))) hDD) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W)) ≫ t)
+      (Category.assoc _ _ _).symm) ?_
+    refine Eq.trans (congrArg (fun t => (omegaFunctor F F').map
+      (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W))
+      ≫ (t ≫ toRootHom (F := F') (HomBirat.mk Z ψ))) g2) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (fun t => t
+      ≫ toRootHom (F := F') (HomBirat.mk Z ψ)) K5) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (fun t => pfKappa (F := F')
+      (biratUp P G Z.unop.left.obj) (biratPfDeg W) ≫ t)
+      (htc ((toBiratCat P G).map Z.unop.hom.hom) (HomBirat.mk Z ψ)).symm) ?_
+    exact congrArg (fun t => pfKappa (F := F')
+      (biratUp P G Z.unop.left.obj) (biratPfDeg W) ≫ toRootHom (F := F') t)
+      (toHomBirat_comp_mk Z ψ)
+  exact hL.trans hR.symm
+
 /-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
 
 ★★`biratPfHom_mk` → `biratPf_mk` → `biratDescHom_eq_of_spec` で、
