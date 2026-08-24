@@ -6,6 +6,7 @@ import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop55PfKappa
 import ABC3.Found.FrdI.Prop55BiratPf
 import ABC3.Found.FrdI.Prop53Birat
+import ABC3.Found.FrdI.Prop53QPhi
 
 /-!
 # [FrdI] `𝒞 → 𝒞^pf` は双有理射の `Div^gp` を `Pf.of` で移す
@@ -532,6 +533,19 @@ theorem biratDivGp_nsmul_mem_pfImage (hfi : IsOfFrobeniusIsotropicType P)
     ⟨(α : End (biratUp P G A)), otri_mem_otimes_birat hfnBirat (hisoB _) α.2, rfl⟩, ?_⟩
   exact (biratDivGp_biratPfHom hfi Gpf F' A A
     ((α : End (biratUp P G A)) : biratUp P G A ⟶ biratUp P G A)).symm
+
+/-- ★★★★★★**部分群の包含として** —— `Φ^birat` の像は `(Φ^pf)^birat` の部分群に入る。
+
+★`Prop53QPhi.lean` の `phiBiratPfImage`(`Φ^birat` の `Pf` への像)の言葉で述べたもの。
+★★これで `Proposition 5.3` の `ℚ·Φ^birat = qPhiBiratOn`(飽和)との比較が
+**部分群の層で**できるようになる。 -/
+theorem phiBiratPfImage_le_phiBiratOn (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C) :
+    phiBiratPfImage P G ((P.toElem.obj A).base)
+      ≤ phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base) := by
+  rintro _ ⟨y, hy, rfl⟩
+  exact phiBiratOn_pf_mem hfi hiso Gpf F' A hy
 
 end Birat
 
