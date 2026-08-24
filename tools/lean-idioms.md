@@ -277,3 +277,62 @@ isotropic 型)はこの穴で止まっている。段取りは
 ★★**シェルの罠(同日)**: `perl -0pi -e 's/.../(@inv ...)/'` の置換文字列で
 `@inv` が**配列展開されて消える**。置換に `@` を含めるときは `sed` を使うか
 `\@` でエスケープする。Lean ファイルの中身は Write/Edit で書くのが安全。
+
+## 14 の続報(2026-08-25、4 回目)—— `inv` の `rw` は**抽象補題へ逃がす**のが唯一安定
+
+`Prop44Univ.lean`(`𝒞^birat` の普遍性)で 4 つ新しい失敗形に当たった。
+**3 回目までの対処(`@inv` で明示、`have` で項にする)では足りない場面がある。**
+
+| 失敗形 | 出るメッセージ | 直し方 |
+|---|---|---|
+| `rw [Category.assoc]` が当たらない | `Did not find an occurrence of the pattern (?f ≫ ?g) ≫ ?h` (**目に見えて在るのに**) | ↓ |
+| `rw [IsIso.hom_inv_id]` が当たらない | `Did not find an occurrence of the pattern inv ?f ≫ ?f` | ↓ |
+| `rw [Ω.map_comp]` / `rw [Ω.map_id]` | `motive is not type correct`(`IsIso _a` に型が付かない) | ↓ |
+
+★**原因**は共通で、`IsIso` の引数がメタ変数だと**インスタンス探索が走らない**こと。
+`rw` は補題 `IsIso.hom_inv_id` を使うのに `[IsIso ?f]` を解決できず、
+パターンそのものを作れないので「見つからない」と言う。
+
+### ★★対処 —— **圏の中だけの抽象補題**に逃がす
+
+`IsIso` を**インスタンス束縛**にした補題を別に立てて、`exact` で当てる。
+補題の中では `?f` が本物の変数なので `rw` が普通に動く。
+
+```lean
+theorem frac_key_aux {X Y T U : E} (g : X ⟶ Y) [IsIso g] (a : X ⟶ T) (p : Y ⟶ U)
+    (w : T ⟶ U) [IsIso w] (hsq : g ≫ p = a ≫ w) : inv g ≫ a = p ≫ inv w := by
+  rw [IsIso.inv_comp_eq, ← Category.assoc, hsq, Category.assoc, IsIso.hom_inv_id,
+    Category.comp_id]
+```
+
+**`rw [Ω.map_comp]` の motive 問題**も、等式を仮定に外出しすれば消える:
+
+```lean
+theorem frac_comp_aux ... (gz : X ⟶ Z) [IsIso gz] (aq : X ⟶ V)
+    (hgz : gz = g ≫ z) (haq : aq = a ≫ q) ... := by
+  subst hgz; subst haq   -- ★ここで初めて合成の形になる。inv の下を rw しない
+```
+
+### ★注意 1 —— 抽象補題の **universe を 1 本に固定する**
+
+`D` / `C` を使わない補題を同じ section に置くと、`Category.{max v u2 v2} E` の
+`max v u2 v2` が**そのまま universe 変数 3 本として一般化**され、
+呼び出し側で `stuck at solving universe constraint` になる。
+
+```lean
+section FracAux
+universe uv
+variable {E : Type uE} [Category.{uv} E]   -- ★ 1 本にする
+```
+
+### ★注意 2 —— 呼ぶときは **インスタンス引数を `@` で明示**する
+
+`exact frac_comp_aux g z a p w q …` は
+`failed to synthesize IsIso (Ω.map …)` で落ちる。
+**局所インスタンスは在る**(`have test : IsIso … := inferInstance` は通る)のに、
+暗黙の**対象**がメタ変数のうちに探索が走るため。
+
+```lean
+exact @frac_comp_aux _ _ _ _ _ _ _ _ g hγ z hZ a p w hW q gz hP aq
+  (Ω.map_comp _ _) (Ω.map_comp _ _) key
+```
