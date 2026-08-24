@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55PfDiv
 import ABC3.Found.FrdI.Prop44Gp
+import ABC3.Found.FrdI.Prop55PfKappa
 
 /-!
 # [FrdI] `𝒞 → 𝒞^pf` は双有理射の `Div^gp` を `Pf.of` で移す
@@ -27,12 +28,16 @@ import ABC3.Found.FrdI.Prop44Gp
 と移す(在庫 `rootBase_toRootHom` / `rootDeg_toRootHom` / `rootDiv_toRootHom`)ので、
 `sliceDivGpOf` は **`Pf.of` を後ろに掛けるだけ**で移る(`sliceDivGpOf_toRootHom`)。
 
+★代表元の対応(`IdxBirat P G A → IdxBirat (pfRootPre P F) Gpf ⟨A,1⟩`)も通したので、
+`biratDivGp` の言葉でも言える(`biratDivGp_toRootHom`)。
+
 ## ★★残り(記録)
 
-* 代表元の対応(`IdxBirat P G A → IdxBirat (pfRootPre P F) Gpf ⟨A,1⟩`)を通して
-  `biratDivGp` の言葉にすること。
+* **像が `𝒪^×` に入る**こと —— 代表元の対応は関手ではないので、
+  「単元が単元へ移る」は `𝒞^birat ⥤ (𝒞^birat)^pf ⥤ (𝒞^pf)^birat` の合成関手
+  (`Proposition 5.5, (ii)` の `biratPfHom`)を通して言う必要がある。
 * 逆向き(**分母を払えば `Φ^birat` に戻る**)—— こちらが
-  `(Φ^pf)^birat ⊆ ℚ·Φ^birat` であり、`Proposition 5.5, (ii)` を使う。
+  `(Φ^pf)^birat ⊆ ℚ·Φ^birat` であり、やはり `Proposition 5.5, (ii)` を使う。
 -/
 
 namespace ABC3.Found.FrdI
@@ -106,6 +111,42 @@ theorem sliceDivGpOf_toRootHom {A B A' : C} (a : A' ⟶ A) (ha : IsIso (P.Base a
           - ((P.degFr φ : ℕ+) : ℕ) • toGp (Φ.val (P.toElem.obj A').base) (P.Div a)) := by
     rw [map_sub, map_nsmul, gpMap_toGp, gpMap_toGp]
   rw [hz, ← AddMonoidHom.comp_apply, ← gpMap_comp, hcomp, gpMap_comp, AddMonoidHom.comp_apply]
+
+/-! ## ★3. 代表元の対応 —— `biratDivGp` の言葉で -/
+
+/-- ★★**pre-step は `𝒞^pf` へ移る**(`deg_Fr` はそのまま、底同型は `toRootHom_baseIso`)。 -/
+theorem preStep_toRootHom {A B : C} {f : A ⟶ B} (hf : IsPreStep P f) :
+    IsPreStep (pfRootPre P F) (toRootHom (F := F) f) :=
+  ⟨by
+    show rootDeg (toRootHom (F := F) f) = 1
+    rw [rootDeg_toRootHom]
+    exact hf.1,
+   toRootHom_baseIso f hf.2⟩
+
+/-- ★★**双有理化の添字対象を `𝒞^pf` へ移す**。
+
+★co-angular 性は `𝒞^pf` では**無条件**である(`pfRoot_isCoAngular`、
+`Proposition 1.4, (i)` ＋ `𝒞^pf` の全対象 isotropic 性)。 -/
+noncomputable def idxBiratToRootHom (Gpf : Frobenioid (pfRootPre P F))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    {A A' : C} (a : A' ⟶ A) (has : IsPreStep P a) :
+    IdxBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) :=
+  idxBiratMk (pfRootPre P F) Gpf (toRootHom (F := F) a)
+    (pfRoot_isCoAngular hfi _) (preStep_toRootHom has)
+
+/-- ★★★★★★**代表元の `Div^gp` も `Pf.of` で移る**。
+
+★`biratDivGp` は代表元では `sliceDivGpOf` そのもの(`biratDivGp_mk`)なので、
+`sliceDivGpOf_toRootHom` がそのまま効く。 -/
+theorem biratDivGp_toRootHom {G : Frobenioid P} (Gpf : Frobenioid (pfRootPre P F))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    {A B A' : C} (a : A' ⟶ A) (hac : IsCoAngular P a) (has : IsPreStep P a) (φ : A' ⟶ B) :
+    biratDivGp (P := pfRootPre P F) (G := Gpf)
+        (HomBirat.mk (idxBiratToRootHom Gpf hfi a has) (toRootHom (F := F) φ))
+      = gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base))
+        (biratDivGp (HomBirat.mk (idxBiratMk P G a hac has) φ)) := by
+  rw [biratDivGp_mk, biratDivGp_mk]
+  exact sliceDivGpOf_toRootHom a has.2 φ
 
 /-! ### ★出典の紐付け -/
 
