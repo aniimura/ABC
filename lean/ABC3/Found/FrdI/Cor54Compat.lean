@@ -42,33 +42,26 @@ import ABC3.Found.FrdI.Prop53Diag
    `cToUnTr_comp_psiUnTr`。★`psiUnTr_square`(`Theorem 3.4, (iv)`)に
    `toIstrOfIsotropic_comp_psiIstr`(両辺が**同じ項**になるので `rfl`)を継ぐだけ。
 
-## ★★まだ実装していない条(記録)
+## ★★残りの条の行方(2026-08-25 に更新)
 
-`Corollary 5.4` の残りは
+本ファイルを書いた時点では `Corollary 5.4` の残りは
+1-一意性・rigidity・縦の矢印の継ぎ目の 3 つだったが、**すべて別ファイルで閉じた**:
 
-* **1-一意性**(`Ψ^rlf` が同型を除いて一意)
-* **rigidity**(図式の合成関手がすべて rigid)
-* ★**縦の矢印を 1 本に繋ぐ最後の継ぎ目** ——
-  `𝒞^un-tr ≌ Model(Φ, Φ^birat)`(`unTr_modelFrobenioid`)が
-  `Ψ^un-tr` と `untrModelHomOver` を**取り違えない**こと、すなわち
+| 条 | 実装 |
+|---|---|
+| rigidity | `cor54_rigid_both`(`Cor54Rigid.lean`) |
+| 1-一意性(等式版) | `psiSc_congr` / `phiIso_ext`(`Cor54Uniq.lean`) |
+| 1-一意性(**同型版**) | `psiSc_iso_of_baseIso`(`Cor54UniqIso.lean`) |
+| 縦の矢印の継ぎ目 | `untrSeamIsoSec`(`Cor54UntrSeam.lean`) |
 
-    `(unTr_modelFrobenioid Fc₁ G₁).functor ⋙ (untrModelHomOver …).functor`
-      `= psiUnTr Ψ … ⋙ (unTr_modelFrobenioid Fc₂ G₂).functor`
-
-  これは `Corollary 4.11, (iii)(iv)` の内容そのものであり、本ファイルの範囲外。
-
-  ★★★**2026-08-24 の分析(次に着手する人へ)**: 両辺は
-  `UnTr P₁ ⥤ ModelData.Obj (unTr_ratFnData Fc₂ G₂ …)` である。
-  model Frobenioid の射は **4 成分 `(base, div, deg, u)`** で、
-  `toElem` が見るのは前 3 つだけ、`u` は有理関数の成分である。
-  ★したがって継ぎ目は 2 つに割れる:
-  * **前 3 成分** —— `Corollary 4.11, (iv)` の 1-可換図式(在庫 `cor_4_11_iv_square`)と
-    model 型の圏同値が `𝔽` と 1-可換であること(在庫 `modelTypeEquiv_comp_toElem`)。
-  * **`u` の成分** —— `Φ^birat` の輸送(在庫 `phiBiratOn_transport_of_cor411`)。
-  ★★要るのは「**model Frobenioid への 2 つの関手が
-  `toElem` の合成と `B` 成分で一致すれば等しい**」という 1 本である。
-  ★1-一意性の側(`Cor54Uniq.lean`)は
-  `natTrans_ext_of_essSurj` / `phiIso_ext` で `(Ψ_𝒟, η)` へ帰着済み。
+★★★**継ぎ目の直し方(測定の結論)**: 継ぎ目は
+`unTr_modelFrobenioid`(= `modelType_equiv` 経由、`Classical.choice` が
+**基準切断を選ぶ**)のままでは**成り立たない** ——
+`Theorem 5.2, (iv)` の対象の類 `FPPath.cls` は基準対象への pre-step に依存し、
+両側の切断が無関係なら差は `Φ₂^birat` の外に出るからである。
+★**`thm_5_2_iv` を使って切断を明示し、`S₂ := Ψ_*(S₁)`
+(在庫 `BaseSection.map`、`Corollary 5.7, (i)`)と揃えれば、仮定なしで 1-可換**になる。
+詳しくは `Cor54SeamCls.lean` / `Cor54SeamSec.lean` / `Cor54UntrSeam.lean`。
 
 ★`hbirat` は `Cor54Birat.lean` の `phiBiratOn_transport_of_cor411` で
 **すでに `Corollary 4.10`/`4.11` から導けている**(`Cor54.lean` 冒頭の記述は古い)。
