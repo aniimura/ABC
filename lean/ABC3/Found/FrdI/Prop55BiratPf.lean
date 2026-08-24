@@ -1385,6 +1385,32 @@ def homRootScaleIso.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 同じ目盛りの対象どうしの Hom は根に依らない",
     sectionId := "frdi-prop-5-5" }
 
+/-! ## ★単元は単元へ移る
+
+★★`biratPfHom` は**恒等射と合成を保つ**(`biratPfHom_id` / `biratPfHom_comp`)ので、
+自己射の単系の準同型である。したがって**単元は単元へ移る**。
+★★★これが `Proposition 5.5, (iv)` の単系の同定で
+「`Φ^birat` の像が `(Φ^pf)^birat` に入る」ことに要る条である ——
+`Φ^birat` は `𝒪^×(A^birat)` の `Div^gp` の像なので、
+`𝒪^×` に入ることを言うには単元性を運ばねばならない。 -/
+
+/-- ★★★★**`biratPfHom` は単元を単元へ移す**(片側の逆元の等式そのもの)。 -/
+theorem biratPfHom_unit [IsConnected D] (hfi : IsOfFrobeniusIsotropicType P)
+    {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (x y : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G A))
+    (hxy : compPf (biratPre P G) F' x y = toHomPf (F := F') (𝟙 (biratUp P G A))) :
+    compBirat (pfRootPre P F) Gpf Gpf.core
+        (biratPfHom hfi Gpf F' A A x) (biratPfHom hfi Gpf F' A A y)
+      = toHomBirat (P := pfRootPre P F) (G := Gpf) (𝟙 (⟨A, 1⟩ : PfRootObj P F)) := by
+  rw [← biratPfHom_comp hfi Gpf F' A A A x y, hxy, biratPfHom_id hfi Gpf F' A]
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の射の全単射は単元を単元へ移す。 -/
+def biratPfHom_unit.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は単元を単元へ移す",
+    sectionId := "frdi-prop-5-5" }
+
 end Scale
 
 section RootScale
