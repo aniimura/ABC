@@ -61,12 +61,18 @@ import ABC3.Found.FrdI.Prop53QPhi
 ★その律速だった「`rootMap` / `rootLift` の `rootBase`」は
 **`𝒞^pf` の標準射の底が恒等**(`rootBase_pfKappa`)から出た。
 
+★★★★★★★**結論**(`mem_qPhiBiratOn_iff_nsmul_mem`)——
+**`ℚ·Φ^birat` は `(Φ^pf)^birat` の飽和である**:
+
+  `Φ^birat` の像 ≤ `(Φ^pf)^birat` ≤ `ℚ·Φ^birat`、かつ `ℚ·Φ^birat` は可除。
+
 ## ★★残り(記録)
 
-両側の包含を `qPhiBiratOn`(`Prop53QPhi.lean` の飽和)の言葉で束ねて
-   **部分群の等号**にすること。★`⊆` の側には
-   「`Φ^birat` の元の `k` 乗根が `(Φ^pf)^birat` に在る」＋
-   `Gp (Pf M)` の torsion-free 性が要る。
+**等号** `(Φ^pf)^birat = ℚ·Φ^birat` にするには、あと
+「`(Φ^pf)^birat` 自身が飽和(可除)」が要る。★筋は測れている ——
+`Div^gp(δ') = y` なる `δ'` を `x`(`𝒞^birat` の完全化の元)へ戻し、
+`x` の `k` 乗根(`Pf.mk α (m·k)`)を取れば `Div^gp` は `y/k` になる。
+そこに `Gp (Pf M)` の torsion-free 性を足せば一意に定まる。
 -/
 
 namespace ABC3.Found.FrdI
@@ -867,6 +873,39 @@ theorem phiBiratPfImage_le_phiBiratOn (hfi : IsOfFrobeniusIsotropicType P)
       ≤ phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base) := by
   rintro _ ⟨y, hy, rfl⟩
   exact phiBiratOn_pf_mem hfi hiso Gpf F' A hy
+
+/-- ★★★★★★★**`Proposition 5.5, (iv)` の単系の同定の結論** ——
+**`ℚ·Φ^birat` は `(Φ^pf)^birat` の飽和である**。
+
+★★★2 本の包含(`phiBiratPfImage_le_phiBiratOn` と `phiBiratOn_pf_le_qPhiBiratOn`)と
+`qPhiBiratOn` の可除性(`qPhiBiratOn_of_nsmul_mem`)から出る。
+★★等号 `(Φ^pf)^birat = ℚ·Φ^birat` は、これに
+「`(Φ^pf)^birat` 自身が飽和(可除)」を足せば得られる。 -/
+theorem mem_qPhiBiratOn_iff_nsmul_mem (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
+    (x : Gp (Pf (Φ.val (P.toElem.obj A).base))) :
+    x ∈ qPhiBiratOn P G ((P.toElem.obj A).base)
+      ↔ ∃ k : ℕ+, ((k : ℕ+) : ℕ) • x
+          ∈ phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base) := by
+  constructor
+  · rintro ⟨k, hk⟩
+    exact ⟨k, phiBiratPfImage_le_phiBiratOn hfi hiso Gpf F' A hk⟩
+  · rintro ⟨k, hk⟩
+    exact qPhiBiratOn_of_nsmul_mem k
+      (phiBiratOn_pf_le_qPhiBiratOn hfi hiso Gpf F' A hisoB hfnBirat hAB hfnB hfnB'
+        ζ hdeg hprop hk)
 
 end Birat
 
