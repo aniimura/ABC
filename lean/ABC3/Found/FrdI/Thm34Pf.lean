@@ -247,6 +247,65 @@ theorem homPfMap_compPf (Ψ : C₁ ⥤ C₂)
   rw [compPf_mk V φ ψ, homPfMap_mk, homPfMap_mk, homPfMap_mk, Ψ.map_comp]
   exact (compPf_mk ((idxPf3Map F₁ F₂ Ψ hFT hdegEq A B E).obj V) (Ψ.map φ) (Ψ.map ψ)).symm
 
+/-! ### ★★★根の不変性との両立 —— `Proposition 5.5, (ii)` で要る
+
+★★`rootIso`(根の不変性)は代表元では**射を変えず添字だけ押し出す**
+(`rootIso_hom_mk`)。`Ψ^pf` も**射に `Ψ` を当てて添字を写す**だけなので、
+両者が可換であることは結局
+
+```
+Under.post K ∘ Under.map f = Under.map (K.map f) ∘ Under.post K
+```
+
+という `Under` の一般則(＝`K.map_comp`)に落ちる。
+
+★★配管メモ: 添字**対象の等式**で `rw` すると motive が壊れるので、
+`homPfMap_toHomPf` と同じく**添字圏の射を 1 本作って `HomPf.mk_map` で移す**。 -/
+theorem homPfMap_rootIso_hom (Ψ : C₁ ⥤ C₂)
+    (hFT : ∀ {X Y : C₁} (f : X ⟶ Y), IsFrobeniusType P₁ f → IsFrobeniusType P₂ (Ψ.map f))
+    (hdegEq : ∀ {X Y X' Y' : C₁} (f : X ⟶ Y) (g : X' ⟶ Y'),
+      P₁.degFr f = P₁.degFr g → P₂.degFr (Ψ.map f) = P₂.degFr (Ψ.map g))
+    {A B A' B' : C₁} (a : A ⟶ A') (ha : IsFrobeniusType P₁ a) (b : B ⟶ B')
+    (hb : IsFrobeniusType P₁ b) (hd : P₁.degFr a = P₁.degFr b) (x : HomPf P₁ F₁ A' B') :
+    homPfMap F₁ F₂ Ψ hFT hdegEq A B ((rootIso (F := F₁) a ha b hb hd).hom x)
+      = (rootIso (F := F₂) (Ψ.map a) (hFT a ha) (Ψ.map b) (hFT b hb)
+          (hdegEq a b hd)).hom (homPfMap F₁ F₂ Ψ hFT hdegEq A' B' x) := by
+  obtain ⟨V, φ, rfl⟩ := HomPf.exists_rep x
+  let hv : (pushIdx (F := F₂) (Ψ.map a) (hFT a ha) (Ψ.map b) (hFT b hb)
+        (hdegEq a b hd)).obj ((idxPfMap F₁ F₂ Ψ hFT hdegEq A' B').obj V)
+      ⟶ (idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj
+        ((pushIdx (F := F₁) a ha b hb hd).obj V) :=
+    Under.homMk (𝟙 _) (by
+      refine (Category.comp_id _).trans ?_
+      exact ((biFrMap F₁ F₂ Ψ hFT hdegEq).map_comp (biFrHom a ha b hb hd) V.hom).symm)
+  have ht : idxTransport P₂ F₂ hv (Ψ.map φ) = Ψ.map φ :=
+    frobTransport_eq _ _ _ _ _ _ _ (by
+      show Ψ.map φ ≫ 𝟙 _ = 𝟙 _ ≫ Ψ.map φ
+      rw [Category.comp_id, Category.id_comp])
+  calc homPfMap F₁ F₂ Ψ hFT hdegEq A B ((rootIso (F := F₁) a ha b hb hd).hom (HomPf.mk V φ))
+      = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj
+          ((pushIdx (F := F₁) a ha b hb hd).obj V)) (Ψ.map φ) := by
+        rw [rootIso_hom_mk]
+        exact homPfMap_mk F₁ F₂ Ψ hFT hdegEq ((pushIdx (F := F₁) a ha b hb hd).obj V) φ
+    _ = HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj
+          ((pushIdx (F := F₁) a ha b hb hd).obj V)) (idxTransport P₂ F₂ hv (Ψ.map φ)) :=
+        congrArg (HomPf.mk ((idxPfMap F₁ F₂ Ψ hFT hdegEq A B).obj
+          ((pushIdx (F := F₁) a ha b hb hd).obj V))) ht.symm
+    _ = HomPf.mk ((pushIdx (F := F₂) (Ψ.map a) (hFT a ha) (Ψ.map b) (hFT b hb)
+          (hdegEq a b hd)).obj ((idxPfMap F₁ F₂ Ψ hFT hdegEq A' B').obj V)) (Ψ.map φ) :=
+        HomPf.mk_map hv (Ψ.map φ)
+    _ = (rootIso (F := F₂) (Ψ.map a) (hFT a ha) (Ψ.map b) (hFT b hb)
+          (hdegEq a b hd)).hom (homPfMap F₁ F₂ Ψ hFT hdegEq A' B' (HomPf.mk V φ)) := by
+        rw [homPfMap_mk]
+        exact (rootIso_hom_mk (F := F₂) (Ψ.map a) (hFT a ha) (Ψ.map b) (hFT b hb)
+          (hdegEq a b hd) ((idxPfMap F₁ F₂ Ψ hFT hdegEq A' B').obj V) (Ψ.map φ)).symm
+
+/-- ★★★★★★locator —— `Theorem 3.4, (iii)` の `Ψ^pf` は**根の不変性と両立する**。 -/
+def homPfMap_rootIso_hom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 64,
+    item := "Theorem 3.4, (iii) — Ψ^pf は根の不変性(rootIso)と両立する",
+    sectionId := "frdi-thm-3-4" }
+
 def homPfMap_compPf.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 64,
     item := "Theorem 3.4, (iii) — Ψ^pf は合成を保つ",
