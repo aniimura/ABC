@@ -813,6 +813,48 @@ theorem biratDivGp_nsmul_mem_pfImage (hfi : IsOfFrobeniusIsotropicType P)
   exact (biratDivGp_biratPfHom hfi Gpf F' A A
     ((α : End (biratUp P G A)) : biratUp P G A ⟶ biratUp P G A)).symm
 
+/-- ★★★★★★**逆向きを部分群の包含として** —— `(Φ^pf)^birat ⊆ ℚ·Φ^birat`。
+
+★★★これで `Proposition 5.5, (iv)` の単系の同定が**部分群の層で両側から挟まれた**:
+
+  `Φ^birat` の像 ≤ `(Φ^pf)^birat` ≤ `ℚ·Φ^birat`(＝ `qPhiBiratOn`、飽和)。 -/
+theorem phiBiratOn_pf_le_qPhiBiratOn (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _)) :
+    phiBiratOn Gpf (((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base)
+      ≤ qPhiBiratOn P G ((P.toElem.obj A).base) := by
+  rw [phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi) (⟨A, 1⟩ : PfRootObj P F)]
+  rintro _ ⟨δ', hδ', rfl⟩
+  obtain ⟨x, hx⟩ := biratPfHom_surjective hfi hiso Gpf F' A A δ'
+  have hδ : biratPfEndHom hfi Gpf F' A x
+      ∈ OTimes (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) := by
+    show biratPfHom hfi Gpf F' A A x ∈ _
+    rw [hx]
+    exact hδ'
+  obtain ⟨k, hk⟩ := biratDivGp_nsmul_mem_pfImage hfi Gpf F' A hisoB hfnBirat hAB hfnB hfnB'
+    ζ hdeg hprop x hδ
+  refine ⟨k, ?_⟩
+  show ((k : ℕ+) : ℕ) • biratDivGp (P := pfRootPre P F) (G := Gpf)
+      ((δ' : End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _)
+    ∈ phiBiratPfImage P G ((P.toElem.obj A).base)
+  rw [phiBiratPfImage, phiBiratOn_base G hiso A]
+  rw [show ((δ' : End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _)
+      = ((biratPfEndHom hfi Gpf F' A x :
+        End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _) from hx.symm]
+  exact hk
+
 /-- ★★★★★★**部分群の包含として** —— `Φ^birat` の像は `(Φ^pf)^birat` の部分群に入る。
 
 ★`Prop53QPhi.lean` の `phiBiratPfImage`(`Φ^birat` の `Pf` への像)の言葉で述べたもの。
