@@ -309,6 +309,79 @@ theorem biratDivGp_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
   subst hZ
   exact biratDivGp_biratPfHom_toHomPf hfi Gpf F' Z ψ
 
+/-! ## ★5. `𝒪^×` は `𝒪^×` へ移る -/
+
+/-- ★`𝒞^birat` の恒等射の底は `𝟙`。 -/
+theorem biratBase_id (A : C) :
+    biratBase (P := P) (G := G) (𝟙 (biratUp P G A)) = 𝟙 ((P.toElem.obj A).base) := by
+  show biratBase (toHomBirat (P := P) (G := G) (𝟙 A)) = _
+  rw [biratBase_toHomBirat, P.Base_id]
+
+/-- ★★★★★**自然な関手は `𝒪^×` を `𝒪^×` へ移す**。
+
+★底恒等性と次数 1 は `biratBase_biratPfHom` / `biratDeg_biratPfHom`、
+単元性は `biratPfHom_unit`(恒等射と合成の保存)から。 -/
+theorem otimes_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    {δ : biratUp P G A ⟶ biratUp P G A}
+    (hδ : δ ∈ OTimes (biratPre P G) (biratUp P G A)) :
+    biratPfHom hfi Gpf F' A A (toHomPf (F := F') δ)
+      ∈ OTimes (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) := by
+  obtain ⟨⟨hb, hl⟩, hu⟩ := hδ
+  obtain ⟨u, hu'⟩ := hu
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · show biratBase (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A A (toHomPf (F := F') δ))
+      = biratBase (P := pfRootPre P F) (G := Gpf)
+        (𝟙 (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)))
+    rw [biratBase_biratPfHom, biratBase_id]
+    have hb' : biratBase (P := P) (G := G) δ
+        = biratBase (P := P) (G := G) (𝟙 (biratUp P G A)) := hb
+    exact hb'.trans (biratBase_id A)
+  · show biratDeg (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A A (toHomPf (F := F') δ)) = 1
+    rw [biratDeg_biratPfHom]
+    exact hl
+  · have hv : (u : End (biratUp P G A)) = δ := hu'
+    have e1 : δ ≫ (u.inv : biratUp P G A ⟶ biratUp P G A) = 𝟙 _ := by
+      have := u.inv_val
+      rw [hv] at this
+      exact this
+    have e2 : (u.inv : biratUp P G A ⟶ biratUp P G A) ≫ δ = 𝟙 _ := by
+      have := u.val_inv
+      rw [hv] at this
+      exact this
+    have h1 : compPf (biratPre P G) F' (toHomPf (F := F') δ)
+        (toHomPf (F := F') (u.inv : biratUp P G A ⟶ biratUp P G A))
+        = toHomPf (F := F') (𝟙 (biratUp P G A)) := by
+      rw [← toHomPf_comp, e1]
+    have h2 : compPf (biratPre P G) F'
+        (toHomPf (F := F') (u.inv : biratUp P G A ⟶ biratUp P G A)) (toHomPf (F := F') δ)
+        = toHomPf (F := F') (𝟙 (biratUp P G A)) := by
+      rw [← toHomPf_comp, e2]
+    have k1 := biratPfHom_unit hfi Gpf F' A _ _ h1
+    have k2 := biratPfHom_unit hfi Gpf F' A _ _ h2
+    exact ⟨⟨biratPfHom hfi Gpf F' A A (toHomPf (F := F') δ),
+      biratPfHom hfi Gpf F' A A
+        (toHomPf (F := F') (u.inv : biratUp P G A ⟶ biratUp P G A)), k2, k1⟩, rfl⟩
+
+/-- ★★★★★★**`Φ^birat` の像は `(Φ^pf)^birat` に入る**。
+
+★★★これが `Proposition 5.5, (iv)` の単系の同定の**片側**である ——
+`Φ^birat(A)` の元 `Div^gp(δ)` は、自然な関手で移した `Div^gp(Ξ δ)` に
+`Pf.of` を掛けただけのものであり、`Ξ δ` は `𝒪^×` に入る。 -/
+theorem phiBiratAt_pf_mem (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    {y : Gp (Φ.val (P.toElem.obj A).base)} (hy : y ∈ phiBiratAt P G (biratUp P G A)) :
+    gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base)) y
+      ∈ phiBiratAt (pfRootPre P F) Gpf
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) := by
+  obtain ⟨δ, hδ, rfl⟩ := hy
+  exact ⟨biratPfHom hfi Gpf F' A A (toHomPf (F := F') (δ : biratUp P G A ⟶ biratUp P G A)),
+    otimes_biratPfHom hfi Gpf F' A hδ,
+    biratDivGp_biratPfHom hfi Gpf F' A A (δ : biratUp P G A ⟶ biratUp P G A)⟩
+
 end Birat
 
 /-! ### ★出典の紐付け -/
