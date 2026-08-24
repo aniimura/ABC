@@ -566,6 +566,248 @@ theorem omegaMap_mk (F' : FrobenioidCore (biratPre P G)) {X Y : PfRootObj P F}
   exact rootIso_hom_mk _ _ _ _ _ _ _
 
 variable (F) in
+/-- ★★★★★★**`Ω` は根 1 の添字の射を `β ≫ Ψ(–) ≫ β⁻¹` に送る**。
+
+★★これが `pfKappa` / `toRootHom` / `rootMap` の像を計算する入口である
+(`Θ.map` の全単射性の橋渡しで要る)。
+
+★★配管メモ: 添字**対象の等式**では `rw` できないので、
+`homPfMap_toHomPf` と同じく**添字圏の射 `(β,β′)` を 1 本作って
+`HomPf.mk_map` で移す**。 -/
+theorem omegaMap_toHomPf (F' : FrobenioidCore (biratPre P G)) {X Y : PfRootObj P F}
+    (χ : rtObj P F X.obj Y.root ⟶ rtObj P F Y.obj X.root) :
+    omegaMap F F' (show HomRoot P F X Y from toHomPf (F := F) χ)
+      = (show HomRoot (biratPre P G) F' (omegaObj F F' X) (omegaObj F F' Y) from
+          toHomPf (F := F') (biratRtIso F F' X.obj Y.root ≫ (toBiratCat P G).map χ
+            ≫ @inv _ _ _ _ (biratRtIso F F' Y.obj X.root)
+              (biratRtIso_isIso F F' Y.obj X.root))) := by
+  have hbA : IsFrobeniusType (biratPre P G) (biratRtIso F F' X.obj Y.root) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hbB : IsFrobeniusType (biratPre P G) (biratRtIso F F' Y.obj X.root) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hdb : (biratPre P G).degFr (biratRtIso F F' X.obj Y.root)
+      = (biratPre P G).degFr (biratRtIso F F' Y.obj X.root) := by
+    rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _]
+  -- ★添字圏の射 `(β, β′)`
+  let hv : idxOne (biratPre P G) F' (rtObj (biratPre P G) F' (biratUp P G X.obj) Y.root)
+        (rtObj (biratPre P G) F' (biratUp P G Y.obj) X.root)
+      ⟶ (pushIdx (F := F') (biratRtIso F F' X.obj Y.root) hbA
+          (biratRtIso F F' Y.obj X.root) hbB hdb).obj
+        ((idxPfMap F F' (toBiratCat P G) biratFT biratDegEq
+          (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root)).obj
+          (idxOne P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root))) :=
+    Under.homMk (biFrHom (biratRtIso F F' X.obj Y.root) hbA
+        (biratRtIso F F' Y.obj X.root) hbB hdb)
+      (WideSubcategory.hom_ext _ (Prod.ext
+        ((Category.id_comp _).trans ((Category.comp_id _).symm.trans
+          (congrArg (fun t => biratRtIso F F' X.obj Y.root ≫ t)
+            ((toBiratCat P G).map_id _).symm)))
+        ((Category.id_comp _).trans ((Category.comp_id _).symm.trans
+          (congrArg (fun t => biratRtIso F F' Y.obj X.root ≫ t)
+            ((toBiratCat P G).map_id _).symm)))))
+  have ht : idxTransport (biratPre P G) F' hv
+      (biratRtIso F F' X.obj Y.root ≫ (toBiratCat P G).map χ
+        ≫ @inv _ _ _ _ (biratRtIso F F' Y.obj X.root)
+          (biratRtIso_isIso F F' Y.obj X.root))
+      = (toBiratCat P G).map χ :=
+    frobTransport_eq _ _ _ _ _ _ _ (by
+      have h1 : ((toBiratCat P G).map χ
+            ≫ @inv _ _ _ _ (biratRtIso F F' Y.obj X.root)
+              (biratRtIso_isIso F F' Y.obj X.root))
+            ≫ biratRtIso F F' Y.obj X.root
+          = (toBiratCat P G).map χ :=
+        (Category.assoc _ _ _).trans
+          ((congrArg (fun t => (toBiratCat P G).map χ ≫ t)
+            (IsIso.inv_hom_id (biratRtIso F F' Y.obj X.root))).trans (Category.comp_id _))
+      exact (Category.assoc _ _ _).trans
+        (congrArg (fun t => biratRtIso F F' X.obj Y.root ≫ t) h1))
+  refine Eq.trans (omegaMap_mk F F' (X := X) (Y := Y)
+    (idxOne P F (rtObj P F X.obj Y.root) (rtObj P F Y.obj X.root)) χ) ?_
+  refine Eq.trans (congrArg (HomPf.mk _) ht.symm) ?_
+  exact HomPf.mk_map hv _
+
+variable (F) in
+/-- ★共役の計算(圏 `𝒞^birat` の中だけの代数)——
+`b₁ ≫ u₁ = r₁⁻¹` と `r_k ≫ b_k = s_k` から `b₁ ≫ (u₁ ≫ s_k) ≫ b_k⁻¹ = r₁⁻¹ ≫ r_k`。
+
+★`Ψ(rtExt A 1)` の可逆性を**要求しない**形にしてある(そこが実装上の要点)。 -/
+theorem conj_ext_aux {A R1 S1 Rk Sk : BiratCat P G}
+    (r1 : A ⟶ R1) [IsIso r1] (b1 : R1 ⟶ S1) (u1 : S1 ⟶ A)
+    (h1 : b1 ≫ u1 = inv r1)
+    (rk : A ⟶ Rk) (bk : Rk ⟶ Sk) [IsIso bk] (sk : A ⟶ Sk) (tk : rk ≫ bk = sk) :
+    b1 ≫ (u1 ≫ sk) ≫ inv bk = inv r1 ≫ rk := by
+  subst tk
+  calc b1 ≫ (u1 ≫ rk ≫ bk) ≫ inv bk
+      = (b1 ≫ u1) ≫ rk ≫ bk ≫ inv bk := by simp only [Category.assoc]
+    _ = inv r1 ≫ rk := by
+        rw [h1, IsIso.hom_inv_id, Category.comp_id]
+
+variable (F) in
+/-- ★★★★★★**`Ω` は標準の Frobenius 型射 `κ` を `κ` に送る**。
+
+★三角形 `rtExt^birat ≫ β = Ψ(rtExt)` を 2 か所(次数 `1` と `k`)で使うだけ。
+★次数 `1` の側は「`β₁ ≫ Ψ(rtOneInv) = (rtExt^birat)⁻¹`」の形で使う ——
+こうすると `Ψ(rtExt A 1)` の可逆性を経由せずに済む。 -/
+theorem omegaMap_pfKappa (F' : FrobenioidCore (biratPre P G)) (A : C) (k : ℕ+) :
+    omegaMap F F' (show HomRoot P F (⟨A, k⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        pfKappa (F := F) A k)
+      = (show HomRoot (biratPre P G) F'
+            (omegaObj F F' (⟨A, k⟩ : PfRootObj P F)) (omegaObj F F' ⟨A, 1⟩) from
+          pfKappa (F := F') (biratUp P G A) k) := by
+  refine Eq.trans (omegaMap_toHomPf F F' (X := (⟨A, k⟩ : PfRootObj P F)) (Y := ⟨A, 1⟩)
+    (kappaRep (P := P) (F := F) A k)) ?_
+  refine congrArg (toHomPf (F := F')) ?_
+  haveI hr1 : IsIso (rtExt P F A 1) := isIso_rtExt_one P F A
+  haveI hq1 : IsIso (rtExt (biratPre P G) F' (biratUp P G A) 1) :=
+    isIso_rtExt_one (biratPre P G) F' (biratUp P G A)
+  -- ★次数 1 の三角形を `β₁ ≫ Ψ(rtOneInv) = (rtExt^birat)⁻¹` の形にする
+  have h1 : biratRtIso F F' A 1
+        ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A)
+      = @inv _ _ _ _ (rtExt (biratPre P G) F' (biratUp P G A) 1) hq1 := by
+    refine (@IsIso.inv_eq_of_hom_inv_id _ _ _ _
+      (rtExt (biratPre P G) F' (biratUp P G A) 1) hq1
+      (biratRtIso F F' A 1 ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A))
+      ?_).symm
+    have e2 : rtExt P F A 1 ≫ rtOneInv (P := P) (F := F) A = 𝟙 A := IsIso.hom_inv_id _
+    have e3 : (toBiratCat P G).map (rtExt P F A 1)
+          ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A)
+        = 𝟙 ((toBiratCat P G).obj A) :=
+      ((toBiratCat P G).map_comp _ _).symm.trans
+        ((congrArg (toBiratCat P G).map e2).trans ((toBiratCat P G).map_id A))
+    calc rtExt (biratPre P G) F' (biratUp P G A) 1
+            ≫ biratRtIso F F' A 1
+              ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A)
+        = (rtExt (biratPre P G) F' (biratUp P G A) 1 ≫ biratRtIso F F' A 1)
+            ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A) :=
+          (Category.assoc _ _ _).symm
+      _ = (toBiratCat P G).map (rtExt P F A 1)
+            ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A) :=
+          congrArg (fun t => t ≫ (toBiratCat P G).map (rtOneInv (P := P) (F := F) A))
+            (biratRtIso_tri F F' A 1)
+      _ = 𝟙 ((toBiratCat P G).obj A) := e3
+  -- ★左辺の中身を `Ψ(rtOneInv) ≫ Ψ(rtExt A k)` に分ける
+  have hmid : (toBiratCat P G).map (kappaRep (P := P) (F := F) A k)
+      = (toBiratCat P G).map (rtOneInv (P := P) (F := F) A)
+        ≫ (toBiratCat P G).map (rtExt P F A k) :=
+    (toBiratCat P G).map_comp _ _
+  refine Eq.trans (congrArg (fun t => biratRtIso F F' A 1 ≫ t
+    ≫ @inv _ _ _ _ (biratRtIso F F' A k) (biratRtIso_isIso F F' A k)) hmid) ?_
+  exact conj_ext_aux (rtExt (biratPre P G) F' (biratUp P G A) 1)
+    (biratRtIso F F' A 1) ((toBiratCat P G).map (rtOneInv (P := P) (F := F) A)) h1
+    (rtExt (biratPre P G) F' (biratUp P G A) k) (biratRtIso F F' A k)
+    ((toBiratCat P G).map (rtExt P F A k)) (biratRtIso_tri F F' A k)
+
+/-- ★共役の計算(その 2)—— 真ん中に射を 1 本挟んだ形。 -/
+theorem conj_mid_aux {A1 S1 A' B' Rk Sk : BiratCat P G}
+    (b1 : A1 ⟶ S1) (u1 : S1 ⟶ A') (w1 : A1 ⟶ A') (h1 : b1 ≫ u1 = w1)
+    (m : A' ⟶ B') (rk : B' ⟶ Rk) (bk : Rk ⟶ Sk) [IsIso bk] (sk : B' ⟶ Sk)
+    (tk : rk ≫ bk = sk) :
+    b1 ≫ (u1 ≫ m ≫ sk) ≫ inv bk = w1 ≫ m ≫ rk := by
+  subst tk
+  subst h1
+  simp
+
+variable (F) in
+/-- ★★★★★★**`Ω` は `𝒞 → 𝒞^pf` の射を `𝒞^birat → (𝒞^birat)^pf` の射に送る**。
+
+★`Ω ∘ toRootHom = toRootHom ∘ Ψ` —— 1-可換性の射の部分である。 -/
+theorem omegaMap_toRootHom (F' : FrobenioidCore (biratPre P G)) {A B : C} (f : A ⟶ B) :
+    omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ from
+        toRootHom (F := F) f)
+      = (show HomRoot (biratPre P G) F'
+            (omegaObj F F' (⟨A, 1⟩ : PfRootObj P F)) (omegaObj F F' ⟨B, 1⟩) from
+          toRootHom (F := F') ((toBiratCat P G).map f)) := by
+  haveI hrA : IsIso (rtExt P F A 1) := isIso_rtExt_one P F A
+  haveI hqA : IsIso (rtExt (biratPre P G) F' (biratUp P G A) 1) :=
+    isIso_rtExt_one (biratPre P G) F' (biratUp P G A)
+  refine Eq.trans (omegaMap_toHomPf F F' (X := (⟨A, 1⟩ : PfRootObj P F)) (Y := ⟨B, 1⟩)
+    (@inv _ _ _ _ (rtExt P F A 1) hrA ≫ f ≫ rtExt P F B 1)) ?_
+  refine congrArg (toHomPf (F := F')) ?_
+  -- ★次数 1 の三角形(`A` 側)を `β ≫ Ψ(rtExt A 1)⁻¹ = (rtExt^birat)⁻¹` の形に
+  have h1 : biratRtIso F F' A 1
+        ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)
+      = @inv _ _ _ _ (rtExt (biratPre P G) F' (biratUp P G A) 1) hqA := by
+    refine (@IsIso.inv_eq_of_hom_inv_id _ _ _ _
+      (rtExt (biratPre P G) F' (biratUp P G A) 1) hqA
+      (biratRtIso F F' A 1
+        ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)) ?_).symm
+    have e2 : rtExt P F A 1 ≫ @inv _ _ _ _ (rtExt P F A 1) hrA = 𝟙 A :=
+      IsIso.hom_inv_id _
+    have e3 : (toBiratCat P G).map (rtExt P F A 1)
+          ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)
+        = 𝟙 ((toBiratCat P G).obj A) :=
+      ((toBiratCat P G).map_comp _ _).symm.trans
+        ((congrArg (toBiratCat P G).map e2).trans ((toBiratCat P G).map_id A))
+    calc rtExt (biratPre P G) F' (biratUp P G A) 1
+            ≫ biratRtIso F F' A 1
+              ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)
+        = (rtExt (biratPre P G) F' (biratUp P G A) 1 ≫ biratRtIso F F' A 1)
+            ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA) :=
+          (Category.assoc _ _ _).symm
+      _ = (toBiratCat P G).map (rtExt P F A 1)
+            ≫ (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA) :=
+          congrArg (fun t => t ≫ (toBiratCat P G).map
+            (@inv _ _ _ _ (rtExt P F A 1) hrA)) (biratRtIso_tri F F' A 1)
+      _ = 𝟙 ((toBiratCat P G).obj A) := e3
+  -- ★左辺の中身を 3 本に分ける
+  have hmid : (toBiratCat P G).map
+        (@inv _ _ _ _ (rtExt P F A 1) hrA ≫ f ≫ rtExt P F B 1)
+      = (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)
+        ≫ (toBiratCat P G).map f ≫ (toBiratCat P G).map (rtExt P F B 1) :=
+    ((toBiratCat P G).map_comp _ _).trans
+      (congrArg (fun t => (toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA) ≫ t)
+        ((toBiratCat P G).map_comp _ _))
+  refine Eq.trans (congrArg (fun t => biratRtIso F F' A 1 ≫ t
+    ≫ @inv _ _ _ _ (biratRtIso F F' B 1) (biratRtIso_isIso F F' B 1)) hmid) ?_
+  exact conj_mid_aux (biratRtIso F F' A 1)
+    ((toBiratCat P G).map (@inv _ _ _ _ (rtExt P F A 1) hrA)) _ h1
+    ((toBiratCat P G).map f) (rtExt (biratPre P G) F' (biratUp P G B) 1)
+    (biratRtIso F F' B 1) ((toBiratCat P G).map (rtExt P F B 1))
+    (biratRtIso_tri F F' B 1)
+
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★**`Ω` は「根を上げた射」`rootMap` を `rootMap` に送る**。
+
+★★`rootMap` は `κ` との合成で**一意に決まる**(`rootMap_ext`、`κ` が mono)。
+`Ω` は関手で、`κ` と `toRootHom` を正しく写す(上の 2 本)ので、
+**方程式 `rootMap ≫ κ_B = κ_A ≫ [f]` を送るだけ**で済む。 -/
+theorem omegaMap_rootMap (F' : FrobenioidCore (biratPre P G))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    (hfiB : IsOfFrobeniusIsotropicType (biratPre P G))
+    {A B : C} (f : A ⟶ B) (k : ℕ+) :
+    omegaMap F F' (show HomRoot P F (⟨A, k⟩ : PfRootObj P F) ⟨B, k⟩ from
+        rootMap (F := F) hfi f k)
+      = (show HomRoot (biratPre P G) F'
+            (omegaObj F F' (⟨A, k⟩ : PfRootObj P F)) (omegaObj F F' ⟨B, k⟩) from
+          rootMap (F := F') hfiB ((toBiratCat P G).map f) k) := by
+  have hR : compRoot (biratPre P G) F'
+        (rootMap (F := F') hfiB ((toBiratCat P G).map f) k)
+        (pfKappa (F := F') (biratUp P G B) k)
+      = compRoot (biratPre P G) F' (pfKappa (F := F') (biratUp P G A) k)
+        (toRootHom (F := F') ((toBiratCat P G).map f)) :=
+    rootMap_spec (F := F') hfiB ((toBiratCat P G).map f) k
+  have s1 := congrArg (compRoot (biratPre P G) F'
+    (omegaMap F F' (show HomRoot P F (⟨A, k⟩ : PfRootObj P F) ⟨B, k⟩ from
+      rootMap (F := F) hfi f k))) (omegaMap_pfKappa F F' B k).symm
+  have s2 := (omegaMap_comp F F'
+    (show HomRoot P F (⟨A, k⟩ : PfRootObj P F) ⟨B, k⟩ from rootMap (F := F) hfi f k)
+    (show HomRoot P F (⟨B, k⟩ : PfRootObj P F) ⟨B, 1⟩ from pfKappa (F := F) B k)).symm
+  have s3 := congrArg (omegaMap F F' (X := (⟨A, k⟩ : PfRootObj P F)) (Y := ⟨B, 1⟩))
+    (rootMap_spec (F := F) hfi f k)
+  have s4 := omegaMap_comp F F'
+    (show HomRoot P F (⟨A, k⟩ : PfRootObj P F) ⟨A, 1⟩ from pfKappa (F := F) A k)
+    (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ from toRootHom (F := F) f)
+  have s5 := congrArg (fun t => compRoot (biratPre P G) F' t
+      (omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ from
+        toRootHom (F := F) f))) (omegaMap_pfKappa F F' A k)
+  have s6 := congrArg (compRoot (biratPre P G) F' (pfKappa (F := F') (biratUp P G A) k))
+    (omegaMap_toRootHom F F' f)
+  exact rootMap_ext (F := F') hfiB _ _
+    (((((s1.trans s2).trans s3).trans s4).trans s5).trans (s6.trans hR.symm))
+
+variable (F) in
 /-- ★★★★★★★**`biratDescFunctor` の入力 `hΩ`** ——
 `Ω` は `𝒞^pf` の co-angular pre-step を `(𝒞^birat)^pf` の**同型**に送る。
 
