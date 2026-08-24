@@ -40,15 +40,48 @@ rtExt (𝒞^birat) F' (A^birat) d ≫ β = (toBiratCat).map (rtExt 𝒞 F A d)
 ★したがって `β` が `Exists.choose` であっても**構わない** ——
 必要なのは `β` の一意性ではなく、この三角形だけである。
 
-## ★本ファイルの内容(`Ω` の 4 材料のうち 3 つ)
+## ★本ファイルの内容(`Ω` の材料 —— 残るは `map_comp` 1 本)
 
 | | 状態 |
 |---|---|
-| `biratFT` / `biratDegEq` …… `homPfMap` の 2 入力 | ★済 |
 | `biratRtIso` …… 根の食い違いを吸収する同型(＋三角形) | ★済 |
+| `biratFT` / `biratDegEq` …… `homPfMap` の 2 入力 | ★済 |
 | `omegaObj` / `omegaMap` …… `Ω` の対象と射 | ★済 |
 | `omegaMap_id` …… `map_id` | ★済 |
-| `omegaMap_comp` …… `map_comp`(`rtLift` と `homPfMap` の可換性) | ☆残 |
+| `biratRtIso_rtLift` …… `β` と根の持ち上げの四角形 | ★済 |
+| `omegaMap_comp` …… `map_comp` | ☆残(道具は 4 つとも揃った) |
+
+## ★★★★`omegaMap_comp` の手順書(2026-08-25 に測った)
+
+★`Ω` の射を **`compPf` の共役ではなく `rootIso` の側**で書き直したので、
+`map_comp` は**在庫 2 本＋新設 2 本**だけで組める。記号を
+`Ψ = toBiratCat`、`hm = homPfMap F F' Ψ …`、`ρ(a,b) = rootIso a _ b _ _`、
+`β_{A,d} = biratRtIso F F' A d` とする。
+
+| 道具 | 出どころ |
+|---|---|
+| `homPfMap_rootIso_hom` …… `hm ∘ ρ.hom = ρ(Ψa,Ψb).hom ∘ hm` | ★本増分(`Thm34Pf.lean`) |
+| `biratRtIso_rtLift` …… `rtLift^birat ≫ β_t = β_d ≫ Ψ(rtLift)` | ★本増分 |
+| `rootIso_trans` …… `ρ(a).hom ∘ ρ(a').hom = ρ(a ≫ a').hom` | 在庫(`Def31Pf.lean`) |
+| `homPfMap_compPf` / `rootIso_comp'` | 在庫 |
+
+★★**鎖**(`compRoot f g = (rtRootIso …).hom (compPf (ρ⁻¹f) (ρ⁻¹g))` の外側から):
+
+```
+hm ((rtRootIso X Z).hom w)
+  = ρ(Ψ(rtLift X), Ψ(rtLift Z)).hom (hm w)          -- homPfMap_rootIso_hom
+ρ(β, β').hom (ρ(Ψ rtLift, Ψ rtLift').hom (hm w))
+  = ρ(β ≫ Ψ(rtLift), β' ≫ Ψ(rtLift')).hom (hm w)    -- rootIso_trans
+  = ρ(rtLift^birat ≫ β_t, rtLift'^birat ≫ β'_t).hom (hm w)   -- ★biratRtIso_rtLift
+  = (rtRootIso^birat X Z).hom (ρ(β_t, β'_t).hom (hm w))       -- rootIso_trans(逆向き)
+```
+
+★内側は `homPfMap_compPf`(`hm` は `compPf` を保つ)と
+`rootIso_comp'`(`ρ.hom` は `compPf` を分配する)で分けてから、
+`.inv` の側は「`hm ∘ ρ.hom = ρ'.hom ∘ hm` ⟹ `hm ∘ ρ.inv = ρ'.inv ∘ hm`」
+(両者が同型だから)で降ろす。
+
+★★残る手間は**指数の帳簿**(`compRoot` の `mul_comm` 6 か所)だけである。
 -/
 
 namespace ABC3.Found.FrdI
@@ -161,43 +194,41 @@ def omegaObj (F' : FrobenioidCore (biratPre P G)) (X : PfRootObj P F) :
   ⟨biratUp P G X.obj, X.root⟩
 
 variable (F) in
-/-- ★★★**射** —— `homPfMap` で送って、根の食い違いを `biratRtIso` で共役する。 -/
+/-- ★★★**射** —— `homPfMap` で送って、根の食い違いを **`rootIso`** で吸収する。
+
+★★★**設計の要点(2026-08-25 に取り直した)**: 最初は
+`compPf` による共役(`β ≫ – ≫ β⁻¹`)で書いていたが、
+**`rootIso`(根の不変性)の側で書くほうが良い** ——
+`β` は同型なので Frobenius 型・次数 1 で、`rootIso` の 3 仮定をそのまま満たす。
+★こう書くと `map_comp` が在庫の `rootIso_trans` / `rootIso_comp'` と
+新設の `homPfMap_rootIso_hom` / `biratRtIso_rtLift` だけで組める。 -/
 noncomputable def omegaMap (F' : FrobenioidCore (biratPre P G))
     {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
     HomRoot (biratPre P G) F' (omegaObj F F' X) (omegaObj F F' Y) :=
-  compPf (biratPre P G) F' (toHomPf (F := F') (biratRtIso F F' X.obj Y.root))
-    (compPf (biratPre P G) F'
-      (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ f)
-      (toHomPf (F := F') (@inv _ _ _ _ (biratRtIso F F' Y.obj X.root) (biratRtIso_isIso F F' Y.obj X.root))))
+  (rootIso (F := F') (biratRtIso F F' X.obj Y.root)
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (biratRtIso F F' Y.obj X.root)
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (by rw [isLinear_of_isIso (biratPre P G) _,
+        isLinear_of_isIso (biratPre P G) _])).hom
+    (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ f)
 
 /-! ## ★4. `map_id` -/
 
 variable (F) in
-/-- ★★★**`Ω` は恒等射を保つ** —— 共役が打ち消し合うだけ。
-
-★★配管メモ: ここは `rw` で通らない。`rtObj` が `Exists.choose` なので
-目標の中では `Classical.indefiniteDescription … |>.1` に展開されており、
-`homPfMap … (rtObj P F X.obj X.root) …` という**畳んだ形のパターンが当たらない**。
-★`congrArg` で項の側から組むと defeq で通る(idiom 14 と同じ逃げ方)。 -/
+/-- ★★★**`Ω` は恒等射を保つ** —— `rootIso_hom_id` そのもの。 -/
 theorem omegaMap_id (F' : FrobenioidCore (biratPre P G)) (X : PfRootObj P F) :
     omegaMap F F' (idRoot P F X) = idRoot (biratPre P G) F' (omegaObj F F' X) := by
   have hmap := homPfMap_toHomPf F F' (toBiratCat P G) biratFT biratDegEq
     (𝟙 (rtObj P F X.obj X.root))
   rw [(toBiratCat P G).map_id] at hmap
-  refine Eq.trans (congrArg (fun t => compPf (biratPre P G) F'
-      (toHomPf (F := F') (biratRtIso F F' X.obj X.root))
-      (compPf (biratPre P G) F' t
-        (toHomPf (F := F') (@inv _ _ _ _ (biratRtIso F F' X.obj X.root)
-          (biratRtIso_isIso F F' X.obj X.root))))) hmap) ?_
-  refine Eq.trans (congrArg (compPf (biratPre P G) F'
-      (toHomPf (F := F') (biratRtIso F F' X.obj X.root)))
-    (compPf_id_left (P := biratPre P G) (F := F')
-      (toHomPf (F := F') (@inv _ _ _ _ (biratRtIso F F' X.obj X.root)
-        (biratRtIso_isIso F F' X.obj X.root))))) ?_
-  refine Eq.trans (toHomPf_comp (F := F') (biratRtIso F F' X.obj X.root)
-      (@inv _ _ _ _ (biratRtIso F F' X.obj X.root)
-        (biratRtIso_isIso F F' X.obj X.root))).symm ?_
-  exact congrArg (toHomPf (F := F')) (IsIso.hom_inv_id _)
+  refine Eq.trans (congrArg (rootIso (F := F') (biratRtIso F F' X.obj X.root)
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (biratRtIso F F' X.obj X.root)
+      (isFrobeniusType_of_isIso (biratPre P G) _)
+      (by rw [isLinear_of_isIso (biratPre P G) _])).hom hmap) ?_
+  exact rootIso_hom_id (F := F') (biratRtIso F F' X.obj X.root)
+    (isFrobeniusType_of_isIso (biratPre P G) _)
 
 /-! ## ★5. `map_comp` の要 —— **持ち上げとの両立** -/
 
