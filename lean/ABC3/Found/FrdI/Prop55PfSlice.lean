@@ -456,6 +456,40 @@ theorem biratPfHom_pow_eq_Xi (hfi : IsOfFrobeniusIsotropicType P)
   rw [← map_pow, h, endRootOneEquiv_toRootHom]
   rfl
 
+/-- ★★**`𝒪^×` の上では `Div^gp` は冪を倍にする**(`biratDivGp_mul_otimes` の帰納)。 -/
+theorem biratDivGp_pow_otimes {X : BiratCat P G} {δ : End X}
+    (hδ : δ ∈ OTimes (biratPre P G) X) (n : ℕ) :
+    biratDivGp ((δ ^ n : End X) : X ⟶ X) = n • biratDivGp ((δ : End X) : X ⟶ X) := by
+  induction n with
+  | zero =>
+      show biratDivGp (((1 : End X)) : X ⟶ X) = 0
+      exact biratDivGp_id X
+  | succ n ih =>
+      rw [pow_succ, biratDivGp_mul_otimes ((OTimes (biratPre P G) X).pow_mem hδ n) hδ, ih,
+        succ_nsmul]
+
+/-- ★★★**`𝒞^birat` の isotropic 対象では `𝒪^▷ = 𝒪^×`**。
+
+★pre-step は `𝒞^birat` で同型になる(`birat_isIso_of_preStep_of_isotropic`)ので、
+`𝒪^▷` の元は自動的に単元である。 -/
+theorem otri_mem_otimes_birat
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    {X : BiratCat P G} (hX : IsIsotropic (biratPre P G) X) {α : End X}
+    (hα : α ∈ OTri (biratPre P G) X) : α ∈ OTimes (biratPre P G) X := by
+  have hb : (biratPre P G).Base ((α : End X) : X ⟶ X) = 𝟙 _ := by
+    have h := hα.1
+    rw [show (biratPre P G).Base ((α : End X) : X ⟶ X)
+      = (biratPre P G).Base (𝟙 X) from h, (biratPre P G).Base_id]
+  have hps : IsPreStep (biratPre P G) ((α : End X) : X ⟶ X) := by
+    refine ⟨hα.2, ?_⟩
+    show IsIso ((biratPre P G).Base ((α : End X) : X ⟶ X))
+    rw [hb]
+    infer_instance
+  haveI := birat_isIso_of_preStep_of_isotropic P G hfnBirat hX hps
+  refine ⟨hα, ⟨⟨α, @inv _ _ _ _ ((α : End X) : X ⟶ X) _, ?_, ?_⟩, rfl⟩⟩
+  · exact IsIso.inv_hom_id _
+  · exact IsIso.hom_inv_id _
+
 end Birat
 
 /-! ### ★出典の紐付け -/
