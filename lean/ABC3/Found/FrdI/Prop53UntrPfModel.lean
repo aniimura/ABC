@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55PfArbFull
+import ABC3.Found.FrdI.Prop53UntrBirat
 
 /-!
 # [FrdI] Proposition 5.3 の第 2 文 —— `(𝒞^un-tr)^pf` は model 型
@@ -105,8 +106,8 @@ set_option maxHeartbeats 1600000 in
 > tively, Φpf) and the rational function monoid Φbirat (respectively, Q · Φbirat =
 
 ★★`𝒞^un-tr` は unit-trivial なので `pfRoot_ratFnData_bmon_val_full`(条なし)が
-そのまま当たる。★★`Φ^birat` を `𝒞` のものへ書き換える段
-(`(𝒞^un-tr)^birat` と `𝒞^birat` の比較)は残作業として記録する。 -/
+そのまま当たる。★`Φ^birat` を `𝒞` のものへ書き換えた版は
+`untrPf_ratFnData_bmon_val_of_C`(下)である。 -/
 theorem untrPf_ratFnData_bmon_val (Fc : FrobenioidCore P) (G : Frobenioid P)
     (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D) (d : D) :
     (untrPf_ratFnData P Fc G hint hfsmD).bmon.val d
@@ -114,6 +115,48 @@ theorem untrPf_ratFnData_bmon_val (Fc : FrobenioidCore P) (G : Frobenioid P)
   pfRoot_ratFnData_bmon_val_full (unTr_frobIsotropicType Fc) (unTr_isotropic P Fc)
     (unTr_frobNormalizedType Fc G hint hfsmD) (unTr_unitTrivial P Fc)
     (unTr_frobenioid P Fc G) (untrPf_frobenioid P Fc G) hfsmD d
+
+variable (P) in
+/-- ★`ℚ·Φ^birat` も `𝒞` と `𝒞^un-tr` で一致する(`phiBiratOn_unTr_eq` の飽和版)。 -/
+theorem qPhiBiratOn_unTr_eq (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X) (d : D) :
+    qPhiBiratOn (unTrPre P Fc) (unTr_frobenioid P Fc G) d = qPhiBiratOn P G d := by
+  have himg : phiBiratPfImage (unTrPre P Fc) (unTr_frobenioid P Fc G) d
+      = phiBiratPfImage P G d :=
+    congrArg (AddSubgroup.map (gpMap _ (Pf.of (M := Φ.val d))))
+      (phiBiratOn_unTr_eq Fc G hiso d)
+  ext x
+  show (∃ k : ℕ+, ((k : ℕ+) : ℕ) • x
+      ∈ phiBiratPfImage (unTrPre P Fc) (unTr_frobenioid P Fc G) d)
+    ↔ (∃ k : ℕ+, ((k : ℕ+) : ℕ) • x ∈ phiBiratPfImage P G d)
+  rw [himg]
+
+variable (P) in
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.3 の第 2 文(`(𝒞^un-tr)^pf` の場合)** ——
+`(𝒞^un-tr)^pf` の有理関数の単系は各 `d ∈ Ob(𝒟)` で
+**`ℚ·Φ^birat(d)`(`𝒞` の `Φ^birat`)** である。
+
+原文 (FrdI p.103):
+> tively, Φpf) and the rational function monoid Φbirat (respectively, Q · Φbirat =
+
+★`untrPf_ratFnData_bmon_val` が `𝒞^un-tr` の `Φ^birat` で述べたものを、
+`qPhiBiratOn_unTr_eq` で **`𝒞` の `Φ^birat`** へ書き換えたものである。 -/
+theorem untrPf_ratFnData_bmon_val_of_C (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D) (d : D) :
+    (untrPf_ratFnData P Fc G hint hfsmD).bmon.val d = ↥(qPhiBiratOn P G d) := by
+  rw [untrPf_ratFnData_bmon_val P Fc G hint hfsmD d, qPhiBiratOn_unTr_eq P Fc G hiso d]
+
+variable (P) in
+/-- ★★★★★**[FrdI] Proposition 5.3 の第 2 文(`𝒞^un-tr` の場合)の単系の側** ——
+`𝒞^un-tr` の有理関数の単系は各 `d ∈ Ob(𝒟)` で **`Φ^birat(d)`(`𝒞` のもの)**。 -/
+theorem unTr_ratFnData_bmon_val_of_C (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D) (d : D) :
+    (unTr_ratFnData Fc G hint hfsmD).bmon.val d = ↥(phiBiratOn G d) := by
+  show ↥(phiBiratOn (unTr_frobenioid P Fc G) d) = ↥(phiBiratOn G d)
+  rw [phiBiratOn_unTr_eq Fc G hiso d]
 
 end UnTrPf
 
