@@ -253,3 +253,27 @@ isotropic 型)はこの穴で止まっている。段取りは
 
 ★残るのは `IsIso` のインスタンス合成(既存の仮定が暗黙引数の書かれ方の違いで
 拾われない)で、これは `haveI` を**目標に現れる形そのまま**で置き直すしかない。
+
+### 14 の続報(2026-08-25、3 回目)—— `𝒟` 側の合成が `Functor.comp` をまたぐとき
+
+`Cor54SeamCls.lean` で、**底 `𝒟` の射の合成**でも同じ穴に落ちた。
+`sq : P₁.proj ⋙ ΨB ≅ Ψ ⋙ P₂.proj` の成分 `sq.hom.app X` の終域は
+`(Ψ ⋙ P₂.proj).obj X` だが、`P₂.Base f` の始域は `(P₂.toElem.obj (Ψ.obj X)).base`。
+**defeq だが `instances` 透明度では型が付かない**ので、
+
+* `Category.assoc` / `IsIso.hom_inv_id` が `rw` で当たらない
+* `IsIso (P₂.Base (Ψ.map φ))` が `haveI` で置いてあっても**合成に失敗する**
+
+**対処(測定済み、3 点)**:
+
+1. **`inv` は `@inv _ _ _ _ f h` でインスタンスを明示**する。
+   `IsIso` は `Prop` なので、どの証明を渡しても defeq。合成に頼らないのが確実。
+2. **`Category.assoc` / `hom_inv_id` は `have` で項として置く**
+   (`(Category.assoc _ _ _).symm` / `@IsIso.hom_inv_id _ _ _ _ f h`)。
+   置いた `have` を `rw` するか、`Eq.trans` / `congrArg` で項の側から組む。
+3. **`rw` の末尾で閉じない**ことがある —— 目標が見た目 `X = X` になっても
+   `rw` の自動 `rfl` は reducible 透明度なので通らない。**`rfl` を 1 行足す**。
+
+★★**シェルの罠(同日)**: `perl -0pi -e 's/.../(@inv ...)/'` の置換文字列で
+`@inv` が**配列展開されて消える**。置換に `@` を含めるときは `sed` を使うか
+`\@` でエスケープする。Lean ファイルの中身は Write/Edit で書くのが安全。
