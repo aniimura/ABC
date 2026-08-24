@@ -407,6 +407,55 @@ theorem phiBiratOn_pf_mem (hfi : IsOfFrobeniusIsotropicType P)
   rw [phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi) (⟨A, 1⟩ : PfRootObj P F)]
   exact phiBiratAt_pf_mem hfi Gpf F' A hy
 
+/-! ## ★6. 逆向き —— 分母を払えば `Φ^birat` に戻る -/
+
+/-- ★★★★**`biratPfHom` は自己射の単系の準同型**(`Proposition 5.5, (ii)` の
+「恒等射と合成を保つ」を `MonoidHom` に束ねたもの)。
+
+★`End` の積は `x * y = y ≫ x` なので、`biratPfHom_comp` を引数を入れ替えて渡す。 -/
+noncomputable def biratPfEndHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C) :
+    End (pfObjOf (biratPre P G) F' (biratUp P G A))
+      →* End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F)) where
+  toFun x := biratPfHom hfi Gpf F' A A x
+  map_one' := biratPfHom_id hfi Gpf F' A
+  map_mul' x y := biratPfHom_comp hfi Gpf F' A A A y x
+
+@[simp] theorem biratPfEndHom_apply (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (x : End (pfObjOf (biratPre P G) F' (biratUp P G A))) :
+    biratPfEndHom hfi Gpf F' A x = biratPfHom hfi Gpf F' A A x := rfl
+
+/-- ★★★★★★**`(𝒞^pf)^birat` の自己射は、正の冪で `𝒞^birat` から来る**。
+
+★★★これが `(Φ^pf)^birat ⊆ ℚ·Φ^birat`(逆向きの包含)の本体である ——
+`Proposition 5.5, (ii)` の全単射で `𝒞^birat` の完全化へ移し、
+そこで `Proposition 5.5, (i)` の「正の冪で戻る」(`hom_pf_pow_toRootHom`)を当てる。 -/
+theorem biratPfHom_pow_eq_Xi (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hAB : IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB : IsFrobeniusNormalized (biratPre P G) (biratUp P G A))
+    (hfnB' : IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ n : ℕ+, (biratPre P G).degFr ((ζ n : End (biratUp P G A)) :
+      biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
+    (x : End (pfObjOf (biratPre P G) F' (biratUp P G A)))
+    (hx : (endRootOneEquiv (F := F') (biratUp P G A)).symm x
+      ∈ OTri (pfRootPre (biratPre P G) F')
+        (⟨biratUp P G A, 1⟩ : PfRootObj (biratPre P G) F')) :
+    ∃ (k : ℕ+) (α : OTri (biratPre P G) (biratUp P G A)),
+      (biratPfEndHom hfi Gpf F' A x) ^ ((k : ℕ+) : ℕ)
+        = biratPfEndHom hfi Gpf F' A
+          (toHomPf (F := F') ((α : End (biratUp P G A)) : _ ⟶ _)) := by
+  obtain ⟨k, α, h⟩ := hom_pf_pow_toRootHom (F := F') hisoB hAB hfnB hfnB' ζ hdeg hprop x hx
+  refine ⟨k, α, ?_⟩
+  rw [← map_pow, h, endRootOneEquiv_toRootHom]
+  rfl
+
 end Birat
 
 /-! ### ★出典の紐付け -/
