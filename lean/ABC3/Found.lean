@@ -132,6 +132,7 @@ import ABC3.Found.FrdI.Thm62RatStd
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Prop55PfDiv
+import ABC3.Found.FrdI.Prop55PfSlice
 import ABC3.Found.FrdI.Prop53UntrPf
 import ABC3.Found.FrdI.Prop55Untr
 import ABC3.Found.FrdI.Prop55UntrIdx
