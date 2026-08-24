@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop32Equiv
+import ABC3.Found.FrdI.Prop53UntrPf
+import Mathlib.CategoryTheory.Conj
 
 /-!
 # [FrdI] Proposition 5.5, (i) の**零因子**の側 —— `𝒞^pf` の `Div` は分母を持つ
@@ -178,6 +180,52 @@ theorem otri_pf_pow (hiso : ∀ X : C, IsIsotropic P X) {A : C}
       End (⟨A, 1⟩ : PfRootObj P F))) hE
   rw [← hy]
   exact h2.symm
+
+/-! ## ★5. 根つきと根なしの橋 —— `End ⟨A,1⟩ ≃* Hom^pf(A,A)`
+
+★★`Proposition 5.5, (ii)` の `biratPfHom` の定義域は**根なしの** `Hom^pf(A,A)`
+(`PfCat` の `End`)であって、`HomRoot ⟨A,1⟩ ⟨A,1⟩` ではない。
+★★★在庫の `endRootMulEquiv`(`rootSelfIso` による `End ⟨A,n⟩ ≃* End_{𝒞^pf} A^{(n·n)}`)を
+`n = 1` で読み、`rtExt A 1` が**同型**であること(`isIso_rtExt_one`)による共役を継ぐと橋になる。
+
+★実務メモ: `End (A : PfCat P F)` は圏インスタンスを取り違える(lean-idioms 6)ので、
+**別名の `def` `pfObjOf` を通して型を運ぶ**(在庫の `rtObjPf` と同じ手)。 -/
+
+/-- ★`𝒞` の対象を `PfCat` の対象として見る(`End` の解決先を分けるための別名)。 -/
+def pfObjOf (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (A : C) : PfCat P F := A
+
+/-- ★★`rtExt A 1` は同型なので、その共役が `End` の同型を与える。 -/
+noncomputable def endPfCatRtOne (A : C) :
+    End (pfObjOf P F A) ≃* End (pfObjOf P F (rtObj P F A 1)) :=
+  Iso.conj ((toPfCat P F).mapIso
+    (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A)))
+
+/-- ★★★★**根つきと根なしの橋** —— `End ⟨A,1⟩ ≃* Hom^pf(A,A)`。 -/
+noncomputable def endRootOneEquiv (A : C) :
+    End (⟨A, 1⟩ : PfRootObj P F) ≃* End (pfObjOf P F A) :=
+  (endRootMulEquiv (F := F) A 1).trans (endPfCatRtOne (F := F) A).symm
+
+/-- ★★★★★**根なしでも「正の冪で `𝒞` へ戻る」**(`otri_pf_pow` を橋で移したもの)。
+
+★★これが `Proposition 5.5, (ii)` の `biratPfHom` の定義域で使える形である。 -/
+theorem hom_pf_pow (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (x : End (pfObjOf P F A))
+    (hx : (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    ∃ (k : ℕ+) (α : OTri P A),
+      x ^ ((k : ℕ+) : ℕ)
+        = endRootOneEquiv (F := F) A (otriPfMk (F := F) hiso (hprop 1).2 ((α : End A))) := by
+  obtain ⟨k, α, h⟩ := otri_pf_pow hiso hA hfn hfn' ζ hdeg hprop
+    ⟨(endRootOneEquiv (F := F) A).symm x, hx⟩
+  refine ⟨k, α, ?_⟩
+  have hx' : x = endRootOneEquiv (F := F) A ((endRootOneEquiv (F := F) A).symm x) :=
+    ((endRootOneEquiv (F := F) A).apply_symm_apply x).symm
+  rw [hx', ← map_pow]
+  exact congrArg (endRootOneEquiv (F := F) A) h
 
 /-! ### ★出典の紐付け -/
 
