@@ -57,6 +57,19 @@ import ABC3.Found.FrdI.Prop53Diag
 
   これは `Corollary 4.11, (iii)(iv)` の内容そのものであり、本ファイルの範囲外。
 
+  ★★★**2026-08-24 の分析(次に着手する人へ)**: 両辺は
+  `UnTr P₁ ⥤ ModelData.Obj (unTr_ratFnData Fc₂ G₂ …)` である。
+  model Frobenioid の射は **4 成分 `(base, div, deg, u)`** で、
+  `toElem` が見るのは前 3 つだけ、`u` は有理関数の成分である。
+  ★したがって継ぎ目は 2 つに割れる:
+  * **前 3 成分** —— `Corollary 4.11, (iv)` の 1-可換図式(在庫 `cor_4_11_iv_square`)と
+    model 型の圏同値が `𝔽` と 1-可換であること(在庫 `modelTypeEquiv_comp_toElem`)。
+  * **`u` の成分** —— `Φ^birat` の輸送(在庫 `phiBiratOn_transport_of_cor411`)。
+  ★★要るのは「**model Frobenioid への 2 つの関手が
+  `toElem` の合成と `B` 成分で一致すれば等しい**」という 1 本である。
+  ★1-一意性の側(`Cor54Uniq.lean`)は
+  `natTrans_ext_of_essSurj` / `phiIso_ext` で `(Ψ_𝒟, η)` へ帰着済み。
+
 ★`hbirat` は `Cor54Birat.lean` の `phiBiratOn_transport_of_cor411` で
 **すでに `Corollary 4.10`/`4.11` から導けている**(`Cor54.lean` 冒頭の記述は古い)。
 -/
