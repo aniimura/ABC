@@ -419,6 +419,52 @@ theorem phiBiratOn_pf_mem (hfi : IsOfFrobeniusIsotropicType P)
   rw [phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi) (⟨A, 1⟩ : PfRootObj P F)]
   exact phiBiratAt_pf_mem hfi Gpf F' A hy
 
+/-! ## ★5-b. `𝒞^pf` の標準射の**底**は恒等
+
+★★★**測って分かった**(2026-08-24): `κ_{A,k} = rtExt(A,1)⁻¹ ≫ rtExt(A,k)` の底は
+`rootBase` の共役(`Base(rtExt X.obj Y.root) ≫ − ≫ Base(rtExt Y.obj X.root)⁻¹`)と
+**ちょうど打ち消し合って恒等になる**。
+★★これで `rootMap` と `rootLift` の底も明示式になり、
+`𝒞^pf` の中の `Base` の計算がすべて `𝒞` の `Base` に落ちる。
+
+★これらは本来 `Prop55PfKappa.lean` の在庫だが、下流の再ビルドを避けて本ファイルに置く。 -/
+
+/-- ★★★★**標準射 `κ_{A,k}` の底は恒等**。 -/
+theorem rootBase_pfKappa (A : C) (k : ℕ+) :
+    rootBase (pfKappa (F := F) A k) = 𝟙 ((P.toElem.obj A).base) := by
+  haveI h1 : IsIso (P.Base (rtExt P F A 1)) := (rtExt_frobType P F A 1).2
+  haveI hk : IsIso (P.Base (rtExt P F A k)) := (rtExt_frobType P F A k).2
+  haveI := isIso_rtExt_one P F A
+  show P.Base (rtExt P F A 1) ≫ pfBase (toHomPf (F := F) (kappaRep (P := P) (F := F) A k))
+      ≫ inv (P.Base (rtExt P F A k)) = _
+  rw [pfBase_toHomPf]
+  show P.Base (rtExt P F A 1) ≫ P.Base (inv (rtExt P F A 1) ≫ rtExt P F A k)
+      ≫ inv (P.Base (rtExt P F A k)) = _
+  rw [P.Base_comp, ← Category.assoc, ← Category.assoc, ← P.Base_comp, IsIso.hom_inv_id,
+    P.Base_id, Category.id_comp, IsIso.hom_inv_id]
+
+/-- ★★★**根を上げた射の底はもとの射の底**。 -/
+theorem rootBase_rootMap (hfi : IsOfFrobeniusIsotropicType P) {A B : C} (f : A ⟶ B) (k : ℕ+) :
+    rootBase (rootMap (F := F) hfi f k) = P.Base f := by
+  have h := congrArg (pfRootPre P F).Base (rootMap_spec (F := F) hfi f k)
+  rw [(pfRootPre P F).Base_comp, (pfRootPre P F).Base_comp] at h
+  have h2 : rootBase (rootMap (F := F) hfi f k) ≫ rootBase (pfKappa (F := F) B k)
+      = rootBase (pfKappa (F := F) A k) ≫ rootBase (toRootHom (F := F) f) := h
+  rw [rootBase_pfKappa, rootBase_pfKappa, Category.comp_id, Category.id_comp,
+    rootBase_toRootHom] at h2
+  exact h2
+
+/-- ★★★**持ち上げた射の底ももとの射の底**。 -/
+theorem rootBase_rootLift (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁)
+    (k : ℕ+) (hk : P.degFr α = k) :
+    rootBase (rootLift (F := F) hfi α k hk) = P.Base α := by
+  have h := congrArg (pfRootPre P F).Base (rootLift_spec (F := F) hfi α k hk)
+  rw [(pfRootPre P F).Base_comp] at h
+  have h2 : rootBase (rootLift (F := F) hfi α k hk) ≫ rootBase (pfKappa (F := F) A₁ k)
+      = rootBase (toRootHom (F := F) α) := h
+  rw [rootBase_pfKappa, Category.comp_id, rootBase_toRootHom] at h2
+  exact h2
+
 /-! ## ★6. 逆向き —— 分母を払えば `Φ^birat` に戻る -/
 
 /-- ★★★★**`biratPfHom` は自己射の単系の準同型**(`Proposition 5.5, (ii)` の
