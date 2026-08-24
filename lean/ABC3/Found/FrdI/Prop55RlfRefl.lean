@@ -68,7 +68,7 @@ namespace ABC3.Found.FrdI
 open CategoryTheory
 open scoped NNReal TensorProduct
 
-universe v u w
+universe v u w u2 v2
 
 section Refl
 
@@ -182,6 +182,15 @@ theorem isSharp_scT (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M) :
   have hp := congrFun hψ p
   rw [Pi.add_apply, Pi.zero_apply] at hp
   exact (add_eq_zero.mp hp).1
+
+/-- ★★★★**`toSc` は単射**(`M` が perf-factorial かつ divisorial なら)。
+
+★`scToFactor ∘ toSc = μ` で `μ` が単射だから。 -/
+theorem toSc_injective (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M) :
+    Function.Injective (toSc (S := ℝ≥0) (M := M)) := by
+  intro a b hab
+  refine suppFactorHom_injective H hdiv ?_
+  rw [suppFactorHom_apply, suppFactorHom_apply, ← scToFactor_toSc H, ← scToFactor_toSc H, hab]
 
 /-- ★★★**`toSc` は `0` でない元を `0` でない元へ送る**(`M` が perf-factorial なら)。
 
@@ -381,6 +390,58 @@ theorem MonoidOn.scOn_isNonDilatingOn_of_perfFactorial (Φ : MonoidOn.{v, u, w} 
       (hpf A).choose_spec.divisorial hb x hx
 
 end ReflOn
+
+/-! ## ★6. `Proposition 5.5, (iii)` の `𝒞^rlf` の側を組み上げる -/
+
+section StdRlf
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (iii) の `𝒞^rlf` の側(組み上げ)** ——
+**`𝒞` が standard 型かつ not group-like で `Φ` が perf-factorial なら、
+`𝒞^rlf` も standard 型**。
+
+原文 (FrdI p.105):
+> if C is of standard (respectively, rationally standard) type, then so are Cun-tr, Crlf.
+
+★★`scModel_standardType` が要求していた 2 条が**両方とも消えた**:
+
+| 条 | 出どころ |
+|---|---|
+| `hnd`(`Φ^rlf` が non-dilating) | ★`MonoidOn.scOn_isNonDilatingOn_of_perfFactorial`(本ファイル) |
+| `hngl`(`𝒞^rlf` が not group-like) | ★在庫 `scModel_not_isOfGroupLikeType` ＋ 本ファイルの `isSharp_scT` / `toSc_injective` |
+
+★★★残る仮引数は**原文の常備仮定**(`hiso` / `hfn` / `hcharInj` / `hint` / `hfsmD` /
+`hdiv` / `htot` / `hconn` / `hfsmff` / `hpf` / `hnd` / `hngl`)と、
+在庫補題が要求する `hperf` だけである。 -/
+theorem scModel_standardType_of_perfFactorial (G : Frobenioid P)
+    (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := ℝ≥0) (Φ.map α)))
+    (hint : ∀ A : D, IsIntegralMonoid (ScT ℝ≥0 (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    (hdiv : (scModel ℝ≥0 G hiso hfn hcharInj hint hfsmD).phi.IsDivisorialOn)
+    (htot : IsTotallyEpimorphic D) (hconn : IsConnected D)
+    (F' : FrobenioidCore (ModelData.modelPre
+      (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)))
+    (hfsmff : IsOfFSMFFType D)
+    (hpf : ∀ A : D, IsPerfFactorial (Φ.val A))
+    (hperf : ∀ A : D, IsPerfectMonoid (Φ.val A))
+    (hnd : Φ.IsNonDilatingOn)
+    (hngl : ¬ IsOfGroupLikeType P) :
+    IsOfStandardType D (ScModelObj ℝ≥0 G hiso hfn hcharInj hint hfsmD)
+      (ModelData.modelPre (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)) F' :=
+  scModel_standardType G hiso hfn hcharInj hint hfsmD hdiv htot hconn F' hfsmff
+    (MonoidOn.scOn_isNonDilatingOn_of_perfFactorial Φ hcharInj hpf hperf hnd)
+    (scModel_not_isOfGroupLikeType G hiso hfn hcharInj hint hfsmD hdiv htot hconn
+      (fun d => isSharp_scT (hpf d).choose_spec (hpf d).choose_spec.divisorial)
+      (fun d => toSc_injective (hpf d).choose_spec (hpf d).choose_spec.divisorial)
+      hngl)
+
+end StdRlf
 
 /-! ### ★出典の紐付け -/
 
