@@ -161,6 +161,35 @@ noncomputable def biratDescHom (Ω : C ⥤ E)
   HomBirat.desc_mk (biratDescFun (G := G) Ω hΩ)
     (fun {_ _} u φ => biratDescFun_compat Ω hΩ u φ) Z φ
 
+/-- ★★★**`biratDescHom` の特徴づけ** —— 分母を前から掛けると分子に戻る。 -/
+theorem biratDescHom_mk_spec (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) :
+    Ω.map Z.unop.hom.hom ≫ biratDescHom (G := G) Ω hΩ (HomBirat.mk Z φ) = Ω.map φ := by
+  rw [biratDescHom_mk]
+  show Ω.map Z.unop.hom.hom
+      ≫ (@inv _ _ _ _ (Ω.map Z.unop.hom.hom) (hΩ _ Z.unop.hom.property) ≫ Ω.map φ)
+    = Ω.map φ
+  have h1 : Ω.map Z.unop.hom.hom
+        ≫ (@inv _ _ _ _ (Ω.map Z.unop.hom.hom) (hΩ _ Z.unop.hom.property) ≫ Ω.map φ)
+      = (Ω.map Z.unop.hom.hom
+          ≫ @inv _ _ _ _ (Ω.map Z.unop.hom.hom) (hΩ _ Z.unop.hom.property)) ≫ Ω.map φ :=
+    (Category.assoc _ _ _).symm
+  rw [h1, IsIso.hom_inv_id, Category.id_comp]
+
+/-- ★★★★**`biratDescHom` は方程式で決まる** ——
+`Ω(分母) ≫ t = Ω(分子)` なら `t` がその値である。
+
+★★これが `Proposition 5.5, (ii)` の橋渡しで使う形(`inv` を書かずに済む)。 -/
+theorem biratDescHom_eq_of_spec (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B : C} (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (t : Ω.obj A ⟶ Ω.obj B)
+    (h : Ω.map Z.unop.hom.hom ≫ t = Ω.map φ) :
+    biratDescHom (G := G) Ω hΩ (HomBirat.mk Z φ) = t := by
+  haveI := hΩ _ Z.unop.hom.property
+  exact (cancel_epi (Ω.map Z.unop.hom.hom)).mp
+    ((biratDescHom_mk_spec Ω hΩ Z φ).trans h.symm)
+
 /-! ## ★3. 恒等と合成 —— 関手にする
 
 ★★配管メモ(idiom 14)—— `inv` を含む式を `rw` で動かすと

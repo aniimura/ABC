@@ -5,6 +5,7 @@ import ABC3.Found.FrdI.Prop55ScaleRootCoa
 import ABC3.Found.FrdI.Thm34Pf
 import ABC3.Found.FrdI.Prop55PfArbFull
 import ABC3.Found.FrdI.Prop44Univ
+import ABC3.Found.FrdI.Prop53PfCatRoot
 
 /-!
 # [FrdI] Proposition 5.5, (ii) —— `Ω : 𝒞^pf ⥤ (𝒞^birat)^pf` の材料
@@ -939,6 +940,30 @@ theorem thetaFunctor_obj_surjective (F' : FrobenioidCore (biratPre P G))
     ({ obj := biratDown P G Y.obj, root := Y.root } : PfRootObj P F), ?_⟩
   rfl
 
+
+
+/-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
+
+★★`biratPfHom_mk` → `biratPf_mk` → `biratDescHom_eq_of_spec` で、
+`Θ.map (biratPfHom … x) = pfCatToRoot.map x` は**次の 1 本の等式に帰着する**
+(型検査まで確認済み):
+
+```
+Ω((biratPfIdx hfi Gpf W Z).hom) ≫ (pfCatToRoot).map x
+  = Ω(rootMap hfi ψ k ≫ (biratPfIsoB hfi W).inv)
+```
+
+★★★**残りの筋**(紙の上では閉じている):
+両辺に **`Ω(iB)`(同型)** と **`κ′`(mono)** を掛けると
+
+```
+左 = κ′ ≫ [Ψz] ≫ [v]   (rootMap_spec, rootLift_spec, mk_comp_toHomPf_den)
+右 = κ′ ≫ [Ψψ]         (rootMap_spec)
+```
+
+となり、**`toHomBirat_comp_mk`(`Ψz ≫ v = Ψψ`)** で一致する。
+★実装上の注意: `Mono ((Ω).mapIso i).hom` の探索は heartbeat を使い切るので、
+`Iso.cancel_iso_hom_right` を使うこと(測定済み)。 -/
 
 end BiratOmega
 
