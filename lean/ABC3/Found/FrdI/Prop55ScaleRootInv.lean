@@ -208,6 +208,70 @@ theorem rootDiv_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X
     (by simp only [mul_comm, mul_assoc, mul_left_comm] :
       (k * X.root) * (k * Y.root) = k * (X.root * Y.root) * k)
 
+/-! ## ★4. `Σ_k` は `Definition 1.2` の型を保つ(`IsCoAngular` を除く) -/
+
+/-- ★`Σ_k` は linear を保つ。 -/
+theorem isLinear_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsLinear (pfRootPre P F) f) :
+    IsLinear (pfRootPre P F) (scaleRootHom (F := F) k f) := by
+  show rootDeg (scaleRootHom (F := F) k f) = 1
+  rw [rootDeg_scaleRootHom]
+  exact h
+
+/-- ★`Σ_k` は base-isomorphism を保つ。 -/
+theorem isBaseIsomorphism_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsBaseIsomorphism (pfRootPre P F) f) :
+    IsBaseIsomorphism (pfRootPre P F) (scaleRootHom (F := F) k f) := by
+  show IsIso (rootBase (scaleRootHom (F := F) k f))
+  rw [rootBase_scaleRootHom]
+  exact h
+
+/-- ★`Σ_k` は pre-step を保つ。 -/
+theorem isPreStep_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsPreStep (pfRootPre P F) f) :
+    IsPreStep (pfRootPre P F) (scaleRootHom (F := F) k f) :=
+  ⟨isLinear_scaleRootHom k h.1, isBaseIsomorphism_scaleRootHom k h.2⟩
+
+/-- ★★**`Σ_k` は isometric を保つ**(零因子は `1/k` 倍されるが `0` は `0`)。 -/
+theorem isIsometric_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsIsometric (pfRootPre P F) f) :
+    IsIsometric (pfRootPre P F) (scaleRootHom (F := F) k f) := by
+  show rootDiv (scaleRootHom (F := F) k f) = 0
+  rw [rootDiv_scaleRootHom, show rootDiv f = 0 from h, Pf.divBy_zero]
+  rfl
+
+/-- ★★**逆も成り立つ** —— `k • Pf.divBy k w = w` だから。 -/
+theorem isIsometric_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsIsometric (pfRootPre P F) (scaleRootHom (F := F) k f)) :
+    IsIsometric (pfRootPre P F) f := by
+  have h2 : Pf.divBy k (rootDiv f) = 0 := by
+    rw [← rootDiv_scaleRootHom]
+    exact h
+  have h3 := congrArg (fun t : Pf (Φ.val (P.toElem.obj X.obj).base) => ((k : ℕ+) : ℕ) • t) h2
+  rw [Pf.nsmul_divBy, smul_zero] at h3
+  exact h3
+
+/-- ★`Σ_k` は linear を反射する。 -/
+theorem isLinear_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsLinear (pfRootPre P F) (scaleRootHom (F := F) k f)) :
+    IsLinear (pfRootPre P F) f := by
+  have : rootDeg (scaleRootHom (F := F) k f) = 1 := h
+  rwa [rootDeg_scaleRootHom] at this
+
+/-- ★`Σ_k` は base-isomorphism を反射する。 -/
+theorem isBaseIsomorphism_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F}
+    {f : HomRoot P F X Y}
+    (h : IsBaseIsomorphism (pfRootPre P F) (scaleRootHom (F := F) k f)) :
+    IsBaseIsomorphism (pfRootPre P F) f := by
+  have : IsIso (rootBase (scaleRootHom (F := F) k f)) := h
+  rwa [rootBase_scaleRootHom] at this
+
+/-- ★`Σ_k` は pre-step を反射する。 -/
+theorem isPreStep_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} {f : HomRoot P F X Y}
+    (h : IsPreStep (pfRootPre P F) (scaleRootHom (F := F) k f)) :
+    IsPreStep (pfRootPre P F) f :=
+  ⟨isLinear_of_scaleRootHom k h.1, isBaseIsomorphism_of_scaleRootHom k h.2⟩
+
 end ScaleRootInv
 
 /-! ### ★出典の紐付け -/
