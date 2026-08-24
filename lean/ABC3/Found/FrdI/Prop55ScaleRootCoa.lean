@@ -166,10 +166,26 @@ Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 
 3 対象を共通の根 `n·m·l` に揃えてから比べる。
 `scaleRootFunctor` の `map_comp` がまさにこの形で書かれているので、同じ骨が使える。
 
-★もう 1 つの手当ては `F'` の根を `F` と揃えること
-(`rtObj (biratPre P G) F' A d = rtObj P F A d`)——
-★★これは `Corollary 5.4` の継ぎ目で**基準切断を揃えた**のと同じ型の手当てである
-(`Cor54SeamCls.lean` / `Cor54SeamSec.lean` を見よ)。 -/
+## ★★★★★訂正(2026-08-25)—— 根の「等式」は**取れない**
+
+前の版では「`F'` の根を `F` と揃える(`rtObj (biratPre P G) F' A d = rtObj P F A d`)」と
+書いたが、★**これは仮定としても成り立たない**。
+`rtObj Q F' A d = (F'.frobDegSurj A d).choose` であり、`Exists` は `Prop` なので
+`choose` は**命題だけで決まる** —— `𝒞` の中の命題と `𝒞^birat` の中の命題は別物だから、
+どちらの `choose` も動かせない。
+
+★★**正しい手当ては `rootIso`(根の不変性)である**。
+`rtObj (biratPre P G) F' A d` と `toBiratCat` で送った `rtObj P F A d` は
+**どちらも `A` の次数 `d` の Frobenius 拡大**なので、
+`F'.frobDegUniq` が(構造射と両立する)同型を与える。
+その同型に沿って `rootIso` を当てれば `HomPf` が移る ——
+★等式は要らず、**同型で十分**である。
+
+★★★これは `Corollary 5.4` の継ぎ目で `modelType_equiv` の
+`Classical.choice` を `thm_5_2_iv` の明示的な切断に置き換えたのと**同じ型の話**だが、
+結論は逆向きである ——
+そこでは切断を**揃えられた**(`BaseSection.map` があった)のに対し、
+ここは揃えられないので**同型で逃げる**。 -/
 noncomputable def biratPfHomEquivRoot (hfi : IsOfFrobeniusIsotropicType P)
     (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
     (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
