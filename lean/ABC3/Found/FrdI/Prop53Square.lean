@@ -98,6 +98,26 @@ theorem cToPf_comp_pfToUnTrPfCat_map (hiso : ∀ X : C, IsIsotropic P X)
   homPfToUnTrPf_toHomPf (Fc := Fc) (F₁ := F₁) (F₂ := F₂)
     ((toIstrOfIsotropic hiso).map φ)
 
+/-- ★★★★★★★**[FrdI] Proposition 5.3 の 1-可換図式**(任意の尻尾つき)——
+
+```
+𝒞  ──→ 𝒞^istr ──→ 𝒞^pf ────────┐
+│                               ↓
+↓                          (𝒞^un-tr)^pf ──T──→ ?
+𝒞^un-tr ──────────────────────┘
+```
+
+★上の道と下の道は、`(𝒞^un-tr)^pf` から先の関手 `T` が何であっても一致する。
+★★`T := untrPf_modelFrobenioid ⋙ pfRootToRlfFunctor_of_arb` と取れば
+**原文の図式そのもの**(尻尾は `𝒞^rlf`)になる。 -/
+theorem cToPf_comp_pfToUnTrPfCat_map_comp {E : Type u2} [Category.{v2} E]
+    (T : PfCat (unTrPre P Fc) F₂ ⥤ E) (hiso : ∀ X : C, IsIsotropic P X)
+    (hisoPf : ∀ X : PfCat (istrPre P Fc) F₁, IsIsotropic (pfPre (istrPre P Fc) F₁) X)
+    {X Y : C} (φ : X ⟶ Y) :
+    (cToPf Fc hiso F₁ ⋙ pfToUnTrPfCat P Fc F₁ F₂ hisoPf ⋙ T).map φ
+      = (cToUnTr hiso ⋙ toPfCat (unTrPre P Fc) F₂ ⋙ T).map φ :=
+  congrArg T.map (cToPf_comp_pfToUnTrPfCat_map P Fc F₁ F₂ hiso hisoPf φ)
+
 end Square
 
 /-! ### ★出典の紐付け -/
