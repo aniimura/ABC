@@ -465,6 +465,165 @@ theorem rootBase_rootLift (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α 
   rw [rootBase_pfKappa, Category.comp_id, rootBase_toRootHom] at h2
   exact h2
 
+/-! ## ★5-c. `biratPfHom` は `Base` と `deg_Fr` を保つ
+
+原文 (FrdI p.104):
+> (ii) There is a natural equivalence of categories [compatible with the func-
+
+★★原文が「compatible with the functors to the respective elementary Frobenioids」と
+書く条である。★代表元(`homPf_birat_exists_rep` で `idxToBirat` の像に取る)の上で
+両辺を計算すると、**どちらも同じ 3 つの `Base` の合成**になる。 -/
+
+section Compat
+
+variable {G : Frobenioid P} [IsConnected D]
+
+/-- ★共通の終域を持つ 2 つの同型についての恒等式(`Base` の計算で 2 度使う)。 -/
+theorem comp_inv_comp_inv_id {X Y Z : D} (f : X ⟶ Z) (g : Y ⟶ Z)
+    (hf : IsIso f) (hg : IsIso g) :
+    (f ≫ @inv _ _ _ _ g hg) ≫ (g ≫ @inv _ _ _ _ f hf) = 𝟙 X := by
+  haveI := hf
+  haveI := hg
+  exact (Category.assoc _ _ _).trans
+    ((congrArg (fun t : Z ⟶ X => f ≫ t)
+      (IsIso.inv_hom_id_assoc g (@inv _ _ _ _ f hf))).trans (IsIso.hom_inv_id f))
+
+theorem rootBase_biratPfIsoA_inv (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) (h1 : IsIso (P.Base W.hom.hom.1)) :
+    rootBase ((biratPfIsoA (F := F) hfi W).inv) = @inv _ _ _ _ (P.Base W.hom.hom.1) h1 := by
+  have hh : (pfRootPre P F).Base ((biratPfIsoA (F := F) hfi W).hom) = P.Base W.hom.hom.1 :=
+    rootBase_rootLift hfi W.hom.hom.1 (biratPfDeg W) rfl
+  have h2 : (pfRootPre P F).Base ((biratPfIsoA (F := F) hfi W).hom)
+      ≫ (pfRootPre P F).Base ((biratPfIsoA (F := F) hfi W).inv) = 𝟙 _ := by
+    rw [← (pfRootPre P F).Base_comp, (biratPfIsoA (F := F) hfi W).hom_inv_id,
+      (pfRootPre P F).Base_id]
+  rw [hh] at h2
+  exact (@IsIso.inv_eq_of_hom_inv_id _ _ _ _ (P.Base W.hom.hom.1) h1 _ h2).symm
+
+theorem rootBase_biratPfIsoB_inv (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) (h2i : IsIso (P.Base W.hom.hom.2)) :
+    rootBase ((biratPfIsoB (F := F) hfi W).inv) = @inv _ _ _ _ (P.Base W.hom.hom.2) h2i := by
+  have hh : (pfRootPre P F).Base ((biratPfIsoB (F := F) hfi W).hom) = P.Base W.hom.hom.2 :=
+    rootBase_rootLift hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm
+  have h2 : (pfRootPre P F).Base ((biratPfIsoB (F := F) hfi W).hom)
+      ≫ (pfRootPre P F).Base ((biratPfIsoB (F := F) hfi W).inv) = 𝟙 _ := by
+    rw [← (pfRootPre P F).Base_comp, (biratPfIsoB (F := F) hfi W).hom_inv_id,
+      (pfRootPre P F).Base_id]
+  rw [hh] at h2
+  exact (@IsIso.inv_eq_of_hom_inv_id _ _ _ _ (P.Base W.hom.hom.2) h2i _ h2).symm
+
+/-- ★★★代表元の側の `deg_Fr`。 -/
+theorem biratDeg_biratPfMk (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    biratDeg (P := pfRootPre P F) (G := Gpf) (biratPfMk hfi Gpf W Z ψ) = P.degFr ψ := by
+  show biratDeg (P := pfRootPre P F) (G := Gpf)
+      (HomBirat.mk (biratPfIdx hfi Gpf W Z)
+        (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)) = _
+  rw [biratDeg_mk]
+  show (pfRootPre P F).degFr
+      (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv) = _
+  rw [(pfRootPre P F).degFr_comp, degFr_of_isIso (pfRootPre P F) (biratPfIsoB hfi W).inv,
+    one_mul, rootMap_degFr]
+
+/-- ★★★代表元の側の `Base`(`𝒞^pf` の中で計算したもの)。 -/
+theorem biratBase_biratPfMk (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2)
+    (h1 : IsIso (P.Base W.hom.hom.1)) (h2 : IsIso (P.Base W.hom.hom.2))
+    (hZi : IsIso (P.Base Z.unop.hom.hom)) :
+    biratBase (P := pfRootPre P F) (G := Gpf) (biratPfMk hfi Gpf W Z ψ)
+      = P.Base W.hom.hom.1 ≫ @inv _ _ _ _ (P.Base Z.unop.hom.hom) hZi
+        ≫ P.Base ψ ≫ @inv _ _ _ _ (P.Base W.hom.hom.2) h2 := by
+  have hbi : IsIso ((pfRootPre P F).Base ((biratPfIdx hfi Gpf W Z).unop.hom.hom)) :=
+    (biratPfIdx hfi Gpf W Z).unop.hom.property.2.2
+  have ha : (pfRootPre P F).Base ((biratPfIdx hfi Gpf W Z).unop.hom.hom)
+      = P.Base Z.unop.hom.hom ≫ @inv _ _ _ _ (P.Base W.hom.hom.1) h1 := by
+    show (pfRootPre P F).Base (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W)
+        ≫ (biratPfIsoA (F := F) hfi W).inv) = _
+    rw [(pfRootPre P F).Base_comp]
+    exact congrArg₂ (· ≫ ·) (rootBase_rootMap hfi _ _) (rootBase_biratPfIsoA_inv hfi W h1)
+  have hphi : (pfRootPre P F).Base (rootMap (F := F) hfi ψ (biratPfDeg W)
+        ≫ (biratPfIsoB (F := F) hfi W).inv)
+      = P.Base ψ ≫ @inv _ _ _ _ (P.Base W.hom.hom.2) h2 := by
+    rw [(pfRootPre P F).Base_comp]
+    exact congrArg₂ (· ≫ ·) (rootBase_rootMap hfi _ _) (rootBase_biratPfIsoB_inv hfi W h2)
+  have hinv : @inv _ _ _ _ ((pfRootPre P F).Base ((biratPfIdx hfi Gpf W Z).unop.hom.hom)) hbi
+      = P.Base W.hom.hom.1 ≫ @inv _ _ _ _ (P.Base Z.unop.hom.hom) hZi := by
+    refine @IsIso.inv_eq_of_hom_inv_id _ _ _ _ _ hbi _ ?_
+    exact ha ▸ comp_inv_comp_inv_id (P.Base Z.unop.hom.hom) (P.Base W.hom.hom.1) hZi h1
+  rw [show biratPfMk hfi Gpf W Z ψ
+      = HomBirat.mk (biratPfIdx hfi Gpf W Z)
+        (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB (F := F) hfi W).inv) from rfl,
+    biratBase_mk, sliceBaseOf_eq]
+  exact (congrArg₂ (· ≫ ·) hinv hphi).trans (Category.assoc _ _ _)
+
+/-- ★★★代表元の側の `Base`(`(𝒞^birat)^pf` の中で計算したもの)—— **同じ式になる**。 -/
+theorem pfBase_mk_idxToBirat (F' : FrobenioidCore (biratPre P G)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2)
+    (h2 : IsIso (P.Base W.hom.hom.2)) (hZi : IsIso (P.Base Z.unop.hom.hom)) :
+    pfBase (HomPf.mk ((idxToBirat P F G F' A B).obj W) (HomBirat.mk Z ψ))
+      = P.Base W.hom.hom.1 ≫ @inv _ _ _ _ (P.Base Z.unop.hom.hom) hZi
+        ≫ P.Base ψ ≫ @inv _ _ _ _ (P.Base W.hom.hom.2) h2 := by
+  have hbi2 : IsIso ((biratPre P G).Base
+      (((idxToBirat P F G F' A B).obj W).hom.hom.2)) :=
+    ((idxToBirat P F G F' A B).obj W).hom.property.2.1.2
+  have hb1 : (biratPre P G).Base (((idxToBirat P F G F' A B).obj W).hom.hom.1)
+      = P.Base W.hom.hom.1 := biratBase_toHomBirat _
+  have hb2 : (biratPre P G).Base (((idxToBirat P F G F' A B).obj W).hom.hom.2)
+      = P.Base W.hom.hom.2 := biratBase_toHomBirat _
+  have hbz : (biratPre P G).Base (HomBirat.mk Z ψ)
+      = @inv _ _ _ _ (P.Base Z.unop.hom.hom) hZi ≫ P.Base ψ := by
+    show biratBase (HomBirat.mk Z ψ) = _
+    rw [biratBase_mk, sliceBaseOf_eq]
+  have hinv2 : @inv _ _ _ _ ((biratPre P G).Base
+        (((idxToBirat P F G F' A B).obj W).hom.hom.2)) hbi2
+      = @inv _ _ _ _ (P.Base W.hom.hom.2) h2 := by
+    refine @IsIso.inv_eq_of_hom_inv_id _ _ _ _ _ hbi2 _ ?_
+    rw [hb2]
+    exact @IsIso.hom_inv_id _ _ _ _ (P.Base W.hom.hom.2) h2
+  rw [pfBase_mk]
+  show (biratPre P G).Base (((idxToBirat P F G F' A B).obj W).hom.hom.1)
+      ≫ (biratPre P G).Base (HomBirat.mk Z ψ)
+      ≫ @inv _ _ _ _ ((biratPre P G).Base
+        (((idxToBirat P F G F' A B).obj W).hom.hom.2)) hbi2 = _
+  rw [hb1]
+  exact congrArg (P.Base W.hom.hom.1 ≫ ·)
+    ((congrArg₂ (· ≫ ·) hbz hinv2).trans (Category.assoc _ _ _))
+
+/-- ★★★★★**`biratPfHom` は `deg_Fr` を保つ**。 -/
+theorem biratDeg_biratPfHom_eq (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :
+    biratDeg (P := pfRootPre P F) (G := Gpf) (biratPfHom hfi Gpf F' A B x) = pfDeg x := by
+  obtain ⟨W, z, hW⟩ := homPf_birat_exists_rep (F := F) F' A B x
+  subst hW
+  obtain ⟨Z, ψ, hZ⟩ := HomBirat.exists_rep z
+  subst hZ
+  rw [biratPfHom_mk, biratPf_mk, biratDeg_biratPfMk, pfDeg_mk]
+  show _ = biratDeg (HomBirat.mk Z ψ)
+  rw [biratDeg_mk]
+
+/-- ★★★★★**`biratPfHom` は `Base` を保つ**。
+
+★★★これが原文の「compatible with the functors to the respective elementary
+Frobenioids」の中身であり、`𝒪^▷` / `𝒪^×` の所属を両側で行き来させる鍵である。 -/
+theorem biratBase_biratPfHom_eq (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :
+    biratBase (P := pfRootPre P F) (G := Gpf) (biratPfHom hfi Gpf F' A B x) = pfBase x := by
+  obtain ⟨W, z, hW⟩ := homPf_birat_exists_rep (F := F) F' A B x
+  subst hW
+  obtain ⟨Z, ψ, hZ⟩ := HomBirat.exists_rep z
+  subst hZ
+  have h1 : IsIso (P.Base W.hom.hom.1) := W.hom.property.1.2
+  have h2 : IsIso (P.Base W.hom.hom.2) := W.hom.property.2.1.2
+  have hZi : IsIso (P.Base Z.unop.hom.hom) := Z.unop.hom.property.2.2
+  rw [biratPfHom_mk, biratPf_mk, biratBase_biratPfMk hfi Gpf W Z ψ h1 h2 hZi]
+  exact (pfBase_mk_idxToBirat F' W Z ψ h2 hZi).symm
+
+end Compat
+
 /-! ## ★6. 逆向き —— 分母を払えば `Φ^birat` に戻る -/
 
 /-- ★★★★**`biratPfHom` は自己射の単系の準同型**(`Proposition 5.5, (ii)` の
