@@ -262,6 +262,32 @@ theorem hom_pf_pow_toRootHom (hiso : ∀ X : C, IsIsotropic P X) {A : C}
   rw [hx', ← map_pow]
   exact congrArg (endRootOneEquiv (F := F) A) h
 
+/-- ★★`n = 1` では `Θ`(`rootSelfIso`)は恒等 —— `rtRootIso` の `e = 1` の場合。 -/
+theorem rootSelfIso_one_inv (A : C) (z : HomPf P F (rtObj P F A 1) (rtObj P F A 1)) :
+    (rootSelfIso (F := F) A 1).inv z = z :=
+  rtRootIso_inv_eq_self P F A A (show (1 : ℕ+) = 1 * 1 from rfl)
+    (show (1 : ℕ+) = 1 * 1 from rfl) z
+
+/-- ★★★★**橋は自然な関手と両立する** —— `endRootOneEquiv (toRootHom α) = toHomPf α`。
+
+★`Θ` は `n = 1` では恒等、残る共役は `rtExt A 1` とその逆で打ち消し合う。 -/
+theorem endRootOneEquiv_toRootHom (A : C) (α : A ⟶ A) :
+    endRootOneEquiv (F := F) A (toRootHom (F := F) α) = toHomPf (F := F) α := by
+  haveI := isIso_rtExt_one P F A
+  show (endPfCatRtOne (F := F) A).symm ((rootSelfIso (F := F) A 1).inv (toRootHom (F := F) α))
+      = toHomPf (F := F) α
+  rw [rootSelfIso_one_inv]
+  show compPf P F (toHomPf (F := F) (rtExt P F A 1))
+      (compPf P F (toRootHom (F := F) α) (toHomPf (F := F) (inv (rtExt P F A 1))))
+    = toHomPf (F := F) α
+  show compPf P F (toHomPf (F := F) (rtExt P F A 1))
+      (compPf P F (toHomPf (F := F) (inv (rtExt P F A 1) ≫ α ≫ rtExt P F A 1))
+        (toHomPf (F := F) (inv (rtExt P F A 1))))
+    = toHomPf (F := F) α
+  rw [← toHomPf_comp, ← toHomPf_comp]
+  refine congrArg (toHomPf (F := F)) ?_
+  simp
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Proposition 5.5, (i)` の零因子の側
