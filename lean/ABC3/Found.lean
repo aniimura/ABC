@@ -206,6 +206,7 @@ import ABC3.Found.FrdI.Prop55PfArbFull
 import ABC3.Found.FrdI.Prop55PfArbOne
 import ABC3.Found.FrdI.Prop55BiratPfFun
 import ABC3.Found.FrdI.Prop55RlfNd
+import ABC3.Found.FrdI.Cor54Uniq
 import ABC3.Found.FrdI.Prop53UntrBirat
 import ABC3.Found.FrdI.Prop55UntrFun
 import ABC3.Found.FrdI.Prop53PfCatRoot
