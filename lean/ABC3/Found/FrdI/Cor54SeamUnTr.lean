@@ -38,7 +38,52 @@ model Frobenioid への 2 関手の同型を作る。本ファイルはその **
 `untrSeamIso` が示すとおり、残るのは **`uu` / `hc` / `hu` の 3 条**だけ ——
 すなわち「`𝒞₁^un-tr` の対象の類 `cls` と射の `u` が、`Ψ` を通した後で
 **`Φ^birat` の元 1 つ分だけずれる**」という**有理関数の側の帳尻**である。
-★これは `Cor54Birat.lean` の `phiBiratOn_transport_of_cor411` が扱う対象と同じ層にある。
+
+## ★★★★★★測って分かったこと(2026-08-24)——**基準切断を揃えないと `hc` は偽**
+
+★★残り 3 条を実際に潰そうとして、**この形のままでは `hc` は成り立たない**ことが分かった。
+次に着手する人はここから始めてほしい。
+
+`Theorem 5.2, (iv)` の対象の類は `Thm52Model.lean` の
+
+```
+pathObj R X = ⟨(P.toElem.obj X.obj).base, X.path.cls⟩
+FPPath.cls  = Φ.gpMapOn (inv (Base toObj)) (toGp (Div toObj) - toGp (Div toRef))
+```
+
+であり、★**`toRef`(基準対象 `ref ∈ 𝒫` への pre-step)に依存する**。
+したがって `cls` は **`BaseSection S` の取り方に依存**する。
+
+* `H₁ ⋙ Fo.functor` の類 …… `S₁` から測ったもの(を `η` で送ったもの)
+* `Ψu ⋙ H₂` の類 …………… `S₂` から測ったもの
+
+`hdivc` は `Div` の対応を与えるので、差は
+**`Ψu (S₁ d)` と `S₂ (ΨB d)` の間の span の類 `γ(d)`** ちょうどになる。
+★`hc` は「`γ(d) ∈ Φ₂^birat`」を要求するが、
+`Φ₂^birat ⊊ Gp(Φ₂)`(算術の例では類群が非自明)である以上、
+★★**`S₁` と `S₂` を無関係に選べば `γ(d)` は `Φ₂^birat` の外に出る。**
+
+★★★そして `unTr_modelFrobenioid` は `modelType_equiv` 経由で
+**`Classical.choice hm.1` が切断を選ぶ**(`Cor54Rigid.lean` の
+`modelTypeEquiv_comp_toElem` を見よ)ので、両側の切断は**無関係**である。
+
+### ★直し方(在庫あり)
+
+**`modelType_equiv` ではなく `thm_5_2_iv` を使い、切断を明示的に渡す。**
+そのうえで `S₂ := S₁.map Ψu …`(★在庫 `BaseSection.map`、`Cor57Base.lean`、
+`Corollary 5.7, (i)`)と取れば、`Ψu (S₁ d)` は `S₂` の `𝒫` の対象そのものになり、
+基準が揃って `γ(d)` が消える(あるいは span の類として明示的に `uu` を与える)。
+
+★`BaseSection.map` の仮定は原文 `Corollary 5.7, (i)` のもの ——
+底の 1-可換図式 `BaseSquare`、pull-back 射の保存、Frobenius-trivial 性の保存。
+★★これは `Corollary 5.4` の入力(`Corollary 4.11, (ii)(iii)(iv)`)と同じ層にあり、
+**新しい数学は要らない**。要るのは `Theorem 5.2, (iv)` の切断を
+`modelType_equiv` の内側から外へ出す作業である。
+
+★なお `divB` は包含そのものなので、`uu` ＋ `hc` は
+「差が `Φ₂^birat` に入る」という **membership 1 条**に畳める。
+★★`cor_4_11_ii_uniq` は**底の関手 `Gf : 𝒟₁ ⥤ 𝒟₂` の** 1-一意性であって
+`𝒞^un-tr` の関手の一意性ではないので、そこからは降りてこない(測定済み)。
 -/
 
 namespace ABC3.Found.FrdI
