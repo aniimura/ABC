@@ -231,3 +231,25 @@ exact @IsIso.hom_inv_id _ _ _ _ (P.Base a) ha       -- ✓ 確実
 ★**2026-08-24 の未着手**: `pf_isOfIsotropicType`(`𝒞^pf` の根 1 の部分が
 isotropic 型)はこの穴で止まっている。段取りは
 `Found/FrdI/Prop53PfCatRoot.lean` の ★2 に書いてある。
+
+### 14 の続報(2026-08-24、2 回目の試作)
+
+**主因は「自前の同義語ほどき関数を書いたこと」**だった。
+在庫に `pfDown (A : PfCat P F) : C := A` があるのに `pfObjDown` を自分で足すと、
+`pfDiv` などの暗黙引数(在庫の `pfDown` で書かれている)と噛み合わない。
+
+★**在庫の同義語ほどき関数に揃える**。揃えた上で
+
+* `pfCat_comp_eq : f ≫ g = compPf P F f g := rfl`
+* `toPfCat_map_eq : (toPfCat P F).map ψ = toHomPf ψ := rfl`
+
+の 2 本を橋にすると、`pfDiv_comp` / `pfDeg_comp` / `rootDiv` / `rootBase` /
+`compRoot_root_one` はすべて当たるようになった。
+
+★★**目標の側で `rw` しない** —— `≫` を開いた目標は
+`instances` 透明度で型が付かなくなる(エラーに
+「The target expression is not type-correct under the `instances` transparency level」
+と出る)。**自分で述べた `have` の側で `rw` して、最後に `exact` で defeq に頼る。**
+
+★残るのは `IsIso` のインスタンス合成(既存の仮定が暗黙引数の書かれ方の違いで
+拾われない)で、これは `haveI` を**目標に現れる形そのまま**で置き直すしかない。

@@ -129,8 +129,21 @@ theorem toPfCat_comp_pfCatToRoot_map {A B : C} (φ : A ⟶ B) :
 (`rtExt A 1` は Frobenius 型の同型なので `Div = 0`、`deg = 1`、`Base` 同型)と、
 `compRoot_root_one` で同型性を `PfCat` へ戻すことの 2 段。
 
-★試作では `pfDiv_comp` 等の `rw` が `instances` 透明度で当たらなかった
-(`pfDown P F ((toPfCat P F).obj X)` と `X` が構文的に違う)。
+★★**2026-08-24 の試作で分かったこと(次に着手する人へ)**:
+
+1. 詰まりの主因は **`pfDown` を使わずに自前の `pfObjDown` を書いたこと**だった。
+   `pfDiv` などの暗黙引数は在庫の `pfDown` で書かれているので、
+   **在庫の `pfDown` に揃える**と `pfDiv_comp` / `pfDeg_comp` /
+   `rootDiv` / `rootBase` / `compRoot_root_one` はすべて当たる。
+2. `≫` を `compPf` に開く橋 `pfCat_comp_eq` と、
+   `(toPfCat P F).map ψ = toHomPf ψ` の橋 `toPfCat_map_eq` を用意し、
+   **目標の側で `rw` せず、自分で述べた `have` の側で `rw` する**
+   (`≫` を開いた目標は `instances` 透明度で型が付かなくなる)。
+3. それでも残ったのは **インスタンス合成 3 件**:
+   `IsIso (P.Base (inv (rtExt X 1)) ≫ pfBase φ ≫ P.Base (rtExt Dd 1))`、
+   `φ = φ ≫ j ≫ inv j` の後始末、最後の `IsIso (inv i ≫ … ≫ inv j)`。
+   ★どれも「暗黙引数の書かれ方が違うので既存の `IsIso` 仮定が拾われない」型。
+
 ★`Proposition 5.3` の図式ではこれを `hisoPf` として仮引数で受けている。
 -/
 
