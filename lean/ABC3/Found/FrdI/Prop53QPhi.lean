@@ -31,12 +31,11 @@ import ABC3.Found.FrdI.Prop53Base
 ★★★2 つの模型が一致すること(`qPhiBiratOn` と `sPhiBiratOn ℚ≥0` の対応)は
 `pfEquivPfT`(`Def24PfT.lean`、`Pf M ≃+ ℚ≥0 ⊗_ℕ M`)で移すだけである。
 
-## ★残り(記録)
+## ★済(記録)
 
-原文の 3 つめ「`(Φ^birat)^pf`」との一致、すなわち
-**`(Φ^pf)^birat = ℚ·Φ^birat`** はまだである。
-★`ℚ` の出どころ(`𝒞^pf` の零因子の分母)は `Prop55PfDiv.lean` で測った。
-残るのは双有理射の `Div^gp`(`sliceDivGpOf`)へその計算を移す段である。
+* 2 模型の一致 `ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ` —— `qPhiBiratOn_map_eq`(本ファイル ★4)。
+* 原文の 3 つめ「`(Φ^birat)^pf`」、すなわち `(Φ^pf)^birat = ℚ·Φ^birat` ——
+  `phiBiratOn_pf_eq_qPhiBiratOn_full`(`Prop55PfArbFull.lean`)。
 -/
 
 namespace ABC3.Found.FrdI
@@ -256,6 +255,78 @@ theorem qPhiBiratOn_map_rlf (G : Frobenioid P) {d : D} {x : Gp (Pf (Φ.val d))}
   exact mem_sPhiBiratOn_of_phiBiratOn G hy
 
 end ToRlf
+
+/-! ## ★4. 原文の 3 通りの書き方の一致 —— `ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ`
+
+原文 (FrdI p.103):
+> tion monoid Φbirat (respectively, Q · Φbirat = Φbirat ⊗Z Q = (Φbirat)pf). In particular,
+
+★★我々の `qPhiBiratOn` は **`Φ^pf = Pf Φ` の中の飽和**(＝ 1 つめの書き方)で、
+`sPhiBiratOn ℚ≥0` は **`ℚ≥0 ⊗_ℕ Φ` の中の ℚ-スパン**(＝ 2 つめの書き方)である。
+★両者が `pfEquivPfT` で対応することを示す。
+-/
+
+section ThreeWays
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★`gpPfEquivPfT` は `Φ^birat` の像を `Φ^birat` の像へ移す。 -/
+theorem gpPfEquivPfT_gpMap_of {M : Type w} [AddCommMonoid M] (y : Gp M) :
+    gpPfEquivPfT M (gpMap _ (Pf.of (M := M)) y) = toScGp (S := NNRat) y := by
+  show gpMap _ ((pfEquivPfT (M := M)) : Pf M →+ PfT M) (gpMap _ (Pf.of (M := M)) y) = _
+  rw [← AddMonoidHom.comp_apply, ← gpMap_comp]
+  exact congrArg (fun t : M →+ PfT M => gpMap _ t y) (AddMonoidHom.ext pfEquivPfT_of)
+
+/-- ★★★★★★**原文の 2 通りの書き方は一致する** ——
+`ℚ·Φ^birat`(`Pf Φ` の中の飽和)は `pfEquivPfT` で
+`Φ^birat ⊗_ℤ ℚ`(`ℚ≥0 ⊗_ℕ Φ` の中の ℚ-スパン)へ写る。 -/
+theorem qPhiBiratOn_map_eq (G : Frobenioid P) (d : D) :
+    AddSubgroup.map
+        ((gpPfEquivPfT (Φ.val d)) : Gp (Pf (Φ.val d)) →+ Gp (PfT (Φ.val d)))
+        (qPhiBiratOn P G d)
+      = sPhiBiratOn NNRat G d := by
+  refine le_antisymm ?_ ?_
+  · -- 順向き: 分母 `k` を払って `Φ^birat` の像に落とし、`ℚ≥0` 側で割り戻す
+    rintro _ ⟨x, ⟨k, y, hy, hyk⟩, rfl⟩
+    refine sPhiBiratOn_of_nsmul_mem G k ?_
+    have h1 : toScGp (S := NNRat) y
+        = ((k : ℕ+) : ℕ) • gpPfEquivPfT (Φ.val d) x := by
+      have h0 := congrArg (gpPfEquivPfT (Φ.val d)) hyk
+      rw [gpPfEquivPfT_gpMap_of, map_nsmul] at h0
+      exact h0
+    show ((k : ℕ+) : ℕ) • gpPfEquivPfT (Φ.val d) x ∈ sPhiBiratOn NNRat G d
+    rw [← h1]
+    exact mem_sPhiBiratOn_of_phiBiratOn G hy
+  · -- 逆向き: 生成元 `r · toScGp y` を `r.den` 倍すれば `Φ^birat` の像
+    refine AddSubgroup.closure_le _ |>.mpr ?_
+    rintro _ ⟨r, y, hy, rfl⟩
+    refine ⟨(gpPfEquivPfT (Φ.val d)).symm (sSmulGp r (toScGp y)), ?_,
+      (gpPfEquivPfT (Φ.val d)).apply_symm_apply _⟩
+    obtain ⟨k, hk⟩ : ∃ k : ℕ+, ((k : ℕ+) : ℕ) = r.den :=
+      ⟨⟨r.den, r.den_pos⟩, rfl⟩
+    refine ⟨k, ?_⟩
+    have hden : ((r.den : ℕ) : NNRat) * r = ((r.num : ℕ) : NNRat) := by
+      rw [mul_comm]
+      exact_mod_cast r.mul_den_eq_num
+    have hsym : (gpPfEquivPfT (Φ.val d)).symm (toScGp (S := NNRat) y)
+        = gpMap _ (Pf.of (M := Φ.val d)) y :=
+      (gpPfEquivPfT (Φ.val d)).injective (by
+        rw [(gpPfEquivPfT (Φ.val d)).apply_symm_apply, gpPfEquivPfT_gpMap_of])
+    have hval : ((k : ℕ+) : ℕ) • (gpPfEquivPfT (Φ.val d)).symm (sSmulGp r (toScGp y))
+        = ((r.num : ℕ)) • gpMap _ (Pf.of (M := Φ.val d)) y := by
+      rw [← map_nsmul, hk, ← sSmulGp_natCast (S := NNRat) (r.den : ℕ), sSmulGp_mul, hden,
+        sSmulGp_natCast (S := NNRat) (r.num : ℕ), map_nsmul, hsym]
+    rw [hval]
+    exact (phiBiratPfImage P G d).nsmul_mem (mem_phiBiratPfImage hy) _
+
+end ThreeWays
+
+/-- ★★★★★★locator —— `Proposition 5.3` の「`ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ`」。 -/
+def qPhiBiratOn_map_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 103,
+    item := "Proposition 5.3 — ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ(2 つの模型の一致)",
+    sectionId := "frdi-prop-5-3" }
 
 /-! ### ★出典の紐付け -/
 
