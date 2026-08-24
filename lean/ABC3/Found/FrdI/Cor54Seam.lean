@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.ModelSquare
+import ABC3.Found.FrdI.Cor411Phi
 
 /-!
 # [FrdI] Corollary 5.4 の縦の矢印の継ぎ目 —— `𝔽_Φ` の上で一致すれば model でも一致する
@@ -141,6 +142,37 @@ noncomputable def squareOfElemIso (hdivOn : M.phi.IsDivisorialOn)
         exact hu f)
 
 end ModelData
+
+/-! ## ★3. `ModelDataHomOver` の関手は `𝔽_Φ` の側の `Ψ_𝔽` と可換 -/
+
+section HomOverElem
+
+variable {D : Type u} [Category.{v} D] {D₂ : Type u} [Category.{v} D₂]
+  {ΨB : D ⥤ D₂} {M : ModelData.{v, u, w} D} {M₂ : ModelData.{v, u, w} D₂}
+
+/-- ★★★**`Ψ^model ⋙ 𝔽 = 𝔽 ⋙ Ψ_𝔽`** ——
+`ModelDataHomOver` が誘導する関手を `toElem` で `𝔽_Φ` へ落とすと、
+`Corollary 4.11, (iii)` の `elemFrobMapOver` そのものになる。
+
+★`base` と `deg` は両辺とも `ΨB.map` / そのまま。`div` だけが
+「`F.phiHom` か `η` か」の違いで、そこを `hη` で一致させる。 -/
+noncomputable def modelDataHomOverElemIso (F : ModelDataHomOver ΨB M M₂)
+    (η : M.phi.functor ⟶ ΨB.op ⋙ M₂.phi.functor)
+    (hη : ∀ (d : D) (x : M.phi.val d), (η.app (Opposite.op d)).hom x = F.phiHom d x) :
+    F.functor ⋙ ModelData.toElem ≅ ModelData.toElem ⋙ elemFrobMapOver ΨB η :=
+  NatIso.ofComponents (fun _ => Iso.refl _) (fun {A B} φ => by
+    refine ElemFrobCat.Hom.ext ?_ ?_ ?_
+    · exact (Category.comp_id _).trans (Category.id_comp _).symm
+    · simp only [Iso.refl_hom, ElemFrobCat.comp_div, ElemFrobCat.id_div, ElemFrobCat.id_deg,
+        map_zero, zero_add, smul_zero, add_zero, PNat.one_coe, one_smul]
+      show F.phiHom A.base φ.div
+        = M₂.phi.map (𝟙 (ΨB.obj A.base)) ((η.app (Opposite.op A.base)).hom φ.div)
+      rw [MonoidOn.map_id]
+      exact (hη _ φ.div).symm
+    · simp only [Iso.refl_hom, ElemFrobCat.comp_deg, ElemFrobCat.id_deg, one_mul, mul_one]
+      rfl)
+
+end HomOverElem
 
 /-! ### ★出典の紐付け -/
 
