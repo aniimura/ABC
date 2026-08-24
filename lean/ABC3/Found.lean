@@ -141,6 +141,7 @@ import ABC3.Found.FrdI.Prop55UntrCat
 import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.FrdI.Thm62Fsm
 import ABC3.Found.Divisor.HeightOneDVR
+import ABC3.Found.Divisor.Hartogs
 import ABC3.Found.Divisor.FreeDivisorial
 import ABC3.Found.Divisor.CartierMonoid
 import ABC3.Found.Divisor.CartierPrime

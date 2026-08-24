@@ -2,7 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Meta.Claim
-import ABC3.Found.Divisor.HeightOneDVR
+import ABC3.Found.Divisor.Hartogs
 
 /-!
 # 代数的 Hartogs —— 正規 Noether 整域は高さ 1 の局所化の交わり(`Skeleton`)
@@ -78,10 +78,16 @@ variable {R : Type u} [CommRing R] [IsDomain R] [IsNoetherianRing R] [IsIntegral
 ★`x ∈ R_v` を「`v` での位数が非負」ではなく
 **`∃ r s, x = r/s ∧ s ∉ v`** の形で書く(局所化の API 摩擦を避ける)。 -/
 theorem mem_of_forall_heightOne (x : FractionRing R)
-    (_h : ∀ v : HeightOnePrime R, ∃ r s : R, s ∉ v.asIdeal ∧
+    (h : ∀ v : HeightOnePrime R, ∃ r s : R, s ∉ v.asIdeal ∧
       x * algebraMap R (FractionRing R) s = algebraMap R (FractionRing R) r) :
     ∃ a : R, x = algebraMap R (FractionRing R) a := by
-  sorry
+  obtain ⟨a, ha⟩ := ABC3.Found.Divisor.Hartogs.mem_Rsub_of_forall_heightOnePrime x (fun v => by
+    obtain ⟨r, s, hs, hrs⟩ := h v
+    refine ⟨s, ?_, hs⟩
+    refine ABC3.Found.Divisor.Hartogs.mem_den.mpr ⟨r, ?_⟩
+    show (algebraMap R (FractionRing R)) r = s • x
+    rw [Algebra.smul_def, ← hrs]; ring)
+  exact ⟨a, ha.symm⟩
 
 /-- ★★**逆向き**(自明) —— `R` の元はどの局所化にも入る。 -/
 theorem forall_heightOne_of_mem (a : R) (v : HeightOnePrime R) :
@@ -97,7 +103,9 @@ def mem_of_forall_heightOne.src : Source :=
     item := "Example 6.1 — 代数的 Hartogs(正規 Noether 整域は高さ 1 の局所化の交わり)",
     sectionId := "frdi-example-6-1" }
 
-/-- ★★★**この節点が §6 の律速の 1 本である**。
+/-- ★★★★★★**2026-08-25 に閉じた** —— 実体は
+`ABC3/Found/Divisor/Hartogs.lean` の `mem_Rsub_of_forall_heightOne`（sorry なし）。
+本ファイルはそこへ委譲するだけである。
 
 ★訂正(2026-08-25): 相方の `proper-global-sections` は
 **mathlib に在庫があった**(`isField_of_universallyClosed` /
@@ -106,6 +114,8 @@ def mem_of_forall_heightOne.src : Source :=
 def mem_of_forall_heightOne.needs : List ProofObligation :=
   [ .citation "[mathlib]" "MaximalSpectrum.iInf_localization_eq_bot(極大イデアルにわたる交わり)"
       (.inMathlib "MaximalSpectrum.iInf_localization_eq_bot") 110,
+    .citation "[ABC3]" "mem_Rsub_of_forall_heightOne（★本体。sorry なしで閉じた）"
+      (.inProject "ABC3" "ABC3.Found.Divisor.Hartogs.mem_Rsub_of_forall_heightOne") 110,
     .citation "[mathlib]" "IsKrullDomain / 高さ 1 の素にわたる交わり"
       (.absent "Mathlib/RingTheory/ に KrullDomain は無い(KrullDimension のみ)。LocalProperties/IntegrallyClosed.lean にも高さ 1 版は無い(2026-08-25 に ls で実測)") 110,
     .citation "[mathlib]" "AlgebraicGeometry.isField_of_universallyClosed(proper なら Γ(X,⊤) は体)"

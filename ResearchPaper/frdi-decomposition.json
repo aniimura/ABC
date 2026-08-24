@@ -3140,13 +3140,13 @@
     },
     {
      "id": "krull-domain-intersection",
-     "status": "skeleton",
+     "status": "done",
      "deps": [],
      "title": "代数的 Hartogs —— Noether 整閉整域は `R = ⋂_{ht 1} R_𝔭`",
-     "decl": "ABC3.Skeleton.Hartogs.mem_of_forall_heightOne",
-     "note": "★★★2026-08-21（在庫測定）：**mathlib に `IsKrullDomain` は無い**。\n在るのは `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり = `R`）だけで、\n**高さ 1 版ではない**。\n★古典的な証明は「`x ∉ R` なら分母イデアル `(R : x)` の随伴素因子 `𝔭` を取り、\nNoether 整閉整域は S2 なので `depth R_𝔭 = 1 ⟹ ht 𝔭 = 1`」で、\n**随伴素因子（mathlib に在る）＋ depth / S2（mathlib に薄い）**が要る。\n★★これが `global-units` の第 1 段である。\n\n★★★★★2026-08-25（**スケルトンを置いた**）：\n`ABC3/Skeleton/Divisor/Hartogs.lean` の\n`mem_of_forall_heightOne`（と自明な向き `forall_heightOne_of_mem`）。\n\n★中身は「分母イデアル `I = {r | r·x ∈ R}` の随伴素は正規性（S2）から高さ 1」。\n★在庫: `MaximalSpectrum.iInf_localization_eq_bot`（**極大**版のみ）、\n`IsKrullDomain` は無い（`Mathlib/RingTheory/` を ls して実測、2026-08-25）。\n\n★★**相方の `proper-global-sections` は mathlib にあった**ので、\n**`Example 6.1` の条なし `.src` を止めているのは本節点 1 本だけ**である。",
+     "decl": "ABC3.Found.Divisor.Hartogs.mem_Rsub_of_forall_heightOne / mem_Rsub_of_forall_heightOnePrime",
+     "note": "★★★2026-08-21（在庫測定）：**mathlib に `IsKrullDomain` は無い**。\n在るのは `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり = `R`）だけで、\n**高さ 1 版ではない**。\n★古典的な証明は「`x ∉ R` なら分母イデアル `(R : x)` の随伴素因子 `𝔭` を取り、\nNoether 整閉整域は S2 なので `depth R_𝔭 = 1 ⟹ ht 𝔭 = 1`」で、\n**随伴素因子（mathlib に在る）＋ depth / S2（mathlib に薄い）**が要る。\n★★これが `global-units` の第 1 段である。\n\n★★★★★2026-08-25（**スケルトンを置いた**）：\n`ABC3/Skeleton/Divisor/Hartogs.lean` の\n`mem_of_forall_heightOne`（と自明な向き `forall_heightOne_of_mem`）。\n\n★中身は「分母イデアル `I = {r | r·x ∈ R}` の随伴素は正規性（S2）から高さ 1」。\n★在庫: `MaximalSpectrum.iInf_localization_eq_bot`（**極大**版のみ）、\n`IsKrullDomain` は無い（`Mathlib/RingTheory/` を ls して実測、2026-08-25）。\n\n★★**相方の `proper-global-sections` は mathlib にあった**ので、\n**`Example 6.1` の条なし `.src` を止めているのは本節点 1 本だけ**である。\n\n★★★★★★2026-08-25（**閉じた**）：`ABC3/Found/Divisor/Hartogs.lean`（sorry なし）。\n\n証明の骨は 4 段:\n\n| 段 | 中身 |\n|---|---|\n| 1 | **分母イデアル** `den R y = (R : y)` を `Submodule.colon` で置く |\n| 2 | `x ∉ R` なら `den R x` を含む**極大な分母イデアル** `p = den R y` が取れる（Noether） |\n| 3 | ★そのような `p` は**素**（`(R : ay) ⊇ (R : y)` と極大性） |\n| 4 | ★★**二分**: `p·y ⊆ p` なら `y` は整（`isIntegral_of_smul_mem_submodule`）で正規性より `y ∈ R` —— 矛盾。<br>そうでなければ `c ∈ p`, `d ∉ p` があって `d = c·y`、このとき **`p·R_p = c·R_p` は主**。<br>主なら `IsDiscreteValuationRing.TFAE`（4↔3）で非零素は 1 つだけ、すなわち `p` は高さ 1 |\n\n★★段 4 の後半が要点である —— `r ∈ p` に `r·y = e ∈ R` を取ると `r·d = c·e` で、\n`d` は `R_p` で単元だから `r = c·e·d⁻¹ ∈ c·R_p`。**局所であることがここで効く**。\n\n★★★これで `Example 6.1` の在庫不足は**消えた**（相方の `proper-global-sections` は mathlib 在庫）。",
      "size": "中",
-     "lean": "ABC3/Skeleton/Divisor/Hartogs.lean"
+     "lean": "ABC3/Found/Divisor/Hartogs.lean"
     },
     {
      "id": "global-units",
