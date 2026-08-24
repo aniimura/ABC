@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55UntrFun
 import ABC3.Found.FrdI.Prop53Diag
+import ABC3.Found.FrdI.Prop53UntrPfModel
+import ABC3.Found.FrdI.Prop53PfCatRoot
 
 /-!
 # [FrdI] Proposition 5.3 の図式 —— **四角形の 1-可換性**
@@ -44,7 +46,7 @@ namespace ABC3.Found.FrdI
 
 open CategoryTheory
 
-universe v u w u2 v2
+universe v u w u2 v2 ue ve
 
 section Square
 
@@ -110,13 +112,78 @@ theorem cToPf_comp_pfToUnTrPfCat_map (hiso : ∀ X : C, IsIsotropic P X)
 ★上の道と下の道は、`(𝒞^un-tr)^pf` から先の関手 `T` が何であっても一致する。
 ★★`T := untrPf_modelFrobenioid ⋙ pfRootToRlfFunctor_of_arb` と取れば
 **原文の図式そのもの**(尻尾は `𝒞^rlf`)になる。 -/
-theorem cToPf_comp_pfToUnTrPfCat_map_comp {E : Type u2} [Category.{v2} E]
+theorem cToPf_comp_pfToUnTrPfCat_map_comp {E : Type ue} [Category.{ve} E]
     (T : PfCat (unTrPre P Fc) F₂ ⥤ E) (hiso : ∀ X : C, IsIsotropic P X)
     (hisoPf : ∀ X : PfCat (istrPre P Fc) F₁, IsIsotropic (pfPre (istrPre P Fc) F₁) X)
     {X Y : C} (φ : X ⟶ Y) :
     (cToPf Fc hiso F₁ ⋙ pfToUnTrPfCat P Fc F₁ F₂ hisoPf ⋙ T).map φ
       = (cToUnTr hiso ⋙ toPfCat (unTrPre P Fc) F₂ ⋙ T).map φ :=
   congrArg T.map (cToPf_comp_pfToUnTrPfCat_map P Fc F₁ F₂ hiso hisoPf φ)
+
+/-! ## ★2. 右の縦の矢印を `𝒞^rlf` まで束ねる -/
+
+section ToRlf
+
+variable [IsConnected D] (G : Frobenioid P)
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.3 の図式の右の縦の矢印(全部)** `𝒞^pf ⟶ 𝒞^rlf`。
+
+```
+𝒞^pf ⟶ (𝒞^pf)^un-tr ≌ (𝒞^un-tr)^pf ⟶ model ⟶ 𝒞^rlf
+```
+
+★4 段の合成である:
+1. `pfToUnTrPfCat` —— 上の 2 本(`Proposition 5.5, (ii)` の圏同値を含む)
+2. `pfCatToRoot` —— 根 1 の部分を原文の `𝒞^pf` へ
+3. `untrPf_modelFrobenioid` —— `(𝒞^un-tr)^pf ≌ model Frobenioid`
+4. `pfRootToRlfFunctor_full` —— 係数を `ℚ` から `ℝ` へ -/
+noncomputable def pfToRlfRight
+    (hisoPf : ∀ X : PfCat (istrPre P Fc) F₁, IsIsotropic (pfPre (istrPre P Fc) F₁) X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D)
+    (hcharInj' : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := NNReal) (Φ.map α)))
+    (hint' : ∀ A : D, IsIntegralMonoid (RlfT (Φ.val A))) :
+    PfCat (istrPre P Fc) F₁ ⥤
+      Crlf (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+        (birat_frobNormalized_of_unitTrivial (unTr_frobenioid P Fc G)
+          (unTr_isotropic P Fc) (unTr_unitTrivial P Fc))
+        hcharInj' hint' hfsmD :=
+  pfToUnTrPfCat P Fc F₁ (unTr_frobenioidCore P Fc) hisoPf
+    ⋙ pfCatToRoot (unTrPre P Fc) (unTr_frobenioidCore P Fc)
+    ⋙ (untrPf_modelFrobenioid P Fc G hint hfsmD).functor
+    ⋙ pfRootToRlfFunctor_full (unTr_frobIsotropicType Fc) (unTr_isotropic P Fc)
+        (unTr_frobNormalizedType Fc G hint hfsmD) (unTr_unitTrivial P Fc)
+        (unTr_frobenioid P Fc G) (untrPf_frobenioid P Fc G) hfsmD hcharInj' hint'
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.3 の 1-可換図式は可換**(射の側、`𝒞^rlf` まで)。
+
+```
+𝒞  ──→ 𝒞^istr ──→ 𝒞^pf
+│                    │
+↓                    ↓
+𝒞^un-tr ─→ (𝒞^un-tr)^pf ─→ 𝒞^rlf
+```
+-/
+theorem cToPf_comp_pfToRlfRight_map (hiso : ∀ X : C, IsIsotropic P X)
+    (hisoPf : ∀ X : PfCat (istrPre P Fc) F₁, IsIsotropic (pfPre (istrPre P Fc) F₁) X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A)) (hfsmD : IsOfFSMType D)
+    (hcharInj' : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := NNReal) (Φ.map α)))
+    (hint' : ∀ A : D, IsIntegralMonoid (RlfT (Φ.val A)))
+    {X Y : C} (φ : X ⟶ Y) :
+    (cToPf Fc hiso F₁ ⋙ pfToRlfRight P Fc F₁ G hisoPf hint hfsmD hcharInj' hint').map φ
+      = (cToUnTr hiso ⋙ toPfCat (unTrPre P Fc) (unTr_frobenioidCore P Fc)
+          ⋙ (pfCatToRoot (unTrPre P Fc) (unTr_frobenioidCore P Fc)
+            ⋙ (untrPf_modelFrobenioid P Fc G hint hfsmD).functor
+            ⋙ pfRootToRlfFunctor_full (unTr_frobIsotropicType Fc) (unTr_isotropic P Fc)
+              (unTr_frobNormalizedType Fc G hint hfsmD) (unTr_unitTrivial P Fc)
+              (unTr_frobenioid P Fc G) (untrPf_frobenioid P Fc G) hfsmD
+              hcharInj' hint')).map φ :=
+  cToPf_comp_pfToUnTrPfCat_map_comp P Fc F₁ (unTr_frobenioidCore P Fc) _ hiso hisoPf φ
+
+end ToRlf
 
 end Square
 
