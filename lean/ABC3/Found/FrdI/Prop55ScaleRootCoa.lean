@@ -161,10 +161,27 @@ Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 
 ★したがって `Hom(X,Y)` と `Hom(Y,Z)` で使う同型が**別物**になり、
 共役をそのまま合成しても `Hom(X,Z)` の共役にならない。
 
-★★**逃げ道**: 在庫の `compRoot_eq_lift`
+★★**逃げ道 A(直接)**: 在庫の `compRoot_eq_lift`
 (「**合成は共通倍数の根で計算してよい**」、`Prop55BiratPf.lean` の ★ に記述)で
 3 対象を共通の根 `n·m·l` に揃えてから比べる。
 `scaleRootFunctor` の `map_comp` がまさにこの形で書かれているので、同じ骨が使える。
+
+★★**逃げ道 B(普遍性、2026-08-25 に見つけた別ルート)**:
+**向きを逆にして**、`𝒞^birat` の**普遍性**で作る。
+
+```
+Ω : 𝒞^pf ⥤ (𝒞^birat)^pf     (代表元を toBiratCat で送るだけ。★在庫 idxToBirat がある)
+```
+
+は co-angular pre-step を**同型に送る**(birat では同型だから)。
+★もし「co-angular pre-step を同型に送る関手は `𝒞^birat` を経由する」という
+**birat 化の普遍性**があれば、`Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf` が
+**関手として無料で出る**(合成の coherence を手で書かずに済む)。
+
+★★ただし在庫の `HomBirat` は**添字圏の余極限**として作ってあり、
+`HomBirat.mk` / `exists_rep` / `sound` はあるが **`HomBirat.desc`(普遍性)は無い**。
+★どちらの逃げ道も同程度の作業量に見えるが、**B は再利用が効く**
+(`Corollary 4.10` の `psiBiratCor` を手で組んでいる所も普遍性で書き直せる)。
 
 ## ★★★★★訂正(2026-08-25)—— 根の「等式」は**取れない**
 
