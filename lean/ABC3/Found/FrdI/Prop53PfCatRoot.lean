@@ -137,7 +137,28 @@ theorem toPfCat_comp_pfCatToRoot_map {A B : C} (φ : A ⟶ B) :
   rw [← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp]
   rfl
 
+
+/-- ★★★★**`pfCatToRoot` は射の上で全単射**(同型による共役だから)。
+
+★★`Iso.homCongr`(`f ↦ α⁻¹ ≫ f ≫ β`)が**定義的にそのもの**なので 1 行で出る。
+★これが `Proposition 5.5, (ii)` で `Θ.map` の全単射性を根 1 で出すのに要る。 -/
+theorem pfCatToRoot_map_bijective (X Y : PfCat P F) :
+    Function.Bijective ((pfCatToRoot P F).map (X := X) (Y := Y)) := by
+  haveI h1 : IsIso (rtExt P F (pfDown P F X) 1) := isIso_rtExt_one P F _
+  haveI h2 : IsIso (rtExt P F (pfDown P F Y) 1) := isIso_rtExt_one P F _
+  exact (Iso.homCongr
+    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F (pfDown P F X) 1) h1))
+    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F (pfDown P F Y) 1) h2))).bijective
+
+/-- ★★★★locator —— `pfCatToRoot` の射の全単射性。 -/
+def pfCatToRoot_map_bijective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 57,
+    item := "Definition 3.1, (iii) — 根 1 の埋め込みは射の上で全単射",
+    sectionId := "frdi-def-3-1" }
+
+
 /-! ## ★2. `𝒞^pf` の isotropic 性を根 1 の部分の言葉で
+
 
 ★★型の同義語 `PfCat P F := C` を跨ぐので、**在庫の `pfDown` に揃える**こと
 (自前の同義語ほどき関数を書くと `pfDiv` などの暗黙引数と噛み合わない)、

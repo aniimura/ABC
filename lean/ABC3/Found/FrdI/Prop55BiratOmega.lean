@@ -1150,6 +1150,38 @@ theorem theta_biratPfHom (F' : FrobenioidCore (biratPre P G))
       (toHomBirat_comp_mk Z ψ)
   exact hL.trans hR.symm
 
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— **`Θ` は根 1 の対象のあいだで充満忠実**。
+
+★★`Θ.map ∘ biratPfHom = pfCatToRoot.map`(橋渡し)で、
+在庫の `biratPfHom_bijective` と `pfCatToRoot_map_bijective` から出る。 -/
+theorem thetaFunctor_map_bijective_one (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) (A B : C) :
+    Function.Bijective ((thetaFunctor F F' Gpf hiso).map
+      (X := (show BiratCat (pfRootPre P F) Gpf from (⟨A, 1⟩ : PfRootObj P F)))
+      (Y := (show BiratCat (pfRootPre P F) Gpf from (⟨B, 1⟩ : PfRootObj P F)))) := by
+  have hcomp : ∀ x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B),
+      (thetaFunctor F F' Gpf hiso).map (biratPfHom hfi Gpf F' A B x)
+        = (pfCatToRoot (biratPre P G) F').map x := by
+    intro x
+    obtain ⟨W, z, rfl⟩ := homPf_birat_exists_rep (F := F) F' A B x
+    obtain ⟨Z, ψ, rfl⟩ := HomBirat.exists_rep z
+    exact theta_biratPfHom F F' Gpf hfi hiso A B W Z ψ
+  have hbij := pfCatToRoot_map_bijective (biratPre P G) F'
+    (biratUp P G A) (biratUp P G B)
+  have hpb := biratPfHom_bijective hfi hiso Gpf F' A B
+  constructor
+  · intro u u' huu'
+    obtain ⟨x, rfl⟩ := hpb.2 u
+    obtain ⟨x', rfl⟩ := hpb.2 u'
+    rw [hcomp, hcomp] at huu'
+    exact congrArg (biratPfHom hfi Gpf F' A B) (hbij.1 huu')
+  · intro y
+    obtain ⟨x, hx⟩ := hbij.2 y
+    exact ⟨biratPfHom hfi Gpf F' A B x, (hcomp x).trans hx⟩
+
 /-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
 
 ★★`biratPfHom_mk` → `biratPf_mk` → `biratDescHom_eq_of_spec` で、
