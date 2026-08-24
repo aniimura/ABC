@@ -99,6 +99,45 @@ theorem eq_iff_same [IsFiltered J] {i : J} {x y : F.obj i} :
     mk F i x = mk F i y ↔ ∃ (j : J) (f : i ⟶ j), F.map f x = F.map f y :=
   Types.FilteredColimit.isColimit_eq_iff' (colimit.isColimit F) x y
 
+/-! ### ★★普遍性 —— 帰納極限**からの**写像
+
+★★これまで `mk` / `sound` / `eq_iff`(極限**への**射と等号判定)しか置いていなかったが、
+**極限からの射**(普遍性)も要る。`HomColim F = colimit F` なので
+mathlib の `colimit.desc` がそのまま使える。
+
+★用途: **`𝒞^birat` の普遍性** ——
+「co-angular pre-step を同型に送る関手は `𝒞^birat` を経由する」。
+これがあると `Corollary 4.10` の `Ψ^birat` や
+`Proposition 5.5, (ii)` の梱包を**手で組まずに済む**。 -/
+
+/-- ★降下のための余錐。 -/
+noncomputable def descCocone {T : Type w} (f : ∀ j : J, F.obj j → T)
+    (hf : ∀ {i j : J} (u : i ⟶ j) (x : F.obj i), f j (F.map u x) = f i x) : Cocone F :=
+  Cocone.mk T
+    { app := fun j => TypeCat.ofHom (f j)
+      naturality := fun _ _ u => by
+        ext x
+        exact hf u x }
+
+/-- ★★★**帰納極限からの写像** —— 各添字での写像が遷移射と両立すればよい。 -/
+noncomputable def desc {T : Type w} (f : ∀ j : J, F.obj j → T)
+    (hf : ∀ {i j : J} (u : i ⟶ j) (x : F.obj i), f j (F.map u x) = f i x) :
+    HomColim F → T :=
+  fun z => colimit.desc F (descCocone F f hf) z
+
+@[simp] theorem desc_mk {T : Type w} (f : ∀ j : J, F.obj j → T)
+    (hf : ∀ {i j : J} (u : i ⟶ j) (x : F.obj i), f j (F.map u x) = f i x)
+    (j : J) (x : F.obj j) : desc F f hf (mk F j x) = f j x := by
+  show colimit.desc F (descCocone F f hf) (colimit.ι F j x) = f j x
+  rw [← types_comp_apply (colimit.ι F j) (colimit.desc F (descCocone F f hf)),
+    colimit.ι_desc]
+  rfl
+
+/-- ★★**極限からの 2 つの写像は代表元で決まる**。 -/
+theorem desc_ext {T : Type w} (g h : HomColim F → T)
+    (hgh : ∀ (j : J) (x : F.obj j), g (mk F j x) = h (mk F j x)) : g = h :=
+  funext (induction F (fun j x => hgh j x))
+
 end HomColim
 
 /-! ## ★★2 変数の写像 —— 「細い」filtered 添字圏の場合
