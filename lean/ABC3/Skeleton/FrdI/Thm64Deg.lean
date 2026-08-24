@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Meta.Claim
 import ABC3.Skeleton.NumberField.Chebotarev
 import ABC3.Found.AddEquivNNReal
+import ABC3.Found.FrdI.Thm64Rat
 import Mathlib.Data.NNReal.Basic
 import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
@@ -81,21 +82,36 @@ theorem monotone_of_addEquiv (f : NNReal ≃+ NNReal) : Monotone f :=
 
 /-- ★★★**6 素点が取れる** —— `Lemma 6.5, (ii)` を当てるための入力。
 
-★`log p₁, …, log p₆` が `ℚ` 上一次独立(`Lemma 6.5, (i)`、実装済み)なので、
-`2 × 3` の格子を張る 6 素点を選べる。 -/
+★★★★★**閉じた**(2026-08-25)—— `2, 3, 5, 7, 11, 13` で足りる。
+★★ただし `Theorem 6.4, (iii)` が要求するのは**任意の 6 素点**ではなく、
+「`Ψ` が誘導する素数の対応 `f` について `p, f p` の 3 組が相異なる」ことであり、
+そちらは `Found/FrdI/Thm64Rat.lean` の `exists_prime_avoiding` が与える。 -/
 theorem exists_six_primes_for_lemma65 :
     ∃ p : Fin 6 → ℕ, (∀ i, Nat.Prime (p i)) ∧ Function.Injective p := by
-  sorry
+  refine ⟨![2, 3, 5, 7, 11, 13], by decide, by decide⟩
 
 /-- ★★★★**`deg(Ψ^rlf) ∈ ℚ>0`** —— `Lemma 6.5, (ii)` を 6 素点に当てる。
 
-★`c` が `deg(Ψ^rlf)` にあたる。`c · log p` がすべて `log`(有理数)になるので、
-six exponentials で `c` が有理数に落ちる。 -/
-theorem deg_rat_of_six_exp (c : NNReal) (_hc : c ≠ 0)
-    (_h : ∀ p : ℕ, Nat.Prime p → ∃ q : ℕ, 0 < q ∧
-      (c : ℝ) * Real.log p = Real.log q) :
-    ∃ q : ℚ, 0 < q ∧ (c : ℝ) = q := by
-  sorry
+## ★★★★逸脱の記録(2026-08-25)—— 仮定を**原文の形**に直した
+
+旧版の仮定は `∀ p 素数, ∃ q, c · log p = log q` だったが、
+原文(物理 p.116)が使うのは
+
+```
+∀ p 素数, ∃ p' 素数, ∃ λ ∈ ℚ>0, log p / log p' = c⁻¹ · λ
+```
+
+——`Ψ` が誘導する **`V(L₁) ≃ V(L₂)`**(素数から素数への対応)である。
+★旧版は原文と別の主張だったので差し替えた。★★消費側はまだ無い
+(`Example 6.3` の配線待ち)ので、後続の証明への影響は無い。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/FrdI/Thm64Rat.lean` にある。 -/
+theorem deg_rat_of_six_exp (c : ℝ) (hc : 0 < c)
+    (f : Nat.Primes → Nat.Primes) (l : Nat.Primes → ℚ) (hl : ∀ p, 0 < l p)
+    (hval : ∀ p : Nat.Primes,
+      Real.log ((p : ℕ) : ℝ) / Real.log ((f p : ℕ) : ℝ) = c⁻¹ * (l p : ℝ)) :
+    ∃ q : ℚ, 0 < q ∧ c = (q : ℝ) :=
+  ABC3.Found.FrdI.deg_rat_of_pairing c hc f l hl hval
 
 /-! ## ★3. `thm64-iv-galois` —— `deg = 1` と `L₁ ≅ L₂` -/
 
@@ -142,7 +158,9 @@ def exists_six_primes_for_lemma65.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.FrdI.log_primes_linearIndependent") 116,
     .citation "[ABC3]" "six exponentials(Lemma 6.5, (ii))"
       (.inProject "ABC3" "ABC3.Found.SixExp") 116,
-    .derivation "2 × 3 の格子を張るように素数を 6 個選ぶ" 116 ]
+    .citation "[ABC3]" "対応 f の下で 3 組を相異なるように選ぶ段(Found、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.exists_prime_avoiding") 116,
+    .derivation "2, 3, 5, 7, 11, 13 で足りる(素数性・単射性は decide)" 116 ]
 
 def deg_rat_of_six_exp.src : Source :=
   { paper := "FrdI", pdfPage := 116,
@@ -150,11 +168,14 @@ def deg_rat_of_six_exp.src : Source :=
     sectionId := "frdi-thm-6-4" }
 
 def deg_rat_of_six_exp.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "six exponentials(Lemma 6.5, (ii)、sorry なし)"
-      (.inProject "ABC3" "ABC3.Found.SixExp") 116,
+  [ .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.deg_rat_of_pairing") 116,
+    .citation "[ABC3]" "six exponentials(Lemma 6.5, (ii)、sorry なし)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.lemma_6_5_ii") 116,
     .citation "[ABC3]" "exists_six_primes_for_lemma65"
       (.inProject "ABC3" "ABC3.Skeleton.Thm64.exists_six_primes_for_lemma65") 116,
-    .derivation "c·log pᵢ がすべて log(有理数)なら、six exponentials で c は有理数" 116 ]
+    .derivation
+      "c が無理数なら対応 f は不動点なしかつ単射。素数は無限個なので 6 つ相異なる素数が取れ、Lemma 6.5, (ii) に矛盾" 116 ]
 
 def deg_eq_one_of_galois.src : Source :=
   { paper := "FrdI", pdfPage := 116,

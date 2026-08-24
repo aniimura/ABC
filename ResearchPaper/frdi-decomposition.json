@@ -3671,11 +3671,11 @@
           "deps": [
             "thm64-ii-deg"
           ],
-          "status": "skeleton",
-          "size": "中",
-          "note": "★★**`Lemma 6.5, (ii)` は閉じた**(`Found/FrdI/Lemma65ii.lean`、six exponentials を `Found/SixExp/` で sorry なしに証明した)。残るのは「6 素点が取れる」段。\n\n★★★2026-08-25（**スケルトンを置いた**）：`Lemma 6.5, (ii)`（six exponentials）は\n`Found/SixExp/` で **sorry なしに閉じている**。残るのは「6 素点が取れる」段だけで、\n`Lemma 6.5, (i)`（素数の対数の ℚ 上一次独立性、実装済み）から選べる。",
-          "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
-          "decl": "ABC3.Skeleton.Thm64.exists_six_primes_for_lemma65 / deg_rat_of_six_exp"
+          "status": "done",
+          "size": "中(閉じた)",
+          "note": "★原文(物理 p.116)は\n\n> If deg(Ψrlf) ∉ Q>0, then one verifies immediately that there exist three\n> nonarchimedean valuations w1, w3, w5 ∈ V(L1) … such that p1, …, p6 are distinct.\n> But this implies that log(p1)/log(p2), log(p3)/log(p4), log(p5)/log(p6) ∈ (deg)⁻¹ · Q>0\n\nと書き、`Lemma 6.5, (ii)`(six exponentials)に当てて矛盾を出す。\n\n★★★★★★2026-08-25(**閉じた**、sorry 無し)。`Found/FrdI/Thm64Rat.lean`。\n\n## ★★★★測定の訂正 —— スケルトンの主張が原文とずれていた\n\n旧 `deg_rat_of_six_exp` の仮定は\n\n```\n∀ p 素数, ∃ q, c · log p = log q\n```\n\nだったが、原文が使うのは\n\n```\n∀ p 素数, ∃ p′ 素数, ∃ λ ∈ ℚ>0, log p / log p′ = c⁻¹ · λ\n```\n\n——**素数から素数への対応**(`Ψ` が誘導する `V(L₁) ≃ V(L₂)`)である。\n★旧版は原文と別の主張だったので差し替えた(逸脱として Lean の docstring にも記録)。\n★消費側はまだ無い(`Example 6.3` の配線待ち)ので後続への影響は無い。\n\n## ★★★★★「one verifies immediately」の中身は 3 段だった\n\n| 段 | 中身 |\n|---|---|\n| (a) | `c ∉ ℚ` なら `f p ≠ p`(`f p = p` なら `1 = c⁻¹·λ` で `c = λ ∈ ℚ`) |\n| (b) | `f` は**単射**(`f p = f q` なら `log p / log q = λ_p/λ_q ∈ ℚ` で `Lemma 6.5, (i)`) |\n| (c) | 単射なので除外は各段で有限個。素数は無限個なので 3 組取れる |\n\n★★(b) が要点 —— **単射性は仮定ではなく `c` の無理性から出る**。\nこれが無いと「6 つが相異なる」を選べない。原文の「immediately」の中身はここ。\n\n★残る入力は「`Ψ` が誘導する素数の対応が `c⁻¹·ℚ>0` の比を与える」だけで、\nこれは `thm64-ii-deg`(`deg` の定義)と `ex63-model`(算術 Frobenioid の配線)の担当。",
+          "lean": "ABC3/Found/FrdI/Thm64Rat.lean(Skeleton/FrdI/Thm64Deg.lean は委譲)",
+          "decl": "ABC3.Found.FrdI.deg_rat_of_pairing / not_six_primes_ratio / exists_prime_avoiding / six_injective / prime_eq_of_log_div_rat"
         },
         {
           "id": "thm64-iii-places",
@@ -3683,11 +3683,11 @@
           "deps": [
             "thm64-iii-q"
           ],
-          "status": "半済",
-          "size": "小",
-          "note": "★`Lemma 6.5, (i)`(素数の対数の ℚ 上一次独立性)は実装済み。",
-          "lean": "ABC3/Found/FrdI/Lemma65.lean",
-          "decl": "log_primes_linearIndependent"
+          "status": "done",
+          "size": "小(閉じた)",
+          "note": "★`Lemma 6.5, (i)`(素数の対数の ℚ 上一次独立性)は実装済み\n(`Found/FrdI/Lemma65.lean` の `log_primes_linearIndependent`)。\n\n★★★★★★2026-08-25(**閉じた**、sorry 無し)——\n`Found/FrdI/Thm64Rat.lean` の `pairing_eq_of_rat`。\n\n中身は 1 行だった: `log p / log (f p) = c⁻¹ · λ` で `c ∈ ℚ`(＝ (iii) の前半)なら\n右辺は有理数なので、`Lemma 6.5, (i)` の系 `log_prime_ne_rat_mul` から `p = f p`。\n★すなわち「`V(L₁) ≃ V(L₂)` は ℚ の素点の上下を保つ」。\n\n★経由の補題 `prime_eq_of_log_div_rat`(「`log p / log q ∈ ℚ` なら `p = q`」)も同ファイル。",
+          "lean": "ABC3/Found/FrdI/Thm64Rat.lean",
+          "decl": "ABC3.Found.FrdI.pairing_eq_of_rat / prime_eq_of_log_div_rat"
         },
         {
           "id": "thm64-iv-cheb",
