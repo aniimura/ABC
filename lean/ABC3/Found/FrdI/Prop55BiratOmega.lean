@@ -941,6 +941,87 @@ theorem thetaFunctor_obj_surjective (F' : FrobenioidCore (biratPre P G))
   rfl
 
 
+/-! ## ★11. 橋渡しの部品 —— `κ′` を掛けた形 -/
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★**`Ω(rootMap) ≫ κ′ = κ′ ≫ [Ψχ]`** —— `rootMap_spec` を `Ω` で送ったもの。 -/
+theorem omegaMap_rootMap_kappa (F' : FrobenioidCore (biratPre P G))
+    (hfi : IsOfFrobeniusIsotropicType P) {X E : C} (χ : X ⟶ E) (k : ℕ+) :
+    compRoot (biratPre P G) F'
+        (omegaMap F F' (show HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨E, k⟩ from
+          rootMap (F := F) hfi χ k))
+        (pfKappa (F := F') (biratUp P G E) k)
+      = compRoot (biratPre P G) F' (pfKappa (F := F') (biratUp P G X) k)
+        (toRootHom (F := F') ((toBiratCat P G).map χ)) := by
+  have s1 := congrArg (compRoot (biratPre P G) F'
+    (omegaMap F F' (show HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨E, k⟩ from
+      rootMap (F := F) hfi χ k))) (omegaMap_pfKappa F F' E k).symm
+  have s2 := (omegaMap_comp F F'
+    (show HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨E, k⟩ from rootMap (F := F) hfi χ k)
+    (show HomRoot P F (⟨E, k⟩ : PfRootObj P F) ⟨E, 1⟩ from pfKappa (F := F) E k)).symm
+  have s3 := congrArg (omegaMap F F' (X := (⟨X, k⟩ : PfRootObj P F)) (Y := ⟨E, 1⟩))
+    (rootMap_spec (F := F) hfi χ k)
+  have s4 := omegaMap_comp F F'
+    (show HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨X, 1⟩ from pfKappa (F := F) X k)
+    (show HomRoot P F (⟨X, 1⟩ : PfRootObj P F) ⟨E, 1⟩ from toRootHom (F := F) χ)
+  have s5 := congrArg (fun t => compRoot (biratPre P G) F' t
+      (omegaMap F F' (show HomRoot P F (⟨X, 1⟩ : PfRootObj P F) ⟨E, 1⟩ from
+        toRootHom (F := F) χ))) (omegaMap_pfKappa F F' X k)
+  have s6 := congrArg (compRoot (biratPre P G) F' (pfKappa (F := F') (biratUp P G X) k))
+    (omegaMap_toRootHom F F' χ)
+  exact (((((s1.trans s2).trans s3).trans s4).trans s5).trans s6)
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★**`Ω(rootLift) ≫ κ′ = [Ψα]`** —— `rootLift_spec` を `Ω` で送ったもの。 -/
+theorem omegaMap_rootLift_kappa (F' : FrobenioidCore (biratPre P G))
+    (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} (α : A ⟶ A₁) (k : ℕ+)
+    (hk : P.degFr α = k) :
+    compRoot (biratPre P G) F'
+        (omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from
+          rootLift (F := F) hfi α k hk))
+        (pfKappa (F := F') (biratUp P G A₁) k)
+      = toRootHom (F := F') ((toBiratCat P G).map α) := by
+  have s1 := congrArg (compRoot (biratPre P G) F'
+    (omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from
+      rootLift (F := F) hfi α k hk))) (omegaMap_pfKappa F F' A₁ k).symm
+  have s2 := (omegaMap_comp F F'
+    (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from rootLift (F := F) hfi α k hk)
+    (show HomRoot P F (⟨A₁, k⟩ : PfRootObj P F) ⟨A₁, 1⟩ from pfKappa (F := F) A₁ k)).symm
+  have s3 := congrArg (omegaMap F F' (X := (⟨A, 1⟩ : PfRootObj P F)) (Y := ⟨A₁, 1⟩))
+    (rootLift_spec (F := F) hfi α k hk)
+  have s4 := omegaMap_toRootHom F F' α
+  exact (((s1.trans s2).trans s3).trans s4)
+
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★**分数に分母を後合成すると分子に戻る**(`(𝒞^birat)^pf` の根 1 の像で) ——
+`mk_comp_toHomPf_den` を `pfCatToRoot` で送ったもの。 -/
+theorem pfCatToRoot_idxToBirat_comp (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (W : IdxPf P F A B)
+    (v : ((idxToBirat P F G F' A B).obj W).right.obj.1
+      ⟶ ((idxToBirat P F G F' A B).obj W).right.obj.2) :
+    compRoot (biratPre P G) F'
+        ((pfCatToRoot (biratPre P G) F').map
+          (HomPf.mk ((idxToBirat P F G F' A B).obj W) v))
+        (toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.2))
+      = toRootHom (F := F') ((toBiratCat P G).map W.hom.hom.1 ≫ v) := by
+  refine Eq.trans (congrArg (compRoot (biratPre P G) F'
+    ((pfCatToRoot (biratPre P G) F').map (HomPf.mk ((idxToBirat P F G F' A B).obj W) v)))
+    (toPfCat_comp_pfCatToRoot_map (P := biratPre P G) (F := F')
+      ((toBiratCat P G).map W.hom.hom.2)).symm) ?_
+  refine Eq.trans (((pfCatToRoot (biratPre P G) F').map_comp
+    (HomPf.mk ((idxToBirat P F G F' A B).obj W) v)
+    (toHomPf (F := F') ((toBiratCat P G).map W.hom.hom.2))).symm) ?_
+  refine Eq.trans (congrArg (pfCatToRoot (biratPre P G) F').map
+    (mk_comp_toHomPf_den (P := biratPre P G) (F := F')
+      ((toBiratCat P G).map W.hom.hom.1) ((toBiratCat P G).map W.hom.hom.2)
+      (biratFT (G := G) _ W.hom.property.1) (biratFT (G := G) _ W.hom.property.2.1)
+      (biratDegEq (G := G) _ _ W.hom.property.2.2) v)) ?_
+  exact toPfCat_comp_pfCatToRoot_map (P := biratPre P G) (F := F')
+    ((toBiratCat P G).map W.hom.hom.1 ≫ v)
 
 /-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
 
