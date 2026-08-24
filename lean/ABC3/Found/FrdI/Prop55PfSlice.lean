@@ -149,6 +149,40 @@ theorem biratDivGp_toRootHom {G : Frobenioid P} (Gpf : Frobenioid (pfRootPre P F
   rw [biratDivGp_mk, biratDivGp_mk]
   exact sliceDivGpOf_toRootHom a has.2 φ
 
+/-! ## ★3-b. 底と次数も移る —— `𝒪^×` に入ることの材料 -/
+
+/-- ★★**双有理射の底も `toRootHom` でそのまま**。
+
+★`sliceBaseOf a _ φ = (Base a)⁻¹ ≫ Base φ` の 2 つの材料がどちらもそのままだから。 -/
+theorem sliceBaseOf_toRootHom {A B A' : C} (a : A' ⟶ A) (ha : IsIso (P.Base a))
+    (φ : A' ⟶ B) :
+    sliceBaseOf (P := pfRootPre P F) (toRootHom (F := F) a)
+        (isIso_rootBase_toRootHom (F := F) ha) (toRootHom (F := F) φ)
+      = sliceBaseOf (P := P) a ha φ := by
+  rw [sliceBaseOf_eq, sliceBaseOf_eq, inv_rootBase_toRootHom ha,
+    show (pfRootPre P F).Base (toRootHom (F := F) φ) = P.Base φ from rootBase_toRootHom φ]
+  rfl
+
+/-- ★★代表元の底は移っても同じ。 -/
+theorem biratBase_toRootHom {G : Frobenioid P} (Gpf : Frobenioid (pfRootPre P F))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    {A B A' : C} (a : A' ⟶ A) (hac : IsCoAngular P a) (has : IsPreStep P a) (φ : A' ⟶ B) :
+    biratBase (P := pfRootPre P F) (G := Gpf)
+        (HomBirat.mk (idxBiratToRootHom Gpf hfi a has) (toRootHom (F := F) φ))
+      = biratBase (HomBirat.mk (idxBiratMk P G a hac has) φ) := by
+  rw [biratBase_mk, biratBase_mk]
+  exact sliceBaseOf_toRootHom a has.2 φ
+
+/-- ★★代表元の次数は移っても同じ。 -/
+theorem biratDeg_toRootHom {G : Frobenioid P} (Gpf : Frobenioid (pfRootPre P F))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    {A B A' : C} (a : A' ⟶ A) (hac : IsCoAngular P a) (has : IsPreStep P a) (φ : A' ⟶ B) :
+    biratDeg (P := pfRootPre P F) (G := Gpf)
+        (HomBirat.mk (idxBiratToRootHom Gpf hfi a has) (toRootHom (F := F) φ))
+      = biratDeg (HomBirat.mk (idxBiratMk P G a hac has) φ) := by
+  rw [biratDeg_mk, biratDeg_mk]
+  exact rootDeg_toRootHom φ
+
 /-! ## ★4. 自然な関手 `𝒞^birat ⟶ (𝒞^pf)^birat` を代表元の上で計算する
 
 ★★`Proposition 5.5, (ii)` の `biratPfHom` と、`𝒞^birat` の完全化(根 1)への
