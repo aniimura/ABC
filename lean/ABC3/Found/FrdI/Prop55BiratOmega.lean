@@ -155,6 +155,45 @@ open CategoryTheory
 
 universe v u w u2 v2
 
+/-! ## ★0. 一般の圏論 —— 充満忠実性は同型で運べる -/
+
+section MapBijIso
+
+universe uu uv uu2 uv2
+
+variable {CC : Type uu} [Category.{uv} CC] {DD : Type uu2} [Category.{uv2} DD]
+
+/-- ★★★★**射の全単射性は同型で運べる** ——
+`X ≅ X'`, `Y ≅ Y'` なら `Θ.map` の `(X',Y')` での全単射性は `(X,Y)` へ移る。
+
+★`Iso.homCongr`(`f ↦ α⁻¹ ≫ f ≫ β`)と関手性だけ。
+★★これが `Proposition 5.5, (ii)` の「一般の根へ」の段である。 -/
+theorem map_bijective_of_iso (Θ : CC ⥤ DD) {X X' Y Y' : CC} (α : X ≅ X') (β : Y ≅ Y')
+    (h : Function.Bijective (fun f : X' ⟶ Y' => Θ.map f)) :
+    Function.Bijective (fun f : X ⟶ Y => Θ.map f) := by
+  have key : ∀ f : X ⟶ Y, Θ.map ((Iso.homCongr α β) f)
+      = (Iso.homCongr (Θ.mapIso α) (Θ.mapIso β)) (Θ.map f) := by
+    intro f
+    show Θ.map (α.inv ≫ f ≫ β.hom)
+      = (Θ.mapIso α).inv ≫ Θ.map f ≫ (Θ.mapIso β).hom
+    rw [Θ.map_comp, Θ.map_comp]
+    rfl
+  constructor
+  · intro f g hfg
+    refine (Iso.homCongr α β).injective (h.1 ?_)
+    show Θ.map ((Iso.homCongr α β) f) = Θ.map ((Iso.homCongr α β) g)
+    rw [key, key]
+    exact congrArg (Iso.homCongr (Θ.mapIso α) (Θ.mapIso β)) hfg
+  · intro w
+    obtain ⟨g, hg⟩ := h.2 ((Iso.homCongr (Θ.mapIso α) (Θ.mapIso β)) w)
+    refine ⟨(Iso.homCongr α β).symm g, ?_⟩
+    refine (Iso.homCongr (Θ.mapIso α) (Θ.mapIso β)).injective ?_
+    refine Eq.trans (key ((Iso.homCongr α β).symm g)).symm ?_
+    rw [Equiv.apply_symm_apply]
+    exact hg
+
+end MapBijIso
+
 section BiratOmega
 
 /-! ### ★★★★測って分かったこと(2026-08-25)—— **universe の壁**と、その越え方
@@ -1265,6 +1304,79 @@ theorem thetaFunctor_map_bijective_scale (F' : FrobenioidCore (biratPre P G))
     refine ⟨(scaleRootBirat (F := F) k Gpf).map u₀, ?_⟩
     refine Eq.trans (theta_scaleRootBirat F F' Gpf hiso k u₀) ?_
     exact (congrArg (scaleRootHom (F := F') k) hu₀).trans hy₀
+
+/-! ## ★14. 一般の根 —— `Θ` は充満忠実 -/
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— **`Θ` は充満忠実**(一般の根)。
+
+★★`pfRoot_exists_iso_root` で `⟨A,n⟩ ≅ ⟨A^{(m)}, n·m⟩`, `⟨B,m⟩ ≅ ⟨B^{(n)}, n·m⟩` と
+**両方を同じ根 `n·m` に揃え**、`map_bijective_of_iso` で運ぶ。 -/
+theorem thetaFunctor_map_bijective (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) (X Y : PfRootObj P F) :
+    Function.Bijective (fun f : (show BiratCat (pfRootPre P F) Gpf from X)
+        ⟶ (show BiratCat (pfRootPre P F) Gpf from Y) =>
+      (thetaFunctor F F' Gpf hiso).map f) := by
+  obtain ⟨A, n⟩ := X
+  obtain ⟨B, m⟩ := Y
+  obtain ⟨a, ha⟩ := pfRoot_exists_iso_root (F := F) A n m (n * m * 1) (mul_one (n * m))
+
+  obtain ⟨b, hb⟩ := pfRoot_exists_iso_root (F := F) B m n (n * m * 1)
+    (by rw [mul_one, mul_comm])
+  haveI := ha
+  haveI := hb
+  refine map_bijective_of_iso (thetaFunctor F F' Gpf hiso)
+    ((toBiratCat (pfRootPre P F) Gpf).mapIso (asIso a))
+    ((toBiratCat (pfRootPre P F) Gpf).mapIso (asIso b)) ?_
+  exact thetaFunctor_map_bijective_scale F F' Gpf hfi hiso (n * m)
+    (rtObj P F A m) (rtObj P F B n)
+
+/-! ## ★15. 圏同値 -/
+
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— `Θ` は**充満**。 -/
+theorem thetaFunctor_full (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) : (thetaFunctor F F' Gpf hiso).Full where
+  map_surjective {_ _} h :=
+    (thetaFunctor_map_bijective F F' Gpf hfi hiso _ _).2 h
+
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— `Θ` は**忠実**。 -/
+theorem thetaFunctor_faithful (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) : (thetaFunctor F F' Gpf hiso).Faithful where
+  map_injective {_ _} {_ _} h :=
+    (thetaFunctor_map_bijective F F' Gpf hfi hiso _ _).1 h
+
+variable (F) in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— `Θ` は**本質的全射**
+(対象の上で全射なので無料)。 -/
+theorem thetaFunctor_essSurj (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F))
+    (hiso : ∀ V : C, IsIsotropic P V) : (thetaFunctor F F' Gpf hiso).EssSurj where
+  mem_essImage Y :=
+    ⟨(thetaFunctor_obj_surjective F' Gpf hiso Y).choose,
+      ⟨eqToIso (thetaFunctor_obj_surjective F' Gpf hiso Y).choose_spec⟩⟩
+
+variable (F) in
+/-- ★★★★★★★★**[FrdI] Proposition 5.5, (ii)** ——
+
+```
+Θ : (𝒞^pf)^birat ≌ (𝒞^birat)^pf
+```
+
+原文 (FrdI p.104):
+> (ii) There is a natural equivalence of categories [compatible with the functors to the -/
+theorem thetaFunctor_isEquivalence (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) : (thetaFunctor F F' Gpf hiso).IsEquivalence :=
+  haveI := thetaFunctor_full F F' Gpf hfi hiso
+  haveI := thetaFunctor_faithful F F' Gpf hfi hiso
+  haveI := thetaFunctor_essSurj F F' Gpf hiso
+  Functor.IsEquivalence.mk
 
 /-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
 
