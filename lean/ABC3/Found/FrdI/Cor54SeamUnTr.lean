@@ -14,7 +14,7 @@ import ABC3.Found.FrdI.Cor54Rigid
 ★`Cor54Seam.lean` の `ModelData.squareOfElemIso` は
 「**`𝔽_Φ` の上の自然同型 `α` ＋ `(cls, u)` の帳尻**」から
 model Frobenioid への 2 関手の同型を作る。本ファイルはその **`α` を実際に組み**、
-継ぎ目を `(cls, u)` の帳尻 3 条だけに落とす。
+継ぎ目を**存在 1 条**だけに落とす。
 
 ## ★★`α` の組み方(4 段)
 
@@ -35,13 +35,17 @@ model Frobenioid への 2 関手の同型を作る。本ファイルはその **
 ## ★★★継ぎ目に残るもの(記録)
 
 これで `base` / `div` / `deg` の側は**完全に閉じた**(`untrSeamElemIso`)。
-`untrSeamIso` が示すとおり、残るのは **`uu` / `hc` / `hu` の 3 条**だけ ——
-すなわち「`𝒞₁^un-tr` の対象の類 `cls` と射の `u` が、`Ψ` を通した後で
-**`Φ^birat` の元 1 つ分だけずれる**」という**有理関数の側の帳尻**である。
+さらに**射の `u` の帳尻は自動**になった(`ModelData.hom_ext_of_divB_inj`)——
+`u` は `cond` が決めるので、`Div_B` が単射なら 3 成分が合えば `u` も合う。
+★`𝒞^un-tr` の model では `Div_B` は **`Φ^birat ⊆ Φ^gp` の包含そのもの**なので無料。
 
-## ★★★★★★測って分かったこと(2026-08-24)——**基準切断を揃えないと `hc` は偽**
+★★`untrSeamIso` が示すとおり、残るのは**存在 1 条**だけ ——
+すなわち「`𝒞₁^un-tr` の対象の類 `cls` が、`Ψ` を通した後で
+**`Φ^birat` の元 1 つ分だけずれる**」ことである。
 
-★★残り 3 条を実際に潰そうとして、**この形のままでは `hc` は成り立たない**ことが分かった。
+## ★★★★★★測って分かったこと(2026-08-24)——**基準切断を揃えないとその 1 条は偽**
+
+★★残りを実際に潰そうとして、**この形のままでは成り立たない**ことが分かった。
 次に着手する人はここから始めてほしい。
 
 `Theorem 5.2, (iv)` の対象の類は `Thm52Model.lean` の
@@ -59,7 +63,7 @@ FPPath.cls  = Φ.gpMapOn (inv (Base toObj)) (toGp (Div toObj) - toGp (Div toRef)
 
 `hdivc` は `Div` の対応を与えるので、差は
 **`Ψu (S₁ d)` と `S₂ (ΨB d)` の間の span の類 `γ(d)`** ちょうどになる。
-★`hc` は「`γ(d) ∈ Φ₂^birat`」を要求するが、
+★その 1 条は「`γ(d) ∈ Φ₂^birat`」を要求するが、
 `Φ₂^birat ⊊ Gp(Φ₂)`(算術の例では類群が非自明)である以上、
 ★★**`S₁` と `S₂` を無関係に選べば `γ(d)` は `Φ₂^birat` の外に出る。**
 
@@ -80,8 +84,8 @@ FPPath.cls  = Φ.gpMapOn (inv (Base toObj)) (toGp (Div toObj) - toGp (Div toRef)
 **新しい数学は要らない**。要るのは `Theorem 5.2, (iv)` の切断を
 `modelType_equiv` の内側から外へ出す作業である。
 
-★なお `divB` は包含そのものなので、`uu` ＋ `hc` は
-「差が `Φ₂^birat` に入る」という **membership 1 条**に畳める。
+★`divB` は包含そのものなので、この 1 条は文字どおり
+「差が `Φ₂^birat` に入る」という **membership** である。
 ★★`cor_4_11_ii_uniq` は**底の関手 `Gf : 𝒟₁ ⥤ 𝒟₂` の** 1-一意性であって
 `𝒞^un-tr` の関手の一意性ではないので、そこからは降りてこない(測定済み)。
 -/
@@ -154,19 +158,18 @@ noncomputable abbrev untrSeamBase (X : UnTr P₁) :
 
 /-- ★★★★★★**[FrdI] Corollary 5.4 の縦の矢印の継ぎ目** ——
 
-**残るのは有理関数の側の帳尻 `uu` / `hc` / `hu` の 3 条だけ**である。
+**残るのは対象の類の帳尻の存在 1 条だけ**である。
 
 ★`base` / `div` / `deg` の側は `untrSeamElemIso` が閉じている
 (`Corollary 4.11, (iii)(iv)` ＋ `Theorem 5.2, (iv)` の圏同値の 1-可換性)。
 ★★`neg` は `RatFnData` の `bneg`(`B` が group-like であること)、
 `hdivOn` は `P₂` の divisorial 性からそのまま取れる。 -/
 noncomputable def untrSeamIso
-    (uu : ∀ X : UnTr P₁,
-      (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.bmon.val
+    (hex : ∀ X : UnTr P₁,
+      ∃ u : (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.bmon.val
         (((((unTr_modelFrobenioid Fc₁ G₁ hint₁ hfsmD₁).functor
           ⋙ (untrModelHomOver ΨB η Fc₁ G₁ hint₁ hfsmD₁
-              Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor)).obj X).base))
-    (hc : ∀ X : UnTr P₁,
+              Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor)).obj X).base),
       ((((unTr_modelFrobenioid Fc₁ G₁ hint₁ hfsmD₁).functor
           ⋙ (untrModelHomOver ΨB η Fc₁ G₁ hint₁ hfsmD₁
               Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor)).obj X).cls
@@ -174,29 +177,16 @@ noncomputable def untrSeamIso
             (untrSeamBase ΨB η Fc₁ G₁ hint₁ hfsmD₁ Fc₂ G₂ hint₂ hfsmD₂ hbirat
               Ψu sq hdivc hdeg X).hom
             (((Ψu ⋙ (unTr_modelFrobenioid Fc₂ G₂ hint₂ hfsmD₂).functor).obj X).cls)
-          + (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.divB _ (uu X))
-    (hu : ∀ {X Y : UnTr P₁} (f : X ⟶ Y),
-      (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.bmon.map
-          ((((unTr_modelFrobenioid Fc₁ G₁ hint₁ hfsmD₁).functor
-            ⋙ (untrModelHomOver ΨB η Fc₁ G₁ hint₁ hfsmD₁
-                Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor)).map f).base (uu Y)
-        + (((unTr_modelFrobenioid Fc₁ G₁ hint₁ hfsmD₁).functor
-            ⋙ (untrModelHomOver ΨB η Fc₁ G₁ hint₁ hfsmD₁
-                Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor).map f).u
-        = (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.bmon.map
-            (untrSeamBase ΨB η Fc₁ G₁ hint₁ hfsmD₁ Fc₂ G₂ hint₂ hfsmD₂ hbirat
-              Ψu sq hdivc hdeg X).hom
-            (((Ψu ⋙ (unTr_modelFrobenioid Fc₂ G₂ hint₂ hfsmD₂).functor).map f).u)
-          + (((((Ψu ⋙ (unTr_modelFrobenioid Fc₂ G₂ hint₂ hfsmD₂).functor).map f).deg
-              : ℕ+) : ℕ)) • (uu X)) :
+          + (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).model.divB _ u) :
     (unTr_modelFrobenioid Fc₁ G₁ hint₁ hfsmD₁).functor
         ⋙ (untrModelHomOver ΨB η Fc₁ G₁ hint₁ hfsmD₁ Fc₂ G₂ hint₂ hfsmD₂ hbirat).functor
       ≅ Ψu ⋙ (unTr_modelFrobenioid Fc₂ G₂ hint₂ hfsmD₂).functor :=
-  ModelData.squareOfElemIso (fun A => P₂.divisorial A)
+  ModelData.squareOfElemIsoOfExists (fun A => P₂.divisorial A)
+    (fun _ => Subtype.val_injective)
     (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).bneg
     (unTr_ratFnData Fc₂ G₂ hint₂ hfsmD₂).bneg_add
     (untrSeamElemIso ΨB η Fc₁ G₁ hint₁ hfsmD₁ Fc₂ G₂ hint₂ hfsmD₂ hbirat Ψu sq hdivc hdeg)
-    uu hc hu
+    hex
 
 end SeamUnTr
 
@@ -211,10 +201,10 @@ def untrSeamElemIso.src : ABC3.Meta.Source :=
     sectionId := "frdi-cor-5-4" }
 
 /-- ★★★★★★locator —— `Corollary 5.4` の縦の矢印の継ぎ目
-(★**条つき**: 残るのは有理関数の側の帳尻 `uu` / `hc` / `hu` の 3 条だけ)。 -/
+(★**条つき**: 残るのは対象の類の帳尻の存在 1 条だけ)。 -/
 def untrSeamIso.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 104,
-    item := "Corollary 5.4 — 縦の矢印の継ぎ目(有理関数の帳尻 3 条へ還元)",
+    item := "Corollary 5.4 — 縦の矢印の継ぎ目(対象の類の帳尻の存在 1 条へ還元)",
     sectionId := "frdi-cor-5-4" }
 
 end ABC3.Found.FrdI
