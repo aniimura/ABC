@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Found.Divisor.CartierFrobenioid
+import ABC3.Found.Divisor.NormFinite
 import ABC3.Found.FrdI.Sec6GaloisCat
 import Mathlib.AlgebraicGeometry.Normalization
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
@@ -56,11 +57,19 @@ variable {V : Scheme.{u}} {SpecL : Scheme.{u}}
 `f : Spec L ⟶ V` は函数体の有限拡大 `L/K` が定める射である。 -/
 noncomputable abbrev normalizationIn (f : SpecL ⟶ V) [QuasiCompact f] [QuasiSeparated f] : Scheme.{u} := f.normalization
 
-/-- ★★**`V[L]` も正規である**。 -/
-theorem isNormalScheme_normalizationIn (f : SpecL ⟶ V) [QuasiCompact f] [QuasiSeparated f] [IsIntegral V]
-    (_hV : IsNormalScheme V) :
-    IsNormalScheme (normalizationIn f) := by
-  sorry
+/-- ★★**`V[L]` も正規である**。
+
+## ★★★★測定の訂正(2026-08-25)—— `V` の正規性は**要らなかった**
+
+旧版は `_hV : IsNormalScheme V` を仮定に置いていたが、
+**正規化は `V` が正規でなくても正規**である(整閉包は整閉)。
+★仮定を落とした。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/NormNormal.lean` にある。 -/
+theorem isNormalScheme_normalizationIn {V : Scheme.{u}} [IsIntegral V] {Kbar : Type u} [Field Kbar]
+    [Algebra V.functionField Kbar] (L : ABC3.Found.FrdI.FinSub V.functionField Kbar) :
+    IsNormalScheme (normalizationIn (ABC3.Found.Divisor.specToV V L)) :=
+  ABC3.Found.Divisor.normObj_isNormalScheme V L
 
 /-- ★★**`V[L]` も proper である**(鎖 `normalize` の `normalization-proper-normal`)。
 
@@ -68,11 +77,28 @@ theorem isNormalScheme_normalizationIn (f : SpecL ⟶ V) [QuasiCompact f] [Quasi
 > If we write V [L] for the normalization of V in L [so V [L] is also
 
 ★正規化射は整(mathlib の instance)で、有限拡大なら有限、したがって proper。
-proper の合成は proper。 -/
-theorem isProper_normalizationIn {S : Scheme.{u}} (f : SpecL ⟶ V) [QuasiCompact f] [QuasiSeparated f] (g : V ⟶ S)
-    (_hg : IsProper g) (_hfin : LocallyOfFiniteType f) :
-    IsProper (f.fromNormalization ≫ g) := by
-  sorry
+proper の合成は proper。
+
+## ★★★★逸脱の記録(2026-08-25)—— 仮定が足りていなかった
+
+旧版の仮定は `_hfin : LocallyOfFiniteType f`(`f : Spec L ⟶ V` の側)だったが、
+**それでは `f.fromNormalization` の有限型性は出ない**。要るのは
+
+* `Γ(V,U)` が**整閉かつ Noether**(原文の「proper normal variety」)
+* `L/K` が**分離的**(原文の「necessarily separable」)
+
+の 3 つで、そこから `IsIntegralClosure.finite`(mathlib)が
+「整閉包は加群として有限」を与える。★仮定を原文に合わせて直した。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/NormFinite.lean` にある。 -/
+theorem isProper_normalizationIn {S V : Scheme.{u}} [IsIntegral V] {Kbar : Type u} [Field Kbar]
+    [Algebra V.functionField Kbar] (L : ABC3.Found.FrdI.FinSub V.functionField Kbar)
+    (g : V ⟶ S) (hg : IsProper g)
+    (hnoeth : ∀ U : V.Opens, IsAffineOpen U → (U : Set V).Nonempty → IsNoetherianRing Γ(V, U))
+    (hic : ∀ U : V.Opens, IsAffineOpen U → (U : Set V).Nonempty → IsIntegrallyClosed Γ(V, U))
+    (hsep : Algebra.IsSeparable V.functionField L.toIF) :
+    IsProper (ABC3.Found.Divisor.normDown V L ≫ g) :=
+  (ABC3.Found.Divisor.isProper_normObj V L g hg hnoeth hic hsep).1
 
 /-! ## ★2. `D_L`(鎖 `normalize` の `DL-set`)
 
@@ -153,7 +179,9 @@ def isNormalScheme_normalizationIn.src : Source :=
     sectionId := "frdi-example-6-1" }
 
 def isNormalScheme_normalizationIn.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "Scheme.Hom.normalization(相対正規化)"
+  [ .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normObj_isNormalScheme") 109,
+    .citation "[mathlib]" "Scheme.Hom.normalization(相対正規化)"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalization") 109,
     .derivation "正規化は各アフィンで整閉包を取るので、茎は整閉" 109,
     .implicitStep "★原文は角括弧で「so V [L] is also a proper normal variety」と述べるだけ" 109 ]
@@ -163,11 +191,15 @@ def isProper_normalizationIn.src : Source :=
     sectionId := "frdi-example-6-1" }
 
 def isProper_normalizationIn.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "IsIntegralHom Scheme.Hom.fromNormalization(正規化射は整)"
+  [ .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.isProper_normObj") 109,
+    .citation "[mathlib]" "IsIntegralHom Scheme.Hom.fromNormalization(正規化射は整)"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.fromNormalization") 109,
+    .citation "[mathlib]" "IsIntegralClosure.finite(整閉包は加群として有限)"
+      (.inMathlib "IsIntegralClosure.finite") 109,
     .citation "[mathlib]" "IsProper(proper 射と合成の安定性)"
       (.inMathlib "AlgebraicGeometry.IsProper") 109,
-    .derivation "有限拡大では正規化射は有限、有限射は proper、proper の合成は proper" 109,
+    .derivation "整閉包が加群として有限 ⟹ 正規化射は有限、有限射は proper、proper の合成は proper" 109,
     .implicitStep "★原文は角括弧で畳む" 109 ]
 
 def DLOf.src : Source :=
