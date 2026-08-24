@@ -149,7 +149,47 @@ theorem isRigidFunctor_comp_cToSc {C₁ : Type u2} [Category.{v2} C₁] (Ψ : C�
   isRigidFunctor_comp_of_isEquivalence Ψ _
     (isRigidFunctor_cToSc S Fc G hiso hint hcharInj hintS hfsmD hM' hrig)
 
+variable (S) in
+/-- ★★★★★★★**[FrdI] Corollary 5.4 の「Moreover」の文** ——
+**図式の 2 本の合成関手はどちらも rigid**。
+
+原文 (FrdI p.104):
+> arrows are equivalences of categories]. Moreover, each of the composite functors of
+
+★下の道 `Ψ ⋙ (𝒞₂ ⥤ 𝒞₂^rlf)` は `isRigidFunctor_comp_cToSc` で直に出る。
+★上の道 `(𝒞₁ ⥤ 𝒞₁^rlf) ⋙ Ψ^rlf` は、図式の 1-可換性
+(`hcomm`、`Corollary 5.4` の主張の第 1 半)で下の道と同型なので
+`isRigidFunctor_of_iso` で届く。 -/
+theorem cor54_rigid_both (Fc : FrobenioidCore P) (G : Frobenioid P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (hint : ∀ A : D, IsIntegralMonoid (Φ.val A))
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
+    (hintS : ∀ A : D, IsIntegralMonoid (ScT S (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    {C₁ : Type u2} [Category.{v2} C₁] (Ψ : C₁ ⥤ C) [Ψ.IsEquivalence]
+    {E : Type u2} [Category.{v2} E] (V₁ : C₁ ⥤ E)
+    (Ψrlf : E ⥤ ScModelObj S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD)
+    (hM' : ModelData.Hyp (scModel S (unTr_frobenioid P Fc G) (unTr_isotropic P Fc)
+      (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD))
+    (hrig : IsRigidFunctor P.proj)
+    (hcomm : V₁ ⋙ Ψrlf
+      ≅ Ψ ⋙ cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD) :
+    IsRigidFunctor (V₁ ⋙ Ψrlf)
+      ∧ IsRigidFunctor (Ψ ⋙ cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD) :=
+  have h2 : IsRigidFunctor (Ψ ⋙ cToSc (S := S) Fc G hiso hint hcharInj hintS hfsmD) :=
+    isRigidFunctor_comp_cToSc (S := S) Ψ Fc G hiso hint hcharInj hintS hfsmD hM' hrig
+  ⟨isRigidFunctor_of_iso hcomm h2, h2⟩
+
 /-! ### ★出典の紐付け -/
+
+/-- ★★★★★★★locator —— `Corollary 5.4` の「Moreover」の文
+(図式の 2 本の合成関手はどちらも rigid)。 -/
+def cor54_rigid_both.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Corollary 5.4 — 図式の 2 本の合成関手はどちらも rigid",
+    sectionId := "frdi-cor-5-4" }
 
 /-- ★★★locator —— `Corollary 5.4` の rigidity の組み立て(★**条つき**)。 -/
 def thm52iv_comp_toElem.src : ABC3.Meta.Source :=
