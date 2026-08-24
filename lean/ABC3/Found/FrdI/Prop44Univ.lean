@@ -129,14 +129,118 @@ noncomputable def biratDescHom (Ω : C ⥤ E)
   HomBirat.desc_mk (biratDescFun (G := G) Ω hΩ)
     (fun {_ _} u φ => biratDescFun_compat Ω hΩ u φ) Z φ
 
+/-! ## ★3. 恒等と合成 —— 関手にする
+
+★★配管メモ(idiom 14)—— `inv` を含む式を `rw` で動かすと
+「パターンが見つからない」「motive が型付かない」に必ず当たる。
+`IsIso` の引数がメタ変数だとインスタンス探索が走らないため。
+★★逃げ方は「**圏 `E` の中だけの抽象補題**にして、`IsIso` を
+インスタンス束縛にしてしまう」こと。下の 2 つがそれ。 -/
+
+section FracAux
+
+universe uv
+
+variable {E : Type uE} [Category.{uv} E]
+
+/-- ★分数の要 —— 四角形 `g ≫ p = a ≫ w` から `g⁻¹ ≫ a = p ≫ w⁻¹`。 -/
+theorem frac_key_aux {X Y T U : E} (g : X ⟶ Y) [IsIso g] (a : X ⟶ T) (p : Y ⟶ U)
+    (w : T ⟶ U) [IsIso w] (hsq : g ≫ p = a ≫ w) :
+    inv g ≫ a = p ≫ inv w := by
+  rw [IsIso.inv_comp_eq, ← Category.assoc, hsq, Category.assoc, IsIso.hom_inv_id,
+    Category.comp_id]
+
+/-- ★分数の合成 —— `(g ≫ z)⁻¹ ≫ (a ≫ q) = (z⁻¹ ≫ p) ≫ (w⁻¹ ≫ q)`。 -/
+theorem frac_comp_aux {X Y Z T U V : E} (g : X ⟶ Y) [IsIso g] (z : Y ⟶ Z) [IsIso z]
+    (a : X ⟶ T) (p : Y ⟶ U) (w : T ⟶ U) [IsIso w] (q : T ⟶ V)
+    (gz : X ⟶ Z) [IsIso gz] (aq : X ⟶ V)
+    (hgz : gz = g ≫ z) (haq : aq = a ≫ q)
+    (key : inv g ≫ a = p ≫ inv w) :
+    inv gz ≫ aq = (inv z ≫ p) ≫ (inv w ≫ q) := by
+  subst hgz
+  subst haq
+  rw [IsIso.inv_comp]
+  simp only [Category.assoc]
+  rw [← Category.assoc (inv g) a q, key, Category.assoc]
+
+/-- ★`e = 𝟙` なら `e⁻¹ ≫ k = k`。 -/
+theorem inv_id_comp_aux {X Y : E} (e : X ⟶ X) [IsIso e] (he : e = 𝟙 X) (k : X ⟶ Y) :
+    inv e ≫ k = k := by
+  subst he
+  rw [IsIso.inv_id, Category.id_comp]
+
+end FracAux
+
+theorem biratDescHom_id (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f)) (A : C) :
+    biratDescHom (G := G) Ω hΩ (toHomBirat (P := P) (G := G) (𝟙 A)) = 𝟙 (Ω.obj A) := by
+  show biratDescHom (G := G) Ω hΩ (HomBirat.mk (idxBiratOne P G A) (𝟙 A)) = _
+  rw [biratDescHom_mk]
+  show @inv _ _ _ _ (Ω.map (𝟙 A)) (hΩ _ (idxBiratOne P G A).unop.hom.property)
+      ≫ Ω.map (𝟙 A) = 𝟙 (Ω.obj A)
+  exact IsIso.inv_hom_id _
+
+theorem biratDescHom_comp (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f))
+    {A B E' : C} (f : HomBirat P G A B) (g : HomBirat P G B E') :
+    biratDescHom (G := G) Ω hΩ (compBirat P G G.core f g)
+      = biratDescHom (G := G) Ω hΩ f ≫ biratDescHom (G := G) Ω hΩ g := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep f
+  obtain ⟨W, ψ, rfl⟩ := HomBirat.exists_rep g
+  rw [compBirat_mk, biratDescHom_mk, biratDescHom_mk, biratDescHom_mk]
+  haveI hZ : IsIso (Ω.map Z.unop.hom.hom) := hΩ _ Z.unop.hom.property
+  haveI hW : IsIso (Ω.map W.unop.hom.hom) := hΩ _ W.unop.hom.property
+  haveI hγ : IsIso (Ω.map (biratPullGamma G.core Z φ W)) :=
+    hΩ _ ⟨biratPullGamma_coAngular G.core Z φ W, biratPullGamma_preStep G.core Z φ W⟩
+  haveI hP : IsIso (Ω.map (biratPullGamma G.core Z φ W ≫ Z.unop.hom.hom)) :=
+    hΩ _ (biratPullIdx G.core Z φ W).unop.hom.property
+  -- ★引き戻しの四角形を `E` へ送る
+  have hsq : Ω.map (biratPullGamma G.core Z φ W) ≫ Ω.map φ
+      = Ω.map (biratPullAlpha G.core Z φ W) ≫ Ω.map W.unop.hom.hom := by
+    rw [← Ω.map_comp, ← Ω.map_comp]
+    exact congrArg Ω.map (biratPull_sq G.core Z φ W)
+  -- ★★インスタンス引数は `@` で明示する ——
+  -- 暗黙の対象がメタ変数のうちに探索が走って落ちるため(idiom 14 の続き)。
+  have key : @inv _ _ _ _ (Ω.map (biratPullGamma G.core Z φ W)) hγ
+        ≫ Ω.map (biratPullAlpha G.core Z φ W)
+      = Ω.map φ ≫ @inv _ _ _ _ (Ω.map W.unop.hom.hom) hW :=
+    @frac_key_aux _ _ _ _ _ _ (Ω.map (biratPullGamma G.core Z φ W)) hγ
+      (Ω.map (biratPullAlpha G.core Z φ W)) (Ω.map φ) (Ω.map W.unop.hom.hom) hW hsq
+  exact @frac_comp_aux _ _ _ _ _ _ _ _
+    (Ω.map (biratPullGamma G.core Z φ W)) hγ (Ω.map Z.unop.hom.hom) hZ
+    (Ω.map (biratPullAlpha G.core Z φ W)) (Ω.map φ) (Ω.map W.unop.hom.hom) hW (Ω.map ψ)
+    (Ω.map (biratPullGamma G.core Z φ W ≫ Z.unop.hom.hom)) hP
+    (Ω.map (biratPullAlpha G.core Z φ W ≫ ψ))
+    (Ω.map_comp _ _) (Ω.map_comp _ _) key
+
+/-- ★★★★★★★**`𝒞^birat` の普遍性** ——
+co-angular pre-step を同型に送る関手は `𝒞^birat` を経由する。
+
+★★これで `Corollary 4.10` の `Ψ^birat` や `Proposition 5.5, (ii)` の梱包を
+**手で組まずに済む**。 -/
+noncomputable def biratDescFunctor (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f)) :
+    BiratCat P G ⥤ E where
+  obj A := Ω.obj (biratDown P G A)
+  map f := biratDescHom (G := G) Ω hΩ f
+  map_id A := biratDescHom_id Ω hΩ (biratDown P G A)
+  map_comp f g := biratDescHom_comp Ω hΩ f g
+
+/-- ★★**`𝒞 → 𝒞^birat` と 1-可換**。 -/
+noncomputable def toBiratCatCompBiratDescFunctor (Ω : C ⥤ E)
+    (hΩ : ∀ {X Y : C} (f : X ⟶ Y), coaPreProp P f → IsIso (Ω.map f)) :
+    toBiratCat P G ⋙ biratDescFunctor (G := G) Ω hΩ ≅ Ω :=
+  NatIso.ofComponents (fun _ => Iso.refl _) (by
+    intro X Y f
+    have hmap : biratDescHom (G := G) Ω hΩ (toHomBirat (P := P) (G := G) f) = Ω.map f := by
+      show biratDescHom (G := G) Ω hΩ (HomBirat.mk (idxBiratOne P G X) f) = _
+      rw [biratDescHom_mk]
+      show @inv _ _ _ _ (Ω.map (𝟙 X)) (hΩ _ (idxBiratOne P G X).unop.hom.property)
+          ≫ Ω.map f = Ω.map f
+      exact @inv_id_comp_aux _ _ _ _ (Ω.map (𝟙 X))
+        (hΩ _ (idxBiratOne P G X).unop.hom.property) (Ω.map_id X) (Ω.map f)
+    show biratDescHom (G := G) Ω hΩ (toHomBirat (P := P) (G := G) f) ≫ 𝟙 (Ω.obj Y)
+      = 𝟙 (Ω.obj X) ≫ Ω.map f
+    rw [Category.comp_id, Category.id_comp, hmap])
+
 end BiratUniv
-
-/-! ### ★出典の紐付け -/
-
-/-- ★★★★★locator —— `Hom^birat` の普遍性(帰納極限からの降下)。 -/
-def HomBirat.desc.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 82,
-    item := "Proposition 4.4 — Hom^birat の普遍性(代表元からの降下)",
-    sectionId := "frdi-prop-4-4" }
-
-end ABC3.Found.FrdI
