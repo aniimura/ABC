@@ -807,6 +807,44 @@ theorem omegaMap_rootMap (F' : FrobenioidCore (biratPre P G))
   exact rootMap_ext (F := F') hfiB _ _
     (((((s1.trans s2).trans s3).trans s4).trans s5).trans (s6.trans hR.symm))
 
+/-- ★★`𝒞` が isotropic なら `𝒞^birat` は Frobenius-isotropic 型。 -/
+theorem birat_isOfFrobeniusIsotropicType (hiso : ∀ W : C, IsIsotropic P W) :
+    IsOfFrobeniusIsotropicType (biratPre P G) := fun A =>
+  ⟨A, 𝟙 A, isFrobeniusType_of_isIso (biratPre P G) (𝟙 A),
+    birat_isOfIsotropicType (G := G) hiso A⟩
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★**`Ω` は `rootLift` を `rootLift` に送る**。
+
+★`rootLift` も `κ` との合成で一意に決まる(`rootLift_spec` ＋ `rootMap_ext`)。 -/
+theorem omegaMap_rootLift (F' : FrobenioidCore (biratPre P G))
+    (hfi : IsOfFrobeniusIsotropicType P)
+    (hfiB : IsOfFrobeniusIsotropicType (biratPre P G))
+    {A A₁ : C} (α : A ⟶ A₁) (k : ℕ+) (hk : P.degFr α = k)
+    (hk' : (biratPre P G).degFr ((toBiratCat P G).map α) = k) :
+    omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from
+        rootLift (F := F) hfi α k hk)
+      = (show HomRoot (biratPre P G) F'
+            (omegaObj F F' (⟨A, 1⟩ : PfRootObj P F)) (omegaObj F F' ⟨A₁, k⟩) from
+          rootLift (F := F') hfiB ((toBiratCat P G).map α) k hk') := by
+  have hR : compRoot (biratPre P G) F'
+        (rootLift (F := F') hfiB ((toBiratCat P G).map α) k hk')
+        (pfKappa (F := F') (biratUp P G A₁) k)
+      = toRootHom (F := F') ((toBiratCat P G).map α) :=
+    rootLift_spec (F := F') hfiB ((toBiratCat P G).map α) k hk'
+  have s1 := congrArg (compRoot (biratPre P G) F'
+    (omegaMap F F' (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from
+      rootLift (F := F) hfi α k hk))) (omegaMap_pfKappa F F' A₁ k).symm
+  have s2 := (omegaMap_comp F F'
+    (show HomRoot P F (⟨A, 1⟩ : PfRootObj P F) ⟨A₁, k⟩ from rootLift (F := F) hfi α k hk)
+    (show HomRoot P F (⟨A₁, k⟩ : PfRootObj P F) ⟨A₁, 1⟩ from pfKappa (F := F) A₁ k)).symm
+  have s3 := congrArg (omegaMap F F' (X := (⟨A, 1⟩ : PfRootObj P F)) (Y := ⟨A₁, 1⟩))
+    (rootLift_spec (F := F) hfi α k hk)
+  have s4 := omegaMap_toRootHom F F' α
+  exact rootMap_ext (F := F') hfiB _ _
+    ((((s1.trans s2).trans s3).trans s4).trans hR.symm)
+
 variable (F) in
 /-- ★★★★★★★**`biratDescFunctor` の入力 `hΩ`** ——
 `Ω` は `𝒞^pf` の co-angular pre-step を `(𝒞^birat)^pf` の**同型**に送る。
