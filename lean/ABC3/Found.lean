@@ -206,6 +206,8 @@ import ABC3.Found.FrdI.Prop55PfArbFull
 import ABC3.Found.FrdI.Prop55PfArbOne
 import ABC3.Found.FrdI.Prop55BiratPfFun
 import ABC3.Found.FrdI.Prop55ScaleRootInv
+import ABC3.Found.FrdI.Prop55CongrIso
+import ABC3.Found.FrdI.Prop55ScaleRootCoa
 import ABC3.Found.FrdI.Prop55RlfNd
 import ABC3.Found.FrdI.Prop55RlfRefl
 import ABC3.Found.FrdI.Cor54Uniq
