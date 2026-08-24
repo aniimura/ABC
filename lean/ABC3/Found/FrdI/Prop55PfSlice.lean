@@ -5,6 +5,7 @@ import ABC3.Found.FrdI.Prop55PfDiv
 import ABC3.Found.FrdI.Prop44Gp
 import ABC3.Found.FrdI.Prop55PfKappa
 import ABC3.Found.FrdI.Prop55BiratPf
+import ABC3.Found.FrdI.Prop53Birat
 
 /-!
 # [FrdI] `𝒞 → 𝒞^pf` は双有理射の `Div^gp` を `Pf.of` で移す
@@ -381,6 +382,19 @@ theorem phiBiratAt_pf_mem (hfi : IsOfFrobeniusIsotropicType P)
   exact ⟨biratPfHom hfi Gpf F' A A (toHomPf (F := F') (δ : biratUp P G A ⟶ biratUp P G A)),
     otimes_biratPfHom hfi Gpf F' A hδ,
     biratDivGp_biratPfHom hfi Gpf F' A A (δ : biratUp P G A ⟶ biratUp P G A)⟩
+
+/-- ★★★★★★同上を **`𝒟` で添字づけた形**で(`Φ^birat` は `𝒟` 上の部分関手なので、
+model Frobenioid が使うのはこちらの形である)。 -/
+theorem phiBiratOn_pf_mem (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    {y : Gp (Φ.val (P.toElem.obj A).base)}
+    (hy : y ∈ phiBiratOn G (P.toElem.obj A).base) :
+    gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base)) y
+      ∈ phiBiratOn Gpf ((pfRootPre P F).toElem.obj (⟨A, 1⟩ : PfRootObj P F)).base := by
+  rw [phiBiratOn_base G hiso A] at hy
+  rw [phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi) (⟨A, 1⟩ : PfRootObj P F)]
+  exact phiBiratAt_pf_mem hfi Gpf F' A hy
 
 end Birat
 
