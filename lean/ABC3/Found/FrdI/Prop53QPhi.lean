@@ -126,6 +126,32 @@ theorem qPhiBiratOn_map (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
   show Pf.map (Φ.map f) (Pf.of z) = Pf.of (Φ.map f z)
   rfl
 
+/-- ★`Pf.map` の逆(合成が恒等なら群化しても恒等)。 -/
+theorem gpMap_pfMap_inv {M N : Type w} [AddCommMonoid M] [AddCommMonoid N]
+    (f : M →+ N) (g : N →+ M) (h : g.comp f = AddMonoidHom.id M) (x : Gp (Pf M)) :
+    gpMap _ (Pf.map g) (gpMap _ (Pf.map f) x) = x := by
+  have hc : (Pf.map g).comp (Pf.map f) = AddMonoidHom.id (Pf M) := by
+    ext z
+    induction z using Pf.inductionOn with | _ m a =>
+    show Pf.map g (Pf.map f (Pf.mk m a)) = Pf.mk m a
+    rw [Pf.map_mk, Pf.map_mk]
+    exact congrArg (fun t => Pf.mk t a) (congrArg (fun t : M →+ M => t m) h)
+  rw [← AddMonoidHom.comp_apply, ← gpMap_comp, hc, gpMap_id]
+  rfl
+
+/-- ★★同型に沿っては両向き(`mem_sPhiBiratOn_iso` の `Pf` 版)。 -/
+theorem mem_qPhiBiratOn_iso (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    {d d' : D} (f : d ⟶ d') [IsIso f] (x : Gp (Pf (Φ.val d'))) :
+    gpMap _ (Pf.map (Φ.map f)) x ∈ qPhiBiratOn P G d ↔ x ∈ qPhiBiratOn P G d' := by
+  refine ⟨fun h => ?_, fun h => qPhiBiratOn_map G hiso hfn f h⟩
+  have hcomp : (Φ.map (inv f)).comp (Φ.map f) = AddMonoidHom.id (Φ.val d') := by
+    ext y
+    show Φ.map (inv f) (Φ.map f y) = y
+    rw [← Φ.map_comp, IsIso.inv_hom_id, Φ.map_id]
+  have h2 := qPhiBiratOn_map G hiso hfn (inv f) h
+  rwa [gpMap_pfMap_inv _ _ hcomp] at h2
+
 end QPhi
 
 /-! ## ★2. `sPhiBiratOn ℚ≥0`(テンソル模型)との一致 -/

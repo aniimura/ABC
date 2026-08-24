@@ -980,6 +980,41 @@ theorem phiBiratOn_pf_eq_qPhiBiratOn (hfi : IsOfFrobeniusIsotropicType P)
     (phiBiratOn_pf_le_qPhiBiratOn hfi hiso Gpf F' A hisoB hfnBirat hAB hfnB hfnB' ζ hdeg hprop)
     (qPhiBiratOn_le_phiBiratOn_pf hfi hiso Gpf F' A hisoB hAB hfnB hfnB' ζ hdeg hprop hfnPfBirat)
 
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★**`Proposition 5.5, (iv)` の単系の同定(`𝒟` のすべての対象で)** ——
+**`(Φ^pf)^birat = ℚ·Φ^birat` が `𝒟` 上の部分関手として一致する**。
+
+★`𝒟` の任意の対象 `d` は `𝒞` の対象の底である(`baseSurj`、`biratBaseObj`)ので、
+点ごとの等式を `biratBaseIso` に沿って運べばよい。 -/
+theorem phiBiratOn_pf_eq_qPhiBiratOn_all (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (hisoB : ∀ X : BiratCat P G, IsIsotropic (biratPre P G) X)
+    (hfnBirat : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hAB : ∀ A : C, IsFrobeniusTrivial (biratPre P G) (biratUp P G A))
+    (hfnB' : ∀ A : C, IsFrobeniusNormalized (biratPre P G)
+      (rtObj (biratPre P G) F' (biratUp P G A) 1))
+    (ζ : ∀ A : C, ℕ+ →* End (biratUp P G A))
+    (hdeg : ∀ (A : C) (n : ℕ+), (biratPre P G).degFr
+      ((ζ A n : End (biratUp P G A)) : biratUp P G A ⟶ biratUp P G A) = n)
+    (hprop : ∀ (A : C) (n : ℕ+), IsBaseIdentity (biratPre P G) (ζ A n)
+      ∧ IsFrobeniusType (biratPre P G) ((ζ A n : End (biratUp P G A)) : _ ⟶ _))
+    (hfnPfBirat : ∀ X : BiratCat (pfRootPre P F) Gpf,
+      IsFrobeniusNormalized (biratPre (pfRootPre P F) Gpf) X)
+    (d : D) :
+    phiBiratOn Gpf d = qPhiBiratOn P G d := by
+  have hST : phiBiratAt (pfRootPre P F) Gpf (⟨biratBaseObj G d, 1⟩ : PfRootObj P F)
+      = qPhiBiratOn P G ((P.toElem.obj (biratBaseObj G d)).base) := by
+    rw [← phiBiratOn_base Gpf (pfRoot_isOfIsotropicType (F := F) hfi)
+      (⟨biratBaseObj G d, 1⟩ : PfRootObj P F)]
+    exact phiBiratOn_pf_eq_qPhiBiratOn hfi hiso Gpf F' (biratBaseObj G d) hisoB hfnBirat
+      (hAB _) (hfnBirat _) (hfnB' _) (ζ _) (hdeg _) (hprop _) hfnPfBirat
+  ext y
+  refine (mem_phiBiratOn_iff Gpf (pfRoot_isOfIsotropicType (F := F) hfi)
+      (A := (⟨biratBaseObj G d, 1⟩ : PfRootObj P F)) (biratBaseIso G d) y).trans ?_
+  rw [hST]
+  exact mem_qPhiBiratOn_iso G hiso hfnBirat (biratBaseIso G d).hom y
+
 end Birat
 
 /-! ### ★出典の紐付け -/
