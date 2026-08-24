@@ -1023,6 +1023,19 @@ theorem pfCatToRoot_idxToBirat_comp (F' : FrobenioidCore (biratPre P G)) (A B : 
   exact toPfCat_comp_pfCatToRoot_map (P := biratPre P G) (F := F')
     ((toBiratCat P G).map W.hom.hom.1 ≫ v)
 
+variable (F) in
+/-- ★★★★★★**`Ω` は根の一斉倍化 `Σ_k` と可換**。
+
+★★★これは `betaIso_rtRootIso_inv` の**そのままの言い換え**である ——
+`scaleRootHom k` は `rtRootIso` の `inv` そのものだから。 -/
+theorem omegaMap_scaleRootHom (F' : FrobenioidCore (biratPre P G)) (k : ℕ+)
+    {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
+    omegaMap F F' (scaleRootHom (F := F) k f)
+      = scaleRootHom (F := F') k (omegaMap F F' f) :=
+  betaIso_rtRootIso_inv F F' X.obj Y.obj
+    (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl) f
+
 /-! ## ★12. 橋渡し —— `Θ.map ∘ biratPfHom = pfCatToRoot.map`(根 1) -/
 
 set_option maxHeartbeats 3200000 in
@@ -1181,6 +1194,77 @@ theorem thetaFunctor_map_bijective_one (F' : FrobenioidCore (biratPre P G))
   · intro y
     obtain ⟨x, hx⟩ := hbij.2 y
     exact ⟨biratPfHom hfi Gpf F' A B x, (hcomp x).trans hx⟩
+
+/-! ## ★13. 一般の根へ —— `Θ` は `Σ_k` と可換 -/
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★**`Θ` は根の一斉倍化と可換** ——
+`Θ ∘ Σ_k^birat = Σ_k^{(𝒞^birat)^pf} ∘ Θ`(射の上)。
+
+★★`omegaMap_scaleRootHom`(`Ω` が `Σ_k` と可換)と
+`biratDescHom_mk_spec`(分母を掛けると分子に戻る)だけで出る。 -/
+theorem theta_scaleRootBirat (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hiso : ∀ V : C, IsIsotropic P V) (k : ℕ+)
+    {X Y : BiratCat (pfRootPre P F) Gpf} (u : X ⟶ Y) :
+    (thetaFunctor F F' Gpf hiso).map ((scaleRootBirat (F := F) k Gpf).map u)
+      = (scaleRootFunctor (biratPre P G) F' k).map
+        ((thetaFunctor F F' Gpf hiso).map u) := by
+  obtain ⟨Z, φ, rfl⟩ := HomBirat.exists_rep u
+  refine Eq.trans (congrArg
+    (fun t : (scaleRootBirat (F := F) k Gpf).obj X ⟶ (scaleRootBirat (F := F) k Gpf).obj Y =>
+      (thetaFunctor F F' Gpf hiso).map t)
+    (biratPsiMap_mk (G₁ := Gpf) (G₂ := Gpf) (Ψ := scaleRootFunctor P F k)
+      (hfwd := fun {_ _} f hf => coaPreProp_scaleRootHom k f hf) X Y Z φ)) ?_
+  refine biratDescHom_eq_of_spec (omegaFunctor F F')
+    (fun {_ _} f h => omegaFunctor_isIso_of_coaPre F F' hiso f h) _ _ _ ?_
+  refine Eq.trans (congrArg (fun t => t ≫ (scaleRootFunctor (biratPre P G) F' k).map
+      ((thetaFunctor F F' Gpf hiso).map (HomBirat.mk Z φ)))
+    (omegaMap_scaleRootHom F F' k Z.unop.hom.hom)) ?_
+  refine Eq.trans (((scaleRootFunctor (biratPre P G) F' k).map_comp
+    ((omegaFunctor F F').map Z.unop.hom.hom)
+    ((thetaFunctor F F' Gpf hiso).map (HomBirat.mk Z φ))).symm) ?_
+  refine Eq.trans (congrArg (scaleRootFunctor (biratPre P G) F' k).map
+    (biratDescHom_mk_spec (omegaFunctor F F')
+      (fun {_ _} f h => omegaFunctor_isIso_of_coaPre F F' hiso f h) Z φ)) ?_
+  exact (omegaMap_scaleRootHom F F' k φ).symm
+
+set_option maxHeartbeats 1600000 in
+variable (F) in
+/-- ★★★★★★★**`Θ` は `Σ_k` で移した根 1 の対象のあいだでも充満忠実**。
+
+★★根 1 の全単射性(`thetaFunctor_map_bijective_one`)を
+`scaleRootBiratHomEquiv`(源)と `scaleRootHom_injective/surjective`(像)で運ぶ。 -/
+theorem thetaFunctor_map_bijective_scale (F' : FrobenioidCore (biratPre P G))
+    (Gpf : Frobenioid (pfRootPre P F)) (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ V : C, IsIsotropic P V) (k : ℕ+) (A B : C) :
+    Function.Bijective ((thetaFunctor F F' Gpf hiso).map
+      (X := (scaleRootBirat (F := F) k Gpf).obj
+        (show BiratCat (pfRootPre P F) Gpf from (⟨A, 1⟩ : PfRootObj P F)))
+      (Y := (scaleRootBirat (F := F) k Gpf).obj
+        (show BiratCat (pfRootPre P F) Gpf from (⟨B, 1⟩ : PfRootObj P F)))) := by
+  haveI := scaleRootBirat_isEquivalence (F := F) k Gpf
+  have h1 := thetaFunctor_map_bijective_one F F' Gpf hfi hiso A B
+  constructor
+  · intro a b hab
+    obtain ⟨a₀, rfl⟩ := (scaleRootBirat (F := F) k Gpf).map_surjective a
+    obtain ⟨b₀, rfl⟩ := (scaleRootBirat (F := F) k Gpf).map_surjective b
+    have ha := theta_scaleRootBirat F F' Gpf hiso k a₀
+    have hb := theta_scaleRootBirat F F' Gpf hiso k b₀
+    have hk2 : (scaleRootFunctor (biratPre P G) F' k).map
+          ((thetaFunctor F F' Gpf hiso).map a₀)
+        = (scaleRootFunctor (biratPre P G) F' k).map
+          ((thetaFunctor F F' Gpf hiso).map b₀) := ha.symm.trans (hab.trans hb)
+    exact congrArg (scaleRootBirat (F := F) k Gpf).map
+      (h1.1 (scaleRootHom_injective (F := F') k _ _ hk2))
+  · intro y
+    obtain ⟨y₀, hy₀⟩ := scaleRootHom_surjective (F := F') k
+      (omegaObj F F' (⟨A, 1⟩ : PfRootObj P F))
+      (omegaObj F F' (⟨B, 1⟩ : PfRootObj P F)) y
+    obtain ⟨u₀, hu₀⟩ := h1.2 y₀
+    refine ⟨(scaleRootBirat (F := F) k Gpf).map u₀, ?_⟩
+    refine Eq.trans (theta_scaleRootBirat F F' Gpf hiso k u₀) ?_
+    exact (congrArg (scaleRootHom (F := F') k) hu₀).trans hy₀
 
 /-! ## ★11. 橋渡しの**最初の 2 段**(残りは次の増分)
 
