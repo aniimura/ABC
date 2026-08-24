@@ -40,10 +40,22 @@ import ABC3.Found.FrdI.Prop55Std
 3. **錐模型** `rlfCone M ⊆ ℝ ⊗_ℤ M^gp` —— `Def24RlfCone` / `Def24RlfPerf`
 
 ★★**perf-factorial の座標(`factorMap` / `perfOrd`)は 2・3 の上にある**。
-したがって上の 2 段目は、**1 と 2(あるいは 3)の一致を経由しないと座標が使えない**。
-★これが鎖 `rlf` の節点 `rlf-agree` が本当に残っている所である
-(`Proposition 5.3` の右の縦の矢印には 2 模型の**橋** `pfToRlfHom` で足りたが、
-**一致そのもの**は別である)。
+したがって上の 2 段目は、1 の上で座標を使うために何か橋が要る。
+
+## ★★★★★訂正(2026-08-25)—— `rlf-agree` は要らなかった
+
+本ファイルは当初ここに「**1 と 2(あるいは 3)の一致(節点 `rlf-agree`)を
+経由しないと座標が使えない**」と書いていた。★**これは強すぎる見立てだった。**
+
+要るのは**一致(同型)ではなく片道の準同型 1 本**である ——
+
+```
+scToFactor : ℝ≥0 ⊗_ℕ M →+ (Prime M → ℝ≥0)      (r ⊗ m ↦ r • factorMap ι (Pf.of m))
+```
+
+これは `TensorProduct.liftAddHom` で作れる。詳しくは `Prop55RlfRefl.lean`。
+★**2 段目のうち `hrefl` はそこで閉じた**(`mprec_of_mprec_sc_primary`)。
+残るのは `hprim`(準素元の保存)だけである。
 -/
 
 namespace ABC3.Found.FrdI
@@ -64,7 +76,8 @@ variable {S : Type} [CommSemiring S]
 theorem scMap_isNonDilating {M : Type w} [AddCommMonoid M]
     (hs : IsSharp M) (hsS : IsSharp (ScT S M))
     (hprim : ∀ b : M, IsPrimaryElt b → IsPrimaryElt (toSc (S := S) b))
-    (hrefl : ∀ x y : M, MPrec (toSc (S := S) x) (toSc y) → MPrec x y)
+    (hrefl : ∀ b : M, IsPrimaryElt b → ∀ x : M,
+      MPrec (toSc (S := S) x) (toSc b) → MPrec x b)
     (f : M →+ M) (h : IsNonDilating f) :
     IsNonDilating (scMap (S := S) f) := by
   refine isNonDilating_of_sharp hsS _ (fun key => ?_)
@@ -78,7 +91,7 @@ theorem scMap_isNonDilating {M : Type w} [AddCommMonoid M]
       rwa [← hb] at this
     have hkey := key (toSc (S := S) b) (hprim b hbp)
     rw [scMap_toSc] at hkey
-    have hMb : MPrec (f b) b := hrefl _ _ hkey
+    have hMb : MPrec (f b) b := hrefl b hbp _ hkey
     have := mprec_map (toChar : M →+ MChar M) hMb
     rw [← charMap_toChar f b, hab] at this
     exact this
@@ -109,8 +122,8 @@ theorem MonoidOn.scOn_isNonDilatingOn (Φ : MonoidOn.{v, u, w} D)
       IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
     (hs : ∀ A : D, IsSharp (Φ.val A)) (hsS : ∀ A : D, IsSharp (ScT S (Φ.val A)))
     (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b → IsPrimaryElt (toSc (S := S) b))
-    (hrefl : ∀ (A : D) (x y : Φ.val A),
-      MPrec (toSc (S := S) x) (toSc y) → MPrec x y)
+    (hrefl : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b → ∀ x : Φ.val A,
+      MPrec (toSc (S := S) x) (toSc b) → MPrec x b)
     (h : Φ.IsNonDilatingOn) : (phiScOn S Φ hcharInj).IsNonDilatingOn := by
   intro A e
   show IsNonDilating (scMap (S := S) (Φ.map e))
