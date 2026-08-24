@@ -112,6 +112,65 @@ theorem scToFactor_toSc (H : IsPerfFactorialWith M ι) (a : M) :
   show scToFactor H ((1 : ℝ≥0) ⊗ₜ[ℕ] a) = _
   rw [scToFactor_tmul, one_smul]
 
+/-! ## ★2-b. 片道の橋は**核が自明** -/
+
+/-- ★★`μ = factorMap ∘ Pf.of` は単射(`M` が divisorial かつ perf-factorial なら)。 -/
+theorem suppFactorHom_injective (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M) :
+    Function.Injective (suppFactorHom H) := by
+  intro a b hab
+  exact Pf.of_injective_of_divisorial hdiv (H.factorInj hab)
+
+/-- ★★★★★**片道の橋の核は自明** —— `scToFactor z = 0` なら `z = 0`。
+
+★★`ℝ≥0` と `Prime M → ℝ≥0` は**負の元を持たない**ので、
+`Σ rᵢ • μ(aᵢ) = 0` から各項が `0` になり、`rᵢ = 0` または `aᵢ = 0`、
+どちらでも `rᵢ ⊗ aᵢ = 0` になる。
+
+★★★これが節点 `rlf-agree` の**片割れ**である ——
+`Proposition 5.5, (iii)` の残り 1 条 `hprim` が要求する 2 つのうち、
+「`z ≠ 0 → scToFactor z ≠ 0`」の側がこれで閉じる。 -/
+theorem scToFactor_eq_zero (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {z : ScT ℝ≥0 M} (h : scToFactor H z = 0) : z = 0 := by
+  induction z using TensorProduct.induction_on with
+  | zero => rfl
+  | tmul r a =>
+    rw [scToFactor_tmul] at h
+    by_cases hr : r = 0
+    · rw [hr, TensorProduct.zero_tmul]
+    · have ha : factorMap ι (Pf.of a) = 0 := by
+        funext p
+        have hp := congrFun h p
+        rw [Pi.smul_apply, Pi.zero_apply, smul_eq_mul] at hp
+        exact (mul_eq_zero.mp hp).resolve_left hr
+      have : a = 0 := by
+        refine suppFactorHom_injective H hdiv ?_
+        rw [suppFactorHom_apply, suppFactorHom_apply, ha, map_zero]
+        exact (factorMap_zero H).symm
+      rw [this, TensorProduct.tmul_zero]
+  | add x y hx hy =>
+    rw [map_add] at h
+    have h0 : ∀ p : Prime M, scToFactor H x p = 0 ∧ scToFactor H y p = 0 := by
+      intro p
+      have hp := congrFun h p
+      rw [Pi.add_apply, Pi.zero_apply] at hp
+      exact add_eq_zero.mp hp
+    rw [hx (funext fun p => (h0 p).1), hy (funext fun p => (h0 p).2), add_zero]
+
+/-- ★★★★同上、対偶の形。 -/
+theorem scToFactor_ne_zero (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {z : ScT ℝ≥0 M} (h : z ≠ 0) : scToFactor H z ≠ 0 :=
+  fun h0 => h (scToFactor_eq_zero H hdiv h0)
+
+/-- ★★★**`toSc` は `0` でない元を `0` でない元へ送る**(`M` が perf-factorial なら)。
+
+★`hprim` の第 1 条(`toSc b ≠ 0`)がこれで閉じる。 -/
+theorem toSc_ne_zero (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {b : M} (hb : b ≠ 0) : toSc (S := ℝ≥0) b ≠ 0 := by
+  intro h0
+  refine hb (suppFactorHom_injective H hdiv ?_)
+  rw [suppFactorHom_apply, suppFactorHom_apply, ← scToFactor_toSc H, ← scToFactor_toSc H,
+    map_zero, h0, map_zero]
+
 /-! ## ★3. `⪯` から台の包含へ -/
 
 /-- ★★★★**`ℝ≥0 ⊗` の上の `⪯` は台の包含を与える**。
