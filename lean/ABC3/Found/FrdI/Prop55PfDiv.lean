@@ -346,6 +346,88 @@ theorem hom_pf_root (hiso : ∀ X : C, IsIsotropic P X) {A : C}
   · rw [← map_pow, hw]
     exact (endRootOneEquiv (F := F) A).apply_symm_apply x
 
+/-! ## ★7. `Gp (Pf M)` は torsion-free
+
+★★★これが「飽和 = それ自身」を言うのに要る最後の道具である。
+`Pf M` では `n •` が**全単射**(単射は在庫 `Pf.nsmul_injective`、
+全射は `Pf.nsmul_mk_mul`)なので、群化しても捩れは出ない。 -/
+
+/-- ★★`Pf M` では `n •` は全射(`a/m = n · (a/(m·n))`)。 -/
+theorem Pf.nsmul_surjective {M : Type w} [AddCommMonoid M] (k : ℕ+) :
+    Function.Surjective (fun x : Pf M => ((k : ℕ+) : ℕ) • x) := by
+  intro x
+  induction x using Pf.inductionOn with | _ m a =>
+  exact ⟨Pf.mk m (a * k), Pf.nsmul_mk_mul m a k⟩
+
+/-- ★★★★**`Gp (Pf M)` は torsion-free**(仮定なし)。 -/
+theorem gp_pf_isTorsionFreeNaive {M : Type w} [AddCommMonoid M] :
+    IsTorsionFreeNaive (Gp (Pf M)) := by
+  intro x n hn hx
+  obtain ⟨a, b, rfl⟩ : ∃ (a b : Pf M), x = toGp (Pf M) a - toGp (Pf M) b := by
+    induction x using AddLocalization.induction_on with
+    | H y => exact ⟨y.1, (y.2 : Pf M), (eq_sub_of_add_eq (mk_add_toGp (Pf M) y.1 y.2)).symm ▸ rfl⟩
+  rw [smul_sub, ← toGp_nsmul, ← toGp_nsmul, sub_eq_zero] at hx
+  obtain ⟨c, hc⟩ := toGp_eq_iff.mp hx
+  obtain ⟨c', rfl⟩ := Pf.nsmul_surjective (M := M) ⟨n, hn⟩ c
+  have hc2 : n • (a + c') = n • (b + c') := by
+    rw [smul_add, smul_add]
+    exact hc
+  have hab := Pf.nsmul_injective (M := M) ⟨n, hn⟩ hc2
+  rw [sub_eq_zero]
+  exact toGp_eq_iff.mpr ⟨c', hab⟩
+
+/-- ★★**同型による共役は `𝒪^▷` を保つ**(底恒等性も次数 1 も共役で不変)。 -/
+theorem mem_otri_conj {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} D}
+    (P₀ : PreFrobenioid Cc Φ₀) {X Y : Cc} (u : X ≅ Y) (f : End X)
+    (hf : f ∈ OTri P₀ X) : (u.conj f) ∈ OTri P₀ Y := by
+  obtain ⟨hb, hl⟩ := hf
+  haveI : IsIso u.hom := u.isIso_hom
+  haveI : IsIso u.inv := u.isIso_inv
+  refine ⟨?_, ?_⟩
+  · show P₀.Base (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = P₀.Base (𝟙 Y)
+    rw [P₀.Base_comp, P₀.Base_comp, show P₀.Base ((f : End X) : X ⟶ X) = P₀.Base (𝟙 X) from hb,
+      P₀.Base_id, Category.id_comp, ← P₀.Base_comp, u.inv_hom_id]
+  · show P₀.degFr (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = 1
+    rw [P₀.degFr_comp, P₀.degFr_comp, degFr_of_isIso P₀ u.hom, degFr_of_isIso P₀ u.inv,
+      show P₀.degFr ((f : End X) : X ⟶ X) = 1 from hl, one_mul, one_mul]
+
+/-- ★★★**根なしの `𝒪^▷` は根つき化身の `𝒪^▷` に移る**(橋 `endRootOneEquiv` で)。 -/
+theorem mem_otri_endRootOneEquiv_symm (A : C) (x : End (pfObjOf P F A))
+    (hx : x ∈ OTri (pfPre P F) (pfObjOf P F A)) :
+    (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) := by
+  refine (mem_otri_rootSelfIso_inv A 1 _).mpr ?_
+  have h : endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
+      = endPfCatRtOne (F := F) A x :=
+    (endRootMulEquiv (F := F) A 1).apply_symm_apply _
+  show endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
+      ∈ OTri (pfPre P F) (rtObjPf P F A 1)
+  rw [h]
+  exact mem_otri_conj (pfPre P F)
+    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))) x hx
+
+/-- ★★同型による共役は `𝒪^▷` を**反射**もする(`mem_otri_conj` を逆向きの同型に当てる)。 -/
+theorem mem_otri_endRootOneEquiv_symm_of (A : C) (x : End (pfObjOf P F A))
+    (hx : (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    x ∈ OTri (pfPre P F) (pfObjOf P F A) := by
+  have h : endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
+      = endPfCatRtOne (F := F) A x :=
+    (endRootMulEquiv (F := F) A 1).apply_symm_apply _
+  have h1 := (mem_otri_rootSelfIso_inv A 1 _).mp hx
+  have h2 : endPfCatRtOne (F := F) A x ∈ OTri (pfPre P F) (rtObjPf P F A 1) := by
+    rw [← h]
+    exact h1
+  have h3 := mem_otri_conj (pfPre P F)
+    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))).symm
+    (endPfCatRtOne (F := F) A x) h2
+  have h4 : (((toPfCat P F).mapIso
+        (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))).symm.conj
+      (endPfCatRtOne (F := F) A x)) = x :=
+    (endPfCatRtOne (F := F) A).symm_apply_apply x
+  rw [h4] at h3
+  exact h3
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Proposition 5.5, (i)` の零因子の側

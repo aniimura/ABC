@@ -634,38 +634,6 @@ theorem biratBase_biratPfHom_eq (hfi : IsOfFrobeniusIsotropicType P)
 
 end Compat
 
-/-! ## ★5-d. 仮定 `hx` を `hδ` から導く -/
-
-/-- ★★**同型による共役は `𝒪^▷` を保つ**(底恒等性も次数 1 も共役で不変)。 -/
-theorem mem_otri_conj {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} D}
-    (P₀ : PreFrobenioid Cc Φ₀) {X Y : Cc} (u : X ≅ Y) (f : End X)
-    (hf : f ∈ OTri P₀ X) : (u.conj f) ∈ OTri P₀ Y := by
-  obtain ⟨hb, hl⟩ := hf
-  haveI : IsIso u.hom := u.isIso_hom
-  haveI : IsIso u.inv := u.isIso_inv
-  refine ⟨?_, ?_⟩
-  · show P₀.Base (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = P₀.Base (𝟙 Y)
-    rw [P₀.Base_comp, P₀.Base_comp, show P₀.Base ((f : End X) : X ⟶ X) = P₀.Base (𝟙 X) from hb,
-      P₀.Base_id, Category.id_comp, ← P₀.Base_comp, u.inv_hom_id]
-  · show P₀.degFr (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = 1
-    rw [P₀.degFr_comp, P₀.degFr_comp, degFr_of_isIso P₀ u.hom, degFr_of_isIso P₀ u.inv,
-      show P₀.degFr ((f : End X) : X ⟶ X) = 1 from hl, one_mul, one_mul]
-
-/-- ★★★**根なしの `𝒪^▷` は根つき化身の `𝒪^▷` に移る**(橋 `endRootOneEquiv` で)。 -/
-theorem mem_otri_endRootOneEquiv_symm (A : C) (x : End (pfObjOf P F A))
-    (hx : x ∈ OTri (pfPre P F) (pfObjOf P F A)) :
-    (endRootOneEquiv (F := F) A).symm x
-      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) := by
-  refine (mem_otri_rootSelfIso_inv A 1 _).mpr ?_
-  have h : endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
-      = endPfCatRtOne (F := F) A x :=
-    (endRootMulEquiv (F := F) A 1).apply_symm_apply _
-  show endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
-      ∈ OTri (pfPre P F) (rtObjPf P F A 1)
-  rw [h]
-  exact mem_otri_conj (pfPre P F)
-    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))) x hx
-
 /-! ## ★6. 逆向き —— 分母を払えば `Φ^birat` に戻る -/
 
 /-- ★★★★**`biratPfHom` は自己射の単系の準同型**(`Proposition 5.5, (ii)` の
