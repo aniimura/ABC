@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55ScaleRootInv
 import ABC3.Found.FrdI.Prop55CongrIso
+import ABC3.Found.FrdI.Cor410Birat
 
 /-!
 # [FrdI] Proposition 5.5, (ii) —— `Σ_k` は co-angular pre-step を保つ
@@ -79,6 +80,57 @@ theorem coaPreProp_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P 
     (h : coaPreProp (pfRootPre P F) f) :
     coaPreProp (pfRootPre P F) ((scaleRootFunctor P F k).map f) :=
   ⟨isCoAngular_scaleRootHom k f h.1, isPreStep_scaleRootHom k h.2⟩
+
+/-- ★★★★★**`Σ_k` は co-angular 性を反射する** —— 在庫 `isCoAngular_of_map` に
+`Σ_k` の**保存**(`Prop55ScaleRootInv.lean`)を渡すだけ。 -/
+theorem isCoAngular_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X Y)
+    (h : IsCoAngular (pfRootPre P F) (scaleRootHom (F := F) k f)) :
+    IsCoAngular (pfRootPre P F) f :=
+  isCoAngular_of_map (scaleRootFunctor P F k)
+    (fun _ hg => isLinear_scaleRootHom k hg)
+    (fun _ hg => isIsometric_scaleRootHom k hg)
+    (fun _ hg => isPreStep_scaleRootHom k hg)
+    (fun _ hg => isBaseIsomorphism_scaleRootHom k hg)
+    f h
+
+/-- ★★★★★★**`psiBiratCor` の入力 `hbwd`** —— `Σ_k` は co-angular pre-step を反射する。 -/
+theorem coaPreProp_of_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X Y)
+    (h : coaPreProp (pfRootPre P F) ((scaleRootFunctor P F k).map f)) :
+    coaPreProp (pfRootPre P F) f :=
+  ⟨isCoAngular_of_scaleRootHom k f h.1, isPreStep_of_scaleRootHom k h.2⟩
+
+/-! ## ★2. `Σ_k` を birat 化へ降ろす -/
+
+/-- ★★★★★★**[FrdI] Proposition 5.5, (ii) の 3 段目** ——
+**根の一斉倍化 `Σ_k` を `(𝒞^pf)^birat` へ降ろした関手**。
+
+★在庫 `psiBiratCor`(`Corollary 4.10`)に `Σ_k` と `hfwd` を流すだけ。 -/
+noncomputable def scaleRootBirat (k : ℕ+) (Gpf : Frobenioid (pfRootPre P F)) :
+    BiratCat (pfRootPre P F) Gpf ⥤ BiratCat (pfRootPre P F) Gpf :=
+  psiBiratCor Gpf Gpf (scaleRootFunctor P F k)
+    (fun {_ _} f hf => coaPreProp_scaleRootHom k f hf)
+
+/-- ★★★★★★**降ろした `Σ_k` も圏同値**。
+
+★★これが `Proposition 5.5, (ii)` の「一般の根を根 1 に落とす」段である。 -/
+theorem scaleRootBirat_isEquivalence (k : ℕ+) (Gpf : Frobenioid (pfRootPre P F)) :
+    (scaleRootBirat (F := F) k Gpf).IsEquivalence :=
+  psiBiratCor_isEquivalence Gpf Gpf (scaleRootFunctor P F k)
+    (fun {_ _} f hf => coaPreProp_scaleRootHom k f hf)
+    (fun {_ _} f hf => coaPreProp_of_scaleRootHom k f hf)
+
+/-- ★★★★★★**`Σ_k` の birat 版が与える Hom の全単射**。
+
+★`Proposition 5.5, (ii)` の 4 段の 3 段目そのもの ——
+`Hom(⟨A,r⟩,⟨B,s⟩) ≃ Hom(⟨A,k·r⟩,⟨B,k·s⟩)`。 -/
+noncomputable def scaleRootBiratHomEquiv (k : ℕ+) (Gpf : Frobenioid (pfRootPre P F))
+    (X Y : BiratCat (pfRootPre P F) Gpf) :
+    (X ⟶ Y) ≃ ((scaleRootBirat (F := F) k Gpf).obj X
+      ⟶ (scaleRootBirat (F := F) k Gpf).obj Y) :=
+  haveI := scaleRootBirat_isEquivalence (F := F) k Gpf
+  Equiv.ofBijective (fun f : X ⟶ Y => (scaleRootBirat (F := F) k Gpf).map f)
+    ⟨fun _ _ h => (scaleRootBirat (F := F) k Gpf).map_injective h,
+      fun g => (scaleRootBirat (F := F) k Gpf).map_surjective g⟩
 
 end ScaleRootCoa
 
