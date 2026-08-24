@@ -147,6 +147,38 @@ theorem rootDiv_otri_image (hiso : ∀ X : C, IsIsotropic P X) {A : C}
     refine ⟨otriPfMk (F := F) hiso (hprop k).2 α, otriPfMk_mem hiso (hprop k).2 α hα, ?_⟩
     rw [rootDiv_otriPfMk hiso (hprop k).2 (hprop k).1 α, hdeg k]
 
+/-! ## ★4. 分母を払う —— `𝒪^▷(A^pf)` の元は正の冪で `𝒞` へ戻る
+
+★★★これが `(Φ^pf)^birat ⊆ ℚ·Φ^birat`(逆向きの包含)の**単系の側の骨**である。
+`𝒪^▷(A^pf) ≅ 𝒪^▷(A)^pf`(`otriPfEquiv`、`Proposition 5.5, (i)`)の下で
+`k · (α/k) = α`(`Pf.nsmul_mk_self`)を読み替えただけである。 -/
+
+/-- ★★★★★**`𝒪^▷(A^pf)` の元 `f` には正の `k` があって `f^k` は `𝒞` の元の像**。
+
+★`otriPfMap` の全射性で `f = α^{1/k}` と書き、
+同型の加法性(`map_nsmul`)＋ `Pf` の `k·(α/k) = α` を当てるだけ。 -/
+theorem otri_pf_pow (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (f : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    ∃ (k : ℕ+) (α : OTri P A),
+      ((f : End (⟨A, 1⟩ : PfRootObj P F)) ^ ((k : ℕ+) : ℕ))
+        = otriPfMk (F := F) hiso (hprop 1).2 ((α : End A)) := by
+  letI : AddCommMonoid (Additive (OTri P A)) := otriAddCommMonoid hfn
+  obtain ⟨y, hy⟩ := otriPfMap_surjective (F := F) hiso hA hfn hfn' ζ hdeg hprop f
+  induction y using Pf.inductionOn with | _ α k =>
+  refine ⟨k, Additive.toMul α, ?_⟩
+  have hE := map_nsmul (otriPfEquiv (F := F) hiso hA hfn hfn' ζ hdeg hprop)
+    ((k : ℕ+) : ℕ) (Pf.mk α k)
+  rw [Pf.nsmul_mk_self] at hE
+  have h2 := congrArg (fun t : Additive (OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) =>
+    ((Additive.toMul t : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+      End (⟨A, 1⟩ : PfRootObj P F))) hE
+  rw [← hy]
+  exact h2.symm
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Proposition 5.5, (i)` の零因子の側
