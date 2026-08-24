@@ -37,24 +37,30 @@ scToFactor : ℝ≥0 ⊗_ℕ M →+ (Prime M → ℝ≥0)      (r ⊗ m ↦ r �
 ★`Prop55RlfNd.lean` の `hrefl` は **primary な相手にしか使っていない**ので、
 本ファイルの形で十分である。
 
-## ★★★★残る `hprim` の測定(2026-08-25)—— こちらは**両向き**が要る
+## ★★★★★★★残る `hprim` も閉じた(2026-08-25、第 2 弾)
 
-`hrefl` が片道で足りたのに対し、残る `hprim`
-(`b` が準素元なら `toSc b` に `≼`-同値な準素元がある)は**そうはいかない**。
+一時「`hprim` は `rlf-agree`(2 模型の**一致**)の側にある」と書いたが、
+★**これも強すぎる見立てだった**。要ったのは 3 つで、いずれも片道の橋で足りる:
 
-`IsPrimaryElt a = a ≠ 0 ∧ ∀ z ≠ 0, z ⪯ a → a ⪯ z` なので、後半には
+1. **核が自明** —— `scToFactor z = 0 → z = 0`(`scToFactor_eq_zero`)。
+   `ℝ≥0` と `Prime M → ℝ≥0` は**負の元を持たない**ので、
+   `Σ rᵢ • μ(aᵢ) = 0` から各項が `0` になり、`rᵢ = 0` または `aᵢ = 0`。
+2. **`0` でないテンソルには `0` でない単項式が下にある**(`exists_tmul_mle`)——
+   テンソルの帰納法だけ。
+3. **Archimedes 性** —— `r ⊗ a ≤ w` かつ `r ≠ 0` なら
+   `N·r ≥ 1` となる `N` を取って `N • w = toSc a + (残り)`(`mprec_toSc_of_tmul_mle`)。
 
-* `z ≠ 0 → scToFactor z ≠ 0`(★**片道の橋の単射性**)
-* 「`p` 成分が正なら `toSc b ⪯ z`」を示すための **`c` の構成**(★**逆向き**)
+★★これで `IsPrimaryElt (toSc b)` が出る(`isPrimaryElt_toSc`)——
+`w ≠ 0` から単項式 `r ⊗ a ≤ w` を取り、台が `b` と同じ 1 点になることを見て
+在庫の `mprec_of_suppElt_eq_singleton` で `M` の中で `b ⪯ a`、
+それを `toSc` で送り、Archimedes 性で `toSc a ⪯ w` に繋ぐ。
 
-の**両方**が要る。★したがって `hprim` は本当に節点 `rlf-agree`
-(`ℝ≥0 ⊗_ℕ M` と素点ごとの座標の**一致**)の側にある。
+★★★あわせて `hsS`(`ScT ℝ≥0 M` が sharp)も核の自明性から出た(`isSharp_scT`)。
 
-★★**弱めておいた**: `Prop55RlfNd.lean` の `hprim` は
-「`toSc b` **そのもの**が準素元」ではなく
-「`toSc b` に **`≼`-同値な準素元がある**」で足りる
-(`scMap f (toSc b) ⪯ scMap f z ⪯ z ⪯ toSc b` と繋がるため)。
-強い形からは `hprimWeak_of_isPrimaryElt` で降りる。
+★★★★**結論**: `Proposition 5.5, (iii)` の `hnd` は
+`Φ` が perf-factorial（＋各 `Φ(A)` が perfect）だけから出る
+(`MonoidOn.scOn_isNonDilatingOn_of_perfFactorial`)。
+節点 `rlf-agree`(2 模型の**一致**)は**どちらにも要らなかった**。
 -/
 
 namespace ABC3.Found.FrdI
@@ -161,6 +167,22 @@ theorem scToFactor_ne_zero (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M
     {z : ScT ℝ≥0 M} (h : z ≠ 0) : scToFactor H z ≠ 0 :=
   fun h0 => h (scToFactor_eq_zero H hdiv h0)
 
+/-- ★★★★**`ScT ℝ≥0 M` は sharp**(`M` が perf-factorial かつ divisorial なら)。
+
+★可逆元 `a` は `a + b = 0` を満たすので、`ℝ≥0` 側で `scToFactor a = 0`、
+核が自明だから `a = 0`。 -/
+theorem isSharp_scT (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M) :
+    IsSharp (ScT ℝ≥0 M) := by
+  intro a ha
+  obtain ⟨u, rfl⟩ := ha
+  have h0 : ((u : ScT ℝ≥0 M) + (u.neg : ScT ℝ≥0 M)) = 0 := u.val_neg
+  have hψ : scToFactor H (u : ScT ℝ≥0 M) + scToFactor H (u.neg : ScT ℝ≥0 M) = 0 := by
+    rw [← map_add, h0, map_zero]
+  refine scToFactor_eq_zero H hdiv (funext fun p => ?_)
+  have hp := congrFun hψ p
+  rw [Pi.add_apply, Pi.zero_apply] at hp
+  exact (add_eq_zero.mp hp).1
+
 /-- ★★★**`toSc` は `0` でない元を `0` でない元へ送る**(`M` が perf-factorial なら)。
 
 ★`hprim` の第 1 条(`toSc b ≠ 0`)がこれで閉じる。 -/
@@ -191,6 +213,100 @@ theorem suppElt_subset_of_mprec_sc (H : IsPerfFactorialWith M ι) {x y : M}
   have hx0 : factorMap ι (Pf.of x) p = 0 :=
     (add_eq_zero.mp hev).1
   exact hp (by simpa [SuppElt, Supp] using hx0)
+
+/-! ## ★3-b. `hprim` —— `toSc b` は準素元 -/
+
+/-- ★★★**`0` でないテンソルには `0` でない単項式が下にある**。 -/
+theorem exists_tmul_mle {w : ScT ℝ≥0 M} (hw : w ≠ 0) :
+    ∃ (r : ℝ≥0) (a : M), r ≠ 0 ∧ a ≠ 0 ∧ MLe (r ⊗ₜ[ℕ] a) w := by
+  induction w using TensorProduct.induction_on with
+  | zero => exact absurd rfl hw
+  | tmul r a =>
+    by_cases hr : r = 0
+    · exact absurd (by rw [hr, TensorProduct.zero_tmul]) hw
+    by_cases ha : a = 0
+    · exact absurd (by rw [ha, TensorProduct.tmul_zero]) hw
+    exact ⟨r, a, hr, ha, 0, add_zero _⟩
+  | add x y hx hy =>
+    by_cases hx0 : x = 0
+    · obtain ⟨r, a, hr, ha, c, hc⟩ := hy (by rw [hx0, zero_add] at hw; exact hw)
+      exact ⟨r, a, hr, ha, c, by rw [hx0, zero_add]; exact hc⟩
+    · obtain ⟨r, a, hr, ha, c, hc⟩ := hx hx0
+      exact ⟨r, a, hr, ha, c + y, by rw [← add_assoc, hc]⟩
+
+/-- ★★★★**単項式が下にあれば `toSc a` は `⪯` で下にある**。
+
+★`ℝ≥0` は Archimedes 的なので、`N·r ≥ 1` となる `N` を取れば
+`N • w = toSc a + (残り)` と書ける。 -/
+theorem mprec_toSc_of_tmul_mle {r : ℝ≥0} (hr : r ≠ 0) {a : M} {w : ScT ℝ≥0 M}
+    (h : MLe (r ⊗ₜ[ℕ] a) w) : MPrec (toSc (S := ℝ≥0) a) w := by
+  obtain ⟨d, hd⟩ := h
+  obtain ⟨N, hN⟩ := exists_nat_ge (1 / r : ℝ≥0)
+  have hrpos : (0 : ℝ≥0) < r := pos_iff_ne_zero.mpr hr
+  set s : ℝ≥0 := ((N : ℝ≥0) + 1) * r with hs
+  have hs1 : (1 : ℝ≥0) ≤ s := by
+    have h1 : (1 / r : ℝ≥0) ≤ (N : ℝ≥0) + 1 := le_trans hN (le_add_of_nonneg_right zero_le')
+    have := mul_le_mul_right' h1 r
+    rwa [div_mul_cancel₀ _ hr] at this
+  refine ⟨N + 1, Nat.succ_pos N, (s - 1) ⊗ₜ[ℕ] a + (N + 1) • d, ?_⟩
+  have hsm : (N + 1) • (r ⊗ₜ[ℕ] a) = s ⊗ₜ[ℕ] a := by
+    have hst : ((N + 1 : ℕ) • r) ⊗ₜ[ℕ] a = (N + 1 : ℕ) • (r ⊗ₜ[ℕ] a) :=
+      TensorProduct.smul_tmul' (N + 1 : ℕ) r a
+    rw [← hst, hs]
+    congr 1
+    rw [nsmul_eq_mul]
+    push_cast
+    ring
+  have hsplit : s ⊗ₜ[ℕ] a = toSc (S := ℝ≥0) a + (s - 1) ⊗ₜ[ℕ] a := by
+    show s ⊗ₜ[ℕ] a = (1 : ℝ≥0) ⊗ₜ[ℕ] a + (s - 1) ⊗ₜ[ℕ] a
+    rw [← TensorProduct.add_tmul, add_tsub_cancel_of_le hs1]
+  calc toSc (S := ℝ≥0) a + ((s - 1) ⊗ₜ[ℕ] a + (N + 1) • d)
+      = (toSc (S := ℝ≥0) a + (s - 1) ⊗ₜ[ℕ] a) + (N + 1) • d := by rw [add_assoc]
+    _ = (N + 1) • (r ⊗ₜ[ℕ] a) + (N + 1) • d := by rw [hsm, hsplit]
+    _ = (N + 1) • (r ⊗ₜ[ℕ] a + d) := (smul_add _ _ _).symm
+    _ = (N + 1) • w := by rw [hd]
+
+/-- ★★★**単項式が `toSc b` の下にあれば台も含まれる**。 -/
+theorem suppElt_subset_of_mprec_tmul (H : IsPerfFactorialWith M ι) {r : ℝ≥0} (hr : r ≠ 0)
+    {a b : M} (h : MPrec (r ⊗ₜ[ℕ] a) (toSc (S := ℝ≥0) b)) : SuppElt ι a ⊆ SuppElt ι b := by
+  obtain ⟨n, -, c, hc⟩ := h
+  have hkey := congrArg (scToFactor H) hc
+  rw [map_add, map_nsmul, scToFactor_tmul, scToFactor_toSc] at hkey
+  intro p hp
+  by_contra hq
+  have hy0 : factorMap ι (Pf.of b) p = 0 := by simpa [SuppElt, Supp] using hq
+  have hev := congrFun hkey p
+  rw [Pi.add_apply, Pi.smul_apply, Pi.smul_apply, hy0, smul_zero] at hev
+  have hx0 : r • factorMap ι (Pf.of a) p = 0 := (add_eq_zero.mp hev).1
+  rw [smul_eq_mul] at hx0
+  exact hp (by simpa [SuppElt, Supp] using (mul_eq_zero.mp hx0).resolve_left hr)
+
+/-- ★★★★★★**[FrdI] Proposition 5.5, (iii) の残り 1 条 `hprim`** ——
+**`b` の台が 1 点なら `toSc b` は準素元**。
+
+★★これで `Prop55RlfNd.lean` の 2 条(`hprim` / `hrefl`)が**両方とも閉じた**。
+
+★道筋:
+1. `toSc b ≠ 0` …… `scToFactor` の核が自明(`toSc_ne_zero`)
+2. `w ≠ 0` から `0` でない単項式 `r ⊗ a ≤ w` を取る(`exists_tmul_mle`)
+3. `SuppElt a = SuppElt b = {p}` を出し、在庫の
+   `mprec_of_suppElt_eq_singleton` で `M` の中で `b ⪯ a`
+4. `toSc` は `⪯` を保つので `toSc b ⪯ toSc a`
+5. Archimedes 性で `toSc a ⪯ w`(`mprec_toSc_of_tmul_mle`) -/
+theorem isPrimaryElt_toSc (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {b : M} {Pb : Prime M} (hbs : SuppElt ι b = {Pb}) (hb0 : b ≠ 0) :
+    IsPrimaryElt (toSc (S := ℝ≥0) b) := by
+  refine ⟨toSc_ne_zero H hdiv hb0, fun w hw hwb => ?_⟩
+  obtain ⟨r, a, hr, ha, hle⟩ := exists_tmul_mle hw
+  have hsub : SuppElt ι a ⊆ SuppElt ι b :=
+    suppElt_subset_of_mprec_tmul H hr (mprec_trans (mprec_of_mle hle) hwb)
+  have hne : SuppElt ι a ≠ ∅ := suppElt_ne_empty H hdiv ha
+  have has : SuppElt ι a = {Pb} := by
+    rcases Set.subset_singleton_iff_eq.mp (hbs ▸ hsub) with h0 | h1
+    · exact absurd h0 hne
+    · exact h1
+  have hba : MPrec b a := mprec_of_suppElt_eq_singleton H hdiv hbs has
+  exact mprec_trans (mprec_map (toSc (S := ℝ≥0)) hba) (mprec_toSc_of_tmul_mle hr hle)
 
 /-! ## ★4. `hrefl`(相手が primary の場合) -/
 
@@ -233,33 +349,36 @@ section ReflOn
 
 variable {D : Type u} [Category.{v} D]
 
-/-- ★★★★★★**[FrdI] Proposition 5.5, (iii)** ——
-**`Φ` が perf-factorial なら、係数を `ℝ≥0` に拡げても non-dilating 性は保たれる**
-(`hrefl` を消した形)。
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (iii)** ——
+**`Φ` が perf-factorial なら、係数を `ℝ≥0` に拡げても non-dilating 性は保たれる**。
 
-★`Prop55RlfNd.lean` の 2 条のうち **`hrefl` はこれで消えた**。
-残るのは `hprim`(準素元が `toSc` で準素元へ移ること)だけである。
+★★★**`Prop55RlfNd.lean` の 2 条(`hprim` / `hrefl`)は両方とも消えた。**
+`hsS`(`ScT ℝ≥0 Φ` が sharp)も片道の橋の核が自明なことから出るので消えた。
 
-★★`hperf`(`Φ(A)` が perfect)は、台が 1 点であることを言う在庫の補題
-(`suppElt_eq_singleton_toPrime` / `suppElt_singleton_of_primary`)が要求するもので、
-**原文の常備仮定ではない**。
-★核心の `mprec_of_mprec_sc_primary` は **`hperf` を使わず「台が 1 点」だけを使う**形に
-してあるので、台が 1 点であることを別の道で与えられればこの仮定は消える。 -/
+★★残る `hperf`(`Φ(A)` が perfect)は、**準素元の台が 1 点**であることを言う
+在庫の補題(`suppElt_eq_singleton_toPrime` / `suppElt_singleton_of_primary`)が
+要求するものであって、**原文の常備仮定ではない**。
+★核心の `isPrimaryElt_toSc` / `mprec_of_mprec_sc_primary` は
+**`hperf` を使わず「台が 1 点」だけを使う**形にしてあるので、
+台が 1 点であることを別の道で与えられればこの仮定も消える。 -/
 theorem MonoidOn.scOn_isNonDilatingOn_of_perfFactorial (Φ : MonoidOn.{v, u, w} D)
     (hcharInj : ∀ {A B : D} (α : B ⟶ A),
       IsCharacteristicallyInjective (scMap (S := ℝ≥0) (Φ.map α)))
-    (hsS : ∀ A : D, IsSharp (ScT ℝ≥0 (Φ.val A)))
     (hpf : ∀ A : D, IsPerfFactorial (Φ.val A))
     (hperf : ∀ A : D, IsPerfectMonoid (Φ.val A))
-    (hprim : ∀ (A : D) (b : Φ.val A), IsPrimaryElt b →
-      ∃ z : ScT ℝ≥0 (Φ.val A), IsPrimaryElt z
-        ∧ MPrec (toSc (S := ℝ≥0) b) z ∧ MPrec z (toSc (S := ℝ≥0) b))
     (h : Φ.IsNonDilatingOn) : (phiScOn ℝ≥0 Φ hcharInj).IsNonDilatingOn := by
   refine MonoidOn.scOn_isNonDilatingOn Φ hcharInj
-    (fun A => ((hpf A).choose_spec.divisorial).2) hsS hprim ?_ h
-  intro A b hb x hx
-  exact mprec_of_mprec_sc_primary_of_perfect (hpf A).choose_spec (hperf A)
-    (hpf A).choose_spec.divisorial hb x hx
+    (fun A => ((hpf A).choose_spec.divisorial).2)
+    (fun A => isSharp_scT (hpf A).choose_spec (hpf A).choose_spec.divisorial)
+    ?_ ?_ h
+  · intro A b hb
+    refine hprimWeak_of_isPrimaryElt (fun b' hb' => ?_) b hb
+    exact isPrimaryElt_toSc (hpf A).choose_spec (hpf A).choose_spec.divisorial
+      (suppElt_eq_singleton_toPrime (hpf A).choose_spec (hperf A)
+        (hpf A).choose_spec.divisorial hb') hb'.1
+  · intro A b hb x hx
+    exact mprec_of_mprec_sc_primary_of_perfect (hpf A).choose_spec (hperf A)
+      (hpf A).choose_spec.divisorial hb x hx
 
 end ReflOn
 
