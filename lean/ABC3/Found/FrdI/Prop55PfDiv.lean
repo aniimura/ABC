@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop32Equiv
 import ABC3.Found.FrdI.Prop53UntrPf
+import ABC3.Found.FrdI.Def24PfT
 import Mathlib.CategoryTheory.Conj
 
 /-!
@@ -287,6 +288,63 @@ theorem endRootOneEquiv_toRootHom (A : C) (α : A ⟶ A) :
   rw [← toHomPf_comp, ← toHomPf_comp]
   refine congrArg (toHomPf (F := F)) ?_
   simp
+
+/-! ## ★6. 逆に —— `𝒪^▷(A^pf)` は**可除**である
+
+★★★これが `(Φ^pf)^birat = ℚ·Φ^birat` の**等号**に要る側である。
+`𝒪^▷(A^pf) ≅ 𝒪^▷(A)^pf` の下で `k · (α/(m·k)) = α/m` を読み替えるだけ。 -/
+
+/-- ★`Pf` の中の可除性 —— `k · (a/(m·k)) = a/m`。 -/
+theorem Pf.nsmul_mk_mul {M : Type w} [AddCommMonoid M] (a : M) (m k : ℕ+) :
+    ((k : ℕ+) : ℕ) • Pf.mk a (m * k) = Pf.mk a m := by
+  rw [Pf.nsmul_mk]
+  refine (Pf.mk_nsmul_eq_of_cross' (N := ((k : ℕ+) : ℕ)) (D := m * k) (P := 1) (Q := m) a ?_).trans
+    (by rw [one_smul])
+  push_cast
+  ring
+
+/-- ★★★★★**`𝒪^▷(A^pf)` は可除** —— どの元にも `k` 乗根が `𝒪^▷(A^pf)` の中にある。 -/
+theorem otri_pf_root (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (f : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) (k : ℕ+) :
+    ∃ w : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F),
+      ((w : End (⟨A, 1⟩ : PfRootObj P F)) ^ ((k : ℕ+) : ℕ))
+        = (f : End (⟨A, 1⟩ : PfRootObj P F)) := by
+  letI : AddCommMonoid (Additive (OTri P A)) := otriAddCommMonoid hfn
+  obtain ⟨y, hy⟩ := otriPfMap_surjective (F := F) hiso hA hfn hfn' ζ hdeg hprop f
+  induction y using Pf.inductionOn with | _ α m =>
+  refine ⟨otriPfMap (F := F) hiso hfn ζ hdeg hprop (Pf.mk α (m * k)), ?_⟩
+  have hE := map_nsmul (otriPfEquiv (F := F) hiso hA hfn hfn' ζ hdeg hprop)
+    ((k : ℕ+) : ℕ) (Pf.mk α (m * k))
+  rw [Pf.nsmul_mk_mul] at hE
+  have h2 := congrArg (fun t : Additive (OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) =>
+    ((Additive.toMul t : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+      End (⟨A, 1⟩ : PfRootObj P F))) hE
+  rw [← hy]
+  exact h2.symm
+
+/-- ★★★★★同上、根なし版(`biratPfHom` の定義域で使える形)。 -/
+theorem hom_pf_root (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (x : End (pfObjOf P F A))
+    (hx : (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) (k : ℕ+) :
+    ∃ x' : End (pfObjOf P F A),
+      (endRootOneEquiv (F := F) A).symm x' ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)
+        ∧ x' ^ ((k : ℕ+) : ℕ) = x := by
+  obtain ⟨w, hw⟩ := otri_pf_root hiso hA hfn hfn' ζ hdeg hprop
+    ⟨(endRootOneEquiv (F := F) A).symm x, hx⟩ k
+  refine ⟨endRootOneEquiv (F := F) A ((w : End (⟨A, 1⟩ : PfRootObj P F))), ?_, ?_⟩
+  · rw [(endRootOneEquiv (F := F) A).symm_apply_apply]
+    exact w.2
+  · rw [← map_pow, hw]
+    exact (endRootOneEquiv (F := F) A).apply_symm_apply x
 
 /-! ### ★出典の紐付け -/
 
