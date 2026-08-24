@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
-import ABC3.Found.FrdI.Def31Pf
+import ABC3.Found.FrdI.Prop32Frob
 
 /-!
 # [FrdI] `PfCat`(根 1 の部分)から `PfRootObj`(原文の `𝒞^pf`)への関手
@@ -27,6 +27,7 @@ import ABC3.Found.FrdI.Def31Pf
 
 ★★関手性は「根 1 どうしでは `compRoot` は `compPf` そのもの」
 (`compRoot_root_one`、`compRoot_eq_lift` ＋ `rtRootIso_*_eq_self`)に落ちる。
+
 -/
 
 namespace ABC3.Found.FrdI
@@ -56,6 +57,16 @@ theorem compRoot_root_one {A B E : C}
 
 /-- ★`PfCat` の対象を `𝒞` の対象として取り出す(型の同義語をほどく)。 -/
 abbrev pfObjDown (A : PfCat P F) : C := A
+
+variable {P F} in
+/-- ★`PfCat` の合成は `compPf`(`rw` のための橋)。 -/
+theorem pfCat_comp_eq {A B E : PfCat P F} (f : A ⟶ B) (g : B ⟶ E) :
+    f ≫ g = compPf P F f g := rfl
+
+variable {P F} in
+/-- ★`toPfCat` の射の部分は `toHomPf`(`rw` のための橋)。 -/
+theorem toPfCat_map_eq {A B : C} (ψ : A ⟶ B) :
+    (toPfCat P F).map ψ = toHomPf (F := F) ψ := rfl
 
 /-- ★共役の合成(任意の圏での代数)—— `j ≫ i' = 𝟙` なら真ん中が消える。 -/
 theorem conj_comp_aux {X : Type u2} [Category.{v2} X] {a b c a' b' c' : X}
@@ -109,6 +120,19 @@ theorem toPfCat_comp_pfCatToRoot_map {A B : C} (φ : A ⟶ B) :
     = toRootHom (F := F) φ
   rw [← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp]
   rfl
+
+/-! ## ★2. 残り(記録)
+
+★★**`𝒞^pf`(根 1 の部分 `PfCat`)が isotropic 型であること**は未着手である。
+在庫の `pfRoot_isOfIsotropicType`(`PfRootObj` の言葉、`Proposition 3.2, (iii)`)を
+`pfCatToRoot` で降ろせばよい —— `pfDiv`/`pfDeg`/`pfBase` が共役で不変であること
+(`rtExt A 1` は Frobenius 型の同型なので `Div = 0`、`deg = 1`、`Base` 同型)と、
+`compRoot_root_one` で同型性を `PfCat` へ戻すことの 2 段。
+
+★試作では `pfDiv_comp` 等の `rw` が `instances` 透明度で当たらなかった
+(`pfDown P F ((toPfCat P F).obj X)` と `X` が構文的に違う)。
+★`Proposition 5.3` の図式ではこれを `hisoPf` として仮引数で受けている。
+-/
 
 end PfCatRoot
 
