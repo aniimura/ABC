@@ -148,6 +148,66 @@ theorem rootBase_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F 
   rw [hL, hR, hextX, Category.assoc, ← hcon]
   rfl
 
+/-! ## ★2. `Pf.divBy` の道具 -/
+
+/-- ★2 段の割り算は 1 段。 -/
+theorem Pf.divBy_divBy {M : Type w} [AddCommMonoid M] (k l : ℕ+) (x : Pf M) :
+    Pf.divBy k (Pf.divBy l x) = Pf.divBy (k * l) x := by
+  induction x using Pf.inductionOn with | _ m a =>
+  rw [Pf.divBy_mk, Pf.divBy_mk, Pf.divBy_mk, mul_assoc]
+
+/-- ★`Pf.map` は割り算と可換。 -/
+theorem Pf.map_divBy {M N : Type w} [AddCommMonoid M] [AddCommMonoid N] (f : M →+ N)
+    (k : ℕ+) (x : Pf M) : Pf.map f (Pf.divBy k x) = Pf.divBy k (Pf.map f x) := by
+  induction x using Pf.inductionOn with | _ m a =>
+  rw [Pf.divBy_mk, Pf.map_mk, Pf.map_mk, Pf.divBy_mk]
+
+/-! ## ★3. `rootDiv` の**スケール則** -/
+
+/-- ★★★★★★**`Σ_k` は零因子を `1/k` 倍する**(不変ではない)。
+
+★`rootDiv` は `X.root * Y.root` で割る定義なので `Σ_k` では `k²·n·m` で割るが、
+`pfDiv` は押し出しで `k` 倍になるだけなので、差し引き `k` 倍だけ余分に割られる。
+★★`⟨A,n⟩` が「`A` の `n` 乗根」であることを思えばこれが正しい ——
+`Σ_k ⟨A,n⟩ = ⟨A, k·n⟩` は「`k·n` 乗根」だから零因子は `1/k` になる。 -/
+theorem rootDiv_scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
+    rootDiv (scaleRootHom (F := F) k f) = Pf.divBy k (rootDiv f) := by
+  set hA : k * Y.root = k * Y.root := rfl with hAdef
+  set hB : k * X.root = k * X.root := rfl with hBdef
+  set a := rtLift P F X.obj hA with hadef
+  set b := rtLift P F Y.obj hB with hbdef
+  set w := Pf.map (Φ.map (P.Base a)) (pfDiv (scaleRootHom (F := F) k f)) with hwdef
+  -- ★`pfDiv` の変化則(`k` 倍になる)
+  have hdiv : pfDiv f = Pf.divBy k w := by
+    have h := pfDiv_rootIso a (rtLift_frobType P F X.obj hA) b (rtLift_frobType P F Y.obj hB)
+      (by rw [rtLift_degFr, rtLift_degFr]) (scaleRootHom (F := F) k f)
+    rw [show (rootIso (F := F) a (rtLift_frobType P F X.obj hA) b
+        (rtLift_frobType P F Y.obj hB) (by rw [rtLift_degFr, rtLift_degFr])).hom
+        (scaleRootHom (F := F) k f)
+        = f from Iso.inv_hom_id_apply (rtRootIso P F X.obj Y.obj hA hB) f,
+      show P.degFr a = k from rtLift_degFr P F X.obj hA] at h
+    exact h
+  -- ★押し出しを 2 段に割る
+  have hmap : ∀ u : Pf (Φ.val (P.toElem.obj (rtObj P F X.obj (k * Y.root))).base),
+      Pf.map (Φ.map (P.Base (rtExt P F X.obj (k * Y.root)))) u
+        = Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root))) (Pf.map (Φ.map (P.Base a)) u) := by
+    intro u
+    have hbase : P.Base (rtExt P F X.obj (k * Y.root))
+        = P.Base (rtExt P F X.obj Y.root) ≫ P.Base a := by
+      rw [← P.Base_comp, hadef, rtLift_ext]
+    induction u using Pf.inductionOn with | _ m s =>
+    rw [Pf.map_mk, Pf.map_mk, Pf.map_mk, hbase, MonoidOn.map_comp]
+  show Pf.divBy ((k * X.root) * (k * Y.root))
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj (k * Y.root))))
+        (pfDiv (scaleRootHom (F := F) k f)))
+    = Pf.divBy k (Pf.divBy (X.root * Y.root)
+        (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root))) (pfDiv f)))
+  rw [hmap, ← hwdef, hdiv, Pf.map_divBy, Pf.divBy_divBy, Pf.divBy_divBy]
+  exact congrArg (fun t : ℕ+ => Pf.divBy t
+      (Pf.map (Φ.map (P.Base (rtExt P F X.obj Y.root))) w))
+    (by simp only [mul_comm, mul_assoc, mul_left_comm] :
+      (k * X.root) * (k * Y.root) = k * (X.root * Y.root) * k)
+
 end ScaleRootInv
 
 /-! ### ★出典の紐付け -/
