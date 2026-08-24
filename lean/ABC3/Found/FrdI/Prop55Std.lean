@@ -288,6 +288,52 @@ theorem scModel_standardType (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P
       (ModelData.modelPre (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)) F' :=
   ModelData.model_isOfStandardType _ F' hfsmff hnd (fun hg => absurd hg hngl)
 
+/-- ★★★★★**[FrdI] Proposition 5.5, (iii) の「hence also」の `𝒞^rlf` の側** ——
+`𝒞` が not group-like 型なら `𝒞^rlf` も。
+
+原文 (FrdI p.105):
+> if C is of standard (respectively, rationally standard) type, then so are Cun-tr, Crlf.
+
+★★中身は 3 行:
+`IsGroupLikeObj` は**底での零因子の単系の性質**(`IsGroupLike (Φ(d))`)なので、
+`𝒞^rlf` が group-like なら各 `d` で `ℝ≥0 ⊗ Φ(d)` が group-like。
+★係数拡大が sharp を保つ(`hsharp`)なら `group-like ＋ sharp ⟹ 零`
+(`eq_zero_of_isGroupLike_of_isSharp`)で `ℝ≥0 ⊗ Φ(d) = 0`、
+`toSc` が単射(`hinj`)なら `Φ(d) = 0`、ゆえに `𝒞` が group-like になってしまう。
+
+★`hsharp` / `hinj` は係数拡大の側の条(`Φ` の divisorial 性から出るはずのもの)で、
+`𝒞^rlf` を立てるときの `hcharInj` / `hint` と同じ種類の入力である。 -/
+theorem scModel_not_isOfGroupLikeType (G : Frobenioid P) (hiso : ∀ Y : C, IsIsotropic P Y)
+    (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
+    (hcharInj : ∀ {A B : D} (α : B ⟶ A),
+      IsCharacteristicallyInjective (scMap (S := S) (Φ.map α)))
+    (hint : ∀ A : D, IsIntegralMonoid (ScT S (Φ.val A)))
+    (hfsmD : IsOfFSMType D)
+    (hdiv : (scModel S G hiso hfn hcharInj hint hfsmD).phi.IsDivisorialOn)
+    (htot : IsTotallyEpimorphic D) (hconn : IsConnected D)
+    (hsharp : ∀ d : D, IsSharp (ScT S (Φ.val d)))
+    (hinj : ∀ d : D, Function.Injective (toSc (S := S) (M := Φ.val d)))
+    (hngl : ¬ IsOfGroupLikeType P) :
+    ¬ IsOfGroupLikeType (ModelData.modelPre
+      (scModel_hyp G hiso hfn hcharInj hint hfsmD hdiv htot hconn)) := by
+  intro hg
+  refine hngl (fun A => ?_)
+  have hgd : IsGroupLike (ScT S (Φ.val (P.toElem.obj A).base)) :=
+    hg (⟨(P.toElem.obj A).base, 0⟩ :
+      ModelData.Obj (scModel S G hiso hfn hcharInj hint hfsmD))
+  refine (isGroupLike_iff _).mpr (fun a => ?_)
+  have h0 : toSc (S := S) a = 0 :=
+    eq_zero_of_isGroupLike_of_isSharp hgd (hsharp (P.toElem.obj A).base) _
+  have ha : a = 0 := hinj _ (by rw [h0, map_zero])
+  rw [ha]
+  exact isAddUnit_zero
+
+/-- ★★★★locator —— `Proposition 5.5, (iii)` の「hence also not group-like」の `𝒞^rlf` の側。 -/
+def scModel_not_isOfGroupLikeType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞 が not group-like なら 𝒞^rlf も",
+    sectionId := "frdi-prop-5-5" }
+
 end Rlf
 
 /-! ## ★5. standard 型が `𝒞^pf` へ移る
