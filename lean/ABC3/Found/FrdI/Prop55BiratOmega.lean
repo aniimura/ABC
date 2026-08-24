@@ -107,19 +107,45 @@ hm ((rtRootIso X Z).hom w)
 `equiv` が全射なので、これだけで `Θ.map = equiv.symm` が出て**全単射**になる。
 ★単射性・全射性を別々に論じる必要は**ない**。
 
-### ★橋渡しの形(根 1 の段)
+### ★★橋渡しの形(根 1 の段)—— 2026-08-25 に**式まで確定した**
 
-`biratPfMk hfi Gpf W Z ψ = HomBirat.mk (biratPfIdx hfi Gpf W Z)
-  (rootMap hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)` なので、要るのは
+★★**`Ω` の計算則は 5 本とも済んだ**(`omegaMap_toHomPf` / `_pfKappa` /
+`_toRootHom` / `_rootMap` / `_rootLift`)。これで
+`biratPfMk hfi Gpf W Z ψ = HomBirat.mk (biratPfIdx …) (rootMap … ≫ isoB⁻¹)` の
+**両成分が `Ω` で計算できる**。
+
+在庫 `homPf_birat_exists_rep` が「`(𝒞^birat)^pf` の射はすべて
+`HomPf.mk ((idxToBirat …).obj W) z` の形」を与えるので、
+示すべきは次の 1 本(`W.hom.hom = (w₁, w₂)`, `k = degFr w₁`, `Z₀ = Z.unop.left.obj`):
 
 ```
-Θ.map (biratPfMk hfi Gpf W Z ψ) = HomPf.mk ((idxToBirat …).obj W) (HomBirat.mk Z ψ)
+Θ.map (biratPfHom hfi Gpf F' A B (HomPf.mk ((idxToBirat …).obj W) (HomBirat.mk Z ψ)))
+  = (pfCatToRoot (biratPre P G) F').map (HomPf.mk ((idxToBirat …).obj W) (HomBirat.mk Z ψ))
 ```
 
-★左辺は `biratDescHom_mk` で `inv (Ω (biratPfIdx …).hom) ≫ Ω (rootMap … ≫ isoB⁻¹)`。
-★したがって新たに要るのは **`Ω` が `rootMap` / `rootLift` をどう写すか**の計算則で、
-`omegaMap_mk`(代表元での表示)がその入口である。
-残る 3 段(`scaleRootBiratHomEquiv` など)は `Θ` が関手であることから従う。
+★左辺は在庫 `biratPfHom_mk` / `biratPf_mk` と `biratDescHom_mk` で
+
+```
+rootLift′(Ψw₁,k) ≫ rootMap′(Ψ(Z.hom),k)⁻¹ ≫ rootMap′(Ψψ,k) ≫ rootLift′(Ψw₂,k)⁻¹
+```
+
+になる(上の 5 本を当てるだけ)。
+
+★★**残る唯一の道具**は「`𝒞^pf` の分数の基本関係」——
+添字 `V` の構造射が `(a₁,a₂)`、値が `v` のとき
+
+```
+HomPf.mk V v ≫ toHomPf a₂ = toHomPf a₁ ≫ toHomPf v
+```
+
+これを `(𝒞^birat)^pf` で使い、`κ` が mono であること(`rootMap_ext`)で
+両辺を突き合わせる。★これが在庫にあるか要確認(`compPf_mk` の系のはず)。
+
+### ★根 1 から一般の根へ
+
+`Θ` は**関手**なので、在庫の 3 段
+(`scaleRootBiratHomEquiv` / `pfRoot_exists_iso_root` / `rootIso`)は
+すべて同型の共役であり、`Θ.map` の全単射性は根 1 から**自動的に伝播する**。
 -/
 
 namespace ABC3.Found.FrdI
