@@ -140,21 +140,31 @@ theorem suppElt_subset_of_mprec_sc (H : IsPerfFactorialWith M ι) {x y : M}
 
 ★これで `Prop55RlfNd.lean` の `hrefl` が閉じる。
 ★★`rlf-agree`(`Φ^rlf` の 2 模型の一致)は**要らなかった** —— 片道の橋で足りる。 -/
-theorem mprec_of_mprec_sc_primary (H : IsPerfFactorialWith M ι)
-    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M)
-    {b : M} (hb : IsPrimaryElt b) (x : M)
+theorem mprec_of_mprec_sc_primary (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M)
+    {b : M} {Pb : Prime M} (hbs : SuppElt ι b = {Pb}) (x : M)
     (h : MPrec (toSc (S := ℝ≥0) x) (toSc b)) : MPrec x b := by
   by_cases hx : x = 0
   · subst hx
     exact ⟨1, one_pos, b, by rw [one_smul, zero_add]⟩
   · have hsub := suppElt_subset_of_mprec_sc H h
-    have hbs := suppElt_eq_singleton_toPrime H hperf hdiv hb
     have hne : SuppElt ι x ≠ ∅ := suppElt_ne_empty H hdiv hx
-    have hxs : SuppElt ι x = {toPrime M b hb} := by
+    have hxs : SuppElt ι x = {Pb} := by
       rcases Set.subset_singleton_iff_eq.mp (hbs ▸ hsub) with h0 | h1
       · exact absurd h0 hne
       · exact h1
     exact mprec_of_suppElt_eq_singleton H hdiv hxs hbs
+
+/-- ★★**`hperf` を使う版**(在庫の「準素元の台は 1 点」を経由する形)。
+
+★★`hperf`(`M` が perfect)は**原文の常備仮定ではない** ——
+台が 1 点であることを言う在庫の補題が要求するだけである。
+上の `mprec_of_mprec_sc_primary` は**台が 1 点であること**しか使わないので、
+そちらを直に与えられるならこの版は要らない。 -/
+theorem mprec_of_mprec_sc_primary_of_perfect (H : IsPerfFactorialWith M ι)
+    (hperf : IsPerfectMonoid M) (hdiv : IsDivisorial M)
+    {b : M} (hb : IsPrimaryElt b) (x : M)
+    (h : MPrec (toSc (S := ℝ≥0) x) (toSc b)) : MPrec x b :=
+  mprec_of_mprec_sc_primary H hdiv (suppElt_eq_singleton_toPrime H hperf hdiv hb) x h
 
 end Refl
 
@@ -173,7 +183,9 @@ variable {D : Type u} [Category.{v} D]
 
 ★★`hperf`(`Φ(A)` が perfect)は、台が 1 点であることを言う在庫の補題
 (`suppElt_eq_singleton_toPrime` / `suppElt_singleton_of_primary`)が要求するもので、
-**原文の常備仮定ではない** —— ここは記録しておく。 -/
+**原文の常備仮定ではない**。
+★核心の `mprec_of_mprec_sc_primary` は **`hperf` を使わず「台が 1 点」だけを使う**形に
+してあるので、台が 1 点であることを別の道で与えられればこの仮定は消える。 -/
 theorem MonoidOn.scOn_isNonDilatingOn_of_perfFactorial (Φ : MonoidOn.{v, u, w} D)
     (hcharInj : ∀ {A B : D} (α : B ⟶ A),
       IsCharacteristicallyInjective (scMap (S := ℝ≥0) (Φ.map α)))
@@ -187,7 +199,7 @@ theorem MonoidOn.scOn_isNonDilatingOn_of_perfFactorial (Φ : MonoidOn.{v, u, w} 
   refine MonoidOn.scOn_isNonDilatingOn Φ hcharInj
     (fun A => ((hpf A).choose_spec.divisorial).2) hsS hprim ?_ h
   intro A b hb x hx
-  exact mprec_of_mprec_sc_primary (hpf A).choose_spec (hperf A)
+  exact mprec_of_mprec_sc_primary_of_perfect (hpf A).choose_spec (hperf A)
     (hpf A).choose_spec.divisorial hb x hx
 
 end ReflOn
