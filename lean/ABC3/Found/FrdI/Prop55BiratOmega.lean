@@ -194,6 +194,19 @@ def omegaObj (F' : FrobenioidCore (biratPre P G)) (X : PfRootObj P F) :
   ⟨biratUp P G X.obj, X.root⟩
 
 variable (F) in
+/-- ★★★★**`β` が定める根の不変性の同型**。
+
+`β` は同型なので Frobenius 型・次数 1 で、`rootIso` の 3 仮定をそのまま満たす。 -/
+noncomputable def betaIso (F' : FrobenioidCore (biratPre P G)) (A B : C) (dA dB : ℕ+) :
+    HomPf (biratPre P G) F' (biratUp P G (rtObj P F A dA))
+        (biratUp P G (rtObj P F B dB))
+      ≅ HomPf (biratPre P G) F' (rtObj (biratPre P G) F' (biratUp P G A) dA)
+        (rtObj (biratPre P G) F' (biratUp P G B) dB) :=
+  rootIso (F := F') (biratRtIso F F' A dA) (isFrobeniusType_of_isIso (biratPre P G) _)
+    (biratRtIso F F' B dB) (isFrobeniusType_of_isIso (biratPre P G) _)
+    (by rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _])
+
+variable (F) in
 /-- ★★★**射** —— `homPfMap` で送って、根の食い違いを **`rootIso`** で吸収する。
 
 ★★★**設計の要点(2026-08-25 に取り直した)**: 最初は
@@ -205,12 +218,7 @@ variable (F) in
 noncomputable def omegaMap (F' : FrobenioidCore (biratPre P G))
     {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
     HomRoot (biratPre P G) F' (omegaObj F F' X) (omegaObj F F' Y) :=
-  (rootIso (F := F') (biratRtIso F F' X.obj Y.root)
-      (isFrobeniusType_of_isIso (biratPre P G) _)
-      (biratRtIso F F' Y.obj X.root)
-      (isFrobeniusType_of_isIso (biratPre P G) _)
-      (by rw [isLinear_of_isIso (biratPre P G) _,
-        isLinear_of_isIso (biratPre P G) _])).hom
+  (betaIso F F' X.obj Y.obj Y.root X.root).hom
     (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ f)
 
 /-! ## ★4. `map_id` -/
@@ -269,6 +277,132 @@ theorem biratRtIso_rtLift (F' : FrobenioidCore (biratPre P G)) (A : C)
     rw [← Category.assoc, biratRtIso_tri]
     exact hc.trans (congrArg (toBiratCat P G).map (rtLift_ext P F A h))
   exact hL.trans hR.symm
+
+/-! ## ★6. `Ω` と根の不変性の交換則 —— `map_comp` の全体 -/
+
+/-- ★射が等しければ `rootIso` の `hom` も等しい(仮定は `Prop` なので `subst` で消える)。 -/
+theorem rootIso_hom_congr (F' : FrobenioidCore (biratPre P G))
+    {A B A' B' : BiratCat P G} {a a' : A ⟶ A'} (haa : a = a')
+    (ha : IsFrobeniusType (biratPre P G) a) (ha' : IsFrobeniusType (biratPre P G) a')
+    {b b' : B ⟶ B'} (hbb : b = b')
+    (hb : IsFrobeniusType (biratPre P G) b) (hb' : IsFrobeniusType (biratPre P G) b')
+    (hd : (biratPre P G).degFr a = (biratPre P G).degFr b)
+    (hd' : (biratPre P G).degFr a' = (biratPre P G).degFr b')
+    (z : HomPf (biratPre P G) F' A' B') :
+    (rootIso (F := F') a ha b hb hd).hom z = (rootIso (F := F') a' ha' b' hb' hd').hom z := by
+  subst haa
+  subst hbb
+  rfl
+
+variable (F) in
+/-- ★★★★★★★**`Ω` は根の不変性と交換する** ——
+
+```
+βIso(dA,dB).hom ∘ hm ∘ (rtRootIso 𝒞).hom
+  = (rtRootIso 𝒞^birat).hom ∘ βIso(tA,tB).hom ∘ hm
+```
+
+★★**筋は 4 段**(ファイル冒頭の手順書のとおり):
+1. `homPfMap_rootIso_hom` で `hm` を `rootIso` の外へ出す
+2. `rootIso_trans` で 2 段を 1 段にする
+3. ★**四角形 `biratRtIso_rtLift`** で `(β ≫ Ψ rtLift)` を `(rtLift^birat ≫ β)` に替える
+4. `rootIso_trans` を逆向きに使って 1 段を 2 段に戻す -/
+theorem betaIso_rtRootIso (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    {dA dB e tA tB : ℕ+} (hA : tA = e * dA) (hB : tB = e * dB)
+    (x : HomPf P F (rtObj P F A tA) (rtObj P F B tB)) :
+    (betaIso F F' A B dA dB).hom
+        (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _
+          ((rtRootIso P F A B hA hB).hom x))
+      = (rtRootIso (biratPre P G) F' (biratUp P G A) (biratUp P G B) hA hB).hom
+          ((betaIso F F' A B tA tB).hom
+            (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ x)) := by
+  -- ★4 種の Frobenius 性
+  have hfA : IsFrobeniusType (biratPre P G) ((toBiratCat P G).map (rtLift P F A hA)) :=
+    biratFT (G := G) _ (rtLift_frobType P F A hA)
+  have hfB : IsFrobeniusType (biratPre P G) ((toBiratCat P G).map (rtLift P F B hB)) :=
+    biratFT (G := G) _ (rtLift_frobType P F B hB)
+  have hbA : IsFrobeniusType (biratPre P G) (biratRtIso F F' A dA) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hbB : IsFrobeniusType (biratPre P G) (biratRtIso F F' B dB) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hbA' : IsFrobeniusType (biratPre P G) (biratRtIso F F' A tA) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hbB' : IsFrobeniusType (biratPre P G) (biratRtIso F F' B tB) :=
+    isFrobeniusType_of_isIso (biratPre P G) _
+  have hLA : IsFrobeniusType (biratPre P G)
+      (rtLift (biratPre P G) F' (biratUp P G A) hA) := rtLift_frobType _ _ _ hA
+  have hLB : IsFrobeniusType (biratPre P G)
+      (rtLift (biratPre P G) F' (biratUp P G B) hB) := rtLift_frobType _ _ _ hB
+  -- ★次数の一致
+  have hdb : (biratPre P G).degFr (biratRtIso F F' A dA)
+      = (biratPre P G).degFr (biratRtIso F F' B dB) := by
+    rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _]
+  have hdb' : (biratPre P G).degFr (biratRtIso F F' A tA)
+      = (biratPre P G).degFr (biratRtIso F F' B tB) := by
+    rw [isLinear_of_isIso (biratPre P G) _, isLinear_of_isIso (biratPre P G) _]
+  have hdl : P.degFr (rtLift P F A hA) = P.degFr (rtLift P F B hB) := by
+    rw [rtLift_degFr, rtLift_degFr]
+  have hdf : (biratPre P G).degFr ((toBiratCat P G).map (rtLift P F A hA))
+      = (biratPre P G).degFr ((toBiratCat P G).map (rtLift P F B hB)) :=
+    biratDegEq (G := G) (rtLift P F A hA) (rtLift P F B hB) hdl
+  have hdL : (biratPre P G).degFr (rtLift (biratPre P G) F' (biratUp P G A) hA)
+      = (biratPre P G).degFr (rtLift (biratPre P G) F' (biratUp P G B) hB) := by
+    rw [rtLift_degFr, rtLift_degFr]
+  -- ★合成の Frobenius 性と次数
+  have hcA : IsFrobeniusType (biratPre P G)
+      (biratRtIso F F' A dA ≫ (toBiratCat P G).map (rtLift P F A hA)) :=
+    IsFrobeniusType.comp (biratPre P G) F' hbA hfA
+  have hcB : IsFrobeniusType (biratPre P G)
+      (biratRtIso F F' B dB ≫ (toBiratCat P G).map (rtLift P F B hB)) :=
+    IsFrobeniusType.comp (biratPre P G) F' hbB hfB
+  have hcA' : IsFrobeniusType (biratPre P G)
+      (rtLift (biratPre P G) F' (biratUp P G A) hA ≫ biratRtIso F F' A tA) :=
+    IsFrobeniusType.comp (biratPre P G) F' hLA hbA'
+  have hcB' : IsFrobeniusType (biratPre P G)
+      (rtLift (biratPre P G) F' (biratUp P G B) hB ≫ biratRtIso F F' B tB) :=
+    IsFrobeniusType.comp (biratPre P G) F' hLB hbB'
+  have hdc : (biratPre P G).degFr
+        (biratRtIso F F' A dA ≫ (toBiratCat P G).map (rtLift P F A hA))
+      = (biratPre P G).degFr
+        (biratRtIso F F' B dB ≫ (toBiratCat P G).map (rtLift P F B hB)) := by
+    rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp, hdb]
+    exact congrArg (fun t => t * (biratPre P G).degFr (biratRtIso F F' B dB)) hdf
+  have hdc' : (biratPre P G).degFr
+        (rtLift (biratPre P G) F' (biratUp P G A) hA ≫ biratRtIso F F' A tA)
+      = (biratPre P G).degFr
+        (rtLift (biratPre P G) F' (biratUp P G B) hB ≫ biratRtIso F F' B tB) := by
+    rw [(biratPre P G).degFr_comp, (biratPre P G).degFr_comp, hdb', hdL]
+  -- ★段 1 —— `hm` を `rootIso` の外へ出す
+  have hstep1 := homPfMap_rootIso_hom F F' (toBiratCat P G) biratFT biratDegEq
+    (rtLift P F A hA) (rtLift_frobType P F A hA)
+    (rtLift P F B hB) (rtLift_frobType P F B hB) hdl x
+  -- ★段 2 —— 2 段を 1 段に
+  have step12 : (betaIso F F' A B dA dB).hom
+        (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _
+          ((rtRootIso P F A B hA hB).hom x))
+      = (rootIso (F := F')
+          (biratRtIso F F' A dA ≫ (toBiratCat P G).map (rtLift P F A hA)) hcA
+          (biratRtIso F F' B dB ≫ (toBiratCat P G).map (rtLift P F B hB)) hcB hdc).hom
+        (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ x) := by
+    refine Eq.trans (congrArg (fun t => (betaIso F F' A B dA dB).hom t) hstep1) ?_
+    exact rootIso_trans (F := F') (biratRtIso F F' A dA) hbA (biratRtIso F F' B dB) hbB hdb
+      ((toBiratCat P G).map (rtLift P F A hA)) hfA
+      ((toBiratCat P G).map (rtLift P F B hB)) hfB hdf hcA hcB hdc _
+  -- ★段 4 —— 右辺も 1 段に
+  have step4 : (rtRootIso (biratPre P G) F' (biratUp P G A) (biratUp P G B) hA hB).hom
+        ((betaIso F F' A B tA tB).hom
+          (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ x))
+      = (rootIso (F := F')
+          (rtLift (biratPre P G) F' (biratUp P G A) hA ≫ biratRtIso F F' A tA) hcA'
+          (rtLift (biratPre P G) F' (biratUp P G B) hB ≫ biratRtIso F F' B tB) hcB' hdc').hom
+        (homPfMap F F' (toBiratCat P G) biratFT biratDegEq _ _ x) :=
+    rootIso_trans (F := F') (rtLift (biratPre P G) F' (biratUp P G A) hA) hLA
+      (rtLift (biratPre P G) F' (biratUp P G B) hB) hLB hdL
+      (biratRtIso F F' A tA) hbA' (biratRtIso F F' B tB) hbB' hdb' hcA' hcB' hdc' _
+  -- ★段 3 —— 四角形で 2 つの 1 段を同一視
+  rw [step12, step4]
+  exact rootIso_hom_congr F' (biratRtIso_rtLift F F' A hA).symm hcA hcA'
+    (biratRtIso_rtLift F F' B hB).symm hcB hcB' hdc hdc' _
 
 end BiratOmega
 
