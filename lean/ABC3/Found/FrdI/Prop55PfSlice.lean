@@ -53,13 +53,17 @@ import ABC3.Found.FrdI.Prop53QPhi
    `k · Div^gp(δ') = Div^gp(δ'^k) = Pf.of (Div^gp α)` となり、分母が払える。
    ★`𝒞^birat` の isotropic 対象では `𝒪^▷ = 𝒪^×`(`otri_mem_otimes_birat`)。
 
+★★★★★★**仮定は `δ' ∈ 𝒪^×` だけになった**(`otri_of_otimes_biratPfHom`)——
+`biratPfHom` が `Base` と `deg_Fr` を保つこと
+(`biratBase_biratPfHom_eq` / `biratDeg_biratPfHom_eq`、原文が (ii) で
+「compatible with the functors to the respective elementary Frobenioids」と書く条)
+から、`𝒪^▷` の 2 条件がそのまま `x` へ降りる。
+★その律速だった「`rootMap` / `rootLift` の `rootBase`」は
+**`𝒞^pf` の標準射の底が恒等**(`rootBase_pfKappa`)から出た。
+
 ## ★★残り(記録)
 
-1. 逆向きの仮定 `hx`(`x` の根つき化身が `𝒪^▷` に入る)を
-   `hδ`(`δ' ∈ 𝒪^×`)から導くこと。★次数は `rootMap_degFr` で出るが、
-   **底恒等性**には `biratPfHom` の一般の元での `Base` の明示式が要る
-   (`rootMap` / `rootLift` の `rootBase` が在庫に無い)。
-2. 両側の包含を `qPhiBiratOn`(`Prop53QPhi.lean` の飽和)の言葉で束ねて
+両側の包含を `qPhiBiratOn`(`Prop53QPhi.lean` の飽和)の言葉で束ねて
    **部分群の等号**にすること。★`⊆` の側には
    「`Φ^birat` の元の `k` 乗根が `(Φ^pf)^birat` に在る」＋
    `Gp (Pf M)` の torsion-free 性が要る。
@@ -624,6 +628,38 @@ theorem biratBase_biratPfHom_eq (hfi : IsOfFrobeniusIsotropicType P)
 
 end Compat
 
+/-! ## ★5-d. 仮定 `hx` を `hδ` から導く -/
+
+/-- ★★**同型による共役は `𝒪^▷` を保つ**(底恒等性も次数 1 も共役で不変)。 -/
+theorem mem_otri_conj {Cc : Type u2} [Category.{v2} Cc] {Φ₀ : MonoidOn.{v, u, w} D}
+    (P₀ : PreFrobenioid Cc Φ₀) {X Y : Cc} (u : X ≅ Y) (f : End X)
+    (hf : f ∈ OTri P₀ X) : (u.conj f) ∈ OTri P₀ Y := by
+  obtain ⟨hb, hl⟩ := hf
+  haveI : IsIso u.hom := u.isIso_hom
+  haveI : IsIso u.inv := u.isIso_inv
+  refine ⟨?_, ?_⟩
+  · show P₀.Base (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = P₀.Base (𝟙 Y)
+    rw [P₀.Base_comp, P₀.Base_comp, show P₀.Base ((f : End X) : X ⟶ X) = P₀.Base (𝟙 X) from hb,
+      P₀.Base_id, Category.id_comp, ← P₀.Base_comp, u.inv_hom_id]
+  · show P₀.degFr (u.inv ≫ ((f : End X) : X ⟶ X) ≫ u.hom) = 1
+    rw [P₀.degFr_comp, P₀.degFr_comp, degFr_of_isIso P₀ u.hom, degFr_of_isIso P₀ u.inv,
+      show P₀.degFr ((f : End X) : X ⟶ X) = 1 from hl, one_mul, one_mul]
+
+/-- ★★★**根なしの `𝒪^▷` は根つき化身の `𝒪^▷` に移る**(橋 `endRootOneEquiv` で)。 -/
+theorem mem_otri_endRootOneEquiv_symm (A : C) (x : End (pfObjOf P F A))
+    (hx : x ∈ OTri (pfPre P F) (pfObjOf P F A)) :
+    (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F) := by
+  refine (mem_otri_rootSelfIso_inv A 1 _).mpr ?_
+  have h : endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
+      = endPfCatRtOne (F := F) A x :=
+    (endRootMulEquiv (F := F) A 1).apply_symm_apply _
+  show endRootMulEquiv (F := F) A 1 ((endRootOneEquiv (F := F) A).symm x)
+      ∈ OTri (pfPre P F) (rtObjPf P F A 1)
+  rw [h]
+  exact mem_otri_conj (pfPre P F)
+    ((toPfCat P F).mapIso (@asIso _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A))) x hx
+
 /-! ## ★6. 逆向き —— 分母を払えば `Φ^birat` に戻る -/
 
 /-- ★★★★**`biratPfHom` は自己射の単系の準同型**(`Proposition 5.5, (ii)` の
@@ -642,6 +678,35 @@ noncomputable def biratPfEndHom (hfi : IsOfFrobeniusIsotropicType P)
     (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
     (x : End (pfObjOf (biratPre P G) F' (biratUp P G A))) :
     biratPfEndHom hfi Gpf F' A x = biratPfHom hfi Gpf F' A A x := rfl
+
+/-- ★★★★★**`δ' ∈ 𝒪^×` から仮定 `hx` が出る**。
+
+★★`biratPfHom` が `Base` と `deg_Fr` を保つこと(`biratBase_biratPfHom_eq` /
+`biratDeg_biratPfHom_eq`)から、`𝒪^▷` の 2 条件がそのまま `x` へ降りる。
+★★★これで逆向きの包含が**単元性の仮定だけ**から出るようになった。 -/
+theorem otri_of_otimes_biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    {x : End (pfObjOf (biratPre P G) F' (biratUp P G A))}
+    (hδ : biratPfEndHom hfi Gpf F' A x
+      ∈ OTimes (biratPre (pfRootPre P F) Gpf)
+        (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) :
+    (endRootOneEquiv (F := F') (biratUp P G A)).symm x
+      ∈ OTri (pfRootPre (biratPre P G) F')
+        (⟨biratUp P G A, 1⟩ : PfRootObj (biratPre P G) F') := by
+  refine mem_otri_endRootOneEquiv_symm (F := F') (biratUp P G A) x ?_
+  obtain ⟨⟨hb, hl⟩, -⟩ := hδ
+  refine ⟨?_, ?_⟩
+  · refine (isBaseIdentity_pf_iff (P := biratPre P G) (F := F') x).mpr ?_
+    have hb' : biratBase (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A A x)
+        = biratBase (P := pfRootPre P F) (G := Gpf)
+          (𝟙 (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) := hb
+    rw [biratBase_id] at hb'
+    exact (biratBase_biratPfHom_eq hfi Gpf F' A A x).symm.trans hb'
+  · show pfDeg x = 1
+    have hl' : biratDeg (P := pfRootPre P F) (G := Gpf)
+        (biratPfHom hfi Gpf F' A A x) = 1 := hl
+    exact (biratDeg_biratPfHom_eq hfi Gpf F' A A x).symm.trans hl'
 
 /-- ★★★★★★**`(𝒞^pf)^birat` の自己射は、正の冪で `𝒞^birat` から来る**。
 
@@ -731,9 +796,6 @@ theorem biratDivGp_nsmul_mem_pfImage (hfi : IsOfFrobeniusIsotropicType P)
     (hprop : ∀ n : ℕ+, IsBaseIdentity (biratPre P G) (ζ n)
       ∧ IsFrobeniusType (biratPre P G) ((ζ n : End (biratUp P G A)) : _ ⟶ _))
     (x : End (pfObjOf (biratPre P G) F' (biratUp P G A)))
-    (hx : (endRootOneEquiv (F := F') (biratUp P G A)).symm x
-      ∈ OTri (pfRootPre (biratPre P G) F')
-        (⟨biratUp P G A, 1⟩ : PfRootObj (biratPre P G) F'))
     (hδ : biratPfEndHom hfi Gpf F' A x
       ∈ OTimes (biratPre (pfRootPre P F) Gpf)
         (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) :
@@ -742,6 +804,7 @@ theorem biratDivGp_nsmul_mem_pfImage (hfi : IsOfFrobeniusIsotropicType P)
           End (biratUp (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F))) : _ ⟶ _)
       ∈ AddSubgroup.map (gpMap _ (Pf.of (M := Φ.val (P.toElem.obj A).base)))
         (phiBiratAt P G (biratUp P G A)) := by
+  have hx := otri_of_otimes_biratPfHom hfi Gpf F' A hδ
   obtain ⟨k, α, hk⟩ := biratPfHom_pow_eq_Xi hfi Gpf F' A hisoB hAB hfnB hfnB' ζ hdeg hprop x hx
   refine ⟨k, ?_⟩
   rw [← biratDivGp_pow_otimes hδ ((k : ℕ+) : ℕ), hk]
@@ -783,7 +846,7 @@ def phiBiratOn_pf_mem.src : ABC3.Meta.Source :=
 
 /-- ★★★★★★locator —— `Proposition 5.5, (iv)` の単系の同定の**逆向き**
 (`(Φ^pf)^birat` の元は分母を払えば `Φ^birat` に戻る)。
-★**条つき**: `x` の根つき化身が `𝒪^▷` に入ることを仮定として受けている。 -/
+★仮定は `δ' ∈ 𝒪^×` だけになった(根つき化身の `𝒪^▷` は `otri_of_otimes_biratPfHom` で出る)。 -/
 def biratDivGp_nsmul_mem_pfImage.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iv) — (Φ^pf)^birat の元は分母を払えば Φ^birat に戻る",
