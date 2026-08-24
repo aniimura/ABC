@@ -109,4 +109,39 @@ def untrSeamIsoSec.src : ABC3.Meta.Source :=
     item := "Corollary 5.4 — 縦の矢印の継ぎ目(𝒞^un-tr の段、帳尻の仮定なし)",
     sectionId := "frdi-cor-5-4" }
 
+/-- ★★★★★★★**[FrdI] Corollary 5.4(系全体)** の locator。
+
+原文 (FrdI p.104):
+> there exists a 1-unique functor Ψrlf : C1rlf → C2rlf that fits into a 1-commutative
+
+★★**原文の 4 つの主張と実装の対応**:
+
+| 原文 | 実装 |
+|---|---|
+| `Ψ^rlf : 𝒞₁^rlf ⥤ 𝒞₂^rlf` の**存在** | `psiSc`(`Cor54.lean`) |
+| 図式の下の行(係数の拡大)との 1-可換性 | `scBaseFunctor_comp_psiSc`(`Cor54Compat.lean`) |
+| 縦の矢印 `𝒞^un-tr ⥤ 𝒞^rlf` との 1-可換性 | `untrToSc_comp_psiSc`(同上) |
+| 縦の矢印 `𝒞 ⥤ 𝒞^un-tr` との 1-可換性 | `cToUnTr_comp_psiUnTr`(同上) |
+| ★縦の矢印の**継ぎ目**(`𝒞^un-tr ≌ Model`) | `untrSeamIsoSec`(本ファイル) |
+| **1-一意性**(等式版・同型版) | `psiSc_congr` / `phiIso_ext`(`Cor54Uniq.lean`)、`psiSc_iso_of_baseIso`(`Cor54UniqIso.lean`) |
+| 「Moreover」の **rigidity** | `cor54_rigid_both`(`Cor54Rigid.lean`) |
+| 「Finally」(完全化・実化との両立) | `scBaseHom_compOver_scModelHomOver`(`Cor54Compat.lean`) |
+
+★★**1-一意性の読み方(明記)**: 本実装の 1-一意性は**原文の論証どおり**、
+`Corollary 4.11, (ii)(iii)` の 1-一意性から降ろした形である ——
+`Ψ^rlf` は `(Ψ_𝒟, η)` の**同型類**で決まり(`psiSc_iso_of_baseIso`)、
+`(Ψ_𝒟, η)` は `Corollary 4.11, (ii)(iii)` で 1-一意(`cor_4_11_ii_uniq` / `phiIso_ext`)。
+★**「図式に入る任意の関手が `Ψ^rlf` と同型」というさらに強い読みは本実装には無い** ——
+`𝒞^rlf` の対象は実係数を持ち、縦の矢印 `cToSc` は本質的全射でないので
+`projPrecompIsoGen` の道は通らない(`Cor54Rigid.lean` の ★4 の測定)。
+
+★★★**継ぎ目についての測定(2026-08-25)**: 継ぎ目は
+`modelType_equiv`(`Classical.choice` が基準切断を選ぶ)のままでは**偽**であり、
+`thm_5_2_iv` で切断を明示して `S₂ := Ψ_*(S₁)`(`BaseSection.map`、
+`Corollary 5.7, (i)`)と揃えて初めて成り立つ。 -/
+def cor_5_4.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 104,
+    item := "Corollary 5.4",
+    sectionId := "frdi-cor-5-4" }
+
 end ABC3.Found.FrdI
