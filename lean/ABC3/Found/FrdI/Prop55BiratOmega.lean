@@ -615,4 +615,24 @@ def omegaMap_id.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — Ω : 𝒞^pf ⥤ (𝒞^birat)^pf の材料(map_id まで)",
     sectionId := "frdi-prop-5-5" }
 
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の `Ω` は**関手**である。 -/
+def omegaFunctor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — Ω : 𝒞^pf ⥤ (𝒞^birat)^pf(関手)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の `Ω` は
+**co-angular pre-step を同型に送る**(`𝒞^birat` の普遍性の入力)。 -/
+def omegaFunctor_isIso_of_coaPre.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — Ω は co-angular pre-step を同型に送る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の関手
+`Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf` と、その**対象の上の全射性**。 -/
+def thetaFunctor.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — Θ : (𝒞^pf)^birat ⥤ (𝒞^birat)^pf(対象は全射)",
+    sectionId := "frdi-prop-5-5" }
+
 end ABC3.Found.FrdI
