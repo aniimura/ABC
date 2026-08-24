@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop53Rlf
+import ABC3.Found.FrdI.Prop53Base
 
 /-!
 # [FrdI] `ℚ·Φ^birat` を `Φ^pf` の中で立てる
@@ -187,6 +188,74 @@ noncomputable def gpPfEquivPfT (M : Type w) [AddCommMonoid M] :
   gpEquiv (pfEquivPfT (M := M))
 
 end Bridge
+
+/-! ## ★3. `ℚ·Φ^birat ⟶ ℝ·Φ^birat` —— `Proposition 5.3` の図式の右の縦の矢印の材料 -/
+
+section ToRlf
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ}
+
+/-- ★★自然数倍とスカラー倍は一致する(`Gp` の層で)。 -/
+theorem sSmulGp_natCast {S : Type} [CommSemiring S] {N : Type w} [AddCommMonoid N]
+    [Module S N] (n : ℕ) (z : Gp N) : sSmulGp ((n : S)) z = n • z := by
+  obtain ⟨a, b, rfl⟩ : ∃ a b : N, z = toGp N a - toGp N b := by
+    induction z using AddLocalization.induction_on with
+    | H y => exact ⟨y.1, (y.2 : N), (eq_sub_of_add_eq (mk_add_toGp N y.1 y.2)).symm ▸ rfl⟩
+  rw [sSmulGp_apply, map_sub, gpMap_toGp, gpMap_toGp]
+  show toGp N ((n : S) • a) - toGp N ((n : S) • b) = n • (toGp N a - toGp N b)
+  rw [Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul, smul_sub, toGp_nsmul, toGp_nsmul]
+
+/-- ★★★**`S·Φ^birat` は可除**(`S` が半体なら) —— スカラー倍で閉じているから。 -/
+theorem sPhiBiratOn_of_nsmul_mem {S : Type} [Semifield S] [CharZero S] (G : Frobenioid P) {d : D}
+    {x : Gp (ScT S (Φ.val d))} (k : ℕ+)
+    (h : ((k : ℕ+) : ℕ) • x ∈ sPhiBiratOn S G d) : x ∈ sPhiBiratOn S G d := by
+  have hk : ((((k : ℕ+) : ℕ) : S)) ≠ 0 := by
+    have : ((k : ℕ+) : ℕ) ≠ 0 := k.ne_zero
+    exact_mod_cast Nat.cast_ne_zero.mpr this
+  have h1 : sSmulGp ((((k : ℕ+) : ℕ) : S))⁻¹ (((k : ℕ+) : ℕ) • x) ∈ sPhiBiratOn S G d :=
+    sPhiBiratOn_smul_mem G _ h
+  rwa [← sSmulGp_natCast (S := S) ((k : ℕ+) : ℕ) x, sSmulGp_mul,
+    inv_mul_cancel₀ hk, sSmulGp_one] at h1
+
+/-- ★`Pf M ≃+ ℚ≥0 ⊗_ℕ M` は `Pf.of` を `toSc` へ移す。 -/
+theorem pfEquivPfT_of {M : Type w} [AddCommMonoid M] (m : M) :
+    pfEquivPfT (Pf.of m : Pf M) = toSc (S := NNRat) m := by
+  show pnatInv (1 : ℕ+) ⊗ₜ[ℕ] m = (1 : NNRat) ⊗ₜ[ℕ] m
+  rw [show pnatInv (1 : ℕ+) = (1 : NNRat) from by
+    show (((1 : ℕ+) : ℕ) : NNRat)⁻¹ = 1
+    norm_num]
+
+/-- ★`Φ^pf = Pf Φ` から `Φ^rlf = ℝ≥0 ⊗_ℕ Φ` への標準の写像。 -/
+noncomputable def pfToRlfHom (M : Type w) [AddCommMonoid M] : Pf M →+ ScT NNReal M :=
+  (scBase (NNRat.castHom NNReal)).comp ((pfEquivPfT (M := M)) : Pf M →+ PfT M)
+
+@[simp] theorem pfToRlfHom_of {M : Type w} [AddCommMonoid M] (m : M) :
+    pfToRlfHom M (Pf.of m) = toSc m := by
+  show scBase (NNRat.castHom NNReal) (pfEquivPfT (Pf.of m)) = _
+  rw [pfEquivPfT_of, scBase_toSc]
+
+/-- ★★★★★**`ℚ·Φ^birat` は `ℝ·Φ^birat` へ移る** ——
+`Proposition 5.3` の図式の右の縦の矢印 `𝒞^pf ⟶ 𝒞^rlf` の単系の側。
+
+★分母 `k` を払って `Φ^birat` の像に落とし、`ℝ≥0` 側では
+スカラー倍で割り戻せる(`sPhiBiratOn_of_nsmul_mem`)。 -/
+theorem qPhiBiratOn_map_rlf (G : Frobenioid P) {d : D} {x : Gp (Pf (Φ.val d))}
+    (hx : x ∈ qPhiBiratOn P G d) :
+    gpMap _ (pfToRlfHom (Φ.val d)) x ∈ sPhiBiratOn NNReal G d := by
+  obtain ⟨k, y, hy, hyk⟩ := hx
+  refine sPhiBiratOn_of_nsmul_mem G k ?_
+  have h1 : ((k : ℕ+) : ℕ) • gpMap _ (pfToRlfHom (Φ.val d)) x
+      = gpMap _ (pfToRlfHom (Φ.val d)) (((k : ℕ+) : ℕ) • x) := (map_nsmul _ _ _).symm
+  rw [h1, ← hyk, ← AddMonoidHom.comp_apply, ← gpMap_comp]
+  have hc : (pfToRlfHom (Φ.val d)).comp (Pf.of (M := Φ.val d))
+      = (toSc : Φ.val d →+ ScT NNReal (Φ.val d)) := by
+    ext z
+    exact pfToRlfHom_of z
+  rw [hc]
+  exact mem_sPhiBiratOn_of_phiBiratOn G hy
+
+end ToRlf
 
 /-! ### ★出典の紐付け -/
 
