@@ -325,6 +325,20 @@
       "notationRisk": "high",
       "notationNotes": "★`MilneCFT` と同じ抽出の壊れ方をする。locator は PDF 目視。",
       "note": "★著者が無償公開している講義ノート。分解群・惰性群・Frobenius 元の基礎(Chapter IV)の参照先。"
+    },
+    "Mzk7": {
+      "title": "The Geometry of Anabelioids",
+      "file": "The Geometry of Anabelioids",
+      "author": "S. Mochizuki",
+      "year": 2004,
+      "pdfPages": 57,
+      "pageOffset": 0,
+      "notationRisk": "high",
+      "notationNotes": "★[FrdI] と同じ抽出の壊れ方をする(矢印・script 文字・添字が脱落)。locator は PDF 目視。物理 p.14 の Corollary 1.1.6 は 2026-08-25 に目視確認済み。",
+      "note": "★[FrdI] の参照記号 [Mzk7]。Theorem 6.2, (iv) が引く Corollary 1.1.6(連結 anabelioid の間の 1-arrow の Aut は中心化群)の参照先。",
+      "verifiedPages": [
+        14
+      ]
     }
   }
 }
