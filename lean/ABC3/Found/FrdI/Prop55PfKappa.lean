@@ -799,6 +799,44 @@ def compPf_mk_toHomPf.src : ABC3.Meta.Source :=
     item := "Proposition 5.5, (ii) — 代表元への後合成の計算則",
     sectionId := "frdi-prop-5-5" }
 
+/-- ★★★★★**`𝒞^pf` の分数の基本関係** ——
+添字 `idxMk a₁ a₂` の代表元 `v` に「分母 `a₂`」を後合成すると、
+「分子 `a₁ ≫ v`」の像になる:
+
+```
+HomPf.mk (idxMk a₁ a₂) v ≫ [a₂] = [a₁ ≫ v]
+```
+
+★★**証明の骨**: `F.frobDegSurj` で次数 `deg a₂` の Frobenius 型射 `e` を 1 本選び、
+両辺を添字 `idxMk a₁ e` へ押し上げる(`toHomPf_eq_mk_idxMk`)。
+そこでは値がどちらも `v ≫ e` になる ——
+`frobTransport a₂ e a₂ = e` と `frobTransport a₁ e (a₁ ≫ v) = v ≫ e` は
+どちらも四角形が `rfl` / `Category.assoc` だからである。
+
+★これが `Proposition 5.5, (ii)` の橋渡し(`Θ.map` の全単射性)で要る道具。 -/
+theorem mk_comp_toHomPf_den {X Y V1 V2 : C} (a1 : X ⟶ V1) (a2 : Y ⟶ V2)
+    (ha1 : IsFrobeniusType P a1) (ha2 : IsFrobeniusType P a2)
+    (hd : P.degFr a1 = P.degFr a2) (v : V1 ⟶ V2) :
+    compPf P F (HomPf.mk (idxMk (P := P) (F := F) a1 a2 ha1 ha2 hd) v)
+        (toHomPf (F := F) a2)
+      = toHomPf (F := F) (a1 ≫ v) := by
+  obtain ⟨E', e, he, hde⟩ := F.frobDegSurj V2 (P.degFr a2)
+  have h2 : frobTransport (F := F) a2 ha2 e he hde.symm a2 = e :=
+    frobTransport_eq a2 ha2 e he hde.symm a2 e rfl
+  have h1 : frobTransport (F := F) a1 ha1 e he (hd.trans hde.symm) (a1 ≫ v) = v ≫ e :=
+    frobTransport_eq a1 ha1 e he (hd.trans hde.symm) (a1 ≫ v) (v ≫ e)
+      (Category.assoc _ _ _)
+  rw [toHomPf_eq_mk_idxMk a2 ha2 e he hde.symm a2,
+    compPf_mk_pair a1 a2 e ha1 ha2 he hd hde.symm v _,
+    toHomPf_eq_mk_idxMk a1 ha1 e he (hd.trans hde.symm) (a1 ≫ v)]
+  exact congrArg (HomPf.mk _) ((congrArg (fun t => v ≫ t) h2).trans h1.symm)
+
+/-- ★★★★★locator —— `𝒞^pf` の分数の基本関係(分母の後合成)。 -/
+def mk_comp_toHomPf_den.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 𝒞^pf の分数の基本関係(分母の後合成)",
+    sectionId := "frdi-prop-5-5" }
+
 /-! ## ★14. 残る図式追跡の材料
 
 ★★第 21 弾で書き下した等式の材料をここに置く。
