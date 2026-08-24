@@ -26,6 +26,37 @@ import ABC3.Found.FrdI.Prop55BiratPf
 根 `n` を一般にした版(`scaleRootEquiv` で根を揃える段)が要る。
 ★un-tr の側(`Prop55UntrFun.lean`)では両側の対象が一致していたので
 そこは無料だったが、birat の側はそうではない。
+
+## ★★★★測って分かったこと(2026-08-25)—— 源を広げるしかない
+
+★**この関手(源が根 1)は原理的に本質的全射にならない**:
+`⟨A,n⟩ ≅ ⟨B,1⟩` は Frobenius 次数が不変量なので起きない。
+`pfKappa A n : ⟨A,n⟩ ⟶ ⟨A,1⟩` は次数 `n` であり、
+★**birat 化は次数 `n` の射を可逆にしない**(可逆にするのは底同型・単元の側)。
+したがって**源を `PfRootObj (biratPre P G) F'` 全体へ広げる**しかない。
+
+★★段取りは `Prop55BiratPf.lean` の ★(1425 行あたり)にある 4 段そのもの:
+
+```
+Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 定義
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},1⟩, ⟨B^{(n)},1⟩)   -- biratPfHomEquiv(★済)
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},k⟩, ⟨B^{(n)},k⟩)   -- ★★Σ_k を birat へ降ろす(残)
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A,n⟩, ⟨B,m⟩)               -- pfRoot_exists_iso_root(★済)
+```
+
+* 2 段目 …… `biratPfHomEquiv`(本ファイルの `biratPfFunctor`)—— **済**
+* 4 段目 …… `⟨A,n⟩ ≅ ⟨A^{(m)}, m·n⟩`(在庫 `pfRoot_exists_iso_root`)を
+  `toBiratCat` で送るだけ —— **済**(関手は同型を同型へ送る)
+* ★★3 段目だけが残る —— `scaleRootEquiv`(`𝒞^pf ≌ 𝒞^pf`、**在庫**)を
+  **birat 化へ降ろす**こと。`Σ_k` は `obj` を変えず `root` を `k` 倍し、
+  射は `rtRootIso` の共役なので**次数と `Div` を保つ** ——
+  したがって Frobenioid の自己同値であり、birat 化は関手的なはずである。
+  ★要るのは「Frobenioid の自己同値が birat 化へ降りる」1 本
+  (在庫 `psiBiratCor`(`Cor411Birat.lean`)が同じ形をしている)。
+
+★あわせて必要: `F'` の根の選び方を `F` のものと揃えること
+(`rtObj (biratPre P G) F' A d = rtObj P F A d`)。
+★★これは `Corollary 5.4` の継ぎ目で基準切断を揃えたのと**同じ型の手当て**である。
 -/
 
 namespace ABC3.Found.FrdI
