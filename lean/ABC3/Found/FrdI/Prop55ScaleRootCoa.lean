@@ -43,6 +43,7 @@ section ScaleRootCoa
 
 variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
   {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+  [IsConnected D]
 
 /-- ★★★★★**`Σ_k` は co-angular 性を保つ**。
 
@@ -132,6 +133,37 @@ noncomputable def scaleRootBiratHomEquiv (k : ℕ+) (Gpf : Frobenioid (pfRootPre
     ⟨fun _ _ h => (scaleRootBirat (F := F) k Gpf).map_injective h,
       fun g => (scaleRootBirat (F := F) k Gpf).map_surjective g⟩
 
+/-! ## ★3. 4 段を繋ぐ —— **一般の根での射の全単射** -/
+
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii) の射の全単射(一般の根)** ——
+
+```
+Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 定義
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},1⟩, ⟨B^{(n)},1⟩)   -- biratPfHomEquiv
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},k⟩, ⟨B^{(n)},k⟩)   -- scaleRootBiratHomEquiv
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A,n⟩, ⟨B,m⟩)               -- pfRoot_exists_iso_root
+```
+
+★★これが `Prop55BiratPfFun.lean` が「根 1 の場合しか無い」と書いていた所の一般化である。
+★左辺の `A^{(m)}` は **`F` の根**で書いてある —— `F'` の根と揃える手当ては
+呼び出し側(`rtObj (biratPre P G) F' = rtObj P F`)で行う。 -/
+noncomputable def biratPfHomEquivRoot (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (A B : C) (n m k : ℕ+) (hk : k * 1 = n * m) (hk' : k * 1 = m * n) :
+    HomPf (biratPre P G) F' (biratUp P G (rtObj P F A m)) (biratUp P G (rtObj P F B n))
+      ≃ HomBirat (pfRootPre P F) Gpf (⟨A, n⟩ : PfRootObj P F) ⟨B, m⟩ :=
+  haveI := (pfRoot_exists_iso_root (F := F) A n m (k * 1) hk).choose_spec
+  haveI := (pfRoot_exists_iso_root (F := F) B m n (k * 1) hk').choose_spec
+  (biratPfHomEquiv hfi hiso Gpf F' (rtObj P F A m) (rtObj P F B n)).trans
+    ((scaleRootBiratHomEquiv (F := F) k Gpf
+        (⟨rtObj P F A m, 1⟩ : PfRootObj P F) (⟨rtObj P F B n, 1⟩ : PfRootObj P F)).trans
+      (Iso.homCongr
+        ((toBiratCat (pfRootPre P F) Gpf).mapIso
+          (asIso (pfRoot_exists_iso_root (F := F) A n m (k * 1) hk).choose)).symm
+        ((toBiratCat (pfRootPre P F) Gpf).mapIso
+          (asIso (pfRoot_exists_iso_root (F := F) B m n (k * 1) hk').choose)).symm))
+
 end ScaleRootCoa
 
 /-! ### ★出典の紐付け -/
@@ -141,6 +173,20 @@ end ScaleRootCoa
 def coaPreProp_scaleRootHom.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (ii) — Σ_k は co-angular pre-step を保つ",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の**一般の根での射の全単射**
+(4 段の鎖を繋いだもの)。 -/
+def biratPfHomEquivRoot.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 一般の根での射の全単射(4 段の鎖)",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★★locator —— `Corollary 4.10` の `Ψ^birat` に `Σ_k` を流したもの
+(`Proposition 5.5, (ii)` の 3 段目)。 -/
+def scaleRootBirat.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — Σ_k を (𝒞^pf)^birat へ降ろす(圏同値)",
     sectionId := "frdi-prop-5-5" }
 
 end ABC3.Found.FrdI
