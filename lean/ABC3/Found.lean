@@ -207,6 +207,7 @@ import ABC3.Found.FrdI.Prop55PfArbOne
 import ABC3.Found.FrdI.Prop55BiratPfFun
 import ABC3.Found.FrdI.Prop55RlfNd
 import ABC3.Found.FrdI.Cor54Uniq
+import ABC3.Found.FrdI.Cor54UniqIso
 import ABC3.Found.FrdI.Cor54Seam
 import ABC3.Found.FrdI.Cor54SeamUnTr
 import ABC3.Found.FrdI.Cor54SeamCls

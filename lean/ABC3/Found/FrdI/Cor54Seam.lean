@@ -301,6 +301,53 @@ noncomputable def modelDataHomOverElemIso (F : ModelDataHomOver ΨB M M₂)
 
 end HomOverElem
 
+/-! ## ★5. 底の関手を同型で取り替えても誘導関手は同型 -/
+
+section HomOverIso
+
+variable {D : Type u} [Category.{v} D] {D₂ : Type u} [Category.{v} D₂]
+  {M : ModelData.{v, u, w} D} {M₂ : ModelData.{v, u, w} D₂}
+
+/-- ★★★★★★**`Ψ^model` は `(Ψ_𝒟, η)` の同型類だけで決まる** ——
+底の関手 `Ψ_𝒟` を同型で取り替え、`η` をそれに合わせて取り替えても、
+誘導関手は**同型**である。
+
+★★これが `Corollary 5.4` の **1-一意性**の要である ——
+`Corollary 4.11, (ii)` が与える `Ψ_𝒟` の 1-一意性は**同型**であって等式ではないので、
+`psiSc_congr`(等式版)だけでは足りない。
+
+★`u` の帳尻は `hom_ext_of_divB_inj` により自動、
+対象の類の帳尻は `hphi` を `Gp` へ持ち上げるだけで `u = 0` で足りる。 -/
+noncomputable def modelDataHomOverIsoOfBase
+    (hinj : ∀ d : D₂, Function.Injective (M₂.divB d))
+    (neg : ∀ d : D₂, M₂.bmon.val d → M₂.bmon.val d)
+    (hneg : ∀ (d : D₂) (x : M₂.bmon.val d), neg d x + x = 0)
+    {ΨB ΨB' : D ⥤ D₂} (θ : ΨB ≅ ΨB')
+    (F : ModelDataHomOver ΨB M M₂) (F' : ModelDataHomOver ΨB' M M₂)
+    (hphi : ∀ (d : D) (x : M.phi.val d),
+      F.phiHom d x = M₂.phi.map (θ.hom.app d) (F'.phiHom d x)) :
+    F.functor ≅ F'.functor :=
+  ModelData.squareOfBaseOfInj hinj neg hneg
+    (fun A => θ.app A.base)
+    (fun {_ _} f => θ.hom.naturality f.base)
+    (fun {A _} f => hphi A.base f.div)
+    (fun {_ _} _ => rfl)
+    (fun _ => 0)
+    (fun A => by
+      have hcomp : F.phiHom A.base
+          = (M₂.phi.map (θ.hom.app A.base)).comp (F'.phiHom A.base) :=
+        AddMonoidHom.ext (hphi A.base)
+      simp only [map_zero, add_zero]
+      show gpMap _ (F.phiHom A.base) A.cls
+        = M₂.phi.gpMapOn (θ.hom.app A.base) (gpMap _ (F'.phiHom A.base) A.cls)
+      rw [hcomp]
+      show gpMap _ ((M₂.phi.map (θ.hom.app A.base)).comp (F'.phiHom A.base)) A.cls
+        = gpMap _ (M₂.phi.map (θ.hom.app A.base)) (gpMap _ (F'.phiHom A.base) A.cls)
+      rw [gpMap_comp]
+      rfl)
+
+end HomOverIso
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★★locator —— `Corollary 5.4` の縦の矢印の継ぎ目
