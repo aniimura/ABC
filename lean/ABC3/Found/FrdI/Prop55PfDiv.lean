@@ -227,6 +227,41 @@ theorem hom_pf_pow (hiso : ∀ X : C, IsIsotropic P X) {A : C}
   rw [hx', ← map_pow]
   exact congrArg (endRootOneEquiv (F := F) A) h
 
+/-- ★★★★★**同上を「自然な関手の像」の形で** —— 添字 1 の `otriPfMk` は
+`toRootHom`(自然な関手 `𝒞 → 𝒞^pf` が定める写像)そのもの(`otriPfMk_one`)。 -/
+theorem otri_pf_pow_toRootHom (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (f : OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    ∃ (k : ℕ+) (α : OTri P A),
+      ((f : End (⟨A, 1⟩ : PfRootObj P F)) ^ ((k : ℕ+) : ℕ))
+        = toRootHom (F := F) ((α : End A) : A ⟶ A) := by
+  obtain ⟨k, α, h⟩ := otri_pf_pow hiso hA hfn hfn' ζ hdeg hprop f
+  exact ⟨k, α, h.trans (otriPfMk_one hiso (hprop 1).2
+    (congrArg (fun t : End A => (t : A ⟶ A)) (map_one ζ)) ((α : End A)))⟩
+
+/-- ★★★★★同上、根なし版。 -/
+theorem hom_pf_pow_toRootHom (hiso : ∀ X : C, IsIsotropic P X) {A : C}
+    (hA : IsFrobeniusTrivial P A)
+    (hfn : IsFrobeniusNormalized P A) (hfn' : IsFrobeniusNormalized P (rtObj P F A 1))
+    (ζ : ℕ+ →* End A) (hdeg : ∀ n : ℕ+, P.degFr ((ζ n : End A) : A ⟶ A) = n)
+    (hprop : ∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P ((ζ n : End A) : A ⟶ A))
+    (x : End (pfObjOf P F A))
+    (hx : (endRootOneEquiv (F := F) A).symm x
+      ∈ OTri (pfRootPre P F) (⟨A, 1⟩ : PfRootObj P F)) :
+    ∃ (k : ℕ+) (α : OTri P A),
+      x ^ ((k : ℕ+) : ℕ)
+        = endRootOneEquiv (F := F) A (toRootHom (F := F) ((α : End A) : A ⟶ A)) := by
+  obtain ⟨k, α, h⟩ := otri_pf_pow_toRootHom hiso hA hfn hfn' ζ hdeg hprop
+    ⟨(endRootOneEquiv (F := F) A).symm x, hx⟩
+  refine ⟨k, α, ?_⟩
+  have hx' : x = endRootOneEquiv (F := F) A ((endRootOneEquiv (F := F) A).symm x) :=
+    ((endRootOneEquiv (F := F) A).apply_symm_apply x).symm
+  rw [hx', ← map_pow]
+  exact congrArg (endRootOneEquiv (F := F) A) h
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `Proposition 5.5, (i)` の零因子の側
