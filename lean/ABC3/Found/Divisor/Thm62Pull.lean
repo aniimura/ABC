@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Divisor.NormPhiFunctor
 import ABC3.Found.Divisor.NormMapBase
+import ABC3.Found.Divisor.Ex61Model
 
 /-!
 # [FrdI] Theorem 6.2, (i) —— 底が動くときの `Φ(L)^gp` の引き戻し
@@ -263,6 +264,24 @@ theorem ffMap_square {X Y Z W : Scheme.{u}}
   have h2 : ffMap (c ≫ e) t = ffMap c (ffMap e t) := by rw [ffMap_comp]; rfl
   rw [← h1, ← h2, ffMap_congr hsq]
 
+/-! ## ★4. `divCompat` の中身 —— 主因子の引き戻しは引き戻しの主因子 -/
+
+/-- ★★★★★★**主因子の引き戻しは引き戻しの主因子** ——
+`div(g^*f) = g^*(div f)`。
+
+★★これが `ModelDataHomOver` の `divCompat`(`Div_B` との両立)の中身である。
+★中身は 1 行 —— **主因子は `⊤` の上で `f` 自身を局所方程式に持つ**ので、
+`pullCoeff_eq` をそのまま当てればよい。 -/
+theorem pullCoeff_weilDivOfFn {W₁ W₂ : Scheme.{u}} (π : W₂ ⟶ W₁) [IsDominant π]
+    [IsIntegral W₁] [IsIntegral W₂] [IsLocallyNoetherian W₁] [IsLocallyNoetherian W₂]
+    [CompactSpace W₁]
+    (hn₂ : IsNormalScheme W₂) (hn₁ : IsNormalScheme W₁)
+    {f : W₁.functionField} (hf : f ≠ 0)
+    (x : PrimeDivisorPt W₂)
+    (hdimx : ringKrullDim (W₁.presheaf.stalk (π.base x.1)) ≤ 1) :
+    pullCoeff π hn₂ hn₁ (isCartierDiv_weilDivOfFn hn₁ hf) x = ordPt W₂ hn₂ x (ffMap π f) :=
+  pullCoeff_eq π hn₂ hn₁ _ x hdimx hf (U := ⊤) trivial (fun _ _ => rfl)
+
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
 def phiPullBase.src : Source :=
@@ -328,5 +347,16 @@ def ffMap_square.src : Source :=
 def ffMap_square.needs : List ProofObligation :=
   [ .citation "[ABC3]" "ffMap_comp"
       (.inProject "ABC3" "ABC3.Found.Divisor.ffMap_comp") 110 ]
+
+def pullCoeff_weilDivOfFn.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 主因子の引き戻しは引き戻しの主因子(divCompat)",
+    sectionId := "frdi-thm-6-2" }
+
+def pullCoeff_weilDivOfFn.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isCartierDiv_weilDivOfFn(主因子は ⊤ の上で f 自身を局所方程式に持つ)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.isCartierDiv_weilDivOfFn") 110,
+    .citation "[ABC3]" "pullCoeff_eq"
+      (.inProject "ABC3" "ABC3.Found.Divisor.pullCoeff_eq") 110 ]
 
 end ABC3.Found.Divisor
