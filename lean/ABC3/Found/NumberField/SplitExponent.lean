@@ -53,7 +53,7 @@ open IntermediateField in
 ★原始元 `α`（`Field.exists_primitive_element`）は整とは限らないが、
 `exists_integral_multiple` で分母を払った `β = m • α` は整で、
 `m` が `ℚ` で可逆なので `ℚ⟮β⟯ = ℚ⟮α⟯ = ⊤` である。 -/
-theorem exists_integral_powerBasis (N : Type) [Field N] [NumberField N] :
+theorem exists_integral_powerBasis (N : Type*) [Field N] [NumberField N] :
     ∃ B : PowerBasis ℚ N, IsIntegral ℤ B.gen := by
   classical
   obtain ⟨α, hα⟩ := Field.exists_primitive_element ℚ N
@@ -84,7 +84,7 @@ theorem exists_integral_powerBasis (N : Type) [Field N] [NumberField N] :
 /-! ## ★段 3〜5. 判別式が導手に入る整数を与える -/
 
 /-- ★**`𝓞 N` の中の `ℤ[θ]` は `N` の中の `ℤ[θ]` から読み取れる**（包含が単射なので）。 -/
-theorem mem_adjoin_of_coe_mem (N : Type) [Field N] [NumberField N] (θ x : 𝓞 N)
+theorem mem_adjoin_of_coe_mem (N : Type*) [Field N] [NumberField N] (θ x : 𝓞 N)
     (h : (x : N) ∈ Algebra.adjoin ℤ ({(θ : N)} : Set N)) :
     x ∈ Algebra.adjoin ℤ ({θ} : Set (𝓞 N)) := by
   have hinj : Function.Injective (algebraMap (𝓞 N) N) := RingOfIntegers.coe_injective
@@ -99,7 +99,7 @@ theorem mem_adjoin_of_coe_mem (N : Type) [Field N] [NumberField N] (θ x : 𝓞 
 ★中身は `disc(θ) · 𝓞 N ⊆ ℤ[θ]`（mathlib の `discr_mul_isIntegral_mem_adjoin`）で、
 `disc(θ)` は `0` でない整数（`discr_isIntegral` ＋ `discr_isUnit_of_basis`）だから
 導手 `conductor ℤ θ` が `ℤ` と自明でなく交わる。 -/
-theorem exponent_ne_zero_of_powerBasis (N : Type) [Field N] [NumberField N]
+theorem exponent_ne_zero_of_powerBasis (N : Type*) [Field N] [NumberField N]
     (B : PowerBasis ℚ N) (hgen : IsIntegral ℤ B.gen) :
     _root_.RingOfIntegers.exponent (⟨B.gen, hgen⟩ : 𝓞 N) ≠ 0 := by
   classical
@@ -134,7 +134,7 @@ theorem exponent_ne_zero_of_powerBasis (N : Type) [Field N] [NumberField N]
   exact hn0 (Ideal.mem_bot.mp hmem2)
 
 /-- ★★★**どの数体にも `exponent ≠ 0` の代数的整数がある**。 -/
-theorem exists_exponent_ne_zero (N : Type) [Field N] [NumberField N] :
+theorem exists_exponent_ne_zero (N : Type*) [Field N] [NumberField N] :
     ∃ θ : 𝓞 N, _root_.RingOfIntegers.exponent θ ≠ 0 := by
   obtain ⟨B, hgen⟩ := exists_integral_powerBasis N
   exact ⟨⟨B.gen, hgen⟩, exponent_ne_zero_of_powerBasis N B hgen⟩
@@ -144,7 +144,7 @@ theorem exists_exponent_ne_zero (N : Type) [Field N] [NumberField N] :
 /-- ★★★★★★**`ℚ` 上 Galois な数体で完全分解する素数は無限個**（★仮定なし）。
 
 ★★**Chebotarev の密度定理は 1 度も使わない**。 -/
-theorem infinite_splitsCompletely_of_isGalois (N : Type) [Field N] [NumberField N]
+theorem infinite_splitsCompletely_of_isGalois (N : Type*) [Field N] [NumberField N]
     [IsGalois ℚ N] :
     {p : ℕ | p.Prime ∧
       (primesOver (span {(p : ℤ)}) (𝓞 N)).ncard = Module.finrank ℚ N}.Infinite := by
@@ -155,7 +155,7 @@ theorem infinite_splitsCompletely_of_isGalois (N : Type) [Field N] [NumberField 
 
 ★これが `Theorem 6.4, (i)` の「数体の自己同型で全素点を固定するものは恒等」の
 唯一残っていた入力である。 -/
-theorem exists_splitsCompletely_prime (N : Type) [Field N] [NumberField N] [IsGalois ℚ N] :
+theorem exists_splitsCompletely_prime (N : Type*) [Field N] [NumberField N] [IsGalois ℚ N] :
     ∃ p : ℕ, p.Prime ∧
       (primesOver (span {(p : ℤ)}) (𝓞 N)).ncard = Module.finrank ℚ N :=
   (infinite_splitsCompletely_of_isGalois N).nonempty

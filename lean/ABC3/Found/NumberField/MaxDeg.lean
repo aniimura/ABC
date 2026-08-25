@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.NumberField.SplitSeparable
+import ABC3.Found.NumberField.SplitExponent
 import ABC3.Found.Divisor.ArithDivisor
 
 /-!
@@ -133,6 +134,29 @@ theorem finrank_isGreatest_deg [IsGalois ℚ L] (θ : 𝓞 L)
     exact degAtPrime_le q
   · exact degAtInfinity_le
 
+
+/-! ## ★★★★★仮定を落とした形（2026-08-25）
+
+`SplitExponent.lean` の `exists_exponent_ne_zero`（判別式で `hexp` を回収）により、
+★以下は **`θ` も `hexp` も要らない**。 -/
+
+variable (L) in
+/-- ★★★**完全分解する素数で最大値が達成される**（★仮定なし）。 -/
+theorem exists_degAtPrime_eq_finrank' [IsGalois ℚ L] :
+    ∃ p : ℕ, p.Prime ∧ degAtPrime L p = Module.finrank ℚ L := by
+  obtain ⟨θ, hexp⟩ := exists_exponent_ne_zero L
+  exact exists_degAtPrime_eq_finrank θ hexp
+
+variable (L) in
+/-- ★★★★★★**[FrdI] Theorem 6.4, (iv) の (a)** —— `[L:ℚ]` は `deg(L,v)` の**最大値**
+（★仮定なし）。
+
+★★**Tchebotarev の密度定理は 1 度も使わない**。 -/
+theorem finrank_isGreatest_deg' [IsGalois ℚ L] :
+    IsGreatest (degSet L) (Module.finrank ℚ L) := by
+  obtain ⟨θ, hexp⟩ := exists_exponent_ne_zero L
+  exact finrank_isGreatest_deg θ hexp
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★locator —— `Theorem 6.4, (iv)` の (a)(`[L:ℚ] = max_v deg(L,v)`)。 -/
@@ -140,5 +164,18 @@ def finrank_isGreatest_deg.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 116,
     item := "Theorem 6.4, (iv) — [L:ℚ] は deg(L,v) の最大値(Tchebotarev を使わない)",
     sectionId := "frdi-thm-6-4" }
+
+
+/-- ★★★★locator —— `Theorem 6.4, (iv)` の (a)(仮定なし)。 -/
+def finrank_isGreatest_deg'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 116,
+    item := "Theorem 6.4, (iv) — [L:ℚ] は deg(L,v) の最大値(仮定なし・Tchebotarev 不使用)",
+    sectionId := "frdi-thm-6-4" }
+
+def finrank_isGreatest_deg'.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_exponent_ne_zero(判別式で hexp を回収)"
+      (.inProject "ABC3" "ABC3.Found.NF.exists_exponent_ne_zero") 116,
+    .citation "[ABC3]" "finrank_isGreatest_deg(θ・hexp つきの形)"
+      (.inProject "ABC3" "ABC3.Found.NF.finrank_isGreatest_deg") 116 ]
 
 end ABC3.Found.NF
