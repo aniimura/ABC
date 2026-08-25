@@ -22410,3 +22410,57 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-565 ★★★★★★★★共線性を三つの整除性に落とす(第 252 ブロック)
+
+`Found/GaloisRep/CollDivisibility.lean`。
+
+### ★★★変数の素元性を一般の位置で取る
+
+第 224 では `ℤ[A,W]` の `X 0`・`X 1` について、`finSuccEquiv` を 1 段・2 段と
+使い分けて素元性を示した。★3 変数になるとこの手は `X 2` で 3 段になり、
+`Polynomial.prime_C_iff` の入れ子が深くなる。
+
+★★★そこで **`Equiv.swap i 0` による `renameEquiv` で任意の変数を `X 0` に運ぶ**形に
+一般化した(`prime_X_fin`)。`X 0` の素元性だけ `finSuccEquiv` で示せば、あとは
+変数の名前替えで済む——**変数の個数にも位置にもよらない**。第 224 の 2 本を
+1 本に置き換えられる形になった。
+
+### ★★★互いに素であること
+
+`IsCoprime`(Bezout)では駄目で `IsRelPrime` を使う点は第 224 と同じ。
+必要なのは `¬(U | V)`、`¬(U | W)`、`¬(V | W)` の 3 つで、どれも `collEval` に
+整数を代入して `1 = 0` を出すだけ。3 つを合わせる `cQ_pow_dvd` は
+`IsRelPrime.mul_left` で `(U^n V^n)` と `W^n` が互いに素になることを使う。
+
+### ★★★★★★★★到達点
+
+    collDefect u v w q = 0
+      <= 分子が U^n・V^n・W^n で割れる(万有な環の中で)
+
+★葉 (b) では二つだったものが三つになっただけで、形は第 224 の
+`tateDefect_eq_zero_of_base` と同じである。
+
+| 定理 | 内容 |
+|---|---|
+| `prime_X_fin` | ★★★**任意の変数が素元**(名前替えで一般化) |
+| `isRelPrime_of_prime_not_dvd` | ★★素元で割り切らないなら互いに素 |
+| `cQ_pow_dvd` | ★★★三つの整除性から `(UVW)^n` |
+| `coll_dvd_pow_of_base` | ★★★★局所化での整除性は分子から |
+| `collDefect_eq_zero_of_base` | ★★★★★★★★**三つの整除性に落ちた** |
+
+### 残り(降下の設計)
+
+第 239 の降下は `ℤ[A,W] = ℤ[a][w]` で、係数が **1 変数**多項式だったので
+`poly_eq_zero_of_infinite_zeros` が直接効いた。3 変数では
+`ℤ[U,V,W] = ℤ[U,V][W]` となり係数が **2 変数**になるので、
+★「2 変数多項式が無限集合の直積の上で消えるなら 0」を 1 枚はさむ必要がある
+(1 変数の議論を 2 回入れ子にすればよい)。
+
+1. 2 変数の消滅補題。
+2. ℂ 側の評価(第 231 の `norm_tateXanalytic_sub_trunc` が 3 点にそのまま効く)。
+3. `W` 側の降下、`U`・`V` 側は変数の入れ替えの自己同型で。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
