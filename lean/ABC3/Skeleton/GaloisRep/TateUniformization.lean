@@ -1,4 +1,5 @@
 import ABC3.Found.GaloisRep.TateNonDeg
+import ABC3.Found.GaloisRep.TateDvrSetup
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 /-!
@@ -34,6 +35,23 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 ★★★合計 **50–150 ブロック**と見積もる(2026-08-20)。
 
+## ★★★★★★★★★★★2026-08-26 —— **証明された**
+
+`ABC3.Found.GaloisRep.tate_uniformization_baseChange`(第 301 ブロック)で閉じた。
+★通った道は上の (a)-(e) とは**別**である。
+
+| 見積もりの道 | 実際に通った道 |
+|---|---|
+| (a) 両側級数の収束(完備付値体) | **`I` 進完備性だけ**——付値も収束も要らない(第 245-) |
+| (b) Weierstrass 方程式(`q` 展開) | **普遍環への降下 + 分母払い**(第 274-277) |
+| (c) 準同型(加法公式との照合) | **共線性の行列式**(第 278-297) |
+| (d) 核が `q^ℤ` | 基本領域 `0 ≤ v(u) < v(q)`(第 284-285) |
+| (e) 全射性(形式群 + Hensel) | **`y/x^2` の整性**——Newton 折れ線を使わない(第 287-289) |
+
+★★★★合計 **57 ブロック**(第 245-301)。見積もり **50-150** の下限に収まった。
+★★付値を使うのは最後の 1 ブロック(第 301)だけで、そこでも
+**2 つの不等式の橋**にしか使っていない。
+
 ## ★★これは「壁」ではない
 
 足場が無いだけである——**mathlib に Tate 曲線が 0 件**だから、
@@ -61,8 +79,8 @@ theorem tate_uniformization {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValu
     Nonempty (((tateCurveAt q hq).baseChange K).toAffine.Point ≃+
       Additive (Kˣ ⧸ Subgroup.zpowers
         (Units.mk0 (algebraMap R K q)
-          ((map_ne_zero_iff _ (IsFractionRing.injective R K)).2 hq0)))) := by
-  sorry
+          ((map_ne_zero_iff _ (IsFractionRing.injective R K)).2 hq0)))) :=
+  tate_uniformization_baseChange hq hq0
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
