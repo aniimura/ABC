@@ -3709,11 +3709,11 @@
           "deps": [
             "thm64-iv-cheb"
           ],
-          "status": "skeleton",
-          "size": "★大",
-          "note": "\n\n★★★★2026-08-25（**スケルトンを置いた**）：\n★★**類体論は要らない**（2026-08-20 の測定のとおり）。使うのは\n`Skeleton/NumberField/Chebotarev.lean` の\n`nonempty_algHom_of_splitsCompletely_subset`（完全分解版）だけである。",
-          "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean",
-          "decl": "ABC3.Skeleton.Thm64.deg_eq_one_of_galois"
+          "status": "done",
+          "size": "中(閉じた。類体論なし)",
+          "note": "\n\n★★★★2026-08-25（**スケルトンを置いた**）：\n★★**類体論は要らない**（2026-08-20 の測定のとおり）。使うのは\n`Skeleton/NumberField/Chebotarev.lean` の\n`nonempty_algHom_of_splitsCompletely_subset`（完全分解版）だけである。\n\n## ★★★★★★★2026-08-25(**閉じた**)\n\n`Skeleton/FrdI/Thm64Deg.lean` の `deg_eq_one_of_galois` から `sorry` が消えた。\n中身は 2 本:\n\n### ★`deg = 1`(`deg_eq_one_of_degOne_both`)\n\n素点の対応 `f : V(L₁) ≃ V(L₂)` と次数の対応 `d₂(f p) = c·d₁(p)` の下で、\n\n* `d₁(p₀) = 1` なる `p₀` を取ると `d₂(f p₀) = c` は**正整数**\n* `d₂(q₀) = 1` なる `q₀` を取ると `1 = c·d₁(f⁻¹ q₀)`、つまり `c = 1/d₁(f⁻¹ q₀)`\n* 積が `1` なのでどちらも `1`\n\n★次数 1 の素点(= 完全分解する素数)が両側にあることは `cheb-spl-infinite`(済)。\n\n### ★★`L₁ ≅ L₂`(`nonempty_algEquiv_of_SplQ_eq`)\n\n両方を `ℚ̄` へ埋め込み、合成体の中で `eq_of_SplQ_eq` を当てる。\n`Spl` が体の同型で不変(`SplQ_congr`)なので埋め込みの取り方によらない。\n\n### ★★★★逸脱の記録\n\n旧版の仮定は `_hgal : ∀ σ, True`(**空虚**)と\n`HeightOneSpectrum (𝓞 ℚ)` 上の完全分解の一致だった。\n★本版は `Theorem 6.4` の兄弟(`deg_rat_of_six_exp`)と**同じ流儀**で、\nFrobenioid 側のデータ(素点の対応 `f` と次数の対応 `hd`)を**明示の仮定**として受ける。\n★底を `ℚ` の有理素数(`Nat.Primes`)に固定したのも同じ理由である。\n\n★★**Artin の相互法則は使っていない**(完全分解の場合だけで済むため)。",
+          "lean": "ABC3/Skeleton/FrdI/Thm64Deg.lean + ABC3/Found/NumberField/SplCompositum.lean",
+          "decl": "ABC3.Skeleton.Thm64.deg_eq_one_of_galois / ABC3.Found.NF.deg_eq_one_of_degOne_both / ABC3.Found.NF.nonempty_algEquiv_of_SplQ_eq / ABC3.Found.NF.SplQ_congr / ABC3.Found.NF.eq_of_SplQ_eq"
         }
       ]
     },
