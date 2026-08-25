@@ -451,3 +451,32 @@ theorem asIdeal_resHOS (V) :
 そこでは `((algebraMap (𝓞 L) (𝓞 M)) x : M) = algebraMap L M (x : L)` が `rfl` である
 （mathlib の `RingOfIntegers.instAlgebra` はそう作られている）。
 ★同じ式を `L = M` に代入した文脈で**書き直す**と `Algebra.id` を拾って壊れる。
+
+## `bernoulli` の値は `decide` でも `norm_num [bernoulli]` でも出ない
+
+**失敗形**:
+
+```lean
+example : (bernoulli 4 : ℚ) = -1/30 := by decide
+-- Decidable インスタンスが `bernoulli' 4` の再帰で止まる
+example : (bernoulli 6 : ℚ) = 1/42 := by norm_num [bernoulli]
+-- `bernoulli.eq_1` と `bernoulli'_def` が looping simp theorem になり maxRecDepth
+```
+
+★原因: `bernoulli'` は `bernoulli' n = 1 - ∑_{k<n} C(n,k)/(n-k+1) * bernoulli' k` という
+**自分自身を含む** well-founded 再帰。simp に渡すと展開が止まらない。
+
+**対処**: `bernoulli'_def` を **1 回だけ `rw`** して、下の値は**既に証明した補題**として
+`norm_num` に渡す。`Nat.choose` も明示的に渡さないと `Nat.choose 4 2` が残る。
+
+```lean
+theorem bernoulli'_four : (bernoulli' 4 : ℚ) = -1/30 := by
+  rw [bernoulli'_def]
+  norm_num [Finset.sum_range_succ, bernoulli'_zero, bernoulli'_one, bernoulli'_two,
+    bernoulli'_three, Nat.choose]
+```
+
+`n = 3, 4, 5, 6` と 1 段ずつ積み上げる。`bernoulli n` へは
+`bernoulli_eq_bernoulli'_of_ne_one`(`n ≠ 1`)で移る。
+★`riemannZeta 6` も mathlib に無いので、`riemannZeta_two_mul_nat` と `B₆` から作る
+(`riemannZeta_two`・`riemannZeta_four` はある)。

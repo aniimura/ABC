@@ -20655,3 +20655,69 @@ mathlib の `qExpansion_identity` を `k = 2` で使うと右辺は `S_{n>=0} n^
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-533 ★★★★★★★★解析側の Tate 方程式が出た(第 220 ブロック)
+
+`Found/GaloisRep/TateEquationAnalytic.lean`。
+
+    Y^2 + XY = X^3 - 5 s3 * X - (5 s3 + 7 s5)/12
+
+★★これは形式側の `tateA4 = -5*sigmaSeries 3`、`12*tateA6 = -(5 s3 + 7 s5)`
+(第 94-112 ブロック)と**同じ形**である。道 β の解析側はこれで閉じた。
+
+### ★★★★★変数変換
+
+`℘'^2 = 4℘^3 - g2*℘ - g3` に次を入れて `(2 pi i)^6` で割る:
+
+| 置き換え | 出どころ |
+|---|---|
+| `℘ = (2 pi i)^2 (X + 1/12)` | 第 218(定数項 `-pi^2/3 = (2 pi i)^2/12`) |
+| `℘' = (2 pi i)^3 (2Y + X)` | 第 219(`h = f + 2g` の分解) |
+| `g2 = (2 pi i)^4 (1 + 240 s3)/12` | 第 215 + `zeta(4) = pi^4/90`、`B4 = -1/30` |
+| `g3 = -(2 pi i)^6 (1 - 504 s5)/216` | 第 215 + `zeta(6) = pi^6/945`、`B6 = 1/42` |
+
+★★★**`1/12` の平行移動と `2Y + X` の捻りが両方要る**——`℘` を平行移動するだけでは
+`X^2` の項が消えず、`℘'` を `2Y + X` と読み替えて初めて `Y^2 + XY` の形になる。
+実際、展開すると `4Y^2 + 4XY + X^2 = 4X^3 + X^2 - 20 s3 X - (5/3)s3 - (7/3)s5` となり、
+**両辺の `X^2` がちょうど相殺する**。定数項も `1/432 - 3/432 + 2/432 = 0` で消える。
+
+### ★★★mathlib に無かったもの
+
+| 要るもの | 状況 |
+|---|---|
+| `zeta(4) = pi^4/90` | ★`riemannZeta_four` ✓ |
+| `zeta(6) = pi^6/945` | ★無い——`riemannZeta_two_mul_nat` から作った |
+| `B4 = -1/30`、`B6 = 1/42` | ★無い——`bernoulli'_def` を 1 段ずつ展開して作った |
+
+★`decide` も `norm_num [bernoulli]` も通らない(`bernoulli'` の再帰が展開されず
+maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
+`Finset.sum_range_succ` と `Nat.choose` で潰す**、を `n = 3,4,5,6` と積み上げるのが
+通る形だった。これは tools/lean-idioms.md 級の知見である。
+
+| 定理 | 内容 |
+|---|---|
+| `bernoulli'_three` .. `bernoulli_six_val` | ★Bernoulli 数の値 |
+| `riemannZeta_six` | ★★`zeta(6) = pi^6/945` |
+| `sigmaSum` | 解析側の `s_k(tau)` |
+| `g2_normalized` / `g3_normalized` | ★★★★★★`g2, g3` の正規化 |
+| `tateXfun` / `tateYfun` | ★★★★★★解析側の `X, Y` |
+| `weierstrassP_eq_tateXfun` | ★★★★★★`℘ = (2 pi i)^2 (X + 1/12)` |
+| `derivWeierstrassP_eq_tateYfun` | ★★★★★★`℘' = (2 pi i)^3 (2Y + X)` |
+| `tate_equation_analytic` | ★★★★★★★★**解析側の Tate 方程式** |
+
+### ★残るのは段 6 だけになった
+
+道 β の段は 4(第 215)・5(第 216-219)が済み、解析側の方程式も出た(本ブロック)。
+残るのは:
+
+| 段 | 内容 |
+|---|---|
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 |
+
+具体的には、解析側の `X(u,q)`・`Y(u,q)` を `q` の形式級数として読み、
+形式側の `tateXpair`・`tateYpair` と係数ごとに一致することを言う。
+そこまで来れば葉 (b)(Weierstrass 方程式が厳密に成り立つこと)が閉じる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
