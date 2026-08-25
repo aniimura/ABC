@@ -32,7 +32,7 @@ import ABC3.Found.FrdI.Prop55Std
 | `C^pf` が isotropic | `pfRoot_isOfIsotropicType`(在庫) |
 | `C^istr` が isotropic | `istr_isOfIsotropicType`(在庫) |
 | `C^un-tr` が **Frobenius**-isotropic | `unTr_frobIsotropicType`(在庫) |
-| `C^un-tr` が isotropic | ★**無い**(2026-08-25 実測、`exact?` 空振り) |
+| `C^un-tr` が isotropic | `unTr_isotropic`(在庫。★2026-08-25 に見立て違いを訂正) |
 | rationally standard(一般形) | `ModelData.model_isOfRationallyStandardType_of_primary`(在庫、**逸脱なし**) |
 
 ★★`Example 6.3` の側は **`ex63Frobenioid` まで組み上がっている**
@@ -40,17 +40,16 @@ import ABC3.Found.FrdI.Prop55Std
 ★★★`Skeleton/Divisor/ArithDivisor.lean` の 11 個の `sorry` は
 **実装済みの `Found` を複製した古い写し**であり、この節点を止めているものではない。
 
-## ★★★★残っているもの(`thm64-i-types`)
+## ★★★★rationally standard の側は `Ex63RatStd.lean` で閉じた(2026-08-25)
 
-`model_isOfRationallyStandardType_of_primary` の仮引数のうち、
-**算術の側で作らねばならない入力**が残る:
+`hsp`(strictly rational)は「素点ごとに `|y|_v ≠ 1` の `y ∈ L^×` を取る」だけで、
+有限素点は `exists_ordFin_eq_one`、無限素点は `y = 2` である。
 
-* `hsp` —— どの素点 `p` にも `a, b ∈ Φ(L)` と `y ∈ B(L)` があって
-  `toGp a − toGp b = ±Div_B(y)`、`p ∈ Supp a`、`p ∉ Supp b`。
-  ★有限素点は `exists_ordFin_eq_one`(在庫)で一様化元を取ればよい。
-  ★★無限素点は `y = 2` のように `|y|_w ≠ 1` の元を取る段が要る。
-* `hprim` / `hx₀mem` —— 準素元が `Φ^birat` に入ること。
-* `hgl` —— group-like のときのコンパクト対象(`Φ ≠ 0` なので前件が偽の見込み)。
+★★★**`hprim` / `hx₀mem` は算術では満たしようがない** ——
+`Φ^birat(L)` は主因子なので積公式で次数 0、`Φ(L)` は有効なので
+`Φ(L) ∩ Φ^birat(L) = {0}` である。
+★そこで `Thm64RatStd.lean` に**底の自己射が恒等しかない対象**(`⊥ = F`)を選ぶ版
+(`model_isOfRationallyStandardType_of_baseId`)を立てた。詳細は `Ex63RatStd.lean`。
 
 ★`hnd`(non-dilating)は **`arithDatumGalois_isNonDilatingOn` で済**、
 `hfsmff` は `finSubOp_isOfFSMType` から出る。
@@ -128,8 +127,7 @@ variable (F Kbar) in
 原文 (FrdI p.114):
 > these indices]. Then the Frobenioids C, Cpf, Crlf, Cun-tr, (Cpf)un-tr are of isotropic
 
-★★rationally standard 型の側は `model_isOfRationallyStandardType_of_primary`
-(在庫、`sorry` 無し)に算術の入力(`hsp` / `hprim` / `hgl`)を渡す段が残る。 -/
+★★rationally standard 型の側は `Ex63RatStd.lean` の `ex63_ratStd`。 -/
 theorem ex63_isotropic_family :
     IsOfIsotropicType (ModelData.modelPre (ex63Hyp F Kbar))
       ∧ IsOfFrobeniusIsotropicType (ModelData.modelPre (ex63Hyp F Kbar))
@@ -168,7 +166,7 @@ def ModelIso.model_isotropic_family.needs : List ProofObligation :=
     .citation "[ABC3]" "unTr_frobIsotropicType"
       (.inProject "ABC3" "ABC3.Found.FrdI.unTr_frobIsotropicType") 114,
     .citation "[ABC3]" "C^un-tr が(Frobenius でない)isotropic であること"
-      (.absent "2026-08-25 実測。unTrPre に対する IsOfIsotropicType は在庫に無い(exact? 空振り)") 114 ]
+      (.inProject "ABC3" "ABC3.Found.FrdI.unTr_isotropic") 114 ]
 
 def ex63_isotropic_family.src : Source :=
   { paper := "FrdI", pdfPage := 114,
@@ -180,10 +178,10 @@ def ex63_isotropic_family.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.ex63Frobenioid") 114,
     .citation "[ABC3]" "model_isotropic_family"
       (.inProject "ABC3" "ABC3.Found.Divisor.ModelIso.model_isotropic_family") 114,
-    .citation "[ABC3]" "rationally standard 型の一般形(算術の入力待ち)"
-      (.inProject "ABC3" "ABC3.Found.FrdI.ModelData.model_isOfRationallyStandardType_of_primary") 114,
+    .citation "[ABC3]" "rationally standard 型(算術)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.ex63_ratStd") 114,
     .implicitStep
-      "★原文は 5 つの圏の型を 1 文で並べる。rationally standard の側は hsp / hprim / hgl の算術入力が残る" 114 ]
+      "★原文は 5 つの圏の型を 1 文で並べる。rationally standard の 𝒞^pf / 𝒞^rlf / 𝒞^un-tr への伝播は Proposition 5.5, (iii)(p55iii-ratstd 節点)" 114 ]
 
 def ex63Hyp.src : Source :=
   { paper := "FrdI", pdfPage := 113,

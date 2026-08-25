@@ -135,6 +135,7 @@ import ABC3.Found.FrdI.Prop55PfKappa
 import ABC3.Found.FrdI.Prop55Birat
 import ABC3.Found.FrdI.Prop55BiratPf
 import ABC3.Found.FrdI.Thm62RatStd
+import ABC3.Found.FrdI.Thm64RatStd
 import ABC3.Found.FrdI.Prop55Pf
 import ABC3.Found.FrdI.Prop55PfUnit
 import ABC3.Found.FrdI.Prop55PfDiv
@@ -163,6 +164,7 @@ import ABC3.Found.Divisor.ArithMonoprime
 import ABC3.Found.Divisor.ArithPhiPrime
 import ABC3.Found.Divisor.ArithPf
 import ABC3.Found.Divisor.ArithPerfFactorial
+import ABC3.Found.Divisor.ArithSuppSplit
 import ABC3.Found.Divisor.ArithPhiPerf
 import ABC3.Found.Divisor.ArithFunctor
 import ABC3.Found.Divisor.ArithTower
@@ -200,6 +202,7 @@ import ABC3.Found.Divisor.NormPhiFunctor
 import ABC3.Found.Divisor.Ex61Model
 import ABC3.Found.Divisor.Ex61Units
 import ABC3.Found.Divisor.Ex63Types
+import ABC3.Found.Divisor.Ex63RatStd
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
 import ABC3.Found.NumberField.SepClosedIn
