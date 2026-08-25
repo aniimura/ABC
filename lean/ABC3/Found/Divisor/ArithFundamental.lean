@@ -405,7 +405,96 @@ theorem absNorm_eq_pow_inertiaDeg_rel (L M : Type) [Field L] [Field M]
   have htow := Ideal.inertiaDeg_algebra_tower (Ideal.span {(p : ℤ)}) q P
   rw [h1, h2, ← pow_mul, htow]
 
+/-! ## ★8. トレース写像は `arithDivGroup` を保つ -/
+
+open NumberField Finset Finsupp Ideal in
+open scoped Classical in
+/-- ★トレース写像の有限素点での値は、上にある有限素点についての和。 -/
+theorem mapDomain_apply_inl (L M : Type) [Field L] [Field M] [NumberField L] [NumberField M]
+    [Algebra L M] (y : ArithPlace M →₀ ℝ) (w : FinitePlace L) :
+    (Finsupp.mapDomain (resPlace (L := L) (M := M)) y) (Sum.inl w)
+      = ∑ W ∈ (finite_fiber_fin (L := L) (M := M) w).toFinset, y (Sum.inl W) := by
+  classical
+  rw [mapDomain_apply_eq_sum']
+  have hsub : (y.support.filter (fun V => resPlace (L := L) V = Sum.inl w))
+      ⊆ (finite_fiber_fin (L := L) (M := M) w).toFinset.image Sum.inl := by
+    intro V hV
+    rw [Finset.mem_filter] at hV
+    obtain ⟨hVs, hVr⟩ := hV
+    cases V with
+    | inl W =>
+        refine Finset.mem_image.mpr ⟨W, ?_, rfl⟩
+        rw [Set.Finite.mem_toFinset]
+        simpa using hVr
+    | inr W => simp at hVr
+  have hzero : ∀ V ∈ (finite_fiber_fin (L := L) (M := M) w).toFinset.image Sum.inl,
+      V ∉ (y.support.filter (fun V => resPlace (L := L) V = Sum.inl w)) → y V = 0 := by
+    intro V hV hVn
+    obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hV
+    rw [Set.Finite.mem_toFinset] at hW
+    by_contra hne
+    refine hVn (Finset.mem_filter.mpr ⟨Finsupp.mem_support_iff.mpr hne, ?_⟩)
+    show resPlace (L := L) (Sum.inl W) = Sum.inl w
+    rw [resPlace_inl]
+    exact congrArg Sum.inl hW
+  rw [Finset.sum_subset hsub hzero,
+    Finset.sum_image (fun _ _ _ _ h => Sum.inl_injective h)]
+
+open NumberField Finset Finsupp Ideal IsDedekindDomain in
+open scoped Classical in
+/-- ★上にある素点の係数は `f` 倍だけずれる（相対ノルムの冪表示から）。 -/
+theorem trace_term_eq (L M : Type) [Field L] [Field M] [NumberField L] [NumberField M]
+    [Algebra L M] (y : ArithPlace M →₀ ℝ) (n : FinitePlace M → ℤ)
+    (hn : ∀ W : FinitePlace M, y (Sum.inl W)
+      = (n W : ℝ) * Real.log (Ideal.absNorm (FinitePlace.maximalIdeal W).asIdeal : ℝ))
+    (w : FinitePlace L) (W : FinitePlace M) (hW : resFin (L := L) W = w) :
+    y (Sum.inl W) = (n W : ℝ)
+      * ((w.maximalIdeal.asIdeal.inertiaDeg W.maximalIdeal.asIdeal : ℤ) : ℝ)
+      * Real.log (Ideal.absNorm (FinitePlace.maximalIdeal w).asIdeal : ℝ) := by
+  classical
+  have hres : resHOS (L := L) W.maximalIdeal = w.maximalIdeal := by
+    rw [← hW, resFin, FinitePlace.maximalIdeal_mk]
+  have hunder : W.maximalIdeal.asIdeal.under (𝓞 L) = w.maximalIdeal.asIdeal :=
+    congrArg IsDedekindDomain.HeightOneSpectrum.asIdeal hres
+  have hPne : W.maximalIdeal.asIdeal ≠ ⊥ := W.maximalIdeal.ne_bot
+  haveI : W.maximalIdeal.asIdeal.IsPrime := W.maximalIdeal.isPrime
+  have hnorm := absNorm_eq_pow_inertiaDeg_rel L M W.maximalIdeal.asIdeal hPne
+  rw [hunder] at hnorm
+  rw [hn W, hnorm]
+  push_cast
+  rw [Real.log_pow]
+  ring
+
+open NumberField Finset Finsupp Ideal in
+open scoped Classical in
+/-- ★★★★★**トレース写像は `arithDivGroup` を保つ**。
+
+★有限素点の係数が `log N𝔭` の整数倍であることは、上にある素点では
+`log N𝔓 = f · log N𝔭`（`absNorm_eq_pow_inertiaDeg_rel`）なので保たれる。 -/
+theorem mapDomain_mem_arithDivGroup (L M : Type) [Field L] [Field M]
+    [NumberField L] [NumberField M] [Algebra L M]
+    (y : ArithPlace M →₀ ℝ) (hy : y ∈ arithDivGroup M) :
+    Finsupp.mapDomain (resPlace (L := L) (M := M)) y ∈ arithDivGroup L := by
+  classical
+  choose n hn using hy
+  intro w
+  rw [mapDomain_apply_inl]
+  refine ⟨∑ W ∈ (finite_fiber_fin (L := L) (M := M) w).toFinset,
+    n W * ((w.maximalIdeal.asIdeal.inertiaDeg W.maximalIdeal.asIdeal : ℤ)), ?_⟩
+  push_cast
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl (fun W hW => ?_)
+  rw [Set.Finite.mem_toFinset] at hW
+  have h := trace_term_eq L M y n hn w W hW
+  push_cast at h
+  exact h
+
 /-! ### ★出典の紐付け -/
+
+def mapDomain_mem_arithDivGroup.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — トレース写像は arithDivGroup を保つ",
+    sectionId := "frdi-thm-6-4" }
 
 def absNorm_eq_pow_inertiaDeg_rel.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
