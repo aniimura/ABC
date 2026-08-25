@@ -3625,11 +3625,11 @@
           "deps": [
             "ex63-model"
           ],
-          "status": "todo",
-          "size": "★大",
-          "note": "★★`Proposition 5.5, (iii)` を消費する(鎖 `prop55` の `p55iii-pf` 待ち)。\n\n★★★2026-08-25（**依存が外れた**）：`p55iii-pf` も `p55ii-birat` も閉じ、**`Proposition 5.5` 全体が揃った**\n（`prop_5_5.src`、§5 は 7/7）。★この節点はもう待ちではなく**葉**である。\n\n★要るのは 5 つの構成（`𝒞^pf` / `𝒞^rlf` / `𝒞^un-tr` / `(𝒞^pf)^un-tr`）への\n**isotropic ＋ rationally standard 型の移送**で、standard 型の移送は在庫\n（`pfRoot_standardType` / `unTr_standardType` / `scModel_standardType_of_perfFactorial`）。\n★★残るのは **rationally standard の「rational 性」の条**（`thm62-iii-ratstd` と同じ形）。",
-          "lean": "",
-          "decl": ""
+          "status": "半済",
+          "size": "★大(isotropic の側は閉じた)",
+          "note": "★★`Proposition 5.5, (iii)` を消費する。\n\n★★★2026-08-25(**依存が外れた**)：`Proposition 5.5` 全体が揃い(§5 は 7/7)、この節点は**葉**になった。\n\n## ★★★★★★2026-08-25(第 2 弾、**測り直した**)\n\n原文は 5 つの圏 `C, C^pf, C^rlf, C^un-tr, (C^pf)^un-tr` について 3 つを言う:\n**isotropic 型** / **rationally standard 型** / **group-like 型でない**。\n\n### ★見立て違いの訂正 —— `ex63-model` は完全に閉じている\n\n`Skeleton/Divisor/ArithDivisor.lean` に `sorry` が 11 個あるが、\n★★**これは実装済みの `Found` を複製した古い写しである**。実際の算術 Frobenioid は\n`Found/Divisor/` の 17 ファイル・4,291 行に `sorry` 0 で組み上がっており\n(`ArithDivisor` / `ArithFrobenioid` / `ArithTower` / `Ex63Model` ほか)、\n`ex63Frobenioid`(= `Theorem 5.2, (ii)` を当てたもの)まで出ている。\n★同じ型の見立て違いは **6 回目**。教訓は毎回同じ:\n**「残っている」と書いた条は、着手前に必ず Lean の側を読む。**\n\n### ★★isotropic の側(**本日閉じた**)\n\n`Found/Divisor/Ex63Types.lean` の `model_isotropic_family` / `ex63_isotropic_family`:\n\n| 圏 | 在庫 |\n|---|---|\n| `C` | `ModelData.model_isotropicType` |\n| `C^pf` | `pfRoot_isOfIsotropicType` |\n| `C^istr` | `istr_isOfIsotropicType` |\n| `C^un-tr`(Frobenius-isotropic) | `unTr_frobIsotropicType` |\n| `C^un-tr`(素の isotropic) | ★**無い**(2026-08-25 実測、`exact?` 空振り) |\n\n### ☆残っているもの\n\n**rationally standard 型**の一般形 `model_isOfRationallyStandardType_of_primary` は\n**在庫にあり `sorry` 無し・逸脱なし**。残るのは**算術の入力**:\n\n* `hsp` —— どの素点 `p` にも `a, b ∈ Φ(L)` と `y ∈ B(L)` があって\n  `toGp a − toGp b = ±Div_B(y)`、`p ∈ Supp a`、`p ∉ Supp b`。\n  ★有限素点は `exists_ordFin_eq_one`(在庫)で一様化元。\n  ★★無限素点は `|y|_w ≠ 1` の元(例: `y = 2`)を取る段が要る。\n  ★分割は算術側では `coord`(座標ごと)なので幾何側の `q`-Cartier の工夫は要らない。\n* `hprim` / `hx₀mem` —— 準素元が `Φ^birat` に入ること。\n* `hgl` —— group-like のときのコンパクト対象(`Φ ≠ 0` なので前件が偽の見込み)。\n* `C^un-tr` の素の isotropic 性(上の表の最終行)。\n\n★`hnd`(non-dilating)は `arithDatumGalois_isNonDilatingOn` で**済**、\n`hfsmff` は `finSubOp_isOfFSMType` から出る。\n★★**新しい数学は要らない** —— 算術の素点ごとの入力を作る作業である。",
+          "lean": "ABC3/Found/Divisor/Ex63Types.lean",
+          "decl": "ABC3.Found.Divisor.ModelIso.model_isotropic_family / ex63_isotropic_family / ex63Hyp"
         },
         {
           "id": "thm64-i-nondil",
