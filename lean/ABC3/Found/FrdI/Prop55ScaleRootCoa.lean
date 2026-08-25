@@ -148,6 +148,26 @@ Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 
 ★左辺の `A^{(m)}` は **`F` の根**で書いてある —— `F'` の根と揃える手当ては
 呼び出し側(`rtObj (biratPre P G) F' = rtObj P F`)で行う。
 
+## ★★★★★★用途によっては関手に束ねなくてよい(2026-08-25 の測定)
+
+★★**`Proposition 5.5, (iii)` の `𝒞^pf` が birationally Frobenius-normalized** を出すには、
+在庫の `isFrobeniusNormalized_transport`(`TypeTransport.lean`)を使う。
+★これが要求するのは **1 つの対象での `End` の乗法同型 ＋ 3 つの対応**
+(`IsBaseIdentity` / `degFr` / `OTri`)だけであり、**関手は要らない**。
+
+★★★下の `biratPfHomEquivRoot` を `A = B`、`n = m`、`k = n·n` で読むと
+
+    End_{(𝒞^birat)^pf}(biratUp (rtObj A n))  ≃  End_{(𝒞^pf)^birat} ⟨A, n⟩
+
+がそのまま出る(2026-08-25 に型検査で確認)。
+★したがって下の「難所」——`Hom(X,Y)` と `Hom(Y,Z)` で共役の同型が別物になる問題——は
+**単一対象の `End` では起きない**(共役の同型が 1 つに固定されるから)。
+
+★残るのは (1) この全単射が**乗法的**であること
+(`biratPfHom_id` / `biratPfHom_comp` ＋ `scaleRootBirat` が関手 ＋ 同型による共役)、
+(2) 3 つの対応(`biratBase_biratPfHom` / `biratDeg_biratPfHom` / `otimes_biratPfHom` ＋
+`rootBase_scaleRootHom` / `rootDeg_scaleRootHom`)の 2 つだけである。
+
 ## ★★★★関手に束ねるときの難所(2026-08-25 の測定、次に着手する人へ)
 
 ★この全単射を**関手**にするには `map_id` / `map_comp` が要るが、
