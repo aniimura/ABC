@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Def24SuppElt
+import ABC3.Found.FrdI.MonoidTransport
 
 /-!
 # 台の理論を **`M` から `M^pf` へ**移す —— `Proposition 5.5, (iii)` の `𝒞^pf` の側
@@ -106,7 +107,96 @@ theorem pCarrierPf_primeToPf (hdiv : IsDivisorial M) (p : Prime M) :
       rw [hX0, map_zero]
       rfl
 
+/-! ## ★4. `factorMap` と `SuppElt` の移送 -/
+
+/-- ★**`M^pf ≃ (M^pf)^pf`** —— 上の `pfOfEquiv` を `M^pf` に当てたもの。 -/
+noncomputable def pfPfEquiv (hdiv : IsDivisorial M) : Pf M ≃+ Pf (Pf M) :=
+  pfOfEquiv (Pf.isDivisorial' hdiv) Pf.isPerfectMonoid_pf
+
+@[simp] theorem pfPfEquiv_apply (hdiv : IsDivisorial M) (x : Pf M) :
+    pfPfEquiv hdiv x = Pf.of x := rfl
+
+/-- ★★**`Φ^pf` の上の因子分解写像 `ι^pf`** —— 2 本の橋で `ι` を運んだもの。
+
+★`Definition 4.5, (ii)` の `IsStrictlyRational` は `ι` を**自由な引数として受ける**だけで
+`IsPerfFactorialWith` を要求しない。★したがって移送に要るのは
+`pCarrierPf` の対応(`pCarrierPf_primeToPf`)ただ 1 本である。 -/
+noncomputable def iotaPf (hdiv : IsDivisorial M) (ι : Prime M → Pf M → ℝ≥0) :
+    Prime (Pf M) → Pf (Pf M) → ℝ≥0 :=
+  fun q Y => ι ((primeEquivPf (isTorsionFreeNaive_of_divisorial hdiv)).symm q)
+    ((pfPfEquiv hdiv).symm Y)
+
+section BoundImage
+
+variable {N : Type*} [AddCommMonoid N]
+
+/-- ★**`Bound` は加法的同型で像に移る**(`MLe` が移るから)。 -/
+theorem bound_image (e : M ≃+ N) (S : Set M) (X : M) :
+    Bound N (e '' S) (e X) = e '' (Bound M S X) := by
+  ext A
+  constructor
+  · rintro ⟨⟨a, ha, rfl⟩, hle⟩
+    exact ⟨a, ⟨ha, (mLe_addEquiv e).mp hle⟩, rfl⟩
+  · rintro ⟨a, ⟨ha, hle⟩, rfl⟩
+    exact ⟨⟨a, ha, rfl⟩, (mLe_addEquiv e).mpr hle⟩
+
+end BoundImage
+
+/-- ★★★★★**因子分解写像は `Pf.of` でちょうど移る**。 -/
+theorem factorMap_iotaPf (hdiv : IsDivisorial M) (ι : Prime M → Pf M → ℝ≥0)
+    (X : Pf M) (p : Prime M) :
+    factorMap (iotaPf hdiv ι) (pfPfEquiv hdiv X)
+        (primeToPf (isTorsionFreeNaive_of_divisorial hdiv) p)
+      = factorMap ι X p := by
+  have htf := isTorsionFreeNaive_of_divisorial hdiv
+  have hp : (primeEquivPf htf).symm (primeToPf htf p) = p :=
+    (primeEquivPf htf).symm_apply_apply p
+  show boundSup (iotaPf hdiv ι (primeToPf htf p))
+      (pCarrierPf (Pf M) (primeToPf htf p)) (pfPfEquiv hdiv X)
+    = boundSup (ι p) (pCarrierPf M p) X
+  rw [pCarrierPf_primeToPf hdiv p]
+  show sSup (iotaPf hdiv ι (primeToPf htf p) ''
+      Bound (Pf (Pf M)) ((Pf.of : Pf M →+ Pf (Pf M)) '' pCarrierPf M p) (pfPfEquiv hdiv X))
+    = sSup (ι p '' Bound (Pf M) (pCarrierPf M p) X)
+  have him : (Pf.of : Pf M →+ Pf (Pf M)) '' pCarrierPf M p
+      = (pfPfEquiv hdiv) '' pCarrierPf M p := rfl
+  rw [him, bound_image (pfPfEquiv hdiv) (pCarrierPf M p) X, Set.image_image]
+  congr 1
+  refine Set.image_congr ?_
+  intro a _
+  show ι ((primeEquivPf htf).symm (primeToPf htf p))
+    ((pfPfEquiv hdiv).symm ((pfPfEquiv hdiv) a)) = ι p a
+  rw [hp, AddEquiv.symm_apply_apply]
+
+/-- ★★★★★★**台も `Pf.of` でちょうど移る** —— これが `𝒞^pf` の
+`IsStrictlyRational` に要る形である。 -/
+theorem mem_suppElt_iotaPf (hdiv : IsDivisorial M) (ι : Prime M → Pf M → ℝ≥0)
+    (a : M) (p : Prime M) :
+    primeToPf (isTorsionFreeNaive_of_divisorial hdiv) p
+        ∈ SuppElt (iotaPf hdiv ι) (Pf.of a : Pf M)
+      ↔ p ∈ SuppElt ι a := by
+  have htf := isTorsionFreeNaive_of_divisorial hdiv
+  have hkey := factorMap_iotaPf hdiv ι (Pf.of a) p
+  show factorMap (iotaPf hdiv ι) (Pf.of (Pf.of a : Pf M)) (primeToPf htf p) ≠ 0
+    ↔ factorMap ι (Pf.of a) p ≠ 0
+  rw [show (Pf.of (Pf.of a : Pf M) : Pf (Pf M)) = pfPfEquiv hdiv (Pf.of a) from rfl, hkey]
+
 /-! ### ★出典の紐付け -/
+
+def iotaPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — Φ^pf の上の因子分解写像 ι^pf",
+    sectionId := "frdi-prop-5-5" }
+
+def factorMap_iotaPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 因子分解写像は Pf.of で移る",
+    sectionId := "frdi-prop-5-5" }
+
+def mem_suppElt_iotaPf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 台は Pf.of で移る",
+    sectionId := "frdi-prop-5-5" }
 
 def pfOfEquiv.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
