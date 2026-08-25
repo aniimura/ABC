@@ -163,6 +163,115 @@ theorem mem_SplQ_iff_restrictNormalHom (K : IntermediateField ℚ Ω) [IsGalois 
     rw [← hσres]
     exact h σ hσQ
 
+/-! ## ★5. `Spl(L ⊔ M) = Spl(L) ∩ Spl(M)` -/
+
+/-- ★★`K` への制限が自明 ⟺ `K` を各点固定する。 -/
+theorem restrictNormalHom_eq_one_iff (K : IntermediateField ℚ Ω) [Normal ℚ ↥K]
+    (σ : Ω ≃ₐ[ℚ] Ω) :
+    AlgEquiv.restrictNormalHom ↥K σ = 1 ↔ σ ∈ K.fixingSubgroup := by
+  rw [IntermediateField.mem_fixingSubgroup_iff]
+  constructor
+  · intro h x hx
+    have hh := AlgEquiv.restrictNormal_commutes σ ↥K ⟨x, hx⟩
+    have h2 : (σ.restrictNormal ↥K) ⟨x, hx⟩ = ⟨x, hx⟩ := DFunLike.congr_fun h ⟨x, hx⟩
+    rw [h2] at hh
+    exact hh.symm
+  · intro h
+    refine AlgEquiv.ext fun y => ?_
+    refine FaithfulSMul.algebraMap_injective ↥K Ω ?_
+    have hh := AlgEquiv.restrictNormal_commutes σ ↥K y
+    show algebraMap ↥K Ω ((σ.restrictNormal ↥K) y) = algebraMap ↥K Ω y
+    rw [hh]
+    exact h (algebraMap ↥K Ω y) y.2
+
+theorem exists_prime_over {p : ℕ} (hp : p.Prime) :
+    ∃ Q : Ideal (𝓞 Ω), Q.IsPrime ∧ Q.LiesOver (Ideal.span {(p : ℤ)}) := by
+  haveI : (Ideal.span {(p : ℤ)}).IsMaximal := span_intCast_isMaximal hp
+  obtain ⟨Q, hQ1, hQ2⟩ := Ideal.exists_isPrime_liesOver_of_faithfullyFlat
+    (A := ℤ) (B := 𝓞 Ω) (Ideal.span {(p : ℤ)})
+  exact ⟨Q, hQ1, hQ2⟩
+
+/-- ★逸脱の記録: `IntermediateField.normal_sup` に `[Normal ℚ ↥L]` を
+インスタンス探索で渡すと落ちる(2026-08-25 実測)。明示に渡す。 -/
+theorem isGalois_sup (L M : IntermediateField ℚ Ω) (hL : Normal ℚ ↥L) (hM : Normal ℚ ↥M) :
+    IsGalois ℚ ↥(L ⊔ M) := by
+  haveI : Normal ℚ ↥(L ⊔ M) :=
+    @IntermediateField.normal_sup ℚ Ω _ _ _ L M hL hM
+  exact IsGalois.mk
+
+/-- ★★★★★★**`Spl(L ⊔ M) = Spl(L) ∩ Spl(M)`** —— Galois 対応
+(`IntermediateField.fixingSubgroup_sup`)1 行。
+
+★★これが原文の「[again by Tchebotarev's density theorem] `L₁ ⊆ L₂`」の要である。 -/
+theorem SplQ_sup (L M : IntermediateField ℚ Ω) (hL : IsGalois ℚ ↥L) (hM : IsGalois ℚ ↥M) :
+    SplQ ↥(L ⊔ M) = SplQ ↥L ∩ SplQ ↥M := by
+  haveI := hL
+  haveI := hM
+  haveI hLn : Normal ℚ ↥L := hL.to_normal
+  haveI hMn : Normal ℚ ↥M := hM.to_normal
+  haveI hsup : IsGalois ℚ ↥(L ⊔ M) := isGalois_sup L M hLn hMn
+  haveI hsupn : Normal ℚ ↥(L ⊔ M) := hsup.to_normal
+  ext p
+  obtain ⟨Q, hQ, hQlo⟩ := exists_prime_over (Ω := Ω) p.2
+  rw [mem_SplQ_iff_restrictNormalHom (L ⊔ M) Q hQ hQlo, Set.mem_inter_iff,
+    mem_SplQ_iff_restrictNormalHom L Q hQ hQlo, mem_SplQ_iff_restrictNormalHom M Q hQ hQlo]
+  constructor
+  · intro h
+    constructor
+    · intro σ hσ
+      rw [restrictNormalHom_eq_one_iff]
+      have hmem := (restrictNormalHom_eq_one_iff (L ⊔ M) σ).mp (h σ hσ)
+      rw [IntermediateField.fixingSubgroup_sup] at hmem
+      exact hmem.1
+    · intro σ hσ
+      rw [restrictNormalHom_eq_one_iff]
+      have hmem := (restrictNormalHom_eq_one_iff (L ⊔ M) σ).mp (h σ hσ)
+      rw [IntermediateField.fixingSubgroup_sup] at hmem
+      exact hmem.2
+  · rintro ⟨h1, h2⟩ σ hσ
+    rw [restrictNormalHom_eq_one_iff, IntermediateField.fixingSubgroup_sup]
+    exact ⟨(restrictNormalHom_eq_one_iff L σ).mp (h1 σ hσ),
+      (restrictNormalHom_eq_one_iff M σ).mp (h2 σ hσ)⟩
+
+/-! ## ★6. 完全分解する素数の集合が体を決める -/
+
+open Filter Topology in
+/-- ★★★★★★★**[cheb-spl-det] 完全分解する素数の集合が体を決める**
+([MilneCFT] Chapter V, Theorem 3.25 の底が `ℚ` の場合)。
+
+原文 (FrdI p.116):
+> over a prime pi ∈V(Li), then pi splits completely in Li if and only if deg(Li, vi) =
+
+★★中身は 3 行 ——
+`Spl(L ⊔ M) = Spl(L) ∩ Spl(M) = Spl(M)`、
+密度(`tendsto_splQ_div_log`)を両方に当てて**極限の一意性**で `[L⊔M:ℚ] = [M:ℚ]`、
+`IntermediateField.eq_of_le_of_finrank_eq` で `M = L ⊔ M`。 -/
+theorem le_of_SplQ_subset (L M : IntermediateField ℚ Ω)
+    (hL : IsGalois ℚ ↥L) (hM : IsGalois ℚ ↥M) (h : SplQ ↥M ⊆ SplQ ↥L) : L ≤ M := by
+  haveI := hL
+  haveI := hM
+  haveI hsup : IsGalois ℚ ↥(L ⊔ M) := isGalois_sup L M hL.to_normal hM.to_normal
+  have hset : SplQ ↥(L ⊔ M) = SplQ ↥M := by
+    rw [SplQ_sup L M hL hM]
+    exact Set.inter_eq_right.mpr h
+  have h1 := tendsto_splQ_div_log (L := ↥(L ⊔ M))
+  have h2 := tendsto_splQ_div_log (L := ↥M)
+  rw [hset] at h1
+  have heq : (1 : ℝ) / (Module.finrank ℚ ↥(L ⊔ M) : ℝ) = 1 / (Module.finrank ℚ ↥M : ℝ) :=
+    tendsto_nhds_unique h1 h2
+  have hfr : Module.finrank ℚ ↥M = Module.finrank ℚ ↥(L ⊔ M) := by
+    have hpos1 : (0 : ℝ) < (Module.finrank ℚ ↥(L ⊔ M) : ℝ) := by
+      have hh : 0 < Module.finrank ℚ ↥(L ⊔ M) := Module.finrank_pos
+      positivity
+    have hpos2 : (0 : ℝ) < (Module.finrank ℚ ↥M : ℝ) := by
+      have hh : 0 < Module.finrank ℚ ↥M := Module.finrank_pos
+      positivity
+    field_simp at heq
+    exact_mod_cast heq
+  have hMeq : M = L ⊔ M := IntermediateField.eq_of_le_of_finrank_eq le_sup_right hfr
+  rw [hMeq]
+  exact le_sup_left
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `cheb-spl-det` の第 2 段。 -/
@@ -170,5 +279,19 @@ def mem_SplQ_iff_restrictNormalHom.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 116,
     item := "Theorem 6.4, (iv) — p ∈ Spl(K) ⟺ 分解群の K への制限が自明",
     sectionId := "frdi-thm-6-4" }
+
+/-- ★★★★★★★locator —— `cheb-spl-det` そのもの。 -/
+def le_of_SplQ_subset.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 116,
+    item := "Theorem 6.4, (iv) — 完全分解する素数の集合が体を決める",
+    sectionId := "frdi-thm-6-4" }
+
+def le_of_SplQ_subset.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "tendsto_splQ_div_log(密度は 1/[L:ℚ])"
+      (.inProject "ABC3" "ABC3.Found.NF.tendsto_splQ_div_log") 116,
+    .citation "[ABC3]" "SplQ_sup(Spl(L ⊔ M) = Spl(L) ∩ Spl(M))"
+      (.inProject "ABC3" "ABC3.Found.NF.SplQ_sup") 116,
+    .citation "[mathlib]" "IntermediateField.fixingSubgroup_sup(Galois 対応)"
+      (.inMathlib "IntermediateField.fixingSubgroup_sup") 116 ]
 
 end ABC3.Found.NF
