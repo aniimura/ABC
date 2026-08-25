@@ -121,6 +121,69 @@ theorem normMapOfBase_unique (f₁ : SpecL ⟶ V₁) (f₂ : SpecL₂ ⟶ V₂)
   have h2 : L2 ≫ pullback.snd ψ f₁.fromNormalization = Ψ' := by rw [hL2, pullback.lift_snd]
   rw [← h1, ← h2, key]
 
+/-! ## ★3. 関手性 —— `thm62-i-pull` が要求する 3 本 -/
+
+/-- ★★**恒等**。 -/
+theorem normMapOfBase_id {V SpecL : Scheme.{u}} (f : SpecL ⟶ V)
+    [QuasiCompact f] [QuasiSeparated f] (h : f ≫ 𝟙 V = 𝟙 SpecL ≫ f) :
+    normMapOfBase f f (𝟙 V) (𝟙 SpecL) h = 𝟙 (f.normalization) := by
+  refine normMapOfBase_unique f f (𝟙 V) (𝟙 SpecL) _ _ ?_ ?_ ?_ ?_
+  · exact normMapOfBase_fromNormalization _ _ _ _ _
+  · rw [Category.id_comp, Category.comp_id]
+  · exact toNormalization_normMapOfBase _ _ _ _ _
+  · rw [Category.comp_id, Category.id_comp]
+
+/-- ★★**合成**。 -/
+theorem normMapOfBase_comp {V₁ V₂ V₃ SpecL₁ SpecL₂ SpecL₃ : Scheme.{u}}
+    (f₁ : SpecL₁ ⟶ V₁) (f₂ : SpecL₂ ⟶ V₂) (f₃ : SpecL₃ ⟶ V₃)
+    [QuasiCompact f₁] [QuasiSeparated f₁] [QuasiCompact f₂] [QuasiSeparated f₂]
+    [QuasiCompact f₃] [QuasiSeparated f₃]
+    (ψ₁ : V₂ ⟶ V₁) (ε₁ : SpecL₂ ⟶ SpecL₁) (h₁ : f₂ ≫ ψ₁ = ε₁ ≫ f₁)
+    (ψ₂ : V₃ ⟶ V₂) (ε₂ : SpecL₃ ⟶ SpecL₂) (h₂ : f₃ ≫ ψ₂ = ε₂ ≫ f₂)
+    (h₃ : f₃ ≫ (ψ₂ ≫ ψ₁) = (ε₂ ≫ ε₁) ≫ f₁) :
+    normMapOfBase f₂ f₃ ψ₂ ε₂ h₂ ≫ normMapOfBase f₁ f₂ ψ₁ ε₁ h₁
+      = normMapOfBase f₁ f₃ (ψ₂ ≫ ψ₁) (ε₂ ≫ ε₁) h₃ := by
+  refine normMapOfBase_unique f₁ f₃ (ψ₂ ≫ ψ₁) (ε₂ ≫ ε₁) _ _ ?_ ?_ ?_ ?_
+  · rw [Category.assoc, normMapOfBase_fromNormalization, ← Category.assoc,
+      normMapOfBase_fromNormalization, Category.assoc]
+  · exact normMapOfBase_fromNormalization _ _ _ _ _
+  · rw [← Category.assoc, toNormalization_normMapOfBase, Category.assoc,
+      toNormalization_normMapOfBase, ← Category.assoc]
+  · exact toNormalization_normMapOfBase _ _ _ _ _
+
+/-- ★★★★★**自然性の四角形** —— `thm62-i-pull` の関手性の背骨。
+
+```
+V₂[M₂] --π_M--> V₁[M]
+   |              |
+  n₂              n₁
+   v              v
+V₂[L₂] --π_L--> V₁[L]
+```
+
+★4 本とも `normMapOfBase` の実例なので、一意性(`normMapOfBase_unique`)で 1 度に出る。 -/
+theorem normMapOfBase_naturality {V₁ V₂ SpecL SpecL₂ SpecM SpecM₂ : Scheme.{u}}
+    (f₁ : SpecL ⟶ V₁) (f₂ : SpecL₂ ⟶ V₂) (g₁ : SpecM ⟶ V₁) (g₂ : SpecM₂ ⟶ V₂)
+    [QuasiCompact f₁] [QuasiSeparated f₁] [QuasiCompact f₂] [QuasiSeparated f₂]
+    [QuasiCompact g₁] [QuasiSeparated g₁] [QuasiCompact g₂] [QuasiSeparated g₂]
+    (ψ : V₂ ⟶ V₁)
+    (εL : SpecL₂ ⟶ SpecL) (hL : f₂ ≫ ψ = εL ≫ f₁)
+    (εM : SpecM₂ ⟶ SpecM) (hM : g₂ ≫ ψ = εM ≫ g₁)
+    (aL : SpecM ⟶ SpecL) (h₁ : g₁ ≫ 𝟙 V₁ = aL ≫ f₁)
+    (aL₂ : SpecM₂ ⟶ SpecL₂) (h₂ : g₂ ≫ 𝟙 V₂ = aL₂ ≫ f₂)
+    (hcube : aL₂ ≫ εL = εM ≫ aL) :
+    normMapOfBase f₂ g₂ (𝟙 V₂) aL₂ h₂ ≫ normMapOfBase f₁ f₂ ψ εL hL
+      = normMapOfBase g₁ g₂ ψ εM hM ≫ normMapOfBase f₁ g₁ (𝟙 V₁) aL h₁ := by
+  refine normMapOfBase_unique f₁ g₂ ψ (aL₂ ≫ εL) _ _ ?_ ?_ ?_ ?_
+  · rw [Category.assoc, normMapOfBase_fromNormalization, ← Category.assoc,
+      normMapOfBase_fromNormalization, Category.assoc, Category.id_comp]
+  · rw [Category.assoc, normMapOfBase_fromNormalization, ← Category.assoc,
+      normMapOfBase_fromNormalization, Category.assoc, Category.comp_id]
+  · rw [← Category.assoc, toNormalization_normMapOfBase, Category.assoc,
+      toNormalization_normMapOfBase, ← Category.assoc]
+  · rw [← Category.assoc, toNormalization_normMapOfBase, Category.assoc,
+      toNormalization_normMapOfBase, ← Category.assoc, hcube]
+
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
 def normMapOfBase.src : Source :=
@@ -149,5 +212,33 @@ def normMapOfBase_unique.needs : List ProofObligation :=
   [ .citation "[mathlib]" "Scheme.Hom.normalization.hom_ext"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalization.hom_ext") 110,
     .derivation "底変換の普遍性で pullback への lift の一意性に帰着させる" 110 ]
+
+def normMapOfBase_naturality.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — V[L] の引き戻しの自然性",
+    sectionId := "frdi-thm-6-2" }
+
+def normMapOfBase_naturality.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "normMapOfBase_unique(一意性)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_unique") 110,
+    .derivation "四角形の 4 辺がどれも normMapOfBase の実例なので、一意性 1 本で出る" 110 ]
+
+def normMapOfBase_comp.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — V[L] の引き戻しの合成",
+    sectionId := "frdi-thm-6-2" }
+
+def normMapOfBase_comp.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "normMapOfBase_unique"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_unique") 110 ]
+
+def normMapOfBase_id.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — V[L] の引き戻しの恒等",
+    sectionId := "frdi-thm-6-2" }
+
+def normMapOfBase_id.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "normMapOfBase_unique"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_unique") 110 ]
 
 end ABC3.Found.Divisor
