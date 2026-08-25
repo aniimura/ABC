@@ -24071,3 +24071,46 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-597 ★★★★★★★★★写像 `Phi : K^x/q^Z -> E_q(K)`(第 284 ブロック)
+
+`Found/GaloisRep/TatePhi.lean`。
+
+### ★★★★★★★★★到達点——写像そのものができた
+
+    Phi c := if 1 - a(c) = 0 then 0 else tatePtPair a(c) w(c) ...
+
+★★★`a(c)`・`w(c)` は類 `c` の**正規化した対**(第 213 の `exists_pair_of_class` を
+`choose` したもの)。第 283 で点が類だけで決まることを示したので、
+この `choose` の任意性は値に響かない。
+
+### ★★★★★道具立てを構造体にまとめた
+
+`TateSetup R I K` は付値 `v`、母数 `Q`(と `R` 側の `q`)、`R -> K` の単射性、
+`v >= 0` の元が `R` から来ること——を 1 つに束ねる。
+★仮定が 9 本あるので、これを毎回書くと定理の頭が読めなくなる。
+★★構造体にしたことで、以後の単射性・全射性・準同型性の主張が 1 行の頭で書ける。
+
+### ★★★場合分けは単位類でだけ切れる
+
+`1 - a(c) = 0` になるのは `a(c) = 1`、すなわち `normRep c = 1`、すなわち **`c = 1`** の
+ときだけ(`tateAOf_ne_one`)。★★★したがって
+
+| 類 | `Phi` の値 |
+|---|---|
+| `c = 1` | `0`(原点) |
+| `c != 1` | `tatePtPair ...`(**アフィン点、けっして原点でない**) |
+
+★★これで `Phi` の単射性の「原点に行くのは単位類だけ」の段が済んだ
+(`tatePhi_eq_zero_iff`)。
+
+| 定理 | 内容 |
+|---|---|
+| `TateSetup` | ★★★★★道具立ての束 |
+| `tateAOf`・`tateWOf` | ★★類の正規化した対 |
+| `tatePhi` | ★★★★★★★★★**写像 `Phi`** |
+| `tatePhi_one`・`tatePhi_ne_zero`・`tatePhi_eq_zero_iff` | ★★★★★原点に行くのは単位類だけ |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
