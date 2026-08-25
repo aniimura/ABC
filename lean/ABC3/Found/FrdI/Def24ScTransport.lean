@@ -385,7 +385,83 @@ theorem mem_suppElt_primeToSc (H : IsPerfFactorialWith M ι) (hperf : IsPerfectM
       mprec_map _ hac⟩
     rw [← hae, primeToSc_mk]
 
+/-! ## ★6. 引き戻し(retraction)があれば係数拡大は単射性を保つ
+
+★★★節点 `rlf-flat`(`S = ℝ≥0`)の**迂回路**である。
+
+`Φ^rlf : MonoidOn 𝒟` を立てるのに要る条件 (a) は
+「`f : M ↪ N` なら `id ⊗ f : S ⊗_ℕ M → S ⊗_ℕ N` も単射」であり、
+`S = ℚ≥0` は在庫(`scMap_injective_nnrat`、`Pf` の商模型に同一視)、
+`S = ℝ≥0` は **`ℝ≥0` が ℕ 上平坦**であること(凸幾何の議論)を要する。
+
+★★しかし **`f` に引き戻し `g`(`g ∘ f = id`)があれば平坦性は要らない** ——
+`scMap g ∘ scMap f = scMap (g ∘ f) = id` だからである。
+
+★算術(`Example 6.3`)では `Φ.map` は**素点の引き戻し**なので、
+素点の制限写像の切断を 1 つ選べば `g` が作れる。 -/
+
+section Retract
+
+variable {S : Type} [CommSemiring S] {M N : Type w} [AddCommMonoid M] [AddCommMonoid N]
+
+/-- ★★★★**引き戻し(retraction)があれば係数拡大は単射**。
+
+★`scMap g ∘ scMap f = scMap (g ∘ f) = id` なので `scMap f` は単射。
+★★**平坦性を要さない** —— 節点 `rlf-flat`(`S = ℝ≥0`)の迂回路である。 -/
+theorem scMap_injective_of_retraction {f : M →+ N} {g : N →+ M}
+    (h : ∀ x : M, g (f x) = x) : Function.Injective (scMap (S := S) f) := by
+  have hcomp : (scMap (S := S) g).comp (scMap (S := S) f) = AddMonoidHom.id (ScT S M) := by
+    rw [← scMap_comp]
+    have hgf : g.comp f = AddMonoidHom.id M := by ext x; exact h x
+    rw [hgf, scMap_id]
+  intro x y hxy
+  have h2 : ((scMap (S := S) g).comp (scMap (S := S) f)) x
+      = ((scMap (S := S) g).comp (scMap (S := S) f)) y := congrArg (scMap (S := S) g) hxy
+  rw [hcomp] at h2
+  exact h2
+
+/-- ★同上、`charMap` の側。 -/
+theorem charMap_scMap_injective_of_retraction {f : M →+ N} {g : N →+ M}
+    (h : ∀ x : M, g (f x) = x) :
+    Function.Injective (charMap (scMap (S := S) f)) := by
+  have hcomp : ∀ z : ScT S M, scMap (S := S) g (scMap (S := S) f z) = z := by
+    intro z
+    have hz : ((scMap (S := S) g).comp (scMap (S := S) f)) z = AddMonoidHom.id (ScT S M) z := by
+      rw [← scMap_comp]
+      have hgf : g.comp f = AddMonoidHom.id M := by ext x; exact h x
+      rw [hgf, scMap_id]
+    exact hz
+  intro x y hxy
+  obtain ⟨a, rfl⟩ := Quotient.exists_rep x
+  obtain ⟨b, rfl⟩ := Quotient.exists_rep y
+  have hkey : toChar (scMap (S := S) f a) = toChar (scMap (S := S) f b) := by
+    rw [← charMap_toChar (scMap (S := S) f) a, ← charMap_toChar (scMap (S := S) f) b]
+    exact hxy
+  have h3 := congrArg (charMap (scMap (S := S) g)) hkey
+  rw [charMap_toChar, charMap_toChar, hcomp, hcomp] at h3
+  exact h3
+
+/-- ★★★★★**引き戻しがあれば `MonoidOn` の条件 (a) がまるごと出る**
+(節点 `rlf-flat` の迂回路)。 -/
+theorem isCharacteristicallyInjective_scMap_of_retraction {f : M →+ N} {g : N →+ M}
+    (h : ∀ x : M, g (f x) = x) :
+    IsCharacteristicallyInjective (scMap (S := S) f) :=
+  ⟨scMap_injective_of_retraction h, charMap_scMap_injective_of_retraction h⟩
+
+end Retract
+
 /-! ### ★出典の紐付け -/
+
+def isCharacteristicallyInjective_scMap_of_retraction.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 51,
+    item := "Definition 2.4, (i) — 引き戻しがあれば係数拡大は単射性を保つ",
+    sectionId := "frdi-def-2-4" }
+
+def isCharacteristicallyInjective_scMap_of_retraction.needs : List ABC3.Meta.ProofObligation :=
+  [ .derivation "scMap g ∘ scMap f = scMap (g ∘ f) = id(関手性だけ)" 51,
+    .implicitStep
+      ("★節点 rlf-flat(S = ℝ≥0、ℝ≥0 が ℕ 上平坦)の迂回路である。" ++
+       "算術では Φ.map が素点の引き戻しなので、制限写像の切断を選べば g が作れる") 51 ]
 
 def mem_suppElt_primeToSc.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 48,
