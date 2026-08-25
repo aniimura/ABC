@@ -322,6 +322,68 @@ noncomputable def phiPullEff :
   restrictEff (phiPullBase DK₁ DK₂ L FL π hdim hpull)
     (fun a ha => phiPullBase_nonneg DK₁ DK₂ L FL π hdim hpull a ha)
 
+/-! ## ★3.9. `π_L` を作るための可換性
+
+原文 (FrdI p.110):
+> in CV,K,DK may be thought of as consisting of the following data: (a) a morphism
+-/
+
+/-- ★★★★★**`normMapOfBase` に渡す可換性** ——
+体の埋め込み `φ : L ↪ L₂` が `K₁ → K₂` と両立すれば
+`Spec L₂ ⟶ V₂ ⟶ V₁` と `Spec L₂ ⟶ Spec L ⟶ V₁` が一致する。
+
+★★これで `normMapOfBase` が `V₂[L₂] ⟶ V₁[L]` を与える。
+★中身は `Scheme.SpecMap_stalkMap_fromSpecStalk`(生成点からの射の自然性)と
+`Scheme.SpecMap_stalkSpecializes_fromSpecStalk`(支配射は生成点を生成点へ送る)。 -/
+theorem specToV_compat {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
+    {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+    [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+    (L : FinSub V₁.functionField Kbar₁) (FL : FinSub V₂.functionField Kbar₂)
+    (φ : CommRingCat.of L.toIF ⟶ CommRingCat.of FL.toIF)
+    (hφ : CommRingCat.ofHom (algebraMap V₁.functionField L.toIF) ≫ φ
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FL.toIF)) :
+    specToV V₂ FL ≫ ψ = Spec.map φ ≫ specToV V₁ L := by
+  have hgen : ψ.base (genericPoint (V₂ : Type u)) = genericPoint (V₁ : Type u) :=
+    genericPoint_eq_of_isDominant ψ
+  have hsp : ψ.base (genericPoint (V₂ : Type u)) ⤳ genericPoint (V₁ : Type u) :=
+    (Inseparable.of_eq hgen).specializes
+  have hfs : Spec.map (V₁.presheaf.stalkSpecializes hsp) ≫ V₁.fromSpecStalk
+      (genericPoint (V₁ : Type u)) = V₁.fromSpecStalk (ψ.base (genericPoint (V₂ : Type u))) :=
+    Scheme.SpecMap_stalkSpecializes_fromSpecStalk hsp
+  have hff : V₁.presheaf.stalkSpecializes hsp ≫ ψ.stalkMap (genericPoint (V₂ : Type u))
+      = ffMap ψ := rfl
+  rw [specToV, specToV, Category.assoc, ← Scheme.SpecMap_stalkMap_fromSpecStalk ψ,
+    ← hfs, ← Category.assoc, ← Spec.map_comp, ← Category.assoc, ← Spec.map_comp,
+    ← Category.assoc (V₁.presheaf.stalkSpecializes hsp), hff,
+    ← Category.assoc (Spec.map φ), ← Spec.map_comp, hφ]
+  rfl
+
+/-- ★★★★★★**幾何のデータの射が `V₂[L₂] ⟶ V₁[L]` を与える** ——
+`Theorem 6.2, (i)` の因子・有理函数の引き戻しの土台。 -/
+noncomputable def normMapGeom {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
+    {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+    [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+    (L : FinSub V₁.functionField Kbar₁) (FL : FinSub V₂.functionField Kbar₂)
+    (φ : CommRingCat.of L.toIF ⟶ CommRingCat.of FL.toIF)
+    (hφ : CommRingCat.ofHom (algebraMap V₁.functionField L.toIF) ≫ φ
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FL.toIF)) :
+    normObj V₂ FL ⟶ normObj V₁ L :=
+  normMapOfBase (specToV V₁ L) (specToV V₂ FL) ψ (Spec.map φ)
+    (specToV_compat ψ L FL φ hφ)
+
+@[reassoc] theorem normMapGeom_normDown {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
+    {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+    [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+    (L : FinSub V₁.functionField Kbar₁) (FL : FinSub V₂.functionField Kbar₂)
+    (φ : CommRingCat.of L.toIF ⟶ CommRingCat.of FL.toIF)
+    (hφ : CommRingCat.ofHom (algebraMap V₁.functionField L.toIF) ≫ φ
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FL.toIF)) :
+    normMapGeom ψ L FL φ hφ ≫ normDown V₁ L = normDown V₂ FL ≫ ψ :=
+  normMapOfBase_fromNormalization _ _ _ _ _
+
 /-! ## ★4. `divCompat` の中身 —— 主因子の引き戻しは引き戻しの主因子 -/
 
 /-- ★★★★★★**主因子の引き戻しは引き戻しの主因子** ——
@@ -416,5 +478,29 @@ def pullCoeff_weilDivOfFn.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.isCartierDiv_weilDivOfFn") 110,
     .citation "[ABC3]" "pullCoeff_eq"
       (.inProject "ABC3" "ABC3.Found.Divisor.pullCoeff_eq") 110 ]
+
+
+def specToV_compat.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 体の埋め込みが Spec L 上の四角形を可換にする",
+    sectionId := "frdi-thm-6-2" }
+
+def specToV_compat.needs : List ProofObligation :=
+  [ .citation "[mathlib]" "Scheme.SpecMap_stalkMap_fromSpecStalk"
+      (.inMathlib "AlgebraicGeometry.Scheme.SpecMap_stalkMap_fromSpecStalk") 110,
+    .citation "[mathlib]" "Scheme.SpecMap_stalkSpecializes_fromSpecStalk"
+      (.inMathlib "AlgebraicGeometry.Scheme.SpecMap_stalkSpecializes_fromSpecStalk") 110,
+    .derivation "支配射は生成点を生成点へ送るので、生成点からの射の四角形が閉じる" 110 ]
+
+def normMapGeom.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 幾何のデータの射が V₂[L₂] ⟶ V₁[L] を与える",
+    sectionId := "frdi-thm-6-2" }
+
+def normMapGeom.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "normMapOfBase(底変換 ＋ normalizationDesc)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase") 110,
+    .citation "[ABC3]" "specToV_compat"
+      (.inProject "ABC3" "ABC3.Found.Divisor.specToV_compat") 110 ]
 
 end ABC3.Found.Divisor
