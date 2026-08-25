@@ -243,6 +243,7 @@ import ABC3.Found.FrdI.Prop55ScaleRootBirat
 import ABC3.Found.FrdI.Prop55PfBiratFn
 import ABC3.Found.FrdI.Prop55PfRatStd
 import ABC3.Found.FrdI.Prop55UnTrRatStd
+import ABC3.Found.FrdI.Prop55RlfRatStd
 import ABC3.Found.FrdI.Thm64Slim
 import ABC3.Found.FrdI.Prop55BiratOmega
 import ABC3.Found.FrdI.Prop55
