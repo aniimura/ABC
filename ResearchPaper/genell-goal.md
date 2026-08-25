@@ -21411,3 +21411,57 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-546 ★★★★★`a4`・`a6` の切り詰めとの差(第 233 ブロック)
+
+`Found/GaloisRep/TateCoeffTail.lean`。
+
+第 231 で `X`・`Y` の差が揃った。`tateDefectTrunc` に残る二つ
+`partialEval tateA4` と `partialEval tateA6` の差を評価した。
+
+### ★★★★`sigma_k` の一般の評価
+
+第 230 の `sigma_1 <= N^2` を一般化した:
+
+    sigma_k(N) = S_{d|N} d^k <= |divisors| * N^k <= N * N^k = N^{k+1} <= (2^{k+1})^N
+
+★`k = 3` なら底は `16`、`k = 5` なら `64`。よって `‖q‖ <= 1/128` を仮定に置けば
+どちらも第 227 の一般の尾の評価が使える。★★第 230 の `sigma_1` 版は
+**この一般版の特別な場合**になっている——先に特別な場合を書いたが、
+一般化はそのまま通った(`Nat.pow_le_pow_left` に `k` を渡すだけ)。
+
+### ★★★`a6` は 12 で割った係数——割り算のまま扱わない
+
+`tateA6` の係数は `-(5 sigma_3(N) + 7 sigma_5(N))/12`(整数——第 94 の `twelve_dvd`)。
+★**`12 * tateA6 = -(5 s3 + 7 s5)`(`twelve_mul_tateA6`)を係数に降ろす**のが要点である。
+そうすれば `partialEval` の側も `12 * PE(a6) = -(5 PE3 + 7 PE5)` になり、
+差は `-(5(s3-PE3) + 7(s5-PE5))/12` と書けて三角不等式に乗る。
+★★整数除法を ℂ に持ち込むと `Nat.cast_div` 型の面倒が出る。**掛け算の形に直してから移す**。
+
+| 定理 | 内容 |
+|---|---|
+| `sigma_le_pow` | ★★`sigma_k(N) <= N^{k+1}` |
+| `pow_succ_le_two_pow_pow` | ★`N^{k+1} <= (2^{k+1})^N` |
+| `sigmaSum_eq_tsum_nat` | ★`sigmaSum` を `N` 添字で(`Equiv.pnatEquivNat`) |
+| `norm_sigma_k_tail_le` | ★★★★★`sigma_k` 級数の尾の評価 |
+| `norm_sigmaSum_sub_partialEval_le` | ★★★★★★`sigmaSum k` と切り詰めの差 |
+| `coeff_twelve_tateA6` / `partialEval_tateA6` | ★★★`12 a6` を係数に降ろす |
+| `norm_a4_sub_partialEval_le` | ★★★★★**`a4` の差** |
+| `norm_a6_sub_partialEval_le` | ★★★★★**`a6` の差** |
+
+### ★これで `tateDefectTrunc` の四つの部品がすべて揃った
+
+| 部品 | 差の評価 | ブロック |
+|---|---|---|
+| `X` | `20 (4‖q‖)^{n+1}` | 第 231 |
+| `Y` | `50 (4‖q‖)^{n+1}` | 第 231 |
+| `a4` | `10 (16‖q‖)^{n+1}` | ★本ブロック |
+| `a6` | `2 (64‖q‖)^{n+1}` | ★本ブロック |
+
+★次は これらを合わせて `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})` を出す。
+解析側の値では方程式がちょうど 0 になる(第 232 の `tate_equation_uw`)ので、
+差の四つを三角不等式で足せばよい。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
