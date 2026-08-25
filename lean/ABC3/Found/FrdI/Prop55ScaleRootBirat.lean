@@ -77,6 +77,63 @@ theorem biratBase_scaleRootBirat (k : ℕ+) (Gpf : Frobenioid (pfRootPre P F))
   simp only [sliceBaseOf, hbase]
   congr 1
 
+/-! ## ★3 段を `End` の乗法同型に束ねる
+
+★★`isFrobeniusNormalized_transport` が要求するのは
+**1 つの対象での `End` の乗法同型**だけなので、
+`Prop55ScaleRootCoa.lean` の docstring が挙げる「関手に束ねる難所」は起きない。
+★3 段はどれも合成を保つ:
+
+| 段 | 乗法性の根拠 |
+|---|---|
+| 1. `biratPfHom` | `biratPfHom_comp`(在庫) |
+| 2. `scaleRootBirat` | **関手**なので `Functor.mapEnd` が `MonoidHom` |
+| 3. 同型による共役 | `Iso.conj`(mathlib、`End X ≃* End Y`) | -/
+
+variable {G : Frobenioid P}
+
+/-- ★★★★**第 1 段の `End` の乗法同型** —— `biratPfHom` は合成を保つ。 -/
+noncomputable def biratPfEndMulEquiv (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (Z : C) :
+    End (show PfCat (biratPre P G) F' from (biratUp P G Z))
+      ≃* End (show BiratCat (pfRootPre P F) Gpf from (⟨Z, 1⟩ : PfRootObj P F)) where
+  toFun := biratPfHom hfi Gpf F' Z Z
+  invFun := (Equiv.ofBijective _ (biratPfHom_bijective hfi hiso Gpf F' Z Z)).symm
+  left_inv := (Equiv.ofBijective _ (biratPfHom_bijective hfi hiso Gpf F' Z Z)).left_inv
+  right_inv := (Equiv.ofBijective _ (biratPfHom_bijective hfi hiso Gpf F' Z Z)).right_inv
+  map_mul' x y := biratPfHom_comp hfi Gpf F' Z Z Z y x
+
+/-- ★★★★**第 2 段の `End` の乗法同型** —— `Σ_k` の birat 版は関手だから。 -/
+noncomputable def scaleRootBiratEndMulEquiv (k : ℕ+) (Gpf : Frobenioid (pfRootPre P F))
+    (X : BiratCat (pfRootPre P F) Gpf) :
+    End X ≃* End ((scaleRootBirat (F := F) k Gpf).obj X) :=
+  haveI := scaleRootBirat_isEquivalence (F := F) k Gpf
+  MulEquiv.ofBijective (Functor.mapEnd X (scaleRootBirat (F := F) k Gpf))
+    ⟨fun _ _ h => (scaleRootBirat (F := F) k Gpf).map_injective h,
+      fun g => (scaleRootBirat (F := F) k Gpf).map_surjective g⟩
+
+/-- ★★★★★★**3 段を束ねた `End` の乗法同型** ——
+
+    End_{(𝒞^birat)^pf}(A^{(n)})  ≃*  End_{(𝒞^pf)^birat} ⟨A, n⟩
+
+★これが `pfRoot_biratFrobNormalizedType` の鍵である
+(`Skeleton/FrdI/Prop55PfBiratFn.lean` の手順書 第 1・2 段)。 -/
+noncomputable def pfBiratEndMulEquiv (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (A : C) (n : ℕ+) :
+    End (show PfCat (biratPre P G) F' from (biratUp P G (rtObj P F A n)))
+      ≃* End (show BiratCat (pfRootPre P F) Gpf from (⟨A, n⟩ : PfRootObj P F)) :=
+  haveI := (pfRoot_exists_iso_root (F := F) A n n ((n * n) * 1)
+    (by rw [mul_one])).choose_spec
+  (biratPfEndMulEquiv hfi hiso Gpf F' (rtObj P F A n)).trans
+    ((scaleRootBiratEndMulEquiv (F := F) (n * n) Gpf
+        (show BiratCat (pfRootPre P F) Gpf from (⟨rtObj P F A n, 1⟩ : PfRootObj P F))).trans
+      (Iso.conj ((toBiratCat (pfRootPre P F) Gpf).mapIso
+        (asIso (pfRoot_exists_iso_root (F := F) A n n ((n * n) * 1)
+          (by rw [mul_one])).choose))).symm)
+
 end ScaleRootBirat
 
 /-! ### ★出典の紐付け -/

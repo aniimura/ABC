@@ -46,15 +46,23 @@ rationally standard だと言う。★2026-08-25 現在:
        End_{(𝒞^birat)^pf}(biratUp (rtObj A n))  ≃  End_{(𝒞^pf)^birat} ⟨A, n⟩
 
    がそのまま出る(★2026-08-25 に型検査で確認済み)。
-2. **乗法性**。3 段の合成なので段ごとに:
-   `biratPfHom_id` / `biratPfHom_comp`(1 段目)、
-   `scaleRootBirat` が関手であること(2 段目)、
-   同型による共役(3 段目、`Iso.homCongr`)。
-   ★`A = B`・`n = m` なので 3 段目の共役の同型は**両側で同じ**(証明無関係性)。
+2. **乗法性 —— ★2026-08-25 に閉じた**(`Found/FrdI/Prop55ScaleRootBirat.lean`):
+
+       biratPfEndMulEquiv        (1 段目、`biratPfHom_comp` が乗法性)
+       scaleRootBiratEndMulEquiv (2 段目、`Functor.mapEnd` は `MonoidHom`)
+       pfBiratEndMulEquiv        (3 段を束ねた `End` の乗法同型)
+
+   ★3 段目の共役は `Iso.conj`(mathlib、`End X ≃* End Y`)を使ったので乗法性は無料。
 3. **3 つの対応**(`IsBaseIdentity` / `degFr` / `OTri`):
-   1 段目は `biratBase_biratPfHom` / `biratDeg_biratPfHom` / `otimes_biratPfHom`(在庫)、
-   2 段目は `rootBase_scaleRootHom` / `rootDeg_scaleRootHom`(在庫)を
-   `biratPsiMap_mk` で代表元に降ろして使う(★この birat 版は**未**、本ファイルの実作業)。
+   * 2 段目(`Σ_k` の birat 版)—— ★**2026-08-25 に閉じた**
+     (`biratBase_scaleRootBirat` / `biratDeg_scaleRootBirat`)。
+   * 1 段目(`biratPfHom`)—— 在庫の
+     `biratBase_biratPfHom` / `biratDeg_biratPfHom` / `otimes_biratPfHom` は
+     **引数が `toHomPf ε` の形のものだけ**である。
+     ★`End` の一般の元は `HomPf.mk W z`(`homPf_birat_exists_rep`)なので、
+     **`pfBase_mk` / `pfDeg_mk`(`repBase` / `repDeg`)経由の一般版が要る** ——
+     ★★**ここが本ファイルに残る唯一の実作業**である。
+   * 3 段目(同型による共役)—— 一般論で済む。
 4. 仕上げは `pf_frobNormalizedType`(`𝒞^birat` 側、在庫)を流すだけ。
    ★`IsOfFrobeniusNormalizedType (biratPre P G)` は
    `IsOfBirationallyFrobeniusNormalizedType C P G` と**同じもの**である
