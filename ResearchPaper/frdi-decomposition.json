@@ -3710,9 +3710,9 @@
             "cheb-max-deg",
             "cheb-split-count"
           ],
-          "status": "分解済",
+          "status": "済(条つき: (c) に Spl(LM) = Spl(L) ∩ Spl(M) が 1 点残る。(a)(b) は仮定なし)",
           "size": "★大",
-          "note": "★★**mathlib に Tchebotarev は 0 件**。ここが §6 に残る唯一の在庫不足である。\n\n★★★（2026-08-20）**依存を 3 本に分解した** —— 原文 p.116 が Tchebotarev を使うのは (a)「`[L_i:ℚ]` は `deg(L_i,v_i)` の最大値」(`cheb-max-deg`)、(b)「`p` が `L_i` で完全分解 ⟺ `deg(L_i,v_i) = [L_i:ℚ]`」(`cheb-split-count`)、(c)「完全分解する素点が包含すれば体が包含する」(`cheb-spl-det`、[MilneCFT] V, Theorem 3.25) の 3 箇所。★★(a) は**全 Chebotarev を使わずに出る見込み**である（鎖 `cheb` の `cheb-spl-infinite`）。",
+          "note": "★★**mathlib に Tchebotarev は 0 件**。ここが §6 に残る唯一の在庫不足である。\n\n★★★（2026-08-20）**依存を 3 本に分解した** —— 原文 p.116 が Tchebotarev を使うのは (a)「`[L_i:ℚ]` は `deg(L_i,v_i)` の最大値」(`cheb-max-deg`)、(b)「`p` が `L_i` で完全分解 ⟺ `deg(L_i,v_i) = [L_i:ℚ]`」(`cheb-split-count`)、(c)「完全分解する素点が包含すれば体が包含する」(`cheb-spl-det`、[MilneCFT] V, Theorem 3.25) の 3 箇所。★★(a) は**全 Chebotarev を使わずに出る見込み**である（鎖 `cheb` の `cheb-spl-infinite`）。\n\n### ★★★★★2026-08-25 —— (a) は**仮定なし**になった\n\n3 本の内訳の現状:\n\n| | 内容 | 状態 |\n|---|---|---|\n| (a) | `[L_i:ℚ]` は `deg(L_i,v_i)` の最大値 | ★**済・仮定なし** `finrank_isGreatest_deg'` |\n| (b) | `p` が完全分解 ⟺ `deg(L_i,v_i) = [L_i:ℚ]` | 済（基本等式だけ）`ncard_primesOver_eq_finrank_iff` |\n| (c) | 完全分解する素点が包含すれば体が包含 | 済（残る 1 点は `Spl(LM) = Spl(L) ∩ Spl(M)`） |\n\n★(a) の最後の仮定 `hexp : exponent θ ≠ 0` は**判別式**で落ちた ——\nmathlib の `discr_mul_isIntegral_mem_adjoin`（`disc(θ)·𝓞 N ⊆ ℤ[θ]`）。\n★★これで **(a)(b) は Tchebotarev を 1 度も使わない**。",
           "lean": "",
           "decl": ""
         },
@@ -3992,7 +3992,7 @@
           ],
           "status": "done",
           "size": "中",
-          "note": "★完全分解する素数が 1 つあれば `deg(L,v) = [L:ℚ]` を達成し、つねに `deg(L,v) ≤ [L:ℚ]`。\n\n★★★2026-08-21：**上界と下界の両方が在庫になった**。\n* `≤` —— `ncard_primesOver_le_finrank`（`SplitCount.lean`、基本等式）\n* `=` を達成する `v` の存在 —— `infinite_splitsCompletely`（`SplitSeparable.lean`）\n★残るのは **`deg(L,v)` の定義を我々の `ncard primesOver` に結び付ける 1 段**だけである。\n\n★★★★★★2026-08-21 完了。原文の `deg(L,v)`（「`v` と同じ `ℚ` の付値の上にある `V(L)` の付値の個数」）を\n`V(L) = FinitePlace L ⊕ InfinitePlace L`（`ArithPlace`）に合わせて 2 通りに書いた：\n* 非アルキメデス（素数 `p` の上）—— `degAtPrime L p = #{𝔭 ∣ p}`\n* アルキメデス —— `degAtInfinity L = #(InfinitePlace L)`\n\n★上界は**基本等式だけ**：非アルキメデスは `Σ_𝔭 e_𝔭 f_𝔭 = [L:ℚ]`\n（`Ideal.sum_ramification_inertia` を**底 `ℤ`** で使う）、\nアルキメデスは `r₁ + 2r₂ = [L:ℚ]`（`InfinitePlace.card_add_two_mul_card_eq_rank`）。\n★★達成は `infinite_splitsCompletely'`（`SplitSeparable.lean`、**Chebotarev を使わない**）。\n★結論 `finrank_isGreatest_deg` : `IsGreatest (degSet L) [L:ℚ]`。\n\n★★★**原文が Tchebotarev を引く 3 箇所のうち (a) は、これで密度定理なしに閉じた。**",
+          "note": "★完全分解する素数が 1 つあれば `deg(L,v) = [L:ℚ]` を達成し、つねに `deg(L,v) ≤ [L:ℚ]`。\n\n★★★2026-08-21：**上界と下界の両方が在庫になった**。\n* `≤` —— `ncard_primesOver_le_finrank`（`SplitCount.lean`、基本等式）\n* `=` を達成する `v` の存在 —— `infinite_splitsCompletely`（`SplitSeparable.lean`）\n★残るのは **`deg(L,v)` の定義を我々の `ncard primesOver` に結び付ける 1 段**だけである。\n\n★★★★★★2026-08-21 完了。原文の `deg(L,v)`（「`v` と同じ `ℚ` の付値の上にある `V(L)` の付値の個数」）を\n`V(L) = FinitePlace L ⊕ InfinitePlace L`（`ArithPlace`）に合わせて 2 通りに書いた：\n* 非アルキメデス（素数 `p` の上）—— `degAtPrime L p = #{𝔭 ∣ p}`\n* アルキメデス —— `degAtInfinity L = #(InfinitePlace L)`\n\n★上界は**基本等式だけ**：非アルキメデスは `Σ_𝔭 e_𝔭 f_𝔭 = [L:ℚ]`\n（`Ideal.sum_ramification_inertia` を**底 `ℤ`** で使う）、\nアルキメデスは `r₁ + 2r₂ = [L:ℚ]`（`InfinitePlace.card_add_two_mul_card_eq_rank`）。\n★★達成は `infinite_splitsCompletely'`（`SplitSeparable.lean`、**Chebotarev を使わない**）。\n★結論 `finrank_isGreatest_deg` : `IsGreatest (degSet L) [L:ℚ]`。\n\n★★★**原文が Tchebotarev を引く 3 箇所のうち (a) は、これで密度定理なしに閉じた。**\n\n★★2026-08-25: `hexp` も落ち、`finrank_isGreatest_deg'` は**仮定なし**になった（`SplitExponent.lean` の判別式論法）。",
           "lean": "ABC3/Found/NumberField/MaxDeg.lean",
           "decl": "degAtPrime / degAtInfinity / degAtPrime_le / degAtInfinity_le / exists_degAtPrime_eq_finrank / finrank_isGreatest_deg",
           "frdiNeeded": true
