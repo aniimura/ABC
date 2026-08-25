@@ -214,6 +214,7 @@ import ABC3.Found.NumberField.DedekindEuler
 import ABC3.Found.NumberField.IdealPowBound
 import ABC3.Found.NumberField.LogZeta
 import ABC3.Found.NumberField.PrimeDensity
+import ABC3.Found.NumberField.IdealCountSplit
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Prop53QPhi
 import ABC3.Found.FrdI.Prop53Base
