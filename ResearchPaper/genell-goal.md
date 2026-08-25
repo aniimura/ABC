@@ -23330,3 +23330,51 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-582 ★★★★★★★★環帯での座標の全射性(第 269 ブロック)
+
+`Found/GaloisRep/TateAnnulus.lean`。
+
+### ★★★★★★★★到達点
+
+> `x, y in I` なら `a, w in I` が在って `X(a,w,q) = x`、`Y(a,w,q) = y`
+> (`exists_tate_annulus`)
+
+★**制約 `a w = q` はまだ課していない**——それは「`defect` の `q` についての
+主要項が `q - aw`」から回復させる(§9-581)。次のブロック。
+
+### ★★★★★2 つの主要項
+
+環帯(`a, w in I`)では `X + Y = a`、`Y = -w`(誤差はどちらも `I` の元)。
+誤差を `δ_S := (X+Y) - a`、`δ_Y := Y + w` と置いて
+
+    a = (x + y) - δ_S(a,w),      w = -y + δ_Y(a,w)
+
+の 2 変数不動点(第 268)を取る。不動点では `X + Y = x + y` と `Y = y`、
+したがって `X = x` が出る。
+
+### ★★★誤差が 1 つ位を上げること
+
+`δ_S = (f(a)+g(a)-a) + Tf(a) + Tg(a) - g(w) - Tg(w) - s1` で、`s1(q)` は
+両側で共通なので**差では消える**。
+
+★**`f + g` の主要項がちょうど `a` である**(第 262 の `mul_tateXYterm`)ことが効いて、
+
+    f(a)+g(a)-a = a (inv(1-a)^3 - 1)
+
+と**積の形**に書ける(`tateXYterm_sub_self_eq`)。差は
+`(a-a') h(a) + (h(a)-h(a')) a'` に分けるだけで `I^{k+1}` に入る。
+★★★§9-575 で見つけた `f+g = t/(1-t)^3` が、単元の領域(線型化)と環帯(誤差の積の形)の
+**両方で効いている**。1 つの恒等式が 2 つの領域を支えた。
+
+| 定理 | 内容 |
+|---|---|
+| `inverse_pow_sub_one_mem` | ★★★`inv((1-a)^n) - 1 in I` |
+| `tateXYterm_sub_self_eq` | ★★★★`f(a)+g(a)-a = a(inv(1-a)^3-1)` |
+| `tateDeltaS`・`tateDeltaY` | ★★★環帯での 2 つの誤差 |
+| `tateDeltaS_diff_mem`・`tateDeltaY_diff_mem` | ★★★★★誤差は 1 つ位を上げる |
+| `exists_tate_annulus` | ★★★★★★★★**環帯での座標の全射性** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
