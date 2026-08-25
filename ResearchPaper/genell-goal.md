@@ -23140,3 +23140,66 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-578 ★★★★★★★葉 (e) の縮小性(第 265 ブロック)
+
+`Found/GaloisRep/TateContract.lean`。
+
+葉 (e) の存在の段は `Λ(a) = c` の解 `a` を作ることである。第 263 より
+`Λ(a) = a + κ(a)`(`κ(a) in I`)なので `a = c - κ(a)` の不動点を探せばよい。
+★要るのは **`κ` の変動が 1 つ位を上げる**こと、すなわち
+
+    a - b in I^j  ⟹  ε(a) - ε(b) in I^{j+1},   ε(a) := Y - a(X+Y)
+
+である(`tateEps_diff_mem`)。本ブロックはこれを示した。
+
+### ★★★相方 `w = q/a` は 1 つ位を稼ぐ
+
+`a` が単元なので `w := q a^{-1}` は `R` の中で取れる(`wOf`)。逆元の差は
+
+    inv(a) - inv(b) = inv(a) inv(b) (b - a)  in I^j
+
+なので、`q in I` を掛けて **`w(a) - w(b) in I^{j+1}`**(`wOf_diff_mem`)。
+★★これが縮小性の源である——**`w` 側の項は最初から 1 つ位を稼いでいる**。
+
+### ★★★★★誤差項の展開
+
+第 262 の `tateYterm_eq_mul`(`g(a) = a(f(a)+g(a))`)で主要項が消えるので
+
+    ε = [Tg(a) - f(w) - Tf(w) - g(w) - Tg(w) + s1]
+        - a [Tf(a) + Tg(a) - g(w) - Tg(w) - s1]
+
+★**尾と `w` の項だけ**が残る。`a` そのものへの依存は尾 `Tf(a), Tg(a)` を通してのみで、
+それらの差は `q in I` を 1 つ含むので `I^{j+1}`(第 259 の `tateXtail_diff_mem`)。
+`a […]` の項は `(a-b)[…]`(`[…] in I`)と `b([…]-[…]')` に分ける。
+★★★**主要項が消えるからこそ縮小する**——ここでも §9-575 の線型化が効いている。
+
+### ★単元版の差の補題
+
+第 259 の差の補題は `a, b in I` を仮定していた(`1 - a` が単元であるため)。
+`a` が**単元**の場合も要るので、仮定を `IsUnit (1 - a)` に直した版を置いた
+(`tateXterm_diff_mem_gen`・`tateYterm_diff_mem_gen`)。
+★証明は同じ明示式(`D (f(a)-f(b)) = (a-b)(1-ab)`)で、仮定だけ差し替わる。
+
+| 定理 | 内容 |
+|---|---|
+| `inverse_diff_mem` | ★★★★逆元の差 |
+| `tateXterm_diff_mem_gen`・`tateYterm_diff_mem_gen` | ★★★★単元版の差 |
+| `wOf`・`wOf_diff_mem` | ★★★相方 `q/a` と 1 つ位を稼ぐこと |
+| `tateEps_eq` | ★★★★★誤差項の展開 |
+| `tateEps_diff_mem` | ★★★★★★★**誤差項の差は 1 つ位が上がる** |
+
+### ★配管 —— 暗黙の `m` が拾えない
+
+`tateXtail_diff_mem (m := 1) ...` と**明示**しないと、`m` を 2、`j` を `j` と
+読んで `q in I^2` を要求してくる(`hqm` が `hab` より前に来るので、`j` がまだ
+決まっていない)。★引数の順序が推論の順序を決める。
+
+### 残り(葉 (e))
+
+`exists_fixedPoint_of_contraction`(第 102)は `I` の中の不動点を作る。
+`a = c + b`(`b in I`)と置き換えて `b = -κ(c+b)` の形にすれば当てられる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
