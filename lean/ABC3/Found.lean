@@ -210,6 +210,7 @@ import ABC3.Found.NumberField.SplitSeparable
 import ABC3.Found.NumberField.MaxDeg
 import ABC3.Found.NumberField.GaloisFaithful
 import ABC3.Found.NumberField.DirichletDensity
+import ABC3.Found.NumberField.DedekindEuler
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Prop53QPhi
 import ABC3.Found.FrdI.Prop53Base
