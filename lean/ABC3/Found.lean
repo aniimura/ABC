@@ -217,6 +217,7 @@ import ABC3.Found.NumberField.PrimeDensity
 import ABC3.Found.NumberField.IdealCountSplit
 import ABC3.Found.NumberField.SplitDensity
 import ABC3.Found.NumberField.DecompGroup
+import ABC3.Found.NumberField.SplCompositum
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Prop53QPhi
 import ABC3.Found.FrdI.Prop53Base
