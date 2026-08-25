@@ -216,6 +216,7 @@ import ABC3.Found.NumberField.PrimeDivisorsOfValues
 import ABC3.Found.NumberField.SplitCount
 import ABC3.Found.NumberField.SplitInfinite
 import ABC3.Found.NumberField.SplitSeparable
+import ABC3.Found.NumberField.SplitExponent
 import ABC3.Found.NumberField.MaxDeg
 import ABC3.Found.NumberField.GaloisFaithful
 import ABC3.Found.NumberField.GaloisFaithfulBase
