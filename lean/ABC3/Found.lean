@@ -57,6 +57,7 @@ import ABC3.Found.FrdI.Prop32Perfect
 import ABC3.Found.FrdI.Prop41Cat
 import ABC3.Found.FrdI.Def24Supp
 import ABC3.Found.FrdI.Def24SuppElt
+import ABC3.Found.FrdI.Def24PfTransport
 import ABC3.Found.FrdI.Prop44
 import ABC3.Found.FrdI.Prop44Univ
 import ABC3.Found.FrdI.Prop33UnTr
