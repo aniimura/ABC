@@ -264,6 +264,64 @@ theorem ffMap_square {X Y Z W : Scheme.{u}}
   have h2 : ffMap (c ≫ e) t = ffMap c (ffMap e t) := by rw [ffMap_comp]; rfl
   rw [← h1, ← h2, ffMap_congr hsq]
 
+/-! ## ★3.5. 有効因子は有効因子へ —— `Φ` は `effSub` なので必要 -/
+
+omit [IsLocallyNoetherian (normObj V₁ L)] in
+/-- ★**非負の `Finsupp` を `D_L` 添字から広げても非負**。 -/
+theorem toWeilOnDL_nonneg (d : (DLSet V₁ DK₁ L) →₀ ℤ) (hd : 0 ≤ d)
+    (v : PrimeDivisorPt (normObj V₁ L)) :
+    0 ≤ toWeilOnDL V₁ DK₁ L d v := by
+  show 0 ≤ Finsupp.embDomain (DLEmb V₁ DK₁ L) d v
+  by_cases h : ∃ y, DLEmb V₁ DK₁ L y = v
+  · obtain ⟨y, rfl⟩ := h
+    rw [Finsupp.embDomain_apply]
+    simpa using (Finsupp.le_def.mp hd) y
+  · rw [Finsupp.embDomain_notin_range _ _ _ (by rintro ⟨y, hy⟩; exact h ⟨y, hy⟩)]
+
+/-- ★★★**有効因子の引き戻しは有効** ——
+`Φ(L) = effSub (Φ(L)^gp)` なので `phiHom` を作るのに要る。 -/
+theorem phiPullBase_nonneg (d : cartierOnDL V₁ DK₁ L (normObj_isNormalScheme V₁ L))
+    (hd : 0 ≤ (d : (DLSet V₁ DK₁ L) →₀ ℤ)) :
+    0 ≤ ((phiPullBase DK₁ DK₂ L FL π hdim hpull d
+      : cartierOnDL V₂ DK₂ FL (normObj_isNormalScheme V₂ FL))
+        : (DLSet V₂ DK₂ FL) →₀ ℤ) := by
+  refine Finsupp.le_def.mpr fun x => ?_
+  have hval : ((phiPullBase DK₁ DK₂ L FL π hdim hpull d
+      : cartierOnDL V₂ DK₂ FL (normObj_isNormalScheme V₂ FL))
+        : (DLSet V₂ DK₂ FL) →₀ ℤ) x
+      = pullCoeff π (normObj_isNormalScheme V₂ FL)
+        (normObj_isNormalScheme V₁ L) d.2 x.1 := rfl
+  rw [show ((0 : (DLSet V₂ DK₂ FL) →₀ ℤ)) x = 0 from rfl, hval]
+  exact pullCoeff_nonneg π (normObj_isNormalScheme V₂ FL) (normObj_isNormalScheme V₁ L)
+    d.2 x.1 (hdim x.1) (fun v => toWeilOnDL_nonneg DK₁ L (d : (DLSet V₁ DK₁ L) →₀ ℤ) hd v)
+
+/-- ★★**有効な部分へ制限する**(一般形)—— `Φ = effSub (Φ^gp)` なので要る。 -/
+noncomputable def restrictEff {S T : Type u} {Γ₁ : AddSubgroup (S →₀ ℤ)}
+    {Γ₂ : AddSubgroup (T →₀ ℤ)} (φ : Γ₁ →+ Γ₂)
+    (hnn : ∀ a : Γ₁, 0 ≤ (a : S →₀ ℤ) → 0 ≤ ((φ a : Γ₂) : T →₀ ℤ)) :
+    effSub Γ₁ →+ effSub Γ₂ where
+  toFun a := ⟨((φ ⟨a.1, a.2.1⟩ : Γ₂) : T →₀ ℤ), (φ ⟨a.1, a.2.1⟩).2, hnn _ a.2.2⟩
+  map_zero' := by
+    refine Subtype.ext ?_
+    have h0 : (⟨(0 : effSub Γ₁).1, (0 : effSub Γ₁).2.1⟩ : Γ₁) = 0 := Subtype.ext rfl
+    show ((φ ⟨(0 : effSub Γ₁).1, (0 : effSub Γ₁).2.1⟩ : Γ₂) : T →₀ ℤ) = 0
+    rw [h0, map_zero]
+    rfl
+  map_add' a b := by
+    refine Subtype.ext ?_
+    have hab : (⟨(a + b).1, (a + b).2.1⟩ : Γ₁) = ⟨a.1, a.2.1⟩ + ⟨b.1, b.2.1⟩ := Subtype.ext rfl
+    show ((φ ⟨(a + b).1, (a + b).2.1⟩ : Γ₂) : T →₀ ℤ) = _
+    rw [hab, map_add]
+    rfl
+
+/-- ★★★★★**`Φ₁(L) → Φ₂(L₂)`**(有効因子の側)——
+`ModelDataHomOver.phiHom` がそのまま要求する形。 -/
+noncomputable def phiPullEff :
+    effSub (cartierOnDL V₁ DK₁ L (normObj_isNormalScheme V₁ L))
+      →+ effSub (cartierOnDL V₂ DK₂ FL (normObj_isNormalScheme V₂ FL)) :=
+  restrictEff (phiPullBase DK₁ DK₂ L FL π hdim hpull)
+    (fun a ha => phiPullBase_nonneg DK₁ DK₂ L FL π hdim hpull a ha)
+
 /-! ## ★4. `divCompat` の中身 —— 主因子の引き戻しは引き戻しの主因子 -/
 
 /-- ★★★★★★**主因子の引き戻しは引き戻しの主因子** ——
