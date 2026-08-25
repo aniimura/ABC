@@ -34,7 +34,7 @@ rationally standard だと言う。★他の 4 つは
 
 | 条 | 出どころ |
 |---|---|
-| (a) birat-Frobenius-normalized | `scModel_isOfModelType` の第 2 成分(在庫) |
+| (a) birat-Frobenius-normalized | `ModelData.model_isOfBiratFrobNormalizedType`(在庫) |
 | (a) rational | ★`scModel_isOfStrictlyRationalType`(本ファイル) |
 | (a) standard | `scModel_standardType`(在庫) |
 | (b) Frobenius-compact 対象 | 仮引数(模型ごと) |
@@ -141,7 +141,17 @@ set_option maxHeartbeats 1000000 in
 (`𝒞` は模型ごと、`𝒞^un-tr` / `𝒞^pf` / `(𝒞^pf)^un-tr` / `𝒞^rlf` は一般形)。
 
 ★(b)(`((𝒞^rlf)^un-tr)^birat` の Frobenius-compact 対象)だけは仮引数で受ける ——
-在庫の `unTr_isOfRationallyStandardType` と同じ流儀で、模型ごとに与えるものである。 -/
+在庫の `unTr_isOfRationallyStandardType` と同じ流儀で、模型ごとに与えるものである。
+
+## ★★★★訂正(2026-08-25)—— `Skeletal 𝒟` は要らない
+
+当初 (a) を `scModel_isOfModelType` の第 2 成分から取っていたが、
+それは **`Skeletal 𝒟` を要求する**。★算術の `𝒟 = (FinSub F K̄)ᵒᵖ` では
+**共役な中間体が同型だが相異なる**ので `Skeletal 𝒟` は**偽**であり、
+それを仮定に置くと定理が空虚になる。
+
+★`biratFrobNormalized` は `ModelData.model_isOfBiratFrobNormalizedType` から
+**`Skeletal` 無しで**取れるので、そちらに差し替えた。 -/
 theorem scModel_isOfRationallyStandardType (G : Frobenioid P)
     (hiso : ∀ Y : C, IsIsotropic P Y)
     (hfn : ∀ X : BiratCat P G, IsFrobeniusNormalized (biratPre P G) X)
@@ -150,7 +160,7 @@ theorem scModel_isOfRationallyStandardType (G : Frobenioid P)
     (hint : ∀ A : D, IsIntegralMonoid (ScT ℝ≥0 (Φ.val A)))
     (hfsmD : IsOfFSMType D)
     (hdivRlf : (phiScOn ℝ≥0 Φ hcharInj).IsDivisorialOn)
-    (htot : IsTotallyEpimorphic D) (hconn : IsConnected D) (hskel : Skeletal D)
+    (htot : IsTotallyEpimorphic D) (hconn : IsConnected D)
     (hfsmff : IsOfFSMFFType D)
     (hnd : (scModel ℝ≥0 G hiso hfn hcharInj hint hfsmD).phi.IsNonDilatingOn)
     (hngl : ¬ IsOfGroupLikeType
@@ -181,7 +191,8 @@ theorem scModel_isOfRationallyStandardType (G : Frobenioid P)
   haveI := hconn
   exact
     { biratFrobNormalized :=
-        (scModel_isOfModelType G hiso hfn hcharInj hint hfsmD hdivRlf htot hconn hskel).2
+        ModelData.model_isOfBiratFrobNormalizedType
+          (scModel_hyp G hiso hfn hcharInj hint hfsmD hdivRlf htot hconn)
       rational := fun X => isRational_of_isStrictlyRational _ X
         (scModel_isOfStrictlyRationalType G hiso hfn hcharInj hint hfsmD hdivRlf htot hconn
           ι Hpf hperf hdiv hsp X)
