@@ -13,6 +13,7 @@ import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
 import ABC3.Skeleton.FrdI.Def28ProL
+import ABC3.Skeleton.FrdI.Prop55PfBiratFn
 import ABC3.Skeleton.FrdI.Lemma65SixExp
 import ABC3.Skeleton.FrdI.Thm64Deg
 import ABC3.Skeleton.FrdI.Thm62Slim
