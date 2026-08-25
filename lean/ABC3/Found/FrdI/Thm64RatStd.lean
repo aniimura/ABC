@@ -291,4 +291,130 @@ def model_isOfRationallyStandardType_of_baseId.src : ABC3.Meta.Source :=
 
 end ModelData
 
+/-! ## ★4. `𝒞^un-tr` の側 —— `Proposition 5.5, (iii)` の rationally standard の入口
+
+原文 (FrdI p.105):
+> if C is of standard (respectively, rationally standard) type, then so are Cun-tr, Crlf.
+
+★★`𝒞^un-tr` の `Φ^birat` は **`Div_B(B)` を丸ごと含む**。
+中身は「同じ底の 2 本の pre-step の差」1 本で、model の `Φ^gp = Φ − Φ` を使うだけである
+(`gp_eq_sub` に相当する `AddLocalization.induction_on`)。 -/
+
+section UnTrRational
+
+variable {M : ModelData.{v, u, w} D}
+
+open ModelData in
+/-- ★★★★★**`Div_B` の像は `𝒞^un-tr` の `Φ^birat` に必ず入る**。
+
+★`X` を始域とする 2 本の pre-step
+
+    f : X ⟶ A'   (Base = 𝟙、degFr = 1、Div = a、u = y)
+    g : X ⟶ A'   (Base = 𝟙、degFr = 1、Div = b、u = 0)
+
+を `A' := (Base X, cls X + toGp b)` の上に作る。`Div_B(y) = toGp a − toGp b` は
+`Φ^gp = Φ − Φ` から取れるので、**追加の仮定はいらない**。 -/
+theorem divB_mem_phiBiratAt_unTr (h : M.Hyp)
+    (X : UnTr (modelPre h)) (y : M.bmon.val X.obj.base) :
+    M.divB X.obj.base y ∈ phiBiratAt (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))
+      (show BiratCat _ _ from X) := by
+  haveI := h.connectedD
+  obtain ⟨a, b, hab⟩ : ∃ a b : M.phi.val X.obj.base,
+      M.divB X.obj.base y = toGp _ a - toGp _ b := by
+    refine AddLocalization.induction_on (M.divB X.obj.base y) ?_
+    rintro ⟨u, v⟩
+    exact ⟨u, (v : M.phi.val X.obj.base), by
+      rw [eq_sub_iff_add_eq]; exact mk_add_toGp _ u v⟩
+  set A' : ModelData.Obj M :=
+    ⟨X.obj.base, X.obj.cls + toGp (M.phi.val X.obj.base) b⟩ with hA'
+  set gm : X.obj ⟶ A' :=
+    { base := 𝟙 X.obj.base, div := b, deg := 1, u := 0,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X.obj.cls + toGp (M.phi.val X.obj.base) b
+          = M.phi.gpMapOn (𝟙 X.obj.base)
+              (X.obj.cls + toGp (M.phi.val X.obj.base) b) + M.divB X.obj.base 0
+        rw [M.phi.gpMapOn_id, map_zero, add_zero]
+        show (1 : ℕ) • X.obj.cls + _ = _
+        rw [one_nsmul] } with hgm
+  set fm : X.obj ⟶ A' :=
+    { base := 𝟙 X.obj.base, div := a, deg := 1, u := y,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X.obj.cls + toGp (M.phi.val X.obj.base) a
+          = M.phi.gpMapOn (𝟙 X.obj.base)
+              (X.obj.cls + toGp (M.phi.val X.obj.base) b) + M.divB X.obj.base y
+        rw [M.phi.gpMapOn_id, hab]
+        show (1 : ℕ) • X.obj.cls + _ = _
+        rw [one_nsmul]
+        abel } with hfm
+  set A'i : Istr (modelPre h) := ⟨A', ModelData.model_isotropicType h A'⟩ with hA'i
+  set fu : X ⟶ (show UnTr (modelPre h) from A'i) :=
+    (istrToUnTr (modelPre h)).map (ObjectProperty.homMk fm) with hfu
+  set gu : X ⟶ (show UnTr (modelPre h) from A'i) :=
+    (istrToUnTr (modelPre h)).map (ObjectProperty.homMk gm) with hgu
+  haveI : IsIso ((unTrPre (modelPre h) (model_frobenioid h).core).Base fu) := by
+    show IsIso (𝟙 X.obj.base)
+    infer_instance
+  have hmem := toGp_div_sub_mem_phiBiratAt_of_preStep
+    (unTrPre (modelPre h) (model_frobenioid h).core)
+    (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))
+    (fun Z => (unTr_isOfModelType (model_frobenioid h).core (model_frobenioid h)).2 Z)
+    (X := X) (A := show UnTr (modelPre h) from A'i)
+    (unTr_isotropic (modelPre h) (model_frobenioid h).core _) fu gu rfl rfl rfl
+  rw [hab]
+  exact hmem
+
+open ModelData in
+/-- ★★★★★★**`𝒞^un-tr` は strictly rational 型** —— model の `hsp` がそのまま効く。
+
+★`Φ` は `𝒞` と `𝒞^un-tr` で**同じ**なので `ι` もそのまま使える。
+★★`Proposition 5.5, (iii)` の rationally standard の 4 条のうち、
+**中身のある 1 条**がこれである(他の 3 条は在庫と移送)。 -/
+theorem unTr_isOfStrictlyRationalType_of_hsp (h : M.Hyp)
+    (ι : ∀ Y : D, Prime (M.phi.val Y) → Pf (M.phi.val Y) → NNReal)
+    (hsp : ∀ (A : ModelData.Obj M)
+        (p : Prime (M.phi.val ((modelPre h).toElem.obj A).base)),
+      ∃ (a b : M.phi.val ((modelPre h).toElem.obj A).base)
+        (y : M.bmon.val ((modelPre h).toElem.obj A).base),
+        (toGp _ a - toGp _ b = M.divB _ y ∨ toGp _ a - toGp _ b = -(M.divB _ y)) ∧
+        p ∈ SuppElt (ι _) a ∧ p ∉ SuppElt (ι _) b) :
+    IsOfStrictlyRationalType (UnTr (modelPre h))
+      (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)) ι := by
+  haveI := h.connectedD
+  intro X p
+  obtain ⟨a, b, y, hor, hap, hbp⟩ := hsp X.obj p
+  refine ⟨a, b, ?_, hap, hbp⟩
+  have hy := divB_mem_phiBiratAt_unTr h X y
+  rcases hor with heq | heq
+  · have h1 : toGp (M.phi.val X.obj.base) a - toGp (M.phi.val X.obj.base) b
+        = M.divB X.obj.base y := heq
+    have h2 : toGp (M.phi.val X.obj.base) a - toGp (M.phi.val X.obj.base) b
+        ∈ phiBiratAt (unTrPre (modelPre h) (model_frobenioid h).core)
+          (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))
+          (show BiratCat _ _ from X) := by rw [h1]; exact hy
+    exact h2
+  · have h1 : toGp (M.phi.val X.obj.base) a - toGp (M.phi.val X.obj.base) b
+        = -(M.divB X.obj.base y) := heq
+    have h2 : toGp (M.phi.val X.obj.base) a - toGp (M.phi.val X.obj.base) b
+        ∈ phiBiratAt (unTrPre (modelPre h) (model_frobenioid h).core)
+          (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))
+          (show BiratCat _ _ from X) := by
+      rw [h1]; exact AddSubgroup.neg_mem _ hy
+    exact h2
+
+/-- ★★★★locator —— `Proposition 5.5, (iii)` の rationally standard の入口。 -/
+def divB_mem_phiBiratAt_unTr.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — Div_B の像は 𝒞^un-tr の Φ^birat に入る",
+    sectionId := "frdi-prop-5-5" }
+
+/-- ★★★★★locator —— `Proposition 5.5, (iii)` の `𝒞^un-tr` が strictly rational 型。 -/
+def unTr_isOfStrictlyRationalType_of_hsp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞^un-tr は strictly rational 型",
+    sectionId := "frdi-prop-5-5" }
+
+end UnTrRational
+
 end ABC3.Found.FrdI
