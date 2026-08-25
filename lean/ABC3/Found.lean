@@ -207,6 +207,7 @@ import ABC3.Found.Divisor.Ex61Model
 import ABC3.Found.Divisor.Ex61Units
 import ABC3.Found.Divisor.Ex61RatStd
 import ABC3.Found.Divisor.Ex63Types
+import ABC3.Found.Divisor.Ex63Rlf
 import ABC3.Found.Divisor.Ex63RatStd
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
