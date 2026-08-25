@@ -343,7 +343,74 @@ theorem mapDomain_arithExtend (L M : Type) [Field L] [Field M] [NumberField L] [
   show _ = (Module.finrank L M : ℕ) • x v
   rw [nsmul_eq_mul]
 
+/-! ## ★7. 相対ノルムの冪表示
+
+★★トレース写像が `arithDivGroup`（有限素点の係数が `log N𝔭` の整数倍）を保つには
+
+    N(𝔓) = N(𝔭)^{f(𝔓/𝔭)}
+
+が要る。★mathlib の `Ideal.absNorm_eq_pow_inertiaDeg` は**底が ℤ**なので、
+`ℤ ⊆ 𝓞 L ⊆ 𝓞 M` の塔で `f` の乗法性（`Ideal.inertiaDeg_algebra_tower`）を挟む。 -/
+
+open NumberField Ideal in
+/-- ★`𝓞 L` の非零素イデアルの下には有理素数がある。 -/
+theorem exists_rational_prime_under (L : Type) [Field L] [NumberField L]
+    (P : Ideal (𝓞 L)) [hp : P.IsPrime] (hne : P ≠ ⊥) :
+    ∃ p : ℕ, p.Prime ∧ P.LiesOver (Ideal.span {(p : ℤ)}) := by
+  classical
+  haveI : (P.under ℤ).IsPrime := Ideal.IsPrime.under _ _
+  have hqne : (P.under ℤ) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot ℤ hne
+  obtain ⟨n, hspan⟩ := (IsPrincipalIdealRing.principal (P.under ℤ)).1
+  have hsp : P.under ℤ = Ideal.span {n} := hspan
+  have hn0 : n ≠ 0 := by
+    rintro rfl
+    refine hqne ?_
+    rw [hsp, Ideal.span_singleton_eq_bot]
+  have hnprime : Prime n := by
+    rw [← Ideal.span_singleton_prime hn0, ← hsp]
+    infer_instance
+  refine ⟨n.natAbs, Int.prime_iff_natAbs_prime.mp hnprime, ⟨?_⟩⟩
+  rw [hsp, Int.span_natAbs]
+
+open NumberField Ideal in
+open scoped Classical in
+/-- ★★★★**相対ノルムの冪表示** —— `N(𝔓) = N(𝔭)^{f(𝔓/𝔭)}`。 -/
+theorem absNorm_eq_pow_inertiaDeg_rel (L M : Type) [Field L] [Field M]
+    [NumberField L] [NumberField M] [Algebra L M]
+    (P : Ideal (𝓞 M)) [P.IsPrime] (hPne : P ≠ ⊥) :
+    Ideal.absNorm P
+      = (Ideal.absNorm (P.under (𝓞 L))) ^ ((P.under (𝓞 L)).inertiaDeg P) := by
+  classical
+  haveI hZ : IsScalarTower ℤ (𝓞 L) (𝓞 M) := inferInstance
+  obtain ⟨p, hp, hlo⟩ := exists_rational_prime_under M P hPne
+  haveI := hlo
+  have hpz : Prime ((p : ℤ)) := Nat.prime_iff_prime_int.mp hp
+  set q : Ideal (𝓞 L) := P.under (𝓞 L) with hqdef
+  haveI : q.IsPrime := Ideal.IsPrime.under _ _
+  haveI : P.LiesOver q := ⟨rfl⟩
+  haveI hql : q.LiesOver (Ideal.span {(p : ℤ)}) :=
+    ⟨by rw [hqdef, Ideal.under_under]; exact Ideal.LiesOver.over⟩
+  haveI : P.IsMaximal := Ideal.IsPrime.isMaximal inferInstance hPne
+  haveI : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal :=
+    PrincipalIdealRing.isMaximal_of_irreducible hpz.irreducible
+  have hspan : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by simp [hp.ne_zero]
+  have hqne : q ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hspan q
+  haveI : q.IsMaximal := Ideal.IsPrime.isMaximal inferInstance hqne
+  have h1 : Ideal.absNorm P = p ^ ((Ideal.span {(p : ℤ)}).inertiaDeg P) := by
+    have h := Ideal.absNorm_eq_pow_inertiaDeg (R := 𝓞 M) P hpz
+    simpa using h
+  have h2 : Ideal.absNorm q = p ^ ((Ideal.span {(p : ℤ)}).inertiaDeg q) := by
+    have h := Ideal.absNorm_eq_pow_inertiaDeg (R := 𝓞 L) q hpz
+    simpa using h
+  have htow := Ideal.inertiaDeg_algebra_tower (Ideal.span {(p : ℤ)}) q P
+  rw [h1, h2, ← pow_mul, htow]
+
 /-! ### ★出典の紐付け -/
+
+def absNorm_eq_pow_inertiaDeg_rel.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 相対ノルムの冪表示 N(𝔓) = N(𝔭)^f",
+    sectionId := "frdi-thm-6-4" }
 
 def mapDomain_arithExtend.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
