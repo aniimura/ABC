@@ -155,6 +155,7 @@ import ABC3.Found.Divisor.CartierMonoprime
 import ABC3.Found.Divisor.CartierPerfFactorial
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.ArithDivisor
+import ABC3.Found.Divisor.ArithPicR
 import ABC3.Found.Divisor.ArithOrd
 import ABC3.Found.Divisor.ArithPhiMonoid
 import ABC3.Found.Divisor.ArithGp
