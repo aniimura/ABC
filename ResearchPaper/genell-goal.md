@@ -23291,3 +23291,42 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-581 ★★★★★★2 変数の縮小写像定理(第 268 ブロック)
+
+`Found/GaloisRep/AdicContraction2.lean`。
+
+### ★★★★★★環帯の領域には 2 変数が要る
+
+葉 (e) の**単元の領域**(第 266)では `a` が単元なので相方 `w = q a^{-1}` を
+**割り算で作れた**——未知数は 1 つで済んだ。
+
+★★環帯の領域(`a, w in I`)では `a` が単元でないので `q/a` が作れない。
+そこで `(a, w)` を**独立な 2 変数**として
+
+    a = (x + y) - δ_S(a,w)      (`X + Y = a` が主要項)
+    w = -y + δ_Y(a,w)           (`Y = -w` が主要項)
+
+の不動点を取る。★★制約 `a w = q` は**あとから**回復させる:
+
+> `(x,y)` が `E_q` 上にあり `X(a,w,q) = x`、`Y(a,w,q) = y` なら `defect(a,w,q) = 0`。
+> 一方 `defect(a,w,aw) = 0`(葉 (b))。`defect` の `q` についての主要項が
+> `q - aw` なので、両者から `q = aw` が出る。
+
+★★★**制約を最初から課さず、あとで回復させる**——これが環帯の設計である。
+`q/a` の割り算を避けられるので、離散付値環の一意化元を持ち出さずに済む見込み。
+
+### ★★★2 変数版は 1 変数版の写し
+
+第 102 の証明(反復 → Cauchy → `IsPrecomplete` → `IsHausdorff`)を対で走らせるだけ。
+成分ごとに `IsPrecomplete.prec'` を当てて極限 `A`, `B` を取り、
+`F (f n).1 (f n).2 - F A B in I^{n+1}` から不動点の式を出す。
+★`nth_rewrite 2` で「引く側の `f (m+1)`」だけを書き換えるのが要点(第 102 と同じ手)。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_fixedPoint_of_contraction₂` | ★★★★★★**2 変数の縮小写像定理** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
