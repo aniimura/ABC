@@ -21661,3 +21661,57 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-551 ★★★★★★★★分子の低次係数は消える(第 238 ブロック)
+
+`Found/GaloisRep/TateCoeffVanish.lean`。三つの部品を噛み合わせた:
+
+| 部品 | 出どころ |
+|---|---|
+| `tateEval u w P = tateDefectTrunc (n+1) u w (uw) * tateEval u w d` | 第 225 |
+| `‖tateDefectTrunc (n+1) u w (uw)‖ <= C_n * 50 * (64‖uw‖)^{n+1}` | 第 237 |
+| `‖f(w)‖ <= K‖w‖^m` なら `f` の低次係数は 0 | 第 236 |
+
+★あと一つ、**分母 `d` の値が有界**であることが要った。
+
+### ★★★★分母の有界性は帰納法で出る
+
+`‖u‖ <= 1`、`‖w‖ <= 1` の上では `tateEval u w Q` は有界。`MvPolynomial.induction_on` で:
+
+| 段 | 上界 |
+|---|---|
+| `C r` | `‖(r : C)‖` |
+| `p + q` | `B_p + B_q` |
+| `p * X i` | `B_p`(変数を掛けても増えない) |
+
+★★**上界を存在量化しておく**のがよかった——係数の和として明示すると
+`MvPolynomial.support` の扱いが要るが、帰納法なら三段で済む。
+
+### ★★★仕上げ
+
+`‖u‖ <= 1` なので `‖uw‖ <= ‖w‖`、したがって `(64‖uw‖)^{n+1} <= 64^{n+1}‖w‖^{n+1}`。
+`‖w‖ < 1/128` なら第 237 の仮定(`‖w‖ <= 1/2` と `‖uw‖ <= 1/128`)がどちらも満たされる。
+★**円板の半径を `1/128` に取れば仮定が二つとも自動で満たされる**のが効いた。よって
+
+    ‖(evalW u P).eval w‖ <= (C_n * 50 * 64^{n+1} * B) * ‖w‖^{n+1}
+
+となり、第 236 から `j <= n` の係数が 0 が出る。
+
+| 定理 | 内容 |
+|---|---|
+| `tateEval_C` | ★定数の評価 |
+| `exists_bound_tateEval` | ★★★★分母は有界 |
+| `coeff_evalW_eq_zero` | ★★★★★★★★**分子の低次係数は消える** |
+
+### ★残り
+
+1. `(evalW u P).coeff j` を `u` の多項式と見る配線
+   (`TateBase -> Polynomial (Polynomial C)`、`A -> C X`、`W -> X`)
+2. `u = exp(2 pi i z)`(`z` は上半平面を動く——無限個)で 0 ==> 係数多項式が 0
+3. `Z[A,W]` への降下:`W^{n+1} | P`
+4. 対称性(`Equiv.swap` の rename)で `A^{n+1} | P`
+5. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
