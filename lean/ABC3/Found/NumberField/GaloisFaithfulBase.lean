@@ -288,7 +288,67 @@ theorem isGalois_fixedField (L : Type) [Field L] [NumberField L]
   rw [IntermediateField.finrank_fixedField_eq_card G]
   exact Nat.card_congr (IntermediateField.subgroupEquivAlgEquiv G).symm.toEquiv
 
+/-! ## ★7. 配線 —— `τ` から始めて `τ = 1` まで
+
+★★★これが `Theorem 6.4, (i)` の「clearly」の**完成形**である。
+`τ` の固定体を取り(★`isGalois_fixedField`)、
+`L` を含む ℚ 上 Galois な `N` で完全分解する有理素数を経由して(★§5)、
+最後に `subgroupEquivAlgEquiv` の単射性で `τ` に戻す。 -/
+
+open IntermediateField in
+/-- ★★★★★★★**数体の自己同型で素点を固定するものは恒等**(配線まで込み)。
+
+★入力は「`L` を含む ℚ 上 Galois な `N` と、そこで完全分解する有理素数」だけである。
+★★`N` は `L/ℚ` の Galois 閉包を取ればよく、完全分解する有理素数の存在は
+在庫の `infinite_splitsCompletely`(**Chebotarev を使わない**)が与える。
+
+★★★中身:
+
+| 段 | 根拠 |
+|---|---|
+| `M := L^{⟨τ⟩}` の上で `L` は Galois | `isGalois_fixedField`(Artin) |
+| `σ := τ` を `Gal(L/M)` の元として見る | `IntermediateField.subgroupEquivAlgEquiv` |
+| `σ` は `R ∩ 𝓞 L` を固定する | `τ` と同じ底写像なので `rfl` |
+| `σ = 1` | `eq_one_of_fixes_prime_of_splitsCompletely` |
+| `τ = 1` | `subgroupEquivAlgEquiv` の単射性 | -/
+theorem eq_one_of_fixes_prime_of_galoisClosure
+    {L N : Type} [Field L] [Field N] [NumberField L] [NumberField N]
+    [Algebra L N] [IsGalois ℚ N]
+    {p : ℕ} [Fact p.Prime]
+    (hsplit : (Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 N)).ncard = Module.finrank ℚ N)
+    (R : Ideal (𝓞 N)) [R.IsPrime] [R.LiesOver (Ideal.span {(p : ℤ)})] (hRne : R ≠ ⊥)
+    (τ : L ≃ₐ[ℚ] L) (hτ : τ • (R.under (𝓞 L)) = R.under (𝓞 L)) : τ = 1 := by
+  haveI : IsScalarTower ℚ L N := IsScalarTower.of_algebraMap_eq (fun x => by
+    show algebraMap ℚ N x = _
+    exact (IsScalarTower.algebraMap_apply ℚ L N x))
+  set G : Subgroup (L ≃ₐ[ℚ] L) := Subgroup.zpowers τ with hG
+  haveI : IsGalois (IntermediateField.fixedField G) L := isGalois_fixedField L G
+  set σ : L ≃ₐ[↥(IntermediateField.fixedField G)] L :=
+    IntermediateField.subgroupEquivAlgEquiv G ⟨τ, Subgroup.mem_zpowers τ⟩ with hσdef
+  have hσact : σ • (R.under (𝓞 L)) = R.under (𝓞 L) := hτ
+  have hσ1 : σ = 1 :=
+    eq_one_of_fixes_prime_of_splitsCompletely hsplit R hRne σ hσact
+  have hsub := (IntermediateField.subgroupEquivAlgEquiv G).injective
+    ((hσdef ▸ hσ1).trans (map_one _).symm)
+  exact congrArg Subtype.val hsub
+
 /-! ### ★出典の紐付け -/
+
+def eq_one_of_fixes_prime_of_galoisClosure.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 数体の自己同型で素点を固定するものは恒等(配線まで)",
+    sectionId := "frdi-thm-6-4" }
+
+def eq_one_of_fixes_prime_of_galoisClosure.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "isGalois_fixedField(Artin。τ の固定体の上で L は Galois)"
+      (.inProject "ABC3" "ABC3.Found.NF.isGalois_fixedField") 114,
+    .citation "[ABC3]" "eq_one_of_fixes_prime_of_splitsCompletely(完全分解を経由する本体)"
+      (.inProject "ABC3" "ABC3.Found.NF.eq_one_of_fixes_prime_of_splitsCompletely") 114,
+    .citation "[mathlib]" "IntermediateField.subgroupEquivAlgEquiv(G ≃* Gal(L/L^G))"
+      (.inMathlib "IntermediateField.subgroupEquivAlgEquiv") 114,
+    .implicitStep
+      ("★入力の N は L/ℚ の Galois 閉包を取ればよく、完全分解する有理素数の存在は" ++
+       "在庫の infinite_splitsCompletely(Chebotarev を使わない)が与える") 116 ]
 
 def isGalois_fixedField.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
