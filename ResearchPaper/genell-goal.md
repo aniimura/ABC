@@ -22878,3 +22878,52 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-573 ★★★★★★付値と `x` 座標の相異性(第 260 ブロック)
+
+`Found/GaloisRep/TateDVR.lean`。
+
+### ★★★★★付値と極大イデアルの冪の橋
+
+第 259 までは `I` 進の言葉だけで進んだが、`(u, q/u)` の対を作る段になると
+**「`v(u) <= v(q)` なら `q/u` が環に入る」**が要る。離散付値環では
+
+    x in 𝔪^n  <->  n <= addVal x                  (`mem_maximalIdeal_pow_iff`)
+    v(u) < v(q)  ⟹  ∃ w in 𝔪, u w = q             (`exists_complement`)
+
+★mathlib の `IsDiscreteValuationRing.addVal_le_iff_dvd`(`v(a) <= v(b) <-> a | b`)と
+`irreducible_iff_uniformizer`(`𝔪 = span {ϖ}`)を合わせるだけで出た。
+★★**在庫で足りた**——付値環の理論を自前で作る必要はなかった。
+
+### ★★★★★★`x` 座標が相異なる条件は `u != v` だけ
+
+第 257 の群法則は「3 点の `x` 座標が相異なること」を要求した。
+第 259 の `tate_inj_X` を 3 点 `(u, vw)`, `(v, uw)`, `(w, uv)`(`u v w = q`)に当てると
+`X1 = X2` は
+
+    (u = v かつ vw = uw)   または   (u = uw かつ vw = v)
+
+を意味する。★★後者は `u(1 - w) = 0` すなわち `w = 1` を強いるが、`w in I` なので
+`1 - w` は単元、`w = 1` なら `0` が単元になって矛盾する。
+
+★したがって **`X1 = X2 <-> u = v`**——非退化条件は
+**`u, v, w` が相異なることだけ**になった。これは群の言葉で言えば
+「3 つの類が相異なる」であり、退化した場合(二倍・逆元)を別扱いすればよい形である。
+
+| 定理 | 内容 |
+|---|---|
+| `mem_maximalIdeal_pow_iff` | ★★★★★付値と `𝔪^n` の橋 |
+| `exists_complement` | ★★★★★相方 `q/u` が環に入る |
+| `tateXpair_ne_of_ne` | ★★★★★★**`x` 座標の相異性は `u != v` から** |
+
+### 残り
+
+1. 3 点の共線性(第 256)+ 群法則(第 257)+ 相異性(本ブロック)を組み立てて
+   **`P(u) + P(v) + P(w) = 0`**(`u v w = q`)。曲線を `K` に基底変換し、
+   `Δ != 0` から `Nonsingular` を取る(`equation_iff_nonsingular_of_Δ_ne_zero`)。
+2. 葉 (e)(全射性)。`u = 1` の近く(形式群の領域)が本体。
+3. `TateCurveData` への組み立て。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
