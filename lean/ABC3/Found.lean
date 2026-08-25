@@ -169,6 +169,7 @@ import ABC3.Found.Divisor.ArithPerfFactorial
 import ABC3.Found.Divisor.ArithSuppSplit
 import ABC3.Found.Divisor.ArithPhiPerf
 import ABC3.Found.Divisor.ArithFunctor
+import ABC3.Found.Divisor.ArithFundamental
 import ABC3.Found.Divisor.ArithTower
 import ABC3.Found.Divisor.ArithSurj
 import ABC3.Found.Divisor.ArithFrobenioid
