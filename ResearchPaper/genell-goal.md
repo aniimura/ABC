@@ -22979,3 +22979,65 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-575 ★★★★★★★葉 (e) の線型化 —— 平方根も Hensel も要らない(第 262 ブロック)
+
+`Found/GaloisRep/TateLinearize.lean`。
+
+### ★★★★★★★`X + Y` が `a` を線型に取り出す
+
+葉 (e)(全射性)は「点 `(x,y)` から `u` を作る」ことである。★素朴に `X(u) = x` を
+解こうとすると、`f(t) = t/(1-t)^2` が **2 対 1**(`f(t) = f(1/t)`)なので
+
+    x s^2 - (2x+1)s + x = 0,   判別式 4x+1
+
+の平方根が要り、**残余体に平方根があるかという条件**に化けてしまう。
+分岐点は `s = ±1` で、そこは `f'` が単元でなくなる所である。
+
+★★★しかし `X` と `Y` を**両方**使うと線型になる:
+
+    f(t) + g(t) = t/(1-t)^3,     g(t) = t^2/(1-t)^3
+    ⟹ g(t) = t (f(t) + g(t))
+
+すなわち **`Y = a (X + Y)`**(主要項で)。`X + Y` は単元なので
+
+    a = Y (X + Y)^{-1} + (補正)
+
+★これが `a` を取り出す式である。**平方根も Hensel も要らない**。
+点は `(x, y)` の対で与えられるのだから、`y` も使ってよい——`x` だけで解こうとして
+2 対 1 に引っかかるのは、情報を捨てているからだった。
+
+### ★★誤差はすべて `I` の元
+
+    Y - a(X + Y) = (Y - g(a)) - a((X + Y) - (f(a) + g(a)))
+                   + (g(a) - a(f(a) + g(a)))
+
+★右辺の最初の 2 つの括弧は、`w in I` なら**尾と `s1(q)` だけ**でできているので `I` の元
+(`tateYpair_sub_tateYterm_mem`・`tateXpair_add_tateYpair_sub_mem`)。
+第 3 項は**恒等的に 0**(`tateYterm_eq_mul`)。
+
+### ★★単元 + `I` は単元
+
+`IsAdicComplete I R` なら `1 - i` が単元(`isUnit_one_sub`)なので、
+`u + i = u(1 - (-u^{-1} i))` も単元(`isUnit_add_mem`)。
+★これで `X + Y` の単元性が主要項 `a/(1-a)^3` から出る。
+
+| 定理 | 内容 |
+|---|---|
+| `mul_tateXYterm` | ★★★★★★`(1-t)^3 (f+g) = t` |
+| `tateYterm_eq_mul` | ★★★★★**`g(a) = a(f(a)+g(a))`** |
+| `tateYpair_sub_mul_mem` | ★★★★★★★**`Y - a(X+Y) in I`** |
+| `isUnit_add_mem` | ★★★★単元 + `I` は単元 |
+| `isUnit_tateXpair_add_tateYpair` | ★★★★★★`X + Y` は単元 |
+
+### 残り(葉 (e))
+
+1. `a = Y(X+Y)^{-1} - 誤差(a)` を縮小写像として解く(第 102 の
+   `exists_fixedPoint_of_contraction`)。誤差の差が `I^{j+1}` に入ることは
+   第 259 の尾の差の補題から出る見込み。
+2. `w = q/a` の側(`v(a) < v(q)/2` の領域)。第 260 の `exists_complement` が道具。
+3. 得られた `(a,w)` が `X(a,w) = x`、`Y(a,w) = y` を満たすことの確認。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
