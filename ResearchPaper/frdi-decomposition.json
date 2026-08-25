@@ -3990,11 +3990,11 @@
             "cheb-euler",
             "cheb-density"
           ],
-          "status": "todo",
-          "size": "中",
-          "note": "★`f(𝔭) ≥ 2` の項と `m ≥ 2` の項は `s → 1+` で有界。★これは初等的な評価である。",
-          "lean": "",
-          "decl": "",
+          "status": "done",
+          "size": "中(閉じた)",
+          "note": "★`f(𝔭) ≥ 2` の項と `m ≥ 2` の項は `s → 1+` で有界。★これは初等的な評価である。\n\n## ★★★★★★2026-08-25(**閉じた**)\n\n`Found/NumberField/LogZeta.lean`(新規・sorry 無し)。\n\n### ★★見立ての要点 —— 素イデアルへの局所分解は要らない\n\n原文の `Σ_{f(𝔭)=1} N𝔭^{-s}` は**有理素数ごとの計数**で書ける ——\n`f(𝔭) = 1` の素イデアルはちょうど「ノルムが有理素数 `p` のイデアル」であり、\nその個数が `a_K(p)` だからである。したがって示すべきは\n\n    |log ζ_L(s) − Σ_p a_L(p)·p^{-s}| ≤ C   (s > 1 について**一様**)\n\nであり、これを閉じた。\n\n| 定理 | 中身 |\n|---|---|\n| `zetaR` / `zetaR_eulerProduct_hasProd` | ★**実の** Euler 積(`ℝ` は完備ノルム環) |\n| `tsum_log_localFactor` | ★★`Σ_p log L_p(s) = log ζ_L(s)` |\n| `zetaSummandR_pow_le` | `e ≥ 2` の項の一様評価(`a(p^e) ≤ (ed+1)^d` を使う) |\n| `abs_log_one_add_sub_le` | `|log(1+A+R) − A| ≤ R + (A+R)²` |\n| `abs_log_localFactor_sub_le` | 素数ごとの一様評価 `≤ C/p²` |\n| `abs_log_zetaR_sub_tsum_le` | ★★★**`|log ζ_L(s) − Σ_p a(p)p^{-s}| ≤ C`** |\n\n★`Σ_p log L_p = log ζ_L` は「正項の無限積の対数」で、\n`Σ_{p∈t} log L_p = log ∏_{p∈t} L_p ≤ log ζ_L(s)` と**部分和が一様有界**だから\n和が収束し、`exp` を取って `HasProd` の一意性で一致する。",
+          "lean": "ABC3/Found/NumberField/LogZeta.lean",
+          "decl": "ABC3.Found.NF.zetaR / zetaR_eulerProduct_hasProd / tsum_log_localFactor / abs_log_one_add_sub_le / abs_log_localFactor_sub_le / abs_log_zetaR_sub_tsum_le",
           "frdiNeeded": true
         },
         {
@@ -4004,11 +4004,11 @@
             "cheb-log-zeta",
             "cheb-split-count"
           ],
-          "status": "todo",
-          "size": "★大",
-          "note": "★★★**これが 2026-08-20 の訂正である**。当初「(c) は Artin の相互法則を要求する」と書いたが、**それは共役類つきの一般形についてであって、完全分解の場合には要らない**。\n\n★根拠（Frobenius/Dedekind の古典的な密度論法）:\n1. `log ζ_L(s) = Σ_{𝔭 : f=1} N𝔭^{-s} + O(1)`（`cheb-log-zeta`）\n2. `L/K` が Galois なら `p` の上の `f` はすべて等しいので、`#{𝔭 ∣ p, f(𝔭)=1}` は `p` が完全分解なら `[L:K]`、そうでなければ `0`（分岐する `p` は有限個）\n3. `ζ_L` は `s=1` で単純極（mathlib の `dedekindZeta_residue`）だから `log ζ_L(s) ~ log(1/(s-1))`\n4. ゆえに `Σ_{p ∈ Spl(L)} p^{-s} ~ (1/[L:K])·log(1/(s-1))`、すなわち密度 `1/[L:K]`\n\n★★**使うのは Dedekind ζ の極（mathlib 在庫）だけ**で、Artin の相互法則も Hecke L 関数も要らない。",
-          "lean": "",
-          "decl": "",
+          "status": "半済",
+          "size": "中(解析側は全部済んだ。残るは代数側)",
+          "note": "★★★**これが 2026-08-20 の訂正である**。当初「(c) は Artin の相互法則を要求する」と書いたが、**それは共役類つきの一般形についてであって、完全分解の場合には要らない**。\n\n★根拠（Frobenius/Dedekind の古典的な密度論法）:\n1. `log ζ_L(s) = Σ_{𝔭 : f=1} N𝔭^{-s} + O(1)`（`cheb-log-zeta`）\n2. `L/K` が Galois なら `p` の上の `f` はすべて等しいので、`#{𝔭 ∣ p, f(𝔭)=1}` は `p` が完全分解なら `[L:K]`、そうでなければ `0`（分岐する `p` は有限個）\n3. `ζ_L` は `s=1` で単純極（mathlib の `dedekindZeta_residue`）だから `log ζ_L(s) ~ log(1/(s-1))`\n4. ゆえに `Σ_{p ∈ Spl(L)} p^{-s} ~ (1/[L:K])·log(1/(s-1))`、すなわち密度 `1/[L:K]`\n\n★★**使うのは Dedekind ζ の極（mathlib 在庫）だけ**で、Artin の相互法則も Hecke L 関数も要らない。\n\n## ★★★★★★2026-08-25(**解析側は全部済んだ**)\n\n`Found/NumberField/PrimeDensity.lean`(新規・sorry 無し)で\n\n    Σ_p a_L(p)·p^{-s} / log(1/(s−1)) → 1   (s → 1+)\n\nを出した(`tendsto_tsum_primes_div_log`)。\n\n| 定理 | 中身 |\n|---|---|\n| `tendsto_sub_one_mul_zetaR` | 実の側での単純極(mathlib の類数公式の実部) |\n| `tendsto_log_zetaR_sub` | `log ζ_L(s) − log(1/(s−1)) → log(留数)` |\n| `tendsto_tsum_primes_div_log` | ★★★`Σ_p a_L(p)p^{-s}/log(1/(s−1)) → 1` |\n\n★★中身は `A/D = 1 + (Z−D)/D + (A−Z)/D` の 3 項分解である ——\n第 2 項は分子が収束して分母が `+∞`、第 3 項は分子が**一様有界**(`logConst`)。\n\n### ☆残っているもの —— **代数側だけ**\n\n`a_L(p)` を分解の様子で読む段である:\n\n* ノルムが素数 `p` のイデアルは素イデアルで `p` の上にある(`f = 1`)\n* `L/ℚ` が Galois なら `p` の上の `f` はすべて等しいので\n  `a_L(p) = g`(`f = 1` のとき)か `0`(そうでないとき)\n* 非分岐なら `e = 1` で `efg = d` より `g = d`。分岐する `p` は有限個\n\nゆえに `Σ_p a_L(p)p^{-s} = d·Σ_{p ∈ Spl} p^{-s} + O(1)` となり、密度 `1/d` が出る。\n\n★在庫: `Found/NumberField/SplitCount.lean`(`ncard_primesOver_eq_finrank_iff` ほか)、\nmathlib の `Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn`。",
+          "lean": "ABC3/Found/NumberField/PrimeDensity.lean",
+          "decl": "ABC3.Found.NF.tendsto_sub_one_mul_zetaR / tendsto_log_zetaR_sub / tendsto_tsum_primes_div_log",
           "frdiNeeded": true
         }
       ]
