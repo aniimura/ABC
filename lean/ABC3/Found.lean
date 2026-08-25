@@ -941,6 +941,7 @@ import ABC3.Found.GaloisRep.TatePhiInv
 import ABC3.Found.GaloisRep.TatePhiHom
 import ABC3.Found.GaloisRep.TatePhiProd
 import ABC3.Found.GaloisRep.TatePhiTwo
+import ABC3.Found.GaloisRep.CollGroupTwo
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
