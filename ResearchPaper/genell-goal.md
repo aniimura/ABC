@@ -20721,3 +20721,64 @@ maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-534 ★★★★★★★Tate 級数は環準同型で移る —— 段 6 の特殊化の道具(第 221 ブロック)
+
+`Found/GaloisRep/TateFunctorial.lean`。
+
+第 220 で解析側の Tate 方程式が出た。これを形式側(任意の `I` 進完備環 `R`)へ移すには
+**「万有な環で 0 なら任意の環で 0」**が要る。その**特殊化の道具**を作った。
+
+    φ (tateDefect a w q hq) = tateDefect (φ a) (φ w) (φ q) hq'
+
+`tateDefect` は Weierstrass 方程式の左辺 − 右辺。これが 0 であることが葉 (b)。
+
+### ★★★`Ring.inverse` が要注意である
+
+★★`Ring.inverse` は環準同型と**一般には可換でない**——`x` が単元でないとき既定値 `0` を
+返すので、`φ x` が単元になっても `φ 0 = 0 != Ring.inverse (φ x)` となる。
+★**単元であるという仮定が要る**(`map_ring_inverse`)。これが `tateXpair` の移送に
+`IsUnit (1 - a)`・`IsUnit (1 - w)` を要求する理由である。
+★★★第 212 ブロックで `Ideal.Quotient` を避けたのも**同じ理由**だった——
+`Ring.inverse` は環の射と交換しない。同じ穴に二度落ちないよう、ここに書いておく。
+
+### ★★★★★`adicSum` の函手性は極限の一意性から出る
+
+`adicSum` は「部分和と `I^n` を法として合同な唯一の元」として特徴づけられている。
+`φ` が `I^n` を `J^n` に送るなら、部分和の合同はそのまま移る。あとは `adicSum_unique`。
+★`evalAdic` も同じ(`partialEval` は `Int.cast` と `q^n` だけなので明らか)。
+
+| 定理 | 内容 |
+|---|---|
+| `map_ring_inverse` | ★単元の上で `Ring.inverse` は移る |
+| `smodEq_iff_sub_mem` | ★`SModEq (I^n . top)` は `I^n` の元であること |
+| `map_adicSum` | ★★★★★**`I` 進和は移る** |
+| `map_evalAdic` | ★★★★★冪級数の値は移る |
+| `map_tateXpair` / `map_tateYpair` | ★★★★★★**Tate 級数は移る** |
+| `map_tateCurveAt` | ★★★★★Tate 曲線は移る |
+| `map_tateDefect` | ★★★★★★★**方程式の差は移る** |
+| `tateDefect_mem` | 第 212 の帰結(差は `I` の元) |
+
+### ★★★在庫を引いたら第 110・111 が既に q 展開を取っていた
+
+本ブロックに入る前に `Found/GaloisRep/` を通しで引いた。**第 110・111 ブロックが
+片側の尾の q 展開を既に取っていた**:
+
+    S_{m>=1} f(q^m u) = S_{n>=1} q^n (S_{d|n} d u^d)         (`tateXtail_eq_divisorSum`)
+    S_{m>=1} g(q^m u) = S_{n>=1} q^n (S_{d|n} C(d,2) u^d)    (`tateYtail_eq_divisorSum`)
+    S_{m>=1} f(q^m)   = s1(q)                                (`tateXtail_one`)
+
+★`pow_succ_mul_mem` も第 110 に在ったので、書きかけた重複を消して既存を使った。
+★★★**着手前に既存のブロックを引く**——§9-524 で記録した手順が今回も効いた。
+
+### ★段 6 の残り(測った結果)
+
+万有な環は `V := Z[a,w]` を `(1-a)(1-w)` で局所化したもの(整域)で、`q := a*w`。
+`tateDefect` を `I^n` で切ると `V` の元 `P_n` になり、示すべきは `P_n in (aw)^n V`。
+★解析側からこれを出すには、`P_n(u, q)` が `q = 0` で位数 `n` 以上で消えることを
+**複素解析の側で**言い、その Taylor 係数(`u` の有理式)が恒等的に 0 だと結論する。
+★★見積もりは 20-40 ブロック。段 6 は 1 ブロックでは終わらない。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

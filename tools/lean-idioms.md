@@ -480,3 +480,29 @@ theorem bernoulli'_four : (bernoulli' 4 : ℚ) = -1/30 := by
 `bernoulli_eq_bernoulli'_of_ne_one`(`n ≠ 1`)で移る。
 ★`riemannZeta 6` も mathlib に無いので、`riemannZeta_two_mul_nat` と `B₆` から作る
 (`riemannZeta_two`・`riemannZeta_four` はある)。
+
+## `Ring.inverse` は環準同型と交換しない(単元でない限り)
+
+**失敗形**: `Ideal.Quotient.mk` や特殊化 `φ : R →+* R'` を `tateXterm t = t * Ring.inverse (1-t)^2`
+のような式に当てて、`φ (Ring.inverse x) = Ring.inverse (φ x)` を暗黙に使ってしまう。
+
+★`Ring.inverse x` は `x` が単元でないとき**既定値 `0`** を返す。`φ x` が単元になっても
+`φ 0 = 0 ≠ Ring.inverse (φ x)` なので**一般には成り立たない**。
+
+**対処**: `IsUnit x` を仮定に持つ。
+
+```lean
+theorem map_ring_inverse (φ : R →+* R') {x : R} (hx : IsUnit x) :
+    φ (Ring.inverse x) = Ring.inverse (φ x) := by
+  have hux : IsUnit (φ x) := hx.map φ
+  have h : φ (Ring.inverse x) * φ x = 1 := by
+    rw [← map_mul, Ring.inverse_mul_cancel _ hx, map_one]
+  calc φ (Ring.inverse x) = φ (Ring.inverse x) * (φ x * Ring.inverse (φ x)) := by
+        rw [Ring.mul_inverse_cancel _ hux, mul_one]
+    _ = (φ (Ring.inverse x) * φ x) * Ring.inverse (φ x) := by ring
+    _ = Ring.inverse (φ x) := by rw [h, one_mul]
+```
+
+★`Ring.eq_inverse_of_mul_eq_one_left` は**無い**ので上の `calc` で作る。
+★★これが理由で、`Ring.inverse` を含む式の mod `I` 議論では `Ideal.Quotient` を使わず
+**差の分解**(`Y²−g² = (Y−g)(Y+g)` 等)で処理する。

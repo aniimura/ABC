@@ -867,6 +867,7 @@ import ABC3.Found.GaloisRep.WeierstrassRows
 import ABC3.Found.GaloisRep.WeierstrassQExp
 import ABC3.Found.GaloisRep.DerivWeierstrassQExp
 import ABC3.Found.GaloisRep.TateEquationAnalytic
+import ABC3.Found.GaloisRep.TateFunctorial
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
