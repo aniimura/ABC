@@ -3,7 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm64Slim
 import ABC3.Found.Divisor.Ex63Datum
-import ABC3.Found.NumberField.GaloisFaithfulBase
+import ABC3.Found.NumberField.GaloisFaithfulAll
+import ABC3.Found.Divisor.ArithRlfFlat
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— 算術の `𝒟` は `Φ` に関して Div-slim（圏側の配線）
@@ -45,7 +46,8 @@ import ABC3.Found.NumberField.GaloisFaithfulBase
 
 namespace ABC3.Found.FrdI
 
-open CategoryTheory ABC3.Found.Divisor
+open CategoryTheory ABC3.Found.Divisor _root_.NumberField
+open scoped _root_.NumberField NNReal
 
 universe v u w
 
@@ -165,6 +167,155 @@ theorem finSubOp_isDivSlim [IsGalois F Kbar]
   refine Quiver.Hom.unop_inj (hfaith X.unop f.unop g.unop ?_)
   exact resPlaceOf_eq_of_pullOf_eq f.unop g.unop (fun x hx hxpos => hfg x hx hxpos)
 
+
+/-! ## ★段 3 の中身 —— 素点の制限から射へ（数論の側） -/
+
+/-- ★**`𝓞` の水準の射**（★一般の `[Algebra L M]` の側で固定する）。
+
+★★`L = M` の文脈で `algebraMap (𝓞 L) (𝓞 L)` と書き直すと
+`Algebra.id` を拾って**恒等写像**になってしまう（`tools\lean-idioms.md`）。
+ここで一度だけ固定しておく。 -/
+noncomputable def intMapOf {L M : FinSub F Kbar} (f : L ⟶ M) : 𝓞 L.toIF →+* 𝓞 M.toIF :=
+  letI := algOfHom f
+  algebraMap (𝓞 L.toIF) (𝓞 M.toIF)
+
+/-- ★`intMapOf` は体の側では `f` そのもの。 -/
+theorem coe_intMapOf {L M : FinSub F Kbar} (f : L ⟶ M) (x : 𝓞 L.toIF) :
+    ((intMapOf f x : 𝓞 M.toIF) : M.toIF) = (FinSub.hom f) (x : L.toIF) := rfl
+
+/-- ★★**全単射な射は `𝓞` の水準でも全単射**。 -/
+theorem intMapOf_bijective {L M : FinSub F Kbar} (f : L ⟶ M)
+    (hb : Function.Bijective (FinSub.hom f)) : Function.Bijective (intMapOf f) := by
+  letI := algOfHom f
+  refine ⟨fun x y hxy => RingOfIntegers.coe_injective
+    (hb.1 (by rw [← coe_intMapOf f x, ← coe_intMapOf f y, hxy])), ?_⟩
+  exact ringOfIntegers_surjective_of_bijective (L := L.toIF) (M := M.toIF) hb
+
+/-- ★★★**素点の制限の一致は素イデアルの引き戻しの一致**。
+
+★有限素点の成分を `FinitePlace.mk V` で読むだけである
+（`FinitePlace.maximalIdeal_mk` が `HeightOneSpectrum` を復元する）。 -/
+theorem comap_intMapOf_eq {L : FinSub F Kbar} (f g : L ⟶ L) (h : resPlaceOf f = resPlaceOf g)
+    (V : IsDedekindDomain.HeightOneSpectrum (𝓞 L.toIF)) :
+    V.asIdeal.comap (intMapOf f) = V.asIdeal.comap (intMapOf g) := by
+  have h1 := congrFun h (Sum.inl (FinitePlace.mk V))
+  simp only [resPlaceOf, resPlace_inl, resFin, FinitePlace.maximalIdeal_mk, Sum.inl.injEq] at h1
+  have h2 := congrArg NumberField.FinitePlace.maximalIdeal h1
+  simp only [FinitePlace.maximalIdeal_mk] at h2
+  exact congrArg IsDedekindDomain.HeightOneSpectrum.asIdeal h2
+
+open scoped Pointwise in
+/-- ★★★★★★**素点の制限が一致する自己射は等しい** —— `Theorem 6.4, (i)` の
+Div-slim の**数論の側**（★仮定なし）。
+
+原文 (FrdI p.115):
+> since any automorphism of a number field that fixes all of the valuations of the
+> number field is clearly equal to the identity automorphism
+
+★★★中身:
+
+| 段 | 根拠 |
+|---|---|
+| `resPlace` の一致 → 素イデアルの引き戻しの一致 | `comap_intMapOf_eq` |
+| `τ := g⁻¹ ∘ f` は全素イデアルを固定する | `intMapOf g` が全単射（引き戻しの像を動かす） |
+| `τ = 1` | ★`eq_one_of_fixes_all_primes`（Chebotarev 不使用） |
+| `f = g` | `g (τ x) = f x` に `τ = 1` を入れる | -/
+theorem finSub_endo_eq_of_resPlaceOf_eq {L : FinSub F Kbar} (f g : L ⟶ L)
+    (h : resPlaceOf f = resPlaceOf g) : f = g := by
+  classical
+  haveI := L.fin
+  have hbf : Function.Bijective (FinSub.hom f) := (FinSub.hom f).bijective
+  have hbg : Function.Bijective (FinSub.hom g) := (FinSub.hom g).bijective
+  set eg : L.toIF ≃ₐ[F] L.toIF := AlgEquiv.ofBijective (FinSub.hom g) hbg with heg
+  set ef : L.toIF ≃ₐ[F] L.toIF := AlgEquiv.ofBijective (FinSub.hom f) hbf with hef
+  set ρ : L.toIF ≃ₐ[F] L.toIF := ef.trans eg.symm with hρ
+  set τ : L.toIF ≃ₐ[ℚ] L.toIF := { ρ.toRingEquiv with commutes' := fun q => by simp } with hτdef
+  have hgτ : ∀ x : L.toIF, (FinSub.hom g) (τ x) = (FinSub.hom f) x := by
+    intro x
+    show (FinSub.hom g) (eg.symm ((FinSub.hom f) x)) = _
+    exact eg.apply_symm_apply _
+  have hbφg : Function.Bijective (intMapOf g) := intMapOf_bijective g hbg
+  set τO : 𝓞 L.toIF →+* 𝓞 L.toIF :=
+    MulSemiringAction.toRingHom (L.toIF ≃ₐ[ℚ] L.toIF) (𝓞 L.toIF) τ with hτO
+  have hcomp : (intMapOf g).comp τO = intMapOf f := by
+    refine RingHom.ext (fun x => RingOfIntegers.coe_injective ?_)
+    show (FinSub.hom g) (τ (algebraMap (𝓞 L.toIF) L.toIF x))
+      = (FinSub.hom f) (algebraMap (𝓞 L.toIF) L.toIF x)
+    exact hgτ _
+  have hsurj : Function.Surjective τO := by
+    intro y
+    refine ⟨τ.symm • y, RingOfIntegers.coe_injective ?_⟩
+    show τ (τ.symm (algebraMap (𝓞 L.toIF) L.toIF y)) = algebraMap (𝓞 L.toIF) L.toIF y
+    exact τ.apply_symm_apply _
+  have hτ1 : τ = 1 := by
+    refine ABC3.Found.NF.eq_one_of_fixes_all_primes L.toIF τ ?_
+    intro 𝔭 hp hne
+    haveI := hp
+    set eφg : 𝓞 L.toIF ≃+* 𝓞 L.toIF := RingEquiv.ofBijective (intMapOf g) hbφg with heφg
+    set q : Ideal (𝓞 L.toIF) := 𝔭.comap (eφg.symm : 𝓞 L.toIF →+* 𝓞 L.toIF) with hq
+    haveI hqp : q.IsPrime := Ideal.comap_isPrime _ _
+    have hgq : q.comap (intMapOf g) = 𝔭 := by
+      rw [hq, Ideal.comap_comap]
+      have hid : (eφg.symm : 𝓞 L.toIF →+* 𝓞 L.toIF).comp (intMapOf g) = RingHom.id _ :=
+        RingHom.ext (fun y => eφg.symm_apply_apply y)
+      rw [hid, Ideal.comap_id]
+    have hqne : q ≠ ⊥ := by
+      intro h0
+      rw [h0, Ideal.comap_bot_of_injective _ hbφg.1] at hgq
+      exact hne hgq.symm
+    have hV := comap_intMapOf_eq f g h ⟨q, hqp, hqne⟩
+    have hfq : q.comap (intMapOf f) = 𝔭.comap τO := by
+      rw [← hcomp, ← Ideal.comap_comap, hgq]
+    rw [hfq, hgq] at hV
+    have hmc := Ideal.map_comap_of_surjective τO hsurj 𝔭
+    rw [hV] at hmc
+    rw [Ideal.pointwise_smul_def]
+    exact hmc
+  refine AlgHom.ext (fun x => ?_)
+  have hx := congrArg (fun t : L.toIF ≃ₐ[ℚ] L.toIF => t x) hτ1
+  simp only [AlgEquiv.one_apply] at hx
+  have h2 : (FinSub.hom g) (τ x) = (FinSub.hom f) x := hgτ x
+  rw [hx] at h2
+  exact h2.symm
+
+variable (F Kbar) in
+/-- ★★★★★★**[FrdI] Theorem 6.4, (i)** —— 算術の `𝒟 = B(G)⁰` は
+`Φ` に関して **Div-slim**（★仮定なし）。
+
+原文 (FrdI p.115):
+> that D is Div-slim [relative to Φ, hence also relative to Φpf, Φrlf].
+
+★★★角括弧の `hence also` は `isDivSlim_pfOn` / `isDivSlim_phiScOn_nnreal`
+（`Thm64Slim.lean`）が与える。 -/
+theorem finSubOp_isDivSlim' [IsGalois F Kbar] : IsDivSlim (phiGalois F Kbar) :=
+  finSubOp_isDivSlim F Kbar (fun _ f g hfg => finSub_endo_eq_of_resPlaceOf_eq f g hfg)
+
+
+/-! ## ★★★★角括弧の `hence also` —— `Φ^pf` と `Φ^rlf` へ
+
+原文 (FrdI p.115):
+> that D is Div-slim [relative to Φ, hence also relative to Φpf, Φrlf].
+
+★★これで `Theorem 6.4, (i)` の Div-slim は**算術で完全に閉じた**。 -/
+
+variable (F Kbar) in
+/-- ★★★★★**算術の `𝒟` は `Φ^pf` に関しても Div-slim**（★仮定なし）。 -/
+theorem finSubOp_isDivSlim_pf [IsGalois F Kbar] :
+    IsDivSlim ((phiGalois F Kbar).pfOn (fun _ => isSharp_effR _)) :=
+  isDivSlim_pfOn _ (phiGalois_isDivisorialOn F Kbar) (finSubOp_isDivSlim' F Kbar)
+
+variable (F Kbar) in
+/-- ★★★★★**算術の `𝒟` は `Φ^rlf` に関しても Div-slim**（★仮定なし）。
+
+★`hcharInj` は `phiGalois_isCharInj_scMap`（`ArithRlfFlat.lean`、
+相対基本等式とトレース写像で作った）である。 -/
+theorem finSubOp_isDivSlim_rlf [IsGalois F Kbar] :
+    IsDivSlim (phiScOn ℝ≥0 (phiGalois F Kbar)
+      (fun {_ _} α => phiGalois_isCharInj_scMap F Kbar α)) :=
+  isDivSlim_phiScOn_nnreal _ (fun A => (phiGalois_isPerfFactorial F Kbar A).choose)
+    (fun A => (phiGalois_isPerfFactorial F Kbar A).choose_spec)
+    (phiGalois_isDivisorialOn F Kbar) (finSubOp_isDivSlim' F Kbar)
+
 end Arith
 
 /-! ### ★出典の紐付け -/
@@ -196,10 +347,46 @@ def finSubOp_isDivSlim.needs : List ABC3.Meta.ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.localDeg_eq_one_of_bijective'") 113,
     .citation "[ABC3]" "isGenSubgroupR_arithDivGroup(各素点に台をもつ正の算術因子)"
       (.inProject "ABC3" "ABC3.Found.Divisor.isGenSubgroupR_arithDivGroup") 113,
+    .citation "[ABC3]" "finSub_endo_eq_of_resPlaceOf_eq(仮定 hfaith を落とした形)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.finSub_endo_eq_of_resPlaceOf_eq") 115,
     .implicitStep
-      ("★仮定 hfaith(素点の制限が一致する自己射は等しい)は、" ++
-       "素イデアルの引き戻しの一致へ翻訳したうえで " ++
-       "eq_one_of_fixes_prime_of_galoisClosure に流す。★訂正: 当初 [Mzk7] Cor 1.1.6 が" ++
-       "要ると見積もっていたが、Φ.map e が素点の引き戻しなので圏論の入力は要らない") 115 ]
+      ("★訂正: 当初 [Mzk7] Cor 1.1.6 が要ると見積もっていたが、" ++
+       "Φ.map e が素点の引き戻しなので圏論の入力は要らない") 115 ]
+
+
+def finSub_endo_eq_of_resPlaceOf_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 素点の制限が一致する自己射は等しい(仮定なし)",
+    sectionId := "frdi-thm-6-4" }
+
+def finSub_endo_eq_of_resPlaceOf_eq.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "eq_one_of_fixes_all_primes(全素イデアルを固定する自己同型は恒等。Chebotarev 不使用)"
+      (.inProject "ABC3" "ABC3.Found.NF.eq_one_of_fixes_all_primes") 115,
+    .derivation "原文「any automorphism of a number field that fixes all of the valuations … is clearly equal to the identity」" 115 ]
+
+def finSubOp_isDivSlim'.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 𝒟 は Φ に関して Div-slim(仮定なし)",
+    sectionId := "frdi-thm-6-4" }
+
+def finSubOp_isDivSlim_pf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 𝒟 は Φ^pf に関して Div-slim(hence also の第 1)",
+    sectionId := "frdi-thm-6-4" }
+
+def finSubOp_isDivSlim_rlf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 𝒟 は Φ^rlf に関して Div-slim(hence also の第 2)",
+    sectionId := "frdi-thm-6-4" }
+
+def intMapOf.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 𝓞 の水準の射(Algebra.id を拾わないよう固定する)",
+    sectionId := "frdi-thm-6-4" }
+
+def comap_intMapOf_eq.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 115,
+    item := "Theorem 6.4, (i) — 素点の制限の一致は素イデアルの引き戻しの一致",
+    sectionId := "frdi-thm-6-4" }
 
 end ABC3.Found.FrdI
