@@ -707,3 +707,26 @@ noncomputable def toPP3 : CollBase →+* PPP :=
 
 ★同じ形は `Polynomial.eval₂RingHom` の入れ子にも起きうる。深い塔を作るときは
 中間の型に名前をつけておくと、エラーも読めるようになる。
+
+## `Kˣ ⧸ Subgroup.zpowers Q` で `rw [one_mul]` が当たらない
+
+**失敗形**
+
+```
+h : 1 * c = 1        (c : Kˣ ⧸ Subgroup.zpowers Q)
+rw [one_mul] at h
+-- Did not find an occurrence of the pattern 1 * ?a in the target expression 1 * c = 1
+```
+
+`simp`・`simpa`・`group` も「made no progress」で止まる。★単位群の商では
+`MulOneClass` の実例が 2 経路(`QuotientGroup` 由来と `CommGroup` 由来)で来るため、
+`rw` の統一が構文的に失敗する。一般の `G ⧸ N` では起きない。
+
+**直し方——項の水準で書く(defeq で通る)**
+
+```
+exact (one_mul c).symm.trans h      -- 1 * c = 1  から  c = 1
+exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
+```
+
+★★`rw`/`simp` は構文照合、`exact` は defeq 照合。**実例のダイヤモンドは後者なら抜ける**。
