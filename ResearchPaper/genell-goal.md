@@ -22563,3 +22563,58 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-568 ★★★★★★★★分子は `W^{n+1}` で割れる(第 255 ブロック)
+
+`Found/GaloisRep/CollCoeffVanish.lean`。
+
+### ★★★★★★ℂ への特殊化 → 分子の値
+
+第 225 の `tateSpecializeC`・`tateEval_numerator` を 3 変数にしたもの。
+`‖u‖, ‖v‖, ‖w‖ < 1` なら分母はすべて ℂ で単元なので、局所化から ℂ への射が作れる。
+そこから
+
+    collEval u v w P = collDefectTrunc (n+1) u v w (uvw) * collEval u v w d
+
+が出る(`collEval_numerator`)。★**分子の値が「切り詰めた差 × 分母」**という形が、
+第 254 の解析的評価と第 236 の `X_pow_dvd_of_norm_le` をつなぐ橋である。
+
+### ★★★★★★★★係数の消滅
+
+`u, v` を `‖.‖ <= 1/8` に固定して `w` を動かすと、第 254 の評価は
+`‖uvw‖ <= ‖w‖` より
+
+    ‖collDefectTrunc (n+1) u v w (uvw)‖ <= C_n * 4^{n+1} ‖w‖^{n+1}
+
+となる。★`coeff_eq_zero_of_norm_le`(第 236)より `evalUV u v P` の
+`j < n+1` 次の係数は消える。
+
+### ★動かす先は「小さい点」の無限集合でよい
+
+第 239 では上半平面の指数像を使った。あれは `u = exp(2πi z)` の形が要ったからだが、
+本ブロックでは **`‖.‖ <= 1/8` でありさえすればよい**(3 変数とも動くので
+`tateXterm` を数値で潰した——§9-567)。
+
+★`smallSet := {1/(k+9) : k in ℕ}` を取れば、無限で、0 でなく、ノルムが `1/9` 以下。
+**上半平面を経由しなくてよい**ぶん、第 239 の `infinite_exp_range`(指数の像が無限で
+あることを `exp(-2π(k+1))` の単射性から示す)より簡単になった。
+★「評価を強くしておくと、動かす先の集合が自由になる」——これは覚えておく形である。
+
+| 定理 | 内容 |
+|---|---|
+| `collSpecializeC` | ★★★★★★万有な環から ℂ への特殊化 |
+| `collEval_numerator` | ★★★★★★**分子の値 = 切り詰めた差 × 分母** |
+| `exists_bound_collEval` | ★★★★分母の有界性 |
+| `coeff_evalUV_eq_zero` | ★★★★★★★★**分子の低次係数は消える** |
+| `smallSet` 他 | ★動かす先の無限集合 |
+| `cW_pow_dvd_numerator` | ★★★★★★★★**分子は `W^{n+1}` で割れる** |
+
+### 残り
+
+`U`・`V` 側は変数の入れ替えの自己同型で(§9-563 の `collDefectTrunc_swap`)。
+そのあと `collDefect_eq_zero_of_base`(第 252)に流して `collDefect = 0`、
+最後に `tateXpair`/`tateYpair` の共線性の形にする。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
