@@ -521,4 +521,65 @@ instance normMapGeom_isDominant {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIn
     rw [heq]; infer_instance
   exact IsDominant.of_comp (normUp V₂ FL) _
 
+
+/-! ## ★5. 幾何のデータの射の族の自然性 -/
+
+/-- ★★**同じ `V` の中の `normMap` も `normMapOfBase` の実例** ——
+底変換を `𝟙` で取ったもの。★自然性の四角形に載せるために要る。 -/
+theorem normMap_eq_normMapOfBase (V : Scheme.{u}) [IsIntegral V] {Kbar : Type u} [Field Kbar]
+    [Algebra V.functionField Kbar] {L M : FinSub V.functionField Kbar} (f : L ⟶ M) :
+    normMap V f = normMapOfBase (specToV V L) (specToV V M) (𝟙 V) (specMapOf V f)
+      (by rw [Category.comp_id]; exact (specMapOf_specToV V f).symm) := by
+  refine normMapOfBase_unique (specToV V L) (specToV V M) (𝟙 V) (specMapOf V f) _ _ ?_ ?_ ?_ ?_
+  · rw [Category.comp_id]
+    exact normMap_normDown V f
+  · exact normMapOfBase_fromNormalization _ _ _ _ _
+  · exact normUp_normMap V f
+  · exact toNormalization_normMapOfBase _ _ _ _ _
+
+/-- ★★★★★★**幾何のデータの射の族は自然** ——
+
+```
+V₂[FM] --π_M--> V₁[M]
+   |              |
+normMap V₂ Ff   normMap V₁ f
+   v              v
+V₂[FL] --π_L--> V₁[L]
+```
+
+★入力は体の側の立方体 `specMapOf V₂ Ff ≫ Spec.map embL = Spec.map embM ≫ specMapOf V₁ f` だけ。
+★★これと `pullCoeff_square` / `ffMap_square` を合わせると
+`ModelDataHomOver` の `phiNat` / `bmonNat` がそのまま出る。 -/
+theorem normMapGeom_naturality {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
+    {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+    [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+    {L M : FinSub V₁.functionField Kbar₁} {FL FM : FinSub V₂.functionField Kbar₂}
+    (f : L ⟶ M) (Ff : FL ⟶ FM)
+    (embL : CommRingCat.of L.toIF ⟶ CommRingCat.of FL.toIF)
+    (embM : CommRingCat.of M.toIF ⟶ CommRingCat.of FM.toIF)
+    (hembL : CommRingCat.ofHom (algebraMap V₁.functionField L.toIF) ≫ embL
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FL.toIF))
+    (hembM : CommRingCat.ofHom (algebraMap V₁.functionField M.toIF) ≫ embM
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FM.toIF))
+    (hcube : specMapOf V₂ Ff ≫ Spec.map embL = Spec.map embM ≫ specMapOf V₁ f) :
+    normMap V₂ Ff ≫ normMapGeom ψ L FL embL hembL
+      = normMapGeom ψ M FM embM hembM ≫ normMap V₁ f := by
+  rw [normMap_eq_normMapOfBase V₂ Ff, normMap_eq_normMapOfBase V₁ f]
+  exact normMapOfBase_naturality (specToV V₁ L) (specToV V₂ FL) (specToV V₁ M)
+    (specToV V₂ FM) ψ (Spec.map embL) _ (Spec.map embM) _
+    (specMapOf V₁ f) _ (specMapOf V₂ Ff) _ hcube
+
+def normMapGeom_naturality.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — V[L] の引き戻しの族の自然性",
+    sectionId := "frdi-thm-6-2" }
+
+def normMapGeom_naturality.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "normMapOfBase_naturality"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_naturality") 110,
+    .citation "[ABC3]" "normMap_eq_normMapOfBase(normMap も normMapOfBase の実例)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMap_eq_normMapOfBase") 110,
+    .derivation "体の側の立方体を四角形へ送るだけ" 110 ]
+
 end ABC3.Found.Divisor
