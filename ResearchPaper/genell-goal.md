@@ -20903,3 +20903,68 @@ maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-537 ★★★★★★★★整除性を `A^n` と `W^n` に分けた(第 224 ブロック)
+
+`Found/GaloisRep/TateDivisibility.lean`。
+
+第 223 で葉 (b) は「万有な環 `TateUniv` の中で `(AW)^n | tateDefectTrunc n A W (AW)`」に
+落ちた。本ブロックはこれを **`Z[A,W]` の中の二つの整除性**に分けた。
+
+### ★★`A`・`W` の素元性は mathlib に無かった
+
+★`MvPolynomial.prime_X` は**存在しない**(`exact?` も空振り)。
+`MvPolynomial.finSuccEquiv` で `Polynomial` に移し、`Polynomial.prime_X` と
+`Polynomial.prime_C_iff` から作った:
+
+    X 0 : Z[A,W]  --finSuccEquiv-->  Polynomial.X   : (Z[W])[A]      -> Polynomial.prime_X
+    X 1 : Z[A,W]  --finSuccEquiv-->  Polynomial.C (X 0)              -> Polynomial.prime_C_iff
+
+★★`Prime` の移送は `MulEquiv.prime_iff` である。`(finSuccEquiv ...).toRingEquiv` を
+渡すとき、`M` を明示しないと単一化に失敗する。
+
+### ★★★`IsCoprime` では駄目、`IsRelPrime` を使う
+
+★`A` と `W` は **`IsCoprime` ではない**——`(A, W)` は `Z[A,W]` の**真のイデアル**なので
+Bezout の意味では互いに素にならない。
+★★**`IsRelPrime`(共通の非単元因子が無い)を使う**。これなら成り立ち、
+`IsRelPrime.mul_dvd`(`DecompositionMonoid` が要る——UFD なので在る)で
+
+    A^n | P  かつ  W^n | P   ==>   (AW)^n | P
+
+★`A | W` でないことは `A -> 0`、`W -> 1` の評価で `0 | 1` になることから出る。
+
+### ★★★★局所化から分子へ
+
+`TateUniv` の元 `x` は `IsLocalization.surj` で `x*(分母) = (分子)` と書ける。
+分子が `(AW)^n` で割れれば、分母は単元なので `x` も割れる(`dvd_pow_of_base`)。
+
+### ★★★★★★★★到達点
+
+> `Z[A,W]` の中で「分子が `A^n` で割れる」「分子が `W^n` で割れる」を示せば、
+> **任意の完備環で Weierstrass 方程式が成り立つ**。
+
+これが `tateDefect_eq_zero_of_base` である。
+★★切り詰めた差も `(a,w)` の交換で不変(`tateDefectTrunc_symm`)なので、
+`A` 側と `W` 側は**同じ議論の入れ替え**で済む。
+
+| 定理 | 内容 |
+|---|---|
+| `prime_univA` / `prime_univW` | ★★`A`・`W` は `Z[A,W]` の素元 |
+| `isRelPrime_univA_univW` | ★★★`A` と `W` は互いに素 |
+| `univQ_pow_dvd` | ★★★`A^n | P` かつ `W^n | P` なら `(AW)^n | P` |
+| `dvd_pow_of_base` | ★★★★局所化の整除性は分子の整除性から |
+| `tateDefectTrunc_symm` | ★★★★切り詰めた差も交換で不変 |
+| `tateDefect_eq_zero_of_base` | ★★★★★★★★**葉 (b) は二つの整除性に落ちた** |
+
+### ★残り
+
+`W^n |(分子)` を示す段取り:`A -> u`(複素定数)、`W -> t/u` と特殊化すると
+分子の `t^j` 係数は `u` の Laurent 多項式になる。第 220 の解析側の恒等式から
+`j < n` の係数が消えることを言えばよい。★ここに残る**唯一の解析の段**は
+「解析側の `X(u,q)` の `q` に関する Taylor 係数が形式側の係数と一致する」ことである。
+見積もりは 10-25 ブロック。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

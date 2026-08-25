@@ -506,3 +506,33 @@ theorem map_ring_inverse (φ : R →+* R') {x : R} (hx : IsUnit x) :
 ★`Ring.eq_inverse_of_mul_eq_one_left` は**無い**ので上の `calc` で作る。
 ★★これが理由で、`Ring.inverse` を含む式の mod `I` 議論では `Ideal.Quotient` を使わず
 **差の分解**(`Y²−g² = (Y−g)(Y+g)` 等)で処理する。
+
+## `MvPolynomial.X` の素元性は mathlib に無い / `IsCoprime` と `IsRelPrime` を混同しない
+
+**失敗形 1**: `Prime (MvPolynomial.X 0 : MvPolynomial (Fin 2) ℤ)` を `exact?` で探しても出ない
+(`MvPolynomial.prime_X` も `MvPolynomial.irreducible_X` も存在しない)。
+
+**対処**: `MvPolynomial.finSuccEquiv` で `Polynomial` に移す。
+
+```lean
+theorem prime_univA : Prime (X 0 : MvPolynomial (Fin 2) ℤ) := by
+  have hp : Prime (Polynomial.X : Polynomial (MvPolynomial (Fin 1) ℤ)) := Polynomial.prime_X
+  rw [← MvPolynomial.finSuccEquiv_X_zero (R := ℤ) (n := 1)] at hp
+  exact (MulEquiv.prime_iff (M := MvPolynomial (Fin 2) ℤ)
+    (MvPolynomial.finSuccEquiv ℤ 1 : MvPolynomial (Fin 2) ℤ ≃ₐ[ℤ] _).toRingEquiv).1 hp
+```
+
+★`X 1` は `finSuccEquiv_X_succ` で `Polynomial.C (X 0)` になり、`Polynomial.prime_C_iff` で落とす。
+★★`MulEquiv.prime_iff` に `.toRingEquiv` を渡すときは `(M := …)` を明示しないと単一化に失敗する。
+
+**失敗形 2**: `IsCoprime (X 0) (X 1)` を示そうとする。
+
+★これは**成り立たない**——`IsCoprime` は Bezout の意味(`∃ a b, a*x + b*y = 1`)であり、
+`(X 0, X 1)` は真のイデアルなので 1 を生成しない。
+
+**対処**: `IsRelPrime`(共通の非単元因子が無い)を使う。`IsRelPrime.mul_dvd`
+(`DecompositionMonoid` が要る。UFD なら在る)と `IsRelPrime.pow` で
+
+    x^n ∣ P ∧ y^n ∣ P → (x*y)^n ∣ P
+
+が出る。`IsRelPrime x y` 自体は「`x` が素元」＋「`x ∤ y`」から手で作る。
