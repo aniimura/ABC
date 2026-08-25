@@ -420,3 +420,34 @@ omegaObj F F' ?X =?= ⟨biratUp Z₀, k⟩
 * 文の中で `show T from e` を使うと `have this := e; this` に展開され、
   以後の `Category.assoc` などの単一化を**全部止める**。
   文では名前つき引数 `(X := …) (Y := …)` を使い、`show` は**戦術の側**に置く。
+
+## `letI := algOfHom f` で `Algebra L L` を入れても `Algebra (𝓞 L) (𝓞 L)` は f を見ない
+
+**失敗形**
+
+```lean
+letI := algOfHom f   -- Algebra L.toIF L.toIF
+have h : ((algebraMap (𝓞 L.toIF) (𝓞 L.toIF)) x : L.toIF) = (FinSub.hom f) (x : L.toIF) := rfl
+-- Type mismatch: rfl has type ?m = ?m
+```
+
+★★原因: `Algebra (𝓞 A) (𝓞 A)` には **`Algebra.id` が既にインスタンスとしてある**ので、
+`letI` で入れた `Algebra L L` から**派生する**インスタンスより先に選ばれる。
+その結果 `algebraMap (𝓞 L) (𝓞 L)` は**恒等写像**に解決され、`f` を一切見ない。
+
+★★★**ただし既存の定義（`resHOS` など）は無事**である ——
+`resHOS {L M : Type} [Algebra L M]` の本体は `L`・`M` が**相異なる型変数**の状態で
+エラボレートされており、そこでは `Algebra.id` は候補にならないので
+**派生インスタンスが焼き付いている**。あとから `L := M := L.toIF` を代入しても
+型クラス探索は**やり直されない**ので、`resHOS` は正しく `f` に依存する。
+
+**対処**: `L = M` の場合を扱う補題は、**一般の `{L M} [Algebra L M]` の側に置く**。
+
+```lean
+theorem asIdeal_resHOS (V) :
+    (resHOS (L := L) V).asIdeal = V.asIdeal.comap (algebraMap (𝓞 L) (𝓞 M)) := rfl
+```
+
+そこでは `((algebraMap (𝓞 L) (𝓞 M)) x : M) = algebraMap L M (x : L)` が `rfl` である
+（mathlib の `RingOfIntegers.instAlgebra` はそう作られている）。
+★同じ式を `L = M` に代入した文脈で**書き直す**と `Algebra.id` を拾って壊れる。
