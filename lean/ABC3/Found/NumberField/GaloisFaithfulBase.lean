@@ -270,7 +270,30 @@ theorem eq_one_of_fixes_prime_of_splitsCompletely
 
 end FromQ
 
+/-! ## ★6. 固定体は Galois(Artin)
+
+★★節点 `nf-spl-base` の使い方の第 1 段 —— `τ` の固定体 `M := L^{⟨τ⟩}` を取ると
+`L/M` は Galois で `Gal(L/M) ≃ ⟨τ⟩` になる。 -/
+
+open IntermediateField in
+/-- ★★★**部分群の固定体の上で `L` は Galois**(Artin の定理、数体の場合)。
+
+★mathlib は `IntermediateField.finrank_fixedField_eq_card`(`[L : L^G] = #G`)と
+`IntermediateField.subgroupEquivAlgEquiv`(`G ≃* Gal(L/L^G)`)を持つので、
+`IsGalois.of_card_aut_eq_finrank` に流すだけである。 -/
+theorem isGalois_fixedField (L : Type) [Field L] [NumberField L]
+    (G : Subgroup (L ≃ₐ[ℚ] L)) :
+    IsGalois (IntermediateField.fixedField G) L := by
+  refine IsGalois.of_card_aut_eq_finrank (↥(fixedField G)) L ?_
+  rw [IntermediateField.finrank_fixedField_eq_card G]
+  exact Nat.card_congr (IntermediateField.subgroupEquivAlgEquiv G).symm.toEquiv
+
 /-! ### ★出典の紐付け -/
+
+def isGalois_fixedField.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 固定体 L^{⟨τ⟩} の上で L は Galois(Artin)",
+    sectionId := "frdi-thm-6-4" }
 
 def eq_one_of_fixes_prime_of_splitsCompletely.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
