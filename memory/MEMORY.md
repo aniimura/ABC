@@ -46,3 +46,4 @@
 - [mathlib の local instance](mathlib-local-instances.md) — `Ideal.Quotient.field` は大域 instance ではない。手で `haveI` すると diamond が立つ。`attribute [local instance]` を書くこと
 - [Lean: `open` の忘れは whnf タイムアウトに化ける](lean-missing-open-looks-like-timeout.md) — 型の途中でタイムアウトしたら、まず名前解決を疑う
 - [Lean: `Nonempty U` は 2 通りに読める](lean-opens-nonempty-two-readings.md) — `X.Opens` のコアーション経路が 2 つあり instance が噛み合わない
+- [在庫の一般補題でも仮引数が実例で偽になる](general-lemma-hypothesis-unsatisfiable.md) — 「渡すだけ」と書いたが渡せなかった。幾何(Ex 6.1)で通った道が算術(Ex 6.3)で塞がった実例。使う前に各仮引数を実例で検算する。
