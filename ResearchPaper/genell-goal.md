@@ -24808,3 +24808,58 @@ Newton 多角形の議論が、モニック多項式ひとつに化けた。
 
 の 2 段のうち、**2 段目だけ**である。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-615 ★★★★★★★★界面 `TateCurveData` は充足不能だった(第 302 ブロック)
+
+`Interface/GaloisRep/Reduction.lean`、`Found/GaloisRep/TateDvrSetup.lean`。
+
+### ★★★★★★★★見つけたもの——**局所高さの欄が矛盾していた**
+
+`TateCurveData` は局所高さを
+
+    localHeight : (v : Kˣ →* Multiplicative ℤ) → (W) → … → ℕ
+    localHeight_eq  : (localHeight v W h : ℤ) = toAdd (v (tateParam W h))
+    localHeight_pos : 0 < localHeight v W h
+
+と書いていた。★**`v` を任意に受けている**のが誤りである。`v := 1`(自明な準同型)を
+入れると `toAdd (1 q) = 0` なので `localHeight = 0`、しかし `localHeight_pos` は
+`0 < localHeight` を要求する。★★★**構造そのものが充足不能**であった。
+
+★★★★これは「証明できない」のではなく「**witness が存在し得ない**」——
+第 302 まで気づかずに G6 の残りを見積もっていたことになる。
+★実装を始める前に**型を読む**ことの実例として記録する。
+
+### ★★★★★直し方——正規化付値に固定する
+
+    localHeight : (W) → … → ℕ
+    localHeight_eq : (𝔪 の adic 付値) (tateParam W h) = ofAdd (-(localHeight W h : ℤ))
+    localHeight_pos : 0 < localHeight W h
+
+★mathlib の `IsDiscreteValuationRing.maximalIdeal`(`HeightOneSpectrum R` を返す)の
+adic 付値に固定した。★★★これは**弱める訂正ではなく強める訂正**である——
+`localHeight` が `q` から一意に決まるので、定数 witness はいっそう通らない。
+★同じ界面の `degInf_ge_localHeight`(G8 側)も `v` を渡していたので直した。
+
+### ★★在庫の訂正——mathlib に高さ 1 スペクトルが在った
+
+第 301 で置いた `tateSpectrum` は **mathlib の `IsDiscreteValuationRing.maximalIdeal`
+そのもの**だった(`asIdeal` まで `rfl` で一致)。★削除して mathlib に寄せた。
+★★★これには実利がある——mathlib の `HasMultiplicativeReduction`・
+`HasSplitMultiplicativeReduction` が**同じ付値で定義されている**ので、
+還元の言葉と私の `vAdd` がそのまま噛み合う。
+★橋 `valuation_eq_ofAdd_neg_vAdd` を 1 本足した(界面の `localHeight_eq` の形)。
+
+### ★★★★G6 の残り(2026-08-26 の見積もり)
+
+| 段 | 内容 | 在庫 | 見積 |
+|---|---|---|---|
+| 1 | 変数変換の点への作用 `W.Point ≃+ (C • W).Point` | 係数側(`variableChange_c₄/Δ/j`)は在るが**点への作用は 0 件** | 6-12 |
+| 2 | 分裂乗法還元 → Tate 標準形 `y² + xy = x³ + a₄x + a₆` | 接線の 2 次式が剰余体で分解(mathlib の定義そのもの) | 5-10 |
+| 3 | `j` 一致 → 係数一致(捻りが自明) | 剰余標数 2, 3 が難所 | 4-8 |
+| 4 | 組み立て(`tateParam`・`localHeight` 等) | `j` の反転は第 100 に済み | 3-5 |
+
+★合計 **18-35 ブロック**(中央値 25)。本ブロックの界面訂正はその前提を整えた。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

@@ -2,6 +2,7 @@ import ABC3.Found.GaloisRep.TateDoubling
 import ABC3.Found.GaloisRep.TateNonDeg
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
 import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
 /-!
 # Galois (G6) 第 301 ブロック —— **★★★★★★★★★★★離散付値環から `TateSetup` を作る**(`Found`)
@@ -41,11 +42,12 @@ import Mathlib.RingTheory.Valuation.ValuationRing
 `TateSetup` は**`q` で正**になる古典的な `ord` を要求するので、
 `unzero` を取って**符号を反転**した(`tateDvrVal`)。
 
-## ★在庫との関係
+## ★在庫との関係(2026-08-26 に訂正)
 
-`ABC3.Found.Divisor.dvrSpectrum` は同じ対象だが、そちらは Scheme 論を
-引き込む鎖の上にある。★`GaloisRep` を Scheme 論から独立に保つため、
-**ここでは 3 行の定義を置き直した**(`tateSpectrum`)。
+高さ 1 スペクトルは **mathlib に `IsDiscreteValuationRing.maximalIdeal` として在った**。
+★これを使う。★★おまけに mathlib の `HasMultiplicativeReduction` などの還元クラスが
+**同じ付値を使っている**ので、還元の言葉とそのまま噛み合う。
+★`ABC3.Found.Divisor.dvrSpectrum` も同じ対象である(そちらは Scheme 論の鎖の上)。
 
 ## ★★本ブロックで取れるもの
 
@@ -87,20 +89,13 @@ theorem withZero_lt_one_iff_neg (x : WithZero (Multiplicative ℤ)) (h : x ≠ 0
 
 /-! ## ★★★★★DVR の分数体の正規化付値 -/
 
-/-- ★★DVR の高さ 1 スペクトル——極大イデアルただ 1 つ。
-
-★`ABC3.Found.Divisor.dvrSpectrum` と同じ対象だが、そちらは Scheme 論の鎖の上にある。 -/
-noncomputable def tateSpectrum (R : Type) [CommRing R] [IsDomain R]
-    [IsDiscreteValuationRing R] : HeightOneSpectrum R :=
-  ⟨IsLocalRing.maximalIdeal R, inferInstance, IsDiscreteValuationRing.not_a_field R⟩
-
 section Dvr
 
 variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
   {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
 
 /-- ★単元の付値は `0` でない。 -/
-theorem tateDvrValuation_ne_zero (x : Kˣ) : ((tateSpectrum R).valuation K) (x : K) ≠ 0 :=
+theorem tateDvrValuation_ne_zero (x : Kˣ) : ((IsDiscreteValuationRing.maximalIdeal R).valuation K) (x : K) ≠ 0 :=
   (Valuation.ne_zero_iff _).2 x.ne_zero
 
 /-- ★★★★★**DVR の分数体の正規化付値** `Kˣ →* Multiplicative ℤ`。
@@ -134,15 +129,22 @@ theorem vAdd_tateDvrVal (x : Kˣ) :
 
 /-- ★★★★`0 ≤ vAdd v x` は `v(x) ≤ 1`。 -/
 theorem tateDvrVal_nonneg_iff (x : Kˣ) :
-    0 ≤ vAdd (tateDvrVal R K) x ↔ ((tateSpectrum R).valuation K) (x : K) ≤ 1 := by
+    0 ≤ vAdd (tateDvrVal R K) x ↔ ((IsDiscreteValuationRing.maximalIdeal R).valuation K) (x : K) ≤ 1 := by
   rw [vAdd_tateDvrVal, neg_nonneg,
     ← withZero_le_one_iff_nonpos _ (tateDvrValuation_ne_zero (R := R) (K := K) x)]
 
 /-- ★★★★`0 < vAdd v x` は `v(x) < 1`。 -/
 theorem tateDvrVal_pos_iff (x : Kˣ) :
-    0 < vAdd (tateDvrVal R K) x ↔ ((tateSpectrum R).valuation K) (x : K) < 1 := by
+    0 < vAdd (tateDvrVal R K) x ↔ ((IsDiscreteValuationRing.maximalIdeal R).valuation K) (x : K) < 1 := by
   rw [vAdd_tateDvrVal, neg_pos,
     ← withZero_lt_one_iff_neg _ (tateDvrValuation_ne_zero (R := R) (K := K) x)]
+
+/-- ★★★★**乗法的な付値と `vAdd` の橋**——界面の `localHeight_eq` の形。 -/
+theorem valuation_eq_ofAdd_neg_vAdd (x : Kˣ) :
+    (IsDiscreteValuationRing.maximalIdeal R).valuation K (x : K)
+      = (Multiplicative.ofAdd (-(vAdd (tateDvrVal R K) x)) : Multiplicative ℤ) := by
+  rw [vAdd_tateDvrVal, neg_neg, ofAdd_toAdd]
+  exact (WithZero.coe_unzero _).symm
 
 /-! ## ★★★★★★引き戻しの 2 条件 -/
 

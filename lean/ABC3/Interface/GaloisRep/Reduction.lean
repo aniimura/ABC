@@ -68,27 +68,37 @@ structure TateCurveData where
       Additive (Kˣ ⧸ Subgroup.zpowers (tateParam W h : Kˣ)))
   /-- ★★★**局所高さ** `v_K(q_E) ∈ ℤ_{>0}`(原文 `Definition 3.3`)。
 
-  ★付値は `Kˣ →* Multiplicative ℤ`(正規化離散付値)として受ける。 -/
+  ★★★★**2026-08-26 の訂正(逸脱の記録)**——以前は付値
+  `v : Kˣ →* Multiplicative ℤ` を**任意に受けていた**。しかしそれだと
+  `v := 1`(自明な準同型、`toAdd (1 q) = 0`)を入れたとき
+  `localHeight_eq` が `localHeight = 0` を、`localHeight_pos` が `0 < localHeight` を
+  要求して**衝突する**——すなわち**構造そのものが充足不能**だった。
+  ★離散付値環の**正規化付値**(mathlib の `IsDiscreteValuationRing.maximalIdeal` の
+  adic 付値)に固定して直す。★★これは**弱めるのではなく強める**訂正である
+  (`localHeight` が `q` から一意に決まる)。 -/
   localHeight : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R] →
     {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
-    (v : Kˣ →* Multiplicative ℤ) → (W : WeierstrassCurve K) → [W.IsMinimal R] →
+    (W : WeierstrassCurve K) → [W.IsMinimal R] →
     W.HasSplitMultiplicativeReduction R → ℕ
   /-- ★★★**局所高さは Tate 母数の付値そのもの**——定義を型に出す。
 
-  ★これがあるので `localHeight := 1` のような定数 witness は通らない。 -/
+  ★正規化付値では `v(q) = ofAdd (−localHeight)`(乗法的な書き方)である。
+  ★★これがあるので `localHeight := 1` のような定数 witness は通らない。 -/
   localHeight_eq : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
-    (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
+    (W : WeierstrassCurve K) [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R),
-    (localHeight v W h : ℤ) = Multiplicative.toAdd (v (tateParam W h))
+    IsDedekindDomain.HeightOneSpectrum.valuation K (IsDiscreteValuationRing.maximalIdeal R)
+        ((tateParam W h : Kˣ) : K)
+      = (Multiplicative.ofAdd (-(localHeight W h : ℤ)) : Multiplicative ℤ)
   /-- ★局所高さは正(原文が `∈ Z_{>0}` と書いている)。 -/
   localHeight_pos : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
-    (v : Kˣ →* Multiplicative ℤ) (W : WeierstrassCurve K) [W.IsMinimal R]
-    (h : W.HasSplitMultiplicativeReduction R), 0 < localHeight v W h
+    (W : WeierstrassCurve K) [W.IsMinimal R]
+    (h : W.HasSplitMultiplicativeReduction R), 0 < localHeight W h
 
 def TateCurveData.waiting : WaitingFor :=
   { what := "(G6) Tate 曲線 E(K̄) ≅ K̄^x/q^Z、Tate 母数 q_E、および局所高さ v_K(q_E)(= [GenEll] Definition 3.3)"
@@ -222,10 +232,9 @@ structure FaltingsHeightData where
     (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     [Algebra R Lv] [IsFractionRing R Lv] [(E.baseChange Lv).IsMinimal R]
-    (v : Lvˣ →* Multiplicative ℤ)
     (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R),
     (Module.finrank ℚ L : ℝ) * degInf L E
-      ≥ (toSemistableModelData.toTateCurveData.localHeight v (E.baseChange Lv) h : ℝ)
+      ≥ (toSemistableModelData.toTateCurveData.localHeight (E.baseChange Lv) h : ℝ)
         * Real.log 2
   /-- ★★★**`Proposition 3.4`** —— `deg∞` は `ht^Falt` で上から抑えられる。
 
