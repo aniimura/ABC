@@ -21365,3 +21365,49 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-545 ★★★★★★★`(z,tau)` と `(u,w)` を繋いだ(第 232 ブロック)
+
+`Found/GaloisRep/TateUWBridge.lean`。
+
+第 220 の解析側の Tate 方程式は `(z, tau)`(上半平面の 2 点)で書かれ、
+第 231 の評価は `(u, w)`(ℂ の 2 元、`q = uw`)で書かれている。本ブロックで繋いだ。
+
+    u := exp(2 pi i z),   w := exp(2 pi i (tau - z)),   uw = exp(2 pi i tau) = q
+
+### ★★`im z < im tau` は `tau - z` が上半平面の点であることも意味する
+
+`im(tau - z) = im tau - im z > 0`。これで `‖w‖ < 1` が
+`UpperHalfPlane.norm_exp_two_pi_I_lt_one` から自動的に出る(`subUH`)。
+
+★★★**`him` は三つの役目を果たしている**:
+第 216 では `shiftDown` を上半平面に乗せ、第 225 では `z` が格子の外であることを与え、
+ここでは `tau - z` が上半平面の点であることを与える。同じ一つの仮定である。
+
+### ★★★★★★繋がった形
+
+第 226 の分解と第 227 の `S_{n in Z}f(q^{-n}) = 2 S_{m>=1}f(q^m)` を使うと
+
+    tateXfun z tau = tateXanalytic u w
+    tateYfun z tau = tateYanalytic u w
+
+★したがって**第 220 の Tate 方程式がそのまま `(u,w)` の形で成り立つ**(`tate_equation_uw`)。
+
+| 定理 | 内容 |
+|---|---|
+| `subUH` | ★★`tau - z` は上半平面の点 |
+| `exp_mul_exp_sub` | ★`u w = q` |
+| `tateXfun_eq_analytic` / `tateYfun_eq_analytic` | ★★★★★★二つの形が一致する |
+| `tate_equation_uw` | ★★★★★★★**解析側の Tate 方程式(`(u,w)` の形)** |
+
+### ★残り
+
+1. `sigma_3`・`sigma_5` の尾の評価(第 230 の `sigma_1` と同じ手順、
+   `sigma_k(N) <= N^{k+1} <= (2^{k+1})^N`)と `tateA4`・`tateA6` の切り詰めとの差
+2. 1 と第 231 を合わせて `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
