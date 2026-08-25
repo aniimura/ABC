@@ -210,6 +210,7 @@ import ABC3.Found.Divisor.Ex63Types
 import ABC3.Found.Divisor.Ex63Rlf
 import ABC3.Found.Divisor.Ex63RatStd
 import ABC3.Found.Divisor.Ex63RlfRatStd
+import ABC3.Found.Divisor.Ex63RlfPic
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
 import ABC3.Found.NumberField.SepClosedIn
