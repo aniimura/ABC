@@ -343,6 +343,56 @@ theorem SplQ_congr {L M : Type*} [Field L] [Field M] [NumberField L] [NumberFiel
   rw [mem_SplQ_iff_idealCount, mem_SplQ_iff_idealCount,
     idealCount_congr (e.toRingEquiv) (p : ℕ), hfr]
 
+/-! ## ★8. 抽象な 2 つの数体の版 -/
+
+theorem isGalois_sup_ac (L M : IntermediateField ℚ (AlgebraicClosure ℚ))
+    (hL : Normal ℚ ↥L) (hM : Normal ℚ ↥M) : IsGalois ℚ ↥(L ⊔ M) := by
+  haveI : Normal ℚ ↥(L ⊔ M) :=
+    @IntermediateField.normal_sup ℚ (AlgebraicClosure ℚ) _ _ _ L M hL hM
+  exact IsGalois.mk
+
+/-- ★★★★★★★**完全分解する素数の集合が体を決める**(抽象な数体の版)——
+`Theorem 6.4, (iv)` の結論「`L₁ ≅ L₂`」の体論の側。
+
+★★★中身は「両方を `ℚ̄` へ埋め込んで合成体の中で `eq_of_SplQ_eq` を当てる」だけ。
+`Spl` が同型で不変(`SplQ_congr`)なので埋め込みの取り方によらない。 -/
+theorem nonempty_algEquiv_of_SplQ_eq (L₁ L₂ : Type) [Field L₁] [Field L₂]
+    [NumberField L₁] [NumberField L₂] [IsGalois ℚ L₁] [IsGalois ℚ L₂]
+    (h : SplQ L₁ = SplQ L₂) : Nonempty (L₁ ≃ₐ[ℚ] L₂) := by
+  classical
+  let i₁ : L₁ →ₐ[ℚ] AlgebraicClosure ℚ := IsAlgClosed.lift
+  let i₂ : L₂ →ₐ[ℚ] AlgebraicClosure ℚ := IsAlgClosed.lift
+  let F₁ : IntermediateField ℚ (AlgebraicClosure ℚ) := i₁.fieldRange
+  let F₂ : IntermediateField ℚ (AlgebraicClosure ℚ) := i₂.fieldRange
+  let e₁ : L₁ ≃ₐ[ℚ] ↥F₁ := AlgHom.equivFieldRange
+  let e₂ : L₂ ≃ₐ[ℚ] ↥F₂ := AlgHom.equivFieldRange
+  haveI hf1 : FiniteDimensional ℚ ↥F₁ := LinearEquiv.finiteDimensional e₁.toLinearEquiv
+  haveI hf2 : FiniteDimensional ℚ ↥F₂ := LinearEquiv.finiteDimensional e₂.toLinearEquiv
+  haveI : NumberField ↥F₁ := ⟨⟩
+  haveI : NumberField ↥F₂ := ⟨⟩
+  haveI hg1 : IsGalois ℚ ↥F₁ := (AlgEquiv.transfer_galois e₁).mp ‹_›
+  haveI hg2 : IsGalois ℚ ↥F₂ := (AlgEquiv.transfer_galois e₂).mp ‹_›
+  haveI hfsup : FiniteDimensional ℚ ↥(F₁ ⊔ F₂) :=
+    IntermediateField.finiteDimensional_sup F₁ F₂
+  haveI : NumberField ↥(F₁ ⊔ F₂) := ⟨⟩
+  haveI : IsGalois ℚ ↥(F₁ ⊔ F₂) := isGalois_sup_ac F₁ F₂ hg1.to_normal hg2.to_normal
+  let G₁ : IntermediateField ℚ ↥(F₁ ⊔ F₂) :=
+    (IntermediateField.inclusion (le_sup_left : F₁ ≤ F₁ ⊔ F₂)).fieldRange
+  let G₂ : IntermediateField ℚ ↥(F₁ ⊔ F₂) :=
+    (IntermediateField.inclusion (le_sup_right : F₂ ≤ F₁ ⊔ F₂)).fieldRange
+  let f₁ : ↥F₁ ≃ₐ[ℚ] ↥G₁ := AlgHom.equivFieldRange
+  let f₂ : ↥F₂ ≃ₐ[ℚ] ↥G₂ := AlgHom.equivFieldRange
+  haveI : FiniteDimensional ℚ ↥G₁ := LinearEquiv.finiteDimensional f₁.toLinearEquiv
+  haveI : FiniteDimensional ℚ ↥G₂ := LinearEquiv.finiteDimensional f₂.toLinearEquiv
+  haveI : NumberField ↥G₁ := ⟨⟩
+  haveI : NumberField ↥G₂ := ⟨⟩
+  haveI hgg1 : IsGalois ℚ ↥G₁ := (AlgEquiv.transfer_galois f₁).mp hg1
+  haveI hgg2 : IsGalois ℚ ↥G₂ := (AlgEquiv.transfer_galois f₂).mp hg2
+  have hsplG : SplQ ↥G₁ = SplQ ↥G₂ := by
+    rw [← SplQ_congr f₁, ← SplQ_congr e₁, h, SplQ_congr e₂, SplQ_congr f₂]
+  have hGeq : G₁ = G₂ := eq_of_SplQ_eq G₁ G₂ hgg1 hgg2 hsplG
+  exact ⟨e₁.trans (f₁.trans ((IntermediateField.equivOfEq hGeq).trans (f₂.symm.trans e₂.symm)))⟩
+
 end Congr
 
 /-! ### ★出典の紐付け -/
