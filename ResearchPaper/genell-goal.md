@@ -20429,3 +20429,55 @@ Lean の `0^-1 = 0` 規約がここで効いている。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-529 ★★★★★★Lipschitz 公式を格子の各段に当てた(第 216 ブロック)—— 道 β の段 5 の前半
+
+`Found/GaloisRep/LipschitzRows.lean`。
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 4 | 格子 `Z + tau*Z` の `g2, g3` を Eisenstein の q 展開に繋ぐ | 済(第 215) |
+| 5 | `℘` の q 展開(Lipschitz 公式を `n in Z` の各段に当てる) | ★**本ブロックはその前半** |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | 未着手 |
+
+### ★★★★★格子を tau の段に分ける
+
+格子 `Z*tau + Z` は `n in Z` ごとの**横一列**(`n*tau + Z`)に分かれる。
+`℘` の二重和を段ごとに切り、各段に第 214 の `lipschitz_tateXterm` を当てると:
+
+    S_{m in Z} 1/(z + n*tau + m)^2     = (2 pi i)^2 * tateXterm(q^n * u)          (n >= 0)
+    S_{m in Z} 1/(z - (n+1)*tau + m)^2 = (2 pi i)^2 * tateXterm(q^{n+1} * u^-1)   (n >= 0)
+
+ここで `q = exp(2 pi i tau)`、`u = exp(2 pi i z)`。
+
+★★**これがちょうど形式側 `tateXpair a w` の `(a, w)` の対の形である**
+——`a` が `u` に、`w` が `q` に対応し、上段が `tateXterm (q^n a)`、下段が `tateXterm (q^{n+1} a^-1)`。
+第 213 の `tateXpair` を作ったときの `(a, w)` の非対称な役割分担が、
+ここで**解析側の段の分け方とそのまま合っていた**。
+
+### ★★★負の段は「折り返し」で取る
+
+`n < 0` の段は `z - (n+1)*tau` の虚部が負になりうるので、上半平面の点として直接は扱えない。
+★`S' m, 1/(w+m)^2 = S' m, 1/(-w+m)^2`(`m -> -m` の置換)で折り返してから
+`(n+1)*tau - z`(`im z < im tau` なら上半平面にある)に当てる。
+★★★**平方だから折り返しで符号が消える**——これが `tsum_inv_sq_neg` の要点である。
+`him : im z < im tau` は段 5 の後半で `z` を基本領域に取るときに自然に満たされる。
+
+| 定理 | 内容 |
+|---|---|
+| `shiftUp` / `shiftUp_coe` | `z + n*tau` を上半平面の点として |
+| `exp_add_nat_mul` | `exp(2 pi i (z + n tau)) = q^n * u` |
+| `lipschitz_shift` | ★★★★★**上向きの段の Lipschitz 公式** |
+| `tsum_inv_sq_neg` | ★★★★**平方和は折り返しで不変** |
+| `shiftDown` / `exp_sub_nat_mul` | `(n+1)*tau - z` の側 |
+| `lipschitz_shift_neg` | ★★★★★★**下向きの段の Lipschitz 公式** |
+
+### ★段 5 の残り
+
+各段は取れた。残るのは**段をまとめる**ところ——mathlib の `weierstrassP` は
+格子の元にわたる無条件可和な和 `S' l, (1/(z-l)^2 - 1/l^2)` なので、
+これを `tau` の係数で括り直して上の各段に落とす(`Summable` の再編成)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
