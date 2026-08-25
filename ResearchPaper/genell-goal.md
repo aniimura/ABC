@@ -23799,3 +23799,48 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-591 ★★★★★★★★★★原点近傍を含む共線性——単元条件が消えた(第 278 ブロック)
+
+`Found/GaloisRep/CollOriginUniv.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `u v w = q` なら **`collDefectE u v w q hq = 0`**(`collDefectE_eq_zero`)
+
+★★★★仮定は `q in I` と `u v w = q` **だけ**。第 256 の `tate_collinear` が要求していた
+6 つの単元条件 `hcp` は**もう要らない**。したがって **`u ≡ 1` の点(原点近傍)も
+3 つ組に入れてよい**。
+
+### ★★★★★★★★分子の整除性は分母を増やしても変わらない(2 度目)
+
+第 274 と同じ手である:
+
+| | 第 274(方程式) | 本ブロック(共線性) |
+|---|---|---|
+| 抜く分母 | `1 - A` | `1 - (6 つの底)` |
+| 掛ける量 | `(1-A)^6` | `M1 M2 M3`(行ごと) |
+| 既存の分子 | `univA_pow_dvd_numerator` | `cU/cV/cW_pow_dvd_numerator` |
+
+★★★`CollUnivE -> CollUniv` の像で `collDefectTruncE = M1 M2 M3 collDefectTrunc` なので、
+分母を `collMbase d` に取り替えれば既存の分子の整除性がそのまま使える。
+★★★★**万有な環を作り直したのではなく、同じ分子の主張を別の分母で読んだ**。
+2 度使えた手は、道具である。
+
+### ★★`1 - q^{m+1} (底)` は落とせない——落とす必要が無い
+
+★抜けるのは `1 - (底)` だけ。`1 - q^{m+1} (底)` の側は**どの領域でも自動的に単元**
+(`q^{m+1} x in I`)なので抜く必要が無い。
+★★★尾の部分が最初から素直だったことが、ここで効いている。
+
+| 定理 | 内容 |
+|---|---|
+| `map_collDefectTruncE` | ★★★環準同型で移る |
+| `CollUnivE`・`collSpecializeE` | ★★★★★★**`1 - (底)` を反転しない万有な環** |
+| `collMbase` | ★★6 点の分母の積 |
+| `collDefectTruncE_univ_dvd` | ★★★★★★★★万有な環での整除性 |
+| `collDefectE_eq_zero` | ★★★★★★★★★★**原点近傍を含む共線性** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
