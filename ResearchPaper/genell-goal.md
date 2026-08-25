@@ -24920,3 +24920,63 @@ mathlib は `y1 = negY x2 y2` のとき `slope := 0` と**約束**している�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-617 ★★★★★★★★乗法還元から Tate 母数が取れる/界面の第 2 の欠陥(第 304 ブロック)
+
+`Found/GaloisRep/TateMultRed.lean`、`Interface/GaloisRep/Reduction.lean`。
+
+### ★★★★★★★★到達点
+
+> `W` が乗法還元をもち `Δ != 0` なら、`q ∈ 𝔪`、`q != 0` が在って **`j(E_q) = j(W)`**
+> (`exists_tateParam_of_mult`)
+
+★★★第 100 の `exists_tateParam`(`j` の反転)を、**mathlib の還元の言葉に接続**した。
+結論は分母を払った形 `Δ_q · c₄(W)³ = Δ(W) · c₄(E_q)³` で書いた。
+
+### ★★★★★★mathlib の乗法還元は 2 つの不等式だけ
+
+    v(Δ) < 1        badReduction
+    v(c₄) = 1       multiplicativeReduction
+
+★どちらも `IsDiscreteValuationRing.maximalIdeal R` の adic 付値である。
+★★★**第 302 で `tateDvrVal` をその付値に揃えておいたので**、第 301 の 2 条件
+(`dvr_mem_of_nonneg`・`dvr_mem_max_of_pos`)がそのまま噛み合った——
+`v(c₄) = 1` は「`c₄` は `R` の単元から来る」、`v(Δ) < 1` は「`Δ` は `𝔪` の元から来る」。
+★★在庫を mathlib に寄せた効果が 2 ブロック後に出た形である。
+
+### ★★★★★★★★界面の第 2 の欠陥——結節三次曲線が仮定を満たす
+
+★★★**mathlib の `HasMultiplicativeReduction` は `Δ = 0` を排除しない**
+(`v(0) = 0 < 1` だから)。実際 `y² + xy = x³`(`⟨1,0,0,0,0⟩`)は
+
+| 条件 | 値 |
+|---|---|
+| `Δ` | `0`(Lean で確認) |
+| `c₄` | `1`(単元、Lean で確認) |
+| 接線の 2 次式 | `X² + X`——**分解する**(分裂乗法還元) |
+| `IsMinimal` | `Δ` が全モデルで `0` なので `MaximalFor` は自明に成立 |
+
+★★★★これは**結節三次曲線**であり、滑らかな点の群は `Kˣ` そのもの——
+Tate 母数は `q = 1` にあたるので**局所高さが `0`** になり、`localHeight_pos` と衝突する。
+★したがって `TateCurveData` の 5 欄すべてに **`[W.IsElliptic]`**(`Δ` が単元)を足した。
+★★G8 側の `degInf_ge_localHeight` も同じ。
+
+### ★★2 つの欠陥に共通する形
+
+第 302(任意の付値 `v`)も本ブロック(`Δ = 0`)も、**「型が広すぎて偽の場合を含む」**
+という同じ形である。★★★どちらも**実装を始める前には見えず、
+実装のために型を読んだときに初めて見えた**。
+★型は仕様であり、**書いた時点では検算されていない**——ここが記録に値する。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | 次 |
+| 3 | `j` 一致 → 係数一致(捻りが自明) | |
+| 4 | 組み立て | ★母数の存在は本ブロックで済 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

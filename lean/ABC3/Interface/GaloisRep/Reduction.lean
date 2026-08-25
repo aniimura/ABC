@@ -54,7 +54,7 @@ structure TateCurveData where
   tateParam : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R] →
     {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
-    (W : WeierstrassCurve K) → [W.IsMinimal R] →
+    (W : WeierstrassCurve K) → [W.IsElliptic] → [W.IsMinimal R] →
     W.HasSplitMultiplicativeReduction R → Kˣ
   /-- ★★★**Tate 一意化** `E(K) ≅ Kˣ / q^ℤ`。
 
@@ -62,7 +62,7 @@ structure TateCurveData where
   uniformization : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [DecidableEq K] [Algebra R K] [IsFractionRing R K]
-    (W : WeierstrassCurve K) [W.IsMinimal R]
+    (W : WeierstrassCurve K) [W.IsElliptic] [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R),
     Nonempty (W.toAffine.Point ≃+
       Additive (Kˣ ⧸ Subgroup.zpowers (tateParam W h : Kˣ)))
@@ -75,11 +75,18 @@ structure TateCurveData where
   要求して**衝突する**——すなわち**構造そのものが充足不能**だった。
   ★離散付値環の**正規化付値**(mathlib の `IsDiscreteValuationRing.maximalIdeal` の
   adic 付値)に固定して直す。★★これは**弱めるのではなく強める**訂正である
-  (`localHeight` が `q` から一意に決まる)。 -/
+  (`localHeight` が `q` から一意に決まる)。
+
+  ★★★★**2026-08-26 の第 2 の訂正**——`Δ ≠ 0`(`IsElliptic`)を要求する。
+  mathlib の `HasMultiplicativeReduction` は `v(Δ) < 1` としか言わず、
+  **`Δ = 0` を排除しない**(`v(0) = 0 < 1`)。実際 `y² + xy = x³` は
+  `Δ = 0`・`c₄ = 1`・接線の 2 次式 `X² + X` が分解、で**すべての仮定を満たす**が、
+  これは**結節三次曲線**であり滑らかな点の群は `Kˣ` そのもの——
+  Tate 母数は `q = 1` にあたるので**局所高さが `0`** になり `localHeight_pos` と衝突する。 -/
   localHeight : {R : Type} → [CommRing R] → [IsDomain R] → [IsDiscreteValuationRing R] →
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R] →
     {K : Type} → [Field K] → [Algebra R K] → [IsFractionRing R K] →
-    (W : WeierstrassCurve K) → [W.IsMinimal R] →
+    (W : WeierstrassCurve K) → [W.IsElliptic] → [W.IsMinimal R] →
     W.HasSplitMultiplicativeReduction R → ℕ
   /-- ★★★**局所高さは Tate 母数の付値そのもの**——定義を型に出す。
 
@@ -88,7 +95,7 @@ structure TateCurveData where
   localHeight_eq : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
-    (W : WeierstrassCurve K) [W.IsMinimal R]
+    (W : WeierstrassCurve K) [W.IsElliptic] [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R),
     IsDedekindDomain.HeightOneSpectrum.valuation K (IsDiscreteValuationRing.maximalIdeal R)
         ((tateParam W h : Kˣ) : K)
@@ -97,7 +104,7 @@ structure TateCurveData where
   localHeight_pos : ∀ {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
-    (W : WeierstrassCurve K) [W.IsMinimal R]
+    (W : WeierstrassCurve K) [W.IsElliptic] [W.IsMinimal R]
     (h : W.HasSplitMultiplicativeReduction R), 0 < localHeight W h
 
 def TateCurveData.waiting : WaitingFor :=
@@ -231,7 +238,8 @@ structure FaltingsHeightData where
     (Lv : Type) [Field Lv] [Algebra L Lv]
     (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
-    [Algebra R Lv] [IsFractionRing R Lv] [(E.baseChange Lv).IsMinimal R]
+    [Algebra R Lv] [IsFractionRing R Lv] [(E.baseChange Lv).IsElliptic]
+    [(E.baseChange Lv).IsMinimal R]
     (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R),
     (Module.finrank ℚ L : ℝ) * degInf L E
       ≥ (toSemistableModelData.toTateCurveData.localHeight (E.baseChange Lv) h : ℝ)
