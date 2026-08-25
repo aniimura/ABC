@@ -22054,3 +22054,87 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-559 ★★★★★★★共線性の行列式 —— 商をやめて分母を消した(第 246 ブロック)
+
+`Found/GaloisRep/CollinearDet.lean`。
+
+### ★★★★★★★経路の切り替え
+
+§9-557・§9-558 では加法定理を**商の形**
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+で扱う計画だった。★この形は悪い点が 3 種類(`z in L`、`z in L - w`、`z = w`)あり、
+分母が消える 2 種類は**それぞれ別の議論**を要する。§9-557 で「どれも同じ形の因数分解で
+処理できる」と書いたが、**これは楽観だった**。`z = -w` の側は 2 次の Taylor 係数まで
+噛み合わせる必要があり、`z = w` の側は零点の位数比較が要る。
+
+★★★本ブロックでは**分母のない形**——3 点 `P(z)`, `P(w)`, `-P(z+w)` の共線性の
+**行列式**——に切り替えた。
+
+    collDet L w z
+      = det [[℘(z), ℘'(z), 1], [℘(w), ℘'(w), 1], [℘(z+w), -℘'(z+w), 1]]
+      = ℘'(w)(℘(z) - ℘(z+w)) - ℘(w)(℘'(z) + ℘'(z+w))
+        + (℘(z)℘'(z+w) + ℘'(z)℘(z+w))
+
+★これは `℘`・`℘'` の**積と和だけ**でできているので、悪い点は極の 2 種類
+(`z in L` と `z in L - w`)しかない。**分母が消える点という悪い点が消滅した**。
+
+### ★★★★反対称性が二役をこなす
+
+`z -> -z - w` は 3 点のうち 2 点を入れ替えるので
+
+    collDet L w (-z - w) = -collDet L w z            (`collDet_neg`)
+
+である。ここから 2 つ出る:
+
+1. **第 2 種の悪い点は第 1 種から出る**(`z0 in L - w` なら `-z0 - w in L`)。
+2. Liouville で定数と分かったあと、**その定数が 0 であること**が出る。
+   ★値を一点で計算する必要がない。
+
+### ★★★★★★極の相殺は Taylor 3 項で `ring` に落ちる
+
+`l0 in L` のまわりで `t := z - l0`、`f(s) := ℘(s + w)` とおくと、周期性から
+`℘(z + w) = f(t)`、`℘'(z + w) = f'(t)`。第 244 の `exists_pole_form` から
+`℘(z) = 1/t^2 + E(z)`、`℘'(z) = -2/t^3 + D(z)` なので、`collDet` の特異部は
+
+    (2f(0) - 2f(t))/t^3 + (f'(0) + f'(t))/t^2
+      = [ -2(f(t) - f(0)) + t(f'(t) + f'(0)) ] / t^3
+
+となる。★★★分子が `t^3` で割り切れることが、在庫の
+**`AnalyticAt.exists_eq_sum_add_pow_mul`**(解析的な剰余つき Taylor 展開、
+`f z = sum_{i<n} (z^i/i!) f^(i)(0) + z^n F z`、`F` は解析的)で **`ring` に落ちる**。
+`f` を 3 次まで、`f'` を 2 次まで展開して代入すると 1 次と 2 次の項がちょうど消える
+(`exists_taylor_pole_cancel`)。`iteratedDeriv_succ'` で `f` 側と `f'` 側の係数を
+突き合わせる。
+
+★`AnalyticAt.order` を持ち出して「3 位で消える」と言う必要はない。
+第 244 で採った「**位数を数えず因数分解で**」の方針がそのまま通った。
+
+### ★配管 —— `AnalyticAt.comp` の合成先が推論できない
+
+`AnalyticAt.comp : AnalyticAt g (f x) -> AnalyticAt f x -> AnalyticAt (g o f) x` に
+`AnalyticAt ℘ (s + w)` を渡すと、エラボレータは `f x` を `HAdd.hAdd s w` と読んで
+`f := HAdd.hAdd s`、`x := w` と分解してしまう。`(f := fun u => u + w) (x := s)` と
+**名前つき引数で明示**すれば通る。`tools/lean-idioms.md` に追加した。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_taylor_pole_cancel` | ★★★★★★**Taylor 3 項で極が消える** |
+| `shiftP`・`deriv_shiftP` 他 | ★平行移動した `℘` とその微分 |
+| `collDet` | ★★★★★★**共線性の行列式** |
+| `collDet_neg` | ★★★★反対称性(`z -> -z - w`) |
+| `collDet_add_lattice` | ★★周期性 |
+| `exists_analytic_collDet` | ★★★★★★★**格子点で極が相殺する** |
+
+### 残り(葉 (c) 段 2)
+
+1. 局所延長を貼り合わせて**整関数**を作る(`limUnder (nhdsWithin z {z}^c)` で
+   一様に定義し、良い点の集合が稠密であることを使って周期性・反対称性を移す)。
+2. 第 241 の `eq_of_periodic_differentiable` で定数、`collDet_neg` で 0。
+3. `collDet = 0` を加法定理の形に直す。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

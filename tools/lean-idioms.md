@@ -632,3 +632,47 @@ refine poly_eq_zero_of_infinite_zeros _ _ infinite_exp_range ?_   -- 0.03 秒
 
 ★★同型の引数を「念のため明示する」のは、Lean では**逆効果になることがある**。
 既に補題が持っている形は、補題に決めさせるのが速い。
+
+
+## `AnalyticAt.comp` は合成先を勝手に別の形に分解する
+
+**失敗形**:
+
+```lean
+theorem analyticAt_shiftP (L : PeriodPair) (w s : ℂ) (h : s + w ∉ L.lattice) :
+    AnalyticAt ℂ (fun u => L.weierstrassP (u + w)) s :=
+  (L.analyticOnNhd_weierstrassP (s + w) h).comp (analyticAt_id.add analyticAt_const)
+-- Type mismatch: has type AnalyticAt ℂ (℘[L] ∘ HAdd.hAdd s) w
+--                but is expected to have type AnalyticAt ℂ (shiftP L w) s
+```
+
+★`AnalyticAt.comp : AnalyticAt g (f x) → AnalyticAt f x → AnalyticAt (g ∘ f) x` に
+`AnalyticAt ℘ (s + w)` を渡すと、エラボレータは `f x` を `HAdd.hAdd s w` と読んで
+**`f := HAdd.hAdd s`、`x := w`** と分解してしまう(欲しいのは `f := (· + w)`、`x := s`)。
+`s + w` は `f x` として 2 通りに読めるので、先に来た方が選ばれる。
+
+**対処**: **`f` と `x` を名前つき引数で明示する**。
+
+```lean
+AnalyticAt.comp (f := fun u : ℂ => u + w) (x := s)
+  (L.analyticOnNhd_weierstrassP (s + w) h) (analyticAt_id.add analyticAt_const)
+```
+
+★★「集合を明示すると爆発する」場合(前項)と逆で、**合成の分解は明示しないと決まらない**。
+分かれ目は「補題側が既にその形を持っているか」。持っていれば任せ、二通りに読めるなら明示する。
+
+## `deriv (shiftP L w)` は `rw` で開かない
+
+`noncomputable def shiftP L w := fun s => L.weierstrassP (s + w)` に対して
+
+```lean
+rw [shiftP]        -- Failed to rewrite using equation theorems for `shiftP`
+rw [deriv_shiftP]  -- 続く rw が (fun s => ...) (z - l₀) の形で止まる
+```
+
+**対処**: 定義を開くときは `show`、書き換えたあとにベータ簡約が要るときは `simp only`。
+
+```lean
+show deriv (fun u : ℂ => L.weierstrassP (u + w)) s = _   -- 定義を開く
+simp only [deriv_shiftP]                                  -- 開いてベータ簡約まで
+```
