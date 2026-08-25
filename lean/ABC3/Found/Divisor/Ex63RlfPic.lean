@@ -7,10 +7,10 @@ import ABC3.Found.Divisor.ArithPicR
 /-!
 # [FrdI] Theorem 6.4, (i) —— `δ_A : Pic_Φ(A) ≅ ℝ` を `Φ^rlf` の水準で述べる
 
-原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.114。
+原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.115。
 
-原文 (FrdI p.114):
-> which is an immediate consequence of the well-known Dirichlet unit theorem
+原文 (FrdI p.115):
+> But this is an immediate consequence of the well-known Dirichlet unit theorem
 
 ## ★★何をする節点か
 
@@ -30,6 +30,22 @@ import ABC3.Found.Divisor.ArithPicR
 
 （`effRGpEquiv` ＋ `AddSubgroup.topEquiv`）。★★したがって `arithPicIso` の定義域と
 **ちょうど噛み合う**。
+
+## ★★★★★★原文自身がこの形で書いている（物理 p.115）
+
+原文 (FrdI p.115):
+> the image of Φbirat
+
+原文はこの直後で、`Φ^birat(L) ⊗_ℤ ℝ = (L^×) ⊗_ℤ ℝ` の
+`(Φ^rlf_factor)^gp(L)` における像が「**有限台をもつ元のうち `deg_L^arith` が `0` のもの**」
+に等しい、と述べている。
+
+★★★これは 3 つを同時に裏づける:
+
+1. `(Φ^rlf)^gp(L)` は**有限台の実係数関数**である —— 我々の `ArithPlace L →₀ ℝ`
+   （`Ex63Rlf.lean` の `grp = ⊤`）と一致する。
+2. `𝒞^rlf` の `Φ^birat` は **ℝ-span**（`⊗_ℤ ℝ` した主因子）である。
+3. `δ_A` は `deg_L^arith` である。
 
 ## ★★★★`Φ^birat` は**実現化した**主因子である
 
@@ -108,8 +124,8 @@ theorem rlfDeg_ker (Y : (FinSub F Kbar)ᵒᵖ) :
 
 /-- ★★★★★★★**[FrdI] Theorem 6.4, (i)** —— `δ_A : Pic_Φ(A) ≃ ℝ`。
 
-原文 (FrdI p.114):
-> which is an immediate consequence of the well-known Dirichlet unit theorem
+原文 (FrdI p.115):
+> But this is an immediate consequence of the well-known Dirichlet unit theorem
 
 ★★中身は `rlfDeg` の全射性（無限素点）と、核が `Φ^birat` であること
 （**Dirichlet 単数定理 ＋ 類数有限**、`ArithPicR.lean`）だけである。 -/
@@ -124,7 +140,7 @@ end
 /-! ### ★出典の紐付け -/
 
 def rlfDeltaA.src : Source :=
-  { paper := "FrdI", pdfPage := 114,
+  { paper := "FrdI", pdfPage := 115,
     item := "Theorem 6.4, (i) — δ_A : Pic_Φ(A) ≃ ℝ(Φ^rlf の水準)",
     sectionId := "frdi-thm-6-4" }
 
