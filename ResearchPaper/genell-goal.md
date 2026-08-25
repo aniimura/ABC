@@ -21314,3 +21314,54 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-544 ★★★★★★解析値と切り詰めの差をまとめた(第 231 ブロック)
+
+`Found/GaloisRep/TateAnalyticTrunc.lean`。
+
+第 227(`X`・`Y` の尾)と第 230(`s1` の尾)を合わせて、**解析側の `X`・`Y` と
+形式側の切り詰めの差**を一つの評価にまとめた:
+
+    ‖X_an(u,w) - tateXtrunc (n+1) u w (uw)‖ <= 20 (4‖uw‖)^{n+1}
+    ‖Y_an(u,w) - tateYtrunc (n+1) u w (uw)‖ <= 50 (4‖uw‖)^{n+1}
+
+★解析側の `X_an`・`Y_an` は、形式側の切り詰めの**部分和を `tsum` に、
+`partialEval (sigmaSeries 1)` を `S_{m>=1} f(q^m)` に置き換えた**ものである
+(第 226 でこの形が `S_{n in Z}` の和と一致することは確かめてある)。
+
+### ★★切り詰めの添字は `n+1` で取る
+
+`s1` の側の評価(第 230)が `partialEval ... (n+1)` の形で出るので、切り詰めも `n+1` で揃えた。
+★これは損にならない——`tateDefect - tateDefectTrunc (n+1) in I^{n+1} subset I^n` なので、
+`n+1` 次の切り詰めで `I^{n+1}` に入ることを示せば `for all n, tateDefect in I^n` が出る。
+
+### ★★★指数の帳尻
+
+`‖q‖^{n+2} <= ‖q‖^{n+1} <= (4‖q‖)^{n+1}`(`‖q‖ <= 1/8` より)。
+これで尾の評価(`8‖q‖^{n+2}` 型)も `s1` の評価(`2(4‖q‖)^{n+1}` 型)も
+**同じ `(4‖q‖)^{n+1}` の定数倍**に揃う(`pow_le_four_pow_mul`)。
+
+★三角不等式の組み立ては `norm_three_comb`・`norm_four_comb` として切り出した。
+項式のまま `(norm_add_le _ _).trans (add_le_add ...)` と繋ぐと**メタ変数が決まらず**
+`don't know how to synthesize implicit argument` になる。補題として型を書き切るのが速い。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXanalytic` / `tateYanalytic` | ★★★★★★解析側の `X`・`Y`(`(u,w)` の形) |
+| `pow_le_four_pow_mul` | ★指数の帳尻 |
+| `norm_three_comb` / `norm_four_comb` | ★三角不等式の組み立て |
+| `norm_tateXanalytic_sub_trunc` | ★★★★★★**`X` の差の評価** |
+| `norm_tateYanalytic_sub_trunc` | ★★★★★★**`Y` の差の評価** |
+
+### ★残り
+
+1. 第 226 の分解を使って `X_an(u,w)`・`Y_an(u,w)` が第 220 の
+   `tateXfun z tau`・`tateYfun z tau` と一致することを言う(`u = exp(2 pi i z)`、
+   `w = exp(2 pi i (tau - z))`)
+2. 第 220 の恒等式から `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

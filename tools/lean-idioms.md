@@ -561,3 +561,30 @@ def fiberEquiv (N : ℕ) :
 `show a * b = …` で形を揃えてから `omega` に渡すこと。
 同様に `Nat.sum_div_divisors n id` は `∑ d, id (n / d)` の形なので、
 `∑ d, n / d` とは構文的に一致しない——`show … = ∑ d, id (n / d) from rfl` を挟む。
+
+## 三角不等式を項式で繋ぐとメタ変数が決まらない
+
+**失敗形**:
+
+```lean
+have hbound := (norm_add_le _ _).trans (add_le_add (…) (le_of_eq (norm_mul _ _)))
+-- don't know how to synthesize implicit argument `a` / `b` / `c` …
+```
+
+★`norm_mul _ _` の `_` は上流の `_` からは決まらない。`have` に型注釈が無いと
+全部メタ変数のまま残る。
+
+**対処**: 組み立てを**独立した補題**として型を書き切る。
+
+```lean
+theorem norm_three_comb (Au Aw As : ℂ) :
+    ‖Au + Aw + (-2 : ℂ) * As‖ ≤ ‖Au‖ + ‖Aw‖ + 2 * ‖As‖ := by
+  have h1 := norm_add_le (Au + Aw) ((-2 : ℂ) * As)
+  have h2 := norm_add_le Au Aw
+  have h3 : ‖(-2 : ℂ) * As‖ = 2 * ‖As‖ := by rw [norm_mul]; simp
+  linarith
+```
+
+そのうえで本体は `have hcomb := norm_three_comb <式> <式> <式>` と当て、最後に `linarith`。
+★★`linarith` に渡す形にしておくと、係数の帳尻(`8‖q‖^{n+2} ≤ (4‖q‖)^{n+1}` など)も
+同じ `linarith` で片付く。
