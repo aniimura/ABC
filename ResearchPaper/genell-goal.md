@@ -22307,3 +22307,55 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-563 ★★★★★★★★共線性を有限の主張の族に落とす(第 250 ブロック)
+
+`Found/GaloisRep/TateCollinearTrunc.lean`。
+
+### ★★★★★★第 222-223 の骨格をそのまま 3 点に使う
+
+葉 (b)(Tate 方程式)では「差 → 切り詰め → 万有な環での整除性」という 3 段で
+有限化した(第 222・223)。★★**共線性でも同じ骨格が使える**。違うのは点が 3 つに
+なることだけである。
+
+3 点は `(u, vw)`, `(v, uw)`, `(w, uv)` で `q = u v w`。各点の相方が多項式になるので
+**追加の変数は要らない**(§9-562)。
+
+    collDefect u v w q := X1(Y2 - Y3) + X2(Y3 - Y1) + X3(Y1 - Y2)
+
+`collDefect_sub_trunc` は第 222 の `tateXpair_sub_trunc`・`tateYpair_sub_trunc` を
+`Ideal.Quotient` の上で 6 回使うだけ。★`a4`・`a6` が出てこない分、葉 (b) より軽い。
+
+### ★★★★行列式なので互換で符号が変わる
+
+    collDefectTrunc n v u w q = -collDefectTrunc n u v w q     (`collDefectTrunc_swap12`)
+    collDefectTrunc n u w v q = -collDefectTrunc n u v w q     (`collDefectTrunc_swap23`)
+
+★これは `ring` で出る(`v * u = u * v` を先に潰すだけ)。第 224 の
+`tateDefectTrunc_symm` が `A` 側の整除性を無料にしたのと同じで、ここでも
+**`U` 側を示せば `V`・`W` 側は対称性で済む**。3 変数になっても降下の手間は
+1 変数分しか増えない。
+
+### ★★切り詰めの函手性は在庫を使う
+
+`map_tateXtrunc`・`map_tateYtrunc`(第 222)を 3 点それぞれに当てるだけ。
+単元条件は 12 個になるので `CollUnits` 構造体にまとめた。
+
+| 定理 | 内容 |
+|---|---|
+| `collDefect` | ★★★★★★共線性の差(形式側) |
+| `collDefectTrunc` | ★★★その `n` 次の切り詰め |
+| `collDefect_eq_zero_of_trunc` | ★★★★★★★有限の主張の族に落ちる |
+| `collDefectTrunc_swap12`・`_swap23` | ★★★★互換で符号が変わる |
+| `map_collDefectTrunc` | ★★★★★★環準同型で移る |
+| `collDefect_eq_zero_of_specialize` | ★★★★★★★★**特殊化の規準** |
+
+### 残り
+
+万有な環 `ℤ[U,V,W]`(`q = UVW`)を作り、`(UVW)^n | collDefectTrunc n U V W (UVW)` を
+示す。ℂ 側の評価は第 231 の `norm_tateXanalytic_sub_trunc` が
+**3 点それぞれにそのまま使える**(どの点でも `‖u * (相方)‖ = ‖q‖` だから)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
