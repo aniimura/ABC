@@ -22464,3 +22464,49 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-566 ★★★★★★★3 変数の降下の骨格(第 253 ブロック)
+
+`Found/GaloisRep/CollDescent.lean`。
+
+### ★★★★★2 変数のときとの唯一の違い
+
+第 239 の降下は `ℤ[A,W] = ℤ[a][w]` で、`W^m | P` を `X^m | toPP P` に直し、
+係数(**1 変数**多項式)が無限個の点で消えることから 0 を出した。
+
+★3 変数では `ℤ[U,V,W] = ℤ[u][v][w]` となり、係数が **2 変数**になる。
+そこで **「無限集合の直積の上で消える 2 変数多項式は 0」**(`poly2_eq_zero_of_infinite`)
+を 1 枚はさむ。★これは 1 変数の議論を 2 回入れ子にするだけで、まず `v` を動かして
+`ℂ[v]` の元として 0、次にその係数を `u` で動かして 0、とする。
+**降下の骨格そのものは第 239 と同じ**で、増えたのはこの 1 枚だけだった。
+
+### ★★★配線
+
+| 写像 | 内容 |
+|---|---|
+| `toPP3 : ℤ[U,V,W] -> ℤ[u][v][w]` | `U -> C(C X)`、`V -> C X`、`W -> X` |
+| `ofPP3` | 逆向き |
+| `evalUV u v : ℤ[U,V,W] -> ℂ[w]` | `U -> C u`、`V -> C v`、`W -> X` |
+| `eval2Z u v : ℤ[u][v] -> ℂ` | 係数を `(u,v)` で評価 |
+
+★`evalUV u v = (map (eval2Z u v)) . toPP3` なので、`evalUV u v P` の係数が
+すべて消えることと `toPP3 P` の係数が `(u,v)` で消えることが同じになる。
+
+### ★配管 —— 3 重の `Polynomial` は型推論が通らない
+
+    MvPolynomial.eval₂Hom (((Polynomial.C).comp Polynomial.C).comp Polynomial.C) ...
+    -- failed to synthesize CommSemiring (Polynomial (Polynomial (Polynomial ?m)))
+
+★`abbrev PPP := Polynomial (Polynomial (Polynomial ℤ))` を置いて
+`eval₂Hom (S₁ := PPP)` と**行き先を名前つきで与える**と通る。
+2 重(第 239)までは推論できたが 3 重で落ちる。`tools/lean-idioms.md` に追加した。
+
+### ★★★★★★★到達点
+
+    (∀ u v ∈ s, ∀ j < n+1, (evalUV u v P).coeff j = 0)  ⟹  W^{n+1} | P
+
+★あとは「`s` を上半平面の指数像に取り、係数の消滅を解析的な評価から出す」だけ。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

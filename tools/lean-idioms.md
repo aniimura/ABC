@@ -676,3 +676,34 @@ rw [deriv_shiftP]  -- 続く rw が (fun s => ...) (z - l₀) の形で止まる
 show deriv (fun u : ℂ => L.weierstrassP (u + w)) s = _   -- 定義を開く
 simp only [deriv_shiftP]                                  -- 開いてベータ簡約まで
 ```
+
+
+## 3 重の `Polynomial` は `eval₂Hom` の行き先が推論できない
+
+**失敗形**:
+
+```lean
+noncomputable def toPP3 : CollBase →+* Polynomial (Polynomial (Polynomial ℤ)) :=
+  MvPolynomial.eval₂Hom
+    (((Polynomial.C : Polynomial (Polynomial ℤ) →+* Polynomial (Polynomial (Polynomial ℤ))).comp
+      (Polynomial.C : Polynomial ℤ →+* Polynomial (Polynomial ℤ))).comp
+      (Polynomial.C : ℤ →+* Polynomial ℤ)) ![...]
+-- failed to synthesize instance of type class
+--   CommSemiring (Polynomial (Polynomial (Polynomial ?m.53)))
+```
+
+★戻り値の型注釈は `def` の側にあるのに、`eval₂Hom` の `S₁` は先に決まらない。
+2 重(`Polynomial (Polynomial ℤ)`)までは通るが、3 重で `?m` が残ってインスタンス
+探索が落ちる。
+
+**対処**: **`abbrev` で名前をつけて `S₁` を名前つき引数で渡す**。
+
+```lean
+abbrev PPP : Type := Polynomial (Polynomial (Polynomial ℤ))
+
+noncomputable def toPP3 : CollBase →+* PPP :=
+  MvPolynomial.eval₂Hom (S₁ := PPP) (...) ![...]
+```
+
+★同じ形は `Polynomial.eval₂RingHom` の入れ子にも起きうる。深い塔を作るときは
+中間の型に名前をつけておくと、エラーも読めるようになる。

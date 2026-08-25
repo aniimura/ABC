@@ -899,6 +899,7 @@ import ABC3.Found.GaloisRep.TateCollinearAnalytic
 import ABC3.Found.GaloisRep.TateCollinearTrunc
 import ABC3.Found.GaloisRep.CollUniversal
 import ABC3.Found.GaloisRep.CollDivisibility
+import ABC3.Found.GaloisRep.CollDescent
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
