@@ -15,7 +15,7 @@ import ABC3.Found.FrdI.Prop55ScaleRootCoa
 
 `Theorem 6.4, (i)` の 5 圏のうち `𝒞^pf` を止めているのは
 **`𝒞^pf` が birationally Frobenius-normalized 型**という 1 条である
-(`Skeleton/FrdI/Prop55PfBiratFn.lean` に主張と手順書がある)。
+(`Found/FrdI/Prop55PfBiratFn.lean` —— ★2026-08-25 に閉じた)。
 
 ★その手順書の第 3 段が「`Σ_k` の birat 版(`scaleRootBirat`)の
 `Base`・`degFr` の保存」であり、**本ファイルがそれを埋める**。
@@ -117,8 +117,10 @@ noncomputable def scaleRootBiratEndMulEquiv (k : ℕ+) (Gpf : Frobenioid (pfRoot
 
     End_{(𝒞^birat)^pf}(A^{(n)})  ≃*  End_{(𝒞^pf)^birat} ⟨A, n⟩
 
-★これが `pfRoot_biratFrobNormalizedType` の鍵である
-(`Skeleton/FrdI/Prop55PfBiratFn.lean` の手順書 第 1・2 段)。 -/
+★★実際に `pfRoot_biratFrobNormalizedType`(`Found/FrdI/Prop55PfBiratFn.lean`)で
+使ったのは**第 1・2 段だけを束ねた `pfBiratEndMulEquiv12`** である ——
+3 段目(同型による共役)は在庫の `isFrobeniusNormalized_of_iso` に任せた方が短い。
+本定義は 3 段を束ねた版として残す。 -/
 noncomputable def pfBiratEndMulEquiv (hfi : IsOfFrobeniusIsotropicType P)
     (hiso : ∀ X : C, IsIsotropic P X)
     (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))

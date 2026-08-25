@@ -239,6 +239,7 @@ import ABC3.Found.FrdI.Prop55ScaleRootInv
 import ABC3.Found.FrdI.Prop55CongrIso
 import ABC3.Found.FrdI.Prop55ScaleRootCoa
 import ABC3.Found.FrdI.Prop55ScaleRootBirat
+import ABC3.Found.FrdI.Prop55PfBiratFn
 import ABC3.Found.FrdI.Prop55BiratOmega
 import ABC3.Found.FrdI.Prop55
 import ABC3.Found.FrdI.Prop55RlfNd
