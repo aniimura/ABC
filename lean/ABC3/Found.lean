@@ -1,5 +1,6 @@
 import ABC3.Meta.Claim
 import ABC3.Found.ResidueFieldFinite
+import ABC3.Found.AddEquivNNReal
 import ABC3.Found.PGC.LocalFieldNorm
 import ABC3.Found.PGC.QpResidueField
 import ABC3.Found.PGC.ResidueCardinality
@@ -14,6 +15,8 @@ import ABC3.Found.FrdI.UnTr
 import ABC3.Found.FrdI.Example310
 import ABC3.Found.FrdI.Remark311
 import ABC3.Found.FrdI.Remark312
+import ABC3.Found.FrdI.Profinite
+import ABC3.Found.FrdI.Thm62Slim
 import ABC3.Found.FrdI.CategoryVocabulary
 import ABC3.Found.FrdI.ElementaryFrobenioid
 import ABC3.Found.FrdI.MorphismTypes
@@ -64,12 +67,14 @@ import ABC3.Found.FrdI.Thm34Rigid
 import ABC3.Found.FrdI.Thm34Pre
 import ABC3.Found.FrdI.Lemma65
 import ABC3.Found.FrdI.Lemma65ii
+import ABC3.Found.FrdI.Thm64Rat
 import ABC3.Found.FrdI.Prop44Pre
 import ABC3.Found.FrdI.Def45
 import ABC3.Found.FrdI.Example43
 import ABC3.Found.FrdI.Thm52
 import ABC3.Found.FrdI.Thm52Change
 import ABC3.Found.FrdI.Thm52Frob
+import ABC3.Found.FrdI.Thm52Otimes
 import ABC3.Found.FrdI.Thm52Birat
 import ABC3.Found.FrdI.Remark491
 import ABC3.Found.FrdI.Prop44Gp
@@ -176,6 +181,9 @@ import ABC3.Found.Divisor.NormKQC
 import ABC3.Found.Divisor.NormB
 import ABC3.Found.Divisor.SchemeNormalCriterion
 import ABC3.Found.Divisor.NormNormal
+import ABC3.Found.Divisor.NormFinite
+import ABC3.Found.Divisor.GlobalUnits
+import ABC3.Found.Divisor.SchemeHartogs
 import ABC3.Found.Divisor.NormFF
 import ABC3.Found.Divisor.SchemeOrdUnit
 import ABC3.Found.Divisor.SchemeFFMap
@@ -185,6 +193,7 @@ import ABC3.Found.Divisor.SchemeDivFinite
 import ABC3.Found.Divisor.SchemeCartierPull
 import ABC3.Found.Divisor.NormPhiFunctor
 import ABC3.Found.Divisor.Ex61Model
+import ABC3.Found.Divisor.Ex61Units
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
 import ABC3.Found.NumberField.SepClosedIn

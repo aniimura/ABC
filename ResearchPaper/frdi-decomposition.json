@@ -3411,11 +3411,11 @@
           "deps": [
             "global-units"
           ],
-          "status": "todo",
-          "size": "★大",
-          "note": "★proper normal ⟹ 大域函数が定数、が本体(鎖 `normalize` の `global-units`)。\n\n★★★★★2026-08-21（**在庫不足を特定した**）：`ex61-model` が閉じたので、\n`𝒪^×(A)` の中身は確定した —— 模型 Frobenioid では\n`𝒪^×(A) = {u ∈ B(L) | div_{D_L}(u) = 0}` であり、`B(L)` の定義から\n`D_L` の外では `ord = 0` なので、これは\n★**「すべての余次元 1 の点で `ord_v(u) = 0`」**と同値である。\n\n★原文はこれが `k_L^×` だと言う。そのためには 2 本要り、**どちらも mathlib に無い**:\n1. ★**代数的 Hartogs**（Noether 整閉整域は `R = ⋂_{ht 1} R_𝔭`、すなわち Krull 整域）——\n   mathlib に `IsKrullDomain` は**無い**。在るのは\n   `MaximalSpectrum.iInf_localization_eq_bot`（**極大**イデアルにわたる交わり）だけで、\n   高さ 1 版ではない。\n2. ★**`Γ(X, 𝒪_X) = k`**（proper かつ幾何的連結）—— mathlib に**無い**（grep 0 件）。\n\n★★したがって `ex61-units` は**新しい 2 節点**に分解すべきである\n（`krull-domain-intersection` と `proper-global-sections`）。\n★★★**`Example 6.1` の条なし `.src` はこれが埋まるまで置けない。**",
-          "lean": "",
-          "decl": ""
+          "status": "半済",
+          "size": "中(𝒪^× の側は閉じた。残るは 𝒪^▷ = 𝒪^× の配線)",
+          "note": "★proper normal ⟹ 大域函数が定数、が本体(鎖 `normalize` の `global-units`)。\n\n★★★★★★2026-08-25(**`𝒪^×(A) = k_L^×` の側は閉じた**、sorry 無し)。\n\n| 段 | 実装 |\n|---|---|\n| model Frobenioid で `𝒪^×(A) ≃* {u ∈ B(L) | Div_B(u) = 0}` | `Found/FrdI/Thm52Otimes.lean` |\n| `Div_B(u) = 0` ＋ `u ∈ B(L)` ⟹ 全ての余次元 1 の点で `ord = 0` | `Found/Divisor/Ex61Units.lean` |\n| `ord = 0` がすべて ⟹ `Γ(V[L],⊤)` の単元 | `Found/Divisor/SchemeHartogs.lean` |\n| `Γ(V[L],⊤)` は `k` 上有限次の体(＝ `k_L`) | `Found/Divisor/GlobalUnits.lean` |\n| 逆向き(`k_L^× ⊆ 𝒪^×(A)`) | `divBHom_eq_zero_of_globalUnit` |\n\n★★2 段目が要点 —— `B(L)` の定義は「`D_L` の**外**では `ord = 0`」で、\n`Div_B(u) = 0` は「`D_L` の**中**で `ord = 0`」。合わせて全部の余次元 1 の点になる。\n\n★★★1 段目(model Frobenioid の `𝒪^×`)の中身: 射は `(Base, Div, deg_Fr, u)` の 4 つ組で、\n`𝒪^×` の条件(`Base = 𝟙`・`deg_Fr = 1`・可逆)を入れると `Div = 0`(`model_isIso_iff`)、\n残った条件式が `Div_B(u) = 0`。合成の `u` 成分が `φ.u + ψ.u` になるので乗法群の同型。\n\n## ☆残っているもの —— `𝒪^▷(A) = 𝒪^×(A)` の側\n\n原文は `𝒪^×(A) = 𝒪^▷(A) = k_L^×` と 3 つを等号で結ぶ。\n★`𝒪^▷(A)` は「`Base = 𝟙`・`deg_Fr = 1`」だけで**可逆性を課さない**ので、\n条件式は `Div = Div_B(u)`(`Div` は**有効**因子)になる。\n\n★★残る論証は 1 本: `Div ≥ 0` ＋ `u ∈ B(L)` ⟹ 全ての余次元 1 の点で `ord ≥ 0`\n⟹(Hartogs、**閉じている**)`u ∈ Γ(V[L],⊤)` ⟹(体、**閉じている**)単元 ⟹ `ord = 0`\n⟹ `Div = 0` ⟹ 可逆。\n★★**新しい数学は無い** —— `mem_range_germ_top_of_forall_ordPt_nonneg`(不等号版の Hartogs)は\nすでに閉じており、残るのは `effSub`(有効因子)と `phiGpHomC` の配線だけ。",
+          "lean": "ABC3/Found/FrdI/Thm52Otimes.lean + ABC3/Found/Divisor/Ex61Units.lean",
+          "decl": "ABC3.Found.FrdI.ModelData.otimesModelEquiv / ABC3.Found.Divisor.forall_ordPt_eq_zero_of_divBHom_eq_zero / exists_globalUnit_of_divBHom_eq_zero / divBHom_eq_zero_of_globalUnit / ordPt_eq_zero_of_globalUnit"
         },
         {
           "id": "thm62-i-ext",
