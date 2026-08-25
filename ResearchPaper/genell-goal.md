@@ -21958,3 +21958,51 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-557 ★★★★★極が相殺する鍵 —— 位数を数えずに因数分解で(第 244 ブロック)
+
+`Found/GaloisRep/WeierstrassPoleForm.lean`。
+
+加法定理の証明で使う関数
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+が格子点 `l0` のまわりで正則であることを示したい。`t := z - l0` として第 243 より
+
+    ℘(z) = 1/t^2 + E(z),   ℘'(z) = -2/t^3 + D(z)      (E, D は l0 で解析的)
+
+`c := ℘(w)`、`c' := ℘'(w)`、`alpha := D - c'`、`beta := E - c` とおくと
+
+    (℘'(z)-c')/(℘(z)-c) = (1/t) N/M,   N = -2 + t^3 alpha,   M = 1 + t^2 beta
+
+であり
+
+    (1/4)(N/M)^2 (1/t^2) - 1/t^2 = (N^2 - 4M^2)/(4 t^2 M^2)
+
+となる。★★ここで **`N^2 - 4M^2 = t^2 R`(`R` は解析的)と因数分解できる**
+(`pole_cancel_factor`)。したがって上の式は `R/(4M^2)` となり **`l0` で解析的**である
+(`M(l0) = 1 != 0`)。
+
+### ★★★位数を数える必要はない
+
+★`AnalyticAt.order` を持ち出して「2 位で消える」と言う代わりに、
+**`ring` で確かめられる恒等式ひとつ**で相殺が出る。これがこの形の利点である。
+
+    (-2 + t^3 a)^2 - 4(1 + t^2 b)^2 = t^2 (-4 t a + t^4 a^2 - 8 b - 4 t^2 b^2)
+
+### ★★見積もりの再訂正
+
+§9-556 で 15-35 ブロックとしたが、この因数分解で相殺の議論が機械化できるので
+**8-20 ブロック**が見込みである。悪い点は 3 種類(`z in L`、`z in L-w`、`z = w`)で、
+どれも同じ形の因数分解で処理できる。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_pole_form` | ★★★★格子点のまわりの `℘`・`℘'` の形 |
+| `differentiableOn_weierstrassP_compl` 他 | ★格子の外での微分可能性 |
+| `weierstrassP_lattice_add` 他 | ★★周期性(`l + z` の向き) |
+| `pole_cancel_factor` | ★★★★★**極が相殺する鍵の因数分解** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
