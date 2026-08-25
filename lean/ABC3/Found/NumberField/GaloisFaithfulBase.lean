@@ -192,7 +192,99 @@ theorem eq_one_of_fixes_prime_tower
 
 end Tower
 
+/-! ## ★5. ℚ の側の完全分解から降ろす
+
+★★節点 `nf-spl-base` の第 3 段。`N/ℚ` が Galois で有理素数 `p` が `N` で完全分解するなら、
+中間体 `M` の下の素点 `q := R ∩ 𝓞 M` でも `e = f = 1` である。
+
+★中身は**塔での `e`・`f` の乗法性をもう一度**当てるだけである
+(`ℤ ⊆ 𝓞 M ⊆ 𝓞 N`)。 -/
+
+section FromQ
+
+/-- ★★★**ℚ の側の完全分解から、中間体 `M` の下の素点での `e = f = 1` を出す**。 -/
+theorem ramificationIdx_inertiaDeg_eq_one_of_splitsCompletely
+    {M N : Type} [Field M] [Field N] [NumberField M] [NumberField N]
+    [Algebra M N] [IsGalois ℚ N] {p : ℕ} [Fact p.Prime]
+    (hsplit : (Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 N)).ncard = Module.finrank ℚ N)
+    (R : Ideal (𝓞 N)) [R.IsPrime] [R.LiesOver (Ideal.span {(p : ℤ)})] (hRne : R ≠ ⊥) :
+    (R.under (𝓞 M)).ramificationIdx R = 1 ∧ (R.under (𝓞 M)).inertiaDeg R = 1 := by
+  haveI := RingOfIntegers.inst_isScalarTower ℚ M N
+  haveI : IsScalarTower ℤ (𝓞 M) (𝓞 N) := inferInstance
+  haveI : R.IsMaximal := Ideal.IsPrime.isMaximal inferInstance hRne
+  haveI : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
+  haveI : (R.under (𝓞 M)).IsMaximal := isMaximal_comap_of_isIntegral_of_isMaximal R
+  have hef := ramificationIdxIn_mul_inertiaDegIn_eq_one (K := N) hsplit
+  have heZ : (Ideal.span {(p : ℤ)} : Ideal ℤ).ramificationIdx R = 1 := by
+    rw [← Ideal.ramificationIdxIn_eq_ramificationIdx _ R (N ≃ₐ[ℚ] N)]
+    exact Nat.eq_one_of_mul_eq_one_right hef
+  have hfZ : (Ideal.span {(p : ℤ)} : Ideal ℤ).inertiaDeg R = 1 := by
+    rw [← Ideal.inertiaDegIn_eq_inertiaDeg _ R (N ≃ₐ[ℚ] N)]
+    exact Nat.eq_one_of_mul_eq_one_left hef
+  constructor
+  · have ht := Ideal.ramificationIdx_algebra_tower' (Ideal.span {(p : ℤ)}) (R.under (𝓞 M)) R
+    rw [heZ] at ht
+    exact Nat.eq_one_of_mul_eq_one_left ht.symm
+  · have ht := Ideal.inertiaDeg_algebra_tower (Ideal.span {(p : ℤ)}) (R.under (𝓞 M)) R
+    rw [hfZ] at ht
+    exact Nat.eq_one_of_mul_eq_one_left ht.symm
+
+/-- ★★★★★★**数体の自己同型で素点を固定するものは恒等**(完全分解する有理素数を経由)。
+
+★★★これが `Theorem 6.4, (i)` の「clearly」の中身である。使うときは
+
+    M := L^{⟨τ⟩}(`τ` の固定体)、 N := `L/ℚ` の Galois 閉包
+
+と取ればよい。★`hsplit`(`N` で完全分解する有理素数の存在)は在庫の
+`infinite_splitsCompletely`(**Chebotarev を使わない**)が与える。 -/
+theorem eq_one_of_fixes_prime_of_splitsCompletely
+    {M L N : Type} [Field M] [Field L] [Field N]
+    [NumberField M] [NumberField L] [NumberField N]
+    [Algebra M L] [Algebra L N] [Algebra M N] [IsScalarTower M L N]
+    [IsGalois M L] [IsGalois ℚ N] {p : ℕ} [Fact p.Prime]
+    (hsplit : (Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 N)).ncard = Module.finrank ℚ N)
+    (R : Ideal (𝓞 N)) [R.IsPrime] [R.LiesOver (Ideal.span {(p : ℤ)})] (hRne : R ≠ ⊥)
+    (σ : L ≃ₐ[M] L) (hσ : σ • (R.under (𝓞 L)) = R.under (𝓞 L)) : σ = 1 := by
+  haveI := RingOfIntegers.inst_isScalarTower M L N
+  haveI := RingOfIntegers.inst_isScalarTower ℚ M N
+  haveI hZL : IsScalarTower ℤ (𝓞 L) (𝓞 N) := inferInstance
+  haveI hZM : IsScalarTower ℤ (𝓞 M) (𝓞 N) := inferInstance
+  haveI : R.IsMaximal := Ideal.IsPrime.isMaximal inferInstance hRne
+  have hspan : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by simp [NeZero.ne p]
+  set P : Ideal (𝓞 L) := R.under (𝓞 L) with hPdef
+  haveI : P.IsMaximal := isMaximal_comap_of_isIntegral_of_isMaximal R
+  haveI : R.LiesOver P := inferInstance
+  haveI hPo : P.LiesOver (Ideal.span {(p : ℤ)}) :=
+    ⟨by rw [hPdef, Ideal.under_under]; exact Ideal.LiesOver.over⟩
+  have hPne : P ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hspan P
+  set q : Ideal (𝓞 M) := P.under (𝓞 M) with hqdef
+  haveI : q.IsMaximal := isMaximal_comap_of_isIntegral_of_isMaximal P
+  haveI : P.LiesOver q := inferInstance
+  haveI hqo : q.LiesOver (Ideal.span {(p : ℤ)}) :=
+    ⟨by rw [hqdef, hPdef, Ideal.under_under, Ideal.under_under]; exact Ideal.LiesOver.over⟩
+  have hqne : q ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hspan q
+  have hqR : q = R.under (𝓞 M) := by rw [hqdef, hPdef, Ideal.under_under]
+  obtain ⟨he, hf⟩ := ramificationIdx_inertiaDeg_eq_one_of_splitsCompletely (M := M) hsplit R hRne
+  rw [← hqR] at he hf
+  exact eq_one_of_fixes_prime_tower q hqne R P hPne he hf σ hσ
+
+end FromQ
+
 /-! ### ★出典の紐付け -/
+
+def eq_one_of_fixes_prime_of_splitsCompletely.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 数体の自己同型で素点を固定するものは恒等",
+    sectionId := "frdi-thm-6-4" }
+
+def eq_one_of_fixes_prime_of_splitsCompletely.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "infinite_splitsCompletely(完全分解する有理素数の存在。Chebotarev を使わない)"
+      (.inProject "ABC3" "ABC3.Found.NF.infinite_splitsCompletely") 116,
+    .citation "[mathlib]" "Ideal.ramificationIdx_algebra_tower' / Ideal.inertiaDeg_algebra_tower"
+      (.inMathlib "Ideal.ramificationIdx_algebra_tower'") 116,
+    .implicitStep
+      ("★使うときは M := L^{⟨τ⟩}(τ の固定体)、N := L/ℚ の Galois 閉包 と取る。" ++
+       "残るのはその 2 つを組む配線だけである") 114 ]
 
 def splitsCompletely_of_tower.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 116,
