@@ -936,6 +936,7 @@ import ABC3.Found.GaloisRep.TateSurjInt
 import ABC3.Found.GaloisRep.TateFormalParam
 import ABC3.Found.GaloisRep.TateSurjOrigin
 import ABC3.Found.GaloisRep.TateSurjAll
+import ABC3.Found.GaloisRep.TatePhiSurj
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
