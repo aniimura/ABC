@@ -22138,3 +22138,68 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-560 ★★★★★★★局所延長の貼り合わせ —— 穴あき近傍の極限で一様に(第 247 ブロック)
+
+`Found/GaloisRep/RemovableGlue.lean`。
+
+### ★★★★★★★問題 —— 悪い点が無限個ある
+
+第 246 で `collDet` は各格子点のまわりで解析的に延びると分かった。しかし Liouville に
+かけるには**その延長どうしを貼り合わせて整関数を作る**必要がある。悪い点は無限個
+(格子の 2 つの平行移動 `L` と `L - w`)なので、`Function.update` で 1 点ずつ潰す形は
+使えない。
+
+★★★そこで**場所によらない一様な定義**を採った:
+
+    glue f z := limUnder (nhdsWithin z {z}^c) f
+
+つまり「`z` を除いた近傍での極限」。これなら **1 本の式で全点を定義できる**。
+
+- **良い点**(`f` がそこで解析的)では `glue f z = f z`。
+- **悪い点**(`f` が穴あき近傍で解析的な `g` に一致する)では `glue f z = g z`。
+
+★どちらも同じ補題 `glue_eq` で出る——**場合分けが要らない**のがこの定義の利点である。
+
+さらに `glue f` は `z0` の**穴のない**近傍で `g` に一致する(`glue_eventuallyEq`)。
+穴あきの点 `z != z0` では `f` が `z` の近傍**全体**で `g` に一致するので `glue f z = g z`、
+`z = z0` では `g` の連続性から極限が `g z0` になる。よって `AnalyticAt.congr` で
+`glue f` の解析性がそのまま出る。
+
+### ★★★★★アフィン変換は `glue` を通り抜ける
+
+`f (a z + b) = eps f(z)` なら `glue f (a z + b) = eps * glue f z`(`glue_affine`)。
+
+| `(a, b, eps)` | 意味 |
+|---|---|
+| `(1, l, 1)` | **周期性** |
+| `(-1, -c, -1)` | **反対称性** |
+
+★逆写像 `v -> (v - b)/a` で局所延長を運ぶだけなので、**フィルターの押し出しを書く
+必要がない**。`Tendsto.eventually` 一発で済む。周期性と反対称性を別々に書かずに
+1 つの補題にまとめられたのはこの形のおかげである。
+
+### ★★★★★★★周期的かつ反対称なら 0
+
+    eq_zero_of_periodic_antisymm : (局所延長) -> (周期性) -> (反対称性) -> f z0 = 0
+
+第 241 の Liouville で `glue f` が定数と分かり、反対称性から
+`glue f 0 = -glue f 0`、よって **0**。★**値を一点で計算する必要がない**。
+
+| 定理 | 内容 |
+|---|---|
+| `glue` | ★★★★★★穴あき近傍の極限による一様な貼り合わせ |
+| `glue_eventuallyEq` | ★★★★★★`glue f` は近傍で局所延長に一致する |
+| `glue_eq`・`analyticAt_glue` | ★★点での一致と解析性 |
+| `glue_affine` | ★★★★★アフィン変換は通り抜ける |
+| `eq_zero_of_periodic_antisymm` | ★★★★★★★**周期的かつ反対称なら 0** |
+
+### 残り(葉 (c) 段 2)
+
+1. `collDet` が良い点で解析的、悪い点で局所延長を持つことを言って
+   `eq_zero_of_periodic_antisymm` に流す。第 2 種の悪い点は `collDet_neg` で第 1 種から。
+2. `collDet = 0` を加法定理の形(`℘(z+w)` の明示式)に直す。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
