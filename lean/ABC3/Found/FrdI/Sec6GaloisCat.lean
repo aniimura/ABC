@@ -233,6 +233,23 @@ theorem finSubOp_isIso_of_endo {A : (FinSub K Kbar)ᵒᵖ} (e : A ⟶ A) : IsIso
   · exact Quiver.Hom.unop_inj (IsIso.inv_hom_id e.unop)
   · exact Quiver.Hom.unop_inj (IsIso.hom_inv_id e.unop)
 
+/-- ★★**`⊥`(= `K` 自身)の `K`-代数自己射は恒等**(`⊥` は `K` の像そのものだから)。
+
+★★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` の
+`(𝒞^un-tr)^birat` の Frobenius-compact 対象を「底の自己射が恒等の対象」で取る鍵である
+(`Thm64RatStd.lean` の `model_isOfRationallyStandardType_of_baseId`)。 -/
+theorem botSub_end_eq_id (f : botSub K Kbar ⟶ botSub K Kbar) : f = 𝟙 (botSub K Kbar) := by
+  refine FinSub.hom_ext (AlgHom.ext fun x => ?_)
+  obtain ⟨c, hc⟩ := (IntermediateField.mem_bot (F := K) (E := Kbar)).mp x.2
+  have hx : x = algebraMap K ((botSub K Kbar).toIF) c := by
+    refine Subtype.ext ?_
+    rw [← hc]
+    rfl
+  rw [hx]
+  show (FinSub.hom f) (algebraMap K _ c) = _
+  rw [AlgHom.commutes]
+  rfl
+
 /-- ★★★**`𝒟 = B(G)⁰` は Aut-saturated** —— sub-automorphism はすべて同型。
 
 ★★これは `Prop16AutAmple.lean` の `cfp_autSubAmple_of_autSaturated`

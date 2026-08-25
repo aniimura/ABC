@@ -159,23 +159,11 @@ theorem divBGalois_nsmul_ne_zero (A : (FinSub F Kbar)ᵒᵖ)
   · exact absurd (Nat.cast_eq_zero.mp hz) hn.ne'
   · exact hy hz
 
-/-! ## ★3. `⊥`(= `F` 自身)の自己射は恒等だけ -/
+/-! ## ★3. `⊥`(= `F` 自身)の自己射は恒等だけ
+
+★★`botSub_end_eq_id` は `Sec6GaloisCat.lean` へ移した(`Example 6.1` と共用するため)。 -/
 
 end Ex63
-
-/-- ★★**`⊥` の `F`-代数自己射は恒等**(`⊥` は `F` の像そのものだから)。 -/
-theorem botSub_end_eq_id {F Kbar : Type} [Field F] [Field Kbar] [Algebra F Kbar]
-    (f : botSub F Kbar ⟶ botSub F Kbar) : f = 𝟙 (botSub F Kbar) := by
-  refine FinSub.hom_ext (AlgHom.ext fun x => ?_)
-  obtain ⟨c, hc⟩ := (IntermediateField.mem_bot (F := F) (E := Kbar)).mp x.2
-  have hx : x = algebraMap F ((botSub F Kbar).toIF) c := by
-    refine Subtype.ext ?_
-    rw [← hc]
-    rfl
-  rw [hx]
-  show (FinSub.hom f) (algebraMap F _ c) = _
-  rw [AlgHom.commutes]
-  rfl
 
 section Ex63Std
 
