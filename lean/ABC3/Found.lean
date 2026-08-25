@@ -913,6 +913,7 @@ import ABC3.Found.GaloisRep.TateLambda
 import ABC3.Found.GaloisRep.TateIdentify
 import ABC3.Found.GaloisRep.TateContract
 import ABC3.Found.GaloisRep.TateSurjUnit
+import ABC3.Found.GaloisRep.TateInjUnit
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

@@ -23257,3 +23257,37 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-580 ★★★★★★★★単元の領域での単射性(第 267 ブロック)
+
+`Found/GaloisRep/TateInjUnit.lean`。
+
+第 259 の単射性は `a, w in I`(**環帯**の領域)での逐次近似だった。そこでは
+`X = a + w`、`Y = -w` という主要項を使ったが、★`a` が**単元**のときはこの展開が
+効かない(`f(a) - a` が位を上げない——`f'(a) != 1`)。
+
+★★★しかし第 265 の `κ = Λ - id` の評価がそのまま使える:
+
+    Λ(a) = Λ(b)  かつ  a - b in I^j   ⟹   a - b = κ(b) - κ(a) in I^{j+1}
+
+を繰り返して `IsHausdorff` で `a = b`(`tate_lambda_inj`)。
+★★**同じ縮小性が全射性(第 266)と単射性(本ブロック)の両方を出す**——
+不動点の存在と一意性が 1 つの評価から出るのは縮小写像定理の常である。
+★1 つの評価を用意しておけば 2 つの定理が落ちる、という形。
+
+### ★★領域ごとの単射性がそろった
+
+| 領域 | 定理 |
+|---|---|
+| 環帯(`a, w in I`) | `tate_inj`・`tate_inj_X`(第 259) |
+| 単元(`a` 単元、`w in I`) | `tate_lambda_inj`・`tate_inj_X_unit`(本ブロック) |
+
+| 定理 | 内容 |
+|---|---|
+| `tate_lambda_inj` | ★★★★★★★★**母数座標は単射** |
+| `tate_point_inj_unit` | ★★★★★★★★座標の単射性(単元の領域) |
+| `tate_inj_X_unit` | ★★★★★★★★`X` だけの版 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
