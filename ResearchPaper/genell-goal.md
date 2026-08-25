@@ -21202,3 +21202,59 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-542 ★★★★★★★`s1` の q 展開が ℂ の上で取れた —— §9-540 の穴を塞いだ(第 229 ブロック)
+
+`Found/GaloisRep/TateSigmaComplex.lean`。
+
+    S_{m>=1} f(q^m) = S_{N>=1} sigma_1(N) q^N        (ℂ の上、`‖q‖ < 1`)
+
+★形式側では第 111(`tateXtail_one`)で取れているが、`evalAdic` の議論は `I` 進完備環
+でしか使えないので ℂ の上では別に要った。§9-540 で「3-8 ブロック」と見積もった穴である。
+
+### ★★★★繊維で括り直す
+
+第 228 で `S_{m>=1}f(q^m) = S_{(m,d)} (d+1)q^{(m+1)(d+1)}` まで開いた。
+これを `N = (m+1)(d+1) - 1` の**繊維**で括り直す:
+
+| 段 | 道具 |
+|---|---|
+| `N x N ~ Sigma N, 繊維 N` | `Equiv.sigmaFiberEquiv` |
+| 二重和を繰り返し和に | `Summable.tsum_sigma` |
+| 繊維 ~ 約数対の集合 | ★★★★本ブロックの `fiberEquiv` |
+| 有限型の `tsum` を `Finset` の和に | `Finset.tsum_subtype` |
+| `S_{(a,b):ab=n} b = sigma_1(n)` | `Nat.sum_divisorsAntidiagonal` + `Nat.sum_div_divisors` |
+
+★★**要点は `fiberEquiv` を非依存な型の間の同値として作ること**である。
+`Sigma` の中で直接作ろうとすると第二成分が依存型になり、`Sigma.mk.injEq` の
+書き換えで motive が壊れる。**繊維分解は `Equiv.sigmaFiberEquiv` に任せ、
+繊維ごとの同値だけを手で作る**——これで `Subtype.ext` だけで済む。
+
+### ★★★落とし穴を 2 つ
+
+★`omega` は `(m+1, d+1).1 * (m+1, d+1).2` と `(m+1)*(d+1)` を**別の原子**として扱う。
+`show (m+1)*(d+1) = ...` で形を揃えてから渡す必要がある。
+★★`Nat.sum_div_divisors n id` は `S_d id (n/d)` の形なので、
+`S_d (n/d)` とは**構文的に一致しない**。`show ... = S_d id (n/d) from rfl` を挟む。
+
+| 定理 | 内容 |
+|---|---|
+| `pos_of_mem_divAntidiag` | ★約数対の成分は `1` 以上 |
+| `fiberEquiv` | ★★★★**繊維 ~ 約数対の集合** |
+| `sum_divAntidiag_snd` | ★★`S_{(a,b):ab=n} b = sigma_1(n)` |
+| `tsum_fiber_card` / `tsum_fiber_eq` | ★★★★★繊維の和 |
+| `tsum_nat_tateXterm_eq_sigma` | ★★★★★★★**`s1` の q 展開(ℂ の上)** |
+
+### ★残り
+
+これで解析側の `X`・`Y` の部品はすべて `sigma` 級数の形に揃った。残るのは:
+
+1. `partialEval (sigmaSeries 1) q n` と `S_{N>=1} sigma_1(N) q^N` の差が `O(q^n)`
+   (`sigma_1(N) <= N^2` で押さえる)
+2. 1 と第 227 の尾の評価を合わせて `tateDefectTrunc n u w (uw) = O(q^n)`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

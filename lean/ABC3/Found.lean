@@ -875,6 +875,7 @@ import ABC3.Found.GaloisRep.TateComplexSpec
 import ABC3.Found.GaloisRep.TateSplitNat
 import ABC3.Found.GaloisRep.TateTailBound
 import ABC3.Found.GaloisRep.TateDoubleSum
+import ABC3.Found.GaloisRep.TateSigmaComplex
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

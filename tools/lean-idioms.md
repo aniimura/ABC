@@ -536,3 +536,28 @@ theorem prime_univA : Prime (X 0 : MvPolynomial (Fin 2) ℤ) := by
     x^n ∣ P ∧ y^n ∣ P → (x*y)^n ∣ P
 
 が出る。`IsRelPrime x y` 自体は「`x` が素元」＋「`x ∤ y`」から手で作る。
+
+## 繊維で括り直すとき——`Equiv.sigmaFiberEquiv` に任せ、繊維ごとの同値だけ作る
+
+**失敗形**: `ℕ × ℕ ≃ Σ N, ((N+1).divisorsAntidiagonal : Finset _)` を直接作ろうとする。
+`right_inv` で `Sigma.mk.injEq` を書き換えると**第二成分が依存型**なので motive が壊れる。
+
+**対処**: 繊維分解そのものは mathlib の `Equiv.sigmaFiberEquiv f` に任せ、
+**繊維ごとの非依存な同値**だけを手で作る。
+
+```lean
+def fiberEquiv (N : ℕ) :
+    {p : ℕ × ℕ // (p.1 + 1) * (p.2 + 1) - 1 = N}
+      ≃ ((N + 1).divisorsAntidiagonal : Finset (ℕ × ℕ)) := …   -- Subtype.ext だけで済む
+```
+
+そのうえで `Summable.tsum_sigma` → `Finset.tsum_subtype` と流す。
+★`(Equiv.sigmaFiberEquiv f) p = p.2.val` は `rfl`。
+★★`Equiv.tsum_eq` は `∑' c, g (e c) = ∑' b, g b`。`rw [← e.tsum_eq g]` のあと
+`exact tsum_congr fun c => rfl` で beta 差を潰す。
+
+## `omega` は `(a, b).1 * (a, b).2` と `a * b` を別の原子として扱う
+
+`show a * b = …` で形を揃えてから `omega` に渡すこと。
+同様に `Nat.sum_div_divisors n id` は `∑ d, id (n / d)` の形なので、
+`∑ d, n / d` とは構文的に一致しない——`show … = ∑ d, id (n / d) from rfl` を挟む。
