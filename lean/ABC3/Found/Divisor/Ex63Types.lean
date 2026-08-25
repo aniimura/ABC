@@ -70,24 +70,41 @@ universe v u w
 
 variable {D : Type u} [Category.{v} D] {M : ModelData.{v, u, w} D}
 
-/-- ★★★★**model Frobenioid とその派生圏の isotropic 性**。
+/-- ★★★★★**model Frobenioid とその派生圏の isotropic 性**。
 
 ★原文 `Theorem 6.4, (i)`(および `Theorem 6.2, (iii)`)が
-`C, C^pf, C^un-tr, …` について主張する isotropic 型の、在庫で出る分。
+`C, C^pf, C^un-tr, (C^pf)^un-tr, …` について主張する isotropic 型。
 
-★★`C^un-tr` は**Frobenius**-isotropic までしか在庫が無い(2026-08-25 実測)。 -/
+## ★★★★見立て違いの訂正(2026-08-25、**9 回目**)
+
+前版はここに「`C^un-tr` は**Frobenius**-isotropic までしか在庫が無い」と書いていたが、
+**誤り**だった —— `Prop33UnTr.lean` の
+
+    unTr_isotropic P Fc B : IsIsotropic (unTrPre P Fc) B
+
+が**すべての対象**について成り立つので、`IsOfIsotropicType (unTrPre P Fc)` は
+`fun B => unTr_isotropic P Fc B` の 1 行である。
+★実際 `unTr_frobIsotropicType` 自身がこの補題を使って書かれていた。
+★★`exact?` が空振りしたのは「`IsOfIsotropicType` を展開しないと当たらない」形だから
+であって、在庫が無いからではない。
+
+★教訓は毎回同じ: **「無い」と書く前に、使っている補題の中身を読む。** -/
 theorem model_isotropic_family (h : M.Hyp) :
     IsOfIsotropicType (modelPre h)
       ∧ IsOfFrobeniusIsotropicType (modelPre h)
       ∧ IsOfIsotropicType (pfRootPre (modelPre h) (model_frobenioid h).core)
       ∧ IsOfIsotropicType (istrPre (modelPre h) (model_frobenioid h).core)
-      ∧ IsOfFrobeniusIsotropicType (unTrPre (modelPre h) (model_frobenioid h).core) := by
+      ∧ IsOfFrobeniusIsotropicType (unTrPre (modelPre h) (model_frobenioid h).core)
+      ∧ IsOfIsotropicType (unTrPre (modelPre h) (model_frobenioid h).core)
+      ∧ IsOfIsotropicType (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core)
+          (pfRootCore (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (model_isotropicType h)))) := by
   haveI := h.connectedD
   have hiso : IsOfIsotropicType (modelPre h) := model_isotropicType h
   have hfiso : IsOfFrobeniusIsotropicType (modelPre h) :=
     isOfFrobeniusIsotropicType_of_isotropic hiso
   exact ⟨hiso, hfiso, pfRoot_isOfIsotropicType hfiso, istr_isOfIsotropicType,
-    unTr_frobIsotropicType _⟩
+    unTr_frobIsotropicType _, fun A => unTr_isotropic _ _ A, fun A => unTr_isotropic _ _ A⟩
 
 end ModelIso
 
@@ -121,7 +138,15 @@ theorem ex63_isotropic_family :
       ∧ IsOfIsotropicType (istrPre (ModelData.modelPre (ex63Hyp F Kbar))
           (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
       ∧ IsOfFrobeniusIsotropicType (unTrPre (ModelData.modelPre (ex63Hyp F Kbar))
-          (ModelData.model_frobenioid (ex63Hyp F Kbar)).core) :=
+          (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+      ∧ IsOfIsotropicType (unTrPre (ModelData.modelPre (ex63Hyp F Kbar))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+      ∧ IsOfIsotropicType
+          (unTrPre (pfRootPre (ModelData.modelPre (ex63Hyp F Kbar))
+              (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+            (pfRootCore (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+              (isOfFrobeniusIsotropicType_of_isotropic
+                (ModelData.model_isotropicType (ex63Hyp F Kbar))))) :=
   ModelIso.model_isotropic_family (ex63Hyp F Kbar)
 
 end Ex63
