@@ -582,4 +582,54 @@ def normMapGeom_naturality.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.normMap_eq_normMapOfBase") 110,
     .derivation "体の側の立方体を四角形へ送るだけ" 110 ]
 
+/-! ## ★6. `ModelDataHomOver` に渡す形 -/
+
+section Bundle
+
+variable {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+  {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+  [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+
+variable (DK₁ : Set (PrimeDivisorPt V₁)) (DK₂ : Set (PrimeDivisorPt V₂))
+  (L : FinSub V₁.functionField Kbar₁) (FL : FinSub V₂.functionField Kbar₂)
+  [IsLocallyNoetherian (normObj V₁ L)] [IsLocallyNoetherian (normObj V₂ FL)]
+  (π : normObj V₂ FL ⟶ normObj V₁ L) [IsDominant π]
+  (hdim : ∀ w : PrimeDivisorPt (normObj V₂ FL),
+    ringKrullDim ((normObj V₁ L).presheaf.stalk (π.base w.1)) ≤ 1)
+  (hpull : ∀ w : PrimeDivisorPt (normObj V₂ FL), w ∉ DLSet V₂ DK₂ FL →
+    ∀ hc : IsCodimOnePt (normObj V₁ L) (π.base w.1),
+      (⟨π.base w.1, hc⟩ : PrimeDivisorPt (normObj V₁ L)) ∉ DLSet V₁ DK₁ L)
+
+/-- ★★**`B₁(L) → B₂(L₂)` を加法的に書いたもの** ——
+`ModelDataHomOver.bmonHom` がそのまま要求する形(`bmon.val` は `Additive`)。 -/
+noncomputable def bPullBaseAdd :
+    Additive (BSubgroup V₁ DK₁ L (normObj_isNormalScheme V₁ L))
+      →+ Additive (BSubgroup V₂ DK₂ FL (normObj_isNormalScheme V₂ FL)) :=
+  AddMonoidHom.mk'
+    (fun x => Additive.ofMul (bPullBase DK₁ DK₂ L FL π hdim hpull (Additive.toMul x)))
+    (fun x y => by
+      show Additive.ofMul (bPullBase DK₁ DK₂ L FL π hdim hpull
+          (Additive.toMul x * Additive.toMul y)) = _
+      rw [map_mul]
+      rfl)
+
+@[simp] theorem bPullBaseAdd_val
+    (x : Additive (BSubgroup V₁ DK₁ L (normObj_isNormalScheme V₁ L))) :
+    ((Additive.toMul (bPullBaseAdd DK₁ DK₂ L FL π hdim hpull x)
+        : BSubgroup V₂ DK₂ FL (normObj_isNormalScheme V₂ FL))
+      : ((normObj V₂ FL).functionField)ˣ)
+      = Units.map (ffMap π).hom.toMonoidHom
+        ((Additive.toMul x : BSubgroup V₁ DK₁ L _) : ((normObj V₁ L).functionField)ˣ) := rfl
+
+end Bundle
+
+def bPullBaseAdd.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — B₁ → B₂|𝒟₁ を加法的に書いたもの",
+    sectionId := "frdi-thm-6-2" }
+
+def bPullBaseAdd.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "bPullBase"
+      (.inProject "ABC3" "ABC3.Found.Divisor.bPullBase") 110 ]
+
 end ABC3.Found.Divisor
