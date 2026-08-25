@@ -2,6 +2,8 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Prop55RlfRefl
+import ABC3.Found.FrdI.Def24SuppIntr
+import ABC3.Found.FrdI.Def24PfTransport
 
 /-!
 # [FrdI] §0 —— `Prime(M) → Prime(M^rlf)` は全単射
@@ -214,7 +216,181 @@ theorem primeToSc_bijective : Function.Bijective (primeToSc H hperf hdiv) := by
     have haP : IsPrimaryElt a := isPrimaryElt_of_toSc H hperf hdiv hsc
     exact ⟨toPrime M a haP, Quotient.sound h2⟩
 
+/-! ## ★5. 台の対応
+
+★`SuppElt ι a` は **`ι` を含まない条件**と同値である
+(`mem_supp_factorMap_iff`、在庫)。したがって `M^rlf` の側では
+`ι` を**指示関数**に取ってよく、両側とも
+
+    ∃ 素元 `a` の類が `p` で `a ⪯ c`
+
+という同じ形に落ちる。 -/
+
+section Supp
+
+variable {N : Type w} [AddCommMonoid N]
+
+open Classical in
+/-- ★★**指示関数の `ι`** —— `M^rlf` の側で `SuppElt` を書くための取り方。
+
+★`SuppElt` は `ι` を含まない条件と同値(`mem_supp_factorMap_iff`)なので、
+`ι` の取り方は結論に影響しない。 -/
+noncomputable def iotaInd (N : Type w) [AddCommMonoid N] : Prime N → Pf N → ℝ≥0 :=
+  fun _ z => if z = 0 then 0 else 1
+
+theorem iotaInd_apply (q : Prime N) (z : Pf N) [Decidable (z = 0)] :
+    iotaInd N q z = if z = 0 then 0 else 1 := by
+  unfold iotaInd; congr 1
+
+theorem iotaInd_eq_zero {q : Prime N} {z : Pf N} (h : z = 0) : iotaInd N q z = 0 := by
+  classical
+  rw [iotaInd_apply, if_pos h]
+
+theorem iotaInd_eq_one {q : Prime N} {z : Pf N} (h : z ≠ 0) : iotaInd N q z = 1 := by
+  classical
+  rw [iotaInd_apply, if_neg h]
+
+theorem iotaInd_le_one (q : Prime N) (z : Pf N) : iotaInd N q z ≤ 1 := by
+  classical
+  rcases eq_or_ne z 0 with h | h
+  · rw [iotaInd_eq_zero h]; exact zero_le_one
+  · rw [iotaInd_eq_one h]
+
+/-- ★★★**指示関数の `ι` での `SuppElt` は `ι` を含まない条件そのもの**。 -/
+theorem mem_suppElt_iotaInd (x : N) (q : Prime N) :
+    q ∈ SuppElt (iotaInd N) x ↔ ∃ z ∈ Bound (Pf N) (pCarrierPf N q) (Pf.of x), z ≠ 0 := by
+  classical
+  have hbdd : BddAbove ((iotaInd N q) '' Bound (Pf N) (pCarrierPf N q) (Pf.of x)) := by
+    refine ⟨1, ?_⟩
+    rintro _ ⟨y, -, rfl⟩
+    exact iotaInd_le_one q y
+  constructor
+  · intro hq
+    by_contra hc
+    simp only [not_exists, not_and, Classical.not_not] at hc
+    refine hq ?_
+    show boundSup (iotaInd N q) (pCarrierPf N q) (Pf.of x) = 0
+    refine le_antisymm ?_ bot_le
+    refine boundSup_le (iotaInd N q) (zero_mem_pCarrierPf q) (Pf.of x) ?_
+    intro z hz
+    exact le_of_eq (iotaInd_eq_zero (hc z hz))
+  · rintro ⟨z, hz, hz0⟩ hcon
+    have hcon' : boundSup (iotaInd N q) (pCarrierPf N q) (Pf.of x) = 0 := hcon
+    have h1 : iotaInd N q z ≤ boundSup (iotaInd N q) (pCarrierPf N q) (Pf.of x) :=
+      le_boundSup (iotaInd N q) _ (Pf.of x) hbdd hz
+    rw [hcon', le_zero_iff, iotaInd_eq_one hz0] at h1
+    exact one_ne_zero h1
+
+/-- ★`Pf` では `n •` は全射(`Pf.mk` の分母を掛ければよい)。 -/
+theorem Pf.nsmul_surjective (n : ℕ+) :
+    Function.Surjective (fun x : Pf N => ((n : ℕ+) : ℕ) • x) := by
+  intro y
+  induction y using Pf.inductionOn with
+  | _ m k =>
+      refine ⟨Pf.mk m (n * k), ?_⟩
+      show ((n : ℕ+) : ℕ) • Pf.mk m (n * k) = Pf.mk m k
+      rw [Pf.nsmul_mk]
+      exact Pf.mk_smul_cancel m n k
+
+/-- ★`Pf` では `n •` は `MLe` を反射する。 -/
+theorem Pf.mle_of_nsmul (n : ℕ+) {x y : Pf N}
+    (h : MLe (((n : ℕ+) : ℕ) • x) (((n : ℕ+) : ℕ) • y)) : MLe x y := by
+  obtain ⟨c, hc⟩ := h
+  obtain ⟨c', rfl⟩ := Pf.nsmul_surjective (N := N) n c
+  refine ⟨c', Pf.nsmul_injective n ?_⟩
+  show ((n : ℕ+) : ℕ) • (x + c') = ((n : ℕ+) : ℕ) • y
+  rw [smul_add]
+  exact hc
+
+theorem mle_nsmul_nsmul (n : ℕ) {x y : N} (h : MLe x y) : MLe (n • x) (n • y) := by
+  obtain ⟨c, hc⟩ := h
+  exact ⟨n • c, by rw [← smul_add, hc]⟩
+
+/-- ★★★★**`Bound` の非零元の存在は `⪯` で書ける**。
+
+★`pCarrierPf` の元は分母を払うと `primeCarrier` の元になるので、
+`Pf` の可除性(`Pf.mle_of_nsmul`)で行き来できる。 -/
+theorem exists_bound_ne_zero_iff (htf : IsTorsionFreeNaive N) (q : Prime N) (c : N) :
+    (∃ z ∈ Bound (Pf N) (pCarrierPf N q) (Pf.of c), z ≠ 0)
+      ↔ ∃ a ∈ primeCarrier N q, MPrec a c := by
+  constructor
+  · rintro ⟨z, ⟨hzc, hzle⟩, hz0⟩
+    rcases hzc with ⟨n, b, hb, hn⟩ | hz
+    · refine ⟨b, hb, ?_⟩
+      refine mprec_pf_of_iff.mp ⟨((n : ℕ+) : ℕ), n.2, ?_⟩
+      have h1 : MLe (((n : ℕ+) : ℕ) • z) (((n : ℕ+) : ℕ) • Pf.of c) :=
+        mle_nsmul_nsmul _ hzle
+      rwa [hn] at h1
+    · exact absurd hz hz0
+  · rintro ⟨a, ha, n, hn, c₀, hc₀⟩
+    refine ⟨Pf.mk a ⟨n, hn⟩, ⟨Or.inl ⟨⟨n, hn⟩, a, ha, Pf.nsmul_mk_self a ⟨n, hn⟩⟩, ?_⟩, ?_⟩
+    · refine Pf.mle_of_nsmul ⟨n, hn⟩ ?_
+      rw [Pf.nsmul_mk_self a ⟨n, hn⟩]
+      show MLe (Pf.of a) (n • Pf.of c)
+      refine ⟨Pf.of c₀, ?_⟩
+      rw [← map_add, hc₀, map_nsmul]
+    · intro h0
+      obtain ⟨k, hk⟩ := (Pf.mk_eq_zero_iff a ⟨n, hn⟩).mp h0
+      obtain ⟨hap, -⟩ := ha
+      exact hap.1 (htf a ((k : ℕ+) : ℕ) k.2 hk)
+
+end Supp
+
+/-- ★`M^rlf` は torsion-free(片道の橋の先 `Prime M → ℝ≥0` がそうだから)。 -/
+theorem isTorsionFreeNaive_scT (H : IsPerfFactorialWith M ι) (hdiv : IsDivisorial M) :
+    IsTorsionFreeNaive (ScT ℝ≥0 M) := by
+  intro w n hn hnw
+  refine scToFactor_eq_zero H hdiv (funext fun p => ?_)
+  have hn0 : ((n : ℝ≥0)) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have h1 : n • scToFactor H w = 0 := by rw [← map_nsmul, hnw, map_zero]
+  have h2 := congrFun h1 p
+  rw [Pi.smul_apply, Pi.zero_apply, nsmul_eq_mul] at h2
+  exact (mul_eq_zero.mp h2).resolve_left hn0
+
+/-- ★★★★★★**台は `toSc` でちょうど移る**。
+
+★左辺は指示関数で書いた `M^rlf` の側の台、右辺は `M` の側の台。
+`SuppElt` は `ι` を含まない条件と同値(`mem_supp_factorMap_iff`)なので、
+両側とも「類が `p` の素元で `⪯ c` なものの存在」に落ちる。
+
+★★これが `Def24PfTransport.lean` の `mem_suppElt_iotaPf` に当たるものである。 -/
+theorem mem_suppElt_primeToSc (H : IsPerfFactorialWith M ι) (hperf : IsPerfectMonoid M)
+    (hdiv : IsDivisorial M) (c : M) (p : Prime M) :
+    primeToSc H hperf hdiv p ∈ SuppElt (iotaInd (ScT ℝ≥0 M)) (toSc (S := ℝ≥0) c)
+      ↔ p ∈ SuppElt ι c := by
+  classical
+  have htfM : IsTorsionFreeNaive M := isTorsionFreeNaive_of_divisorial hdiv
+  rw [mem_suppElt_iotaInd, exists_bound_ne_zero_iff (isTorsionFreeNaive_scT H hdiv),
+    suppElt_eq, mem_supp_factorMap_iff H, exists_bound_ne_zero_iff htfM]
+  constructor
+  · rintro ⟨w, ⟨hwp, hwe⟩, hwc⟩
+    obtain ⟨a, ha0, h1, h2⟩ := exists_toSc_mprec_of_primary H hdiv hwp
+    have hsc : IsPrimaryElt (toSc (S := ℝ≥0) a) :=
+      isPrimaryElt_of_mprec_equiv hwp (toSc_ne_zero H hdiv ha0) h1 h2
+    have haP : IsPrimaryElt a := isPrimaryElt_of_toSc H hperf hdiv hsc
+    have hac : MPrec (toSc (S := ℝ≥0) a) (toSc (S := ℝ≥0) c) := mprec_trans h2 hwc
+    have hpa : toPrime M a haP = p := by
+      refine (primeToSc_bijective H hperf hdiv).1 ?_
+      rw [primeToSc_mk, ← hwe]
+      exact Quotient.sound h2
+    have hsub : SuppElt ι a ⊆ SuppElt ι c := suppElt_subset_of_mprec_sc H hac
+    have hpS : SuppElt ι a = {p} := by
+      rw [← hpa]
+      exact suppElt_eq_singleton_toPrime H hperf hdiv haP
+    have hpc : p ∈ SuppElt ι c := hsub (by rw [hpS]; exact rfl)
+    rw [suppElt_eq, mem_supp_factorMap_iff H, exists_bound_ne_zero_iff htfM] at hpc
+    exact hpc
+  · rintro ⟨a, ⟨haP, hae⟩, hac⟩
+    refine ⟨toSc (S := ℝ≥0) a, ⟨isPrimaryElt_toSc_of_primary H hperf hdiv haP, ?_⟩,
+      mprec_map _ hac⟩
+    rw [← hae, primeToSc_mk]
+
 /-! ### ★出典の紐付け -/
+
+def mem_suppElt_primeToSc.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 48,
+    item := "Definition 2.4, (i), (d) — 台は M → M^rlf でちょうど移る",
+    sectionId := "frdi-def-2-4" }
 
 def primeToSc.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 12,
