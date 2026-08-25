@@ -891,6 +891,7 @@ import ABC3.Found.GaloisRep.EllipticLiouville
 import ABC3.Found.GaloisRep.EllipticConst
 import ABC3.Found.GaloisRep.WeierstrassPole
 import ABC3.Found.GaloisRep.WeierstrassPoleForm
+import ABC3.Found.GaloisRep.WeierstrassQuotient
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

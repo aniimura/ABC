@@ -22006,3 +22006,51 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-558 ★★★★★★★格子点での正則延長 —— 相殺を「商の形」で(第 245 ブロック)
+
+`Found/GaloisRep/WeierstrassQuotient.lean`。
+
+第 244 の `pole_cancel_factor` は多項式の恒等式だった。本ブロックはそれを
+**除算のある形**に翻訳し、`℘`・`℘'` に代入して
+
+    (1/4) ((℘'(z) - c')/(℘(z) - c))^2 - ℘(z)
+
+が**格子点 `l0` のまわりで解析的な関数に一致する**ことを示した
+(`exists_analytic_quotient_sub`)。`c := ℘(w)`、`c' := ℘'(w)` は定数でよい。
+
+### ★★★★★★★段取り
+
+`t := z - l0`、`alpha := D z - c'`、`beta := E z - c` として第 244 の形に合わせる:
+
+| 補題 | 内容 |
+|---|---|
+| `quotient_pole_form` | `(-2/t^3 + alpha)/(1/t^2 + beta) = (-2 + t^3 alpha)/(t(1 + t^2 beta))` |
+| `sq_quotient_sub_pole` | `(1/4)(...)^2 - 1/t^2 = R/(4(1 + t^2 beta)^2)` |
+| `exists_analytic_quotient_sub` | ★★★★★★★上を `℘` に代入し `1/t^2` を消す |
+
+`℘(z) = 1/t^2 + E z` を引くと `1/t^2` が消えて
+
+    g z := R z /(4 (1 + t^2 beta)^2) - E z
+
+が残る。`R`・`E` は `l0` で解析的、分母は `l0` で `4 != 0` なので `g` は解析的。
+
+### ★分母が消えないことは `∀ᶠ` で持つ
+
+`1 + t^2 beta` は `l0` で `1` なので、**`l0` の近傍で** `!= 0` である。
+等式を全 `z` で主張せず `∀ᶠ z in 𝓝 l0` の形にすることで、
+余計な仮定を呼び出し側に押し付けずに済んだ。`ContinuousAt.eventually_ne` を使う。
+
+### ★★★これが 3 種類の悪い点をまとめて処理する
+
+加法定理
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+の見かけの極は `z in L`、`z in L - w`、`z = w (mod L)` の 3 種類だが、
+どれも**同じ商の形**に帰着する。本ブロックの `exists_analytic_quotient_sub` は
+そのうち第 1 種(`z in L`)をそのまま与え、残る 2 種も同じ補題の平行移動で出る。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
