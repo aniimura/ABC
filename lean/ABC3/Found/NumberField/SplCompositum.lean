@@ -272,6 +272,13 @@ theorem le_of_SplQ_subset (L M : IntermediateField ℚ Ω)
   rw [hMeq]
   exact le_sup_left
 
+/-- ★★★★★★★**完全分解する素数の集合が体を決める**(等号版)——
+`Theorem 6.4, (iv)` の「`L₁ ≅ L₂`」の中身。 -/
+theorem eq_of_SplQ_eq (L M : IntermediateField ℚ Ω)
+    (hL : IsGalois ℚ ↥L) (hM : IsGalois ℚ ↥M) (h : SplQ ↥L = SplQ ↥M) : L = M :=
+  le_antisymm (le_of_SplQ_subset L M hL hM (h ▸ subset_rfl))
+    (le_of_SplQ_subset M L hM hL (h ▸ subset_rfl))
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `cheb-spl-det` の第 2 段。 -/
