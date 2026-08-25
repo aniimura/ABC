@@ -145,6 +145,31 @@ noncomputable def otimesModelEquiv (h : M.Hyp) (A : Obj M) :
     rw [hbase2, hdeg]
     simp [MonoidOn.map_id]
 
+/-! ## ★4. `𝒪^▷(A)` の側 -/
+
+/-- ★★**`𝒪^▷(A)` の元は `Div = Div_B(u)`**(群化の中で)。
+
+★★`𝒪^×` と違って**可逆性を課さない**ので `Div` は `0` とは限らない。
+原文の `𝒪^×(A) = 𝒪^▷(A)` は「`Div` が有効なら `0` になる」ということである。 -/
+theorem toGp_div_eq_divB_of_mem_otri (h : M.Hyp) {A : Obj M} (φ : OTri (modelPre h) A) :
+    toGpHom _ (φ : End A).div = M.divB A.base (φ : End A).u := by
+  obtain ⟨hb, hlin⟩ := φ.2
+  have hbase : (φ : End A).base = 𝟙 A.base := hb
+  have hdeg : (φ : End A).deg = 1 := hlin
+  have hc := (φ : End A).cond
+  rw [hbase, hdeg] at hc
+  simp only [PNat.one_coe, one_smul] at hc
+  rw [gpMapOn_id] at hc
+  exact add_left_cancel hc
+
+/-- ★★**`Base = 𝟙`・`deg_Fr = 1`・`Div = 0` なら `𝒪^×` に入る**。 -/
+theorem mem_otimes_of_div_eq_zero (h : M.Hyp) {A : Obj M} (φ : End A)
+    (hb : φ.base = 𝟙 A.base) (hlin : φ.deg = 1) (hdiv : φ.div = 0) :
+    φ ∈ OTimes (modelPre h) A := by
+  refine ⟨⟨hb, hlin⟩, ?_⟩
+  refine (isUnit_iff_isIso _).mpr ((model_isIso_iff h _).mpr ⟨?_, hdiv, hlin⟩)
+  rw [hb]; infer_instance
+
 @[simp] theorem otimesModelEquiv_apply (h : M.Hyp) (A : Obj M) (φ : OTimes (modelPre h) A) :
     ((Multiplicative.toAdd (otimesModelEquiv h A φ) : unitSub M A) : M.bmon.val A.base)
       = (φ : End A).u := rfl
@@ -168,6 +193,23 @@ def unitSub.src : Source :=
   { paper := "FrdI", pdfPage := 100,
     item := "Theorem 5.2 — Div_B の核",
     sectionId := "frdi-thm-5-2" }
+
+def toGp_div_eq_divB_of_mem_otri.src : Source :=
+  { paper := "FrdI", pdfPage := 100,
+    item := "Theorem 5.2 — 𝒪^▷(A) の元は Div = Div_B(u)",
+    sectionId := "frdi-thm-5-2" }
+
+def toGp_div_eq_divB_of_mem_otri.needs : List ProofObligation :=
+  [ .derivation "Base = 𝟙・deg_Fr = 1 を射の条件式に入れて Gp の中で消去する" 100 ]
+
+def mem_otimes_of_div_eq_zero.src : Source :=
+  { paper := "FrdI", pdfPage := 100,
+    item := "Theorem 5.2 — Div = 0 なら 𝒪^× に入る",
+    sectionId := "frdi-thm-5-2" }
+
+def mem_otimes_of_div_eq_zero.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "model_isIso_iff"
+      (.inProject "ABC3" "ABC3.Found.FrdI.ModelData.model_isIso_iff") 100 ]
 
 end ModelData
 

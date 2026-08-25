@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Divisor.SchemeHartogs
 import ABC3.Found.Divisor.Ex61Model
+import ABC3.Found.FrdI.Thm52Otimes
 
 /-!
 # [FrdI] Example 6.1 —— `𝒪^×(A) = 𝒪^▷(A) = k_L^×`(鎖 `normalize` の `ex61-units`)
@@ -64,6 +65,26 @@ theorem ordPt_eq_zero_of_globalUnit {X : Scheme.{u}} [IsIntegral X] [IsLocallyNo
   have hgm := germ_algebraMap_functionField (X := X) ⊤ w.1 trivial t
   rw [← hgm, ← hu.unit_spec]
   exact ordPt_eq_zero_of_isUnit hnorm w hu.unit
+
+/-- ★★★**`ord ≥ 0` がすべてなら `ord = 0` がすべて**(proper normal のとき)。
+
+★Hartogs で `Γ(X,⊤)` に入り、`Γ(X,⊤)` は体なので単元、単元なら `ord = 0`。
+★★これが `𝒪^▷(A) = 𝒪^×(A)`(可逆性を課さなくても可逆になる)の中身である。 -/
+theorem forall_ordPt_eq_zero_of_forall_nonneg {X : Scheme.{u}} [IsIntegral X]
+    [IsLocallyNoetherian X] {k : Type u} [Field k]
+    (g : X ⟶ Spec (CommRingCat.of k)) (hg : IsProper g)
+    (hnorm : IsNormalScheme X)
+    (hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (hic : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsIntegrallyClosed Γ(X, U))
+    (u : X.functionField) (hu : u ≠ 0)
+    (h : ∀ x : PrimeDivisorPt X, 0 ≤ ordPt X hnorm x u) :
+    ∀ x : PrimeDivisorPt X, ordPt X hnorm x u = 0 := by
+  obtain ⟨t, ht⟩ := mem_range_germ_top_of_forall_ordPt_nonneg hnorm hnoeth hic u h
+  letI := (globalSections_isField g hg).toField
+  have htne : t ≠ 0 := fun h0 => hu (by rw [← ht, h0, map_zero])
+  intro x
+  rw [← ht]
+  exact ordPt_eq_zero_of_globalUnit hnorm t (isUnit_iff_ne_zero.mpr htne) x
 
 /-! ## ★2. `Div_B(u) = 0` は「すべての余次元 1 の点で `ord = 0`」 -/
 
@@ -138,6 +159,83 @@ theorem divBHom_eq_zero_of_globalUnit (L : FinSub V.functionField Kbar)
   rw [ordPt_eq_zero_of_globalUnit (normObj_isNormalScheme V L) t ht s.1]
   rfl
 
+/-! ## ★5. `𝒪^▷(A) = 𝒪^×(A)`
+
+原文 (FrdI p.110):
+> where kL denotes the algebraic closure of k in L [so kL is a finite separable extension
+-/
+
+section Otri
+
+variable [IsGalois V.functionField Kbar]
+  (hkq : IsKQCartier V DK
+    (fun (L : FinSub V.functionField Kbar) _ => normObj_isNormalScheme V L))
+
+/-- ★`Example 6.1` の model Frobenioid の仮説束。 -/
+theorem ex61Hyp : (ex61ModelData V DK hkq).Hyp :=
+  (cartierDatumGeom V DK hkq).modelHyp finSubOp_isOfFSMType (bmonGeom V DK)
+    (fun A => divBGeom V DK hkq A) (fun f x => divBGeom_nat V DK hkq f x)
+    (bmonGeom_isGroupLike V DK) finSubOp_totallyEpimorphic finSubOp_isConnected
+
+open ModelData in
+/-- ★★★★★★**[FrdI] Example 6.1 —— `𝒪^▷(A) = 𝒪^×(A)`**。
+
+★`𝒪^▷(A)` は可逆性を課さないので `Div` は有効因子でしかないが、
+`Div = Div_B(u)` と `u ∈ B(L)` から**すべての**余次元 1 の点で `ord(u) ≥ 0` が出る。
+`V[L]` が proper normal なので(Hartogs ＋ `Γ(V[L],⊤)` が体)`u` は単元、
+したがって `ord(u) = 0`、すなわち `Div = 0` で `φ` は可逆になる。
+
+★★これで原文の `𝒪^×(A) = 𝒪^▷(A) = k_L^×` の 3 つの等号が揃う。 -/
+theorem ex61_otri_le_otimes (A : ModelData.Obj (ex61ModelData V DK hkq))
+    {k : Type u} [Field k]
+    (g : normObj V A.base.unop ⟶ Spec (CommRingCat.of k)) (hg : IsProper g)
+    (hnoeth : ∀ U : (normObj V A.base.unop).Opens, IsAffineOpen U → Nonempty U →
+      IsNoetherianRing Γ(normObj V A.base.unop, U))
+    (hic : ∀ U : (normObj V A.base.unop).Opens, IsAffineOpen U → Nonempty U →
+      IsIntegrallyClosed Γ(normObj V A.base.unop, U)) :
+    OTri (modelPre (ex61Hyp V DK hkq)) A ≤ OTimes (modelPre (ex61Hyp V DK hkq)) A := by
+  rintro ψ hψ
+  -- ★段 1: `Div = Div_B(u)` を `Γ` の中で
+  have hdiv : effSubIncl ((cartierDatumGeom V DK hkq).grp A.base) (ψ.div)
+      = divBHom V DK A.base.unop (ψ.u) := by
+    have hkey : toGp (((cartierDatumGeom V DK hkq).phi finSubOp_isOfFSMType).val A.base)
+        (ψ.div) = divBGeom V DK hkq A.base (ψ.u) := by
+      have h0 := ModelData.toGp_div_eq_divB_of_mem_otri (ex61Hyp V DK hkq) ⟨ψ, hψ⟩
+      rw [toGpHom_apply] at h0
+      exact h0
+    have happ := congrArg (phiGpHomC (cartierDatumGeom V DK hkq) finSubOp_isOfFSMType) hkey
+    rw [phiGpHomC_divBGeom, phiGpHomC_toGp'] at happ
+    exact happ
+  -- ★段 2: すべての余次元 1 の点で `ord ≥ 0`
+  have hnn : ∀ w : PrimeDivisorPt (normObj V A.base.unop),
+      0 ≤ ordPt (normObj V A.base.unop) (normObj_isNormalScheme V A.base.unop) w
+        (((Additive.toMul ψ.u : BSubgroup V DK A.base.unop _)
+          : ((normObj V A.base.unop).functionField)ˣ)
+            : (normObj V A.base.unop).functionField) := by
+    intro w
+    by_cases hw : w ∈ DLSet V DK A.base.unop
+    · have h1 := divBHom_apply V DK A.base.unop (ψ.u) ⟨w, hw⟩
+      rw [← hdiv] at h1
+      rw [← h1]
+      exact ψ.div.2.2 ⟨w, hw⟩
+    · exact le_of_eq ((Additive.toMul ψ.u : BSubgroup V DK A.base.unop _).2 w hw).symm
+  -- ★段 3: proper normal なので `ord = 0`
+  have hz := forall_ordPt_eq_zero_of_forall_nonneg g hg
+    (normObj_isNormalScheme V A.base.unop) hnoeth hic _
+    (((Additive.toMul ψ.u : BSubgroup V DK A.base.unop _)
+      : ((normObj V A.base.unop).functionField)ˣ)).ne_zero hnn
+  -- ★段 4: `Div = 0` ゆえ可逆
+  have hdb : divBHom V DK A.base.unop (ψ.u) = 0 := by
+    refine Subtype.ext (Finsupp.ext fun s => ?_)
+    rw [divBHom_apply V DK A.base.unop, hz s.1]
+    rfl
+  have h2 : effSubIncl ((cartierDatumGeom V DK hkq).grp A.base) (ψ.div) = 0 := by
+    rw [hdiv]; exact hdb
+  rw [Subtype.ext_iff] at h2
+  exact ModelData.mem_otimes_of_div_eq_zero _ ψ hψ.1 hψ.2 (Subtype.ext h2)
+
+end Otri
+
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
 def exists_globalUnit_of_divBHom_eq_zero.src : Source :=
@@ -176,5 +274,39 @@ def ordPt_eq_zero_of_globalUnit.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.ordPt_eq_zero_of_isUnit") 110,
     .citation "[mathlib]" "TopCat.Presheaf.germ_stalkSpecializes"
       (.inMathlib "TopCat.Presheaf.germ_stalkSpecializes") 110 ]
+
+def ex61_otri_le_otimes.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Example 6.1 — O^▷(A) = O^×(A)",
+    sectionId := "frdi-example-6-1" }
+
+def ex61_otri_le_otimes.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "toGp_div_eq_divB_of_mem_otri(𝒪^▷ の元は Div = Div_B(u))"
+      (.inProject "ABC3" "ABC3.Found.FrdI.ModelData.toGp_div_eq_divB_of_mem_otri") 110,
+    .citation "[ABC3]" "forall_ordPt_eq_zero_of_forall_nonneg(Hartogs ＋ Γ(X,⊤) は体)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.forall_ordPt_eq_zero_of_forall_nonneg") 110,
+    .citation "[ABC3]" "mem_otimes_of_div_eq_zero(Div = 0 なら可逆)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.ModelData.mem_otimes_of_div_eq_zero") 110,
+    .derivation "Div が有効因子なので ord ≥ 0、proper normal なら単元、よって ord = 0 で Div = 0" 110 ]
+
+def forall_ordPt_eq_zero_of_forall_nonneg.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Example 6.1 — ord ≥ 0 がすべてなら ord = 0 がすべて",
+    sectionId := "frdi-example-6-1" }
+
+def forall_ordPt_eq_zero_of_forall_nonneg.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "mem_range_germ_top_of_forall_ordPt_nonneg(Hartogs のスキーム版)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.mem_range_germ_top_of_forall_ordPt_nonneg") 110,
+    .citation "[ABC3]" "globalSections_isField"
+      (.inProject "ABC3" "ABC3.Found.Divisor.globalSections_isField") 110 ]
+
+def ex61Hyp.src : Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — model Frobenioid の仮説束",
+    sectionId := "frdi-example-6-1" }
+
+def ex61Hyp.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "cartierDatumGeom(幾何から CartierDatum)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.cartierDatumGeom") 109 ]
 
 end ABC3.Found.Divisor
