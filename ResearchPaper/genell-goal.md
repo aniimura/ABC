@@ -22359,3 +22359,54 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-564 ★★★★★★共線性の万有な環 —— `ℤ[U,V,W]`(第 251 ブロック)
+
+`Found/GaloisRep/CollUniversal.lean`。
+
+第 223 の `ℤ[A,W]` を 3 変数にしたもの。`q = U V W` で、3 点は
+`(U, VW)`, `(V, UW)`, `(W, UV)`。
+
+★分母になるのは **6 つの「底」**——`U, V, W, VW, UW, UV`——とその `Q^{m+1}` 倍。
+
+    collDenomBases : Fin 6 -> CollBase := ![U, V, W, VW, UW, UV]
+    collDenomSet := range (fun i => 1 - 底 i)
+                    ∪ range (fun (m,i) => 1 - Q^{m+1} 底 i)
+
+★★**`Fin 6` で添字づけた**ので、単元性の場合分けが **2 通り**で済む。
+6 個を素直に並べて書いていたら 7 個の `∪` に対して 7 通りの `rcases` になっていた。
+第 223 は 3 通りだったが、そこから増えなかった。
+
+### ★★特殊化に要る仮定
+
+    ∀ i, IsUnit (1 - collPts u v w i)      (collPts u v w = ![u, v, w, vw, uw, uv])
+
+これは「3 点のどれも原点でなく、どの 2 点の和も原点でない」という条件である。
+★Tate 一意化の準同型性を述べるときの自然な非退化条件にあたる。
+
+### ★★★★★★★★帰着の形
+
+    collDefect u v w q = 0
+      <= ∀ n, (kU kV kW)^n | collDefectTrunc n kU kV kW (kU kV kW)
+
+★残るのは**万有な環での整除性ひとつ**である。第 223 の
+`tateDefect_eq_zero_of_univ` と同じ形になった。
+
+| 定理 | 内容 |
+|---|---|
+| `CollUniv` | ★★★★★共線性の万有な環 |
+| `collEval`・`collSpecialize` | ★★★★★★特殊化 |
+| `collUnits_k` | ★★万有な環の側では 12 個の単元条件が自動で成り立つ |
+| `collDefect_eq_zero_of_univ` | ★★★★★★★★**万有な環での整除性ひとつに帰着** |
+
+### 残り
+
+1. `U`・`V`・`W` の素性と `IsRelPrime`(第 224 の 3 変数化)。
+   ★対称性(§9-563)で `U` 側だけ示せばよい。
+2. ℂ 側の評価——第 231 の `norm_tateXanalytic_sub_trunc` が
+   **3 点それぞれにそのまま使える**(どの点でも相方との積の norm が `‖q‖`)。
+3. 第 236 の `X_pow_dvd_of_norm_le` と第 238-240 の降下。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
