@@ -21615,3 +21615,49 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-550 ★★★★★★★`w` を自由にした(第 237 ブロック)
+
+`Found/GaloisRep/TateUWFree.lean`。
+
+第 235 の評価は `z, tau : H` の言葉で書かれている。しかし第 236 の
+「`‖f(w)‖ <= C‖w‖^m` なら `X^m | f`」を当てるには、
+**`w` を小さい円板の中で自由に動かせる**必要がある。
+
+### ★★★`0 < ‖w‖ < 1` は上半平面から来る
+
+`w' = log w / (2 pi i)` とおけば `im w' = -log‖w‖/(2 pi) > 0`(`exists_uh_exp_eq`)。
+`tau := z + w'` とすれば `im z < im tau` で `subUH z tau = w'`、よって
+`exp(2 pi i subUH) = w`、`exp(2 pi i tau) = u w` となる。
+★これで第 235 が `(u, w)` の言葉になった(`norm_tateDefectTrunc_uw_le`)。
+
+★★`w'` の虚部の計算は `t = -i log w/(2 pi)` から `im t = -(log w).re/(2 pi)` で、
+`Complex.log_re : (log x).re = Real.log ‖x‖` を使う。`Complex.div_im` を展開してから
+`simp [Complex.normSq_apply]; field_simp` が通る形だった。
+
+### ★★★★分子を `w` の多項式と見る
+
+`P in Z[A,W]` を `A -> u`(定数)、`W -> X` で `C[w]` に送る(`evalW`)。
+`w` を代入すれば `tateEval u w P` に戻る(`eval_evalW`)。
+★示し方は `MvPolynomial.ringHom_ext`——**`C` と `X i` での一致で環準同型が決まる**。
+`fin_cases i` で `X 0`・`X 1` を潰す。
+
+| 定理 | 内容 |
+|---|---|
+| `evalW` / `eval_evalW` | ★★★★分子を `w` の多項式と見る |
+| `exists_uh_exp_eq` | ★★★`0 < ‖w‖ < 1` は上半平面から来る |
+| `addUH` / `subUH_addUH` | ★`tau := z + w'` の配線 |
+| `norm_tateDefectTrunc_uw_le` | ★★★★★★★**評価の `(u,w)` 形** |
+
+### ★残り
+
+1. 第 225 の `tateEval_numerator` と本ブロックを合わせて
+   `‖(evalW u P).eval w‖ <= C ‖w‖^{n+1}`
+2. 第 236 の `coeff_eq_zero_of_norm_le` で `(evalW u P).coeff j = 0`(`j <= n`)
+3. `u` を無限個動かして `Z[A,W]` の係数が 0 ==> `W^{n+1} | P`
+4. 対称性(`Equiv.swap` による rename)で `A^{n+1} | P`
+5. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
