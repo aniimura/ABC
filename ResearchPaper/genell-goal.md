@@ -23939,3 +23939,55 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-594 ★★★★★★★★全領域で成り立つ反転則(第 281 ブロック)
+
+`Found/GaloisRep/TateInversion.lean`。
+
+### ★★★★★★★★到達点
+
+> `u` が単元なら **`P(1/u) = -P(u)`**(`tate_point_ringInverse_eq_neg`)
+
+★★★`1 - u` が単元である必要が**無い**——原点近傍でも成り立つ。
+準同型性の退化した場合(`c2 = c1^{-1}`)と倍化の補助母数の議論に要る。
+
+### ★★★★★★分母を払えば反転則も通る
+
+`f(1/t) = f(t)`・`g(1/t) = -g(t) - f(t)` は `1 - t` が単元でないと書けない
+(`Ring.inverse (1-t)` が意味を持たない)。★★しかし**分母を払った形なら通る**:
+
+    XE(1/u, qu) = XE(u, q/u) (1/u)^2
+    YE(1/u, qu) = (1/u)^3 ((1-u) XE(u, q/u) + YE(u, q/u))
+
+★★★`1 - 1/u = -(1-u)/u` なので `(1-1/u)^2 = (1-u)^2/u^2`——**分母の変換も `u` の冪だけ**。
+これを `K` で割れば `X(1/u) = X(u)`、`Y(1/u) = -X(u) - Y(u)`。
+★★★★分母払いが 3 度目の働きをした(第 274 方程式・第 278 共線性・本ブロック反転則)。
+
+### ★★★★★尾のずらしが両側をつなぐ
+
+    T(u) = f(qu) + T(qu)        (`tateXtail_shift`)
+
+★これで `X(1/u, qu)` の `f(qu) + T(qu)` が `X(u, q/u)` の `T(u)` に化ける。
+★★`adicSum_shift`(在庫)がそのまま使えた。
+
+### ★在庫の引き当て(2 件)
+
+- `tateXterm_inv`・`tateYterm_inv` は **`TateXY.lean` に既にあった**(体の `inv` 版)。
+  本ブロックのものは一般の環の `Ring.inverse` 版なので `_ringInverse` と改名した。
+- `isUnit_ringInverse` は **mathlib にある**(`IsUnit (Ring.inverse a) ↔ IsUnit a`)。
+  自作せず `.mpr` を使った。
+
+★着手前の `grep` は**補題名の単位で**行うこと(第 270 と同じ轍)。今回は
+再宣言エラーで気づいたが、`grep` を先に打てば手戻りは無かった。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXterm_ringInverse`・`tateYterm_ringInverse` | ★★★★★項の反転則 |
+| `tateXtail_shift`・`tateYtail_shift` | ★★★★★尾のずらし |
+| `tateXpairE_ringInverse`・`tateYpairE_ringInverse` | ★★★★★★分母を払った反転則 |
+| `tateXK_ringInverse`・`tateYK_ringInverse` | ★★★★★★★`K` の水準の反転則 |
+| `tate_point_ringInverse_eq_neg` | ★★★★★★★★**全領域で `P(1/u) = -P(u)`** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

@@ -927,6 +927,7 @@ import ABC3.Found.GaloisRep.CollDenomFree
 import ABC3.Found.GaloisRep.CollOriginUniv
 import ABC3.Found.GaloisRep.CollGroupK
 import ABC3.Found.GaloisRep.TateSeparate
+import ABC3.Found.GaloisRep.TateInversion
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
