@@ -22739,3 +22739,73 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-571 ★★★★★★葉 (d) の主要項 —— 単射性の設計(第 258 ブロック)
+
+`Found/GaloisRep/TateLeading.lean`。
+
+### ★★★★★★葉 (d)(単射性)の設計を決めた
+
+第 257 で「`x` 座標が相異なること」が群法則に要ると分かった。それは
+**Tate 座標が単射であること**(葉 (d))から来る。
+
+★★★単射性の骨格は**逐次近似**である:
+
+    a - a' in I^j  かつ  w - w' in I^j
+      ⟹ (X, Y が一致するなら) a - a' in I^{j+1}
+
+これを `j` について繰り返すと `a - a' in ⋂ I^n = 0`(`IsHausdorff`)。
+★★**付値を使わない**——`I` 進の言葉だけで閉じる。
+第 213 の `normRep`(付値による基本領域)は「類の代表を取る」ためのもので、
+単射性そのものは `I` 進の逐次近似で済む、という見立てである。
+
+### ★★★主要項
+
+`f(t) = t/(1-t)^2 = t + 2t^2 + ...`、`g(t) = t^2/(1-t)^3 = t^2 + ...` なので
+
+| 補題 | 内容 |
+|---|---|
+| `tateXterm_sub_self_mem` | `f(t) - t in I^{2k}`(`t in I^k`) |
+| `tateYterm_mem_two_mul` | `g(t) in I^{2k}` |
+| `tateXpair_sub_add_mem` | ★★★★★★**`X(a,w) = a + w`(2 位まで)** |
+| `tateYpair_add_mem` | ★★★★★**`Y(a,w) = -w`(2 位まで)** |
+
+★`(1-t)^2 f(t) = t` を使うと `f(t) - t = inv(1-t)^2 t^2 (2-t)` と**明示的に**書けるので、
+冪級数の係数を触らずに済む。第 212 の `mul_tateXterm` がそのまま効いた。
+
+### ★★★★★差の形
+
+逐次近似には「差」の形が要る:
+
+    f(a) - f(b) - (a - b) in I^{j+1}      (`a - b in I^j`、`a, b in I`)
+
+★★これも明示式で出る。`D := (1-a)^2 (1-b)^2` として
+
+    D (f(a) - f(b)) = (a-b)(1 - ab)
+    ⟹ f(a) - f(b) - (a-b) = (a-b) inv(D) ((1-ab) - D)
+
+で、`(1-ab) - D = -ab + 2s - s^2`(`s := a+b-ab in I`)は `I` の元である。
+
+### ★★配管 —— adic 和の冪
+
+`adicSum_mem`(在庫)は `in I` しか言わない。`in I^k` が要るので
+`adicSum_mem_pow` を足した(部分和 `partialSum a k` が `I^k` に入り、
+残差 `adicSum - partialSum a k` も `I^k` に入る、の 2 行)。
+`evalAdic_mem_pow` も同じ形である。
+
+| 定理 | 内容 |
+|---|---|
+| `adicSum_mem_pow`・`evalAdic_mem_pow` | ★★★★adic 和の冪への所属 |
+| `tateXtail_mem_pow`・`tateYtail_mem_pow` | ★★★尾の冪 |
+| `tateXpair_sub_add_mem`・`tateYpair_add_mem` | ★★★★★★**主要項** |
+| `tateXterm_diff_mem` | ★★★★★**差の形** |
+
+### 残り(葉 (d))
+
+1. `g` の差の形、尾の差の形(`q - q' in I^{j+1}` から)。
+2. 1 段の改良を組み立てる。
+3. `IsHausdorff` で `a = a'`。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
