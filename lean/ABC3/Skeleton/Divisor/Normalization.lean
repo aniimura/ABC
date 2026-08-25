@@ -5,7 +5,7 @@ import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.NormFinite
 import ABC3.Found.Divisor.GlobalUnits
-import ABC3.Found.Divisor.SchemeOrdUnit
+import ABC3.Found.Divisor.SchemeHartogs
 import ABC3.Found.FrdI.Sec6GaloisCat
 import Mathlib.AlgebraicGeometry.Normalization
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
@@ -135,23 +135,26 @@ def IsKQCartier {ι : Type u} (W : ι → Scheme.{u})
 > that [since V [L] is a proper normal variety] for A ∈Ob(CV, -/
 
 open ABC3.Found.Divisor in
-/-- ★★★★**代数的 Hartogs のスキーム版** —— `global-units` に残っている **1 本**。
+/-- ★★★★**代数的 Hartogs のスキーム版**。
 
-★環の側(`Found/Divisor/Hartogs.lean` の `mem_Rsub_of_forall_heightOnePrime`)は
-**閉じている**。残るのは配線だけで、
+★環の側(`Found/Divisor/Hartogs.lean` の `mem_Rsub_of_forall_heightOnePrime`)と
+貼り合わせ(`Found/Divisor/GlobalUnits.lean` の `exists_globalSection`)を繋ぐ配線は
 
-* `Γ(X,U)` の**高さ 1 素イデアル** ↔ `X` の**余次元 1 の点**(`isCodimOnePt_spec_iff`)
-* `ordPt ≥ 0` ↔ 茎に入る(`exists_mem_stalk_of_ordPt_nonneg`、実装済み)
-* アフィン開 `U ≅ Spec Γ(X,U)` を通す
+* `Γ(X,U)` の**高さ 1 素イデアル** ↦ `X` の**余次元 1 の点**(`isCodimOnePt_fromSpec`)
+* `ordPt ≥ 0` ⟹ 茎に入る(`exists_mem_stalk_of_ordPt_nonneg`)
+* 茎 `= R_p` から「分母が `p` の外」を取り出す(`IsLocalization.surj`)
 
-の 3 段である。★貼り合わせの側(`exists_globalSection`)は**閉じた**。 -/
+の 3 本だった。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/SchemeHartogs.lean` にある。 -/
 theorem mem_range_germ_of_forall_ordPt_nonneg {X : Scheme.{u}} [IsIntegral X]
     [AlgebraicGeometry.IsLocallyNoetherian X] (hnorm : IsNormalScheme X)
-    (_hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (hic : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsIntegrallyClosed Γ(X, U))
     (u : X.functionField)
-    (_h : ∀ x : PrimeDivisorPt X, 0 ≤ ordPt X hnorm x u) :
-    u ∈ Set.range (CategoryTheory.ConcreteCategory.hom (X.germToFunctionField ⊤)) := by
-  sorry
+    (h : ∀ x : PrimeDivisorPt X, 0 ≤ ordPt X hnorm x u) :
+    u ∈ Set.range (CategoryTheory.ConcreteCategory.hom (X.germToFunctionField ⊤)) :=
+  mem_range_germ_top_of_forall_ordPt_nonneg hnorm hnoeth hic u h
 
 open ABC3.Found.Divisor in
 /-- ★★**`O^×(A) = O^▷(A) = k_L^×`** —— proper normal なら大域函数は定数。
@@ -166,18 +169,20 @@ open ABC3.Found.Divisor in
 
 ★正しい形は「`ord` がすべての余次元 1 の点で `0` の元は `Γ(X,⊤)` の**単元**」であり、
 そのうえで `Γ(X,⊤)` が `k` 上有限次の**体**(＝ `k_L`)である
-(`Found/Divisor/GlobalUnits.lean` の `globalSections_isField` / `globalSections_finite`)。 -/
+(`Found/Divisor/GlobalUnits.lean` の `globalSections_isField` / `globalSections_finite`)。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/SchemeHartogs.lean` にある。 -/
 theorem globalSections_eq_constants {X : Scheme.{u}} [IsIntegral X]
     [AlgebraicGeometry.IsLocallyNoetherian X] {k : Type u} [Field k]
     (g : X ⟶ Spec (CommRingCat.of k)) (hg : IsProper g)
     (hnorm : IsNormalScheme X)
     (hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (hic : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsIntegrallyClosed Γ(X, U))
     (u : X.functionField) (hu : u ≠ 0)
     (h : ∀ x : PrimeDivisorPt X, ordPt X hnorm x u = 0) :
     ∃ t : Γ(X, ⊤), IsUnit t ∧
       (CategoryTheory.ConcreteCategory.hom (X.germToFunctionField ⊤)) t = u :=
-  exists_unit_globalSection g hg hu
-    (mem_range_germ_of_forall_ordPt_nonneg hnorm hnoeth u (fun x => (h x).ge))
+  exists_unit_of_forall_ordPt_eq_zero g hg hnorm hnoeth hic u hu h
 
 /-! ## ★5. 出口 —— `CartierDatum` を作る(鎖 `normalize` の `cartier-datum-geom`) -/
 
@@ -256,7 +261,7 @@ def globalSections_eq_constants.src : Source :=
 def globalSections_eq_constants.needs : List ProofObligation :=
   [ .citation "[ABC3]" "exists_unit_globalSection(Found、sorry 無し)"
       (.inProject "ABC3" "ABC3.Found.Divisor.exists_unit_globalSection") 110,
-    .citation "[ABC3]" "mem_range_germ_of_forall_ordPt_nonneg(代数的 Hartogs のスキーム版、残り 1 本)"
+    .citation "[ABC3]" "mem_range_germ_of_forall_ordPt_nonneg(代数的 Hartogs のスキーム版、sorry 無し)"
       (.inProject "ABC3" "ABC3.Skeleton.Divisor.mem_range_germ_of_forall_ordPt_nonneg") 110,
     .citation "[mathlib]" "isField_of_universallyClosed(proper なら Γ(X,⊤) は体)"
       (.inMathlib "AlgebraicGeometry.isField_of_universallyClosed") 110,
