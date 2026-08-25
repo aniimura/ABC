@@ -22255,3 +22255,55 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-562 ★★★★★★★★解析側の共線性 —— 段 3 の入口(第 249 ブロック)
+
+`Found/GaloisRep/TateCollinearAnalytic.lean`。
+
+第 248 の `weierstrass_collinear` を、第 218・220 の対応
+
+    ℘(z)  = (2πi)^2 (X + 1/12)          (`weierstrassP_eq_tateXfun`)
+    ℘'(z) = (2πi)^3 (2Y + X)            (`derivWeierstrassP_eq_tateYfun`)
+
+で書き換えると、★★**`1/12` の項も `Xi Xj` の項もちょうど消えて**
+
+    X1(Y2 - Y3) + X2(Y3 - Y1) + X3(Y1 - Y2) = 0
+
+という**同じ形の行列式**が残る(`collinear_tatefun`)。係数は `2(2πi)^5` だけ。
+行列式の形を選んだ(§9-559)ことが、ここでも効いた——商の形なら分母の変換が要った。
+
+### ★★★★★対称な 3 変数 `(u, v, w)` へ
+
+`z3 := τ - z1 - z2` と取ると `z1 + z2 + z3 = τ` なので、
+`u := e^{2πi z1}`、`v := e^{2πi z2}`、`w := e^{2πi z3}` について **`q = u v w`**。
+しかも各点の「相方」`q/ui` が
+
+    q/u = v w,   q/v = u w,   q/w = u v
+
+と**すべて多項式**になる。★★★これが段 3 の普遍環を **`ℤ[U,V,W]`(`q = UVW`)**に
+取れる理由である——第 223 の `ℤ[A,W]`(`q = AW`)の素直な 3 変数化になる。
+`(u, q/u)` の対を各点で別々に持つ必要がない。
+
+### ★上半平面から自由になる
+
+第 237 の `exists_uh_exp_eq` で `u, v, w` を任意の「単位開円板の 0 でない点」に
+取り替えられる。★`τ := z1 + z2 + z3` と**定義してしまう**ので、`im` の条件は
+`z3 in ℍ` から自動的に出る(第 237 の `addUH` と同じ手)。
+
+| 定理 | 内容 |
+|---|---|
+| `thirdUH` | ★第 3 の点 `τ - z1 - z2` |
+| `collinear_tatefun` | ★★★★★★★`tateXfun`/`tateYfun` の形の共線性 |
+| `collinear_analytic_uvw` | ★★★★★★★★**`(u,v,w)` の形の共線性** |
+
+### 次
+
+1. 普遍環 `ℤ[U,V,W]` を局所化し、共線性の差(defect)を定義して切り詰める
+   (第 222-223 の 3 変数化)。
+2. 切り詰めた差の ℂ 側評価 `O(q^{n+1})`(第 226-235 の 3 変数化)。
+3. `U^n | `, `V^n | `, `W^n | ` を `IsRelPrime` で分け(第 224)、
+   第 236 の `X_pow_dvd_of_norm_le` と第 238-240 の降下で係数消滅。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
