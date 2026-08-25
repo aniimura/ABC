@@ -184,6 +184,7 @@ import ABC3.Found.Divisor.NormNormal
 import ABC3.Found.Divisor.NormFinite
 import ABC3.Found.Divisor.GlobalUnits
 import ABC3.Found.Divisor.SchemeHartogs
+import ABC3.Found.Divisor.NormalSections
 import ABC3.Found.Divisor.NormFF
 import ABC3.Found.Divisor.SchemeOrdUnit
 import ABC3.Found.Divisor.SchemeFFMap

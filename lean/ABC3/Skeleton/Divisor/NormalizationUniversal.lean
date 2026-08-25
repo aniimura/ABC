@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Skeleton.Divisor.Normalization
+import ABC3.Found.Divisor.NormalSections
 
 /-!
 # 正規化の普遍性(正規スキームからの支配射)——`Theorem 6.2, (i)` の壁(`Skeleton`)
@@ -66,16 +67,38 @@ universe u
 
 /-! ## ★1. 正規スキームからの支配射は相対正規化を経由する -/
 
+open ABC3.Found.Divisor in
 /-- ★★★★★★**正規化の普遍性(正規スキーム版)** ——
-`W` が正規で `g : W ⟶ Y` が支配的、`f : SpecL ⟶ Y` が `g` を経由するなら、
+`W` が正規で `g : W ⟶ Y` が支配的、`L ⊆ K(W)` が `Y` の上で両立するなら、
 `W` は `Y` の `L` における正規化 `f.normalization` を経由する。
 
-★`g` が支配的であることは `IsDominant g` で受ける。
-★「`L ⊆ K(W)`」は「`f` が `g` を経由する」(`e : SpecL ⟶ W`, `f = e ≫ g`)で受ける。 -/
+## ★★★★測定の訂正(2026-08-25)—— 仮定の向きが逆だった
+
+旧版は「`f` が `g` を経由する」(`e : SpecL ⟶ W`, `f = e ≫ g`)と書いていたが、
+★**これは `K(W) ⊆ L` を意味していて、原文の `L ⊆ K(W)` の逆である**。
+`Example 6.1` では `V[L]` の函数体が `L` で、`Theorem 6.2, (i)` が要求するのは
+`V₂[K₂(L)] ⟶ V₁[L]`(函数体は `L₂ ⊇ L`)なので、正しい向きは
+
+```
+ε : Spec K(W) ⟶ SpecL   ただし  ε ≫ f = (生成点からの射) ≫ g
+```
+
+である。★仮定を直した。
+
+## ★★★★★核は閉じた(2026-08-25)
+
+数学の中身は「**正規スキームでは整な有理函数は切断**」1 本で、
+`Found/Divisor/NormalSections.lean` の `mem_range_germ_of_forall_isIntegral` として
+**`sorry` 無しで閉じた**。`Y[L]|_U = Spec(integralClosure Γ(Y,U) L)` の切断を
+`Γ(W, g⁻¹U)` へ送る環準同型はこれで作れる。
+
+★★残るのは**射の貼り合わせ**(`Scheme.OpenCover.glueMorphisms` で
+`g⁻¹U ⟶ f.normalization` を貼る)という**配管**である。新しい数学は要らない。 -/
 theorem exists_toNormalizationIn {W Y SpecL : Scheme.{u}} (f : SpecL ⟶ Y)
     [QuasiCompact f] [QuasiSeparated f] [IsIntegral Y] [IsIntegral W]
     (g : W ⟶ Y) [IsDominant g] (_hnorm : IsNormalScheme W)
-    (e : SpecL ⟶ W) (_he : f = e ≫ g) :
+    (_ε : Spec W.functionField ⟶ SpecL)
+    (_hε : _ε ≫ f = W.fromSpecStalk (genericPoint (W : Type u)) ≫ g) :
     ∃ h : W ⟶ normalizationIn f, h ≫ f.fromNormalization = g := by
   sorry
 
@@ -126,8 +149,12 @@ def exists_toNormalizationIn.needs : List ProofObligation :=
       (.absent "Mathlib/AlgebraicGeometry/Normalization.lean の宣言を列挙(2026-08-25)。normalizationDesc / normalization.hom_ext はいずれも「分解が与えられていれば降りる」向きで、作る向きは無い") 110,
     .citation "[mathlib]" "IsIntegrallyClosed / integralClosure(アフィン局所の中身)"
       (.inMathlib "IsIntegrallyClosed") 110,
+    .citation "[ABC3]" "★数学の中身(正規スキームでは整な有理函数は切断、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.mem_range_germ_of_forall_isIntegral") 110,
+    .citation "[ABC3]" "開集合の上での切断の貼り合わせ(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.exists_sectionOn") 110,
     .derivation
-      "アフィン局所で「Γ(Y,U) の L における整閉包は Γ(W, ψ⁻¹U) に入る」。貼り合わせは mathlib の relativeGluingData をもう一度書く" 110,
+      "アフィン局所で「Γ(Y,U) の L における整閉包は Γ(W, ψ⁻¹U) に入る」——これは閉じた。残るのは Scheme.OpenCover.glueMorphisms による射の貼り合わせ" 110,
     .implicitStep
       "★原文は仮定 (a) から因子と有理函数の引き戻しを「(i)」の一言で置いている" 110 ]
 

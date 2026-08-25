@@ -3166,12 +3166,12 @@
           "id": "normalization-universal-normal",
           "title": "正規スキームからの支配射は相対正規化を経由する",
           "deps": [],
-          "status": "skeleton",
-          "size": "★大",
+          "status": "半済",
+          "size": "★大(核は閉じた。残るは射の貼り合わせ)",
           "frdiNeeded": true,
-          "note": "★★★★★2026-08-25（**節点として立てた**。`thm62-i-pull` の測定が名指ししていたもの）：\n\n`W` が正規整、`g : W ⟶ Y` が支配的、`L ⊆ K(W)` なら `W ⟶ Y[L]` が一意に定まること。\n\n★★**mathlib の `Scheme.Hom.normalizationDesc` では出ない** —— あちらは\n```\nnormalizationDesc (f : X ⟶ Y) (f₁ : X ⟶ T) (f₂ : T ⟶ Y) [IsIntegralHom f₂]\n    (H : f = f₁ ≫ f₂) : f.normalization ⟶ T\n```\nすなわち「**すでに `T` を経由する分解が与えられていれば**降りる」向きで、\n`f₁ : X ⟶ T` を先に要求するので**そのままでは循環する**（2026-08-25 に再確認）。\n\n★中身はアフィン局所で「`Γ(Y,U)` の `L` における整閉包は `Γ(W, ψ⁻¹U)` に入る」だけだが、\nmathlib の正規化は貼り合わせ（`relativeGluingData`）で作られているので、\nその貼り合わせをもう一度書くことになる。\n\n★★★**`Theorem 6.2` の (ii)(iii)(iv) は `V₁ = V₂` の場合**であり、\nそこでは `ψ` が Frobenius（＝有限射）なので `normMap` と同じ筋で出る。\n**(i) の一般形だけ**がこの節点を要求する。",
-          "lean": "ABC3/Skeleton/Divisor/NormalizationUniversal.lean",
-          "decl": "ABC3.Skeleton.Divisor.exists_toNormalizationIn / exists_normalizationIn_map"
+          "note": "★「**正規整スキームからの支配射は相対正規化を経由する**」。\n★★mathlib の `Scheme.Hom.normalizationDesc` は**向きが逆**\n(すでに分解が与えられていれば正規化がそこへ降りる)なので、そのままでは循環する。\n\n## ★★★★★★2026-08-25(**核を閉じた**、sorry 無し)\n\n数学の中身は 1 本だった:\n\n```\nu ∈ K(W) が Ω 内のどのアフィン開 V でも Γ(W,V) 上整  ⟹  u ∈ Γ(W, Ω)\n```\n\n`Found/Divisor/NormalSections.lean` の `mem_range_germ_of_forall_isIntegral`。\n\n| 段 | 根拠 |\n|---|---|\n| アフィン開ごと: 整 ⟹ 切断 | `IsIntegrallyClosed.isIntegral_iff` ＋ `functionField_isFractionRing_of_isAffineOpen` |\n| 開集合 `Ω` へ貼り合わせ | ★`exists_sectionOn`(`GlobalUnits.lean` の `⊤` 版の一般化) |\n| 底の切断上で整 ⟹ 上の切断上でも整 | `isIntegral_sections_of_appLE`(`IsIntegral.tower_top`) |\n\n★★貼り合わせの重なりの一致は **`W` が既約であること**から自動である\n(空でない開集合は必ず生成点を含むので必ず交わり、`Γ(W,−) ↪ K(W)` は単射)。\n\n## ★★★★測定の訂正 —— スケルトンの仮定の向きが逆だった\n\n旧 `exists_toNormalizationIn` は「`f` が `g` を経由する」\n(`e : SpecL ⟶ W`、`f = e ≫ g`)と書いていたが、\n★**これは `K(W) ⊆ L` を意味していて、原文の `L ⊆ K(W)` の逆である**。\n`Theorem 6.2, (i)` が要求するのは `V₂[K₂(L)] ⟶ V₁[L]`(函数体は `L₂ ⊇ L`)なので、\n正しい向きは `ε : Spec K(W) ⟶ SpecL` である。仮定を直した。\n\n## ☆残っているもの —— **射の貼り合わせ(配管)**\n\n`W` を `g⁻¹U`(`U` は `Y` のアフィン開)で覆い、\n\n* `Y[L]|_U = Spec(integralClosure Γ(Y,U) L)` はアフィンなので、\n  `g⁻¹U ⟶ Y[L]|_U` は環準同型 `integralClosure Γ(Y,U) L → Γ(W, g⁻¹U)` と同じ\n* その環準同型は上の核(`mem_range_germ_of_forall_isIntegral`)が与える\n* `Scheme.OpenCover.glueMorphisms` で貼る(重なりの一致は `Γ(W,−) ↪ K(W)` の単射性)\n\n★★**新しい数学は要らない**。mathlib に「glued への desc」が無い\n(`RelativeGluing.lean` の宣言を列挙、2026-08-25 実測)ので、\n正規化の貼り合わせをこちら側でもう一度書く形になる。",
+          "lean": "ABC3/Found/Divisor/NormalSections.lean(核)＋ ABC3/Skeleton/Divisor/NormalizationUniversal.lean(残り)",
+          "decl": "ABC3.Found.Divisor.mem_range_germ_of_forall_isIntegral / exists_sectionOn / mem_range_germ_of_forall_affine_le / mem_range_germ_of_isIntegral_affine / isIntegral_sections_of_appLE / iSup_affineOpens_le_eq"
         }
       ]
     },
