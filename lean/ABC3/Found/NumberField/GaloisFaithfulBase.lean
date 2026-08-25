@@ -131,7 +131,86 @@ theorem eq_one_of_fixes_prime_base
   exact congrArg Subtype.val
     (Subsingleton.elim (⟨σ, hmem⟩ : MulAction.stabilizer (L ≃ₐ[M] L) P) 1)
 
+/-! ## ★4. 完全分解は塔を降りる
+
+★★節点 `nf-spl-base` の第 2 段。`M ⊆ L ⊆ N` で `N` の側の素点が `e = f = 1` なら、
+**間の `L` でも `q` は完全分解する**。
+
+★中身は mathlib の**塔での `e`・`f` の乗法性**
+(`Ideal.ramificationIdx_algebra_tower'` / `Ideal.inertiaDeg_algebra_tower`)と、
+Galois の基本等式 `g·e·f = #Gal(L/M) = [L:M]` だけである。 -/
+
+section Tower
+
+variable {M L N : Type} [Field M] [Field L] [Field N]
+  [NumberField M] [NumberField L] [NumberField N]
+  [Algebra M L] [Algebra L N] [Algebra M N] [IsScalarTower M L N]
+  [IsGalois M L]
+
+/-- ★★★★**完全分解は塔を降りる** —— `q` の上の `N` の素点 `R` が `e = f = 1` なら、
+`q` は `L` で完全分解する。 -/
+theorem splitsCompletely_of_tower
+    (q : Ideal (𝓞 M)) [q.IsMaximal] (hq : q ≠ ⊥)
+    (R : Ideal (𝓞 N)) [R.IsPrime]
+    (P : Ideal (𝓞 L)) [P.IsPrime] [P.IsMaximal] [P.LiesOver q] [R.LiesOver P]
+    (he : q.ramificationIdx R = 1) (hf : q.inertiaDeg R = 1) :
+    (q.primesOver (𝓞 L)).ncard = Module.finrank M L := by
+  haveI := RingOfIntegers.inst_isScalarTower M L N
+  have heP : q.ramificationIdx P = 1 := by
+    have htower := Ideal.ramificationIdx_algebra_tower' q P R
+    rw [he] at htower
+    exact Nat.eq_one_of_mul_eq_one_right htower.symm
+  have hfP : q.inertiaDeg P = 1 := by
+    have htower := Ideal.inertiaDeg_algebra_tower q P R
+    rw [hf] at htower
+    exact Nat.eq_one_of_mul_eq_one_right htower.symm
+  have hG := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
+    (p := q) hq (𝓞 L) (L ≃ₐ[M] L)
+  rw [Ideal.ramificationIdxIn_eq_ramificationIdx q P (L ≃ₐ[M] L),
+    Ideal.inertiaDegIn_eq_inertiaDeg q P (L ≃ₐ[M] L), heP, hfP,
+    mul_one, mul_one, IsGalois.card_aut_eq_finrank M L] at hG
+  exact hG
+
+/-- ★★★★★**塔の上で完全分解する素点があれば、その下の素点を固定する自己同型は恒等**。
+
+★★これが `Theorem 6.4, (i)` の「数体の自己同型で全素点を固定するものは恒等」に
+そのまま当たる形である —— `τ ∈ Aut(L/F)` が全素点を固定するとき
+
+    M := L^{⟨τ⟩}、  N := L/ℚ の Galois 閉包
+
+と取れば、`N` で完全分解する有理素数(在庫の `infinite_splitsCompletely`、
+★Chebotarev を使わない)から `he` / `hf` が出る。 -/
+theorem eq_one_of_fixes_prime_tower
+    (q : Ideal (𝓞 M)) [q.IsMaximal] (hq : q ≠ ⊥)
+    (R : Ideal (𝓞 N)) [R.IsPrime]
+    (P : Ideal (𝓞 L)) [P.IsPrime] [P.IsMaximal] [P.LiesOver q] [R.LiesOver P]
+    (hPne : P ≠ ⊥)
+    (he : q.ramificationIdx R = 1) (hf : q.inertiaDeg R = 1)
+    (σ : L ≃ₐ[M] L) (hσ : σ • P = P) : σ = 1 :=
+  eq_one_of_fixes_prime_base q hq
+    (splitsCompletely_of_tower q hq R P he hf) P hPne σ hσ
+
+end Tower
+
 /-! ### ★出典の紐付け -/
+
+def splitsCompletely_of_tower.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 116,
+    item := "Theorem 6.4, (i) — 完全分解は塔を降りる",
+    sectionId := "frdi-thm-6-4" }
+
+def eq_one_of_fixes_prime_tower.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 塔の上の完全分解から素点を固定する自己同型は恒等",
+    sectionId := "frdi-thm-6-4" }
+
+def splitsCompletely_of_tower.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Ideal.ramificationIdx_algebra_tower'(塔での e の乗法性)"
+      (.inMathlib "Ideal.ramificationIdx_algebra_tower'") 116,
+    .citation "[mathlib]" "Ideal.inertiaDeg_algebra_tower(塔での f の乗法性)"
+      (.inMathlib "Ideal.inertiaDeg_algebra_tower") 116,
+    .citation "[mathlib]" "Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn(基本等式)"
+      (.inMathlib "Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn") 116 ]
 
 /-- ★★★★locator —— `Theorem 6.4, (i)` の「全素点を固定する自己同型は恒等」
 (★**底が一般の数体**の版。`ℚ` 上 Galois とは限らない `L` に当てるため)。 -/
