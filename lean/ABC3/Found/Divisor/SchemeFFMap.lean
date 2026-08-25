@@ -79,6 +79,40 @@ theorem ffMap_algebraMap (x : X) (t : Y.presheaf.stalk (g.base x)) :
 
 end FFMap
 
+section FFMapFunctor
+
+/-- ★★★**`ffMap` は反変関手的** —— `thm62-i-pull` の `Div` の自然性が要求するもの。
+
+★中身は `stalkMap_comp` ＋ `stalkSpecializes_stalkMap`(生成点は生成点へ行くので
+`stalkCongr` が繋がる)。 -/
+theorem ffMap_comp {X Y Z : Scheme.{u}} (g₁ : X ⟶ Y) (g₂ : Y ⟶ Z)
+    [IsDominant g₁] [IsDominant g₂] [IsDominant (g₁ ≫ g₂)]
+    [IrreducibleSpace X] [IrreducibleSpace Y] [IrreducibleSpace Z] :
+    ffMap (g₁ ≫ g₂) = ffMap g₂ ≫ ffMap g₁ := by
+  have hg : g₁.base (genericPoint (X : Type u)) = genericPoint (Y : Type u) :=
+    genericPoint_eq_of_isDominant g₁
+  rw [ffMap, ffMap, ffMap, Scheme.Hom.stalkMap_comp]
+  simp only [TopCat.Presheaf.stalkCongr_hom, Category.assoc]
+  rw [← Category.assoc (Scheme.Hom.stalkMap g₂ (genericPoint (Y : Type u))),
+    ← Scheme.Hom.stalkSpecializes_stalkMap g₂ (g₁.base (genericPoint (X : Type u)))
+      (genericPoint (Y : Type u)) (Inseparable.of_eq hg).specializes]
+  simp only [← Category.assoc]
+  rw [TopCat.Presheaf.stalkSpecializes_comp, Category.assoc]
+  rfl
+
+/-- ★**恒等射では恒等**。 -/
+theorem ffMap_id (X : Scheme.{u}) [IrreducibleSpace X] [IsDominant (𝟙 X)] :
+    ffMap (𝟙 X) = 𝟙 X.functionField := by
+  rw [ffMap, Scheme.Hom.stalkMap_id]
+  simp
+
+def ffMap_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 関数体の射は反変関手的",
+    sectionId := "frdi-thm-6-2" }
+
+end FFMapFunctor
+
 section Ord
 
 variable {X Y : Scheme.{u}} (g : X ⟶ Y) [IsDominant g] [IsIntegral X] [IsIntegral Y]

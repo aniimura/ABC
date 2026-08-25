@@ -198,6 +198,39 @@ theorem isCartierDiv_cartierPullback (hnormX : IsNormalScheme X) (hnormY : IsNor
   · rw [cartierPullback_apply]
     exact pullCoeff_eq g hnormX hnormY hD v (hdim v) hf0 hv hDU0
 
+/-- ★★★★★★**引き戻しは関手的** —— `(g₁ ≫ g₂)^* D = g₁^* (g₂^* D)`。
+
+★★これが `thm62-i-pull` の `Div` の**自然性**の中身である。
+★中身は「局所方程式 `f` を取ると `g₂^*f` が `g₂^*D` の局所方程式になる」
+(`isCartierDiv_cartierPullback` の証明そのもの)＋ `ffMap_comp`。 -/
+theorem pullCoeff_comp {X Y Z : Scheme.{u}} (g₁ : X ⟶ Y) (g₂ : Y ⟶ Z)
+    [IsDominant g₁] [IsDominant g₂] [IsDominant (g₁ ≫ g₂)]
+    [IsIntegral X] [IsIntegral Y] [IsIntegral Z]
+    [IsLocallyNoetherian X] [IsLocallyNoetherian Y] [IsLocallyNoetherian Z]
+    (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y) (hnormZ : IsNormalScheme Z)
+    {D : WeilDiv Z} (hD : IsCartierDiv hnormZ D) [CompactSpace Y]
+    (hdim2 : ∀ v : PrimeDivisorPt Y, ringKrullDim (Z.presheaf.stalk (g₂.base v.1)) ≤ 1)
+    (w : PrimeDivisorPt X)
+    (hdim1 : ringKrullDim (Y.presheaf.stalk (g₁.base w.1)) ≤ 1)
+    (hdim12 : ringKrullDim (Z.presheaf.stalk ((g₁ ≫ g₂).base w.1)) ≤ 1) :
+    pullCoeff (g₁ ≫ g₂) hnormX hnormZ hD w
+      = pullCoeff g₁ hnormX hnormY
+          (isCartierDiv_cartierPullback g₂ hnormY hnormZ hD hdim2) w := by
+  obtain ⟨p, hmem, hf0, hDU⟩ := cartier_local hnormZ hD ((g₁ ≫ g₂).base w.1)
+  have hffne : ffMap g₂ p.2 ≠ 0 := fun h => hf0 ((ffMap g₂).hom.injective (by simpa using h))
+  have h1 : pullCoeff (g₁ ≫ g₂) hnormX hnormZ hD w
+      = ordPt X hnormX w (ffMap (g₁ ≫ g₂) p.2) :=
+    pullCoeff_eq (g₁ ≫ g₂) hnormX hnormZ hD w hdim12 hf0 hmem hDU
+  have h2 : pullCoeff g₁ hnormX hnormY
+      (isCartierDiv_cartierPullback g₂ hnormY hnormZ hD hdim2) w
+      = ordPt X hnormX w (ffMap g₁ (ffMap g₂ p.2)) := by
+    refine pullCoeff_eq g₁ hnormX hnormY _ w hdim1 hffne (U := g₂ ⁻¹ᵁ p.1) hmem ?_
+    intro v hv
+    rw [cartierPullback_apply]
+    exact pullCoeff_eq g₂ hnormY hnormZ hD v (hdim2 v) hf0 hv hDU
+  rw [h1, h2, ffMap_comp]
+  rfl
+
 /-- ★★★★**引き戻しは加法的**。 -/
 theorem pullCoeff_add (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
     {D₁ D₂ : WeilDiv Y} (hD₁ : IsCartierDiv hnormY D₁) (hD₂ : IsCartierDiv hnormY D₂)
