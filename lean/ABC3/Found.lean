@@ -887,6 +887,7 @@ import ABC3.Found.GaloisRep.TateUWFree
 import ABC3.Found.GaloisRep.TateCoeffVanish
 import ABC3.Found.GaloisRep.TateDescent
 import ABC3.Found.GaloisRep.TateEquation
+import ABC3.Found.GaloisRep.EllipticLiouville
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

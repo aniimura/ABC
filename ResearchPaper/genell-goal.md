@@ -21821,3 +21821,46 @@ Bezout の意味では互いに素にならない。
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)——葉 (b) は G6 の一部であり、
 G6 自体は `uniformization` の完成を要求している。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-554 ★★★★★★葉 (c) の道を測り、楕円関数の Liouville を取った(第 241 ブロック)
+
+`Found/GaloisRep/EllipticLiouville.lean`。
+
+葉 (b) が閉じた(第 240)。次は**葉 (c)——写像 `K^x/q^Z -> E(K)` が準同型であること**。
+古典的にはこれは**三点の共線性**である:
+
+    u1 u2 u3 = 1  ==>  (X(u1),Y(u1)), (X(u2),Y(u2)), (X(u3),Y(u3)) は一直線上
+
+### ★★★在庫を引いた —— mathlib に `℘` の加法定理は無い
+
+`Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` は `derivWeierstrassP_sq`
+(`℘'^2 = 4℘^3 - g2 ℘ - g3`)で終わっており、**加法定理も「楕円関数は定数」も無い**
+(1074 行目が最後の補題)。★第 214 と同じ手順で先に測った。
+
+### ★★★★道は三段になる
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 楕円関数の Liouville(二重周期な整関数は定数) | ★**本ブロックで完了** |
+| 2 | `℘` の加法定理(共線性の形) | 未 |
+| 3 | 解析側の共線性を第 221-240 の機構で形式側へ移す | 未 |
+
+★★★**段 3 は葉 (b) で作った機構がそのまま使える**——変数が `(u1, u2, q)` の 3 つに
+増えるだけで、万有な環・特殊化・係数の消滅の流れは同じである。
+27 ブロックかけて作った機構が、ここで再利用できる形になっている。
+
+### ★★★★★★段 1 —— 道具はすべて mathlib に在った
+
+| 部品 | mathlib |
+|---|---|
+| Liouville | `Differentiable.apply_eq_apply_of_bounded` |
+| 基本領域の存在 | `ZSpan.exist_unique_vadd_mem_fundamentalDomain` |
+| 基本領域の有界性 | `ZSpan.fundamentalDomain_isBounded` |
+| 有界閉集合はコンパクト | `Bornology.IsBounded.isCompact_closure`(ℂ は proper) |
+
+★**値域は基本領域の閉包の像に含まれる**——周期性で任意の点を基本領域に移せるから。
+そこは連続像なのでコンパクト、したがって有界。あとは Liouville。10 行で通った。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
