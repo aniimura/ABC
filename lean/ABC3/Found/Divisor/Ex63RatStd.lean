@@ -5,6 +5,7 @@ import ABC3.Found.Divisor.Ex63Types
 import ABC3.Found.Divisor.ArithSuppSplit
 import ABC3.Found.FrdI.Thm64RatStd
 import ABC3.Found.FrdI.Prop55PfRatStd
+import ABC3.Found.FrdI.Prop55UnTrRatStd
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— 算術 Frobenioid は **rationally standard 型**
@@ -480,6 +481,63 @@ theorem ex63_pf_ratStd :
       (fun n hn => nsmul_gpMap_pfOf_ne_zero ((ModelData.modelPre h).divisorial Y) n
         (divBGalois_nsmul_ne_zero Y y v0 hy n hn)))
 
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Proposition 5.5, (iii)** ——
+算術の **`(𝒞^pf)^un-tr` も rationally standard**。
+
+★一般形は `Prop55UnTrRatStd.lean` の `pfRoot_unTr_isOfRationallyStandardType`。
+★★`Theorem 6.4, (i)` が並べる 5 圏のうち **4 つ目**がこれで閉じる
+(`𝒞`・`𝒞^un-tr`・`𝒞^pf`・`(𝒞^pf)^un-tr`)。残るは `𝒞^rlf` である。 -/
+theorem ex63_pf_unTr_ratStd :
+    IsOfRationallyStandardType
+      (unTrPre (pfRootPre (ModelData.modelPre (ex63Hyp F Kbar))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+        (pfRoot_frobenioid (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+          (isOfFrobeniusIsotropicType_of_isotropic
+            (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar))).core)
+      (unTr_frobenioid (pfRootPre (ModelData.modelPre (ex63Hyp F Kbar))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+        (pfRoot_frobenioid (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+          (isOfFrobeniusIsotropicType_of_isotropic
+            (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar))).core
+        (pfRoot_frobenioid (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+          (isOfFrobeniusIsotropicType_of_isotropic
+            (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+          (ModelData.model_frobenioid (ex63Hyp F Kbar))))
+      (fun Y => iotaPf ((ModelData.modelPre (ex63Hyp F Kbar)).divisorial Y)
+        (ex63Iota F Kbar Y)) := by
+  classical
+  haveI := (ex63Hyp F Kbar).connectedD
+  set L := (botSub F Kbar).toIF with hL
+  set Y : (FinSub F Kbar)ᵒᵖ := Opposite.op (botSub F Kbar) with hY
+  set v0 : ArithPlace L := Sum.inr (Classical.arbitrary (InfinitePlace L)) with hv0
+  obtain ⟨y, hy⟩ := exists_arithDiv_ne_zero_at L v0
+  exact pfRoot_unTr_isOfRationallyStandardType
+    (isOfFrobeniusIsotropicType_of_isotropic
+      (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+    (ex63_isotropic_family F Kbar).2.2.1
+    (pfRoot_frobenioid (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+      (isOfFrobeniusIsotropicType_of_isotropic
+        (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+      (ModelData.model_frobenioid (ex63Hyp F Kbar)))
+    (ModelData.model_birat_frobenioidCore (ex63Hyp F Kbar))
+    (ex63Iota F Kbar)
+    (fun A => isStrictlyRational_of_divB (ModelData.modelRatFnData (ex63Hyp F Kbar))
+      (ex63Iota F Kbar) A (ex63_hsp F Kbar A))
+    finSubOp_isOfFSMType
+    (ex63_not_isOfGroupLikeType F Kbar)
+    (ex63_standardType F Kbar)
+    ⟨Y, 0⟩
+    (fun e => ex63_phi_map_bot_eq_id F Kbar e)
+    ((ModelData.modelRatFnData (ex63Hyp F Kbar)).divB _ (Additive.ofMul y))
+    (divB_mem_phiBiratAt (ModelData.modelRatFnData (ex63Hyp F Kbar))
+      (A := (⟨Y, 0⟩ : ModelData.Obj _)) (Additive.ofMul y))
+    (fun n hn => nsmul_gpMap_pfOf_ne_zero
+      ((ModelData.modelPre (ex63Hyp F Kbar)).divisorial Y) n
+      (divBGalois_nsmul_ne_zero Y y v0 hy n hn))
+
 end Ex63Std
 
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
@@ -497,6 +555,11 @@ def ex63_unTr_ratStd.src : Source :=
 def ex63_pf_ratStd.src : Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iii) — 算術の 𝒞^pf も rationally standard",
+    sectionId := "frdi-prop-5-5" }
+
+def ex63_pf_unTr_ratStd.src : Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 算術の (𝒞^pf)^un-tr も rationally standard",
     sectionId := "frdi-prop-5-5" }
 
 def ex63_pf_ratStd.needs : List ProofObligation :=
@@ -542,8 +605,10 @@ def ex63_thm64_i_types.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.ex63_isotropic_family") 114,
     .citation "[ABC3]" "ex63_ratStd(rationally standard の側)"
       (.inProject "ABC3" "ABC3.Found.Divisor.ex63_ratStd") 114,
-    .citation "[FrdI]" "Proposition 5.5, (iii) — rationally standard 性の 𝒞^pf / 𝒞^rlf / 𝒞^un-tr への伝播"
-      (.absent "2026-08-25 実測。standard 性の伝播(p55iii-std)は在庫だが、rationally standard の伝播は未。依存グラフの p55iii-ratstd 節点に分けた") 114,
+    .citation "[FrdI]" "Proposition 5.5, (iii) — rationally standard 性の 𝒞^rlf への伝播"
+      (.absent ("2026-08-25 実測(第 2 版)。5 圏のうち 𝒞 / 𝒞^un-tr / 𝒞^pf / (𝒞^pf)^un-tr は" ++
+        "ex63_ratStd / ex63_unTr_ratStd / ex63_pf_ratStd / ex63_pf_unTr_ratStd で閉じた。" ++
+        "残るは 𝒞^rlf(実化)のみ。依存グラフの p55iii-ratstd 節点に分けてある")) 114,
     .citation "[ABC3]" "not group-like の伝播(𝒞^pf / 𝒞^un-tr / (𝒞^pf)^un-tr)"
       (.inProject "ABC3" "ABC3.Found.FrdI.pfRoot_not_isOfGroupLikeType") 114 ]
 
