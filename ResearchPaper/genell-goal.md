@@ -23093,3 +23093,50 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-577 ★★★★★★★★葉 (e) の同定の段(第 264 ブロック)
+
+`Found/GaloisRep/TateIdentify.lean`。
+
+葉 (e)(全射性)は 2 段に分かれる:
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 存在 | `Λ(a) = c` を満たす `a` を縮小写像で作る | 次 |
+| **同定** | **その `a` の点が目標の点に等しい** | ★本ブロック |
+
+### ★★★★★★★★同定の段
+
+> `(x,y)` が曲線上、`x` と `x+y` が単元、`Λ(a) = y (x+y)^{-1}` なら
+> `X(a,w) = x` かつ `Y(a,w) = y`
+
+段取り:
+
+1. `Λ(a) = Y (X+Y)^{-1}` と `c = y (x+y)^{-1}` の等式に、両辺 `(X+Y)(x+y)` を掛けて
+   **逆元を消す**:`Y(x+y) = y(X+Y)`。
+2. 展開すると **`Y x = y X`**——第 263 の `curve_point_unique_of_rel` の仮定の形。
+3. `(X,Y)` は曲線上(葉 (b)、第 240)、`X` は単元(`isUnit_tateXpair`
+   ——主要項 `a/(1-a)^2` が単元)。
+4. 第 263 の一意性で `X = x`、`Y = y`。
+
+★★逆元を「掛けて消す」だけで済むのは、`X + Y` と `x + y` が**両方とも単元**だから
+である(第 262 の `isUnit_tateXpair_add_tateYpair`)。
+★`Ring.inverse` は環準同型を通らない(`tools/lean-idioms.md`)ので、
+**逆元を持ち歩かずに早めに消す**のが定石になっている。
+
+| 定理 | 内容 |
+|---|---|
+| `isUnit_tateXpair` | ★★★★★`X` は単元 |
+| `tate_point_eq_of_lambda` | ★★★★★★★★**母数座標が一致すれば点が一致する** |
+
+### 残り(葉 (e) の存在の段)
+
+`Λ(a) = c` を `a` について解く。`Λ(a) = a + κ(a)`(`κ(a) in I`)なので
+`a = c - κ(a)` の不動点であり、第 102 の `exists_fixedPoint_of_contraction` が使える。
+★要るのは「`κ` の変動が 1 つ位を上げる」こと:
+`w = q a^{-1}` の変動(第 260 の `exists_complement`)と
+尾の差(第 259)から出る見込み。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
