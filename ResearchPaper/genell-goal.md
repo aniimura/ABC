@@ -21153,3 +21153,52 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-541 ★★★★★ℂ の上の二重和(第 228 ブロック)
+
+`Found/GaloisRep/TateDoubleSum.lean`。§9-540 で書き留めた穴に着手した。
+
+    S_{m>=1} f(q^m) = S_{N>=1} sigma_1(N) q^N     (ℂ の上)
+
+★形式側では第 111(`tateXtail_one`)で取れているが、**ℂ の上では別に要る**
+——`evalAdic` の議論は `I` 進完備環でしか使えない。
+
+### ★★★★二重和に開く
+
+`‖t‖ < 1` なら `f(t) = S_{d>=0}(d+1)t^{d+1}`(幾何級数の微分——mathlib の
+`hasSum_coe_mul_geometric_of_norm_lt_one`)。よって
+
+    S_{m>=1} f(q^m) = S_{(m,d) in N x N} (d+1) q^{(m+1)(d+1)}
+
+★★**二重族の可和性**が要る。ここで効いたのは `(m+1)(d+1) >= m + (d+1)` である:
+
+    ‖(d+1) q^{(m+1)(d+1)}‖ <= ‖q‖^m * (d+1)‖q‖^{d+1}
+
+と**積の形**に分かれるので `Summable.mul_of_nonneg` で押さえられる。
+★★★指数の不等式を `nlinarith`/`omega` で通そうとすると `whnf` が時間切れになる。
+`a + (b+1) = 0 + (a+b+1) <= a*b + (a+b+1) = (a+1)(b+1)` と `calc` で書くと通る
+(`add_succ_le_mul_succ`)。★`summable_double_family` 自体も
+`set_option maxHeartbeats 1000000` が要った。
+
+| 定理 | 内容 |
+|---|---|
+| `hasSum_nat_mul_geometric` | ★`f(t) = S_{d>=0} d t^d`(ℂ の上) |
+| `hasSum_nat_succ_mul_geometric` | ★`f(t) = S_{d>=0}(d+1)t^{d+1}` |
+| `add_succ_le_mul_succ` | ★`a + (b+1) <= (a+1)(b+1)` |
+| `summable_double_family` | ★★★★**二重族は可和** |
+| `tsum_double_family_eq` | ★★★★★**二重和の内側は `f(q^{m+1})`** |
+
+### ★次の段
+
+`N = (m+1)(d+1)` で括り直せば `S_{d|N} d = sigma_1(N)` が出る。道具は:
+
+- `Equiv.sigmaFiberEquiv`(`pi : N x N -> N`、`pi (m,d) = (m+1)(d+1)` の繊維分解)
+- `Summable.tsum_sigma`
+- `Nat.divisorsAntidiagonal`(`(a,b) |-> ab = N` の有限集合)と
+  `Nat.sum_divisorsAntidiagonal`
+
+★繊維 `{p // (p.1+1)(p.2+1) = N}` に `Fintype` を入れて有限和に落とすところが手間である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
