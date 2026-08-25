@@ -212,6 +212,57 @@ theorem toWeilOnDL_phiPullBase
           (normObj_isNormalScheme V₁ L) d.2 hdim) from rfl, hemb]
   rfl
 
+/-! ## ★3. 底が動くときの `B(L)` の引き戻し -/
+
+/-- ★★★**`S₂` の外では `ord = 0` が保たれる**(一般形)——
+`B(L) → B(L₂)` の中身。 -/
+theorem ordPt_ffMap_eq_zero_of_notMem {W₁ W₂ : Scheme.{u}} (π : W₂ ⟶ W₁) [IsDominant π]
+    [IsIntegral W₁] [IsIntegral W₂] [IsLocallyNoetherian W₁] [IsLocallyNoetherian W₂]
+    (hn₂ : IsNormalScheme W₂) (hn₁ : IsNormalScheme W₁)
+    (S₁ : Set (PrimeDivisorPt W₁)) (S₂ : Set (PrimeDivisorPt W₂))
+    (hdim : ∀ x : PrimeDivisorPt W₂, ringKrullDim (W₁.presheaf.stalk (π.base x.1)) ≤ 1)
+    (hpull : ∀ x : PrimeDivisorPt W₂, x ∉ S₂ → ∀ hc : IsCodimOnePt W₁ (π.base x.1),
+      (⟨π.base x.1, hc⟩ : PrimeDivisorPt W₁) ∉ S₁)
+    (u : (W₁.functionField)ˣ)
+    (hu : ∀ z : PrimeDivisorPt W₁, z ∉ S₁ → ordPt W₁ hn₁ z (u : W₁.functionField) = 0)
+    (x : PrimeDivisorPt W₂) (hx : x ∉ S₂) :
+    ordPt W₂ hn₂ x (ffMap π (u : W₁.functionField)) = 0 := by
+  obtain ⟨t, ht⟩ : ∃ t : (W₁.presheaf.stalk (π.base x.1))ˣ,
+      algebraMap (W₁.presheaf.stalk (π.base x.1)) W₁.functionField
+        (t : W₁.presheaf.stalk (π.base x.1)) = (u : W₁.functionField) := by
+    by_cases hcod : IsCodimOnePt W₁ (π.base x.1)
+    · exact exists_unit_of_ordPt_eq_zero hn₁ _ u.ne_zero (hu _ (hpull x hx hcod))
+    · exact exists_unit_of_ringKrullDim_le_zero
+        (withBot_le_zero_of_le_one_of_ne (hdim x) hcod) u
+  rw [← ht]
+  exact ordPt_ffMap_eq_zero_of_isUnit π hn₂ x t
+
+/-- ★★★★★★**`B₁(L) → B₂(L₂)`**(底が動く版)——
+`Theorem 6.2, (i)` の `B₁ → B₂|𝒟₁` の中身。 -/
+noncomputable def bPullBase :
+    BSubgroup V₁ DK₁ L (normObj_isNormalScheme V₁ L)
+      →* BSubgroup V₂ DK₂ FL (normObj_isNormalScheme V₂ FL) where
+  toFun u := ⟨Units.map (ffMap π).hom.toMonoidHom (u : ((normObj V₁ L).functionField)ˣ), by
+    intro x hx
+    exact ordPt_ffMap_eq_zero_of_notMem π (normObj_isNormalScheme V₂ FL)
+      (normObj_isNormalScheme V₁ L) (DLSet V₁ DK₁ L) (DLSet V₂ DK₂ FL) hdim hpull
+      (u : ((normObj V₁ L).functionField)ˣ) u.2 x hx⟩
+  map_one' := Subtype.ext (map_one _)
+  map_mul' a b := Subtype.ext (map_mul _ _ _)
+
+/-- ★★★★**可換な四角形では関数体の引き戻しが一致する** ——
+`B` の**自然性**の中身。 -/
+theorem ffMap_square {X Y Z W : Scheme.{u}}
+    (a : X ⟶ Y) (b : Y ⟶ W) (c : X ⟶ Z) (e : Z ⟶ W)
+    [IsDominant a] [IsDominant b] [IsDominant c] [IsDominant e]
+    [IsDominant (a ≫ b)] [IsDominant (c ≫ e)]
+    [IrreducibleSpace X] [IrreducibleSpace Y] [IrreducibleSpace Z] [IrreducibleSpace W]
+    (hsq : a ≫ b = c ≫ e) (t : W.functionField) :
+    ffMap a (ffMap b t) = ffMap c (ffMap e t) := by
+  have h1 : ffMap (a ≫ b) t = ffMap a (ffMap b t) := by rw [ffMap_comp]; rfl
+  have h2 : ffMap (c ≫ e) t = ffMap c (ffMap e t) := by rw [ffMap_comp]; rfl
+  rw [← h1, ← h2, ffMap_congr hsq]
+
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
 def phiPullBase.src : Source :=
@@ -253,5 +304,29 @@ def pullCoeff_square.needs : List ProofObligation :=
     .citation "[ABC3]" "normMapOfBase_naturality(四角形の可換性を与える側)"
       (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_naturality") 110,
     .derivation "関手性を 2 回使い、四角形の可換性で繋ぐ。IsDominant は Prop なので射の等式で移送できる" 110 ]
+
+def bPullBase.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — B₁ → B₂|𝒟₁(底が動く版の有理函数の引き戻し)",
+    sectionId := "frdi-thm-6-2" }
+
+def bPullBase.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "ffMap(支配射に沿った関数体の射)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.ffMap") 110,
+    .citation "[ABC3]" "exists_unit_of_ordPt_eq_zero / exists_unit_of_ringKrullDim_le_zero"
+      (.inProject "ABC3" "ABC3.Found.Divisor.exists_unit_of_ordPt_eq_zero") 110,
+    .derivation
+      "D_{L₂} の外の点は D_L の外へ行くので、そこでは u が茎の単元になり ord = 0 が保たれる" 110,
+    .implicitStep
+      "★原文は仮定 (a) から有理函数の引き戻しを「(i)」の一言で置いている" 110 ]
+
+def ffMap_square.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 可換な四角形では関数体の引き戻しが一致する(B の自然性)",
+    sectionId := "frdi-thm-6-2" }
+
+def ffMap_square.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "ffMap_comp"
+      (.inProject "ABC3" "ABC3.Found.Divisor.ffMap_comp") 110 ]
 
 end ABC3.Found.Divisor
