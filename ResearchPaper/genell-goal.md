@@ -21907,3 +21907,54 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-556 ★★★★格子点での主要部 —— 見積もりを縮めた(第 243 ブロック)
+
+`Found/GaloisRep/WeierstrassPole.lean`。
+
+### ★★★訂正 —— 偏角の原理は要らなかった
+
+§9-555 では葉 (c) の段 2(`℘` の加法定理)を **30-60 ブロック**と見積もり、
+「零点の和 = 極の和」(Abel、偏角の原理)が要ると書いた。★**これは読み違いである**。
+
+★★**Liouville だけで済む古典的な証明がある**:
+
+    F(z) := ℘(z+w) - [ (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2 - ℘(z) - ℘(w) ]
+
+は `z` の楕円関数で、**見かけの極がすべて相殺する**。よって第 241・242 で定数、
+値を一点で見れば 0——これが加法定理である。基本平行四辺形上の周回積分は要らない。
+
+### ★★★極の相殺を確かめる主要部は mathlib に在った
+
+| 補題 | 内容 |
+|---|---|
+| `weierstrassPExcept_def` | `℘[L-l0](z) = ℘(z) + (1/l0^2 - 1/(z-l0)^2)` |
+| `analyticAt_weierstrassPExcept` | `℘[L-l0]` は `l0` で解析的 |
+| `derivWeierstrassPExcept_def` | `℘'[L-l0](z) = ℘'(z) + 2/(z-l0)^3` |
+| `analyticAt_derivWeierstrassPExcept` | 同上 |
+
+★つまり **`℘` から `l0` の項だけ抜いたもの**が既に用意されていて、
+それが `l0` で解析的であることまで示されている。これで
+
+    ℘(z)  = 1/(z-l0)^2 + (正則部)
+    ℘'(z) = -2/(z-l0)^3 + (正則部)
+
+が直ちに書ける。★★★**見積もりは 15-35 ブロックに縮まった**。
+
+★§9-527 で「測ってから選ぶ」と書いたが、**測り直すこと**も同じくらい大事だった。
+在庫(`weierstrassPExcept`)を見ていれば §9-555 の時点で気づけた。
+
+| 定理 | 内容 |
+|---|---|
+| `weierstrassP_principal` | ★★★★`℘` の主要部 |
+| `derivWeierstrassP_principal` | ★★★★`℘'` の主要部 |
+| `sq_mul_weierstrassP` | ★★★`(z-l0)^2 ℘(z) = 1 + O((z-l0)^2)` |
+| `cube_mul_derivWeierstrassP` | ★★★`(z-l0)^3 ℘'(z) = -2 + O((z-l0)^3)` |
+
+★★`linear_combination` は `1/(z-l0)^2` の形を `ring` で展開しようとして落ちる。
+`rw [weierstrassPExcept_def]` してから `ring` にすると、逆元が両辺に同じ形で
+現れるので通る。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
