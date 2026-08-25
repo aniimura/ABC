@@ -332,7 +332,34 @@ theorem eq_one_of_fixes_prime_of_galoisClosure
     ((hσdef ▸ hσ1).trans (map_one _).symm)
   exact congrArg Subtype.val hsub
 
+open IntermediateField in
+/-- ★★★★**数体は ℚ 上 Galois な数体に埋め込める**(Galois 閉包)。
+
+★mathlib の `normalClosure ℚ L (AlgebraicClosure L)` を取るだけ。
+`FiniteDimensional` は `normalClosure.is_finiteDimensional`、
+`Normal` は `normalClosure.normal`(`Normal ℚ (AlgebraicClosure L)` が要る)。 -/
+theorem exists_galoisClosure (L : Type) [Field L] [NumberField L] :
+    ∃ (N : Type) (_ : Field N) (_ : NumberField N) (_ : Algebra L N), IsGalois ℚ N := by
+  haveI hAlg : Algebra.IsAlgebraic ℚ (AlgebraicClosure L) :=
+    Algebra.IsAlgebraic.trans (R := ℚ) (S := L) (A := AlgebraicClosure L)
+  haveI hac : IsAlgClosure ℚ (AlgebraicClosure L) := ⟨inferInstance, hAlg⟩
+  haveI h0 : Normal ℚ (AlgebraicClosure L) := inferInstance
+  haveI hfd : FiniteDimensional ℚ ↥(normalClosure ℚ L (AlgebraicClosure L)) :=
+    normalClosure.is_finiteDimensional ℚ L (AlgebraicClosure L)
+  haveI hnf : NumberField ↥(normalClosure ℚ L (AlgebraicClosure L)) :=
+    { to_charZero := inferInstance, to_finiteDimensional := hfd }
+  haveI hn : Normal ℚ ↥(normalClosure ℚ L (AlgebraicClosure L)) :=
+    normalClosure.normal ℚ L (AlgebraicClosure L)
+  haveI : IsGalois ℚ ↥(normalClosure ℚ L (AlgebraicClosure L)) := ⟨⟩
+  exact ⟨↥(normalClosure ℚ L (AlgebraicClosure L)), inferInstance, hnf,
+    normalClosure.algebra ℚ L (AlgebraicClosure L), inferInstance⟩
+
 /-! ### ★出典の紐付け -/
+
+def exists_galoisClosure.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 数体は ℚ 上 Galois な数体に埋め込める(Galois 閉包)",
+    sectionId := "frdi-thm-6-4" }
 
 def eq_one_of_fixes_prime_of_galoisClosure.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
