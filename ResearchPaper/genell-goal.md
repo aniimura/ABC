@@ -22618,3 +22618,70 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-569 ★★★★★★★★★葉 (c) が終わった —— Tate 級数の 3 点は共線(第 256 ブロック)
+
+`Found/GaloisRep/TateCollinear.lean`。
+
+### ★★★★★★★★★到達点
+
+> `u v w = q` なら Tate 級数の 3 点 `(X(u),Y(u))`, `(X(v),Y(v))`, `(X(w),Y(w))` は
+> 一直線上にある(`tate_collinear`)。
+
+    X(u)(Y(v) - Y(w)) + X(v)(Y(w) - Y(u)) + X(w)(Y(u) - Y(v)) = 0
+
+これが**葉 (c)(一意化が準同型であること)の中身**である。
+仮定は `q in I`、`u v w = q`、そして「3 点のどれも原点でなく、どの 2 点の和も原点でない」
+(`∀ i, IsUnit (1 - collPts u v w i)`)。
+
+### ★★★★★変数の入れ替えで `U`・`V` 側を出す
+
+第 255 で `W^{n+1} | P` を示した。`U`・`V` 側は**変数の名前替え**で出る。
+
+    swapUW := rename (Equiv.swap 0 2),   swapVW := rename (Equiv.swap 1 2)
+
+これは `CollBase` の環同型(対合)で `swapUW cW = cU` なので
+`W^m | swapUW P` から `U^m | P` が出る。★★そして
+
+    (evalUV u v (swapUW P)).eval t = collEval t v u P
+
+なので、**第 253 の `cW_pow_dvd_of_coeff` をそのまま `swapUW P` に当てられる**。
+`ℤ[v][w][u]` のような**新しい多項式環の塔を作る必要がない**。
+第 240 では `A` 側のために `evalA`・`toPP2`・`ofPP2` を作り直したが、
+今回はその手間が消えた。
+
+### ★★★★★★評価は 3 変数対称だった
+
+第 254 の `norm_collDefectTrunc_le` は `(u,v,w)` について対称な形をしている。
+そこで「動かす変数 `t` はどのスロットでもよい」形に一度だけ書き直しておく
+(`norm_collEval_le`——仮定は `‖uvw‖ <= ‖t‖` だけ)。
+★これで 3 つの側が**同じ 1 本の評価**から出る。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_collEval_le` | ★★★★★★動かす変数はどのスロットでもよい |
+| `swapUW`・`swapVW` | ★★★★★変数の入れ替え |
+| `eval_evalUV_swapUW` 他 | ★★★★入れ替えたあとの評価 |
+| `cU_pow_dvd_numerator`・`cV_pow_dvd_numerator` | ★★★★★★★★残る二つの整除性 |
+| `tate_collinear` | ★★★★★★★★★**葉 (c) の到達点** |
+
+### ★★見積もりの実績(葉 (c) 全体)
+
+段 2(`℘` の共線性)を第 244-248 の **5 ブロック**、
+段 3(Tate 側への移送と降下)を第 249-256 の **8 ブロック**、合わせて **13 ブロック**。
+§9-555 で葉 (c) 全体を 30-60 ブロックと見積もったが、
+経路を行列式に切り替えたこと(§9-559)と、対称な 3 変数 `q = UVW` を選んだこと
+(§9-562)で、葉 (b) の在庫がほぼそのまま効いた。
+
+### 葉 (b)・(c) が済み、残るのは (d)(e)
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 | ★済(第 240) |
+| (c) | 準同型(共線性) | ★★済(本ブロック) |
+| (d) | 核が `q^ℤ` | 未着手 |
+| (e) | 全射性 | 未着手 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
