@@ -489,6 +489,17 @@ theorem mapDomain_mem_arithDivGroup (L M : Type) [Field L] [Field M]
   push_cast at h
   exact h
 
+open NumberField Finset Finsupp in
+open scoped Classical in
+/-- ★トレース写像は非負性を保つ（非負元の有限和だから）。 -/
+theorem mapDomain_nonneg (L M : Type) [Field L] [Field M] [NumberField L] [NumberField M]
+    [Algebra L M] {y : ArithPlace M →₀ ℝ} (hy : ∀ s, 0 ≤ y s) :
+    ∀ v, 0 ≤ (Finsupp.mapDomain (resPlace (L := L) (M := M)) y) v := by
+  classical
+  intro v
+  rw [mapDomain_apply_eq_sum']
+  exact Finset.sum_nonneg (fun V _ => hy V)
+
 /-! ### ★出典の紐付け -/
 
 def mapDomain_mem_arithDivGroup.src : ABC3.Meta.Source :=
