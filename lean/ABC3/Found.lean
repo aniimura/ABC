@@ -254,6 +254,7 @@ import ABC3.Found.FrdI.Prop55UnTrRatStd
 import ABC3.Found.FrdI.Prop55RlfRatStd
 import ABC3.Found.FrdI.Thm64Slim
 import ABC3.Found.FrdI.Thm64DivSlim
+import ABC3.Found.FrdI.Thm64Bundle
 import ABC3.Found.FrdI.Prop55BiratOmega
 import ABC3.Found.FrdI.Prop55
 import ABC3.Found.FrdI.Prop55RlfNd
