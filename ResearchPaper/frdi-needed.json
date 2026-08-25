@@ -122,7 +122,7 @@
    "page": 41,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 2.1",
@@ -187,7 +187,7 @@
    "page": 52,
    "section": "2",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Definition 3.1",
@@ -350,7 +350,7 @@
     "IUTchII",
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 5.2",
@@ -361,7 +361,7 @@
     "IUTchII",
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 5.3",
@@ -372,7 +372,7 @@
     "IUTchII",
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Corollary 5.4",
@@ -381,14 +381,14 @@
    "citedBy": [
     "IUTchI"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 5.5",
    "page": 104,
    "section": "5",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 5.6",
@@ -397,7 +397,7 @@
    "citedBy": [
     "IUTchI"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Corollary 5.7",
@@ -406,7 +406,7 @@
    "citedBy": [
     "IUTchI"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Example 6.1",
@@ -431,7 +431,7 @@
     "IUTchII",
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 6.4",
@@ -449,9 +449,9 @@
    "page": 116,
    "section": "6",
    "citedBy": [],
-   "done": false
+   "done": true
   }
  ],
  "total": 54,
- "done": 39
+ "done": 50
 }
