@@ -3976,11 +3976,11 @@
           "deps": [
             "cheb-zeta"
           ],
-          "status": "todo",
-          "size": "中",
-          "note": "★mathlib の `NumberField.dedekindZeta` は `LSeries` で定義されている。Euler 積は `EulerProduct` の一般論に乗る見込み。\n\n★★2026-08-21 実測：**Dedekind ζ の Euler 積は mathlib に無い**（`dedekindZeta` は `LSeries` として\n定義されているだけ）。★ただし `Mathlib/NumberTheory/EulerProduct/` に Euler 積の機構があり、\nDirichlet L 関数については `LSeries_eulerProduct_exp_log` が在る。★これに乗せる形で書くこと。",
-          "lean": "",
-          "decl": "",
+          "status": "半済",
+          "size": "中(有理素数ごとの Euler 積は出た。残るは局所因子の素イデアル分解)",
+          "note": "★mathlib の `NumberField.dedekindZeta` は `LSeries` で定義されている。Euler 積は `EulerProduct` の一般論に乗る見込み。\n\n★★2026-08-21 実測：**Dedekind ζ の Euler 積は mathlib に無い**（`dedekindZeta` は `LSeries` として\n定義されているだけ）。★ただし `Mathlib/NumberTheory/EulerProduct/` に Euler 積の機構があり、\nDirichlet L 関数については `LSeries_eulerProduct_exp_log` が在る。★これに乗せる形で書くこと。\n\n## ★★★★★★2026-08-25(**Euler 積が出た**)\n\n`Found/NumberField/DedekindEuler.lean`(新規・sorry 無し)。\n\n### ★律速だったもの —— イデアル計数関数の乗法性(mathlib に無い)\n\n`a_K(n) = #{I : N I = n}` が互いに素な引数で乗法的であること。実測(2026-08-25)で\nmathlib に無いことを確かめ、次の順で証明した:\n\n| 定理 | 中身 |\n|---|---|\n| `sup_eq_top_of_coprime_absNorm` | ノルムが互いに素なら comaximal |\n| `mul_sup_span_absNorm` | ★**復元** `I = I·J + (N I)` |\n| `mul_split_eq` | ★**分解** `A = (A + (m))·(A + (n))` |\n| `absNorm_sup_span_eq` | 各因子のノルムはちょうど `m`・`n` |\n| `coprimeIdealEquiv` | `{N I = m} × {N J = n} ≃ {N A = m·n}` |\n| `idealCount_mul` | ★★**計数関数は乗法的** |\n\n★★要は **Bézout 1 本**である —— `u·m + v·n = 1` を `x ∈ I` に掛けると\n`x = (u·m)·x + v·(x·n)` で、前者は `(m)`、後者は `I·J` に入る。\n\n### ★解析の側\n\n* `sum_card_absNorm_eq` / `sum_card_absNorm_isBigO` —— 部分和は `O(n)`\n  (mathlib の類数公式の漸近 `Ideal.tendsto_norm_le_div_atTop₀` から)\n* `summable_zetaSummand` —— `Re s > 1` で絶対収束\n* ★`dedekindZeta_eulerProduct_hasProd` / `_tprod` / `_`(3 形)\n\n### ☆残っているもの —— **局所因子の素イデアル分解**\n\n出たのは**有理素数ごとの局所因子** `L_p(s) = Σ_e a(p^e)p^{-es}` の形である。\n原文の `Π_𝔭 (1 − N𝔭^{-s})^{-1}` にするには\n\n    Σ_e a(p^e)p^{-es} = Π_{𝔭 | p} (1 − N𝔭^{-s})^{-1}\n\nが要る(= 「ノルムが `p` 冪のイデアル ≃ `p` の上の素イデアルの積」)。\n★★これは `cheb-log-zeta` の **`e ≥ 2` の項の一様評価**にも要る ——\n`a(p^e) ≤ (ed+1)^d`(多項式増大)が無いと `s → 1+` で一様に押さえられない。\n★`a(n) ≤ C·n`(部分和の漸近から出る)では**弱すぎる**ことを実測した。\n\n★在庫: `IsDedekindDomain.primesOverFinset` / `card_primesOverFinset_le_finrank` /\n`Ideal.sum_ramification_inertia`。",
+          "lean": "ABC3/Found/NumberField/DedekindEuler.lean",
+          "decl": "ABC3.Found.NF.idealCount / idealCount_mul / coprimeIdealEquiv / mul_sup_span_absNorm / mul_split_eq / absNorm_sup_span_eq / sum_card_absNorm_isBigO / summable_zetaSummand / dedekindZeta_eulerProduct_hasProd / dedekindZeta_eulerProduct_tprod / dedekindZeta_eulerProduct",
           "frdiNeeded": true
         },
         {
