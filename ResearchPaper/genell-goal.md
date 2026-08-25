@@ -21465,3 +21465,58 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-547 ★★★★★★方程式の差の差と大きさの評価(第 234 ブロック)
+
+`Found/GaloisRep/TateBounds.lean`。
+
+第 231・233 で四つの部品(`X`・`Y`・`a4`・`a6`)の**差**が揃った。
+方程式の差は二次・三次の項を含むので、差を足すには**値の大きさ**も要る。
+
+### ★★★★★★差の差をまとめた
+
+    Y^2 - Y'^2 = (Y-Y')(Y+Y'),  X^3 - X'^3 = (X-X')(X^2 + XX' + X'^2), ...
+
+をまとめて
+
+    ‖D(X,Y,A4,A6) - D(X',Y',A4',A6')‖ <= (3M^2 + 6M + 1) * eps
+
+(`M` は値の大きさの上界、`eps` は差の上界、`D` は Weierstrass の左辺 - 右辺)。
+★これが `norm_defect_diff_le` である。**七項の三角不等式**(`norm_sum7`)に落として
+`nlinarith` で締める形にした。
+
+### ★★★★切り詰めの大きさ
+
+`‖q‖ <= 1/8` かつ `‖u‖ <= 1`、`‖w‖ <= 1/2` なら各項は絶対定数で押さえられる:
+
+| 項 | 上界 |
+|---|---|
+| `f(q^{m+1}c)`(`‖c‖ <= 1`) | `4` |
+| `g(q^{m+1}c)` | `8` |
+| `partialEval (sigmaSeries k) q (n+1)` | `n`(各項が `1` 以下) |
+| `f(w)`(`‖w‖ <= 1/2`) | `2` |
+| `g(w)` | `4` |
+
+★★★**`u` に依存するのは `f(u)`・`g(u)` だけ**である。`w = q/u` は `q -> 0` で 0 に
+行くので `f(w)`・`g(w)` は絶対定数で押さえられる。
+**`u` を固定して `q -> 0` を見る**という最終段の構図が、ここで初めて式の上に現れた。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_sum7` | ★7 項の三角不等式 |
+| `norm_defect_diff_le` | ★★★★★★**方程式の差の差** |
+| `norm_partialSum_le` | ★部分和の大きさ |
+| `norm_tateXtrunc_le` / `norm_tateYtrunc_le` | ★★★★★切り詰めの大きさ |
+| `norm_partialEval_tateA4_le` / `_tateA6_le` | ★★★★係数の切り詰めの大きさ |
+
+### ★残り
+
+1. 第 232 の `tate_equation_uw`(解析側の差は 0)と本ブロックを合わせて
+   `‖tateDefectTrunc (n+1) u w (uw)‖ <= C_n ‖q‖^{n+1}`
+2. 第 225 の `tateEval_numerator` で分子に移し、`u` を動かして係数の消滅(`W^n | P`)
+3. 対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

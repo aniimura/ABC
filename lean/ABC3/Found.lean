@@ -880,6 +880,7 @@ import ABC3.Found.GaloisRep.TateSigmaTail
 import ABC3.Found.GaloisRep.TateAnalyticTrunc
 import ABC3.Found.GaloisRep.TateUWBridge
 import ABC3.Found.GaloisRep.TateCoeffTail
+import ABC3.Found.GaloisRep.TateBounds
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
