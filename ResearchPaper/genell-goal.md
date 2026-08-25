@@ -21258,3 +21258,59 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-543 ★★★★★★`s1` の切り詰めとの差(第 230 ブロック)
+
+`Found/GaloisRep/TateSigmaTail.lean`。
+
+第 227 で `X`・`Y` の尾の評価、第 229 で `s1` の q 展開(ℂ の上)が取れた。
+本ブロックで **`s1` の解析値と `partialEval (sigmaSeries 1) q n` の差**を評価した:
+
+    ‖S_{m>=1}f(q^m) - partialEval (sigmaSeries 1) q (n+1)‖ <= 2 (4‖q‖)^{n+1}
+
+### ★★★★係数は `4^N` で押さえる
+
+`sigma_1(N) = S_{d|N} d <= N * |divisors(N)| <= N * N = N^2`
+(約数はすべて `N` 以下、個数も `N` 以下)。さらに `N < 2^N` なので `N^2 <= 4^N`。よって
+
+    ‖sigma_1(N) q^N‖ <= (4‖q‖)^N
+
+★★**`‖q‖ <= 1/8` を仮定に置く**と `4‖q‖ <= 1/2` になり、第 227 の一般の尾の評価が
+`r := 4‖q‖` でそのまま使える。★新しい評価補題を作らずに済んだ。
+
+★★★**定数が `n` に依存してよい**ことに注意——`(4‖q‖)^{n+1} = 4^{n+1} ‖q‖^{n+1}` は
+`‖q‖^{n+1}` の `4^{n+1}` 倍である。各 `n` を固定して `q -> 0` を見るので、
+`n` に依存する定数で十分である。ここを取り違えると評価が出ないところだった。
+
+### ★`partialEval` と部分和の対応
+
+`sigmaSeries 1` の `0` 次係数は `0` なので `Finset.sum_range_succ'` で先頭を切り出すと
+
+    partialEval (sigmaSeries 1) q (n+1) = S_{k<n} sigma_1(k+1) q^{k+1}
+
+| 定理 | 内容 |
+|---|---|
+| `sigma_one_le_sq` | ★★`sigma_1(N) <= N^2` |
+| `sq_le_four_pow` | ★`N^2 <= 4^N` |
+| `norm_sigma_term_le` | ★★`‖sigma_1(N) q^N‖ <= (4‖q‖)^N` |
+| `norm_sigma_tail_le` | ★★★★★`sigma_1` 級数の尾の評価 |
+| `partialEval_sigmaSeries_succ` | ★`partialEval` は部分和である |
+| `norm_tateXtail_one_sub_partialEval_le` | ★★★★★★**`s1` の解析値と切り詰めの差** |
+
+### ★これで解析側の部品はそろった
+
+| 部品 | ブロック |
+|---|---|
+| 解析側の Tate 方程式(差は厳密に 0) | 第 220 |
+| ℤ 和を頭と尾に分ける | 第 226 |
+| `X`・`Y` の尾の評価 | 第 227 |
+| `s1` の q 展開(ℂ の上) | 第 228-229 |
+| `s1` の切り詰めとの差 | ★本ブロック |
+
+★次は これらを合わせて `tateDefectTrunc n u w (uw) = O(q^n)` を出し、
+そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`、
+第 224 の `tateDefect_eq_zero_of_base` に流し込む。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
