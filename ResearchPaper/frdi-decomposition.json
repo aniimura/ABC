@@ -3156,11 +3156,11 @@
             "krull-domain-intersection",
             "proper-global-sections"
           ],
-          "status": "todo",
-          "size": "★大",
-          "note": "★原文が「we observe that [since `V[L]` is a proper normal variety]」で畳む段。**proper + 整 ⟹ 大域切断は `k` 上有限**(mathlib 在庫は要測定)。\n\n★★★★2026-08-21：**2 段に分解した** —— `krull-domain-intersection`（代数的 Hartogs）と\n`proper-global-sections`（`Γ(X,𝒪_X) = k`）。**どちらも mathlib に無い**ことを実測した。\n★★`ex61-model` は閉じたので、`𝒪^×(A)` の中身は確定している：\n`𝒪^×(A) = {u ∈ B(L) | すべての余次元 1 の点で ord_v(u) = 0}`。",
-          "lean": "",
-          "decl": ""
+          "status": "半済",
+          "size": "中(残り 1 本)",
+          "note": "★原文が「we observe that [since `V[L]` is a proper normal variety]」で畳む段。\n\n★★★★2026-08-21：**2 段に分解した** —— `krull-domain-intersection`(代数的 Hartogs)と\n`proper-global-sections`(`Γ(X,𝒪_X)` が体)。\n\n## ★★★★★★2026-08-25 の進捗(残りは **1 本**)\n\n| 段 | 状態 |\n|---|---|\n| 代数的 Hartogs(**環の側**) | ★★**済** `Found/Divisor/Hartogs.lean` |\n| `Γ(X,⊤)` は体・`k` 上有限 | ★★**済**(mathlib にあった) |\n| **貼り合わせ**(局所切断 → 大域切断) | ★★**済** `Found/Divisor/GlobalUnits.lean` |\n| 代数的 Hartogs の**スキーム版**(配線) | ☆残り 1 本 |\n\n★★**訂正**: `proper-global-sections` は mathlib に**あった** ——\n`isField_of_universallyClosed` と `finite_appTop_of_universallyClosed`\n(`Mathlib/AlgebraicGeometry/Morphisms/Proper.lean` の `## Main results` に両方書いてある)。\n\n★★★**訂正**: スケルトンの旧主張 `Function.Bijective (g.appTop)` は**偽**だった ——\n原文が言うのは `Γ(W,⊤) = k_L` であって `k` ではない(`k_L` は `k` の有限拡大)。\n正しい形(`ord` が全ての余次元 1 の点で 0 の元は `Γ(X,⊤)` の単元)に直した。\n\n★★★★貼り合わせが効くのは `X` が既約だから —— 空でない開集合は必ず生成点を含むので、\n2 つの空でない開集合は必ず交わり、`Γ(X,−) ↪ K(X)` の単射性から\n重なりでの一致が**自動**で出る。層の貼り合わせ条件がそのまま埋まる。\n\n★残る 1 本(`Skeleton/Divisor/Normalization.lean` の\n`mem_range_germ_of_forall_ordPt_nonneg`)は配線 3 段:\n\n* `Γ(X,U)` の高さ 1 素イデアル ↔ `X` の余次元 1 の点(`isCodimOnePt_spec_iff`、実装済み)\n* `ordPt ≥ 0` ↔ 茎に入る(`exists_mem_stalk_of_ordPt_nonneg`、実装済み)\n* アフィン開 `U ≅ Spec Γ(X,U)` を通す\n\n★★`ex61-model` は閉じているので、`𝒪^×(A)` の中身は確定している：\n`𝒪^×(A) = {u ∈ B(L) | すべての余次元 1 の点で ord_v(u) = 0}`。",
+          "lean": "ABC3/Found/Divisor/GlobalUnits.lean(貼り合わせと体性)＋ ABC3/Skeleton/Divisor/Normalization.lean(残り 1 本)",
+          "decl": "ABC3.Found.Divisor.exists_globalSection / mem_range_germ_top_of_forall_affine / globalSections_isField / globalSections_finite / exists_unit_globalSection"
         },
         {
           "id": "normalization-universal-normal",

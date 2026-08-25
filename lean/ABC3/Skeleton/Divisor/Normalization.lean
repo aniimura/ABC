@@ -4,6 +4,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Found.Divisor.CartierFrobenioid
 import ABC3.Found.Divisor.NormFinite
+import ABC3.Found.Divisor.GlobalUnits
+import ABC3.Found.Divisor.SchemeOrdUnit
 import ABC3.Found.FrdI.Sec6GaloisCat
 import Mathlib.AlgebraicGeometry.Normalization
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
@@ -132,13 +134,50 @@ def IsKQCartier {ι : Type u} (W : ι → Scheme.{u})
 原文 (FrdI p.110):
 > that [since V [L] is a proper normal variety] for A ∈Ob(CV, -/
 
+open ABC3.Found.Divisor in
+/-- ★★★★**代数的 Hartogs のスキーム版** —— `global-units` に残っている **1 本**。
+
+★環の側(`Found/Divisor/Hartogs.lean` の `mem_Rsub_of_forall_heightOnePrime`)は
+**閉じている**。残るのは配線だけで、
+
+* `Γ(X,U)` の**高さ 1 素イデアル** ↔ `X` の**余次元 1 の点**(`isCodimOnePt_spec_iff`)
+* `ordPt ≥ 0` ↔ 茎に入る(`exists_mem_stalk_of_ordPt_nonneg`、実装済み)
+* アフィン開 `U ≅ Spec Γ(X,U)` を通す
+
+の 3 段である。★貼り合わせの側(`exists_globalSection`)は**閉じた**。 -/
+theorem mem_range_germ_of_forall_ordPt_nonneg {X : Scheme.{u}} [IsIntegral X]
+    [AlgebraicGeometry.IsLocallyNoetherian X] (hnorm : IsNormalScheme X)
+    (_hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (u : X.functionField)
+    (_h : ∀ x : PrimeDivisorPt X, 0 ≤ ordPt X hnorm x u) :
+    u ∈ Set.range (CategoryTheory.ConcreteCategory.hom (X.germToFunctionField ⊤)) := by
+  sorry
+
+open ABC3.Found.Divisor in
 /-- ★★**`O^×(A) = O^▷(A) = k_L^×`** —— proper normal なら大域函数は定数。
 
-★`k_L` は `L` の中での `k` の代数閉包(`k` の有限分離拡大)。 -/
-theorem globalSections_eq_constants {S : Scheme.{u}} (W : Scheme.{u}) [IsIntegral W]
-    (g : W ⟶ S) (_hg : IsProper g) (_hnorm : IsNormalScheme W) :
-    Function.Bijective (g.appTop) := by
-  sorry
+★`k_L` は `L` の中での `k` の代数閉包(`k` の有限分離拡大)。
+
+## ★★★★測定の訂正(2026-08-25)—— 主張が偽だった
+
+旧版は `Function.Bijective (g.appTop)`(`Γ(S) → Γ(W)` が全単射)と書いていたが、
+**これは偽**である —— 原文が言うのは `Γ(W,⊤) = k_L` であって `k` ではない。
+`k_L` は `k` の**有限拡大**で、一般に `k` とは違う。
+
+★正しい形は「`ord` がすべての余次元 1 の点で `0` の元は `Γ(X,⊤)` の**単元**」であり、
+そのうえで `Γ(X,⊤)` が `k` 上有限次の**体**(＝ `k_L`)である
+(`Found/Divisor/GlobalUnits.lean` の `globalSections_isField` / `globalSections_finite`)。 -/
+theorem globalSections_eq_constants {X : Scheme.{u}} [IsIntegral X]
+    [AlgebraicGeometry.IsLocallyNoetherian X] {k : Type u} [Field k]
+    (g : X ⟶ Spec (CommRingCat.of k)) (hg : IsProper g)
+    (hnorm : IsNormalScheme X)
+    (hnoeth : ∀ U : X.Opens, IsAffineOpen U → Nonempty U → IsNoetherianRing Γ(X, U))
+    (u : X.functionField) (hu : u ≠ 0)
+    (h : ∀ x : PrimeDivisorPt X, ordPt X hnorm x u = 0) :
+    ∃ t : Γ(X, ⊤), IsUnit t ∧
+      (CategoryTheory.ConcreteCategory.hom (X.germToFunctionField ⊤)) t = u :=
+  exists_unit_globalSection g hg hu
+    (mem_range_germ_of_forall_ordPt_nonneg hnorm hnoeth u (fun x => (h x).ge))
 
 /-! ## ★5. 出口 —— `CartierDatum` を作る(鎖 `normalize` の `cartier-datum-geom`) -/
 
@@ -215,11 +254,34 @@ def globalSections_eq_constants.src : Source :=
     sectionId := "frdi-example-6-1" }
 
 def globalSections_eq_constants.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "IsProper(proper 射)"
-      (.inMathlib "AlgebraicGeometry.IsProper") 110,
+  [ .citation "[ABC3]" "exists_unit_globalSection(Found、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.exists_unit_globalSection") 110,
+    .citation "[ABC3]" "mem_range_germ_of_forall_ordPt_nonneg(代数的 Hartogs のスキーム版、残り 1 本)"
+      (.inProject "ABC3" "ABC3.Skeleton.Divisor.mem_range_germ_of_forall_ordPt_nonneg") 110,
+    .citation "[mathlib]" "isField_of_universallyClosed(proper なら Γ(X,⊤) は体)"
+      (.inMathlib "AlgebraicGeometry.isField_of_universallyClosed") 110,
+    .citation "[mathlib]" "finite_appTop_of_universallyClosed(Γ(X,⊤) は k 上有限)"
+      (.inMathlib "AlgebraicGeometry.finite_appTop_of_universallyClosed") 110,
     .derivation "proper + 整 ⟹ 大域切断は基礎体上有限次(したがって体、k の代数閉包)" 110,
     .implicitStep
       "★原文は「[since V [L] is a proper normal variety]」の角括弧ひとつで畳む" 110 ]
+
+def mem_range_germ_of_forall_ordPt_nonneg.src : Source :=
+  { paper := "FrdI", pdfPage := 110, item := "Example 6.1 — 代数的 Hartogs のスキーム版",
+    sectionId := "frdi-example-6-1" }
+
+/-- ★★★**`global-units` に残っている 1 本**。環の側は閉じているので、残るのは配線。 -/
+def mem_range_germ_of_forall_ordPt_nonneg.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "代数的 Hartogs(環の側、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.Hartogs.mem_Rsub_of_forall_heightOnePrime") 110,
+    .citation "[ABC3]" "exists_globalSection(貼り合わせ、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.exists_globalSection") 110,
+    .citation "[ABC3]" "exists_mem_stalk_of_ordPt_nonneg(ord ≥ 0 なら茎に入る)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.exists_mem_stalk_of_ordPt_nonneg") 110,
+    .citation "[ABC3]" "isCodimOnePt_spec_iff(Spec R の余次元 1 の点は高さ 1 の素イデアル)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.isCodimOnePt_spec_iff") 110,
+    .derivation
+      "アフィン開 U ≅ Spec Γ(X,U) を通し、高さ 1 素イデアルごとに ord ≥ 0 を使って環の Hartogs を当て、貼り合わせる" 110 ]
 
 def exists_cartierDatum_of_geometry.src : Source :=
   { paper := "FrdI", pdfPage := 109, item := "Example 6.1 — Φ・B が 𝒟 上の単系を定める",
