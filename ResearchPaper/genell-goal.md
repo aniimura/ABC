@@ -21864,3 +21864,46 @@ G6 自体は `uniformization` の完成を要求している。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-555 ★★★★★★★格子の外で正則な楕円関数は定数(第 242 ブロック)
+
+`Found/GaloisRep/EllipticConst.lean`。
+
+第 241 の Liouville は「**全体で微分可能**な楕円関数は定数」だった。
+しかし加法定理の議論で現れる関数(`℘'(z) - lambda ℘(z) - nu` の組み合わせ等)は
+**格子の外でしか正則でない**。極が実は消えている場合を扱えるようにした:
+
+> 格子の外で正則、全体で連続な楕円関数は定数である。
+
+### ★★★★格子点は孤立している
+
+mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
+「**`x` 以外の格子点を除いた集合が `x` の近傍**」を与える。
+その上で `Complex.differentiableOn_compl_singleton_and_continuousAt_iff`(可除特異点)を
+当てれば `x` でも微分可能になり、第 241 が適用できる。
+
+★★**mathlib の `PeriodPair` には「格子は離散」まわりの補題が揃っていた**
+(`isClosed_lattice`、`isOpen_compl_lattice_sdiff`、`compl_lattice_sdiff_singleton_mem_nhds`)。
+`℘` の加法定理そのものは無いが、**その周辺の位相的な準備は在る**。
+
+| 定理 | 内容 |
+|---|---|
+| `eq_of_periodic_continuous` | ★★★★★★★格子の外で正則・全体で連続な楕円関数は定数 |
+| `const_of_periodic_continuous` | ★一点の値に等しい形 |
+
+### ★葉 (c) の残り(測り直し)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 楕円関数の Liouville | 済(第 241) |
+| 1' | 格子の外で正則な場合 | ★**済(本ブロック)** |
+| 2 | `℘` の加法定理(共線性) | 未——**零点と極の個数**(偏角の原理)が要る |
+| 3 | 解析側の共線性を形式側へ移す | 未(第 221-240 の機構を 3 変数に) |
+
+★★段 2 の核は「位数 3 の楕円関数の零点の和は極の和に等しい」(Abel)であり、
+基本平行四辺形上の周回積分が要る。mathlib には長方形の Cauchy はあるが
+平行四辺形版は無い。**見積もりは 30-60 ブロック**。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
