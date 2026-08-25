@@ -388,9 +388,67 @@ theorem ex63_thm64_i_types :
               (ModelData.model_isotropicType (ex63Hyp F Kbar)))))) :=
   ⟨ex63_isotropic_family F Kbar, ex63_ratStd F Kbar, ex63_not_groupLike_family F Kbar⟩
 
+/-- ★★★★**[FrdI] Theorem 6.4, (i)** —— 算術 Frobenioid は **standard 型**。 -/
+theorem ex63_standardType :
+    IsOfStandardType ((FinSub F Kbar)ᵒᵖ) _
+      (ModelData.modelPre (ex63Hyp F Kbar))
+      (ModelData.model_frobenioid (ex63Hyp F Kbar)).core :=
+  ModelData.model_isOfStandardType (ex63Hyp F Kbar)
+    (ModelData.model_frobenioid (ex63Hyp F Kbar)).core
+    (isOfFSMFFType_of_isOfFSMType finSubOp_isOfFSMType)
+    arithDatumGalois_isNonDilatingOn
+    (fun hgl => absurd hgl (ex63_not_isOfGroupLikeType F Kbar))
+
+/-- ★★★★★★**[FrdI] Proposition 5.5, (iii)** —— 算術の **`𝒞^un-tr` も rationally standard**。
+
+★一般形は `Thm64RatStd.lean` の `unTr_isOfRationallyStandardType`。
+★★`Theorem 6.4, (i)` が並べる 5 圏のうち **`𝒞^un-tr` の 1 つ**がこれで閉じる。 -/
+theorem ex63_unTr_ratStd :
+    IsOfRationallyStandardType
+      (unTrPre (ModelData.modelPre (ex63Hyp F Kbar))
+        (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+      (unTr_frobenioid (ModelData.modelPre (ex63Hyp F Kbar))
+        (ModelData.model_frobenioid (ex63Hyp F Kbar)).core
+        (ModelData.model_frobenioid (ex63Hyp F Kbar)))
+      (ex63Iota F Kbar) := by
+  classical
+  haveI := (ex63Hyp F Kbar).connectedD
+  set L := (botSub F Kbar).toIF with hL
+  set Y : (FinSub F Kbar)ᵒᵖ := Opposite.op (botSub F Kbar) with hY
+  set M := ex63ModelData (F := F) (Kbar := Kbar) with hM
+  set h := ex63Hyp F Kbar with hh
+  set X0 : ModelData.Obj M := ⟨Y, 0⟩ with hX0
+  set Xi : Istr (ModelData.modelPre h) := ⟨X0, ModelData.model_isotropicType h X0⟩ with hXi
+  set Xi2 : Istr (unTrPre (ModelData.modelPre h)
+      (ModelData.model_frobenioid h).core) :=
+    ⟨show UnTr (ModelData.modelPre h) from Xi,
+      unTr_isotropic (ModelData.modelPre h) (ModelData.model_frobenioid h).core _⟩ with hXi2
+  set v0 : ArithPlace L := Sum.inr (Classical.arbitrary (InfinitePlace L)) with hv0
+  obtain ⟨y, hy⟩ := exists_arithDiv_ne_zero_at L v0
+  exact unTr_isOfRationallyStandardType h (ex63Iota F Kbar) (ex63_hsp F Kbar)
+    (fun A => (isDivisorial_arithEff (L := A.unop.toIF)).1.1)
+    finSubOp_isOfFSMType
+    (ex63_not_isOfGroupLikeType F Kbar)
+    (ex63_standardType F Kbar)
+    (show UnTr (unTrPre (ModelData.modelPre h)
+      (ModelData.model_frobenioid h).core) from Xi2)
+    (fun e => ex63_phi_map_bot_eq_id F Kbar e)
+    (Additive.ofMul y)
+    (fun n hn => divBGalois_nsmul_ne_zero Y y v0 hy n hn)
+
 end Ex63Std
 
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
+
+def ex63_standardType.src : Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 算術 Frobenioid は standard 型",
+    sectionId := "frdi-thm-6-4" }
+
+def ex63_unTr_ratStd.src : Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 算術の 𝒞^un-tr も rationally standard",
+    sectionId := "frdi-prop-5-5" }
 
 def exists_arithDiv_ne_zero_at.src : Source :=
   { paper := "FrdI", pdfPage := 114,

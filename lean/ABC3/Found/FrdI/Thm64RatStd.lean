@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm62RatStd
+import ABC3.Found.FrdI.Prop55Std
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— `(𝒞^un-tr)^birat` の Frobenius-compact 対象(算術版)
@@ -402,6 +403,146 @@ theorem unTr_isOfStrictlyRationalType_of_hsp (h : M.Hyp)
           (show BiratCat _ _ from X) := by
       rw [h1]; exact AddSubgroup.neg_mem _ hy
     exact h2
+
+open ModelData in
+/-- ★★★★★**もう一段上でも同じ** —— `Div_B` の像は `(𝒞^un-tr)^un-tr` の `Φ^birat` に入る。
+
+★★`Definition 4.5, (iii)` の第 4 条は `𝒞` について
+`((𝒞)^un-tr)^birat` の Frobenius-compact 対象を要求するので、
+**`𝒞^un-tr` について言うときは `((𝒞^un-tr)^un-tr)^birat`** になる。
+★`Base`・`degFr`・`Div` はどちらの商でも代表元のものがそのまま降りるので、
+`𝒞` の model の射をそのまま 2 段上げればよい。 -/
+theorem divB_mem_phiBiratAt_unTr2 (h : M.Hyp)
+    (X : UnTr (unTrPre (modelPre h) (model_frobenioid h).core))
+    (y : M.bmon.val X.obj.obj.base) :
+    M.divB X.obj.obj.base y ∈
+      phiBiratAt (unTrPre (unTrPre (modelPre h) (model_frobenioid h).core)
+          (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core)
+        (unTr_frobenioid (unTrPre (modelPre h) (model_frobenioid h).core)
+          (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core
+          (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)))
+        (show BiratCat _ _ from X) := by
+  haveI := h.connectedD
+  obtain ⟨a, b, hab⟩ : ∃ a b : M.phi.val X.obj.obj.base,
+      M.divB X.obj.obj.base y = toGp _ a - toGp _ b := by
+    refine AddLocalization.induction_on (M.divB X.obj.obj.base y) ?_
+    rintro ⟨u, v⟩
+    exact ⟨u, (v : M.phi.val X.obj.obj.base), by
+      rw [eq_sub_iff_add_eq]; exact mk_add_toGp _ u v⟩
+  set A' : ModelData.Obj M :=
+    ⟨X.obj.obj.base, X.obj.obj.cls + toGp (M.phi.val X.obj.obj.base) b⟩ with hA'
+  set gm : X.obj.obj ⟶ A' :=
+    { base := 𝟙 X.obj.obj.base, div := b, deg := 1, u := 0,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X.obj.obj.cls + toGp (M.phi.val X.obj.obj.base) b
+          = M.phi.gpMapOn (𝟙 X.obj.obj.base)
+              (X.obj.obj.cls + toGp (M.phi.val X.obj.obj.base) b) + M.divB X.obj.obj.base 0
+        rw [M.phi.gpMapOn_id, map_zero, add_zero]
+        show (1 : ℕ) • X.obj.obj.cls + _ = _
+        rw [one_nsmul] } with hgm
+  set fm : X.obj.obj ⟶ A' :=
+    { base := 𝟙 X.obj.obj.base, div := a, deg := 1, u := y,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X.obj.obj.cls + toGp (M.phi.val X.obj.obj.base) a
+          = M.phi.gpMapOn (𝟙 X.obj.obj.base)
+              (X.obj.obj.cls + toGp (M.phi.val X.obj.obj.base) b) + M.divB X.obj.obj.base y
+        rw [M.phi.gpMapOn_id, hab]
+        show (1 : ℕ) • X.obj.obj.cls + _ = _
+        rw [one_nsmul]
+        abel } with hfm
+  set A'i : Istr (modelPre h) := ⟨A', ModelData.model_isotropicType h A'⟩ with hA'i
+  set fu : X.obj ⟶ (show UnTr (modelPre h) from A'i) :=
+    (istrToUnTr (modelPre h)).map (ObjectProperty.homMk fm) with hfu
+  set gu : X.obj ⟶ (show UnTr (modelPre h) from A'i) :=
+    (istrToUnTr (modelPre h)).map (ObjectProperty.homMk gm) with hgu
+  set A'i2 : Istr (unTrPre (modelPre h) (model_frobenioid h).core) :=
+    ⟨show UnTr (modelPre h) from A'i,
+      unTr_isotropic (modelPre h) (model_frobenioid h).core _⟩ with hA'i2
+  set fu2 : X ⟶ (show UnTr (unTrPre (modelPre h) (model_frobenioid h).core) from A'i2) :=
+    (istrToUnTr (unTrPre (modelPre h) (model_frobenioid h).core)).map
+      (ObjectProperty.homMk fu) with hfu2
+  set gu2 : X ⟶ (show UnTr (unTrPre (modelPre h) (model_frobenioid h).core) from A'i2) :=
+    (istrToUnTr (unTrPre (modelPre h) (model_frobenioid h).core)).map
+      (ObjectProperty.homMk gu) with hgu2
+  haveI : IsIso ((unTrPre (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core).Base
+        fu2) := by
+    show IsIso (𝟙 X.obj.obj.base)
+    infer_instance
+  have hmem := toGp_div_sub_mem_phiBiratAt_of_preStep
+    (unTrPre (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core)
+    (unTr_frobenioid (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)))
+    (fun Z => (unTr_isOfModelType
+      (P := unTrPre (modelPre h) (model_frobenioid h).core)
+      ((unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))).2 Z)
+    (X := X) (A := show UnTr (unTrPre (modelPre h) (model_frobenioid h).core) from A'i2)
+    (unTr_isotropic _ _ _) fu2 gu2 rfl rfl rfl
+  rw [hab]
+  exact hmem
+
+open ModelData in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (iii) の `𝒞^un-tr` の側** ——
+**`𝒞` が rationally standard なら `𝒞^un-tr` も**。
+
+原文 (FrdI p.105):
+> if C is of standard (respectively, rationally standard) type, then so are Cun-tr, Crlf.
+
+| `Definition 4.5, (iii)` の条 | 出どころ |
+|---|---|
+| birationally Frobenius-normalized | `unTr_isOfModelType`(在庫) |
+| rational | ★`unTr_isOfStrictlyRationalType_of_hsp`(本ファイル) |
+| standard | `unTr_standardType`(在庫) |
+| `((𝒞^un-tr)^un-tr)^birat` の Frobenius-compact 対象 | ★`birat_isFrobeniusCompact_of_baseId` ＋ `divB_mem_phiBiratAt_unTr2` | -/
+theorem unTr_isOfRationallyStandardType (h : M.Hyp)
+    (ι : ∀ Y : D, Prime (M.phi.val Y) → Pf (M.phi.val Y) → NNReal)
+    (hsp : ∀ (A : ModelData.Obj M)
+        (p : Prime (M.phi.val ((modelPre h).toElem.obj A).base)),
+      ∃ (a b : M.phi.val ((modelPre h).toElem.obj A).base)
+        (y : M.bmon.val ((modelPre h).toElem.obj A).base),
+        (toGp _ a - toGp _ b = M.divB _ y ∨ toGp _ a - toGp _ b = -(M.divB _ y)) ∧
+        p ∈ SuppElt (ι _) a ∧ p ∉ SuppElt (ι _) b)
+    (hint : ∀ A : D, IsIntegralMonoid (M.phi.val A))
+    (hfsmD : IsOfFSMType D)
+    (hngl : ¬ IsOfGroupLikeType (modelPre h))
+    (hstd : IsOfStandardType D (ModelData.Obj M) (modelPre h) (model_frobenioid h).core)
+    (A : UnTr (unTrPre (modelPre h) (model_frobenioid h).core))
+    (hbase : ∀ e : A.obj.obj.base ⟶ A.obj.obj.base,
+      M.phi.map e = AddMonoidHom.id (M.phi.val A.obj.obj.base))
+    (y : M.bmon.val A.obj.obj.base)
+    (hy : ∀ n : ℕ, 0 < n → n • M.divB A.obj.obj.base y ≠ 0) :
+    IsOfRationallyStandardType (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)) ι := by
+  haveI := h.connectedD
+  refine
+    { biratFrobNormalized := (unTr_isOfModelType (model_frobenioid h).core
+        (model_frobenioid h)).2
+      rational := fun X => isRational_of_isStrictlyRational ι X
+        (unTr_isOfStrictlyRationalType_of_hsp h ι hsp X)
+      standard := unTr_standardType (model_frobenioid h).core (model_frobenioid h)
+        hint hfsmD _ hngl hstd
+      unTrBiratCompact := ⟨A, ?_⟩ }
+  exact birat_isFrobeniusCompact_of_baseId
+    (unTrPre (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core)
+    (unTr_frobenioid (unTrPre (modelPre h) (model_frobenioid h).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)))
+    (fun Z => (unTr_isOfModelType
+      (P := unTrPre (modelPre h) (model_frobenioid h).core)
+      ((unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h)).core)
+      (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))).2 Z)
+    A (fun θ => hbase (biratBase θ.inv)) (M.divB A.obj.obj.base y)
+    (divB_mem_phiBiratAt_unTr2 h A y) hy
+
+/-- ★★★★★★locator —— `Proposition 5.5, (iii)` の `𝒞^un-tr` の rationally standard。 -/
+def unTr_isOfRationallyStandardType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 𝒞 が rationally standard なら 𝒞^un-tr も",
+    sectionId := "frdi-prop-5-5" }
 
 /-- ★★★★locator —— `Proposition 5.5, (iii)` の rationally standard の入口。 -/
 def divB_mem_phiBiratAt_unTr.src : ABC3.Meta.Source :=
