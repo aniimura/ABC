@@ -588,3 +588,24 @@ theorem norm_three_comb (Au Aw As : ℂ) :
 そのうえで本体は `have hcomb := norm_three_comb <式> <式> <式>` と当て、最後に `linarith`。
 ★★`linarith` に渡す形にしておくと、係数の帳尻(`8‖q‖^{n+2} ≤ (4‖q‖)^{n+1}` など)も
 同じ `linarith` で片付く。
+
+## 帰納法で回る形にするため、仮定はあえて弱くする(`w ≠ 0` に限る)
+
+`‖f(w)‖ ≤ C‖w‖^m`(小さい `w`)から `X^m ∣ f` を出す帰納法で、
+仮定を `∀ w, ‖w‖ < r → …`(`w = 0` を含む)と書くと**楽に見えるが帰納法が回らない**。
+
+★`f = X * g` と割ったあと `g` について同じ形の仮定が要るが、`w = 0` での評価は
+`f` の仮定からは出ない(`‖g(0)‖ ≤ C·0^m` は `‖f(0)‖ ≤ C·0^{m+1}` から導けない)。
+
+**対処**: 仮定を `∀ w, w ≠ 0 → ‖w‖ < r → …` と**弱めて**おく。すると `f` でも `g` でも
+同じ形が保たれ、`w = 0` の評価は毎段「連続性 + `𝓝[≠] 0` の極限」で作る。
+
+```lean
+theorem eval_zero_le_of_bound (g : Polynomial ℂ) (C r : ℝ) (hr : 0 < r) (m : ℕ)
+    (h : ∀ w : ℂ, w ≠ 0 → ‖w‖ < r → ‖g.eval w‖ ≤ C * ‖w‖ ^ m) :
+    ‖g.eval 0‖ ≤ C * ‖(0 : ℂ)‖ ^ m := by
+  …  -- le_of_tendsto_of_tendsto + g.continuous.continuousAt + self_mem_nhdsWithin
+```
+
+★`le_of_tendsto_of_tendsto` は `f ≤ᶠ[b] g`(eventually)を取る。
+`filter_upwards [self_mem_nhdsWithin, hball.filter_mono nhdsWithin_le_nhds]` で供給する。
