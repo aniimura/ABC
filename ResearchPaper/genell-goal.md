@@ -22685,3 +22685,57 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-570 ★★★★★★★★共線性から群法則へ(第 257 ブロック)
+
+`Found/GaloisRep/CollinearGroupLaw.lean`。
+
+第 256 で Tate 級数の 3 点の**共線性の行列式が 0** であることが出た。
+本ブロックはそれを mathlib の群法則 `WeierstrassCurve.Affine.Point.add` に翻訳する。
+
+    x1(y2-y3) + x2(y3-y1) + x3(y1-y2) = 0
+      かつ 3 点が曲線上、`x` 座標が相異なる
+      ⟹ P1 + P2 + P3 = 0
+
+### ★★★★★★Vieta は「差の差」で出る
+
+`yi = l xi + m` を曲線の式に代入すると、各 `xi` は
+`g(x) := x^3 - B x^2 - C x - D`(`B = l^2 + a1 l - a2`)の根になる。
+★★★**3 次式の根と係数の関係は、根の差で 2 回割るだけで出る**:
+
+    (x1-x2)(x1^2+x1x2+x2^2 - B(x1+x2) - C) = 0     (= g(x1) - g(x2))
+    (x2-x3)(x2^2+x2x3+x3^2 - B(x2+x3) - C) = 0
+    ⟹ (x1-x3)(x1+x2+x3 - B) = 0
+
+★因数分解も多項式環も要らない——`linear_combination` 3 回である。
+mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくてよい。
+
+### ★`x` 座標が相異なることは落とせない —— 測っておく
+
+★★`x3 = x1`(かつ `y3 = y1`、つまり `P3 = P1`)のとき、行列式は**自動的に 0** になり
+何の情報も持たない。このとき本当の第 3 根は別の点なので、結論は成り立たない。
+
+★★★これは**設計上の分岐点**である。行列式(第 246 で商から切り替えた形)は
+非退化の情報を持たないので、Vieta の形
+
+    (X1+X2+X3+a2)(X1-X2)^2 = (Y1-Y2)^2 + a1(Y1-Y2)(X1-X2)
+
+を Tate 側で直接示す道もありうる。しかしその形は `℘` 側で **6 位の極**の相殺を
+要求する(行列式は 3 位だった)。★**3 つの `x` 座標が相異なること**を
+葉 (d)(単射性)から取る方が安い、と見積もった。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_line_of_collinear` | ★★★★行列式 0 なら同一直線上 |
+| `addX_eq_of_line` | ★★★★★★**Vieta**——`addX x1 x2 l = x3` |
+| `add_eq_neg_of_line` | ★★★★★★★`P1 + P2 = -P3` |
+| `add_add_eq_zero_of_collDet` | ★★★★★★★★**行列式 0 ⟹ 和が 0** |
+
+### 次
+
+葉 (d)(単射性)——これが `x` 座標の相異性を与え、群法則の退化した場合
+(`P2 = ±P1`、二倍)も片付ける。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
