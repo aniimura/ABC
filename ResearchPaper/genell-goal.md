@@ -20596,3 +20596,62 @@ CLAUDE.md の「在庫」の手順(`decl-index` / grep)通りに引いてから�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-532 ★★★★★★★`℘'` の q 展開が取れた(第 219 ブロック)
+
+`Found/GaloisRep/DerivWeierstrassQExp.lean`。第 218 で `℘` が取れた。
+Tate の方程式には `℘'` も要るので、同じ手順を**重み 3** で繰り返した。
+
+★★`℘` と違って**補正項が要らない**——`S_l 1/(z-l)^3` は絶対収束するので、
+`℘` のときの `-1/l^2` に当たるものが最初から無く、定数項も出ない。
+
+### ★★★★★重み 3 の Lipschitz 公式は `h = f + 2g` を生む
+
+mathlib の `qExpansion_identity` を `k = 2` で使うと右辺は `S_{n>=0} n^2 t^n` になる。
+
+    S_{n>=0} n^2 t^n = t(1+t)/(1-t)^3 = f(t) + 2g(t)
+
+★`n^2 = 2*C(n+2,2) - 3*C(n+1,1) + 1` と分けて `hasSum_choose_mul_geometric_of_norm_lt_one`
+を 2 回使えば出る(mathlib に `S n^2 x^n` の閉じた形は無かった)。
+★★この `h := f + 2g` が **`℘'` の側に出る項**である(`tateDterm`)。
+
+### ★★★★★★符号は `h` の反転で吸収される
+
+奇数べきなので折り返しで符号が変わる(`S_m 1/(w+m)^3 = -S_m 1/(-w+m)^3`)。
+そのため上向きの段と下向きの段は**符号が逆**に出る。一方
+
+    h(1/t) = -h(t)                                    (`tateDterm_inv`)
+
+なので**両者はちょうど 1 つの形にまとまる**(`rowDP`)。
+
+★★★**`f` は反転で不変、`h` は反転で符号が変わる**——偶数べき(重み 2)と
+奇数べき(重み 3)の違いがそのまま出ている。第 217 の `rowP` と第 219 の `rowDP` は
+形は同じだが、符号の吸収の仕方が違う。
+
+### ★★到達点
+
+    ℘(z)  = (2 pi i)^2 * S_{n in Z} (f(q^{-n}u) - f(q^{-n})) - pi^2/3     (第 218)
+    ℘'(z) = (2 pi i)^3 * S_{n in Z} h(q^{-n}u)                             (本ブロック)
+
+| 定理 | 内容 |
+|---|---|
+| `tateDterm` | `h(t) = f(t) + 2g(t)` |
+| `tateDterm_inv` | ★★★★★`h(1/t) = -h(t)` |
+| `hasSum_sq_mul_geometric` | ★★★★★`S_{n>=0} n^2 t^n = h(t)` |
+| `lipschitz_three` | ★★★★★重み 3 の Lipschitz 公式 |
+| `tsum_inv_cube_neg` | ★★★★奇数べきの折り返しは符号を変える |
+| `rowDP` | ★★★★★★段の値の一様形 |
+| `summable_int_tateDterm` | ★★★★★★段の和は可和 |
+| `derivWeierstrassP_qExpansion` | ★★★★★★★**`℘'` の q 展開** |
+
+### ★残り
+
+1. `g2, g3` を `(2 pi i)^4`, `(2 pi i)^6` で割った形に正規化する
+   (第 215 の `g2_qExpansion` に `zeta(4) = pi^4/90`, `B_4 = -1/30` 等を入れる)
+2. `(℘, ℘')` から `(X, Y)` への変数変換——`x = X + 1/12`, `y' = 2Y + X` で
+   `y'^2 = 4x^3 - Ax - B` が `Y^2 + XY = X^3 + a4 X + a6` になる
+3. 段 6(`Z` 係数の形式級数が関数として 0 なら形式的に 0)
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
