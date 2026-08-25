@@ -25272,3 +25272,66 @@ sympy が出した 3 本の多項式)。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-623 ★★★★★★★★★★★G6 達成——Galois が 5/8 になった(第 310 ブロック)
+
+`Found/GaloisRep/TateCurveWitness.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> **`TateCurveData` は非空虚である**(`TateCurveData.nonvacuous`)
+
+★★★★★**義務の数が動いた**——Arakelov 9/9、**Galois 4/8 → 5/8**(G1, G2, G3, G4, G6)。
+
+### ★★★★★★組み立ての 4 本
+
+| 欄 | 中身 | 出どころ |
+|---|---|---|
+| `tateParam` | `q ∈ Kˣ` | 第 309 の `exists_tate_model` から選択 |
+| `uniformization` | `W(K) ≅ Kˣ/q^ℤ` | 第 303(点への作用)+ 第 301(一意化) |
+| `localHeight` | `v(q)` の自然数化 | 第 302 の橋 |
+| `localHeight_eq`・`_pos` | 定義の同定と正値性 | `q ∈ 𝔪`、`q != 0` |
+
+### ★★★★★★★一意化の鎖
+
+    W.Point  ~=+  ((C の像) . W).Point        第 303 `vcPointAddEquiv`
+             =    (E_q の K への像).Point       第 309 を `map` した
+             ~=+  Additive (K^x/q^Z)           第 301 `tate_uniformization_dvr`
+
+★★★★mathlib の `map_variableChange`(`C.map φ . W.map φ = (C . W).map φ`)が
+**ちょうど継ぎ目**になっている。整モデルの底変換が `W` に戻ること
+(`baseChange_integralModel_eq`)も mathlib に在った。
+
+### ★★★★★★★★G6 の全体像(第 245-310、66 ブロック)
+
+| 段 | 内容 | ブロック |
+|---|---|---|
+| 一意化本体 | `E_q(K) ~= K^x/q^Z` | 245-301(57) |
+| 界面の訂正 | 付値の固定・`Δ != 0` | 302, 304 |
+| 変数変換の点への作用 | mathlib 0 件 | 303 |
+| 標準形への正規化 | 節点・剪断・Artin-Schreier | 305-307 |
+| `E_q` への同定 | `a₄` を合わせ、`a₆` は自動 | 308-309 |
+| 組み立て | `TateCurveData` | 310 |
+
+★★★2026-08-20 のスケルトンは (a)-(e) の 5 段で **50-150 ブロック**と見積もっていた。
+**実際は 66 ブロック**で、見積もりの下 1/3 に収まった。
+★★★★ただし**通った道は 5 段のどれとも違う**——級数の収束も形式群も Newton 折れ線も
+捻りの分類も使わなかった。使ったのは
+**`I` 進完備性・分母払い・共線性の行列式・Hensel(Artin-Schreier 型)**である。
+
+### ★★★★★界面の訂正が 2 回入っている(記録)
+
+本 witness が通るのは、第 302(任意の付値 → 正規化付値)と第 304(`Δ != 0` を要求)の
+**2 つの界面訂正**を先に済ませてあるからである。
+★★★訂正前の `TateCurveData` は**充足不能**だった——**実装は仕様の検算でもある**。
+
+### ★★残り(Galois 3 件)
+
+| 件 | 内容 | 状況 |
+|---|---|---|
+| G5 | `FullImageData`(Serre の全射定理) | G1-G4・G6-G8 に従属、重い |
+| G7 | 半安定還元と `O_L` 上のモデル | Néron モデルが mathlib に無い |
+| G8 | Faltings 高さ | Arakelov 側 (D2) と合流 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
