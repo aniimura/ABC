@@ -20782,3 +20782,66 @@ maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-535 ★★★★★★★★段 6 の骨格が立った —— 葉 (b) を有限の主張の族に落とした(第 222 ブロック)
+
+`Found/GaloisRep/TateTruncate.lean`。
+
+### ★★★葉 (b) を有限の主張の族に落とす
+
+葉 (b) は `tateDefect a w q = 0`(Weierstrass 方程式)である。`R` は `I` 進完備
+(したがって `IsHausdorff`)なので、**`for all n, tateDefect in I^n` を示せば足りる**。
+
+★`I^n` を法とすると `adicSum` は**部分和**に、`evalAdic` は `partialEval` に化ける:
+
+    tateDefect a w q hq - tateDefectTrunc n a w q  in  I^n      (`tateDefect_sub_trunc`)
+
+★★`tateDefectTrunc n a w q` は `Ring.inverse` を除けば **`(a, w, q)` の多項式**である
+——**無限和も極限も入っていない**。ここが本ブロックの要点である。
+
+### ★★★★★★★★そして特殊化の規準が立った
+
+`tateDefectTrunc` は**完備性を要求しない**ので任意の環準同型で移る
+(`map_tateDefectTrunc`)。したがって:
+
+> 万有な環 `S` の元 `A, W` について `(AW)^n | tateDefectTrunc n A W (AW)` が示せれば、
+> `φ A = a`、`φ W = w` なる**任意の特殊化**で `tateDefect a w q = 0` が従う。
+
+これが `tateDefect_eq_zero_of_specialize` である。
+
+★★★**段 6 の骨格はこれで立った**。残るのは「万有な環
+`Z[A,W]`(`(1-A)(1-W)` と `1-(AW)^{m+1}A`、`1-(AW)^{m+1}W` で局所化)で
+その整除性を示す」ことだけになった。**完備化は要らない**——これは §9-534 で見積もった
+ときより道が短い。切り詰めが有限式であることに気づいたのが効いた。
+
+### ★★差は対称である
+
+`X(w,a) = X(a,w)`、`Y(w,a) = -X-Y` なので `tateDefect(w,a) = tateDefect(a,w)`
+(`tateDefect_symm`)。★万有な環での議論で `A` と `W` の役割を入れ替えられる
+——係数の消滅を両側から取るのに要る。
+
+| 定理 | 内容 |
+|---|---|
+| `tateDefect_symm` | ★★★★差は `(a,w)` の交換で不変 |
+| `eq_zero_of_mem_pow` | ★すべての `I^n` に属する元は 0 |
+| `tateXtrunc` / `tateYtrunc` / `tateDefectTrunc` | ★★`n` 次の切り詰め |
+| `tateXpair_sub_trunc` / `tateYpair_sub_trunc` | ★★★級数と切り詰めの差は `I^n` |
+| `tateDefect_sub_trunc` | ★★★★★差と切り詰めの差は `I^n` |
+| `tateDefect_eq_zero_of_trunc` | ★★★★★★★**葉 (b) は有限の主張の族に落ちる** |
+| `map_tateDefectTrunc` | ★★★★★★切り詰めは任意の環準同型で移る |
+| `tateDefect_eq_zero_of_specialize` | ★★★★★★★★**特殊化の規準** |
+
+★ここでは `Ideal.Quotient` を使ってよい——`tateDefect` から `tateDefectTrunc` への
+移行は `Ring.inverse` を含まない**多項式の関係**だからである(第 212・221 で
+`Ring.inverse` を避けたのとは事情が違う)。
+
+### ★残り
+
+万有な環での整除性 `(AW)^n | tateDefectTrunc n A W (AW)`。
+`Z[A,W]` は UFD なので、`A^n |` と `W^n |` に分かれる。
+`A ↦ u`(複素定数)、`W ↦ t/u` と特殊化して `t` の Taylor 係数を見れば、
+解析側の恒等式(第 220)から係数の消滅が出る——という段取りである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
