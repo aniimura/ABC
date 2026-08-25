@@ -871,6 +871,7 @@ import ABC3.Found.GaloisRep.TateFunctorial
 import ABC3.Found.GaloisRep.TateTruncate
 import ABC3.Found.GaloisRep.TateUniversal
 import ABC3.Found.GaloisRep.TateDivisibility
+import ABC3.Found.GaloisRep.TateComplexSpec
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

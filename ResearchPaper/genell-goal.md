@@ -20968,3 +20968,67 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-538 ★★★★★★万有な環から ℂ への特殊化 —— 解析の段への橋(第 225 ブロック)
+
+`Found/GaloisRep/TateComplexSpec.lean`。
+
+第 224 で葉 (b) は「万有な環の分子 `P in Z[A,W]` が `A^n`・`W^n` で割れる」に落ちた。
+分子の係数の消滅を言うには **`A -> u`、`W -> w`(複素数)と特殊化**して `q = uw -> 0` の
+様子を見る。その橋を架けた。
+
+### ★★完備性は要らない
+
+`TateUniv` から ℂ への環準同型は、**分母が ℂ で単元でありさえすれば**作れる。
+`‖u‖ < 1` かつ `‖w‖ < 1` なら分母はすべて単元になる:
+
+| 分母 | ℂ での単元性 |
+|---|---|
+| `1 - u` / `1 - w` | ★`‖.‖ < 1` なので `!= 1` |
+| `1 - (uw)^{m+1} u` / `1 - (uw)^{m+1} w` | ★★`‖.‖ <= ‖u‖ < 1`(または `‖w‖`) |
+
+これで `tateSpecializeC : TateUniv ->+* ℂ` が得られる。
+★第 223 の `tateSpecialize`(完備環向け)と**同じ形の議論**が、単元性の理由だけ
+差し替えて通った——`Submonoid.closure_induction` の骨格は共通である。
+
+### ★★★★★★橋の形
+
+`x*(分母) = (分子)` を ℂ に落とすと:
+
+    tateEval u w P = tateDefectTrunc n u w (uw) * tateEval u w d      (`tateEval_numerator`)
+
+★左辺は分子 `P` の値、右辺は**切り詰めた差の複素数値**である。
+★★あとは「`q = uw -> 0` のとき右辺が `O(q^n)`」を解析側から出せばよい。
+
+### ★★`im z < im tau` は格子の外を意味する
+
+`z = n*tau + m` なら `im z = n * im tau`。`0 < im z < im tau` から `0 < n < 1` となり、
+整数 `n` としては不可能(`notMem_lattice_of_im_lt`)。
+★これで第 220 の `tate_equation_analytic` から仮定 `hz` が落ちた
+(`tate_equation_analytic'`)——**解析側の恒等式は `im z < im tau` だけで成り立つ**。
+★★`him` は第 216 から `shiftDown` を上半平面に乗せるために持ち歩いていた仮定であり、
+それが `hz` も兼ねていた。仮定が 1 つ減ったのは後段で効く。
+
+| 定理 | 内容 |
+|---|---|
+| `notMem_lattice_of_im_lt` | ★★★★`im z < im tau` なら格子の外 |
+| `tate_equation_analytic'` | ★★★仮定を `him` だけにした解析側の方程式 |
+| `isUnit_one_sub_of_norm_lt_one` | ★`‖t‖ < 1` なら `1 - t` は単元 |
+| `tateSpecializeC` | ★★★★★★**万有な環から ℂ への特殊化** |
+| `tateSpecializeC_tateDefectTrunc` | ★★★★★ℂ 側での切り詰めた差の値 |
+| `tateEval_numerator` | ★★★★★★**分子の値 = 切り詰めた差 x 分母** |
+
+### ★残り(解析の段)
+
+    tateDefectTrunc n u w (uw) = O(q^n)      (q = uw -> 0、u は固定)
+
+を出す。道具は:
+1. 第 220 の `tate_equation_analytic'`(解析側の差は厳密に 0)
+2. 第 218 の `norm_tateXterm_le_of_small`(`‖f(t)‖ <= 4‖t‖`)——尾の評価
+3. `tateXfun - tateXtrunc n` が `O(q^{n+1})` であること
+
+★見積もりは 10-25 ブロック。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
