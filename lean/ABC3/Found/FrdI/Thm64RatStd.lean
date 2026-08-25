@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm62RatStd
 import ABC3.Found.FrdI.Prop55Std
+import ABC3.Found.FrdI.Prop55PfSlice
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— `(𝒞^un-tr)^birat` の Frobenius-compact 対象(算術版)
@@ -537,6 +538,132 @@ theorem unTr_isOfRationallyStandardType (h : M.Hyp)
       (unTr_frobenioid (modelPre h) (model_frobenioid h).core (model_frobenioid h))).2 Z)
     A (fun θ => hbase (biratBase θ.inv)) (M.divB A.obj.obj.base y)
     (divB_mem_phiBiratAt_unTr2 h A y) hy
+
+open ModelData in
+/-- ★★★★★★**`((𝒞^pf)^un-tr)^birat` の Frobenius-compact 対象** ——
+`Definition 4.5, (iii), (b)` を `𝒞^pf` について。
+
+★★`𝒞 → 𝒞^pf` の `toRootHom`(`Def31Pf.lean`)は
+`Base` をそのまま・`degFr` をそのまま・`Div` を `Pf.of` で移す
+(`rootBase_toRootHom` / `rootDeg_toRootHom` / `div_toRootHom`)。
+★したがって model の 2 本の pre-step をそのまま `𝒞^pf` へ送れば、
+`Φ^birat` の元は **`Pf.of` の像**として得られる。 -/
+theorem unTr_pf_biratCompact_of_baseId (h : M.Hyp)
+    (X₀ : ModelData.Obj M) (y : M.bmon.val X₀.base)
+    (hbase : ∀ e : X₀.base ⟶ X₀.base,
+      M.phi.map e = AddMonoidHom.id (M.phi.val X₀.base))
+    (hy : ∀ n : ℕ, 0 < n →
+      n • gpMap _ (Pf.of (M := M.phi.val X₀.base)) (M.divB X₀.base y) ≠ 0) :
+    ∃ X : BiratCat
+        (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core)
+          (pfRoot_frobenioid (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+            (model_frobenioid h)).core)
+        (unTr_frobenioid (pfRootPre (modelPre h) (model_frobenioid h).core)
+          (pfRoot_frobenioid (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+            (model_frobenioid h)).core
+          (pfRoot_frobenioid (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+            (model_frobenioid h))),
+      IsFrobeniusCompact
+        (unTrBiratPre (pfRootPre (modelPre h) (model_frobenioid h).core)
+          (pfRoot_frobenioid (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+            (model_frobenioid h)).core
+          (pfRoot_frobenioid (F := (model_frobenioid h).core)
+            (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+            (model_frobenioid h))) X := by
+  haveI := h.connectedD
+  obtain ⟨a, b, hab⟩ : ∃ a b : M.phi.val X₀.base,
+      M.divB X₀.base y = toGp _ a - toGp _ b := by
+    refine AddLocalization.induction_on (M.divB X₀.base y) ?_
+    rintro ⟨u, v⟩
+    exact ⟨u, (v : M.phi.val X₀.base), by
+      rw [eq_sub_iff_add_eq]; exact mk_add_toGp _ u v⟩
+  set A' : ModelData.Obj M := ⟨X₀.base, X₀.cls + toGp (M.phi.val X₀.base) b⟩ with hA'
+  set gm : X₀ ⟶ A' :=
+    { base := 𝟙 X₀.base, div := b, deg := 1, u := 0,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X₀.cls + toGp (M.phi.val X₀.base) b
+          = M.phi.gpMapOn (𝟙 X₀.base)
+              (X₀.cls + toGp (M.phi.val X₀.base) b) + M.divB X₀.base 0
+        rw [M.phi.gpMapOn_id, map_zero, add_zero]
+        show (1 : ℕ) • X₀.cls + _ = _
+        rw [one_nsmul] } with hgm
+  set fm : X₀ ⟶ A' :=
+    { base := 𝟙 X₀.base, div := a, deg := 1, u := y,
+      cond := by
+        show ((1 : ℕ+) : ℕ) • X₀.cls + toGp (M.phi.val X₀.base) a
+          = M.phi.gpMapOn (𝟙 X₀.base)
+              (X₀.cls + toGp (M.phi.val X₀.base) b) + M.divB X₀.base y
+        rw [M.phi.gpMapOn_id, hab]
+        show (1 : ℕ) • X₀.cls + _ = _
+        rw [one_nsmul]
+        abel } with hfm
+  set hfi : IsOfFrobeniusIsotropicType (modelPre h) :=
+    isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h) with hhfi
+  set Gpf := pfRoot_frobenioid (F := (model_frobenioid h).core) hfi (model_frobenioid h) with hGpf
+  set Xp : UnTr (pfRootPre (modelPre h) (model_frobenioid h).core) :=
+    ⟨(⟨X₀, 1⟩ : PfRootObj (modelPre h) (model_frobenioid h).core),
+      pfRoot_isOfIsotropicType hfi _⟩ with hXp
+  set Ap : UnTr (pfRootPre (modelPre h) (model_frobenioid h).core) :=
+    ⟨(⟨A', 1⟩ : PfRootObj (modelPre h) (model_frobenioid h).core),
+      pfRoot_isOfIsotropicType hfi _⟩ with hAp
+  set fu : Xp ⟶ Ap :=
+    (istrToUnTr (pfRootPre (modelPre h) (model_frobenioid h).core)).map
+      (ObjectProperty.homMk (toRootHom (F := (model_frobenioid h).core) fm)) with hfu
+  set gu : Xp ⟶ Ap :=
+    (istrToUnTr (pfRootPre (modelPre h) (model_frobenioid h).core)).map
+      (ObjectProperty.homMk (toRootHom (F := (model_frobenioid h).core) gm)) with hgu
+  haveI : IsIso ((unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core)
+      Gpf.core).Base fu) := by
+    have hb : (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core).Base fu
+        = 𝟙 X₀.base := rootBase_toRootHom (F := (model_frobenioid h).core) fm
+    rw [hb]
+    exact CategoryTheory.IsIso.id _
+  have hmem := toGp_div_sub_mem_phiBiratAt_of_preStep
+    (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core)
+    (unTr_frobenioid (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core Gpf)
+    (fun Z => (unTr_isOfModelType (P := pfRootPre (modelPre h) (model_frobenioid h).core)
+      Gpf.core Gpf).2 Z)
+    (X := Xp) (A := Ap)
+    (unTr_isotropic _ _ _) fu gu
+    (rootDeg_toRootHom (F := (model_frobenioid h).core) fm)
+    (rootDeg_toRootHom (F := (model_frobenioid h).core) gm)
+    ((rootBase_toRootHom (F := (model_frobenioid h).core) fm).trans
+      (rootBase_toRootHom (F := (model_frobenioid h).core) gm).symm)
+  have hdf : (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core).Div fu
+      = Pf.of a := div_toRootHom (F := (model_frobenioid h).core) fm
+  have hdg : (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core).Div gu
+      = Pf.of b := div_toRootHom (F := (model_frobenioid h).core) gm
+  rw [hdf, hdg] at hmem
+  have hz : gpMap _ (Pf.of (M := M.phi.val X₀.base)) (M.divB X₀.base y)
+      ∈ phiBiratAt (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core)
+        (unTr_frobenioid (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core Gpf)
+        (show BiratCat _ _ from Xp) := by
+    rw [hab, map_sub, gpMap_toGp, gpMap_toGp]
+    exact hmem
+  have hbid : ∀ θ : (show BiratCat
+        (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core)
+        (unTr_frobenioid (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core Gpf)
+        from Xp) ≅ (show BiratCat _ _ from Xp),
+      (M.phi.pfOn (phiSharp (modelPre h))).map (biratBase θ.inv) = AddMonoidHom.id _ :=
+    fun θ => (congrArg Pf.map (hbase (biratBase θ.inv))).trans Pf.map_id
+  exact ⟨show BiratCat _ _ from Xp,
+    birat_isFrobeniusCompact_of_baseId
+      (unTrPre (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core)
+      (unTr_frobenioid (pfRootPre (modelPre h) (model_frobenioid h).core) Gpf.core Gpf)
+      (fun Z => (unTr_isOfModelType (P := pfRootPre (modelPre h) (model_frobenioid h).core)
+        Gpf.core Gpf).2 Z)
+      (show BiratCat _ _ from Xp) hbid
+      (gpMap _ (Pf.of (M := M.phi.val X₀.base)) (M.divB X₀.base y)) hz hy⟩
+
+/-- ★★★★★locator —— `Definition 4.5, (iii), (b)` を `𝒞^pf` について。 -/
+def unTr_pf_biratCompact_of_baseId.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — ((𝒞^pf)^un-tr)^birat の Frobenius-compact 対象",
+    sectionId := "frdi-prop-5-5" }
 
 /-- ★★★★★★locator —— `Proposition 5.5, (iii)` の `𝒞^un-tr` の rationally standard。 -/
 def unTr_isOfRationallyStandardType.src : ABC3.Meta.Source :=
