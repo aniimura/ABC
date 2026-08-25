@@ -20845,3 +20845,61 @@ maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-536 ★★★★★★★★万有な環と特殊化 —— 葉 (b) は整除性ひとつに帰着した(第 223 ブロック)
+
+`Found/GaloisRep/TateUniversal.lean`。
+
+第 222 で葉 (b) は「切り詰め `tateDefectTrunc n a w q` が `I^n` に入る」に落ちた。
+切り詰めは**有限の式**なので、**万有な環**を作ってそこで一度示せばよい。
+
+    TateBase := Z[A, W]                              (`MvPolynomial (Fin 2) Z`)
+    TateUniv := TateBase を次の元で局所化したもの
+                1 - A、1 - W、1 - (AW)^{m+1} A、1 - (AW)^{m+1} W   (m >= 0)
+
+★★**完備化は要らない**——切り詰めが有限式だからである。局所化だけで足りる。
+§9-534 で「完備化した万有環」を見積もったが、第 222 の切り詰めでその必要が消えた。
+
+### ★★★★★特殊化はどんな完備環にも届く
+
+`R` が `I` 進完備で `a*w = q in I`、`1-a` と `1-w` が単元なら、分母のすべてが単元になる:
+
+| 分母 | `R` での単元性 |
+|---|---|
+| `1 - A -> 1 - a` | ★仮定 |
+| `1 - W -> 1 - w` | ★仮定(`w in I` なら自動) |
+| `1 - (AW)^{m+1} A -> 1 - q^{m+1} a` | ★★`q^{m+1} a in I` なので自動(`isUnit_one_sub`) |
+| `1 - (AW)^{m+1} W -> 1 - q^{m+1} w` | ★★同上 |
+
+よって `IsLocalization.lift` で `TateUniv ->+* R` が得られる(`tateSpecialize`)。
+★分母が単元であることは `Submonoid.closure_induction` で生成元に落として示した。
+
+### ★★★★★★★★到達点
+
+> **`TateUniv` の中で `(AW)^n | tateDefectTrunc n A W (AW)` を示せば、
+> 任意の完備環で Weierstrass 方程式が成り立つ。**
+
+これが `tateDefect_eq_zero_of_univ` である。
+
+| 定義・定理 | 内容 |
+|---|---|
+| `TateBase` / `univA` / `univW` / `univQ` | 万有な多項式環と生成元 |
+| `tateDenomSet` / `tateDenoms` / `TateUniv` | ★★★★★**万有な環** |
+| `tateEval` | `A -> a`、`W -> w` の評価 |
+| `tateEval_isUnit_denoms` | ★★★★分母はすべて `R` で単元になる |
+| `tateSpecialize` | ★★★★★★**特殊化 `TateUniv ->+* R`** |
+| `isUnit_one_sub_uA` 他 | 万有な環の側での単元性 |
+| `tateDefect_eq_zero_of_univ` | ★★★★★★★★**葉 (b) は整除性ひとつに帰着** |
+
+### ★残り(段取り)
+
+`Z[A,W]` は UFD で `A`・`W` は素元、分母はどれも定数項 1 なので `A`・`W` と互いに素。
+したがって `(AW)^n | ...` は `A^n |` と `W^n |` に分かれる。
+★`A -> u`(複素定数)、`W -> t/u` と特殊化して `t` の Taylor 係数を見れば、
+第 220 の解析側の恒等式から係数の消滅が出る。
+★★差は `(a,w)` の交換で対称(第 222 の `tateDefect_symm`)なので、
+`A` 側と `W` 側は同じ議論の入れ替えで済む。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
