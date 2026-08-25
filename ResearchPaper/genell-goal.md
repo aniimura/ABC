@@ -22927,3 +22927,55 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-574 ★★★★★★★★★Tate 点の 3 つ組は群として 0(第 261 ブロック)
+
+`Found/GaloisRep/TatePointGroup.lean`。
+
+### ★★★★★★★★★到達点
+
+> `u v w = q`、`u, v, w in I` が相異なるなら
+> **`P(u) + P(v) + P(w) = 0`**(`E_q(K)` の中で)
+
+これが**葉 (c)(準同型)の最終形**である。第 256(共線性)・第 257(群法則)・
+第 259(単射性)・第 260(`x` 座標の相異性)がここで合流した。
+
+### ★★基底変換
+
+`tateXpair`・`tateYpair` は完備環 `R` の値だが、mathlib の群法則は**体**を要求する。
+そこで `R -> K`(分数体)へ送る:`(tateCurveAt q hq).map (algebraMap R K)`。
+
+★係数は `a1 = 1`、`a2 = a3 = 0`、`a4 = f(a4)`、`a6 = f(a6)` になるので、
+葉 (b) の `tate_equation` をそのまま送れば `Equation` が出る(`tate_equation_map`)。
+★★`Δ != 0` なら `equation_iff_nonsingular_of_Δ_ne_zero` で `Nonsingular` に上がる
+(`nonsingular_tate_point`)。**mathlib の在庫がそのまま使えた**。
+
+### ★★★相異性は 3 回の当てはめで
+
+第 260 の `tateXpair_ne_of_ne` は `(u, v, w)` の順に依存するので、
+`(u,v,w)`・`(u,w,v)`・`(v,w,u)` の 3 通りに当てる。
+★相方の積は可換なので `mul_comm` の書き換えだけで揃った。
+
+### ★配管 —— 内側の名前空間
+
+第 256 の `tate_collinear` は `TateCollinearSection` という内側の名前空間に置いた
+(`variable` の都合)。呼ぶ側で `TateCollinearSection.tate_collinear` と
+**修飾が要る**。REPL では名前空間なしで試していたので、ファイルにしてから
+`Unknown identifier` で気づいた。★REPL の env と file の名前空間はずれうる。
+
+| 定理 | 内容 |
+|---|---|
+| `tate_equation_map` | ★★★★★基底変換した曲線の上にある |
+| `nonsingular_tate_point` | ★★★★★`Δ != 0` なら非特異 |
+| `tate_points_add_eq_zero` | ★★★★★★★★★**3 つ組は群として 0** |
+
+### 残り(G6)
+
+1. 葉 (e)(全射性)。`u = 1` の近く(形式群の領域)が本体。
+   第 102 の縮小写像定理が道具。
+2. 退化した場合(`u = v`、二倍、逆元)の群法則。
+3. `TateCurveData` への組み立て(`AddEquiv E(K) ≃+ Kˣ/q^ℤ`)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
