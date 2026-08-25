@@ -905,6 +905,7 @@ import ABC3.Found.GaloisRep.CollCoeffVanish
 import ABC3.Found.GaloisRep.TateCollinear
 import ABC3.Found.GaloisRep.CollinearGroupLaw
 import ABC3.Found.GaloisRep.TateLeading
+import ABC3.Found.GaloisRep.TateInjective
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
