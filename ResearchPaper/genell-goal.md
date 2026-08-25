@@ -22510,3 +22510,56 @@ mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-567 ★★★★★★★切り詰めた共線性の差の評価(第 254 ブロック)
+
+`Found/GaloisRep/CollBound.lean`。
+
+### ★★★★★★在庫がそのまま 3 点に効いた
+
+第 231 の `norm_tateXanalytic_sub_trunc`・`norm_tateYanalytic_sub_trunc` と
+第 234 の `norm_tateXtrunc_le`・`norm_tateYtrunc_le` は `(u, w)` の対に対する評価である。
+★★3 点はどれも `(u, vw)`・`(v, uw)`・`(w, uv)` という **`(点, 相方)` の対**なので、
+**そのまま 3 回当てられた**。しかも相方との積はどれも `q = uvw` なので、
+**評価はどの点でも同じ `eps = 50(4‖q‖)^{n+1}`** になる。
+新しい解析はひとつも要らなかった——これが §9-562 で対称な 3 変数を選んだ効き目である。
+
+★`‖u‖, ‖v‖, ‖w‖ <= 1/8` と取れば `‖tateXterm t‖ <= 4‖t‖ <= 1/2`、
+`‖tateYterm t‖ <= 8‖t‖ <= 1` なので、**切り詰めの大きさ `M` が `n` だけで決まる**。
+第 237 では `u` が固定されていたので `‖tateXterm u‖` を残したが、
+ここは 3 変数とも動くので数値で潰した。
+
+### ★★★★★★行列式の差は `M` の 1 次
+
+    D - D' = Σ_i [ (X_i - X_i')(Y_j - Y_k) + X_i'((Y_j - Y_j') - (Y_k - Y_k')) ]
+
+各項は `eps 2M` と `M 2eps` で押さえられ、合計 **`12 M eps`**(`norm_coll_diff_le`)。
+★第 234 の `norm_defect_diff_le` が `(3M^2 + 6M + 1) eps` だったのに比べ、
+**行列式は双線形なので `M` の 1 次で済む**。曲線の方程式は 3 次だったが、
+共線性は 2 次(しかも各変数について 1 次)なので、ここでも行列式の形が軽い。
+
+### ★★★★★★★到達点
+
+解析側は 0(第 249)なので
+
+    ‖collDefectTrunc (n+1) u v w (uvw)‖ <= 12(25(n+1)+8) * 50(4‖uvw‖)^{n+1}
+
+★右辺は `‖uvw‖^{n+1} = ‖uv‖^{n+1} ‖w‖^{n+1}` を含むので、`u, v` を固定して `w` を
+動かせば `C‖w‖^{n+1}` の形になり、第 236 の `X_pow_dvd_of_norm_le` が効く。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_sum6` | ★6 項の三角不等式 |
+| `norm_coll_diff_le` | ★★★★★★**行列式の差は `12 M eps`** |
+| `norm_collDefectTrunc_le` | ★★★★★★★**切り詰めた共線性の差の評価** |
+
+### 残り
+
+1. 係数の消滅(第 238 の 3 変数版)。
+2. `W` 側の整除性(第 253 の `cW_pow_dvd_of_coeff` に流す)。
+3. `U`・`V` 側は変数の入れ替えの自己同型で(§9-563 の `collDefectTrunc_swap`)。
+4. 組み立てて `collDefect = 0`、そこから `tateXpair`/`tateYpair` の共線性。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
