@@ -23431,3 +23431,56 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-584 ★★★★★★★★★環帯での全射性が閉じた(第 271 ブロック)
+
+`Found/GaloisRep/TateQUnique.lean`。
+
+### ★★★★★★★★★到達点
+
+> `x, y in I` で `(x,y)` が `E_q` 上なら、`a, w in I` が在って
+> **`a w = q`** かつ `X(a,w,q) = x`、`Y(a,w,q) = y`(`tate_surjective_annulus`)
+
+★第 269 では制約 `a w = q` を課さずに `(a,w)` を作った。本ブロックでそれを回復した。
+
+### ★★★★★★★★`defect = 0` は `q` を決める
+
+    defect(a,w,q) = 0  かつ  defect(a,w,a w) = 0   ⟹   q = a w
+
+★逐次近似:`q - q' in I^k` と仮定すると、曲線の式の差から
+
+    a6(q) - a6(q') = (Y-Y')(Y+Y') + (X-X')Y + (Y-Y')X'
+                     - (X-X')(X^2+XX'+X'^2) - (a4-a4')X - (X-X')a4'
+
+の右辺はすべて **`I^k` の元 × `I` の元** なので `I^{k+1}`。
+一方 第 270 より `a6(q) - a6(q') + (q - q') in I^{k+1}` なので **`q - q' in I^{k+1}`**。
+`IsHausdorff` で `q = q'`。
+
+★★**`X, Y, a4` がすべて `I` に入る**(環帯だから)ことが効いている。
+`a6` だけが `q` を 1 次で拾い、他は全部 1 つ位を上げる——それが「`q` が決まる」ことの中身。
+★★★制約を「解いてから回復する」設計(§9-581)が、そのまま通った。
+
+### ★★`q` についての差
+
+`X(a,w,q) - X(a,w,q')` は尾と `s1(q)` の差だけ(`f(a)`, `f(w)` は `q` によらない)。
+各項は `q^{n+1}u - q'^{n+1}u = (q^{n+1} - q'^{n+1})u` が `q - q'` で割れるので `I^k`。
+`adicSum_diff_mem`(第 259)でそのまま和に上がる。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXpair_diff_q_mem`・`tateYpair_diff_q_mem` | ★★★★`q` についての差 |
+| `tateXpair_mem`・`tateYpair_mem` | ★★環帯では座標も `I` の元 |
+| `tate_q_unique` | ★★★★★★★★**`defect = 0` は `q` を決める** |
+| `tate_surjective_annulus` | ★★★★★★★★★**環帯での全射性(制約つき)** |
+
+### 葉 (e) の領域の状況
+
+| 領域 | `x = X(u)` | 全射性 | 単射性 |
+|---|---|---|---|
+| 単元 | 単元 | ★済(第 266) | ★済(第 267) |
+| 環帯 | `x in I` | ★済(本ブロック) | ★済(第 259) |
+| 原点近傍 | `x notin R` | 未(`K` 上の定式化が要る) | 未 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
