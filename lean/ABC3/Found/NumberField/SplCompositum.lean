@@ -279,6 +279,72 @@ theorem eq_of_SplQ_eq (L M : IntermediateField ℚ Ω)
   le_antisymm (le_of_SplQ_subset L M hL hM (h ▸ subset_rfl))
     (le_of_SplQ_subset M L hM hL (h ▸ subset_rfl))
 
+/-! ## ★7. `Spl` は体の同型で不変 -/
+
+section Congr
+
+/-- ★環同型が誘導するイデアルの全単射。 -/
+def idealEquivOfRingEquiv {R S : Type*} [CommRing R] [CommRing S] (e : R ≃+* S) :
+    Ideal R ≃ Ideal S where
+  toFun I := Ideal.map (e : R →+* S) I
+  invFun J := Ideal.map (e.symm : S →+* R) J
+  left_inv I := by
+    show Ideal.map (e.symm : S →+* R) (Ideal.map (e : R →+* S) I) = I
+    rw [Ideal.map_map]
+    have h : (e.symm : S →+* R).comp (e : R →+* S) = RingHom.id R := by ext x; simp
+    rw [h, Ideal.map_id]
+  right_inv J := by
+    show Ideal.map (e : R →+* S) (Ideal.map (e.symm : S →+* R) J) = J
+    rw [Ideal.map_map]
+    have h : (e : R →+* S).comp (e.symm : S →+* R) = RingHom.id S := by ext x; simp
+    rw [h, Ideal.map_id]
+
+/-- ★ノルムは環同型で不変(`absNorm I = #(S/I)` だから)。 -/
+theorem absNorm_map_ringEquiv {L M : Type*} [Field L] [Field M] [NumberField L] [NumberField M]
+    (e : L ≃+* M) (I : Ideal (𝓞 L)) :
+    Ideal.absNorm (Ideal.map (RingOfIntegers.mapRingEquiv e : 𝓞 L →+* 𝓞 M) I)
+      = Ideal.absNorm I := by
+  rw [Ideal.absNorm_apply, Ideal.absNorm_apply, Submodule.cardQuot_apply,
+    Submodule.cardQuot_apply]
+  refine Nat.card_congr ?_
+  exact (Ideal.quotientEquiv I (Ideal.map (RingOfIntegers.mapRingEquiv e : 𝓞 L →+* 𝓞 M) I)
+    (RingOfIntegers.mapRingEquiv e) rfl).toEquiv.symm
+
+/-- ★★イデアル計数は体の同型で不変。 -/
+theorem idealCount_congr {L M : Type*} [Field L] [Field M] [NumberField L] [NumberField M]
+    (e : L ≃+* M) (n : ℕ) : idealCount L n = idealCount M n := by
+  refine Nat.card_congr ?_
+  refine Equiv.subtypeEquiv (idealEquivOfRingEquiv (RingOfIntegers.mapRingEquiv e)) ?_
+  intro I
+  show Ideal.absNorm I = n ↔ Ideal.absNorm (Ideal.map
+    (RingOfIntegers.mapRingEquiv e : 𝓞 L →+* 𝓞 M) I) = n
+  rw [absNorm_map_ringEquiv e I]
+
+/-- ★★`p ∈ Spl(L)` ⟺ `a_L(p) = [L:ℚ]`。 -/
+theorem mem_SplQ_iff_idealCount {L : Type*} [Field L] [NumberField L] [IsGalois ℚ L]
+    {p : Nat.Primes} : p ∈ SplQ L ↔ idealCount L (p : ℕ) = Module.finrank ℚ L := by
+  constructor
+  · exact fun h => idealCount_eq_finrank_of_splitsCompletely p.2 h
+  · intro h
+    have h1 : idealCount L (p : ℕ)
+        ≤ (primesOver (Ideal.span {((p : ℕ) : ℤ)}) (𝓞 L)).ncard := by
+      rw [idealCount_eq_ncard p.2]
+      exact Set.ncard_le_ncard (fun P hP => hP.1) (finite_primesOver_int p.2)
+    have h2 := ncard_primesOver_le_finrank_int (L := L) p.2
+    show (primesOver (Ideal.span {((p : ℕ) : ℤ)}) (𝓞 L)).ncard = Module.finrank ℚ L
+    omega
+
+/-- ★★★**`Spl` は体の同型で不変**。 -/
+theorem SplQ_congr {L M : Type*} [Field L] [Field M] [NumberField L] [NumberField M]
+    [IsGalois ℚ L] [IsGalois ℚ M] (e : L ≃ₐ[ℚ] M) : SplQ L = SplQ M := by
+  have hfr : Module.finrank ℚ L = Module.finrank ℚ M :=
+    LinearEquiv.finrank_eq (e.toLinearEquiv)
+  ext p
+  rw [mem_SplQ_iff_idealCount, mem_SplQ_iff_idealCount,
+    idealCount_congr (e.toRingEquiv) (p : ℕ), hfr]
+
+end Congr
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★★★locator —— `cheb-spl-det` の第 2 段。 -/
