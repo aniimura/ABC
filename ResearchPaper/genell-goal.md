@@ -20481,3 +20481,58 @@ Lean の `0^-1 = 0` 規約がここで効いている。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-530 ★★★★★★℘ を段に切って各段の値を出した(第 217 ブロック)—— 道 β の段 5 の後半
+
+`Found/GaloisRep/WeierstrassRows.lean`。第 216 で各段の Lipschitz 公式を取った。
+本ブロックは **`℘` の二重和をその段に切り、各段の値を閉じた形で出した**。
+
+### ★★★★★段に切る
+
+mathlib の `℘` は**格子の元にわたる**無条件可和な和 `S' l : L.lattice, (1/(z-l)^2 - 1/l^2)` である。
+`latticeEquivProd` で `Z x Z` に移し、`Summable.tsum_prod` で `n`(tau の係数)を外側にすると
+**横一列ごとの和**になる(`weierstrassP_eq_tsum_rows`)。
+
+★★★**段ごとには `1/(z-l)^2` と `1/l^2` が別々に可和なので差に分けられる**(`row_eq_sub`)
+——これは二重和全体では成り立たない(`S_l 1/l^2` は絶対収束しない。weight 2 の
+Eisenstein 級数が条件収束なのはこのためである)。**段に切ってから分ける**のが要点。
+
+### ★★★★★★段の値は 1 つの形にまとまった
+
+| 段 | ℘ 側 | 格子側 |
+|---|---|---|
+| `n <= 0` | `(2 pi i)^2 f(q^{-n} u)`(第 216 の上向き) | `(2 pi i)^2 f(q^{-n})` |
+| `n >= 1` | `(2 pi i)^2 f(q^n u^-1)`(第 216 の下向き) | `(2 pi i)^2 f(q^n)` |
+| `n = 0`(格子側) | —— | `S_m 1/m^2 = 2 zeta(2) = pi^2/3` |
+
+★★★★**`tateXterm` は反転で不変**(`tateXterm_inv`)——`f(1/t) = (1/t)/(1-1/t)^2 = t/(1-t)^2 = f(t)`。
+これで `f(q^n u^-1) = f(q^{-n} u)` となり、**上向きと下向きが 1 つの形にまとまる**(`rowP`)。
+★`t != 1` は `‖t‖ < 1`(`norm_down_lt_one`——第 216 の `shiftDown` が上半平面に乗ることから)。
+
+★★★★★**在庫を先に引いたのが効いた**——`tateXterm_inv` は既に在った。
+CLAUDE.md の「在庫」の手順(`decl-index` / grep)通りに引いてから書き始めたので、書き直しが無かった。
+
+| 定理 | 内容 |
+|---|---|
+| `summable_one_div_sq_add` / `_sub` | 段ごとの可和性(`EisensteinSeries.linear_right_summable`) |
+| `hasSum_weierstrassP_prod` | ★★★★`℘` の和を `Z x Z` に移す |
+| `weierstrassP_eq_tsum_rows` | ★★★★★**`℘` を段に切る** |
+| `row_eq_sub` | ★★★★段ごとには差に分けられる |
+| `rowP_nonpos` / `rowP_pos` / `rowP` | ★★★★★★**℘ 側の段の値** |
+| `rowG_pos` / `rowG_neg` / `rowG_zero` / `rowG` | ★★★★★★**格子側の段の値** |
+| `tsum_int_one_div_sq` | ★★★★★`S_{m in Z} 1/m^2 = pi^2/3` |
+| `row_value` / `row_value_zero` | ★★★★★★**段の値(差の形)** |
+
+### ★段 5 の残り
+
+各段の値は取れた。残るのは**段の和が収束することと、その値**:
+
+    (2 pi i)^-2 ℘(z) = S_{n in Z} f(q^{-n} u) - S_{n != 0} f(q^{-n}) - 1/12
+
+★`f(q^{-n} u)` も `f(q^{-n})` も `|n| -> infty` で幾何級数的に 0 に落ちる
+(`f(t) ~ t` は `t -> 0`、`f(t) ~ 1/t` は `t -> infty`)ので、両方の和は収束する。
+★★これで段 5 が閉じ、あとは段 6(形式化への移行)である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

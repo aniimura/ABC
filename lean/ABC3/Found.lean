@@ -863,6 +863,7 @@ import ABC3.Found.GaloisRep.TateClassMap
 import ABC3.Found.GaloisRep.LipschitzBridge
 import ABC3.Found.GaloisRep.LatticeInvariant
 import ABC3.Found.GaloisRep.LipschitzRows
+import ABC3.Found.GaloisRep.WeierstrassRows
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
