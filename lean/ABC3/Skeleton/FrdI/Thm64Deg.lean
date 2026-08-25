@@ -5,6 +5,7 @@ import ABC3.Meta.Claim
 import ABC3.Skeleton.NumberField.Chebotarev
 import ABC3.Found.AddEquivNNReal
 import ABC3.Found.FrdI.Thm64Rat
+import ABC3.Found.NumberField.SplCompositum
 import Mathlib.Data.NNReal.Basic
 import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
@@ -117,18 +118,34 @@ theorem deg_rat_of_six_exp (c : ℝ) (hc : 0 < c)
 
 /-- ★★★★★★**`deg(Ψ^rlf) = 1`**(`L₁/ℚ` が Galois のとき)と体の同型。
 
-★★Chebotarev の**完全分解版**(`Skeleton/NumberField/Chebotarev.lean` の
-`nonempty_algHom_of_splitsCompletely_subset`)で
-「完全分解する素点が包含すれば体が包含する」を使う。
-★★★**類体論(Artin の相互法則)は要らない** —— 2026-08-20 の測定のとおり、
-[FrdI] が使う 3 箇所はいずれも完全分解の場合に収まる。 -/
+原文 (FrdI p.116):
+> over a prime pi ∈V(Li), then pi splits completely in Li if and only if deg(Li, vi) =
+
+★★★★★**閉じた**(2026-08-25)。中身は 2 本:
+
+* `deg = 1` —— `Found/NumberField/SplCompositum.lean` の `deg_eq_one_of_degOne_both`。
+  `d₂(f p₀) = c·d₁(p₀) = c` は正整数、`1 = d₂(q₀) = c·d₁(f⁻¹ q₀)` から
+  `c = 1/d₁(f⁻¹ q₀)`。積が `1` なのでどちらも `1`。
+  ★次数 1 の素点(= 完全分解する素数)は無限個ある(`cheb-spl-infinite`)。
+* `L₁ ≅ L₂` —— `nonempty_algEquiv_of_SplQ_eq`。両方を `ℚ̄` へ埋め込んで
+  合成体の中で `eq_of_SplQ_eq` を当てる。★★**類体論は要らない**。
+
+★★★★逸脱の記録(2026-08-25): 旧版の仮定は
+`_hgal : ∀ σ, True`(**空虚**)と `HeightOneSpectrum (𝓞 ℚ)` 上の完全分解の一致だった。
+★本版は `Theorem 6.4` の兄弟(`deg_rat_of_six_exp`)と**同じ流儀**で、
+Frobenioid 側のデータ(素点の対応 `f` と次数の対応 `hd`)を**明示の仮定**として受ける。
+★底を `ℚ` の有理素数(`Nat.Primes`)に固定したのも同じ理由である。 -/
 theorem deg_eq_one_of_galois (L₁ L₂ : Type) [Field L₁] [Field L₂]
-    [NumberField L₁] [NumberField L₂]
-    (_hgal : ∀ σ : L₁ ≃ₐ[ℚ] L₁, True)
-    (_hspl : ∀ p : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers ℚ),
-      (ABC3.Skeleton.Cheb.SplitsCompletely ℚ L₁ p ↔ ABC3.Skeleton.Cheb.SplitsCompletely ℚ L₂ p)) :
-    Nonempty (L₁ ≃ₐ[ℚ] L₂) := by
-  sorry
+    [NumberField L₁] [NumberField L₂] [IsGalois ℚ L₁] [IsGalois ℚ L₂]
+    (c : ℝ) (hc : 0 < c)
+    (d₁ d₂ : Nat.Primes → ℕ) (f : Nat.Primes ≃ Nat.Primes)
+    (hd : ∀ p, (d₂ (f p) : ℝ) = c * (d₁ p : ℝ))
+    (hone₁ : ∃ p, d₁ p = 1) (hone₂ : ∃ q, d₂ q = 1)
+    (hpos₁ : ∀ p, 0 < d₁ p)
+    (hspl : ABC3.Found.NF.SplQ L₁ = ABC3.Found.NF.SplQ L₂) :
+    c = 1 ∧ Nonempty (L₁ ≃ₐ[ℚ] L₂) :=
+  ⟨ABC3.Found.NF.deg_eq_one_of_degOne_both c hc d₁ d₂ f hd hone₁ hone₂ hpos₁,
+   ABC3.Found.NF.nonempty_algEquiv_of_SplQ_eq L₁ L₂ hspl⟩
 
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -183,20 +200,23 @@ def deg_eq_one_of_galois.src : Source :=
     sectionId := "frdi-thm-6-4" }
 
 /-- ★★★**Chebotarev の完全分解版だけで足りる**(2026-08-20 の測定)。
-類体論(Artin の相互法則・Hecke L 関数)は**共役類つきの一般形**にしか要らない。 -/
+類体論(Artin の相互法則・Hecke L 関数)は**共役類つきの一般形**にしか要らない。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/NumberField/` の 2 本。
+★Artin の相互法則は**使っていない**(完全分解の場合だけで済むため)。 -/
 def deg_eq_one_of_galois.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "nonempty_algHom_of_splitsCompletely_subset(Spl が体を決める)"
-      (.inProject "ABC3" "ABC3.Skeleton.Cheb.nonempty_algHom_of_splitsCompletely_subset") 116,
-    .citation "[ABC3]" "chebotarev_splitsCompletely(完全分解の密度 1/[L:K])"
-      (.inProject "ABC3" "ABC3.Skeleton.Cheb.chebotarev_splitsCompletely") 116,
-    .citation "[mathlib]" "NumberField.dedekindZeta_residue(Dedekind ζ の s=1 での留数)"
-      (.inMathlib "NumberField.dedekindZeta_residue") 116,
-    .citation "[mathlib]" "Artin の相互法則 / Hecke L 関数 / 射類群"
-      (.absent "Mathlib に ClassFieldTheory ディレクトリは無く、Chebotarev|Artin 相互法則|RayClassGroup は 0 件(2026-08-25 に find で再確認)") 116,
-    .derivation
-      "deg の有理性(iii)と、完全分解の集合が一致することから [L₁:ℚ] = [L₂:ℚ]、Galois なら L₁ ≅ L₂" 116,
+  [ .citation "[ABC3]" "deg_eq_one_of_degOne_both(次数 1 の素点が両側にあれば deg = 1)"
+      (.inProject "ABC3" "ABC3.Found.NF.deg_eq_one_of_degOne_both") 116,
+    .citation "[ABC3]" "nonempty_algEquiv_of_SplQ_eq(Spl が等しければ体が同型)"
+      (.inProject "ABC3" "ABC3.Found.NF.nonempty_algEquiv_of_SplQ_eq") 116,
+    .citation "[ABC3]" "le_of_SplQ_subset(cheb-spl-det、類体論なし)"
+      (.inProject "ABC3" "ABC3.Found.NF.le_of_SplQ_subset") 116,
+    .citation "[ABC3]" "tendsto_splQ_div_log(完全分解の密度 1/[L:ℚ]、類体論なし)"
+      (.inProject "ABC3" "ABC3.Found.NF.tendsto_splQ_div_log") 116,
+    .citation "[mathlib]" "NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT(類数公式)"
+      (.inMathlib "NumberField.tendsto_sub_one_mul_dedekindZeta_nhdsGT") 116,
     .implicitStep
-      "★原文は「by Tchebotarev's density theorem」と外部文献へ送る" 116 ]
+      "★原文は「by Tchebotarev's density theorem」と外部文献へ送る。本項は完全分解の場合だけで済むので類体論を使わない" 116 ]
 
 def monotone_of_addEquiv.src : Source :=
   { paper := "FrdI", pdfPage := 114,

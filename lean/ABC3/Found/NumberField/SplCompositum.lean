@@ -393,6 +393,37 @@ theorem nonempty_algEquiv_of_SplQ_eq (L₁ L₂ : Type) [Field L₁] [Field L₂
   have hGeq : G₁ = G₂ := eq_of_SplQ_eq G₁ G₂ hgg1 hgg2 hsplG
   exact ⟨e₁.trans (f₁.trans ((IntermediateField.equivOfEq hGeq).trans (f₂.symm.trans e₂.symm)))⟩
 
+/-! ## ★9. `deg(Ψ^rlf) = 1` の算術の核 -/
+
+/-- ★★★**次数 1 の素点が両側にあれば `deg = 1`**。
+
+原文 (FrdI p.116):
+> §4, Theorem 10], it follows that [Li : Q] is equal to the maximum of the deg(Li, vi),
+
+★`d₂(f p₀) = c·d₁(p₀) = c` は正整数、`1 = d₂(q₀) = c·d₁(f⁻¹ q₀)` から
+`c = 1/d₁(f⁻¹ q₀)`。積が `1` なのでどちらも `1`。
+★★次数 1 の素点は「完全分解する素数」であり、無限個ある(`cheb-spl-infinite`)。 -/
+theorem deg_eq_one_of_degOne_both (c : ℝ) (hc : 0 < c)
+    (d₁ d₂ : Nat.Primes → ℕ) (f : Nat.Primes ≃ Nat.Primes)
+    (hd : ∀ p, (d₂ (f p) : ℝ) = c * (d₁ p : ℝ))
+    (h1 : ∃ p, d₁ p = 1) (h2 : ∃ q, d₂ q = 1)
+    (hpos1 : ∀ p, 0 < d₁ p) : c = 1 := by
+  obtain ⟨p₀, hp₀⟩ := h1
+  obtain ⟨q₀, hq₀⟩ := h2
+  have hA : (d₂ (f p₀) : ℝ) = c := by rw [hd p₀, hp₀]; norm_num
+  have hB : c * (d₁ (f.symm q₀) : ℝ) = 1 := by
+    have hh := hd (f.symm q₀)
+    rw [Equiv.apply_symm_apply, hq₀] at hh
+    simpa using hh.symm
+  set n := d₂ (f p₀) with hn
+  set m := d₁ (f.symm q₀) with hm
+  have hmpos : 0 < m := hpos1 _
+  have hnm : (n : ℝ) * (m : ℝ) = 1 := by rw [hA]; linarith
+  have hnm' : n * m = 1 := by exact_mod_cast hnm
+  have hn1 : n = 1 := Nat.eq_one_of_mul_eq_one_right (by rwa [mul_comm] at hnm')
+  rw [← hA, hn1]
+  norm_num
+
 end Congr
 
 /-! ### ★出典の紐付け -/
