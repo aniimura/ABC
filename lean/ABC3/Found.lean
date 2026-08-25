@@ -952,6 +952,7 @@ import ABC3.Found.GaloisRep.TateVarChange
 import ABC3.Found.GaloisRep.TateMultRed
 import ABC3.Found.GaloisRep.TateSplitRoot
 import ABC3.Found.GaloisRep.TateNodeMove
+import ABC3.Found.GaloisRep.TateNormalForm
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
