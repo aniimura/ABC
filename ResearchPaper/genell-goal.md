@@ -24032,3 +24032,42 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-596 ★★★★★★★点は類だけで決まる(第 283 ブロック)
+
+`Found/GaloisRep/TateClassPt.lean`。
+
+### ★★★★★★★到達点——`Phi` が定まる根拠
+
+> 同じ類 `c in K^x/q^Z` から来る 2 つの正規化した対は同じ点を与える
+> (`tatePtPair_eq_of_same_class'`)
+
+★★★第 213 の `pair_eq_of_same_class` は「対 `(a,w)` **そのもの**が一致する」を言うので、
+**対の任意の関数が類だけで決まる**。第 282 の `tatePtPair` はまさにその関数である。
+★★★★強い形の補題(値の一致でなく引数の一致)を作っておくと、後から作った関数にも
+そのまま効く——第 213 の時点では `tatePtPair` はまだ無かった。
+
+### ★★★★対の一意性の骨
+
+| 段 | 内容 |
+|---|---|
+| 1 | 同じ類の正規化元は代表元に一致する(`eq_normRep`、第 213) |
+| 2 | `algebraMap a = u = u' = algebraMap a'` と単射性で `a = a'` |
+| 3 | `a w = q = a' w'` と `a != 0` の相殺で `w = w'` |
+
+### ★★★単位類の代表元は `1`
+
+`vAdd v 1 = 0` は `[0, vAdd v q)` に入り、類も単位元なので `normRep v Q hQ 1 = 1`。
+★★★したがって **`a = 1` ⟺ 類が単位元**であり、`Phi` の場合分けはここで切れる
+(`1 - a = 0` になるのは単位類のときだけ)。
+
+| 定理 | 内容 |
+|---|---|
+| `pair_eq_of_same_class'` | ★★★★★対は類だけで決まる(`q` 固定) |
+| `tateXK_eq_of_same_class`・`tateYK_eq_of_same_class` | ★★★★★★座標も類だけで決まる |
+| `tatePtPair_eq_of_same_class'` | ★★★★★★★**点も類だけで決まる** |
+| `vAdd_one`・`normRep_one` | ★★★単位類の代表元は `1` |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
