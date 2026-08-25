@@ -503,4 +503,22 @@ def normMapGeom.needs : List ProofObligation :=
     .citation "[ABC3]" "specToV_compat"
       (.inProject "ABC3" "ABC3.Found.Divisor.specToV_compat") 110 ]
 
+
+/-- ★★**`normMapGeom` は支配的** —— `normUp` が支配的で、それを経由するから。 -/
+instance normMapGeom_isDominant {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
+    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
+    {Kbar₁ Kbar₂ : Type u} [Field Kbar₁] [Field Kbar₂]
+    [Algebra V₁.functionField Kbar₁] [Algebra V₂.functionField Kbar₂]
+    (L : FinSub V₁.functionField Kbar₁) (FL : FinSub V₂.functionField Kbar₂)
+    (φ : CommRingCat.of L.toIF ⟶ CommRingCat.of FL.toIF)
+    (hφ : CommRingCat.ofHom (algebraMap V₁.functionField L.toIF) ≫ φ
+        = ffMap ψ ≫ CommRingCat.ofHom (algebraMap V₂.functionField FL.toIF)) :
+    IsDominant (normMapGeom ψ L FL φ hφ) := by
+  haveI : Surjective (Spec.map φ) := ⟨fun _ => ⟨default, Subsingleton.elim _ _⟩⟩
+  have heq : normUp V₂ FL ≫ normMapGeom ψ L FL φ hφ = Spec.map φ ≫ normUp V₁ L :=
+    toNormalization_normMapOfBase (specToV V₁ L) (specToV V₂ FL) ψ (Spec.map φ) _
+  have h : IsDominant (normUp V₂ FL ≫ normMapGeom ψ L FL φ hφ) := by
+    rw [heq]; infer_instance
+  exact IsDominant.of_comp (normUp V₂ FL) _
+
 end ABC3.Found.Divisor
