@@ -187,6 +187,7 @@ import ABC3.Found.Divisor.SchemeHartogs
 import ABC3.Found.Divisor.NormalSections
 import ABC3.Found.Divisor.NormMapBase
 import ABC3.Found.Divisor.Thm62Pull
+import ABC3.Found.Divisor.Thm62Hom
 import ABC3.Found.Divisor.NormFF
 import ABC3.Found.Divisor.SchemeOrdUnit
 import ABC3.Found.Divisor.SchemeFFMap
