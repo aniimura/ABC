@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.Divisor.Ex63Types
 import ABC3.Found.Divisor.ArithSuppSplit
 import ABC3.Found.FrdI.Thm64RatStd
+import ABC3.Found.FrdI.Prop55PfRatStd
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— 算術 Frobenioid は **rationally standard 型**
@@ -436,6 +437,49 @@ theorem ex63_unTr_ratStd :
     (Additive.ofMul y)
     (fun n hn => divBGalois_nsmul_ne_zero Y y v0 hy n hn)
 
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**[FrdI] Proposition 5.5, (iii)** —— 算術の **`𝒞^pf` も rationally standard**。
+
+★一般形は `Prop55PfRatStd.lean` の `pfRoot_isOfRationallyStandardType`。
+★★`Theorem 6.4, (i)` が並べる 5 圏のうち **`𝒞^pf` の 1 つ**がこれで閉じる
+(残るは `𝒞^rlf` と `(𝒞^pf)^un-tr`)。
+
+★(b) の Frobenius-compact 対象は `𝒞^un-tr` のときと同じく **底 `⊥`(= `F` 自身)の対象**で取る。
+`Div_B(2)` が `(Φ^pf)^gp` でも無限位数であることは `nsmul_gpMap_pfOf_ne_zero` による。 -/
+theorem ex63_pf_ratStd :
+    IsOfRationallyStandardType
+      (pfRootPre (ModelData.modelPre (ex63Hyp F Kbar))
+        (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+      (pfRoot_frobenioid (F := (ModelData.model_frobenioid (ex63Hyp F Kbar)).core)
+        (isOfFrobeniusIsotropicType_of_isotropic
+          (ModelData.model_isotropicType (ex63Hyp F Kbar)))
+        (ModelData.model_frobenioid (ex63Hyp F Kbar)))
+      (fun Y => iotaPf ((ModelData.modelPre (ex63Hyp F Kbar)).divisorial Y)
+        (ex63Iota F Kbar Y)) := by
+  classical
+  haveI := (ex63Hyp F Kbar).connectedD
+  set L := (botSub F Kbar).toIF with hL
+  set Y : (FinSub F Kbar)ᵒᵖ := Opposite.op (botSub F Kbar) with hY
+  set h := ex63Hyp F Kbar with hh
+  set v0 : ArithPlace L := Sum.inr (Classical.arbitrary (InfinitePlace L)) with hv0
+  obtain ⟨y, hy⟩ := exists_arithDiv_ne_zero_at L v0
+  exact pfRoot_isOfRationallyStandardType
+    (isOfFrobeniusIsotropicType_of_isotropic (ModelData.model_isotropicType h))
+    (ModelData.model_isotropicType h)
+    (ex63_isotropic_family F Kbar).2.2.1
+    _
+    (ModelData.model_birat_frobenioidCore h)
+    (ex63Iota F Kbar)
+    (ModelData.model_isOfBiratFrobNormalizedType h)
+    (fun A => isStrictlyRational_of_divB (ModelData.modelRatFnData h) (ex63Iota F Kbar) A
+      (ex63_hsp F Kbar A))
+    (ex63_not_isOfGroupLikeType F Kbar)
+    (ex63_standardType F Kbar)
+    (unTr_pf_biratCompact_of_baseId h ⟨Y, 0⟩ (Additive.ofMul y)
+      (fun e => ex63_phi_map_bot_eq_id F Kbar e)
+      (fun n hn => nsmul_gpMap_pfOf_ne_zero ((ModelData.modelPre h).divisorial Y) n
+        (divBGalois_nsmul_ne_zero Y y v0 hy n hn)))
+
 end Ex63Std
 
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
@@ -449,6 +493,21 @@ def ex63_unTr_ratStd.src : Source :=
   { paper := "FrdI", pdfPage := 105,
     item := "Proposition 5.5, (iii) — 算術の 𝒞^un-tr も rationally standard",
     sectionId := "frdi-prop-5-5" }
+
+def ex63_pf_ratStd.src : Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — 算術の 𝒞^pf も rationally standard",
+    sectionId := "frdi-prop-5-5" }
+
+def ex63_pf_ratStd.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "pfRoot_isOfRationallyStandardType(一般形。4 条を集める)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.pfRoot_isOfRationallyStandardType") 105,
+    .citation "[ABC3]" "unTr_pf_biratCompact_of_baseId((b) の Frobenius-compact 対象)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.unTr_pf_biratCompact_of_baseId") 114,
+    .citation "[ABC3]" "ModelData.model_birat_frobenioidCore(𝒞^birat の 21 条)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.ModelData.model_birat_frobenioidCore") 85,
+    .citation "[ABC3]" "nsmul_gpMap_pfOf_ne_zero(Div_B(2) は (Φ^pf)^gp でも無限位数)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.nsmul_gpMap_pfOf_ne_zero") 105 ]
 
 def exists_arithDiv_ne_zero_at.src : Source :=
   { paper := "FrdI", pdfPage := 114,

@@ -181,7 +181,33 @@ theorem mem_suppElt_iotaPf (hdiv : IsDivisorial M) (ι : Prime M → Pf M → �
     ↔ factorMap ι (Pf.of a) p ≠ 0
   rw [show (Pf.of (Pf.of a : Pf M) : Pf (Pf M)) = pfPfEquiv hdiv (Pf.of a) from rfl, hkey]
 
+/-! ## ★4. `M^gp → (M^pf)^gp` は単射
+
+★`Definition 4.5, (iii), (b)`(`((𝒞^pf)^un-tr)^birat` の Frobenius-compact 対象)を
+`𝒞^pf` で使うとき、`Φ^birat` の元が **`M^pf` の側でも無限位数**であることが要る。
+★`Pf.of` が単射(`Pf.of_injective_of_divisorial`)で両側が簡約的なので、
+`gpMap_injective` がそのまま効く。 -/
+
+/-- ★★`M` が divisorial なら `M^gp → (M^pf)^gp` は単射。 -/
+theorem gpMap_pfOf_injective (hdiv : IsDivisorial M) :
+    Function.Injective (gpMap M (Pf.of : M →+ Pf M)) := by
+  haveI := isCancelAdd_of_isIntegralMonoid M hdiv.1.1
+  haveI := isCancelAdd_of_isIntegralMonoid (Pf M) (Pf.isDivisorial' hdiv).1.1
+  exact gpMap_injective M (Pf.of_injective_of_divisorial hdiv)
+
+/-- ★★★したがって「無限位数」は `M^pf` の側でも保たれる。 -/
+theorem nsmul_gpMap_pfOf_ne_zero (hdiv : IsDivisorial M) {x : Gp M} (n : ℕ)
+    (hx : n • x ≠ 0) : n • gpMap M (Pf.of : M →+ Pf M) x ≠ 0 := by
+  rw [← map_nsmul]
+  intro h
+  exact hx (gpMap_pfOf_injective hdiv (h.trans (map_zero _).symm))
+
 /-! ### ★出典の紐付け -/
+
+def gpMap_pfOf_injective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (iii) — M^gp → (M^pf)^gp は単射",
+    sectionId := "frdi-prop-5-5" }
 
 def iotaPf.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 105,
