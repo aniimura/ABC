@@ -21032,3 +21032,60 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-539 ★★★★★★解析側の ℤ 和を形式側と同じ形に分けた(第 226 ブロック)
+
+`Found/GaloisRep/TateSplitNat.lean`。
+
+解析側(第 218・219)の `X`・`Y` は **`n in Z` にわたる和**、形式側(第 105-107)の
+`tateXpair`・`tateYpair` は **頭 + `N` の尾**で書かれている。同じものであることを型で確かめた。
+
+### ★★★鍵は `q^{-(m+1)} u = (q^m w)^{-1}`
+
+`q = uw` とすると `q^{-(m+1)} u = u^{-m} w^{-(m+1)} = (q^m w)^{-1}` である
+(`zpow_neg_succ_mul`)。よって段ごとに:
+
+| 段 `n` | `X` 側 | `Y` 側 |
+|---|---|---|
+| `n = 0` | `f(u)` | `g(u)` |
+| `n = -(m+1)` | `f(q^{m+1} u)` | `g(q^{m+1} u)` |
+| `n = m+1` | `f((q^m w)^{-1}) = f(q^m w)` | `g((q^m w)^{-1}) = -(f(q^m w) + g(q^m w))` |
+
+★★`f` は反転で不変、`g` は `g(1/t) = -(f(t)+g(t))`(`tateYterm_inv'`)——
+**偶数べき・奇数べきの違いがそのまま `X` と `Y` の形の違いになる**。
+第 217/219 で `rowP` と `rowDP` の符号の吸収が違ったのと同じ現象がここでも出た。
+
+    S_{n in Z} f(q^{-n}u) = [f(u) + S_{m>=1} f(q^m u)] + [f(w) + S_{m>=1} f(q^m w)]
+    S_{n in Z} g(q^{-n}u) = [g(u) + S_{m>=1} g(q^m u)] - [f(w) + S_{m>=1} f(q^m w)]
+                                                       - [g(w) + S_{m>=1} g(q^m w)]
+
+★★★**これは `tateXpair`・`tateYpair` の定義そのものの形**である。
+`Y` の負の段が `X` の尾と `Y` の尾の**両方**を生むのが、形式側の定義
+`tateYpair = (g(a)+..) - (f(w)+..) - (g(w)+..) + s1` の由来である。
+
+### ★★収束の条件は `‖u‖ < 1`、`‖w‖ < 1` だけ
+
+`q = uw` なので `‖q‖ < 1`。`‖q^m w‖ <= ‖w‖ < 1` なので反転則に要る `t != 1` も自動。
+★`t != 0` には `u != 0`、`w != 0` が要る(`‖.‖ < 1` からは出ない)。
+
+| 定理 | 内容 |
+|---|---|
+| `zpow_neg_succ_mul` | ★`q^{-(m+1)}u = (q^m w)^{-1}` |
+| `summable_nat_tateXterm` 他 | ★★`N` 側の可和性 |
+| `tateYterm_inv'` | ★★★★`g(1/t) = -(f(t)+g(t))` |
+| `tsum_int_tateXterm_split` | ★★★★★★**`X` の ℤ 和は頭と二本の尾** |
+| `tsum_int_tateYterm_split` | ★★★★★★**`Y` の ℤ 和は頭と三本の尾** |
+
+### ★残り
+
+`tateXfun z tau` は `u = exp(2 pi i z)`、`w = exp(2 pi i (tau - z))` とすれば
+本ブロックの形になる(`u*w = exp(2 pi i tau) = q`)。あとは:
+
+1. 尾の切り詰めとの差が `O(q^n)`(第 218 の `‖f(t)‖ <= 4‖t‖` で押さえる)
+2. `s1` の側の切り詰めとの差も `O(q^n)`
+3. 合わせて `tateDefectTrunc n u w (uw) = O(q^n)`
+4. そこから分子の係数の消滅
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
