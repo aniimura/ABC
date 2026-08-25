@@ -21715,3 +21715,52 @@ Bezout の意味では互いに素にならない。
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-552 ★★★★★★★★分子は `W^{n+1}` で割れる —— ℂ から ℤ への降下(第 239 ブロック)
+
+`Found/GaloisRep/TateDescent.lean`。
+
+第 238 で「各 `u = exp(2 pi i z)` について `(evalW u P)` の低次係数が 0」まで来た。
+これを **`Z[A,W]` の中の `W^{n+1} | P`** に降ろした。
+
+### ★★★★★`Z[A,W] = Z[a][w]`(`W` を外側の変数に)を作る
+
+`toPP` / `ofPP` を `eval2Hom` と `Polynomial.eval2RingHom` で作り、
+`MvPolynomial.ringHom_ext` と `Polynomial.ringHom_ext` で互いに逆であることを示した。すると
+
+    W^m | P  <=>  X^m | toPP P  <=>  for all j < m, (toPP P).coeff j = 0
+
+★`(toPP P).coeff j in Z[a]` は `u` の多項式である。`evalW u` はちょうどその係数を
+`u` で評価したものになる(`coeff_evalW_eq`)——これも `MvPolynomial.ringHom_ext` で出る。
+
+### ★★★`u` の動く先は無限集合
+
+`z = i(k+1)` とすれば `‖exp(2 pi i z)‖ = exp(-2 pi (k+1))` がすべて相異なる
+(`infinite_exp_range`)。これで第 236 の「無限個の点で消える多項式は 0」が使え、
+`C[a]` の側で 0 になる。★`Z[a] -> C[a]` は単射なので `Z[a]` の側でも 0。
+
+### ★★配線の落とし穴
+
+`poly_eq_zero_of_infinite_zeros _ (Set.range fun z : H => …) infinite_exp_range` と
+**集合を明示すると `isDefEq` が時間切れになる**(maxHeartbeats 200 万でも落ちた)。
+`_ _ infinite_exp_range` と書いて**補題側から推論させる**と 0.03 秒で通る。
+★同じ集合を二度書くと、`UpperHalfPlane` の coercion の展開で単一化が爆発するらしい。
+
+| 定理 | 内容 |
+|---|---|
+| `toPP` / `ofPP` / `univW_pow_dvd_iff` | ★★★★★`Z[A,W] = Z[a][w]` と整除性の言い換え |
+| `coeff_evalW_eq` | ★★★★`evalW u` は係数を `u` で評価したもの |
+| `infinite_exp_range` | ★★★`exp(2 pi i H)` の像は無限 |
+| `univW_pow_dvd_of_coeff` | ★★★★★★★`u` を動かして `W^{n+1} | P` |
+| `univW_pow_dvd_numerator` | ★★★★★★★★**分子は `W^{n+1}` で割れる** |
+
+### ★残り
+
+1. 対称性(`A` と `W` の交換)で `A^{n+1} | P`
+2. 第 224 の `tateDefect_eq_zero_of_base` に流し込む(添字が `n+1` の形に合わせる)
+
+★これで葉 (b) が閉じる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

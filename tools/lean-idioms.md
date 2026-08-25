@@ -609,3 +609,26 @@ theorem eval_zero_le_of_bound (g : Polynomial ℂ) (C r : ℝ) (hr : 0 < r) (m :
 
 ★`le_of_tendsto_of_tendsto` は `f ≤ᶠ[b] g`(eventually)を取る。
 `filter_upwards [self_mem_nhdsWithin, hball.filter_mono nhdsWithin_le_nhds]` で供給する。
+
+## 同じ集合を二度書くと `isDefEq` が爆発する
+
+**失敗形**:
+
+```lean
+refine poly_eq_zero_of_infinite_zeros _
+  (Set.range fun z : UpperHalfPlane => Complex.exp (2 * ↑π * I * (z : ℂ)))
+  infinite_exp_range ?_
+-- (deterministic) timeout at `isDefEq` (maxHeartbeats 2000000 でも落ちる)
+```
+
+★補題 `infinite_exp_range` の集合と、ここで書いた集合を単一化しようとして、
+`UpperHalfPlane` の coercion の展開で爆発する。
+
+**対処**: **集合を書かず、補題側から推論させる**。
+
+```lean
+refine poly_eq_zero_of_infinite_zeros _ _ infinite_exp_range ?_   -- 0.03 秒
+```
+
+★★同型の引数を「念のため明示する」のは、Lean では**逆効果になることがある**。
+既に補題が持っている形は、補題に決めさせるのが速い。

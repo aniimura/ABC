@@ -885,6 +885,7 @@ import ABC3.Found.GaloisRep.TateDefectBound
 import ABC3.Found.GaloisRep.PolyVanish
 import ABC3.Found.GaloisRep.TateUWFree
 import ABC3.Found.GaloisRep.TateCoeffVanish
+import ABC3.Found.GaloisRep.TateDescent
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
