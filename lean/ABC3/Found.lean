@@ -894,6 +894,7 @@ import ABC3.Found.GaloisRep.WeierstrassPoleForm
 import ABC3.Found.GaloisRep.WeierstrassQuotient
 import ABC3.Found.GaloisRep.CollinearDet
 import ABC3.Found.GaloisRep.RemovableGlue
+import ABC3.Found.GaloisRep.WeierstrassAddition
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
