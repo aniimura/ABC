@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.FrdI.Thm62Slim
 import ABC3.Found.FrdI.Prop55RlfRefl
+import ABC3.Found.FrdI.Sec6GaloisCat
+import Mathlib.FieldTheory.Galois.Profinite
 
 /-!
 # [FrdI] Theorem 6.4, (i) —— Div-slim は `Φ` から `Φ^pf`・`Φ^rlf` へ移る
@@ -121,7 +123,72 @@ theorem isDivSlim_phiScOn_nnreal
 
 end DivSlimTransport
 
+/-! ## ★2. 算術の `𝒟 = B(G)⁰` での slim 性
+
+原文 (FrdI p.115):
+> The proof of the criterion for D to be slim is entirely similar to the proof
+> given for Theorem 6.2, (iv).
+
+★★★原文自身が `Theorem 6.2, (iv)` と同じだと言うので、
+在庫の一般形(`Thm62Slim.lean`)をそのまま算術の `𝒟` に当てる。
+★入力は [Mzk7] `Corollary 1.1.6`(`Z_G(H) ≃ Aut(𝒟_{Spec L} → 𝒟)`)で、
+`Theorem 6.2, (iv)` と同じく**仮定として受ける**(原文の証明もそこを引いている)。
+
+★`G = Gal(K̄/F)` が副有限であることは mathlib(`Mathlib.FieldTheory.Galois.Profinite`
+の `CompactSpace Gal(K/k)` ほか)から出る —— そこが幾何の場合との違いである。 -/
+
+section ArithSlim
+
+variable (F Kbar : Type) [Field F] [Field Kbar] [Algebra F Kbar] [IsGalois F Kbar]
+
+/-- ★★★★★**[FrdI] Theorem 6.4, (i)** —— 算術の `𝒟 = B(G)⁰` は **Frobenius-slim**。
+
+★仮定 `h` が [Mzk7] `Corollary 1.1.6` の**使う分だけ**の形である
+(同型まで要らず、副有限群 `Gal(K̄/F)` への**単射準同型**で足りる)。
+★★副有限性は mathlib が与えるので、あとは在庫の
+`isFrobeniusSlim_of_embeds_profinite` に流すだけである。 -/
+theorem finSubOp_isFrobeniusSlim
+    (h : ∀ A : (FinSub F Kbar)ᵒᵖ,
+      ∃ f : Aut (Over.forget A) →* (Kbar ≃ₐ[F] Kbar), Function.Injective f) :
+    IsFrobeniusSlim ((FinSub F Kbar)ᵒᵖ) :=
+  isFrobeniusSlim_of_embeds_profinite h
+
+omit [IsGalois F Kbar] in
+/-- ★★★★★**[FrdI] Theorem 6.4, (i)** —— 算術の `𝒟` が **slim ⟺ `Z = {1}`**。
+
+原文の `Z = ⋃_H Z_G(H)` を添字ごとに読んだ形である
+(`Theorem 6.2, (iv)` と同じ流儀)。 -/
+theorem finSubOp_isSlimCat_iff (Hsub : (FinSub F Kbar)ᵒᵖ → Subgroup (Kbar ≃ₐ[F] Kbar))
+    (e : ∀ A : (FinSub F Kbar)ᵒᵖ, Aut (Over.forget A) ≃* (Hsub A)) :
+    IsSlimCat ((FinSub F Kbar)ᵒᵖ) ↔ ∀ A : (FinSub F Kbar)ᵒᵖ, Hsub A = ⊥ :=
+  isSlimCat_iff_of_mulEquiv Hsub e
+
+end ArithSlim
+
 /-! ### ★出典の紐付け -/
+
+def finSubOp_isFrobeniusSlim.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 𝒟 は Frobenius-slim",
+    sectionId := "frdi-thm-6-4" }
+
+def finSubOp_isFrobeniusSlim.needs : List ABC3.Meta.ProofObligation :=
+  [ .otherPaper "[Mzk7]" "Corollary 1.1.6 — Z_G(H) ≃ Aut(𝒟_{Spec L} → 𝒟)。★仮定 h として受ける" 14,
+    .citation "[ABC3]" "isFrobeniusSlim_of_embeds_profinite(一般形。Theorem 6.2, (iv) で作った)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.isFrobeniusSlim_of_embeds_profinite") 112,
+    .citation "[mathlib]" "Gal(K̄/F) は副有限(CompactSpace / T2 / TotallyDisconnected)"
+      (.inMathlib "InfiniteGalois.instCompactSpaceAlgEquiv") 114 ]
+
+def finSubOp_isSlimCat_iff.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — 𝒟 が slim ⟺ Z = {1}",
+    sectionId := "frdi-thm-6-4" }
+
+def finSubOp_isSlimCat_iff.needs : List ABC3.Meta.ProofObligation :=
+  [ .otherPaper "[Mzk7]" "Corollary 1.1.6 — Z_G(H) ≃ Aut(𝒟_{Spec L} → 𝒟)。★仮定 e として受ける" 14,
+    .citation "[ABC3]" "isSlimCat_iff_of_mulEquiv(一般形。Theorem 6.2, (iv) で作った)"
+      (.inProject "ABC3" "ABC3.Found.FrdI.isSlimCat_iff_of_mulEquiv") 112,
+    .derivation "原文「The proof … is entirely similar to the proof given for Theorem 6.2, (iv).」" 115 ]
 
 def isDivSlim_pfOn.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
