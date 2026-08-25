@@ -216,6 +216,7 @@ import ABC3.Found.NumberField.SplitInfinite
 import ABC3.Found.NumberField.SplitSeparable
 import ABC3.Found.NumberField.MaxDeg
 import ABC3.Found.NumberField.GaloisFaithful
+import ABC3.Found.NumberField.GaloisFaithfulBase
 import ABC3.Found.NumberField.DirichletDensity
 import ABC3.Found.NumberField.DedekindEuler
 import ABC3.Found.NumberField.IdealPowBound
