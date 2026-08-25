@@ -920,6 +920,7 @@ import ABC3.Found.GaloisRep.TateLinearQ
 import ABC3.Found.GaloisRep.TateQUnique
 import ABC3.Found.GaloisRep.TateMixedGroup
 import ABC3.Found.GaloisRep.TateUnitGroup
+import ABC3.Found.GaloisRep.TateOriginUniv
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
