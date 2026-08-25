@@ -286,7 +286,69 @@ theorem sum_localDeg_eq (L M : Type) [Field L] [Field M] [NumberField L] [Number
       rw [hset, Finset.sum_image (fun _ _ _ _ h => Sum.inr_injective h)]
       exact sum_localDeg_inf_eq L M v₀
 
+/-! ## ★6. トレース写像 —— `Finsupp.mapDomain resPlace`
+
+★★★`Φ^rlf` の条件 (a) を出すのに要る「`k` 倍の引き戻し」は、
+**素点の制限に沿った `Finsupp.mapDomain`**（＝上にある素点についての和）である。 -/
+
+open scoped Classical in
+/-- ★`Finsupp.mapDomain` の値は**像の点でなくても**ファイバー上の和で書ける。
+
+★mathlib の `mapDomain_apply_eq_sum` は `f a` の形の点だけなので、一般の点で置き直す。 -/
+theorem mapDomain_apply_eq_sum' {α β N : Type} [DecidableEq β] [AddCommMonoid N] (f : α → β)
+    (x : α →₀ N) (v : β) : (x.mapDomain f) v = ∑ i ∈ x.support with f i = v, x i := by
+  classical
+  simp [Finsupp.mapDomain, Finsupp.sum, Finsupp.single_apply, Finset.sum_ite]
+
+open scoped Classical in
+/-- ★★★★★★**トレース写像は `arithExtend` の `[M:L]` 倍の引き戻し**。
+
+    mapDomain resPlace ∘ arithExtend = [M : L] · id
+
+★これが節点 `rlf-flat`（`S = ℝ≥0`）を算術で埋める鍵である
+（`isCharacteristicallyInjective_scMap_of_nsmul_retraction` に流す）。 -/
+theorem mapDomain_arithExtend (L M : Type) [Field L] [Field M] [NumberField L] [NumberField M]
+    [Algebra L M] (x : ArithPlace L →₀ ℝ) :
+    Finsupp.mapDomain (resPlace (L := L) (M := M)) (arithExtend (L := L) (M := M) x)
+      = (Module.finrank L M : ℕ) • x := by
+  classical
+  ext v
+  rw [mapDomain_apply_eq_sum']
+  have hsub : ((arithExtend (L := L) (M := M) x).support.filter
+      (fun V => resPlace (L := L) V = v))
+      ⊆ (finite_fiber (L := L) (M := M) v).toFinset := by
+    intro V hV
+    rw [Finset.mem_filter] at hV
+    rw [Set.Finite.mem_toFinset]
+    exact hV.2
+  have hzero : ∀ V ∈ (finite_fiber (L := L) (M := M) v).toFinset,
+      V ∉ ((arithExtend (L := L) (M := M) x).support.filter
+        (fun V => resPlace (L := L) V = v)) → (arithExtend (L := L) (M := M) x) V = 0 := by
+    intro V hV hVn
+    rw [Set.Finite.mem_toFinset] at hV
+    by_contra hne
+    exact hVn (Finset.mem_filter.mpr ⟨Finsupp.mem_support_iff.mpr hne, hV⟩)
+  rw [Finset.sum_subset hsub hzero]
+  have hterm : ∀ V ∈ (finite_fiber (L := L) (M := M) v).toFinset,
+      (arithExtend (L := L) (M := M) x) V = (localDeg (L := L) V : ℝ) * x v := by
+    intro V hV
+    rw [Set.Finite.mem_toFinset] at hV
+    show (localDeg (L := L) V : ℝ) * x (resPlace (L := L) V) = _
+    rw [hV]
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_mul]
+  have hsum : ∑ V ∈ (finite_fiber (L := L) (M := M) v).toFinset, ((localDeg (L := L) V : ℝ))
+      = ((Module.finrank L M : ℕ) : ℝ) := by
+    rw [← Nat.cast_sum, sum_localDeg_eq L M v]
+  rw [hsum]
+  show _ = (Module.finrank L M : ℕ) • x v
+  rw [nsmul_eq_mul]
+
 /-! ### ★出典の紐付け -/
+
+def mapDomain_arithExtend.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 114,
+    item := "Theorem 6.4, (i) — トレース写像は arithExtend の [M:L] 倍の引き戻し",
+    sectionId := "frdi-thm-6-4" }
 
 def sum_localDeg_fin_eq.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 114,
