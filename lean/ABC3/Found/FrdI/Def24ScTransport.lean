@@ -448,9 +448,62 @@ theorem isCharacteristicallyInjective_scMap_of_retraction {f : M →+ N} {g : N 
     IsCharacteristicallyInjective (scMap (S := S) f) :=
   ⟨scMap_injective_of_retraction h, charMap_scMap_injective_of_retraction h⟩
 
+/-! ### ★★`k` 倍の引き戻し(トレース写像)でも足りる
+
+★★★算術の `Φ.map` は素点の引き戻しに**局所次数を掛ける**(`arithExtend`)ので、
+素朴な引き戻し(1 つの素点で評価する)は `arithDivGroup` の整数性を壊す。
+★そこで **「上にある素点についての和」**を取ると
+
+    h(f(x))(v) = Σ_{w | v} localDeg(w) · x(v) = [M:L] · x(v)
+
+となり、`h ∘ f = [M:L]·id` である。★**`ScT ℝ≥0 M` は `ℝ≥0`-加群なので
+正の整数倍は可逆**(逆は `1/k` 倍)、したがってこれで単射性が出る。 -/
+
+/-- ★`ScT ℝ≥0 M` は `ℝ≥0`-加群なので、正の整数倍は単射(逆は `1/k` 倍)。 -/
+theorem nsmul_injective_scT {k : ℕ} (hk : 0 < k) :
+    Function.Injective (fun z : ScT ℝ≥0 M => k • z) := by
+  intro x y hxy
+  have hk0 : ((k : ℝ≥0)) ≠ 0 := Nat.cast_ne_zero.mpr hk.ne'
+  have h1 : ((k : ℝ≥0)) • x = ((k : ℝ≥0)) • y :=
+    (Nat.cast_smul_eq_nsmul ℝ≥0 k x).trans (hxy.trans (Nat.cast_smul_eq_nsmul ℝ≥0 k y).symm)
+  have h2 := congrArg (fun z : ScT ℝ≥0 M => ((k : ℝ≥0))⁻¹ • z) h1
+  simpa [smul_smul, inv_mul_cancel₀ hk0] using h2
+
+/-- ★★★★★**`k` 倍の引き戻し(トレース写像)でも係数拡大は単射**。 -/
+theorem scMap_injective_of_nsmul_retraction {f : M →+ N} {g : N →+ M} {k : ℕ} (hk : 0 < k)
+    (h : ∀ x : M, g (f x) = k • x) : Function.Injective (scMap (S := ℝ≥0) f) := by
+  have hcomp : ∀ z : ScT ℝ≥0 M, scMap (S := ℝ≥0) g (scMap (S := ℝ≥0) f z) = k • z := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp
+    | tmul r m =>
+        rw [scMap_tmul, scMap_tmul, h m]
+        exact (TensorProduct.tmul_smul (R := ℕ) k r m).symm ▸ rfl
+    | add u v hu hv =>
+        rw [map_add, map_add, hu, hv]
+        exact (smul_add k u v).symm
+  intro x y hxy
+  refine nsmul_injective_scT (M := M) hk ?_
+  show k • x = k • y
+  rw [← hcomp x, ← hcomp y, hxy]
+
+/-- ★★★★★★**`k` 倍の引き戻しがあれば `MonoidOn` の条件 (a) がまるごと出る**
+(★節点 `rlf-flat`(`S = ℝ≥0`)の迂回路の完成形)。 -/
+theorem isCharacteristicallyInjective_scMap_of_nsmul_retraction
+    (hsharpN : IsSharp (ScT ℝ≥0 N)) {f : M →+ N} {g : N →+ M} {k : ℕ} (hk : 0 < k)
+    (h : ∀ x : M, g (f x) = k • x) :
+    IsCharacteristicallyInjective (scMap (S := ℝ≥0) f) :=
+  ⟨scMap_injective_of_nsmul_retraction hk h,
+    charMap_injective_of_sharp hsharpN (scMap_injective_of_nsmul_retraction hk h)⟩
+
 end Retract
 
 /-! ### ★出典の紐付け -/
+
+def isCharacteristicallyInjective_scMap_of_nsmul_retraction.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 51,
+    item := "Definition 2.4, (i) — k 倍の引き戻しがあれば係数拡大は単射性を保つ",
+    sectionId := "frdi-def-2-4" }
 
 def isCharacteristicallyInjective_scMap_of_retraction.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 51,
