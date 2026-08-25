@@ -71,6 +71,49 @@ theorem pullCoeff_eq_zero_of_notMem {W₁ W₂ : Scheme.{u}} (π : W₂ ⟶ W₁
   rw [show q = ((Units.mk0 q hq : (W₁.functionField)ˣ) : W₁.functionField) from rfl, ← ht]
   exact ordPt_ffMap_eq_zero_of_isUnit π hnorm₂ w t
 
+/-! ## ★1.5. 射が等しければ引き戻しも等しい -/
+
+/-- ★**射が等しければ関数体の射も等しい**(`IsDominant` は `Prop` なので証明無関係)。 -/
+theorem ffMap_congr {X Y : Scheme.{u}} {g g' : X ⟶ Y} [IsDominant g] [IsDominant g']
+    [IrreducibleSpace X] [IrreducibleSpace Y] (h : g = g') : ffMap g = ffMap g' := by
+  subst h; rfl
+
+/-- ★**射が等しければ引き戻しの係数も等しい**。 -/
+theorem pullCoeff_congr_hom {X Y : Scheme.{u}} {g g' : X ⟶ Y} [IsDominant g] [IsDominant g']
+    [IsIntegral X] [IsIntegral Y] [IsLocallyNoetherian X] [IsLocallyNoetherian Y]
+    (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) (h : g = g') (w : PrimeDivisorPt X) :
+    pullCoeff g hnormX hnormY hD w = pullCoeff g' hnormX hnormY hD w := by
+  subst h; rfl
+
+/-- ★★★★★**可換な四角形では引き戻しが一致する** ——
+`thm62-i-pull` の `Div` の**自然性**の中身。
+
+★`pullCoeff_comp`(引き戻しの関手性)を 2 回使い、四角形の可換性で繋ぐ。 -/
+theorem pullCoeff_square {X Y Z W : Scheme.{u}}
+    (a : X ⟶ Y) (b : Y ⟶ W) (c : X ⟶ Z) (e : Z ⟶ W)
+    [IsDominant a] [IsDominant b] [IsDominant c] [IsDominant e]
+    [IsDominant (a ≫ b)] [IsDominant (c ≫ e)]
+    [IsIntegral X] [IsIntegral Y] [IsIntegral Z] [IsIntegral W]
+    [IsLocallyNoetherian X] [IsLocallyNoetherian Y] [IsLocallyNoetherian Z]
+    [IsLocallyNoetherian W]
+    (hnX : IsNormalScheme X) (hnY : IsNormalScheme Y) (hnZ : IsNormalScheme Z)
+    (hnW : IsNormalScheme W) {D : WeilDiv W} (hD : IsCartierDiv hnW D)
+    [CompactSpace Y] [CompactSpace Z]
+    (hdimb : ∀ v : PrimeDivisorPt Y, ringKrullDim (W.presheaf.stalk (b.base v.1)) ≤ 1)
+    (hdime : ∀ v : PrimeDivisorPt Z, ringKrullDim (W.presheaf.stalk (e.base v.1)) ≤ 1)
+    (x : PrimeDivisorPt X)
+    (hdima : ringKrullDim (Y.presheaf.stalk (a.base x.1)) ≤ 1)
+    (hdimc : ringKrullDim (Z.presheaf.stalk (c.base x.1)) ≤ 1)
+    (hdimab : ringKrullDim (W.presheaf.stalk ((a ≫ b).base x.1)) ≤ 1)
+    (hdimce : ringKrullDim (W.presheaf.stalk ((c ≫ e).base x.1)) ≤ 1)
+    (hsq : a ≫ b = c ≫ e) :
+    pullCoeff a hnX hnY (isCartierDiv_cartierPullback b hnY hnW hD hdimb) x
+      = pullCoeff c hnX hnZ (isCartierDiv_cartierPullback e hnZ hnW hD hdime) x := by
+  rw [← pullCoeff_comp a b hnX hnY hnW hD hdimb x hdima hdimab,
+      ← pullCoeff_comp c e hnX hnZ hnW hD hdime x hdimc hdimce,
+      pullCoeff_congr_hom hnX hnW hD hsq x]
+
 /-! ## ★2. 底が動くときの `Φ(L)^gp` の引き戻し -/
 
 variable {V₁ V₂ : Scheme.{u}} [IsIntegral V₁] [IsIntegral V₂]
@@ -198,5 +241,17 @@ def pullCoeff_eq_zero_of_notMem.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Divisor.exists_unit_of_ordPt_of_dim_le_one") 110,
     .citation "[ABC3]" "ordPt_ffMap_eq_zero_of_isUnit"
       (.inProject "ABC3" "ABC3.Found.Divisor.ordPt_ffMap_eq_zero_of_isUnit") 110 ]
+
+def pullCoeff_square.src : Source :=
+  { paper := "FrdI", pdfPage := 110,
+    item := "Theorem 6.2, (i) — 可換な四角形では引き戻しが一致する(Div の自然性)",
+    sectionId := "frdi-thm-6-2" }
+
+def pullCoeff_square.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "pullCoeff_comp(引き戻しの関手性)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.pullCoeff_comp") 110,
+    .citation "[ABC3]" "normMapOfBase_naturality(四角形の可換性を与える側)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_naturality") 110,
+    .derivation "関手性を 2 回使い、四角形の可換性で繋ぐ。IsDominant は Prop なので射の等式で移送できる" 110 ]
 
 end ABC3.Found.Divisor
