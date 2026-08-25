@@ -41,3 +41,19 @@ metadata:
 
 関連: [[leaves-are-measured-not-guessed]] / [[measure-mathlib-before-skeleton]] /
 [[frdi-split-nonisotropic-not-derivable]]
+
+## ★★★★★7・8 回目(2026-08-25)
+
+| 回 | 節点 | 実際 |
+|---|---|---|
+| 7 | `normalization-universal-normal` | `Scheme.Hom.normalizationDesc` は**使えた**。底変換を 1 つ挟めば 15 行。「★大」の見積りは誤り |
+| 8 | `cheb-spl-det` の分解群 | ★`decompositionGroup` が mathlib に 0 件 → 「分解群が無い」と読んだが、**`MulAction.stabilizer` がそれ**。さらに `Found/NumberField/GaloisFaithful.lean` に順方向(`eq_one_of_fixes_prime` ほか)が**既にあった** |
+
+★★8 回目は**同名の宣言を作ってしまい `lake build` が落ちた**
+(`ABC3.Found.NF.isSeparable_residue` の重複)。
+★単一モジュールの `lake build ABC3.Found.X` は通るので、
+**必ず全体の `lake build` を通してからコミットする**。
+
+★★★概念名(`decompositionGroup`)で 0 件でも、mathlib は
+「量の名前」(`card_stabilizer_eq`)で索引されていることがある。
+[[frdi-split-nonisotropic-not-derivable]] と同じ失敗形。
