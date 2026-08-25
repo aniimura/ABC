@@ -931,6 +931,7 @@ import ABC3.Found.GaloisRep.TateInversion
 import ABC3.Found.GaloisRep.TatePt
 import ABC3.Found.GaloisRep.TateClassPt
 import ABC3.Found.GaloisRep.TatePhi
+import ABC3.Found.GaloisRep.TatePhiInj
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

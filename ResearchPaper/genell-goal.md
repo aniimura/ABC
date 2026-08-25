@@ -24114,3 +24114,44 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-598 ★★★★★★★★★★`Phi` は単射——葉 (d) が閉じた(第 285 ブロック)
+
+`Found/GaloisRep/TatePhiInj.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `Phi : K^x/q^Z -> E_q(K)` は**単射**(`tatePhi_injective`)
+
+★★★葉 (d)(単射性)が、**3 領域すべてを含む形で**閉じた。
+
+### ★★★★★★★★★5 通りの貼り合わせ
+
+`tate_inj_all` が芯。局所環の二分法 `forall x, IsUnit x or x in I` のもとで
+`1 - a`・`1 - a'` と `a`・`a'` について場合分けする:
+
+| `1 - a` | `1 - a'` | 根拠 |
+|---|---|---|
+| 非単元(原点近傍) | 非単元 | `tateZ_inj`(第 276) |
+| 非単元 | 単元 | `tateXK_ne_of_origin`(第 280)——矛盾 |
+| 単元、`a` 単元 | 単元、`a'` 単元 | `tate_point_inj_unit`(第 267) |
+| 単元、`a in I` | 単元、`a' in I` | `tate_inj`(第 259) |
+| 単元、片方だけ単元 | | `ne_of_isUnit_of_mem`(第 272)——矛盾 |
+
+★★★★**「領域が違えば矛盾、同じなら領域内の単射性」**——これだけである。
+矛盾の 3 通りは座標の住む場所(単元か、`I` の元か、`R` の外か)で決まる。
+★★★★★領域を分けた設計が、そのまま貼り合わせの場合分けになった。
+
+### ★★★局所環の二分法は仮定として受ける
+
+`TateSetup` には入れず `hloc : forall x : R, IsUnit x or x in I` として渡す。
+★実際の適用では `R` は完備離散付値環、`I = m` なので成り立つ。
+
+### ★★類の水準へ
+
+`a(c) = a(c')` から `normRep c = normRep c'`、`mk . normRep = id` で `c = c'`。
+★単位類の場合は「原点に行くのは単位類だけ」(第 284)で処理する。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
