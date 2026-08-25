@@ -91,9 +91,19 @@ theorem cfp_baseTrivial_mpr_of_isotropic (G : Frobenioid P)
 
 ★`𝒟'` の sub-automorphism が**すべて同型**なら(`IsAutSaturatedObj`)、
 `Aut^sub_{𝒟'}(a) = Aut_{𝒟'}(a)` なので `Aut-ample` から直に出る。
-★★**これは応用では真である** —— `Example 6.1` / `Example 6.3` の底の圈
-`B(G)⁰`(`Sec6GaloisCat.lean` の `(FinSub K K̄)ᵒᵖ`)では、連結対象の
-自己射がすべて同型だからである。
+
+## ★★★★応用でこの仮定が成り立つことは**証明した**(2026-08-25)
+
+前版はここに「**これは応用では真である**」と書いていたが、
+**Lean の主張としては書かれていなかった**(docstring の断言のまま)。
+★`Sec6GaloisCat.lean` の **`finSubOp_autSaturated` / `finSubOp_isAutSaturatedObj`** で埋めた。
+中身は在庫の `finSubOp_isIso_of_endo` 1 本で、
+`Example 6.1` / `Example 6.3` の底の圏 `B(G)⁰`(`(FinSub K K̄)ᵒᵖ`)では
+**自己射がそもそも全部同型**である。
+
+★★★したがってその底の上では `Aut^sub_𝒟 = Aut_𝒟 = End_𝒟` であり、
+原文が (vi) で引く 2 つの概念の**区別は元から無い**。
+下の追加仮定は、この応用では**結論を弱めない**。
 
 ## ★逸脱(記録)
 
@@ -101,7 +111,12 @@ theorem cfp_baseTrivial_mpr_of_isotropic (G : Frobenioid P)
 下の定理は代わりに **`Aut-ample`** を仮定する。
 ★`𝒟'` が Aut-saturated のとき、結論が要求するのは**同型の持ち上げ**なので、
 この強めの仮定が自然である(`Aut^sub-ample` だけでは
-持ち上げた `φ` が同型とは限らず、上の障壁に戻る)。 -/
+持ち上げた `φ` が同型とは限らず、上の障壁に戻る)。
+★★★**残る危険**: `Aut^sub` が `Aut` より真に大きい底の上で (vi) を使う消費者が現れたら、
+この版は使えない。★現時点で `IsAutSubAmple` の消費者は
+`Prop15.lean`(初等 Frobenioid、別証明)だけで、`CfpCat` の消費者は
+`ElementaryFrobenioid.lean` / `Prop16.lean` / 本ファイルの 3 つに限られる
+(2026-08-25 実測)。原典側の消費者は **[IUTchI]**(未形式化)である。 -/
 
 /-- ★★★★**[FrdI] Proposition 1.6, (vi)** の `Aut^sub-ample` ——
 `𝒟'` の sub-automorphism がすべて同型なら、`Aut-ample` から降りる。 -/

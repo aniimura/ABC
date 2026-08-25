@@ -428,8 +428,18 @@ def Gap_1_6_v.record : ABC3.Meta.GapRecord :=
 
 ★★★**`𝒟'` の sub-automorphism がすべて同型ならこの穴は閉じる**
 (`Found/FrdI/Prop16AutAmple.lean` の `cfp_autSubAmple_of_autSaturated`)。
-応用ではそうである —— `Example 6.1` / `Example 6.3` の底の圈 `B(G)⁰` では
-連結対象の自己射がすべて同型だからである。 -/
+
+★★★★**応用でそうであることは 2026-08-25 に証明した**
+(`Sec6GaloisCat.lean` の `finSubOp_autSaturated` / `finSubOp_isAutSaturatedObj`)。
+それまでは docstring の断言のままで、**Lean の主張としては書かれていなかった**。
+★`B(G)⁰`(`(FinSub K K̄)ᵒᵖ`)では自己射がそもそも全部同型なので
+`Aut^sub_𝒟 = Aut_𝒟 = End_𝒟` であり、この底の上では追加仮定は結論を弱めない。
+
+★★**残る危険**: `Aut^sub` が `Aut` より真に大きい底の上で (vi) を使う消費者には
+この抜け道は使えない。★2026-08-25 実測では `CfpCat`(`Proposition 1.6` の構成)の
+消費者は `ElementaryFrobenioid.lean` / `Prop16.lean` / `Prop16AutAmple.lean` の
+3 ファイルだけで、**我々のツリー内に `Proposition 1.6` の消費者はいない**。
+原典側の消費者は **[IUTchI]**(未形式化)である。 -/
 
 /-- ★**`Proposition 1.6, (vi)` の `Aut^sub-ample` に不足しているもの**。
 

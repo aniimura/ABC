@@ -233,4 +233,29 @@ theorem finSubOp_isIso_of_endo {A : (FinSub K Kbar)ᵒᵖ} (e : A ⟶ A) : IsIso
   · exact Quiver.Hom.unop_inj (IsIso.inv_hom_id e.unop)
   · exact Quiver.Hom.unop_inj (IsIso.hom_inv_id e.unop)
 
+/-- ★★★**`𝒟 = B(G)⁰` は Aut-saturated** —— sub-automorphism はすべて同型。
+
+★★これは `Prop16AutAmple.lean` の `cfp_autSubAmple_of_autSaturated`
+(`Proposition 1.6, (vi)` の `Aut^sub-ample` を**条つき**で出す定理)が
+要求する仮定 `hsat` そのものである。
+
+## ★★★★測定の訂正(2026-08-25)
+
+`Prop16AutAmple.lean` の docstring は「**これは応用では真である**」と
+`B(G)⁰` について主張していたが、**Lean の主張としては書かれていなかった**。
+★本補題でそれを埋める。中身は `finSubOp_isIso_of_endo`(在庫)1 本であり、
+**`B(G)⁰` では自己射がそもそも全部同型**なので
+`Aut^sub_𝒟(d) = Aut_𝒟(d) = End_𝒟(d)` である。
+
+★★★したがって `Example 6.1` / `Example 6.3` の底の上では、
+原文が `Definition 1.2, (iv)` で引く `Aut-ample` と `Aut^sub-ample` の**区別は元から無い**。
+`cfp_autSubAmple_of_autSaturated` の追加仮定は、この応用では**結論を弱めない**。 -/
+theorem finSubOp_autSaturated (d : (FinSub K Kbar)ᵒᵖ) (α : End d)
+    (_hα : IsSubAutomorphism α) : IsIso α :=
+  finSubOp_isIso_of_endo α
+
+/-- ★同じことを `Definition 1.2` の語彙(`IsAutSaturatedObj`)で。 -/
+theorem finSubOp_isAutSaturatedObj (d : (FinSub K Kbar)ᵒᵖ) : IsAutSaturatedObj d :=
+  fun α hα => finSubOp_autSaturated d α hα
+
 end ABC3.Found.FrdI
