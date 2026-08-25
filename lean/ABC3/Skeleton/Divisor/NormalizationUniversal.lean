@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Skeleton.Divisor.Normalization
 import ABC3.Found.Divisor.NormalSections
+import ABC3.Found.Divisor.NormMapBase
 
 /-!
 # 正規化の普遍性(正規スキームからの支配射)——`Theorem 6.2, (i)` の壁(`Skeleton`)
@@ -28,10 +29,22 @@ import ABC3.Found.Divisor.NormalSections
 V₂[K₂(L)] ⟶ V₁[L]
 ```
 
-が要る。★これは「**正規整スキームからの支配射は相対正規化を経由する**」であり、
-★★**mathlib の `Scheme.Hom.normalizationDesc` では出ない**。
+が要る。
 
-## ★★★★★測定 —— `normalizationDesc` は向きが逆である(2026-08-25 に再確認)
+## ★★★★★★★測定の訂正(2026-08-25、**この節点は閉じた**)
+
+以下の「`normalizationDesc` では出ない」という見立ては**誤りだった**。
+★**底変換(pullback)を 1 つ挟めば出る** —— `Found/Divisor/NormMapBase.lean` の
+`normMapOfBase`(15 行)。**正規性も支配性も要らない**。
+
+* `f₁.fromNormalization : V₁[L] ⟶ V₁` は整射(mathlib の instance)
+* 整射は**底変換で保たれる**ので `pullback.fst ψ f₁.fromNormalization : T ⟶ V₂` も整射
+* 仮定 `f₂ ≫ ψ = ε ≫ f₁` がちょうど `T` への lift の条件になる
+* よって `normalizationDesc` が `V₂[L₂] ⟶ T` を与え、`pullback.snd` で `V₁[L]` へ降りる
+
+★★以下は**訂正前の記録**として残す(判断の履歴)。
+
+## ★★★★★測定 —— `normalizationDesc` は向きが逆である(★訂正済み)
 
 mathlib の普遍性は
 
@@ -93,7 +106,14 @@ open ABC3.Found.Divisor in
 `Γ(W, g⁻¹U)` へ送る環準同型はこれで作れる。
 
 ★★残るのは**射の貼り合わせ**(`Scheme.OpenCover.glueMorphisms` で
-`g⁻¹U ⟶ f.normalization` を貼る)という**配管**である。新しい数学は要らない。 -/
+`g⁻¹U ⟶ f.normalization` を貼る)という**配管**である。新しい数学は要らない。
+
+## ★★★★★★★2026-08-25 —— **この一般形はもう要らない**
+
+`Theorem 6.2, (i)` が実際に要求するのは `V₂[L₂] ⟶ V₁[L]` だけで、
+それは**底変換 ＋ `normalizationDesc`** で出た(下の `exists_normalizationIn_map`)。
+★したがって本定理(任意の正規 `W` からの一般形)は**臨界路から外れている**。
+★★記録として残すが、`thm62-i-pull` はこれを待たない。 -/
 theorem exists_toNormalizationIn {W Y SpecL : Scheme.{u}} (f : SpecL ⟶ Y)
     [QuasiCompact f] [QuasiSeparated f] [IsIntegral Y] [IsIntegral W]
     (g : W ⟶ Y) [IsDominant g] (_hnorm : IsNormalScheme W)
@@ -102,34 +122,62 @@ theorem exists_toNormalizationIn {W Y SpecL : Scheme.{u}} (f : SpecL ⟶ Y)
     ∃ h : W ⟶ normalizationIn f, h ≫ f.fromNormalization = g := by
   sorry
 
-/-- ★★**一意性** —— `Y` の上での射は高々 1 本(`fromNormalization` が mono だから)。
+open ABC3.Found.Divisor in
+/-- ★★**一意性** —— 生成点の側でも合っていれば射は 1 本。
 
-★`f.toNormalization` が支配的で `fromNormalization` が整なので、
-`Y` 上の 2 本の射は一致する。 -/
-theorem toNormalizationIn_unique {W Y SpecL : Scheme.{u}} (f : SpecL ⟶ Y)
-    [QuasiCompact f] [QuasiSeparated f] [IsIntegral Y] [IsIntegral W]
-    (g : W ⟶ Y) (h h' : W ⟶ normalizationIn f)
-    (_hh : h ≫ f.fromNormalization = g) (_hh' : h' ≫ f.fromNormalization = g) :
-    h = h' := by
-  sorry
+## ★★★★測定の訂正(2026-08-25)
+
+旧版は「`fromNormalization` が mono だから」と書いていたが、
+★**`fromNormalization` は一般に mono ではない**(整射であるだけ)。
+正しくは `normalization.hom_ext`(`toNormalization` の側でも一致することを要求する)で、
+底変換の普遍性と合わせると出る。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/NormMapBase.lean` にある。 -/
+theorem toNormalizationIn_unique {V₁ V₂ SpecL SpecL₂ : Scheme.{u}}
+    (f₁ : SpecL ⟶ V₁) (f₂ : SpecL₂ ⟶ V₂)
+    [QuasiCompact f₁] [QuasiSeparated f₁] [QuasiCompact f₂] [QuasiSeparated f₂]
+    (ψ : V₂ ⟶ V₁) (ε : SpecL₂ ⟶ SpecL)
+    (Ψ Ψ' : normalizationIn f₂ ⟶ normalizationIn f₁)
+    (hΨ : Ψ ≫ f₁.fromNormalization = f₂.fromNormalization ≫ ψ)
+    (hΨ' : Ψ' ≫ f₁.fromNormalization = f₂.fromNormalization ≫ ψ)
+    (htop : f₂.toNormalization ≫ Ψ = ε ≫ f₁.toNormalization)
+    (htop' : f₂.toNormalization ≫ Ψ' = ε ≫ f₁.toNormalization) :
+    Ψ = Ψ' :=
+  normMapOfBase_unique f₁ f₂ ψ ε Ψ Ψ' hΨ hΨ' htop htop'
 
 /-! ## ★2. 出口 —— 支配射に沿った `V[L]` の引き戻し -/
 
+open ABC3.Found.Divisor in
 /-- ★★★★**`Theorem 6.2, (i)` が要求する射** ——
 支配射 `ψ : V₂ ⟶ V₁` と体の埋め込み `L ↪ K₂(L)` から
 `V₂[K₂(L)] ⟶ V₁[L]` を作る。
 
 ★★これがあれば `cartierPullback`(在庫)がそのまま当たり、
-`thm62-i-pull` は**在庫の組み立て**になる(新しい数学は無い)。 -/
+`thm62-i-pull` は**在庫の組み立て**になる(新しい数学は無い)。
+
+## ★★★★★★測定の訂正(2026-08-25)—— `normalizationDesc` は**使えた**
+
+本ファイルの冒頭には長らく「`normalizationDesc` は向きが逆なので循環する」と
+書いてあったが、★**底変換(pullback)を 1 つ挟めば出る**:
+
+* `f₁.fromNormalization : V₁[L] ⟶ V₁` は整射(mathlib の instance)
+* 整射は**底変換で保たれる**ので `pullback.fst ψ f₁.fromNormalization : T ⟶ V₂` も整射
+* 仮定 `f₂ ≫ ψ = ε ≫ f₁` がちょうど `T` への lift の条件になる
+* よって `normalizationDesc` が `V₂[L₂] ⟶ T` を与え、`pullback.snd` で `V₁[L]` へ降りる
+
+★★**正規性も支配性も要らない**。見積りは ★大(「貼り合わせをもう一度書く」)だったが、
+実際は **15 行**だった。★★★同じ型の見立て違いは **7 回目**である。
+
+★★★★★**閉じた**(2026-08-25)—— 中身は `Found/Divisor/NormMapBase.lean` にある。 -/
 theorem exists_normalizationIn_map {V₁ V₂ SpecL SpecL₂ : Scheme.{u}}
     (f₁ : SpecL ⟶ V₁) (f₂ : SpecL₂ ⟶ V₂)
     [QuasiCompact f₁] [QuasiSeparated f₁] [QuasiCompact f₂] [QuasiSeparated f₂]
-    [IsIntegral V₁] [IsIntegral V₂]
-    (ψ : V₂ ⟶ V₁) [IsDominant ψ]
-    (_hcompat : ∃ ε : SpecL₂ ⟶ SpecL, f₂ ≫ ψ = ε ≫ f₁) :
+    (ψ : V₂ ⟶ V₁)
+    (hcompat : ∃ ε : SpecL₂ ⟶ SpecL, f₂ ≫ ψ = ε ≫ f₁) :
     ∃ Ψ : normalizationIn f₂ ⟶ normalizationIn f₁,
       Ψ ≫ f₁.fromNormalization = f₂.fromNormalization ≫ ψ := by
-  sorry
+  obtain ⟨ε, hε⟩ := hcompat
+  exact ⟨normMapOfBase f₁ f₂ ψ ε hε, normMapOfBase_fromNormalization f₁ f₂ ψ ε hε⟩
 
 /-! ### ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -164,11 +212,13 @@ def exists_normalizationIn_map.src : Source :=
     sectionId := "frdi-thm-6-2" }
 
 def exists_normalizationIn_map.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "exists_toNormalizationIn"
-      (.inProject "ABC3" "ABC3.Skeleton.Divisor.exists_toNormalizationIn") 110,
+  [ .citation "[ABC3]" "Found 側の本体(底変換 ＋ normalizationDesc、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase") 110,
+    .citation "[mathlib]" "Scheme.Hom.normalizationDesc"
+      (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalizationDesc") 110,
     .citation "[ABC3]" "cartierPullback(支配射に沿った Cartier 因子の引き戻し)"
       (.inProject "ABC3" "ABC3.Found.Divisor.pullbackCartier") 110,
-    .derivation "V₂[K₂(L)] は V₂ の上で正規なので、上の普遍性を V₁ の上で当てる" 110 ]
+    .derivation "V₂ ×_{V₁} V₁[L] は V₂ の上で整。仮定がちょうど lift の条件になる" 110 ]
 
 def toNormalizationIn_unique.src : Source :=
   { paper := "FrdI", pdfPage := 110,
@@ -178,6 +228,8 @@ def toNormalizationIn_unique.src : Source :=
 def toNormalizationIn_unique.needs : List ProofObligation :=
   [ .citation "[mathlib]" "Scheme.Hom.normalization.hom_ext(正規化への 2 射の一致)"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalization.hom_ext") 110,
-    .derivation "fromNormalization が整で toNormalization が支配的なので、Y 上の 2 射は一致する" 110 ]
+    .citation "[ABC3]" "Found 側の本体(sorry 無し)"
+      (.inProject "ABC3" "ABC3.Found.Divisor.normMapOfBase_unique") 110,
+    .derivation "底変換の普遍性で pullback への lift の一意性に帰着させる" 110 ]
 
 end ABC3.Skeleton.Divisor

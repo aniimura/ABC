@@ -3164,14 +3164,14 @@
         },
         {
           "id": "normalization-universal-normal",
-          "title": "正規スキームからの支配射は相対正規化を経由する",
+          "title": "支配射に沿った V[L] の引き戻し(底変換 ＋ normalizationDesc で出る)",
           "deps": [],
-          "status": "半済",
-          "size": "★大(核は閉じた。残るは射の貼り合わせ)",
+          "status": "done",
+          "size": "小(閉じた。見積り ★大 は誤りだった)",
           "frdiNeeded": true,
-          "note": "★「**正規整スキームからの支配射は相対正規化を経由する**」。\n★★mathlib の `Scheme.Hom.normalizationDesc` は**向きが逆**\n(すでに分解が与えられていれば正規化がそこへ降りる)なので、そのままでは循環する。\n\n## ★★★★★★2026-08-25(**核を閉じた**、sorry 無し)\n\n数学の中身は 1 本だった:\n\n```\nu ∈ K(W) が Ω 内のどのアフィン開 V でも Γ(W,V) 上整  ⟹  u ∈ Γ(W, Ω)\n```\n\n`Found/Divisor/NormalSections.lean` の `mem_range_germ_of_forall_isIntegral`。\n\n| 段 | 根拠 |\n|---|---|\n| アフィン開ごと: 整 ⟹ 切断 | `IsIntegrallyClosed.isIntegral_iff` ＋ `functionField_isFractionRing_of_isAffineOpen` |\n| 開集合 `Ω` へ貼り合わせ | ★`exists_sectionOn`(`GlobalUnits.lean` の `⊤` 版の一般化) |\n| 底の切断上で整 ⟹ 上の切断上でも整 | `isIntegral_sections_of_appLE`(`IsIntegral.tower_top`) |\n\n★★貼り合わせの重なりの一致は **`W` が既約であること**から自動である\n(空でない開集合は必ず生成点を含むので必ず交わり、`Γ(W,−) ↪ K(W)` は単射)。\n\n## ★★★★測定の訂正 —— スケルトンの仮定の向きが逆だった\n\n旧 `exists_toNormalizationIn` は「`f` が `g` を経由する」\n(`e : SpecL ⟶ W`、`f = e ≫ g`)と書いていたが、\n★**これは `K(W) ⊆ L` を意味していて、原文の `L ⊆ K(W)` の逆である**。\n`Theorem 6.2, (i)` が要求するのは `V₂[K₂(L)] ⟶ V₁[L]`(函数体は `L₂ ⊇ L`)なので、\n正しい向きは `ε : Spec K(W) ⟶ SpecL` である。仮定を直した。\n\n## ☆残っているもの —— **射の貼り合わせ(配管)**\n\n`W` を `g⁻¹U`(`U` は `Y` のアフィン開)で覆い、\n\n* `Y[L]|_U = Spec(integralClosure Γ(Y,U) L)` はアフィンなので、\n  `g⁻¹U ⟶ Y[L]|_U` は環準同型 `integralClosure Γ(Y,U) L → Γ(W, g⁻¹U)` と同じ\n* その環準同型は上の核(`mem_range_germ_of_forall_isIntegral`)が与える\n* `Scheme.OpenCover.glueMorphisms` で貼る(重なりの一致は `Γ(W,−) ↪ K(W)` の単射性)\n\n★★**新しい数学は要らない**。mathlib に「glued への desc」が無い\n(`RelativeGluing.lean` の宣言を列挙、2026-08-25 実測)ので、\n正規化の貼り合わせをこちら側でもう一度書く形になる。",
-          "lean": "ABC3/Found/Divisor/NormalSections.lean(核)＋ ABC3/Skeleton/Divisor/NormalizationUniversal.lean(残り)",
-          "decl": "ABC3.Found.Divisor.mem_range_germ_of_forall_isIntegral / exists_sectionOn / mem_range_germ_of_forall_affine_le / mem_range_germ_of_isIntegral_affine / isIntegral_sections_of_appLE / iSup_affineOpens_le_eq"
+          "note": "★「**正規整スキームからの支配射は相対正規化を経由する**」として立てた節点。\n\n## ★★★★★★★2026-08-25(**閉じた** —— ただし道が違った)\n\n台帳は長らく「mathlib の `normalizationDesc` は**向きが逆**なので循環する。\n`relativeGluingData` をもう一度書くことになる(★大)」と書いていたが、\n★★**底変換(pullback)を 1 つ挟めば `normalizationDesc` で出る**。\n\n```\nΨ := normalizationDesc f₂ ⟨lift⟩ (pullback.fst ψ f₁.fromNormalization) ⋯\n       ≫ pullback.snd ψ f₁.fromNormalization\n```\n\n* `f₁.fromNormalization : V₁[L] ⟶ V₁` は**整射**(mathlib の instance)\n* 整射は**底変換で保たれる**ので `pullback.fst ψ f₁.fromNormalization : T ⟶ V₂` も整射\n* 仮定 `f₂ ≫ ψ = ε ≫ f₁` がちょうど `T` への lift の条件になる\n* よって `normalizationDesc` が `V₂[L₂] ⟶ T` を与え、`pullback.snd` で `V₁[L]` へ降りる\n\n★★**正規性も支配性も要らない**。見積り ★大 に対して実際は **15 行**だった。\n★★★同じ型の見立て違いは **7 回目**である。\n\n### 実装(`Found/Divisor/NormMapBase.lean`、sorry 無し)\n\n| 宣言 | 中身 |\n|---|---|\n| `normMapOfBase` | 射そのもの |\n| `normMapOfBase_fromNormalization` | `V₁` の上での可換性(原文の四角形) |\n| `toNormalization_normMapOfBase` | 生成点の側での可換性 |\n| `normMapOfBase_unique` | 一意性(底変換の普遍性 ＋ `normalization.hom_ext`) |\n\n★一意性についても訂正: 旧記録は「`fromNormalization` が mono だから」と書いていたが、\n★★**`fromNormalization` は一般に mono ではない**(整射であるだけ)。\n正しくは `normalization.hom_ext`(生成点の側でも一致することを要求)である。\n\n## ★一般形は臨界路から外れた\n\n任意の正規 `W` からの一般形(`exists_toNormalizationIn`)は **`thm62-i-pull` が要求しない**。\n★記録として `Skeleton` に残すが、その `sorry` はこの節点を止めていない。\n★★数学の中身(「正規スキームでは整な有理函数は切断」)は\n`Found/Divisor/NormalSections.lean` に `sorry` 無しで置いてある\n(`mem_range_germ_of_forall_isIntegral` / `exists_sectionOn`)ので、\n一般形を後で書くときはそこから始められる。",
+          "lean": "ABC3/Found/Divisor/NormMapBase.lean + ABC3/Found/Divisor/NormalSections.lean",
+          "decl": "ABC3.Found.Divisor.normMapOfBase / normMapOfBase_fromNormalization / toNormalization_normMapOfBase / normMapOfBase_unique / mem_range_germ_of_forall_isIntegral / exists_sectionOn"
         }
       ]
     },
