@@ -916,6 +916,7 @@ import ABC3.Found.GaloisRep.TateSurjUnit
 import ABC3.Found.GaloisRep.TateInjUnit
 import ABC3.Found.GaloisRep.AdicContraction2
 import ABC3.Found.GaloisRep.TateAnnulus
+import ABC3.Found.GaloisRep.TateLinearQ
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

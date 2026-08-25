@@ -23378,3 +23378,56 @@ mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくて�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-583 ★★★★★★`a6` の 1 次の項が `q` を決める(第 270 ブロック)
+
+`Found/GaloisRep/TateLinearQ.lean`。
+
+### ★★★★★★制約 `a w = q` を回復する道具
+
+第 269 の環帯の解 `(a,w)` は制約 `a w = q` を満たすとは限らない。回復の筋は
+
+> `(x,y)` が `E_q` 上で `X(a,w,q) = x`、`Y(a,w,q) = y` なら `defect(a,w,q) = 0`。
+> 一方 `defect(a,w,a w) = 0`(葉 (b))。
+> `defect` の `q` についての**主要項が `q - aw`** なので `q = aw`。
+
+★その「主要項」を作るのが本ブロックである。
+
+### ★★★★★★評価の 1 次の項
+
+冪級数 `f`(定数項 0)について
+
+    f(a) - f(b) - c1 (a - b) in I^{k+1}      (`a - b in I^k`、`a, b in I`)
+
+(`evalAdic_sub_linear_mem`)。★2 次以上の項 `a^n - b^n` は
+`(a-b)a^{n-1} + (a^{n-1}-b^{n-1})b` と分けるだけで `I^{k+1}` に入る
+(`pow_sub_pow_mem_succ`)。**係数を触らずに済む**。
+
+★配線:`partialEval` を `N = k+2` まで取り、`Finset.sum_erase_add` で `n = 1` の項だけ
+抜き出す。残差 `evalAdic - partialEval in I^{k+2} ⊆ I^{k+1}` は自動である。
+
+### ★★`a6` の 1 次の係数は `-1`
+
+`coeff 1 tateA6 = -(5 σ3(1) + 7 σ5(1))/12 = -12/12 = -1`。したがって
+
+    a6(q) - a6(q') + (q - q') in I^{k+1}
+
+★**`a6` が `q` を 1 次で拾う**——これが制約の回復の芯である。
+`a4(q) = -5 s3(q)` の側は `in I^k` で十分(`defect` の中で `X in I` が掛かるから)。
+
+### ★在庫の引き忘れ
+
+`coeff_one_tateA6` は **`TateDelta.lean` に既にあった**。書いてから
+`already been declared` で気づいた。★着手前に `grep` する規約を、
+補題名の単位でも守ること(ファイル名だけでなく)。
+
+| 定理 | 内容 |
+|---|---|
+| `pow_sub_pow_mem_succ` | ★★★`a^n - b^n in I^{k+1}`(`n >= 2`) |
+| `evalAdic_sub_linear_mem` | ★★★★★★**評価の 1 次の項** |
+| `tateCurveAt_a6_sub_linear` | ★★★★★★**`a6` の 1 次の項は `-q`** |
+| `tateCurveAt_a4_sub_mem` | ★★`a4` の差 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
