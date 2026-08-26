@@ -27898,3 +27898,100 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 
 ★★Lean 全体の sorry は **51 → 46**。
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-678 ★★★★★★★★**`Theorem 3.8` を導出した**(第 365 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/GaloisImage.lean`。
+新しいゴール「GenEll と NCBelyi の Skeleton の sorry を 0 にする」の 1 件目。
+
+### ★★★★★★原文 p.20 の骨格は基底変換である
+
+原文を通読して分かったのは、証明がまず **`L′` へ移る**ことである:
+
+> there exists a Galois extension `L′` of `L` of degree that divides
+> `d₀ = (3²−1)(3²−3)(5²−1)(5²−5) = 23040`, so as to render the 3- and 5-torsion
+> points of `E_L` rational over `L′` … we may assume that `E_{L′}` has **semi-stable
+> reduction** at all of the finite primes
+
+★★これで 3 つのことが一度に片付く:
+
+| これが欲しい | `L′` が与える |
+|---|---|
+| `Lemma 3.7` の仮説 `SemiStable` | ★定理 3.8 の statement には**無い**——基底変換で**得る** |
+| 潜在的乗法還元 → 乗法還元 | 条件 (a) が `Lemma 3.7` の (a) になる |
+| 係数 `23040` | `d′ ≤ 23040·d` そのもの |
+
+### ★★★★★★★★`30` の使い道が見えた
+
+条件 (b) の『`l` is prime to … the number `2·3·5 = 30`』は、原文 p.20 の括弧にある:
+
+> passing to such a Galois extension of `L` only affects the prime decomposition of
+> the local heights via the primes that divide `d₀`, of which there are only finitely
+> many, namely, **2, 3, and 5**
+
+★すなわち **`30` と互いに素なら、局所高さと素であることが `L′` へそのまま移る**。
+★★界面の欄 `primeToLocalHeights_torsionExt` はこの一文そのものである。
+
+### ★★★★★定数 23040 の帳尻(本ブロックの算術的な中身)
+
+原文はここを『for a suitable choice of `C` … **[perhaps for a different “C”]**』と
+1 文で済ませている。実際には:
+
+    d′ ≤ 23040·d 、 [E_{L′}] = [E_L] なので ht^Falt はそのまま
+    d′^ε ≤ (23040·d)^ε = 23040^ε·d^ε
+    ★C := C₇·23040^ε + |B| + 1
+
+★★`ht^Falt < 0` のとき第 1 項は**逆向きになる**が、超過分は `|B|·23040·d` 以下であり
+(`ht^Falt ≥ B`)、`C` の `|B| + 1` の分が `d^ε ≥ 1` を使ってそれを吸収する。
+
+### ★★★★B5 にならないことの確認
+
+`GaloisImage.lean` のヘッダには「**`sorry` を消すことを目的にしてはならない**」と
+書いてあった。★**その警告は今も生きている**ので、ヘッダに 3 点を明記した:
+
+1. 界面に出した 7 つはすべて**原文 p.20 が実際に書いている段**である
+2. 中身は `Lemma 3.7` からの**導出**である(上の帳尻と `30` の使い道)
+3. 残った 1 つの posit は `imageContainsSL2_of_torsionExt` だけで、
+   それは **Galois 表現が未構築だから**であって、`Lemma 3.1` を持っていないからではない
+
+### 逸脱
+
+量化する界面を `TorsionGaloisRepData` → **`EllModuliData`**(後者は前者を extend)。
+★`Corollary 4.3` / `4.4` はもともと `EllModuliData` の上にあるので下流は失わない。
+
+★★Lean 全体の sorry は **46 → 45**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+## §9-679 ★★★★★§4 の定数を作った(第 366 ブロック)
+
+`Found/GenEll/PrimeConstants.lean`。
+
+`Lemma 4.1` は『条件 (i)(ii) を満たす `ϵ, x_ϵ, C_ϵ` が**与えられたとき**』を主張する。
+★`Corollary 4.3` / `4.4` はそれを**適用する**側なので、ここで初めて
+「そのような定数が**存在する**」ことが要る。
+
+### ★★★★定数の順番が鍵である
+
+★`C_ϵ < ϵ·x_ϵ` という制約があるので、**`C_ϵ` を先に固めてから `x_ϵ` を大きく取る**:
+
+    θ(x)/x → 1 から X₀ を取る(x ≥ X₀ で 5/6·x < θ(x) < 5/4·x)
+    C_ϵ := θ(X₀) + 1        ← 0 < x < X₀ では θ の単調性で押さえる
+    x_ϵ := max X₀ (6(C_ϵ+1))  ← こう取れば C_ϵ < (1/6)·x_ϵ
+
+★★`x_ϵ` を大きくしても (i) の第 2 式と (ii) は壊れない——どちらも「`x ≥ x_ϵ` なら」の形だから。
+★★★`ϵ := 1/6` に固定してよい——原文 p.23 が『“1 + 6ϵ” to be 2』と取るから。
+
+### ★★★もう 1 本: 「enlarging S」の中身
+
+原文 p.23 の『by enlarging `S` … we may always assume that `x_ϵ ≤ x_S`』は、
+**対数和がいくらでも大きい有限素数集合がある**ことであり、
+`θ(x) > (5/6)·x` から直ちに出る(`exists_finset_primes_sum_log_gt`)。
+
+★`theta_mono`(`θ` の単調性)もここで取った。`Found/` なので sorry 0。
+
+### ★★配管の事故と復旧(記録)
+
+`lake build --dir=lean` をリポジトリ直下で走らせてしまい、10 分で殺された拍子に
+mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
+★直し方は **`lake exe cache get!`**である——削除して回らないこと。
+★★`lake` は `lean/` の中でしか走らせない(`--dir` で代用しない)。

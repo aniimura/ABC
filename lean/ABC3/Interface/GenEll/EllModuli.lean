@@ -189,6 +189,49 @@ structure EllModuliData extends TorsionGaloisRepData where
   /-- ★Galois-finite は有限合併で閉じる(`Example 1.3, (i)`)。 -/
   galoisFinite_union : ∀ S T : Set EllClass, GaloisFinite S → GaloisFinite T →
     GaloisFinite (S ∪ T)
+  /-- ★★★★★★**3･5 捧れを有理化する拡大 `L′`**(`Theorem 3.8` の証明の骨格)。
+
+  原文 (GenEll p.19):
+  > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+  ★原文 p.20:『there exists a Galois extension `L′` of `L` of degree that divides
+  `d₀ = (3²−1)(3²−3)(5²−1)(5²−5) = 23040`、so as to render the 3- and 5-torsion
+  points of `E_L` rational over `L′` … we may assume that `E_{L′}` has **semi-stable
+  reduction** at all of the finite primes』。 -/
+  torsionExt : Curve → Curve
+  /-- ★`ℚ̄` 上の同型類は変わらない——だから `ht^Falt` も `deg_∞` もそのまま。 -/
+  cls_torsionExt : ∀ E : Curve, cls (torsionExt E) = cls E
+  /-- ★★次数は高々 `23040` 倍——これが `Theorem 3.8` の係数 `23040` の出所である。 -/
+  degOfDefinition_torsionExt : ∀ E : Curve,
+    degOfDefinition (torsionExt E) ≤ 23040 * degOfDefinition E
+  /-- ★★★**`L′` の上では半安定還元になる**——原文の『we may assume』の中身。 -/
+  semiStable_torsionExt : ∀ E : Curve, SemiStable (torsionExt E)
+  /-- ★★★**潜在的乗法還元は `L′` 上で乗法還元になる**。 -/
+  hasMultRed_torsionExt : ∀ E : Curve, HasPotMultRed E → HasMultRed (torsionExt E)
+  /-- ★★★★★**`30` と互いに素なら局所高さと素であることは `L′` へ移る**。
+
+  ★原文 p.20 の括弧:『passing to such a Galois extension of `L` only affects the prime
+  decomposition of the local heights via the primes that divide `d₀`, of which there are
+  only finitely many, namely, **2, 3, and 5**』。
+  ★★これが `Theorem 3.8` の条件 (b) の『`30 = 2·3·5` と素』の出所である。 -/
+  primeToLocalHeights_torsionExt : ∀ (E : Curve) (l : ℕ), PrimeToLocalHeights E l →
+    Nat.Coprime l 30 → PrimeToLocalHeights (torsionExt E) l
+  /-- ★★★★★★**原文 p.20 の最終段**。
+
+  原文 (GenEll p.19):
+  > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+  ★乗法還元の素点で局所高さが `l` で割れなければ、局所理論(`Lemma 3.2` の直前)により
+  mod `l` 像は `α = (1 1 / 0 1)` を含む。
+  ★★`l`-巡回部分群スキームを持たなければ、mod `l` 像は**非上三角**行列を含む。
+  ★★★その 2 つから **`Lemma 3.1, (iv)`** で `GL₂(ℤ_l)` の像は `SL₂(ℤ_l)` を含む。
+  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**実装済み**であるが、
+  **Galois 表現そのものが未構築**なので、その適用をここで受ける。
+  ★★★★★結論が `E`(`L` 上)についてなのは、
+  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。 -/
+  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+    HasMultRed (torsionExt E) → PrimeToLocalHeights (torsionExt E) l →
+    ¬ HasLCyclic (torsionExt E) l → ImageContainsSL2 E l
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=
