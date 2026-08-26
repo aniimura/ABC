@@ -1079,6 +1079,7 @@ import ABC3.Found.GenEll.TameRamification
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
+import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.Normalize
 /-!
 # Found — 実装済みの基礎
