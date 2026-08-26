@@ -1,4 +1,4 @@
-import ABC3.Found.GenEll.LatticeInvariance
+import ABC3.Found.GenEll.LatticeFromG
 
 /-!
 # スケルトン —— **`(g₂,g₃)` は束を決める**(`Skeleton`)
@@ -76,8 +76,8 @@ open ABC3.Meta ABC3.Found.GenEll
 
 ★これが `archInv` の一意性、ひいては `ht^Falt` の固定に効く。 -/
 theorem lattice_eq_of_g₂_g₃_eq {L L' : PeriodPair}
-    (h₂ : L.g₂ = L'.g₂) (h₃ : L.g₃ = L'.g₃) : L.lattice = L'.lattice := by
-  sorry
+    (h₂ : L.g₂ = L'.g₂) (h₃ : L.g₃ = L'.g₃) : L.lattice = L'.lattice :=
+  ABC3.Found.GenEll.lattice_eq_of_g₂_g₃_eq h₂ h₃
 
 /-- ★★★★★★**アルキメデス不変量は `(g₂,g₃)` で決まる**——本節点の下流。 -/
 theorem archInv_eq_of_g₂_g₃_eq {L L' : PeriodPair}
