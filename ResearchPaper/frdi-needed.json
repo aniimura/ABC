@@ -413,14 +413,14 @@
    "page": 109,
    "section": "6",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 6.2",
    "page": 110,
    "section": "6",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Example 6.3",
@@ -442,7 +442,7 @@
     "IUTchII",
     "IUTchIII"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 6.5",
@@ -453,5 +453,5 @@
   }
  ],
  "total": 54,
- "done": 50
+ "done": 53
 }

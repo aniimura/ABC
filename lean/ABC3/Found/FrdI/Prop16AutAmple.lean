@@ -144,4 +144,57 @@ def cfp_autSubAmple_of_autSaturated.src : ABC3.Meta.Source :=
     item := "Proposition 1.6, (vi) — Aut^sub-ample",
     sectionId := "frdi-prop-1-6-v" }
 
+/-! ### ★★★★★★★★項目全体の `.src`
+
+★`.src` は「その原典項目を**完全に**実装した」という主張である
+(`tools/frdi-progress.mjs` の規則)。★★下の 1 つは
+**仮定を 2 つ足すという逸脱の下で**置く —— 逸脱の内容は次の docstring に書く。 -/
+
+/-- ★★★★★★★★**[FrdI] Proposition 1.6** —— 条がすべて実装された
+(★★**仮定を 2 つ足す逸脱つき**)。
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i)(ii) | `C^fp` の 21 条(pre-Frobenioid ＋ Frobenioid の核) | `cfpPreFrobenioid` / `cfpFrobenioidCore`(`Prop16.lean`) |
+| (iii) | pull-back の両向き | `cfp_isPullBack_iff` |
+| (iv) | LB-invertible と因子分解の一意性 | `cfp_pullBackLB` / `cfp_arbFactorUniq` |
+| (v) | perfect / Frobenius-normalized | `cfp_perfect_iff` / `cfp_frobNormalized_iff` |
+| (v) | base-trivial の `⟸` | ★`cfp_baseTrivial_mpr_of_isotropic`(**isotropic 型を仮定**) |
+| (vi) | `Aut-ample` / `End-ample` | `cfp_autAmple_of` / `cfp_endAmple_of` |
+| (vi) | `Aut^sub-ample` | ★`cfp_autSubAmple_of_autSaturated`(**`𝒟'` の Aut-saturated 性を仮定**) |
+
+## ★★★★逸脱の記録(CLAUDE.md の「逸脱」)
+
+★原文は (v) の `base-trivial ⟸` と (vi) の `Aut^sub-ample` を**無条件**で述べるが、
+我々はそれぞれに**原文にない仮定を 1 つずつ足して**閉じている。
+
+| 条 | 足した仮定 | 不足の記録 |
+|---|---|---|
+| (v) | `𝒞` が **isotropic 型** | `ABC3.Gap.FrdI.Gap_1_6_v`(`autAmple`) |
+| (vi) | `𝒟'` が **Aut-saturated**(sub-automorphism がすべて同型) | `ABC3.Gap.FrdI.Gap_1_6_vi`(`witnessDescends`) |
+
+★★どちらの `GapRecord` も `GapClass.missingMath`(② 原典の穴の疑い)のままである ——
+③(反証)を名乗るには反例が要り、①(閉じた)を名乗るには
+`Definition 1.3` からの導出が要る。**その判定は保留する。**
+
+## ★★★★★なぜ後続に影響しないと見るか
+
+★★**応用では 2 つの仮定はどちらも満たされる**:
+
+* isotropic 型 —— `Example 6.1` / `Example 6.3` の Frobenioid はいずれも isotropic 型
+  (`ex61Frobenioid_isotropicType` / `ex63_isotropic_family`)。
+* Aut-saturated —— 底の圏 `B(G)⁰ = (FinSub K K̄)ᵒᵖ` では自己射がそもそも
+  **全部同型**なので `Aut^sub_𝒟 = Aut_𝒟 = End_𝒟` である
+  (`Sec6GaloisCat.lean` の `finSubOp_autSaturated` / `finSubOp_isAutSaturatedObj`)。
+
+★★★**我々のツリー内に `Proposition 1.6` の消費者はいない**(2026-08-25 実測。
+`CfpCat` の消費者は `ElementaryFrobenioid.lean` / `Prop16.lean` / 本ファイルの 3 つだけ)。
+原典側の消費者は **[IUTchI]**(未形式化)である。
+★★したがって危険は **[IUTchI] を形式化する段で、`Aut^sub` が `Aut` より真に大きい底の上で
+(vi) を使う箇所が現れたとき**に限られる。そこに来たら本 docstring と
+`Gap_1_6_vi` を読み直すこと。 -/
+def prop_1_6.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 27, item := "Proposition 1.6",
+    sectionId := "frdi-prop-1-6" }
+
 end ABC3.Found.FrdI

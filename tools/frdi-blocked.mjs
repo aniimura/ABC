@@ -1,4 +1,4 @@
-// **まだ閉じていない 3 つの塊**の下流に何件あるかを数える。
+// **まだ閉じていない塊**の下流に何件あるかを数える(塊は分解グラフから導出)。
 //
 // ★動機(2026-08-18): 残り 24 件のうち、いくつかは 3 つの未着手の塊の下流にある。
 //   その伝播を機械で測る。
@@ -12,10 +12,19 @@
 //   **この道具が印字するのは「そのチェーンを閉じると何件動くか」であって、
 //   到達不能の証明ではない。**
 //
-// 3 つの塊(`ResearchPaper/frdi-decomposition.json` のチェーンに対応):
-//   - Definition 2.8  …… 副有限アーベル群の pro-l 分解        (チェーン prol、葉 4)
-//   - Lemma 6.5       …… six exponentials theorem            (チェーン sixexp、葉 3)
-//   - Proposition 4.4 …… (ii) の `otriBase`(一般の 𝒞)       (チェーン otricomm、葉 2 は済)
+// ★★★**訂正(2026-08-25)—— 塊をハードコードするのをやめた**。
+//
+//   旧版は 3 つの塊(`Definition 2.8` / `Lemma 6.5` / `Proposition 4.4`)を
+//   **この場に書き込んで**いたため、prol 鎖と sixexp 鎖が閉じたあとも
+//   それらを壁として数え続け、「§6 現在 2/5」のような**古い数**を印字していた。
+//   ★いまは `ResearchPaper/frdi-decomposition.json` の**チェーンから導出**する ——
+//   「未着手(`todo` / `absent`)の節点を 1 つでも持つチェーン」が塊であり、
+//   `notRequired: true` の付いたチェーンは数えない。
+//   ★これで台帳を直せば道具の出力も自動で追従する。
+//
+// ★★`done` は `ResearchPaper/frdi-needed.json` を読む。この JSON は
+//   `node tools/frdi-progress.mjs --json` が `.src` の実走査から書き出す。
+//   ★古い数を見たら、まずそちらを走らせること。
 //
 // ★これは pdftotext 経由の依存抽出に乗っているので、当たりを付けるためだけに使う。
 //
@@ -30,12 +39,24 @@ const REPO = path.resolve(HERE, '..');
 const TXT = path.join(REPO, 'ResearchPaper', '0_Source',
   'The Geometry of Frobenioids I.txt');
 const NEED = path.join(REPO, 'ResearchPaper', 'frdi-needed.json');
+const DECOMP = path.join(REPO, 'ResearchPaper', 'frdi-decomposition.json');
 
-const WALLS = new Map([
-  ['Definition 2.8', 'チェーン prol(pro-l 分解)'],
-  ['Lemma 6.5', 'チェーン sixexp(six exponentials)'],
-  ['Proposition 4.4', 'チェーン otricomm((ii) の otriBase)'],
-]);
+/** ★分解グラフから塊を導く —— 未着手の節点を持ち、`notRequired` でないチェーン。 */
+const WALLS = new Map();
+{
+  const decomp = JSON.parse(readFileSync(DECOMP, 'utf8'));
+  for (const ch of decomp.chains ?? []) {
+    if (ch.notRequired) continue;
+    const open = (ch.nodes ?? []).filter((n) => /^(todo|absent)/.test(n.status ?? ''));
+    if (!open.length) continue;
+    // `serves.item` は条つきのことがある("Proposition 4.4, (ii)")。項目名まで削る。
+    const item = String(ch.serves?.item ?? '').replace(/,.*$/, '').trim();
+    if (!item) continue;
+    const prev = WALLS.get(item);
+    const why = `チェーン ${ch.id}(未着手 ${open.length}: ${open.map((n) => n.id).join(', ')})`;
+    WALLS.set(item, prev ? `${prev} / ${why}` : why);
+  }
+}
 
 const KIND = 'Definition|Proposition|Theorem|Corollary|Remark|Lemma|Example';
 const HEAD = new RegExp(`^\\s*(${KIND})\\s+(\\d+\\.\\d+(?:\\.\\d+)?)\\.`);
@@ -90,7 +111,7 @@ const bad = todo.filter((x) => blocked.has(x.item));
 const ok = todo.filter((x) => !blocked.has(x.item));
 
 console.log(`★[FrdI] 残り ${todo.length} 件のうち`);
-console.log(`  ★★3 つのチェーンの下流にある: ${bad.length} 件`);
+console.log(`  ★★未着手のチェーン ${WALLS.size} 本の下流にある: ${bad.length} 件`);
 for (const x of bad) {
   console.log(`     §${x.section} p.${String(x.page).padStart(3)} ${x.item.padEnd(18)} ${blocked.get(x.item)}`);
 }
@@ -109,7 +130,7 @@ for (const x of needed) {
   bySec.set(x.section, s);
 }
 console.log('\n★節ごとの「いまチェーン待ちの数」');
-console.log('  ★★これは到達不能の証明ではない。3 つのチェーンはいずれも既知数学であり、');
+console.log(`  ★★これは到達不能の証明ではない。チェーン ${WALLS.size} 本はいずれも既知数学であり、`);
 console.log('     葉と層は `node tools/frdi-newleaves.mjs` が印字する。');
 for (const [sec, s] of [...bySec].sort()) {
   console.log(

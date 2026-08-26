@@ -27585,3 +27585,55 @@ mathlib の `ModularForm.E₄`・`ModularForm.discriminant` だけで同定し�
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
 **Arakelov 9/9、Galois 8/8**。
+
+
+## §9-671 ★★★★★★★★§3 の 5 つの `sorry` は「難しい」のではなく**偽**である(第 358 ブロック)
+
+`Check/GenEll/Section3NotProvable.lean`。新しいゴール「§3 の sorry を 0 にする」の**段 1**。
+
+### ★★★★★★★★診断
+
+`Skeleton/GenEll/Section3.lean` の 5 つの `sorry` はすべて
+
+    ∀ D : TateLocalData  もしくは  ∀ D : EllModuliData
+
+という形をしている。★★**ところがこの 2 つの界面は公理をほとんど持たない**
+(`TateLocalData` は `vq_pos`・`ramIdx_pos` の 2 本、`EllModuliData` は **0 本**)。
+★★★したがって**退化した `D` を作れば主張は破れる**。
+
+本ブロックはそれを**機械可読に**記録した:
+
+| 定理 | 退化の取り方 |
+|---|---|
+| `lemma_3_2_i_false` | `l = 2`・`v_K(q_E) = 1`・`IsCyclotomic := False` |
+| `lemma_3_2_ii_false` | `deg_∞` を定数にすると `deg_∞(E/μ_l) = l·deg_∞(E)` が破れる |
+| `potLocalHeight_indep_false` | 分岐指数だけが違う 2 つの拡大を取る |
+| `prop_3_4_first_false` | `deg_∞ ≡ 0`・`ht_∞ = n` なら差は非有界 |
+| `prop_3_4_finite_false` | `ht^Falt ≡ 0`・`M_ell^{≤d} = univ` なら集合は `ℕ` 全体 |
+
+### ★★★★★★これは G6 が 2026-08-17 に通った道と**同じ**である
+
+`Interface/GaloisRep/Reduction.lean` の `TateCurveData` は、以前
+`LocalField : Type` / `Curve : LocalField → Type` と**世界ごと posit** していて
+`PUnit` と定数 `1` で埋まった。★そこで mathlib の `WeierstrassCurve` と
+正規化付値に**接地**し、**Tate 一意化そのもの**を要求する形に作り直した。
+
+★★**`Interface/GenEll/TateLocal.lean` はその捨てたはずの形のまま**である。
+★★★`EllModuliData` も `EllClass : Type` / `faltingsHeight : EllClass → ℝ` を
+条件なしで持つだけである。
+
+### ★★★界面の欠陥 #7・#8
+
+| # | 場所 | 欠陥の型 | 塞いだ |
+|---|---|---|---|
+| 6 | G8 `htFalt` | 弱すぎる | 第 357 |
+| 7 | **`TateLocalData`** | 弱すぎる(世界ごと posit、`Unit` で埋まる) | ★**未** |
+| 8 | **`EllModuliData`** | 弱すぎる(高さの間に関係が無い) | ★**未** |
+
+### ★★★★塞ぎ方は分かっている
+
+G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightData`(G8)に接地する**。
+★G8 で本物の `ht^Falt` を建てた(第 357)ので、`EllModuliData` の
+`faltingsHeight` をそこに縛れば `≡ 0` は落ちる。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

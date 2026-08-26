@@ -1,11 +1,11 @@
 {
-  "nodes": 1178,
-  "sccs": 1145,
+  "nodes": 1189,
+  "sccs": 1156,
   "bigSccs": 8,
   "boxes": 296,
   "layers": 64,
   "ours": 76,
-  "oblig": 37,
-  "obligDone": 14,
+  "oblig": 41,
+  "obligDone": 18,
   "maxLayer": 63
 }
