@@ -27126,3 +27126,83 @@ q 展開の位数が `12/12 = 1` より大きければ `f = 0`(`sturm_bound_leve
 | (ii) `ℂ/Λ ≅ E(ℂ)` 群同型 | ★★`℘` の加法定理が mathlib に無い(`weierstrassP_add` 0 件) |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-661 ★★★★★★モジュラー `j` 関数を建てた(第 347 ブロック)
+
+`Found/GenEll/JFunction.lean`。
+
+### ★★★★★★★なぜ `j` を建てるのか——一意化 (iii)
+
+第 346 で (i) が閉じ、`j(ℤ + τℤ) = E₄(τ)³/Δ(τ)` まで出た。
+★スケルトンの `exists_periodPair` は mathlib の
+**`WeierstrassCurve.exists_variableChange_of_j_eq`**(分離閉体上で `j` が等しければ同型)
+と合わせると **`j : ℍ → ℂ` の全射性**だけに帰着する。
+★★★**mathlib にモジュラー `j` 関数は無い**(2026-08-26 実測)ので本ブロックで建てた。
+
+### ★★★★★在庫(2026-08-26 実測)
+
+| 段 | mathlib |
+|---|---|
+| 基本領域 `𝒟`・`∃ g, g • z ∈ 𝒟` | ✅ `ModularGroup.fd`・`exists_smul_mem_fd` |
+| **切り詰めた基本領域のコンパクト性** | ✅ `isCompact_truncatedFundamentalDomain` |
+| 開写像定理(連結開集合版) | ✅ `AnalyticOnNhd.is_constant_or_isOpen` |
+| `f(γ•z) = (cz+d)^k f(z)` | ✅ `SlashInvariantForm.slash_action_eqn''` |
+| `Δ` はカスプ形式(`→ 0`) | ✅ `CuspFormClass.zero_at_infty` |
+| モジュラー形式の**カスプでの極限** | ★無い(`cuspFunction_apply_zero` から 5 行) |
+| **`j` 関数そのもの** | ★無い |
+
+### ★★本ブロック
+
+`jFun`・`jFun_smul`(`SL(2,ℤ)` 不変)・`analyticOnNhd_jC`(上半平面で正則)・
+`tendsto_atImInfty_coeff_zero`(カスプでの極限は定数項)・
+`tendsto_norm_jFun_atImInfty`(**`‖j‖ → ∞`**)・`jC_not_constant`。
+
+## §9-662 ★★★★★★★★一意化が閉じた(第 348 ブロック)
+
+`Found/GenEll/JSurjective.lean`。**`Skeleton/GenEll/Uniformization.lean` の `sorry` が消えた。**
+
+### ★★★★★★★★到達点
+
+> **任意の楕円曲線 `W/ℂ` は、ある周期束の曲線と変数変換で移り合う**
+> (`exists_periodPair_of_isElliptic`)
+
+### ★★★★★★`j` の全射性——**開かつ閉**
+
+| 段 | 補題 |
+|---|---|
+| 像は**開** | `isOpen_range_jFun`(開写像定理 + `jC_not_constant`) |
+| 像は**閉** | `isClosed_range_jFun` |
+| `ℂ` は連結 | `isClopen_iff` |
+
+★★★閉の証明が核である:`wₙ → w` で `wₙ = j(τₙ)` とする。
+★`j` は `SL(2,ℤ)` 不変なので `τₙ` は基本領域 `𝒟` に移せる。
+★★`‖wₙ‖` は有界で、`‖j‖ → ∞`(カスプ)だから `im τₙ` も有界。
+★★★したがって `τₙ` は**コンパクト**な `𝒟 ∩ {im ≤ M}` に入り、部分列が収束する。
+
+★★★★★**valence 公式(留数計算)を一切使わなかった**——
+mathlib の `isCompact_truncatedFundamentalDomain` が効いた。
+
+### ★★★★★★★★見積もりの訂正——**25-60 → 17 ブロック**
+
+第 331 の `.needs` は本節点を **25-60 ブロック**と見積もり、
+「上流(mathlib)に入るべき仕事であり、**Galois の義務の中では閉じない**」と書いていた。
+★★★実際には **第 332-348 の 17 ブロック**で閉じた。
+★★★★差の大半は **(ii) `ℂ/Λ ≅ E(ℂ)` の群同型は要らなかった**ことによる
+——`exists_periodPair` は**曲線の同型**(変数変換)であって群同型ではない。
+★見積もりが (ii) を要求に数えていたのが過大の原因である。
+
+### ★★残る障害(G8)
+
+    一意化 ★済(本ブロック)
+      → 周期束の共体積(アルキメデス norm)  ★未
+      → `ω_E` を計量つき算術直線束にする        ★未
+      → (D1)(D2)(D3) の `deg` に載せる            ★機構はある
+      → `ht^Falt = deg(ω_E)` を固定し、欠陥 #6 を塞ぐ
+
+### ★配管(`tools/lean-idioms.md` に追記)
+
+`check.mjs` の引用抽出は `>` を含む行が続く限り本文として食うので、
+引用行の直後に `fun x => …` を置くと式ごと食い込まれる。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
