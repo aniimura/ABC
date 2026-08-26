@@ -148,6 +148,33 @@ theorem aeval_derivative_eisenstein_tame {B : Type*} [CommRing B] [IsLocalRing B
   rw [hsplit]
   ring
 
+/-! ## ★★★★全分岐のとき Eisenstein の条件は `λ^e ∣ ·` になる -/
+
+/-- ★★**`λ^e` と `π` が単元倍の違いなら、割り切れどうしが一致する**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★**全分岐**なら `π_K` は `B` で `λ^e` の単元倍になる。
+★★したがって Eisenstein の標準的な条件『係数が `π_K` で割れる』は、
+`DifferentKummer.lean` の `mem_differentIdeal_of_eisenstein_tame` が要求する
+**`λ^e ∣ ·`** にそのままなる。 -/
+theorem pow_dvd_iff_of_isUnit_mul {B : Type*} [CommRing B] {e : ℕ} {lam pi u x : B}
+    (hu : IsUnit u) (hpi : lam ^ e = pi * u) :
+    lam ^ e ∣ x ↔ pi ∣ x := by
+  constructor
+  · intro h
+    exact dvd_trans (Dvd.intro u hpi.symm) h
+  · intro h
+    rw [hpi, mul_comm]
+    exact (hu.mul_left_dvd).mpr h
+
+/-- ★★★**Eisenstein の条件を `λ^e ∣ ·` へ移す**——全分岐の場合。 -/
+theorem pow_dvd_of_dvd_of_isUnit_mul {B : Type*} [CommRing B] {e : ℕ} {lam pi u : B}
+    (hu : IsUnit u) (hpi : lam ^ e = pi * u) {x : B} (hx : pi ∣ x) :
+    lam ^ e ∣ x :=
+  (pow_dvd_iff_of_isUnit_mul hu hpi).mpr hx
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -168,6 +195,11 @@ def aeval_derivative_eisenstein.src : ABC3.Meta.Source :=
 def aeval_derivative_eisenstein_tame.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(段 1——馴なら different の指数はちょうど e−1)",
+    sectionId := "genell-prop-1-7" }
+
+def pow_dvd_iff_of_isUnit_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(全分岐で Eisenstein の条件が λ^e ∣ · になる)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
