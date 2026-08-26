@@ -1084,6 +1084,7 @@ import ABC3.Found.NCBelyi.Normalize
 import ABC3.Found.NCBelyi.CoeffBound
 import ABC3.Found.NCBelyi.ReducedDegree
 import ABC3.Found.NCBelyi.NestedInduction
+import ABC3.Found.NCBelyi.RatSeparation
 /-!
 # Found — 実装済みの基礎
 
