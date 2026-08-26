@@ -148,6 +148,32 @@ theorem rat_cast_inf' {ι : Type*} (S : Finset ι) (hne : S.Nonempty) (g : ι �
     rw [hj]
     exact Finset.inf'_le (fun i => (g i : ℝ)) hjS
 
+/-! ## ★★★★`ℚ` 側の `f` と `f₀` -/
+
+/-- ★`Lemma 2.1` の `f(x) = x^{a+1}(x−1)^{b+1}` を `ℚ` で書いたもの。 -/
+def belyiVal (a b : ℕ) (x : ℚ) : ℚ := x ^ (a + 1) * (x - 1) ^ (b + 1)
+
+/-- ★`Lemma 2.1` の `f₀ ≙ -inf'` を `ℚ` で書いたもの。 -/
+noncomputable def belyiShift (a b : ℕ) (S : Finset ℚ) (hne : S.Nonempty) : ℚ :=
+  - S.inf' hne (belyiVal a b)
+
+/-- ★★**`ℚ` で定めた `f` をキャストすると `ℝ` 側の `f` になる**。 -/
+theorem cast_belyiVal (a b : ℕ) (x : ℚ) :
+    ((belyiVal a b x : ℚ) : ℝ) = (x : ℝ) ^ (a + 1) * ((x : ℝ) - 1) ^ (b + 1) := by
+  simp [belyiVal]
+
+/-- ★★★**`ℚ` で定めた `f₀` をキャストすると `ℝ` 側の `f₀` になる**。
+
+★像の上の `inf'` を `Finset.inf'_image` で元の集合の `inf'` に戻し、
+`rat_cast_inf'` でキャストを外に出す。 -/
+theorem cast_inf'_image (a b : ℕ) (S : Finset ℚ) (hne : S.Nonempty) :
+    ((S.image (fun q : ℚ => (q : ℝ))).inf' (hne.image _)
+        (fun x : ℝ => x ^ (a + 1) * (x - 1) ^ (b + 1)))
+      = ((S.inf' hne (belyiVal a b) : ℚ) : ℝ) := by
+  rw [Finset.inf'_image, rat_cast_inf' S hne (belyiVal a b)]
+  refine Finset.inf'_congr hne rfl (fun x _ => ?_)
+  simp [Function.comp, belyiVal]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
@@ -163,6 +189,16 @@ def derivative_comp_scale_eq_zero_iff.src : ABC3.Meta.Source :=
 def rat_cast_inf'.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 4,
     item := "Lemma 2.2(帰納段——Lemma 2.1 を ℚ 側へ移すための inf' のキャスト)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def belyiVal.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 3,
+    item := "Lemma 2.1 の f(x) = x^{a+1}(x−1)^{b+1}(ℚ 版)",
+    sectionId := "ncbelyi-lemma-2-1" }
+
+def cast_inf'_image.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——f₀ を ℚ で定めても同じものになる)",
     sectionId := "ncbelyi-lemma-2-2" }
 
 end ABC3.Found.NCBelyi
