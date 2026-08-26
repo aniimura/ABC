@@ -28928,3 +28928,55 @@ Python の文字列で `𝔪` を**サロゲート対**で書くと UTF-8 への
 2. Σ の帳尻(スキーム側)
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-708 ★★★★★★★★**残り 4 件の「節点はあるのか」を測った**(第 396 ブロック、2026-08-27)
+
+問い: 作業が必要な 4 つの理論で、スケルトン作成と依存グラフ展開はできているか。節点は何個か。
+
+### ★★★★★★★まず区別が要る
+
+`Skeleton/` は**原典の statement 専用トラック**である。
+★したがって 4 つのうち**原典に節点があるのは 1 つだけ**(Belyi = [NCBelyi])。
+残り 3 つは mathlib に無い**標準数学**であり、設計上
+Skeleton には載らない。
+
+### ★★★★実測(2026-08-27)
+
+| 理論 | 原典節点 | Skeleton | グラフ展開 | 必要な節点数 |
+|---|---|---|---|---|
+| **Belyi**([NCBelyi] Thm 2.5) | ✅ ある(9 ページ) | **2/5** | ✅ **5 節点 / 辺 5 / 深さ 2** | ★**あと 2**(Lemma 2.2･Lemma 2.4) |
+| **曲線の RR / Serre 双対性** | ❌ 無い(folklore) | ❌ | ❌ | ★★**未測定** |
+| **馴分岐**(Prop 1.7) | ❌ 無い(証明中の claim) | ❌(設計どおり) | △ `.needs` のみ | 原文の **6 段**、うち **5 実装済み** |
+| **spreading out**(Rem 1.5.1) | ❌ 無い | ❌ | ❌ | ★★**未測定** |
+
+### ★★★★★合図の件数(hedge-index に GenEll/NCBelyi を登録して初測定)
+
+| 項目 | 合図 | 内訳 |
+|---|---|---|
+| `Proposition 1.7` | **7** | immediately×5 one verifies×1 easily×1 |
+| `Theorem 2.1` | **6** | immediately×3 well-known×2 clearly×1 |
+| `Remark 1.5.1` | **3** | one verifies×1 immediately×2 |
+| `[NCBelyi] Theorem 2.5` | **1** | formally×1 |
+| `[NCBelyi] Lemma 2.4` | **2** | immediately×1 one verifies×1 ★**未実装の合図はこれだけ** |
+
+### ★★★★★★訂正——spreading out は mathlib に**部分的にある**
+
+以前の測定(2026-08-16、`remark_1_5_1.needs`)は「mathlib に scheme の spreading out は無い」だったが、
+★**`Mathlib/AlgebraicGeometry/SpreadingOut.lean` は存在する**
+(`spread_out_of_isGermInjective` / `spread_out_unique_of_isGermInjective`)。
+
+★★ただしそれは**茎レベル**(`Spec 𝒪_{X,x} ⟶ Spec 𝒪_{Y,y}` を**近傍へ**延ばす)であり、
+原文が要るのは『`X′_ℚ ≅ X_ℚ` が `ℤ[Σ^{-1}]` 上へ延びる』——**基底の極限版**(EGA IV, 8.8.2)である。
+★★★ファイル自身の TODO が「morphism property の spreading out」を残している。
+
+### ★★★★★★★設計上の発見——**「mathlib に無い標準数学」を置く節点の型が無い**
+
+`Skeleton/` は原典専用、`Interface/` は posit 専用、`Found/` は実装専用である。
+★**「作るべき標準数学」を節点として数える場所が無い**——
+現状は `.needs` の `.citation(.absent …)` だけで、**節点数を持たない**。
+★★だから 4 つのうち 3 つは「グラフに載っていない」。
+
+★★★**提案**: `ResearchPaper/mathlib-gap.json` を作り、
+各項目に「何を作るか / 最小構成は何か / 節点数 / 外部プロジェクトの在庫」を書く。
+小さい仕事で、以後の見積もりが機械的になる。
