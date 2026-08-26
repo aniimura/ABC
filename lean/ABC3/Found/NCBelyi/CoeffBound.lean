@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import Mathlib.RingTheory.Polynomial.Vieta
 import Mathlib.Analysis.Complex.Polynomial.Basic
+import Mathlib.Analysis.Complex.Polynomial.GaussLucas
 
 /-!
 # [NCBelyi] Lemma 2.4 —— 最小多項式の係数と値の評価(`Found`)
@@ -40,8 +41,9 @@ import Mathlib.Analysis.Complex.Polynomial.Basic
 
 原文は「係数が `≤ d₀^{d₀}` ⇒ 値が抑えられる」と**係数を経由する**。
 ★実装では `f = ∏(X − αᵢ)` から直接 `‖f(x)‖ ≤ (‖x‖+1)^{d₀}` が出た(`norm_eval_le_pow`)
-——係数の限界は要らない。★★それでも `norm_coeff_le_choose` を取るのは、
-**`f₀′` の根の位置を Cauchy 限界で抑える**のに係数が要るからである(次のブロック)。
+——係数の限界は要らない。★★★**それでも `norm_coeff_le_choose` を残してある**——原文が明示的に述べている主張だからである。
+★★★当初は「`f₀′` の根の位置を Cauchy 限界で抑えるのに要る」と見積もっていたが、
+**Gauss–Lucas が mathlib にあった**のでそれも不要になった(本ファイル末尾)。
 -/
 
 namespace ABC3.Found.NCBelyi
@@ -220,6 +222,62 @@ theorem eval_ne_of_norm_le (f : ℂ[X]) (hf : f.Monic) (hdeg : 0 < f.natDegree)
   rw [hcon] at this
   exact lt_irrefl _ this
 
+/-! ## ★★★★★★★★`f₀′` の根の位置 —— Gauss–Lucas
+
+原文 (NCBelyi p.5):
+> bounded by some fixed expression in d0. Thus, for a suitable choice of C, it follows
+
+原文は `S₀`(= `f₀′` の根の集合)での `f₀` の値も「`d₀` のある式で抑えられる」と言うだけで、
+**`S₀` がどこにあるかを書かない**。★係数の限界から Cauchy 限界を作れば
+`‖w‖ ≤ 1 + 2^{d₀}` は出るが、★★**Gauss–Lucas を使えば `‖w‖ ≤ 1` である**
+——`f₀′` の根は `f₀` の根の凸包に入り、単位閉円板は凸だからである。
+
+★★★これで `S` と `S₀` が**同じ半径 1 で抑えられる**。
+`C` は `d₀` に依らず **`3`** で足りる。
+-/
+
+/-- ★★★★★**`f₀′` の根も単位閉円板の中**(Gauss–Lucas)。
+
+★mathlib の `rootSet_derivative_subset_convexHull_rootSet` がそのまま使える
+(`Mathlib/Analysis/Complex/Polynomial/GaussLucas.lean`)。
+あとは単位閉円板が凸(`convex_closedBall`)であることだけ。 -/
+theorem norm_root_derivative_le_one (f : ℂ[X]) (hdeg : 0 < f.natDegree)
+    (h : ∀ z ∈ f.roots, ‖z‖ ≤ 1) {w : ℂ} (hw : (derivative f).eval w = 0) :
+    ‖w‖ ≤ 1 := by
+  have hf0 : f ≠ 0 := fun hc => by simp [hc] at hdeg
+  have hdeg' : 0 < f.degree := natDegree_pos_iff_degree_pos.1 hdeg
+  have hd0 : derivative f ≠ 0 := by
+    intro hc
+    have := (Polynomial.derivative_eq_zero (p := f)).1 hc
+    omega
+  have hmem : w ∈ (derivative f).rootSet ℂ := by
+    rw [Polynomial.mem_rootSet]
+    exact ⟨hd0, by simpa using hw⟩
+  have hsub : f.rootSet ℂ ⊆ Metric.closedBall (0 : ℂ) 1 := by
+    intro z hz
+    rw [Polynomial.mem_rootSet] at hz
+    have hzr : z ∈ f.roots := by
+      rw [Polynomial.mem_roots hf0]
+      simpa [Polynomial.IsRoot] using hz.2
+    simpa [Complex.dist_eq] using h z hzr
+  have hcv := Polynomial.rootSet_derivative_subset_convexHull_rootSet hdeg' hmem
+  have hball := convexHull_min hsub (convex_closedBall (0 : ℂ) 1) hcv
+  simpa [Complex.dist_eq] using hball
+
+/-- ★★★★★★**`f₀(β) ∉ f₀(S) ∪ f₀(S₀)`** —— 原文の `f0(β) /∈ S′` そのもの。
+
+原文 (NCBelyi p.5):
+> bounded by some fixed expression in d0. Thus, for a suitable choice of C, it follows
+
+★★**`C = 3` で足りる**。原文の「`d₀` に相対的に十分大きい `C`」は、
+`f₀` がモニックで根が単位円板の中である以上、**`d₀` に依らない**。 -/
+theorem eval_ne_of_root_or_root_derivative (f : ℂ[X]) (hf : f.Monic) (hdeg : 0 < f.natDegree)
+    (h : ∀ z ∈ f.roots, ‖z‖ ≤ 1) {β x : ℂ} (hβ : 3 < ‖β‖)
+    (hx : ‖x‖ ≤ 1 ∨ (derivative f).eval x = 0) :
+    f.eval β ≠ f.eval x := by
+  have hx1 : ‖x‖ ≤ 1 := hx.elim id (fun hc => norm_root_derivative_le_one f hdeg h hc)
+  exact eval_ne_of_norm_le f hf hdeg h 1 hx1 zero_le_one (by linarith)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def norm_coeff_le_choose.src : ABC3.Meta.Source :=
@@ -240,6 +298,16 @@ def norm_eval_lt_norm_eval_of_le.src : ABC3.Meta.Source :=
 def eval_ne_of_norm_le.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 5,
     item := "Lemma 2.4(f₀(β) ∉ S′)",
+    sectionId := "ncbelyi-lemma-2-4" }
+
+def norm_root_derivative_le_one.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 5,
+    item := "Lemma 2.4(S₀ —— f₀′ の根の集合の位置)",
+    sectionId := "ncbelyi-lemma-2-4" }
+
+def eval_ne_of_root_or_root_derivative.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 5,
+    item := "Lemma 2.4(f₀(β) ∉ S′ —— C = 3 で足りる)",
     sectionId := "ncbelyi-lemma-2-4" }
 
 end ABC3.Found.NCBelyi
