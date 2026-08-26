@@ -262,6 +262,63 @@ theorem minpoly_eq_X_pow_sub_C_of_finrank
   refine minpoly_eq_X_pow_sub_C_of_natDegree K L n hn x c hx ?_
   rw [← hrank, IntermediateField.adjoin.finrank hint]
 
+/-! ## ★★★★★★単生成なら different は**等式**になる -/
+
+/-- ★★★★★**`B = A[x]` なら `𝔡 = (f′(x))`**(包含ではなく**等式**)。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★局所体の有限拡大では `O_L = O_K[x]` が**常に成り立つ**ので、
+これが段 1(馴分岐の**上界**)への入口になる——
+下界しか無い mathlib の `pow_sub_one_dvd_differentIdeal` と違い、**両側が取れる**。
+
+★★mathlib の `conductor_mul_differentIdeal`(`conductor · 𝔡 = (f′(x))`)で
+`conductor = ⊤` とするだけである。 -/
+theorem differentIdeal_eq_span_of_adjoin_eq_top
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (x : B) (hmono : Algebra.adjoin A {x} = ⊤)
+    (hgen : Algebra.adjoin K {(algebraMap B L) x} = ⊤) :
+    differentIdeal A B = Ideal.span {(aeval x) (derivative (minpoly A x))} := by
+  rw [← conductor_mul_differentIdeal A K L x hgen,
+    conductor_eq_top_of_adjoin_eq_top hmono, Ideal.top_mul]
+
+/-- ★★★★**冪基底がある場合**も同じ。 -/
+theorem differentIdeal_eq_span_of_powerBasis
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (pb : PowerBasis A B)
+    (hgen : Algebra.adjoin K {(algebraMap B L) pb.gen} = ⊤) :
+    differentIdeal A B = Ideal.span {(aeval pb.gen) (derivative (minpoly A pb.gen))} := by
+  rw [← conductor_mul_differentIdeal A K L pb.gen hgen,
+    conductor_eq_top_of_powerBasis pb, Ideal.top_mul]
+
+/-- ★★★★★★**Kummer 拡大で単生成なら `𝔡 = (n·λ^{n−1})`**——段 6 の**鋭い形**。
+
+★第 374 は包含(`n·λ^{n−1} ∈ 𝔡`)しか取っていなかった。
+★★単生成を仮定すれば**等式**になり、上界も取れる。 -/
+theorem differentIdeal_eq_span_kummer
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (n : ℕ) (lam : B) (kappa : A)
+    (hmono : Algebra.adjoin A {lam} = ⊤)
+    (hmin : minpoly A lam = X ^ n - C kappa)
+    (hgen : Algebra.adjoin K {(algebraMap B L) lam} = ⊤) :
+    differentIdeal A B = Ideal.span {(n : B) * lam ^ (n - 1)} := by
+  rw [differentIdeal_eq_span_of_adjoin_eq_top A K L lam hmono hgen, hmin]
+  congr 1
+  simp [derivative_sub, derivative_X_pow, derivative_C]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -297,6 +354,16 @@ def pow_mem_differentIdeal_tower.src : ABC3.Meta.Source :=
 def minpoly_eq_X_pow_sub_C_of_natDegree.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(Kummer 拡大の最小多項式は X^p − κ)",
+    sectionId := "genell-prop-1-7" }
+
+def differentIdeal_eq_span_of_adjoin_eq_top.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(単生成なら different は f′(x) の生成するイデアルに等しい)",
+    sectionId := "genell-prop-1-7" }
+
+def differentIdeal_eq_span_kummer.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(Kummer 拡大での different の等式)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
