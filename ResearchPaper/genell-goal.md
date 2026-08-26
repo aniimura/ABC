@@ -27842,3 +27842,59 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 | `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-677 ★★★★★★★★★★**§3 の sorry が 0 になった**(第 364 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`。
+ゴール「§3 の sorry を 0 にする」**達成**。
+
+### ★★★★★★★★`Lemma 3.7` の内訳
+
+**(a)** は**完全な導出**である:
+
+    Proposition 3.4 を ε₀ = 1/6 (すなわち 12(1+ε₀) = 14) で使う
+      ⇒ deg_∞ ≤ 14·ht^Falt + A
+    ht^Falt ≥ B (下に有界) と 100·d·(ht^Falt + C·d^ε) ≤ l から
+      ⇒ d·deg_∞ < l·log 2
+    primeToLocalHeights_of_lt に渡す
+
+★定数は **`C := |A| + 100|B| + 1`** と取ればよい——`100·log 2 > 69` と `d^ε ≥ 1` が効く。
+★★`d·ht^Falt` の符号で場合分けする(負のときは `ht^Falt ≥ B` が効く)。
+
+**(b)(c)** は例外集合を `lcyclicExc ∪ noMultRedExc KV` と**取る**ことで導く。
+★★★(c) では **(a) と (b) のどちらでも `PrimeToLocalHeights` が得られる**のが鍵である
+——(a) からは上の導出で、(b) からは定義そのものから。
+
+### ★★★★界面に足した 8 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degOfDefinition_pos` | `d = [L:ℚ] ≥ 1` |
+| `primeToLocalHeights_of_lt` | 『d·deg_∞([E_L]) ≥ v·log(2)』(原文は証明なし)+ `l` が素数 |
+| `lcyclicExc`･`galoisFinite_lcyclicExc`･`mem_lcyclicExc` | `Lemma 3.5` + `Lemma 3.6` + `Prop 1.4, (iv)` |
+| `noMultRedExc`･`galoisFinite_noMultRedExc`･`mem_noMultRedExc` | `Example 1.3, (ii)` |
+| `galoisFinite_union` | `Example 1.3, (i)` |
+
+### ★★★★★★★★★★§3 の全体(第 358-364、7 ブロック)
+
+| 定理 | どう閉じたか |
+|---|---|
+| `lemma_3_1` | 既実装(`Found/GenEll/Lemma31.lean`･`Sl2Padic.lean`) |
+| `lemma_3_2` | (i) は [FC] を仕様として受け、**(ii) は導出**(第 363) |
+| `localHeight_pos` | 既実装 |
+| `potLocalHeight_indep` | **完全な導出**(第 359-360、mathlib の `valuation_liesOver`) |
+| `prop_3_4` | 原文が引く 4 つを接地し、**`ε` 入り 2 本は導出**(第 361) |
+| `lemma_3_5` | **完全な導出**(第 362) |
+| `lemma_3_6` | 既実装(`Found/GenEll/Elementary.lean`) |
+| `lemma_3_7` | **(a) は完全な導出**、(b)(c) は例外集合を取る(第 364) |
+
+★★★★★**進め方の型**がここで固まった:
+
+1. ★**まず退化 witness を作って「難しい」のか「偽」なのかを分ける**(第 358)。
+2. ★★**原文が実際に引いているものだけ**を界面の欄に出す。
+3. ★★★**欄を強めたら充足 witness を置く**(第 363 で `l = 0` の充足不能を 1 つ防いだ)。
+4. ★★★★**残りは導出する**——posit で消すのではなく。
+
+★★Lean 全体の sorry は **51 → 46**。
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

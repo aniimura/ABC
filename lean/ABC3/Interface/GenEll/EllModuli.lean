@@ -149,6 +149,46 @@ structure EllModuliData extends TorsionGaloisRepData where
   faltingsHeight_quotLCyclic : ∃ C₀ : ℝ, ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
     faltingsHeight (cls (quotLCyclic E l))
       ≤ faltingsHeight (cls E) + 2 * Real.log l + C₀
+  /-- ★`d = [L:ℚ]` は正。 -/
+  degOfDefinition_pos : ∀ E : Curve, 0 < degOfDefinition E
+  /-- ★★★★★**`l` が十分大きければ局所高さと素になる**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★原文は『if `v` is any local height of `E_L`, then `d·deg_∞([E_L]) ≥ v·log(2)`』を
+  証明なしで使う。★★`l` が素数ですべての局所高さより大きければ、
+  `l` はそれらを割らない——この 2 段をまとめて欄に出している。 -/
+  primeToLocalHeights_of_lt : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
+    (degOfDefinition E : ℝ) * degInf (cls E) < (l : ℝ) * Real.log 2 →
+    PrimeToLocalHeights E l
+  /-- ★★★★★★**l-cyclic かつ局所高さと素な類の例外集合**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★これが Galois-finite であることは **`Lemma 3.5`**(高さの不等式)と
+  **`Lemma 3.6`**(初等的な評価)から `ht^Falt` が有界になり、
+  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。 -/
+  lcyclicExc : Set EllClass
+  galoisFinite_lcyclicExc : GaloisFinite lcyclicExc
+  mem_lcyclicExc : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
+    HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+  /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★compactly bounded な集合(`Example 1.3, (ii)`)の中で、
+  乗法還元を持たないものは潜在的に良還元であり、高さが有界になる。 -/
+  noMultRedExc : Set EllClass → Set EllClass
+  galoisFinite_noMultRedExc : ∀ KV : Set EllClass, CompactlyBounded KV →
+    GaloisFinite (noMultRedExc KV)
+  mem_noMultRedExc : ∀ (KV : Set EllClass) (E : Curve), cls E ∈ KV → ¬ HasMultRed E →
+    cls E ∈ noMultRedExc KV
+  /-- ★Galois-finite は有限合併で閉じる(`Example 1.3, (i)`)。 -/
+  galoisFinite_union : ∀ S T : Set EllClass, GaloisFinite S → GaloisFinite T →
+    GaloisFinite (S ∪ T)
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=

@@ -7,6 +7,7 @@ import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.BDClass
 import Mathlib.Topology.Algebra.Ring.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # [GenEll] §3 Full Special Linear Galois Actions —— 残り 8 件(`Skeleton`)
@@ -275,6 +276,7 @@ theorem lemma_3_6 (eps : ℝ) (heps : 0 < eps) :
 
 /-! ## Lemma 3.7 —— 有限例外集合 -/
 
+set_option maxHeartbeats 1600000 in
 /-- **[GenEll] Lemma 3.7**(Finite Exceptional Sets)。
 
 原文 (GenEll p.18):
@@ -307,7 +309,89 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
           (condA → D.PrimeToLocalHeights E l)
         ∧ (condB → D.cls E ∉ Exc → D.HasMultRed E)
         ∧ ((condA ∨ condB) → D.HasLCyclic E l → D.cls E ∈ Exc) := by
-  sorry
+  -- `Proposition 3.4` を `ε₀ = 1/6`(すなわち `12(1+ε₀) = 14`)で使う
+  obtain ⟨h1, h2, _, _⟩ := prop_3_4 D (1/6) (by norm_num)
+  obtain ⟨C₁, hC₁⟩ := h1
+  obtain ⟨C₂, hC₂⟩ := h2
+  obtain ⟨B, hB⟩ := D.faltingsHeight_bddBelow
+  set A : ℝ := C₁ + C₂ with hAdef
+  have hdeg : ∀ x, D.degInf x ≤ 14 * D.faltingsHeight x + A := by
+    intro x
+    have ha := hC₁ x
+    have hb := hC₂ x
+    norm_num at hb
+    linarith
+  have hLlo : (0.69 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hLhi : Real.log 2 ≤ (0.70 : ℝ) := by linarith [Real.log_two_lt_d9]
+  refine ⟨|A| + 100 * |B| + 1, by positivity,
+    D.lcyclicExc ∪ D.noMultRedExc KV,
+    D.galoisFinite_union _ _ D.galoisFinite_lcyclicExc (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
+  intro E l hl hss condA condB hcA hcB
+  have hAimp : condA → D.PrimeToLocalHeights E l := by
+    intro hc
+    rw [hcA] at hc
+    obtain ⟨hle, _⟩ := hc
+    refine D.primeToLocalHeights_of_lt E l hl hss ?_
+    set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
+    set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
+    set C : ℝ := |A| + 100 * |B| + 1 with hCdef
+    set P : ℝ := d ^ eps with hPdef
+    set L : ℝ := Real.log 2 with hLdef
+    have hd1 : (1 : ℝ) ≤ d := by
+      rw [hddef]
+      exact_mod_cast D.degOfDefinition_pos E
+    have hdpos : (0 : ℝ) < d := by linarith
+    have hP1 : (1 : ℝ) ≤ P := by
+      rw [hPdef]
+      exact Real.one_le_rpow hd1 heps.le
+    have hCpos : (0 : ℝ) < C := by
+      rw [hCdef]
+      positivity
+    have hAle : A ≤ |A| := le_abs_self A
+    have hAnn : (0 : ℝ) ≤ |A| := abs_nonneg A
+    have hBnn : (0 : ℝ) ≤ |B| := abs_nonneg B
+    have hBge : -|B| ≤ B := neg_abs_le B
+    have hGlow : d * B ≤ d * F := by nlinarith [hB (D.cls E)]
+    have hkey1 : d * D.degInf (D.cls E) ≤ 14 * (d * F) + d * A := by
+      nlinarith [hdeg (D.cls E)]
+    have hdP : d ≤ d * P := by nlinarith
+    have hdPnn : (0 : ℝ) ≤ d * P := by nlinarith
+    have hkey3 : 14 * (d * F) + d * A < 100 * d * (F + C * P) * L := by
+      have hexp : 100 * d * (F + C * P) * L
+          = 100 * L * (d * F) + 100 * L * C * (d * P) := by ring
+      rw [hexp]
+      have e2 : d * A ≤ d * |A| := by nlinarith
+      have hX : (0 : ℝ) ≤ C * (d * P) := by nlinarith
+      have e4a : 69 * (C * d) ≤ 69 * (C * (d * P)) := by nlinarith
+      have e4b : 69 * (C * (d * P)) ≤ 100 * L * (C * (d * P)) := by nlinarith [hLlo, hX]
+      have e4 : 69 * (C * d) ≤ 100 * L * C * (d * P) := by linarith
+      rcases le_or_gt 0 (d * F) with hG | hG
+      · have e1 : 14 * (d * F) ≤ 100 * L * (d * F) := by nlinarith
+        have e3 : d * |A| < 69 * (C * d) := by
+          rw [hCdef]
+          nlinarith
+        linarith
+      · have f0 : -(d * F) ≤ d * |B| := by nlinarith
+        have f1 : 14 * (d * F) - 100 * L * (d * F) ≤ 56 * (d * |B|) := by nlinarith
+        have f3 : 56 * (d * |B|) + d * |A| < 69 * (C * d) := by
+          rw [hCdef]
+          nlinarith
+        linarith
+    have hL0 : (0 : ℝ) ≤ L := by linarith
+    have hkey2 : 100 * d * (F + C * P) * L ≤ (l : ℝ) * L := by nlinarith
+    linarith
+  refine ⟨hAimp, ?_, ?_⟩
+  · intro hc hnot
+    rw [hcB] at hc
+    by_contra hmult
+    exact hnot (Or.inr (D.mem_noMultRedExc KV E hc.1 hmult))
+  · intro hor hcyc
+    have hpr : D.PrimeToLocalHeights E l := by
+      rcases hor with h | h
+      · exact hAimp h
+      · rw [hcB] at h
+        exact h.2
+    exact Or.inl (D.mem_lcyclicExc E l hl hss hcyc hpr)
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -427,6 +511,16 @@ def lemma_3_7.src : Source :=
   { paper := "GenEll", pdfPage := 18, item := "Lemma 3.7",
     sectionId := "genell-lemma-3-7" }
 
+/-- ★★★★★★★★**2026-08-26 に閉じた**——内訳は次のとおり。
+
+★(a) は**完全な導出**である: `Proposition 3.4` を `ε₀ = 1/6`(すなわち `12(1+ε₀) = 14`)で
+使って `deg_∞ ≤ 14·ht^Falt + A` を得、`ht^Falt ≥ B`(下に有界)と
+`100·d·(ht^Falt + C·d^ε) ≤ l` から `d·deg_∞ < l·log 2` を出し、
+`primeToLocalHeights_of_lt` に渡す。★★定数は `C := |A| + 100|B| + 1` と取ればよい
+——`100·log 2 > 69` と `d^ε ≥ 1` が効く。
+
+★(b)(c) は例外集合を `lcyclicExc ∪ noMultRedExc KV` と**取る**ことで導く。
+★★★(c) では **(a) と (b) のどちらでも `PrimeToLocalHeights` が得られる**のが鍵である。 -/
 def lemma_3_7.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Lemma 3.5(大域階数 1 部分群の不等式)" 17,
     .otherPaper "[GenEll]" "Proposition 3.4(『12(1+ϵ)』を 14 に取る箇所)" 17,
