@@ -188,6 +188,70 @@ theorem degNormalized_adivRed_le_sum_log (a : ADiv F) (Sig : Finset ℕ)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun q _ => by ring)
 
+/-! ## ★★★★★★★★★★一般形 —— 係数が `≤ 1` の因子なら何でもよい
+
+★`ADivRed` の形に限る必要はない。`log-cond` の導手 `f_x^D ≝ (D_x)_red` は
+`CartierPullback.lean` では **イデアルの根基**として作られており、
+`ADivRed` を経由していない。★★一般形にしておけば、そちらへも直接使える。
+-/
+
+/-- ★★**係数が `≤ 1` の因子の次数は台の上の `log N v` の和で抑えられる**。 -/
+theorem deg_le_sum_of_coeff_le_one (c : ADiv F) (harc : c.arc = 0)
+    (hle1 : ∀ v, c.fin v ≤ 1)
+    (V : Finset (FinitePlace F)) (hsupp : c.fin.support ⊆ V) :
+    deg c ≤ ∑ v ∈ V, Real.log (residueCard v) := by
+  classical
+  have h0 : c.arc.sum (fun _ r => r) = 0 := by rw [harc]; simp
+  rw [deg, h0, add_zero, Finsupp.sum]
+  have hterm : ∀ v ∈ c.fin.support,
+      ((c.fin v : ℤ) : ℝ) * Real.log (residueCard v) ≤ Real.log (residueCard v) := by
+    intro v _
+    have h1 : ((c.fin v : ℤ) : ℝ) ≤ 1 := by exact_mod_cast hle1 v
+    nlinarith [(log_residueCard_pos v).le, h1]
+  refine le_trans (Finset.sum_le_sum hterm) ?_
+  exact Finset.sum_le_sum_of_subset_of_nonneg hsupp
+    (fun v _ _ => (log_residueCard_pos v).le)
+
+/-- ★★★★★★★★★★**一般形の `Σ`-限界**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+係数が `≤ 1`、台が `Σ` の上にあるなら、正規化次数は `Σ_{q ∈ Σ} log q` 以下。
+★**`ADivRed` を経由しない導手(イデアルの根基)にもそのまま使える**。 -/
+theorem degNormalized_le_sum_log (c : ADiv F) (harc : c.arc = 0)
+    (hle1 : ∀ v, c.fin v ≤ 1)
+    (Sig : Finset ℕ) (hprime : ∀ q ∈ Sig, q.Prime)
+    (ch : FinitePlace F → ℕ)
+    (hmem : ∀ v ∈ c.fin.support, ch v ∈ Sig)
+    (hover : ∀ v ∈ c.fin.support, (v.asIdeal).LiesOver (Ideal.span {((ch v : ℕ) : ℤ)})) :
+    degNormalized c ≤ ∑ q ∈ Sig, Real.log q := by
+  classical
+  have hn : 0 < (Module.finrank ℚ F : ℝ) := by
+    exact_mod_cast Module.finrank_pos (R := ℚ) (M := F)
+  have hdeg : deg c ≤ ∑ v ∈ c.fin.support, Real.log (residueCard v) :=
+    deg_le_sum_of_coeff_le_one c harc hle1 _ (Finset.Subset.refl _)
+  have hfib : ∑ q ∈ Sig, ∑ v ∈ c.fin.support with ch v = q, Real.log (residueCard v)
+      = ∑ v ∈ c.fin.support, Real.log (residueCard v) :=
+    Finset.sum_fiberwise_of_maps_to hmem _
+  have hq : ∀ q ∈ Sig, ∑ v ∈ c.fin.support with ch v = q,
+      Real.log (residueCard v) ≤ (Module.finrank ℚ F : ℝ) * Real.log q := by
+    intro q hqS
+    refine sum_log_residueCard_le q (hprime q hqS) _ (fun v hv => ?_)
+    obtain ⟨hv1, hv2⟩ := Finset.mem_filter.1 hv
+    have hh := hover v hv1
+    rwa [hv2] at hh
+  have hsum : ∑ v ∈ c.fin.support, Real.log (residueCard v)
+      ≤ ∑ q ∈ Sig, (Module.finrank ℚ F : ℝ) * Real.log q := by
+    rw [← hfib]
+    exact Finset.sum_le_sum hq
+  rw [degNormalized, div_le_iff₀ hn]
+  calc deg c ≤ ∑ v ∈ c.fin.support, Real.log (residueCard v) := hdeg
+    _ ≤ ∑ q ∈ Sig, (Module.finrank ℚ F : ℝ) * Real.log q := hsum
+    _ = (∑ q ∈ Sig, Real.log q) * (Module.finrank ℚ F : ℝ) := by
+        rw [Finset.sum_mul]
+        exact Finset.sum_congr rfl (fun q _ => by ring)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_inertiaDeg_le.src : ABC3.Meta.Source :=
@@ -198,6 +262,11 @@ def sum_inertiaDeg_le.src : ABC3.Meta.Source :=
 def degNormalized_adivRed_le_sum_log.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i)(Σ 上の log-cond の寄与は Σ_{q∈Σ} log q で抑えられる)",
+    sectionId := "genell-prop-1-7" }
+
+def degNormalized_le_sum_log.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i)(Σ 上の寄与の限界の一般形——係数が ≤ 1 なら何でもよい)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
