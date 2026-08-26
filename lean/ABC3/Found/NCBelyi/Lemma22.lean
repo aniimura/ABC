@@ -128,6 +128,26 @@ theorem natDegree_comp_scale (g : ℚ[X]) (lam : ℚ) (hlam : lam ≠ 0) :
     (g.comp (C lam * X)).natDegree = g.natDegree := by
   rw [natDegree_comp, natDegree_C_mul hlam, natDegree_X, mul_one]
 
+/-! ## ★★★`Lemma 2.1` を `ℚ` 側へ移すための道具
+
+`Lemma 2.1`(`Lemma21.lean`)は `ℝ` の上で書いてあるが、
+`Lemma 2.2` の帰納法は `ℚ` の上で回る。
+★差は `f₀ ≙ -inf'` のところだけである——埋め込みが単調なので下確は保たれる。
+-/
+
+/-- ★★**`ℚ → ℝ` の埋め込みは `inf'` と可換**である。
+
+★単調な埋め込みなので両向きの不等式が出る。
+★★`Lemma 2.1` の `f₀ ≙ -S.inf'` を `ℚ` 側で定めても同じものになる、ということである。 -/
+theorem rat_cast_inf' {ι : Type*} (S : Finset ι) (hne : S.Nonempty) (g : ι → ℚ) :
+    ((S.inf' hne g : ℚ) : ℝ) = S.inf' hne (fun i => (g i : ℝ)) := by
+  refine le_antisymm ?_ ?_
+  · refine Finset.le_inf' hne _ (fun i hi => ?_)
+    exact_mod_cast Finset.inf'_le g hi
+  · obtain ⟨j, hjS, hj⟩ := Finset.exists_mem_eq_inf' hne g
+    rw [hj]
+    exact Finset.inf'_le (fun i => (g i : ℝ)) hjS
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
@@ -138,6 +158,11 @@ def lemma_2_2_base.src : ABC3.Meta.Source :=
 def derivative_comp_scale_eq_zero_iff.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 4,
     item := "Lemma 2.2(帰納段——スケーリングは臨界点を移すだけ)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def rat_cast_inf'.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——Lemma 2.1 を ℚ 側へ移すための inf' のキャスト)",
     sectionId := "ncbelyi-lemma-2-2" }
 
 end ABC3.Found.NCBelyi
