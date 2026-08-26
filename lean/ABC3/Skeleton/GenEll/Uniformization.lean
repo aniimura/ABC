@@ -1,6 +1,4 @@
-import ABC3.Meta.Claim
-import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import ABC3.Found.GenEll.LatticeCurve
 
 /-!
 # スケルトン —— **複素楕円曲線の一意化**(`Skeleton`)
@@ -58,13 +56,7 @@ Faltings 高さではない(`Check/GaloisRep/HtFaltNotPinned.lean`)。
 
 namespace ABC3.Skeleton.GenEll
 
-open ABC3.Meta
-
-/-- ★束 `Λ` に対応する Weierstrass 曲線 `y² = x³ − (g₂/4)x − (g₃/4)`。
-
-★`℘'² = 4℘³ − g₂℘ − g₃` で `x = ℘`、`y = ℘'/2` と置いた形である。 -/
-noncomputable def latticeCurve (P : PeriodPair) : WeierstrassCurve ℂ :=
-  ⟨0, 0, 0, -P.g₂ / 4, -P.g₃ / 4⟩
+open ABC3.Meta ABC3.Found.GenEll
 
 /-- ★★★★★★★**複素楕円曲線の一意化**——任意の `E/ℂ` はある周期束の曲線と同型。
 
@@ -77,11 +69,6 @@ theorem exists_periodPair (W : WeierstrassCurve ℂ) (hell : W.IsElliptic) :
   sorry
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
-
-def latticeCurve.src : Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Proposition 3.4(Faltings Heights and the Divisor at Infinity)",
-    sectionId := "genell-prop-3-4" }
 
 def exists_periodPair.src : Source :=
   { paper := "GenEll", pdfPage := 17,

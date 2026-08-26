@@ -26664,3 +26664,40 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 | `G_normPair` | ★★★★★**`G(Λ_τ, k) = Σ_{(m,n)} (m+nτ)⁻ᵏ`** |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-649 ★★★★★★束の曲線と `j` 不変量(第 335 ブロック)
+
+`Found/GenEll/LatticeCurve.lean`、`Skeleton/GenEll/Uniformization.lean`。
+
+### ★★★★★★束の側と曲線の側を繋いだ
+
+`℘'² = 4℘³ − g₂℘ − g₃` で `x = ℘`、`y = ℘'/2` と置くと `y² = x³ − (g₂/4)x − (g₃/4)`。
+これを `latticeCurve P` として `Found` に置き、判別式と `j` を計算した:
+
+    Δ(latticeCurve P) = g₂³ − 27g₃² = latticeDisc P
+    j(latticeCurve P) = 1728·g₂³ / (g₂³ − 27g₃²)
+
+★どちらも `b₂ b₄ b₆ b₈` を展開して `ring` で出る。
+
+### ★★★★これで一意化の 3 段が格子の言葉に翻訳された
+
+| 段 | 格子の言葉 |
+|---|---|
+| (i) 判別式の非消失 | **`latticeCurve P` が楕円曲線であること**(同値、本ブロック) |
+| (iii) `j` の全射性 | 与えられた `j₀` に対し `1728g₂³/(g₂³−27g₃²) = j₀` なる束を作ること |
+
+★★`Skeleton/GenEll/Uniformization.lean` が自前で持っていた `latticeCurve` を撤去し、
+`Found` のものを使うようにした(重複の解消)。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `latticeCurve` | ★★束に対応する Weierstrass 曲線 |
+| `latticeCurve_Δ` | ★★★★★**`Δ = g₂³ − 27g₃²`** |
+| `isElliptic_latticeCurve`・`latticeDisc_ne_zero_of_isElliptic` | ★★★★同値 |
+| `latticeCurve_c₄` | ★★`c₄ = 12g₂` |
+| `latticeCurve_j` | ★★★★★★**`j = 1728g₂³/(g₂³−27g₃²)`** |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
