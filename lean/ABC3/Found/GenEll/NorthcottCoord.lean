@@ -138,6 +138,43 @@ theorem finite_normalizedCoord {ι : Type*} [Finite ι] (d : ℕ) (B : ℝ)
   rw [hy i]
   exact coord_mem_boundedAlg d B L hd x hx i jj
 
+/-! ## ★★★★★★★射影モデルを受けた `Proposition 1.4, (iv)` -/
+
+/-- ★★★★★★★**[GenEll] Proposition 1.4, (iv)** —— 射影モデルを与えられたものとして。
+
+原文 (GenEll p.6):
+> (iv) Let d be a positive integer, C ∈ R. Suppose further that the line bundle LQ is ample on XQ. Then the set of points x ∈ X(Q)≤d [cf. Example 1.3, (i)] such that htL(x) ≤ C is ﬁnite.
+
+★原文は `X` の `ℤ`-固有性と `L_ℚ` の豊富性から**射影埋め込み**を得る。
+本定理はその埋め込みを `ArcModel` と同じ立場で**データとして受けている**:
+
+| 受けるもの | 原文での出所 |
+|---|---|
+| 各点の定義体 `fld p`(次数 `≤ d`) | `X(ℚ̄)^{≤d}` |
+| 同次座標 `crd p` と割る成分 `idx` | 射影埋め込み |
+| 正規化座標が**単射** | 閉埋め込みだから |
+| `H(crd p) ≤ exp(ht p + const)` | `ht_L = ht_{O(1)}∘φ + O(1)` |
+
+★★**Northcott 性そのものは受けていない**——それが本ファイルの中身である。 -/
+theorem northcott_of_projModel {P : Type*} {ι : Type*} [Finite ι] (d : ℕ)
+    (ht : P → ℝ)
+    (fld : P → IntermediateField ℚ ℂ) (hnf : ∀ p, NumberField (fld p))
+    (hdeg : ∀ p, Module.finrank ℚ (fld p) ≤ d)
+    (crd : ∀ p, ι → (fld p)) (idx : ι) (const : ℝ)
+    (hcmp : ∀ p, haveI := hnf p; Height.mulHeight (crd p) ≤ Real.exp (ht p + const))
+    (hinj : Function.Injective
+      (fun (p : P) (i : ι) => ((crd p i / crd p idx : fld p) : ℂ)))
+    (C : ℝ) :
+    {p : P | ht p ≤ C}.Finite := by
+  refine finite_of_injOn_boundedAlg (d := d) (B := Real.exp (C + const))
+    (fun (p : P) (i : ι) => ((crd p i / crd p idx : fld p) : ℂ)) _ hinj.injOn ?_
+  intro p hp i
+  haveI := hnf p
+  refine coord_mem_boundedAlg d (Real.exp (C + const)) (fld p) (hdeg p) (crd p) ?_ i idx
+  refine le_trans (hcmp p) (Real.exp_le_exp.2 ?_)
+  have : ht p ≤ C := hp
+  linarith
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mulHeight₁_div_le_mulHeight.src : ABC3.Meta.Source :=
@@ -158,6 +195,11 @@ def coord_mem_boundedAlg.src : ABC3.Meta.Source :=
 def finite_normalizedCoord.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(ℙⁿ の次数有界 Northcott)",
+    sectionId := "genell-prop-1-4" }
+
+def northcott_of_projModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(射影モデルを与えられたものとして)",
     sectionId := "genell-prop-1-4" }
 
 end ABC3.Found.GenEll

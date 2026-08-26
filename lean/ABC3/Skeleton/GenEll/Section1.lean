@@ -4,6 +4,9 @@ import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.Conductor
 import ABC3.Found.GenEll.Prop16
+import ABC3.Found.GenEll.NorthcottCoord
+import ABC3.Found.GenEll.HeightMetric
+import ABC3.Found.GenEll.HeightAdditive
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -119,35 +122,76 @@ def example_1_3 (D : HeightTheoryData) :
 **定義どおりに読むと「上に有界」であって「下に有界」ではない**——
 これも上の docstring で述べた向きの食い違いの一例である(`Gap/GenEll/BDDirection.lean`)。
 
-## ★★★この `sorry` は「まだ証明していない」ではなく「証明できない」
+## ★★★★★★★★ 2026-08-26——構成に置き換えて閉じた(第 371 ブロック)
 
-★本 statement は `∀ D : HeightTheoryData` と量化しているが、
-**`HeightTheoryData` は公理を 1 つも持たないデータ**である
-(`Interface/GenEll/HeightTheory.lean` が明言)。
-★★したがって本 statement は**原文より強く、しかも偽**である。
+★以前は `∀ D : HeightTheoryData` と量化していたが、
+**`HeightTheoryData` は公理を 1 つも持たないデータ**なのでそれは**偽**であった
+(反例: `Check/GenEll/HeightAxiomGap.lean` の `prop_1_4_statement_false`。
+`Point ≝ ℕ`･`ABundle ≝ ℝ`･`tensor ≝ (+)`･`ht L x ≝ L²` で
+**(i) 加法性と (iv) Northcott が同時に破れる**)。
 
-★**反例は `Check/GenEll/HeightAxiomGap.lean` に構成してある**
-(`prop_1_4_statement_false`、`#print axioms` は標準 3 公理のみ)。
-`Point ≝ ℕ`、`ABundle ≝ ℝ`、`tensor ≝ (+)`、`ht L x ≝ L²` で
-**(i) 加法性と (iv) Northcott が同時に破れる**。
+★★公理を足すのは **B5 そのもの**である——`Proposition 1.4` の (i)-(iv) は
+`HeightTheoryData` に足すべき公理**そのもの**だから、足せば仮定の言い換えになる。
+★★★ゆえに**構成に置き換えた**。
 
-★★**原文は偽ではない。** 偽になったのは、`Interface` で「語彙だけ」を posit し、
-`Skeleton` でそれを全称量化したからである。
-★`check.mjs` 冒頭 B5(条件を posit して `sorry` を消す穴)の**裏側**——
-**条件を posit しないまま全称量化すると statement が偽になる**。
+### ★★★★ 4 つの内訳
 
-★★**閉じるには `HeightTheoryData` を posit ではなく構成に置き換えるほかない。**
-公理を足すのは B5 そのものである(`Proposition 1.4` が仮定の言い換えになる)。 -/
-theorem prop_1_4 (D : HeightTheoryData) :
-    (∀ (L M : D.ABundle) (x : D.Point),
-        D.ht (D.tensor L M) x = D.ht L x + D.ht M x)
-  ∧ (∀ L : D.ABundle, D.SomePowerGlobGen (D.generic L) →
-        BDge (D.ht L) (fun _ => (0 : ℝ)))
-  ∧ (∀ L L' : D.ABundle, D.generic L = D.generic L' →
-        BDeq (D.ht L) (D.ht L'))
-  ∧ (∀ (L : D.ABundle) (d : ℕ) (C : ℝ), 0 < d → D.Ample (D.generic L) →
-        {x ∈ D.degLe d | D.ht L x ≤ C}.Finite) := by
-  sorry
+| 条 | 中身 | どこにあるか |
+|---|---|---|
+| (i) 加法性 | `ht(D⊗E) = ht(D) + ht(E)` | `htArith_tensor_unconditional` |
+| (ii) 下に有界 | `-C ≤ ht`(`C` は `F` にも点にも依らない) | `Prop16.lean` の `prop_1_4_ii` |
+| (iii) `≈` | 因子が同じで計量が連続なら高さの差は一様に有界 | `HeightMetric.lean` の `htArith_sub_abs_le`(第 371) |
+| (iv) Northcott | 射影モデルがあれば有限 | `NorthcottCoord.lean` の `northcott_of_projModel`(第 369-371) |
+
+### ★★★★★逸脱と、残してあるもの(明示)
+
+1. ★**量化する対象**: `∀ D : HeightTheoryData` → `ArcModel` + `ArithCartier`。前者では偽だから。
+2. ★★**(iii) の形**: 原文は『生成ファイバーが同じなら』。因子表示では
+   『因子が同じ(計量だけ違う)』である。**垂直因子の差の分は含めていない**。
+3. ★★★**(iv) の形**: 原文は `X` の `ℤ`-固有性と `L_ℚ` の豊富性から**射影埋め込み**を得る。
+   本 statement はその埋め込みを **`ArcModel` と同じ立場でデータとして受けている**。
+   ★★★★**Northcott 性そのものは受けていない**——
+   それは `Found/GenEll/NorthcottTuple.lean`･`NorthcottCoord.lean` で**証明している**。
+   ★★★★★残っているのは「**`htArith` がその意味での射影モデルを持つ**」という幾何の段だけである。 -/
+theorem prop_1_4 {X : AlgebraicGeometry.Scheme.{0}} {V : Type}
+    [NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]
+    (M : ABC3.Found.GenEll.ArcModel X V)
+    [Nonempty (ABC3.Found.GenEll.complexPoints X)]
+    (Dv : ABC3.Found.GenEll.ArithCartier X)
+    (hg : @Continuous _ _ M.topology _ Dv.green) :
+    -- (i) 加法性
+    (∀ (Ev : ABC3.Found.GenEll.ArithCartier X) (F : Type) [Field F] [NumberField F]
+        (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+        ABC3.Found.GenEll.pullbackIdeal F Dv.divisor xF ≠ 0 →
+        ABC3.Found.GenEll.pullbackIdeal F Ev.divisor xF ≠ 0 →
+        ABC3.Found.GenEll.htArith F (Dv.tensor Ev) xF
+          = ABC3.Found.GenEll.htArith F Dv xF + ABC3.Found.GenEll.htArith F Ev xF)
+    -- (ii) 下に一様に有界
+  ∧ (∃ C : ℝ, 0 ≤ C ∧ ∀ (F : Type) [Field F] [NumberField F]
+        (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+        -C ≤ ABC3.Found.GenEll.htArith F Dv xF)
+    -- (iii) 因子が同じで計量が連続なら高さは BD-同値
+  ∧ (∀ Ev : ABC3.Found.GenEll.ArithCartier X, Ev.divisor = Dv.divisor →
+        @Continuous _ _ M.topology _ Ev.green →
+        ∃ C : ℝ, 0 ≤ C ∧ ∀ (F : Type) [Field F] [NumberField F]
+          (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+          |ABC3.Found.GenEll.htArith F Dv xF - ABC3.Found.GenEll.htArith F Ev xF| ≤ C)
+    -- (iv) Northcott(射影モデルを与えられたものとして)
+  ∧ (∀ (P I : Type) [Finite I] (d : ℕ) (ht : P → ℝ)
+        (fld : P → IntermediateField ℚ ℂ) (hnf : ∀ p, NumberField (fld p)),
+        (∀ p, Module.finrank ℚ (fld p) ≤ d) →
+        ∀ (crd : ∀ p, I → (fld p)) (idx : I) (const : ℝ),
+        (∀ p, haveI := hnf p; Height.mulHeight (crd p) ≤ Real.exp (ht p + const)) →
+        Function.Injective (fun (p : P) (i : I) => ((crd p i / crd p idx : fld p) : ℂ)) →
+        ∀ C : ℝ, {p : P | ht p ≤ C}.Finite) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro Ev F _ _ xF hD hE
+    exact ABC3.Found.GenEll.htArith_tensor_unconditional F Dv Ev xF hD hE
+  · exact ABC3.Found.GenEll.prop_1_4_ii M Dv hg
+  · intro Ev hdiv hcont
+    exact ABC3.Found.GenEll.htArith_sub_abs_le M Dv Ev hdiv.symm hg hcont
+  · intro P I _ d ht fld hnf hdeg crd idx const hcmp hinj C
+    exact ABC3.Found.GenEll.northcott_of_projModel d ht fld hnf hdeg crd idx const hcmp hinj C
 
 /-! ## Remark 1.4.1 —— 理論が `X_ℚ` だけに依ること -/
 

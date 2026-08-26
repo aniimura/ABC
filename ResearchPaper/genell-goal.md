@@ -28167,3 +28167,35 @@ mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 ★★**数論的な中身はここで終わった**。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-683 ★★★★★★★★**`Proposition 1.4` を構成の上に立て直した**(第 371 ブロック)
+
+`Found/GenEll/HeightMetric.lean`・`Found/GenEll/NorthcottCoord.lean`・
+`Skeleton/GenEll/Section1.lean`。
+
+### ★★★★ 4 つの内訳
+
+| 条 | どこにあるか |
+|---|---|
+| (i) 加法性 | `htArith_tensor_unconditional`(既実装) |
+| (ii) 下に有界 | `Prop16.lean` の `prop_1_4_ii`(既実装) |
+| (iii) `≈` | `HeightMetric.lean` の `htArith_sub_abs_le`(**本ブロック**) |
+| (iv) Northcott | `NorthcottCoord.lean` の `northcott_of_projModel`(第 369-371) |
+
+★(iii) のために `ArchBound` の下界の**鏡像**(`archADiv_sum_le`･
+`archADiv_sum_div_finrank_le`)と高さの分解(`htArith_eq_add`)を足した。
+★★因子が同じで計量がどちらも連続なら、`X^arc` のコンパクト性から
+`|ht_D − ht_E|` が**一様に**有界になる——定数は `F` にも点にも依らない。
+
+### ★★★★★逸脱を 3 つ明示した
+
+1. 量化する対象: `∀ D : HeightTheoryData` → `ArcModel` + `ArithCartier`(前者では偽)
+2. (iii) は『生成ファイバーが同じ』ではなく『因子が同じ(計量だけ違う)』
+   ——**垂直因子の差の分は含めていない**
+3. (iv) は射影埋め込みを `ArcModel` と同じ立場で**データとして受けている**
+   ——★★**Northcott 性そのものは受けていない**(第 369-370 で証明済み)。
+   残っているのは「`htArith` がその意味での射影モデルを持つ」という**幾何の段**だけである
+
+★★`Section1` の sorry は **4 → 3**(`remark_1_4_1`･`remark_1_5_1`･`prop_1_7`)。
+Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
