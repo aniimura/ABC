@@ -79,6 +79,25 @@
       "done": 3,
       "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
       "missingSkeleton": ["[NCBelyi] Lemma 2.4"],
+      "lemma24Progress": {
+        "measuredAt": "2026-08-27",
+        "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
+        "nodes": 9,
+        "done": 5,
+        "doneList": [
+          "係数の限界(norm_coeff_le_choose、第 405)",
+          "値の上界・下界と suitable choice of C(第 405)",
+          "f₀′ の根の位置(Gauss–Lucas、第 406)",
+          "次数の降下と reduced degree(第 407)",
+          "入れ子帰納法の測度が 1 段下がること(第 408)"
+        ],
+        "todoList": [
+          "正規化(Lemma 2.3 の自己同型 + 有理数倍で |α| ≤ 1, |β| ≥ C)",
+          "Gal(ℚ̄/ℚ)-安定性(S を共役で閉じる・S′ も安定)",
+          "ℙ¹ 上の有理関数としての組み立て(★出力は多項式ではなく f(x) ∈ ℚ(x))",
+          "帰納の本体(m, d の辞書式)"
+        ]
+      },
       "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
       "where": [
         "lean/ABC3/Skeleton/NCBelyi/Theorem25.lean",
