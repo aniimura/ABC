@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.FieldTheory.KummerExtension
+import ABC3.Found.GenEll.TameRamification
 
 /-!
 # [GenEll] Proposition 1.7 の "elementary claim" —— **Kummer 拡大の different**(`Found`)
@@ -443,6 +444,52 @@ theorem pow_mem_differentIdeal_of_kummer
   have hdvd : lam ∣ pp := dvd_of_not_pow_dvd_pow B n lam pp hval
   exact pow_mem_differentIdeal A K L n hn lam kappa pp hdvd hcoef hmin hgen
 
+/-! ## ★★★★★★★★馴の場合を端から端まで -/
+
+open Finset in
+/-- ★★★★★★★★**馴分岐の場合を端から端まで**——
+Eisenstein な生成元があれば `p ∈ 𝔡`。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★原文の段 1 の馴の側(『馴なら `n = 1` で足りる』)を、
+単生成(第 378)と Eisenstein の導関数(第 385)を繋いで出したものである。
+
+| 仮説 | 意味 |
+|---|---|
+| `hmap` | 最小多項式が Eisenstein の形をしている(全分岐の生成元) |
+| `hdvd` | 係数が `λ^e` で割れる(Eisenstein の中身) |
+| `hunit` | ★**馴分岐**(`TameRamification.lean` で `IsTameDegree` と同値と示した) |
+| `hdvdp`･`hle` | `λ^m ∣ p` で `e−1 ≤ m` |
+
+★★**残っているのは `hmap`･`hmono` を与える構造定理だけ**である。 -/
+theorem mem_differentIdeal_of_eisenstein_tame
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    [IsLocalRing B]
+    (e m : ℕ) (he : 0 < e) (b : ℕ → B) (lam pp : B)
+    (hmap : (minpoly A lam).map (algebraMap A B) = X ^ e + ∑ i ∈ range e, C (b i) * X ^ i)
+    (hdvd : ∀ i ∈ range e, lam ^ e ∣ b i)
+    (hlam : lam ∈ IsLocalRing.maximalIdeal B) (hunit : IsUnit (e : B))
+    (hmono : Algebra.adjoin A {lam} = ⊤)
+    (hgen : Algebra.adjoin K {(algebraMap B L) lam} = ⊤)
+    (hle : e - 1 ≤ m) (hdvdp : lam ^ m ∣ pp) :
+    pp ∈ differentIdeal A B := by
+  have hval : (aeval lam) (derivative (minpoly A lam))
+      = (aeval lam) (derivative ((minpoly A lam).map (algebraMap A B))) := by
+    rw [derivative_map, aeval_map_algebraMap]
+  obtain ⟨v, hv, hveq⟩ :=
+    aeval_derivative_eisenstein_tame e he b lam hdvd hlam hunit
+  rw [differentIdeal_eq_span_of_adjoin_eq_top A K L lam hmono hgen, Ideal.mem_span_singleton,
+    hval, hmap, hveq]
+  have h1 : lam ^ (e - 1) ∣ pp := dvd_trans (pow_dvd_pow lam hle) hdvdp
+  rw [mul_comm]
+  exact (hv.mul_left_dvd).mpr h1
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -503,6 +550,11 @@ def exists_gen_pow_mem_range.src : ABC3.Meta.Source :=
 def pow_mem_differentIdeal_of_kummer.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(段 4-6 を端から端まで繋いだ形)",
+    sectionId := "genell-prop-1-7" }
+
+def mem_differentIdeal_of_eisenstein_tame.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(段 1 の馴の側を端から端まで)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll

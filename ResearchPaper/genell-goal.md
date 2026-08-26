@@ -28656,3 +28656,37 @@ mathlib の `pow_sub_one_dvd_differentIdeal` は**下界**(`P^{e−1} ∣ 𝔡`)
 ★★★★**残りは本当に 1 つ**——「馴なら不分岐部を除けば Eisenstein な生成元を持つ」。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-698 ★★★★★★★★**馴の場合も端から端まで繋いだ**(第 386 ブロック)
+
+`Found/GenEll/DifferentKummer.lean` の `mem_differentIdeal_of_eisenstein_tame`。
+
+原文 p.10 の段 1 の**馴の側**(『馴なら `n = 1` で足りる』)が、1 本の定理になった:
+
+    Eisenstein な生成元があり、馴(`e` が単元)で、`λ^m ∣ p`･`e−1 ≤ m`
+      ⇒  `p ∈ 𝔡`
+
+| 仮説 | 意味 |
+|---|---|
+| `hmap` | 最小多項式が Eisenstein の形(全分岐の生成元) |
+| `hdvd` | 係数が `λ^e` で割れる |
+| `hunit` | ★**馴分岐**(`TameRamification.lean` で `IsTameDegree` と同値と示した) |
+
+★★これで**野生の場合(第 383)と馴の場合(本ブロック)の両方が、
+それぞれ 1 本の定理として端から端まで繋がった**。
+
+### elementary claim の現状(第 374-386、13 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(馴の側) | ★★★**端から端まで繋がった**。構造定理待ち |
+| 2(`ζ_p` への帰着) | 同上 |
+| 3(`p`-群) | ★★★群論も different も揃った |
+| 4(Kummer) | ★★★完了 |
+| 5･6･結論(野生の側) | ★★★**端から端まで繋がった** |
+
+★★★★**残っているのは `hmap`･`hmono` を与える構造定理だけ**である
+——「全分岐なら一根元が生成し、その最小多項式は Eisenstein」。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
