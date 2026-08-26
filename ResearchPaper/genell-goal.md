@@ -27206,3 +27206,55 @@ mathlib の `isCompact_truncatedFundamentalDomain` が効いた。
 引用行の直後に `fun x => …` を置くと式ごと食い込まれる。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-663 ★★★★★★周期束の共体積とアルキメデス不変量(第 349 ブロック)
+
+`Found/GenEll/Covolume.lean`。
+
+### ★★★★★★★核心——**`‖Δ_lat‖·covol⁶` は相似で変わらない**
+
+| 量 | `Λ ↦ cΛ` での変わり方 |
+|---|---|
+| `Δ_lat = g₂³ − 27g₃²` | `|c|⁻¹²` 倍(第 333) |
+| `covol` | `|c|²` 倍(`covol_scalePair`) |
+| **`‖Δ_lat‖·covol⁶`** | ★**不変**(`archInv_scalePair`) |
+
+★★★★★これが「曲線に付く量」である——周期束は相似の分だけ選べるが、
+`archInv` は選び方に依らない。**Faltings 高さのアルキメデス局所因子そのもの**である。
+
+### ★★★★★モジュラーな姿
+
+    covol(ℤ + τℤ) = Im τ
+    archInv(ℤ + τℤ) = 4096·π¹²·‖Δ(τ)‖·(Im τ)⁶
+
+★`‖Δ(τ)‖(Im τ)⁶` は `Δ` の **Petersson ノルム**で、`SL(2,ℤ)` 不変
+(重さ 12 の `|cτ+d|¹²` と `Im(γτ) = Im τ/|cτ+d|²` の 6 乗が打ち消す)。
+★★★★★★**任意の周期束は Petersson ノルムに帰着する**(`exists_archInv_eq_petersson`)。
+
+### ★★★逸脱の記録——`ZLattice.covolume` を使わなかった
+
+mathlib は `ZLattice.covolume`(Haar 測度による基本領域の体積)を持つが、
+本ブロックは **2 次元の行列式そのもの**(`|Im(ω̄1ω₂)|`)で定義した。
+★理由: `PeriodPair` に `IsZLattice` を付ける配管を通さずに済み、
+必要な**スケール則と正値性**は 3 行で出るから。
+★★下流が使うのは `covol_scalePair`・`covol_pos`・`covol_tauPair` の 3 本だけである。
+`ZLattice.covolume` との一致(`covolume_eq_det`)は必要になったら足す。
+
+### ★★★★★★★次の障害を特定した——**`Λ ↦ (g₂,g₃)` の単射性**
+
+`htFalt` を固定するには、与えられた曲線 `W/ℂ` に対して
+`archInv(P)` が **`P` の選び方に依らない**ことが要る。
+
+★`C • W = latticeCurve P` と `C' • W = latticeCurve P'` とすると、
+`D := C'C⁻¹` の `u` について `g₂(P') = u⁻⁴g₂(P)`・`g₃(P') = u⁻⁶g₃(P)`、
+すなわち `P'` と `scalePair P u` は**同じ `(g₂,g₃)`** を持つ。
+★★したがって **`Λ ↦ (g₂,g₃)` が単射**なら `archInv(P') = archInv(P)` が出る。
+
+★★★これは古典的には **`j` の `ℍ/Γ` 上での単射性**と同値で、
+通常は **valence 公式**(幅角の原理)で出す。
+★★★★★**2026-08-26 実測: mathlib に valence 公式は無い**。
+★ただし `℘` の極の位置(`not_continuousAt_weierstrassP`・`order_weierstrassP`)はあるので、
+`℘_Λ = ℘_Λ'` から `Λ = Λ'` は出る——残るのは「`(g₂,g₃)` が `℘` を決める」である。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
