@@ -27443,3 +27443,45 @@ mathlib は `derivWeierstrassP_sq : ℘'² = 4℘³ − g₂℘ − g₃` を持
     → 界面にアルキメデス条件を追加し、`ht^Falt` を固定して欠陥 #6 を塞ぐ
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-668 ★★★★★★★曲線のアルキメデス不変量(第 354 ブロック)
+
+`Found/GenEll/CurveArchInv.lean`。
+
+### ★★★★★★★`archInv` が**曲線の関数**になった
+
+一意化(第 348)で `C • W = latticeCurve P` なる `P` は存在し、
+2 つの取り方 `(P,C)`・`(P',C')` に対しては `D := C'C⁻¹` の `u` について
+`g₂(P') = u⁻⁴g₂(P)`・`g₃(P') = u⁻⁶g₃(P)`——すなわち `P'` と `scalePair P u` が
+**同じ `(g₂,g₃)`** を持つので、第 353 で束が一致し、`archInv` が一致する。
+
+★`c₄ = 12g₂`(第 335)に加えて **`c₆ = 216g₃`** を本ブロックで出した。
+
+### ★★★★★★これは `j` だけの関数である
+
+`curveArchInv` は変数変換で不変、したがって **`j` だけで決まる**。実際
+
+    curveArchInv(W) = 4096·π¹²·‖Δ(τ)‖·(Im τ)⁶      (`j(τ) = j(W)` なる τ)
+
+で、右辺は `Δ` の **Petersson ノルム**である。
+★★これは正しい——Faltings 高さのアルキメデス局所因子は**同型不変量**であり、
+モデル依存性は**有限素点側**(`Δ_min`)にしか現れないからである。
+
+### ★★★★界面へ渡す形
+
+数体 `L` と埋め込み `σ : L →+* ℂ` に対し `archNorm E σ := curveArchInv (E.map σ)`。
+★**正**であり(`archNorm_pos`)、**変数変換で不変**(`archNorm_variableChange`)。
+★★★`FaltingsHeightData` に「`ht^Falt` が `archNorm` を通じて曲線に縛られる」条件を
+足すための材料がこれでそろった。
+
+### ★★残る鎖(G8)
+
+    一意化                              ✅ 第 348
+    共体積と archInv                     ✅ 第 349-350
+    (g₂,g₃) が束を決める                ✅ 第 351-353
+    archInv を曲線の関数にする          ✅ 第 354
+    → 界面にアルキメデス条件を追加する    ★次
+    → witness を組み直して欠陥 #6 を塞ぐ
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
