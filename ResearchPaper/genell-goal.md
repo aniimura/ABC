@@ -25478,3 +25478,49 @@ mathlib の `IsMinimal` は「整モデルの中で `v(Δ)` を最大にする�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-627 ★★★★★★★悪い素点は有限個(第 314 ブロック)
+
+`Found/GaloisRep/NeronFinite.lean`。
+
+### ★★★★★★★到達点
+
+> 数体 `L` 上の曲線 `W`(`Δ != 0`)に対し、
+> **Néron 指数が `0` でない素点は有限個**(`finite_bad_primes`)
+
+★★★これで `ω_E`(第 311 の分数イデアル)の**台が有限**になり、分数イデアルとして意味を持つ。
+
+### ★★★★★★素点ごとの環は `valuationSubringAtPrime` を使う
+
+`Localization.AtPrime p` を `L` の中で見るには `Algebra (Localization.AtPrime p) L` の
+配管が要る(**mathlib に無い**——`exact?` で確認)。
+★mathlib の **`HeightOneSpectrum.valuationSubringAtPrime L p`**(`L` の部分環)を使うと
+`Algebra`・`IsFractionRing`・`IsDomain` が**すべて自動で付く**。
+★★離散付値環であることは `IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain`
+から出る(この部分環は `p` での局所化そのものだから)。
+★★★★**「同じ環の別の書き方」を選ぶだけで配管が消えた**——在庫の読み方の実例である。
+
+### ★★★★★悪い素点の中身
+
+`p` が悪い(指数 `!= 0`)なら、`a₁, a₂, a₃, a₄, a₆` のどれかが `p` で極を持つか、
+`Δ` または `Δ⁻¹` が `p` で極を持つ。
+★★★★どれも `HeightOneSpectrum.Support`(極の集合)で、**mathlib が有限性を持っている**
+(`Support.finite`)。★7 つの有限集合の合併で押さえた。
+
+### ★★★なぜ `Δ` と `Δ⁻¹` の両方か
+
+`v(Δ) = 0` を言うのに「`Δ` が整」だけでは足りない(`v(Δ) > 0` かもしれない)。
+★`Δ⁻¹` も整なら `v(Δ) <= 0` も出て、合わせて `v(Δ) = 0 < 12`——第 313 が効く。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 局所の Néron 指数 | ★済(第 312) |
+| 2 | ほとんどの素点で指数 `0` | ★★★★**済(第 313-314)** |
+| 3 | 分数イデアルの構成と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
