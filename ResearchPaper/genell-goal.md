@@ -27764,3 +27764,40 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 | `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-675 ★★★★★★★★§3 の sorry が **3 → 2**——`Lemma 3.5` を導出した(第 362 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`。
+
+### ★★★★★★導出の筋(原文の 4 行をそのまま)
+
+`E′ ≙ E/H` として:
+
+    l·deg_∞(E)  = deg_∞(E′)                          (`degInf_quotLCyclic`、`Lemma 3.2` の大域版)
+                ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)        (`Proposition 3.4`、第 361)
+                ≤ 12(1+ε)·(ht^Falt(E) + 2log l + C₀) + (C₁ + C₂)
+                                                        (`faltingsHeight_quotLCyclic`)
+
+両辺を `12(1+ε) > 0` で割ると目的の形になる。
+
+### ★★★★界面に足した 3 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `quotLCyclic` | 原文 `E′ ≙ E/H_F` |
+| `degInf_quotLCyclic` | [GenEll] `Lemma 3.2, (i)(ii)` の**大域版**(素点にわたる足し上げは原文に無い) |
+| `faltingsHeight_quotLCyclic` | [FC] Ch. I, `Proposition 2.7` + 「(1,1)-形式の積分が `l` 倍違う」の段 |
+
+★**`C₀` は `E`･`l` に依らない**——原文が明記しているので `∃` を外側に置いた。
+★★量化子の順序が本命題の要点であり、導出もその順序を保っている。
+
+### ★★§3 の現状(sorry 2 件)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`・`localHeight_pos`・`potLocalHeight_indep`・`prop_3_4`・`lemma_3_6`・**`lemma_3_5`** | ✅ |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

@@ -222,7 +222,33 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
       D.HasLCyclic E l → D.PrimeToLocalHeights E l →
       (1 / (12 * (1 + eps))) * (l : ℝ) * D.degInf (D.cls E)
         ≤ D.faltingsHeight (D.cls E) + 2 * Real.log l + C := by
-  sorry
+  obtain ⟨_, h2, _, _⟩ := prop_3_4 D eps heps
+  obtain ⟨C₁, hC₁⟩ := D.degInf_le_htInf
+  obtain ⟨C₂, hC₂⟩ := h2
+  obtain ⟨C₀, hC₀⟩ := D.faltingsHeight_quotLCyclic
+  have hpos : (0:ℝ) < 12 * (1 + eps) := by nlinarith
+  refine ⟨C₀ + (C₁ + C₂) / (12 * (1 + eps)), fun E l hl hcyc hprime => ?_⟩
+  set E' := D.quotLCyclic E l with hE'
+  -- deg∞(E′) = l·deg∞(E)
+  have hdeg : D.degInf (D.cls E') = (l : ℝ) * D.degInf (D.cls E) :=
+    D.degInf_quotLCyclic E l hl hcyc hprime
+  -- deg∞(E′) ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)
+  have hchain : D.degInf (D.cls E')
+      ≤ 12 * (1 + eps) * D.faltingsHeight (D.cls E') + (C₁ + C₂) := by
+    have ha := hC₁ (D.cls E')
+    have hb := hC₂ (D.cls E')
+    linarith
+  -- ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀
+  have hfal := hC₀ E l hl hcyc
+  rw [hdeg] at hchain
+  rw [mul_assoc, one_div_mul_eq_div, div_le_iff₀ hpos]
+  have hexp : (D.faltingsHeight (D.cls E) + 2 * Real.log l
+        + (C₀ + (C₁ + C₂) / (12 * (1 + eps)))) * (12 * (1 + eps))
+      = 12 * (1 + eps) * (D.faltingsHeight (D.cls E) + 2 * Real.log l + C₀) + (C₁ + C₂) := by
+    field_simp
+    ring
+  rw [hexp]
+  nlinarith [hchain, hfal]
 
 /-! ## Lemma 3.6 —— 初等的な評価 -/
 
@@ -360,6 +386,10 @@ def lemma_3_5.src : Source :=
   { paper := "GenEll", pdfPage := 17, item := "Lemma 3.5",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★**2026-08-26 に閉じた**——`Interface/GenEll/EllModuli.lean` に
+`quotLCyclic`・`degInf_quotLCyclic`(`Lemma 3.2` の大域版)・
+`faltingsHeight_quotLCyclic`([FC] Ch. I, Prop 2.7 + 複素解析の段)を欄に出し、
+**`Proposition 3.4` と合わせて初等的に導いた**。 -/
 def lemma_3_5.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Lemma 3.2, (i)(ii)(局所階数 1 部分群と deg_∞(E′) = l·deg_∞(E))" 15,
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さと無限遠因子)" 17,

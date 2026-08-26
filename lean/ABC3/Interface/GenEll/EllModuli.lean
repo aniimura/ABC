@@ -1,6 +1,7 @@
 import ABC3.Interface.GenEll.GaloisRep
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # [GenEll] §3–§4 大域理論 —— `M_ell(ℚ̄)` 上の高さの `Interface`
@@ -117,6 +118,37 @@ structure EllModuliData extends TorsionGaloisRepData where
 
   ★`ht^Falt` が有界な点は有限個しかない。 -/
   northcott : ∀ (C : ℝ) (d : ℕ), 0 < d → {x ∈ degLe d | faltingsHeight x ≤ C}.Finite
+  /-- 原文 `E′ ≙ E/H_F`——l-cyclic 部分群スキームによる商。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★`Lemma 3.5` の証明はこの商を取って `Proposition 3.4` を適用する。 -/
+  quotLCyclic : Curve → ℕ → Curve
+  /-- ★★★★★★**`deg_∞(E′) = l·deg_∞(E)`**——`Lemma 3.2` の**大域版**。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★局所版は `Interface/GenEll/TateLocal.lean` の上の `Lemma 3.2, (ii)` であり、
+  そこから素点にわたって足し上げる段は原文に書かれていない。
+  ★★`l` が局所高さと素であることがここで効く
+  ——`Lemma 3.2, (i)` により `H` は各素点で `μ_l` になる。 -/
+  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+    PrimeToLocalHeights E l →
+    degInf (cls (quotLCyclic E l)) = (l : ℝ) * degInf (cls E)
+  /-- ★★★★★**`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀`**——l-同種による変化。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★原文の典拠は **[FC] Chapter I, Proposition 2.7**(次数 `l` の被覆射の延長)と、
+  「(1,1)-形式を `E_v` 上で積分するのと `(E_H)_v` 上で積分するのとで `l` 倍だけ違う」
+  という複素解析の段である(原文は 1 文で済ませている)。
+  ★★**`C₀` は `E`･`l` に依らない**——だから `∃` を外側に置く。 -/
+  faltingsHeight_quotLCyclic : ∃ C₀ : ℝ, ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+    faltingsHeight (cls (quotLCyclic E l))
+      ≤ faltingsHeight (cls E) + 2 * Real.log l + C₀
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=
