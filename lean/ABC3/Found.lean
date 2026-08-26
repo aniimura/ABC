@@ -964,6 +964,7 @@ import ABC3.Found.GaloisRep.NeronIdeal
 import ABC3.Found.GaloisRep.NeronWitness
 import ABC3.Found.GaloisRep.DegInf
 import ABC3.Found.GaloisRep.LocalHeightDelta
+import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve

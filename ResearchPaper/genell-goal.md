@@ -25839,3 +25839,71 @@ mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-634 ★★★★★★★`d·deg∞ ≥ (局所高さ)·log 2` を示した(第 321 ブロック)
+
+`Found/GaloisRep/DegInfLocal.lean`。
+
+### ★★★★★★★到達点
+
+> **`d · deg∞(E) ≥ (局所高さ) · log 2`**(`degInfOf_ge_localHeight`)
+
+★★★これが `FaltingsHeightData` の `degInf_ge_localHeight` 欄の中身である
+(第 318 で入れた**不分岐の仮定つき**の形)。
+
+### ★★★★★証明の筋——3 段
+
+1. ★★★★**局所高さ ≤ `minDeltaExp p E`**(`localHeight_le_minDeltaExp`)
+   ——`E` を `p` で極小化する変数変換 `C` を取り、それを `Lv` に移す。
+   `C•E` は `p` 上整だから、不分岐の仮定で `R` 上も整。
+   `E⁄Lv` は `R` 上極小なので
+
+       v_R(Δ(E⁄Lv)) <= v_R(Δ((C•E)⁄Lv)) = v_p(Δ(C•E)) = minDeltaExp p E
+
+   ★左辺は第 320 で局所高さに等しい。
+2. ★★`log N(p) >= log 2`——素イデアルのノルムは `2` 以上。
+3. ★★`minDeltaExp` は各項非負だから、**単項 <= 有限和**(`single_le_finsum`)。
+
+### ★★★★★★不等式の向きが自然に出る理由
+
+★`Lv` の側の極小性は `L` の側の極小性より**強い**(変数変換が多いから)。
+★★したがって `v_R(Δ_min over Lv) <= v_p(Δ_min over L)` が自動的に成り立ち、
+求める向き「局所高さ <= `v_p(Δ_min)`」がそのまま出る。
+★★★★**極小性の全称の向きを、そのまま不等式の向きとして使えた**。
+
+### ★★★★★★不分岐の仮定が効く場所は 2 つだけ
+
+    hp : ∀ x : L, v_R(algebraMap L Lv x) = v_p(x)
+
+* ★`p` 上整 ⟹ `R` 上整(`isIntegral_baseChange_of_isIntegral`
+  ——係数を 1 つずつ `R` に持ち上げて曲線を組み立てる)
+* ★`v_R` の指数 = `v_p` の指数(`vAdd_algebraMap_eq_valAdd`)
+
+★★★第 318 で見つけた「分岐で偽になる」という欠陥は、この 2 箇所で塞がれている。
+★★★★★**欠陥を塞ぐために入れた仮定が、証明のどこで効くかまで確認できた**
+——仮定が過不足ないことの確認になっている。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `minimal_vAdd_Delta_le` | ★★★★極小モデルの `v(Δ)` は最小 |
+| `exists_preimage_of_valuation_le_one` | ★付値 `<= 1` の元は係数環から来る |
+| `isIntegral_baseChange_of_isIntegral` | ★★★★**`p` 上整 ⟹ `R` 上整** |
+| `vAdd_algebraMap_eq_valAdd` | ★★★★**付値指数の一致** |
+| `localHeight_le_minDeltaExp` | ★★★★★★**局所高さ <= `v_p(Δ_min)`** |
+| `two_le_absNorm`・`log_two_le_log_absNorm` | ★★`N(p) >= 2` |
+| `degInfOf_ge_localHeight` | ★★★★★★★**`d·deg∞ >= (局所高さ)·log 2`** |
+
+### ★★残り(G8)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg` | ★★★★**済**(第 319) |
+| `degInf_ge_localHeight` | ★★★★★★**済(本ブロック)** |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
