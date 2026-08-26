@@ -26846,3 +26846,39 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射 / 339 積の形。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-654 ★★★★★★格子和の絶対収束——在庫で足りた(第 340 ブロック)
+
+`Found/GenEll/LatticeSummable.lean`。
+
+### ★★★★★★★mathlib の Eisenstein 級数の収束がそのまま効いた
+
+(i) の残りは解析——`Σ_d d⁻ᵏ` と `Σ_{w 原始} (w₁+w₂τ)⁻ᵏ` の絶対収束であった。
+
+★★★**mathlib の `EisensteinSeries.summable_norm_eisSummand` は
+`gammaSet` に制限した和ではなく `Fin 2 → ℤ` 全体についての絶対収束である**
+(2026-08-26 実測):
+
+    3 ≤ k → ∀ z, Summable fun x : Fin 2 → ℤ => ‖eisSummand k x z‖
+
+★★したがって格子和の絶対収束は**そのまま**得られ、部分型への制限も `Summable.subtype`
+で出た。★★★★当初「絶対収束を自分で積む」と見ていたが、**在庫で足りた**
+——これで (i) の解析の山は消えた。
+
+### ★★★★索引の突き合わせ
+
+mathlib の `eisSummand k x z = (x₀·z + x₁)^(-k)` に対し格子側は `(m + nτ)⁻ᵏ` で、
+**順序が `(m,n) ↔ (x₁,x₀)` で入れ替わる**。★`swapEquiv : ℤ × ℤ ≃ (Fin 2 → ℤ)` を噛ませた。
+
+### ★★残り((i) の最後の 1 段)
+
+★`tsum_mul_tsum_of_summable_norm` で積に分け、`Σ_d d⁻ᵏ = ζ(k)`・
+`Σ_{w 原始} = 2E_k` を突き合わせる。
+
+### ★★G8 側の積み上げ(9 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 曲線の点 / 337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
