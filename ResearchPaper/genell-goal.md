@@ -27527,3 +27527,61 @@ witness は `ht^Falt := deg∞/12 − A`(`A` はアルキメデス項)という�
 `−Σ_σ log((2π)¹²·archNorm)/(12d)` に縛ると、**`deg∞/12` は落ちる**。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-670 ★★★★★★★★★★**欠陥 #6 が塞がった**——G8 の `ht^Falt` が Faltings 高さになった(第 356-357 ブロック)
+
+`Found/GenEll/ArchNormTotal.lean`・`Interface/GaloisRep/Reduction.lean`・
+`Found/GaloisRep/FaltingsWitness.lean`・`Check/GaloisRep/HtFaltPinned.lean`。
+
+### ★★★★★★★★★★到達点
+
+> **`12·ht^Falt(E) = deg∞(E) − (1/d)·Σ_{σ:L↪ℂ} log( (2π)¹²·‖Δ‖_arch(E^σ) )`**
+
+★第 329 の witness は `htFalt := deg∞/12` で、`Proposition 3.4` が**恒等的に成り立つ形**で
+埋まっていた(界面の欠陥 #6、初めての「弱すぎる」型)。
+★★本ブロックで**アルキメデス項が入り**、`htFalt` は界面によって一意に決まるようになった。
+
+### ★★★★界面に足した 4 つ
+
+| 欄・条件 | 役割 |
+|---|---|
+| `archNorm` | アルキメデス素点でのノルム `‖Δ‖_arch(E^σ)` |
+| `archNorm_pos` | 楕円曲線では正 |
+| **`archNorm_eq`** | **モジュラー判別式で同定**——`j` の全射性により一意に決まる |
+| **`htFalt_eq`** | **Faltings 高さの式** |
+
+★**`Interface/` は `Found/` を import できない**ので、`archNorm` を**欄**にし、
+mathlib の `ModularForm.E₄`・`ModularForm.discriminant` だけで同定した。
+★★この書き方なら依存の向きを壊さずに `archNorm` を固定できる。
+
+### ★★★★★`prop_3_4` を保てた理由
+
+`htFalt = deg∞/12 − S/(12d)` で `S := Σ_σ log((2π)¹²·archNorm)`。
+★`archNorm` は**一様に有界**(第 355)なので `S ≤ d·log((2π)¹²M)`、
+したがって `S/(12d)` は普遍定数で抑えられ、`C := log((2π)¹²M)/12` で `prop_3_4` が出る。
+
+### ★★★★★★検査(`Check/GaloisRep/HtFaltPinned.lean`)
+
+* `htFalt_determined`: **`degInf` が一致すれば `htFalt` も一致する**——欄はもはや自由でない。
+* `htFalt_ne_degInf_div_twelve`: アルキメデス和が `0` でない曲線が 1 つでもあれば
+  **`htFalt = deg∞/12` は排除される**。
+
+★示さないこと: 「アルキメデス和が `0` でない曲線が実在すること」は
+具体的な数値評価になるので、仮定の形で残した。
+
+### ★★★★★★★★鎖の全体(第 332-357、26 ブロック)
+
+    (i) 判別式の非消失        第 332-346
+    j の全射性・一意化         第 347-348
+    共体積と archInv           第 349-350
+    (g₂,g₃) が束を決める       第 351-353
+    archInv を曲線の関数に     第 354
+    アルキメデス因子の有界性   第 355
+    界面の強化と witness      第 356-357  ★**欠陥 #6 を塞いだ**
+
+★★★**(ii) `ℂ/Λ ≅ E(ℂ)` の群同型は一度も要らなかった**
+——一意化は**曲線の同型**で、アルキメデス因子は `j` の関数だからである。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+**Arakelov 9/9、Galois 8/8**。

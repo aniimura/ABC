@@ -21,7 +21,7 @@ import ABC3.Check.Arakelov.PullbackNondegenerate
 import ABC3.Check.Arakelov.MetricNondegenerate
 import ABC3.Check.Arakelov.ProperFlatNondegenerate
 import ABC3.Check.GaloisRep.OmegaNondegenerate
-import ABC3.Check.GaloisRep.HtFaltNotPinned
+import ABC3.Check.GaloisRep.HtFaltPinned
 import ABC3.Check.Arakelov.ProjectiveCaseWeak
 import ABC3.Check.GaloisRep.TorsionEquivWeak
 /-!

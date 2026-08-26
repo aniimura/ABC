@@ -3,6 +3,9 @@ import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.GroupTheory.QuotientGroup.Basic
+import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+import Mathlib.NumberTheory.ModularForms.Discriminant
+import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Basic
 
 /-!
 # Galois 表現のスケルトン(3/3)—— **還元・Tate 曲線・Faltings 高さ**
@@ -288,6 +291,47 @@ structure FaltingsHeightData where
     (Module.finrank ℚ L : ℝ) * degInf L E
       ≥ (toSemistableModelData.toTateCurveData.localHeight (E.baseChange Lv) h : ℝ)
         * Real.log 2
+  /-- ★★★★★**アルキメデス素点でのノルム** `‖Δ‖_arch(E^σ)`。
+
+  ## ★★★★★★★★ 2026-08-26 の訂正(欠陥 #6 を塞ぐ)
+
+  以前は `htFalt` に `htFalt_variableChange` と `prop_3_4` の 2 本しか課しておらず、
+  ★`htFalt := deg∞/12` で満たせてしまった(§9-659 以降の記録)。
+  ★★塞ぐには**アルキメデス素点での計量**が要る——それがこの欄である。
+
+  ★★★`ω_E` のアルキメデス norm は周期束 `Λ_σ` の共体積を通じて
+  `‖Δ‖_arch = |Δ(Λ_σ)|·covol(Λ_σ)⁶` で与えられ、これは**相似で不変**な量である。 -/
+  archNorm : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → (L →+* ℂ) → ℝ
+  /-- ★楕円曲線では正である。 -/
+  archNorm_pos : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic]
+    (σ : L →+* ℂ), 0 < archNorm L E σ
+  /-- ★★★★★★**`archNorm` の同定**——これが `archNorm` を完全に固定する。
+
+  `j(τ) = j(E^σ)` なる `τ` について `archNorm = 4096·π¹²·‖Δ(τ)‖·(Im τ)⁶`
+  (`Δ` はモジュラー判別式、右辺は `Δ` の **Petersson ノルム**の定数倍)。
+
+  ★★`j : ℍ → ℂ` は全射なので、そのような `τ` は必ず存在する。
+  ★★★したがってこの条件は `archNorm` を**一意に決める**——定数で埋める逃げ道は無い。 -/
+  archNorm_eq : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic]
+    (σ : L →+* ℂ) (τ : UpperHalfPlane),
+    ModularForm.E₄ τ ^ 3 / ModularForm.discriminant τ = (E.map σ).j →
+    archNorm L E σ = 4096 * Real.pi ^ 12 * (‖ModularForm.discriminant τ‖ * τ.im ^ 6)
+  /-- ★★★★★★★**`ht^Falt` の定義式**——これが欠陥 #6 を塞ぐ。
+
+  真の Faltings 高さは
+
+      12·ht^Falt(E) = deg∞(E) − (1/d)·Σ_{σ} log( (2π)¹²·‖Δ‖_arch(E^σ) )
+
+  である(`d = [L:ℚ]`)。★有限素点側は `deg∞`、アルキメデス側が第 2 項である。
+
+  ★★★★**これで `htFalt` の欄は自由でなくなる**——`degInf` と `archNorm` から
+  一意に決まる。★`archNorm` は `archNorm_eq` で固定されているので、
+  **`htFalt := deg∞/12` はもはや通らない**(アルキメデス項が残る)。 -/
+  htFalt_eq : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic],
+    12 * htFalt L E
+      = degInf L E
+        - (∑ σ : (L →+* ℂ), Real.log ((2 * Real.pi) ^ 12 * archNorm L E σ))
+            / (Module.finrank ℚ L : ℝ)
   /-- ★★★**`Proposition 3.4`** —— `deg∞` は `ht^Falt` で上から抑えられる。
 
 原文 (GenEll p.17):
