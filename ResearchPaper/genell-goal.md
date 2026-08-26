@@ -25569,3 +25569,53 @@ mathlib の `IsMinimal` は「整モデルの中で `v(Δ)` を最大にする�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-629 ★★★★★★★★Néron 微分の分数イデアル——`count` と付値の橋(第 316 ブロック)
+
+`Found/GaloisRep/NeronIdeal.lean`。
+
+### ★★★★★★★★到達点
+
+> `ω_E := ∏ᶠ p, p^{Néron 指数}` を**分数イデアルとして構成**し、
+> **零でないこと**と**各素点での重複度がちょうど Néron 指数であること**を示した。
+
+★★★これが界面(第 311)の `omegaFrac` の中身である。
+
+### ★★★★★★★★橋——`count` と付値
+
+mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複度)で書かれ、
+私の Néron 指数は **adic 付値**で書かれている。両者はどちらも `Associates.count` で
+定義されているので、**主分数イデアルの上で一致する**:
+
+    count K p (spanSingleton x) = valAdd p x
+
+★★★★証明は `x = a/b` と書いて `count_well_defined` と `intValuationDef` を突き合わせるだけ。
+★★これがあるので、以降は **mathlib の `count` の代数(`count_mul`・`count_zpow`・
+`count_finprod`)がそのまま使える**。
+★★★★★**2 つの定義が同じ土台(`Associates.count`)に立っていた**のが効いた——
+付値の正規化(第 315)は同値で回避したが、こちらは**等式が取れた**。
+
+### ★★★★構成と基本性質
+
+* `omegaFracIdeal W := ∏ᶠ p, p^{neronExp p W}`(有限台なので実質有限積)
+* `count_omegaFracIdeal`:`count p (ω_E) = neronExp p W`(`count_finprod`)
+* `omegaFracIdeal_ne_zero`:有限個の非零因子の積だから非零
+
+### ★★在庫の確認漏れ(記録)
+
+外延性(「`count` がすべて一致すれば分数イデアルは一致」)を書いたら、
+**既に `Found/GaloisRep/D2Bridge.lean` に同名・同内容の `eq_of_count_eq` があった**
+(しかもより一般の Dedekind 環で)。★ビルドが `environment already contains` で教えてくれた。
+★★★**新しい補題を書く前に名前で grep する**——本セッション 3 度目の同じ失敗である。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 3a | 分数イデアルの構成 | ★★★★**済(本ブロック)** |
+| 3b | 変数変換則(イデアルの水準)と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
