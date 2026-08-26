@@ -26918,3 +26918,34 @@ gcd 分解(337)→ 全単射(338)→ 積の形(339)→ 絶対収束(340)→ **Fu
 337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束 / 341 Fubini。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-656 ★★★★★`ζ(6)` の級数形——別目的の在庫が効いた(第 342 ブロック)
+
+`Found/GenEll/ZetaSix.lean`。
+
+### ★★★★★★在庫の確認が効いた(今回は grep で気づけた)
+
+`ζ(6) = π⁶/945` を出すのに Bernoulli 数 `B₆ = 1/42` が要る。
+★書き始めてから `bernoulli'_five|bernoulli'_six|bernoulli_six` で grep したところ、
+**`Found/GaloisRep/TateEquationAnalytic.lean` に既にあった**
+——`bernoulli'_three` … `bernoulli_six_val`、さらに `riemannZeta_six` まで。
+★★これは **Tate 曲線の `q` 展開のために積んだもの**である。
+
+★★★★**別の目的で積んだ在庫が、Eisenstein 級数の正規化でそのまま効いた。**
+★重複させかけたが、書き直して再利用にした(§9-636 の教訓が働いた)。
+
+### ★★足したのは級数形だけ
+
+在庫の `riemannZeta_six` は `riemannZeta 6 = π⁶/945`(解析接続の側)である。
+★格子和は `tsum` で書かれているので、**級数形 `HasSum (fun n => 1/n⁶) (π⁶/945)`** が要る。
+★★それだけを `hasSum_zeta_nat` + `bernoulli_six_val` から足した。
+
+### ★★残り((i) の最後)
+
+★`Σ_{d>0} d⁻ᴷ` と `ζ(K)` の同定(`K = 4, 6`)、
+`Σ_{w 原始} = 2E_K` の同定、そして `E₄³ − E₆² = 1728Δ`。
+★★最後のものは mathlib に**無い**(2026-08-26 実測)が、
+レベル 1 の次元公式と Sturm 境界(`LevelOne/DimensionFormula.lean`)から出る見込み。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
