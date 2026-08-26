@@ -26815,3 +26815,34 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-653 ★★★★★★添字を「正整数 × 原始ベクトル」の積にした(第 339 ブロック)
+
+`Found/GenEll/GcdProd.lean`。
+
+### ★★★★★★Fubini を当てられる形にした
+
+第 338 の `DecompIndex ≃ {v ≠ 0}` は、添字が**条件の連言つき部分型**
+`{p : ℕ × (ℤ×ℤ) // 0 < p.1 ∧ gcd p.2 = 1}` だった。★`tsum` の Fubini
+(`∑' (a,b), f a·g b = (∑' a, f a)(∑' b, g b)`)を当てるには**積の形**でなければならない。
+
+★★そこで
+
+    {d : ℕ // 0 < d} × {w : ℤ × ℤ // gcd w = 1}  ≃  {v : ℤ × ℤ // v ≠ 0}
+
+に整えた。★★★被加数も `d⁻ᵏ · (w₁ + w₂τ)⁻ᵏ` と積の形で書ける。
+
+### ★★残り((i) の解析)
+
+★`Σ_d d⁻ᵏ` の絶対収束(`k ≥ 2`)と `Σ_{w 原始} (w₁+w₂τ)⁻ᵏ` の絶対収束(`k ≥ 3`)。
+★★mathlib は `EisensteinSeries.summable_one_div_norm_rpow`
+(`2 < k` で `Summable fun x => ‖x‖ ^ (-k)`)を持つ(2026-08-26 実測)。
+★★★そこから `tsum_mul_tsum_of_summable_norm` で積に分ける。
+
+### ★★G8 側の積み上げ(8 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射 / 339 積の形。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
