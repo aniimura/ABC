@@ -423,6 +423,36 @@ theorem root_relation_minpoly {A : Type*} {B : Type*} [CommRing A] [CommRing B] 
     lam ^ e + ∑ i ∈ range e, algebraMap A B ((minpoly A lam).coeff i) * lam ^ i = 0 :=
   root_relation_of_monic (minpoly A lam) (minpoly.monic hint) e hdeg lam (minpoly.aeval A lam)
 
+/-! ## ★★★★★★全分岐の仮説を局所環のデータから出す -/
+
+/-- ★局所準同型の逆向きは常に成り立つ——単元は単元に移るから。 -/
+theorem not_isUnit_of_not_isUnit_algebraMap {A : Type*} {B : Type*} [CommRing A] [CommRing B]
+    [Algebra A B] (x : A) (h : ¬ IsUnit (algebraMap A B x)) : ¬ IsUnit x :=
+  fun hu => h (hu.map (algebraMap A B))
+
+/-- ★★★★★★**全分岐の仮説を局所環のデータから出す**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★`A` が局所環で極大イデアルが `(π)`、かつ `λ^e` が `π` の単元倍なら、
+`A` の非単元は `λ^e` で割れる——
+`DifferentKummer.lean` の `mem_differentIdeal_of_totallyRamified_tame` が要求する形である。
+
+★★仮説 `hmax` は「`A` は `π` を素元とする離散付値環」、
+`hpi` は「全分岐(`π·B = 𝔪_B^e`)」である(第 388 が与える)。 -/
+theorem pow_dvd_algebraMap_of_not_isUnit {A : Type*} {B : Type*} [CommRing A] [IsLocalRing A]
+    [CommRing B] [Algebra A B] (e : ℕ) (pi : A) (lam u : B) (hu : IsUnit u)
+    (hmax : IsLocalRing.maximalIdeal A = Ideal.span {pi})
+    (hpi : lam ^ e = algebraMap A B pi * u) :
+    ∀ x : A, ¬ IsUnit x → lam ^ e ∣ algebraMap A B x := by
+  intro x hx
+  have hmem : x ∈ IsLocalRing.maximalIdeal A := by
+    by_contra hcon
+    exact hx (IsLocalRing.notMem_maximalIdeal.mp hcon)
+  rw [hmax, Ideal.mem_span_singleton] at hmem
+  exact (pow_dvd_iff_of_isUnit_mul hu hpi).mpr (map_dvd (algebraMap A B) hmem)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -478,6 +508,11 @@ def not_isUnit_coeff_of_root.src : ABC3.Meta.Source :=
 def root_relation_of_monic.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(minpoly への配線——根の関係式)",
+    sectionId := "genell-prop-1-7" }
+
+def pow_dvd_algebraMap_of_not_isUnit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(全分岐の仮説を局所環のデータから)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
