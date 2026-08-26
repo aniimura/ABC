@@ -72,6 +72,8 @@ def det_galRep_eq_cyclotomic.src : Source :=
 
 def det_galRep_eq_cyclotomic.needs : List ProofObligation :=
   [ .implicitStep
+      "★★★★★★★2026-08-26 の訂正: 下の『残件 (i)』は**古い**。★`normEDS` が楼円列であること(Ward の定理)は **第 58 ブロック `Found/GaloisRep/EdsWard.lean` の `isEllSequence_normEDS` で閉じている**(Somos-4 は第 47 `EdsSomos.lean`、(Λ) は第 56 `EdsLambda.lean`、`W(j) ≠ 0` は第 57 `EdsIdentity.lean`)。★★したがって『mathlib 自身の TODO』『30-80 ブロック』『上流案件』という見積もりは**もう当てはまらない**。★★★いま非退化性に残っているのは `hfix`(= `deg[n] = n²`)であり、第 196-198 の測定によりそれは `Φ_n(x) = x_n·ΨSq_n(x)`(`Skeleton/GaloisRep/WeilFunctionField.lean` の `exists_mulByNPullback`)1 本に帰着している。★★★★点の水準の乗法公式 `x(nP)·ΨSq_n(x) = Φ_n(x)` は **第 52 ブロック `MulPoint.lean` の `mulOK_of_ne` に在庫がある**(仮定は `1 ≤ k ≤ n` で `ΨSq_k(x) ≠ 0`)。生成点が捩れ点でないことは第 125。★★★★★したがって残りは**新しい数学ではなく配線の見込み**である(2026-08-26 時点で未実測)" 19,
+    .implicitStep
       "★★★★★★★★★**2026-08-20: 数学はすべて揃った**(第 178-204 ブロック)。★Weil 対 `e_n` の構成(第 178)、`e_n^n = 1`(第 179)、双線型性(第 184・191・195)、交代性(第 190・191)、Galois 同変性(第 192-194)、反対称性(第 195)、**行列式の公式 `e_n(aP+cQ, bP+dQ)·e_n(P,Q)^{bc} = e_n(P,Q)^{ad}`**(第 203)、**円分指標の段 `σ ζ · ζ^{bc} = ζ^{ad}`**(第 204)。★★当初の見積もり『50-150 ブロック、因子の層から積む』は**2 つの残件**に絞れた(0 ブロック)" 19,
     .implicitStep
       "★★★★★★★★**残件 (i): 非退化性 = `normEDS` が楕円列であること**。第 197 で非退化性は `F(E)^{E[n]} = [n]^*F(E)` の 1 つに絞れ、第 196 の Artin(`[F(E) : F(E)^{E[n]}] = n²`)と第 198 のモニック性(`Φ_n − c·ΨSq_n` は次数ちょうど `n²`)で挟むと、要るのは `x(nP) = Φ_n/ΨSq_n` だけになる。★これは分点多項式列が**楕円列**であることに帰着し、**mathlib 自身の TODO** である(`Mathlib/NumberTheory/EllipticDivisibilitySequence.lean` の `TODO: prove that normEDS satisfies IsEllDivSequence`、2026-08-20 実測)(30-80 ブロック、上流案件)" 19,

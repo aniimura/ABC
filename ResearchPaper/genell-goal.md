@@ -25980,3 +25980,67 @@ mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのも�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-636 ★★★★★★★訂正——Ward の定理は第 58 で既に閉じていた(§9-635 の在庫漏れ)
+
+`Found/GaloisRep/EDSThreeTerm.lean` を書き直し、`Skeleton/GaloisRep/EDSThreeTerm.lean` を撤去。
+
+### ★★★★★★★何が起きたか
+
+§9-635(第 322)で「`normEDS` が楕円列であること」を**未解決の葉**として Skeleton に
+立てた。★しかしそれは**第 47-58 ブロックで既に閉じていた**:
+
+| 段 | 場所 | ブロック |
+|---|---|---|
+| Somos-4 `W(m+2)W(m−2) = b²W(m+1)W(m−1) − cW(m)²` | `EdsSomos.lean` | 第 47 |
+| (Λ) の恒等式 | `EdsLambda.lean` | 第 56 |
+| `W(j) ≠ 0`(普遍環) | `EdsIdentity.lean` | 第 57 |
+| **Ward の定理 `isEllSequence_normEDS`** | `EdsWard.lean` | **第 58** |
+
+★★しかも私が今回たどり直した道筋——Somos-4 →(Λ)→ 積の並べ替え → 例外は `normEDS_even`
+→ 普遍環 `ℤ[b,c,d]` で割り算 → 一般の `r` は `r = 1` から——は
+**第 58 の証明と完全に同じ構造**であった。
+
+### ★★★★★★原因と対策
+
+★**在庫の規則を破った**。`Somos`・`Eds`・`normEDS` のいずれかで grep していれば
+1 回で見つかった(`EdsAll`・`EdsWard` など 8 ファイルある)。
+★★私が grep したのは**自分が付けようとしている名前**だけで、**概念**では引かなかった。
+★★★★★**新しい定義を書く前に、名前ではなく「何を証明しようとしているか」で引く**
+——`tools/lean-idioms.md` に 1 行足した。
+
+### ★★★★もう 1 つの原因——スケルトンの `.needs` が古かった
+
+`Skeleton/GaloisRep/WeilPairing.lean` の `.needs` は
+「非退化性 = `normEDS` が楕円列 = **mathlib 自身の TODO**、30-80 ブロック、上流案件」
+と書いたままだった(2026-08-20 記)。★これは第 58 で閉じたあと**更新されていなかった**。
+★★★2026-08-26 の訂正として、`.needs` の先頭に打ち消しを入れた。
+
+### ★★★★★★訂正後の (G5) の姿
+
+    (G5) 非退化性
+      → hfix = deg[n] = n²                        (第 196-197)
+      → Φ_n(x) = x_n·ΨSq_n(x)  in F(E)            (第 198 で 1 本に)
+         ↑ 点の水準の乗法公式 x(nP)·ΨSq_n(x) = Φ_n(x) は
+           **第 52 `MulPoint.lean` の `mulOK_of_ne` に在庫がある**
+           (仮定は 1 ≤ k ≤ n で ΨSq_k(x) ≠ 0、生成点が捩れ点でないことは第 125)
+
+★★★★★したがって残りは**新しい数学ではなく配線の見込み**である(未実測)。
+★Ward の定理という「上流案件」は **もう障害ではない**。
+
+### ★★残した中身
+
+`Found/GaloisRep/EDSThreeTerm.lean` は、`EdsWard` が `normEDS` について具体的に
+行っていることを**任意の列 `W : ℤ → R`** の言明として抜き出した部分だけを残した:
+
+| 定理 | 内容 |
+|---|---|
+| `IsThreeTerm` | `EllAt` の全称版 |
+| `isEllSequence_of_isThreeTerm` | ★★★`IsEllSequence` は `r = 1` の場合から `ring` で出る |
+| `isThreeTerm_of_isEllSequence` | 逆(`W 1 = 1` のとき) |
+| `riemann_four_term` | ★★★**Riemann の 4 項恒等式**(`EdsWard` には無い) |
+| `normEDS_isThreeTerm`・`normEDS_riemann_four_term` | 第 58 の言い換え |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
