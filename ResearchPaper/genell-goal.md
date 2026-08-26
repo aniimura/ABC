@@ -26584,3 +26584,48 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 | `isRoot_cubic_e₁`・`_e₂`・`_e₃` | ★★★★3 つの根 |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-647 ★★★★★★束のスケール変換——判別式の非消失が軽くなった(第 333 ブロック)
+
+`Found/GenEll/LatticeScale.lean`。
+
+### ★★★★★★★到達点
+
+> **`G(cΛ, n) = c⁻ⁿ·G(Λ, n)`**、したがって **判別式 `g₂³ − 27g₃²` は `c⁻¹²` 倍**
+
+★これにより **(i) 判別式の非消失は「正規化された束 `Λ_τ = ℤ + τℤ`」に帰着する**
+(`latticeDisc_ne_zero_iff`)。
+
+### ★★★★★★道が軽くなった——偏角の原理は要らない
+
+§9-646 では「3 根の相異には**偏角の原理**(基本平行四辺形の周)が要る」と書いた。
+★★しかし正規化された束では、古典的に
+
+    g₂(Λ_τ)³ − 27g₃(Λ_τ)² = (2π)¹²·Δ(τ),    Δ = η²⁴
+
+であり、★★★**mathlib は `Δ = η²⁴` とその非消失を持つ**
+(`NumberTheory/ModularForms/Discriminant.lean`)。
+★★★★したがって (i) は「格子 Eisenstein 級数 `G` とモジュラー Eisenstein 級数 `E` の
+**正規化の対応**」に帰着する——**偏角の原理は不要**である。
+
+★★★★★★見積もりの根拠が変わった:当初「楕円関数論を一から積む」と見ていたが、
+**mathlib のモジュラー形式の在庫に載せ替えられる**。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `scalePair`・`scalePair_lattice` | ★束の `c` 倍 |
+| `G_scalePair` | ★★★★★**`G(cΛ, n) = c⁻ⁿ G(Λ, n)`** |
+| `latticeDisc` | ★判別式 |
+| `g₂_scalePair`・`g₃_scalePair` | ★★★`c⁻⁴`・`c⁻⁶` 倍 |
+| `latticeDisc_scalePair` | ★★★★★★**判別式は `c⁻¹²` 倍** |
+| `latticeDisc_ne_zero_iff` | ★★★★★**非消失はスケールに依らない** |
+
+### ★★次の段
+
+★格子 Eisenstein 級数 `G(Λ_τ, k)` と mathlib の `ModularForm.E k` の正規化の対応
+(`G_k = 2ζ(k)E_k`)。★★`ζ(4) = π⁴/90`・`ζ(6) = π⁶/945` は mathlib にある。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
