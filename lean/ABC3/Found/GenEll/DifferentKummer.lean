@@ -44,7 +44,7 @@ import Mathlib.RingTheory.DedekindDomain.Different
 | 1(野生/馴の分離) | 未着手 |
 | 2(`ζ_p ∈ K` への帰着) | 未着手 |
 | 3(`p`-群の可解性で `[L:K] = p` へ) | ★**道具(塔で継ぐ補題)は本ファイル**。群論の側は未着手 |
-| 4(Kummer 理論) | 未着手 |
+| 4(Kummer 理論) | ★**最小多項式が `X^p − κ` であることは本ファイル**。`λ` の存在は未着手 |
 | **5(`p ∈ λ·O_L`)** | ★**本ファイル**——付値環の全順序性 1 行 |
 | **6(different の下界)** | ★**本ファイル** |
 | **5+6 を繋いだ結論 `p^p·O_L ⊆ different`** | ★★**本ファイル** |
@@ -52,7 +52,7 @@ import Mathlib.RingTheory.DedekindDomain.Different
 
 namespace ABC3.Found.GenEll
 
-open Polynomial
+open Polynomial IntermediateField
 
 /-! ## ★最小多項式を整閉な底へ降ろす -/
 
@@ -202,6 +202,44 @@ theorem pow_mem_differentIdeal_tower
   rw [h]
   exact Ideal.mul_mem_mul hBC (Ideal.mem_map_of_mem _ hAB)
 
+/-! ## ★★★★★段 4 —— Kummer 拡大の最小多項式 -/
+
+/-- ★★★★**`x^n = c` で次数が `n` なら、最小多項式は `X^n − c`**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★原文の段 4(『it follows immediately from elementary Kummer theory that
+`L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』)のあと、
+**different を計算するには最小多項式が `X^p − κ` であること**が要る。
+
+★★中身は 3 行である——`X^n − c` はモニックで `x` を消し、次数が `n` なので、
+最小多項式が割る上に次数が同じなら一致する。 -/
+theorem minpoly_eq_X_pow_sub_C_of_natDegree
+    (K : Type*) (L : Type*) [Field K] [Field L] [Algebra K L] (n : ℕ) (hn : n ≠ 0)
+    (x : L) (c : K) (hx : x ^ n = algebraMap K L c)
+    (hdeg : (minpoly K x).natDegree = n) :
+    minpoly K x = X ^ n - C c := by
+  have hmon : (X ^ n - C c : K[X]).Monic := Polynomial.monic_X_pow_sub_C c hn
+  have haev : (Polynomial.aeval x) (X ^ n - C c : K[X]) = 0 := by simp [hx]
+  have hdvd : minpoly K x ∣ (X ^ n - C c : K[X]) := minpoly.dvd K x haev
+  have hne : (X ^ n - C c : K[X]) ≠ 0 := hmon.ne_zero
+  have hle : (X ^ n - C c : K[X]).natDegree ≤ (minpoly K x).natDegree := by
+    rw [Polynomial.natDegree_X_pow_sub_C, hdeg]
+  have hint : IsIntegral K x := ⟨X ^ n - C c, hmon, by simpa using haev⟩
+  exact Polynomial.eq_of_monic_of_associated (minpoly.monic hint) hmon
+    (Polynomial.associated_of_dvd_of_natDegree_le hdvd hne hle)
+
+/-- ★★★**次数の仮説を `[K(x):K] = n` の形で受ける形**。 -/
+theorem minpoly_eq_X_pow_sub_C_of_finrank
+    (K : Type*) (L : Type*) [Field K] [Field L] [Algebra K L] (n : ℕ) (hn : n ≠ 0)
+    (x : L) (c : K) (hx : x ^ n = algebraMap K L c)
+    (hint : IsIntegral K x)
+    (hrank : Module.finrank K K⟮x⟯ = n) :
+    minpoly K x = X ^ n - C c := by
+  refine minpoly_eq_X_pow_sub_C_of_natDegree K L n hn x c hx ?_
+  rw [← hrank, IntermediateField.adjoin.finrank hint]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -232,6 +270,11 @@ def pow_mem_differentIdeal.src : ABC3.Meta.Source :=
 def pow_mem_differentIdeal_tower.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(次数 p の塔で different の下界を継ぐ)",
+    sectionId := "genell-prop-1-7" }
+
+def minpoly_eq_X_pow_sub_C_of_natDegree.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(Kummer 拡大の最小多項式は X^p − κ)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll

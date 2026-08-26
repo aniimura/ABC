@@ -28318,3 +28318,33 @@ Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools
 | 結論 `p^p·O_L ⊆ different` | ★★取った(第 374) |
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-688 ★★★★★**elementary claim の段 4——Kummer 拡大の最小多項式**(第 376 ブロック)
+
+原文 p.10 の段 4 は『elementary Kummer theory から `L = K(λ)` で `κ ≙ λ^p ∈ K`』である。
+そのあと different を計算するには、**最小多項式が `X^p − κ`** であることが要る。
+
+★中身は 3 行だった——`X^n − c` はモニックで `x` を消し、次数が `n` なので、
+最小多項式が割る上に次数が同じなら一致する。
+★★次数の仮説は **`[K(x):K] = n`** の形でも受けられるようにした。
+
+★★★これで第 374 の `natCast_mul_pow_mem_differentIdeal_of_map` が要求する `hmapK` が
+`λ^p = κ` と `[K(λ):K] = p` から作れるようになった——**段 4 → 段 6 が繋がった**。
+
+### elementary claim の現状
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | 未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具は取った(第 375)。群論の側は未着手 |
+| 4(Kummer) | ★**最小多項式は取った**(第 376)。`λ` の存在は未着手 |
+| 5･6･結論 | ★★取った(第 374) |
+
+### 配管
+
+`K⟮x⟯` の記法は `open IntermediateField` が要り、`⟮` と `x` の間に**空白を入れると**
+`expected token` になる。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
