@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import Mathlib.RingTheory.LocalRing.ResidueField.Defs
 import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.Algebra.CharP.Basic
+import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 
 /-!
 # [GenEll] Proposition 1.7 の "elementary claim" —— **馴分岐**(`Found`)
@@ -79,6 +80,74 @@ theorem isTameDegree_one (B : Type*) [CommRing B] [IsLocalRing B]
   intro h
   exact hchar (Nat.dvd_one.mp h)
 
+/-! ## ★★★★★★Eisenstein の導関数 —— 馴なら指数はちょうど `e−1` -/
+
+/-- ★単元に極大イデアルの元を足しても単元である。 -/
+theorem isUnit_add_mem_maximalIdeal {B : Type*} [CommRing B] [IsLocalRing B] {x y : B}
+    (hx : IsUnit x) (hy : y ∈ maximalIdeal B) : IsUnit (x + y) := by
+  rw [← notMem_maximalIdeal]
+  intro hmem
+  rw [← notMem_maximalIdeal] at hx
+  exact hx (by simpa using Ideal.sub_mem _ hmem hy)
+
+open Polynomial Finset in
+/-- ★★★★★**Eisenstein 多項式の導関数の値**——
+`f′(λ) = e·λ^{e−1} + λ^e·(…)`。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★Eisenstein の仮説は「係数が `π` で割れる」であり、全分岐なら `λ^e ∣ π` なので
+**`λ^e ∣ a_i`** として受けている。 -/
+theorem aeval_derivative_eisenstein {B : Type*} [CommRing B] (e : ℕ) (a : ℕ → B) (lam : B)
+    (hdvd : ∀ i ∈ range e, lam ^ e ∣ a i) :
+    ∃ c : B, (aeval lam) (derivative (X ^ e + ∑ i ∈ range e, C (a i) * X ^ i))
+      = (e : B) * lam ^ (e - 1) + lam ^ e * c := by
+  have hder : derivative (X ^ e + ∑ i ∈ range e, C (a i) * X ^ i)
+      = C (e : B) * X ^ (e - 1) + ∑ i ∈ range e, C (a i) * (C (i : B) * X ^ (i - 1)) := by
+    rw [derivative_add, derivative_X_pow, derivative_sum]
+    congr 1
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [derivative_C_mul, derivative_X_pow]
+  have hsum : lam ^ e ∣ ∑ i ∈ range e, a i * ((i : B) * lam ^ (i - 1)) := by
+    refine Finset.dvd_sum (fun i hi => ?_)
+    exact Dvd.dvd.mul_right (hdvd i hi) _
+  obtain ⟨c, hc⟩ := hsum
+  refine ⟨c, ?_⟩
+  rw [hder]
+  simp only [map_add, map_mul, map_sum, aeval_C, aeval_X, map_pow]
+  rw [← hc]
+  simp
+
+open Polynomial Finset in
+/-- ★★★★★★★**馴分岐なら `f′(λ)` は `λ^{e−1}` の単元倍**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★単生成なら `𝔡 = (f′(λ))` なので(`DifferentKummer.lean` の
+`differentIdeal_eq_span_of_adjoin_eq_top`、第 378)、これは
+**different の指数がちょうど `e−1`** であることを意味する——
+mathlib の `pow_sub_one_dvd_differentIdeal` は**下界しか**与えないので、
+こちらが**上界**にあたる。
+
+★★機構: `f′(λ) = λ^{e−1}·(e + λ·c)` で、馴(`e` が単元)なら
+`e + λ·c` も単元である(`λ` は極大イデアルの元だから)。 -/
+theorem aeval_derivative_eisenstein_tame {B : Type*} [CommRing B] [IsLocalRing B]
+    (e : ℕ) (he : 0 < e) (a : ℕ → B) (lam : B)
+    (hdvd : ∀ i ∈ range e, lam ^ e ∣ a i)
+    (hlam : lam ∈ maximalIdeal B) (hunit : IsUnit (e : B)) :
+    ∃ v : B, IsUnit v ∧
+      (aeval lam) (derivative (X ^ e + ∑ i ∈ range e, C (a i) * X ^ i)) = lam ^ (e - 1) * v := by
+  obtain ⟨c, hc⟩ := aeval_derivative_eisenstein e a lam hdvd
+  refine ⟨(e : B) + lam * c, isUnit_add_mem_maximalIdeal hunit (Ideal.mul_mem_right c _ hlam), ?_⟩
+  rw [hc]
+  have hsplit : lam ^ e = lam ^ (e - 1) * lam := by
+    conv_lhs => rw [show e = (e - 1) + 1 by omega]
+    rw [pow_succ]
+  rw [hsplit]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -89,6 +158,16 @@ def IsTameDegree.src : ABC3.Meta.Source :=
 def isUnit_natCast_iff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(段 1——IsUnit (n : B) が馴分岐であること)",
+    sectionId := "genell-prop-1-7" }
+
+def aeval_derivative_eisenstein.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(Eisenstein の導関数の値)",
+    sectionId := "genell-prop-1-7" }
+
+def aeval_derivative_eisenstein_tame.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(段 1——馴なら different の指数はちょうど e−1)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
