@@ -362,6 +362,7 @@ import ABC3.Found.GenEll.LatticeDiscNonzero
 import ABC3.Found.GenEll.JFunction
 import ABC3.Found.GenEll.JSurjective
 import ABC3.Found.GenEll.Covolume
+import ABC3.Found.GenEll.LatticeInvariance
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence
