@@ -27485,3 +27485,45 @@ mathlib は `derivWeierstrassP_sq : ℘'² = 4℘³ − g₂℘ − g₃` を持
     → witness を組み直して欠陥 #6 を塞ぐ
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-669 ★★★★★★アルキメデス因子は有界(第 355 ブロック)
+
+`Found/GenEll/PeterssonBound.lean`。
+
+### ★★★★★★★なぜ有界性が要るのか——`prop_3_4` を保つため
+
+第 354 で `archNorm` が建った。★これを `ht^Falt` の界面条件に入れると、
+witness は `ht^Falt := deg∞/12 − A`(`A` はアルキメデス項)という形になる。
+★★このとき `prop_3_4`(`deg∞/(12(1+ε)) ≤ ht^Falt + C`)を保つには、
+**`A` が普遍定数で上から抑えられる**ことが要る。
+
+### ★★★★★★段取り
+
+`archNorm = 4096π¹²·‖Δ(τ)‖(Im τ)⁶` なので、Petersson ノルムの有界性に帰着する。
+
+| 段 | 内容 |
+|---|---|
+| 1 | `Δ` はカスプ形式なので `Δ =O[atImInfty] exp(−2π·Im τ)`(mathlib) |
+| 2 | `exp(−2πy)·y⁶ → 0`(`Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero` を `x = 2πy` で) |
+| 3 | ⇒ `peterssonDelta → 0`(カスプ)、したがって `Im τ` が大きい所では `< 1` |
+| 4 | 残りは `𝒟 ∩ {Im ≤ y₁}` で、これは**コンパクト**なので最大値を取る |
+| 5 | 任意の `τ` は `SL(2,ℤ)` で `𝒟` に移せ、`peterssonDelta` は不変(第 349) |
+
+★★★★★第 348(`j` の全射性)で使ったのと**同じ 2 つの在庫**——
+指数減衰と `isCompact_truncatedFundamentalDomain`——がここでも効いた。
+
+### ★★残る鎖(G8)
+
+    一意化 ✅ / 共体積・archInv ✅ / (g₂,g₃) が束を決める ✅ /
+    archInv を曲線の関数に ✅ / アルキメデス因子の有界性 ✅(本ブロック)
+    → 界面にアルキメデス条件を追加                                  ★次
+    → witness を組み直して欠陥 #6 を塞ぐ
+
+★★**界面の設計**(次ブロックの方針):`Interface/` は `Found/` を import できないので、
+`archNorm` を `FaltingsHeightData` の**欄**にし、mathlib の `ModularForm.discriminant` で
+**同定する条件**(`j(τ) = j(E^σ)` なら `archNorm = 4096π¹²‖Δ(τ)‖(Im τ)⁶`)を課す。
+★★★これで `archNorm` は完全に固定され、`deg∞ = 0` のときの `ht^Falt` を
+`−Σ_σ log((2π)¹²·archNorm)/(12d)` に縛ると、**`deg∞/12` は落ちる**。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
