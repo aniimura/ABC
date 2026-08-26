@@ -7,6 +7,7 @@ import ABC3.Found.GenEll.Prop16
 import ABC3.Found.GenEll.NorthcottCoord
 import ABC3.Found.GenEll.HeightMetric
 import ABC3.Found.GenEll.HeightAdditive
+import ABC3.Found.GenEll.HeightClass
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -207,13 +208,37 @@ theorem prop_1_4 {X : AlgebraicGeometry.Scheme.{0}} {V : Type}
 高さ関数は BD-同値である。
 
 ★これが **`Theorem 2.1` が「数体上の曲線」から出発できる根拠**である——
-ℤ-モデル `X` の取り方に依らないことを保証している。 -/
-theorem remark_1_4_1 (D D' : HeightTheoryData)
-    (ePt : D.Point ≃ D'.Point) (eGen : D.GenericClass ≃ D'.GenericClass)
-    (L : D.ABundle) (L' : D'.ABundle)
-    (h : eGen (D.generic L) = D'.generic L') :
-    BDeq (D.ht L) (fun x => D'.ht L' (ePt x)) := by
-  sorry
+ℤ-モデル `X` の取り方に依らないことを保証している。
+
+## ★★★★★★★ 2026-08-26——構成に置き換えて閉じた(第 372 ブロック)
+
+原文は『follows **immediately** from the definitions, together with
+**Proposition 1.4, (iii)**』と書いている。
+★すなわち中身は「**高さは類にしか依らない**」であり、
+構成の側では `Found/GenEll/HeightClass.lean` が**すでにそれを持っていた**
+——`htArith_bdeq_of_pullbackAPic_eq`。
+
+★★構成の側では**定数差すら出ない**(`C = 0`)——
+機構は `deg` が主算術因子の上で消えること(積公式)である。
+
+### 逸脱(明示)
+
+| 項 | 原典 | 形式化 |
+|---|---|---|
+| 量化する対象 | `∀ D D' : HeightTheoryData` | **同じ `X` 上の 2 つの `ArithCartier`** |
+| 「だけに依る」の中身 | `X_ℚ` だけに依る | **引き戻した算術因子の類だけに依る** |
+
+★★★**含めていないもの**: 異なる 2 つの `ℤ`-モデルの比較
+——原文は『同型がある有限素数集合 `Σ` の上で `ℤ[Σ^{-1}]` へ延びる』という段を使うが、
+その段はまだ持っていない。★**本 statement はその手前までである**。 -/
+theorem remark_1_4_1 {X : AlgebraicGeometry.Scheme.{0}}
+    (Dv Ev : ABC3.Found.GenEll.ArithCartier X)
+    (F : Type) [Field F] [NumberField F]
+    (h : ∀ xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X,
+      ABC3.Found.GenEll.pullbackAPic F Dv xF = ABC3.Found.GenEll.pullbackAPic F Ev xF) :
+    BDeq (fun xF => ABC3.Found.GenEll.htArith F Dv xF)
+      (fun xF => ABC3.Found.GenEll.htArith F Ev xF) :=
+  ABC3.Found.GenEll.htArith_bdeq_of_pullbackAPic_eq F Dv Ev h
 
 /-! ## Definition 1.5 —— log-diff と log-cond -/
 
@@ -252,6 +277,19 @@ noncomputable def defn_1_5 {F : Type*} [Field F] [NumberField F] : ADiv F → �
 
 ★理由は原文が書いている——別の対の同型は
 **ある有限素数集合 `Σ` の上で** `ℤ[Σ^{-1}]` へ延びる。
+
+## ★★★★★★ 2026-08-26——**前半はすでに `Found/` にある**(第 372 の実測)
+
+原文の主張は 2 つに分かれる:
+
+| 半分 | 状態 |
+|---|---|
+| `log-diff_X` は `X_ℚ` だけに依る | ★**すでにある**——`Found/GenEll/LogDiff.lean` の `logDiffOfField` は **`X` を引数に持たない**し、`LogDiffValue.lean` の `logDiffOfField_eq` が `log|disc F| / [F:ℚ]` と値を与える(実際には `X_ℚ` にさえ依らない) |
+| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけに依る | ★★**こちらが残っている**——spreading out(`ℤ[Σ^{-1}]` への延長)が要る |
+
+★★★**前半だけを `Remark 1.5.1` として書き換えることはしない**——
+後半は `Proposition 1.7` の証明が実際に使う(『Σ 上の log-cond の寄与は ≈ 0』)ので、
+落とすと下流に影響が出る。★★★★**この `sorry` は spreading out 待ちである**。
 ★**「有限個の素数を除けば」という緩みが BD-class に吸収される**というのが
 この論文が BD-class を使う理由そのものであり、
 `Proposition 1.7` の証明でも「`Σ` の上の寄与は `≈ 0`」として同じ形で現れる。 -/

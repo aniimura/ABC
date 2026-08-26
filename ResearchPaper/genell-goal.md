@@ -28199,3 +28199,25 @@ mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 
 ★★`Section1` の sorry は **4 → 3**(`remark_1_4_1`･`remark_1_5_1`･`prop_1_7`)。
 Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-684 ★★★★★★★**`Remark 1.4.1` を閉じた——残りは spreading out 待ち**(第 372 ブロック)
+
+原文は『follows **immediately** from the definitions, together with
+**Proposition 1.4, (iii)**』と書いている。★中身は「高さは類にしか依らない」であり、
+構成の側では `Found/GenEll/HeightClass.lean` が**すでにそれを持っていた**。
+★★構成の側では**定数差すら出ない**(`C = 0`)——積公式が効く。
+
+### ★★★★★`Remark 1.5.1` の実測——半分はすでにある
+
+| 半分 | 状態 |
+|---|---|
+| `log-diff_X` は `X_ℚ` だけに依る | ★**すでにある**——`logDiffOfField` は `X` を引数に持たないし、`logDiffOfField_eq` が `log|disc F| / [F:ℚ]` と値を与える |
+| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけ | ★★**残っている**——spreading out(`ℤ[Σ^{-1}]` への延長) |
+
+★★★**前半だけを `Remark 1.5.1` として書き換えることはしない**——
+後半は `Proposition 1.7` の証明が実際に使う(『Σ 上の log-cond の寄与は ≈ 0』)ので、
+落とすと下流に影響が出る。
+
+★★`Section1` の sorry は **3 → 2**。Lean 全体の sorry は **41 → 40**。
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
