@@ -31,8 +31,8 @@
       "minimalForm": "『全分岐かつ馴なら p·O_L ⊆ 𝔡』。フルの分岐理論は要らない。",
       "nodes": 6,
       "nodesNote": "原文の 6 段(野生/馴の分離・ζ_p への帰着・p-群の可解性・Kummer・λ ∣ p・different の下界)を節点とする。hedge-index の実測でも Proposition 1.7 の合図は 7 件(immediately×5 one verifies×1 easily×1)。",
-      "done": 5,
-      "doneNote": "2026-08-26〜27 の第 374-395 ブロックで、段 2〜6 を実装し野生・馴の両枝を端から端まで結線。段 1 の構造定理は 3 項目(λ^e ~ π / B = A[λ] / minpoly が Eisenstein)とも代数的な核を実装済み。残るのは剰余体の一致と [L:K] = e からの最終組み立て。",
+      "done": 6,
+      "doneNote": "★2026-08-27 の第 411 ブロックで 6/6 になった。第 374-395 で段 2〜6 を実装し野生・馴の両枝を結線し、第 411 で段 1 の全分岐の構造定理(B = A[λ] と deg minpoly = e)を Nakayama で自作して閉じた(Found/GenEll/TotallyRamified.lean)。★★ただしこれは『局所の馴分岐の道具が揃った』ということであって、Proposition 1.7 の sorry が消えたということではない——prop_1_7 の .needs には Remark 1.5.1 と一様性の項が残っている。",
       "lastStepMeasurement": {
         "measuredAt": "2026-08-27",
         "what": "段 1 の最終組み立て(B = A[λ] と (minpoly A λ).natDegree = e)に何が要るかを mathlib 全体を探して測った。",
@@ -56,7 +56,8 @@
       "where": [
         "lean/ABC3/Found/GenEll/TameRamification.lean",
         "lean/ABC3/Found/GenEll/DifferentKummer.lean",
-        "lean/ABC3/Found/GenEll/PGroupTower.lean"
+        "lean/ABC3/Found/GenEll/PGroupTower.lean",
+        "lean/ABC3/Found/GenEll/TotallyRamified.lean"
       ]
     },
     "spreading-out-over-base": {
