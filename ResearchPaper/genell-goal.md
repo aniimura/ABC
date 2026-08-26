@@ -27017,3 +27017,43 @@ gcd 分解(337)→ 全単射(338)→ 積の形(339)→ 絶対収束(340)→ **Fu
 342-343 `ζ(6)`・`ζ(K)` の同定 / 344 Eisenstein との同定。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-659 ★★★★★`E₄`・`E₆` の q 展開係数(第 345 ブロック)
+
+`Found/GenEll/EisensteinCoeff.lean`。
+
+### ★★★★★★(i) の最後——`E₄³ − E₆² = 1728Δ` に向けて
+
+第 344 までで `g₂ = (4π⁴/3)E₄`・`g₃ = (8π⁶/27)E₆` と
+`g₂³ − 27g₃² = (64π¹²/27)(E₄³ − E₆²)` が出た。★残るのは `E₄³ − E₆² = 1728Δ` である。
+
+★★その筋は **Sturm 境界**:`f := E₄³ − E₆² − 1728Δ` は重さ 12 の modular form で、
+q 展開の位数が `12/12 = 1` より大きければ `f = 0`(`sturm_bound_levelOne`)。
+★★★したがって **0 次と 1 次の係数**を突き合わせればよい。
+
+### ★★★★★2026-08-26 の実測——mathlib の在庫
+
+| 段 | mathlib |
+|---|---|
+| `E_k` の q 展開係数 | ✅ `EisensteinSeries.E_qExpansion_coeff` |
+| `Δ` の 1 次係数 = `1` | ✅ `discriminant_qExpansion_coeff_one` |
+| `Δ ≠ 0` | ✅ `discriminant_ne_zero` |
+| Sturm 境界(レベル 1) | ✅ `ModularForm.sturm_bound_levelOne` |
+| q 展開の積・和・スカラー倍 | ✅ `qExpansion_mul`・`_add`・`_smul` |
+| **`E₄³ − E₆² = 1728Δ`** | ★**無い** |
+
+★★★★★**必要な道具はすべて在庫にあった**——残りは組み立てである。
+
+### ★★係数の値
+
+`E_qExpansion_coeff` は `-(2k/B_k)·σ_{k-1}(m)` を与える。
+★`B₄ = −1/30` ⟹ `E₄` の `q` 係数は `240`、`B₆ = 1/42` ⟹ `E₆` は `−504`。
+★★Bernoulli 数の値は第 342 で確認したとおり
+`Found/GaloisRep/TateEquationAnalytic.lean`(Tate 曲線用)の在庫を使った。
+
+### ★★G8 側の積み上げ(14 ブロック、すべて sorry なし)
+
+332-336 / 337-339 / 340-341 / 342-343 / 344 / 345。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
