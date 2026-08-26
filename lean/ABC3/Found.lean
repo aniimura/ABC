@@ -369,6 +369,7 @@ import ABC3.Found.GenEll.LatticeFromG
 import ABC3.Found.GenEll.CurveArchInv
 import ABC3.Found.GenEll.PeterssonBound
 import ABC3.Found.GenEll.ArchNormTotal
+import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence

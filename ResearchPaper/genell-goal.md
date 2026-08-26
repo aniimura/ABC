@@ -27637,3 +27637,42 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 `faltingsHeight` をそこに縛れば `≡ 0` は落ちる。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-672 ★★★★★★★`Remark 3.3.1` の実質を出した(第 359 ブロック)
+
+`Found/GenEll/LocalHeightRamified.lean`。ゴール「§3 の sorry を 0 にする」の**段 2** の 1 つ目。
+
+### ★★★★★★★★何が `Remark 3.3.1` の中身なのか
+
+原文は「one verifies **immediately** that this definition is independent of the choice of L」
+の 1 文である。★この「immediately」が畳んでいるのは
+
+> **`ord_w(x) = e(w/v)·ord_v(x)`**(`x ∈ Kˣ`、`w` は `v` の上にある素点)
+
+である。★★これがあれば `ord_w(q)/e(w/v) = ord_v(q)` となり、
+**右辺は `L` を含まない**ので独立性が直ちに出る。
+
+### ★★★★★在庫調査(2026-08-26)——**mathlib にあった**
+
+| 段 | mathlib |
+|---|---|
+| **`v.valuation K x ^ e = w.valuation L (algebraMap K L x)`** | ✅ `HeightOneSpectrum.valuation_liesOver` |
+| `e ≠ 0` | ✅ `ramificationIdx_ne_zero_of_liesOver` |
+| 加法的な位数 `ord_v` | ★無い(付値は乗法的な `WithZero (Multiplicative ℤ)` 値) |
+
+★★**既存の `valAdd`(第 320)は使えない**——数体の整数環に特化しており、
+かつ `vAdd_algebraMap_eq_valAdd` は**不分岐**を仮定している。
+★★★`Remark 3.3.1` は**まさに分岐する場合**なので、一般の Dedekind 環に対する
+`ordAt` を建て直した。
+
+### ★★取れたもの
+
+`ordAt`・`valuation_eq_ofAdd_neg_ordAt`・`ofAdd_pow`・`ramificationIdx_ne_zero`・
+**`ordAt_liesOver`**(`ord_w = e·ord_v`)・**`ordAt_div_ramificationIdx`**(`ord_w/e = ord_v`)・
+**`ordAt_div_ramificationIdx_indep`**(`Remark 3.3.1` そのもの)。
+
+★★★これで `Skeleton` 側の `potLocalHeight_indep` は
+**界面を接地させれば導出できる**——残るのは `TateLocalData` の作り直しである。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
