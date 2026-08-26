@@ -26212,3 +26212,55 @@ mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのも�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-640 ★★★★★★`hfix` の帳簿の道具——(c) と (d) が取れた(第 326 ブロック)
+
+`Found/GaloisRep/DegBoundTower.lean`。
+
+### ★★★★★★(c) `x` と `y` を含む中間体は `⊤`
+
+`F[W]` は `AdjoinRoot` なので `CoordinateRing.mk` が全射であり、`F[X][Y]` の元は
+単項式の和である。★単項式 `C a · Y^k` の像は `a(x)·y^k` で、中間体は多項式の値と積で
+閉じているから `M` に入る(`algebraMap_mk_C` + `aeval_mem_intermediateField`)。
+★★`F(E)` は `F[W]` の分数体だから `IsFractionRing.div_surjective` で `⊤` になる。
+
+★★★★★**`mk (C p)` の像が `p(x)` であること**は、2 つの環準同型
+`F[X] → F(E)` が `C a` と `X` で一致することから `Polynomial.ringHom_ext` で出た
+——生成元での一致に落とす道具は第 119 で用意してあった型と同じである。
+
+### ★★★★★(d) 次数で挟んで中間体を一致させる
+
+> `L ≤ M`、`[K : L] ≤ N`、`[K : M] = N`、`0 < [K : L]` ならば `L = M`
+
+★`IntermediateField.extendScalars` で `M` を `L` 上の中間体と見ると、
+塔 `[M:L]·[K:M] = [K:L]` がそのまま `Module.finrank_mul_finrank` で使える。
+★★`[M:L] = 1` から `M = ⊥`(`IntermediateField.finrank_eq_one_iff`)、
+すなわち `M ⊆ L` が出る。
+★★★★**体の同型に沿った次数の輸送は最後まで要らなかった**
+——`extendScalars` が「同じ台で底だけ変える」形を用意しているからである。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `algebraMap_mk_C` | ★`mk (C p)` の像は `p(x)` |
+| `intermediateField_eq_top_of_coord` | ★★★★★★**(c)** |
+| `finrank_le_of_adjoin_top` | ★★★★`L(x) = K` から `[K:L] ≤ deg(minpoly)` |
+| `eq_of_finrank_bound` | ★★★★★**(d)** |
+
+### ★★残り((G5) の `hfix`)——**組み立てだけ**
+
+    L := F(x_n, y_n)
+    (a) 第 325 `finrank_adjoin_le_of_monic_rel`   ✅
+    (b) 第 325 `coordY_mem_of_mem`                ✅
+    (c) 第 326 `intermediateField_eq_top_of_coord` ✅
+    (d) 第 326 `eq_of_finrank_bound`              ✅
+    (e) `L ⊆ μF(E)`(第 118 の `pointHom_genX/genY`)  ✅
+
+★残るのは **`Fix` を `IntermediateField F K` として作ること**と、上の 5 つを繋ぐ配線である。
+★★`Fix` は `FixedPoints.subfield (torsGroup W n) F(E)`(第 196)で、
+`F` の元が固定されること(群は `F` 代数自己同型で作用する)を足せば中間体になる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
