@@ -26701,3 +26701,38 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 | `latticeCurve_j` | ★★★★★★**`j = 1728g₂³/(g₂³−27g₃²)`** |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-650 ★★★★★★`(℘, ℘'/2)` は曲線の点である——(ii) の前半(第 336 ブロック)
+
+`Found/GenEll/LatticePoint.lean`。
+
+### ★★★★★★到達点
+
+> `z ∉ Λ` ⟹ **`(℘(z), ℘'(z)/2)` は `latticeCurve P` の点**であり、
+> **`z ↦ -z` は点の符号に対応する**
+
+★これは `℘'² = 4℘³ − g₂℘ − g₃`(mathlib の `derivWeierstrassP_sq`)を
+`y² = x³ − (g₂/4)x − (g₃/4)` に読み替えるだけで、**`linear_combination h/4` で出た**。
+★★非特異性は楕円曲線なので `equation_iff_nonsingular` から自動。
+★★★符号の対応は `℘` が偶・`℘'` が奇であることと、
+`latticeCurve P` が `a₁ = a₃ = 0` ゆえ `negY x y = -y` であることから出る。
+
+### ★★残り((ii) の後半)
+
+★**加法定理** `latticePoint P (z+w) = latticePoint P z + latticePoint P w`。
+★★mathlib に `℘` の加法定理は無い(2026-08-26 実測、`weierstrassP_add` で 0 件)。
+★★★古典的には 3 点共線条件を直接示すか、`℘, ℘'` が周期 `Λ` の楕円関数体を生成する
+ことを使う。
+
+### ★★G8 側の積み上げ(5 ブロック、すべて sorry なし)
+
+| ブロック | 内容 |
+|---|---|
+| 332 | 半周期で `℘' = 0`、`℘(w/2)` は `4x³−g₂x−g₃` の根 |
+| 333 | スケール則、判別式は `c⁻¹²` 倍、非消失はスケール不変 |
+| 334 | `G(Λ_τ, k) = Σ_{(m,n)∈ℤ²} (m+nτ)⁻ᵏ` |
+| 335 | `Δ = g₂³−27g₃²`、`j = 1728g₂³/Δ` |
+| 336 | `(℘, ℘'/2)` は曲線の点、`z ↦ -z` は符号に対応 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
