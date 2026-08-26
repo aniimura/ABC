@@ -1,5 +1,6 @@
 import ABC3.Found.GaloisRep.GenericNotTorsion
 import ABC3.Found.GaloisRep.PointHom
+import ABC3.Found.GaloisRep.MulByNCoordX
 
 /-!
 # スケルトン —— **関数体への引き戻し(Weil 対の葉)**(`Skeleton`)
@@ -66,11 +67,20 @@ noncomputable def polyToFF (W : WeierstrassCurve.Affine F) (p : Polynomial F) : 
 Weil 対の構成が実際に消費するのは `f_P ∈ F[W]` への作用だけであり、
 それは第 118・125 ブロックで**群法則によって固定された形で Found に入った**
 (`exists_mulByNHom_charZero`)。
-★式の側は真であるが、現在の道では消費されない——将来の層が要求したときのために残す。 -/
-theorem exists_mulByNPullback (W : WeierstrassCurve.Affine F) (n : ℤ) :
-    ∃ μ : W.FunctionField →ₐ[F] W.FunctionField,
-      μ (coordX W) = polyToFF W (W.Φ n) / polyToFF W (W.ΨSq n) := by
-  sorry
+★★★★★★2026-08-26: **本節点は閉じた**。第 196-198 の測定で式の側が臨界路に戻ったので、第 323 ブロック `Found/GaloisRep/MulByNCoordX.lean` で
+`mulOK_of_ne`(第 52)を**生成点に当てる**だけで取れた。
+★★★★**逸脱の記録**: statement を次の 2 点で直した。
+(i) `n : ℤ` を `1 ≤ n` の自然数にした——`n = 0` では `ΨSq_0 = 0` で割れない。
+(ii) 割り算を払って積の形にし、`μ` を `F(E)` の `AlgHom` ではなく
+`F[W] →+* F(E)`(第 118 の `pointHom`)で受けた——`AlgHom` への拡張 `muExtAlg` には `μ` の単射性が要り、
+それは `x([n]P)` の超越性(未実施)に依る。★下流が消費するのは積の形である。 -/
+theorem exists_mulByNPullback (W : WeierstrassCurve.Affine F) [W.IsElliptic] [DecidableEq F]
+    [CharZero F] (n : ℕ) (hn : 1 ≤ n) :
+    ∃ μ : W.CoordinateRing →+* W.FunctionField,
+      μ (genX W) * Polynomial.eval₂ (algebraMap F W.FunctionField) (coordX W) (W.ΨSq (n : ℤ))
+        = Polynomial.eval₂ (algebraMap F W.FunctionField) (coordX W) (W.Φ (n : ℤ)) := by
+  obtain ⟨x', y', h', _, hx, μ, hμx, _⟩ := mulByN_coordX_hom W n hn
+  exact ⟨μ, by rw [hμx]; exact hx⟩
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -85,7 +95,9 @@ def exists_mulByNPullback.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def exists_mulByNPullback.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.4 / Exercise 3.7(乗法 [n] の関数体への作用)"
+  [ .implicitStep
+      "★★★★★★★**2026-08-26: 本節点は閉じた**(第 323 ブロック `Found/GaloisRep/MulByNCoordX.lean`)。★下の『壁の所在』の項(EDS 恒等式が mathlib の TODO だから 30-80 ブロック、上流案件)は**古い**——Ward の定理は第 58 `EdsWard.lean` で閉じており、しかも本節点は **EDS 恒等式を使わずに**閉じた。★★実際に使ったのは第 52 `MulPoint.lean` の `mulOK_of_ne`(点の水準の乗法公式)を**生成点に当てる**ことだけであり、仮定 `ΨSq_k(x) ≠ 0` は第 116 の超越性で 1 行で出た。★★★★★**結局、分点多項式の帰納を自分で回す必要はなかった**——第 42-52 で既に回してあった(0 ブロック)" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.4 / Exercise 3.7(乗法 [n] の関数体への作用)"
       (.absent "mathlib に [n] の関数体への引き戻しは 0 件(2026-08-20、同上の検索)") 19,
     .implicitStep
       "★分点多項式 `Φ_n` / `ΨSq_n` は mathlib にある(`WeierstrassCurve.Φ`・`WeierstrassCurve.ΨSq`、2026-08-20 実測)。**足場はある**(0 ブロック)" 19,
