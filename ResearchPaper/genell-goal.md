@@ -27021,6 +27021,11 @@ gcd 分解(337)→ 全単射(338)→ 積の形(339)→ 絶対収束(340)→ **Fu
 
 ## §9-659 ★★★★★`E₄`・`E₆` の q 展開係数(第 345 ブロック)
 
+> ★★★★★**訂正(§9-660)**——本節の「`E₄³ − E₆² = 1728Δ` は mathlib に無い」は**誤り**である。
+> `ModularForms/LevelOne/GradedRing.lean` の `discriminant_eq_E₄_cube_sub_E₆_sq` として**あった**。
+> `E₄`・`E₆` の係数も `LevelOne/DimensionFormula.lean` にあり、本ブロックのファイル
+> `Found/GenEll/EisensteinCoeff.lean` は**重複なので削除した**。詳しくは §9-660。
+
 `Found/GenEll/EisensteinCoeff.lean`。
 
 ### ★★★★★★(i) の最後——`E₄³ − E₆² = 1728Δ` に向けて
@@ -27055,5 +27060,69 @@ q 展開の位数が `12/12 = 1` より大きければ `f = 0`(`sturm_bound_leve
 ### ★★G8 側の積み上げ(14 ブロック、すべて sorry なし)
 
 332-336 / 337-339 / 340-341 / 342-343 / 344 / 345。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-660 ★★★★★★★(i) 判別式の非消失が閉じた(第 346 ブロック)
+
+`Found/GenEll/LatticeDiscNonzero.lean`。
+
+### ★★★★★★★到達点
+
+> **任意の周期対 `L` について `latticeDisc L = g₂³ − 27g₃² ≠ 0`**(`latticeDisc_ne_zero`)
+
+★これで `latticeCurve L` はつねに楕円曲線になり(`isElliptic_latticeCurve'`)、
+一意化 (ii)・(iii) の土台ができた。
+
+★★おまけに **`j(ℤ + τℤ) = E₄(τ)³ / Δ(τ)`**(`latticeCurve_j_tauPair`)——
+格子から作った曲線の `j` 不変量が**古典的なモジュラー `j` 関数**であることが出た。
+★★★これは (iii) の入口そのものである。
+
+### ★★★★★★★★在庫調査——**8 ブロックぶんの回り道をしていた**
+
+★mathlib を「概念で」引き直したところ:
+
+| 探していたもの | 実は | 場所 |
+|---|---|---|
+| `E₄³ − E₆² = 1728Δ` | ★**あった** | `LevelOne/GradedRing.lean` `discriminant_eq_E₄_cube_sub_E₆_sq` |
+| `E₄` の `q` 係数 `240` | ★**あった** | `LevelOne/DimensionFormula.lean` `E₄_qExpansion_coeff_one` |
+| `E₆` の `q` 係数 `−504` | ★**あった** | 同上 `E₆_qExpansion_coeff_one` |
+| 格子和 = `ζ(k)·Eisenstein` | ★**あった** | `tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries` |
+
+★★★さらに悪いことに、4 つめは**自分の第 215 ブロック
+(`Found/GaloisRep/LatticeInvariant.lean`、`G_eq_two_zeta_mul_E`)が既に使っていた**。
+
+★★★★つまり第 337-345 の 9 ブロック(gcd 分解 → 全単射 → 積 → 絶対収束 → Fubini →
+`ζ(4)`,`ζ(6)` → Eisenstein 同定 → 係数)は、
+**すでに手元にある `G_eq_two_zeta_mul_E` の一行**で置き換えられた。
+★本ブロックの `g₂_tauPair` が 3 行で済んでいるのがその証拠である。
+
+★★★★★**なぜ落ちたか**——`grep` を「**これから使うつもりの道具の名前**」
+(`sturm_bound_levelOne`・`qExpansion_mul`)で打った。
+`1728` という**概念**で打てば 1 秒で当たっていた。
+`tools/lean-idioms.md` の「在庫は名前でなく概念で引く」の**2 度目の違反**である。
+
+★★**重複していた `Found/GenEll/EisensteinCoeff.lean`(第 345)は削除した**。
+第 337-344 は残した(sorry なしで正しく、gcd 分解の機構は別の用途に使える)が、
+**(i) には不要だった**と明記しておく。
+
+### ★★★★★★組み立て(残ったのは 5 行)
+
+    g₂(Λ_τ) = 60·G₄ = 60·2ζ(4)·E₄ = (4π⁴/3)·E₄
+    g₃(Λ_τ) = 140·G₆ = 140·2ζ(6)·E₆ = (8π⁶/27)·E₆
+    Δ_lat   = (64π¹²/27)(E₄³ − E₆²) = (64π¹²/27)·1728·Δ(τ) = 4096π¹²·Δ(τ) ≠ 0
+
+★★一般の `L` へは**スケール則**(第 333 `latticeDisc_ne_zero_iff`)で降ろす:
+`L = ω₂ · ⟨ω₁/ω₂, 1⟩`。★`im(ω₁/ω₂) < 0` のときは `ω₁ ↔ ω₂` を入れ替える
+——**束 `span{ω₁,ω₂}` は入れ替えで変わらない**(`swap_lattice`)ので判別式も変わらない。
+
+### ★★★(ii)(iii) の残り
+
+| 段 | 状態 |
+|---|---|
+| (i) 判別式の非消失 | ★**本ブロックで完了** |
+| (iii) `j` の全射性 | ★`j = E₄³/Δ` まで出た。残りは `j : ℍ/SL₂(ℤ) → ℂ` が全射 |
+| (ii) `ℂ/Λ ≅ E(ℂ)` 群同型 | ★★`℘` の加法定理が mathlib に無い(`weierstrassP_add` 0 件) |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
