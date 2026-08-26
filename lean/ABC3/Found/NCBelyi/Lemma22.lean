@@ -249,6 +249,50 @@ theorem lemma_2_1_rat (a b : ℕ) (S : Finset ℚ) (hne : S.Nonempty) (r β : �
       rw [hcast, hcast2]; exact hdd
     exact_mod_cast this
 
+/-! ## ★★★★★★帰納段の帳尻 —— `S₂` の 3 つの性質
+
+原文 (NCBelyi p.4):
+> λ. Then, so long as |S| ≥ 4, the polynomial “f(x) + f0” of Lemma 2.1 determines
+
+帰納段は `S₂ ≙ (f + f₀)(λ·S)` を作って帰納仮定を適用する。
+★`S₂` が帰納仮定の形を満たすことを、ここで 3 つに分けて取る。
+-/
+
+/-- ★**`f(0) = f(1) = 0`** —— `Lemma 2.1` の (a)。 -/
+theorem belyiVal_zero (a b : ℕ) : belyiVal a b 0 = 0 := by
+  simp [belyiVal]
+
+theorem belyiVal_one (a b : ℕ) : belyiVal a b 1 = 0 := by
+  simp [belyiVal]
+
+/-- ★★★**`|S₂| < |S₁|`** —— `0` と `1` が同じ値へ行くから。
+
+原文 (NCBelyi p.4):
+> which the cardinalities of S , S satisfy |S | < |S|.
+
+★原文は `|S′| < |S|` とだけ書くが、**その根拠は `f(0) = f(1)`** である。 -/
+theorem card_image_belyiVal_lt (a b : ℕ) (S₁ : Finset ℚ) (f0 : ℚ)
+    (h0 : (0 : ℚ) ∈ S₁) (h1 : (1 : ℚ) ∈ S₁) :
+    (S₁.image (fun α => belyiVal a b α + f0)).card < S₁.card := by
+  refine card_image_lt_of_collision h0 h1 (by norm_num) ?_
+  rw [belyiVal_zero, belyiVal_one]
+
+/-- ★★**`f₀` を足すと値は非負になる** —— `f₀ ≙ -inf'` だから。 -/
+theorem belyiVal_add_shift_nonneg (a b : ℕ) (S₁ : Finset ℚ) (hne : S₁.Nonempty)
+    {α : ℚ} (hα : α ∈ S₁) :
+    0 ≤ belyiVal a b α + belyiShift a b S₁ hne := by
+  rw [belyiShift]
+  have := Finset.inf'_le (belyiVal a b) hα
+  linarith
+
+/-- ★★★**`0 ∈ S₂`** —— 下確を達成する点で `f + f₀` が `0` になる。 -/
+theorem zero_mem_image_belyiVal_add_shift (a b : ℕ) (S₁ : Finset ℚ) (hne : S₁.Nonempty) :
+    (0 : ℚ) ∈ S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne) := by
+  obtain ⟨j, hjS, hj⟩ := Finset.exists_mem_eq_inf' hne (belyiVal a b)
+  refine Finset.mem_image.2 ⟨j, hjS, ?_⟩
+  rw [belyiShift, ← hj]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
@@ -280,5 +324,15 @@ def lemma_2_1_rat.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 2,
     item := "Lemma 2.1, (c)(d)(ℚ 版——Lemma 2.2 の帰納法が使う形)",
     sectionId := "ncbelyi-lemma-2-1" }
+
+def card_image_belyiVal_lt.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——f(0) = f(1) から |S′| < |S|)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def zero_mem_image_belyiVal_add_shift.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——f₀ を足すと下確が 0 になる)",
+    sectionId := "ncbelyi-lemma-2-2" }
 
 end ABC3.Found.NCBelyi
