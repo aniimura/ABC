@@ -26440,3 +26440,52 @@ Faltings 高さではない。`Proposition 3.4` の数学的内容は証明さ�
 ★★★★★★次にやるべきは数を増やすことではなく、**(D3) を入れて #6 を塞ぐこと**である。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-644 ★★★★★★★G8 の穴を依存グラフの節点にした——一意化(第 330 ブロック)
+
+`Skeleton/GenEll/Uniformization.lean`、`Interface/GaloisRep/Reduction.lean`。
+
+### ★★★★★★★なぜこの節点を立てたか
+
+第 329 の witness の `htFalt` は `deg∞/12` であって Faltings 高さではない。
+★これを散文の但し書きで済ませず、**依存グラフの節点**にした
+——本プロジェクトの進め方(スケルトンで依存グラフ → 葉から形式化)に従う。
+
+★★界面(`Interface/GaloisRep/Reduction.lean`)の `htFalt_variableChange` の docstring にも
+2026-08-26 の確認として書き込んだ:**この 2 本ではまだ足りない**。
+
+### ★★★★★★2026-08-26 の実測(mathlib の在庫)
+
+| 段 | mathlib |
+|---|---|
+| 周期対 `PeriodPair`・束 `lattice` | ✅ `Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` |
+| `℘`・`℘'`・`g₂`・`g₃` | ✅ 同上 |
+| **`℘'² = 4℘³ − g₂℘ − g₃`** | ✅ `derivWeierstrassP_sq` |
+| Eisenstein 級数・Dedekind η・モジュラー判別式 `Δ = η²⁴` | ✅ `NumberTheory/ModularForms/` |
+| **`℘` の加法定理** | ★**0 件**(`weierstrassP_add` で 0) |
+| **一意化**(任意の `E/ℂ` が `ℂ/Λ`) | ★**0 件** |
+
+★★★★★**「束 → 曲線」は揃っており、欠けているのは「曲線 → 束」だけである。**
+★この非対称は 2025 年に `Weierstrass.lean` が入ったことによる——
+以前の測定(「複素一意化は丸ごと無い」)は**古い**。
+
+### ★★★★下流の鎖(G8 の欠陥 #6 を塞ぐまで)
+
+    exists_periodPair(本節点、一意化)
+      → 周期束の共体積(アルキメデス norm)
+      → ω_E を**計量つき**算術直線束にする
+      → (D1)(D2)(D3) の deg に載せる
+      → ht^Falt = deg(ω_E) を固定 → 欠陥 #6 が塞がる
+
+★(D1)(D2)(D3) はいずれも `Interface/Arakelov/APic.lean` に `waiting` を持つ**未達の義務**である
+——すなわち **G8 の実質的な達成は Arakelov 側の未達義務に従属している**。
+
+### ★★★★★数の読み方(再掲)
+
+★**「Galois 8/8」は「界面に書いた条件をすべて満たす witness がある」ことである。**
+★★G5 は本物の数学(Weil 対の非退化性)で埋まったが、
+G8 の `htFalt` 欄は**界面が要求を書ききれていない**状態のままである。
+★★★★その差を、散文ではなく `Check/` の定理と `Skeleton/` の節点として**機械可読に**残した。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

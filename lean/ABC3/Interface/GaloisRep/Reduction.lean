@@ -233,7 +233,20 @@ structure FaltingsHeightData where
   ——未塗りの穴として §9-404 に記録する。
 
   ★★代わりに課すのは**真であり、かつ効く**条件である。
-  ★★★例えば `htFalt := log|Delta|`(変数変換で `u^12` 倍される)を落とす。 -/
+  ★★★例えば `htFalt := log|Delta|`(変数変換で `u^12` 倍される)を落とす。
+
+  ## ★★★★★★★★ 2026-08-26 の確認——**この 2 本ではまだ足りない**
+
+  ★第 329 で witness を組んだところ、**`htFalt := deg∞/12` がこの 2 本を満たす**
+  ことが分かった(`Check/GaloisRep/HtFaltNotPinned.lean` の `htFalt_not_pinned`)。
+  ★★すなわち `prop_3_4` は**恒等的に成り立つ形**で埋まり、
+  **`Proposition 3.4` の数学的内容は witness では証明されない**。
+  ★★★★★これが界面の欠陥 #6 であり、**初めての「弱すぎる」型**である
+  (#1 #2 #4 #5 は充足不能、#3 は弱すぎるで塞いだ)。
+  ★★★★★★**塞ぐにはアルキメデス素点での計量が要る**——
+  周期束の共体積が入って初めて `ht^Falt` は固定される。
+  ★その最下流の葉は `Skeleton/GenEll/Uniformization.lean` の `exists_periodPair`
+  (任意の `E/ℂ` が `ℂ/Λ` であること)である。 -/
   htFalt_variableChange : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
     (C : WeierstrassCurve.VariableChange L), htFalt L (C • E) = htFalt L E
   /-- 無限遠因子の次数 `deg∞`。 -/
