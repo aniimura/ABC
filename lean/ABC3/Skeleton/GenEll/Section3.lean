@@ -176,13 +176,33 @@ theorem potLocalHeight_indep (D : TateLocalData) {K : D.LocalField} {E : D.Curve
 
 ★**Faltings 高さが初めて出る場所**である。証明は 4 行で、
 最初の `≲` は `Proposition 1.6` の証明から、残りは **[Silv2] Proposition 2.1** と
-**[FC] Chapter V, Proposition 4.5**(無限遠での計量の**対数的特異性**)から。 -/
+**[FC] Chapter V, Proposition 4.5**(無限遠での計量の**対数的特異性**)から。
+
+## ★★★★★★★★ 2026-08-26 の逸脱の記録——`BDle` ではなく `BDge` で書く
+
+以前は 3 つの `≲` を `BDle`(原典 `Definition 1.2, (ii)` の**印字どおり**)で書いていた。
+★★しかし `Check/GenEll/Section3NotProvable.lean` の `bdle_chain_forces_bounded` が示すとおり、
+**2 番目と 3 番目を `BDle` で読むと `ht_∞` が上に有界になってしまう**
+(`(1+ε)ht_∞ ≤ ht_∞ + C` から `ε·ht_∞ ≤ C`)。
+★★★モジュライ上の高さは上に有界でないので、その読みは意図されたものではない。
+
+★★★★`Found/GenEll/BDClass.lean` の docstring がすでに定めているとおり
+「**abc の主張を書くときは `BDge`(原文の印字の `≳`)を使う**」に従い、
+本命題も `BDge` で書く。★これは**逸脱**であり、ここに記録する。 -/
 theorem prop_3_4 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
-    BDle D.degInf D.htInf
-  ∧ BDle D.htInf (fun x => 12 * (1 + eps) * D.faltingsHeight x)
-  ∧ BDle (fun x => 12 * (1 + eps) * D.faltingsHeight x) (fun x => (1 + eps) * D.htInf x)
+    BDge D.degInf D.htInf
+  ∧ BDge D.htInf (fun x => 12 * (1 + eps) * D.faltingsHeight x)
+  ∧ BDge (fun x => 12 * (1 + eps) * D.faltingsHeight x) (fun x => (1 + eps) * D.htInf x)
   ∧ (∀ (C : ℝ) (d : ℕ), 0 < d → {x ∈ D.degLe d | D.faltingsHeight x ≤ C}.Finite) := by
-  sorry
+  obtain ⟨M, hM⟩ := D.htInf_bdeq_faltings
+  obtain ⟨B, hB⟩ := D.faltingsHeight_bddBelow
+  refine ⟨D.degInf_le_htInf, ⟨M - 12 * eps * B, fun x => ?_⟩,
+    ⟨(1 + eps) * M, fun x => ?_⟩, D.northcott⟩
+  · have h1 := abs_le.1 (hM x)
+    have h2 := hB x
+    nlinarith [h1.1, h1.2]
+  · have h1 := abs_le.1 (hM x)
+    nlinarith [h1.1, h1.2]
 
 /-! ## Lemma 3.5 —— l-捩れの大域階数 1 部分群 -/
 
@@ -322,6 +342,10 @@ def prop_3_4.src : Source :=
   { paper := "GenEll", pdfPage := 17, item := "Proposition 3.4",
     sectionId := "genell-prop-3-4" }
 
+/-- ★★★★★★**2026-08-26 に閉じた**——`Interface/GenEll/EllModuli.lean` に
+原文が実際に引く 4 つ(`degInf_le_htInf`・`htInf_bdeq_faltings`・
+`faltingsHeight_bddBelow`・`northcott`)を欄に出し、
+**`ε` の入った 2 つの不等式はそこから初等的に導いた**。 -/
 def prop_3_4.needs : List ProofObligation :=
   [ .citation "[Silv2]" "Proposition 2.1(ht_∞ と ht^Falt の比較)"
       (.absent "mathlib に Faltings 高さは無い(`Arakelov` 0 件、`arithmetic line bundle` 0 件、2026-08-16 実測)") 17,

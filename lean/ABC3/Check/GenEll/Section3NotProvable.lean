@@ -15,7 +15,7 @@ import ABC3.Found.GenEll.BDClass
 |---|---|
 | `lemma_3_2` | `∀ D : TateLocalData` |
 | `potLocalHeight_indep` | `∀ D : TateLocalData` ★**2026-08-26 に閉じた** |
-| `prop_3_4` | `∀ D : EllModuliData` |
+| `prop_3_4` | `∀ D : EllModuliData` ★**2026-08-26 に閉じた**(第 361) |
 | `lemma_3_5` | `∀ D : EllModuliData` |
 | `lemma_3_7` | `∀ D : EllModuliData` |
 
@@ -50,7 +50,7 @@ import ABC3.Found.GenEll.BDClass
 | 1-5 | G6/G7/G8 | 充足不能・弱すぎる | 第 302-318 |
 | 6 | G8 `htFalt` | **弱すぎる**(`deg∞/12` で満たせる) | 第 357 |
 | 7 | **`TateLocalData`** | **弱すぎる**(世界ごと posit、`Unit` で埋まる) | ★**部分**(第 360: `Remark 3.3.1`) |
-| 8 | **`EllModuliData`** | **弱すぎる**(高さの間に関係が無い) | ★**未** |
+| 8 | **`EllModuliData`** | **弱すぎる**(高さの間に関係が無い) | ★**部分**(第 361: `Proposition 3.4`) |
 -/
 
 namespace ABC3.Check.GenEll
@@ -122,64 +122,50 @@ mathlib の `HeightOneSpectrum.valuation_liesOver` から導いている。
 ★下の `degenerateTateLocal` は `ramIdx ≡ 1` にしてあるので新しい欄を満たすが、
 `Lemma 3.2` は依然として破る。 -/
 
-/-! ## ★★★★★★2. `EllModuliData` は高さの間に関係を持たない -/
+/-! ## ★★★★★★★★2. `Proposition 3.4` も 2026-08-26 に閉じた
 
-/-- ★**退化した `EllModuliData`**——`ht_∞` だけを非有界にし、他をすべて自明にしたもの。 -/
-def degenerateEllModuli : EllModuliData where
-  EllClass := ℕ
-  Curve := Unit
-  cls := fun _ => 0
-  degOfDefinition := fun _ => 1
-  faltingsHeight := fun _ => 0
-  HasPotMultRed := fun _ => True
-  PrimeToLocalHeights := fun _ _ => True
-  CompactlyBounded := fun _ => True
-  GaloisFinite := fun _ => True
-  ImageContainsSL2 := fun _ _ => True
-  degInf := fun _ => 0
-  htInf := fun n => (n : ℝ)
-  logDiffMell := fun _ => 0
-  degLe := fun _ => Set.univ
-  SemiStable := fun _ => True
-  HasLCyclic := fun _ _ => True
-  MinimalField := fun _ => True
-  ImageSurjective := fun _ _ => True
-  PrimeToRamification := fun _ _ => True
-  HasMultRed := fun _ => True
-  PrimeToMultPrimes := fun _ _ => True
+★以前はここに `prop_3_4_first_false`･`prop_3_4_finite_false` があった——
+`deg_∞ ≡ 0`･`ht_∞ = n`･`ht^Falt ≡ 0` とすれば破れていた。
 
-/-- ★★★★★★**`Proposition 3.4` の最初の `≲` は現在の界面の上では偽である**。
+★★`Interface/GenEll/EllModuli.lean` に、原文が `Proposition 3.4` の証明で
+**実際に引いている 4 つ**(`degInf_le_htInf`･`htInf_bdeq_faltings`･
+`faltingsHeight_bddBelow`･`northcott`)を欄として足したので、
+**その退化 witness はもはや作れない**。 -/
 
-`deg_∞ ≡ 0`・`ht_∞ = n` とすれば `ht_∞ − deg_∞` は非有界。 -/
-theorem prop_3_4_first_false :
-    ¬ BDle degenerateEllModuli.degInf degenerateEllModuli.htInf := by
-  rintro ⟨C, hC⟩
-  obtain ⟨n, hn⟩ := exists_nat_gt C
-  have h2 := hC n
-  simp only [degenerateEllModuli, sub_zero] at h2
-  linarith
+/-! ## ★★★★★★★3. `≲` を印字どおりに読むと `ht_∞` が上に有界になる -/
 
-/-- ★★★★★★**`Proposition 3.4` の有限性(Northcott)も現在の界面の上では偽である**。
+/-- ★★★★★★★**逐語どおりの `BDle` で `Proposition 3.4` の鎖を書くと、
+`ht_∞` が上に有界になってしまう**。
 
-`ht^Falt ≡ 0`・`M_ell^{≤d} = univ` なので、集合は `ℕ` 全体になる。 -/
-theorem prop_3_4_finite_false :
-    ¬ (∀ (C : ℝ) (d : ℕ), 0 < d →
-      {x ∈ degenerateEllModuli.degLe d | degenerateEllModuli.faltingsHeight x ≤ C}.Finite) := by
-  intro h
-  have h2 := h 0 1 Nat.one_pos
-  haveI : Infinite degenerateEllModuli.EllClass := (inferInstance : Infinite ℕ)
-  have hsub : (Set.univ : Set degenerateEllModuli.EllClass)
-      ⊆ {x ∈ degenerateEllModuli.degLe 1 | degenerateEllModuli.faltingsHeight x ≤ 0} := by
-    intro n _
-    exact ⟨trivial, le_refl 0⟩
-  exact (Set.Infinite.mono hsub Set.infinite_univ) h2
+`BDle α β` は `∃C, ∀x, β x − α x ≤ C`(原典 `Definition 1.2, (ii)` の印字どおり)。
+★2 番目 `BDle ht_∞ (12(1+ε)ht^Falt)` と 3 番目 `BDle (12(1+ε)ht^Falt) ((1+ε)ht_∞)` を
+足すと `(1+ε)ht_∞ ≤ ht_∞ + C`、すなわち `ε·ht_∞ ≤ C` が出る。
 
-/-! ## ★★★塞ぎ方は分かっている -/
+★★モジュライ上の高さは上に有界でないので、**その読みは意図されたものではない**。
+★★★`Skeleton/GenEll/Section3.lean` の `prop_3_4` は `BDge` で書き直した(逸脱を記録)。 -/
+theorem bdle_chain_forces_bounded {F : Type*} (htInf faltings : F → ℝ) (eps : ℝ) (heps : 0 < eps)
+    (h2 : BDle htInf (fun x => 12 * (1 + eps) * faltings x))
+    (h3 : BDle (fun x => 12 * (1 + eps) * faltings x) (fun x => (1 + eps) * htInf x)) :
+    ∃ C : ℝ, ∀ x, htInf x ≤ C := by
+  obtain ⟨C₂, hC₂⟩ := h2
+  obtain ⟨C₃, hC₃⟩ := h3
+  refine ⟨(C₂ + C₃) / eps, fun x => ?_⟩
+  have h2x := hC₂ x
+  have h3x := hC₃ x
+  rw [le_div_iff₀ heps]
+  nlinarith
 
-/-- ★★★★**`EllModuliData` は `ht^Falt ≡ 0` を許す**——G8 で本物の `ht^Falt` を
-建てた(第 357)ので、そこに接地すれば塞がる。 -/
-theorem faltingsHeight_can_be_zero :
-    ∃ D : EllModuliData, ∀ x : D.EllClass, D.faltingsHeight x = 0 :=
-  ⟨degenerateEllModuli, fun _ => rfl⟩
+/-! ## ★★★★★4. `ε` 入りの 2 本は posit ではなく導出である -/
+
+/-- ★★★★★**`ht_∞ ≈ 12·ht^Falt` と `ht^Falt` の下界から `ε` 入りの不等式が出る**。
+
+★posit しているのは `≈` の方であって、`ε` 入りの形ではない。 -/
+theorem eps_ineq_is_derived {F : Type*} (htInf faltings : F → ℝ) (eps : ℝ) (heps : 0 < eps)
+    (M B : ℝ) (hM : ∀ x, |htInf x - 12 * faltings x| ≤ M) (hB : ∀ x, B ≤ faltings x) :
+    BDge htInf (fun x => 12 * (1 + eps) * faltings x) := by
+  refine ⟨M - 12 * eps * B, fun x => ?_⟩
+  have h1 := abs_le.1 (hM x)
+  have h2 := hB x
+  nlinarith [h1.1, h1.2]
 
 end ABC3.Check.GenEll

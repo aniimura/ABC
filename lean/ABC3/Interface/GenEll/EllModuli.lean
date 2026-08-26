@@ -30,6 +30,25 @@ import Mathlib.Data.Set.Finite.Basic
 | `deg_∞` / `ht_∞`(無限遠因子) | ★**0 件** |
 | `log-diff_{M̄_ell}` | ★**0 件**(`Definition 1.5, (iii)` を `M̄_ell` に適用したもの) |
 | 楕円曲線のモジュライスタック `M̄_ell` | ★**0 件** |
+
+## ★★★★★★★★ 2026-08-26 の訂正(欠陥 #8 を塞ぐ)
+
+以前は本構造体は**公理を 1 つも持たなかった**。
+★そのため `Skeleton/GenEll/Section3.lean` の `prop_3_4` は
+`deg_∞ ≡ 0`・`ht_∞ = n`・`ht^Falt ≡ 0` などの退化した `D` で**破れていた**
+(`Check/GenEll/Section3NotProvable.lean` で実測)。
+
+★★そこで原文が `Proposition 3.4` の証明で**実際に引いている 4 つ**を欄に出した:
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degInf_le_htInf` | [GenEll] `Proposition 1.6` の証明 |
+| `htInf_bdeq_faltings` | [Silv2] `Proposition 2.1` + [FC] Ch. V, `Proposition 4.5` |
+| `faltingsHeight_bddBelow` | 古典的(Faltings 高さは下に有界) |
+| `northcott` | [GenEll] `Proposition 1.4, (iv)` |
+
+★★★**`ε` の入った 2 つの不等式はこれらから導かれる**——
+posit しているのは原文が引く外部文献と内部参照だけである。
 -/
 
 namespace ABC3.Interface.GenEll
@@ -70,6 +89,34 @@ structure EllModuliData extends TorsionGaloisRepData where
   ★`PrimeToLocalHeights`(局所高さと素)とは**別の条件**である——
   原文 (a) は "as well as to" で 2 つを並べている(p.22 目視確認)。 -/
   PrimeToMultPrimes : Curve → ℕ → Prop
+  /-- ★★★★★★**`deg_∞ ≲ ht_∞`**——`Proposition 3.4` の最初の `≲`。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★原文はこれを `Proposition 1.6` の証明から取る。
+  ★★**向きは `deg_∞(x) − ht_∞(x) ≤ C`**(abc の向き、`BDge`)である——
+  逆向きにすると `ht_∞` が上に有界になる(`Check/GenEll/Section3NotProvable.lean`)。 -/
+  degInf_le_htInf : ∃ C : ℝ, ∀ x, degInf x - htInf x ≤ C
+  /-- ★★★★★★★**`ht_∞ ≈ 12·ht^Falt`**——無限遠での計量の対数的特異性。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★原文の典拠は **[Silv2] Proposition 2.1** と **[FC] Ch. V, Proposition 4.5**。
+  ★★★これが `Proposition 3.4` の 2 番目・3 番目の `≲` を**導く**。 -/
+  htInf_bdeq_faltings : ∃ C : ℝ, ∀ x, |htInf x - 12 * faltingsHeight x| ≤ C
+  /-- ★★★★**Faltings 高さは下に有界**。
+
+  ★`ε` の入った不等式を出すのに要る——`12ε·ht^Falt` を下から抑えねばならない。 -/
+  faltingsHeight_bddBelow : ∃ B : ℝ, ∀ x, B ≤ faltingsHeight x
+  /-- ★★★★★★**Northcott の有限性**——原文は `Proposition 1.4, (iv)` から取る。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★`ht^Falt` が有界な点は有限個しかない。 -/
+  northcott : ∀ (C : ℝ) (d : ℕ), 0 < d → {x ∈ degLe d | faltingsHeight x ≤ C}.Finite
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=

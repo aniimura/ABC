@@ -27717,3 +27717,50 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 | `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-674 ★★★★★★★★§3 の sorry が **4 → 3**——`Proposition 3.4` を閉じた(第 361 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★★★★もう 1 つ見つかった——**`≲` の向き**
+
+`Proposition 3.4` は 3 つの `≲` を鎖にしている。
+★これを `BDle`(原典 `Definition 1.2, (ii)` の**印字どおり**)で読むと、
+**2 番目と 3 番目から `ht_∞` が上に有界になってしまう**:
+
+    (1+ε)·ht_∞ ≤ ht_∞ + C   ⇒   ε·ht_∞ ≤ C
+
+★★モジュライ上の高さは上に有界でないので、**その読みは意図されたものではない**。
+★★★`Check` の `bdle_chain_forces_bounded` で**機械可読に**記録した。
+
+★★★★`Found/GenEll/BDClass.lean` の docstring はすでに
+「**abc の主張を書くときは `BDge`(原文の印字の `≳`)を使う**」と定めていたので、
+`prop_3_4` も `BDge` で書き直した——**逸脱として statement の docstring に記録**。
+
+### ★★★★★★界面に足した 4 つはすべて**原文が実際に引いている**
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degInf_le_htInf` | [GenEll] `Proposition 1.6` の証明 |
+| `htInf_bdeq_faltings` | [Silv2] `Proposition 2.1` + [FC] Ch. V, `Proposition 4.5` |
+| `faltingsHeight_bddBelow` | 古典的(Faltings 高さは下に有界) |
+| `northcott` | [GenEll] `Proposition 1.4, (iv)` |
+
+★★★**`ε` の入った 2 本はこれらから導出した**——posit しているのは `≈` の方であって
+`ε` 入りの形ではない。`Check` の `eps_ineq_is_derived` がその記録である。
+
+    ht_∞ ≤ 12 ht^Falt + M  かつ  ht^Falt ≥ B
+      ⇒ ht_∞ ≤ 12(1+ε)ht^Falt + (M − 12εB)
+
+### ★★§3 の現状(sorry 3 件)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`・`localHeight_pos`・`potLocalHeight_indep`・**`prop_3_4`**・`lemma_3_6` | ✅ |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `lemma_3_5` | ★sorry——`Lemma 3.2` + `Prop 3.4` から導く |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
