@@ -169,15 +169,19 @@ structure SemistableModelData where
   Néron 微分を `ω` で割った係数は `u⁻¹` 倍され、分数イデアルも `u⁻¹` 倍される。 -/
   omegaFrac : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L →
     Submodule (𝓞 L) L
-  /-- ★分数イデアルであること(有限生成)——`L` 全体は f.g. でないので、これが効く。 -/
-  omegaFrac_fg : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
+  /-- ★分数イデアルであること(有限生成)——`L` 全体は f.g. でないので、これが効く。
+
+  ★★★★**2026-08-26 の訂正**——`[W.IsElliptic]` を付けた。`Δ = 0` の曲線に
+  Néron 微分は無い(第 304 で `TateCurveData` に入れたのと同じ理由)。
+  ★欄そのものは全曲線で定義しておき、**性質だけを楕円曲線に限る**。 -/
+  omegaFrac_fg : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L) [W.IsElliptic],
     (omegaFrac L W).FG
   /-- ★零でない(階数 1 の代わり)。 -/
-  omegaFrac_ne_bot : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
-    omegaFrac L W ≠ ⊥
+  omegaFrac_ne_bot : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L)
+    [W.IsElliptic], omegaFrac L W ≠ ⊥
   /-- ★★★★**変数変換で `u⁻¹` 倍される**——これが `ω_E` を曲線に結びつける条件。 -/
   omegaFrac_variableChange : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L)
-    (C : WeierstrassCurve.VariableChange L) (x : L),
+    [W.IsElliptic] (C : WeierstrassCurve.VariableChange L) (x : L),
     x ∈ omegaFrac L (C • W) ↔ ((C.u : L) * x) ∈ omegaFrac L W
   /-- 大域の半安定性(原文が繰り返し仮定するもの)。 -/
   SemiStable : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Prop

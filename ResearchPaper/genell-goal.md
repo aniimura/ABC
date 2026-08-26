@@ -25619,3 +25619,66 @@ mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-630 ★★★★★★★★★★★G7 達成——Galois が 6/8 になった(第 317 ブロック)
+
+`Found/GaloisRep/NeronWitness.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> **`SemistableModelData` は非空虚である**(`SemistableModelData.nonvacuous`)
+
+★★★★★**義務の数が動いた**——Arakelov 9/9、**Galois 5/8 → 6/8**
+(G1, G2, G3, G4, G6, G7)。
+
+### ★★★★★★変数変換則——イデアルの水準から元の水準へ
+
+`count` の代数で**イデアルの等式**を出す:
+
+    ω_E(C . W) = (u)^-1 · ω_E(W)
+
+★各素点で `count` を比べるだけ(`count_mul`・`count_inv`・第 316 の橋)。
+★★★これを**元の水準**に落とすと界面の形になる:
+
+    x ∈ ω_E(C . W)  <->  u·x ∈ ω_E(W)
+
+★★`spanSingleton x <= I <-> x ∈ I` と `le_spanSingleton_mul_iff` で往復する。
+
+### ★★★★有限生成性は mathlib が持っていた
+
+`FractionalIdeal.fg_of_isNoetherianRing`——**分数イデアルは Noether 環の上で f.g.**。
+★`𝓞_L` は Noether なのでそのまま効く(1 行)。
+
+### ★★★界面の第 3 の訂正(記録)
+
+`omegaFrac` の 3 性質に **`[W.IsElliptic]`** を付けた。
+★`Δ = 0` の曲線に Néron 微分は無く、変数変換則も成り立たない
+(両辺とも自明なイデアルになり `x ∈ 1 <-> u·x ∈ 1` は偽)。
+★★欄そのものは全曲線で定義しておき、**性質だけを楕円曲線に限る**形にした。
+★★★第 304(`TateCurveData` の `Δ != 0`)と同じ訂正である。
+
+### ★★★★★★★★G7 の全体像(第 311-317、7 ブロック)
+
+| 段 | 内容 | ブロック |
+|---|---|---|
+| 界面の穴を塞ぐ | `ω_E` を分数イデアル + 変数変換則に | 311 |
+| 局所の Néron 指数 | 極小モデルの `u` の付値は一意 | 312 |
+| ほとんどの素点で `0` | `v(Δ) < 12` なら極小 / 有限性 | 313-314 |
+| 素点の付値へ移送 | 付値の**同値**で足りる | 315 |
+| 分数イデアルの構成 | `count` と付値の橋 | 316 |
+| 組み立て | 変数変換則と f.g. | 317 |
+
+★★★★**7 ブロックで済んだ**のは、mathlib の Dedekind 環の在庫
+(`exists_isMinimal`・`Support.finite`・`FractionalIdeal.count` の代数・
+`fg_of_isNoetherianRing`)が厚かったから。
+★★★★★逆に**無かったのは「極小モデルの `u` の一意性」だけ**で、そこが本質だった。
+
+### ★★残り(Galois 2 件)
+
+| 件 | 内容 | 状況 |
+|---|---|---|
+| G5 | `FullImageData`(Serre の全射定理) | 重い。G1-G4・G6-G8 に従属 |
+| G8 | Faltings 高さ | **(D3) の計量**が要る(§9-404 の未塗りの穴) |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
