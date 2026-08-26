@@ -28980,3 +28980,59 @@ Skeleton には載らない。
 ★★★**提案**: `ResearchPaper/mathlib-gap.json` を作り、
 各項目に「何を作るか / 最小構成は何か / 節点数 / 外部プロジェクトの在庫」を書く。
 小さい仕事で、以後の見積もりが機械的になる。
+
+## §9-709 ★★★★★★★★★★**[NCBelyi] Lemma 2.2 が閉じた——`sorry` を増やさずに Skeleton へ載った**(第 404 ブロック、2026-08-27)
+
+`Found/NCBelyi/Lemma22.lean` に帰納の組み立てを入れ、`Skeleton/NCBelyi/Theorem25.lean` に
+`sorry` **無し**の `lemma_2_2` を足した。`belyi-noncritical` は **済 2/5 → 3/5**。
+
+### ★★組み立ての形
+
+原文 p.4 の証明は 8 行である。実装は 3 段になった。
+
+| 段 | 宣言 | 中身 |
+|---|---|---|
+| 多項式 | `stepPoly a b f₀ λ` | `(x^{a+1}(x−1)^{b+1} + f₀)(λx)` |
+| 臨界点 | `crit_stepPoly` | `λx ∈ {0, 1, r}` ——`belyi_critical` そのもの |
+| 帳尻 | `lemma_2_2_shift` | `Lemma 2.1` の (a)(c)(d) を条件 (i)(ii)(iii) へ翻訳 |
+| 帰納段 | `lemma_2_2_step` | `λ` と `a, b` を決めて上の 3 つを束ねる |
+| 本体 | `lemma_2_2_aux` / `lemma_2_2` | `|S∖{0}|` についての帰納法 |
+
+### ★★★★★★★★合成される 2 つは対等でない
+
+★これが本補題の構造上の要点である。
+
+`stepPoly` は **`{0,1}` を `{0,1}` へ写さない**(`f₀` へ写す)ので `IsBelyiPoly` ではない。
+持っているのは「臨界値が `stepPoly(S)` に入る」という**相対的な**性質だけである。
+それを帰納法の仮定 `g(S₂) ⊆ {0,1}` が吸収する。
+
+★★`BelyiComp.lean` は 2026-08-17 の時点でこれを見抜いて `comp_crit_of_rel` を用意していた
+(同ファイルの「★★★自己訂正」節)。★★★**7 ブロック前に書いた受け皿が、そのまま嵌まった。**
+
+### ★★★★★★λ と (a,b) の決め方——原文が「appropriate」で畳んだところ
+
+原文は『for some appropriate positive rational number λ』としか書かない。実測すると
+
+- `λ ≝ 1/α₂`(`α₂` は `S∖{0}` の**2 番目に小さい元**)——`exists_normalizing_scale`
+- そのとき `r = α₁/α₂ ∈ (0,1)` で、`a+1 ≝ r.num`、`b+1 ≝ r.den − r.num`——`exists_num_den`
+
+この 2 つで `λ·S ⊆ {0, r, 1} ∪ (1,∞)` が**ちょうど** `Lemma 2.1` の仮定になる。
+★**`|S∖{0}| ≥ 2` が要る**のはここである——原文の『so long as |S| ≥ 4』
+(`0`, `∞` を含めて数えるので `|S∖{0,∞}| ≥ 2`)と一致した。
+
+### ★★★★★★★配管——pdftotext は [NCBelyi] のプライムを落とす
+
+`check.mjs` が 1 件 NG を出した。`0_Source` の `.txt` には
+`some β′, S′ that satisfy …` と**プライムが残っている**が、
+`check.mjs` が PDF から取り直したテキストでは `someβ,Sthatsatisfy…` と**消えている**。
+
+★★**`.txt` を見て引用を書くと照合が落ちる。**
+`Lemma21.lean` の冒頭が「`f′(x)` のプライム `′` が消える」と既に書いていた性質だが、
+`.txt` 側には残っているという**非対称**までは書いていなかった。引用は `.cache/pdf-pages.json`
+の側に合わせること。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**、`sorry` **40 件**(変化なし)
+- `Skeleton/GenEll` + `Skeleton/NCBelyi` の `sorry` は **4 件**のまま
+  ——★**今回は減らないのが正しい**。`Lemma 2.2` は新しい `sorry` を作らずに足した

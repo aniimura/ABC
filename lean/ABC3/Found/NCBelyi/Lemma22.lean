@@ -293,6 +293,293 @@ theorem zero_mem_image_belyiVal_add_shift (a b : ℕ) (S₁ : Finset ℚ) (hne :
   rw [belyiShift, ← hj]
   ring
 
+/-! ## ★★★★★★★帰納段の多項式とその臨界点 -/
+
+/-- ★帰納段で使う多項式 —— `Lemma 2.1` の `f + f₀` を `λ` 倍したもの。
+
+原文 (NCBelyi p.4):
+> λ. Then, so long as |S| ≥ 4, the polynomial “f(x) + f0” of Lemma 2.1 determines -/
+noncomputable def stepPoly (a b : ℕ) (f0 lam : ℚ) : ℚ[X] :=
+  ((X : ℚ[X]) ^ (a + 1) * (X - 1) ^ (b + 1) + C f0).comp (C lam * X)
+
+/-- ★★**`stepPoly` の評価** —— `λ x` での `f` の値に `f₀` を足したもの。 -/
+theorem eval_stepPoly (a b : ℕ) (f0 lam x : ℚ) :
+    (stepPoly a b f0 lam).eval x = belyiVal a b (lam * x) + f0 := by
+  rw [stepPoly, eval_comp]
+  simp [belyiVal]
+
+/-- ★**`stepPoly` は非定数**(`λ ≠ 0`)。 -/
+theorem natDegree_stepPoly_pos (a b : ℕ) (f0 lam : ℚ) (hlam : lam ≠ 0) :
+    0 < (stepPoly a b f0 lam).natDegree := by
+  rw [stepPoly, natDegree_comp_scale _ _ hlam]
+  have h1 : ((X : ℚ[X]) - 1).Monic := by simpa using monic_X_sub_C (1 : ℚ)
+  have hdeg1 : ((X : ℚ[X]) - 1).natDegree = 1 := by simpa using natDegree_X_sub_C (1 : ℚ)
+  have hdeg : ((X : ℚ[X]) ^ (a + 1) * (X - 1) ^ (b + 1)).natDegree = (a + 1) + (b + 1) := by
+    rw [Monic.natDegree_mul (monic_X_pow (a + 1)) (h1.pow (b + 1)), natDegree_X_pow,
+      natDegree_pow, hdeg1, mul_one]
+  rw [natDegree_add_C, hdeg]
+  omega
+
+/-- ★★★★★**`stepPoly` の臨界点は `λ` 倍すると `{0, 1, r}` に入る**。
+
+原文 (NCBelyi p.2):
+> mediately from the fact that:
+
+★`f₀` を足しても導関数は変わらず、スケーリングは臨界点を `1/λ` 倍に移すだけである
+(第 399)。★★あとは `Lemma21.lean` の `belyi_critical` そのもの。 -/
+theorem crit_stepPoly (a b : ℕ) (f0 lam : ℚ) (hlam : lam ≠ 0) (x : ℂ)
+    (hx : (derivative ((stepPoly a b f0 lam).map (algebraMap ℚ ℂ))).eval x = 0) :
+    algebraMap ℚ ℂ lam * x = 0 ∨ algebraMap ℚ ℂ lam * x = 1
+      ∨ algebraMap ℚ ℂ lam * x = ((a : ℂ) + 1) / ((a : ℂ) + 1 + ((b : ℂ) + 1)) := by
+  rw [stepPoly, derivative_comp_scale_eq_zero_iff _ _ hlam] at hx
+  have hmap : (((X : ℚ[X]) ^ (a + 1) * (X - 1) ^ (b + 1) + C f0).map (algebraMap ℚ ℂ))
+      = (X : ℂ[X]) ^ (a + 1) * (X - 1) ^ (b + 1) + C (algebraMap ℚ ℂ f0) := by
+    simp [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub]
+  rw [hmap, derivative_add, derivative_C, add_zero] at hx
+  exact belyi_critical a b hx
+
+/-! ## ★★★★★★★★帰納段の受け皿 —— `f + f₀` が条件 (i)(ii)(iii) を作り直す -/
+
+/-- ★★★★★★**`Lemma 2.2` の帰納段の帳尻**。
+
+原文 (NCBelyi p.4):
+> some β, S that satisfy conditions (i), (ii), (iii) of the present Lemma 2.2, but for
+
+★原文はこの 1 文で済ませるが、中身は
+`Lemma 2.1` の (a)(c)(d) を条件 (i)(ii)(iii) へ**翻訳する**作業である。
+
+| 出す性質 | 根拠 |
+|---|---|
+| `0 ∈ S′`(条件 (i)) | 下確を達成する点で `f + f₀ = 0` |
+| `α ∈ S′\{0} → α > 0`(条件 (ii)) | `f₀ ≝ -inf'` だから `f + f₀ ≥ 0` |
+| `β′ ∉ S′` | `Lemma 2.1` (c) |
+| `β′/α ≥ 2`(条件 (iii)) | `Lemma 2.1` (d) |
+| `|S′| < |S|` | `f(0) = f(1)` |
+-/
+theorem lemma_2_2_shift (a b : ℕ) (S₁ : Finset ℚ) (hne : S₁.Nonempty) (r β₁ : ℚ)
+    (hr : (r : ℝ) = ((a : ℝ) + 1) / (((a : ℝ) + 1) + ((b : ℝ) + 1)))
+    (h0S : (0 : ℚ) ∈ S₁) (h1S : (1 : ℚ) ∈ S₁) (hrS : r ∈ S₁)
+    (hS : ∀ α ∈ S₁, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α)
+    (hβ : ∀ α ∈ S₁, α ≠ 0 → 2 * α ≤ β₁) :
+    (0 : ℚ) ∈ S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne)
+    ∧ (∀ α ∈ S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne), α ≠ 0 → 0 < α)
+    ∧ (belyiVal a b β₁ + belyiShift a b S₁ hne)
+        ∉ S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne)
+    ∧ (∀ α ∈ S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne), α ≠ 0 →
+        2 * α ≤ belyiVal a b β₁ + belyiShift a b S₁ hne)
+    ∧ (S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne)).card < S₁.card := by
+  classical
+  obtain ⟨hc, hd⟩ := lemma_2_1_rat a b S₁ hne r β₁ hr h0S h1S hrS hS hβ
+  refine ⟨zero_mem_image_belyiVal_add_shift a b S₁ hne, ?_, ?_, ?_, ?_⟩
+  · intro α hα hα0
+    obtain ⟨γ, hγ, rfl⟩ := Finset.mem_image.1 hα
+    exact lt_of_le_of_ne (belyiVal_add_shift_nonneg a b S₁ hne hγ) (Ne.symm hα0)
+  · intro hcon
+    obtain ⟨γ, hγ, hγe⟩ := Finset.mem_image.1 hcon
+    exact hc γ hγ (by linarith [hγe])
+  · intro α hα hα0
+    obtain ⟨γ, hγ, rfl⟩ := Finset.mem_image.1 hα
+    have hpos : 0 < belyiVal a b γ + belyiShift a b S₁ hne :=
+      lt_of_le_of_ne (belyiVal_add_shift_nonneg a b S₁ hne hγ) (Ne.symm hα0)
+    have hdd := hd γ hγ hα0
+    rwa [le_div_iff₀ hpos] at hdd
+  · exact card_image_belyiVal_lt a b S₁ _ h0S h1S
+
+/-! ## ★★★★★★★★★帰納段 -/
+
+/-- ★`λ` 倍を打ち消して「臨界点は有理点である」を取り出す。 -/
+theorem eq_ratCast_of_scale {lam s : ℚ} (hlam : lam ≠ 0) {x : ℂ}
+    (h : algebraMap ℚ ℂ lam * x = algebraMap ℚ ℂ (lam * s)) : x = algebraMap ℚ ℂ s := by
+  have hl : algebraMap ℚ ℂ lam ≠ 0 := fun hc =>
+    hlam ((algebraMap ℚ ℂ).injective (by simpa using hc))
+  rw [map_mul] at h
+  exact mul_left_cancel₀ hl h
+
+/-- ★★★★★★★★**[NCBelyi] Lemma 2.2 の帰納段**。
+
+原文 (NCBelyi p.4):
+> Indeed, we induct on the cardinality |S| of S and apply Lemma 2.1 [with,
+> say, C = 2] to the set λ · S ⊆ P1
+
+★★`λ` は `Normalize.lean` の `exists_normalizing_scale`(= `1/α₂`)、
+`a, b` は `exists_num_den`(= `r` の分子と分母−分子)で決まる。
+★★★これで `λ·S` が `Lemma 2.1` の仮定 `α ∈ {0, r, 1} ∪ (1,∞)` を**ちょうど**満たす。
+
+出す多項式は `stepPoly a b f₀ λ = (f + f₀)(λx)` である。 -/
+theorem lemma_2_2_step (S : Finset ℚ) (β : ℚ)
+    (h0S : (0 : ℚ) ∈ S)
+    (hpos : ∀ α ∈ S, α ≠ 0 → 0 < α)
+    (hratio : ∀ α ∈ S, α ≠ 0 → 2 * α ≤ β)
+    (hcard : 2 ≤ (S.erase 0).card) :
+    ∃ (h : ℚ[X]) (S₂ : Finset ℚ) (β₂ : ℚ),
+      0 < h.natDegree
+      ∧ (0 : ℚ) ∈ S₂
+      ∧ (∀ α ∈ S, h.eval α ∈ S₂)
+      ∧ h.eval β = β₂
+      ∧ (∀ α ∈ S₂, α ≠ 0 → 0 < α)
+      ∧ β₂ ∉ S₂
+      ∧ (∀ α ∈ S₂, α ≠ 0 → 2 * α ≤ β₂)
+      ∧ (S₂.erase 0).card < (S.erase 0).card
+      ∧ (∀ x : ℂ, (derivative (h.map (algebraMap ℚ ℂ))).eval x = 0 →
+          ∃ s ∈ S, (h.map (algebraMap ℚ ℂ)).eval x = algebraMap ℚ ℂ (h.eval s)) := by
+  classical
+  have hposT : ∀ α ∈ S.erase 0, 0 < α := fun α hα =>
+    hpos α (Finset.mem_of_mem_erase hα) (Finset.ne_of_mem_erase hα)
+  obtain ⟨lam, r, hlam0, hr0, hr1, h1mem, hrmem, hall⟩ :=
+    exists_normalizing_scale (S.erase 0) hposT hcard
+  obtain ⟨a, b, hr⟩ := exists_num_den r hr0 hr1
+  have hlamne : lam ≠ 0 := hlam0.ne'
+  obtain ⟨S₁, hS₁def⟩ : ∃ S₁ : Finset ℚ, S₁ = S.image (fun t => lam * t) := ⟨_, rfl⟩
+  have hmemS₁ : ∀ t ∈ S, lam * t ∈ S₁ := by
+    intro t ht
+    rw [hS₁def]
+    exact Finset.mem_image.2 ⟨t, ht, rfl⟩
+  have hsub : (S.erase 0).image (fun t => lam * t) ⊆ S₁ := by
+    rw [hS₁def]
+    exact Finset.image_subset_image (Finset.erase_subset _ _)
+  have h0S₁ : (0 : ℚ) ∈ S₁ := by
+    have := hmemS₁ 0 h0S
+    rwa [mul_zero] at this
+  have h1S₁ : (1 : ℚ) ∈ S₁ := hsub h1mem
+  have hrS₁ : r ∈ S₁ := hsub hrmem
+  have hne₁ : S₁.Nonempty := ⟨0, h0S₁⟩
+  have hS₁all : ∀ α ∈ S₁, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α := by
+    intro α hα
+    rw [hS₁def] at hα
+    obtain ⟨t, htS, rfl⟩ := Finset.mem_image.1 hα
+    by_cases h : t = 0
+    · left; rw [h, mul_zero]
+    · exact Or.inr (hall _ (Finset.mem_image.2 ⟨t, Finset.mem_erase.2 ⟨h, htS⟩, rfl⟩))
+  have hβ₁ : ∀ α ∈ S₁, α ≠ 0 → 2 * α ≤ lam * β := by
+    intro α hα hα0
+    rw [hS₁def] at hα
+    obtain ⟨t, htS, rfl⟩ := Finset.mem_image.1 hα
+    have ht0 : t ≠ 0 := by
+      intro h
+      exact hα0 (by rw [h, mul_zero])
+    calc 2 * (lam * t) = lam * (2 * t) := by ring
+      _ ≤ lam * β := mul_le_mul_of_nonneg_left (hratio t htS ht0) hlam0.le
+  obtain ⟨h0S₂, hpos₂, hβ₂notmem, hratio₂, hcardlt⟩ :=
+    lemma_2_2_shift a b S₁ hne₁ r (lam * β) hr h0S₁ h1S₁ hrS₁ hS₁all hβ₁
+  refine ⟨stepPoly a b (belyiShift a b S₁ hne₁) lam,
+    S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne₁),
+    belyiVal a b (lam * β) + belyiShift a b S₁ hne₁,
+    natDegree_stepPoly_pos a b _ lam hlamne, h0S₂, ?_, eval_stepPoly a b _ lam β,
+    hpos₂, hβ₂notmem, hratio₂, ?_, ?_⟩
+  · intro α hα
+    rw [eval_stepPoly]
+    exact Finset.mem_image.2 ⟨lam * α, hmemS₁ α hα, rfl⟩
+  · -- `|S₂\{0}| < |S\{0}|`
+    have hcardS₁ : S₁.card = S.card := by
+      rw [hS₁def, Finset.card_image_of_injective _ (mul_right_injective₀ hlamne)]
+    have h1le : 1 ≤ (S₁.image (fun α => belyiVal a b α + belyiShift a b S₁ hne₁)).card :=
+      Finset.card_pos.2 ⟨0, h0S₂⟩
+    rw [Finset.card_erase_of_mem h0S₂, Finset.card_erase_of_mem h0S]
+    omega
+  · -- 臨界点は `λ·S` の中の `{0, 1, r}` から来る
+    have hrC : algebraMap ℚ ℂ r = ((a : ℂ) + 1) / ((a : ℂ) + 1 + ((b : ℂ) + 1)) := by
+      have hcast := congrArg (fun z : ℝ => (z : ℂ)) hr
+      push_cast at hcast
+      simpa using hcast
+    intro x hx
+    rcases crit_stepPoly a b (belyiShift a b S₁ hne₁) lam hlamne x hx with hcx | hcx | hcx
+    · refine ⟨0, h0S, ?_⟩
+      have hxs : x = algebraMap ℚ ℂ (0 : ℚ) := by
+        refine eq_ratCast_of_scale hlamne ?_
+        rw [hcx, mul_zero, map_zero]
+      rw [hxs, eval_map_ratCast]
+    · obtain ⟨t, htT, hts⟩ := Finset.mem_image.1 h1mem
+      refine ⟨t, Finset.mem_of_mem_erase htT, ?_⟩
+      have hxs : x = algebraMap ℚ ℂ t := by
+        refine eq_ratCast_of_scale hlamne ?_
+        rw [hcx, hts, map_one]
+      rw [hxs, eval_map_ratCast]
+    · obtain ⟨t, htT, hts⟩ := Finset.mem_image.1 hrmem
+      refine ⟨t, Finset.mem_of_mem_erase htT, ?_⟩
+      have hxs : x = algebraMap ℚ ℂ t := by
+        refine eq_ratCast_of_scale hlamne ?_
+        rw [hcx, hts, hrC]
+      rw [hxs, eval_map_ratCast]
+
+/-! ## ★★★★★★★★★★`Lemma 2.2` 本体 —— `|S\{0}|` についての帰納法 -/
+
+/-- ★★★★★★★★★**帰納法の本体**(`n` は `|S\{0}|` の上界)。
+
+原文 (NCBelyi p.4):
+> hypothesis and composing the resulting morphisms P1
+
+★★合成は `BelyiComp.lean` の `comp_crit_of_rel` が受ける
+——★★★**合成される 2 つは対等でない**:
+`stepPoly` は `{0,1}` を `{0,1}` へ写さない(`f₀` へ写す)ので `IsBelyiPoly` ではなく、
+臨界値が `stepPoly(S)` に入るという**相対的な**性質しか持たない。
+それを帰納法の仮定 `g(S₂) ⊆ {0,1}` が吸収する。 -/
+theorem lemma_2_2_aux : ∀ (n : ℕ) (S : Finset ℚ) (β : ℚ),
+    (S.erase 0).card ≤ n →
+    (0 : ℚ) ∈ S →
+    (∀ α ∈ S, α ≠ 0 → 0 < α) →
+    β ∉ S → β ≠ 0 →
+    (∀ α ∈ S, α ≠ 0 → 2 * α ≤ β) →
+    ∃ f : ℚ[X], 0 < f.natDegree
+      ∧ (∀ α ∈ S, f.eval α = 0 ∨ f.eval α = 1)
+      ∧ f.eval β ≠ 0 ∧ f.eval β ≠ 1
+      ∧ (∀ x : ℂ, (derivative (f.map (algebraMap ℚ ℂ))).eval x = 0 →
+          (f.map (algebraMap ℚ ℂ)).eval x = 0 ∨ (f.map (algebraMap ℚ ℂ)).eval x = 1) := by
+  intro n
+  induction n with
+  | zero =>
+    intro S β hcard _ hpos hβ hβ0 _
+    exact lemma_2_2_base S β hpos hβ hβ0 (by omega)
+  | succ n ih =>
+    intro S β hcard h0S hpos hβ hβ0 hratio
+    by_cases hsmall : (S.erase 0).card ≤ 1
+    · exact lemma_2_2_base S β hpos hβ hβ0 hsmall
+    · push_neg at hsmall
+      obtain ⟨h, S₂, β₂, hdeg, h0S₂, hmaps, hevalβ, hpos₂, hβ₂, hratio₂, hcard₂, hcrit⟩ :=
+        lemma_2_2_step S β h0S hpos hratio (by omega)
+      have hβ₂0 : β₂ ≠ 0 := by
+        intro hc
+        rw [hc] at hβ₂
+        exact hβ₂ h0S₂
+      obtain ⟨g, hgdeg, hgS, hgβ0, hgβ1, hgcrit⟩ :=
+        ih S₂ β₂ (by omega) h0S₂ hpos₂ hβ₂ hβ₂0 hratio₂
+      refine ⟨g.comp h, ?_, ?_, ?_, ?_, ?_⟩
+      · rw [natDegree_comp]
+        exact Nat.mul_pos hgdeg hdeg
+      · intro α hα
+        rw [eval_comp]
+        exact hgS _ (hmaps α hα)
+      · rw [eval_comp, hevalβ]
+        exact hgβ0
+      · rw [eval_comp, hevalβ]
+        exact hgβ1
+      · exact comp_crit_of_rel hcrit (fun s hs => hgS _ (hmaps s hs)) hgcrit
+
+/-- ★★★★★★★★★★**[NCBelyi] Lemma 2.2**(Belyi Maps Noncritical at Prescribed Rational Points)。
+
+原文 (NCBelyi p.3):
+> Lemma 2.2.
+> (Belyi Maps Noncritical at Prescribed Rational Points)
+
+`S ⊆ ℙ¹(ℚ)` が (i) `0, ∞ ∈ S`、(ii) `α ∈ S\{0,∞} → α > 0` を満たし、
+`β ∈ ℚ\S` が (iii) `β/α ≥ 2`(`∀ α ∈ S\{0,∞}`)を満たすとき、
+**非定数多項式 `f ∈ ℚ[x]`** が存在して
+(a) `φ(S) ⊆ {0,1,∞}`、(b) `φ(β) ∉ {0,1,∞}`、(c) `φ` は `ℙ¹\{0,1,∞}` 上不分岐。
+
+★`∞` は多項式なら常に `∞` へ行くので、アフィン部分だけで書いてある
+(`Lemma22.lean` 冒頭の対応表)。★条件 (iii) は `β/α ≥ 2` を
+**割り算を避けて `2·α ≤ β`** と書いた(`α > 0` なので同値)。 -/
+theorem lemma_2_2 (S : Finset ℚ) (β : ℚ)
+    (h0S : (0 : ℚ) ∈ S)
+    (hpos : ∀ α ∈ S, α ≠ 0 → 0 < α)
+    (hβ : β ∉ S) (hβ0 : β ≠ 0)
+    (hratio : ∀ α ∈ S, α ≠ 0 → 2 * α ≤ β) :
+    ∃ f : ℚ[X], 0 < f.natDegree
+      ∧ (∀ α ∈ S, f.eval α = 0 ∨ f.eval α = 1)
+      ∧ f.eval β ≠ 0 ∧ f.eval β ≠ 1
+      ∧ (∀ x : ℂ, (derivative (f.map (algebraMap ℚ ℂ))).eval x = 0 →
+          (f.map (algebraMap ℚ ℂ)).eval x = 0 ∨ (f.map (algebraMap ℚ ℂ)).eval x = 1) :=
+  lemma_2_2_aux (S.erase 0).card S β le_rfl h0S hpos hβ hβ0 hratio
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
@@ -333,6 +620,31 @@ def card_image_belyiVal_lt.src : ABC3.Meta.Source :=
 def zero_mem_image_belyiVal_add_shift.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 4,
     item := "Lemma 2.2(帰納段——f₀ を足すと下確が 0 になる)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def stepPoly.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段の多項式——f + f₀ を λ 倍したもの)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def crit_stepPoly.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 2,
+    item := "Lemma 2.1, (b)(スケーリングと f₀ を通した形)",
+    sectionId := "ncbelyi-lemma-2-1" }
+
+def lemma_2_2_shift.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——β′, S′ が条件 (i)(ii)(iii) を満たす)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def lemma_2_2_step.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——λ·S へ Lemma 2.1 を適用する)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def lemma_2_2.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 3,
+    item := "Lemma 2.2",
     sectionId := "ncbelyi-lemma-2-2" }
 
 end ABC3.Found.NCBelyi

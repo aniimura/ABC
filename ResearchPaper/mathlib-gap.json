@@ -76,14 +76,15 @@
       "minimalForm": "Theorem 2.5 そのもの。",
       "nodes": 5,
       "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
-      "done": 2,
-      "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)と Lemma 2.3(Found/NCBelyi/Separation.lean)は実装済み。Lemma 2.2 の部品(Normalize.lean の λ-スケーリング、BelyiComp.lean の IsBelyiPoly と comp_crit_of_rel)も揃っている。",
-      "missingSkeleton": ["[NCBelyi] Lemma 2.2", "[NCBelyi] Lemma 2.4"],
-      "missingSkeletonNote": "★★Skeleton が無いのはこの 2 つだけ。原典があるので今すぐ書ける。未実装の合図は Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。",
+      "done": 3,
+      "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
+      "missingSkeleton": ["[NCBelyi] Lemma 2.4"],
+      "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
       "where": [
         "lean/ABC3/Skeleton/NCBelyi/Theorem25.lean",
         "lean/ABC3/Found/NCBelyi/Lemma21.lean",
         "lean/ABC3/Found/NCBelyi/Separation.lean",
+        "lean/ABC3/Found/NCBelyi/Lemma22.lean",
         "lean/ABC3/Found/NCBelyi/Normalize.lean",
         "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
       ]

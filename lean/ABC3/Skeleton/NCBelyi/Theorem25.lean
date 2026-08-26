@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.NCBelyi.BelyiSetup
 import ABC3.Found.NCBelyi.Separation
+import ABC3.Found.NCBelyi.Lemma22
 
 /-!
 # [NCBelyi] Theorem 2.5 —— Belyi Maps Noncritical at Prescribed Points(`Skeleton`)
@@ -123,5 +124,57 @@ def lemma_2_3.src : Source :=
 /-- ★**空リストは省略ではなく主張である** —— 原文の証明は外部依存を持たない
 (「`|λ − β|` を十分小さく取ればよい」だけ)。 -/
 def lemma_2_3.needs : List ProofObligation := []
+
+/-! ## Lemma 2.2 —— 有理点で非臨界な Belyi 写像(★実装済み) -/
+
+section Lemma22
+open Polynomial
+
+/-- **[NCBelyi] Lemma 2.2**(Belyi Maps Noncritical at Prescribed Rational Points)。
+
+原文 (NCBelyi p.3):
+> (Belyi Maps Noncritical at Prescribed Rational Points)
+
+★★**本 statement は `sorry` ではない**——`Found/NCBelyi/Lemma22.lean` の実装を参照する。
+
+`S ⊆ ℙ¹(ℚ)` が (i) `0, ∞ ∈ S`、(ii) `α ∈ S∖{0,∞} → α > 0` を満たし、
+`β ∈ ℚ∖S` が (iii) `β/α ≥ 2`(`∀ α ∈ S∖{0,∞}`)を満たすとき、
+**非定数多項式 `f ∈ ℚ[x]`** が存在して
+(a) `φ(S) ⊆ {0,1,∞}`、(b) `φ(β) ∉ {0,1,∞}`、(c) `φ` は `ℙ¹_ℚ∖{0,1,∞}` 上不分岐。
+
+## ★原文からの読み替え(2 点、いずれも後続に影響しない)
+
+1. **`∞` を落とした。** 多項式は常に `∞ ↦ ∞` で、`∞ ∈ {0,1,∞}` だから
+   (a)(c) は `∞` で自動的に満たされる。よってアフィン部分だけで書いてある。
+2. **`β/α ≥ 2` を `2·α ≤ β` と書いた。** `α > 0` なので同値であり、
+   割り算の場合分けを持ち込まずに済む。
+
+## ★★原文が書いていない段を 1 つ足した
+
+原文の証明は『**so long as |S| ≥ 4**』と書くだけで**基底段を書かない**。
+`|S∖{0,∞}| ≤ 1` では 1 次式 `x ↦ c·x` で足りる(`exists_base_scale`)。
+★★**1 次式は臨界点を持たない**ので条件 (c) は空虚に成り立つ——これが基底段が易しい理由である。 -/
+theorem lemma_2_2 (S : Finset ℚ) (β : ℚ)
+    (h0S : (0 : ℚ) ∈ S)
+    (hpos : ∀ α ∈ S, α ≠ 0 → 0 < α)
+    (hβ : β ∉ S) (hβ0 : β ≠ 0)
+    (hratio : ∀ α ∈ S, α ≠ 0 → 2 * α ≤ β) :
+    ∃ f : ℚ[X], 0 < f.natDegree
+      ∧ (∀ α ∈ S, f.eval α = 0 ∨ f.eval α = 1)
+      ∧ f.eval β ≠ 0 ∧ f.eval β ≠ 1
+      ∧ (∀ x : ℂ, (derivative (f.map (algebraMap ℚ ℂ))).eval x = 0 →
+          (f.map (algebraMap ℚ ℂ)).eval x = 0 ∨ (f.map (algebraMap ℚ ℂ)).eval x = 1) :=
+  ABC3.Found.NCBelyi.lemma_2_2 S β h0S hpos hβ hβ0 hratio
+
+def lemma_2_2.src : Source :=
+  { paper := "NCBelyi", pdfPage := 3, item := "Lemma 2.2",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+/-- ★原文の証明が実際に依拠しているのは `Lemma 2.1` だけである
+(『apply Lemma 2.1 [with, say, C = 2] to the set λ · S』)。 -/
+def lemma_2_2.needs : List ProofObligation :=
+  [ .otherPaper "[NCBelyi]" "Lemma 2.1(Separating Properties of Belyi Maps)" 2 ]
+
+end Lemma22
 
 end ABC3.Skeleton.NCBelyi
