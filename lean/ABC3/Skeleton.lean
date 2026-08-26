@@ -23,6 +23,7 @@ import ABC3.Skeleton.GaloisRep.WeilDivisor
 import ABC3.Skeleton.GaloisRep.WeilRoot
 import ABC3.Skeleton.GaloisRep.WeilPairingDef
 import ABC3.Skeleton.GaloisRep.WeilPairing
+import ABC3.Skeleton.GaloisRep.EDSThreeTerm
 import ABC3.Skeleton.Divisor.SchemeWeil
 import ABC3.Skeleton.Divisor.Cartier
 import ABC3.Skeleton.Divisor.ArithDivisor

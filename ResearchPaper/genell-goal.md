@@ -25907,3 +25907,76 @@ mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-635 ★★★★★★★楕円列の核心は 2 変数の 3 項恒等式だけ(第 322 ブロック)
+
+`Found/GaloisRep/EDSThreeTerm.lean`・`Skeleton/GaloisRep/EDSThreeTerm.lean`。
+
+### ★★★★★★★到達点
+
+> **`IsEllSequence W` は `r = 1` の場合(2 変数の 3 項恒等式)から `ring` で出る**
+
+★★★これで **mathlib の TODO**(`normEDS` が `IsEllDivSequence` を満たすこと)の
+楕円列の側は、**3 変数の恒等式から 2 変数の恒等式へ縮んだ**。
+
+### ★★★★★★なぜ縮むのか——2 次元の Plücker 関係
+
+`h(x,y) := W(x+y)·W(x−y)` と置くと、3 項恒等式は
+
+    h(m,n) = h(m,1)·h(n,0) − h(n,1)·h(m,0)
+
+すなわち **`h(x,y) = det(v_x, v_y)`、`v_x := (W(x+1)W(x−1), W(x)²)`** という
+2 次元ベクトルの行列式である。★★`IsEllSequence` の主張
+
+    h(m,n)·h(r,0) = h(m,r)·h(n,0) − h(n,r)·h(m,0)
+
+は、その行列式表示を代入すれば **2 次元の Plücker 関係**そのものになり、`ring` で閉じる。
+★★★★★`W 1 = 1` すら要らない。同じ理由で **Riemann の 4 項恒等式**も出る。
+
+### ★★★★★★残る核心は「差 `3` 以上」だけである
+
+mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのもの**であった:
+
+| mathlib | 3 項恒等式の場合 | 差 `m − n` |
+|---|---|---|
+| `normEDS_odd` | `T(m+1, m)` | `1` |
+| `normEDS_even` | `T(m+1, m−1)` | `2` |
+
+★`n = 0`・`n = 1` は自明、`m ↔ n` の交換は奇関数性。
+★★★★★★★**残るのは差が `3` 以上の場合だけ**である。
+
+差 `3` の場合を書き下すと
+
+    c·[W(m)W(m−2)³ − W(m−3)W(m−1)³] = W(m+1)W(m−1)W(m−3)² − W(m−2)W(m−4)W(m)²
+
+★mathlib の漸化式は指数を半分に落とすので、これを隣接指数だけの `ring` では出せない
+——**倍加の構造を経由した強い帰納法**が要る(第 203 相当の `n = 4` が 124 秒で失敗したのと
+同じ壁の、正体である)。
+
+### ★★これがどこに効くか(G5 の縮約の鎖)
+
+    (G5) 非退化性
+      → F(E)^{E[n]} = [n]^*F(E)        (第 197)
+      → deg[n] = n²                    (第 196)
+      → [F(x) : F(x∘[n])] <= n²        (第 198、モニック多項式で上から)
+      → x([n]P) = Φ_n/ΨSq_n            (Skeleton/WeilFunctionField)
+      → **EDS 恒等式**                  (mathlib の TODO)
+      → **2 変数の 3 項恒等式**         ★本ブロック
+
+★★依存グラフに新しい葉 `Skeleton/GaloisRep/EDSThreeTerm.lean` を立てた。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `IsThreeTerm` | ★★2 変数の 3 項恒等式 |
+| `isEllSequence_of_isThreeTerm` | ★★★★★★★**`IsEllSequence` は 3 項恒等式から出る** |
+| `isThreeTerm_of_isEllSequence` | ★★逆(`W 1 = 1` のとき) |
+| `riemann_four_term` | ★★★★**Riemann の 4 項恒等式** |
+| `threeTerm_swap` | ★★`m ↔ n` の交換 |
+| `normEDS_threeTerm_zero`・`_one` | ★`n = 0, 1` は自明 |
+| `normEDS_threeTerm_diff_one`・`_two` | ★★★★**漸化式は差 `1`・`2` の場合そのもの** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
