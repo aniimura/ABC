@@ -48,6 +48,28 @@ import Mathlib.RingTheory.DedekindDomain.Different
 | **5(`p ∈ λ·O_L`)** | ★**本ファイル**——付値環の全順序性 1 行 |
 | **6(different の下界)** | ★**本ファイル** |
 | **5+6 を繋いだ結論 `p^p·O_L ⊆ different`** | ★★**本ファイル** |
+## ★★★★★★★★ 2026-08-26 の在庫調査——段 1 を閘として測った
+
+段 1(野生/馴の分離、馴なら `n = 1`)には「**馴分岐なら different の指数はちょうど `e−1`**」
+が要る。mathlib を実測した(2026-08-26、`Mathlib/RingTheory/DedekindDomain/Different.lean`):
+
+| 欲しいもの | mathlib |
+|---|---|
+| `P^{e−1} ∣ 𝔡`(下界) | ✅ `pow_sub_one_dvd_differentIdeal` |
+| 不分岐 ⇔ `P ∤ 𝔡` | ✅ `not_dvd_differentIdeal_iff` / `dvd_differentIdeal_iff` |
+| ★**馴分岐なら `¬ P^e ∣ 𝔡`(上界)** | ❌**無い** |
+| ★★**Serre の評価 `d_P ≤ e − 1 + v_P(e)`** | ❌**無い** |
+
+★★★**Serre の評価 1 本あれば elementary claim は一発で出る**:
+`v_P(p) = e·e_K ≥ e` なので、`n ≙ 1 + log_p d` と取れば
+`n·v_P(p) ≥ n·e ≥ e − 1 + e·v_{P_K}(e) ≥ d_P` となる——
+野生/馴の分離も `ζ_p` への帰着も Kummer 理論も**要らなくなる**。
+
+★★★★したがってこの先の選択肢は 2 つである:
+**(A)** 原文の 6 段をそのまま追う(段 1 の上界を自分で作る)、
+**(B)** Serre の評価を 1 本作ってそこから出す。
+★★★★★どちらも**トレース形の局所計算**に帰着するので、大きさは同程度である。
+
 -/
 
 namespace ABC3.Found.GenEll

@@ -28348,3 +28348,35 @@ Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools
 `expected token` になる。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-689 ★★★★★★★**段 1 を閘として測った——Serre の評価 1 本で出る**(第 377 ブロック)
+
+段 1(野生/馴の分離、馴なら `n = 1`)には「**馴分岐なら different の指数はちょうど `e−1`**」
+が要る。mathlib を実測した(`Mathlib/RingTheory/DedekindDomain/Different.lean`):
+
+| 欲しいもの | mathlib |
+|---|---|
+| `P^{e−1} ∣ 𝔡`(下界) | ✅ `pow_sub_one_dvd_differentIdeal` |
+| 不分岐 ⇔ `P ∤ 𝔡` | ✅ `not_dvd_differentIdeal_iff` |
+| ★**馴分岐なら `¬ P^e ∣ 𝔡`(上界)** | ❌**無い** |
+| ★★**Serre の評価 `d_P ≤ e − 1 + v_P(e)`** | ❌**無い** |
+
+### ★★★★★★Serre の評価 1 本あれば elementary claim は**一発で出る**
+
+    v_P(p) = e·e_K ≥ e
+    n ≙ 1 + log_p d と取れば
+    n·v_P(p) ≥ n·e ≥ e − 1 + e·v_{P_K}(e) ≥ d_P
+
+★**野生/馴の分離も `ζ_p` への帰着も Kummer 理論も要らなくなる**。
+
+### この先の選択肢
+
+| | 道 | 大きさ |
+|---|---|---|
+| (A) | 原文の 6 段をそのまま追う(段 1 の上界を自分で作る) | トレース形の局所計算 |
+| (B) | **Serre の評価を 1 本作ってそこから出す** | 同じくトレース形 |
+
+★★どちらも同程度だが、**(B) の方が得られるものが広い**(分岐理論全般に使える)。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
