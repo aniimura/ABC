@@ -1,4 +1,5 @@
 import ABC3.Found.GaloisRep.GalRepWitness
+import ABC3.Found.GaloisRep.FullImageWitness
 
 /-!
 # スケルトン —— **行列式は円分指標(Weil 対)**(`Skeleton`)
@@ -61,7 +62,9 @@ theorem det_galRep_eq_cyclotomic {K L : Type} [Field K] [DecidableEq K] [CharZer
     (σ : L ≃ₐ[K] L) (n : ℕ) (ζ : L) (hζ : ζ ^ (l ^ n) = 1) :
     σ ζ = ζ ^ ((PadicInt.toZModPow n
       ((galRep W l e σ : Matrix (Fin 2) (Fin 2) ℤ_[l]).det)).val) := by
-  sorry
+  haveI : WeierstrassCurve.IsElliptic ((W.baseChange L).toAffine) :=
+    isElliptic_baseChange_affine W hell
+  exact det_cyclotomic_full W l e σ n ζ hζ
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -71,7 +74,19 @@ def det_galRep_eq_cyclotomic.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def det_galRep_eq_cyclotomic.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8(Weil 対の構成と性質)"
+  [ .implicitStep
+      "★★★★★★★★★★**2026-08-26: 本節点は閉じた**。★非退化性は第 327 ブロック `Found/GaloisRep/WeilNondegFull.lean` の `weilPairing_nondegenerate` で取れ、第 210 の `det_cyclotomic_of_nondeg` に渡して `det_cyclotomic_full`(第 328)になった。★★`hfix`(= `F(E)^{E[n]} = [n]^*F(E)`)は `L := F(x_n, y_n)` を取り、(a) `x` は `L` 上整で最小多項式の次数 <= n²、(b) `y ∈ L(x)`、(c) ゆえに `L(x) = F(E)`、(d) Artin の `[F(E):Fix] = n²` で挟む、(e) `L ⊆ μF(E)`、の 5 段で出た(第 325-327)。★★★★★**EDS 恒等式も双対同種も使わなかった**——`x([n]P)·ΨSq_n(x) = Φ_n(x)` の帰納は第 42-52 で既に回してあった(0 ブロック)" 19,
+    .implicitStep
+      "★★★★★★★2026-08-26 の訂正: 下の『残件 (i)』は**古い**。★`normEDS` が楼円列であること(Ward の定理)は **第 58 ブロック `Found/GaloisRep/EdsWard.lean` の `isEllSequence_normEDS` で閉じている**(Somos-4 は第 47 `EdsSomos.lean`、(Λ) は第 56 `EdsLambda.lean`、`W(j) ≠ 0` は第 57 `EdsIdentity.lean`)。★★したがって『mathlib 自身の TODO』『30-80 ブロック』『上流案件』という見積もりは**もう当てはまらない**。★★★いま非退化性に残っているのは `hfix`(= `deg[n] = n²`)であり、第 196-198 の測定によりそれは `Φ_n(x) = x_n·ΨSq_n(x)`(`Skeleton/GaloisRep/WeilFunctionField.lean` の `exists_mulByNPullback`)1 本に帰着している。★★★★点の水準の乗法公式 `x(nP)·ΨSq_n(x) = Φ_n(x)` は **第 52 ブロック `MulPoint.lean` の `mulOK_of_ne` に在庫がある**(仮定は `1 ≤ k ≤ n` で `ΨSq_k(x) ≠ 0`)。生成点が捩れ点でないことは第 125。★★★★★したがって残りは**新しい数学ではなく配線の見込み**である(2026-08-26 時点で未実測)" 19,
+    .implicitStep
+      "★★★★★★★★★**2026-08-20: 数学はすべて揃った**(第 178-204 ブロック)。★Weil 対 `e_n` の構成(第 178)、`e_n^n = 1`(第 179)、双線型性(第 184・191・195)、交代性(第 190・191)、Galois 同変性(第 192-194)、反対称性(第 195)、**行列式の公式 `e_n(aP+cQ, bP+dQ)·e_n(P,Q)^{bc} = e_n(P,Q)^{ad}`**(第 203)、**円分指標の段 `σ ζ · ζ^{bc} = ζ^{ad}`**(第 204)。★★当初の見積もり『50-150 ブロック、因子の層から積む』は**2 つの残件**に絞れた(0 ブロック)" 19,
+    .implicitStep
+      "★★★★★★★★**残件 (i): 非退化性 = `normEDS` が楕円列であること**。第 197 で非退化性は `F(E)^{E[n]} = [n]^*F(E)` の 1 つに絞れ、第 196 の Artin(`[F(E) : F(E)^{E[n]}] = n²`)と第 198 のモニック性(`Φ_n − c·ΨSq_n` は次数ちょうど `n²`)で挟むと、要るのは `x(nP) = Φ_n/ΨSq_n` だけになる。★これは分点多項式列が**楕円列**であることに帰着し、**mathlib 自身の TODO** である(`Mathlib/NumberTheory/EllipticDivisibilitySequence.lean` の `TODO: prove that normEDS satisfies IsEllDivSequence`、2026-08-20 実測)(30-80 ブロック、上流案件)" 19,
+    .implicitStep
+      "★★★★★★★★★**残件 (ii): Lean 上の配線——2026-08-20 に完了した**(第 205-210 ブロック)。`galRep W l e σ` は `galTate` の基底 `e` での行列 `galMat` である(`Found/GaloisRep/GalRep.lean`)。★第 204 を当てるには、`T_l E` の基底 `e⁻¹(1,0)`・`e⁻¹(0,1)` の第 `n` 成分 `P, Q` が `E[l^n]` の基底になり、`σP = aP + cQ`・`σQ = bP + dQ` の `(a b; c d)` が `galMat mod l^n` に一致することが要る。★★要するに **`T_l E / l^n·T_l E ≅ E[l^n]`** と、`ℤ_l` の `E[l^n]` への作用が `PadicInt.toZModPow n` を経由すること。★★★射影 `T_l E → E[l^n]` は `Interface/GaloisRep/Torsion.lean` に定義済み、全射性に要る `E[l^{n+1}] → E[l^n]` の全射は**第 186 の `exists_nsmul_eq_point` で済んでいる**。★★★★**第 205(射影と `Z_l` 作用)・第 206(行列成分の読み替え)・第 207(`hgen` を仮定した形)・第 208(塔の各段の全射)・第 209(逆極限の全射性と生成性)・第 210(数え上げで自由性)で閉じた**。★★★★★`Found/GaloisRep/BasisFree.lean` の `det_cyclotomic_of_nondeg` が**非退化性だけを仮定した形**で取れている(0 ブロック)" 19,
+    .implicitStep
+      "★★★★★★★★**2026-08-20: 本節点に残っているのは非退化性 1 件だけである**。★`Z_l` 線型性を使わずに済んだ——`tateModule` は加法同型 `~+ Z_l^2` しか持たないが、`#E[l^n] = l^{2n}` の数え上げだけで基底の位数がちょうど `l^n` であることが出た(第 210 `order_exact_of_gen`)。★★非退化性には別ルートも測った——`deg [n] = #fiber = n^2` を `Ideal.sum_ramification_inertia`(mathlib にある)で出す道であるが、「関数体の place と点の対応」「不分岐性」「拡大の有限性を先に言う」の 3 段が要り、15-40 ブロックと見積もる(どちらも上流の作業であり、本節点の下では閉じない)" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8(Weil 対の構成と性質)"
       (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の Galois 同変性)" 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の双線型性)" 19,

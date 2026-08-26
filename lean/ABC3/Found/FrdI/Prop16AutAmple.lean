@@ -91,9 +91,19 @@ theorem cfp_baseTrivial_mpr_of_isotropic (G : Frobenioid P)
 
 ★`𝒟'` の sub-automorphism が**すべて同型**なら(`IsAutSaturatedObj`)、
 `Aut^sub_{𝒟'}(a) = Aut_{𝒟'}(a)` なので `Aut-ample` から直に出る。
-★★**これは応用では真である** —— `Example 6.1` / `Example 6.3` の底の圈
-`B(G)⁰`(`Sec6GaloisCat.lean` の `(FinSub K K̄)ᵒᵖ`)では、連結対象の
-自己射がすべて同型だからである。
+
+## ★★★★応用でこの仮定が成り立つことは**証明した**(2026-08-25)
+
+前版はここに「**これは応用では真である**」と書いていたが、
+**Lean の主張としては書かれていなかった**(docstring の断言のまま)。
+★`Sec6GaloisCat.lean` の **`finSubOp_autSaturated` / `finSubOp_isAutSaturatedObj`** で埋めた。
+中身は在庫の `finSubOp_isIso_of_endo` 1 本で、
+`Example 6.1` / `Example 6.3` の底の圏 `B(G)⁰`(`(FinSub K K̄)ᵒᵖ`)では
+**自己射がそもそも全部同型**である。
+
+★★★したがってその底の上では `Aut^sub_𝒟 = Aut_𝒟 = End_𝒟` であり、
+原文が (vi) で引く 2 つの概念の**区別は元から無い**。
+下の追加仮定は、この応用では**結論を弱めない**。
 
 ## ★逸脱(記録)
 
@@ -101,7 +111,12 @@ theorem cfp_baseTrivial_mpr_of_isotropic (G : Frobenioid P)
 下の定理は代わりに **`Aut-ample`** を仮定する。
 ★`𝒟'` が Aut-saturated のとき、結論が要求するのは**同型の持ち上げ**なので、
 この強めの仮定が自然である(`Aut^sub-ample` だけでは
-持ち上げた `φ` が同型とは限らず、上の障壁に戻る)。 -/
+持ち上げた `φ` が同型とは限らず、上の障壁に戻る)。
+★★★**残る危険**: `Aut^sub` が `Aut` より真に大きい底の上で (vi) を使う消費者が現れたら、
+この版は使えない。★現時点で `IsAutSubAmple` の消費者は
+`Prop15.lean`(初等 Frobenioid、別証明)だけで、`CfpCat` の消費者は
+`ElementaryFrobenioid.lean` / `Prop16.lean` / 本ファイルの 3 つに限られる
+(2026-08-25 実測)。原典側の消費者は **[IUTchI]**(未形式化)である。 -/
 
 /-- ★★★★**[FrdI] Proposition 1.6, (vi)** の `Aut^sub-ample` ——
 `𝒟'` の sub-automorphism がすべて同型なら、`Aut-ample` から降りる。 -/
@@ -128,5 +143,58 @@ def cfp_autSubAmple_of_autSaturated.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 28,
     item := "Proposition 1.6, (vi) — Aut^sub-ample",
     sectionId := "frdi-prop-1-6-v" }
+
+/-! ### ★★★★★★★★項目全体の `.src`
+
+★`.src` は「その原典項目を**完全に**実装した」という主張である
+(`tools/frdi-progress.mjs` の規則)。★★下の 1 つは
+**仮定を 2 つ足すという逸脱の下で**置く —— 逸脱の内容は次の docstring に書く。 -/
+
+/-- ★★★★★★★★**[FrdI] Proposition 1.6** —— 条がすべて実装された
+(★★**仮定を 2 つ足す逸脱つき**)。
+
+| 条 | 主張 | 宣言 |
+|---|---|---|
+| (i)(ii) | `C^fp` の 21 条(pre-Frobenioid ＋ Frobenioid の核) | `cfpPreFrobenioid` / `cfpFrobenioidCore`(`Prop16.lean`) |
+| (iii) | pull-back の両向き | `cfp_isPullBack_iff` |
+| (iv) | LB-invertible と因子分解の一意性 | `cfp_pullBackLB` / `cfp_arbFactorUniq` |
+| (v) | perfect / Frobenius-normalized | `cfp_perfect_iff` / `cfp_frobNormalized_iff` |
+| (v) | base-trivial の `⟸` | ★`cfp_baseTrivial_mpr_of_isotropic`(**isotropic 型を仮定**) |
+| (vi) | `Aut-ample` / `End-ample` | `cfp_autAmple_of` / `cfp_endAmple_of` |
+| (vi) | `Aut^sub-ample` | ★`cfp_autSubAmple_of_autSaturated`(**`𝒟'` の Aut-saturated 性を仮定**) |
+
+## ★★★★逸脱の記録(CLAUDE.md の「逸脱」)
+
+★原文は (v) の `base-trivial ⟸` と (vi) の `Aut^sub-ample` を**無条件**で述べるが、
+我々はそれぞれに**原文にない仮定を 1 つずつ足して**閉じている。
+
+| 条 | 足した仮定 | 不足の記録 |
+|---|---|---|
+| (v) | `𝒞` が **isotropic 型** | `ABC3.Gap.FrdI.Gap_1_6_v`(`autAmple`) |
+| (vi) | `𝒟'` が **Aut-saturated**(sub-automorphism がすべて同型) | `ABC3.Gap.FrdI.Gap_1_6_vi`(`witnessDescends`) |
+
+★★どちらの `GapRecord` も `GapClass.missingMath`(② 原典の穴の疑い)のままである ——
+③(反証)を名乗るには反例が要り、①(閉じた)を名乗るには
+`Definition 1.3` からの導出が要る。**その判定は保留する。**
+
+## ★★★★★なぜ後続に影響しないと見るか
+
+★★**応用では 2 つの仮定はどちらも満たされる**:
+
+* isotropic 型 —— `Example 6.1` / `Example 6.3` の Frobenioid はいずれも isotropic 型
+  (`ex61Frobenioid_isotropicType` / `ex63_isotropic_family`)。
+* Aut-saturated —— 底の圏 `B(G)⁰ = (FinSub K K̄)ᵒᵖ` では自己射がそもそも
+  **全部同型**なので `Aut^sub_𝒟 = Aut_𝒟 = End_𝒟` である
+  (`Sec6GaloisCat.lean` の `finSubOp_autSaturated` / `finSubOp_isAutSaturatedObj`)。
+
+★★★**我々のツリー内に `Proposition 1.6` の消費者はいない**(2026-08-25 実測。
+`CfpCat` の消費者は `ElementaryFrobenioid.lean` / `Prop16.lean` / 本ファイルの 3 つだけ)。
+原典側の消費者は **[IUTchI]**(未形式化)である。
+★★したがって危険は **[IUTchI] を形式化する段で、`Aut^sub` が `Aut` より真に大きい底の上で
+(vi) を使う箇所が現れたとき**に限られる。そこに来たら本 docstring と
+`Gap_1_6_vi` を読み直すこと。 -/
+def prop_1_6.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 27, item := "Proposition 1.6",
+    sectionId := "frdi-prop-1-6" }
 
 end ABC3.Found.FrdI

@@ -304,4 +304,48 @@ def unTr_modelFrobenioid.src : ABC3.Meta.Source :=
     item := "Proposition 5.3 — 𝒞^un-tr は (Φ, Φ^birat) の model Frobenioid",
     sectionId := "frdi-prop-5-3" }
 
+/-! ## ★★★`IsStrictlyRational` を分割から出す —— `Theorem 6.2, (iii)` の配線(2026-08-21) -/
+
+/-- ★★★★**`Div_B` の像で「`p` で正・`p` を含まない」差が取れれば strictly rational**。
+
+★★原文 `Theorem 6.2, (iii)` の追加仮定
+「どの `D ∈ D_L` も `B(L)` の元の像の台に入る」がちょうどこの形になる。
+★分割そのものは `exists_split_suppElt_of_qc`(`CartierPerfFactorial.lean`)で、
+`K`-`Q`-Cartier だけから出る。 -/
+theorem isStrictlyRational_of_divB {G : Frobenioid P} (R : RatFnData P G)
+    (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → NNReal) (A : C)
+    (hsp : ∀ p : Prime (Φ.val (P.toElem.obj A).base),
+      ∃ (a b : Φ.val (P.toElem.obj A).base) (y : R.bmon.val (P.toElem.obj A).base),
+        (toGp _ a - toGp _ b = R.divB _ y ∨ toGp _ a - toGp _ b = -(R.divB _ y)) ∧
+        p ∈ SuppElt (ι _) a ∧ p ∉ SuppElt (ι _) b) :
+    IsStrictlyRational P G ι A := by
+  intro p
+  obtain ⟨a, b, y, hy, hpa, hpb⟩ := hsp p
+  refine ⟨a, b, ?_, hpa, hpb⟩
+  rcases hy with h | h
+  · rw [h]; exact divB_mem_phiBiratAt R y
+  · rw [h]; exact (phiBiratAt P G _).neg_mem (divB_mem_phiBiratAt R y)
+
+/-- ★strictly rational なら rational(恒等射は pull-back)。 -/
+theorem isRational_of_isStrictlyRational {G : Frobenioid P}
+    (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → NNReal) (A : C)
+    (h : IsStrictlyRational P G ι A) : IsRational P G ι A :=
+  ⟨A, 𝟙 A, isPullBack_of_isIso P (𝟙 A), h⟩
+
+/-- ★★★★★**`IsOfRationalType`**(`Theorem 6.2, (iii)` の中身のある一条)。 -/
+theorem isOfRationalType_of_divB {G : Frobenioid P} (R : RatFnData P G)
+    (ι : ∀ Y : D, Prime (Φ.val Y) → Pf (Φ.val Y) → NNReal)
+    (hsp : ∀ (A : C) (p : Prime (Φ.val (P.toElem.obj A).base)),
+      ∃ (a b : Φ.val (P.toElem.obj A).base) (y : R.bmon.val (P.toElem.obj A).base),
+        (toGp _ a - toGp _ b = R.divB _ y ∨ toGp _ a - toGp _ b = -(R.divB _ y)) ∧
+        p ∈ SuppElt (ι _) a ∧ p ∉ SuppElt (ι _) b) :
+    IsOfRationalType C P G ι :=
+  fun A => isRational_of_isStrictlyRational ι A (isStrictlyRational_of_divB R ι A (hsp A))
+
+/-- ★★★★locator —— `Theorem 6.2, (iii)` の rational 型。 -/
+def isOfRationalType_of_divB.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — Div_B の像で分割できれば rational 型",
+    sectionId := "frdi-thm-6-2" }
+
 end ABC3.Found.FrdI

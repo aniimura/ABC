@@ -20,6 +20,7 @@
 - [heredoc はバックスラッシュを 1 段食う](heredoc-eats-backslash.md) — `<<'EOF'` でも。`` がバックスペース文字(0x08)になり、正規表現が静かに一致しなくなる。器具が嘘の測定値を出した。Write/Edit を使う。
 - [形式化は葉から積む](leaf-first-with-graph-feedback.md) — 依存グラフの葉(層が小さいもの)から。途中で必要物が出たらスケルトンを足してグラフを更新し、新しい葉から再開する。★目的は「大きな塊を壁として認識しない」こと。2026-08-17 に Prop 3.2 を上から掘って**カウンタが 1 も動かなかった**実例つき。
 - [Lean の検査は MCP の lean_check で](lean-check-via-mcp-repl.md) — `lake env lean` はファイル全体を再検査する(3,800 行で数分)。`abc3-lean` MCP なら 0.01 秒。★ただし**確定は必ず `lake build`**(書いた順序・`variable`・リンタは build でしか出ない)。Windows では `repl.exe` を直に spawn してはならない(`lake env` 経由)。
+- [「残っている」と書いた条は着手前に Lean を読む](stale-status-read-lean-first.md) — 台帳の status は書いた時点の見立て。6 回とも既に閉じていた。★Skeleton に sorry があっても Found では閉じていることがある。
 - [葉は測る、当てない](leaves-are-measured-not-guessed.md) — `node tools/frdi-leaves.mjs` で「未実装依存の数」と「波及」を出す。★ページ順では葉が分からない実例つき(`Theorem 5.2` は §5 の大物に見えて依存 0 の葉・波及 6 件だった)。
 - [WideSubcategory / toElem の型の罠](widesubcategory-type-trap.md) — `{ obj := A }.obj.base` は `A.base` と構文上別物。`rw` 失敗・instance 合成失敗・motive 不整合として**別々の症状に見える**。射の構成は素の型を取る補題に出す。
 - [塊は 3 つ、いずれも「壁」ではなくチェーン](frdi-three-chains.md) — otricomm(下流 11 件・最大の律速)/ prol / sixexp。★割ったら在庫の測り違いが 2 件出た。数字は node tools/frdi-newleaves.mjs で。
@@ -39,3 +40,10 @@
 - [座標・型・仮定は要るまで固定しない](defer-fixing-coordinates.md) — B2 で 5 回当たった。固定しすぎた補題は使えなくなり、パラメータ化すると証明を 1 文字も変えずに通る。
 - [FrdI §5・§6 の残りは在庫不足 2 群に帰着](frdi-s5-s6-blockers.md) — Prop 5.6 は Nikolov–Segal、§6 は因子論と six exponentials。それ以外は残り 1〜2 段。
 - [`rw`/`simp` が「型が正しくない」で止まる罠](lean-proj-vs-toelem-rw-trap.md) — defeq だが構文の違う 2 つの綴りが混ざると `instances` 透明度で型付かない。対処は `calc`+`congrArg` を**項として**書くこと。Prop 1.6 (ii) はこれで 1 セッション止まっていた。
+- [node -e はバックティックを食う](node-e-eats-backticks.md) — Bash ツールの `node -e "..."` はバックティックをコマンド置換として実行する。識別子が消えた JSON が静かにコミットされる。
+- [Python の open(w) はファイルを消す](python-w-truncates.md) — encode 失敗で原本が飛ぶ。空 Lean ファイルは無言で通るので検証も空回りする
+- [プロジェクトの namespace が mathlib を隠す](namespace-shadows-mathlib.md) — ABC3.Found.NumberField があると `open NumberField` が mathlib を指さず `𝓞` が unknown になる。`_root_.` を付けること
+- [mathlib の local instance](mathlib-local-instances.md) — `Ideal.Quotient.field` は大域 instance ではない。手で `haveI` すると diamond が立つ。`attribute [local instance]` を書くこと
+- [Lean: `open` の忘れは whnf タイムアウトに化ける](lean-missing-open-looks-like-timeout.md) — 型の途中でタイムアウトしたら、まず名前解決を疑う
+- [Lean: `Nonempty U` は 2 通りに読める](lean-opens-nonempty-two-readings.md) — `X.Opens` のコアーション経路が 2 つあり instance が噛み合わない
+- [在庫の一般補題でも仮引数が実例で偽になる](general-lemma-hypothesis-unsatisfiable.md) — 「渡すだけ」と書いたが渡せなかった。幾何(Ex 6.1)で通った道が算術(Ex 6.3)で塞がった実例。使う前に各仮引数を実例で検算する。

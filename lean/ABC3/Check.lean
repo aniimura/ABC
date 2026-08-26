@@ -2,6 +2,7 @@ import ABC3.Meta.Claim
 import ABC3.Check.GenEll.HeightAxiomGap
 import ABC3.Check.GenEll.RemarkAxiomGap
 import ABC3.Check.GenEll.HeightInterfaceNondegenerate
+import ABC3.Check.GenEll.Section3NotProvable
 import ABC3.Check.AbsTopIII.LogShellLanding
 import ABC3.Check.PGC.Section1Discriminating
 import ABC3.Check.PGC.InertiaDegeneracy
@@ -21,6 +22,7 @@ import ABC3.Check.Arakelov.PullbackNondegenerate
 import ABC3.Check.Arakelov.MetricNondegenerate
 import ABC3.Check.Arakelov.ProperFlatNondegenerate
 import ABC3.Check.GaloisRep.OmegaNondegenerate
+import ABC3.Check.GaloisRep.HtFaltPinned
 import ABC3.Check.Arakelov.ProjectiveCaseWeak
 import ABC3.Check.GaloisRep.TorsionEquivWeak
 /-!

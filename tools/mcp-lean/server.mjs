@@ -38,6 +38,12 @@ const DEFAULT_TIMEOUT_MS = Number(process.env.ABC3_LEAN_TIMEOUT_MS ?? 600000);
 const MAX_MB = Number(process.env.ABC3_LEAN_MAX_MB ?? 6000);
 const MAX_CHECKS = Number(process.env.ABC3_LEAN_MAX_CHECKS ?? 120);
 const MEM_CHECK_EVERY = Number(process.env.ABC3_LEAN_MEM_CHECK_EVERY ?? 20);
+// ★★2026-08-20 の追加対処: **遊んでいる REPL を回収する**。
+// 上の建て直しは `lean_check` の中でしか走らないので、
+// 途中から `lake build` に切り替えたセッションでは
+// **使われない REPL が数 GB を抱えたまま永遠に残る**（2026-08-20 に実測）。
+// 一定時間触られていなければ落とす——次の `lean_check` で自動的に読み直される。
+const IDLE_KILL_MS = Number(process.env.ABC3_LEAN_IDLE_KILL_SEC ?? 900) * 1000;
 
 /** @type {{proc: import('node:child_process').ChildProcess|null, baseEnv: number|null, imports: string[], leanPath: string|null, busy: boolean, buf: string[], pending: ((s: string) => void)|null}} */
 const state = {
@@ -52,6 +58,8 @@ const state = {
   /** ★`addToEnv` で基準環境に積んだコード片。建て直しのときに再生する。 */
   envLog: [],
   recycles: 0,
+  /** ★最後に REPL を触った時刻（遊び回収の判定用）。 */
+  lastUse: Date.now(),
 };
 
 /** ★生きている `repl.exe` の物理メモリを報告する(2026-08-20 の 46 GB 事故の再発検知)。 */
@@ -183,6 +191,7 @@ function replSend(obj, timeoutMs) {
     if (!state.proc) return reject(new Error('REPL が起動していない'));
     if (state.busy) return reject(new Error('REPL は処理中(直列にしか使えない)'));
     state.busy = true;
+    state.lastUse = Date.now();
     const timer = setTimeout(() => {
       state.busy = false;
       killRepl();
@@ -485,6 +494,18 @@ function shutdown(code) {
   killRepl();
   process.exit(code ?? 0);
 }
+// ★★★**遊んでいる REPL の回収**——`lean_check` を呼ばないままになった
+// セッションでもメモリを抱えっぱなしにしない。基準環境は `state.envLog` に
+// 控えてあるので、次の `lean_check` が import を読み直して再生する。
+const idleTimer = setInterval(() => {
+  if (!state.proc || state.busy) return;
+  if (Date.now() - state.lastUse < IDLE_KILL_MS) return;
+  const mb = Math.round(replMemoryMB());
+  log(`idle: ${Math.round((Date.now() - state.lastUse) / 1000)} 秒触られていないので REPL を落とす (${mb} MB)`);
+  killRepl();
+}, 60_000);
+idleTimer.unref?.();
+
 process.on('exit', killRepl);
 process.on('SIGINT', () => shutdown(0));
 process.on('SIGTERM', () => shutdown(0));

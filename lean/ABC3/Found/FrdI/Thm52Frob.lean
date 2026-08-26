@@ -1745,6 +1745,39 @@ Lean で回すこと。★添字の合成が段ごとに伸びるので、
 `birat_frobenioidCore_of_frobNormalized` 経由)。
 -/
 
+
+/-! ## ★★★★★model Frobenioid は standard 型 —— 残る入力は 3 つだけ(2026-08-21)
+
+`IsOfStandardType` の 6 条のうち **3 条は model Frobenioid の在庫で埋まる**:
+
+| 条 | 根拠 |
+|---|---|
+| quasi-isotropic | `model_isotropicType` |
+| Frobenius-isotropic | 恒等射が Frobenius 型 ＋ isotropic |
+| Frobenius-normalized | `model_frobNormalizedType` |
+
+★残る 3 つ(`𝒟` が FSMFF・`Φ` が non-dilating・group-like のときのコンパクト対象)は
+入力として受け取る。★`Example 6.1` では前 2 つが在庫にある
+(`thm62-iii-fsm` / `CartierDatum.isNonDilatingOn`)。 -/
+
+theorem model_isOfStandardType (h : Hyp M) (F : FrobenioidCore (modelPre h))
+    (hfsmff : IsOfFSMFFType D) (hnd : M.phi.IsNonDilatingOn)
+    (hgl : IsOfGroupLikeType (modelPre h) →
+      ∃ A, IsFrobeniusCompact (istrPre (modelPre h) F) A) :
+    IsOfStandardType D (Obj M) (modelPre h) F where
+  quasiIsotropic := isOfQuasiIsotropicType_of_isOfIsotropicType _ F (model_isotropicType h)
+  frobIsotropic := fun A => ⟨A, 𝟙 A, isFrobeniusType_of_isIso _ (𝟙 A), model_isotropic h A⟩
+  groupLikeCompact := hgl
+  frobNormalized := model_frobNormalizedType h
+  baseFSMFF := hfsmff
+  phiNonDilating := hnd
+
+/-- ★★★★locator —— `Theorem 6.2, (iii)` の standard 型(model Frobenioid の側)。 -/
+def model_isOfStandardType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — model Frobenioid は standard 型(残る入力は 3 つ)",
+    sectionId := "frdi-thm-6-2" }
+
 end ModelData
 
 end ABC3.Found.FrdI

@@ -218,4 +218,168 @@ def mem_supp_map.src : ABC3.Meta.Source :=
     item := "Definition 2.4, (i), (d) — Supp は単系同型で移る",
     sectionId := "frdi-def-2-4" }
 
+/-! ## ★sharp なモノイドでの non-dilating —— `M^char` を `M` に置き換える
+
+★`IsNonDilating` の言明は `M^char` の上に書かれているが、**sharp なら `M ≃+ M^char`** なので
+`M` の上の条件に置き換えられる。★`Theorem 6.2, (iii)` / `Theorem 6.4, (i)` はどちらも
+sharp な `Φ(L)`(有効因子の単系)を相手にするので、この形が要る。 -/
+
+/-- ★★**sharp なら `M ≃+ M^char`**。 -/
+noncomputable def mCharEquivOfSharp (hs : IsSharp M) : M ≃+ MChar M :=
+  AddEquiv.ofBijective toChar ⟨toChar_injective_of_isSharp hs, toChar_surjective M⟩
+
+@[simp] theorem mCharEquivOfSharp_apply (hs : IsSharp M) (a : M) :
+    mCharEquivOfSharp hs a = toChar a := rfl
+
+/-- ★★★★**non-dilating の十分条件(sharp 版)** ——
+`M` が primary 元で生成され、primary 元の上で `α` が恒等なら `α` は non-dilating。
+
+★★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` が「immediately / clearly」と
+畳んだ段の骨組みである ——
+`hfix` が「自己同型は素因子を素因子へ(係数 1 で)移す」に、
+`hgen` が「`Φ(L)` は素因子で生成される」に対応する。 -/
+theorem isNonDilating_of_primary_sharp (hs : IsSharp M) (α : M →+ M)
+    (hgen : AddSubmonoid.closure {a : M | IsPrimaryElt a} = ⊤)
+    (hfix : ∀ a : M, IsPrimaryElt a → MPrec (α a) a → α a = a) :
+    IsNonDilating α := by
+  refine isNonDilating_of_primary α ?_ ?_
+  · refine eq_top_iff.mpr fun x _ => ?_
+    obtain ⟨y, rfl⟩ := toChar_surjective M x
+    have hy : y ∈ AddSubmonoid.closure {a : M | IsPrimaryElt a} := by rw [hgen]; trivial
+    refine AddSubmonoid.closure_induction ?_ ?_ ?_ hy
+    · intro a ha
+      exact AddSubmonoid.subset_closure (isPrimaryElt_map (mCharEquivOfSharp hs) ha)
+    · rw [map_zero]; exact AddSubmonoid.zero_mem _
+    · intro u v _ _ hu hv
+      rw [map_add]; exact AddSubmonoid.add_mem _ hu hv
+  · intro a ha hprec
+    obtain ⟨b, rfl⟩ := toChar_surjective M a
+    have hb : IsPrimaryElt b :=
+      (mCharEquivOfSharp hs).symm_apply_apply b ▸ isPrimaryElt_map (mCharEquivOfSharp hs).symm ha
+    rw [charMap_toChar] at hprec ⊢
+    have hp : MPrec (α b) b := by
+      have h2 := mprec_map ((mCharEquivOfSharp hs).symm : MChar M →+ M) hprec
+      have h3 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar (α b)) = α b :=
+        (mCharEquivOfSharp hs).symm_apply_apply (α b)
+      have h4 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar b) = b :=
+        (mCharEquivOfSharp hs).symm_apply_apply b
+      rwa [h3, h4] at h2
+    rw [hfix b hb hp]
+
+/-- ★★★locator —— sharp なモノイドでの non-dilating の十分条件。 -/
+def isNonDilating_of_primary_sharp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 19,
+    item := "Definition 1.1, (i) — non-dilating の十分条件(sharp 版)",
+    sectionId := "frdi-def-1-1-i" }
+
+/-- ★★★★**non-dilating を `M` の上の含意に丸ごと降ろす**(sharp 版)。
+
+★`isNonDilating_of_primary_sharp` は「生成」＋「primary 元で恒等」に割ったが、
+★★**生成が成り立たない場合**(幾何の `Φ(L)` —— 単独の素因子は Cartier とは限らない)
+のために、**含意そのものを `M` の上へ移した形**も要る。 -/
+theorem isNonDilating_of_sharp (hs : IsSharp M) (α : M →+ M)
+    (key : (∀ a : M, IsPrimaryElt a → MPrec (α a) a) → α = AddMonoidHom.id M) :
+    IsNonDilating α := by
+  intro h
+  have hM : ∀ a : M, IsPrimaryElt a → MPrec (α a) a := by
+    intro a ha
+    have ha' : IsPrimaryElt (toChar a) := isPrimaryElt_map (mCharEquivOfSharp hs) ha
+    have h2 := h (toChar a) ha'
+    rw [charMap_toChar] at h2
+    have h3 := mprec_map ((mCharEquivOfSharp hs).symm : MChar M →+ M) h2
+    have h4 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar (α a)) = α a :=
+      (mCharEquivOfSharp hs).symm_apply_apply (α a)
+    have h5 : ((mCharEquivOfSharp hs).symm : MChar M →+ M) (toChar a) = a :=
+      (mCharEquivOfSharp hs).symm_apply_apply a
+    rwa [h4, h5] at h3
+  rw [key hM]
+  refine AddMonoidHom.ext fun x => ?_
+  obtain ⟨y, rfl⟩ := toChar_surjective M x
+  rw [charMap_toChar]
+  rfl
+
+/-! ## ★★加法同型に沿った `MLe` / `MPrec` / 準素性の移送
+
+★★**用途**: `IsNonDilating` は**準素な指標**についてしか仮定を要求しないので、
+「すべての元について `MPrec`」を仮定する `addMonoidHom_eq_id_of_forall_mprec` は**強すぎる**。
+★`M` が sharp なら `M ≃+ MChar M`(`mCharEquivOfSharp`)なので、
+**準素元だけの仮定で `f = id` が出る**。
+
+★これは `Theorem 6.2, (iii)` で効く —— 原文の追加仮定は
+「`D` が `B(L)` の元の像の**台**に入る」であって「主因子であること」ではない。 -/
+
+section CharTransport
+
+variable {M : Type*} [AddCommMonoid M] {N : Type*} [AddCommMonoid N]
+
+/-- ★加法同型に沿って `MLe` は移る。 -/
+theorem mLe_addEquiv (e : M ≃+ N) {a b : M} : MLe (e a) (e b) ↔ MLe a b := by
+  constructor
+  · rintro ⟨c, hc⟩
+    refine ⟨e.symm c, ?_⟩
+    have := congrArg e.symm hc
+    simpa using this
+  · rintro ⟨c, rfl⟩
+    exact ⟨e c, by simp⟩
+
+/-- ★加法同型に沿って `MPrec` は移る。 -/
+theorem mPrec_addEquiv (e : M ≃+ N) {a b : M} : MPrec (e a) (e b) ↔ MPrec a b := by
+  constructor
+  · rintro ⟨n, hn, hle⟩
+    refine ⟨n, hn, ?_⟩
+    refine (mLe_addEquiv e).mp ?_
+    simpa using hle
+  · rintro ⟨n, hn, hle⟩
+    refine ⟨n, hn, ?_⟩
+    have : MLe (e a) (e (n • b)) := (mLe_addEquiv e).mpr hle
+    simpa using this
+
+/-- ★加法同型に沿って準素性は移る。 -/
+theorem isPrimaryElt_addEquiv (e : M ≃+ N) {a : M} : IsPrimaryElt (e a) ↔ IsPrimaryElt a := by
+  constructor
+  · rintro ⟨h0, hmin⟩
+    refine ⟨fun h => h0 (by rw [h]; simp), fun b hb hle => ?_⟩
+    refine (mPrec_addEquiv e).mp ?_
+    exact hmin (e b) (fun h => hb (by simpa using congrArg e.symm h))
+      ((mPrec_addEquiv e).mpr hle)
+  · rintro ⟨h0, hmin⟩
+    refine ⟨fun h => h0 (by simpa using congrArg e.symm h), fun b hb hle => ?_⟩
+    obtain ⟨b₀, rfl⟩ := e.surjective b
+    refine (mPrec_addEquiv e).mpr ?_
+    exact hmin b₀ (fun h => hb (by rw [h]; simp)) ((mPrec_addEquiv e).mp hle)
+
+/-- ★★★★**準素元だけの仮定で `f = id`**(`M` が sharp なら)。
+
+★★`addMonoidHom_eq_id_of_forall_mprec` は「**すべての** `x` について `MPrec (f x) x`」を
+要求するが、`IsNonDilating` の定義がそもそも**準素な指標**しか見ていないので、
+★`M ≃+ MChar M`(`mCharEquivOfSharp`)を通せば**準素元だけで足りる**。 -/
+theorem addMonoidHom_eq_id_of_primary_mprec (hs : IsSharp M) (f : M →+ M)
+    (hnd : IsNonDilating f) (h : ∀ a : M, IsPrimaryElt a → MPrec (f a) a) :
+    f = AddMonoidHom.id M := by
+  have hchar : charMap f = AddMonoidHom.id (MChar M) := by
+    refine hnd (fun b hb => ?_)
+    obtain ⟨a, rfl⟩ : ∃ a : M, (mCharEquivOfSharp hs) a = b :=
+      ⟨(mCharEquivOfSharp hs).symm b, by simp⟩
+    have hpa : IsPrimaryElt a := (isPrimaryElt_addEquiv (mCharEquivOfSharp hs)).mp hb
+    have hkey := h a hpa
+    rw [mCharEquivOfSharp_apply, charMap_toChar]
+    rw [show (toChar (f a)) = (mCharEquivOfSharp hs) (f a) from
+        (mCharEquivOfSharp_apply hs _).symm,
+      show (toChar a) = (mCharEquivOfSharp hs) a from (mCharEquivOfSharp_apply hs _).symm]
+    exact (mPrec_addEquiv (mCharEquivOfSharp hs)).mpr hkey
+  ext a
+  have h1 : toChar (f a) = toChar a := by
+    rw [← charMap_toChar, hchar]
+    rfl
+  exact (mCharEquivOfSharp hs).injective (by
+    rw [mCharEquivOfSharp_apply, mCharEquivOfSharp_apply]; exact h1)
+
+/-- ★★★locator —— `Theorem 6.2, (iii)` で逸脱 (B) を外すための 1 本。 -/
+def addMonoidHom_eq_id_of_primary_mprec.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 111,
+    item := "Theorem 6.2, (iii) — 準素元だけで非膨張写像は恒等になる",
+    sectionId := "frdi-thm-6-2" }
+
+end CharTransport
+
 end ABC3.Found.FrdI

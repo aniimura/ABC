@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node D:/Math_ABC3/tools/hooks/bash-guard.mjs",
+            "timeout": 15,
+            "statusMessage": "ABC3 ガード"
+          }
+        ]
+      }
+    ]
+  }
+}

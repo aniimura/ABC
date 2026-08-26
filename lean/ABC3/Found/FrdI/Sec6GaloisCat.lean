@@ -212,4 +212,67 @@ def finSubOp_isOfFSMType.src : ABC3.Meta.Source :=
     item := "Example 6.1 — 底の圧 B(G)⁰ は of FSM-type",
     sectionId := "frdi-example-6-1" }
 
+/-- ★★**`FinSub` の自己射は同型**(有限次元だから全単射)。
+
+★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` の non-dilating に効く。 -/
+theorem finSub_isIso_of_endo {L : FinSub K Kbar} (σ : L ⟶ L) : IsIso σ := by
+  haveI := L.fin
+  have hb : Function.Bijective (FinSub.hom σ) := AlgHom.bijective (FinSub.hom σ)
+  refine ⟨(AlgEquiv.ofBijective (FinSub.hom σ) hb).symm.toAlgHom, ?_, ?_⟩
+  · refine FinSub.hom_ext ?_
+    refine AlgHom.ext fun x => ?_
+    exact (AlgEquiv.ofBijective (FinSub.hom σ) hb).symm_apply_apply x
+  · refine FinSub.hom_ext ?_
+    refine AlgHom.ext fun x => ?_
+    exact (AlgEquiv.ofBijective (FinSub.hom σ) hb).apply_symm_apply x
+
+/-- ★反対圏でも同じ。 -/
+theorem finSubOp_isIso_of_endo {A : (FinSub K Kbar)ᵒᵖ} (e : A ⟶ A) : IsIso e := by
+  haveI := finSub_isIso_of_endo e.unop
+  refine ⟨(inv e.unop).op, ?_, ?_⟩
+  · exact Quiver.Hom.unop_inj (IsIso.inv_hom_id e.unop)
+  · exact Quiver.Hom.unop_inj (IsIso.hom_inv_id e.unop)
+
+/-- ★★**`⊥`(= `K` 自身)の `K`-代数自己射は恒等**(`⊥` は `K` の像そのものだから)。
+
+★★これが `Theorem 6.2, (iii)` / `Theorem 6.4, (i)` の
+`(𝒞^un-tr)^birat` の Frobenius-compact 対象を「底の自己射が恒等の対象」で取る鍵である
+(`Thm64RatStd.lean` の `model_isOfRationallyStandardType_of_baseId`)。 -/
+theorem botSub_end_eq_id (f : botSub K Kbar ⟶ botSub K Kbar) : f = 𝟙 (botSub K Kbar) := by
+  refine FinSub.hom_ext (AlgHom.ext fun x => ?_)
+  obtain ⟨c, hc⟩ := (IntermediateField.mem_bot (F := K) (E := Kbar)).mp x.2
+  have hx : x = algebraMap K ((botSub K Kbar).toIF) c := by
+    refine Subtype.ext ?_
+    rw [← hc]
+    rfl
+  rw [hx]
+  show (FinSub.hom f) (algebraMap K _ c) = _
+  rw [AlgHom.commutes]
+  rfl
+
+/-- ★★★**`𝒟 = B(G)⁰` は Aut-saturated** —— sub-automorphism はすべて同型。
+
+★★これは `Prop16AutAmple.lean` の `cfp_autSubAmple_of_autSaturated`
+(`Proposition 1.6, (vi)` の `Aut^sub-ample` を**条つき**で出す定理)が
+要求する仮定 `hsat` そのものである。
+
+## ★★★★測定の訂正(2026-08-25)
+
+`Prop16AutAmple.lean` の docstring は「**これは応用では真である**」と
+`B(G)⁰` について主張していたが、**Lean の主張としては書かれていなかった**。
+★本補題でそれを埋める。中身は `finSubOp_isIso_of_endo`(在庫)1 本であり、
+**`B(G)⁰` では自己射がそもそも全部同型**なので
+`Aut^sub_𝒟(d) = Aut_𝒟(d) = End_𝒟(d)` である。
+
+★★★したがって `Example 6.1` / `Example 6.3` の底の上では、
+原文が `Definition 1.2, (iv)` で引く `Aut-ample` と `Aut^sub-ample` の**区別は元から無い**。
+`cfp_autSubAmple_of_autSaturated` の追加仮定は、この応用では**結論を弱めない**。 -/
+theorem finSubOp_autSaturated (d : (FinSub K Kbar)ᵒᵖ) (α : End d)
+    (_hα : IsSubAutomorphism α) : IsIso α :=
+  finSubOp_isIso_of_endo α
+
+/-- ★同じことを `Definition 1.2` の語彙(`IsAutSaturatedObj`)で。 -/
+theorem finSubOp_isAutSaturatedObj (d : (FinSub K Kbar)ᵒᵖ) : IsAutSaturatedObj d :=
+  fun α hα => finSubOp_autSaturated d α hα
+
 end ABC3.Found.FrdI

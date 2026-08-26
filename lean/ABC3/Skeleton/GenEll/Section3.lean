@@ -7,6 +7,7 @@ import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.BDClass
 import Mathlib.Topology.Algebra.Ring.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # [GenEll] §3 Full Special Linear Galois Actions —— 残り 8 件(`Skeleton`)
@@ -99,11 +100,14 @@ theorem lemma_3_1 (l : ℕ) [Fact (Nat.Prime l)] (hl : 5 ≤ l) :
 
 ★(i) の「either … or」は**排他的ではない**(原文 "either … or")。 -/
 theorem lemma_3_2 (D : TateLocalData) :
-    (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ) (N : D.StableLine K E l),
-        l ∣ D.vq K E ∨ D.IsCyclotomic N)
-  ∧ (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ),
+    (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ), Nat.Prime l →
+        ∀ (N : D.StableLine K E l), l ∣ D.vq K E ∨ D.IsCyclotomic N)
+  ∧ (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ), Nat.Prime l →
         D.degInf K (D.quotMu K E l) = (l : ℝ) * D.degInf K E) := by
-  sorry
+  refine ⟨D.stableLine_dvd_or_cyclotomic, fun K E l hl => ?_⟩
+  rw [D.degInf_eq K (D.quotMu K E l), D.degInf_eq K E, D.vq_quotMu K E l hl]
+  push_cast
+  ring
 
 /-! ## Definition 3.3 —— 局所高さ -/
 
@@ -147,7 +151,21 @@ noncomputable def potLocalHeight (D : TateLocalData) {K : D.LocalField} {E : D.C
 theorem potLocalHeight_indep (D : TateLocalData) {K : D.LocalField} {E : D.Curve K}
     (L L' : D.MultExt K E) :
     potLocalHeight D L = potLocalHeight D L' := by
-  sorry
+  have he : ((D.ramIdx L : ℚ)) ≠ 0 := by
+    have h := D.ramIdx_pos L
+    have h0 : D.ramIdx L ≠ 0 := Nat.pos_iff_ne_zero.1 h
+    exact_mod_cast h0
+  have he' : ((D.ramIdx L' : ℚ)) ≠ 0 := by
+    have h := D.ramIdx_pos L'
+    have h0 : D.ramIdx L' ≠ 0 := Nat.pos_iff_ne_zero.1 h
+    exact_mod_cast h0
+  have hcross := D.vq_baseChange L L'
+  have hq : ((D.vq (D.extField L) (D.baseChange L) : ℚ)) * (D.ramIdx L' : ℚ)
+      = ((D.vq (D.extField L') (D.baseChange L') : ℚ)) * (D.ramIdx L : ℚ) := by
+    exact_mod_cast congrArg (fun n : ℕ => (n : ℚ)) hcross
+  rw [potLocalHeight, potLocalHeight]
+  field_simp
+  linarith [hq]
 
 /-! ## Proposition 3.4 —— Faltings 高さと無限遠因子 -/
 
@@ -162,13 +180,33 @@ theorem potLocalHeight_indep (D : TateLocalData) {K : D.LocalField} {E : D.Curve
 
 ★**Faltings 高さが初めて出る場所**である。証明は 4 行で、
 最初の `≲` は `Proposition 1.6` の証明から、残りは **[Silv2] Proposition 2.1** と
-**[FC] Chapter V, Proposition 4.5**(無限遠での計量の**対数的特異性**)から。 -/
+**[FC] Chapter V, Proposition 4.5**(無限遠での計量の**対数的特異性**)から。
+
+## ★★★★★★★★ 2026-08-26 の逸脱の記録——`BDle` ではなく `BDge` で書く
+
+以前は 3 つの `≲` を `BDle`(原典 `Definition 1.2, (ii)` の**印字どおり**)で書いていた。
+★★しかし `Check/GenEll/Section3NotProvable.lean` の `bdle_chain_forces_bounded` が示すとおり、
+**2 番目と 3 番目を `BDle` で読むと `ht_∞` が上に有界になってしまう**
+(`(1+ε)ht_∞ ≤ ht_∞ + C` から `ε·ht_∞ ≤ C`)。
+★★★モジュライ上の高さは上に有界でないので、その読みは意図されたものではない。
+
+★★★★`Found/GenEll/BDClass.lean` の docstring がすでに定めているとおり
+「**abc の主張を書くときは `BDge`(原文の印字の `≳`)を使う**」に従い、
+本命題も `BDge` で書く。★これは**逸脱**であり、ここに記録する。 -/
 theorem prop_3_4 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
-    BDle D.degInf D.htInf
-  ∧ BDle D.htInf (fun x => 12 * (1 + eps) * D.faltingsHeight x)
-  ∧ BDle (fun x => 12 * (1 + eps) * D.faltingsHeight x) (fun x => (1 + eps) * D.htInf x)
+    BDge D.degInf D.htInf
+  ∧ BDge D.htInf (fun x => 12 * (1 + eps) * D.faltingsHeight x)
+  ∧ BDge (fun x => 12 * (1 + eps) * D.faltingsHeight x) (fun x => (1 + eps) * D.htInf x)
   ∧ (∀ (C : ℝ) (d : ℕ), 0 < d → {x ∈ D.degLe d | D.faltingsHeight x ≤ C}.Finite) := by
-  sorry
+  obtain ⟨M, hM⟩ := D.htInf_bdeq_faltings
+  obtain ⟨B, hB⟩ := D.faltingsHeight_bddBelow
+  refine ⟨D.degInf_le_htInf, ⟨M - 12 * eps * B, fun x => ?_⟩,
+    ⟨(1 + eps) * M, fun x => ?_⟩, D.northcott⟩
+  · have h1 := abs_le.1 (hM x)
+    have h2 := hB x
+    nlinarith [h1.1, h1.2]
+  · have h1 := abs_le.1 (hM x)
+    nlinarith [h1.1, h1.2]
 
 /-! ## Lemma 3.5 —— l-捩れの大域階数 1 部分群 -/
 
@@ -188,7 +226,33 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
       D.HasLCyclic E l → D.PrimeToLocalHeights E l →
       (1 / (12 * (1 + eps))) * (l : ℝ) * D.degInf (D.cls E)
         ≤ D.faltingsHeight (D.cls E) + 2 * Real.log l + C := by
-  sorry
+  obtain ⟨_, h2, _, _⟩ := prop_3_4 D eps heps
+  obtain ⟨C₁, hC₁⟩ := D.degInf_le_htInf
+  obtain ⟨C₂, hC₂⟩ := h2
+  obtain ⟨C₀, hC₀⟩ := D.faltingsHeight_quotLCyclic
+  have hpos : (0:ℝ) < 12 * (1 + eps) := by nlinarith
+  refine ⟨C₀ + (C₁ + C₂) / (12 * (1 + eps)), fun E l hl hcyc hprime => ?_⟩
+  set E' := D.quotLCyclic E l with hE'
+  -- deg∞(E′) = l·deg∞(E)
+  have hdeg : D.degInf (D.cls E') = (l : ℝ) * D.degInf (D.cls E) :=
+    D.degInf_quotLCyclic E l hl hcyc hprime
+  -- deg∞(E′) ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)
+  have hchain : D.degInf (D.cls E')
+      ≤ 12 * (1 + eps) * D.faltingsHeight (D.cls E') + (C₁ + C₂) := by
+    have ha := hC₁ (D.cls E')
+    have hb := hC₂ (D.cls E')
+    linarith
+  -- ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀
+  have hfal := hC₀ E l hl hcyc
+  rw [hdeg] at hchain
+  rw [mul_assoc, one_div_mul_eq_div, div_le_iff₀ hpos]
+  have hexp : (D.faltingsHeight (D.cls E) + 2 * Real.log l
+        + (C₀ + (C₁ + C₂) / (12 * (1 + eps)))) * (12 * (1 + eps))
+      = 12 * (1 + eps) * (D.faltingsHeight (D.cls E) + 2 * Real.log l + C₀) + (C₁ + C₂) := by
+    field_simp
+    ring
+  rw [hexp]
+  nlinarith [hchain, hfal]
 
 /-! ## Lemma 3.6 —— 初等的な評価 -/
 
@@ -212,6 +276,7 @@ theorem lemma_3_6 (eps : ℝ) (heps : 0 < eps) :
 
 /-! ## Lemma 3.7 —— 有限例外集合 -/
 
+set_option maxHeartbeats 1600000 in
 /-- **[GenEll] Lemma 3.7**(Finite Exceptional Sets)。
 
 原文 (GenEll p.18):
@@ -244,7 +309,89 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
           (condA → D.PrimeToLocalHeights E l)
         ∧ (condB → D.cls E ∉ Exc → D.HasMultRed E)
         ∧ ((condA ∨ condB) → D.HasLCyclic E l → D.cls E ∈ Exc) := by
-  sorry
+  -- `Proposition 3.4` を `ε₀ = 1/6`(すなわち `12(1+ε₀) = 14`)で使う
+  obtain ⟨h1, h2, _, _⟩ := prop_3_4 D (1/6) (by norm_num)
+  obtain ⟨C₁, hC₁⟩ := h1
+  obtain ⟨C₂, hC₂⟩ := h2
+  obtain ⟨B, hB⟩ := D.faltingsHeight_bddBelow
+  set A : ℝ := C₁ + C₂ with hAdef
+  have hdeg : ∀ x, D.degInf x ≤ 14 * D.faltingsHeight x + A := by
+    intro x
+    have ha := hC₁ x
+    have hb := hC₂ x
+    norm_num at hb
+    linarith
+  have hLlo : (0.69 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hLhi : Real.log 2 ≤ (0.70 : ℝ) := by linarith [Real.log_two_lt_d9]
+  refine ⟨|A| + 100 * |B| + 1, by positivity,
+    D.lcyclicExc ∪ D.noMultRedExc KV,
+    D.galoisFinite_union _ _ D.galoisFinite_lcyclicExc (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
+  intro E l hl hss condA condB hcA hcB
+  have hAimp : condA → D.PrimeToLocalHeights E l := by
+    intro hc
+    rw [hcA] at hc
+    obtain ⟨hle, _⟩ := hc
+    refine D.primeToLocalHeights_of_lt E l hl hss ?_
+    set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
+    set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
+    set C : ℝ := |A| + 100 * |B| + 1 with hCdef
+    set P : ℝ := d ^ eps with hPdef
+    set L : ℝ := Real.log 2 with hLdef
+    have hd1 : (1 : ℝ) ≤ d := by
+      rw [hddef]
+      exact_mod_cast D.degOfDefinition_pos E
+    have hdpos : (0 : ℝ) < d := by linarith
+    have hP1 : (1 : ℝ) ≤ P := by
+      rw [hPdef]
+      exact Real.one_le_rpow hd1 heps.le
+    have hCpos : (0 : ℝ) < C := by
+      rw [hCdef]
+      positivity
+    have hAle : A ≤ |A| := le_abs_self A
+    have hAnn : (0 : ℝ) ≤ |A| := abs_nonneg A
+    have hBnn : (0 : ℝ) ≤ |B| := abs_nonneg B
+    have hBge : -|B| ≤ B := neg_abs_le B
+    have hGlow : d * B ≤ d * F := by nlinarith [hB (D.cls E)]
+    have hkey1 : d * D.degInf (D.cls E) ≤ 14 * (d * F) + d * A := by
+      nlinarith [hdeg (D.cls E)]
+    have hdP : d ≤ d * P := by nlinarith
+    have hdPnn : (0 : ℝ) ≤ d * P := by nlinarith
+    have hkey3 : 14 * (d * F) + d * A < 100 * d * (F + C * P) * L := by
+      have hexp : 100 * d * (F + C * P) * L
+          = 100 * L * (d * F) + 100 * L * C * (d * P) := by ring
+      rw [hexp]
+      have e2 : d * A ≤ d * |A| := by nlinarith
+      have hX : (0 : ℝ) ≤ C * (d * P) := by nlinarith
+      have e4a : 69 * (C * d) ≤ 69 * (C * (d * P)) := by nlinarith
+      have e4b : 69 * (C * (d * P)) ≤ 100 * L * (C * (d * P)) := by nlinarith [hLlo, hX]
+      have e4 : 69 * (C * d) ≤ 100 * L * C * (d * P) := by linarith
+      rcases le_or_gt 0 (d * F) with hG | hG
+      · have e1 : 14 * (d * F) ≤ 100 * L * (d * F) := by nlinarith
+        have e3 : d * |A| < 69 * (C * d) := by
+          rw [hCdef]
+          nlinarith
+        linarith
+      · have f0 : -(d * F) ≤ d * |B| := by nlinarith
+        have f1 : 14 * (d * F) - 100 * L * (d * F) ≤ 56 * (d * |B|) := by nlinarith
+        have f3 : 56 * (d * |B|) + d * |A| < 69 * (C * d) := by
+          rw [hCdef]
+          nlinarith
+        linarith
+    have hL0 : (0 : ℝ) ≤ L := by linarith
+    have hkey2 : 100 * d * (F + C * P) * L ≤ (l : ℝ) * L := by nlinarith
+    linarith
+  refine ⟨hAimp, ?_, ?_⟩
+  · intro hc hnot
+    rw [hcB] at hc
+    by_contra hmult
+    exact hnot (Or.inr (D.mem_noMultRedExc KV E hc.1 hmult))
+  · intro hor hcyc
+    have hpr : D.PrimeToLocalHeights E l := by
+      rcases hor with h | h
+      · exact hAimp h
+      · rw [hcB] at h
+        exact h.2
+    exact Or.inl (D.mem_lcyclicExc E l hl hss hcyc hpr)
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -265,6 +412,11 @@ def lemma_3_2.src : Source :=
   { paper := "GenEll", pdfPage := 15, item := "Lemma 3.2",
     sectionId := "genell-lemma-3-2" }
 
+/-- ★★★★★★**2026-08-26 の内訳**——(i) は `Interface` の
+`stableLine_dvd_or_cyclotomic` を**そのまま受けている**(原文が証明を与えず
+[FC] Ch. III, Cor. 7.3 に帰しているため)。
+★一方 (ii) は **`q_{E′} = q_E^l`(`vq_quotMu`)と `deg_∞ = v_K(q_E)·log #(O_K/𝔪)`
+(`degInf_eq`)から導出している**——原文の『hence』の中身である。 -/
 def lemma_3_2.needs : List ProofObligation :=
   [ .citation "[FC]" "Degenerations of Abelian Varieties, Chapter III, Corollary 7.3(完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0)"
       (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16、EllipticCurve/ 配下の全宣言名を確認)") 15,
@@ -279,9 +431,9 @@ def potLocalHeight_indep.src : Source :=
 
 def potLocalHeight_indep.needs : List ProofObligation :=
   [ .implicitStep
-      "原文は『one verifies immediately that this definition is independent of the choice of L』の 1 文。★実際には『2 つの拡大 L, L′ の合成を取り、局所高さが拡大次数に比例して伸びる』ことを要する" 16,
+      "原文は『one verifies immediately that this definition is independent of the choice of L』の 1 文。★畳んでいるのは局所高さが有限拡大で分岐指数倍になること(v_L(q_E) = e(L/K)·v_K(q_E))である" 16,
     .implicitStep
-      "★局所高さが有限拡大で分岐指数倍になること(v_L(q_E) = e(L/K)·v_K(q_E))は原文に書かれていない。これがこの Remark の実質である" 16 ]
+      "★★★★★★**2026-08-26 に閉じた**。その実質は `Found/GenEll/LocalHeightRamified.lean` の `ordAt_liesOver`(mathlib の `HeightOneSpectrum.valuation_liesOver` から導いた)であり、`Interface/GenEll/TateLocal.lean` の `vq_baseChange` として仕様に出してある。★本定理はそこからの初等的な導出(交差乗法)である" 16 ]
 
 def localHeight.src : Source :=
   { paper := "GenEll", pdfPage := 15, item := "Definition 3.3",
@@ -308,6 +460,10 @@ def prop_3_4.src : Source :=
   { paper := "GenEll", pdfPage := 17, item := "Proposition 3.4",
     sectionId := "genell-prop-3-4" }
 
+/-- ★★★★★★**2026-08-26 に閉じた**——`Interface/GenEll/EllModuli.lean` に
+原文が実際に引く 4 つ(`degInf_le_htInf`・`htInf_bdeq_faltings`・
+`faltingsHeight_bddBelow`・`northcott`)を欄に出し、
+**`ε` の入った 2 つの不等式はそこから初等的に導いた**。 -/
 def prop_3_4.needs : List ProofObligation :=
   [ .citation "[Silv2]" "Proposition 2.1(ht_∞ と ht^Falt の比較)"
       (.absent "mathlib に Faltings 高さは無い(`Arakelov` 0 件、`arithmetic line bundle` 0 件、2026-08-16 実測)") 17,
@@ -322,6 +478,10 @@ def lemma_3_5.src : Source :=
   { paper := "GenEll", pdfPage := 17, item := "Lemma 3.5",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★**2026-08-26 に閉じた**——`Interface/GenEll/EllModuli.lean` に
+`quotLCyclic`・`degInf_quotLCyclic`(`Lemma 3.2` の大域版)・
+`faltingsHeight_quotLCyclic`([FC] Ch. I, Prop 2.7 + 複素解析の段)を欄に出し、
+**`Proposition 3.4` と合わせて初等的に導いた**。 -/
 def lemma_3_5.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Lemma 3.2, (i)(ii)(局所階数 1 部分群と deg_∞(E′) = l·deg_∞(E))" 15,
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さと無限遠因子)" 17,
@@ -351,6 +511,16 @@ def lemma_3_7.src : Source :=
   { paper := "GenEll", pdfPage := 18, item := "Lemma 3.7",
     sectionId := "genell-lemma-3-7" }
 
+/-- ★★★★★★★★**2026-08-26 に閉じた**——内訳は次のとおり。
+
+★(a) は**完全な導出**である: `Proposition 3.4` を `ε₀ = 1/6`(すなわち `12(1+ε₀) = 14`)で
+使って `deg_∞ ≤ 14·ht^Falt + A` を得、`ht^Falt ≥ B`(下に有界)と
+`100·d·(ht^Falt + C·d^ε) ≤ l` から `d·deg_∞ < l·log 2` を出し、
+`primeToLocalHeights_of_lt` に渡す。★★定数は `C := |A| + 100|B| + 1` と取ればよい
+——`100·log 2 > 69` と `d^ε ≥ 1` が効く。
+
+★(b)(c) は例外集合を `lcyclicExc ∪ noMultRedExc KV` と**取る**ことで導く。
+★★★(c) では **(a) と (b) のどちらでも `PrimeToLocalHeights` が得られる**のが鍵である。 -/
 def lemma_3_7.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Lemma 3.5(大域階数 1 部分群の不等式)" 17,
     .otherPaper "[GenEll]" "Proposition 3.4(『12(1+ϵ)』を 14 に取る箇所)" 17,

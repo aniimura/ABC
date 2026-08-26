@@ -29,3 +29,6 @@ tools/lean-repl/
 # ★第三者の Lean プロジェクト(調査用に clone するだけ。再配布しない)
 #   2026-08-19 追加。ABC3b の `git add -A` に巻き込まれないよう先に無視する。
 external/
+
+# 検査器のページキャッシュ(pdftotext の結果。原本が変われば自動で外れる)
+.cache/

@@ -70,6 +70,44 @@ noncomputable def cToSc (Fc : FrobenioidCore P) (G : Frobenioid P)
       (fun Z => (unTr_isOfModelType Fc G).2 Z) hcharInj hintS hfsmD :=
   cToUnTr hiso ⋙ untrToSc S Fc G hint hcharInj hintS hfsmD
 
+/-! ## ★1-可換性と上の行 -/
+
+omit [IsConnected D] in
+/-- ★★★**左の縦の矢印は `𝔽_Φ` への射影と 1-可換**。
+
+★★これが `Proposition 5.3` の図式の**可換性の中身**である ——
+`ƒ → 𝒞^un-tr → 𝔽_Φ` と `𝒞 → 𝔽_Φ` が一致する。
+★`istrToUnTr_comp_unTrToElem`(`UnTr.lean`)と、
+`toIstrOfIsotropic` が `ι` で戻ること(定義から)の 2 本で `rfl` になる。 -/
+theorem cToUnTr_comp_unTrToElem (hiso : ∀ X : C, IsIsotropic P X) :
+    cToUnTr hiso ⋙ unTrToElem P = P.toElem := rfl
+
+omit [IsConnected D] in
+/-- ★★**底への射影とも 1-可換**。 -/
+theorem cToUnTr_comp_proj (hiso : ∀ X : C, IsIsotropic P X) :
+    cToUnTr hiso ⋙ (unTrToElem P ⋙ ElemFrobCat.proj) = P.proj := rfl
+
+/-! ## ★図式の上の行 `𝒞 ⟶ 𝒞^istr ⟶ 𝒞^pf` -/
+
+/-- ★★★**図式の上の行** —— `𝒞 ⟶ 𝒞^istr ⟶ 𝒞^pf`。
+
+★isotropic 型なら `𝒞 ⟶ 𝒞^istr` は恒等的(`toIstrOfIsotropic`)、
+`𝒞^istr ⟶ 𝒞^pf` は在庫(`toPfCat`、`Definition 3.1, (iii)`)。 -/
+noncomputable def cToPf (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (F₁ : FrobenioidCore (istrPre P Fc)) : C ⥤ PfCat (istrPre P Fc) F₁ :=
+  toIstrOfIsotropic hiso ⋙ toPfCat (istrPre P Fc) F₁
+
+omit [IsConnected D] in
+/-- ★★**上の行も `𝔽_{Φ^pf}` への射影と 1-可換**
+(`Proposition 3.2, (i)` の 1-可換図式を `𝒞` から見たもの)。 -/
+theorem cToPf_comp_pfToElem (Fc : FrobenioidCore P) (hiso : ∀ X : C, IsIsotropic P X)
+    (F₁ : FrobenioidCore (istrPre P Fc)) :
+    cToPf Fc hiso F₁ ⋙ pfToElem (istrPre P Fc) F₁
+      = toIstrOfIsotropic hiso ⋙ (istrPre P Fc).toElem ⋙ elemToPfElem (istrPre P Fc) := by
+  rw [cToPf, Functor.assoc]
+  exact congrArg (fun G => toIstrOfIsotropic hiso ⋙ G)
+    (Functor.ext_of_iso (pfSquare (istrPre P Fc) F₁) (fun _ => rfl) (fun _ => rfl))
+
 /-! ## ★`Proposition 5.5, (iii)` の observation
 
 原文 (FrdI p.105):
@@ -79,6 +117,7 @@ noncomputable def cToSc (Fc : FrobenioidCore P) (G : Frobenioid P)
 すでに在庫がある(`unTr_isPullBack_iff` / `ModelData.model_isPullBack_iff`)ので、
 ここでは**isotropic 型の Frobenioid 一般**の形に束ねておく。 -/
 
+omit [IsConnected D] in
 /-- ★★★**isotropic 型では「pull-back 射 ⟺ linear な等長射」**。
 
 ★`⟹` は `Definition 1.3, (iv)` の `pullBackLB`、

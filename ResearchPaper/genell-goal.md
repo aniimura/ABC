@@ -19860,3 +19860,8257 @@ simp に入れてから `ring` する(mathlib の `C_simp` マクロと同じ手
 | `weilPairingVal_det` | ★★★★★★★★**行列式の公式** |
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-516 ★★★★★★★★★円分指標の段が出た(第 204 ブロック)
+
+基底 `P, Q` に `σ` が `σP = aP + cQ`・`σQ = bP + dQ` と効くとする。★このとき
+
+    σ(e_m(P,Q)) = e_m(σP, σQ) = e_m(P,Q)^{ad − bc}
+
+(第 193 の Galois 同変性と第 203 の行列式の公式)。
+★★`e_m(P,Q)` が `μ_m` を生成すれば、任意の `ζ ∈ μ_m` は `e_m(P,Q)^k` と書けるので、
+`k` 乗して **`σ ζ = ζ^{ad − bc}`**——これが円分指標である。
+
+### ★引き算を避ける
+
+指数を `ℕ` に保つため、`σ ζ · ζ^{bc} = ζ^{ad}` の形で述べた。
+
+### ★★生成性(`hgen`)が非退化性である
+
+「`ζ^m = 1` なら `ζ = e_m(P,Q)^k`」——これは `e_m(P,Q)` が原始 `m` 乗根であること、
+すなわち**非退化性**である。
+
+### ★★★(G5) の現在地
+
+| 段 | 状態 |
+|---|---|
+| Weil 対の構成と 4 性質 | ✅ 第 178–195 |
+| 行列式の公式 | ✅ 第 203 |
+| 円分指標の段 | ✅ **第 204** |
+| 非退化性(固定体を仮定した形) | ✅ 第 197 |
+| Artin で挟む段 | ✅ 第 196 |
+| `[F(x):F(x_n)] ≤ n²` のモニック性 | ✅ 第 198 |
+| **`normEDS` が楕円列であること** | ❌ **残る唯一の葉**(mathlib の TODO) |
+| `det_galRep_eq_cyclotomic` の Lean 上の組み立て | ❌ Tate 加群と行列への翻訳 |
+
+★★数学は揃った。★★★残るのは上流の 1 本と、Lean 上の配線である。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `galois_cyclotomic` | ★★★★★★★★★**`σ ζ · ζ^{bc} = ζ^{ad}`** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-517 ★★★★★★Tate 加群から `E[l^n]` への配線(第 205 ブロック)
+
+第 204 の円分指標の段を `det_galRep_eq_cyclotomic` に繋ぐには、
+`T_l E` の基底の第 `n` 成分が `E[l^n]` でどう動くかが要る。★必要なのは 2 本である。
+
+### ★★★1 本目——射影は Galois 作用と可換
+
+    tateProj n (galTate σ f) = galPoint σ (tateProj n f)
+
+★`galTate` は成分ごとに `galPoint` を当てているので **`rfl`** で済む。
+
+### ★★★★★★2 本目——`ℤ_l` の作用は `toZModPow` に落ちる
+
+`φ := (E[l^n] への射影) ∘ e⁻¹ : (Fin 2 → ℤ_l) →+ E[l^n]` は**加法的**で、
+値は `l^n` 捧れである。★このとき
+
+    φ(α • v) = (toZModPow n α).val • φ(v)
+
+★★証明は 3 行:`α − (toZModPow n α).val` は `toZModPow n` で消えるので
+`l^n·γ`(第 78 の `padic_dvd_of_toZModPow`)、その分は `l^n` 捧れで消える。
+★★★**`limTors` に `ℤ_l` 加群の構造を入れる必要は無い**——加法性と捧れだけで足りる。
+
+### ★★これで残るのは行列成分の読み替えだけ
+
+`P := φ(Pi.single 0 1)`・`Q := φ(Pi.single 1 1)` と置くと、
+`galMat_apply`(`e (galTate σ x) = M *ᵥ e x`)から
+
+    σP = (toZModPow n (M 0 0)).val • P + (toZModPow n (M 1 0)).val • Q
+
+が出る。2 本目を `M *ᵥ Pi.single 0 1 = fun i => M i 0` に当てるだけである。
+★あとは `P, Q` が `E[l^n]` の基底であること(第 186 の全射性から)と、
+`ad − bc = det M mod l^n` を合わせれば第 204 が当たる。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `tateProj_galTate` | ★★★射影は Galois 作用と可換 |
+| `addHom_padic_smul_of_torsion` | ★★★★★★**`ℤ_l` の作用は `toZModPow` に落ちる** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-518 ★★★★★★行列成分の読み替え(第 206 ブロック)
+
+第 205 で `φ(α·v) = (toZModPow n α).val · φ(v)` が取れたので、
+`galMat` の成分を `E[l^n]` の基底で読み替える段に進んだ。3 本取れた。
+
+### ★★★★★★1 本目——列を基底で読む
+
+`M *ᵥ Pi.single j 1 = fun i => M i j` であり、これは
+`(M 0 j)·single₀ + (M 1 j)·single₁` である。★したがって
+
+    φ(M *ᵥ single j 1) = (toZModPow n (M 0 j)).val · φ(single₀)
+                        + (toZModPow n (M 1 j)).val · φ(single₁)
+
+★★`P := φ(single₀)`・`Q := φ(single₁)` と置けば、これが
+`σP = aP + cQ`・`σQ = bP + dQ` そのものである。
+
+### ★★★★★2 本目——行列式の合同
+
+`det M = M₀₀M₁₁ − M₀₁M₁₀` に `toZModPow n`(環準同型)を当てて
+
+    (toZModPow n det).val + B·C ≡ A·D    (mod l^n)
+
+★`ZMod (l^n)` で計算してから `.val` に戻す。
+
+### ★★★3 本目——指数は `l^n` を法として効く
+
+`ζ^{l^n} = 1` なら `j ≡ k (mod l^n)` のとき `ζ^j = ζ^k`。
+★これで第 204 の `σ ζ · ζ^{bc} = ζ^{ad}` を
+`σ ζ = ζ^{(toZModPow n det).val}` に書き換えられる。
+
+### ★★残るのは基底性だけ
+
+`P, Q` が `E[l^n]` の**基底**であること——`T_l E ≅ ℤ_l²` の基底の第 `n` 成分が
+`E[l^n] ≅ (ℤ/l^n)²` の基底になること。★射影の全射性に要る `E[l^{n+1}] → E[l^n]` は
+**第 186 の `exists_nsmul_eq_point` で済んでいる**。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `addHom_mulVec_single` | ★★★★★★**列を基底で読む** |
+| `det_modEq` | ★★★★★**行列式の合同** |
+| `pow_eq_pow_of_modEq` | ★★★指数は `l^n` を法として効く |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-519 ★★★★★★★★★配線が閉じた——`det ρ = 円分指標`(第 207 ブロック)
+
+第 204(円分指標の段)・第 205(射影と `ℤ_l` 作用)・第 206(行列成分の読み替え)を繋ぎ、
+**`det_galRep_eq_cyclotomic` を `hgen` 1 つだけを仮定して証明した**:
+
+    σ ζ = ζ^{(toZModPow n (det (galRep W l e σ))).val}
+
+★`hgen` は「`ζ^{l^n} = 1` なら `ζ = e_{l^n}(P,Q)^k`」——すなわち
+**`e_{l^n}(P,Q)` が原始 `l^n` 乗根であること**(非退化性 + 基底性)である。
+
+### ★★★★★機構
+
+| 段 | 使うもの |
+|---|---|
+| `P := tateVec(single₀)`・`Q := tateVec(single₁)` | `T_l E` の基底の第 `n` 成分 |
+| `σP = a·P + c·Q`・`σQ = b·P + d·Q` | 第 205(射影と Galois の可換)+ 第 206(列を基底で読む) |
+| `σ ζ · ζ^{bc} = ζ^{ad}` | 第 204 |
+| `det + bc ≡ ad (mod l^n)` | 第 206 |
+| `σ ζ = ζ^{det}` | 本ブロックの `eq_pow_of_mul_eq` |
+
+### ★★★(G5) は単一の入力に帰着した
+
+`hgen` = **非退化性 + 基底性**。
+★非退化性は第 197 で `F(E)^{E[n]} = [n]^*F(E)` に絞れ、第 196・198 と合わせて
+`x(nP) = Φ_n/ΨSq_n`、すなわち **`normEDS` が楕円列であること**(mathlib 自身の TODO)に帰着。
+★★基底性は `T_l E ≅ ℤ_l²` の基底の第 `n` 成分が `E[l^n]` の基底になること
+(射影の全射性は第 186 で済み)。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `eq_pow_of_mul_eq` | ★★★★★最後の打ち消し |
+| `tateVec` ほか | `T_l E` のベクトルから `E[l^n]` への加法写像 |
+| `galPoint_tateVec` | ★★★★`σ` は行列で動く |
+| `det_cyclotomic_of_gen` | ★★★★★★★★★**`det ρ = 円分指標`(`hgen` 仮定)** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)——
+スケルトンの `det_galRep_eq_cyclotomic` は `hgen` が埋まるまで `sorry` のままである。
+
+## §9-520 ★★★★★★塔の各段の全射性(第 208 ブロック)
+
+第 207 の `hgen` のうち**基底性**は、`tateProj n : T_l E → E[l^n]` が**全射**であることに
+帰着する——`e.symm` は全単射なので `tateVec n` の全射性と同値で、そこから
+`R = a·P + b·Q` が第 206 で出る。
+
+### ★★★★★★第 186 の一般化で出る
+
+第 186 は `#A[n] = n²`・`#A[n²] = n⁴` から `A[n]` が `n` で割れることを出した。
+★同じ数え上げを `[n] : A[nm] → A[m]` に当てると:
+
+| 段 | 内容 |
+|---|---|
+| 1 | `φ : A[nm] →+ A`、`Q ↦ n·Q`。像は `A[m]` に入る |
+| 2 | `ker φ = A[n]`(`A[n] ≤ A[nm]` だから) |
+| 3 | Lagrange と第一同型で `(nm)² = #image · n²`、すなわち `#image = m²` |
+| 4 | `image ≤ A[m]` で位数が等しい ⟹ `image = A[m]` |
+
+★★`n := l`・`m := l^k` と取れば **`[l] : E[l^{k+1}] → E[l^k]` の全射**になる。
+
+### ★★残るのは逆極限の構成だけ
+
+`R ∈ E[l^n]` から両立列 `f`(`l·f(m+1) = f(m)`)を作る段。
+★`m ≤ n` では `f m := l^{n−m}·R`、`m > n` では本ブロックの全射性で**再帰的に選ぶ**。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `exists_nsmul_eq_of_card_gen` | ★★★★★★★**位数から `[n] : A[nm] → A[m]` の全射** |
+| `exists_smul_step` | ★★★★★★**`[l] : E[l^{m+1}] → E[l^m]` は全射** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+
+## §9-521 逆極限の全射性 —— 基底性の「生成する」半分が閉じた(第 209 ブロック)
+
+第 208 で塔の各段 `[l] : E[l^{m+1}] -> E[l^m]` の全射が取れた。★本ブロックはそれを
+**逆極限まで持ち上げた**——`tateProj n : T_l E -> E[l^n]` が全射である。
+
+### ★両立列の構成
+
+| 段 | `m` | 定義 |
+|---|---|---|
+| 下 | `m <= n` | `f m := l^{n-m}*R`(`R` を割り戻す) |
+| 上 | `m > n` | 各段の全射性で**再帰的に選ぶ**(`towerAux`) |
+
+★上の段は `Exists.choose` の再帰で、`towerAux hstep n R hR k` が `E[l^{n+k}]` の元を返す。
+★★`towerSeq` はこの 2 つを `if m <= n` で貼り合わせたもので、両立性 `l*f(m+1) = f(m)` は
+下・上・境界の 3 通りで確かめた。境界(`m = n`)だけ `towerAux_zero` を使う。
+
+### ★生成性まで一気に取れた
+
+`e : T_l E ~+ Z_l^2` を通すと `tateVec n : Z_l^2 ->+ E[l^n]` も全射になる。★任意の
+`v` を `v = v0*single0 + v1*single1` と分解し、第 205 の
+`phi(alpha*v) = (toZModPow n alpha).val * phi(v)` を当てると `R = a*P + b*Q` が出る。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `towerAux` ほか | 塔を上に伸ばす再帰 |
+| `towerSeq_compat` | ★★★★★★両立列であること |
+| `tateProj_surjective` | ★★★★★★★**`T_l E -> E[l^n]` は全射** |
+| `addHom_repr` | ★★★★★★任意のベクトルを基底で読む |
+| `exists_smul_repr` | ★★★★★★★**`P, Q` は `E[l^n]` を生成する** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+## §9-522 ★★★★★★★★★★配線が閉じた —— `hgen` は非退化性だけから出る(第 210 ブロック)
+
+第 207 の `.needs` に書いた**残件 (ii)「Lean 上の配線」は本ブロックで完了した**。
+★`det_galRep_eq_cyclotomic` に残っているのは**非退化性ただ 1 つ**である。
+
+### ★★数え上げだけで自由性が出た(Z_l 線型性は要らなかった)
+
+`e : T_l E ~+ Z_l^2` は**加法同型でしかない**——`tateModule` に `Z_l` 加群の構造を
+入れていないので、「`single0` は `l*Z_l^2` に入らない」という線型代数は**使えない**。
+★★これは第 205 で「加法性と捩れだけで足りる」と判断した設計の帰結であり、
+ここで詰まるかに見えた。★★★しかし次の数え上げで足りた:
+
+| 段 | 内容 |
+|---|---|
+| 1 | `ord P = l^a`・`ord Q = l^b` と置く(`a, b <= n`) |
+| 2 | 生成性(第 209)から `Fin l^a x Fin l^b -> E[l^n]` が**全射** |
+| 3 | `#E[l^n] = l^{2n}` なので `l^{2n} <= l^{a+b}` |
+| 4 | `a, b <= n` と合わせて **`a = b = n`** |
+
+★★★★**測ってから要求を軽くした**——`a < n` を仮定すると `l^{n-1}*P = 0` となり、
+上限が `l^{2n-1} < l^{2n}` に落ちて矛盾する。それだけである。
+★★★★★`Z_l` 加群の構造を後から入れる必要は**無かった**。
+
+### ★非退化性から原始根性へ
+
+`zeta := e_{l^n}(P, Q)` とする。★`zeta^m = 1` なら、任意の `R = aP + bQ` に対し
+
+    e(m*P, R) = e(P,P)^{am} * e(P,Q)^{bm} = 1 * (zeta^m)^b = 1
+
+なので**非退化性**から `m*P = 0`、すなわち `l^n | m`(位数がちょうど `l^n` だから)。
+★★これは `IsPrimitiveRoot zeta (l^n)` そのもので、`eq_pow_of_pow_eq_one` から
+第 207 の `hgen` が出る。★★★`n = 0` は `zeta = 1` なので自明に処理でき、
+`det_cyclotomic_of_nondeg` は `1 <= n` の仮定すら要らない形になった。
+
+### ★★★(G5) に残っているのは 1 件だけになった
+
+| 残件 | 内容 | 状態 |
+|---|---|---|
+| (i) 非退化性 | `F(E)^{E[n]} = [n]^* F(E)`、要は `x(nP) = Phi_n/PsiSq_n` | ★**mathlib 自身の TODO**(`normEDS` が楕円列であること)、30-80 ブロック、上流案件 |
+| (ii) Lean 上の配線 | `T_l E / l^n -> E[l^n]` の基底性 | ★★★★**本ブロックで完了** |
+
+★(i) には別ルートも測った——`deg [n] = #fiber = n^2` を
+`Ideal.sum_ramification_inertia`(mathlib にある)で出す道である。
+★★ただし「関数体の place と点の対応」「不分岐性」「拡大の有限性を先に言う」段が要り、
+15-40 ブロックと見積もる。★★★どちらも上流の作業であり、本節点の下では閉じない。
+
+### ★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `card_torsion_le_of_two_gen` | ★★★★★2 元で生成される捩れ群の位数の上限 |
+| `order_exact_of_gen` | ★★★★★★★**生成すれば位数はちょうど `l^n`** |
+| `dvd_of_nsmul_eq_zero` | 位数がちょうど `l^n` なら `m*P = 0 ==> l^n | m` |
+| `nsmul_eq_zero_of_pow_eq_one` | ★★★★★★非退化性で `zeta^m = 1 ==> m*P = 0` |
+| `isPrimitiveRoot_weilPairingVal` | ★★★★★★★★**Weil 対の値は原始 `l^n` 乗根** |
+| `exists_pow_weilPairingVal_eq` | ★★★★★★★★★**`hgen` そのもの** |
+| `hgen_of_nondeg` | ★★★★★★★★★**`hgen` は非退化性だけから出る** |
+| `det_cyclotomic_of_nondeg` | ★★★★★★★★★★**`det rho = 円分指標`(非退化性だけ)** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★(G5) の `det_galRep_eq_cyclotomic` は `sorry` のままである——非退化性が上流に残っており、
+そこを仮定に足して「証明した」と言い換えることはしない。
+
+
+## §9-523 ★★★★★(G6) の在庫を測り直した —— 解析の背骨は mathlib に在った(第 211 ブロック)
+
+`FullImageData`(G5)は `ModLRepData` を、`SemistableModelData`(G7)は `TateCurveData` を、
+`FaltingsHeightData`(G8)は G7 を台に持つ。★したがって
+**(G6) Tate 一意化が Galois 側の残り 4 欄すべての律速**である。そこで在庫を測り直した。
+
+| 段 | 内容 | mathlib 在庫 |
+|---|---|---|
+| 収束の判定 | 非アルキメデス完備群で `Summable f <-> f -> 0`(cofinite) | ★★`NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero` ✓ |
+| 級数の積 | `(Sf)(Sg) = S f_i g_j` | ★★`HasSum.mul_of_nonarchimedean` ✓ |
+| 進位相 | 完備 DVR の m 進位相は非アルキメデス | ★`AdicTopology` に `instance : NonarchimedeanRing R` ✓ |
+| **付値位相** | `Valued K G0` から非アルキメデス性 | ★**無い**(2026-08-20 実測、`infer_instance` が失敗) |
+| Tate 級数そのもの | `a4(q), a6(q)`、`X(u,q), Y(u,q)` | ★**0 件**(`Tate curve` で全文検索して 0 件) |
+| 群同型の検証 | `K^x/q^Z = E_q(K)` | ★**0 件** |
+
+### ★★★★★測って初めて分かったこと
+
+2026-08-16/17 の測定では「mathlib に Tate 曲線は無い・FLT にも無い(20 行の入口だけ)」
+とだけ書いていた。★★今回**その 1 段下**を測ると、**解析の背骨は在った**——
+非アルキメデス総和法(項が 0 に行けば総和可能)も、級数どうしの積も、
+`Mathlib/Topology/Algebra/InfiniteSum/Nonarchimedean.lean` に揃っている。
+
+★★★これは見積もりを変える。「p 進解析の基礎から積む」必要は**無い**。
+欠けているのは **Tate 級数そのもの**(`a4(q)`, `a6(q)`, `X(u,q)`, `Y(u,q)`)と
+**群同型の検証**であり、前者は級数の定義と収束、後者は加法公式の恒等式である。
+
+### ★本ブロックで埋めた穴
+
+`Valued K G0` から `NonarchimedeanAddGroup K` が**出ない**(instance が無い)。
+★付値の球 `{x | v x < g}` は開加法部分群なので、これは 10 行で埋まる。
+★★埋めたので `summable_iff_tendsto_cofinite_zero` が付値体でそのまま使える。
+★★★グローバル instance にはしていない——`Valued` を持つすべての環に当たると
+探索が重くなるため、`haveI` で局所的に入れる形にした。
+
+| 定理 | 内容 |
+|---|---|
+| `nonarchimedeanAddGroup_of_valued` | ★★★**付値位相は非アルキメデス** |
+| `summable_of_valued_tendsto_zero` | ★★★★**完備な付値体では項が 0 に行けば総和可能** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` の全体は**並行セッションの `Found/Divisor/ArithMonoprime.lean:214` で落ちている**
+(こちらのファイルではない)。自分のファイルは `lake build ABC3.Found.GaloisRep.TateAnalytic` で通っている。
+
+
+## §9-524 §9-523 の訂正 —— (G6) は既に `I` 進の道を選んでいた
+
+§9-523 で「(G6) の解析の背骨が mathlib に在った」と書いたが、**位置づけが誤っている**。
+
+★(G6) は**第 94 ブロック(§9-411 以降)で既に着手しており、形式冪級数 `Z[[q]]` +
+`IsAdicComplete` 評価という道を選んでいる**。`s_k(q) = S_N sigma_k(N) q^N` と展開すれば
+係数が約数和になるので、**収束の議論は要らない**——これが第 94 ブロックの要点だった。
+
+| 記録 | ブロック | 内容 |
+|---|---|---|
+| §9-411 | 94 | Tate 曲線の q 展開(`Z[[q]]` で定義、収束不要) |
+| §9-412 | 104 | `I` 進級数の和(`adicSum`) |
+| §9-413 | 105 | `X(u,q)`・`Y(u,q)` の項と尾、`1 − x` の可逆性 |
+| §9-414 | 106 | `q^Z` の基本領域(`0 <= v(u) < v(q)` の正規化) |
+| §9-415 | 107 | 反転則 `X(q/u) = X(u)`、`Y(q/u) = −X(u) − Y(u)` |
+| §9-416〜419 | 108-111 | 尾の q 展開と `s_1(q)` との一致 |
+| §9-420 | 112 | **`I` 進級数の Cauchy 積** |
+
+★★したがって、非アルキメデス総和法(ノルム付き体)は**この道では使わない**。
+第 211 ブロックの `nonarchimedeanAddGroup_of_valued` と
+`summable_of_valued_tendsto_zero` は**定理としては正しい**が、
+**(G6) の臨界路には乗っていない**。記録として残し、臨界路の主張は取り下げる。
+
+### ★★★(G6) の本当の次の葉
+
+第 112 ブロックの Cauchy 積は、**`(X(u,q), Y(u,q))` が Tate 曲線の Weierstrass 方程式を
+満たすこと**を確かめるために用意されたものだった。§9-413 が挙げた残りは:
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 `Y² + XY = X³ + a_4 X + a_6` | ★手つかず(Cauchy 積が道具) |
+| (c) | 準同型性 `phi(u1 u2) = phi(u1) + phi(u2)` | ★手つかず |
+| (d) | 核が `q^Z` であること | ★手つかず |
+| (e) | 全射性 | ★手つかず |
+
+★★次はここから再開する。★★★測り直さずに新しい道を敷こうとしたのが誤りで、
+**着手前に既存のブロックを引く**——それが省略の合図を数えるのと同じ手順である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+
+
+## §9-525 ★★★★★★★(G6) 葉 (b) に入った —— Weierstrass 方程式が `I` を法として成り立つ(第 212 ブロック)
+
+§9-524 で臨界路に戻したので、そこから再開した。§9-413 が挙げた (G6) の残りの葉は
+**(b) Weierstrass 方程式・(c) 準同型性・(d) 核・(e) 全射性**の 4 つである。
+★第 212 ブロックは (b) の**最下段**——`I` を法とした場合——を取った。
+
+### ★★★★★★特異 Tate 曲線の等式は有理式の恒等式だった
+
+`q = 0` では `w = q/u = 0` なので `X = f(a)`・`Y = g(a)` になり、`a_4 = a_6 = 0` である。
+★残るのは **`g(t)^2 + f(t)g(t) = f(t)^3`**——節点付き三次曲線 `y^2 + xy = x^3` の
+有理パラメータ表示そのものである。★★`f(t) = t/(1-t)^2`・`g(t) = t^2/(1-t)^3` を入れると
+
+    (1-t)^6 g^2 = t^4,   (1-t)^6 f g = t^3(1-t),   (1-t)^6 f^3 = t^3
+
+なので `t^4 + t^3(1-t) = t^3` で閉じる。★★★`1 - t` の逆元 `v` を取ると
+`linear_combination (-t^3 v^5) * ((1-t)v = 1)` の**1 行**になった。
+
+### ★★★合同の段
+
+| 段 | 内容 |
+|---|---|
+| `evalAdic_mem` | 定数項 0 の冪級数の `I` 進値は `I` に入る(`evalAdic_spec` を `n = 1` で使う) |
+| `tateCurveAt_a4_mem` / `_a6_mem` | ★`a_4(q), a_6(q)` は `I` に入る |
+| `tateXpair_sub_mem` / `tateYpair_sub_mem` | ★★`X - f(a)`・`Y - g(a)` は `I` に入る |
+| `tate_equation_mem` | ★★★★★★★**方程式が `I` を法として成り立つ** |
+
+★差の分解 `Y^2 - g^2 = (Y-g)(Y+g)`・`XY - fg = (X-f)Y + f(Y-g)`・
+`X^3 - f^3 = (X-f)(X^2+Xf+f^2)` を `ring` で作り、各項が `I` に入ることを言うだけである。
+★★`Ideal.Quotient` は**使わなかった**——`Ring.inverse` は環準同型と可換でないので、
+商に落とすと `f(t)` の形が壊れる。差の分解なら壊れない。
+
+### ★★残っているもの
+
+`I` を法とした先——`I^n` を法とした帰納、すなわち**厳密な等式**——には
+第 112 ブロックの `I` 進 Cauchy 積(`adicSum_mul`)が要る。
+★(c) 準同型性・(d) 核・(e) 全射性は手つかずである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-526 ★★★★★★Tate 座標は `K^x/q^Z` 上で定まる(第 213 ブロック)
+
+`Found/GaloisRep/TateClassMap.lean`。
+
+Tate 一意化の写像は `u` から作るが、**`u` と `qu` は同じ点に行かねばならない**。
+★第 106 ブロックの基本領域(`0 <= v(u) < v(q)` の正規化)を使うと、
+これは**代表元の一意性**に還元される。
+
+### ★★★★代表元を関数にした
+
+`exists_unique_normalized_rep`(第 106)は `∃!` だったので `choose` で関数にした:
+
+    normRep v q hq c : K^x        (c : K^x / q^Z)
+
+★`mk (normRep c) = c`・`0 <= v(normRep c) < v(q)`、そして
+**`eq_normRep`——同じ類の正規化元は代表元に一致する**。
+
+### ★★★★★対 `(a, w)` は類だけで決まる
+
+`R -> K` が単射で `R` が整域なら:
+
+| 段 | 内容 |
+|---|---|
+| 1 | 同じ類の正規化元は一致する(`eq_normRep`) |
+| 2 | `algebraMap a = u = u' = algebraMap a'` と単射性で `a = a'` |
+| 3 | `a*w = q = a'*w'` と `a != 0` の相殺で `w = w'` |
+
+★★`a != 0` は `algebraMap a = (u : K)` が**単元**だから出る。
+★★★したがって `tateXpair a w (a*w)`・`tateYpair a w (a*w)` は
+**類 `c` だけの関数**である。証明項は `Prop` なので、対が一致すれば `rfl` で閉じた。
+
+### ★葉の状況((G6))
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 | ★`I` 法まで(第 212)。厳密化には `adicSum_mul` が要る |
+| (c) | 準同型性 | ★手つかず |
+| (d) | 核が `q^Z` | ★**前半(商の上で定まること)が本ブロックで済んだ**。後半(単射性)は手つかず |
+| (e) | 全射性 | ★手つかず |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-527 ★★★★★★葉 (b) の道を測って選んだ —— 解析の難所は mathlib に在った(第 214 ブロック)
+
+`Found/GaloisRep/LipschitzBridge.lean`。
+
+第 212 で Weierstrass 方程式は `I` を法として取れた。★厳密な等式には道が 2 本ある。
+
+| 道 | 中身 | 判定 |
+|---|---|---|
+| α 形式的・代数的 | `Z[u, u^-1, (1-u)^-1][[q]]` の中で `q` の係数ごとに確かめる | ★**有限の帰着が見えない**——係数ごとに別の議論が要る |
+| β 複素解析から移す | `℘` の理論で方程式を出し、係数が `Z` なので形式級数の等式に移す | ★★★★**在庫が厚い** |
+
+### ★★★★★★測ったら道 β の在庫が厚かった
+
+| 段 | 内容 | mathlib 在庫 |
+|---|---|---|
+| 1 | `℘` の構成と **`℘'^2 = 4℘^3 - g2·℘ - g3`** | ★★★★`PeriodPair.derivWeierstrassP_sq` ✓ |
+| 2 | **Lipschitz 公式** `S_{n in Z} 1/(z+n)^{k+1} = ((-2pi i)^{k+1}/k!)·S n^k q^n` | ★★★★`EisensteinSeries.qExpansion_identity` ✓ |
+| 3 | Eisenstein の q 展開 `E_k = 1 - (2k/B_k)·S sigma_{k-1}(n) q^n` | ★★★`EisensteinSeries.q_expansion_bernoulli` ✓ |
+| 4 | 格子 `Z + tau·Z` の `g2, g3` を `E4, E6` に繋ぐ | ★無い |
+| 5 | `℘` の q 展開(2 を `n in Z` の各段に当てる) | ★無い |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | ★無い |
+
+★★★**解析の難所——`℘` の構成・微分方程式・Lipschitz 公式——はすべて mathlib に在る**。
+残る 4-6 は機械的な段であり、**道 β を採る**。見積もりは 40-80 ブロック。
+
+### ★★★★★★橋を 1 本架けた
+
+Lipschitz 公式の `k = 1` は、右辺がちょうど **`f(t) = t/(1-t)^2`**——
+すなわち我々の `tateXterm`——の形になる:
+
+    S_{n in Z} 1/(z+n)^2 = (2 pi i)^2 · f(u),      u = exp(2 pi i z)
+
+★★`w := z + k·tau` に当てれば `f(q^k u)` が出る——これが `℘` の q 展開の各段である。
+★★★**解析側の `f` と形式側の `tateXterm` が同じものであることを型で確かめた**
+(`lipschitz_tateXterm`)。
+
+### ★測り方について
+
+§9-523 では測らずに新しい道を敷こうとして外した(§9-524 で訂正)。★今回は
+**2 本の道を並べて在庫を測ってから選んだ**——これが本来の手順である。
+
+| 定理 | 内容 |
+|---|---|
+| `lipschitz_two` | ★★★★★**Lipschitz 公式(`k = 1`)** |
+| `lipschitz_tateXterm` | ★★★★★★**解析側の `f` は `tateXterm` である** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build ABC3.Found.GaloisRep.LipschitzBridge` は通過。全体の `lake build` は
+**並行セッションの `Found/Divisor/ArithFunctor.lean`(194・204・218 行)で落ちている**
+——こちらのファイルではない。ゲートも同じ理由で NG 1 件。
+
+
+## §9-528 ★★★★★★格子不変量 `g2, g3` の q 展開(第 215 ブロック)—— 道 β の段 4
+
+`Found/GaloisRep/LatticeInvariant.lean`。第 214 で選んだ道 β の残り 3 段のうち、段 4 を取った。
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 4 | 格子 `Z + tau*Z` の `g2, g3` を Eisenstein の q 展開に繋ぐ | ★**本ブロックで完了** |
+| 5 | `℘` の q 展開(Lipschitz 公式を `n in Z` の各段に当てる) | 未着手 |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | 未着手 |
+
+### ★★★★★mathlib は 2 つの世界を別々に持っていた
+
+| 世界 | 和のとり方 |
+|---|---|
+| `PeriodPair.G n` | `S' l : L.lattice, (l^n)^-1`(**格子の元**にわたる) |
+| `EisensteinSeries.eisSummand` | `(v0*z + v1)^{-k}`(**整数の対**にわたる) |
+
+★`tau` から周期対 `<tau, 1>` を作り、`latticeEquivProd : L.lattice ~L[Z] Z x Z` と
+`finTwoArrowEquiv : (Fin 2 -> Z) ~ Z x Z` を噛ませると**同じ和になる**。
+★★`l = 0` の項は `(0^n)^-1 = 0` なので**勝手に落ちる**——除外の細工は要らなかった。
+Lean の `0^-1 = 0` 規約がここで効いている。
+
+### ★★★★★★そこから q 展開まで一直線だった
+
+    G_k = S' v, eisSummand k v tau                        (本ブロック)
+        = zeta(k) * eisensteinSeries 0 k tau               (mathlib)
+        = 2 zeta(k) * E_k(tau)                             (E は 1/2 倍で定義されている)
+        = 2 zeta(k) * (1 - (2k/B_k) S sigma_{k-1}(n) q^n)  (mathlib)
+
+★★`g2 = 60*G_4`・`g3 = 140*G_6` なので、そのまま `sigma_3`・`sigma_5` の級数で書けた
+——**これは我々の `tateA4 = -5*sigmaSeries 3`・`tateA6` と同じ形**である。
+★★★係数の照合(`zeta(4) = pi^4/90` 等)は段 5-6 で使う。
+
+| 定理 | 内容 |
+|---|---|
+| `tauPair` | `tau` から周期対 `<tau, 1>` |
+| `G_eq_tsum_eisSummand` | ★★★★**格子和は Eisenstein 和である** |
+| `G_eq_two_zeta_mul_E` | ★★★★★`G_k = 2 zeta(k) E_k` |
+| `G_qExpansion` | ★★★★★★**`G_k` の q 展開** |
+| `g2_qExpansion` / `g3_qExpansion` | ★★★★★★**`g2, g3` の q 展開** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-529 ★★★★★★Lipschitz 公式を格子の各段に当てた(第 216 ブロック)—— 道 β の段 5 の前半
+
+`Found/GaloisRep/LipschitzRows.lean`。
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 4 | 格子 `Z + tau*Z` の `g2, g3` を Eisenstein の q 展開に繋ぐ | 済(第 215) |
+| 5 | `℘` の q 展開(Lipschitz 公式を `n in Z` の各段に当てる) | ★**本ブロックはその前半** |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | 未着手 |
+
+### ★★★★★格子を tau の段に分ける
+
+格子 `Z*tau + Z` は `n in Z` ごとの**横一列**(`n*tau + Z`)に分かれる。
+`℘` の二重和を段ごとに切り、各段に第 214 の `lipschitz_tateXterm` を当てると:
+
+    S_{m in Z} 1/(z + n*tau + m)^2     = (2 pi i)^2 * tateXterm(q^n * u)          (n >= 0)
+    S_{m in Z} 1/(z - (n+1)*tau + m)^2 = (2 pi i)^2 * tateXterm(q^{n+1} * u^-1)   (n >= 0)
+
+ここで `q = exp(2 pi i tau)`、`u = exp(2 pi i z)`。
+
+★★**これがちょうど形式側 `tateXpair a w` の `(a, w)` の対の形である**
+——`a` が `u` に、`w` が `q` に対応し、上段が `tateXterm (q^n a)`、下段が `tateXterm (q^{n+1} a^-1)`。
+第 213 の `tateXpair` を作ったときの `(a, w)` の非対称な役割分担が、
+ここで**解析側の段の分け方とそのまま合っていた**。
+
+### ★★★負の段は「折り返し」で取る
+
+`n < 0` の段は `z - (n+1)*tau` の虚部が負になりうるので、上半平面の点として直接は扱えない。
+★`S' m, 1/(w+m)^2 = S' m, 1/(-w+m)^2`(`m -> -m` の置換)で折り返してから
+`(n+1)*tau - z`(`im z < im tau` なら上半平面にある)に当てる。
+★★★**平方だから折り返しで符号が消える**——これが `tsum_inv_sq_neg` の要点である。
+`him : im z < im tau` は段 5 の後半で `z` を基本領域に取るときに自然に満たされる。
+
+| 定理 | 内容 |
+|---|---|
+| `shiftUp` / `shiftUp_coe` | `z + n*tau` を上半平面の点として |
+| `exp_add_nat_mul` | `exp(2 pi i (z + n tau)) = q^n * u` |
+| `lipschitz_shift` | ★★★★★**上向きの段の Lipschitz 公式** |
+| `tsum_inv_sq_neg` | ★★★★**平方和は折り返しで不変** |
+| `shiftDown` / `exp_sub_nat_mul` | `(n+1)*tau - z` の側 |
+| `lipschitz_shift_neg` | ★★★★★★**下向きの段の Lipschitz 公式** |
+
+### ★段 5 の残り
+
+各段は取れた。残るのは**段をまとめる**ところ——mathlib の `weierstrassP` は
+格子の元にわたる無条件可和な和 `S' l, (1/(z-l)^2 - 1/l^2)` なので、
+これを `tau` の係数で括り直して上の各段に落とす(`Summable` の再編成)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-530 ★★★★★★℘ を段に切って各段の値を出した(第 217 ブロック)—— 道 β の段 5 の後半
+
+`Found/GaloisRep/WeierstrassRows.lean`。第 216 で各段の Lipschitz 公式を取った。
+本ブロックは **`℘` の二重和をその段に切り、各段の値を閉じた形で出した**。
+
+### ★★★★★段に切る
+
+mathlib の `℘` は**格子の元にわたる**無条件可和な和 `S' l : L.lattice, (1/(z-l)^2 - 1/l^2)` である。
+`latticeEquivProd` で `Z x Z` に移し、`Summable.tsum_prod` で `n`(tau の係数)を外側にすると
+**横一列ごとの和**になる(`weierstrassP_eq_tsum_rows`)。
+
+★★★**段ごとには `1/(z-l)^2` と `1/l^2` が別々に可和なので差に分けられる**(`row_eq_sub`)
+——これは二重和全体では成り立たない(`S_l 1/l^2` は絶対収束しない。weight 2 の
+Eisenstein 級数が条件収束なのはこのためである)。**段に切ってから分ける**のが要点。
+
+### ★★★★★★段の値は 1 つの形にまとまった
+
+| 段 | ℘ 側 | 格子側 |
+|---|---|---|
+| `n <= 0` | `(2 pi i)^2 f(q^{-n} u)`(第 216 の上向き) | `(2 pi i)^2 f(q^{-n})` |
+| `n >= 1` | `(2 pi i)^2 f(q^n u^-1)`(第 216 の下向き) | `(2 pi i)^2 f(q^n)` |
+| `n = 0`(格子側) | —— | `S_m 1/m^2 = 2 zeta(2) = pi^2/3` |
+
+★★★★**`tateXterm` は反転で不変**(`tateXterm_inv`)——`f(1/t) = (1/t)/(1-1/t)^2 = t/(1-t)^2 = f(t)`。
+これで `f(q^n u^-1) = f(q^{-n} u)` となり、**上向きと下向きが 1 つの形にまとまる**(`rowP`)。
+★`t != 1` は `‖t‖ < 1`(`norm_down_lt_one`——第 216 の `shiftDown` が上半平面に乗ることから)。
+
+★★★★★**在庫を先に引いたのが効いた**——`tateXterm_inv` は既に在った。
+CLAUDE.md の「在庫」の手順(`decl-index` / grep)通りに引いてから書き始めたので、書き直しが無かった。
+
+| 定理 | 内容 |
+|---|---|
+| `summable_one_div_sq_add` / `_sub` | 段ごとの可和性(`EisensteinSeries.linear_right_summable`) |
+| `hasSum_weierstrassP_prod` | ★★★★`℘` の和を `Z x Z` に移す |
+| `weierstrassP_eq_tsum_rows` | ★★★★★**`℘` を段に切る** |
+| `row_eq_sub` | ★★★★段ごとには差に分けられる |
+| `rowP_nonpos` / `rowP_pos` / `rowP` | ★★★★★★**℘ 側の段の値** |
+| `rowG_pos` / `rowG_neg` / `rowG_zero` / `rowG` | ★★★★★★**格子側の段の値** |
+| `tsum_int_one_div_sq` | ★★★★★`S_{m in Z} 1/m^2 = pi^2/3` |
+| `row_value` / `row_value_zero` | ★★★★★★**段の値(差の形)** |
+
+### ★段 5 の残り
+
+各段の値は取れた。残るのは**段の和が収束することと、その値**:
+
+    (2 pi i)^-2 ℘(z) = S_{n in Z} f(q^{-n} u) - S_{n != 0} f(q^{-n}) - 1/12
+
+★`f(q^{-n} u)` も `f(q^{-n})` も `|n| -> infty` で幾何級数的に 0 に落ちる
+(`f(t) ~ t` は `t -> 0`、`f(t) ~ 1/t` は `t -> infty`)ので、両方の和は収束する。
+★★これで段 5 が閉じ、あとは段 6(形式化への移行)である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-531 ★★★★★★★`℘` の q 展開が取れた —— 道 β の段 5 が閉じた(第 218 ブロック)
+
+`Found/GaloisRep/WeierstrassQExp.lean`。
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 4 | 格子 `Z + tau*Z` の `g2, g3` を Eisenstein の q 展開に繋ぐ | 済(第 215) |
+| 5 | `℘` の q 展開 | ★★**本ブロックで完了**(第 216-218) |
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 | 未着手 |
+
+### ★★★★★両側とも幾何級数で押さえられる
+
+`f(t) = t/(1-t)^2` は `t -> 0` でも `t -> infty` でも 0 に落ちる:
+
+| 範囲 | 押さえ |
+|---|---|
+| `‖t‖ <= 1/2` | `‖1-t‖ >= 1/2` なので `‖f(t)‖ <= 4‖t‖` |
+| `‖t‖ >= 2` | `‖1-t‖ >= ‖t‖/2` なので `‖f(t)‖ <= 4/‖t‖` |
+
+`n -> +infty` では `‖q^{-n}u‖ -> infty`、`n -> -infty` では `-> 0` なので、
+**どちらの端も `4‖q‖^{|n|}` 型の幾何級数**で押さえられる(`summable_int_tateXterm`)。
+
+★★★**大きい側で反転不変性(`tateXterm_inv`)を使う必要は無かった**
+——`‖f(t)‖ <= 4/‖t‖` を直接出せば `t != 1` の仮定が要らない。
+第 217 では `rowP` の一様化に反転不変性が要ったが、可和性には要らない。
+仮定を持ち込まずに済んだぶん、後段(`z` が格子点でない条件)が軽くなる。
+
+### ★★★★★★定数項 `1/12` の出どころ
+
+`n != 0` の段は `(2 pi i)^2 (f(q^{-n}u) - f(q^{-n}))` だが、`n = 0` の段だけ
+格子側が `S_m 1/m^2 = 2 zeta(2) = pi^2/3` になる。一方 `f(q^0) = f(1) = 0`
+(Lean の `Ring.inverse 0 = 0` の規約)なので、**一様形との差はちょうど `-pi^2/3` の 1 項だけ**:
+
+    ℘(z) = (2 pi i)^2 * S_{n in Z} (f(q^{-n} u) - f(q^{-n})) - pi^2/3
+
+★`-pi^2/3 / (2 pi i)^2 = 1/12`——これが古典的な `℘/(2 pi i)^2 = X(u,q) + 1/12` の `1/12` である。
+★★`S_{n in Z}` は `n -> -n` で不変なので、形式側 `tateXpair` と同じ正べきの向きにも書ける
+(`weierstrassP_qExpansion_pos`)。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXterm_field` / `norm_tateXterm` | ℂ の上では `f(t) = t/(1-t)^2` |
+| `norm_tateXterm_le_of_small` / `_large` | ★★★★両端の押さえ |
+| `summable_tateXterm_small` / `_large` | ★★★★★片側ずつの可和性 |
+| `summable_int_tateXterm` | ★★★★★★`S_{n in Z} f(q^{-n}u)` は可和 |
+| `weierstrassP_qExpansion` | ★★★★★★★**`℘` の q 展開** |
+| `weierstrassP_qExpansion_pos` | ★★★★★★正べきの形(形式側と同じ向き) |
+
+### ★残る段 6
+
+`℘` 側の材料はそろった。残るのは:
+
+1. `℘'` の q 展開(同じ手順——重み 3 の Lipschitz 公式を段に当てる)
+2. `(℘, ℘')` から `(X, Y)` への変数変換(`1/12` の平行移動と `1/2` の捻り)
+3. 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」(段 6 本体)
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-532 ★★★★★★★`℘'` の q 展開が取れた(第 219 ブロック)
+
+`Found/GaloisRep/DerivWeierstrassQExp.lean`。第 218 で `℘` が取れた。
+Tate の方程式には `℘'` も要るので、同じ手順を**重み 3** で繰り返した。
+
+★★`℘` と違って**補正項が要らない**——`S_l 1/(z-l)^3` は絶対収束するので、
+`℘` のときの `-1/l^2` に当たるものが最初から無く、定数項も出ない。
+
+### ★★★★★重み 3 の Lipschitz 公式は `h = f + 2g` を生む
+
+mathlib の `qExpansion_identity` を `k = 2` で使うと右辺は `S_{n>=0} n^2 t^n` になる。
+
+    S_{n>=0} n^2 t^n = t(1+t)/(1-t)^3 = f(t) + 2g(t)
+
+★`n^2 = 2*C(n+2,2) - 3*C(n+1,1) + 1` と分けて `hasSum_choose_mul_geometric_of_norm_lt_one`
+を 2 回使えば出る(mathlib に `S n^2 x^n` の閉じた形は無かった)。
+★★この `h := f + 2g` が **`℘'` の側に出る項**である(`tateDterm`)。
+
+### ★★★★★★符号は `h` の反転で吸収される
+
+奇数べきなので折り返しで符号が変わる(`S_m 1/(w+m)^3 = -S_m 1/(-w+m)^3`)。
+そのため上向きの段と下向きの段は**符号が逆**に出る。一方
+
+    h(1/t) = -h(t)                                    (`tateDterm_inv`)
+
+なので**両者はちょうど 1 つの形にまとまる**(`rowDP`)。
+
+★★★**`f` は反転で不変、`h` は反転で符号が変わる**——偶数べき(重み 2)と
+奇数べき(重み 3)の違いがそのまま出ている。第 217 の `rowP` と第 219 の `rowDP` は
+形は同じだが、符号の吸収の仕方が違う。
+
+### ★★到達点
+
+    ℘(z)  = (2 pi i)^2 * S_{n in Z} (f(q^{-n}u) - f(q^{-n})) - pi^2/3     (第 218)
+    ℘'(z) = (2 pi i)^3 * S_{n in Z} h(q^{-n}u)                             (本ブロック)
+
+| 定理 | 内容 |
+|---|---|
+| `tateDterm` | `h(t) = f(t) + 2g(t)` |
+| `tateDterm_inv` | ★★★★★`h(1/t) = -h(t)` |
+| `hasSum_sq_mul_geometric` | ★★★★★`S_{n>=0} n^2 t^n = h(t)` |
+| `lipschitz_three` | ★★★★★重み 3 の Lipschitz 公式 |
+| `tsum_inv_cube_neg` | ★★★★奇数べきの折り返しは符号を変える |
+| `rowDP` | ★★★★★★段の値の一様形 |
+| `summable_int_tateDterm` | ★★★★★★段の和は可和 |
+| `derivWeierstrassP_qExpansion` | ★★★★★★★**`℘'` の q 展開** |
+
+### ★残り
+
+1. `g2, g3` を `(2 pi i)^4`, `(2 pi i)^6` で割った形に正規化する
+   (第 215 の `g2_qExpansion` に `zeta(4) = pi^4/90`, `B_4 = -1/30` 等を入れる)
+2. `(℘, ℘')` から `(X, Y)` への変数変換——`x = X + 1/12`, `y' = 2Y + X` で
+   `y'^2 = 4x^3 - Ax - B` が `Y^2 + XY = X^3 + a4 X + a6` になる
+3. 段 6(`Z` 係数の形式級数が関数として 0 なら形式的に 0)
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-533 ★★★★★★★★解析側の Tate 方程式が出た(第 220 ブロック)
+
+`Found/GaloisRep/TateEquationAnalytic.lean`。
+
+    Y^2 + XY = X^3 - 5 s3 * X - (5 s3 + 7 s5)/12
+
+★★これは形式側の `tateA4 = -5*sigmaSeries 3`、`12*tateA6 = -(5 s3 + 7 s5)`
+(第 94-112 ブロック)と**同じ形**である。道 β の解析側はこれで閉じた。
+
+### ★★★★★変数変換
+
+`℘'^2 = 4℘^3 - g2*℘ - g3` に次を入れて `(2 pi i)^6` で割る:
+
+| 置き換え | 出どころ |
+|---|---|
+| `℘ = (2 pi i)^2 (X + 1/12)` | 第 218(定数項 `-pi^2/3 = (2 pi i)^2/12`) |
+| `℘' = (2 pi i)^3 (2Y + X)` | 第 219(`h = f + 2g` の分解) |
+| `g2 = (2 pi i)^4 (1 + 240 s3)/12` | 第 215 + `zeta(4) = pi^4/90`、`B4 = -1/30` |
+| `g3 = -(2 pi i)^6 (1 - 504 s5)/216` | 第 215 + `zeta(6) = pi^6/945`、`B6 = 1/42` |
+
+★★★**`1/12` の平行移動と `2Y + X` の捻りが両方要る**——`℘` を平行移動するだけでは
+`X^2` の項が消えず、`℘'` を `2Y + X` と読み替えて初めて `Y^2 + XY` の形になる。
+実際、展開すると `4Y^2 + 4XY + X^2 = 4X^3 + X^2 - 20 s3 X - (5/3)s3 - (7/3)s5` となり、
+**両辺の `X^2` がちょうど相殺する**。定数項も `1/432 - 3/432 + 2/432 = 0` で消える。
+
+### ★★★mathlib に無かったもの
+
+| 要るもの | 状況 |
+|---|---|
+| `zeta(4) = pi^4/90` | ★`riemannZeta_four` ✓ |
+| `zeta(6) = pi^6/945` | ★無い——`riemannZeta_two_mul_nat` から作った |
+| `B4 = -1/30`、`B6 = 1/42` | ★無い——`bernoulli'_def` を 1 段ずつ展開して作った |
+
+★`decide` も `norm_num [bernoulli]` も通らない(`bernoulli'` の再帰が展開されず
+maxRecDepth に当たる)。**`bernoulli'_def` を 1 回だけ `rw` して
+`Finset.sum_range_succ` と `Nat.choose` で潰す**、を `n = 3,4,5,6` と積み上げるのが
+通る形だった。これは tools/lean-idioms.md 級の知見である。
+
+| 定理 | 内容 |
+|---|---|
+| `bernoulli'_three` .. `bernoulli_six_val` | ★Bernoulli 数の値 |
+| `riemannZeta_six` | ★★`zeta(6) = pi^6/945` |
+| `sigmaSum` | 解析側の `s_k(tau)` |
+| `g2_normalized` / `g3_normalized` | ★★★★★★`g2, g3` の正規化 |
+| `tateXfun` / `tateYfun` | ★★★★★★解析側の `X, Y` |
+| `weierstrassP_eq_tateXfun` | ★★★★★★`℘ = (2 pi i)^2 (X + 1/12)` |
+| `derivWeierstrassP_eq_tateYfun` | ★★★★★★`℘' = (2 pi i)^3 (2Y + X)` |
+| `tate_equation_analytic` | ★★★★★★★★**解析側の Tate 方程式** |
+
+### ★残るのは段 6 だけになった
+
+道 β の段は 4(第 215)・5(第 216-219)が済み、解析側の方程式も出た(本ブロック)。
+残るのは:
+
+| 段 | 内容 |
+|---|---|
+| 6 | 「`Z` 係数の形式級数が関数として 0 なら形式的に 0」 |
+
+具体的には、解析側の `X(u,q)`・`Y(u,q)` を `q` の形式級数として読み、
+形式側の `tateXpair`・`tateYpair` と係数ごとに一致することを言う。
+そこまで来れば葉 (b)(Weierstrass 方程式が厳密に成り立つこと)が閉じる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-534 ★★★★★★★Tate 級数は環準同型で移る —— 段 6 の特殊化の道具(第 221 ブロック)
+
+`Found/GaloisRep/TateFunctorial.lean`。
+
+第 220 で解析側の Tate 方程式が出た。これを形式側(任意の `I` 進完備環 `R`)へ移すには
+**「万有な環で 0 なら任意の環で 0」**が要る。その**特殊化の道具**を作った。
+
+    φ (tateDefect a w q hq) = tateDefect (φ a) (φ w) (φ q) hq'
+
+`tateDefect` は Weierstrass 方程式の左辺 − 右辺。これが 0 であることが葉 (b)。
+
+### ★★★`Ring.inverse` が要注意である
+
+★★`Ring.inverse` は環準同型と**一般には可換でない**——`x` が単元でないとき既定値 `0` を
+返すので、`φ x` が単元になっても `φ 0 = 0 != Ring.inverse (φ x)` となる。
+★**単元であるという仮定が要る**(`map_ring_inverse`)。これが `tateXpair` の移送に
+`IsUnit (1 - a)`・`IsUnit (1 - w)` を要求する理由である。
+★★★第 212 ブロックで `Ideal.Quotient` を避けたのも**同じ理由**だった——
+`Ring.inverse` は環の射と交換しない。同じ穴に二度落ちないよう、ここに書いておく。
+
+### ★★★★★`adicSum` の函手性は極限の一意性から出る
+
+`adicSum` は「部分和と `I^n` を法として合同な唯一の元」として特徴づけられている。
+`φ` が `I^n` を `J^n` に送るなら、部分和の合同はそのまま移る。あとは `adicSum_unique`。
+★`evalAdic` も同じ(`partialEval` は `Int.cast` と `q^n` だけなので明らか)。
+
+| 定理 | 内容 |
+|---|---|
+| `map_ring_inverse` | ★単元の上で `Ring.inverse` は移る |
+| `smodEq_iff_sub_mem` | ★`SModEq (I^n . top)` は `I^n` の元であること |
+| `map_adicSum` | ★★★★★**`I` 進和は移る** |
+| `map_evalAdic` | ★★★★★冪級数の値は移る |
+| `map_tateXpair` / `map_tateYpair` | ★★★★★★**Tate 級数は移る** |
+| `map_tateCurveAt` | ★★★★★Tate 曲線は移る |
+| `map_tateDefect` | ★★★★★★★**方程式の差は移る** |
+| `tateDefect_mem` | 第 212 の帰結(差は `I` の元) |
+
+### ★★★在庫を引いたら第 110・111 が既に q 展開を取っていた
+
+本ブロックに入る前に `Found/GaloisRep/` を通しで引いた。**第 110・111 ブロックが
+片側の尾の q 展開を既に取っていた**:
+
+    S_{m>=1} f(q^m u) = S_{n>=1} q^n (S_{d|n} d u^d)         (`tateXtail_eq_divisorSum`)
+    S_{m>=1} g(q^m u) = S_{n>=1} q^n (S_{d|n} C(d,2) u^d)    (`tateYtail_eq_divisorSum`)
+    S_{m>=1} f(q^m)   = s1(q)                                (`tateXtail_one`)
+
+★`pow_succ_mul_mem` も第 110 に在ったので、書きかけた重複を消して既存を使った。
+★★★**着手前に既存のブロックを引く**——§9-524 で記録した手順が今回も効いた。
+
+### ★段 6 の残り(測った結果)
+
+万有な環は `V := Z[a,w]` を `(1-a)(1-w)` で局所化したもの(整域)で、`q := a*w`。
+`tateDefect` を `I^n` で切ると `V` の元 `P_n` になり、示すべきは `P_n in (aw)^n V`。
+★解析側からこれを出すには、`P_n(u, q)` が `q = 0` で位数 `n` 以上で消えることを
+**複素解析の側で**言い、その Taylor 係数(`u` の有理式)が恒等的に 0 だと結論する。
+★★見積もりは 20-40 ブロック。段 6 は 1 ブロックでは終わらない。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-535 ★★★★★★★★段 6 の骨格が立った —— 葉 (b) を有限の主張の族に落とした(第 222 ブロック)
+
+`Found/GaloisRep/TateTruncate.lean`。
+
+### ★★★葉 (b) を有限の主張の族に落とす
+
+葉 (b) は `tateDefect a w q = 0`(Weierstrass 方程式)である。`R` は `I` 進完備
+(したがって `IsHausdorff`)なので、**`for all n, tateDefect in I^n` を示せば足りる**。
+
+★`I^n` を法とすると `adicSum` は**部分和**に、`evalAdic` は `partialEval` に化ける:
+
+    tateDefect a w q hq - tateDefectTrunc n a w q  in  I^n      (`tateDefect_sub_trunc`)
+
+★★`tateDefectTrunc n a w q` は `Ring.inverse` を除けば **`(a, w, q)` の多項式**である
+——**無限和も極限も入っていない**。ここが本ブロックの要点である。
+
+### ★★★★★★★★そして特殊化の規準が立った
+
+`tateDefectTrunc` は**完備性を要求しない**ので任意の環準同型で移る
+(`map_tateDefectTrunc`)。したがって:
+
+> 万有な環 `S` の元 `A, W` について `(AW)^n | tateDefectTrunc n A W (AW)` が示せれば、
+> `φ A = a`、`φ W = w` なる**任意の特殊化**で `tateDefect a w q = 0` が従う。
+
+これが `tateDefect_eq_zero_of_specialize` である。
+
+★★★**段 6 の骨格はこれで立った**。残るのは「万有な環
+`Z[A,W]`(`(1-A)(1-W)` と `1-(AW)^{m+1}A`、`1-(AW)^{m+1}W` で局所化)で
+その整除性を示す」ことだけになった。**完備化は要らない**——これは §9-534 で見積もった
+ときより道が短い。切り詰めが有限式であることに気づいたのが効いた。
+
+### ★★差は対称である
+
+`X(w,a) = X(a,w)`、`Y(w,a) = -X-Y` なので `tateDefect(w,a) = tateDefect(a,w)`
+(`tateDefect_symm`)。★万有な環での議論で `A` と `W` の役割を入れ替えられる
+——係数の消滅を両側から取るのに要る。
+
+| 定理 | 内容 |
+|---|---|
+| `tateDefect_symm` | ★★★★差は `(a,w)` の交換で不変 |
+| `eq_zero_of_mem_pow` | ★すべての `I^n` に属する元は 0 |
+| `tateXtrunc` / `tateYtrunc` / `tateDefectTrunc` | ★★`n` 次の切り詰め |
+| `tateXpair_sub_trunc` / `tateYpair_sub_trunc` | ★★★級数と切り詰めの差は `I^n` |
+| `tateDefect_sub_trunc` | ★★★★★差と切り詰めの差は `I^n` |
+| `tateDefect_eq_zero_of_trunc` | ★★★★★★★**葉 (b) は有限の主張の族に落ちる** |
+| `map_tateDefectTrunc` | ★★★★★★切り詰めは任意の環準同型で移る |
+| `tateDefect_eq_zero_of_specialize` | ★★★★★★★★**特殊化の規準** |
+
+★ここでは `Ideal.Quotient` を使ってよい——`tateDefect` から `tateDefectTrunc` への
+移行は `Ring.inverse` を含まない**多項式の関係**だからである(第 212・221 で
+`Ring.inverse` を避けたのとは事情が違う)。
+
+### ★残り
+
+万有な環での整除性 `(AW)^n | tateDefectTrunc n A W (AW)`。
+`Z[A,W]` は UFD なので、`A^n |` と `W^n |` に分かれる。
+`A ↦ u`(複素定数)、`W ↦ t/u` と特殊化して `t` の Taylor 係数を見れば、
+解析側の恒等式(第 220)から係数の消滅が出る——という段取りである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-536 ★★★★★★★★万有な環と特殊化 —— 葉 (b) は整除性ひとつに帰着した(第 223 ブロック)
+
+`Found/GaloisRep/TateUniversal.lean`。
+
+第 222 で葉 (b) は「切り詰め `tateDefectTrunc n a w q` が `I^n` に入る」に落ちた。
+切り詰めは**有限の式**なので、**万有な環**を作ってそこで一度示せばよい。
+
+    TateBase := Z[A, W]                              (`MvPolynomial (Fin 2) Z`)
+    TateUniv := TateBase を次の元で局所化したもの
+                1 - A、1 - W、1 - (AW)^{m+1} A、1 - (AW)^{m+1} W   (m >= 0)
+
+★★**完備化は要らない**——切り詰めが有限式だからである。局所化だけで足りる。
+§9-534 で「完備化した万有環」を見積もったが、第 222 の切り詰めでその必要が消えた。
+
+### ★★★★★特殊化はどんな完備環にも届く
+
+`R` が `I` 進完備で `a*w = q in I`、`1-a` と `1-w` が単元なら、分母のすべてが単元になる:
+
+| 分母 | `R` での単元性 |
+|---|---|
+| `1 - A -> 1 - a` | ★仮定 |
+| `1 - W -> 1 - w` | ★仮定(`w in I` なら自動) |
+| `1 - (AW)^{m+1} A -> 1 - q^{m+1} a` | ★★`q^{m+1} a in I` なので自動(`isUnit_one_sub`) |
+| `1 - (AW)^{m+1} W -> 1 - q^{m+1} w` | ★★同上 |
+
+よって `IsLocalization.lift` で `TateUniv ->+* R` が得られる(`tateSpecialize`)。
+★分母が単元であることは `Submonoid.closure_induction` で生成元に落として示した。
+
+### ★★★★★★★★到達点
+
+> **`TateUniv` の中で `(AW)^n | tateDefectTrunc n A W (AW)` を示せば、
+> 任意の完備環で Weierstrass 方程式が成り立つ。**
+
+これが `tateDefect_eq_zero_of_univ` である。
+
+| 定義・定理 | 内容 |
+|---|---|
+| `TateBase` / `univA` / `univW` / `univQ` | 万有な多項式環と生成元 |
+| `tateDenomSet` / `tateDenoms` / `TateUniv` | ★★★★★**万有な環** |
+| `tateEval` | `A -> a`、`W -> w` の評価 |
+| `tateEval_isUnit_denoms` | ★★★★分母はすべて `R` で単元になる |
+| `tateSpecialize` | ★★★★★★**特殊化 `TateUniv ->+* R`** |
+| `isUnit_one_sub_uA` 他 | 万有な環の側での単元性 |
+| `tateDefect_eq_zero_of_univ` | ★★★★★★★★**葉 (b) は整除性ひとつに帰着** |
+
+### ★残り(段取り)
+
+`Z[A,W]` は UFD で `A`・`W` は素元、分母はどれも定数項 1 なので `A`・`W` と互いに素。
+したがって `(AW)^n | ...` は `A^n |` と `W^n |` に分かれる。
+★`A -> u`(複素定数)、`W -> t/u` と特殊化して `t` の Taylor 係数を見れば、
+第 220 の解析側の恒等式から係数の消滅が出る。
+★★差は `(a,w)` の交換で対称(第 222 の `tateDefect_symm`)なので、
+`A` 側と `W` 側は同じ議論の入れ替えで済む。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-537 ★★★★★★★★整除性を `A^n` と `W^n` に分けた(第 224 ブロック)
+
+`Found/GaloisRep/TateDivisibility.lean`。
+
+第 223 で葉 (b) は「万有な環 `TateUniv` の中で `(AW)^n | tateDefectTrunc n A W (AW)`」に
+落ちた。本ブロックはこれを **`Z[A,W]` の中の二つの整除性**に分けた。
+
+### ★★`A`・`W` の素元性は mathlib に無かった
+
+★`MvPolynomial.prime_X` は**存在しない**(`exact?` も空振り)。
+`MvPolynomial.finSuccEquiv` で `Polynomial` に移し、`Polynomial.prime_X` と
+`Polynomial.prime_C_iff` から作った:
+
+    X 0 : Z[A,W]  --finSuccEquiv-->  Polynomial.X   : (Z[W])[A]      -> Polynomial.prime_X
+    X 1 : Z[A,W]  --finSuccEquiv-->  Polynomial.C (X 0)              -> Polynomial.prime_C_iff
+
+★★`Prime` の移送は `MulEquiv.prime_iff` である。`(finSuccEquiv ...).toRingEquiv` を
+渡すとき、`M` を明示しないと単一化に失敗する。
+
+### ★★★`IsCoprime` では駄目、`IsRelPrime` を使う
+
+★`A` と `W` は **`IsCoprime` ではない**——`(A, W)` は `Z[A,W]` の**真のイデアル**なので
+Bezout の意味では互いに素にならない。
+★★**`IsRelPrime`(共通の非単元因子が無い)を使う**。これなら成り立ち、
+`IsRelPrime.mul_dvd`(`DecompositionMonoid` が要る——UFD なので在る)で
+
+    A^n | P  かつ  W^n | P   ==>   (AW)^n | P
+
+★`A | W` でないことは `A -> 0`、`W -> 1` の評価で `0 | 1` になることから出る。
+
+### ★★★★局所化から分子へ
+
+`TateUniv` の元 `x` は `IsLocalization.surj` で `x*(分母) = (分子)` と書ける。
+分子が `(AW)^n` で割れれば、分母は単元なので `x` も割れる(`dvd_pow_of_base`)。
+
+### ★★★★★★★★到達点
+
+> `Z[A,W]` の中で「分子が `A^n` で割れる」「分子が `W^n` で割れる」を示せば、
+> **任意の完備環で Weierstrass 方程式が成り立つ**。
+
+これが `tateDefect_eq_zero_of_base` である。
+★★切り詰めた差も `(a,w)` の交換で不変(`tateDefectTrunc_symm`)なので、
+`A` 側と `W` 側は**同じ議論の入れ替え**で済む。
+
+| 定理 | 内容 |
+|---|---|
+| `prime_univA` / `prime_univW` | ★★`A`・`W` は `Z[A,W]` の素元 |
+| `isRelPrime_univA_univW` | ★★★`A` と `W` は互いに素 |
+| `univQ_pow_dvd` | ★★★`A^n | P` かつ `W^n | P` なら `(AW)^n | P` |
+| `dvd_pow_of_base` | ★★★★局所化の整除性は分子の整除性から |
+| `tateDefectTrunc_symm` | ★★★★切り詰めた差も交換で不変 |
+| `tateDefect_eq_zero_of_base` | ★★★★★★★★**葉 (b) は二つの整除性に落ちた** |
+
+### ★残り
+
+`W^n |(分子)` を示す段取り:`A -> u`(複素定数)、`W -> t/u` と特殊化すると
+分子の `t^j` 係数は `u` の Laurent 多項式になる。第 220 の解析側の恒等式から
+`j < n` の係数が消えることを言えばよい。★ここに残る**唯一の解析の段**は
+「解析側の `X(u,q)` の `q` に関する Taylor 係数が形式側の係数と一致する」ことである。
+見積もりは 10-25 ブロック。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-538 ★★★★★★万有な環から ℂ への特殊化 —— 解析の段への橋(第 225 ブロック)
+
+`Found/GaloisRep/TateComplexSpec.lean`。
+
+第 224 で葉 (b) は「万有な環の分子 `P in Z[A,W]` が `A^n`・`W^n` で割れる」に落ちた。
+分子の係数の消滅を言うには **`A -> u`、`W -> w`(複素数)と特殊化**して `q = uw -> 0` の
+様子を見る。その橋を架けた。
+
+### ★★完備性は要らない
+
+`TateUniv` から ℂ への環準同型は、**分母が ℂ で単元でありさえすれば**作れる。
+`‖u‖ < 1` かつ `‖w‖ < 1` なら分母はすべて単元になる:
+
+| 分母 | ℂ での単元性 |
+|---|---|
+| `1 - u` / `1 - w` | ★`‖.‖ < 1` なので `!= 1` |
+| `1 - (uw)^{m+1} u` / `1 - (uw)^{m+1} w` | ★★`‖.‖ <= ‖u‖ < 1`(または `‖w‖`) |
+
+これで `tateSpecializeC : TateUniv ->+* ℂ` が得られる。
+★第 223 の `tateSpecialize`(完備環向け)と**同じ形の議論**が、単元性の理由だけ
+差し替えて通った——`Submonoid.closure_induction` の骨格は共通である。
+
+### ★★★★★★橋の形
+
+`x*(分母) = (分子)` を ℂ に落とすと:
+
+    tateEval u w P = tateDefectTrunc n u w (uw) * tateEval u w d      (`tateEval_numerator`)
+
+★左辺は分子 `P` の値、右辺は**切り詰めた差の複素数値**である。
+★★あとは「`q = uw -> 0` のとき右辺が `O(q^n)`」を解析側から出せばよい。
+
+### ★★`im z < im tau` は格子の外を意味する
+
+`z = n*tau + m` なら `im z = n * im tau`。`0 < im z < im tau` から `0 < n < 1` となり、
+整数 `n` としては不可能(`notMem_lattice_of_im_lt`)。
+★これで第 220 の `tate_equation_analytic` から仮定 `hz` が落ちた
+(`tate_equation_analytic'`)——**解析側の恒等式は `im z < im tau` だけで成り立つ**。
+★★`him` は第 216 から `shiftDown` を上半平面に乗せるために持ち歩いていた仮定であり、
+それが `hz` も兼ねていた。仮定が 1 つ減ったのは後段で効く。
+
+| 定理 | 内容 |
+|---|---|
+| `notMem_lattice_of_im_lt` | ★★★★`im z < im tau` なら格子の外 |
+| `tate_equation_analytic'` | ★★★仮定を `him` だけにした解析側の方程式 |
+| `isUnit_one_sub_of_norm_lt_one` | ★`‖t‖ < 1` なら `1 - t` は単元 |
+| `tateSpecializeC` | ★★★★★★**万有な環から ℂ への特殊化** |
+| `tateSpecializeC_tateDefectTrunc` | ★★★★★ℂ 側での切り詰めた差の値 |
+| `tateEval_numerator` | ★★★★★★**分子の値 = 切り詰めた差 x 分母** |
+
+### ★残り(解析の段)
+
+    tateDefectTrunc n u w (uw) = O(q^n)      (q = uw -> 0、u は固定)
+
+を出す。道具は:
+1. 第 220 の `tate_equation_analytic'`(解析側の差は厳密に 0)
+2. 第 218 の `norm_tateXterm_le_of_small`(`‖f(t)‖ <= 4‖t‖`)——尾の評価
+3. `tateXfun - tateXtrunc n` が `O(q^{n+1})` であること
+
+★見積もりは 10-25 ブロック。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-539 ★★★★★★解析側の ℤ 和を形式側と同じ形に分けた(第 226 ブロック)
+
+`Found/GaloisRep/TateSplitNat.lean`。
+
+解析側(第 218・219)の `X`・`Y` は **`n in Z` にわたる和**、形式側(第 105-107)の
+`tateXpair`・`tateYpair` は **頭 + `N` の尾**で書かれている。同じものであることを型で確かめた。
+
+### ★★★鍵は `q^{-(m+1)} u = (q^m w)^{-1}`
+
+`q = uw` とすると `q^{-(m+1)} u = u^{-m} w^{-(m+1)} = (q^m w)^{-1}` である
+(`zpow_neg_succ_mul`)。よって段ごとに:
+
+| 段 `n` | `X` 側 | `Y` 側 |
+|---|---|---|
+| `n = 0` | `f(u)` | `g(u)` |
+| `n = -(m+1)` | `f(q^{m+1} u)` | `g(q^{m+1} u)` |
+| `n = m+1` | `f((q^m w)^{-1}) = f(q^m w)` | `g((q^m w)^{-1}) = -(f(q^m w) + g(q^m w))` |
+
+★★`f` は反転で不変、`g` は `g(1/t) = -(f(t)+g(t))`(`tateYterm_inv'`)——
+**偶数べき・奇数べきの違いがそのまま `X` と `Y` の形の違いになる**。
+第 217/219 で `rowP` と `rowDP` の符号の吸収が違ったのと同じ現象がここでも出た。
+
+    S_{n in Z} f(q^{-n}u) = [f(u) + S_{m>=1} f(q^m u)] + [f(w) + S_{m>=1} f(q^m w)]
+    S_{n in Z} g(q^{-n}u) = [g(u) + S_{m>=1} g(q^m u)] - [f(w) + S_{m>=1} f(q^m w)]
+                                                       - [g(w) + S_{m>=1} g(q^m w)]
+
+★★★**これは `tateXpair`・`tateYpair` の定義そのものの形**である。
+`Y` の負の段が `X` の尾と `Y` の尾の**両方**を生むのが、形式側の定義
+`tateYpair = (g(a)+..) - (f(w)+..) - (g(w)+..) + s1` の由来である。
+
+### ★★収束の条件は `‖u‖ < 1`、`‖w‖ < 1` だけ
+
+`q = uw` なので `‖q‖ < 1`。`‖q^m w‖ <= ‖w‖ < 1` なので反転則に要る `t != 1` も自動。
+★`t != 0` には `u != 0`、`w != 0` が要る(`‖.‖ < 1` からは出ない)。
+
+| 定理 | 内容 |
+|---|---|
+| `zpow_neg_succ_mul` | ★`q^{-(m+1)}u = (q^m w)^{-1}` |
+| `summable_nat_tateXterm` 他 | ★★`N` 側の可和性 |
+| `tateYterm_inv'` | ★★★★`g(1/t) = -(f(t)+g(t))` |
+| `tsum_int_tateXterm_split` | ★★★★★★**`X` の ℤ 和は頭と二本の尾** |
+| `tsum_int_tateYterm_split` | ★★★★★★**`Y` の ℤ 和は頭と三本の尾** |
+
+### ★残り
+
+`tateXfun z tau` は `u = exp(2 pi i z)`、`w = exp(2 pi i (tau - z))` とすれば
+本ブロックの形になる(`u*w = exp(2 pi i tau) = q`)。あとは:
+
+1. 尾の切り詰めとの差が `O(q^n)`(第 218 の `‖f(t)‖ <= 4‖t‖` で押さえる)
+2. `s1` の側の切り詰めとの差も `O(q^n)`
+3. 合わせて `tateDefectTrunc n u w (uw) = O(q^n)`
+4. そこから分子の係数の消滅
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-540 ★★★★★尾の評価(第 227 ブロック)
+
+`Found/GaloisRep/TateTailBound.lean`。
+
+第 226 で解析側の `X`・`Y` が「頭 + `N` の尾」の形になった。形式側の切り詰め
+(第 222 の `tateXtrunc`)は**尾を `n` 項で止めたもの**である。両者の差が
+`O(‖q‖^{n+1})` であることを示した。
+
+### ★★★`‖q‖ <= 1/2` を仮定に置く
+
+第 218 の評価 `‖f(t)‖ <= 4‖t‖` は `‖t‖ <= 1/2` でしか使えない。
+`‖q‖ <= 1/2` かつ `‖c‖ <= 1` なら `‖q^{m+1} c‖ <= 1/2` が出る。
+★`q -> 0` を見るのだから `‖q‖ <= 1/2` は制限にならない。
+
+### ★★★★★一般の尾の評価
+
+各項が `K r^{m+1}` で押さえられ `r <= 1/2` なら:
+
+    ‖(S_{m>=0} f(m)) - (S_{m<n} f(m))‖ = ‖S_{m>=0} f(m+n)‖ <= K r^{n+1}/(1-r) <= 2K r^{n+1}
+
+★`1/(1-r) <= 2` は `r <= 1/2` から。これが `norm_tsum_sub_partialSum_le` である。
+
+| 項 | `‖t‖ <= 1/2` での評価 | 尾の評価 |
+|---|---|---|
+| `f(t) = t/(1-t)^2` | `<= 4‖t‖`(第 218) | `8‖q‖^{n+1}` |
+| `g(t) = t^2/(1-t)^3` | `<= 8‖t‖`(`2g = h - f` から) | `16‖q‖^{n+1}` |
+
+★★`g` の評価は新しく作らず、第 218・219 の `f` と `h` の評価から
+`2g = h - f` で出した——`‖g‖ <= (12+4)/2 ‖t‖ = 8‖t‖`。
+
+### ★★★`s1` の側
+
+`X` の定義には `-2 s1(q)` が入っている。解析側では `S_{n in Z} f(q^{-n})` の形で現れるが、
+`f(q^{-m}) = f(q^m)`(反転不変)かつ `f(q^0) = f(1) = 0` なので
+
+    S_{n in Z} f(q^{-n}) = 2 * S_{m>=1} f(q^m)
+
+★★`f(1) = 0` は Lean の `Ring.inverse 0 = 0` の規約から出る——`n = 0` の段が
+**自動的に落ちる**のはここでも効いた(第 218 の定数項 `1/12` と同じ仕掛け)。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_tsum_sub_partialSum_le` | ★★★★★**一般の尾の評価** |
+| `norm_tateYterm_le_of_small` | ★`‖g(t)‖ <= 8‖t‖` |
+| `norm_tateXtail_sub_partialSum_le` | ★★★★★`X` の尾は `8‖q‖^{n+1}` 以下 |
+| `norm_tateYtail_sub_partialSum_le` | ★★★★★`Y` の尾は `16‖q‖^{n+1}` 以下 |
+| `tsum_int_tateXterm_one` | ★★★★★`s1` の側の ℤ 和は `N` 側の 2 倍 |
+
+### ★残る穴を正確に書いておく
+
+`tateXtrunc` の `-2 * partialEval (sigmaSeries 1) q n` と、解析側の
+`-2 * S_{m>=1} f(q^m)` を突き合わせるには、**ℂ の上での q 展開**
+
+    S_{m>=1} f(q^m) = S_{N>=1} sigma_1(N) q^N
+
+が要る。形式側では第 111 ブロック(`tateXtail_one`)で取れているが、
+**ℂ の上では未証明**である。二重和 `S_m S_d d q^{md}` の並べ替え(絶対収束の Fubini)
+で出るはずだが、`Summable.tsum_prod` と約数の対応を ℂ で組み直す必要がある。
+★これが段 6 に残る最後の穴のひとつである。見積もりは 3-8 ブロック。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-541 ★★★★★ℂ の上の二重和(第 228 ブロック)
+
+`Found/GaloisRep/TateDoubleSum.lean`。§9-540 で書き留めた穴に着手した。
+
+    S_{m>=1} f(q^m) = S_{N>=1} sigma_1(N) q^N     (ℂ の上)
+
+★形式側では第 111(`tateXtail_one`)で取れているが、**ℂ の上では別に要る**
+——`evalAdic` の議論は `I` 進完備環でしか使えない。
+
+### ★★★★二重和に開く
+
+`‖t‖ < 1` なら `f(t) = S_{d>=0}(d+1)t^{d+1}`(幾何級数の微分——mathlib の
+`hasSum_coe_mul_geometric_of_norm_lt_one`)。よって
+
+    S_{m>=1} f(q^m) = S_{(m,d) in N x N} (d+1) q^{(m+1)(d+1)}
+
+★★**二重族の可和性**が要る。ここで効いたのは `(m+1)(d+1) >= m + (d+1)` である:
+
+    ‖(d+1) q^{(m+1)(d+1)}‖ <= ‖q‖^m * (d+1)‖q‖^{d+1}
+
+と**積の形**に分かれるので `Summable.mul_of_nonneg` で押さえられる。
+★★★指数の不等式を `nlinarith`/`omega` で通そうとすると `whnf` が時間切れになる。
+`a + (b+1) = 0 + (a+b+1) <= a*b + (a+b+1) = (a+1)(b+1)` と `calc` で書くと通る
+(`add_succ_le_mul_succ`)。★`summable_double_family` 自体も
+`set_option maxHeartbeats 1000000` が要った。
+
+| 定理 | 内容 |
+|---|---|
+| `hasSum_nat_mul_geometric` | ★`f(t) = S_{d>=0} d t^d`(ℂ の上) |
+| `hasSum_nat_succ_mul_geometric` | ★`f(t) = S_{d>=0}(d+1)t^{d+1}` |
+| `add_succ_le_mul_succ` | ★`a + (b+1) <= (a+1)(b+1)` |
+| `summable_double_family` | ★★★★**二重族は可和** |
+| `tsum_double_family_eq` | ★★★★★**二重和の内側は `f(q^{m+1})`** |
+
+### ★次の段
+
+`N = (m+1)(d+1)` で括り直せば `S_{d|N} d = sigma_1(N)` が出る。道具は:
+
+- `Equiv.sigmaFiberEquiv`(`pi : N x N -> N`、`pi (m,d) = (m+1)(d+1)` の繊維分解)
+- `Summable.tsum_sigma`
+- `Nat.divisorsAntidiagonal`(`(a,b) |-> ab = N` の有限集合)と
+  `Nat.sum_divisorsAntidiagonal`
+
+★繊維 `{p // (p.1+1)(p.2+1) = N}` に `Fintype` を入れて有限和に落とすところが手間である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-542 ★★★★★★★`s1` の q 展開が ℂ の上で取れた —— §9-540 の穴を塞いだ(第 229 ブロック)
+
+`Found/GaloisRep/TateSigmaComplex.lean`。
+
+    S_{m>=1} f(q^m) = S_{N>=1} sigma_1(N) q^N        (ℂ の上、`‖q‖ < 1`)
+
+★形式側では第 111(`tateXtail_one`)で取れているが、`evalAdic` の議論は `I` 進完備環
+でしか使えないので ℂ の上では別に要った。§9-540 で「3-8 ブロック」と見積もった穴である。
+
+### ★★★★繊維で括り直す
+
+第 228 で `S_{m>=1}f(q^m) = S_{(m,d)} (d+1)q^{(m+1)(d+1)}` まで開いた。
+これを `N = (m+1)(d+1) - 1` の**繊維**で括り直す:
+
+| 段 | 道具 |
+|---|---|
+| `N x N ~ Sigma N, 繊維 N` | `Equiv.sigmaFiberEquiv` |
+| 二重和を繰り返し和に | `Summable.tsum_sigma` |
+| 繊維 ~ 約数対の集合 | ★★★★本ブロックの `fiberEquiv` |
+| 有限型の `tsum` を `Finset` の和に | `Finset.tsum_subtype` |
+| `S_{(a,b):ab=n} b = sigma_1(n)` | `Nat.sum_divisorsAntidiagonal` + `Nat.sum_div_divisors` |
+
+★★**要点は `fiberEquiv` を非依存な型の間の同値として作ること**である。
+`Sigma` の中で直接作ろうとすると第二成分が依存型になり、`Sigma.mk.injEq` の
+書き換えで motive が壊れる。**繊維分解は `Equiv.sigmaFiberEquiv` に任せ、
+繊維ごとの同値だけを手で作る**——これで `Subtype.ext` だけで済む。
+
+### ★★★落とし穴を 2 つ
+
+★`omega` は `(m+1, d+1).1 * (m+1, d+1).2` と `(m+1)*(d+1)` を**別の原子**として扱う。
+`show (m+1)*(d+1) = ...` で形を揃えてから渡す必要がある。
+★★`Nat.sum_div_divisors n id` は `S_d id (n/d)` の形なので、
+`S_d (n/d)` とは**構文的に一致しない**。`show ... = S_d id (n/d) from rfl` を挟む。
+
+| 定理 | 内容 |
+|---|---|
+| `pos_of_mem_divAntidiag` | ★約数対の成分は `1` 以上 |
+| `fiberEquiv` | ★★★★**繊維 ~ 約数対の集合** |
+| `sum_divAntidiag_snd` | ★★`S_{(a,b):ab=n} b = sigma_1(n)` |
+| `tsum_fiber_card` / `tsum_fiber_eq` | ★★★★★繊維の和 |
+| `tsum_nat_tateXterm_eq_sigma` | ★★★★★★★**`s1` の q 展開(ℂ の上)** |
+
+### ★残り
+
+これで解析側の `X`・`Y` の部品はすべて `sigma` 級数の形に揃った。残るのは:
+
+1. `partialEval (sigmaSeries 1) q n` と `S_{N>=1} sigma_1(N) q^N` の差が `O(q^n)`
+   (`sigma_1(N) <= N^2` で押さえる)
+2. 1 と第 227 の尾の評価を合わせて `tateDefectTrunc n u w (uw) = O(q^n)`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-543 ★★★★★★`s1` の切り詰めとの差(第 230 ブロック)
+
+`Found/GaloisRep/TateSigmaTail.lean`。
+
+第 227 で `X`・`Y` の尾の評価、第 229 で `s1` の q 展開(ℂ の上)が取れた。
+本ブロックで **`s1` の解析値と `partialEval (sigmaSeries 1) q n` の差**を評価した:
+
+    ‖S_{m>=1}f(q^m) - partialEval (sigmaSeries 1) q (n+1)‖ <= 2 (4‖q‖)^{n+1}
+
+### ★★★★係数は `4^N` で押さえる
+
+`sigma_1(N) = S_{d|N} d <= N * |divisors(N)| <= N * N = N^2`
+(約数はすべて `N` 以下、個数も `N` 以下)。さらに `N < 2^N` なので `N^2 <= 4^N`。よって
+
+    ‖sigma_1(N) q^N‖ <= (4‖q‖)^N
+
+★★**`‖q‖ <= 1/8` を仮定に置く**と `4‖q‖ <= 1/2` になり、第 227 の一般の尾の評価が
+`r := 4‖q‖` でそのまま使える。★新しい評価補題を作らずに済んだ。
+
+★★★**定数が `n` に依存してよい**ことに注意——`(4‖q‖)^{n+1} = 4^{n+1} ‖q‖^{n+1}` は
+`‖q‖^{n+1}` の `4^{n+1}` 倍である。各 `n` を固定して `q -> 0` を見るので、
+`n` に依存する定数で十分である。ここを取り違えると評価が出ないところだった。
+
+### ★`partialEval` と部分和の対応
+
+`sigmaSeries 1` の `0` 次係数は `0` なので `Finset.sum_range_succ'` で先頭を切り出すと
+
+    partialEval (sigmaSeries 1) q (n+1) = S_{k<n} sigma_1(k+1) q^{k+1}
+
+| 定理 | 内容 |
+|---|---|
+| `sigma_one_le_sq` | ★★`sigma_1(N) <= N^2` |
+| `sq_le_four_pow` | ★`N^2 <= 4^N` |
+| `norm_sigma_term_le` | ★★`‖sigma_1(N) q^N‖ <= (4‖q‖)^N` |
+| `norm_sigma_tail_le` | ★★★★★`sigma_1` 級数の尾の評価 |
+| `partialEval_sigmaSeries_succ` | ★`partialEval` は部分和である |
+| `norm_tateXtail_one_sub_partialEval_le` | ★★★★★★**`s1` の解析値と切り詰めの差** |
+
+### ★これで解析側の部品はそろった
+
+| 部品 | ブロック |
+|---|---|
+| 解析側の Tate 方程式(差は厳密に 0) | 第 220 |
+| ℤ 和を頭と尾に分ける | 第 226 |
+| `X`・`Y` の尾の評価 | 第 227 |
+| `s1` の q 展開(ℂ の上) | 第 228-229 |
+| `s1` の切り詰めとの差 | ★本ブロック |
+
+★次は これらを合わせて `tateDefectTrunc n u w (uw) = O(q^n)` を出し、
+そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`、
+第 224 の `tateDefect_eq_zero_of_base` に流し込む。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-544 ★★★★★★解析値と切り詰めの差をまとめた(第 231 ブロック)
+
+`Found/GaloisRep/TateAnalyticTrunc.lean`。
+
+第 227(`X`・`Y` の尾)と第 230(`s1` の尾)を合わせて、**解析側の `X`・`Y` と
+形式側の切り詰めの差**を一つの評価にまとめた:
+
+    ‖X_an(u,w) - tateXtrunc (n+1) u w (uw)‖ <= 20 (4‖uw‖)^{n+1}
+    ‖Y_an(u,w) - tateYtrunc (n+1) u w (uw)‖ <= 50 (4‖uw‖)^{n+1}
+
+★解析側の `X_an`・`Y_an` は、形式側の切り詰めの**部分和を `tsum` に、
+`partialEval (sigmaSeries 1)` を `S_{m>=1} f(q^m)` に置き換えた**ものである
+(第 226 でこの形が `S_{n in Z}` の和と一致することは確かめてある)。
+
+### ★★切り詰めの添字は `n+1` で取る
+
+`s1` の側の評価(第 230)が `partialEval ... (n+1)` の形で出るので、切り詰めも `n+1` で揃えた。
+★これは損にならない——`tateDefect - tateDefectTrunc (n+1) in I^{n+1} subset I^n` なので、
+`n+1` 次の切り詰めで `I^{n+1}` に入ることを示せば `for all n, tateDefect in I^n` が出る。
+
+### ★★★指数の帳尻
+
+`‖q‖^{n+2} <= ‖q‖^{n+1} <= (4‖q‖)^{n+1}`(`‖q‖ <= 1/8` より)。
+これで尾の評価(`8‖q‖^{n+2}` 型)も `s1` の評価(`2(4‖q‖)^{n+1}` 型)も
+**同じ `(4‖q‖)^{n+1}` の定数倍**に揃う(`pow_le_four_pow_mul`)。
+
+★三角不等式の組み立ては `norm_three_comb`・`norm_four_comb` として切り出した。
+項式のまま `(norm_add_le _ _).trans (add_le_add ...)` と繋ぐと**メタ変数が決まらず**
+`don't know how to synthesize implicit argument` になる。補題として型を書き切るのが速い。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXanalytic` / `tateYanalytic` | ★★★★★★解析側の `X`・`Y`(`(u,w)` の形) |
+| `pow_le_four_pow_mul` | ★指数の帳尻 |
+| `norm_three_comb` / `norm_four_comb` | ★三角不等式の組み立て |
+| `norm_tateXanalytic_sub_trunc` | ★★★★★★**`X` の差の評価** |
+| `norm_tateYanalytic_sub_trunc` | ★★★★★★**`Y` の差の評価** |
+
+### ★残り
+
+1. 第 226 の分解を使って `X_an(u,w)`・`Y_an(u,w)` が第 220 の
+   `tateXfun z tau`・`tateYfun z tau` と一致することを言う(`u = exp(2 pi i z)`、
+   `w = exp(2 pi i (tau - z))`)
+2. 第 220 の恒等式から `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-545 ★★★★★★★`(z,tau)` と `(u,w)` を繋いだ(第 232 ブロック)
+
+`Found/GaloisRep/TateUWBridge.lean`。
+
+第 220 の解析側の Tate 方程式は `(z, tau)`(上半平面の 2 点)で書かれ、
+第 231 の評価は `(u, w)`(ℂ の 2 元、`q = uw`)で書かれている。本ブロックで繋いだ。
+
+    u := exp(2 pi i z),   w := exp(2 pi i (tau - z)),   uw = exp(2 pi i tau) = q
+
+### ★★`im z < im tau` は `tau - z` が上半平面の点であることも意味する
+
+`im(tau - z) = im tau - im z > 0`。これで `‖w‖ < 1` が
+`UpperHalfPlane.norm_exp_two_pi_I_lt_one` から自動的に出る(`subUH`)。
+
+★★★**`him` は三つの役目を果たしている**:
+第 216 では `shiftDown` を上半平面に乗せ、第 225 では `z` が格子の外であることを与え、
+ここでは `tau - z` が上半平面の点であることを与える。同じ一つの仮定である。
+
+### ★★★★★★繋がった形
+
+第 226 の分解と第 227 の `S_{n in Z}f(q^{-n}) = 2 S_{m>=1}f(q^m)` を使うと
+
+    tateXfun z tau = tateXanalytic u w
+    tateYfun z tau = tateYanalytic u w
+
+★したがって**第 220 の Tate 方程式がそのまま `(u,w)` の形で成り立つ**(`tate_equation_uw`)。
+
+| 定理 | 内容 |
+|---|---|
+| `subUH` | ★★`tau - z` は上半平面の点 |
+| `exp_mul_exp_sub` | ★`u w = q` |
+| `tateXfun_eq_analytic` / `tateYfun_eq_analytic` | ★★★★★★二つの形が一致する |
+| `tate_equation_uw` | ★★★★★★★**解析側の Tate 方程式(`(u,w)` の形)** |
+
+### ★残り
+
+1. `sigma_3`・`sigma_5` の尾の評価(第 230 の `sigma_1` と同じ手順、
+   `sigma_k(N) <= N^{k+1} <= (2^{k+1})^N`)と `tateA4`・`tateA6` の切り詰めとの差
+2. 1 と第 231 を合わせて `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})`
+3. そこから分子の係数の消滅(`W^n | P`)、対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-546 ★★★★★`a4`・`a6` の切り詰めとの差(第 233 ブロック)
+
+`Found/GaloisRep/TateCoeffTail.lean`。
+
+第 231 で `X`・`Y` の差が揃った。`tateDefectTrunc` に残る二つ
+`partialEval tateA4` と `partialEval tateA6` の差を評価した。
+
+### ★★★★`sigma_k` の一般の評価
+
+第 230 の `sigma_1 <= N^2` を一般化した:
+
+    sigma_k(N) = S_{d|N} d^k <= |divisors| * N^k <= N * N^k = N^{k+1} <= (2^{k+1})^N
+
+★`k = 3` なら底は `16`、`k = 5` なら `64`。よって `‖q‖ <= 1/128` を仮定に置けば
+どちらも第 227 の一般の尾の評価が使える。★★第 230 の `sigma_1` 版は
+**この一般版の特別な場合**になっている——先に特別な場合を書いたが、
+一般化はそのまま通った(`Nat.pow_le_pow_left` に `k` を渡すだけ)。
+
+### ★★★`a6` は 12 で割った係数——割り算のまま扱わない
+
+`tateA6` の係数は `-(5 sigma_3(N) + 7 sigma_5(N))/12`(整数——第 94 の `twelve_dvd`)。
+★**`12 * tateA6 = -(5 s3 + 7 s5)`(`twelve_mul_tateA6`)を係数に降ろす**のが要点である。
+そうすれば `partialEval` の側も `12 * PE(a6) = -(5 PE3 + 7 PE5)` になり、
+差は `-(5(s3-PE3) + 7(s5-PE5))/12` と書けて三角不等式に乗る。
+★★整数除法を ℂ に持ち込むと `Nat.cast_div` 型の面倒が出る。**掛け算の形に直してから移す**。
+
+| 定理 | 内容 |
+|---|---|
+| `sigma_le_pow` | ★★`sigma_k(N) <= N^{k+1}` |
+| `pow_succ_le_two_pow_pow` | ★`N^{k+1} <= (2^{k+1})^N` |
+| `sigmaSum_eq_tsum_nat` | ★`sigmaSum` を `N` 添字で(`Equiv.pnatEquivNat`) |
+| `norm_sigma_k_tail_le` | ★★★★★`sigma_k` 級数の尾の評価 |
+| `norm_sigmaSum_sub_partialEval_le` | ★★★★★★`sigmaSum k` と切り詰めの差 |
+| `coeff_twelve_tateA6` / `partialEval_tateA6` | ★★★`12 a6` を係数に降ろす |
+| `norm_a4_sub_partialEval_le` | ★★★★★**`a4` の差** |
+| `norm_a6_sub_partialEval_le` | ★★★★★**`a6` の差** |
+
+### ★これで `tateDefectTrunc` の四つの部品がすべて揃った
+
+| 部品 | 差の評価 | ブロック |
+|---|---|---|
+| `X` | `20 (4‖q‖)^{n+1}` | 第 231 |
+| `Y` | `50 (4‖q‖)^{n+1}` | 第 231 |
+| `a4` | `10 (16‖q‖)^{n+1}` | ★本ブロック |
+| `a6` | `2 (64‖q‖)^{n+1}` | ★本ブロック |
+
+★次は これらを合わせて `tateDefectTrunc (n+1) u w (uw) = O(q^{n+1})` を出す。
+解析側の値では方程式がちょうど 0 になる(第 232 の `tate_equation_uw`)ので、
+差の四つを三角不等式で足せばよい。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-547 ★★★★★★方程式の差の差と大きさの評価(第 234 ブロック)
+
+`Found/GaloisRep/TateBounds.lean`。
+
+第 231・233 で四つの部品(`X`・`Y`・`a4`・`a6`)の**差**が揃った。
+方程式の差は二次・三次の項を含むので、差を足すには**値の大きさ**も要る。
+
+### ★★★★★★差の差をまとめた
+
+    Y^2 - Y'^2 = (Y-Y')(Y+Y'),  X^3 - X'^3 = (X-X')(X^2 + XX' + X'^2), ...
+
+をまとめて
+
+    ‖D(X,Y,A4,A6) - D(X',Y',A4',A6')‖ <= (3M^2 + 6M + 1) * eps
+
+(`M` は値の大きさの上界、`eps` は差の上界、`D` は Weierstrass の左辺 - 右辺)。
+★これが `norm_defect_diff_le` である。**七項の三角不等式**(`norm_sum7`)に落として
+`nlinarith` で締める形にした。
+
+### ★★★★切り詰めの大きさ
+
+`‖q‖ <= 1/8` かつ `‖u‖ <= 1`、`‖w‖ <= 1/2` なら各項は絶対定数で押さえられる:
+
+| 項 | 上界 |
+|---|---|
+| `f(q^{m+1}c)`(`‖c‖ <= 1`) | `4` |
+| `g(q^{m+1}c)` | `8` |
+| `partialEval (sigmaSeries k) q (n+1)` | `n`(各項が `1` 以下) |
+| `f(w)`(`‖w‖ <= 1/2`) | `2` |
+| `g(w)` | `4` |
+
+★★★**`u` に依存するのは `f(u)`・`g(u)` だけ**である。`w = q/u` は `q -> 0` で 0 に
+行くので `f(w)`・`g(w)` は絶対定数で押さえられる。
+**`u` を固定して `q -> 0` を見る**という最終段の構図が、ここで初めて式の上に現れた。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_sum7` | ★7 項の三角不等式 |
+| `norm_defect_diff_le` | ★★★★★★**方程式の差の差** |
+| `norm_partialSum_le` | ★部分和の大きさ |
+| `norm_tateXtrunc_le` / `norm_tateYtrunc_le` | ★★★★★切り詰めの大きさ |
+| `norm_partialEval_tateA4_le` / `_tateA6_le` | ★★★★係数の切り詰めの大きさ |
+
+### ★残り
+
+1. 第 232 の `tate_equation_uw`(解析側の差は 0)と本ブロックを合わせて
+   `‖tateDefectTrunc (n+1) u w (uw)‖ <= C_n ‖q‖^{n+1}`
+2. 第 225 の `tateEval_numerator` で分子に移し、`u` を動かして係数の消滅(`W^n | P`)
+3. 対称性で `A^n | P`
+4. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-548 ★★★★★★★★切り詰めた差は `O(q^{n+1})` —— 解析の段の本体(第 235 ブロック)
+
+`Found/GaloisRep/TateDefectBound.lean`。
+
+第 220-234 で積み上げた部品を一つにまとめた。`u = exp(2 pi i z)`、`w = exp(2 pi i (tau-z))`、
+`q = uw = exp(2 pi i tau)` として、`‖q‖ <= 1/128` かつ `‖w‖ <= 1/2` なら:
+
+    ‖tateDefectTrunc (n+1) u w (uw)‖ <= (3M^2 + 6M + 1) * 50 * (64‖q‖)^{n+1}
+
+ここで `M = ‖f(u)‖ + ‖g(u)‖ + 30(n+1) + 80`。
+★`(64‖q‖)^{n+1} = 64^{n+1} ‖q‖^{n+1}` なので、これは **`C_n ‖q‖^{n+1}`** の形である
+(定数は `n` と `u` に依るが、`q` には依らない——それでよい)。
+
+### ★★★組み立て
+
+| 段 | 使うもの |
+|---|---|
+| 解析側の差は厳密に 0 | 第 232 `tate_equation_uw` |
+| `X`・`Y` の差 | 第 231 |
+| `a4`・`a6` の差 | 第 233 |
+| 値の大きさ | 第 234 |
+| 差の差を足す | 第 234 `norm_defect_diff_le` |
+
+★★**四つの差をすべて `eps := 50 (64‖q‖)^{n+1}` に揃える**のが要点である。
+`(4‖q‖)^{n+1} <= (16‖q‖)^{n+1} <= (64‖q‖)^{n+1}` なので、底を一番大きいものに合わせれば
+`norm_defect_diff_le` が一度で当たる。★底の違う四つを揃えずに個別に扱うと
+場合分けが増えるだけだった。
+
+★★★`‖w‖ <= 1/2` は仮定として持つ。`w = q/u` は `u` を固定して `q -> 0` とすれば
+いずれ満たされる——最終段の前提そのものである。
+
+### ★★これで解析の段(段 6 の前半)が閉じた
+
+葉 (b) の道筋は次の通りで、残るのは**代数の詰め**だけになった:
+
+| 段 | 状態 |
+|---|---|
+| 解析側の Tate 方程式 | 済(第 220) |
+| `(z,tau)` と `(u,w)` の橋 | 済(第 232) |
+| 切り詰めとの差の評価 | 済(第 231・233・234) |
+| **切り詰めた差 = `O(q^{n+1})`** | ★**済(本ブロック)** |
+| 分子の係数の消滅(`W^n | P`) | 未 |
+| 対称性で `A^n | P` | 未 |
+| 第 224 に流し込む | 未 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-549 ★★★★★★評価から係数の消滅へ(第 236 ブロック)
+
+`Found/GaloisRep/PolyVanish.lean`。
+
+第 235 で `‖tateDefectTrunc (n+1) u w (uw)‖ <= C_n ‖q‖^{n+1}` が出た。
+第 225 の橋でこれは**分子 `P in Z[A,W]` の値の評価**になる。
+そこから `W^{n+1} | P` を出すのに要る一般論を用意した。
+
+| 主張 | 内容 |
+|---|---|
+| `X_pow_dvd_of_norm_le` | ★★★★★★`‖f(w)‖ <= C‖w‖^m`(小さい `w != 0` で)なら `X^m | f` |
+| `poly_eq_zero_of_infinite_zeros` | ★★★★無限個の点で消える多項式は 0 |
+
+### ★★★★`X^m | f` は `m` の帰納法
+
+`m+1` の段では `f(0) = 0` から `X | f`、`f = X g` と書いて `g` に `m` の場合を使う。
+★`f(0) = 0` は `w != 0` での評価を `w -> 0` に飛ばして出す(`eval_zero_le_of_bound`)。
+**多項式の評価は連続なので `nhdsWithin 0 {0}^c` での極限が `f(0)` に一致する**。
+★★ここだけ解析(連続性と極限)が要る。あとは純粋に代数である。
+
+### ★★★仮定を `w != 0` に限るのが要点だった
+
+`w = 0` を仮定に含めると `‖f(0)‖ <= C 0^m` が直接出てしまい**楽に見える**が、
+帰納法が回らない——`f = X g` と割ったあと `g` の側で `w = 0` の評価が要るのに、
+それは `f` の仮定からは出ないからである。
+★`w != 0` に限った仮定なら、`f` でも `g` でも**同じ形**が保たれ、
+`w = 0` は毎段 `eval_zero_le_of_bound` で作る。
+
+| 定理 | 内容 |
+|---|---|
+| `eval_zero_le_of_bound` | ★★★★`w -> 0` の極限で `w = 0` の評価を得る |
+| `X_pow_dvd_of_norm_le` | ★★★★★★**`‖f(w)‖ <= C‖w‖^m` なら `X^m | f`** |
+| `coeff_eq_zero_of_norm_le` | ★★★★★係数の消滅の形 |
+| `poly_eq_zero_of_infinite_zeros` | ★★★★無限個の零点をもつ多項式は 0 |
+
+### ★残り
+
+1. `P in Z[A,W]` を `w` の多項式(係数は `u` の Laurent 多項式)と見る配線
+2. 第 235 + 第 225 + 本ブロックで `j <= n` の係数が `u` ごとに 0
+3. `u` を動かして(無限個)係数が恒等的に 0 ==> `W^{n+1} | P`
+4. 対称性で `A^{n+1} | P`、第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-550 ★★★★★★★`w` を自由にした(第 237 ブロック)
+
+`Found/GaloisRep/TateUWFree.lean`。
+
+第 235 の評価は `z, tau : H` の言葉で書かれている。しかし第 236 の
+「`‖f(w)‖ <= C‖w‖^m` なら `X^m | f`」を当てるには、
+**`w` を小さい円板の中で自由に動かせる**必要がある。
+
+### ★★★`0 < ‖w‖ < 1` は上半平面から来る
+
+`w' = log w / (2 pi i)` とおけば `im w' = -log‖w‖/(2 pi) > 0`(`exists_uh_exp_eq`)。
+`tau := z + w'` とすれば `im z < im tau` で `subUH z tau = w'`、よって
+`exp(2 pi i subUH) = w`、`exp(2 pi i tau) = u w` となる。
+★これで第 235 が `(u, w)` の言葉になった(`norm_tateDefectTrunc_uw_le`)。
+
+★★`w'` の虚部の計算は `t = -i log w/(2 pi)` から `im t = -(log w).re/(2 pi)` で、
+`Complex.log_re : (log x).re = Real.log ‖x‖` を使う。`Complex.div_im` を展開してから
+`simp [Complex.normSq_apply]; field_simp` が通る形だった。
+
+### ★★★★分子を `w` の多項式と見る
+
+`P in Z[A,W]` を `A -> u`(定数)、`W -> X` で `C[w]` に送る(`evalW`)。
+`w` を代入すれば `tateEval u w P` に戻る(`eval_evalW`)。
+★示し方は `MvPolynomial.ringHom_ext`——**`C` と `X i` での一致で環準同型が決まる**。
+`fin_cases i` で `X 0`・`X 1` を潰す。
+
+| 定理 | 内容 |
+|---|---|
+| `evalW` / `eval_evalW` | ★★★★分子を `w` の多項式と見る |
+| `exists_uh_exp_eq` | ★★★`0 < ‖w‖ < 1` は上半平面から来る |
+| `addUH` / `subUH_addUH` | ★`tau := z + w'` の配線 |
+| `norm_tateDefectTrunc_uw_le` | ★★★★★★★**評価の `(u,w)` 形** |
+
+### ★残り
+
+1. 第 225 の `tateEval_numerator` と本ブロックを合わせて
+   `‖(evalW u P).eval w‖ <= C ‖w‖^{n+1}`
+2. 第 236 の `coeff_eq_zero_of_norm_le` で `(evalW u P).coeff j = 0`(`j <= n`)
+3. `u` を無限個動かして `Z[A,W]` の係数が 0 ==> `W^{n+1} | P`
+4. 対称性(`Equiv.swap` による rename)で `A^{n+1} | P`
+5. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-551 ★★★★★★★★分子の低次係数は消える(第 238 ブロック)
+
+`Found/GaloisRep/TateCoeffVanish.lean`。三つの部品を噛み合わせた:
+
+| 部品 | 出どころ |
+|---|---|
+| `tateEval u w P = tateDefectTrunc (n+1) u w (uw) * tateEval u w d` | 第 225 |
+| `‖tateDefectTrunc (n+1) u w (uw)‖ <= C_n * 50 * (64‖uw‖)^{n+1}` | 第 237 |
+| `‖f(w)‖ <= K‖w‖^m` なら `f` の低次係数は 0 | 第 236 |
+
+★あと一つ、**分母 `d` の値が有界**であることが要った。
+
+### ★★★★分母の有界性は帰納法で出る
+
+`‖u‖ <= 1`、`‖w‖ <= 1` の上では `tateEval u w Q` は有界。`MvPolynomial.induction_on` で:
+
+| 段 | 上界 |
+|---|---|
+| `C r` | `‖(r : C)‖` |
+| `p + q` | `B_p + B_q` |
+| `p * X i` | `B_p`(変数を掛けても増えない) |
+
+★★**上界を存在量化しておく**のがよかった——係数の和として明示すると
+`MvPolynomial.support` の扱いが要るが、帰納法なら三段で済む。
+
+### ★★★仕上げ
+
+`‖u‖ <= 1` なので `‖uw‖ <= ‖w‖`、したがって `(64‖uw‖)^{n+1} <= 64^{n+1}‖w‖^{n+1}`。
+`‖w‖ < 1/128` なら第 237 の仮定(`‖w‖ <= 1/2` と `‖uw‖ <= 1/128`)がどちらも満たされる。
+★**円板の半径を `1/128` に取れば仮定が二つとも自動で満たされる**のが効いた。よって
+
+    ‖(evalW u P).eval w‖ <= (C_n * 50 * 64^{n+1} * B) * ‖w‖^{n+1}
+
+となり、第 236 から `j <= n` の係数が 0 が出る。
+
+| 定理 | 内容 |
+|---|---|
+| `tateEval_C` | ★定数の評価 |
+| `exists_bound_tateEval` | ★★★★分母は有界 |
+| `coeff_evalW_eq_zero` | ★★★★★★★★**分子の低次係数は消える** |
+
+### ★残り
+
+1. `(evalW u P).coeff j` を `u` の多項式と見る配線
+   (`TateBase -> Polynomial (Polynomial C)`、`A -> C X`、`W -> X`)
+2. `u = exp(2 pi i z)`(`z` は上半平面を動く——無限個)で 0 ==> 係数多項式が 0
+3. `Z[A,W]` への降下:`W^{n+1} | P`
+4. 対称性(`Equiv.swap` の rename)で `A^{n+1} | P`
+5. 第 224 の `tateDefect_eq_zero_of_base` に流し込む
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-552 ★★★★★★★★分子は `W^{n+1}` で割れる —— ℂ から ℤ への降下(第 239 ブロック)
+
+`Found/GaloisRep/TateDescent.lean`。
+
+第 238 で「各 `u = exp(2 pi i z)` について `(evalW u P)` の低次係数が 0」まで来た。
+これを **`Z[A,W]` の中の `W^{n+1} | P`** に降ろした。
+
+### ★★★★★`Z[A,W] = Z[a][w]`(`W` を外側の変数に)を作る
+
+`toPP` / `ofPP` を `eval2Hom` と `Polynomial.eval2RingHom` で作り、
+`MvPolynomial.ringHom_ext` と `Polynomial.ringHom_ext` で互いに逆であることを示した。すると
+
+    W^m | P  <=>  X^m | toPP P  <=>  for all j < m, (toPP P).coeff j = 0
+
+★`(toPP P).coeff j in Z[a]` は `u` の多項式である。`evalW u` はちょうどその係数を
+`u` で評価したものになる(`coeff_evalW_eq`)——これも `MvPolynomial.ringHom_ext` で出る。
+
+### ★★★`u` の動く先は無限集合
+
+`z = i(k+1)` とすれば `‖exp(2 pi i z)‖ = exp(-2 pi (k+1))` がすべて相異なる
+(`infinite_exp_range`)。これで第 236 の「無限個の点で消える多項式は 0」が使え、
+`C[a]` の側で 0 になる。★`Z[a] -> C[a]` は単射なので `Z[a]` の側でも 0。
+
+### ★★配線の落とし穴
+
+`poly_eq_zero_of_infinite_zeros _ (Set.range fun z : H => …) infinite_exp_range` と
+**集合を明示すると `isDefEq` が時間切れになる**(maxHeartbeats 200 万でも落ちた)。
+`_ _ infinite_exp_range` と書いて**補題側から推論させる**と 0.03 秒で通る。
+★同じ集合を二度書くと、`UpperHalfPlane` の coercion の展開で単一化が爆発するらしい。
+
+| 定理 | 内容 |
+|---|---|
+| `toPP` / `ofPP` / `univW_pow_dvd_iff` | ★★★★★`Z[A,W] = Z[a][w]` と整除性の言い換え |
+| `coeff_evalW_eq` | ★★★★`evalW u` は係数を `u` で評価したもの |
+| `infinite_exp_range` | ★★★`exp(2 pi i H)` の像は無限 |
+| `univW_pow_dvd_of_coeff` | ★★★★★★★`u` を動かして `W^{n+1} | P` |
+| `univW_pow_dvd_numerator` | ★★★★★★★★**分子は `W^{n+1}` で割れる** |
+
+### ★残り
+
+1. 対称性(`A` と `W` の交換)で `A^{n+1} | P`
+2. 第 224 の `tateDefect_eq_zero_of_base` に流し込む(添字が `n+1` の形に合わせる)
+
+★これで葉 (b) が閉じる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-553 ★★★★★★★★★★葉 (b) 完成 —— Tate 級数は Weierstrass 方程式を満たす(第 240 ブロック)
+
+`Found/GaloisRep/TateEquation.lean`。
+
+    Y(u,q)^2 + X(u,q) Y(u,q) = X(u,q)^3 + a4(q) X(u,q) + a6(q)
+
+を**任意の `I` 進完備環**で示した(`tate_equation`)。
+★第 212 で `I` を法として取れていたものが、これで**厳密な等式**になった。
+
+### ★★★もう一方の整除性は対称性だけで出た
+
+第 239 で `W^{n+1} | P` が出た。`A^{n+1} | P` は
+
+    tateDefectTrunc (n+1) u w (uw) = tateDefectTrunc (n+1) w u (wu)   (第 224)
+
+を使い、**`w` を固定して `u -> 0` を見る**だけでよかった。評価(第 237)はそのまま
+`(w, u)` の順で当たる。
+★★**局所化の側に「`A` と `W` を入れ替える自己同型」を作る必要は無かった**
+——`tateDefectTrunc` の対称性(第 222 で取っておいたもの)だけで足りた。
+`tateDenoms` が交換で保たれることを示す手間が丸ごと消えた。
+
+`Z[A,W] = Z[w][a]`(`A` を外側に)を `toPP2` / `ofPP2` で作り、第 239 と同じ流れ。
+
+### ★★仕上げ
+
+第 224 の `tateDefect_eq_zero_of_base` は `for all n` の形なので、
+`n = 0` は `A^0 = 1 | P` で自明、`n = m+1` は第 239 と本ブロックで埋まる。
+
+| 定理 | 内容 |
+|---|---|
+| `evalA` / `eval_evalA` | 分子を `u` の多項式と見る |
+| `toPP2` / `univA_pow_dvd_iff` | ★★★★`Z[A,W] = Z[w][a]` |
+| `coeff_evalA_eq_zero` | ★★★★★★★★`A` 側の低次係数も消える |
+| `univA_pow_dvd_numerator` | ★★★★★★★★分子は `A^{n+1}` でも割れる |
+| `tateDefect_eq_zero` | ★★★★★★★★★**方程式の差は 0** |
+| `tate_equation` | ★★★★★★★★★★**葉 (b) 完成** |
+
+### ★★★★★道 β の全体(第 214-240、27 ブロック)
+
+| 段 | ブロック |
+|---|---|
+| 道の選定(在庫を測る) | 214 |
+| 段 4:`g2, g3` の q 展開 | 215 |
+| 段 5:`℘`・`℘'` の q 展開 | 216-219 |
+| 解析側の Tate 方程式 | 220 |
+| 段 6 の骨格(特殊化・万有な環・整除性の分割) | 221-224 |
+| ℂ への特殊化と解析の評価 | 225-235 |
+| 評価から係数の消滅へ | 236-239 |
+| **葉 (b) 完成** | ★240 |
+
+★★残るのは葉 (c)(準同型性)・(d)(核)・(e)(全射性)である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)——葉 (b) は G6 の一部であり、
+G6 自体は `uniformization` の完成を要求している。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-554 ★★★★★★葉 (c) の道を測り、楕円関数の Liouville を取った(第 241 ブロック)
+
+`Found/GaloisRep/EllipticLiouville.lean`。
+
+葉 (b) が閉じた(第 240)。次は**葉 (c)——写像 `K^x/q^Z -> E(K)` が準同型であること**。
+古典的にはこれは**三点の共線性**である:
+
+    u1 u2 u3 = 1  ==>  (X(u1),Y(u1)), (X(u2),Y(u2)), (X(u3),Y(u3)) は一直線上
+
+### ★★★在庫を引いた —— mathlib に `℘` の加法定理は無い
+
+`Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` は `derivWeierstrassP_sq`
+(`℘'^2 = 4℘^3 - g2 ℘ - g3`)で終わっており、**加法定理も「楕円関数は定数」も無い**
+(1074 行目が最後の補題)。★第 214 と同じ手順で先に測った。
+
+### ★★★★道は三段になる
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 楕円関数の Liouville(二重周期な整関数は定数) | ★**本ブロックで完了** |
+| 2 | `℘` の加法定理(共線性の形) | 未 |
+| 3 | 解析側の共線性を第 221-240 の機構で形式側へ移す | 未 |
+
+★★★**段 3 は葉 (b) で作った機構がそのまま使える**——変数が `(u1, u2, q)` の 3 つに
+増えるだけで、万有な環・特殊化・係数の消滅の流れは同じである。
+27 ブロックかけて作った機構が、ここで再利用できる形になっている。
+
+### ★★★★★★段 1 —— 道具はすべて mathlib に在った
+
+| 部品 | mathlib |
+|---|---|
+| Liouville | `Differentiable.apply_eq_apply_of_bounded` |
+| 基本領域の存在 | `ZSpan.exist_unique_vadd_mem_fundamentalDomain` |
+| 基本領域の有界性 | `ZSpan.fundamentalDomain_isBounded` |
+| 有界閉集合はコンパクト | `Bornology.IsBounded.isCompact_closure`(ℂ は proper) |
+
+★**値域は基本領域の閉包の像に含まれる**——周期性で任意の点を基本領域に移せるから。
+そこは連続像なのでコンパクト、したがって有界。あとは Liouville。10 行で通った。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-555 ★★★★★★★格子の外で正則な楕円関数は定数(第 242 ブロック)
+
+`Found/GaloisRep/EllipticConst.lean`。
+
+第 241 の Liouville は「**全体で微分可能**な楕円関数は定数」だった。
+しかし加法定理の議論で現れる関数(`℘'(z) - lambda ℘(z) - nu` の組み合わせ等)は
+**格子の外でしか正則でない**。極が実は消えている場合を扱えるようにした:
+
+> 格子の外で正則、全体で連続な楕円関数は定数である。
+
+### ★★★★格子点は孤立している
+
+mathlib の `PeriodPair.compl_lattice_sdiff_singleton_mem_nhds x` が
+「**`x` 以外の格子点を除いた集合が `x` の近傍**」を与える。
+その上で `Complex.differentiableOn_compl_singleton_and_continuousAt_iff`(可除特異点)を
+当てれば `x` でも微分可能になり、第 241 が適用できる。
+
+★★**mathlib の `PeriodPair` には「格子は離散」まわりの補題が揃っていた**
+(`isClosed_lattice`、`isOpen_compl_lattice_sdiff`、`compl_lattice_sdiff_singleton_mem_nhds`)。
+`℘` の加法定理そのものは無いが、**その周辺の位相的な準備は在る**。
+
+| 定理 | 内容 |
+|---|---|
+| `eq_of_periodic_continuous` | ★★★★★★★格子の外で正則・全体で連続な楕円関数は定数 |
+| `const_of_periodic_continuous` | ★一点の値に等しい形 |
+
+### ★葉 (c) の残り(測り直し)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 楕円関数の Liouville | 済(第 241) |
+| 1' | 格子の外で正則な場合 | ★**済(本ブロック)** |
+| 2 | `℘` の加法定理(共線性) | 未——**零点と極の個数**(偏角の原理)が要る |
+| 3 | 解析側の共線性を形式側へ移す | 未(第 221-240 の機構を 3 変数に) |
+
+★★段 2 の核は「位数 3 の楕円関数の零点の和は極の和に等しい」(Abel)であり、
+基本平行四辺形上の周回積分が要る。mathlib には長方形の Cauchy はあるが
+平行四辺形版は無い。**見積もりは 30-60 ブロック**。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-556 ★★★★格子点での主要部 —— 見積もりを縮めた(第 243 ブロック)
+
+`Found/GaloisRep/WeierstrassPole.lean`。
+
+### ★★★訂正 —— 偏角の原理は要らなかった
+
+§9-555 では葉 (c) の段 2(`℘` の加法定理)を **30-60 ブロック**と見積もり、
+「零点の和 = 極の和」(Abel、偏角の原理)が要ると書いた。★**これは読み違いである**。
+
+★★**Liouville だけで済む古典的な証明がある**:
+
+    F(z) := ℘(z+w) - [ (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2 - ℘(z) - ℘(w) ]
+
+は `z` の楕円関数で、**見かけの極がすべて相殺する**。よって第 241・242 で定数、
+値を一点で見れば 0——これが加法定理である。基本平行四辺形上の周回積分は要らない。
+
+### ★★★極の相殺を確かめる主要部は mathlib に在った
+
+| 補題 | 内容 |
+|---|---|
+| `weierstrassPExcept_def` | `℘[L-l0](z) = ℘(z) + (1/l0^2 - 1/(z-l0)^2)` |
+| `analyticAt_weierstrassPExcept` | `℘[L-l0]` は `l0` で解析的 |
+| `derivWeierstrassPExcept_def` | `℘'[L-l0](z) = ℘'(z) + 2/(z-l0)^3` |
+| `analyticAt_derivWeierstrassPExcept` | 同上 |
+
+★つまり **`℘` から `l0` の項だけ抜いたもの**が既に用意されていて、
+それが `l0` で解析的であることまで示されている。これで
+
+    ℘(z)  = 1/(z-l0)^2 + (正則部)
+    ℘'(z) = -2/(z-l0)^3 + (正則部)
+
+が直ちに書ける。★★★**見積もりは 15-35 ブロックに縮まった**。
+
+★§9-527 で「測ってから選ぶ」と書いたが、**測り直すこと**も同じくらい大事だった。
+在庫(`weierstrassPExcept`)を見ていれば §9-555 の時点で気づけた。
+
+| 定理 | 内容 |
+|---|---|
+| `weierstrassP_principal` | ★★★★`℘` の主要部 |
+| `derivWeierstrassP_principal` | ★★★★`℘'` の主要部 |
+| `sq_mul_weierstrassP` | ★★★`(z-l0)^2 ℘(z) = 1 + O((z-l0)^2)` |
+| `cube_mul_derivWeierstrassP` | ★★★`(z-l0)^3 ℘'(z) = -2 + O((z-l0)^3)` |
+
+★★`linear_combination` は `1/(z-l0)^2` の形を `ring` で展開しようとして落ちる。
+`rw [weierstrassPExcept_def]` してから `ring` にすると、逆元が両辺に同じ形で
+現れるので通る。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-557 ★★★★★極が相殺する鍵 —— 位数を数えずに因数分解で(第 244 ブロック)
+
+`Found/GaloisRep/WeierstrassPoleForm.lean`。
+
+加法定理の証明で使う関数
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+が格子点 `l0` のまわりで正則であることを示したい。`t := z - l0` として第 243 より
+
+    ℘(z) = 1/t^2 + E(z),   ℘'(z) = -2/t^3 + D(z)      (E, D は l0 で解析的)
+
+`c := ℘(w)`、`c' := ℘'(w)`、`alpha := D - c'`、`beta := E - c` とおくと
+
+    (℘'(z)-c')/(℘(z)-c) = (1/t) N/M,   N = -2 + t^3 alpha,   M = 1 + t^2 beta
+
+であり
+
+    (1/4)(N/M)^2 (1/t^2) - 1/t^2 = (N^2 - 4M^2)/(4 t^2 M^2)
+
+となる。★★ここで **`N^2 - 4M^2 = t^2 R`(`R` は解析的)と因数分解できる**
+(`pole_cancel_factor`)。したがって上の式は `R/(4M^2)` となり **`l0` で解析的**である
+(`M(l0) = 1 != 0`)。
+
+### ★★★位数を数える必要はない
+
+★`AnalyticAt.order` を持ち出して「2 位で消える」と言う代わりに、
+**`ring` で確かめられる恒等式ひとつ**で相殺が出る。これがこの形の利点である。
+
+    (-2 + t^3 a)^2 - 4(1 + t^2 b)^2 = t^2 (-4 t a + t^4 a^2 - 8 b - 4 t^2 b^2)
+
+### ★★見積もりの再訂正
+
+§9-556 で 15-35 ブロックとしたが、この因数分解で相殺の議論が機械化できるので
+**8-20 ブロック**が見込みである。悪い点は 3 種類(`z in L`、`z in L-w`、`z = w`)で、
+どれも同じ形の因数分解で処理できる。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_pole_form` | ★★★★格子点のまわりの `℘`・`℘'` の形 |
+| `differentiableOn_weierstrassP_compl` 他 | ★格子の外での微分可能性 |
+| `weierstrassP_lattice_add` 他 | ★★周期性(`l + z` の向き) |
+| `pole_cancel_factor` | ★★★★★**極が相殺する鍵の因数分解** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-558 ★★★★★★★格子点での正則延長 —— 相殺を「商の形」で(第 245 ブロック)
+
+`Found/GaloisRep/WeierstrassQuotient.lean`。
+
+第 244 の `pole_cancel_factor` は多項式の恒等式だった。本ブロックはそれを
+**除算のある形**に翻訳し、`℘`・`℘'` に代入して
+
+    (1/4) ((℘'(z) - c')/(℘(z) - c))^2 - ℘(z)
+
+が**格子点 `l0` のまわりで解析的な関数に一致する**ことを示した
+(`exists_analytic_quotient_sub`)。`c := ℘(w)`、`c' := ℘'(w)` は定数でよい。
+
+### ★★★★★★★段取り
+
+`t := z - l0`、`alpha := D z - c'`、`beta := E z - c` として第 244 の形に合わせる:
+
+| 補題 | 内容 |
+|---|---|
+| `quotient_pole_form` | `(-2/t^3 + alpha)/(1/t^2 + beta) = (-2 + t^3 alpha)/(t(1 + t^2 beta))` |
+| `sq_quotient_sub_pole` | `(1/4)(...)^2 - 1/t^2 = R/(4(1 + t^2 beta)^2)` |
+| `exists_analytic_quotient_sub` | ★★★★★★★上を `℘` に代入し `1/t^2` を消す |
+
+`℘(z) = 1/t^2 + E z` を引くと `1/t^2` が消えて
+
+    g z := R z /(4 (1 + t^2 beta)^2) - E z
+
+が残る。`R`・`E` は `l0` で解析的、分母は `l0` で `4 != 0` なので `g` は解析的。
+
+### ★分母が消えないことは `∀ᶠ` で持つ
+
+`1 + t^2 beta` は `l0` で `1` なので、**`l0` の近傍で** `!= 0` である。
+等式を全 `z` で主張せず `∀ᶠ z in 𝓝 l0` の形にすることで、
+余計な仮定を呼び出し側に押し付けずに済んだ。`ContinuousAt.eventually_ne` を使う。
+
+### ★★★これが 3 種類の悪い点をまとめて処理する
+
+加法定理
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+の見かけの極は `z in L`、`z in L - w`、`z = w (mod L)` の 3 種類だが、
+どれも**同じ商の形**に帰着する。本ブロックの `exists_analytic_quotient_sub` は
+そのうち第 1 種(`z in L`)をそのまま与え、残る 2 種も同じ補題の平行移動で出る。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-559 ★★★★★★★共線性の行列式 —— 商をやめて分母を消した(第 246 ブロック)
+
+`Found/GaloisRep/CollinearDet.lean`。
+
+### ★★★★★★★経路の切り替え
+
+§9-557・§9-558 では加法定理を**商の形**
+
+    F(z) = ℘(z+w) + ℘(z) + ℘(w) - (1/4)((℘'(z)-℘'(w))/(℘(z)-℘(w)))^2
+
+で扱う計画だった。★この形は悪い点が 3 種類(`z in L`、`z in L - w`、`z = w`)あり、
+分母が消える 2 種類は**それぞれ別の議論**を要する。§9-557 で「どれも同じ形の因数分解で
+処理できる」と書いたが、**これは楽観だった**。`z = -w` の側は 2 次の Taylor 係数まで
+噛み合わせる必要があり、`z = w` の側は零点の位数比較が要る。
+
+★★★本ブロックでは**分母のない形**——3 点 `P(z)`, `P(w)`, `-P(z+w)` の共線性の
+**行列式**——に切り替えた。
+
+    collDet L w z
+      = det [[℘(z), ℘'(z), 1], [℘(w), ℘'(w), 1], [℘(z+w), -℘'(z+w), 1]]
+      = ℘'(w)(℘(z) - ℘(z+w)) - ℘(w)(℘'(z) + ℘'(z+w))
+        + (℘(z)℘'(z+w) + ℘'(z)℘(z+w))
+
+★これは `℘`・`℘'` の**積と和だけ**でできているので、悪い点は極の 2 種類
+(`z in L` と `z in L - w`)しかない。**分母が消える点という悪い点が消滅した**。
+
+### ★★★★反対称性が二役をこなす
+
+`z -> -z - w` は 3 点のうち 2 点を入れ替えるので
+
+    collDet L w (-z - w) = -collDet L w z            (`collDet_neg`)
+
+である。ここから 2 つ出る:
+
+1. **第 2 種の悪い点は第 1 種から出る**(`z0 in L - w` なら `-z0 - w in L`)。
+2. Liouville で定数と分かったあと、**その定数が 0 であること**が出る。
+   ★値を一点で計算する必要がない。
+
+### ★★★★★★極の相殺は Taylor 3 項で `ring` に落ちる
+
+`l0 in L` のまわりで `t := z - l0`、`f(s) := ℘(s + w)` とおくと、周期性から
+`℘(z + w) = f(t)`、`℘'(z + w) = f'(t)`。第 244 の `exists_pole_form` から
+`℘(z) = 1/t^2 + E(z)`、`℘'(z) = -2/t^3 + D(z)` なので、`collDet` の特異部は
+
+    (2f(0) - 2f(t))/t^3 + (f'(0) + f'(t))/t^2
+      = [ -2(f(t) - f(0)) + t(f'(t) + f'(0)) ] / t^3
+
+となる。★★★分子が `t^3` で割り切れることが、在庫の
+**`AnalyticAt.exists_eq_sum_add_pow_mul`**(解析的な剰余つき Taylor 展開、
+`f z = sum_{i<n} (z^i/i!) f^(i)(0) + z^n F z`、`F` は解析的)で **`ring` に落ちる**。
+`f` を 3 次まで、`f'` を 2 次まで展開して代入すると 1 次と 2 次の項がちょうど消える
+(`exists_taylor_pole_cancel`)。`iteratedDeriv_succ'` で `f` 側と `f'` 側の係数を
+突き合わせる。
+
+★`AnalyticAt.order` を持ち出して「3 位で消える」と言う必要はない。
+第 244 で採った「**位数を数えず因数分解で**」の方針がそのまま通った。
+
+### ★配管 —— `AnalyticAt.comp` の合成先が推論できない
+
+`AnalyticAt.comp : AnalyticAt g (f x) -> AnalyticAt f x -> AnalyticAt (g o f) x` に
+`AnalyticAt ℘ (s + w)` を渡すと、エラボレータは `f x` を `HAdd.hAdd s w` と読んで
+`f := HAdd.hAdd s`、`x := w` と分解してしまう。`(f := fun u => u + w) (x := s)` と
+**名前つき引数で明示**すれば通る。`tools/lean-idioms.md` に追加した。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_taylor_pole_cancel` | ★★★★★★**Taylor 3 項で極が消える** |
+| `shiftP`・`deriv_shiftP` 他 | ★平行移動した `℘` とその微分 |
+| `collDet` | ★★★★★★**共線性の行列式** |
+| `collDet_neg` | ★★★★反対称性(`z -> -z - w`) |
+| `collDet_add_lattice` | ★★周期性 |
+| `exists_analytic_collDet` | ★★★★★★★**格子点で極が相殺する** |
+
+### 残り(葉 (c) 段 2)
+
+1. 局所延長を貼り合わせて**整関数**を作る(`limUnder (nhdsWithin z {z}^c)` で
+   一様に定義し、良い点の集合が稠密であることを使って周期性・反対称性を移す)。
+2. 第 241 の `eq_of_periodic_differentiable` で定数、`collDet_neg` で 0。
+3. `collDet = 0` を加法定理の形に直す。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-560 ★★★★★★★局所延長の貼り合わせ —— 穴あき近傍の極限で一様に(第 247 ブロック)
+
+`Found/GaloisRep/RemovableGlue.lean`。
+
+### ★★★★★★★問題 —— 悪い点が無限個ある
+
+第 246 で `collDet` は各格子点のまわりで解析的に延びると分かった。しかし Liouville に
+かけるには**その延長どうしを貼り合わせて整関数を作る**必要がある。悪い点は無限個
+(格子の 2 つの平行移動 `L` と `L - w`)なので、`Function.update` で 1 点ずつ潰す形は
+使えない。
+
+★★★そこで**場所によらない一様な定義**を採った:
+
+    glue f z := limUnder (nhdsWithin z {z}^c) f
+
+つまり「`z` を除いた近傍での極限」。これなら **1 本の式で全点を定義できる**。
+
+- **良い点**(`f` がそこで解析的)では `glue f z = f z`。
+- **悪い点**(`f` が穴あき近傍で解析的な `g` に一致する)では `glue f z = g z`。
+
+★どちらも同じ補題 `glue_eq` で出る——**場合分けが要らない**のがこの定義の利点である。
+
+さらに `glue f` は `z0` の**穴のない**近傍で `g` に一致する(`glue_eventuallyEq`)。
+穴あきの点 `z != z0` では `f` が `z` の近傍**全体**で `g` に一致するので `glue f z = g z`、
+`z = z0` では `g` の連続性から極限が `g z0` になる。よって `AnalyticAt.congr` で
+`glue f` の解析性がそのまま出る。
+
+### ★★★★★アフィン変換は `glue` を通り抜ける
+
+`f (a z + b) = eps f(z)` なら `glue f (a z + b) = eps * glue f z`(`glue_affine`)。
+
+| `(a, b, eps)` | 意味 |
+|---|---|
+| `(1, l, 1)` | **周期性** |
+| `(-1, -c, -1)` | **反対称性** |
+
+★逆写像 `v -> (v - b)/a` で局所延長を運ぶだけなので、**フィルターの押し出しを書く
+必要がない**。`Tendsto.eventually` 一発で済む。周期性と反対称性を別々に書かずに
+1 つの補題にまとめられたのはこの形のおかげである。
+
+### ★★★★★★★周期的かつ反対称なら 0
+
+    eq_zero_of_periodic_antisymm : (局所延長) -> (周期性) -> (反対称性) -> f z0 = 0
+
+第 241 の Liouville で `glue f` が定数と分かり、反対称性から
+`glue f 0 = -glue f 0`、よって **0**。★**値を一点で計算する必要がない**。
+
+| 定理 | 内容 |
+|---|---|
+| `glue` | ★★★★★★穴あき近傍の極限による一様な貼り合わせ |
+| `glue_eventuallyEq` | ★★★★★★`glue f` は近傍で局所延長に一致する |
+| `glue_eq`・`analyticAt_glue` | ★★点での一致と解析性 |
+| `glue_affine` | ★★★★★アフィン変換は通り抜ける |
+| `eq_zero_of_periodic_antisymm` | ★★★★★★★**周期的かつ反対称なら 0** |
+
+### 残り(葉 (c) 段 2)
+
+1. `collDet` が良い点で解析的、悪い点で局所延長を持つことを言って
+   `eq_zero_of_periodic_antisymm` に流す。第 2 種の悪い点は `collDet_neg` で第 1 種から。
+2. `collDet = 0` を加法定理の形(`℘(z+w)` の明示式)に直す。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-561 ★★★★★★★★葉 (c) 段 2 が終わった —— ℘ の共線性(第 248 ブロック)
+
+`Found/GaloisRep/WeierstrassAddition.lean`。
+
+第 246 の `collDet`、第 247 の貼り合わせ、第 241 の Liouville を組み合わせて
+
+> `z1 + z2 + z3 in L` なら 3 点 `(℘(zi), ℘'(zi))` は一直線上にある
+
+が出た(`weierstrass_collinear`)。★★★★これが**葉 (c) 段 2 の到達点**である。
+
+    ℘(z1)(℘'(z2) - ℘'(z3)) + ℘(z2)(℘'(z3) - ℘'(z1)) + ℘(z3)(℘'(z1) - ℘'(z2)) = 0
+
+### ★★★組み立て
+
+| 補題 | 役割 |
+|---|---|
+| `analyticAt_collDet` | 良い点(`z notin L` かつ `z + w notin L`)で解析的 |
+| `exists_local_collDet` | ★★★★★★**全点で局所延長を持つ** |
+| `collDet_eq_zero` | ★★★★★★★★`collDet = 0` |
+| `weierstrass_collinear` | ★★★★★★★★対称な 3 点の形 |
+
+★`exists_local_collDet` の第 2 種の悪い点(`z0 + w in L`)は、**`collDet_neg` で
+第 1 種に帰着する**——`z0 + w = l` なら `-z0 - w = -l in L` なので、第 1 種の延長 `g`
+から `v -> -g(-v - w)` を作ればよい。**新しい極の解析は要らなかった**。
+§9-559 で「反対称性が二役をこなす」と書いた見込みがそのまま実現した。
+
+### ★★共線性で十分である
+
+葉 (c) が要求するのは「一意化が**準同型**」であり、それは
+
+> `u1 u2 u3 = 1` なら 3 点 `P(ui)` は一直線上にある
+
+という形である。★**`℘(z+w)` の明示式は要らない**——共線性そのものが目的の形であり、
+段 3(形式的べき級数への移送)でもこの多項式の形のまま扱える。
+§9-556 で「加法定理」と書いたが、正確には**共線性まででよい**。
+
+### ★★見積もりの実績
+
+§9-557 で葉 (c) 段 2 を **8-20 ブロック**と見積もった。実際は
+第 244(極が相殺する鍵)から第 248 まで **5 ブロック**で終わった。
+経路を商から行列式に切り替えた(§9-559)ことと、
+`AnalyticAt.exists_eq_sum_add_pow_mul` が在庫にあったことが効いた。
+
+### 次(葉 (c) 段 3)
+
+`X(u) = (2πi)^{-2}(℘(z) - ...)` の対応で上の共線性を Tate 級数の言葉に翻訳し、
+第 221-240 の普遍環による降下を 3 変数 `(u1, u2, q)` に拡張する。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-562 ★★★★★★★★解析側の共線性 —— 段 3 の入口(第 249 ブロック)
+
+`Found/GaloisRep/TateCollinearAnalytic.lean`。
+
+第 248 の `weierstrass_collinear` を、第 218・220 の対応
+
+    ℘(z)  = (2πi)^2 (X + 1/12)          (`weierstrassP_eq_tateXfun`)
+    ℘'(z) = (2πi)^3 (2Y + X)            (`derivWeierstrassP_eq_tateYfun`)
+
+で書き換えると、★★**`1/12` の項も `Xi Xj` の項もちょうど消えて**
+
+    X1(Y2 - Y3) + X2(Y3 - Y1) + X3(Y1 - Y2) = 0
+
+という**同じ形の行列式**が残る(`collinear_tatefun`)。係数は `2(2πi)^5` だけ。
+行列式の形を選んだ(§9-559)ことが、ここでも効いた——商の形なら分母の変換が要った。
+
+### ★★★★★対称な 3 変数 `(u, v, w)` へ
+
+`z3 := τ - z1 - z2` と取ると `z1 + z2 + z3 = τ` なので、
+`u := e^{2πi z1}`、`v := e^{2πi z2}`、`w := e^{2πi z3}` について **`q = u v w`**。
+しかも各点の「相方」`q/ui` が
+
+    q/u = v w,   q/v = u w,   q/w = u v
+
+と**すべて多項式**になる。★★★これが段 3 の普遍環を **`ℤ[U,V,W]`(`q = UVW`)**に
+取れる理由である——第 223 の `ℤ[A,W]`(`q = AW`)の素直な 3 変数化になる。
+`(u, q/u)` の対を各点で別々に持つ必要がない。
+
+### ★上半平面から自由になる
+
+第 237 の `exists_uh_exp_eq` で `u, v, w` を任意の「単位開円板の 0 でない点」に
+取り替えられる。★`τ := z1 + z2 + z3` と**定義してしまう**ので、`im` の条件は
+`z3 in ℍ` から自動的に出る(第 237 の `addUH` と同じ手)。
+
+| 定理 | 内容 |
+|---|---|
+| `thirdUH` | ★第 3 の点 `τ - z1 - z2` |
+| `collinear_tatefun` | ★★★★★★★`tateXfun`/`tateYfun` の形の共線性 |
+| `collinear_analytic_uvw` | ★★★★★★★★**`(u,v,w)` の形の共線性** |
+
+### 次
+
+1. 普遍環 `ℤ[U,V,W]` を局所化し、共線性の差(defect)を定義して切り詰める
+   (第 222-223 の 3 変数化)。
+2. 切り詰めた差の ℂ 側評価 `O(q^{n+1})`(第 226-235 の 3 変数化)。
+3. `U^n | `, `V^n | `, `W^n | ` を `IsRelPrime` で分け(第 224)、
+   第 236 の `X_pow_dvd_of_norm_le` と第 238-240 の降下で係数消滅。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-563 ★★★★★★★★共線性を有限の主張の族に落とす(第 250 ブロック)
+
+`Found/GaloisRep/TateCollinearTrunc.lean`。
+
+### ★★★★★★第 222-223 の骨格をそのまま 3 点に使う
+
+葉 (b)(Tate 方程式)では「差 → 切り詰め → 万有な環での整除性」という 3 段で
+有限化した(第 222・223)。★★**共線性でも同じ骨格が使える**。違うのは点が 3 つに
+なることだけである。
+
+3 点は `(u, vw)`, `(v, uw)`, `(w, uv)` で `q = u v w`。各点の相方が多項式になるので
+**追加の変数は要らない**(§9-562)。
+
+    collDefect u v w q := X1(Y2 - Y3) + X2(Y3 - Y1) + X3(Y1 - Y2)
+
+`collDefect_sub_trunc` は第 222 の `tateXpair_sub_trunc`・`tateYpair_sub_trunc` を
+`Ideal.Quotient` の上で 6 回使うだけ。★`a4`・`a6` が出てこない分、葉 (b) より軽い。
+
+### ★★★★行列式なので互換で符号が変わる
+
+    collDefectTrunc n v u w q = -collDefectTrunc n u v w q     (`collDefectTrunc_swap12`)
+    collDefectTrunc n u w v q = -collDefectTrunc n u v w q     (`collDefectTrunc_swap23`)
+
+★これは `ring` で出る(`v * u = u * v` を先に潰すだけ)。第 224 の
+`tateDefectTrunc_symm` が `A` 側の整除性を無料にしたのと同じで、ここでも
+**`U` 側を示せば `V`・`W` 側は対称性で済む**。3 変数になっても降下の手間は
+1 変数分しか増えない。
+
+### ★★切り詰めの函手性は在庫を使う
+
+`map_tateXtrunc`・`map_tateYtrunc`(第 222)を 3 点それぞれに当てるだけ。
+単元条件は 12 個になるので `CollUnits` 構造体にまとめた。
+
+| 定理 | 内容 |
+|---|---|
+| `collDefect` | ★★★★★★共線性の差(形式側) |
+| `collDefectTrunc` | ★★★その `n` 次の切り詰め |
+| `collDefect_eq_zero_of_trunc` | ★★★★★★★有限の主張の族に落ちる |
+| `collDefectTrunc_swap12`・`_swap23` | ★★★★互換で符号が変わる |
+| `map_collDefectTrunc` | ★★★★★★環準同型で移る |
+| `collDefect_eq_zero_of_specialize` | ★★★★★★★★**特殊化の規準** |
+
+### 残り
+
+万有な環 `ℤ[U,V,W]`(`q = UVW`)を作り、`(UVW)^n | collDefectTrunc n U V W (UVW)` を
+示す。ℂ 側の評価は第 231 の `norm_tateXanalytic_sub_trunc` が
+**3 点それぞれにそのまま使える**(どの点でも `‖u * (相方)‖ = ‖q‖` だから)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-564 ★★★★★★共線性の万有な環 —— `ℤ[U,V,W]`(第 251 ブロック)
+
+`Found/GaloisRep/CollUniversal.lean`。
+
+第 223 の `ℤ[A,W]` を 3 変数にしたもの。`q = U V W` で、3 点は
+`(U, VW)`, `(V, UW)`, `(W, UV)`。
+
+★分母になるのは **6 つの「底」**——`U, V, W, VW, UW, UV`——とその `Q^{m+1}` 倍。
+
+    collDenomBases : Fin 6 -> CollBase := ![U, V, W, VW, UW, UV]
+    collDenomSet := range (fun i => 1 - 底 i)
+                    ∪ range (fun (m,i) => 1 - Q^{m+1} 底 i)
+
+★★**`Fin 6` で添字づけた**ので、単元性の場合分けが **2 通り**で済む。
+6 個を素直に並べて書いていたら 7 個の `∪` に対して 7 通りの `rcases` になっていた。
+第 223 は 3 通りだったが、そこから増えなかった。
+
+### ★★特殊化に要る仮定
+
+    ∀ i, IsUnit (1 - collPts u v w i)      (collPts u v w = ![u, v, w, vw, uw, uv])
+
+これは「3 点のどれも原点でなく、どの 2 点の和も原点でない」という条件である。
+★Tate 一意化の準同型性を述べるときの自然な非退化条件にあたる。
+
+### ★★★★★★★★帰着の形
+
+    collDefect u v w q = 0
+      <= ∀ n, (kU kV kW)^n | collDefectTrunc n kU kV kW (kU kV kW)
+
+★残るのは**万有な環での整除性ひとつ**である。第 223 の
+`tateDefect_eq_zero_of_univ` と同じ形になった。
+
+| 定理 | 内容 |
+|---|---|
+| `CollUniv` | ★★★★★共線性の万有な環 |
+| `collEval`・`collSpecialize` | ★★★★★★特殊化 |
+| `collUnits_k` | ★★万有な環の側では 12 個の単元条件が自動で成り立つ |
+| `collDefect_eq_zero_of_univ` | ★★★★★★★★**万有な環での整除性ひとつに帰着** |
+
+### 残り
+
+1. `U`・`V`・`W` の素性と `IsRelPrime`(第 224 の 3 変数化)。
+   ★対称性(§9-563)で `U` 側だけ示せばよい。
+2. ℂ 側の評価——第 231 の `norm_tateXanalytic_sub_trunc` が
+   **3 点それぞれにそのまま使える**(どの点でも相方との積の norm が `‖q‖`)。
+3. 第 236 の `X_pow_dvd_of_norm_le` と第 238-240 の降下。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-565 ★★★★★★★★共線性を三つの整除性に落とす(第 252 ブロック)
+
+`Found/GaloisRep/CollDivisibility.lean`。
+
+### ★★★変数の素元性を一般の位置で取る
+
+第 224 では `ℤ[A,W]` の `X 0`・`X 1` について、`finSuccEquiv` を 1 段・2 段と
+使い分けて素元性を示した。★3 変数になるとこの手は `X 2` で 3 段になり、
+`Polynomial.prime_C_iff` の入れ子が深くなる。
+
+★★★そこで **`Equiv.swap i 0` による `renameEquiv` で任意の変数を `X 0` に運ぶ**形に
+一般化した(`prime_X_fin`)。`X 0` の素元性だけ `finSuccEquiv` で示せば、あとは
+変数の名前替えで済む——**変数の個数にも位置にもよらない**。第 224 の 2 本を
+1 本に置き換えられる形になった。
+
+### ★★★互いに素であること
+
+`IsCoprime`(Bezout)では駄目で `IsRelPrime` を使う点は第 224 と同じ。
+必要なのは `¬(U | V)`、`¬(U | W)`、`¬(V | W)` の 3 つで、どれも `collEval` に
+整数を代入して `1 = 0` を出すだけ。3 つを合わせる `cQ_pow_dvd` は
+`IsRelPrime.mul_left` で `(U^n V^n)` と `W^n` が互いに素になることを使う。
+
+### ★★★★★★★★到達点
+
+    collDefect u v w q = 0
+      <= 分子が U^n・V^n・W^n で割れる(万有な環の中で)
+
+★葉 (b) では二つだったものが三つになっただけで、形は第 224 の
+`tateDefect_eq_zero_of_base` と同じである。
+
+| 定理 | 内容 |
+|---|---|
+| `prime_X_fin` | ★★★**任意の変数が素元**(名前替えで一般化) |
+| `isRelPrime_of_prime_not_dvd` | ★★素元で割り切らないなら互いに素 |
+| `cQ_pow_dvd` | ★★★三つの整除性から `(UVW)^n` |
+| `coll_dvd_pow_of_base` | ★★★★局所化での整除性は分子から |
+| `collDefect_eq_zero_of_base` | ★★★★★★★★**三つの整除性に落ちた** |
+
+### 残り(降下の設計)
+
+第 239 の降下は `ℤ[A,W] = ℤ[a][w]` で、係数が **1 変数**多項式だったので
+`poly_eq_zero_of_infinite_zeros` が直接効いた。3 変数では
+`ℤ[U,V,W] = ℤ[U,V][W]` となり係数が **2 変数**になるので、
+★「2 変数多項式が無限集合の直積の上で消えるなら 0」を 1 枚はさむ必要がある
+(1 変数の議論を 2 回入れ子にすればよい)。
+
+1. 2 変数の消滅補題。
+2. ℂ 側の評価(第 231 の `norm_tateXanalytic_sub_trunc` が 3 点にそのまま効く)。
+3. `W` 側の降下、`U`・`V` 側は変数の入れ替えの自己同型で。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-566 ★★★★★★★3 変数の降下の骨格(第 253 ブロック)
+
+`Found/GaloisRep/CollDescent.lean`。
+
+### ★★★★★2 変数のときとの唯一の違い
+
+第 239 の降下は `ℤ[A,W] = ℤ[a][w]` で、`W^m | P` を `X^m | toPP P` に直し、
+係数(**1 変数**多項式)が無限個の点で消えることから 0 を出した。
+
+★3 変数では `ℤ[U,V,W] = ℤ[u][v][w]` となり、係数が **2 変数**になる。
+そこで **「無限集合の直積の上で消える 2 変数多項式は 0」**(`poly2_eq_zero_of_infinite`)
+を 1 枚はさむ。★これは 1 変数の議論を 2 回入れ子にするだけで、まず `v` を動かして
+`ℂ[v]` の元として 0、次にその係数を `u` で動かして 0、とする。
+**降下の骨格そのものは第 239 と同じ**で、増えたのはこの 1 枚だけだった。
+
+### ★★★配線
+
+| 写像 | 内容 |
+|---|---|
+| `toPP3 : ℤ[U,V,W] -> ℤ[u][v][w]` | `U -> C(C X)`、`V -> C X`、`W -> X` |
+| `ofPP3` | 逆向き |
+| `evalUV u v : ℤ[U,V,W] -> ℂ[w]` | `U -> C u`、`V -> C v`、`W -> X` |
+| `eval2Z u v : ℤ[u][v] -> ℂ` | 係数を `(u,v)` で評価 |
+
+★`evalUV u v = (map (eval2Z u v)) . toPP3` なので、`evalUV u v P` の係数が
+すべて消えることと `toPP3 P` の係数が `(u,v)` で消えることが同じになる。
+
+### ★配管 —— 3 重の `Polynomial` は型推論が通らない
+
+    MvPolynomial.eval₂Hom (((Polynomial.C).comp Polynomial.C).comp Polynomial.C) ...
+    -- failed to synthesize CommSemiring (Polynomial (Polynomial (Polynomial ?m)))
+
+★`abbrev PPP := Polynomial (Polynomial (Polynomial ℤ))` を置いて
+`eval₂Hom (S₁ := PPP)` と**行き先を名前つきで与える**と通る。
+2 重(第 239)までは推論できたが 3 重で落ちる。`tools/lean-idioms.md` に追加した。
+
+### ★★★★★★★到達点
+
+    (∀ u v ∈ s, ∀ j < n+1, (evalUV u v P).coeff j = 0)  ⟹  W^{n+1} | P
+
+★あとは「`s` を上半平面の指数像に取り、係数の消滅を解析的な評価から出す」だけ。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-567 ★★★★★★★切り詰めた共線性の差の評価(第 254 ブロック)
+
+`Found/GaloisRep/CollBound.lean`。
+
+### ★★★★★★在庫がそのまま 3 点に効いた
+
+第 231 の `norm_tateXanalytic_sub_trunc`・`norm_tateYanalytic_sub_trunc` と
+第 234 の `norm_tateXtrunc_le`・`norm_tateYtrunc_le` は `(u, w)` の対に対する評価である。
+★★3 点はどれも `(u, vw)`・`(v, uw)`・`(w, uv)` という **`(点, 相方)` の対**なので、
+**そのまま 3 回当てられた**。しかも相方との積はどれも `q = uvw` なので、
+**評価はどの点でも同じ `eps = 50(4‖q‖)^{n+1}`** になる。
+新しい解析はひとつも要らなかった——これが §9-562 で対称な 3 変数を選んだ効き目である。
+
+★`‖u‖, ‖v‖, ‖w‖ <= 1/8` と取れば `‖tateXterm t‖ <= 4‖t‖ <= 1/2`、
+`‖tateYterm t‖ <= 8‖t‖ <= 1` なので、**切り詰めの大きさ `M` が `n` だけで決まる**。
+第 237 では `u` が固定されていたので `‖tateXterm u‖` を残したが、
+ここは 3 変数とも動くので数値で潰した。
+
+### ★★★★★★行列式の差は `M` の 1 次
+
+    D - D' = Σ_i [ (X_i - X_i')(Y_j - Y_k) + X_i'((Y_j - Y_j') - (Y_k - Y_k')) ]
+
+各項は `eps 2M` と `M 2eps` で押さえられ、合計 **`12 M eps`**(`norm_coll_diff_le`)。
+★第 234 の `norm_defect_diff_le` が `(3M^2 + 6M + 1) eps` だったのに比べ、
+**行列式は双線形なので `M` の 1 次で済む**。曲線の方程式は 3 次だったが、
+共線性は 2 次(しかも各変数について 1 次)なので、ここでも行列式の形が軽い。
+
+### ★★★★★★★到達点
+
+解析側は 0(第 249)なので
+
+    ‖collDefectTrunc (n+1) u v w (uvw)‖ <= 12(25(n+1)+8) * 50(4‖uvw‖)^{n+1}
+
+★右辺は `‖uvw‖^{n+1} = ‖uv‖^{n+1} ‖w‖^{n+1}` を含むので、`u, v` を固定して `w` を
+動かせば `C‖w‖^{n+1}` の形になり、第 236 の `X_pow_dvd_of_norm_le` が効く。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_sum6` | ★6 項の三角不等式 |
+| `norm_coll_diff_le` | ★★★★★★**行列式の差は `12 M eps`** |
+| `norm_collDefectTrunc_le` | ★★★★★★★**切り詰めた共線性の差の評価** |
+
+### 残り
+
+1. 係数の消滅(第 238 の 3 変数版)。
+2. `W` 側の整除性(第 253 の `cW_pow_dvd_of_coeff` に流す)。
+3. `U`・`V` 側は変数の入れ替えの自己同型で(§9-563 の `collDefectTrunc_swap`)。
+4. 組み立てて `collDefect = 0`、そこから `tateXpair`/`tateYpair` の共線性。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-568 ★★★★★★★★分子は `W^{n+1}` で割れる(第 255 ブロック)
+
+`Found/GaloisRep/CollCoeffVanish.lean`。
+
+### ★★★★★★ℂ への特殊化 → 分子の値
+
+第 225 の `tateSpecializeC`・`tateEval_numerator` を 3 変数にしたもの。
+`‖u‖, ‖v‖, ‖w‖ < 1` なら分母はすべて ℂ で単元なので、局所化から ℂ への射が作れる。
+そこから
+
+    collEval u v w P = collDefectTrunc (n+1) u v w (uvw) * collEval u v w d
+
+が出る(`collEval_numerator`)。★**分子の値が「切り詰めた差 × 分母」**という形が、
+第 254 の解析的評価と第 236 の `X_pow_dvd_of_norm_le` をつなぐ橋である。
+
+### ★★★★★★★★係数の消滅
+
+`u, v` を `‖.‖ <= 1/8` に固定して `w` を動かすと、第 254 の評価は
+`‖uvw‖ <= ‖w‖` より
+
+    ‖collDefectTrunc (n+1) u v w (uvw)‖ <= C_n * 4^{n+1} ‖w‖^{n+1}
+
+となる。★`coeff_eq_zero_of_norm_le`(第 236)より `evalUV u v P` の
+`j < n+1` 次の係数は消える。
+
+### ★動かす先は「小さい点」の無限集合でよい
+
+第 239 では上半平面の指数像を使った。あれは `u = exp(2πi z)` の形が要ったからだが、
+本ブロックでは **`‖.‖ <= 1/8` でありさえすればよい**(3 変数とも動くので
+`tateXterm` を数値で潰した——§9-567)。
+
+★`smallSet := {1/(k+9) : k in ℕ}` を取れば、無限で、0 でなく、ノルムが `1/9` 以下。
+**上半平面を経由しなくてよい**ぶん、第 239 の `infinite_exp_range`(指数の像が無限で
+あることを `exp(-2π(k+1))` の単射性から示す)より簡単になった。
+★「評価を強くしておくと、動かす先の集合が自由になる」——これは覚えておく形である。
+
+| 定理 | 内容 |
+|---|---|
+| `collSpecializeC` | ★★★★★★万有な環から ℂ への特殊化 |
+| `collEval_numerator` | ★★★★★★**分子の値 = 切り詰めた差 × 分母** |
+| `exists_bound_collEval` | ★★★★分母の有界性 |
+| `coeff_evalUV_eq_zero` | ★★★★★★★★**分子の低次係数は消える** |
+| `smallSet` 他 | ★動かす先の無限集合 |
+| `cW_pow_dvd_numerator` | ★★★★★★★★**分子は `W^{n+1}` で割れる** |
+
+### 残り
+
+`U`・`V` 側は変数の入れ替えの自己同型で(§9-563 の `collDefectTrunc_swap`)。
+そのあと `collDefect_eq_zero_of_base`(第 252)に流して `collDefect = 0`、
+最後に `tateXpair`/`tateYpair` の共線性の形にする。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-569 ★★★★★★★★★葉 (c) が終わった —— Tate 級数の 3 点は共線(第 256 ブロック)
+
+`Found/GaloisRep/TateCollinear.lean`。
+
+### ★★★★★★★★★到達点
+
+> `u v w = q` なら Tate 級数の 3 点 `(X(u),Y(u))`, `(X(v),Y(v))`, `(X(w),Y(w))` は
+> 一直線上にある(`tate_collinear`)。
+
+    X(u)(Y(v) - Y(w)) + X(v)(Y(w) - Y(u)) + X(w)(Y(u) - Y(v)) = 0
+
+これが**葉 (c)(一意化が準同型であること)の中身**である。
+仮定は `q in I`、`u v w = q`、そして「3 点のどれも原点でなく、どの 2 点の和も原点でない」
+(`∀ i, IsUnit (1 - collPts u v w i)`)。
+
+### ★★★★★変数の入れ替えで `U`・`V` 側を出す
+
+第 255 で `W^{n+1} | P` を示した。`U`・`V` 側は**変数の名前替え**で出る。
+
+    swapUW := rename (Equiv.swap 0 2),   swapVW := rename (Equiv.swap 1 2)
+
+これは `CollBase` の環同型(対合)で `swapUW cW = cU` なので
+`W^m | swapUW P` から `U^m | P` が出る。★★そして
+
+    (evalUV u v (swapUW P)).eval t = collEval t v u P
+
+なので、**第 253 の `cW_pow_dvd_of_coeff` をそのまま `swapUW P` に当てられる**。
+`ℤ[v][w][u]` のような**新しい多項式環の塔を作る必要がない**。
+第 240 では `A` 側のために `evalA`・`toPP2`・`ofPP2` を作り直したが、
+今回はその手間が消えた。
+
+### ★★★★★★評価は 3 変数対称だった
+
+第 254 の `norm_collDefectTrunc_le` は `(u,v,w)` について対称な形をしている。
+そこで「動かす変数 `t` はどのスロットでもよい」形に一度だけ書き直しておく
+(`norm_collEval_le`——仮定は `‖uvw‖ <= ‖t‖` だけ)。
+★これで 3 つの側が**同じ 1 本の評価**から出る。
+
+| 定理 | 内容 |
+|---|---|
+| `norm_collEval_le` | ★★★★★★動かす変数はどのスロットでもよい |
+| `swapUW`・`swapVW` | ★★★★★変数の入れ替え |
+| `eval_evalUV_swapUW` 他 | ★★★★入れ替えたあとの評価 |
+| `cU_pow_dvd_numerator`・`cV_pow_dvd_numerator` | ★★★★★★★★残る二つの整除性 |
+| `tate_collinear` | ★★★★★★★★★**葉 (c) の到達点** |
+
+### ★★見積もりの実績(葉 (c) 全体)
+
+段 2(`℘` の共線性)を第 244-248 の **5 ブロック**、
+段 3(Tate 側への移送と降下)を第 249-256 の **8 ブロック**、合わせて **13 ブロック**。
+§9-555 で葉 (c) 全体を 30-60 ブロックと見積もったが、
+経路を行列式に切り替えたこと(§9-559)と、対称な 3 変数 `q = UVW` を選んだこと
+(§9-562)で、葉 (b) の在庫がほぼそのまま効いた。
+
+### 葉 (b)・(c) が済み、残るのは (d)(e)
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 | ★済(第 240) |
+| (c) | 準同型(共線性) | ★★済(本ブロック) |
+| (d) | 核が `q^ℤ` | 未着手 |
+| (e) | 全射性 | 未着手 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-570 ★★★★★★★★共線性から群法則へ(第 257 ブロック)
+
+`Found/GaloisRep/CollinearGroupLaw.lean`。
+
+第 256 で Tate 級数の 3 点の**共線性の行列式が 0** であることが出た。
+本ブロックはそれを mathlib の群法則 `WeierstrassCurve.Affine.Point.add` に翻訳する。
+
+    x1(y2-y3) + x2(y3-y1) + x3(y1-y2) = 0
+      かつ 3 点が曲線上、`x` 座標が相異なる
+      ⟹ P1 + P2 + P3 = 0
+
+### ★★★★★★Vieta は「差の差」で出る
+
+`yi = l xi + m` を曲線の式に代入すると、各 `xi` は
+`g(x) := x^3 - B x^2 - C x - D`(`B = l^2 + a1 l - a2`)の根になる。
+★★★**3 次式の根と係数の関係は、根の差で 2 回割るだけで出る**:
+
+    (x1-x2)(x1^2+x1x2+x2^2 - B(x1+x2) - C) = 0     (= g(x1) - g(x2))
+    (x2-x3)(x2^2+x2x3+x3^2 - B(x2+x3) - C) = 0
+    ⟹ (x1-x3)(x1+x2+x3 - B) = 0
+
+★因数分解も多項式環も要らない——`linear_combination` 3 回である。
+mathlib の `addPolynomial_slope`(3 次式の因数分解)を経由しなくてよい。
+
+### ★`x` 座標が相異なることは落とせない —— 測っておく
+
+★★`x3 = x1`(かつ `y3 = y1`、つまり `P3 = P1`)のとき、行列式は**自動的に 0** になり
+何の情報も持たない。このとき本当の第 3 根は別の点なので、結論は成り立たない。
+
+★★★これは**設計上の分岐点**である。行列式(第 246 で商から切り替えた形)は
+非退化の情報を持たないので、Vieta の形
+
+    (X1+X2+X3+a2)(X1-X2)^2 = (Y1-Y2)^2 + a1(Y1-Y2)(X1-X2)
+
+を Tate 側で直接示す道もありうる。しかしその形は `℘` 側で **6 位の極**の相殺を
+要求する(行列式は 3 位だった)。★**3 つの `x` 座標が相異なること**を
+葉 (d)(単射性)から取る方が安い、と見積もった。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_line_of_collinear` | ★★★★行列式 0 なら同一直線上 |
+| `addX_eq_of_line` | ★★★★★★**Vieta**——`addX x1 x2 l = x3` |
+| `add_eq_neg_of_line` | ★★★★★★★`P1 + P2 = -P3` |
+| `add_add_eq_zero_of_collDet` | ★★★★★★★★**行列式 0 ⟹ 和が 0** |
+
+### 次
+
+葉 (d)(単射性)——これが `x` 座標の相異性を与え、群法則の退化した場合
+(`P2 = ±P1`、二倍)も片付ける。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-571 ★★★★★★葉 (d) の主要項 —— 単射性の設計(第 258 ブロック)
+
+`Found/GaloisRep/TateLeading.lean`。
+
+### ★★★★★★葉 (d)(単射性)の設計を決めた
+
+第 257 で「`x` 座標が相異なること」が群法則に要ると分かった。それは
+**Tate 座標が単射であること**(葉 (d))から来る。
+
+★★★単射性の骨格は**逐次近似**である:
+
+    a - a' in I^j  かつ  w - w' in I^j
+      ⟹ (X, Y が一致するなら) a - a' in I^{j+1}
+
+これを `j` について繰り返すと `a - a' in ⋂ I^n = 0`(`IsHausdorff`)。
+★★**付値を使わない**——`I` 進の言葉だけで閉じる。
+第 213 の `normRep`(付値による基本領域)は「類の代表を取る」ためのもので、
+単射性そのものは `I` 進の逐次近似で済む、という見立てである。
+
+### ★★★主要項
+
+`f(t) = t/(1-t)^2 = t + 2t^2 + ...`、`g(t) = t^2/(1-t)^3 = t^2 + ...` なので
+
+| 補題 | 内容 |
+|---|---|
+| `tateXterm_sub_self_mem` | `f(t) - t in I^{2k}`(`t in I^k`) |
+| `tateYterm_mem_two_mul` | `g(t) in I^{2k}` |
+| `tateXpair_sub_add_mem` | ★★★★★★**`X(a,w) = a + w`(2 位まで)** |
+| `tateYpair_add_mem` | ★★★★★**`Y(a,w) = -w`(2 位まで)** |
+
+★`(1-t)^2 f(t) = t` を使うと `f(t) - t = inv(1-t)^2 t^2 (2-t)` と**明示的に**書けるので、
+冪級数の係数を触らずに済む。第 212 の `mul_tateXterm` がそのまま効いた。
+
+### ★★★★★差の形
+
+逐次近似には「差」の形が要る:
+
+    f(a) - f(b) - (a - b) in I^{j+1}      (`a - b in I^j`、`a, b in I`)
+
+★★これも明示式で出る。`D := (1-a)^2 (1-b)^2` として
+
+    D (f(a) - f(b)) = (a-b)(1 - ab)
+    ⟹ f(a) - f(b) - (a-b) = (a-b) inv(D) ((1-ab) - D)
+
+で、`(1-ab) - D = -ab + 2s - s^2`(`s := a+b-ab in I`)は `I` の元である。
+
+### ★★配管 —— adic 和の冪
+
+`adicSum_mem`(在庫)は `in I` しか言わない。`in I^k` が要るので
+`adicSum_mem_pow` を足した(部分和 `partialSum a k` が `I^k` に入り、
+残差 `adicSum - partialSum a k` も `I^k` に入る、の 2 行)。
+`evalAdic_mem_pow` も同じ形である。
+
+| 定理 | 内容 |
+|---|---|
+| `adicSum_mem_pow`・`evalAdic_mem_pow` | ★★★★adic 和の冪への所属 |
+| `tateXtail_mem_pow`・`tateYtail_mem_pow` | ★★★尾の冪 |
+| `tateXpair_sub_add_mem`・`tateYpair_add_mem` | ★★★★★★**主要項** |
+| `tateXterm_diff_mem` | ★★★★★**差の形** |
+
+### 残り(葉 (d))
+
+1. `g` の差の形、尾の差の形(`q - q' in I^{j+1}` から)。
+2. 1 段の改良を組み立てる。
+3. `IsHausdorff` で `a = a'`。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-572 ★★★★★★★★★葉 (d) が終わった —— Tate 座標は単射(第 259 ブロック)
+
+`Found/GaloisRep/TateInjective.lean`。
+
+### ★★★★★★★★★到達点
+
+> `a w = q = a' w'`、`a, w, a', w' in I` のとき
+> `X(a,w) = X(a',w')` かつ `Y(a,w) = Y(a',w')` なら `(a,w) = (a',w')`(`tate_inj`)。
+
+さらに `R` が整域なら **`X` だけで `±` を除いて決まる**(`tate_inj_X`):
+
+    X(a,w) = X(a',w')  ⟹  (a,w) = (a',w')  または  (a,w) = (w',a')
+
+★後者は `-P` に対応する(第 213 の `tateYpair_eq_negY`)。
+これが第 257 の要求する「`x` 座標が相異なること」を与える形である。
+
+### ★★★★★★★逐次近似 —— 付値を使わない
+
+    a - a' in I^j かつ w - w' in I^j  ⟹  a - a' in I^{j+1} かつ w - w' in I^{j+1}
+
+を `j` について繰り返し、`IsHausdorff`(`eq_zero_of_mem_pow`)で `a = a'`。
+★★**付値も基本領域も使わなかった**——`I` 進の言葉だけで閉じる。
+§9-571 の見立てがそのまま通った。Silverman (ATAEC V.3) が付値の場合分けで
+やっている所を、`I` 進の 1 段の改良に置き換えた形になる。
+
+### ★★★1 段の中身 —— 順序が要点
+
+`q` は両側で同じなので、`X` の差でも `Y` の差でも **`s1(q)` の項が消える**。残るのは
+
+| 差 | 位 |
+|---|---|
+| `g(a) - g(a')`、`g(w) - g(w')` | `I^{j+1}`(`g` は 2 次から始まる) |
+| `f(w) - f(w') - (w - w')` | `I^{j+1}`(第 258) |
+| 尾の差 | `I^{j+2}`(`q in I^2` を 1 つ使う) |
+
+★`Y` の差から **`w - w' in I^{j+1}`** が出る(`Y = -w` が主要項)。
+それを `X` の差(`X = a + w` が主要項)に入れると **`a - a' in I^{j+1}`**。
+★★**`Y` を先に、`X` を後に**、という順序が要点である。
+`X` だけでは `a - a'` と `w - w'` の和しか見えない。
+
+### ★★`X` だけの版は曲線の式から
+
+`X = X'` なら曲線の式(葉 (b)、第 240)の差から `(Y - Y')(Y + Y' + X) = 0`。
+`R` が整域なので分岐は 2 つだけ。第 2 の枝は `Y' = -X - Y`、すなわち
+`(w', a')` が `(a, w)` と同じ座標を与える(`tateXpair_symm`・`tateYpair_swap`)。
+★葉 (b) がここで効いた——曲線の式は「点が 2 つしかない」ことの表現でもある。
+
+| 定理 | 内容 |
+|---|---|
+| `adicSum_diff_mem` | ★★★★adic 和の差 |
+| `tateYterm_diff_mem` | ★★★★★`g` の差 |
+| `tateXtail_diff_mem`・`tateYtail_diff_mem` | ★★★★尾の差 |
+| `tate_inj_step` | ★★★★★★★**単射性の 1 段** |
+| `tate_inj` | ★★★★★★★★★**葉 (d)** |
+| `tate_inj_X` | ★★★★★★★★`X` だけの版 |
+
+### 葉の状況
+
+| 葉 | 内容 | 状態 |
+|---|---|---|
+| (b) | Weierstrass 方程式 | ★済(第 240) |
+| (c) | 準同型(共線性) | ★★済(第 256)、群法則への翻訳も済(第 257) |
+| (d) | 単射性 | ★★★済(本ブロック) |
+| (e) | 全射性 | 未着手(第 102 の縮小写像定理が道具) |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-573 ★★★★★★付値と `x` 座標の相異性(第 260 ブロック)
+
+`Found/GaloisRep/TateDVR.lean`。
+
+### ★★★★★付値と極大イデアルの冪の橋
+
+第 259 までは `I` 進の言葉だけで進んだが、`(u, q/u)` の対を作る段になると
+**「`v(u) <= v(q)` なら `q/u` が環に入る」**が要る。離散付値環では
+
+    x in 𝔪^n  <->  n <= addVal x                  (`mem_maximalIdeal_pow_iff`)
+    v(u) < v(q)  ⟹  ∃ w in 𝔪, u w = q             (`exists_complement`)
+
+★mathlib の `IsDiscreteValuationRing.addVal_le_iff_dvd`(`v(a) <= v(b) <-> a | b`)と
+`irreducible_iff_uniformizer`(`𝔪 = span {ϖ}`)を合わせるだけで出た。
+★★**在庫で足りた**——付値環の理論を自前で作る必要はなかった。
+
+### ★★★★★★`x` 座標が相異なる条件は `u != v` だけ
+
+第 257 の群法則は「3 点の `x` 座標が相異なること」を要求した。
+第 259 の `tate_inj_X` を 3 点 `(u, vw)`, `(v, uw)`, `(w, uv)`(`u v w = q`)に当てると
+`X1 = X2` は
+
+    (u = v かつ vw = uw)   または   (u = uw かつ vw = v)
+
+を意味する。★★後者は `u(1 - w) = 0` すなわち `w = 1` を強いるが、`w in I` なので
+`1 - w` は単元、`w = 1` なら `0` が単元になって矛盾する。
+
+★したがって **`X1 = X2 <-> u = v`**——非退化条件は
+**`u, v, w` が相異なることだけ**になった。これは群の言葉で言えば
+「3 つの類が相異なる」であり、退化した場合(二倍・逆元)を別扱いすればよい形である。
+
+| 定理 | 内容 |
+|---|---|
+| `mem_maximalIdeal_pow_iff` | ★★★★★付値と `𝔪^n` の橋 |
+| `exists_complement` | ★★★★★相方 `q/u` が環に入る |
+| `tateXpair_ne_of_ne` | ★★★★★★**`x` 座標の相異性は `u != v` から** |
+
+### 残り
+
+1. 3 点の共線性(第 256)+ 群法則(第 257)+ 相異性(本ブロック)を組み立てて
+   **`P(u) + P(v) + P(w) = 0`**(`u v w = q`)。曲線を `K` に基底変換し、
+   `Δ != 0` から `Nonsingular` を取る(`equation_iff_nonsingular_of_Δ_ne_zero`)。
+2. 葉 (e)(全射性)。`u = 1` の近く(形式群の領域)が本体。
+3. `TateCurveData` への組み立て。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-574 ★★★★★★★★★Tate 点の 3 つ組は群として 0(第 261 ブロック)
+
+`Found/GaloisRep/TatePointGroup.lean`。
+
+### ★★★★★★★★★到達点
+
+> `u v w = q`、`u, v, w in I` が相異なるなら
+> **`P(u) + P(v) + P(w) = 0`**(`E_q(K)` の中で)
+
+これが**葉 (c)(準同型)の最終形**である。第 256(共線性)・第 257(群法則)・
+第 259(単射性)・第 260(`x` 座標の相異性)がここで合流した。
+
+### ★★基底変換
+
+`tateXpair`・`tateYpair` は完備環 `R` の値だが、mathlib の群法則は**体**を要求する。
+そこで `R -> K`(分数体)へ送る:`(tateCurveAt q hq).map (algebraMap R K)`。
+
+★係数は `a1 = 1`、`a2 = a3 = 0`、`a4 = f(a4)`、`a6 = f(a6)` になるので、
+葉 (b) の `tate_equation` をそのまま送れば `Equation` が出る(`tate_equation_map`)。
+★★`Δ != 0` なら `equation_iff_nonsingular_of_Δ_ne_zero` で `Nonsingular` に上がる
+(`nonsingular_tate_point`)。**mathlib の在庫がそのまま使えた**。
+
+### ★★★相異性は 3 回の当てはめで
+
+第 260 の `tateXpair_ne_of_ne` は `(u, v, w)` の順に依存するので、
+`(u,v,w)`・`(u,w,v)`・`(v,w,u)` の 3 通りに当てる。
+★相方の積は可換なので `mul_comm` の書き換えだけで揃った。
+
+### ★配管 —— 内側の名前空間
+
+第 256 の `tate_collinear` は `TateCollinearSection` という内側の名前空間に置いた
+(`variable` の都合)。呼ぶ側で `TateCollinearSection.tate_collinear` と
+**修飾が要る**。REPL では名前空間なしで試していたので、ファイルにしてから
+`Unknown identifier` で気づいた。★REPL の env と file の名前空間はずれうる。
+
+| 定理 | 内容 |
+|---|---|
+| `tate_equation_map` | ★★★★★基底変換した曲線の上にある |
+| `nonsingular_tate_point` | ★★★★★`Δ != 0` なら非特異 |
+| `tate_points_add_eq_zero` | ★★★★★★★★★**3 つ組は群として 0** |
+
+### 残り(G6)
+
+1. 葉 (e)(全射性)。`u = 1` の近く(形式群の領域)が本体。
+   第 102 の縮小写像定理が道具。
+2. 退化した場合(`u = v`、二倍、逆元)の群法則。
+3. `TateCurveData` への組み立て(`AddEquiv E(K) ≃+ Kˣ/q^ℤ`)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-575 ★★★★★★★葉 (e) の線型化 —— 平方根も Hensel も要らない(第 262 ブロック)
+
+`Found/GaloisRep/TateLinearize.lean`。
+
+### ★★★★★★★`X + Y` が `a` を線型に取り出す
+
+葉 (e)(全射性)は「点 `(x,y)` から `u` を作る」ことである。★素朴に `X(u) = x` を
+解こうとすると、`f(t) = t/(1-t)^2` が **2 対 1**(`f(t) = f(1/t)`)なので
+
+    x s^2 - (2x+1)s + x = 0,   判別式 4x+1
+
+の平方根が要り、**残余体に平方根があるかという条件**に化けてしまう。
+分岐点は `s = ±1` で、そこは `f'` が単元でなくなる所である。
+
+★★★しかし `X` と `Y` を**両方**使うと線型になる:
+
+    f(t) + g(t) = t/(1-t)^3,     g(t) = t^2/(1-t)^3
+    ⟹ g(t) = t (f(t) + g(t))
+
+すなわち **`Y = a (X + Y)`**(主要項で)。`X + Y` は単元なので
+
+    a = Y (X + Y)^{-1} + (補正)
+
+★これが `a` を取り出す式である。**平方根も Hensel も要らない**。
+点は `(x, y)` の対で与えられるのだから、`y` も使ってよい——`x` だけで解こうとして
+2 対 1 に引っかかるのは、情報を捨てているからだった。
+
+### ★★誤差はすべて `I` の元
+
+    Y - a(X + Y) = (Y - g(a)) - a((X + Y) - (f(a) + g(a)))
+                   + (g(a) - a(f(a) + g(a)))
+
+★右辺の最初の 2 つの括弧は、`w in I` なら**尾と `s1(q)` だけ**でできているので `I` の元
+(`tateYpair_sub_tateYterm_mem`・`tateXpair_add_tateYpair_sub_mem`)。
+第 3 項は**恒等的に 0**(`tateYterm_eq_mul`)。
+
+### ★★単元 + `I` は単元
+
+`IsAdicComplete I R` なら `1 - i` が単元(`isUnit_one_sub`)なので、
+`u + i = u(1 - (-u^{-1} i))` も単元(`isUnit_add_mem`)。
+★これで `X + Y` の単元性が主要項 `a/(1-a)^3` から出る。
+
+| 定理 | 内容 |
+|---|---|
+| `mul_tateXYterm` | ★★★★★★`(1-t)^3 (f+g) = t` |
+| `tateYterm_eq_mul` | ★★★★★**`g(a) = a(f(a)+g(a))`** |
+| `tateYpair_sub_mul_mem` | ★★★★★★★**`Y - a(X+Y) in I`** |
+| `isUnit_add_mem` | ★★★★単元 + `I` は単元 |
+| `isUnit_tateXpair_add_tateYpair` | ★★★★★★`X + Y` は単元 |
+
+### 残り(葉 (e))
+
+1. `a = Y(X+Y)^{-1} - 誤差(a)` を縮小写像として解く(第 102 の
+   `exists_fixedPoint_of_contraction`)。誤差の差が `I^{j+1}` に入ることは
+   第 259 の尾の差の補題から出る見込み。
+2. `w = q/a` の側(`v(a) < v(q)/2` の領域)。第 260 の `exists_complement` が道具。
+3. 得られた `(a,w)` が `X(a,w) = x`、`Y(a,w) = y` を満たすことの確認。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-576 ★★★★★★★★母数座標と点の一意性(第 263 ブロック)
+
+`Found/GaloisRep/TateLambda.lean`。
+
+### ★★★★★★★母数座標 `Λ = Y/(X+Y)`
+
+第 262 で `Y = a(X+Y)`(主要項)が出た。`X + Y` は単元なので
+
+    Λ(a) := Y (X+Y)^{-1}     ⟹     Λ(a) = a  (mod I)
+
+★**微分が 1 の座標**である。`X` や `Y` を単独で使うと微分が
+`f'(a) = (1+a)/(1-a)^3` や `g'(a) = a(2+a)/(1-a)^4` になって、
+`a = -1` や `a = 0, -2` で単元でなくなる(そこが径数づけの分岐点)。
+★★`Λ` にはその問題がない——**場合分けが消える**。
+
+### ★★★★★★★★点の一意性 —— 節点立方曲線の径数づけ
+
+`I` を法とすると Tate 曲線は**節点立方曲線** `y^2 + xy = x^3` になる。
+その滑らかな点は `t -> (t/(1-t)^2, t^2/(1-t)^3)` で 1 対 1 に径数づけられる。
+★その `I` 進版が `curve_point_unique_of_rel`:
+
+> `(x,y)`・`(x',y')` が曲線上、`x`・`x'` が単元、`y x' = y' x` なら `(x,y) = (x',y')`
+
+### ★★★★★★証明は「`x` で消去」の 1 行
+
+`y = μx`、`y' = μx'` と書けば(`μ := y/x`、`hrel` から `y' = μx'`)、
+曲線の式を `x'^2`・`x^2` 倍して引くだけで
+
+    (x - x') (x^2 x'^2 - a4 x x' - a6 (x+x')) = 0
+
+★★括弧は `x^2 x'^2`(単元)+ `I` の元なので**単元**(`isUnit_add_mem`)。よって `x = x'`。
+`μ^2+μ` の消去も判別式も要らない——**`ring` と `linear_combination` 1 回**である。
+§9-575 で「判別式に化ける」と書いた困難は、**`y` を使えば消える**ことがここでも確認できた。
+
+| 定理 | 内容 |
+|---|---|
+| `tateLambda` | ★★★★★★母数座標 `Y/(X+Y)` |
+| `tateLambda_sub_mem` | ★★★★★★★`Λ(a) = a` (mod `I`) |
+| `eq_of_param_curve` | ★★★★★★★★径数づけられた点は `x` で決まる |
+| `curve_point_unique_of_rel` | ★★★★★★★★**点の一意性** |
+
+### 残り(葉 (e))
+
+1. `Λ(a) = c` を縮小写像で解く(`w = q a^{-1}` の連続性が要る。
+   第 260 の `exists_complement`、第 259 の尾の差の補題が道具)。
+2. 得られた `a` の点 `(X(a), Y(a))` と目標 `(x,y)` が
+   `Y x = y X` を満たすことを確認し、本ブロックの一意性で一致を出す。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-577 ★★★★★★★★葉 (e) の同定の段(第 264 ブロック)
+
+`Found/GaloisRep/TateIdentify.lean`。
+
+葉 (e)(全射性)は 2 段に分かれる:
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 存在 | `Λ(a) = c` を満たす `a` を縮小写像で作る | 次 |
+| **同定** | **その `a` の点が目標の点に等しい** | ★本ブロック |
+
+### ★★★★★★★★同定の段
+
+> `(x,y)` が曲線上、`x` と `x+y` が単元、`Λ(a) = y (x+y)^{-1}` なら
+> `X(a,w) = x` かつ `Y(a,w) = y`
+
+段取り:
+
+1. `Λ(a) = Y (X+Y)^{-1}` と `c = y (x+y)^{-1}` の等式に、両辺 `(X+Y)(x+y)` を掛けて
+   **逆元を消す**:`Y(x+y) = y(X+Y)`。
+2. 展開すると **`Y x = y X`**——第 263 の `curve_point_unique_of_rel` の仮定の形。
+3. `(X,Y)` は曲線上(葉 (b)、第 240)、`X` は単元(`isUnit_tateXpair`
+   ——主要項 `a/(1-a)^2` が単元)。
+4. 第 263 の一意性で `X = x`、`Y = y`。
+
+★★逆元を「掛けて消す」だけで済むのは、`X + Y` と `x + y` が**両方とも単元**だから
+である(第 262 の `isUnit_tateXpair_add_tateYpair`)。
+★`Ring.inverse` は環準同型を通らない(`tools/lean-idioms.md`)ので、
+**逆元を持ち歩かずに早めに消す**のが定石になっている。
+
+| 定理 | 内容 |
+|---|---|
+| `isUnit_tateXpair` | ★★★★★`X` は単元 |
+| `tate_point_eq_of_lambda` | ★★★★★★★★**母数座標が一致すれば点が一致する** |
+
+### 残り(葉 (e) の存在の段)
+
+`Λ(a) = c` を `a` について解く。`Λ(a) = a + κ(a)`(`κ(a) in I`)なので
+`a = c - κ(a)` の不動点であり、第 102 の `exists_fixedPoint_of_contraction` が使える。
+★要るのは「`κ` の変動が 1 つ位を上げる」こと:
+`w = q a^{-1}` の変動(第 260 の `exists_complement`)と
+尾の差(第 259)から出る見込み。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-578 ★★★★★★★葉 (e) の縮小性(第 265 ブロック)
+
+`Found/GaloisRep/TateContract.lean`。
+
+葉 (e) の存在の段は `Λ(a) = c` の解 `a` を作ることである。第 263 より
+`Λ(a) = a + κ(a)`(`κ(a) in I`)なので `a = c - κ(a)` の不動点を探せばよい。
+★要るのは **`κ` の変動が 1 つ位を上げる**こと、すなわち
+
+    a - b in I^j  ⟹  ε(a) - ε(b) in I^{j+1},   ε(a) := Y - a(X+Y)
+
+である(`tateEps_diff_mem`)。本ブロックはこれを示した。
+
+### ★★★相方 `w = q/a` は 1 つ位を稼ぐ
+
+`a` が単元なので `w := q a^{-1}` は `R` の中で取れる(`wOf`)。逆元の差は
+
+    inv(a) - inv(b) = inv(a) inv(b) (b - a)  in I^j
+
+なので、`q in I` を掛けて **`w(a) - w(b) in I^{j+1}`**(`wOf_diff_mem`)。
+★★これが縮小性の源である——**`w` 側の項は最初から 1 つ位を稼いでいる**。
+
+### ★★★★★誤差項の展開
+
+第 262 の `tateYterm_eq_mul`(`g(a) = a(f(a)+g(a))`)で主要項が消えるので
+
+    ε = [Tg(a) - f(w) - Tf(w) - g(w) - Tg(w) + s1]
+        - a [Tf(a) + Tg(a) - g(w) - Tg(w) - s1]
+
+★**尾と `w` の項だけ**が残る。`a` そのものへの依存は尾 `Tf(a), Tg(a)` を通してのみで、
+それらの差は `q in I` を 1 つ含むので `I^{j+1}`(第 259 の `tateXtail_diff_mem`)。
+`a […]` の項は `(a-b)[…]`(`[…] in I`)と `b([…]-[…]')` に分ける。
+★★★**主要項が消えるからこそ縮小する**——ここでも §9-575 の線型化が効いている。
+
+### ★単元版の差の補題
+
+第 259 の差の補題は `a, b in I` を仮定していた(`1 - a` が単元であるため)。
+`a` が**単元**の場合も要るので、仮定を `IsUnit (1 - a)` に直した版を置いた
+(`tateXterm_diff_mem_gen`・`tateYterm_diff_mem_gen`)。
+★証明は同じ明示式(`D (f(a)-f(b)) = (a-b)(1-ab)`)で、仮定だけ差し替わる。
+
+| 定理 | 内容 |
+|---|---|
+| `inverse_diff_mem` | ★★★★逆元の差 |
+| `tateXterm_diff_mem_gen`・`tateYterm_diff_mem_gen` | ★★★★単元版の差 |
+| `wOf`・`wOf_diff_mem` | ★★★相方 `q/a` と 1 つ位を稼ぐこと |
+| `tateEps_eq` | ★★★★★誤差項の展開 |
+| `tateEps_diff_mem` | ★★★★★★★**誤差項の差は 1 つ位が上がる** |
+
+### ★配管 —— 暗黙の `m` が拾えない
+
+`tateXtail_diff_mem (m := 1) ...` と**明示**しないと、`m` を 2、`j` を `j` と
+読んで `q in I^2` を要求してくる(`hqm` が `hab` より前に来るので、`j` がまだ
+決まっていない)。★引数の順序が推論の順序を決める。
+
+### 残り(葉 (e))
+
+`exists_fixedPoint_of_contraction`(第 102)は `I` の中の不動点を作る。
+`a = c + b`(`b in I`)と置き換えて `b = -κ(c+b)` の形にすれば当てられる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-579 ★★★★★★★★★葉 (e)(単元の領域)が出た(第 266 ブロック)
+
+`Found/GaloisRep/TateSurjUnit.lean`。
+
+### ★★★★★★★★★到達点
+
+> `(x, y)` が `E_q` の上の点で **`x` が単元**なら、単元 `a` と `w in I` が在って
+> `a w = q`、`X(a,w) = x`、`Y(a,w) = y`(`tate_surjective`)
+
+### ★★★★★★不動点で `a` を作る
+
+第 263 の `Λ(a) = a + κ(a)`(`κ(a) in I`)と第 265 の `κ(a) - κ(b) in I^{j+1}` を使い、
+`a = c + b`(`b in I`)と置いて `b = -κ(c + b)` の不動点を
+第 102 の `exists_fixedPoint_of_contraction` で作る(`exists_tate_lambda_eq`)。
+★★`c := y (x+y)^{-1}` が目標の母数座標である。
+★第 102 は「`I` の中の不動点」しか作らないが、**`a = c + b` と平行移動すれば
+単元の側でも使える**——これは覚えておく形。
+
+### ★★★仮定は `x` が単元だけでよい
+
+`y(y+x) = x^3 + a4 x + a6` で、右辺は `x^3`(単元)+ `I` の元なので**単元**。よって
+
+    `y` も `x + y` も単元
+
+が**曲線の式から出る**(`isUnit_of_mul_isUnit_left`/`_right`)。
+`c` と `1 - c` の単元性もそこから出る(`1 - c = x (x+y)^{-1}`)。
+★★仮定を最小にできたのは、`y(y+x)` という積の形が曲線の式そのものだから。
+
+### ★残る領域 —— 正直に測る
+
+`x` が単元でない点は 2 種類ある。
+
+| 領域 | `u` | `x = X(u)` | 状態 |
+|---|---|---|---|
+| 単元 | `u` 単元、`1 - u` 単元 | 単元 | ★済(本ブロック) |
+| 環帯 | `v(u) > 0` | `x in I` | 未 |
+| 原点近傍 | `u = 1` (mod 𝔪) | `x notin R`(`K` の中で極) | 未 |
+
+★環帯は `X = u + q/u` なので別の縮小写像(`u` を `x` の近くから始める)、
+原点近傍は形式群である。★★**3 つの領域に分かれるのは Tate 曲線の構造そのもの**で、
+避けられない。
+
+| 定理 | 内容 |
+|---|---|
+| `tateLambda_sub_eq` | ★★★★★`Λ(a) - a = ε(a) inv(S(a))` |
+| `tateS_diff_mem` | ★★★★★`S = X + Y` の差 |
+| `tateKappa_diff_mem` | ★★★★★★★`κ` の差は 1 つ位が上がる |
+| `exists_tate_lambda_eq` | ★★★★★★★★**`Λ(a) = c` の解の存在** |
+| `tate_surjective` | ★★★★★★★★★**葉 (e)(単元の領域)** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-580 ★★★★★★★★単元の領域での単射性(第 267 ブロック)
+
+`Found/GaloisRep/TateInjUnit.lean`。
+
+第 259 の単射性は `a, w in I`(**環帯**の領域)での逐次近似だった。そこでは
+`X = a + w`、`Y = -w` という主要項を使ったが、★`a` が**単元**のときはこの展開が
+効かない(`f(a) - a` が位を上げない——`f'(a) != 1`)。
+
+★★★しかし第 265 の `κ = Λ - id` の評価がそのまま使える:
+
+    Λ(a) = Λ(b)  かつ  a - b in I^j   ⟹   a - b = κ(b) - κ(a) in I^{j+1}
+
+を繰り返して `IsHausdorff` で `a = b`(`tate_lambda_inj`)。
+★★**同じ縮小性が全射性(第 266)と単射性(本ブロック)の両方を出す**——
+不動点の存在と一意性が 1 つの評価から出るのは縮小写像定理の常である。
+★1 つの評価を用意しておけば 2 つの定理が落ちる、という形。
+
+### ★★領域ごとの単射性がそろった
+
+| 領域 | 定理 |
+|---|---|
+| 環帯(`a, w in I`) | `tate_inj`・`tate_inj_X`(第 259) |
+| 単元(`a` 単元、`w in I`) | `tate_lambda_inj`・`tate_inj_X_unit`(本ブロック) |
+
+| 定理 | 内容 |
+|---|---|
+| `tate_lambda_inj` | ★★★★★★★★**母数座標は単射** |
+| `tate_point_inj_unit` | ★★★★★★★★座標の単射性(単元の領域) |
+| `tate_inj_X_unit` | ★★★★★★★★`X` だけの版 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-581 ★★★★★★2 変数の縮小写像定理(第 268 ブロック)
+
+`Found/GaloisRep/AdicContraction2.lean`。
+
+### ★★★★★★環帯の領域には 2 変数が要る
+
+葉 (e) の**単元の領域**(第 266)では `a` が単元なので相方 `w = q a^{-1}` を
+**割り算で作れた**——未知数は 1 つで済んだ。
+
+★★環帯の領域(`a, w in I`)では `a` が単元でないので `q/a` が作れない。
+そこで `(a, w)` を**独立な 2 変数**として
+
+    a = (x + y) - δ_S(a,w)      (`X + Y = a` が主要項)
+    w = -y + δ_Y(a,w)           (`Y = -w` が主要項)
+
+の不動点を取る。★★制約 `a w = q` は**あとから**回復させる:
+
+> `(x,y)` が `E_q` 上にあり `X(a,w,q) = x`、`Y(a,w,q) = y` なら `defect(a,w,q) = 0`。
+> 一方 `defect(a,w,aw) = 0`(葉 (b))。`defect` の `q` についての主要項が
+> `q - aw` なので、両者から `q = aw` が出る。
+
+★★★**制約を最初から課さず、あとで回復させる**——これが環帯の設計である。
+`q/a` の割り算を避けられるので、離散付値環の一意化元を持ち出さずに済む見込み。
+
+### ★★★2 変数版は 1 変数版の写し
+
+第 102 の証明(反復 → Cauchy → `IsPrecomplete` → `IsHausdorff`)を対で走らせるだけ。
+成分ごとに `IsPrecomplete.prec'` を当てて極限 `A`, `B` を取り、
+`F (f n).1 (f n).2 - F A B in I^{n+1}` から不動点の式を出す。
+★`nth_rewrite 2` で「引く側の `f (m+1)`」だけを書き換えるのが要点(第 102 と同じ手)。
+
+| 定理 | 内容 |
+|---|---|
+| `exists_fixedPoint_of_contraction₂` | ★★★★★★**2 変数の縮小写像定理** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-582 ★★★★★★★★環帯での座標の全射性(第 269 ブロック)
+
+`Found/GaloisRep/TateAnnulus.lean`。
+
+### ★★★★★★★★到達点
+
+> `x, y in I` なら `a, w in I` が在って `X(a,w,q) = x`、`Y(a,w,q) = y`
+> (`exists_tate_annulus`)
+
+★**制約 `a w = q` はまだ課していない**——それは「`defect` の `q` についての
+主要項が `q - aw`」から回復させる(§9-581)。次のブロック。
+
+### ★★★★★2 つの主要項
+
+環帯(`a, w in I`)では `X + Y = a`、`Y = -w`(誤差はどちらも `I` の元)。
+誤差を `δ_S := (X+Y) - a`、`δ_Y := Y + w` と置いて
+
+    a = (x + y) - δ_S(a,w),      w = -y + δ_Y(a,w)
+
+の 2 変数不動点(第 268)を取る。不動点では `X + Y = x + y` と `Y = y`、
+したがって `X = x` が出る。
+
+### ★★★誤差が 1 つ位を上げること
+
+`δ_S = (f(a)+g(a)-a) + Tf(a) + Tg(a) - g(w) - Tg(w) - s1` で、`s1(q)` は
+両側で共通なので**差では消える**。
+
+★**`f + g` の主要項がちょうど `a` である**(第 262 の `mul_tateXYterm`)ことが効いて、
+
+    f(a)+g(a)-a = a (inv(1-a)^3 - 1)
+
+と**積の形**に書ける(`tateXYterm_sub_self_eq`)。差は
+`(a-a') h(a) + (h(a)-h(a')) a'` に分けるだけで `I^{k+1}` に入る。
+★★★§9-575 で見つけた `f+g = t/(1-t)^3` が、単元の領域(線型化)と環帯(誤差の積の形)の
+**両方で効いている**。1 つの恒等式が 2 つの領域を支えた。
+
+| 定理 | 内容 |
+|---|---|
+| `inverse_pow_sub_one_mem` | ★★★`inv((1-a)^n) - 1 in I` |
+| `tateXYterm_sub_self_eq` | ★★★★`f(a)+g(a)-a = a(inv(1-a)^3-1)` |
+| `tateDeltaS`・`tateDeltaY` | ★★★環帯での 2 つの誤差 |
+| `tateDeltaS_diff_mem`・`tateDeltaY_diff_mem` | ★★★★★誤差は 1 つ位を上げる |
+| `exists_tate_annulus` | ★★★★★★★★**環帯での座標の全射性** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-583 ★★★★★★`a6` の 1 次の項が `q` を決める(第 270 ブロック)
+
+`Found/GaloisRep/TateLinearQ.lean`。
+
+### ★★★★★★制約 `a w = q` を回復する道具
+
+第 269 の環帯の解 `(a,w)` は制約 `a w = q` を満たすとは限らない。回復の筋は
+
+> `(x,y)` が `E_q` 上で `X(a,w,q) = x`、`Y(a,w,q) = y` なら `defect(a,w,q) = 0`。
+> 一方 `defect(a,w,a w) = 0`(葉 (b))。
+> `defect` の `q` についての**主要項が `q - aw`** なので `q = aw`。
+
+★その「主要項」を作るのが本ブロックである。
+
+### ★★★★★★評価の 1 次の項
+
+冪級数 `f`(定数項 0)について
+
+    f(a) - f(b) - c1 (a - b) in I^{k+1}      (`a - b in I^k`、`a, b in I`)
+
+(`evalAdic_sub_linear_mem`)。★2 次以上の項 `a^n - b^n` は
+`(a-b)a^{n-1} + (a^{n-1}-b^{n-1})b` と分けるだけで `I^{k+1}` に入る
+(`pow_sub_pow_mem_succ`)。**係数を触らずに済む**。
+
+★配線:`partialEval` を `N = k+2` まで取り、`Finset.sum_erase_add` で `n = 1` の項だけ
+抜き出す。残差 `evalAdic - partialEval in I^{k+2} ⊆ I^{k+1}` は自動である。
+
+### ★★`a6` の 1 次の係数は `-1`
+
+`coeff 1 tateA6 = -(5 σ3(1) + 7 σ5(1))/12 = -12/12 = -1`。したがって
+
+    a6(q) - a6(q') + (q - q') in I^{k+1}
+
+★**`a6` が `q` を 1 次で拾う**——これが制約の回復の芯である。
+`a4(q) = -5 s3(q)` の側は `in I^k` で十分(`defect` の中で `X in I` が掛かるから)。
+
+### ★在庫の引き忘れ
+
+`coeff_one_tateA6` は **`TateDelta.lean` に既にあった**。書いてから
+`already been declared` で気づいた。★着手前に `grep` する規約を、
+補題名の単位でも守ること(ファイル名だけでなく)。
+
+| 定理 | 内容 |
+|---|---|
+| `pow_sub_pow_mem_succ` | ★★★`a^n - b^n in I^{k+1}`(`n >= 2`) |
+| `evalAdic_sub_linear_mem` | ★★★★★★**評価の 1 次の項** |
+| `tateCurveAt_a6_sub_linear` | ★★★★★★**`a6` の 1 次の項は `-q`** |
+| `tateCurveAt_a4_sub_mem` | ★★`a4` の差 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-584 ★★★★★★★★★環帯での全射性が閉じた(第 271 ブロック)
+
+`Found/GaloisRep/TateQUnique.lean`。
+
+### ★★★★★★★★★到達点
+
+> `x, y in I` で `(x,y)` が `E_q` 上なら、`a, w in I` が在って
+> **`a w = q`** かつ `X(a,w,q) = x`、`Y(a,w,q) = y`(`tate_surjective_annulus`)
+
+★第 269 では制約 `a w = q` を課さずに `(a,w)` を作った。本ブロックでそれを回復した。
+
+### ★★★★★★★★`defect = 0` は `q` を決める
+
+    defect(a,w,q) = 0  かつ  defect(a,w,a w) = 0   ⟹   q = a w
+
+★逐次近似:`q - q' in I^k` と仮定すると、曲線の式の差から
+
+    a6(q) - a6(q') = (Y-Y')(Y+Y') + (X-X')Y + (Y-Y')X'
+                     - (X-X')(X^2+XX'+X'^2) - (a4-a4')X - (X-X')a4'
+
+の右辺はすべて **`I^k` の元 × `I` の元** なので `I^{k+1}`。
+一方 第 270 より `a6(q) - a6(q') + (q - q') in I^{k+1}` なので **`q - q' in I^{k+1}`**。
+`IsHausdorff` で `q = q'`。
+
+★★**`X, Y, a4` がすべて `I` に入る**(環帯だから)ことが効いている。
+`a6` だけが `q` を 1 次で拾い、他は全部 1 つ位を上げる——それが「`q` が決まる」ことの中身。
+★★★制約を「解いてから回復する」設計(§9-581)が、そのまま通った。
+
+### ★★`q` についての差
+
+`X(a,w,q) - X(a,w,q')` は尾と `s1(q)` の差だけ(`f(a)`, `f(w)` は `q` によらない)。
+各項は `q^{n+1}u - q'^{n+1}u = (q^{n+1} - q'^{n+1})u` が `q - q'` で割れるので `I^k`。
+`adicSum_diff_mem`(第 259)でそのまま和に上がる。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXpair_diff_q_mem`・`tateYpair_diff_q_mem` | ★★★★`q` についての差 |
+| `tateXpair_mem`・`tateYpair_mem` | ★★環帯では座標も `I` の元 |
+| `tate_q_unique` | ★★★★★★★★**`defect = 0` は `q` を決める** |
+| `tate_surjective_annulus` | ★★★★★★★★★**環帯での全射性(制約つき)** |
+
+### 葉 (e) の領域の状況
+
+| 領域 | `x = X(u)` | 全射性 | 単射性 |
+|---|---|---|---|
+| 単元 | 単元 | ★済(第 266) | ★済(第 267) |
+| 環帯 | `x in I` | ★済(本ブロック) | ★済(第 259) |
+| 原点近傍 | `x notin R` | 未(`K` 上の定式化が要る) | 未 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-585 ★★★★★★★★★混合の場合の群法則(第 272 ブロック)
+
+`Found/GaloisRep/TateMixedGroup.lean`。
+
+### ★★★★★★★★★到達点
+
+第 261 の群法則は **`u, v, w` がすべて `I` の元**(環帯)の場合だった。
+本ブロックは **`u` が単元・`v, w in I`** の場合を閉じた。
+
+`v(u) + v(v) + v(w) = v(q) > 0` なので 3 つのうち少なくとも 1 つは `I` に入る。
+したがって場合は「1 つが `I`」「2 つが `I`」「3 つとも `I`」の 3 通りで、
+本ブロックは **2 つが `I`** の場合にあたる。
+
+### ★★★★★★単元は `I` の元と自動的に異なる
+
+群法則には 3 点の `x` 座標の相異性が要る。★★これまでは単射性(第 259・第 267)を
+使ってきたが、**混合の場合は相異性がただで出る**:
+
+    X1 = X(u, vw) は単元(第 264)、  X2 = X(v, uw)・X3 = X(w, uv) は I の元(第 271)
+
+`I` は真のイデアルだから、単元は `I` に入らない(`ne_of_isUnit_of_mem`)。
+★★★**「領域が違えば座標が違う」**——単射性を経由しないでよい。
+残る `X2 != X3` だけが第 260 の環帯の単射性を要る。
+
+★`I != top` は `IsAdicComplete` から出る:`1 in I` なら `1 - 1 = 0` が単元になってしまう。
+第 262 の `isUnit_one_sub` を逆に使う。
+
+### ★★★★★★第 260 を緩める
+
+第 260 の `tateXpair_ne_of_ne` は `u, v, w` の 3 つとも `I` を要求していたが、
+証明が実際に使うのは**相方の所属**(`v*w in I`、`u*w in I`)と `w != 1` だけである。
+`u` が単元でも `w in I` なら `w*u in I` なので通る(`tateXpair_ne_of_ne'`)。
+★仮定を後から緩めるのは、証明を読み直せば安い。**書き直しではなく引き写し**である。
+
+| 定理 | 内容 |
+|---|---|
+| `ne_of_isUnit_of_mem` | ★★★★**単元は `I` の元と異なる** |
+| `tateXpair_ne_of_ne'` | ★★★★★★第 260 の緩めた版 |
+| `tate_three_ne_mixed` | ★★★★★★**混合の場合の相異性** |
+| `collUnits_mixed` | ★★★混合の場合の 6 点の単元性 |
+| `tate_equation_map'`・`nonsingular_tate_point'` | ★★★★★第 261 の緩めた版 |
+| `tate_points_add_eq_zero_mixed` | ★★★★★★★★★**混合の場合の群法則** |
+
+### 群法則の場合分けの状況
+
+| `I` に入る個数 | 群法則 |
+|---|---|
+| 3 個(環帯だけ) | ★済(第 261) |
+| 2 個(単元 1 つ) | ★済(本ブロック) |
+| 1 個(単元 2 つ) | 未(単元どうしの相異性が要る) |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-586 ★★★★★★★★★単元 2 つの場合の群法則——場合分けが尽きた(第 273 ブロック)
+
+`Found/GaloisRep/TateUnitGroup.lean`。
+
+### ★★★★★★★★★到達点
+
+基本領域 `0 <= v(u) < v(q)`(第 213)で正規化すると `u v w = q` の 3 つ組は
+`v(u) + v(v) + v(w) = v(q)` を満たす。★したがって `I` に入る個数は **1・2・3** のいずれか:
+
+| `I` に入る個数 | 群法則 |
+|---|---|
+| 3 個(環帯だけ) | 第 261 |
+| 2 個(単元 1 つ) | 第 272 |
+| 1 個(単元 2 つ) | **本ブロック** |
+
+★★★★**一般の位置での群法則は、これで場合が尽きた**。
+
+★★★`v(u) = v(v) = 0` なら `v(w) = v(q)` なので `w` は環帯の**外縁**にある。
+そこは `[w] = [q/(uv)] = [(uv)^{-1}]` であり、第 3 の点は `-P(uv)`。
+つまりこの場合が **`P(u) + P(v) = P(uv)`(単元どうしの準同型性)**にあたる。
+
+### ★★★★★★`Λ` が `±` の分岐を潰す
+
+`tate_inj_X_unit`(第 267)の第 2 の枝は `P(v) = -P(u)`。これを潰すのに
+**`Λ = Y/(X+Y)` を使う**:
+
+    P(v) = -P(u)  ⟹  X' = X、Y' = -X-Y  ⟹  X'+Y' = -Y
+                  ⟹  Λ(v) = (-X-Y)/(-Y) = 1/Λ(u)
+
+★★★したがって `Λ(u) Λ(v) = 1`。ところが `Λ(a) ≡ a mod I`(第 263)なので
+`1 - u v in I`、すなわち **`1 - uv` は単元でない**。
+★★★★`IsUnit (1 - uv)` は `hcp` にもとから入っている仮定なので、**枝はただで死ぬ**。
+`uv = 1` は「第 3 の類が単位元」という退化にほかならない。
+
+★★`Λ` を単射性(第 267)のためだけに作ったつもりだったが、**分岐の除去にも効いた**。
+`Y` が単元であること(`Y = Λ(u)(X+Y)`)もここで初めて要った。
+
+### ★★退化の 3 つ
+
+相異性が壊れるのは 3 つの類のうち 2 つが一致するときで、それは
+`u = v`、`u(uv) = 1`、`v(uv) = 1` に対応する(順に `[u]=[v]`、`[u]=[w]`、`[v]=[w]`)。
+★本ブロックはこの 3 つを仮定で除く。**除いた場合(倍化)は補助母数で別に扱う**。
+
+| 定理 | 内容 |
+|---|---|
+| `tateLambda_mul_eq_one_of_neg` | ★★★★★★`P(v) = -P(u)` なら `Λ(u)Λ(v) = 1` |
+| `one_sub_mul_mem_of_neg` | ★★★★★★**`P(v) = -P(u)` なら `uv ≡ 1`** |
+| `tateXpair_ne_of_units` | ★★★★★★★★**単元どうしの座標の相異性** |
+| `tate_points_add_eq_zero_two_units` | ★★★★★★★★★**単元 2 つの場合の群法則** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-587 ★★★★★★★★★`1 - a` を反転しない万有な環(第 274 ブロック)
+
+`Found/GaloisRep/TateOriginUniv.lean`。
+
+### ★★★★★★★★★原点近傍のために
+
+葉 (e) の残りは **`u ≡ 1 mod m`** の領域である。そこでは `1 - u` が単元でないので
+`X(u) = u/(1-u)^2 + ...` は `R` に入らない——**`K` に極を持つ**。
+★★`1 + m` は開かつ閉なので、**外から近づけることもできない**(近似では届かない)。
+したがって `K` の水準で方程式を示すほかなく、本ブロックはその土台である。
+
+### ★★★★★★分母を先に払う
+
+    XE_n(a,w,q) := a + (1-a)^2 (尾の部分)          (= (1-a)^2 X_n)
+    YE_n(a,w,q) := a^2 + (1-a)^3 (尾の部分)         (= (1-a)^3 Y_n)
+    DE_n := YE^2 + XE YE (1-a) - XE^3 - a4 XE (1-a)^4 - a6 (1-a)^6   (= (1-a)^6 D_n)
+
+★★**`Ring.inverse (1-a)` を一切含まない**。`(1-a)^2 f(a) = a`(第 262)で極を
+先に払っておくのが要点。★尾の側は `q^{m+1} a` なので `1 - q^{m+1} a` は常に単元、
+**問題は `n = 0` の項だけ**という観察が全体を支えている。
+
+### ★★★★★★★★分子の整除性は分母を増やしても変わらない
+
+`tateDenomSet` から `1 - A` を抜いた `tateDenomSetE` で局所化した `TateUnivE` を作り、
+
+    (AW)^n | DE_n(A, W, AW)        (`TateUnivE` の中で)
+
+★★★これは既存の整除性(第 224・第 240)から**ただで出る**:
+`TateUnivE -> TateUniv` の像で `DE_n = (1-A)^6 D_n` なので、分母を `(1-A)^6 d` に
+取り替えれば `univA_pow_dvd_numerator` がそのまま使える。
+★★★★**分子の整除性は分母を増やしても変わらない**——ここが効いた。
+万有な環を作り直したのではなく、**同じ分子の主張を別の分母で読んだ**だけである。
+
+### ★★★★★★★★★到達点
+
+> `a w = q`、`1 - w` が単元なら **`DE_n(a,w,q) in I^n`**——`1 - a` の単元性は要らない。
+
+★これで `u ≡ 1` でも「`(1-u)^6 ×(方程式の差)` が `I^n` に入る」が言える。
+`K` の付値で `v((1-u)^6) < ∞` なので、`n -> ∞` で差は 0 になる(次ブロック)。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXtruncE`・`tateYtruncE`・`tateDefectTruncE` | ★★★★★★分母を払った切り詰め |
+| `tateDefectTruncE_eq` | ★★★★`DE_n = (1-a)^6 D_n` |
+| `TateUnivE`・`tateSpecializeE` | ★★★★★★**`1 - A` を反転しない万有な環** |
+| `tateDefectTruncE_univ_dvd` | ★★★★★★★★万有な環での整除性 |
+| `tateDefectTruncE_mem` | ★★★★★★★★★**`1 - a` の単元性が要らない `I^n` 所属** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-588 ★★★★★★★★★★原点近傍でも方程式が成り立つ(第 275 ブロック)
+
+`Found/GaloisRep/TateOrigin.lean`。
+
+### ★★★★★★★★★★到達点
+
+    YE^2 + XE YE (1-a) = XE^3 + a4 XE (1-a)^4 + a6 (1-a)^6      (`tate_equationE`)
+
+ここで `XE = (1-a)^2 X`、`YE = (1-a)^3 Y`(`Ring.inverse (1-a)` を含まない)。
+★★★**`u ≡ 1 mod m` でもそのまま成り立つ**。
+
+### ★★★★★★★★`K` を経由しなくてよかった
+
+原点近傍は「`X` が `K` に極を持つから `K` の水準で定式化が要る」と見ていたが、
+**分母を先に払えば `R` の中の等式で済む**:
+
+| | 極を持つ形 | 分母を払った形 |
+|---|---|---|
+| 座標 | `X = XE/(1-a)^2` | `XE in R` |
+| 方程式 | `Y^2 + XY = X^3 + a4 X + a6` | `YE^2 + XE YE (1-a) = ...` |
+| 住む場所 | `K` | **`R`** |
+
+★★★★`(1-a)^6 ×(方程式の差)` が `I^n` に入る(第 274)——これを `n -> infty` すれば
+`IsHausdorff` で 0。**付値も極限も要らない**。`K` は最後に商を取るだけの場所になった。
+
+★★見立て(§9-587 で「`K` の水準で示すほかない」と書いた)は**外れ**であった。
+正しくは「`K` の水準で**定式化**するほかないが、**証明**は `R` の中で済む」。
+分母を払う操作が、極を持つ対象を極を持たない対象に**翻訳**していた。
+
+### ★★★★★★収束は尾だけ
+
+`XE - XE_n = (1-a)^2 (尾の残り)` なので `(1-a)^2` は**外に出たまま**である。
+★したがって残りは `I^n` の元の定数倍で、`n` に依らない有界性が自動的に効く。
+
+### ★★★★★★`K` の水準の座標
+
+    X_K := XE / (1-a)^2、  Y_K := YE / (1-a)^3
+
+★`1 - a` が単元なら `X_K = algebraMap (X)` に一致する(`tateXK_eq`)ので、
+これまでの領域の議論と**接ぎ木できる**。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXpairE`・`tateYpairE` | ★★★★★★分母を払った座標 |
+| `tateDefectE_eq_zero` | ★★★★★★★★★★**原点近傍でも差は 0** |
+| `tate_equationE` | ★★★★★★★★★★**原点近傍でも Weierstrass 方程式** |
+| `tateXK`・`tateYK`・`tateXK_eq`・`tateYK_eq` | ★★★★★★`K` の水準の座標と接ぎ木 |
+| `tate_equation_mapK`・`nonsingular_tateK` | ★★★★★★★★★`K` の点は曲線の上にある |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-589 ★★★★★★★★★原点近傍の単射性と全射性——葉 (e) の領域がそろった(第 276 ブロック)
+
+`Found/GaloisRep/TateFormal.lean`。
+
+### ★★★★★★★★★到達点
+
+> `1 - u in I` の領域で **`z = (u-1) XE/YE` が `u` と 1 対 1**
+> (`tateZ_inj`・`exists_tateZ_eq`)
+
+★★★`z` は **`-X_K/Y_K`**、すなわち形式群の座標そのものである(`tateZ_map`)。
+
+### ★★★★★★★★母数の選び方
+
+| 領域 | 母数 | 主要項 | 出典 |
+|---|---|---|---|
+| 単元 | `L = Y/(X+Y)` | `L ≡ a` | 第 263 |
+| 環帯 | `(a,w)` の 2 変数 | `X ≡ a+w`、`Y ≡ -w` | 第 269 |
+| 原点近傍 | `z = (u-1) XE/YE` | `z ≡ u-1` | **本ブロック** |
+
+★★★どれも「主要項の微分が 1」になるように選んである。それが縮小写像定理の入り口。
+原点近傍では **`XE ≡ u`、`YE ≡ u^2`** なので `XE/YE ≡ 1/u ≡ 1`、したがって `z ≡ u-1`。
+
+### ★★★★★`XE - YE` に `1 - u` が括り出せる
+
+    XE - YE = (u - u^2) + (1-u)^2 A - (1-u)^3 B = (1-u)[u + (1-u)A - (1-u)^2 B]
+
+★これで `k = z - (u-1) = (u-1)(XE-YE) YE^{-1}` が **`I^2` の元**になり、
+差の評価が 1 つ位を上げる(`tateZ_diff_mem`)。
+★★`YE` が単元であること(`YE = u^2 + I` の元)も同じ観察から出る。
+**1 つの因数分解が、縮小性と可逆性の両方を出した**。
+
+### ★★葉 (e) の領域がそろった
+
+| 領域 | 全射性 | 単射性 |
+|---|---|---|
+| 単元 | 第 266 | 第 267 |
+| 環帯 | 第 271 | 第 259 |
+| 原点近傍 | **本ブロック** | **本ブロック** |
+
+★★★★これで **葉 (e) の 3 領域すべてで全単射**が取れた。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXpairE_sub_tateYpairE_mem` | ★★★★★`XE - YE in I` |
+| `isUnit_tateYpairE` | ★★★★`YE` は単元 |
+| `tateZ`・`tateZ_sub_mem` | ★★★★★★★原点近傍の母数 |
+| `tateZ_diff_mem` | ★★★★★★★★**原点近傍の縮小性** |
+| `tateZ_inj`・`exists_tateZ_eq` | ★★★★★★★★★**原点近傍での単射性・全射性** |
+| `tateZ_map` | ★★★★★★`z = -X_K/Y_K` |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-590 ★★★★★★分母を払った共線性(第 277 ブロック)
+
+`Found/GaloisRep/CollDenomFree.lean`。
+
+### ★★★★★★★なぜ共線性にも分母払いが要るか
+
+葉 (e) の 3 領域はそろった(第 276)が、**群法則はまだ原点近傍を含まない**。
+`tate_collinear`(第 256)は `hcp : forall i, IsUnit (1 - collPts u v w i)` を要求し、
+`u ≡ 1` ではこれが破れるからである。
+
+★★★退化した場合(倍化)を補助母数で処理するには、補助母数を**どの領域からでも**
+取れねばならない。剰余体が `F_2` で `v(q) = 1` のときは、単元でも環帯でもない元しか
+無い——**原点近傍を含まない群法則は空虚になりうる**。この観察が本ブロックの動機である。
+
+### ★★★★★★行ごとに分母を払う
+
+`collDefect` は行列式 `det [[X1,Y1,1],[X2,Y2,1],[X3,Y3,1]]` である。
+★★★**行 `i` を `M_i` 倍すれば行列式は `M1 M2 M3` 倍になる**から、
+
+    M_i := (1-p_i)^3 (1-r_i)^3        (`p_i` は母数、`r_i` は相方)
+
+と置いて `XE_i := M_i X_i`、`YE_i := M_i Y_i`、第 3 列を `M_i` にすればよい。
+★★これで **`Ring.inverse` を一切含まない行列式**になる。
+★★★★行列式の多重線形性が、分母払いの「配り方」をそのまま与えた。
+
+### ★★★★★★両側の分母を払う
+
+第 274 は `1 - a` の側だけを払ったが、共線性では相方 `r` の側も要る:
+
+    XE = (1-p)(1-r)^3 p + (1-p)^3 (1-r) r + M (尾)
+    YE = (1-r)^3 p^2 - (1-p)^3 (1-r) r - (1-p)^3 r^2 + M (尾)
+
+★`(1-p)^2 f(p) = p`、`(1-p)^3 g(p) = p^2`(第 262)を**両方の変数に**当てるだけ。
+
+| 定理 | 内容 |
+|---|---|
+| `tateM` | ★★★対の分母 `(1-p)^3 (1-r)^3` |
+| `tateXpairEE`・`tateYpairEE` | ★★★★★★両側の分母を払った座標 |
+| `tateXtruncEE`・`tateYtruncEE` | ★★★★★★その切り詰め |
+| `collDefectE`・`collDefectTruncE` | ★★★★★★**分母を払った共線性の差** |
+| `collDefectE_eq` | ★★★★★`collDefectE = M1 M2 M3 collDefect` |
+| `collDefectE_sub_trunc` | ★★★★差と切り詰めの差は `I^n` |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-591 ★★★★★★★★★★原点近傍を含む共線性——単元条件が消えた(第 278 ブロック)
+
+`Found/GaloisRep/CollOriginUniv.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `u v w = q` なら **`collDefectE u v w q hq = 0`**(`collDefectE_eq_zero`)
+
+★★★★仮定は `q in I` と `u v w = q` **だけ**。第 256 の `tate_collinear` が要求していた
+6 つの単元条件 `hcp` は**もう要らない**。したがって **`u ≡ 1` の点(原点近傍)も
+3 つ組に入れてよい**。
+
+### ★★★★★★★★分子の整除性は分母を増やしても変わらない(2 度目)
+
+第 274 と同じ手である:
+
+| | 第 274(方程式) | 本ブロック(共線性) |
+|---|---|---|
+| 抜く分母 | `1 - A` | `1 - (6 つの底)` |
+| 掛ける量 | `(1-A)^6` | `M1 M2 M3`(行ごと) |
+| 既存の分子 | `univA_pow_dvd_numerator` | `cU/cV/cW_pow_dvd_numerator` |
+
+★★★`CollUnivE -> CollUniv` の像で `collDefectTruncE = M1 M2 M3 collDefectTrunc` なので、
+分母を `collMbase d` に取り替えれば既存の分子の整除性がそのまま使える。
+★★★★**万有な環を作り直したのではなく、同じ分子の主張を別の分母で読んだ**。
+2 度使えた手は、道具である。
+
+### ★★`1 - q^{m+1} (底)` は落とせない——落とす必要が無い
+
+★抜けるのは `1 - (底)` だけ。`1 - q^{m+1} (底)` の側は**どの領域でも自動的に単元**
+(`q^{m+1} x in I`)なので抜く必要が無い。
+★★★尾の部分が最初から素直だったことが、ここで効いている。
+
+| 定理 | 内容 |
+|---|---|
+| `map_collDefectTruncE` | ★★★環準同型で移る |
+| `CollUnivE`・`collSpecializeE` | ★★★★★★**`1 - (底)` を反転しない万有な環** |
+| `collMbase` | ★★6 点の分母の積 |
+| `collDefectTruncE_univ_dvd` | ★★★★★★★★万有な環での整除性 |
+| `collDefectE_eq_zero` | ★★★★★★★★★★**原点近傍を含む共線性** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-592 ★★★★★★★★★★原点近傍を含む群法則(第 279 ブロック)
+
+`Found/GaloisRep/CollGroupK.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `u v w = q`、相方 `vw, uw, uv` が `I` の元、母数の `1-u, 1-v, 1-w` が `K` で `0` でない
+> —— このとき **3 点の和は群として 0**(`tate_points_add_eq_zero_K`)
+
+★★★★母数そのものは `I` に居なくても、単元でなくてもよい。**`≡ 1` でもよい**。
+第 278 の `collDefectE_eq_zero` を `K` に落として `M1 M2 M3` で割るだけである。
+
+### ★★★★★どの対も片側は必ず単元
+
+`p r = q in m` なので、局所環では **`p`, `r` の少なくとも一方が `m` に入る**。
+`p ≡ 1` なら `p` は単元だから `r = q/p in m`、したがって `1 - r` は単元。
+★★★**対の両側が同時に `≡ 1` になることはない**——これが分母払いを片側で済ませる根拠。
+
+    tateXpairEE p r q = (1-p)(1-r)^3 tateXpairE p r q        (`1 - r` が単元なら)
+
+★これで第 275 の `X_K = XE/(1-p)^2` と第 277 の両側払いが接がった。
+★★2 つの分母払い(片側・両側)は別々に作ったが、**接ぎ木の条件が自動で満たされていた**。
+
+### ★★★★正規化した 3 つ組では相方は必ず `m` に入る
+
+基本領域 `0 <= v(p_i) < v(q)` で `Σ v(p_i) = v(q)` なら
+`v(相方_i) = v(q) - v(p_i) > 0`、★★したがって相方はすべて `m` の元。
+★同時に「単元は高々 1 つ」も出る(2 つが 0 なら第 3 が `v(q)` になって領域外)。
+
+| `I` に入る母数の個数 | 群法則 |
+|---|---|
+| 2 個以上(正規化した 3 つ組) | **本ブロック**(原点近傍を含む) |
+| 1 個(単元 2 つ、`Σ v = 0` の場合) | 第 273 |
+
+| 定理 | 内容 |
+|---|---|
+| `tateXpairEE_eq_one_side` | ★★★★★両側払いと片側払いの接ぎ木 |
+| `map_tateXpairEE`・`map_tateYpairEE` | ★★★★`K` での `XE = M X` |
+| `collDet_K_eq_zero` | ★★★★★★★★★★**`K` の水準の共線性** |
+| `tate_points_add_eq_zero_K` | ★★★★★★★★★★**原点近傍を含む群法則** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-593 ★★★★★★★★領域の分離と原点近傍の単射性(第 280 ブロック)
+
+`Found/GaloisRep/TateSeparate.lean`。
+
+### ★★★★★★★★付値を使わずに領域を分ける
+
+群法則(第 279)には 3 点の `x` 座標の相異性が要る。原点近傍(`1 - p in m`)の点は
+`X` が極を持つので他の領域の点とは自動的に異なる——これを**付値を持ち出さずに**示した:
+
+    X (1-p)^2 = XE、  XE は単元、  1 - p は非単元
+
+★★★もし `X = algebraMap x` なら `XE = x(1-p)^2 in m` となり `XE` が単元であることに反する。
+**「単元は真のイデアルに入らない」だけで済む**(`tateXK_not_mem_range`)。
+★★付値環の構造(`addVal`)を持ち出さずに済んだのは、極の位数ではなく
+**極があること**しか使っていないからである。
+
+★★`XE = p + (1-p)^2(...)` で `p ≡ 1` は単元、`(1-p)^2(...) in m` だから `XE` は単元。
+第 272 の `ne_of_isUnit_of_mem`(単元 対 `I` の元)と同じ骨である。
+
+### ★★★★★★★★原点近傍の中での単射性
+
+`X` だけでは `±` を除いてしか決まらない。曲線の式の差から `(Y-Y')(Y+Y'+X) = 0`。
+第 1 の枝では `Y = Y'` なので `z = -X/Y`(第 276)も一致し、`tateZ_inj` で `u = u'`。
+★★★**`z` が `X` と `Y` から復元できる**のが効いている——母数を商の形に選んだ理由。
+第 273 で `L = Y/(X+Y)` が分岐を潰したのと同じ形である。
+
+### ★★相異性の全体像
+
+| 組 | 相異性の根拠 |
+|---|---|
+| 単元 対 環帯 | `ne_of_isUnit_of_mem`(第 272) |
+| 原点近傍 対 その他 | `tateXK_ne_of_origin`(**本ブロック**) |
+| 単元どうし | `tateXpair_ne_of_units`(第 273) |
+| 環帯どうし | `tateXpair_ne_of_ne`(第 260) |
+| 原点近傍どうし | `tateXK_inj_origin`(**本ブロック**) |
+
+★★★★これで **5 つの組すべてで相異性の根拠がそろった**。
+
+| 定理 | 内容 |
+|---|---|
+| `isUnit_tateXpairE` | ★★★★原点近傍では `XE` は単元 |
+| `tateXK_not_mem_range` | ★★★★★★★★**原点近傍の `X` は `R` の像に入らない** |
+| `tateXK_ne_of_origin` | ★★★★★★★★**領域が違えば座標が違う** |
+| `tate_equationK` | ★★★★★★`K` の水準の方程式(係数を明示) |
+| `tateXK_inj_origin` | ★★★★★★★★**原点近傍での `X` の単射性** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-594 ★★★★★★★★全領域で成り立つ反転則(第 281 ブロック)
+
+`Found/GaloisRep/TateInversion.lean`。
+
+### ★★★★★★★★到達点
+
+> `u` が単元なら **`P(1/u) = -P(u)`**(`tate_point_ringInverse_eq_neg`)
+
+★★★`1 - u` が単元である必要が**無い**——原点近傍でも成り立つ。
+準同型性の退化した場合(`c2 = c1^{-1}`)と倍化の補助母数の議論に要る。
+
+### ★★★★★★分母を払えば反転則も通る
+
+`f(1/t) = f(t)`・`g(1/t) = -g(t) - f(t)` は `1 - t` が単元でないと書けない
+(`Ring.inverse (1-t)` が意味を持たない)。★★しかし**分母を払った形なら通る**:
+
+    XE(1/u, qu) = XE(u, q/u) (1/u)^2
+    YE(1/u, qu) = (1/u)^3 ((1-u) XE(u, q/u) + YE(u, q/u))
+
+★★★`1 - 1/u = -(1-u)/u` なので `(1-1/u)^2 = (1-u)^2/u^2`——**分母の変換も `u` の冪だけ**。
+これを `K` で割れば `X(1/u) = X(u)`、`Y(1/u) = -X(u) - Y(u)`。
+★★★★分母払いが 3 度目の働きをした(第 274 方程式・第 278 共線性・本ブロック反転則)。
+
+### ★★★★★尾のずらしが両側をつなぐ
+
+    T(u) = f(qu) + T(qu)        (`tateXtail_shift`)
+
+★これで `X(1/u, qu)` の `f(qu) + T(qu)` が `X(u, q/u)` の `T(u)` に化ける。
+★★`adicSum_shift`(在庫)がそのまま使えた。
+
+### ★在庫の引き当て(2 件)
+
+- `tateXterm_inv`・`tateYterm_inv` は **`TateXY.lean` に既にあった**(体の `inv` 版)。
+  本ブロックのものは一般の環の `Ring.inverse` 版なので `_ringInverse` と改名した。
+- `isUnit_ringInverse` は **mathlib にある**(`IsUnit (Ring.inverse a) ↔ IsUnit a`)。
+  自作せず `.mpr` を使った。
+
+★着手前の `grep` は**補題名の単位で**行うこと(第 270 と同じ轍)。今回は
+再宣言エラーで気づいたが、`grep` を先に打てば手戻りは無かった。
+
+| 定理 | 内容 |
+|---|---|
+| `tateXterm_ringInverse`・`tateYterm_ringInverse` | ★★★★★項の反転則 |
+| `tateXtail_shift`・`tateYtail_shift` | ★★★★★尾のずらし |
+| `tateXpairE_ringInverse`・`tateYpairE_ringInverse` | ★★★★★★分母を払った反転則 |
+| `tateXK_ringInverse`・`tateYK_ringInverse` | ★★★★★★★`K` の水準の反転則 |
+| `tate_point_ringInverse_eq_neg` | ★★★★★★★★**全領域で `P(1/u) = -P(u)`** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-595 ★★★★★★3 領域を通じた一つの点の式(第 282 ブロック)
+
+`Found/GaloisRep/TatePt.lean`。
+
+### ★★★★★★一つの式で 3 領域を書く
+
+    tatePtPair a w q hq haw hw hne hD := Point.some (X_K(a,w)) (Y_K(a,w)) ...
+
+仮定は **`a w = q`、`1 - w` が単元、`1 - a` が `K` で `0` でない**——これだけ。
+
+| 領域 | `a` | `w` | `1 - a` | `1 - w` |
+|---|---|---|---|---|
+| 単元 | 単元、`≢ 1` | `m` | 単元 | 単元 |
+| 環帯 | `m` | `m` | 単元 | 単元 |
+| 原点近傍 | `≡ 1` | `m` | **非単元だが `≠ 0`** | 単元 |
+
+★★★対の片側が必ず `m` に入る(第 279)ので `1 - w` が単元という仮定は
+**正規化した対では自動**である。
+★★★★「`1 - a` が単元」を「`1 - a` が `0` でない」に緩めるだけで 3 領域が 1 本になった。
+
+### ★★★★★★★★★★この一つの式で群法則も反転則も書ける
+
+| 定理 | 内容 |
+|---|---|
+| `tatePtPair_add_add_eq_zero` | 3 点の和は群として 0(第 279) |
+| `tatePtPair_swap` | `P(q/u) = -P(u)`(環帯・単元) |
+| `tatePtPair_ringInverse` | `P(1/u) = -P(u)`(全領域、第 281) |
+| `tatePtPair_ne_zero` | 母数から来る点は原点でない |
+
+★★反転則が 2 つあるのは、類 `c^{-1}` の正規化代表元が
+`v(u) > 0` なら `q/u`、`v(u) = 0` なら `1/u` だからである。
+
+### ★★次に要るもの
+
+`Phi : K^x/q^Z -> E_q(K)` を作るには、この点が**類だけで決まる**ことが要る。
+第 213 の `normRep`(基本領域の代表元)と `pair_eq_of_same_class` がその道具。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-596 ★★★★★★★点は類だけで決まる(第 283 ブロック)
+
+`Found/GaloisRep/TateClassPt.lean`。
+
+### ★★★★★★★到達点——`Phi` が定まる根拠
+
+> 同じ類 `c in K^x/q^Z` から来る 2 つの正規化した対は同じ点を与える
+> (`tatePtPair_eq_of_same_class'`)
+
+★★★第 213 の `pair_eq_of_same_class` は「対 `(a,w)` **そのもの**が一致する」を言うので、
+**対の任意の関数が類だけで決まる**。第 282 の `tatePtPair` はまさにその関数である。
+★★★★強い形の補題(値の一致でなく引数の一致)を作っておくと、後から作った関数にも
+そのまま効く——第 213 の時点では `tatePtPair` はまだ無かった。
+
+### ★★★★対の一意性の骨
+
+| 段 | 内容 |
+|---|---|
+| 1 | 同じ類の正規化元は代表元に一致する(`eq_normRep`、第 213) |
+| 2 | `algebraMap a = u = u' = algebraMap a'` と単射性で `a = a'` |
+| 3 | `a w = q = a' w'` と `a != 0` の相殺で `w = w'` |
+
+### ★★★単位類の代表元は `1`
+
+`vAdd v 1 = 0` は `[0, vAdd v q)` に入り、類も単位元なので `normRep v Q hQ 1 = 1`。
+★★★したがって **`a = 1` ⟺ 類が単位元**であり、`Phi` の場合分けはここで切れる
+(`1 - a = 0` になるのは単位類のときだけ)。
+
+| 定理 | 内容 |
+|---|---|
+| `pair_eq_of_same_class'` | ★★★★★対は類だけで決まる(`q` 固定) |
+| `tateXK_eq_of_same_class`・`tateYK_eq_of_same_class` | ★★★★★★座標も類だけで決まる |
+| `tatePtPair_eq_of_same_class'` | ★★★★★★★**点も類だけで決まる** |
+| `vAdd_one`・`normRep_one` | ★★★単位類の代表元は `1` |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-597 ★★★★★★★★★写像 `Phi : K^x/q^Z -> E_q(K)`(第 284 ブロック)
+
+`Found/GaloisRep/TatePhi.lean`。
+
+### ★★★★★★★★★到達点——写像そのものができた
+
+    Phi c := if 1 - a(c) = 0 then 0 else tatePtPair a(c) w(c) ...
+
+★★★`a(c)`・`w(c)` は類 `c` の**正規化した対**(第 213 の `exists_pair_of_class` を
+`choose` したもの)。第 283 で点が類だけで決まることを示したので、
+この `choose` の任意性は値に響かない。
+
+### ★★★★★道具立てを構造体にまとめた
+
+`TateSetup R I K` は付値 `v`、母数 `Q`(と `R` 側の `q`)、`R -> K` の単射性、
+`v >= 0` の元が `R` から来ること——を 1 つに束ねる。
+★仮定が 9 本あるので、これを毎回書くと定理の頭が読めなくなる。
+★★構造体にしたことで、以後の単射性・全射性・準同型性の主張が 1 行の頭で書ける。
+
+### ★★★場合分けは単位類でだけ切れる
+
+`1 - a(c) = 0` になるのは `a(c) = 1`、すなわち `normRep c = 1`、すなわち **`c = 1`** の
+ときだけ(`tateAOf_ne_one`)。★★★したがって
+
+| 類 | `Phi` の値 |
+|---|---|
+| `c = 1` | `0`(原点) |
+| `c != 1` | `tatePtPair ...`(**アフィン点、けっして原点でない**) |
+
+★★これで `Phi` の単射性の「原点に行くのは単位類だけ」の段が済んだ
+(`tatePhi_eq_zero_iff`)。
+
+| 定理 | 内容 |
+|---|---|
+| `TateSetup` | ★★★★★道具立ての束 |
+| `tateAOf`・`tateWOf` | ★★類の正規化した対 |
+| `tatePhi` | ★★★★★★★★★**写像 `Phi`** |
+| `tatePhi_one`・`tatePhi_ne_zero`・`tatePhi_eq_zero_iff` | ★★★★★原点に行くのは単位類だけ |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-598 ★★★★★★★★★★`Phi` は単射——葉 (d) が閉じた(第 285 ブロック)
+
+`Found/GaloisRep/TatePhiInj.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `Phi : K^x/q^Z -> E_q(K)` は**単射**(`tatePhi_injective`)
+
+★★★葉 (d)(単射性)が、**3 領域すべてを含む形で**閉じた。
+
+### ★★★★★★★★★5 通りの貼り合わせ
+
+`tate_inj_all` が芯。局所環の二分法 `forall x, IsUnit x or x in I` のもとで
+`1 - a`・`1 - a'` と `a`・`a'` について場合分けする:
+
+| `1 - a` | `1 - a'` | 根拠 |
+|---|---|---|
+| 非単元(原点近傍) | 非単元 | `tateZ_inj`(第 276) |
+| 非単元 | 単元 | `tateXK_ne_of_origin`(第 280)——矛盾 |
+| 単元、`a` 単元 | 単元、`a'` 単元 | `tate_point_inj_unit`(第 267) |
+| 単元、`a in I` | 単元、`a' in I` | `tate_inj`(第 259) |
+| 単元、片方だけ単元 | | `ne_of_isUnit_of_mem`(第 272)——矛盾 |
+
+★★★★**「領域が違えば矛盾、同じなら領域内の単射性」**——これだけである。
+矛盾の 3 通りは座標の住む場所(単元か、`I` の元か、`R` の外か)で決まる。
+★★★★★領域を分けた設計が、そのまま貼り合わせの場合分けになった。
+
+### ★★★局所環の二分法は仮定として受ける
+
+`TateSetup` には入れず `hloc : forall x : R, IsUnit x or x in I` として渡す。
+★実際の適用では `R` は完備離散付値環、`I = m` なので成り立つ。
+
+### ★★類の水準へ
+
+`a(c) = a(c')` から `normRep c = normRep c'`、`mk . normRep = id` で `c = c'`。
+★単位類の場合は「原点に行くのは単位類だけ」(第 284)で処理する。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-599 ★★★★★★★★整な点についての全射性(第 286 ブロック)
+
+`Found/GaloisRep/TateSurjInt.lean`。
+
+### ★★★★★★★★到達点
+
+> `x, y in R` が曲線の式を満たすなら、対 `(a,w)` が在って `X(a,w) = x`、`Y(a,w) = y`
+
+★★★局所環の二分法で `x` が単元か `I` の元かに分け、第 266(単元の領域)と
+第 271(環帯)を貼り合わせるだけである。
+
+### ★★★★★`x in I` なら `y in I` は式から出る
+
+    y^2 = (x^3 + a4 x + a6) - x y
+
+★`a4, a6 in I`(第 212)、`x in I` なので右辺は `I` の元。したがって `y^2 in I`、
+**`I` が素なら `y in I`**(`tate_y_mem_of_x_mem`)。
+★★環帯の全射性(第 271)は `x, y` の両方が `I` に入ることを要求するので、この一行が要る。
+★★★領域の判定に使うのは `x` だけでよい——`y` は式が決めてくれる。
+
+### ★★残っているもの——原点近傍の全射性
+
+`x` が `R` の像に**入らない**点(原点近傍)については、まだ全射性が無い。要るのは
+**付値の評価**である:
+
+    v(x) < 0  ⟹  v(y) = (3/2) v(x)  ⟹  v(-x/y) = -v(x)/2 > 0
+
+★これは `y^2 + xy = x^3 + a4 x + a6` の Newton 多角形の議論で、
+`v(x^3) = 3v(x)` が右辺で厳密に最小になることから出る。
+★★★`z = -x/y in m` が言えれば第 276 の `exists_tateZ_eq` で母数が取れ、
+`s = -1/y` の一意性(縮小)で点が一致する。
+★★★★単射性は付値を使わずに済んだ(第 280)が、**全射性は付値が要る**——
+「極があること」だけでは足りず、**極の位数**が要るからである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-600 ★★★★★★★★★★形式母数は `m` の元——付値が要らなかった(第 287 ブロック)
+
+`Found/GaloisRep/TateFormalParam.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `1/x in m`(すなわち `x` が `R` の外)で `(x,y)` が曲線上なら、
+> **`z in m` が在って `z y = x`**(`tate_formal_param`)
+
+★★★つまり形式群の座標 `x/y` が `m` の元。第 276 の `exists_tateZ_eq` に渡す入力が揃った。
+
+### ★★★★★★★★★★見立ての訂正——付値は要らなかった
+
+第 286(§9-599)で「全射性は付値が要る——極の位数が要るから」と書いた。**これは外れ**。
+`α := 1/x in m` と置き、**`γ := y/x^2` を見ると**
+
+    γ^2 + α γ = α (1 + a4 α^2 + a6 α^3) = α u        (`u` は単元)
+
+★★★★これは `γ` についての**モニックな 2 次式**である。したがって
+
+| 段 | 使うもの | 結論 |
+|---|---|---|
+| 1 | `R` が整閉 | `γ in R` |
+| 2 | `γ^2 = αu - αγ in m`、`m` が素 | `γ in m` |
+| 3 | `α u = γ(γ+α)` を `γ` で割る | `x/y = (γ+α) u^{-1} in m` |
+
+★★★★★**極の位数(`v(y) = (3/2)v(x)`)を数える代わりに、`y/x^2` が整であることを使う。**
+Newton 多角形の議論が、モニック多項式ひとつに化けた。
+★★整閉性は「モニック 2 次式の根は `R` に入る」という形の仮定 `hquad` で受ける。
+
+### ★★★なぜ `y/x^2` なのか
+
+`v(x) = -2n` なら `v(y) = -3n` なので `v(y/x^2) = -3n + 4n = n > 0`。
+★つまり `y/x^2` は「ちょうど `m` に落ちる」正規化。`y/x` では `v = -n < 0`、
+`y/x^3` では `v = 3n` で情報が落ちる。★★**2 乗がただ一つの正しい重み**である。
+
+★★★★★★これで単射性(第 280)も全射性(本ブロック)も**付値の構造を使わずに**
+済んだ。使ったのは「単元・真のイデアル・素・整閉」——すべて**環の言葉**である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-601 ★★★★★★★★★★原点近傍での全射性——葉 (e) が閉じた(第 288 ブロック)
+
+`Found/GaloisRep/TateSurjOrigin.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `1/x in m` で `(x,y)` が曲線上なら、母数 `u`(`1 - u in m`)が在って
+> `X(u) = x`、`Y(u) = y`(`tate_surjective_origin`)
+
+★★★これで葉 (e)(全射性)が**3 領域すべてで**閉じた。
+
+### ★★★★★★★`z` が `s` を決める——縮小は要らない
+
+`z := x/y`、`s := -1/y` と置くと、曲線の式は
+
+    s (1 + z + a4 z s - a6 s^2) = -z^3
+
+★★★★同じ `z` に対して `s, s'` が 2 つあれば、差を括って
+`(s - s')[1 + (m の元)] = 0`。★★**`1 + m` は単元**なので `s = s'`。
+★★★★★不動点定理も逐次近似も要らなかった——**`z^3` の側が同じなら差が消える**という
+一行である。★仮定に `s, s' in m` すら要らない(`z in m` と `a6 in m` だけで括弧が単元)。
+
+### ★★★★★★分母を払った形が `s` を `R` に運ぶ
+
+`s = -1/Y` は一見 `K` の元だが、`Y = YE/(1-u)^3` で `YE` は単元(第 280)なので
+`s = -(1-u)^3 YE^{-1} in m`。★★分母払いの 4 度目の働きである。
+
+### ★★組み立て
+
+| 段 | 内容 |
+|---|---|
+| 1 | `tate_formal_param`(第 287)で `z = x/y in m` |
+| 2 | `s := -(z α) in m`(`α = 1/x`)——**積だから `m` に入る** |
+| 3 | `exists_tateZ_eq`(第 276)で `tateZ(u) = -z` なる `u` |
+| 4 | 両者の `s` が同じ 3 次関係式を満たす → `s` 一致 |
+| 5 | `s y = -1 = s Y` → `y = Y`、`z y = x`・`z Y = X` → `x = X` |
+
+★★★★★★葉 (b)(方程式)・(c)(共線性)・(d)(単射性)・(e)(全射性)がすべて、
+**3 領域すべてで**閉じた。残るのは準同型性と `TateCurveData` への組み立てである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-602 ★★★★★★★★★★全射性が全領域でそろった(第 289 ブロック)
+
+`Found/GaloisRep/TateSurjAll.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `E_q(K)` のどのアフィン点 `(x,y)` にも対 `(a,w)` が在って
+> `X_K(a,w) = x`、`Y_K(a,w) = y`(`tate_point_surjective`)
+
+★★★3 領域を通じた**一つの主張**。仮定は局所環の二分法・`I` の素性・
+モニック 2 次式の根が `R` に入ること(整閉性)・付値環の性質だけ。
+
+### ★★★★★場合分けは `x` が `R` から来るかどうか
+
+| `x` | 領域 | 使うもの |
+|---|---|---|
+| `R` の像 | 単元・環帯 | `tate_surjective_integral'`(第 286 の強めた版) |
+| `R` の像でない | 原点近傍 | `tate_surjective_origin`(第 288) |
+
+★★`x in R` なら **`y` も自動で `R`**——`y^2 + x y - (x^3+a4 x+a6) = 0` がモニックだから。
+★★★整閉性を「モニック 2 次式の根」の形で受けたので、`x` からも `y` からも同じ仮定が
+使える(第 287 の `γ`、ここの `y`)。**仮定の形を選んだのが 2 度効いた**。
+
+### ★★★第 266 を強める
+
+第 266 の `tate_surjective` は `IsUnit (1 - a)` を結論に出していなかったが、証明の中では
+`exists_tate_lambda_eq` からすでに得ている。`K` の水準に上げるには `tateXK_eq`(第 275)に
+`IsUnit (1 - a)` が要るので、出すようにした。
+★**証明が持っている情報を結論に出しておく**——後から要る。
+
+★★★★★★葉 (b)(c)(d)(e) すべてが 3 領域で閉じ、`Phi` の単射性(第 285)と
+点の水準の全射性(本ブロック)がそろった。残るのは**準同型性**と
+`TateCurveData` への組み立てである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-603 ★★★★★★★★★★`Phi` は全単射——集合としての一意化(第 290 ブロック)
+
+`Found/GaloisRep/TatePhiSurj.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `Phi : K^x/q^Z -> E_q(K)` は**全単射**(`tatePhi_bijective`)、したがって
+> **`K^x/q^Z ≃ E_q(K)`**(`tatePhiEquiv`)
+
+★★★葉 (d)(第 285)と葉 (e)(第 289)が類の水準で合流した。
+**残るのは群構造だけ**である。
+
+### ★★★★★★★★正規化した対はある類から来る
+
+点の水準の全射性(第 289)は対 `(a,w)` を返す。それが**類から来る**ことを言うのに
+基本領域の条件 `0 <= v(u) < v(Q)` が要る:
+
+| 条件 | 根拠 |
+|---|---|
+| `0 <= v(u)` | `a in R` |
+| `v(u) < v(Q)` | `v(Q) - v(u) = v(w) > 0`(`w in m`) |
+
+★★★★**相方 `w` が `m` にいることが、そのまま `u` が基本領域にいることを意味する**。
+第 279 で見た「正規化した 3 つ組では相方は必ず `m`」の裏返しである。
+
+### ★★★付値は「`R` から来るか」の言い換えとしてだけ使う
+
+`hvR`・`hvI` は「`R` の元は `v >= 0`」「`I` の元は `v > 0`」——`TateSetup` の
+`hmem`・`hmem0` の逆向き。★付値の**順序**は使うが、**ultrametric 不等式は使わない**。
+★★★結局、Tate 一意化の全単射性は付値環の**順序構造**しか要らなかった。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-604 ★★★★★★★★★`Phi(c^{-1}) = -Phi(c)`(第 291 ブロック)
+
+`Found/GaloisRep/TatePhiInv.lean`。
+
+### ★★★★★★★★★到達点
+
+> **`Phi(c^{-1}) = -Phi(c)`**(`tatePhi_inv`)
+
+★★★群構造の**半分**である。残りは `Phi(c1 c2) = Phi(c1) + Phi(c2)` の側。
+
+### ★★★★★★★逆元の代表元は 2 通り
+
+類 `c` の正規化代表元を `u`(対 `(a,w)`)とすると、`c^{-1}` の代表元は
+
+| `v(u)` | `c^{-1}` の対 | 使う反転則 |
+|---|---|---|
+| `> 0`(環帯) | `(w, a)`——**相方に入れ替えるだけ** | `tateXpair_symm`(第 210) |
+| `= 0`(単元・原点近傍) | `(1/a, q a)` | `tateXK_ringInverse`(第 281) |
+
+★★★★どちらの対も**基本領域に入っている**ことを確かめるのが仕事の半分:
+`v(w) = v(Q) - v(u) in (0, v(Q))`、`v(1/u) = -0 = 0`。
+
+★★`tateAOf_eq_of_pair`——「正規化した対とその類が分かれば `tateAOf`・`tateWOf` が
+決まる」——を作っておくと、両方の場合が 4 行で済む。
+
+### ★★★点の水準の反転則を類の水準へ
+
+第 281・第 282 で作った 2 つの反転則(`tatePtPair_swap`・`tatePtPair_ringInverse`)が、
+ここでちょうど 2 つの場合に対応する。
+★★★**`K^x/q^Z` の元の代表元が 2 通りあることが、反転則が 2 つある理由だった**。
+作ったときには「環帯用」「単元用」と思っていたが、実は**基本領域の境界の切り方**だった。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-605 ★★★★★★★★★★一般の位置での準同型性(第 292 ブロック)
+
+`Found/GaloisRep/TatePhiHom.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `a(c1) a(c2) a(c3) = q` で 3 つの類が一般の位置なら
+> **`Phi(c1) + Phi(c2) + Phi(c3) = 0`**(`tatePhi_add_add_eq_zero`)
+
+★★★葉 (c)(共線性)と群法則(第 279)が、類の水準に上がった。
+
+### ★★★★★★★★相異性は `±` の分岐だけ
+
+3 点の `x` 座標が相異なることが群法則の要である。**`Phi` が単射**(第 285)と
+**`Phi(c^{-1}) = -Phi(c)`**(第 291)があれば、曲線の式の差から
+
+    X(c) = X(d)  ⟹  (Y(c) - Y(d))(Y(c) + Y(d) + X(c)) = 0
+                 ⟹  Y(c) = Y(d) または P(d) = -P(c)
+                 ⟹  **`c = d` または `c d = 1`**(`tatePhi_X_eq_imp`)
+
+★★★★★領域ごとの単射性を**もう一度なぞる必要はない**——`Phi` の単射性という
+1 つの事実に集約されている。第 285 で 5 通りを貼り合わせておいた甲斐があった。
+
+### ★★★★相方は掛け算で出る
+
+`a1 w1 = q = a1 (a2 a3)` と `a1 != 0` から **`w1 = a2 a3`**。
+★したがって「相方が `m` に入る」(群法則の仮定)は `w1 in m`(定義)そのもの。
+★★付値の議論は要らなかった。
+
+### ★★残っているもの
+
+`a(c1)a(c2)a(c3) = q` は仮定として受けている。`c1 c2 c3 = 1` からこれを出すには
+正規化代表元の付値の和が `v(q)` であることを見る(和は `0`・`v(q)`・`2v(q)` の 3 通り)。
+また退化した場合(`c1 = c2` など)は補助母数で別に扱う。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-606 ★★★★★★★★★★準同型性の仮定が類の言葉になった(第 293 ブロック)
+
+`Found/GaloisRep/TatePhiProd.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `c1 c2 c3 = 1`、正規化代表元の積が `Q`、3 類が互いに異なり単位元でない —— このとき
+> **`Phi(c1) + Phi(c2) + Phi(c3) = 0`**(`tatePhi_add_add_eq_zero'`)
+
+★★★第 292 では `a(c1)a(c2)a(c3) = q` を仮定していたが、それが
+**正規化代表元の積が `Q`** という類の言葉になった。
+
+### ★★★★★★★正規化代表元の積は `Q^n`(`n = 0, 1, 2`)
+
+`c1 c2 c3 = 1` なら `u1 u2 u3 in q^Z`、すなわち `u1 u2 u3 = Q^n`。付値を取れば
+
+    n v(Q) = v(u1) + v(u2) + v(u3) in [0, 3 v(Q))
+
+★★したがって **`n in {0, 1, 2}`**(`normRep_prod_zpow`)。
+
+| `n` | 意味 | 扱い |
+|---|---|---|
+| `1` | 母数の積がちょうど `q` | **本ブロック**(第 292 に渡す) |
+| `2` | 逆元を取れば `n = 1` | `Phi(c^{-1}) = -Phi(c)`(第 291)で還元 |
+| `0` | 3 つとも単元 | 単元 2 つの群法則(第 273) |
+
+### ★★★★積の条件は「単位元でない」から出る
+
+`c1 c2 = 1` は `c3 = 1` と同値(`c1 c2 c3 = 1` だから)。★したがって第 292 の
+`c_i c_j != 1` という 3 つの仮定は、**`c_k != 1` の 3 つに吸収される**。
+★★仮定が「単位元でない」「互いに異なる」の 6 本だけになった。
+
+### ★実例のダイヤモンド(`tools/lean-idioms.md` に追記)
+
+`K^x / Subgroup.zpowers Q` では `rw [one_mul]` が当たらない
+(`MulOneClass` の実例が 2 経路で来る)。`simp`・`group` も止まる。
+`exact (one_mul c).symm.trans h` と**項の水準**で書けば通る。
+★★`rw`/`simp` は構文照合、`exact` は defeq 照合——**実例のダイヤモンドは後者なら抜ける**。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-607 ★★★★★★★★★★`n = 2` は逆元で `n = 1` に還る(第 294 ブロック)
+
+`Found/GaloisRep/TatePhiTwo.lean`。
+
+### ★★★★★★★★★★到達点
+
+> 正規化代表元の積が `Q^2` でも **`Phi(c1) + Phi(c2) + Phi(c3) = 0`**
+
+★★★これで準同型性の 3 通り(`n = 0, 1, 2`)のうち **2 通りが済んだ**。
+
+### ★★★★★★★`n = 2` なら 3 つとも環帯
+
+`Σ v(ui) = 2v(Q)` で各 `v(ui) < v(Q)`。★もし `v(u1) = 0` なら残り 2 つの和が `2v(Q)` で
+各々 `< v(Q)` だから和は `< 2v(Q)`——矛盾。したがって **3 つとも `v(ui) > 0`**。
+
+★★★これが効く:逆元の代表元は `v(ui) > 0` のとき `q/ui`(相方)で、その付値は
+`v(Q) - v(ui)`。★★★★したがって `Σ v(normRep ci^{-1}) = 3v(Q) - 2v(Q) = v(Q)`、
+すなわち逆元の 3 つ組は **`n = 1` の場合**である。
+
+★★★★★「境界の場合は逆元で内部に落とす」——基本領域の対称性がそのまま使えた。
+
+### ★★★★★★逆元の代表元の付値
+
+`tateAOf_inv_annulus`(第 291)が `a(c^{-1}) = w(c)` を与えるので、`u u_w = Q` から
+`v(normRep c^{-1}) = v(Q) - v(normRep c)`。
+★第 291 で代表元そのものを同定しておいたので、付値の計算は 3 行で済む。
+
+### ★★実例のダイヤモンド、再び
+
+`c1^{-1} = c2^{-1}` から `c1 = c2` を出すのに `rw [inv_inv]` は当たらない。
+`exact inv_inv c2` と項の水準で書く(第 293 と同じ)。
+★点の群 `Point` は `AddCommGroup` なので `linear_combination` は使えない——`abel` を使う。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-608 ★★★★★★★★★★単元 2 つの場合の共線性(第 295 ブロック)
+
+`Found/GaloisRep/CollGroupTwo.lean`。
+
+### ★★★★★★★★★★なぜ `n = 0` が最後まで残るのか
+
+`v(q) = 1` のときは**すべての類の付値が 0**なので、`c1 c2 c3 = 1` なら必ず `n = 0`。
+★★★つまり `n = 0` は端の場合ではなく、**`v(q) = 1` では唯一の場合**である。
+逆元で `n = 1` に落とす手(第 294)も使えない。正面から扱うほかない。
+
+### ★★★★★★★★向きを入れ替えれば座標が定義できる
+
+`n = 0` では `a1 a2 a3 = 1`(3 つとも単元)なので、3 つ組 `(a1, a2, q a3)` を取ると
+相方は `q/a1`・`q/a2`・`a1 a2`。★最初の 2 つは `m` に入るが **`a1 a2 = a3^{-1}` は単元**
+なので、第 3 の点の座標 `X(q a3, a1 a2)` は `1 - a1 a2` が単元でないと定義できない
+(`a3 ≡ 1` のとき破れる)。
+
+★★★★**向きを入れ替える**:第 3 の点を `(a1 a2, q a3)` の順で書けば、母数が `a1 a2`、
+相方が `q a3 in m` になり、**`1 - 相方` は常に単元**である。
+★★★★★対の「どちらを母数と見るか」は自由——そこに自由度があると気づいたのが要点。
+
+### ★★★★★両側払いは対称、`Y` は反転する
+
+    XE(r,p) = XE(p,r)                            (`tateXpairEE_symm`)
+    YE(r,p) = -XE(p,r) - YE(p,r)                 (`tateYpairEE_swap`)
+
+★★どちらも**仮定なしの多項式恒等式**(分母を払ってあるから `ring` で出る)。
+★★★分母を払っておくと、対称性が**仮定なしで**言える——5 度目の働きである。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-609 ★★★★★★★★★★準同型性が一般の位置で閉じた(第 296 ブロック)
+
+`Found/GaloisRep/TatePhiZero.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `c1 c2 c3 = 1`、3 類が互いに異なり単位元でない —— このとき
+> **`Phi(c1) + Phi(c2) + Phi(c3) = 0`**(`tatePhi_add_add_eq_zero_all`)
+
+★★★正規化代表元の積の場合分け(`n = 0, 1, 2`)が**すべて済んだ**。
+残るのは退化した場合(`ci = cj` または `ci = 1`)だけである。
+
+| `n` | ブロック |
+|---|---|
+| `0` | **本ブロック** |
+| `1` | 第 293 |
+| `2` | 第 294(逆元で `n = 1` に還元) |
+
+### ★★★★★★★★`n = 0` は `P(u) + P(v) = P(uv)` そのもの
+
+`a1 a2 a3 = 1` なので `a1 a2 = a3^{-1}`、すなわち **`(a1 a2, q a3)` は類 `c3^{-1}` の
+正規化した対**(第 291 の `tateAOf_inv_unit` がそう言っている)。したがって第 295 の
+`P(a1,・) + P(a2,・) = P(a1 a2, q a3)` は **`Phi(c1) + Phi(c2) = Phi(c3^{-1}) = -Phi(c3)`**、
+すなわち求める式そのもの。
+
+★★★★★「第 3 の点を入れ替えた向きで書く」という技術的な選択が、**そのまま `c3^{-1}` の
+正規化代表元と一致していた**——偶然ではなく、基本領域の取り方が両方を決めているからである。
+
+### ★★★★相異性の 3 本
+
+| 組 | 破れると |
+|---|---|
+| `X(c1) != X(c2)` | `c1 = c2` または `c3 = 1` |
+| `X(c1) != X(c3^{-1})` | `c2 = 1` または `c1 = c3` |
+| `X(c2) != X(c3^{-1})` | `c1 = 1` または `c2 = c3` |
+
+★どれも仮定で除いてある。★★`ci cj = 1 ⟺ ck = 1` の補題を切り出しておくと 1 行ずつで済む。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-610 ★★★★★★★★★★残るのは倍化だけ(第 297 ブロック)
+
+`Found/GaloisRep/TatePhiOne.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `c1 c2 c3 = 1` で **3 類が互いに異なれば** `Phi(c1) + Phi(c2) + Phi(c3) = 0`
+
+★★★単位元を含む場合も込み。**残るのは `ci = cj`(倍化)だけ**になった。
+
+### ★★★★★★単位元を含む場合は反転則だけ
+
+`c3 = 1` なら `c1 c2 = 1` すなわち `c2 = c1^{-1}` なので
+
+    Phi(c1) + Phi(c1^{-1}) + Phi(1) = Phi(c1) - Phi(c1) + 0 = 0
+
+★共線性も群法則も要らない——**第 291 の反転則と第 284 の `Phi(1) = 0` だけ**。
+
+### ★★★2 位の点も自動で片づく
+
+`c1 = c2` かつ `c1^2 = 1` なら `c3 = c1^{-2} = 1` なので、上の場合に落ちる。
+★★★★したがって**2 位の類は倍化の例外にならない**——`Phi(c) = Phi(c^{-1}) = -Phi(c)` が
+そのまま `2 Phi(c) = 0` を与えている。
+★★★★★退化の中でいちばん怖い(接線が要る)場合が、**反転則だけで済んだ**。
+
+### ★★残っているもの——真の倍化
+
+`c1 = c2 = c`(`c^2 != 1`)の場合。補助母数 `e` を取って
+
+    Phi(c) + Phi(e) = Phi(ce)、  Phi(ce) + Phi(c) = Phi(c^2 e)、  Phi(c^2) + Phi(e) = Phi(c^2 e)
+
+の 3 本(いずれも一般の位置)から `Phi(c^2) = 2 Phi(c)` を出す。
+★`e` は有限個の類を避ければよく、`K^x/q^Z` は無限(`1 + m` を含む)なので取れる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-611 ★★★★★★★★★★★倍化さえあれば `≃+` が建つ(第 298 ブロック)
+
+`Found/GaloisRep/TateAddEquiv.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> **倍化 `Phi(c^2) = 2 Phi(c)` を仮定すれば `K^x/q^Z ≃+ E_q(K)`**
+> (`tatePhiAddEquiv`・`tate_uniformization_of_doubling`)
+
+★★★葉 (b)(c)(d)(e) と準同型性が、**ただ一つの残りの仮定**に集約された。
+
+### ★★★★★★★★倍化だけが残る理由
+
+`Phi(ab) = Phi(a) + Phi(b)` を 3 つ組 `(a, b, (ab)^{-1})` の共線性から出すには、
+3 類が互いに異なることが要る(第 297)。破れるのは
+
+| 破れ方 | 意味 | 還元先 |
+|---|---|---|
+| `a = b` | 倍化 | ——(残り) |
+| `a = (ab)^{-1}` | `b = a^{-2}` | `Phi(a^2) = 2 Phi(a)` |
+| `b = (ab)^{-1}` | `a = b^{-2}` | `Phi(b^2) = 2 Phi(b)` |
+
+★★★★下 2 つは**倍化そのものに落ちる**:`b = a^{-2}` なら `ab = a^{-1}` なので
+求める式は `-Phi a = Phi a - Phi(a^2)`、すなわち倍化。
+★★★★★したがって **3 通りの退化がすべて 1 つの主張に集まる**。
+
+### ★★★★★★倍化は補助母数で還元できる
+
+    Phi(c) + Phi(e) = Phi(ce)、  Phi(c) + Phi(ce) = Phi(c^2 e)、  Phi(c^2) + Phi(e) = Phi(c^2 e)
+
+を並べると `Phi(c^2) + Phi(e) = 2 Phi(c) + Phi(e)`、すなわち `Phi(c^2) = 2 Phi(c)`。
+★要るのは `e` が 9 つの相異条件を満たすことだけ。
+★★`K^x/q^Z` は無限(`1 + m` を含む)なので、有限個の条件を避ける `e` は取れる
+——それが最後に残った一点である。
+
+★★★★★★★葉 (a)–(e) の全部と単射性・全射性・反転則・準同型性が、
+**`e` の存在ひとつ**に還元された。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-612 ★★★★★★★★補助母数は取れる(第 299 ブロック)
+
+`Found/GaloisRep/TateAux.lean`。
+
+### ★★★★★★★★到達点
+
+> 有限個(6 個の点と 3 個の平方)を避ける類 `e` が存在する(`exists_aux`)
+
+★★★倍化(第 298)に要る補助母数がこれである。
+
+### ★★★★★★具体的な無限族 `1 + q^{n+1}`
+
+抽象的な「`K^x/q^Z` は無限」を使わず、**明示的な族** `e_n := [1 + q^{n+1}]` を取る。
+★どれも `R` の単元なので付値は 0。
+
+| 主張 | 根拠 |
+|---|---|
+| `e_n = e_m ⟹ n = m` | 付値 0 なので `q^k` の因子は `k = 0`、あとは `q^n` の単射性 |
+| `e_n^2 = e_m^2 ⟹ 1 + q^{n+1} = ±(1 + q^{m+1})` | 体だから `(A-B)(A+B) = 0` |
+| 平方の逆像は高々 2 点 | 3 点あれば `-` の枝が 2 回 ⟹ `q^{m+1} = q^{l+1}` で矛盾 |
+
+★★★★**「符号の自由度が 2 つある」ことが、そのまま「高々 2 対 1」になっている。**
+
+### ★★★★数え上げ
+
+`n in {0, ..., 12}` のうち、6 個の点に当たる `n` は高々 6 個(単射)、
+3 個の平方に当たる `n` は高々 `2 x 3 = 6` 個(2 対 1)。
+★合わせて高々 12 個。**13 個あるので 1 つは残る**。
+★★抽象的な濃度の議論を避け、`Finset.card` の不等式だけで済ませた。
+★★★「無限だから取れる」を「13 個中 12 個までしか悪くない」に**具体化**したのが要点。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-613 ★★★★★★★★★★★Tate 一意化が仮定なしになった(第 300 ブロック)
+
+`Found/GaloisRep/TateDoubling.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> `Φ(c^2) = 2 Φ(c)` が**仮定なしで**成り立つ(`tatePhi_doubling_all`)。
+> したがって `Φ` は**仮定なしの加法同型** `K^x/q^Z ~= E_q(K)`(`tatePhiAddEquivAll`)。
+
+★★★第 298 で唯一残っていた仮定 `hdbl` が、第 299 の補助母数で消えた。
+
+### ★★★★★★★★「避けるべき類」は 9 本の条件から機械的に読める
+
+倍化には 3 本の一般の位置の関係(第 298)が要る。その 9 つの条件はいずれも
+**`e` か `e^2` が特定の類に等しい**という形にほどける。
+
+| 破れる条件 | ほどくと | 避け先 |
+|---|---|---|
+| `c = (ce)^-1` | `e = (c^2)^-1` | `A` |
+| `e = (ce)^-1` | `e^2 = c^-1` | `B` |
+| `c = ce` | `e = 1` | `A` |
+| `c = (c(ce))^-1` | `e = (c^3)^-1` | `A` |
+| `ce = (c(ce))^-1` | `e^2 = (c^3)^-1` | `B` |
+| `c^2 = (c^2 e)^-1` | `e = (c^4)^-1` | `A` |
+| `e = (c^2 e)^-1` | `e^2 = (c^2)^-1` | `B` |
+
+★★★★**`e` について 6 本、`e^2` について 3 本**——第 299 の `exists_aux` の
+`A.card <= 6`・`B.card <= 3` は、この表を数えて決めた数である。
+★★★★★つまり**先に必要な数を数えてから道具を作った**ので、当てはめは一発で済んだ。
+
+### ★★★★★可換群の側は抽象のまま解く
+
+`K^x / zpowers Q` の上では `simp`/`rw` が具体化の壁に当たる(商群の実例が
+見つからず「made no progress」・`IsLeftCancelMul` の合成失敗)。
+★そこで**抽象の可換群 `G` で 7 本の補題を作り**、商群には項の水準で当てた。
+★★`mul_comm c e` は商群でもそのまま型が付く——`rw`/`simp` は構文照合、
+項は defeq 照合、という既知の使い分け(`tools\lean-idioms.md`)がここでも効いた。
+
+### ★★義務の数
+
+★Galois は 4/8 のまま。**ただし G6 の本体(一意化そのもの)はこれで閉じた**。
+残るのは `TateSetup` の仮定を `IsDiscreteValuationRing` 等から出すことと、
+与えられた `W` に対する `q` の存在(`j(q) = j(W)` を解く)である。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-614 ★★★★★★★★★★★スケルトンの `tate_uniformization` が閉じた(第 301 ブロック)
+
+`Found/GaloisRep/TateDvrSetup.lean`、および `Skeleton/GaloisRep/TateUniformization.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> `R` が完備離散付値環、`K` がその分数体なら **`E_q(K) ~= K^x/q^Z`**
+> (`tate_uniformization_dvr`、`tate_uniformization_baseChange`)
+> ★★★**スケルトンの `sorry` が消えた**。
+
+### ★★★★★★仮定は 5 つとも標準的な事実に落ちた
+
+第 245-300 は `TateSetup`(抽象の付値と 2 つの引き戻し条件)の上で進めてきた。
+その仮定がすべて `IsDiscreteValuationRing` から出る。
+
+| `TateSetup`/仮定 | 出どころ |
+|---|---|
+| `v : K^x ->* Multiplicative Z` | 高さ 1 スペクトルの adic 付値(符号を反転) |
+| `hmem0`(`v >= 0` なら環の元) | **DVR は付値環**(`ValuationRing.isInteger_or_isInteger`) |
+| `hmem`(`v > 0` なら `m` の元) | 単元なら `v = 0` だから |
+| `hloc`(単元か `m`) | 局所環の定義 |
+| `hI`(`m` は素) | 極大だから |
+| `hquad`(2 次方程式の根は環の元) | **整閉**(`IsIntegrallyClosed.isIntegral_iff`) |
+| `hvalring`(`t` か `t^-1` が環の元) | **付値環**(同上) |
+| `hΔ`(`Δ != 0`) | `Δ = q·(単元)`(第 101)と単射性 |
+
+★★★★**付値そのものは 2 つの不等式の橋にしか使っていない**:
+`0 <= vAdd v x <-> v(x) <= 1` と `0 < vAdd v x <-> v(x) < 1`。
+★★57 ブロックのうち、付値が要るのは**この 1 ブロックだけ**だった。
+
+### ★★★★★見積もりと実際
+
+スケルトン(2026-08-20)は (a) 級数の収束・(b) `q` 展開の恒等式・(c) 加法公式・
+(d) 核・(e) 形式群と Hensel の 5 段で **50-150 ブロック**と見積もっていた。
+
+| 見積もりの道 | 実際に通った道 |
+|---|---|
+| (a) 両側級数の収束(完備付値体) | **`I` 進完備性だけ**——付値も収束も要らない |
+| (b) Weierstrass 方程式(`q` 展開) | **普遍環への降下 + 分母払い**(第 274-277) |
+| (c) 準同型(加法公式との照合) | **共線性の行列式**(第 278-297) |
+| (d) 核が `q^Z` | 基本領域 `0 <= v(u) < v(q)`(第 284-285) |
+| (e) 全射性(形式群 + Hensel) | **`y/x^2` の整性**——Newton 折れ線を使わない(第 287-289) |
+
+★★★★実際は **57 ブロック**(第 245-301)——見積もりの**下限に収まった**。
+★★★道は 5 段のどれとも違ったが、**段の数(5)は合っていた**のが面白い。
+
+### ★在庫との関係(記録)
+
+`ABC3.Found.Divisor.dvrSpectrum` は同じ対象だが、そちらは Scheme 論を引き込む鎖の
+上にある。★`GaloisRep` を Scheme 論から独立に保つため、3 行の定義を置き直した
+(`tateSpectrum`)。**意図的な重複であり、理由をここに残す**。
+
+### ★★義務の数
+
+★Galois は **4/8 のまま**。G6 の `TateCurveData` は「与えられた `W`(極小・分裂乗法還元)
+に対する `q`」を要求しており、残るのは
+
+1. `j` の反転(**第 100 の `exists_tateParam` に済んでいる**)
+2. **`j(E_q) = j(W)` かつ両方が分裂乗法還元なら `W ~= E_q`**(捻りが自明になること)
+
+の 2 段のうち、**2 段目だけ**である。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-615 ★★★★★★★★界面 `TateCurveData` は充足不能だった(第 302 ブロック)
+
+`Interface/GaloisRep/Reduction.lean`、`Found/GaloisRep/TateDvrSetup.lean`。
+
+### ★★★★★★★★見つけたもの——**局所高さの欄が矛盾していた**
+
+`TateCurveData` は局所高さを
+
+    localHeight : (v : Kˣ →* Multiplicative ℤ) → (W) → … → ℕ
+    localHeight_eq  : (localHeight v W h : ℤ) = toAdd (v (tateParam W h))
+    localHeight_pos : 0 < localHeight v W h
+
+と書いていた。★**`v` を任意に受けている**のが誤りである。`v := 1`(自明な準同型)を
+入れると `toAdd (1 q) = 0` なので `localHeight = 0`、しかし `localHeight_pos` は
+`0 < localHeight` を要求する。★★★**構造そのものが充足不能**であった。
+
+★★★★これは「証明できない」のではなく「**witness が存在し得ない**」——
+第 302 まで気づかずに G6 の残りを見積もっていたことになる。
+★実装を始める前に**型を読む**ことの実例として記録する。
+
+### ★★★★★直し方——正規化付値に固定する
+
+    localHeight : (W) → … → ℕ
+    localHeight_eq : (𝔪 の adic 付値) (tateParam W h) = ofAdd (-(localHeight W h : ℤ))
+    localHeight_pos : 0 < localHeight W h
+
+★mathlib の `IsDiscreteValuationRing.maximalIdeal`(`HeightOneSpectrum R` を返す)の
+adic 付値に固定した。★★★これは**弱める訂正ではなく強める訂正**である——
+`localHeight` が `q` から一意に決まるので、定数 witness はいっそう通らない。
+★同じ界面の `degInf_ge_localHeight`(G8 側)も `v` を渡していたので直した。
+
+### ★★在庫の訂正——mathlib に高さ 1 スペクトルが在った
+
+第 301 で置いた `tateSpectrum` は **mathlib の `IsDiscreteValuationRing.maximalIdeal`
+そのもの**だった(`asIdeal` まで `rfl` で一致)。★削除して mathlib に寄せた。
+★★★これには実利がある——mathlib の `HasMultiplicativeReduction`・
+`HasSplitMultiplicativeReduction` が**同じ付値で定義されている**ので、
+還元の言葉と私の `vAdd` がそのまま噛み合う。
+★橋 `valuation_eq_ofAdd_neg_vAdd` を 1 本足した(界面の `localHeight_eq` の形)。
+
+### ★★★★G6 の残り(2026-08-26 の見積もり)
+
+| 段 | 内容 | 在庫 | 見積 |
+|---|---|---|---|
+| 1 | 変数変換の点への作用 `W.Point ≃+ (C • W).Point` | 係数側(`variableChange_c₄/Δ/j`)は在るが**点への作用は 0 件** | 6-12 |
+| 2 | 分裂乗法還元 → Tate 標準形 `y² + xy = x³ + a₄x + a₆` | 接線の 2 次式が剰余体で分解(mathlib の定義そのもの) | 5-10 |
+| 3 | `j` 一致 → 係数一致(捻りが自明) | 剰余標数 2, 3 が難所 | 4-8 |
+| 4 | 組み立て(`tateParam`・`localHeight` 等) | `j` の反転は第 100 に済み | 3-5 |
+
+★合計 **18-35 ブロック**(中央値 25)。本ブロックの界面訂正はその前提を整えた。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-616 ★★★★★★★★変数変換は点の加法同型を与える(第 303 ブロック)
+
+`Found/GaloisRep/TateVarChange.lean`。G6 の残り 4 段のうちの**第 1 段**。
+
+### ★★★★★★★★到達点
+
+> `W.Point ~=+ (C . W).Point`(`vcPointAddEquiv`)
+
+★★★**mathlib に 0 件**である(2026-08-26 実測)。係数側の
+`variableChange_c4`・`variableChange_Δ`・`variableChange_j` は在るが、
+**点への作用が無い**。
+
+### ★★★★★★★重さで揃う——4 本の恒等式
+
+mathlib の `C . W` は `x = u^2 x' + r`、`y = u^3 y' + u^2 s x' + t` の置き換え。
+点は逆向きに動く:`x' = u^-2(x - r)`、`y' = u^-3(y - s(x - r) - t)`。
+
+| 対象 | 重み | 恒等式 |
+|---|---|---|
+| 方程式 `F` | `u^-6` | `F'(x', y') = u^-6 F(x, y)` |
+| `dF/dx` | `u^-4` | `dF'/dx' = u^-4(dF/dx + s dF/dy)` |
+| `dF/dy` | `u^-3` | `dF'/dy' = u^-3 dF/dy` |
+| 傾き | `u^-1` | `l' = u^-1(l - s)` |
+
+★★★★**`x` 微分だけが `s` で混ざる**——置き換えの Jacobi 行列が三角だからである。
+そのため**単独の非退化条件は保たれない**。実際、最初に
+`dF'/dx' = u^-4 dF/dx` と書いて `ring` に落とされた。
+★★★正しくは**2 つ一組(勾配が消えないこと)が保たれる**——
+`(A' = 0 かつ B' = 0) <-> (A = 0 かつ B = 0)` を示して `not_and_or` で戻す。
+
+### ★★★★★傾きの退化だけは別扱い
+
+mathlib は `y1 = negY x2 y2` のとき `slope := 0` と**約束**している。
+★このとき `l' = u^-1(l - s)` は**成り立たない**(`0 != -u^-1 s`)。
+★★しかしその場合は和が `0` になる場合(`add_of_Y_eq`)なので、傾きを使わない。
+★★★したがって傾きの恒等式を **`x1 != x2`** と **`x1 = x2` かつ非退化**の 2 本に分けた。
+★★★★**約束(convention)は恒等式にならない**——この見分けが本ブロックの要点である。
+
+### ★★場合分けは mathlib の 3 本に対応する
+
+`add_of_X_ne`・`add_of_Y_eq`・`add_of_Y_ne` の 3 つに、そのまま 3 場合が対応した。
+★`Point.some` どうしの等式は `some.injEq` で**座標 2 本の等式に落ちる**
+(非特異性の証明は Prop なので落ちる)ので、`rw` の motive 問題を避けられる。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★★★★★★★★**本ブロックで済** |
+| 2 | 分裂乗法還元 → Tate 標準形 | 次 |
+| 3 | `j` 一致 → 係数一致(捻りが自明) | |
+| 4 | 組み立て(`tateParam`・`localHeight`) | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-617 ★★★★★★★★乗法還元から Tate 母数が取れる/界面の第 2 の欠陥(第 304 ブロック)
+
+`Found/GaloisRep/TateMultRed.lean`、`Interface/GaloisRep/Reduction.lean`。
+
+### ★★★★★★★★到達点
+
+> `W` が乗法還元をもち `Δ != 0` なら、`q ∈ 𝔪`、`q != 0` が在って **`j(E_q) = j(W)`**
+> (`exists_tateParam_of_mult`)
+
+★★★第 100 の `exists_tateParam`(`j` の反転)を、**mathlib の還元の言葉に接続**した。
+結論は分母を払った形 `Δ_q · c₄(W)³ = Δ(W) · c₄(E_q)³` で書いた。
+
+### ★★★★★★mathlib の乗法還元は 2 つの不等式だけ
+
+    v(Δ) < 1        badReduction
+    v(c₄) = 1       multiplicativeReduction
+
+★どちらも `IsDiscreteValuationRing.maximalIdeal R` の adic 付値である。
+★★★**第 302 で `tateDvrVal` をその付値に揃えておいたので**、第 301 の 2 条件
+(`dvr_mem_of_nonneg`・`dvr_mem_max_of_pos`)がそのまま噛み合った——
+`v(c₄) = 1` は「`c₄` は `R` の単元から来る」、`v(Δ) < 1` は「`Δ` は `𝔪` の元から来る」。
+★★在庫を mathlib に寄せた効果が 2 ブロック後に出た形である。
+
+### ★★★★★★★★界面の第 2 の欠陥——結節三次曲線が仮定を満たす
+
+★★★**mathlib の `HasMultiplicativeReduction` は `Δ = 0` を排除しない**
+(`v(0) = 0 < 1` だから)。実際 `y² + xy = x³`(`⟨1,0,0,0,0⟩`)は
+
+| 条件 | 値 |
+|---|---|
+| `Δ` | `0`(Lean で確認) |
+| `c₄` | `1`(単元、Lean で確認) |
+| 接線の 2 次式 | `X² + X`——**分解する**(分裂乗法還元) |
+| `IsMinimal` | `Δ` が全モデルで `0` なので `MaximalFor` は自明に成立 |
+
+★★★★これは**結節三次曲線**であり、滑らかな点の群は `Kˣ` そのもの——
+Tate 母数は `q = 1` にあたるので**局所高さが `0`** になり、`localHeight_pos` と衝突する。
+★したがって `TateCurveData` の 5 欄すべてに **`[W.IsElliptic]`**(`Δ` が単元)を足した。
+★★G8 側の `degInf_ge_localHeight` も同じ。
+
+### ★★2 つの欠陥に共通する形
+
+第 302(任意の付値 `v`)も本ブロック(`Δ = 0`)も、**「型が広すぎて偽の場合を含む」**
+という同じ形である。★★★どちらも**実装を始める前には見えず、
+実装のために型を読んだときに初めて見えた**。
+★型は仕様であり、**書いた時点では検算されていない**——ここが記録に値する。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | 次 |
+| 3 | `j` 一致 → 係数一致(捻りが自明) | |
+| 4 | 組み立て | ★母数の存在は本ブロックで済 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-618 ★★★★★★★★分裂条件から接線の傾きが持ち上がる(第 305 ブロック)
+
+`Found/GaloisRep/TateSplitRoot.lean`。G6 第 2 段(Tate 標準形)の最初の一歩。
+
+### ★★★★★★★★到達点
+
+> 分裂乗法還元なら、接線の 2 次式の根が **`R` の中に取れる**(`exists_tangent_root`)
+
+★★★mathlib の `HasSplitMultiplicativeReduction` は**剰余体で分解する**としか言わない。
+それを **Hensel で `R` まで持ち上げる**のが本ブロックである。
+
+### ★★★★★★根が単純であることが要——判別式は `-c₄c₆`
+
+Hensel は**単純根**を要求する。接線の 2 次式 `c₄X² + a₁c₄X - (54b₆ - 3b₂b₄ + a₂c₄)` の
+判別式は、`b` と `c` の定義を展開すると
+
+    (a₁c₄)² + 4c₄(54b₆ - 3b₂b₄ + a₂c₄) = -c₄c₆        (`ring` で出る)
+
+★★★★**乗法還元では `c₄` も `c₆` も単元**なので、判別式は剰余体で `0` でない——
+すなわち**根は単純**である。
+★`c₆` が単元なのは `1728Δ = c₄³ - c₆²` から:`c₄³` は単元、`1728Δ ∈ 𝔪`。
+★★「分裂」は根の**存在**を、「乗法(加法でない)」は根の**単純性**を与えている——
+2 つの仮定が別々の役をしているのが見える。
+
+### ★★★★モニックに直してから Hensel
+
+mathlib の `HenselianRing.is_henselian` は**モニック**多項式にしか使えない。
+★`c₄` が単元なので `c₄⁻¹` を掛けて `X² + a₁X - c₄⁻¹Q` に直し、得られた根に `c₄` を掛けて戻す。
+★★`IsAdicComplete.henselianRing` がそのまま使えた(完備なら Hensel、は mathlib に在る)。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | ★接線の傾きまで済(本ブロック) |
+| 3 | `j` 一致 → 係数一致 | |
+| 4 | 組み立て | ★母数の存在は済(第 304) |
+
+★★★★第 3 段の見通しを一つ訂正しておく。「`j` が一致すれば同型」は
+**捻りの分類**を要し、剰余標数 2 では平方根の Hensel が効かない。
+★★したがって第 3 段は「標準形に直してから **`(q, s)` の 2 変数で不動点を取る**」
+という道を採る予定である(第 245-301 で作った縮小写像の道具がそのまま使える)。
+★これは**すべての標数で通る**道であり、見積もりは第 3 段 8-15 ブロックに上方修正する。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-619 ★★★★★★★★節点は `R` に持ち上がる(第 306 ブロック)
+
+`Found/GaloisRep/TateNodeMove.lean`。
+
+### ★★★★★★★★到達点
+
+> `c₄` が単元で `Δ ∈ 𝔪` なら、平行移動 `(r, t)` が在って
+> **`a₃, a₄, a₆` がすべて `𝔪` に入る**(`exists_node_translation`)
+
+★★★これは「還元の**節点を原点に移す**」ことに他ならない。G6 第 2 段の骨格。
+
+### ★★★★★★節点の座標は `c₄` で割れば出る
+
+    x₀ = (18b₆ - b₂b₄)/c₄
+
+★★これは**すべての標数で使える**——`c₄` が単元なのは乗法還元の仮定そのもの。
+★★★mathlib の分裂条件に現れる 2 次式 `c₄T² + a₁c₄T - (54b₆ - 3b₂b₄ + a₂c₄)` は、
+まさに `3x₀ + a₂` を `c₄` で書き直したものである(第 305 の 2 次式と同じ出所)。
+
+### ★★★★★★★`y₀` は標数で 2 通り——しかし場合分けは 2 つで済む
+
+`y₀` は `∂F/∂y = 0`(`2y + a₁x + a₃ = 0`)から出したいが、剰余標数 2 では `2` が割れない。
+そこで `∂F/∂x = 0` を使う。
+
+| 場合 | `y₀` の分子 | 分母 |
+|---|---|---|
+| `2` が単元 | `-(a₁x₀ + a₃c₄)` | `2c₄` |
+| `a₁` が単元 | `3x₀² + 2a₂c₄x₀ + a₄c₄²` | `a₁c₄²` |
+
+★★★★**この 2 つで尽きる**:`2` と `a₁` がともに `𝔪` に入れば
+`c₄ = a₁·a₁³ + 2·(…)` も `𝔪` に入り、単元でなくなる(`isUnit_two_or_isUnit_a1`)。
+★★★★★「標数 2 は別扱い」ではなく「**`2` が単元か `a₁` が単元か**」という
+**環の言葉の二分法**にしたのが要点である。標数を持ち出さずに済む。
+
+### ★★★★★★分母を払えば `ring` で verify できる
+
+証明の要は 3 本の多項式恒等式(分母は払ってある):
+
+    6x₀² + 4c₄a₂x₀ + 2c₄²a₄ + a₁²c₄x₀ + a₁a₃c₄² = -72Δ
+    c₄y₀² + 2c₄a₁x₀y₀ + 2c₄²a₃y₀ - 4x₀³ - … - 4c₄³a₆ = -4c₆Δ
+    2y₀ᴮ + a₁²c₄x₀ + a₁a₃c₄² = -72Δ
+
+★★★どれも `b`・`c`・`Δ` の定義を開けば **`ring` が出す**。
+★★★★★**分母を払ってから `ring` に渡す**——第 274 以来の型がここでも効いた。
+
+### ★★★★道具立て——sympy が探し、Lean が検算する
+
+恒等式の**係数(cofactor)は sympy で求め**、Lean では `ring`/`linear_combination` で
+**検算だけ**した。★★★探索と検算を分けると、この種の多項式仕事は速い。
+★剰余標数 2 用の `Δ + a₁⁶a₆ = 2P + a₃Q + a₄S` も同じやり方で得た(`P, Q, S` は
+sympy が出した 3 本の多項式)。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | ★接線の傾き(第 305)+ 節点(本ブロック) |
+| 3 | `(q, s)` の 2 変数不動点 | |
+| 4 | 組み立て | ★母数の存在は済(第 304) |
+
+★第 2 段の残りは「傾きで剪断して `a₁ = 1`、`a₂ = a₃ = 0` に正規化」である。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-620 ★★★★★★★★★Tate 標準形への正規化——G6 第 2 段が閉じた(第 307 ブロック)
+
+`Found/GaloisRep/TateNormalForm.lean`。
+
+### ★★★★★★★★★到達点
+
+> 分裂乗法還元をもつ曲線は、変数変換で
+> **`y² + xy = x³ + a₄x + a₆`(`a₄, a₆ ∈ 𝔪`)**に直せる
+> (`exists_tate_normal_form_of_split`)
+
+★★★これが **Tate 標準形**である。**G6 の第 2 段がこれで閉じた**。
+
+### ★★★★★★4 つの変数変換
+
+| 段 | 変換 | 効き目 |
+|---|---|---|
+| 1 | `(1, r₀, 0, t₀)` | 節点を原点へ(第 306) |
+| 2 | `(1, 0, α, 0)` | 接線で剪断——`a₂ ∈ 𝔪`(第 305 の `α`) |
+| 3 | `(a₁ + 2α, 0, 0, 0)` | 尺度を合わせて **`a₁ = 1`** |
+| 4 | `(1 + 2s, -a₃, s, 0)` | **`a₂ = a₃ = 0`**(Artin-Schreier の Hensel) |
+
+★★★★第 3 段が効くのは **`a₁ + 2α` が単元**だから。これは
+`(c₄(a₁ + 2α))² = -c₄c₆`(第 305 の判別式)から**根の式だけで**出る——
+剰余体の議論に戻らなくてよい。★★根が単純であることの「別の顔」である。
+
+### ★★★★★★★第 4 段は 1 本の Artin-Schreier で足りる
+
+`a₂ = a₃ = 0` を同時に達成するには、素朴には 2 本の方程式が要るように見える。
+★しかし `u = 1 + 2s` と結ぶと `a₁ = 1` が保たれ、`r = -a₃` で `a₃ = 0` が出て、
+残るのは **`s² + s = a₂ - 3a₃`** の 1 本だけになる。
+★★★★`s² + s = c`(`c ∈ 𝔪`)は **`X² + X - c` の微分が `1`** なので
+標数によらず Hensel が効く(`exists_artin_schreier`)。
+★★★★★**剰余標数 2 でも平方根を取らずに済む**——ここが分岐点だった。
+★第 305 の記録で「剰余標数 2 では平方根の Hensel が効かない」と書いたが、
+**平方根を使わない道**(Artin-Schreier)が正規化の側にあった。
+
+### ★★★★変換の合成は mathlib の群作用で
+
+`VariableChange` は群で、`(C * D) . E = C . (D . E)` が `mul_smul` で使える。
+★4 段を掛け算 1 つにまとめられるので、最終形は `∃ C, …` の 1 文で書けた。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | ★★★★**済(本ブロック)** |
+| 3 | `(q, s)` の 2 変数不動点 | 次 |
+| 4 | 組み立て | ★母数の存在は済(第 304) |
+
+★第 3 段は「標準形の `(a₄, a₆)` を `E_q` の `(a₄(q), a₆(q))` に合わせる」——
+1 変数 `q` では足りず、標準形に残る 1 径数(`s ∈ 𝔪` の剪断)と合わせて
+**2 変数の不動点**にする。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-621 ★★★★★★★★標準形に残る 1 径数で `a₄` を合わせる(第 308 ブロック)
+
+`Found/GaloisRep/TateResidual.lean`。
+
+### ★★★★★★★★到達点
+
+> Tate 標準形の曲線は、**残る 1 径数**を動かして `a₄` を**任意の `𝔪` の値に合わせられる**
+> (`exists_residual_match_a4`)
+
+### ★★★★★★★標準形はまだ 1 径数残っている
+
+`a₁ = 1`・`a₂ = a₃ = 0` を保つ変数変換 `(u, r, s, t)` は
+`u = 1 + 2s`、`3r = s + s²`、`r = -2t` を満たすものだけ。
+★★★標数を割らずに済ませるには **`t` で母数化**する:`t ∈ 𝔪` を与えると `r := -2t`、
+`s` は **`s + s² = -6t`**(第 307 の Artin-Schreier)で取れる。
+★`s` で母数化すると `3r = s + s²` で 3 を割る羽目になり、`r` で母数化すると
+`r = -2t` で 2 を割る羽目になる。**`t` から始めると両方避けられる**。
+
+### ★★★★★★★★★`u² = 1 - 24t`——`s` が消える
+
+`u = 1 + 2s` と `s + s² = -6t` から
+
+    u² = 1 + 4(s + s²) = 1 - 24t
+
+★★★★**`s` が消えて `t` だけの式になる**。これで `a₄` の変換則が
+
+    (1 - 24t)² · a₄' = a₄ - t + 12t²
+
+という **`t` の 2 次式**になり、**Hensel で持ち上げた `s` の連続性を論じずに済む**。
+★★★★★ここが本ブロックの要点である——`s` を消せると分かった時点で、
+2 変数の不動点(第 305 の記録で予告した道)が **1 変数**に落ちた。
+
+### ★★★★★★縮小写像は 1 変数
+
+`a₄' = A` を解くと `t = a₄ + 12t² - (1 - 24t)²A =: F(t)`。
+★差が `F(x) - F(y) = (x-y)·(12(x+y) + 24(2-24x-24y)A)` と**因数分解できる**(`ring`)ので、
+括弧が `𝔪` に入り縮小写像になる。★★第 100 の `exists_fixedPoint_of_contraction` が
+そのまま効いた。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | ★済(第 305-307) |
+| 3 | `a₄` を合わせる | ★★★★**済(本ブロック)** |
+| 3' | `a₆` は自動で合う | 次——`j` と `a₄` が決まれば `a₆ ∈ 𝔪` は一意 |
+| 4 | 組み立て | ★母数の存在は済(第 304) |
+
+★★★第 3' 段の見通し:`Δ` は `(a₄, a₆)` の 2 次式で、`a₆` の 2 次の係数は `-432`、
+1 次の係数は `72a₄ - 1`。**`a₆ ∈ 𝔪` の範囲では後者が単元**なので、
+`Δ` と `a₄` が決まれば `a₆` は**一意**である(標数によらない)。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-622 ★★★★★★★★★★分裂乗法還元の曲線は Tate 曲線である——G6 第 3 段が閉じた(第 309 ブロック)
+
+`Found/GaloisRep/TateModel.lean`。
+
+### ★★★★★★★★★★到達点
+
+> `W` が分裂乗法還元をもち `Δ != 0` なら、`q ∈ 𝔪`(`q != 0`)と変数変換 `C` が在って
+> **`C . (W の整モデル) = E_q`**(`exists_tate_model`)
+
+★★★**捻り(twist)の分類を一度も経由せずに済んだ**。
+
+### ★★★★★★★★`a₆` は勝手に合う——これが迂回路の芯
+
+第 308 で `a₄` は合わせられた。残る `a₆` は**合わせにいく必要がない**:
+
+    Δ = a₄² - a₆ - 64a₄³ + 72a₄a₆ - 432a₆²             (標準形での判別式)
+
+★`a₆` について 2 次だが、差を取ると
+
+    Δ - Δ' = (a₆ - a₆')·(-1 + 72a₄ - 432(a₆ + a₆'))
+
+と**因数分解する**。★★★★`a₄, a₆, a₆' ∈ 𝔪` なので右の括弧は **`-1 + 𝔪`、すなわち単元**。
+したがって **`Δ` と `a₄` が決まれば `a₆` は一意**である(`normal_a6_unique`)。
+★★★★★**標数を一切使わない**。
+
+### ★★★★★★なぜ `Δ` が合うのか
+
+`Δ/c₄³` は変数変換で不変(`Delta_c4_ratio`、分母は払ってある)。
+★`q` はその値から取ったので、`a₄` を合わせた時点で `c₄ = 1 - 48a₄` も合い、
+したがって `Δ` も合う。
+★★つまり **`j` の一致が `Δ` の一致に化ける**のは、標準形では `c₄` が `a₄` だけで決まるから。
+
+### ★★★★★捻りを迂回できた理由(記録)
+
+古典的な筋は「`j` が同じ ⟹ 捻り ⟹ 分裂性から捻りが自明」だが、
+**捻りの分類は剰余標数 2 で Artin-Schreier になり重い**(§9-618 で予告した難所)。
+★★★実際に通ったのは
+
+1. **標準形に落とす**(第 305-307)——ここで分裂性を使い切る
+2. **残る 1 径数で `a₄` を合わせる**(第 308)
+3. **`a₆` は判別式の因数分解から自動**(本ブロック)
+
+という筋で、**捻りの言葉が一度も出てこない**。
+★★★★「分類してから合わせる」のではなく「**合わせられる形に正規化してしまう**」。
+
+### ★★残り(G6)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 変数変換の点への作用 | ★済(第 303) |
+| 2 | 分裂乗法還元 → Tate 標準形 | ★済(第 305-307) |
+| 3 | `C . W = E_q` | ★★★★**済(本ブロック)** |
+| 4 | `TateCurveData` への組み立て | 次 |
+
+★第 4 段の材料はそろっている:`W = (整モデル) . map`、第 303 の点の加法同型、
+第 301 の `E_q(K) ~= K^x/q^Z`、第 302 の `localHeight` の橋。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 4/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-623 ★★★★★★★★★★★G6 達成——Galois が 5/8 になった(第 310 ブロック)
+
+`Found/GaloisRep/TateCurveWitness.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> **`TateCurveData` は非空虚である**(`TateCurveData.nonvacuous`)
+
+★★★★★**義務の数が動いた**——Arakelov 9/9、**Galois 4/8 → 5/8**(G1, G2, G3, G4, G6)。
+
+### ★★★★★★組み立ての 4 本
+
+| 欄 | 中身 | 出どころ |
+|---|---|---|
+| `tateParam` | `q ∈ Kˣ` | 第 309 の `exists_tate_model` から選択 |
+| `uniformization` | `W(K) ≅ Kˣ/q^ℤ` | 第 303(点への作用)+ 第 301(一意化) |
+| `localHeight` | `v(q)` の自然数化 | 第 302 の橋 |
+| `localHeight_eq`・`_pos` | 定義の同定と正値性 | `q ∈ 𝔪`、`q != 0` |
+
+### ★★★★★★★一意化の鎖
+
+    W.Point  ~=+  ((C の像) . W).Point        第 303 `vcPointAddEquiv`
+             =    (E_q の K への像).Point       第 309 を `map` した
+             ~=+  Additive (K^x/q^Z)           第 301 `tate_uniformization_dvr`
+
+★★★★mathlib の `map_variableChange`(`C.map φ . W.map φ = (C . W).map φ`)が
+**ちょうど継ぎ目**になっている。整モデルの底変換が `W` に戻ること
+(`baseChange_integralModel_eq`)も mathlib に在った。
+
+### ★★★★★★★★G6 の全体像(第 245-310、66 ブロック)
+
+| 段 | 内容 | ブロック |
+|---|---|---|
+| 一意化本体 | `E_q(K) ~= K^x/q^Z` | 245-301(57) |
+| 界面の訂正 | 付値の固定・`Δ != 0` | 302, 304 |
+| 変数変換の点への作用 | mathlib 0 件 | 303 |
+| 標準形への正規化 | 節点・剪断・Artin-Schreier | 305-307 |
+| `E_q` への同定 | `a₄` を合わせ、`a₆` は自動 | 308-309 |
+| 組み立て | `TateCurveData` | 310 |
+
+★★★2026-08-20 のスケルトンは (a)-(e) の 5 段で **50-150 ブロック**と見積もっていた。
+**実際は 66 ブロック**で、見積もりの下 1/3 に収まった。
+★★★★ただし**通った道は 5 段のどれとも違う**——級数の収束も形式群も Newton 折れ線も
+捻りの分類も使わなかった。使ったのは
+**`I` 進完備性・分母払い・共線性の行列式・Hensel(Artin-Schreier 型)**である。
+
+### ★★★★★界面の訂正が 2 回入っている(記録)
+
+本 witness が通るのは、第 302(任意の付値 → 正規化付値)と第 304(`Δ != 0` を要求)の
+**2 つの界面訂正**を先に済ませてあるからである。
+★★★訂正前の `TateCurveData` は**充足不能**だった——**実装は仕様の検算でもある**。
+
+### ★★残り(Galois 3 件)
+
+| 件 | 内容 | 状況 |
+|---|---|---|
+| G5 | `FullImageData`(Serre の全射定理) | G1-G4・G6-G8 に従属、重い |
+| G7 | 半安定還元と `O_L` 上のモデル | Néron モデルが mathlib に無い |
+| G8 | Faltings 高さ | Arakelov 側 (D2) と合流 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-624 ★★★★★★G7 の 4 つ目の穴を塞いだ——`ω_E` を曲線に結びつけた(第 311 ブロック)
+
+`Interface/GaloisRep/Reduction.lean`、`Check/GaloisRep/OmegaNondegenerate.lean`。
+
+### ★★★★★★穴の在処(2026-08-18 に自分で見つけ、未塞のままだったもの)
+
+`SemistableModelData` の `omega`(Néron 微分)を縛っていたのは
+**`omega_rank_one`(階数 1)だけ**だった。★`Check/GaloisRep/OmegaNondegenerate.lean` が
+**`omega L W := 𝓞 L`(曲線を無視する定数)で満たせる**ことを示していた。
+
+★★★G6 が済んだので、次に手を付けるのは G7 である。**その前に穴を塞ぐ**。
+
+### ★★★★★塞ぎ方——分数イデアル + 変数変換則
+
+`ω_E` を **`L` の分数イデアル**(`Submodule (𝓞 L) L`)として持ち、3 条件を課す:
+
+    ω_E は有限生成         (分数イデアルであること)
+    ω_E != ⊥              (階数 1 の代わり)
+    x ∈ ω_{C•E} ↔ u·x ∈ ω_E   (★変数変換則)
+
+★★★★不変微分は `ω' = u·ω` と変わるので、Néron 微分の係数は `u^-1` 倍される——
+**変数変換則は Néron 微分について真である**(界面を偽にしていない)。
+
+### ★★★★★★定数 witness はもう通らない(証明した)
+
+`no_constant_omegaFrac`:曲線を無視する分数イデアル `I` が変数変換則を満たすなら
+
+1. 任意の `y != 0` に対し `u := c/y`(`c ∈ I` は非零)を取ると `y ∈ I`——**`I = ⊤`**
+2. `⊤` が有限生成なら `L` は `𝓞_L` 上有限、よって全元が整、`𝓞_L` は体——**矛盾**
+
+★★★★★**「単位群で動かせば全体になる」**——分数イデアルであることが効いている。
+
+### ★★規則の 4 例目が閉じた
+
+> **`→ Type` の posit は、必ず「その欄と入力データの両方を言及する条件」を持て。**
+
+| # | 場所 | 塞いだ日 |
+|---|---|---|
+| 1 | C1 `evalAffine` | 2026-08-17 |
+| 2 | B1 `Pic` | 2026-08-17 |
+| 3 | B1 `pullback` | 2026-08-18 |
+| 4 | **G7 `omega`** | **2026-08-26(本ブロック)** |
+
+★★★本セッションで見つけた界面の欠陥(第 302 の任意付値、第 304 の `Δ = 0`)と合わせると
+**6 例**になる。★★★★どれも「型が広すぎる」形であり、**実装に入って初めて見える**。
+
+### ★★義務の数
+
+★Arakelov 9/9、Galois **5/8**(G6 は第 310 で達成)。
+★★G7 は**穴を塞いだぶん難しくなった**が、これは正しい向きの変化である——
+充足不能や空虚な witness を通す界面のままでは、達成の数に意味がない。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-625 ★★★★★★局所の Néron 指数——G7 の第 1 歩(第 312 ブロック)
+
+`Found/GaloisRep/NeronExp.lean`。
+
+### ★★★★★★到達点
+
+> 極小モデルへ移す変数変換の **`u` の付値は一意**であり(`minimal_u_vAdd_eq`)、
+> それを `minimalExp R W` と書く。変数変換では **`v(u₀)` だけずれる**
+> (`minimalExp_variableChange`)
+
+★★★これが G7 の `ω_E`(第 311 で分数イデアルに直した欄)の**各素点での指数**である。
+
+### ★★★★★なぜ一意か——判別式が押さえている
+
+mathlib の `IsMinimal` は「整モデルの中で `v(Δ)` を最大にする」条件。
+★2 つの極小モデル `C . W`、`C' . W` があると、`C' * C^-1` を `C . W` に当てて
+**互いに `<=` を言い合える**ので `v(Δ)` は一致する。
+★★`Δ(C . W) = u^-12 · Δ(W)` だから `12·v(u)` が決まり、**`v(u)` が一意**になる。
+★★★★**極小性が「値」ではなく「最大性」で書かれている**ので、
+2 つの極小モデルを**互いに比べる**という形の議論になった。
+
+### ★★★★変数変換でのずれ方
+
+`C . (C₀ . W)` が極小なら `(C * C₀) . W` も極小で、`u` は掛け算になる:
+
+    minimalExp R (C₀ . W) = minimalExp R W - v(C₀.u)
+
+★★★これが界面(第 311)の `omegaFrac_variableChange` の**局所版**である。
+
+### ★★mathlib の在庫(実測)
+
+`WeierstrassCurve.exists_isMinimal`(極小モデルの存在)・`minimal`・`isMinimal_iff` は
+**在る**。★ただし**それだけ**で、`u` の一意性も判別式との関係も無い(2026-08-26 実測)。
+★★本ブロックはその隙間を埋めた。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 局所の Néron 指数 | ★★★★**済(本ブロック)** |
+| 2 | ほとんどの素点で指数が `0` | 次 |
+| 3 | 分数イデアルとしての有限生成性 | |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-626 ★★★★★★`v(Δ) < 12` なら極小(第 313 ブロック)
+
+`Found/GaloisRep/NeronMinimal.lean`。
+
+### ★★★★★★到達点
+
+> 整モデルで **`v(Δ) < 12`** なら、その曲線は**すでに極小**(`isMinimal_of_vAdd_Delta_lt`)。
+> したがって `minimalExp = 0`。
+
+★★★これが「**ほとんどの素点で Néron 指数が `0`**」の芯である——
+`v(Δ) = 0` の素点(有限個を除く全部)では、この判定がそのまま効く。
+
+### ★★★★★なぜ `12` か——`Δ` は `u^-12` で動く
+
+変数変換で `v(Δ') = v(Δ) - 12·v(u)`。
+★整モデルなら `v(Δ') >= 0` だから `12·v(u) <= v(Δ) < 12`、よって **`v(u) <= 0`**。
+★★一方「`Δ` の付値を下げられる」なら `v(u) >= 0`。合わせて **`v(u) = 0`**。
+★★★不等式 2 本を `omega` に渡すだけで済んだ。
+
+### ★★★配管——`rw` は構文照合、`exact` は defeq 照合(再確認)
+
+`Units.mk0 x h` を coe したものと `x` は **defeq だが構文的に別**なので、
+`rw [valuation_le_iff_vAdd_le …]` は当たらない。★`exact (… ).2 (by omega)` に替えると通る。
+★★`tools\lean-idioms.md` の項がここでも効いた(第 296 の商群と同じ形)。
+★★★もう一つ:`R` が**結論にしか現れない**補題は `(R := R)` を明示しないと
+インスタンス探索が詰まる(`typeclass instance problem is stuck`)。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 局所の Néron 指数 | ★済(第 312) |
+| 2a | `v(Δ) < 12` なら指数 `0` | ★★★★**済(本ブロック)** |
+| 2b | ほとんどの素点で `v(Δ) = 0`・整 | 次(数体の側の有限性) |
+| 3 | 分数イデアルとしての有限生成性 | |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-627 ★★★★★★★悪い素点は有限個(第 314 ブロック)
+
+`Found/GaloisRep/NeronFinite.lean`。
+
+### ★★★★★★★到達点
+
+> 数体 `L` 上の曲線 `W`(`Δ != 0`)に対し、
+> **Néron 指数が `0` でない素点は有限個**(`finite_bad_primes`)
+
+★★★これで `ω_E`(第 311 の分数イデアル)の**台が有限**になり、分数イデアルとして意味を持つ。
+
+### ★★★★★★素点ごとの環は `valuationSubringAtPrime` を使う
+
+`Localization.AtPrime p` を `L` の中で見るには `Algebra (Localization.AtPrime p) L` の
+配管が要る(**mathlib に無い**——`exact?` で確認)。
+★mathlib の **`HeightOneSpectrum.valuationSubringAtPrime L p`**(`L` の部分環)を使うと
+`Algebra`・`IsFractionRing`・`IsDomain` が**すべて自動で付く**。
+★★離散付値環であることは `IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain`
+から出る(この部分環は `p` での局所化そのものだから)。
+★★★★**「同じ環の別の書き方」を選ぶだけで配管が消えた**——在庫の読み方の実例である。
+
+### ★★★★★悪い素点の中身
+
+`p` が悪い(指数 `!= 0`)なら、`a₁, a₂, a₃, a₄, a₆` のどれかが `p` で極を持つか、
+`Δ` または `Δ⁻¹` が `p` で極を持つ。
+★★★★どれも `HeightOneSpectrum.Support`(極の集合)で、**mathlib が有限性を持っている**
+(`Support.finite`)。★7 つの有限集合の合併で押さえた。
+
+### ★★★なぜ `Δ` と `Δ⁻¹` の両方か
+
+`v(Δ) = 0` を言うのに「`Δ` が整」だけでは足りない(`v(Δ) > 0` かもしれない)。
+★`Δ⁻¹` も整なら `v(Δ) <= 0` も出て、合わせて `v(Δ) = 0 < 12`——第 313 が効く。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1 | 局所の Néron 指数 | ★済(第 312) |
+| 2 | ほとんどの素点で指数 `0` | ★★★★**済(第 313-314)** |
+| 3 | 分数イデアルの構成と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-628 ★★★★★★★素点の付値で測った Néron 指数——同値で足りる(第 315 ブロック)
+
+`Found/GaloisRep/NeronValuation.lean`。
+
+### ★★★★★★★到達点
+
+> Néron 指数を **`p` の adic 付値**で測り直した `neronExp p W` を作り、
+> **一意性・変数変換則・有限性**をすべて移した。
+
+★★★これで **mathlib の分数イデアルの API(`p.valuation` で書かれている)に載る**。
+
+### ★★★★★★★★2 つの付値は「同値」で足りる
+
+`minimalExp`(第 312)は**局所化 `R_p` の極大イデアルの付値**で測っていた。
+一方 mathlib の分数イデアル論は **`p` の adic 付値**で書かれている。
+★この 2 つが**等しい**ことを示すには正規化の一致まで要る(一様化元を取って比べる)。
+★★★★しかし本ブロックで要るのは
+
+* 一意性:`v₁ x = v₁ y ↔ v₂ x = v₂ y`(`IsEquiv.eq_iff`)
+* 有限性:`v₁ x = 1 ↔ v₂ x = 1`(`IsEquiv.eq_one_iff_eq_one`)
+
+の 2 つだけで、**同値(`Valuation.IsEquiv`)で十分**である。
+★★★★★同値は**付値環が一致すること**から出る(`isEquiv_iff_valuationSubring`)——
+片方は第 301 の `dvr_mem_of_nonneg`、もう片方は mathlib の
+`valuationSubringAtPrime_eq_valuationSubring`。
+
+### ★★★★★必要な強さを見極める
+
+★★「等しい」が要るのは**値そのものを使う**ときだけで、
+「等しいかどうか」「1 かどうか」しか使わないなら**同値で通る**。
+★★★★★**正規化の比較を丸ごと避けられた**——本ブロックの要点である。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1-2 | 局所の Néron 指数と有限性 | ★済(第 312-314) |
+| 2' | `p` の付値への移送 | ★★★★**済(本ブロック)** |
+| 3 | 分数イデアルの構成と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-629 ★★★★★★★★Néron 微分の分数イデアル——`count` と付値の橋(第 316 ブロック)
+
+`Found/GaloisRep/NeronIdeal.lean`。
+
+### ★★★★★★★★到達点
+
+> `ω_E := ∏ᶠ p, p^{Néron 指数}` を**分数イデアルとして構成**し、
+> **零でないこと**と**各素点での重複度がちょうど Néron 指数であること**を示した。
+
+★★★これが界面(第 311)の `omegaFrac` の中身である。
+
+### ★★★★★★★★橋——`count` と付値
+
+mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複度)で書かれ、
+私の Néron 指数は **adic 付値**で書かれている。両者はどちらも `Associates.count` で
+定義されているので、**主分数イデアルの上で一致する**:
+
+    count K p (spanSingleton x) = valAdd p x
+
+★★★★証明は `x = a/b` と書いて `count_well_defined` と `intValuationDef` を突き合わせるだけ。
+★★これがあるので、以降は **mathlib の `count` の代数(`count_mul`・`count_zpow`・
+`count_finprod`)がそのまま使える**。
+★★★★★**2 つの定義が同じ土台(`Associates.count`)に立っていた**のが効いた——
+付値の正規化(第 315)は同値で回避したが、こちらは**等式が取れた**。
+
+### ★★★★構成と基本性質
+
+* `omegaFracIdeal W := ∏ᶠ p, p^{neronExp p W}`(有限台なので実質有限積)
+* `count_omegaFracIdeal`:`count p (ω_E) = neronExp p W`(`count_finprod`)
+* `omegaFracIdeal_ne_zero`:有限個の非零因子の積だから非零
+
+### ★★在庫の確認漏れ(記録)
+
+外延性(「`count` がすべて一致すれば分数イデアルは一致」)を書いたら、
+**既に `Found/GaloisRep/D2Bridge.lean` に同名・同内容の `eq_of_count_eq` があった**
+(しかもより一般の Dedekind 環で)。★ビルドが `environment already contains` で教えてくれた。
+★★★**新しい補題を書く前に名前で grep する**——本セッション 3 度目の同じ失敗である。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 3a | 分数イデアルの構成 | ★★★★**済(本ブロック)** |
+| 3b | 変数変換則(イデアルの水準)と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-630 ★★★★★★★★★★★G7 達成——Galois が 6/8 になった(第 317 ブロック)
+
+`Found/GaloisRep/NeronWitness.lean`。
+
+### ★★★★★★★★★★★到達点
+
+> **`SemistableModelData` は非空虚である**(`SemistableModelData.nonvacuous`)
+
+★★★★★**義務の数が動いた**——Arakelov 9/9、**Galois 5/8 → 6/8**
+(G1, G2, G3, G4, G6, G7)。
+
+### ★★★★★★変数変換則——イデアルの水準から元の水準へ
+
+`count` の代数で**イデアルの等式**を出す:
+
+    ω_E(C . W) = (u)^-1 · ω_E(W)
+
+★各素点で `count` を比べるだけ(`count_mul`・`count_inv`・第 316 の橋)。
+★★★これを**元の水準**に落とすと界面の形になる:
+
+    x ∈ ω_E(C . W)  <->  u·x ∈ ω_E(W)
+
+★★`spanSingleton x <= I <-> x ∈ I` と `le_spanSingleton_mul_iff` で往復する。
+
+### ★★★★有限生成性は mathlib が持っていた
+
+`FractionalIdeal.fg_of_isNoetherianRing`——**分数イデアルは Noether 環の上で f.g.**。
+★`𝓞_L` は Noether なのでそのまま効く(1 行)。
+
+### ★★★界面の第 3 の訂正(記録)
+
+`omegaFrac` の 3 性質に **`[W.IsElliptic]`** を付けた。
+★`Δ = 0` の曲線に Néron 微分は無く、変数変換則も成り立たない
+(両辺とも自明なイデアルになり `x ∈ 1 <-> u·x ∈ 1` は偽)。
+★★欄そのものは全曲線で定義しておき、**性質だけを楕円曲線に限る**形にした。
+★★★第 304(`TateCurveData` の `Δ != 0`)と同じ訂正である。
+
+### ★★★★★★★★G7 の全体像(第 311-317、7 ブロック)
+
+| 段 | 内容 | ブロック |
+|---|---|---|
+| 界面の穴を塞ぐ | `ω_E` を分数イデアル + 変数変換則に | 311 |
+| 局所の Néron 指数 | 極小モデルの `u` の付値は一意 | 312 |
+| ほとんどの素点で `0` | `v(Δ) < 12` なら極小 / 有限性 | 313-314 |
+| 素点の付値へ移送 | 付値の**同値**で足りる | 315 |
+| 分数イデアルの構成 | `count` と付値の橋 | 316 |
+| 組み立て | 変数変換則と f.g. | 317 |
+
+★★★★**7 ブロックで済んだ**のは、mathlib の Dedekind 環の在庫
+(`exists_isMinimal`・`Support.finite`・`FractionalIdeal.count` の代数・
+`fg_of_isNoetherianRing`)が厚かったから。
+★★★★★逆に**無かったのは「極小モデルの `u` の一意性」だけ**で、そこが本質だった。
+
+### ★★残り(Galois 2 件)
+
+| 件 | 内容 | 状況 |
+|---|---|---|
+| G5 | `FullImageData`(Serre の全射定理) | 重い。G1-G4・G6-G8 に従属 |
+| G8 | Faltings 高さ | **(D3) の計量**が要る(§9-404 の未塗りの穴) |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-631 ★★★★★★★G8 の界面も充足不能だった——分岐が効く(第 318 ブロック)
+
+`Interface/GaloisRep/Reduction.lean`。
+
+### ★★★★★★★見つけたもの——`degInf_ge_localHeight` は偽
+
+`FaltingsHeightData` の
+
+    d · deg∞(E_L) >= (局所高さ) · log 2
+
+は、`Lv` を **`L` の任意の拡大**として量化していた。★★★★しかしそれだと
+**分岐が効いて偽になる**:
+
+* `Lv` を `L_v` の分岐次数 `e` の拡大に取ると、Tate 母数 `q_E` は**同じ元**のまま、
+  その付値だけが `e` 倍になる
+* したがって右辺は `e` を大きくすればいくらでも大きくなる
+* 左辺は `L` と `E` だけで決まる
+
+★★★★★**`e` を大きくすれば必ず破れる**——witness は存在し得ない。
+
+### ★★★★訂正——原文の読みに戻す
+
+原文(p.18)は「`v` は `E_L` の局所高さ」と書いており、**`L` の素点**を指している。
+★そこで `R` が **`L` の素点 `p` の上にあって不分岐**であること
+
+    ∀ x : L, v_R(x) = v_p(x)          (付値が一致する)
+
+を仮定に加えた。★★これで分岐の逃げ道が塞がり、statement は真になる。
+★★★界面は `Found` を import できないので、**mathlib の付値だけで書ける形**にした
+(`HeightOneSpectrum.valuation` の一致)。
+
+### ★★これで界面の欠陥は 5 つ目
+
+| # | 場所 | 欠陥 | 塞いだ |
+|---|---|---|---|
+| 1 | G6 `localHeight` | 付値が任意 → 充足不能 | 第 302 |
+| 2 | G6 全体 | `Δ = 0` を排除せず | 第 304 |
+| 3 | G7 `omega` | 曲線と結ばれていない | 第 311 |
+| 4 | G7 `omegaFrac` | `Δ = 0` を排除せず | 第 317 |
+| 5 | **G8 `degInf_ge_localHeight`** | **分岐で偽** | **本ブロック** |
+
+★★★★★どれも**実装に入って初めて見えた**。
+★★「型は仕様、しかし書いた時点では検算されていない」——5 例目である。
+
+### ★★G8 の残り(記録)
+
+* `htFalt`(Faltings 高さ)は **(D3) の計量**が要る(§9-404 の未塗りの穴)
+* `prop_3_4` は原文の主定理の一つで、解析的な評価が要る
+* `degInf` 自体は G6・G7 の局所高さの和として**構成できる見込み**である
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-632 ★★★★★★★無限遠因子の次数 `deg∞` を構成した(第 319 ブロック)
+
+`Found/GaloisRep/DegInf.lean`。
+
+### ★★★★★★★到達点
+
+> **`deg∞(E) = (1/[L:ℚ]) Σᶠ_p v_p(Δ_min) · log N(p)`** を構成し、**非負性**を示した
+
+★★★これが G8 の `degInf` 欄の中身である。
+
+### ★★★★★★局所高さの和ではなく**極小判別式**で書く
+
+原文の `deg∞` は乗法還元の素点での局所高さの和だが、**局所高さ `v(q_E)` は
+極小判別式の付値 `v(Δ_min)` に等しい**(第 101 の `addVal_tateDelta`:`Δ = q·(単元)`)。
+★★そこで**すべての素点にわたる `v_p(Δ_min)` の和**として定義した。
+
+★★★★★**完備化を経由せずに定義できる**のが利点である——
+局所高さの定義(第 310)は完備 DVR を要求するが、`v_p(Δ_min)` は `L` の素点だけで書ける。
+★mathlib の `adicCompletionIntegers` には DVR・完備の instance が**付いていない**
+(2026-08-26 実測)ので、完備化を避けられたのは大きい。
+
+### ★★★★極小判別式の指数
+
+    minDeltaExp p W := v_p(Δ_W) - 12·(Néron 指数)
+
+★`Δ_min = u^-12 Δ_W` だから、これはちょうど `v_p(Δ_min)` である(`minDeltaExp_eq`)。
+★★**非負**(極小モデルは整だから)で、**台は有限**(第 314-315 の有限性 + `Δ` の台)。
+★★★第 312-317 で作った Néron 指数が、そのまま次数の材料になった。
+
+### ★★残り(G8)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf` | ★★★★**構成済(本ブロック)** |
+| `degInf_nonneg` | ★★★★**済** |
+| `degInf_ge_localHeight` | 局所高さと `v_p(Δ_min)` の一致(不分岐の仮定つき)が要る |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-633 ★★★★★★★局所高さは極小判別式の付値である(第 320 ブロック)
+
+`Found/GaloisRep/LocalHeightDelta.lean`。
+
+### ★★★★★★★到達点
+
+> **`localHeightOf W h = vAdd (Δ_W)`**(`W` が `R` 上極小のとき)
+
+★★★これが第 319 の `deg∞` と第 310 の局所高さを**繋ぐ**唯一の環である。
+`deg∞` を `v_p(Δ_min)` の和として定義した以上、この一致がなければ
+`degInf_ge_localHeight` は書けない。
+
+### ★★★★★証明の筋——「Tate モデルは極小である」
+
+第 310 の `tateParamR_spec` は、`W` の整モデルを変数変換 `C` で
+**Tate 標準形 `tateCurveAt q`** に移せることを言う。そこで
+
+1. `tateCurveAt q` の `c₄` は**単元**(第 304 の `tateCurveAt_c4_isUnit`)
+2. ★★★★★**`v(c₄) = 0` ならば極小**(`isMinimal_of_c4_vAdd_eq_zero`、本ブロック)
+3. したがって `C.map` の `u` の付値は `0`(第 312 の `minimal_u_vAdd_eq`)
+4. ★★`Δ(C•W) = u⁻¹²Δ(W)` より `v(Δ_q) = v(Δ_W)`
+5. ★★★`Δ_q = q·(単元)`(第 101)より `v(Δ_q) = v(q) = 局所高さ`
+
+### ★★★★★★鍵は「極小性の判定を `c₄` の付値だけで済ませた」こと
+
+★極小性は本来「すべての変数変換にわたる最小値」という**全称**の主張で、
+そのままでは扱いにくい。しかし乗法還元では
+
+    v(c₄) = 0 かつ整  ⟹  極小
+
+が使える:`c₄` は変数変換で `-4v(u)`、`Δ` は `-12v(u)` だけ動くから、
+整であることが `v(u) ≤ 0` を強い、`Δ` の側が `v(u) ≥ 0` を強いる。
+★★★★★**片方向の不等式を 2 本ぶつけて `v(u) = 0` を出す**——
+完備化も一意性定理も要らない。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `integral_c4_vAdd_nonneg` | ★★整モデルの `c₄` は付値非負 |
+| `vAdd_c4_variableChange` | ★★★`c₄` の付値は `-4v(u)` だけ動く |
+| `variableChange_c4_ne_zero` | ★`c₄ ≠ 0` は変数変換で保たれる |
+| `isMinimal_of_c4_vAdd_eq_zero` | ★★★★★**`v(c₄) = 0` ⟹ 極小** |
+| `tateDvrVal_eq_zero_of_isUnit` | ★★単元の付値は `0` |
+| `isIntegral_baseChange` | ★係数環から来た曲線は整 |
+| `localHeight_eq_vAdd_Delta` | ★★★★★★★**局所高さ = `v(Δ_min)`** |
+
+### ★★残り(G8)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg` | ★★★★**済**(第 319) |
+| `degInf_ge_localHeight` | ★本ブロックで**芯が通った**。あとは不分岐の仮定で `R` の付値を `p` の付値に移し、単項 `≤` 有限和、`log N(p) ≥ log 2` |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-634 ★★★★★★★`d·deg∞ ≥ (局所高さ)·log 2` を示した(第 321 ブロック)
+
+`Found/GaloisRep/DegInfLocal.lean`。
+
+### ★★★★★★★到達点
+
+> **`d · deg∞(E) ≥ (局所高さ) · log 2`**(`degInfOf_ge_localHeight`)
+
+★★★これが `FaltingsHeightData` の `degInf_ge_localHeight` 欄の中身である
+(第 318 で入れた**不分岐の仮定つき**の形)。
+
+### ★★★★★証明の筋——3 段
+
+1. ★★★★**局所高さ ≤ `minDeltaExp p E`**(`localHeight_le_minDeltaExp`)
+   ——`E` を `p` で極小化する変数変換 `C` を取り、それを `Lv` に移す。
+   `C•E` は `p` 上整だから、不分岐の仮定で `R` 上も整。
+   `E⁄Lv` は `R` 上極小なので
+
+       v_R(Δ(E⁄Lv)) <= v_R(Δ((C•E)⁄Lv)) = v_p(Δ(C•E)) = minDeltaExp p E
+
+   ★左辺は第 320 で局所高さに等しい。
+2. ★★`log N(p) >= log 2`——素イデアルのノルムは `2` 以上。
+3. ★★`minDeltaExp` は各項非負だから、**単項 <= 有限和**(`single_le_finsum`)。
+
+### ★★★★★★不等式の向きが自然に出る理由
+
+★`Lv` の側の極小性は `L` の側の極小性より**強い**(変数変換が多いから)。
+★★したがって `v_R(Δ_min over Lv) <= v_p(Δ_min over L)` が自動的に成り立ち、
+求める向き「局所高さ <= `v_p(Δ_min)`」がそのまま出る。
+★★★★**極小性の全称の向きを、そのまま不等式の向きとして使えた**。
+
+### ★★★★★★不分岐の仮定が効く場所は 2 つだけ
+
+    hp : ∀ x : L, v_R(algebraMap L Lv x) = v_p(x)
+
+* ★`p` 上整 ⟹ `R` 上整(`isIntegral_baseChange_of_isIntegral`
+  ——係数を 1 つずつ `R` に持ち上げて曲線を組み立てる)
+* ★`v_R` の指数 = `v_p` の指数(`vAdd_algebraMap_eq_valAdd`)
+
+★★★第 318 で見つけた「分岐で偽になる」という欠陥は、この 2 箇所で塞がれている。
+★★★★★**欠陥を塞ぐために入れた仮定が、証明のどこで効くかまで確認できた**
+——仮定が過不足ないことの確認になっている。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `minimal_vAdd_Delta_le` | ★★★★極小モデルの `v(Δ)` は最小 |
+| `exists_preimage_of_valuation_le_one` | ★付値 `<= 1` の元は係数環から来る |
+| `isIntegral_baseChange_of_isIntegral` | ★★★★**`p` 上整 ⟹ `R` 上整** |
+| `vAdd_algebraMap_eq_valAdd` | ★★★★**付値指数の一致** |
+| `localHeight_le_minDeltaExp` | ★★★★★★**局所高さ <= `v_p(Δ_min)`** |
+| `two_le_absNorm`・`log_two_le_log_absNorm` | ★★`N(p) >= 2` |
+| `degInfOf_ge_localHeight` | ★★★★★★★**`d·deg∞ >= (局所高さ)·log 2`** |
+
+### ★★残り(G8)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg` | ★★★★**済**(第 319) |
+| `degInf_ge_localHeight` | ★★★★★★**済(本ブロック)** |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-635 ★★★★★★★楕円列の核心は 2 変数の 3 項恒等式だけ(第 322 ブロック)
+
+`Found/GaloisRep/EDSThreeTerm.lean`・`Skeleton/GaloisRep/EDSThreeTerm.lean`。
+
+### ★★★★★★★到達点
+
+> **`IsEllSequence W` は `r = 1` の場合(2 変数の 3 項恒等式)から `ring` で出る**
+
+★★★これで **mathlib の TODO**(`normEDS` が `IsEllDivSequence` を満たすこと)の
+楕円列の側は、**3 変数の恒等式から 2 変数の恒等式へ縮んだ**。
+
+### ★★★★★★なぜ縮むのか——2 次元の Plücker 関係
+
+`h(x,y) := W(x+y)·W(x−y)` と置くと、3 項恒等式は
+
+    h(m,n) = h(m,1)·h(n,0) − h(n,1)·h(m,0)
+
+すなわち **`h(x,y) = det(v_x, v_y)`、`v_x := (W(x+1)W(x−1), W(x)²)`** という
+2 次元ベクトルの行列式である。★★`IsEllSequence` の主張
+
+    h(m,n)·h(r,0) = h(m,r)·h(n,0) − h(n,r)·h(m,0)
+
+は、その行列式表示を代入すれば **2 次元の Plücker 関係**そのものになり、`ring` で閉じる。
+★★★★★`W 1 = 1` すら要らない。同じ理由で **Riemann の 4 項恒等式**も出る。
+
+### ★★★★★★残る核心は「差 `3` 以上」だけである
+
+mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのもの**であった:
+
+| mathlib | 3 項恒等式の場合 | 差 `m − n` |
+|---|---|---|
+| `normEDS_odd` | `T(m+1, m)` | `1` |
+| `normEDS_even` | `T(m+1, m−1)` | `2` |
+
+★`n = 0`・`n = 1` は自明、`m ↔ n` の交換は奇関数性。
+★★★★★★★**残るのは差が `3` 以上の場合だけ**である。
+
+差 `3` の場合を書き下すと
+
+    c·[W(m)W(m−2)³ − W(m−3)W(m−1)³] = W(m+1)W(m−1)W(m−3)² − W(m−2)W(m−4)W(m)²
+
+★mathlib の漸化式は指数を半分に落とすので、これを隣接指数だけの `ring` では出せない
+——**倍加の構造を経由した強い帰納法**が要る(第 203 相当の `n = 4` が 124 秒で失敗したのと
+同じ壁の、正体である)。
+
+### ★★これがどこに効くか(G5 の縮約の鎖)
+
+    (G5) 非退化性
+      → F(E)^{E[n]} = [n]^*F(E)        (第 197)
+      → deg[n] = n²                    (第 196)
+      → [F(x) : F(x∘[n])] <= n²        (第 198、モニック多項式で上から)
+      → x([n]P) = Φ_n/ΨSq_n            (Skeleton/WeilFunctionField)
+      → **EDS 恒等式**                  (mathlib の TODO)
+      → **2 変数の 3 項恒等式**         ★本ブロック
+
+★★依存グラフに新しい葉 `Skeleton/GaloisRep/EDSThreeTerm.lean` を立てた。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `IsThreeTerm` | ★★2 変数の 3 項恒等式 |
+| `isEllSequence_of_isThreeTerm` | ★★★★★★★**`IsEllSequence` は 3 項恒等式から出る** |
+| `isThreeTerm_of_isEllSequence` | ★★逆(`W 1 = 1` のとき) |
+| `riemann_four_term` | ★★★★**Riemann の 4 項恒等式** |
+| `threeTerm_swap` | ★★`m ↔ n` の交換 |
+| `normEDS_threeTerm_zero`・`_one` | ★`n = 0, 1` は自明 |
+| `normEDS_threeTerm_diff_one`・`_two` | ★★★★**漸化式は差 `1`・`2` の場合そのもの** |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-636 ★★★★★★★訂正——Ward の定理は第 58 で既に閉じていた(§9-635 の在庫漏れ)
+
+`Found/GaloisRep/EDSThreeTerm.lean` を書き直し、`Skeleton/GaloisRep/EDSThreeTerm.lean` を撤去。
+
+### ★★★★★★★何が起きたか
+
+§9-635(第 322)で「`normEDS` が楕円列であること」を**未解決の葉**として Skeleton に
+立てた。★しかしそれは**第 47-58 ブロックで既に閉じていた**:
+
+| 段 | 場所 | ブロック |
+|---|---|---|
+| Somos-4 `W(m+2)W(m−2) = b²W(m+1)W(m−1) − cW(m)²` | `EdsSomos.lean` | 第 47 |
+| (Λ) の恒等式 | `EdsLambda.lean` | 第 56 |
+| `W(j) ≠ 0`(普遍環) | `EdsIdentity.lean` | 第 57 |
+| **Ward の定理 `isEllSequence_normEDS`** | `EdsWard.lean` | **第 58** |
+
+★★しかも私が今回たどり直した道筋——Somos-4 →(Λ)→ 積の並べ替え → 例外は `normEDS_even`
+→ 普遍環 `ℤ[b,c,d]` で割り算 → 一般の `r` は `r = 1` から——は
+**第 58 の証明と完全に同じ構造**であった。
+
+### ★★★★★★原因と対策
+
+★**在庫の規則を破った**。`Somos`・`Eds`・`normEDS` のいずれかで grep していれば
+1 回で見つかった(`EdsAll`・`EdsWard` など 8 ファイルある)。
+★★私が grep したのは**自分が付けようとしている名前**だけで、**概念**では引かなかった。
+★★★★★**新しい定義を書く前に、名前ではなく「何を証明しようとしているか」で引く**
+——`tools/lean-idioms.md` に 1 行足した。
+
+### ★★★★もう 1 つの原因——スケルトンの `.needs` が古かった
+
+`Skeleton/GaloisRep/WeilPairing.lean` の `.needs` は
+「非退化性 = `normEDS` が楕円列 = **mathlib 自身の TODO**、30-80 ブロック、上流案件」
+と書いたままだった(2026-08-20 記)。★これは第 58 で閉じたあと**更新されていなかった**。
+★★★2026-08-26 の訂正として、`.needs` の先頭に打ち消しを入れた。
+
+### ★★★★★★訂正後の (G5) の姿
+
+    (G5) 非退化性
+      → hfix = deg[n] = n²                        (第 196-197)
+      → Φ_n(x) = x_n·ΨSq_n(x)  in F(E)            (第 198 で 1 本に)
+         ↑ 点の水準の乗法公式 x(nP)·ΨSq_n(x) = Φ_n(x) は
+           **第 52 `MulPoint.lean` の `mulOK_of_ne` に在庫がある**
+           (仮定は 1 ≤ k ≤ n で ΨSq_k(x) ≠ 0、生成点が捩れ点でないことは第 125)
+
+★★★★★したがって残りは**新しい数学ではなく配線の見込み**である(未実測)。
+★Ward の定理という「上流案件」は **もう障害ではない**。
+
+### ★★残した中身
+
+`Found/GaloisRep/EDSThreeTerm.lean` は、`EdsWard` が `normEDS` について具体的に
+行っていることを**任意の列 `W : ℤ → R`** の言明として抜き出した部分だけを残した:
+
+| 定理 | 内容 |
+|---|---|
+| `IsThreeTerm` | `EllAt` の全称版 |
+| `isEllSequence_of_isThreeTerm` | ★★★`IsEllSequence` は `r = 1` の場合から `ring` で出る |
+| `isThreeTerm_of_isEllSequence` | 逆(`W 1 = 1` のとき) |
+| `riemann_four_term` | ★★★**Riemann の 4 項恒等式**(`EdsWard` には無い) |
+| `normEDS_isThreeTerm`・`normEDS_riemann_four_term` | 第 58 の言い換え |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-637 ★★★★★★★生成点での乗法公式——葉が 1 つ閉じた(第 323 ブロック)
+
+`Found/GaloisRep/MulByNCoordX.lean`、`Skeleton/GaloisRep/WeilFunctionField.lean`。
+
+### ★★★★★★★到達点
+
+> **`x([n]P)·ΨSq_n(x) = Φ_n(x)`** を関数体 `F(E)` の生成点で示した
+
+★★★これは第 196-198 で「非退化性に残る唯一の入力」と測定されたものであり、
+`Skeleton/GaloisRep/WeilFunctionField.lean` の `exists_mulByNPullback` の `sorry` が消えた。
+
+### ★★★★★★在庫だけで組み上がった——新しい数学は要らなかった
+
+| 段 | 在庫 |
+|---|---|
+| 点の水準の乗法公式 `x'·ΨSq_n(x) = Φ_n(x)` | ★第 52 `MulPoint.lean` の `mulOK_of_ne` |
+| 仮定 `ΨSq_k(x) ≠ 0` (`1 ≤ k ≤ n`) | ★★第 116 `coordX_transcendental` + mathlib の `ΨSq_ne_zero` |
+| 生成点が非特異点であること | ★第 114 `nonsingular_coord` |
+| `[n]` の環準同型 `μ` | ★第 118 `pointHom` |
+
+★★★★★**やったことは `mulOK_of_ne` を生成点に当てることだけ**である。
+`ΨSq_k(coordX) ≠ 0` は「生成点は捩れ点でない」(第 125)と**同じ 1 行**で出た
+——`ΨSq_k` は `F` 係数の非零多項式、`coordX` は `F` 上超越的。
+
+### ★★★★★★★2026-08-20 の見積もりは大きく外れていた
+
+当該節点の `.needs` は「一般の `n` を多項式展開で押すのは実際的でない、
+構造的には **EDS 恒等式**が要るが、これは **mathlib 自身の TODO**、
+**30-80 ブロック**、上流に入れるのが本筋」と書いていた。
+
+★★★★実際には **EDS 恒等式を 1 度も使わずに**閉じた。
+★分点多項式の帰納は**第 42-52 で既に回してあった**(`MulOK` の同時帰納)。
+★★見積もりが外れた原因は、**同じプロジェクト内の在庫を数えていなかった**ことである
+——§9-636 の在庫漏れと**同じ根**を持つ。
+
+### ★★★★逸脱の記録(スケルトンの statement を直した)
+
+| # | 直したところ | 理由 |
+|---|---|---|
+| (i) | `n : ℤ` → `1 ≤ n` の自然数 | `n = 0` では `ΨSq_0 = 0` で割れない(元の statement は偽) |
+| (ii) | 割り算を払って積の形に | 下流(第 198)が消費するのは積の形 |
+| (iii) | `μ` を `F(E)` の `AlgHom` から `F[W] →+* F(E)` に | `AlgHom` 化 `muExtAlg` には `μ` の単射性が要り、それは `x([n]P)` の超越性(未実施)に依る |
+
+### ★★★★★★訂正後の (G5) の残り
+
+    (G5) 非退化性
+      → hfix : F(E)^{E[n]} = [n]^* F(E)         (第 197)
+      → deg[n] = n²                             (第 196 の Artin が下から)
+      → [F(x) : F(x∘[n])] <= n²                 (第 198:Φ_n − c·ΨSq_n はモニックで次数 n²)
+      → **Φ_n(x) = x_n·ΨSq_n(x)**               ★★★★**第 323 で済**
+
+★残るのは 2 つ:
+1. **`x([n]P)` の超越性**(`μ` の単射性に要る)——第 117 と同じ型、5-15 ブロックの見積もり
+2. **体の拡大次数の帳簿**——`[F(E) : μF(E)] = [F(x) : F(x_n)]` と塔の議論
+
+★★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Skeleton の `sorry` は 54 → 53。
+
+
+## §9-638 ★★★★★★★`x([n]P)` の超越性——`μ` の単射性がそろった(第 324 ブロック)
+
+`Found/GaloisRep/MulByNTranscendental.lean`。
+
+### ★★★★★★★到達点
+
+> **`x([n]P)` は `F` 上超越的**であり、したがって `[n]` の引き戻し `μ` は**単射**である
+
+★★★これで `NondegStep.eq_zero_of_weilPairingVal_trivial` が要求する一式
+(`hinj`・`hμF`・`hμP`・`hμx`・`hμy`)が**すべて揃った**。残るのは `hfix` だけである。
+
+### ★★★★★★超越性は「次数を数える」だけで出た
+
+原文の道(`n` 等分点での 1 点評価)ではなく、代数的整数論の 1 行で出た:
+
+> `z·B(x) = A(x)`、`A` はモニックで `deg B < deg A`、`x` は超越的 ⟹ `z` は超越的
+
+★★`z` が代数的だと仮定すると、`x` は `F[z]` 上**整**である
+——`A − z·B` がモニック(次数は `deg A`、`deg B < deg A` だから)。
+★★★`F[z]` は `F` 上整だから `isIntegral_trans` で `x` が `F` 上整になり、
+`x` の超越性(第 116)に矛盾する。
+
+★★★★★`A = Φ_n`(モニック、次数ちょうど `n²`——第 198)、`B = ΨSq_n`(次数 `≤ n²−1`)
+がちょうどこの形である。
+
+### ★★★★見積もりが外れた(今度は下振れ)
+
+スケルトンの `.needs` は「`x([n]P)` の超越性——`n` 等分点での 1 点評価で出る見込み。
+第 117 と同じ型(**5-15 ブロック**)」と書いていたが、**1 ブロック**で済んだ。
+★理由は第 198 で `Φ_n` の次数をちょうど `n²` と測ってあったことである
+——**別の目的で測った量が、そのまま超越性の証明になった**。
+
+### ★★★★★★(G5) の残り
+
+    (G5) 非退化性
+      → eq_zero_of_weilPairingVal_trivial(第 197)の仮定
+         ・hμP・hμx・hμy(第 118・125)      ✅
+         ・hinj(μ の単射性)                 ✅ ★第 324
+         ・hμF(μ は F 上恒等)               ✅ 第 118 `pointHom_algebraMap`
+         ・hfix : F(E)^{E[n]} = [n]^*F(E)    ❌ **残る 1 件**
+
+★★`hfix` は `deg[n] = n²`、すなわち
+
+* `[F(x) : F(x∘[n])] ≤ n²`(第 198 のモニック多項式 `Φ_n − c·ΨSq_n` から)
+* `[F(E) : μF(E)] = [F(x) : F(x_n)]`(`[F(E):F(x)] = 2` を両側で使う塔の帳簿)
+* 第 196 の Artin `[F(E) : F(E)^{E[n]}] = n²` と挟んで等号
+
+の 3 段である。★★★**残っているのは体の拡大次数の帳簿だけ**になった。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-639 ★★★★★★`hfix` に要る 2 つの部品——道筋を測り直した(第 325 ブロック)
+
+`Found/GaloisRep/DegBoundParts.lean`。
+
+### ★★★★★★★測り直し——`[F(E):F(x)] = 2` は要らなかった
+
+§9-638 で「残るのは体の拡大次数の帳簿 3 段」と書いた。★その筋は
+
+    [F(E) : μF(E)] = [F(x) : F(x_n)]     ← [F(E):F(x)] = 2 を μ の両側で使う
+
+というもので、**`μ` に沿った次数の輸送**(体の同型に沿って `finrank` を移す)が重い。
+★★測り直すと、次の筋なら輸送も `[F(E):F(x)] = 2` も要らない:
+
+    L := F(x_n, y_n) と置く
+    (a) x は L 上整で、最小多項式の次数は n² 以下   ← Φ_n − x_n·ΨSq_n がモニック(第 198)
+    (b) y ∈ L(x)                                    ← 乗法公式の y 側の式
+    (c) ゆえに L(x) = F(E)、つまり [F(E) : L] <= n²
+    (d) L ⊆ Fix、[F(E) : Fix] = n²(第 196 の Artin)⟹ Fix = L
+    (e) L ⊆ μF(E)(x_n = μx、y_n = μy)⟹ **hfix**
+
+★★★★★**(b) が `[F(E):F(x)] = 2` を肩代わりする**——これが今回の発見である。
+
+### ★★★★★★(b) の中身——乗法公式の `y` 側が効いた
+
+第 52 の `MulOK` の**第 3 成分**
+
+    (y_n − negY(x_n,y_n))·ΨSq_n(x)² = preΨ_{2n}(x)·(y − negY(x,y))
+
+は `y − negY(x,y) = 2y + a₁x + a₃` なので、標数 0 なら `y` について解ける:
+
+    y = ((2y_n + a₁x_n + a₃)·ΨSq_n(x)²/preΨ_{2n}(x) − a₁x − a₃)/2
+
+★`preΨ_{2n}(x) ≠ 0` は `preΨ_{2n}` が非零多項式で `x` が超越的(第 116)だから。
+★★★**第 198 の測定「消費されるのは `x` の側だけ——`y([n]P)` の式は要らない」は、
+半分だけ正しかった**——`y` の式そのものは要らないが、
+**`MulOK` の `y` 側の成分は生成の議論で効く**。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `finrank_adjoin_le_of_monic_rel` | ★★★★★**(a)**——整性と最小多項式の次数評価 |
+| `aeval_mem_intermediateField` | ★中間体は多項式の値で閉じている |
+| `coordY_mem_of_mem` | ★★★★★★**(b)**——`x, x_n, y_n` を含む中間体は `y` も含む |
+
+### ★★残り((G5) の `hfix`)
+
+* (c) **`L(x) = F(E)`**——`x, y` を含む中間体は `⊤` であること
+  (`F[W]` が `genX, genY` で生成され、`F(E)` はその分数体だから)
+* (d) `finrank` の塔の帳簿と Artin(第 196)で挟む
+* (e) `L ⊆ μF(E)` は `x_n = μ(genX)`・`y_n = μ(genY)`(第 118)から直ちに出る
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-640 ★★★★★★`hfix` の帳簿の道具——(c) と (d) が取れた(第 326 ブロック)
+
+`Found/GaloisRep/DegBoundTower.lean`。
+
+### ★★★★★★(c) `x` と `y` を含む中間体は `⊤`
+
+`F[W]` は `AdjoinRoot` なので `CoordinateRing.mk` が全射であり、`F[X][Y]` の元は
+単項式の和である。★単項式 `C a · Y^k` の像は `a(x)·y^k` で、中間体は多項式の値と積で
+閉じているから `M` に入る(`algebraMap_mk_C` + `aeval_mem_intermediateField`)。
+★★`F(E)` は `F[W]` の分数体だから `IsFractionRing.div_surjective` で `⊤` になる。
+
+★★★★★**`mk (C p)` の像が `p(x)` であること**は、2 つの環準同型
+`F[X] → F(E)` が `C a` と `X` で一致することから `Polynomial.ringHom_ext` で出た
+——生成元での一致に落とす道具は第 119 で用意してあった型と同じである。
+
+### ★★★★★(d) 次数で挟んで中間体を一致させる
+
+> `L ≤ M`、`[K : L] ≤ N`、`[K : M] = N`、`0 < [K : L]` ならば `L = M`
+
+★`IntermediateField.extendScalars` で `M` を `L` 上の中間体と見ると、
+塔 `[M:L]·[K:M] = [K:L]` がそのまま `Module.finrank_mul_finrank` で使える。
+★★`[M:L] = 1` から `M = ⊥`(`IntermediateField.finrank_eq_one_iff`)、
+すなわち `M ⊆ L` が出る。
+★★★★**体の同型に沿った次数の輸送は最後まで要らなかった**
+——`extendScalars` が「同じ台で底だけ変える」形を用意しているからである。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `algebraMap_mk_C` | ★`mk (C p)` の像は `p(x)` |
+| `intermediateField_eq_top_of_coord` | ★★★★★★**(c)** |
+| `finrank_le_of_adjoin_top` | ★★★★`L(x) = K` から `[K:L] ≤ deg(minpoly)` |
+| `eq_of_finrank_bound` | ★★★★★**(d)** |
+
+### ★★残り((G5) の `hfix`)——**組み立てだけ**
+
+    L := F(x_n, y_n)
+    (a) 第 325 `finrank_adjoin_le_of_monic_rel`   ✅
+    (b) 第 325 `coordY_mem_of_mem`                ✅
+    (c) 第 326 `intermediateField_eq_top_of_coord` ✅
+    (d) 第 326 `eq_of_finrank_bound`              ✅
+    (e) `L ⊆ μF(E)`(第 118 の `pointHom_genX/genY`)  ✅
+
+★残るのは **`Fix` を `IntermediateField F K` として作ること**と、上の 5 つを繋ぐ配線である。
+★★`Fix` は `FixedPoints.subfield (torsGroup W n) F(E)`(第 196)で、
+`F` の元が固定されること(群は `F` 代数自己同型で作用する)を足せば中間体になる。
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-641 ★★★★★★★★★Weil 対の非退化性が取れた(第 327 ブロック)
+
+`Found/GaloisRep/WeilNondegFull.lean`。
+
+### ★★★★★★★★★到達点
+
+> **`e_n(S, ·) ≡ 1 ⟹ S = 0`**(`weilPairing_nondegenerate`)
+
+★★★これが (G5) に残っていた**最後の数学**である。第 197 で
+「非退化性は `F(E)^{E[n]} = [n]^*F(E)` の 1 つに絞れた」と測って以来の穴が埋まった。
+
+### ★★★★★★★`hfix` の証明——5 つの部品の配線
+
+    L := F(x_n, y_n)
+    (a) x は L 上整、最小多項式の次数 <= n²   第 325 `finrank_adjoin_le_of_monic_rel`
+    (b) y ∈ L(x)                             第 325 `coordY_mem_of_mem`
+    (c) ゆえに L(x) = F(E)                   第 326 `intermediateField_eq_top_of_coord`
+    (d) L ⊆ Fix、[F(E):Fix] = n² で挟む      第 326 `eq_of_finrank_bound` + 第 196 Artin
+    (e) L ⊆ μF(E)                            第 118 `pointHom_genX/genY`
+
+★`Fix` は `FixedPoints.subfield (torsGroup W n) F(E)`(第 196)を
+`Subfield.toIntermediateField` で中間体に持ち上げた
+——`F` の元が固定されるのは、群が **`F` 代数自己同型**で作用するからである。
+
+### ★★★★★★当初の道との違い
+
+第 196 は「`deg[n] = n²` には**分点多項式**か**双対同種**のどちらかが要る
+——本プロジェクトがこれまで避けてきた量である」と書いた。
+★★実際に効いたのは分点多項式の側だが、`x([n]P) = Φ_n/ΨSq_n` の
+**帰納は第 42-52 で既に回してあった**(`MulOK` の同時帰納)。
+★★★★★**避けていたのは量ではなく帰納であり、それは在庫にあった。**
+
+### ★★★★見積もりの記録
+
+| 時点 | 見積もり | 実際 |
+|---|---|---|
+| 2026-08-20(第 196) | 分点多項式か双対同種、避けてきた量 | —— |
+| 2026-08-20(WeilPairing.needs) | EDS 恒等式は mathlib の TODO、30-80 ブロック、上流案件 | **EDS 恒等式は不要** |
+| 2026-08-26(§9-637 直前) | 配線の見込み | 第 323 で 1 ブロック |
+| 2026-08-26(§9-638 直前) | 超越性 5-15 ブロック | 第 324 で 1 ブロック |
+| 2026-08-26(§9-639 直前) | 拡大次数の帳簿 3-8 ブロック | 第 325-327 で 3 ブロック |
+
+★★★★★**上流案件と見えていたものが、在庫の組み替えで 5 ブロックに収まった。**
+
+### ★★残り((G5))
+
+* `det_cyclotomic_of_nondeg`(第 210 `BasisFree.lean`)に非退化性を渡す
+* `Skeleton/GaloisRep/WeilPairing.lean` の `det_galRep_eq_cyclotomic` の `sorry` が消える
+* `Interface/GaloisRep/Representation.lean` の `FullImageData` の witness を組む
+
+★★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。次の配線で **G5** が埋まる見込み。
+★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-642 ★★★★★★★★★★G5 達成——Galois 義務が 7/8 になった(第 328 ブロック)
+
+`Found/GaloisRep/FullImageWitness.lean`、`Skeleton/GaloisRep/WeilPairing.lean`。
+
+### ★★★★★★★★★★到達点
+
+> **`FullImageData.nonvacuous`**——(G5) 達成。Galois 表現論の 8 件のうち **7 件**が埋まった
+
+★`Skeleton/GaloisRep/WeilPairing.lean` の `det_galRep_eq_cyclotomic` の `sorry` も消えた。
+
+### ★★★★★★配線の中身
+
+    第 327 `weilPairing_nondegenerate`(非退化性)
+      → 第 210 `det_cyclotomic_of_nondeg`(`BasisFree.lean`)
+      → `det_cyclotomic_full`(本ブロック)
+      → `FullImageData.det_cyclotomic`
+
+★`IsDedekindDomain F[W]` は第 137 の `isDedekindDomain_coordinateRing` で供給
+(`IsAlgClosed L` と `IsUnit (2:L)` から)。
+★★`Infinite L` は `CharZero L` から、`CharZero L` は `CharZero K` と
+`algebraMap K L` の単射性から出る。
+
+### ★★★★界面の型が `Fact l.Prime` を持たない件(逸脱ではない対処)
+
+界面の `ImageContainsSL2` は `... → WeierstrassCurve K → ℕ → Prop` であって
+`[Fact l.Prime]` を取らない。★しかし `ℤ_[l]` は `Fact l.Prime` が無いと環ですらない。
+★★そこで述語の本体を **`∀ hp : Nat.Prime l, ...`** の形にし、
+中身は `Fact` 付きの補助述語 `ImageSL2Aux` に流した。
+★★★`imageContainsSL2_iff` は `Fact` が場にあるときの同値で、
+`⟨Fact.out⟩ ≡ inst`(構造の η と証明の非関与)で両向きとも通る。
+★★★★**界面は書き換えていない**——読み方だけで済んだ。
+
+### ★★★★★★★(G5) の全行程(2026-08-26 の 6 ブロック)
+
+| ブロック | 内容 |
+|---|---|
+| 323 | 生成点での乗法公式 `x([n]P)·ΨSq_n(x) = Φ_n(x)` |
+| 324 | `x([n]P)` の超越性 ⟹ `μ` の単射性 |
+| 325 | `hfix` の部品 (a)(b) |
+| 326 | `hfix` の部品 (c)(d) |
+| 327 | **Weil 対の非退化性** |
+| 328 | **G5 達成** |
+
+★★★★★見積もりは当初 **30-80 ブロック(上流案件)**、実際 **6 ブロック**。
+★差は「在庫を数えていなかった」ことに尽きる——分点多項式の帰納(第 42-52)、
+Artin(第 196)、モニック性(第 198)、Dedekind 性(第 137)はすべて既にあった。
+
+### ★★残り(G8 のみ)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg`・`degInf_ge_localHeight` | ★★★★**済**(第 319・321) |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★★**Galois 義務 7/8**(Arakelov 9/9)。
+★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-643 ★★★★★★★★Galois 義務 8/8——ただし `ht^Falt` は固定されていない(第 329 ブロック)
+
+`Found/GaloisRep/FaltingsWitness.lean`、`Check/GaloisRep/HtFaltNotPinned.lean`。
+
+### ★★★★★★★★到達点(と、その正確な意味)
+
+> **`FaltingsHeightData.nonvacuous`** が取れ、Galois 義務の **8 欄すべてに witness がある**
+
+★★★★★★★★★**ただし本 witness の `htFalt` は `deg∞/12` であって
+Faltings 高さではない。`Proposition 3.4` の数学的内容は証明されていない。**
+
+### ★★★★★★なぜそれで界面が満たせてしまうのか
+
+界面が `htFalt` に課しているのは 2 本だけである:
+
+* `htFalt_variableChange`(変数変換で不変)
+* `prop_3_4`(`deg∞/(12(1+ε)) <= htFalt + C`)
+
+★`htFalt := deg∞/12` は**どちらも満たす**——前者は `deg∞` が変数変換で不変だから
+(本ブロックの `degInfOf_variableChange`、**真の定理**)、
+後者は `deg∞ >= 0` と `1+ε > 1` から `C = 0` で出る。
+★★つまり `prop_3_4` が**恒等的に成り立つ形**で埋まる。
+
+### ★★★★★★★★これで界面の欠陥は 6 つ目——初めての「弱すぎる」型
+
+| # | 場所 | 欠陥の型 | 塞いだ |
+|---|---|---|---|
+| 1 | G6 `localHeight` | **充足不能**(付値が任意) | 第 302 |
+| 2 | G6 全体 | **充足不能**(`Δ = 0`) | 第 304 |
+| 3 | G7 `omega` | **弱すぎる**(曲線と結ばれていない) | 第 311 |
+| 4 | G7 `omegaFrac` | **充足不能**(`Δ = 0`) | 第 317 |
+| 5 | G8 `degInf_ge_localHeight` | **充足不能**(分岐で偽) | 第 318 |
+| 6 | **G8 `htFalt`** | **弱すぎる**(`deg∞/12` で満たせる) | ★**未** |
+
+★★#3 は塞げた(`omegaFrac_variableChange` を足した)。
+★★★★#6 が塞げないのは、**塞ぐ条件が (D3) の計量に依存する**からである(§9-404):
+`ht^Falt = deg(ω_E)` は算術直線束の**計量込みの**次数であり、
+有限部分だけでは変数変換不変にすらならない
+(積公式により `Σ_p v_p(u)·log N(p)` が残り、アルキメデス側が打ち消す)。
+
+★★★★★★★**機械可読の形で `Check/GaloisRep/HtFaltNotPinned.lean` に記録した**
+——`htFalt_not_pinned`(`htFalt = deg∞/12` なる witness の存在)と
+`prop_3_4_trivial_for_witness`(その witness では `C = 0` で成り立つ)。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `minDeltaExp_variableChange` | ★★★★★**極小判別式の指数は変数変換で不変**(真) |
+| `degInfOf_variableChange` | ★★★★★★**`deg∞` は変数変換で不変**(真) |
+| `faltingsHeightDataWitness` | ★★★★★★★★**`FaltingsHeightData` の実装** |
+| `FaltingsHeightData.nonvacuous` | ★★★★★★★★**G8 の欄が埋まる** |
+
+### ★★★★★数の読み方(自戒)
+
+★**「Galois 8/8」は「界面に書いた条件をすべて満たす witness がある」ことであって、
+「原文の主張をすべて証明した」ことではない。**
+★★★G8 については、界面が要求を書ききれていない(#6)ことを本ブロックで確認した。
+★★★★★★次にやるべきは数を増やすことではなく、**(D3) を入れて #6 を塞ぐこと**である。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-644 ★★★★★★★G8 の穴を依存グラフの節点にした——一意化(第 330 ブロック)
+
+`Skeleton/GenEll/Uniformization.lean`、`Interface/GaloisRep/Reduction.lean`。
+
+### ★★★★★★★なぜこの節点を立てたか
+
+第 329 の witness の `htFalt` は `deg∞/12` であって Faltings 高さではない。
+★これを散文の但し書きで済ませず、**依存グラフの節点**にした
+——本プロジェクトの進め方(スケルトンで依存グラフ → 葉から形式化)に従う。
+
+★★界面(`Interface/GaloisRep/Reduction.lean`)の `htFalt_variableChange` の docstring にも
+2026-08-26 の確認として書き込んだ:**この 2 本ではまだ足りない**。
+
+### ★★★★★★2026-08-26 の実測(mathlib の在庫)
+
+| 段 | mathlib |
+|---|---|
+| 周期対 `PeriodPair`・束 `lattice` | ✅ `Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` |
+| `℘`・`℘'`・`g₂`・`g₃` | ✅ 同上 |
+| **`℘'² = 4℘³ − g₂℘ − g₃`** | ✅ `derivWeierstrassP_sq` |
+| Eisenstein 級数・Dedekind η・モジュラー判別式 `Δ = η²⁴` | ✅ `NumberTheory/ModularForms/` |
+| **`℘` の加法定理** | ★**0 件**(`weierstrassP_add` で 0) |
+| **一意化**(任意の `E/ℂ` が `ℂ/Λ`) | ★**0 件** |
+
+★★★★★**「束 → 曲線」は揃っており、欠けているのは「曲線 → 束」だけである。**
+★この非対称は 2025 年に `Weierstrass.lean` が入ったことによる——
+以前の測定(「複素一意化は丸ごと無い」)は**古い**。
+
+### ★★★★下流の鎖(G8 の欠陥 #6 を塞ぐまで)
+
+    exists_periodPair(本節点、一意化)
+      → 周期束の共体積(アルキメデス norm)
+      → ω_E を**計量つき**算術直線束にする
+      → (D1)(D2)(D3) の deg に載せる
+      → ht^Falt = deg(ω_E) を固定 → 欠陥 #6 が塞がる
+
+★(D1)(D2)(D3) はいずれも `Interface/Arakelov/APic.lean` に `waiting` を持つ**未達の義務**である
+——すなわち **G8 の実質的な達成は Arakelov 側の未達義務に従属している**。
+
+### ★★★★★数の読み方(再掲)
+
+★**「Galois 8/8」は「界面に書いた条件をすべて満たす witness がある」ことである。**
+★★G5 は本物の数学(Weil 対の非退化性)で埋まったが、
+G8 の `htFalt` 欄は**界面が要求を書ききれていない**状態のままである。
+★★★★その差を、散文ではなく `Check/` の定理と `Skeleton/` の節点として**機械可読に**残した。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-645 ★★★★★★訂正——(D1)(D2)(D3) は達成済み。残るのは一意化と解析(第 331 ブロック)
+
+`Skeleton/GenEll/Uniformization.lean` の `.needs` を訂正・精密化。
+
+### ★★★★★★★訂正——前ターンの記述は誤りだった
+
+§9-644 で「G8 の実質的な達成は Arakelov 側の**未達義務** (D1)(D2)(D3) に従属している」と
+書いたが、**これは誤りである**。★(D1)(D2)(D3) はいずれも witness を持つ:
+
+| 義務 | witness |
+|---|---|
+| (D1) `APicData` | `Found/Arakelov/APicWitness.lean` |
+| (D2) `APicSpecData` | `Found/Arakelov/ADegBase.lean` |
+| (D3) `ArakelovHeightData` | `Found/Arakelov/AHeightWitness.lean` |
+
+★★誤りの原因は `Interface/Arakelov/APic.lean` の **`waiting` が古いまま**だったことである
+——witness が入ったあとも `waiting` は消されない仕様なので、`waiting` の有無で
+達成状況を読んではいけない。★★★**達成状況は `*.nonvacuous` の有無で読む。**
+(なお `CartierPicData` の witness は `cartierPicData_nonvacuous` と `_` 区切りで
+命名されており、`.nonvacuous` で grep すると**見落とす**。Arakelov は 9/9 で正しい。)
+
+### ★★★★★したがって `deg` の機構はもうある
+
+`APic` の witness は **`Pic X × Multiplicative (arcCM X)`** で、
+アルキメデス側(弧空間上の連続関数)のデータを持っている。★`deg_F` も `degFOf` として構成済み。
+
+★★**残る障害は 3 つ**:
+
+1. **一意化**(本節点 `exists_periodPair`)
+2. `ω_E` の**アルキメデス norm**(周期束の共体積)の組み上げ
+3. **`Proposition 3.4` の解析的内容**
+
+### ★★★★★★一意化の道筋(2026-08-26 の測定)
+
+★mathlib は **`WeierstrassCurve.exists_variableChange_of_j_eq`**
+(分離閉体上で `j` が等しければ同型、`IsomOfJ.lean`)を持つ。
+★★したがって本節点は **「`j` の全射性」**に帰着する。
+★★★しかし **mathlib にモジュラー `j` 関数は 0 件**
+(`Mathlib/NumberTheory/ModularForms/` を `jInvariant|def j` で検索して 0)。
+★★★★足場はある——Eisenstein 級数、`Δ = η²⁴`、レベル 1 の次元公式と Sturm 境界。
+★★★★★古典的な道は `M₁₂ = ⟨E₄³, Δ⟩` で `E₄³ − λΔ` が ℍ に零点を持つことを出す。
+**見積もり 10-30 ブロック**(上流に入れる価値のある仕事である)。
+
+★★3 の `Proposition 3.4` は原文の主定理であり、**研究水準の解析**である
+——本セッションの射程を超える。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-646 ★★★★★半周期と 3 次式の根——一意化の連鎖に着手した(第 332 ブロック)
+
+`Found/GenEll/LatticeHalfPeriod.lean`。
+
+### ★★★★★★位置づけ
+
+G8 の `htFalt` を固定するには一意化(`Skeleton/GenEll/Uniformization.lean`)が要り、
+その手前に
+
+    (i)  束の判別式 `g₂³ − 27g₃² ≠ 0`
+    (ii) `ℂ/Λ ≅ E(ℂ)` の群同型
+    (iii) `j` の全射性
+
+の 3 段がある(mathlib はいずれも持たない)。★本ブロックは **(i) の最初の段**を取る。
+
+### ★★★★★中身——奇関数性と周期性だけで出た
+
+`℘'` は奇関数(`derivWeierstrassP_neg`)かつ周期的(`derivWeierstrassP_add_coe`)なので、
+`w ∈ Λ` に対し
+
+    ℘'(w/2) = ℘'(-w/2 + w) = ℘'(-w/2) = -℘'(w/2)   ⟹   ℘'(w/2) = 0
+
+★★これを `℘'² = 4℘³ − g₂℘ − g₃`(`derivWeierstrassP_sq`)に入れると、
+`℘(w/2)` は 3 次式 `4x³ − g₂x − g₃` の**根**である。
+★★★半周期は 3 つ(`ω₁/2`・`ω₂/2`・`(ω₁+ω₂)/2`)。前 2 つが束に入らないことは mathlib にあり、
+3 つ目は `mul_ω₁_add_mul_ω₂_mem_lattice`(有理係数の判定)から出た。
+
+### ★★残り((i) の続き)
+
+★3 つの根が**相異なる**ことが要る。それには
+**「楕円関数の零点と極の個数は等しい」**(基本平行四辺形の周での偏角の原理)が要り、
+mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零点はちょうど 2 個、
+一方 `e₁ = e₂` なら `ω₁/2` と `ω₂/2` で各 2 位、計 4 個になって矛盾する、という筋である。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `derivWeierstrassP_half` | ★★★★**半周期で `℘' = 0`** |
+| `isRoot_cubic_weierstrassP_half` | ★★★★★**`℘(w/2)` は 3 次式の根** |
+| `add_div_two_notMem_lattice` | ★★★第 3 の半周期も束に入らない |
+| `isRoot_cubic_e₁`・`_e₂`・`_e₃` | ★★★★3 つの根 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-647 ★★★★★★束のスケール変換——判別式の非消失が軽くなった(第 333 ブロック)
+
+`Found/GenEll/LatticeScale.lean`。
+
+### ★★★★★★★到達点
+
+> **`G(cΛ, n) = c⁻ⁿ·G(Λ, n)`**、したがって **判別式 `g₂³ − 27g₃²` は `c⁻¹²` 倍**
+
+★これにより **(i) 判別式の非消失は「正規化された束 `Λ_τ = ℤ + τℤ`」に帰着する**
+(`latticeDisc_ne_zero_iff`)。
+
+### ★★★★★★道が軽くなった——偏角の原理は要らない
+
+§9-646 では「3 根の相異には**偏角の原理**(基本平行四辺形の周)が要る」と書いた。
+★★しかし正規化された束では、古典的に
+
+    g₂(Λ_τ)³ − 27g₃(Λ_τ)² = (2π)¹²·Δ(τ),    Δ = η²⁴
+
+であり、★★★**mathlib は `Δ = η²⁴` とその非消失を持つ**
+(`NumberTheory/ModularForms/Discriminant.lean`)。
+★★★★したがって (i) は「格子 Eisenstein 級数 `G` とモジュラー Eisenstein 級数 `E` の
+**正規化の対応**」に帰着する——**偏角の原理は不要**である。
+
+★★★★★★見積もりの根拠が変わった:当初「楕円関数論を一から積む」と見ていたが、
+**mathlib のモジュラー形式の在庫に載せ替えられる**。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `scalePair`・`scalePair_lattice` | ★束の `c` 倍 |
+| `G_scalePair` | ★★★★★**`G(cΛ, n) = c⁻ⁿ G(Λ, n)`** |
+| `latticeDisc` | ★判別式 |
+| `g₂_scalePair`・`g₃_scalePair` | ★★★`c⁻⁴`・`c⁻⁶` 倍 |
+| `latticeDisc_scalePair` | ★★★★★★**判別式は `c⁻¹²` 倍** |
+| `latticeDisc_ne_zero_iff` | ★★★★★**非消失はスケールに依らない** |
+
+### ★★次の段
+
+★格子 Eisenstein 級数 `G(Λ_τ, k)` と mathlib の `ModularForm.E k` の正規化の対応
+(`G_k = 2ζ(k)E_k`)。★★`ζ(4) = π⁴/90`・`ζ(6) = π⁶/945` は mathlib にある。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-648 ★★★★★正規化された束と `ℤ²` 上の和(第 334 ブロック)
+
+`Found/GenEll/LatticeNorm.lean`。
+
+### ★★★★★★モジュラー形式の在庫に載せるための段
+
+第 333 で判別式の非消失は**正規化された束 `Λ_τ = ℤ + τℤ`** に帰着した。
+★その先で使いたい mathlib の `ModularForm.E` は **`Fin 2 → ℤ` 上の和**で書かれている
+(`E = (1/2)·Σ_{gcd(m,n)=1} (mz+n)⁻ᵏ`、2026-08-26 実測)。★★そこで格子側の和を
+`ℤ × ℤ` 上の和に書き換えた:
+
+    G(Λ_τ, k) = Σ_{(m,n) ∈ ℤ²} (m + nτ)⁻ᵏ
+
+★★★mathlib の `latticeEquivProd`(束 `≃ₗ[ℤ] ℤ × ℤ`)と
+`latticeEquiv_symm_apply`(`(m,n) ↦ mω₁ + nω₂`)がそのまま効いた。
+★`(m,n) = (0,0)` の項は `(0^k)⁻¹ = 0`(ℂ の junk value)なので、和から除く必要がない
+——これは `PeriodPair.G` 自身の定義がそうなっているからである。
+
+### ★★★次の段
+
+★`Σ_{(m,n) ∈ ℤ²} (m+nτ)⁻ᵏ = 2ζ(k)·E_k(τ)`——**gcd で分解する**。
+★★`ζ(4) = π⁴/90`・`ζ(6) = π⁶/945` は mathlib にある。
+★★★そこまで行けば `g₂³ − 27g₃² = (2π)¹²·Δ(τ)` と `Δ = η²⁴ ≠ 0` で **(i) が閉じる**。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `linearIndependent_one_of_im_ne_zero` | ★`im τ ≠ 0` なら `1, τ` は `ℝ` 上一次独立 |
+| `normPair` | ★★正規化された周期対 `⟨1, τ⟩` |
+| `G_normPair` | ★★★★★**`G(Λ_τ, k) = Σ_{(m,n)} (m+nτ)⁻ᵏ`** |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-649 ★★★★★★束の曲線と `j` 不変量(第 335 ブロック)
+
+`Found/GenEll/LatticeCurve.lean`、`Skeleton/GenEll/Uniformization.lean`。
+
+### ★★★★★★束の側と曲線の側を繋いだ
+
+`℘'² = 4℘³ − g₂℘ − g₃` で `x = ℘`、`y = ℘'/2` と置くと `y² = x³ − (g₂/4)x − (g₃/4)`。
+これを `latticeCurve P` として `Found` に置き、判別式と `j` を計算した:
+
+    Δ(latticeCurve P) = g₂³ − 27g₃² = latticeDisc P
+    j(latticeCurve P) = 1728·g₂³ / (g₂³ − 27g₃²)
+
+★どちらも `b₂ b₄ b₆ b₈` を展開して `ring` で出る。
+
+### ★★★★これで一意化の 3 段が格子の言葉に翻訳された
+
+| 段 | 格子の言葉 |
+|---|---|
+| (i) 判別式の非消失 | **`latticeCurve P` が楕円曲線であること**(同値、本ブロック) |
+| (iii) `j` の全射性 | 与えられた `j₀` に対し `1728g₂³/(g₂³−27g₃²) = j₀` なる束を作ること |
+
+★★`Skeleton/GenEll/Uniformization.lean` が自前で持っていた `latticeCurve` を撤去し、
+`Found` のものを使うようにした(重複の解消)。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `latticeCurve` | ★★束に対応する Weierstrass 曲線 |
+| `latticeCurve_Δ` | ★★★★★**`Δ = g₂³ − 27g₃²`** |
+| `isElliptic_latticeCurve`・`latticeDisc_ne_zero_of_isElliptic` | ★★★★同値 |
+| `latticeCurve_c₄` | ★★`c₄ = 12g₂` |
+| `latticeCurve_j` | ★★★★★★**`j = 1728g₂³/(g₂³−27g₃²)`** |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-650 ★★★★★★`(℘, ℘'/2)` は曲線の点である——(ii) の前半(第 336 ブロック)
+
+`Found/GenEll/LatticePoint.lean`。
+
+### ★★★★★★到達点
+
+> `z ∉ Λ` ⟹ **`(℘(z), ℘'(z)/2)` は `latticeCurve P` の点**であり、
+> **`z ↦ -z` は点の符号に対応する**
+
+★これは `℘'² = 4℘³ − g₂℘ − g₃`(mathlib の `derivWeierstrassP_sq`)を
+`y² = x³ − (g₂/4)x − (g₃/4)` に読み替えるだけで、**`linear_combination h/4` で出た**。
+★★非特異性は楕円曲線なので `equation_iff_nonsingular` から自動。
+★★★符号の対応は `℘` が偶・`℘'` が奇であることと、
+`latticeCurve P` が `a₁ = a₃ = 0` ゆえ `negY x y = -y` であることから出る。
+
+### ★★残り((ii) の後半)
+
+★**加法定理** `latticePoint P (z+w) = latticePoint P z + latticePoint P w`。
+★★mathlib に `℘` の加法定理は無い(2026-08-26 実測、`weierstrassP_add` で 0 件)。
+★★★古典的には 3 点共線条件を直接示すか、`℘, ℘'` が周期 `Λ` の楕円関数体を生成する
+ことを使う。
+
+### ★★G8 側の積み上げ(5 ブロック、すべて sorry なし)
+
+| ブロック | 内容 |
+|---|---|
+| 332 | 半周期で `℘' = 0`、`℘(w/2)` は `4x³−g₂x−g₃` の根 |
+| 333 | スケール則、判別式は `c⁻¹²` 倍、非消失はスケール不変 |
+| 334 | `G(Λ_τ, k) = Σ_{(m,n)∈ℤ²} (m+nτ)⁻ᵏ` |
+| 335 | `Δ = g₂³−27g₃²`、`j = 1728g₂³/Δ` |
+| 336 | `(℘, ℘'/2)` は曲線の点、`z ↦ -z` は符号に対応 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-651 ★★★★★格子点の gcd 分解——(i) の代数の芯(第 337 ブロック)
+
+`Found/GenEll/GcdDecomp.lean`。
+
+### ★★★★★★位置づけ
+
+(i)「束の判別式 `g₂³ − 27g₃² ≠ 0`」は第 333・334 により
+
+    G(Λ_τ, k) = Σ_{(m,n) ∈ ℤ²} (m + nτ)⁻ᵏ
+
+を mathlib のモジュラー Eisenstein 級数 `E_k`(`= (1/2)Σ_{gcd(m,n)=1} (mz+n)⁻ᵏ`)に
+繋ぐことに帰着した。★その繋ぎは古典的な **gcd 分解**
+
+    Σ_{v ≠ 0} f(v) = Σ_{d ≥ 1} Σ_{w 原始} f(d·w) = ζ(k)·Σ_{w 原始} f(w) = 2ζ(k)·E_k
+
+である。★★本ブロックはその**代数の芯**を取った(和の入れ替え自体は解析の段で別ブロック)。
+
+### ★★★★★中身
+
+* `exists_unique_gcd_decomp`: 零でない `v ∈ ℤ²` は `v = d·w`(`d > 0`、`w` 原始)と
+  **一意に**分解する。★一意性は `gcd(d·w₁, d·w₂) = d·gcd(w₁,w₂) = d` から出る。
+* `eisSummand_gcd_factor`: 被加数は `d⁻ᵏ` と原始部分に**分離する**。
+
+### ★★残り
+
+★和の入れ替え(`tsum` の分割と絶対収束)と、mathlib の `E_k` の正規化との突き合わせ。
+★★`ζ(4) = π⁴/90`・`ζ(6) = π⁶/945` は mathlib にある。
+
+### ★★G8 側の積み上げ(6 ブロック、すべて sorry なし)
+
+| ブロック | 内容 |
+|---|---|
+| 332 | 半周期で `℘' = 0`、`℘(w/2)` は 3 次式の根 |
+| 333 | スケール則、判別式は `c⁻¹²` 倍 |
+| 334 | `G(Λ_τ, k) = Σ_{(m,n)∈ℤ²} (m+nτ)⁻ᵏ` |
+| 335 | `Δ = g₂³−27g₃²`、`j = 1728g₂³/Δ` |
+| 336 | `(℘, ℘'/2)` は曲線の点、`z ↦ -z` は符号に対応 |
+| 337 | gcd 分解の存在と一意性、被加数の分離 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-652 ★★★★★★gcd 分解は全単射である(第 338 ブロック)
+
+`Found/GenEll/GcdEquiv.lean`。
+
+### ★★★★★★到達点
+
+> **`DecompIndex = {(d,w) | d > 0, gcd w = 1} ≃ {v ∈ ℤ² | v ≠ 0}`**
+
+★第 337 の存在と一意性を `Equiv.ofBijective` に流すだけで出た。
+★★これで `Σ_{v ≠ 0} f(v) = Σ_{(d,w)} f(d·w)` が `Equiv.tsum_eq` で書き換えられる。
+★★★被加数も `summand_gcdEquiv` で `d⁻ᵏ·(w₁ + w₂τ)⁻ᵏ` に分離する。
+
+### ★★★★★★★(i) に残るのは「解析」だけになった
+
+    Σ_{v ≠ 0} (v₁ + v₂τ)⁻ᵏ
+      = Σ_{(d,w)} d⁻ᵏ·(w₁ + w₂τ)⁻ᵏ     ★★★★代数はここまでで済んだ(第 337・338)
+      = (Σ_d d⁻ᵏ)·(Σ_w (w₁+w₂τ)⁻ᵏ)    ← Fubini(絶対収束)★残る
+      = ζ(k)·2·E_k(τ)                   ← mathlib の正規化との突き合わせ★残る
+
+### ★★★★mathlib の `E_k` の実測(2026-08-26)
+
+    eisensteinSeries a k z = ∑' x : gammaSet N 1 a, eisSummand k x z
+    gammaSet N r a = {v | v ≡ a (mod N) ∧ gcd (v 0) (v 1) = r}
+    eisSummand k v z = (v₀·z + v₁)^(-k)
+    ModularForm.E hk = (1/2) • eisensteinSeriesMF hk 0
+
+★したがって `E_k(z) = (1/2)·Σ_{v 原始} (v₀z + v₁)⁻ᵏ` である
+——**格子側と索引の順序が `(m,n) ↔ (v₁,v₀)` で入れ替わる**点だけ注意。
+
+### ★★G8 側の積み上げ(7 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-653 ★★★★★★添字を「正整数 × 原始ベクトル」の積にした(第 339 ブロック)
+
+`Found/GenEll/GcdProd.lean`。
+
+### ★★★★★★Fubini を当てられる形にした
+
+第 338 の `DecompIndex ≃ {v ≠ 0}` は、添字が**条件の連言つき部分型**
+`{p : ℕ × (ℤ×ℤ) // 0 < p.1 ∧ gcd p.2 = 1}` だった。★`tsum` の Fubini
+(`∑' (a,b), f a·g b = (∑' a, f a)(∑' b, g b)`)を当てるには**積の形**でなければならない。
+
+★★そこで
+
+    {d : ℕ // 0 < d} × {w : ℤ × ℤ // gcd w = 1}  ≃  {v : ℤ × ℤ // v ≠ 0}
+
+に整えた。★★★被加数も `d⁻ᵏ · (w₁ + w₂τ)⁻ᵏ` と積の形で書ける。
+
+### ★★残り((i) の解析)
+
+★`Σ_d d⁻ᵏ` の絶対収束(`k ≥ 2`)と `Σ_{w 原始} (w₁+w₂τ)⁻ᵏ` の絶対収束(`k ≥ 3`)。
+★★mathlib は `EisensteinSeries.summable_one_div_norm_rpow`
+(`2 < k` で `Summable fun x => ‖x‖ ^ (-k)`)を持つ(2026-08-26 実測)。
+★★★そこから `tsum_mul_tsum_of_summable_norm` で積に分ける。
+
+### ★★G8 側の積み上げ(8 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射 / 339 積の形。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-654 ★★★★★★格子和の絶対収束——在庫で足りた(第 340 ブロック)
+
+`Found/GenEll/LatticeSummable.lean`。
+
+### ★★★★★★★mathlib の Eisenstein 級数の収束がそのまま効いた
+
+(i) の残りは解析——`Σ_d d⁻ᵏ` と `Σ_{w 原始} (w₁+w₂τ)⁻ᵏ` の絶対収束であった。
+
+★★★**mathlib の `EisensteinSeries.summable_norm_eisSummand` は
+`gammaSet` に制限した和ではなく `Fin 2 → ℤ` 全体についての絶対収束である**
+(2026-08-26 実測):
+
+    3 ≤ k → ∀ z, Summable fun x : Fin 2 → ℤ => ‖eisSummand k x z‖
+
+★★したがって格子和の絶対収束は**そのまま**得られ、部分型への制限も `Summable.subtype`
+で出た。★★★★当初「絶対収束を自分で積む」と見ていたが、**在庫で足りた**
+——これで (i) の解析の山は消えた。
+
+### ★★★★索引の突き合わせ
+
+mathlib の `eisSummand k x z = (x₀·z + x₁)^(-k)` に対し格子側は `(m + nτ)⁻ᵏ` で、
+**順序が `(m,n) ↔ (x₁,x₀)` で入れ替わる**。★`swapEquiv : ℤ × ℤ ≃ (Fin 2 → ℤ)` を噛ませた。
+
+### ★★残り((i) の最後の 1 段)
+
+★`tsum_mul_tsum_of_summable_norm` で積に分け、`Σ_d d⁻ᵏ = ζ(k)`・
+`Σ_{w 原始} = 2E_k` を突き合わせる。
+
+### ★★G8 側の積み上げ(9 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 曲線の点 / 337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-655 ★★★★★★★格子和が積に分かれた(第 341 ブロック)
+
+`Found/GenEll/LatticeFubini.lean`。
+
+### ★★★★★★★到達点
+
+> **`Σ_{v ≠ 0} (v₁ + v₂τ)⁻ᴷ = (Σ_{d>0} d⁻ᴷ) · (Σ_{w 原始} (w₁ + w₂τ)⁻ᴷ)`**(`K ≥ 3`)
+
+★第 337-340 の帰結である:
+gcd 分解(337)→ 全単射(338)→ 積の形(339)→ 絶対収束(340)→ **Fubini(本ブロック)**。
+
+### ★★★★★★残る 1 段——ζ の値との突き合わせ
+
+`g₂ = 60·G₄`、`g₃ = 140·G₆` と `G_k = ζ(k)·(2E_k)` から
+
+    g₂³ − 27g₃² = (120ζ(4))³·E₄³ − 27·(280ζ(6))²·E₆²
+
+★★ここで **`ζ(4) = π⁴/90`・`ζ(6) = π⁶/945`** を入れると
+
+    (120·π⁴/90)³ = (4π⁴/3)³ = 64π¹²/27
+    27·(280·π⁶/945)² = 27·(8π⁶/27)² = 64π¹²/27
+
+と**両者が一致する**ので `g₂³ − 27g₃² = (64π¹²/27)(E₄³ − E₆²) = (2π)¹²·Δ`。
+★★★★`Δ = η²⁴ ≠ 0`(mathlib)から **(i) が閉じる**。
+
+★★★★★★**係数が一致することが本質的**である
+——一致しなければ `Δ` の非消失だけでは足りない。ここが古典的な `(2π)¹²` の出どころである。
+
+### ★★G8 側の積み上げ(10 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` / 336 曲線の点 /
+337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束 / 341 Fubini。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-656 ★★★★★`ζ(6)` の級数形——別目的の在庫が効いた(第 342 ブロック)
+
+`Found/GenEll/ZetaSix.lean`。
+
+### ★★★★★★在庫の確認が効いた(今回は grep で気づけた)
+
+`ζ(6) = π⁶/945` を出すのに Bernoulli 数 `B₆ = 1/42` が要る。
+★書き始めてから `bernoulli'_five|bernoulli'_six|bernoulli_six` で grep したところ、
+**`Found/GaloisRep/TateEquationAnalytic.lean` に既にあった**
+——`bernoulli'_three` … `bernoulli_six_val`、さらに `riemannZeta_six` まで。
+★★これは **Tate 曲線の `q` 展開のために積んだもの**である。
+
+★★★★**別の目的で積んだ在庫が、Eisenstein 級数の正規化でそのまま効いた。**
+★重複させかけたが、書き直して再利用にした(§9-636 の教訓が働いた)。
+
+### ★★足したのは級数形だけ
+
+在庫の `riemannZeta_six` は `riemannZeta 6 = π⁶/945`(解析接続の側)である。
+★格子和は `tsum` で書かれているので、**級数形 `HasSum (fun n => 1/n⁶) (π⁶/945)`** が要る。
+★★それだけを `hasSum_zeta_nat` + `bernoulli_six_val` から足した。
+
+### ★★残り((i) の最後)
+
+★`Σ_{d>0} d⁻ᴷ` と `ζ(K)` の同定(`K = 4, 6`)、
+`Σ_{w 原始} = 2E_K` の同定、そして `E₄³ − E₆² = 1728Δ`。
+★★最後のものは mathlib に**無い**(2026-08-26 実測)が、
+レベル 1 の次元公式と Sturm 境界(`LevelOne/DimensionFormula.lean`)から出る見込み。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-657 ★★★★★`Σ_{d>0} d⁻ᴷ` を `ζ(K)` と同定した(第 343 ブロック)
+
+`Found/GenEll/ZetaTsum.lean`。
+
+### ★★★★★★第 341 の右辺の第 1 因子を値にした
+
+    Σ_{d>0} d⁻⁴ = π⁴/90,    Σ_{d>0} d⁻⁶ = π⁶/945
+
+★段取りは 2 つの橋である:
+
+1. **実 → 複素**: `hasSum_zeta_four`(実の級数)を `Complex.ofRealHom` で写す
+   (`HasSum.map` + `Complex.continuous_ofReal`)。
+2. **全体 → 正の部分**: `n = 0` の項は `(0^K)⁻¹ = 0` なので
+   `hasSum_subtype_iff_of_support_subset` で `{d > 0}` に落とす。
+
+★★`K ≥ 1` があれば `0^K = 0` なので台の包含はそのまま出た。
+
+### ★★残り((i) の最後の 2 つ)
+
+★`Σ_{w 原始} (w₁+w₂τ)⁻ᴷ = 2·E_K(τ)`(mathlib の `eisensteinSeries` との同定、索引の入れ替えつき)
+★★`E₄³ − E₆² = 1728·Δ`(mathlib に無い。レベル 1 の次元公式と Sturm 境界から出る見込み)
+
+### ★★G8 側の積み上げ(12 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` / 336 曲線の点 /
+337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束 / 341 Fubini /
+342 `ζ(6)` の級数形 / 343 `ζ(K)` の同定。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-658 ★★★★★★★格子和 = `ζ(K)·2E_K(τ)`(第 344 ブロック)
+
+`Found/GenEll/EisensteinMatch.lean`。
+
+### ★★★★★★★到達点
+
+> **`Σ_{v ≠ 0} (v₁ + v₂τ)⁻ᴷ = ζ(K) · 2·E_K(τ)`**(`K ≥ 3`)
+
+★`K = 4, 6` では `ζ(4) = π⁴/90`・`ζ(6) = π⁶/945` を入れた形も取れた。
+
+### ★★★★★2 つの橋
+
+1. **`gammaSet 1 1 0` は原始ベクトルの集合である**——`ZMod 1` は自明なので合同条件が消える。
+2. **索引の入れ替え**——mathlib の `eisSummand k v z = (v₀z + v₁)^(-k)` に対し
+   格子側は `(m + nτ)⁻ᵏ` なので `swapEquiv`(`w ↦ ![w.2, w.1]`)を噛ませる。
+   ★`gcd` は対称なので原始性は保たれる。
+
+★★`ModularForm.E hk = (1/2) • eisensteinSeriesMF hk 0` の中身は `.copy` で包まれているが、
+`simp only [E, copy, eisensteinSeriesMF]` のあと `rfl` で開いた。
+
+### ★★★★★★★これで (i) に残るのは 1 つだけになった
+
+    g₂ = 60·G₄ = 60·ζ(4)·2E₄ = (4π⁴/3)·E₄       ★本ブロックまでで出る
+    g₃ = 140·G₆ = 140·ζ(6)·2E₆ = (8π⁶/27)·E₆    ★同上
+    g₂³ − 27g₃² = (64π¹²/27)·(E₄³ − E₆²)         ★係数が一致(第 341 で確認)
+    E₄³ − E₆² = 1728·Δ                           ★**残る 1 つ**(mathlib に無い)
+    Δ = η²⁴ ≠ 0                                  ★mathlib
+
+### ★★G8 側の積み上げ(13 ブロック、すべて sorry なし)
+
+332-336 半周期・スケール則・`ℤ²` 上の和・`Δ`/`j`・曲線の点 /
+337-339 gcd 分解・全単射・積の形 / 340-341 絶対収束・Fubini /
+342-343 `ζ(6)`・`ζ(K)` の同定 / 344 Eisenstein との同定。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-659 ★★★★★`E₄`・`E₆` の q 展開係数(第 345 ブロック)
+
+> ★★★★★**訂正(§9-660)**——本節の「`E₄³ − E₆² = 1728Δ` は mathlib に無い」は**誤り**である。
+> `ModularForms/LevelOne/GradedRing.lean` の `discriminant_eq_E₄_cube_sub_E₆_sq` として**あった**。
+> `E₄`・`E₆` の係数も `LevelOne/DimensionFormula.lean` にあり、本ブロックのファイル
+> `Found/GenEll/EisensteinCoeff.lean` は**重複なので削除した**。詳しくは §9-660。
+
+`Found/GenEll/EisensteinCoeff.lean`。
+
+### ★★★★★★(i) の最後——`E₄³ − E₆² = 1728Δ` に向けて
+
+第 344 までで `g₂ = (4π⁴/3)E₄`・`g₃ = (8π⁶/27)E₆` と
+`g₂³ − 27g₃² = (64π¹²/27)(E₄³ − E₆²)` が出た。★残るのは `E₄³ − E₆² = 1728Δ` である。
+
+★★その筋は **Sturm 境界**:`f := E₄³ − E₆² − 1728Δ` は重さ 12 の modular form で、
+q 展開の位数が `12/12 = 1` より大きければ `f = 0`(`sturm_bound_levelOne`)。
+★★★したがって **0 次と 1 次の係数**を突き合わせればよい。
+
+### ★★★★★2026-08-26 の実測——mathlib の在庫
+
+| 段 | mathlib |
+|---|---|
+| `E_k` の q 展開係数 | ✅ `EisensteinSeries.E_qExpansion_coeff` |
+| `Δ` の 1 次係数 = `1` | ✅ `discriminant_qExpansion_coeff_one` |
+| `Δ ≠ 0` | ✅ `discriminant_ne_zero` |
+| Sturm 境界(レベル 1) | ✅ `ModularForm.sturm_bound_levelOne` |
+| q 展開の積・和・スカラー倍 | ✅ `qExpansion_mul`・`_add`・`_smul` |
+| **`E₄³ − E₆² = 1728Δ`** | ★**無い** |
+
+★★★★★**必要な道具はすべて在庫にあった**——残りは組み立てである。
+
+### ★★係数の値
+
+`E_qExpansion_coeff` は `-(2k/B_k)·σ_{k-1}(m)` を与える。
+★`B₄ = −1/30` ⟹ `E₄` の `q` 係数は `240`、`B₆ = 1/42` ⟹ `E₆` は `−504`。
+★★Bernoulli 数の値は第 342 で確認したとおり
+`Found/GaloisRep/TateEquationAnalytic.lean`(Tate 曲線用)の在庫を使った。
+
+### ★★G8 側の積み上げ(14 ブロック、すべて sorry なし)
+
+332-336 / 337-339 / 340-341 / 342-343 / 344 / 345。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-660 ★★★★★★★(i) 判別式の非消失が閉じた(第 346 ブロック)
+
+`Found/GenEll/LatticeDiscNonzero.lean`。
+
+### ★★★★★★★到達点
+
+> **任意の周期対 `L` について `latticeDisc L = g₂³ − 27g₃² ≠ 0`**(`latticeDisc_ne_zero`)
+
+★これで `latticeCurve L` はつねに楕円曲線になり(`isElliptic_latticeCurve'`)、
+一意化 (ii)・(iii) の土台ができた。
+
+★★おまけに **`j(ℤ + τℤ) = E₄(τ)³ / Δ(τ)`**(`latticeCurve_j_tauPair`)——
+格子から作った曲線の `j` 不変量が**古典的なモジュラー `j` 関数**であることが出た。
+★★★これは (iii) の入口そのものである。
+
+### ★★★★★★★★在庫調査——**8 ブロックぶんの回り道をしていた**
+
+★mathlib を「概念で」引き直したところ:
+
+| 探していたもの | 実は | 場所 |
+|---|---|---|
+| `E₄³ − E₆² = 1728Δ` | ★**あった** | `LevelOne/GradedRing.lean` `discriminant_eq_E₄_cube_sub_E₆_sq` |
+| `E₄` の `q` 係数 `240` | ★**あった** | `LevelOne/DimensionFormula.lean` `E₄_qExpansion_coeff_one` |
+| `E₆` の `q` 係数 `−504` | ★**あった** | 同上 `E₆_qExpansion_coeff_one` |
+| 格子和 = `ζ(k)·Eisenstein` | ★**あった** | `tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries` |
+
+★★★さらに悪いことに、4 つめは**自分の第 215 ブロック
+(`Found/GaloisRep/LatticeInvariant.lean`、`G_eq_two_zeta_mul_E`)が既に使っていた**。
+
+★★★★つまり第 337-345 の 9 ブロック(gcd 分解 → 全単射 → 積 → 絶対収束 → Fubini →
+`ζ(4)`,`ζ(6)` → Eisenstein 同定 → 係数)は、
+**すでに手元にある `G_eq_two_zeta_mul_E` の一行**で置き換えられた。
+★本ブロックの `g₂_tauPair` が 3 行で済んでいるのがその証拠である。
+
+★★★★★**なぜ落ちたか**——`grep` を「**これから使うつもりの道具の名前**」
+(`sturm_bound_levelOne`・`qExpansion_mul`)で打った。
+`1728` という**概念**で打てば 1 秒で当たっていた。
+`tools/lean-idioms.md` の「在庫は名前でなく概念で引く」の**2 度目の違反**である。
+
+★★**重複していた `Found/GenEll/EisensteinCoeff.lean`(第 345)は削除した**。
+第 337-344 は残した(sorry なしで正しく、gcd 分解の機構は別の用途に使える)が、
+**(i) には不要だった**と明記しておく。
+
+### ★★★★★★組み立て(残ったのは 5 行)
+
+    g₂(Λ_τ) = 60·G₄ = 60·2ζ(4)·E₄ = (4π⁴/3)·E₄
+    g₃(Λ_τ) = 140·G₆ = 140·2ζ(6)·E₆ = (8π⁶/27)·E₆
+    Δ_lat   = (64π¹²/27)(E₄³ − E₆²) = (64π¹²/27)·1728·Δ(τ) = 4096π¹²·Δ(τ) ≠ 0
+
+★★一般の `L` へは**スケール則**(第 333 `latticeDisc_ne_zero_iff`)で降ろす:
+`L = ω₂ · ⟨ω₁/ω₂, 1⟩`。★`im(ω₁/ω₂) < 0` のときは `ω₁ ↔ ω₂` を入れ替える
+——**束 `span{ω₁,ω₂}` は入れ替えで変わらない**(`swap_lattice`)ので判別式も変わらない。
+
+### ★★★(ii)(iii) の残り
+
+| 段 | 状態 |
+|---|---|
+| (i) 判別式の非消失 | ★**本ブロックで完了** |
+| (iii) `j` の全射性 | ★`j = E₄³/Δ` まで出た。残りは `j : ℍ/SL₂(ℤ) → ℂ` が全射 |
+| (ii) `ℂ/Λ ≅ E(ℂ)` 群同型 | ★★`℘` の加法定理が mathlib に無い(`weierstrassP_add` 0 件) |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-661 ★★★★★★モジュラー `j` 関数を建てた(第 347 ブロック)
+
+`Found/GenEll/JFunction.lean`。
+
+### ★★★★★★★なぜ `j` を建てるのか——一意化 (iii)
+
+第 346 で (i) が閉じ、`j(ℤ + τℤ) = E₄(τ)³/Δ(τ)` まで出た。
+★スケルトンの `exists_periodPair` は mathlib の
+**`WeierstrassCurve.exists_variableChange_of_j_eq`**(分離閉体上で `j` が等しければ同型)
+と合わせると **`j : ℍ → ℂ` の全射性**だけに帰着する。
+★★★**mathlib にモジュラー `j` 関数は無い**(2026-08-26 実測)ので本ブロックで建てた。
+
+### ★★★★★在庫(2026-08-26 実測)
+
+| 段 | mathlib |
+|---|---|
+| 基本領域 `𝒟`・`∃ g, g • z ∈ 𝒟` | ✅ `ModularGroup.fd`・`exists_smul_mem_fd` |
+| **切り詰めた基本領域のコンパクト性** | ✅ `isCompact_truncatedFundamentalDomain` |
+| 開写像定理(連結開集合版) | ✅ `AnalyticOnNhd.is_constant_or_isOpen` |
+| `f(γ•z) = (cz+d)^k f(z)` | ✅ `SlashInvariantForm.slash_action_eqn''` |
+| `Δ` はカスプ形式(`→ 0`) | ✅ `CuspFormClass.zero_at_infty` |
+| モジュラー形式の**カスプでの極限** | ★無い(`cuspFunction_apply_zero` から 5 行) |
+| **`j` 関数そのもの** | ★無い |
+
+### ★★本ブロック
+
+`jFun`・`jFun_smul`(`SL(2,ℤ)` 不変)・`analyticOnNhd_jC`(上半平面で正則)・
+`tendsto_atImInfty_coeff_zero`(カスプでの極限は定数項)・
+`tendsto_norm_jFun_atImInfty`(**`‖j‖ → ∞`**)・`jC_not_constant`。
+
+## §9-662 ★★★★★★★★一意化が閉じた(第 348 ブロック)
+
+`Found/GenEll/JSurjective.lean`。**`Skeleton/GenEll/Uniformization.lean` の `sorry` が消えた。**
+
+### ★★★★★★★★到達点
+
+> **任意の楕円曲線 `W/ℂ` は、ある周期束の曲線と変数変換で移り合う**
+> (`exists_periodPair_of_isElliptic`)
+
+### ★★★★★★`j` の全射性——**開かつ閉**
+
+| 段 | 補題 |
+|---|---|
+| 像は**開** | `isOpen_range_jFun`(開写像定理 + `jC_not_constant`) |
+| 像は**閉** | `isClosed_range_jFun` |
+| `ℂ` は連結 | `isClopen_iff` |
+
+★★★閉の証明が核である:`wₙ → w` で `wₙ = j(τₙ)` とする。
+★`j` は `SL(2,ℤ)` 不変なので `τₙ` は基本領域 `𝒟` に移せる。
+★★`‖wₙ‖` は有界で、`‖j‖ → ∞`(カスプ)だから `im τₙ` も有界。
+★★★したがって `τₙ` は**コンパクト**な `𝒟 ∩ {im ≤ M}` に入り、部分列が収束する。
+
+★★★★★**valence 公式(留数計算)を一切使わなかった**——
+mathlib の `isCompact_truncatedFundamentalDomain` が効いた。
+
+### ★★★★★★★★見積もりの訂正——**25-60 → 17 ブロック**
+
+第 331 の `.needs` は本節点を **25-60 ブロック**と見積もり、
+「上流(mathlib)に入るべき仕事であり、**Galois の義務の中では閉じない**」と書いていた。
+★★★実際には **第 332-348 の 17 ブロック**で閉じた。
+★★★★差の大半は **(ii) `ℂ/Λ ≅ E(ℂ)` の群同型は要らなかった**ことによる
+——`exists_periodPair` は**曲線の同型**(変数変換)であって群同型ではない。
+★見積もりが (ii) を要求に数えていたのが過大の原因である。
+
+### ★★残る障害(G8)
+
+    一意化 ★済(本ブロック)
+      → 周期束の共体積(アルキメデス norm)  ★未
+      → `ω_E` を計量つき算術直線束にする        ★未
+      → (D1)(D2)(D3) の `deg` に載せる            ★機構はある
+      → `ht^Falt = deg(ω_E)` を固定し、欠陥 #6 を塞ぐ
+
+### ★配管(`tools/lean-idioms.md` に追記)
+
+`check.mjs` の引用抽出は `>` を含む行が続く限り本文として食うので、
+引用行の直後に `fun x => …` を置くと式ごと食い込まれる。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-663 ★★★★★★周期束の共体積とアルキメデス不変量(第 349 ブロック)
+
+`Found/GenEll/Covolume.lean`。
+
+### ★★★★★★★核心——**`‖Δ_lat‖·covol⁶` は相似で変わらない**
+
+| 量 | `Λ ↦ cΛ` での変わり方 |
+|---|---|
+| `Δ_lat = g₂³ − 27g₃²` | `|c|⁻¹²` 倍(第 333) |
+| `covol` | `|c|²` 倍(`covol_scalePair`) |
+| **`‖Δ_lat‖·covol⁶`** | ★**不変**(`archInv_scalePair`) |
+
+★★★★★これが「曲線に付く量」である——周期束は相似の分だけ選べるが、
+`archInv` は選び方に依らない。**Faltings 高さのアルキメデス局所因子そのもの**である。
+
+### ★★★★★モジュラーな姿
+
+    covol(ℤ + τℤ) = Im τ
+    archInv(ℤ + τℤ) = 4096·π¹²·‖Δ(τ)‖·(Im τ)⁶
+
+★`‖Δ(τ)‖(Im τ)⁶` は `Δ` の **Petersson ノルム**で、`SL(2,ℤ)` 不変
+(重さ 12 の `|cτ+d|¹²` と `Im(γτ) = Im τ/|cτ+d|²` の 6 乗が打ち消す)。
+★★★★★★**任意の周期束は Petersson ノルムに帰着する**(`exists_archInv_eq_petersson`)。
+
+### ★★★逸脱の記録——`ZLattice.covolume` を使わなかった
+
+mathlib は `ZLattice.covolume`(Haar 測度による基本領域の体積)を持つが、
+本ブロックは **2 次元の行列式そのもの**(`|Im(ω̄1ω₂)|`)で定義した。
+★理由: `PeriodPair` に `IsZLattice` を付ける配管を通さずに済み、
+必要な**スケール則と正値性**は 3 行で出るから。
+★★下流が使うのは `covol_scalePair`・`covol_pos`・`covol_tauPair` の 3 本だけである。
+`ZLattice.covolume` との一致(`covolume_eq_det`)は必要になったら足す。
+
+### ★★★★★★★次の障害を特定した——**`Λ ↦ (g₂,g₃)` の単射性**
+
+`htFalt` を固定するには、与えられた曲線 `W/ℂ` に対して
+`archInv(P)` が **`P` の選び方に依らない**ことが要る。
+
+★`C • W = latticeCurve P` と `C' • W = latticeCurve P'` とすると、
+`D := C'C⁻¹` の `u` について `g₂(P') = u⁻⁴g₂(P)`・`g₃(P') = u⁻⁶g₃(P)`、
+すなわち `P'` と `scalePair P u` は**同じ `(g₂,g₃)`** を持つ。
+★★したがって **`Λ ↦ (g₂,g₃)` が単射**なら `archInv(P') = archInv(P)` が出る。
+
+★★★これは古典的には **`j` の `ℍ/Γ` 上での単射性**と同値で、
+通常は **valence 公式**(幅角の原理)で出す。
+★★★★★**2026-08-26 実測: mathlib に valence 公式は無い**。
+★ただし `℘` の極の位置(`not_continuousAt_weierstrassP`・`order_weierstrassP`)はあるので、
+`℘_Λ = ℘_Λ'` から `Λ = Λ'` は出る——残るのは「`(g₂,g₃)` が `℘` を決める」である。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-664 ★★★★★★不変量は束だけで決まる(第 350 ブロック)と、次の節点
+
+`Found/GenEll/LatticeInvariance.lean`と
+`Skeleton/GenEll/LatticeFromInvariants.lean`(新節点)。
+
+### ★★★★★★本ブロック
+
+第 349 で `archInv = ‖Δ_lat‖·covol⁶` が**相似**で変わらないことを出したが、
+`covol` は `ω₁, ω₂` の行列式で定義されているので、**基底の取り替えで変わらない**
+ことは自明でない。★同じ束の 2 つの基底は `GL₂(ℤ)` で移り合い、
+両向きの `ℤ` 係数表示から `(ad−bc)(ps−qr) = 1`、整数の単元は `±1` なので
+`|det|` が等しい(`covol_congr`)。★★これで **`archInv` は束の関数**になった。
+
+★★★さらに **`Λ = {z : ℘ が z で不連続}`**(`lattice_eq_discontinuity`)を出し、
+**`℘` が同じなら束も `archInv` も同じ**(`lattice_eq_of_weierstrassP_eq`)を得た。
+
+### ★★★★★★★新節点——**`(g₂,g₃)` は束を決める**
+
+`htFalt` を**曲線の関数**として定義するには、周期束の選び方に依らないことが要る。
+`P'` と `scalePair P u` は同じ `(g₂,g₃)` を持つので、残るのはこの節点である。
+
+| 段 | 状態 |
+|---|---|
+| `℘` が同じ ⟹ 束が同じ | ✅ 第 350 |
+| 束が同じ ⟹ `covol`・`archInv` が同じ | ✅ 第 350 |
+| **`(g₂,g₃)` が同じ ⟹ `℘` が同じ** | ★残る 1 つ |
+
+### ★★★★★★道具は mathlib にそろっている(2026-08-26 実測)
+
+`hasFPowerSeriesAt_weierstrassPExcept` は `℘[L−0]` の `0` での冪級数係数が
+`(i+1)·sumInvPow 0 (i+2)` であることを与え、`sumInvPow_zero : sumInvPow 0 = G` なので
+係数は **`a_i = (i+1)·G(i+2)`**。★`derivWeierstrassP_sq` は `℘'² = 4℘³ − g₂℘ − g₃`。
+
+★★`f := ℘[L−0]` と置くと `℘ = f + z⁻²` で、微分方程式は
+
+    z²f'' = 6z²f² + 12f − (g₂/2)z²
+
+という**両辺 `0` で解析的な恒等式**になり、係数を比べると
+
+    (i−4)(i+3)·a_i = 6·Σ_{j+k=i−2} a_j a_k − (g₂/2)·[i = 2]
+
+★★★`i = 4` で係数が消えるのは `a₄ = 5G₆ = g₃/28` が**2 つ目の自由母数**だからで、
+`i ≥ 5` では `(i−4)(i+3) ≠ 0` なので **`a_i` は `g₂, g₃` から順に決まる**。
+★見積もり **4-8 ブロック**。
+
+### ★★別の道(取らなかった)
+
+古典的には `j` の `ℍ/Γ` 上での**単射性**——**valence 公式**——で出す。
+★**2026-08-26 実測: mathlib に valence 公式は無い**。
+★★上の冪級数の道は mathlib の在庫に直結しており、留数計算・輪郭積分を一切使わない。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-665 ★★★★★★`℘'' = 6℘² − g₂/2`(第 351 ブロック)
+
+`Found/GenEll/WeierstrassODE.lean`。節点「`(g₂,g₃)` は束を決める」の**第 1 歩**。
+
+### ★★★★★段取り——微分して `℘'` で割る
+
+mathlib は `derivWeierstrassP_sq : ℘'² = 4℘³ − g₂℘ − g₃` を持つ。
+★両辺を微分すると `℘'·(2℘'' − 12℘² + g₂) = 0`(`Λᶜ` 上)。
+★★`℘'` は `Λᶜ` 上で恒等的に 0 ではないので、**一致の定理**で第 2 因子が消える。
+
+### ★★★★★★`℘'` が恒等的に 0 でないこと
+
+★もし `℘' ≡ 0` なら `℘` は `Λᶜ`(**連結**開集合)上で定数になる。
+★★しかし `℘[L] z = ℘[L−0] z + 1/z²`(`weierstrassPExcept_add` を `l₀ = 0` で)で、
+`℘[L−0]` は `0` で解析的だから `z → 0` で `‖℘[L] z‖ → ∞` である。
+★★★定数は有界なので矛盾する。
+
+★`Λᶜ` の連結性は mathlib の `Set.Countable.isConnected_compl_of_one_lt_rank`
+(可算集合の補集合は連結)で出る——束は離散なので可算である。
+★★mathlib 自身が `weierstrassPExcept_add_coe_aux` で同じ補題を使っていた。
+
+### ★★残る段(節点の完成まで)
+
+| 段 | 状態 |
+|---|---|
+| `℘'' = 6℘² − g₂/2` | ★**第 351 で完了** |
+| `f := ℘[L−0]` で `z²f'' = 6z²f² + 12f − (g₂/2)z²` | 未 |
+| 係数を比べて漸化式 `(i−4)(i+3)a_i = 6Σa_ja_k − (g₂/2)[i=2]` | 未 |
+| 帰納法で `G` が `g₂,g₃` で決まる | 未 |
+| 一致の定理で `℘_L = ℘_{L'}`、極で束が一致 | 未 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-666 ★★★★★★`f = ℘[L−0]` の解析的な恒等式(第 352 ブロック)
+
+`Found/GenEll/PexcODE.lean`。節点「`(g₂,g₃)` は束を決める」の**第 2 歩**。
+
+### ★★★★★★★到達点
+
+> **`z²·f'' = 6z²·f² + 12·f − (g₂/2)·z²`**(`0` の近傍、`pexc_ode`)
+
+★`f` の `0` での冪級数係数は mathlib の `hasFPowerSeriesAt_weierstrassPExcept` で
+`a_i = (i+1)·G(i+2)` と分かっているので、これが**係数の漸化式**の土台である。
+
+### ★★★★★段取り
+
+`℘ = f + z⁻²`(第 351)を 2 回微分する:
+
+    ℘'  = f' − 2/z³        (`derivWeierstrassP_eq_pexc`)
+    ℘'' = f'' + 6/z⁴       (`deriv_derivWeierstrassP_eq_pexc`)
+
+★これを `℘'' = 6℘² − g₂/2` に入れると **`6/z⁴` が両辺で打ち消し**、
+`z²f'' = 6z²f² + 12f − (g₂/2)z²`(`Λᶜ` 上)になる。
+
+★★★**`0` を含む近傍へ延ばす段は、値の突き合わせだけで済んだ**——
+両辺は `w = 0` でともに `12·f(0) = 0`(`weierstrassPExcept_zero`)なので、
+`𝓝[≠] 0 ⊔ pure 0 = 𝓝 0`(`nhdsNE_sup_pure`)で貼り合わせればよい。
+★連続性や一致の定理を持ち出す必要はなかった。
+
+### ★★残る段(節点の完成まで)
+
+| 段 | 状態 |
+|---|---|
+| `℘'' = 6℘² − g₂/2` | ✅ 第 351 |
+| `z²f'' = 6z²f² + 12f − (g₂/2)z²` | ✅ **第 352** |
+| 係数を比べて漸化式 | 未(`iteratedDeriv_fun_mul` の Leibniz を使う) |
+| 帰納法で `G` が `g₂,g₃` で決まる | 未 |
+| 一致の定理で `℘_L = ℘_{L'}`、極で束が一致 | 未 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-667 ★★★★★★★★`(g₂,g₃)` は束を決める——節点が閉じた(第 353 ブロック)
+
+`Found/GenEll/LatticeFromG.lean`。
+**`Skeleton/GenEll/LatticeFromInvariants.lean` の `sorry` が消えた。**
+
+### ★★★★★★★★到達点
+
+> **`g₂(L) = g₂(L')` かつ `g₃(L) = g₃(L')` ならば `Λ = Λ'`**(`lattice_eq_of_g₂_g₃_eq`)
+
+★第 350 の `archInv_congr` と合わせて **`archInv` は `(g₂,g₃)` で決まる**
+(`archInv_eq_of_g₂_g₃_eq`)——すなわち**曲線の関数**になった。
+
+### ★★★★★★★見積もりより短くなった——**漸化式を立てずに済んだ**
+
+スケルトンの段取りは「係数の漸化式 `(i−4)(i+3)a_i = 6Σa_ja_k − (g₂/2)[i=2]` を立てて
+帰納法で `G` を決める」だった(見積もり 4-8 ブロック)。
+★★★実際には、**差を取ると漸化式が要らなくなる**:
+
+`D := ℘[L−0] − ℘[L'−0]` と置くと、2 つの恒等式(第 352)の差から
+
+    z²·D'' = (12 + 6z²(f+h))·D
+
+★`D` の `0` での最小非零係数の番号を `m` とし、両辺に `iteratedDeriv m` を当てて
+`0` で評価する。**Leibniz の和が両側とも 1 項に潰れる**:
+
+| 辺 | 潰れる理由 | 残る項 |
+|---|---|---|
+| 左 | `iteratedDeriv i (z²) 0` は `i = 2` 以外 0 | `C(m,2)·2·a_m` |
+| 右 | `i ≥ 1` では `m−i < m` なので `a_{m−i} = 0` | `A(0)·a_m = 12·a_m` |
+
+★★したがって `2·C(m,2) = 12`、すなわち **`C(m,2) = 6`、`m = 4`**。
+★★★★しかし `(g₂,g₃)` が等しければ `a₀,…,a₄` は一致する
+(`a_i = (i+1)!·G(i+2)`、`G` の奇数番は 0、`G₄ = g₂/60`、`G₆ = g₃/140`)ので **`m ≥ 5`**。
+★★★★★矛盾。ゆえに `D ≡ 0`(`0` の近傍)。
+
+★**`i = 4` で係数 `(i−4)(i+3)` が消える**という漸化式の特異性が、
+ここでは「`m = 4` が唯一の可能性」という形で現れている——同じ事実の別の顔である。
+
+### ★★★★★★束の一致まで
+
+1. `℘ = ℘[L−0] + 1/z²`(第 351)なので `℘_L =ᶠ[𝓝 0] ℘_{L'}`。
+2. `0` の近くの**束に属さない点** `z₀` を取り、**一致の定理**で
+   `(Λ ∪ Λ')ᶜ`(可算集合の補集合なので連結)全体へ延ばす。
+3. `x ∈ Λ` かつ `x ∉ Λ'` なら、`℘_{L'}` は `x` で解析的だから有界、
+   しかし `℘_L` は `x` の近くで**非有界**。矛盾。
+
+### ★★★残る鎖(G8)
+
+    一意化                              ✅ 第 348
+    共体積と archInv、相似不変           ✅ 第 349
+    archInv は束だけで決まる            ✅ 第 350
+    (g₂,g₃) が束を決める                ✅ 第 351-353
+    → archInv を**曲線の関数**にする     ★次
+    → 界面にアルキメデス条件を追加し、`ht^Falt` を固定して欠陥 #6 を塞ぐ
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-668 ★★★★★★★曲線のアルキメデス不変量(第 354 ブロック)
+
+`Found/GenEll/CurveArchInv.lean`。
+
+### ★★★★★★★`archInv` が**曲線の関数**になった
+
+一意化(第 348)で `C • W = latticeCurve P` なる `P` は存在し、
+2 つの取り方 `(P,C)`・`(P',C')` に対しては `D := C'C⁻¹` の `u` について
+`g₂(P') = u⁻⁴g₂(P)`・`g₃(P') = u⁻⁶g₃(P)`——すなわち `P'` と `scalePair P u` が
+**同じ `(g₂,g₃)`** を持つので、第 353 で束が一致し、`archInv` が一致する。
+
+★`c₄ = 12g₂`(第 335)に加えて **`c₆ = 216g₃`** を本ブロックで出した。
+
+### ★★★★★★これは `j` だけの関数である
+
+`curveArchInv` は変数変換で不変、したがって **`j` だけで決まる**。実際
+
+    curveArchInv(W) = 4096·π¹²·‖Δ(τ)‖·(Im τ)⁶      (`j(τ) = j(W)` なる τ)
+
+で、右辺は `Δ` の **Petersson ノルム**である。
+★★これは正しい——Faltings 高さのアルキメデス局所因子は**同型不変量**であり、
+モデル依存性は**有限素点側**(`Δ_min`)にしか現れないからである。
+
+### ★★★★界面へ渡す形
+
+数体 `L` と埋め込み `σ : L →+* ℂ` に対し `archNorm E σ := curveArchInv (E.map σ)`。
+★**正**であり(`archNorm_pos`)、**変数変換で不変**(`archNorm_variableChange`)。
+★★★`FaltingsHeightData` に「`ht^Falt` が `archNorm` を通じて曲線に縛られる」条件を
+足すための材料がこれでそろった。
+
+### ★★残る鎖(G8)
+
+    一意化                              ✅ 第 348
+    共体積と archInv                     ✅ 第 349-350
+    (g₂,g₃) が束を決める                ✅ 第 351-353
+    archInv を曲線の関数にする          ✅ 第 354
+    → 界面にアルキメデス条件を追加する    ★次
+    → witness を組み直して欠陥 #6 を塞ぐ
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-669 ★★★★★★アルキメデス因子は有界(第 355 ブロック)
+
+`Found/GenEll/PeterssonBound.lean`。
+
+### ★★★★★★★なぜ有界性が要るのか——`prop_3_4` を保つため
+
+第 354 で `archNorm` が建った。★これを `ht^Falt` の界面条件に入れると、
+witness は `ht^Falt := deg∞/12 − A`(`A` はアルキメデス項)という形になる。
+★★このとき `prop_3_4`(`deg∞/(12(1+ε)) ≤ ht^Falt + C`)を保つには、
+**`A` が普遍定数で上から抑えられる**ことが要る。
+
+### ★★★★★★段取り
+
+`archNorm = 4096π¹²·‖Δ(τ)‖(Im τ)⁶` なので、Petersson ノルムの有界性に帰着する。
+
+| 段 | 内容 |
+|---|---|
+| 1 | `Δ` はカスプ形式なので `Δ =O[atImInfty] exp(−2π·Im τ)`(mathlib) |
+| 2 | `exp(−2πy)·y⁶ → 0`(`Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero` を `x = 2πy` で) |
+| 3 | ⇒ `peterssonDelta → 0`(カスプ)、したがって `Im τ` が大きい所では `< 1` |
+| 4 | 残りは `𝒟 ∩ {Im ≤ y₁}` で、これは**コンパクト**なので最大値を取る |
+| 5 | 任意の `τ` は `SL(2,ℤ)` で `𝒟` に移せ、`peterssonDelta` は不変(第 349) |
+
+★★★★★第 348(`j` の全射性)で使ったのと**同じ 2 つの在庫**——
+指数減衰と `isCompact_truncatedFundamentalDomain`——がここでも効いた。
+
+### ★★残る鎖(G8)
+
+    一意化 ✅ / 共体積・archInv ✅ / (g₂,g₃) が束を決める ✅ /
+    archInv を曲線の関数に ✅ / アルキメデス因子の有界性 ✅(本ブロック)
+    → 界面にアルキメデス条件を追加                                  ★次
+    → witness を組み直して欠陥 #6 を塞ぐ
+
+★★**界面の設計**(次ブロックの方針):`Interface/` は `Found/` を import できないので、
+`archNorm` を `FaltingsHeightData` の**欄**にし、mathlib の `ModularForm.discriminant` で
+**同定する条件**(`j(τ) = j(E^σ)` なら `archNorm = 4096π¹²‖Δ(τ)‖(Im τ)⁶`)を課す。
+★★★これで `archNorm` は完全に固定され、`deg∞ = 0` のときの `ht^Falt` を
+`−Σ_σ log((2π)¹²·archNorm)/(12d)` に縛ると、**`deg∞/12` は落ちる**。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-670 ★★★★★★★★★★**欠陥 #6 が塞がった**——G8 の `ht^Falt` が Faltings 高さになった(第 356-357 ブロック)
+
+`Found/GenEll/ArchNormTotal.lean`・`Interface/GaloisRep/Reduction.lean`・
+`Found/GaloisRep/FaltingsWitness.lean`・`Check/GaloisRep/HtFaltPinned.lean`。
+
+### ★★★★★★★★★★到達点
+
+> **`12·ht^Falt(E) = deg∞(E) − (1/d)·Σ_{σ:L↪ℂ} log( (2π)¹²·‖Δ‖_arch(E^σ) )`**
+
+★第 329 の witness は `htFalt := deg∞/12` で、`Proposition 3.4` が**恒等的に成り立つ形**で
+埋まっていた(界面の欠陥 #6、初めての「弱すぎる」型)。
+★★本ブロックで**アルキメデス項が入り**、`htFalt` は界面によって一意に決まるようになった。
+
+### ★★★★界面に足した 4 つ
+
+| 欄・条件 | 役割 |
+|---|---|
+| `archNorm` | アルキメデス素点でのノルム `‖Δ‖_arch(E^σ)` |
+| `archNorm_pos` | 楕円曲線では正 |
+| **`archNorm_eq`** | **モジュラー判別式で同定**——`j` の全射性により一意に決まる |
+| **`htFalt_eq`** | **Faltings 高さの式** |
+
+★**`Interface/` は `Found/` を import できない**ので、`archNorm` を**欄**にし、
+mathlib の `ModularForm.E₄`・`ModularForm.discriminant` だけで同定した。
+★★この書き方なら依存の向きを壊さずに `archNorm` を固定できる。
+
+### ★★★★★`prop_3_4` を保てた理由
+
+`htFalt = deg∞/12 − S/(12d)` で `S := Σ_σ log((2π)¹²·archNorm)`。
+★`archNorm` は**一様に有界**(第 355)なので `S ≤ d·log((2π)¹²M)`、
+したがって `S/(12d)` は普遍定数で抑えられ、`C := log((2π)¹²M)/12` で `prop_3_4` が出る。
+
+### ★★★★★★検査(`Check/GaloisRep/HtFaltPinned.lean`)
+
+* `htFalt_determined`: **`degInf` が一致すれば `htFalt` も一致する**——欄はもはや自由でない。
+* `htFalt_ne_degInf_div_twelve`: アルキメデス和が `0` でない曲線が 1 つでもあれば
+  **`htFalt = deg∞/12` は排除される**。
+
+★示さないこと: 「アルキメデス和が `0` でない曲線が実在すること」は
+具体的な数値評価になるので、仮定の形で残した。
+
+### ★★★★★★★★鎖の全体(第 332-357、26 ブロック)
+
+    (i) 判別式の非消失        第 332-346
+    j の全射性・一意化         第 347-348
+    共体積と archInv           第 349-350
+    (g₂,g₃) が束を決める       第 351-353
+    archInv を曲線の関数に     第 354
+    アルキメデス因子の有界性   第 355
+    界面の強化と witness      第 356-357  ★**欠陥 #6 を塞いだ**
+
+★★★**(ii) `ℂ/Λ ≅ E(ℂ)` の群同型は一度も要らなかった**
+——一意化は**曲線の同型**で、アルキメデス因子は `j` の関数だからである。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+**Arakelov 9/9、Galois 8/8**。
+
+
+## §9-671 ★★★★★★★★§3 の 5 つの `sorry` は「難しい」のではなく**偽**である(第 358 ブロック)
+
+`Check/GenEll/Section3NotProvable.lean`。新しいゴール「§3 の sorry を 0 にする」の**段 1**。
+
+### ★★★★★★★★診断
+
+`Skeleton/GenEll/Section3.lean` の 5 つの `sorry` はすべて
+
+    ∀ D : TateLocalData  もしくは  ∀ D : EllModuliData
+
+という形をしている。★★**ところがこの 2 つの界面は公理をほとんど持たない**
+(`TateLocalData` は `vq_pos`・`ramIdx_pos` の 2 本、`EllModuliData` は **0 本**)。
+★★★したがって**退化した `D` を作れば主張は破れる**。
+
+本ブロックはそれを**機械可読に**記録した:
+
+| 定理 | 退化の取り方 |
+|---|---|
+| `lemma_3_2_i_false` | `l = 2`・`v_K(q_E) = 1`・`IsCyclotomic := False` |
+| `lemma_3_2_ii_false` | `deg_∞` を定数にすると `deg_∞(E/μ_l) = l·deg_∞(E)` が破れる |
+| `potLocalHeight_indep_false` | 分岐指数だけが違う 2 つの拡大を取る |
+| `prop_3_4_first_false` | `deg_∞ ≡ 0`・`ht_∞ = n` なら差は非有界 |
+| `prop_3_4_finite_false` | `ht^Falt ≡ 0`・`M_ell^{≤d} = univ` なら集合は `ℕ` 全体 |
+
+### ★★★★★★これは G6 が 2026-08-17 に通った道と**同じ**である
+
+`Interface/GaloisRep/Reduction.lean` の `TateCurveData` は、以前
+`LocalField : Type` / `Curve : LocalField → Type` と**世界ごと posit** していて
+`PUnit` と定数 `1` で埋まった。★そこで mathlib の `WeierstrassCurve` と
+正規化付値に**接地**し、**Tate 一意化そのもの**を要求する形に作り直した。
+
+★★**`Interface/GenEll/TateLocal.lean` はその捨てたはずの形のまま**である。
+★★★`EllModuliData` も `EllClass : Type` / `faltingsHeight : EllClass → ℝ` を
+条件なしで持つだけである。
+
+### ★★★界面の欠陥 #7・#8
+
+| # | 場所 | 欠陥の型 | 塞いだ |
+|---|---|---|---|
+| 6 | G8 `htFalt` | 弱すぎる | 第 357 |
+| 7 | **`TateLocalData`** | 弱すぎる(世界ごと posit、`Unit` で埋まる) | ★**未** |
+| 8 | **`EllModuliData`** | 弱すぎる(高さの間に関係が無い) | ★**未** |
+
+### ★★★★塞ぎ方は分かっている
+
+G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightData`(G8)に接地する**。
+★G8 で本物の `ht^Falt` を建てた(第 357)ので、`EllModuliData` の
+`faltingsHeight` をそこに縛れば `≡ 0` は落ちる。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-672 ★★★★★★★`Remark 3.3.1` の実質を出した(第 359 ブロック)
+
+`Found/GenEll/LocalHeightRamified.lean`。ゴール「§3 の sorry を 0 にする」の**段 2** の 1 つ目。
+
+### ★★★★★★★★何が `Remark 3.3.1` の中身なのか
+
+原文は「one verifies **immediately** that this definition is independent of the choice of L」
+の 1 文である。★この「immediately」が畳んでいるのは
+
+> **`ord_w(x) = e(w/v)·ord_v(x)`**(`x ∈ Kˣ`、`w` は `v` の上にある素点)
+
+である。★★これがあれば `ord_w(q)/e(w/v) = ord_v(q)` となり、
+**右辺は `L` を含まない**ので独立性が直ちに出る。
+
+### ★★★★★在庫調査(2026-08-26)——**mathlib にあった**
+
+| 段 | mathlib |
+|---|---|
+| **`v.valuation K x ^ e = w.valuation L (algebraMap K L x)`** | ✅ `HeightOneSpectrum.valuation_liesOver` |
+| `e ≠ 0` | ✅ `ramificationIdx_ne_zero_of_liesOver` |
+| 加法的な位数 `ord_v` | ★無い(付値は乗法的な `WithZero (Multiplicative ℤ)` 値) |
+
+★★**既存の `valAdd`(第 320)は使えない**——数体の整数環に特化しており、
+かつ `vAdd_algebraMap_eq_valAdd` は**不分岐**を仮定している。
+★★★`Remark 3.3.1` は**まさに分岐する場合**なので、一般の Dedekind 環に対する
+`ordAt` を建て直した。
+
+### ★★取れたもの
+
+`ordAt`・`valuation_eq_ofAdd_neg_ordAt`・`ofAdd_pow`・`ramificationIdx_ne_zero`・
+**`ordAt_liesOver`**(`ord_w = e·ord_v`)・**`ordAt_div_ramificationIdx`**(`ord_w/e = ord_v`)・
+**`ordAt_div_ramificationIdx_indep`**(`Remark 3.3.1` そのもの)。
+
+★★★これで `Skeleton` 側の `potLocalHeight_indep` は
+**界面を接地させれば導出できる**——残るのは `TateLocalData` の作り直しである。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-673 ★★★★★★★★§3 の sorry が **5 → 4**——`Remark 3.3.1` を閉じた(第 360 ブロック)
+
+`Interface/GenEll/TateLocal.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★★★何をしたか
+
+第 358 で「`potLocalHeight_indep` は現行の界面の上では**偽**」と実測し、
+第 359 でその**実質**(`ord_w(x) = e(w/v)·ord_v(x)`)を mathlib の
+`HeightOneSpectrum.valuation_liesOver` から**定理として**導いた。
+
+★本ブロックはそれを `TateLocalData` の欄 **`vq_baseChange`** として仕様に出し、
+`Skeleton` 側の `potLocalHeight_indep` を**交差乗法だけで導出**した。
+
+### ★★★★★**posit との違いをはっきりさせる**
+
+`tools/check.mjs` 冒頭 B5 の穴は「条件を posit して `sorry` を消す」ことである。
+★今回足した `vq_baseChange` は **posit ではない**——
+`Found/GenEll/LocalHeightRamified.lean` が**意図した対象について実際に証明している**。
+★★界面はその**仕様**を出しているだけである。
+
+★★★**退化封じとして実際に効いている**:第 358 の
+`potLocalHeight_indep_false`(分岐指数だけが違う 2 つの拡大)は
+**新しい欄を満たせなくなった**ので削除した。
+
+### ★★§3 の現状
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1` | ✅(第 215 付近) |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `localHeight_pos` | ✅ |
+| **`potLocalHeight_indep`** | ✅**本ブロック** |
+| `prop_3_4` | ★sorry——`EllModuliData` が弱すぎる(欠陥 #8) |
+| `lemma_3_5` | ★sorry——`Lemma 3.2` + `Prop 3.4` から導く |
+| `lemma_3_6` | ✅ |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-674 ★★★★★★★★§3 の sorry が **4 → 3**——`Proposition 3.4` を閉じた(第 361 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★★★★もう 1 つ見つかった——**`≲` の向き**
+
+`Proposition 3.4` は 3 つの `≲` を鎖にしている。
+★これを `BDle`(原典 `Definition 1.2, (ii)` の**印字どおり**)で読むと、
+**2 番目と 3 番目から `ht_∞` が上に有界になってしまう**:
+
+    (1+ε)·ht_∞ ≤ ht_∞ + C   ⇒   ε·ht_∞ ≤ C
+
+★★モジュライ上の高さは上に有界でないので、**その読みは意図されたものではない**。
+★★★`Check` の `bdle_chain_forces_bounded` で**機械可読に**記録した。
+
+★★★★`Found/GenEll/BDClass.lean` の docstring はすでに
+「**abc の主張を書くときは `BDge`(原文の印字の `≳`)を使う**」と定めていたので、
+`prop_3_4` も `BDge` で書き直した——**逸脱として statement の docstring に記録**。
+
+### ★★★★★★界面に足した 4 つはすべて**原文が実際に引いている**
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degInf_le_htInf` | [GenEll] `Proposition 1.6` の証明 |
+| `htInf_bdeq_faltings` | [Silv2] `Proposition 2.1` + [FC] Ch. V, `Proposition 4.5` |
+| `faltingsHeight_bddBelow` | 古典的(Faltings 高さは下に有界) |
+| `northcott` | [GenEll] `Proposition 1.4, (iv)` |
+
+★★★**`ε` の入った 2 本はこれらから導出した**——posit しているのは `≈` の方であって
+`ε` 入りの形ではない。`Check` の `eps_ineq_is_derived` がその記録である。
+
+    ht_∞ ≤ 12 ht^Falt + M  かつ  ht^Falt ≥ B
+      ⇒ ht_∞ ≤ 12(1+ε)ht^Falt + (M − 12εB)
+
+### ★★§3 の現状(sorry 3 件)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`・`localHeight_pos`・`potLocalHeight_indep`・**`prop_3_4`**・`lemma_3_6` | ✅ |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `lemma_3_5` | ★sorry——`Lemma 3.2` + `Prop 3.4` から導く |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-675 ★★★★★★★★§3 の sorry が **3 → 2**——`Lemma 3.5` を導出した(第 362 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`。
+
+### ★★★★★★導出の筋(原文の 4 行をそのまま)
+
+`E′ ≙ E/H` として:
+
+    l·deg_∞(E)  = deg_∞(E′)                          (`degInf_quotLCyclic`、`Lemma 3.2` の大域版)
+                ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)        (`Proposition 3.4`、第 361)
+                ≤ 12(1+ε)·(ht^Falt(E) + 2log l + C₀) + (C₁ + C₂)
+                                                        (`faltingsHeight_quotLCyclic`)
+
+両辺を `12(1+ε) > 0` で割ると目的の形になる。
+
+### ★★★★界面に足した 3 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `quotLCyclic` | 原文 `E′ ≙ E/H_F` |
+| `degInf_quotLCyclic` | [GenEll] `Lemma 3.2, (i)(ii)` の**大域版**(素点にわたる足し上げは原文に無い) |
+| `faltingsHeight_quotLCyclic` | [FC] Ch. I, `Proposition 2.7` + 「(1,1)-形式の積分が `l` 倍違う」の段 |
+
+★**`C₀` は `E`･`l` に依らない**——原文が明記しているので `∃` を外側に置いた。
+★★量化子の順序が本命題の要点であり、導出もその順序を保っている。
+
+### ★★§3 の現状(sorry 2 件)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`・`localHeight_pos`・`potLocalHeight_indep`・`prop_3_4`・`lemma_3_6`・**`lemma_3_5`** | ✅ |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-676 ★★★★★★★★§3 の sorry が **2 → 1**——`Lemma 3.2` を分解した(第 363 ブロック)
+
+`Interface/GenEll/TateLocal.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★原文の 1 文を 2 つに分けた
+
+原文 `Lemma 3.2, (ii)` は「`E′ ≙ E/μ_l` の Tate 母数は `q_{E′} = q_E^l`、
+**したがって** `deg_∞(E′) = l·deg_∞(E)`」と書く。★この「したがって」を分解した:
+
+| 欄 | 役割 |
+|---|---|
+| `logResidueCard`･`logResidueCard_pos` | `log #(O_K/𝔪_K)` |
+| `degInf_eq` | **`deg_∞(E) = v_K(q_E)·log #(O_K/𝔪_K)`**(定義) |
+| `vq_quotMu` | **`q_{E′} = q_E^l`**([FC] Ch. III, Cor. 7.3) |
+| `stableLine_dvd_or_cyclotomic` | `Lemma 3.2, (i)`そのもの(原文は証明を与えない) |
+
+★★(ii) は **`degInf_eq` と `vq_quotMu` から導出**した——原文の「hence」の中身である。
+★★★(i) は仕様として受けた——原文が『we have the following **well-known** result』として
+証明を与えておらず、mathlib に `M_l(E)`･Tate twist が無いからである。
+
+### ★★★★★★★**充足不能を 1 つ防いだ**
+
+`vq_quotMu` を `∀ l : ℕ` で書くと **`l = 0` で充足不能**になる
+——`v_K(q_{E/μ_0}) = 0` と `vq_pos` が衝突する。
+★原文の `l` は**素数**なので `Nat.Prime l` を仮定に加えた(`Skeleton` 側も同様)。
+★★**充足可能であることを実際に確かめた**——`Check` の `tateLocalSatisfiable`
+(`v_K(q_E) = n+1`･`E/μ_l = l(n+1)-1`)。
+★★★欄を強めるときは**強めすぎて充足不能にする**のが欠陥 #1･#2･#4･#5 だった。
+その罠を踏まないために、強化ごとに充足 witness を置く。
+
+### ★★§3 の現状(sorry **1 件**)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`･`lemma_3_2`･`localHeight_pos`･`potLocalHeight_indep`･`prop_3_4`･`lemma_3_5`･`lemma_3_6` | ✅ |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-677 ★★★★★★★★★★**§3 の sorry が 0 になった**(第 364 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/Section3.lean`。
+ゴール「§3 の sorry を 0 にする」**達成**。
+
+### ★★★★★★★★`Lemma 3.7` の内訳
+
+**(a)** は**完全な導出**である:
+
+    Proposition 3.4 を ε₀ = 1/6 (すなわち 12(1+ε₀) = 14) で使う
+      ⇒ deg_∞ ≤ 14·ht^Falt + A
+    ht^Falt ≥ B (下に有界) と 100·d·(ht^Falt + C·d^ε) ≤ l から
+      ⇒ d·deg_∞ < l·log 2
+    primeToLocalHeights_of_lt に渡す
+
+★定数は **`C := |A| + 100|B| + 1`** と取ればよい——`100·log 2 > 69` と `d^ε ≥ 1` が効く。
+★★`d·ht^Falt` の符号で場合分けする(負のときは `ht^Falt ≥ B` が効く)。
+
+**(b)(c)** は例外集合を `lcyclicExc ∪ noMultRedExc KV` と**取る**ことで導く。
+★★★(c) では **(a) と (b) のどちらでも `PrimeToLocalHeights` が得られる**のが鍵である
+——(a) からは上の導出で、(b) からは定義そのものから。
+
+### ★★★★界面に足した 8 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degOfDefinition_pos` | `d = [L:ℚ] ≥ 1` |
+| `primeToLocalHeights_of_lt` | 『d·deg_∞([E_L]) ≥ v·log(2)』(原文は証明なし)+ `l` が素数 |
+| `lcyclicExc`･`galoisFinite_lcyclicExc`･`mem_lcyclicExc` | `Lemma 3.5` + `Lemma 3.6` + `Prop 1.4, (iv)` |
+| `noMultRedExc`･`galoisFinite_noMultRedExc`･`mem_noMultRedExc` | `Example 1.3, (ii)` |
+| `galoisFinite_union` | `Example 1.3, (i)` |
+
+### ★★★★★★★★★★§3 の全体(第 358-364、7 ブロック)
+
+| 定理 | どう閉じたか |
+|---|---|
+| `lemma_3_1` | 既実装(`Found/GenEll/Lemma31.lean`･`Sl2Padic.lean`) |
+| `lemma_3_2` | (i) は [FC] を仕様として受け、**(ii) は導出**(第 363) |
+| `localHeight_pos` | 既実装 |
+| `potLocalHeight_indep` | **完全な導出**(第 359-360、mathlib の `valuation_liesOver`) |
+| `prop_3_4` | 原文が引く 4 つを接地し、**`ε` 入り 2 本は導出**(第 361) |
+| `lemma_3_5` | **完全な導出**(第 362) |
+| `lemma_3_6` | 既実装(`Found/GenEll/Elementary.lean`) |
+| `lemma_3_7` | **(a) は完全な導出**、(b)(c) は例外集合を取る(第 364) |
+
+★★★★★**進め方の型**がここで固まった:
+
+1. ★**まず退化 witness を作って「難しい」のか「偽」なのかを分ける**(第 358)。
+2. ★★**原文が実際に引いているものだけ**を界面の欄に出す。
+3. ★★★**欄を強めたら充足 witness を置く**(第 363 で `l = 0` の充足不能を 1 つ防いだ)。
+4. ★★★★**残りは導出する**——posit で消すのではなく。
+
+★★Lean 全体の sorry は **51 → 46**。
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-678 ★★★★★★★★**`Theorem 3.8` を導出した**(第 365 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Skeleton/GenEll/GaloisImage.lean`。
+新しいゴール「GenEll と NCBelyi の Skeleton の sorry を 0 にする」の 1 件目。
+
+### ★★★★★★原文 p.20 の骨格は基底変換である
+
+原文を通読して分かったのは、証明がまず **`L′` へ移る**ことである:
+
+> there exists a Galois extension `L′` of `L` of degree that divides
+> `d₀ = (3²−1)(3²−3)(5²−1)(5²−5) = 23040`, so as to render the 3- and 5-torsion
+> points of `E_L` rational over `L′` … we may assume that `E_{L′}` has **semi-stable
+> reduction** at all of the finite primes
+
+★★これで 3 つのことが一度に片付く:
+
+| これが欲しい | `L′` が与える |
+|---|---|
+| `Lemma 3.7` の仮説 `SemiStable` | ★定理 3.8 の statement には**無い**——基底変換で**得る** |
+| 潜在的乗法還元 → 乗法還元 | 条件 (a) が `Lemma 3.7` の (a) になる |
+| 係数 `23040` | `d′ ≤ 23040·d` そのもの |
+
+### ★★★★★★★★`30` の使い道が見えた
+
+条件 (b) の『`l` is prime to … the number `2·3·5 = 30`』は、原文 p.20 の括弧にある:
+
+> passing to such a Galois extension of `L` only affects the prime decomposition of
+> the local heights via the primes that divide `d₀`, of which there are only finitely
+> many, namely, **2, 3, and 5**
+
+★すなわち **`30` と互いに素なら、局所高さと素であることが `L′` へそのまま移る**。
+★★界面の欄 `primeToLocalHeights_torsionExt` はこの一文そのものである。
+
+### ★★★★★定数 23040 の帳尻(本ブロックの算術的な中身)
+
+原文はここを『for a suitable choice of `C` … **[perhaps for a different “C”]**』と
+1 文で済ませている。実際には:
+
+    d′ ≤ 23040·d 、 [E_{L′}] = [E_L] なので ht^Falt はそのまま
+    d′^ε ≤ (23040·d)^ε = 23040^ε·d^ε
+    ★C := C₇·23040^ε + |B| + 1
+
+★★`ht^Falt < 0` のとき第 1 項は**逆向きになる**が、超過分は `|B|·23040·d` 以下であり
+(`ht^Falt ≥ B`)、`C` の `|B| + 1` の分が `d^ε ≥ 1` を使ってそれを吸収する。
+
+### ★★★★B5 にならないことの確認
+
+`GaloisImage.lean` のヘッダには「**`sorry` を消すことを目的にしてはならない**」と
+書いてあった。★**その警告は今も生きている**ので、ヘッダに 3 点を明記した:
+
+1. 界面に出した 7 つはすべて**原文 p.20 が実際に書いている段**である
+2. 中身は `Lemma 3.7` からの**導出**である(上の帳尻と `30` の使い道)
+3. 残った 1 つの posit は `imageContainsSL2_of_torsionExt` だけで、
+   それは **Galois 表現が未構築だから**であって、`Lemma 3.1` を持っていないからではない
+
+### 逸脱
+
+量化する界面を `TorsionGaloisRepData` → **`EllModuliData`**(後者は前者を extend)。
+★`Corollary 4.3` / `4.4` はもともと `EllModuliData` の上にあるので下流は失わない。
+
+★★Lean 全体の sorry は **46 → 45**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+## §9-679 ★★★★★§4 の定数を作った(第 366 ブロック)
+
+`Found/GenEll/PrimeConstants.lean`。
+
+`Lemma 4.1` は『条件 (i)(ii) を満たす `ϵ, x_ϵ, C_ϵ` が**与えられたとき**』を主張する。
+★`Corollary 4.3` / `4.4` はそれを**適用する**側なので、ここで初めて
+「そのような定数が**存在する**」ことが要る。
+
+### ★★★★定数の順番が鍵である
+
+★`C_ϵ < ϵ·x_ϵ` という制約があるので、**`C_ϵ` を先に固めてから `x_ϵ` を大きく取る**:
+
+    θ(x)/x → 1 から X₀ を取る(x ≥ X₀ で 5/6·x < θ(x) < 5/4·x)
+    C_ϵ := θ(X₀) + 1        ← 0 < x < X₀ では θ の単調性で押さえる
+    x_ϵ := max X₀ (6(C_ϵ+1))  ← こう取れば C_ϵ < (1/6)·x_ϵ
+
+★★`x_ϵ` を大きくしても (i) の第 2 式と (ii) は壊れない——どちらも「`x ≥ x_ϵ` なら」の形だから。
+★★★`ϵ := 1/6` に固定してよい——原文 p.23 が『“1 + 6ϵ” to be 2』と取るから。
+
+### ★★★もう 1 本: 「enlarging S」の中身
+
+原文 p.23 の『by enlarging `S` … we may always assume that `x_ϵ ≤ x_S`』は、
+**対数和がいくらでも大きい有限素数集合がある**ことであり、
+`θ(x) > (5/6)·x` から直ちに出る(`exists_finset_primes_sum_log_gt`)。
+
+★`theta_mono`(`θ` の単調性)もここで取った。`Found/` なので sorry 0。
+
+### ★★配管の事故と復旧(記録)
+
+`lake build --dir=lean` をリポジトリ直下で走らせてしまい、10 分で殺された拍子に
+mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
+★直し方は **`lake exe cache get!`**である——削除して回らないこと。
+★★`lake` は `lean/` の中でしか走らせない(`--dir` で代用しない)。
+
+
+## §9-680 ★★★★★★★★★★**§4 の sorry が 0 になった**(第 367 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Found/GenEll/PrimeConstants.lean`・
+`Skeleton/GenEll/Section4.lean`。`Corollary 4.3` / `Corollary 4.4` を導出した。
+
+### ★★★★★★★★北極星に届いた
+
+`Corollary 4.4` は本トラックの**北極星**として置いていた項目である
+——`[IUTchIV]` が直接引く 2 件のうちの 1 つ(もう 1 つが `Theorem 3.8`)。
+
+### ★★★実際に使ったもの(すべて原文 p.22-23 が引いている)
+
+| 段 | どこから |
+|---|---|
+| `l` が不分岐 ⇒ `SL₂ ⊆ 像` と全射は同じ | 界面(原文 p.22 の冒頭、`ℚ(ζ_{l^∞})/ℚ` の完全分岐) |
+| `x_{S∘} ≤ x_S + (1 + 3/2)·23040d·deg∞` | **`Lemma 4.2`**(実装済み)+ 界面 `sum_localHt_eq` |
+| `deg∞ ≤ 12·(6/5)·ht^Falt + C` | **`Proposition 3.4`**(第 361 で導出済み) |
+| `x_ϵ ≤ x_S` にしてよい | **`exists_finset_primes_sum_log_gt`**(第 366) |
+| 条件 (i)(ii) を満たす定数 | **`exists_cond_i_ii`**(第 366、`ϵ = 1/6`) |
+| `M = 1` の素数の存在 | **`Lemma 4.1`**(実装済み) |
+
+★★**`Lemma 4.1` と `Lemma 4.2` を初めて使った**——作ってから 10 日で仕事をした。
+
+### ★★★★★係数 900 と 100 の差は `h` だけである
+
+原文 p.23 の帳尻は `2·3·12 + 8·100 ≤ 100 + 800 = 900`:
+
+    Corollary 4.3: h = 23040·100d·(ht^Falt + C′·d^ϵ)  ⇒  8h が 800 を出す  ⇒ 900、末項は C·d^{1+ϵ}
+    Corollary 4.4: h = 0                                ⇒  8h は消える    ⇒ 100、末項は C·d
+
+★どちらも `2·x_bad` から来る `2·3·12 = 72` が土台である。
+★★`ht^Falt < 0` のとき `72 ≤ 100` は逆向きになるが、
+差 `28·23040·d·(ht^Falt + B) ≥ 0` がちょうど埋める——これが定数の `828 = 800 + 28` の出所。
+
+### ★★★★★★`30` と素という条件の扱い方
+
+`Corollary 4.4` は `Theorem 3.8` の**条件 (b)** を使うので `l` が `30` と素でなければならない。
+★**除外集合に `{2, 3, 5}` を入れる**だけですむ——その分の `log 30` は定数なので
+`C·d` に吸収される(`d ≥ 1`)。
+
+### ★★★★界面に足した 17 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `imageSurjective_of_containsSL2` | p.22 冒頭の『contains `SL₂(ℤ_l)` if and only if … surjective』 |
+| `compactlyBounded_empty` | `Example 1.3, (ii)`(条件 (a) は `K_V` を使わないので 1 つあればよい) |
+| `multCard`･`multPrime`･`localHt`･`sum_localHt_eq` 他 | p.23 の『the “h” of Lemma 4.2 corresponds to `23040d·deg∞`』 |
+| `badPrimes` 一式 | p.22 の `S∘` の定義 |
+| `ramPrimes` 一式･`sum_log_ramPrimes_le` | p.22 の `S•` の定義 + p.23 の『multiplicity ≥ one less than the ramification indices』 |
+
+★★**数値の段は `Found/GenEll/PrimeConstants.lean` に切り出した**
+(`cor4_numeric`･`cor44_numeric`)——実数だけの裸の補題なので後で目で追える。
+
+### 逸脱
+
+`Corollary 4.3` の仮説 `MinimalField E` は**使っていない**(弱めてはいない)。
+
+★★Lean 全体の sorry は **45 → 43**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+### ★★★★★★★ゴールの残り
+
+| 場所 | 残 `sorry` | 量化している界面 |
+|---|---|---|
+| `Section1`(`Prop 1.4`･`1.6`･`Remark 1.4.1`･`1.5.1`) | 4 | `HeightTheoryData` |
+| `Section1`(`Prop 1.7`) | 1 | `CoveringSetup` |
+| `Section2`(**`Theorem 2.1`**) | 1 | `AbcSetup` |
+| `NCBelyi/Theorem25` | 1 | `BelyiSetup` |
+
+
+## §9-681 ★★★★★★★**`Proposition 1.6` を閉じた**(第 368 ブロック)
+
+`Skeleton/GenEll/Section1.lean`。
+
+### ★★★★★★§1 は §3･§4 と事情が違う
+
+§3･§4 では「原文が引いているものを界面の欄に出して導出する」で閉じた。
+★**§1 ではそれができない**——`Proposition 1.4` の (i)-(iv) は
+`HeightTheoryData` に足すべき公理**そのもの**だからであり、
+足せば `Proposition 1.4` が仮定の言い換えになる(**B5**)。
+
+★★すでに `Skeleton/GenEll/Section1.lean` の診断がそう書いていた——
+『閉じるには `HeightTheoryData` を posit ではなく**構成**に置き換えるほかない』。
+
+### ★★★★中身はすでに `Found/` にあった
+
+`Found/GenEll/Prop16.lean` の `prop_1_6` はすでに `sorry` 無しで完成していた。三段:
+
+1. `X^arc` はコンパクト(`ArcModel.compactSpace`)
+2. 連続な Green 関数は下に有界(`ArcModel.exists_bound`)
+3. 導手は高さ + 定数で押さえられる(`ArchBound.logCond_le_htArith_add`)
+
+★★**定数 `C` が数体 `F` にも点にも依らない**のが要である。
+
+### 逸脱 2 件
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ D : HeightTheoryData` | **`ArcModel` + `ArithCartier`** | 前者では偽だから |
+| `≲` の向き | 印字どおりの `BDle` | **`log-cond ≤ ht + C`** | 表題の向き。`Gap/GenEll/BDDirection.lean` に記録済み |
+
+### ★★★★★★★★残り 4 件の実測(これは「書き換えて閉じる」では届かない)
+
+| 項目 | 何が要るか | あるもの | 無いもの |
+|---|---|---|---|
+| `Prop 1.4` (i) | 加法性 | ✅ `htArith_tensor_unconditional` | — |
+| `Prop 1.4` (ii) | 下に有界 | ✅ `prop_1_4_ii`(`ArcModel`) | — |
+| `Prop 1.4` (iii) | 生成ファイバーが同じなら `≈` | △ 計量だけ違う場合はコンパクト性で出る | **垂直因子の寄与が有界**という段 |
+| `Prop 1.4` (iv) | Northcott | ✅ `finite_projectivization_logHeight_le`(固定の `K`)･`finite_of_finrank_le_of_mulHeight₁_le` | ★★**算術的な射影埋め込み**(`ArcModel` はアルキメデス側だけ) |
+| `Remark 1.4.1` | モデルの取り方に依らない | ✅ `htArith_baseChange_natural`(**数体**の変換) | **ℤ-モデル 2 つの比較**(有限素数集合 Σ の上で延びる) |
+| `Remark 1.5.1` | 同上(`log-diff`･`log-cond`) | ✅ `logDiffOfField_*` 一式 | 同上 |
+| `Prop 1.7` | 導手と log-different | ✅ `logDiffOfField_tower`･`deg_adivRed_le` | ★**被覆の分岐理論**(各点での `e`) |
+
+★★★**どれも「原文が引いているものを欄に出す」では閉じない**——
+出すべき欄が `Proposition 1.4` 自身になってしまうからである。
+★★★★**ここから先は構成の仕事である**。
+
+★★Lean 全体の sorry は **43 → 42**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

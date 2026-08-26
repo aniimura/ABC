@@ -1,0 +1,1639 @@
+/-
+Copyright (c) 2026 ABC3. All rights reserved.
+-/
+import ABC3.Found.FrdI.Prop32Equiv
+import ABC3.Found.FrdI.Prop55Birat
+import ABC3.Found.FrdI.Prop55PfKappa
+import ABC3.Found.FrdI.Thm52Rem272
+
+/-!
+# [FrdI] Proposition 5.5, (ii) —— 左辺 `(𝒞^pf)^birat` の側
+
+原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.105。
+
+原文 (FrdI p.105):
+> tween the respective sets of morphisms between the images of two given objects of C
+
+## ★★測って分かった正体
+
+模型 Frobenioid で計算すると、`(𝒞^pf)^birat` と `(𝒞^birat)^pf` は
+**どちらも同じ 1 本の余極限** `colim_k Hom^birat(A^{(k)}, B^{(k)})` である。
+
+* 右辺は `idxToBirat_final`(`Prop55Birat.lean`)で**すでにその形**になっている ——
+  `colim_{W ∈ IdxPf(𝒞)(A,B)} Hom^birat(W₁, W₂)`。
+* 左辺は、外の添字(`𝒞^pf` の co-angular pre-step `⟨A″,n⟩ → ⟨A,1⟩`)と
+  内の `Hom^pf` を**共通の根に揃える**と、同じスパン `A^{(k)} ← X → B^{(k)}` になる。
+
+## ★★★本ファイルの一歩 —— 右辺の代表元から左辺の元を作る
+
+★★鍵は **`⟨A,1⟩ ≅ ⟨A₁,k⟩`** である ——
+`α : A ⟶ A₁` が次数 `k` の Frobenius 型なら、`𝒞^pf` では
+**`A₁` の `k` 乗根が `A`** である。
+★★★**その同型は方程式 `e ≫ κ = [α]` で特徴づける**(`rootLift`、`Prop55PfKappa.lean`)——
+`.choose` で取ると `W` を大きくしたときの整合性が言えないからである。
+
+| 定理 | 中身 |
+|---|---|
+| `compBirat_mk_of_sq` | ★★合成は**どの引き戻しデータで計算してもよい** |
+| `biratPfIsoA` / `biratPfIsoB` | `⟨A,1⟩ ≅ ⟨W₁,k⟩`(`rootLift` で作る) |
+| `biratPfIdx` / `biratPfMk` | ★★★★右辺の代表元から左辺の元 |
+| `biratPfMk_map` | ★★`IdxBirat` の遷移で不変(well-definedness の半分) |
+| `biratPf` | ★★★★内側の余極限から降ろした写像 |
+
+## ★★実務メモ
+
+★**`Frobenioid (pfRootPre P F)` は仮引数で受けること。**
+`pfRoot_frobenioid hfi G` を型の中に直接書くと、`whnf` が巨大な構造体を展開しようとして
+**200000 heartbeats を超える**(実測 73 秒で timeout)。★`F'` を仮引数で受ける
+`Prop55Birat.lean` と同じ流儀にすると 0.2 秒で通る。
+
+★`Category.assoc` の `rw` は `𝒞^pf` の側で「`instances` 透明度で型が合わない」と言って落ちる。
+**`Eq.trans` と `congrArg` で繋ぐこと**(本ファイルでも 2 箇所)。
+-/
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory
+
+universe v u w u2 v2
+
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} {P : PreFrobenioid C Φ} {F : FrobenioidCore P}
+
+/-! ## ★0. `𝒞^birat` の合成は引き戻しデータの取り方に依らない -/
+
+section CompSq
+
+variable {G : Frobenioid P}
+
+/-- ★★★**合成は「どの引き戻しデータで計算してもよい」**。
+
+★★`Proposition 4.4` の合成は `birat_pull_exists` の `.choose` で定義されているが、
+**`W` の構造射が mono** なので `birat_lift_unique` により
+どの引き戻しデータを使っても同じ元になる。 -/
+theorem compBirat_mk_of_sq (Fc : FrobenioidCore P) {A B E : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (W : IdxBirat P G B)
+    (ψ : W.unop.left.obj ⟶ E)
+    {Dd : C} (γ : Dd ⟶ Z.unop.left.obj) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (α₀ : Dd ⟶ W.unop.left.obj) (hsq : γ ≫ φ = α₀ ≫ W.unop.hom.hom) :
+    compBirat P G Fc (HomBirat.mk Z φ) (HomBirat.mk W ψ)
+      = HomBirat.mk (idxBiratMk P G (γ ≫ Z.unop.hom.hom)
+          (G.core.coAngularComp _ _ hγc Z.unop.hom.property.1)
+          (IsPreStep.comp P hγs Z.unop.hom.property.2)) (α₀ ≫ ψ) := by
+  rw [compBirat_mk]
+  haveI hb : Mono W.unop.hom.hom := G.core.preStepMono _ W.unop.hom.property.2
+  set Z₂ : IdxBirat P G A := idxBiratMk P G (γ ≫ Z.unop.hom.hom)
+    (G.core.coAngularComp _ _ hγc Z.unop.hom.property.1)
+    (IsPreStep.comp P hγs Z.unop.hom.property.2) with hZ₂
+  set V := IsFiltered.max (biratPullIdx Fc Z φ W) Z₂ with hV
+  set cc := IsFiltered.leftToMax (biratPullIdx Fc Z φ W) Z₂ with hcc
+  set cc' := IsFiltered.rightToMax (biratPullIdx Fc Z φ W) Z₂ with hcc'
+  refine HomBirat.sound V cc cc' ?_
+  have hraw := idxBirat_left_ext ((idxBiratHomMk γ hγc hγs rfl) ≫ cc')
+    (biratPullHom Fc Z φ W ≫ cc)
+  have hc : cc'.unop.left.hom ≫ γ = cc.unop.left.hom ≫ biratPullGamma Fc Z φ W := hraw
+  have key := birat_lift_unique φ hb hsq (biratPull_sq Fc Z φ W) hc
+  simp only [← Category.assoc] at key ⊢
+  exact congrArg (fun t => t ≫ ψ) key.symm
+
+end CompSq
+
+/-! ## ★1. 右辺の代表元から左辺の元へ -/
+
+/-- ★右辺の代表元 `W` の Frobenius 次数 `k`。 -/
+abbrev biratPfDeg {A B : C} (W : IdxPf P F A B) : ℕ+ := P.degFr W.hom.hom.1
+
+/-- ★★`⟨A,1⟩ ≅ ⟨W₁,k⟩`(**方程式つき**の `rootLift` で作る)。 -/
+noncomputable def biratPfIsoA (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) : (⟨A, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.1, biratPfDeg W⟩ :=
+  @asIso _ _ _ _ (rootLift (F := F) hfi W.hom.hom.1 (biratPfDeg W) rfl)
+    (rootLift_isIso hfi W.hom.hom.1 W.hom.property.1 _ rfl)
+
+@[simp] theorem biratPfIsoA_hom (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) :
+    (biratPfIsoA hfi W).hom = rootLift (F := F) hfi W.hom.hom.1 (biratPfDeg W) rfl := rfl
+
+/-- ★★`⟨B,1⟩ ≅ ⟨W₂,k⟩`(次数が揃うのは `IdxPf` の条件そのもの)。 -/
+noncomputable def biratPfIsoB (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) : (⟨B, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.2, biratPfDeg W⟩ :=
+  @asIso _ _ _ _
+    (rootLift (F := F) hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm)
+    (rootLift_isIso hfi W.hom.hom.2 W.hom.property.2.1 _ W.hom.property.2.2.symm)
+
+@[simp] theorem biratPfIsoB_hom (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) :
+    (biratPfIsoB hfi W).hom
+      = rootLift (F := F) hfi W.hom.hom.2 (biratPfDeg W) W.hom.property.2.2.symm := rfl
+
+/-- ★★**左辺の添字対象** —— `⟨X,k⟩ → ⟨A,1⟩` の co-angular pre-step。 -/
+noncomputable def biratPfIdx (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F))
+    {A B : C} (W : IdxPf P F A B) (Z : IdxBirat P G W.right.obj.1) :
+    IdxBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) :=
+  idxBiratMk (pfRootPre P F) Gpf
+    (rootMap (F := F) hfi Z.unop.hom.hom (biratPfDeg W) ≫ (biratPfIsoA hfi W).inv)
+    (pfRoot_isCoAngular hfi _)
+    (IsPreStep.comp (pfRootPre P F)
+      (rootMap_preStep hfi _ _ Z.unop.hom.property.2)
+      (isPreStep_of_isIso (pfRootPre P F) _))
+
+/-- ★★★★**右辺の代表元 `(W, Z, ψ)` から左辺 `(𝒞^pf)^birat` の元を作る**。 -/
+noncomputable def biratPfMk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F))
+    {A B : C} (W : IdxPf P F A B) (Z : IdxBirat P G W.right.obj.1)
+    (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  HomBirat.mk (biratPfIdx hfi Gpf W Z)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+
+/-- ★★**`IdxBirat` の遷移で不変** —— well-definedness の半分。
+
+★`rootMap` が関手的であること(`rootMap_comp`)だけで出る。 -/
+theorem biratPfMk_map (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F))
+    {A B : C} (W : IdxPf P F A B) {Z Z' : IdxBirat P G W.right.obj.1} (u : Z ⟶ Z')
+    (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    biratPfMk hfi Gpf W Z' (u.unop.left.hom ≫ ψ) = biratPfMk hfi Gpf W Z ψ := by
+  have htri : u.unop.left.hom ≫ Z.unop.hom.hom = Z'.unop.hom.hom :=
+    congrArg (fun t : Z'.unop.left ⟶ (coaPreObj P G W.right.obj.1) => t.hom) (Over.w u.unop)
+  have hw : rootMap (F := F) hfi u.unop.left.hom (biratPfDeg W)
+        ≫ (biratPfIdx hfi Gpf W Z).unop.hom.hom
+      = (biratPfIdx hfi Gpf W Z').unop.hom.hom :=
+    (Category.assoc _ _ _).symm.trans
+      (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
+          ⟶ ⟨W.right.obj.1, biratPfDeg W⟩ => t ≫ (biratPfIsoA hfi W).inv)
+        ((rootMap_comp hfi _ _ _).symm.trans
+          (congrArg (fun t => rootMap (F := F) hfi t (biratPfDeg W)) htri)))
+  have hmap := HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
+    (idxBiratHomMk (Z := biratPfIdx hfi Gpf W Z) (W := biratPfIdx hfi Gpf W Z')
+      (rootMap (F := F) hfi u.unop.left.hom (biratPfDeg W)) (pfRoot_isCoAngular hfi _)
+      (rootMap_preStep hfi _ _ u.unop.left.property.2) hw)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+  refine Eq.trans ?_ hmap
+  refine congrArg (HomBirat.mk (biratPfIdx hfi Gpf W Z')) ?_
+  exact (congrArg (fun t : (⟨Z'.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)
+      ⟶ ⟨W.right.obj.2, biratPfDeg W⟩ => t ≫ (biratPfIsoB hfi W).inv)
+    (rootMap_comp (F := F) hfi u.unop.left.hom ψ (biratPfDeg W))).trans
+    (Category.assoc _ _ _)
+
+/-! ## ★2. 右辺の内側の余極限からの写像 -/
+
+/-- ★★右辺の内側の余極限 `Hom^birat(W₁,W₂)` からの余錐。 -/
+noncomputable def biratPfCocone (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) :
+    CategoryTheory.Limits.Cocone (homFunctorBirat P G W.right.obj.1 W.right.obj.2) :=
+  CategoryTheory.Limits.Cocone.mk
+    (HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩)
+    { app := fun Z => TypeCat.ofHom fun ψ => biratPfMk hfi Gpf W Z ψ.down
+      naturality := fun Z Z' u => by
+        ext ψ
+        exact biratPfMk_map hfi Gpf W u ψ.down }
+
+/-- ★★★★**`Hom^birat(W₁,W₂) → Hom^birat_{𝒞^pf}(⟨A,1⟩,⟨B,1⟩)`**。 -/
+noncomputable def biratPf (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) :
+    HomBirat P G W.right.obj.1 W.right.obj.2
+      → HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  fun z => CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W) z
+
+@[simp] theorem biratPf_mk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    biratPf hfi Gpf W (HomBirat.mk Z ψ) = biratPfMk hfi Gpf W Z ψ := by
+  show CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W)
+    (CategoryTheory.Limits.colimit.ι
+      (homFunctorBirat P G W.right.obj.1 W.right.obj.2) Z (ULift.up ψ)) = _
+  rw [← types_comp_apply (CategoryTheory.Limits.colimit.ι
+      (homFunctorBirat P G W.right.obj.1 W.right.obj.2) Z)
+    (CategoryTheory.Limits.colimit.desc _ (biratPfCocone hfi Gpf W)),
+    CategoryTheory.Limits.colimit.ι_desc]
+  rfl
+
+/-! ### ★出典の紐付け -/
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の左辺の側(右辺の代表元からの写像)。 -/
+def biratPfMk.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 右辺の代表元から (𝒞^pf)^birat の元を作る",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★3. `IdxPf` の遷移で不変 —— well-definedness のもう半分
+
+★★ここが「選択された同型」の問題が効くところである。
+`rootLift` を**方程式で特徴づけた**(`Prop55PfKappa.lean`)おかげで、
+`W` を `W′` へ大きくしたときの比較 `iA_{W′} = iA_W ≫ rootStep a` が**言える**
+(`biratPfIsoA_step`)。★あとは `rootMap` の自然性の四角形を当てるだけ。 -/
+
+theorem rootLift_congr (hfi : IsOfFrobeniusIsotropicType P) {A A₁ : C} {α α' : A ⟶ A₁}
+    (h : α = α') (k : ℕ+) (hk : P.degFr α = k) (hk' : P.degFr α' = k) :
+    rootLift (F := F) hfi α k hk = rootLift (F := F) hfi α' k hk' := by
+  subst h; rfl
+
+/-- ★遷移射の次数の関係 `k′ = k · d`。 -/
+theorem biratPf_hk' {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    biratPfDeg W' = biratPfDeg W * P.degFr u.right.hom.1 := by
+  have htriA : W.hom.hom.1 ≫ u.right.hom.1 = W'.hom.hom.1 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.1) (Under.w u)
+  show P.degFr W'.hom.hom.1 = P.degFr W.hom.hom.1 * P.degFr u.right.hom.1
+  rw [← htriA, P.degFr_comp, mul_comm]
+
+/-- ★★★★**`iA_{W′} = iA_W ≫ rootStep a`** —— ここが整合性の要。 -/
+theorem biratPfIsoA_step (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    (biratPfIsoA hfi W').hom
+      = (biratPfIsoA hfi W).hom ≫ rootStep (F := F) hfi u.right.hom.1 u.right.property.1
+          (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl (biratPf_hk' u) := by
+  have htriA : W.hom.hom.1 ≫ u.right.hom.1 = W'.hom.hom.1 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.1) (Under.w u)
+  have hka : P.degFr (W.hom.hom.1 ≫ u.right.hom.1) = biratPfDeg W' := by rw [htriA]
+  show rootLift (F := F) hfi W'.hom.hom.1 (biratPfDeg W') rfl = _
+  rw [rootLift_congr hfi htriA.symm (biratPfDeg W') rfl hka]
+  exact rootLift_comp hfi W.hom.hom.1 u.right.hom.1 u.right.property.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl rfl (biratPf_hk' u) hka
+
+/-- ★★★★**`iB_{W′} = iB_W ≫ rootStep b`**。 -/
+theorem biratPfIsoB_step (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    {W W' : IdxPf P F A B} (u : W ⟶ W') :
+    (biratPfIsoB hfi W').hom
+      = (biratPfIsoB hfi W).hom ≫ rootStep (F := F) hfi u.right.hom.2 u.right.property.2.1
+          (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+          u.right.property.2.2.symm (biratPf_hk' u) := by
+  have htriB : W.hom.hom.2 ≫ u.right.hom.2 = W'.hom.hom.2 :=
+    congrArg (fun t : biFrObj P F A B ⟶ W'.right => t.hom.2) (Under.w u)
+  have hkb : P.degFr (W.hom.hom.2 ≫ u.right.hom.2) = biratPfDeg W' := by
+    rw [htriB]; exact W'.hom.property.2.2.symm
+  show rootLift (F := F) hfi W'.hom.hom.2 (biratPfDeg W') W'.hom.property.2.2.symm = _
+  rw [rootLift_congr hfi htriB.symm (biratPfDeg W') W'.hom.property.2.2.symm hkb]
+  exact rootLift_comp hfi W.hom.hom.2 u.right.hom.2 u.right.property.2.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+    W.hom.property.2.2.symm u.right.property.2.2.symm (biratPf_hk' u) hkb
+
+/-- ★★★★★★**`IdxPf` の遷移で不変**(四角形の形)。
+
+★★`z ≫ a = β ≫ α`(底の側)と `ψ ≫ b = β ≫ ψ′`(有理関数の側)の 2 本の四角形から、
+`(𝒞^pf)^birat` の元が一致することを言う。
+★中身は `rootMap_rootStep_sq` を 2 回と `HomBirat.mk_map` 1 回。 -/
+theorem biratPfMk_step (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F))
+    {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    {X : C} (z : X ⟶ W.right.obj.1) (hzc : IsCoAngular P z) (hzs : IsPreStep P z)
+    (ψ : X ⟶ W.right.obj.2)
+    {Y : C} (β : X ⟶ Y) (hβ : IsFrobeniusType P β)
+    (hdβ : P.degFr β = P.degFr u.right.hom.1)
+    (α : Y ⟶ W'.right.obj.1) (hαc : IsCoAngular P α) (hαs : IsPreStep P α)
+    (hsqA : z ≫ u.right.hom.1 = β ≫ α)
+    (ψ' : Y ⟶ W'.right.obj.2) (hsqB : ψ ≫ u.right.hom.2 = β ≫ ψ') :
+    biratPfMk hfi Gpf W' (idxBiratMk P G α hαc hαs) ψ'
+      = biratPfMk hfi Gpf W (idxBiratMk P G z hzc hzs) ψ := by
+  have hk' := biratPf_hk' (F := F) u
+  set Sa := rootStep (F := F) hfi u.right.hom.1 u.right.property.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') rfl hk' with hSa
+  set Sb := rootStep (F := F) hfi u.right.hom.2 u.right.property.2.1
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W')
+    u.right.property.2.2.symm hk' with hSb
+  set Sβ := rootStep (F := F) hfi β hβ
+    (biratPfDeg W) (P.degFr u.right.hom.1) (biratPfDeg W') hdβ hk' with hSβ
+  haveI hia : IsIso Sa := rootStep_isIso hfi _ _ _ _ _ _ _
+  haveI hib : IsIso Sb := rootStep_isIso hfi _ _ _ _ _ _ _
+  haveI hiβ : IsIso Sβ := rootStep_isIso hfi _ _ _ _ _ _ _
+  have sqA : rootMap (F := F) hfi z (biratPfDeg W) ≫ Sa
+      = Sβ ≫ rootMap (F := F) hfi α (biratPfDeg W') :=
+    rootMap_rootStep_sq hfi z u.right.hom.1 u.right.property.1 β hβ α
+      _ _ _ rfl hdβ hk' hsqA
+  have sqB : rootMap (F := F) hfi ψ (biratPfDeg W) ≫ Sb
+      = Sβ ≫ rootMap (F := F) hfi ψ' (biratPfDeg W') :=
+    rootMap_rootStep_sq hfi ψ u.right.hom.2 u.right.property.2.1 β hβ ψ'
+      _ _ _ u.right.property.2.2.symm hdβ hk' hsqB
+  have hIA : biratPfIsoA hfi W' = biratPfIsoA hfi W ≪≫ asIso Sa :=
+    Iso.ext (biratPfIsoA_step hfi u)
+  have hIB : biratPfIsoB hfi W' = biratPfIsoB hfi W ≪≫ asIso Sb :=
+    Iso.ext (biratPfIsoB_step hfi u)
+  have keyA : (@inv _ _ _ _ Sβ hiβ) ≫ rootMap (F := F) hfi z (biratPfDeg W)
+      = rootMap (F := F) hfi α (biratPfDeg W') ≫ (@inv _ _ _ _ Sa hia) := by
+    rw [IsIso.inv_comp_eq, ← Category.assoc, ← sqA, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have keyB : (@inv _ _ _ _ Sβ hiβ) ≫ rootMap (F := F) hfi ψ (biratPfDeg W)
+      = rootMap (F := F) hfi ψ' (biratPfDeg W') ≫ (@inv _ _ _ _ Sb hib) := by
+    rw [IsIso.inv_comp_eq, ← Category.assoc, ← sqB, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have hwA : (@inv _ _ _ _ Sβ hiβ)
+        ≫ (biratPfIdx hfi Gpf W (idxBiratMk P G z hzc hzs)).unop.hom.hom
+      = (biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs)).unop.hom.hom := by
+    show (@inv _ _ _ _ Sβ hiβ)
+        ≫ (rootMap (F := F) hfi z (biratPfDeg W) ≫ (biratPfIsoA hfi W).inv)
+      = rootMap (F := F) hfi α (biratPfDeg W') ≫ (biratPfIsoA hfi W').inv
+    rw [hIA, Iso.trans_inv, asIso_inv, ← Category.assoc, ← Category.assoc, keyA]
+  have hmap := HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
+    (idxBiratHomMk (Z := biratPfIdx hfi Gpf W (idxBiratMk P G z hzc hzs))
+      (W := biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs))
+      (@inv _ _ _ _ Sβ hiβ) (pfRoot_isCoAngular hfi _)
+      (isPreStep_of_isIso (pfRootPre P F) _) hwA)
+    (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+  refine Eq.trans ?_ hmap
+  refine congrArg (HomBirat.mk (biratPfIdx hfi Gpf W' (idxBiratMk P G α hαc hαs))) ?_
+  show rootMap (F := F) hfi ψ' (biratPfDeg W') ≫ (biratPfIsoB hfi W').inv
+    = (@inv _ _ _ _ Sβ hiβ)
+      ≫ (rootMap (F := F) hfi ψ (biratPfDeg W) ≫ (biratPfIsoB hfi W).inv)
+  rw [hIB, Iso.trans_inv, asIso_inv, ← Category.assoc, ← Category.assoc, keyB]
+
+/-- ★★★★★locator —— `Proposition 5.5, (ii)` の `IdxPf` 遷移での不変性。 -/
+def biratPfMk_step.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — IdxPf の遷移で不変(well-definedness のもう半分)",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★4. 四角形の存在
+
+★★`u : W ⟶ W′` と代表元 `(z, ψ)` から、
+`biratPfMk_step` が要求する 2 本の四角形を作る。
+★道具は `Proposition 1.10, (ii)`(在庫、`pre-step ≫ Frobenius` を
+`Frobenius ≫ pre-step` へ組み替える)と `frobTransport`(在庫)だけである。 -/
+
+/-- ★★★★**四角形の存在** —— `Proposition 1.10, (ii)` と `frobTransport` で作る。 -/
+theorem exists_biratPf_step {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    {X : C} (z : X ⟶ W.right.obj.1) (hzc : IsCoAngular P z) (hzs : IsPreStep P z)
+    (ψ : X ⟶ W.right.obj.2) :
+    ∃ (Y : C) (β : X ⟶ Y) (_ : IsFrobeniusType P β), P.degFr β = P.degFr u.right.hom.1 ∧
+      ∃ (α : Y ⟶ W'.right.obj.1), IsCoAngular P α ∧ IsPreStep P α ∧
+        ∃ ψ' : Y ⟶ W'.right.obj.2,
+          z ≫ u.right.hom.1 = β ≫ α ∧ ψ ≫ u.right.hom.2 = β ≫ ψ' := by
+  obtain ⟨Y, β, α, hβ, hdβ, hαs, hsq⟩ :=
+    prop_1_10_ii P F z hzs u.right.hom.1 u.right.property.1
+  refine ⟨Y, β, hβ, hdβ, α,
+    prop_1_10_i_coAngular_of P F hβ u.right.property.1 hsq.symm hzc, hαs,
+    frobTransport (F := F) β hβ u.right.hom.2 u.right.property.2.1
+      (hdβ.trans u.right.property.2.2) ψ, hsq.symm, ?_⟩
+  exact frobTransport_spec (F := F) β hβ u.right.hom.2 u.right.property.2.1
+    (hdβ.trans u.right.property.2.2) ψ
+
+/-- ★★★locator —— `Proposition 5.5, (ii)` の四角形の存在。 -/
+def exists_biratPf_step.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — IdxPf の遷移が与える四角形の存在",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★5. 余錐であること —— well-definedness の完成
+
+★★★ここで 3 つが繋がる:
+* `exists_biratPf_step` —— `𝒞` の側で四角形を作る(`Proposition 1.10, (ii)`)
+* `biratPf_sq` —— それが `𝒞^birat` の四角形になる(`compBirat_mk_of_sq′`)
+* `biratPfMk_step` —— そこから左辺の元が一致する(`rootMap_rootStep_sq`)
+
+★`frobTransport` の**一意性**(`frobTransport_eq`、在庫)が
+「作った四角形」と「余極限の遷移写像」を結ぶ。 -/
+
+section Cocone
+
+variable [IsConnected D] {G : Frobenioid P}
+
+theorem idxBiratMk_congr {A A' : C} {a a' : A' ⟶ A} (h : a = a')
+    (hac : IsCoAngular P a) (has : IsPreStep P a)
+    (hac' : IsCoAngular P a') (has' : IsPreStep P a') :
+    idxBiratMk P G a hac has = idxBiratMk P G a' hac' has' := by subst h; rfl
+
+/-- ★★合成の計算則(添字の構造射を好きな形で受け取る版)。 -/
+theorem compBirat_mk_of_sq' (Fc : FrobenioidCore P) {A B E : C}
+    (Z : IdxBirat P G A) (φ : Z.unop.left.obj ⟶ B) (W : IdxBirat P G B)
+    (ψ : W.unop.left.obj ⟶ E)
+    {Dd : C} (γ : Dd ⟶ Z.unop.left.obj) (hγc : IsCoAngular P γ) (hγs : IsPreStep P γ)
+    (α₀ : Dd ⟶ W.unop.left.obj) (hsq : γ ≫ φ = α₀ ≫ W.unop.hom.hom)
+    {δ : Dd ⟶ A} (hδ : δ = γ ≫ Z.unop.hom.hom)
+    (hδc : IsCoAngular P δ) (hδs : IsPreStep P δ) :
+    compBirat P G Fc (HomBirat.mk Z φ) (HomBirat.mk W ψ)
+      = HomBirat.mk (idxBiratMk P G δ hδc hδs) (α₀ ≫ ψ) := by
+  subst hδ
+  exact compBirat_mk_of_sq Fc Z φ W ψ γ hγc hγs α₀ hsq
+
+/-- ★★★★**`𝒞` の 2 本の四角形は `𝒞^birat` の四角形になる**。 -/
+theorem biratPf_sq {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    {X : C} (z : X ⟶ W.right.obj.1) (hzc : IsCoAngular P z) (hzs : IsPreStep P z)
+    (ψ : X ⟶ W.right.obj.2)
+    {Y : C} (β : X ⟶ Y) (α : Y ⟶ W'.right.obj.1)
+    (hαc : IsCoAngular P α) (hαs : IsPreStep P α) (ψ' : Y ⟶ W'.right.obj.2)
+    (hsqA : z ≫ u.right.hom.1 = β ≫ α) (hsqB : ψ ≫ u.right.hom.2 = β ≫ ψ') :
+    compBirat P G F (HomBirat.mk (idxBiratMk P G z hzc hzs) ψ)
+        (toHomBirat (P := P) (G := G) u.right.hom.2)
+      = compBirat P G F (toHomBirat (P := P) (G := G) u.right.hom.1)
+          (HomBirat.mk (idxBiratMk P G α hαc hαs) ψ') := by
+  have hone : z = z ≫ (idxBiratOne P G W.right.obj.1).unop.hom.hom :=
+    (Category.comp_id z).symm
+  rw [compBirat_mk_toHomBirat]
+  rw [show (toHomBirat (P := P) (G := G) u.right.hom.1)
+      = HomBirat.mk (idxBiratOne P G W.right.obj.1) u.right.hom.1 from rfl]
+  rw [compBirat_mk_of_sq' (G := G) F (idxBiratOne P G W.right.obj.1) u.right.hom.1
+    (idxBiratMk P G α hαc hαs) ψ' z hzc hzs β hsqA hone hzc hzs]
+  exact congrArg (HomBirat.mk (idxBiratMk P G z hzc hzs)) hsqB
+
+/-- ★★★★★★★**`biratPf` は `IdxPf` 上の余錐** —— well-definedness の完成。
+
+★★★これで「右辺の余極限から左辺 `(𝒞^pf)^birat` への写像」が
+**代表元の取り方に依らずに定まる**。 -/
+theorem biratPf_map (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    {A B : C} {W W' : IdxPf P F A B} (u : W ⟶ W')
+    (zz : HomBirat P G W.right.obj.1 W.right.obj.2) :
+    biratPf hfi Gpf W'
+        (frobTransport (F := F') (toHomBirat (P := P) (G := G) u.right.hom.1)
+          ((birat_isFrobeniusType_iff P G _).mpr ⟨u.right.property.1.1.1, u.right.property.1.2⟩)
+          (toHomBirat (P := P) (G := G) u.right.hom.2)
+          ((birat_isFrobeniusType_iff P G _).mpr
+            ⟨u.right.property.2.1.1.1, u.right.property.2.1.2⟩)
+          ((biratDeg_toHomBirat (P := P) (G := G) u.right.hom.1).trans
+            (u.right.property.2.2.trans
+              (biratDeg_toHomBirat (P := P) (G := G) u.right.hom.2).symm)) zz)
+      = biratPf hfi Gpf W zz := by
+  obtain ⟨Z, x, rfl⟩ :=
+    HomColim.exists_rep (homFunctorBirat P G W.right.obj.1 W.right.obj.2) zz
+  obtain ⟨ψ⟩ := x
+  obtain ⟨Y, β, hβ, hdβ, α, hαc, hαs, ψ', hsqA, hsqB⟩ :=
+    exists_biratPf_step u Z.unop.hom.hom Z.unop.hom.property.1 Z.unop.hom.property.2 ψ
+  have hsq := biratPf_sq (F := G.core) (G := G) u Z.unop.hom.hom Z.unop.hom.property.1
+    Z.unop.hom.property.2 ψ β α hαc hαs ψ' hsqA hsqB
+  have htr := frobTransport_eq (F := F') (toHomBirat (P := P) (G := G) u.right.hom.1)
+    ((birat_isFrobeniusType_iff P G _).mpr ⟨u.right.property.1.1.1, u.right.property.1.2⟩)
+    (toHomBirat (P := P) (G := G) u.right.hom.2)
+    ((birat_isFrobeniusType_iff P G _).mpr ⟨u.right.property.2.1.1.1, u.right.property.2.1.2⟩)
+    ((biratDeg_toHomBirat (P := P) (G := G) u.right.hom.1).trans
+      (u.right.property.2.2.trans
+        (biratDeg_toHomBirat (P := P) (G := G) u.right.hom.2).symm))
+    (HomBirat.mk Z ψ) (HomBirat.mk (idxBiratMk P G α hαc hαs) ψ') hsq
+  have hgoal : HomColim.mk (homFunctorBirat P G W.right.obj.1 W.right.obj.2) Z (ULift.up ψ)
+      = HomBirat.mk Z ψ := rfl
+  rw [hgoal]
+  refine ((congrArg (biratPf hfi Gpf W') htr).trans
+    (biratPf_mk hfi Gpf W' (idxBiratMk P G α hαc hαs) ψ')).trans ?_
+  refine Eq.trans ?_ (biratPf_mk hfi Gpf W Z ψ).symm
+  exact biratPfMk_step hfi Gpf u Z.unop.hom.hom Z.unop.hom.property.1
+    Z.unop.hom.property.2 ψ β hβ hdβ α hαc hαs hsqA ψ' hsqB
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の余錐性(well-definedness の完成)。 -/
+def biratPf_map.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 右辺の余極限から (𝒞^pf)^birat への写像(well-defined)",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★6. 余極限から降ろす —— 右辺全体からの写像
+
+★★`idxToBirat` が**終尾**(`idxToBirat_final`、`Prop55Birat.lean`)なので、
+`colim_{W ∈ IdxPf(𝒞)(A,B)} Hom^birat(W₁,W₂) ≅ Hom^pf_{𝒞^birat}(A,B)` である。
+★`biratPf_map`(余錐性)を `colimit.desc` に渡し、その終尾同型で戻せば
+**`(𝒞^birat)^pf` の射から `(𝒞^pf)^birat` の射への写像**が得られる。 -/
+
+/-- ★★★★★★左辺への写像を与える余錐(右辺の外側の余極限から)。 -/
+noncomputable def biratPfOuterCocone (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Limits.Cocone (idxToBirat P F G F' A B ⋙
+      homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :=
+  Limits.Cocone.mk (HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩)
+    { app := fun W => TypeCat.ofHom fun z => biratPf hfi Gpf W z.down
+      naturality := fun W W' u => by
+        ext z
+        exact biratPf_map hfi Gpf F' u z.down }
+
+/-- ★★★★★★★**`(𝒞^birat)^pf` の射から `(𝒞^pf)^birat` の射への写像**。 -/
+noncomputable def biratPfHom (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)
+      → HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  fun z => Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)
+    ((Functor.Final.colimitIso (idxToBirat P F G F' A B)
+      (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv z)
+
+/-- ★★**代表元での計算則**。 -/
+@[simp] theorem biratPfHom_mk (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C)
+    (W : IdxPf P F A B) (z : HomBirat P G W.right.obj.1 W.right.obj.2) :
+    biratPfHom hfi Gpf F' A B
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z) = biratPf hfi Gpf W z := by
+  have h2 : Limits.colimit.pre
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))
+        (idxToBirat P F G F' A B)
+        (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+          homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W (ULift.up z))
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z := by
+    rw [← types_comp_apply (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+        homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W)
+      (Limits.colimit.pre (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))
+        (idxToBirat P F G F' A B)), Limits.colimit.ι_pre]
+    rfl
+  have hinv : (Functor.Final.colimitIso (idxToBirat P F G F' A B)
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z)
+      = Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+          homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W (ULift.up z) := by
+    rw [← h2]
+    exact Iso.hom_inv_id_apply _ _
+  show Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)
+      ((Functor.Final.colimitIso (idxToBirat P F G F' A B)
+        (homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))).inv
+        (HomPf.mk ((idxToBirat P F G F' A B).obj W) z)) = _
+  rw [hinv, ← types_comp_apply (Limits.colimit.ι (idxToBirat P F G F' A B ⋙
+      homFunctorPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) W)
+    (Limits.colimit.desc _ (biratPfOuterCocone hfi Gpf F' A B)), Limits.colimit.ι_desc]
+  rfl
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の右辺から左辺への写像。 -/
+def biratPfHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — (𝒞^birat)^pf の射から (𝒞^pf)^birat の射への写像",
+    sectionId := "frdi-prop-5-5" }
+
+end Cocone
+
+
+section Surj
+
+variable {G : Frobenioid P}
+
+/-! ## ★全射性 —— 右辺の代表元は必ず左辺から来る
+
+★★★右辺 `(𝒞^birat)^pf` の任意の元は、**添字を粗くすれば**
+`⟨A″,n⟩ → ⟨A,1⟩`(co-angular pre-step)と
+`ψ₁ : (A″)^{(k)} ⟶ A^{(n,k)}` の対で書ける。
+★このとき **`biratPfMk` がその元をちょうど返す** ——
+これが `Proposition 5.5, (ii)` の全射性の中身である。
+
+★鍵は `Prop55PfKappa.lean` の**全射性の三角形** `surj_triangle'`:
+同じ 1 本の `e_β = kappaLift` が `A` の側(構造射)にも `B` の側(値)にも当たる。
+`e_β` は `A″`・`n`・`k` にしか依らないからである。 -/
+
+/-- ★★全射性で使う添字 —— `θ_A = rtExt A n ≫ rtExt A^{(n)} k` と `θ_B` の対。 -/
+noncomputable def surjW (A B : C) (n k : ℕ+) : IdxPf P F A B :=
+  idxMk (P := P) (F := F) (rtExt P F A n ≫ rtExt P F (rtObj P F A n) k)
+    (rtExt P F B n ≫ rtExt P F (rtObj P F B n) k)
+    (IsFrobeniusType.comp P F (rtExt_frobType P F A n) (rtExt_frobType P F _ k))
+    (IsFrobeniusType.comp P F (rtExt_frobType P F B n) (rtExt_frobType P F _ k))
+    (by rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, rtExt_degFr, rtExt_degFr, rtExt_degFr])
+
+/-- ★`surjW` の次数は `k · n`。 -/
+theorem surjW_deg (A B : C) (n k : ℕ+) :
+    biratPfDeg (P := P) (F := F) (surjW (P := P) (F := F) A B n k) = k * n :=
+  surj_degA (P := P) (F := F) A n k
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**全射性** —— `biratPfMk` は右辺の代表元をそのまま返す。
+
+★★`ε = [ψ₁]`(co-angular pre-step)と値 `[ψ₂]` を与えると、
+`surjW A B n k` を添字にした `biratPfMk` が
+**`HomBirat.mk ⟨ε⟩ [ψ₂]` に一致する**。
+
+★★証明は 3 段:
+1. `e_β := kappaLift`(`κ ≫ [β]` に沿った持ち上げ)は同型 —— `κ ≫ [β]` が Frobenius 型だから。
+2. `surj_triangle'` を `A` の側と `B` の側に 1 回ずつ当てる。
+   出てくる `e_β` は**同じ 1 本**である。
+3. `e_β⁻¹` を `IdxBirat` の射とみなし(`idxBiratHomMk`)、`HomBirat.mk_map` に流し込む。 -/
+theorem biratPfMk_surj (hfi : IsOfFrobeniusIsotropicType P)
+    (Gpf : Frobenioid (pfRootPre P F)) (A B A'' : C) (n k : ℕ+)
+    (ψ₁ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F A n) k)
+    (hψ₁c : IsCoAngular P ψ₁) (hψ₁s : IsPreStep P ψ₁)
+    (ψ₂ : rtObj P F (rtObj P F A'' 1) k ⟶ rtObj P F (rtObj P F B n) k)
+    (hεc : IsCoAngular (pfRootPre P F)
+      (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁))
+    (hεs : IsPreStep (pfRootPre P F)
+      (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)) :
+    biratPfMk hfi Gpf (surjW (P := P) (F := F) A B n k)
+        (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂
+      = HomBirat.mk (idxBiratMk (pfRootPre P F) Gpf
+          (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁) hεc hεs)
+        (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+          HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂) := by
+  have hBdeg : (pfRootPre P F).degFr (pfKappa (F := F) A'' n
+      ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k))
+      = biratPfDeg (P := P) (F := F) (surjW (P := P) (F := F) A B n k) :=
+    (surj_degB (P := P) (F := F) A'' n k).trans
+      (surj_degA (P := P) (F := F) A n k).symm
+  set eβ := kappaLift (F := F) hfi (biratPfDeg (P := P) (F := F)
+      (surjW (P := P) (F := F) A B n k)) (pfKappa (F := F) A'' n
+    ≫ toRootHom (F := F) (rtExt P F A'' 1 ≫ rtExt P F (rtObj P F A'' 1) k)) hBdeg with heβ
+  haveI hiso : IsIso eβ := kappaLift_isIso hfi _ _
+    (IsFrobeniusType.comp (pfRootPre P F) (pfRootCore hfi) (pfKappa_frobType hfi A'' n)
+      (toRootHom_frobType hfi _
+        (IsFrobeniusType.comp P F (rtExt_frobType P F A'' 1) (rtExt_frobType P F _ k)))) hBdeg
+  have htriA : (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+        ≫ (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k)).hom
+      = eβ ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg (P := P) (F := F)
+        (surjW (P := P) (F := F) A B n k)) :=
+    surj_triangle' (F := F) hfi A'' A n k _ ψ₁ rfl hBdeg
+  have htriB : (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+        HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂)
+        ≫ (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k)).hom
+      = eβ ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg (P := P) (F := F)
+        (surjW (P := P) (F := F) A B n k)) :=
+    surj_triangle' (F := F) hfi A'' B n k _ ψ₂
+      (surjW (P := P) (F := F) A B n k).hom.property.2.2.symm hBdeg
+  have hw : (@inv _ _ _ _ eβ hiso)
+        ≫ (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁)
+      = rootMap (F := F) hfi ψ₁ (biratPfDeg (P := P) (F := F)
+          (surjW (P := P) (F := F) A B n k))
+        ≫ (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k)).inv :=
+    (Iso.eq_comp_inv (biratPfIsoA hfi (surjW (P := P) (F := F) A B n k))).mpr
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun t => (@inv _ _ _ _ eβ hiso) ≫ t) htriA).trans
+          (IsIso.inv_hom_id_assoc eβ _)))
+  have hval : (@inv _ _ _ _ eβ hiso)
+        ≫ (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+            HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂)
+      = rootMap (F := F) hfi ψ₂ (biratPfDeg (P := P) (F := F)
+          (surjW (P := P) (F := F) A B n k))
+        ≫ (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k)).inv :=
+    (Iso.eq_comp_inv (biratPfIsoB hfi (surjW (P := P) (F := F) A B n k))).mpr
+      ((Category.assoc _ _ _).trans
+        ((congrArg (fun t => (@inv _ _ _ _ eβ hiso) ≫ t) htriB).trans
+          (IsIso.inv_hom_id_assoc eβ _)))
+  refine Eq.trans ?_ (HomBirat.mk_map (P := pfRootPre P F) (G := Gpf)
+    (idxBiratHomMk (Z := idxBiratMk (pfRootPre P F) Gpf _ hεc hεs)
+      (W := biratPfIdx hfi Gpf (surjW (P := P) (F := F) A B n k)
+        (idxBiratMk P G ψ₁ hψ₁c hψ₁s))
+      (@inv _ _ _ _ eβ hiso) (pfRoot_isCoAngular hfi _)
+      (isPreStep_of_isIso (pfRootPre P F) _) hw)
+    (show HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩ from
+      HomPf.mk (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F B n) k) ψ₂))
+  exact congrArg (HomBirat.mk (biratPfIdx hfi Gpf (surjW (P := P) (F := F) A B n k)
+    (idxBiratMk P G ψ₁ hψ₁c hψ₁s))) hval.symm
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の全射性。 -/
+def biratPfMk_surj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 全射性(右辺の代表元は biratPfMk の像)",
+    sectionId := "frdi-prop-5-5" }
+
+end Surj
+
+section Inj
+
+/-! ## ★単射性 —— 「単元のずれ」は外側の余極限で潰れる
+
+★★★測って分かった筋は 4 段である:
+
+1. ★**`κ` と co-angular pre-step は epi** —— Frobenioid は totally epimorphic なので、
+   `𝒞^pf` の側の等式は `rootMap ψ₁ K = rootMap ψ₂ K` に潰れ、
+   さらに `rootMap_spec` で `toRootHom ψ₁ = toRootHom ψ₂` になる。
+2. ★★**`𝒞 ⥤ 𝒞^pf` は忠実ではない**(単元のぶんだけずれる)。
+   ★しかし `HomPf.eq_iff` ＋ 添字圏の細さ(`idx_hom_ext`)から
+   **「Frobenius 型射 `β` を後合成すれば `𝒞` で一致する」**ところまでは降りる
+   (`toHomPf_descend`)。
+3. ★★★**その `β` がそのまま外側の添字の遷移になる** ——
+   `W₁` の側は `rtExt W₁ (deg β)` を取れば次数が揃うので
+   `W ⟶ W'` が `IdxPf` の射として作れる。
+4. ★★`𝒞^birat` も totally epimorphic なので、遷移先で 2 つの元は一致し、
+   外側の余極限で等しくなる(`biratPf_outer_eq`)。
+
+★★**「忠実でない」ことが障害にならない**のがこの節の要点である ——
+外側の余極限がちょうどそのずれを吸収する。 -/
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**同じ添字での等式は `𝒞 ⥤ 𝒞^pf` の等式に降りる**。
+
+★★`𝒞^pf` の等式 → `a` が epi → `rootMap` が一致 → `κ` が epi → `toRootHom` が一致。 -/
+theorem biratPfMk_toHomPf (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B)
+    (Z : IdxBirat P G W.right.obj.1) (ψ₁ ψ₂ : Z.unop.left.obj ⟶ W.right.obj.2)
+    (h : biratPfMk hfi Gpf W Z ψ₁ = biratPfMk hfi Gpf W Z ψ₂) :
+    toHomPf (F := F) ψ₁ = toHomPf (F := F) ψ₂ := by
+  obtain ⟨T, a, ha⟩ := HomBirat.eq_iff_same.mp h
+  have h1 : (a.unop.left.hom ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg W))
+        ≫ (biratPfIsoB hfi W).inv
+      = (a.unop.left.hom ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg W))
+        ≫ (biratPfIsoB hfi W).inv :=
+    (Category.assoc _ _ _).trans (ha.trans (Category.assoc _ _ _).symm)
+  have h2 : a.unop.left.hom ≫ rootMap (F := F) hfi ψ₁ (biratPfDeg W)
+      = a.unop.left.hom ≫ rootMap (F := F) hfi ψ₂ (biratPfDeg W) :=
+    (cancel_mono (biratPfIsoB hfi W).inv).mp h1
+  have hep : Epi (a.unop.left.hom
+      : T.unop.left.obj ⟶ (⟨Z.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F)) :=
+    (pfRootPre P F).totEpiC T.unop.left.obj
+      (⟨Z.unop.left.obj, biratPfDeg W⟩ : PfRootObj P F) a.unop.left.hom
+  have h3 : rootMap (F := F) hfi ψ₁ (biratPfDeg W)
+      = rootMap (F := F) hfi ψ₂ (biratPfDeg W) := hep.left_cancellation _ _ h2
+  have h4 : pfKappa (F := F) Z.unop.left.obj (biratPfDeg W) ≫ toRootHom (F := F) ψ₁
+      = pfKappa (F := F) Z.unop.left.obj (biratPfDeg W) ≫ toRootHom (F := F) ψ₂ := by
+    rw [← rootMap_spec (F := F) hfi ψ₁ (biratPfDeg W),
+      ← rootMap_spec (F := F) hfi ψ₂ (biratPfDeg W), h3]
+  have hep2 : Epi (pfKappa (F := F) Z.unop.left.obj (biratPfDeg W)) :=
+    (pfRootPre P F).totEpiC _ _ _
+  have h5 : toRootHom (F := F) ψ₁ = toRootHom (F := F) ψ₂ := hep2.left_cancellation _ _ h4
+  haveI := isIso_rtExt_one P F Z.unop.left.obj
+  have h6 : (toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)
+        ≫ (toPfCat P F).map ψ₁ ≫ (toPfCat P F).map (rtExt P F W.right.obj.2 1)
+      = (toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)
+        ≫ (toPfCat P F).map ψ₂ ≫ (toPfCat P F).map (rtExt P F W.right.obj.2 1) := by
+    rw [← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp,
+      ← (toPfCat P F).map_comp, ← (toPfCat P F).map_comp]
+    exact h5
+  haveI hA : IsIso ((toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)) := by
+    haveI : IsIso (rtOneInv (P := P) (F := F) Z.unop.left.obj) :=
+      @IsIso.inv_isIso _ _ _ _ (rtExt P F Z.unop.left.obj 1) _
+    exact (toPfCat P F).map_isIso _
+  haveI hB : IsIso ((toPfCat P F).map (rtExt P F W.right.obj.2 1)) := by
+    haveI := isIso_rtExt_one P F W.right.obj.2
+    exact (toPfCat P F).map_isIso _
+  have hmono : Mono ((toPfCat P F).map (rtExt P F W.right.obj.2 1)) := inferInstance
+  have hepi : Epi ((toPfCat P F).map (rtOneInv (P := P) (F := F) Z.unop.left.obj)) :=
+    inferInstance
+  exact hmono.right_cancellation _ _ (hepi.left_cancellation _ _ h6)
+
+/-- ★★★**`𝒞 ⥤ 𝒞^pf` の等号は `𝒞` の等号に「Frobenius 型射を後合成して」降りる**。
+
+★★`𝒞 ⥤ 𝒞^pf` は**忠実とは限らない**が、これだけは言える ——
+`HomPf.eq_iff` の共通上界を取り、添字圏が細い(`idx_hom_ext`)ので
+2 本の遷移射が一致し、`idxTransport_spec` の四角形が両側で同じになるからである。 -/
+theorem toHomPf_descend {X Y : C} {ψ₁ ψ₂ : X ⟶ Y}
+    (h : toHomPf (F := F) ψ₁ = toHomPf (F := F) ψ₂) :
+    ∃ (Y' : C) (β : Y ⟶ Y'), IsFrobeniusType P β ∧ ψ₁ ≫ β = ψ₂ ≫ β := by
+  obtain ⟨V, u, v, hUV⟩ := HomPf.eq_iff.mp h
+  rw [idx_hom_ext v u] at hUV
+  refine ⟨V.right.obj.2, u.right.hom.2, u.right.property.2.1, ?_⟩
+  exact (idxTransport_spec u ψ₁).trans
+    ((congrArg (fun t : V.right.obj.1 ⟶ V.right.obj.2 => u.right.hom.1 ≫ t) hUV).trans
+      (idxTransport_spec u ψ₂).symm)
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**外側の余極限では「`𝒞` の Frobenius 型射を後合成して一致」すれば等しい**。
+
+★`W₁` の側は `rtExt W₁ (deg β)` を取れば次数が揃うので、
+`β` がそのまま外側の添字の遷移 `W ⟶ W'` になる。 -/
+theorem biratPf_outer_eq {G : Frobenioid P} (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (W : IdxPf P F A B) (z₁ z₂ : HomBirat P G W.right.obj.1 W.right.obj.2)
+    {Y' : C} (β : W.right.obj.2 ⟶ Y') (hβ : IsFrobeniusType P β)
+    (hz : compBirat P G G.core z₁ (toHomBirat (P := P) (G := G) β)
+        = compBirat P G G.core z₂ (toHomBirat (P := P) (G := G) β)) :
+    HomPf.mk ((idxToBirat P F G F' A B).obj W) z₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z₂ := by
+  have hα := rtExt_frobType P F W.right.obj.1 (P.degFr β)
+  have hαd := rtExt_degFr P F W.right.obj.1 (P.degFr β)
+  have hdW : P.degFr W.hom.hom.1 = P.degFr W.hom.hom.2 := W.hom.property.2.2
+  let t : W ⟶ idxMk (W.hom.hom.1 ≫ rtExt P F W.right.obj.1 (P.degFr β))
+      (W.hom.hom.2 ≫ β) (IsFrobeniusType.comp P F W.hom.property.1 hα)
+      (IsFrobeniusType.comp P F W.hom.property.2.1 hβ)
+      (by rw [P.degFr_comp, P.degFr_comp, hαd]
+          exact congrArg (fun m : ℕ+ => P.degFr β * m) hdW) :=
+    Under.homMk (show W.right ⟶ _ from ⟨(rtExt P F W.right.obj.1 (P.degFr β), β), hα, hβ, hαd⟩)
+      (WideSubcategory.hom_ext _ rfl)
+  have s1 := idxTransport_spec ((idxToBirat P F G F' A B).map t) z₁
+  have s2 := idxTransport_spec ((idxToBirat P F G F' A B).map t) z₂
+  have hepi : Epi (((idxToBirat P F G F' A B).map t).right.hom.1) := birat_totEpi P G _ _ _
+  have hζ : idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map t) z₁
+      = idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map t) z₂ :=
+    hepi.left_cancellation _ _ (s1.symm.trans (hz.trans s2))
+  exact (HomPf.mk_map ((idxToBirat P F G F' A B).map t) z₁).symm.trans
+    ((congrArg (HomPf.mk ((idxToBirat P F G F' A B).obj _)) hζ).trans
+      (HomPf.mk_map ((idxToBirat P F G F' A B).map t) z₂))
+
+/-- ★★★右辺の元は必ず `idxToBirat` の像の添字で代表できる(`idxToBirat` が本質的全射)。 -/
+theorem homPf_birat_exists_rep {G : Frobenioid P} (F' : FrobenioidCore (biratPre P G))
+    (A B : C) (x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)) :
+    ∃ (W : IdxPf P F A B) (z : HomBirat P G W.right.obj.1 W.right.obj.2),
+      HomPf.mk ((idxToBirat P F G F' A B).obj W) z = x := by
+  obtain ⟨Z', zx, hzx⟩ := HomPf.exists_rep x
+  haveI := idxToBirat_essSurj P F G F' A B
+  exact ⟨(idxToBirat P F G F' A B).objPreimage Z',
+    idxTransport (biratPre P G) F'
+      ((idxToBirat P F G F' A B).objObjPreimageIso Z').inv zx,
+    (HomPf.mk_map _ zx).trans hzx⟩
+
+section InjConn
+
+variable [IsConnected D]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★★**同じ外側の添字での単射性**。 -/
+theorem biratPf_inj_mk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) {A B : C}
+    (W : IdxPf P F A B) (z₁ z₂ : HomBirat P G W.right.obj.1 W.right.obj.2)
+    (h : biratPf hfi Gpf W z₁ = biratPf hfi Gpf W z₂) :
+    HomPf.mk ((idxToBirat P F G F' A B).obj W) z₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W) z₂ := by
+  obtain ⟨Z, ψ₁, ψ₂, hz₁, hz₂⟩ := HomBirat.exists_rep_pair (P := P) (G := G) z₁ z₂
+  subst hz₁
+  subst hz₂
+  have hmk : biratPfMk hfi Gpf W Z ψ₁ = biratPfMk hfi Gpf W Z ψ₂ := by
+    rw [← biratPf_mk hfi Gpf W Z ψ₁, ← biratPf_mk hfi Gpf W Z ψ₂]
+    exact h
+  obtain ⟨Y', β, hβ, hβe⟩ := toHomPf_descend (F := F)
+    (biratPfMk_toHomPf hfi Gpf W Z ψ₁ ψ₂ hmk)
+  refine biratPf_outer_eq F' W _ _ β hβ ?_
+  rw [compBirat_mk_toHomBirat G.core Z ψ₁ β, compBirat_mk_toHomBirat G.core Z ψ₂ β, hβe]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— 射の写像は**単射**。
+
+★★2 つの元を共通の外側の添字に揃え(`IdxPf` は filtered)、
+そこで `biratPf_inj_mk` を当てるだけである。 -/
+theorem biratPfHom_injective (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Injective (biratPfHom hfi Gpf F' A B) := by
+  intro x y hxy
+  obtain ⟨W₁, z₁, hx⟩ := homPf_birat_exists_rep (F := F) F' A B x
+  obtain ⟨W₂, z₂, hy⟩ := homPf_birat_exists_rep (F := F) F' A B y
+  subst hx
+  subst hy
+  haveI := idxPf_isFiltered P F (A := A) (B := B)
+  set V := IsFiltered.max W₁ W₂ with hV
+  set u := IsFiltered.leftToMax W₁ W₂ with hu
+  set v := IsFiltered.rightToMax W₁ W₂ with hv
+  set w₁ := idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map u) z₁ with hw₁
+  set w₂ := idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map v) z₂ with hw₂
+  have e1 : HomPf.mk ((idxToBirat P F G F' A B).obj V) w₁
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W₁) z₁ :=
+    HomPf.mk_map ((idxToBirat P F G F' A B).map u) z₁
+  have e2 : HomPf.mk ((idxToBirat P F G F' A B).obj V) w₂
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W₂) z₂ :=
+    HomPf.mk_map ((idxToBirat P F G F' A B).map v) z₂
+  have hval : biratPf hfi Gpf V w₁ = biratPf hfi Gpf V w₂ := by
+    rw [← biratPfHom_mk hfi Gpf F' A B V w₁, ← biratPfHom_mk hfi Gpf F' A B V w₂, e1, e2]
+    exact hxy
+  exact e1.symm.trans ((biratPf_inj_mk hfi Gpf F' V w₁ w₂ hval).trans e2)
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の単射性。 -/
+def biratPfHom_injective.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — (𝒞^birat)^pf → (𝒞^pf)^birat は単射",
+    sectionId := "frdi-prop-5-5" }
+
+end InjConn
+
+end Inj
+
+section Bij
+
+variable [IsConnected D]
+
+/-! ## ★射の全単射 —— `Proposition 5.5, (ii)` の Hom の部分
+
+★★全射性は `biratPfMk_surj` を代表元に当てるだけである。要る材料は 2 つ:
+
+* `HomPf.exists_rep_pow_pair` —— **構造射 `δ` と値 `φ` を同じ `k` で代表する**
+  (`Prop55PfKappa.lean`)。
+* `isPreStep_mk_iff` / `isCoAngular_of_isotropic_dom` ——
+  `𝒞^pf` の co-angular pre-step を `𝒞` へ**降ろす**。
+
+★★**isotropic 型を仮定するのが要点**である。原典の `𝒞^pf` は
+`Definition 3.1, (iii)` により isotropic 型の `𝒞`(実際には `𝒞^istr`)に対して作るので、
+これは逸脱ではない。★isotropic 型なら `𝒞` の射は**すべて** co-angular
+(`isCoAngular_of_isotropic_dom`)なので、`ψ₁` の co-angular 性は無料である。 -/
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★全射性(代表元の形で)。
+
+★`δ` と `φ` を同じ `k` で代表し、`biratPfMk_surj` に流し込む。 -/
+theorem biratPfHom_surj_mk (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    (A B A'' : C) (n : ℕ+)
+    (δ : HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨A, 1⟩)
+    (hδc : IsCoAngular (pfRootPre P F) δ) (hδs : IsPreStep (pfRootPre P F) δ)
+    (φ : HomRoot P F (⟨A'', n⟩ : PfRootObj P F) ⟨B, 1⟩) :
+    ∃ x, biratPfHom hfi Gpf F' A B x
+      = HomBirat.mk (idxBiratMk (pfRootPre P F) Gpf δ hδc hδs) φ := by
+  obtain ⟨k, ψ₁, ψ₂, hψ₁, hψ₂⟩ := HomPf.exists_rep_pow_pair (F := F) δ φ
+  subst hψ₁
+  subst hψ₂
+  have hψ₁c : IsCoAngular P ψ₁ := isCoAngular_of_isotropic_dom P F (hiso _) ψ₁
+  have hψ₁s : IsPreStep P ψ₁ :=
+    (isPreStep_mk_iff (X := (⟨A'', n⟩ : PfRootObj P F)) (Y := (⟨A, 1⟩ : PfRootObj P F))
+      (idxPow (F := F) (rtObj P F A'' 1) (rtObj P F A n) k) ψ₁).mp hδs
+  refine ⟨HomPf.mk ((idxToBirat P F G F' A B).obj (surjW (P := P) (F := F) A B n k))
+    (HomBirat.mk (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂), ?_⟩
+  refine (biratPfHom_mk hfi Gpf F' A B (surjW (P := P) (F := F) A B n k) _).trans ?_
+  refine (biratPf_mk hfi Gpf (surjW (P := P) (F := F) A B n k)
+    (idxBiratMk P G ψ₁ hψ₁c hψ₁s) ψ₂).trans ?_
+  exact biratPfMk_surj hfi Gpf A B A'' n k ψ₁ hψ₁c hψ₁s ψ₂ hδc hδs
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— 射の写像は**全射**。
+
+★★添字対象 `T` は**そのまま `idxBiratMk` の形**である(構造の eta で `rfl`)ので、
+代表元の形の全射性がそのまま効く。 -/
+theorem biratPfHom_surjective (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Surjective (biratPfHom hfi Gpf F' A B) := by
+  intro y
+  obtain ⟨T, φ, hTφ⟩ := HomBirat.exists_rep y
+  obtain ⟨x, hx⟩ := biratPfHom_surj_mk hfi hiso Gpf F' A B T.unop.left.obj.obj
+    T.unop.left.obj.root T.unop.hom.hom T.unop.hom.property.1 T.unop.hom.property.2 φ
+  exact ⟨x, hx.trans hTφ⟩
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— **射の全単射**。 -/
+theorem biratPfHom_bijective (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    Function.Bijective (biratPfHom hfi Gpf F' A B) :=
+  ⟨biratPfHom_injective hfi Gpf F' A B, biratPfHom_surjective hfi hiso Gpf F' A B⟩
+
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** ——
+**`Hom_{(𝒞^birat)^pf}(A,B) ≃ Hom_{(𝒞^pf)^birat}(A,B)`**。
+
+原文 (FrdI p.105):
+> tween the respective sets of morphisms between the images of two given objects of C -/
+noncomputable def biratPfHomEquiv (hfi : IsOfFrobeniusIsotropicType P)
+    (hiso : ∀ X : C, IsIsotropic P X) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B : C) :
+    HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B)
+      ≃ HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  Equiv.ofBijective _ (biratPfHom_bijective hfi hiso Gpf F' A B)
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の射の全単射。 -/
+def biratPfHomEquiv.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射 Hom_{(𝒞^birat)^pf} ≃ Hom_{(𝒞^pf)^birat}",
+    sectionId := "frdi-prop-5-5" }
+
+end Bij
+
+section Unit
+
+/-! ## ★恒等射の保存
+
+★★★測って分かったこと: **恒等射の保存は 3 行で出る**。
+`W = idxOne`、`Z = idxBiratOne` のとき、`biratPfMk` の**添字の射と値が同じ項になる**
+(`biratPfIsoA` と `biratPfIsoB` が `idxOne` では同じ `rootLift` だから)ので、
+「co-angular pre-step をそれ自身に当てた類は恒等射」(`homBirat_mk_self`)がそのまま効く。 -/
+
+/-- ★`κ_{A,1}` は恒等射。 -/
+theorem pfKappa_one (A : C) : pfKappa (F := F) A 1 = 𝟙 (⟨A, 1⟩ : PfRootObj P F) := by
+  show toHomPf (F := F) (kappaRep (P := P) (F := F) A 1) = _
+  rw [show kappaRep (P := P) (F := F) A 1 = 𝟙 (rtObj P F A 1) from
+    @IsIso.inv_hom_id _ _ _ _ (rtExt P F A 1) (isIso_rtExt_one P F A)]
+  rfl
+
+/-- ★★`rootMap` は恒等射を恒等射へ送る。 -/
+theorem rootMap_id (hfi : IsOfFrobeniusIsotropicType P) (A : C) (k : ℕ+) :
+    rootMap (F := F) hfi (𝟙 A) k = 𝟙 (⟨A, k⟩ : PfRootObj P F) := by
+  refine rootMap_ext (F := F) hfi (rootMap (F := F) hfi (𝟙 A) k)
+    (𝟙 (⟨A, k⟩ : PfRootObj P F)) ?_
+  rw [rootMap_spec, toRootHom_id]
+  show pfKappa (F := F) A k ≫ 𝟙 (⟨A, 1⟩ : PfRootObj P F)
+    = 𝟙 (⟨A, k⟩ : PfRootObj P F) ≫ pfKappa (F := F) A k
+  rw [Category.comp_id, Category.id_comp]
+
+/-- ★★**co-angular pre-step をそれ自身に当てた類は恒等射**。
+
+★`Proposition 4.4, (i)` の「co-angular pre-step は `𝒞^birat` で同型になる」の
+一番使いやすい形である。 -/
+theorem homBirat_mk_self {G : Frobenioid P} {A A' : C} (e : A' ⟶ A)
+    (hc : IsCoAngular P e) (hs : IsPreStep P e) :
+    HomBirat.mk (idxBiratMk P G e hc hs) e = toHomBirat (P := P) (G := G) (𝟙 A) := by
+  have hw : e ≫ (idxBiratOne P G A).unop.hom.hom = (idxBiratMk P G e hc hs).unop.hom.hom :=
+    Category.comp_id e
+  exact ((congrArg (HomBirat.mk (idxBiratMk P G e hc hs)) (Category.comp_id e)).symm).trans
+    (HomBirat.mk_map (idxBiratHomMk (Z := idxBiratOne P G A) (W := idxBiratMk P G e hc hs)
+      e hc hs hw) (𝟙 A))
+
+section UnitConn
+
+variable [IsConnected D]
+
+set_option maxHeartbeats 800000 in
+/-- ★★★★★**`Proposition 5.5, (ii)` の射の写像は恒等射を保つ**。
+
+★★`W = idxOne`・`Z = idxBiratOne` では `biratPfMk` の**添字の射と値が同じ項**になる。 -/
+theorem biratPfHom_id (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C) :
+    biratPfHom hfi Gpf F' A A (toHomPf (F := F') (𝟙 (biratUp P G A)))
+      = toHomBirat (P := pfRootPre P F) (G := Gpf) (𝟙 (⟨A, 1⟩ : PfRootObj P F)) := by
+  refine (biratPfHom_mk hfi Gpf F' A A (idxOne P F A A) (𝟙 (biratUp P G A))).trans ?_
+  refine (biratPf_mk hfi Gpf (idxOne P F A A) (idxBiratOne P G A) (𝟙 A)).trans ?_
+  exact homBirat_mk_self (G := Gpf) _ _ _
+
+/-- ★★★★★locator —— `Proposition 5.5, (ii)` の射の写像は恒等射を保つ。 -/
+def biratPfHom_id.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は恒等射を保つ",
+    sectionId := "frdi-prop-5-5" }
+
+end UnitConn
+
+end Unit
+
+section Comp
+
+/-! ## ★合成との両立(内側)
+
+★★★測って分かった急所は **`biratPfDeg`(＝ 添字の脚の Frobenius 次数)が
+`PfRootObj` の「根」の位置に現れる**ことである。
+3 つ組の添字 `T` の 3 本の脚 `a, b, e` は
+「次数が命題としては等しいが項としては違う」ので、
+`biratPfIsoB (idx12 T)` と `biratPfIsoA (idx23 T)` が**同じ項にならない**。
+
+★★**次数を仮引数 `K` に出すと解決する**(`biratPfIsoA'` 以下)——
+`K` を共通に取れば `rootLift hfi b K _` が両者に現れ、
+証明部分は `Prop` なので**同じ項**になる。
+★`biratPfMk' hfi Gpf W K hKA hKB Z ψ = biratPfMk hfi Gpf W Z ψ` は `subst` 一発である。
+
+★★あとは `compBirat_mk_of_sq`(本ファイル)に
+**`rootMap` の像で作った引き戻し四角形**を入れるだけである ——
+`rootMap` が関手的(`rootMap_comp`)なので、`𝒞` の四角形がそのまま `𝒞^pf` の四角形になる。 -/
+
+/-- ★次数を仮引数に出した `biratPfIsoA`。 -/
+noncomputable def biratPfIsoA' (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) (K : ℕ+) (hK : P.degFr W.hom.hom.1 = K) :
+    (⟨A, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.1, K⟩ :=
+  @asIso _ _ _ _ (rootLift (F := F) hfi W.hom.hom.1 K hK)
+    (rootLift_isIso hfi W.hom.hom.1 W.hom.property.1 _ hK)
+
+/-- ★次数を仮引数に出した `biratPfIsoB`。 -/
+noncomputable def biratPfIsoB' (hfi : IsOfFrobeniusIsotropicType P) {A B : C}
+    (W : IdxPf P F A B) (K : ℕ+) (hK : P.degFr W.hom.hom.2 = K) :
+    (⟨B, 1⟩ : PfRootObj P F) ≅ ⟨W.right.obj.2, K⟩ :=
+  @asIso _ _ _ _ (rootLift (F := F) hfi W.hom.hom.2 K hK)
+    (rootLift_isIso hfi W.hom.hom.2 W.hom.property.2.1 _ hK)
+
+/-- ★次数を仮引数に出した `biratPfIdx`。 -/
+noncomputable def biratPfIdx' (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) (K : ℕ+)
+    (hK : P.degFr W.hom.hom.1 = K) (Z : IdxBirat P G W.right.obj.1) :
+    IdxBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) :=
+  idxBiratMk (pfRootPre P F) Gpf
+    (rootMap (F := F) hfi Z.unop.hom.hom K ≫ (biratPfIsoA' hfi W K hK).inv)
+    (pfRoot_isCoAngular hfi _)
+    (IsPreStep.comp (pfRootPre P F)
+      (rootMap_preStep hfi _ _ Z.unop.hom.property.2)
+      (isPreStep_of_isIso (pfRootPre P F) _))
+
+/-- ★★次数を仮引数に出した `biratPfMk`。 -/
+noncomputable def biratPfMk' (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) (K : ℕ+)
+    (hKA : P.degFr W.hom.hom.1 = K) (hKB : P.degFr W.hom.hom.2 = K)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    HomBirat (pfRootPre P F) Gpf (⟨A, 1⟩ : PfRootObj P F) ⟨B, 1⟩ :=
+  HomBirat.mk (biratPfIdx' hfi Gpf W K hKA Z)
+    (rootMap (F := F) hfi ψ K ≫ (biratPfIsoB' hfi W K hKB).inv)
+
+/-- ★★`K` を仮引数に出しても同じ元である(`subst` 一発)。 -/
+theorem biratPfMk'_eq (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B : C} (W : IdxPf P F A B) (K : ℕ+)
+    (hKA : P.degFr W.hom.hom.1 = K) (hKB : P.degFr W.hom.hom.2 = K)
+    (Z : IdxBirat P G W.right.obj.1) (ψ : Z.unop.left.obj ⟶ W.right.obj.2) :
+    biratPfMk' hfi Gpf W K hKA hKB Z ψ = biratPfMk hfi Gpf W Z ψ := by
+  subst hKA; rfl
+
+/-- ★代表元の等式は「射」と「値」の等式から出る。 -/
+theorem homBirat_mk_congr {G : Frobenioid P} {A A' B : C} {a b : A' ⟶ A} (h : a = b)
+    (hac : IsCoAngular P a) (has : IsPreStep P a)
+    (hbc : IsCoAngular P b) (hbs : IsPreStep P b)
+    {φ ψ : A' ⟶ B} (hφ : φ = ψ) :
+    HomBirat.mk (idxBiratMk P G a hac has) φ = HomBirat.mk (idxBiratMk P G b hbc hbs) ψ := by
+  subst h; subst hφ; rfl
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**代表元での合成則** ——
+3 つ組の添字 `T` の上で、`biratPfMk'` は合成と両立する。
+
+★★引き戻し四角形は `𝒞` のものを `rootMap` で送るだけでよい
+(`compBirat_mk_of_sq` が引き戻しデータの自由度を与える)。 -/
+theorem biratPfMk'_comp (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B E : C} (T : IdxPf3 P F A B E) (K : ℕ+)
+    (ha : P.degFr T.hom.hom.1 = K) (hb : P.degFr T.hom.hom.2.1 = K)
+    (he : P.degFr T.hom.hom.2.2 = K)
+    (Z : IdxBirat P G T.right.obj.1) (φ : Z.unop.left.obj ⟶ T.right.obj.2.1)
+    (W : IdxBirat P G T.right.obj.2.1) (ψ : W.unop.left.obj ⟶ T.right.obj.2.2) :
+    compBirat (pfRootPre P F) Gpf Gpf.core
+        (biratPfMk' hfi Gpf ((idx12 P F A B E).obj T) K ha hb Z φ)
+        (biratPfMk' hfi Gpf ((idx23 P F A B E).obj T) K hb he W ψ)
+      = biratPfMk' hfi Gpf ((idx13 P F A B E).obj T) K ha he
+          (biratPullIdx G.core Z φ W) (biratPullAlpha G.core Z φ W ≫ ψ) := by
+  have hsq : rootMap (F := F) hfi (biratPullGamma G.core Z φ W) K
+        ≫ (rootMap (F := F) hfi φ K
+          ≫ (biratPfIsoB' hfi ((idx12 P F A B E).obj T) K hb).inv)
+      = rootMap (F := F) hfi (biratPullAlpha G.core Z φ W) K
+        ≫ (biratPfIdx' hfi Gpf ((idx23 P F A B E).obj T) K hb W).unop.hom.hom := by
+    show _ = rootMap (F := F) hfi (biratPullAlpha G.core Z φ W) K
+      ≫ (rootMap (F := F) hfi W.unop.hom.hom K
+        ≫ (biratPfIsoA' hfi ((idx23 P F A B E).obj T) K hb).inv)
+    rw [← Category.assoc, ← Category.assoc, ← rootMap_comp, ← rootMap_comp,
+      biratPull_sq G.core Z φ W]
+    rfl
+  have hm : rootMap (F := F) hfi (biratPullGamma G.core Z φ W) K
+        ≫ (biratPfIdx' hfi Gpf ((idx12 P F A B E).obj T) K ha Z).unop.hom.hom
+      = rootMap (F := F) hfi (biratPullIdx G.core Z φ W).unop.hom.hom K
+        ≫ (biratPfIsoA' hfi ((idx13 P F A B E).obj T) K ha).inv := by
+    show rootMap (F := F) hfi (biratPullGamma G.core Z φ W) K
+        ≫ (rootMap (F := F) hfi Z.unop.hom.hom K
+          ≫ (biratPfIsoA' hfi ((idx12 P F A B E).obj T) K ha).inv) = _
+    rw [← Category.assoc, ← rootMap_comp]
+    rfl
+  have hv : rootMap (F := F) hfi (biratPullAlpha G.core Z φ W) K
+        ≫ (rootMap (F := F) hfi ψ K
+          ≫ (biratPfIsoB' hfi ((idx23 P F A B E).obj T) K he).inv)
+      = rootMap (F := F) hfi (biratPullAlpha G.core Z φ W ≫ ψ) K
+        ≫ (biratPfIsoB' hfi ((idx13 P F A B E).obj T) K he).inv := by
+    rw [← Category.assoc, ← rootMap_comp]
+    rfl
+  refine (compBirat_mk_of_sq (P := pfRootPre P F) (G := Gpf) Gpf.core
+    (biratPfIdx' hfi Gpf ((idx12 P F A B E).obj T) K ha Z)
+    (rootMap (F := F) hfi φ K ≫ (biratPfIsoB' hfi ((idx12 P F A B E).obj T) K hb).inv)
+    (biratPfIdx' hfi Gpf ((idx23 P F A B E).obj T) K hb W)
+    (rootMap (F := F) hfi ψ K ≫ (biratPfIsoB' hfi ((idx23 P F A B E).obj T) K he).inv)
+    (rootMap (F := F) hfi (biratPullGamma G.core Z φ W) K)
+    (pfRoot_isCoAngular hfi _)
+    (rootMap_preStep hfi _ _ (biratPullGamma_preStep G.core Z φ W))
+    (rootMap (F := F) hfi (biratPullAlpha G.core Z φ W) K) hsq).trans ?_
+  exact homBirat_mk_congr (G := Gpf) hm _ _ _ _ hv
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★**内側の余極限からの写像は合成と両立する**。 -/
+theorem biratPf_comp (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) {A B E : C} (T : IdxPf3 P F A B E) (K : ℕ+)
+    (ha : P.degFr T.hom.hom.1 = K) (hb : P.degFr T.hom.hom.2.1 = K)
+    (he : P.degFr T.hom.hom.2.2 = K)
+    (z : HomBirat P G T.right.obj.1 T.right.obj.2.1)
+    (w : HomBirat P G T.right.obj.2.1 T.right.obj.2.2) :
+    biratPf hfi Gpf ((idx13 P F A B E).obj T) (compBirat P G G.core z w)
+      = compBirat (pfRootPre P F) Gpf Gpf.core
+          (biratPf hfi Gpf ((idx12 P F A B E).obj T) z)
+          (biratPf hfi Gpf ((idx23 P F A B E).obj T) w) := by
+  obtain ⟨Z, φ, hZ⟩ := HomBirat.exists_rep (P := P) (G := G) z
+  obtain ⟨W, ψ, hW⟩ := HomBirat.exists_rep (P := P) (G := G) w
+  subst hZ
+  subst hW
+  refine Eq.trans (congrArg (biratPf hfi Gpf ((idx13 P F A B E).obj T))
+    (compBirat_mk G.core Z φ W ψ)) ?_
+  refine (biratPf_mk hfi Gpf ((idx13 P F A B E).obj T) (biratPullIdx G.core Z φ W)
+    (biratPullAlpha G.core Z φ W ≫ ψ)).trans ?_
+  refine Eq.trans (biratPfMk'_eq hfi Gpf ((idx13 P F A B E).obj T) K ha he
+    (biratPullIdx G.core Z φ W) (biratPullAlpha G.core Z φ W ≫ ψ)).symm ?_
+  refine (biratPfMk'_comp hfi Gpf T K ha hb he Z φ W ψ).symm.trans ?_
+  exact congrArg₂ (compBirat (pfRootPre P F) Gpf Gpf.core)
+    ((biratPfMk'_eq hfi Gpf ((idx12 P F A B E).obj T) K ha hb Z φ).trans
+      (biratPf_mk hfi Gpf ((idx12 P F A B E).obj T) Z φ).symm)
+    ((biratPfMk'_eq hfi Gpf ((idx23 P F A B E).obj T) K hb he W ψ).trans
+      (biratPf_mk hfi Gpf ((idx23 P F A B E).obj T) W ψ).symm)
+
+/-- ★★★★★★locator —— `Proposition 5.5, (ii)` の合成との両立(内側)。 -/
+def biratPf_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 内側の写像は合成と両立する",
+    sectionId := "frdi-prop-5-5" }
+
+end Comp
+
+section CompOuter
+
+/-! ## ★合成との両立(外側)
+
+★★内側(`biratPf_comp`)を外の余極限へ持ち上げるには 2 つ要る:
+
+1. **3 脚版の添字圏のあいだの関手** `idxToBirat3` ——
+   `idx12 / idx23 / idx13` と**可換**である(`rfl`)ので、
+   `compPf_mk` がそのまま像の 3 つ組添字で使える。
+2. **2 つの添字を共通の 3 つ組添字に揃える段**(`exists_idx3_of_pair`)——
+   真ん中の脚は `frob_common_upper` で揃え、両端は `rtExt` で次数を合わせる。
+   ★★このとき **3 本の脚の次数を共通の `K` に取れる**ことまで一緒に出しておくのが要点である
+   (`biratPfMk'` がそれを要求するから)。 -/
+
+section Tri
+
+variable (F)
+
+/-- ★★3 脚版の添字圏のあいだの関手。 -/
+noncomputable def triFrToBirat (G : Frobenioid P) (F' : FrobenioidCore (biratPre P G)) :
+    TriFr P F ⥤ TriFr (biratPre P G) F' where
+  obj Z := ⟨((toBiratCat P G).obj Z.obj.1, (toBiratCat P G).obj Z.obj.2.1,
+    (toBiratCat P G).obj Z.obj.2.2)⟩
+  map {Z W} u :=
+    ⟨((toBiratCat P G).map u.hom.1, (toBiratCat P G).map u.hom.2.1,
+        (toBiratCat P G).map u.hom.2.2),
+      (birat_isFrobeniusType_iff P G _).mpr ⟨u.property.1.1.1, u.property.1.2⟩,
+      (birat_isFrobeniusType_iff P G _).mpr ⟨u.property.2.1.1.1, u.property.2.1.2⟩,
+      (birat_isFrobeniusType_iff P G _).mpr ⟨u.property.2.2.1.1.1, u.property.2.2.1.2⟩,
+      (biratDeg_toHomBirat (P := P) (G := G) u.hom.1).trans
+        (u.property.2.2.2.1.trans (biratDeg_toHomBirat (P := P) (G := G) u.hom.2.1).symm),
+      (biratDeg_toHomBirat (P := P) (G := G) u.hom.2.1).trans
+        (u.property.2.2.2.2.trans
+          (biratDeg_toHomBirat (P := P) (G := G) u.hom.2.2).symm)⟩
+  map_id Z := by
+    apply InducedWideCategory.Hom.ext
+    exact Prod.ext ((toBiratCat P G).map_id _)
+      (Prod.ext ((toBiratCat P G).map_id _) ((toBiratCat P G).map_id _))
+  map_comp u v := by
+    apply InducedWideCategory.Hom.ext
+    exact Prod.ext ((toBiratCat P G).map_comp _ _)
+      (Prod.ext ((toBiratCat P G).map_comp _ _) ((toBiratCat P G).map_comp _ _))
+
+/-- ★★3 脚版の添字圏のあいだの関手(コスライス)。
+
+★`idx12 / idx23 / idx13` と可換であることは **`rfl`** である。 -/
+noncomputable def idxToBirat3 (G : Frobenioid P) (F' : FrobenioidCore (biratPre P G))
+    (A B E : C) :
+    IdxPf3 P F A B E ⥤ IdxPf3 (biratPre P G) F' (biratUp P G A) (biratUp P G B)
+      (biratUp P G E) :=
+  Under.post (triFrToBirat F G F')
+
+end Tri
+
+set_option maxHeartbeats 800000 in
+/-- ★★★**2 つの添字を共通の 3 つ組の添字に揃える**(次数も共通に取れる)。
+
+★真ん中の脚は `frob_common_upper`、両端は `rtExt` で次数を合わせる。 -/
+theorem exists_idx3_of_pair {A B E : C} (W₁₂ : IdxPf P F A B) (W₂₃ : IdxPf P F B E) :
+    ∃ (T : IdxPf3 P F A B E) (K : ℕ+) (_ : P.degFr T.hom.hom.1 = K)
+      (_ : P.degFr T.hom.hom.2.1 = K) (_ : P.degFr T.hom.hom.2.2 = K),
+      Nonempty (W₁₂ ⟶ (idx12 P F A B E).obj T) ∧
+      Nonempty (W₂₃ ⟶ (idx23 P F A B E).obj T) := by
+  obtain ⟨ha, hb₁, hab₁⟩ := W₁₂.hom.property
+  obtain ⟨hb₂, he, hb₂e⟩ := W₂₃.hom.property
+  obtain ⟨X₃, p, q, hp, hq, hpd, hqd, hsq⟩ :=
+    frob_common_upper P F W₁₂.hom.hom.2 hb₁ W₂₃.hom.hom.1 hb₂
+  have hdeg1 : P.degFr (W₁₂.hom.hom.1 ≫ rtExt P F W₁₂.right.obj.1 (P.degFr p))
+      = P.degFr (W₁₂.hom.hom.2 ≫ p) := by
+    rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, hab₁]
+  have hdeg2 : P.degFr (W₂₃.hom.hom.2 ≫ rtExt P F W₂₃.right.obj.2 (P.degFr q))
+      = P.degFr (W₁₂.hom.hom.2 ≫ p) := by
+    rw [P.degFr_comp, P.degFr_comp, rtExt_degFr, hpd, hqd]
+    exact (mul_comm _ _).trans
+      (congrArg (fun t : ℕ+ => t * P.degFr W₁₂.hom.hom.2) hb₂e.symm)
+  refine ⟨Under.mk (Y := (⟨(rtObj P F W₁₂.right.obj.1 (P.degFr p), X₃,
+        rtObj P F W₂₃.right.obj.2 (P.degFr q))⟩ : TriFr P F))
+      (show triFrObj P F A B E ⟶ _ from
+        ⟨(W₁₂.hom.hom.1 ≫ rtExt P F W₁₂.right.obj.1 (P.degFr p),
+          W₁₂.hom.hom.2 ≫ p,
+          W₂₃.hom.hom.2 ≫ rtExt P F W₂₃.right.obj.2 (P.degFr q)),
+        IsFrobeniusType.comp P F ha (rtExt_frobType P F _ _),
+        IsFrobeniusType.comp P F hb₁ hp,
+        IsFrobeniusType.comp P F he (rtExt_frobType P F _ _),
+        hdeg1, hdeg2.symm⟩),
+    P.degFr (W₁₂.hom.hom.2 ≫ p), hdeg1, rfl, hdeg2, ⟨?_⟩, ⟨?_⟩⟩
+  · exact Under.homMk (show W₁₂.right ⟶ _ from
+      ⟨(rtExt P F W₁₂.right.obj.1 (P.degFr p), p), rtExt_frobType P F _ _, hp,
+        (rtExt_degFr P F _ _)⟩) (WideSubcategory.hom_ext _ rfl)
+  · exact Under.homMk (show W₂₃.right ⟶ _ from
+      ⟨(q, rtExt P F W₂₃.right.obj.2 (P.degFr q)), hq, rtExt_frobType P F _ _,
+        (rtExt_degFr P F _ _).symm⟩)
+      (WideSubcategory.hom_ext _ (Prod.ext hsq.symm rfl))
+
+section CompOuterConn
+
+variable [IsConnected D]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★代表元での合成則(外側)。 -/
+theorem biratPfHom_comp_mk (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G))
+    {A B E : C} (T : IdxPf3 P F A B E) (K : ℕ+)
+    (ha : P.degFr T.hom.hom.1 = K) (hb : P.degFr T.hom.hom.2.1 = K)
+    (he : P.degFr T.hom.hom.2.2 = K)
+    (z : HomBirat P G T.right.obj.1 T.right.obj.2.1)
+    (w : HomBirat P G T.right.obj.2.1 T.right.obj.2.2) :
+    biratPfHom hfi Gpf F' A E
+        (compPf (biratPre P G) F'
+          (HomPf.mk ((idxToBirat P F G F' A B).obj ((idx12 P F A B E).obj T)) z)
+          (HomPf.mk ((idxToBirat P F G F' B E).obj ((idx23 P F A B E).obj T)) w))
+      = compBirat (pfRootPre P F) Gpf Gpf.core
+          (biratPfHom hfi Gpf F' A B
+            (HomPf.mk ((idxToBirat P F G F' A B).obj ((idx12 P F A B E).obj T)) z))
+          (biratPfHom hfi Gpf F' B E
+            (HomPf.mk ((idxToBirat P F G F' B E).obj ((idx23 P F A B E).obj T)) w)) := by
+  refine Eq.trans (congrArg (biratPfHom hfi Gpf F' A E)
+    (compPf_mk (P := biratPre P G) (F := F') ((idxToBirat3 F G F' A B E).obj T) z w)) ?_
+  refine (biratPfHom_mk hfi Gpf F' A E ((idx13 P F A B E).obj T)
+    (compBirat P G G.core z w)).trans ?_
+  refine (biratPf_comp hfi Gpf T K ha hb he z w).trans ?_
+  exact congrArg₂ (compBirat (pfRootPre P F) Gpf Gpf.core)
+    (biratPfHom_mk hfi Gpf F' A B ((idx12 P F A B E).obj T) z).symm
+    (biratPfHom_mk hfi Gpf F' B E ((idx23 P F A B E).obj T) w).symm
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★**[FrdI] Proposition 5.5, (ii)** —— 射の全単射は**合成と両立する**。
+
+★★2 つの元を共通の 3 つ組添字に揃え(`exists_idx3_of_pair`)、
+そこで代表元での合成則を当てるだけである。 -/
+theorem biratPfHom_comp (hfi : IsOfFrobeniusIsotropicType P) {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A B E : C)
+    (x : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G B))
+    (y : HomPf (biratPre P G) F' (biratUp P G B) (biratUp P G E)) :
+    biratPfHom hfi Gpf F' A E (compPf (biratPre P G) F' x y)
+      = compBirat (pfRootPre P F) Gpf Gpf.core
+          (biratPfHom hfi Gpf F' A B x) (biratPfHom hfi Gpf F' B E y) := by
+  obtain ⟨W₁₂, z₀, hx⟩ := homPf_birat_exists_rep (F := F) F' A B x
+  obtain ⟨W₂₃, w₀, hy⟩ := homPf_birat_exists_rep (F := F) F' B E y
+  subst hx
+  subst hy
+  obtain ⟨T, K, ha, hb, he, ⟨u⟩, ⟨v⟩⟩ := exists_idx3_of_pair (F := F) (E := E) W₁₂ W₂₃
+  have hx' : HomPf.mk ((idxToBirat P F G F' A B).obj ((idx12 P F A B E).obj T))
+        (idxTransport (biratPre P G) F' ((idxToBirat P F G F' A B).map u) z₀)
+      = HomPf.mk ((idxToBirat P F G F' A B).obj W₁₂) z₀ :=
+    HomPf.mk_map ((idxToBirat P F G F' A B).map u) z₀
+  have hy' : HomPf.mk ((idxToBirat P F G F' B E).obj ((idx23 P F A B E).obj T))
+        (idxTransport (biratPre P G) F' ((idxToBirat P F G F' B E).map v) w₀)
+      = HomPf.mk ((idxToBirat P F G F' B E).obj W₂₃) w₀ :=
+    HomPf.mk_map ((idxToBirat P F G F' B E).map v) w₀
+  refine Eq.trans (congrArg (biratPfHom hfi Gpf F' A E)
+    (congrArg₂ (compPf (biratPre P G) F') hx'.symm hy'.symm)) ?_
+  refine (biratPfHom_comp_mk hfi Gpf F' T K ha hb he _ _).trans ?_
+  exact congrArg₂ (compBirat (pfRootPre P F) Gpf Gpf.core)
+    (congrArg (biratPfHom hfi Gpf F' A B) hx')
+    (congrArg (biratPfHom hfi Gpf F' B E) hy')
+
+/-- ★★★★★★★locator —— `Proposition 5.5, (ii)` の射の全単射は合成と両立する。 -/
+def biratPfHom_comp.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は合成と両立する",
+    sectionId := "frdi-prop-5-5" }
+
+end CompOuterConn
+
+end CompOuter
+
+section Scale
+
+/-! ## ★圏同値としての梱包へ —— 「同じ目盛りの Hom は根に依らない」
+
+★★★原文 `Definition 3.1, (iii)`(p.57)を読み直して分かったこと:
+**両辺の対象集合はどちらも `Ob(𝒞) × ℕ≥1`** である
+(`(𝒞^pf)^birat` は双有理化が対象を変えないから、`(𝒞^birat)^pf` は
+`Ob(𝒞^birat) = Ob(𝒞)` だから)。★関手は**対象の上で恒等**にすべきである。
+
+★★Hom の対応は
+* 右辺 `Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})`
+  —— **根 1 の場合を対象 `A^{(m)}, B^{(n)}` で読んだもの**なので `biratPfHomEquiv` が当たる。
+* 左辺 `Hom_{(𝒞^pf)^birat}(⟨A,n⟩,⟨B,m⟩)` は `𝒞^pf` の中の同型
+  `⟨A,n⟩ ≅ ⟨A^{(m)}, m·n⟩`(在庫 `pfRoot_exists_iso_root`)で
+  `Hom(⟨A^{(m)}, k⟩, ⟨B^{(n)}, k⟩)`(`k = m·n`)に移る。
+
+★★★**測って分かった注意**: `⟨A,n⟩ ≇ ⟨A,1⟩` である ——
+`Hom(⟨A,n⟩,⟨A,1⟩)` の元はどれも Frobenius 次数が `n` になる
+(`pfKappa` も `rtExt` の像もそう)。**根は「Frobenius 次数の目盛りの取り替え」を
+記録している**ので消せない。
+
+★したがって残る段は「**同じ目盛りの対象どうしの `Hom` は根に依らない**」であり、
+それが本節の `homRootScaleIso` である。 -/
+
+/-- ★★★★**同じ目盛りの対象どうしの `Hom` は根に依らない**。
+
+★★`rtExt X k` と `rtExt Y k` は**同次数の Frobenius 型射**なので、
+`Definition 3.1, (iii)` の「independent of the choice」(`rootIso`)がそのまま効く。
+★★★対象の同型ではない(`⟨X,k⟩ ≇ ⟨X,1⟩`)ことに注意 —— これは **`Hom` の集合の同型**である。 -/
+noncomputable def homRootScaleIso (X Y : C) (k : ℕ+) :
+    HomRoot P F (⟨X, k⟩ : PfRootObj P F) ⟨Y, k⟩
+      ≅ HomRoot P F (⟨X, 1⟩ : PfRootObj P F) ⟨Y, 1⟩ :=
+  rootIso (F := F) (rtExt P F X k) (rtExt_frobType P F X k) (rtExt P F Y k)
+      (rtExt_frobType P F Y k) (by rw [rtExt_degFr, rtExt_degFr])
+    ≪≫ (rootIso (F := F) (rtExt P F X 1) (rtExt_frobType P F X 1) (rtExt P F Y 1)
+      (rtExt_frobType P F Y 1) (by rw [rtExt_degFr, rtExt_degFr])).symm
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の圏同値としての梱包に要る
+「同じ目盛りの `Hom` は根に依らない」。 -/
+def homRootScaleIso.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 同じ目盛りの対象どうしの Hom は根に依らない",
+    sectionId := "frdi-prop-5-5" }
+
+/-! ## ★単元は単元へ移る
+
+★★`biratPfHom` は**恒等射と合成を保つ**(`biratPfHom_id` / `biratPfHom_comp`)ので、
+自己射の単系の準同型である。したがって**単元は単元へ移る**。
+★★★これが `Proposition 5.5, (iv)` の単系の同定で
+「`Φ^birat` の像が `(Φ^pf)^birat` に入る」ことに要る条である ——
+`Φ^birat` は `𝒪^×(A^birat)` の `Div^gp` の像なので、
+`𝒪^×` に入ることを言うには単元性を運ばねばならない。 -/
+
+/-- ★★★★**`biratPfHom` は単元を単元へ移す**(片側の逆元の等式そのもの)。 -/
+theorem biratPfHom_unit [IsConnected D] (hfi : IsOfFrobeniusIsotropicType P)
+    {G : Frobenioid P}
+    (Gpf : Frobenioid (pfRootPre P F)) (F' : FrobenioidCore (biratPre P G)) (A : C)
+    (x y : HomPf (biratPre P G) F' (biratUp P G A) (biratUp P G A))
+    (hxy : compPf (biratPre P G) F' x y = toHomPf (F := F') (𝟙 (biratUp P G A))) :
+    compBirat (pfRootPre P F) Gpf Gpf.core
+        (biratPfHom hfi Gpf F' A A x) (biratPfHom hfi Gpf F' A A y)
+      = toHomBirat (P := pfRootPre P F) (G := Gpf) (𝟙 (⟨A, 1⟩ : PfRootObj P F)) := by
+  rw [← biratPfHom_comp hfi Gpf F' A A A x y, hxy, biratPfHom_id hfi Gpf F' A]
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の射の全単射は単元を単元へ移す。 -/
+def biratPfHom_unit.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 射の全単射は単元を単元へ移す",
+    sectionId := "frdi-prop-5-5" }
+
+end Scale
+
+section RootScale
+
+/-! ## ★根の一斉倍化 `Σ_k` —— 梱包の骨
+
+★★★**測って分かった架構**(2026-08-21):
+`⟨A,n⟩ ≇ ⟨A,1⟩` なので「根を 1 に落とす」ことはできないが、
+**根を一斉に `k` 倍する対応 `Σ_k : ⟨X,r⟩ ↦ ⟨X, k·r⟩` は圏同値になる**。
+
+* 射の対応は `rtRootIso`(`Definition 3.1, (iii)` の「independent of the choice」)そのもの。
+* **本質的全射**である —— `⟨X,r⟩ ≅ ⟨X^{(k)}, k·r⟩`(在庫 `pfRoot_exists_iso_root`)だから。
+
+★★これがあると `Proposition 5.5, (ii)` の**一般の根**の場合が根 1 の場合に落ちる:
+
+```
+Hom_{(𝒞^birat)^pf}((A,n),(B,m)) = Hom^pf_{𝒞^birat}(A^{(m)}, B^{(n)})   -- 原文の定義そのもの
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},1⟩, ⟨B^{(n)},1⟩)                     -- biratPfHomEquiv(済)
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A^{(m)},k⟩, ⟨B^{(n)},k⟩)                     -- Σ_k を birat へ
+    ≃ Hom_{(𝒞^pf)^birat}(⟨A,n⟩, ⟨B,m⟩)                                 -- ⟨A,n⟩ ≅ ⟨A^{(m)},m·n⟩
+```
+
+★★★★★**本節で `Σ_k` は圏同値として閉じた**(2026-08-21):
+`scaleRootObj` / `scaleRootHom` / `scaleRootHom_id` / `scaleRootHom_comp`
+→ `scaleRootFunctor` → `Full` + `Faithful` + `EssSurj` → `scaleRootEquiv`。
+
+★`map_comp` の骨は 2 本だけである ——
+`compRoot_eq_lift`(**合成は共通倍数の根で計算してよい**)で両辺を同じ大きな根
+`(k·c)·(k·b)` 等の上に持ち上げ、`rtRootIso_trans_inv` / `rtRootIso_trans_hom_inv`
+(**2 段の根の取り替えは 1 段**、本節で新設)で 3 箇所の 2 段を 1 段に潰す。
+★★**本質的全射**は在庫 `pfRoot_exists_iso_root`(`⟨A,n⟩ ≅ ⟨A^{(m)}, n·m⟩`)で
+`X := ⟨A^{(k)}, n⟩` と取れば `Σ_k X = ⟨A^{(k)}, k·n⟩ ≅ ⟨A,n⟩` になる。 -/
+
+/-- ★★**根を一斉に `k` 倍する対応**(対象の側)。 -/
+def scaleRootObj (k : ℕ+) (X : PfRootObj P F) : PfRootObj P F := ⟨X.obj, k * X.root⟩
+
+/-- ★★★**根を一斉に `k` 倍する対応**(射の側)——
+`Definition 3.1, (iii)` の「independent of the choice」(`rtRootIso`)そのもの。 -/
+noncomputable def scaleRootHom (k : ℕ+) {X Y : PfRootObj P F} (f : HomRoot P F X Y) :
+    HomRoot P F (scaleRootObj (F := F) k X) (scaleRootObj (F := F) k Y) :=
+  (rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).inv f
+
+/-- ★★`Σ_k` は恒等射を保つ。 -/
+theorem scaleRootHom_id (k : ℕ+) (X : PfRootObj P F) :
+    scaleRootHom (F := F) k (idRoot P F X) = idRoot P F (scaleRootObj (F := F) k X) :=
+  rtRootIso_inv_id P F X.obj (show k * X.root = k * X.root from rfl)
+
+/-- ★★`Σ_1` は恒等。 -/
+theorem scaleRootObj_one (X : PfRootObj P F) :
+    scaleRootObj (F := F) 1 X = X := by
+  show (⟨X.obj, 1 * X.root⟩ : PfRootObj P F) = X
+  rw [one_mul]
+
+/-! ### ★2 段の根の取り替えは 1 段(逆向きの版)
+
+★★在庫の `rtRootIso_trans` は `.hom` の向きだけを述べている。
+`Σ_k` の `map_comp` では `.inv` を 2 回重ねた形と、`.hom` の外側に `.inv` を掛けた形が
+出るので、その 2 つを**そのまま使える形**にしておく。 -/
+
+variable (P F) in
+/-- ★★**2 段の根の取り替えは 1 段**(`.inv` を 2 回重ねた版)。 -/
+theorem rtRootIso_trans_inv (A B : C) {dA dB e tA tB e' sA sB e'' : ℕ+}
+    (hA : tA = e * dA) (hB : tB = e * dB) (hA' : sA = e' * tA) (hB' : sB = e' * tB)
+    (hA'' : sA = e'' * dA) (hB'' : sB = e'' * dB)
+    (z : HomPf P F (rtObj P F A dA) (rtObj P F B dB)) :
+    (rtRootIso P F A B hA' hB').inv ((rtRootIso P F A B hA hB).inv z)
+      = (rtRootIso P F A B hA'' hB'').inv z := by
+  have h := rtRootIso_trans (F := F) A B hA hB hA' hB' hA'' hB''
+    ((rtRootIso P F A B hA' hB').inv ((rtRootIso P F A B hA hB).inv z))
+  rw [Iso.inv_hom_id_apply, Iso.inv_hom_id_apply] at h
+  exact ((congrArg (rtRootIso P F A B hA'' hB'').inv h).trans
+    (Iso.hom_inv_id_apply _ _)).symm
+
+variable (P F) in
+/-- ★★**2 段の根の取り替えは 1 段**(`.hom` の外側に `.inv` を掛けた版)。 -/
+theorem rtRootIso_trans_hom_inv (A B : C) {dA dB e tA tB e' sA sB e'' : ℕ+}
+    (hA : tA = e * dA) (hB : tB = e * dB) (hA' : sA = e' * tA) (hB' : sB = e' * tB)
+    (hA'' : sA = e'' * dA) (hB'' : sB = e'' * dB)
+    (w : HomPf P F (rtObj P F A sA) (rtObj P F B sB)) :
+    (rtRootIso P F A B hA hB).inv ((rtRootIso P F A B hA'' hB'').hom w)
+      = (rtRootIso P F A B hA' hB').hom w :=
+  (congrArg (rtRootIso P F A B hA hB).inv
+    (rtRootIso_trans (F := F) A B hA hB hA' hB' hA'' hB'' w)).symm.trans
+    (Iso.hom_inv_id_apply _ _)
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★**`Σ_k` は合成と両立する**(`map_comp`)。
+
+★**筋**: 両辺を「共通の大きな根」`PA = (k·c)·(k·b)`, `PB = (k·c)·(k·a)`, `PE = (k·b)·(k·a)`
+(`a = X.root`, `b = Y.root`, `c = Z.root`)の上で計算する(`compRoot_eq_lift`)。
+★★左辺は `𝒞^pf` の元の根で、右辺は `k` 倍した根で計算するので、
+**持ち上げの次数だけが `k` 倍ずれる**。そのずれはちょうど
+`rtRootIso_trans_inv`(内側 2 箇所)と `rtRootIso_trans_hom_inv`(外側 1 箇所)の
+「2 段 = 1 段」で吸収される。 -/
+theorem scaleRootHom_comp (k : ℕ+) {X Y Z : PfRootObj P F}
+    (f : HomRoot P F X Y) (g : HomRoot P F Y Z) :
+    scaleRootHom (F := F) k (compRoot P F f g)
+      = compRoot P F (scaleRootHom (F := F) k f) (scaleRootHom (F := F) k g) := by
+  have hL := compRoot_eq_lift (P := P) (F := F) f g
+    (c := k * k)
+    (PA := (k * Z.root) * (k * Y.root))
+    (PB := (k * Z.root) * (k * X.root))
+    (PE := (k * Y.root) * (k * X.root))
+    (hcA := by simp [mul_comm, mul_left_comm])
+    (hcB := by simp [mul_comm, mul_left_comm])
+    (hcE := by simp [mul_comm, mul_left_comm])
+    (ef := k * k * Z.root)
+    (hfA := by simp [mul_comm, mul_left_comm])
+    (hfB := by simp [mul_comm, mul_left_comm])
+    (eg := k * k * X.root)
+    (hgA := by simp [mul_comm, mul_left_comm])
+    (hgE := by simp [mul_comm, mul_left_comm])
+    (er := k * k * Y.root)
+    (hrA := by simp [mul_comm, mul_left_comm])
+    (hrE := by simp [mul_comm, mul_left_comm])
+  have hR := compRoot_eq_lift (P := P) (F := F)
+    (X := scaleRootObj (F := F) k X) (Y := scaleRootObj (F := F) k Y)
+    (Z := scaleRootObj (F := F) k Z)
+    (scaleRootHom (F := F) k f) (scaleRootHom (F := F) k g)
+    (c := 1)
+    (PA := (k * Z.root) * (k * Y.root))
+    (PB := (k * Z.root) * (k * X.root))
+    (PE := (k * Y.root) * (k * X.root))
+    (hcA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hcB := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hcE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (ef := k * Z.root)
+    (hfA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hfB := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (eg := k * X.root)
+    (hgA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hgE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (er := k * Y.root)
+    (hrA := by simp [scaleRootObj, mul_comm, mul_left_comm])
+    (hrE := by simp [scaleRootObj, mul_comm, mul_left_comm])
+  have hf := rtRootIso_trans_inv P F X.obj Y.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * Y.root)) (sB := (k * Z.root) * (k * X.root))
+    (e' := k * Z.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * Z.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) f
+  have hg := rtRootIso_trans_inv P F Y.obj Z.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * X.root)) (sB := (k * Y.root) * (k * X.root))
+    (e' := k * X.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * X.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) g
+  rw [hR, hL]
+  unfold scaleRootHom scaleRootObj
+  rw [hf, hg]
+  exact rtRootIso_trans_hom_inv P F X.obj Z.obj
+    (e := k) (hA := rfl) (hB := rfl)
+    (sA := (k * Z.root) * (k * Y.root)) (sB := (k * Y.root) * (k * X.root))
+    (e' := k * Y.root)
+    (hA' := by simp [mul_comm, mul_left_comm])
+    (hB' := by simp [mul_comm, mul_left_comm])
+    (e'' := k * k * Y.root)
+    (hA'' := by simp [mul_comm, mul_left_comm])
+    (hB'' := by simp [mul_comm, mul_left_comm]) _
+
+/-- ★★★★★**根の一斉倍化 `Σ_k : 𝒞^pf ⥤ 𝒞^pf`**。 -/
+noncomputable def scaleRootFunctor (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (k : ℕ+) :
+    PfRootObj P F ⥤ PfRootObj P F where
+  obj X := scaleRootObj (F := F) k X
+  map f := scaleRootHom (F := F) k f
+  map_id X := scaleRootHom_id k X
+  map_comp f g := scaleRootHom_comp k f g
+
+/-- ★★`Σ_k` は射の上で単射(`rtRootIso` が同型だから)。 -/
+theorem scaleRootHom_injective (k : ℕ+) (X Y : PfRootObj P F) :
+    Function.Injective (scaleRootHom (F := F) (X := X) (Y := Y) k) := by
+  intro a b h
+  have h2 := congrArg (rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).hom h
+  unfold scaleRootHom at h2
+  rwa [Iso.inv_hom_id_apply, Iso.inv_hom_id_apply] at h2
+
+/-- ★★`Σ_k` は射の上で全射。 -/
+theorem scaleRootHom_surjective (k : ℕ+) (X Y : PfRootObj P F) :
+    Function.Surjective (scaleRootHom (F := F) (X := X) (Y := Y) k) := fun w =>
+  ⟨(rtRootIso P F X.obj Y.obj (show k * Y.root = k * Y.root from rfl)
+    (show k * X.root = k * X.root from rfl)).hom w, Iso.hom_inv_id_apply _ _⟩
+
+noncomputable instance scaleRootFunctor_faithful (k : ℕ+) :
+    (scaleRootFunctor P F k).Faithful where
+  map_injective {X Y} := scaleRootHom_injective k X Y
+
+noncomputable instance scaleRootFunctor_full (k : ℕ+) : (scaleRootFunctor P F k).Full where
+  map_surjective {X Y} := scaleRootHom_surjective k X Y
+
+/-- ★★★**本質的全射** —— `X := ⟨A^{(k)}, n⟩` と取れば
+`Σ_k X = ⟨A^{(k)}, k·n⟩ ≅ ⟨A, n⟩`(在庫 `pfRoot_exists_iso_root`)。 -/
+noncomputable instance scaleRootFunctor_essSurj (k : ℕ+) :
+    (scaleRootFunctor P F k).EssSurj where
+  mem_essImage W := by
+    obtain ⟨e, he⟩ := pfRoot_exists_iso_root (F := F) W.obj W.root k (k * W.root)
+      (mul_comm k W.root)
+    haveI := he
+    exact ⟨⟨rtObj P F W.obj k, W.root⟩, ⟨(asIso e).symm⟩⟩
+
+noncomputable instance scaleRootFunctor_isEquivalence (k : ℕ+) :
+    (scaleRootFunctor P F k).IsEquivalence where
+
+/-- ★★★★★**根の一斉倍化は圏同値** `Σ_k : 𝒞^pf ≌ 𝒞^pf`。
+
+★★これが `Proposition 5.5, (ii)` の「一般の根の場合を根 1 の場合に落とす」段である。 -/
+noncomputable def scaleRootEquiv (P : PreFrobenioid C Φ) (F : FrobenioidCore P) (k : ℕ+) :
+    PfRootObj P F ≌ PfRootObj P F :=
+  (scaleRootFunctor P F k).asEquivalence
+
+/-- ★★★★locator —— `Proposition 5.5, (ii)` の梱包に要る「根の一斉倍化」。 -/
+def scaleRootHom.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 105,
+    item := "Proposition 5.5, (ii) — 根の一斉倍化 Σ_k は圏同値",
+    sectionId := "frdi-prop-5-5" }
+
+end RootScale
+
+end ABC3.Found.FrdI

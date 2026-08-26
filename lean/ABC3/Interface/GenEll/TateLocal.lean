@@ -1,6 +1,7 @@
 import ABC3.Meta.Claim
 import Mathlib.Data.Rat.Defs
 import Mathlib.Data.Real.Basic
+import Mathlib.Data.Nat.Prime.Basic
 
 /-!
 # [GenEll] §3 局所理論 —— Tate 曲線と局所高さの `Interface`
@@ -26,10 +27,22 @@ import Mathlib.Data.Real.Basic
 
 ## ★★ただし「何を作れば終わりか」は完全に決まる
 
-★本 Interface は**公理を 1 つも持たない**(データと述語だけ)。
-`Lemma 3.2` の主張(i)(ii)、`Remark 3.3.1` の well-defined 性は、
-**すべて `Skeleton/GenEll/Section3.lean` 側の `sorry` として残る**。
-これが `tools/check.mjs` 冒頭 B5 の穴(条件を posit して `sorry` を消す)を避ける形である。
+★★★★★★**2026-08-26 の訂正(欠陥 #7 を部分的に塞ぐ)**。
+
+以前は本 Interface は**公理を 1 つも持たなかった**(データと述語だけ)。
+★そのため `Skeleton/GenEll/Section3.lean` の `lemma_3_2` ・ `potLocalHeight_indep` は
+**退化した `D` で破れてしまう**——すなわち「まだ証明していない」のではなく
+**「この形では偽」**だった(`Check/GenEll/Section3NotProvable.lean` で実測)。
+
+★★そこで `vq_baseChange`(局所高さは分岐指数倍)を足した。
+★★★**これは posit ではない**——`Found/GenEll/LocalHeightRamified.lean`(第 359)が
+mathlib の `valuation_liesOver` から**定理として**導いている。
+★★★★**2026-08-26 の第 2 の訂正**: `Lemma 3.2` の欄を足すとき
+`vq_quotMu` を `∀ l : ℕ` で書くと**充足不能**になる
+——`l = 0` で `v_K(q_{E/μ_0}) = 0` と `vq_pos` が衝突する。
+★原文の `l` は**素数**なので `Nat.Prime l` を仮定に加えた。
+★★充足可能であることは `Check/GenEll/Section3NotProvable.lean` の
+`tateLocalSatisfiable` で確かめている。
 -/
 
 namespace ABC3.Interface.GenEll
@@ -71,6 +84,59 @@ structure TateLocalData where
   ramIdx : {K : LocalField} → {E : Curve K} → MultExt K E → ℕ
   /-- 分岐指数は正。 -/
   ramIdx_pos : ∀ {K : LocalField} {E : Curve K} (L : MultExt K E), 0 < ramIdx L
+  /-- ★★★★★★**局所高さは分岐指数倍になる**——`Remark 3.3.1` の実質。
+
+  原文 (GenEll p.16):
+  > that this definition is independent of the choice of L].
+
+  ★原文は「one verifies **immediately**」で畳んでいるが、畳んでいるのは
+  **`v_L(q_E) = e(L/K)·v_K(q_E)`** である。
+
+  ★★★★**これは posit ではなく定理である**——
+  `Found/GenEll/LocalHeightRamified.lean` の `ordAt_liesOver` が
+  mathlib の `HeightOneSpectrum.valuation_liesOver` から導いている(2026-08-26、第 359)。
+  ★★ここでは「意図した対象が満たす仕様」として欄に出している。
+
+  ★★★★★★**退化封じとしても効く**——`v_K(q_E)` を定数にしたまま
+  分岐指数だけを動かす witness はこれで落ちる。 -/
+  vq_baseChange : ∀ {K : LocalField} {E : Curve K} (L L' : MultExt K E),
+    vq (extField L) (baseChange L) * ramIdx L'
+      = vq (extField L') (baseChange L') * ramIdx L
+  /-- 剰余体の位数の対数 `log #(O_K/𝔪_K)`。 -/
+  logResidueCard : LocalField → ℝ
+  /-- ★剰余体は 2 元以上なので対数は正。 -/
+  logResidueCard_pos : ∀ K : LocalField, 0 < logResidueCard K
+  /-- ★★★★**`deg_∞(E) = v_K(q_E)·log #(O_K/𝔪_K)`**——原文 `Lemma 3.2, (ii)` の定義。
+
+  原文 (GenEll p.15):
+  > Lemma 3.2. (Local Rank One Subgroups of l-Torsion)
+
+  ★これがあるので `deg_∞` を定数にした退化 witness は作れない。 -/
+  degInf_eq : ∀ (K : LocalField) (E : Curve K),
+    degInf K E = (vq K E : ℝ) * logResidueCard K
+  /-- ★★★★★**`q_{E/μ_l} = q_E^l`**——原文 `Lemma 3.2, (ii)` の前半。
+
+  原文 (GenEll p.15):
+  > Lemma 3.2. (Local Rank One Subgroups of l-Torsion)
+
+  ★原文の典拠は **[FC] Chapter III, Corollary 7.3** である。
+  ★★付値を取ると `v_K(q_{E′}) = l·v_K(q_E)` になる。 -/
+  vq_quotMu : ∀ (K : LocalField) (E : Curve K) (l : ℕ), Nat.Prime l →
+    vq K (quotMu K E l) = l * vq K E
+  /-- ★★★★★★**`Lemma 3.2, (i)`**——`G_K` 安定な 1 次元部分空間は
+  `μ_l` であるか、さもなくば局所高さが `l` で割り切れる。
+
+  原文 (GenEll p.15):
+  > Lemma 3.2. (Local Rank One Subgroups of l-Torsion)
+
+  ★★原文はこれを『we have the following **well-known** result』として提示し、
+  証明を与えていない。典拠は **[FC] Chapter III, Corollary 7.3** の完全列
+  `0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0` である。
+  ★★★**完全列からこの主張への段**(拡大類が `q_E` の `l` 乗根の抽出で与えられること)は
+  原文に書かれていない——mathlib に `M_l(E)`･Tate twist が無いので、
+  ここでは**結論を仕様として受ける**。 -/
+  stableLine_dvd_or_cyclotomic : ∀ (K : LocalField) (E : Curve K) (l : ℕ), Nat.Prime l →
+    ∀ (N : StableLine K E l), l ∣ vq K E ∨ IsCyclotomic N
 
 /-- ★Track B は何を作らねばならないか。 -/
 def TateLocalData.waiting : WaitingFor :=

@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-20 ・ コミット 1512 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-08-20 ・ コミット 1761 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">7538</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">2018</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">9554</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">2447</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">197</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">23</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">56</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -52,11 +52,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>原文項目の実装率 —— [FrdI]「The Geometry of Frobenioids I」</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">必要分の実装</div><div class="v">41/54</div></div>
-  <div class="card"><div class="k">達成率</div><div class="v">76%</div></div>
+  <div class="card ok"><div class="k">必要分の実装</div><div class="v">46/54</div></div>
+  <div class="card"><div class="k">達成率</div><div class="v">85%</div></div>
   <div class="card"><div class="k">直接名指し</div><div class="v">25</div></div>
   <div class="card"><div class="k">FrdI 全項目</div><div class="v">83</div></div>
-  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">3</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">7</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
 <tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">14/15</td>
@@ -67,22 +67,15 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">10/10</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
-<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">2/7</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:29%"></div></div></td></tr>
+<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">4/7</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:57%"></div></div></td></tr>
 <tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">1/5</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:20%"></div></div></td></tr>
 </table>
-<div class="note"><b>★★★§5 の最大の在庫不足だった Nikolov–Segal を外した</b>（2026-08-20）—— <code>Proposition 5.6</code> は <code>M_p ⊆ 𝒪^×(A)</code> を「<code>l ≠ p</code> の pro-<code>l</code> 部分が<b>位相的に</b>生成する閉部分群」と定める。そのため <code>Aut_𝒞(A)</code> の共役で閉じることを言うには共役が<b>連続</b>でなければならず、それは <b>Nikolov–Segal</b>（有限単純群の分類を使う）を要求していた。<br>★★<b>抽象群としての特徴づけがあった</b>：<code>M_p = { y | ∀ k, ∃ x, x^{p^k} = y }</code>。位相的有限生成なアーベル副有限群 <code>M ≅ ∏_l M[l]</code> では <code>M^{p^k} = ∏_{l≠p} M[l] × M[p]^{p^k}</code> であり、<code>⋂_k M[p]^{p^k} = 1</code> なので右辺は <code>∏_{l≠p} M[l]</code>。<br>★<b>この記述は冪しか使わない</b>ので任意の<b>抽象</b>自己同型で保たれる——連続性が要らない。実装は <code>Found/FrdI/Prop56MpAbs.lean</code>（<code>MpDiv</code> と 3 性質）と <code>Found/ProL/DivByP.lean</code>（両者の<b>一致の証明</b>）。<code>Gap_5_6_Mp</code> は<b>定理になった</b>。<br>★★付随して <code>⋂_k N^{p^k} = 1</code>（pro-<code>p</code> 群）を <b>位相的有限生成を仮定せずに</b>証明した——各有限商が有限 <code>p</code> 群だからである。</div>
-<div class="note"><b>★★§5 の実化 <code>Φ^rlf</code> を錐模型に取り替えた</b>（2026-08-20）—— <code>Φ^rlf(A) := </code>（<code>ℝ ⊗_ℤ Φ(A)^gp</code> の中で <code>Φ(A)</code> の像が生成する <code>ℝ≥0</code>-錐）と置くと、<code>MonoidOn</code> の条件 (a) の第 1 成分が<b>無料</b>になる（<code>gpMap_injective</code> ＋ <b><code>ℝ</code> は <code>ℤ</code> 上平坦</b>）。★★<b>半環上の平坦性が環上の平坦性に落ちた</b>。残るのは「錐が sharp」だけで、これは <code>ModelData.Hyp</code> の <code>divisorial</code> がどのみち要求するものであり、<b>狭義正の線型汎関数があれば出る</b>（<code>isSharp_rlfCone_of_pos</code>。幾何なら係数の総和、算術なら次数）。<br>★完全化の側は閉じた——<code>M^pf ≃ ℚ≥0 ⊗_ℕ M</code>（<code>Found/FrdI/Def24PfT.lean</code>）で <code>Φ^pf : MonoidOn 𝒟</code> は<b>仮定なし</b>で立つ。</div>
-<div class="note"><b>★★§6 が 0/5 → 1/5 になった</b>（2026-08-20）—— <code>Lemma 6.5</code> を閉じた。(ii) が引く<b>six exponentials theorem</b>（Lang / Ramachandra）を<code>Found/SixExp/</code> に <b>sorry なしで証明</b>した。mathlib には影も無かったものである。<br>★背理法：6 個がすべて代数的とすると数体 <code>K = ℚ(6 個)</code> が取れ、共通分母を払って <code>𝒪_K</code> に入れられる。Siegel で補助関数の係数を取り、外挿で<b>すべての格子点で消える</b>ことを示し、指標の一次独立性で<b>係数がすべて 0</b> になってSiegel の「0 でない」に反する。<br>★★組み立ての要は 1 本の等式だった：<code>Δ k · M k · (H k)^e = P^{1+e} · Z₀^{Lb(n+1)}</code>。数え上げがちょうど合うのは <b><code>L' ≈ N^{3/2}</code></b> のときで、そこが <code>y</code> を 3 個取る理由である（零点は <code>N³</code> 個、増大は <code>N</code> の 1 乗）。<br>★<code>Example 6.1</code> の<b>単系論も全部閉じている</b>（divisorial・<code>Φ^gp ≃ Γ</code>・<code>Prime(Φ) ≃ D_L</code>・台の同定・<code>Φ^pf ≃ ℚ≥0[D_L]</code>・perf-factorial 11 条）。残るのは <code>V[L]</code>（相対正規化）と <code>D_L</code> のスキーム層での構成と、<code>L ↦ Φ(L)</code> の関手性である。</div>
-<div class="note"><b>★★★残りの地図（実測、依存グラフから機械的に）</b>（2026-08-20）—— <b>[FrdI] の必要分に残るのは 86 節点（うち ★大 36）</b>。鎖 <code>cheb</code> のうち**共役類つきの一般形のための 13 節点は [FrdI] に不要**なので除いてある（<code>frdiNeeded: false</code> を JSON に立てた）。<br><table><tr><th>鎖</th><th>残り</th><th>★大</th><th>奉じる項目</th></tr><tr><td><code>rlf</code></td><td>6</td><td>5</td><td>Prop 5.3 / Cor 5.4</td></tr><tr><td><code>prop55</code></td><td>6</td><td>5</td><td>Prop 5.5</td></tr><tr><td><code>prop56</code></td><td>3</td><td>2</td><td>Prop 5.6 / Cor 5.7</td></tr><tr><td><code>otricomm</code></td><td>3</td><td>1</td><td>Prop 4.4, (ii) の下流</td></tr><tr><td><code>weil</code></td><td>7</td><td>2</td><td>Example 6.1（因子論第 1 層）</td></tr><tr><td><code>cartier</code></td><td>4</td><td>1</td><td>Example 6.1（第 2 層）</td></tr><tr><td><code>normalize</code></td><td>8</td><td>3</td><td>Example 6.1（第 3 層）</td></tr><tr><td><code>arith</code></td><td>7</td><td>0</td><td>Example 6.3（★大が 0）</td></tr><tr><td><code>cheb</code></td><td>7</td><td>1</td><td>Theorem 6.4, (iv)</td></tr><tr><td><code>sec6items</code></td><td>30</td><td>12</td><td>§6 の 4 項目そのもの</td></tr></table>★★<b><code>arith</code>（Example 6.3）は ★大が 0</b> —— mathlib の在庫（積公式・Dirichlet 単数定理・素点の語彙）が良いからである。<b>§6 の重量物は幾何側</b>（<code>affine-compat</code>・<code>cartier-pullback</code>・<code>V[L]</code> の構成）である。</div>
-<div class="note"><b>★★★★★訂正：§6 に類体論は要らない</b>（2026-08-20）—— 直前に「<code>Theorem 6.4, (iv)</code> の (c) は密度を本当に要求し、律速は <b>Artin の相互法則</b>」と書いたが、<b>それは共役類つきの一般形についてであって、[FrdI] が使う 3 箇所はいずれも「完全分解」の場合に収まる</b>。<br>★完全分解の密度 <code>1/[L:K]</code> は <b>Frobenius/Dedekind の古典的な論法</b>で出る：<code>log ζ_L(s) = Σ_{f(𝔭)=1} N𝔭^{-s} + O(1)</code>、Galois なら <code>#{𝔭∣p, f=1}</code> は完全分解のとき <code>[L:K]</code>・それ以外は <code>0</code>、そして <code>ζ_L</code> は <code>s=1</code> で単純極。<b>使うのは mathlib 在庫の <code>dedekindZeta_residue</code> だけ</b>である。<br>★★鎖 <code>cheb</code> に <code>cheb-euler</code> / <code>cheb-log-zeta</code> / <code>cheb-split-density</code> を足し、18 → 22 節点になった。<code>cheb-spl-det</code> の依存を <code>cheb-main</code>（共役類つき）から <code>cheb-split-density</code> へ差し替えた。<br>★★★<b>3 箇所の現在地</b>：(a) は迂回路の<b>前半（Schur の補題）・後半（Galois なら 1 つで決まる）が済</b>で残りは Dedekind–Kummer の 1 段、(b) は <b>閉じた</b>、(c) は <code>cheb-split-density</code> 経由で<b>類体論不要</b>。</div>
-<div class="note"><b>★★★Tchebotarev を部分木へ展開した</b>（2026-08-20）—— <code>Theorem 6.4, (iv)</code> は Tchebotarev の密度定理を <b>3 箇所</b>で使う。出典は <b>[MilneCFT]</b>（J. S. Milne, <i>Class Field Theory</i>、著者が無償公開している講義ノート）の Chapter V, Theorem 3.23（声明）と Chapter VIII, §7, Theorem 7.4（証明）。その証明に 1 対 1 で対応させた鎖 <code>cheb</code>（19 節点・8 層）を置いた。<br>★★<b>在庫は思ったより良い</b>：Dedekind ζ の <code>s=1</code> での留数（<code>NumberField.dedekindZeta_residue</code>）も Dirichlet の算術級数定理（<code>Nat.infinite_setOf_prime_and_eq_mod</code>）も mathlib に<b>在る</b>。無いのは Chebotarev・<b>Artin の相互法則</b>・Dirichlet 密度・Frobenius 元・射類群で、<b>律速は Artin の相互法則</b>（単体で大きな形式化計画）である。<br>★★★<b>迂回路を 1 本見つけた</b>：3 箇所のうち (a)「<code>[L_i:ℚ]</code> は <code>deg</code> の最大値」は「Galois 拡大で完全分解する素数は無限個」で足り、(b)「完全分解の判定」は <code>Σ e_i f_i = [L:K]</code>（mathlib 在庫）で出る。<b>密度を本当に要求するのは (c) だけ</b>である。<br>★その迂回路の第 1 段を閉じた——<b>Schur の補題</b>（<code>Found/NumberField/PrimeDivisorsOfValues.lean</code> の <code>infinite_primes_dvd_eval</code>、sorry なし）：定数でない整数係数多項式の値を割る素数は無限個。★証明は<b>極限を使わない</b>——<code>u ≡ 1 (mod P)</code> と「非零多項式の根は有限」だけで出る。★mathlib に同値の主張は見当たらなかった。</div>
-<div class="note"><b>★★★因子論のスケルトンと部分グラフを完成させた</b>（2026-08-20）—— それまで <code>Example 6.1</code> / <code>Theorem 6.2</code> / <code>Example 6.3</code> / <code>Theorem 6.4</code> は依存グラフで<b>各 1 節点に畳んだまま</b>だった。<code>tools/hedge-index.mjs --item</code> の実測（§6 の省略の合図は <b>26 件</b>：4 / 9 / 5 / 8）に合わせて<b>32 節点</b>へ展開し、因子論の在庫側を <b>4 層</b>に分けた（<code>weil</code> 7・<code>cartier</code> 5・<code>normalize</code> 8・<code>arith</code> 11）。全体で 22 鎖・287 節点。<code>Skeleton/Divisor/</code> に statement を 4 ファイル置いた。<br>★★<b>「因子論は一分野ぶん」という見立ては誤りである。</b>環の層（<code>HeightOneDVR.lean</code>）と単系の層（<code>Cartier*.lean</code>）は閉じており、幾何側に残るのは実質 <b>2 本</b>である——<code>affine-compat</code>（余次元 1 の点 ↔ 高さ 1 の素イデアル）と <code>cartier-pullback</code>（Cartier 因子の引き戻し＝関手性の本体）。<br>★算術側（<code>Example 6.3</code>）の在庫は<b>良い</b>：<b>積公式</b>（<code>NumberField.prod_abs_eq_one</code>）も<b>Dirichlet 単数定理</b>（<code>NumberField.Units.dirichletUnitTheorem</code>）も mathlib に在る。★★<b>§6 に残る真の在庫不足は Tchebotarev 密度定理ただ 1 つ</b>（<code>Theorem 6.4, (iv)</code>、grep 0 件）である。</div>
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 6 件が条つきのみ。うち <code>Example 6.1</code> は 11 個)。<br>
+(いま 7 件が条つきのみ)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
@@ -90,22 +83,22 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>依存グラフ(我々が写した範囲)</h2>
 <div class="grid">
-  <div class="card"><div class="k">節点</div><div class="v">40</div></div>
-  <div class="card"><div class="k">辺</div><div class="v">44</div></div>
+  <div class="card"><div class="k">節点</div><div class="v">44</div></div>
+  <div class="card"><div class="k">辺</div><div class="v">59</div></div>
   <div class="card"><div class="k">最大深さ</div><div class="v">7</div></div>
-  <div class="card ok"><div class="k">循環</div><div class="v">0</div></div>
-  <div class="card ok"><div class="k">着地した葉</div><div class="v">11</div></div>
-  <div class="card"><div class="k">未展開の葉</div><div class="v">6</div></div>
-  <div class="card"><div class="k">暗黙の段</div><div class="v">70</div></div>
+  <div class="card ok"><div class="k">循環</div><div class="v">2</div></div>
+  <div class="card ok"><div class="k">着地した葉</div><div class="v">37</div></div>
+  <div class="card"><div class="k">未展開の葉</div><div class="v">10</div></div>
+  <div class="card"><div class="k">暗黙の段</div><div class="v">162</div></div>
   <div class="card"><div class="k">Interface 実装待ち</div><div class="v">14</div></div>
 </div>
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 1005 節点を、強連結成分で潰して 294 個の箱・61 層に並べたもの。
+<span>原文の参照から機械抽出した 1174 節点を、強連結成分で潰して 296 個の箱・64 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
-<b>我々が触れている節点 67 件・Interface の義務 9/32 件。</b>
+<b>我々が触れている節点 76 件・Interface の義務 14/37 件。</b>
 生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
@@ -171,7 +164,11 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 2026-08-16 に穴は <code>htwist</code> 1 点まで絞れており、反例があるとすれば
 <code>Aut_C(A)</code> の底が <code>Φ(A)</code> に非自明に作用する所にしかない、と分かっている。
 <b>足した前提が空虚でないことは証明済み</b>（<code>autAmple_and_baseTrivial_nonvacuous</code>：𝔽_Φ の対象はすべて両方を満たす）。
-<b>★★★2026-08-20: (ii)「𝒞′ = 𝒞 ×_𝒟 𝒟′ が Frobenioid」は<u>閉じた</u></b>——<code>Definition 1.3</code> の 21 条をすべて移送した（<code>cfpFrobenioidCore</code>）。最後まで残っていた <code>plBkEquiv</code> と、それが要求する pull-back の「𝒞′ ⇒ 𝒞」向き（<code>cfp_isPullBack_to</code>）が揃った。★止まっていた原因は <code>P.proj.obj X</code> と <code>(P.toElem.obj X).base</code> が <code>def proj</code> を展開しないと一致せず、<code>rw</code>/<code>simp</code> が <code>instances</code> 透明度で型検査して止まることであった（以前の候補 2 つはどちらも外れ）。<b>残るのは (v) の metrically trivial の <code>⇐</code>（<code>Gap_1_6_v</code>）と (vi) の Aut^sub-ample の 2 点である</b>（perfect・Frobenius-normalized は 2026-08-20 に両向きで移送済み）。Aut^sub-ample が残るのは、sub-automorphism の証人対象を <code>𝒞′</code> へ持ち上げるのに <code>G</code> の充満性が要るからである（未解決）。</td></tr>
+<b>★★併せて (ii)「𝒞′ = 𝒞 ×_𝒟 𝒟′ が Frobenioid」は<u>まだ構成していない</u></b>——
+<code>cfpPreFrobenioid</code>（pre-Frobenioid 構造）までで、<code>Definition 1.3</code> の 21 条は組み立てていない。
+律速は <code>plBkEquiv</code>（<code>(𝒞′^pl-bk)_A → 𝒟′_{A_𝒟}</code> が圏同値）の本質的全射性で、
+<b>数学は片付いている</b>（循環しないことも確認済み）が Lean の書き換えで打ち切った。
+したがって Prop 1.6 は「前提を足した」だけでなく<b>未実装の条を持つ</b>。</td></tr>
 <tr><td><b>[FrdI] Proposition 1.14, (ii)(iii)</b></td><td><b style="color:#b3261e">A</b>／<b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
 <b>★★これが §3 を 8/9 で止めている唯一の原因である。</b>
 「Frobenius 型射は mono」を出すのに <b>unit-trivial 型を足した</b>
@@ -206,32 +203,6 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 <code>Proposition 4.8</code>／<code>Corollary 4.10</code>／<code>Corollary 4.11</code> の <b>5 件</b>が
 この 1 段の下流にある（<code>node tools/frdi-blocked.mjs</code>）。
 記録: <code>Gap/FrdI/Prop44.lean</code> の <code>Gap_4_4_ii_otriBase</code>（分類 ② missingMath、③ へ上がる条件つき）。</td></tr>
-<tr><td><b>[FrdI] Proposition 4.4, (iii) ／ Proposition 5.3</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
-<b>★<code>Φ^birat</code> を「<code>𝒟</code> 上の単系」にするために、<code>𝒟</code> が <u>of FSM-type</u>（§0：FSM 射はすべて同型）であることを足した</b>（<code>phiBiratMonoidOn</code> の <code>hfsmD</code>）。
-原文 <code>Proposition 4.4, (iii)</code> は <code>Φ^birat ⊆ Φ^gp</code> を <b>「subfunctor of groups」としか呼ばず</b>、<code>Definition 1.1</code> の
-(a) characteristic injectivity・(b) FSM 射なら同型 を<b>主張していない</b>。
-ところが <code>Theorem 5.2</code> の有理関数の単系 <code>B</code> は「group-like <b>monoid on 𝒟</b>」でなければならないので、
-<code>Proposition 5.3</code>（<code>𝒞^un-tr</code> は <code>(Φ, Φ^birat)</code> の model Frobenioid）を言うには (a)(b) が要る。<br>
-<b>(a) は無料で出る</b>——<code>Φ^gp</code> の単射性の制限で、第 2 成分（<code>charMap</code> の単射性）は群なので自動。<br>
-<b>★(b) が足した所である。</b>外すには「FSM 射に沿って <code>Φ^birat</code> が<b>降りる</b>」——
-<code>Base ν</code> が FSM の pull-back <code>ν : A₁ → A₀</code> について
-<code>Φ^gp(Base ν)(z) ∈ Φ^birat(A₁) ⟹ z ∈ Φ^birat(A₀)</code>——が要る。
-これは幾何では <code>ker(Pic(A₀) → Pic(A₁)) = 0</code> に相当し、<b>一般の連結・全射的圏では期待できない</b>。<br>
-★<b>足した仮定は本来の応用では成り立つ</b>——<code>Example 6.1</code> の <code>𝒟 = B(G)⁰</code>（連結有限次被覆の Galois 圏）では
-FSM 射は同型である。★逆に反例を作れれば分類は ③ sourceGap に上がり、原文の「monoid on 𝒟」という語法の側の問題になる。<br>
-★<b>足した前提の下では <code>Proposition 5.3</code> の第 2 文は完全に証明できている</b>
-（<code>Found/FrdI/Prop53Birat.lean</code> の <code>unTr_modelFrobenioid</code>、sorry 0・公理は標準 3 つ）。
-記録: 同ファイル冒頭の「逸脱」節、および <code>ResearchPaper/frdi-decomposition.json</code> の鎖
-<code>phibirat-monoidon</code> の節点 <code>birat-fsmiso</code>。</td></tr>
-<tr><td><b>[FrdI] Definition 2.4, (i) ／ Proposition 5.3</b></td><td><b style="color:#2f6fd0">B</b></td><td>数えていない</td><td style="font-size:12px">
-<b>★実化 <code>Φ^rlf</code> を「<code>𝒟</code> 上の単系」にするために、条件 (a)（characteristic injectivity）を仮定に置いた</b>（<code>phiScOn</code> の <code>hcharInj</code>）。
-我々は実化を <b>関手的な模型</b> <code>M^rlf := ℝ≥0 ⊗_ℕ M</code> で作った（<code>Def24.lean</code> の素点分解版は素点ごとの同一視 <code>ι</code> の選択に依存し、<code>𝒟</code> 上の関手にできないため）。
-★<b>条件 (b)（FSM 射なら同型）は証明した</b>——単射性は (a) から、全射性はテンソルの右完全性（<code>scMap_surjective</code>）から。
-したがって <code>Φ^rlf : MonoidOn 𝒟</code> は<b>ただ 1 つの言明</b>に還元されている。<br>
-★★<b>その言明は perf-factorial なら真である</b>と測った——<code>f : M ↪ N</code> の <code>ℝ≥0</code> 係数拡大が非単射なら、<code>ℝ</code> 上の線形従属が出て、係数が有理数なので<b>有理係数の関係</b>、分母を払って<b>整数係数の関係</b>、正負に分ければ <code>f</code> 自身が非単射になる。
-実装には <code>ℚ ⊆ ℝ</code> の核の底変換が要る（未着手）。<br>
-★あわせて、原文の <code>ℚ·Φ^birat = Φ^birat ⊗_ℤ ℚ = (Φ^birat)^pf</code> の <b>3 通りの表示が一致することも未証明</b>である（我々は 1 つめ＝スカラー倍で生成した部分群だけを採った）。
-記録: <code>Found/FrdI/Def24Rlf.lean</code> / <code>Prop53Rlf.lean</code> 冒頭、および <code>frdi-decomposition.json</code> の鎖 <code>rlf</code>（節点 <code>rlf-flat</code> / <code>rlf-agree</code>）。</td></tr>
 <tr><td><b>[FrdI] Definition 2.8, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 <b>位相的有限生成な副有限アーベル群の pro-<code>l</code> 分解</b>（<code>M ≅ ∏_l M[l]</code>）が要る。
 mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極限表示と有限アーベル群の準素分解は<b>ある</b>が、
@@ -242,18 +213,6 @@ mathlib を測ったところ（2026-08-17）、<code>ProfiniteGrp</code> の極
 「分解を仮定に置く」形では下流が posit に依ることになる。
 <b>★これが §2 を 7/8 で止めている唯一の原因である。</b>
 記録: <code>Gap/FrdI/Section2.lean</code> の <code>Gap_2_8_ii</code>（分類 ② missingMath）。</td></tr>
-<tr><td><b>[FrdI] Proposition 5.6（<code>M_p</code> の段）</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
-<b>★★<code>Proposition 5.6</code> の証明は <code>Definition 2.8, (i)</code> の角括弧「[uniquely determined]」を<u>そのまま消費している</u>——すなわち <b>Nikolov–Segal</b> の定理に依る。</b><br>
-2026-08-20 に穴を 1 点に絞った。<code>Found/FrdI/Prop56Mp.lean</code> の <code>isShiftStable_baseIsoEnd</code> により、残る入力は
-<b>「<code>M_p ⊆ 𝒪^×(A)</code> が <code>Aut_𝒞(A)</code> による共役で閉じていること」</b>だけである。<br>
-★<code>θ ∈ Aut_𝒞(A)</code> による共役は <code>𝒪^×(A)</code> の<b>抽象群としての</b>自己同型を与えるが、
-<code>M_p</code> は<b>位相</b>（pro-<code>l</code> 部分、<code>OpenNormalSubgroup</code> を走る）で定義されているので、
-保たれるには自己同型が<b>連続</b>でなければならない。
-位相的有限生成な副有限群で抽象自己同型がすべて連続であることが Nikolov–Segal（同値な形：有限指数部分群はすべて開）である。<br>
-★在庫測定（2026-08-20）：mathlib で <code>Nikolov</code> は <b>0 件</b>。<code>Topology/Algebra/Group/ClosedSubgroup.lean</code> にあるのは閉部分群の一般論のみ。<br>
-★<b>迂回路</b>：(a) pro-<code>l</code> 部分の<b>抽象群としての</b>特徴づけが見つかれば Nikolov–Segal を使わずに閉じる、
-(b) 位相の <code>Aut</code> 不変性を仮定に置く（その場合は分類 (B) に移る）。<br>
-記録: <code>Gap/FrdI/Section5.lean</code> の <code>Gap_5_6_Mp</code>（分類 ② missingMath、falsifier つき）。</td></tr>
 <tr><td><b>[FrdI] Lemma 6.5, (ii)</b></td><td><b style="color:#7a5cb3">C</b></td><td>数えていない</td><td style="font-size:12px">
 (i)「<code>log p</code>（<code>p</code> は素数）は <code>ℚ</code> 上一次独立」は<b>実装済み</b>
 （<code>Found/FrdI/Lemma65.lean</code> の <code>log_primes_linearIndependent</code>）。
@@ -322,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>9e0173b</code></td><td>2026-08-20</td><td>G5 の残り(Weil 対=行列式が円分指標)をスケルトンとして固定</td></tr>
-<tr><td><code>e7adda6</code></td><td>2026-08-20</td><td>G6 の残り(Tate 一意化)をスケルトンとして固定——葉を可視化した</td></tr>
-<tr><td><code>361b4be</code></td><td>2026-08-20</td><td>G6 の臨界路——E_q の非退化性と局所高さの正値性(第 101 ブロック)</td></tr>
-<tr><td><code>7b68f81</code></td><td>2026-08-20</td><td>★★★★★G6 の臨界路——Tate 母数の存在(j 反転)(第 100 ブロック)</td></tr>
-<tr><td><code>f1bdf19</code></td><td>2026-08-20</td><td>G6 の臨界路——1/j = q·(単元)(第 99 ブロック)</td></tr>
-<tr><td><code>8d970c9</code></td><td>2026-08-20</td><td>G6 の臨界路——局所高さは判別式の付値(第 98 ブロック)</td></tr>
-<tr><td><code>a424e4f</code></td><td>2026-08-20</td><td>G6 の臨界路——Tate 曲線の判別式は q + O(q^2)(第 97 ブロック)</td></tr>
-<tr><td><code>9c495d0</code></td><td>2026-08-20</td><td>★★★★Theorem 5.2, (iv) —— 本質的全射性と忠実性を取った(残るは充満性 1 点)</td></tr>
-<tr><td><code>474acac</code></td><td>2026-08-20</td><td>G6 の臨界路——完備環上の Tate 曲線(第 96 ブロック)</td></tr>
-<tr><td><code>1e7594b</code></td><td>2026-08-20</td><td>G6 の臨界路——完備環での冪級数の値(第 95 ブロック)</td></tr>
-<tr><td><code>cf70a56</code></td><td>2026-08-20</td><td>G6 の臨界路——Tate 曲線の q 展開(第 94 ブロック)</td></tr>
-<tr><td><code>367c538</code></td><td>2026-08-20</td><td>負の対照を 2 件追加——旧 projectiveCase は偽、旧 structure_eq は数え上げで埋まる</td></tr>
+<tr><td><code>7306607</code></td><td>2026-08-20</td><td>★★★★Dirichlet 密度の語彙——cheb 鎖の cheb-density</td></tr>
+<tr><td><code>077fbc6</code></td><td>2026-08-20</td><td>記憶の更新——§5 は 4/7、残り 3 項目は完全化のクラスタに帰着する</td></tr>
+<tr><td><code>4f87fa8</code></td><td>2026-08-20</td><td>★★★★★★Corollary 5.7 が閉じた——§5 は 4/7</td></tr>
+<tr><td><code>8a35949</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (i) の後半——base-Frobenius 対と pre-model 型が移る</td></tr>
+<tr><td><code>cbe8d88</code></td><td>2026-08-20</td><td>★★★★★★Corollary 5.7, (i)——Ψ は base-section を base-section へ移す</td></tr>
+<tr><td><code>7b0a445</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (iii)(iv)——base-Frobenius 対は圏同値で移る</td></tr>
+<tr><td><code>6c8515b</code></td><td>2026-08-20</td><td>記録の修正——cor57 の note の誤字（Τimes → 𝒪^×）</td></tr>
+<tr><td><code>196dee4</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (ii)——unit-profinite 型は圏同値で移る</td></tr>
+<tr><td><code>63598b3</code></td><td>2026-08-20</td><td>依存グラフ——ex63-model を半済に更新（組み立ては閉じた）</td></tr>
+<tr><td><code>7ea188f</code></td><td>2026-08-20</td><td>★★★★★算術因子のデータから model Frobenioid へ（Example 6.3 の Theorem 5.2 (ii) の段）</td></tr>
+<tr><td><code>691fb3a</code></td><td>2026-08-20</td><td>★★★★★★格子不変量 g₂, g₃ の q 展開(§9-528、第 215 ブロック)——道 β の段 4</td></tr>
+<tr><td><code>18bc6fe</code></td><td>2026-08-20</td><td>★★★★★Φ・B の数体についての関手性——鎖 arith が全節点完了</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(2018 件)。</div>
+<b>すべて PDF と機械照合している</b>(2447 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>

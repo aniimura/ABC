@@ -1,6 +1,7 @@
 import ABC3.Interface.GenEll.GaloisRep
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # [GenEll] §3–§4 大域理論 —— `M_ell(ℚ̄)` 上の高さの `Interface`
@@ -30,6 +31,25 @@ import Mathlib.Data.Set.Finite.Basic
 | `deg_∞` / `ht_∞`(無限遠因子) | ★**0 件** |
 | `log-diff_{M̄_ell}` | ★**0 件**(`Definition 1.5, (iii)` を `M̄_ell` に適用したもの) |
 | 楕円曲線のモジュライスタック `M̄_ell` | ★**0 件** |
+
+## ★★★★★★★★ 2026-08-26 の訂正(欠陥 #8 を塞ぐ)
+
+以前は本構造体は**公理を 1 つも持たなかった**。
+★そのため `Skeleton/GenEll/Section3.lean` の `prop_3_4` は
+`deg_∞ ≡ 0`・`ht_∞ = n`・`ht^Falt ≡ 0` などの退化した `D` で**破れていた**
+(`Check/GenEll/Section3NotProvable.lean` で実測)。
+
+★★そこで原文が `Proposition 3.4` の証明で**実際に引いている 4 つ**を欄に出した:
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `degInf_le_htInf` | [GenEll] `Proposition 1.6` の証明 |
+| `htInf_bdeq_faltings` | [Silv2] `Proposition 2.1` + [FC] Ch. V, `Proposition 4.5` |
+| `faltingsHeight_bddBelow` | 古典的(Faltings 高さは下に有界) |
+| `northcott` | [GenEll] `Proposition 1.4, (iv)` |
+
+★★★**`ε` の入った 2 つの不等式はこれらから導かれる**——
+posit しているのは原文が引く外部文献と内部参照だけである。
 -/
 
 namespace ABC3.Interface.GenEll
@@ -70,6 +90,222 @@ structure EllModuliData extends TorsionGaloisRepData where
   ★`PrimeToLocalHeights`(局所高さと素)とは**別の条件**である——
   原文 (a) は "as well as to" で 2 つを並べている(p.22 目視確認)。 -/
   PrimeToMultPrimes : Curve → ℕ → Prop
+  /-- ★★★★★★**`deg_∞ ≲ ht_∞`**——`Proposition 3.4` の最初の `≲`。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★原文はこれを `Proposition 1.6` の証明から取る。
+  ★★**向きは `deg_∞(x) − ht_∞(x) ≤ C`**(abc の向き、`BDge`)である——
+  逆向きにすると `ht_∞` が上に有界になる(`Check/GenEll/Section3NotProvable.lean`)。 -/
+  degInf_le_htInf : ∃ C : ℝ, ∀ x, degInf x - htInf x ≤ C
+  /-- ★★★★★★★**`ht_∞ ≈ 12·ht^Falt`**——無限遠での計量の対数的特異性。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★原文の典拠は **[Silv2] Proposition 2.1** と **[FC] Ch. V, Proposition 4.5**。
+  ★★★これが `Proposition 3.4` の 2 番目・3 番目の `≲` を**導く**。 -/
+  htInf_bdeq_faltings : ∃ C : ℝ, ∀ x, |htInf x - 12 * faltingsHeight x| ≤ C
+  /-- ★★★★**Faltings 高さは下に有界**。
+
+  ★`ε` の入った不等式を出すのに要る——`12ε·ht^Falt` を下から抑えねばならない。 -/
+  faltingsHeight_bddBelow : ∃ B : ℝ, ∀ x, B ≤ faltingsHeight x
+  /-- ★★★★★★**Northcott の有限性**——原文は `Proposition 1.4, (iv)` から取る。
+
+  原文 (GenEll p.17):
+  > Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+  ★`ht^Falt` が有界な点は有限個しかない。 -/
+  northcott : ∀ (C : ℝ) (d : ℕ), 0 < d → {x ∈ degLe d | faltingsHeight x ≤ C}.Finite
+  /-- 原文 `E′ ≙ E/H_F`——l-cyclic 部分群スキームによる商。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★`Lemma 3.5` の証明はこの商を取って `Proposition 3.4` を適用する。 -/
+  quotLCyclic : Curve → ℕ → Curve
+  /-- ★★★★★★**`deg_∞(E′) = l·deg_∞(E)`**——`Lemma 3.2` の**大域版**。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★局所版は `Interface/GenEll/TateLocal.lean` の上の `Lemma 3.2, (ii)` であり、
+  そこから素点にわたって足し上げる段は原文に書かれていない。
+  ★★`l` が局所高さと素であることがここで効く
+  ——`Lemma 3.2, (i)` により `H` は各素点で `μ_l` になる。 -/
+  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+    PrimeToLocalHeights E l →
+    degInf (cls (quotLCyclic E l)) = (l : ℝ) * degInf (cls E)
+  /-- ★★★★★**`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀`**——l-同種による変化。
+
+  原文 (GenEll p.17):
+  > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+  ★原文の典拠は **[FC] Chapter I, Proposition 2.7**(次数 `l` の被覆射の延長)と、
+  「(1,1)-形式を `E_v` 上で積分するのと `(E_H)_v` 上で積分するのとで `l` 倍だけ違う」
+  という複素解析の段である(原文は 1 文で済ませている)。
+  ★★**`C₀` は `E`･`l` に依らない**——だから `∃` を外側に置く。 -/
+  faltingsHeight_quotLCyclic : ∃ C₀ : ℝ, ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+    faltingsHeight (cls (quotLCyclic E l))
+      ≤ faltingsHeight (cls E) + 2 * Real.log l + C₀
+  /-- ★`d = [L:ℚ]` は正。 -/
+  degOfDefinition_pos : ∀ E : Curve, 0 < degOfDefinition E
+  /-- ★★★★★**`l` が十分大きければ局所高さと素になる**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★原文は『if `v` is any local height of `E_L`, then `d·deg_∞([E_L]) ≥ v·log(2)`』を
+  証明なしで使う。★★`l` が素数ですべての局所高さより大きければ、
+  `l` はそれらを割らない——この 2 段をまとめて欄に出している。 -/
+  primeToLocalHeights_of_lt : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
+    (degOfDefinition E : ℝ) * degInf (cls E) < (l : ℝ) * Real.log 2 →
+    PrimeToLocalHeights E l
+  /-- ★★★★★★**l-cyclic かつ局所高さと素な類の例外集合**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★これが Galois-finite であることは **`Lemma 3.5`**(高さの不等式)と
+  **`Lemma 3.6`**(初等的な評価)から `ht^Falt` が有界になり、
+  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。 -/
+  lcyclicExc : Set EllClass
+  galoisFinite_lcyclicExc : GaloisFinite lcyclicExc
+  mem_lcyclicExc : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
+    HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+  /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。
+
+  原文 (GenEll p.18):
+  > Lemma 3.7. (Finite Exceptional Sets) Let
+
+  ★compactly bounded な集合(`Example 1.3, (ii)`)の中で、
+  乗法還元を持たないものは潜在的に良還元であり、高さが有界になる。 -/
+  noMultRedExc : Set EllClass → Set EllClass
+  galoisFinite_noMultRedExc : ∀ KV : Set EllClass, CompactlyBounded KV →
+    GaloisFinite (noMultRedExc KV)
+  mem_noMultRedExc : ∀ (KV : Set EllClass) (E : Curve), cls E ∈ KV → ¬ HasMultRed E →
+    cls E ∈ noMultRedExc KV
+  /-- ★Galois-finite は有限合併で閉じる(`Example 1.3, (i)`)。 -/
+  galoisFinite_union : ∀ S T : Set EllClass, GaloisFinite S → GaloisFinite T →
+    GaloisFinite (S ∪ T)
+  /-- ★★★★★★**3･5 捧れを有理化する拡大 `L′`**(`Theorem 3.8` の証明の骨格)。
+
+  原文 (GenEll p.19):
+  > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+  ★原文 p.20:『there exists a Galois extension `L′` of `L` of degree that divides
+  `d₀ = (3²−1)(3²−3)(5²−1)(5²−5) = 23040`、so as to render the 3- and 5-torsion
+  points of `E_L` rational over `L′` … we may assume that `E_{L′}` has **semi-stable
+  reduction** at all of the finite primes』。 -/
+  torsionExt : Curve → Curve
+  /-- ★`ℚ̄` 上の同型類は変わらない——だから `ht^Falt` も `deg_∞` もそのまま。 -/
+  cls_torsionExt : ∀ E : Curve, cls (torsionExt E) = cls E
+  /-- ★★次数は高々 `23040` 倍——これが `Theorem 3.8` の係数 `23040` の出所である。 -/
+  degOfDefinition_torsionExt : ∀ E : Curve,
+    degOfDefinition (torsionExt E) ≤ 23040 * degOfDefinition E
+  /-- ★★★**`L′` の上では半安定還元になる**——原文の『we may assume』の中身。 -/
+  semiStable_torsionExt : ∀ E : Curve, SemiStable (torsionExt E)
+  /-- ★★★**潜在的乗法還元は `L′` 上で乗法還元になる**。 -/
+  hasMultRed_torsionExt : ∀ E : Curve, HasPotMultRed E → HasMultRed (torsionExt E)
+  /-- ★★★★★**`30` と互いに素なら局所高さと素であることは `L′` へ移る**。
+
+  ★原文 p.20 の括弧:『passing to such a Galois extension of `L` only affects the prime
+  decomposition of the local heights via the primes that divide `d₀`, of which there are
+  only finitely many, namely, **2, 3, and 5**』。
+  ★★これが `Theorem 3.8` の条件 (b) の『`30 = 2·3·5` と素』の出所である。 -/
+  primeToLocalHeights_torsionExt : ∀ (E : Curve) (l : ℕ), PrimeToLocalHeights E l →
+    Nat.Coprime l 30 → PrimeToLocalHeights (torsionExt E) l
+  /-- ★★★★★★**原文 p.20 の最終段**。
+
+  原文 (GenEll p.19):
+  > Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+  ★乗法還元の素点で局所高さが `l` で割れなければ、局所理論(`Lemma 3.2` の直前)により
+  mod `l` 像は `α = (1 1 / 0 1)` を含む。
+  ★★`l`-巡回部分群スキームを持たなければ、mod `l` 像は**非上三角**行列を含む。
+  ★★★その 2 つから **`Lemma 3.1, (iv)`** で `GL₂(ℤ_l)` の像は `SL₂(ℤ_l)` を含む。
+  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**実装済み**であるが、
+  **Galois 表現そのものが未構築**なので、その適用をここで受ける。
+  ★★★★★結論が `E`(`L` 上)についてなのは、
+  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。 -/
+  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+    HasMultRed (torsionExt E) → PrimeToLocalHeights (torsionExt E) l →
+    ¬ HasLCyclic (torsionExt E) l → ImageContainsSL2 E l
+  /-- ★★★★★**`SL₂` を含むことと全射性は、`l` が `L` で不分岐なら同じこと**である。
+
+  原文 (GenEll p.22):
+  > Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+  ★原文 p.22 の冒頭:『if `l` is any prime number that is **unramified in `L`**, then the
+  image of the Galois representation … contains `SL₂(ℤ_l)` **if and only if** the Galois
+  representation … is **surjective**』。
+  ★★理由も原文が括弧で書いている——`ℚ(ζ_{l^∞})/ℚ` は `l` で**完全分岐**するので
+  `L/ℚ` と**線型無関連**であり、円分円指標が全射になる。
+  ★★★使うのは片向きだけなので、そちらだけを欄に出す。 -/
+  imageSurjective_of_containsSL2 : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+    PrimeToRamification E l → ImageContainsSL2 E l → ImageSurjective E l
+  /-- ★空集合は compactly bounded である(`Example 1.3, (ii)`)。
+
+  ★`Corollary 4.3` は `K_V` を持たないが、`Theorem 3.8` の条件 (a) を使うには
+  何か 1 つ compactly bounded な集合を渡す必要がある——条件 (a) は `K_V` を使わない。 -/
+  compactlyBounded_empty : CompactlyBounded (∅ : Set EllClass)
+  -- ★★★★§4 —— 原文 p.22-23 が Corollary 4.3 の証明で引くもの
+  /-- ★★★★**乗法還元の素点の下にある `ℚ` の素数と、そこでの局所高さ**。
+
+  原文 (GenEll p.22):
+  > Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+  ★原文 p.23:『the “`h`” of Lemma 4.2 corresponds to **`23040d · deg∞([E_L])`**
+  [cf. the meaning of “`d₀ = 23040`” in the proof of Theorem 3.8]』。
+  ★★すなわち `∑ h_j·log(p_j) = 23040·d·deg∞` であり、これが `Lemma 4.2` への入力になる。 -/
+  multCard : Curve → ℕ
+  multCard_pos : ∀ E : Curve, 0 < multCard E
+  multPrime : ∀ E : Curve, Fin (multCard E) → ℕ
+  multPrime_prime : ∀ (E : Curve) (j : Fin (multCard E)), Nat.Prime (multPrime E j)
+  localHt : ∀ E : Curve, Fin (multCard E) → ℕ
+  localHt_pos : ∀ (E : Curve) (j : Fin (multCard E)), 0 < localHt E j
+  /-- ★★★★★**`∑ h_j·log(p_j) = 23040·d·deg∞([E_L])`**(原文 p.23)。 -/
+  sum_localHt_eq : ∀ E : Curve,
+    (∑ j : Fin (multCard E), (localHt E j : ℝ) * Real.log (multPrime E j))
+      = 23040 * (degOfDefinition E : ℝ) * degInf (cls E)
+  /-- ★★★**`S∘` のうち `S` 以外の部分**。
+
+  原文 p.22:『write `S∘` for the union of `S`, the primes of `ℚ` that lie under primes of
+  **potentially multiplicative reduction** of `E_L`, and the primes that appear in the
+  **prime decomposition of the local heights** of `E_L`』。 -/
+  badPrimes : Curve → Finset ℕ
+  badPrimes_prime : ∀ (E : Curve), ∀ p ∈ badPrimes E, Nat.Prime p
+  /-- ★★★★**`Lemma 4.2` が押さえるのはこの和である**。
+
+  ★左辺は `x_{S∘} − x_S`、右辺の第 1 項が乗法還元の素数、第 2 項が
+  局所高さ `h_j` の素因数分解に現れる素数である。
+  ★★この形にしておけば、**実装済みの `Lemma 4.2`** がそのまま使える。 -/
+  sum_log_badPrimes_le : ∀ E : Curve, (∑ p ∈ badPrimes E, Real.log p)
+      ≤ (∑ j : Fin (multCard E), Real.log (multPrime E j))
+        + (∑ j : Fin (multCard E), Real.log ((localHt E j : ℝ) + 1))
+  /-- ★★`badPrimes` の外の素数は条件 (a) の前半を満たす。 -/
+  primeTo_badPrimes : ∀ (E : Curve) (l : ℕ), Nat.Prime l → l ∉ badPrimes E →
+    PrimeToMultPrimes E l ∧ PrimeToLocalHeights E l
+  /-- ★★★**`S•` のうち `S` 以外の部分**。
+
+  原文 p.22:『write `S•` for the union of `S∘`, the primes of `ℚ` that **ramify in `L`**,
+  and the primes that divide the **ramification indices** of primes of `ℚ` in `L`』。 -/
+  ramPrimes : Curve → Finset ℕ
+  ramPrimes_prime : ∀ (E : Curve), ∀ p ∈ ramPrimes E, Nat.Prime p
+  badPrimes_subset_ramPrimes : ∀ E : Curve, badPrimes E ⊆ ramPrimes E
+  primeTo_ramPrimes : ∀ (E : Curve) (l : ℕ), Nat.Prime l → l ∉ ramPrimes E →
+    PrimeToRamification E l
+  /-- ★★★★**`x_{S•} ≤ x_{S∘} + 3d·log-diff`**。
+
+  原文 p.23:『since [as is easily verified, by considering the **trace** of an extension of
+  number fields] the primes appearing in the arithmetic divisor that gives rise to
+  “`log-diff_Mell`” [cf. Definition 1.5, (iii)] appear with **multiplicity ≥ one less than
+  the ramification indices** of `L/ℚ`』。
+  ★これが `Corollary 4.3, (c)` の `6d·log-diff` の出所である(2 倍される)。 -/
+  sum_log_ramPrimes_le : ∀ E : Curve, (∑ p ∈ ramPrimes E, Real.log p)
+      ≤ (∑ p ∈ badPrimes E, Real.log p)
+        + 3 * (degOfDefinition E : ℝ) * logDiffMell (cls E)
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=

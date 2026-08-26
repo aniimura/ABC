@@ -1,0 +1,345 @@
+/-
+Copyright (c) 2026 ABC3. All rights reserved.
+-/
+import ABC3.Found.Divisor.SchemeDivFinite
+import ABC3.Found.Divisor.SchemeFFMap
+import ABC3.Found.Divisor.NormBFunctor
+
+/-!
+# Cartier 因子の引き戻し —— 局所方程式の取り替えに依らないこと(鎖 `cartier` の `cartier-pullback`)
+
+原典: S. Mochizuki, *The Geometry of Frobenioids I* [FrdI]、物理 p.109。
+
+原文 (FrdI p.109):
+> If for every Spec(L) ∈Ob(B(G)0) [cf. §0], every prime divisor of DL is Q-Cartier,
+
+## ★★引き戻しの定義と、その要
+
+`IsCartierDiv` は**定義に局所方程式を持っている** ——
+各点 `y` に開 `U ∋ y` と `f ∈ K(Y)^×` があって `D v = ord_v f`(`v ∈ U`)。
+★したがって引き戻しの係数は `ord_w(g^* f)` で定めればよい。
+
+★★★**要は「局所方程式の取り替えに依らないこと」**である。
+2 つの局所方程式 `f₁, f₂` が `g(w)` の近くで両方 `D` を与えるなら、
+`u := f₁/f₂` は `ord_{g(w)}(u) = 0` を満たすので
+**`𝒪_{Y,g(w)}` の単元**(`SchemeOrdUnit.lean`)、したがって
+`g^*u` は `𝒪_{X,w}` の単元(`SchemeFFMap.lean` の四角形)、
+すなわち `ord_w(g^*f₁) = ord_w(g^*f₂)` である。
+
+★`g(w)` が余次元 1 でない場合は `dim 𝒪_{Y,g(w)} ≤ 1` から茎が**体**になるので、
+やはり単元である(`codim-preserved` の系)。
+
+## ★本ファイルで閉じること
+
+| 定理 | 中身 |
+|---|---|
+| `exists_unit_of_ordPt_of_dim_le_one` | ★`ord = 0`(余次元 1 のとき)＋ `dim ≤ 1` ⟹ 茎の単元 |
+| `ordPt_ffMap_congr` | ★★★**局所方程式の取り替えに依らない** |
+-/
+
+namespace ABC3.Found.Divisor
+
+open AlgebraicGeometry CategoryTheory
+
+universe u
+
+/-! ## ★1. 茎の単元を取り出す(まとめた形) -/
+
+/-- ★★**`dim 𝒪_{Y,z} ≤ 1` のとき、`z` が余次元 1 なら `ord_z = 0`、
+そうでなければ無条件に、`u` は茎の単元から来る**。 -/
+theorem exists_unit_of_ordPt_of_dim_le_one {Y : Scheme.{u}} [IsIntegral Y]
+    [IsLocallyNoetherian Y] (hnorm : IsNormalScheme Y) (z : Y)
+    (hdim : ringKrullDim (Y.presheaf.stalk z) ≤ 1) (u : (Y.functionField)ˣ)
+    (hord : ∀ hc : IsCodimOnePt Y z,
+      ordPt Y hnorm ⟨z, hc⟩ (u : Y.functionField) = 0) :
+    ∃ t : (Y.presheaf.stalk z)ˣ,
+      algebraMap (Y.presheaf.stalk z) Y.functionField (t : Y.presheaf.stalk z)
+        = (u : Y.functionField) := by
+  by_cases hc : IsCodimOnePt Y z
+  · exact exists_unit_of_ordPt_eq_zero hnorm ⟨z, hc⟩ u.ne_zero (hord hc)
+  · exact exists_unit_of_ringKrullDim_le_zero
+      (withBot_le_zero_of_le_one_of_ne hdim hc) u
+
+/-! ## ★2. 局所方程式の取り替えに依らない -/
+
+variable {X Y : Scheme.{u}} (g : X ⟶ Y) [IsDominant g] [IsIntegral X] [IsIntegral Y]
+  [IsLocallyNoetherian X] [IsLocallyNoetherian Y]
+
+/-- ★★★★**引き戻しの係数は局所方程式の取り替えに依らない**。 -/
+theorem ordPt_ffMap_congr (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    (w : PrimeDivisorPt X)
+    (hdim : ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1)
+    {f₁ f₂ : Y.functionField} (h₁ : f₁ ≠ 0) (h₂ : f₂ ≠ 0)
+    (hord : ∀ hc : IsCodimOnePt Y (g.base w.1),
+      ordPt Y hnormY ⟨g.base w.1, hc⟩ f₁ = ordPt Y hnormY ⟨g.base w.1, hc⟩ f₂) :
+    ordPt X hnormX w (ffMap g f₁) = ordPt X hnormX w (ffMap g f₂) := by
+  set u : (Y.functionField)ˣ := (Units.mk0 f₁ h₁) * (Units.mk0 f₂ h₂)⁻¹ with hu
+  have huval : (u : Y.functionField) = f₁ * f₂⁻¹ := rfl
+  obtain ⟨t, ht⟩ := exists_unit_of_ordPt_of_dim_le_one hnormY (g.base w.1) hdim u (by
+    intro hc
+    rw [huval, ordPt_mul hnormY _ h₁ (inv_ne_zero h₂), ordPt_inv hnormY _ h₂, hord hc]
+    ring)
+  have hzero : ordPt X hnormX w (ffMap g (u : Y.functionField)) = 0 := by
+    rw [← ht]
+    exact ordPt_ffMap_eq_zero_of_isUnit g hnormX w t
+  have hff2 : ffMap g f₂ ≠ 0 := by
+    intro h
+    exact h₂ ((ffMap g).hom.injective (by simpa using h))
+  have hsplit : ffMap g (u : Y.functionField) = ffMap g f₁ * (ffMap g f₂)⁻¹ := by
+    rw [huval, map_mul, map_inv₀]
+  rw [hsplit, ordPt_mul hnormX w
+    (by intro h; exact h₁ ((ffMap g).hom.injective (by simpa using h))) (inv_ne_zero hff2),
+    ordPt_inv hnormX w hff2] at hzero
+  omega
+
+/-! ## ★3. 引き戻しの係数 -/
+
+/-- ★局所方程式を組にして取り出す(選択のため)。 -/
+theorem cartier_local (hnormY : IsNormalScheme Y) {D : WeilDiv Y}
+    (hD : IsCartierDiv hnormY D) (y : Y) :
+    ∃ p : Y.Opens × Y.functionField, y ∈ p.1 ∧ p.2 ≠ 0 ∧
+      ∀ v : PrimeDivisorPt Y, (v : Y) ∈ p.1 → D v = ordPt Y hnormY v p.2 := by
+  obtain ⟨U, hy, f, hf, hDU⟩ := hD y
+  exact ⟨⟨U, f⟩, hy, hf, hDU⟩
+
+/-- ★★**引き戻しの係数** `ord_w(g^* f)`(`f` は `g(w)` の近くの局所方程式)。 -/
+noncomputable def pullCoeff (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) (w : PrimeDivisorPt X) : ℤ :=
+  ordPt X hnormX w (ffMap g (cartier_local hnormY hD (g.base w.1)).choose.2)
+
+/-- ★★★**係数はどの局所方程式で測っても同じ**。 -/
+theorem pullCoeff_eq (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) (w : PrimeDivisorPt X)
+    (hdim : ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1)
+    {U : Y.Opens} {f : Y.functionField} (hf : f ≠ 0) (hw : g.base w.1 ∈ U)
+    (hDU : ∀ v : PrimeDivisorPt Y, (v : Y) ∈ U → D v = ordPt Y hnormY v f) :
+    pullCoeff g hnormX hnormY hD w = ordPt X hnormX w (ffMap g f) := by
+  obtain ⟨hy0, hf0, hDU0⟩ := (cartier_local hnormY hD (g.base w.1)).choose_spec
+  refine ordPt_ffMap_congr g hnormX hnormY w hdim hf0 hf (fun hc => ?_)
+  rw [← hDU0 ⟨g.base w.1, hc⟩ hy0, ← hDU ⟨g.base w.1, hc⟩ hw]
+
+/-- ★係数は `D` にしか依らない(証明の取り替えに依らない)。 -/
+theorem pullCoeff_congr (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D D' : WeilDiv Y} (hD : IsCartierDiv hnormY D) (hD' : IsCartierDiv hnormY D')
+    (h : D = D') (w : PrimeDivisorPt X) :
+    pullCoeff g hnormX hnormY hD w = pullCoeff g hnormX hnormY hD' w := by
+  subst h
+  rfl
+
+/-! ## ★4. 台の有限性 -/
+
+/-- ★★★★**引き戻しの係数の台は有限**(`X` は準コンパクト)。
+
+★各点で「局所方程式が定義されているアフィン開」を取り、
+そこでは係数が `ord_w(g^*f)` になるので `div-finite` が効く。 -/
+theorem finite_pullCoeff_ne_zero (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) [CompactSpace X]
+    (hdim : ∀ w : PrimeDivisorPt X,
+      ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1) :
+    {w : PrimeDivisorPt X | pullCoeff g hnormX hnormY hD w ≠ 0}.Finite := by
+  have key : ∀ x : X, ∃ W : X.Opens, x ∈ W ∧
+      {w : PrimeDivisorPt X | (w : X) ∈ W ∧
+        pullCoeff g hnormX hnormY hD w ≠ 0}.Finite := by
+    intro x
+    obtain ⟨hy0, hf0, hDU0⟩ := (cartier_local hnormY hD (g.base x)).choose_spec
+    obtain ⟨_, ⟨W, hWaff, rfl⟩, hxW, hWU⟩ := X.isBasis_affineOpens.exists_subset_of_mem_open
+      (show x ∈ (g ⁻¹ᵁ (cartier_local hnormY hD (g.base x)).choose.1 : X.Opens) from hy0)
+      (g ⁻¹ᵁ (cartier_local hnormY hD (g.base x)).choose.1).2
+    refine ⟨W, hxW, ?_⟩
+    haveI : Nonempty W := ⟨⟨x, hxW⟩⟩
+    have hffne : ffMap g (cartier_local hnormY hD (g.base x)).choose.2 ≠ 0 := by
+      intro h
+      exact hf0 ((ffMap g).hom.injective (by simpa using h))
+    refine Set.Finite.subset (finite_ordPt_ne_zero_on_affine hnormX hWaff hffne) ?_
+    rintro w ⟨hwW, hne⟩
+    refine ⟨hwW, ?_⟩
+    rw [← pullCoeff_eq g hnormX hnormY hD w (hdim w) hf0 (hWU hwW) hDU0]
+    exact hne
+  choose W hxW hWfin using key
+  obtain ⟨s, hs⟩ := isCompact_univ.elim_finite_subcover (fun x : X => (W x : Set X))
+    (fun x => (W x).2) (fun x _ => Set.mem_iUnion.mpr ⟨x, hxW x⟩)
+  refine Set.Finite.subset (Set.Finite.biUnion s.finite_toSet (fun x _ => hWfin x)) ?_
+  intro w hw
+  obtain ⟨x, hx⟩ := Set.mem_iUnion.mp (hs (Set.mem_univ (w : X)))
+  obtain ⟨hxs, hwW⟩ := Set.mem_iUnion.mp hx
+  exact Set.mem_biUnion hxs ⟨hwW, hw⟩
+
+open scoped Classical in
+/-- ★★★★★★**Cartier 因子の引き戻し** `g^* D : WeilDiv X`。 -/
+noncomputable def cartierPullback (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) [CompactSpace X]
+    (hdim : ∀ w : PrimeDivisorPt X,
+      ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1) : WeilDiv X :=
+  Finsupp.onFinset (finite_pullCoeff_ne_zero g hnormX hnormY hD hdim).toFinset
+    (pullCoeff g hnormX hnormY hD) (fun w hw => by simpa using hw)
+
+@[simp] theorem cartierPullback_apply (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) [CompactSpace X]
+    (hdim : ∀ w : PrimeDivisorPt X,
+      ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1) (w : PrimeDivisorPt X) :
+    cartierPullback g hnormX hnormY hD hdim w = pullCoeff g hnormX hnormY hD w := rfl
+
+/-! ## ★5. 引き戻しは Cartier で、加法的 -/
+
+/-- ★★★★★**Cartier 因子の引き戻しは Cartier**。
+
+★局所方程式 `f` を引き戻した `g^*f` がそのまま局所方程式になる。 -/
+theorem isCartierDiv_cartierPullback (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) [CompactSpace X]
+    (hdim : ∀ w : PrimeDivisorPt X,
+      ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1) :
+    IsCartierDiv hnormX (cartierPullback g hnormX hnormY hD hdim) := by
+  intro x
+  obtain ⟨hy0, hf0, hDU0⟩ := (cartier_local hnormY hD (g.base x)).choose_spec
+  refine ⟨g ⁻¹ᵁ (cartier_local hnormY hD (g.base x)).choose.1, hy0,
+    ffMap g (cartier_local hnormY hD (g.base x)).choose.2, ?_, fun v hv => ?_⟩
+  · intro h
+    exact hf0 ((ffMap g).hom.injective (by simpa using h))
+  · rw [cartierPullback_apply]
+    exact pullCoeff_eq g hnormX hnormY hD v (hdim v) hf0 hv hDU0
+
+/-- ★★★★★★**引き戻しは関手的** —— `(g₁ ≫ g₂)^* D = g₁^* (g₂^* D)`。
+
+★★これが `thm62-i-pull` の `Div` の**自然性**の中身である。
+★中身は「局所方程式 `f` を取ると `g₂^*f` が `g₂^*D` の局所方程式になる」
+(`isCartierDiv_cartierPullback` の証明そのもの)＋ `ffMap_comp`。 -/
+theorem pullCoeff_comp {X Y Z : Scheme.{u}} (g₁ : X ⟶ Y) (g₂ : Y ⟶ Z)
+    [IsDominant g₁] [IsDominant g₂] [IsDominant (g₁ ≫ g₂)]
+    [IsIntegral X] [IsIntegral Y] [IsIntegral Z]
+    [IsLocallyNoetherian X] [IsLocallyNoetherian Y] [IsLocallyNoetherian Z]
+    (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y) (hnormZ : IsNormalScheme Z)
+    {D : WeilDiv Z} (hD : IsCartierDiv hnormZ D) [CompactSpace Y]
+    (hdim2 : ∀ v : PrimeDivisorPt Y, ringKrullDim (Z.presheaf.stalk (g₂.base v.1)) ≤ 1)
+    (w : PrimeDivisorPt X)
+    (hdim1 : ringKrullDim (Y.presheaf.stalk (g₁.base w.1)) ≤ 1)
+    (hdim12 : ringKrullDim (Z.presheaf.stalk ((g₁ ≫ g₂).base w.1)) ≤ 1) :
+    pullCoeff (g₁ ≫ g₂) hnormX hnormZ hD w
+      = pullCoeff g₁ hnormX hnormY
+          (isCartierDiv_cartierPullback g₂ hnormY hnormZ hD hdim2) w := by
+  obtain ⟨p, hmem, hf0, hDU⟩ := cartier_local hnormZ hD ((g₁ ≫ g₂).base w.1)
+  have hffne : ffMap g₂ p.2 ≠ 0 := fun h => hf0 ((ffMap g₂).hom.injective (by simpa using h))
+  have h1 : pullCoeff (g₁ ≫ g₂) hnormX hnormZ hD w
+      = ordPt X hnormX w (ffMap (g₁ ≫ g₂) p.2) :=
+    pullCoeff_eq (g₁ ≫ g₂) hnormX hnormZ hD w hdim12 hf0 hmem hDU
+  have h2 : pullCoeff g₁ hnormX hnormY
+      (isCartierDiv_cartierPullback g₂ hnormY hnormZ hD hdim2) w
+      = ordPt X hnormX w (ffMap g₁ (ffMap g₂ p.2)) := by
+    refine pullCoeff_eq g₁ hnormX hnormY _ w hdim1 hffne (U := g₂ ⁻¹ᵁ p.1) hmem ?_
+    intro v hv
+    rw [cartierPullback_apply]
+    exact pullCoeff_eq g₂ hnormY hnormZ hD v (hdim2 v) hf0 hv hDU
+  rw [h1, h2, ffMap_comp]
+  rfl
+
+/-- ★★★★**引き戻しは加法的**。 -/
+theorem pullCoeff_add (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D₁ D₂ : WeilDiv Y} (hD₁ : IsCartierDiv hnormY D₁) (hD₂ : IsCartierDiv hnormY D₂)
+    (hDs : IsCartierDiv hnormY (D₁ + D₂)) (w : PrimeDivisorPt X)
+    (hdim : ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1) :
+    pullCoeff g hnormX hnormY hDs w
+      = pullCoeff g hnormX hnormY hD₁ w + pullCoeff g hnormX hnormY hD₂ w := by
+  obtain ⟨U₁, hw₁, f₁, hf₁, hD₁U⟩ := hD₁ (g.base w.1)
+  obtain ⟨U₂, hw₂, f₂, hf₂, hD₂U⟩ := hD₂ (g.base w.1)
+  have hsum : ∀ v : PrimeDivisorPt Y, (v : Y) ∈ U₁ ⊓ U₂ →
+      (D₁ + D₂) v = ordPt Y hnormY v (f₁ * f₂) := by
+    rintro v ⟨hv₁, hv₂⟩
+    rw [Finsupp.add_apply, hD₁U v hv₁, hD₂U v hv₂, ordPt_mul hnormY v hf₁ hf₂]
+  rw [pullCoeff_eq g hnormX hnormY hDs w hdim (U := U₁ ⊓ U₂) (mul_ne_zero hf₁ hf₂)
+      ⟨hw₁, hw₂⟩ hsum,
+    pullCoeff_eq g hnormX hnormY hD₁ w hdim hf₁ hw₁ hD₁U,
+    pullCoeff_eq g hnormX hnormY hD₂ w hdim hf₂ hw₂ hD₂U, map_mul,
+    ordPt_mul hnormX w
+      (by intro h; exact hf₁ ((ffMap g).hom.injective (by simpa using h)))
+      (by intro h; exact hf₂ ((ffMap g).hom.injective (by simpa using h)))]
+
+
+/-! ## ★6. 有効性は引き戻しで保たれる -/
+
+/-- ★★`dim ≤ 1` のとき、`ord ≥ 0`(余次元 1 のとき)なら茎から来る。 -/
+theorem exists_mem_stalk_of_dim_le_one {Y : Scheme.{u}} [IsIntegral Y] [IsLocallyNoetherian Y]
+    (hnorm : IsNormalScheme Y) (z : Y) (hdim : ringKrullDim (Y.presheaf.stalk z) ≤ 1)
+    {u : Y.functionField} (hu : u ≠ 0)
+    (hord : ∀ hc : IsCodimOnePt Y z, 0 ≤ ordPt Y hnorm ⟨z, hc⟩ u) :
+    ∃ r : Y.presheaf.stalk z,
+      algebraMap (Y.presheaf.stalk z) Y.functionField r = u := by
+  by_cases hc : IsCodimOnePt Y z
+  · exact exists_mem_stalk_of_ordPt_nonneg hnorm ⟨z, hc⟩ hu (hord hc)
+  · obtain ⟨t, ht⟩ := exists_unit_of_ringKrullDim_le_zero
+      (withBot_le_zero_of_le_one_of_ne hdim hc) (Units.mk0 u hu)
+    exact ⟨(t : Y.presheaf.stalk z), ht⟩
+
+/-- ★★★★**有効因子の引き戻しは有効**。 -/
+theorem pullCoeff_nonneg (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    {D : WeilDiv Y} (hD : IsCartierDiv hnormY D) (w : PrimeDivisorPt X)
+    (hdim : ringKrullDim (Y.presheaf.stalk (g.base w.1)) ≤ 1)
+    (hDnn : ∀ v : PrimeDivisorPt Y, 0 ≤ D v) :
+    0 ≤ pullCoeff g hnormX hnormY hD w := by
+  obtain ⟨U, hwU, q, hq, hDU⟩ := hD (g.base w.1)
+  rw [pullCoeff_eq g hnormX hnormY hD w hdim hq hwU hDU]
+  obtain ⟨r, hr⟩ := exists_mem_stalk_of_dim_le_one hnormY (g.base w.1) hdim hq (by
+    intro hc
+    rw [← hDU ⟨g.base w.1, hc⟩ hwU]
+    exact hDnn _)
+  have hffne : ffMap g q ≠ 0 := by
+    intro h
+    exact hq ((ffMap g).hom.injective (by simpa using h))
+  rw [← hr, ffMap_algebraMap]
+  refine ordPt_nonneg_of_mem_stalk hnormX w _ ?_
+  rw [← ffMap_algebraMap, hr]
+  exact hffne
+
+/-! ## ★7. 非零の位数は非零へ移る(`pull_inj` の要) -/
+
+/-- ★★**位数が正なら引き戻しの位数も非零** —— 茎への射が**局所射**だから。 -/
+theorem ordPt_ffMap_ne_zero_of_pos (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    (w : PrimeDivisorPt X) (hgw : IsCodimOnePt Y (g.base w.1))
+    {q : Y.functionField} (hq : q ≠ 0)
+    (hpos : 0 < ordPt Y hnormY ⟨g.base w.1, hgw⟩ q) :
+    ordPt X hnormX w (ffMap g q) ≠ 0 := by
+  obtain ⟨r, hr⟩ := exists_mem_stalk_of_ordPt_nonneg hnormY ⟨g.base w.1, hgw⟩ hq (le_of_lt hpos)
+  have hrnu : ¬ IsUnit r := by
+    intro hu
+    obtain ⟨t, ht⟩ := hu
+    have : ordPt Y hnormY ⟨g.base w.1, hgw⟩ q = 0 := by
+      rw [← hr, ← ht]
+      exact ordPt_eq_zero_of_isUnit hnormY ⟨g.base w.1, hgw⟩ t
+    omega
+  have hmapnu : ¬ IsUnit ((g.stalkMap w.1) r) := by
+    intro hu
+    exact hrnu (IsLocalHom.map_nonunit (f := (g.stalkMap w.1).hom) r hu)
+  have hffne : ffMap g q ≠ 0 := by
+    intro h
+    exact hq ((ffMap g).hom.injective (by simpa using h))
+  intro hzero
+  obtain ⟨t, ht⟩ := exists_unit_of_ordPt_eq_zero hnormX w hffne hzero
+  refine hmapnu ⟨t, ?_⟩
+  refine (IsFractionRing.injective (X.presheaf.stalk w.1) X.functionField) ?_
+  rw [ht, ← hr, ffMap_algebraMap]
+
+/-- ★★★**非零の位数は非零へ移る**。 -/
+theorem ordPt_ffMap_ne_zero (hnormX : IsNormalScheme X) (hnormY : IsNormalScheme Y)
+    (w : PrimeDivisorPt X) (hgw : IsCodimOnePt Y (g.base w.1))
+    {q : Y.functionField} (hq : q ≠ 0)
+    (hne : ordPt Y hnormY ⟨g.base w.1, hgw⟩ q ≠ 0) :
+    ordPt X hnormX w (ffMap g q) ≠ 0 := by
+  rcases lt_or_gt_of_ne hne with hlt | hgt
+  · have hinv : 0 < ordPt Y hnormY ⟨g.base w.1, hgw⟩ q⁻¹ := by
+      rw [ordPt_inv hnormY _ hq]
+      omega
+    have h := ordPt_ffMap_ne_zero_of_pos g hnormX hnormY w hgw (inv_ne_zero hq) hinv
+    have hffne : ffMap g q ≠ 0 := by
+      intro h0
+      exact hq ((ffMap g).hom.injective (by simpa using h0))
+    rw [map_inv₀, ordPt_inv hnormX w hffne] at h
+    omega
+  · exact ordPt_ffMap_ne_zero_of_pos g hnormX hnormY w hgw hq hgt
+
+/-! ### ★出典の紐付け -/
+
+/-- ★★★★★locator —— `Example 6.1` の Cartier 因子の引き戻し。 -/
+def cartierPullback.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — Cartier 因子の引き戻し(局所方程式を引き戻す)",
+    sectionId := "frdi-example-6-1" }
+
+end ABC3.Found.Divisor
