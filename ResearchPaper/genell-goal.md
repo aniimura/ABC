@@ -25524,3 +25524,48 @@ mathlib の `IsMinimal` は「整モデルの中で `v(Δ)` を最大にする�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-628 ★★★★★★★素点の付値で測った Néron 指数——同値で足りる(第 315 ブロック)
+
+`Found/GaloisRep/NeronValuation.lean`。
+
+### ★★★★★★★到達点
+
+> Néron 指数を **`p` の adic 付値**で測り直した `neronExp p W` を作り、
+> **一意性・変数変換則・有限性**をすべて移した。
+
+★★★これで **mathlib の分数イデアルの API(`p.valuation` で書かれている)に載る**。
+
+### ★★★★★★★★2 つの付値は「同値」で足りる
+
+`minimalExp`(第 312)は**局所化 `R_p` の極大イデアルの付値**で測っていた。
+一方 mathlib の分数イデアル論は **`p` の adic 付値**で書かれている。
+★この 2 つが**等しい**ことを示すには正規化の一致まで要る(一様化元を取って比べる)。
+★★★★しかし本ブロックで要るのは
+
+* 一意性:`v₁ x = v₁ y ↔ v₂ x = v₂ y`(`IsEquiv.eq_iff`)
+* 有限性:`v₁ x = 1 ↔ v₂ x = 1`(`IsEquiv.eq_one_iff_eq_one`)
+
+の 2 つだけで、**同値(`Valuation.IsEquiv`)で十分**である。
+★★★★★同値は**付値環が一致すること**から出る(`isEquiv_iff_valuationSubring`)——
+片方は第 301 の `dvr_mem_of_nonneg`、もう片方は mathlib の
+`valuationSubringAtPrime_eq_valuationSubring`。
+
+### ★★★★★必要な強さを見極める
+
+★★「等しい」が要るのは**値そのものを使う**ときだけで、
+「等しいかどうか」「1 かどうか」しか使わないなら**同値で通る**。
+★★★★★**正規化の比較を丸ごと避けられた**——本ブロックの要点である。
+
+### ★★残り(G7)
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 1-2 | 局所の Néron 指数と有限性 | ★済(第 312-314) |
+| 2' | `p` の付値への移送 | ★★★★**済(本ブロック)** |
+| 3 | 分数イデアルの構成と有限生成性 | 次 |
+| 4 | `SemistableModelData` への組み立て | |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 5/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
