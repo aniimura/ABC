@@ -235,6 +235,34 @@ theorem mem_adjoin_of_pow_smul_of_isEisensteinAt {R : Type*} {K : Type*} {L : Ty
       exact mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt hp hBint hz
         (ih (pi • z) hpz h') hEis
 
+/-! ## ★★★★★分母を払う——`d·z ∈ A[λ]` なる `d` は常に取れる -/
+
+/-- ★★★★★**どの `z ∈ L` にも、`d·z ∈ A[λ]` となる `0 ≠ d ∈ A` がある**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★冪基底の係数は `K = Frac A` の元なので、**共通の分母を取る**だけである
+(`IsLocalization.exist_integer_multiples`)。
+★★`A` が DVR なら `d = π^k × 単元` なので、第 389 の降下の段に渡せる形になる
+——この 2 つで **`B = A[λ]`** が出る。 -/
+theorem exists_smul_mem_adjoin_powerBasis {R : Type*} {K : Type*} {L : Type*}
+    [CommRing R] [Field K] [Field L] [Algebra K L] [Algebra R L] [Algebra R K]
+    [IsScalarTower R K L] [IsDomain R] [IsFractionRing R K]
+    (PB : PowerBasis K L) (z : L) :
+    ∃ d : R, d ≠ 0 ∧ d • z ∈ Algebra.adjoin R {PB.gen} := by
+  classical
+  obtain ⟨b, hb⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors R)
+    (Finset.univ : Finset (Fin PB.dim)) (fun i => PB.basis.repr z i)
+  refine ⟨(b : R), nonZeroDivisors.coe_ne_zero b, ?_⟩
+  have hz : ∑ i, (PB.basis.repr z) i • PB.basis i = z := PB.basis.sum_repr z
+  rw [← hz, Finset.smul_sum]
+  refine Subalgebra.sum_mem _ (fun i _ => ?_)
+  obtain ⟨c, hc⟩ := hb i (Finset.mem_univ i)
+  rw [PB.basis_eq_pow, ← smul_assoc, ← hc, IsScalarTower.algebraMap_smul]
+  exact Subalgebra.smul_mem _
+    (Subalgebra.pow_mem _ (Algebra.self_mem_adjoin_singleton R PB.gen) _) c
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -270,6 +298,11 @@ def exists_isUnit_pow_eq_of_span_eq.src : ABC3.Meta.Source :=
 def mem_adjoin_of_pow_smul_of_isEisensteinAt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(B = A[λ] への降下の段)",
+    sectionId := "genell-prop-1-7" }
+
+def exists_smul_mem_adjoin_powerBasis.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(B = A[λ] —— 分母を払う段)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
