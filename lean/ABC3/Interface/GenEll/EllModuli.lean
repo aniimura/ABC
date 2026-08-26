@@ -232,6 +232,80 @@ structure EllModuliData extends TorsionGaloisRepData where
   imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
     HasMultRed (torsionExt E) → PrimeToLocalHeights (torsionExt E) l →
     ¬ HasLCyclic (torsionExt E) l → ImageContainsSL2 E l
+  /-- ★★★★★**`SL₂` を含むことと全射性は、`l` が `L` で不分岐なら同じこと**である。
+
+  原文 (GenEll p.22):
+  > Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+  ★原文 p.22 の冒頭:『if `l` is any prime number that is **unramified in `L`**, then the
+  image of the Galois representation … contains `SL₂(ℤ_l)` **if and only if** the Galois
+  representation … is **surjective**』。
+  ★★理由も原文が括弧で書いている——`ℚ(ζ_{l^∞})/ℚ` は `l` で**完全分岐**するので
+  `L/ℚ` と**線型無関連**であり、円分円指標が全射になる。
+  ★★★使うのは片向きだけなので、そちらだけを欄に出す。 -/
+  imageSurjective_of_containsSL2 : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+    PrimeToRamification E l → ImageContainsSL2 E l → ImageSurjective E l
+  /-- ★空集合は compactly bounded である(`Example 1.3, (ii)`)。
+
+  ★`Corollary 4.3` は `K_V` を持たないが、`Theorem 3.8` の条件 (a) を使うには
+  何か 1 つ compactly bounded な集合を渡す必要がある——条件 (a) は `K_V` を使わない。 -/
+  compactlyBounded_empty : CompactlyBounded (∅ : Set EllClass)
+  -- ★★★★§4 —— 原文 p.22-23 が Corollary 4.3 の証明で引くもの
+  /-- ★★★★**乗法還元の素点の下にある `ℚ` の素数と、そこでの局所高さ**。
+
+  原文 (GenEll p.22):
+  > Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+  ★原文 p.23:『the “`h`” of Lemma 4.2 corresponds to **`23040d · deg∞([E_L])`**
+  [cf. the meaning of “`d₀ = 23040`” in the proof of Theorem 3.8]』。
+  ★★すなわち `∑ h_j·log(p_j) = 23040·d·deg∞` であり、これが `Lemma 4.2` への入力になる。 -/
+  multCard : Curve → ℕ
+  multCard_pos : ∀ E : Curve, 0 < multCard E
+  multPrime : ∀ E : Curve, Fin (multCard E) → ℕ
+  multPrime_prime : ∀ (E : Curve) (j : Fin (multCard E)), Nat.Prime (multPrime E j)
+  localHt : ∀ E : Curve, Fin (multCard E) → ℕ
+  localHt_pos : ∀ (E : Curve) (j : Fin (multCard E)), 0 < localHt E j
+  /-- ★★★★★**`∑ h_j·log(p_j) = 23040·d·deg∞([E_L])`**(原文 p.23)。 -/
+  sum_localHt_eq : ∀ E : Curve,
+    (∑ j : Fin (multCard E), (localHt E j : ℝ) * Real.log (multPrime E j))
+      = 23040 * (degOfDefinition E : ℝ) * degInf (cls E)
+  /-- ★★★**`S∘` のうち `S` 以外の部分**。
+
+  原文 p.22:『write `S∘` for the union of `S`, the primes of `ℚ` that lie under primes of
+  **potentially multiplicative reduction** of `E_L`, and the primes that appear in the
+  **prime decomposition of the local heights** of `E_L`』。 -/
+  badPrimes : Curve → Finset ℕ
+  badPrimes_prime : ∀ (E : Curve), ∀ p ∈ badPrimes E, Nat.Prime p
+  /-- ★★★★**`Lemma 4.2` が押さえるのはこの和である**。
+
+  ★左辺は `x_{S∘} − x_S`、右辺の第 1 項が乗法還元の素数、第 2 項が
+  局所高さ `h_j` の素因数分解に現れる素数である。
+  ★★この形にしておけば、**実装済みの `Lemma 4.2`** がそのまま使える。 -/
+  sum_log_badPrimes_le : ∀ E : Curve, (∑ p ∈ badPrimes E, Real.log p)
+      ≤ (∑ j : Fin (multCard E), Real.log (multPrime E j))
+        + (∑ j : Fin (multCard E), Real.log ((localHt E j : ℝ) + 1))
+  /-- ★★`badPrimes` の外の素数は条件 (a) の前半を満たす。 -/
+  primeTo_badPrimes : ∀ (E : Curve) (l : ℕ), Nat.Prime l → l ∉ badPrimes E →
+    PrimeToMultPrimes E l ∧ PrimeToLocalHeights E l
+  /-- ★★★**`S•` のうち `S` 以外の部分**。
+
+  原文 p.22:『write `S•` for the union of `S∘`, the primes of `ℚ` that **ramify in `L`**,
+  and the primes that divide the **ramification indices** of primes of `ℚ` in `L`』。 -/
+  ramPrimes : Curve → Finset ℕ
+  ramPrimes_prime : ∀ (E : Curve), ∀ p ∈ ramPrimes E, Nat.Prime p
+  badPrimes_subset_ramPrimes : ∀ E : Curve, badPrimes E ⊆ ramPrimes E
+  primeTo_ramPrimes : ∀ (E : Curve) (l : ℕ), Nat.Prime l → l ∉ ramPrimes E →
+    PrimeToRamification E l
+  /-- ★★★★**`x_{S•} ≤ x_{S∘} + 3d·log-diff`**。
+
+  原文 p.23:『since [as is easily verified, by considering the **trace** of an extension of
+  number fields] the primes appearing in the arithmetic divisor that gives rise to
+  “`log-diff_Mell`” [cf. Definition 1.5, (iii)] appear with **multiplicity ≥ one less than
+  the ramification indices** of `L/ℚ`』。
+  ★これが `Corollary 4.3, (c)` の `6d·log-diff` の出所である(2 倍される)。 -/
+  sum_log_ramPrimes_le : ∀ E : Curve, (∑ p ∈ ramPrimes E, Real.log p)
+      ≤ (∑ p ∈ badPrimes E, Real.log p)
+        + 3 * (degOfDefinition E : ℝ) * logDiffMell (cls E)
 
 /-- ★Track B は何を作らねばならないか。 -/
 def EllModuliData.waiting : WaitingFor :=

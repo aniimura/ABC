@@ -1,3 +1,4 @@
+import Mathlib.Tactic.NormNum.Prime
 import ABC3.Found.GenEll.PrimeNumberTheorem
 
 /-!
@@ -144,6 +145,92 @@ theorem exists_finset_primes_sum_log_gt (y : ℝ) :
   rw [hsum]
   linarith
 
+/-! ## ★★★★★`Corollary 4.3` / `4.4` の (c) を出す数値の段 -/
+
+/-- ★★★★★**原文 p.22-23 の不等式の連鎖を 1 本にしたもの**。
+
+原文 (GenEll p.23):
+> Corollary 4.3, except that instead of applying condition (a) of Theorem 3.8, we
+
+引数の意味: `d = [L:ℚ]`、`F = ht^Falt`、`dinf = deg∞`、`x_S`、`x_bad = x_{S∘} − x_S`、
+`x_T`(『enlarging S』の分)、`extra`(`l•` のとき `3d·log-diff`)、`H`(`Lemma 4.1` の `h`)、
+`l`、`A`(`Proposition 3.4` の定数)、`B`(`ht^Falt` の下界の絶対値)、`P = d^{1+ϵ}`。
+
+★係数の帳尻は原文 p.23 の『`2·3·12 + 8·100 ≤ 100 + 800 = 900`』である:
+
+    2·x_bad ≤ 5·23040·d·deg∞ ≤ 72·23040·d·F + …   (Prop 3.4 を 1+ϵ = 6/5 で)
+    8·H     ≤ 800·23040·d·F + …
+    72 + 800 = 872 ≤ 900
+
+★★`F < 0` のとき `872 ≤ 900` は逆向きになるが、差 `28·23040·d·(F+B) ≥ 0` がちょうど埋める
+——これが定数の `828 = 800 + 28` の出所である。 -/
+theorem cor4_numeric (d F dinf xS xbad xT extra H l A B C₈ P : ℝ)
+    (hd1 : 1 ≤ d) (hP1 : 1 ≤ P) (hdP : d ≤ P)
+    (hA : dinf ≤ 12 * (1 + 1/5) * F + A)
+    (hxbad : xbad ≤ 5/2 * (23040 * (d * dinf)))
+    (hB : -B ≤ F) (hBnn : 0 ≤ B) (hC₈ : 0 < C₈) (hxT : 0 ≤ xT)
+    (hH : H ≤ 23040 * 100 * (d * F) + 23040 * 100 * (C₈ * P) + 23040 * 100 * (d * B))
+    (hl : l ≤ 2 * (xS + xbad + xT + extra) + 8 * H) :
+    l ≤ 23040 * 900 * (d * F) + 2 * extra + 2 * xS
+        + (23040 * (5 * |A| + 800 * C₈ + 828 * B) + 2 * xT + 1) * P := by
+  have hdpos : (0:ℝ) < d := by linarith
+  have hAabs : A ≤ |A| := le_abs_self A
+  have hdA : d * dinf ≤ 12 * (1 + 1/5) * (d * F) + d * A := by
+    have hm := mul_le_mul_of_nonneg_left hA hdpos.le
+    linarith [hm]
+  have h1 : d * A ≤ d * |A| := mul_le_mul_of_nonneg_left hAabs hdpos.le
+  have h2 : d * |A| ≤ P * |A| := mul_le_mul_of_nonneg_right hdP (abs_nonneg A)
+  have hdBP : d * B ≤ P * B := mul_le_mul_of_nonneg_right hdP hBnn
+  have hxTP : xT ≤ xT * P := by nlinarith
+  have hFB : (0:ℝ) ≤ d * F + d * B := by nlinarith
+  have hPnn : (0:ℝ) ≤ P := by linarith
+  linarith [hl, hxbad, hdA, h1, h2, hdBP, hxTP, hFB, hH, hPnn]
+
+/-- ★★★★**`Corollary 4.4` の (c)**——`Lemma 4.1` の `h` を `0` に取る場合。
+
+原文 (GenEll p.23):
+> Corollary 4.3, except that instead of applying condition (a) of Theorem 3.8, we
+
+★原文:『Also, when applying Lemma 4.1, we take “`h`” to be **`0`**』。
+★★`8h` の項が消えるので係数は `2·3·12 = 72 ≤ **100**` で足り、
+末項も `C·d^{1+ϵ}` ではなく **`C·d`** になる——これが `Corollary 4.3` との差である。 -/
+theorem cor44_numeric (d F dinf xS xbad xT extra l A B P : ℝ)
+    (hd1 : 1 ≤ d) (hP1 : 1 ≤ P) (hdP : d ≤ P)
+    (hA : dinf ≤ 12 * (1 + 1/5) * F + A)
+    (hxbad : xbad ≤ 5/2 * (23040 * (d * dinf)))
+    (hB : -B ≤ F) (hBnn : 0 ≤ B) (hxT : 0 ≤ xT)
+    (hl : l ≤ 2 * (xS + xbad + xT + extra)) :
+    l ≤ 23040 * 100 * (d * F) + 2 * extra + 2 * xS
+        + (23040 * (5 * |A| + 28 * B) + 2 * xT + 1) * P := by
+  have hdpos : (0:ℝ) < d := by linarith
+  have hAabs : A ≤ |A| := le_abs_self A
+  have hdA : d * dinf ≤ 12 * (1 + 1/5) * (d * F) + d * A := by
+    have hm := mul_le_mul_of_nonneg_left hA hdpos.le
+    linarith [hm]
+  have h1 : d * A ≤ d * |A| := mul_le_mul_of_nonneg_left hAabs hdpos.le
+  have h2 : d * |A| ≤ P * |A| := mul_le_mul_of_nonneg_right hdP (abs_nonneg A)
+  have hdBP : d * B ≤ P * B := mul_le_mul_of_nonneg_right hdP hBnn
+  have hxTP : xT ≤ xT * P := by nlinarith
+  have hFB : (0:ℝ) ≤ d * F + d * B := by nlinarith
+  have hPnn : (0:ℝ) ≤ P := by linarith
+  linarith [hl, hxbad, hdA, h1, h2, hdBP, hxTP, hFB, hPnn]
+
+/-- ★素数 `l` が `2, 3, 5` のいずれでもなければ `30` と互いに素である。
+
+★`Corollary 4.4` が `Theorem 3.8` の条件 (b) を使うときに要る(`30 = 2·3·5`)。 -/
+theorem coprime_thirty_of_prime {l : ℕ} (hl : l.Prime) (h2 : l ≠ 2) (h3 : l ≠ 3) (h5 : l ≠ 5) :
+    Nat.Coprime l 30 := by
+  rw [Nat.Prime.coprime_iff_not_dvd hl]
+  intro hd
+  have h : l ∣ 2 * (3 * 5) := by
+    have h30 : (2 * (3 * 5) : ℕ) = 30 := by norm_num
+    rw [h30]; exact hd
+  rcases (Nat.Prime.dvd_mul hl).1 h with hh | hh
+  · exact h2 ((Nat.prime_dvd_prime_iff_eq hl Nat.prime_two).1 hh)
+  · rcases (Nat.Prime.dvd_mul hl).1 hh with hh' | hh'
+    · exact h3 ((Nat.prime_dvd_prime_iff_eq hl Nat.prime_three).1 hh')
+    · exact h5 ((Nat.prime_dvd_prime_iff_eq hl (by norm_num)).1 hh')
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_cond_i_ii.src : ABC3.Meta.Source :=
@@ -154,5 +241,15 @@ def exists_finset_primes_sum_log_gt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 23,
     item := "Corollary 4.3 の証明(by enlarging S … we may always assume that x_ϵ ≤ x_S)",
     sectionId := "genell-cor-4-3" }
+
+def cor4_numeric.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 23,
+    item := "Corollary 4.3 の証明(2·3·12 + 8·100 ≤ 100 + 800 = 900)",
+    sectionId := "genell-cor-4-3" }
+
+def cor44_numeric.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 23,
+    item := "Corollary 4.4 の証明(when applying Lemma 4.1, we take “h” to be 0)",
+    sectionId := "genell-cor-4-4" }
 
 end ABC3.Found.GenEll

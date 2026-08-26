@@ -27995,3 +27995,72 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 ★直し方は **`lake exe cache get!`**である——削除して回らないこと。
 ★★`lake` は `lean/` の中でしか走らせない(`--dir` で代用しない)。
+
+
+## §9-680 ★★★★★★★★★★**§4 の sorry が 0 になった**(第 367 ブロック)
+
+`Interface/GenEll/EllModuli.lean`・`Found/GenEll/PrimeConstants.lean`・
+`Skeleton/GenEll/Section4.lean`。`Corollary 4.3` / `Corollary 4.4` を導出した。
+
+### ★★★★★★★★北極星に届いた
+
+`Corollary 4.4` は本トラックの**北極星**として置いていた項目である
+——`[IUTchIV]` が直接引く 2 件のうちの 1 つ(もう 1 つが `Theorem 3.8`)。
+
+### ★★★実際に使ったもの(すべて原文 p.22-23 が引いている)
+
+| 段 | どこから |
+|---|---|
+| `l` が不分岐 ⇒ `SL₂ ⊆ 像` と全射は同じ | 界面(原文 p.22 の冒頭、`ℚ(ζ_{l^∞})/ℚ` の完全分岐) |
+| `x_{S∘} ≤ x_S + (1 + 3/2)·23040d·deg∞` | **`Lemma 4.2`**(実装済み)+ 界面 `sum_localHt_eq` |
+| `deg∞ ≤ 12·(6/5)·ht^Falt + C` | **`Proposition 3.4`**(第 361 で導出済み) |
+| `x_ϵ ≤ x_S` にしてよい | **`exists_finset_primes_sum_log_gt`**(第 366) |
+| 条件 (i)(ii) を満たす定数 | **`exists_cond_i_ii`**(第 366、`ϵ = 1/6`) |
+| `M = 1` の素数の存在 | **`Lemma 4.1`**(実装済み) |
+
+★★**`Lemma 4.1` と `Lemma 4.2` を初めて使った**——作ってから 10 日で仕事をした。
+
+### ★★★★★係数 900 と 100 の差は `h` だけである
+
+原文 p.23 の帳尻は `2·3·12 + 8·100 ≤ 100 + 800 = 900`:
+
+    Corollary 4.3: h = 23040·100d·(ht^Falt + C′·d^ϵ)  ⇒  8h が 800 を出す  ⇒ 900、末項は C·d^{1+ϵ}
+    Corollary 4.4: h = 0                                ⇒  8h は消える    ⇒ 100、末項は C·d
+
+★どちらも `2·x_bad` から来る `2·3·12 = 72` が土台である。
+★★`ht^Falt < 0` のとき `72 ≤ 100` は逆向きになるが、
+差 `28·23040·d·(ht^Falt + B) ≥ 0` がちょうど埋める——これが定数の `828 = 800 + 28` の出所。
+
+### ★★★★★★`30` と素という条件の扱い方
+
+`Corollary 4.4` は `Theorem 3.8` の**条件 (b)** を使うので `l` が `30` と素でなければならない。
+★**除外集合に `{2, 3, 5}` を入れる**だけですむ——その分の `log 30` は定数なので
+`C·d` に吸収される(`d ≥ 1`)。
+
+### ★★★★界面に足した 17 つ
+
+| 欄 | 原文の典拠 |
+|---|---|
+| `imageSurjective_of_containsSL2` | p.22 冒頭の『contains `SL₂(ℤ_l)` if and only if … surjective』 |
+| `compactlyBounded_empty` | `Example 1.3, (ii)`(条件 (a) は `K_V` を使わないので 1 つあればよい) |
+| `multCard`･`multPrime`･`localHt`･`sum_localHt_eq` 他 | p.23 の『the “h” of Lemma 4.2 corresponds to `23040d·deg∞`』 |
+| `badPrimes` 一式 | p.22 の `S∘` の定義 |
+| `ramPrimes` 一式･`sum_log_ramPrimes_le` | p.22 の `S•` の定義 + p.23 の『multiplicity ≥ one less than the ramification indices』 |
+
+★★**数値の段は `Found/GenEll/PrimeConstants.lean` に切り出した**
+(`cor4_numeric`･`cor44_numeric`)——実数だけの裸の補題なので後で目で追える。
+
+### 逸脱
+
+`Corollary 4.3` の仮説 `MinimalField E` は**使っていない**(弱めてはいない)。
+
+★★Lean 全体の sorry は **45 → 43**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+### ★★★★★★★ゴールの残り
+
+| 場所 | 残 `sorry` | 量化している界面 |
+|---|---|---|
+| `Section1`(`Prop 1.4`･`1.6`･`Remark 1.4.1`･`1.5.1`) | 4 | `HeightTheoryData` |
+| `Section1`(`Prop 1.7`) | 1 | `CoveringSetup` |
+| `Section2`(**`Theorem 2.1`**) | 1 | `AbcSetup` |
+| `NCBelyi/Theorem25` | 1 | `BelyiSetup` |

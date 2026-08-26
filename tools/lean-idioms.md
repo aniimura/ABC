@@ -791,3 +791,38 @@ exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
 直し方: U+10000 以上の文字は **`\U0001D49F` の 8 桁形式**で書く。
 ★Python 3 の str はサロゲート対を結合しないので、UTF-8 への書き出しで必ず失敗する。
 ★★別の道: その文字を変数に入れて連結する(`D = u"\U0001D49F"` を `+` で繋ぐ)。
+
+
+## structure の中に `/-! … -/` を書くと、そこで structure が終わる
+
+失敗形: 欄をグループ分けしようとして
+
+    structure Foo where
+      a : ℕ
+      /-! ### ここからは §4 の分 -/
+      b : ℕ
+
+と書いたら `unexpected identifier; expected 'lemma'` が**ずっと先の行で**出た。
+
+直し方: **`--` の行コメントにする**。`/-! -/` はモジュール/セクションのドキュメントであり、
+宣言の中には置けない。★フィールドの `/-- -/` は問題ない。
+★★エラー位置が離れるので、「さっき追加した `/-!` は無いか」を先に見ること。
+
+## `Finset.sum_union_inter` に `(s := …)` で引数を渡せない
+
+失敗形: `Finset.sum_union_inter (s := U) (t := V) (f := fun p => …)` が
+`Invalid argument name \`s\`` で落ちる(引数名が `s✝` の形でしか無い)。
+
+直し方: **型を書いて `:=` で受ける**。
+
+    have hui : (∑ p ∈ U ∪ V, f p) + ∑ p ∈ U ∩ V, f p
+        = (∑ p ∈ U, f p) + ∑ p ∈ V, f p := Finset.sum_union_inter
+
+## `lake` は `lean/` の中でしか走らせない
+
+失敗形: リポジトリ直下で `lake build --dir=lean` を走らせたところ、
+別のトゥールチェインで全再ビルドが始まり、タイムアウトで殺された拍子に
+mathlib の olean が 1 つ途中で切れて `failed to read file … incompatible header` になった。
+
+直し方: **`lake exe cache get!`**(`lean/` の中で)。★olean を手で削除しないこと。
+★★そもそも `cd /d/Math_ABC3/lean` してから `lake` を走らせる。`--dir` で代用しない。
