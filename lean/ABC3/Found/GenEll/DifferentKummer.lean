@@ -396,6 +396,53 @@ theorem exists_gen_pow_mem_range
   have h := (isCyclic_tfae K L hroot).out 0 2
   exact h.mp (And.intro hgal hcyc)
 
+/-! ## ★★★★★★★★段 4-6 を端から端まで繋いだ形 -/
+
+/-- ★★★★★★★★**野生の `[L:K] = n` の場合を端から端まで**——
+`λ^n = κ ∈ A`･`κ ∉ p^n`･単生成なら `p^n ∈ 𝔡`。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★原文の段 4-6 を一本にしたものである:
+
+| 仮説 | 原文のどこ |
+|---|---|
+| `hpow`･`hrank` | 段 4(Kummer 理論で `L = K(λ)`･`κ ≙ λ^p ∈ K`) |
+| `hval` | 段 5(`κ ∈ O_K` だが `κ ∉ p^p·O_K`) |
+| `hmono` | 局所体では常に成り立つ(`O_L = O_K[λ]`) |
+| 結論 | 段 6(`different` は `p·λ^{p−1}·O_L ⊇ p^p·O_L` を含む) |
+
+★★中間のすべて(最小多項式が `X^n − κ`･`λ ∣ p`･`different` の下界)は
+本ファイルの他の定理である。 -/
+theorem pow_mem_differentIdeal_of_kummer
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    [IsFractionRing B L] [ValuationRing B]
+    (n : ℕ) (hn : 0 < n) (lam : B) (kappa : A) (pp : B)
+    (hpow : lam ^ n = algebraMap A B kappa)
+    (hval : ¬ (pp ^ n ∣ lam ^ n))
+    (hint : IsIntegral K (algebraMap B L lam))
+    (hrank : Module.finrank K K⟮(algebraMap B L lam)⟯ = n)
+    (hmono : Algebra.adjoin A {lam} = ⊤)
+    (hgen : Algebra.adjoin K {(algebraMap B L) lam} = ⊤)
+    (hcoef : (n : B) = pp) :
+    pp ^ n ∈ differentIdeal A B := by
+  have hxpow : (algebraMap B L lam) ^ n = algebraMap K L (algebraMap A K kappa) := by
+    rw [← map_pow, hpow, ← IsScalarTower.algebraMap_apply A B L,
+      ← IsScalarTower.algebraMap_apply A K L]
+  have hmapK : minpoly K (algebraMap B L lam) = X ^ n - C (algebraMap A K kappa) :=
+    minpoly_eq_X_pow_sub_C_of_finrank K L n hn.ne' (algebraMap B L lam)
+      (algebraMap A K kappa) hxpow hint hrank
+  have hintA : IsIntegral A lam := IsIntegralClosure.isIntegral A L lam
+  have hmin : minpoly A lam = X ^ n - C kappa :=
+    minpoly_eq_X_pow_sub_C_of_map A K L n lam kappa hintA hmapK
+  have hdvd : lam ∣ pp := dvd_of_not_pow_dvd_pow B n lam pp hval
+  exact pow_mem_differentIdeal A K L n hn lam kappa pp hdvd hcoef hmin hgen
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -451,6 +498,11 @@ def mem_differentIdeal_of_isUnit_natCast.src : ABC3.Meta.Source :=
 def exists_gen_pow_mem_range.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(段 4——Kummer 理論で L = K(λ))",
+    sectionId := "genell-prop-1-7" }
+
+def pow_mem_differentIdeal_of_kummer.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(段 4-6 を端から端まで繋いだ形)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
