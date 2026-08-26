@@ -26264,3 +26264,57 @@ mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのも�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-641 ★★★★★★★★★Weil 対の非退化性が取れた(第 327 ブロック)
+
+`Found/GaloisRep/WeilNondegFull.lean`。
+
+### ★★★★★★★★★到達点
+
+> **`e_n(S, ·) ≡ 1 ⟹ S = 0`**(`weilPairing_nondegenerate`)
+
+★★★これが (G5) に残っていた**最後の数学**である。第 197 で
+「非退化性は `F(E)^{E[n]} = [n]^*F(E)` の 1 つに絞れた」と測って以来の穴が埋まった。
+
+### ★★★★★★★`hfix` の証明——5 つの部品の配線
+
+    L := F(x_n, y_n)
+    (a) x は L 上整、最小多項式の次数 <= n²   第 325 `finrank_adjoin_le_of_monic_rel`
+    (b) y ∈ L(x)                             第 325 `coordY_mem_of_mem`
+    (c) ゆえに L(x) = F(E)                   第 326 `intermediateField_eq_top_of_coord`
+    (d) L ⊆ Fix、[F(E):Fix] = n² で挟む      第 326 `eq_of_finrank_bound` + 第 196 Artin
+    (e) L ⊆ μF(E)                            第 118 `pointHom_genX/genY`
+
+★`Fix` は `FixedPoints.subfield (torsGroup W n) F(E)`(第 196)を
+`Subfield.toIntermediateField` で中間体に持ち上げた
+——`F` の元が固定されるのは、群が **`F` 代数自己同型**で作用するからである。
+
+### ★★★★★★当初の道との違い
+
+第 196 は「`deg[n] = n²` には**分点多項式**か**双対同種**のどちらかが要る
+——本プロジェクトがこれまで避けてきた量である」と書いた。
+★★実際に効いたのは分点多項式の側だが、`x([n]P) = Φ_n/ΨSq_n` の
+**帰納は第 42-52 で既に回してあった**(`MulOK` の同時帰納)。
+★★★★★**避けていたのは量ではなく帰納であり、それは在庫にあった。**
+
+### ★★★★見積もりの記録
+
+| 時点 | 見積もり | 実際 |
+|---|---|---|
+| 2026-08-20(第 196) | 分点多項式か双対同種、避けてきた量 | —— |
+| 2026-08-20(WeilPairing.needs) | EDS 恒等式は mathlib の TODO、30-80 ブロック、上流案件 | **EDS 恒等式は不要** |
+| 2026-08-26(§9-637 直前) | 配線の見込み | 第 323 で 1 ブロック |
+| 2026-08-26(§9-638 直前) | 超越性 5-15 ブロック | 第 324 で 1 ブロック |
+| 2026-08-26(§9-639 直前) | 拡大次数の帳簿 3-8 ブロック | 第 325-327 で 3 ブロック |
+
+★★★★★**上流案件と見えていたものが、在庫の組み替えで 5 ブロックに収まった。**
+
+### ★★残り((G5))
+
+* `det_cyclotomic_of_nondeg`(第 210 `BasisFree.lean`)に非退化性を渡す
+* `Skeleton/GaloisRep/WeilPairing.lean` の `det_galRep_eq_cyclotomic` の `sorry` が消える
+* `Interface/GaloisRep/Representation.lean` の `FullImageData` の witness を組む
+
+★★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。次の配線で **G5** が埋まる見込み。
+★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
