@@ -1077,6 +1077,7 @@ import ABC3.Found.GenEll.DifferentKummer
 import ABC3.Found.GenEll.PGroupTower
 import ABC3.Found.GenEll.TameRamification
 import ABC3.Found.GenEll.TotallyRamified
+import ABC3.Found.GenEll.SigmaBound
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp

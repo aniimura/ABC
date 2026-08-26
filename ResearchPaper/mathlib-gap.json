@@ -77,10 +77,21 @@
         "correction": "★2026-08-16 の remark_1_5_1.needs は『mathlib に scheme の spreading out は無い』としていたが、それは誤り(または測定漏れ)。2026-08-27 に訂正。"
       },
       "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
-      "nodes": "unmeasured",
-      "howToMeasure": "Remark 1.5.1 の合図は 3 件(one verifies×1 immediately×2)。原文 p.8-9 の該当段落を 1_Structured に起こし、intra-graph ではなく手で段を数える(原典内の番号付き項目にならないため機械では拾えない)。",
-      "done": 0,
-      "where": []
+      "nodes": 5,
+      "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。",
+      "done": 2,
+      "doneNote": "★段 5 はすでにあった——Found/GenEll/LogDiff.lean の logDiffOfField は X を引数に持たない(第 372 の実測)。★★段 4 を 2026-08-27 の第 412 ブロックで実装した(Found/GenEll/SigmaBound.lean の degNormalized_adivRed_le_sum_log)。残りは段 1-3。",
+      "criticalFinding": {
+        "measuredAt": "2026-08-27",
+        "what": "★★★Skeleton の remark_1_5_1 は現在の形では**偽**である(Check/GenEll/RemarkAxiomGap.lean の remark_1_5_1_false で機械検証済み)。∀ D D′ : HeightTheoryData の形で、HeightTheoryData は公理を 1 つも持たないので、点の全単射だけでは logDiff を何も縛らない(logDiff を 0 と x に取れば反例)。",
+        "consequence": "★この sorry は『spreading out 待ち』ではない——**そのままでは決して閉じられない**。spreading out を実装しても statement が偽のままである。",
+        "fix": "prop_1_4 / remark_1_4_1 と同じ方法で**構成に載せ替える**(Found/GenEll/HeightConstruction.lean 系の語彙で書き直し、逸脱を記録する)。★★段 4 と 5 は構成の側ではすでに真なので、載せ替えれば残るのは段 1-3 だけになる。"
+      },
+      "where": [
+        "lean/ABC3/Found/GenEll/SigmaBound.lean",
+        "lean/ABC3/Found/GenEll/LogDiff.lean",
+        "lean/ABC3/Check/GenEll/RemarkAxiomGap.lean"
+      ]
     },
     "belyi-noncritical": {
       "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
