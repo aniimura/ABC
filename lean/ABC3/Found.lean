@@ -1083,6 +1083,7 @@ import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.Normalize
 import ABC3.Found.NCBelyi.CoeffBound
 import ABC3.Found.NCBelyi.ReducedDegree
+import ABC3.Found.NCBelyi.NestedInduction
 /-!
 # Found — 実装済みの基礎
 
