@@ -774,6 +774,7 @@ import ABC3.Found.GaloisRep.TranslateAutAll
 import ABC3.Found.GaloisRep.GenericNotTorsion
 import ABC3.Found.GaloisRep.MulByNCoordX
 import ABC3.Found.GaloisRep.MulByNTranscendental
+import ABC3.Found.GaloisRep.DegBoundParts
 import ABC3.Found.GaloisRep.TorsionIdealIntegral
 import ABC3.Found.GaloisRep.CoordinateDimension
 import ABC3.Found.GaloisRep.CoordinateUnits
