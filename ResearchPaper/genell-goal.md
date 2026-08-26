@@ -28746,3 +28746,27 @@ Python の文字列で `𝔪` を**サロゲート対**で書くと UTF-8 への
 ★**8 桁の `\U0001D52A`** で書く。規則は `tools/lean-idioms.md` にある。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-701 ★★★★★★**`B = A[λ]` への降下の段**(第 389 ブロック)
+
+構造定理の 3 つ目(**`B = A[λ]`**)へ向けて、降下の段を取った:
+
+    Eisenstein なら  `p^k·z ∈ A[λ]`  ⇒  `z ∈ A[λ]`
+
+★任意の `z ∈ O_L` に対して `p^k·z ∈ O_K[λ]` となる `k` が取れれば、
+この補題で `k` を `0` まで落とせる。
+
+★★**1 段分は mathlib にあった**——
+`mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt`(`p·z ∈ A[λ] ⇒ z ∈ A[λ]`)。
+本定理はそれを `k` 回繰り返す帰納である。
+
+### 構造定理の現状
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★取った(第 388) |
+| 最小多項式が `π`-Eisenstein | 未着手 |
+| `B = A[λ]` | ★**降下の段を取った**(第 389)。`k` の存在は未着手 |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

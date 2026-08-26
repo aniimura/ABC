@@ -4,6 +4,7 @@ import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.Algebra.CharP.Basic
 import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 import Mathlib.RingTheory.PrincipalIdealDomain
+import Mathlib.RingTheory.Polynomial.Eisenstein.IsIntegral
 
 /-!
 # [GenEll] Proposition 1.7 の "elementary claim" —— **馴分岐**(`Found`)
@@ -197,6 +198,43 @@ theorem exists_isUnit_pow_eq_of_span_eq {B : Type*} [CommRing B] [IsDomain B] {l
   obtain ⟨u, hu⟩ := associated_pow_of_span_eq h
   exact ⟨(u : B), u.isUnit, hu.symm⟩
 
+/-! ## ★★★★★★Eisenstein なら `p^k` を割って降りられる -/
+
+open Polynomial in
+/-- ★★★★★★**Eisenstein なら `p^k·z ∈ A[λ]` から `z ∈ A[λ]` が出る**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★これが構造定理の 3 つ目(**`B = A[λ]`**)への降下の段である——
+任意の `z ∈ O_L` に対して `p^k·z ∈ O_K[λ]` となる `k` が取れれば、
+この補題で `k` を `0` まで落とせる。
+
+★★**1 段分は mathlib にあった**——
+`mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt`。
+本定理はそれを `k` 回繰り返す帰納である。 -/
+theorem mem_adjoin_of_pow_smul_of_isEisensteinAt {R : Type*} {K : Type*} {L : Type*} {pi : R}
+    [CommRing R] [Field K] [Field L] [Algebra K L] [Algebra R L] [Algebra R K]
+    [IsScalarTower R K L] [IsDomain R] [IsFractionRing R K] [IsIntegrallyClosed R]
+    {PB : PowerBasis K L} (hp : Prime pi) (hBint : IsIntegral R PB.gen)
+    (hEis : (minpoly R PB.gen).IsEisensteinAt (Ideal.span {pi})) :
+    ∀ (k : ℕ) (z : L), IsIntegral R z → (pi ^ k) • z ∈ Algebra.adjoin R {PB.gen} →
+      z ∈ Algebra.adjoin R {PB.gen} := by
+  intro k
+  induction k with
+  | zero => intro z _ h; simpa using h
+  | succ n ih =>
+      intro z hz h
+      have hpz : IsIntegral R (pi • z) := by
+        rw [Algebra.smul_def]
+        exact (isIntegral_algebraMap).mul hz
+      have h' : (pi ^ n) • (pi • z) ∈ Algebra.adjoin R {PB.gen} := by
+        rw [smul_smul]
+        convert h using 2
+        ring
+      exact mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt hp hBint hz
+        (ih (pi • z) hpz h') hEis
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -227,6 +265,11 @@ def pow_dvd_iff_of_isUnit_mul.src : ABC3.Meta.Source :=
 def exists_isUnit_pow_eq_of_span_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(全分岐なら π は λ^e の単元倍)",
+    sectionId := "genell-prop-1-7" }
+
+def mem_adjoin_of_pow_smul_of_isEisensteinAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(B = A[λ] への降下の段)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
