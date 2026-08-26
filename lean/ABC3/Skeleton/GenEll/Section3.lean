@@ -99,11 +99,14 @@ theorem lemma_3_1 (l : ℕ) [Fact (Nat.Prime l)] (hl : 5 ≤ l) :
 
 ★(i) の「either … or」は**排他的ではない**(原文 "either … or")。 -/
 theorem lemma_3_2 (D : TateLocalData) :
-    (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ) (N : D.StableLine K E l),
-        l ∣ D.vq K E ∨ D.IsCyclotomic N)
-  ∧ (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ),
+    (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ), Nat.Prime l →
+        ∀ (N : D.StableLine K E l), l ∣ D.vq K E ∨ D.IsCyclotomic N)
+  ∧ (∀ (K : D.LocalField) (E : D.Curve K) (l : ℕ), Nat.Prime l →
         D.degInf K (D.quotMu K E l) = (l : ℝ) * D.degInf K E) := by
-  sorry
+  refine ⟨D.stableLine_dvd_or_cyclotomic, fun K E l hl => ?_⟩
+  rw [D.degInf_eq K (D.quotMu K E l), D.degInf_eq K E, D.vq_quotMu K E l hl]
+  push_cast
+  ring
 
 /-! ## Definition 3.3 —— 局所高さ -/
 
@@ -325,6 +328,11 @@ def lemma_3_2.src : Source :=
   { paper := "GenEll", pdfPage := 15, item := "Lemma 3.2",
     sectionId := "genell-lemma-3-2" }
 
+/-- ★★★★★★**2026-08-26 の内訳**——(i) は `Interface` の
+`stableLine_dvd_or_cyclotomic` を**そのまま受けている**(原文が証明を与えず
+[FC] Ch. III, Cor. 7.3 に帰しているため)。
+★一方 (ii) は **`q_{E′} = q_E^l`(`vq_quotMu`)と `deg_∞ = v_K(q_E)·log #(O_K/𝔪)`
+(`degInf_eq`)から導出している**——原文の『hence』の中身である。 -/
 def lemma_3_2.needs : List ProofObligation :=
   [ .citation "[FC]" "Degenerations of Abelian Varieties, Chapter III, Corollary 7.3(完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0)"
       (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16、EllipticCurve/ 配下の全宣言名を確認)") 15,

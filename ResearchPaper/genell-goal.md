@@ -27801,3 +27801,44 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 | `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-676 ★★★★★★★★§3 の sorry が **2 → 1**——`Lemma 3.2` を分解した(第 363 ブロック)
+
+`Interface/GenEll/TateLocal.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★原文の 1 文を 2 つに分けた
+
+原文 `Lemma 3.2, (ii)` は「`E′ ≙ E/μ_l` の Tate 母数は `q_{E′} = q_E^l`、
+**したがって** `deg_∞(E′) = l·deg_∞(E)`」と書く。★この「したがって」を分解した:
+
+| 欄 | 役割 |
+|---|---|
+| `logResidueCard`･`logResidueCard_pos` | `log #(O_K/𝔪_K)` |
+| `degInf_eq` | **`deg_∞(E) = v_K(q_E)·log #(O_K/𝔪_K)`**(定義) |
+| `vq_quotMu` | **`q_{E′} = q_E^l`**([FC] Ch. III, Cor. 7.3) |
+| `stableLine_dvd_or_cyclotomic` | `Lemma 3.2, (i)`そのもの(原文は証明を与えない) |
+
+★★(ii) は **`degInf_eq` と `vq_quotMu` から導出**した——原文の「hence」の中身である。
+★★★(i) は仕様として受けた——原文が『we have the following **well-known** result』として
+証明を与えておらず、mathlib に `M_l(E)`･Tate twist が無いからである。
+
+### ★★★★★★★**充足不能を 1 つ防いだ**
+
+`vq_quotMu` を `∀ l : ℕ` で書くと **`l = 0` で充足不能**になる
+——`v_K(q_{E/μ_0}) = 0` と `vq_pos` が衝突する。
+★原文の `l` は**素数**なので `Nat.Prime l` を仮定に加えた(`Skeleton` 側も同様)。
+★★**充足可能であることを実際に確かめた**——`Check` の `tateLocalSatisfiable`
+(`v_K(q_E) = n+1`･`E/μ_l = l(n+1)-1`)。
+★★★欄を強めるときは**強めすぎて充足不能にする**のが欠陥 #1･#2･#4･#5 だった。
+その罠を踏まないために、強化ごとに充足 witness を置く。
+
+### ★★§3 の現状(sorry **1 件**)
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1`･`lemma_3_2`･`localHeight_pos`･`potLocalHeight_indep`･`prop_3_4`･`lemma_3_5`･`lemma_3_6` | ✅ |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` + Galois-finite の性質 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

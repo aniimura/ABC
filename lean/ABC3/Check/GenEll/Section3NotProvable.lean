@@ -57,70 +57,52 @@ namespace ABC3.Check.GenEll
 
 open ABC3.Interface.GenEll ABC3.Found.GenEll
 
-/-! ## ★★★★★★1. `TateLocalData` は `Unit` で埋まる -/
+/-! ## ★★★★★★★★1. `TateLocalData` は 2026-08-26 に接地された
 
-/-- ★**退化した `TateLocalData`**——世界を `Unit`、`v_K(q_E)` を定数 `1` にしたもの。
+★以前はここに `degenerateTateLocal`･`lemma_3_2_i_false`･`lemma_3_2_ii_false` があった
+——世界を `Unit`、`v_K(q_E)` を定数 `1`、`deg_∞` を定数にして破れていた。
 
-★`MultExt` だけは 2 元にしてある(`Remark 3.3.1` を破るため)。 -/
-def degenerateTateLocal : TateLocalData where
+★★次の 5 つを欄に出したので、**その退化 witness はもはや作れない**:
+`vq_baseChange`(第 360)･`logResidueCard`･`logResidueCard_pos`･
+`degInf_eq`･`vq_quotMu`･`stableLine_dvd_or_cyclotomic`(第 363)。
+
+★★★**充足不能になっていないかを確かめる**のが下の `tateLocalSatisfiable` である
+——欄を強めるときは**強めすぎて充足不能にする**のが欠陥 #1･#2･#4･#5 であった。 -/
+
+/-- ★★★★★**強めた `TateLocalData` は充足可能である**。
+
+`v_K(q_E) = n+1`･`deg_∞ = n+1`･`E/μ_l` を `l(n+1)-1` とすればすべての欄が成り立つ。
+★`l` を素数に限ったのがここで効く——`l = 0` なら `vq_quotMu` と `vq_pos` が衝突する。 -/
+def tateLocalSatisfiable : TateLocalData where
   LocalField := Unit
-  Curve := fun _ => Unit
-  vq := fun _ _ => 1
-  vq_pos := fun _ _ => Nat.one_pos
-  degInf := fun _ _ => 1
-  StableLine := fun _ _ _ => Unit
-  IsCyclotomic := fun _ => False
-  quotMu := fun _ _ _ => ()
-  MultExt := fun _ _ => Bool
+  Curve := fun _ => ℕ
+  vq := fun _ n => n + 1
+  vq_pos := fun _ n => Nat.succ_pos n
+  degInf := fun _ n => ((n + 1 : ℕ) : ℝ)
+  StableLine := fun _ _ _ => Empty
+  IsCyclotomic := fun _ => True
+  quotMu := fun _ n l => l * (n + 1) - 1
+  MultExt := fun _ _ => Unit
   extField := fun _ => ()
-  baseChange := fun _ => ()
+  baseChange := fun _ => 0
   ramIdx := fun _ => 1
-  ramIdx_pos := by
-    intro K E L
-    norm_num
-  vq_baseChange := by
-    intro K E L L'
-    rfl
-
-/-- ★★★★★★**`Lemma 3.2, (i)` は現在の界面の上では偽である**。
-
-`l = 2`、`v_K(q_E) = 1`、`IsCyclotomic := False` で破れる。 -/
-theorem lemma_3_2_i_false :
-    ¬ (∀ (K : degenerateTateLocal.LocalField) (E : degenerateTateLocal.Curve K) (l : ℕ)
-        (N : degenerateTateLocal.StableLine K E l),
-      l ∣ degenerateTateLocal.vq K E ∨ degenerateTateLocal.IsCyclotomic N) := by
-  intro h
-  rcases h () () 2 () with hdvd | hcyc
-  · exact absurd hdvd (by decide)
-  · exact hcyc
-
-/-- ★★★★★★**`Lemma 3.2, (ii)` は現在の界面の上では偽である**。
-
-`deg_∞` が定数なので `deg_∞(E/μ_l) = l·deg_∞(E)` は `l = 2` で破れる。 -/
-theorem lemma_3_2_ii_false :
-    ¬ (∀ (K : degenerateTateLocal.LocalField) (E : degenerateTateLocal.Curve K) (l : ℕ),
-      degenerateTateLocal.degInf K (degenerateTateLocal.quotMu K E l)
-        = (l : ℝ) * degenerateTateLocal.degInf K E) := by
-  intro h
-  have h2 := h () () 2
-  show False
-  simp only [degenerateTateLocal] at h2
-  norm_num at h2
-
-/-! ## ★★★★★★★`Remark 3.3.1` は 2026-08-26 に閉じた
-
-★以前はここに `potLocalHeight_indep_false` があった——分岐指数だけが違う
-2 つの拡大を取れば `v/e` は一致せず、`Remark 3.3.1` は破れていた。
-
-★★`Interface/GenEll/TateLocal.lean` に **`vq_baseChange`**(局所高さは分岐指数倍)を
-足したので、**その退化 witness はもはや作れない**。
-★★★これは posit ではなく定理である——`Found/GenEll/LocalHeightRamified.lean`(第 359)が
-mathlib の `HeightOneSpectrum.valuation_liesOver` から導いている。
-★★★★`Skeleton/GenEll/Section3.lean` の `potLocalHeight_indep` はこれで
-**`sorry` ではなくなった**。
-
-★下の `degenerateTateLocal` は `ramIdx ≡ 1` にしてあるので新しい欄を満たすが、
-`Lemma 3.2` は依然として破る。 -/
+  ramIdx_pos := fun _ => Nat.one_pos
+  vq_baseChange := fun _ _ => rfl
+  logResidueCard := fun _ => 1
+  logResidueCard_pos := fun _ => one_pos
+  degInf_eq := by
+    intro K E
+    show ((E + 1 : ℕ) : ℝ) = ((E + 1 : ℕ) : ℝ) * 1
+    ring
+  vq_quotMu := by
+    intro K E l hl
+    show (l * (E + 1) - 1) + 1 = l * (E + 1)
+    have h1 : 1 ≤ l * (E + 1) :=
+      Nat.one_le_iff_ne_zero.2 (Nat.mul_ne_zero hl.ne_zero (Nat.succ_ne_zero E))
+    omega
+  stableLine_dvd_or_cyclotomic := by
+    intro K E l hl N
+    exact N.elim
 
 /-! ## ★★★★★★★★2. `Proposition 3.4` も 2026-08-26 に閉じた
 
