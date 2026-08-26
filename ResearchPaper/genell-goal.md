@@ -28221,3 +28221,34 @@ Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools
 
 ★★`Section1` の sorry は **3 → 2**。Lean 全体の sorry は **41 → 40**。
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-685 ★★★★★★**`Proposition 1.7` の「≳ ではなく ≥」の段の前半**(第 373 ブロック)
+
+`Found/GenEll/MinFieldCovering.lean`。
+
+原文 p.10 は『the "portion over Σ" of `log-diff_Y − log-diff_Z` is **≥ 0**
+[i.e., with "≥", not "≳"!]』と**わざわざ区別して**書いている。中身は 2 行:
+
+1. `φ : Y → Z` を通すと点の**最小定義体は小さくなる**(`F_min(φ∘y) ⊆ F_min(y)`)
+2. `log-diff` は体を大きくすると**増えるだけ**(`logDiffOfField_le`、既実装)
+
+### ★★★★ 1 のために `MinField.lean` の欠けを埋めた
+
+`MinField.lean` は**極小性**(`x_F` が `E` を経由するなら `F_min ⊆ E`)は取っていたが、
+「**`F_min` 自身が定義体である**」ことは `κ(ξ)` を経由する形でしか取っていなかった。
+★`κ(ξ) ↠ F_min ↪ F` と**値域制限して分解**すれば、`x_F` は `Spec F_min` を経由する。
+★★これがあれば `x_F ≫ φ` も経由するので、**極小性がそのまま被覆の単調性を与える**。
+
+### 残り
+
+`minField` は `Subfield F` を返すので、部分体を**数体として見る**インスタンス
+(`Algebra ℚ ↥E`･`FiniteDimensional ℚ ↥E`)を通す必要がある。
+
+### 配管
+
+★`rw` が `minField F xF` の中の `xF` まで書き換えて motive not type correct になる
+——`conv_lhs` で**左辺だけ**書き換える。
+★★`set` で別名を付けると `let` の展開差でさらに詰まるので、この種の証明では使わない。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
