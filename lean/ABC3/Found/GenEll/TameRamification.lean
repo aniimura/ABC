@@ -3,6 +3,7 @@ import Mathlib.RingTheory.LocalRing.ResidueField.Defs
 import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.Algebra.CharP.Basic
 import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
+import Mathlib.RingTheory.PrincipalIdealDomain
 
 /-!
 # [GenEll] Proposition 1.7 の "elementary claim" —— **馴分岐**(`Found`)
@@ -175,6 +176,27 @@ theorem pow_dvd_of_dvd_of_isUnit_mul {B : Type*} [CommRing B] {e : ℕ} {lam pi 
     lam ^ e ∣ x :=
   (pow_dvd_iff_of_isUnit_mul hu hpi).mpr hx
 
+/-! ## ★★★★★全分岐 ⇒ `π` は `λ^e` の単元倍 -/
+
+/-- ★★**イデアルが一致すれば単元倍である**。 -/
+theorem associated_pow_of_span_eq {B : Type*} [CommRing B] [IsDomain B] {lam x : B} {e : ℕ}
+    (h : Ideal.span {x} = Ideal.span {lam} ^ e) : Associated x (lam ^ e) := by
+  rw [Ideal.span_singleton_pow] at h
+  exact (Ideal.span_singleton_eq_span_singleton).mp h
+
+/-- ★★★★**全分岐なら `π` は `λ^e` の単元倍**——
+`pow_dvd_iff_of_isUnit_mul` が要求する形で出す。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★仮説の `Ideal.span {π} = Ideal.span {λ}^e` が**全分岐の定義そのもの**である
+——`π·B = 𝔪_B^e`。 -/
+theorem exists_isUnit_pow_eq_of_span_eq {B : Type*} [CommRing B] [IsDomain B] {lam x : B} {e : ℕ}
+    (h : Ideal.span {x} = Ideal.span {lam} ^ e) : ∃ u : B, IsUnit u ∧ lam ^ e = x * u := by
+  obtain ⟨u, hu⟩ := associated_pow_of_span_eq h
+  exact ⟨(u : B), u.isUnit, hu.symm⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -200,6 +222,11 @@ def aeval_derivative_eisenstein_tame.src : ABC3.Meta.Source :=
 def pow_dvd_iff_of_isUnit_mul.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(全分岐で Eisenstein の条件が λ^e ∣ · になる)",
+    sectionId := "genell-prop-1-7" }
+
+def exists_isUnit_pow_eq_of_span_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(全分岐なら π は λ^e の単元倍)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll

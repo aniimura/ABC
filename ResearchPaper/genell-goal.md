@@ -28720,3 +28720,29 @@ Eisenstein の**標準的な条件**は「係数が `π_K` で割れる」であ
 | Eisenstein の条件の橋 | ★★**本ブロック** |
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-700 ★★★★★**全分岐 ⇒ `π` は `λ^e` の単元倍**(第 388 ブロック)
+
+構造定理が与えるべき 3 つのうち、1 つ目を取った:
+
+    Ideal.span {π} = Ideal.span {λ}^e   (全分岐の定義そのもの、`π·B = 𝔪_B^e`)
+      ⇒ ∃ u, IsUnit u ∧ λ^e = π·u
+
+★イデアルが一致すれば単元倍である(`Ideal.span_singleton_eq_span_singleton`)という 2 行で、
+第 387 の橋(`pow_dvd_iff_of_isUnit_mul`)が要求する形がそのまま出る。
+
+### 構造定理の残り
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★**取った**(第 388) |
+| 最小多項式が `π`-Eisenstein | 未着手 |
+| `B = A[λ]` | 未着手 |
+
+### 配管(既知の穴に 3 度目)
+
+Python の文字列で `𝔪` を**サロゲート対**で書くと UTF-8 への書き出しで落ちる。
+★**8 桁の `\U0001D52A`** で書く。規則は `tools/lean-idioms.md` にある。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
