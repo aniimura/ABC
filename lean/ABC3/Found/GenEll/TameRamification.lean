@@ -322,6 +322,76 @@ theorem constCoeff_eq_pow_mul_isUnit {B : Type*} [CommRing B] [IsLocalRing B]
     rw [hz]
     ring
 
+/-! ## ★★★★★★★Eisenstein の係数——すべて `π` で割れる -/
+
+open Finset in
+/-- ★★★★★★★**全分岐の生成元の最小多項式の係数はすべて非単元**——
+Eisenstein の『`i < e` の係数が `π` で割れる』。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★これも**付値なし**で出る——最小の反例 `i` を取ると:
+
+* `λ^e` は `e > i` なので `λ^{i+1}` で割れる
+* `j > i` の項は `λ^j` で割れ、`j ≥ i+1`
+* `j < i` の項は最小性から `a_j` が非単元、すなわち `λ^e ∣ a_j` なので `λ^{e+j}` で割れ、`e+j > i`
+
+★★したがって `a_i·λ^i` も `λ^{i+1}` で割れ、`λ^i` を約すと `λ ∣ a_i`、
+つまり `a_i` は単元でない——矛盾である。
+
+★★★仮説 `hpi` が「`A` の非単元は `λ^e` で割れる」であり、
+これが**全分岐**(`π ~ λ^e`、第 388)の使い所である。 -/
+theorem not_isUnit_coeff_of_root {A : Type*} {B : Type*} [CommRing A] [CommRing B]
+    [IsDomain B] [Algebra A B]
+    (e : ℕ) (a : ℕ → A) (lam : B) (hlam : lam ≠ 0) (hlamnu : ¬ IsUnit lam)
+    (hpi : ∀ x : A, ¬ IsUnit x → lam ^ e ∣ algebraMap A B x)
+    (hloc : ∀ x : A, ¬ IsUnit (algebraMap A B x) → ¬ IsUnit x)
+    (hroot : lam ^ e + ∑ i ∈ range e, algebraMap A B (a i) * lam ^ i = 0) :
+    ∀ i, i < e → ¬ IsUnit (a i) := by
+  classical
+  intro i
+  induction i using Nat.strong_induction_on with
+  | _ i ih =>
+    intro hie hunit
+    -- ★他の項はすべて `λ^{i+1}` で割れる
+    have hrest : lam ^ (i + 1) ∣ ∑ j ∈ (range e).erase i, algebraMap A B (a j) * lam ^ j := by
+      refine Finset.dvd_sum (fun j hj => ?_)
+      have hjne : j ≠ i := (Finset.mem_erase.mp hj).1
+      have hje : j < e := Finset.mem_range.mp (Finset.mem_erase.mp hj).2
+      rcases lt_or_gt_of_ne hjne with hlt | hgt
+      · obtain ⟨c, hc⟩ := hpi (a j) (ih j hlt hje)
+        rw [hc]
+        have h1 : lam ^ (i + 1) ∣ lam ^ (e + j) := pow_dvd_pow lam (by omega)
+        have h2 : lam ^ e * c * lam ^ j = lam ^ (e + j) * c := by rw [pow_add]; ring
+        rw [h2]
+        exact h1.mul_right c
+      · exact Dvd.dvd.mul_left (pow_dvd_pow lam (by omega)) _
+    have hlead : lam ^ (i + 1) ∣ lam ^ e := pow_dvd_pow lam (by omega)
+    have hsplit : ∑ j ∈ range e, algebraMap A B (a j) * lam ^ j
+        = algebraMap A B (a i) * lam ^ i
+          + ∑ j ∈ (range e).erase i, algebraMap A B (a j) * lam ^ j :=
+      (Finset.add_sum_erase _ _ (Finset.mem_range.mpr hie)).symm
+    rw [hsplit] at hroot
+    have hkey : lam ^ (i + 1) ∣ algebraMap A B (a i) * lam ^ i := by
+      have hneg : algebraMap A B (a i) * lam ^ i
+          = -(lam ^ e + ∑ j ∈ (range e).erase i, algebraMap A B (a j) * lam ^ j) := by
+        linear_combination hroot
+      rw [hneg]
+      exact dvd_neg.mpr (Dvd.dvd.add hlead hrest)
+    obtain ⟨c, hc⟩ := hkey
+    have hcancel : algebraMap A B (a i) = lam * c := by
+      have hne : (lam : B) ^ i ≠ 0 := pow_ne_zero i hlam
+      have heq : lam ^ i * algebraMap A B (a i) = lam ^ i * (lam * c) := by
+        rw [pow_succ] at hc
+        linear_combination hc
+      exact mul_left_cancel₀ hne heq
+    have hnu : ¬ IsUnit (algebraMap A B (a i)) := by
+      rw [hcancel]
+      intro hu
+      exact hlamnu (isUnit_of_mul_isUnit_left hu)
+    exact hloc (a i) hnu hunit
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -367,6 +437,11 @@ def exists_smul_mem_adjoin_powerBasis.src : ABC3.Meta.Source :=
 def constCoeff_eq_pow_mul_isUnit.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(Eisenstein の定数項は π² で割れない)",
+    sectionId := "genell-prop-1-7" }
+
+def not_isUnit_coeff_of_root.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(Eisenstein の係数はすべて π で割れる)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
