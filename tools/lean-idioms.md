@@ -730,3 +730,10 @@ exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
 ```
 
 ★★`rw`/`simp` は構文照合、`exact` は defeq 照合。**実例のダイヤモンドは後者なら抜ける**。
+
+## `R` が結論にしか現れない補題は `(R := R)` を明示する
+
+`theorem foo (W : WeierstrassCurve K) [IsIntegral R W] (h : …) : 0 ≤ vAdd (tateDvrVal R K) …`
+のように `R` がインスタンス引数と結論だけに現れる補題を `foo (C • W) hΔ` と当てると
+`typeclass instance problem is stuck / IsFractionRing ?m K` で止まる。
+インスタンス探索が結論より先に走るため。`foo (R := R) (C • W) hΔ` と書けば通る。

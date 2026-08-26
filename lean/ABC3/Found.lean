@@ -957,6 +957,7 @@ import ABC3.Found.GaloisRep.TateResidual
 import ABC3.Found.GaloisRep.TateModel
 import ABC3.Found.GaloisRep.TateCurveWitness
 import ABC3.Found.GaloisRep.NeronExp
+import ABC3.Found.GaloisRep.NeronMinimal
 import ABC3.Found.Arakelov.PicUnfoldLE
 import ABC3.Found.Arakelov.PicSquareGen
 import ABC3.Found.Arakelov.PicPredSieve
