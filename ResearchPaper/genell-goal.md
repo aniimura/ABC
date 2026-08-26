@@ -26489,3 +26489,52 @@ G8 の `htFalt` 欄は**界面が要求を書ききれていない**状態のま
 ★★★★その差を、散文ではなく `Check/` の定理と `Skeleton/` の節点として**機械可読に**残した。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-645 ★★★★★★訂正——(D1)(D2)(D3) は達成済み。残るのは一意化と解析(第 331 ブロック)
+
+`Skeleton/GenEll/Uniformization.lean` の `.needs` を訂正・精密化。
+
+### ★★★★★★★訂正——前ターンの記述は誤りだった
+
+§9-644 で「G8 の実質的な達成は Arakelov 側の**未達義務** (D1)(D2)(D3) に従属している」と
+書いたが、**これは誤りである**。★(D1)(D2)(D3) はいずれも witness を持つ:
+
+| 義務 | witness |
+|---|---|
+| (D1) `APicData` | `Found/Arakelov/APicWitness.lean` |
+| (D2) `APicSpecData` | `Found/Arakelov/ADegBase.lean` |
+| (D3) `ArakelovHeightData` | `Found/Arakelov/AHeightWitness.lean` |
+
+★★誤りの原因は `Interface/Arakelov/APic.lean` の **`waiting` が古いまま**だったことである
+——witness が入ったあとも `waiting` は消されない仕様なので、`waiting` の有無で
+達成状況を読んではいけない。★★★**達成状況は `*.nonvacuous` の有無で読む。**
+(なお `CartierPicData` の witness は `cartierPicData_nonvacuous` と `_` 区切りで
+命名されており、`.nonvacuous` で grep すると**見落とす**。Arakelov は 9/9 で正しい。)
+
+### ★★★★★したがって `deg` の機構はもうある
+
+`APic` の witness は **`Pic X × Multiplicative (arcCM X)`** で、
+アルキメデス側(弧空間上の連続関数)のデータを持っている。★`deg_F` も `degFOf` として構成済み。
+
+★★**残る障害は 3 つ**:
+
+1. **一意化**(本節点 `exists_periodPair`)
+2. `ω_E` の**アルキメデス norm**(周期束の共体積)の組み上げ
+3. **`Proposition 3.4` の解析的内容**
+
+### ★★★★★★一意化の道筋(2026-08-26 の測定)
+
+★mathlib は **`WeierstrassCurve.exists_variableChange_of_j_eq`**
+(分離閉体上で `j` が等しければ同型、`IsomOfJ.lean`)を持つ。
+★★したがって本節点は **「`j` の全射性」**に帰着する。
+★★★しかし **mathlib にモジュラー `j` 関数は 0 件**
+(`Mathlib/NumberTheory/ModularForms/` を `jInvariant|def j` で検索して 0)。
+★★★★足場はある——Eisenstein 級数、`Δ = η²⁴`、レベル 1 の次元公式と Sturm 境界。
+★★★★★古典的な道は `M₁₂ = ⟨E₄³, Δ⟩` で `E₄³ − λΔ` が ℍ に零点を持つことを出す。
+**見積もり 10-30 ブロック**(上流に入れる価値のある仕事である)。
+
+★★3 の `Proposition 3.4` は原文の主定理であり、**研究水準の解析**である
+——本セッションの射程を超える。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
