@@ -71,7 +71,7 @@
    "citedBy": [
     "IUTchI"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 1.7",
@@ -453,5 +453,5 @@
   }
  ],
  "total": 54,
- "done": 53
+ "done": 54
 }
