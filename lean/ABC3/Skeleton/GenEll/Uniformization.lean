@@ -97,6 +97,8 @@ def exists_periodPair.needs : List ProofObligation :=
       "★★★★**下流の鎖**: 本節点 → 周期束の共体積(アルキメデス norm)→ `ω_E` を計量つき算術直線束にする → (D1)(D2)(D3) の `deg` に載せる → `ht^Falt = deg(ω_E)` を固定 → G8 の欠陥 #6 を塞ぐ。★★★★★**2026-08-26 の訂正**: (D1)(D2)(D3) はすでに witness を持つ(`APicWitness`・`ADegBase`・`AHeightWitness`)。`Interface/Arakelov/APic.lean` の `waiting` は古い。★したがって **`deg` の機構はもうある**——`APic` の witness は `Pic X × Multiplicative (arcCM X)` でアルキメデス側を持つ。★★残る障害は本節点と、`ω_E` のアルキメデス normの組み上げ、そして `Proposition 3.4` の解析的内容である" 17,
     .implicitStep
       "★★★★★★**2026-08-26 の測定(本節点の道筋)**: mathlib は **`WeierstrassCurve.exists_variableChange_of_j_eq`**(分離閉体上で `j` が等しければ同型、`AlgebraicGeometry/EllipticCurve/IsomOfJ.lean`)を持つ。★★したがって本節点は **「j の全射性」**に帰着する——与えられた `j₀ : ℂ` に対し `j(latticeCurve P) = j₀` なる周期対 `P` を作ればよい。★★★しかし **mathlib にモジュラー `j` 関数は 0 件**(`Mathlib/NumberTheory/ModularForms/` を `jInvariant|def j` で検索して 0)。★★★★足場はある——Eisenstein 級数、`Δ = η²⁴`(`Discriminant.lean`)、レベル 1 の次元公式と Sturm 境界(`LevelOne/DimensionFormula.lean`)。★★★★★古典的な道は `M₁₂ = ⟨E₄³, Δ⟩` と値の式で、`E₄³ − λΔ` が ℍ に零点を持つことを出す。見積もり **10-30 ブロック**" 17,
+    .implicitStep
+      "★★★★★★★**2026-08-26 の追加測定(見積もりの上振れ)**: mathlib の `Elliptic/Weierstrass.lean` は **微分方程式で止まっている**。★同ファイルを `27|discrim|halfPeriod|Injective|surjective` で検索して **0 件**——すなわち (i) 束の判別式 `g₂³ − 27g₃² ≠ 0`、(ii) 半周期と `e₁,e₂,e₃`、(iii) `℘` の 2 対 1 性・全射性 はいずれも無い。★★したがって本節点は「j の全射性」だけではなく、**束の判別式の非消失と `ℂ/Λ ≅ E(ℂ)` の群同型**も必要とする。★★★★見積もりを **25-60 ブロック**に上振れさせる。★★★★★これは上流(mathlib)に入るべき仕事であり、**Galois の義務の中では閉じない**" 17,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, VI.5(複素楕円曲線の一意化)"
       (.absent "mathlib に一意化(任意の E/ℂ が ℂ/Λ)は 0 件(2026-08-26 実測)") 17,
     .otherPaper "GenEll" "Proposition 3.4(Faltings 高さと無限遠因子)" 17 ]
