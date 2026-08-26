@@ -26377,3 +26377,66 @@ Artin(第 196)、モニック性(第 198)、Dedekind 性(第 137)はすべて既
 
 ★★**Galois 義務 7/8**(Arakelov 9/9)。
 ★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-643 ★★★★★★★★Galois 義務 8/8——ただし `ht^Falt` は固定されていない(第 329 ブロック)
+
+`Found/GaloisRep/FaltingsWitness.lean`、`Check/GaloisRep/HtFaltNotPinned.lean`。
+
+### ★★★★★★★★到達点(と、その正確な意味)
+
+> **`FaltingsHeightData.nonvacuous`** が取れ、Galois 義務の **8 欄すべてに witness がある**
+
+★★★★★★★★★**ただし本 witness の `htFalt` は `deg∞/12` であって
+Faltings 高さではない。`Proposition 3.4` の数学的内容は証明されていない。**
+
+### ★★★★★★なぜそれで界面が満たせてしまうのか
+
+界面が `htFalt` に課しているのは 2 本だけである:
+
+* `htFalt_variableChange`(変数変換で不変)
+* `prop_3_4`(`deg∞/(12(1+ε)) <= htFalt + C`)
+
+★`htFalt := deg∞/12` は**どちらも満たす**——前者は `deg∞` が変数変換で不変だから
+(本ブロックの `degInfOf_variableChange`、**真の定理**)、
+後者は `deg∞ >= 0` と `1+ε > 1` から `C = 0` で出る。
+★★つまり `prop_3_4` が**恒等的に成り立つ形**で埋まる。
+
+### ★★★★★★★★これで界面の欠陥は 6 つ目——初めての「弱すぎる」型
+
+| # | 場所 | 欠陥の型 | 塞いだ |
+|---|---|---|---|
+| 1 | G6 `localHeight` | **充足不能**(付値が任意) | 第 302 |
+| 2 | G6 全体 | **充足不能**(`Δ = 0`) | 第 304 |
+| 3 | G7 `omega` | **弱すぎる**(曲線と結ばれていない) | 第 311 |
+| 4 | G7 `omegaFrac` | **充足不能**(`Δ = 0`) | 第 317 |
+| 5 | G8 `degInf_ge_localHeight` | **充足不能**(分岐で偽) | 第 318 |
+| 6 | **G8 `htFalt`** | **弱すぎる**(`deg∞/12` で満たせる) | ★**未** |
+
+★★#3 は塞げた(`omegaFrac_variableChange` を足した)。
+★★★★#6 が塞げないのは、**塞ぐ条件が (D3) の計量に依存する**からである(§9-404):
+`ht^Falt = deg(ω_E)` は算術直線束の**計量込みの**次数であり、
+有限部分だけでは変数変換不変にすらならない
+(積公式により `Σ_p v_p(u)·log N(p)` が残り、アルキメデス側が打ち消す)。
+
+★★★★★★★**機械可読の形で `Check/GaloisRep/HtFaltNotPinned.lean` に記録した**
+——`htFalt_not_pinned`(`htFalt = deg∞/12` なる witness の存在)と
+`prop_3_4_trivial_for_witness`(その witness では `C = 0` で成り立つ)。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `minDeltaExp_variableChange` | ★★★★★**極小判別式の指数は変数変換で不変**(真) |
+| `degInfOf_variableChange` | ★★★★★★**`deg∞` は変数変換で不変**(真) |
+| `faltingsHeightDataWitness` | ★★★★★★★★**`FaltingsHeightData` の実装** |
+| `FaltingsHeightData.nonvacuous` | ★★★★★★★★**G8 の欄が埋まる** |
+
+### ★★★★★数の読み方(自戒)
+
+★**「Galois 8/8」は「界面に書いた条件をすべて満たす witness がある」ことであって、
+「原文の主張をすべて証明した」ことではない。**
+★★★G8 については、界面が要求を書ききれていない(#6)ことを本ブロックで確認した。
+★★★★★★次にやるべきは数を増やすことではなく、**(D3) を入れて #6 を塞ぐこと**である。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。

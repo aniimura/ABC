@@ -850,6 +850,7 @@ import ABC3.Found.GaloisRep.TorsionAction
 import ABC3.Found.GaloisRep.NondegStep
 import ABC3.Found.GaloisRep.WeilNondegFull
 import ABC3.Found.GaloisRep.FullImageWitness
+import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.PhiDegree
 import ABC3.Found.GaloisRep.PhiTwo
 import ABC3.Found.GaloisRep.KummerX
