@@ -27346,3 +27346,42 @@ mathlib は `derivWeierstrassP_sq : ℘'² = 4℘³ − g₂℘ − g₃` を持
 | 一致の定理で `℘_L = ℘_{L'}`、極で束が一致 | 未 |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-666 ★★★★★★`f = ℘[L−0]` の解析的な恒等式(第 352 ブロック)
+
+`Found/GenEll/PexcODE.lean`。節点「`(g₂,g₃)` は束を決める」の**第 2 歩**。
+
+### ★★★★★★★到達点
+
+> **`z²·f'' = 6z²·f² + 12·f − (g₂/2)·z²`**(`0` の近傍、`pexc_ode`)
+
+★`f` の `0` での冪級数係数は mathlib の `hasFPowerSeriesAt_weierstrassPExcept` で
+`a_i = (i+1)·G(i+2)` と分かっているので、これが**係数の漸化式**の土台である。
+
+### ★★★★★段取り
+
+`℘ = f + z⁻²`(第 351)を 2 回微分する:
+
+    ℘'  = f' − 2/z³        (`derivWeierstrassP_eq_pexc`)
+    ℘'' = f'' + 6/z⁴       (`deriv_derivWeierstrassP_eq_pexc`)
+
+★これを `℘'' = 6℘² − g₂/2` に入れると **`6/z⁴` が両辺で打ち消し**、
+`z²f'' = 6z²f² + 12f − (g₂/2)z²`(`Λᶜ` 上)になる。
+
+★★★**`0` を含む近傍へ延ばす段は、値の突き合わせだけで済んだ**——
+両辺は `w = 0` でともに `12·f(0) = 0`(`weierstrassPExcept_zero`)なので、
+`𝓝[≠] 0 ⊔ pure 0 = 𝓝 0`(`nhdsNE_sup_pure`)で貼り合わせればよい。
+★連続性や一致の定理を持ち出す必要はなかった。
+
+### ★★残る段(節点の完成まで)
+
+| 段 | 状態 |
+|---|---|
+| `℘'' = 6℘² − g₂/2` | ✅ 第 351 |
+| `z²f'' = 6z²f² + 12f − (g₂/2)z²` | ✅ **第 352** |
+| 係数を比べて漸化式 | 未(`iteratedDeriv_fun_mul` の Leibniz を使う) |
+| 帰納法で `G` が `g₂,g₃` で決まる | 未 |
+| 一致の定理で `℘_L = ℘_{L'}`、極で束が一致 | 未 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
