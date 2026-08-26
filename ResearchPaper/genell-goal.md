@@ -25779,3 +25779,63 @@ mathlib の分数イデアル論は `FractionalIdeal.count`(素因子の重複�
 
 ★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-633 ★★★★★★★局所高さは極小判別式の付値である(第 320 ブロック)
+
+`Found/GaloisRep/LocalHeightDelta.lean`。
+
+### ★★★★★★★到達点
+
+> **`localHeightOf W h = vAdd (Δ_W)`**(`W` が `R` 上極小のとき)
+
+★★★これが第 319 の `deg∞` と第 310 の局所高さを**繋ぐ**唯一の環である。
+`deg∞` を `v_p(Δ_min)` の和として定義した以上、この一致がなければ
+`degInf_ge_localHeight` は書けない。
+
+### ★★★★★証明の筋——「Tate モデルは極小である」
+
+第 310 の `tateParamR_spec` は、`W` の整モデルを変数変換 `C` で
+**Tate 標準形 `tateCurveAt q`** に移せることを言う。そこで
+
+1. `tateCurveAt q` の `c₄` は**単元**(第 304 の `tateCurveAt_c4_isUnit`)
+2. ★★★★★**`v(c₄) = 0` ならば極小**(`isMinimal_of_c4_vAdd_eq_zero`、本ブロック)
+3. したがって `C.map` の `u` の付値は `0`(第 312 の `minimal_u_vAdd_eq`)
+4. ★★`Δ(C•W) = u⁻¹²Δ(W)` より `v(Δ_q) = v(Δ_W)`
+5. ★★★`Δ_q = q·(単元)`(第 101)より `v(Δ_q) = v(q) = 局所高さ`
+
+### ★★★★★★鍵は「極小性の判定を `c₄` の付値だけで済ませた」こと
+
+★極小性は本来「すべての変数変換にわたる最小値」という**全称**の主張で、
+そのままでは扱いにくい。しかし乗法還元では
+
+    v(c₄) = 0 かつ整  ⟹  極小
+
+が使える:`c₄` は変数変換で `-4v(u)`、`Δ` は `-12v(u)` だけ動くから、
+整であることが `v(u) ≤ 0` を強い、`Δ` の側が `v(u) ≥ 0` を強いる。
+★★★★★**片方向の不等式を 2 本ぶつけて `v(u) = 0` を出す**——
+完備化も一意性定理も要らない。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `integral_c4_vAdd_nonneg` | ★★整モデルの `c₄` は付値非負 |
+| `vAdd_c4_variableChange` | ★★★`c₄` の付値は `-4v(u)` だけ動く |
+| `variableChange_c4_ne_zero` | ★`c₄ ≠ 0` は変数変換で保たれる |
+| `isMinimal_of_c4_vAdd_eq_zero` | ★★★★★**`v(c₄) = 0` ⟹ 極小** |
+| `tateDvrVal_eq_zero_of_isUnit` | ★★単元の付値は `0` |
+| `isIntegral_baseChange` | ★係数環から来た曲線は整 |
+| `localHeight_eq_vAdd_Delta` | ★★★★★★★**局所高さ = `v(Δ_min)`** |
+
+### ★★残り(G8)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg` | ★★★★**済**(第 319) |
+| `degInf_ge_localHeight` | ★本ブロックで**芯が通った**。あとは不分岐の仮定で `R` の付値を `p` の付値に移し、単項 `≤` 有限和、`log N(p) ≥ log 2` |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
