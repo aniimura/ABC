@@ -43,7 +43,7 @@ import Mathlib.RingTheory.DedekindDomain.Different
 |---|---|
 | 1(野生/馴の分離) | 未着手 |
 | 2(`ζ_p ∈ K` への帰着) | 未着手 |
-| 3(`p`-群の可解性で `[L:K] = p` へ) | 未着手 |
+| 3(`p`-群の可解性で `[L:K] = p` へ) | ★**道具(塔で継ぐ補題)は本ファイル**。群論の側は未着手 |
 | 4(Kummer 理論) | 未着手 |
 | **5(`p ∈ λ·O_L`)** | ★**本ファイル**——付値環の全順序性 1 行 |
 | **6(different の下界)** | ★**本ファイル** |
@@ -167,6 +167,41 @@ theorem pow_mem_differentIdeal
   rw [hc]
   exact Ideal.mul_mem_right c _ h1
 
+/-! ## ★★★★★段 3 の道具 —— 塔で継ぐ -/
+
+/-- ★★★★**`p^m ∈ different(A,B)` と `p^k ∈ different(B,C)` なら
+`p^{k+m} ∈ different(A,C)`**。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★原文の段 3(`Gal(L/K)` は位数 `≤ d` の可解な `p`-群なので
+`[L:K] = p` の場合に帰着する)を**実際に実行するときの道具**である——
+次数 `p` の塔 `K = K₀ ⊆ K₁ ⊆ … ⊆ K_s = L`(`p^s ≤ d`)の各段で
+`p^p ∈ different` が出れば、**塔全体で `p^{s·p} ∈ different`** となり、
+`s ≤ log_p d` なので **`n ≙ p·log_p d` が `d` にだけ依る一様な値**になる。
+
+★★乗法性 `different(A,C) = different(B,C) · map(different(A,B))` は mathlib にある
+(`differentIdeal_eq_differentIdeal_mul_differentIdeal`)。
+★★★本定理はそれを**仮説として受けている**——
+分数体の間の `Algebra` インスタンスの道が呼び出し側でしか定まらないからである。 -/
+theorem pow_mem_differentIdeal_tower
+    (A : Type*) (B : Type*) (C : Type*) [CommRing A] [CommRing B] [Algebra A B]
+    [CommRing C] [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    [IsDomain A] [IsDedekindDomain B] [IsDedekindDomain C]
+    [Module.IsTorsionFree A B] [Module.IsTorsionFree B C] [Module.IsTorsionFree A C]
+    (pnat m k : ℕ)
+    (hmul : differentIdeal A C
+      = differentIdeal B C * Ideal.map (algebraMap B C) (differentIdeal A B))
+    (hAB : ((pnat : B)) ^ m ∈ differentIdeal A B)
+    (hBC : ((pnat : C)) ^ k ∈ differentIdeal B C) :
+    ((pnat : C)) ^ (k + m) ∈ differentIdeal A C := by
+  rw [hmul]
+  have h : ((pnat : C)) ^ (k + m) = (pnat : C) ^ k * algebraMap B C ((pnat : B) ^ m) := by
+    rw [map_pow, map_natCast, pow_add]
+  rw [h]
+  exact Ideal.mul_mem_mul hBC (Ideal.mem_map_of_mem _ hAB)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -192,6 +227,11 @@ def dvd_of_not_pow_dvd_pow.src : ABC3.Meta.Source :=
 def pow_mem_differentIdeal.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(p^p·O_L ⊆ different(L/K))",
+    sectionId := "genell-prop-1-7" }
+
+def pow_mem_differentIdeal_tower.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(次数 p の塔で different の下界を継ぐ)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll

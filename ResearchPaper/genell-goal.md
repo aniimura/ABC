@@ -28290,3 +28290,31 @@ Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools
 `¬(p^n ∣ λ^n)` から `λ ∣ p` が出る。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-687 ★★★★★**elementary claim の段 3 の道具——塔で継ぐ**(第 375 ブロック)
+
+原文 p.10 の段 3 は『`Gal(L/K)` は位数 `≤ d` の可解な `p`-群なので
+`[L:K] = p` の場合に帰着する』である。
+
+★これを実行するときの道具が、次数 `p` の塔 `K = K₀ ⊆ … ⊆ K_s = L` の各段で
+`p^p ∈ different` が出れば**塔全体で `p^{s·p} ∈ different`** になる、という継ぎである。
+★★`p^s ≤ d` なので `s ≤ log_p d`、したがって **`n ≙ p·log_p d` が `d` にだけ依る一様な値**になる。
+
+乗法性は mathlib にある(`differentIdeal_eq_differentIdeal_mul_differentIdeal`)。
+★本定理はそれを**仮説として受けている**——分数体の間の `Algebra` インスタンスの道が
+呼び出し側でしか定まらないからである。
+
+### elementary claim の現状
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | 未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★**道具は取った**(第 375)。群論の側は未着手 |
+| 4(Kummer 理論) | 未着手 |
+| 5(`λ ∣ p`) | ★取った(第 374) |
+| 6(different の下界) | ★取った(第 374) |
+| 結論 `p^p·O_L ⊆ different` | ★★取った(第 374) |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
