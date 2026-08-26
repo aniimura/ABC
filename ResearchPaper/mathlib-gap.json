@@ -1,0 +1,119 @@
+{
+  "_comment": [
+    "★『mathlib に無い標準数学』の登録簿。2026-08-27 に新設。",
+    "★★なぜ要るか: Skeleton/ は原典の statement 専用、Interface/ は posit 専用、Found/ は実装専用であり、",
+    "   『これから作るべき標準数学』を節点として数える場所がどこにも無かった。",
+    "   従来は .needs の .citation(.absent …) だけで、節点数を持てなかった。",
+    "★★★書き方の規則:",
+    "   - mathlibStatus には **探索範囲** を必ず書く(absent は範囲を伴わなければ主張として無効。lean-ecosystem.json の _absentPolicy と同じ)。",
+    "   - nodes は『フルの理論』ではなく **原文が実際に使う 1 本に必要な最小構成** で数える。",
+    "   - 測っていないものは nodes を \"unmeasured\" にし、howToMeasure に測り方を書く。嘘の数字を置かない。",
+    "   - measuredAt を必ず書く。測定は古くなる。"
+  ],
+  "measuredAt": "2026-08-27",
+  "gaps": {
+    "tame-ramification": {
+      "what": "馴分岐の理論。全分岐の構造定理(馴なら不分岐部を除けば Eisenstein な生成元 λ^e = π を持つ)と、馴なら different の指数がちょうど e−1 であること。",
+      "whereUsed": [
+        "[GenEll] Proposition 1.7, (i) の証明が畳んでいる \"elementary claim\" の段 1(野生/馴の分離)と段 2(ζ_p への帰着)"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "REPL で名前解決を試した(2026-08-27): IsTamelyRamified / Algebra.IsTamelyRamified / Ideal.IsTamelyRamified / IsTame はいずれも未定義。Algebra.IsUnramifiedAt はある。",
+        "partial": [
+          "pow_sub_one_dvd_differentIdeal —— P^{e−1} ∣ 𝔡(下界のみ)",
+          "not_dvd_differentIdeal_iff / dvd_differentIdeal_iff —— 不分岐 ⇔ P ∤ 𝔡(e = 1 の場合のみ)",
+          "conductor_mul_differentIdeal —— 単生成なら 𝔡 = (f′(x))(上界への入口)",
+          "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt —— Eisenstein なら p·z ∈ A[λ] ⇒ z ∈ A[λ]"
+        ],
+        "absentPart": "馴分岐の概念そのもの、および馴での different の**上界**(¬ P^e ∣ 𝔡)。Serre の評価 d_P ≤ e − 1 + v_P(e) も無い。"
+      },
+      "minimalForm": "『全分岐かつ馴なら p·O_L ⊆ 𝔡』。フルの分岐理論は要らない。",
+      "nodes": 6,
+      "nodesNote": "原文の 6 段(野生/馴の分離・ζ_p への帰着・p-群の可解性・Kummer・λ ∣ p・different の下界)を節点とする。hedge-index の実測でも Proposition 1.7 の合図は 7 件(immediately×5 one verifies×1 easily×1)。",
+      "done": 5,
+      "doneNote": "2026-08-26〜27 の第 374-395 ブロックで、段 2〜6 を実装し野生・馴の両枝を端から端まで結線。段 1 の構造定理は 3 項目(λ^e ~ π / B = A[λ] / minpoly が Eisenstein)とも代数的な核を実装済み。残るのは剰余体の一致と [L:K] = e からの最終組み立て。",
+      "where": [
+        "lean/ABC3/Found/GenEll/TameRamification.lean",
+        "lean/ABC3/Found/GenEll/DifferentKummer.lean",
+        "lean/ABC3/Found/GenEll/PGroupTower.lean"
+      ]
+    },
+    "spreading-out-over-base": {
+      "what": "生成ファイバー上の同型が、ある有限素数集合 Σ の上で ℤ[Σ^{-1}] へ延びること(EGA IV, 8.8.2 の極限論)。",
+      "whereUsed": [
+        "[GenEll] Remark 1.5.1 の後半(log-cond_D の BD-class が (X_ℚ, D_ℚ) だけに依ること)",
+        "[GenEll] Proposition 1.7, (i) の証明が『Σ 上の log-cond の寄与は ≈ 0』として引く"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial",
+        "searched": "Glob で Mathlib/**/*{SpreadingOut,Spread}*.lean を検索し、REPL で主定理を #check(2026-08-27)。",
+        "partial": [
+          "Mathlib/AlgebraicGeometry/SpreadingOut.lean は**存在する**",
+          "spread_out_of_isGermInjective / spread_out_unique_of_isGermInjective —— 茎の射を**近傍へ**延ばす"
+        ],
+        "absentPart": "**基底の極限版**が無い。ファイル自身の TODO が『certain morphism properties can also be spread out』を残している。",
+        "correction": "★2026-08-16 の remark_1_5_1.needs は『mathlib に scheme の spreading out は無い』としていたが、それは誤り(または測定漏れ)。2026-08-27 に訂正。"
+      },
+      "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
+      "nodes": "unmeasured",
+      "howToMeasure": "Remark 1.5.1 の合図は 3 件(one verifies×1 immediately×2)。原文 p.8-9 の該当段落を 1_Structured に起こし、intra-graph ではなく手で段を数える(原典内の番号付き項目にならないため機械では拾えない)。",
+      "done": 0,
+      "where": []
+    },
+    "belyi-noncritical": {
+      "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
+      "whereUsed": [
+        "[GenEll] Theorem 2.1 の証明(原文 p.11 の『[Mzk1]』)"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "2026-08-16 に mathlib 全宣言名を Belyi で検索して 0 件。",
+        "absentPart": "Belyi 写像そのもの。"
+      },
+      "hasSourceNode": true,
+      "sourceNodeNote": "★これだけは**原典に節点がある**([NCBelyi]、9 ページ、0_Source にあり)。したがって Skeleton トラックに載る。",
+      "minimalForm": "Theorem 2.5 そのもの。",
+      "nodes": 5,
+      "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
+      "done": 2,
+      "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)と Lemma 2.3(Found/NCBelyi/Separation.lean)は実装済み。Lemma 2.2 の部品(Normalize.lean の λ-スケーリング、BelyiComp.lean の IsBelyiPoly と comp_crit_of_rel)も揃っている。",
+      "missingSkeleton": ["[NCBelyi] Lemma 2.2", "[NCBelyi] Lemma 2.4"],
+      "missingSkeletonNote": "★★Skeleton が無いのはこの 2 つだけ。原典があるので今すぐ書ける。未実装の合図は Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。",
+      "where": [
+        "lean/ABC3/Skeleton/NCBelyi/Theorem25.lean",
+        "lean/ABC3/Found/NCBelyi/Lemma21.lean",
+        "lean/ABC3/Found/NCBelyi/Separation.lean",
+        "lean/ABC3/Found/NCBelyi/Normalize.lean",
+        "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
+      ]
+    },
+    "riemann-roch-curves": {
+      "what": "曲線上の因子・連接コホモロジー・Riemann–Roch・Serre 双対性。",
+      "whereUsed": [
+        "[NCBelyi] Theorem 2.5 の証明が使う 1 本: deg(ω_X ⊗ L^{-1}(x)) ≤ −2 ⇒ H¹(X, L(−x)) = 0 ⇒ Γ(X,L) ↠ L ⊗ k(x)"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "Glob で Mathlib/AlgebraicGeometry/**/*{Divisor,Cohomolog,Curve,Genus,Sheaf}*.lean を検索(2026-08-27)。出たのは Sites/ConstantSheaf・Sites/ElladicCohomology・Sites/SheafQuasiCompact・Modules/Sheaf・ProjectiveSpectrum/StructureSheaf・StructureSheaf のみ。",
+        "absentPart": "曲線の因子・連接コホモロジー・Riemann–Roch・Serre 双対性のいずれも無い。ElladicCohomology は étale であって連接ではない。"
+      },
+      "minimalForm": "★フルの Riemann–Roch は要らない。原文が使うのは『次数が十分負なら H¹ が消え、大域切断が点で全射になる』の 1 本だけである。まずこの 1 本に必要な最小構成を測ること。",
+      "nodes": "unmeasured",
+      "howToMeasure": "[NCBelyi] Theorem 2.5 の証明(物理 p.6)の該当 3 行を 1_Structured に起こし、(1) 曲線上の直線束の次数 (2) H¹ の消滅判定 (3) 大域切断の点での全射性 の 3 段に分けて、各段の前提を数える。外部プロジェクト(lean-ecosystem.json)の在庫調査も同時に行う。",
+      "done": 0,
+      "where": []
+    }
+  },
+  "summary": {
+    "totalNodesKnown": 11,
+    "totalNodesKnownNote": "tame-ramification 6 + belyi-noncritical 5。残り 2 件(spreading-out-over-base / riemann-roch-curves)は未測定。",
+    "totalDone": 7,
+    "nextActions": [
+      "1. [NCBelyi] Lemma 2.2 と Lemma 2.4 の Skeleton を書く(原典があるので今すぐ書ける。★sorry は一時的に増える——これは依存グラフ展開の正しい手順である)",
+      "2. riemann-roch-curves の最小構成を測る(NCBelyi p.6 の 3 行を 1_Structured に起こす)",
+      "3. spreading-out-over-base の最小構成を測る(GenEll p.8-9)",
+      "4. tame-ramification の最終組み立て(剰余体の一致と [L:K] = e から)"
+    ]
+  }
+}
