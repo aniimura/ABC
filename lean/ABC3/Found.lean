@@ -351,6 +351,7 @@ import ABC3.Found.GenEll.LatticeNorm
 import ABC3.Found.GenEll.LatticeCurve
 import ABC3.Found.GenEll.LatticePoint
 import ABC3.Found.GenEll.GcdDecomp
+import ABC3.Found.GenEll.GcdEquiv
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence

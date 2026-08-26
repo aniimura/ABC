@@ -26778,3 +26778,40 @@ mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零
 | 337 | gcd 分解の存在と一意性、被加数の分離 |
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-652 ★★★★★★gcd 分解は全単射である(第 338 ブロック)
+
+`Found/GenEll/GcdEquiv.lean`。
+
+### ★★★★★★到達点
+
+> **`DecompIndex = {(d,w) | d > 0, gcd w = 1} ≃ {v ∈ ℤ² | v ≠ 0}`**
+
+★第 337 の存在と一意性を `Equiv.ofBijective` に流すだけで出た。
+★★これで `Σ_{v ≠ 0} f(v) = Σ_{(d,w)} f(d·w)` が `Equiv.tsum_eq` で書き換えられる。
+★★★被加数も `summand_gcdEquiv` で `d⁻ᵏ·(w₁ + w₂τ)⁻ᵏ` に分離する。
+
+### ★★★★★★★(i) に残るのは「解析」だけになった
+
+    Σ_{v ≠ 0} (v₁ + v₂τ)⁻ᵏ
+      = Σ_{(d,w)} d⁻ᵏ·(w₁ + w₂τ)⁻ᵏ     ★★★★代数はここまでで済んだ(第 337・338)
+      = (Σ_d d⁻ᵏ)·(Σ_w (w₁+w₂τ)⁻ᵏ)    ← Fubini(絶対収束)★残る
+      = ζ(k)·2·E_k(τ)                   ← mathlib の正規化との突き合わせ★残る
+
+### ★★★★mathlib の `E_k` の実測(2026-08-26)
+
+    eisensteinSeries a k z = ∑' x : gammaSet N 1 a, eisSummand k x z
+    gammaSet N r a = {v | v ≡ a (mod N) ∧ gcd (v 0) (v 1) = r}
+    eisSummand k v z = (v₀·z + v₁)^(-k)
+    ModularForm.E hk = (1/2) • eisensteinSeriesMF hk 0
+
+★したがって `E_k(z) = (1/2)·Σ_{v 原始} (v₀z + v₁)⁻ᵏ` である
+——**格子側と索引の順序が `(m,n) ↔ (v₁,v₀)` で入れ替わる**点だけ注意。
+
+### ★★G8 側の積み上げ(7 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` /
+336 `(℘,℘'/2)` は曲線の点 / 337 gcd 分解 / 338 全単射。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
