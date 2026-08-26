@@ -26318,3 +26318,62 @@ mathlib の 2 本の漸化式は、**3 項恒等式の特別な場合そのも�
 
 ★★義務の数は動いていない(Arakelov 9/9、Galois 6/8)。次の配線で **G5** が埋まる見込み。
 ★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-642 ★★★★★★★★★★G5 達成——Galois 義務が 7/8 になった(第 328 ブロック)
+
+`Found/GaloisRep/FullImageWitness.lean`、`Skeleton/GaloisRep/WeilPairing.lean`。
+
+### ★★★★★★★★★★到達点
+
+> **`FullImageData.nonvacuous`**——(G5) 達成。Galois 表現論の 8 件のうち **7 件**が埋まった
+
+★`Skeleton/GaloisRep/WeilPairing.lean` の `det_galRep_eq_cyclotomic` の `sorry` も消えた。
+
+### ★★★★★★配線の中身
+
+    第 327 `weilPairing_nondegenerate`(非退化性)
+      → 第 210 `det_cyclotomic_of_nondeg`(`BasisFree.lean`)
+      → `det_cyclotomic_full`(本ブロック)
+      → `FullImageData.det_cyclotomic`
+
+★`IsDedekindDomain F[W]` は第 137 の `isDedekindDomain_coordinateRing` で供給
+(`IsAlgClosed L` と `IsUnit (2:L)` から)。
+★★`Infinite L` は `CharZero L` から、`CharZero L` は `CharZero K` と
+`algebraMap K L` の単射性から出る。
+
+### ★★★★界面の型が `Fact l.Prime` を持たない件(逸脱ではない対処)
+
+界面の `ImageContainsSL2` は `... → WeierstrassCurve K → ℕ → Prop` であって
+`[Fact l.Prime]` を取らない。★しかし `ℤ_[l]` は `Fact l.Prime` が無いと環ですらない。
+★★そこで述語の本体を **`∀ hp : Nat.Prime l, ...`** の形にし、
+中身は `Fact` 付きの補助述語 `ImageSL2Aux` に流した。
+★★★`imageContainsSL2_iff` は `Fact` が場にあるときの同値で、
+`⟨Fact.out⟩ ≡ inst`(構造の η と証明の非関与)で両向きとも通る。
+★★★★**界面は書き換えていない**——読み方だけで済んだ。
+
+### ★★★★★★★(G5) の全行程(2026-08-26 の 6 ブロック)
+
+| ブロック | 内容 |
+|---|---|
+| 323 | 生成点での乗法公式 `x([n]P)·ΨSq_n(x) = Φ_n(x)` |
+| 324 | `x([n]P)` の超越性 ⟹ `μ` の単射性 |
+| 325 | `hfix` の部品 (a)(b) |
+| 326 | `hfix` の部品 (c)(d) |
+| 327 | **Weil 対の非退化性** |
+| 328 | **G5 達成** |
+
+★★★★★見積もりは当初 **30-80 ブロック(上流案件)**、実際 **6 ブロック**。
+★差は「在庫を数えていなかった」ことに尽きる——分点多項式の帰納(第 42-52)、
+Artin(第 196)、モニック性(第 198)、Dedekind 性(第 137)はすべて既にあった。
+
+### ★★残り(G8 のみ)
+
+| 欄 | 状態 |
+|---|---|
+| `degInf`・`degInf_nonneg`・`degInf_ge_localHeight` | ★★★★**済**(第 319・321) |
+| `htFalt`・`htFalt_variableChange` | **(D3) の計量**が要る(§9-404) |
+| `prop_3_4` | 原文の主定理——解析的評価 |
+
+★★**Galois 義務 7/8**(Arakelov 9/9)。
+★★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
