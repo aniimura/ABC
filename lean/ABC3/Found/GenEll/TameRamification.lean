@@ -392,6 +392,37 @@ theorem not_isUnit_coeff_of_root {A : Type*} {B : Type*} [CommRing A] [CommRing 
       exact hlamnu (isUnit_of_mul_isUnit_left hu)
     exact hloc (a i) hnu hunit
 
+/-! ## ★★★★★★★★`minpoly` への配線 -/
+
+open Polynomial Finset in
+/-- ★★★★★★**モニックな多項式の根の関係式**——
+`f` がモニックで次数 `e`、`λ` が根なら
+`λ^e + ∑_{i<e} f.coeff i · λ^i = 0`。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★これが、本ファイルの Eisenstein の 2 本
+(`constCoeff_eq_pow_mul_isUnit`･`not_isUnit_coeff_of_root`)への**入口**である。
+★★mathlib の `Polynomial.Monic.as_sum` を使うだけである。 -/
+theorem root_relation_of_monic {A : Type*} {B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    (f : A[X]) (hf : f.Monic) (e : ℕ) (hdeg : f.natDegree = e) (lam : B)
+    (hroot : (aeval lam) f = 0) :
+    lam ^ e + ∑ i ∈ range e, algebraMap A B (f.coeff i) * lam ^ i = 0 := by
+  have h := hf.as_sum
+  rw [hdeg] at h
+  rw [h] at hroot
+  simpa using hroot
+
+open Polynomial Finset in
+/-- ★★★★★★★**`minpoly` に当てた形**——`λ` が `A` 上整で最小多項式の次数が `e` なら
+`λ^e + ∑_{i<e} (minpoly A λ).coeff i · λ^i = 0`。 -/
+theorem root_relation_minpoly {A : Type*} {B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    [Nontrivial B] (lam : B) (hint : IsIntegral A lam) (e : ℕ)
+    (hdeg : (minpoly A lam).natDegree = e) :
+    lam ^ e + ∑ i ∈ range e, algebraMap A B ((minpoly A lam).coeff i) * lam ^ i = 0 :=
+  root_relation_of_monic (minpoly A lam) (minpoly.monic hint) e hdeg lam (minpoly.aeval A lam)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -442,6 +473,11 @@ def constCoeff_eq_pow_mul_isUnit.src : ABC3.Meta.Source :=
 def not_isUnit_coeff_of_root.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(Eisenstein の係数はすべて π で割れる)",
+    sectionId := "genell-prop-1-7" }
+
+def root_relation_of_monic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(minpoly への配線——根の関係式)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
