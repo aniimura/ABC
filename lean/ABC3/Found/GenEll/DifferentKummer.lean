@@ -319,6 +319,37 @@ theorem differentIdeal_eq_span_kummer
   congr 1
   simp [derivative_sub, derivative_X_pow, derivative_C]
 
+/-! ## ★★★★★★★段 1 の馴分岐の場合——`n = 1` で足りる -/
+
+/-- ★★★★★★★**馴分岐なら `p·O_L ⊆ 𝔡`**——原文の『馴なら `n = 1` で足りる』。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★仮説の意味:
+* `hunit`——**次数 `n` が `B` の単元**。これが**馴分岐**の形式化である
+  (野生分岐なら `p ∣ n` なので `n` は単元でない)。
+* `hdvd`･`hle`——`λ^m ∣ p` で `n−1 ≤ m`。全分岐なら `v(λ) = 1`･`v(p) = n·e_K ≥ n` なので
+  `m ≙ n·e_K` でこれが成り立つ。
+
+★★単生成で 𝔡 が**等式**になる(第 378)ので、
+`n` が単元なら `(n·λ^{n−1}) = (λ^{n−1})` となり、あとは `λ^{n−1} ∣ λ^m ∣ p` だけである。 -/
+theorem mem_differentIdeal_of_isUnit_natCast
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (n m : ℕ) (lam : B) (kappa : A) (pp : B)
+    (hmono : Algebra.adjoin A {lam} = ⊤)
+    (hmin : minpoly A lam = X ^ n - C kappa)
+    (hgen : Algebra.adjoin K {(algebraMap B L) lam} = ⊤)
+    (hunit : IsUnit (n : B)) (hle : n - 1 ≤ m) (hdvd : lam ^ m ∣ pp) :
+    pp ∈ differentIdeal A B := by
+  rw [differentIdeal_eq_span_kummer A K L n lam kappa hmono hmin hgen,
+    Ideal.mem_span_singleton]
+  exact (hunit.mul_left_dvd).mpr (dvd_trans (pow_dvd_pow lam hle) hdvd)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -364,6 +395,11 @@ def differentIdeal_eq_span_of_adjoin_eq_top.src : ABC3.Meta.Source :=
 def differentIdeal_eq_span_kummer.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(Kummer 拡大での different の等式)",
+    sectionId := "genell-prop-1-7" }
+
+def mem_differentIdeal_of_isUnit_natCast.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(馴分岐なら n = 1 で足りる)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
