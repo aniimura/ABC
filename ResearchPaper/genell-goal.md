@@ -28481,3 +28481,41 @@ theory** that `L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』�
 ★★★★**残りは 3 項目**——段 1 の分離･段 2･段 3 の群論。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-693 ★★★★★★**段 3 の群論——Sylow 1 本で足りた**(第 381 ブロック)
+
+`Found/GenEll/PGroupTower.lean`。
+
+原文 p.10 の段 3 は『Moreover, since `Gal(L/K)` is a [**necessarily solvable!**]
+`p`-group of order `≤ d`, it suffices to consider the case where `[L : K] = p`』である。
+
+★Galois 対応で体の塔 `K = K₀ ⊆ … ⊆ K_s = L`(各段の次数 `p`)に落ち、
+群の側では**指数 `p` ずつ上がる部分群の鎖**になる。
+
+### ★★★在庫を引いた結果——mathlib の 1 本で足りた
+
+`Sylow.exists_subgroup_card_pow_prime_le`:
+
+> `p^m ∣ |G|` かつ `|H| = p^n` かつ `n ≤ m` なら、`H ≤ K` で `|K| = p^m` なる `K` がある
+
+★`m ≙ n+1` で使えば**1 段上がる**。鎖はそれを繰り返すだけである。
+
+★★**可解性を経由する必要はなかった**——原文が『necessarily solvable!』と書いたのは
+読者への注意であって、鎖の存在には Sylow の定理で足りる。
+
+★★★`different` の側は塔で継げる(第 375)ので、**段 3 の道具は両側揃った**。
+
+### elementary claim の現状(第 374-381、8 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★馴の側は取った。**分離そのものは未着手** |
+| 2(`ζ_p` への帰着) | **未着手** |
+| **3(`p`-群)** | ★★★**群論も different も揃った** |
+| **4(Kummer)** | ★★★**完了** |
+| 5･6･結論 | ★★取った |
+
+★★★★**残りは段 1 の分離と段 2 の 2 項目**である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
