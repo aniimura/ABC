@@ -28252,3 +28252,41 @@ Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools
 ★★`set` で別名を付けると `let` の展開差でさらに詰まるので、この種の証明では使わない。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-686 ★★★★★★**`Proposition 1.7` の "elementary claim" の段 5･7 6**(第 374 ブロック)
+
+`Found/GenEll/DifferentKummer.lean`。
+
+原文 p.10 は `Proposition 1.7, (i)` の証明を、最後に**局所体の主張 1 つ**へ落としている:
+
+> Fix a prime number `p` and a positive integer `d`. Then there exists a positive
+> integer `n` such that for any finite Galois extension `L/K` of finite extensions
+> of `ℚ_p` with `[L : K] ≤ d`, the different ideal of `L/K` contains `p^n · O_L`.
+
+### ★★★原文の 6 段と、本ブロックが取った分
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離、馴なら `n = 1`) | 未着手 |
+| 2(`ζ_p ∈ K` への帰着) | 未着手 |
+| 3(`p`-群の可解性で `[L:K] = p` へ) | 未着手 |
+| 4(Kummer 理論で `L = K(λ)`) | 未着手 |
+| **5(`λ ∣ p`)** | ★**本ブロック** |
+| **6(`p·λ^{p−1} ∈ different`)** | ★**本ブロック** |
+| **結論 `p^p·O_L ⊆ different`** | ★★**本ブロック** |
+
+### ★★★★ 6 は mathlib の 1 本を当てるだけだった
+
+`aeval_derivative_mem_differentIdeal`(`f'(λ) ∈ different`)に `f = X^n − κ` を当てる
+——`f' = n·X^{n−1}` なので `n·λ^{n−1} ∈ different` が出る。
+
+★ただし `different` は **`minpoly_A`** を使うので、`minpoly_K` の側で分かっていても
+**`A` が整閉であること**(`minpoly.isIntegrallyClosed_eq_field_fractions'`)で降ろす段が 1 つ要る。
+
+### ★★★ 5 は付値環の全順序性 3 行
+
+`ValuationRing.cond`(割り切れどうしが全順序)だけを使う——
+`¬(p^n ∣ λ^n)` から `λ ∣ p` が出る。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

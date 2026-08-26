@@ -1073,6 +1073,7 @@ import ABC3.Found.GenEll.NorthcottTuple
 import ABC3.Found.GenEll.NorthcottCoord
 import ABC3.Found.GenEll.HeightMetric
 import ABC3.Found.GenEll.MinFieldCovering
+import ABC3.Found.GenEll.DifferentKummer
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
