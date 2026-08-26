@@ -1069,6 +1069,8 @@ import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
 import ABC3.Found.GenEll.Prop16
 import ABC3.Found.GenEll.NorthcottClassical
+import ABC3.Found.GenEll.NorthcottTuple
+import ABC3.Found.GenEll.NorthcottCoord
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp

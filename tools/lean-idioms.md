@@ -826,3 +826,18 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 
 直し方: **`lake exe cache get!`**(`lean/` の中で)。★olean を手で削除しないこと。
 ★★そもそも `cd /d/Math_ABC3/lean` してから `lake` を走らせる。`--dir` で代用しない。
+
+## 包む定義が要るインスタンスは `haveI` ではなく `letI`
+
+失敗形: `haveI : Algebra E L := (IntermediateField.inclusion h).toRingHom.toAlgebra` の後で
+`IsScalarTower.of_algebraMap_eq (fun _ => rfl)` が
+
+    (algebraMap ℚ L) q is not definitionally equal to
+    (algebraMap E L) ((algebraMap ℚ E) q)
+
+で落ちる。同じ理由で `Subtype.ext rfl` も落ちる。
+
+直し方: **`letI` にする**。`haveI` は命題としてのみ保持するので定義的な中身が消える。
+★mathlib 自身(`FieldTheory/IntermediateField/Algebraic.lean`)も `let _ :=` で置いている。
+★★中間体の次数比較は自分で塔を組まず
+`IntermediateField.finrank_le_of_le_right` / `finrank_le_of_le_left` を引く。

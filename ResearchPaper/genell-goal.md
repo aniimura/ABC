@@ -28114,3 +28114,56 @@ mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 ★★★★**ここから先は構成の仕事である**。
 
 ★★Lean 全体の sorry は **43 → 42**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-682 ★★★★★★★**`ℙⁿ(ℚ̄)` の次数有界 Northcott**(第 369-370 ブロック)
+
+`Found/GenEll/NorthcottTuple.lean`・`Found/GenEll/NorthcottCoord.lean`。
+`Proposition 1.4, (iv)` の**数論的な中身**を取った。
+
+### ★★★★何が残っていたか
+
+すでにあったのは:
+
+* `finite_of_finrank_le_of_mulHeight₁_le`——**1 成分**の古典的 Northcott(体を固定しない)
+* `logAbsHeight`･`mulHeight₁_extension`——高さの体拡大公式
+
+★残っていたのは **2 段**である:
+
+| 段 | 使ったもの |
+|---|---|
+| `H₁(x_i/x_j) ≤ H(x)` | mathlib の `mulHeight₁_div_eq_mulHeight` + `mulHeight_comp_le` |
+| `H_L(z) ≤ B ⇒ H_E(z) ≤ B`(`E ⊆ L`) | `mulHeight₁_extension`(`H_L = H_E^{[L:E]}`･`H_E ≥ 1`) |
+
+★★**2 段目が要るのは**、`NorthcottClassical` が高さを **`ℚ⟫α⟬` の上で**測っているからである
+——大きい体で測った高さを、生成する部分体まで**降ろさねばならない**。
+
+### ★★★取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `boundedAlg` | 次数 `≤ d`･高さ `≤ B` の代数的数 |
+| `finite_pi_boundedAlg` | ★その**組**も有限 |
+| `finite_of_injOn_boundedAlg` | ★★そこへ単射に写る集合は有限(射影モデル経由の受け皿) |
+| `mulHeight₁_div_le_mulHeight` | ★座標の比の高さ ≤ 射影高さ |
+| `mulHeight₁_le_of_extension` | ★★部分体へ降ろす |
+| `coord_mem_boundedAlg` | ★★★★射影高さ `≤ B` なら正規化座標は `boundedAlg d B` に入る |
+| `finite_normalizedCoord` | ★★★★★★**`ℙⁿ(L)` の次数有界 Northcott** |
+
+★★★**正規化座標を `ℂ` の中で見ている**のが要である——
+`L` が動いても同じ `boundedAlg d B` の中に入るので、次数を `d` で押さえれば一様に有限になる。
+
+### ★★★★配管: `haveI` ではなく `letI`
+
+`(IntermediateField.inclusion hle).toRingHom.toAlgebra` を `haveI` で置くと
+**包む定義が消えて** `IsScalarTower.of_algebraMap_eq (fun _ => rfl)` が通らない。
+★mathlib 自身(`IntermediateField/Algebraic.lean`)も `let _ :=` で置いている。
+★★次数の比較は自分で塔を組まず `IntermediateField.finrank_le_of_le_right` を使えばよい。
+
+### ★★★★★これで `Prop 1.4, (iv)` に残るのは
+
+★**算術的な射影埋め込み**だけである——原文は `X` の `ℤ`-固有性から得るが、
+我々は `ArcModel`(アルキメデス側)しか持っていない。
+★★**数論的な中身はここで終わった**。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
