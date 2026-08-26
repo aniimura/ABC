@@ -1,4 +1,5 @@
 import ABC3.Found.NCBelyi.Normalize
+import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
 
 /-!
@@ -174,6 +175,80 @@ theorem cast_inf'_image (a b : ℕ) (S : Finset ℚ) (hne : S.Nonempty) :
   refine Finset.inf'_congr hne rfl (fun x _ => ?_)
   simp [Function.comp, belyiVal]
 
+/-! ## ★★★★★`Lemma 2.1` の (c)(d) を `ℚ` へ戻す -/
+
+/-- ★★★★★**`Lemma 2.1` の (c)(d) の `ℚ` 版**。
+
+原文 (NCBelyi p.2):
+> Lemma 2.1. (Separating Properties of Belyi Maps) Let C ∈ R be such
+
+★`Lemma21.lean` の `lemma_2_1` は `ℝ` の上で書いてあるが、
+`Lemma 2.2` の帰納法は `ℚ` の上で回る。埋め込みが単射・単調なので
+結論はそのまま戻る。
+
+* (c) `f(β) ∉ f(S)`
+* (d) `(f(β)+f₀)/(f(α)+f₀) ≥ 2` —— ★これが帰納仮定の条件 (iii) を再現する -/
+theorem lemma_2_1_rat (a b : ℕ) (S : Finset ℚ) (hne : S.Nonempty) (r β : ℚ)
+    (hr : (r : ℝ) = ((a : ℝ) + 1) / (((a : ℝ) + 1) + ((b : ℝ) + 1)))
+    (h0S : (0 : ℚ) ∈ S) (h1S : (1 : ℚ) ∈ S) (hrS : r ∈ S)
+    (hS : ∀ α ∈ S, α = 0 ∨ α = r ∨ α = 1 ∨ 1 < α)
+    (hβ : ∀ α ∈ S, α ≠ 0 → 2 * α ≤ β) :
+    (∀ α ∈ S, belyiVal a b β ≠ belyiVal a b α)
+  ∧ (∀ α ∈ S, belyiVal a b α + belyiShift a b S hne ≠ 0 →
+      2 ≤ (belyiVal a b β + belyiShift a b S hne)
+          / (belyiVal a b α + belyiShift a b S hne)) := by
+  classical
+  have hne' : (S.image (fun q : ℚ => (q : ℝ))).Nonempty := hne.image _
+  have hmem : ∀ α ∈ S, ((α : ℝ)) ∈ (S.image (fun q : ℚ => (q : ℝ))) := fun α hα => Finset.mem_image.2 ⟨α, hα, rfl⟩
+  have h0img : (0 : ℝ) ∈ (S.image (fun q : ℚ => (q : ℝ))) := by simpa using hmem 0 h0S
+  have h1img : (1 : ℝ) ∈ (S.image (fun q : ℚ => (q : ℝ))) := by simpa using hmem 1 h1S
+  have hrimg : (r : ℝ) ∈ (S.image (fun q : ℚ => (q : ℝ))) := hmem r hrS
+  have hS'' : ∀ α ∈ (S.image (fun q : ℚ => (q : ℝ))), α = 0 ∨ α = (r : ℝ) ∨ α = 1 ∨ 1 < α := by
+    intro α hα
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.1 hα
+    rcases hS q hq with h | h | h | h
+    · left; exact_mod_cast congrArg (fun z : ℚ => (z : ℝ)) h
+    · right; left; exact_mod_cast congrArg (fun z : ℚ => (z : ℝ)) h
+    · right; right; left; exact_mod_cast congrArg (fun z : ℚ => (z : ℝ)) h
+    · right; right; right; exact_mod_cast h
+  have hβ' : ∀ α ∈ (S.image (fun q : ℚ => (q : ℝ))), α ≠ 0 → (2 : ℝ) * α ≤ (β : ℝ) := by
+    intro α hα hne0
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.1 hα
+    have hq0 : q ≠ 0 := by
+      intro h
+      exact hne0 (by rw [h]; norm_num)
+    exact_mod_cast hβ q hq hq0
+  obtain ⟨-, -, hc, hd⟩ :=
+    lemma_2_1 2 (le_refl 2) a b (S.image (fun q : ℚ => (q : ℝ))) hne' (r : ℝ) (β : ℝ) hr h0img h1img hrimg hS'' hβ'
+  have hinf := cast_inf'_image a b S hne
+  refine ⟨?_, ?_⟩
+  · intro α hα hcon
+    refine hc ((α : ℝ)) (hmem α hα) ?_
+    rw [← cast_belyiVal, ← cast_belyiVal, hcon]
+  · intro α hα hnz
+    have hnz' : ((α : ℝ)) ^ (a + 1) * (((α : ℝ)) - 1) ^ (b + 1)
+        - (S.image (fun q : ℚ => (q : ℝ))).inf' hne' (fun x : ℝ => x ^ (a + 1) * (x - 1) ^ (b + 1)) ≠ 0 := by
+      rw [← cast_belyiVal, hinf]
+      intro h
+      refine hnz ?_
+      have : ((belyiVal a b α + belyiShift a b S hne : ℚ) : ℝ) = 0 := by
+        rw [belyiShift]
+        push_cast
+        linarith [h]
+      exact_mod_cast this
+    have hdd := hd ((α : ℝ)) (hmem α hα) hnz'
+    rw [← cast_belyiVal, ← cast_belyiVal, hinf] at hdd
+    have hcast : ((belyiVal a b β + belyiShift a b S hne : ℚ) : ℝ)
+        = (belyiVal a b β : ℝ) - ((S.inf' hne (belyiVal a b) : ℚ) : ℝ) := by
+      rw [belyiShift]; push_cast; ring
+    have hcast2 : ((belyiVal a b α + belyiShift a b S hne : ℚ) : ℝ)
+        = (belyiVal a b α : ℝ) - ((S.inf' hne (belyiVal a b) : ℚ) : ℝ) := by
+      rw [belyiShift]; push_cast; ring
+    have : (2 : ℝ) ≤ ((belyiVal a b β + belyiShift a b S hne : ℚ) : ℝ)
+        / ((belyiVal a b α + belyiShift a b S hne : ℚ) : ℝ) := by
+      rw [hcast, hcast2]; exact hdd
+    exact_mod_cast this
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
@@ -192,7 +267,7 @@ def rat_cast_inf'.src : ABC3.Meta.Source :=
     sectionId := "ncbelyi-lemma-2-2" }
 
 def belyiVal.src : ABC3.Meta.Source :=
-  { paper := "NCBelyi", pdfPage := 3,
+  { paper := "NCBelyi", pdfPage := 2,
     item := "Lemma 2.1 の f(x) = x^{a+1}(x−1)^{b+1}(ℚ 版)",
     sectionId := "ncbelyi-lemma-2-1" }
 
@@ -200,5 +275,10 @@ def cast_inf'_image.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 4,
     item := "Lemma 2.2(帰納段——f₀ を ℚ で定めても同じものになる)",
     sectionId := "ncbelyi-lemma-2-2" }
+
+def lemma_2_1_rat.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 2,
+    item := "Lemma 2.1, (c)(d)(ℚ 版——Lemma 2.2 の帰納法が使う形)",
+    sectionId := "ncbelyi-lemma-2-1" }
 
 end ABC3.Found.NCBelyi
