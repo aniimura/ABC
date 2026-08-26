@@ -247,14 +247,31 @@ structure FaltingsHeightData where
   > First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
 
   ★★★**これが「全部 0」の退化を殺す。**乗法還元をもつ素点が 1 つでもあれば
-  `deg∞ > 0` が強制される。★`d = [L:ℚ]` の正規化は原文どおり。 -/
+  `deg∞ > 0` が強制される。★`d = [L:ℚ]` の正規化は原文どおり。
+
+  ## ★★★★★2026-08-26 の訂正(4 つ目の充足不能)
+
+  以前は `Lv` を **`L` の任意の拡大**として量化していた。しかしそれだと
+  **分岐が効いて偽になる**:`Lv` を `L_v` の分岐次数 `e` の拡大に取ると
+  局所高さ `v(q_E)` は `e` 倍になり(`q_E` は同じ元、付値が `e` 倍)、
+  右辺はいくらでも大きくなる。★左辺は `L` と `E` だけで決まるから、
+  **`e` を大きくすれば必ず破れる**。
+
+  ★★★★訂正:`R` が **`L` の素点 `p` の上にあって不分岐**であること——
+  すなわち `L` の元の付値が `p` の付値と一致すること——を仮定に加える。
+  ★これは原文の「`v` は `E_L` の局所高さ」(= `L` の素点)という読みに戻す訂正である。 -/
   degInf_ge_localHeight : ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
     (Lv : Type) [Field Lv] [Algebra L Lv]
     (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
     [Algebra R Lv] [IsFractionRing R Lv] [(E.baseChange Lv).IsElliptic]
     [(E.baseChange Lv).IsMinimal R]
-    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R),
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : IsDedekindDomain.HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L,
+      (IsDedekindDomain.HeightOneSpectrum.valuation Lv
+          (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+        = (IsDedekindDomain.HeightOneSpectrum.valuation L p) x),
     (Module.finrank ℚ L : ℝ) * degInf L E
       ≥ (toSemistableModelData.toTateCurveData.localHeight (E.baseChange Lv) h : ℝ)
         * Real.log 2
