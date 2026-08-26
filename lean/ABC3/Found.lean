@@ -1081,6 +1081,7 @@ import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
 import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.Normalize
+import ABC3.Found.NCBelyi.CoeffBound
 /-!
 # Found — 実装済みの基礎
 
