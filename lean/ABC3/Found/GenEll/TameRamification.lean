@@ -263,6 +263,65 @@ theorem exists_smul_mem_adjoin_powerBasis {R : Type*} {K : Type*} {L : Type*}
   exact Subalgebra.smul_mem _
     (Subalgebra.pow_mem _ (Algebra.self_mem_adjoin_singleton R PB.gen) _) c
 
+/-! ## ★★★★★★Eisenstein の定数項——`π²` では割れない -/
+
+open Finset in
+/-- ★★★★★★**定数項は `λ^e` の単元倍**——Eisenstein の『定数項が `π²` で割れない』。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★付値を使わず**割り切れだけ**で出る:
+`a₀ = −λ^e − ∑_{i≥1} a_i λ^i` で、`i ≥ 1` の項はすべて `λ^{e+1}` で割れるので、
+`a₀ = λ^e·(−1 − λ·s)` となり、`−1 − λ·s` は単元である。
+
+★★これで **`λ^{e+1} ∤ a₀`**、とくに `e ≥ 1` なら `λ^{2e} ∤ a₀`、
+すなわち `π² ∤ a₀` が出る。 -/
+theorem constCoeff_eq_pow_mul_isUnit {B : Type*} [CommRing B] [IsLocalRing B]
+    (e : ℕ) (he : 0 < e) (a : ℕ → B) (lam : B)
+    (hlam : lam ∈ maximalIdeal B)
+    (hdvd : ∀ i ∈ range e, lam ^ e ∣ a i)
+    (hroot : lam ^ e + ∑ i ∈ range e, a i * lam ^ i = 0) :
+    ∃ w : B, IsUnit w ∧ a 0 = lam ^ e * w := by
+  classical
+  -- ★`i ≥ 1` の項は `λ^{e+1}` で割れる
+  have hIco : lam ^ (e + 1) ∣ ∑ i ∈ Ico 1 e, a i * lam ^ i := by
+    refine Finset.dvd_sum (fun i hi => ?_)
+    have hi1 : 1 ≤ i := (Finset.mem_Ico.mp hi).1
+    have hie : i < e := (Finset.mem_Ico.mp hi).2
+    obtain ⟨c, hc⟩ := hdvd i (Finset.mem_range.mpr hie)
+    refine ⟨c * lam ^ (i - 1), ?_⟩
+    rw [hc]
+    have : lam ^ i = lam * lam ^ (i - 1) := by
+      conv_lhs => rw [show i = 1 + (i - 1) by omega]
+      rw [pow_add, pow_one]
+    rw [this, pow_add, pow_one]
+    ring
+  obtain ⟨s, hs⟩ := hIco
+  -- ★和を `a₀` と残りに分ける
+  have hsplit : ∑ i ∈ range e, a i * lam ^ i
+      = a 0 + ∑ i ∈ Ico 1 e, a i * lam ^ i := by
+    have h0 : range e = insert 0 (Ico 1 e) := by
+      ext x
+      simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Ico]
+      omega
+    rw [h0, Finset.sum_insert (by simp)]
+    simp
+  rw [hsplit, hs] at hroot
+  refine ⟨-1 - lam * s, ?_, ?_⟩
+  · have hneg : IsUnit (-1 : B) := isUnit_one.neg
+    have hmem : -(lam * s) ∈ maximalIdeal B :=
+      Submodule.neg_mem _ (Ideal.mul_mem_right s _ hlam)
+    have h2 := isUnit_add_mem_maximalIdeal hneg hmem
+    simpa [sub_eq_add_neg] using h2
+  · have hsplit2 : lam ^ (e + 1) = lam ^ e * lam := by rw [pow_succ]
+    rw [hsplit2] at hroot
+    have hz : a 0 = -(lam ^ e) - lam ^ e * lam * s := by
+      have := hroot
+      linear_combination this
+    rw [hz]
+    ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def IsTameDegree.src : ABC3.Meta.Source :=
@@ -303,6 +362,11 @@ def mem_adjoin_of_pow_smul_of_isEisensteinAt.src : ABC3.Meta.Source :=
 def exists_smul_mem_adjoin_powerBasis.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(B = A[λ] —— 分母を払う段)",
+    sectionId := "genell-prop-1-7" }
+
+def constCoeff_eq_pow_mul_isUnit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(Eisenstein の定数項は π² で割れない)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
