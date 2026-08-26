@@ -79,11 +79,65 @@ theorem lemma_2_2_base (S : Finset ℚ) (β : ℚ)
     simp only [zero_mul, mul_one, zero_add, eval_C] at hx
     exact hc0 ((map_eq_zero_iff (algebraMap ℚ ℂ) (algebraMap ℚ ℂ).injective).mp hx)
 
+/-! ## ★★★★帰納段の部品 —— スケーリングとの合成
+
+原文 (NCBelyi p.4):
+> λ. Then, so long as |S| ≥ 4, the polynomial “f(x) + f0” of Lemma 2.1 determines
+
+★帰納段は `Lemma 2.1` を **`λ·S`** に適用する。多項式の側では
+`g(λ·x)`、すなわち **`g.comp (C λ * X)`** を扱うことになる。
+★★その 2 つの基本性質(評価と臨界点)をここで取る。
+-/
+
+/-- ★**スケーリングとの合成の評価** —— `(g ∘ (λ·))(x) = g(λ x)`。 -/
+theorem eval_comp_scale (g : ℚ[X]) (lam x : ℚ) :
+    (g.comp (C lam * X)).eval x = g.eval (lam * x) := by
+  rw [eval_comp]
+  simp
+
+/-- ★★**スケーリングは臨界点を `1/λ` 倍に移すだけ** ——
+`(g(λ x))′ = λ·g′(λ x)` で `λ ≠ 0` だから。
+
+★★★これがあれば、`Lemma 2.1` が与える「臨界点は `{0, 1, r}`」が
+そのまま `λ·S` の側へ移る。 -/
+theorem derivative_comp_scale_eval (g : ℚ[X]) (lam : ℚ) (x : ℂ) :
+    (derivative ((g.comp (C lam * X)).map (algebraMap ℚ ℂ))).eval x
+      = algebraMap ℚ ℂ lam * (derivative (g.map (algebraMap ℚ ℂ))).eval
+          (algebraMap ℚ ℂ lam * x) := by
+  rw [Polynomial.map_comp, derivative_comp]
+  rw [Polynomial.map_mul, Polynomial.map_C, Polynomial.map_X, eval_mul, eval_comp]
+  rw [derivative_mul, derivative_C, derivative_X]
+  simp only [zero_mul, mul_one, zero_add, eval_C, eval_mul, eval_X]
+
+/-- ★★★**臨界点の対応**(`λ ≠ 0`)。 -/
+theorem derivative_comp_scale_eq_zero_iff (g : ℚ[X]) (lam : ℚ) (hlam : lam ≠ 0) (x : ℂ) :
+    (derivative ((g.comp (C lam * X)).map (algebraMap ℚ ℂ))).eval x = 0
+      ↔ (derivative (g.map (algebraMap ℚ ℂ))).eval (algebraMap ℚ ℂ lam * x) = 0 := by
+  rw [derivative_comp_scale_eval]
+  constructor
+  · intro h
+    rcases mul_eq_zero.mp h with h1 | h2
+    · exact absurd ((map_eq_zero_iff (algebraMap ℚ ℂ)
+        (algebraMap ℚ ℂ).injective).mp h1) hlam
+    · exact h2
+  · intro h
+    rw [h, mul_zero]
+
+/-- ★**スケーリングとの合成の次数**は元の次数に等しい(`λ ≠ 0`)。 -/
+theorem natDegree_comp_scale (g : ℚ[X]) (lam : ℚ) (hlam : lam ≠ 0) :
+    (g.comp (C lam * X)).natDegree = g.natDegree := by
+  rw [natDegree_comp, natDegree_C_mul hlam, natDegree_X, mul_one]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def lemma_2_2_base.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 4,
     item := "Lemma 2.2(基底段——原文が書いていない |S| ≤ 3 の場合)",
+    sectionId := "ncbelyi-lemma-2-2" }
+
+def derivative_comp_scale_eq_zero_iff.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 4,
+    item := "Lemma 2.2(帰納段——スケーリングは臨界点を移すだけ)",
     sectionId := "ncbelyi-lemma-2-2" }
 
 end ABC3.Found.NCBelyi
