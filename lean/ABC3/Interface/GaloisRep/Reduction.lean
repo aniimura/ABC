@@ -156,19 +156,29 @@ theorem isSemiStableAt_iff_not_additive (R : Type) [CommRing R] [IsDomain R]
 structure SemistableModelData where
   /-- 台となる Tate 曲線。 -/
   toTateCurveData : TateCurveData
-  /-- ★★**Néron 微分** `ω_E` —— `𝓞_L` 上の加群。 -/
-  omega : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Type
-  /-- 加法群の構造。 -/
-  omegaAddCommGroup : (L : Type) → [Field L] → [NumberField L] →
-    (W : WeierstrassCurve L) → AddCommGroup (omega L W)
-  /-- `𝓞_L` 加群の構造。 -/
-  omegaModule : (L : Type) → [inst : Field L] → [instN : NumberField L] →
-    (W : WeierstrassCurve L) →
-    @Module (𝓞 L) (omega L W) _ (omegaAddCommGroup L W).toAddCommMonoid
-  /-- ★★★**階数 1**(可逆加群)——これが退化を殺す。 -/
-  omega_rank_one : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
-    @Module.rank (𝓞 L) (omega L W) _ (omegaAddCommGroup L W).toAddCommMonoid
-      (omegaModule L W) = 1
+  /-- ★★**Néron 微分が定める分数イデアル** `ω_E ⊆ L`。
+
+  ★★★★**2026-08-26 の訂正(4 つ目の穴を塞ぐ)**——以前は
+  `omega : … → Type` と**階数 1 だけ**を課していた。
+  `Check/GaloisRep/OmegaNondegenerate.lean` が示したとおり、それは
+  **`ω_E := 𝓞_L`(曲線を無視する定数)で満たせてしまう**。
+  ★ここでは `ω_E` を **`L` の分数イデアル**として持ち、
+  **変数変換での変わり方**を課す——これが「その欄と入力データの両方を言及する条件」である。
+
+  ★★不変微分 `ω = dx/(2y + a₁x + a₃)` は変数変換で `ω' = u·ω` と変わるので、
+  Néron 微分を `ω` で割った係数は `u⁻¹` 倍され、分数イデアルも `u⁻¹` 倍される。 -/
+  omegaFrac : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L →
+    Submodule (𝓞 L) L
+  /-- ★分数イデアルであること(有限生成)——`L` 全体は f.g. でないので、これが効く。 -/
+  omegaFrac_fg : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
+    (omegaFrac L W).FG
+  /-- ★零でない(階数 1 の代わり)。 -/
+  omegaFrac_ne_bot : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L),
+    omegaFrac L W ≠ ⊥
+  /-- ★★★★**変数変換で `u⁻¹` 倍される**——これが `ω_E` を曲線に結びつける条件。 -/
+  omegaFrac_variableChange : ∀ (L : Type) [Field L] [NumberField L] (W : WeierstrassCurve L)
+    (C : WeierstrassCurve.VariableChange L) (x : L),
+    x ∈ omegaFrac L (C • W) ↔ ((C.u : L) * x) ∈ omegaFrac L W
   /-- 大域の半安定性(原文が繰り返し仮定するもの)。 -/
   SemiStable : (L : Type) → [Field L] → [NumberField L] → WeierstrassCurve L → Prop
   /-- ★★★**その意味を固定する**——各離散付値環の上で半安定であること。
@@ -180,7 +190,7 @@ structure SemistableModelData where
         [Algebra R L] [IsFractionRing R L] [W.IsMinimal R], IsSemiStableAt R W
 
 def SemistableModelData.waiting : WaitingFor :=
-  { what := "(G7) 半安定還元(★mathlib の還元型で定義済——posit ではない)と、𝓞_L 上への延長が与える階数 1 の Néron 微分 omega_E"
+  { what := "(G7) 半安定還元(★mathlib の還元型で定義済——posit ではない)と、𝓞_L 上への延長が与える Néron 微分の分数イデアル omega_E(★2026-08-26: 変数変換での変わり方を課して曲線に結びつけた)"
     trackB := "Found/GaloisRep — ★mathlib は `AlgebraicGeometry/EllipticCurve/Reduction.lean` を持つ(2026-08-17 実測)が、**Néron モデル・半アーベルスキームは無い**。★★原文は延長の存在を [FC] Chapter I, Proposition 2.7 に帰している" }
 
 /-! ## ★★★G8 —— Faltings 高さ(Arakelov 側との合流点) -/
