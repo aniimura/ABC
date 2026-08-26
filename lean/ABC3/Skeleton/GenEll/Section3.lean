@@ -147,7 +147,21 @@ noncomputable def potLocalHeight (D : TateLocalData) {K : D.LocalField} {E : D.C
 theorem potLocalHeight_indep (D : TateLocalData) {K : D.LocalField} {E : D.Curve K}
     (L L' : D.MultExt K E) :
     potLocalHeight D L = potLocalHeight D L' := by
-  sorry
+  have he : ((D.ramIdx L : ℚ)) ≠ 0 := by
+    have h := D.ramIdx_pos L
+    have h0 : D.ramIdx L ≠ 0 := Nat.pos_iff_ne_zero.1 h
+    exact_mod_cast h0
+  have he' : ((D.ramIdx L' : ℚ)) ≠ 0 := by
+    have h := D.ramIdx_pos L'
+    have h0 : D.ramIdx L' ≠ 0 := Nat.pos_iff_ne_zero.1 h
+    exact_mod_cast h0
+  have hcross := D.vq_baseChange L L'
+  have hq : ((D.vq (D.extField L) (D.baseChange L) : ℚ)) * (D.ramIdx L' : ℚ)
+      = ((D.vq (D.extField L') (D.baseChange L') : ℚ)) * (D.ramIdx L : ℚ) := by
+    exact_mod_cast congrArg (fun n : ℕ => (n : ℚ)) hcross
+  rw [potLocalHeight, potLocalHeight]
+  field_simp
+  linarith [hq]
 
 /-! ## Proposition 3.4 —— Faltings 高さと無限遠因子 -/
 
@@ -279,9 +293,9 @@ def potLocalHeight_indep.src : Source :=
 
 def potLocalHeight_indep.needs : List ProofObligation :=
   [ .implicitStep
-      "原文は『one verifies immediately that this definition is independent of the choice of L』の 1 文。★実際には『2 つの拡大 L, L′ の合成を取り、局所高さが拡大次数に比例して伸びる』ことを要する" 16,
+      "原文は『one verifies immediately that this definition is independent of the choice of L』の 1 文。★畳んでいるのは局所高さが有限拡大で分岐指数倍になること(v_L(q_E) = e(L/K)·v_K(q_E))である" 16,
     .implicitStep
-      "★局所高さが有限拡大で分岐指数倍になること(v_L(q_E) = e(L/K)·v_K(q_E))は原文に書かれていない。これがこの Remark の実質である" 16 ]
+      "★★★★★★**2026-08-26 に閉じた**。その実質は `Found/GenEll/LocalHeightRamified.lean` の `ordAt_liesOver`(mathlib の `HeightOneSpectrum.valuation_liesOver` から導いた)であり、`Interface/GenEll/TateLocal.lean` の `vq_baseChange` として仕様に出してある。★本定理はそこからの初等的な導出(交差乗法)である" 16 ]
 
 def localHeight.src : Source :=
   { paper := "GenEll", pdfPage := 15, item := "Definition 3.3",

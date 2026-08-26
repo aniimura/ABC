@@ -14,7 +14,7 @@ import ABC3.Found.GenEll.BDClass
 | 定理 | 量化している界面 |
 |---|---|
 | `lemma_3_2` | `∀ D : TateLocalData` |
-| `potLocalHeight_indep` | `∀ D : TateLocalData` |
+| `potLocalHeight_indep` | `∀ D : TateLocalData` ★**2026-08-26 に閉じた** |
 | `prop_3_4` | `∀ D : EllModuliData` |
 | `lemma_3_5` | `∀ D : EllModuliData` |
 | `lemma_3_7` | `∀ D : EllModuliData` |
@@ -49,7 +49,7 @@ import ABC3.Found.GenEll.BDClass
 |---|---|---|---|
 | 1-5 | G6/G7/G8 | 充足不能・弱すぎる | 第 302-318 |
 | 6 | G8 `htFalt` | **弱すぎる**(`deg∞/12` で満たせる) | 第 357 |
-| 7 | **`TateLocalData`** | **弱すぎる**(世界ごと posit、`Unit` で埋まる) | ★**未** |
+| 7 | **`TateLocalData`** | **弱すぎる**(世界ごと posit、`Unit` で埋まる) | ★**部分**(第 360: `Remark 3.3.1`) |
 | 8 | **`EllModuliData`** | **弱すぎる**(高さの間に関係が無い) | ★**未** |
 -/
 
@@ -74,10 +74,13 @@ def degenerateTateLocal : TateLocalData where
   MultExt := fun _ _ => Bool
   extField := fun _ => ()
   baseChange := fun _ => ()
-  ramIdx := fun b => if b then 1 else 2
+  ramIdx := fun _ => 1
   ramIdx_pos := by
     intro K E L
-    cases L <;> norm_num
+    norm_num
+  vq_baseChange := by
+    intro K E L L'
+    rfl
 
 /-- ★★★★★★**`Lemma 3.2, (i)` は現在の界面の上では偽である**。
 
@@ -104,21 +107,20 @@ theorem lemma_3_2_ii_false :
   simp only [degenerateTateLocal] at h2
   norm_num at h2
 
-/-- ★★★★★★**`Remark 3.3.1`(`L` の取り方に依らない)は現在の界面の上では偽である**。
+/-! ## ★★★★★★★`Remark 3.3.1` は 2026-08-26 に閉じた
 
-分岐指数だけが違う 2 つの拡大を取れば `v/e` は一致しない。 -/
-theorem potLocalHeight_indep_false :
-    ¬ (∀ (K : degenerateTateLocal.LocalField) (E : degenerateTateLocal.Curve K)
-        (L L' : degenerateTateLocal.MultExt K E),
-      ((degenerateTateLocal.vq (degenerateTateLocal.extField L)
-          (degenerateTateLocal.baseChange L) : ℚ) / (degenerateTateLocal.ramIdx L : ℚ))
-        = ((degenerateTateLocal.vq (degenerateTateLocal.extField L')
-            (degenerateTateLocal.baseChange L') : ℚ) / (degenerateTateLocal.ramIdx L' : ℚ))) := by
-  intro h
-  have h2 := h () () true false
-  show False
-  simp only [degenerateTateLocal] at h2
-  norm_num at h2
+★以前はここに `potLocalHeight_indep_false` があった——分岐指数だけが違う
+2 つの拡大を取れば `v/e` は一致せず、`Remark 3.3.1` は破れていた。
+
+★★`Interface/GenEll/TateLocal.lean` に **`vq_baseChange`**(局所高さは分岐指数倍)を
+足したので、**その退化 witness はもはや作れない**。
+★★★これは posit ではなく定理である——`Found/GenEll/LocalHeightRamified.lean`(第 359)が
+mathlib の `HeightOneSpectrum.valuation_liesOver` から導いている。
+★★★★`Skeleton/GenEll/Section3.lean` の `potLocalHeight_indep` はこれで
+**`sorry` ではなくなった**。
+
+★下の `degenerateTateLocal` は `ramIdx ≡ 1` にしてあるので新しい欄を満たすが、
+`Lemma 3.2` は依然として破る。 -/
 
 /-! ## ★★★★★★2. `EllModuliData` は高さの間に関係を持たない -/
 

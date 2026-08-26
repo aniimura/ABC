@@ -27676,3 +27676,44 @@ G6 と同じく、**既に達成済みの `TateCurveData`(G6)・`FaltingsHeightD
 **界面を接地させれば導出できる**——残るのは `TateLocalData` の作り直しである。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-673 ★★★★★★★★§3 の sorry が **5 → 4**——`Remark 3.3.1` を閉じた(第 360 ブロック)
+
+`Interface/GenEll/TateLocal.lean`・`Skeleton/GenEll/Section3.lean`・
+`Check/GenEll/Section3NotProvable.lean`。
+
+### ★★★★★★★何をしたか
+
+第 358 で「`potLocalHeight_indep` は現行の界面の上では**偽**」と実測し、
+第 359 でその**実質**(`ord_w(x) = e(w/v)·ord_v(x)`)を mathlib の
+`HeightOneSpectrum.valuation_liesOver` から**定理として**導いた。
+
+★本ブロックはそれを `TateLocalData` の欄 **`vq_baseChange`** として仕様に出し、
+`Skeleton` 側の `potLocalHeight_indep` を**交差乗法だけで導出**した。
+
+### ★★★★★**posit との違いをはっきりさせる**
+
+`tools/check.mjs` 冒頭 B5 の穴は「条件を posit して `sorry` を消す」ことである。
+★今回足した `vq_baseChange` は **posit ではない**——
+`Found/GenEll/LocalHeightRamified.lean` が**意図した対象について実際に証明している**。
+★★界面はその**仕様**を出しているだけである。
+
+★★★**退化封じとして実際に効いている**:第 358 の
+`potLocalHeight_indep_false`(分岐指数だけが違う 2 つの拡大)は
+**新しい欄を満たせなくなった**ので削除した。
+
+### ★★§3 の現状
+
+| 定理 | 状態 |
+|---|---|
+| `lemma_3_1` | ✅(第 215 付近) |
+| `lemma_3_2` | ★sorry——[FC] Ch. III, Cor. 7.3(完全列)を要求 |
+| `localHeight_pos` | ✅ |
+| **`potLocalHeight_indep`** | ✅**本ブロック** |
+| `prop_3_4` | ★sorry——`EllModuliData` が弱すぎる(欠陥 #8) |
+| `lemma_3_5` | ★sorry——`Lemma 3.2` + `Prop 3.4` から導く |
+| `lemma_3_6` | ✅ |
+| `lemma_3_7` | ★sorry——`Lemma 3.5` + `Lemma 3.6` から導く |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

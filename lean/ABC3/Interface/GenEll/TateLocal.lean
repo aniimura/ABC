@@ -26,10 +26,18 @@ import Mathlib.Data.Real.Basic
 
 ## ★★ただし「何を作れば終わりか」は完全に決まる
 
-★本 Interface は**公理を 1 つも持たない**(データと述語だけ)。
-`Lemma 3.2` の主張(i)(ii)、`Remark 3.3.1` の well-defined 性は、
-**すべて `Skeleton/GenEll/Section3.lean` 側の `sorry` として残る**。
-これが `tools/check.mjs` 冒頭 B5 の穴(条件を posit して `sorry` を消す)を避ける形である。
+★★★★★★**2026-08-26 の訂正(欠陥 #7 を部分的に塞ぐ)**。
+
+以前は本 Interface は**公理を 1 つも持たなかった**(データと述語だけ)。
+★そのため `Skeleton/GenEll/Section3.lean` の `lemma_3_2` ・ `potLocalHeight_indep` は
+**退化した `D` で破れてしまう**——すなわち「まだ証明していない」のではなく
+**「この形では偽」**だった(`Check/GenEll/Section3NotProvable.lean` で実測)。
+
+★★そこで `vq_baseChange`(局所高さは分岐指数倍)を足した。
+★★★**これは posit ではない**——`Found/GenEll/LocalHeightRamified.lean`(第 359)が
+mathlib の `valuation_liesOver` から**定理として**導いている。
+★★★★`Lemma 3.2` の (i)(ii) は依然として `Skeleton` 側の `sorry` である
+——そちらは [FC] Chapter III, Corollary 7.3 を要求する。
 -/
 
 namespace ABC3.Interface.GenEll
@@ -71,6 +79,24 @@ structure TateLocalData where
   ramIdx : {K : LocalField} → {E : Curve K} → MultExt K E → ℕ
   /-- 分岐指数は正。 -/
   ramIdx_pos : ∀ {K : LocalField} {E : Curve K} (L : MultExt K E), 0 < ramIdx L
+  /-- ★★★★★★**局所高さは分岐指数倍になる**——`Remark 3.3.1` の実質。
+
+  原文 (GenEll p.16):
+  > that this definition is independent of the choice of L].
+
+  ★原文は「one verifies **immediately**」で畳んでいるが、畳んでいるのは
+  **`v_L(q_E) = e(L/K)·v_K(q_E)`** である。
+
+  ★★★★**これは posit ではなく定理である**——
+  `Found/GenEll/LocalHeightRamified.lean` の `ordAt_liesOver` が
+  mathlib の `HeightOneSpectrum.valuation_liesOver` から導いている(2026-08-26、第 359)。
+  ★★ここでは「意図した対象が満たす仕様」として欄に出している。
+
+  ★★★★★★**退化封じとしても効く**——`v_K(q_E)` を定数にしたまま
+  分岐指数だけを動かす witness はこれで落ちる。 -/
+  vq_baseChange : ∀ {K : LocalField} {E : Curve K} (L L' : MultExt K E),
+    vq (extField L) (baseChange L) * ramIdx L'
+      = vq (extField L') (baseChange L') * ramIdx L
 
 /-- ★Track B は何を作らねばならないか。 -/
 def TateLocalData.waiting : WaitingFor :=
