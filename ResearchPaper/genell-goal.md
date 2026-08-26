@@ -28064,3 +28064,53 @@ mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 | `Section1`(`Prop 1.7`) | 1 | `CoveringSetup` |
 | `Section2`(**`Theorem 2.1`**) | 1 | `AbcSetup` |
 | `NCBelyi/Theorem25` | 1 | `BelyiSetup` |
+
+
+## §9-681 ★★★★★★★**`Proposition 1.6` を閉じた**(第 368 ブロック)
+
+`Skeleton/GenEll/Section1.lean`。
+
+### ★★★★★★§1 は §3･§4 と事情が違う
+
+§3･§4 では「原文が引いているものを界面の欄に出して導出する」で閉じた。
+★**§1 ではそれができない**——`Proposition 1.4` の (i)-(iv) は
+`HeightTheoryData` に足すべき公理**そのもの**だからであり、
+足せば `Proposition 1.4` が仮定の言い換えになる(**B5**)。
+
+★★すでに `Skeleton/GenEll/Section1.lean` の診断がそう書いていた——
+『閉じるには `HeightTheoryData` を posit ではなく**構成**に置き換えるほかない』。
+
+### ★★★★中身はすでに `Found/` にあった
+
+`Found/GenEll/Prop16.lean` の `prop_1_6` はすでに `sorry` 無しで完成していた。三段:
+
+1. `X^arc` はコンパクト(`ArcModel.compactSpace`)
+2. 連続な Green 関数は下に有界(`ArcModel.exists_bound`)
+3. 導手は高さ + 定数で押さえられる(`ArchBound.logCond_le_htArith_add`)
+
+★★**定数 `C` が数体 `F` にも点にも依らない**のが要である。
+
+### 逸脱 2 件
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ D : HeightTheoryData` | **`ArcModel` + `ArithCartier`** | 前者では偽だから |
+| `≲` の向き | 印字どおりの `BDle` | **`log-cond ≤ ht + C`** | 表題の向き。`Gap/GenEll/BDDirection.lean` に記録済み |
+
+### ★★★★★★★★残り 4 件の実測(これは「書き換えて閉じる」では届かない)
+
+| 項目 | 何が要るか | あるもの | 無いもの |
+|---|---|---|---|
+| `Prop 1.4` (i) | 加法性 | ✅ `htArith_tensor_unconditional` | — |
+| `Prop 1.4` (ii) | 下に有界 | ✅ `prop_1_4_ii`(`ArcModel`) | — |
+| `Prop 1.4` (iii) | 生成ファイバーが同じなら `≈` | △ 計量だけ違う場合はコンパクト性で出る | **垂直因子の寄与が有界**という段 |
+| `Prop 1.4` (iv) | Northcott | ✅ `finite_projectivization_logHeight_le`(固定の `K`)･`finite_of_finrank_le_of_mulHeight₁_le` | ★★**算術的な射影埋め込み**(`ArcModel` はアルキメデス側だけ) |
+| `Remark 1.4.1` | モデルの取り方に依らない | ✅ `htArith_baseChange_natural`(**数体**の変換) | **ℤ-モデル 2 つの比較**(有限素数集合 Σ の上で延びる) |
+| `Remark 1.5.1` | 同上(`log-diff`･`log-cond`) | ✅ `logDiffOfField_*` 一式 | 同上 |
+| `Prop 1.7` | 導手と log-different | ✅ `logDiffOfField_tower`･`deg_adivRed_le` | ★**被覆の分岐理論**(各点での `e`) |
+
+★★★**どれも「原文が引いているものを欄に出す」では閉じない**——
+出すべき欄が `Proposition 1.4` 自身になってしまうからである。
+★★★★**ここから先は構成の仕事である**。
+
+★★Lean 全体の sorry は **43 → 42**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

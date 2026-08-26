@@ -3,6 +3,7 @@ import ABC3.Interface.GenEll.HeightTheory
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.Conductor
+import ABC3.Found.GenEll.Prop16
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -239,11 +240,43 @@ theorem remark_1_5_1 (D D' : HeightTheoryData)
 
 ★証明が `X^arc` を要求する箇所も目視で特定した——アルキメデス素点の寄与を
 「**コンパクト空間 `X^arc` 上の連続関数 `|s|_L` が有界**」で処理している。
-非アルキメデス側は `Definition 1.5, (iv)` の `(−)_red` だけで済む。 -/
-theorem prop_1_6 (D : HeightTheoryData) (dv : D.Divisor) :
-    BDle (fun x : ↥(D.compl dv) => D.logCond dv x.1)
-         (fun x : ↥(D.compl dv) => D.ht (D.bundleOf dv) x.1) := by
-  sorry
+非アルキメデス側は `Definition 1.5, (iv)` の `(−)_red` だけで済む。
+
+## ★★★★★★★★ 2026-08-26——`sorry` が消えた(第 368 ブロック)
+
+★以前は `∀ D : HeightTheoryData` と量化していたが、**それは偽である**
+(`Check/GenEll/HeightAxiomGap.lean`)。★★公理を足すのは B5 そのものなので、
+本ファイルの診断が書いていたとおり**構成に置き換えた**。
+
+★★★中身は `Found/GenEll/Prop16.lean` にすでにあった——三段である:
+
+1. `X^arc` はコンパクト(`ArcModel.compactSpace`)
+2. 連続な Green 関数は下に有界(`ArcModel.exists_bound`)
+3. 導手は高さ + 定数で押さえられる(`ArchBound.logCond_le_htArith_add`)
+
+★★★★**定数 `C` が数体 `F` にも点にも依らない**のが要である(次数で正規化してあるから)。
+
+### 逸脱 2 件
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ D : HeightTheoryData` | **`ArcModel` + `ArithCartier`** | 前者では偽だから |
+| `≲` の向き | 印字どおりの `BDle` | **`log-cond ≤ ht + C`** | 表題 "Conductor **Bounded by** the Height" の向き。`Gap/GenEll/BDDirection.lean` に記録済み |
+
+★原文の `U(ℚ̄)` への制限は `pullbackIdeal F Dv.divisor xF ≠ 0` が担っている。 -/
+theorem prop_1_6 {X : AlgebraicGeometry.Scheme.{0}} {V : Type}
+    [NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]
+    (M : ABC3.Found.GenEll.ArcModel X V)
+    [Nonempty (ABC3.Found.GenEll.complexPoints X)]
+    (Dv : ABC3.Found.GenEll.ArithCartier X)
+    (hg : @Continuous _ _ M.topology _ Dv.green) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (F : Type) [Field F] [NumberField F]
+        (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+        ABC3.Found.GenEll.pullbackIdeal F Dv.divisor xF ≠ 0 →
+        ABC3.Found.GenEll.logCond F Dv.divisor xF
+          ≤ ABC3.Found.GenEll.htArith F Dv xF + C :=
+  ABC3.Found.GenEll.prop_1_6 M Dv hg
 
 /-! ## Proposition 1.7 —— 導手と log-different -/
 
