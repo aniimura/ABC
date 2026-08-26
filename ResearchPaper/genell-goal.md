@@ -28450,3 +28450,34 @@ Kummer 拡大に当てた鋭い形も取った:
 **スクラッチパッドの `.py` に書いてパスで実行する**。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-692 ★★★★★★★**段 4 が完了した——Kummer 理論は mathlib にあった**(第 380 ブロック)
+
+原文 p.10 の段 4 は『Since `ζ ∈ K`, it follows **immediately from elementary Kummer
+theory** that `L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』である。
+
+★**在庫を引いたら mathlib にあった**——`isCyclic_tfae`
+(`Mathlib/FieldTheory/KummerExtension.lean`)。`ζ_n ∈ K` のとき次の 3 つが同値:
+
+    IsGalois K L かつ IsCyclic Gal(L/K)
+    ∃ a, Irreducible (X^n − C a) かつ IsSplittingField K L (X^n − C a)
+    ∃ α, α^n ∈ range (algebraMap K L) かつ K⟮α⟯ = ⊤
+
+★★**3 つ目が原文の段 4 そのもの**である。ここでは**作らずに済んだ**。
+
+★★★これで段 4 は**完了**である(最小多項式は第 376、`λ` の存在は本ブロック)。
+
+### elementary claim の現状(第 374-380、7 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★馴の側は取った。分離そのものは未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具(塔で継ぐ)を取った。群論の側は未着手 |
+| **4(Kummer)** | ★★★**完了** |
+| 5･6･結論 | ★★取った |
+
+★★★★**残りは 3 項目**——段 1 の分離･段 2･段 3 の群論。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。

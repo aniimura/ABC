@@ -1,5 +1,6 @@
 import ABC3.Meta.Claim
 import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.FieldTheory.KummerExtension
 
 /-!
 # [GenEll] Proposition 1.7 の "elementary claim" —— **Kummer 拡大の different**(`Found`)
@@ -44,7 +45,7 @@ import Mathlib.RingTheory.DedekindDomain.Different
 | 1(野生/馴の分離) | 未着手 |
 | 2(`ζ_p ∈ K` への帰着) | 未着手 |
 | 3(`p`-群の可解性で `[L:K] = p` へ) | ★**道具(塔で継ぐ補題)は本ファイル**。群論の側は未着手 |
-| 4(Kummer 理論) | ★**最小多項式が `X^p − κ` であることは本ファイル**。`λ` の存在は未着手 |
+| 4(Kummer 理論) | ★★**完了**——最小多項式も `λ` の存在(mathlib の `isCyclic_tfae`)も本ファイル |
 | **5(`p ∈ λ·O_L`)** | ★**本ファイル**——付値環の全順序性 1 行 |
 | **6(different の下界)** | ★**本ファイル** |
 | **5+6 を繋いだ結論 `p^p·O_L ⊆ different`** | ★★**本ファイル** |
@@ -350,6 +351,28 @@ theorem mem_differentIdeal_of_isUnit_natCast
     Ideal.mem_span_singleton]
   exact (hunit.mul_left_dvd).mpr (dvd_trans (pow_dvd_pow lam hle) hdvd)
 
+/-! ## ★★★★★★★段 4 の存在の側 —— Kummer 理論は mathlib にあった -/
+
+/-- ★★★★★★★**段 4(Kummer 理論)** —— `ζ_n ∈ K` で巡回 Galois なら
+`L = K(α)` で `α^n ∈ K`。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★原文は『Since `ζ ∈ K`, it follows **immediately from elementary Kummer theory**
+that `L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』と 1 文で済ませている。
+
+★★**mathlib にあった**——`isCyclic_tfae`(`Mathlib/FieldTheory/KummerExtension.lean`)。
+在庫を引いてから作ること——ここでは**作らずに済んだ**。 -/
+theorem exists_gen_pow_mem_range
+    (K : Type*) (L : Type*) [Field K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    (hroot : (primitiveRoots (Module.finrank K L) K).Nonempty)
+    (hgal : IsGalois K L) (hcyc : IsCyclic (L ≃ₐ[K] L)) :
+    ∃ α : L, α ^ (Module.finrank K L) ∈ Set.range (algebraMap K L)
+      ∧ IntermediateField.adjoin K {α} = ⊤ := by
+  have h := (isCyclic_tfae K L hroot).out 0 2
+  exact h.mp (And.intro hgal hcyc)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -400,6 +423,11 @@ def differentIdeal_eq_span_kummer.src : ABC3.Meta.Source :=
 def mem_differentIdeal_of_isUnit_natCast.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(馴分岐なら n = 1 で足りる)",
+    sectionId := "genell-prop-1-7" }
+
+def exists_gen_pow_mem_range.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(段 4——Kummer 理論で L = K(λ))",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll
