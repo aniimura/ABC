@@ -28519,3 +28519,40 @@ theory** that `L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』�
 ★★★★**残りは段 1 の分離と段 2 の 2 項目**である。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-694 ★★★★★★★★**残り 2 項目の閘は 1 つだった——馴分岐の構造定理**(第 382 ブロック)
+
+elementary claim の残りは段 1(分離)と段 2(`ζ_p` への帰着)であったが、
+★**どちらも同じ 1 つに帰着する**:
+
+> **馴分岐の構造定理**——馴なら不分岐部を除けば
+> **Kummer 型の生成元** `λ^e = π` を持つ
+
+★★これがあれば、第 379 の `mem_differentIdeal_of_isUnit_natCast` が**そのまま**馴の場合を与える
+——`v(f′(λ)) = v(e) + (e−1) = e−1`(`p ∤ e` なので `v(e) = 0`)。
+★★★段 2 も同じである——`K(ζ_p)/K` の次数は `p−1` を割るので**馴**だから。
+
+### ★★★★実測——mathlib には馴分岐が無い
+
+| 探したもの | mathlib |
+|---|---|
+| `Algebra.IsUnramifiedAt` | ✅ ある |
+| `IsTamelyRamified` / `Algebra.IsTamelyRamified` / `Ideal.IsTamelyRamified` / `IsTame` | ❌**どれも無い** |
+
+★★★★★**したがって残りは「引いてくる」ではなく「建てる」仕事である**——
+定義(`p ∤ e`)、不分岐部との分解、構造定理の順に積むことになる。
+
+### ★★★★★★今日分かったことのまとめ(第 374-382)
+
+原文が『elementary』と畳んだ 6 段のうち、**3 段は mathlib にすでにあった**:
+
+| 段 | どこにあったか |
+|---|---|
+| 3(`p`-群の鎖) | `Sylow.exists_subgroup_card_pow_prime_le` |
+| 4(Kummer 理論) | `isCyclic_tfae`(`FieldTheory/KummerExtension.lean`) |
+| 6(different の下界) | `aeval_derivative_mem_differentIdeal` |
+
+★**在庫を引く規則がここで大きく効いた**——作らずに済んだのが半分である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
