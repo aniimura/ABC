@@ -26538,3 +26538,49 @@ G8 の `htFalt` 欄は**界面が要求を書ききれていない**状態のま
 ——本セッションの射程を超える。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-646 ★★★★★半周期と 3 次式の根——一意化の連鎖に着手した(第 332 ブロック)
+
+`Found/GenEll/LatticeHalfPeriod.lean`。
+
+### ★★★★★★位置づけ
+
+G8 の `htFalt` を固定するには一意化(`Skeleton/GenEll/Uniformization.lean`)が要り、
+その手前に
+
+    (i)  束の判別式 `g₂³ − 27g₃² ≠ 0`
+    (ii) `ℂ/Λ ≅ E(ℂ)` の群同型
+    (iii) `j` の全射性
+
+の 3 段がある(mathlib はいずれも持たない)。★本ブロックは **(i) の最初の段**を取る。
+
+### ★★★★★中身——奇関数性と周期性だけで出た
+
+`℘'` は奇関数(`derivWeierstrassP_neg`)かつ周期的(`derivWeierstrassP_add_coe`)なので、
+`w ∈ Λ` に対し
+
+    ℘'(w/2) = ℘'(-w/2 + w) = ℘'(-w/2) = -℘'(w/2)   ⟹   ℘'(w/2) = 0
+
+★★これを `℘'² = 4℘³ − g₂℘ − g₃`(`derivWeierstrassP_sq`)に入れると、
+`℘(w/2)` は 3 次式 `4x³ − g₂x − g₃` の**根**である。
+★★★半周期は 3 つ(`ω₁/2`・`ω₂/2`・`(ω₁+ω₂)/2`)。前 2 つが束に入らないことは mathlib にあり、
+3 つ目は `mul_ω₁_add_mul_ω₂_mem_lattice`(有理係数の判定)から出た。
+
+### ★★残り((i) の続き)
+
+★3 つの根が**相異なる**ことが要る。それには
+**「楕円関数の零点と極の個数は等しい」**(基本平行四辺形の周での偏角の原理)が要り、
+mathlib には無い。★★`℘ − e` は 0 で 2 位の極を持つので零点はちょうど 2 個、
+一方 `e₁ = e₂` なら `ω₁/2` と `ω₂/2` で各 2 位、計 4 個になって矛盾する、という筋である。
+
+### ★★本ブロックで取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `derivWeierstrassP_half` | ★★★★**半周期で `℘' = 0`** |
+| `isRoot_cubic_weierstrassP_half` | ★★★★★**`℘(w/2)` は 3 次式の根** |
+| `add_div_two_notMem_lattice` | ★★★第 3 の半周期も束に入らない |
+| `isRoot_cubic_e₁`・`_e₂`・`_e₃` | ★★★★3 つの根 |
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。

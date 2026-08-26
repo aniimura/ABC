@@ -345,6 +345,7 @@ import ABC3.Found.IUTchIII.LogVolume
 import ABC3.Found.IUTchIII.PadicLogMul
 import ABC3.Found.SemiAnbd.TemperedGroup
 import ABC3.Found.GenEll.Lemma31
+import ABC3.Found.GenEll.LatticeHalfPeriod
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence
