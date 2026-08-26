@@ -490,6 +490,69 @@ theorem mem_differentIdeal_of_eisenstein_tame
   rw [mul_comm]
   exact (hv.mul_left_dvd).mpr h1
 
+/-! ## ★★★★★★★★★段 1 の馴の側——全分岐の仮説から直接 -/
+
+open Finset in
+/-- ★★★★★★★★★**全分岐かつ馴なら `p ∈ 𝔡`**——
+原文 p.10 の段 1 の馴の側を、全分岐の仮説から**直接**出した形。
+
+原文 (GenEll p.10):
+> Σ” of log-condE, log-condD is ≈0 [cf. Remark 1.5.1], while [again by the elementary
+
+★仮説は全分岐と馴分岐だけである:
+
+| 仮説 | 意味 |
+|---|---|
+| `hpiA` | **全分岐**——`A` の非単元は `λ^e` で割れる(`π ~ λ^e`、`TameRamification.lean` 第 388) |
+| `hloc` | 局所準同型(非単元が非単元に戻る) |
+| `hunit` | **馴分岐**(`IsTameDegree` と同値、第 384) |
+| `hmono` | `B = A[λ]`(第 389 + 390) |
+| `hdvdp`･`hle` | `λ^m ∣ p` で `e−1 ≤ m` |
+
+★★中間の Eisenstein 性(係数がすべて非単元)は
+`TameRamification.lean` の `not_isUnit_coeff_of_root`(第 392)で**導かれる**
+——仮説には置いていない。 -/
+theorem mem_differentIdeal_of_totallyRamified_tame
+    (A : Type*) (K : Type*) (L : Type*) {B : Type*} [CommRing A] [Field K] [CommRing B] [Field L]
+    [Algebra A K] [Algebra B L] [Algebra A B] [Algebra K L] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [IsDomain A] [IsFractionRing A K]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [IsIntegralClosure B A L]
+    [IsIntegrallyClosed A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    [IsLocalRing B]
+    (e m : ℕ) (he : 0 < e) (lam pp : B) (hlam0 : lam ≠ 0)
+    (hlamm : lam ∈ IsLocalRing.maximalIdeal B)
+    (hpiA : ∀ x : A, ¬ IsUnit x → lam ^ e ∣ algebraMap A B x)
+    (hloc : ∀ x : A, ¬ IsUnit (algebraMap A B x) → ¬ IsUnit x)
+    (hint : IsIntegral A lam)
+    (hdeg : (minpoly A lam).natDegree = e)
+    (hunit : IsUnit (e : B))
+    (hmono : Algebra.adjoin A {lam} = ⊤)
+    (hgen : Algebra.adjoin K {(algebraMap B L) lam} = ⊤)
+    (hle : e - 1 ≤ m) (hdvdp : lam ^ m ∣ pp) :
+    pp ∈ differentIdeal A B := by
+  classical
+  -- ★根の関係式(第 393)
+  have hroot := root_relation_minpoly (A := A) lam hint e hdeg
+  -- ★Eisenstein 性(第 392)
+  have hlamnu : ¬ IsUnit lam := by
+    rw [← IsLocalRing.notMem_maximalIdeal] at *
+    exact fun h => h hlamm
+  have hcoeff : ∀ i, i < e → ¬ IsUnit ((minpoly A lam).coeff i) :=
+    not_isUnit_coeff_of_root e (fun i => (minpoly A lam).coeff i) lam hlam0 hlamnu hpiA hloc hroot
+  have hdvd : ∀ i ∈ range e, lam ^ e ∣ algebraMap A B ((minpoly A lam).coeff i) := by
+    intro i hi
+    exact hpiA _ (hcoeff i (Finset.mem_range.mp hi))
+  -- ★最小多項式の式
+  have hmap : (minpoly A lam).map (algebraMap A B)
+      = X ^ e + ∑ i ∈ range e, C (algebraMap A B ((minpoly A lam).coeff i)) * X ^ i := by
+    have h := (minpoly.monic hint).as_sum
+    rw [hdeg] at h
+    conv_lhs => rw [h]
+    simp [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_sum, Polynomial.map_mul]
+  exact mem_differentIdeal_of_eisenstein_tame A K L e m he
+    (fun i => algebraMap A B ((minpoly A lam).coeff i)) lam pp hmap hdvd hlamm hunit hmono hgen
+    hle hdvdp
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minpoly_eq_X_pow_sub_C_of_map.src : ABC3.Meta.Source :=
@@ -555,6 +618,11 @@ def pow_mem_differentIdeal_of_kummer.src : ABC3.Meta.Source :=
 def mem_differentIdeal_of_eisenstein_tame.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
     item := "Proposition 1.7, (i) の elementary claim(段 1 の馴の側を端から端まで)",
+    sectionId := "genell-prop-1-7" }
+
+def mem_differentIdeal_of_totallyRamified_tame.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7, (i) の elementary claim(段 1 の馴の側を全分岐の仮説から直接)",
     sectionId := "genell-prop-1-7" }
 
 end ABC3.Found.GenEll

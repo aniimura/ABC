@@ -28876,3 +28876,33 @@ Python の文字列で `𝔪` を**サロゲート対**で書くと UTF-8 への
 これらの仮説を実際に導く**最後の組み立て**である。
 
 `lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-706 ★★★★★★★★★**段 1 の馴の側が全分岐の仮説から直接出た**(第 394 ブロック)
+
+`Found/GenEll/DifferentKummer.lean` の `mem_differentIdeal_of_totallyRamified_tame`。
+
+原文 p.10 の段 1 の馴の側(『馴なら `n = 1` で足りる』)が、
+**全分岐と馴分岐の仮説だけ**から出る形になった:
+
+    全分岐(`A` の非単元は `λ^e` で割れる)+ 馴(`e` が単元)
+      + `B = A[λ]` + `λ^m ∣ p`･`e−1 ≤ m`
+      ⇒  `p ∈ 𝔡`
+
+★**中間の Eisenstein 性は仮説に置いていない**——
+第 392 の `not_isUnit_coeff_of_root` で**導いている**。
+根の関係式は第 393、最小多項式の式は `Monic.as_sum` を `map` したものである。
+
+★★これで **elementary claim の両方の枝が自立した定理として立っている**:
+
+| 枝 | 定理 | ブロック |
+|---|---|---|
+| 野生(`[L:K] = p` の Kummer) | `pow_mem_differentIdeal_of_kummer` | 第 383 |
+| 馴 | `mem_differentIdeal_of_totallyRamified_tame` | 第 394 |
+
+### `Prop 1.7` の系統で残るもの
+
+1. 全分岐の仮説を実際の局所体の状況から出すこと(剰余体の一致･次数 = `e` など)
+2. Σ の帳尻(スキーム側)
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
