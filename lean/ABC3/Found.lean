@@ -356,6 +356,7 @@ import ABC3.Found.GenEll.GcdProd
 import ABC3.Found.GenEll.LatticeSummable
 import ABC3.Found.GenEll.LatticeFubini
 import ABC3.Found.GenEll.ZetaSix
+import ABC3.Found.GenEll.ZetaTsum
 import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence

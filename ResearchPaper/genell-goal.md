@@ -26949,3 +26949,34 @@ gcd 分解(337)→ 全単射(338)→ 積の形(339)→ 絶対収束(340)→ **Fu
 レベル 1 の次元公式と Sturm 境界(`LevelOne/DimensionFormula.lean`)から出る見込み。
 
 ★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
+
+
+## §9-657 ★★★★★`Σ_{d>0} d⁻ᴷ` を `ζ(K)` と同定した(第 343 ブロック)
+
+`Found/GenEll/ZetaTsum.lean`。
+
+### ★★★★★★第 341 の右辺の第 1 因子を値にした
+
+    Σ_{d>0} d⁻⁴ = π⁴/90,    Σ_{d>0} d⁻⁶ = π⁶/945
+
+★段取りは 2 つの橋である:
+
+1. **実 → 複素**: `hasSum_zeta_four`(実の級数)を `Complex.ofRealHom` で写す
+   (`HasSum.map` + `Complex.continuous_ofReal`)。
+2. **全体 → 正の部分**: `n = 0` の項は `(0^K)⁻¹ = 0` なので
+   `hasSum_subtype_iff_of_support_subset` で `{d > 0}` に落とす。
+
+★★`K ≥ 1` があれば `0^K = 0` なので台の包含はそのまま出た。
+
+### ★★残り((i) の最後の 2 つ)
+
+★`Σ_{w 原始} (w₁+w₂τ)⁻ᴷ = 2·E_K(τ)`(mathlib の `eisensteinSeries` との同定、索引の入れ替えつき)
+★★`E₄³ − E₆² = 1728·Δ`(mathlib に無い。レベル 1 の次元公式と Sturm 境界から出る見込み)
+
+### ★★G8 側の積み上げ(12 ブロック、すべて sorry なし)
+
+332 半周期の根 / 333 スケール則 / 334 `ℤ²` 上の和 / 335 `Δ`・`j` / 336 曲線の点 /
+337 gcd 分解 / 338 全単射 / 339 積の形 / 340 絶対収束 / 341 Fubini /
+342 `ζ(6)` の級数形 / 343 `ζ(K)` の同定。
+
+★★`lake build` 全体通過、`node tools/check.mjs` は **PASS**。Arakelov 9/9、Galois 8/8。
