@@ -33,6 +33,26 @@
       "nodesNote": "原文の 6 段(野生/馴の分離・ζ_p への帰着・p-群の可解性・Kummer・λ ∣ p・different の下界)を節点とする。hedge-index の実測でも Proposition 1.7 の合図は 7 件(immediately×5 one verifies×1 easily×1)。",
       "done": 5,
       "doneNote": "2026-08-26〜27 の第 374-395 ブロックで、段 2〜6 を実装し野生・馴の両枝を端から端まで結線。段 1 の構造定理は 3 項目(λ^e ~ π / B = A[λ] / minpoly が Eisenstein)とも代数的な核を実装済み。残るのは剰余体の一致と [L:K] = e からの最終組み立て。",
+      "lastStepMeasurement": {
+        "measuredAt": "2026-08-27",
+        "what": "段 1 の最終組み立て(B = A[λ] と (minpoly A λ).natDegree = e)に何が要るかを mathlib 全体を探して測った。",
+        "present": [
+          "Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing —— e·f = [L:K] の局所版(Mathlib/NumberTheory/RamificationInertia/Basic.lean:650)。★これで e = [L:K] から f = 1 が出る",
+          "Ideal.inertiaDeg_algebraMap / inertiaDeg_pos / inertiaDeg_ne_zero(RamificationInertia/Inertia.lean)",
+          "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt(RingTheory/Polynomial/Eisenstein/IsIntegral.lean:227)——Eisenstein から p を割って降りる道具",
+          "Polynomial.Monic.isEisensteinAt_of_mem_of_notMem(Eisenstein/Basic.lean:206)",
+          "Nakayama の道具: Submodule.le_of_le_smul_of_le_jacobson_bot(RingTheory/Nakayama.lean:146)、IsLocalRing.maximalIdeal_le_jacobson"
+        ],
+        "absent": [
+          "★★『totally ramified』という語が mathlib に 1 件も無い(大文字小文字を無視した全文検索で 0 件、2026-08-27)。IsTotallyRamified も無い",
+          "分岐の仮説から Algebra.adjoin A {λ} = ⊤ を出す定理。唯一の adjoin = ⊤ は IsLocalRing.exists_adjoin_eq_top(RingTheory/LocalRing/Etale.lean:93)で、FormallyUnramified すなわち**逆の場合**である",
+          "(minpoly A λ).IsEisensteinAt (maximalIdeal A) や (minpoly A λ).natDegree = e。IsEisensteinAt は mathlib の 3 ファイルにしか現れず、そのどれも ramificationIdx・DVR・素元に触れていない",
+          "『Eisenstein ⇒ 全分岐』の向き。AdjoinRoot は Eisenstein/ のどのファイルにも現れない",
+          "剰余体が一致すれば素元で生成される、という Nakayama の帰結。IsLocalRing.adjoin_residue_eq_top_iff_adjoin_eq_top(Etale.lean:63)はまさにその論法だが、Algebra.FormallyUnramified.map_maximalIdeal を消費する——全分岐では偽(そこでは maximalIdeal S ^ e)なのでそのままは使えない"
+        ],
+        "template": "円分体の具体例が NumberField/Cyclotomic/Ideal.lean に手で書き下してある(inertiaDeg_span_zeta_sub_one:92 / ramificationIdx_span_zeta_sub_one:116)。★mathlib で『素元もどきの minpoly が Eisenstein ⇒ adjoin が全体』を実際に通しているのは NumberField/Cyclotomic/Basic.lean:108-119 の 1 箇所だけで、ζ−1 の ℤ 上に特殊化され判別式を使っている。一般の全分岐仮説では書かれていない。",
+        "estimate": "★残り 1 段は『既知数学だが mathlib に無い』——Nakayama を自分で回す必要がある。e·f = [L:K] から f = 1 は既存。B = A[λ] は Nakayama を λ で回して自作する。"
+      },
       "where": [
         "lean/ABC3/Found/GenEll/TameRamification.lean",
         "lean/ABC3/Found/GenEll/DifferentKummer.lean",
