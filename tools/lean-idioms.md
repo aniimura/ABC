@@ -894,3 +894,35 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 ★根本的に直すなら `closure` でなく**明示的な `carrier`** で部分環を定義する。
 ★★同じ穴: 「エラボレーションが速い」ことは「核が速い」ことを意味しない。
 `lean_check` が 120 秒で背景に落ちたら、まずこの形を疑う。
+
+## 関手の合成で作った対象は `rw`/`simp` を止める（`pullback` と `Over.forget`）
+
+失敗形(2026-08-27、第 374-375 ブロック):
+
+`D f := overRatTowerDiagram ⋙ Over.pullback f ⋙ Over.forget X` と定義すると
+`(D f).obj i` は **`pullback (over.obj i).hom f` と defeq だが構文的に違う**。
+その結果:
+
+* `pullback.hom_ext` を当てると、生成される目標の項が
+  「外側は関手合成の型・内側は生の `pullback` の型」という**混在**になる
+* `Category.assoc` すら「pattern が見つからない」で落ちる
+  （エラー末尾に `Note: The target expression is not type-correct under the
+  instances transparency level` が出るのが目印）
+* `simp only [..., pullback.lift_fst]` も同じ理由で発火しない
+
+★型注釈を足して目標の**外側**を生の `pullback` に固定すると `Category.assoc` は通る:
+
+    ((a ≫ b : (D f).obj m ⟶ pullback (over.obj i).hom f') = (c ≫ d : ...))
+
+★★しかし**内側**（`pullback.lift` の引数の型）は依然として混在なので、
+`pullback.lift_fst` はまだ発火しない。
+
+直し方: **関手を合成で作らず、`obj` を生の形で直接書く**。
+
+    noncomputable def D (f) : ℕᵒᵖ ⥤ Scheme where
+      obj i := pullback (overRatTowerDiagram.obj i).hom f
+      map h := pullback.map _ _ _ _ (over.map h).left (𝟙 _) (𝟙 _) _ _
+
+★極限は合成版で取り、`Iso` で生版へ移す（`IsLimit.ofIsoLimit`）。
+★★★教訓は「配管」の一般則と同じ: **defeq は `rw`/`simp` を助けない。**
+構文をそろえるのは設計の仕事である。
