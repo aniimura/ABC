@@ -217,16 +217,17 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj）はすでにある**。 ★★残るのは上層である。",
+    "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）はすべてある**。 ★★残るのは上層だけである。",
     "stages": [
      {
       "stage": "A",
       "claim": "層のテンソル積（SheafOfModules の monoidal 構造）",
       "status": "open",
-      "why": "★前層の monoidal 構造は ModuleCat/Presheaf/Monoidal.lean に**ある**。 ★★層化（Sheafify.lean / Sheafification.lean）もある。 ★★★組み合わせるだけであるが、mathlib には Sheaf/Monoidal.lean が無い（2026-08-27 実測）。",
+      "why": "★★★★**2026-08-27 の実測で道が短くなった**: `PresheafOfModules.monoidalCategory` が mathlib に**すでにある**（infer_instance で確認。前層のテンソル積は monoidal category として完成している）。 ★★したがって段 A は**「層化（反射的局所化）に沿って monoidal 構造が降りる」**だけである。 ★★★ただし mathlib の Monoidal.transport は**圈同値に沿ってしか使えない**し、CategoryTheory.Localization.Monoidal は**無い**（2026-08-27 実測）。 ★四つめの選択肢: 全 monoidal 構造を作らず、**L^{⊗n} だけを再帰で定義する**（ample の定義にはそれで足りる）。",
       "sources": [
        "[Stacks] 01CA Sheaves of modules",
-       "[Stacks] 01CC Tensor product"
+       "[Stacks] 01CC Tensor product",
+       "mathlib: PresheafOfModules.monoidalCategory (already present)"
       ]
      },
      {
