@@ -48,13 +48,20 @@ import ABC3.Found.Arakelov.ArithSections
 `conjPoint (p ≫ f) = conjPoint p ≫ f`（`ArcConjInvol.lean` の `conjPoint_comp`）
 ——★`ι_X` は射に沿って自然だからである。
 
+## ★★★★★★計量の `𝒪_X`-乗法性は本ファイルに入っている
+
+    `|c · s|_L (p) = ‖c(p)‖ · |s|_L (p)`（`TorsorMetric.norm_smul`）
+
+★これが `Γ(L̄) = Hom(Ō_X, L̄)` の同一視の**数学的な核**である
+——`φ(s) = s · φ(1)` なので `|φ(s)| = ‖s(p)‖ · |φ(1)|` となり、
+`|φ(s)| ≤ |s|_{Ō}` は `|φ(1)| ≤ 1` と同値になる。
+
 ## ★残っている 1 段（明示）
 
-★★**`Γ(L̄) = Hom(Ō_X, L̄)` の同一視**が残っている。
-原文は `Γ(L̄)` を「`Ō_X → L̄` の射の集合」と**定義**するが、
-本プロジェクトは `Γ(L̄)` を「`|s|_L ≤ 1` なる大域切断の集合」として定義した
-（`ArithSections.lean`）。★★★両者が一致するには
-`|φ(s)|_L = |s|·|φ(1)|_L`（計量の `𝒪_X`-乗法性）が要る。
+★★**正規化した自明な算術直線束 `Ō_X`（`|1| = 1`）**だけが残っている。
+`TorsorMetric` の `base` は `Classical.choice` なので `|1|` を直接は選べないが、
+`green p ≔ log(base.nrm p (arcEval p 1))` と取れば `|1| = 1` になる。
+★★★それには **`arcEval p 1 ≠ 0`**（正性）と **`HasContMetrics X`**（連続性）が要る。
 ★これが `Definition 1.1` を**条なしで**閉じるための最後の 1 本である。
 -/
 
@@ -203,6 +210,57 @@ theorem TorsorMetric.zero_mem_arithSections (m : TorsorMetric X F) :
     rw [arcEval_zero, (m.base.eq_zero_iff p 0).2 rfl, mul_zero]
   rw [h]; norm_num
 
+/-! ## ★★★★★★ノルムは `Γ(X, ⊤)` の作用について乗法的 -/
+
+/-- ★前層加群の恒等射での移送は元を動かさない。
+
+★★mathlib の `PresheafOfModules.map_id` は `restrictScalarsId'` を経由するので、
+**元の水準の形**を別に用意する。 -/
+theorem PresheafOfModules.map_id_apply' {C : Type} [Category C] {R : Cᵒᵖ ⥤ RingCat}
+    (M : PresheafOfModules R) (Y : Cᵒᵖ) (x : (M.obj Y : Type)) :
+    (M.map (𝟙 Y)).hom x = x := by
+  rw [PresheafOfModules.map_id]; rfl
+
+variable (F) (p : Spec (CommRingCat.of ℂ) ⟶ X)
+
+theorem preimage_top_eq_top : p ⁻¹ᵁ (⊤ : X.Opens) = ⊤ := rfl
+
+/-- ★`⊤` 上では `arcEvalOnTop` は `arcEval` そのものである。 -/
+theorem arcEvalOnTop_top (s : (F.val.obj (op (⊤ : X.Opens)) : Type)) :
+    arcEvalOnTop F p ⊤ (preimage_top_eq_top p) s = arcEval p F s := by
+  show ((((Scheme.Modules.pullback p).obj F).val.map
+    (homOfLE (le_of_eq (preimage_top_eq_top p).symm)).op)).hom (arcEvalOn F p ⊤ s) = _
+  have h1 : ((homOfLE (le_of_eq (preimage_top_eq_top p).symm)
+      : (⊤ : (Spec (CommRingCat.of ℂ)).Opens) ⟶ p ⁻¹ᵁ (⊤ : X.Opens))).op
+      = 𝟙 (op (p ⁻¹ᵁ (⊤ : X.Opens))) := rfl
+  rw [h1]
+  exact PresheafOfModules.map_id_apply' _ _ _
+
+/-- ★★**評価は `Γ(X, ⊤)` の作用について半線形**——第 257 の `arcEvalOn_smul` を `⊤` で読む。 -/
+theorem arcEval_smul (c : ((X.presheaf.obj (op (⊤ : X.Opens))) : Type))
+    (s : (F.val.obj (op (⊤ : X.Opens)) : Type)) :
+    arcEval p F (c • s) = (evalOn p ⊤ (preimage_top_eq_top p) c) • arcEval p F s := by
+  have h := arcEvalOnTop_smul F p ⊤ (preimage_top_eq_top p) c s
+  rw [arcEvalOnTop_top, arcEvalOnTop_top] at h
+  exact h
+
+/-- ★★★★★★**ノルムは `Γ(X, ⊤)` の作用について乗法的**:
+
+    `|c · s|_L (p) = ‖c(p)‖ · |s|_L (p)`
+
+★★★これが `Γ(L̄) = Hom(Ō_X, L̄)` の同一視の**数学的な核**である
+——`φ(s) = s · φ(1)` なので `|φ(s)| = ‖s(p)‖ · |φ(1)|` となり、
+`|φ(s)| ≤ |s|_{Ō}` は `|φ(1)| ≤ 1`（`Ō_X` を `|1| = 1` で正規化したとき）と同値になる。 -/
+theorem TorsorMetric.norm_smul (m : TorsorMetric X F)
+    (c : ((X.presheaf.obj (op (⊤ : X.Opens))) : Type))
+    (s : (F.val.obj (op (⊤ : X.Opens)) : Type)) :
+    m.norm (c • s) p = ‖evalOn p ⊤ (preimage_top_eq_top p) c‖ * m.norm s p := by
+  show Real.exp (-(m.green p)) * m.base.nrm p (arcEval p F (c • s)) = _
+  rw [arcEval_smul, m.base.smul]
+  show _ = ‖evalOn p ⊤ (preimage_top_eq_top p) c‖
+    * (Real.exp (-(m.green p)) * m.base.nrm p (arcEval p F s))
+  ring
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★★**項目全体の `.src` はまだ置かない。** 残っているのは
@@ -228,6 +286,11 @@ def arithPicPullback.src : ABC3.Meta.Source :=
     item := "Definition 1.1, (ii)(引き戻し φ^*L̄——ι_X 両立を保つこと込み)",
     sectionId := "genell-def-1-1-i" }
 
+def TorsorMetric.norm_smul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(ノルムは Γ(X, ⊤) の作用について乗法的)",
+    sectionId := "genell-def-1-1-i" }
+
 def ArithPic.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "picardDataWitness(スキーム上の直線束の群 Pic(X))"
       (.inProject "ABC3" "ABC3.Interface.Arakelov.picardDataWitness") 3,
@@ -243,6 +306,9 @@ def ArithPic.needs : List ABC3.Meta.ProofObligation :=
       ("★★残っている 1 段: Γ(L̄) = Hom(Ō_X, L̄) の同一視。" ++
        "原文は Γ(L̄) を「Ō_X → L̄ の射の集合」と定義するが、" ++
        "本プロジェクトは「|s|_L ≤ 1 なる大域切断の集合」として定義した。" ++
-       "★★★一致には計量の 𝒪_X-乗法性 |φ(s)|_L = |s|·|φ(1)|_L が要る") 3 ]
+       "★★★計量の 𝒪_X-乗法性は 2026-08-27 に閉じた" ++
+       "——TorsorMetric.norm_smul。" ++
+       "★★★★残るのは **正規化した自明な算術直線束 Ō_X（|1| = 1）**だけであり、" ++
+       "それには arcEval p 1 ≠ 0 と HasContMetrics X が要る") 3 ]
 
 end ABC3.Found.Arakelov
