@@ -792,6 +792,14 @@ exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
 ★Python 3 の str はサロゲート対を結合しないので、UTF-8 への書き出しで必ず失敗する。
 ★★別の道: その文字を変数に入れて連結する(`D = u"\U0001D49F"` を `+` で繋ぐ)。
 
+★★★2026-08-28 追記: **8 桁形式でも「どの O か」を間違える**。
+本プロジェクトの整数環は U+1D4DE(𝓞 = MATHEMATICAL BOLD SCRIPT CAPITAL O)であって
+U+1D4AA(𝒪 = MATHEMATICAL SCRIPT CAPITAL O)ではない。
+★見た目がほぼ同じなので、書いた直後の目視では気づかない。
+★★**エスケープを書かず、ファイルから既存の行をコピーする**のが確実。
+やむを得ず書いたら書いた後に grep で誤った方の字を数え、0 を確認する
+(ビルドは「Unknown identifier」で捕まえてくれるが、docstring に混ざると気づかない)。
+
 
 ## structure の中に `/-! … -/` を書くと、そこで structure が終わる
 
