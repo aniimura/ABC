@@ -122,19 +122,19 @@
         "measuredAt": "2026-08-27",
         "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
         "nodes": 9,
-        "done": 5,
+        "done": 8,
         "doneList": [
           "係数の限界(norm_coeff_le_choose、第 405)",
           "値の上界・下界と suitable choice of C(第 405)",
           "f₀′ の根の位置(Gauss–Lucas、第 406)",
           "次数の降下と reduced degree(第 407)",
-          "入れ子帰納法の測度が 1 段下がること(第 408)"
+          "入れ子帰納法の測度が 1 段下がること(第 408)",
+          "★正規化(lemma_2_3_rat / exists_rat_normalization、第 409)",
+          "★Galois 安定性(IsConjStable / conjClosure、第 410)",
+          "★★帰納の本体(nested_induction / nested_induction_descend、第 416)"
         ],
         "todoList": [
-          "正規化(Lemma 2.3 の自己同型 + 有理数倍で |α| ≤ 1, |β| ≥ C)",
-          "Gal(ℚ̄/ℚ)-安定性(S を共役で閉じる・S′ も安定)",
-          "ℙ¹ 上の有理関数としての組み立て(★出力は多項式ではなく f(x) ∈ ℚ(x))",
-          "帰納の本体(m, d の辞書式)"
+          "★残りは 1 つだけ: descend を実際に作る段——f₀ を α₀ の最小多項式に取り、E ≙ f₀(S₀) として、ℙ¹ 上の有理関数として組み立てる(★出力は多項式ではなく f(x) ∈ ℚ(x) なので Separation.lean の P1C を使う)"
         ]
       },
       "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",

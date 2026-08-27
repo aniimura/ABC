@@ -168,6 +168,96 @@ theorem measure_lt (S E : Finset ℂ) (g : ℂ → ℂ)
   rw [dSum_eq, dSum_eq, heq]
   exact Nat.mul_lt_mul_of_lt_of_le hcard (le_refl _) hm0
 
+/-! ## ★★★★★★★★★★入れ子帰納法そのもの
+
+原文 (NCBelyi p.5):
+> on m(S), and, for each fixed value of m(S), we induct on d(S). If m(S), d(S)
+
+★原文の『`m(S)` について帰納し、`m(S)` を固定するごとに `d(S)` について帰納する』を
+**辞書式の整礎帰納法**として取る。
+-/
+
+/-- ★★★★★★★★★**入れ子帰納法の骨格**。
+
+原文 (NCBelyi p.5):
+> on m(S), and, for each fixed value of m(S), we induct on d(S). If m(S), d(S)
+
+`m(S)` について外側、`d(S)` について内側の 2 重帰納である。
+★`ℕ × ℕ` の辞書式順序を持ち出さず、**`ℕ` の帰納を 2 段重ねて**取った
+——上界 `n`, `k` を introduce するだけで済む。 -/
+theorem nested_induction {P : Finset ℂ → Prop}
+    (base : ∀ S : Finset ℂ, maxRedDeg S = 0 → P S)
+    (step : ∀ S : Finset ℂ, 0 < maxRedDeg S →
+      (∀ T : Finset ℂ, maxRedDeg T < maxRedDeg S → P T) →
+      (∀ T : Finset ℂ, maxRedDeg T = maxRedDeg S → dSum T < dSum S → P T) → P S) :
+    ∀ S : Finset ℂ, P S := by
+  have key : ∀ n k : ℕ, ∀ S : Finset ℂ, maxRedDeg S ≤ n → dSum S ≤ k → P S := by
+    intro n
+    induction n with
+    | zero => intro k S hm _; exact base S (by omega)
+    | succ n ih =>
+      intro k
+      induction k with
+      | zero =>
+        intro S hm hd
+        by_cases h0 : maxRedDeg S = 0
+        · exact base S h0
+        · exact step S (by omega) (fun T hT => ih (dSum T) T (by omega) le_rfl)
+            (fun T _ hTd => absurd hTd (by omega))
+      | succ k ihk =>
+        intro S hm hd
+        by_cases h0 : maxRedDeg S = 0
+        · exact base S h0
+        · exact step S (by omega) (fun T hT => ih (dSum T) T (by omega) le_rfl)
+            (fun T hTm hTd => ihk T (by omega) (by omega))
+  intro S
+  exact key (maxRedDeg S) (dSum S) S le_rfl le_rfl
+
+/-- ★★★★★★★★★★**[NCBelyi] Lemma 2.4 の帰納の本体**。
+
+原文 (NCBelyi p.5):
+> hypothesis, and composing the resulting morphisms yields
+
+`m(S) > 0` のとき **1 段下げる操作**(`g` と余分な点 `E`、落ちる点 `x₀`)が作れて、
+その結論が `S` へ戻せるなら、**すべての `S` で結論が成り立つ**。
+
+★これが原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis,
+and composing the resulting morphisms』の骨格である。
+★★測度が下がることは `measure_lt`(第 408)が保証する。
+
+★★★**残っているのは `descend` を実際に作ること**である
+——`f₀` を `α₀` の最小多項式に取り、`E ≝ f₀(S₀)` とする段。
+その定量的な部分(`f₀(β) ∉ S′`)は `CoeffBound.lean` に、
+次数の降下は `ReducedDegree.lean` にある。 -/
+theorem nested_induction_descend {P : Finset ℂ → Prop}
+    (base : ∀ S : Finset ℂ, maxRedDeg S = 0 → P S)
+    (descend : ∀ S : Finset ℂ, 0 < maxRedDeg S →
+      ∃ (E : Finset ℂ) (g : ℂ → ℂ) (x₀ : ℂ),
+        (∀ x ∈ S, redDeg (g x) ≤ redDeg x)
+        ∧ (∀ y ∈ E, redDeg y < maxRedDeg S)
+        ∧ x₀ ∈ S ∧ redDeg x₀ = maxRedDeg S ∧ redDeg (g x₀) < maxRedDeg S
+        ∧ (P (S.image g ∪ E) → P S)) :
+    ∀ S : Finset ℂ, P S := by
+  classical
+  refine nested_induction base (fun S hS ihm ihd => ?_)
+  obtain ⟨E, g, x₀, hno, hE, hx₀S, hx₀top, hx₀drop, himp⟩ := descend S hS
+  refine himp ?_
+  rcases measure_lt S E g hno hE hx₀S hx₀top hx₀drop hS with h | ⟨h1, h2⟩
+  · exact ihm _ h
+  · exact ihd _ h1 h2
+
+/-- ★★★**基底段の中身** —— `m(S) = 0` は「`S` がすべて有理点」である。
+
+原文 (NCBelyi p.5):
+> f and only if m(S) = 0 if and only if S ⊆P1(Q).
+
+★帰納法が止まるところがちょうど `Lemma 2.2` の適用条件である。 -/
+theorem forall_isRat_of_maxRedDeg_eq_zero {S : Finset ℂ} (hS : maxRedDeg S = 0)
+    (hint : ∀ x ∈ S, IsIntegral ℚ x) :
+    ∀ x ∈ S, ∃ q : ℚ, x = (q : ℂ) := by
+  intro x hx
+  exact (redDeg_eq_zero_iff (hint x hx)).1 (maxRedDeg_eq_zero_iff.1 hS x hx)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def maxRedDeg.src : ABC3.Meta.Source :=
@@ -188,6 +278,16 @@ def dSum_eq_zero_iff_of_nonempty.src : ABC3.Meta.Source :=
 def measure_lt.src : ABC3.Meta.Source :=
   { paper := "NCBelyi", pdfPage := 5,
     item := "Lemma 2.4(nested induction —— m(S′) < m(S) または m(S′) = m(S), d(S′) < d(S))",
+    sectionId := "ncbelyi-lemma-2-4" }
+
+def nested_induction.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 5,
+    item := "Lemma 2.4(nested induction —— m(S) の外側・d(S) の内側の 2 重帰納)",
+    sectionId := "ncbelyi-lemma-2-4" }
+
+def nested_induction_descend.src : ABC3.Meta.Source :=
+  { paper := "NCBelyi", pdfPage := 5,
+    item := "Lemma 2.4(帰納の本体——1 段下げる操作から全体へ)",
     sectionId := "ncbelyi-lemma-2-4" }
 
 end ABC3.Found.NCBelyi
