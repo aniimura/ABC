@@ -187,12 +187,18 @@ theorem arithPicOfMetric_surjective {X : Scheme.{0}} (x : ArithPic X) :
   ⟨x.1, ⟨((Multiplicative.toAdd x.2 : ↥(conjArcCM X)) : arcCM X).fn,
     arcCM.fn_cont _, picSheaf_locallyTrivial X x.1⟩, (Multiplicative.toAdd x.2).2, rfl⟩
 
-/-- ★★★★★★**群の乗法がそのままテンソル積である**。
+/-- ★★★★**群の乗法は `TorsorMetric.tensor` に対応する**（`rfl`）。
 
 原文 (GenEll p.3):
 > of tensor product, thus determine a group APic(X).
 
-★**`rfl` で出る**——`TorsorMetric.tensor` の Green 関数が和だからである。 -/
+★★★★**訂正（2026-08-28）: これは「群法則が計量のテンソル積である」とは言っていない。**
+`TorsorMetric.tensor` は **Green を足すだけ**であり、
+表す計量は `base_{G⊗H} · e^{-(g+h)}`、
+真のテンソル積は `(base_G ⊗ base_H) · e^{-(g+h)}` である。
+★`base` が `Classical.choice` なので両者は一致せず、
+差は 2-コサイクル `log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]}))` である
+（`Definition11.lean` の訂正の節）。 -/
 theorem arithPicOfMetric_mul {X : Scheme.{0}}
     (L L' : picardDataWitness.Pic X)
     (m : TorsorMetric X (picardDataWitness.sheafOf X L)) (hm : m.IsConjCompatible)

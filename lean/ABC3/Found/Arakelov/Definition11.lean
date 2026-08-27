@@ -76,6 +76,31 @@ import ABC3.Meta.Claim
 これは `Scheme.ΓSpecIso_naturality` を `starRingEnd ℂ` に当てるだけで出た。
 ★★★引き戻しも降りる（`APicOfPullback`）ので (ii) も同型類の側で取れている。
 
+## ★★★★★★★★★訂正（2026-08-28）——項目全体の `.src` を下げた
+
+★**当初ここに `item := "Definition 1.1"`（条なし）を置いていた。過剰な主張であった。**
+
+原文は「**テンソル積で**同型類が群 `APic(X)` をなす」と書く。
+ところが `TorsorMetric` の設計では
+
+* 計量は `base_F · exp(-green)` で表され、`base_F` は **`Classical.choice`**
+* `TorsorMetric.tensor` は **`green` を足すだけ**
+
+なので、群法則が表す計量は `base_{G⊗H} · e^{-(g+h)}` であり、
+真のテンソル積 `(base_G ⊗ base_H) · e^{-(g+h)}` と**一致しない**。
+
+★★差は 2-コサイクル `c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]}))` である。
+★★★したがって `ArithPic` / `APicOf` は **`APic(X)` と集合としては対応するが、
+群としては基準計量を整合的に選ばない限り一致しない**。
+
+★★★★**失われていないもの**: 対の群・同型類への商・引き戻し・
+射と `Γ(L̄)`・`Ō_X`（`|1| = 1`）はすべて**真のまま**である。
+欠けているのは「群法則がテンソル積である」の 1 本だけである。
+
+★★★★★これは `Interface/Arakelov/APic.lean` の `APicData` の穴と同種であり
+（`logMetric_tensor` は Green の和しか要求しない）、
+`Def12Height.lean` が 2026-08-27 に `Definition 1.2` を下げたのと**同じ根**である。
+
 ★`X` に正規性・`ℤ`-固有性・`ℤ`-平坦性を**課していない**。それらは §1 の地の文の
 標準仮定であって、定義そのものには要らない——要る所（`X^arc` のコンパクト性）では
 `compactSpace_arc` が固有性から出す。
@@ -236,7 +261,8 @@ theorem arithGamma_apply_one_mem (m : GreenMetric X F) (φ : arithGamma m) :
 逸脱は 2 つ（射の条件を強い側で取ったこと、`X` に §1 の標準仮定を課していないこと）。 -/
 
 def definition_1_1.src : ABC3.Meta.Source :=
-  { paper := "GenEll", pdfPage := 3, item := "Definition 1.1",
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1(語彙は揃った——ただし群法則が計量のテンソル積を表すには基準計量の整合性が要る)",
     sectionId := "genell-def-1-1-i" }
 
 def trivialGreenMetric.src : ABC3.Meta.Source :=
