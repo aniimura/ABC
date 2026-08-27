@@ -18,7 +18,7 @@ import ABC3.Meta.Claim
 |---|---|
 | 算術直線束 `L̄ = (L, |−|_L)` | `AMetric`（`AMetricMonoid.lean`） |
 | **射 `L̄ → M̄`**（`|−|_L ≤ 1` を `|−|_M ≤ 1` へ送る） | ★★**本ファイル** `IsAHom` / `AHom` |
-| **`Γ(L̄)`**（`Ō_X → L̄` の集合） | ★★★**本ファイル** `arithGamma` |
+| **`Γ(L̄)`**（`Ō_X → L̄` の集合） | ★★★**本ファイル** `AMetric.gamma` |
 | テンソル積と `APic(X)` | `AMetricPic.lean` |
 
 原文の射の条件は
@@ -107,15 +107,15 @@ end AHom
 ★原文は `Γ(L̄) ≝ Hom(Ō_X, L̄)` と定めるが、
 `Ō_X` の切断 `f` の像は `f·s` で `|f·s| = |f|·|s|` なので、
 条件は `|s|_L ≤ 1` に他ならない。 -/
-def arithGamma (L : AMetric X) : Set (L.sheaf.obj (op ⊤)) :=
+def AMetric.gamma (L : AMetric X) : Set (L.sheaf.obj (op ⊤)) :=
   { s | ∀ p : Spec (CommRingCat.of ℂ) ⟶ X, L.norm s p ≤ 1 }
 
-theorem mem_arithGamma_iff (L : AMetric X) (s : L.sheaf.obj (op ⊤)) :
-    s ∈ arithGamma L ↔ ∀ p : Spec (CommRingCat.of ℂ) ⟶ X, L.norm s p ≤ 1 := Iff.rfl
+theorem AMetric.mem_gamma_iff (L : AMetric X) (s : L.sheaf.obj (op ⊤)) :
+    s ∈ AMetric.gamma L ↔ ∀ p : Spec (CommRingCat.of ℂ) ⟶ X, L.norm s p ≤ 1 := Iff.rfl
 
 /-- ★★**射は `Γ` を `Γ` へ送る**。 -/
-theorem AHom.mapsTo_arithGamma {L M : AMetric X} (f : AHom L M) :
-    Set.MapsTo (fun s => f.hom.app (op ⊤) s) (arithGamma L) (arithGamma M) :=
+theorem AHom.mapsTo_gamma {L M : AMetric X} (f : AHom L M) :
+    Set.MapsTo (fun s => f.hom.app (op ⊤) s) (AMetric.gamma L) (AMetric.gamma M) :=
   fun _ hs p => isAHom_mapsTo f.isAHom _ p (hs p)
 
 /-- ★★★★★★★★★**`Γ` はテンソル積で掛け算になる**——
@@ -125,15 +125,15 @@ theorem AHom.mapsTo_arithGamma {L M : AMetric X} (f : AHom L M) :
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
 
 ★機構は `AMetric.norm_mul`（`|s ⊗ t| = |s| · |t|`）だけである。 -/
-theorem tmul_mem_arithGamma {L M : AMetric X} {s : L.sheaf.obj (op ⊤)}
-    {t : M.sheaf.obj (op ⊤)} (hs : s ∈ arithGamma L) (ht : t ∈ arithGamma M) :
-    (s ⊗ₜ[(Γ(X, (⊤ : X.Opens)) : Type)] t) ∈ arithGamma (L * M) := by
+theorem AMetric.tmul_mem_gamma {L M : AMetric X} {s : L.sheaf.obj (op ⊤)}
+    {t : M.sheaf.obj (op ⊤)} (hs : s ∈ AMetric.gamma L) (ht : t ∈ AMetric.gamma M) :
+    (s ⊗ₜ[(Γ(X, (⊤ : X.Opens)) : Type)] t) ∈ AMetric.gamma (L * M) := by
   intro p
   rw [AMetric.norm_mul]
   exact mul_le_one₀ (hs p) (AMetric.norm_nonneg M t p) (ht p)
 
 /-- ★★`0` はつねに `Γ(L̄)` に入る。 -/
-theorem zero_mem_arithGamma (L : AMetric X) : (0 : L.sheaf.obj (op ⊤)) ∈ arithGamma L := by
+theorem AMetric.zero_mem_gamma (L : AMetric X) : (0 : L.sheaf.obj (op ⊤)) ∈ AMetric.gamma L := by
   intro p
   obtain ⟨c⟩ := nonempty_normChart L.triv p
   rw [AMetric.norm_eq L 0 p c.V c.e c.hp]
@@ -156,17 +156,17 @@ def IsAHom.src : ABC3.Meta.Source :=
     item := "Definition 1.1, (i)(算術直線束の射——作用素ノルムが 1 以下)",
     sectionId := "genell-def-1-1-i" }
 
-def arithGamma.src : ABC3.Meta.Source :=
+def AMetric.gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(Γ(L̄)——大域切断の単位球)",
     sectionId := "genell-def-1-1-i" }
 
-def tmul_mem_arithGamma.src : ABC3.Meta.Source :=
+def AMetric.tmul_mem_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(Γ はテンソル積で閉じること)",
     sectionId := "genell-def-1-1-i" }
 
-def arithGamma.needs : List ABC3.Meta.ProofObligation :=
+def AMetric.gamma.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "AMetric.norm(切断の大域ノルム)"
       (.inProject "ABC3" "ABC3.Found.Arakelov.AMetric.norm") 3,
     .citation "[ABC3]" "AMetric.norm_mul(|s ⊗ t| = |s| · |t|)"
