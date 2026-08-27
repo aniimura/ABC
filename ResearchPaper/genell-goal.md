@@ -29483,3 +29483,61 @@ theorem evalGlobal_conjPoint (p) (g) :
 - **`GenEll` の必要分 11/24（§1 は 4/9）** ——★正直な数である
 - 本日入った真の資産: `ArithSections` / `ArithPic` / `APicQuot` / `Definition11` /
   `PicClassGroup` / `FractionalIdealDivisor`、および ample の段 A1・C1・D1-D3
+
+## §9-716 ★★★★★★★★★**ample の段 D と段 F がほぼ閉じた**(第 441-442 ブロック、2026-08-28)
+
+`§9-715` の訂正のあと、**確実に閉じられる段**を 2 つ取った。
+
+### ★★★★★★★★段 F2ab —— 閉包は `ℤ`-射影かつ `ℤ`-固有
+
+段 C1（`ℙⁿ_R` が `Spec R` 上固有）が入っていたので、**2 行**で出た:
+
+```lean
+theorem isProper_subscheme_projSpace (N : ℕ) {Y : Scheme.{0}}
+    (f : Y ⟶ projSpace N ℤ) [QuasiCompact f] :
+    IsProper ((Scheme.Hom.ker f).subschemeι ≫ projSpaceOverSpec N ℤ) :=
+  IsProper.mk
+```
+
+★機構は「閉埋め込みは固有」＋「`ℙᴺ_ℤ` は固有」＋「固有射の合成は固有」。
+
+★★★**射影性は別に示す必要がなかった**——`subschemeι` は mathlib の instance で
+すでに閉埋め込みであり、「`ℤ`-射影」とは `ℙᴺ_ℤ` の閉部分スキームであることだからである。
+
+★★これで原文 `Remark 1.4.1` 第 2 文の括弧「`ℤ`-flat, `ℤ`-projective model」のうち
+**平坦性（F1）・射影性・固有性**が揃った。残るのは
+「生成ファイバーが元の `Y` に戻ること」（F2c）だけである。
+
+### ★★★★★★★★★段 D4 —— 切断の比が `X_t` の上へ貼り合った
+
+`sectionRatio_agree`（`§9-710` で入れた貼り合わせ条件）はすでにあったので、
+`TopCat.Sheaf.existsUnique_gluing` に渡す**配管だけ**であった。
+
+★配管を短くしたのは **`Opens` が poset であること**である——平行な射は等しいので
+
+    `homOfLE h₁ = homOfLE hA ≫ homOfLE hB`
+
+が **`rfl`** で出る。★★被覆は `IsLocallyTrivial` の被覆篩から取れる（`iSup_trivIndex`）。
+
+### ★★★これで `ample` の内訳は 10/13
+
+| 段 | 状態 |
+|---|---|
+| A1 | ★閉 |
+| A2 | ★not-a-blocker（前層の水準では要らない） |
+| B | ★閉（`IsLocallyTrivial` / `IsLocallyTrivial.tensor` は在庫だった） |
+| C1 | ★閉（`ℙⁿ_R` と固有性） |
+| **C2** | ★★**開**——`O(1)`。mathlib に twisting sheaf は 1 件も無い |
+| D1–D4 | ★**すべて閉**（定義・健全性・空虚封じ・切断の比・貼り合わせ） |
+| **E** | ★★**開**——Serre の定理 |
+| F1, F2ab | ★閉 |
+| F2c | ★小さい（生成ファイバー） |
+
+★★**残る本体は C2 と E の 2 つだけ**である。どちらも mathlib への PR 規模だが、
+**`ℙⁿ` の固有性という土台はもう建っている**。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**
+- `ample` **10/13**
