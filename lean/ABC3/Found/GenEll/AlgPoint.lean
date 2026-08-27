@@ -25,11 +25,13 @@ import ABC3.Found.GenEll.HeightInvariant
 ★したがって本ファイルの `htOff` は、**同じ点の別の定義体による表示**でも
 同じ値を返す(`htOff_baseChange`)。
 
-## ★残る設計
+## ★★商は入った(2026-08-28、§9-744)
 
-「同じ点」を商として実装する(数体についての colimit)。
-★★**降りることは本ファイルの `htOff_baseChange` が保証している**——
-残るのは商の作り方だけである。
+「同じ点」を商として実装する段(数体についての colimit)は
+`AlgPointClass.lean` で閉じた。★**降りることは本ファイルの `htOff_baseChange` が
+保証している**——そこで `Quot.lift` の条件になっているのがそれである。
+★★合成体は要らなかった:`Quot`(`Quotient` ではない)は
+与えた関係が**生成する**同値関係による商だからである。
 -/
 
 namespace ABC3.Found.GenEll
@@ -91,8 +93,8 @@ def algPointOff (F : Type) [instF : Field F] [instN : NumberField F] {X : Scheme
 原文 (GenEll p.5):
 > as the height function associated to the arithmetic line bundle M.
 
-★★★**これで `ht` を商の上に降ろす準備が整った**——
-残るのは商そのものの構成(設計)だけである。
+★★★**これが `ht` を商の上に降ろす条件そのものである**——
+`AlgPointClass.lean` の `htClass` は本定理を `Quot.lift` に渡して作られる。
 
 ★仮定は原文自身のもの 2 つ(`ι_X` 両立と「`D` を通らない」)だけである。 -/
 theorem htOff_baseChange (F K : Type) [Field F] [NumberField F]
@@ -110,12 +112,11 @@ theorem htOff_baseChange (F K : Type) [Field F] [NumberField F]
 
 /-! ## ★出典の紐付け(`.src`)
 
-★条つきである。`Definition 1.2` 全体には
-「同じ点」を商として実装する段(数体についての colimit)が残っている。 -/
+★条つきである。商の構成は `AlgPointClass.lean`(§9-744)にある。 -/
 
 def htOff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 5,
-    item := "Definition 1.2, (i)(U_X(ℚ̄) 上の高さ——商の構成は含まない)",
+    item := "Definition 1.2, (i)(U_X(ℚ̄) 上の高さ——商は AlgPointClass.lean)",
     sectionId := "genell-def-1-2-i" }
 
 end ABC3.Found.GenEll

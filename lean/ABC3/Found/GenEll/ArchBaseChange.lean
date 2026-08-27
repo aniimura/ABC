@@ -117,7 +117,7 @@ theorem green_archPoint_baseChange {X : Scheme.{0}} (v : InfinitePlace F)
 /-! ## ★出典の紐付け(`.src`)
 
 ★条つきである。`Definition 1.2, (i)` 全体には
-`degNormalized_baseChange` との接続と `X(ℚ̄)` の型の構成が残っている。 -/
+`degNormalized_baseChange` との接続と `X(ℚ̄)` の型は `AlgPointClass.lean`(§9-744)で入った。 -/
 
 def green_archPoint_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 5,

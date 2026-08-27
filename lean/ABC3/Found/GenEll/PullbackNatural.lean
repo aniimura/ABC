@@ -77,7 +77,7 @@ theorem pullbackIdeal_specMap_algebraMap [Algebra F K] [Algebra (𝓞 F) (𝓞 K
 /-! ## ★出典の紐付け(`.src`)
 
 ★条つきである。`Definition 1.2, (i)` 全体には
-アルキメデス側の仮定(埋め込みの両立)と `X(ℚ̄)` の型の構成が残っている。 -/
+アルキメデス側の仮定(埋め込みの両立)と `X(ℚ̄)` の型は `AlgPointClass.lean`(§9-744)で入った。 -/
 
 def pullbackIdeal_specMap.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 5,

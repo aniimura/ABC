@@ -125,7 +125,7 @@ end BaseChange
 /-! ## ★出典の紐付け(`.src`)
 
 ★条つきである。`Definition 1.2, (i)` 全体には
-アルキメデス側の `ADiv` への翻訳と `X(ℚ̄)` の型の構成が残っている。 -/
+アルキメデス側の `ADiv` への翻訳と `X(ℚ̄)` の型は `AlgPointClass.lean`(§9-744)で入った。 -/
 
 def idealADiv_fin_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 5,
