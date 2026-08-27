@@ -38,11 +38,28 @@ import ABC3.Meta.Claim
 
     `Γ(L̄) = { s ∈ Γ(L) | ∀ p, |s|_L(p) ≤ 1 }`
 
+## ★★★★★★★台の水準では `Hom(Ō_X, L) ≅ Γ(L, ⊤)` が出る
+
+    `unitHomEquiv L : (𝟙_ ⟶ L) ≃ Γ(L, ⊤)`
+
+★機構は「`⊤` が `X.Opens` の**終対象**だから `𝟙_ ≅ freeObj (yoneda ⊤)`」
+（在庫の `freeYonedaTermIso`）＋ mathlib の `PresheafOfModules.freeYonedaEquiv`。
+
+## ★★★★★★そして計量の側は 2 つの補題で繋がる
+
+    `|f|_{Ō_X}(p) = |f(p)|`            （`AMetric.one_norm`）
+    `|c·s|(p) = |c(p)|·|s|(p)`         （`AMetric.norm_smul`）
+
+★前者が「`Ō_X` は**自明な** hermitian 計量」の中身であり、
+後者が「射の条件は作用素ノルム `≤ 1` と同値」の根拠である。
+
 ## ★残っている段（明示）
 
-★`Hom(Ō_X, L̄) ≅ Γ(L̄)` を**射の側から**証明する段（`Γ(L) ≅ Hom(𝒪_X, L)` の
-`⊤` の水準の形）。★★在庫は制限した圏（`PresheafModulesOn X V`）の水準にある
-（`unitHomOfSection`、`PicTrivialNoSheaf.lean`）。
+★★**`Hom(Ō_X, L̄) ≅ Γ(L̄)` を計量込みで閉じる**段
+——`φ ↦ φ(1)` が単位球への全単射であること。
+★数学は上の 2 補題で尽きているが、`𝟙_` の切断を「加群の元」と
+「環の元」として同時に扱う配管（`s • 1 = s` の綴り）で詰まっており、
+**1 ブロックぶんの仕事として残す**（2026-08-28 実測）。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -149,6 +166,88 @@ theorem AMetric.zero_mem_gamma (L : AMetric X) : (0 : L.sheaf.obj (op ⊤)) ∈ 
   rw [h0, zero_mul]
   exact zero_le_one
 
+/-! ## ★★★★★★★ノルムの斉次性と `Ō_X` の計量 -/
+
+/-- ★★`trivValue` は大域切断へのスカラー倍と可換である。 -/
+theorem trivValue_smul (L : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj L ≅ 𝟙_ (PresheafModulesOn X V))
+    (c : (Γ(X, (⊤ : X.Opens)) : Type)) (s : L.obj (op ⊤)) :
+    trivValue L V e (c • s)
+      = (X.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op c) * trivValue L V e s := by
+  have h1 : secOn L V (c • s)
+      = (X.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op c) • secOn L V s :=
+    PresheafOfModules.map_smul L (homOfLE (le_top : V ≤ ⊤)).op c s
+  rw [trivValue_eq_trivEquiv, trivValue_eq_trivEquiv, h1, map_smul]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- ★基準の自明化での値は制限そのものである。 -/
+theorem trivValue_baseTriv (V : X.Opens)
+    (s : ((𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens)) : Type)) :
+    trivValue (𝟙_ X.PresheafOfModules) V (baseTriv X V) s
+      = X.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op s := rfl
+
+namespace AMetric
+
+/-- ★★★★★★★★**`Ō_X` の計量は `|f|(p) = |f(p)|` である**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★原文の「`O_X` に**自明な** hermitian 計量を入れたもの `Ō_X`」がこれである。 -/
+theorem one_norm (s : ((1 : AMetric X).sheaf.obj (op (⊤ : X.Opens)) : Type))
+    (p : Spec (CommRingCat.of ℂ) ⟶ X) (htop : p ⁻¹ᵁ (⊤ : X.Opens) = ⊤) :
+    (1 : AMetric X).norm s p = ‖evalOn p ⊤ htop s‖ := by
+  obtain ⟨c⟩ := nonempty_normChart (1 : AMetric X).triv p
+  rw [AMetric.norm_eq (1 : AMetric X) s p c.V (baseTriv X c.V) c.hp]
+  have hb : (1 : AMetric X).metric.normOf c.V (baseTriv X c.V) p c.hp s
+      = ‖evalOn p c.V c.hp (trivValue (𝟙_ X.PresheafOfModules) c.V (baseTriv X c.V) s)‖ :=
+    structLocalMetric_normOf_baseTriv X c.V p c.hp s
+  rw [hb, trivValue_baseTriv, evalOn_restrict p (le_top : c.V ≤ ⊤) c.hp]
+
+/-- ★★★★★★**ノルムは斉次である**: `|c·s|(p) = |c(p)|·|s|(p)`。
+
+★これが「射の条件は作用素ノルム `≤ 1` と同値」の根拠である。 -/
+theorem norm_smul (L : AMetric X) (c : (Γ(X, (⊤ : X.Opens)) : Type))
+    (s : L.sheaf.obj (op ⊤)) (p : Spec (CommRingCat.of ℂ) ⟶ X)
+    (htop : p ⁻¹ᵁ (⊤ : X.Opens) = ⊤) :
+    L.norm (c • s) p = ‖evalOn p ⊤ htop c‖ * L.norm s p := by
+  obtain ⟨ch⟩ := nonempty_normChart L.triv p
+  rw [AMetric.norm_eq L (c • s) p ch.V ch.e ch.hp, AMetric.norm_eq L s p ch.V ch.e ch.hp]
+  show trivSecNorm L.sheaf ch.V ch.e p ch.hp (c • s) * L.metric.h ch.V ch.e p
+    = _ * (trivSecNorm L.sheaf ch.V ch.e p ch.hp s * L.metric.h ch.V ch.e p)
+  have hts : trivSecNorm L.sheaf ch.V ch.e p ch.hp (c • s)
+      = ‖evalOn p ⊤ htop c‖ * trivSecNorm L.sheaf ch.V ch.e p ch.hp s := by
+    show ‖evalOn p ch.V ch.hp (trivValue L.sheaf ch.V ch.e (c • s))‖ = _
+    rw [trivValue_smul, evalOn_mul, _root_.norm_mul,
+      evalOn_restrict p (le_top : ch.V ≤ ⊤) ch.hp]
+    rfl
+  rw [hts]
+  ring
+
+end AMetric
+
+/-! ## ★★★★★`Hom(Ō_X, L) ≅ Γ(L, ⊤)`（台の水準） -/
+
+/-- ★`⊤` は `X.Opens` の終対象なので、`𝟙_` は `yoneda ⊤` の自由前層加群である。 -/
+noncomputable def topTermIso (X : Scheme.{0}) :
+    PresheafOfModules.freeObj
+      (R := X.presheaf ⋙ forget₂ CommRingCat RingCat) (yoneda.obj (⊤ : X.Opens))
+      ≅ 𝟙_ X.PresheafOfModules :=
+  freeYonedaTermIso (R := X.presheaf) (⊤ : X.Opens)
+    (fun _ => ⟨⟨homOfLE le_top⟩, fun _ => Subsingleton.elim _ _⟩)
+
+/-- ★★★★**`Hom(𝟙_, L) ≅ Γ(L, ⊤)`**——原文の `Γ(L̄) ≝ Hom(Ō_X, L̄)` の**台の水準**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★機構は「`⊤` が終対象だから `𝟙_ ≅ freeObj (yoneda ⊤)`」＋ mathlib の
+`PresheafOfModules.freeYonedaEquiv`。 -/
+noncomputable def unitHomEquiv (L : X.PresheafOfModules) :
+    (𝟙_ X.PresheafOfModules ⟶ L) ≃ (L.obj (op (⊤ : X.Opens)) : Type) :=
+  ((topTermIso X).symm.homCongr (Iso.refl L)).trans PresheafOfModules.freeYonedaEquiv
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def IsAHom.src : ABC3.Meta.Source :=
@@ -159,6 +258,21 @@ def IsAHom.src : ABC3.Meta.Source :=
 def AMetric.gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(Γ(L̄)——大域切断の単位球)",
+    sectionId := "genell-def-1-1-i" }
+
+def AMetric.one_norm.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(Ō_X の自明な hermitian 計量——|f|(p) = |f(p)|)",
+    sectionId := "genell-def-1-1-i" }
+
+def AMetric.norm_smul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(ノルムの斉次性)",
+    sectionId := "genell-def-1-1-i" }
+
+def unitHomEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(Hom(𝟙_, L) ≅ Γ(L, ⊤)——Γ(L̄) の台の水準)",
     sectionId := "genell-def-1-1-i" }
 
 def AMetric.tmul_mem_gamma.src : ABC3.Meta.Source :=
@@ -175,9 +289,19 @@ def AMetric.gamma.needs : List ABC3.Meta.ProofObligation :=
       ("★原文の射の条件「locally on X^arc、|−|_L ≤ 1 の切断を |−|_M ≤ 1 へ送る」を" ++
        "**作用素ノルムが 1 以下**の形で書いた。" ++
        "★★同値性は「計量が斉次だから s を定数倍して |s| ≤ 1 に落とせる」ことである") 3,
+    .citation "[ABC3]" "freeYonedaTermIso(終対象の自由前層加群は単位)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.freeYonedaTermIso") 3,
+    .citation "[mathlib]" "PresheafOfModules.freeYonedaEquiv"
+      (.inMathlib "PresheafOfModules.freeYonedaEquiv") 3,
     .implicitStep
-      ("★★★残っている段: Hom(Ō_X, L̄) ≅ Γ(L̄) を射の側から証明する段" ++
-       "(Γ(L) ≅ Hom(𝒪_X, L) の ⊤ の水準の形)。" ++
-       "★在庫は制限した圏(PresheafModulesOn X V)の水準にある(unitHomOfSection)") 3 ]
+      ("★★台の水準では Hom(Ō_X, L) ≅ Γ(L, ⊤) が出る(unitHomEquiv)。" ++
+       "★計量の側は one_norm(|f|_{Ō_X} = |f(p)|)と " ++
+       "norm_smul(|c·s| = |c(p)|·|s|)で繋がる") 3,
+    .implicitStep
+      ("★★★残っている段: Hom(Ō_X, L̄) ≅ Γ(L̄) を**計量込みで**閉じる段" ++
+       "(φ ↦ φ(1) が単位球への全単射であること)。" ++
+       "★数学は上の 2 補題で尽きているが、𝟙_ の切断を「加群の元」と" ++
+       "「環の元」として同時に扱う配管(s • 1 = s の綴り)で詰まっており、" ++
+       "1 ブロックぶんの仕事として残す(2026-08-28 実測)") 3 ]
 
 end ABC3.Found.Arakelov
