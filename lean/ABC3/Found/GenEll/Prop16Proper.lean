@@ -87,6 +87,80 @@ theorem logCond_bdge_htArith_of_proper (F : Type) [Field F] [NumberField F]
   obtain ⟨C, hC, hg⟩ := exists_lower_bound_of_continuous D.green hcont
   exact logCond_bdge_htArith_of_bddBelow F D C hC hg h
 
+/-! ### ★★★★★★★★項目全体の `.src`
+
+★`.src` は「その原典項目を**完全に**実装した」という主張である
+（`tools/genell-progress.mjs` の規則）。下の 1 つは、
+`Proposition 1.6` の**主張と証明の 2 段がともに `Found/` に揃った**ので置く。 -/
+
+/-- ★★★★★★★★**[GenEll] Proposition 1.6**（Conductor Bounded by the Height）
+—— 主張と証明の 2 段がともに実装された。
+
+原文 (GenEll p.9):
+> Proposition 1.6. (Conductor Bounded by the Height) Let D ⊆ X be an effective Cartier divisor,
+
+## ★主張
+
+| 原文 | 宣言 |
+|---|---|
+| `log-cond_D ≲ ht_D` on `U(ℚ̄)` | ★`logCond_bdge_htArith_of_proper`（本ファイル） |
+| `U ≝ X\D`（`x` が `D` を通らない） | `AlgPointOff` の `off`／仮定 `pullbackIdeal ≠ 0` |
+| `ht_D ≝ ht_{O_X(D)}` | ★**因子表示では定義そのもの**（下記） |
+
+## ★証明の 2 段（原文どおり）
+
+| 原文の段 | 宣言 |
+|---|---|
+| 非アルキメデス側（`(−)_red` の定義から） | `deg_adivRed_le`（`Conductor.lean`）／`logCondAt_le` |
+| アルキメデス側（`X^arc` がコンパクト） | ★`compactSpace_arc` ＋ `exists_lower_bound_of_continuous` |
+
+## ★★★★逸脱の記録（CLAUDE.md の「逸脱」）
+
+### 1. `L = O_X(D)` は**因子表示では定義**である
+
+原文は `L̄ = (L, |−|_L)` を算術直線束、`L = O_X(D)`、`ht_D ≝ ht_L̄` と置く。
+★本実装は **`ArithCartier X`（因子 ＋ Green 関数）から直に高さ `htArith` を作る**ので、
+`ht_D` は `divisor := D` に対する `htArith` そのものであり、
+**`L = O_X(D)` という対応が定義になる**（`Prop16.lean` の観察）。
+
+★★`Definition 1.1` の算術直線束 `APic(X)` との橋（因子表示 ↔ 束表示）は
+**別の項目の仕事**であり、本項目の主張には要らない。
+
+### 2. `Continuous D.green` は仮定として受ける
+
+原文の `|s|_L` が連続なのは**エルミート計量の定義から**である。
+★本実装の `GreenFn` は任意の実数値関数なので、連続性は利用者が与える。
+★★`ArithCartier` に連続性を組み込むかは設計判断であり、
+**原文の仮定をそのまま外に出す**ことにした。
+
+### 3. 固有性の形
+
+原文は `X` が `ℤ`-固有であることを前提の中で仮定する。
+★本実装は `[CompactSpace X]` ＋ `ValuativeCriterion` として受ける
+（＝固有性の定義そのもの）。★★**射影モデルは要らない** ——
+`compactSpace_arc` が付値判定法から直に `X^arc` のコンパクト性を出すためである
+（`Prop16.lean` の `ArcModel` 経由の版は、射影モデルを与える別の道として残してある）。 -/
+def prop_1_6_proper.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 9, item := "Proposition 1.6",
+    sectionId := "genell-prop-1-6" }
+
+def prop_1_6_proper.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "logCond_bdge_htArith_of_proper(主張そのもの)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.logCond_bdge_htArith_of_proper") 9,
+    .citation "[ABC3]" "compactSpace_arc(固有性から X^arc のコンパクト性)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.compactSpace_arc") 3,
+    .citation "[ABC3]" "deg_adivRed_le(非アルキメデス側——被約化で次数が減る)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.deg_adivRed_le") 9,
+    .implicitStep
+      ("★逸脱 1: L = O_X(D) は因子表示では定義である(htArith は ArithCartier から" ++
+       "直に高さを作るため)。Definition 1.1 の算術直線束との橋は別項目の仕事") 9,
+    .implicitStep
+      ("★逸脱 2: Continuous D.green は仮定として受ける。原文の |s|_L が連続なのは" ++
+       "エルミート計量の定義からだが、我々の GreenFn は任意の実数値関数である") 9,
+    .implicitStep
+      ("★逸脱 3: 固有性を [CompactSpace X] ＋ ValuativeCriterion で受ける(定義そのもの)。" ++
+       "★★射影モデルは要らない —— compactSpace_arc が付値判定法から直に出すため") 9 ]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def logCond_bdge_htArith_of_proper.src : ABC3.Meta.Source :=
