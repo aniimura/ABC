@@ -272,18 +272,29 @@
       ]
      },
      {
-      "stage": "F",
-      "claim": "原文の吹き上げ（X から正規・Z-固有・Z-平坦な Y を作る）",
+      "stage": "F1",
+      "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
+      "status": "closed",
+      "where": "Found/GenEll/FlatModel.lean の flat_int_subschemeObj",
+      "why": "★道具は 3 本だけだった:\n  Scheme.Hom.ker_apply（mathlib）——核をアフィンで読む\n  Module.Flat.flat_iff_torsion_eq_bot_of_isBezout（mathlib）——**ℤ が Bezout だから平坦 ⇔ ねじれ無し**\n  Module.Flat.trans（ℚ が ℤ 上平坦・体上の加群は自由）\n★★**吹き上げも Proj も要らなかった**。",
+      "sources": [
+       "[GenEll] p.8 Remark 1.4.1 の括弧",
+       "mathlib: Scheme.Hom.ker_apply / Flat.flat_iff_torsion_eq_bot_of_isBezout"
+      ]
+     },
+     {
+      "stage": "F2",
+      "claim": "その閉包が **ℤ-射影**であり、生成ファイバーが元の Y に戻ること",
       "status": "open",
-      "why": "★mathlib に Blowup は無い（2026-08-27 再確認）。 ★★ただし**消費側には不要な可能性がある**——Proposition 3.4 は M_ell に適用するので、その粗モジュライ P^1_j は Z 上の射影モデルを明示的に持つ。",
+      "why": "★射影性は段 C（P^n_S と O(1)）に帰着する。 ★★X_ℚ ≅ Y は平坦底変換とスキーム論的像の交換性である。 ★★★原文の吹き上げ（正規化）は Proposition 1.4, (iv) の証明の側であり、Remark 1.4.1 の括弧には要らない。",
       "sources": [
        "[Stacks] Blowing up",
        "[GenEll] p.7 proof"
       ]
      }
     ],
-    "done": "0/6",
-    "remaining": "★★★**土台はすでにある**。最初の葉は**段 A（層のテンソル積）**であり、前層の monoidal 構造と層化の合成である。 ★mathlib へ PR できる形である。"
+    "done": "1/7",
+    "remaining": "★★★**土台はすでにある**。最初の葉は**段 A（層のテンソル積）**であり、前層の monoidal 構造と層化の合成である。 ★段 F1（閉包の ℤ-平坦性）は 2026-08-27 に閉じた。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
