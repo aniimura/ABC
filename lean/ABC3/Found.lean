@@ -817,6 +817,7 @@ import ABC3.Found.GaloisRep.AdicContraction
 import ABC3.Found.GaloisRep.QTorsion
 import ABC3.Found.GenEll.Lemma32StableLine
 import ABC3.Found.GenEll.Lemma32Uniformized
+import ABC3.Found.GenEll.Lemma32Tate
 import ABC3.Found.GenEll.Lemma32QuotMu
 import ABC3.Found.GaloisRep.AdicSeries
 import ABC3.Found.GaloisRep.TateXY
@@ -1011,6 +1012,7 @@ import ABC3.Found.GaloisRep.TatePt
 import ABC3.Found.GaloisRep.TatePointNatural
 import ABC3.Found.GaloisRep.TateBaseChange
 import ABC3.Found.GaloisRep.TateUniformizationEquivariant
+import ABC3.Found.GaloisRep.TateGaloisStab
 import ABC3.Found.GaloisRep.TateCurveNatural
 import ABC3.Found.GaloisRep.TateClassPt
 import ABC3.Found.GaloisRep.TatePhi
