@@ -32,11 +32,11 @@ import ABC3.Found.Arakelov.UltraCompact
 ## ★★★原文の証明のとおりの形になった
 
 原文 (GenEll p.9):
-> the asserted inequality log-condD ≲ htL follows,
-> **for the contributions at the nonarchimedean primes**, from the definition of log-condD
-> [i.e., involving “(−)red”] in Definition 1.5, (iv),
-> and, **for the contributions at the archimedean primes**, from the fact that
-> the continuous function |s|L on the **compact** topological space Xarc is bounded.
+> archimedean primes, from the fact that the continuous function |s|L on the com-
+
+原文の証明は 2 段に分かれている ——
+**非アルキメデス側**は `log-cond_D` の定義（`(−)_red` を含む）から、
+**アルキメデス側**は「`X^arc` はコンパクトなので連続関数 `|s|_L` は有界」から。
 
 | 原文の段 | 宣言 |
 |---|---|
