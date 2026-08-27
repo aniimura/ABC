@@ -252,10 +252,23 @@
       "why": "★★★★**2026-08-27 の実測で道が短くなった**。mathlib には AlgebraicGeometry.Proj、MvPolynomial.gradedAlgebra、Proj.toSpecZero、そして **instance [Algebra.FiniteType (𝒜 0) A] : IsProper (Proj.toSpecZero 𝒜)**（[Stacks] 01MF）がある。 ★埋めた隙間は 2 つだけ: （1）Algebra.FiniteType (𝒜 0) (MvPolynomial …) は instance でないので変数が生成することを書いた、（2）𝒜 0 は R そのものではないので homogeneousSubmodule_zero から R ≅+* 𝒜 0 を作った。"
      },
      {
-      "stage": "C2",
-      "claim": "O(1)（twisting sheaf）と ℙⁿ の点の関子",
+      "stage": "C2a",
+      "claim": "ℙⁿ の**標準アフィン被覆** D₊(x_i) と**正規化座標** x_j/x_i",
+      "status": "closed",
+      "where": "Found/GenEll/ProjSpaceCover.lean の **iSup_basicOpen_X_eq_top** / **projCoord** / projCoord_self",
+      "why": "★★★★**消費側（northcott_of_projModel）が要るのは**同次座標**であって O(1) そのものではない**。 ★正規化座標 x_j/x_i は ℙⁿ の標準アフィンチャートから直に取れる——D₊(x_i) ≅ Spec (A⁰_{x_i}) であり、A⁰_{x_i} は x_j/x_i たちで生成される。 ★★被覆の中身は「無関係イデアルは変数で生成される」である。"
+     },
+     {
+      "stage": "C2b",
+      "claim": "点 Spec F ⟶ ℙⁿ をチャートに落として環準同型 A⁰_{x_i} → F を取る配管",
       "status": "open",
-      "why": "★mathlib に **twisting sheaf は 1 件も無い**（2026-08-27、Mathlib/AlgebraicGeometry 全体を twisting|Serre で検索して 0 件）。 ★★これが段 D（ample の定義）と 段 E（Serre の定理）の前提である。"
+      "why": "★チャートの同型 Proj| D₊(f) ≅ Spec (A⁰_f) は **mathlib にある**（AlgebraicGeometry.projIsoSpec、ただし LocallyRingedSpace の水準）。 ★★残るのは開埋め込みへの持ち上げと、Scheme の水準への翻訳だけである。"
+     },
+     {
+      "stage": "C2c",
+      "claim": "O(1)（twisting sheaf）そのもの",
+      "status": "open",
+      "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。"
      },
      {
       "stage": "D1",
@@ -321,8 +334,8 @@
       "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
      }
     ],
-    "done": "10/13",
-    "remaining": "★★**残るのは C2・E・F2c の 3 段**である。 ★**段 D は完全に閉じた**（定義・健全性・空虚封じ・切断の比・貼り合わせ）。 ★★段 F も F2c（生成ファイバーが Y に戻る）を除いて閉じた。 ★★★残る本体は **C2（O(1)）** と **E（Serre の定理）**である。"
+    "done": "11/15",
+    "remaining": "★★**残るのは C2b・C2c・E・F2c の 4 段**である。 ★段 C2b（チャートへ落とす配管）は**小さい**——mathlib の projIsoSpec がある。 ★★残る本体は **C2c（O(1)）** と **E（Serre の定理）**であり、どちらも very ample を述べ・示すために要る。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },
