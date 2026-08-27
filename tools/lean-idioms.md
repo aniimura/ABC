@@ -871,3 +871,26 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 直し方: **落ちたら、その塊全部を作り直して送る**。
 ★★塊が大きいなら、そもそもファイルに書いて `lake build` したほうが速い
 (REPL は 1 定理ずつの探りに使う)。
+
+## `Subring.closure` を台にした型を圏論の構造に載せると核が発散する
+
+失敗形(2026-08-27、第 368-369 ブロックで 2 回落ちた):
+
+1. `def D : ℕ ⥤ CommRingCat where obj n := CommRingCat.of (ratTower n); ...`
+   と**素朴に `Functor` の構造体を書き**、`map_id` / `map_comp` を `ext; rfl` で埋める
+   —— エラボレーションは通るが **核判定が 100 秒を超えて落ちない**。
+2. `def towerMk (n) (q) (hq) : D.obj n := ⟨q, hq⟩` という**補助定義を挟む**
+   —— これも核判定が 95 秒。
+
+原因: `ratTower n = Subring.closure {...}` なので `CommRingCat.of (ratTower n)` の
+`CommRing` インスタンスの経路が長く、核での defeq が重い。
+
+直し方:
+
+* `Functor.ofSequence` / `NatTrans.ofSequence`(`Mathlib/CategoryTheory/Functor/OfSequence.lean`)
+  に寄せる —— `n ⟶ n+1` の射だけ与えれば `map_id` / `map_comp` は mathlib が持つ。**0.07 秒**。
+* 補助定義を挟まず `show ratTower n from ⟨q, hq⟩` と**直に書く** —— **0.05 秒**。
+
+★根本的に直すなら `closure` でなく**明示的な `carrier`** で部分環を定義する。
+★★同じ穴: 「エラボレーションが速い」ことは「核が速い」ことを意味しない。
+`lean_check` が 120 秒で背景に落ちたら、まずこの形を疑う。
