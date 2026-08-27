@@ -656,6 +656,36 @@ noncomputable def quotIdealEquivQuotSpan (R : CommRingCat.{0}) [IsDomain (R : Ty
             (Ideal.span {u} : Ideal (R : Type))) :=
   Submodule.Quotient.equiv _ _ (spanSingletonEquivGamma R L s hs) rfl
 
+/-! ## ★★★★★★★★★部分加群の対応 —— 段 D 本体の第三段 -/
+
+/-- ★★★★★★★★★**`R ≃ span{s}` の下で `(u)` は `span{u·s}` に対応する**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★機構は `Submodule.map_span`(像の span は span の像)だけである。 -/
+theorem map_spanSingletonEquiv_span (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) :
+    Submodule.map (spanSingletonEquivGamma R L s hs).toLinearMap
+        (Ideal.span {u} : Ideal (R : Type))
+      = Submodule.span (R : Type) {(spanSingletonEquivGamma R L s hs) u} := by
+  show Submodule.map _ (Submodule.span (R : Type) {u}) = _
+  rw [Submodule.map_span]
+  congr 1
+  simp
+
+/-- ★★**同型の値は `u • s`** である。★**`rfl`**。 -/
+theorem spanSingletonEquivGamma_apply_coe (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) :
+    (((spanSingletonEquivGamma R L s hs) u :
+      (Submodule.span (R : Type) {s})) :
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+      = u • s := rfl
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -692,6 +722,21 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def map_spanSingletonEquiv_span.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)((u) が span{u·s} に対応すること——段 D 本体の第三段)",
+    sectionId := "genell-def-1-1-ii" }
+
+def map_spanSingletonEquiv_span.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Submodule.map_span(像の span は span の像)"
+      (.inMathlib "Submodule.map_span") 4,
+    .implicitStep
+      ("★★段 D 本体の残り 3 段: " ++
+       "(1) 短完全列 0 → span{s}/span{us} → Γ/span{us} → Γ/span{s} → 0 " ++
+       "(mathlib の Submodule.quotientQuotientEquivQuotient が使えるはず)、" ++
+       "(2) Nat.card の乗法性で degFin(u·s) = degFin(s) + log N(u)、" ++
+       "(3) アルキメデス部分と合わせて積公式(deg_principalADiv_eq_zero)") 4 ]
 
 def quotIdealEquivQuotSpan.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
