@@ -35,12 +35,27 @@ import ABC3.Found.GaloisRep.TateOrigin
 
 ★★★どの段も「**一意 ⟹ 自然**」か「環演算」だけである。
 
+## ★★★★★★★★★★★行き先は**別の環・別の体でよい**（段 3 の座標側）
+
+★本ファイルの補題は `σ : R →+* R'`・`σ_K : K →+* L` の形で述べてある
+——**行き先が同じである必要はない**。
+
+★★したがって台帳の**段 3（有限拡大 `K ⊆ L` に対する自然性）の座標側**は
+本ファイルで閉じている:
+
+    `σ_K : K →+* L`、`σ : R →+* R'`、`σ I ⊆ I'` のとき
+      `σ_K (X_K(a,w,q)) = X_L(σa, σw, σq)`
+
+★★★`K ⊆ L` の場合、`normRep` の一意性（`NormRepNatural.lean`）から
+`normRep_L(c の像) = normRep_K(c)` が出る——付値が `e` 倍になっても
+基本領域 `[0, v(q))` の条件は保たれるからである。
+
 ## ★逸脱の記録（CLAUDE.md の「逸脱」）
 
-★`σ` は `σR : R →+* R` と `σK : K →+* K` の**対**として受け、
-両立 `σK ∘ algebraMap = algebraMap ∘ σR` と `σ I ⊆ I` を仮説に置く。
-★★体の自己同型から来る場合、`σ I ⊆ I` は付値の拡大の一意性から出るが、
-本ファイルはそれを仮説にしている（段 3 の担当）。
+★`σ` は `σR : R →+* R'` と `σK : K →+* L` の**対**として受け、
+両立 `σK ∘ algebraMap = algebraMap ∘ σR` と `σ I ⊆ I'` を仮説に置く。
+★★体の自己同型から来る場合、`σ I ⊆ I'` は付値の拡大の一意性から出るが、
+本ファイルはそれを仮説にしている。
 -/
 
 namespace ABC3.Found.GaloisRep
@@ -48,27 +63,29 @@ namespace ABC3.Found.GaloisRep
 /-! ## ★★★★分母を払った座標の自然性 -/
 
 /-- ★★★★★★★**`(1−a)²·X` は自然**。 -/
-theorem tateXpairE_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (a w q : R)
-    (hq : q ∈ I) (hq' : σ q ∈ I) (hw : w ∈ I) :
+theorem tateXpairE_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (a w q : R)
+    (hq : q ∈ I) (hq' : σ q ∈ I') (hw : w ∈ I) :
     σ (tateXpairE a w q hq) = tateXpairE (σ a) (σ w) (σ q) hq' := by
   unfold tateXpairE
   rw [map_add, map_mul, map_pow, map_sub, map_one, map_sub, map_add, map_add,
     map_mul, map_ofNat,
     tateXtail_map σ hσI a q hq hq', tateXtail_map σ hσI w q hq hq',
-    tateXterm_map σ (I := I) hw,
+    tateXterm_map (I := I) σ hw,
     evalAdic_map σ hσI _ q hq hq']
 
 /-- ★★★★★★★**`(1−a)³·Y` は自然**。 -/
-theorem tateYpairE_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (a w q : R)
-    (hq : q ∈ I) (hq' : σ q ∈ I) (hw : w ∈ I) :
+theorem tateYpairE_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (a w q : R)
+    (hq : q ∈ I) (hq' : σ q ∈ I') (hw : w ∈ I) :
     σ (tateYpairE a w q hq) = tateYpairE (σ a) (σ w) (σ q) hq' := by
   unfold tateYpairE
   simp only [map_add, map_sub, map_mul, map_pow, map_one]
   rw [tateYtail_map σ hσI a q hq hq', tateXtail_map σ hσI w q hq hq',
     tateYtail_map σ hσI w q hq hq',
-    tateXterm_map σ (I := I) hw, tateYterm_map σ (I := I) hw,
+    tateXterm_map (I := I) σ hw, tateYterm_map (I := I) σ hw,
     evalAdic_map σ hσI _ q hq hq']
 
 /-! ## ★★★★★★★★★★`K` の水準の座標 -/
@@ -82,22 +99,24 @@ theorem tateYpairE_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R
 
 ★★`tateXK = algebraMap R K (tateXpairE …) · (algebraMap R K (1−a))⁻¹²` なので、
 `R` の中の自然性（上）と `σ_K` が体準同型であること（`map_inv₀`）だけで出る。 -/
-theorem tateXK_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    {K : Type} [Field K] [Algebra R K]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (σK : K →+* K)
-    (hcompat : ∀ r : R, σK (algebraMap R K r) = algebraMap R K (σ r))
-    (a w q : R) (hq : q ∈ I) (hq' : σ q ∈ I) (hw : w ∈ I) :
+theorem tateXK_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    {K L : Type} [Field K] [Field L] [Algebra R K] [Algebra R' L]
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (σK : K →+* L)
+    (hcompat : ∀ r : R, σK (algebraMap R K r) = algebraMap R' L (σ r))
+    (a w q : R) (hq : q ∈ I) (hq' : σ q ∈ I') (hw : w ∈ I) :
     σK (tateXK a w q hq : K) = tateXK (σ a) (σ w) (σ q) hq' := by
   unfold tateXK
   rw [map_mul, map_pow, map_inv₀, hcompat, hcompat, map_sub, map_one,
     tateXpairE_map σ hσI a w q hq hq' hw]
 
 /-- ★★★★★★★★★★**Tate 一意化の `Y` 座標は自然**。 -/
-theorem tateYK_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    {K : Type} [Field K] [Algebra R K]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (σK : K →+* K)
-    (hcompat : ∀ r : R, σK (algebraMap R K r) = algebraMap R K (σ r))
-    (a w q : R) (hq : q ∈ I) (hq' : σ q ∈ I) (hw : w ∈ I) :
+theorem tateYK_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    {K L : Type} [Field K] [Field L] [Algebra R K] [Algebra R' L]
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (σK : K →+* L)
+    (hcompat : ∀ r : R, σK (algebraMap R K r) = algebraMap R' L (σ r))
+    (a w q : R) (hq : q ∈ I) (hq' : σ q ∈ I') (hw : w ∈ I) :
     σK (tateYK a w q hq : K) = tateYK (σ a) (σ w) (σ q) hq' := by
   unfold tateYK
   rw [map_mul, map_pow, map_inv₀, hcompat, hcompat, map_sub, map_one,

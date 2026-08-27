@@ -48,18 +48,20 @@ namespace ABC3.Found.GaloisRep
 /-- ★★**`Ring.inverse` は単元の上で環準同型と可換**。
 
 ★一般には成り立たない（非単元では `0` に潰れるため）。 -/
-theorem ringInverse_map {R : Type} [CommRing R] (σ : R →+* R) {x : R} (hx : IsUnit x) :
+theorem ringInverse_map {R R' : Type} [CommRing R] [CommRing R'] (σ : R →+* R')
+    {x : R} (hx : IsUnit x) :
     σ (Ring.inverse x) = Ring.inverse (σ x) := by
   obtain ⟨u, rfl⟩ := hx
   rw [Ring.inverse_unit]
-  have hcast : σ (u : R) = ((Units.map (σ : R →* R) u : Rˣ) : R) := rfl
+  have hcast : σ (u : R) = ((Units.map (σ : R →* R') u : R'ˣ) : R') := rfl
   rw [hcast, Ring.inverse_unit, ← map_inv]
   rfl
 
 /-! ## ★★adic 和の自然性 -/
 
 /-- ★**部分和は `σ` と可換**（有限和）。 -/
-theorem partialSum_map {R : Type} [CommRing R] (σ : R →+* R) (a : ℕ → R) (n : ℕ) :
+theorem partialSum_map {R R' : Type} [CommRing R] [CommRing R'] (σ : R →+* R')
+    (a : ℕ → R) (n : ℕ) :
     σ (partialSum a n) = partialSum (fun k => σ (a k)) n := by
   unfold partialSum
   rw [map_sum]
@@ -70,9 +72,10 @@ theorem partialSum_map {R : Type} [CommRing R] (σ : R →+* R) (a : ℕ → R) 
 > Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
 
 ★機構は `evalAdic_map` と同じ——**一意性 `adicSum_unique` 1 本**である。 -/
-theorem adicSum_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (a : ℕ → R) (ha : ∀ n, a n ∈ I ^ n)
-    (ha' : ∀ n, σ (a n) ∈ I ^ n) :
+theorem adicSum_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (a : ℕ → R) (ha : ∀ n, a n ∈ I ^ n)
+    (ha' : ∀ n, σ (a n) ∈ I' ^ n) :
     adicSum (fun n => σ (a n)) ha' = σ (adicSum a ha) := by
   refine adicSum_unique _ ha' _ (fun n => ?_)
   rw [← partialSum_map σ a n]
@@ -81,15 +84,15 @@ theorem adicSum_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
 /-! ## ★★★項の自然性 -/
 
 /-- ★★**`f(t) = t/(1−t)²` は自然**（`t ∈ I` なら `1−t` は単元）。 -/
-theorem tateXterm_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) {t : R} (ht : t ∈ I) :
+theorem tateXterm_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R}
+    [IsAdicComplete I R] (σ : R →+* R') {t : R} (ht : t ∈ I) :
     σ (tateXterm t) = tateXterm (σ t) := by
   unfold tateXterm
   rw [map_mul, map_pow, ringInverse_map σ (isUnit_one_sub (I := I) ht), map_sub, map_one]
 
 /-- ★★**`g(t) = t²/(1−t)³` は自然**。 -/
-theorem tateYterm_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) {t : R} (ht : t ∈ I) :
+theorem tateYterm_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R}
+    [IsAdicComplete I R] (σ : R →+* R') {t : R} (ht : t ∈ I) :
     σ (tateYterm t) = tateYterm (σ t) := by
   unfold tateYterm
   rw [map_mul, map_pow, map_pow, ringInverse_map σ (isUnit_one_sub (I := I) ht),
@@ -103,16 +106,17 @@ theorem tateYterm_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
 > Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
 
 ★`adicSum_map`（一意性）と `tateXterm_map`（項ごと）を繋ぐ。 -/
-theorem tateXtail_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (u q : R) (hq : q ∈ I) (hq' : σ q ∈ I) :
+theorem tateXtail_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (u q : R) (hq : q ∈ I) (hq' : σ q ∈ I') :
     σ (tateXtail u q hq) = tateXtail (σ u) (σ q) hq' := by
   have hmem : ∀ n : ℕ, q ^ (n + 1) * u ∈ I := by
     intro n
     exact Ideal.mul_mem_right u I (Ideal.pow_mem_of_mem I hq _ (Nat.succ_pos n))
   have hterm : ∀ n : ℕ, σ (tateXterm (q ^ (n + 1) * u)) = tateXterm ((σ q) ^ (n + 1) * σ u) := by
     intro n
-    rw [tateXterm_map σ (I := I) (hmem n), map_mul, map_pow]
-  have ha' : ∀ n : ℕ, σ (tateXterm (q ^ (n + 1) * u)) ∈ I ^ n := by
+    rw [tateXterm_map (I := I) σ (hmem n), map_mul, map_pow]
+  have ha' : ∀ n : ℕ, σ (tateXterm (q ^ (n + 1) * u)) ∈ I' ^ n := by
     intro n
     rw [hterm n]
     exact tateXtail_aux hq' n
@@ -121,16 +125,17 @@ theorem tateXtail_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
   exact adicSum_congr ha' (tateXtail_aux hq') hterm
 
 /-- ★★★★★★★★**`∑_{m≥1} g(qᵐu)` は自然**。 -/
-theorem tateYtail_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I) (u q : R) (hq : q ∈ I) (hq' : σ q ∈ I) :
+theorem tateYtail_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') (u q : R) (hq : q ∈ I) (hq' : σ q ∈ I') :
     σ (tateYtail u q hq) = tateYtail (σ u) (σ q) hq' := by
   have hmem : ∀ n : ℕ, q ^ (n + 1) * u ∈ I := by
     intro n
     exact Ideal.mul_mem_right u I (Ideal.pow_mem_of_mem I hq _ (Nat.succ_pos n))
   have hterm : ∀ n : ℕ, σ (tateYterm (q ^ (n + 1) * u)) = tateYterm ((σ q) ^ (n + 1) * σ u) := by
     intro n
-    rw [tateYterm_map σ (I := I) (hmem n), map_mul, map_pow]
-  have ha' : ∀ n : ℕ, σ (tateYterm (q ^ (n + 1) * u)) ∈ I ^ n := by
+    rw [tateYterm_map (I := I) σ (hmem n), map_mul, map_pow]
+  have ha' : ∀ n : ℕ, σ (tateYterm (q ^ (n + 1) * u)) ∈ I' ^ n := by
     intro n
     rw [hterm n]
     exact tateYtail_aux hq' n

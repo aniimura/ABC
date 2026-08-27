@@ -46,7 +46,7 @@ namespace ABC3.Found.GaloisRep
 /-! ## ★部分和は環準同型と可換 -/
 
 /-- ★**部分和は多項式なので `σ` と可換**（係数は `ℤ`）。 -/
-theorem partialEval_map {R : Type} [CommRing R] (σ : R →+* R)
+theorem partialEval_map {R R' : Type} [CommRing R] [CommRing R'] (σ : R →+* R')
     (f : PowerSeries ℤ) (q : R) (n : ℕ) :
     σ (partialEval f q n) = partialEval f (σ q) n := by
   unfold partialEval
@@ -59,16 +59,18 @@ theorem partialEval_map {R : Type} [CommRing R] (σ : R →+* R)
 /-- ★★**`σ I ⊆ I` なら `I^n` を法とする合同は `σ` で保たれる**。
 
 ★`Ideal.map σ (I^n) = (Ideal.map σ I)^n ≤ I^n` による。 -/
-theorem smodEq_map {R : Type} [CommRing R] {I : Ideal R} (σ : R →+* R)
-    (hσI : ∀ x ∈ I, σ x ∈ I) {n : ℕ} {a b : R}
+theorem smodEq_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I') {n : ℕ} {a b : R}
     (h : a ≡ b [SMOD (I ^ n • ⊤ : Submodule R R)]) :
-    σ a ≡ σ b [SMOD (I ^ n • ⊤ : Submodule R R)] := by
+    σ a ≡ σ b [SMOD (I' ^ n • ⊤ : Submodule R' R')] := by
   rw [SModEq.sub_mem] at h ⊢
   rw [← map_sub]
   have hI : (I ^ n • ⊤ : Submodule R R) = (I ^ n : Ideal R) := by simp
-  rw [hI] at h ⊢
-  have hmapI : Ideal.map σ I ≤ I := Ideal.map_le_iff_le_comap.2 (fun x hx => hσI x hx)
-  have hpow : Ideal.map σ (I ^ n) ≤ I ^ n := by
+  have hI' : (I' ^ n • ⊤ : Submodule R' R') = (I' ^ n : Ideal R') := by simp
+  rw [hI] at h
+  rw [hI']
+  have hmapI : Ideal.map σ I ≤ I' := Ideal.map_le_iff_le_comap.2 (fun x hx => hσI x hx)
+  have hpow : Ideal.map σ (I ^ n) ≤ I' ^ n := by
     rw [Ideal.map_pow]
     exact Ideal.pow_right_mono hmapI n
   exact hpow (Ideal.mem_map_of_mem σ h)
@@ -88,9 +90,10 @@ theorem smodEq_map {R : Type} [CommRing R] {I : Ideal R} (σ : R →+* R)
 
 ★★★`σ q = q` の場合は **`σ (evalAdic f q) = evalAdic f q`**、
 すなわち**級数の値は `σ` で固定される**——これが Tate 一意化の同変性の核である。 -/
-theorem evalAdic_map {R : Type} [CommRing R] {I : Ideal R} [IsAdicComplete I R]
-    (σ : R →+* R) (hσI : ∀ x ∈ I, σ x ∈ I)
-    (f : PowerSeries ℤ) (q : R) (hq : q ∈ I) (hq' : σ q ∈ I) :
+theorem evalAdic_map {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {I' : Ideal R'}
+    [IsAdicComplete I R] [IsAdicComplete I' R']
+    (σ : R →+* R') (hσI : ∀ x ∈ I, σ x ∈ I')
+    (f : PowerSeries ℤ) (q : R) (hq : q ∈ I) (hq' : σ q ∈ I') :
     evalAdic f (σ q) hq' = σ (evalAdic f q hq) := by
   refine evalAdic_unique f (σ q) hq' _ (fun n => ?_)
   rw [← partialEval_map σ f q n]

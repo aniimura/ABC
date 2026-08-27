@@ -384,10 +384,17 @@
       "where": "Found/GaloisRep/TatePointNatural.lean の tateXK_map_fixed / nonsingular_tateK_map / **tatePtPair_map**"
      },
      {
-      "stage": "3",
-      "claim": "有限拡大 K ⊆ L に対する自然性（両方の同型が包含と両立する）",
+      "stage": "3a",
+      "claim": "有限拡大 K ⊆ L に対する**座標の**自然性",
+      "status": "closed",
+      "where": "Found/GaloisRep/AdicEvalNatural.lean / TateSeriesNatural.lean / TateCoordNatural.lean（すべて σ : R →+* R′、σ_K : K →+* L の形で一般化済み）",
+      "why": "★段 2a〜2c の補題はすべて**行き先が別の環・別の体でも通る**——2026-08-27 に一般化した。 ★★normRep の一意性から normRep_L(c の像) = normRep_K(c) が出る——付値が e 倍になっても基本領域 [0, v(q)) の条件は保たれる。"
+     },
+     {
+      "stage": "3b",
+      "claim": "それを**点の水準**で述べる（別の体の上の曲線の間の Point.map）",
       "status": "open",
-      "why": "★段 2 と同じ道筋。 ★★L も完備離散付値体で q は同じので、tatePhiAddEquivAll が L でも立つ——問題は 2 つの同型が両立するかである。"
+      "why": "★Point.some の合同は**同じ曲線の上**でしか取れない。 ★★mathlib の WeierstrassCurve.Affine.Point.map （F →ₐ[S] K に沿った点の写像）を使う。 ★★★曲線 tateCurveAt q は q ∈ R_K で決まるので、K と L の両方を**同じ R_K 上の底変換**と見ればS = R_K で Point.map が使える。"
      },
      {
       "stage": "4",
@@ -403,8 +410,8 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "6/9",
-    "remaining": "★★残るは**段 3（有限拡大 K ⊆ L）と段 4（K̄ への帰納極限）**だけである。 ★どちらも**新しい数学ではなく組み立て**である。"
+    "done": "7/10",
+    "remaining": "★★残るは**段 3b（Point.map で点の水準へ）と 段 4（K̄ への帰納極限）**だけである。 ★どちらも**新しい数学ではなく組み立て**である。"
    },
    "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },
