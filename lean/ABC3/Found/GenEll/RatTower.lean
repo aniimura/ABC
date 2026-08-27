@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.Data.Nat.Factorial.BigOperators
+import Mathlib.Algebra.Category.Ring.Colimits
+import Mathlib.CategoryTheory.Functor.OfSequence
 import ABC3.Meta.Claim
 
 /-!
@@ -154,6 +156,60 @@ theorem exists_ratTower_range_le {S : Type} [CommRing S] (φ : S →+* ℚ)
   · intro a b _ _ ha hb; rw [map_add]; exact add_mem ha hb
   · intro a _ ha; rw [map_neg]; exact neg_mem ha
   · intro a b _ _ ha hb; rw [map_mul]; exact mul_mem ha hb
+
+/-! ## ★★★★★★★★余極限へ —— 図式と余錐
+
+★★`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`（mathlib、EGA IV §8）へ
+渡すには `IsLimit` の錐が要る。その台となる**環の側の図式と余錐**をここに置く。 -/
+
+/-- ★★**有向性** —— どの 2 段も上に共通の段を持つ。 -/
+theorem ratTower_directed : Directed (· ≤ ·) ratTower := by
+  intro n m
+  exact ⟨max n m, ratTower_mono (le_max_left n m), ratTower_mono (le_max_right n m)⟩
+
+/-- ★★★★**合併は `ℚ` 全体** —— 汲み尽くしの束論的な形。 -/
+theorem iSup_ratTower_eq_top : (⨆ n : ℕ, ratTower n) = ⊤ := by
+  refine eq_top_iff.2 (fun q _ => ?_)
+  exact le_iSup ratTower q.den (mem_ratTower_den q)
+
+open CategoryTheory Limits
+
+/-- ★★★**図式** `n ↦ ℤ[1/n!]`。
+
+★`Functor.ofSequence` を使う——`n ⟶ n+1` の射だけ与えれば `map_id` / `map_comp` は
+mathlib が持つ。★★**素朴に `Functor` の構造体を書くと核の判定が発散する**
+（2026-08-27 に実測。`Subring.inclusion` の defeq が重い）。 -/
+def ratTowerDiagram : ℕ ⥤ CommRingCat.{0} :=
+  Functor.ofSequence (X := fun n => CommRingCat.of (ratTower n))
+    (fun n => CommRingCat.ofHom (Subring.inclusion (ratTower_mono (Nat.le_succ n))))
+
+/-- ★★★**余錐** —— 頂点は `ℚ`、成分は包含。
+
+★`NatTrans.ofSequence` で自然性も `n ⟶ n+1` だけで済む。 -/
+def ratTowerCocone : Cocone ratTowerDiagram where
+  pt := CommRingCat.of ℚ
+  ι := NatTrans.ofSequence (F := ratTowerDiagram) (G := (Functor.const ℕ).obj (CommRingCat.of ℚ))
+    (fun n => CommRingCat.ofHom (ratTower n).subtype)
+    (fun n => by
+      simp only [ratTowerDiagram, Functor.ofSequence_map_homOfLE_succ,
+        Functor.const_obj_map]
+      apply CommRingCat.hom_ext; apply RingHom.ext; intro x
+      rfl)
+
+/-! ### ★★★★★★次の一歩 —— `IsColimit`
+
+★この余錐が余極限であること（＝`ℚ = colim ℤ[1/n!]`）が次の段である。
+
+★★**道は測ってある**（2026-08-27）: mathlib の
+`Subalgebra.iSupLift`（`Mathlib/Algebra/Algebra/Subalgebra/Directed.lean`）が
+「有向な部分代数の上限からの射を各段の射から作る」を与える。
+`ratTower_directed` と `iSup_ratTower_eq_top` がその 2 つの入力である。
+
+★★★ただし `iSupLift` は **`Subalgebra R A` 用で `Subring` 版が無い**。
+`ratTower n` を `Subalgebra ℤ ℚ` として取り直すか、`toSubring` で橋を渡す必要がある。
+
+★★★★そのあと `Spec`（`ΓSpec.adjunction` の右随伴）で `IsLimit` に移し、
+`X ×_ℤ (−)`（`Over.mapPullbackAdj` の右随伴）で `X_ℚ = lim (X ×_ℤ ℤ[1/n!])` にする。 -/
 
 /-! ### ★出典の紐付け(`.src`)
 
