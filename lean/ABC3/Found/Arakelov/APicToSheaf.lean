@@ -429,6 +429,36 @@ theorem finite_quotient_span_singleton (F : Type) [Field F] [NumberField F]
     (Ideal.finrank_eq_finrank (Module.Free.chooseBasis ℤ (RingOfIntegers F)) (Ideal.span {r})
       (by simpa using hr))
 
+/-! ## ★★★★★★★★商の共通の消滅元 -/
+
+/-- ★★★★★★★★**`Γ(L)/(R·s)` には共通の消滅元がある**(`s ≠ 0`)。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★`exists_smul_mem_span_gamma`(商は捻れ)を商に持ち上げ、
+`exists_common_annihilator`(生成元の積)に渡すだけである。
+
+★★これで台帳の段 B の**部品と前半の組み立て**が揃った。 -/
+theorem exists_annihilator_quotient_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) :
+    ∃ r ∈ nonZeroDivisors (R : Type),
+      ∀ n : ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+        ⧸ Submodule.span (R : Type) {s}), r • n = 0 := by
+  haveI := finite_gamma R L
+  haveI : Module.Finite (R : Type)
+      (((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+        ⧸ Submodule.span (R : Type) {s})) := inferInstance
+  refine exists_common_annihilator (R : Type) _ ?_
+  intro n
+  obtain ⟨m, rfl⟩ := Submodule.Quotient.mk_surjective _ n
+  obtain ⟨r, hr, hrm⟩ := exists_smul_mem_span_gamma R L s m hs
+  exact ⟨r, hr, by
+    rw [← Submodule.Quotient.mk_smul]
+    exact (Submodule.Quotient.mk_eq_zero _).2 hrm⟩
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -465,6 +495,27 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def exists_annihilator_quotient_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(Γ(L)/(R·s) の共通の消滅元——段 B の組み立て前半)",
+    sectionId := "genell-def-1-1-ii" }
+
+def exists_annihilator_quotient_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_smul_mem_span_gamma(商は捻れ)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.exists_smul_mem_span_gamma") 4,
+    .citation "[ABC3]" "exists_common_annihilator(生成元の積)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.exists_common_annihilator") 4,
+    .implicitStep
+      ("★★段 B の残りは**型クラスの diamond を埋める作業だけ**になった" ++
+       "(2026-08-28 実測)。道筋は: htor.module で N を R/(r)-加群にし、" ++
+       "finite_quotient_span_singleton で Finite (R/(r))、" ++
+       "Module.Finite.of_restrictScalars_finite で Module.Finite (R/(r)) N、" ++
+       "Module.finite_iff_finite で結論。" ++
+       "★詰まったのは Module.IsTorsionBySet.isScalarTower が作る " ++
+       "IsScalarTower が Submodule.Quotient.instSMul' ベースで、" ++
+       "of_restrictScalars_finite が要求する instSMul ベースと形が違う点である。" ++
+       "★★IsScalarTower を手で作れば通るはず") 4 ]
 
 def finite_quotient_span_singleton.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
