@@ -232,6 +232,26 @@ theorem exists_ne_zero_gamma (R : CommRingCat.{0}) [Nontrivial (R : Type)]
     (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
   exact exists_ne 0
 
+/-! ## ★★★★段 B の前提 —— 有限生成と射影性 -/
+
+/-- ★★★**`Γ(L)` は有限生成である**。
+
+★mathlib の「An invertible module is finite and projective」が
+**インスタンスとして**与えてくれる(実測 2026-08-28)。 -/
+theorem finite_gamma (R : CommRingCat.{0}) (L : AInv (Spec R)) :
+    Module.Finite (R : Type)
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) := by
+  haveI := invertible_gamma_toInvSheaf R L
+  infer_instance
+
+/-- ★★★**`Γ(L)` は射影である**。★射影＋整域なので**捻れなし**であり、
+これが段 B(商の有限性)の出発点になる。 -/
+theorem projective_gamma (R : CommRingCat.{0}) (L : AInv (Spec R)) :
+    Module.Projective (R : Type)
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) := by
+  haveI := invertible_gamma_toInvSheaf R L
+  infer_instance
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -268,6 +288,22 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def finite_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(Γ(L) が有限生成・射影であること——段 B の前提)",
+    sectionId := "genell-def-1-1-ii" }
+
+def finite_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Module.Invertible から Module.Finite / Module.Projective(インスタンス)"
+      (.inMathlib "Module.Invertible") 4,
+    .implicitStep
+      ("★段 B の残りの道筋(実測 2026-08-28): " ++
+       "Γ(L) は有限生成・射影(mathlib のインスタンス)、" ++
+       "O_F は有限生成 Z-加群なので Γ(L) も有限生成 Z-加群。" ++
+       "★★残るのは「Γ(L)/(O_F·s) が捻れ」であり、" ++
+       "それは Γ(L) ⊗ F が 1 次元 F-ベクトル空間で s ≠ 0 がそれを張ることから出る。" ++
+       "★★★有限生成＋捻れの Z-加群は有限") 4 ]
 
 def exists_ne_zero_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
