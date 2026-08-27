@@ -6,6 +6,7 @@ import ABC3.Found.Arakelov.PicEvalIso
 import ABC3.Found.Arakelov.PicSheafGroup
 import ABC3.Found.Arakelov.PicClassGroup
 import ABC3.Found.Arakelov.PicAssoc
+import ABC3.Found.Arakelov.PicGammaInv
 import ABC3.Meta.Claim
 
 /-!
@@ -181,6 +182,26 @@ noncomputable def APicMToClassGroupHom (F : Type) [Field F] [NumberField F] :
     APicMToClassGroupHom F (APicM.mk L)
       = picSheafEquivClassGroupOF F (PicSheaf.mk (AInv.toInvSheaf L)) := rfl
 
+/-! ## ★★★★★★★★★★段 A の到達点 —— `Γ(L)` は可逆加群である -/
+
+/-- ★★★★★★★★★★**台帳の段 A（アフィンの橋）そのもの**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+台帳 `arakelov-degF-finite-places` の段 A の claim は
+
+> `Spec R` 上の局所自明な**前層**加群 `L` から**可逆 `R`-加群** `Γ(L,⊤)` を得る
+
+であった。★層化して（`AInv.toInvSheaf`）在庫の `invertible_gammaCarrier` に渡すだけである。
+
+★★これで**段 A が閉じた**。★★★段 B（有限部分 `log #(Γ(L)/𝓞_F·s)`）の前提が揃う
+——`Γ(L)` が可逆（＝階数 1 射影）なので、`s ≠ 0` に対して商が有限になる。 -/
+theorem invertible_gamma_toInvSheaf (R : CommRingCat.{0}) (L : AInv (Spec R)) :
+    Module.Invertible (R : Type)
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) :=
+  invertible_gammaCarrier R (AInv.toInvSheaf L)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -211,6 +232,11 @@ def APicMToClassGroupHom.src : ABC3.Meta.Source :=
 def sheafifyTensorIso.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(層化はテンソル積と可換であること)",
+    sectionId := "genell-def-1-1-ii" }
+
+def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
 
 def APicMToPicSheaf.needs : List ABC3.Meta.ProofObligation :=
