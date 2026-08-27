@@ -117,7 +117,9 @@
       "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
       "done": 3,
       "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
-      "missingSkeleton": ["[NCBelyi] Lemma 2.4"],
+      "missingSkeleton": [
+        "[NCBelyi] Lemma 2.4"
+      ],
       "lemma24Progress": {
         "measuredAt": "2026-08-27",
         "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
@@ -174,6 +176,57 @@
       "2. riemann-roch-curves の最小構成を測る(NCBelyi p.6 の 3 行を 1_Structured に起こす)",
       "3. spreading-out-over-base の最小構成を測る(GenEll p.8-9)",
       "4. tame-ramification の最終組み立て(剰余体の一致と [L:K] = e から)"
+    ]
+  },
+  "sourceNodesFound": {
+    "measuredAt": "2026-08-27",
+    "question": "★「mathlib に無い標準数学」に節点が作れないのは、スケルトンを作るための原典が無いからか。落とせば節点を作れるのか。",
+    "answer": "★★原典はすでに `0_Source` にあり `papers.json` に登記済みだった——**The Stacks Project(7654 ページ)**である。新しく落とす必要は無い。実測で 4 つのギャップすべてに対応する章が見つかった(2026-08-27)。",
+    "sections": {
+      "spreading-out-over-base": {
+        "stacks": [
+          "32.6 Limits and morphisms of finite presentation",
+          "32.8 Descending properties of morphisms",
+          "32.10 Descending relative objects",
+          "32.22 Descending finite type schemes(tag 0CNL/0CNM/0CNN)"
+        ],
+        "note": "★これが EGA IV §8 にあたる。Situation 32.22.1 が『Noetherian スキームの有向系の極限』で、Lemma 32.22.2 が『有限型のものは有限段で降りる』。原文 Remark 1.5.1 の『ℤ[Σ^{-1}] へ延びる』はこの形である。"
+      },
+      "riemann-roch-curves": {
+        "stacks": [
+          "53.4 Duality(曲線の双対性)",
+          "53.5 Riemann-Roch(tag 0BRX/0BRY)",
+          "53.12 Riemann-Hurwitz",
+          "48.27 Duality for proper schemes over fields(Serre 双対性の一般形)"
+        ],
+        "note": "★★[NCBelyi] Theorem 2.5 が要求する deg(ω_X ⊗ L^{-1}(x)) の計算と Serre 双対性は 53.4/53.5 にある。★★★おまけに 53.12 Riemann-Hurwitz は [GenEll] Proposition 1.7, (ii) が要求するものである——『HeightTheoryData の語彙の外』として範囲外にしていたが、原典側の節点は取れる。"
+      },
+      "etale-fundamental-group": {
+        "stacks": [
+          "58.6 Fundamental groups"
+        ],
+        "note": "★[GenEll] Theorem 2.1 の folklore『well-known structure of étale fundamental groups of hyperbolic curves』の原典側。★★ただし『標数 0 の代数閉体上の双曲曲線の位相的生成』の部分が Stacks にあるかは未確認。"
+      },
+      "p1-ramification": {
+        "stacks": [
+          "53.12 Riemann-Hurwitz",
+          "Morphisms: 不分岐・エタール"
+        ],
+        "note": "★[NCBelyi] Lemma 2.4 の (b) が要求する ℙ¹ 上の有理関数の分岐。多項式の段(第 417-418)は臨界値の条件として自前で書けたので、残るのは正規化(Möbius)を通した形だけである。"
+      }
+    },
+    "whatThisChanges": [
+      "★節点が作れる: papers.json に [Stacks] が登記済みなので `.otherPaper \"[Stacks]\"` の辺が引ける(check.mjs の G6 を通る)。",
+      "★★逐語照合も効く: 0_Source に PDF と txt があるので check.mjs の引用検査が使える。ただし notationRisk は unmeasured——目視していない。",
+      "★★★依存グラフを広げられる: 1_Structured に該当節を起こせば intra-graph で節点数と深さが機械的に出る。「未測定」が消える。"
+    ],
+    "whatThisDoesNotChange": [
+      "★★★★工数は減らない。節点が作れる = 測れる、であって実装の person-years は変わらない。",
+      "★★★★★在庫確認が先。lean-ecosystem.json に作業中の公開プロジェクトが 1 件ある。曲線の Riemann-Roch や scheme cohomology は他所で進行中の可能性があり、重複投資を避けるべきである。"
+    ],
+    "notInSource": [
+      "EGA III / EGA IV は 0_Source に無い(EGA I と II はある)。★ただし EGA IV 8.8.2 に相当するものは Stacks 32.22 にあるので、必須ではない。",
+      "★Numdam(numdam.org)で EGA は全巻無料公開されている——必要になれば正規に入手できる。"
     ]
   }
 }
