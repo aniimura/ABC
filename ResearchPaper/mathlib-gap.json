@@ -83,8 +83,8 @@
    "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
    "nodes": 5,
    "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。 ★★2026-08-27 の再測(第 365)——段 1(生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる)の**射の部分**は mathlib の Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation で足りる。残るのは「同型であることの降下」と図式の組み立て。",
-   "done": 4,
-   "doneNote": "★段 5（log-diff は X_ℚ だけに依る）は Found/GenEll/LogDiff.lean。★★段 4（Σ の上の寄与の一様な上界）は Found/GenEll/LogCondSigma.lean の abs_logCond_sub_le_sum_log。★★★★★**2026-08-27 に段 1・2 を閉じ、段 3 の中身も閉じた**——段 1 = IsoDescent.lean の exists_iso_of_generic_iso、段 2 = DivisorDescent.lean の exists_pair_descent、段 3 = ConductorDescent.lean の conductorADiv_eq_of_square / logCond_eq_of_square （いずれも sorry 0）。★★★**段 3 では定数差すら出ない（C = 0）**——段 n の上では因子そのものが一致するからである。",
+   "done": 5,
+   "doneNote": "★★★★★**2026-08-27、5 段すべてが Found/ に載った（sorry 0）。**\n段 1 生成ファイバーの同型が延びる —— IsoDescent.lean exists_iso_of_generic_iso\n段 2 因子も一緒に延びる —— DivisorDescent.lean exists_pair_descent\n段 3 Σ の外で conductor が一致 —— ConductorDescent / LocalizationBridge / PullbackLocalization / Remark151Chain / RatTowerLocalization / Remark151Sigma\n段 4 Σ 上の寄与の一様な上界 —— LogCondSigma.lean（既存）\n段 5 log-diff は X_ℚ だけに依る —— LogDiff.lean（既存）\n★到達点は remark_1_5_1_bdeq（Remark151Sigma.lean）で、定数は ∑_{q ∣ n!} log q——原文の ∑_{q ∈ Σ} log q そのもの。",
    "resolvedNode": {
     "resolvedAt": "2026-08-27",
     "what": "★段 4 を log-cond へ繋ぐ橋が渡った(第 414 ブロック、Found/GenEll/LogCondSigma.lean)。",
@@ -110,7 +110,7 @@
     "nonVacuous": "★★★仮定が空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で機械検証した(D = D′, Σ = ∅ で hagree が成り立ち、結論 BDeq が実際に得られる)。",
     "stillNeeded": "★★★★Σ ≠ ∅ の場合に hagree を供給する幾何(= spreading out、段 1-3)。.needs に [Stacks] 32.22 として登記した。"
    },
-   "remaining": "★★★★★**残っているのは「局所化の橋」1 本だけである。**原文は「X の点 x と Σ の外の素点 v」について述べ、ConductorDescent.lean は「X_n = X ×_ℤ ℤ[1/n!] の点」について述べている。★両者を繋ぐのは「v が n! を割らないなら x は Spec 𝒪_F[1/n!] を経由して X_n に入る」という段で、具体的には「I・J ⊆ 𝒪_F が 𝒪_F[1/N] で一致すれば、N を割らない v で ord_v が一致する」という Dedekind 環の局所化の補題である。★★**mathlib の欠落ではなく我々の作業**である（FinitePlace F = IsDedekindDomain.HeightOneSpectrum 𝒪_F なので、mathlib の付値の道具は揃っている）。"
+   "remaining": "★★★★★**残っているのは「点の対応 `ePt` を固有性から作る」1 本だけである。**\n★原文の定義域は U_X(ℚ̄) であり、これは X_ℚ だけで決まるので 2 つのモデルで**同じ集合**である（ePt は恒等）。\n★★形式化では定義域を Spec 𝒪_F ⟶ X としているのでモデルに依り、ePt がデータとして現れる。両者を繋ぐのが固有性（付値判定法）である。\n★★★mathlib には ValuativeCriterion.lean があり、付値環に対する存在・一意性は揃っている。残るのは「Dedekind 環 𝒪_F への貼り合わせ」（各 (𝒪_F)_v で延び、分離性で一致させる）であり、**mathlib の欠落ではなく我々の作業**である。"
   },
   "belyi-noncritical": {
    "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
