@@ -154,6 +154,44 @@ theorem exists_bcMap_span_eq {X : Scheme.{0}}
   obtain ⟨j, g, hg⟩ := exists_bcMap_app_eq_forall f hU s t h
   exact ⟨j, g, by simp only [funext hg]⟩
 
+/-! ## ★★★★★★開集合の降下——支持の側 -/
+
+/-- ★★★★★★**`X_ℚ` の準コンパクト開集合は有限段から来る**（Stacks 01Z4 (1)）。
+
+原文 (GenEll p.9):
+> immediately that the BD-class of log-condD on UX (Q) depends only on the pair
+
+★因子 `D` の**支持**（閉集合）を降ろす段は、この補題を補集合に使う。 -/
+theorem exists_bcOpens_eq {X : Scheme.{0}}
+    [CompactSpace X] [QuasiSeparatedSpace X]
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (U : (baseChangeRatTowerCone f).pt.Opens)
+    (hU : IsCompact (U : Set (baseChangeRatTowerCone f).pt)) :
+    ∃ (i : ℕᵒᵖ) (V : ((baseChangeRatTowerDiagram f).obj i).Opens),
+      IsCompact (V : Set ((baseChangeRatTowerDiagram f).obj i)) ∧
+        (baseChangeRatTowerCone f).π.app i ⁻¹ᵁ V = U :=
+  exists_preimage_eq _ _ (baseChangeRatTowerIsLimit f) U hU
+
+/-- ★★★★★★**`X_ℚ` で引き戻しが一致する 2 つの開集合は有限段で一致する**
+（Stacks 01Z4 (2)）。
+
+原文 (GenEll p.9):
+> immediately that the BD-class of log-condD on UX (Q) depends only on the pair
+
+★★`Scheme.IdealSheafData.support_comap`（引き戻しの支持は支持の逆像）と合わせれば、
+**因子の支持が有限段で一致する**ことが出る。 -/
+theorem exists_bcMap_preimage_eq {X : Scheme.{0}}
+    [CompactSpace X] [QuasiSeparatedSpace X]
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    {i : ℕᵒᵖ} {U V : ((baseChangeRatTowerDiagram f).obj i).Opens}
+    (hU : IsCompact (U : Set ((baseChangeRatTowerDiagram f).obj i)))
+    (hV : IsCompact (V : Set ((baseChangeRatTowerDiagram f).obj i)))
+    (H : (baseChangeRatTowerCone f).π.app i ⁻¹ᵁ U
+       = (baseChangeRatTowerCone f).π.app i ⁻¹ᵁ V) :
+    ∃ (j : ℕᵒᵖ) (g : j ⟶ i),
+      (baseChangeRatTowerDiagram f).map g ⁻¹ᵁ U = (baseChangeRatTowerDiagram f).map g ⁻¹ᵁ V :=
+  exists_map_preimage_eq_map_preimage _ _ (baseChangeRatTowerIsLimit f) hU hV H
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** `Remark 1.5.1` には
@@ -188,6 +226,14 @@ def exists_bcMap_span_eq.needs : List ABC3.Meta.ProofObligation :=
     .implicitStep
       ("★★★★残る段: Σ の外での conductor の一致。" ++
        "★これが揃えば Skeleton/GenEll/Section1.lean の remark_1_5_1 が受けている" ++
-       "仮定 hagree を証明で置き換えられる") 9 ]
+       "仮定 hagree を証明で置き換えられる") 9,
+    .citation "[mathlib]" "exists_preimage_eq / exists_map_preimage_eq_map_preimage(開集合の降下、Stacks 01Z4)"
+      (.inMathlib "AlgebraicGeometry.exists_preimage_eq") 9,
+    .implicitStep
+      ("★★★★★**2026-08-27 の実測**: mathlib の IdealSheafData には " ++
+       "一般の射に対する ideal_comap（(I.comap f).ideal U = (I.ideal V).map (f.appLE V U)）が" ++
+       "**無い**。あるのは ideal_comap_of_isOpenImmersion だけである。" ++
+       "★そのためアフィン被覆で貼る段は、まずこの補題を作るところから始まる。" ++
+       "★★貼る側の道具（IdealSheafData.ext_of_iSup_eq_top）はある") 9 ]
 
 end ABC3.Found.GenEll
