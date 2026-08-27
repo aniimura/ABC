@@ -43,15 +43,25 @@ import ABC3.Meta.Claim
 ★これが **`Classical.choice` の基準計量では落ちていた加法性**である。
 ★★`normOf_indep` と併せると、**テンソル自明化の上での値だけで計量が決まる**。
 
+## ★★★★★★★★★そしてノルムは**チャートに全く依らない**
+
+構造体は `restrict` の欄（生成切断を小さい開集合へ制限してもノルムは変わらない）を持つ。
+★それと `normOf_indep` を併せると
+
+    `normOf V e p hp s = normOf V' e' p hp' s`   （`normOf_chart_indep`）
+
+——★★**`normOf` は `(p, s)` だけの関数になる**。これで計量として意味を持つ。
+★★★機構は「共通の細分 `V ⊓ V'` へ降りる」だけである。
+
 ## ★残っている段（明示）
 
 ★★**存在**——`IsTensorOf` を満たす `LocalMetric X (A ⊗ B)` を `mA`, `mB` から
 実際に作る段。★そこでは「`(A⊗B)|_V` は自明だが `A|_V` は自明でない `V`」が問題になり、
 両方が自明になる小さい `W ∋ p` へ降りて貼り合わせる必要がある。
-★★★値が選択に依らないことは本ファイルの `normOf_indep` と `compat` が与える。
+★★★降りる道具は揃った（`transUnit_restrict`・`evalOn_restrict`・`restrict` の欄）。
+値が選択に依らないことは `normOf_chart_indep` が与える。
 
-★★★★もう 1 つ: 制限との両立（`h` を `W ⊆ V` へ落とす欄）を構造体に足す段。
-本ファイルは**同じ `V` の上での自明化の取り替え**だけを扱う。
+★★★★もう 1 つ: 連続性の欄と、`APic` の群法則への載せ替え。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -93,6 +103,49 @@ theorem trivValue_transUnit (F : X.PresheafOfModules) (V : X.Opens)
   rw [trivValue_eq_trivEquiv, trivValue_eq_trivEquiv, ← h2, h]
   rfl
 
+/-- ★★★**自明化の同型は制限と可換**（`trivValue_restrict` の、`V` 上の切断版）。
+
+★`trivValue_restrict` は**大域切断**についての形だったが、遷移単元は
+`(trivEquiv e).symm 1`——`V` 上の切断——に当たるので、こちらの形が要る。
+★★機構は同じ、`e.hom` の自然性だけである。 -/
+theorem trivEquiv_restrict (F : X.PresheafOfModules) {V W : X.Opens} (hWV : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V))
+    (x : F.obj (op V)) :
+    trivEquiv F W (trivialOfLe F hWV e) (F.map (homOfLE hWV).op x)
+      = X.presheaf.map (homOfLE hWV).op (trivEquiv F V e x) := by
+  have hnat := PresheafOfModules.naturality_apply e.hom
+    (Y := op (Over.mk (homOfLE hWV : W ⟶ V)))
+    (X := op (Over.mk (𝟙 V)))
+    (Over.homMk (homOfLE hWV) : Over.mk (homOfLE hWV : W ⟶ V) ⟶ Over.mk (𝟙 V)).op
+    x
+  have h1 : trivEquiv F W (trivialOfLe F hWV e) (F.map (homOfLE hWV).op x)
+      = e.hom.app (op (Over.mk (homOfLE hWV : W ⟶ V))) (F.map (homOfLE hWV).op x) := rfl
+  have h2 : X.presheaf.map (homOfLE hWV).op (trivEquiv F V e x)
+      = (𝟙_ (PresheafModulesOn X V)).map
+          (Over.homMk (homOfLE hWV) : Over.mk (homOfLE hWV : W ⟶ V) ⟶ Over.mk (𝟙 V)).op
+          (e.hom.app (op (Over.mk (𝟙 V))) x) := rfl
+  rw [h1, h2]
+  exact hnat
+
+/-- ★★★★★**遷移単元は制限と可換である**。
+
+★機構は `trivEquiv_restrict` と、「制限した自明化の生成切断は生成切断の制限」
+（`trivEquiv` が単射だから出る）。 -/
+theorem transUnit_restrict (F : X.PresheafOfModules) {V W : X.Opens} (hWV : W ≤ V)
+    (e e' : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V)) :
+    transUnit F W (trivialOfLe F hWV e) (trivialOfLe F hWV e')
+      = X.presheaf.map (homOfLE hWV).op (transUnit F V e e') := by
+  set g : (F.obj (op V) : Type) := (trivEquiv F V e).symm 1 with hg
+  have hgen : (trivEquiv F W (trivialOfLe F hWV e)).symm 1
+      = F.map (homOfLE hWV).op g := by
+    apply (trivEquiv F W (trivialOfLe F hWV e)).injective
+    rw [LinearEquiv.apply_symm_apply, trivEquiv_restrict F hWV e g, hg,
+      LinearEquiv.apply_symm_apply]
+    exact ((X.presheaf.map (homOfLE hWV).op).hom.map_one).symm
+  show trivEquiv F W (trivialOfLe F hWV e') ((trivEquiv F W (trivialOfLe F hWV e)).symm 1) = _
+  rw [hgen, trivEquiv_restrict F hWV e' g]
+  rfl
+
 /-- ★★★★**遷移単元はコサイクルである**: `u_{e→e''} = u_{e→e'} · u_{e'→e''}`。
 
 ★機構は `linearEquiv_self_apply`（`θ x = x · θ 1`）だけである。 -/
@@ -123,6 +176,25 @@ theorem evalOn_ne_zero_of_isUnit (p : Spec (CommRingCat.of ℂ) ⟶ X) (V : X.Op
   have : (1 : (CommRingCat.of ℂ : Type)) = 0 := by
     rw [← evalOn_one V p hp, ← hv, evalOn_mul, h0, zero_mul]
   exact one_ne_zero this
+
+/-- ★★`p` が小さい開集合に入るなら大きい方にも入る。 -/
+theorem preimage_eq_top_of_le {p : Spec (CommRingCat.of ℂ) ⟶ X} {V W : X.Opens} (hWV : W ≤ V)
+    (hpW : p ⁻¹ᵁ W = ⊤) : p ⁻¹ᵁ V = ⊤ :=
+  top_le_iff.1 (hpW ▸ (TopologicalSpace.Opens.map p.base).monotone hWV)
+
+/-- ★★★**`evalOn` は制限と可換である**。
+
+★機構は mathlib の `Scheme.Hom.map_appLE` だけである。 -/
+theorem evalOn_restrict (p : Spec (CommRingCat.of ℂ) ⟶ X) {V W : X.Opens} (hWV : W ≤ V)
+    (hpW : p ⁻¹ᵁ W = ⊤) (c : ((X.presheaf.obj (op V)) : Type)) :
+    evalOn p W hpW (X.presheaf.map (homOfLE hWV).op c)
+      = evalOn p V (preimage_eq_top_of_le hWV hpW) c := by
+  have hm := Scheme.Hom.map_appLE p (le_of_eq hpW.symm) (homOfLE hWV).op
+  have happ := congrArg (fun (m : X.presheaf.obj (op V) ⟶ _) => (CommRingCat.Hom.hom m) c) hm
+  show (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom
+      ((p.appLE W ⊤ (le_of_eq hpW.symm)).hom
+        ((X.presheaf.map (homOfLE hWV).op).hom c)) = _
+  exact congrArg (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom happ
 
 /-- ★`trivSecNorm` の、遷移単元を受け取る形。
 
@@ -158,6 +230,14 @@ structure LocalMetric (X : Scheme.{0}) (F : X.PresheafOfModules) where
     (e e' : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V))
     (p : Spec (CommRingCat.of ℂ) ⟶ X) (hp : p ⁻¹ᵁ V = ⊤),
     h V e' p * ‖evalOn p V hp (transUnit F V e e')‖ = h V e p
+  /-- ★★★**制限との両立**——生成切断を小さい開集合へ制限してもノルムは変わらない。
+
+  ★これが無いと「計量」が局所的な対象にならない
+  （テンソル積の構成では、両方が自明になる小さい `W` へ降りる必要がある）。 -/
+  restrict : ∀ {V W : X.Opens} (hWV : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V))
+    (p : Spec (CommRingCat.of ℂ) ⟶ X), p ⁻¹ᵁ W = ⊤ →
+    h W (trivialOfLe F hWV e) p = h V e p
 
 namespace LocalMetric
 
@@ -199,6 +279,41 @@ theorem normOf_eq_zero_iff (m : LocalMetric X F) (V : X.Opens)
     · exact absurd h2 (m.pos V e p).ne'
   · intro h1
     exact Or.inl (by show ‖evalOn p V hp (trivValue F V e s)‖ = 0; rw [h1, norm_zero])
+
+/-- ★★★★**ノルムは小さい開集合へ降りても変わらない**。
+
+★機構は `trivValue_restrict` ＋ `evalOn_restrict` ＋ `restrict` の欄。 -/
+theorem normOf_restrict (m : LocalMetric X F) {V W : X.Opens} (hWV : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V))
+    (p : Spec (CommRingCat.of ℂ) ⟶ X) (hpW : p ⁻¹ᵁ W = ⊤) (s : F.obj (op ⊤)) :
+    m.normOf W (trivialOfLe F hWV e) p hpW s
+      = m.normOf V e p (preimage_eq_top_of_le hWV hpW) s := by
+  show trivSecNorm F W (trivialOfLe F hWV e) p hpW s * m.h W (trivialOfLe F hWV e) p
+    = trivSecNorm F V e p _ s * m.h V e p
+  rw [m.restrict hWV e p hpW]
+  congr 1
+  show ‖evalOn p W hpW (trivValue F W (trivialOfLe F hWV e) s)‖ = _
+  rw [trivValue_restrict F hWV e s, evalOn_restrict p hWV hpW]
+  rfl
+
+/-- ★★★★★★★★★**ノルムはチャート（開集合と自明化）の取り方に全く依らない**。
+
+★★これで `normOf` は `(p, s)` だけの関数になる——**計量として意味を持つ**。
+
+★機構は「共通の細分 `V ⊓ V'` へ降りて `normOf_indep`」である。 -/
+theorem normOf_chart_indep (m : LocalMetric X F) {V V' : X.Opens}
+    (e : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V))
+    (e' : (restrictPresheafFunctor X V').obj F ≅ 𝟙_ (PresheafModulesOn X V'))
+    (p : Spec (CommRingCat.of ℂ) ⟶ X) (hp : p ⁻¹ᵁ V = ⊤) (hp' : p ⁻¹ᵁ V' = ⊤)
+    (s : F.obj (op ⊤)) :
+    m.normOf V e p hp s = m.normOf V' e' p hp' s := by
+  have hpW : p ⁻¹ᵁ (V ⊓ V') = ⊤ := by
+    show p ⁻¹ᵁ V ⊓ p ⁻¹ᵁ V' = ⊤
+    rw [hp, hp', inf_idem]
+  rw [← normOf_restrict m (inf_le_left : V ⊓ V' ≤ V) e p hpW s,
+    ← normOf_restrict m (inf_le_right : V ⊓ V' ≤ V') e' p hpW s]
+  exact m.normOf_indep (V ⊓ V') (trivialOfLe F inf_le_right e')
+    (trivialOfLe F inf_le_left e) p hpW s
 
 end LocalMetric
 
@@ -278,6 +393,11 @@ noncomputable def baseTriv (X : Scheme.{0}) (V : X.Opens) :
     (restrictPresheafFunctor X V).obj (𝟙_ X.PresheafOfModules) ≅ 𝟙_ (PresheafModulesOn X V) :=
   (restrictPresheafUnit (X := X) (U := V)).symm
 
+set_option backward.isDefEq.respectTransparency false in
+/-- ★★基準の自明化は制限しても基準の自明化である。 -/
+theorem trivialOfLe_baseTriv (X : Scheme.{0}) {V W : X.Opens} (hWV : W ≤ V) :
+    trivialOfLe (𝟙_ X.PresheafOfModules) hWV (baseTriv X V) = baseTriv X W := rfl
+
 /-- ★★★★★★★★**構造層 `Ō_X` の標準計量**——`LocalMetric` が空虚でないことの目撃者。
 
 原文 (GenEll p.3):
@@ -316,6 +436,17 @@ noncomputable def structLocalMetric (X : Scheme.{0}) :
     have hne : ‖evalOn p V hp (transUnit (𝟙_ X.PresheafOfModules) V e e')‖ ≠ 0 :=
       norm_ne_zero_iff.2 (evalOn_ne_zero_of_isUnit p V hp (isUnit_transUnit _ V e e'))
     field_simp
+  restrict {V W} hWV e p hpW := by
+    show (if hp : p ⁻¹ᵁ W = ⊤ then
+        ‖evalOn p W hp (transUnit (𝟙_ X.PresheafOfModules) W (baseTriv X W)
+          (trivialOfLe (𝟙_ X.PresheafOfModules) hWV e))‖⁻¹
+      else 1) = _
+    rw [dif_pos hpW, ← trivialOfLe_baseTriv X hWV,
+      transUnit_restrict (𝟙_ X.PresheafOfModules) hWV (baseTriv X V) e,
+      evalOn_restrict p hWV hpW]
+    show _ = (if hp : p ⁻¹ᵁ V = ⊤ then
+        ‖evalOn p V hp (transUnit (𝟙_ X.PresheafOfModules) V (baseTriv X V) e)‖⁻¹ else 1)
+    rw [dif_pos (preimage_eq_top_of_le hWV hpW)]
 
 /-- ★基準の自明化では `h = 1` である。 -/
 theorem structLocalMetric_h_baseTriv (X : Scheme.{0}) (V : X.Opens)
@@ -348,6 +479,21 @@ def LocalMetric.src : ABC3.Meta.Source :=
 def LocalMetric.normOf_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(切断のノルムが自明化の取り方に依らないこと)",
+    sectionId := "genell-def-1-1-i" }
+
+def transUnit_restrict.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(遷移単元は制限と可換であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def evalOn_restrict.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(層 C——evalOn は制限と可換)",
+    sectionId := "genell-def-1-1-i" }
+
+def LocalMetric.normOf_chart_indep.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(ノルムはチャートの取り方に全く依らないこと)",
     sectionId := "genell-def-1-1-i" }
 
 def transUnit_trans.src : ABC3.Meta.Source :=
