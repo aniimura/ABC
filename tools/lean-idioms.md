@@ -926,3 +926,31 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 ★極限は合成版で取り、`Iso` で生版へ移す（`IsLimit.ofIsoLimit`）。
 ★★★教訓は「配管」の一般則と同じ: **defeq は `rw`/`simp` を助けない。**
 構文をそろえるのは設計の仕事である。
+
+## `Scheme.Spec.obj (op R)` と `Spec R` は別物として扱われる
+
+★**2026-08-27、第 371-380 ブロックで 5 ブロックぶんの摩擦の正体がこれだった。**
+
+mathlib の `AlgebraicGeometry.Spec (R : CommRingCat) : Scheme` は
+`Scheme.Spec.obj (op R)` の `def` である。★**defeq だが構文的に別物**なので:
+
+* `specZIsTerminal.from X : X ⟶ Spec (CommRingCat.of ℤ)`（`Spec` の形）
+* 自分で `f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))` と書くと（関手の形）
+
+この 2 つを混ぜた瞬間、`rw`/`simp` が**すべて**落ちる。出るエラーは
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+
+で、`Category.assoc` すら「pattern が見つからない」と言われる。
+★★真の原因は最後の `Full error:` に出る:
+
+    f has type X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))
+    but is expected to have type X ⟶ Spec (CommRingCat.of ℤ)
+
+直し方: **`Spec R` の形に統一する**。`Scheme.Spec` を明示的に書くのは
+関手性（`Scheme.Spec.map`、随伴、`mapCone`）が要るときだけにし、
+対象は `Spec R` で書く。
+
+★★★同じ穴の一般形は前節と同じ——**defeq は `rw`/`simp` を助けない**。
+ただし今回のように**エラーの表面（`Category.assoc` が効かない）と原因（対象の書き方）が
+遠い**ことがあるので、`Full error:` の末尾まで読むこと。
