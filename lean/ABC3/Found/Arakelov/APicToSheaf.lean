@@ -686,6 +686,23 @@ theorem spanSingletonEquivGamma_apply_coe (R : CommRingCat.{0}) [IsDomain (R : T
       (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
       = u • s := rfl
 
+/-! ## ★★★★★★包含 —— 短完全列の前提 -/
+
+/-- ★★★★★★**`span{u·s} ≤ span{s}`**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★短完全列 `0 → span{s}/span{us} → Γ/span{us} → Γ/span{s} → 0` の前提であり、
+mathlib の `Submodule.quotientQuotientEquivQuotient` に渡す他ならぬもの。 -/
+theorem span_smul_le_span (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    (u : R) (s : M) : Submodule.span R {u • s} ≤ Submodule.span R {s} := by
+  rw [Submodule.span_le]
+  intro x hx
+  simp only [Set.mem_singleton_iff] at hx
+  subst hx
+  exact Submodule.smul_mem _ u (Submodule.mem_span_singleton_self s)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -722,6 +739,23 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def span_smul_le_span.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(span{u·s} ≤ span{s}——短完全列の前提)",
+    sectionId := "genell-def-1-1-ii" }
+
+def span_smul_le_span.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★段 D 本体の残り 2 段の**道具が揃った**(2026-08-28 実測): " ++
+       "(1) Submodule.quotientQuotientEquivQuotient S T (h : S ≤ T) : " ++
+       "((M ⧸ S) ⧸ map S.mkQ T) ≃ M ⧸ T、" ++
+       "(2) AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup : " ++
+       "Nat.card a = Nat.card (a ⧸ s) * Nat.card s。" ++
+       "★★S := span{u·s}、T := span{s} として組めば " ++
+       "Nat.card(Γ/span{us}) = Nat.card(Γ/span{s}) · Nat.card(R/(u)) が出、" ++
+       "degFin(u·s) = degFin(s) + log N(u) になる。" ++
+       "★★★残るのは Submodule と AddSubgroup の商の型の齯齬を埋める作業だけ") 4 ]
 
 def map_spanSingletonEquiv_span.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
