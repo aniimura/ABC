@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.GenEll.PointCorrespondence
 import ABC3.Found.GenEll.HeightClass
 import ABC3.Found.GenEll.VerticalTwist
+import ABC3.Found.GenEll.VerticalBound
 
 /-!
 # [GenEll] Remark 1.4.1 —— **2 つの `ℤ`-モデルにまたがる形**（`Found`）
@@ -132,6 +133,43 @@ theorem remark_1_4_1_of_descent_twist {X X' : Scheme.{0}}
   obtain ⟨ePt, hcompat⟩ := exists_ePt F f f' A hinv φ
   exact ⟨ePt, hcompat, fun h => htArith_bdeq_of_baseChange' F D E ePt N h⟩
 
+/-- ★★★★★★★★★★**[GenEll] Remark 1.4.1 —— 到達点**。
+
+原文 (GenEll p.8):
+> Remark 1.4.1. Observe that it follows immediately from the definitions, together with Proposition 1.4, (iii), that the theory of
+
+仮定は 3 段で弱まった:
+
+| 版 | 仮定 | 定数 |
+|---|---|---|
+| `remark_1_4_1_of_descent` | 引き戻した**類が一致**する | `0` |
+| `remark_1_4_1_of_descent_twist` | 差が `Spec ℤ` から来る（`VerticalTwist`） | `deg_ℚ(N)` |
+| **本定理** | 差のイデアルが**有理整数 `n` を含む**（`VerticalBound`） | `log n` |
+
+★★★★★最後の版が**幾何が実際に与える形**である——
+垂直因子 `V ≤ m·X_q` の引き戻しは `q^m` を含むので、
+**ファイバーが可約でも交点数は要らない**。
+
+★★定数 `log n` は**点にも定義体にも依らない**。 -/
+theorem remark_1_4_1_of_descent_bound {X X' : Scheme.{0}}
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ)) [IsProper f']
+    {m : ℕᵒᵖ}
+    (A : Type) [CommRing A] [IsDomain A] [Algebra (NumberField.RingOfIntegers F) A]
+    [Algebra A F] [IsScalarTower (NumberField.RingOfIntegers F) A F] [IsFractionRing A F]
+    (hinv : IsUnit (algebraMap ℤ A ((Nat.factorial m.unop : ℕ) : ℤ)))
+    (φ : bcObj f m ⟶ bcObj f' m)
+    (D : ArithCartier X) (E : ArithCartier X') (n : ℕ) (hn : n ≠ 0) :
+    ∃ ePt : (specRingOfIntegers F ⟶ X) → (specRingOfIntegers F ⟶ X'),
+      (∀ xF, Spec.map (CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F) A)) ≫ ePt xF
+        = liftPointToBc F A hinv f xF ≫ φ ≫
+          pullback.snd (overRatTowerDiagram.obj m).hom f')
+      ∧ (∀ J : (specRingOfIntegers F ⟶ X) → Ideal (NumberField.RingOfIntegers F),
+          (∀ xF, ((n : ℕ) : NumberField.RingOfIntegers F) ∈ J xF) →
+          (∀ xF, pullbackADiv F E (ePt xF) - pullbackADiv F D xF = idealADiv F (J xF)) →
+          BDeq (fun xF => htArith F D xF) (fun xF => htArith F E (ePt xF))) := by
+  obtain ⟨ePt, hcompat⟩ := exists_ePt F f f' A hinv φ
+  exact ⟨ePt, hcompat, fun J hJn h => htArith_bdeq_of_idealADiv_diff F D E ePt n hn J hJn h⟩
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**条つきである。** 原文の「`X_ℚ` だけに依る」を仮定なしで出すには
@@ -150,6 +188,11 @@ def remark_1_4_1_of_descent.src : ABC3.Meta.Source :=
 def remark_1_4_1_of_descent_twist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Remark 1.4.1(垂直なひねりを許した形。差が Spec ℤ から来る場合)",
+    sectionId := "genell-rem-1-4-1" }
+
+def remark_1_4_1_of_descent_bound.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Remark 1.4.1(到達点——差のイデアルが有理整数 n を含む場合、定数 log n)",
     sectionId := "genell-rem-1-4-1" }
 
 def remark_1_4_1_of_descent.needs : List ABC3.Meta.ProofObligation :=

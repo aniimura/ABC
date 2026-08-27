@@ -388,11 +388,70 @@
      {
       "stage": "2c-2",
       "claim": "開近傍 {U_v} から開被覆を作って貼り合わせる",
-      "status": "open",
-      "why": "★道具はすべて特定済み:\n  (a) Scheme.Opens.iSupOpenCover (U : J → X.Opens) : (⨆ i, U i).toScheme.OpenCover\n  (b) Scheme.Cover.glueMorphisms（整合条件 hf を要求）\n  (c) ⨆ U_v = ⊤ は generic_mem_opens（OpenExtend.lean）から——空でない開は生成点を含むので、閉点を全部覆えばよい\n  (d) 整合 hf は ext_of_isDominant_of_isSeparated（extend_unique と同じ機構）\n★★残る配管は「g_v を生成点へ制限すると xK になる」を茎の言葉から取り出すところである。"
+      "status": "closed",
+      "why": "★Scheme.Opens.iSupOpenCover で開被覆を作り、Scheme.Cover.glueMorphisms で貼った。★★整合条件は生成点で一致すること（ext_of_isDominant_of_isSeparated）から。★★★結果は X′(F) ≃ X′(𝒪_F)である",
+      "where": "Found/GenEll/GlobalExtend.lean の exists_global_extend / existsUnique_global_extend"
      }
     ],
-    "remaining": "★★★★★**残るのは 2c だけであり、道具（spread_out_of_isGermInjective′）は mathlib にある。**"
+    "remaining": "★★★★★★**2026-08-27、全 5 段が閉じた。**★この穴は埋まっている——Remark 1.5.1 は項目として閉じた",
+    "done": "5/5"
+   }
+  },
+  "vertical-divisors-generate-pic-kernel": {
+   "what": "正規で ℤ 上平坦なモデル X について、Pic(X) → Pic(X_ℚ) の核が**垂直因子**（ファイバーの成分の ℤ-結合）で生成されること。",
+   "whereUsed": [
+    "★[GenEll] Remark 1.4.1——「BD-class の理論が X_ℚ だけに依る」を**2 つの ℤ-モデルにまたがる形**で無条件に出す段",
+    "★★Found/GenEll/Remark141.lean の remark_1_4_1_of_descent_twist が「差が Spec ℤ から来る」を**仮説に置いている**理由",
+    "[GenEll] Proposition 1.4, (ii)の証明中の ht_{L⊗M} ≈ ht_L の消費側"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-08-27 実測。mathlib の ClassGroup は Dedekind 環専用で、一般のスキーム上の Weil 因子類群・局所化完全列（Cl(X) → Cl(U) → 0）は無い。",
+    "partial": [
+     "★mathlib: Scheme.IdealSheafData の束構造と comap はある",
+     "★★ABC3: Found/GenEll/VerticalTwist.lean で「差が Spec ℤ から来るなら高さの差は定数 deg_ℚ(N)」は sorry 0 で閉じた（2026-08-27）"
+    ],
+    "absentPart": "★「核 = 垂直因子」の部分。★★正規スキームの Weil 因子類群と開部分スキームへの制限の完全列が要る。"
+   },
+   "minimalForm": "★消費側が要るのは**一様有界性だけ**である。★★垂直因子 V は V ≤ m·X_q を満たすので deg_F(x^*V) ≤ m·log q となり、**交点数は要らない**——引き戻しの単調性と x^*(f^*(q)) = (q) だけで出る。★★★したがって minimalForm は「2 つのモデルの差がある m, q で m·X_q に押さえられる」であり、類群全体は要らない。",
+   "impact": "★Remark 1.4.1 を項目として閉じるのに必要な 2 本のうち 1 本。★★もう 1 本は ample-and-projective-embedding（原文第 2 文の「any normal, projective scheme Y over ℚ」）。",
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★**原典は手元にある**——[Stacks] の Weil divisor の章。",
+    "sources": [
+     "[Stacks] 0BE0 Weil divisors",
+     "[Stacks] 02SE Divisors / 0BE9 The Weil divisor class group",
+     "[Hartshorne] II.6.5 (Cl(X) → Cl(U) の完全列)"
+    ],
+    "howToProceed": "★まず minimalForm（一様有界性）を取る。★★必要なのは (a) pullbackIdeal の単調性、(b) x^*(f^*(q)) = (q)·𝒪_F、(c) degNormalized(idealADiv((q^m)𝒪_F)) = m·log q（= degNormalized_baseChange）の 3 本である。"
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★**2026-08-27に 3 つに割り、2 つを閉じた。**★割ってみると、残る 1 つは「幾何が与える形」だけであり、交点数も類群も要らないことが分かった。",
+    "stages": [
+     {
+      "stage": "1",
+      "claim": "差が Spec ℤ 上の因子の底変換なら高さの差は定数 deg_ℚ(N)",
+      "status": "closed",
+      "where": "Found/GenEll/VerticalTwist.lean の htArith_bdeq_of_baseChange′",
+      "why": "★degNormalized_baseChange（正規化次数の底変換不変性）1 本。★★原文の ≈ は実際には**等式**であった"
+     },
+     {
+      "stage": "2",
+      "claim": "差のイデアルが有理整数 n を含めば高さの差は log n 以下（一様）",
+      "status": "closed",
+      "where": "Found/GenEll/VerticalBound.lean の degNormalized_idealADiv_le_log_of_natCast_mem / htArith_bdeq_of_idealADiv_diff",
+      "why": "★deg(idealADiv I) = log(absNorm I) と Ideal.absNorm_dvd_absNorm_of_le（包含でノルムが割り切れる）。★★absNorm(n·𝒪_F) = n^{[F:ℚ]} なので正規化で [F:ℚ] が約分され、**定義体に依らない**。★★★これで**交点数は不要**になった"
+     },
+     {
+      "stage": "3",
+      "claim": "2 つのモデルの差が実際に V ≤ m·X_q の形の垂直因子であること",
+      "status": "open",
+      "why": "★ここだけが**幾何の側**である。★★Pic(X) → Pic(X_ℚ) の核が垂直因子で生成される（Cl(X) → Cl(U) の局所化完全列）ことが要る。★★★mathlib には一般のスキーム上の Weil 因子類群が無い。★★★★ただし Remark141.lean はこれを**仮説に置いて先に進める**形になっている"
+     }
+    ],
+    "done": "2/3",
+    "remaining": "★★★残るは幾何の 1 段だけである——**解析の側（一様有界性）は閉じた**。"
    }
   }
  },
