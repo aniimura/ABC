@@ -1006,6 +1006,7 @@ import ABC3.Found.GaloisRep.CollGroupK
 import ABC3.Found.GaloisRep.TateSeparate
 import ABC3.Found.GaloisRep.TateInversion
 import ABC3.Found.GaloisRep.TatePt
+import ABC3.Found.GaloisRep.TatePointNatural
 import ABC3.Found.GaloisRep.TateClassPt
 import ABC3.Found.GaloisRep.TatePhi
 import ABC3.Found.GaloisRep.TatePhiInj

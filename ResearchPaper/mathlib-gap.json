@@ -339,7 +339,7 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★★**9 段に割った（2026-08-27）。4 段が閉じている。** ★★★発見: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——normRep に eq_normRep、tateAOf に tateAOf_spec、evalAdic に evalAdic_unique。 ★したがって**自然性は機械的に出る**。",
+    "note": "★★★★★★★**9 段に割っ、6 段が閉じた（2026-08-27）。** ★朝の時点では**absent・未分割**であった。 ★★★発見: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。 ★したがって**同変性は「新しい数学」ではなく帳簿であった**。",
     "stages": [
      {
       "stage": "1",
@@ -379,8 +379,9 @@
      {
       "stage": "2c-3",
       "claim": "tatePtPair の自然性（Point.some の合同）",
-      "status": "open",
-      "why": "★座標が揃えば Point.some の合同である。 ★★曲線自体は σR q = q で固定される（tateSetup_q_map、段 2b）。"
+      "status": "closed",
+      "why": "★座標の自然性（段 2c-2）があれば Point.some の合同だけである。 ★★母数を固定する場合（σ q = q）に絞った——Point.some の合同は**同じ曲線の上**でなければ取れない。 ★★★G_K は q ∈ K を固定するので、これが実際の場合である。 ★★★★**これで同変性の本体（段 2c）が閉じた。**",
+      "where": "Found/GaloisRep/TatePointNatural.lean の tateXK_map_fixed / nonsingular_tateK_map / **tatePtPair_map**"
      },
      {
       "stage": "3",
@@ -402,8 +403,8 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "5/9",
-    "remaining": "★★残るは段 2c-3（Point.some の合同）と、段 3（有限拡大）・段 4（帰納極限）である。 ★**座標は揃った**ので 2c-3 は合同だけである。"
+    "done": "6/9",
+    "remaining": "★★残るは**段 3（有限拡大 K ⊆ L）と段 4（K̄ への帰納極限）**だけである。 ★どちらも**新しい数学ではなく組み立て**である。"
    },
    "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },
