@@ -29601,3 +29601,72 @@ theorem isProper_subscheme_projSpace (N : ℕ) {Y : Scheme.{0}}
 - `lake build` 全体通過、`node tools/check.mjs` **PASS**
 - `GenEll` の必要分 **11/24**
 - **`ample` 12/15** ——★**座標の側は完全に揃った**。残るのは C2c・E・F2c
+
+
+## §9-718〜734 —— **`Definition 1.1` の (i) が閉じた**（2026-08-28）
+
+### ★★★★★★★★★★何が起きたか
+
+2026-08-27/28 に `Definition 1.1` の項目全体の `.src` を下げた。理由は
+
+> `TorsorMetric.base` は対象ごとの `Classical.choice` なので
+> `base_{[L·M]} ≠ base_{[L]} ⊗ base_{[M]}` となり、
+> **群法則が計量のテンソル積を表さない**
+
+であった。★**捻れ集合表示をやめる**ことでこれを塞いだ。
+
+### ★★★★★★★★段（`Found/Arakelov/`）
+
+| 段 | ファイル | 内容 |
+|---|---|---|
+| 1 | `TrivTensor.lean` | `trivValue` がテンソル積で掛け算になる（**`rfl`**） |
+| 2 | `TrivSecNorm.lean` | 切断のノルムが掛け算になる（**ファイバーの橋を迂回**） |
+| 3 | `LocalMetric.lean` | `LocalMetric`（基準ノルム `h_{V,e}`）・チャート独立性・`Ō_X` |
+| 4 | `TensorMetric.lean` | **テンソル計量の存在**と `‖s ⊗ t‖ = ‖s‖·‖t‖` |
+| 5 | `AMetricMonoid/Iso/Group/Pic.lean` | `AMetric` = `(L, |−|_L)`、等長同型、結合・単位・交換律、**`CommGroup (APicM X)`** |
+| 6 | `AMetricNorm.lean` | 大域ノルム `|s|_L̄ : X^arc → ℝ` |
+| 7 | `AMetricHom.lean` | 射・`Γ(L̄)`・**`Γ(L̄) = Hom(Ō_X, L̄)`** |
+| — | `ArchDeg.lean` | `deg_F` の**アルキメデス部分**（台帳の段 C） |
+
+### ★★★★★★★段 2 の迂回が効いた
+
+`arcFiber p (A ⊗ B) ≅ arcFiber p A ⊗_ℂ arcFiber p B` は mathlib に無く
+（`SheafOfModules` にモノイダル構造が無い、2026-08-28 実測）作るのは PR 規模である。
+★しかし切断のノルムは
+
+    `‖s‖_{V,e}(p) ≝ ‖evalOn p V hp (trivValue F V e s)‖`
+
+と書けばファイバーを経由しない。★★在庫の `genNorm_arcEvalOnTop` が
+「ファイバーで測っても同じ値」を保証している。
+
+### ★★★★★★逸脱の明示 —— **前層の水準である**
+
+原文の `APic(X)` は可逆**層**の同型類だが、`APicM X` は局所自明な**前層**加群の
+同型類である。★局所自明でも層とは限らず（`𝟙_` と proper open で一致し `⊤` で `0`
+の前層が反例）、前層のテンソルは層でない（だから本プロジェクトの `tensorModules` は
+層化を挟む）。★★「テンソル積が**厳密**」と「対象が層」は**同時には取れず**、
+本ファイル群は前者を取った——それが `trivValue_tensor` が `rfl` になった理由である。
+
+### ★★★★★`Definition 1.1` の残り（明示）
+
+| 欄 | 状態 |
+|---|---|
+| (i) 算術直線束・射・`Γ(L̄)`・テンソル・`APic` | ★**閉じた**（前層の水準） |
+| (i) `unitHomEquiv` が `φ ↦ φ(1)` であること | ★小さい配管（`rfl` ではない、実測） |
+| (i) 層の水準への橋 | ★★別の段（`deg_F` の段 A と同じもの） |
+| (ii) 引き戻し `φ^*L̄` | ★★★`AMetric` の側は開。★因子表示（`pullbackAPic`）では**在庫** |
+| (ii) `V(F)`・`ord_v`・`q_v`・`ADiv`・`APrc` | ★**在庫**（`ArithDiv.lean`） |
+| (ii) `deg_F`・正規化・**底変換不変性** | ★**在庫**（`deg` / `degNormalized` / `degNormalized_baseChange`） |
+| (ii) `ADiv(F)/APrc(F) ≅ APic(Spec 𝒪_F)` | ★原文が **[Szp] Prop 1.1 に引用**（Mochizuki は証明していない） |
+| (ii) `ht_M̄(x)` | ★**在庫**（`htArith`） |
+
+★★★★したがって `Definition 1.1` の残りは
+**(a) 層の水準への橋**と **(b) `AMetric` の引き戻し**の 2 つである。
+★(b) には mathlib の `(PresheafOfModules.pullback φ).Monoidal` が無い
+（台帳 `arakelov-pullback-monoidal`、2026-08-28 実測）。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**（`Definition 1.1` は (ii) の 2 段が残るので**まだ数えない**）
+- `Found/` の `.src` つき実装 **2305 件超**
