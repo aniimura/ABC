@@ -143,7 +143,51 @@ theorem BoundedByNonArch.mono (F : Type) [Field F] [NumberField F] (p : ℕ) [Fa
     BoundedByNonArch F p L xF :=
   h.trans hKL
 
-/-! ## ★4. 素点ごとの囲い込み領域を束ねる -/
+/-! ## ★4. 定義体を上げても変わらないこと（関手性の側） -/
+
+/-- ★★埋め込みの制限に沿った関手性 —— `𝓞_K → ℚ̄_p` を `𝓞_F` へ制限する。 -/
+theorem padicPoint_comp (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
+    [Algebra F K] (p : ℕ) [Fact p.Prime]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X)
+    (σ : (𝓞 K) →+* AlgebraicClosure ℚ_[p]) :
+    padicPoint (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF) σ
+      = padicPoint xF (σ.comp (algebraMap (𝓞 F) (𝓞 K))) := by
+  show padicSpecMap K p σ ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF
+    = padicSpecMap F p (σ.comp (algebraMap (𝓞 F) (𝓞 K))) ≫ xF
+  rw [← Category.assoc]
+  congr 1
+  show Spec.map (CommRingCat.ofHom σ) ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))
+    = Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 F) (𝓞 K))))
+  rw [← Spec.map_comp]
+  rfl
+
+/-- ★★★**定義体を上げても新しい点は出ない**。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★この向きは**関手性だけ**で出る（`ℚ̄_p` が代数閉であることは要らない）。
+★★逆向き（`𝓞_F → ℚ̄_p` が `𝓞_K` へ延びる）は代数閉性が要る —— `.needs` に記録。 -/
+theorem padicPointSet_baseChange_subset (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) :
+    padicPointSet K p (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      ⊆ padicPointSet F p xF := by
+  rintro _ ⟨σ, rfl⟩
+  exact ⟨σ.comp (algebraMap (𝓞 F) (𝓞 K)), (padicPoint_comp F K p xF σ).symm⟩
+
+/-- ★★★**囲われていることは定義体を上げても保たれる**。
+
+★これが「`K_V` が `X(ℚ̄)` の部分集合として意味を持つ」ことの半分である。 -/
+theorem BoundedByNonArch.baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
+    {X : Scheme.{0}} {C : Set (Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ X)}
+    {xF : specRingOfIntegers F ⟶ X} (h : BoundedByNonArch F p C xF) :
+    BoundedByNonArch K p C
+      (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF) :=
+  (padicPointSet_baseChange_subset F K p xF).trans h
+
+/-! ## ★5. 素点ごとの囲い込み領域を束ねる -/
 
 /-- ★**非アルキメデス側の囲い込み領域** —— 素数 `p` と `X(ℚ̄_p)` の部分集合の対。
 
