@@ -85,13 +85,17 @@ theorem IsCompactDomain.isClosed {T : Type*} [TopologicalSpace T] {S : Set T}
 
 /-! ## ★2. `X(ℚ̄_p)` の点 -/
 
-/-- ★**`Spec ℚ̄_p ⟶ Spec 𝓞_F`** —— 埋め込み `σ : 𝓞_F → ℚ̄_p` が定める射。
+/-- ★**`Spec ℚ̄_p ⟶ Spec 𝓞_F`** —— 埋め込み `σ : F → ℚ̄_p` が定める射。
 
-★アルキメデス側の `archSpecMap`（`ArchPoint.lean`）の非アルキメデス版である。 -/
+★アルキメデス側の `archSpecMap`（`ArchPoint.lean`）の非アルキメデス版である。
+
+★★**索引は `F → ℚ̄_p`（`𝓞_F → ℚ̄_p` ではない）**。理由は 2 つ:
+原文が「the set of **`[F:ℚ]` points**」と数えているのは体の埋め込みだからであり、
+★★★体からの射は自動的に単射なので、`K/F` への**延長**が `IsAlgClosed.lift` で直に出る。 -/
 noncomputable def padicSpecMap (F : Type) [Field F] [NumberField F] (p : ℕ) [Fact p.Prime]
-    (σ : (𝓞 F) →+* AlgebraicClosure ℚ_[p]) :
+    (σ : F →+* AlgebraicClosure ℚ_[p]) :
     Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ specRingOfIntegers F :=
-  Spec.map (CommRingCat.ofHom σ)
+  Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 F) F)))
 
 /-- ★★**`x ∈ X(F)` と埋め込み `σ` が定める `X(ℚ̄_p)` の点**。
 
@@ -99,7 +103,7 @@ noncomputable def padicSpecMap (F : Type) [Field F] [NumberField F] (p : ℕ) [F
 > for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each -/
 noncomputable def padicPoint {F : Type} [Field F] [NumberField F] {p : ℕ} [Fact p.Prime]
     {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X)
-    (σ : (𝓞 F) →+* AlgebraicClosure ℚ_[p]) :
+    (σ : F →+* AlgebraicClosure ℚ_[p]) :
     (Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ X) :=
   padicSpecMap F p σ ≫ xF
 
@@ -126,7 +130,7 @@ theorem boundedByNonArch_iff (F : Type) [Field F] [NumberField F] (p : ℕ) [Fac
     {X : Scheme.{0}} (K : Set (Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ X))
     (xF : specRingOfIntegers F ⟶ X) :
     BoundedByNonArch F p K xF
-      ↔ ∀ σ : (𝓞 F) →+* AlgebraicClosure ℚ_[p], padicPoint xF σ ∈ K := by
+      ↔ ∀ σ : F →+* AlgebraicClosure ℚ_[p], padicPoint xF σ ∈ K := by
   constructor
   · intro h σ; exact h ⟨σ, rfl⟩
   · rintro h _ ⟨σ, rfl⟩; exact h σ
@@ -149,16 +153,25 @@ theorem BoundedByNonArch.mono (F : Type) [Field F] [NumberField F] (p : ℕ) [Fa
 theorem padicPoint_comp (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
     [Algebra F K] (p : ℕ) [Fact p.Prime]
     {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X)
-    (σ : (𝓞 K) →+* AlgebraicClosure ℚ_[p]) :
+    (σ : K →+* AlgebraicClosure ℚ_[p]) :
     padicPoint (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF) σ
-      = padicPoint xF (σ.comp (algebraMap (𝓞 F) (𝓞 K))) := by
+      = padicPoint xF (σ.comp (algebraMap F K)) := by
   show padicSpecMap K p σ ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF
-    = padicSpecMap F p (σ.comp (algebraMap (𝓞 F) (𝓞 K))) ≫ xF
+    = padicSpecMap F p (σ.comp (algebraMap F K)) ≫ xF
   rw [← Category.assoc]
   congr 1
-  show Spec.map (CommRingCat.ofHom σ) ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))
-    = Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 F) (𝓞 K))))
+  show Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 K) K)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))
+    = Spec.map (CommRingCat.ofHom ((σ.comp (algebraMap F K)).comp (algebraMap (𝓞 F) F)))
   rw [← Spec.map_comp]
+  -- ★タワー: `𝓞_F → 𝓞_K → K` = `𝓞_F → F → K`
+  have htower : (σ.comp (algebraMap (𝓞 K) K)).comp (algebraMap (𝓞 F) (𝓞 K))
+      = (σ.comp (algebraMap F K)).comp (algebraMap (𝓞 F) F) := by
+    ext x
+    show σ (algebraMap (𝓞 K) K (algebraMap (𝓞 F) (𝓞 K) x))
+      = σ (algebraMap F K (algebraMap (𝓞 F) F x))
+    rw [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+  rw [← htower]
   rfl
 
 /-- ★★★**定義体を上げても新しい点は出ない**。
@@ -167,25 +180,54 @@ theorem padicPoint_comp (F K : Type) [Field F] [NumberField F] [Field K] [Number
 > for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
 
 ★この向きは**関手性だけ**で出る（`ℚ̄_p` が代数閉であることは要らない）。
-★★逆向き（`𝓞_F → ℚ̄_p` が `𝓞_K` へ延びる）は代数閉性が要る —— `.needs` に記録。 -/
+★★逆向きは `exists_padic_extension`(代数閉性)で取ってある —— 併せて `padicPointSet_baseChange`。 -/
 theorem padicPointSet_baseChange_subset (F K : Type) [Field F] [NumberField F]
     [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
     {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) :
     padicPointSet K p (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
       ⊆ padicPointSet F p xF := by
   rintro _ ⟨σ, rfl⟩
-  exact ⟨σ.comp (algebraMap (𝓞 F) (𝓞 K)), (padicPoint_comp F K p xF σ).symm⟩
+  exact ⟨σ.comp (algebraMap F K), (padicPoint_comp F K p xF σ).symm⟩
 
-/-- ★★★**囲われていることは定義体を上げても保たれる**。
+/-- ★★★**埋め込みは延びる** —— `ℚ̄_p` が代数閉で `K/F` が代数的だから。
 
-★これが「`K_V` が `X(ℚ̄)` の部分集合として意味を持つ」ことの半分である。 -/
-theorem BoundedByNonArch.baseChange (F K : Type) [Field F] [NumberField F]
+★★ここが「索引を `F → ℚ̄_p` に取った」ことの効き目である ——
+体からの射なので `IsAlgClosed.lift` がそのまま使える。 -/
+theorem exists_padic_extension (F K : Type) [Field F] [NumberField F]
     [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
-    {X : Scheme.{0}} {C : Set (Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ X)}
-    {xF : specRingOfIntegers F ⟶ X} (h : BoundedByNonArch F p C xF) :
-    BoundedByNonArch K p C
-      (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF) :=
-  (padicPointSet_baseChange_subset F K p xF).trans h
+    (σ : F →+* AlgebraicClosure ℚ_[p]) :
+    ∃ τ : K →+* AlgebraicClosure ℚ_[p], τ.comp (algebraMap F K) = σ := by
+  letI : Algebra F (AlgebraicClosure ℚ_[p]) := σ.toAlgebra
+  haveI : Algebra.IsAlgebraic F K := inferInstance
+  let ψ : K →ₐ[F] AlgebraicClosure ℚ_[p] := IsAlgClosed.lift
+  exact ⟨ψ.toRingHom, by ext x; exact ψ.commutes x⟩
+
+/-- ★★★★★**`x` が定める `X(ℚ̄_p)` の点の集合は定義体の取り方に依らない**。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★★★**これが「`K_V` が `X(ℚ̄)` の部分集合として意味を持つ」ことの中身**である。
+`⊆` は関手性、`⊇` は `ℚ̄_p` の代数閉性（`exists_padic_extension`）。 -/
+theorem padicPointSet_baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) :
+    padicPointSet K p (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      = padicPointSet F p xF := by
+  refine Set.Subset.antisymm (padicPointSet_baseChange_subset F K p xF) ?_
+  rintro _ ⟨σ, rfl⟩
+  obtain ⟨τ, hτ⟩ := exists_padic_extension F K p σ
+  exact ⟨τ, by rw [padicPoint_comp F K p xF τ, hτ]⟩
+
+/-- ★★★★**囲われていることは定義体の取り方に依らない**（両向き）。 -/
+theorem boundedByNonArch_baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (p : ℕ) [Fact p.Prime]
+    {X : Scheme.{0}} (C : Set (Spec (CommRingCat.of (AlgebraicClosure ℚ_[p])) ⟶ X))
+    (xF : specRingOfIntegers F ⟶ X) :
+    BoundedByNonArch K p C (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      ↔ BoundedByNonArch F p C xF := by
+  unfold BoundedByNonArch
+  rw [padicPointSet_baseChange F K p xF]
 
 /-! ## ★5. 素点ごとの囲い込み領域を束ねる -/
 
