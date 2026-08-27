@@ -24,11 +24,11 @@ import Mathlib.Algebra.Algebra.Subalgebra.Directed
 | 同じ有理数を表す元は同じ値へ | ★★`cocone_app_compat` |
 | ★**余極限からの写像** | ★★★`descFun` |
 | どの段で読んでも同じ | ★★`descFun_eq` |
-| `ℤ`-部分代数版（`iSupLift` へ渡す形） | `ratTowerAlg` ほか |
+| ★**余極限からの環準同型** | ★★★`descHom` |
+| ★★**`ℚ = colim ℤ[1/n!]`** | ★★★★`ratTowerIsColimit` |
+| `ℤ`-部分代数版 | `ratTowerAlg` ほか |
 
-★★`descFun` が**環準同型であること**が残っている。★機構は分かっている——
-`exists_ratTower_of_finset` で `a`・`b`・`a+b` を共通の段に集め、
-その段の射が環準同型であることを使う。
+★★★**環の側は閉じた。** 次は `Spec` で `IsLimit` に移す段である。
 
 ## ★★★★★配管の記録（`tools/lean-idioms.md` にも 1 行足した）
 
@@ -129,10 +129,70 @@ theorem descFun_eq (s : Cocone ratTowerDiagram) (n : ℕ) (q : ℚ) (hq : q ∈ 
   cocone_app_compat (s := s) (show ratTowerDiagram.obj q.den from ⟨q, mem_ratTower_den q⟩)
     (show ratTowerDiagram.obj n from ⟨q, hq⟩) rfl
 
+/-! ## ★★★★★★★★★★★★余極限 -/
+
+/-- ★★★★★★**余極限からの環準同型**。
+
+★`exists_ratTower_of_finset` で `a`・`b`・`a+b` を共通の段に集め、
+その段の射が環準同型であることを使う。★★段の中では `⟨a+b, _⟩ = ⟨a, _⟩ + ⟨b, _⟩` は `rfl`。 -/
+noncomputable def descHom (s : Cocone ratTowerDiagram) : ℚ →+* s.pt where
+  toFun := descFun s
+  map_one' := by
+    rw [descFun_eq s 1 1 (one_mem _)]
+    exact map_one _
+  map_zero' := by
+    rw [descFun_eq s 1 0 (zero_mem _)]
+    exact map_zero _
+  map_mul' a b := by
+    obtain ⟨n, hn⟩ := exists_ratTower_of_finset ({a, b, a*b} : Finset ℚ)
+    have ha := hn a (by simp)
+    have hb := hn b (by simp)
+    have hab := hn (a*b) (by simp)
+    have key : (show ratTower n from ⟨a*b, hab⟩)
+        = (show ratTower n from ⟨a, ha⟩) * (show ratTower n from ⟨b, hb⟩) := rfl
+    rw [descFun_eq s n a ha, descFun_eq s n b hb, descFun_eq s n (a*b) hab, key]
+    exact map_mul _ _ _
+  map_add' a b := by
+    obtain ⟨n, hn⟩ := exists_ratTower_of_finset ({a, b, a+b} : Finset ℚ)
+    have ha := hn a (by simp)
+    have hb := hn b (by simp)
+    have hab := hn (a+b) (by simp)
+    have key : (show ratTower n from ⟨a+b, hab⟩)
+        = (show ratTower n from ⟨a, ha⟩) + (show ratTower n from ⟨b, hb⟩) := rfl
+    rw [descFun_eq s n a ha, descFun_eq s n b hb, descFun_eq s n (a+b) hab, key]
+    exact map_add _ _ _
+
+/-- ★★★★★★★★**`ℚ = colim ℤ[1/n!]`**。
+
+原文 (GenEll p.9):
+> immediately that the BD-class of log-condD on UX (Q) depends only on the pair
+
+★★★これが spreading out の**環の側の到達点**である。
+`desc` は `descHom`、`fac` は `descFun_eq`、`uniq` は余錐の条件そのものから出る。
+
+★★次は `Spec`（`ΓSpec.adjunction` の右随伴）でこれを `IsLimit` に移し、
+`X ×_ℤ (−)`（`Over.mapPullbackAdj` の右随伴）で `X_ℚ = lim (X ×_ℤ ℤ[1/n!])` にする。
+★そこまで行けば mathlib の
+`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` が当たる。 -/
+noncomputable def ratTowerIsColimit : IsColimit ratTowerCocone where
+  desc s := CommRingCat.ofHom (descHom s)
+  fac s n := by
+    apply CommRingCat.hom_ext
+    apply RingHom.ext
+    intro x
+    show descFun s (((show ratTower n from x) : ℚ)) = _
+    exact descFun_eq s n _ (show ratTower n from x).2
+  uniq s m hm := by
+    apply CommRingCat.hom_ext
+    apply RingHom.ext
+    intro q
+    show m.hom q = descFun s q
+    exact congrArg (fun (f : CommRingCat.of (ratTower q.den) ⟶ s.pt) =>
+      f.hom (show ratTowerDiagram.obj q.den from ⟨q, mem_ratTower_den q⟩)) (hm q.den)
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** 残っているのは
-(a) `descFun` が環準同型であること、(b) `IsColimit` に束ねること、
 (c) `Spec` で `IsLimit` に移すこと、(d) `X ×_ℤ (−)` で `X_ℚ` の図式にすること、
 (e) mathlib の `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` を当てること、
 (f) 因子 `D` の降下、(g) `Σ` の外での conductor の一致、である。 -/
@@ -154,7 +214,7 @@ def cocone_app_compat.src : ABC3.Meta.Source :=
 
 def descFun.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 9,
-    item := "Remark 1.5.1(余極限からの写像——環準同型であることは含まない)",
+    item := "Remark 1.5.1(余極限からの写像)",
     sectionId := "genell-rem-1-5-1" }
 
 def descFun.needs : List ABC3.Meta.ProofObligation :=
