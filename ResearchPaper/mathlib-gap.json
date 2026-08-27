@@ -795,7 +795,8 @@
       "stage": "B",
       "status": "open",
       "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
-      "why": "★`s ≠ 0` なら商は捻れかつ有限生成なので有限。★★Dedekind 環上の階数 1 射影加群であることを段 A から使う。 ★★★2026-08-28: 段 A が閉じたので**前提が揃った**(invertible_gamma_toInvSheaf)。"
+      "why": "★s ≠ 0 なら商は捻れかつ有限生成なので有限。★★2026-08-28 の実測で道筋が確定した:\n  ・Γ(L) が可逆(段 A、§9-751)→ mathlib が Module.Finite / Module.Projective を**インスタンスで**与える(§9-753 で取得済)。\n  ・非零切断の存在も取得済(§9-752 exists_ne_zero_gamma)。\n  ・★★★残るのは **rank 1** である。mathlib の Module.Invertible.rank_eq_one は **[Free R M] を前提**とする(PicardGroup.lean:251)が、Dedekind 域上では可逆加群は free でない。\n  ・★★★★抜け道の候補 2 つ(未測):\n     (a) 体は局所環なので Pic K は自明(PicardGroup.lean:509)。従って M ⊗ K は free rank 1。★ただし Module.Invertible の**環を変える底変換**が mathlib にあるか未確認。\n     (b) PicardGroup.lean:56 の記述「become free of rank one when localized at every prime ideal」を使う道。",
+      "nextStep": "★まず (a) を測る——Module.Invertible の環を変える底変換が mathlib にあるか。あれば M ⊗ K が free rank 1 になり、Γ(L)/(O_F·s) の捻れ性が出る。"
      },
      {
       "stage": "C",
