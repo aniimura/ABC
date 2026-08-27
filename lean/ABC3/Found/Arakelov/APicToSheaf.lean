@@ -567,6 +567,38 @@ theorem degFin_smul_unit (R : CommRingCat.{0}) (L : AInv (Spec R))
     = Real.log (Nat.card (_ ⧸ Submodule.span (R : Type) {s}))
   rw [Submodule.span_singleton_smul_eq hu s]
 
+/-! ## ★★★★★★★切断の非捻れ性 -/
+
+open scoped TensorProduct in
+/-- ★★★★★★★**非零切断は非捻れである** `r ≠ 0 → s ≠ 0 → r • s ≠ 0`。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★機構は `gamma_toFractionRing_injective`(§9-756)で分数体に上げるだけ
+——体上のベクトル空間なので `algebraMap r ≠ 0` なら消えない。
+
+★★これが台帳の**段 D の本体**に要る
+——`r ↦ r·s` が `R ≃ span{s}` を与えるのはこの単射性からである。 -/
+theorem smul_ne_zero_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)] (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (r : (R : Type)) (hr : r ≠ 0) : r • s ≠ 0 := by
+  intro h
+  have hinj := gamma_toFractionRing_injective R L
+  have hts : (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] s ≠ 0 := by
+    intro h0
+    refine hs (hinj ?_)
+    show (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] s
+      = (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] 0
+    rw [h0, TensorProduct.tmul_zero]
+  have hsm : (algebraMap (R : Type) (FractionRing (R : Type))) r
+      • ((1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] s) = 0 := by
+    rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one,
+      Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul, h, TensorProduct.tmul_zero]
+  have hr0 : (algebraMap (R : Type) (FractionRing (R : Type))) r ≠ 0 :=
+    fun h0 => hr (IsFractionRing.to_map_eq_zero_iff.mp h0)
+  exact hts ((smul_eq_zero.mp hsm).resolve_left hr0)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -603,6 +635,22 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def smul_ne_zero_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(非零切断は非捻れ——段 D の本体に要る)",
+    sectionId := "genell-def-1-1-ii" }
+
+def smul_ne_zero_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "gamma_toFractionRing_injective(分数体へ単射)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.gamma_toFractionRing_injective") 4,
+    .implicitStep
+      ("★★段 D の本体の残り: (1) 本補題から r ↦ r·s が " ++
+       "R ≃ span{s} を与える(LinearMap.toSpanSingleton の単射性)、" ++
+       "(2) その同型で (u) ↦ span{u·s} なので span{s}/span{u·s} ≅ R/(u)、" ++
+       "(3) 短完全列で Nat.card の乗法性、" ++
+       "(4) degFin(u·s) = degFin(s) + log N(u)、" ++
+       "(5) アルキメデス部分と合わせて積公式(deg_principalADiv_eq_zero)") 4 ]
 
 def degFin_smul_unit.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
