@@ -299,21 +299,24 @@
    "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
    "whereUsed": [
     "[GenEll] Remark 1.5.1 の段 2（因子 D の降下をアフィン被覆で貼る段）",
-    "★Found/GenEll/SectionDescent.lean の切断の降下を IdealSheafData の水準へ上げるところ"
+    "★Found/GenEll/SectionDescent.lean の切断の降下を IdealSheafData の水準へ上げるところ",
+    "★★★vertical-divisors-generate-pic-kernel の段 3b（チャートごとの m を点に引き戻す段）——**2 つの塡がりが同じ 1 本に帰着する**（2026-08-27 に判明）"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
+    "verdict": "partial-major",
     "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean を grep。ideal_comap_of_isOpenImmersion（開埋め込みの場合）はあるが、一般の射に対する ideal_comap は**無い**。",
     "partial": [
      "Scheme.IdealSheafData.comap / comap_comp / comap_id / support_comap はある",
      "Scheme.Hom.ker_apply（準コンパクトな射なら ker.ideal U = RingHom.ker (f.app U)）はある",
      "★貼る側の道具 IdealSheafData.ext_of_iSup_eq_top（アフィン被覆上で一致なら等しい）はある",
-     "★★mathlib.Ideal.map 側の道具は完備"
+     "★★mathlib.Ideal.map 側の道具は完備",
+     "★★mathlib に IdealSheafData.le_of_iSup_eq_top / ideal_mul / comap_mono はある。**無いのは comap のチャート式と comap_mul の 2 本**（2026-08-27 実測）",
+     "★★★ABC3: Found/GenEll/IdealComapAffine.lean で**アフィンの場合を sorry 0 で閉じた**（2026-08-27）——ker_specMap_ideal_top / ker_algebraMap_tensor / comap_ker_quotient / ideal_comap_ker_quotient_top の 4 本。"
     ],
     "absentPart": "comap をアフィン開の上で Ideal.map として計算する補題そのもの。★comap の定義は pullback.fst の ker なので、アフィンでの引き戻し（環のテンソル積）に降りる段が要る。"
    },
    "minimalForm": "★消費者が要るのは「2 つのイデアル層が各アフィン開で一致すれば等しい」だけであり、ext_of_iSup_eq_top で済む。★★したがって必要なのは (I.comap f).ideal U を**生成切断で書く**ことだけであり、完全な ideal_comap ではない。",
-   "impact": "★Remark 1.5.1 の段 2 の残り。★★段 1（同型の降下）は 2026-08-27 に閉じた。",
+   "impact": "★Remark 1.5.1 の段 2 の残り。★★★**加えて Remark 1.4.1 の段 3b もこれ 1 本で開く**（2026-08-27）——**本セッションで一番優先度の高い 1 本になった**。",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★**原典は手元にある**——[Stacks] 01Z4 / 01ZC 系と EGA IV §8。★★これは「原典が無い」型の塞がりではなく、**mathlib に補題が 1 本足りない**型である。",
@@ -322,6 +325,48 @@
      "[EGA2] / EGA IV §8"
     ],
     "howToProceed": "★自分で 1 本書く。Scheme.Hom.ker_apply（準コンパクト）から入り、pullback.fst のアフィン局所記述（環のテンソル積）に降りる。★★mathlib へ PR できる形の補題である。"
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★★**2026-08-27、アフィンの場合を閉じた。**★部品を 1 つずつ実測して並べたところ、**部品はすべて mathlib にあり、無かったのは繋ぎ方だけ**であった。",
+    "parts": [
+     {
+      "name": "Scheme.Hom.ker_apply",
+      "status": "in-mathlib",
+      "what": "[QuasiCompact f] のとき f.ker.ideal U = RingHom.ker (f.app U)"
+     },
+     {
+      "name": "Scheme.IdealSheafData.comap",
+      "status": "in-mathlib",
+      "what": "comap I f = (pullback.fst f I.subschemeι).ker（**定義そのもの**）"
+     },
+     {
+      "name": "Scheme.IdealSheafData.subschemeObjIso",
+      "status": "in-mathlib",
+      "what": "Γ(I.subscheme, ι⁻¹U) ≅ Γ(X,U) ⧸ I.ideal U（閉部分スキームのアフィン記述）"
+     },
+     {
+      "name": "Algebra.TensorProduct.quotIdealMapEquivTensorQuot",
+      "status": "in-mathlib",
+      "what": "A ⧸ J.map ≅ A ⊗[B] (B ⧸ J)（アフィンでの引き戻しが Ideal.map になる根拠）"
+     },
+     {
+      "name": "Scheme.IdealSheafData.ker_fst_of_isClosedImmersion",
+      "status": "in-mathlib",
+      "what": "ker (pullback.fst f i) = (ker i).comap f（i が閉埋め込み）"
+     },
+     {
+      "name": "ideal_comap",
+      "status": "partial",
+      "what": "★**アフィンの場合は閉じた**（2026-08-27、Found/GenEll/IdealComapAffine.lean の ideal_comap_ker_quotient_top）。★★残るのは一般の X・Y の場合で、道筋は comap_comp で開埋め込みに沿って制限し、ideal_comap_of_isOpenImmersion（mathlib に**ある**）で .ideal U に降ろし、アフィンの場合を当てる。"
+     },
+     {
+      "name": "comap_mul",
+      "status": "ABSENT",
+      "what": "★★(I*J).comap f = (I.comap f)*(J.comap f)。**ideal_comap から Ideal.map_mul で直ちに出る**——別の塡がりではない。★mathlib に comap_mono はあるが comap_mul は無い（2026-08-27 実測）"
+     }
+    ],
+    "remaining": "★★★残るは**一般の X・Y への拡張 1 段**と、その系の comap_mul である。★道具はすべて揃っている。"
    }
   },
   "dedekind-point-extension": {
@@ -454,7 +499,7 @@
       "stage": "3b",
       "claim": "その m を X 全体で 1 つに揃える（一様化）",
       "status": "open",
-      "why": "★道具は特定済み: X は準コンパクトなので**アフィン被覆は有限**であり、各チャートで 3a を当てて m_i の最大を取ればよい。★★残る配管は Scheme.IdealSheafData の水準でN^m·I_D ⊆ I_E を書き、点に引き戻すところである。★★★Found/GenEll/IdealComparable.lean の htArith_bdeq_of_ideal_comparable はそれを**仮説として受けている**"
+      "why": "★道具は特定済み: X は準コンパクトなのでアフィン被覆は有限であり、IdealSheafData.le_of_iSup_eq_top（mathlibに**ある**、2026-08-27 実測）で被覆の上だけ見ればよい。★★しかし**それを点に引き戻す段で止まる**——comap は pullback.fst の ker として定義されており（Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean）、comap_mono はあるが **comap_mul は無い**。★★★したがって本段は**ideal-comap-on-affine-opens と同じ 1 本に帰着する**。★入口も同じ: Scheme.Hom.ker_apply（準コンパクトな射ならker.ideal U = RingHom.ker (f.app U)）。"
      }
     ],
     "done": "3/4",
