@@ -326,7 +326,7 @@
      "★★ABC3: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（TateCurveData の非空虚性、G6）",
      "★★★ABC3: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean——**消費側（K̄ˣ/q^ℤ の上での Lemma 3.2 (i)(ii)）は閉じている**"
     ],
-    "absentPart": "★フィールドの自己同型 σ に対する同変性。 ★★体の拡大 K ⊆ L に対する自然性。 ★★★K̄ への帰納極限。"
+    "absentPart": "★**2026-08-27 にほぼ埋まった**。 残るのは M_l(E) を (Kˣ/q^ℤ)[l] と同定する段だけである。"
    },
    "primarySource": {
     "measuredAt": "2026-08-27",
@@ -339,7 +339,7 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★★★★**10 段に割り、8 段を閉じた（2026-08-27 の 1 日）。** ★朝の時点では**absent・未分割**であった。 ★★★発見: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。 ★★同変性は「新しい数学」ではなく**帳簿**であった。",
+    "note": "★★★★★★★★★**10 段に割り、9 段を閉じた（2026-08-27 の 1 日）。** ★朝の時点では**absent・未分割**であった。 ★★★発見 1: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。「一意 ⇒ 自然」で 5 段が機械的に閉じた。 ★★★発見 2: **帰納極限は要らなかった**——l-捩れは有限拡大に載る。",
     "stages": [
      {
       "stage": "1",
@@ -399,9 +399,10 @@
      },
      {
       "stage": "4",
-      "claim": "K̄ への帰納極限: E(K̄) ≅ K̄ˣ/q^ℤ（G_K-同変）",
-      "status": "open",
-      "why": "★K̄ は**完備ではない**ので直接は適用できない。 ★★E(K̄) = ∪_L E(L)（L/K 有限）として帰納極限を取る。 ★★★段 3 があれば形式的である。"
+      "claim": "Φ の G_K-同変性（当初は「K̄ への帰納極限」と書いていた）",
+      "status": "closed",
+      "where": "Found/GaloisRep/TateUniformizationEquivariant.lean の **tatePhi_map** / tatePhi_map_one",
+      "why": "★★★★**帰納極限は要らなかった**——M_l(E) の l-捩れは**有限拡大 L = K(E[l]) の中に載る**ので、L（完備離散付値体）で段 1 がそのまま使え、G_K は Gal(L/K) を通して作用する。 ★q ∈ K なので σ q = q は自動である。 ★★到達点: Φ(σ_* c) = Point.some (σ_K X) (σ_K Y)、すなわち **Φ は同変**である。"
      },
      {
       "stage": "5",
@@ -411,10 +412,10 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "8/10",
-    "remaining": "★★★**残るは段 4（K̄ = ∪_L L への帰納極限）だけ**であり、段 3b があれば**形式的な組み立て**である。"
+    "done": "9/10",
+    "remaining": "★★残るは段 5 の消費側への紐付けだけである——**M_l(E) を (Kˣ/q^ℤ)[l] と同定する**（有限拡大 L = K(E[l]) の選択）。 ★Lemma32StableLine.lean は Kˣ/q^ℤ の上で既に閉じている。"
    },
-   "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
+   "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門。 ★★**2026-08-27 に 9/10 まで詰まった**——同変性は「新しい数学」ではなく**帳簿**であった。"
   },
   "faltings-height-vs-degree-at-infinity": {
    "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",
