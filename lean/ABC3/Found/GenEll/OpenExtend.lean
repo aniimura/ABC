@@ -106,6 +106,77 @@ theorem generic_mem_opens (U : (specRingOfIntegers F).Opens)
   show (⟨⊥, Ideal.isPrime_bot⟩ : specRingOfIntegers F) ∈ (U : Set (specRingOfIntegers F))
   exact generic_mem_of_mem (R := NumberField.RingOfIntegers F) _ U.2 hx'
 
+/-! ## ★★★★★★★★生成点を茎経由で見る -/
+
+/-- ★★**茎 `𝒪_{Spec 𝒪_F, v}` から `F` への環準同型**（`Spec.stalkIso` 経由）。 -/
+noncomputable def stalkToF (v : FinitePlace F) :
+    (specRingOfIntegers F).presheaf.stalk (placePoint F v) ⟶ CommRingCat.of F :=
+  (Spec.stalkIso (CommRingCat.of (NumberField.RingOfIntegers F)) (placePoint F v)).hom ≫
+    CommRingCat.ofHom (algebraMap (Localization.AtPrime v.asIdeal) F)
+
+/-- ★★★★★★**茎を経由した生成点は、素直な生成点と同じ**。
+
+★機構は 3 本の合成:
+`Spec.fromSpecStalk_eq`（アフィンでの `fromSpecStalk` の記述）、
+`Spec.germ_stalkMapIso_hom`（芽と `stalkIso` の両立）、
+`IsScalarTower.algebraMap_eq`（𝒪_F → (𝒪_F)_v → F）。
+
+★★`rw` が芽（`germ`）の型で落ちるので、
+`congrArg` と `calc` で項で繋いでいる（`tools/lean-idioms.md`）。 -/
+theorem specMap_stalkToF_fromSpecStalk (v : FinitePlace F) :
+    Spec.map (stalkToF F v) ≫ (specRingOfIntegers F).fromSpecStalk (placePoint F v)
+      = Spec.map (CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F) F)) := by
+  set R := CommRingCat.of (NumberField.RingOfIntegers F) with hR
+  set x := placePoint F v with hx
+  set alg : CommRingCat.of (Localization.AtPrime v.asIdeal) ⟶ CommRingCat.of F :=
+    CommRingCat.ofHom (algebraMap (Localization.AtPrime v.asIdeal) F) with halg
+  rw [Spec.fromSpecStalk_eq, ← Spec.map_comp]
+  congr 1
+  have key := Spec.germ_stalkMapIso_hom (R := R) x
+  calc ((Scheme.ΓSpecIso R).inv ≫ (Spec R).presheaf.germ ⊤ x trivial) ≫
+        ((Spec.stalkIso R x).hom ≫ alg)
+      = (Scheme.ΓSpecIso R).inv ≫
+          ((Spec R).presheaf.germ ⊤ x trivial ≫ (Spec.stalkIso R x).hom) ≫ alg := by
+        simp only [Category.assoc]
+    _ = (Scheme.ΓSpecIso R).inv ≫
+          ((Scheme.ΓSpecIso R).hom ≫ CommRingCat.ofHom (algebraMap _ _)) ≫ alg :=
+        congrArg (fun z => (Scheme.ΓSpecIso R).inv ≫ z ≫ alg) key
+    _ = CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F)
+          (Localization.AtPrime v.asIdeal)) ≫ alg := by
+        simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+    _ = CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F) F) := by
+        rw [halg, ← CommRingCat.ofHom_comp]
+        congr 1
+        exact (IsScalarTower.algebraMap_eq (NumberField.RingOfIntegers F)
+          (Localization.AtPrime v.asIdeal) F).symm
+
+/-- ★★★★**開近傍の中で見た生成点を `X` へ戻すと、素直な生成点**。 -/
+theorem generic_comp_ι (v : FinitePlace F)
+    (U : (specRingOfIntegers F).Opens) (hxU : placePoint F v ∈ U) :
+    (Spec.map (stalkToF F v) ≫ U.fromSpecStalkOfMem _ hxU) ≫ U.ι
+      = Spec.map (CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F) F)) := by
+  rw [Category.assoc, AlgebraicGeometry.Scheme.Opens.fromSpecStalkOfMem_ι,
+    specMap_stalkToF_fromSpecStalk]
+
+/-- ★★★★★★★★**開近傍へ広げた射を生成点へ制限すると、元の `F`-点に戻る**。
+
+★★★これが貼り合わせの整合条件の根拠である
+——どの `U_v` で見ても生成点では同じ `xK` になる。 -/
+theorem generic_comp_open_extend {X' : Scheme.{0}}
+    (v : FinitePlace F)
+    (xv : Spec (CommRingCat.of (Localization.AtPrime v.asIdeal)) ⟶ X')
+    (U : (specRingOfIntegers F).Opens) (hxU : placePoint F v ∈ U)
+    (g : U.toScheme ⟶ X')
+    (h : Spec.map (Spec.stalkIso (CommRingCat.of (NumberField.RingOfIntegers F))
+          (placePoint F v)).inv ≫ xv = U.fromSpecStalkOfMem _ hxU ≫ g)
+    (xK : Spec (CommRingCat.of F) ⟶ X')
+    (hxv : Spec.map (CommRingCat.ofHom
+        (algebraMap (Localization.AtPrime v.asIdeal) F)) ≫ xv = xK) :
+    (Spec.map (stalkToF F v) ≫ U.fromSpecStalkOfMem _ hxU) ≫ g = xK := by
+  rw [Category.assoc, ← h, ← Category.assoc, ← Spec.map_comp, stalkToF,
+    ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  exact hxv
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** 残っているのは
