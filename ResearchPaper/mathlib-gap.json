@@ -77,14 +77,14 @@
      "Scheme.exists_isAffine_of_isLimit / exists_isOpenCover_and_isAffine / compactSpace_of_isLimit / nonempty_of_isLimit —— 極限の性質(Stacks 01Z2/01Z3/01Z5/01Z6)",
      "exists_map_preimage_eq_map_preimage / exists_preimage_eq / isBasis_preimage_isAffineOpen —— 開集合の降下(Stacks 01Z4)"
     ],
-    "absentPart": "★★★★★**2026-08-27 に解消した**——ここには「同型であることの降下（Stacks 01ZM / EGA IV 8.10.5）がmathlib に無い」と書いていたが、**01ZM は要らなかった**。単射側（01ZC）と引き戻しの普遍性だけで組み立てられる（Found/GenEll/IsoDescent.lean、4 段）。★図式の組み立て（ℚ = colim ℤ[1/n!] → Spec ℚ = lim Spec ℤ[1/n!] → X_ℚ = lim (X ×_ℤ ℤ[1/n!])）も自前で終わっている。★★**残るのは段 2（因子 D の降下）と段 3（Σ の外で conductor が一致）だけであり、どちらも mathlib の欠落ではなく我々の作業である。**",
+    "absentPart": "★★★★★**2026-08-27 に解消した。**ここには「同型であることの降下（Stacks 01ZM / EGA IV 8.10.5）が mathlib に無い」と書いていたが、**01ZM は要らなかった**——単射側（01ZC）と引き戻しの普遍性だけで組み立てられる。★図式の組み立て（ℚ = colim ℤ[1/n!] → Spec ℚ = lim Spec ℤ[1/n!] → X_ℚ = lim (X ×_ℤ ℤ[1/n!])）も自前で終わっている。★★**因子の降下も閉じた**——因子を**閉部分スキーム**で書けば、mathlib に無い ideal_comap（ideal-comap-on-affine-opens を見よ）を経由せずに可換正方形の降下として出る。★★★**残るのは Σ の外での conductor の一致だけであり、これは mathlib の欠落ではなく我々の作業である。**",
     "correction": "★2026-08-16 の remark_1_5_1.needs は『mathlib に scheme の spreading out は無い』としていた。2026-08-27 に一度『SpreadingOut.lean はあるが別物』と訂正したが、**それも不完全だった**——同日の再測で AffineTransitionLimit.lean(EGA IV §8 そのもの)が見つかった。★★★教訓: 在庫の判定を**ファイル名**で行うと外す。**主張の形**(ここでは「スキームの余フィルター極限」)で引くこと。tools/lean-idioms.md と ResearchMethod にも同じ規則がある。"
    },
    "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
    "nodes": 5,
    "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。 ★★2026-08-27 の再測(第 365)——段 1(生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる)の**射の部分**は mathlib の Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation で足りる。残るのは「同型であることの降下」と図式の組み立て。",
-   "done": 3,
-   "doneNote": "★段 5 はすでにあった——Found/GenEll/LogDiff.lean。★★段 4（Σ の上の寄与の一様な上界）は Found/GenEll/LogCondSigma.lean の abs_logCond_sub_le_sum_log。★★★★★**2026-08-27 に段 1（生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる）を閉じた**——Found/GenEll/IsoDescent.lean の exists_iso_of_generic_iso（sorry 0）。",
+   "done": 4,
+   "doneNote": "★段 5 はすでにあった——Found/GenEll/LogDiff.lean。★★段 4（Σ の上の寄与の一様な上界）は Found/GenEll/LogCondSigma.lean の abs_logCond_sub_le_sum_log。★★★★★**2026-08-27 に段 1 と段 2 を閉じた**——段 1（生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる）は Found/GenEll/IsoDescent.lean の exists_iso_of_generic_iso、段 2（因子 D も一緒に延びる）は Found/GenEll/DivisorDescent.lean の exists_pair_descent（いずれも sorry 0）。★★★**残るのは段 3（Σ の外で conductor が一致）だけである。**",
    "resolvedNode": {
     "resolvedAt": "2026-08-27",
     "what": "★段 4 を log-cond へ繋ぐ橋が渡った(第 414 ブロック、Found/GenEll/LogCondSigma.lean)。",
