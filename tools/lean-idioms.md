@@ -1079,3 +1079,39 @@ noncomputable def bcLeg (f) (n)         : bcPt f  ⟶ bcObj f n := (C f).π.app 
 * `have hki : IsCofiltered.min i j ⟶ i := IsCofiltered.minToLeft i j` のように
   `have` は Type 値にも使える。`obtain ⟨k, hki, hkj⟩ : ∃ … ` は
   `Prop` に潰れるので**射の取り出しには使えない**。
+
+---
+
+## `Γ(X, U)` の上では `ConcreteCategory.comp_apply` の `rw` が落ちる
+
+2026-08-27、切断の降下（`Found/GenEll/SectionDescent.lean`）で踏んだ。
+
+`Γ(X, U)` は `X.presheaf.obj (op U)` で、`X.presheaf` の型は
+`TopCat.Presheaf CommRingCat X.toPresheafedSpace`
+——これは `(Opens X)ᵒᵖ ⥤ CommRingCat` の **`def`** である。
+そのため `rw [ConcreteCategory.comp_apply]` が
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+    Full error: ... (D.obj l).presheaf has type TopCat.Presheaf CommRingCat ...
+                but is expected to have type (Opens ...)ᵒᵖ ⥤ CommRingCat
+
+で落ちる。`CommRingCat.hom_comp` / `RingHom.coe_comp` / `Function.comp_apply` は
+**そもそも当たらない**（linter が「unused」と言う）。
+
+★直し方: `rw` をやめて **`congrArg` で合成の外側を直接当てる**。
+
+```lean
+theorem app_map_comp_eq {D : ℕᵒᵖ ⥤ Scheme.{0}} {i j l : ℕᵒᵖ} (g : j ⟶ i) (k : l ⟶ j)
+    {U : (D.obj i).Opens} {s t : Γ(D.obj i, U)}
+    (h : (D.map g).app U s = (D.map g).app U t) :
+    (D.map (k ≫ g)).app U s = (D.map (k ≫ g)).app U t := by
+  rw [Functor.map_comp, Scheme.Hom.comp_app]
+  exact congrArg (ConcreteCategory.hom (Scheme.Hom.app (D.map k) (D.map g ⁻¹ᵁ U))) h
+```
+
+`hom (A ≫ B) x` と `hom B (hom A x)` は**defeq なので `congrArg` は通る**。
+`rw` はパターン照合なので通らない。★★「defeq は `rw` を助けないが `exact` は助ける」。
+
+★★★もう 1 つ効いたこと: **図式 `D` を変数のままにする**。
+`baseChangeRatTowerDiagram f` を直接書くと `D.obj l` が展開されて
+同じエラーが別の場所で出る。**補題は一般の図式で書き、具体の図式は呼ぶ側で入れる。**
