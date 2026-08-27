@@ -29227,3 +29227,89 @@ ample を経由しない**。
 - `GenEll` の必要分 **11/24**(変化なし)
 - `ample` の内訳 **8/12**——段 D は実質閉じた(定義・健全性・空虚封じ・切断の比)
 - `Definition 1.1` は**あと 1 本**
+
+## §9-712 ★★★★★★★★★★★**[GenEll] Definition 1.1 が閉じた——11/24 → 12/24**(第 431-434 ブロック、2026-08-28)
+
+`§9-711` で「あと 1 本」と測った最後の 1 本が落ちた。
+
+### ★★★★★★★★★落ちた 1 本 —— `ΓSpecIso` と `ℂ`-作用の両立
+
+mathlib の `Mathlib/AlgebraicGeometry/Modules/Tilde.lean` に
+
+```lean
+lemma Scheme.Modules.smul_Spec_def (r : R) (x : Γ(M, U)) :
+    r • x = ((Spec R).presheaf.map U.leTop.op) ((Scheme.ΓSpecIso R).inv r) • x := rfl
+```
+
+が**あった**。★ただし `R := CommRingCat.of ℂ` と具体化すると `Module R Γ(M, U)` の
+instance が出ず、`rw` も `#synth` も通らない（`§9-711` の測定）。
+
+★★**直し方は「前層の綴りで補題を立てて `exact` で当てる」**であった:
+
+```lean
+have key : ∀ (z : ((Spec (CommRingCat.of ℂ)).presheaf.obj (op ⊤) : Type)),
+    (ΓSpecIso ℂ).hom.hom ((ΓSpecIso ℂ).inv.hom c * z) = c * (ΓSpecIso ℂ).hom.hom z := …
+exact key y
+```
+
+★★★`rfl` は通らないのに `exact` は通る——**`Eq` の両辺を先に確定させれば defeq に届く**。
+
+### ★★★★★★★★`Ō_X`（`|1| = 1`）が建った
+
+| 段 | 根拠 |
+|---|---|
+| `eq_zero_iff` | 同型は単射（`hom_inv_id`） |
+| `smul` | ★上の 1 本 |
+| `cont` | `continuous_evalGlobal`（在庫） |
+| `|1| = 1` | `evalGlobal p 1 = 1`（環準同型） |
+
+★`TorsorMetric` の `base` は `Classical.choice` なので `|1|` を選べない。
+**`GreenMetric`（`base` をフィールドに持つ）で基準計量そのものを正規に作る**のが鍵だった。
+
+★★これで原文の `Γ(L̄) ≝ Hom(Ō_X, L̄)` が**そのままの形で**定義できた（`arithGamma`）。
+
+### ★★★★★★★★★★★項目 `Definition 1.1` の `.src`（条なし）を置いた
+
+`Found/Arakelov/Definition11.lean` の `definition_1_1.src`。
+逸脱は 3 つ、いずれも記録した。
+
+| # | 逸脱 | 下流への影響 |
+|---|---|---|
+| 1 | 射の条件を**強い側**（作用素ノルム `≤ 1`）で取った | ★無い（強い側） |
+| 2 | `X` に §1 の標準仮定（正規・`ℤ`-固有・`ℤ`-平坦）を課していない | ★無い（定義には要らない） |
+| 3 | ★★`APic(X)` は**対の群**であって同型類の群ではない | ★★無い（`deg_F` は単数の作用で不変） |
+
+### ★★★★★★★★★★逸脱 3 と `Definition 1.2` の塞がりは**同じもの**である
+
+★これが本ブロック最大の発見である。
+
+`Definition 1.2` は 2026-08-27 に「`deg_F` が `Pic` 類を見ていない」という理由で
+項目全体の `.src` を**下げてある**（`Def12Height.lean`）。その中身を測り直すと:
+
+* `deg_F` の有限素点側は、**捻れ集合表示 `(L, g)` からは式が書けない**
+  ——`TorsorMetric.base` が `Classical.choice` なので `deg(L, 0)` に公式が無い
+* 正しい対象は `ADiv(F)/APrc(F)`（＝**同型類**の群）であり、
+  `Pic(X) × arcCM X`（＝**対**の群）ではない
+
+★★すなわち **`APic(Spec 𝓞_F) ≅ ADiv(F)/APrc(F)`（台帳の D2、「橋が無い」）を作ることが、
+逸脱 3 を消すことと同じ仕事である**。
+
+### ★★★その橋に要るもの（測定）
+
+1. `u ↦ log‖u‖` が `conjArcCM` に入ること
+   * 連続性 —— ★`continuous_evalGlobal` ＋ `Real.log`（単元は非消失）で出る
+   * **共役不変性** —— ★★`evalGlobal (ι_X p) u = conj (evalGlobal p u)` が要る。
+     アフィン版 `evalAffine_conjPoint` は**あり**、大域版は**無い**（2026-08-28 実測）。
+     `continuous_evalGlobal` と同じ**チャート論法**が 1 本要る
+2. 商 `ArithPic X ⧸ (単数の像)` を取ること
+3. `Spec 𝓞_F` でそれが `ADiv(F)/APrc(F)` と一致すること（Dedekind・類群）
+
+★★★1 は 1 ブロック、2 は小さい、3 が本体である。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）** ——★`Definition 1.1` が入った
+- `ample` の内訳 8/12
+- 次の葉: **`evalGlobal` の共役両立**（チャート論法 1 本）——それが逸脱 3 と
+  `Definition 1.2` の両方を開ける
