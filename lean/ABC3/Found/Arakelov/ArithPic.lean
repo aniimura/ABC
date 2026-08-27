@@ -4,6 +4,8 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.Arakelov.APicWitness
 import ABC3.Found.Arakelov.ArcConjInvol
 import ABC3.Found.Arakelov.ArithSections
+import ABC3.Found.Arakelov.ArcUnitEval
+import ABC3.Found.Arakelov.ArcEvalGlobal
 
 /-!
 # Arakelov —— **`APic(X)`（`ι_X` 両立を型に入れた版）と引き戻し**（`Found`）
@@ -59,10 +61,21 @@ import ABC3.Found.Arakelov.ArithSections
 ## ★残っている 1 段（明示）
 
 ★★**正規化した自明な算術直線束 `Ō_X`（`|1| = 1`）**だけが残っている。
-`TorsorMetric` の `base` は `Classical.choice` なので `|1|` を直接は選べないが、
-`green p ≔ log(base.nrm p (arcEval p 1))` と取れば `|1| = 1` になる。
-★★★それには **`arcEval p 1 ≠ 0`**（正性）と **`HasContMetrics X`**（連続性）が要る。
-★これが `Definition 1.1` を**条なしで**閉じるための最後の 1 本である。
+内訳は 3 つで、**2 つはもうある**:
+
+| 段 | 状態 |
+|---|---|
+| 正性 `u(p) ≠ 0` | ★**閉じた**——`arcEval_unit_one_ne_zero`（2026-08-28） |
+| 連続性 | ★**ある**——`continuous_evalGlobal`（`ArcEvalGlobal.lean`） |
+| ファイバーの**正規な ℂ-ノルム** | ★★残っている |
+
+★★★三つ目の中身は、`Scheme.ΓSpecIso` と
+`moduleSpecΓFunctor` が `Γ(Spec ℂ, ⊤)` に入れる ℂ-加群構造の**両立**:
+
+    `(ΓSpecIso ℂ).hom (c • y) = c · (ΓSpecIso ℂ).hom y`
+
+★mathlib にこの補題は無い（2026-08-28 実測、`exact?` ・ `simp` とも失敗）。
+★★★これが `Definition 1.1` を**条なしで**閉じるための最後の 1 本である。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -261,6 +274,31 @@ theorem TorsorMetric.norm_smul (m : TorsorMetric X F)
     * (Real.exp (-(m.green p)) * m.base.nrm p (arcEval p F s))
   ring
 
+/-! ## ★★★★構造層のファイバーで `1` は消えない -/
+
+/-- ★★★★**構造層のファイバーで `1` は消えない**。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★★これは**正規化した自明な算術直線束 `Ō_X`（`|1| = 1`）を作るための正性**である
+——`|1| = exp(-green)·u` を `1` にするには `u ≝ base.nrm p (arcEval p 1) > 0` が要り、
+`ArcMetric.eq_zero_iff` によりそれは `arcEval p 1 ≠ 0` に等しい。
+
+★機構は `evalUnit_eq`（`ArcUnitEval.lean`）＋「環準同型は `1` を `1` へ送る」＋
+`Scheme.ΓSpecIso` で `Γ(Spec ℂ, ⊤) ≅ ℂ` に落として `0 ≠ 1` を使う、の 3 段。 -/
+theorem arcEval_unit_one_ne_zero (p : Spec (CommRingCat.of ℂ) ⟶ X) :
+    arcEval p (unitModules X) (1 : ((X.presheaf.obj (op (⊤ : X.Opens))) : Type)) ≠ 0 := by
+  intro h
+  have h1 := evalUnit_eq p (1 : ((X.presheaf.obj (op (⊤ : X.Opens))) : Type))
+  rw [h, map_zero] at h1
+  have h2 : ((Scheme.Hom.toRingCatSheafHom p).hom.app (op ⊤)) 1 = 1 := map_one _
+  have h3 : (0 : ((Spec (CommRingCat.of ℂ)).presheaf.obj
+        (op (⊤ : (Spec (CommRingCat.of ℂ)).Opens)) : Type)) = 1 := h1.trans h2
+  have h4 := congrArg (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom h3
+  rw [map_zero, map_one] at h4
+  exact zero_ne_one h4
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★★**項目全体の `.src` はまだ置かない。** 残っているのは
@@ -289,6 +327,11 @@ def arithPicPullback.src : ABC3.Meta.Source :=
 def TorsorMetric.norm_smul.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(ノルムは Γ(X, ⊤) の作用について乗法的)",
+    sectionId := "genell-def-1-1-i" }
+
+def arcEval_unit_one_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(構造層のファイバーで 1 は消えない)",
     sectionId := "genell-def-1-1-i" }
 
 def ArithPic.needs : List ABC3.Meta.ProofObligation :=
