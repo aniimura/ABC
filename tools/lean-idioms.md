@@ -825,9 +825,21 @@ U+1D4AA(𝒪 = MATHEMATICAL SCRIPT CAPITAL O)ではない。
 ★★見分け方: エラー本文に `@instHSMul … htor.hasSMul` と
 `@instHSMul … DistribMulAction.toDistribSMul.toSMul` が**並んで出る**。
 
-★★★直し方(未完): `haveI := htor.module` を入れる**前に** `mk_smul` を使うか、
-`@Module.Finite.of_restrictScalars_finite` でインスタンスを明示的に渡す。
-★`show` で形を揃えようとしても `•` の解決は同じになるので効かない。
+★★★**直し方(2026-08-28 解決): `haveI` ではなく `letI` を使う**。
+
+    letI := htor.module
+    letI := htor.isScalarTower (S := R)
+
+`Module` インスタンスは **data を持つ**ので、`haveI` だと中身が失われる
+(`haveI` は proof-irrelevant に扱う)。すると `isScalarTower` が
+`htor.module` の中身を参照できず、別のインスタンスとして扱われる。
+
+★★★★見つけ方: mathlib の `Algebra/Module/Torsion/Basic.lean:597` が
+`(hM : Module.IsTorsionBySet R M I) : letI := hM.module` と書いている。
+**定義側が `letI` を使っているなら、使う側も `letI`** である。
+
+★★★★★一般化: **instance が data を持つなら `letI`**。
+`Module` / `Algebra` / `SMul` は data、`Finite` / `IsDomain` は Prop なので `haveI` でよい。
 
 ## structure の中に `/-! … -/` を書くと、そこで structure が終わる
 

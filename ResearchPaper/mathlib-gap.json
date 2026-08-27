@@ -793,10 +793,10 @@
      },
      {
       "stage": "B",
-      "status": "core-done",
+      "status": "closed",
       "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
-      "why": "★s ≠ 0 なら商は捻れかつ有限生成なので有限。★★2026-08-28 の実測で道筋が確定した:\n  ・Γ(L) が可逆(段 A、§9-751)→ mathlib が Module.Finite / Module.Projective を**インスタンスで**与える(§9-753 で取得済)。\n  ・非零切断の存在も取得済(§9-752 exists_ne_zero_gamma)。\n  ・★★★残るのは **rank 1** である。mathlib の Module.Invertible.rank_eq_one は **[Free R M] を前提**とする(PicardGroup.lean:251)が、Dedekind 域上では可逆加群は free でない。\n  ・★★★★抜け道の候補 2 つ(未測):\n     (a) 体は局所環なので Pic K は自明(PicardGroup.lean:509)。従って M ⊗ K は free rank 1。★ただし Module.Invertible の**環を変える底変換**が mathlib にあるか未確認。\n     (b) PicardGroup.lean:56 の記述「become free of rank one when localized at every prime ideal」を使う道。",
-      "nextStep": "★段 B は道具が揃った。残るのは **N = Γ(L)/(O_F·s) の有限性**で、ルートが 2 つある(2026-08-28 実測):\n★★ルート 1(Z 経由): finite_of_finite_isTorsion_int(§9-758 で入った)に渡す。要るのは (1) Module.Finite Z N（Module.Finite.trans）と (2) Module.IsTorsion Z N。★(2) には r ∈ O_F を Z の元に落とす必要があるが、RingOfIntegers.dvd_norm は **Galois 拡大を仮定**する(NumberField/Norm.lean:74)ので一般の数体では使えない。最小多項式の定数項を使う道が残る。\n★★★ルート 2(O_F のまま): **Module.finite_iff_finite** （有限環上の有限生成加群は有限）を使う。N の共通消滅元 r ≠ 0 を取れば N は O_F/(r)-加群で、O_F/(r) は有限なので N も有限。★共通消滅元の存在(∃ r ≠ 0, r • N = 0)は mathlib に**直接は無い**(exact? 失敗)が、生成元の有限集合の積で 10-20 行で作れる。\n★★★★ルート 2 のほうが短い——Z への降下とノルムの議論が不要になる。",
+      "why": "★2026-08-28 に閉じた。s ≠ 0 なら Γ(L)/(R·s) は有限である(finite_quotient_gamma_of)。★★機構: 分数体上で rank 1 → 商は捻れ → 共通の消滅元 r → N は R/(r)-加群 → R/(r) は有限 → Module.finite_iff_finite。",
+      "nextStep": "",
       "where": "Found/Arakelov/APicToSheaf.lean（finite_gamma / projective_gamma / exists_ne_zero_gamma / finrank_fractionRing_gamma / gamma_toFractionRing_injective / exists_smul_mem_span_gamma / finite_of_finite_isTorsion_int）"
      },
      {
@@ -819,8 +819,8 @@
       "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
      }
     ],
-    "done": "2/5",
-    "remaining": "★段 A・C は閉じた(2026-08-28)。★★残るのは B・D・E。★★★次に着手すべきは **段 B(有限部分 log #(Γ(L)/ᵊƒ·s))** である——段 A で Γ(L) が可逆(＝階数 1 射影)になったので、s ≠ 0 に対して商が有限になる。★★★★注意: 以前ここにあった「A2(局所自明な前層のテンソルは層)」は§9-731 で**偽として撤回**されている——前層のテンソルは層でない。"
+    "done": "3/5",
+    "remaining": "★段 A・B・C が閉じた(2026-08-28)。★★残るのは D・E。★★★段 D(s の取り方に依らないこと＝積公式)は Found/GenEll/ProductFormula.lean の在庫が効く。★★★★段 E(加法性)は §9-743(引き戻しの乗法性)と §9-750(APicM →* PicSheaf が群準同型)が効く。"
    }
   },
   "arakelov-coherent-base-metric": {

@@ -459,6 +459,56 @@ theorem exists_annihilator_quotient_gamma (R : CommRingCat.{0}) [IsDomain (R : T
     rw [← Submodule.Quotient.mk_smul]
     exact (Submodule.Quotient.mk_eq_zero _).2 hrm⟩
 
+/-! ## ★★★★★★★★★★段 B の到達点 -/
+
+/-- ★★★★★★★★★★**`Γ(L)/(R·s)` は有限である**(`s ≠ 0`)。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★★★これが台帳 `arakelov-degF-finite-places` の**段 B の到達点**である
+——古典的な `deg_F` の有限部分 `log #(Γ(L)/O_F·s)` が**意味を持つ**。
+
+★機構は 4 段:
+
+| 段 | 道具 |
+|---|---|
+| 商の共通の消滅元 `r` | `exists_annihilator_quotient_gamma` |
+| `N` を `R/(r)`-加群と見る | `Module.IsTorsionBySet.module` |
+| `R/(r)` が有限 | 仮定 `hfin`（数体では `finite_quotient_span_singleton`） |
+| 結論 | `Module.finite_iff_finite` |
+
+★★配管: `Module` インスタンスは **data** なので `haveI` ではなく **`letI`** が要る。
+`haveI` だと中身が失われ、`isScalarTower` が参照できずに
+`failed to synthesize IsScalarTower` になる。 -/
+theorem finite_quotient_gamma_of (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0)
+    (hfin : ∀ r : (R : Type), r ≠ 0 →
+      Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))) :
+    Finite ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+      ⧸ Submodule.span (R : Type) {s}) := by
+  obtain ⟨r, hr, hrN⟩ := exists_annihilator_quotient_gamma R L s hs
+  have hr0 : r ≠ 0 := nonZeroDivisors.ne_zero hr
+  have htor : Module.IsTorsionBySet (R : Type)
+      ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+        ⧸ Submodule.span (R : Type) {s})
+      (Ideal.span {r} : Set (R : Type)) := by
+    intro x a
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp a.2
+    have hcx : (a : (R : Type)) • x = c • (r • x) := by rw [← hc, mul_smul]
+    rw [hcx, hrN x, smul_zero]
+  letI := htor.module
+  letI := htor.isScalarTower (S := (R : Type))
+  haveI := hfin r hr0
+  haveI := finite_gamma R L
+  haveI hmf : Module.Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))
+      ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+        ⧸ Submodule.span (R : Type) {s}) :=
+    Module.Finite.of_restrictScalars_finite (R : Type) _ _
+  exact Module.finite_iff_finite.mp hmf
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -495,6 +545,28 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def finite_quotient_gamma_of.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(Γ(L)/(R·s) が有限であること——台帳の段 B の到達点)",
+    sectionId := "genell-def-1-1-ii" }
+
+def finite_quotient_gamma_of.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_annihilator_quotient_gamma(商の共通の消滅元)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.exists_annihilator_quotient_gamma") 4,
+    .citation "[ABC3]" "finite_quotient_span_singleton(数体で hfin を満たす)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.finite_quotient_span_singleton") 4,
+    .citation "[mathlib]" "Module.IsTorsionBySet.module / Module.finite_iff_finite"
+      (.inMathlib "Module.IsTorsionBySet.module") 4,
+    .implicitStep
+      ("★配管(2026-08-28): Module インスタンスは **data** なので " ++
+       "haveI ではなく **letI** が要る。haveI だと中身が失われ、" ++
+       "isScalarTower が参照できず failed to synthesize IsScalarTower になる") 4,
+    .implicitStep
+      ("★★数体版の型は書けない——moduleSpecGammaFunctor の暗黙引数が " ++
+       "CommRingCat.of (O_F) から逆算できないため。" ++
+       "使うときは R := CommRingCat.of (O_F) を渡し、" ++
+       "hfin に finite_quotient_span_singleton を渡す") 4 ]
 
 def exists_annihilator_quotient_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
