@@ -77,6 +77,35 @@ theorem exists_open_extend {X' : Scheme.{0}}
     (specZIsTerminal.hom_ext _ _)
   exact ⟨U, hxU, g, h1⟩
 
+/-! ## ★★★★★★空でない開は生成点を含む -/
+
+/-- ★★★★**整域の `Spec` では、点を含む開集合は生成点（`⊥`）を含む**。
+
+★機構: 任意の点 `x` は `⊥` の閉包（＝`zeroLocus ⊥` ＝全体）に入るので、
+`x` の任意の開近傍は `{⊥}` と交わる。 -/
+theorem generic_mem_of_mem {R : Type} [CommRing R] [IsDomain R]
+    (U : Set (PrimeSpectrum R)) (hU : IsOpen U) {x : PrimeSpectrum R} (hx : x ∈ U) :
+    (⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum R) ∈ U := by
+  have hcl : x ∈ closure ({(⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum R)} :
+      Set (PrimeSpectrum R)) := by
+    rw [PrimeSpectrum.closure_singleton, PrimeSpectrum.zeroLocus_bot]
+    exact Set.mem_univ x
+  obtain ⟨y, hyU, hy⟩ := mem_closure_iff.1 hcl U hU hx
+  rw [Set.mem_singleton_iff] at hy
+  exact hy ▸ hyU
+
+omit [NumberField F] in
+/-- ★★★★★★**`Spec 𝒪_F` では、点を含む開集合は生成点を含む**。
+
+★★★これが「閉点を全部覆えば自動的に全体を覆う」ことの根拠である
+——`Spec 𝒪_F` の点は生成点と閉点しかない。 -/
+theorem generic_mem_opens (U : (specRingOfIntegers F).Opens)
+    {x : specRingOfIntegers F} (hx : x ∈ U) :
+    (⟨⊥, Ideal.isPrime_bot⟩ : specRingOfIntegers F) ∈ U := by
+  have hx' : x ∈ (U : Set (specRingOfIntegers F)) := hx
+  show (⟨⊥, Ideal.isPrime_bot⟩ : specRingOfIntegers F) ∈ (U : Set (specRingOfIntegers F))
+  exact generic_mem_of_mem (R := NumberField.RingOfIntegers F) _ U.2 hx'
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** 残っているのは
