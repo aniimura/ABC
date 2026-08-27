@@ -408,6 +408,27 @@ theorem exists_common_annihilator (R M : Type) [CommRing R] [AddCommGroup M] [Mo
   have hm := hker (Submodule.mem_top : m ∈ (⊤ : Submodule R M))
   simpa using hm
 
+/-! ## ★★★★★★★★非零元で割った剰余は有限 -/
+
+open NumberField in
+/-- ★★★★★★★★**`O_F/(r)` は `r ≠ 0` なら有限である**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★実測(2026-08-28)で 2 つの在庫が完璧に噴み合った:
+
+  `Ideal.finrank_eq_finrank`              `I ≠ ⊥` なら `finrank Z I = finrank Z S`
+  `Submodule.finiteQuotientOfFreeOfRankEq` rank が一致すれば商は有限
+
+★★これが台帳の段 B の最後の部品である。 -/
+theorem finite_quotient_span_singleton (F : Type) [Field F] [NumberField F]
+    (r : RingOfIntegers F) (hr : r ≠ 0) :
+    Finite ((RingOfIntegers F) ⧸ (Submodule.restrictScalars ℤ (Ideal.span {r}))) :=
+  Submodule.finiteQuotientOfFreeOfRankEq _
+    (Ideal.finrank_eq_finrank (Module.Free.chooseBasis ℤ (RingOfIntegers F)) (Ideal.span {r})
+      (by simpa using hr))
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -444,6 +465,27 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def finite_quotient_span_singleton.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(O_F/(r) は r ≠ 0 なら有限——段 B の最後の部品)",
+    sectionId := "genell-def-1-1-ii" }
+
+def finite_quotient_span_singleton.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Ideal.finrank_eq_finrank(I ≠ ⊥ なら finrank Z I = finrank Z S)"
+      (.inMathlib "Ideal.finrank_eq_finrank") 4,
+    .citation "[mathlib]" "Submodule.finiteQuotientOfFreeOfRankEq(rank 一致なら商は有限)"
+      (.inMathlib "Submodule.finiteQuotientOfFreeOfRankEq") 4,
+    .implicitStep
+      ("★実測(2026-08-28): この 2 つの在庫が完璧に噴み合い、3 行で出た。" ++
+       "AbsNorm.lean:370 の使用例を見つけて同じ型を使った") 4,
+    .implicitStep
+      ("★★段 B は**部品が全部揃った**。残るのは組み立てのみ: " ++
+       "(1) N = Γ(L)/(O_F·s) に exists_common_annihilator を適用して r ≠ 0、" ++
+       "(2) Module.IsTorsionBySet.module で N を O_F/(r)-加群に、" ++
+       "(3) 本補題で Finite (O_F/(r))、" ++
+       "(4) Module.finite_iff_finite で結論。" ++
+       "★型の齯齬(restrictScalars の商 vs Ideal.Quotient)を Finite.of_equiv で埋める") 4 ]
 
 def exists_common_annihilator.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
