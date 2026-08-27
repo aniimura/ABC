@@ -461,6 +461,7 @@ import ABC3.Found.Arakelov.UltraTransfer
 import ABC3.Found.Arakelov.UltraBasic
 import ABC3.Found.Arakelov.UltraCoord
 import ABC3.Found.Arakelov.UltraCompact
+import ABC3.Found.GenEll.Prop16Proper
 import ABC3.Found.Arakelov.ProjModelWitness
 import ABC3.Found.Arakelov.PicPresheafTensor
 import ABC3.Found.Arakelov.PicSheafTensor
