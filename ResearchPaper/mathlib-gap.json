@@ -755,6 +755,22 @@
    "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
    "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
    "nextStep": "★第 1 歩は 2026-08-28 に入った——APicQuot.lean の **APicOf（同型類の群）**。 ★★次は Γ(L) を分数イデアルと見て log #(𝒪_F/𝔞) を Ideal.absNorm で書き、積公式（Found/GenEll/ProductFormula.lean にある）でs の取り方に依らないことを示す。"
+  },
+  "arakelov-coherent-base-metric": {
+   "what": "算術直線束の**基準計量を整合的に選ぶ**こと。 すなわち base_{[L·M]} = base_{[L]} ⊗ base_{[M]}。",
+   "whereUsed": [
+    "[GenEll] Definition 1.1（「テンソル積で同型類が群 APic(X) をなす」）",
+    "★[GenEll] Definition 1.2（deg_F の加法性）",
+    "★★Interface/Arakelov/APic.lean の APicData の穴と同種"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-08-28 実測。mathlib に Arakelov の計量は無い。",
+    "absentPart": "★Found/Arakelov/ArcTorsorMetric.lean の TorsorMetric.base は **Classical.choice** であり、対象ごとに獨立に選ばれている。 ★★TorsorMetric.tensor は **Green を足すだけ**なので、群法則が表す計量は base_{G⊗H} · e^{-(g+h)}、真のテンソル積は (base_G ⊗ base_H) · e^{-(g+h)} で一致しない。 ★★★差は 2-コサイクル c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]})) である。"
+   },
+   "minimalForm": "★道は 2 つある。 （a）**整合的な基準計量の族をデータとして持つ**（CoherentBase 構造体を作り、存在は別途）。 （b）**捻れ集合表示をやめて**、同型類を「可逆層＋本物の連続計量」の商として直に作る（テンソル積の計量を作る必要があり、§9-335 の見積もりでは 10〜15 ブロック）。",
+   "impact": "★**Definition 1.1 の最後の 1 本**である（2026-08-28 に項目全体の .src を下げた）。 ★★Definition 1.2 の deg_F の加法性もこれに依る。 ★★★したがって **§1 の 2 項目の共通の根**である。",
+   "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。"
   }
  },
  "summary": {

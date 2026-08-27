@@ -29426,3 +29426,60 @@ theorem evalGlobal_conjPoint (p) (g) :
 - `lake build` 全体通過、`node tools/check.mjs` **PASS**
 - **`GenEll` の必要分 12/24（§1 は 5/9）**
 - 次の葉: **`ADiv(F)` の有限部分 ≅ 分数イデアル**（Dedekind の一意分解を群同型に束ねる）
+
+## §9-715 ★★★★★★★★★**訂正——`Definition 1.1` の項目全体の `.src` を下げた**(第 439-440 ブロック、2026-08-28)
+
+`§9-712` で `item := "Definition 1.1"`（条なし）を置いた。★**過剰な主張であった。**
+
+### ★★★★★★★★何を見落としたか
+
+原文は「**テンソル積で**同型類が群 `APic(X)` をなす」と書く。ところが `TorsorMetric` の設計では
+
+* 計量は `base_F · exp(-green)` で表され、`base_F` は **`Classical.choice`**（対象ごとに独立）
+* `TorsorMetric.tensor` は **`green` を足すだけ**
+
+なので、群法則が表す計量は `base_{G⊗H} · e^{-(g+h)}` であり、
+真のテンソル積 `(base_G ⊗ base_H) · e^{-(g+h)}` と**一致しない**。
+
+★★差は 2-コサイクル
+
+    `c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]}))`
+
+である。★★★したがって `ArithPic` / `APicOf` は `APic(X)` と**集合としては対応するが、
+群としては基準計量を整合的に選ばない限り一致しない**。
+
+### ★★★失われていないもの
+
+| もの | 状態 |
+|---|---|
+| 対の群 `ArithPic` | ★真 |
+| 同型類への商 `APicOf` | ★真 |
+| 引き戻し `APicOfPullback` | ★真 |
+| 射 `ArithHom` と `Γ(L̄) ≝ Hom(Ō_X, L̄)` | ★真 |
+| `Ō_X`（`|1| = 1`） | ★真 |
+
+★**欠けているのは「群法則がテンソル積である」の 1 本だけ**である。
+
+### ★★★★★これは `APicData` の穴と同じ根である
+
+`Interface/Arakelov/APic.lean` の `logMetric_tensor` は **Green の和しか要求しない**。
+★`Def12Height.lean` が 2026-08-27 に `Definition 1.2` を下げたのも同じ根であり、
+★★台帳に `arakelov-coherent-base-metric` として登録した——
+**§1 の 2 項目（`Definition 1.1` と `Definition 1.2`）の共通の根**である。
+
+### ★★★★道は 2 つ（測定）
+
+| 道 | 中身 | 見積もり |
+|---|---|---|
+| (a) | **整合的な基準計量の族をデータとして持つ**（`CoherentBase` 構造体、存在は別途） | ★小 + 存在定理 |
+| (b) | 捻れ集合表示をやめ、同型類を「可逆層＋本物の連続計量」の商として直に作る | ★★§9-335 の見積もりで 10〜15 ブロック |
+
+★存在定理の側は、`Pic(Spec 𝓞_F) = Cl(F)` が**有限群**で
+`C(X^arc,ℝ)` が**可除**なので `H²` が消えることから出るはずである（未検証）。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 11/24（§1 は 4/9）** ——★正直な数である
+- 本日入った真の資産: `ArithSections` / `ArithPic` / `APicQuot` / `Definition11` /
+  `PicClassGroup` / `FractionalIdealDivisor`、および ample の段 A1・C1・D1-D3
