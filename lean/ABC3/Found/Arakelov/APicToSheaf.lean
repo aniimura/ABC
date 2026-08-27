@@ -635,6 +635,27 @@ noncomputable def spanSingletonEquivGamma (R : CommRingCat.{0}) [IsDomain (R : T
     (LinearEquiv.ofEq _ _ (LinearMap.span_singleton_eq_range (R : Type)
       (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) s).symm)
 
+/-! ## ★★★★★★★★`R/(u) ≃ span{s}/…` —— 段 D 本体の第二段 -/
+
+/-- ★★★★★★★★**`R/(u)` は `span{s}` の商に移る**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★`spanSingletonEquivGamma`(§9-768)を `Submodule.Quotient.equiv` に渡すだけである。
+★★右辺の部分加群が `span{u·s}`(を `span{s}` の中で見たもの)と一致することを
+示せば、商の位数が `#(R/(u)) = N(u)` 倍になることが出る。 -/
+noncomputable def quotIdealEquivQuotSpan (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) :
+    ((R : Type) ⧸ (Ideal.span {u} : Ideal (R : Type)))
+      ≃ₗ[(R : Type)]
+      ((Submodule.span (R : Type) {s})
+        ⧸ Submodule.map (spanSingletonEquivGamma R L s hs).toLinearMap
+            (Ideal.span {u} : Ideal (R : Type))) :=
+  Submodule.Quotient.equiv _ _ (spanSingletonEquivGamma R L s hs) rfl
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -671,6 +692,24 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def quotIdealEquivQuotSpan.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(R/(u) が span{s} の商に移ること——段 D 本体の第二段)",
+    sectionId := "genell-def-1-1-ii" }
+
+def quotIdealEquivQuotSpan.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "spanSingletonEquivGamma(R ≃ span{s})"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.spanSingletonEquivGamma") 4,
+    .citation "[mathlib]" "Submodule.Quotient.equiv"
+      (.inMathlib "Submodule.Quotient.equiv") 4,
+    .implicitStep
+      ("★★段 D 本体の残り: (1) 右辺の部分加群 " ++
+       "map (spanSingletonEquivGamma) (span{u}) が span{u·s} と一致すること、" ++
+       "(2) 短完全列 0 → span{s}/span{us} → Γ/span{us} → Γ/span{s} → 0 で " ++
+       "Nat.card の乗法性、" ++
+       "(3) degFin(u·s) = degFin(s) + log N(u)、" ++
+       "(4) アルキメデス部分と合わせて積公式") 4 ]
 
 def spanSingletonEquivGamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
