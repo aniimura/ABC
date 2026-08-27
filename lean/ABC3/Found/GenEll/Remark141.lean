@@ -188,9 +188,19 @@ theorem remark_1_4_1_of_descent_bound {X X' : Scheme.{0}}
 ★★★★★最下段が**「`n` を反転すれば一致する」の定量版**である
 ——これが降下（`exists_pair_descent`）が実際に与える形に最も近い。
 
-★★残る段は**一様な `n` をスキームから取ること**である
-（`X` は準コンパクトなのでアフィン被覆は有限、
-各チャートで `exists_pow_mul_le_of_map_le`、その最大を取る）。 -/
+★★★★★★**一様な `n` をスキームから取る段は閉じた**（2026-08-27、第 365 ブロック）:
+`ChartwiseUniform.lean` の `htArith_bdeq_of_chartwise_localization` が
+
+> `X` が有限個のネーターなアフィンチャートで覆われ、
+> 各チャートで `D` と `E` が `N` を反転して一致するなら `ht_D ≈ ht_E`
+
+を与える。★`mathlib-gap.json` の `vertical-divisors-generate-pic-kernel` は
+**5/5 で閉じた**。
+
+★★残るのは原文**第 2 文**の側だけである
+——「this theory may be applied to any normal, projective scheme `Y` over `ℚ`」は
+射影埋め込みから `ℤ`-モデルを作る段を要求し、それは
+`ample-and-projective-embedding` の在庫不足である。 -/
 theorem remark_1_4_1_of_descent_comparable {X X' : Scheme.{0}}
     (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ)) [IsProper f']
     {m : ℕᵒᵖ}
@@ -259,12 +269,16 @@ def remark_1_4_1_of_descent.needs : List ABC3.Meta.ProofObligation :=
        "(＝垂直因子の差)が残る") 8,
     .citation "[ABC3]" "htArith_bdeq_of_baseChange′(垂直なひねりは高さを定数だけ動かす)"
       (.inProject "ABC3" "ABC3.Found.GenEll.htArith_bdeq_of_baseChange'") 6,
+    .citation "[ABC3]"
+      "htArith_bdeq_of_chartwise_localization(垂直な差の一様有界性——完全な形)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.htArith_bdeq_of_chartwise_localization") 6,
     .implicitStep
-      ("★★★★その差は**一様に有界**である——垂直因子は Spec ℤ 上の因子の引き戻しなので " ++
-       "x^*(X_q) = (q) となり deg_F は log q(点にも定義体にも依らない)。" ++
-       "★★この段は VerticalTwist.lean で取れた。" ++
-       "★残るのは「2 つのモデルのずれが必ずその形になる」——" ++
-       "ファイバーが可約な場合は交点数の評価が要る") 8,
+      ("★★★★★★**垂直な差の一様有界性は 2026-08-27 に閉じた**" ++
+       "(mathlib-gap の vertical-divisors-generate-pic-kernel、5/5)。" ++
+       "★当初「Cl(X) → Cl(U) の完全列が要る」と登記したのは過大であった" ++
+       "——実際に使ったのは 有限生成性・準コンパクト性・absNorm の単調性・" ++
+       "Spec ℤ が終対象であること の 4 つだけである。" ++
+       "★★**交点数も Weil 因子類群も要らなかった**") 8,
     .implicitStep
       ("★★原文の第 2 文「In particular, this theory may be applied to any normal, " ++
        "projective scheme Y over ℚ」は、射影埋め込みから ℤ-モデルを作る段" ++

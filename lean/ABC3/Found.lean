@@ -405,6 +405,7 @@ import ABC3.Found.GenEll.VerticalBound
 import ABC3.Found.GenEll.IdealComparable
 import ABC3.Found.GenEll.VerticalDescent
 import ABC3.Found.GenEll.ChartwiseUniform
+import ABC3.Found.GenEll.Prop14iii
 import ABC3.Found.GenEll.Remark141
 import ABC3.Found.GenEll.BcDiagramRaw
 import ABC3.Found.GenEll.ArithDivHom
