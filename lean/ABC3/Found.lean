@@ -480,6 +480,7 @@ import ABC3.Found.Arakelov.PullbackPic
 import ABC3.Found.Arakelov.MetricHeight
 import ABC3.Found.Arakelov.PullbackFunctorial
 import ABC3.Found.Arakelov.SheafifyTriv
+import ABC3.Found.Arakelov.APicToSheaf
 import ABC3.Found.Arakelov.ArchDeg
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
