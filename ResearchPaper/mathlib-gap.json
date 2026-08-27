@@ -134,8 +134,9 @@
           "★★帰納の本体(nested_induction / nested_induction_descend、第 416)"
         ],
         "todoList": [
-          "★残りは 1 つだけ: descend を実際に作る段——f₀ を α₀ の最小多項式に取り、E ≙ f₀(S₀) として、ℙ¹ 上の有理関数として組み立てる(★出力は多項式ではなく f(x) ∈ ℚ(x) なので Separation.lean の P1C を使う)"
-        ]
+          "★残りは 1 つだけ: ℙ¹ 上の有理関数としての組み立て(不分岐性の帳簿)。★★多項式の段は 2026-08-27 の第 417 ブロックで端から端まで閉じた(exists_poly_image_rat: 代数的数の有限集合は ℚ[x] の非定数多項式 1 つで ℚ の中へ写せる)。残るのは、その写像が ℙ¹ の射として S_φ の外で不分岐であることの帳簿だけである。"
+        ],
+        "extraDone": "★★第 417: exists_descend_data(帰納段のデータを実際に作る段)と nested_induction_descend′(不変量付き)を経て、exists_poly_image_rat を得た。★原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis, and composing the resulting morphisms』がこれで Lean の中にある。"
       },
       "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
       "where": [
