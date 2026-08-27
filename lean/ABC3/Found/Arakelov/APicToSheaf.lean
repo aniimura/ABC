@@ -810,6 +810,37 @@ theorem degFin_smul (R : CommRingCat.{0}) [IsDomain (R : Type)]
     Real.log_mul (by exact_mod_cast h1.ne') (by exact_mod_cast h2.ne')]
   rfl
 
+/-! ## ★★★★★★★★★★積公式への橋 -/
+
+/-- ★★★**商の位数は絶対ノルムである**。 -/
+theorem card_quotient_span_eq_normAbs (R : Type) [CommRing R] [IsDedekindDomain R]
+    [Module.Free ℤ R] [Module.Finite ℤ R] (r : R) :
+    Nat.card (R ⧸ (Ideal.span {r} : Ideal R)) = ((Algebra.norm ℤ) r).natAbs := by
+  rw [← Ideal.absNorm_span_singleton r]
+  rfl
+
+/-- ★★★★★★★★★★**段 D の有限部分側をノルムで書いた形**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+    `degFin (u·s) = degFin s + log |N(u)|`
+
+★★★これが**積公式への橋**である——
+アルキメデス部分のずれは `−Σ_σ log|σ(u)|` であり、
+`log |N(u)| = Σ_σ log|σ(u)|` なので相殺する。
+★`ProductFormula.lean` の `deg_principalADiv_eq_zero` がその積公式である。 -/
+theorem degFin_smul_norm (R : CommRingCat.{0})
+    [IsDedekindDomain (R : Type)] [Module.Free ℤ (R : Type)] [Module.Finite ℤ (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) (hu : u ≠ 0)
+    (hfin : ∀ r : (R : Type), r ≠ 0 →
+      Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))) :
+    degFin R L (u • s)
+      = degFin R L s + Real.log (((Algebra.norm ℤ) u).natAbs) := by
+  rw [degFin_smul R L s hs u hu hfin, card_quotient_span_eq_normAbs (R : Type) u]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -846,6 +877,23 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul_norm.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(degFin(u·s) = degFin(s) + log |N(u)|——積公式への橋)",
+    sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul_norm.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "degFin_smul(段 D の有限部分側)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.degFin_smul") 4,
+    .citation "[mathlib]" "Ideal.absNorm_span_singleton(absNorm (span{r}) = |N(r)|)"
+      (.inMathlib "Ideal.absNorm_span_singleton") 4,
+    .implicitStep
+      ("★★段 D の残りは積公式との接続だけである: " ++
+       "log |N(u)| = Σ_σ log|σ(u)| なので、" ++
+       "アルキメデス部分のずれ −Σ_σ log|σ(u)| と相殺する。" ++
+       "ProductFormula.lean の deg_principalADiv_eq_zero がその積公式であり、" ++
+       "在庫にある") 4 ]
 
 def degFin_smul.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
