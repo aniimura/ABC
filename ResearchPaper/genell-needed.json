@@ -59,7 +59,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 1.5.1",
@@ -213,5 +213,5 @@
   }
  ],
  "total": 24,
- "done": 7
+ "done": 8
 }
