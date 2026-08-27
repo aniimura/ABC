@@ -1113,6 +1113,7 @@ import ABC3.Found.Arakelov.ArcGreenMetric
 import ABC3.Found.Arakelov.ArcGreenConj
 import ABC3.Found.Arakelov.ArithSections
 import ABC3.Found.Arakelov.ArithPic
+import ABC3.Found.Arakelov.APicQuot
 import ABC3.Found.Arakelov.Definition11
 import ABC3.Found.Arakelov.ArcTorsorMetric
 import ABC3.Found.Arakelov.ArcMetricWitness

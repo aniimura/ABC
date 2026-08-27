@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Arakelov.ArithPic
+import ABC3.Found.Arakelov.APicQuot
 import ABC3.Meta.Claim
 
 /-!
@@ -63,22 +64,17 @@ import ABC3.Meta.Claim
 「`≤ 1` を保つ」⟺ `|u| ≤ 1` ⟺ `|φ(s)| ≤ |s|`）だが、**その同値は証明していない**。
 ★★★向きは**強い側**なので下流は弱くならない（`ArithHom.mapsTo_arithSections`）。
 
-## ★★★逸脱 3（明示）——`APic(X)` は**対の群**であって同型類の群ではない
+## ★★★★★逸脱 3 は消えた（2026-08-28）——`APic(X)` は**同型類**の群である
 
-原文は「テンソル積で**同型類**が群 `APic(X)` をなす」と書くが、
+原文は「テンソル積で**同型類**が群 `APic(X)` をなす」と書く。
 `ArithPic X = Pic(X) × Multiplicative (共役不変な連続関数)` は**対の群**であり、
-同型による商を取っていない。
+差は `Γ(X, 𝒪_X^×)` の作用（単元 `u` は計量を `|u|` 倍する）である。
 
-★差は `Γ(X, 𝒪_X^×)` の作用である——単元 `u` による自己同型は
-計量を `|u|` 倍するので、`(L, g)` と `(L, g + log|u|)` は**同型な算術直線束**である。
-
-★★**下流は影響を受けない**。消費側が使うのは `deg_F`（とその上の `ht`）だけで、
-`deg_F` はこの作用で**不変**である——単元の積公式で
-`Σ_σ log|σ(u)| = 0` だからである。★★★したがって `ht` は同型類を経由して因数分解する。
-
-★★★★商を作るには `u ↦ log‖u‖` が `conjArcCM` に入ること（単元は非消失なので
-`continuous_evalGlobal` と `Real.log` の連続性から出る）を言えばよく、
-**作れないものではない**。本ファイルは取っていない。
+★**`Found/Arakelov/APicQuot.lean` がその部分群で商を取る**（`APicOf`）。
+★★鍵は `evalGlobal` の共役両立
+（`evalGlobal (ι_X p) g = conj (evalGlobal p g)`）で、
+これは `Scheme.ΓSpecIso_naturality` を `starRingEnd ℂ` に当てるだけで出た。
+★★★引き戻しも降りる（`APicOfPullback`）ので (ii) も同型類の側で取れている。
 
 ★`X` に正規性・`ℤ`-固有性・`ℤ`-平坦性を**課していない**。それらは §1 の地の文の
 標準仮定であって、定義そのものには要らない——要る所（`X^arc` のコンパクト性）では
@@ -201,11 +197,6 @@ noncomputable def trivialGreenMetric (X : Scheme.{0}) : GreenMetric X (unitModul
 theorem trivialGreenMetric_isConjCompatible :
     (trivialGreenMetric X).IsConjCompatible := fun _ => rfl
 
-theorem evalGlobal_one (p : Spec (CommRingCat.of ℂ) ⟶ X) :
-    evalGlobal p (1 : ((X.presheaf.obj (op (⊤ : X.Opens))) : Type)) = 1 := by
-  show (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom ((Scheme.Hom.appTop p).hom 1) = 1
-  rw [map_one, map_one]
-
 /-- ★★★★★★**`|1|_{Ō} = 1`**——正規化の中身。 -/
 theorem trivialGreenMetric_norm_one (p : Spec (CommRingCat.of ℂ) ⟶ X) :
     (trivialGreenMetric X).norm (structOne X) p = 1 := by
@@ -287,12 +278,10 @@ def definition_1_1.needs : List ABC3.Meta.ProofObligation :=
       ("★★逸脱 2: X に正規性・ℤ-固有性・ℤ-平坦性を課していない。" ++
        "それらは §1 の地の文の標準仮定であって定義そのものには要らず、" ++
        "要る所(X^arc のコンパクト性)では compactSpace_arc が固有性から出す") 3,
-    .implicitStep
-      ("★★★逸脱 3: APic(X) を**対の群**として作った。" ++
-       "原文は「同型類が群をなす」と書くが、差は Γ(X, 𝒪_X^×) の作用" ++
-       "（単元 u は計量を |u| 倍する）である。" ++
-       "★下流は影響を受けない——deg_F は単元の積公式でこの作用に不変だからである。" ++
-       "★★商は作れないものではない（u ↦ log‖u‖ が conjArcCM に入る）が、本ファイルは取っていない") 3,
+    .citation "[ABC3]" "APicOf(APic(X)は同型類の群——逸脱 3 は 2026-08-28 に消えた)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.APicOf") 3,
+    .citation "[ABC3]" "APicOfPullback((ii) は同型類の側でも取れている)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.APicOfPullback") 3,
     .implicitStep
       ("★★★★計量は「基準計量 × exp(-Green)」の捻れ集合表示で持つ。" ++
        "これは Arakelov 理論の標準的な表示であり、" ++
