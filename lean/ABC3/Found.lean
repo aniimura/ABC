@@ -469,6 +469,7 @@ import ABC3.Found.Arakelov.AMetricMonoid
 import ABC3.Found.Arakelov.AMetricIso
 import ABC3.Found.Arakelov.AMetricGroup
 import ABC3.Found.Arakelov.AMetricPic
+import ABC3.Found.Arakelov.AMetricNorm
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
