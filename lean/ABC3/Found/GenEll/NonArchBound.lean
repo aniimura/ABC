@@ -229,7 +229,69 @@ theorem boundedByNonArch_baseChange (F K : Type) [Field F] [NumberField F]
   unfold BoundedByNonArch
   rw [padicPointSet_baseChange F K p xF]
 
-/-! ## ★5. 素点ごとの囲い込み領域を束ねる -/
+/-! ## ★5. アルキメデス側を「`[F:ℚ]` 個の埋め込み全部」で取り直す
+
+★★`CompactBound.lean` の `archPointSet` は**無限素点ごとに 1 つ**の埋め込みを取る
+（`archPoint` が `InfinitePlace F` で索引されている）。
+★原文は「the set of **`[F:ℚ]` points** of `X^arc` determined by `x`」と数えるので、
+**共役も含めた埋め込み全部**である。
+
+★★★`K_v` が `ι_X`-安定なら 2 つは同値だが、
+本ファイルは `K_v` に安定性を課さない流儀なので、**原文どおり全部で取る**。
+★★こうすると非アルキメデス側と**同じ証明**で底変換不変性が出る（`ℂ` も代数閉だから）。 -/
+
+/-- ★**埋め込み `σ : F → ℂ` が定める ℂ-点**（原文の「`[F:ℚ]` 個の点」）。 -/
+noncomputable def archPointFull {F : Type} [Field F] [NumberField F]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) (σ : F →+* ℂ) : complexPoints X :=
+  Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 F) F))) ≫ xF
+
+/-- ★★`x` が定める `X^arc` の点全体（共役も含む）。 -/
+def archPointSetFull (F : Type) [Field F] [NumberField F]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) : Set (complexPoints X) :=
+  Set.range (archPointFull xF)
+
+theorem archPointFull_comp (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
+    [Algebra F K] {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) (σ : K →+* ℂ) :
+    archPointFull (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF) σ
+      = archPointFull xF (σ.comp (algebraMap F K)) := by
+  show Spec.map (CommRingCat.ofHom (σ.comp (algebraMap (𝓞 K) K)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF
+    = Spec.map (CommRingCat.ofHom ((σ.comp (algebraMap F K)).comp (algebraMap (𝓞 F) F))) ≫ xF
+  rw [← Category.assoc, ← Spec.map_comp]
+  have htower : (σ.comp (algebraMap (𝓞 K) K)).comp (algebraMap (𝓞 F) (𝓞 K))
+      = (σ.comp (algebraMap F K)).comp (algebraMap (𝓞 F) F) := by
+    ext x
+    show σ (algebraMap (𝓞 K) K (algebraMap (𝓞 F) (𝓞 K) x))
+      = σ (algebraMap F K (algebraMap (𝓞 F) F x))
+    rw [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+  rw [← htower]
+  rfl
+
+/-- ★★`F → ℂ` は `K → ℂ` へ延びる（`ℂ` は代数閉）。 -/
+theorem exists_complex_extension (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (σ : F →+* ℂ) :
+    ∃ τ : K →+* ℂ, τ.comp (algebraMap F K) = σ := by
+  letI : Algebra F ℂ := σ.toAlgebra
+  haveI : Algebra.IsAlgebraic F K := inferInstance
+  let ψ : K →ₐ[F] ℂ := IsAlgClosed.lift
+  exact ⟨ψ.toRingHom, by ext x; exact ψ.commutes x⟩
+
+/-- ★★★★**アルキメデス側も定義体の取り方に依らない**。
+
+★非アルキメデス側（`padicPointSet_baseChange`）と**同じ証明**である。 -/
+theorem archPointSetFull_baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K]
+    {X : Scheme.{0}} (xF : specRingOfIntegers F ⟶ X) :
+    archPointSetFull K (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      = archPointSetFull F xF := by
+  refine Set.Subset.antisymm ?_ ?_
+  · rintro _ ⟨σ, rfl⟩
+    exact ⟨σ.comp (algebraMap F K), (archPointFull_comp F K xF σ).symm⟩
+  · rintro _ ⟨σ, rfl⟩
+    obtain ⟨τ, hτ⟩ := exists_complex_extension F K σ
+    exact ⟨τ, by rw [archPointFull_comp F K xF τ, hτ]⟩
+
+/-! ## ★6. 素点ごとの囲い込み領域を束ねる -/
 
 /-- ★**非アルキメデス側の囲い込み領域** —— 素数 `p` と `X(ℚ̄_p)` の部分集合の対。
 
@@ -264,6 +326,57 @@ theorem boundedByV_of_arch {X : Scheme.{0}} (F : Type) [Field F] [NumberField F]
     (h : BoundedByArch F Karc xF) : BoundedByV F Karc [] xF :=
   ⟨h, by simp⟩
 
+/-! ## ★7. ★★★★★★compactly bounded subset —— 原文の語彙で束ねる -/
+
+/-- ★★★**compactly bounded subset のデータ** —— 原文の `V` と `K_v` の組。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★`V` は `V(ℚ)^arc` を必ず含む有限集合なので、`ℚ` の唯一のアルキメデス素点に対する
+`Karc` と、有限個の `PadicBound` の族で書ける。 -/
+structure CBData (X : Scheme.{0}) : Type 1 where
+  /-- `V^arc` の唯一の素点に対する `K_v ⊆ X^arc`（**bounding domain**）。 -/
+  Karc : Set (complexPoints X)
+  /-- `V^non` の各素点に対する `K_v ⊆ X(ℚ̄_p)`（**bounding domains**）。 -/
+  Vnon : List (PadicBound X)
+
+/-- ★**support**（原文「to `V` as the **support** of the compactly bounded subset」）。
+
+★アルキメデス素点は必ず入るので、非アルキメデス側の素数の並びで表す。 -/
+def CBData.support {X : Scheme.{0}} (c : CBData X) : List ℕ :=
+  c.Vnon.map PadicBound.p
+
+/-- ★★★★★**`K_V` の条件そのもの**（原文どおり、両側とも `[F:ℚ]` 個の点で）。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★★アルキメデス側に `archPointSetFull`（埋め込み全部）を使うのが要点である。 -/
+def CBData.Bounds {X : Scheme.{0}} (c : CBData X) (F : Type) [Field F] [NumberField F]
+    (xF : specRingOfIntegers F ⟶ X) : Prop :=
+  archPointSetFull F xF ⊆ c.Karc ∧ ∀ b ∈ c.Vnon, b.Bounds F xF
+
+/-- ★★★★★★**`K_V` は `X(ℚ̄)` の部分集合として意味を持つ** ——
+定義体を上げても条件は変わらない。
+
+原文 (GenEll p.6):
+> for the subset of points x ∈ X(F ) ⊆ X(Q), where [F : Q] < ∞, such that for each
+
+★★★これが `Example 1.3, (ii)` の定義が well-posed であることの中身である。
+アルキメデス側は `archPointSetFull_baseChange`、
+非アルキメデス側は `padicPointSet_baseChange`（どちらも代数閉性を使う）。 -/
+theorem CBData.bounds_baseChange {X : Scheme.{0}} (c : CBData X)
+    (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K] [Algebra F K]
+    (xF : specRingOfIntegers F ⟶ X) :
+    c.Bounds K (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      ↔ c.Bounds F xF := by
+  unfold CBData.Bounds PadicBound.Bounds BoundedByNonArch
+  rw [archPointSetFull_baseChange F K xF]
+  refine and_congr Iff.rfl (forall_congr' fun b => forall_congr' fun _ => ?_)
+  haveI := b.isPrime
+  rw [padicPointSet_baseChange F K b.p xF]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def IsCompactDomain.src : ABC3.Meta.Source :=
@@ -285,6 +398,40 @@ def BoundedByV.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Example 1.3, (ii)(K_V の条件——アルキメデス側と非アルキメデス側の連言)",
     sectionId := "genell-ex-1-3" }
+
+def archPointSetFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Example 1.3, (ii)(アルキメデス側を [F:ℚ] 個の埋め込み全部で取る)",
+    sectionId := "genell-ex-1-3" }
+
+def padicPointSet_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Example 1.3, (ii)(非アルキメデス側の点の集合は定義体に依らない)",
+    sectionId := "genell-ex-1-3" }
+
+def archPointSetFull_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Example 1.3, (ii)(アルキメデス側の点の集合は定義体に依らない)",
+    sectionId := "genell-ex-1-3" }
+
+def CBData.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Example 1.3, (ii)(compactly bounded subset のデータ——bounding domains と support)",
+    sectionId := "genell-ex-1-3" }
+
+def CBData.bounds_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Example 1.3, (ii)(K_V が X(ℚ̄) の部分集合として意味を持つ)",
+    sectionId := "genell-ex-1-3" }
+
+def CBData.bounds_baseChange.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "archPointSetFull_baseChange(アルキメデス側)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.archPointSetFull_baseChange") 6,
+    .citation "[ABC3]" "padicPointSet_baseChange(非アルキメデス側)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.padicPointSet_baseChange") 6,
+    .implicitStep
+      ("★どちらも中身は「埋め込みは代数閉体へ延びる」(IsAlgClosed.lift)である。" ++
+       "★★索引を体の埋め込み F → ℂ / F → ℚ̄_p に取ったので両側が同じ証明になった") 6 ]
 
 def BoundedByV.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "BoundedByArch(アルキメデス側。CompactBound.lean)"
