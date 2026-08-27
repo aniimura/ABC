@@ -1221,3 +1221,40 @@ congr 1
 `exact` は助ける——`Γ(X,U)` の項（本ファイル上方）と**同じ型の失敗形**である。
 
 ★「defeq なのに `rw` が落ちた」と思ったら、まず `refine (…).trans ?_` を試すこと。
+
+## `unfold` の後はインスタンスが合流しない —— `show` で形を合わせる
+
+**失敗形**（2026-08-27、`ProjectiveSpace.lean`）:
+
+```lean
+instance : IsProper (projSpaceOverSpec n R) := by
+  unfold projSpaceOverSpec
+  exact IsProper.mk
+-- failed to synthesize IsSeparated (Proj.toSpecZero … ≫ Spec.map …)
+```
+
+ところが**同じ式を直に書けば通る**:
+
+```lean
+example : IsSeparated (Proj.toSpecZero … ≫ Spec.map …) := by infer_instance  -- OK
+```
+
+★`unfold` が展開した後の項は、インスタンス探索から見ると元の項と別物になる
+（`letI` が残る・簡約段階が違う）。★★**直す形は `show`**:
+
+```lean
+instance : IsProper (projSpaceOverSpec n R) := by
+  show IsProper (Proj.toSpecZero (MvPolynomial.homogeneousSubmodule (Fin (n + 1)) R)
+      ≫ Spec.map (CommRingCat.ofHom (gradeZeroEquiv n R).toRingHom))
+  exact IsProper.mk
+```
+
+★★★同じ理由で、定義の中で `letI : GradedAlgebra … := MvPolynomial.gradedAlgebra` と
+書くより、ファイル冒頭で `attribute [local instance] MvPolynomial.gradedAlgebra` と
+宣言するほうがよい——`letI` は展開後に項として残ってインスタンス探索を邪魔する。
+
+## `IsProper` は合成の instance を持たない —— `IsProper.mk` を明示する
+
+`IsSeparated`・`UniversallyClosed`・`LocallyOfFiniteType` はそれぞれ合成の instance を
+持つが、**`IsProper (f ≫ g)` の instance は無い**（2026-08-27 実測）。
+★`exact IsProper.mk` と書けば 3 つの親を instance 探索させられる。

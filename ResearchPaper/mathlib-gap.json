@@ -244,14 +244,17 @@
       ]
      },
      {
-      "stage": "C",
-      "claim": "P^n_S と O(1)（点の関子を含む）",
+      "stage": "C1",
+      "claim": "ℙⁿ_R と、その Spec R 上の**固有性**",
+      "status": "closed",
+      "where": "Found/GenEll/ProjectiveSpace.lean の projSpace / projSpaceOverSpec / **projSpaceOverSpec_isProper**",
+      "why": "★★★★**2026-08-27 の実測で道が短くなった**。mathlib には AlgebraicGeometry.Proj、MvPolynomial.gradedAlgebra、Proj.toSpecZero、そして **instance [Algebra.FiniteType (𝒜 0) A] : IsProper (Proj.toSpecZero 𝒜)**（[Stacks] 01MF）がある。 ★埋めた隙間は 2 つだけ: （1）Algebra.FiniteType (𝒜 0) (MvPolynomial …) は instance でないので変数が生成することを書いた、（2）𝒜 0 は R そのものではないので homogeneousSubmodule_zero から R ≅+* 𝒜 0 を作った。"
+     },
+     {
+      "stage": "C2",
+      "claim": "O(1)（twisting sheaf）と ℙⁿ の点の関子",
       "status": "open",
-      "why": "★Proj はある（ProjectiveSpectrum/Scheme.lean）し、**Proj の固有性もある**（Proper.lean）。 ★★無いのは O(1) と、P^n の点を座標で書く層である。 ★★★**消費側（northcott_of_projModel）は座標を要求する**ので、ここが繋ぎ目になる。",
-      "sources": [
-       "[Stacks] 01M3 Projective space",
-       "[EGA2] 4.1"
-      ]
+      "why": "★mathlib に **twisting sheaf は 1 件も無い**（2026-08-27、Mathlib/AlgebraicGeometry 全体を twisting|Serre で検索して 0 件）。 ★★これが段 D（ample の定義）と 段 E（Serre の定理）の前提である。"
      },
      {
       "stage": "D",
@@ -296,8 +299,8 @@
       ]
      }
     ],
-    "done": "2/8",
-    "remaining": "★★**次の葉は段 C（P^n_S と O(1)）または 段 D（ample の定義）**である。 ★段 D には X_s（切断の非消失軌跡）が要るが、monoidal 構造の全体（段 A2）は要らない。"
+    "done": "3/9",
+    "remaining": "★★**残るのは A2・B・C2・D・E・F2 の 6 段**である。 ★次の葉は段 D（ample の定義）の核 **X_s（切断の非消失軌跡）**である。 ★★mathlib には加群層の**茂**が無いので、X_s は **SheafOfModules.LocalGeneratorsData（局所自明化）** と **Scheme.basicOpen** で作るのが短い（局所自明化ごとに切断を関数と見て basicOpen を取り、合併する）。 ★★★消費側（northcott_of_projModel）が要るのは**同次座標**であって ℙⁿ そのものではない。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
