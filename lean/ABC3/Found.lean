@@ -464,6 +464,7 @@ import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
 import ABC3.Found.Arakelov.LocalMetric
+import ABC3.Found.Arakelov.TensorMetric
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase

@@ -327,7 +327,7 @@ def IsTensorOf {A B : X.PresheafOfModules} (mA : LocalMetric X A) (mB : LocalMet
   ∀ (V : X.Opens)
     (eA : (restrictPresheafFunctor X V).obj A ≅ 𝟙_ (PresheafModulesOn X V))
     (eB : (restrictPresheafFunctor X V).obj B ≅ 𝟙_ (PresheafModulesOn X V))
-    (p : Spec (CommRingCat.of ℂ) ⟶ X),
+    (p : Spec (CommRingCat.of ℂ) ⟶ X), p ⁻¹ᵁ V = ⊤ →
     m.h V (tensorTriv eA eB) p = mA.h V eA p * mB.h V eB p
 
 /-- ★★★★★★★★★**テンソル積の計量では切断のノルムが掛け算になる**。
@@ -347,7 +347,7 @@ theorem normOf_tensor {A B : X.PresheafOfModules} {mA : LocalMetric X A} {mB : L
     m.normOf V (tensorTriv eA eB) p hp (s ⊗ₜ[(Γ(X, (⊤ : X.Opens)) : Type)] t)
       = mA.normOf V eA p hp s * mB.normOf V eB p hp t := by
   show trivSecNorm (A ⊗ B) V (tensorTriv eA eB) p hp _ * m.h V (tensorTriv eA eB) p = _
-  rw [trivSecNorm_tensor, hm V eA eB p]
+  rw [trivSecNorm_tensor, hm V eA eB p hp]
   show _ = (trivSecNorm A V eA p hp s * mA.h V eA p) * (trivSecNorm B V eB p hp t * mB.h V eB p)
   ring
 
