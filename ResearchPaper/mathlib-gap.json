@@ -779,7 +779,45 @@
    "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
    "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
    "nextStep": "★第 1・2 段は 2026-08-28 に入った:\n  第 1 段 Pic(Spec 𝒪_F) ≃* Cl(F) —— Found/Arakelov/PicClassGroup.lean\n  第 2 段 分数イデアルの群 ≃+ 有限素点の自由アーベル群 —— Found/GenEll/FractionalIdealDivisor.lean\n★★**塞がりだった arakelov-coherent-base-metric は同日に閉じた**（`APicM` が `CommGroup` になり、積が本物のテンソル積になった）ので、第 3 段（`ADiv(F)/APrc(F) ≃* APicM (Spec 𝒪_F)`、`deg_F` の転送）に着手できる。\n★★★古典的な定義 `deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v` を使うなら、`s` の取り方に依らないこと（積公式、`Found/GenEll/ProductFormula.lean` に在庫）が鍵である。",
-   "blockedBy": ""
+   "blockedBy": "",
+   "decomposition": {
+    "measuredAt": "2026-08-28",
+    "note": "★★★★★**`APicM`（`AMetricPic.lean`）が入ったので、古典的な定義で書ける**。`deg_F(L̄) = (1/[F:ℚ])·( log #(Γ(L)/𝒪_F·s) − Σ_σ log‖s‖_σ )`（`s ≠ 0` は任意）。★在庫の `degFOf`（`Interface/Arakelov/ADegEmb.lean`）は**アルキメデス側だけ**で、しかも `Interface`（posit）にある。本 gap はそれを `Found` の側で作り直す段である。",
+    "stages": [
+     {
+      "stage": "A",
+      "status": "open",
+      "claim": "★アフィンの橋——`Spec R` 上の局所自明な前層加群 `L` から**可逆 `R`-加群 `Γ(L,⊤)`** を得る",
+      "why": "★在庫の `equivPicRingSheaf`（`PicEquivRing.lean`）は**層**の水準（`PicSheaf (Spec R) ≃* CommRing.Pic R`）である。★★`AMetric` は**前層**の水準なので、層化を挟む橋が要る。"
+     },
+     {
+      "stage": "B",
+      "status": "open",
+      "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
+      "why": "★`s ≠ 0` なら商は捻れかつ有限生成なので有限。★★Dedekind 環上の階数 1 射影加群であることを段 A から使う。"
+     },
+     {
+      "stage": "C",
+      "status": "open",
+      "claim": "★★★アルキメデス部分 `Σ_σ log‖s‖_σ`",
+      "why": "★複素点は埋め込み `σ : F ↪ ℂ` に対応する（在庫の `embPoint`）。★★ノルムは `AMetric.normOf`（チャート独立、`normOf_chart_indep`）で取れる。★★★`Fintype.card (F →+* ℂ) = [F:ℚ]`（在庫の `Embeddings.card`）が正規化の分母を消す。"
+     },
+     {
+      "stage": "D",
+      "status": "open",
+      "claim": "★★★★**`s` の取り方に依らないこと**（積公式）",
+      "why": "★`s' = u·s`（`u ∈ F^×`）と取り替えると、有限側が `−Σ_v ord_v(u)·log(Nv)` 動き、アルキメデス側が `−Σ_σ log|σ(u)|` 動く。★★その和が `0` になるのが積公式で、`Found/GenEll/ProductFormula.lean` に在庫がある。"
+     },
+     {
+      "stage": "E",
+      "status": "open",
+      "claim": "★★★★★**加法性**（`deg_F` が `APicM (Spec 𝒪_F) →+ ℝ`）",
+      "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
+     }
+    ],
+    "done": "0/5",
+    "remaining": "★5 段とも開いている。★★ただし塞がりだった arakelov-coherent-base-metric は 2026-08-28 に閉じたので、着手できる。"
+   }
   },
   "arakelov-coherent-base-metric": {
    "what": "算術直線束の**基準計量を整合的に選ぶ**こと。 すなわち base_{[L·M]} = base_{[L]} ⊗ base_{[M]}。",
