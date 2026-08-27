@@ -1066,6 +1066,7 @@ import ABC3.Found.Arakelov.PicComapChain
 import ABC3.Found.Arakelov.PicUnitSurj
 import ABC3.Found.Arakelov.PicPrincipal
 import ABC3.Found.GenEll.UPoint
+import ABC3.Found.GenEll.LogDiffPoint
 import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
 import ABC3.Found.GenEll.Prop16
