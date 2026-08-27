@@ -78,7 +78,75 @@ theorem discr_congr {F K : Type} [Field F] [NumberField F]
     NumberField.discr F = NumberField.discr K :=
   NumberField.discr_eq_discr_of_algEquiv F (ratAlgEquivOfRingEquiv e)
 
+/-! ## ★★★★★★2 つの側を繋ぐ -/
+
+/-- ★**部分体の像は元の部分体と同型**（体からの射は単射だから）。 -/
+noncomputable def subfieldMapEquiv {F K : Type} [Field F] [Field K]
+    (E : Subfield F) (f : F →+* K) : E ≃+* (E.map f) := by
+  refine RingEquiv.ofBijective
+    ({ toFun := fun x => ⟨f x.1, ⟨x.1, x.2, rfl⟩⟩
+       map_one' := by ext; simp
+       map_mul' := fun a b => by ext; simp
+       map_zero' := by ext; simp
+       map_add' := fun a b => by ext; simp } : E →+* (E.map f)) ⟨?_, ?_⟩
+  · intro a b hab
+    exact Subtype.ext (f.injective (congrArg Subtype.val hab))
+  · rintro ⟨_, x, hx, rfl⟩
+    exact ⟨⟨x, hx⟩, rfl⟩
+
+open AlgebraicGeometry CategoryTheory in
+/-- ★★★★★★**同じ点の最小定義体は同じ `log-diff` を与える**。
+
+原文 (GenEll p.8):
+> determines a well-defined log-different function log-diffX on X(Q).
+
+★★★**これが `Definition 1.5, (iii)` の well-defined 性そのもの**である ——
+幾何の側（`minField_baseChange`：最小定義体は底変換で対応する）と
+代数の側（`logDiffOfField_congr`：同型な数体は同じ `log-diff`）を繋いだ形。
+
+★対比: `logDiffAt`（点の**定義体**で測る）は底変換で**増える**
+（`logDiffAt_le_baseChange`）。★★**最小定義体で測ると不変になる** —— それが本定理である。 -/
+theorem logDiff_minField_baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] {X : Scheme}
+    (xF : Spec (CommRingCat.of F) ⟶ X) :
+    haveI := NumberField.of_subfield (minField F xF)
+    haveI := NumberField.of_subfield
+      (minField K (Spec.map (CommRingCat.ofHom (algebraMap F K)) ≫ xF))
+    logDiffOfField (minField K (Spec.map (CommRingCat.ofHom (algebraMap F K)) ≫ xF))
+      = logDiffOfField (minField F xF) := by
+  haveI := NumberField.of_subfield (minField F xF)
+  haveI := NumberField.of_subfield
+    (minField K (Spec.map (CommRingCat.ofHom (algebraMap F K)) ≫ xF))
+  haveI := NumberField.of_subfield ((minField F xF).map (algebraMap F K))
+  -- ★`minField K (bc) ≃+* (minField F xF).map alg ≃+* minField F xF`
+  have e : (minField K (Spec.map (CommRingCat.ofHom (algebraMap F K)) ≫ xF))
+      ≃+* ((minField F xF).map (algebraMap F K)) :=
+    RingEquiv.subfieldCongr (minField_baseChange F K xF)
+  have e2 : (minField F xF) ≃+* ((minField F xF).map (algebraMap F K)) :=
+    subfieldMapEquiv (minField F xF) (algebraMap F K)
+  exact (logDiffOfField_congr e).trans (logDiffOfField_congr e2).symm
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def subfieldMapEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (iii)(部分体の像は元の部分体と同型)",
+    sectionId := "genell-def-1-5" }
+
+def logDiff_minField_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (iii)(同じ点の最小定義体は同じ log-diff を与える)",
+    sectionId := "genell-def-1-5" }
+
+def logDiff_minField_baseChange.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "minField_baseChange(幾何の側——最小定義体は底変換で対応する)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.minField_baseChange") 8,
+    .citation "[ABC3]" "logDiffOfField_congr(代数の側——同型な数体は同じ log-diff)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.logDiffOfField_congr") 8,
+    .implicitStep
+      ("★★★これが Definition 1.5, (iii) の well-defined 性そのものである。" ++
+       "★対比: logDiffAt(点の定義体で測る)は底変換で増える(logDiffAt_le_baseChange)。" ++
+       "最小定義体で測ると不変になる —— それが本定理") 8 ]
 
 def ratAlgEquivOfRingEquiv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
