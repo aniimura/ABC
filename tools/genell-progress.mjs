@@ -98,7 +98,11 @@ const need = new Set(direct.keys());
 
 // ── 分子: Found/ の `.src`
 const ITEM_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*$`);
-const PART_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*[,—-]`);
+// ★2026-08-27 の訂正: 限定が `(` で始まる形(`Proposition 3.4(無限遠因子…)`)を
+//   取りこぼしていた。★数えていたのは `,` `—` `-` で始まるものだけで、
+//   その結果 `Proposition 3.4` の条つき実装(Found/ に 10 本以上ある)が
+//   「条つき 0 件」に見えていた。★★分子(条なし `.src`)の規則は変えていない。
+const PART_RE = new RegExp(`^\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)\\s*[,(（—-]`);
 const SRC_RE = /\.src[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?item\s*:=\s*"([^"]*)"/g;
 function walk(d, out = []) { for (const e of readdirSync(d)) { const p = join(d, e); if (statSync(p).isDirectory()) walk(p, out); else out.push(p); } return out; }
 const LEAN = join(ROOT, 'lean', 'ABC3');
