@@ -74,6 +74,12 @@ import ABC3.Meta.Claim
 > `unitEnd V' ((pullUnitIsoOn).inv ≫ G.map Ψ ≫ (pullUnitIsoOn).hom)`
 >   `= ρ (unitEnd W Ψ)`   （`G = pullTransportFun`、`ρ : Γ(Y,W) → Γ(X,V')`）
 
+★★★★★**その相方は本ファイルで済んだ**——`evalOn_pullback`:
+
+    `evalOn p V' (ρ u) = evalOn (p ≫ f) W u`
+
+★つまり「関数の側」は閉じており、残るのは「自明化の側」1 本だけである。
+
 ★計算の道具も在庫にある:
 
 | 在庫 | 役割 |
@@ -165,6 +171,38 @@ theorem pullTrivOfBase_comp {X Y : Scheme.{0}} (f : X ⟶ Y) (L : Y.PresheafOfMo
   simp [pullTrivOfBase, pullUnitIsoOn, pullTransportFun]
   cat_disch
 
+/-! ## ★★★★★評価は引き戻しと可換 -/
+
+/-- ★`p` が `V' ≤ f⁻¹W` に入るなら `p ≫ f` は `W` に入る。 -/
+theorem comp_preimage_eq_top_of_le {X Y : Scheme.{0}} (f : X ⟶ Y)
+    {p : Spec (CommRingCat.of ℂ) ⟶ X} {W : Y.Opens} {V' : X.Opens}
+    (hV'W : V' ≤ (Opens.map f.base).obj W) (hp : p ⁻¹ᵁ V' = ⊤) :
+    (p ≫ f) ⁻¹ᵁ W = ⊤ := by
+  have h : (p ≫ f) ⁻¹ᵁ W = p ⁻¹ᵁ ((Opens.map f.base).obj W) := rfl
+  rw [h]
+  exact preimage_eq_top_of_le hV'W hp
+
+/-- ★★★★★★**評価は関数の引き戻しと可換である**:
+
+    `evalOn p V' (ρ u) = evalOn (p ≫ f) W u`
+
+原文 (GenEll p.3):
+> (ii) Let φ : Y → X be a morphism of normal, Z-proper, Z-flat schemes. Then there is an evident notion of pull-back of arithmetic line bundles by φ.
+
+★★これが「引き戻した計量が `p` で見ると元の計量を `p ≫ f` で見たものになる」の
+**関数の側**である。★機構は mathlib の `Scheme.Hom.appLE_comp_appLE` と
+在庫の `evalOn_restrict` だけである。 -/
+theorem evalOn_pullback {X Y : Scheme.{0}} (f : X ⟶ Y)
+    (p : Spec (CommRingCat.of ℂ) ⟶ X) (W : Y.Opens)
+    {V' : X.Opens} (hV'W : V' ≤ (Opens.map f.base).obj W) (hp : p ⁻¹ᵁ V' = ⊤)
+    (hpW : (p ≫ f) ⁻¹ᵁ W = ⊤) (u : (Γ(Y, W) : Type)) :
+    evalOn p V' hp (X.presheaf.map (homOfLE hV'W).op (f.c.app (op W) u))
+      = evalOn (p ≫ f) W hpW u := by
+  rw [evalOn_restrict p hV'W hp]
+  show (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom
+      ((p.appLE ((Opens.map f.base).obj W) ⊤ _).hom ((f.c.app (op W)).hom u)) = _
+  congr 1
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def pullTrivOfBase.src : ABC3.Meta.Source :=
@@ -175,6 +213,11 @@ def pullTrivOfBase.src : ABC3.Meta.Source :=
 def pullTrivOfBase_comp.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (ii)(輸送した 2 つの自明化の比は、元の比の輸送の共役であること)",
+    sectionId := "genell-def-1-1-ii" }
+
+def evalOn_pullback.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (ii)(評価は関数の引き戻しと可換であること)",
     sectionId := "genell-def-1-1-ii" }
 
 def transUnit_eq_unitEnd.src : ABC3.Meta.Source :=
