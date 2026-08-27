@@ -428,7 +428,7 @@
     "[GenEll] Proposition 1.4, (ii)の証明中の ht_{L⊗M} ≈ ht_L の消費側"
    ],
    "mathlibStatus": {
-    "verdict": "partial-minor",
+    "verdict": "closed-in-ABC3",
     "searched": "2026-08-27 実測。mathlib の ClassGroup は Dedekind 環専用で、一般のスキーム上の Weil 因子類群・局所化完全列（Cl(X) → Cl(U) → 0）は無い。",
     "partial": [
      "★mathlib: Scheme.IdealSheafData の束構造と comap はある",
@@ -437,7 +437,7 @@
     "absentPart": "★**当初の見立て（Weil 因子類群が要る）は過大であった**（2026-08-27 に訂正）。★★実際に要るのは Scheme.IdealSheafData の水準で有限アフィン被覆を取って m を揃える配管だけである。"
    },
    "minimalForm": "★消費側が要るのは**一様有界性だけ**である。★★垂直因子 V は V ≤ m·X_q を満たすので deg_F(x^*V) ≤ m·log q となり、**交点数は要らない**——引き戻しの単調性と x^*(f^*(q)) = (q) だけで出る。★★★したがって minimalForm は「2 つのモデルの差がある m, q で m·X_q に押さえられる」であり、類群全体は要らない。",
-   "impact": "★Remark 1.4.1 を項目として閉じるのに必要な 2 本のうち 1 本。★★もう 1 本は ample-and-projective-embedding（原文第 2 文の「any normal, projective scheme Y over ℚ」）。",
+   "impact": "★★★★**2026-08-27 に閉じた**。★Remark 1.4.1 に残るのは原文第 2 文（any normal, projective scheme Y over ℚ）の側だけであり、それは ample-and-projective-embedding の在庫不足である。",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★**原典は手元にある**——[Stacks] の Weil divisor の章。",
@@ -450,7 +450,7 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★★**2026-08-27に 4 つに割り、3 つを閉じた。**★当初「Weil 因子類群が要る」と見ていたが、割ってみると**類群も交点数も要らなかった**——有限生成性と準コンパクト性だけである。",
+    "note": "★★★★★★★**2026-08-27、全 5 段が閉じた。**\n★当初「Pic(X) → Pic(X_ℚ) の核 = 垂直因子」としてWeil 因子類群を要求していたが、割ってみると**類群も交点数も要らなかった**。\n★★実際に使ったのは: 有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であることだけである。",
     "stages": [
      {
       "stage": "1",
@@ -483,12 +483,13 @@
      {
       "stage": "3b-2",
       "claim": "その n を**アフィン被覆から取る**（D と E が ℤ[1/N] の上で一致するところから）",
-      "status": "open",
-      "why": "★残るのは 2 本:\n  (i) 各アフィンチャート U で Γ(X_N ∩ U) = Γ(X,U)[1/N]（基本開集合の切断。mathlib の IsAffineOpen.isLocalization_basicOpen）\n  (ii) X が準コンパクトなので有限個の m_i の最大を取る\n★★各チャートの m_i は IdealComparable.lean の exists_pow_mul_le_of_map_le が与える\n★★★貼るのは mathlib の IdealSheafData.le_of_iSup_eq_top（被覆の上で見ればよい）"
+      "status": "closed",
+      "why": "★道具は 4 本だけだった:\n  exists_pow_mul_le_of_map_le（各チャートの m_i。有限生成性のみ）\n  Finset.univ.sup（**被覆が有限**だから最大が取れる）\n  IdealSheafData.le_of_iSup_eq_top（mathlib。被覆の上で見れば足りる）\n  RingHom.ext_int（ℤ からの環準同型は 1 つ——specIdealSheaf_comap_ideal_top の要）\n★★★**交点数も Weil 因子類群も使っていない**。",
+      "where": "Found/GenEll/ChartwiseUniform.lean の exists_uniform_sheaf_le_of_localization / htArith_bdeq_of_chartwise_localization"
      }
     ],
-    "done": "4/5",
-    "remaining": "★★★★**残るは段 3b-2 だけ**であり、道具（isLocalization_basicOpen・le_of_iSup_eq_top・exists_pow_mul_le_of_map_le）は**すべて揃っている**。"
+    "done": "5/5",
+    "remaining": "★★★**なし**。到達点は htArith_bdeq_of_chartwise_localization：\n  X が有限個のネーターなアフィンチャートで覆われ、各チャートで D と E が N を反転して一致するなら ht_D ≈ ht_E。"
    }
   }
  },
