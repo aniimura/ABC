@@ -740,6 +740,21 @@
     ],
     "howToProceed": "★まず **minimalForm で進む**——商をスキームとして作らず、q_{E′} = q_E^l を持つ Tate 曲線として特徴づける。 ★★項目として閉じるには群スキームの商が要るが、それは person-years 規模の別項目である。"
    }
+  },
+  "arakelov-degF-finite-places": {
+   "what": "APic(Spec 𝒪_F) 上の正規化次数 deg_F の**有限素点側**。台帳の D2（APic(Spec 𝒪_F) ≅ ADiv(F)/APrc(F)）と同じもの。",
+   "whereUsed": [
+    "[GenEll] Definition 1.2（ht_M̄(x) ≔ deg_F(x_F^* M̄)）",
+    "★その下流: Proposition 1.4 の線束表示側"
+   ],
+   "mathlibStatus": {
+    "verdict": "partial-major",
+    "searched": "2026-08-28 実測。ADiv(F) / APrc(F) / deg / degNormalized / degAPic は Found/GenEll/ArithDiv.lean と ProductFormula.lean に**実装済み**。★欠けているのは橋だけである。",
+    "absentPart": "★Found/Arakelov/ADegEmb.lean の degFOf は**アルキメデス側しか見ていない**（Pic 類が式に現れない、Def12Height.lean の訂正）。 ★★捻れ集合表示 (L, g) から有限素点側の**式が書けない**——TorsorMetric.base が Classical.choice だからである。 ★★★古典的な定義 deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v なら書けるが、s の取り方に依らないこと（積公式）が要る。"
+   },
+   "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
+   "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
+   "nextStep": "★第 1 歩は 2026-08-28 に入った——APicQuot.lean の **APicOf（同型類の群）**。 ★★次は Γ(L) を分数イデアルと見て log #(𝒪_F/𝔞) を Ideal.absNorm で書き、積公式（Found/GenEll/ProductFormula.lean にある）でs の取り方に依らないことを示す。"
   }
  },
  "summary": {
@@ -761,7 +776,8 @@
    "1. ample の段 A1（層のテンソル積の対象と L^{⊗n}）は 2026-08-27 に閉じた（InvertibleSheaf.lean）。★次の葉は段 C（ℙ^n_S と O(1)）または段 D（ample の定義——X_s が要る）。★★mathlib に twisting sheaf も Serre の定理も無い（2026-08-27 実測）。",
    "2. Lemma 3.2, (i) は 2026-08-27 に posit を全部消した（Lemma32Tate.lean）。残るのは (ii) の**商をスキームとして作る段**だけである。",
    "3. faltings の段 1〜4 と belyi の Lemma 2.4 は並行セッションの領分——**重複を避けること**。★belyi は Lemma 2.4 が 9 節点中 8、残るのは「ℙ¹ 上の有理関数としての組み立て」1 つである。"
-  ]
+  ],
+  "definition11": "★★★★★★**2026-08-28——[GenEll] Definition 1.1 が閉じた**（Found/Arakelov/Definition11.lean の definition_1_1.src）。GenEll の必要分は **11/24 → 12/24**、§1 は **4/9 → 5/9**。\n★最後の 1 本は「正規化した自明な算術直線束 Ō_X（|1| = 1）」で、TorsorMetric の base が Classical.choice なので**GreenMetric（base をフィールドに持つ）で基準計量そのものを作った**。\n★★さらに APicQuot.lean で **APic(X) を同型類の群**にした（単元の作用で商を取る）。鍵は evalGlobal の共役両立で、Scheme.ΓSpecIso_naturality を starRingEnd ℂ に当てるだけで出た。"
  },
  "sourceNodesFound": {
   "measuredAt": "2026-08-27",

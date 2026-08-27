@@ -29313,3 +29313,69 @@ exact key y
 - `ample` の内訳 8/12
 - 次の葉: **`evalGlobal` の共役両立**（チャート論法 1 本）——それが逸脱 3 と
   `Definition 1.2` の両方を開ける
+
+## §9-713 ★★★★★★★★★**逸脱 3 が消えた——`APic(X)` は同型類の群になった**(第 435-437 ブロック、2026-08-28)
+
+`§9-712` で `Definition 1.1` を閉じたあと、読み直して 1 つ気づいた:
+
+★**`ArithPic X = Pic(X) × Multiplicative (共役不変な連続関数)` は「対の群」であって、
+原文の言う「同型類の群」ではない。** 差は `Γ(X, 𝓞_X^×)` の作用である——
+単元 `u` による自己同型は計量を `|u|` 倍するので `(L, g)` と `(L, g + log‖u‖)` は同型。
+
+### ★★★★★★見積もりは 1 ブロック外していた
+
+`§9-712` では「商を作るには `evalGlobal` の共役両立が要り、
+`continuous_evalGlobal` と同じ**チャート論法**が 1 本要る」と測った。★**それは要らなかった**:
+
+```lean
+theorem evalGlobal_conjPoint (p) (g) :
+    evalGlobal (conjPoint p) g = starRingEnd ℂ (evalGlobal p g) := by
+  have hnat := Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (starRingEnd ℂ))
+  …
+  exact congrArg (fun m => (CommRingCat.Hom.hom m) _) hnat
+```
+
+★★`conjSpec = Spec.map (ofHom (starRingEnd ℂ))` なので、
+**`ΓSpecIso` の自然性がそのまま共役両立になる**。
+`continuous_evalGlobal` がチャート論法を要したのは**位相**のためであって、
+代数的な等式には要らない。
+
+★★★教訓: 「同じ関数についての性質だから同じ道具が要る」とは限らない。
+
+### ★★★本ブロックで入ったもの(`Found/Arakelov/APicQuot.lean`)
+
+| 宣言 | 内容 |
+|---|---|
+| `evalGlobal_one` / `_mul` / `_comp` / `_unit_ne_zero` | 環としての性質 |
+| `evalGlobal_conjPoint` | ★`ι_X` 両立 |
+| `unitLogGreen` ほか 4 本 | ★★単元が定める Green 関数 `log‖u‖` |
+| `unitToArithPic` / `isometrySubgroup` | 単元の像の部分群 |
+| **`APicOf`** | ★★★**同型類の群 `APic(X)`** |
+| **`APicOfPullback`** | ★★★★(ii) 引き戻しも降りる |
+| `APicOf.ofMetric` / `_surjective` | 余計な元が無いこと |
+
+★これで `Definition 1.1` の逸脱は **2 つ**（射の条件を強い側で取った、
+`X` に §1 の標準仮定を課していない）になり、どちらも下流に影響しない。
+
+### ★★★★★★★★次の塞がりを台帳に登録した —— `arakelov-degF-finite-places`
+
+`Definition 1.2` の唯一の塞がりを測って登録した。
+
+* `Found/Arakelov/ADegEmb.lean` の `degFOf` は**アルキメデス側しか見ていない**
+  （`Pic` 類が式に現れない——`Def12Height.lean` の 2026-08-27 の訂正）
+* ★捻れ集合表示 `(L, g)` からは有限素点側の**式が書けない**
+  ——`TorsorMetric.base` が `Classical.choice` だからである
+* ★★古典的な定義 `deg(L̄) = log #(Γ(L)/𝓞_F s) − Σ_v log‖s‖_v` なら書けるが、
+  `s` の取り方に依らないこと（**積公式**）が要る
+
+★★★`ADiv(F)` / `APrc(F)` / `deg` / `degNormalized` / `degAPic` は
+`Found/GenEll/ArithDiv.lean` と `ProductFormula.lean` に**実装済み**である。
+**欠けているのは橋だけ**であり、その第 1 歩（同型類の側）が本ブロックで入った。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）**
+- 次の葉: **`deg_F` の有限素点側**——`Γ(L)` を分数イデアルと見て
+  `Ideal.absNorm` で書き、積公式で `s` の取り方に依らないことを示す。
+  ★開けば §1 は 5/9 → 6/9（`Definition 1.2`）になる
