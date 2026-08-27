@@ -793,10 +793,11 @@
      },
      {
       "stage": "B",
-      "status": "open",
+      "status": "core-done",
       "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
       "why": "★s ≠ 0 なら商は捻れかつ有限生成なので有限。★★2026-08-28 の実測で道筋が確定した:\n  ・Γ(L) が可逆(段 A、§9-751)→ mathlib が Module.Finite / Module.Projective を**インスタンスで**与える(§9-753 で取得済)。\n  ・非零切断の存在も取得済(§9-752 exists_ne_zero_gamma)。\n  ・★★★残るのは **rank 1** である。mathlib の Module.Invertible.rank_eq_one は **[Free R M] を前提**とする(PicardGroup.lean:251)が、Dedekind 域上では可逆加群は free でない。\n  ・★★★★抜け道の候補 2 つ(未測):\n     (a) 体は局所環なので Pic K は自明(PicardGroup.lean:509)。従って M ⊗ K は free rank 1。★ただし Module.Invertible の**環を変える底変換**が mathlib にあるか未確認。\n     (b) PicardGroup.lean:56 の記述「become free of rank one when localized at every prime ideal」を使う道。",
-      "nextStep": "★まず (a) を測る——Module.Invertible の環を変える底変換が mathlib にあるか。あれば M ⊗ K が free rank 1 になり、Γ(L)/(O_F·s) の捻れ性が出る。"
+      "nextStep": "★段 B に残るのは 1 つだけ: **有限生成＋捻れの O_F-加群は有限**。\n★★実測(2026-08-28): mathlib に「有限生成＋捻れ ⇒ 有限」の**直接の補題は見当たらない**(Algebra/Module/ 配下を探索)。\n★★★あるのは構造定理 2 つ:\n  ・Module.equiv_directSum_of_isTorsion (Algebra/Module/PID.lean:234)——PID 上\n  ・exists_isInternal_prime_power_torsion (Algebra/Module/DedekindDomain.lean:74)\n★★★★道筋の候補 2 つ:\n  (i) Dedekind 版で N ≅ ⊕ (素イデアル冪の捻れ部分) に分解し、各因子が有限であることを Ideal.absNorm / O_F/I の有限性から出す。\n  (ii) O_F は有限生成 Z-加群なので Z 上に落とし、PID 版の構造定理を使う。",
+      "where": "Found/Arakelov/APicToSheaf.lean（finite_gamma / projective_gamma / exists_ne_zero_gamma / finrank_fractionRing_gamma / gamma_toFractionRing_injective / exists_smul_mem_span_gamma）"
      },
      {
       "stage": "C",
