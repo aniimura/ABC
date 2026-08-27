@@ -181,9 +181,10 @@
   "ample-and-projective-embedding": {
    "what": "豊富(ample)な直線束の理論。とくに (a) ample ⟹ ある正のテンソル冪が very ample(Serre)、(b) very ample から射影空間への閉埋め込み、(c) 原文が使う吹き上げ(X から正規・ℤ-固有・ℤ-平坦な Y を作り φ:Y→X が生成ファイバーで同型、ψ:Y→ℙⁿ_ℤ)。",
    "whereUsed": [
-    "[GenEll] Proposition 1.4, (iv)(Northcott 性)の証明——原文 p.7「[some positive tensor power of] the ample line bundle LQ yields an embedding ϵQ : XQ ⊆ PQ」",
-    "[GenEll] Proposition 3.4 の有限性の主張(Prop 1.4, (iv) を引く)",
-    "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
+    "[GenEll] Proposition 1.4, (iv) の**文面**（「L_ℚ が ample なら」——mathlib に ample が無いので**述べられない**）",
+    "[GenEll] Remark 1.4.1 の第 2 文（any normal, projective scheme Y over ℚ から ℤ-モデルを作る段）",
+    "[GenEll] Definition 1.1 / Definition 1.2（算術直線束 = 可逆層 + 計量。★arc-metric-not-attached-to-bundle と対をなす）",
+    "[GenEll] Proposition 1.7, (ii)（Riemann-Hurwitz は直線束の次数を要求する）"
    ],
    "mathlibStatus": {
     "verdict": "partial-major",
@@ -202,7 +203,7 @@
     "absentPart": "★**層のテンソル積**（前層のテンソル積の層化）——これが無いので Pic(X)（スキーム）が作れない。 ★★可逆層（階数 1 の局所自由層）という**定義**。 ★★★Proj 上の O(1)、P^n_S の点の関子（座標表示）。 ★★★★ample / very ample の定義と Serre の定理（ample のある冪が very ample）。 ★吹き上げ（Blowing up）。"
    },
    "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
-   "impact": "★★★★**残り 13 項目のうち 11 項目**がこの塡がりの下流にある（§1 の 5・§3 の 4・§4 の 2）。 ★**3 つの塡がりの中で最大のレバーである。**",
+   "impact": "★★★★**2026-08-27 に訂正**: 直前に「残り 13 項目のうち 11 項目」と書いたのは**過大**であった。 ★実際にこの塡がりが門であるのは**§1 の 5 項目**（Definition 1.1・Definition 1.2・Proposition 1.4・Remark 1.4.1・Proposition 1.7）である。 ★★§3・§4 の 6 項目は **ample を経由しない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と 粗モジュライ ℙ¹_j の明示モデルで出る（台帳の minimalForm の通り）。 ★★★§3・§4 の実質的な塡がりは faltings-height-vs-degree-at-infinity と galois-equivariant-tate-uniformization の 2 つである。",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
@@ -329,10 +330,13 @@
     "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
+    "verdict": "partial-minor",
     "searched": "mathlib に Faltings 高さは無い。",
     "partial": [
-     "ABC3 側: Found/GenEll/Covolume.lean ほか（並行セッションが構築中）"
+     "ABC3: Found/GenEll/Covolume.lean ほか（並行セッションが構築中）",
+     "★★ABC3: Found/GenEll/DeligneElementary.lean（2026-08-27）——**段 5・6（初等評価）を sorry 0 で閉じた**",
+     "★mathlib: JFunction の tendsto_norm_jFun_atImInfty（段 4 の支え）",
+     "★ABC3: Found/GenEll/FiniteFromNorthcott.lean の finite_of_le_of_northcott（Proposition 3.4 の**有限性の主張**はこれで出る）"
     ],
     "absentPart": "比較不等式そのもの。"
    },
@@ -345,7 +349,54 @@
      "[RayHt] Raynaud - Hauteurs et isogénies（Astérisque 127）——等因子写像での高さの変化（Lemma 3.5 が使う）"
     ],
     "howToProceed": "★[DelSB616] §1 を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
-   }
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★**Skeleton/GenEll/DeligneHeight.lean が 260 dpi 目視で測った 6 段**。 ★うち**段 5・6（初等）を 2026-08-27 に閉じた**。 ★★残る 1〜4 は複素解析の側で、並行セッションの領分である。",
+    "stages": [
+     {
+      "stage": "1",
+      "claim": "(E,ω) ≅ (ℂ/Λ, dz)、Λ = ℤω₁ ⊕ ℤω₂、τ = ω₂/ω₁、q = exp(2πiτ)",
+      "status": "open",
+      "why": "複素解析。並行セッションが LatticeCurve.lean 等で構築中。"
+     },
+     {
+      "stage": "2",
+      "claim": "H(E) = (1/|ω₁|)·|Im τ/π|^{-1/2}（|ω₁| 最小の基底で）",
+      "status": "open",
+      "why": "同上。Covolume.lean がここを担当する。"
+     },
+     {
+      "stage": "3",
+      "claim": "H*(E) ≤ C₀·H(E)·Im(τ)^{1/2}",
+      "status": "open",
+      "why": "同上。"
+     },
+     {
+      "stage": "4",
+      "claim": "j = q⁻¹ + 744 + …、Im(τ) ∼ sup(1, log|j|)/2π",
+      "status": "open",
+      "why": "★mathlib の JFunction.lean に tendsto_norm_jFun_atImInfty が**ある**。 ★★漸近を不等式に直す段が残る。"
+     },
+     {
+      "stage": "5",
+      "claim": "|j| ≤ H*^{12} から H* ≤ C₁·H·√(max 1 (log H*))",
+      "status": "closed",
+      "where": "Found/GenEll/DeligneElementary.lean の sqrt_bound_of_j_bound",
+      "why": "★log を取って 12 を外に出すだけ。 ★★|j| ≤ H*^{12} は「Δ が整数」から出るが、それ自体は仮説として受けている（段 1〜4 の側）。"
+     },
+     {
+      "stage": "6",
+      "claim": "★**H* ≤ C₂·H·√(max 1 (log H))**（自己参照を消す）",
+      "status": "closed",
+      "where": "Found/GenEll/DeligneElementary.lean の exists_bound_of_self_referential_sqrt_log / naive_bound_of_chain",
+      "why": "★★★**要は「自己参照的な評価を右辺から消す」こと**である。 log を取ると log(log A) ≤ log A（Real.log_le_sub_one_of_pos）で (1/2)log A が吸収され、log A ≤ 2 log C₁ + 2 log B になる。 ★定数は C₁·√(2 log C₁ + 2)。"
+     }
+    ],
+    "done": "2/6",
+    "remaining": "★★残るは段 1〜4（複素解析）であり、**並行セッションの領分**である。 ★段 4 は mathlib の JFunction が支える。"
+   },
+   "impact": "★★★**§3・§4 の 6 項目の実質的な塡がりの 1 つ**である（もう 1 つは galois-equivariant-tate-uniformization）。 ★**ample ではない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と ℙ¹_j の明示モデルで出る。"
   },
   "ideal-comap-on-affine-opens": {
    "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
