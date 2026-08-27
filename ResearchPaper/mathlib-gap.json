@@ -789,13 +789,44 @@
     "★★Interface/Arakelov/APic.lean の APicData の穴と同種"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
+    "verdict": "resolved-in-project",
     "searched": "2026-08-28 実測。mathlib に Arakelov の計量は無い。",
     "absentPart": "★Found/Arakelov/ArcTorsorMetric.lean の TorsorMetric.base は **Classical.choice** であり、対象ごとに獨立に選ばれている。 ★★TorsorMetric.tensor は **Green を足すだけ**なので、群法則が表す計量は base_{G⊗H} · e^{-(g+h)}、真のテンソル積は (base_G ⊗ base_H) · e^{-(g+h)} で一致しない。 ★★★差は 2-コサイクル c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]})) である。"
    },
-   "minimalForm": "★道は 2 つある。 （a）**整合的な基準計量の族をデータとして持つ**（CoherentBase 構造体を作り、存在は別途）。 （b）**捻れ集合表示をやめて**、同型類を「可逆層＋本物の連続計量」の商として直に作る（テンソル積の計量を作る必要があり、§9-335 の見積もりでは 10〜15 ブロック）。",
-   "impact": "★**Definition 1.1 の最後の 1 本**である（2026-08-28 に項目全体の .src を下げた）。 ★★Definition 1.2 の deg_F の加法性もこれに依る。 ★★★したがって **§1 の 2 項目の共通の根**である。",
-   "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。"
+   "minimalForm": "★2026-08-28 に**道（b）で閉じた**——捻れ集合表示をやめ、**自明化の側で書いた計量**（`LocalMetric`）を作った。★★基準計量を整合的に選ぶ必要は消えた（`Classical.choice` を使わない）。",
+   "impact": "★**根は 2026-08-28 に塞がった**（本 gap の resolution を見よ）。★★残るのは ArithPic / APicOf を LocalMetric の上に建て直す段と、Definition 1.1 (ii) の deg_F（別 gap: arakelov-degF-finite-places）である。★★★したがって §1 の 2 項目の共通の根としての障害はもう無い。",
+   "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。",
+   "resolution": {
+    "measuredAt": "2026-08-28",
+    "verdict": "★★★★★★★★★**根は塞がった**。テンソル積の計量が**構成つきで**出る。",
+    "stages": [
+     {
+      "stage": "1",
+      "where": "Found/Arakelov/TrivTensor.lean",
+      "claim": "trivValue がテンソル積で掛け算になる",
+      "why": "★rfl である。制限の μIso は Iso.refl、tensorHom_app も leftUnitor_hom_app も rfl（mathlib）。set_option backward.isDefEq.respectTransparency false が要る。"
+     },
+     {
+      "stage": "2",
+      "where": "Found/Arakelov/TrivSecNorm.lean",
+      "claim": "切断のノルムが掛け算になる（ファイバーの橋を迂回）",
+      "why": "★‖s‖_{V,e}(p) ≝ ‖evalOn p V hp (trivValue F V e s)‖ と書けば arcFiber を経由しない。★★在庫の genNorm_arcEvalOnTop が「ファイバーで測っても同じ値」を保証している。★★★これで mathlib の SheafOfModules のモノイダル構造（PR 規模、2026-08-28 実測で不在）が要らなくなった。"
+     },
+     {
+      "stage": "3",
+      "where": "Found/Arakelov/LocalMetric.lean",
+      "claim": "基準ノルム h_{V,e} を担ぐ構造体・自明化独立性・チャート独立性",
+      "why": "★compat（自明化を遷移単元 u 倍すると h は |u| で割られる）と restrict（小さい開集合へ降りても変わらない）の 2 欄。★★normOf_chart_indep で normOf は (p,s) だけの関数になる。★★★空虚でないことは structLocalMetric（Ō_X の標準計量）が目撃する。"
+     },
+     {
+      "stage": "4",
+      "where": "Found/Arakelov/TensorMetric.lean",
+      "claim": "★テンソル計量の**存在**と ‖s ⊗ t‖ = ‖s‖ · ‖t‖",
+      "why": "★構成の要は「(A⊗B)|_V は自明だが A|_V は自明でない V」の扱いである（連結スキーム上でも A ⊗ B ≅ 𝒪 は A ≅ 𝒪 を含意しない）。局所自明性から p を含む W ≤ V で両方が自明になるものを取り、そこで h_A · h_B と置いて遷移単元で V の自明化へ運ぶ。★★値がチャートに依らないことは chartH_indep（共通の細分へ降りて transUnit_tensorTriv と compat）。★★★構造の恒等式は 4 つとも rfl であった。"
+     }
+    ],
+    "remaining": "★★**残るのは載せ替えである**——既存の ArithPic / APicOf はまだ TorsorMetric（Classical.choice の基準計量）の上に建っている。★それを LocalMetric の上に建て直す段（単位 Ō_X は structLocalMetric で在庫、逆元は双対計量、結合律、そして同型類による商）が要る。★★★Definition 1.1 の項目全体を閉じるには、さらに (ii) の deg_F（台帳 arakelov-degF-finite-places）も要る。"
+   }
   }
  },
  "summary": {
