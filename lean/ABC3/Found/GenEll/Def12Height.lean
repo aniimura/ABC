@@ -242,9 +242,35 @@ theorem finrank_not_descends {X : Scheme.{0}} (F K : Type) [Field F] [NumberFiel
 ★`Definition 1.1` そのものの項目全体はまだ閉じていない
 （層の側の欄が残っている）が、本項目が使うのは
 `pullback` / `pullback_mul` / `pullback_comp` と `deg_F` だけであり、
-それらはすべて `Found/` にある。 -/
+それらはすべて `Found/` にある。
+
+### ★★★★★★★★2026-08-27 の訂正 —— 項目全体の `.src` を下げた
+
+★**当初ここに `item := "Definition 1.2"`(条なし)を置いていた。過剰な主張だった。**
+
+`Found/Arakelov/ADegEmb.lean` の正規化次数は
+
+    degFOf F x = -(∑_{σ : F →+* ℂ} x.2.fn (embPoint F σ)) / [F:ℚ]
+
+であり、★**`x.1`(`Pic` 類)が式に現れない**。したがって `ht` も `Pic` 類を見ない
+——`Check/GenEll/Def12Degenerate.lean` の `ht_indep_pic` で機械検証した(`rfl` で落ちる)。
+
+原文 (GenEll p.4):
+> — where cv ∈ Z if v ∈ V(F )non and cv ∈ R if v ∈ V(F )arc [cf. [Szp], §1.1]. Here, if
+
+★★算術因子は有限素点の整数係数とアルキメデス素点の実係数の対であり、
+`deg_F` はその**両方**を測る。アルキメデス側だけでは `deg_F` ではない。
+
+★★★**Interface が止められなかった理由**: `APicSpecData` は `deg_F` について
+`degF_mul` / `degF_baseChange` / `degF_scale` の 3 欄しか持たず、
+**有限素点と結ぶ欄が無い**。`APicData` の 2 つの穴(`ι_X` 両立・`pullback_comp`)と同種である。
+
+★★★★**失われていないもの**: `ht` が `X(ℚ̄)` の関数として well-defined であること
+(`htOf_baseChange`——原文の「any morphism」の要求そのもの)は**真のままである**。
+(ii) の BD-類も `Pic` に依らないので真である。 -/
 def definition_1_2.src : ABC3.Meta.Source :=
-  { paper := "GenEll", pdfPage := 5, item := "Definition 1.2",
+  { paper := "GenEll", pdfPage := 5,
+    item := "Definition 1.2(well-defined 性と BD-類——deg_F が Pic 類を見ていないので高さ本体は未)",
     sectionId := "genell-def-1-2" }
 
 def definition_1_2.needs : List ABC3.Meta.ProofObligation :=
