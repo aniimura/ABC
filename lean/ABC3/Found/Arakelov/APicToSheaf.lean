@@ -547,6 +547,26 @@ theorem degFin_nonneg (R : CommRingCat.{0}) [IsDomain (R : Type)]
   have h := card_pos_quotient_gamma R L s hs hfin
   exact Real.log_nonneg (by exact_mod_cast h)
 
+/-! ## ★★★★★★段 D への一歩 —— 単元倍では変わらない -/
+
+/-- ★★★★★★**有限部分は単元倍で変わらない**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★台帳の段 D(`s` の取り方に依らないこと)の**特別な場合**である。
+`u` が単元なら `span {u·s} = span {s}` なので商そのものが等しい。
+
+★★一般の `u ≠ 0`(非単元)では `degFin (u·s) = degFin s + log N(u)` となり、
+そのずれをアルキメデス部分が打ち消す(積公式)。 -/
+theorem degFin_smul_unit (R : CommRingCat.{0}) (L : AInv (Spec R))
+    (u : (R : Type)) (hu : IsUnit u)
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)) :
+    degFin R L (u • s) = degFin R L s := by
+  show Real.log (Nat.card (_ ⧸ Submodule.span (R : Type) {u • s}))
+    = Real.log (Nat.card (_ ⧸ Submodule.span (R : Type) {s}))
+  rw [Submodule.span_singleton_smul_eq hu s]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -583,6 +603,22 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul_unit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(有限部分は単元倍で変わらない——段 D の特別な場合)",
+    sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul_unit.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Submodule.span_singleton_smul_eq(単元倍で span は変わらない)"
+      (.inMathlib "Submodule.span_singleton_smul_eq") 4,
+    .implicitStep
+      ("★★段 D の本体(非単元の場合)の道筋: " ++
+       "span{u·s} ⊆ span{s} で span{s}/span{u·s} ≅ R/(u)(s が非捻れだから)。" ++
+       "短完全列から #(Γ/span{us}) = #(Γ/span{s})·#(R/(u)) なので " ++
+       "degFin(u·s) = degFin(s) + log N(u)。" ++
+       "★そのずれをアルキメデス部分 −Σ log|σ(u)| が打ち消すのが積公式で、" ++
+       "ProductFormula.lean の deg_principalADiv_eq_zero がそれである") 4 ]
 
 def degFin.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
