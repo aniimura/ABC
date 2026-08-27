@@ -1258,3 +1258,45 @@ instance : IsProper (projSpaceOverSpec n R) := by
 `IsSeparated`・`UniversallyClosed`・`LocallyOfFiniteType` はそれぞれ合成の instance を
 持つが、**`IsProper (f ≫ g)` の instance は無い**（2026-08-27 実測）。
 ★`exact IsProper.mk` と書けば 3 つの親を instance 探索させられる。
+
+## モノイダル関手の `ε`/`η` が `Iso.refl` なのに `rfl` が通らない —— `respectTransparency false`
+
+**失敗形**（2026-08-27、`AmpleDef.lean`）:
+
+```lean
+example (s : (𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens))) :
+    trivValue (𝟙_ X.PresheafOfModules) ⊤ restrictPresheafUnit.symm s = s := rfl
+-- Type mismatch: ?m = ?m vs …
+```
+
+`simp [trivValue, secOn, restrictPresheafUnit, Functor.Monoidal.εIso]` まで進めると
+残る目標は `(Functor.OplaxMonoidal.η F).app o s = s` である。
+★mathlib の `PresheafOfModules.pushforward₀OfCommRingCat` は
+`εIso := Iso.refl _` / `μIso _ _ := Iso.refl _` で定義されているので**本当に恒等**だが、
+既定の透明度では `rfl` が届かない。
+
+★★**直す形**——mathlib 自身がその instance に付けているのと同じ option を付ける:
+
+```lean
+set_option backward.isDefEq.respectTransparency false in
+theorem trivValue_unit_top (s : …) : trivValue … s = s := by
+  simp [trivValue, secOn, restrictPresheafUnit, Functor.Monoidal.εIso]
+  rfl
+```
+
+★★★一般に「mathlib 側の定義に `set_option backward.…` が付いていたら、
+それを消費する側にも要る」と思ってよい。
+
+## 前層加群の射の自然性は `PresheafOfModules.naturality_apply`
+
+`e.hom.naturality` ではなく **`PresheafOfModules.naturality_apply`**（元の水準）である:
+
+```lean
+PresheafOfModules.naturality_apply (f : M₁ ⟶ M₂) (g : X ⟶ Y) (x : M₁.obj X) :
+  f.app Y (M₁.map g x) = M₂.map g (f.app X x)
+```
+
+★`Over U` の site では `g` は `(Over.homMk (homOfLE h) : Over.mk (homOfLE h) ⟶ Over.mk (𝟙 U)).op`
+と書く。★★`X` / `Y` は名前付き引数で明示しないと合わないことが多い。
+★★★`exact hnat` か `exact hnat.symm` かはエラーメッセージの左右を見て決める
+——`Eq.symm hnat` の表示が期待と**同じ向き**なら `exact hnat` が正しい。
