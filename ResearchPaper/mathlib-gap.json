@@ -823,9 +823,15 @@
       "where": "Found/Arakelov/TensorMetric.lean",
       "claim": "★テンソル計量の**存在**と ‖s ⊗ t‖ = ‖s‖ · ‖t‖",
       "why": "★構成の要は「(A⊗B)|_V は自明だが A|_V は自明でない V」の扱いである（連結スキーム上でも A ⊗ B ≅ 𝒪 は A ≅ 𝒪 を含意しない）。局所自明性から p を含む W ≤ V で両方が自明になるものを取り、そこで h_A · h_B と置いて遷移単元で V の自明化へ運ぶ。★★値がチャートに依らないことは chartH_indep（共通の細分へ降りて transUnit_tensorTriv と compat）。★★★構造の恒等式は 4 つとも rfl であった。"
+     },
+     {
+      "stage": "5",
+      "where": "Found/Arakelov/AMetricMonoid.lean / AMetricIso.lean / AMetricGroup.lean",
+      "claim": "★原文の L̄ = (L, |−|_L) の型と、同型類の群への段",
+      "why": "★`AMetric X`（可逆層＋局所自明性＋計量）と `1 = Ō_X`・`L * M`（本物のテンソル積）。★★等長同型は**基準ノルム `h` の等式**として書いた——切断のノルムで書くと「純テンソルでしか確かめられないがノルムは加法的でない」という穴が開くからである。★★★積が同値類に降りること（`isIsometry_mul`）・結合律（`isIsometry_mul_assoc`）・単位律（`isIsometry_mul_one`）まで入った。★★★★自明化の側の恒等式 `pullTriv (α_ …) (tensorTriv eA (tensorTriv eB eC)) = tensorTriv (tensorTriv eA eB) eC` は `rfl` ではなく、`oplax_associativity` ＋ `associator_naturality` ＋ `triangle` ＋ `unitors_equal` の 4 段である。"
      }
     ],
-    "remaining": "★★**残るのは載せ替えである**——既存の ArithPic / APicOf はまだ TorsorMetric（Classical.choice の基準計量）の上に建っている。★それを LocalMetric の上に建て直す段（単位 Ō_X は structLocalMetric で在庫、逆元は双対計量、結合律、そして同型類による商）が要る。★★★Definition 1.1 の項目全体を閉じるには、さらに (ii) の deg_F（台帳 arakelov-degF-finite-places）も要る。"
+    "remaining": "★★**残るのは逆元（双対計量）と商そのもの**である。★逆元は本プロジェクトの `InvSheaf`（`PicSheafGroup.lean`）と同じく「逆をデータとして担ぐ」形にできるが、`mul` の逆を作る段で`(A ⊗ B) ⊗ (A' ⊗ B') ≅ (A ⊗ A') ⊗ (B ⊗ B')` の並べ替えが要り、そこには**組み紐（braiding）が等長であること**が要る（結合律と同じ形の証明になる見込み）。★★双対 `F^∨` の側は `PicDualSheaf.lean` / `PicDualGlue.lean` に層性と貼り合わせがあるが、`F ⊗ F^∨ ≅ 𝟙_` の完成形はまだ見当たらない（2026-08-28 実測）。★★★`Definition 1.1` の項目全体を閉じるには、さらに (ii) の `deg_F`（台帳 `arakelov-degF-finite-places`）も要る。"
    }
   }
  },
