@@ -388,6 +388,7 @@ import ABC3.Found.GenEll.DescentUnique
 import ABC3.Found.GenEll.IsoDescent
 import ABC3.Found.GenEll.SectionDescent
 import ABC3.Found.GenEll.DivisorDescent
+import ABC3.Found.GenEll.ConductorDescent
 import ABC3.Found.GenEll.BcDiagramRaw
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
