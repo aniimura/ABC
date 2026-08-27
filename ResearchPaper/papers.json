@@ -220,9 +220,11 @@
       "year": 1985,
       "pdfPages": 18,
       "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★[GenEll] の参考文献 [Falt](Invent. Math. 73, 1983)は有料。★★★**これはその公開の解説**であり、Faltings 高さと半安定還元を扱う。(G7)(G8) に効く。",
-      "verifiedPages": []
+      "notationRisk": "measured-p5",
+      "notationNotes": "★★★**2026-08-27 に物理 p.5 を 260 dpi で目視した**（Exemple 1.4）。実測した壊れ方: ★pdftotext のテキスト層は**数式をほぼ落とす**。omega は w になり、アクセント付き文字は U+FFFD になる。★★**逐語に使えるのは数式を含まない行だけ**であり、数式は「読み」に日本語で書くこと。★取得元は Numdam（公開）。★★[GenEll] の参考文献 [Falt]（Invent. Math. 73, 1983）は有料。★★★**これはその公開の解説**であり、Faltings 高さと半安定還元を扱う。★★★★★**[Silv2]（Advanced Topics）Prop 2.1 の代わりになる原典である**——[GenEll] Proposition 3.4 の不等式の側。(G7)(G8) に効く。",
+      "verifiedPages": [
+        5
+      ]
     },
     "RaySB427": {
       "title": "Construction analytique de courbes en géométrie non archimédienne (d'après David Mumford)",

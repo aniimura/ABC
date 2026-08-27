@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[DelSB616] Exemple 1.4 — Faltings 高さと素朴な高さの比較（k = ℚ, g = 1）</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .bb { font-weight: bold; }
+ .bar { text-decoration: overline; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[DelSB616] Exemple 1.4 — Faltings 高さと素朴な高さの比較（k = ℚ, g = 1）</h1>
+
+<p>P. Deligne, <em>Preuve des conjectures de Tate et de Shafarevitch (d'après G. Faltings)</em>,
+Séminaire Bourbaki 616 (1983/84)（全 18 ページ）。物理 p.5。
+<strong>260 dpi 目視確認 2026-08-27</strong>。</p>
+
+<h2>★★★★★なぜこの論文を構造化するのか — 2026-08-27 の訂正</h2>
+
+<p><code>[GenEll] Proposition 3.4</code> の不等式
+<code>deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞</code> は、原文が
+<code>[Silv2]</code>（Silverman, <em>Advanced Topics in the Arithmetic of Elliptic Curves</em>）
+Prop 2.1 に帰している。</p>
+
+<p class="open">★<code>[Silv2]</code> は <code>0_Source</code> に<strong>無い</strong>。
+そのため台帳（<code>mathlib-gap.json</code>）には「原典が無い」と書いていた。
+★★★<strong>それは誤りだった。</strong>
+<code>[DelSB616]</code> §1 が同じ内容を扱っており、<code>0_Source</code> にあり
+<code>papers.json</code> に登記済みである（18 ページ）。</p>
+
+<p>★Deligne 本人が §1 の冒頭でこう書いている——
+「Nous traitons en détail des propriétés de la "hauteur" d'une variété abélienne,
+introduite par G. Faltings. C'est la partie la plus technique, et la plus longue, de la preuve.」
+★★<strong>すなわち <code>[Silv2]</code> が畳んでいる内容の、公開された詳細版である。</strong></p>
+
+<h2>★★記法の実測（この論文に固有）</h2>
+
+<p class="open">★<code>pdftotext</code> のテキスト層は<strong>数式をほぼ落とす</strong>。
+<code>ω</code> は <code>w</code> に、アクセント付き文字は <code>&#65533;</code> になる。
+★★<strong>逐語に使えるのは数式を含まない行だけ</strong>である。
+本ファイルの <code>verbatim</code> は <code>pdftotext</code> の出力どおりに写してある
+（ゲートの逐語照合がそれと突き合わせるため）。</p>
+
+<p class="open">★★★数式は<strong>目視した内容を「読み」に日本語で書く</strong>。
+逐語ブロックには入れない。</p>
+
+<h2>★★★★★★★★到達点 — 6 段の分解</h2>
+
+<section class="statement example"
+         id="delsb616-ex-1-4"
+         data-paper="DelSB616"
+         data-pdf-page="5"
+         data-item="Exemple 1.4"
+         data-notation-checked="2026-08-27">
+<div class="verbatim">Exemple 1.4 Le cas k = Q , g = 1 .- Soient E une courbe elliptique sur Q et w</div>
+<div class="reading">★260 dpi で目視した内容（数式はテキスト層に無いので日本語で書く）。
+
+<p><code>E</code> を <code>ℚ</code> 上の楕円曲線、<code>ω</code> を Néron 微分とする。
+<code>E</code> は整係数の Weierstrass 方程式をもち、<code>(E,ω) ≅ (ℂ/Λ, dz)</code>。
+<code>Λ = ℤω₁ ⊕ ℤω₂</code> を正の基底、<code>τ = ω₂/ω₁</code>（<code>Im(τ) &gt; 0</code>）、
+<code>q = exp(2πiτ)</code>。</p>
+
+<p><code>c₄ = (ω₁/2πi)<sup>−4</sup>(1 + 240 Σσ₃(n)qⁿ)</code>、
+<code>c₆ = −(ω₁/2πi)<sup>−6</sup>(1 − 504 Σσ₅(n)qⁿ)</code>、
+<code>Δ = (c₄³ − c₆²)/1728</code>。これらは基底の取り方に依らず、
+<code>a_i</code> の整係数多項式なので<strong>整数</strong>である。</p>
+
+<p><strong>置く記号:</strong> <code>H(E) = exp h(E)</code>（Faltings 高さ）、
+<code>H*(E) = sup(|c₄|<sup>1/4</sup>, |c₆|<sup>1/6</sup>)</code>（素朴な高さ）。</p>
+
+<p>★★★<strong>目標</strong>: 「<code>h(E)</code> を与えたとき <code>ℚ</code> 上の楕円曲線は有限個」
+を示すには <code>H*(E)</code> を <code>H(E)</code> で抑えれば足りる。</p>
+
+<table>
+<tr><th>段</th><th>内容</th><th>種類</th></tr>
+<tr><td>1</td><td><code>|ω₁|</code> が最小の基底を取ると <code>Im(τ) ≥ √3/2</code></td><td>格子の初等幾何</td></tr>
+<tr><td>2</td><td><code>H(E) = (1/π·|ω₁|·|ω₁ Im(τ)|)<sup>−1/2</sup> = (1/|ω₁|)·|Im(τ)/π|<sup>−1/2</sup></code></td><td>複素解析（周期の共体積）</td></tr>
+<tr><td>3</td><td><code>H*(E) ≤ C₀·H(E)·Im(τ)<sup>1/2</sup></code></td><td>複素解析（Eisenstein 級数の評価）</td></tr>
+<tr><td>4</td><td><code>Im(τ) &gt; a &gt; 0</code> では <code>j = c₄³/Δ = q<sup>−1</sup> + 744 + …</code> から <code>Im(τ) ∼ sup(1, log|j|)/2π</code></td><td><code>j</code> の漸近</td></tr>
+<tr><td>5</td><td><code>Δ</code> は整数なので <code>|j| ≤ H*(E)<sup>12</sup></code>、ゆえに <code>H*(E) ≤ C₁·H(E)·sup(1, log H*(E))<sup>1/2</sup></code></td><td>初等</td></tr>
+<tr><td>6</td><td>★<strong><code>H*(E) ≤ C₂·H(E)·sup(1, log H(E))<sup>1/2</sup></code></strong></td><td>初等</td></tr>
+</table>
+
+<p class="open">★★段 5 → 6 は <code>[GenEll] Lemma 4.2</code>（An Elementary Estimate）と
+<strong>同じ形の評価</strong>であり、<code>Found/GenEll/Elementary.lean</code> に既にある。</p>
+
+<p class="open">★★★段 1–3 は複素解析であり、並行セッションが
+<code>Found/GenEll/LatticeCurve.lean</code>・<code>Covolume.lean</code>・
+<code>EisensteinMatch.lean</code> 等で構築中である。
+★段 4 の入口は <code>Found/GenEll/JFunction.lean</code> の
+<code>tendsto_norm_jFun_atImInfty</code>。</p>
+</div>
+</section>
+
+<h2>★★★★★★これが依存グラフのどこに入るか</h2>
+
+<pre>
+[DelSB616] Exemple 1.4  ⟶  [GenEll] Proposition 3.4 の不等式
+                        ⟶  Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4
+</pre>
+
+<p>★<code>Proposition 3.4</code> の<strong>有限性の主張</strong>のほうは既に取れている
+（<code>Found/GenEll/FiniteFromNorthcott.lean</code> の <code>finite_of_le_of_northcott</code>、
+Northcott 側の入力は <code>Check/GenEll/NorthcottProjModelNonvacuous.lean</code> で検査済み）。
+★★<strong>残るのは不等式の側だけ</strong>であり、その原典が本節点である。</p>
+
+<h2>★★★方法論の記録</h2>
+
+<p class="open">★★★★★<strong>「mathlib に無い」と「原典が無い」を混同していた。</strong>
+4 本の塞がりのうち 3 本は原典が <code>0_Source</code> にあり <code>papers.json</code> に
+登記済みである（<code>[Stacks]</code>/<code>[EGA2]</code>、<code>[RaySB427]</code>、
+<code>[DelSB616]</code>/<code>[Elkik]</code>/<code>[RayHt]</code>）。</p>
+
+<p>★したがって <code>CLAUDE.md</code> の進め方
+（スケルトンで依存グラフを作成後、葉から Lean 形式化）が<strong>そのまま適用できる</strong>。
+★★「壁」ではなく<strong>「まだグラフに載せていない道」</strong>である
+——<code>CLAUDE.md</code> の姿勢どおり、既知数学の person-years は壁でなく道である。</p>
+
+</body>
+</html>
