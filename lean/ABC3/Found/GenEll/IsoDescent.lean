@@ -160,6 +160,17 @@ theorem bcDescHom_map {X X' : Scheme.{0}}
   · rw [Category.assoc, bcDescHom_snd, Category.assoc, bcMap_snd, bcDescHom_snd,
       bcMap_comp, Category.assoc]
 
+/-- ★★**材料を段の途中で移しても降下射は同じ** ——
+`bcDescHom f f' (bcMap f h ≫ a) h'` と `bcDescHom f f' a (h' ≫ h)` は等しい。
+
+★これが無いと、別々の段で得た降下射を共通の段へ揃えるときに
+「同じもの」と言えない。 -/
+theorem bcDescHom_bcMap {X X' : Scheme.{0}}
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ))
+    {i k n : ℕᵒᵖ} (a : bcObj f i ⟶ X') (h : k ⟶ i) (h' : n ⟶ k) :
+    bcDescHom f f' (bcMap f h ≫ a) h' = bcDescHom f f' a (h' ≫ h) :=
+  congrArg (liftDescent f f') (by rw [bcMap_comp]; exact (Category.assoc _ _ _).symm)
+
 /-! ## ★★★★★★★★生成ファイバーでの一致 -/
 
 /-- ★★★★★★**降下射は生成ファイバーで元の射に戻る**。
@@ -201,7 +212,91 @@ theorem bcDescHom_comp_id_of {X X' : Scheme.{0}}
       ← bcDescHom_snd f' f b h2, ← Category.assoc, ← bcDescHom_map,
       Category.assoc, H, bcMap_snd, Category.id_comp]
 
+/-- ★★**合成が恒等であることを下の段へ運ぶ**。
+
+★別々に得た等式を共通の段へ揃えるときに使う。 -/
+theorem bcDescHom_comp_id_of_le {X X' : Scheme.{0}}
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ))
+    {i j : ℕᵒᵖ} (a : bcObj f i ⟶ X') (b : bcObj f' j ⟶ X)
+    {m n : ℕᵒᵖ} (hi : m ⟶ i) (hj : m ⟶ j) (h : n ⟶ m)
+    (H : bcDescHom f f' a hi ≫ bcDescHom f' f b hj = 𝟙 (bcObj f m)) :
+    bcDescHom f f' a (h ≫ hi) ≫ bcDescHom f' f b (h ≫ hj) = 𝟙 (bcObj f n) :=
+  bcDescHom_comp_id_of f f' a b hi hj h
+    (by rw [(reassoc_of% H) (pullback.snd (overRatTowerDiagram.obj m).hom f)])
+
 /-! ## ★★★★★★★★★★同型の spreading out -/
+
+/-- ★★★★★★★★★**降下済みの材料から両向きの恒等式を出す**。
+
+原文 (GenEll p.9):
+> immediately that the BD-class of log-condD on UX (Q) depends only on the pair
+
+★`a`（`e.hom` の降下）と `b`（`e.inv` の降下）を**外から受ける**形にしてある
+——因子の降下（`DivisorDescent.lean`）と**同じ材料で同じ段に揃える**ためである。
+
+★★組み立ては 4 段のうちの段 3・4。 -/
+theorem exists_comp_id_of_desc {X X' : Scheme.{0}}
+    [CompactSpace X] [QuasiSeparatedSpace X]
+    [CompactSpace X'] [QuasiSeparatedSpace X']
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ))
+    [LocallyOfFiniteType f] [LocallyOfFiniteType f']
+    (e : bcPt f ≅ bcPt f')
+    (he : e.hom ≫ pullback.fst (overRatTowerCone.pt).hom f'
+      = pullback.fst (overRatTowerCone.pt).hom f)
+    {i j : ℕᵒᵖ} (a : bcObj f i ⟶ X') (b : bcObj f' j ⟶ X)
+    (hai : bcLeg f i ≫ a = e.hom ≫ pullback.snd (overRatTowerCone.pt).hom f')
+    (hbj : bcLeg f' j ≫ b = e.inv ≫ pullback.snd (overRatTowerCone.pt).hom f) :
+    ∃ (n : ℕᵒᵖ) (h : n ⟶ i) (h' : n ⟶ j),
+      bcDescHom f f' a h ≫ bcDescHom f' f b h' = 𝟙 (bcObj f n) ∧
+      bcDescHom f' f b h' ≫ bcDescHom f f' a h = 𝟙 (bcObj f' n) := by
+  classical
+  have he' : e.inv ≫ pullback.fst (overRatTowerCone.pt).hom f
+      = pullback.fst (overRatTowerCone.pt).hom f' := by
+    rw [← he, ← Category.assoc, e.inv_hom_id, Category.id_comp]
+  have hki : IsCofiltered.min i j ⟶ i := IsCofiltered.minToLeft i j
+  have hkj : IsCofiltered.min i j ⟶ j := IsCofiltered.minToRight i j
+  set k : ℕᵒᵖ := IsCofiltered.min i j
+  have hα : ∀ {n : ℕᵒᵖ} (h : n ⟶ i), bcLeg f n ≫ bcDescHom f f' a h = e.hom ≫ bcLeg f' n :=
+    fun h => bcLeg_bcDescHom f f' a e.hom he hai h
+  have hβ : ∀ {n : ℕᵒᵖ} (h : n ⟶ j), bcLeg f' n ≫ bcDescHom f' f b h = e.inv ≫ bcLeg f n :=
+    fun h => bcLeg_bcDescHom f' f b e.inv he' hbj h
+  have keyAB : bcLeg f k ≫ bcDescHom f f' a hki ≫ bcDescHom f' f b hkj = bcLeg f k := by
+    rw [← Category.assoc, hα hki, Category.assoc, hβ hkj, ← Category.assoc,
+      e.hom_inv_id, Category.id_comp]
+  have keyBA : bcLeg f' k ≫ bcDescHom f' f b hkj ≫ bcDescHom f f' a hki = bcLeg f' k := by
+    rw [← Category.assoc, hβ hkj, Category.assoc, hα hki, ← Category.assoc,
+      e.inv_hom_id, Category.id_comp]
+  obtain ⟨mA, hA1, hA2, hmA⟩ := descent_unique_baseChangeRatTower f f
+    (bcDescHom f f' a hki ≫ bcDescHom f' f b hkj ≫
+      pullback.snd (overRatTowerDiagram.obj k).hom f)
+    (specZIsTerminal.hom_ext _ _)
+    (pullback.snd (overRatTowerDiagram.obj k).hom f)
+    (specZIsTerminal.hom_ext _ _)
+    ((reassoc_of% keyAB) (pullback.snd (overRatTowerDiagram.obj k).hom f))
+  obtain ⟨mB, hB1, hB2, hmB⟩ := descent_unique_baseChangeRatTower f' f'
+    (bcDescHom f' f b hkj ≫ bcDescHom f f' a hki ≫
+      pullback.snd (overRatTowerDiagram.obj k).hom f')
+    (specZIsTerminal.hom_ext _ _)
+    (pullback.snd (overRatTowerDiagram.obj k).hom f')
+    (specZIsTerminal.hom_ext _ _)
+    ((reassoc_of% keyBA) (pullback.snd (overRatTowerDiagram.obj k).hom f'))
+  have hA12 : hA1 = hA2 := Subsingleton.elim _ _
+  have hB12 : hB1 = hB2 := Subsingleton.elim _ _
+  subst hA12; subst hB12
+  have hAB : bcDescHom f f' a (hA1 ≫ hki) ≫ bcDescHom f' f b (hA1 ≫ hkj)
+      = 𝟙 (bcObj f mA) := bcDescHom_comp_id_of f f' a b hki hkj hA1 hmA
+  have hBA : bcDescHom f' f b (hB1 ≫ hkj) ≫ bcDescHom f f' a (hB1 ≫ hki)
+      = 𝟙 (bcObj f' mB) := bcDescHom_comp_id_of f' f b a hkj hki hB1 hmB
+  have hn1 : IsCofiltered.min mA mB ⟶ mA := IsCofiltered.minToLeft mA mB
+  have hn2 : IsCofiltered.min mA mB ⟶ mB := IsCofiltered.minToRight mA mB
+  set n : ℕᵒᵖ := IsCofiltered.min mA mB
+  have hABn := bcDescHom_comp_id_of_le f f' a b (hA1 ≫ hki) (hA1 ≫ hkj) hn1 hAB
+  have hBAn := bcDescHom_comp_id_of_le f' f b a (hB1 ≫ hkj) (hB1 ≫ hki) hn2 hBA
+  have e1 : hn2 ≫ hB1 ≫ hki = hn1 ≫ hA1 ≫ hki := Subsingleton.elim _ _
+  have e2 : hn2 ≫ hB1 ≫ hkj = hn1 ≫ hA1 ≫ hkj := Subsingleton.elim _ _
+  rw [e1, e2] at hBAn
+  exact ⟨n, hn1 ≫ hA1 ≫ hki, hn1 ≫ hA1 ≫ hkj, hABn, hBAn⟩
+
 
 /-- ★★★★★★★★★★**[GenEll] Remark 1.5.1 —— 同型の spreading out（両向きの射の形）**。
 
@@ -227,72 +322,14 @@ theorem exists_iso_baseChangeRatTower {X X' : Scheme.{0}}
       = pullback.fst (overRatTowerCone.pt).hom f) :
     ∃ (n : ℕᵒᵖ) (φ : bcObj f n ⟶ bcObj f' n) (ψ : bcObj f' n ⟶ bcObj f n),
       φ ≫ ψ = 𝟙 (bcObj f n) ∧ ψ ≫ φ = 𝟙 (bcObj f' n) := by
-  classical
-  have he' : e.inv ≫ pullback.fst (overRatTowerCone.pt).hom f
-      = pullback.fst (overRatTowerCone.pt).hom f' := by
-    rw [← he, ← Category.assoc, e.inv_hom_id, Category.id_comp]
-  -- ★段 1: `e.hom` を降ろす
+  -- ★段 1-2: `e.hom` と `e.inv` を降ろす
   obtain ⟨i, a, hai, -⟩ := exists_factor_baseChangeRatTower f f'
     (e.hom ≫ pullback.snd (overRatTowerCone.pt).hom f')
-  -- ★段 2: `e.inv` を降ろす
   obtain ⟨j, b, hbj, -⟩ := exists_factor_baseChangeRatTower f' f
     (e.inv ≫ pullback.snd (overRatTowerCone.pt).hom f)
-  have hai' : bcLeg f i ≫ a = e.hom ≫ pullback.snd (overRatTowerCone.pt).hom f' := hai
-  have hbj' : bcLeg f' j ≫ b = e.inv ≫ pullback.snd (overRatTowerCone.pt).hom f := hbj
-  -- ★共通の段へ落とす
-  have hki : IsCofiltered.min i j ⟶ i := IsCofiltered.minToLeft i j
-  have hkj : IsCofiltered.min i j ⟶ j := IsCofiltered.minToRight i j
-  set k : ℕᵒᵖ := IsCofiltered.min i j
-  have hα : ∀ {n : ℕᵒᵖ} (h : n ⟶ i), bcLeg f n ≫ bcDescHom f f' a h = e.hom ≫ bcLeg f' n :=
-    fun h => bcLeg_bcDescHom f f' a e.hom he hai' h
-  have hβ : ∀ {n : ℕᵒᵖ} (h : n ⟶ j), bcLeg f' n ≫ bcDescHom f' f b h = e.inv ≫ bcLeg f n :=
-    fun h => bcLeg_bcDescHom f' f b e.inv he' hbj' h
-  -- ★段 3: 生成ファイバーでは合成が恒等
-  have keyAB : bcLeg f k ≫ bcDescHom f f' a hki ≫ bcDescHom f' f b hkj = bcLeg f k := by
-    rw [← Category.assoc, hα hki, Category.assoc, hβ hkj, ← Category.assoc,
-      e.hom_inv_id, Category.id_comp]
-  have keyBA : bcLeg f' k ≫ bcDescHom f' f b hkj ≫ bcDescHom f f' a hki = bcLeg f' k := by
-    rw [← Category.assoc, hβ hkj, Category.assoc, hα hki, ← Category.assoc,
-      e.inv_hom_id, Category.id_comp]
-  -- ★段 4: ゆえに有限段で一致（両向き）
-  obtain ⟨mA, hA1, hA2, hmA⟩ := descent_unique_baseChangeRatTower f f
-    (bcDescHom f f' a hki ≫ bcDescHom f' f b hkj ≫
-      pullback.snd (overRatTowerDiagram.obj k).hom f)
-    (specZIsTerminal.hom_ext _ _)
-    (pullback.snd (overRatTowerDiagram.obj k).hom f)
-    (specZIsTerminal.hom_ext _ _)
-    ((reassoc_of% keyAB) (pullback.snd (overRatTowerDiagram.obj k).hom f))
-  obtain ⟨mB, hB1, hB2, hmB⟩ := descent_unique_baseChangeRatTower f' f'
-    (bcDescHom f' f b hkj ≫ bcDescHom f f' a hki ≫
-      pullback.snd (overRatTowerDiagram.obj k).hom f')
-    (specZIsTerminal.hom_ext _ _)
-    (pullback.snd (overRatTowerDiagram.obj k).hom f')
-    (specZIsTerminal.hom_ext _ _)
-    ((reassoc_of% keyBA) (pullback.snd (overRatTowerDiagram.obj k).hom f'))
-  -- ★★`ℕᵒᵖ` は前順序なので 2 本の道は等しい
-  have hA12 : hA1 = hA2 := Subsingleton.elim _ _
-  have hB12 : hB1 = hB2 := Subsingleton.elim _ _
-  subst hA12; subst hB12
-  have hAB : bcDescHom f f' a (hA1 ≫ hki) ≫ bcDescHom f' f b (hA1 ≫ hkj)
-      = 𝟙 (bcObj f mA) := bcDescHom_comp_id_of f f' a b hki hkj hA1 hmA
-  have hBA : bcDescHom f' f b (hB1 ≫ hkj) ≫ bcDescHom f f' a (hB1 ≫ hki)
-      = 𝟙 (bcObj f' mB) := bcDescHom_comp_id_of f' f b a hkj hki hB1 hmB
-  -- ★★★両者を共通の段 `n` へ運ぶ
-  have hn1 : IsCofiltered.min mA mB ⟶ mA := IsCofiltered.minToLeft mA mB
-  have hn2 : IsCofiltered.min mA mB ⟶ mB := IsCofiltered.minToRight mA mB
-  set n : ℕᵒᵖ := IsCofiltered.min mA mB
-  have hABn : bcDescHom f f' a (hn1 ≫ hA1 ≫ hki) ≫ bcDescHom f' f b (hn1 ≫ hA1 ≫ hkj)
-      = 𝟙 (bcObj f n) :=
-    bcDescHom_comp_id_of f f' a b (hA1 ≫ hki) (hA1 ≫ hkj) hn1
-      (by rw [(reassoc_of% hAB) (pullback.snd (overRatTowerDiagram.obj mA).hom f)])
-  have hBAn : bcDescHom f' f b (hn2 ≫ hB1 ≫ hkj) ≫ bcDescHom f f' a (hn2 ≫ hB1 ≫ hki)
-      = 𝟙 (bcObj f' n) :=
-    bcDescHom_comp_id_of f' f b a (hB1 ≫ hkj) (hB1 ≫ hki) hn2
-      (by rw [(reassoc_of% hBA) (pullback.snd (overRatTowerDiagram.obj mB).hom f')])
-  have e1 : hn2 ≫ hB1 ≫ hki = hn1 ≫ hA1 ≫ hki := Subsingleton.elim _ _
-  have e2 : hn2 ≫ hB1 ≫ hkj = hn1 ≫ hA1 ≫ hkj := Subsingleton.elim _ _
-  rw [e1, e2] at hBAn
-  exact ⟨n, _, _, hABn, hBAn⟩
+  -- ★★段 3-4: 降ろした材料から両向きの恒等式を出す
+  obtain ⟨n, h, h', hAB, hBA⟩ := exists_comp_id_of_desc f f' e he a b hai hbj
+  exact ⟨n, _, _, hAB, hBA⟩
 
 /-- ★★★★★★★★★★**[GenEll] Remark 1.5.1 —— 同型の spreading out（同型の形）**。
 
