@@ -397,6 +397,7 @@ import ABC3.Found.GenEll.Remark151Sigma
 import ABC3.Found.GenEll.ProperExtend
 import ABC3.Found.GenEll.DedekindExtend
 import ABC3.Found.GenEll.OpenExtend
+import ABC3.Found.GenEll.GlobalExtend
 import ABC3.Found.GenEll.BcDiagramRaw
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
