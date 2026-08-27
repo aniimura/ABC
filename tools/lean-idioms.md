@@ -1032,3 +1032,50 @@ io.open(p, 'wb').write(out)          # ここまで来れば必ず書ける
 
 ★★★落ちたら `git checkout -- <file>` で戻る。
 **台帳を触る前にコミットしておくこと**が唯一の保険である。
+
+---
+
+## 図式・錐が絡む `pullback.hom_ext` は「生の形」に**全部**揃える
+
+2026-08-27、同型の spreading out（`Found/GenEll/IsoDescent.lean`）で 4 回落ちた。
+
+`(baseChangeRatTowerDiagram f).obj n` と `pullback (overRatTowerDiagram.obj n).hom f` は
+**defeq だが構文が違う**。`pullback.hom_ext` が作る目標では後者の形が現れるので、
+前者の形の射を混ぜると `Category.assoc` すら発火せず、毎回
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+
+が出る。`Full error:` を読むと `Quiver.Hom A ((D f').obj n)` と
+`Quiver.Hom A (pullback ... f')` の食い違いだと分かる。
+
+### ★★片方だけ揃えても駄目
+
+最初は自作の射の**余域**だけを `pullback ...` にした。すると今度は
+**域**（`(D f).map h'` の余域）が合わなくなり、同じエラーが場所を変えて出た。
+
+### 直し方: 対象・射・錐の脚に別名を置いて 1 つの形に揃える
+
+```lean
+noncomputable abbrev bcObj (f) (n) : Scheme := pullback (overRatTowerDiagram.obj n).hom f
+noncomputable abbrev bcPt  (f)     : Scheme := pullback (overRatTowerCone.pt).hom f
+noncomputable def bcMap (f) (h : m ⟶ n) : bcObj f m ⟶ bcObj f n := (D f).map h
+noncomputable def bcLeg (f) (n)         : bcPt f  ⟶ bcObj f n := (C f).π.app n
+```
+
+そのうえで `bcMap_fst` / `bcMap_snd` / `bcLeg_fst` / `bcLeg_snd` を `@[simp]` で置く。
+★`bcLeg_*` の証明は `show (C f).π.app n ≫ _ = _` で**関手の形へ戻してから** `simp only` する
+——補題の中では戻し、外では生、と役割を分ける。
+
+★★★これで `rw [Category.assoc, bcDescHom_fst, …]` が普通に通るようになる。
+**別名は中身を変えるためではなく、構文を 1 つに揃えて `rw` を通すために置く。**
+
+### 付随して覚えたこと
+
+* `reassoc_of% h` は `∀ {Z} (k : … ⟶ Z), …` を返す。**引数を 1 つ与える**必要がある:
+  `(reassoc_of% keyAB) (pullback.snd _ f)`。
+* `ℕᵒᵖ` は前順序の圏なので `Subsingleton (m ⟶ i)` が通る。
+  余フィルターの `min` で 2 回落とした後、**2 本の道は自動的に等しい**
+  （`Subsingleton.elim` → `rw` で片方に寄せる）。
+* `have hki : IsCofiltered.min i j ⟶ i := IsCofiltered.minToLeft i j` のように
+  `have` は Type 値にも使える。`obtain ⟨k, hki, hkj⟩ : ∃ … ` は
+  `Prop` に潰れるので**射の取り出しには使えない**。
