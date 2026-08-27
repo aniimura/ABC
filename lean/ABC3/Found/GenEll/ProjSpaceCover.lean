@@ -146,6 +146,77 @@ theorem projCoord_self (N : ℕ) (R : Type) [CommRing R] (i : Fin (N + 1)) :
   rw [projCoord, HomogeneousLocalization.Away.val_mk]
   simp
 
+/-! ## ★★★★★★★★点をチャートへ落とす（段 C2b） -/
+
+/-- ★★★**体値の点はどれかのチャートに入る**。
+
+★`Spec F` は 1 点なので、`exists_X_notMem` がそのまま効く。 -/
+theorem exists_chart_range (N : ℕ) (R : Type) [CommRing R] (F : Type) [Field F]
+    (x : Spec (CommRingCat.of F) ⟶ Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)) :
+    ∃ i : Fin (N + 1), Set.range x.base ⊆
+      Set.range (Proj.awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+        (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos).base := by
+  haveI : Nonempty (Spec (CommRingCat.of F)) :=
+    inferInstanceAs (Nonempty (PrimeSpectrum F))
+  haveI : Subsingleton (Spec (CommRingCat.of F)) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum F))
+  obtain ⟨pt⟩ := ‹Nonempty (Spec (CommRingCat.of F))›
+  obtain ⟨i, hi⟩ := exists_X_notMem (Fin (N + 1)) R (x.base pt)
+  refine ⟨i, ?_⟩
+  rintro _ ⟨q, rfl⟩
+  have hq : q = pt := Subsingleton.elim _ _
+  subst hq
+  have hr := Proj.opensRange_awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+    (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos
+  have h2 : x.base q ∈ Proj.basicOpen (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+      (MvPolynomial.X i) := hi
+  rw [← hr] at h2
+  exact h2
+
+/-- ★★★★★★**点をチャートに落として得られる環準同型** `A⁰_{x_i} → F`。
+
+★`Proj.awayι` は開埋め込みなので `IsOpenImmersion.lift` が使え、
+`Spec.preimage` で環準同型に直せる。 -/
+noncomputable def projChartHom (N : ℕ) (R : Type) [CommRing R] (F : Type) [Field F]
+    (x : Spec (CommRingCat.of F) ⟶ Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R))
+    (i : Fin (N + 1))
+    (hx : Set.range x.base ⊆
+      Set.range (Proj.awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+        (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos).base) :
+    CommRingCat.of (HomogeneousLocalization.Away
+        (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R) (MvPolynomial.X i))
+      ⟶ CommRingCat.of F :=
+  Spec.preimage (IsOpenImmersion.lift
+    (Proj.awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+      (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos) x hx)
+
+/-- ★★★★★★★★**点の正規化座標** `x_j/x_i ∈ F`。
+
+原文 (GenEll p.6):
+> (iv) Let d be a positive integer, C ∈ R. Suppose further that the line bundle LQ is ample on XQ. Then the set of points x ∈ X(Q)≤d [cf. Example 1.3, (i)] such that htL(x) ≤ C is ﬁnite.
+
+★★これが `northcott_of_projModel` の `crd p j / crd p idx` そのものである
+——`idx = i` と取れば分母は `1` になる（`projPointCoord_self`）。 -/
+noncomputable def projPointCoord (N : ℕ) (R : Type) [CommRing R] (F : Type) [Field F]
+    (x : Spec (CommRingCat.of F) ⟶ Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R))
+    (i : Fin (N + 1))
+    (hx : Set.range x.base ⊆
+      Set.range (Proj.awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+        (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos).base)
+    (j : Fin (N + 1)) : F :=
+  (projChartHom N R F x i hx).hom (projCoord N R i j)
+
+/-- ★★★**割る成分の座標は `1`** —— 正規化されている。 -/
+theorem projPointCoord_self (N : ℕ) (R : Type) [CommRing R] (F : Type) [Field F]
+    (x : Spec (CommRingCat.of F) ⟶ Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R))
+    (i : Fin (N + 1))
+    (hx : Set.range x.base ⊆
+      Set.range (Proj.awayι (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+        (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos).base) :
+    projPointCoord N R F x i hx i = 1 := by
+  show (projChartHom N R F x i hx).hom (projCoord N R i i) = 1
+  rw [projCoord_self, map_one]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def iSup_basicOpen_X_eq_top.src : ABC3.Meta.Source :=
@@ -156,6 +227,11 @@ def iSup_basicOpen_X_eq_top.src : ABC3.Meta.Source :=
 def projCoord.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(語彙——正規化座標 x_j/x_i)",
+    sectionId := "genell-prop-1-4" }
+
+def projPointCoord.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(点の正規化座標 x_j/x_i ∈ F)",
     sectionId := "genell-prop-1-4" }
 
 def iSup_basicOpen_X_eq_top.needs : List ABC3.Meta.ProofObligation :=

@@ -261,8 +261,9 @@
      {
       "stage": "C2b",
       "claim": "点 Spec F ⟶ ℙⁿ をチャートに落として環準同型 A⁰_{x_i} → F を取る配管",
-      "status": "open",
-      "why": "★チャートの同型 Proj| D₊(f) ≅ Spec (A⁰_f) は **mathlib にある**（AlgebraicGeometry.projIsoSpec、ただし LocallyRingedSpace の水準）。 ★★残るのは開埋め込みへの持ち上げと、Scheme の水準への翻訳だけである。"
+      "status": "closed",
+      "why": "★mathlib の **Proj.awayι**（Spec (A⁰_f) ⟶ Proj 、開埋め込み）と **Proj.opensRange_awayι** があったので、IsOpenImmersion.lift と Spec.preimage を繋ぐだけで出た。 ★★Spec F は 1 点なので、どのチャートに入るかは exists_X_notMem が決める。 ★★★**これで northcott_of_projModel の crd に渡す座標が実際に作れる**。",
+      "where": "Found/GenEll/ProjSpaceCover.lean の exists_chart_range / projChartHom / **projPointCoord** / projPointCoord_self"
      },
      {
       "stage": "C2c",
@@ -334,8 +335,8 @@
       "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
      }
     ],
-    "done": "11/15",
-    "remaining": "★★**残るのは C2b・C2c・E・F2c の 4 段**である。 ★段 C2b（チャートへ落とす配管）は**小さい**——mathlib の projIsoSpec がある。 ★★残る本体は **C2c（O(1)）** と **E（Serre の定理）**であり、どちらも very ample を述べ・示すために要る。"
+    "done": "12/15",
+    "remaining": "★★**残るのは C2c・E・F2c の 3 段**である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★残る本体は **C2c（O(1)）** と **E（Serre の定理）**であり、どちらも very ample（L のある冪が ℙᴺ への閉埋め込みを与える）を述べ・示すために要る。 ★★★F2c（生成ファイバーが Y に戻る）は小さい。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },
