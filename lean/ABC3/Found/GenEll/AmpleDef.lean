@@ -452,6 +452,44 @@ theorem sectionRatio_congr (M : X.PresheafOfModules) (V : X.Opens)
     sectionRatio M V e 0 t = 0 :=
   (sectionRatio_unique M V e 0 t 0 (by rw [zero_mul, trivValue_zero, map_zero])).symm
 
+/-- ★★★★★★**比は制限と両立する**。
+
+★機構は `trivValue_restrict` と `sectionRatio_unique` だけである。 -/
+theorem sectionRatio_restrict (M : X.PresheafOfModules) {V W : X.Opens} (h : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s t : M.obj (op ⊤)) :
+    sectionRatio M W (trivialOfLe M h e) s t
+      = X.presheaf.map (homOfLE (inf_le_inf_left (nonVanishing M t) h)).op
+          (sectionRatio M V e s t) := by
+  refine (sectionRatio_unique M W (trivialOfLe M h e) s t _ ?_).symm
+  have key : ∀ x : M.obj (op ⊤),
+      X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ W ≤ W)).op
+          (trivValue M W (trivialOfLe M h e) x)
+        = X.presheaf.map (homOfLE (inf_le_inf_left (nonVanishing M t) h)).op
+            (X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+              (trivValue M V e x)) := by
+    intro x
+    rw [trivValue_restrict M h e x, ← CommRingCat.comp_apply, ← CommRingCat.comp_apply,
+      ← Functor.map_comp, ← Functor.map_comp]
+    rfl
+  rw [key t, key s, ← map_mul, sectionRatio_mul M V e s t]
+
+/-- ★★★★★★★**どの 2 つの自明化から作った比も重なりの上で一致する**。
+
+★★これが「`s/t` が `X_t` の上の**大域的な**正則関数として貼り合う」ことの
+**貼り合わせ条件**そのものである（貼り合わせ自体はまだ入れていない）。 -/
+theorem sectionRatio_agree (M : X.PresheafOfModules) (V W : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (e' : (restrictPresheafFunctor X W).obj M ≅ 𝟙_ (PresheafModulesOn X W))
+    (s t : M.obj (op ⊤)) :
+    X.presheaf.map (homOfLE (inf_le_inf_left (nonVanishing M t)
+        (inf_le_left : V ⊓ W ≤ V))).op (sectionRatio M V e s t)
+      = X.presheaf.map (homOfLE (inf_le_inf_left (nonVanishing M t)
+          (inf_le_right : V ⊓ W ≤ W))).op (sectionRatio M W e' s t) := by
+  rw [← sectionRatio_restrict M (inf_le_left : V ⊓ W ≤ V) e s t,
+    ← sectionRatio_restrict M (inf_le_right : V ⊓ W ≤ W) e' s t]
+  exact sectionRatio_congr M (V ⊓ W) _ _ s t
+
 /-! ## ★★★★★★★同型に沿った移送と、`IsAmple` の空虚封じ -/
 
 /-- ★大域切断は射に沿って移る（自然性）。 -/
@@ -556,6 +594,11 @@ def sectionRatio.src : ABC3.Meta.Source :=
 def sectionRatio_congr.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(切断の比は自明化の取り方に依らないこと)",
+    sectionId := "genell-prop-1-4" }
+
+def sectionRatio_agree.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(比の貼り合わせ条件。貼り合わせ自体は含まない)",
     sectionId := "genell-prop-1-4" }
 
 def nonVanishing.needs : List ABC3.Meta.ProofObligation :=
