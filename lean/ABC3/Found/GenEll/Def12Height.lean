@@ -265,7 +265,15 @@ def definition_1_2.needs : List ABC3.Meta.ProofObligation :=
     .implicitStep
       ("★逸脱 2: 算術直線束は APicWitness.lean の実装(可逆層の類と X^arc 上の連続関数の対)" ++
        "を使う。Definition 1.1 の項目全体はまだ閉じていないが、本項目が使うのは" ++
-       "pullback / pullback_mul / pullback_comp と deg_F だけで、すべて Found/ にある") 3,
+       "pullback / pullback_mul / pullback_comp と deg_F だけで、すべて Found/ にある。" ++
+       "★★Definition 1.1 が閉じない理由は 2 点で測れた(2026-08-27): " ++
+       "(a) APicData に ι_X(複素共役)との両立を課す欄が無い —— arcCM X = C(X^arc, ℝ) は" ++
+       "無条件なので、実装の APic は原文の APic より大きい。因子表示側には" ++
+       "IsConjInvariant があり ArchADivBase.lean で実際に使っている; " ++
+       "(b) APicData に pullback_comp の欄が無い —— 本ファイルの aPicPullback_comp は" ++
+       "witness についての定理であって Interface の保証ではない。" ++
+       "★どちらも本項目の証明には要らない(deg_F は全埋め込みにわたる和なので" ++
+       "共役対称性が自動で出る)") 3,
     .implicitStep
       ("★★G3 負の対照: finrank_not_descends —— 体の次数 [F:ℚ] は点の関数にならない。" ++
        "したがって ht が商へ降りるのは自明ではなく htOf_baseChange のおかげである。" ++
