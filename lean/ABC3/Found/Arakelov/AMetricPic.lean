@@ -5,14 +5,14 @@ import ABC3.Found.Arakelov.AMetricGroup
 import ABC3.Meta.Claim
 
 /-!
-# **`APic(X)` —— 算術直線束の同型類がなす群**（`Found`）
+# **算術直線束の同型類がなす群**（前層の水準、`Found`）
 
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.3。
 
 原文 (GenEll p.3):
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
 
-## ★★★★★★★★★★到達点 —— 原文の `APic(X)` が群であること
+## ★★★★★★★★★★到達点 —— 同型類が群をなすこと（**前層の水準**）
 
     `APicM X ≝ { (L̄, L̄⁻¹, L̄ ⊗ L̄⁻¹ ≅ Ō_X) } / 等長同型`
 
@@ -43,11 +43,35 @@ import ABC3.Meta.Claim
 `L̄ ⊗ L̄⁻¹ ≅ Ō_X` かつ `L̄ ≅ M̄` なら `L̄⁻¹ ≅ M̄⁻¹`（`AInv.inv_isometric`）
 ——これがないと商の上で `⁻¹` が定義できない。
 
+## ★★★★★★★★★★逸脱の明示 —— **前層の水準である**
+
+★★**原文の `APic(X)` は可逆*層*の同型類の群である**が、
+`APicM X` は**局所自明な*前層*加群**の同型類の群である。
+
+★★★これは意図的な逸脱であり、理由は次の測定である（2026-08-28）:
+
+| 事実 | 帰結 |
+|---|---|
+| **局所自明でも層とは限らない** | `𝟙_` と proper open で一致し `⊤` で `0` の前層は局所自明だが層でない |
+| **前層のテンソルは層でない** | だから本プロジェクトの `tensorModules` は**層化**を挟む（`PicSheafTensor.lean`） |
+| 層の圏にはモノイダル構造が無い | mathlib 実測（2026-08-28）。層化を挟むと結合律が別問題になる |
+
+★したがって「テンソル積が**厳密**である」ことと「対象が層である」ことは
+**同時には取れない**——本ファイル群は前者を取った。
+★★それが `trivValue_tensor` が `rfl` になり、
+`normOf_mul`（`|s ⊗ t| = |s|·|t|`）が構成つきで出た理由である。
+
 ## ★残っている段（明示）
 
-★★`Definition 1.1` の項目全体には (ii) の `deg_F`
-（台帳 `arakelov-degF-finite-places`）も要る。
-★★★`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段も別に要る。
+★**層の水準への橋**——`A ⊗ B → (A ⊗ B)^sh` は**局所同型**なので
+自明化も計量も移り、群準同型 `APicM X → APic^{層}(X)` が定まるはずである。
+★★単射性は自明でない（上の反例の前層は `𝟙_` に層化される）。
+
+★★★`Definition 1.1` の項目全体には (ii) の `deg_F`
+（台帳 `arakelov-degF-finite-places`）も要る。★その段 A は
+**この層の水準への橋そのもの**である（`Γ(L,⊤)` が可逆 `R`-加群であるために要る）。
+
+★★★★`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段も別に要る。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -135,7 +159,7 @@ def setoid (X : Scheme.{0}) : Setoid (AInv X) where
 
 end AInv
 
-/-- ★★★★★★★★★★**`APic(X)`——算術直線束の同型類がなす群**。
+/-- ★★★★★★★★★★**算術直線束の同型類がなす群**（★前層の水準）。
 
 原文 (GenEll p.3):
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any -/
@@ -163,7 +187,7 @@ noncomputable instance : Inv (APicM X) :=
 
 theorem one_def (X : Scheme.{0}) : (1 : APicM X) = mk (AInv.one X) := rfl
 
-/-- ★★★★★★★★★★**`APic(X)` は可換群である**。
+/-- ★★★★★★★★★★**`APicM X` は可換群である**。
 
 原文 (GenEll p.3):
 > (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
@@ -208,7 +232,7 @@ def AInv.inv_isometric.src : ABC3.Meta.Source :=
 
 def APicM.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
-    item := "Definition 1.1, (i)(APic(X)——算術直線束の同型類がなす可換群)",
+    item := "Definition 1.1, (i)(算術直線束の同型類がなす可換群。★前層の水準であり、原文の可逆層の水準ではない)",
     sectionId := "genell-def-1-1-i" }
 
 def APicM.needs : List ABC3.Meta.ProofObligation :=
@@ -229,8 +253,22 @@ def APicM.needs : List ABC3.Meta.ProofObligation :=
        "★mul の逆は並べ替え (A⊗B)⊗(A'⊗B') ≅ (A⊗A')⊗(B⊗B') で作り、" ++
        "その並べ替えは結合律と交換律の等長版を繋いだものである") 3,
     .implicitStep
+      ("★★★★**逸脱(2026-08-28 の測定)**: 本構成は**前層の水準**であり、" ++
+       "原文の APic(X)(可逆**層**の同型類)とは違う。" ++
+       "★局所自明でも層とは限らず(𝟙_ と proper open で一致し ⊤ で 0 の前層が反例)、" ++
+       "前層のテンソルは層でない" ++
+       "(だから本プロジェクトの tensorModules は層化を挟む)。" ++
+       "★★「テンソル積が厳密である」と「対象が層である」は同時には取れず、" ++
+       "本ファイル群は前者を取った——それが trivValue_tensor が rfl になり、" ++
+       "normOf_mul が構成つきで出た理由である") 3,
+    .implicitStep
+      ("★層の水準への橋: A ⊗ B → (A ⊗ B)^sh は**局所同型**なので" ++
+       "自明化も計量も移り、群準同型 APicM X → APic^{層}(X) が定まるはずである。" ++
+       "★★単射性は自明でない(上の反例の前層は 𝟙_ に層化される)") 3,
+    .implicitStep
       ("★★★残っている段: Definition 1.1 の項目全体には (ii) の deg_F" ++
-       "(台帳 arakelov-degF-finite-places)も要る。" ++
+       "(台帳 arakelov-degF-finite-places)も要る。★その段 A は" ++
+       "この層の水準への橋そのものである(Γ(L,⊤) が可逆 R-加群であるために要る)。" ++
        "★APicM と既存の APicOf(捻れ集合表示の商)を繋ぐ段も別に要る") 3 ]
 
 end ABC3.Found.Arakelov
