@@ -344,6 +344,114 @@ def IsAmple (M : X.PresheafOfModules) : Prop :=
       x ∈ nonVanishing (presheafTensorPow M n) s ∧
         IsAffineOpen (nonVanishing (presheafTensorPow M n) s)
 
+/-! ## ★★★★★★★★切断の比 `s/t` —— 同次座標の入口 -/
+
+/-- ★`basicOpen f` の中の開集合の上では `f` の制限は単元である。 -/
+theorem isUnit_res_of_le_basicOpen {V U : X.Opens} (f : Γ(X, V)) (h : U ≤ V)
+    (hU : U ≤ X.basicOpen f) :
+    IsUnit (X.presheaf.map (homOfLE h).op f) := by
+  have h1 := X.toRingedSpace.isUnit_res_basicOpen f
+  have h2 := h1.map (X.presheaf.map (homOfLE hU).op).hom
+  have h3 : (X.presheaf.map (homOfLE hU).op)
+      ((X.presheaf.map (homOfLE (X.basicOpen_le f)).op) f)
+      = X.presheaf.map (homOfLE h).op f := by
+    rw [← CommRingCat.comp_apply, ← Functor.map_comp]
+    rfl
+  rw [← h3]
+  exact h2
+
+/-- ★★**分母は `X_t ⊓ V` の上で単元**——`nonVanishing_inf` がそのまま効く。 -/
+theorem isUnit_trivValue_res (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (t : M.obj (op ⊤)) :
+    IsUnit (X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+      (trivValue M V e t)) :=
+  isUnit_res_of_le_basicOpen (trivValue M V e t) inf_le_right
+    (le_of_eq (nonVanishing_inf M V e t))
+
+/-- ★★★★★★★★**切断の比 `s/t`**——`X_t ⊓ V` の上の正則関数。
+
+原文 (GenEll p.6):
+> (iv) Let d be a positive integer, C ∈ R. Suppose further that the line bundle LQ is ample on XQ. Then the set of points x ∈ X(Q)≤d [cf. Example 1.3, (i)] such that htL(x) ≤ C is ﬁnite.
+
+★★**型が `e` を含まない**のが要点である——`nonVanishing_inf` によって
+`X.basicOpen (trivValue M V e t)` を `X_t ⊓ V` と書き換えられるからで、
+これで「自明化に依らない」が**転送なしの等式**として言える（`sectionRatio_congr`）。
+
+★★★これが `northcott_of_projModel` が要求する**同次座標**の入口である
+——原文の『射影埋め込み』の座標は `s_i / s_j` に他ならない。 -/
+noncomputable def sectionRatio (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s t : M.obj (op ⊤)) : Γ(X, nonVanishing M t ⊓ V) :=
+  X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op (trivValue M V e s)
+    * ↑(isUnit_trivValue_res M V e t).unit⁻¹
+
+/-- ★★★**比の特徴づけ**: `(s/t) · t = s`。 -/
+theorem sectionRatio_mul (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s t : M.obj (op ⊤)) :
+    sectionRatio M V e s t
+        * X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+            (trivValue M V e t)
+      = X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+          (trivValue M V e s) := by
+  have hu := isUnit_trivValue_res M V e t
+  have key : (↑(hu.unit⁻¹) : Γ(X, nonVanishing M t ⊓ V)) * (↑hu.unit : Γ(X, nonVanishing M t ⊓ V))
+      = 1 := hu.unit.inv_mul
+  rw [hu.unit_spec] at key
+  rw [sectionRatio, mul_assoc, key, mul_one]
+
+/-- ★★★★**その特徴づけは一意である**（分母が単元だから）。 -/
+theorem sectionRatio_unique (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s t : M.obj (op ⊤)) (r : Γ(X, nonVanishing M t ⊓ V))
+    (hr : r * X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+            (trivValue M V e t)
+        = X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+            (trivValue M V e s)) :
+    r = sectionRatio M V e s t := by
+  have hu := isUnit_trivValue_res M V e t
+  have key : (↑hu.unit : Γ(X, nonVanishing M t ⊓ V)) * (↑(hu.unit⁻¹) : Γ(X, nonVanishing M t ⊓ V))
+      = 1 := hu.unit.mul_inv
+  rw [hu.unit_spec] at key
+  calc r = r * (X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+              (trivValue M V e t) * ↑(hu.unit⁻¹)) := by rw [key, mul_one]
+    _ = (r * X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op
+              (trivValue M V e t)) * ↑(hu.unit⁻¹) := by rw [mul_assoc]
+    _ = sectionRatio M V e s t := by rw [hr]; rfl
+
+/-- ★★★★★★★★★**切断の比は自明化の取り方に依らない**。
+
+★機構は `trivValue_congr'`——**分子と分母が同じ単元 `u` 倍される**ので比では消える。
+★★これで `s_i / s_j` が「`X_{s_j}` の上の正則関数」として意味を持つ。 -/
+theorem sectionRatio_congr (M : X.PresheafOfModules) (V : X.Opens)
+    (e e' : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s t : M.obj (op ⊤)) :
+    sectionRatio M V e' s t = sectionRatio M V e s t := by
+  obtain ⟨u, hu, hall⟩ := trivValue_congr' M V e e'
+  set ρ := X.presheaf.map (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op with hρ
+  have huρ : IsUnit (ρ u) := hu.map (X.presheaf.map
+    (homOfLE (inf_le_right : nonVanishing M t ⊓ V ≤ V)).op).hom
+  refine sectionRatio_unique M V e s t (sectionRatio M V e' s t) ?_
+  have h1 := sectionRatio_mul M V e' s t
+  rw [hall t, hall s, map_mul, map_mul] at h1
+  have h2 : sectionRatio M V e' s t * ρ (trivValue M V e t) * ρ u
+      = ρ (trivValue M V e s) * ρ u := by
+    rw [mul_assoc]; exact h1
+  exact IsUnit.mul_right_cancel huρ h2
+
+@[simp] theorem sectionRatio_self (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (t : M.obj (op ⊤)) :
+    sectionRatio M V e t t = 1 :=
+  (sectionRatio_unique M V e t t 1 (by rw [one_mul])).symm
+
+@[simp] theorem sectionRatio_zero (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (t : M.obj (op ⊤)) :
+    sectionRatio M V e 0 t = 0 :=
+  (sectionRatio_unique M V e 0 t 0 (by rw [zero_mul, trivValue_zero, map_zero])).symm
+
 /-! ## ★★★★★★★同型に沿った移送と、`IsAmple` の空虚封じ -/
 
 /-- ★大域切断は射に沿って移る（自然性）。 -/
@@ -438,6 +546,16 @@ def nonVanishing_of_iso.src : ABC3.Meta.Source :=
 def isAmple_unit.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(空虚封じ——アフィンなら構造層は ample)",
+    sectionId := "genell-prop-1-4" }
+
+def sectionRatio.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(切断の比 s/t——同次座標の入口)",
+    sectionId := "genell-prop-1-4" }
+
+def sectionRatio_congr.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(切断の比は自明化の取り方に依らないこと)",
     sectionId := "genell-prop-1-4" }
 
 def nonVanishing.needs : List ABC3.Meta.ProofObligation :=
