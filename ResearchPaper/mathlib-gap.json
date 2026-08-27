@@ -778,8 +778,8 @@
    },
    "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
    "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
-   "nextStep": "★第 1 段と第 2 段は 2026-08-28 に入った:\n  第 1 段 Pic(Spec 𝒪_F) ≃* Cl(F) —— Found/Arakelov/PicClassGroup.lean\n  第 2 段 分数イデアルの群 ≃+ 有限素点の自由アーベル群 —— Found/GenEll/FractionalIdealDivisor.lean\n★★残る第 3 段（ADiv(F)/APrc(F) ≃* APicOf、deg_F の転送）は、先に **arakelov-coherent-base-metric** を閉じないと意味を持たない——群法則がテンソル積でなければ deg の加法性が言えないからである。",
-   "blockedBy": "arakelov-coherent-base-metric"
+   "nextStep": "★第 1・2 段は 2026-08-28 に入った:\n  第 1 段 Pic(Spec 𝒪_F) ≃* Cl(F) —— Found/Arakelov/PicClassGroup.lean\n  第 2 段 分数イデアルの群 ≃+ 有限素点の自由アーベル群 —— Found/GenEll/FractionalIdealDivisor.lean\n★★**塞がりだった arakelov-coherent-base-metric は同日に閉じた**（`APicM` が `CommGroup` になり、積が本物のテンソル積になった）ので、第 3 段（`ADiv(F)/APrc(F) ≃* APicM (Spec 𝒪_F)`、`deg_F` の転送）に着手できる。\n★★★古典的な定義 `deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v` を使うなら、`s` の取り方に依らないこと（積公式、`Found/GenEll/ProductFormula.lean` に在庫）が鍵である。",
+   "blockedBy": ""
   },
   "arakelov-coherent-base-metric": {
    "what": "算術直線束の**基準計量を整合的に選ぶ**こと。 すなわち base_{[L·M]} = base_{[L]} ⊗ base_{[M]}。",
@@ -789,16 +789,16 @@
     "★★Interface/Arakelov/APic.lean の APicData の穴と同種"
    ],
    "mathlibStatus": {
-    "verdict": "resolved-in-project",
+    "verdict": "closed-in-project",
     "searched": "2026-08-28 実測。mathlib に Arakelov の計量は無い。",
     "absentPart": "★Found/Arakelov/ArcTorsorMetric.lean の TorsorMetric.base は **Classical.choice** であり、対象ごとに獨立に選ばれている。 ★★TorsorMetric.tensor は **Green を足すだけ**なので、群法則が表す計量は base_{G⊗H} · e^{-(g+h)}、真のテンソル積は (base_G ⊗ base_H) · e^{-(g+h)} で一致しない。 ★★★差は 2-コサイクル c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]})) である。"
    },
    "minimalForm": "★2026-08-28 に**道（b）で閉じた**——捻れ集合表示をやめ、**自明化の側で書いた計量**（`LocalMetric`）を作った。★★基準計量を整合的に選ぶ必要は消えた（`Classical.choice` を使わない）。",
-   "impact": "★**根は 2026-08-28 に塞がった**（本 gap の resolution を見よ）。★★残るのは ArithPic / APicOf を LocalMetric の上に建て直す段と、Definition 1.1 (ii) の deg_F（別 gap: arakelov-degF-finite-places）である。★★★したがって §1 の 2 項目の共通の根としての障害はもう無い。",
+   "impact": "★**2026-08-28 に閉じた**。`APicM X` が `CommGroup` になり、積が本物のテンソル積であることが `normOf_mul` で言える。★★したがって §1 の 2 項目の共通の根としての障害はもう無い。★★★`Definition 1.1` の項目全体を閉じるには (ii) の `deg_F` だけが残る。",
    "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。",
    "resolution": {
     "measuredAt": "2026-08-28",
-    "verdict": "★★★★★★★★★**根は塞がった**。テンソル積の計量が**構成つきで**出る。",
+    "verdict": "★★★★★★★★★★**閉じた（2026-08-28）**。`APicM X`（算術直線束の同型類）に **`CommGroup` のインスタンス**が入り、積は**本物のテンソル積**である（`normOf_mul : |s ⊗ t| = |s| · |t|`）。",
     "stages": [
      {
       "stage": "1",
@@ -827,11 +827,17 @@
      {
       "stage": "5",
       "where": "Found/Arakelov/AMetricMonoid.lean / AMetricIso.lean / AMetricGroup.lean",
-      "claim": "★原文の L̄ = (L, |−|_L) の型と、同型類の群への段",
+      "claim": "★原文の L̄ = (L, |−|_L) の型と、同型類の群 APicM X",
       "why": "★`AMetric X`（可逆層＋局所自明性＋計量）と `1 = Ō_X`・`L * M`（本物のテンソル積）。★★等長同型は**基準ノルム `h` の等式**として書いた——切断のノルムで書くと「純テンソルでしか確かめられないがノルムは加法的でない」という穴が開くからである。★★★積が同値類に降りること（`isIsometry_mul`）・結合律（`isIsometry_mul_assoc`）・単位律（`isIsometry_mul_one`）まで入った。★★★★自明化の側の恒等式 `pullTriv (α_ …) (tensorTriv eA (tensorTriv eB eC)) = tensorTriv (tensorTriv eA eB) eC` は `rfl` ではなく、`oplax_associativity` ＋ `associator_naturality` ＋ `triangle` ＋ `unitors_equal` の 4 段である。"
+     },
+     {
+      "stage": "6",
+      "where": "Found/Arakelov/AMetricPic.lean",
+      "claim": "★★★★★**APic(X) は可換群である**",
+      "why": "★逆元は双対 `F^∨` を構成する代わりに**データとして担いだ**（本プロジェクトの `InvSheaf` と同じ形）。★★`mul` の逆は並べ替え `(A⊗B)⊗(A'⊗B') ≅ (A⊗A')⊗(B⊗B')` で作り、その並べ替えは結合律・交換律の等長版を繋いだものである。★★★商で `⁻¹` を定義するには「逆元は等長同型を除いて一意」（`AInv.inv_isometric`）が要った。★★★★交換律の自明化版 `pullTriv (β_ A B) V (tensorTriv eB eA) = tensorTriv eA eB` は `restrict_map_braiding`（`rfl`）＋ `braiding_naturality` ＋ `braiding_leftUnitor` ＋ `unitors_equal`。"
      }
     ],
-    "remaining": "★★**残るのは逆元（双対計量）と商そのもの**である。★逆元は本プロジェクトの `InvSheaf`（`PicSheafGroup.lean`）と同じく「逆をデータとして担ぐ」形にできるが、`mul` の逆を作る段で`(A ⊗ B) ⊗ (A' ⊗ B') ≅ (A ⊗ A') ⊗ (B ⊗ B')` の並べ替えが要り、そこには**組み紐（braiding）が等長であること**が要る（結合律と同じ形の証明になる見込み）。★★双対 `F^∨` の側は `PicDualSheaf.lean` / `PicDualGlue.lean` に層性と貼り合わせがあるが、`F ⊗ F^∨ ≅ 𝟙_` の完成形はまだ見当たらない（2026-08-28 実測）。★★★`Definition 1.1` の項目全体を閉じるには、さらに (ii) の `deg_F`（台帳 `arakelov-degF-finite-places`）も要る。"
+    "remaining": "★**(i) の側は閉じた**。★★残るのは `Definition 1.1` (ii) の `deg_F`（別 gap: `arakelov-degF-finite-places`）と、`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段である。"
    }
   }
  },
