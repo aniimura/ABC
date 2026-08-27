@@ -293,6 +293,35 @@
     ],
     "howToProceed": "★[DelSB616] §1 を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
    }
+  },
+  "ideal-comap-on-affine-opens": {
+   "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
+   "whereUsed": [
+    "[GenEll] Remark 1.5.1 の段 2（因子 D の降下をアフィン被覆で貼る段）",
+    "★Found/GenEll/SectionDescent.lean の切断の降下を IdealSheafData の水準へ上げるところ"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean を grep。ideal_comap_of_isOpenImmersion（開埋め込みの場合）はあるが、一般の射に対する ideal_comap は**無い**。",
+    "partial": [
+     "Scheme.IdealSheafData.comap / comap_comp / comap_id / support_comap はある",
+     "Scheme.Hom.ker_apply（準コンパクトな射なら ker.ideal U = RingHom.ker (f.app U)）はある",
+     "★貼る側の道具 IdealSheafData.ext_of_iSup_eq_top（アフィン被覆上で一致なら等しい）はある",
+     "★★mathlib.Ideal.map 側の道具は完備"
+    ],
+    "absentPart": "comap をアフィン開の上で Ideal.map として計算する補題そのもの。★comap の定義は pullback.fst の ker なので、アフィンでの引き戻し（環のテンソル積）に降りる段が要る。"
+   },
+   "minimalForm": "★消費者が要るのは「2 つのイデアル層が各アフィン開で一致すれば等しい」だけであり、ext_of_iSup_eq_top で済む。★★したがって必要なのは (I.comap f).ideal U を**生成切断で書く**ことだけであり、完全な ideal_comap ではない。",
+   "impact": "★Remark 1.5.1 の段 2 の残り。★★段 1（同型の降下）は 2026-08-27 に閉じた。",
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★**原典は手元にある**——[Stacks] 01Z4 / 01ZC 系と EGA IV §8。★★これは「原典が無い」型の塞がりではなく、**mathlib に補題が 1 本足りない**型である。",
+    "sources": [
+     "[Stacks] 01Z4 / 01ZC（極限での降下）",
+     "[EGA2] / EGA IV §8"
+    ],
+    "howToProceed": "★自分で 1 本書く。Scheme.Hom.ker_apply（準コンパクト）から入り、pullback.fst のアフィン局所記述（環のテンソル積）に降りる。★★mathlib へ PR できる形の補題である。"
+   }
   }
  },
  "summary": {
