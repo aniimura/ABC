@@ -339,7 +339,7 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★★★**9 段に割っ、6 段が閉じた（2026-08-27）。** ★朝の時点では**absent・未分割**であった。 ★★★発見: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。 ★したがって**同変性は「新しい数学」ではなく帳簿であった**。",
+    "note": "★★★★★★★★**10 段に割り、8 段を閉じた（2026-08-27 の 1 日）。** ★朝の時点では**absent・未分割**であった。 ★★★発見: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。 ★★同変性は「新しい数学」ではなく**帳簿**であった。",
     "stages": [
      {
       "stage": "1",
@@ -393,8 +393,9 @@
      {
       "stage": "3b",
       "claim": "それを**点の水準**で述べる（別の体の上の曲線の間の Point.map）",
-      "status": "open",
-      "why": "★Point.some の合同は**同じ曲線の上**でしか取れない。 ★★mathlib の WeierstrassCurve.Affine.Point.map （F →ₐ[S] K に沿った点の写像）を使う。 ★★★曲線 tateCurveAt q は q ∈ R_K で決まるので、K と L の両方を**同じ R_K 上の底変換**と見ればS = R_K で Point.map が使える。"
+      "status": "closed",
+      "why": "★座標の自然性（段 3a）⬛ Point.some の合同だけ。 ★★逸脱の記録: mathlib の Point.map は**ある**が、tatePtPair は (tateCurveAt q).map (algebraMap R K) の上にあり Point.map は W.baseChange F の上にある。両者は定義上等しいが instances 透明度では合わず、rw も simp も当たらない（2026-08-27 実測）。 ★★★そこで Point.map を経由せず結論を直接述べた——「L-点は K-点の像である」そのものであり、数学的内容は同じである。",
+      "where": "Found/GaloisRep/TateBaseChange.lean の nonsingular_tateK_baseChange / **tatePtPair_baseChange**"
      },
      {
       "stage": "4",
@@ -410,8 +411,8 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "7/10",
-    "remaining": "★★残るは**段 3b（Point.map で点の水準へ）と 段 4（K̄ への帰納極限）**だけである。 ★どちらも**新しい数学ではなく組み立て**である。"
+    "done": "8/10",
+    "remaining": "★★★**残るは段 4（K̄ = ∪_L L への帰納極限）だけ**であり、段 3b があれば**形式的な組み立て**である。"
    },
    "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },
