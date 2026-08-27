@@ -155,7 +155,42 @@ theorem logCondAt_le {X : Scheme.{0}} {D : X.IdealSheafData} (p : AlgPointOff X 
   letI := p.instNF
   exact logCond_le_degNormalized_pullback p.fld D p.map p.off
 
+/-- ★**引き戻しは合成に沿って分解する**（`log-cond` の底変換の第 1 段）。
+
+原文 (GenEll p.8):
+> allows one to pull-back the divisor D to Spec(OF ) so as to obtain
+
+★★中身は mathlib の `Scheme.IdealSheafData.comap_comp` 1 本である。
+
+★★★**次の段が mathlib に無い**（2026-08-27 実測）——
+「アフィンでイデアル層の `comap` が `Ideal.map`（拡大）に対応する」。
+`comap_ideal` / `ideal_comap` / `equivOfIsAffine_comap` / `map_comap` /
+`comap_symm_equivOfIsAffine` のいずれの名前でも見つからない。
+★これが取れれば `pullbackIdeal K D (bc ≫ xF) = (pullbackIdeal F D xF).map (𝓞_F → 𝓞_K)`
+が出て、`log-cond` の底変換が測れる。 -/
+theorem comap_baseChange (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] {X : Scheme.{0}} (D : X.IdealSheafData)
+    (xF : specRingOfIntegers F ⟶ X) :
+    D.comap (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K))) ≫ xF)
+      = (D.comap xF).comap (Spec.map (CommRingCat.ofHom (algebraMap (𝓞 F) (𝓞 K)))) :=
+  Scheme.IdealSheafData.comap_comp D _ _
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def comap_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (iv)(引き戻しは合成に沿って分解する)",
+    sectionId := "genell-def-1-5" }
+
+def comap_baseChange.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Scheme.IdealSheafData.comap_comp"
+      (.inMathlib "AlgebraicGeometry.Scheme.IdealSheafData.comap_comp") 8,
+    .implicitStep
+      ("★★☆次の段が mathlib に無い(2026-08-27 実測): 「アフィンでイデアル層の comap が " ++
+       "Ideal.map(拡大)に対応する」。comap_ideal / ideal_comap / equivOfIsAffine_comap / " ++
+       "map_comap / comap_symm_equivOfIsAffine のいずれの名前でも見つからない。" ++
+       "★これが取れれば pullbackIdeal K D (bc ≫ xF) = (pullbackIdeal F D xF).map で " ++
+       "log-cond の底変換が測れる(Σ_{𝔓|𝔭} f_𝔓 ≤ [K:F] により減りうる)") 8 ]
 
 def logCondAt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
