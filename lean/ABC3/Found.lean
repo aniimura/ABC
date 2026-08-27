@@ -1115,6 +1115,7 @@ import ABC3.Found.NCBelyi.DescendData
 import ABC3.Found.NCBelyi.BelyiPoly
 import ABC3.Found.NCBelyi.RatSeparation
 import ABC3.Found.NCBelyi.ConjStable
+import ABC3.Found.Stacks.ProperImmersion
 /-!
 # Found — 実装済みの基礎
 

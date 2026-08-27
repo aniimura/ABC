@@ -954,3 +954,81 @@ mathlib の `AlgebraicGeometry.Spec (R : CommRingCat) : Scheme` は
 ★★★同じ穴の一般形は前節と同じ——**defeq は `rw`/`simp` を助けない**。
 ただし今回のように**エラーの表面（`Category.assoc` が効かない）と原因（対象の書き方）が
 遠い**ことがあるので、`Full error:` の末尾まで読むこと。
+
+---
+
+## `0_Source/*.txt` は逐語に使えない——`-enc UTF-8` の有無で記号が消える
+
+2026-08-27、[Stacks] Lemma 29.40.4 で実際に読み違えた。
+
+`0_Source/<論文>.txt` は `pdftotext` の**古い引き方**（`-enc UTF-8` なし）で作られており、
+`→` `≥` `≫` `⊗` `≅` がすべて**空白に落ちている**。そのため
+
+    (3) Ld is f -very ample for some d  1,
+    (4) Ld is f -very ample for all  d  1,
+
+の (3) が `d ≥ 1`、(4) が `d ≫ 1` であることが**テキスト層からは分からない**。
+★「ある `d`」と「十分大きい全ての `d`」は主張の強さが違うので、これは実害である。
+
+★★しかしこれは `pdftotext` の限界ではない。`tools/check.mjs` が実際に引く
+
+    pdftotext -enc UTF-8 -f N -l N <pdf> -
+
+は `→ ≥ ≫ ⊗ ≅` を**そのまま出力する**。落ちていたのは `.txt` の側だけだった。
+
+**規約として引き出すこと:**
+
+| 用途 | 使うもの |
+|---|---|
+| どのページに何があるか探す | `0_Source/*.txt`（速い。7654 ページを 1 秒で走査できる） |
+| `.verbatim` / `原文 (...)` に写す | ★**必ず `pdftotext -enc UTF-8 -f N -l N` を引き直す** |
+| 装飾（下線・書体・ハット）の確認 | ★★`pdftoppm -r 150` で目視。上の 2 つは代替しない |
+
+★★★症状: ゲートが `S4 逐語が物理 p.N に見つからない(先頭 19/124 文字まで一致)` と言い、
+`一致した末尾` が**ちょうど記号の直前で切れている**。
+そこで止まったら、まず `.txt` から写していないかを疑うこと。
+
+---
+
+## `Scheme` を扱うファイルには `universe u` が要る
+
+`variable {X Y S : Scheme.{u}}` と書くと
+
+    error: unknown universe level `u`
+
+`Scheme.{0}` で固定しないなら、`open` の後に `universe u` を 1 行入れる。
+★mathlib の `AlgebraicGeometry` 側のファイルは全部そうしている。
+
+---
+
+## Python: アストラル面のエスケープと、台帳を壊す書き込み
+
+2026-08-27 に **`ResearchPaper/mathlib-gap.json` を 2 回空にした**。
+
+### 症状
+
+    UnicodeEncodeError: 'utf-8' codec can't encode characters
+    in position 15025-15026: surrogates not allowed
+
+原因は `𝒪`（𝒪 を**サロゲート対を 2 つの `\u` で**書いたもの）。
+Python 3 はこれを 1 文字に合成せず、**孤立サロゲート 2 個**として保持する。
+`json.dumps(..., ensure_ascii=False)` は通るが、UTF-8 への符号化で落ちる。
+
+★直し方: BMP 外は `\U0001D4AA` の 8 桁形で書く。`\uXXXX` を 2 つ並べない。
+
+### ★★★本当に痛いのはここ
+
+    io.open(p, 'w', encoding='utf-8').write(<エンコードで落ちる文字列>)
+
+`open(p, 'w')` は**書く前にファイルを 0 バイトに切り詰める**。
+`.write()` で例外が出た時点で、**元の内容は既に消えている**。
+
+★★規約: 台帳を書き換えるときは**エンコードしてから開く**。
+
+```python
+out = (json.dumps(j, ensure_ascii=False, indent=1) + '\n').encode('utf-8')
+io.open(p, 'wb').write(out)          # ここまで来れば必ず書ける
+```
+
+★★★落ちたら `git checkout -- <file>` で戻る。
+**台帳を触る前にコミットしておくこと**が唯一の保険である。

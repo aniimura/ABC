@@ -205,6 +205,30 @@
      "[Stacks] Blowing up（原文の吹き上げ Y の段）"
     ],
     "howToProceed": "★プロジェクトの方法論どおり、**スケルトンを作って依存グラフを拡張する**のが正攻法である。★★葉（層番号が少ないもの）から形式化すれば、person-years の山を壁として見なくて済む。"
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★**スケルトン化して依存グラフに載せたところ、この塞がりは 2 段に分かれ、うち 1 段はその場で閉じた。**",
+    "stages": [
+     {
+      "stage": 1,
+      "source": "[Stacks] Lemma 29.40.4（tag 01VT、物理 p.2516）",
+      "claim": "S アフィン・f 有限型のとき、ℒ が ample ならある d ≥ 1 と n ≥ 1 と immersion i : X → ℙⁿ_S があって ℒ^{⊗d} ≅ i*𝒪(1)",
+      "status": "blocked",
+      "why": "★mathlib に**スキーム上の可逆層そのものが無い**（AlgebraicGeometry/Modules/ にあるのは Presheaf / Sheaf / Tilde の 3 本だけ、2026-08-27 実測）。ample / very ample も 0 件。★★Proj は ProjectiveSpectrum/ にあるが、ℙⁿ_S の**点の関子（座標表示）は無い**。",
+      "structured": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html #stacks-lemma-29-40-4"
+     },
+     {
+      "stage": 2,
+      "source": "[Stacks] Lemma 29.42.7（tag 01W6、物理 p.2520）",
+      "claim": "X が S 上固有で Y が S 上分離的なら、X → Y の immersion は**閉**埋め込み。ゆえに mono であり、すべての T-点で単射。",
+      "status": "closed",
+      "where": "lean/ABC3/Found/Stacks/ProperImmersion.lean（sorry 0、2026-08-27）",
+      "why": "★★**ample の語彙を一切使わない**ので、可逆層が無くても書ける。★mathlib の IsProper.of_comp が本補題 (2) そのもの、UniversallyClosed.of_comp_of_isSeparated が (1) そのものであり、足りなかったのは「immersion ＋ 普遍閉 ⇒ 閉埋め込み」の 1 行だけだった。",
+      "structured": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-42-7.html #stacks-lemma-29-42-7"
+     }
+    ],
+    "remaining": "★段 1（ample ⇒ immersion）と、★★「ℙⁿ(K) = 座標の組」（Proj の点の関子）の 2 つ。★★★**固有性から閉埋め込みを出す段と、閉埋め込みから点の単射性を出す段はもう残っていない**。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
