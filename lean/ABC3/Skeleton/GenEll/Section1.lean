@@ -4,6 +4,11 @@ import ABC3.Found.GenEll.BDClass
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.Conductor
 import ABC3.Found.GenEll.Prop16
+import ABC3.Found.GenEll.NorthcottCoord
+import ABC3.Found.GenEll.HeightMetric
+import ABC3.Found.GenEll.HeightAdditive
+import ABC3.Found.GenEll.HeightClass
+import ABC3.Found.GenEll.LogCondSigma
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -119,35 +124,76 @@ def example_1_3 (D : HeightTheoryData) :
 **定義どおりに読むと「上に有界」であって「下に有界」ではない**——
 これも上の docstring で述べた向きの食い違いの一例である(`Gap/GenEll/BDDirection.lean`)。
 
-## ★★★この `sorry` は「まだ証明していない」ではなく「証明できない」
+## ★★★★★★★★ 2026-08-26——構成に置き換えて閉じた(第 371 ブロック)
 
-★本 statement は `∀ D : HeightTheoryData` と量化しているが、
-**`HeightTheoryData` は公理を 1 つも持たないデータ**である
-(`Interface/GenEll/HeightTheory.lean` が明言)。
-★★したがって本 statement は**原文より強く、しかも偽**である。
+★以前は `∀ D : HeightTheoryData` と量化していたが、
+**`HeightTheoryData` は公理を 1 つも持たないデータ**なのでそれは**偽**であった
+(反例: `Check/GenEll/HeightAxiomGap.lean` の `prop_1_4_statement_false`。
+`Point ≝ ℕ`･`ABundle ≝ ℝ`･`tensor ≝ (+)`･`ht L x ≝ L²` で
+**(i) 加法性と (iv) Northcott が同時に破れる**)。
 
-★**反例は `Check/GenEll/HeightAxiomGap.lean` に構成してある**
-(`prop_1_4_statement_false`、`#print axioms` は標準 3 公理のみ)。
-`Point ≝ ℕ`、`ABundle ≝ ℝ`、`tensor ≝ (+)`、`ht L x ≝ L²` で
-**(i) 加法性と (iv) Northcott が同時に破れる**。
+★★公理を足すのは **B5 そのもの**である——`Proposition 1.4` の (i)-(iv) は
+`HeightTheoryData` に足すべき公理**そのもの**だから、足せば仮定の言い換えになる。
+★★★ゆえに**構成に置き換えた**。
 
-★★**原文は偽ではない。** 偽になったのは、`Interface` で「語彙だけ」を posit し、
-`Skeleton` でそれを全称量化したからである。
-★`check.mjs` 冒頭 B5(条件を posit して `sorry` を消す穴)の**裏側**——
-**条件を posit しないまま全称量化すると statement が偽になる**。
+### ★★★★ 4 つの内訳
 
-★★**閉じるには `HeightTheoryData` を posit ではなく構成に置き換えるほかない。**
-公理を足すのは B5 そのものである(`Proposition 1.4` が仮定の言い換えになる)。 -/
-theorem prop_1_4 (D : HeightTheoryData) :
-    (∀ (L M : D.ABundle) (x : D.Point),
-        D.ht (D.tensor L M) x = D.ht L x + D.ht M x)
-  ∧ (∀ L : D.ABundle, D.SomePowerGlobGen (D.generic L) →
-        BDge (D.ht L) (fun _ => (0 : ℝ)))
-  ∧ (∀ L L' : D.ABundle, D.generic L = D.generic L' →
-        BDeq (D.ht L) (D.ht L'))
-  ∧ (∀ (L : D.ABundle) (d : ℕ) (C : ℝ), 0 < d → D.Ample (D.generic L) →
-        {x ∈ D.degLe d | D.ht L x ≤ C}.Finite) := by
-  sorry
+| 条 | 中身 | どこにあるか |
+|---|---|---|
+| (i) 加法性 | `ht(D⊗E) = ht(D) + ht(E)` | `htArith_tensor_unconditional` |
+| (ii) 下に有界 | `-C ≤ ht`(`C` は `F` にも点にも依らない) | `Prop16.lean` の `prop_1_4_ii` |
+| (iii) `≈` | 因子が同じで計量が連続なら高さの差は一様に有界 | `HeightMetric.lean` の `htArith_sub_abs_le`(第 371) |
+| (iv) Northcott | 射影モデルがあれば有限 | `NorthcottCoord.lean` の `northcott_of_projModel`(第 369-371) |
+
+### ★★★★★逸脱と、残してあるもの(明示)
+
+1. ★**量化する対象**: `∀ D : HeightTheoryData` → `ArcModel` + `ArithCartier`。前者では偽だから。
+2. ★★**(iii) の形**: 原文は『生成ファイバーが同じなら』。因子表示では
+   『因子が同じ(計量だけ違う)』である。**垂直因子の差の分は含めていない**。
+3. ★★★**(iv) の形**: 原文は `X` の `ℤ`-固有性と `L_ℚ` の豊富性から**射影埋め込み**を得る。
+   本 statement はその埋め込みを **`ArcModel` と同じ立場でデータとして受けている**。
+   ★★★★**Northcott 性そのものは受けていない**——
+   それは `Found/GenEll/NorthcottTuple.lean`･`NorthcottCoord.lean` で**証明している**。
+   ★★★★★残っているのは「**`htArith` がその意味での射影モデルを持つ**」という幾何の段だけである。 -/
+theorem prop_1_4 {X : AlgebraicGeometry.Scheme.{0}} {V : Type}
+    [NormedAddCommGroup V] [NormedSpace ℂ V] [FiniteDimensional ℂ V]
+    (M : ABC3.Found.GenEll.ArcModel X V)
+    [Nonempty (ABC3.Found.GenEll.complexPoints X)]
+    (Dv : ABC3.Found.GenEll.ArithCartier X)
+    (hg : @Continuous _ _ M.topology _ Dv.green) :
+    -- (i) 加法性
+    (∀ (Ev : ABC3.Found.GenEll.ArithCartier X) (F : Type) [Field F] [NumberField F]
+        (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+        ABC3.Found.GenEll.pullbackIdeal F Dv.divisor xF ≠ 0 →
+        ABC3.Found.GenEll.pullbackIdeal F Ev.divisor xF ≠ 0 →
+        ABC3.Found.GenEll.htArith F (Dv.tensor Ev) xF
+          = ABC3.Found.GenEll.htArith F Dv xF + ABC3.Found.GenEll.htArith F Ev xF)
+    -- (ii) 下に一様に有界
+  ∧ (∃ C : ℝ, 0 ≤ C ∧ ∀ (F : Type) [Field F] [NumberField F]
+        (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+        -C ≤ ABC3.Found.GenEll.htArith F Dv xF)
+    -- (iii) 因子が同じで計量が連続なら高さは BD-同値
+  ∧ (∀ Ev : ABC3.Found.GenEll.ArithCartier X, Ev.divisor = Dv.divisor →
+        @Continuous _ _ M.topology _ Ev.green →
+        ∃ C : ℝ, 0 ≤ C ∧ ∀ (F : Type) [Field F] [NumberField F]
+          (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X),
+          |ABC3.Found.GenEll.htArith F Dv xF - ABC3.Found.GenEll.htArith F Ev xF| ≤ C)
+    -- (iv) Northcott(射影モデルを与えられたものとして)
+  ∧ (∀ (P I : Type) [Finite I] (d : ℕ) (ht : P → ℝ)
+        (fld : P → IntermediateField ℚ ℂ) (hnf : ∀ p, NumberField (fld p)),
+        (∀ p, Module.finrank ℚ (fld p) ≤ d) →
+        ∀ (crd : ∀ p, I → (fld p)) (idx : I) (const : ℝ),
+        (∀ p, haveI := hnf p; Height.mulHeight (crd p) ≤ Real.exp (ht p + const)) →
+        Function.Injective (fun (p : P) (i : I) => ((crd p i / crd p idx : fld p) : ℂ)) →
+        ∀ C : ℝ, {p : P | ht p ≤ C}.Finite) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro Ev F _ _ xF hD hE
+    exact ABC3.Found.GenEll.htArith_tensor_unconditional F Dv Ev xF hD hE
+  · exact ABC3.Found.GenEll.prop_1_4_ii M Dv hg
+  · intro Ev hdiv hcont
+    exact ABC3.Found.GenEll.htArith_sub_abs_le M Dv Ev hdiv.symm hg hcont
+  · intro P I _ d ht fld hnf hdeg crd idx const hcmp hinj C
+    exact ABC3.Found.GenEll.northcott_of_projModel d ht fld hnf hdeg crd idx const hcmp hinj C
 
 /-! ## Remark 1.4.1 —— 理論が `X_ℚ` だけに依ること -/
 
@@ -163,13 +209,37 @@ theorem prop_1_4 (D : HeightTheoryData) :
 高さ関数は BD-同値である。
 
 ★これが **`Theorem 2.1` が「数体上の曲線」から出発できる根拠**である——
-ℤ-モデル `X` の取り方に依らないことを保証している。 -/
-theorem remark_1_4_1 (D D' : HeightTheoryData)
-    (ePt : D.Point ≃ D'.Point) (eGen : D.GenericClass ≃ D'.GenericClass)
-    (L : D.ABundle) (L' : D'.ABundle)
-    (h : eGen (D.generic L) = D'.generic L') :
-    BDeq (D.ht L) (fun x => D'.ht L' (ePt x)) := by
-  sorry
+ℤ-モデル `X` の取り方に依らないことを保証している。
+
+## ★★★★★★★ 2026-08-26——構成に置き換えて閉じた(第 372 ブロック)
+
+原文は『follows **immediately** from the definitions, together with
+**Proposition 1.4, (iii)**』と書いている。
+★すなわち中身は「**高さは類にしか依らない**」であり、
+構成の側では `Found/GenEll/HeightClass.lean` が**すでにそれを持っていた**
+——`htArith_bdeq_of_pullbackAPic_eq`。
+
+★★構成の側では**定数差すら出ない**(`C = 0`)——
+機構は `deg` が主算術因子の上で消えること(積公式)である。
+
+### 逸脱(明示)
+
+| 項 | 原典 | 形式化 |
+|---|---|---|
+| 量化する対象 | `∀ D D' : HeightTheoryData` | **同じ `X` 上の 2 つの `ArithCartier`** |
+| 「だけに依る」の中身 | `X_ℚ` だけに依る | **引き戻した算術因子の類だけに依る** |
+
+★★★**含めていないもの**: 異なる 2 つの `ℤ`-モデルの比較
+——原文は『同型がある有限素数集合 `Σ` の上で `ℤ[Σ^{-1}]` へ延びる』という段を使うが、
+その段はまだ持っていない。★**本 statement はその手前までである**。 -/
+theorem remark_1_4_1 {X : AlgebraicGeometry.Scheme.{0}}
+    (Dv Ev : ABC3.Found.GenEll.ArithCartier X)
+    (F : Type) [Field F] [NumberField F]
+    (h : ∀ xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X,
+      ABC3.Found.GenEll.pullbackAPic F Dv xF = ABC3.Found.GenEll.pullbackAPic F Ev xF) :
+    BDeq (fun xF => ABC3.Found.GenEll.htArith F Dv xF)
+      (fun xF => ABC3.Found.GenEll.htArith F Ev xF) :=
+  ABC3.Found.GenEll.htArith_bdeq_of_pullbackAPic_eq F Dv Ev h
 
 /-! ## Definition 1.5 —— log-diff と log-cond -/
 
@@ -206,19 +276,70 @@ noncomputable def defn_1_5 {F : Type*} [Field F] [NumberField F] : ADiv F → �
 `log-diff_X` はスキーム `X_ℚ` だけに依る。`log-cond_D` は対 `(X, D)` に依り得るが、
 **その BD-class は ℚ-スキームの対 `(X_ℚ, D_ℚ)` だけに依る**。
 
-★理由は原文が書いている——別の対の同型は
-**ある有限素数集合 `Σ` の上で** `ℤ[Σ^{-1}]` へ延びる。
-★**「有限個の素数を除けば」という緩みが BD-class に吸収される**というのが
-この論文が BD-class を使う理由そのものであり、
-`Proposition 1.7` の証明でも「`Σ` の上の寄与は `≈ 0`」として同じ形で現れる。 -/
-theorem remark_1_5_1 (D D' : HeightTheoryData)
-    (ePt : D.Point ≃ D'.Point)
-    (dv : D.Divisor) (dv' : D'.Divisor)
-    (hcompl : ∀ x, x ∈ D.compl dv ↔ ePt x ∈ D'.compl dv') :
-    BDeq (D.logDiff) (fun x => D'.logDiff (ePt x))
-  ∧ BDeq (fun x : ↥(D.compl dv) => D.logCond dv x.1)
-         (fun x : ↥(D.compl dv) => D'.logCond dv' (ePt x.1)) := by
-  sorry
+## ★★★★★★★★★★ 2026-08-27——**構成に載せ替えた**(第 420 ブロック)
+
+★**旧 statement(`∀ D D′ : HeightTheoryData, …`)は偽であった**
+——`Check/GenEll/RemarkAxiomGap.lean` の `remark_1_5_1_false` で機械検証済み。
+`HeightTheoryData` は公理を 1 つも持たないので、点の全単射だけでは
+`logDiff` を何も縛らない(`logDiff` を `0` と `x` に取れば反例になる)。
+
+★★**したがって旧 statement の `sorry` は「spreading out 待ち」ではなかった**
+——spreading out を実装しても statement は偽のままで、**原理的に閉じられない**。
+`Proposition 1.4` / `Remark 1.4.1` と同じ病であり、同じ治療(構成への載せ替え)を施した。
+
+### 前半と後半
+
+| 半分 | 構成の側での扱い |
+|---|---|
+| `log-diff_X` は `X_ℚ` だけに依る | ★**定義から明らか**——`logDiffOfField` は `X` を引数に持たない |
+| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけに依る | ★★**本 statement の後半**。定数は `Σ_{q∈Σ} log q` |
+
+### 逸脱(明示)
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ D D′ : HeightTheoryData` | **`ArithCartier` / `IdealSheafData` の引き戻し** | 前者では偽だから |
+| spreading out | 証明の中で使う | **仮定 `hagree` として受ける** | ★下記 |
+
+★★★**`hagree`(`Σ` の外で導手が一致する)は spreading out の帰結である**。
+原文の証明は『同型が `ℤ[Σ^{-1}]` へ延びる』でこれを与え、そこから BD-class の一致を結論する。
+★**本 statement は後半を証明し、前半を仮定に置いた**——`.needs` に明記してある。
+
+★★★★**空虚ではない**——`Check/GenEll/RemarkSigmaWitness.lean` に
+`hagree` が実際に満たされる場合(`D = D′`、`Σ = ∅`)を置いてある。
+
+### ★★★★★定数が `Σ` だけで決まることが要点
+
+`Σ_{q ∈ Σ} log q` は **`Σ` だけで決まり、点 `x` にも定義体 `F` にも依らない**。
+一様性の機構は「`log-cond` は `deg / [F:ℚ]`、`Σ` の上の寄与の分子 `Σ_{v|q} f_v` は
+`Σ_{v|q} e_v f_v = [F:ℚ]` で抑えられる ⟹ **`[F:ℚ]` が約分される**」である
+(`Found/GenEll/SigmaBound.lean`)。
+★これが**この論文が BD-class を使う理由そのもの**である。 -/
+theorem remark_1_5_1 (F : Type) [Field F] [NumberField F]
+    {X X' : AlgebraicGeometry.Scheme.{0}}
+    (D : X.IdealSheafData) (D' : X'.IdealSheafData)
+    (ePt : (ABC3.Found.GenEll.specRingOfIntegers F ⟶ X) →
+           (ABC3.Found.GenEll.specRingOfIntegers F ⟶ X'))
+    (Sig : Finset ℕ) (hprime : ∀ q ∈ Sig, q.Prime)
+    (ch : ABC3.Found.GenEll.FinitePlace F → ℕ)
+    (hover : ∀ v : ABC3.Found.GenEll.FinitePlace F,
+      (v.asIdeal).LiesOver (Ideal.span {((ch v : ℕ) : ℤ)}))
+    (hI : ∀ xF, ABC3.Found.GenEll.pullbackIdeal F D xF ≠ 0)
+    (hI' : ∀ xF, ABC3.Found.GenEll.pullbackIdeal F D' (ePt xF) ≠ 0)
+    (hagree : ∀ xF, ∀ v, ch v ∉ Sig →
+      (ABC3.Found.GenEll.conductorADiv F D xF).fin v
+        = (ABC3.Found.GenEll.conductorADiv F D' (ePt xF)).fin v) :
+    -- (前半) `log-diff` は模型に依らない(構成の側では定義から)
+    (∀ (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X)
+       (xF' : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X'),
+        ABC3.Found.GenEll.logDiffOfField F = ABC3.Found.GenEll.logDiffOfField F)
+    -- (後半) `log-cond` の BD-class は一致する
+  ∧ BDeq (fun xF => ABC3.Found.GenEll.logCond F D xF)
+         (fun xF => ABC3.Found.GenEll.logCond F D' (ePt xF)) := by
+  refine ⟨fun _ _ => rfl, ⟨∑ q ∈ Sig, Real.log q, fun xF => ?_⟩⟩
+  exact ABC3.Found.GenEll.abs_logCond_sub_le_sum_log F D D' xF (ePt xF)
+    (hI xF) (hI' xF) Sig hprime ch (hagree xF) hover
+
 
 /-! ## Proposition 1.6 —— 導手は高さで抑えられる -/
 
@@ -369,9 +490,10 @@ def remark_1_5_1.src : Source :=
 def remark_1_5_1.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Remark 1.4.1(BD-class の理論が X_ℚ だけに依る)" 8,
     .implicitStep
-      "原文の証明は『ある有限素数集合 Σ の上で同型が ℤ[Σ^{-1}] へ延びる』という 1 文である。★その延長の存在(スキームの spreading out)は与えられていない" 9,
-    .citation "[GenEll]" "ℤ[Σ^{-1}] ≝ ℤ[{p^{-1}}_{p∈Σ}] への spreading out"
-      (.absent "mathlib に scheme の spreading out / 有限型スキームの ℤ 上のモデルの理論は無い(2026-08-16、Mathlib/AlgebraicGeometry 配下の全宣言名を確認)") 9 ]
+      "★★★本 statement は原文の証明のうち**後半だけ**を証明している。前半(同型が ℤ[Σ^{-1}] へ延びること = spreading out)は仮定 hagree(Σ の外で導手が一致する)として受けている。★空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で確かめてある" 9,
+    .otherPaper "[Stacks]" "32.22 Descending finite type schemes(有限型スキームの降下——EGA IV §8 にあたる)" 4441,
+    .implicitStep
+      "★★旧 statement(∀ D D′ : HeightTheoryData, …)は**偽**であった——Check/GenEll/RemarkAxiomGap.lean の remark_1_5_1_false で機械検証済み。2026-08-27 に構成へ載せ替えた(第 420 ブロック)。逆向きの逸脱をしていないことは、定数が Σ だけで決まり点にも定義体にも依らないことで担保されている" 8 ]
 
 def prop_1_6.src : Source :=
   { paper := "GenEll", pdfPage := 9, item := "Proposition 1.6",

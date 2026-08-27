@@ -1069,10 +1069,27 @@ import ABC3.Found.GenEll.HeightInterface
 import ABC3.Found.GenEll.DegSubset
 import ABC3.Found.GenEll.Prop16
 import ABC3.Found.GenEll.NorthcottClassical
+import ABC3.Found.GenEll.NorthcottTuple
+import ABC3.Found.GenEll.NorthcottCoord
+import ABC3.Found.GenEll.HeightMetric
+import ABC3.Found.GenEll.MinFieldCovering
+import ABC3.Found.GenEll.DifferentKummer
+import ABC3.Found.GenEll.PGroupTower
+import ABC3.Found.GenEll.TameRamification
+import ABC3.Found.GenEll.TotallyRamified
+import ABC3.Found.GenEll.SigmaBound
+import ABC3.Found.GenEll.LogCondSigma
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
+import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.Normalize
+import ABC3.Found.NCBelyi.CoeffBound
+import ABC3.Found.NCBelyi.ReducedDegree
+import ABC3.Found.NCBelyi.NestedInduction
+import ABC3.Found.NCBelyi.DescendData
+import ABC3.Found.NCBelyi.RatSeparation
+import ABC3.Found.NCBelyi.ConjStable
 /-!
 # Found — 実装済みの基礎
 

@@ -28114,3 +28114,925 @@ mathlib の olean が 1 つ**途中で切れた**(`incompatible header`)。
 ★★★★**ここから先は構成の仕事である**。
 
 ★★Lean 全体の sorry は **43 → 42**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-682 ★★★★★★★**`ℙⁿ(ℚ̄)` の次数有界 Northcott**(第 369-370 ブロック)
+
+`Found/GenEll/NorthcottTuple.lean`・`Found/GenEll/NorthcottCoord.lean`。
+`Proposition 1.4, (iv)` の**数論的な中身**を取った。
+
+### ★★★★何が残っていたか
+
+すでにあったのは:
+
+* `finite_of_finrank_le_of_mulHeight₁_le`——**1 成分**の古典的 Northcott(体を固定しない)
+* `logAbsHeight`･`mulHeight₁_extension`——高さの体拡大公式
+
+★残っていたのは **2 段**である:
+
+| 段 | 使ったもの |
+|---|---|
+| `H₁(x_i/x_j) ≤ H(x)` | mathlib の `mulHeight₁_div_eq_mulHeight` + `mulHeight_comp_le` |
+| `H_L(z) ≤ B ⇒ H_E(z) ≤ B`(`E ⊆ L`) | `mulHeight₁_extension`(`H_L = H_E^{[L:E]}`･`H_E ≥ 1`) |
+
+★★**2 段目が要るのは**、`NorthcottClassical` が高さを **`ℚ⟫α⟬` の上で**測っているからである
+——大きい体で測った高さを、生成する部分体まで**降ろさねばならない**。
+
+### ★★★取れたもの
+
+| 定理 | 内容 |
+|---|---|
+| `boundedAlg` | 次数 `≤ d`･高さ `≤ B` の代数的数 |
+| `finite_pi_boundedAlg` | ★その**組**も有限 |
+| `finite_of_injOn_boundedAlg` | ★★そこへ単射に写る集合は有限(射影モデル経由の受け皿) |
+| `mulHeight₁_div_le_mulHeight` | ★座標の比の高さ ≤ 射影高さ |
+| `mulHeight₁_le_of_extension` | ★★部分体へ降ろす |
+| `coord_mem_boundedAlg` | ★★★★射影高さ `≤ B` なら正規化座標は `boundedAlg d B` に入る |
+| `finite_normalizedCoord` | ★★★★★★**`ℙⁿ(L)` の次数有界 Northcott** |
+
+★★★**正規化座標を `ℂ` の中で見ている**のが要である——
+`L` が動いても同じ `boundedAlg d B` の中に入るので、次数を `d` で押さえれば一様に有限になる。
+
+### ★★★★配管: `haveI` ではなく `letI`
+
+`(IntermediateField.inclusion hle).toRingHom.toAlgebra` を `haveI` で置くと
+**包む定義が消えて** `IsScalarTower.of_algebraMap_eq (fun _ => rfl)` が通らない。
+★mathlib 自身(`IntermediateField/Algebraic.lean`)も `let _ :=` で置いている。
+★★次数の比較は自分で塔を組まず `IntermediateField.finrank_le_of_le_right` を使えばよい。
+
+### ★★★★★これで `Prop 1.4, (iv)` に残るのは
+
+★**算術的な射影埋め込み**だけである——原文は `X` の `ℤ`-固有性から得るが、
+我々は `ArcModel`(アルキメデス側)しか持っていない。
+★★**数論的な中身はここで終わった**。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-683 ★★★★★★★★**`Proposition 1.4` を構成の上に立て直した**(第 371 ブロック)
+
+`Found/GenEll/HeightMetric.lean`・`Found/GenEll/NorthcottCoord.lean`・
+`Skeleton/GenEll/Section1.lean`。
+
+### ★★★★ 4 つの内訳
+
+| 条 | どこにあるか |
+|---|---|
+| (i) 加法性 | `htArith_tensor_unconditional`(既実装) |
+| (ii) 下に有界 | `Prop16.lean` の `prop_1_4_ii`(既実装) |
+| (iii) `≈` | `HeightMetric.lean` の `htArith_sub_abs_le`(**本ブロック**) |
+| (iv) Northcott | `NorthcottCoord.lean` の `northcott_of_projModel`(第 369-371) |
+
+★(iii) のために `ArchBound` の下界の**鏡像**(`archADiv_sum_le`･
+`archADiv_sum_div_finrank_le`)と高さの分解(`htArith_eq_add`)を足した。
+★★因子が同じで計量がどちらも連続なら、`X^arc` のコンパクト性から
+`|ht_D − ht_E|` が**一様に**有界になる——定数は `F` にも点にも依らない。
+
+### ★★★★★逸脱を 3 つ明示した
+
+1. 量化する対象: `∀ D : HeightTheoryData` → `ArcModel` + `ArithCartier`(前者では偽)
+2. (iii) は『生成ファイバーが同じ』ではなく『因子が同じ(計量だけ違う)』
+   ——**垂直因子の差の分は含めていない**
+3. (iv) は射影埋め込みを `ArcModel` と同じ立場で**データとして受けている**
+   ——★★**Northcott 性そのものは受けていない**(第 369-370 で証明済み)。
+   残っているのは「`htArith` がその意味での射影モデルを持つ」という**幾何の段**だけである
+
+★★`Section1` の sorry は **4 → 3**(`remark_1_4_1`･`remark_1_5_1`･`prop_1_7`)。
+Lean 全体の sorry は **42 → 41**。`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-684 ★★★★★★★**`Remark 1.4.1` を閉じた——残りは spreading out 待ち**(第 372 ブロック)
+
+原文は『follows **immediately** from the definitions, together with
+**Proposition 1.4, (iii)**』と書いている。★中身は「高さは類にしか依らない」であり、
+構成の側では `Found/GenEll/HeightClass.lean` が**すでにそれを持っていた**。
+★★構成の側では**定数差すら出ない**(`C = 0`)——積公式が効く。
+
+### ★★★★★`Remark 1.5.1` の実測——半分はすでにある
+
+| 半分 | 状態 |
+|---|---|
+| `log-diff_X` は `X_ℚ` だけに依る | ★**すでにある**——`logDiffOfField` は `X` を引数に持たないし、`logDiffOfField_eq` が `log|disc F| / [F:ℚ]` と値を与える |
+| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけ | ★★**残っている**——spreading out(`ℤ[Σ^{-1}]` への延長) |
+
+★★★**前半だけを `Remark 1.5.1` として書き換えることはしない**——
+後半は `Proposition 1.7` の証明が実際に使う(『Σ 上の log-cond の寄与は ≈ 0』)ので、
+落とすと下流に影響が出る。
+
+★★`Section1` の sorry は **3 → 2**。Lean 全体の sorry は **41 → 40**。
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-685 ★★★★★★**`Proposition 1.7` の「≳ ではなく ≥」の段の前半**(第 373 ブロック)
+
+`Found/GenEll/MinFieldCovering.lean`。
+
+原文 p.10 は『the "portion over Σ" of `log-diff_Y − log-diff_Z` is **≥ 0**
+[i.e., with "≥", not "≳"!]』と**わざわざ区別して**書いている。中身は 2 行:
+
+1. `φ : Y → Z` を通すと点の**最小定義体は小さくなる**(`F_min(φ∘y) ⊆ F_min(y)`)
+2. `log-diff` は体を大きくすると**増えるだけ**(`logDiffOfField_le`、既実装)
+
+### ★★★★ 1 のために `MinField.lean` の欠けを埋めた
+
+`MinField.lean` は**極小性**(`x_F` が `E` を経由するなら `F_min ⊆ E`)は取っていたが、
+「**`F_min` 自身が定義体である**」ことは `κ(ξ)` を経由する形でしか取っていなかった。
+★`κ(ξ) ↠ F_min ↪ F` と**値域制限して分解**すれば、`x_F` は `Spec F_min` を経由する。
+★★これがあれば `x_F ≫ φ` も経由するので、**極小性がそのまま被覆の単調性を与える**。
+
+### 残り
+
+`minField` は `Subfield F` を返すので、部分体を**数体として見る**インスタンス
+(`Algebra ℚ ↥E`･`FiniteDimensional ℚ ↥E`)を通す必要がある。
+
+### 配管
+
+★`rw` が `minField F xF` の中の `xF` まで書き換えて motive not type correct になる
+——`conv_lhs` で**左辺だけ**書き換える。
+★★`set` で別名を付けると `let` の展開差でさらに詰まるので、この種の証明では使わない。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-686 ★★★★★★**`Proposition 1.7` の "elementary claim" の段 5･7 6**(第 374 ブロック)
+
+`Found/GenEll/DifferentKummer.lean`。
+
+原文 p.10 は `Proposition 1.7, (i)` の証明を、最後に**局所体の主張 1 つ**へ落としている:
+
+> Fix a prime number `p` and a positive integer `d`. Then there exists a positive
+> integer `n` such that for any finite Galois extension `L/K` of finite extensions
+> of `ℚ_p` with `[L : K] ≤ d`, the different ideal of `L/K` contains `p^n · O_L`.
+
+### ★★★原文の 6 段と、本ブロックが取った分
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離、馴なら `n = 1`) | 未着手 |
+| 2(`ζ_p ∈ K` への帰着) | 未着手 |
+| 3(`p`-群の可解性で `[L:K] = p` へ) | 未着手 |
+| 4(Kummer 理論で `L = K(λ)`) | 未着手 |
+| **5(`λ ∣ p`)** | ★**本ブロック** |
+| **6(`p·λ^{p−1} ∈ different`)** | ★**本ブロック** |
+| **結論 `p^p·O_L ⊆ different`** | ★★**本ブロック** |
+
+### ★★★★ 6 は mathlib の 1 本を当てるだけだった
+
+`aeval_derivative_mem_differentIdeal`(`f'(λ) ∈ different`)に `f = X^n − κ` を当てる
+——`f' = n·X^{n−1}` なので `n·λ^{n−1} ∈ different` が出る。
+
+★ただし `different` は **`minpoly_A`** を使うので、`minpoly_K` の側で分かっていても
+**`A` が整閉であること**(`minpoly.isIntegrallyClosed_eq_field_fractions'`)で降ろす段が 1 つ要る。
+
+### ★★★ 5 は付値環の全順序性 3 行
+
+`ValuationRing.cond`(割り切れどうしが全順序)だけを使う——
+`¬(p^n ∣ λ^n)` から `λ ∣ p` が出る。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-687 ★★★★★**elementary claim の段 3 の道具——塔で継ぐ**(第 375 ブロック)
+
+原文 p.10 の段 3 は『`Gal(L/K)` は位数 `≤ d` の可解な `p`-群なので
+`[L:K] = p` の場合に帰着する』である。
+
+★これを実行するときの道具が、次数 `p` の塔 `K = K₀ ⊆ … ⊆ K_s = L` の各段で
+`p^p ∈ different` が出れば**塔全体で `p^{s·p} ∈ different`** になる、という継ぎである。
+★★`p^s ≤ d` なので `s ≤ log_p d`、したがって **`n ≙ p·log_p d` が `d` にだけ依る一様な値**になる。
+
+乗法性は mathlib にある(`differentIdeal_eq_differentIdeal_mul_differentIdeal`)。
+★本定理はそれを**仮説として受けている**——分数体の間の `Algebra` インスタンスの道が
+呼び出し側でしか定まらないからである。
+
+### elementary claim の現状
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | 未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★**道具は取った**(第 375)。群論の側は未着手 |
+| 4(Kummer 理論) | 未着手 |
+| 5(`λ ∣ p`) | ★取った(第 374) |
+| 6(different の下界) | ★取った(第 374) |
+| 結論 `p^p·O_L ⊆ different` | ★★取った(第 374) |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-688 ★★★★★**elementary claim の段 4——Kummer 拡大の最小多項式**(第 376 ブロック)
+
+原文 p.10 の段 4 は『elementary Kummer theory から `L = K(λ)` で `κ ≙ λ^p ∈ K`』である。
+そのあと different を計算するには、**最小多項式が `X^p − κ`** であることが要る。
+
+★中身は 3 行だった——`X^n − c` はモニックで `x` を消し、次数が `n` なので、
+最小多項式が割る上に次数が同じなら一致する。
+★★次数の仮説は **`[K(x):K] = n`** の形でも受けられるようにした。
+
+★★★これで第 374 の `natCast_mul_pow_mem_differentIdeal_of_map` が要求する `hmapK` が
+`λ^p = κ` と `[K(λ):K] = p` から作れるようになった——**段 4 → 段 6 が繋がった**。
+
+### elementary claim の現状
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | 未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具は取った(第 375)。群論の側は未着手 |
+| 4(Kummer) | ★**最小多項式は取った**(第 376)。`λ` の存在は未着手 |
+| 5･6･結論 | ★★取った(第 374) |
+
+### 配管
+
+`K⟮x⟯` の記法は `open IntermediateField` が要り、`⟮` と `x` の間に**空白を入れると**
+`expected token` になる。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-689 ★★★★★★★**段 1 を閘として測った——Serre の評価 1 本で出る**(第 377 ブロック)
+
+段 1(野生/馴の分離、馴なら `n = 1`)には「**馴分岐なら different の指数はちょうど `e−1`**」
+が要る。mathlib を実測した(`Mathlib/RingTheory/DedekindDomain/Different.lean`):
+
+| 欲しいもの | mathlib |
+|---|---|
+| `P^{e−1} ∣ 𝔡`(下界) | ✅ `pow_sub_one_dvd_differentIdeal` |
+| 不分岐 ⇔ `P ∤ 𝔡` | ✅ `not_dvd_differentIdeal_iff` |
+| ★**馴分岐なら `¬ P^e ∣ 𝔡`(上界)** | ❌**無い** |
+| ★★**Serre の評価 `d_P ≤ e − 1 + v_P(e)`** | ❌**無い** |
+
+### ★★★★★★Serre の評価 1 本あれば elementary claim は**一発で出る**
+
+    v_P(p) = e·e_K ≥ e
+    n ≙ 1 + log_p d と取れば
+    n·v_P(p) ≥ n·e ≥ e − 1 + e·v_{P_K}(e) ≥ d_P
+
+★**野生/馴の分離も `ζ_p` への帰着も Kummer 理論も要らなくなる**。
+
+### この先の選択肢
+
+| | 道 | 大きさ |
+|---|---|---|
+| (A) | 原文の 6 段をそのまま追う(段 1 の上界を自分で作る) | トレース形の局所計算 |
+| (B) | **Serre の評価を 1 本作ってそこから出す** | 同じくトレース形 |
+
+★★どちらも同程度だが、**(B) の方が得られるものが広い**(分岐理論全般に使える)。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-690 ★★★★★★**単生成なら different は等式になる**(第 378 ブロック)
+
+段 1(馴分岐なら different の指数はちょうど `e−1`)には**上界**が要るが、
+mathlib は下界しか持たない。★入口は**単生成**である:
+
+    B = A[x] なら 𝔡 = (f′(x))   —— 包含ではなく**等式**
+
+★★mathlib の `conductor_mul_differentIdeal`(`conductor · 𝔡 = (f′(x))`)で
+`conductor = ⊤` とするだけである。
+★★★**局所体の有限拡大では `O_L = O_K[x]` が常に成り立つ**ので、この形がそのまま使える。
+
+Kummer 拡大に当てた鋭い形も取った:
+
+    単生成 + minpoly_A(λ) = X^n − κ  ⇒  𝔡 = (n·λ^{n−1})
+
+★第 374 は包含しか取っていなかったので、これで**上界も取れる**ようになった。
+
+### elementary claim の現状(第 374-378)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★**上界の入口**(単生成 ⇒ 等式)を取った。馴での指数計算は未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具(塔で継ぐ)を取った。群論の側は未着手 |
+| 4(Kummer) | ★最小多項式を取った。`λ` の存在は未着手 |
+| 5･6･結論 | ★★取った |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-691 ★★★★★★★**段 1 の馴分岐の場合を取った——`n = 1` で足りる**(第 379 ブロック)
+
+原文 p.10 の段 1 は『野生分岐と馴分岐に分ける。**馴なら `n = 1` で足りる**』である。
+★その馴の側を取った。
+
+    馴分岐(= 次数 `n` が `B` の単元)なら `p·O_L ⊆ 𝔡`
+
+★★仮説の意味:
+
+| 仮説 | 中身 |
+|---|---|
+| `IsUnit (n : B)` | ★**馴分岐の形式化**——野生なら `p ∣ n` なので単元にならない |
+| `λ^m ∣ p`･`n−1 ≤ m` | 全分岐なら `v(λ) = 1`･`v(p) = n·e_K ≥ n` なので `m ≙ n·e_K` で成り立つ |
+
+★★★第 378 で 𝔡 が**等式**になったのが効いた——
+`n` が単元なら `(n·λ^{n−1}) = (λ^{n−1})` なので、あとは `λ^{n−1} ∣ λ^m ∣ p` だけである。
+
+### elementary claim の現状(第 374-379)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★**馴の側は取った**。分離そのもの(野生側への徒歩)は未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具(塔で継ぐ)を取った。群論の側は未着手 |
+| 4(Kummer) | ★最小多項式を取った。`λ` の存在は未着手 |
+| 5･6･結論 | ★★取った |
+
+★★★★**野生も馴も、同じ 1 本(`differentIdeal_eq_span_kummer`)から出ている**
+——違いは「`n` が単元か」だけである。
+
+### 配管(既知の穴に再度落ちた)
+
+`python -c "…"` の中の**バッククォートが bash にコマンド置換される**。
+★docstring の `` `n = 1` `` が**空になってファイルに入った**。
+★★規則はすでに `tools/lean-idioms.md` にある——
+**スクラッチパッドの `.py` に書いてパスで実行する**。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-692 ★★★★★★★**段 4 が完了した——Kummer 理論は mathlib にあった**(第 380 ブロック)
+
+原文 p.10 の段 4 は『Since `ζ ∈ K`, it follows **immediately from elementary Kummer
+theory** that `L = K(λ)` for some `λ ∈ L` such that `κ ≙ λ^p ∈ K`』である。
+
+★**在庫を引いたら mathlib にあった**——`isCyclic_tfae`
+(`Mathlib/FieldTheory/KummerExtension.lean`)。`ζ_n ∈ K` のとき次の 3 つが同値:
+
+    IsGalois K L かつ IsCyclic Gal(L/K)
+    ∃ a, Irreducible (X^n − C a) かつ IsSplittingField K L (X^n − C a)
+    ∃ α, α^n ∈ range (algebraMap K L) かつ K⟮α⟯ = ⊤
+
+★★**3 つ目が原文の段 4 そのもの**である。ここでは**作らずに済んだ**。
+
+★★★これで段 4 は**完了**である(最小多項式は第 376、`λ` の存在は本ブロック)。
+
+### elementary claim の現状(第 374-380、7 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★馴の側は取った。分離そのものは未着手 |
+| 2(`ζ_p` への帰着) | 未着手 |
+| 3(`p`-群の可解性) | ★道具(塔で継ぐ)を取った。群論の側は未着手 |
+| **4(Kummer)** | ★★★**完了** |
+| 5･6･結論 | ★★取った |
+
+★★★★**残りは 3 項目**——段 1 の分離･段 2･段 3 の群論。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-693 ★★★★★★**段 3 の群論——Sylow 1 本で足りた**(第 381 ブロック)
+
+`Found/GenEll/PGroupTower.lean`。
+
+原文 p.10 の段 3 は『Moreover, since `Gal(L/K)` is a [**necessarily solvable!**]
+`p`-group of order `≤ d`, it suffices to consider the case where `[L : K] = p`』である。
+
+★Galois 対応で体の塔 `K = K₀ ⊆ … ⊆ K_s = L`(各段の次数 `p`)に落ち、
+群の側では**指数 `p` ずつ上がる部分群の鎖**になる。
+
+### ★★★在庫を引いた結果——mathlib の 1 本で足りた
+
+`Sylow.exists_subgroup_card_pow_prime_le`:
+
+> `p^m ∣ |G|` かつ `|H| = p^n` かつ `n ≤ m` なら、`H ≤ K` で `|K| = p^m` なる `K` がある
+
+★`m ≙ n+1` で使えば**1 段上がる**。鎖はそれを繰り返すだけである。
+
+★★**可解性を経由する必要はなかった**——原文が『necessarily solvable!』と書いたのは
+読者への注意であって、鎖の存在には Sylow の定理で足りる。
+
+★★★`different` の側は塔で継げる(第 375)ので、**段 3 の道具は両側揃った**。
+
+### elementary claim の現状(第 374-381、8 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★馴の側は取った。**分離そのものは未着手** |
+| 2(`ζ_p` への帰着) | **未着手** |
+| **3(`p`-群)** | ★★★**群論も different も揃った** |
+| **4(Kummer)** | ★★★**完了** |
+| 5･6･結論 | ★★取った |
+
+★★★★**残りは段 1 の分離と段 2 の 2 項目**である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-694 ★★★★★★★★**残り 2 項目の閘は 1 つだった——馴分岐の構造定理**(第 382 ブロック)
+
+elementary claim の残りは段 1(分離)と段 2(`ζ_p` への帰着)であったが、
+★**どちらも同じ 1 つに帰着する**:
+
+> **馴分岐の構造定理**——馴なら不分岐部を除けば
+> **Kummer 型の生成元** `λ^e = π` を持つ
+
+★★これがあれば、第 379 の `mem_differentIdeal_of_isUnit_natCast` が**そのまま**馴の場合を与える
+——`v(f′(λ)) = v(e) + (e−1) = e−1`(`p ∤ e` なので `v(e) = 0`)。
+★★★段 2 も同じである——`K(ζ_p)/K` の次数は `p−1` を割るので**馴**だから。
+
+### ★★★★実測——mathlib には馴分岐が無い
+
+| 探したもの | mathlib |
+|---|---|
+| `Algebra.IsUnramifiedAt` | ✅ ある |
+| `IsTamelyRamified` / `Algebra.IsTamelyRamified` / `Ideal.IsTamelyRamified` / `IsTame` | ❌**どれも無い** |
+
+★★★★★**したがって残りは「引いてくる」ではなく「建てる」仕事である**——
+定義(`p ∤ e`)、不分岐部との分解、構造定理の順に積むことになる。
+
+### ★★★★★★今日分かったことのまとめ(第 374-382)
+
+原文が『elementary』と畳んだ 6 段のうち、**3 段は mathlib にすでにあった**:
+
+| 段 | どこにあったか |
+|---|---|
+| 3(`p`-群の鎖) | `Sylow.exists_subgroup_card_pow_prime_le` |
+| 4(Kummer 理論) | `isCyclic_tfae`(`FieldTheory/KummerExtension.lean`) |
+| 6(different の下界) | `aeval_derivative_mem_differentIdeal` |
+
+★**在庫を引く規則がここで大きく効いた**——作らずに済んだのが半分である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-695 ★★★★★★★★**段 4-6 を端から端まで繋いだ**(第 383 ブロック)
+
+`Found/GenEll/DifferentKummer.lean` の `pow_mem_differentIdeal_of_kummer`。
+
+原文 p.10 の**野生の `[L:K] = n` の場合**が、1 本の定理になった:
+
+    λ^n = κ ∈ A、κ ∉ p^n、単生成  ⇒  p^n ∈ 𝔡
+
+| 仮説 | 原文のどこ |
+|---|---|
+| `hpow`･`hrank` | 段 4(Kummer 理論で `L = K(λ)`･`κ ≙ λ^p ∈ K`) |
+| `hval` | 段 5(`κ ∈ O_K` だが `κ ∉ p^p·O_K`) |
+| `hmono` | 局所体では常に成り立つ(`O_L = O_K[λ]`) |
+| 結論 | 段 6(`different` は `p·λ^{p−1}·O_L ⊇ p^p·O_L` を含む) |
+
+★中間のすべて(最小多項式が `X^n − κ`･`λ ∣ p`･`different` の下界)は
+同じファイルの他の定理である。
+★★**部品が実際に噛み合うことが型で確かめられた**。
+
+### elementary claim の現状(第 374-383、10 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★馴の側は取った。**分離は馴分岐の構造定理待ち** |
+| 2(`ζ_p` への帰着) | **同上** |
+| 3(`p`-群) | ★★★群論も different も揃った |
+| 4(Kummer) | ★★★完了 |
+| 5･6･結論 | ★★★**完了、かつ端から端まで繋がった** |
+
+★★★★**残りは 1 つ**——馴分岐の構造定理(mathlib に馴分岐の概念そのものが無い)。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-696 ★★★★★★**馴分岐を建て始めた——第 379 の仮説は馴分岐そのものだった**(第 384 ブロック)
+
+`Found/GenEll/TameRamification.lean`。
+
+mathlib に馴分岐の概念が無いことは第 382 で測った。**建てる**しかないので、
+その最初の一段を置いた。
+
+| 定義･定理 | 内容 |
+|---|---|
+| `IsTameDegree B n` | 剰余標数が `n` を割らない(馴分岐の**次数の側**) |
+| `isUnit_natCast_iff` | ★★局所環では `IsUnit (n : B)` ⇔ 剰余標数が `n` を割らない |
+| `isUnit_natCast_iff_isTameDegree` | ★上の言い換え |
+| `isTameDegree_one` | 不分岐は馴分岐 |
+
+★機構は 3 行である——単元であることは極大イデアルに入らないこと、
+極大イデアルに入ることは剰余体で `0` になること、
+剰余体で `0` になることは標数が割ることである。
+
+★★★これで第 379 の `mem_differentIdeal_of_isUnit_natCast` が
+「**馴分岐なら `p·O_L ⊆ 𝔡`**」を言っていることが**型で見える**ようになった。
+★★★★原文の段 1(野生と馴に分ける)は、形式化の側では
+**「`n` が単元か」という 1 行の場合分け**に集約される。
+
+### 残り
+
+その場合分けを実際に使うために要る**構造定理**
+——馴なら不分岐部を除けば Kummer 型の生成元 `λ^e = π` を持つ——である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-697 ★★★★★★★**段 1 の上界を取った——馴なら指数はちょうど `e−1`**(第 385 ブロック)
+
+`Found/GenEll/TameRamification.lean`。
+
+mathlib の `pow_sub_one_dvd_differentIdeal` は**下界**(`P^{e−1} ∣ 𝔡`)しか与えない。
+★**上界がこれで埋まった**:
+
+    Eisenstein の `f` について `f′(λ) = e·λ^{e−1} + λ^e·(…)`
+    馴(`e` が単元)なら `f′(λ) = λ^{e−1}·(e + λ·c)` で `e + λ·c` は単元
+    ⇒ `f′(λ)` は `λ^{e−1}` の単元倍、すなわち**指数はちょうど `e−1`**
+
+★★単生成なら `𝔡 = (f′(λ))` である(第 378)ので、これが**上界**にあたる。
+
+### ★★★機構は 2 段
+
+| 段 | 中身 |
+|---|---|
+| 導関数の値 | 項ごとに導関数を取り、Eisenstein の仮説(`λ^e ∣ a_i`)から `i < e` の項はすべて `λ^e` で割れる |
+| 単元性 | `λ` は極大イデアルの元なので `λ·c` もそうであり、単元 `e` に足しても単元のまま |
+
+### elementary claim の現状(第 374-385、12 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(野生/馴の分離) | ★★★**馴の側も上界も取った**。残るのは**構造定理**(馴 ⇒ Eisenstein 生成元) |
+| 2(`ζ_p` への帰着) | 構造定理があれば同じく出る |
+| 3(`p`-群) | ★★★群論も different も揃った |
+| 4(Kummer) | ★★★完了 |
+| 5･6･結論 | ★★★完了、端から端まで繋がった |
+
+★★★★**残りは本当に 1 つ**——「馴なら不分岐部を除けば Eisenstein な生成元を持つ」。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-698 ★★★★★★★★**馴の場合も端から端まで繋いだ**(第 386 ブロック)
+
+`Found/GenEll/DifferentKummer.lean` の `mem_differentIdeal_of_eisenstein_tame`。
+
+原文 p.10 の段 1 の**馴の側**(『馴なら `n = 1` で足りる』)が、1 本の定理になった:
+
+    Eisenstein な生成元があり、馴(`e` が単元)で、`λ^m ∣ p`･`e−1 ≤ m`
+      ⇒  `p ∈ 𝔡`
+
+| 仮説 | 意味 |
+|---|---|
+| `hmap` | 最小多項式が Eisenstein の形(全分岐の生成元) |
+| `hdvd` | 係数が `λ^e` で割れる |
+| `hunit` | ★**馴分岐**(`TameRamification.lean` で `IsTameDegree` と同値と示した) |
+
+★★これで**野生の場合(第 383)と馴の場合(本ブロック)の両方が、
+それぞれ 1 本の定理として端から端まで繋がった**。
+
+### elementary claim の現状(第 374-386、13 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(馴の側) | ★★★**端から端まで繋がった**。構造定理待ち |
+| 2(`ζ_p` への帰着) | 同上 |
+| 3(`p`-群) | ★★★群論も different も揃った |
+| 4(Kummer) | ★★★完了 |
+| 5･6･結論(野生の側) | ★★★**端から端まで繋がった** |
+
+★★★★**残っているのは `hmap`･`hmono` を与える構造定理だけ**である
+——「全分岐なら一根元が生成し、その最小多項式は Eisenstein」。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-699 ★★★★★**Eisenstein の条件を `λ^e ∣ ·` へ移した**(第 387 ブロック)
+
+第 386 の `mem_differentIdeal_of_eisenstein_tame` は係数について `λ^e ∣ a_i` を要求していたが、
+Eisenstein の**標準的な条件**は「係数が `π_K` で割れる」である。
+★全分岐なら `π_K` は `B` で `λ^e` の単元倍になるので、両者は一致する:
+
+    `λ^e = π·u`(`u` 単元)なら  `λ^e ∣ x` ⇔ `π ∣ x`
+
+★★これで**構造定理が与えるべきものが 3 つに整理された**:
+
+| 与えるもの | 使う先 |
+|---|---|
+| `λ^e ~ π`(全分岐) | 本ブロックの橋 |
+| 最小多項式が `π`-Eisenstein | `hmap` |
+| `B = A[λ]` | `hmono` |
+
+### elementary claim の現状(第 374-387、14 ブロック)
+
+| 段 | 状態 |
+|---|---|
+| 1(馴の側) | ★★★端から端まで繋がった。構造定理待ち |
+| 2(`ζ_p` への帰着) | 同上 |
+| 3(`p`-群) | ★★★揃った |
+| 4(Kummer) | ★★★完了 |
+| 5･6･結論(野生) | ★★★端から端まで繋がった |
+| Eisenstein の条件の橋 | ★★**本ブロック** |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-700 ★★★★★**全分岐 ⇒ `π` は `λ^e` の単元倍**(第 388 ブロック)
+
+構造定理が与えるべき 3 つのうち、1 つ目を取った:
+
+    Ideal.span {π} = Ideal.span {λ}^e   (全分岐の定義そのもの、`π·B = 𝔪_B^e`)
+      ⇒ ∃ u, IsUnit u ∧ λ^e = π·u
+
+★イデアルが一致すれば単元倍である(`Ideal.span_singleton_eq_span_singleton`)という 2 行で、
+第 387 の橋(`pow_dvd_iff_of_isUnit_mul`)が要求する形がそのまま出る。
+
+### 構造定理の残り
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★**取った**(第 388) |
+| 最小多項式が `π`-Eisenstein | 未着手 |
+| `B = A[λ]` | 未着手 |
+
+### 配管(既知の穴に 3 度目)
+
+Python の文字列で `𝔪` を**サロゲート対**で書くと UTF-8 への書き出しで落ちる。
+★**8 桁の `\U0001D52A`** で書く。規則は `tools/lean-idioms.md` にある。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-701 ★★★★★★**`B = A[λ]` への降下の段**(第 389 ブロック)
+
+構造定理の 3 つ目(**`B = A[λ]`**)へ向けて、降下の段を取った:
+
+    Eisenstein なら  `p^k·z ∈ A[λ]`  ⇒  `z ∈ A[λ]`
+
+★任意の `z ∈ O_L` に対して `p^k·z ∈ O_K[λ]` となる `k` が取れれば、
+この補題で `k` を `0` まで落とせる。
+
+★★**1 段分は mathlib にあった**——
+`mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt`(`p·z ∈ A[λ] ⇒ z ∈ A[λ]`)。
+本定理はそれを `k` 回繰り返す帰納である。
+
+### 構造定理の現状
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★取った(第 388) |
+| 最小多項式が `π`-Eisenstein | 未着手 |
+| `B = A[λ]` | ★**降下の段を取った**(第 389)。`k` の存在は未着手 |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-702 ★★★★★**分母を払う段——`B = A[λ]` の残り半分**(第 390 ブロック)
+
+第 389 の降下の段(`p^k·z ∈ A[λ] ⇒ z ∈ A[λ]`)に渡すための `k` を作る側を取った:
+
+    どの `z ∈ L` にも、`d·z ∈ A[λ]` となる `0 ≠ d ∈ A` がある
+
+★冪基底の係数は `K = Frac A` の元なので、**共通の分母を取る**だけである
+(`IsLocalization.exist_integer_multiples`)。
+★★`A` が DVR なら `d = π^k × 単元` なので、第 389 の降下の段にそのまま渡せる。
+
+★★★**この 2 つで `B = A[λ]` が出る**——構造定理の 3 項目のうち 2 つ目が実質揃った。
+
+### 構造定理の現状
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★取った(第 388) |
+| `B = A[λ]` | ★★**降下(第 389)+ 分母払い(第 390)で揃った** |
+| 最小多項式が `π`-Eisenstein | 未着手 |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-703 ★★★★★★**Eisenstein の定数項——`π²` では割れない**(第 391 ブロック)
+
+構造定理の 3 つ目(最小多項式が `π`-Eisenstein)のうち、**定数項の条件**を取った:
+
+    a₀ = λ^e·w   (`w` は単元)
+
+★**付値を使わず割り切れだけで出る**:
+`a₀ = −λ^e − ∑_{i≥1} a_i λ^i` で、`i ≥ 1` の項はすべて `λ^{e+1}` で割れるので
+`a₀ = λ^e·(−1 − λ·s)` となり、`−1 − λ·s` は単元(`λ` は極大イデアルの元)。
+★★これで `λ^{e+1} ∤ a₀`、とくに `e ≥ 1` なら **`π² ∤ a₀`** が出る。
+
+### ★★★残りは係数の条件 1 つ
+
+「`i < e` の係数がすべて `π` で割れる」。★これも**付値なしで出る見込み**がある
+——最小の反例 `i₀` を取ると、他の項がすべて `λ^{i₀+1}` で割れるので
+`a_{i₀}` も `λ` で割れ、単元でなくなって矛盾する。
+
+### 構造定理の現状
+
+| 与えるもの | 状態 |
+|---|---|
+| `λ^e ~ π`(全分岐) | ★取った(第 388) |
+| `B = A[λ]` | ★★揃った(第 389 + 390) |
+| 最小多項式が `π`-Eisenstein | ★**定数項の条件を取った**(第 391)。係数の条件が残り |
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-704 ★★★★★★★**Eisenstein の係数条件——構造定理の代数的な核が揃った**(第 392 ブロック)
+
+構造定理の 3 つ目(最小多項式が `π`-Eisenstein)の残り、**係数の条件**を取った:
+
+    `λ^e + ∑_{i<e} a_i λ^i = 0` で、`A` の非単元が `λ^e` で割れる(= 全分岐)なら
+    `i < e` の `a_i` はすべて非単元
+
+★**付値を使わず**、最小の反例 `i` を取る強帰納法で出る:
+
+| 項 | なぜ `λ^{i+1}` で割れるか |
+|---|---|
+| `λ^e` | `e > i` |
+| `j > i` の項 | `λ^j` で割れ、`j ≥ i+1` |
+| `j < i` の項 | 最小性から `a_j` が非単元 ⇒ `λ^e ∣ a_j` ⇒ `λ^{e+j}` で割れ、`e+j > i` |
+
+★★したがって `a_i·λ^i` も `λ^{i+1}` で割れ、`λ^i` を約すと `λ ∣ a_i`——矛盾。
+★★★仮説「`A` の非単元は `λ^e` で割れる」が**全分岐**(第 388)の使い所である。
+
+### ★★★★構造定理の代数的な核が 3 つとも揃った
+
+| 与えるもの | どこ |
+|---|---|
+| `λ^e ~ π`(全分岐) | 第 388 |
+| `B = A[λ]` | 第 389 + 390 |
+| 最小多項式が `π`-Eisenstein | 定数項が第 391、係数が第 392 |
+
+★残るのは、これらを**実際の `minpoly` の係数関数と全分岐の仮説に配線する**ことである。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-705 ★★★★★★**`minpoly` への配線——根の関係式**(第 393 ブロック)
+
+第 391･392 の Eisenstein の 2 本は「`λ^e + ∑ a_i λ^i = 0`」という**根の関係式**を
+入力に取る形で書いてあった。その入力を `minpoly` から作る配線を置いた:
+
+    `f` がモニックで次数 `e`、`λ` が根  ⇒  `λ^e + ∑_{i<e} f.coeff i · λ^i = 0`
+
+★mathlib の `Polynomial.Monic.as_sum`(モニックなら `f = X^e + ∑_{i<e} C (coeff i) X^i`)を
+使うだけである。`minpoly` に当てた形も置いた。
+
+### 構造定理の現状(第 388-393)
+
+| 与えるもの | どこ |
+|---|---|
+| `λ^e ~ π`(全分岐) | 第 388 |
+| `B = A[λ]` | 第 389 + 390 |
+| 最小多項式が `π`-Eisenstein | 定数項が第 391、係数が第 392、**入口が第 393** |
+
+★残るのは、**全分岐の仮説**(`π ~ λ^e`･剰余体が一致･次数 = `e`)から
+これらの仮説を実際に導く**最後の組み立て**である。
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-706 ★★★★★★★★★**段 1 の馴の側が全分岐の仮説から直接出た**(第 394 ブロック)
+
+`Found/GenEll/DifferentKummer.lean` の `mem_differentIdeal_of_totallyRamified_tame`。
+
+原文 p.10 の段 1 の馴の側(『馴なら `n = 1` で足りる』)が、
+**全分岐と馴分岐の仮説だけ**から出る形になった:
+
+    全分岐(`A` の非単元は `λ^e` で割れる)+ 馴(`e` が単元)
+      + `B = A[λ]` + `λ^m ∣ p`･`e−1 ≤ m`
+      ⇒  `p ∈ 𝔡`
+
+★**中間の Eisenstein 性は仮説に置いていない**——
+第 392 の `not_isUnit_coeff_of_root` で**導いている**。
+根の関係式は第 393、最小多項式の式は `Monic.as_sum` を `map` したものである。
+
+★★これで **elementary claim の両方の枝が自立した定理として立っている**:
+
+| 枝 | 定理 | ブロック |
+|---|---|---|
+| 野生(`[L:K] = p` の Kummer) | `pow_mem_differentIdeal_of_kummer` | 第 383 |
+| 馴 | `mem_differentIdeal_of_totallyRamified_tame` | 第 394 |
+
+### `Prop 1.7` の系統で残るもの
+
+1. 全分岐の仮説を実際の局所体の状況から出すこと(剰余体の一致･次数 = `e` など)
+2. Σ の帳尻(スキーム側)
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-707 ★★★★★★**全分岐の仮説を局所環のデータから出した**(第 395 ブロック)
+
+第 394 の `mem_differentIdeal_of_totallyRamified_tame` は
+「`A` の非単元は `λ^e` で割れる」と「局所準同型の逆向き」を仮説に置いていた。
+★その 2 つを、より素朴なデータから出した:
+
+| 出したもの | どう出したか |
+|---|---|
+| `A` の非単元は `λ^e` で割れる | `A` が局所環で `𝔪_A = (π)`、かつ `λ^e ~ π`(第 388) |
+| 局所準同型の逆向き | 単元は単元に移るので**常に成り立つ**(対偶) |
+
+★★これで**段 1 の馴の側は、局所環としての `A`･`B` と
+全分岐･馴分岐という素朴な仮定だけから出る**ようになった。
+
+### `Prop 1.7` の系統で残るもの
+
+1. `B = A[λ]` と最小多項式の次数 `e` を、剰余体の一致と `[L:K] = e` から出すこと
+2. Σ の帳尻(スキーム側)
+
+`lake build` 全体通過、`node tools/check.mjs` は **PASS**。
+
+
+## §9-708 ★★★★★★★★**残り 4 件の「節点はあるのか」を測った**(第 396 ブロック、2026-08-27)
+
+問い: 作業が必要な 4 つの理論で、スケルトン作成と依存グラフ展開はできているか。節点は何個か。
+
+### ★★★★★★★まず区別が要る
+
+`Skeleton/` は**原典の statement 専用トラック**である。
+★したがって 4 つのうち**原典に節点があるのは 1 つだけ**(Belyi = [NCBelyi])。
+残り 3 つは mathlib に無い**標準数学**であり、設計上
+Skeleton には載らない。
+
+### ★★★★実測(2026-08-27)
+
+| 理論 | 原典節点 | Skeleton | グラフ展開 | 必要な節点数 |
+|---|---|---|---|---|
+| **Belyi**([NCBelyi] Thm 2.5) | ✅ ある(9 ページ) | **2/5** | ✅ **5 節点 / 辺 5 / 深さ 2** | ★**あと 2**(Lemma 2.2･Lemma 2.4) |
+| **曲線の RR / Serre 双対性** | ❌ 無い(folklore) | ❌ | ❌ | ★★**未測定** |
+| **馴分岐**(Prop 1.7) | ❌ 無い(証明中の claim) | ❌(設計どおり) | △ `.needs` のみ | 原文の **6 段**、うち **5 実装済み** |
+| **spreading out**(Rem 1.5.1) | ❌ 無い | ❌ | ❌ | ★★**未測定** |
+
+### ★★★★★合図の件数(hedge-index に GenEll/NCBelyi を登録して初測定)
+
+| 項目 | 合図 | 内訳 |
+|---|---|---|
+| `Proposition 1.7` | **7** | immediately×5 one verifies×1 easily×1 |
+| `Theorem 2.1` | **6** | immediately×3 well-known×2 clearly×1 |
+| `Remark 1.5.1` | **3** | one verifies×1 immediately×2 |
+| `[NCBelyi] Theorem 2.5` | **1** | formally×1 |
+| `[NCBelyi] Lemma 2.4` | **2** | immediately×1 one verifies×1 ★**未実装の合図はこれだけ** |
+
+### ★★★★★★訂正——spreading out は mathlib に**部分的にある**
+
+以前の測定(2026-08-16、`remark_1_5_1.needs`)は「mathlib に scheme の spreading out は無い」だったが、
+★**`Mathlib/AlgebraicGeometry/SpreadingOut.lean` は存在する**
+(`spread_out_of_isGermInjective` / `spread_out_unique_of_isGermInjective`)。
+
+★★ただしそれは**茎レベル**(`Spec 𝒪_{X,x} ⟶ Spec 𝒪_{Y,y}` を**近傍へ**延ばす)であり、
+原文が要るのは『`X′_ℚ ≅ X_ℚ` が `ℤ[Σ^{-1}]` 上へ延びる』——**基底の極限版**(EGA IV, 8.8.2)である。
+★★★ファイル自身の TODO が「morphism property の spreading out」を残している。
+
+### ★★★★★★★設計上の発見——**「mathlib に無い標準数学」を置く節点の型が無い**
+
+`Skeleton/` は原典専用、`Interface/` は posit 専用、`Found/` は実装専用である。
+★**「作るべき標準数学」を節点として数える場所が無い**——
+現状は `.needs` の `.citation(.absent …)` だけで、**節点数を持たない**。
+★★だから 4 つのうち 3 つは「グラフに載っていない」。
+
+★★★**提案**: `ResearchPaper/mathlib-gap.json` を作り、
+各項目に「何を作るか / 最小構成は何か / 節点数 / 外部プロジェクトの在庫」を書く。
+小さい仕事で、以後の見積もりが機械的になる。
+
+## §9-709 ★★★★★★★★★★**[NCBelyi] Lemma 2.2 が閉じた——`sorry` を増やさずに Skeleton へ載った**(第 404 ブロック、2026-08-27)
+
+`Found/NCBelyi/Lemma22.lean` に帰納の組み立てを入れ、`Skeleton/NCBelyi/Theorem25.lean` に
+`sorry` **無し**の `lemma_2_2` を足した。`belyi-noncritical` は **済 2/5 → 3/5**。
+
+### ★★組み立ての形
+
+原文 p.4 の証明は 8 行である。実装は 3 段になった。
+
+| 段 | 宣言 | 中身 |
+|---|---|---|
+| 多項式 | `stepPoly a b f₀ λ` | `(x^{a+1}(x−1)^{b+1} + f₀)(λx)` |
+| 臨界点 | `crit_stepPoly` | `λx ∈ {0, 1, r}` ——`belyi_critical` そのもの |
+| 帳尻 | `lemma_2_2_shift` | `Lemma 2.1` の (a)(c)(d) を条件 (i)(ii)(iii) へ翻訳 |
+| 帰納段 | `lemma_2_2_step` | `λ` と `a, b` を決めて上の 3 つを束ねる |
+| 本体 | `lemma_2_2_aux` / `lemma_2_2` | `|S∖{0}|` についての帰納法 |
+
+### ★★★★★★★★合成される 2 つは対等でない
+
+★これが本補題の構造上の要点である。
+
+`stepPoly` は **`{0,1}` を `{0,1}` へ写さない**(`f₀` へ写す)ので `IsBelyiPoly` ではない。
+持っているのは「臨界値が `stepPoly(S)` に入る」という**相対的な**性質だけである。
+それを帰納法の仮定 `g(S₂) ⊆ {0,1}` が吸収する。
+
+★★`BelyiComp.lean` は 2026-08-17 の時点でこれを見抜いて `comp_crit_of_rel` を用意していた
+(同ファイルの「★★★自己訂正」節)。★★★**7 ブロック前に書いた受け皿が、そのまま嵌まった。**
+
+### ★★★★★★λ と (a,b) の決め方——原文が「appropriate」で畳んだところ
+
+原文は『for some appropriate positive rational number λ』としか書かない。実測すると
+
+- `λ ≝ 1/α₂`(`α₂` は `S∖{0}` の**2 番目に小さい元**)——`exists_normalizing_scale`
+- そのとき `r = α₁/α₂ ∈ (0,1)` で、`a+1 ≝ r.num`、`b+1 ≝ r.den − r.num`——`exists_num_den`
+
+この 2 つで `λ·S ⊆ {0, r, 1} ∪ (1,∞)` が**ちょうど** `Lemma 2.1` の仮定になる。
+★**`|S∖{0}| ≥ 2` が要る**のはここである——原文の『so long as |S| ≥ 4』
+(`0`, `∞` を含めて数えるので `|S∖{0,∞}| ≥ 2`)と一致した。
+
+### ★★★★★★★配管——pdftotext は [NCBelyi] のプライムを落とす
+
+`check.mjs` が 1 件 NG を出した。`0_Source` の `.txt` には
+`some β′, S′ that satisfy …` と**プライムが残っている**が、
+`check.mjs` が PDF から取り直したテキストでは `someβ,Sthatsatisfy…` と**消えている**。
+
+★★**`.txt` を見て引用を書くと照合が落ちる。**
+`Lemma21.lean` の冒頭が「`f′(x)` のプライム `′` が消える」と既に書いていた性質だが、
+`.txt` 側には残っているという**非対称**までは書いていなかった。引用は `.cache/pdf-pages.json`
+の側に合わせること。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**、`sorry` **40 件**(変化なし)
+- `Skeleton/GenEll` + `Skeleton/NCBelyi` の `sorry` は **4 件**のまま
+  ——★**今回は減らないのが正しい**。`Lemma 2.2` は新しい `sorry` を作らずに足した

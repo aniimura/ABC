@@ -30,6 +30,8 @@ const REPO = path.resolve(HERE, '..');
 const PAPERS = {
   FrdI: 'The Geometry of Frobenioids I.txt',
   FrdII: 'The Geometry of Frobenioids II.txt',
+  GenEll: 'Arithmetic Elliptic Curves in General Position.txt',
+  NCBelyi: 'Noncritical Belyi Maps.txt',
 };
 
 const args = process.argv.slice(2);

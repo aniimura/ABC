@@ -826,3 +826,48 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 
 直し方: **`lake exe cache get!`**(`lean/` の中で)。★olean を手で削除しないこと。
 ★★そもそも `cd /d/Math_ABC3/lean` してから `lake` を走らせる。`--dir` で代用しない。
+
+## 包む定義が要るインスタンスは `haveI` ではなく `letI`
+
+失敗形: `haveI : Algebra E L := (IntermediateField.inclusion h).toRingHom.toAlgebra` の後で
+`IsScalarTower.of_algebraMap_eq (fun _ => rfl)` が
+
+    (algebraMap ℚ L) q is not definitionally equal to
+    (algebraMap E L) ((algebraMap ℚ E) q)
+
+で落ちる。同じ理由で `Subtype.ext rfl` も落ちる。
+
+直し方: **`letI` にする**。`haveI` は命題としてのみ保持するので定義的な中身が消える。
+★mathlib 自身(`FieldTheory/IntermediateField/Algebraic.lean`)も `let _ :=` で置いている。
+★★中間体の次数比較は自分で塔を組まず
+`IntermediateField.finrank_le_of_le_right` / `finrank_le_of_le_left` を引く。
+
+## mathlib のモジュール名は動く——`import` は Glob で実在を確かめてから書く
+
+失敗形(2026-08-27): 記憶にある名前で `import` を書いて、
+
+    error: no such file or directory … Mathlib\Data\Complex\Module.lean
+    error: bad import 'Mathlib.Data.Complex.Module'
+
+実測で動いていたもの:
+
+| 覚えていた名前 | 実在する名前 |
+|---|---|
+| `Mathlib.FieldTheory.Adjoin` | `Mathlib.FieldTheory.IntermediateField.Adjoin.Basic` |
+| `Mathlib.Data.Complex.Module` | `Mathlib.LinearAlgebra.Complex.Module` |
+
+直し方: **Glob(`.lake/packages/mathlib/Mathlib/**/<名前>*.lean`)で実在を見てから書く**。
+★`abc3-lean` の `lean_start` は「読めた」としか言わないので、
+**`unknown namespace` が出たら import が無いことを疑う**(名前の綴り違いではない)。
+
+★★`Algebra ℚ ℂ` のインスタンスは `Mathlib.Algebra.Algebra.Rat` が要る。
+`ℂ` を import しても付いてこない——`failed to synthesize Algebra ℚ ℂ` はこれ。
+
+## REPL の `addToEnv` は「エラーが 1 つでもあれば」何も積まない
+
+失敗形: 3 つの定理をまとめて `lean_check(addToEnv: true)` に渡し、3 つめだけ落ちたので
+直して再送したら、1 つめ・2 つめも `Unknown identifier` になっていた。
+
+直し方: **落ちたら、その塊全部を作り直して送る**。
+★★塊が大きいなら、そもそもファイルに書いて `lake build` したほうが速い
+(REPL は 1 定理ずつの探りに使う)。
