@@ -53,13 +53,19 @@ import ABC3.Meta.Claim
 ★前者が「`Ō_X` は**自明な** hermitian 計量」の中身であり、
 後者が「射の条件は作用素ノルム `≤ 1` と同値」の根拠である。
 
+## ★★★★★★★★★そして `Γ(L̄) = Hom(Ō_X, L̄)` が閉じる
+
+    `IsAHom 1 L φ ↔ φ(1) ∈ Γ(L̄)`   （`isAHom_one_iff`）
+
+★層の射 `φ : 𝒪_X → L` が**算術直線束の射** `Ō_X → L̄` であるための必要十分条件は
+`|φ(1)| ≤ 1` である——これが原文の `Γ(L̄) ≝ Hom(Ō_X, L̄)` の中身である。
+
 ## ★残っている段（明示）
 
-★★**`Hom(Ō_X, L̄) ≅ Γ(L̄)` を計量込みで閉じる**段
-——`φ ↦ φ(1)` が単位球への全単射であること。
-★数学は上の 2 補題で尽きているが、`𝟙_` の切断を「加群の元」と
-「環の元」として同時に扱う配管（`s • 1 = s` の綴り）で詰まっており、
-**1 ブロックぶんの仕事として残す**（2026-08-28 実測）。
+★★`unitHomEquiv` が**`φ ↦ φ(1)` そのものである**ことの証明（`unitHomEquiv_apply`）。
+★`rfl` ではない（2026-08-28 実測）——`freeYonedaEquiv` の順方向の計算補題が
+mathlib に無く（`freeYonedaEquiv_symm_app` はある）、`topTermIso` を展開する段が要る。
+★★これは**小さい配管**であって、上の `isAHom_one_iff` が数学の中身をすでに持っている。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -248,6 +254,56 @@ noncomputable def unitHomEquiv (L : X.PresheafOfModules) :
     (𝟙_ X.PresheafOfModules ⟶ L) ≃ (L.obj (op (⊤ : X.Opens)) : Type) :=
   ((topTermIso X).symm.homCongr (Iso.refl L)).trans PresheafOfModules.freeYonedaEquiv
 
+/-- ★`Ō_X` の大域切断 `1`。 -/
+noncomputable def unitOneSec (X : Scheme.{0}) :
+    ((𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens)) : Type) :=
+  (1 : (Γ(X, (⊤ : X.Opens)) : Type))
+
+theorem smul_unitOneSec (X : Scheme.{0}) (s : (Γ(X, (⊤ : X.Opens)) : Type)) :
+    s • unitOneSec X = s := by
+  show s * (1 : (Γ(X, (⊤ : X.Opens)) : Type)) = s
+  rw [mul_one]
+
+/-- ★★★★★★★★★**`Γ(L̄) = Hom(Ō_X, L̄)`** —— 原文の定義そのもの。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★層の射 `φ : 𝒪_X → L` が**算術直線束の射** `Ō_X → L̄` であるための必要十分条件は
+`φ(1) ∈ Γ(L̄)`（すなわち `|φ(1)| ≤ 1`）である。
+
+★★機構は 2 つ:
+`Ō_X` の計量が `|f|(p) = |f(p)|` であること（`AMetric.one_norm`、とくに `|1| = 1`）と、
+ノルムが斉次であること（`AMetric.norm_smul`）。 -/
+theorem isAHom_one_iff (L : AMetric X) (φ : (1 : AMetric X).sheaf ⟶ L.sheaf) :
+    IsAHom 1 L φ ↔ (φ.app (op (⊤ : X.Opens)) (unitOneSec X)) ∈ AMetric.gamma L := by
+  have htop : ∀ p : Spec (CommRingCat.of ℂ) ⟶ X, p ⁻¹ᵁ (⊤ : X.Opens) = ⊤ := fun _ => rfl
+  constructor
+  · intro h p
+    have h1 := h (unitOneSec X) p
+    have hone : (1 : AMetric X).norm (unitOneSec X) p = 1 := by
+      rw [AMetric.one_norm (unitOneSec X) p (htop p)]
+      show ‖evalOn p ⊤ (htop p) (1 : (Γ(X, (⊤ : X.Opens)) : Type))‖ = 1
+      rw [evalOn_one, norm_one]
+    rw [hone] at h1
+    exact h1
+  · intro h s p
+    have hs1 : (s : (Γ(X, (⊤ : X.Opens)) : Type)) • unitOneSec X = s := smul_unitOneSec X s
+    have hsm : φ.app (op (⊤ : X.Opens)) s
+        = (s : (Γ(X, (⊤ : X.Opens)) : Type)) • φ.app (op (⊤ : X.Opens)) (unitOneSec X) :=
+      (congrArg (fun y => φ.app (op (⊤ : X.Opens)) y) hs1).symm.trans
+        (map_smul ((φ.app (op (⊤ : X.Opens))).hom) s (unitOneSec X))
+    have hns : L.norm ((s : (Γ(X, (⊤ : X.Opens)) : Type))
+          • φ.app (op (⊤ : X.Opens)) (unitOneSec X)) p
+        = ‖evalOn p ⊤ (htop p) (s : (Γ(X, (⊤ : X.Opens)) : Type))‖
+          * L.norm (φ.app (op (⊤ : X.Opens)) (unitOneSec X)) p :=
+      AMetric.norm_smul L s _ p (htop p)
+    have hn1 : (1 : AMetric X).norm s p
+        = ‖evalOn p ⊤ (htop p) (s : (Γ(X, (⊤ : X.Opens)) : Type))‖ :=
+      AMetric.one_norm s p (htop p)
+    rw [hsm, hns, hn1]
+    exact mul_le_of_le_one_right (norm_nonneg _) (h p)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def IsAHom.src : ABC3.Meta.Source :=
@@ -258,6 +314,11 @@ def IsAHom.src : ABC3.Meta.Source :=
 def AMetric.gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (i)(Γ(L̄)——大域切断の単位球)",
+    sectionId := "genell-def-1-1-i" }
+
+def isAHom_one_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(Γ(L̄) = Hom(Ō_X, L̄)——射であることと |φ(1)| ≤ 1 の同値)",
     sectionId := "genell-def-1-1-i" }
 
 def AMetric.one_norm.src : ABC3.Meta.Source :=
