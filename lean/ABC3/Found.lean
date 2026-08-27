@@ -381,6 +381,7 @@ import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
 import ABC3.Found.GenEll.Conductor
+import ABC3.Found.GenEll.AbsNormCongr
 import ABC3.Found.GenEll.LogDiff
 import ABC3.Found.GenEll.LogDiffValue
 import ABC3.Found.GenEll.NorthcottRat
