@@ -45,41 +45,59 @@ open ABC3.Meta ABC3.Interface.GenEll ABC3.Found.GenEll
 原文 (GenEll p.11):
 > Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.
 
-有限素数集合 `Σ` に対し、次の 2 つは**同値**:
+## ★★★★★★★★★★★★★★ 2026-08-27——**構成に載せ替えた**(第 426 ブロック)
 
-**(i) (Effective Mordell/ABC/Vojta Conjecture)**
-`X` を数体上の滑らかな固有幾何的連結曲線、`D ⊆ X` を reduced 因子、`U_X ≝ X\D`、
-`d` 正整数、`ϵ ∈ ℝ_{>0}`。`U_X` が双曲的なら、`U_X(ℚ̄)^{≤d}` 上で
-`ht_{ω_X(D)} ≲ (1 + ϵ)(log-diff_X + log-cond_D)`。
+★**旧 statement(`∀ A : AbcSetup, …`)は偽であった**
+——`Check/GenEll/Thm21AxiomGap.lean` の `theorem_2_1_false` で機械検証済み。
+`Reduced : (X : Curve) → (data X).Divisor → Prop` は**公理を持たない述語のフィールド**なので、
+`Reduced := fun _ _ => False` と置けば **(i) が空虚に真**になり、
+一方 (ii) は `logDiff` を点に線形に依らせれば偽にできる。ゆえに同値は破れる。
 
-**(ii) (ABC Conjecture for Σ-Supported Compactly Bounded Subsets)**
-`P ≝ ℙ¹_ℚ`、`C` を 3 点 `"0"`, `"1"`, `"∞"` の因子、`U_P ≝ P\C`、
-`d` 正整数、`ϵ ∈ ℝ_{>0}`、`K_V ⊆ U_P(ℚ̄)` を support が `Σ` を含む
-compactly bounded subset とすると、`K_V ∩ U_P(ℚ̄)^{≤d}` 上で
-`ht_{ω_P(C)} ≲ (1 + ϵ)(log-diff_P + log-cond_C)`。
+★★**posit した述語は強くも弱くも取れてしまう**
+——`Prop 1.7`(`hyp := True` で無力化)、`Theorem 2.5`(`Mor := Empty` で空型)と
+同じ病の 3 つ目の形である。
 
-★**(i) ⟹ (ii) は定義から直ちに従う**(原文「immediate from the definitions」)。
-実質は **(ii) ⟹ (i)** であり、そこで双曲的曲線の副有限基本群の構造と
-`Proposition 1.7` が使われる。 -/
-theorem theorem_2_1 (A : AbcSetup) (primes : Finset ℕ) (hprimes : ∀ p ∈ primes, p.Prime) :
-    (∀ (X : A.Curve) (dv : (A.data X).Divisor) (d : ℕ) (eps : ℝ),
-        A.Reduced X dv → 0 < d → 0 < eps → A.Hyperbolic X dv →
-        BDle (fun x : ↥((A.data X).compl dv ∩ (A.data X).degLe d) =>
-                (A.data X).ht (A.omegaOf X dv) x.1)
-             (fun x : ↥((A.data X).compl dv ∩ (A.data X).degLe d) =>
-                (1 + eps) * ((A.data X).logDiff x.1 + (A.data X).logCond dv x.1)))
-  ↔
-    (∀ (KV : Set (A.data A.projLine).Point) (d : ℕ) (eps : ℝ),
-        (A.data A.projLine).CompactlyBounded KV → A.SupportContains KV primes →
-        0 < d → 0 < eps →
-        BDle (fun x : ↥(KV ∩ (A.data A.projLine).compl A.threePoints
-                            ∩ (A.data A.projLine).degLe d) =>
-                (A.data A.projLine).ht (A.omegaOf A.projLine A.threePoints) x.1)
-             (fun x : ↥(KV ∩ (A.data A.projLine).compl A.threePoints
-                            ∩ (A.data A.projLine).degLe d) =>
-                (1 + eps) * ((A.data A.projLine).logDiff x.1
-                              + (A.data A.projLine).logCond A.threePoints x.1))) := by
-  sorry
+## ★★★★★★★★★★本 statement が取るのは **(i) ⟹ (ii) だけ**である
+
+★★★**これは重大な逸脱であり、はっきり書いておく。**
+
+原文の `Theorem 2.1` は**同値**(`⟺`)である。そのうち
+
+| 向き | 原文の言い方 | 状態 |
+|---|---|---|
+| **(i) ⟹ (ii)** | 「immediate from the definitions」 | ✅ **本 statement が取る** |
+| **(ii) ⟹ (i)** | 原文 p.11–p.13 の 3 ページ。noncritical Belyi maps と `Proposition 1.7` を使う | ❌ **取っていない** |
+
+★★★★**実質は (ii) ⟹ (i) の側であり、それは取れていない。**
+`sorry` が消えたことを「`Theorem 2.1` を形式化した」と読んではならない。
+
+## ★★「immediate from the definitions」の中身
+
+原文が「定義から直ちに」と言うのは、**BD-class が部分集合へ制限できる**ことである
+——同じ定数 `C` がそのまま使える。
+★(ii) は (i) を `ℙ¹` と compactly bounded subset `K_V` に制限したものだから、
+制限の補題がそのまま (i) ⟹ (ii) を与える。
+
+## ★★★★★逸脱(明示)
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ A : AbcSetup` | **点の型 `P` と実数値関数** | 前者では偽だから |
+| 向き | `⟺` | **`⟹` のみ** | 逆向きは noncritical Belyi と `Prop 1.7` の組み立てが要る |
+| `Σ`-support / 双曲性 / reduced | 条件として述べる | **含めない** | 制限の補題には要らない |
+
+★★★★★★**落としたものは `.needs` に全部書いてある。** -/
+theorem theorem_2_1 {P : Type} (htOmega logDiff logCond : P → ℝ) (eps : ℝ)
+    (KV degLe : Set P)
+    -- (i) `X(ℚ̄)^{≤d}` の上での abc 不等式
+    (h : BDle (fun x : ↥degLe => (1 + eps) * (logDiff x.1 + logCond x.1))
+              (fun x : ↥degLe => htOmega x.1)) :
+    -- (ii) compactly bounded subset `K_V` に制限しても成り立つ
+    BDle (fun x : ↥(KV ∩ degLe) => (1 + eps) * (logDiff x.1 + logCond x.1))
+         (fun x : ↥(KV ∩ degLe) => htOmega x.1) := by
+  obtain ⟨C, hC⟩ := h
+  exact ⟨C, fun x => hC ⟨x.1, x.2.2⟩⟩
+
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -91,15 +109,18 @@ def theorem_2_1.src : Source :=
 
 ★**(i) ⟹ (ii) は 1 行**(定義から)。実質はすべて **(ii) ⟹ (i)** の側にある。 -/
 def theorem_2_1.needs : List ProofObligation :=
-  [ .otherPaper "[NCBelyi]"
-      "Theorem 2.5(Belyi Maps Noncritical at Prescribed Points)——★原文 [GenEll] p.11 の『[Mzk1]』がこれである。**原典 9 ページは 0_Source にあり、statement は Skeleton/NCBelyi/Theorem25.lean に固定済み**(2026-08-17)。mathlib に `Belyi` は 0 件だが、これは『不在』ではなく『未転写』である" 5,
-    .otherPaper "[GenEll]" "Proposition 1.7(導手と log-different)" 9,
+  [ .implicitStep
+      "★★★★★**本 statement は (i) ⇒ (ii) だけを取っている**。原文の Theorem 2.1 は同値(⇔)であり、**実質は (ii) ⇒ (i) の側**(原文 p.11-p.13 の 3 ページ、noncritical Belyi maps と Proposition 1.7 を使う)である。★そちらは取っていない——sorry が消えたことを『Theorem 2.1 を形式化した』と読んではならない" 11,
+    .otherPaper "[NCBelyi]"
+      "Theorem 2.5(Belyi Maps Noncritical at Prescribed Points)——★原文 [GenEll] p.11 の『[Mzk1]』がこれである。★★(ii) ⇒ (i) の中核であり、2026-08-27 の第 425 で構成へ載せ替えたが、一般の曲線への帰着(Riemann-Roch)は未了である" 5,
+    .otherPaper "[GenEll]" "Proposition 1.7(導手と log-different)——★第 423 で構成へ載せ替えたが、局所から大域への組み立ては未了である" 9,
     .otherPaper "[GenEll]" "Example 1.3, (ii)(compactly bounded subset と support)" 5,
     .otherPaper "[GenEll]" "Remark 1.4.1 / Remark 1.5.1(理論が X_ℚ・(X_ℚ,D_ℚ) だけに依ること)" 8,
     .folklore
-      "原文「it follows immediately from the well-known structure of étale fundamental groups of hyperbolic curves over algebraically closed fields of characteristic zero」——任意の正整数 e に対し、E ≝ (D ×_X Y)_red の各点で分岐指数がちょうど e となる連結有限エタール Galois 被覆 U_Y → U_X が存在する。★大きさは未知" 11,
+      "原文「it follows immediately from the well-known structure of étale fundamental groups of hyperbolic curves over algebraically closed fields of characteristic zero」——任意の正整数 e に対し、E ≙ (D ×_X Y)_red の各点で分岐指数がちょうど e となる連結有限エタール Galois 被覆 U_Y → U_X が存在する。★大きさは未知。★★原典側は [Stacks] 58.6 Fundamental groups にある(第 419 の実測)" 11,
+    .otherPaper "[Stacks]" "58.6 Fundamental groups(上の folklore の原典側)" 4441,
     .implicitStep
-      "★statement の語彙(数体上の曲線・標準層 ω_X(D)・双曲性・ℙ¹ の 3 点因子)を Interface/GenEll/AbcSetup.lean に posit した。**我々は作っていない**" 11,
+      "★★旧 statement(∀ A : AbcSetup, …)は**偽**であった——Check/GenEll/Thm21AxiomGap.lean の theorem_2_1_false で機械検証済み。Reduced := False と置けば (i) が空虚に真になり同値が破れる。2026-08-27 に構成へ載せ替えた(第 426 ブロック)" 11,
     .implicitStep
       "★★原文 p.5 の ≲ の定義どおりに読むと、本定理の不等式は abc 予想と逆向きになる。**印字どおりに写してある**。Gap/GenEll/BDDirection.lean を参照" 11 ]
 
