@@ -400,6 +400,8 @@ import ABC3.Found.GenEll.OpenExtend
 import ABC3.Found.GenEll.GlobalExtend
 import ABC3.Found.GenEll.PointCorrespondence
 import ABC3.Found.GenEll.Remark151
+import ABC3.Found.GenEll.VerticalTwist
+import ABC3.Found.GenEll.Remark141
 import ABC3.Found.GenEll.BcDiagramRaw
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
