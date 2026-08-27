@@ -54,7 +54,27 @@ import ABC3.Meta.Claim
 4. ★★★★あとは `chartH_triv_indep` / `chartH_shrink` / `chartH_indep` と
    同じ 3 段を書けばよい。
 
-★★★★★見積もり **2〜4 ブロック**（`LocalMetric.tensor` と同規模）。
+## ★★★★★★★★★段 3 の**道具は特定できた**（2026-08-28）
+
+`transUnit F V e e' = unitEnd V (e.symm ≪≫ e').hom` は **`rfl`** である
+（本ファイルの `transUnit_eq_unitEnd`）。★`unitEnd` は**環準同型**
+`End(𝟙_|_V) →+* Γ(X,V)` で、在庫に `unitMul_unitEnd` / `unitEnd_unitMul` がある。
+
+★★したがって段 3 は次に翻訳される:
+
+> `pullTrivOfBase` による共役 `Ψ ↦ B⁻¹ ≫ (f|)^*Ψ ≫ B` が
+> `End(𝟙_|_W) → End(𝟙_|_{V'})` の上で**環準同型 `ρ` を実現する**こと。
+
+★★★そしてその計算の道具も在庫にある:
+
+| 在庫 | 役割 |
+|---|---|
+| `unitMul_unitEnd` | `Ψ = unitMul W (unitEnd W Ψ)` ——`Ψ` を単元倍に還元 |
+| `isoHomUnitGenOn` | ★**制限した site でも `unit` は生成元を生成元へ送る** |
+| `pullbackOnCorepresentableBy` | `(f|)^*` の射への作用を `freeYonedaEquiv` で計算する |
+| `unitMul_app_apply` / `unitMul_res` | `unitMul` の値と制限 |
+
+★★★★見積もり **2〜4 ブロック**（`LocalMetric.tensor` と同規模）。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -86,12 +106,30 @@ noncomputable def pullTrivOfBase {X Y : Scheme.{0}} (f : X ⟶ Y) (L : Y.Preshea
     ≪≫ (Iso.refl _ : (restrictOnFunctor hV'W).obj
           (𝟙_ (PresheafModulesOn X ((Opens.map f.base).obj W))) ≅ 𝟙_ (PresheafModulesOn X V'))
 
+/-- ★★★★★★**遷移単元は `unitEnd`（単位対象の自己射環）そのものである**。
+
+★`transUnit F V e e' = unitEnd V (e.symm ≪≫ e').hom` は **`rfl`**（2026-08-28 実測）。
+
+★★これが効く理由: `unitEnd` は**環準同型** `End(𝟙_|_V) →+* Γ(X,V)` であり、
+在庫に `unitMul_unitEnd`（`φ = unitMul (unitEnd φ)`）と
+`unitEnd_unitMul`（`unitEnd (unitMul c) = c`）がある。
+★★★したがって「遷移単元が輸送と可換」は
+**「輸送が `End(𝟙_)` の上で環準同型 `ρ` を実現する」**に翻訳される。 -/
+theorem transUnit_eq_unitEnd {X : Scheme.{0}} (F : X.PresheafOfModules) (V : X.Opens)
+    (e e' : (restrictPresheafFunctor X V).obj F ≅ 𝟙_ (PresheafModulesOn X V)) :
+    transUnit F V e e' = unitEnd V (e.symm ≪≫ e').hom := rfl
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def pullTrivOfBase.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (ii)(引き戻した層の自明化——輸送を名前にしたもの)",
     sectionId := "genell-def-1-1-ii" }
+
+def transUnit_eq_unitEnd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(遷移単元は単位対象の自己射環 unitEnd そのものであること)",
+    sectionId := "genell-def-1-1-i" }
 
 def pullTrivOfBase.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "bcIso(Beck–Chevalley)"
