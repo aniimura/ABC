@@ -703,6 +703,30 @@ theorem span_smul_le_span (R M : Type) [CommRing R] [AddCommGroup M] [Module R M
   subst hx
   exact Submodule.smul_mem _ u (Submodule.mem_span_singleton_self s)
 
+/-! ## ★★★★★★★★★位数の乗法性 —— 段 D 本体の第五段 -/
+
+/-- ★★★★★★★★★**短完全列から位数が掛け算になる**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+    `#(M/S) = #(M/T) · #(T の M/S での像)`   (`S ≤ T`)
+
+★機構は mathlib の 2 つを繋ぐだけ:
+`Submodule.quotientQuotientEquivQuotient`(三つ組の商)と
+`AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup`(位数の乗法性)。
+
+★★`S := span{u·s}`、`T := span{s}` とすれば
+`#(Γ/span{us}) = #(Γ/span{s}) · #(R/(u))` になり、
+`degFin(u·s) = degFin(s) + log N(u)` が出る——これが段 D の心臓である。 -/
+theorem card_quotient_mul_card_map (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    (S T : Submodule R M) (h : S ≤ T) :
+    Nat.card (M ⧸ S) = Nat.card (M ⧸ T) * Nat.card (Submodule.map S.mkQ T) := by
+  rw [AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup
+    (Submodule.map S.mkQ T).toAddSubgroup]
+  congr 1
+  exact Nat.card_congr (Submodule.quotientQuotientEquivQuotient S T h).toEquiv
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -739,6 +763,24 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def card_quotient_mul_card_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(短完全列から位数が掛け算になること——段 D の心臓)",
+    sectionId := "genell-def-1-1-ii" }
+
+def card_quotient_mul_card_map.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Submodule.quotientQuotientEquivQuotient(三つ組の商)"
+      (.inMathlib "Submodule.quotientQuotientEquivQuotient") 4,
+    .citation "[mathlib]" "AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup"
+      (.inMathlib "AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup") 4,
+    .implicitStep
+      ("★★段 D 本体の残り 1 段: " ++
+       "map (span{u·s}).mkQ (span{s}) が R/(u) と同型であること。" ++
+       "★第二同型定理で map mkQ (span{s}) ≅ span{s}/(span{us} ⊓ span{s}) " ++
+       "= span{s}/span{us} で、§9-769/770 で R/(u) と繋がる。" ++
+       "★★その後は degFin(u·s) = degFin(s) + log N(u) とし、" ++
+       "アルキメデス部分と合わせて積公式(deg_principalADiv_eq_zero、在庫)") 4 ]
 
 def span_smul_le_span.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
