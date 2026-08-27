@@ -230,18 +230,19 @@
      {
       "stage": "A2",
       "claim": "monoidal 構造の**全体**（結合子・単位子・五角形・三角形）",
-      "status": "open",
-      "why": "★これが mathlib への PR 規模の仕事である。 ★★Localization.Monoidal / Monoidal.Reflective / Adjunction.monoidal は**いずれも無い**（2026-08-27 #check で実測）。 ★★★**段 D（ample の定義）には要らない**——A1 だけで足りる。要るのは段 B（Pic(X)）と L^{⊗(m+n)} ≅ L^{⊗m} ⊗ L^{⊗n} である。"
+      "status": "not-a-blocker",
+      "why": "★★★★**2026-08-27 再測定：塡がりではない。** プロジェクトは前層の水準（X.PresheafOfModules）で作業しており、そこでは mathlib の monoidal 構造が**完成している**。 ★層の水準の monoidal 構造は確かに PR 規模だが、**本プロジェクトはそれを使わない**。"
      },
      {
       "stage": "B",
       "claim": "可逆層（階数 1 の局所自由層）と Pic(X)",
-      "status": "open",
-      "why": "★IsLocallyFree はあるので、局所生成元の字母を 1 点に制限すれば定義できる。 ★★Pic には段 A（テンソル積）が要る。 ★★★環の水準の Module.Invertible / CommRing.Pic は**すでにある**ので、アフィンでの比較は取れる。",
+      "status": "closed",
+      "why": "★★★**2026-08-27 の在庫確認で既にあると判った**。 IsLocallyTrivial が可逆層の定義であり、IsLocallyTrivial.tensor が Pic の乗法が閉じていることである。 ★さらに有限の基本開集合で自明化できる（exists_finite_basicOpen_trivial）。",
       "sources": [
        "[Stacks] 01CR Invertible modules",
        "[Stacks] 0B8L The Picard group of a scheme"
-      ]
+      ],
+      "where": "Found/Arakelov/PicLocalTrivial.lean の **IsLocallyTrivial** / **IsLocallyTrivial.tensor**、Found/Arakelov/APicWitness.lean の **aPicGroup**"
      },
      {
       "stage": "C1",
@@ -299,9 +300,10 @@
       ]
      }
     ],
-    "done": "3/9",
-    "remaining": "★★**残るのは A2・B・C2・D・E・F2 の 6 段**である。 ★次の葉は段 D（ample の定義）の核 **X_s（切断の非消失軌跡）**である。 ★★mathlib には加群層の**茂**が無いので、X_s は **SheafOfModules.LocalGeneratorsData（局所自明化）** と **Scheme.basicOpen** で作るのが短い（局所自明化ごとに切断を関数と見て basicOpen を取り、合併する）。 ★★★消費側（northcott_of_projModel）が要るのは**同次座標**であって ℙⁿ そのものではない。"
-   }
+    "done": "5/9",
+    "remaining": "★★**残るのは C2・D・E・F2 の 4 段**である。 ★次の葉は段 D の核 **X_s（切断の非消失軌跡）**。 ★★道具はすでにある——IsLocallyTrivial が与える自明化 e : M|_V ≅ 𝟙 で切断を関数 f_V ∈ Γ(V, 𝒪) と見、Scheme.basicOpen f_V を取って合併する。 ★★★自明化の取り方に依らないことは「別の自明化は単元倍」から出る。"
+   },
+   "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },
   "arc-metric-not-attached-to-bundle": {
    "what": "★これは mathlib の欠落ではなく**我々の設計の穴**である(2026-08-27 に発見、Check/GenEll/Def12Degenerate.lean で機械検証)。arcCM X = C(X^arc, ℝ) は点上の関数であって L^arc 上のエルミート計量ではないので、束と計量の対応が失われている。その結果 deg_F が Pic 類を見ず、ht も見ない。",
