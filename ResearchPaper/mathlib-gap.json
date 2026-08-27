@@ -318,7 +318,7 @@
     "[GenEll] Lemma 3.2, (i)(ii)をスキームの水準で閉じるため"
    ],
    "mathlibStatus": {
-    "verdict": "partial-minor",
+    "verdict": "closed-in-ABC3",
     "searched": "★★★**2026-08-27 に再測定して訂正した。** mathlib に Tate 曲線は無いが、**ABC3 側には選ばれた同型がすでにある**——前回の記録は uniformization_of_split だけを見ており、tatePhiAddEquivAll（**Nonempty ではなく選ばれた ≃+**）を見ていなかった。",
     "partial": [
      "★★★ABC3: Found/GaloisRep/TateDoubling.lean の **tatePhiAddEquivAll**（Additive (Kˣ/q^ℤ) ≃+ E_q(K)、**選ばれた同型**。倒化の仮定なし）",
@@ -326,7 +326,7 @@
      "★★ABC3: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（TateCurveData の非空虚性、G6）",
      "★★★ABC3: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean——**消費側（K̄ˣ/q^ℤ の上での Lemma 3.2 (i)(ii)）は閉じている**"
     ],
-    "absentPart": "★**2026-08-27 にほぼ埋まった**。 残るのは M_l(E) を (Kˣ/q^ℤ)[l] と同定する段だけである。"
+    "absentPart": "★**2026-08-27 に埋まった。** ★★ただし Lemma 3.2 を**項目として**閉じるには (ii)（E/μ_l を**スキームとして**作る段、有限平坦群スキームによる商）が別に要る——それは mathlib にも ABC3 にも無い。"
    },
    "primarySource": {
     "measuredAt": "2026-08-27",
@@ -406,16 +406,16 @@
      },
      {
       "stage": "5",
-      "claim": "l-捩れへ落として完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0",
-      "status": "consumer-side-closed",
-      "where": "Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean",
-      "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
+      "claim": "M_l(E) を (Kˣ/q^ℤ)[l] と同定し、Lemma 3.2, (i) を出す",
+      "status": "closed",
+      "where": "Found/GenEll/Lemma32Uniformized.lean の exists_lift_pow / **lemma_3_2_i_of_uniformization**",
+      "why": "★同変な一意化 Φ を**入力として受ける形**で、M_l(E) の G_K-安定な直線から lemma_3_2_i の仮説を作る。 ★★機構は Φ が**同変かつ単射**であることだけ: (1) c ≙ Φ⁻¹(P) は l-捩れ、(2) x へ持ち上げて x^l = Q^k、(3) 安定性に Φ⁻¹ を当てると σx = x^{c′}·Q^n。 ★★★これで Lemma32StableLine.lean の逸脱「G_K 同変な一意化は含まない」が**消えた**。"
      }
     ],
-    "done": "9/10",
-    "remaining": "★★残るは段 5 の消費側への紐付けだけである——**M_l(E) を (Kˣ/q^ℤ)[l] と同定する**（有限拡大 L = K(E[l]) の選択）。 ★Lemma32StableLine.lean は Kˣ/q^ℤ の上で既に閉じている。"
+    "done": "10/10",
+    "remaining": "★★★**なし。** 到達点は Found/GenEll/Lemma32Uniformized.lean の lemma_3_2_i_of_uniformization： 同変な一意化を入力として Lemma 3.2, (i) が出る。 ★その一意化は Found/GaloisRep/ の 8 段で構成済みである。"
    },
-   "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門。 ★★**2026-08-27 に 9/10 まで詰まった**——同変性は「新しい数学」ではなく**帳簿**であった。"
+   "impact": "★★★★**2026-08-27 に閉じた（10/10）。** ★朝の時点では absent・未分割であった。 ★★§3 の 5 項目に残るのはこの塡がりではなく、**Lemma 3.2, (ii) の E/μ_l をスキームとして作る段**と faltings-height-vs-degree-at-infinity である。"
   },
   "faltings-height-vs-degree-at-infinity": {
    "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",
