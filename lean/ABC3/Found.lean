@@ -472,6 +472,7 @@ import ABC3.Found.Arakelov.AMetricPic
 import ABC3.Found.Arakelov.AMetricNorm
 import ABC3.Found.Arakelov.AMetricHom
 import ABC3.Found.Arakelov.PullbackTriv
+import ABC3.Found.Arakelov.PullbackUnitEnd
 import ABC3.Found.Arakelov.ArchDeg
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
