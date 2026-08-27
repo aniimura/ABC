@@ -358,8 +358,9 @@
      {
       "stage": "2b",
       "claim": "tateAOf / tateWOf の自然性（tateAOf_spec 経由）",
-      "status": "open",
-      "why": "★tateAOf_spec（algebraMap R K (tateAOf S c) = normRep …）と 段 2a から出るはずである。 ★★algebraMap R K の単射性と、σ(R_L) ⊆ R_{L′} が要る。"
+      "status": "closed",
+      "why": "★**.choose で定義されたものでも、特徴づけがあれば自然性は出る**。 tateAOf_spec（algebraMap R K (tateAOf S c) = normRep …）と 段 2a、それに TateSetup の hinj（単射性）を繋ぐだけ。 ★★tateWOf は tateAOf · tateWOf = q から**消去**で出る。 ★★★σR S.q = S.q は**仮説ではなく導出される**。",
+      "where": "Found/GaloisRep/TatePhiNatural.lean の tateAOf_map / tateWOf_map"
      },
      {
       "stage": "2c",
@@ -387,8 +388,8 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "2/7",
-    "remaining": "★★次の葉は**段 2b**（tateAOf の自然性）であり、段 2a と tateAOf_spec を繋ぐだけである。 ★本体は段 2c（級数と σ の交換、σ の連続性）である。"
+    "done": "3/7",
+    "remaining": "★★残るのは**段 2c（tatePtPair の自然性）**が本体であり、それは級数と σ を交換させる段（σ の連続性）である。 ★その先の段 3（有限拡大）・段 4（帰納極限）は形式的な組み立てである。"
    },
    "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },
