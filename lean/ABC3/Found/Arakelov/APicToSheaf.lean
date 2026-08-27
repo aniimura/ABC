@@ -377,6 +377,37 @@ theorem finite_of_finite_isTorsion_int (M : Type) [AddCommGroup M] [Module.Finit
     Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
   exact Finite.of_equiv _ eq.symm.toEquiv
 
+/-! ## ★★★★★★★共通の消滅元 -/
+
+/-- ★★★★★★★**有限生成な捻れ加群には共通の消滅元がある**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★実測(2026-08-28): mathlib に **∃ r ≠ 0, r • M = 0** の直接の補題は無い
+(`exact?` 失敗)。生成元の有限集合の**積**で作る。
+
+★★これが台帳 `arakelov-degF-finite-places` の段 B の**ルート 2**の鍵である
+——共通の消滅元 `r` が取れれば `M` は `R/(r)`-加群になり、
+`R/(r)` が有限なら `Module.finite_iff_finite` で `M` も有限になる。 -/
+theorem exists_common_annihilator (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.Finite R M] (h : ∀ m : M, ∃ r ∈ nonZeroDivisors R, r • m = 0) :
+    ∃ r ∈ nonZeroDivisors R, ∀ m : M, r • m = 0 := by
+  classical
+  obtain ⟨S, hS⟩ := (Module.finite_def.mp inferInstance : (⊤ : Submodule R M).FG)
+  choose f hf hf0 using h
+  refine ⟨∏ s ∈ S, f s, Submonoid.prod_mem _ (fun s _ => hf s), ?_⟩
+  intro m
+  have hker : (Submodule.span R (S : Set M)) ≤
+      LinearMap.ker ((∏ s ∈ S, f s) • LinearMap.id (R := R) (M := M)) := by
+    rw [Submodule.span_le]
+    intro x hx
+    simp only [SetLike.mem_coe, LinearMap.mem_ker, LinearMap.smul_apply, LinearMap.id_apply]
+    rw [← Finset.prod_erase_mul S f (Finset.mem_coe.mp hx), mul_smul, hf0 x, smul_zero]
+  rw [hS] at hker
+  have hm := hker (Submodule.mem_top : m ∈ (⊤ : Submodule R M))
+  simpa using hm
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -413,6 +444,26 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def exists_common_annihilator.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(有限生成な捻れ加群の共通の消滅元——段 B のルート 2)",
+    sectionId := "genell-def-1-1-ii" }
+
+def exists_common_annihilator.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Module.finite_def / Finset.prod_erase_mul / Submonoid.prod_mem"
+      (.inMathlib "Module.finite_def") 4,
+    .implicitStep
+      ("★実測(2026-08-28): mathlib に ∃ r ≠ 0, r • M = 0 の直接の補題は無い" ++
+       "(exact? 失敗)。生成元の有限集合の積で作る") 4,
+    .implicitStep
+      ("★★段 B の残り(2026-08-28 実測): " ++
+       "(1) N = Γ(L)/(O_F·s) に本補題を適用して r ≠ 0 を得る、" ++
+       "(2) Module.IsTorsionBySet.module で N を O_F/(r)-加群にする、" ++
+       "(3) Finite (O_F/(r)) ——**Submodule.finiteQuotientOfFreeOfRankEq** " ++
+       "(LinearAlgebra/FreeModule/Finite/Quotient.lean:96)で出るが " ++
+       "finrank Z の一致が要る、" ++
+       "(4) Module.finite_iff_finite で結論") 4 ]
 
 def finite_of_finite_isTorsion_int.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
