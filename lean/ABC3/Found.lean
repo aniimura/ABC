@@ -402,7 +402,6 @@ import ABC3.Found.GenEll.PointCorrespondence
 import ABC3.Found.GenEll.Remark151
 import ABC3.Found.GenEll.VerticalTwist
 import ABC3.Found.GenEll.VerticalBound
-import ABC3.Found.GenEll.IdealComapAffine
 import ABC3.Found.GenEll.IdealComparable
 import ABC3.Found.GenEll.Remark141
 import ABC3.Found.GenEll.BcDiagramRaw

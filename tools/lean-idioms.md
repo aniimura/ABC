@@ -1160,3 +1160,32 @@ have hJ : J ≠ 0 := fun hz => hI (le_bot_iff.mp (le_trans h hz.le))   -- ○
 ★`pullback` は `CategoryTheory.Limits` にある。ファイル先頭の `open` に
 `Limits` を入れること——**型に `pullback` が出なくても、
 `bcObj` のような `abbrev` を展開した先で必要になる**。
+
+---
+
+## 在庫確認は **新しい名前すべて**について引く
+
+2026-08-27、`Found/GenEll/ComapMul.lean` を**二度書き**した。
+
+平行セッションが 2026-08-17 に既に取っていた
+`ideal_comap_eq_map_of_isAffine`（`ComapAffine.lean`）と
+`comap_mul`（`ComapMul.lean`、**一般の射**）を知らずに、
+`pullbackSpecIso` 経由で同じものを書き直し、
+あまつさえ `Write` で相手のファイルを上書きした（`git checkout --` で復元）。
+
+★原因は**在庫確認の部分実施**である。
+新しい補題名を 5 つ確認したところで満足し、
+後から足した `comap_mul_of_isAffine` / `ideal_comap_of_isAffine` を引かなかった。
+
+★★手順（CLAUDE.md の「在庫」）:
+
+```bash
+node tools/decl-index.mjs                     # .cache/decl-index.txt を作る
+for n in <新しい名前を全部>; do grep -c "\.$n\b" .cache/decl-index.txt; done
+```
+
+★★★**ファイル名でも引くこと**。`ComapMul.lean` が既にあることは
+`ls lean/ABC3/Found/GenEll/ | grep -i comap` で 1 秒で分かった。
+
+★★★★`Write` が「updated」と言ったら**既存ファイルである**。
+「created」でなければ手を止めて `git log -- <path>` を見ること。
