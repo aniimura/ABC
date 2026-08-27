@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.GenEll.DivisorDescent
 import ABC3.Found.GenEll.CartierPullback
+import ABC3.Found.GenEll.BDClass
 
 /-!
 # [GenEll] Remark 1.5.1 —— **`Σ` の外での導手の一致**（`Found`）
@@ -197,11 +198,40 @@ theorem logCond_eq_of_square {Z Z' X X' : Scheme.{0}}
       = logCond F iZ'.ker (xF ≫ φ ≫ pullback.snd (overRatTowerDiagram.obj n).hom f') :=
   logCond_eq_of_comap_eq F _ _ _ _ φ (comap_eq_of_square f f' iZ iZ' φ ψ hsq) xF
 
+/-- ★★★★★★★★★★**[GenEll] Remark 1.5.1 —— 段 `n` の点の上では BD-同値**。
+
+原文 (GenEll p.9):
+> immediately that the BD-class of log-condD on UX (Q) depends only on the pair
+
+★★**定数差すら出ない**（`C = 0`）——段 `n` の上では因子そのものが一致するからである。
+★原文が `≈`（BD-同値）で済ませているのは、`X` の点全体を見ると
+`Σ` の上の寄与が残るからであり（段 4、`LogCondSigma.lean`）、
+**段 `n` の点に限ればその寄与も消える**。 -/
+theorem remark_1_5_1_bdeq_of_square {Z Z' X X' : Scheme.{0}}
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ))
+    (iZ : Z ⟶ X) (iZ' : Z' ⟶ X') [IsClosedImmersion iZ] [IsClosedImmersion iZ']
+    {n : ℕᵒᵖ}
+    (φ : bcObj f n ⟶ bcObj f' n) (ψ : bcObj (iZ ≫ f) n ⟶ bcObj (iZ' ≫ f') n)
+    [IsIso φ] [IsIso ψ]
+    (hsq : ψ ≫ bcBC (iZ' ≫ f') f' iZ' n = bcBC (iZ ≫ f) f iZ n ≫ φ) :
+    BDeq (fun xF : specRingOfIntegers F ⟶ bcObj f n =>
+            logCond F iZ.ker (xF ≫ pullback.snd (overRatTowerDiagram.obj n).hom f))
+         (fun xF => logCond F iZ'.ker
+            (xF ≫ φ ≫ pullback.snd (overRatTowerDiagram.obj n).hom f')) :=
+  ⟨0, fun xF => by
+    dsimp only
+    rw [logCond_eq_of_square F f f' iZ iZ' φ ψ hsq xF, sub_self, abs_zero]⟩
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` はまだ置かない。** 残っているのは
 「`X` の点のうち `Σ` の外の素点でだけ `X_n` の点になれる」という**橋**である
 ——本ファイルは `X_n` の点について述べており、原文は `X` の点について述べている。 -/
+
+def remark_1_5_1_bdeq_of_square.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 9,
+    item := "Remark 1.5.1(段 n の点の上で log-cond が BD-同値。X の点への橋は含まない)",
+    sectionId := "genell-rem-1-5-1" }
 
 def pullbackIdeal_target.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
