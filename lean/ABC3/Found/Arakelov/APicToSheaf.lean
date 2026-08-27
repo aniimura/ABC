@@ -252,6 +252,34 @@ theorem projective_gamma (R : CommRingCat.{0}) (L : AInv (Spec R)) :
   haveI := invertible_gamma_toInvSheaf R L
   infer_instance
 
+/-! ## ★★★★★★★段 B の核へ —— 分数体上で rank 1 -/
+
+open scoped TensorProduct in
+/-- ★★★★★★★**分数体に上げると rank 1 になる**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★★★実測(2026-08-28)で道が開けた——mathlib の
+`Module.Invertible.finrank_eq_one` は `[Free R M]` を前提とするので
+Dedekind 域上では直接使えないが、
+
+  ・`instance : Module.Invertible A (A ⊗[R] M)`(環を変える底変換)と
+  ・体上の加群は常に free
+
+がどちらも**インスタンスで動く**ので、分数体へ上げれば 1 行で出る。
+
+★★★★これが段 B(商の有限性)の鍵である
+——rank 1 なので `s ≠ 0` は分数体上で全体を張り、
+商 `Γ(L)/(R·s)` が捻れになる。 -/
+theorem finrank_fractionRing_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R)) :
+    Module.finrank (FractionRing (R : Type))
+        (FractionRing (R : Type) ⊗[(R : Type)]
+          (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)) = 1 := by
+  haveI := invertible_gamma_toInvSheaf R L
+  exact Module.Invertible.finrank_eq_one _ _
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -288,6 +316,27 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def finrank_fractionRing_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(Γ(L) は分数体上で rank 1——段 B の鍵)",
+    sectionId := "genell-def-1-1-ii" }
+
+def finrank_fractionRing_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Module.Invertible の環を変える底変換(instance)"
+      (.inMathlib "Module.Invertible") 4,
+    .citation "[mathlib]" "Module.Invertible.finrank_eq_one([Free R M] 前提)"
+      (.inMathlib "Module.Invertible.finrank_eq_one") 4,
+    .implicitStep
+      ("★実測(2026-08-28): finrank_eq_one は [Free R M] を前提とするので " ++
+       "Dedekind 域上では直接使えないが、環を変える底変換が " ++
+       "instance であり、体上の加群は常に free なので、" ++
+       "分数体へ上げれば 1 行で出る") 4,
+    .implicitStep
+      ("★★残るのは 2 段: (1) Γ(L) が torsion-free" ++
+       "(Module.Flat は instance で出るが NoZeroSMulDivisors への橋は " ++
+       "mathlib に instance としては無い——実測 2026-08-28)、" ++
+       "(2) 有限生成＋捻れの Z-加群は有限") 4 ]
 
 def finite_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
