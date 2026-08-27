@@ -267,9 +267,14 @@
      },
      {
       "stage": "C2c",
-      "claim": "O(1)（twisting sheaf）そのもの",
-      "status": "open",
-      "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28 の測定：因子表示なら O(1) は要らないかもしれない**。 本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★very ample は「**n·D が閉埋め込みによる超平面の引き戻しである**」と因子の言葉だけで述べられ、高さの比較も ht_{n·D}(x) = ht_{超平面}(i(x)) + O(1) になる。 ★★★ただし超平面因子を IdealSheafData として作る段が別に要る（mathlib に Proj の斉次イデアルの定める閉部分スキームは無い、本日実測）。"
+      "claim": "O(1)（twisting sheaf）——★因子表示では**超平面因子**",
+      "status": "partial",
+      "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28：因子表示なら O(1) の層は要らない**。本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★★★★★**超平面は本日入った**——hyperplaneι : Proj 𝒜(Fin N) ⟶ Proj 𝒜(Fin (N+1))（x₀ ↦ 0、x_{j+1} ↦ y_j の次数付き環準同型を mathlib の Proj.map に渡す）と、そのイデアル層 hyperplaneIdeal ≝ (hyperplaneι).ker。 ★埋めた隙間は 2 つだけであった——（1）aeval が斉次性を保つこと（mathlib に IsHomogeneous.bind₁ は無いので単項式に分けた）、（2）無関係イデアルの条件（rename Fin.succ が aeval の**切断**であることから出る）。 ★★**残るのは「超平面因子の高さが素朴高さ log max|x_i| であること」と、very ample（n·D が閉埋め込みによる超平面の引き戻し）の定義である。",
+      "where": "Found/GenEll/Hyperplane.lean の hyperplaneHom / **hyperplaneι** / **hyperplaneIdeal**",
+      "sources": [
+       "[Stacks] 01MX Proj and graded ring maps",
+       "[EGA2] §4.4"
+      ]
      },
      {
       "stage": "D1",
@@ -335,8 +340,8 @@
       "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
      }
     ],
-    "done": "12/15",
-    "remaining": "★★**残るのは C2c・E・F2c の 3 段**である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★残る本体は **C2c（O(1)）** と **E（Serre の定理）**であり、どちらも very ample（L のある冪が ℙᴺ への閉埋め込みを与える）を述べ・示すために要る。 ★★★F2c（生成ファイバーが Y に戻る）は小さい。"
+    "done": "12.5/15",
+    "remaining": "★★**残るのは C2c（半分）・E・F2c** である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★**超平面因子も 2026-08-28 に入った**（hyperplaneι / hyperplaneIdeal）ので、C2c の残りは「超平面因子の高さ = 素朴高さ」と very ample の定義だけである。 ★★★残る本体は **E（Serre の定理）**であり、F2c（生成ファイバーが Y に戻る）は小さい。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
    "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
