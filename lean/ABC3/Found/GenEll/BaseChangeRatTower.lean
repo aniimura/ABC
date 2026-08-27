@@ -60,7 +60,7 @@ open CategoryTheory Limits AlgebraicGeometry
 
 /-- ★★図式を `Over (Spec ℤ)` へ持ち上げる（`Spec ℤ` は終対象なので構造射は一意）。 -/
 noncomputable def overRatTowerDiagram :
-    ℕᵒᵖ ⥤ Over (Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) :=
+    ℕᵒᵖ ⥤ Over (Spec (CommRingCat.of ℤ)) :=
   specRatTowerDiagram.toOver _ (fun _ => specZIsTerminal.from _)
     (fun _ => specZIsTerminal.hom_ext _ _)
 
@@ -88,12 +88,12 @@ noncomputable def overRatTowerIsLimit : IsLimit overRatTowerCone :=
 
 /-- ★★★★**底変換した図式** `n ↦ X ×_ℤ Spec ℤ[1/n!]`。 -/
 noncomputable def baseChangeRatTowerDiagram {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) : ℕᵒᵖ ⥤ Scheme.{0} :=
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) : ℕᵒᵖ ⥤ Scheme.{0} :=
   overRatTowerDiagram ⋙ Over.pullback f ⋙ Over.forget X
 
 /-- ★★★★**その錐** —— 頂点は `X ×_ℤ Spec ℚ`（＝ `X_ℚ`）。 -/
 noncomputable def baseChangeRatTowerCone {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) :
     Cone (baseChangeRatTowerDiagram f) :=
   (Over.forget X).mapCone ((Over.pullback f).mapCone overRatTowerCone)
 
@@ -105,7 +105,7 @@ noncomputable def baseChangeRatTowerCone {X : Scheme.{0}}
 ★`Over.pullback f` は `Over.mapPullbackAdj f` の**右随伴**なので極限を保つ。
 ★★`Over.forget X` も（創出するので）保つ。★★★あとは `overRatTowerIsLimit` を流すだけ。 -/
 noncomputable def baseChangeRatTowerIsLimit {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) :
     IsLimit (baseChangeRatTowerCone f) := by
   haveI : PreservesLimits (Over.pullback f) := (Over.mapPullbackAdj f).rightAdjoint_preservesLimits
   exact isLimitOfPreserves (Over.forget X)
@@ -114,14 +114,14 @@ noncomputable def baseChangeRatTowerIsLimit {X : Scheme.{0}}
 /-! ## ★★★★★★mathlib の降下補題が要求するインスタンス -/
 
 instance baseChangeRatTower_affineHom {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
     {i j : ℕᵒᵖ} (g : i ⟶ j) : IsAffineHom ((baseChangeRatTowerDiagram f).map g) := by
   show IsAffineHom (((Over.pullback f).map (overRatTowerDiagram.map g)).left)
   exact MorphismProperty.overPullbackMap f (overRatTowerDiagram.map g)
     (specRatTowerDiagram_affineHom g)
 
 instance baseChangeRatTower_compact {X : Scheme.{0}} [CompactSpace X]
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) (i : ℕᵒᵖ) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (i : ℕᵒᵖ) :
     CompactSpace ((baseChangeRatTowerDiagram f).obj i) := by
   have hA : IsAffineHom (pullback.snd (overRatTowerDiagram.obj i).hom f) :=
     MorphismProperty.pullback_snd _ _ (overRatTower_obj_hom_affine i)
@@ -131,7 +131,7 @@ instance baseChangeRatTower_compact {X : Scheme.{0}} [CompactSpace X]
   exact @QuasiCompact.compactSpace_of_compactSpace _ _ _ hQ _
 
 instance baseChangeRatTower_qs {X : Scheme.{0}} [QuasiSeparatedSpace X]
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) (i : ℕᵒᵖ) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (i : ℕᵒᵖ) :
     QuasiSeparatedSpace ((baseChangeRatTowerDiagram f).obj i) := by
   have hA : IsAffineHom (pullback.snd (overRatTowerDiagram.obj i).hom f) :=
     MorphismProperty.pullback_snd _ _ (overRatTower_obj_hom_affine i)
@@ -143,9 +143,9 @@ instance baseChangeRatTower_qs {X : Scheme.{0}} [QuasiSeparatedSpace X]
 
 /-- ★底 `Spec ℤ` への自然変換（終対象なので一意）。 -/
 noncomputable def baseChangeRatTowerToZ {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) :
     baseChangeRatTowerDiagram f ⟶
-      (Functor.const ℕᵒᵖ).obj (Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) where
+      (Functor.const ℕᵒᵖ).obj (Spec (CommRingCat.of ℤ)) where
   app _ := specZIsTerminal.from _
   naturality _ _ _ := specZIsTerminal.hom_ext _ _
 
@@ -169,8 +169,8 @@ mathlib の `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`
 `Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`（単射側）に流せば出る。 -/
 theorem exists_factor_baseChangeRatTower {X X' : Scheme.{0}}
     [CompactSpace X] [QuasiSeparatedSpace X]
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
-    (f' : X' ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (f' : X' ⟶ Spec (CommRingCat.of ℤ))
     [LocallyOfFinitePresentation f']
     (a : (baseChangeRatTowerCone f).pt ⟶ X') :
     ∃ (i : ℕᵒᵖ) (g : (baseChangeRatTowerDiagram f).obj i ⟶ X'),

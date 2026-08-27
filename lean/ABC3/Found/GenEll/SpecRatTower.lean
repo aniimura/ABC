@@ -102,7 +102,7 @@ noncomputable def specRatTowerIsLimit : IsLimit specRatTowerCone :=
 ★★`Spec ℤ` は終対象（`specZIsTerminal`）なので、射も自然性も**一意に決まる**。 -/
 noncomputable def specRatTowerToZ :
     specRatTowerDiagram ⟶
-      (Functor.const ℕᵒᵖ).obj (Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) where
+      (Functor.const ℕᵒᵖ).obj (Spec (CommRingCat.of ℤ)) where
   app _ := specZIsTerminal.from _
   naturality _ _ _ := specZIsTerminal.hom_ext _ _
 
@@ -123,7 +123,7 @@ noncomputable def specRatTowerToZ :
 ★★★★**モデルの同型**の spreading out（原文が実際に使う形）には、
 `X_ℚ = lim (X ×_ℤ ℤ[1/n!])` の図式が要る——`X ×_ℤ (−)` で本補題の極限を押し出す段である。 -/
 theorem exists_factor_specRatTower {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
     [LocallyOfFinitePresentation f]
     (a : specRatTowerCone.pt ⟶ X) :
     ∃ (i : ℕᵒᵖ) (g : specRatTowerDiagram.obj i ⟶ X),

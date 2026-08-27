@@ -61,7 +61,7 @@ open CategoryTheory Limits AlgebraicGeometry
 ★★★**`obj` が構文的に `pullback` である**ことが要点である——
 `BaseChangeRatTower.lean` の合成版と defeq だが、下流の `rw`/`simp` はこちらでしか効かない。 -/
 noncomputable def bcDiagram {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) : ℕᵒᵖ ⥤ Scheme.{0} :=
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) : ℕᵒᵖ ⥤ Scheme.{0} :=
   Functor.ofOpSequence
     (X := fun n => pullback (overRatTowerDiagram.obj (Opposite.op n)).hom f)
     (fun n => pullback.map _ _ _ _
@@ -71,7 +71,7 @@ noncomputable def bcDiagram {X : Scheme.{0}}
 
 /-- ★合成版と生版の対象は同じもの（`rfl`）。 -/
 theorem bcDiagram_obj {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))) (i : ℕᵒᵖ) :
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (i : ℕᵒᵖ) :
     (bcDiagram f).obj i = pullback (overRatTowerDiagram.obj i).hom f := rfl
 
 /-! ### ★出典の紐付け(`.src`)

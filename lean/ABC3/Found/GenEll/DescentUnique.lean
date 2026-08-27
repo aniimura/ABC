@@ -63,8 +63,8 @@ open CategoryTheory Limits AlgebraicGeometry
 ★★仮定は `LocallyOfFiniteType f′`——**有限表示より弱い**（降下そのものは有限表示が要る）。 -/
 theorem descent_unique_baseChangeRatTower {X X' : Scheme.{0}}
     [CompactSpace X] [QuasiSeparatedSpace X]
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
-    (f' : X' ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (f' : X' ⟶ Spec (CommRingCat.of ℤ))
     [LocallyOfFiniteType f']
     {i j : ℕᵒᵖ} (a : (baseChangeRatTowerDiagram f).obj i ⟶ X')
     (ha : (baseChangeRatTowerToZ f).app i = a ≫ f')
@@ -90,8 +90,8 @@ theorem descent_unique_baseChangeRatTower {X X' : Scheme.{0}}
 ★★★整合性の仮定が要らない: `pullback.fst ≫ (Spec ℤ[1/i!] → Spec ℤ) = g ≫ f′` は
 **`Spec ℤ` が終対象なので `specZIsTerminal.hom_ext` 1 行**で出る。 -/
 noncomputable def liftDescent {X X' : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
-    (f' : X' ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (f' : X' ⟶ Spec (CommRingCat.of ℤ))
     {i : ℕᵒᵖ} (g : (baseChangeRatTowerDiagram f).obj i ⟶ X') :
     (baseChangeRatTowerDiagram f).obj i ⟶ (baseChangeRatTowerDiagram f').obj i :=
   pullback.lift (pullback.fst (overRatTowerDiagram.obj i).hom f) g
@@ -99,16 +99,16 @@ noncomputable def liftDescent {X X' : Scheme.{0}}
 
 /-- ★持ち上げてから `X′` へ落とすと元の射。 -/
 theorem liftDescent_snd {X X' : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
-    (f' : X' ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (f' : X' ⟶ Spec (CommRingCat.of ℤ))
     {i : ℕᵒᵖ} (g : (baseChangeRatTowerDiagram f).obj i ⟶ X') :
     liftDescent f f' g ≫ pullback.snd (overRatTowerDiagram.obj i).hom f' = g :=
   pullback.lift_snd _ _ _
 
 /-- ★★持ち上げは `Spec ℤ[1/i!]` への射影と両立する——**段を保つ**。 -/
 theorem liftDescent_fst {X X' : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
-    (f' : X' ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
+    (f' : X' ⟶ Spec (CommRingCat.of ℤ))
     {i : ℕᵒᵖ} (g : (baseChangeRatTowerDiagram f).obj i ⟶ X') :
     liftDescent f f' g ≫ pullback.fst (overRatTowerDiagram.obj i).hom f'
       = pullback.fst (overRatTowerDiagram.obj i).hom f :=
@@ -118,7 +118,7 @@ theorem liftDescent_fst {X X' : Scheme.{0}}
 
 /-- ★★**段を下げても `X` への射影は変わらない**。 -/
 theorem baseChangeMap_snd {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
     {i m : ℕᵒᵖ} (h : m ⟶ i) :
     (baseChangeRatTowerDiagram f).map h ≫ pullback.snd (overRatTowerDiagram.obj i).hom f
       = pullback.snd (overRatTowerDiagram.obj m).hom f := by
@@ -128,7 +128,7 @@ theorem baseChangeMap_snd {X : Scheme.{0}}
 
 /-- ★★**段を下げると `Spec ℤ[1/n!]` への射影は塔の射で送られる**。 -/
 theorem baseChangeMap_fst {X : Scheme.{0}}
-    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    (f : X ⟶ Spec (CommRingCat.of ℤ))
     {i m : ℕᵒᵖ} (h : m ⟶ i) :
     (baseChangeRatTowerDiagram f).map h ≫ pullback.fst (overRatTowerDiagram.obj i).hom f
       = pullback.fst (overRatTowerDiagram.obj m).hom f ≫ (overRatTowerDiagram.map h).left := by
