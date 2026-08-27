@@ -29036,3 +29036,105 @@ Skeleton には載らない。
 - `lake build` 全体通過、`node tools/check.mjs` **PASS**、`sorry` **40 件**(変化なし)
 - `Skeleton/GenEll` + `Skeleton/NCBelyi` の `sorry` は **4 件**のまま
   ——★**今回は減らないのが正しい**。`Lemma 2.2` は新しい `sorry` を作らずに足した
+
+## §9-710 ★★★★★★★★★★**ample の道が 3 段進んだ——そして段 A・B の見積もりは「層」と「前層」の取り違えだった**(第 418-423 ブロック、2026-08-27)
+
+`ample-and-projective-embedding` は §1 の 5 項目すべての門である。本日そこを 6 回叩いた。
+台帳(`ResearchPaper/mathlib-gap.json`)の内訳は **3/9 → 7/10** になった。
+
+### ★★★★★★★★★まず訂正——段 A・B は最初から**要らなかった**
+
+朝の測定は「段 A(層のテンソル積)は mathlib への PR 規模」と判定した。
+`Localization.Monoidal` / `Monoidal.Reflective` / `Adjunction.monoidal` が
+いずれも無いので、**層の水準**では正しい。
+
+★しかし CLAUDE.md の在庫の手順どおり `.cache/decl-index.txt` を引いたら、
+ABC3 は**前層の水準**で既に全部持っていた:
+
+| 宣言 | 場所 | 中身 |
+|---|---|---|
+| `PresheafModulesOn` / `restrictPresheafFunctor` | `Found/Arakelov/PicRestrictTensor.lean` | ★制限が**モノイダル関手**であること |
+| `restrictPresheafTensor` | 同上 | `P|_U ⊗ Q|_U ≅ (P ⊗ Q)|_U` |
+| `IsLocallyTrivial` | `Found/Arakelov/PicLocalTrivial.lean` | ★★**可逆層の定義**(強い局所自明性) |
+| `IsLocallyTrivial.tensor` | 同上 | ★★★テンソル積で閉じる = **Pic の乗法** |
+| `aPicGroup` | `Found/Arakelov/APicWitness.lean` | 算術 Picard 群 |
+
+★★mathlib の `PresheafOfModules.monoidalCategory` は**結合子・単位子まで完成している**。
+したがって前層の水準では段 A2 はそもそも要らず、段 B は既に閉じていた。
+
+★★★**教訓は「規模の判定は作業水準を固定してから行う」**である。
+同じ数学が層の水準では person-years、前層の水準では在庫、ということが起きる。
+
+### ★★★★★★★★段 C1——`ℙⁿ_R` は mathlib の部品だけで建った
+
+台帳は段 C を absent としていたが、実測すると
+
+    AlgebraicGeometry.Proj                             ある
+    MvPolynomial.gradedAlgebra                         ある(instance ではない)
+    Proj.toSpecZero                                    ある
+    IsProper (Proj.toSpecZero 𝒜)  ([Stacks] 01MF)      ★ある
+
+`Found/GenEll/ProjectiveSpace.lean` で埋めた隙間は **2 つだけ**:
+
+1. `Algebra.FiniteType (𝒜 0) (MvPolynomial …)` は instance になっていない
+   —— 変数 `X i` が生成することを書いた
+2. `𝒜 0` は `R` そのものではない —— `homogeneousSubmodule_zero : 𝒜 0 = 1` から
+   環同型 `R ≃+* 𝒜 0` を作り、構造射を `Spec R` へ向けた
+
+★これで **`ℙⁿ_R` は `Spec R` 上固有**である。
+
+### ★★★★★★★★★★段 D1・D2——`X_s` を茎なしで作る
+
+`ample` の定義([Stacks] 28.27.1)の核は `X_s`(切断の非消失軌跡)である。
+教科書の定義は茎 `M_x` の中で `s_x ∉ 𝔪_x M_x` だが、
+★**mathlib に加群層の茎は 1 件も無い**(本日実測)。
+
+★★そこで **`IsLocallyTrivial` が与える自明化を使った**:
+
+    X_s ≝ ⨆_V ⨆_{e : M|_V ≅ 𝟙} X.basicOpen (trivValue M V e s)
+
+★★★合併なので**開であることが自動**で、自明化を**選ばない**ので選択公理も要らない。
+
+そして `Found/GenEll/AmpleDef.lean` で 2 段:
+
+| 段 | 定理 | 機構 |
+|---|---|---|
+| D1 | `basicOpen_trivValue_congr` | ★同じ `V` の上の自明化は単元倍で違う。**純代数**——`R` を `R`-加群と見た線型同型は `θ 1` 倍で `θ 1` は単元 |
+| D2 | `nonVanishing_inf` | ★★`X_s ⊓ V = X.basicOpen (trivValue M V e s)`。機構は `trivValue_restrict`(`e.hom` の**自然性**)だけ |
+
+★★★★**健全性**も取れた: 構造層なら `X_s = Scheme.basicOpen s`(`nonVanishing_unit`)。
+これで `nonVanishing` が「知っている `basicOpen` の一般化」だと型で言える——**空虚ではない**。
+
+★★★★★`trivialOfLe`(`Found/Arakelov/PicBasicTrivial.lean`)は 2 つの `rfl` 等式を
+`rw` して作られているので、**評価すると計算する**——`trivValue_restrict` の証明中の
+`h1`・`h2` はどちらも `rfl` で通った。**7 か月前の設計が、そのまま嵌まった**。
+
+### ★★★★★★★★★★★もう 1 つ——`Lemma 3.2, (i)` から一意化の posit が消えた
+
+`Lemma32Uniformized.lean` は「同変な一意化 `(Φ, act, hequiv)`」を**入力として**受けていた。
+本日 `galois-equivariant-tate-uniformization` を閉じたので、その入力を構成したもので埋められる:
+
+| 入力 | 何で埋めたか |
+|---|---|
+| `Φ` | `tatePhiAddEquivAll`(仮定なしの加法同型) |
+| `act σ` | ★**mathlib の `Point.map`**(`(σ : L →ₐ[K] L).restrictScalars R` に沿って) |
+| `hequiv` | `tatePhi_pointMap`(`Found/GaloisRep/TateGaloisStab.lean`) |
+
+★`act` が mathlib の**加法群準同型** `WeierstrassCurve.Affine.Point.map` になったので、
+「`Φ` は `G_K`-加群の同型」が**定理として**言える。
+
+★★`σ` が `R` を固定することは**自動**である——`σ ∈ Gal(L/K)` は `K` を固定し `R → K → L` なので
+`(σ : L →ₐ[K] L).restrictScalars R` がそのまま使え、`tatePhi_map` の `σ : R →+* R` は
+`RingHom.id R` でよい。同じ理由で `σ_U S.Q = S.Q` も仮説ではなく定理になる。
+
+★★★これで `Lemma32StableLine.lean` の逸脱「`G_K` 同変な一意化は含まない」が**消えた**。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**(変化なし)——★**残り 13 項目はどれも「塞がりを丸ごと閉じる」ことを要求する**ので、段が進んでも数は動かない
+- `ample` の内訳 **7/10**。残るのは **C2(`O(1)` —— mathlib に twisting sheaf は 1 件も無い)**、
+  **E(Serre の定理 —— Stacks 側は構造化済み)**、**F2(ℤ-射影性)**、
+  そして台帳の外の**座標の高さと `htArith` の比較**である
+- `finite-flat-group-scheme-quotient` は `Lemma 3.2` を項目として閉じる最後の 1 本だが、
+  minimalForm の通り**下流(`Lemma 3.5` 以降)はこれを待たない**
