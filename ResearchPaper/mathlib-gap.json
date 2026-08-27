@@ -118,7 +118,7 @@
     "[GenEll] Theorem 2.1 の証明(原文 p.11 の『[Mzk1]』)"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
+    "verdict": "partial-major",
     "searched": "2026-08-16 に mathlib 全宣言名を Belyi で検索して 0 件。",
     "absentPart": "Belyi 写像そのもの。"
    },
@@ -160,7 +160,8 @@
     "lean/ABC3/Found/NCBelyi/Lemma22.lean",
     "lean/ABC3/Found/NCBelyi/Normalize.lean",
     "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
-   ]
+   ],
+   "impact": "★§2 の 1 項目（Theorem 2.1）の門。 ★★**未分割ではない**（2026-08-27 確認）——5 節点中 3 が実装済みで、残る Lemma 2.4 も 9 節点中 8 が閉じている。 ★★★残るは「ℙ¹ 上の有理関数としての組み立て（不分岐性の帳簿）」1 つと Theorem 2.5 本体である。"
   },
   "riemann-roch-curves": {
    "what": "曲線上の因子・連接コホモロジー・Riemann–Roch・Serre 双対性。",
@@ -317,13 +318,15 @@
     "[GenEll] Lemma 3.2, (i)(ii)をスキームの水準で閉じるため"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
-    "searched": "mathlib に Tate 曲線・Tate twist・M_l(E) は無い（2026-08-16 実測）。",
+    "verdict": "partial-minor",
+    "searched": "★★★**2026-08-27 に再測定して訂正した。** mathlib に Tate 曲線は無いが、**ABC3 側には選ばれた同型がすでにある**——前回の記録は uniformization_of_split だけを見ており、tatePhiAddEquivAll（**Nonempty ではなく選ばれた ≃+**）を見ていなかった。",
     "partial": [
-     "ABC3 側: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（K 上、G_K-同変ではない）",
-     "ABC3 側: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean（Kˣ/q^ℤ の側は閉じている）"
+     "★★★ABC3: Found/GaloisRep/TateDoubling.lean の **tatePhiAddEquivAll**（Additive (Kˣ/q^ℤ) ≃+ E_q(K)、**選ばれた同型**。倒化の仮定なし）",
+     "★ABC3: Found/GaloisRep/TatePhi.lean の tatePhi / tateAOf / tateWOf（写像の中身。ただし tateAOf は .choose なので**公式ではなく選択**である——tateAOf_spec が特徴づける）",
+     "★★ABC3: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（TateCurveData の非空虚性、G6）",
+     "★★★ABC3: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean——**消費側（K̄ˣ/q^ℤ の上での Lemma 3.2 (i)(ii)）は閉じている**"
     ],
-    "absentPart": "G_K-同変性と、K̄ への拡張。"
+    "absentPart": "★フィールドの自己同型 σ に対する同変性。 ★★体の拡大 K ⊆ L に対する自然性。 ★★★K̄ への帰納極限。"
    },
    "primarySource": {
     "measuredAt": "2026-08-27",
@@ -333,7 +336,61 @@
      "[Stacks] étale 基本群と Galois 作用の側"
     ],
     "howToProceed": "★[RaySB427] を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
-   }
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★**7 段に割った（2026-08-27）。** ★段 1（固定した完備体での選ばれた同型）と 段 2a（normRep の自然性）は**閉じている**。 ★★消費側（段 5、Lemma 3.2 の中身）も閉じている。 ★★★残るのは**段 2b・2c・3・4**であり、どれも新しい数学ではなく**同変性の帳簿**である。",
+    "stages": [
+     {
+      "stage": "1",
+      "claim": "固定した完備離散付値体 K での**選ばれた**同型 Kˣ/q^ℤ ≃+ E_q(K)",
+      "status": "closed",
+      "where": "Found/GaloisRep/TateDoubling.lean の tatePhiAddEquivAll",
+      "why": "★**Nonempty ではなく選ばれた ≃+ である**。 ★★tate_uniformization_dvr はこれを Nonempty で包んだだけなので、自然性を問うには tatePhiAddEquivAll を直接使えばよい。"
+     },
+     {
+      "stage": "2a",
+      "claim": "**正規化代表 normRep の自然性**（付値を保つ群準同型に沿って）",
+      "status": "closed",
+      "where": "Found/GaloisRep/NormRepNatural.lean の normRep_map / normRep_map_self",
+      "why": "★**一意なものは自動的に自然である**。 normRep は .choose だが eq_normRep（一意性）があるので、σ (normRep c) が条件 [0, v q) を満たすことを見れば済む。 ★★証明は 3 行。"
+     },
+     {
+      "stage": "2b",
+      "claim": "tateAOf / tateWOf の自然性（tateAOf_spec 経由）",
+      "status": "open",
+      "why": "★tateAOf_spec（algebraMap R K (tateAOf S c) = normRep …）と 段 2a から出るはずである。 ★★algebraMap R K の単射性と、σ(R_L) ⊆ R_{L′} が要る。"
+     },
+     {
+      "stage": "2c",
+      "claim": "tatePtPair の自然性（級数と σ を交換させる）",
+      "status": "open",
+      "why": "★ここが**段 2 の本体**である。 ★★前提: **σ が連続**（付値の拡大の一意性から等距写像）。 ★★★tatePtPair は a, w, q の収束級数で与えられているので、連続な σ は無限和と交換する。"
+     },
+     {
+      "stage": "3",
+      "claim": "有限拡大 K ⊆ L に対する自然性（両方の同型が包含と両立する）",
+      "status": "open",
+      "why": "★段 2 と同じ道筋。 ★★L も完備離散付値体で q は同じので、tatePhiAddEquivAll が L でも立つ——問題は 2 つの同型が両立するかである。"
+     },
+     {
+      "stage": "4",
+      "claim": "K̄ への帰納極限: E(K̄) ≅ K̄ˣ/q^ℤ（G_K-同変）",
+      "status": "open",
+      "why": "★K̄ は**完備ではない**ので直接は適用できない。 ★★E(K̄) = ∪_L E(L)（L/K 有限）として帰納極限を取る。 ★★★段 3 があれば形式的である。"
+     },
+     {
+      "stage": "5",
+      "claim": "l-捩れへ落として完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0",
+      "status": "consumer-side-closed",
+      "where": "Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean",
+      "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
+     }
+    ],
+    "done": "2/7",
+    "remaining": "★★次の葉は**段 2b**（tateAOf の自然性）であり、段 2a と tateAOf_spec を繋ぐだけである。 ★本体は段 2c（級数と σ の交換、σ の連続性）である。"
+   },
+   "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },
   "faltings-height-vs-degree-at-infinity": {
    "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",

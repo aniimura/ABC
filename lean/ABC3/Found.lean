@@ -932,6 +932,7 @@ import ABC3.Found.GaloisRep.BasisFree
 import ABC3.Found.GaloisRep.TateAnalytic
 import ABC3.Found.GaloisRep.TateEquationMod
 import ABC3.Found.GaloisRep.TateClassMap
+import ABC3.Found.GaloisRep.NormRepNatural
 import ABC3.Found.GaloisRep.LipschitzBridge
 import ABC3.Found.GaloisRep.LatticeInvariant
 import ABC3.Found.GaloisRep.LipschitzRows
