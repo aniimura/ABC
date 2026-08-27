@@ -342,7 +342,7 @@
     "absentPart": "★各 (𝒪_F)_v での延長を Dedekind 環 𝒪_F の上へ**貼り合わせる**段。★★Spec (𝒪_F)_v は Zariski 開ではないので素朴には貼れない。Spec 𝒪_F[1/m] へ延ばしてから残りの有限個の素点を処理する道になり、ZMT／正規化の水準の作業である。"
    },
    "minimalForm": "★消費者が要るのは「ℚ-同型から点の対応 ePt を作る」だけである。★★原文の定義域 U_X(ℚ̄) は X_ℚ だけで決まるので ePt は**恒等**であり、形式化で Spec 𝒪_F ⟶ X を定義域にしたことから生じた橋である。",
-   "impact": "★Remark 1.5.1 を項目として閉じるのに必要な**最後の 1 本**。★★段 1-5 はすべて Found/ に載っている（sorry 0）。",
+   "impact": "★Remark 1.5.1 を項目として閉じるのに必要な最後の 1 本。★★★**2026-08-27 に大域延長の一意性が付いたので、点の対応 ePt は「与えられたデータ」ではなく「存在すれば一意に決まるもの」になった。**",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★**原典は手元にある**——[Stacks] 0BX5（付値判定法）と正規化の章。",
@@ -352,6 +352,40 @@
      "[EGA2]"
     ],
     "howToProceed": "★mathlib の ValuativeCriterion を入口にし、Spec 𝒪_F[1/m] への延長（有限型性から）と残りの有限個の素点での局所延長を貼る。★★分離性から一意性は出るので、貼ること自体はできるはずである。"
+   },
+   "decomposition": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★★★**2026-08-27 に 3 つに割り、2 つを閉じた。**",
+    "stages": [
+     {
+      "stage": "1",
+      "claim": "付値環なら分数体の点が一意に延びる",
+      "status": "closed",
+      "where": "Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper",
+      "why": "★mathlib の IsProper.eq_valuativeCriterion（Stacks 0BX5）に Spec ℤ が終対象であることを合わせるだけ"
+     },
+     {
+      "stage": "2a",
+      "claim": "各素点 v で (O_F)_v-点へ一意に延びる",
+      "status": "closed",
+      "where": "Found/GenEll/DedekindExtend.lean の exists_unique_extend_atPrime",
+      "why": "★(O_F)_v は離散付値環で分数体が F。algLocAtPrime / towerLocAtPrime / fracLocAtPrime を自前で立てた"
+     },
+     {
+      "stage": "2b",
+      "claim": "大域延長は一意",
+      "status": "closed",
+      "where": "Found/GenEll/DedekindExtend.lean の extend_unique",
+      "why": "★mathlib の ext_of_isDominant_of_isSeparated。★★生成点の稠密性（isDominant_specMap_fractionRing）は 3 行で出た——像は生成点 ⟨⊥⟩ を含み、その閉包は zeroLocus ⊥ = univ"
+     },
+     {
+      "stage": "2c",
+      "claim": "局所延長を開近傍へ広げて貼り合わせる",
+      "status": "open",
+      "why": "★mathlib の spread_out_of_isGermInjective′（SpreadingOut.lean、Stacks 0BX6）がそのまま使える——Spec O_F は整なので IsGermInjective は自動で付く。★★貼り合わせの整合は 2b と同じ機構（生成点の稠密性）で出る。★★★残る配管は茎（stalk）と Localization.AtPrime の同一視である"
+     }
+    ],
+    "remaining": "★★★★★**残るのは 2c だけであり、道具（spread_out_of_isGermInjective′）は mathlib にある。**"
    }
   }
  },
