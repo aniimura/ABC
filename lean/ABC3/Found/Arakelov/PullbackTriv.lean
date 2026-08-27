@@ -89,7 +89,30 @@ import ABC3.Meta.Claim
 | `pullbackOnCorepresentableBy` | `(f|)^*` の射への作用を `freeYonedaEquiv` で計算する |
 | `unitMul_app_apply` / `unitMul_res` | `unitMul` の値と制限 |
 
-★★★★見積もり **2〜4 ブロック**（`LocalMetric.tensor` と同規模）。
+## ★★★★★★★★★★**制限の層も剥がれた**——残りは `V'` を含まない 1 本
+
+`unitEnd_restrictOn`（`unitEnd` は制限と可換）と
+`unitEnd_pullTransport_reduce` により、残る等式は
+
+    `pullUnitEnd f W Ψ = f.c.app (op W) (unitEnd W Ψ)`
+
+**ただ 1 本**である（`V'` も `L` も現れない。`rfl` ではない、2026-08-28 実測）。
+
+### ★★★★★★★★その証明の筋（導出済み・未実装）
+
+★随伴で移すのが正しい道である:
+
+1. `pullbackPreOn f W ⊣ pushforward (phiOn f W)` の転置で
+   `Hom(G' 𝟙_|_W, B) ≅ Hom(𝟙_|_W, F_* B)`。
+2. `Hom(𝟙_|_W, M) ≅ M.obj ⟨W,𝟙⟩`（`freeYonedaTermIso` ＋ `freeYonedaEquiv`）。
+   ★`(F_* B).obj ⟨W,𝟙⟩ = B.obj ⟨f⁻¹W,𝟙⟩` は**係数の制限**なので、
+   台の集合は同じで、`Γ(Y,W)` 作用が `ρ` を通す。
+3. `pullbackOnUnitIso.hom` の転置 `η : 𝟙_|_W ⟶ F_* 𝟙_|_{f⁻¹W}` は
+   生成元を生成元へ送る（`isoHomUnitGenOn`）ので `η(1) = 1`。
+4. ★★したがって `η(u) = η(u • 1) = ρ(u) • η(1) = ρ u`
+   ——**`η` の `Γ(Y,W)`-線型性（＝係数制限）が `ρ` を出す**。
+
+★★★これが「なぜ `ρ` が現れるか」の答えである。★実装は残っている。
 -/
 
 namespace ABC3.Found.Arakelov
@@ -203,6 +226,51 @@ theorem evalOn_pullback {X Y : Scheme.{0}} (f : X ⟶ Y)
       ((p.appLE ((Opens.map f.base).obj W) ⊤ _).hom ((f.c.app (op W)).hom u)) = _
   congr 1
 
+/-! ## ★★★★★★★制限の層を剥がす -/
+
+/-- ★★★★**`unitEnd` は制限と可換である**。
+
+★機構は `unitMul_unitEnd` → `unitMul_res` → `unitEnd_unitMul` の 3 段。 -/
+theorem unitEnd_restrictOn {X : Scheme.{0}} {U V' : X.Opens} (h : V' ≤ U)
+    (Φ : End (𝟙_ (PresheafModulesOn X U))) :
+    unitEnd V' ((restrictOnFunctor h).map Φ)
+      = X.presheaf.map (homOfLE h).op (unitEnd U Φ) := by
+  conv_lhs => rw [← unitMul_unitEnd U Φ]
+  rw [unitMul_res h (unitEnd U Φ), unitEnd_unitMul]
+
+/-- ★★**引き戻しが `End(𝟙_)` の上に誘導する写像**（制限を含まない形）。 -/
+noncomputable def pullUnitEnd {X Y : Scheme.{0}} (f : X ⟶ Y) (W : Y.Opens)
+    (Ψ : End (𝟙_ (PresheafModulesOn Y W))) :
+    (Γ(X, (Opens.map f.base).obj W) : Type) :=
+  unitEnd ((Opens.map f.base).obj W)
+    ((pullbackOnUnitIso f W).inv ≫ (pullbackPreOn f W).map Ψ ≫ (pullbackOnUnitIso f W).hom)
+
+/-- ★★★★★★**輸送の共役から制限の層が剥がれる**。
+
+原文 (GenEll p.3):
+> (ii) Let φ : Y → X be a morphism of normal, Z-proper, Z-flat schemes. Then there is an evident notion of pull-back of arithmetic line bundles by φ.
+
+★これで「遷移単元が輸送と可換」の残りは **`V'` を含まない 1 本**になった:
+
+    `pullUnitEnd f W Ψ = f.c.app (op W) (unitEnd W Ψ)`
+
+★★機構は `restrictOnFunctor` の関手性と `unitEnd_restrictOn` だけである。 -/
+theorem unitEnd_pullTransport_reduce {X Y : Scheme.{0}} (f : X ⟶ Y) (W : Y.Opens)
+    {V' : X.Opens} (hV'W : V' ≤ (Opens.map f.base).obj W)
+    (Ψ : End (𝟙_ (PresheafModulesOn Y W))) :
+    unitEnd V' ((pullUnitIsoOn f W hV'W).inv ≫ (pullTransportFun f W hV'W).map Ψ
+        ≫ (pullUnitIsoOn f W hV'W).hom)
+      = X.presheaf.map (homOfLE hV'W).op (pullUnitEnd f W Ψ) := by
+  have hcomp : (pullUnitIsoOn f W hV'W).inv ≫ (pullTransportFun f W hV'W).map Ψ
+      ≫ (pullUnitIsoOn f W hV'W).hom
+      = (restrictOnFunctor hV'W).map ((pullbackOnUnitIso f W).inv
+          ≫ (pullbackPreOn f W).map Ψ ≫ (pullbackOnUnitIso f W).hom) := by
+    simp only [pullUnitIsoOn, pullTransportFun, Functor.mapIso_inv, Functor.mapIso_hom,
+      Functor.comp_map, Functor.map_comp]
+    rfl
+  rw [hcomp, unitEnd_restrictOn]
+  rfl
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def pullTrivOfBase.src : ABC3.Meta.Source :=
@@ -213,6 +281,16 @@ def pullTrivOfBase.src : ABC3.Meta.Source :=
 def pullTrivOfBase_comp.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
     item := "Definition 1.1, (ii)(輸送した 2 つの自明化の比は、元の比の輸送の共役であること)",
+    sectionId := "genell-def-1-1-ii" }
+
+def unitEnd_restrictOn.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (i)(unitEnd は制限と可換であること)",
+    sectionId := "genell-def-1-1-i" }
+
+def unitEnd_pullTransport_reduce.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 3,
+    item := "Definition 1.1, (ii)(輸送の共役から制限の層が剥がれること)",
     sectionId := "genell-def-1-1-ii" }
 
 def evalOn_pullback.src : ABC3.Meta.Source :=
