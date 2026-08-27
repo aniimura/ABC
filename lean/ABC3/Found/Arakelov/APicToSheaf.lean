@@ -202,6 +202,36 @@ theorem invertible_gamma_toInvSheaf (R : CommRingCat.{0}) (L : AInv (Spec R)) :
       (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) :=
   invertible_gammaCarrier R (AInv.toInvSheaf L)
 
+/-! ## ★★★★★段 B への一歩 —— 非零切断の存在 -/
+
+open scoped TensorProduct in
+/-- ★★★**可逆加群は自明でない**。
+
+★`Mv ⊗ M ≃ R` なので、`M = 0` なら `R = 0` になる。 -/
+theorem invertible_nontrivial (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.Invertible R M] [Nontrivial R] : Nontrivial M := by
+  by_contra h
+  rw [not_nontrivial_iff_subsingleton] at h
+  haveI : Subsingleton (Module.Dual R M ⊗[R] M) := by infer_instance
+  haveI : Subsingleton R := (Module.Invertible.linearEquiv R M).symm.toEquiv.subsingleton
+  exact false_of_nontrivial_of_subsingleton R
+
+/-- ★★★★★**算術直線束には非零の大域切断がある**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★古典的な `deg_F` の式は **非零の `s`** を取る。
+★★段 A が閉じたのでその存在が言える。 -/
+theorem exists_ne_zero_gamma (R : CommRingCat.{0}) [Nontrivial (R : Type)]
+    (L : AInv (Spec R)) :
+    ∃ s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type),
+      s ≠ 0 := by
+  haveI := invertible_gamma_toInvSheaf R L
+  haveI := invertible_nontrivial (R : Type)
+    (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+  exact exists_ne 0
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -238,6 +268,23 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def exists_ne_zero_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(算術直線束に非零の大域切断があること——段 B への一歩)",
+    sectionId := "genell-def-1-1-ii" }
+
+def exists_ne_zero_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "invertible_gamma_toInvSheaf(Γ(L) が可逆 R-加群＝段 A)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.invertible_gamma_toInvSheaf") 4,
+    .citation "[mathlib]" "Module.Invertible.linearEquiv(Mv ⊗ M ≃ R)"
+      (.inMathlib "Module.Invertible.linearEquiv") 4,
+    .implicitStep
+      ("★★残っている段 B の核: Γ(L)/(O_F·s) が**有限**であること。" ++
+       "★機構は「Γ(L) は有限生成・階数 1 なので商は捻れ、" ++
+       "O_F は Dedekind で剰余体が有限だから有限長」である。" ++
+       "★★実測(2026-08-28): mathlib に Module.Invertible の API と Ideal.absNorm はあるが、" ++
+       "可逆加群から分数イデアルへの橋を自分で繋ぐ必要がある") 4 ]
 
 def APicMToPicSheaf.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "isLocallyTrivial_sheafify(層化は局所自明性を保つ＝段 A1)"

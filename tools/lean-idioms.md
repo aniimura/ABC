@@ -1047,6 +1047,40 @@ io.open(p, 'wb').write(out)          # ここまで来れば必ず書ける
 また 0 バイトにした。★**「文字列を作る」と「ファイルを開く」を同じ行に書かない**。
 コミット済みだったので `git checkout --` で戻った。
 
+### ★★★★★2026-08-28 に **4 回目**をやった——今度は **Lean ファイル**
+
+規約を自分で書いて、同じ日にまた 0 バイトにした。今回の違いは 2 つ:
+
+1. ★壊したのは台帳ではなく **`Found/Arakelov/APicToSheaf.lean`**。
+   規約を「台帳を書き換えるときは」と読んでしまい、Lean ファイルに適用しなかった。
+   ★★**規約はすべてのファイル書き込みに適用する**。
+2. ★`out = s` で**文字列は先に作った**のに `io.open(p,'w').write(out)` と書いた。
+   ★★★**エンコードは `write` 時に起きる**ので、文字列を先に作っても意味がない。
+   規約の正しい読み方は「**`.encode('utf-8')` を先に実行し、`'wb'` で開く**」である。
+
+```python
+data = s.encode('utf-8')     # ★ここで落ちてもファイルは無傷
+f = io.open(p, 'wb'); f.write(data); f.close()
+```
+
+★★★★**もっと良い道: 非 BMP 文字をそもそも書かない**。
+docstring や `.needs` の文字列なら `O_F` のように ASCII で代用できる。
+Lean の識別子で必要なら**既存の行をコピーする**。
+
+### ★docstring と宣言の間に `open ... in` を挟めない
+
+失敗形: `/-- doc -/` の直後に `open scoped TensorProduct in` を置いたら
+
+    unexpected token 'open'; expected 'lemma'
+
+直し方: **`open ... in` を docstring の前に置く**。
+
+```lean
+open scoped TensorProduct in
+/-- doc -/
+theorem foo ...
+```
+
 ### ★台帳を書き戻すときは `indent` を**元に合わせる**
 
 `mathlib-gap.json` は **`indent=1`** である。`indent=2` で書き戻すと
