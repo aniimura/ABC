@@ -57,8 +57,10 @@ import Mathlib.FieldTheory.Galois.Infinite
 ★**`M_l(E)` を `E` の捩れ点としてではなく `K̄ˣ/q^ℤ` の `l`-捩れとして扱う。**
 両者を繋ぐのは Tate 一意化（`Found/GaloisRep/TateCurveWitness.lean` の
 `uniformization_of_split`）であり、**それは既に建っている**。
-★★ただし一意化を `G_K`-同変に持ち上げる段は本ファイルには入っていない
+★★一意化を `G_K`-同変に持ち上げる段は本ファイルには入っていない
 ——ここは `K̄ˣ/q^ℤ` の側だけを閉じる。
+★★★★**2026-08-27——その段は `Found/GenEll/Lemma32Tate.lean` で閉じた**
+（`lemma_3_2_i_tate_all`。一意化は `tatePhiAddEquivAll`、Galois 作用は mathlib の `Point.map`）。
 
 ★★★**`L/K` は `IsGalois` として受ける**（原文の `K̄/K`）。
 `InfiniteGalois` 版を使うので**有限次元は要らない**。
@@ -225,7 +227,9 @@ theorem stable_of_mem_mu {K L : Type} [Field K] [Field L] [Algebra K L]
 
 ★★**項目全体の `.src` は置かない。** `Lemma 3.2` は (i)(ii) の 2 条あり、
 また本ファイルは `M_l(E)` を `K̄ˣ/q^ℤ` の側で閉じただけで、
-一意化を `G_K`-同変に持ち上げる段は入っていない。 -/
+一意化を `G_K`-同変に持ち上げる段は入っていない。
+★★★★**その段は 2026-08-27 に `Lemma32Tate.lean` で閉じた**——
+本ファイルの条つき `.src` の限定は**本ファイルの範囲の話**であり、項目の残高ではない。 -/
 
 def sigma_eq_of_stable.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
@@ -256,7 +260,8 @@ def lemma_3_2_i.needs : List ABC3.Meta.ProofObligation :=
     .implicitStep
       ("★逸脱: M_l(E) を E の捩れ点としてではなく K̄ˣ/q^ℤ の l-捩れとして扱う。" ++
        "両者を繋ぐ Tate 一意化(uniformization_of_split)は建っているが、" ++
-       "それを G_K-同変に持ち上げる段は本ファイルには入っていない") 15,
+       "それを G_K-同変に持ち上げる段は本ファイルには入っていない。" ++
+       "★★★その段は 2026-08-27 に Lemma32Tate.lean で閉じた（lemma_3_2_i_tate_all）") 15,
     .implicitStep
       ("★★機構: Bézout k·u + l·w = 1 で π ≝ x^u·q^w に正規化すると π^l = q かつ π^k = x。" ++
        "そこで σπ = π^c·q^n の両辺を l 乗すると q^{c+ln-1} = 1、q が 1 の冪根でないので" ++

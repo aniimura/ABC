@@ -707,7 +707,7 @@
     "absentPart": "★μ_l を 𝒪_K 上の**有限平坦部分群スキーム**として作る段。 ★★その商 E/μ_l を**スキームとして**作る段。 ★★★商が再び 1 次元半アーベルスキームになること。"
    },
    "minimalForm": "★消費側が実際に使うのは **q_{E′} = q_E^l と deg_∞(E′) = l·deg_∞(E) だけ**であり、両方とも Lemma32QuotMu.lean にある。 ★★したがって Lemma 3.5 以降は**商をスキームとして作らなくても進める**。 ★★★作らなければならないのは **Lemma 3.2 の (ii) を項目として閉じるときだけ**である。",
-   "impact": "★**Lemma 3.2 を項目として閉じるのに必要な最後の 1 本**。 ★★(i) は 2026-08-27 に閉じた（Found/GenEll/Lemma32Uniformized.lean）。 ★★★ただし minimalForm の通り、**下流（Lemma 3.5 以降）はこれを待たない**。",
+   "impact": "★**Lemma 3.2 を項目として閉じるのに必要な最後の 1 本**。 ★★(i) は 2026-08-27 に**完全に**閉じた——Found/GenEll/Lemma32Tate.lean の lemma_3_2_i_tate_all は**一意化も Galois 作用も posit していない**（Φ = tatePhiAddEquivAll、act = mathlib の Point.map）。 ★★★ただし minimalForm の通り、**下流（Lemma 3.5 以降）はこれを待たない**。",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★原文は [FC] Chapter III に帰すが **[FC] は 0_Source に無い**。 ★★群スキームの商の一般論は [SGA3] / Raynaud であり、これも手元に無い。",
@@ -736,10 +736,9 @@
    "conclusion": "★★★**実質的な塡がりは 4 つ**である: ample-and-projective-embedding・faltings-height-vs-degree-at-infinity・belyi-noncritical・finite-flat-group-scheme-quotient。 ★うち 2 つ（faltings の段 1〜4、belyi の Lemma 2.4）は**並行セッションが現在進めている**。"
   },
   "nextActions": [
-   "1. ample の段 A（層のテンソル積）——PresheafOfModules.monoidalCategory はあるので、層化に沿って monoidal 構造を降ろす 1 本。mathlib へ PR できる形。",
-   "2. あるいは段 A を避けて **L^{⊗n} だけを再帰で定義**する（ample の定義にはそれで足りる）。",
-   "3. faltings の段 1〜4 は並行セッションの領分——**重複を避けること**（本日 ComapMul.lean で二度書きした）。",
-   "4. finite-flat-group-scheme-quotient は minimalForm （q_{E′} = q_E^l で特徴づける）で下流は進める。"
+   "1. ample の段 A1（層のテンソル積の対象と L^{⊗n}）は 2026-08-27 に閉じた（InvertibleSheaf.lean）。★次の葉は段 C（ℙ^n_S と O(1)）または段 D（ample の定義——X_s が要る）。★★mathlib に twisting sheaf も Serre の定理も無い（2026-08-27 実測）。",
+   "2. Lemma 3.2, (i) は 2026-08-27 に posit を全部消した（Lemma32Tate.lean）。残るのは (ii) の**商をスキームとして作る段**だけである。",
+   "3. faltings の段 1〜4 と belyi の Lemma 2.4 は並行セッションの領分——**重複を避けること**。★belyi は Lemma 2.4 が 9 節点中 8、残るのは「ℙ¹ 上の有理関数としての組み立て」1 つである。"
   ]
  },
  "sourceNodesFound": {
