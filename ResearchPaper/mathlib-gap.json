@@ -194,7 +194,18 @@
     "absentPart": "★ample / very ample の概念そのものが mathlib に無い。吹き上げも無い。"
    },
    "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
-   "impact": "★★★残り 14 項目のうち **6 項目**がこの塞がりの下流にある。spreading out(4 項目)と並ぶ 2 大要因。"
+   "impact": "★★★残り 14 項目のうち **6 項目**がこの塞がりの下流にある。spreading out(4 項目)と並ぶ 2 大要因。",
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
+    "sources": [
+     "[Stacks] 28.27 Ample invertible sheaves（Definition 28.27.1、Lemma 01PU / 01Q1 ほか）",
+     "[Stacks] 29.39-29.41 relatively (very) ample。★**Lemma 29.40.5（f が有限型なら L^n が f-very ample＝Serre）**が鍵。Lemma 29.39.2 は逆向き。",
+     "[EGA2] §4.4 Immersions dans les fibrés projectifs. Faisceaux très amples（Définition 4.4.2）",
+     "[Stacks] Blowing up（原文の吹き上げ Y の段）"
+    ],
+    "howToProceed": "★プロジェクトの方法論どおり、**スケルトンを作って依存グラフを拡張する**のが正攻法である。★★葉（層番号が少ないもの）から形式化すれば、person-years の山を壁として見なくて済む。"
+   }
   },
   "arc-metric-not-attached-to-bundle": {
    "what": "★これは mathlib の欠落ではなく**我々の設計の穴**である(2026-08-27 に発見、Check/GenEll/Def12Degenerate.lean で機械検証)。arcCM X = C(X^arc, ℝ) は点上の関数であって L^arc 上のエルミート計量ではないので、束と計量の対応が失われている。その結果 deg_F が Pic 類を見ず、ht も見ない。",
@@ -209,6 +220,55 @@
    },
    "minimalForm": "★Spec 𝓞_F で言うと: 原文は L の生成元 s に対し |s|_σ を持ち deg_F = log #(L/s𝓞_F) − ∑_σ log|s|_σ(s の取り替えで両項が動き和は不変、積公式)。実装は −log|s|_σ を s を記録せずに持つ。",
    "note": "★★★因子表示(Found/GenEll/HeightConstruction.lean の htArith)は健全である——有限素点を見ている。Proposition 1.6 / Definition 1.5 / Proposition 1.4,(ii)(iii) の .src はそちらに乗っているので影響しない。**混同しない。**"
+  },
+  "galois-equivariant-tate-uniformization": {
+   "what": "M_l(E) = E[l] への G_K 作用と、Tate 一意化 E(K̄) ≅ K̄ˣ/q^ℤ がそれと同変であること。",
+   "whereUsed": [
+    "[GenEll] Lemma 3.2, (i)(ii)をスキームの水準で閉じるため"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "mathlib に Tate 曲線・Tate twist・M_l(E) は無い（2026-08-16 実測）。",
+    "partial": [
+     "ABC3 側: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（K 上、G_K-同変ではない）",
+     "ABC3 側: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean（Kˣ/q^ℤ の側は閉じている）"
+    ],
+    "absentPart": "G_K-同変性と、K̄ への拡張。"
+   },
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★原文は [FC]（Faltings–Chai）Ch. III に帰すが、**[FC] は 0_Source に無い**。★★しかし**同じ内容の別原典が手元にある**。",
+    "sources": [
+     "[RaySB427] Raynaud - Construction analytique de courbes en géométrie non archimédienne（Bourbaki 427）——Tate / Mumford の一意化そのもの",
+     "[Stacks] étale 基本群と Galois 作用の側"
+    ],
+    "howToProceed": "★[RaySB427] を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
+   }
+  },
+  "faltings-height-vs-degree-at-infinity": {
+   "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",
+   "whereUsed": [
+    "[GenEll] Proposition 3.4 の不等式の側",
+    "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "mathlib に Faltings 高さは無い。",
+    "partial": [
+     "ABC3 側: Found/GenEll/Covolume.lean ほか（並行セッションが構築中）"
+    ],
+    "absentPart": "比較不等式そのもの。"
+   },
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★原文は [Silv2]（Silverman, Advanced Topics）Prop 2.1 に帰すが、**[Silv2] は 0_Source に無い**。★★しかし**同じ内容の別原典が 2 つ手元にある**。",
+    "sources": [
+     "[DelSB616] Deligne - Preuve des conjectures de Tate et de Shafarevitch（Bourbaki 616）§1 HAUTEURS。★本人が「C’est la partie la plus technique, et la plus longue, de la preuve」と書いている。定義 1.1, 1.2 と 1.3。",
+     "[Elkik] Elkik - Fonctions de Green, volumes de Faltings（Astérisque 127）",
+     "[RayHt] Raynaud - Hauteurs et isogénies（Astérisque 127）——等因子写像での高さの変化（Lemma 3.5 が使う）"
+    ],
+    "howToProceed": "★[DelSB616] §1 を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
+   }
   }
  },
  "summary": {
@@ -272,5 +332,6 @@
    "EGA III / EGA IV は 0_Source に無い(EGA I と II はある)。★ただし EGA IV 8.8.2 に相当するものは Stacks 32.22 にあるので、必須ではない。",
    "★Numdam(numdam.org)で EGA は全巻無料公開されている——必要になれば正規に入手できる。"
   ]
- }
+ },
+ "_methodologyNote": "★★★★★2026-08-27 の重要な訂正。「person-years 規模の既知数学」を壁と呼んでいたが、**4 本の塞がりのうち 3 本は原典が 0_Source にあり、papers.json に登記済みである**。★したがって CLAUDE.md の進め方（スケルトンで依存グラフを作成後、葉から Lean 形式化）が**そのまま適用できる**。★★「壁」ではなく「まだグラフに載せていない道」である。★★★例外は arc-metric-not-attached-to-bundle だけで、これは原典の問題ではなく**我々の設計**である。"
 }
