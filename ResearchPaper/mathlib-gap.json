@@ -379,10 +379,17 @@
       "why": "★mathlib の ext_of_isDominant_of_isSeparated。★★生成点の稠密性（isDominant_specMap_fractionRing）は 3 行で出た——像は生成点 ⟨⊥⟩ を含み、その閉包は zeroLocus ⊥ = univ"
      },
      {
-      "stage": "2c",
-      "claim": "局所延長を開近傍へ広げて貼り合わせる",
+      "stage": "2c-1",
+      "claim": "局所延長を開近傍へ広げる",
+      "status": "closed",
+      "where": "Found/GenEll/OpenExtend.lean の exists_open_extend",
+      "why": "★mathlib の spread_out_of_isGermInjective′（SpreadingOut.lean、Stacks 0BX6）をそのまま使った。★★Spec O_F は整なので IsGermInjective は自動、底が Spec Z（終対象）なので S-射条件も自動。★★★茎と AtPrime 局所化を繋ぐのは mathlib の Spec.stalkIso。"
+     },
+     {
+      "stage": "2c-2",
+      "claim": "開近傍 {U_v} から開被覆を作って貼り合わせる",
       "status": "open",
-      "why": "★mathlib の spread_out_of_isGermInjective′（SpreadingOut.lean、Stacks 0BX6）がそのまま使える——Spec O_F は整なので IsGermInjective は自動で付く。★★貼り合わせの整合は 2b と同じ機構（生成点の稠密性）で出る。★★★残る配管は茎（stalk）と Localization.AtPrime の同一視である"
+      "why": "★道具はすべて特定済み:\n  (a) Scheme.Opens.iSupOpenCover (U : J → X.Opens) : (⨆ i, U i).toScheme.OpenCover\n  (b) Scheme.Cover.glueMorphisms（整合条件 hf を要求）\n  (c) ⨆ U_v = ⊤ は generic_mem_opens（OpenExtend.lean）から——空でない開は生成点を含むので、閉点を全部覆えばよい\n  (d) 整合 hf は ext_of_isDominant_of_isSeparated（extend_unique と同じ機構）\n★★残る配管は「g_v を生成点へ制限すると xK になる」を茎の言葉から取り出すところである。"
      }
     ],
     "remaining": "★★★★★**残るのは 2c だけであり、道具（spread_out_of_isGermInjective′）は mathlib にある。**"
