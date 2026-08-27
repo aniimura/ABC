@@ -307,18 +307,21 @@
       ]
      },
      {
-      "stage": "F2",
-      "claim": "その閉包が **ℤ-射影**であり、生成ファイバーが元の Y に戻ること",
+      "stage": "F2ab",
+      "claim": "閉包が **ℤ-射影**（ℙᴺ_ℤ への閉埋め込み）かつ **ℤ-固有**",
+      "status": "closed",
+      "where": "Found/GenEll/ProjectiveModel.lean の isProper_subscheme_projSpace / **projective_flat_model**",
+      "why": "★段 C1（ℙⁿ_R の固有性）が入ったので 2 行で出た。 ★★閉埋め込みは固有であり、固有射の合成は固有。 ★★★**射影性は別に示す必要がない**——subschemeι は mathlib の instance ですでに閉埋め込みであり、「ℤ-射影」とは ℙᴺ_ℤ の閉部分スキームであることだからである。"
+     },
+     {
+      "stage": "F2c",
+      "claim": "閉包の**生成ファイバーが元の Y に戻る**こと",
       "status": "open",
-      "why": "★射影性は段 C（P^n_S と O(1)）に帰着する。 ★★X_ℚ ≅ Y は平坦底変換とスキーム論的像の交換性である。 ★★★原文の吹き上げ（正規化）は Proposition 1.4, (iv) の証明の側であり、Remark 1.4.1 の括弧には要らない。",
-      "sources": [
-       "[Stacks] Blowing up",
-       "[GenEll] p.7 proof"
-      ]
+      "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
      }
     ],
-    "done": "8/12",
-    "remaining": "★★**残るのは C2・D4・E・F2 の 4 段**である。 ★**段 D は実質閉じた**——ample の定義・X_s の健全性・空虚封じ（アフィンなら構造層は ample）・切断の比まで入った。 ★★次の葉は **C2（O(1)）** か **台帳の外の「座標の高さと htArith の比較」**である。 ★★★後者は northcott_of_projModel の hcmp を直接埋める道で、ℙᴺ への閉埋め込みを経由しない可能性がある。"
+    "done": "9/13",
+    "remaining": "★★**残るのは C2・D4・E・F2c の 4 段**である。 ★段 D と段 F は実質閉じた。 ★★残る本体は **C2（O(1)——mathlib に twisting sheaf は 1 件も無い）** と **E（Serre の定理）**である。 ★★★F2c（生成ファイバーが Y に戻る）は小さい。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },

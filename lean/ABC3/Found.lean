@@ -457,6 +457,7 @@ import ABC3.Found.GenEll.ComapAffine
 import ABC3.Found.GenEll.ComapMul
 import ABC3.Found.GenEll.InvertibleSheaf
 import ABC3.Found.GenEll.ProjectiveSpace
+import ABC3.Found.GenEll.ProjectiveModel
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
