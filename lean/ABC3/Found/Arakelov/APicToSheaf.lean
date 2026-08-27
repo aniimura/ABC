@@ -509,6 +509,44 @@ theorem finite_quotient_gamma_of (R : CommRingCat.{0}) [IsDomain (R : Type)]
     Module.Finite.of_restrictScalars_finite (R : Type) _ _
   exact Module.finite_iff_finite.mp hmf
 
+/-! ## ★★★★★★★★★`deg_F` の有限部分 -/
+
+/-- ★★★★★★★★★**`deg_F` の有限部分** `log #(Γ(L)/(R·s))`。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★古典的な式 `deg_F(L) = (1/[F:Q])·( log #(Γ(L)/O_F·s) − Σ log|s|_σ )` の
+**第 1 項**である。
+★★`s ≠ 0` なら商は有限(`finite_quotient_gamma_of`、段 B)なので**意味を持つ**。 -/
+noncomputable def degFin (R : CommRingCat.{0}) (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)) : ℝ :=
+  Real.log (Nat.card ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier
+    : Type) ⧸ Submodule.span (R : Type) {s}))
+
+/-- ★★**商の位数は正**である(`s ≠ 0`)。 -/
+theorem card_pos_quotient_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0)
+    (hfin : ∀ r : (R : Type), r ≠ 0 →
+      Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))) :
+    0 < Nat.card ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+      ⧸ Submodule.span (R : Type) {s}) := by
+  haveI := finite_quotient_gamma_of R L s hs hfin
+  exact Nat.card_pos
+
+/-- ★★**有限部分は非負**である。 -/
+theorem degFin_nonneg (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0)
+    (hfin : ∀ r : (R : Type), r ≠ 0 →
+      Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))) :
+    0 ≤ degFin R L s := by
+  have h := card_pos_quotient_gamma R L s hs hfin
+  exact Real.log_nonneg (by exact_mod_cast h)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -545,6 +583,24 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def degFin.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(deg_F の有限部分 log #(Γ(L)/(R·s)))",
+    sectionId := "genell-def-1-1-ii" }
+
+def degFin.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "finite_quotient_gamma_of(商が有限＝段 B)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.finite_quotient_gamma_of") 4,
+    .implicitStep
+      ("★★段 D(s の取り方に依らないこと)の道筋: " ++
+       "s' = u·s (u ∈ F^×) で有限部分が +log|N(u)| 動き、" ++
+       "アルキメデス部分が −Σ log|σ(u)| 動く。" ++
+       "その和が 0 になるのが積公式で、" ++
+       "Found/GenEll/ProductFormula.lean の deg_principalADiv_eq_zero がそれである") 4,
+    .implicitStep
+      ("★★★段 E(加法性)の道筋: §9-743(引き戻しの乗法性)と " ++
+       "§9-750(APicM →* PicSheaf が群準同型)が効く") 4 ]
 
 def finite_quotient_gamma_of.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
