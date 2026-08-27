@@ -489,6 +489,7 @@ import ABC3.Found.GenEll.PullbackNatural
 import ABC3.Found.GenEll.ArchCompat
 import ABC3.Found.GenEll.HeightInvariant
 import ABC3.Found.GenEll.AlgPoint
+import ABC3.Found.GenEll.AlgPointClass
 import ABC3.Found.Arakelov.ArcEval
 import ABC3.Found.Arakelov.ArcConjInvol
 import ABC3.Found.Arakelov.ArcTopologyAffine
