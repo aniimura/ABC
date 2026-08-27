@@ -1300,3 +1300,35 @@ PresheafOfModules.naturality_apply (f : M₁ ⟶ M₂) (g : X ⟶ Y) (x : M₁.o
 と書く。★★`X` / `Y` は名前付き引数で明示しないと合わないことが多い。
 ★★★`exact hnat` か `exact hnat.symm` かはエラーメッセージの左右を見て決める
 ——`Eq.symm hnat` の表示が期待と**同じ向き**なら `exact hnat` が正しい。
+
+## `Scheme.Modules.smul_Spec_def` は `rfl` だが `rw` も `#synth` も通らない
+
+**測定**（2026-08-28、`Definition 1.1` の最後の 1 本を追ったとき）:
+
+mathlib の `Mathlib/AlgebraicGeometry/Modules/Tilde.lean` には
+
+```lean
+instance : Module R Γ(M, U) :=
+  inferInstanceAs <| Module R ((modulesSpecToSheaf.obj M).obj.obj (.op U))
+
+lemma smul_Spec_def (r : R) (x : Γ(M, U)) :
+    r • x = ((Spec R).presheaf.map U.leTop.op) ((Scheme.ΓSpecIso R).inv r) • x := rfl
+```
+
+があり、これが「`Γ(Spec ℂ, ⊤)` の `ℂ`-加群構造は `ΓSpecIso` 経由である」を与える。
+
+★**ところが具体化すると instance が出ない**:
+
+```lean
+#synth Module ((CommRingCat.of ℂ) : Type)
+  (Γ(unitModules (Spec (CommRingCat.of ℂ)), (⊤ : (Spec (CommRingCat.of ℂ)).Opens)) : Type)
+-- failed to synthesize
+```
+
+★★したがって `rw [Scheme.Modules.smul_Spec_def]` も通らない
+（`HSMul ↑(CommRingCat.of ℂ) ↑Γ(…) ?m` が出ない）。
+`c : ℂ` を `c : ((CommRingCat.of ℂ) : Type)` に書き換えても同じ。
+
+★★★**回避の方向**（未検証）: `moduleSpecΓFunctor` 側の項
+（`(moduleSpecΓFunctor.obj M : Type)`）で書くと `•` は出る——
+`arcFiber` はそちらの綴りなので、`ArcFiber.lean` の側から降りるほうが近い。
