@@ -727,6 +727,89 @@ theorem card_quotient_mul_card_map (R M : Type) [CommRing R] [AddCommGroup M] [M
   congr 1
   exact Nat.card_congr (Submodule.quotientQuotientEquivQuotient S T h).toEquiv
 
+/-! ## ★★★★★★★★★★段 D の到達点 -/
+
+/-- ★★部分加群の中で見た `span` は `comap` で書ける。 -/
+theorem comap_subtype_span_singleton (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    (T : Submodule R M) (x : M) (hx : x ∈ T) :
+    Submodule.comap T.subtype (Submodule.span R {x}) = Submodule.span R {(⟨x, hx⟩ : T)} := by
+  apply le_antisymm
+  · intro y hy
+    obtain ⟨r, hr⟩ := Submodule.mem_span_singleton.mp hy
+    exact Submodule.mem_span_singleton.2 ⟨r, Subtype.ext hr⟩
+  · rw [Submodule.span_le]
+    intro y hy
+    simp only [Set.mem_singleton_iff] at hy
+    subst hy
+    exact Submodule.mem_span_singleton_self x
+
+/-- ★★★**第二同型定理の位数版**。 -/
+theorem card_map_mkQ_eq (R M : Type) [CommRing R] [AddCommGroup M] [Module R M]
+    (S T : Submodule R M) :
+    Nat.card (Submodule.map S.mkQ T) = Nat.card (T ⧸ Submodule.comap T.subtype S) := by
+  have e := LinearMap.quotKerEquivRange (S.mkQ ∘ₗ T.subtype)
+  have hk : LinearMap.ker (S.mkQ ∘ₗ T.subtype) = Submodule.comap T.subtype S := by
+    rw [LinearMap.ker_comp, Submodule.ker_mkQ]
+  have hr : LinearMap.range (S.mkQ ∘ₗ T.subtype) = Submodule.map S.mkQ T := by
+    rw [LinearMap.range_comp, Submodule.range_subtype]
+  rw [← hk, ← hr]
+  exact (Nat.card_congr e.toEquiv).symm
+
+/-- ★★★★★★★★★★**商の位数は `u` 倍で `#(R/(u))` 倍になる**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+    `#(Γ/span{u·s}) = #(Γ/span{s}) · #(R/(u))`
+
+★★★これが台帳の**段 D の心臓**である。 -/
+theorem card_quotient_smul_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) :
+    Nat.card ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+        ⧸ Submodule.span (R : Type) {u • s})
+      = Nat.card ((AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)
+          ⧸ Submodule.span (R : Type) {s})
+        * Nat.card ((R : Type) ⧸ (Ideal.span {u} : Ideal (R : Type))) := by
+  have hmem : u • s ∈ Submodule.span (R : Type) {s} :=
+    Submodule.smul_mem _ u (Submodule.mem_span_singleton_self s)
+  rw [card_quotient_mul_card_map (R : Type) _ _ _ (span_smul_le_span (R : Type) _ u s),
+    card_map_mkQ_eq, comap_subtype_span_singleton (R : Type) _ _ (u • s) hmem]
+  congr 1
+  refine (Nat.card_congr ((quotIdealEquivQuotSpan R L s hs u).toEquiv.trans (Equiv.cast ?_))).symm
+  rw [map_spanSingletonEquiv_span R L s hs u]
+  congr 2
+
+/-- ★★★★★★★★★★**有限部分の `s` 依存性**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+    `degFin (u·s) = degFin s + log #(R/(u))`
+
+★★これが台帳の**段 D の有限部分側の到達点**である。
+★★★残るのはこのずれをアルキメデス部分 `−Σ log|σ(u)|` が打ち消すことであり、
+それが**積公式**である——`ProductFormula.lean` の
+`deg_principalADiv_eq_zero` が在庫にある。 -/
+theorem degFin_smul (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) (u : (R : Type)) (hu : u ≠ 0)
+    (hfin : ∀ r : (R : Type), r ≠ 0 →
+      Finite ((R : Type) ⧸ (Ideal.span {r} : Ideal (R : Type)))) :
+    degFin R L (u • s)
+      = degFin R L s + Real.log (Nat.card ((R : Type) ⧸ (Ideal.span {u} : Ideal (R : Type)))) := by
+  haveI := hfin u hu
+  have h1 : 0 < Nat.card ((AlgebraicGeometry.moduleSpecΓFunctor.obj
+      (AInv.toInvSheaf L).carrier : Type) ⧸ Submodule.span (R : Type) {s}) :=
+    card_pos_quotient_gamma R L s hs hfin
+  have h2 : 0 < Nat.card ((R : Type) ⧸ (Ideal.span {u} : Ideal (R : Type))) := Nat.card_pos
+  show Real.log (Nat.card (_ ⧸ Submodule.span (R : Type) {u • s})) = _
+  rw [card_quotient_smul_gamma R L s hs u, Nat.cast_mul,
+    Real.log_mul (by exact_mod_cast h1.ne') (by exact_mod_cast h2.ne')]
+  rfl
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -763,6 +846,24 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(degFin(u·s) = degFin(s) + log #(R/(u))——段 D の有限部分側の到達点)",
+    sectionId := "genell-def-1-1-ii" }
+
+def degFin_smul.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "card_quotient_mul_card_map(位数の乗法性)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.card_quotient_mul_card_map") 4,
+    .citation "[ABC3]" "quotIdealEquivQuotSpan / map_spanSingletonEquiv_span"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.quotIdealEquivQuotSpan") 4,
+    .citation "[mathlib]" "LinearMap.quotKerEquivRange(第二同型定理)"
+      (.inMathlib "LinearMap.quotKerEquivRange") 4,
+    .implicitStep
+      ("★★段 D の有限部分側はこれで閉じた。" ++
+       "残るのはこのずれ log #(R/(u)) をアルキメデス部分 " ++
+       "−Σ log|σ(u)| が打ち消すことであり、それが**積公式**である。" ++
+       "ProductFormula.lean の deg_principalADiv_eq_zero が在庫にある") 4 ]
 
 def card_quotient_mul_card_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
