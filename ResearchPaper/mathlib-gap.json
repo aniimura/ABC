@@ -372,8 +372,9 @@
      {
       "stage": "2c-2",
       "claim": "tateXtail / tateXterm / tateXpairE / tateXK の自然性",
-      "status": "open",
-      "why": "★段 2c-1 と**環演算の組み合わせ**で出る。 ★★tateXK = algebraMap R K (tateXpairE …) · (algebraMap R K (1-a))⁻¹² なので、R の中の自然性が出れば K へは自動である。"
+      "status": "closed",
+      "why": "★adicSum も Classical.choose だが **adicSum_unique** があるので、同じ「一意 ⇒ 自然」。 ★★Ring.inverse は一般には環準同型と可換でないが、**単元の上では可換**（1-t は t ∈ I なら単元）。 ★★★K の水準へは map_inv₀（体準同型は逆元と可換）で上がる。 ★★★★**これで tatePtPair の座標そのものが自然である**。",
+      "where": "Found/GaloisRep/TateSeriesNatural.lean（adicSum_map / tateXtail_map / tateYtail_map）と Found/GaloisRep/TateCoordNatural.lean（tateXpairE_map / **tateXK_map** / tateYK_map）"
      },
      {
       "stage": "2c-3",
@@ -401,8 +402,8 @@
       "why": "★★**K̄ˣ/q^ℤ のモデルでの Lemma 3.2 (i)(ii) は閉じている**。 ★段 4 があれば、M_l(E) をそのモデルと同定するだけである。"
      }
     ],
-    "done": "4/9",
-    "remaining": "★★残るは段 2c-2・2c-3（環演算と Point.some の合同）と、段 3（有限拡大）・段 4（帰納極限）である。 ★どれも**新しい数学ではなく帳簿**である。"
+    "done": "5/9",
+    "remaining": "★★残るは段 2c-3（Point.some の合同）と、段 3（有限拡大）・段 4（帰納極限）である。 ★**座標は揃った**ので 2c-3 は合同だけである。"
    },
    "impact": "★★★**§3 の 5 項目**（Lemma 3.2 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / その下流の Corollary 4.3・4.4）の門である。 ★**しかし段 1 と段 5 はすでに閉じており、残るのは同変性の帳簿 3 段だけである。**"
   },

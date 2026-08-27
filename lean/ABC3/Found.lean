@@ -818,6 +818,7 @@ import ABC3.Found.GenEll.Lemma32StableLine
 import ABC3.Found.GenEll.Lemma32QuotMu
 import ABC3.Found.GaloisRep.AdicSeries
 import ABC3.Found.GaloisRep.TateXY
+import ABC3.Found.GaloisRep.TateSeriesNatural
 import ABC3.Found.GaloisRep.QDomain
 import ABC3.Found.GaloisRep.TatePair
 import ABC3.Found.GaloisRep.TateExpand
@@ -997,6 +998,7 @@ import ABC3.Found.GaloisRep.TateMixedGroup
 import ABC3.Found.GaloisRep.TateUnitGroup
 import ABC3.Found.GaloisRep.TateOriginUniv
 import ABC3.Found.GaloisRep.TateOrigin
+import ABC3.Found.GaloisRep.TateCoordNatural
 import ABC3.Found.GaloisRep.TateFormal
 import ABC3.Found.GaloisRep.CollDenomFree
 import ABC3.Found.GaloisRep.CollOriginUniv
