@@ -186,16 +186,23 @@
     "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
    ],
    "mathlibStatus": {
-    "verdict": "absent",
-    "searched": "2026-08-27(第 365 ブロック)。Mathlib/AlgebraicGeometry/ 配下を Ample|VeryAmple|IsVeryAmple で grep —— **1 件もヒットしない**。Blowup|blowUp|Chow も Mathlib 全体で 0 件。",
+    "verdict": "partial-major",
+    "searched": "★★★**2026-08-27 に再測定して訂正した。**前回の「スキーム上の可逆層そのものが無い」は**誤り**であった——Ample|VeryAmple を grep しただけで、土台を見ていなかった。実際には以下が**すでにある**。",
     "partial": [
-     "Mathlib/NumberTheory/Height/Northcott.lean —— ℙⁿ 上の Northcott 性は**ある**(我々も使っている)",
-     "ABC3 側: Found/GenEll/NorthcottCoord.lean の northcott_of_projModel —— 射影埋め込みのデータを受け取れば Northcott が出る所まで来ている"
+     "★Mathlib/RingTheory/PicardGroup.lean: **Module.Invertible / CommRing.Pic**（環の水準の可逆加群と Picard 群。Module.Invertible.exists_linearEquiv_ideal まである）",
+     "★★Mathlib/AlgebraicGeometry/Modules/Sheaf.lean: **Scheme.Modules = SheafOfModules X.ringCatSheaf**、pushforward / pullback とその随伴（pullbackPushforwardAdjunction）",
+     "★★★Mathlib/Algebra/Category/ModuleCat/Sheaf/LocallyFree.lean: **SheafOfModules.IsLocallyFree**（局所自由層）",
+     "Mathlib/Algebra/Category/ModuleCat/Sheaf/Quasicoherent.lean: 準一貫層",
+     "Mathlib/Algebra/Category/ModuleCat/Presheaf/Monoidal.lean: **前層のテンソル積**（層の側は未組立）",
+     "Mathlib/AlgebraicGeometry/ProjectiveSpectrum/: Proj と**Proj の固有性**（Proper.lean）",
+     "Mathlib/AlgebraicGeometry/AffineSpace.lean: アフィン空間",
+     "Mathlib/NumberTheory/Height/Northcott.lean: ℙⁿ 上の Northcott 性",
+     "ABC3: Found/GenEll/NorthcottCoord.lean の northcott_of_projModel（座標のデータを受け取れば Northcott）"
     ],
-    "absentPart": "★ample / very ample の概念そのものが mathlib に無い。吹き上げも無い。"
+    "absentPart": "★**層のテンソル積**（前層のテンソル積の層化）——これが無いので Pic(X)（スキーム）が作れない。 ★★可逆層（階数 1 の局所自由層）という**定義**。 ★★★Proj 上の O(1)、P^n_S の点の関子（座標表示）。 ★★★★ample / very ample の定義と Serre の定理（ample のある冪が very ample）。 ★吹き上げ（Blowing up）。"
    },
    "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
-   "impact": "★★★残り 14 項目のうち **6 項目**がこの塞がりの下流にある。spreading out(4 項目)と並ぶ 2 大要因。",
+   "impact": "★★★★**残り 13 項目のうち 11 項目**がこの塡がりの下流にある（§1 の 5・§3 の 4・§4 の 2）。 ★**3 つの塡がりの中で最大のレバーである。**",
    "primarySource": {
     "measuredAt": "2026-08-27",
     "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
@@ -209,27 +216,72 @@
    },
    "decomposition": {
     "measuredAt": "2026-08-27",
-    "note": "★★★★★**スケルトン化して依存グラフに載せたところ、この塞がりは 2 段に分かれ、うち 1 段はその場で閉じた。**",
+    "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj）はすでにある**。 ★★残るのは上層である。",
     "stages": [
      {
-      "stage": 1,
-      "source": "[Stacks] Lemma 29.40.4（tag 01VT、物理 p.2516）",
-      "claim": "S アフィン・f 有限型のとき、ℒ が ample ならある d ≥ 1 と n ≥ 1 と immersion i : X → ℙⁿ_S があって ℒ^{⊗d} ≅ i*𝒪(1)",
-      "status": "blocked",
-      "why": "★mathlib に**スキーム上の可逆層そのものが無い**（AlgebraicGeometry/Modules/ にあるのは Presheaf / Sheaf / Tilde の 3 本だけ、2026-08-27 実測）。ample / very ample も 0 件。★★Proj は ProjectiveSpectrum/ にあるが、ℙⁿ_S の**点の関子（座標表示）は無い**。",
-      "structured": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html #stacks-lemma-29-40-4"
+      "stage": "A",
+      "claim": "層のテンソル積（SheafOfModules の monoidal 構造）",
+      "status": "open",
+      "why": "★前層の monoidal 構造は ModuleCat/Presheaf/Monoidal.lean に**ある**。 ★★層化（Sheafify.lean / Sheafification.lean）もある。 ★★★組み合わせるだけであるが、mathlib には Sheaf/Monoidal.lean が無い（2026-08-27 実測）。",
+      "sources": [
+       "[Stacks] 01CA Sheaves of modules",
+       "[Stacks] 01CC Tensor product"
+      ]
      },
      {
-      "stage": 2,
-      "source": "[Stacks] Lemma 29.42.7（tag 01W6、物理 p.2520）",
-      "claim": "X が S 上固有で Y が S 上分離的なら、X → Y の immersion は**閉**埋め込み。ゆえに mono であり、すべての T-点で単射。",
-      "status": "closed",
-      "where": "lean/ABC3/Found/Stacks/ProperImmersion.lean（sorry 0、2026-08-27）",
-      "why": "★★**ample の語彙を一切使わない**ので、可逆層が無くても書ける。★mathlib の IsProper.of_comp が本補題 (2) そのもの、UniversallyClosed.of_comp_of_isSeparated が (1) そのものであり、足りなかったのは「immersion ＋ 普遍閉 ⇒ 閉埋め込み」の 1 行だけだった。",
-      "structured": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-42-7.html #stacks-lemma-29-42-7"
+      "stage": "B",
+      "claim": "可逆層（階数 1 の局所自由層）と Pic(X)",
+      "status": "open",
+      "why": "★IsLocallyFree はあるので、局所生成元の字母を 1 点に制限すれば定義できる。 ★★Pic には段 A（テンソル積）が要る。 ★★★環の水準の Module.Invertible / CommRing.Pic は**すでにある**ので、アフィンでの比較は取れる。",
+      "sources": [
+       "[Stacks] 01CR Invertible modules",
+       "[Stacks] 0B8L The Picard group of a scheme"
+      ]
+     },
+     {
+      "stage": "C",
+      "claim": "P^n_S と O(1)（点の関子を含む）",
+      "status": "open",
+      "why": "★Proj はある（ProjectiveSpectrum/Scheme.lean）し、**Proj の固有性もある**（Proper.lean）。 ★★無いのは O(1) と、P^n の点を座標で書く層である。 ★★★**消費側（northcott_of_projModel）は座標を要求する**ので、ここが繋ぎ目になる。",
+      "sources": [
+       "[Stacks] 01M3 Projective space",
+       "[EGA2] 4.1"
+      ]
+     },
+     {
+      "stage": "D",
+      "claim": "ample / very ample の定義",
+      "status": "open",
+      "why": "★段 B・C があれば定義は短い。 ★★[Stacks] Definition 28.27.1（ample）と 29.38.1（relatively very ample）。",
+      "sources": [
+       "[Stacks] 28.27 Ample invertible sheaves",
+       "[Stacks] 29.38-29.41 relatively (very) ample"
+      ]
+     },
+     {
+      "stage": "E",
+      "claim": "Serre の定理: ample のある冪が very ample",
+      "status": "open",
+      "where": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み（tag 01VT、物理 p.2516）",
+      "why": "★**原典は手元にあり、構造化も済んでいる**。 ★★段 A-D が揃えば着手できる。",
+      "sources": [
+       "[Stacks] Lemma 29.40.4 (tag 01VT)",
+       "[Stacks] Lemma 29.40.5"
+      ]
+     },
+     {
+      "stage": "F",
+      "claim": "原文の吹き上げ（X から正規・Z-固有・Z-平坦な Y を作る）",
+      "status": "open",
+      "why": "★mathlib に Blowup は無い（2026-08-27 再確認）。 ★★ただし**消費側には不要な可能性がある**——Proposition 3.4 は M_ell に適用するので、その粗モジュライ P^1_j は Z 上の射影モデルを明示的に持つ。",
+      "sources": [
+       "[Stacks] Blowing up",
+       "[GenEll] p.7 proof"
+      ]
      }
     ],
-    "remaining": "★段 1（ample ⇒ immersion）と、★★「ℙⁿ(K) = 座標の組」（Proj の点の関子）の 2 つ。★★★**固有性から閉埋め込みを出す段と、閉埋め込みから点の単射性を出す段はもう残っていない**。"
+    "done": "0/6",
+    "remaining": "★★★**土台はすでにある**。最初の葉は**段 A（層のテンソル積）**であり、前層の monoidal 構造と層化の合成である。 ★mathlib へ PR できる形である。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
