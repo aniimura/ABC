@@ -258,14 +258,17 @@
       "why": "★mathlib に **twisting sheaf は 1 件も無い**（2026-08-27、Mathlib/AlgebraicGeometry 全体を twisting|Serre で検索して 0 件）。 ★★これが段 D（ample の定義）と 段 E（Serre の定理）の前提である。"
      },
      {
-      "stage": "D",
-      "claim": "ample / very ample の定義",
+      "stage": "D1",
+      "claim": "**X_s（切断の非消失軌跡）** と **ample の定義**",
+      "status": "closed",
+      "where": "Found/GenEll/AmpleDef.lean の trivValue / **nonVanishing** / presheafTensorPow / **IsAmple**",
+      "why": "★mathlib に加群層の**茂**は 1 件も無い（2026-08-27 実測）ので、教科書の定義（茂で s_x ∉ 𝔪_x M_x）は書けない。 ★★代わりに **IsLocallyTrivial が与える局所自明化 e : M|_V ≅ 𝟙 ごとに basicOpen を取って合併した**。 ★★★開であることが自動になり、自明化を選ばないので選択公理も要らない。 ★同じ V の上の自明化の取り方に依らないことも閉じた（basicOpen_trivValue_congr。機構は「環 R を自分自身の上の加群と見たときの線型同型は θ 1 倍で、θ 1 は単元」という純代数）。"
+     },
+     {
+      "stage": "D2",
+      "claim": "X_s の**異なる V, W にまたがる独立性**と very ample の定義",
       "status": "open",
-      "why": "★段 B・C があれば定義は短い。 ★★[Stacks] Definition 28.27.1（ample）と 29.38.1（relatively very ample）。",
-      "sources": [
-       "[Stacks] 28.27 Ample invertible sheaves",
-       "[Stacks] 29.38-29.41 relatively (very) ample"
-      ]
+      "why": "★X_s ⊓ V = X.basicOpen (trivValue M V e s) を示すには、**自明化の制限（Found/Arakelov/PicBasicTrivial.lean の trivialOfLe）と trivValue が可換**であることが要る。 ★★very ample（ℙᴺ への閉埋め込み）は段 C2（O(1)）の後である。"
      },
      {
       "stage": "E",
@@ -300,8 +303,8 @@
       ]
      }
     ],
-    "done": "5/9",
-    "remaining": "★★**残るのは C2・D・E・F2 の 4 段**である。 ★次の葉は段 D の核 **X_s（切断の非消失軌跡）**。 ★★道具はすでにある——IsLocallyTrivial が与える自明化 e : M|_V ≅ 𝟙 で切断を関数 f_V ∈ Γ(V, 𝒪) と見、Scheme.basicOpen f_V を取って合併する。 ★★★自明化の取り方に依らないことは「別の自明化は単元倍」から出る。"
+    "done": "6/10",
+    "remaining": "★★**残るのは C2・D2・E・F2 の 4 段**である。 ★次の葉は **D2（自明化の制限と trivValue の可換性）**——最も小さく、道具（trivialOfLe）はすでにある。 ★★段 E（Serre の定理）は ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },
