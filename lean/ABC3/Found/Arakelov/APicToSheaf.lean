@@ -280,6 +280,73 @@ theorem finrank_fractionRing_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
   haveI := invertible_gamma_toInvSheaf R L
   exact Module.Invertible.finrank_eq_one _ _
 
+/-! ## ★★★★★★★★★段 B の核 —— 商は捻れである -/
+
+open scoped TensorProduct in
+/-- ★★★★★**`Γ(L)` は分数体へ単射である**(＝torsion-free)。
+
+★実測(2026-08-28): `Module.Flat` は `Module.Invertible` から instance で出るが、
+`NoZeroSMulDivisors` への橋は instance としては**無い**。
+★★代わりに `Module.Flat.tensorProduct_mk_injective` が直接使える。 -/
+theorem gamma_toFractionRing_injective (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R)) :
+    Function.Injective
+      ((TensorProduct.mk (R : Type) (FractionRing (R : Type))
+        (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)) 1) := by
+  haveI := invertible_gamma_toInvSheaf R L
+  exact Module.Flat.tensorProduct_mk_injective _ _ _
+
+open scoped TensorProduct in
+/-- ★★★★★★★★★**商 `Γ(L)/(R·s)` は捻れである**(`s ≠ 0`)。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★★★これが台帳 `arakelov-degF-finite-places` の**段 B の核**である。
+
+★機構は 3 つの組み合わせ:
+
+| 道具 | 役割 |
+|---|---|
+| `finrank_fractionRing_gamma` | 分数体上で rank 1 |
+| `gamma_toFractionRing_injective` | `Γ(L) → K ⊗ Γ(L)` が単射 |
+| `IsFractionRing.div_surjective` | `c = a/y` に分解 |
+
+★★`s ≠ 0` なら `1 ⊗ s ≠ 0` で、rank 1 なので `1 ⊗ m = c • (1 ⊗ s)`。
+`c = a/y` の分母を払って単射性を使えば `y • m = a • s` となる。 -/
+theorem exists_smul_mem_span_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s m : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) :
+    ∃ r ∈ nonZeroDivisors (R : Type), r • m ∈ Submodule.span (R : Type) {s} := by
+  have hinj := gamma_toFractionRing_injective R L
+  have hts : (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] s ≠ 0 := by
+    intro h
+    refine hs (hinj ?_)
+    show (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] s
+      = (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] 0
+    rw [h, TensorProduct.tmul_zero]
+  obtain ⟨c, hc⟩ := (finrank_eq_one_iff_of_nonzero' _ hts).1 (finrank_fractionRing_gamma R L)
+    ((1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] m)
+  obtain ⟨a, y, hy, hay⟩ := IsFractionRing.div_surjective (R : Type) c
+  refine ⟨y, hy, ?_⟩
+  have hy0 : (algebraMap (R : Type) (FractionRing (R : Type))) y ≠ 0 :=
+    IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors hy
+  have h1 : ∀ (r : (R : Type))
+      (x : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type)),
+      (algebraMap (R : Type) (FractionRing (R : Type))) r
+          • ((1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] x)
+        = (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] (r • x) := by
+    intro r x
+    rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one,
+      Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul]
+  have key : (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] (y • m)
+      = (1 : FractionRing (R : Type)) ⊗ₜ[(R : Type)] (a • s) := by
+    rw [← h1, ← h1, ← hc, ← hay, smul_smul, mul_comm, div_mul_cancel₀ _ hy0]
+  have hym : y • m = a • s := hinj key
+  rw [hym]
+  exact Submodule.mem_span_singleton.2 ⟨a, rfl⟩
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -316,6 +383,27 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def exists_smul_mem_span_gamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(商 Γ(L)/(R·s) が捻れであること——台帳の段 B の核)",
+    sectionId := "genell-def-1-1-ii" }
+
+def exists_smul_mem_span_gamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "finrank_fractionRing_gamma(分数体上で rank 1)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.finrank_fractionRing_gamma") 4,
+    .citation "[mathlib]" "Module.Flat.tensorProduct_mk_injective(平坦なら分数体へ単射)"
+      (.inMathlib "Module.Flat.tensorProduct_mk_injective") 4,
+    .citation "[mathlib]" "finrank_eq_one_iff_of_nonzero' / IsFractionRing.div_surjective"
+      (.inMathlib "finrank_eq_one_iff_of_nonzero'") 4,
+    .implicitStep
+      ("★実測(2026-08-28): Module.Flat は Module.Invertible から instance で出るが " ++
+       "NoZeroSMulDivisors への橋は instance としては無い。" ++
+       "代わりに Module.Flat.tensorProduct_mk_injective が直接使える") 4,
+    .implicitStep
+      ("★★段 B に残るのは 1 つだけ: **有限生成＋捻れの O_F-加群は有限**。" ++
+       "O_F は有限生成 Z-加群なので Γ(L)/(O_F·s) もそうであり、" ++
+       "捻れなので有限") 4 ]
 
 def finrank_fractionRing_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
