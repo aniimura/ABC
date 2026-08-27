@@ -380,6 +380,7 @@ import ABC3.Found.GenEll.PrimesOfSize
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.RatTower
 import ABC3.Found.GenEll.RatTowerColimit
+import ABC3.Found.GenEll.SpecRatTower
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
 import ABC3.Found.GenEll.Conductor
