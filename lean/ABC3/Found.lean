@@ -391,6 +391,7 @@ import ABC3.Found.GenEll.DivisorDescent
 import ABC3.Found.GenEll.ConductorDescent
 import ABC3.Found.GenEll.LocalizationBridge
 import ABC3.Found.GenEll.PullbackLocalization
+import ABC3.Found.GenEll.Remark151Chain
 import ABC3.Found.GenEll.BcDiagramRaw
 import ABC3.Found.GenEll.ArithDivHom
 import ABC3.Found.GenEll.ProductFormula
