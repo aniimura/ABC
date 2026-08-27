@@ -176,6 +176,39 @@
    "howToMeasure": "[NCBelyi] Theorem 2.5 の証明(物理 p.6)の該当 3 行を 1_Structured に起こし、(1) 曲線上の直線束の次数 (2) H¹ の消滅判定 (3) 大域切断の点での全射性 の 3 段に分けて、各段の前提を数える。外部プロジェクト(lean-ecosystem.json)の在庫調査も同時に行う。",
    "done": 0,
    "where": []
+  },
+  "ample-and-projective-embedding": {
+   "what": "豊富(ample)な直線束の理論。とくに (a) ample ⟹ ある正のテンソル冪が very ample(Serre)、(b) very ample から射影空間への閉埋め込み、(c) 原文が使う吹き上げ(X から正規・ℤ-固有・ℤ-平坦な Y を作り φ:Y→X が生成ファイバーで同型、ψ:Y→ℙⁿ_ℤ)。",
+   "whereUsed": [
+    "[GenEll] Proposition 1.4, (iv)(Northcott 性)の証明——原文 p.7「[some positive tensor power of] the ample line bundle LQ yields an embedding ϵQ : XQ ⊆ PQ」",
+    "[GenEll] Proposition 3.4 の有限性の主張(Prop 1.4, (iv) を引く)",
+    "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-08-27(第 365 ブロック)。Mathlib/AlgebraicGeometry/ 配下を Ample|VeryAmple|IsVeryAmple で grep —— **1 件もヒットしない**。Blowup|blowUp|Chow も Mathlib 全体で 0 件。",
+    "partial": [
+     "Mathlib/NumberTheory/Height/Northcott.lean —— ℙⁿ 上の Northcott 性は**ある**(我々も使っている)",
+     "ABC3 側: Found/GenEll/NorthcottCoord.lean の northcott_of_projModel —— 射影埋め込みのデータを受け取れば Northcott が出る所まで来ている"
+    ],
+    "absentPart": "★ample / very ample の概念そのものが mathlib に無い。吹き上げも無い。"
+   },
+   "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
+   "impact": "★★★残り 14 項目のうち **6 項目**がこの塞がりの下流にある。spreading out(4 項目)と並ぶ 2 大要因。"
+  },
+  "arc-metric-not-attached-to-bundle": {
+   "what": "★これは mathlib の欠落ではなく**我々の設計の穴**である(2026-08-27 に発見、Check/GenEll/Def12Degenerate.lean で機械検証)。arcCM X = C(X^arc, ℝ) は点上の関数であって L^arc 上のエルミート計量ではないので、束と計量の対応が失われている。その結果 deg_F が Pic 類を見ず、ht も見ない。",
+   "whereUsed": [
+    "[GenEll] Definition 1.1(算術直線束 = 可逆層 + ι_X-両立な計量)",
+    "[GenEll] Definition 1.2, (i)(高さ ht_M̄)"
+   ],
+   "mathlibStatus": {
+    "verdict": "not-a-mathlib-gap",
+    "searched": "Pic(Spec 𝓞_F) ≃ ClassGroup は Found/Arakelov/PicSpecWitness.lean の picSpecEquiv に**既にある**(mathlib の ClassGroup.equivPic 経由)。足りないのは類群の側ではない。",
+    "absentPart": "★★arcCM を「L に付いた計量」に変える設計変更(APicData の ofMetric / forgetMetric の水準)。★APicSpecData に「deg_F を有限素点と結ぶ欄」を足すだけでは**現在の APic では満たせない**。"
+   },
+   "minimalForm": "★Spec 𝓞_F で言うと: 原文は L の生成元 s に対し |s|_σ を持ち deg_F = log #(L/s𝓞_F) − ∑_σ log|s|_σ(s の取り替えで両項が動き和は不変、積公式)。実装は −log|s|_σ を s を記録せずに持つ。",
+   "note": "★★★因子表示(Found/GenEll/HeightConstruction.lean の htArith)は健全である——有限素点を見ている。Proposition 1.6 / Definition 1.5 / Proposition 1.4,(ii)(iii) の .src はそちらに乗っているので影響しない。**混同しない。**"
   }
  },
  "summary": {
