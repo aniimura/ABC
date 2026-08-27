@@ -688,17 +688,56 @@
     "done": "5/5",
     "remaining": "★★★**なし**。到達点は htArith_bdeq_of_chartwise_localization：\n  X が有限個のネーターなアフィンチャートで覆われ、各チャートで D と E が N を反転して一致するなら ht_D ≈ ht_E。"
    }
+  },
+  "finite-flat-group-scheme-quotient": {
+   "what": "有限平坦群スキームによる商。とくに [GenEll] Lemma 3.2, (ii) の μ_l ⊆ E （𝒪_K 上の有限平坦部分群スキーム）と E′ = E/μ_l。",
+   "whereUsed": [
+    "[GenEll] Lemma 3.2, (ii) の (a)(b)（μ_l が有限平坦部分群スキームであること、E′ が 1 次元半アーベルスキームであること）",
+    "★その下流: Lemma 3.5（E_H = E/H_F）"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-08-27 実測。mathlib に群スキームによる商は無い。AlgebraicGeometry/Group/ はあるが、有限平坦部分群スキームによる商の存在定理（SGA3 / Raynaud）は無い。",
+    "partial": [
+     "★★★ABC3: Found/GenEll/Lemma32QuotMu.lean——**一意化の側では閉じている**（ker_pow_mk_eq・vAdd_pow・mu_inj）。Kˣ/q^ℤ の上では x ↦ x^l が Kˣ/q^ℤ → Kˣ/q^{lℤ} を与え、核が μ_l である。",
+     "★ABC3: 2026-08-27 に galois-equivariant-tate-uniformization が閉じたので、「一意化の側で述べる」ことの正当化は取れている。"
+    ],
+    "absentPart": "★μ_l を 𝒪_K 上の**有限平坦部分群スキーム**として作る段。 ★★その商 E/μ_l を**スキームとして**作る段。 ★★★商が再び 1 次元半アーベルスキームになること。"
+   },
+   "minimalForm": "★消費側が実際に使うのは **q_{E′} = q_E^l と deg_∞(E′) = l·deg_∞(E) だけ**であり、両方とも Lemma32QuotMu.lean にある。 ★★したがって Lemma 3.5 以降は**商をスキームとして作らなくても進める**。 ★★★作らなければならないのは **Lemma 3.2 の (ii) を項目として閉じるときだけ**である。",
+   "impact": "★**Lemma 3.2 を項目として閉じるのに必要な最後の 1 本**。 ★★(i) は 2026-08-27 に閉じた（Found/GenEll/Lemma32Uniformized.lean）。 ★★★ただし minimalForm の通り、**下流（Lemma 3.5 以降）はこれを待たない**。",
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★原文は [FC] Chapter III に帰すが **[FC] は 0_Source に無い**。 ★★群スキームの商の一般論は [SGA3] / Raynaud であり、これも手元に無い。",
+    "sources": [
+     "[FC] Faltings-Chai, Degenerations of Abelian Varieties, Chapter III",
+     "[SGA3] Schémas en groupes",
+     "[Stacks] Groupoid schemes / quotients"
+    ],
+    "howToProceed": "★まず **minimalForm で進む**——商をスキームとして作らず、q_{E′} = q_E^l を持つ Tate 曲線として特徴づける。 ★★項目として閉じるには群スキームの商が要るが、それは person-years 規模の別項目である。"
+   }
   }
  },
  "summary": {
-  "totalNodesKnown": 11,
-  "totalNodesKnownNote": "tame-ramification 6 + belyi-noncritical 5。残り 2 件(spreading-out-over-base / riemann-roch-curves)は未測定。",
-  "totalDone": 7,
+  "measuredAt": "2026-08-27",
+  "note": "★★★★★**2026-08-27 に全面的に測り直した。** この日 2 つの塡がりを absent から**全段閉じた**。",
+  "closedToday": [
+   "vertical-divisors-generate-pic-kernel (5/5)——交点数も Weil 因子類群も要らなかった。有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であること の 4 つだけ。",
+   "galois-equivariant-tate-uniformization (10/10)——ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いていた（eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique）。**一意 ⇒ 自然** で 8 段が機械的に閉じた。"
+  ],
+  "funnel": {
+   "note": "★★**残り 13 項目がどの塡がりで止まっているか**（2026-08-27 実測）。",
+   "sec1": "§1 の 5 項目（Definition 1.1 / Definition 1.2 / Proposition 1.4 / Remark 1.4.1 / Proposition 1.7） → **ample-and-projective-embedding (1/7)**。 ★土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）は mathlib にある。 ★★最初の葉は段 A（層のテンソル積）である。",
+   "sec2": "§2 の 1 項目（Theorem 2.1） → **belyi-noncritical**。 ★未分割ではなく、5 節点中 3、残る Lemma 2.4 も 9 節点中 8 が閉じている。",
+   "sec3": "§3 の 5 項目（Lemma 3.2 / Proposition 3.4 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8）: Lemma 3.2 → **finite-flat-group-scheme-quotient**（(ii) の E/μ_l）、残り 4 項目 → **faltings-height-vs-degree-at-infinity (2/6)**。 ★段 5・6（初等）は閉じた。残る 1〜4 は複素解析であり、並行セッションが Lattice*.lean / Covolume.lean / JFunction.lean で構築中。",
+   "sec4": "§4 の 2 項目（Corollary 4.3 / 4.4） → Theorem 3.8 の下流、すなわち §3 と同じ塡がり。",
+   "conclusion": "★★★**実質的な塡がりは 4 つ**である: ample-and-projective-embedding・faltings-height-vs-degree-at-infinity・belyi-noncritical・finite-flat-group-scheme-quotient。 ★うち 2 つ（faltings の段 1〜4、belyi の Lemma 2.4）は**並行セッションが現在進めている**。"
+  },
   "nextActions": [
-   "1. [NCBelyi] Lemma 2.2 と Lemma 2.4 の Skeleton を書く(原典があるので今すぐ書ける。★sorry は一時的に増える——これは依存グラフ展開の正しい手順である)",
-   "2. riemann-roch-curves の最小構成を測る(NCBelyi p.6 の 3 行を 1_Structured に起こす)",
-   "3. spreading-out-over-base の最小構成を測る(GenEll p.8-9)",
-   "4. tame-ramification の最終組み立て(剰余体の一致と [L:K] = e から)"
+   "1. ample の段 A（層のテンソル積）——PresheafOfModules.monoidalCategory はあるので、層化に沿って monoidal 構造を降ろす 1 本。mathlib へ PR できる形。",
+   "2. あるいは段 A を避けて **L^{⊗n} だけを再帰で定義**する（ample の定義にはそれで足りる）。",
+   "3. faltings の段 1〜4 は並行セッションの領分——**重複を避けること**（本日 ComapMul.lean で二度書きした）。",
+   "4. finite-flat-group-scheme-quotient は minimalForm （q_{E′} = q_E^l で特徴づける）で下流は進める。"
   ]
  },
  "sourceNodesFound": {
