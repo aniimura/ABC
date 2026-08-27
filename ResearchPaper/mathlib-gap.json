@@ -221,15 +221,17 @@
     "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）はすべてある**。 ★★残るのは上層だけである。",
     "stages": [
      {
-      "stage": "A",
-      "claim": "層のテンソル積（SheafOfModules の monoidal 構造）",
+      "stage": "A1",
+      "claim": "層のテンソル積の**対象**と L^{⊗n}（回避経路）",
+      "status": "closed",
+      "where": "Found/GenEll/InvertibleSheaf.lean の **schemeTensorObj** / schemeTensorPow / IsInvertibleModule",
+      "why": "★前層のテンソル積（PresheafOfModules.Monoidal.tensorObj）を**層化する**だけ。 ★★X.ringCatSheaf.obj = X.presheaf ⋙ forget₂ CommRingCat RingCat が **rfl** なので型はそのまま合う（2026-08-27 実測）。 ★★★層化は PresheafOfModules.sheafification (𝟙 _)——構造前層は既に層なので α = 𝟙 が局所全単射。 ★可逆層は [Stacks] 01CR の定義（逆元を持つ）で入れた。"
+     },
+     {
+      "stage": "A2",
+      "claim": "monoidal 構造の**全体**（結合子・単位子・五角形・三角形）",
       "status": "open",
-      "why": "★★★★**2026-08-27 に #check で実測した結果**: \n  ある: PresheafOfModules.monoidalCategory（前層のテンソル積は monoidal category として完成）\n  ある: Monoidal.transport / Monoidal.transportStruct（ただし**圈同値に沿ってのみ**）\n  無い: CategoryTheory.Localization.Monoidal\n  無い: CategoryTheory.Localization.monoidalCategory\n  無い: CategoryTheory.Monoidal.Reflective\n  無い: CategoryTheory.Adjunction.monoidal\n★したがって段 A は**「反射的局所化（層化）に沿って monoidal 構造が降りる」を一から作る**ことになる——mathlib への PR 規模の仕事である。\n★★**回避経路**: 全 monoidal 構造（結合子・単位子・五角形・三角形）を作らず、**tensorObj だけを定義して L^{⊗n} を再帰で作る**。ample の定義（[Stacks] 28.27.1）にはそれで足りる。",
-      "sources": [
-       "[Stacks] 01CA Sheaves of modules",
-       "[Stacks] 01CC Tensor product",
-       "mathlib: PresheafOfModules.monoidalCategory (already present)"
-      ]
+      "why": "★これが mathlib への PR 規模の仕事である。 ★★Localization.Monoidal / Monoidal.Reflective / Adjunction.monoidal は**いずれも無い**（2026-08-27 #check で実測）。 ★★★**段 D（ample の定義）には要らない**——A1 だけで足りる。要るのは段 B（Pic(X)）と L^{⊗(m+n)} ≅ L^{⊗m} ⊗ L^{⊗n} である。"
      },
      {
       "stage": "B",
@@ -294,8 +296,8 @@
       ]
      }
     ],
-    "done": "1/7",
-    "remaining": "★★★**土台はすでにある**。最初の葉は段 Aであり、**全 monoidal 構造を作る道（mathlib への PR 規模）と、tensorObj だけで L^{⊗n} を作る回避経路**の 2 つがある。 ★段 F1（閉包の ℤ-平坦性）は 2026-08-27 に閉じた。"
+    "done": "2/8",
+    "remaining": "★★**次の葉は段 C（P^n_S と O(1)）または 段 D（ample の定義）**である。 ★段 D には X_s（切断の非消失軌跡）が要るが、monoidal 構造の全体（段 A2）は要らない。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
