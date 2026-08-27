@@ -8,6 +8,7 @@ import ABC3.Found.GenEll.NorthcottCoord
 import ABC3.Found.GenEll.HeightMetric
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.HeightClass
+import ABC3.Found.GenEll.LogCondSigma
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -275,32 +276,70 @@ noncomputable def defn_1_5 {F : Type*} [Field F] [NumberField F] : ADiv F → �
 `log-diff_X` はスキーム `X_ℚ` だけに依る。`log-cond_D` は対 `(X, D)` に依り得るが、
 **その BD-class は ℚ-スキームの対 `(X_ℚ, D_ℚ)` だけに依る**。
 
-★理由は原文が書いている——別の対の同型は
-**ある有限素数集合 `Σ` の上で** `ℤ[Σ^{-1}]` へ延びる。
+## ★★★★★★★★★★ 2026-08-27——**構成に載せ替えた**(第 420 ブロック)
 
-## ★★★★★★ 2026-08-26——**前半はすでに `Found/` にある**(第 372 の実測)
+★**旧 statement(`∀ D D′ : HeightTheoryData, …`)は偽であった**
+——`Check/GenEll/RemarkAxiomGap.lean` の `remark_1_5_1_false` で機械検証済み。
+`HeightTheoryData` は公理を 1 つも持たないので、点の全単射だけでは
+`logDiff` を何も縛らない(`logDiff` を `0` と `x` に取れば反例になる)。
 
-原文の主張は 2 つに分かれる:
+★★**したがって旧 statement の `sorry` は「spreading out 待ち」ではなかった**
+——spreading out を実装しても statement は偽のままで、**原理的に閉じられない**。
+`Proposition 1.4` / `Remark 1.4.1` と同じ病であり、同じ治療(構成への載せ替え)を施した。
 
-| 半分 | 状態 |
+### 前半と後半
+
+| 半分 | 構成の側での扱い |
 |---|---|
-| `log-diff_X` は `X_ℚ` だけに依る | ★**すでにある**——`Found/GenEll/LogDiff.lean` の `logDiffOfField` は **`X` を引数に持たない**し、`LogDiffValue.lean` の `logDiffOfField_eq` が `log|disc F| / [F:ℚ]` と値を与える(実際には `X_ℚ` にさえ依らない) |
-| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけに依る | ★★**こちらが残っている**——spreading out(`ℤ[Σ^{-1}]` への延長)が要る |
+| `log-diff_X` は `X_ℚ` だけに依る | ★**定義から明らか**——`logDiffOfField` は `X` を引数に持たない |
+| `log-cond_D` の BD-class は `(X_ℚ, D_ℚ)` だけに依る | ★★**本 statement の後半**。定数は `Σ_{q∈Σ} log q` |
 
-★★★**前半だけを `Remark 1.5.1` として書き換えることはしない**——
-後半は `Proposition 1.7` の証明が実際に使う(『Σ 上の log-cond の寄与は ≈ 0』)ので、
-落とすと下流に影響が出る。★★★★**この `sorry` は spreading out 待ちである**。
-★**「有限個の素数を除けば」という緩みが BD-class に吸収される**というのが
-この論文が BD-class を使う理由そのものであり、
-`Proposition 1.7` の証明でも「`Σ` の上の寄与は `≈ 0`」として同じ形で現れる。 -/
-theorem remark_1_5_1 (D D' : HeightTheoryData)
-    (ePt : D.Point ≃ D'.Point)
-    (dv : D.Divisor) (dv' : D'.Divisor)
-    (hcompl : ∀ x, x ∈ D.compl dv ↔ ePt x ∈ D'.compl dv') :
-    BDeq (D.logDiff) (fun x => D'.logDiff (ePt x))
-  ∧ BDeq (fun x : ↥(D.compl dv) => D.logCond dv x.1)
-         (fun x : ↥(D.compl dv) => D'.logCond dv' (ePt x.1)) := by
-  sorry
+### 逸脱(明示)
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ D D′ : HeightTheoryData` | **`ArithCartier` / `IdealSheafData` の引き戻し** | 前者では偽だから |
+| spreading out | 証明の中で使う | **仮定 `hagree` として受ける** | ★下記 |
+
+★★★**`hagree`(`Σ` の外で導手が一致する)は spreading out の帰結である**。
+原文の証明は『同型が `ℤ[Σ^{-1}]` へ延びる』でこれを与え、そこから BD-class の一致を結論する。
+★**本 statement は後半を証明し、前半を仮定に置いた**——`.needs` に明記してある。
+
+★★★★**空虚ではない**——`Check/GenEll/RemarkSigmaWitness.lean` に
+`hagree` が実際に満たされる場合(`D = D′`、`Σ = ∅`)を置いてある。
+
+### ★★★★★定数が `Σ` だけで決まることが要点
+
+`Σ_{q ∈ Σ} log q` は **`Σ` だけで決まり、点 `x` にも定義体 `F` にも依らない**。
+一様性の機構は「`log-cond` は `deg / [F:ℚ]`、`Σ` の上の寄与の分子 `Σ_{v|q} f_v` は
+`Σ_{v|q} e_v f_v = [F:ℚ]` で抑えられる ⟹ **`[F:ℚ]` が約分される**」である
+(`Found/GenEll/SigmaBound.lean`)。
+★これが**この論文が BD-class を使う理由そのもの**である。 -/
+theorem remark_1_5_1 (F : Type) [Field F] [NumberField F]
+    {X X' : AlgebraicGeometry.Scheme.{0}}
+    (D : X.IdealSheafData) (D' : X'.IdealSheafData)
+    (ePt : (ABC3.Found.GenEll.specRingOfIntegers F ⟶ X) →
+           (ABC3.Found.GenEll.specRingOfIntegers F ⟶ X'))
+    (Sig : Finset ℕ) (hprime : ∀ q ∈ Sig, q.Prime)
+    (ch : ABC3.Found.GenEll.FinitePlace F → ℕ)
+    (hover : ∀ v : ABC3.Found.GenEll.FinitePlace F,
+      (v.asIdeal).LiesOver (Ideal.span {((ch v : ℕ) : ℤ)}))
+    (hI : ∀ xF, ABC3.Found.GenEll.pullbackIdeal F D xF ≠ 0)
+    (hI' : ∀ xF, ABC3.Found.GenEll.pullbackIdeal F D' (ePt xF) ≠ 0)
+    (hagree : ∀ xF, ∀ v, ch v ∉ Sig →
+      (ABC3.Found.GenEll.conductorADiv F D xF).fin v
+        = (ABC3.Found.GenEll.conductorADiv F D' (ePt xF)).fin v) :
+    -- (前半) `log-diff` は模型に依らない(構成の側では定義から)
+    (∀ (xF : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X)
+       (xF' : ABC3.Found.GenEll.specRingOfIntegers F ⟶ X'),
+        ABC3.Found.GenEll.logDiffOfField F = ABC3.Found.GenEll.logDiffOfField F)
+    -- (後半) `log-cond` の BD-class は一致する
+  ∧ BDeq (fun xF => ABC3.Found.GenEll.logCond F D xF)
+         (fun xF => ABC3.Found.GenEll.logCond F D' (ePt xF)) := by
+  refine ⟨fun _ _ => rfl, ⟨∑ q ∈ Sig, Real.log q, fun xF => ?_⟩⟩
+  exact ABC3.Found.GenEll.abs_logCond_sub_le_sum_log F D D' xF (ePt xF)
+    (hI xF) (hI' xF) Sig hprime ch (hagree xF) hover
+
 
 /-! ## Proposition 1.6 —— 導手は高さで抑えられる -/
 
@@ -451,9 +490,10 @@ def remark_1_5_1.src : Source :=
 def remark_1_5_1.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Remark 1.4.1(BD-class の理論が X_ℚ だけに依る)" 8,
     .implicitStep
-      "原文の証明は『ある有限素数集合 Σ の上で同型が ℤ[Σ^{-1}] へ延びる』という 1 文である。★その延長の存在(スキームの spreading out)は与えられていない" 9,
-    .citation "[GenEll]" "ℤ[Σ^{-1}] ≝ ℤ[{p^{-1}}_{p∈Σ}] への spreading out"
-      (.absent "mathlib に scheme の spreading out / 有限型スキームの ℤ 上のモデルの理論は無い(2026-08-16、Mathlib/AlgebraicGeometry 配下の全宣言名を確認)") 9 ]
+      "★★★本 statement は原文の証明のうち**後半だけ**を証明している。前半(同型が ℤ[Σ^{-1}] へ延びること = spreading out)は仮定 hagree(Σ の外で導手が一致する)として受けている。★空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で確かめてある" 9,
+    .otherPaper "[Stacks]" "32.22 Descending finite type schemes(有限型スキームの降下——EGA IV §8 にあたる)" 4441,
+    .implicitStep
+      "★★旧 statement(∀ D D′ : HeightTheoryData, …)は**偽**であった——Check/GenEll/RemarkAxiomGap.lean の remark_1_5_1_false で機械検証済み。2026-08-27 に構成へ載せ替えた(第 420 ブロック)。逆向きの逸脱をしていないことは、定数が Σ だけで決まり点にも定義体にも依らないことで担保されている" 8 ]
 
 def prop_1_6.src : Source :=
   { paper := "GenEll", pdfPage := 9, item := "Proposition 1.6",

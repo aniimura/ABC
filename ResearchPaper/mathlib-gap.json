@@ -98,7 +98,14 @@
         "lean/ABC3/Found/GenEll/SigmaBound.lean",
         "lean/ABC3/Found/GenEll/LogDiff.lean",
         "lean/ABC3/Check/GenEll/RemarkAxiomGap.lean"
-      ]
+      ],
+      "skeletonStatus": {
+        "at": "2026-08-27(第 420 ブロック)",
+        "what": "★Skeleton の remark_1_5_1 を構成へ載せ替え、sorry を外した。Skeleton/GenEll + Skeleton/NCBelyi の sorry は 4 → 3。",
+        "honest": "★★これは『原文の Remark 1.5.1 を証明した』ではない。旧 statement は**偽**であった(Check/GenEll/RemarkAxiomGap.lean で機械検証済み)ので、そのままでは決して閉じられなかった。prop_1_4 / remark_1_4_1 と同じ治療(構成への載せ替え)を施し、原文の証明の**後半だけ**を証明して前半(spreading out)を仮定 hagree に置いた。",
+        "nonVacuous": "★★★仮定が空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で機械検証した(D = D′, Σ = ∅ で hagree が成り立ち、結論 BDeq が実際に得られる)。",
+        "stillNeeded": "★★★★Σ ≠ ∅ の場合に hagree を供給する幾何(= spreading out、段 1-3)。.needs に [Stacks] 32.22 として登記した。"
+      }
     },
     "belyi-noncritical": {
       "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
