@@ -5,6 +5,7 @@ import ABC3.Found.GenEll.PointCorrespondence
 import ABC3.Found.GenEll.HeightClass
 import ABC3.Found.GenEll.VerticalTwist
 import ABC3.Found.GenEll.VerticalBound
+import ABC3.Found.GenEll.IdealComparable
 
 /-!
 # [GenEll] Remark 1.4.1 —— **2 つの `ℤ`-モデルにまたがる形**（`Found`）
@@ -170,10 +171,55 @@ theorem remark_1_4_1_of_descent_bound {X X' : Scheme.{0}}
   obtain ⟨ePt, hcompat⟩ := exists_ePt F f f' A hinv φ
   exact ⟨ePt, hcompat, fun J hJn h => htArith_bdeq_of_idealADiv_diff F D E ePt n hn J hJn h⟩
 
+/-- ★★★★★★★★★★**[GenEll] Remark 1.4.1 —— 最も弱い仮定の版**。
+
+原文 (GenEll p.8):
+> Remark 1.4.1. Observe that it follows immediately from the definitions, together with Proposition 1.4, (iii), that the theory of
+
+仮定の梯子（弱いほど下）:
+
+| 版 | 仮定 | 定数 | 出どころ |
+|---|---|---|---|
+| `remark_1_4_1_of_descent` | 引き戻した**類が一致** | `0` | `HeightClass` |
+| `remark_1_4_1_of_descent_twist` | 差が `Spec ℤ` から来る | `deg_ℚ(N)` | `VerticalTwist` |
+| `remark_1_4_1_of_descent_bound` | 差のイデアルが `n` を含む | `log n` | `VerticalBound` |
+| **本定理** | 2 つのイデアルが **`n` で互いに比較できる** | `log n` | `IdealComparable` |
+
+★★★★★最下段が**「`n` を反転すれば一致する」の定量版**である
+——これが降下（`exists_pair_descent`）が実際に与える形に最も近い。
+
+★★残る段は**一様な `n` をスキームから取ること**である
+（`X` は準コンパクトなのでアフィン被覆は有限、
+各チャートで `exists_pow_mul_le_of_map_le`、その最大を取る）。 -/
+theorem remark_1_4_1_of_descent_comparable {X X' : Scheme.{0}}
+    (f : X ⟶ Spec (CommRingCat.of ℤ)) (f' : X' ⟶ Spec (CommRingCat.of ℤ)) [IsProper f']
+    {m : ℕᵒᵖ}
+    (A : Type) [CommRing A] [IsDomain A] [Algebra (NumberField.RingOfIntegers F) A]
+    [Algebra A F] [IsScalarTower (NumberField.RingOfIntegers F) A F] [IsFractionRing A F]
+    (hinv : IsUnit (algebraMap ℤ A ((Nat.factorial m.unop : ℕ) : ℤ)))
+    (φ : bcObj f m ⟶ bcObj f' m)
+    (D : ArithCartier X) (E : ArithCartier X') (n : ℕ) (hn : n ≠ 0) :
+    ∃ ePt : (specRingOfIntegers F ⟶ X) → (specRingOfIntegers F ⟶ X'),
+      (∀ xF, Spec.map (CommRingCat.ofHom (algebraMap (NumberField.RingOfIntegers F) A)) ≫ ePt xF
+        = liftPointToBc F A hinv f xF ≫ φ ≫
+          pullback.snd (overRatTowerDiagram.obj m).hom f')
+      ∧ ((∀ xF, pullbackIdeal F D.divisor xF ≠ 0) →
+         (∀ xF, pullbackIdeal F E.divisor (ePt xF) ≠ 0) →
+         (∀ xF, Ideal.span {((n : ℕ) : NumberField.RingOfIntegers F)}
+             * pullbackIdeal F D.divisor xF ≤ pullbackIdeal F E.divisor (ePt xF)) →
+         (∀ xF, Ideal.span {((n : ℕ) : NumberField.RingOfIntegers F)}
+             * pullbackIdeal F E.divisor (ePt xF) ≤ pullbackIdeal F D.divisor xF) →
+         (∀ xF, (archADiv F D.green xF).sum (fun _ r => r)
+             = (archADiv F E.green (ePt xF)).sum (fun _ r => r)) →
+         BDeq (fun xF => htArith F D xF) (fun xF => htArith F E (ePt xF))) := by
+  obtain ⟨ePt, hcompat⟩ := exists_ePt F f f' A hinv φ
+  exact ⟨ePt, hcompat, fun hD0 hE0 h1 h2 harc =>
+    htArith_bdeq_of_ideal_comparable F D E ePt n hn hD0 hE0 h1 h2 harc⟩
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**条つきである。** 原文の「`X_ℚ` だけに依る」を仮定なしで出すには
-垂直因子の差の評価（`∑_q n_q · f^*(q)` の形）が要る。 -/
+一様な `n` をスキームの側から取る段が要る。 -/
 
 def htArith_bdeq_of_pullbackAPic_eq'.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
@@ -193,6 +239,11 @@ def remark_1_4_1_of_descent_twist.src : ABC3.Meta.Source :=
 def remark_1_4_1_of_descent_bound.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Remark 1.4.1(到達点——差のイデアルが有理整数 n を含む場合、定数 log n)",
+    sectionId := "genell-rem-1-4-1" }
+
+def remark_1_4_1_of_descent_comparable.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Remark 1.4.1(最弱形——引き戻したイデアルが n で互いに比較できる場合)",
     sectionId := "genell-rem-1-4-1" }
 
 def remark_1_4_1_of_descent.needs : List ABC3.Meta.ProofObligation :=
