@@ -45,6 +45,37 @@ import ABC3.Found.GenEll.Def12Height
 
 ★★★したがって `Definition 1.2` は**条つき**に下げる。
 well-defined 性（原文の "any morphism"）は取れている——そこは失われていない。
+
+## ★★★★★★★★根本原因 —— 計量が束から切り離されている
+
+★**`APicSpecData` に「`deg_F` を有限素点と結ぶ欄」を足せば直る、という話ではない。**
+足しても**現在の `APic` の設計では満たせない**。理由:
+
+`Found/Arakelov/APicWitness.lean` の `arcCM X` は
+**`X^arc` 上の連続実数値関数**である（`C(Spec ℂ ⟶ X, ℝ)`）。
+★原文の `|−|_L` は **`L^arc` 上のエルミート計量**であって、点の上の関数ではない。
+
+`Spec 𝓞_F` で見ると差がはっきりする:
+
+* 原文: `L` の生成元 `s` に対して `|s|_σ` が決まる。`deg_F(L̄) = log #(L/s𝓞_F) − ∑_σ log|s|_σ`。
+  ★**`s` の取り替えで両項が動き、和は不変**（積公式）。
+* 実装: `arcCM` は `−log|s|_σ` に当たる関数を**`s` を記録せずに**持つ。
+  ★★だから `L` と計量の**対応が失われている**——`(L, m)` の `L` を取り替えても `m` は動かない。
+
+★★★**したがって `deg_F` は `L` を見ようがない。** 見せるには `arcCM` を
+「`L` に付いた計量」に変える設計変更（`APicData` の `ofMetric` / `forgetMetric` の水準）が要る。
+
+★★★★`Pic(Spec 𝓞_F) ≃ ClassGroup (𝓞 F)` は **既にある**
+（`Found/Arakelov/PicSpecWitness.lean` の `picSpecEquiv`、`ClassGroup.equivPic` 経由）。
+★足りないのは類群の側ではなく、**計量の側の設計**である。
+
+## ★★★★★★★★★因子表示は健全である —— 混同しない
+
+`Found/GenEll/HeightConstruction.lean` の `htArith` は
+`degNormalized (idealADiv F (pullbackIdeal F D.divisor xF)) + (アルキメデス側)`
+であり、★**有限素点を見ている**。`Proposition 1.6` / `Definition 1.5` /
+`Proposition 1.4, (ii)(iii)` の `.src` はすべてこちらに乗っているので、
+★★**本検査はそれらを揺るがさない**。
 -/
 
 namespace ABC3.Check.GenEll
