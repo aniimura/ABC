@@ -29541,3 +29541,63 @@ theorem isProper_subscheme_projSpace (N : ℕ) {Y : Scheme.{0}}
 - `lake build` 全体通過、`node tools/check.mjs` **PASS**
 - `GenEll` の必要分 **11/24**
 - `ample` **10/13**
+
+## §9-717 ★★★★★★★★**`ℙⁿ` の座標が端から端まで取れた**(第 443-444 ブロック、2026-08-28)
+
+`§9-716` で「残る本体は C2（`O(1)`）と E（Serre）」と測ったが、
+★**消費側を読み直すと `O(1)` は要らなかった**。
+
+### ★★★★★★★★★測定 —— 消費側が要るのは**座標**である
+
+`Found/GenEll/NorthcottCoord.lean` の `northcott_of_projModel` が受けるのは
+
+| 受けるもの | 中身 |
+|---|---|
+| `crd p : ι → fld p` | ★**同次座標** |
+| `idx : ι` | 割る成分 |
+| `hinj` | 正規化座標 `crd p j / crd p idx` が単射 |
+| `hcmp` | `H(crd p) ≤ exp(ht p + const)` |
+
+であって、**`O(1)` そのものではない**。
+★★正規化座標 `x_j/x_i` は `ℙⁿ` の**標準アフィンチャート**から直に取れる。
+
+### ★★★★★★★★取れたもの（`Found/GenEll/ProjSpaceCover.lean`）
+
+| 宣言 | 内容 |
+|---|---|
+| `homogeneous_mem_span_X` | 正の次数の斉次多項式は変数の生成するイデアルに入る |
+| `irrelevant_le_span_X` | 無関係イデアルは変数で生成される |
+| `exists_X_notMem` | どの点でもある変数が消えない |
+| **`iSup_basicOpen_X_eq_top`** | ★**`ℙⁿ` の標準アフィン被覆** |
+| **`projCoord`** | ★★`x_j/x_i ∈ A⁰_{x_i}` |
+| `exists_chart_range` | 体値の点はどれかのチャートに入る（`Spec F` は 1 点） |
+| `projChartHom` | 点をチャートに落とす環準同型 `A⁰_{x_i} → F` |
+| **`projPointCoord`** | ★★★**点の正規化座標 `x_j/x_i ∈ F`** |
+
+★mathlib の **`Proj.awayι`**（`Spec (A⁰_f) ⟶ Proj`、開埋め込み）と
+**`Proj.opensRange_awayι`** があったので、
+`IsOpenImmersion.lift` と `Spec.preimage` を繋ぐだけで出た。
+
+★★被覆の中身は「無関係イデアルは変数で生成される」で、
+`𝒜ₙ = (𝒜₁)ⁿ` と `𝒜₁ = span_R{x_i}` から出る。
+
+### ★★★★★残る 3 段はいずれも mathlib への PR 規模（実測）
+
+2026-08-28 の実測:
+
+* mathlib に **`VeryAmple` / globally generated は 1 件も無い**（段 E）
+* mathlib に **次数 `n` の斉次分数の層は無い**（`HomogeneousLocalization` は次数 0 だけ）（段 C2c）
+* `Scheme.Hom.ker` に**因数分解（`Y ⟶ 像`）の API も無い**（段 F2c）
+
+★★★★ただし **`O(1)` は因子表示なら要らないかもしれない**（本ブロックの測定）:
+本プロジェクトは §1 を通して**因子表示**（`ArithCartier`）で作業しており、
+そこでは `O(1)` は**超平面因子の類**である。very ample は
+「`n·D` が閉埋め込みによる超平面の引き戻しである」と因子の言葉だけで述べられ、
+高さの比較も `ht_{n·D}(x) = ht_{超平面}(i(x)) + O(1)` になる。
+★超平面因子を `IdealSheafData` として作る段は別に要る。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**
+- **`ample` 12/15** ——★**座標の側は完全に揃った**。残るのは C2c・E・F2c
