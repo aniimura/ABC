@@ -29138,3 +29138,92 @@ ABC3 は**前層の水準**で既に全部持っていた:
   そして台帳の外の**座標の高さと `htArith` の比較**である
 - `finite-flat-group-scheme-quotient` は `Lemma 3.2` を項目として閉じる最後の 1 本だが、
   minimalForm の通り**下流(`Lemma 3.5` 以降)はこれを待たない**
+
+## §9-711 ★★★★★★★★★★**`Definition 1.1` の残りが「1 本」まで縮んだ**(第 424-430 ブロック、2026-08-28)
+
+`§9-710` の続き。ample の道を進めたあと、**`Definition 1.1` に持ち替えた**。
+理由は funnel を読み直した結果である——★**§1 の 5 項目のうち `Definition 1.1` だけが
+ample を経由しない**。
+
+### ★★★★★★★★まず在庫を引いた——残っていたのは 2 語だけ
+
+`Interface/GenEll/HeightTheory.lean` の `waiting.trackB` は 2026-08-27 に
+「律速だった `X^arc` は建った。残るのは条なし `.src` への**組み上げ**である」と
+更新されていた。★そこで `Definition 1.1, (i)` の語を 1 つずつ在庫と突き合わせた:
+
+| 原文の語 | 在庫 |
+|---|---|
+| `X^arc` はコンパクト、`ι_X` つき | ★あり(`arcTopology` / `conjPoint` / `compactSpace_arc`) |
+| 直線束 `L` | ★あり(`picardDataWitness.Pic`) |
+| `ι_X` 両立な hermitian 計量 | ★あり(`TorsorMetric` / `IsConjCompatible`) |
+| テンソル積で群 `APic(X)` | ★あり(`aPicDataWitness`) |
+| (ii) 引き戻し `φ^*L̄` | ★あり |
+| **射**（`≤ 1` の切断が `≤ 1` へ） | ★★**無い** |
+| **`Γ(L̄)`** | ★★**無い** |
+
+★★317 ファイル・3.1 万行の `Found/Arakelov` に、**この 2 語だけが無かった**。
+
+### ★★★★★★埋めた 2 語(`Found/Arakelov/ArithSections.lean`)
+
+* `GreenMetric.arithSections` —— `|s|_L ≤ 1` なる大域切断の集合
+* `ArithHom` —— **ノルムを増やさない**層の射
+
+★**逸脱を記録した**。原文の射の条件は「**局所的に** `≤ 1` が `≤ 1` へ」だが、
+本ファイルは `|φ(s)|_M ≤ |s|_L`（作用素ノルム `≤ 1`）を要求する。
+★★前者を**含意する**（`mapsTo_arithSections`）ので下流は弱くならない。
+
+★★★おまけで `exists_scale_mem_arithSections` が出た——`X^arc` がコンパクトなら
+どんな切断も計量を `c ≝ log(C+1)` だけずらせば `Γ` に入る。
+これは `Proposition 1.4, (ii)` の証明が
+『to a section of `L ⊗ M` over `X` such that `|t| ≤ 1` on `X^arc`』と書く段の根拠である。
+
+### ★★★★★★★★`APic(X)` に `ι_X` 両立を型で入れた(`Found/Arakelov/ArithPic.lean`)
+
+`aPicDataWitness` は `APic(X) = Pic(X) × Multiplicative C(X^arc, ℝ)` を作るが、
+`Interface` の `APicData` に「計量は `ι_X` と両立する」欄が無いので**型に入っていない**。
+
+    ArithPic X ≝ Pic(X) × Multiplicative (共役不変な連続関数のなす部分群)
+
+★引き戻しが共役不変性を保つ根拠は `conjPoint (p ≫ f) = conjPoint p ≫ f`
+（`ι_X` の射に沿った自然性）だけである。
+
+★★★**`arithPicOfMetric_mul` は `rfl` で出た**——`TorsorMetric.tensor` の Green 関数が
+和だからで、原文の「thus determine a group `APic(X)`」がそのまま型になった。
+
+### ★★★★★★★★★★残りは**ちょうど 1 本**
+
+`Γ(L̄)` を原文どおり `Hom(Ō_X, L̄)` と読むには、**正規化した自明束 `Ō_X`（`|1| = 1`）**が要る。
+その内訳を測ると 3 つで、**2 つはもう手にある**:
+
+| 段 | 状態 |
+|---|---|
+| 計量の `𝒪_X`-乗法性 `|c·s| = ‖c(p)‖·|s|` | ★**閉じた**(`TorsorMetric.norm_smul`) |
+| 正性 `u(p) ≠ 0` | ★**閉じた**(`arcEval_unit_one_ne_zero`) |
+| 連続性 | ★**ある**(`continuous_evalGlobal`) |
+| ファイバーの**正規な `ℂ`-ノルム** | ★★**残っている** |
+
+★★四つ目の中身は 1 行で書ける:
+
+    `(ΓSpecIso ℂ).hom (c • y) = c · (ΓSpecIso ℂ).hom y`
+
+——`Scheme.ΓSpecIso` と `moduleSpecΓFunctor` が `Γ(Spec ℂ, ⊤)` に入れる `ℂ`-加群構造の**両立**である。
+★mathlib にこの補題は無い（2026-08-28 実測、`exact?` も `simp` も `rfl` も失敗）。
+
+★★★**これが `Definition 1.1` を条なしで閉じるための最後の 1 本である。**
+`Definition 1.2` は `Definition 1.1` の上に立つので、ここが開けば §1 は 2 つ動く。
+
+### ★★★配管——`TorsorMetric.base` は `Classical.choice` なので `|1|` を直接は選べない
+
+★これが「正規化」が要る理由である。`TorsorMetric` は `(green, green_cont, triv)` の
+3 つ組で、`base` は `HasContMetrics X` の下で `Classical.choice` に落ちる。
+★★したがって `|1| = 1` は `green p ≝ log(base.nrm p (arcEval p 1))` と取ることで**しか**
+作れない——だから正性と連続性が要る。
+★★★一方 `GreenMetric` は `base` を**フィールドに持つ**ので、
+正規な `ℂ`-ノルムさえ作れれば `Ō_X` はそちらで直に組める。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**(変化なし)
+- `ample` の内訳 **8/12**——段 D は実質閉じた(定義・健全性・空虚封じ・切断の比)
+- `Definition 1.1` は**あと 1 本**
