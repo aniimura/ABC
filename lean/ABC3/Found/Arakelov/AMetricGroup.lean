@@ -110,6 +110,31 @@ theorem pullTriv_associator {A B C : X.PresheafOfModules} (V : X.Opens)
   congr 1
   rw [MonoidalCategory.triangle_assoc, ← MonoidalCategory.unitors_equal]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- ★★**制限は組み紐を保つ**（`μ = Iso.refl` だから `rfl`）。 -/
+theorem restrict_map_braiding {A B : X.PresheafOfModules} (V : X.Opens) :
+    (restrictPresheafFunctor X V).map (β_ A B).hom
+        ≫ Functor.OplaxMonoidal.δ (restrictPresheafFunctor X V) B A
+      = Functor.OplaxMonoidal.δ (restrictPresheafFunctor X V) A B
+        ≫ (β_ ((restrictPresheafFunctor X V).obj A)
+            ((restrictPresheafFunctor X V).obj B)).hom := rfl
+
+/-- ★★★★★★**交換律の自明化版**。 -/
+theorem pullTriv_braiding {A B : X.PresheafOfModules} (V : X.Opens)
+    (eA : (restrictPresheafFunctor X V).obj A ≅ 𝟙_ (PresheafModulesOn X V))
+    (eB : (restrictPresheafFunctor X V).obj B ≅ 𝟙_ (PresheafModulesOn X V)) :
+    pullTriv (β_ A B) V (tensorTriv eB eA) = tensorTriv eA eB := by
+  ext1
+  show ((restrictPresheafFunctor X V).mapIso (β_ A B)).hom ≫ (tensorTriv eB eA).hom
+    = (tensorTriv eA eB).hom
+  simp only [tensorTriv, restrictPresheafTensor, Iso.trans_hom, Iso.symm_hom, tensorIso_hom,
+    Functor.Monoidal.μIso_inv, Functor.mapIso_hom, Category.assoc]
+  rw [← Category.assoc, restrict_map_braiding, Category.assoc]
+  congr 1
+  rw [← Category.assoc, ← BraidedCategory.braiding_naturality eA.hom eB.hom, Category.assoc,
+    braiding_leftUnitor,
+    ← MonoidalCategory.unitors_equal]
+
 /-- ★★★★**右単位子は「基準の自明化とのテンソル」である**。
 
 ★機構は mathlib の `right_unitality_hom` ＋ `unitors_equal` ＋ `rightUnitor_naturality`。 -/
@@ -268,6 +293,71 @@ theorem isIsometry_mul_assoc (L M N : AMetric X) :
 /-- ★★**したがって同値類の上で結合律が成り立つ**。 -/
 theorem isometric_mul_assoc (L M N : AMetric X) : Isometric ((L * M) * N) (L * (M * N)) :=
   ⟨α_ L.sheaf M.sheaf N.sheaf, isIsometry_mul_assoc L M N⟩
+
+/-! ## ★★★★★★★★交換律 -/
+
+/-- ★★★★★★★★**交換律** `L̄ ⊗ M̄ ≅ M̄ ⊗ L̄`（等長）。
+
+原文 (GenEll p.3):
+> (i) We shall refer to as an arithmetic line bundle L = (L, | − |L) on X any
+
+★機構は結合律と同じ——チャートへ降りて `IsTensorOf` で分解し、最後は実数の `mul_comm`。 -/
+theorem isIsometry_mul_comm (L M : AMetric X) :
+    IsIsometry (L * M) (M * L) (β_ L.sheaf M.sheaf) := by
+  intro V f p hp
+  obtain ⟨c⟩ := nonempty_tensorChart M.triv L.triv V p hp
+  have hpW := c.hpW
+  set g := trivialOfLe (M * L).sheaf c.hWV f with hgdef
+  have hfac : ‖evalOn p c.W hpW (transUnit (M * L).sheaf c.W
+      (tensorTriv c.eA c.eB) g)‖ ≠ 0 :=
+    norm_ne_zero_iff.2 (evalOn_ne_zero_of_isUnit p c.W hpW (isUnit_transUnit _ c.W _ _))
+  have hR : (M * L).metric.h c.W g p
+      * ‖evalOn p c.W hpW (transUnit (M * L).sheaf c.W (tensorTriv c.eA c.eB) g)‖
+      = M.metric.h c.W c.eA p * L.metric.h c.W c.eB p := by
+    rw [(M * L).metric.compat c.W (tensorTriv c.eA c.eB) g p hpW]
+    exact isTensorOf_tensor M.triv L.triv M.metric L.metric c.W c.eA c.eB p hpW
+  have e2 := (L * M).metric.compat c.W
+    (pullTriv (β_ L.sheaf M.sheaf) c.W (tensorTriv c.eA c.eB))
+    (pullTriv (β_ L.sheaf M.sheaf) c.W g) p hpW
+  have e1 : transUnit (L * M).sheaf c.W
+        (pullTriv (β_ L.sheaf M.sheaf) c.W (tensorTriv c.eA c.eB))
+        (pullTriv (β_ L.sheaf M.sheaf) c.W g)
+      = transUnit (M * L).sheaf c.W (tensorTriv c.eA c.eB) g :=
+    transUnit_pullTriv (β_ L.sheaf M.sheaf) c.W _ _
+  rw [e1] at e2
+  have ebraid : pullTriv (β_ L.sheaf M.sheaf) c.W (tensorTriv c.eA c.eB)
+      = tensorTriv c.eB c.eA :=
+    pullTriv_braiding c.W c.eB c.eA
+  have e4 : (L * M).metric.h c.W (tensorTriv c.eB c.eA) p
+      = L.metric.h c.W c.eB p * M.metric.h c.W c.eA p :=
+    isTensorOf_tensor L.triv M.triv L.metric M.metric c.W c.eB c.eA p hpW
+  have e3 : (L * M).metric.h c.W (pullTriv (β_ L.sheaf M.sheaf) c.W (tensorTriv c.eA c.eB)) p
+      = M.metric.h c.W c.eA p * L.metric.h c.W c.eB p := by
+    refine (congrArg (fun t => (L * M).metric.h c.W t p) ebraid).trans ?_
+    rw [e4, mul_comm]
+  have hkey : (L * M).metric.h c.W (pullTriv (β_ L.sheaf M.sheaf) c.W g) p
+      = (M * L).metric.h c.W g p :=
+    mul_right_cancel₀ hfac ((e2.trans e3).trans hR.symm)
+  have h1 : (L * M).metric.h V (pullTriv (β_ L.sheaf M.sheaf) V f) p
+      = (L * M).metric.h c.W
+        (trivialOfLe (L * M).sheaf c.hWV (pullTriv (β_ L.sheaf M.sheaf) V f)) p :=
+    ((L * M).metric.restrict c.hWV (pullTriv (β_ L.sheaf M.sheaf) V f) p hpW).symm
+  have h2 : (M * L).metric.h V f p = (M * L).metric.h c.W g p :=
+    ((M * L).metric.restrict c.hWV f p hpW).symm
+  have h3 : (L * M).metric.h c.W
+        (trivialOfLe (L * M).sheaf c.hWV (pullTriv (β_ L.sheaf M.sheaf) V f)) p
+      = (L * M).metric.h c.W (pullTriv (β_ L.sheaf M.sheaf) c.W g) p :=
+    congrArg (fun t => (L * M).metric.h c.W t p)
+      (trivialOfLe_pullTriv (β_ L.sheaf M.sheaf) c.hWV f)
+  exact h1.trans (h3.trans (hkey.trans h2.symm))
+
+/-- ★★**したがって同値類の上で交換律が成り立つ**。 -/
+theorem isometric_mul_comm (L M : AMetric X) : Isometric (L * M) (M * L) :=
+  ⟨β_ L.sheaf M.sheaf, isIsometry_mul_comm L M⟩
+
+/-- ★★**左単位律**——交換律と右単位律から。 -/
+theorem isometric_one_mul (L : AMetric X) : Isometric (1 * L) L :=
+  isometric_trans (isometric_mul_comm 1 L) (isometric_mul_one L)
 
 /-! ### ★出典の紐付け(`.src`) -/
 
