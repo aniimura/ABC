@@ -224,7 +224,7 @@
       "stage": "A",
       "claim": "層のテンソル積（SheafOfModules の monoidal 構造）",
       "status": "open",
-      "why": "★★★★**2026-08-27 の実測で道が短くなった**: `PresheafOfModules.monoidalCategory` が mathlib に**すでにある**（infer_instance で確認。前層のテンソル積は monoidal category として完成している）。 ★★したがって段 A は**「層化（反射的局所化）に沿って monoidal 構造が降りる」**だけである。 ★★★ただし mathlib の Monoidal.transport は**圈同値に沿ってしか使えない**し、CategoryTheory.Localization.Monoidal は**無い**（2026-08-27 実測）。 ★四つめの選択肢: 全 monoidal 構造を作らず、**L^{⊗n} だけを再帰で定義する**（ample の定義にはそれで足りる）。",
+      "why": "★★★★**2026-08-27 に #check で実測した結果**: \n  ある: PresheafOfModules.monoidalCategory（前層のテンソル積は monoidal category として完成）\n  ある: Monoidal.transport / Monoidal.transportStruct（ただし**圈同値に沿ってのみ**）\n  無い: CategoryTheory.Localization.Monoidal\n  無い: CategoryTheory.Localization.monoidalCategory\n  無い: CategoryTheory.Monoidal.Reflective\n  無い: CategoryTheory.Adjunction.monoidal\n★したがって段 A は**「反射的局所化（層化）に沿って monoidal 構造が降りる」を一から作る**ことになる——mathlib への PR 規模の仕事である。\n★★**回避経路**: 全 monoidal 構造（結合子・単位子・五角形・三角形）を作らず、**tensorObj だけを定義して L^{⊗n} を再帰で作る**。ample の定義（[Stacks] 28.27.1）にはそれで足りる。",
       "sources": [
        "[Stacks] 01CA Sheaves of modules",
        "[Stacks] 01CC Tensor product",
@@ -295,7 +295,7 @@
      }
     ],
     "done": "1/7",
-    "remaining": "★★★**土台はすでにある**。最初の葉は**段 A（層のテンソル積）**であり、前層の monoidal 構造と層化の合成である。 ★段 F1（閉包の ℤ-平坦性）は 2026-08-27 に閉じた。"
+    "remaining": "★★★**土台はすでにある**。最初の葉は段 Aであり、**全 monoidal 構造を作る道（mathlib への PR 規模）と、tensorObj だけで L^{⊗n} を作る回避経路**の 2 つがある。 ★段 F1（閉包の ℤ-平坦性）は 2026-08-27 に閉じた。"
    }
   },
   "arc-metric-not-attached-to-bundle": {
