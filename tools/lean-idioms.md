@@ -1347,3 +1347,45 @@ lemma smul_Spec_def (r : R) (x : Γ(M, U)) :
 ★★★**回避の方向**（未検証）: `moduleSpecΓFunctor` 側の項
 （`(moduleSpecΓFunctor.obj M : Type)`）で書くと `•` は出る——
 `arcFiber` はそちらの綴りなので、`ArcFiber.lean` の側から降りるほうが近い。
+
+---
+
+## `rw` は「同じ項の別の綴り」を見ない —— `have` で綴りを固定してから書き換える
+
+2026-08-28、算術直線束の等長同型（`Found/Arakelov/AMetricIso.lean`）で 4 回落ちた。
+
+### 症状
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+      transUnit ?m.375 ?V (pullTriv ?φ ?V ?e) (pullTriv ?φ ?V ?e')
+    in the target expression
+      … transUnit (L * M).sheaf c.W (pullTriv (φ ⊗ᵢ ψ) c.W …) (pullTriv (φ ⊗ᵢ ψ) c.W …) …
+
+★**パターンは目で見て一致している。** 落ちる理由は、補題の暗黙引数
+`?L` が `?φ : ?L ≅ ?M` から決まり、`φ ⊗ᵢ ψ` の域は `L.sheaf ⊗ M.sheaf` と綴られるのに、
+ゴールの項は `(L * M).sheaf` と綴られているからである。
+★★`(L * M).sheaf = L.sheaf ⊗ M.sheaf` は **`rfl`** だが、`rw` は構文で照合する。
+
+同じ落ち方が `metric` の欄でも出る:
+
+    Application type mismatch: The argument tensorTriv … has type
+      … ((restrictPresheafFunctor X c.W).obj (L.sheaf ⊗ M.sheaf)) …
+    but is expected to have type
+      … ((restrictPresheafFunctor X c.W).obj (L * M).sheaf) …
+
+### ★★★直し方: `have` で**ゴールの綴り**に固定してから `rw`
+
+```lean
+have e1 : transUnit (L * M).sheaf c.W (pullTriv (φ ⊗ᵢ ψ) c.W (tensorTriv c.eA c.eB))
+      (pullTriv (φ ⊗ᵢ ψ) c.W g)
+    = transUnit (L' * M').sheaf c.W (tensorTriv c.eA c.eB) g :=
+  transUnit_pullTriv (φ ⊗ᵢ ψ) c.W (tensorTriv c.eA c.eB) _   -- ← ここは defeq で通る
+rw [e1] at e2
+```
+
+`have` の型注釈は `exact` と同じく**定義的等価まで**見るので、
+補題の綴りとゴールの綴りの橋渡しはここで済む。
+
+★最後の `rw [h1, h2, …]` も同じ理由で落ちることがある。
+そのときは `Eq.trans` の連鎖（`exact h1.trans (h3.trans (hkey.trans h2.symm))`）に替える。
+★★項の同一性だけを使う書き換えは `congrArg (fun t => f … t …) lemma` で作れる。
