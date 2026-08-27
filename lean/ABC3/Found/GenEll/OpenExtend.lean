@@ -177,6 +177,43 @@ theorem generic_comp_open_extend {X' : Scheme.{0}}
     ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
   exact hxv
 
+/-! ## ★★★★★★★★開近傍は全体を覆う -/
+
+/-- ★**数体の整数環には素点が存在する**。
+
+★体ではないので単元でない非零元があり、それを含む極大イデアルは `≠ ⊥`。 -/
+theorem nonempty_finitePlace : Nonempty (FinitePlace F) := by
+  obtain ⟨p, hp0, hp⟩ := Ring.exists_not_isUnit_of_not_isField
+    (NumberField.RingOfIntegers.not_isField F)
+  obtain ⟨m, hm, hpm⟩ := Ideal.exists_le_maximal (Ideal.span {p}) (Ideal.span_singleton_ne_top hp)
+  refine ⟨⟨m, hm.isPrime, ?_⟩⟩
+  intro h
+  rw [h] at hpm
+  have hmem : p ∈ (⊥ : Ideal (NumberField.RingOfIntegers F)) :=
+    hpm (Ideal.mem_span_singleton_self p)
+  exact hp0 (by simpa using hmem)
+
+/-- ★★★★★★★★**各素点の開近傍は `Spec 𝒪_F` 全体を覆う**。
+
+★`Spec 𝒪_F` の点は**生成点と閉点しかない**:
+閉点 `x` は `x` 自身の近傍 `U_x` に入り、
+生成点は空でない任意の開に入る（`generic_mem_opens`）。
+
+★★★これで `Scheme.Opens.iSupOpenCover` が `Spec 𝒪_F` 自身の開被覆になる。 -/
+theorem iSup_opens_eq_top (U : FinitePlace F → (specRingOfIntegers F).Opens)
+    (hxU : ∀ v, placePoint F v ∈ U v) : ⨆ v, U v = ⊤ := by
+  refine le_antisymm le_top (fun x _ => ?_)
+  show x ∈ (⨆ v, U v : (specRingOfIntegers F).Opens)
+  rw [TopologicalSpace.Opens.mem_iSup]
+  by_cases h : x.asIdeal = ⊥
+  · obtain ⟨v₀⟩ := nonempty_finitePlace F
+    refine ⟨v₀, ?_⟩
+    have hb := generic_mem_opens F (U v₀) (hxU v₀)
+    have hxeq : x = (⟨⊥, Ideal.isPrime_bot⟩ : specRingOfIntegers F) := PrimeSpectrum.ext h
+    rw [hxeq]
+    exact hb
+  · exact ⟨⟨x.asIdeal, x.isPrime, h⟩, hxU _⟩
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** 残っているのは
