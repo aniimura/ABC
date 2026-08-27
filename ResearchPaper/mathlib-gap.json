@@ -81,12 +81,12 @@
       "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。",
       "done": 2,
       "doneNote": "★段 5 はすでにあった——Found/GenEll/LogDiff.lean の logDiffOfField は X を引数に持たない(第 372 の実測)。★★段 4 を 2026-08-27 の第 412 ブロックで実装した(Found/GenEll/SigmaBound.lean の degNormalized_adivRed_le_sum_log)。残りは段 1-3。",
-      "nextNode": {
-        "measuredAt": "2026-08-27",
-        "what": "★段 4 を log-cond へ繋ぐのに要る橋が 1 つ残っている。",
-        "statement": "Dedekind 環では根基イデアルの分解の重複度は ≤ 1。すなわち (idealADiv F I.radical).fin v ≤ 1。",
-        "why": "CartierPullback.lean の conductorADiv は ADivRed を経由せずイデアルの根基で作られている。SigmaBound の degNormalized_le_sum_log は係数 ≤ 1 だけを要求する一般形にしてあるので、この 1 行が埋まれば log-cond へ直接適用できる。",
-        "mathlibStatus": "未測定。Ideal.radical_isRadical はあるが、『Dedekind 環の根基イデアルは squarefree』は探していない。Associates.count_ne_zero_iff_dvd 経由で自作する道もある。"
+      "resolvedNode": {
+        "resolvedAt": "2026-08-27",
+        "what": "★段 4 を log-cond へ繋ぐ橋が渡った(第 414 ブロック、Found/GenEll/LogCondSigma.lean)。",
+        "statement": "Dedekind 環では根基イデアルの分解の重複度は ≤ 1。これを経由して logCond_le_sum_log が出た。",
+        "howItWentThrough": "★mathlib の Ideal.radical_isRadical はイデアル論の IsRadical(r^n ∈ I → r ∈ I)であって、Squarefree へ渡すにはモノイドの IsRadical(x ∣ y^n → x ∣ y)が要る。★★両者を繋ぐ道は短かった——Ideal.dvd_iff_le で包含に直せば radical_pow と radical_idem だけで出る。あとは IsRadical.squarefree と Associates.prime_pow_dvd_iff_le。",
+        "absentInMathlib": "『Dedekind 環の根基イデアルは squarefree』そのものは mathlib に無い(exact? で見つからず、IsRadical↔Squarefree はモノイド版しか無い)。イデアルへの橋を自作した。"
       },
       "criticalFinding": {
         "measuredAt": "2026-08-27",
