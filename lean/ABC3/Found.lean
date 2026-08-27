@@ -1076,6 +1076,7 @@ import ABC3.Found.GenEll.NorthcottCoord
 import ABC3.Found.GenEll.HeightMetric
 import ABC3.Found.GenEll.MinFieldCovering
 import ABC3.Found.GenEll.MinFieldBaseChange
+import ABC3.Found.GenEll.LogDiffCongr
 import ABC3.Found.GenEll.DifferentKummer
 import ABC3.Found.GenEll.PGroupTower
 import ABC3.Found.GenEll.TameRamification
