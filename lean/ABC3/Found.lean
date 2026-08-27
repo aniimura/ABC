@@ -483,6 +483,7 @@ import ABC3.Found.Arakelov.SheafifyTriv
 import ABC3.Found.Arakelov.APicToSheaf
 import ABC3.Found.Arakelov.ArchDeg
 import ABC3.Found.Arakelov.ArchDegSmul
+import ABC3.Found.Arakelov.DegArith
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
