@@ -281,8 +281,9 @@
      {
       "stage": "D4",
       "claim": "比を X_t の上の**大域な**正則関数へ貼り合わせる",
-      "status": "open",
-      "why": "★**貼り合わせ条件はすでにある**（sectionRatio_agree）。 ★★残るのは、IsLocallyTrivial から X_t の被覆を取り、TopCat.Sheaf.existsUnique_gluing に渡す配管だけである。 ★★★ただし **northcott_of_projModel が消費するのは点での値**なので、大域化は必須ではない（点はどこかの自明化近傍に入る）。"
+      "status": "closed",
+      "why": "★貼り合わせ条件（sectionRatio_agree）はすでにあったので、TopCat.Sheaf.existsUnique_gluing に渡す配管だけであった。 ★★Opens は poset なので平行な射は等しく、homOfLE h₁ = homOfLE hA ≫ homOfLE hB が **rfl** で出る。 ★★★被覆は IsLocallyTrivial の被覆篩から（iSup_trivIndex）。",
+      "where": "Found/GenEll/AmpleDef.lean の TrivIndex / iSup_trivIndex / ratioFamily_compatible / **exists_glued_ratio**"
      },
      {
       "stage": "E",
@@ -320,8 +321,8 @@
       "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
      }
     ],
-    "done": "9/13",
-    "remaining": "★★**残るのは C2・D4・E・F2c の 4 段**である。 ★段 D と段 F は実質閉じた。 ★★残る本体は **C2（O(1)——mathlib に twisting sheaf は 1 件も無い）** と **E（Serre の定理）**である。 ★★★F2c（生成ファイバーが Y に戻る）は小さい。"
+    "done": "10/13",
+    "remaining": "★★**残るのは C2・E・F2c の 3 段**である。 ★**段 D は完全に閉じた**（定義・健全性・空虚封じ・切断の比・貼り合わせ）。 ★★段 F も F2c（生成ファイバーが Y に戻る）を除いて閉じた。 ★★★残る本体は **C2（O(1)）** と **E（Serre の定理）**である。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },

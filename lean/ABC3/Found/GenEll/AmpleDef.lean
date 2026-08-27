@@ -490,6 +490,81 @@ theorem sectionRatio_agree (M : X.PresheafOfModules) (V W : X.Opens)
     ← sectionRatio_restrict M (inf_le_right : V ⊓ W ≤ W) e' s t]
   exact sectionRatio_congr M (V ⊓ W) _ _ s t
 
+/-! ## ★★★★★★★★★段 D4 —— 比を `X_t` の上へ貼り合わせる -/
+
+open TopologicalSpace in
+/-- ★自明化つき開集合の添字型。 -/
+abbrev TrivIndex (M : X.PresheafOfModules) : Type _ :=
+  Σ V : X.Opens, ((restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+
+/-- ★★**自明化つき開集合は `X_t` を覆う**——`IsLocallyTrivial` の被覆篩から。 -/
+theorem iSup_trivIndex (M : X.PresheafOfModules) (hM : IsLocallyTrivial X M)
+    (t : M.obj (op ⊤)) :
+    (⨆ i : TrivIndex M, nonVanishing M t ⊓ i.1) = nonVanishing M t := by
+  refine le_antisymm (iSup_le fun i => inf_le_left) ?_
+  intro x hx
+  obtain ⟨S, hS, htriv⟩ := hM ⊤
+  obtain ⟨V, i, hi, hxV⟩ := hS x trivial
+  obtain ⟨e⟩ := htriv i hi
+  exact TopologicalSpace.Opens.mem_iSup.2 ⟨⟨V, e⟩, ⟨hx, hxV⟩⟩
+
+/-- ★貼り合わせに渡す切断の族。 -/
+noncomputable def ratioFamily (M : X.PresheafOfModules) (s t : M.obj (op ⊤))
+    (i : TrivIndex M) : Γ(X, nonVanishing M t ⊓ i.1) :=
+  sectionRatio M i.1 i.2 s t
+
+theorem inf_index_eq (M : X.PresheafOfModules) (t : M.obj (op ⊤)) (i j : TrivIndex M) :
+    (nonVanishing M t ⊓ i.1) ⊓ (nonVanishing M t ⊓ j.1)
+      = nonVanishing M t ⊓ (i.1 ⊓ j.1) := by
+  rw [inf_inf_inf_comm, inf_idem]
+
+/-- ★★★★**族は貼り合わせ条件を満たす**——`sectionRatio_agree` そのもの。
+
+★`Opens` は poset なので平行な射は等しく、`homOfLE h₁ = homOfLE hA ≫ homOfLE hB` は `rfl`。 -/
+theorem ratioFamily_compatible (M : X.PresheafOfModules) (s t : M.obj (op ⊤)) :
+    TopCat.Presheaf.IsCompatible X.sheaf.1
+      (fun i : TrivIndex M => nonVanishing M t ⊓ i.1) (ratioFamily M s t) := by
+  intro i j
+  have hA : (nonVanishing M t ⊓ i.1) ⊓ (nonVanishing M t ⊓ j.1)
+      ≤ nonVanishing M t ⊓ (i.1 ⊓ j.1) := by
+    rw [inf_index_eq M t i j]
+  have hBi : nonVanishing M t ⊓ (i.1 ⊓ j.1) ≤ nonVanishing M t ⊓ i.1 :=
+    inf_le_inf_left _ inf_le_left
+  have hBj : nonVanishing M t ⊓ (i.1 ⊓ j.1) ≤ nonVanishing M t ⊓ j.1 :=
+    inf_le_inf_left _ inf_le_right
+  have h1 : (X.presheaf.map (homOfLE (inf_le_left :
+        (nonVanishing M t ⊓ i.1) ⊓ (nonVanishing M t ⊓ j.1) ≤ _)).op)
+      (ratioFamily M s t i)
+      = (X.presheaf.map (homOfLE hA).op)
+        ((X.presheaf.map (homOfLE hBi).op) (ratioFamily M s t i)) := by
+    rw [← CommRingCat.comp_apply, ← Functor.map_comp]
+    rfl
+  have h2 : (X.presheaf.map (homOfLE (inf_le_right :
+        (nonVanishing M t ⊓ i.1) ⊓ (nonVanishing M t ⊓ j.1) ≤ _)).op)
+      (ratioFamily M s t j)
+      = (X.presheaf.map (homOfLE hA).op)
+        ((X.presheaf.map (homOfLE hBj).op) (ratioFamily M s t j)) := by
+    rw [← CommRingCat.comp_apply, ← Functor.map_comp]
+    rfl
+  show (X.presheaf.map (homOfLE _).op) (ratioFamily M s t i)
+    = (X.presheaf.map (homOfLE _).op) (ratioFamily M s t j)
+  rw [h1, h2]
+  congr 1
+  exact sectionRatio_agree M i.1 j.1 i.2 j.2 s t
+
+/-- ★★★★★★★★★**切断の比は貼り合う**（段 D4 の到達点）。
+
+原文 (GenEll p.6):
+> (iv) Let d be a positive integer, C ∈ R. Suppose further that the line bundle LQ is ample on XQ. Then the set of points x ∈ X(Q)≤d [cf. Example 1.3, (i)] such that htL(x) ≤ C is ﬁnite.
+
+★★`iSup_trivIndex` により、この `⨆` は `M` が局所自明なら **`X_t` そのもの**である。
+★★★これで `s/t` が `X_t` の上の**大域的な正則関数**として意味を持つ。 -/
+theorem exists_glued_ratio (M : X.PresheafOfModules) (s t : M.obj (op ⊤)) :
+    ∃! r : Γ(X, ⨆ i : TrivIndex M, nonVanishing M t ⊓ i.1),
+      TopCat.Presheaf.IsGluing X.sheaf.1
+        (fun i : TrivIndex M => nonVanishing M t ⊓ i.1) (ratioFamily M s t) r :=
+  X.sheaf.existsUnique_gluing _ _ (ratioFamily_compatible M s t)
+
 /-! ## ★★★★★★★同型に沿った移送と、`IsAmple` の空虚封じ -/
 
 /-- ★大域切断は射に沿って移る（自然性）。 -/
@@ -599,6 +674,11 @@ def sectionRatio_congr.src : ABC3.Meta.Source :=
 def sectionRatio_agree.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(比の貼り合わせ条件。貼り合わせ自体は含まない)",
+    sectionId := "genell-prop-1-4" }
+
+def exists_glued_ratio.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(切断の比は X_t の上へ貼り合う)",
     sectionId := "genell-prop-1-4" }
 
 def nonVanishing.needs : List ABC3.Meta.ProofObligation :=
