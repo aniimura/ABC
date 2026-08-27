@@ -153,6 +153,22 @@ theorem basicOpen_trivValue_congr (M : X.PresheafOfModules) (V : X.Opens)
   rw [huv, X.basicOpen_mul, X.basicOpen_of_isUnit hu, inf_eq_left]
   exact X.basicOpen_le _
 
+/-- ★★★★★**単元は切断に依らない**（`trivValue_congr` の強い形）。
+
+★★★これが「切断の比 `s/t` が自明化に依らない」ことの根拠になる
+——分子と分母が**同じ** `u` 倍されるからである。 -/
+theorem trivValue_congr' (M : X.PresheafOfModules) (V : X.Opens)
+    (e e' : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V)) :
+    ∃ u : Γ(X, V), IsUnit u ∧
+      ∀ s : M.obj (op ⊤), trivValue M V e' s = trivValue M V e s * u := by
+  set θ : (Γ(X, V) : Type u) ≃ₗ[(Γ(X, V) : Type u)] (Γ(X, V) : Type u) :=
+    (trivEquiv M V e).symm.trans (trivEquiv M V e') with hθ
+  refine ⟨θ 1, linearEquiv_self_isUnit θ, fun s => ?_⟩
+  have h := linearEquiv_self_apply θ (trivEquiv M V e (secOn M V s))
+  have h2 : θ (trivEquiv M V e (secOn M V s)) = trivEquiv M V e' (secOn M V s) := by
+    rw [hθ]; simp
+  rw [trivValue_eq_trivEquiv, trivValue_eq_trivEquiv, ← h2, h]
+
 /-! ## ★★★★★★★★非消失軌跡 `X_s` -/
 
 /-- ★★★★★★★★**切断 `s` の非消失軌跡 `X_s`**。
@@ -328,6 +344,67 @@ def IsAmple (M : X.PresheafOfModules) : Prop :=
       x ∈ nonVanishing (presheafTensorPow M n) s ∧
         IsAffineOpen (nonVanishing (presheafTensorPow M n) s)
 
+/-! ## ★★★★★★★同型に沿った移送と、`IsAmple` の空虚封じ -/
+
+/-- ★大域切断は射に沿って移る（自然性）。 -/
+theorem secOn_map (M N : X.PresheafOfModules) (φ : M ⟶ N) (V : X.Opens) (s : M.obj (op ⊤)) :
+    secOn N V (φ.app (op ⊤) s) = φ.app (op V) (secOn M V s) :=
+  (PresheafOfModules.naturality_apply φ (homOfLE (le_top : V ≤ ⊤)).op s).symm
+
+/-- ★★**同型 `i : M ≅ N` は自明化を移す**——
+`trivValue N V e (i s) = trivValue M V (i|_V ≪≫ e) s`。 -/
+theorem trivValue_of_iso (M N : X.PresheafOfModules) (i : M ≅ N) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj N ≅ 𝟙_ (PresheafModulesOn X V))
+    (s : M.obj (op ⊤)) :
+    trivValue N V e (i.hom.app (op ⊤) s)
+      = trivValue M V ((restrictPresheafFunctor X V).mapIso i ≪≫ e) s := by
+  simp only [trivValue, secOn_map M N i.hom V s]
+  rfl
+
+/-- ★★★★★**`X_s` は同型で移る**。
+
+★機構は「自明化の集合が `e ↦ i|_V ≪≫ e` で 1 対 1 に対応する」ことだけである。 -/
+theorem nonVanishing_of_iso (M N : X.PresheafOfModules) (i : M ≅ N) (s : M.obj (op ⊤)) :
+    nonVanishing N (i.hom.app (op ⊤) s) = nonVanishing M s := by
+  apply le_antisymm
+  · intro x hx
+    obtain ⟨V, e, hxe⟩ := (mem_nonVanishing_iff N _ x).1 hx
+    rw [trivValue_of_iso M N i V e s] at hxe
+    exact basicOpen_trivValue_le M V _ s hxe
+  · intro x hx
+    obtain ⟨V, e', hxe⟩ := (mem_nonVanishing_iff M s x).1 hx
+    refine basicOpen_trivValue_le N V (((restrictPresheafFunctor X V).mapIso i).symm ≪≫ e') _ ?_
+    rw [trivValue_of_iso M N i V _ s, basicOpen_trivValue_congr M V e' _ s]
+    exact hxe
+
+/-- ★★★★★★★★**空虚封じ** —— アフィンスキームの上では構造層 `𝒪_X` は ample である。
+
+原文 (GenEll p.6):
+> (iv) Let d be a positive integer, C ∈ R. Suppose further that the line bundle LQ is ample on XQ. Then the set of points x ∈ X(Q)≤d [cf. Example 1.3, (i)] such that htL(x) ≤ C is ﬁnite.
+
+★`n = 1`、`s ≝ λ⁻¹(1)`（`λ_ : 𝟙 ⊗ 𝟙 ≅ 𝟙` の逆で `1` を移したもの）と取ると
+`X_s = X.basicOpen 1 = ⊤` で、`⊤` はアフィンである。
+★★これで `IsAmple` が**満たされうる述語**であることが型で言える。 -/
+theorem isAmple_unit [IsAffine X] : IsAmple (𝟙_ X.PresheafOfModules) := by
+  refine ⟨inferInstance, fun x => ⟨1, one_pos, ?_⟩⟩
+  refine ⟨(λ_ (𝟙_ X.PresheafOfModules)).inv.app (op ⊤) (1 : Γ(X, (⊤ : X.Opens))), ?_, ?_⟩
+  · have h := nonVanishing_of_iso (𝟙_ X.PresheafOfModules)
+      (𝟙_ X.PresheafOfModules ⊗ 𝟙_ X.PresheafOfModules)
+      (λ_ (𝟙_ X.PresheafOfModules)).symm (1 : Γ(X, (⊤ : X.Opens)))
+    show x ∈ nonVanishing (𝟙_ X.PresheafOfModules ⊗ 𝟙_ X.PresheafOfModules) _
+    rw [show ((λ_ (𝟙_ X.PresheafOfModules)).symm).hom = (λ_ (𝟙_ X.PresheafOfModules)).inv from rfl]
+      at h
+    rw [h, nonVanishing_unit, Scheme.basicOpen_one]
+    trivial
+  · have h := nonVanishing_of_iso (𝟙_ X.PresheafOfModules)
+      (𝟙_ X.PresheafOfModules ⊗ 𝟙_ X.PresheafOfModules)
+      (λ_ (𝟙_ X.PresheafOfModules)).symm (1 : Γ(X, (⊤ : X.Opens)))
+    show IsAffineOpen (nonVanishing (𝟙_ X.PresheafOfModules ⊗ 𝟙_ X.PresheafOfModules) _)
+    rw [show ((λ_ (𝟙_ X.PresheafOfModules)).symm).hom = (λ_ (𝟙_ X.PresheafOfModules)).inv from rfl]
+      at h
+    rw [h, nonVanishing_unit, Scheme.basicOpen_one]
+    exact isAffineOpen_top X
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★`Proposition 1.4, (iv)` の証明が使う語彙である。
@@ -351,6 +428,16 @@ def presheafTensorPow.src : ABC3.Meta.Source :=
 def IsAmple.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
     item := "Proposition 1.4, (iv)(語彙——ample の定義。Serre の定理は含まない)",
+    sectionId := "genell-prop-1-4" }
+
+def nonVanishing_of_iso.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(X_s は同型で移ること)",
+    sectionId := "genell-prop-1-4" }
+
+def isAmple_unit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(空虚封じ——アフィンなら構造層は ample)",
     sectionId := "genell-prop-1-4" }
 
 def nonVanishing.needs : List ABC3.Meta.ProofObligation :=
