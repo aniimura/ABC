@@ -599,6 +599,42 @@ theorem smul_ne_zero_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)] (L : AInv
     fun h0 => hr (IsFractionRing.to_map_eq_zero_iff.mp h0)
   exact hts ((smul_eq_zero.mp hsm).resolve_left hr0)
 
+/-! ## ★★★★★★★★`R ≃ span{s}` —— 段 D 本体の第一段 -/
+
+/-- ★★★★★★★**`r ↦ r·s` は単射である**(`s ≠ 0`)。 -/
+theorem toSpanSingleton_injective_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) :
+    Function.Injective (LinearMap.toSpanSingleton (R : Type)
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) s) := by
+  intro a b hab
+  by_contra hne
+  have hd : a - b ≠ 0 := sub_ne_zero.2 hne
+  refine smul_ne_zero_gamma R L s hs (a - b) hd ?_
+  have h1 : (a - b) • s = a • s - b • s := sub_smul a b s
+  rw [h1]
+  have ha : LinearMap.toSpanSingleton (R : Type) _ s a = a • s := rfl
+  have hb : LinearMap.toSpanSingleton (R : Type) _ s b = b • s := rfl
+  rw [← ha, ← hb, hab, sub_self]
+
+/-- ★★★★★★★★**`R ≃ span{s}`**(`s ≠ 0`)。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★★台帳の**段 D 本体の第一段**である
+——この同型で `(u) ↦ span{u·s}` なので
+`span{s}/span{u·s} ≅ R/(u)` が出、商の位数が `N(u)` 倍になる。 -/
+noncomputable def spanSingletonEquivGamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
+    (L : AInv (Spec R))
+    (s : (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type))
+    (hs : s ≠ 0) :
+    (R : Type) ≃ₗ[(R : Type)] (Submodule.span (R : Type) {s}) :=
+  (LinearEquiv.ofInjective _ (toSpanSingleton_injective_gamma R L s hs)).trans
+    (LinearEquiv.ofEq _ _ (LinearMap.span_singleton_eq_range (R : Type)
+      (AlgebraicGeometry.moduleSpecΓFunctor.obj (AInv.toInvSheaf L).carrier : Type) s).symm)
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -635,6 +671,24 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def spanSingletonEquivGamma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(R ≃ span{s}——段 D 本体の第一段)",
+    sectionId := "genell-def-1-1-ii" }
+
+def spanSingletonEquivGamma.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "smul_ne_zero_gamma(切断の非捻れ性)"
+      (.inProject "ABC3" "ABC3.Found.Arakelov.smul_ne_zero_gamma") 4,
+    .citation "[mathlib]" "LinearMap.span_singleton_eq_range / LinearEquiv.ofInjective"
+      (.inMathlib "LinearMap.span_singleton_eq_range") 4,
+    .implicitStep
+      ("★★段 D 本体の残り: (1) 本同型で (u) ↦ span{u·s} を確かめ、" ++
+       "span{s}/span{u·s} ≅ R/(u) を出す、" ++
+       "(2) 短完全列 0 → span{s}/span{us} → Γ/span{us} → Γ/span{s} → 0 で " ++
+       "Nat.card の乗法性、" ++
+       "(3) degFin(u·s) = degFin(s) + log N(u)、" ++
+       "(4) アルキメデス部分と合わせて積公式(deg_principalADiv_eq_zero)") 4 ]
 
 def smul_ne_zero_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
