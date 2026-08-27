@@ -801,6 +801,34 @@ U+1D4AA(𝒪 = MATHEMATICAL SCRIPT CAPITAL O)ではない。
 (ビルドは「Unknown identifier」で捕まえてくれるが、docstring に混ざると気づかない)。
 
 
+## `Module.IsTorsionBySet.module` の SMul は diamond を作る(2026-08-28)
+
+失敗形: `M` が `I` で消えることから `Module (R ⧸ I) M` を作り
+(`htor.module`)、`Module.Finite.of_restrictScalars_finite` に渡そうとしたら
+
+    failed to synthesize IsScalarTower R (R ⧸ I) M
+
+文脈に `IsScalarTower` が**あるのに**拾わない。
+
+原因: `Module.IsTorsionBySet` が作る `SMul` に 2 つの経路がある。
+
+  ・`htor.hasSMul`                            ← `mk_smul` 補題が使う形
+  ・`DistribMulAction.toDistribSMul.toSMul`    ← `htor.module` を instance にした後に
+                                                 `•` が解決される形
+
+★ defeq だが**形が違う**ので、`rw [htor.mk_smul]` が
+「Did not find an occurrence」で落ちる。
+同じ理由で `htor.isScalarTower` が作るインスタンスも
+(`Submodule.Quotient.instSMul'` ベース)、`of_restrictScalars_finite` が要求する
+(`instSMul` ベース)と別物になる。
+
+★★見分け方: エラー本文に `@instHSMul … htor.hasSMul` と
+`@instHSMul … DistribMulAction.toDistribSMul.toSMul` が**並んで出る**。
+
+★★★直し方(未完): `haveI := htor.module` を入れる**前に** `mk_smul` を使うか、
+`@Module.Finite.of_restrictScalars_finite` でインスタンスを明示的に渡す。
+★`show` で形を揃えようとしても `•` の解決は同じになるので効かない。
+
 ## structure の中に `/-! … -/` を書くと、そこで structure が終わる
 
 失敗形: 欄をグループ分けしようとして
