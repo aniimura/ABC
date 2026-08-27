@@ -788,7 +788,7 @@
       "stage": "A",
       "status": "open",
       "claim": "★アフィンの橋——`Spec R` 上の局所自明な前層加群 `L` から**可逆 `R`-加群 `Γ(L,⊤)`** を得る",
-      "why": "★在庫の `equivPicRingSheaf`（`PicEquivRing.lean`）は**層**の水準（`PicSheaf (Spec R) ≃* CommRing.Pic R`）である。★★`AMetric` は**前層**の水準なので、層化を挟む橋が要る。"
+      "why": "★★★★★**2026-08-28 の測定で中身が分かった**。`AMetric` は**前層**の水準なので、`Γ(L,⊤)` は何も保証されない（層でない局所自明な前層がありうる）。★したがって段 A の中身は 3 つ:\n  (A1) `AMetric` に**層条件**を足す（または層であることを仮定した部分型を作る）\n  (A2) **局所自明な前層のテンソルは層である**——局所的に `𝟙_ ⊗ 𝟙_ = 𝟙_` で、層であることは局所的な性質だから。★★これが無いと `mul` が層の圏に閉じない。\n  (A3) `Spec R` の上でそれが**可逆 `R`-加群** `Γ(L,⊤)` を与えること（在庫の `equivPicRingSheaf` は層の水準なので、そこへ繋ぐ）\n★★★(A2) は本プロジェクトが層の側で `tensorModules`（層化）を使っている理由そのものだが、**直線束に限れば層化は要らない**——これが本ファイル群の設計の要である。"
      },
      {
       "stage": "B",
@@ -798,9 +798,10 @@
      },
      {
       "stage": "C",
-      "status": "open",
+      "status": "closed",
       "claim": "★★★アルキメデス部分 `Σ_σ log‖s‖_σ`",
-      "why": "★複素点は埋め込み `σ : F ↪ ℂ` に対応する（在庫の `embPoint`）。★★ノルムは `AMetric.normOf`（チャート独立、`normOf_chart_indep`）で取れる。★★★`Fintype.card (F →+* ℂ) = [F:ℚ]`（在庫の `Embeddings.card`）が正規化の分母を消す。"
+      "why": "★複素点は埋め込み `σ : F ↪ ℂ` に対応する。ノルムは `AMetric.norm`（チャート独立、`AMetricNorm.lean`）で取れる。★★加法性は `AMetric.norm_mul`（`|s ⊗ t| = |s|·|t|`）と `Real.log_mul` で出る（`s`, `t` の非消失を仮定した形）。★★★退化を殺す欄（ノルムを一律 `r` 倍すると `archDeg` が `log r` 下がる）も入れた——`Fintype.card (F →+* ℂ) = [F:ℚ]` がちょうど分母を消す。",
+      "where": "Found/Arakelov/ArchDeg.lean の embSpecPoint / archDeg / archDeg_mul / archDeg_of_norm_smul"
      },
      {
       "stage": "D",
@@ -815,8 +816,8 @@
       "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
      }
     ],
-    "done": "0/5",
-    "remaining": "★5 段とも開いている。★★ただし塞がりだった arakelov-coherent-base-metric は 2026-08-28 に閉じたので、着手できる。"
+    "done": "1/5",
+    "remaining": "★段 C は閉じた（2026-08-28）。★★残るのは A・B・D・E。★★★次に着手すべきは **A2（局所自明な前層のテンソルは層）**である——それが段 A の他の 2 つと段 B を開ける。"
    }
   },
   "arakelov-coherent-base-metric": {
