@@ -1189,3 +1189,35 @@ for n in <新しい名前を全部>; do grep -c "\.$n\b" .cache/decl-index.txt; 
 
 ★★★★`Write` が「updated」と言ったら**既存ファイルである**。
 「created」でなければ手を止めて `git log -- <path>` を見ること。
+
+---
+
+## `Point.map` は `rw` では当たらないが `refine … .trans` なら通る
+
+2026-08-27、Tate 一意化の体拡大との両立（`Found/GaloisRep/TateCurveNatural.lean`）で踏んだ。
+
+`tatePtPair` は `((tateCurveAt q hq).map (algebraMap R K)).toAffine.Point` の上にあり、
+mathlib の `WeierstrassCurve.Affine.Point.map` は `(W'.baseChange F).Point` の上にある。
+★`baseChange F = map (algebraMap R F)` は **`rfl`** だが、
+
+```lean
+rw [Point.map_some]     -- ✕
+simp only [Point.map_some]  -- ✕（simp made no progress）
+```
+
+    Application type mismatch: … has type @Point K … ((tateCurveAt q hq).map (algebraMap R K)).toAffine
+    but is expected to have type @Point K … (tateCurveAt q hq)⁄K
+
+★★直し方: **`refine`/`exact` に載せる**。
+
+```lean
+refine (Point.map_some (S := R) φ (nonsingular_tateK a w q hq haw hwu hne hΔ)).trans ?_  -- ○
+unfold tatePtPair
+congr 1
+```
+
+★★★理由: **`rw` はパターン照合（`instances` 透明度）、`refine`/`exact` は
+既定透明度の `isDefEq`** である。定義上等しいだけの型は `rw` を助けないが
+`exact` は助ける——`Γ(X,U)` の項（本ファイル上方）と**同じ型の失敗形**である。
+
+★「defeq なのに `rw` が落ちた」と思ったら、まず `refine (…).trans ?_` を試すこと。
