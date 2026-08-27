@@ -7,6 +7,7 @@ import ABC3.Found.Arakelov.PicSheafGroup
 import ABC3.Found.Arakelov.PicClassGroup
 import ABC3.Found.Arakelov.PicAssoc
 import ABC3.Found.Arakelov.PicGammaInv
+import Mathlib.Algebra.Module.PID
 import ABC3.Meta.Claim
 
 /-!
@@ -347,6 +348,35 @@ theorem exists_smul_mem_span_gamma (R : CommRingCat.{0}) [IsDomain (R : Type)]
   rw [hym]
   exact Submodule.mem_span_singleton.2 ⟨a, rfl⟩
 
+/-! ## ★★★★★★★★段 B の最後の道具 —— 有限生成＋捻れ ⇒ 有限 -/
+
+/-- ★★★★★★★★**有限生成な捻れ Z-加群は有限である**。
+
+原文 (GenEll p.4):
+> — where xF : Spec(OF ) →X is any morphism that gives rise to x.
+
+★★★実測(2026-08-28): mathlib には「有限生成＋捻れ ⇒ 有限」の
+**直接の補題は無い**(`exact?` も失敗)。
+★代わりに PID 上の構造定理 `Module.equiv_directSum_of_isTorsion` を使う:
+
+    M ≅ ⊕ (Z / (p_i ^ e_i))
+
+★★各因子は `Int.quotientSpanEquivZMod` で `ZMod` になり、
+添字は `Fintype` なので `DFinsupp.equivFunOnFintype` で有限積になる。
+
+★★★★これが台帳 `arakelov-degF-finite-places` の**段 B の最後の道具**である。 -/
+theorem finite_of_finite_isTorsion_int (M : Type) [AddCommGroup M] [Module.Finite ℤ M]
+    (hM : Module.IsTorsion ℤ M) : Finite M := by
+  obtain ⟨ι, fι, p, hp, e, ⟨eq⟩⟩ := Module.equiv_directSum_of_isTorsion (R := ℤ) (M := M) hM
+  haveI hfin : ∀ i : ι, Finite (ℤ ⧸ (Submodule.span ℤ {p i ^ e i})) := by
+    intro i
+    have hp0 : (p i ^ e i) ≠ 0 := pow_ne_zero _ (hp i).ne_zero
+    haveI : NeZero (p i ^ e i).natAbs := ⟨Int.natAbs_ne_zero.2 hp0⟩
+    exact Finite.of_equiv _ (Int.quotientSpanEquivZMod (p i ^ e i)).symm.toEquiv
+  haveI : Finite (DirectSum ι (fun i => ℤ ⧸ (Submodule.span ℤ {p i ^ e i}))) :=
+    Finite.of_equiv _ (DFinsupp.equivFunOnFintype).symm
+  exact Finite.of_equiv _ eq.symm.toEquiv
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def AInv.toInvSheaf.src : ABC3.Meta.Source :=
@@ -383,6 +413,25 @@ def invertible_gamma_toInvSheaf.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
     item := "Definition 1.1, (ii)(局所自明な前層加群から可逆 R-加群 Γ(L,⊤)——台帳の段 A)",
     sectionId := "genell-def-1-1-ii" }
+
+def finite_of_finite_isTorsion_int.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 4,
+    item := "Definition 1.1, (ii)(有限生成な捻れ Z-加群は有限——段 B の最後の道具)",
+    sectionId := "genell-def-1-1-ii" }
+
+def finite_of_finite_isTorsion_int.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "Module.equiv_directSum_of_isTorsion(PID 上の構造定理)"
+      (.inMathlib "Module.equiv_directSum_of_isTorsion") 4,
+    .citation "[mathlib]" "Int.quotientSpanEquivZMod / DFinsupp.equivFunOnFintype"
+      (.inMathlib "Int.quotientSpanEquivZMod") 4,
+    .implicitStep
+      ("★実測(2026-08-28): mathlib に「有限生成＋捻れ ⇒ 有限」の " ++
+       "**直接の補題は無い**(exact? も失敗)。PID 上の構造定理を経由する") 4,
+    .implicitStep
+      ("★★段 B に残るのは **Z への降下**だけである: " ++
+       "(1) Γ(L)/(O_F·s) が Z 上有限生成(O_F が有限生成 Z-加群なので " ++
+       "Module.Finite.trans)、(2) Z 上捻れ(exists_smul_mem_span_gamma の r ∈ O_F を " ++
+       "そのノルムで Z の元に落とす)") 4 ]
 
 def exists_smul_mem_span_gamma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 4,
