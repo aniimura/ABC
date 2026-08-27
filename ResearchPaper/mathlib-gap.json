@@ -879,6 +879,21 @@
     "remaining": "★**(i) の側は閉じた**。★★残るのは `Definition 1.1` (ii) の `deg_F`（別 gap: `arakelov-degF-finite-places`）と、`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段である。",
     "deviation": "★★★★★★**逸脱の明示（2026-08-28）**: 本構成は**前層の水準**であり、原文の `APic(X)`（可逆**層**の同型類）とは違う。★局所自明でも層とは限らない（`𝟙_` と proper open で一致し `⊤` で `0` の前層が反例）。★★前層のテンソルは層でない（だから本プロジェクトの `tensorModules` は層化を挟む）。★★★したがって「テンソル積が**厳密**である」と「対象が層である」は**同時には取れず**、本ファイル群は前者を取った——それが `trivValue_tensor` が `rfl` になり、`normOf_mul` が構成つきで出た理由である。★★★★層の水準への橋（`A ⊗ B → (A ⊗ B)^sh` は局所同型なので自明化も計量も移る）は**別の段**であり、`deg_F` の段 A がまさにそれである。"
    }
+  },
+  "arakelov-pullback-monoidal": {
+   "what": "前層加群の**引き戻し関手のモノイダル性**。`f : Y ⟶ X` に対する `f^* : X.PresheafOfModules ⥤ Y.PresheafOfModules` が `⊗` と `𝟙_` を保つこと。",
+   "whereUsed": [
+    "[GenEll] Definition 1.1, (ii)（算術直線束の**引き戻し** `φ^*L̄`）",
+    "★その下流: `ht_M̄(x) ≝ deg_F(x_F^* M̄)`（ただし本プロジェクトは因子表示で別に持っている）"
+   ],
+   "mathlibStatus": {
+    "verdict": "partial",
+    "searched": "2026-08-28 実測（REPL）。`PresheafOfModules.pullback` は**ある**。スキームの射に対しては `Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)` を渡せばよく、必要な `(PresheafOfModules.pushforward φ).IsRightAdjoint` も **instance で解決する**。",
+    "absentPart": "★`(PresheafOfModules.pullback φ).Monoidal` の instance が**無い**（`infer_instance` が失敗、2026-08-28 実測）。 ★★引き戻しは随伴で定義されているので切断ごとの計算では出ず、`pushforward` が lax monoidal であることから mate で oplax を作る段が要る。"
+   },
+   "minimalForm": "★計量を運ぶのに要るのは (1) `f^*(𝟙_) ≅ 𝟙_` と (2) `f^*` が自明化を自明化へ送ること、の 2 つだけである。★★完全なモノイダル性（結合子・単位子の整合）までは要らない。",
+   "impact": "★**`Definition 1.1, (ii)` の引き戻しの段**である。 ★★ただし**高さの理論はこれを待たない**——本プロジェクトは因子表示（`ArithCartier`）で `pullbackAPic` / `pullbackADiv` / `htArith` を `sorry` 無しで持っている。 ★★★待つのは「`AMetric` の側で引き戻しを書く」ことだけである。",
+   "measuredAt": "2026-08-28"
   }
  },
  "summary": {

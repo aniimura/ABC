@@ -1389,3 +1389,34 @@ rw [e1] at e2
 ★最後の `rw [h1, h2, …]` も同じ理由で落ちることがある。
 そのときは `Eq.trans` の連鎖（`exact h1.trans (h3.trans (hkey.trans h2.symm))`）に替える。
 ★★項の同一性だけを使う書き換えは `congrArg (fun t => f … t …) lemma` で作れる。
+
+---
+
+## 在庫確認を飛ばすと**同名で衝突してビルドが落ちる**（2026-08-28、1 日に 2 回）
+
+`Found/` は 1 つの名前空間 `ABC3.Found.Arakelov` に 300 ファイル以上が入っている。
+★新しい補題を書く前に**必ず**在庫を引くこと（CLAUDE.md 在庫）。
+
+    node tools/decl-index.mjs        # .cache/decl-index.txt を作る
+    grep -n "^\(theorem\|def\) *<名前>" .cache/decl-index.txt
+
+★★`decl-index.txt` は**作った時点のスナップショット**なので、
+同じセッションで足した宣言は載らない。**木も引くこと**:
+
+    grep -rn "theorem <名前>\|def <名前>" lean/ABC3/
+
+### 落ち方
+
+1 回目（`evalOn_one`）——同じ import 木に無かったので**単体ビルドは通り**、
+`Found.lean` に足した時点で衝突が出た。
+
+2 回目（`arithGamma`）——`lake build <その 1 ファイル>` は通ったが、
+
+    error: import ABC3.Found.Arakelov.Definition11 failed,
+      environment already contains 'ABC3.Found.Arakelov.arithGamma.src'
+      from ABC3.Found.Arakelov.AMetricHom
+
+が `Found.lean` で出た。★**`.src` の名前も衝突する**——本体の名前だけ見ても足りない。
+
+★★★**単体ビルドが通っただけで commit しないこと**。
+`Found.lean` に import を足して `lake build`（全体）まで通してから commit する。
