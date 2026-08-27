@@ -4,9 +4,10 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.GenEll.LogDiffTower
 import ABC3.Found.GenEll.MinField
 import ABC3.Found.GenEll.UPoint
+import ABC3.Found.GenEll.CartierPullback
 
 /-!
-# [GenEll] Definition 1.5, (iii) —— **`log-diff` を点の関数にする**（`Found`）
+# [GenEll] Definition 1.5, (iii)(iv) —— **`log-diff` と `log-cond` を点の関数にする**（`Found`）
 
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.8。
 
@@ -112,7 +113,74 @@ theorem logDiffAt_of_minimal (F : Type) [Field F] [NumberField F]
     (_hmin : IsMinimalFieldOfDefinition F xgen) :
     logDiffAt (algPointOff F xF h) = logDiffOfField F := rfl
 
+/-! ## ★4. `Definition 1.5, (iv)` —— `log-cond` も点の関数にする -/
+
+/-- ★★**点の定義体における `log-cond`** —— 原文の `deg_F(f^D_x)`。
+
+原文 (GenEll p.8):
+> determines a well-defined log-conductor function log-condD on UX(Q) ⊆X(Q).
+
+★`AlgPointOff X D` は「`x` が `D` を通らない」（`off`）を持つので、
+原文の `U_X(ℚ̄)` の点そのものである。 -/
+noncomputable def logCondAt {X : Scheme.{0}} {D : X.IdealSheafData}
+    (p : AlgPointOff X D) : ℝ :=
+  letI := p.instField
+  letI := p.instNF
+  logCond p.fld D p.map
+
+@[simp] theorem logCondAt_algPointOff (F : Type) [Field F] [NumberField F]
+    {X : Scheme.{0}} {D : X.IdealSheafData} (xF : specRingOfIntegers F ⟶ X)
+    (h : pullbackIdeal F D xF ≠ 0) :
+    logCondAt (algPointOff F xF h) = logCond F D xF := rfl
+
+/-- ★★**負の対照** —— `D = ⊤`（空因子）なら `log-cond = 0`。
+
+★引き戻しの向きか被約化を取り違えていれば、ここが `0` にならない。 -/
+@[simp] theorem logCondAt_top {X : Scheme.{0}} (p : AlgPointOff X (⊤ : X.IdealSheafData)) :
+    logCondAt p = 0 := by
+  letI := p.instField
+  letI := p.instNF
+  exact logCond_top p.fld p.map
+
+/-- ★★**[GenEll] Proposition 1.6 の非アルキメデス側**（点の言葉で）。
+
+> `log-cond_D(x) ≤ deg_F(D_x)`
+
+★被約化で次数は減る（`deg_idealADiv_radical_le`）。 -/
+theorem logCondAt_le {X : Scheme.{0}} {D : X.IdealSheafData} (p : AlgPointOff X D) :
+    logCondAt p
+      ≤ (letI := p.instField; letI := p.instNF;
+         degNormalized (idealADiv p.fld (pullbackIdeal p.fld D p.map))) := by
+  letI := p.instField
+  letI := p.instNF
+  exact logCond_le_degNormalized_pullback p.fld D p.map p.off
+
 /-! ### ★出典の紐付け(`.src`) -/
+
+def logCondAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (iv)(点の定義体における log-cond)",
+    sectionId := "genell-def-1-5" }
+
+def logCondAt_top.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 8,
+    item := "Definition 1.5, (iv)(負の対照——空因子なら log-cond = 0)",
+    sectionId := "genell-def-1-5" }
+
+def logCondAt_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 9,
+    item := "Proposition 1.6(非アルキメデス側——点の言葉で)",
+    sectionId := "genell-prop-1-6" }
+
+def logCondAt.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "logCond(引き戻した因子の被約化の正規化次数)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.logCond") 8,
+    .implicitStep
+      ("☆残る段: log-cond_D を U_X(ℚ̄) の関数として完成させるには、" ++
+       "log-diff と同じく最小定義体の一意性が要る。★★なお log-cond は log-diff と" ++
+       "逆向きに動くはずである —— 分岐があると (D_x)_red の次数は定義体を上げると" ++
+       "減りうる(Σ_{𝔓|𝔭} f_𝔓 ≤ [K:F] で、等号は e = 1 のときだけ)。" ++
+       "これは Ideal.sum_ramification_inertia で測れる(FrdI の ArithFundamental.lean と同じ機械)") 8 ]
 
 def logDiffAt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
