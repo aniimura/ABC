@@ -29379,3 +29379,50 @@ theorem evalGlobal_conjPoint (p) (g) :
 - 次の葉: **`deg_F` の有限素点側**——`Γ(L)` を分数イデアルと見て
   `Ideal.absNorm` で書き、積公式で `s` の取り方に依らないことを示す。
   ★開けば §1 は 5/9 → 6/9（`Definition 1.2`）になる
+
+## §9-714 ★★★★★★**`deg_F` の橋の有限素点側と、設計の測定**(第 438 ブロック、2026-08-28)
+
+`§9-713` で登録した `arakelov-degF-finite-places` の第 1 歩。
+
+### ★★★★★★有限素点側は 2 つの同型を継ぐだけだった
+
+    `PicSheaf (Spec R) ≃* CommRing.Pic R`   —— 本プロジェクト（`PicEquivRing.lean`）
+    `ClassGroup R ≃* CommRing.Pic R`        —— ★**mathlib にある**（`ClassGroup.equivPic`）
+
+`Found/Arakelov/PicClassGroup.lean` の `picSheafEquivClassGroupOF` で
+**`Pic(Spec 𝓞_F) ≃* Cl(F)`** が出た。
+
+### ★★★★★★★★★測定 —— `deg_F` は捻れ集合表示では**作れない**（設計の問題）
+
+`APicOf X = (Pic X × Multiplicative (共役不変な連続関数)) / Γ(X,𝓞^×)` は
+原文どおりの同型類の群である（`§9-713`）。★そこに `deg_F` を載せようとすると
+
+    `deg(L, g) = deg(L₀, base_{[L]}) + (アルキメデス側の g の寄与)`
+
+となるが、`base_{[L]}` は `TorsorMetric.base` の **`Classical.choice`** である。
+
+★★**すると加法性が落ちる**——`base_{[L·M]}` と `base_{[L]} ⊗ base_{[M]}` は
+一致しないからである。★★★`deg` は関数としては定義できるが、
+`deg(L·M) = deg(L) + deg(M)` が**言えない**。
+
+★★★★したがって道は「基準計量を**整合的に**選ぶ」ことであり、それは
+**分数イデアル `𝔞 ⊂ F` を標準の計量つきで代表に取る**こと、すなわち
+`ADiv(F)` の側から作ることに他ならない。
+
+### ★★これで `Definition 1.2` の道は 3 段に確定した
+
+| 段 | 状態 |
+|---|---|
+| `Pic(Spec 𝓞_F) ≃* Cl(F)` | ★**閉じた**（本ブロック） |
+| `ADiv(F)` の有限部分 ≅ 分数イデアル | ★★開（mathlib に `finprod_heightOneSpectrum_factorization` / `count_finsuppProd` はあるが**群同型として束ねられていない**、2026-08-28 実測） |
+| `ADiv(F)/APrc(F) ≃* APicOf (Spec 𝓞_F)` と `deg_F` の転送 | ★★★開（本体） |
+
+★`degNormalizedAPic`（`ProductFormula.lean`）と `htArith_eq_degNormalizedAPic`
+（`HeightClass.lean`、**`ht = deg_APic ∘ 類`**）は**在庫**なので、
+橋がつながれば `Definition 1.2` はそのまま落ちる。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）**
+- 次の葉: **`ADiv(F)` の有限部分 ≅ 分数イデアル**（Dedekind の一意分解を群同型に束ねる）
