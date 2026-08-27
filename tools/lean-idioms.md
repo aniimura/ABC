@@ -1115,3 +1115,48 @@ theorem app_map_comp_eq {D : ℕᵒᵖ ⥤ Scheme.{0}} {i j l : ℕᵒᵖ} (g : 
 ★★★もう 1 つ効いたこと: **図式 `D` を変数のままにする**。
 `baseChangeRatTowerDiagram f` を直接書くと `D.obj l` が展開されて
 同じエラーが別の場所で出る。**補題は一般の図式で書き、具体の図式は呼ぶ側で入れる。**
+
+
+---
+
+## `hz ▸` は「向きが合わない」と落ちる——`⊥` と `0` は同じ項ではない
+
+2026-08-27、`Found/GenEll/VerticalBound.lean` で踏んだ。
+
+```lean
+have hJ : J ≠ 0 := fun hz => hI (le_bot_iff.mp (hz ▸ h))   -- ✕
+```
+
+    invalid `▸` notation, expected result type of cast is  I ≤ ⊥
+    however, the equality hz of type J = 0 does not contain the expected result type
+
+★`Ideal` では `0` と `⊥` が**同じ値だが同じ項ではない**ので、
+`▸` も `rw [← hz]` もパターンが見つからない。
+
+★★直し方: 書き換えをやめて**順序の推移で繋ぐ**。
+
+```lean
+have hJ : J ≠ 0 := fun hz => hI (le_bot_iff.mp (le_trans h hz.le))   -- ○
+```
+
+`hz.le : J ≤ 0` は `Eq.le` で取れ、`0` と `⊥` は順序の側では同一視される。
+
+## `div_le_div_of_nonneg_right` は `0 ≤ c` を取る（`0 < c` ではない）
+
+同じブロック。名前から `0 < c` を渡すと
+
+    Application type mismatch: hd has type 0 < ↑(Module.finrank ℚ F)
+    but is expected to have type 0 ≤ ↑(Module.finrank ℚ F)
+
+★`c = 0` でも `a/0 = 0 ≤ 0 = b/0` で成立するので仮定が弱い。
+★★`positivity` で `0 ≤ ↑(finrank …)` を出すのが一番短い。
+
+## `Found/GenEll/` で `pullback.snd` を使うなら `open … Limits`
+
+`open AlgebraicGeometry CategoryTheory` だけだと
+
+    Unknown identifier `pullback.snd`
+
+★`pullback` は `CategoryTheory.Limits` にある。ファイル先頭の `open` に
+`Limits` を入れること——**型に `pullback` が出なくても、
+`bcObj` のような `abbrev` を展開した先で必要になる**。
