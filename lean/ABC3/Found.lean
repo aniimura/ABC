@@ -475,6 +475,7 @@ import ABC3.Found.Arakelov.PullbackTriv
 import ABC3.Found.Arakelov.PullbackUnitEnd
 import ABC3.Found.Arakelov.PullbackGen
 import ABC3.Found.Arakelov.PullbackMetric
+import ABC3.Found.Arakelov.PullbackTensor
 import ABC3.Found.Arakelov.ArchDeg
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
