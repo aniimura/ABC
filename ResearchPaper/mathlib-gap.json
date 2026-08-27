@@ -323,6 +323,36 @@
     ],
     "howToProceed": "★自分で 1 本書く。Scheme.Hom.ker_apply（準コンパクト）から入り、pullback.fst のアフィン局所記述（環のテンソル積）に降りる。★★mathlib へ PR できる形の補題である。"
    }
+  },
+  "dedekind-point-extension": {
+   "what": "X が ℤ 上固有なら、分数体の点 Spec F ⟶ X は Dedekind 環の点 Spec 𝒪_F ⟶ X へ一意に延びること。",
+   "whereUsed": [
+    "[GenEll] Definition 1.5, (iii)(iv)——原文が「where we recall that X is proper!」と叫ぶ箇所",
+    "★[GenEll] Remark 1.5.1——点の対応 ePt を ℚ-同型から作る段",
+    "★★Found/GenEll/Remark151Sigma.lean の remark_1_5_1_bdeq が ePt をデータとして受けている理由"
+   ],
+   "mathlibStatus": {
+    "verdict": "partial-major",
+    "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/ValuativeCriterion.lean に IsProper.eq_valuativeCriterion（Stacks 0BX5）がある。Dedekind 環への拡張は無い。",
+    "partial": [
+     "★mathlib: ValuativeCriterion（付値環に対する存在・一意性）は揃っている",
+     "★★ABC3: Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper（付値環の場合を sorry 0 で閉じた。2026-08-27）",
+     "★★★Spec ℤ が終対象なので、付値可換四角形の底での可換性は自動"
+    ],
+    "absentPart": "★各 (𝒪_F)_v での延長を Dedekind 環 𝒪_F の上へ**貼り合わせる**段。★★Spec (𝒪_F)_v は Zariski 開ではないので素朴には貼れない。Spec 𝒪_F[1/m] へ延ばしてから残りの有限個の素点を処理する道になり、ZMT／正規化の水準の作業である。"
+   },
+   "minimalForm": "★消費者が要るのは「ℚ-同型から点の対応 ePt を作る」だけである。★★原文の定義域 U_X(ℚ̄) は X_ℚ だけで決まるので ePt は**恒等**であり、形式化で Spec 𝒪_F ⟶ X を定義域にしたことから生じた橋である。",
+   "impact": "★Remark 1.5.1 を項目として閉じるのに必要な**最後の 1 本**。★★段 1-5 はすべて Found/ に載っている（sorry 0）。",
+   "primarySource": {
+    "measuredAt": "2026-08-27",
+    "note": "★**原典は手元にある**——[Stacks] 0BX5（付値判定法）と正規化の章。",
+    "sources": [
+     "[Stacks] 0BX5 Valuative criterion for properness",
+     "[Stacks] Normalization / ZMT",
+     "[EGA2]"
+    ],
+    "howToProceed": "★mathlib の ValuativeCriterion を入口にし、Spec 𝒪_F[1/m] への延長（有限型性から）と残りの有限個の素点での局所延長を貼る。★★分離性から一意性は出るので、貼ること自体はできるはずである。"
+   }
   }
  },
  "summary": {
