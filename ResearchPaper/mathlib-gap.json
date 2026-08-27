@@ -266,9 +266,10 @@
      },
      {
       "stage": "D2",
-      "claim": "X_s の**異なる V, W にまたがる独立性**と very ample の定義",
-      "status": "open",
-      "why": "★X_s ⊓ V = X.basicOpen (trivValue M V e s) を示すには、**自明化の制限（Found/Arakelov/PicBasicTrivial.lean の trivialOfLe）と trivValue が可換**であることが要る。 ★★very ample（ℙᴺ への閉埋め込み）は段 C2（O(1)）の後である。"
+      "claim": "X_s の**異なる V, W にまたがる独立性**と定義の健全性",
+      "status": "closed",
+      "why": "★X_s ⊓ V = X.basicOpen (trivValue M V e s) を閉じた。 ★★機構は「自明化の制限と trivValue が可換」（trivValue_restrict）だけで、それは e.hom の**自然性**（PresheafOfModules.naturality_apply）から出る。 ★★★trivialOfLe は 2 つの rfl 等式を rw して作られているので**評価すると計算する**。 ★★★★**健全性も取れた**——構造層なら X_s = Scheme.basicOpen s（nonVanishing_unit）。",
+      "where": "Found/GenEll/AmpleDef.lean の trivValue_restrict / **nonVanishing_inf** / mem_nonVanishing_iff_of_mem / **nonVanishing_unit**"
      },
      {
       "stage": "E",
@@ -303,8 +304,8 @@
       ]
      }
     ],
-    "done": "6/10",
-    "remaining": "★★**残るのは C2・D2・E・F2 の 4 段**である。 ★次の葉は **D2（自明化の制限と trivValue の可換性）**——最も小さく、道具（trivialOfLe）はすでにある。 ★★段 E（Serre の定理）は ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み。"
+    "done": "7/10",
+    "remaining": "★★**残るのは C2・E・F2 の 3 段**である。 ★次の葉は **C2（O(1)——twisting sheaf）**。mathlib には 1 件も無いので一から作ることになるが、ℙⁿ_R 自体は段 C1 で入った。 ★★段 E（Serre の定理）は ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み。 ★★★その先には台帳の外に**座標の高さと htArith の比較**がある（northcott_of_projModel が消費する hcmp）。"
    },
    "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。"
   },

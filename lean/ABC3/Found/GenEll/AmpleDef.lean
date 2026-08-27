@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.Arakelov.PicLocalTrivial
+import ABC3.Found.Arakelov.PicBasicTrivial
 import Mathlib.AlgebraicGeometry.AffineScheme
 import ABC3.Meta.Claim
 
@@ -47,12 +48,26 @@ import ABC3.Meta.Claim
 （`linearEquiv_self_apply` / `linearEquiv_self_isUnit`）。
 ★★したがって `basicOpen` は変わらない（`basicOpen_trivValue_congr`）。
 
+## ★★★★★★★異なる `V, W` にまたがる独立性（段 D2）
+
+    `X_s ⊓ V = X.basicOpen (trivValue M V e s)`（`nonVanishing_inf`）
+
+★機構は `trivialOfLe`（`Found/Arakelov/PicBasicTrivial.lean`）と `trivValue` が
+**可換**であること（`trivValue_restrict`）だけで、それは `e.hom` の**自然性**から出る。
+★★`trivialOfLe` は 2 つの `rfl` 等式を `rw` して作られているので、
+**評価すると計算する**——証明中の `h1`・`h2` はどちらも `rfl` である。
+
+## ★★★★★★定義の健全性
+
+構造層 `𝒪_X` については **`X_s` は `Scheme.basicOpen s` そのもの**である
+（`nonVanishing_unit`）。★これで `nonVanishing` が
+「知っている `basicOpen` の一般化」だと型で言える——**空虚ではない**。
+
 ## ★残っている段（明示）
 
-★★**異なる `V, W` にまたがる独立性**——`X_s ⊓ V = X.basicOpen (trivValue M V e s)`——
-はまだ無い。要るのは「自明化の制限と `trivValue` が可換」であること
-（`Found/Arakelov/PicBasicTrivial.lean` の `trivialOfLe` の自然性）である。
-★★★`ample` の基本性質（`X_s` が `L^{⊗n}` の取り方に依らない等）はその先である。
+★**very ample（`ℙᴺ` への閉埋め込み）**は段 C2（`O(1)`）の後である。
+★★**Serre の定理**（ample のある冪が very ample）は段 E。
+★★★**座標の高さと `htArith` の比較**がその先にある。
 -/
 
 namespace ABC3.Found.GenEll
@@ -196,6 +211,104 @@ theorem isLocallyTrivial_presheafTensorPow {M : X.PresheafOfModules}
   | 0 => isLocallyTrivial_unit
   | n + 1 => hM.tensor (isLocallyTrivial_presheafTensorPow hM n)
 
+/-! ## ★★★★★★★★★異なる `V, W` にまたがる独立性（段 D2） -/
+
+/-- ★**大域切断の制限は推移的**——`(s|_V)|_W = s|_W`。 -/
+theorem secOn_restrict (M : X.PresheafOfModules) {V W : X.Opens} (h : W ≤ V)
+    (s : M.obj (op ⊤)) :
+    ((restrictPresheafFunctor X V).obj M).map
+        (Over.homMk (homOfLE h) : Over.mk (homOfLE h : W ⟶ V) ⟶ Over.mk (𝟙 V)).op
+        (secOn M V s) = secOn M W s := by
+  simp only [secOn]
+  show (ConcreteCategory.hom (M.map (homOfLE h).op)) _ = _
+  rw [← PresheafOfModules.map_comp_apply]
+  rfl
+
+/-- ★★★★★★★**自明化の制限と `trivValue` は可換**。
+
+    `trivValue M W (trivialOfLe M h e) s = (trivValue M V e s)|_W`
+
+★機構は `e.hom` の**自然性**（`PresheafOfModules.naturality_apply`）だけである。
+★★`trivialOfLe`（`Found/Arakelov/PicBasicTrivial.lean`）は 2 つの `rfl` 等式を
+`rw` して作られているので、**評価すると計算する**——`h1`・`h2` はどちらも `rfl` である。 -/
+theorem trivValue_restrict (M : X.PresheafOfModules) {V W : X.Opens} (h : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s : M.obj (op ⊤)) :
+    trivValue M W (trivialOfLe M h e) s
+      = X.presheaf.map (homOfLE h).op (trivValue M V e s) := by
+  have hnat := PresheafOfModules.naturality_apply e.hom
+    (Y := op (Over.mk (homOfLE h : W ⟶ V)))
+    (X := op (Over.mk (𝟙 V)))
+    (Over.homMk (homOfLE h) : Over.mk (homOfLE h : W ⟶ V) ⟶ Over.mk (𝟙 V)).op
+    (secOn M V s)
+  rw [secOn_restrict M h s] at hnat
+  have h1 : trivValue M W (trivialOfLe M h e) s
+      = e.hom.app (op (Over.mk (homOfLE h : W ⟶ V))) (secOn M W s) := rfl
+  have h2 : X.presheaf.map (homOfLE h).op (trivValue M V e s)
+      = (𝟙_ (PresheafModulesOn X V)).map
+          (Over.homMk (homOfLE h) : Over.mk (homOfLE h : W ⟶ V) ⟶ Over.mk (𝟙 V)).op
+          (e.hom.app (op (Over.mk (𝟙 V))) (secOn M V s)) := rfl
+  rw [h1, h2]
+  exact hnat
+
+theorem basicOpen_trivValue_restrict (M : X.PresheafOfModules) {V W : X.Opens} (h : W ≤ V)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s : M.obj (op ⊤)) :
+    X.basicOpen (trivValue M W (trivialOfLe M h e) s)
+      = W ⊓ X.basicOpen (trivValue M V e s) := by
+  rw [trivValue_restrict M h e s, X.basicOpen_res]
+
+/-- ★★★★★★★★★**`X_s` は自明化の上でちょうど `basicOpen` である**（段 D2 の到達点）。
+
+    `X_s ⊓ V = X.basicOpen (trivValue M V e s)`
+
+★これで `X_s` が「どの `(V, e)` から見ても同じもの」であることが型で言える。
+★★機構は `V ⊓ W` へ両方の自明化を落として `basicOpen_trivValue_congr` を当てるだけ。 -/
+theorem nonVanishing_inf (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s : M.obj (op ⊤)) :
+    nonVanishing M s ⊓ V = X.basicOpen (trivValue M V e s) := by
+  refine le_antisymm ?_ (le_inf (basicOpen_trivValue_le M V e s) (X.basicOpen_le _))
+  rintro x ⟨hxN, hxV⟩
+  obtain ⟨W, e', hxW⟩ := (mem_nonVanishing_iff M s x).1 hxN
+  have hxW' : x ∈ W := X.basicOpen_le (trivValue M W e' s) hxW
+  have hxU : x ∈ V ⊓ W := ⟨hxV, hxW'⟩
+  have h1 : x ∈ X.basicOpen (trivValue M (V ⊓ W) (trivialOfLe M inf_le_right e') s) := by
+    rw [basicOpen_trivValue_restrict M (inf_le_right : V ⊓ W ≤ W) e' s]
+    exact ⟨hxU, hxW⟩
+  rw [basicOpen_trivValue_congr M (V ⊓ W) (trivialOfLe M inf_le_left e)
+    (trivialOfLe M inf_le_right e') s] at h1
+  rw [basicOpen_trivValue_restrict M (inf_le_left : V ⊓ W ≤ V) e s] at h1
+  exact h1.2
+
+/-- ★★★★**局所判定**——自明化のある近傍の点については `basicOpen` を見ればよい。 -/
+theorem mem_nonVanishing_iff_of_mem (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    (s : M.obj (op ⊤)) {x : X} (hx : x ∈ V) :
+    x ∈ nonVanishing M s ↔ x ∈ X.basicOpen (trivValue M V e s) := by
+  constructor
+  · intro hxN
+    have hxi : x ∈ nonVanishing M s ⊓ V := ⟨hxN, hx⟩
+    rwa [nonVanishing_inf M V e s] at hxi
+  · exact fun hxB => basicOpen_trivValue_le M V e s hxB
+
+set_option backward.isDefEq.respectTransparency false in
+theorem trivValue_unit_top (s : (𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens))) :
+    trivValue (𝟙_ X.PresheafOfModules) ⊤ restrictPresheafUnit.symm s = s := by
+  simp [trivValue, secOn, restrictPresheafUnit, Functor.Monoidal.εIso]
+  rfl
+
+/-- ★★★★★★★★**定義の健全性** —— 構造層 `𝒪_X` については
+`X_s` は `Scheme.basicOpen s` そのものである。
+
+★★これで `nonVanishing` が「知っている `basicOpen` の一般化」だと型で言える
+——空虚ではない。 -/
+theorem nonVanishing_unit (s : (𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens))) :
+    nonVanishing (𝟙_ X.PresheafOfModules) s = X.basicOpen s := by
+  have h := nonVanishing_inf (𝟙_ X.PresheafOfModules) ⊤ restrictPresheafUnit.symm s
+  rw [inf_top_eq, trivValue_unit_top] at h
+  exact h
+
 /-! ## ★★★★★★★`ample` の定義 -/
 
 /-- ★★★★★★★**ample な可逆層**（[Stacks] 28.27.1）。
@@ -254,8 +367,25 @@ def nonVanishing.needs : List ABC3.Meta.ProofObligation :=
        "★★代わりに局所自明化ごとに basicOpen を取って合併した" ++
        "——開であることが自動になり、自明化を選ばないので選択公理も要らない") 6,
     .implicitStep
-      ("★★★残っているのは**異なる V, W にまたがる独立性**" ++
-       "(X_s ⊓ V = X.basicOpen (trivValue M V e s))である。" ++
-       "要るのは自明化の制限(trivialOfLe)と trivValue が可換であること") 6 ]
+      ("★★★異なる V, W にまたがる独立性" ++
+       "(X_s ⊓ V = X.basicOpen (trivValue M V e s))は 2026-08-27 に閉じた" ++
+       "——nonVanishing_inf。機構は trivValue_restrict(e.hom の自然性)だけである。" ++
+       "★健全性も取れている——構造層なら X_s = Scheme.basicOpen s(nonVanishing_unit)。" ++
+       "★★残るのは very ample(段 C2 の後)と Serre の定理(段 E)である") 6 ]
+
+def nonVanishing_inf.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(X_s は自明化の上でちょうど basicOpen であること)",
+    sectionId := "genell-prop-1-4" }
+
+def nonVanishing_unit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(健全性——構造層なら X_s = Scheme.basicOpen s)",
+    sectionId := "genell-prop-1-4" }
+
+def trivValue_restrict.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(自明化の制限と trivValue が可換であること)",
+    sectionId := "genell-prop-1-4" }
 
 end ABC3.Found.GenEll
