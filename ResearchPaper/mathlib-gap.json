@@ -474,14 +474,21 @@
       "why": "★I が有限生成であることだけを使う——各生成元 a について N^{k_a}·a ∈ J が出るのでm = max k_a を取る。★★**交点数も類群も要らない**ことがここで確定した。★★★機構は IsLocalization.mem_map_algebraMap_iff と eq_iff_exists の 2 本だけ"
      },
      {
-      "stage": "3b",
-      "claim": "その m を X 全体で 1 つに揃える（一様化）",
+      "stage": "3b-1",
+      "claim": "層の水準の n·D ≤ E を**点の水準へ降ろす**",
+      "status": "closed",
+      "where": "Found/GenEll/VerticalDescent.lean の span_natCast_mul_pullbackIdeal_le / htArith_bdeq_of_sheaf_comparable",
+      "why": "★道具は 3 本だけだった:\n  pullbackIdealOf_mul（ComapMul.lean の comap_mul を環へ落とす）\n  pullbackIdealOf_mono（mathlib の comap_mono）\n  pullbackIdealOf_comap_intSpan（**Spec ℤ が終対象**）\n★★★最後の 1 本が本質である——x ≫ f は Spec ℤ への**唯一の**射なので、定数 n が点にも定義体にも依らない。\n★★結果: **高さの BD-同値の仮定が「層の不等式 2 本」になった**（htArith_bdeq_of_sheaf_comparable）"
+     },
+     {
+      "stage": "3b-2",
+      "claim": "その n を**アフィン被覆から取る**（D と E が ℤ[1/N] の上で一致するところから）",
       "status": "open",
-      "why": "★道具は揃っている:\n  (a) IdealSheafData.le_of_iSup_eq_top / ext_of_iSup_eq_top（mathlib）\n  (b) comap_mono（mathlib）と comap_mul（**ABC3 の Found/GenEll/ComapMul.lean、2026-08-17**）\n  (c) exists_pow_mul_le_of_map_le（本セッション、Found/GenEll/IdealComparable.lean）\n★★残るのは 2 本:\n  (i) Spec ℤ 上の N のイデアル層を点へ引き戻すと span{N} になること\n  (ii) 各アフィンチャートで Γ(X_N ∩ U) = Γ(X,U)[1/N] となること（基本開集合の切断）と、有限被覆で m の最大を取ること\n★★★**comap_mul 待ちではない**（2026-08-27 訂正）"
+      "why": "★残るのは 2 本:\n  (i) 各アフィンチャート U で Γ(X_N ∩ U) = Γ(X,U)[1/N]（基本開集合の切断。mathlib の IsAffineOpen.isLocalization_basicOpen）\n  (ii) X が準コンパクトなので有限個の m_i の最大を取る\n★★各チャートの m_i は IdealComparable.lean の exists_pow_mul_le_of_map_le が与える\n★★★貼るのは mathlib の IdealSheafData.le_of_iSup_eq_top（被覆の上で見ればよい）"
      }
     ],
-    "done": "3/4",
-    "remaining": "★★★残るは「チャートごとの m を最大で揃える」配管 1 段だけである。"
+    "done": "4/5",
+    "remaining": "★★★★**残るは段 3b-2 だけ**であり、道具（isLocalization_basicOpen・le_of_iSup_eq_top・exists_pow_mul_le_of_map_le）は**すべて揃っている**。"
    }
   }
  },
