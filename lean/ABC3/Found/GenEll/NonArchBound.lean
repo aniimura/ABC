@@ -433,6 +433,81 @@ def CBData.bounds_baseChange.needs : List ABC3.Meta.ProofObligation :=
       ("★どちらも中身は「埋め込みは代数閉体へ延びる」(IsAlgClosed.lift)である。" ++
        "★★索引を体の埋め込み F → ℂ / F → ℚ̄_p に取ったので両側が同じ証明になった") 6 ]
 
+/-! ### ★★★★★★★★項目全体の `.src`
+
+★`.src` は「その原典項目を**完全に**実装した」という主張である
+（`tools/genell-progress.mjs` の規則）。下の 1 つは、
+`Example 1.3` が**導入する語彙がすべて `Found/` に揃った**ので置く。 -/
+
+/-- ★★★★★★★★**[GenEll] Example 1.3** —— 導入される語がすべて実装された。
+
+原文 (GenEll p.5):
+> Example 1.3. Various Natural Subsets of the Set of Points.
+
+## ★(i) —— 次数による部分集合
+
+| 原文の語 | 宣言 | 場所 |
+|---|---|---|
+| `X(ℚ̄)^{≤d}`（`d ∈ ℕ ∪ {∞}`） | `leDeg`（`ℕ∞` で索引） | `DegSubset.lean` |
+| `X(ℚ̄)^{≤∞} = X(ℚ̄)` | `leDeg_top` | 同上 |
+| `X(ℚ̄)^{=d}` | `eqDeg` | 同上 |
+| 「最小定義体」への参照 | `mem_eqDeg_iff` | 同上 |
+| `E^{≤d}` / `E^{=d}` | `subLeDeg` / `subEqDeg` | 同上 |
+| **Galois-finite** | `GaloisFinite` | 同上 |
+
+## ★(ii) —— compactly bounded subset
+
+| 原文の語 | 宣言 | 場所 |
+|---|---|---|
+| **compact domain** | `IsCompactDomain` | ★本ファイル |
+| `K_v ⊆ X^arc`（`v ∈ V^arc`） | `CBData.Karc` ＋ `archPointSetFull` | ★本ファイル |
+| `K_v ⊆ X(ℚ̄_v)`（`v ∈ V^non`） | `PadicBound` ＋ `padicPointSet` | ★本ファイル |
+| 「`x` が定める `[F:ℚ]` 個の点」 | `archPointFull` / `padicPoint` | ★本ファイル |
+| **`K_V`** | `CBData.Bounds` | ★本ファイル |
+| **support** | `CBData.support` | ★本ファイル |
+| **bounding domains** | `CBData.Karc` / `PadicBound.K` | ★本ファイル |
+| `K_V ⊆ X(ℚ̄)` が well-posed | ★`CBData.bounds_baseChange` | ★本ファイル |
+
+★★アルキメデス側の囲い込みは `CompactBound.lean` の `BoundedByArch`（素点ごとに 1 つ）
+も残してある。本ファイルの `archPointSetFull` は原文の「`[F:ℚ]` 個」に合わせた版である。
+
+## ★★★★逸脱の記録（CLAUDE.md の「逸脱」）
+
+★★**`K_v` の側の条件は課していない** —— 原文は
+`ι_X`-安定・compact domain・`K_v ≠ X^arc`（非アルキメデス側は
+`Gal(ℚ̄_p/ℚ_p)`-安定・各 `X(K)` との交わりが compact domain・`K_v ≠ X(ℚ̄_p)`）を要求するが、
+本実装は `K_v` を任意の部分集合として受ける。
+★理由: それらは**利用者が課す条件**であって、「囲われている」という述語の定義には要らない。
+`IsCompactDomain` は定義したので、課したいときは課せる。
+
+★★★**原文末尾の Note は取っていない**:
+
+> Note that by applying **well-known approximation results in elementary number theory**,
+> it follows immediately that the bounding domains of a compactly bounded subset,
+> hence also the support, are **completely determined by the compactly bounded subset itself**.
+
+★これは語の導入ではなく、導入した語**についての観察**であり、
+原文自身が「well-known approximation results」に委ねている。`.needs` に folklore として記録する。 -/
+def example_1_3.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 5, item := "Example 1.3",
+    sectionId := "genell-ex-1-3" }
+
+def example_1_3.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "leDeg / eqDeg / subLeDeg / subEqDeg / GaloisFinite((i) の語)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.GaloisFinite") 5,
+    .citation "[ABC3]" "CBData.bounds_baseChange(K_V が X(ℚ̄) の部分集合として意味を持つ)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.CBData.bounds_baseChange") 6,
+    .folklore
+      ("原文末尾の Note「by applying well-known approximation results in elementary " ++
+       "number theory … the bounding domains, hence also the support, are completely " ++
+       "determined by the compactly bounded subset itself」——★語の導入ではなく" ++
+       "導入した語についての観察であり、原文自身が well-known に委ねている。本実装は取っていない") 6,
+    .implicitStep
+      ("★逸脱: K_v の側の条件(ι_X-安定・compact domain・K_v ≠ 全体、" ++
+       "非アルキメデス側は Gal(ℚ̄_p/ℚ_p)-安定・各 X(K) との交わりが compact domain)は" ++
+       "課していない。利用者が課す条件であり述語の定義には要らないためで、" ++
+       "IsCompactDomain は定義したので課したいときは課せる") 6 ]
+
 def BoundedByV.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "BoundedByArch(アルキメデス側。CompactBound.lean)"
       (.inProject "ABC3" "ABC3.Found.GenEll.BoundedByArch") 6,
