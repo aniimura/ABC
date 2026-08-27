@@ -114,6 +114,28 @@ theorem liftDescent_fst {X X' : Scheme.{0}}
       = pullback.fst (overRatTowerDiagram.obj i).hom f :=
   pullback.lift_fst _ _ _
 
+/-! ## ★★★★図式の射と射影の関係 -/
+
+/-- ★★**段を下げても `X` への射影は変わらない**。 -/
+theorem baseChangeMap_snd {X : Scheme.{0}}
+    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    {i m : ℕᵒᵖ} (h : m ⟶ i) :
+    (baseChangeRatTowerDiagram f).map h ≫ pullback.snd (overRatTowerDiagram.obj i).hom f
+      = pullback.snd (overRatTowerDiagram.obj m).hom f := by
+  simp only [baseChangeRatTowerDiagram, Functor.comp_map, Over.forget_map,
+    Over.pullback_map_left]
+  exact pullback.lift_snd _ _ _
+
+/-- ★★**段を下げると `Spec ℤ[1/n!]` への射影は塔の射で送られる**。 -/
+theorem baseChangeMap_fst {X : Scheme.{0}}
+    (f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ)))
+    {i m : ℕᵒᵖ} (h : m ⟶ i) :
+    (baseChangeRatTowerDiagram f).map h ≫ pullback.fst (overRatTowerDiagram.obj i).hom f
+      = pullback.fst (overRatTowerDiagram.obj m).hom f ≫ (overRatTowerDiagram.map h).left := by
+  simp only [baseChangeRatTowerDiagram, Functor.comp_map, Over.forget_map,
+    Over.pullback_map_left]
+  exact pullback.lift_fst _ _ _
+
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** 同型の降下の**組み立て**（上の 5 段）と、
@@ -146,5 +168,15 @@ def liftDescent.needs : List ABC3.Meta.ProofObligation :=
     .implicitStep
       ("★★そのあと因子 D の降下と Σ の外での conductor の一致を経て、" ++
        "LogCondSigma.lean の abs_logCond_sub_le_sum_log(既存)で Remark 1.5.1 が閉じる") 9 ]
+
+def baseChangeMap_snd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 9,
+    item := "Remark 1.5.1(段を下げても X への射影は変わらない)",
+    sectionId := "genell-rem-1-5-1" }
+
+def baseChangeMap_fst.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 9,
+    item := "Remark 1.5.1(段を下げると Spec ℤ[1/n!] への射影は塔の射で送られる)",
+    sectionId := "genell-rem-1-5-1" }
 
 end ABC3.Found.GenEll
