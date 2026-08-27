@@ -1420,3 +1420,27 @@ rw [e1] at e2
 
 ★★★**単体ビルドが通っただけで commit しないこと**。
 `Found.lean` に import を足して `lake build`（全体）まで通してから commit する。
+
+### ★★★★★3 回目は**台帳に嘘を書きかけた**（2026-08-28）
+
+`PresheafOfModules.pullback` の `Monoidal` インスタンスが mathlib に無いのを見て、
+台帳に `arakelov-pullback-monoidal` を新設した。★**在庫を引いていなかった**。
+
+実際には `Found/Arakelov/PicSchemeDelta.lean` に
+
+    instance pullbackPreOplax : (pullbackPre f).OplaxMonoidal
+
+が `sorry` 無しで在り、さらに `isLocallyTrivial_pullbackPre`（`PicLTPull.lean`）の
+証明の中に**自明化の輸送が明示的に書かれていた**（`bcIso`・`pullbackOnUnitIso`）。
+
+★★同じ回に `schemeRingHom` / `schemePullback` / `pullbackFreeYonedaIso` を
+書き下ろしたが、これらも `pullbackPhi` / `pullbackPre` / `pullbackFreeYonedaIso`
+として**すべて在庫**であった（`pullbackFreeYonedaIso` は**名前まで同じ**）。
+
+★★★**教訓**: 「mathlib に無い」を測ったら、**必ず続けて木を引く**。
+
+    grep -rn "def <名前>\|theorem <名前>" lean/ABC3/
+    grep -rn "<概念の日本語>" lean/ABC3/Found/*/*.lean | head
+
+★★★★台帳に gap を新設する前は**とくに**引くこと——
+台帳の嘘は Lean のビルドが捕まえてくれない。

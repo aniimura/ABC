@@ -881,19 +881,32 @@
    }
   },
   "arakelov-pullback-monoidal": {
-   "what": "前層加群の**引き戻し関手のモノイダル性**。`f : Y ⟶ X` に対する `f^* : X.PresheafOfModules ⥤ Y.PresheafOfModules` が `⊗` と `𝟙_` を保つこと。",
+   "what": "前層加群の**引き戻し関手のモノイダル性**（`f^* : Y.PresheafOfModules ⥤ X.PresheafOfModules`）。★本 gap は 2026-08-28 に**訂正した**——下の `correction` を見よ。",
    "whereUsed": [
     "[GenEll] Definition 1.1, (ii)（算術直線束の**引き戻し** `φ^*L̄`）",
     "★その下流: `ht_M̄(x) ≝ deg_F(x_F^* M̄)`（ただし本プロジェクトは因子表示で別に持っている）"
    ],
    "mathlibStatus": {
-    "verdict": "partial",
+    "verdict": "absent-in-mathlib-but-built-in-project",
     "searched": "2026-08-28 実測（REPL）。`PresheafOfModules.pullback` は**ある**。スキームの射に対しては `Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)` を渡せばよく、必要な `(PresheafOfModules.pushforward φ).IsRightAdjoint` も **instance で解決する**。",
-    "absentPart": "★`(PresheafOfModules.pullback φ).Monoidal` の instance が**無い**（`infer_instance` が失敗、2026-08-28 実測）。 ★★引き戻しは随伴で定義されているので切断ごとの計算では出ず、`pushforward` が lax monoidal であることから mate で oplax を作る段が要る。"
+    "absentPart": "★mathlib には `(PresheafOfModules.pullback φ).Monoidal` の instance が無い（`infer_instance` が失敗、2026-08-28 実測）。★★**しかし本プロジェクトはそれを既に建てている**——`pullbackPreOplax`（`Found/Arakelov/PicSchemeDelta.lean`）が `(pullbackPre f).OplaxMonoidal` を与える。"
    },
    "minimalForm": "★計量を運ぶのに要るのは (1) `f^*(𝟙_) ≅ 𝟙_` と (2) `f^*` が自明化を自明化へ送ること、の 2 つだけである。★★完全なモノイダル性（結合子・単位子の整合）までは要らない。",
-   "impact": "★**`Definition 1.1, (ii)` の引き戻しの段**である。 ★★ただし**高さの理論はこれを待たない**——本プロジェクトは因子表示（`ArithCartier`）で `pullbackAPic` / `pullbackADiv` / `htArith` を `sorry` 無しで持っている。 ★★★待つのは「`AMetric` の側で引き戻しを書く」ことだけである。",
-   "measuredAt": "2026-08-28"
+   "impact": "★**訂正後**: `Definition 1.1, (ii)` の引き戻しは、台の側は**すべて在庫**であり、残るのは**計量を運ぶ段だけ**である（1〜2 ブロック）。★★高さの理論はこれを待たない——因子表示で `pullbackAPic` / `htArith` は在庫である。",
+   "measuredAt": "2026-08-28",
+   "correction": {
+    "measuredAt": "2026-08-28",
+    "note": "★★★★★★**本 gap を立てたのは在庫確認の怠りであった**。「mathlib に無い」は正しいが、「本プロジェクトに無い」は**誤り**である。★以下はすべて `Found/Arakelov/` に **`sorry` 無しで在庫**（2026-08-28 実測）:",
+    "inStock": [
+     "`pullbackPre f`（`PicSchemeDelta.lean`）—— スキームの射に沿った**前層**加群の引き戻し",
+     "★`pullbackPreOplax` —— **`(pullbackPre f).OplaxMonoidal`**",
+     "`pullbackDelta` / `pullbackEta` —— 比較射 `f^*(P⊗Q) ⟶ f^*P ⊗ f^*Q` と `f^*𝒪 ⟶ 𝒪`",
+     "★★`isLocallyTrivial_pullbackPre`（`PicLTPull.lean`）—— **局所自明性は引き戻しで保たれる**。証明の中に自明化の輸送が**明示的に**書かれている（`bcIso`＝Beck–Chevalley、`pullbackOnUnitIso`、`restrictOnFunctor`）",
+     "`pullbackFreeYonedaIso`（`PicPullFree.lean`）/ `pullbackTensorFreeIso`（`PicPullTensorFree.lean`）",
+     "★★★層の段: `pullbackUnitIso`（`f^*𝒪_Y ≅ 𝒪_X`）・`pullbackSheafTensorIso'`（`f^*(L⊗M) ≅ f^*L ⊗ f^*M`、局所自明性だけを仮定）・`picPullback`＋`picPullback_mul`・`InvSheaf.pullback`"
+    ],
+    "remaining": "★したがって `Definition 1.1, (ii)` の引き戻しに残るのは**計量を運ぶ段だけ**である——`bcIso` と `pullbackOnUnitIso` が自明化を運ぶので、`LocalMetric.tensor` と同じチャートの型で `h` を運べばよい。★★見積もり: 1〜2 ブロック。"
+   }
   }
  },
  "summary": {
