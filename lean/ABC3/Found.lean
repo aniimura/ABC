@@ -538,6 +538,7 @@ import ABC3.Found.GenEll.HyperplanePullbackChart
 import ABC3.Found.GenEll.HyperplanePullbackGlobal
 import ABC3.Found.GenEll.HeightGlobalChart
 import ABC3.Found.GenEll.NorthcottGlobalChart
+import ABC3.Found.GenEll.NorthcottChartUnion
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm

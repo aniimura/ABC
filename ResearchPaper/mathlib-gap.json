@@ -580,6 +580,12 @@
             "why": "★★★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottGlobalChart.lean`）: `northcott_globalChart`——「切断の非零開 `X_{s_i}` の点について Northcott が出る」。★`§9-881`（射に沿った移送）と `§9-887`（チャート射の分解）の合成である。★★**計量については仮定が要らない**——`hyperplaneArith N` の Green 関数は `greenFS` そのものなので、差は `0`（定数関数）で連続だからである。★★★残っている仮定は 3 つで、いずれも出どころが判っている: `hdeg`（原文の `X(ℚ)_{≤d}`）・`hw`/`hx`/`h0`（`§9-854` の整数表示）・`hinj`（`§9-849`・`§9-851` の点の分離）。★★★★これが `Proposition 1.4, (iv)` の**チャート版**である。`X` 全体へ広げるには `X = ⋃ X_{s_i}`（段 E2）で有限和を取ればよい。"
           },
           {
+            "stage": "E3i",
+            "status": "closed",
+            "title": "チャートごとに有限なら全体でも有限（段 E2 を Northcott に効かせる）",
+            "why": "★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottChartUnion.lean`）: `finite_of_finite_charts` と `finite_of_finite_charts_subset`。★`§9-888` は**チャート 1 枚分**の Northcott だったので、`X = ⋃_i X_{s_i}`（段 E2）で全体へ広げる形を与えた。★★機構は集合論の 1 行——**有限個の有限集合の和は有限**（`Set.finite_iUnion`）——だけである。添字が `Fin (N+1)`（有限）なので効く。★★★残るのは「各点をどのチャートに割り当てるか」の配管で、`§9-C2b`（`exists_chart_range`——体値の点はどれかのチャートに入る）が与える。"
+          },
+          {
             "stage": "F1",
             "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
             "status": "closed",
