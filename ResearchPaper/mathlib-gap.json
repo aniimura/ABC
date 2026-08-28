@@ -358,12 +358,13 @@
           {
             "stage": "E3a",
             "claim": "★**ample の核** —— `g ∈ Γ(X, X_s)` なら、ある `n` で `g·s^n` が `Γ(X, L^{⊗(d(n+1))})` の切断の制限になる",
-            "status": "open",
-            "why": "★★★★**これが段 E3 の葉であり、[Stacks] Lemma 01PW（tag 01PW / 01Q3）そのもの**である（2026-08-28 の測定）。★`X_s` がアフィンで `X` が準コンパクトなことから、`X` を有限個の `X_{s_i}` で覆い、各々で `g` の分母を `s` の冪で払う。★★`M` が可逆であることと `X_s ⊓ X_{s_i}` の上で `s` が単元であることが効く。★★★プロジェクトには材料がある——`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2、`§9-820`）。",
+            "status": "partial",
+            "why": "★★★★**これが段 E3 の葉であり、[Stacks] Lemma 01PW（tag 01PW / 01Q3）そのもの**である（2026-08-28 の測定）。★`X_s` がアフィンで `X` が準コンパクトなことから、`X` を有限個の `X_{s_i}` で覆い、各々で `g` の分母を `s` の冪で払う。★★`M` が可逆であることと `X_s ⊓ X_{s_i}` の上で `s` が単元であることが効く。★★★プロジェクトには材料がある——`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2、`§9-820`）。 ★★★★★**2026-08-28 夜: 局所版が入った**（`§9-822`）——アフィン開 `U` の上では `g ∈ Γ(X, X_s ⊓ U)` の分母を `trivValue s` の冪で払える。★機構は mathlib の `IsAffineOpen.isLocalization_basicOpen`（`Γ(X, D(f))` は `Γ(X,U)` の `f` による局所化）＋ `IsLocalization.Away.surj` そのものであった。★★**残るのは大域化**——(1) 自明化するアフィン開で有限被覆、(2) 指数を最大値で揃える、(3) 貼り合わせ。★★★(3) が本体で、重なりでの一致に `trivValue` の遷移単元（段 D1）が効く。",
             "sources": [
               "[Stacks] Lemma 01PW（ample な可逆層の切断の延長）",
               "[Stacks] 28.27 Ample invertible sheaves"
-            ]
+            ],
+            "where": "Found/GenEll/ClearDenominator.lean の exists_pow_mul_eq_res / exists_pow_mul_eq_res_nonVanishing"
           },
           {
             "stage": "E3b",
@@ -408,7 +409,7 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "20/24",
+        "done": "20.5/24",
         "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせの重なり一致）・E3a〜E3d・C2c 前半・F2c** である。★★★**葉は E3a**（[Stacks] Lemma 01PW）——ample な可逆層の切断が `s` の冪を掛ければ延びること。ここが `Proposition 1.4, (iv)` の、ひいては §1 の残り 3 項目と §3 の 2 項目の門である。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
