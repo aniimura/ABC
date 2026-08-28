@@ -87,12 +87,12 @@ noncomputable def genericFiberEquiv {X Y : Scheme.{0}} (f : Y ⟶ X) [QuasiCompa
 def ker_ideal_localized.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Remark 1.4.1(閉包のイデアル層の生成ファイバーへの像)",
-    sectionId := "genell-remark-1-4-1" }
+    sectionId := "genell-rem-1-4-1" }
 
 def genericFiberEquiv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 8,
     item := "Remark 1.4.1(段 F2c——閉包を生成ファイバーへ落とすと Y に戻る)",
-    sectionId := "genell-remark-1-4-1" }
+    sectionId := "genell-rem-1-4-1" }
 
 def genericFiberEquiv.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[mathlib]" "Scheme.Hom.ker_apply(アフィン開で核を読む)"
