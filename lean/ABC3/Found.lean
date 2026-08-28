@@ -535,6 +535,7 @@ import ABC3.Found.GenEll.NorthcottVeryAmple
 import ABC3.Found.GenEll.GenericFiberScheme
 import ABC3.Found.GenEll.DivisorOfSectionEq
 import ABC3.Found.GenEll.HyperplanePullbackChart
+import ABC3.Found.GenEll.HyperplanePullbackGlobal
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm

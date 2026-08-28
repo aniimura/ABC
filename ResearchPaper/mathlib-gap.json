@@ -562,6 +562,12 @@
             "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/HyperplanePullbackChart.lean`）: `map_globalAwayHom_ker_hyperplane`——`(globalAwayHom i)_* ( ker (Away.map hyperplaneHom (x_i)) ) = ( s_0/s_i )`。★これが「**非常に豊富**」であることの中身である——超平面を引き戻すと、切断 `s_0` の零点因子（`s_i` で自明化して測ったもの）になる。★★機構は `§9-863`（段 C2c-1：`ker (Away.map hyperplaneHom (x_i)) = (x_0/x_i)`）と `§9-842`（`globalAwayHom_projCoord`：`x_j/x_i ↦ s_j/s_i`）の合成だけであった。★★★これを `Scheme.IdealSheafData` の水準へ持ち上げると `(globalChartToProj i)^* (超平面) = div(s_0)|_{X_{s_i}}` になり、`§9-884`（`X_{s_i}` の上では `M` は自明なので `div(s)` は等号）が受ける。★★★★それが `§9-882` の仮定 `hDn` の `n = 1` の場合（＝非常に豊富）である。"
           },
           {
+            "stage": "E3f",
+            "status": "closed",
+            "title": "点に沿った超平面の引き戻しは比の切断の値である（幾何側と数論側の合流）",
+            "why": "★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/HyperplanePullbackGlobal.lean`）: `pullbackIdeal_hyperplane_globalRatio`——`pullbackIdeal F (超平面) (x ≫ globalChartToProj i) = ( (s_0/s_i)(x) )`。★機構: `globalChartMorphism` の**終域はアフィン**（`Spec A⁰_{x_i}`）なので、点 `x : Spec 𝓞_F ⟶ X_{s_i}` を合成すると `Spec.map ρ` の形になり（`Spec.map_preimage`）、`§9-865`（段 C2c-1）がそのまま当たる。生成元は `§9-842` の `globalAwayHom_projCoord` で `(s_0/s_i)(x)` になる。★★**これで幾何側と数論側が同じ対象で出会った**: 幾何側「ample ⟹ 切断で生成 ⟹ チャート射 ⟹ 超平面の引き戻し = 比の切断」と 数論側「超平面の引き戻し ⟹ deg_fin ⟹ ht = log H ⟹ Northcott」が、**点に沿った超平面の引き戻しイデアル**という同じ対象を共有する。"
+          },
+          {
             "stage": "F1",
             "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
             "status": "closed",
