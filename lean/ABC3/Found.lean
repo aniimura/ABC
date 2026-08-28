@@ -1209,6 +1209,7 @@ import ABC3.Found.NCBelyi.BelyiPoly
 import ABC3.Found.NCBelyi.RatSeparation
 import ABC3.Found.NCBelyi.ConjStable
 import ABC3.Found.Stacks.ProperImmersion
+import ABC3.Found.Arakelov.ConjMetric
 /-!
 # Found — 実装済みの基礎
 
