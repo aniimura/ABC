@@ -10,7 +10,7 @@
     "   - 測っていないものは nodes を \"unmeasured\" にし、howToMeasure に測り方を書く。嘘の数字を置かない。",
     "   - measuredAt を必ず書く。測定は古くなる。"
   ],
-  "measuredAt": "2026-08-27",
+  "measuredAt": "2026-08-29",
   "gaps": {
     "tame-ramification": {
       "what": "馴分岐の理論。全分岐の構造定理(馴なら不分岐部を除けば Eisenstein な生成元 λ^e = π を持つ)と、馴なら different の指数がちょうど e−1 であること。",
@@ -283,7 +283,22 @@
         "lean/ABC3/Found/NCBelyi/Normalize.lean",
         "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
       ],
-      "impact": "★§2 の 1 項目（Theorem 2.1）の門。 ★★**未分割ではない**（2026-08-27 確認）——5 節点中 3 が実装済みで、残る Lemma 2.4 も 9 節点中 8 が閉じている。 ★★★残るは「ℙ¹ 上の有理関数としての組み立て（不分岐性の帳簿）」1 つと Theorem 2.5 本体である。"
+      "impact": "★§2 の 1 項目（Theorem 2.1）の門。 ★★**未分割ではない**（2026-08-27 確認）——5 節点中 3 が実装済みで、残る Lemma 2.4 も 9 節点中 8 が閉じている。 ★★★残るは「ℙ¹ 上の有理関数としての組み立て（不分岐性の帳簿）」1 つと Theorem 2.5 本体である。",
+      "thm21RemainderMeasured20260829": {
+        "measuredAt": "2026-08-29",
+        "note": "★★★★★★[GenEll] Theorem 2.1 の (ii) ⟹ (i) を 4 つの段に分けて測り、**3 つを Found/ で閉じた**(第 512-514、§9-976〜978)。",
+        "stagesDone": [
+          "原文 p.12/p.13 の不等式の鎖 2 本 — Found/GenEll/Thm21Chain.lean(thm_2_1_stepA / thm_2_1_stepB)。★(i) ⟹ (ii) の bdge_restrict も同じファイル。",
+          "原文 p.12 のコンパクト性の段(Ξ・Ξ_v を取る) — Found/GenEll/Thm21Extract.lean(exists_bad_seq_tendsto)。★★測定: この段は「¬BDge から悪い点の列を作る」＋「有限個のコンパクト第一可算空間の積で収束部分列を取る」に尽きる(isCompact_univ ＋ IsCompact.tendsto_subseq ＋ tendsto_pi_nhds)。",
+          "原文 p.12 の次数の段(e を大きく取れば deg(ω_Y(E)) ≤ (1+ϵ′)deg(ω_Y)) — Found/GenEll/Thm21DegRatio.lean。★★Riemann–Hurwitz を認めれば純粋に算術: #E = n·Dg/e から deg(ω_Y) = n(A+(1−1/e)Dg)、deg(ω_Y(E)) = n(A+Dg) で **e が消える**。同時に U_Y の双曲性も出る。"
+        ],
+        "stagesRemaining": [
+          "(a) 任意の正整数 e に対し、E = (D ×_X Y)_red の各点で分岐指数がちょうど e となる連結有限エタール Galois 被覆 U_Y → U_X(folklore／[Stacks] 58.6 Fundamental groups)。",
+          "(b) noncritical Belyi 写像([NCBelyi] Theorem 2.5)——★本 gap の本体。"
+        ],
+        "inputsInHand": "★[GenEll] 内の入力はすべて手元にある: Proposition 1.7, (i) = Found/GenEll/Prop17.lean の prop_1_7(★2026-08-29 に閉じた、§9-975)、Proposition 1.6 = prop_1_6、Proposition 1.4, (i)(iii)(iv) = Found/GenEll/Prop14.lean。",
+        "verdict": "★★★Theorem 2.1 に残るのは**幾何の 2 点だけ**であり、どちらも**本論文の外**の結果である。算術・解析の段はすべて閉じた。"
+      }
     },
     "riemann-roch-curves": {
       "what": "曲線上の因子・連接コホモロジー・Riemann–Roch・Serre 双対性。",
@@ -1046,7 +1061,23 @@
         "done": "2/6",
         "remaining": "★★残るは段 1〜4（複素解析）であり、**並行セッションの領分**である。 ★段 4 は mathlib の JFunction が支える。"
       },
-      "impact": "★★★**§3・§4 の 6 項目の実質的な塡がりの 1 つ**である（もう 1 つは galois-equivariant-tate-uniformization）。 ★**ample ではない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と ℙ¹_j の明示モデルで出る。"
+      "impact": "★★★**§3・§4 の 6 項目の実質的な塡がりの 1 つ**である（もう 1 つは galois-equivariant-tate-uniformization）。 ★**ample ではない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と ℙ¹_j の明示モデルで出る。",
+      "measured20260829": {
+        "measuredAt": "2026-08-29",
+        "note": "★★★★★§9-670(第 357)で htFaltOf が構成済み(12·ht^Falt = deg∞ − (1/d)·Σ_σ log((2π)¹²‖Δ‖_arch))なので、3 本の ≲ は**アルキメデス和 archSum の評価だけ**の問題になる。",
+        "done": [
+          "★第 1・第 2 の ≲ の合成(deg∞ ≲ 12(1+ϵ)·ht^Falt) — Found/GaloisRep/Prop34Chain.lean の degInf_le_htFalt。★★archSum の**上界だけ**で出る(archSum_le、第 355 の一様上界)。",
+          "★有限性の帰着の半分(ht^Falt が有界なら deg∞ も有界) — 同ファイルの degInf_le_of_htFalt_le。"
+        ],
+        "remaining": [
+          "★★第 3 の ≲(12(1+ϵ)·ht^Falt ≲ (1+ϵ)·ht∞)。中身は −archSum/d ≲ ϵ·ht∞ + C——すなわち log(1/‖Δ‖_arch) が ht∞ で抑えられること。",
+          "★ht∞ の同定——M̄_ell の無限遠因子に付随する高さが h(j) であること。★deg∞(有限素点だけの寄与)とは別物である。",
+          "★有限性の残り半分——deg∞ を M̄_ell の豊富な直線束の高さと同定して Proposition 1.4, (iv)(§9-938／§9-961、本プロジェクトで取得済み)を当てる段。"
+        ],
+        "whyNotUniform": "★★★★★★**archNorm に一様な正の下界は無い**——Im τ → ∞ で ‖Δ‖ ~ e^{−2π Im τ} → 0 だからである。★したがって第 3 の ≲ は archSum 単独では出ず、**ht∞ との相殺**が要る。★★これが [Silv2] Prop 2.1／[FC] Chapter V, Proposition 4.5 の「無限遠での対数的特異性」の意味である。",
+        "concreteForm": "★アルキメデス素点ごとに書けば log(1/((2π)¹²·‖Δ‖_Pet(τ))) ≤ log⁺|j(τ)| + C を一様に言うこと。★‖Δ‖·|j| = |E₄(τ)|³(Im τ)⁶ なので、E₄ の Petersson ノルムの下界(ρ = e^{2πi/3} での零点に注意)に帰着する。",
+        "deviationRecorded": "★★逸脱(第 517 で自己訂正): Prop34Chain.lean は ht∞ そのものを扱っていない。取ったのは合成した形であって、原文の第 2 の ≲ そのものではない。"
+      }
     },
     "ideal-comap-on-affine-opens": {
       "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
