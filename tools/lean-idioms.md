@@ -1936,3 +1936,36 @@ exact hgen _ hfac
 同じ形は `f ⁻¹ᵁ U`・`f.app U`・`Scheme.Opens.ι` を含むゴールでも起きる
 （`§9-864` の `ker_app_congr` は同じ病に対する別の処方）。
 （2026-08-28、`§9-916` で実測）
+
+## 引用照合(`check.mjs`)—— 本文からコピーした逐語が落ちることがある
+
+**失敗形**
+
+```
+NG  lean\ABC3\Found\GenEll\Thm21Chain.lean:84
+    引用照合: 逐語が GenEll 物理 p.12 に見つからない(layout で 3/65 文字まで一致)
+    次に来るはず: "factthat(i)=⇒(ii)isimmediatefromthedefinitions.Thus,itsuffic"
+```
+
+**原因** `.txt`(`ResearchPaper/0_Source/*.txt`)から目で写した逐語と、
+`check.mjs` が `pdftotext -layout` で取り直した文字列が**別の字**になることがある。
+数式記号（`⇒` `≲` `ϵ′` `ω`）や合字の周りで起きる。
+★「次に来るはず」に出るのは**PDF 側の実物**なので、それを見ると自分の写しの
+どこが違うかが分かる（上の例では見た目が同じでも一致しない＝不可視の差）。
+
+**直し方** その項目で**すでに通っている逐語**（多くは見出し行）に差し替える。
+落とした逐語の内容は地の文に `` ` `` で括って残せばよい。
+
+```lean
+原文 (GenEll p.11):
+> Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.
+
+★原文 p.12 は「`The fact that (i) ⟹ (ii) is immediate from the definitions.`」と書く。
+```
+
+★ページ番号は**その docstring の `原文 (Tag p.NN):` 行**から取られる（`.src` の
+`pdfPage` ではない）。差し替えるときは両方を見ること。
+
+**★コミット前に必ず `node tools/check.mjs` を見る。**
+`lake build` が通っても引用照合は落ちる——2026-08-29 に NG 2 件のまま
+コミットしてしまった（次のコミットで修復）。
