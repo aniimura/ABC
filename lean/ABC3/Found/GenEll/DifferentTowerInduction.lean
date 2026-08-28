@@ -46,6 +46,19 @@ mathlib に `differentIdeal … = ⊤` の判定（不分岐との同値、自�
 `differentIdeal_eq_top_iff`・`differentIdeal_self` いずれも無し、2026-08-28 実測）。
 ★中身は「次数 1 の拡大は同型なので different は単位イデアル」であり、
 数学としては自明だが、mathlib の語彙に無いので**明示的に受けた**。
+
+## ★★★★★★後日の追記（2026-08-28、`§9-905`）—— `base` は外れた
+
+★★★★★上の測定は**「その名前で無い」でしかなかった**。
+`differentIdeal` を主語にした判定は確かに無いが、**判別式を主語にすれば全部あった**:
+
+    `[L:K] = 1` ⟹ `K ≃ₐ[ℚ] L` ⟹ `|disc L| = |disc K|`
+                ⟹ `N(𝔡) = 1`（`|disc L| = N(𝔡)·|disc K|^{[L:K]}` から）⟹ `𝔡 = ⊤`
+
+★`base` を外した形は `Found/GenEll/DifferentTrivialDegree.lean`
+（`pow_mem_differentIdeal_of_pow_finrank'`・`pow_mem_uniform_of_finrank_le'`）。
+★★本ファイルの形（`base` を仮定に持つ）は**一般形として残す**——
+局所体版など `NumberField` 以外に当てるときに要る。
 -/
 
 namespace ABC3.Found.GenEll
