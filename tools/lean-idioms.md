@@ -1526,3 +1526,31 @@ rw [e1] at e2
 
 ★★★★台帳に gap を新設する前は**とくに**引くこと——
 台帳の嘘は Lean のビルドが捕まえてくれない。
+
+## `def` はインスタンス探索を塞ぐ（`abbrev` の後付けはできない、2026-08-28）
+
+`gammaModPre R L := (ModuleCat.restrictScalars ρ).obj (L.obj (op ⊤))` と `def` で置くと、
+
+    Module ↑Γ(Spec R, ⊤) ↑(gammaModPre R L)
+
+が **見つからない**。書き下した形
+
+    Module ↑Γ(Spec R, ⊤) ↑((ModuleCat.restrictScalars ρ).obj (L.obj (op ⊤)))
+
+なら `ModuleCat.instModuleCarrierObjRestrictScalars` で **見つかる**。
+★インスタンス探索は `def` の中身を見ない（`instances` 透明度）。
+
+★★**後付けの `attribute [local reducible] foo` は拒否される**：
+
+    failed to set `[local reducible]` for `foo`, recall that `[reducible]` affects
+    the term indexing datastructures used by `simp` and type class resolution
+
+★★★直し方は 2 つ：
+1. 最初から `abbrev`（＝ `@[reducible] def`）で置く。
+2. **書き下した形で定理を証明し、`def` 版は `rfl` 相当で受け直す**
+   （`invertible_gammaRestrict` → `invertible_gammaModPre`、§9-788）。
+
+★同じ穴が「戻り値の型」でも起きる：`pullSec f L ⊤` の行き先は
+`op ((Opens.map f.base).obj ⊤)` の成分で、`op ⊤` とは `rfl` だがインスタンスは見つからない。
+→ `pullSecTop` / `psiU` のように **戻り値・引数の型を `op ⊤` で宣言し直す**（§9-786、§9-787）。
+`gammaSheafifyM`（§9-780）が最初の例である。
