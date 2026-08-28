@@ -71,7 +71,23 @@ structure EllModuliData extends TorsionGaloisRepData where
   degLe : ℕ → Set EllClass
   /-- 原文「`E_L` … with **semi-stable reduction** at all the finite primes of `L`」。 -/
   SemiStable : Curve → Prop
-  /-- 原文「`E_L` admits an **l-cyclic** subgroup scheme `H_L ⊆ E_L`」。 -/
+  /-- 原文「`E_L` admits an **l-cyclic** subgroup scheme `H_L ⊆ E_L`」。
+
+  ## ★★★★★★2026-08-29 の測定 —— **標数 0 では「Galois 安定な直線」と同じ**
+
+  ★原文の `H_F ⊆ E_F` は**生成ファイバー**（数体 `F` の上）の部分群スキームである。
+  ★★標数 0 では有限群スキームはすべてエタール（Cartier）であり、
+  エタール有限群スキームは**有限 Galois 加群**と圏同値である。
+  ★★★したがって
+
+      「`l`-巡回部分群スキーム `H_F ⊆ E_F`」 ⟺ 「`E[l]` の中の `Gal(ℚ̄/F)`-安定な直線」
+
+  である。**有限平坦群スキームの一般論は要らない**
+  （それが要るのは `Lemma 3.2, (ii)` の `E/μ_l` を `𝒪_K` 上で作る段だけである）。
+
+  ★★★★これで `Theorem 3.8` の側では、`¬ HasLCyclic` は
+  「安定な直線が無い」と読め、`Found/GenEll/Thm38Bridge.lean` の
+  `exists_nonUpper_of_no_stable_line` がそのまま効く。 -/
   HasLCyclic : Curve → ℕ → Prop
   /-- 原文「`L` is a **minimal field of definition** of the point `[E_L]`」。 -/
   MinimalField : Curve → Prop
