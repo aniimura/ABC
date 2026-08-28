@@ -201,7 +201,7 @@ def theorem_3_8.src : Source :=
 ★**群論は `Lemma 3.1, (iv)` ただ 1 つ**で、そのうち (i)(ii)(iii) は実装済みである。
 残りはすべて算術側で、そこが `Interface` に載っている。 -/
 def theorem_3_8.needs : List ProofObligation :=
-  [ .otherPaper "[GenEll]" "Lemma 3.1, (iv)(SL₂(ℤ_l) の持ち上げ)——★原文の証明が使う群論はこれだけ。(i)(ii)(iii) は Found/GenEll/Lemma31.lean に実装済み" 14,
+  [ .otherPaper "[GenEll]" "Lemma 3.1, (iv)(SL₂(ℤ_l) の持ち上げ)——★原文の証明が使う群論はこれだけであり、★★★★★**4 条すべてが実装済み**である(2026-08-29 確認): (i)(ii)(iii) は Found/GenEll/Lemma31.lean、**(iv) は Found/GenEll/Sl2Padic.lean の lemma_3_1_iv**。★原文は [Serre] Chapter IV §3.4 Lemma 3 を引くが 0_Source に無いため、本プロジェクトが自分で証明している。★★★★★★**したがって Theorem 3.8 に「Serre の開像定理」は要らない**——障壁は Tate 曲線(下の 2 行)だけである" 14,
     .otherPaper "[GenEll]" "Lemma 3.7(局所高さと l-巡回部分群スキーム)" 18,
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さによる例外集合の有限性)" 17,
     .otherPaper "[GenEll]" "Lemma 3.2 の直前の局所理論(Tate 曲線)" 15,
