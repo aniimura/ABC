@@ -1647,5 +1647,19 @@
       "☆有限平坦群スキームによる商（1 回目で確認済み）。"
     ],
     "lesson": "★★★★★★**grep だけの「無い」は測定として弱い。** KummerExtension.lean を見落として §9-994 に「mathlib に Kummer 対応は無い」と書き、§9-995 で訂正した。★以後、`absent` を書く前に **Mathlib 全体を import した REPL で `#check` を並べる**こと（0.02 秒で済む）。★★mathlib-gap.json の _absentPolicy（「absent は探索範囲を伴わなければならない」）の運用強化である。"
+  },
+  "heightLibraryFound20260829": {
+    "measuredAt": "2026-08-29",
+    "what": "★★★★★★★★★★**mathlib に `Mathlib/NumberTheory/Height/` がある**（Basic・NumberField・Northcott・Projectivization・MvPolynomial・EllipticCurve）。本プロジェクトの過去の測定（2026-08-16 の「高さは無い」）は**古い**。",
+    "contents": [
+      "`Height.mulHeight₁ : K → ℝ` / `Height.logHeight₁ : K → ℝ`（`[Height.AdmissibleAbsValues K]` の下で）。",
+      "`Height.AdmissibleAbsValues` の**数体でのインスタンス**（`Height/NumberField.lean` の `instAdmissibleAbsValues`）。",
+      "`Height/Projectivization.lean`（射影空間上の高さ）。",
+      "`Height/Northcott.lean`——★**Northcott の枠組み**（`Northcott (logHeight₁)` を `Northcott (mulHeight₁)` から出すインスタンス）。",
+      "`Height/EllipticCurve.lean`——☆まだ WIP（naive height は TODO、平行四辺形則が目標）。"
+    ],
+    "gapNow": "☆**`Northcott (Height.mulHeight₁ (K := K))` のインスタンスは（数体でも）まだ無い**——2026-08-29 に `infer_instance` で確認（failed to synthesize）。★したがって残っているのは「Northcott の定理そのもの」であって「高さの理論」ではない。",
+    "whyItMatters": "★★★[GenEll] `Proposition 3.4` の有限性は `Found/GenEll/FiniteFromNorthcott.lean` の `finite_of_le_of_northcott` により **`{ht∞ ≤ B}` の有限性**に落ちる。★`ht∞ = h(j)` と同定すれば、それは **`Height.logHeight₁ (j E)` の Northcott** である。★★つまり残っているのは「`ht∞` の同定」＋「Northcott の定理」であり、どちらも mathlib の Height ライブラリの上で述べられる。★★★本プロジェクトには `northcott_of_isAmple_final`（§9-938）／`northcott_of_isAmple_coords_image`（§9-961）があり、**そちらから供給できる可能性がある**（未接続）。",
+    "todo": "★次に測るべきは (1) 本プロジェクトの Northcott（§9-938／§9-961）が `Height.mulHeight₁` の Northcott インスタンスを与えられるか、(2) `ht∞` を `Height.logHeight₁ ∘ j` と定義したとき `Prop 3.4` の 3 本の `≲` がどう見えるか。"
   }
 }
