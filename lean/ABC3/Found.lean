@@ -541,6 +541,7 @@ import ABC3.Found.GenEll.NorthcottGlobalChart
 import ABC3.Found.GenEll.NorthcottChartUnion
 import ABC3.Found.GenEll.NorthcottAssembled
 import ABC3.Found.GenEll.PGroupChain
+import ABC3.Found.GenEll.CyclotomicTame
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
