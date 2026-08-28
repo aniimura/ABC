@@ -30528,3 +30528,39 @@ noncritical Belyi maps ＋ `Proposition 1.7` ＋ 一般の曲線への帰着）�
 
 ★★★したがって `Proposition 1.7` の elementary claim は
 **下からの側が閉じ、上からの側だけが残った**。
+
+
+---
+
+## 2026-08-29（第 489-490 ブロック、§9-955〜956）—— `Proposition 1.7` の elementary claim が両側で挟まれた
+
+### 到達
+
+| 向き | 主張 | 出どころ |
+|---|---|---|
+| 下から | 各 `P` で `P^{a_P} ∣ 𝔡` ⟹ `(∑ a_P log N(P))/[K:ℚ] ≤ log-diff(K) − log-diff(F)` | `§9-954` |
+| 上から | `𝔡` の台が `S`・各 `P` で `P^{a_P+1} ∤ 𝔡` ⟹ `log-diff(K) − log-diff(F) ≤ (∑ a_P log N(P))/[K:ℚ]` | `§9-955`＋`§9-956` |
+
+★★★これが `Skeleton/GenEll/Section1.lean` の `prop_1_7` が仮定として受けている
+`hup` / `hlow` の**局所から大域への組み立て**である。
+
+### ★★★★測定
+
+* **局所の核は mathlib にあった**——`pow_sub_one_dvd_differentIdeal`（`P^{e−1} ∣ 𝔡`）と
+  `not_dvd_differentIdeal_of_isCoprime`（馴分岐なら `P^e ∤ 𝔡`）。
+  ★自分で作る必要は無かった（馴分岐 6/6 の実装は別の目的に効く）。
+* **割り切りは数えるだけで出る**（`§9-956`）——
+  `P^n ∣ I ↔ n ≤ count P (normalizedFactors I)` と `Multiset.le_iff_count`。
+  ★**積の因子分解を計算する必要はない**：`Q ∈ S` の側は
+  `Finset.dvd_prod_of_mem` で `Q^{a_Q} ∣ ∏` を出せば足りる。
+
+### ★残っている段（明示）
+
+★★`hsupp`（`𝔡` の台が `S` に入る）と `hbound`（`P^{e_P} ∤ 𝔡`）を
+**分岐の言葉から供給する**段だけである:
+
+* `hbound` —— 馴分岐なら mathlib（`not_dvd_differentIdeal_of_isCoprime`）
+* `hsupp` —— 不分岐なら `P ∤ 𝔡`（`not_dvd_differentIdeal_iff` の系）
+
+★★★したがって残るのは**野分岐の素点の扱い**だけであり、
+それが原文が `Σ` の上の食い違いとして分離している部分にあたる。
