@@ -554,6 +554,7 @@ import ABC3.Found.GenEll.SpanLocalization
 import ABC3.Found.GenEll.RatioChartHom
 import ABC3.Found.GenEll.SeparatedUnique
 import ABC3.Found.GenEll.ChartChangeField
+import ABC3.Found.GenEll.LocalPointChart
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
