@@ -1996,3 +1996,28 @@ error: ABC3/Skeleton/GenEll/Section3.lean:196:22: Unknown identifier `EllModuliD
 
 ★★CLAUDE.md の「配管」にも同じ形が登記されている（アストラル面エスケープ）。
 **2 度目なのでここに失敗の"結末"（ファイルが壊れる）まで書いた。**
+
+## 在庫の測り方 —— **grep だけの「無い」は弱い**
+
+**失敗形**（2026-08-29）
+
+`Mathlib/AlgebraicGeometry/` と `Mathlib/NumberTheory/` を grep して
+「mathlib に Kummer 対応は無い」と `.needs` に書いた。
+★**`Mathlib/FieldTheory/KummerExtension.lean` を見ていなかった**——
+`autAdjoinRootXPowSubCEquiv_root : σ_η(root) = η • root` が
+まさに探していたものだった（次のブロックで訂正）。
+
+**直し方**
+
+`absent` を書く前に、**Mathlib 全体を import した REPL で `#check` を並べる**。
+
+```
+mcp__abc3-lean__lean_start  imports: ["Mathlib"]      -- 約 136 秒（1 回だけ）
+mcp__abc3-lean__lean_check  #check @Foo / #check @Bar -- 0.02 秒で 10 個
+```
+
+★`grep -r` は分単位でかかるうえ、**ディレクトリの見当が外れると空振りする**。
+★★`#check` は名前が合っていれば必ず当たり、型まで出る。
+★★★`mathlib-gap.json` の `_absentPolicy`（「absent は探索範囲を伴わなければならない」）
+の運用として、**探索範囲は「grep したディレクトリ」ではなく
+「`#check` した名前の一覧」で書く**のがよい。

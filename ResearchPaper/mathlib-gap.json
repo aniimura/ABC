@@ -1629,5 +1629,23 @@
       "☆一方で**保型形式は厚い**: NumberTheory/ModularForms/ に Delta.lean・Discriminant.lean・Petersson.lean・DedekindEta.lean・EisensteinSeries/・JacobiTheta/・LevelOne/・Cusps.lean・BoundedAtCusp.lean・Bounds.lean・QExpansion.lean があり、NumberTheory/Modular.lean に基本領域がある。★これは faltings-height-vs-degree-at-infinity の段 1-4(並行セッションの領分)を支える側である。"
     ],
     "verdict": "★★★2026-08-16 の測定は**そのまま生きている**——本プロジェクトの担当分(Tate 曲線・Riemann–Roch/Serre 双対性・エタール基本群・ample)は依然として mathlib に無い。☆保型形式の側だけが厚く、そこは並行セッションの領分である。"
+  },
+  "remeasured20260829b": {
+    "measuredAt": "2026-08-29（2 回目・#check ベース）",
+    "how": "Mathlib 全体を import した REPL で `#check @Foo` を並べて確認した。★1 回目（grep ベース）は Mathlib/FieldTheory/KummerExtension.lean を見落としており、§9-994 の .needs に誤記した——その反省による再測定。",
+    "present": [
+      "★★★Kummer 理論: Mathlib/FieldTheory/KummerExtension.lean。X_pow_sub_C_irreducible_of_prime / autAdjoinRootXPowSubCEquiv / **autAdjoinRootXPowSubCEquiv_root（σ_η(root) = η • root）** / X_pow_sub_C_splits_of_isPrimitiveRoot。★[GenEll] Theorem 3.8 の「α が像に入る」段の σ はこれで取れた（§9-995）。",
+      "★★楕円曲線の還元: Mathlib/AlgebraicGeometry/EllipticCurve/Reduction.lean。WeierstrassCurve.IsMinimal / HasGoodReduction / **HasMultiplicativeReduction** / HasSplitMultiplicativeReduction / HasAdditiveReduction、および三分律 hasGoodReduction_or_hasMultiplicativeReduction_or_hasAdditiveReduction。★これは EllModuliData の HasMultRed / SemiStable / deg∞ に直に効く可能性がある（未接続）。",
+      "★Galois 圏の枠組み: Mathlib/CategoryTheory/Galois/（Basic・GaloisObjects・Prorepresentability・IsFundamentalgroup・Topology）。CategoryTheory.GaloisCategory / PreGaloisCategory.IsFundamentalGroup。★ただし**スキームの有限エタール圏を Galois 圏として与えるインスタンスは無い**（下記）。",
+      "★保型形式: NumberTheory/ModularForms/（Delta・Discriminant・Petersson・DedekindEta・EisensteinSeries・JacobiTheta・LevelOne・Cusps・BoundedAtCusp・Bounds・QExpansion）、NumberTheory/Modular.lean（基本領域）。"
+    ],
+    "absent": [
+      "☆Tate 曲線: WeierstrassCurve.tate / EllipticCurve.TateCurve いずれも Unknown。",
+      "☆曲線の Riemann–Roch / 因子 / 種数: RiemannRoch / AlgebraicGeometry.Scheme.Divisor / AlgebraicGeometry.genus いずれも Unknown。",
+      "☆スキームのエタール基本群: AlgebraicGeometry.FiniteEtale / Scheme.FiniteEtale いずれも Unknown。★Galois 圏の**抽象論はある**が、スキーム側のインスタンスが無い。",
+      "☆ample / very ample / スキームの Picard 群（1 回目の grep で確認済み）。",
+      "☆有限平坦群スキームによる商（1 回目で確認済み）。"
+    ],
+    "lesson": "★★★★★★**grep だけの「無い」は測定として弱い。** KummerExtension.lean を見落として §9-994 に「mathlib に Kummer 対応は無い」と書き、§9-995 で訂正した。★以後、`absent` を書く前に **Mathlib 全体を import した REPL で `#check` を並べる**こと（0.02 秒で済む）。★★mathlib-gap.json の _absentPolicy（「absent は探索範囲を伴わなければならない」）の運用強化である。"
   }
 }
