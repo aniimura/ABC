@@ -772,13 +772,13 @@
         "★その下流: Proposition 1.4 の線束表示側"
       ],
       "mathlibStatus": {
-        "verdict": "partial-major",
+        "verdict": "partial-minor",
         "searched": "2026-08-28 実測。ADiv(F) / APrc(F) / deg / degNormalized / degAPic は Found/GenEll/ArithDiv.lean と ProductFormula.lean に**実装済み**。★欠けているのは橋だけである。",
         "absentPart": "★Found/Arakelov/ADegEmb.lean の degFOf は**アルキメデス側しか見ていない**（Pic 類が式に現れない、Def12Height.lean の訂正）。 ★★捻れ集合表示 (L, g) から有限素点側の**式が書けない**——TorsorMetric.base が Classical.choice だからである。 ★★★古典的な定義 deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v なら書けるが、s の取り方に依らないこと（積公式）が要る。"
       },
       "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
       "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
-      "nextStep": "★段 E(加法性)だけが残っている。アルキメデス側は archDeg_mul(在庫)、有限側は Γ(L⊗M)/(s⊗t) の指数が積になること。",
+      "nextStep": "★段 A〜E は閉じた。残るのは (a) 非零切断のノルムの非零性、(b) APicM →+ ℝ の組み立て、(c) 底変換の計量版。",
       "blockedBy": "",
       "decomposition": {
         "measuredAt": "2026-08-28",
@@ -810,20 +810,20 @@
             "stage": "D",
             "status": "closed",
             "claim": "★★★★**`s` の取り方に依らないこと**（積公式）",
-            "why": "★2026-08-28 に閉じた。有限側 degFin_smul_norm(§9-774)は + log |N(c)|、アルキメデス側 archDeg_smul(§9-775)は − log |N(c)|/[F:ℚ] 動き、正規化を揃えると打ち消す(degArith_smul、§9-776)。★★任意の二つの非零切断についての独立性(degArith_congr、§9-777)は、norm_congr_of_sheafify_eq(アルキメデスのノルムは層化した切断だけで決まる)＋段 B の exists_smul_mem_span_gamma で出た。",
-            "where": "Found/Arakelov/ArchDegSmul.lean(§9-775) / Found/Arakelov/DegArith.lean(§9-776) / Found/Arakelov/DegArithIndep.lean(§9-777)"
+            "why": "★2026-08-28 に閉じた。★★設計を付け替えて**前層の大域切断**で測る形にした(§9-779: Γ(L) 自身が可逆 Γ(X,⊤)-加群である。前層のテンソルは各開集合ごとなので L ⊗ L⁻¹ ≅ 1 を ⊤ で評価するだけで出る)。有限側 degFinPre_smul は + log |N(c)|、アルキメデス側 archDeg_smul(§9-775)は − log |N(c)|/[F:ℚ] 動き、相殺する(degArithPre_smul、§9-780)。★★★任意の二つの非零切断については可逆加群の階数 1 性(exists_common_smul_invertible)が a·s = b·t を与えるので、そこに 2 回当てるだけである(degArithPre_congr)。",
+            "where": "Found/Arakelov/InvertibleIndex.lean(§9-779) / Found/Arakelov/DegArithPre.lean(§9-780)"
           },
           {
             "stage": "E",
-            "status": "core-done",
+            "status": "closed",
             "claim": "★★★★★**加法性**（`deg_F` が `APicM (Spec 𝒪_F) →+ ℝ`）",
-            "why": "★アルキメデス側は在庫の archDeg_mul。★★有限側の**純粋な可換環論の部分**は 2026-08-28 に入った(card_quotient_tmul、§9-778): #((A⊗B)/R·(a⊗b)) = #(A/R·a)·#(B/R·b)。鍵は card_tensor_invertible(#(Q ⊗ B) = #(Q)、Q 有限・B 可逆)で、S := R/Ann(Q) が有限環→Artin→極大スペクトル有限→mathlib の Subsingleton (Pic S)→S ⊗_R B は自由階数 1、という道で通した。",
-            "where": "Found/Arakelov/TensorIndex.lean(§9-778) / Found/Arakelov/ArchDeg.lean(archDeg_mul)",
-            "nextStep": "★残るのは配管である: Γ(sheafify(L⊗M)) ≅ Γ(sheafify L) ⊗_R Γ(sheafify M)(在庫の gammaTensorCmp / tildeTensorIso / PicQCoh の tilde Γ(F) ≅ F を繋ぐ)と、gammaSheafifyM が s ⊗ t を送る先の同定。"
+            "why": "★2026-08-28 に閉じた。★★アルキメデス側は在庫の archDeg_mul。有限側は Γ(L ⊗ M) = Γ(L) ⊗ Γ(M) が rfl(前層のテンソルは各開集合ごと)なので、§9-778 の card_quotient_tmul(#((A⊗B)/R·(a⊗b)) = #(A/R·a)·#(B/R·b))が直接当たる(degArithPre_mul、§9-780)。",
+            "where": "Found/Arakelov/TensorIndex.lean(§9-778) / Found/Arakelov/DegArithPre.lean(§9-780)",
+            "nextStep": ""
           }
         ],
-        "done": "4/5",
-        "remaining": "★段 A・B・C・D が閉じ、段 E は核(指数の乗法性)まで入った(2026-08-28)。★★残るのは段 E の配管(Γ(L⊗M) ≅ Γ(L) ⊗ Γ(M))だけである。"
+        "done": "5/5",
+        "remaining": "★★★★★段 A〜E がすべて閉じた(2026-08-28)。★等長不変性も入った(degArithPre_of_isIsometry、§9-781)。★★残るのは (a)「非零切断のノルムはどの複素点でも非零」(deg_F を APicM の上で**定義する**のに要る)と、(b) APicM →+ ℝ への組み立て、(c) 底変換 deg_K(L|_K) = deg_F(L) の計量版(X(ℚ̄) の上に降ろすのに要る)である。"
       }
     },
     "arakelov-coherent-base-metric": {
