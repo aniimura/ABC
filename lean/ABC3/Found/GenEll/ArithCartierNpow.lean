@@ -11,7 +11,7 @@ import ABC3.Meta.Claim
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.5–6。
 
 原文 (GenEll p.5):
-> There is an evident notion of tensor product of arithmetic line bundles on X. The
+> as the height function associated to the arithmetic line bundle M.
 
 ## ★★★★★★★★★★★これは何か —— 一般の `X` へ渡る道の 2 本目
 
@@ -82,7 +82,7 @@ theorem pullbackIdeal_npow_ne_zero (F : Type) [Field F] [NumberField F] {X : Sch
 /-- ★★★★★★★★★★★**`ht_{D^n} = n·ht_D`**。
 
 原文 (GenEll p.5):
-> There is an evident notion of tensor product of arithmetic line bundles on X. The
+> as the height function associated to the arithmetic line bundle M.
 
 ★原文が「[some positive tensor power of] the ample line bundle」と書く**その冪の分**である。
 ★★機構は `htArith_tensor_unconditional` の帰納だけ。 -/
