@@ -86,7 +86,36 @@ noncomputable def chartToProj (M : X.PresheafOfModules) (V : X.Opens)
   chartMorphism M V e φ s i
     ≫ Proj.awayι _ (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos
 
+/-- ★★★★★**チャートの射の像は `D₊(x_i)` に入る**。
+
+★`Proj.opensRange_awayι`（mathlib、`awayι` の像はちょうど `D₊(f)`）そのものである。
+★★貼り合わせ（段 E1d の残り）で「どのチャートがどこを覆うか」を言うのに要る。
+
+★★★型の記録: `projSpace N R` は `def`（semireducible）なので
+`(projSpace N R).Opens` では `Proj.basicOpen` と**構文的に合わない**。
+`Proj (…)` の綴りで書くと通る（2026-08-28 実測）。 -/
+theorem range_chartToProj_le (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    {R : Type} [CommRing R] [Nontrivial R] (φ : R →+* (Γ(X, V) : Type))
+    {N : ℕ} (s : Fin (N + 1) → (M.obj (op ⊤) : Type)) (i : Fin (N + 1)) :
+    Set.range (chartToProj M V e φ s i).base
+      ⊆ (↑(Proj.basicOpen (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R)
+          (MvPolynomial.X i)) :
+          Set (Proj (MvPolynomial.homogeneousSubmodule (Fin (N + 1)) R))) := by
+  rintro y ⟨z, rfl⟩
+  have h : (chartToProj M V e φ s i).base z
+      = (Proj.awayι _ (MvPolynomial.X i) (MvPolynomial.isHomogeneous_X R i) one_pos).base
+        ((chartMorphism M V e φ s i).base z) := rfl
+  rw [h, ← Proj.opensRange_awayι _ (MvPolynomial.X i)
+    (MvPolynomial.isHomogeneous_X R i) one_pos]
+  exact ⟨_, rfl⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def range_chartToProj_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 7,
+    item := "Proposition 1.4, (iv)(チャートの射の像は D₊(x_i) に入る)",
+    sectionId := "genell-prop-1-4" }
 
 def chartMorphism.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 7,
