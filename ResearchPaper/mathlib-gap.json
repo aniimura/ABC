@@ -348,12 +348,12 @@
           {
             "stage": "E2",
             "claim": "**ample ⟹ 有限個の切断で覆える**（準コンパクト性から）と、それらを同じ次数 `d` に揃える",
-            "status": "partial",
-            "why": "★`IsAmple` は各点ごとに `n` と `s` を与えるだけなので、(a) 準コンパクト性で有限個に落とし、(b) 次数を最小公倍数で揃える必要がある。★★(b) は `presheafTensorPow` の冪の掛け算であり、段 A1 の `schemeTensorPow` が支える。 ★★★★★**2026-08-28 夜: 前半（有限化）が入った**（`§9-817`）——各点の `X_s` は開なので開被覆になり、`isCompact_univ.elim_finite_subcover` で有限部分被覆が取れる。★★**残るのは次数揃え**である: 有限被覆の切断は別々の `M^{⊗n_j}` に属するので `L = lcm(n_j)` として `s_j^{⊗(L/n_j)}` に置き換える。★★★そこで要るのは **`X_{s^{⊗k}} = X_s`**（`TrivTensor.lean` の `X_{s⊗t} = X_s ∩ X_t` の冪版）であり、`presheafTensorPow` の結合の整合が絡む。 ★★★★★★**2026-08-28 夜: 後半の核も入った**（`§9-818`）——`X_{s^{⊗k}} = X_s`。★`TrivTensor.lean` にあったのはチャート固定の形と片側の包含だけだったので、「各点で 2 つの層が**同時に**自明化する開を取る」ことで**大域の等式** `X_{s⊗t} = X_s ∩ X_t` に上げた。★★残るのは **`lcm` の帳簿**（次数 `n_j` の最小公倍数 `L` を取り `k_j = L/n_j` で揃える）だけである。 ★★★★★★★**2026-08-28 夜: コヒーレンスも入った**（`§9-819`）——`M^{⊗(n·k)} ≅ (M^{⊗n})^{⊗k}`。`secPow (M^{⊗n}) s k` の行き先は `(M^{⊗n})^{⊗k}` であって `M^{⊗(n·k)}` ではないので、射がひとつの束の切断を要求する以上この同型が要った。★要点は `n·(k+1) = n + n·k` と**左に `n` を出す**こと——`whiskerLeftIso` だけで届き、**組み紐は要らない**。★★これで段 E2 の道具はすべて揃い、残るのは `lcm` の帳簿だけである。",
+            "status": "closed",
+            "why": "★`IsAmple` は各点ごとに `n` と `s` を与えるだけなので、(a) 準コンパクト性で有限個に落とし、(b) 次数を最小公倍数で揃える必要がある。★★(b) は `presheafTensorPow` の冪の掛け算であり、段 A1 の `schemeTensorPow` が支える。 ★★★★★**2026-08-28 夜: 前半（有限化）が入った**（`§9-817`）——各点の `X_s` は開なので開被覆になり、`isCompact_univ.elim_finite_subcover` で有限部分被覆が取れる。★★**残るのは次数揃え**である: 有限被覆の切断は別々の `M^{⊗n_j}` に属するので `L = lcm(n_j)` として `s_j^{⊗(L/n_j)}` に置き換える。★★★そこで要るのは **`X_{s^{⊗k}} = X_s`**（`TrivTensor.lean` の `X_{s⊗t} = X_s ∩ X_t` の冪版）であり、`presheafTensorPow` の結合の整合が絡む。 ★★★★★★**2026-08-28 夜: 後半の核も入った**（`§9-818`）——`X_{s^{⊗k}} = X_s`。★`TrivTensor.lean` にあったのはチャート固定の形と片側の包含だけだったので、「各点で 2 つの層が**同時に**自明化する開を取る」ことで**大域の等式** `X_{s⊗t} = X_s ∩ X_t` に上げた。★★残るのは **`lcm` の帳簿**（次数 `n_j` の最小公倍数 `L` を取り `k_j = L/n_j` で揃える）だけである。 ★★★★★★★**2026-08-28 夜: コヒーレンスも入った**（`§9-819`）——`M^{⊗(n·k)} ≅ (M^{⊗n})^{⊗k}`。`secPow (M^{⊗n}) s k` の行き先は `(M^{⊗n})^{⊗k}` であって `M^{⊗(n·k)}` ではないので、射がひとつの束の切断を要求する以上この同型が要った。★要点は `n·(k+1) = n + n·k` と**左に `n` を出す**こと——`whiskerLeftIso` だけで届き、**組み紐は要らない**。★★これで段 E2 の道具はすべて揃い、残るのは `lcm` の帳簿だけである。 ★★★★★★★★**2026-08-28 夜に閉じた**（`§9-820`）——`exists_common_degree_cover`: ample なら共通次数 `L` の有限個の切断で `X` を覆える。★`L` は `lcm` ではなく**積** `∏ c.n` で十分である（倍数でありさえすればよい）。★★`c.n ∣ L` から `L = c.n * k` を取り出して `subst` すれば型の食い違いは消える（`▸` で運ぶ必要はなかった）。",
             "sources": [
               "[Stacks] Lemma 29.40.4 の証明の第 1 段"
             ],
-            "where": "Found/GenEll/AmpleCover.lean の AmpleChart / exists_finite_cover_of_isAmple ／ Found/GenEll/SecPow.lean の exists_common_triv / nonVanishing_tensor / secPow / nonVanishing_secPow ／ Found/GenEll/TensorPowCoherence.lean の presheafTensorPowAdd / presheafTensorPowMul"
+            "where": "Found/GenEll/AmpleCover.lean の AmpleChart / exists_finite_cover_of_isAmple ／ Found/GenEll/SecPow.lean の exists_common_triv / nonVanishing_tensor / secPow / nonVanishing_secPow ／ Found/GenEll/TensorPowCoherence.lean の presheafTensorPowAdd / presheafTensorPowMul ／ Found/GenEll/CommonDegree.lean の secPowAligned / exists_section_of_degree / **exists_common_degree_cover**"
           },
           {
             "stage": "E3",
@@ -390,8 +390,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "19.8/21",
-        "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせ）・E2（有限化と次数揃え）・E3（immersion 性）・C2c 前半（超平面因子の高さ = 素朴高さ）・F2c** である。★★★E1 の 4 段のうち **E1a・E1b・E1c が閉じ、残るのは E1d だけ**になった（2026-08-28 夜）——材料は `Scheme.homSpecIso`（環準同型 ⟷ `Spec` への射）と `Proj.awayι`（mathlib）である。",
+        "done": "20/21",
+        "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせの重なり一致）・E3（immersion 性）・C2c 前半（超平面因子の高さ = 素朴高さ）・F2c** である。★★★段 E2 は 2026-08-28 に閉じた。E1 は 4 段のうち E1a・E1b・E1c が閉じ、E1d だけが残る。★**本丸は E3**（`X_{s_i}` がアフィンであることから各チャートで閉埋め込みになることを示す段）である。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
