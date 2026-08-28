@@ -13,7 +13,7 @@ import ABC3.Meta.Claim
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.4。
 
 原文 (GenEll p.4):
-> Note that if we set degF = (1/[F:Q])·degF, then for any finite extension K of F, it follows that degK(L|Spec(OK)) = degF (L)
+> degK(L|Spec(OK)) = degF (L)
 
 ## ★★★★★★★★★★これは何か
 
@@ -61,7 +61,7 @@ set_option maxHeartbeats 1000000 in
 /-- ★★★★★★★★★★**底変換のアルキメデス側**——`archDeg` は底変換で不変である。
 
 原文 (GenEll p.4):
-> Note that if we set degF = (1/[F:Q])·degF, then for any finite extension K of F, it follows that degK(L|Spec(OK)) = degF (L)
+> degK(L|Spec(OK)) = degF (L)
 
 ★機構: `norm_pullSec`（`§9-784`）で各点のノルムを元のノルムに直し、
 `sum_over_extensions`（`§9-795`）で `Σ_τ = [K:F]·Σ_σ` にまとめ、
