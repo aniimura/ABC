@@ -499,6 +499,8 @@ import ABC3.Found.GenEll.CommonGluedRatio
 import ABC3.Found.GenEll.CoordsSurjective
 import ABC3.Found.GenEll.GlobalChartToProj
 import ABC3.Found.GenEll.ChartPoints
+import ABC3.Found.GenEll.AwayGenerated
+import ABC3.Found.GenEll.ChartCoordsSeparate
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
