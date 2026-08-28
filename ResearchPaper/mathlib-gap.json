@@ -295,6 +295,12 @@
             "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/ArithCartierComap.lean`）: `ArithCartier.comap`（算術因子の引き戻し）と `htArith_comap`——`ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`。★`§9-878` は `ℙᴺ_ℤ` の超平面因子についての Northcott だが、一般の `X`（`L_ℚ` が豊富）へ渡すには射影埋め込み `ψ : X ⟶ ℙᴺ` に沿った関手性が要る。★★機構は 2 行であった: 有限側は `IdealSheafData.comap_comp`、アルキメデス側は `archPoint (xF ≫ ψ) v = archPoint xF v ≫ ψ`（結合則）。★★★一般の `X` への還元に残るのは (1) `L^n` が**非常に豊富**（`ψ^*O(1) ≅ L^n`）——段 E3、(2) `ht_{L^n} = n·ht_L + O(1)`——`htArith_tensor_unconditional` の反復、の 2 つである。"
           },
           {
+            "stage": "C2g",
+            "status": "closed",
+            "title": "ht_{D^n} = n·ht_D（原文の「some positive tensor power」の分）",
+            "why": "★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/ArithCartierNpow.lean`）: `ArithCartier.npow`（算術因子の `n` 乗）・`pullbackIdeal_npow_ne_zero`・`htArith_npow`。★原文が「[some positive tensor power of] the ample line bundle」と書く**その冪の分**である。★★機構は `htArith_tensor_unconditional`（高さの加法性、無条件）の帰納だけ。各段の「引き戻しイデアルが `0` でない」は `pullbackMul_all`（引き戻しは積を保つ、無条件）と `𝓞_F` が整域であることから帰納で出る。★★★これで一般の `X` への還元は **1 本**になった: (1) `ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`——`§9-879` 済、(2) `ht_{L^n} = n·ht_L`——本段、(3) `L^n` が**非常に豊富**（`ψ^*O(1) ≅ L^n`）——段 E3 が残る。"
+          },
+          {
             "stage": "C2c-1",
             "status": "closed",
             "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",
