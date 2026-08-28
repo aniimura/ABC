@@ -511,6 +511,7 @@ import ABC3.Found.GenEll.EnlargedSurjective
 import ABC3.Found.GenEll.AmpleImmersion
 import ABC3.Found.GenEll.NorthcottGlobalToProj
 import ABC3.Found.GenEll.ComapChartIdeal
+import ABC3.Found.GenEll.ComapOnAffineOpen
 import ABC3.Found.GenEll.NorthcottHeightComparison
 import ABC3.Found.GenEll.CoordsSurjective
 import ABC3.Found.GenEll.GlobalChartToProj
