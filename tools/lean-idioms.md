@@ -1831,3 +1831,56 @@ rw [← Category.assoc a, ← Scheme.Hom.appIso_hom f U]
 
 **測定 (2026-08-28)**: この形の「強すぎる仮定」は**証明が通るので気づきにくい**。
 消費側で実際の対象（ここでは Fubini–Study 計量）を当てようとして初めて露見した。
+
+## 在庫が「無い」と出たら、**主語を変えて引き直す**
+
+`differentIdeal … = ⊤` の判定を探して
+
+```
+Algebra.isUnramified_iff_differentIdeal_eq_top   無い
+differentIdeal_eq_top_iff                        無い
+differentIdeal_self                              無い
+```
+
+で「mathlib に無い」と結論し、仮定として受けた（`§9-901`）。
+**しかしそれは「その名前で無い」でしかなかった。**
+
+`differentIdeal` を主語にした判定は確かに無いが、
+**判別式を主語にすれば全部あった**（2026-08-28 実測）:
+
+```lean
+Algebra.finrank_eq_one_iff_bijective_algebraMap                    -- [L:K] = 1 ⟺ 全単射
+NumberField.discr_eq_discr_of_algEquiv                             -- K ≃ₐ[ℚ] L ⟹ disc 一致
+NumberField.natAbs_discr_eq_absNorm_differentIdeal_mul_natAbs_discr_pow
+Ideal.absNorm_eq_one_iff                                           -- N(I) = 1 ⟺ I = ⊤
+```
+
+これで `[L:K] = 1 ⟹ 𝔡 = ⊤` が 10 行で出る（`differentIdeal_eq_top_of_finrank_eq_one`）。
+
+**直し方**: 求めている命題を**同値な別の量で言い換えてから**引き直す。
+`𝔡` なら `disc`・`absNorm`・`ramificationIdx`、
+`高さ` なら `deg`・`absNorm`、`連結` なら `IsPreconnected`・`Irreducible` など。
+`exact?` が timeout するのは「近い形も無い」ではなく「主語が違う」の合図でもある。
+
+## 原文が「by working locally」と書いた段を大域へ持ち上げない
+
+`[GenEll] Proposition 1.7` の elementary claim は
+**`ℚ_p` の有限次拡大**についての主張であり、原文はその直前に
+「Moreover, **by working locally**, we reduce immediately to …」と書いている。
+
+これを数体（`NumberField.ringOfIntegers`）へ持ち上げると**偽**になる:
+
+- `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3`
+- `2` の上の素点 `𝔮` は `e = 3`・剰余標数 `2`（`2 ∤ 3` なので**馴**）→ `v_𝔮(𝔡) = 2`
+- `𝔮 ∤ 3` なので `v_𝔮(3^3) = 0` → `3^3 ∉ 𝔡`
+
+局所体（剰余標数 `p`）なら `v(p) ≥ e(L/K)` なので馴の場合も `e−1 < v(p)` で通る。
+**`p` と無関係な素点で馴分岐が起こり得るのが大域だけの現象**である。
+
+**直し方**: 原文の「locally」「at a prime」「in a neighborhood」は
+**形式化でも局所環・付値環のまま置く**。大域へ上げるのは、
+上げても成り立つことを**素点ごとの不等式で確かめてから**にする。
+
+**測定 (2026-08-28)**: 大域版は**条件付き定理としては通る**（仮定 `step` を持つ形）ので、
+`lake build` では何も出ない。仮定を充足しようとして初めて露見した
+——`§9-872`（Green 関数の連続性）と**同じ形の失敗**である。
