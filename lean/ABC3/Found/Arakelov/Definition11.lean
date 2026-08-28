@@ -262,7 +262,7 @@ theorem arithGamma_apply_one_mem (m : GreenMetric X F) (φ : arithGamma m) :
 
 def definition_1_1.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 3,
-    item := "Definition 1.1(語彙は揃った——ただし群法則が計量のテンソル積を表すには基準計量の整合性が要る)",
+    item := "Definition 1.1(ArithPic の設計での語彙——群法則がテンソル積ではない。項目全体は Def11Complete.lean の AMetric の設計で取った)",
     sectionId := "genell-def-1-1-i" }
 
 def trivialGreenMetric.src : ABC3.Meta.Source :=

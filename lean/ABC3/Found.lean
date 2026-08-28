@@ -1212,6 +1212,7 @@ import ABC3.Found.Stacks.ProperImmersion
 import ABC3.Found.Arakelov.ConjMetric
 import ABC3.Found.Arakelov.ConjMetricClosed
 import ABC3.Found.Arakelov.ContMetric
+import ABC3.Found.Arakelov.Def11Complete
 /-!
 # Found — 実装済みの基礎
 
