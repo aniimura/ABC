@@ -1365,6 +1365,7 @@ import ABC3.Found.NCBelyi.CoeffBound
 import ABC3.Found.NCBelyi.ReducedDegree
 import ABC3.Found.NCBelyi.NestedInduction
 import ABC3.Found.NCBelyi.DescendData
+import ABC3.Found.NCBelyi.Lemma24Package
 import ABC3.Found.NCBelyi.BelyiPoly
 import ABC3.Found.NCBelyi.RatSeparation
 import ABC3.Found.NCBelyi.ConjStable
