@@ -703,7 +703,60 @@
         "measured20260828q": "★★★★★★★★★★**2026-08-28 夜——段 E3c・E3c-2 が閉じた**。段 E の残りは **E1d**（チャートの射を貼って `ψ : X ⟶ ℙᴺ_R` を作る）だけである——`§9-836` に貼り合わせの機構はあるが「`chartToProj i` が重なりで一致する」ことが未着手。★この区切りで一番大きかったのは `§9-841` の**分解の欠陥の発見**（`⊓ V` が外れていない）であった。",
         "measured20260828r": "★★★★★★★★★★**2026-08-28 夜——迂回路が見つかった**。段 E1d（チャートの射を貼って `ψ : X ⟶ ℙᴺ_R` を作る）は Prop 1.4 (iv) の**必須路ではない**——消費側 `northcott_of_projModel` は**座標と単射性**しか受け取らないからである。★代わりに要るのは「座標が点を分ける」ことで、それは `§9-847` の全射性＋`ext_of_isAffine` から出る（`§9-849`）。★★残る穴は「`A⁰_{x_i}` は `R` 上 `x_j/x_i` で生成される」という**純代数の 1 本**に縮んだ。★★★これは「消費側が何を要求しているか」を読み直したから出た測定である。",
         "measured20260828s": "★★★★★★★★★★**2026-08-28 夜——Northcott 路の幾何側が塞がった**。`ample` ⟹ 有限被覆（`§9-817`）→ 分母を払って大域化（`§9-822`〜`§9-831`）→ チャートの座標環は有限生成（`§9-832`）→ `A⁰_{x_i} → Γ(X, X_{s_i})` が全射（`§9-847`）→ **正規化座標が点を分ける**（`§9-849`＋`§9-850`＋`§9-851`）。★★残っているのは**高さの側**である——C2c 前半（超平面因子の高さ ＝ 素朴高さ）と `northcott_of_projModel` の `hcmp`（`mulHeight ≤ exp(ht + const)`）を繋ぐ段。",
-        "measured20260828t": "★★★★★★★★**2026-08-28 夜——段 C2c 前半を 3 つに分解した**。`northcott_of_projModel` の `hcmp`（`Height.mulHeight (crd p) ≤ exp(ht p + const)`）へ繋ぐには（1）超平面因子の引き戻しが座標の生成するイデアルであること（C2c-1）、（2）有限素点側の `log #(𝓞_F/I)` と非アルキメデス積の対応（C2c-2）、（3）アルキメデス側で与えられた計量と Fubini–Study 型の差が一様に有界であること（C2c-3）、の 3 段が要る。★（3）は Prop 1.4 (iii)（`§9-806` の `htMetricAlg_sub_abs_le`）で**すでに持っている**ので、実質は（1）（2）である。★★（2）は `DenominatorBound.lean` の 1 成分版を組に持ち上げるだけである。"
+        "measured20260828t": "★★★★★★★★**2026-08-28 夜——段 C2c 前半を 3 つに分解した**。`northcott_of_projModel` の `hcmp`（`Height.mulHeight (crd p) ≤ exp(ht p + const)`）へ繋ぐには（1）超平面因子の引き戻しが座標の生成するイデアルであること（C2c-1）、（2）有限素点側の `log #(𝓞_F/I)` と非アルキメデス積の対応（C2c-2）、（3）アルキメデス側で与えられた計量と Fubini–Study 型の差が一様に有界であること（C2c-3）、の 3 段が要る。★（3）は Prop 1.4 (iii)（`§9-806` の `htMetricAlg_sub_abs_le`）で**すでに持っている**ので、実質は（1）（2）である。★★（2）は `DenominatorBound.lean` の 1 成分版を組に持ち上げるだけである。",
+        "measured20260829": {
+          "date": "2026-08-29",
+          "blocks": "§9-929〜935（第 462-468 ブロック）",
+          "headline": "★★★★★Proposition 1.4, (iv) の鎖からイデアル類の障害が完全に消えた",
+          "what": "点が大域的にチャート D₊(x_i) を通るという仮定（chart・xF : Spec 𝓞_F ⟶ X_{s_i}）を、素点ごとのチャートに置き換えた。有限素点では v_P(x_i) が最小になる i、無限素点では v(x_i) ≠ 0 になる i を取ればよく、どちらも常に取れる。",
+          "chain": [
+            {
+              "id": "§9-929",
+              "file": "Found/GenEll/HeightArithDegreeGen.lean",
+              "what": "ノルムの等式 N(I)·N(𝔞) = N((x_j)) だけで deg_fin + deg_arch = log H",
+              "measurement": "§9-866 の hI（𝔞 = (x_{i₀})）は N(𝔞) を N((x_{i₀})) に書き換えるためだけに使われていた。証明の本体（log_mulHeight_add_log_absNorm とprod_infinitePlace_eq_absNorm）はどちらも一般である。"
+            },
+            {
+              "id": "§9-930",
+              "file": "Found/GenEll/PullbackChartLocal.lean",
+              "what": "局所化した点がチャートを通れば引き戻しイデアルの局所化が読める",
+              "measurement": "pullbackIdealOf_specMap（§9-907）が任意の可換環で成り立つので、§9-865・§9-886・§9-921 の証明は底環を B = (𝓞_F)_P に替えてもそのまま通る。"
+            },
+            {
+              "id": "§9-931",
+              "file": "Found/GenEll/HeightArithLocalization.lean",
+              "what": "局所条件だけで ht = log H",
+              "measurement": "Ideal.eq_of_localization_maximal（mathlib、イデアルは局所化で決まる）で I·𝔞 = (x_j) が出て、Ideal.absNorm が乗法的だから §9-929 のノルムの等式になる。"
+            },
+            {
+              "id": "§9-932",
+              "file": "Found/GenEll/HeightLocalCharts.lean",
+              "what": "局所チャートだけで ht = log H（有限素点側）"
+            },
+            {
+              "id": "§9-933",
+              "file": "Found/GenEll/HeightLocalArch.lean",
+              "what": "アルキメデス側も局所化——大域チャート仮定が消えた",
+              "measurement": "greenFS は §9-870（greenFS_eq_greenChartOf）で既にチャート独立なので、無限素点ごとに違うチャートを使ってよい。残っていたのは §9-869（正規化座標で測っても Fubini–Study は変わらない）の ℂ 係数版だけであった。"
+            },
+            {
+              "id": "§9-934",
+              "file": "Found/GenEll/NorthcottLocal.lean",
+              "what": "局所チャートだけで Northcott",
+              "measurement": "次数の扱いが要点。H(x) = exp([F:ℚ]·ht) であって exp(ht) ではないが、[F:ℚ] ≤ d かつ ht ≥ 0（H ≥ 1）なので H(x) ≤ exp(d·ht) となり northcott_of_projModel の hcmp が埋まる。"
+            },
+            {
+              "id": "§9-935",
+              "file": "Found/GenEll/NorthcottLocalAmple.lean",
+              "what": "IsAmple から Northcott まで一本（局所チャート版）"
+            }
+          ],
+          "remainingAfter": [
+            "幾何の側——有限アフィン自明化被覆（U・hcovU・hU・eU）。X が Spec A 上分離的・準コンパクトで M が可逆なら出るはずのもので、Arakelov 理論ではなくスキーム論の一般論である。",
+            "点の側——hinj（座標が点を分けること）。ψ が埋め込み（§9-920）であることの点版で、P := AlgPointAnyClass X（Example 1.3 で実装済み）に取れば projEmb_injective（§9-875）から出るはずである。"
+          ],
+          "supersedes": "measured20260828 系の『chart はイデアル類が自明でないと通らない』という測定（§9-928）——障害そのものは正しいが、素点ごとのチャートで回避できることが分かった。"
+        }
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
