@@ -1214,6 +1214,7 @@ import ABC3.Found.Arakelov.ConjMetricClosed
 import ABC3.Found.Arakelov.ContMetric
 import ABC3.Found.Arakelov.Def11Complete
 import ABC3.Found.Arakelov.Def12Complete
+import ABC3.Found.Arakelov.Prop14ii
 /-!
 # Found — 実装済みの基礎
 

@@ -936,13 +936,13 @@
         "[GenEll] Definition 1.1 (i)（「compatible [in the evident sense] with the complex conjugation automorphism ιX」）"
       ],
       "mathlibStatus": {
-        "verdict": "absent",
+        "verdict": "closed-in-ABC3",
         "searched": "2026-08-28 実測。IsConjCompatible は Found/Arakelov/ArcGreenConj.lean（GreenMetric 用）と ArcTorsorMetric.lean（TorsorMetric 用）にしかない。AMetric / LocalMetric には無い（grep で 0 件）。conjPoint（複素点の共役）は ArcConjInvol.lean にある。",
         "absentPart": "★LocalMetric の基準ノルム h に対する共役不変性 h V e (conjPoint p) = h V e p と、それが 1 / ⊗ / 引き戻し / 等長で閉じること。"
       },
       "minimalForm": "★AMetric を書き換えずに述語 AMetric.IsConjCompatible を足し、1・⊗・引き戻し・等長で閉じることを示せばよい。★★そうすれば APicM の共役両立な部分群の上で deg_F / ht がそのまま使える。",
-      "impact": "★★これが Definition 1.1 の項目全体の .src を書くための**最後の条項**である（2026-08-28 時点）。(ii) はすべて閉じた。",
-      "nextStep": "★conjPoint（ArcConjInvol.lean）を使って IsConjCompatible を定義し、AMetric.one / AMetric.mul / AMetricPullback / IsIsometry について閉じることを示す。",
+      "impact": "★★★★★2026-08-28 に閉じた(§9-800/§9-801)。LocalMetric.IsConjCompatible を足し、1・⊗・逆元・引き戻し・等長で閉じることを示した。★★さらに同日 §9-802 で**連続性**(LocalMetric.IsContinuous)も足した——原文の hermitian 計量が要求するもう一つの条項である。★★★これで APicA X = APicC X ⊓ APicK X が APicM X の部分群になり、Definition 1.1 の項目全体が取れた。",
+      "nextStep": "★閉じた。",
       "blockedBy": ""
     }
   },
