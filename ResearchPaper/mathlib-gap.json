@@ -312,7 +312,7 @@
             "stage": "C2c-3",
             "status": "open",
             "claim": "★★★アルキメデス側 —— 与えられた計量と `sup_i |σ(x_i)|` の差が**一様に有界**であること",
-            "why": "★★★★★★**2026-08-28 夜に分解した**。`archDeg` は与えられた計量 `|·|_L` で測るが、素朴高さが使うのは `sup_i |σ(x_i)|`（Fubini–Study 型）である。★2 つは**同じ因子の別の計量**なので、差は一様に有界である——それが Prop 1.4 (iii) そのものであり、本プロジェクトは `§9-806`（`MetricRatio.lean`）で`htMetricAlg_sub_abs_le` としてすでに持っている。★★したがって本段は「Fubini–Study 型の計量が `Definition 1.1` の意味の計量である」（連続・ι_X 両立・局所有界）ことを言えばよい。★★★`§9-802`（`ContMetric.lean`）の `AMetric.continuous_norm` が要求を型で持っている。 ★★★★★★**2026-08-28 夜（測定の訂正）**——本段は当初「Fubini–Study 型の計量が `Definition 1.1` の意味の**計量**（`LocalMetric` ＋ `IsContinuous`）であること」と書いていたが、`§9-867` で**因子表示なら計量の構造は要らない**ことが判った。★`ArithCartier` の `green` は `complexPoints X → ℝ` というただの実関数であり、`htArith_sub_abs_le`（`Found/GenEll/HeightMetric.lean`）が要求するのは`green` の**連続性**（`ArcModel` の位相に関して）だけである。★★したがって本段に残るのは「Fubini–Study 型の `green` が連続であること」と、`§9-867` の仮定 `hgreen`（素点と複素点の対応）の 2 本である。",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。`archDeg` は与えられた計量 `|·|_L` で測るが、素朴高さが使うのは `sup_i |σ(x_i)|`（Fubini–Study 型）である。★2 つは**同じ因子の別の計量**なので、差は一様に有界である——それが Prop 1.4 (iii) そのものであり、本プロジェクトは `§9-806`（`MetricRatio.lean`）で`htMetricAlg_sub_abs_le` としてすでに持っている。★★したがって本段は「Fubini–Study 型の計量が `Definition 1.1` の意味の計量である」（連続・ι_X 両立・局所有界）ことを言えばよい。★★★`§9-802`（`ContMetric.lean`）の `AMetric.continuous_norm` が要求を型で持っている。 ★★★★★★**2026-08-28 夜（測定の訂正）**——本段は当初「Fubini–Study 型の計量が `Definition 1.1` の意味の**計量**（`LocalMetric` ＋ `IsContinuous`）であること」と書いていたが、`§9-867` で**因子表示なら計量の構造は要らない**ことが判った。★`ArithCartier` の `green` は `complexPoints X → ℝ` というただの実関数であり、`htArith_sub_abs_le`（`Found/GenEll/HeightMetric.lean`）が要求するのは`green` の**連続性**（`ArcModel` の位相に関して）だけである。★★したがって本段に残るのは「Fubini–Study 型の `green` が連続であること」と、`§9-867` の仮定 `hgreen`（素点と複素点の対応）の 2 本である。 ★★★★★★★**2026-08-28 夜（続）**——`§9-868` で「素点と複素点の対応」が閉じた（`greenChartOf_archRingHom`）。★本段に残るのは 2 本である: (1) **大域的な `green` の構成**——`greenChartOf` はチャートを固定した形なので、`ArithCartier` の欄に入れるには「別のチャートで測っても同じ値」（チャート独立性）が要る（同じ約分で出るが、`projChartHom` を 2 つのチャートで比べる段が別に要る）; (2) その `green` の**連続性**（`htArith_sub_abs_le` が要求する `ArcModel` の位相に関して）。",
             "sources": [
               "ABC3: Found/Arakelov/MetricRatio.lean",
               "ABC3: Found/Arakelov/ContMetric.lean"
@@ -329,6 +329,12 @@
             "status": "closed",
             "title": "超平面因子の htArith は素朴高さである",
             "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/HyperplaneHeight.lean`）: `htArith_eq_log_mulHeight`——「`htArith F D̄ xF = log H(x) / [F : ℚ]`」（`D̄ = (超平面因子, Fubini–Study 型の Green 関数)`）。★`§9-866` の実数の等式を**プロジェクトの高さ `htArith` の言葉**に載せた段である。★★機構は在庫の分解 `htArith_eq_add` の 2 項に `deg_idealADiv`（`deg (idealADiv I) = log N(I)`）と `§9-866` を差し込むだけであった。★★★★★**測定——層 `O(1)` は要らなかった**: 台帳は当初「`O(1)` の層が mathlib に無い」ことを段 C2c の障害としていたが、**因子表示 `ArithCartier`（イデアル層 ＋ Green 関数）で足りる**。`GreenFn X` は `complexPoints X → ℝ` という**ただの実関数**なので、Fubini–Study を載せるのに層も計量の構造も要らない（2026-08-28 実測）。★★★★★★残る仮定は `hgreen`（`g (archPoint xF v) = log( sup_i v(x_i)/v(x₀) )`）だけで、これは「`v` が定める複素点で座標を読むと絶対値が `v(x_i)` である」という**素点と複素点の対応**である——`archPoint` の定義（`archRingHom v` を前合成）と `projPointCoord`（`§9-C2b`）を突き合わせれば出る。新しい数学は要らない。"
+          },
+          {
+            "stage": "C2c-6",
+            "status": "closed",
+            "title": "Fubini–Study の Green 関数と無限素点の対応",
+            "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/GreenFubiniStudy.lean`）: `greenChartOf`（チャートを固定した Fubini–Study の Green 関数）と `greenChartOf_archRingHom`——`§9-867` の仮定 `hgreen` の**中身**。★素点と複素点の対応は 2 行であった: `archPoint xF v = archSpecMap v ≫ xF` で、`xF = Spec ψ ≫ chartA i₀` なら `Spec` の反変性で `archPoint xF v = Spec (ψ ≫ archRingHom v) ≫ chartA i₀`——**同じチャートを通り、環の射が `archRingHom v ∘ ψ` になるだけ**である。★★あとは `‖archRingHom F v a‖ = v(a)`（`InfinitePlace.norm_embedding_eq`）と `v(w_k) = v(x_k)/v(x_{i₀})` で `v(x_{i₀})` が**約分される**——これが「Fubini–Study は射影的に不変」ということである。★★★結果として `htArith_hyperplane_eq_log_mulHeight` の仮定は `hdiv`（因子は超平面）と `hgreenChart`（`D.green` はチャートの上で Fubini–Study）の 2 本だけになった。"
           },
           {
             "stage": "C2a-2",
