@@ -495,6 +495,7 @@ import ABC3.Found.Arakelov.PullbackNorm
 import ABC3.Found.Arakelov.TensorSurj
 import ABC3.Found.Arakelov.BaseChangeSetup
 import ABC3.Found.Arakelov.BaseChangeUnit
+import ABC3.Found.Arakelov.GammaModInvertible
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
