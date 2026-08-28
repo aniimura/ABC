@@ -56,7 +56,7 @@ open scoped TensorProduct
 /-- ★**前層の大域切断を `R`-加群として見る**（`Γ-Spec` 同型で係数制限）。
 
 ★`moduleSpecΓFunctor` の前層版である（`gammaEqRestrict` と同じ形）。 -/
-noncomputable def gammaModPre (R : CommRingCat.{0}) (L : (Spec R).PresheafOfModules) :
+noncomputable abbrev gammaModPre (R : CommRingCat.{0}) (L : (Spec R).PresheafOfModules) :
     ModuleCat R :=
   (ModuleCat.restrictScalars (Scheme.ΓSpecIso R).inv.hom).obj (L.obj (op ⊤))
 
