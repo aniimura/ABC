@@ -364,19 +364,19 @@
           },
           {
             "stage": "E3a-2",
-            "claim": "★**局所自明な前層加群は層である**（層化の単位 `P → sheafify P` が同型）",
+            "claim": "★**訂正**——「局所自明な前層加群は層である」は**偽**である。大域切断は**層化の側**で取る",
             "status": "open",
-            "why": "★★★★**2026-08-28 夜の測定——これが E3a の大域化の門である**。プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるには `M^{⊗n}` が層であることが要る。★**材料は在庫にある**: `isSheaf_restrict_of_triv`（自明化があれば制限は層、`SheafifyTriv.lean`）と `isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型、`PicSheafifyTrivial.lean`）。★★残るのは「同型性は局所的」で大域へ上げる段だけである。 ★★★★★**2026-08-28 夜の追測定——道は 2 本あり、どちらも「局所性」を自分で書く必要がある**。(a) 「層であることは局所的」（`P|_V` が層である被覆があれば `P` は層）を書いて `isSheaf_restrict_of_triv` に繋ぐ。(b) 層化の単位 `P → sheafify P` の**各成分**が同型であることを示す（`isIso_restrict_sheafifyUnit` は `V` 以下の成分しか与えない）。★**mathlib に over-topology 版の「層であることは局所的」は見当たらない**（2026-08-28 実測——`Mathlib/CategoryTheory/Sites/` を `isSheaf.*cover` / `isSheaf_of_isSheaf_over` で検索、該当なし）。★★どちらの道も**分離性と貼り合わせの両方が局所化する**という初等的な議論であり、person-years ではない。★★★(a) のほうが再利用が効く——プロジェクトは前層の水準で作業しているので、「局所自明な前層加群は層である」は今後も繰り返し要る。",
+            "why": "★★★★★★★★**2026-08-28 夜の訂正——前の判定は誤りであった**。「局所自明な前層加群は層である」を段 E3a-2 として立てたが、これは**偽**である。★★**反例**: `X = {p, q}`（離散）、`F(∅) = 0`・`F({p}) = ℤ`・`F({q}) = ℤ`・`F(X) = 0`。各 `V = {p}`, `{q}` の上で `F|_V ≅ 𝒪|_V` だが、`F(X) = 0 ≠ ℤ × ℤ` なので `F` は層でない。★★★すなわち**層であることは局所的ではない**（分離性の局所化と貼り合わせの局所化が両方とも循環する）。★★★★**正しい道**: 大域切断は**層化 `sheafify (M^{⊗n})` の側**で取る。プロジェクトには `isLocallyTrivial_sheafify`（層化は局所自明性を保つ）・`isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型）・`gammaSheafifyM` があり、**局所の理論（`trivValue`・`nonVanishing`・`homogRatio`）は層化で変わらない**。★変わるのは `Γ(X, −)` だけである。",
             "sources": [
-              "ABC3: Found/Arakelov/PicSheafifyTrivial.lean",
-              "ABC3: Found/Arakelov/SheafifyTriv.lean"
+              "ABC3: Found/Arakelov/APicToSheaf.lean（層化への橋）",
+              "ABC3: Found/Arakelov/PicSheafifyTrivial.lean（isLocallyTrivial_sheafify / isIso_restrict_sheafifyUnit）"
             ]
           },
           {
             "stage": "E3a-3",
             "claim": "大域化 —— 有限被覆で指数を最大値に揃え、`a_j` を貼り合わせて `Γ(X, M^{⊗n})` の大域切断にする",
             "status": "open",
-            "why": "★E3a-1（各チャートで分母が払える）＋ E3a-2（貼り合わせが使える）＋ 段 E2（有限被覆）から組み立てる。★★重なりでの一致には `trivValue` の遷移単元（段 D1）が効く——`g·s^n` は自明化に依らないからである。"
+            "why": "★E3a-1（各チャートで分母が払える）＋ E3a-2（貼り合わせが使える）＋ 段 E2（有限被覆）から組み立てる。★★重なりでの一致には `trivValue` の遷移単元（段 D1）が効く——`g·s^n` は自明化に依らないからである。 ★★★★**2026-08-28 の訂正を受けて**——貼り合わせは `M^{⊗n}` ではなく **`sheafify (M^{⊗n})`** で行う。★局所の理論は層化で変わらない（`isIso_restrict_sheafifyUnit`）ので、E3a-1（分母を払う段）はそのまま使える。★★消費側（`homogValue` / `homogRatio`）が受け取る切断も層化の側に置き換える必要がある——そこが配管である。"
           },
           {
             "stage": "E3b",
@@ -428,7 +428,8 @@
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
         "measured20260828e": "★★★★★★**2026-08-28 夜: 段 E1 を 4 つに割った**（E1a 斉次多項式を切断で評価・E1b 次数 n の比・E1c 環準同型の well-defined 性・E1d 貼り合わせ）。★測定の要点——mathlib の `HomogeneousLocalization.Away.mk_surjective` が `A⁰_{x_i}` の元を `a / x_i^n`（`a` は `n` 次斉次）に落とすので、**要るのは「`a` を切断 `s` で評価して `Γ(X, M^{⊗n})` に入れる」段（E1a）である**。★★段 D3・D4 の `sectionRatio` は**次数 1** の比しか扱えないので、E1b でそれを広げる必要がある——「材料は揃っている」という 8/28 夜の早い時点の判定は**やや楽観であった**。",
         "measured20260828f": "★★★★★★★★**2026-08-28 夜: 段 E3 を 4 つに割った**（E3a ample の核・E3b 有限生成・E3c 全射性・E3d immersion）。★測定の要点——**葉は E3a**（[Stacks] Lemma 01PW「`g ∈ Γ(X_s)` なら `g·s^n` が大域切断の制限になる」）である。★★プロジェクトにはその材料がある（`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2））。★★★E3c・E3d は E3a・E3b からの組み立てであって、新しい数学は入らない。",
-        "measured20260828g": "★★★★★★★★**2026-08-28 夜: E3a の大域化の門を特定した**——**「局所自明な前層加群は層である」**（段 E3a-2）。★プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるにはこれが要る。★★**材料は在庫にある**: `isSheaf_restrict_of_triv` と `isIso_restrict_sheafifyUnit`（どちらも `Found/Arakelov/` に既にある）。残るのは「同型性は局所的」で大域へ上げる段だけである。★★★これが分かったのは `§9-822`（E3a の局所版）を書いて、次に何が要るかを追ったからである。"
+        "measured20260828g": "★★★★★★★★**2026-08-28 夜: E3a の大域化の門を特定した**——**「局所自明な前層加群は層である」**（段 E3a-2）。★プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるにはこれが要る。★★**材料は在庫にある**: `isSheaf_restrict_of_triv` と `isIso_restrict_sheafifyUnit`（どちらも `Found/Arakelov/` に既にある）。残るのは「同型性は局所的」で大域へ上げる段だけである。★★★これが分かったのは `§9-822`（E3a の局所版）を書いて、次に何が要るかを追ったからである。",
+        "measured20260828h": "★★★★★★★★★★**2026-08-28 夜の訂正**——段 E3a-2 として立てた「局所自明な前層加群は層である」は**偽**であった。★反例: `X = {p,q}`（離散）、`F({p}) = F({q}) = ℤ`、`F(X) = 0`。局所自明だが層でない。★★**層であることは局所的ではない**（分離性・貼り合わせの局所化がどちらも循環する）。★★★**正しい道は層化**——`sheafify (M^{⊗n})` の側で大域切断を取る。局所の理論（`trivValue`・`nonVanishing`・`homogRatio`）は `isIso_restrict_sheafifyUnit` により層化で変わらない。★★★★この訂正は「次の葉は何か」を追ったから出た。**誤った葉のまま person-years を投じずに済んだ**。"
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
