@@ -364,9 +364,9 @@
           },
           {
             "stage": "E3a-2",
-            "claim": "★**訂正**——「局所自明な前層加群は層である」は**偽**である。大域切断は**層化の側**で取る",
+            "claim": "★層化への橋 —— `nonVanishing (sheafify M) (unit s) = nonVanishing M s`（局所の理論が層化で変わらないこと）",
             "status": "open",
-            "why": "★★★★★★★★**2026-08-28 夜の訂正——前の判定は誤りであった**。「局所自明な前層加群は層である」を段 E3a-2 として立てたが、これは**偽**である。★★**反例**: `X = {p, q}`（離散）、`F(∅) = 0`・`F({p}) = ℤ`・`F({q}) = ℤ`・`F(X) = 0`。各 `V = {p}`, `{q}` の上で `F|_V ≅ 𝒪|_V` だが、`F(X) = 0 ≠ ℤ × ℤ` なので `F` は層でない。★★★すなわち**層であることは局所的ではない**（分離性の局所化と貼り合わせの局所化が両方とも循環する）。★★★★**正しい道**: 大域切断は**層化 `sheafify (M^{⊗n})` の側**で取る。プロジェクトには `isLocallyTrivial_sheafify`（層化は局所自明性を保つ）・`isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型）・`gammaSheafifyM` があり、**局所の理論（`trivValue`・`nonVanishing`・`homogRatio`）は層化で変わらない**。★変わるのは `Γ(X, −)` だけである。",
+            "why": "★★★★★★★★**2026-08-28 夜の訂正——前の判定は誤りであった**。「局所自明な前層加群は層である」を段 E3a-2 として立てたが、これは**偽**である。★★**反例**: `X = {p, q}`（離散）、`F(∅) = 0`・`F({p}) = ℤ`・`F({q}) = ℤ`・`F(X) = 0`。各 `V = {p}`, `{q}` の上で `F|_V ≅ 𝒪|_V` だが、`F(X) = 0 ≠ ℤ × ℤ` なので `F` は層でない。★★★すなわち**層であることは局所的ではない**（分離性の局所化と貼り合わせの局所化が両方とも循環する）。★★★★**正しい道**: 大域切断は**層化 `sheafify (M^{⊗n})` の側**で取る。プロジェクトには `isLocallyTrivial_sheafify`（層化は局所自明性を保つ）・`isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型）・`gammaSheafifyM` があり、**局所の理論（`trivValue`・`nonVanishing`・`homogRatio`）は層化で変わらない**。★変わるのは `Γ(X, −)` だけである。 ★★★★★★**2026-08-28 夜の追測定——次に書くべき補題が確定した**: `nonVanishing (sheafify M) ((sheafifyUnit X M).app (op ⊤) s) = nonVanishing M s`。★これがあれば `§9-817`〜`§9-820`（被覆・次数揃え）と `§9-822`（分母を払う）が層化の側へそのまま移る。★★**障害は 1 つだけ**: `isLocallyTrivial_sheafify`（`PicSheafifyTrivial.lean`）は 各自明化 `e` から層化側の自明化を**証明の中で**作っていて、**名前が付いていない**。★★★まずそこを `sheafifyTriv P V e` として括り出し、`trivValue (sheafify P) V (sheafifyTriv P V e) (unit s) = trivValue P V e s` を示せばよい。★機構は「層化の単位の制限が同型」（`isIso_restrictMap_sheafifyUnit`、在庫）だけである。",
             "sources": [
               "ABC3: Found/Arakelov/APicToSheaf.lean（層化への橋）",
               "ABC3: Found/Arakelov/PicSheafifyTrivial.lean（isLocallyTrivial_sheafify / isIso_restrict_sheafifyUnit）"
