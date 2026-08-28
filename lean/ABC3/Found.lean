@@ -502,6 +502,7 @@ import ABC3.Found.Arakelov.BaseChangeIso
 import ABC3.Found.Arakelov.CardQuotientBC
 import ABC3.Found.Arakelov.EmbeddingCount
 import ABC3.Found.Arakelov.ArchDegBaseChange
+import ABC3.Found.Arakelov.DegFinBCTools
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
