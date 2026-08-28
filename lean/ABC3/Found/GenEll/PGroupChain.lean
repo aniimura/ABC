@@ -112,6 +112,35 @@ theorem exponent_le_log (p d k : ℕ) (hp : 2 ≤ p) (hd : d ≠ 0) (h : p ^ k �
     k ≤ Nat.log p d :=
   (Nat.le_log_iff_pow_le hp hd).mpr h
 
+/-! ## ★★★★★★★★指数の一様化 -/
+
+/-- ★**指数を上げても入ったまま** —— `x^m ∈ I` かつ `m ≤ n` なら `x^n ∈ I`。 -/
+theorem pow_mem_of_le {R : Type*} [CommRing R] (I : Ideal R) (x : R) {m n : ℕ}
+    (h : m ≤ n) (hm : x ^ m ∈ I) : x ^ n ∈ I := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le h
+  rw [pow_add]
+  exact Ideal.mul_mem_right _ _ hm
+
+/-- ★★★★★★★★**`n` は `p` と `d` だけで決まる**。
+
+原文 (GenEll p.10):
+> integer n such that for any finite Galois extension L/K of finite extensions
+
+★塔の段数 `s` は `p^s ≤ d` を満たすので `s ≤ log_p d`であり（`exponent_le_log`）、
+各段で `p^p` が出るので塔全体で `p^{s·p}` となる。
+★★指数は上げても入ったままなので（`pow_mem_of_le`）、
+**`n ≔ p·log_p d` という `L` にも `K` にも依らない値**で揃えられる。 -/
+theorem pow_mem_uniform {R : Type*} [CommRing R] (I : Ideal R) (p d s N : ℕ)
+    (hp : 2 ≤ p) (hd : d ≠ 0) (hs : p ^ s ≤ d) (hN : Nat.log p d * p ≤ N)
+    (h : (p : R) ^ (s * p) ∈ I) : (p : R) ^ N ∈ I := by
+  have hle : s ≤ Nat.log p d := (Nat.le_log_iff_pow_le hp hd).mpr hs
+  exact pow_mem_of_le I _ (le_trans (Nat.mul_le_mul_right p hle) hN) h
+
+def pow_mem_uniform.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——n は p と d だけで決まる)",
+    sectionId := "genell-prop-1-7" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_intermediateField_finrank.src : ABC3.Meta.Source :=
