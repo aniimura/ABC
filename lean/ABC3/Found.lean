@@ -466,6 +466,7 @@ import ABC3.Found.GenEll.HomogValue
 import ABC3.Found.GenEll.HomogRatio
 import ABC3.Found.GenEll.AwayNumDen
 import ABC3.Found.GenEll.AwayToSection
+import ABC3.Found.GenEll.AwayHom
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
