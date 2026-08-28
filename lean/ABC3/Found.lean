@@ -507,6 +507,7 @@ import ABC3.Found.GenEll.HeightProductFormula
 import ABC3.Found.GenEll.ProjCompact
 import ABC3.Found.GenEll.HyperplaneChart
 import ABC3.Found.GenEll.AwayPolynomial
+import ABC3.Found.GenEll.KillX0
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
