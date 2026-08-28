@@ -368,6 +368,7 @@ import ABC3.Found.GenEll.PexcODE
 import ABC3.Found.GenEll.LatticeFromG
 import ABC3.Found.GenEll.CurveArchInv
 import ABC3.Found.GenEll.PeterssonBound
+import ABC3.Found.GenEll.JPeterssonBound
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass
