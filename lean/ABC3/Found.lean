@@ -438,6 +438,7 @@ import ABC3.Found.GenEll.Prop17Norms
 import ABC3.Found.GenEll.Prop17DiffEq
 import ABC3.Found.GenEll.Prop17LeftEq
 import ABC3.Found.GenEll.Prop17
+import ABC3.Found.GenEll.Thm21Chain
 import ABC3.Found.GenEll.DifferentTameExact
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
