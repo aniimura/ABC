@@ -1809,3 +1809,25 @@ rw [← Category.assoc a, ← Scheme.Hom.appIso_hom f U]
 
 `← Category.assoc` に**最初の射を明示的に渡す**と、どの箇所を括り直すかが決まる。
 （2026-08-28、`Γ(Proj 𝒜, D₊(x_i)) ≅ A⁰_{x_i}` の打ち消しで実測）
+
+## 因子の Green 関数は連続でない —— 仮定は「差の連続性」で置く
+
+算術因子 `D̄ = (D, g)` の Green 関数 `g(p) = −log‖s(p)‖` は
+**台 `|D|` の上で発散する**ので、`Continuous g` を仮定に置くと
+**本物の因子には当たらない補題**ができる（空虚ではないが使えない）。
+
+原典が言うのは「同じ直線束の**2 つの計量**の比が有界」であり、
+そこで連続なのは**差** `D.green − E.green` の方である（特異性が打ち消し合う）。
+
+**直し方**: 比較の補題は
+
+```lean
+(hcont : Continuous (fun p => D.green p - E.green p))
+```
+
+で書く（`ABC3.Found.GenEll.htArith_sub_abs_le_of_diff`）。
+`D.divisor = E.divisor` なら有限側は打ち消し合い、`archADiv` は Green 関数について
+線型なので、既存の一様評価がそのまま効く。
+
+**測定 (2026-08-28)**: この形の「強すぎる仮定」は**証明が通るので気づきにくい**。
+消費側で実際の対象（ここでは Fubini–Study 計量）を当てようとして初めて露見した。
