@@ -161,6 +161,24 @@
             "status": "open"
           },
           "remaining": "★局所（IsLocalRing B）から大域（数体の整数環）への持ち上げだけである——上の newMathlibGap がその中身。"
+        },
+        "measured20260829b": {
+          "date": "2026-08-29",
+          "blocks": "第 503 ブロック（測定のみ）",
+          "headline": "★★★★★hlow の局所→大域は「局所化」ではなく「トレースの witness」に帰着する",
+          "what": "第 500-502 ブロックの時点で、Proposition 1.7 の hlow に残るのは §9-959（馴分岐で 𝔡 = (λ^{e−1})、局所）を大域へ上げる段であり、そのために differentIdeal と局所化の両立（mathlib に無い）が要る、と記録していた。★本測定はその道筋が**変わる**ことを示す。",
+          "measurement": [
+            "mathlib の not_dvd_differentIdeal_of_intTrace_not_mem は {p : Ideal A} (P Q : Ideal B) (hP : P * Q = p.map) (x : B) (hxQ : x ∈ Q) (hx : Algebra.intTrace A B x ∉ p) : ¬ P ∣ differentIdeal A B であり、★**P に IsMaximal を要求していない**（2026-08-29 実測）。",
+            "したがって P ≔ 𝔭^e、Q ≔ p·B の残りの因子と取れば、**大域のまま** ¬ 𝔭^e ∣ 𝔡 が出る——局所化を経由する必要がない。",
+            "★残るのは witness の構成だけである: x ∈ Q で intTrace A B x ∉ p なるもの。mathlib の not_dvd_differentIdeal_of_isCoprime_of_isSeparable は e = 1 の場合にこれを Algebra.trace_ne_zero (A/p) (B/P)（B/P は体）で作っている。",
+            "★★e ≥ 2 では B/𝔭^e は体でないので trace_ne_zero が直接は当たらない。馴分岐（p ∤ e）のとき Algebra.trace (A/p) (B/𝔭^e) ≠ 0 を示すのが**残っている計算**である——これが原文の『elementary theory of differents』の上からの側の核にあたる。"
+          ],
+          "revisedGap": {
+            "what": "馴分岐での剰余トレース: p ∤ e のとき Algebra.trace (A/p) (B/𝔭^e) ≠ 0",
+            "whyEasier": "これが取れれば mathlib の not_dvd_differentIdeal_of_intTrace_not_mem にそのまま渡せて、**大域の ¬ 𝔭^e ∣ 𝔡 が局所化なしで出る**。",
+            "supersedes": "measured20260829.newMathlibGap（differentIdeal × 局所化）",
+            "status": "open"
+          }
         }
       }
     },
