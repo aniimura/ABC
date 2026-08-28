@@ -59,6 +59,30 @@ mathlib に `differentIdeal … = ⊤` の判定（不分岐との同値、自�
 （`pow_mem_differentIdeal_of_pow_finrank'`・`pow_mem_uniform_of_finrank_le'`）。
 ★★本ファイルの形（`base` を仮定に持つ）は**一般形として残す**——
 局所体版など `NumberField` 以外に当てるときに要る。
+
+## ★★★★★★★訂正（2026-08-28、`§9-906`）—— `step` の**大域版は偽**である
+
+★★★★★★**`step`（`[L:K] = p`（Galois、数体）⟹ `p^p ∈ 𝔡_{K,L}`）は
+数体では成り立たない**。
+
+★**反例の形**: `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3`。
+`2` の上の素点 `𝔮` で `e(𝔮/2) = 3`、剰余標数は `2` で `2 ∤ 3` だから**馴**、
+よって `v_𝔮(𝔡) = e − 1 = 2`。一方 `𝔮 ∤ 3` なので `v_𝔮(3^3) = 0`。
+`0 < 2` だから `3^3 ∉ 𝔡_{K,L}`。
+
+★★**原因**——原文は `L`・`K` を **`ℚ_p` の有限次拡大**と書いており、その直前に
+
+> Moreover, by working locally, we reduce immediately to the following elementary claim
+
+と**局所化を明示している**。局所体（剰余標数 `p`）では `v(p) ≥ e(L/K)` なので
+馴の場合も `d = e−1 < v(p)` で通る
+（原文の "if we restrict to tamely ramified L/K, then it suffices to take n = 1"）が、
+数体では `p` と無関係な素点で馴分岐が起こり得るため通らない。
+
+★★★**本ファイルの定理は条件付きとしては正しい**（`step` を仮定に持つ形）。
+★偽なのは「その仮定を数体で充足できる」という見込みの方であり、
+**定理を撤回する必要は無い**——局所体版を作るときにそのまま使える骨格である。
+★★詳細と直し方は `ResearchPaper/mathlib-gap.json` の `tame-ramification` / `EC9`。
 -/
 
 namespace ABC3.Found.GenEll

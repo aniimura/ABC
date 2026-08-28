@@ -49,6 +49,17 @@ import ABC3.Meta.Claim
 
 `§9-901`・`§9-904` の `base` 仮定が**消える**。
 ★残る仮定は `step`（次数 `p` の Galois 拡大で `p^p ∈ 𝔡`）だけである。
+
+## ★★★★★★★訂正（同日、`§9-906`）—— 残った `step` は**大域では偽**
+
+★★★★★★`step` を数体で充足しようとしたところ、**大域版が偽**であることが分かった:
+`K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3` で、`2` の上の素点 `𝔮` は `e = 3`・馴なので
+`v_𝔮(𝔡) = 2` だが `v_𝔮(3^3) = 0`、よって `3^3 ∉ 𝔡`。
+
+★原文は `ℚ_p` の有限次拡大について述べており（"by working locally, we reduce
+immediately to the following elementary claim"）、局所化が**本質的**である。
+★★本ファイルの `base`（`[L:K] = 1 ⟹ 𝔡 = ⊤`）は**大域でも真**であり、そのまま残る。
+★★★詳細は `ResearchPaper/mathlib-gap.json` の `tame-ramification` / `EC9`。
 -/
 
 namespace ABC3.Found.GenEll

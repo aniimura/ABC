@@ -114,9 +114,9 @@
           },
           {
             "stage": "EC9",
-            "status": "open",
-            "title": "★★残る唯一の仮定——次数 `p` の Galois 拡大で `p^p ∈ 𝔡`（`step`）",
-            "why": "★`§9-905` で `base` が外れたので、elementary claim に残る仮定は `step` だけになった:**`[L:K] = p`（Galois、数体）⟹ `p^p ∈ 𝔡_{K,L}`**。★★原文の「it suffices to consider the case where [L : K] = p」そのものである。★★★部品は `§9-DifferentKummer` に**ある**:`pow_mem_differentIdeal_of_kummer`（野生＋`ζ ∈ K`、Kummer 理論）と`mem_differentIdeal_of_isUnit_natCast`（馴）。★★★★**ただし両者は局所的な形**（`ValuationRing B`・`Algebra.adjoin A {lam} = ⊤` = 単生成）であり、数体の `𝓞 K → 𝓞 L` に当てるには**素点ごとに局所化して貼り直す**段が要る。★これが `EC9` の中身であり、`tame-ramification` に残る最後の段である。"
+            "status": "blocked",
+            "title": "★★★★★★訂正——`step` の**大域版は偽**である（原文は局所的）",
+            "why": "★★★★★★**自己訂正（2026-08-28、同じブロック内）**。直前にこの段を「`[L:K] = p`（Galois、数体）⟹ `p^p ∈ 𝔡_{K,L}`」として立てたが、**この大域版は偽である**。★**反例の形**: `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3`。`2` の上の素点 `𝔮` で `e(𝔮/2) = 3`、剰余標数は `2` で `2 ∤ 3` だから**馴**、よって `v_𝔮(𝔡) = e − 1 = 2`。一方 `𝔮 ∤ 3` なので `v_𝔮(3^3) = 0`。`0 < 2` だから `3^3 ∉ 𝔡_{K,L}`。★★**原因**: 原文は `L`・`K` を **`ℚ_p` の有限次拡大**と書いており、その直前に「Moreover, **by working locally**, we reduce immediately to the followingelementary claim」と**局所化を明示している**。局所体（剰余標数 `p`）では `v(p) ≥ e(L/K)` なので馴の場合も `d = e−1 < v(p)` で通るが、数体では `p` と関係の無い素点で馴分岐が起こり得るため通らない。★★★**したがって `§9-901`・`§9-904`・`§9-905` の `step` 仮定は大域では充足できない**（定理そのものは条件付きとして正しいが、仮定を外せない）。★★★★**直し方は 2 つ**:(1) 局所体（`ℚ_p` の有限次拡大）で組み直す——原文に忠実。`𝓞 K` を `NumberField.ringOfIntegers` ではなく局所環にする必要があり、`§9-DifferentKummer` の部品（`ValuationRing B`・単生成）は**むしろこちらに合う**。(2) 大域のまま、`p` の上の素点だけに制限した形（`𝔡` の `p`-部分が `p^n` を割る）にする。★★★★★消費側（`log-diff` の「portion over Σ」）が要求するのも局所的な量なので、(1) が原文に忠実であり、既存の部品とも合う。"
           }
         ]
       }
