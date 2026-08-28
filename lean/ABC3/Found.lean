@@ -1138,6 +1138,7 @@ import ABC3.Found.GaloisRep.FullImageWitness
 import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.Prop34Chain
 import ABC3.Found.GaloisRep.Lemma37Constructed
+import ABC3.Found.GaloisRep.Semistable
 import ABC3.Found.GaloisRep.PhiDegree
 import ABC3.Found.GaloisRep.PhiTwo
 import ABC3.Found.GaloisRep.KummerX
