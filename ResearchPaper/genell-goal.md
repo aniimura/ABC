@@ -30433,3 +30433,62 @@ theorem northcott_of_isAmple_final
 
 ★★★本日 1 日で `Proposition 1.4, (iv)` の**仮定はすべて定理か原文の仮定そのものになった**
 ——残るのは「点の族 `P` が相異なる点の族である」という、族の定義に属する条件だけである。
+
+
+---
+
+## 2026-08-29（第 487 ブロック）—— ★★★★★残り 11 項目の**実測**
+
+`Skeleton` の各定理の証明本体を機械で読み、**Interface の射影を何個消費しているか**を数えた
+（ツール: `$CLAUDE_JOB_DIR/tmp/measure-remaining.py`、出力は `remaining-measure.md`）。
+★これは `CLAUDE.md` の B6（Interface にフィールドを posit すれば `sorry` は消えるが
+仕事は増える）を**定量化する**ものである。
+
+| 項目 | Skeleton 定理 | `sorry` | ★Interface 射影 | `Found` 呼び出し |
+|---|---|---|---|---|
+| Proposition 1.4 | `prop_1_4` | なし | **0** | 10 |
+| Remark 1.4.1 | `remark_1_4_1` | なし | **0** | 5 |
+| Proposition 1.7 | `prop_1_7` | なし | **0** | 1 |
+| Theorem 2.1 | `theorem_2_1` | なし | **0** | 0 |
+| Lemma 3.2 | `lemma_3_2` | なし | 10 | 0 |
+| Proposition 3.4 | `prop_3_4` | なし | 8 | 0 |
+| Lemma 3.5 | `lemma_3_5` | なし | 10 | 0 |
+| Lemma 3.7 | `lemma_3_7` | なし | 22 | 0 |
+| Theorem 3.8 | `theorem_3_8` | なし | 22 | 0 |
+| Corollary 4.3 | `cor_4_3` | なし | 35 | 3 |
+| Corollary 4.4 | `cor_4_4` | なし | 34 | 4 |
+
+### ★★★★★読み取れること
+
+#### (a) §1 の 3 項目は **Interface を 1 つも使っていない**
+
+`Proposition 1.4`・`Remark 1.4.1`・`Proposition 1.7` は
+**`Found/` の上だけで組まれている**。★したがってこの 3 つは
+「posit を外す」問題ではなく「**まだ書いていない段を書く**」問題である
+——本日の 25 ブロックはまさにその作業だった。
+
+* `Proposition 1.4` —— 残るのは点の族の条件（`hpt`）だけ（本日 §9-952 まで）
+* `Remark 1.4.1` —— 第 2 文の `ℤ`-モデルは本日 `§9-953` で取れた
+* `Proposition 1.7` —— 残るのは**局所から大域への組み立て**（`hlow`/`hup`）
+
+#### (b) `Theorem 2.1` は **(i) ⇒ (ii) の側しか取っていない**
+
+`Skeleton` 自身が『`sorry` が消えたことを「`Theorem 2.1` を形式化した」と
+読んではならない』と書いている。★実質は **(ii) ⇒ (i)**（原文 p.11–13 の 3 ページ、
+noncritical Belyi maps ＋ `Proposition 1.7` ＋ 一般の曲線への帰着）である。
+
+#### (c) §3・§4 は **8〜35 個の posit の上に立っている**
+
+`Lemma 3.2` の (i) は `D.stableLine_dvd_or_cyclotomic` **そのもの**であり、
+`Proposition 3.4` は `D.htInf_bdeq_faltings`（[Silv2] Prop 2.1 ＋ [FC] Ch. V Prop 4.5）と
+`D.northcott`（＝`Proposition 1.4, (iv)`）を消費する。
+★★★★**これらを `Found/` に移して指標を上げるのは B6 そのもの**である
+——見出しの数は増えるが、実際に残っている仕事は 1 つも減らない。
+
+### ★★★次に効く順（測定に基づく）
+
+1. **`Proposition 1.7` の局所→大域**（Interface ゼロ、局所の核は馴分岐 6/6 で実装済み）
+2. **`Proposition 1.4` の `hpt`**（点の族の定義に属する条件——族の作り方の問題）
+3. `EllModuliData.northcott` を `Proposition 1.4, (iv)` から**供給する**
+   （★posit を 1 つ減らす。`Proposition 3.4` の 8 個のうち 1 個）
+4. `Theorem 2.1` の (ii) ⇒ (i)（Belyi ＋ `Proposition 1.7`）
