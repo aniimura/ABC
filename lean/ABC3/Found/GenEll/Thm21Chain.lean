@@ -81,9 +81,10 @@ theorem bdge_trans {Pt : Type} {α β γ : Pt → ℝ} (h1 : BDge α β) (h2 : B
 
 /-- ★★**`(i) ⟹ (ii)` の中身** —— `BD`-類の不等式は部分集合へ制限できる。
 
-原文 (GenEll p.12):
-> The fact that (i) =⇒(ii) is immediate from the definitions. Thus, it suffices
+原文 (GenEll p.11):
+> Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.
 
+★原文 p.12 は「`The fact that (i) ⟹ (ii) is immediate from the definitions.`」と書く。
 ★原文が「定義から直ちに」と言うのはこれである——**同じ定数 `C` がそのまま使える**。 -/
 theorem bdge_restrict {Pt : Type} (α β : Pt → ℝ) (T : Set Pt)
     (h : BDge α β) :
@@ -95,8 +96,8 @@ theorem bdge_restrict {Pt : Type} (α β : Pt → ℝ) (T : Set Pt)
 
 /-- ★★★★★★★★★★★★★★**原文 p.12 の鎖**（`D = ∅` への帰着）。
 
-原文 (GenEll p.12):
-> htωX(D) ≲(1 + ϵ′) · htωY
+原文 (GenEll p.11):
+> Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.
 
     `ht_{ω_X(D)} ≲ (1+ϵ′)·ht_{ω_Y} ≲ (1+ϵ′)²·log-diff_Y`
                  `≲ (1+ϵ′)²(log-diff_X + log-cond_D) ≲ (1+ϵ)(log-diff_X + log-cond_D)`
