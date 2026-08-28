@@ -75,7 +75,54 @@ theorem exists_le_subgroup_card (p : ℕ) [Fact p.Prime] {G : Type*} [Group G] [
   exact ⟨K'.map H.subtype, Subgroup.map_subtype_le K',
     (Subgroup.card_subtype H K').trans hK'⟩
 
+/-! ## ★★★★★★★Galois 対応 —— 中間体へ翻訳する -/
+
+open IntermediateField in
+/-- ★★★★★★★**次数 `p^{k+1}` の Galois 拡大は次数 `p` の中間体を持つ**。
+
+原文 (GenEll p.10):
+> integer n such that for any finite Galois extension L/K of finite extensions
+
+★`exists_le_subgroup_card` を Galois 対応（`fixedField`）で中間体に翻訳したものである。
+★★これで different の塔公式（`pow_mem_differentIdeal_tower`）に渡せる形になる。 -/
+theorem exists_intermediateField_finrank (p : ℕ) [Fact p.Prime]
+    (K L : Type) [Field K] [Field L] [Algebra K L] [FiniteDimensional K L] [IsGalois K L]
+    {k : ℕ} (h : Module.finrank K L = p ^ (k + 1)) :
+    ∃ M : IntermediateField K L, Module.finrank M L = p ^ k ∧ Module.finrank K M = p := by
+  have hcard : Nat.card (L ≃ₐ[K] L) = p ^ (k + 1) := by
+    rw [IsGalois.card_aut_eq_finrank, h]
+  obtain ⟨H, hH⟩ : ∃ H : Subgroup (L ≃ₐ[K] L), Nat.card H = p ^ k :=
+    ⟨_, (Sylow.exists_subgroup_card_pow_prime (G := (L ≃ₐ[K] L)) p
+      (n := k) (by rw [hcard]; exact pow_dvd_pow p (Nat.le_succ k))).choose_spec⟩
+  refine ⟨fixedField H, ?_, ?_⟩
+  · rw [finrank_fixedField_eq_card H, hH]
+  · have hmul := Module.finrank_mul_finrank K (fixedField H) L
+    rw [finrank_fixedField_eq_card H, hH, h, pow_succ, mul_comm (p ^ k) p] at hmul
+    have hp : 0 < p := (Fact.out : p.Prime).pos
+    exact Nat.eq_of_mul_eq_mul_right (pow_pos hp k) hmul
+
+/-! ## ★★段数は `d` だけで決まる -/
+
+/-- ★★**次数が `d` 以下なら段数は `log_p d` 以下**。
+
+★これが「`n` が `p` と `d` だけで決まる」ことの中身である
+——原文の `Fix a prime number p and a positive integer d. Then there exists a positive
+integer n` の `n` の一様性はここから来る。 -/
+theorem exponent_le_log (p d k : ℕ) (hp : 2 ≤ p) (hd : d ≠ 0) (h : p ^ k ≤ d) :
+    k ≤ Nat.log p d :=
+  (Nat.le_log_iff_pow_le hp hd).mpr h
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_intermediateField_finrank.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——次数 p^{k+1} の Galois 拡大は次数 p の中間体を持つ)",
+    sectionId := "genell-prop-1-7" }
+
+def exponent_le_log.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——段数は log_p d 以下)",
+    sectionId := "genell-prop-1-7" }
 
 def exists_subgroup_card_pow_of_pow_succ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
