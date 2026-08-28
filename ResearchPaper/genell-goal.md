@@ -29874,3 +29874,59 @@ IsAmple M ⟹ ∃ L > 0, ∃ N, ∃ s : Fin (N+1) → Γ(X, M^{⊗L}), ⨆_i X_{
 1. **段 E3**（`haff`・`hsurj`）を `IsAmple` から出す——これで `IsImmersion ψ` が無条件になる。
 2. **高さの側**——`D^{⊗n} = ψ^*(超平面)`（`northcott_of_veryAmple` の `hDn`）。
 3. `Proposition 1.7` を**局所体**で組み直す（`§9-DifferentKummer` の部品はむしろ局所向き）。
+
+## 2026-08-29（第 448〜453 ブロック、§9-915〜§9-920）—— ★★★★Serre の道が繋がった
+
+### ★★★★★到達点 —— 原文 p.7 の "yields an embedding" が定理になった
+
+```lean
+theorem exists_immersion_of_isAmple … (hample : IsAmple M) … :
+    ∃ (L n N' : ℕ) (s' : …) (hcov' : …),
+      IsImmersion (globalToProj … φ s' hcov')
+```
+
+原文が `Proposition 1.4, (iv)`（Northcott）の証明で
+
+> that [some positive tensor power of] the ample line bundle `L_ℚ` **yields an embedding**
+
+と 1 行で引く Serre の定理の**射の側**である。
+★`L` は「共通次数」、`n` は「分母を払う指数」であり、
+どちらも原文の「some positive tensor power」の中身である。
+
+### 入ったもの
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 448 | アフィン性を `IsAmple` から捨てずに運ぶ | `AmpleCover`・`CommonDegree`・`FinCover` |
+| 449 | ★埋め込み性は**部分族**で確かめれば足りる | `ImmersionSubfamily.lean` |
+| 450 | 分母が複数でも単一の指数が取れる | `CommonGluedRatioMulti.lean` |
+| 451 | 族を拡大して試験元を比にする | `EnlargedFamily.lean` |
+| 452 | ★★段 E3——チャート写像は全射である | `EnlargedSurjective.lean` |
+| 453 | ★★★★到達——ample なら射影空間へ埋め込める | `AmpleImmersion.lean` |
+
+### ★★測定 3 件
+
+1. ★★★★**`§9-913` の形には穴があった**（`§9-916`）——段 E3 の全射性を出すには
+   **分子の切断を族に足す**必要があるが、分母の非消失軌跡は `IsAmple` からアフィンでも、
+   **分子の非消失軌跡はアフィンとは限らない**。
+   ★直し方は「像が入る開 `V ≔ ⨆_{i∈I₀} D₊(x_i)` へ落とす」ことで、
+   `IsOpenImmersion.lift` と `IsZariskiLocalAtTarget` で通る。
+2. ★★★★**`IsAmple` の定義はアフィン性を含んでいた**（`§9-915`）——
+   `AmpleChart` がそれを捨てていただけで、構造体に 1 フィールド足すだけで `haff` が出た。
+3. ★★★★**証明無関係が効く**（`§9-919`）——`homOfLE p` と `homOfLE q` は定義上等しいので、
+   `≤` の証明の食い違いは気にしなくてよい。食い違うのは**開集合そのもの**の方であり、
+   そちらは `∀ u, s' (ρ i) = u → …` と汎化してから `rintro rfl` で潰す。
+
+### Serre 道（`ample-and-projective-embedding`、全 56 段）
+
+未閉は **`A2`（そもそも塡がりでない）と `E0`（部分）の 2 つだけ**。
+★★残る仮定は「有限アフィン自明化被覆」（`U`・`hU`・`hUij`・`e`）と
+`f : X ⟶ Spec A` の `LocallyOfFiniteType`・`hφ` だけであり、
+いずれも Arakelov 理論ではなく**スキーム論の一般論**である。
+
+### 次の一手
+
+★★★★**高さの側**——`D^{⊗n} = ψ^*(超平面)` を言えば
+`northcott_of_veryAmple`（`§9-882`）に繋がり、`Proposition 1.4, (iv)` が閉じる。
+★材料は揃っている: `§9-885`・`§9-886`（チャートの上で超平面の引き戻しは `s_0/s_i`）と
+`§9-913`（`ψ⁻¹(D₊(x_i)) = X_{s_i}`）。
