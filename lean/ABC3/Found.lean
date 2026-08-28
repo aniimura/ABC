@@ -380,6 +380,7 @@ import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.DeligneElementary
 import ABC3.Found.GenEll.PrimesOfSize
+import ABC3.Found.GenEll.Cor43Arith
 import ABC3.Found.GenEll.ArithDiv
 import ABC3.Found.GenEll.FractionalIdealDivisor
 import ABC3.Found.GenEll.RatTower
