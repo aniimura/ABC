@@ -1641,3 +1641,25 @@ JS 文字列の中の **バッククォート付き Markdown**（``` `X` ```）�
 restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の `V`** で通り、
 右辺が `s` から `s|_V` に変わるだけであった（`trivValue_unit'`）。
 ★「⊤ でしか無いから使えない」と諦める前に、証明をコピーして一般形を試す。
+
+## `⨆ U i = ⊤` を `rw` で入れると motive が壊れる（2026-08-28）
+
+    rw [← hcov]   -- ✗ motive is not type correct
+
+目標に `le_iSup U i : U i ≤ ⨆ U i` という**証明項が現れる**からである
+（`homOfLE (le_iSup U i)` の引数）。`⨆ U i` を `⊤` に書き換えると、
+その証明項の型が合わなくなる。
+
+★**直し方は「同型で運ぶ」**である:
+
+    have hup : (⊤ : X.Opens) ≤ ⨆ i, U i := le_of_eq hcov.symm
+    -- 両向きの制限射 map (homOfLE hup).op / map (homOfLE le_top).op が互いに逆
+
+★★`Opens` の射は `Subsingleton` なので、合成した射は `Subsingleton.elim` で
+好きな射に取り替えられ、`A ⟶ A` は `𝟙 A` に潰れる（`map_id_apply`）。
+
+### 付随——`PresheafOfModules.map` は `map_comp` が直接使えない
+
+`restrictScalars` を挟むので `M.map g.op ≫ M.map f.op` が型検査を通らない。
+★`show M.presheaf.map … ` で **`Ab` 値の前層に降りてから** `map_comp` を使う
+（`Found/GenEll/SheafifyGlue.lean` の `map_map_apply`）。
