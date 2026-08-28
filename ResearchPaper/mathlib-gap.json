@@ -1615,5 +1615,19 @@
       "★Numdam(numdam.org)で EGA は全巻無料公開されている——必要になれば正規に入手できる。"
     ]
   },
-  "_methodologyNote": "★★★★★2026-08-27 の重要な訂正。「person-years 規模の既知数学」を壁と呼んでいたが、**4 本の塞がりのうち 3 本は原典が 0_Source にあり、papers.json に登記済みである**。★したがって CLAUDE.md の進め方（スケルトンで依存グラフを作成後、葉から Lean 形式化）が**そのまま適用できる**。★★「壁」ではなく「まだグラフに載せていない道」である。★★★例外は arc-metric-not-attached-to-bundle だけで、これは原典の問題ではなく**我々の設計**である。"
+  "_methodologyNote": "★★★★★2026-08-27 の重要な訂正。「person-years 規模の既知数学」を壁と呼んでいたが、**4 本の塞がりのうち 3 本は原典が 0_Source にあり、papers.json に登記済みである**。★したがって CLAUDE.md の進め方（スケルトンで依存グラフを作成後、葉から Lean 形式化）が**そのまま適用できる**。★★「壁」ではなく「まだグラフに載せていない道」である。★★★例外は arc-metric-not-attached-to-bundle だけで、これは原典の問題ではなく**我々の設計**である。",
+  "remeasured20260829": {
+    "measuredAt": "2026-08-29",
+    "how": "lean/.lake/packages/mathlib の木を直接 grep(#no-guard)。ディレクトリ一覧＋宣言名の両方を見た。",
+    "findings": [
+      "★Riemann–Roch: `grep -rl \"RiemannRoch\" Mathlib/` は **0 件**。Serre 双対性も同様。",
+      "★ample: `grep -rln \"IsVeryAmple\" Mathlib/` は **0 件**、`Ample` は AlgebraicGeometry/ に **0 件**。",
+      "★スキームの Picard 群: 無い(RingTheory/PicardGroup.lean は**環**の Picard 群)。AlgebraicGeometry/Modules/ は Presheaf / Sheaf / Tilde の 3 本だけ。",
+      "★Tate 曲線: `grep -rln \"TateCurve\\|tateCurve\" Mathlib/` は **0 件**。",
+      "★エタール基本群: AlgebraicGeometry/ にも Topology/ にも無い(Homotopy/HomotopyGroup.lean は位相のホモトピー群)。",
+      "★Serre の開像定理: NumberTheory/ に **0 件**——★★ただし Theorem 3.8 には要らない(群論の核 Lemma 3.1, (iv) は本プロジェクトに実装済み)。",
+      "☆一方で**保型形式は厚い**: NumberTheory/ModularForms/ に Delta.lean・Discriminant.lean・Petersson.lean・DedekindEta.lean・EisensteinSeries/・JacobiTheta/・LevelOne/・Cusps.lean・BoundedAtCusp.lean・Bounds.lean・QExpansion.lean があり、NumberTheory/Modular.lean に基本領域がある。★これは faltings-height-vs-degree-at-infinity の段 1-4(並行セッションの領分)を支える側である。"
+    ],
+    "verdict": "★★★2026-08-16 の測定は**そのまま生きている**——本プロジェクトの担当分(Tate 曲線・Riemann–Roch/Serre 双対性・エタール基本群・ample)は依然として mathlib に無い。☆保型形式の側だけが厚く、そこは並行セッションの領分である。"
+  }
 }
