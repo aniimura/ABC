@@ -422,6 +422,7 @@ import ABC3.Found.GenEll.FinitePlaceRel
 import ABC3.Found.GenEll.BaseChange
 import ABC3.Found.GenEll.LogDiffTower
 import ABC3.Found.GenEll.DifferentGlobalBound
+import ABC3.Found.GenEll.DifferentGlobalBoundUpper
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
 import ABC3.Found.GenEll.RadicalPrincipal
