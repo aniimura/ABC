@@ -366,7 +366,7 @@
             "stage": "E3a-2",
             "claim": "★**局所自明な前層加群は層である**（層化の単位 `P → sheafify P` が同型）",
             "status": "open",
-            "why": "★★★★**2026-08-28 夜の測定——これが E3a の大域化の門である**。プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるには `M^{⊗n}` が層であることが要る。★**材料は在庫にある**: `isSheaf_restrict_of_triv`（自明化があれば制限は層、`SheafifyTriv.lean`）と `isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型、`PicSheafifyTrivial.lean`）。★★残るのは「同型性は局所的」で大域へ上げる段だけである。",
+            "why": "★★★★**2026-08-28 夜の測定——これが E3a の大域化の門である**。プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるには `M^{⊗n}` が層であることが要る。★**材料は在庫にある**: `isSheaf_restrict_of_triv`（自明化があれば制限は層、`SheafifyTriv.lean`）と `isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型、`PicSheafifyTrivial.lean`）。★★残るのは「同型性は局所的」で大域へ上げる段だけである。 ★★★★★**2026-08-28 夜の追測定——道は 2 本あり、どちらも「局所性」を自分で書く必要がある**。(a) 「層であることは局所的」（`P|_V` が層である被覆があれば `P` は層）を書いて `isSheaf_restrict_of_triv` に繋ぐ。(b) 層化の単位 `P → sheafify P` の**各成分**が同型であることを示す（`isIso_restrict_sheafifyUnit` は `V` 以下の成分しか与えない）。★**mathlib に over-topology 版の「層であることは局所的」は見当たらない**（2026-08-28 実測——`Mathlib/CategoryTheory/Sites/` を `isSheaf.*cover` / `isSheaf_of_isSheaf_over` で検索、該当なし）。★★どちらの道も**分離性と貼り合わせの両方が局所化する**という初等的な議論であり、person-years ではない。★★★(a) のほうが再利用が効く——プロジェクトは前層の水準で作業しているので、「局所自明な前層加群は層である」は今後も繰り返し要る。",
             "sources": [
               "ABC3: Found/Arakelov/PicSheafifyTrivial.lean",
               "ABC3: Found/Arakelov/SheafifyTriv.lean"
