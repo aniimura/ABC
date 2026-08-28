@@ -772,13 +772,13 @@
         "★その下流: Proposition 1.4 の線束表示側"
       ],
       "mathlibStatus": {
-        "verdict": "partial-minor",
+        "verdict": "closed",
         "searched": "2026-08-28 実測。ADiv(F) / APrc(F) / deg / degNormalized / degAPic は Found/GenEll/ArithDiv.lean と ProductFormula.lean に**実装済み**。★欠けているのは橋だけである。",
         "absentPart": "★Found/Arakelov/ADegEmb.lean の degFOf は**アルキメデス側しか見ていない**（Pic 類が式に現れない、Def12Height.lean の訂正）。 ★★捻れ集合表示 (L, g) から有限素点側の**式が書けない**——TorsorMetric.base が Classical.choice だからである。 ★★★古典的な定義 deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v なら書けるが、s の取り方に依らないこと（積公式）が要る。"
       },
       "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
-      "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
-      "nextStep": "★段 A〜E は閉じた。残るのは (a) 非零切断のノルムの非零性、(b) APicM →+ ℝ の組み立て、(c) 底変換の計量版。",
+      "impact": "★★★★★2026-08-28 に閉じた。deg_F : APic(Spec 𝓞_F) → ℝ(§9-782)、高さの加法性(§9-783)、底変換 deg_K(L|Spec(𝓞_K)) = deg_F(L)(§9-799)まで無条件で入った。[Szp] Prop 1.1 の同型は**経由していない**(逸脱の記録)。",
+      "nextStep": "★閉じた。★★Definition 1.1 全体としてはまだ (i) の「複素共役との両立」の条項が AMetric の設計に無い(IsConjCompatible は GreenMetric / TorsorMetric にしか無い、2026-08-28 実測)。項目全体の .src を書くにはそこを埋める必要がある。",
       "blockedBy": "",
       "decomposition": {
         "measuredAt": "2026-08-28",
@@ -928,6 +928,21 @@
       "minimalForm": "★消費側が要るのは「f が全射なら Γ(f^*L) ≅ Γ(L) ⊗_{O_Y(⊤)} O_X(⊤)、しかも pullSec が s ↦ s ⊗ 1 に対応する」ことだけである。★★f が全射のとき U = ⊤ に対する colimit は V = ⊤ に潰れるので、これは colimit 公式の**最も易しい場合**である。",
       "impact": "★★★2026-08-28 に閉じた。得られた形は Γ(f^*L) = Γ(X,⊤)-span { pullSec f L ⊤ s }(任意の f、任意の算術直線束 L)。★残るのは (a) これを μ の全単射性に上げ、(b) #(𝓞_K/𝔞𝓞_K) = #(𝓞_F/𝔞)^{[K:F]} と埋め込みの数え上げで底変換を組み立てること。",
       "nextStep": "★2026-08-28 に**塞がった**(§9-790、span_pullSecT_of_inv)。Γ(f^*L) を計算せずに、テンソルで回した: 単位束(pullbackUnitPreIso)→ A ⊗ A⁻¹ ≅ Ō で持ち上げ → delta_pullSec(§9-743)＋isIso_pullbackDelta → surjective_of_map_surjective(§9-785)で因子を落とす。★★f の全射性は要らなかった。",
+      "blockedBy": ""
+    },
+    "amet-conj-compatible": {
+      "what": "★AMetric(いまの算術直線束の設計)に**複素共役との両立**の条項が無い。",
+      "whereUsed": [
+        "[GenEll] Definition 1.1 (i)（「compatible [in the evident sense] with the complex conjugation automorphism ιX」）"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "2026-08-28 実測。IsConjCompatible は Found/Arakelov/ArcGreenConj.lean（GreenMetric 用）と ArcTorsorMetric.lean（TorsorMetric 用）にしかない。AMetric / LocalMetric には無い（grep で 0 件）。conjPoint（複素点の共役）は ArcConjInvol.lean にある。",
+        "absentPart": "★LocalMetric の基準ノルム h に対する共役不変性 h V e (conjPoint p) = h V e p と、それが 1 / ⊗ / 引き戻し / 等長で閉じること。"
+      },
+      "minimalForm": "★AMetric を書き換えずに述語 AMetric.IsConjCompatible を足し、1・⊗・引き戻し・等長で閉じることを示せばよい。★★そうすれば APicM の共役両立な部分群の上で deg_F / ht がそのまま使える。",
+      "impact": "★★これが Definition 1.1 の項目全体の .src を書くための**最後の条項**である（2026-08-28 時点）。(ii) はすべて閉じた。",
+      "nextStep": "★conjPoint（ArcConjInvol.lean）を使って IsConjCompatible を定義し、AMetric.one / AMetric.mul / AMetricPullback / IsIsometry について閉じることを示す。",
       "blockedBy": ""
     }
   },
