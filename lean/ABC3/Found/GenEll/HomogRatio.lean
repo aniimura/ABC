@@ -146,7 +146,70 @@ theorem homogRatio_self (M : X.PresheafOfModules) (V : X.Opens)
     rw [MvPolynomial.eval₂_pow, MvPolynomial.eval₂_X]
   rw [hv, map_pow]
 
+/-! ## ★★★★★★★★★段 E1c の核 —— `Away` の同値関係を潰す -/
+
+theorem homogValue_mul (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    {R : Type} [CommRing R] (φ : R →+* (Γ(X, V) : Type))
+    {σ : Type} (s : σ → (M.obj (op ⊤) : Type)) (p q : MvPolynomial σ R) :
+    homogValue M V e φ s (p * q) = homogValue M V e φ s p * homogValue M V e φ s q :=
+  MvPolynomial.eval₂_mul _ _
+
+theorem homogValue_pow_X (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    {R : Type} [CommRing R] (φ : R →+* (Γ(X, V) : Type))
+    {σ : Type} (s : σ → (M.obj (op ⊤) : Type)) (i : σ) (m : ℕ) :
+    homogValue M V e φ s (MvPolynomial.X i ^ m) = trivValue M V e (s i) ^ m := by
+  show MvPolynomial.eval₂ φ (fun j => trivValue M V e (s j)) (MvPolynomial.X i ^ m) = _
+  rw [MvPolynomial.eval₂_pow, MvPolynomial.eval₂_X]
+
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★★★**`x_i^m·a = x_i^n·b` なら比は等しい**。
+
+原文 (GenEll p.7):
+> that [some positive tensor power of] the ample line bundle LQ yields an embedding
+
+★★これが `HomogeneousLocalization.Away` の**同値関係を潰す**段（段 E1c の核）である
+——`mk n a = mk m b` は（`MvPolynomial` が整域なので）
+`x_i^m·a = x_i^n·b` に帰着するからである。
+
+★★★機構は「両辺に `t_i^{n+m}` を掛けて `homogRatio_mul` で潰す」だけである。 -/
+theorem homogRatio_congr_of_mul_eq (M : X.PresheafOfModules) (V : X.Opens)
+    (e : (restrictPresheafFunctor X V).obj M ≅ 𝟙_ (PresheafModulesOn X V))
+    {R : Type} [CommRing R] (φ : R →+* (Γ(X, V) : Type))
+    {σ : Type} (s : σ → (M.obj (op ⊤) : Type)) (i : σ) {n m : ℕ}
+    {a b : MvPolynomial σ R}
+    (h : (MvPolynomial.X i) ^ m * a = (MvPolynomial.X i) ^ n * b) :
+    homogRatio M V e φ s i n a = homogRatio M V e φ s i m b := by
+  set ρ := X.presheaf.map (homOfLE (inf_le_right : nonVanishing M (s i) ⊓ V ≤ V)).op with hρ
+  have hu := isUnit_trivValue_res M V e (s i)
+  have hv : homogValue M V e φ s ((MvPolynomial.X i) ^ m * a)
+      = homogValue M V e φ s ((MvPolynomial.X i) ^ n * b) := by rw [h]
+  rw [homogValue_mul, homogValue_mul, homogValue_pow_X, homogValue_pow_X] at hv
+  have hvr : ρ.hom (trivValue M V e (s i)) ^ m * ρ.hom (homogValue M V e φ s a)
+      = ρ.hom (trivValue M V e (s i)) ^ n * ρ.hom (homogValue M V e φ s b) := by
+    have := congrArg (fun z => ρ.hom z) hv
+    simpa [map_mul, map_pow] using this
+  refine IsUnit.mul_right_cancel (hu.pow (n + m)) ?_
+  have h1 := homogRatio_mul M V e φ s i n a
+  have h2 := homogRatio_mul M V e φ s i m b
+  calc homogRatio M V e φ s i n a * ρ.hom (trivValue M V e (s i)) ^ (n + m)
+      = (homogRatio M V e φ s i n a * ρ.hom (trivValue M V e (s i)) ^ n)
+        * ρ.hom (trivValue M V e (s i)) ^ m := by rw [pow_add, mul_assoc]
+    _ = ρ.hom (homogValue M V e φ s a) * ρ.hom (trivValue M V e (s i)) ^ m := by rw [h1]
+    _ = ρ.hom (trivValue M V e (s i)) ^ m * ρ.hom (homogValue M V e φ s a) := by ring
+    _ = ρ.hom (trivValue M V e (s i)) ^ n * ρ.hom (homogValue M V e φ s b) := hvr
+    _ = (homogRatio M V e φ s i m b * ρ.hom (trivValue M V e (s i)) ^ m)
+        * ρ.hom (trivValue M V e (s i)) ^ n := by rw [h2]; ring
+    _ = homogRatio M V e φ s i m b * ρ.hom (trivValue M V e (s i)) ^ (n + m) := by
+        rw [pow_add]; ring
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def homogRatio_congr_of_mul_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 7,
+    item := "Proposition 1.4, (iv)(x_i^m·a = x_i^n·b なら比は等しい——Away の同値関係を潰す)",
+    sectionId := "genell-prop-1-4" }
 
 def homogRatio.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 7,
