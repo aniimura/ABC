@@ -85,7 +85,46 @@ theorem not_dvd_finrank_cyclotomic_prime (p : ℕ) [Fact p.Prime] (K : Type) [Fi
   have hle2 : Module.finrank K L ≤ p - 1 := Nat.le_of_dvd hp1 hdvd2
   omega
 
+/-! ## ★★★★`IsTameDegree` へ繋ぐ -/
+
+open IsLocalRing in
+/-- ★★★★**`p−1` を割る正の次数は馴である**（`IsTameDegree` の形）。
+
+★`§9-TameRamification` の `IsTameDegree B n ≝ ¬ (ringChar (ResidueField B) ∣ n)` に、
+`n ∣ p−1` かつ `0 < n` を渡すだけである——`n ≤ p−1 < p` だから `p ∤ n`。 -/
+theorem isTameDegree_of_dvd_sub_one (p : ℕ) [Fact p.Prime] (B : Type*) [CommRing B]
+    [IsLocalRing B] (hchar : ringChar (ResidueField B) = p)
+    (n : ℕ) (hn : n ∣ p - 1) (hpos : 0 < n) : IsTameDegree B n := by
+  rw [IsTameDegree, hchar]
+  intro hdvd
+  have hle : p ≤ n := Nat.le_of_dvd hpos hdvd
+  have hp1 : 0 < p - 1 := Nat.sub_pos_of_lt (Fact.out : p.Prime).one_lt
+  have hle2 : n ≤ p - 1 := Nat.le_of_dvd hp1 hn
+  omega
+
+open IsLocalRing in
+/-- ★★★★★**`ζ_p` を添加する拡大の次数は馴である**（`IsTameDegree` の形）。
+
+★これが原文の「tamely ramified extensions」の側そのものである。 -/
+theorem isTameDegree_finrank_cyclotomic (p : ℕ) [Fact p.Prime] (K : Type) [Field K]
+    (L : Type) [Field L] {μ : L} (hμ : IsPrimitiveRoot μ p) [Algebra K L]
+    [IsCyclotomicExtension {p} K L] [FiniteDimensional K L] [IsGalois K L]
+    (hpos : 0 < Module.finrank K L)
+    (B : Type*) [CommRing B] [IsLocalRing B] (hchar : ringChar (ResidueField B) = p) :
+    IsTameDegree B (Module.finrank K L) :=
+  isTameDegree_of_dvd_sub_one p B hchar _ (finrank_cyclotomic_prime_dvd p K L hμ) hpos
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def isTameDegree_of_dvd_sub_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——p−1 を割る正の次数は馴である)",
+    sectionId := "genell-prop-1-7" }
+
+def isTameDegree_finrank_cyclotomic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——ζ_p の添加の次数は馴である)",
+    sectionId := "genell-prop-1-7" }
 
 def finrank_cyclotomic_dvd.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 10,
