@@ -1677,3 +1677,23 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
 ★★`def` で包んだ射（ここでは `globalChartMorphism`）が絡むと起きやすい
 ——`show` で展開しても解決器は元の形を探しに行くことがある。
 ★★★「instance が見つからない」と言われたら、**まず `@` で手渡してみる**。
+
+## 名前の衝突——プロジェクト側の `FinitePlace` が mathlib の同名を隠す（2026-08-28）
+
+    namespace ABC3.Found.GenEll
+    open NumberField
+    …  ∏ᶠ v : FinitePlace K, ⨆ i, v (x i)   -- ✗ Function expected at v
+
+`ABC3.Found.GenEll.FinitePlace ≝ IsDedekindDomain.HeightOneSpectrum (𝓞 F)`
+（`Found/GenEll/ArithDiv.lean:65`）が **`NumberField.FinitePlace` を隠す**。
+名前空間の中では自分の `abbrev` が優先されるからである。
+
+★**直し方**: `NumberField.FinitePlace K` と**完全修飾で書く**。
+
+★★合図は「`h` の側は `NumberField.FinitePlace` と表示されるのに、
+目標の側は `FinitePlace` と表示される」ことである
+——**表示が食い違ったら名前解決を疑う**。
+
+★★★REPL では `open … in example` の形で書いていて通ったのに
+ファイルでは通らなかった。名前空間の中かどうかで解決が変わるので、
+**REPL の断片が通ってもファイルでもう一度ビルドする**。

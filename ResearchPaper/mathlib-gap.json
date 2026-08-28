@@ -288,9 +288,9 @@
           },
           {
             "stage": "C2c-2",
-            "status": "open",
+            "status": "closed",
             "claim": "★★有限素点側 —— `log #(𝓞_F/(x_0,…,x_N))` と `∏ᶠ_{v 非アルキメデス} sup_i v(x_i)` の関係",
-            "why": "★★★★★★**2026-08-28 夜に分解した**。mathlib の `Height.mulHeight` は`(∏_{v arch} sup_i v(x_i)) · (∏ᶠ_{v nonarch} sup_i v(x_i))` である（`Height/Basic.lean:232` 実測）。★座標が `𝓞_F` に入るとき、非アルキメデス側の積は生成イデアルのノルムの逆数になる——これが `degFinPre`（`log #(𝓞_F/I)`）とちょうど符号違いで対応する。★★在庫: `Found/GenEll/DenominatorBound.lean` の `absNorm_denIdeal_le_mulHeight₁` が**同じ型の議論**をすでに持っている（1 成分の場合）。★★★それを組に持ち上げるのが本段である。",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。mathlib の `Height.mulHeight` は`(∏_{v arch} sup_i v(x_i)) · (∏ᶠ_{v nonarch} sup_i v(x_i))` である（`Height/Basic.lean:232` 実測）。★座標が `𝓞_F` に入るとき、非アルキメデス側の積は生成イデアルのノルムの逆数になる——これが `degFinPre`（`log #(𝓞_F/I)`）とちょうど符号違いで対応する。★★在庫: `Found/GenEll/DenominatorBound.lean` の `absNorm_denIdeal_le_mulHeight₁` が**同じ型の議論**をすでに持っている（1 成分の場合）。★★★それを組に持ち上げるのが本段である。 ★★★★★★★★**2026-08-28 夜——閉じた**（`Found/GenEll/HeightIdealNorm.lean`）: `mulHeight_mul_absNorm`——「`H(x) · N(span{x_i}) = ∏_{v 無限素点} (sup_i v(x_i))^{mult v}`」。★**在庫を引いたら書く必要がほとんど無かった**——mathlib の `NumberField.absNorm_mul_finprod_finitePlace_eq_one`（`Height/NumberField.lean:174`）が「素朴高さの有限素点部分は座標イデアルのノルムの逆数である」を既に持っていた。★★`NumberField.mulHeight_eq` と合わせるだけで出る。★★★対数の形 `log_mulHeight_add_log_absNorm` も入れた——`degArith = degArch + degFin` と直に見比べられる。★配管の記録: プロジェクトの `ABC3.Found.GenEll.FinitePlace`（`ArithDiv.lean:65`）が `NumberField.FinitePlace` を**隠す**ので完全修飾が要った（`tools/lean-idioms.md`）。",
             "sources": [
               "mathlib: Mathlib/NumberTheory/Height/Basic.lean",
               "ABC3: Found/GenEll/DenominatorBound.lean"
@@ -462,8 +462,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。 ★★★★★★★★**2026-08-28 夜——アフィンでの核が入った**(`Found/GenEll/GenericFiber.lean`): `ker_locMap`(局所化は核と可換)と `quotKerMapEquiv` / `ratQuotKerEquiv`。★アフィンで読むと閉包のイデアルは `ker φ`(φ : A → B、A = Γ(U ⊆ ℙᴺ_ℤ)、B = Γ(Y, f⁻¹U))であり、生成ファイバーへ移るのは A を ℤ∖{0} で局所化すること。**B はすでに ℚ-代数なので局所化で変わらない**。★★したがって要るのは `ker (A_ℚ → B) = (ker φ)·A_ℚ`(mathlib の `IsLocalization.ker_map`)だけで、A_ℚ → B が全射なら `A_ℚ / (ker φ)·A_ℚ ≅ B`——**閉包の生成ファイバーは Y そのもの**である。★★★測定: mathlib に「単元の部分モノイドによる局所化は恒等」の instance が無かったので`isLocalization_self_of_isUnit` を自前で置いた(3 行)。`IsLocalization.atUnits` は『局所化が与えられているとき同型になる』形で、instance を**作る**形ではない。★残るのは `Scheme.IdealSheafData` の水準へ持ち上げる配管だけで、**新しい数学は要らない**(`Scheme.Hom.ker_apply` を各チャートに当てて貼る)。"
           }
         ],
-        "done": "★完全に閉じた 23 / 30（部分的 4、未着手 3）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2（「⊓ V」を外す）と段 C2c-1〜C2c-3（超平面因子の高さの分解）を新たに挿入したので分母が増えた。",
-        "remaining": "C2c(partial), C2c-1(open), C2c-2(open), C2c-3(open), E0(partial), E1d(partial), F2c(partial)",
+        "done": "★完全に閉じた 24 / 30（部分的 4、未着手 2）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2 と段 C2c-1〜C2c-3 を新たに発見して挿入したので分母が増えた。",
+        "remaining": "C2c(partial), C2c-1(open), C2c-3(open), E0(partial), E1d(partial), F2c(partial)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
