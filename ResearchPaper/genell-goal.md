@@ -30492,3 +30492,39 @@ noncritical Belyi maps ＋ `Proposition 1.7` ＋ 一般の曲線への帰着）�
 3. `EllModuliData.northcott` を `Proposition 1.4, (iv)` から**供給する**
    （★posit を 1 つ減らす。`Proposition 3.4` の 8 個のうち 1 個）
 4. `Theorem 2.1` の (ii) ⇒ (i)（Belyi ＋ `Proposition 1.7`）
+
+
+---
+
+## 2026-08-29（第 488 ブロック、§9-954）—— `Proposition 1.7` の局所→大域（下から）
+
+第 487 ブロックの実測で「次に効く」と測った **1 番目**に着手した。
+
+### 到達
+
+    各素点 `P` で `P^{a_P} ∣ 𝔡_{K/F}` なら
+      `(∑_P a_P · log N(P)) / [K:ℚ]  ≤  log-diff(K) − log-diff(F)`
+
+★`a_P ≔ e_P − 1` と取れるのは **mathlib の `pow_sub_one_dvd_differentIdeal`**
+（`P^e ∣ p·𝓞_K` ⟹ `P^{e−1} ∣ 𝔡`）である
+——★★**局所の核は mathlib にあった**（自分で作る必要は無かった）。
+
+### 機構（3 段）
+
+1. 相異なる極大イデアルの冪は互いに素なので、個々に割り切れば**積も割り切る**
+   （`Finset.prod_dvd_of_coprime`）
+2. `Ideal.absNorm` は乗法的かつ割り切りを保つので、**ノルムの不等式**になる
+3. `logDiffOfField_tower`（`log-diff(K) − log-diff(F) = log N(𝔡)/[K:ℚ]`）で読み替える
+
+### ★残り（`hlow`、上からの評価）
+
+`𝔡 ∣ ∏_{P∈S} P^{a_P}` を出すには**素因数分解の重複度**が要る:
+
+* `P^{e_P} ∤ 𝔡`（馴分岐）は mathlib の `not_dvd_differentIdeal_of_isCoprime` にある
+* しかし「`𝔡` の台が `S` に含まれる」＋「各 `P` で重複度 ≤ `a_P`」から `∣` を出す段は
+  `dvd_iff_normalizedFactors_le_normalizedFactors`（mathlib）経由の**別の組み立て**である
+* ★★**野分岐の素点をどう集めるか**が残る——原文が `Σ` の上の食い違いとして
+  分離している部分にあたる
+
+★★★したがって `Proposition 1.7` の elementary claim は
+**下からの側が閉じ、上からの側だけが残った**。
