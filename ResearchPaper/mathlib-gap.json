@@ -307,6 +307,12 @@
             "why": "★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottComap.lean`）: `northcott_comap`——「射 `ψ : X ⟶ ℙᴺ` に沿って `§9-878` の Northcott が移送される」。★機構は `§9-879`（`ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`）を `§9-878` に差し込むだけであった。★★`hinj` が「`X` の点を分ける」条件になっているのが要点で、これは `ψ` が**埋め込み**であることの帰結である（`§9-849`・`§9-851`）。★★★これで原文の「`L_ℚ` が豊富 ⟹ 射影埋め込み ⟹ Northcott」のうち、**移送の段は済んだ**。残るのは `ψ^*(超平面) = n·D`（段 E3、`L^n` が非常に豊富）だけで、`§9-880` の `ht_{D^n} = n·ht_D` と繋げば `ht_D` についての Northcott になる。"
           },
           {
+            "stage": "C2i",
+            "status": "closed",
+            "title": "非常に豊富な因子についての Northcott（射影埋め込みから先）",
+            "why": "★★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottVeryAmple.lean`）: `northcott_of_veryAmple`——「`D` の `n` 倍が（計量込みで）超平面の引き戻しなら、`ht_D` で有界な点の集合は有限」。★`§9-880`（`ht_{D^n} = n·ht_D`）と `§9-881`（射に沿った移送）を繋いだものである。★★これが原文の「`L_ℚ` が豊富 ⟹ ある冪が非常に豊富 ⟹ 射影埋め込み ⟹ Northcott」の**射影埋め込みから先の 2 段**にあたる。★★★仮定 `hDn : D.npow n = E.comap ψ` は因子だけの条件（`IsVeryAmpleDiv`）より強いが、計量の差は `Proposition 1.4, (iii)`（`§9-872`）で吸収できるので BD-類の水準では同じことである。★★★★残るのは **`hDn` を満たす `n` の存在**（＝ Serre の定理「豊富なら或る冪は非常に豊富」）で、段 E3（`isImmersion_globalChartToProj` まで来ている）の締めくくりである。"
+          },
+          {
             "stage": "C2c-1",
             "status": "closed",
             "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",

@@ -531,6 +531,7 @@ import ABC3.Found.GenEll.NorthcottHyperplane
 import ABC3.Found.GenEll.ArithCartierComap
 import ABC3.Found.GenEll.ArithCartierNpow
 import ABC3.Found.GenEll.NorthcottComap
+import ABC3.Found.GenEll.NorthcottVeryAmple
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
