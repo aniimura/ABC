@@ -487,6 +487,7 @@ import ABC3.Found.Arakelov.DegArith
 import ABC3.Found.Arakelov.DegArithIndep
 import ABC3.Found.Arakelov.TensorIndex
 import ABC3.Found.Arakelov.InvertibleIndex
+import ABC3.Found.Arakelov.DegArithPre
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
