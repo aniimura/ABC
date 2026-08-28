@@ -504,6 +504,7 @@ import ABC3.Found.GenEll.ChartCoordsSeparate
 import ABC3.Found.GenEll.HeightIdealNorm
 import ABC3.Found.GenEll.HeightIntegralRepr
 import ABC3.Found.GenEll.HeightProductFormula
+import ABC3.Found.GenEll.ProjCompact
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
