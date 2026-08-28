@@ -431,6 +431,7 @@ import ABC3.Found.GenEll.Prop17Hup
 import ABC3.Found.GenEll.LogCondSupport
 import ABC3.Found.GenEll.Prop17HupCond
 import ABC3.Found.GenEll.DifferentTameGlobal
+import ABC3.Found.GenEll.Prop17Sandwich
 import ABC3.Found.GenEll.DifferentTameExact
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
