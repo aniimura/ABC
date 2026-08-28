@@ -510,6 +510,7 @@ import ABC3.Found.GenEll.EnlargedFamily
 import ABC3.Found.GenEll.EnlargedSurjective
 import ABC3.Found.GenEll.AmpleImmersion
 import ABC3.Found.GenEll.NorthcottGlobalToProj
+import ABC3.Found.GenEll.PullbackChartLocal
 import ABC3.Found.GenEll.ComapChartIdeal
 import ABC3.Found.GenEll.ComapOnAffineOpen
 import ABC3.Found.GenEll.DivisorOfSectionComap
@@ -537,6 +538,7 @@ import ABC3.Found.GenEll.HyperplaneChartSection
 import ABC3.Found.GenEll.HyperplanePullback
 import ABC3.Found.GenEll.HeightArithDegree
 import ABC3.Found.GenEll.HeightArithDegreeGen
+import ABC3.Found.GenEll.HeightArithLocalization
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
