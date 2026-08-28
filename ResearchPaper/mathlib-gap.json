@@ -815,13 +815,15 @@
           },
           {
             "stage": "E",
-            "status": "open",
+            "status": "core-done",
             "claim": "★★★★★**加法性**（`deg_F` が `APicM (Spec 𝒪_F) →+ ℝ`）",
-            "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
+            "why": "★アルキメデス側は在庫の archDeg_mul。★★有限側の**純粋な可換環論の部分**は 2026-08-28 に入った(card_quotient_tmul、§9-778): #((A⊗B)/R·(a⊗b)) = #(A/R·a)·#(B/R·b)。鍵は card_tensor_invertible(#(Q ⊗ B) = #(Q)、Q 有限・B 可逆)で、S := R/Ann(Q) が有限環→Artin→極大スペクトル有限→mathlib の Subsingleton (Pic S)→S ⊗_R B は自由階数 1、という道で通した。",
+            "where": "Found/Arakelov/TensorIndex.lean(§9-778) / Found/Arakelov/ArchDeg.lean(archDeg_mul)",
+            "nextStep": "★残るのは配管である: Γ(sheafify(L⊗M)) ≅ Γ(sheafify L) ⊗_R Γ(sheafify M)(在庫の gammaTensorCmp / tildeTensorIso / PicQCoh の tilde Γ(F) ≅ F を繋ぐ)と、gammaSheafifyM が s ⊗ t を送る先の同定。"
           }
         ],
         "done": "4/5",
-        "remaining": "★段 A・B・C・D が閉じた(2026-08-28)。★★残るのは段 E(加法性)だけである。★★★段 E のアルキメデス側は在庫の archDeg_mul、有限側は Γ(L⊗M)/(s⊗t) の指数が積になること——イデアルノルムの乗法性(Ideal.absNorm は MonoidHom)に落ちるはずである。"
+        "remaining": "★段 A・B・C・D が閉じ、段 E は核(指数の乗法性)まで入った(2026-08-28)。★★残るのは段 E の配管(Γ(L⊗M) ≅ Γ(L) ⊗ Γ(M))だけである。"
       }
     },
     "arakelov-coherent-base-metric": {
