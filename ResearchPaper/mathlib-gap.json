@@ -307,12 +307,12 @@
           {
             "stage": "E0",
             "claim": "**加群層 ⟷ 因子**の橋——可逆前層 `M` と `X.IdealSheafData` の対応（`O(D)` の構成、または `D = div(s)` の構成）",
-            "status": "open",
-            "why": "★`Found/GenEll/AmpleDef.lean` の `IsAmple` は**加群層**の述語、`Found/GenEll/VeryAmpleDef.lean` の `IsVeryAmpleDiv` は**因子**の述語である。★★段 E を述べるにはこの 2 つを繋ぐ必要がある。★★★因子表示（§1 が採っている表示）を主にするなら、要るのは「切断 `s` の零点因子 `div(s) : X.IdealSheafData`」の構成だけでよい——`nonVanishing M s` の補集合がその台である。 ★★★★**2026-08-28 夜の実測——入口が判った**。mathlib の `Scheme.IdealSheafData` は「**すべての**アフィン開 `U` に対する `Ideal Γ(X,U)`」を要求するので、局所自明化しか持たない `M` から直には作れない。★しかし `IdealSheafData.ofIdeals`（族に含まれる最大のイデアル層）と `IdealSheafData.gci`（`ideal` と `ofIdeals` の Galois coinsertion）があり、`gci.choice_eq` は「族が既に `map_ideal_basicOpen` を満たすなら `ofIdeals` はその族そのもの」を与える。★★したがって `div(s).ideal U ≝ (trivValue M U e s)`（自明化が無い `U` では `⊤`）と置き、**`map_ideal_basicOpen`（`I(D(f)) = I(U)_f`）だけを示せばよい**——それは `trivValue_restrict`（段 D2、既存）から出る。★★★これが E0 の具体的な入口である。",
+            "status": "partial",
+            "why": "★`Found/GenEll/AmpleDef.lean` の `IsAmple` は**加群層**の述語、`Found/GenEll/VeryAmpleDef.lean` の `IsVeryAmpleDiv` は**因子**の述語である。★★段 E を述べるにはこの 2 つを繋ぐ必要がある。★★★因子表示（§1 が採っている表示）を主にするなら、要るのは「切断 `s` の零点因子 `div(s) : X.IdealSheafData`」の構成だけでよい——`nonVanishing M s` の補集合がその台である。 ★★★★**2026-08-28 夜の実測——入口が判った**。mathlib の `Scheme.IdealSheafData` は「**すべての**アフィン開 `U` に対する `Ideal Γ(X,U)`」を要求するので、局所自明化しか持たない `M` から直には作れない。★しかし `IdealSheafData.ofIdeals`（族に含まれる最大のイデアル層）と `IdealSheafData.gci`（`ideal` と `ofIdeals` の Galois coinsertion）があり、`gci.choice_eq` は「族が既に `map_ideal_basicOpen` を満たすなら `ofIdeals` はその族そのもの」を与える。★★したがって `div(s).ideal U ≝ (trivValue M U e s)`（自明化が無い `U` では `⊤`）と置き、**`map_ideal_basicOpen`（`I(D(f)) = I(U)_f`）だけを示せばよい**——それは `trivValue_restrict`（段 D2、既存）から出る。★★★これが E0 の具体的な入口である。 ★★★★★★**2026-08-28 夜: 着手して大半が入った**（`§9-809`）——自明化ごとの `span` を `⨅` で束ねる `divIdeal` と、自明化がある開の上での `map_ideal_basicOpen`（機構は `trivValue_restrict` だけ）、`ofIdeals` で受けた `divisorOfSection`、構造層での健全性まで。★**残るのは `(divisorOfSection M s).ideal U = divIdeal M s U`（`U` が自明化する場合）の等号だけ**——`ofIdeals` は `≤` しか与えず、等号には「自明化する開が基底をなす」議論が要る。",
             "sources": [
               "[Stacks] 01X0 Effective Cartier divisors and invertible sheaves"
             ],
-            "where": "mathlib: Scheme.IdealSheafData.ofIdeals / IdealSheafData.gci / gci.choice_eq ／ ABC3: Found/GenEll/AmpleDef.lean の trivValue / trivValue_restrict / nonVanishing_inf"
+            "where": "Found/GenEll/DivisorOfSection.lean の span_trivValue_congr / divIdeal / divIdeal_eq / divIdeal_map_basicOpen / divisorOfSection / divIdeal_unit"
           },
           {
             "stage": "E1",
@@ -368,7 +368,7 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "13/18",
+        "done": "13.5/18",
         "remaining": "★★**残るのは C2c（半分）・E・F2c** である。★★★2026-08-28 夕の再測定で**優先順位が確定した**——消費側（`northcott_of_projModel`）が要求するのは (a) 同次座標 `crd`、(b) 正規化座標の**単射性**、(c) 高さの比較 `ht_L = ht_{O(1)}∘φ + const` の 3 つである。★(a) は段 C2a/C2b で揃った。★★(b) は**閉埋め込み**からしか来ないので段 E が要る。★★★(c) は C2c の残り「超平面因子の高さ = 素朴高さ `log max|x_i|`」である。★★★★したがって **(iv) を段 E 抜きで取ることはできない**——単射性がそこからしか出ない。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
