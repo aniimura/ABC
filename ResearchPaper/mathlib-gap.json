@@ -301,6 +301,12 @@
             "why": "★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/ArithCartierNpow.lean`）: `ArithCartier.npow`（算術因子の `n` 乗）・`pullbackIdeal_npow_ne_zero`・`htArith_npow`。★原文が「[some positive tensor power of] the ample line bundle」と書く**その冪の分**である。★★機構は `htArith_tensor_unconditional`（高さの加法性、無条件）の帰納だけ。各段の「引き戻しイデアルが `0` でない」は `pullbackMul_all`（引き戻しは積を保つ、無条件）と `𝓞_F` が整域であることから帰納で出る。★★★これで一般の `X` への還元は **1 本**になった: (1) `ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`——`§9-879` 済、(2) `ht_{L^n} = n·ht_L`——本段、(3) `L^n` が**非常に豊富**（`ψ^*O(1) ≅ L^n`）——段 E3 が残る。"
           },
           {
+            "stage": "C2h",
+            "status": "closed",
+            "title": "Northcott は射影埋め込みに沿って移送される",
+            "why": "★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottComap.lean`）: `northcott_comap`——「射 `ψ : X ⟶ ℙᴺ` に沿って `§9-878` の Northcott が移送される」。★機構は `§9-879`（`ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`）を `§9-878` に差し込むだけであった。★★`hinj` が「`X` の点を分ける」条件になっているのが要点で、これは `ψ` が**埋め込み**であることの帰結である（`§9-849`・`§9-851`）。★★★これで原文の「`L_ℚ` が豊富 ⟹ 射影埋め込み ⟹ Northcott」のうち、**移送の段は済んだ**。残るのは `ψ^*(超平面) = n·D`（段 E3、`L^n` が非常に豊富）だけで、`§9-880` の `ht_{D^n} = n·ht_D` と繋げば `ht_D` についての Northcott になる。"
+          },
+          {
             "stage": "C2c-1",
             "status": "closed",
             "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",
