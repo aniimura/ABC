@@ -491,6 +491,7 @@ import ABC3.Found.Arakelov.DegArithPre
 import ABC3.Found.Arakelov.DegArithIsometry
 import ABC3.Found.Arakelov.DegAPicM
 import ABC3.Found.Arakelov.HeightUncond
+import ABC3.Found.Arakelov.PullbackNorm
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
