@@ -118,7 +118,50 @@
             "title": "★★★★★★訂正——`step` の**大域版は偽**である（原文は局所的）",
             "why": "★★★★★★**自己訂正（2026-08-28、同じブロック内）**。直前にこの段を「`[L:K] = p`（Galois、数体）⟹ `p^p ∈ 𝔡_{K,L}`」として立てたが、**この大域版は偽である**。★**反例の形**: `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3`。`2` の上の素点 `𝔮` で `e(𝔮/2) = 3`、剰余標数は `2` で `2 ∤ 3` だから**馴**、よって `v_𝔮(𝔡) = e − 1 = 2`。一方 `𝔮 ∤ 3` なので `v_𝔮(3^3) = 0`。`0 < 2` だから `3^3 ∉ 𝔡_{K,L}`。★★**原因**: 原文は `L`・`K` を **`ℚ_p` の有限次拡大**と書いており、その直前に「Moreover, **by working locally**, we reduce immediately to the followingelementary claim」と**局所化を明示している**。局所体（剰余標数 `p`）では `v(p) ≥ e(L/K)` なので馴の場合も `d = e−1 < v(p)` で通るが、数体では `p` と関係の無い素点で馴分岐が起こり得るため通らない。★★★**したがって `§9-901`・`§9-904`・`§9-905` の `step` 仮定は大域では充足できない**（定理そのものは条件付きとして正しいが、仮定を外せない）。★★★★**直し方は 2 つ**:(1) 局所体（`ℚ_p` の有限次拡大）で組み直す——原文に忠実。`𝓞 K` を `NumberField.ringOfIntegers` ではなく局所環にする必要があり、`§9-DifferentKummer` の部品（`ValuationRing B`・単生成）は**むしろこちらに合う**。(2) 大域のまま、`p` の上の素点だけに制限した形（`𝔡` の `p`-部分が `p^n` を割る）にする。★★★★★消費側（`log-diff` の「portion over Σ」）が要求するのも局所的な量なので、(1) が原文に忠実であり、既存の部品とも合う。"
           }
-        ]
+        ],
+        "measured20260829": {
+          "date": "2026-08-29",
+          "blocks": "§9-954〜959（第 488-493 ブロック）",
+          "headline": "★★★★★Proposition 1.7 の elementary claim は局所まで還元された",
+          "chain": [
+            {
+              "id": "§9-954",
+              "what": "分岐指数から log-diff を下から押さえる（局所→大域）"
+            },
+            {
+              "id": "§9-955",
+              "what": "上から（数値の側、割り切りを仮定）"
+            },
+            {
+              "id": "§9-956",
+              "what": "その割り切りを重複度から出す"
+            },
+            {
+              "id": "§9-957",
+              "what": "hsupp を分岐の言葉へ翻訳＋不分岐の系（完全な定理）"
+            },
+            {
+              "id": "§9-958",
+              "what": "hup は分岐指数だけで出る（mathlib の pow_sub_one_dvd_differentIdeal）"
+            },
+            {
+              "id": "§9-959",
+              "what": "★馴分岐では different はちょうど (λ^{e−1})——hlow の局所版"
+            }
+          ],
+          "measurements": [
+            "★hup（下から）に要る P^{e−1} ∣ 𝔡 は **mathlib にあった**（pow_sub_one_dvd_differentIdeal）。自分で作る必要は無かった。",
+            "★★hlow（上から）に要る P^e ∤ 𝔡（馴分岐）は mathlib に無い（不分岐 e=1 の not_dvd_differentIdeal_of_isCoprime だけ）が、**本プロジェクトの部品 2 本を掛け合わせるだけで出た**——§9-397（𝔡 = (f'(λ))、単項生成）と §9-393（f'(λ) = λ^{e−1}·単元、Eisenstein＋馴）。単元倍は span で消えるので 𝔡 = (λ^{e−1}) が**等式**で出る。",
+            "★★★割り切りは数えるだけで出る（§9-956）——P^n ∣ I ↔ n ≤ count P (normalizedFactors I) と Multiset.le_iff_count。積の因子分解を計算する必要はない（Q ∈ S の側は Finset.dvd_prod_of_mem で足りる）。"
+          ],
+          "newMathlibGap": {
+            "what": "differentIdeal と局所化の両立（differentIdeal A_p B_P = (differentIdeal A B) の局所化）",
+            "measured": "2026-08-29 実測: mathlib の DedekindDomain/Different.lean には局所化との両立の補題が無い（conductor_mul_differentIdeal・differentIdeal_eq_differentIdeal_mul_differentIdeal（塔）・coeIdeal_differentIdeal はあるが、局所化は無い）。",
+            "whyNeeded": "§9-959 は IsLocalRing B での主張である。Proposition 1.7 の hbound を大域（数体の整数環）で使うには、各素点で局所化して §9-959 を当てる段が要る。",
+            "status": "open"
+          },
+          "remaining": "★局所（IsLocalRing B）から大域（数体の整数環）への持ち上げだけである——上の newMathlibGap がその中身。"
+        }
       }
     },
     "spreading-out-over-base": {
