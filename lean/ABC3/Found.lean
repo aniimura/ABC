@@ -552,6 +552,7 @@ import ABC3.Found.GenEll.HomogeneousCoords
 import ABC3.Found.GenEll.HomogeneousCoordsArch
 import ABC3.Found.GenEll.SpanLocalization
 import ABC3.Found.GenEll.RatioChartHom
+import ABC3.Found.GenEll.SeparatedUnique
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
