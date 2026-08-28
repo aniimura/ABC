@@ -312,7 +312,7 @@
             "stage": "C2c-3",
             "status": "open",
             "claim": "★★★アルキメデス側 —— 与えられた計量と `sup_i |σ(x_i)|` の差が**一様に有界**であること",
-            "why": "★★★★★★**2026-08-28 夜に分解した**。`archDeg` は与えられた計量 `|·|_L` で測るが、素朴高さが使うのは `sup_i |σ(x_i)|`（Fubini–Study 型）である。★2 つは**同じ因子の別の計量**なので、差は一様に有界である——それが Prop 1.4 (iii) そのものであり、本プロジェクトは `§9-806`（`MetricRatio.lean`）で`htMetricAlg_sub_abs_le` としてすでに持っている。★★したがって本段は「Fubini–Study 型の計量が `Definition 1.1` の意味の計量である」（連続・ι_X 両立・局所有界）ことを言えばよい。★★★`§9-802`（`ContMetric.lean`）の `AMetric.continuous_norm` が要求を型で持っている。 ★★★★★★**2026-08-28 夜（測定の訂正）**——本段は当初「Fubini–Study 型の計量が `Definition 1.1` の意味の**計量**（`LocalMetric` ＋ `IsContinuous`）であること」と書いていたが、`§9-867` で**因子表示なら計量の構造は要らない**ことが判った。★`ArithCartier` の `green` は `complexPoints X → ℝ` というただの実関数であり、`htArith_sub_abs_le`（`Found/GenEll/HeightMetric.lean`）が要求するのは`green` の**連続性**（`ArcModel` の位相に関して）だけである。★★したがって本段に残るのは「Fubini–Study 型の `green` が連続であること」と、`§9-867` の仮定 `hgreen`（素点と複素点の対応）の 2 本である。 ★★★★★★★**2026-08-28 夜（続）**——`§9-868` で「素点と複素点の対応」が閉じた（`greenChartOf_archRingHom`）。★本段に残るのは 2 本である: (1) **大域的な `green` の構成**——`greenChartOf` はチャートを固定した形なので、`ArithCartier` の欄に入れるには「別のチャートで測っても同じ値」（チャート独立性）が要る（同じ約分で出るが、`projChartHom` を 2 つのチャートで比べる段が別に要る）; (2) その `green` の**連続性**（`htArith_sub_abs_le` が要求する `ArcModel` の位相に関して）。",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。`archDeg` は与えられた計量 `|·|_L` で測るが、素朴高さが使うのは `sup_i |σ(x_i)|`（Fubini–Study 型）である。★2 つは**同じ因子の別の計量**なので、差は一様に有界である——それが Prop 1.4 (iii) そのものであり、本プロジェクトは `§9-806`（`MetricRatio.lean`）で`htMetricAlg_sub_abs_le` としてすでに持っている。★★したがって本段は「Fubini–Study 型の計量が `Definition 1.1` の意味の計量である」（連続・ι_X 両立・局所有界）ことを言えばよい。★★★`§9-802`（`ContMetric.lean`）の `AMetric.continuous_norm` が要求を型で持っている。 ★★★★★★**2026-08-28 夜（測定の訂正）**——本段は当初「Fubini–Study 型の計量が `Definition 1.1` の意味の**計量**（`LocalMetric` ＋ `IsContinuous`）であること」と書いていたが、`§9-867` で**因子表示なら計量の構造は要らない**ことが判った。★`ArithCartier` の `green` は `complexPoints X → ℝ` というただの実関数であり、`htArith_sub_abs_le`（`Found/GenEll/HeightMetric.lean`）が要求するのは`green` の**連続性**（`ArcModel` の位相に関して）だけである。★★したがって本段に残るのは「Fubini–Study 型の `green` が連続であること」と、`§9-867` の仮定 `hgreen`（素点と複素点の対応）の 2 本である。 ★★★★★★★**2026-08-28 夜（続）**——`§9-868` で「素点と複素点の対応」が閉じた（`greenChartOf_archRingHom`）。★本段に残るのは 2 本である: (1) **大域的な `green` の構成**——`greenChartOf` はチャートを固定した形なので、`ArithCartier` の欄に入れるには「別のチャートで測っても同じ値」（チャート独立性）が要る（同じ約分で出るが、`projChartHom` を 2 つのチャートで比べる段が別に要る）; (2) その `green` の**連続性**（`htArith_sub_abs_le` が要求する `ArcModel` の位相に関して）。 ★★★★★★★★**2026-08-28 夜（続）**——`§9-869`＋`§9-870` でチャート独立性が代数・スキームの両側とも閉じた（`greenChartOf_congr`）。★本段に残るのは (1) 各複素点にチャートを選ぶ配管（体値の点については `exists_chart_range` が既にある）と (2) 得られた `green` の**連続性**（`htArith_sub_abs_le` が要求する `ArcModel` の位相）の 2 本である。",
             "sources": [
               "ABC3: Found/Arakelov/MetricRatio.lean",
               "ABC3: Found/Arakelov/ContMetric.lean"
@@ -341,6 +341,12 @@
             "status": "closed",
             "title": "Fubini–Study はチャートに依らない(代数の側)",
             "why": "★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/GreenChartIndep.lean`）: `toOverlap_eq_mul`（重なり `A⁰_{x_i x_{i^prime}}` の上で `x_k/x_i = (x_k/x_{i^prime})·(x_{i^prime}/x_i)`）と `greenChartOf_overlap`（**Fubini–Study はチャートに依らない**）。★機構は「遷移単元 `t = x_{i^prime}/x_i` が **k に依らない**」ことだけである——`sup_k` からも比の分母からも同じだけ出て**約分される**。★★これは `§9-868` の `log_iSup_norm_eq`（`v(x_{i_0})` が約分される）と**同じ形**であり、射影空間の高さの話が一貫して「共通因子の約分」で動いていることの現れである。★★★残るのは (1)「同じ複素点が 2 つのチャートに入るなら**重なりのチャートを通る**」というスキームの側の段（`Proj.SpecMap_awayMap_awayι` と開埋め込みの持ち上げ）と、(2) 得られた `green` の**連続性**である。"
+          },
+          {
+            "stage": "C2c-8",
+            "status": "closed",
+            "title": "2 つのチャートに入る複素点は重なりを通る(スキームの側)",
+            "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/GreenChartGlue.lean`）: `exists_overlap_factor`（同じ点が 2 つのチャートを通るなら**重なりのチャートも通る**）と `greenChartOf_congr`（**Fubini–Study はチャートに依らない**——重なりの仮定なし）。★`§9-869` が代数の側、本段がスキームの側である。★★機構は mathlib の 3 本（`Proj.basicOpen_mul`・`IsOpenImmersion.lift`・`Proj.SpecMap_awayMap_awayι`）と、`chartA` が**モノ**（開埋め込み）であることだけ。★★★★★測定: 非退化条件は `χ` を持ち出さずに **`φ(x_{i^prime}/x_i) ≠ 0`** と書ける——遷移単元 `t = x_{i^prime}/x_i` は `toOverlap (x_{i^prime}/x_i)` そのものだからである（`toOverlap_projCoord_self`）。これは「点が `D₊(x_{i^prime})` にも入っている」ことの座標での言い方である。"
           },
           {
             "stage": "C2a-2",
