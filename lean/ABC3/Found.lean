@@ -527,6 +527,7 @@ import ABC3.Found.GenEll.ProjCoordProportional
 import ABC3.Found.GenEll.ProjArcModel
 import ABC3.Found.GenEll.HyperplaneBDClass
 import ABC3.Found.GenEll.HeightNormalizationBridge
+import ABC3.Found.GenEll.NorthcottHyperplane
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
