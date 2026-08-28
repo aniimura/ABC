@@ -1724,3 +1724,27 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
 ★★★添字の型にも注意: `awayEval N R i` は `i : Fin (N+1)` で
 `MvPolynomial (Fin (N+1)) R` の上の写像である。
 **終域側（`MvPolynomial (Fin N) R`）に使うには `N = M+1` の分解が要る。**
+
+## `Away ℬ f` の `f` が型に現れる —— 変数に特殊化した補題は使えない
+
+`HomogeneousLocalization.Away ℬ f` は **`f` を型の引数に持つ**。したがって
+
+* `awayEval N R i`（`f = x_i` に特殊化）を作っておいても、
+* 終域が `Away ℬ (hyperplaneHom (x_i))` の場面では**そのままでは使えない**
+
+——`hyperplaneHom (x_{i+1}) = y_i` は**命題としては成り立つが `rfl` ではない**ので、
+型が合わない。`rw`-in-type や `Eq.mpr` で運ぶのは苦しい。
+
+**直し方**: 最初から `f` を**任意の次数 1 の斉次元**にしておく
+（`awayCoordOf R f hf j`、`awayEvalOf R f hf`；`ABC3.Found.GenEll.AwayEvalGen`）。
+
+**測定 (2026-08-28)**: 一般化しても証明は**一字も変わらなかった**
+——`x_i` であることを使っていたのは「分母が単項式であること」ではなく
+「**次数が 1 であること**」だけだったから。
+`awayCoordOf R (X i) _ j = projCoord N R i j` は **`rfl`** なので、
+既存の特殊形は一般形の定義的な場合として残る。
+
+**系**: 次数付き環準同型 `g` についての四角
+`Away.map g f ∘ awayEvalOf f = awayEvalOf (g f) ∘ g` に
+「`g (C r) = C r`」の仮定は**要らない**——`awayEvalOf_mk` が**次数だけ**で
+右辺を `Away.mk` に潰すからである。一般化した方が証明が短くなる例。

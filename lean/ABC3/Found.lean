@@ -508,6 +508,9 @@ import ABC3.Found.GenEll.ProjCompact
 import ABC3.Found.GenEll.HyperplaneChart
 import ABC3.Found.GenEll.AwayPolynomial
 import ABC3.Found.GenEll.KillX0
+import ABC3.Found.GenEll.AwayEvalGen
+import ABC3.Found.GenEll.AwayEvalGenMk
+import ABC3.Found.GenEll.AwaySquare
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
