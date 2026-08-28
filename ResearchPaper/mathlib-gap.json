@@ -418,12 +418,12 @@
           {
             "stage": "F2c",
             "claim": "閉包の**生成ファイバーが元の Y に戻る**こと",
-            "status": "open",
-            "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
+            "status": "partial",
+            "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。 ★★★★★★★★**2026-08-28 夜——アフィンでの核が入った**(`Found/GenEll/GenericFiber.lean`): `ker_locMap`(局所化は核と可換)と `quotKerMapEquiv` / `ratQuotKerEquiv`。★アフィンで読むと閉包のイデアルは `ker φ`(φ : A → B、A = Γ(U ⊆ ℙᴺ_ℤ)、B = Γ(Y, f⁻¹U))であり、生成ファイバーへ移るのは A を ℤ∖{0} で局所化すること。**B はすでに ℚ-代数なので局所化で変わらない**。★★したがって要るのは `ker (A_ℚ → B) = (ker φ)·A_ℚ`(mathlib の `IsLocalization.ker_map`)だけで、A_ℚ → B が全射なら `A_ℚ / (ker φ)·A_ℚ ≅ B`——**閉包の生成ファイバーは Y そのもの**である。★★★測定: mathlib に「単元の部分モノイドによる局所化は恒等」の instance が無かったので`isLocalization_self_of_isUnit` を自前で置いた(3 行)。`IsLocalization.atUnits` は『局所化が与えられているとき同型になる』形で、instance を**作る**形ではない。★残るのは `Scheme.IdealSheafData` の水準へ持ち上げる配管だけで、**新しい数学は要らない**(`Scheme.Hom.ker_apply` を各チャートに当てて貼る)。"
           }
         ],
-        "done": "★完全に閉じた 21 / 26（部分的 4、未着手 1）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
-        "remaining": "C2c(partial), E0(partial), E1d(partial), E3c(partial), F2c(open)",
+        "done": "★完全に閉じた 21 / 26（部分的 5、未着手 0）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
+        "remaining": "C2c(partial), E0(partial), E1d(partial), E3c(partial), F2c(partial)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
