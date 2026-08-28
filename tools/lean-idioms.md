@@ -1697,3 +1697,11 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
 ★★★REPL では `open … in example` の形で書いていて通ったのに
 ファイルでは通らなかった。名前空間の中かどうかで解決が変わるので、
 **REPL の断片が通ってもファイルでもう一度ビルドする**。
+
+## `|(n:ℝ)| = (n.natAbs : ℝ)` は `Int.cast_natAbs` では通らない（2026-08-28）
+
+    rw [Int.cast_natAbs]        -- ✗ Unknown constant
+    push_cast [Int.abs_eq_natAbs]  -- ✗ does nothing
+    rw [← Int.cast_abs, Int.abs_eq_natAbs]; simp   -- ○
+
+★先に `ℝ` の絶対値を `ℤ` の絶対値へ戻してから `Int.abs_eq_natAbs` を当てる。
