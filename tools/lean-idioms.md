@@ -1607,3 +1607,14 @@ JS 文字列の中の **バッククォート付き Markdown**（``` `X` ```）�
 
     M ◁ (iso)              -- ✗ `◁` は射を取る
     whiskerLeftIso M (iso) -- ○
+
+## 在庫——「無い」と書く前に `decl-index` を引く（2026-08-28）
+
+`isLocallyTrivial_sheafify` の証明を読んで「層化した側の自明化には**名前が付いていない**」
+と台帳に書いたが、**誤りだった**——`Found/Arakelov/SheafifyTriv.lean` に
+`sheafifyTriv` / `sheafifyTrivOf` が既にあり、`transUnit_sheafifyTriv`・
+`sheafifyTriv_restrict` まで揃っていた。
+
+★原因は「証明の中を読んだだけで在庫を引かなかった」ことである。
+★★CLAUDE.md の在庫の規律どおり、**まず `node tools/decl-index.mjs` を作って
+`.cache/decl-index.txt` を grep する**。木を読むのは在庫を引いた後でよい。
