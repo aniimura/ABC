@@ -507,6 +507,7 @@ import ABC3.Found.GenEll.GluedGlobalRatio
 import ABC3.Found.GenEll.CommonGluedRatio
 import ABC3.Found.GenEll.CommonGluedRatioMulti
 import ABC3.Found.GenEll.EnlargedFamily
+import ABC3.Found.GenEll.EnlargedSurjective
 import ABC3.Found.GenEll.CoordsSurjective
 import ABC3.Found.GenEll.GlobalChartToProj
 import ABC3.Found.GenEll.ChartPoints
