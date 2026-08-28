@@ -1118,6 +1118,21 @@
         "whyNotUniform": "★★★★★★**archNorm に一様な正の下界は無い**——Im τ → ∞ で ‖Δ‖ ~ e^{−2π Im τ} → 0 だからである。★したがって第 3 の ≲ は archSum 単独では出ず、**ht∞ との相殺**が要る。★★これが [Silv2] Prop 2.1／[FC] Chapter V, Proposition 4.5 の「無限遠での対数的特異性」の意味である。",
         "concreteForm": "★アルキメデス素点ごとに書けば log(1/((2π)¹²·‖Δ‖_Pet(τ))) ≤ log⁺|j(τ)| + C を一様に言うこと。★‖Δ‖·|j| = |E₄(τ)|³(Im τ)⁶ なので、E₄ の Petersson ノルムの下界(ρ = e^{2πi/3} での零点に注意)に帰着する。",
         "deviationRecorded": "★★逸脱(第 517 で自己訂正): Prop34Chain.lean は ht∞ そのものを扱っていない。取ったのは合成した形であって、原文の第 2 の ≲ そのものではない。"
+      },
+      "finalTarget20260829": {
+        "measuredAt": "2026-08-29",
+        "statement": "★★★★★★★★**`h(j) ≤ 12(1+ϵ)·ht^Falt + C`**——`j` 不変量の（naive Weil）高さが Faltings 高さで抑えられること。★これが §3・§4 の 7 項目すべてに残る唯一の解析的入力である。",
+        "whyThisForm": "★`Prop 3.4` の有限性は `Found/GenEll/FiniteFromNorthcott.lean` の `finite_of_le_of_northcott` で出る。その仮定 `hN`（Northcott）は `Found/GenEll/NorthcottImage.lean` の `northcott_of_log_mulHeight_image`（**mathlib の `Height.mulHeight` で書かれている**）が与える。★★したがって残るのは仮定 `hle` すなわち上の不等式だけである。",
+        "reduction": [
+          "`12·ht^Falt = deg∞ − archSum/d`（`htFaltOf` の定義、§9-670）。",
+          "半安定なら `h(j)` の有限素点の寄与 ＝ `deg∞`（`v(j) = −v(Δ_min)`）。",
+          "したがって示すべきは、アルキメデス素点ごとに `log⁺|j(τ)| ≤ (1+ϵ)·log(1/((2π)¹²‖Δ‖_Pet(τ))) + C′`。",
+          "★`‖Δ‖_Pet(τ)·|j(τ)| = |E₄(τ)|³·(Im τ)⁶` なので、これは `log⁺|j| ≤ (1+ϵ)(log|j| − 3log|E₄| − 6log Im τ − 12log(2π)) + C′` と同じ。",
+          "★★カスプ側（`Im τ → ∞`）: `log|j| ≈ 2π Im τ`、`|E₄| → 1` なので、`ϵ·2π Im τ` が `6 log Im τ` を飲む。",
+          "★★★コンパクト側: `log⁺|j|` は有界、`‖Δ‖` は下に有界（`Δ` は非零・連続）なので両辺とも有界。★`ρ = e^{2πi/3}` では `E₄(ρ) = 0` だが、そこでは `j = 0` なので `log⁺|j| = 0` であり破綻しない。"
+        ],
+        "mathlibSupport": "★mathlib の `NumberTheory/ModularForms/`（`Delta`・`Discriminant`・`Petersson`・`DedekindEta`・`EisensteinSeries`・`QExpansion`・`BoundedAtCusp`・`Bounds`）と `NumberTheory/Modular.lean`（基本領域）が支える。★★`NumberTheory/Height/`（`mulHeight₁`・`logHeight₁`・数体のインスタンス）が `h(j)` の側を支える。",
+        "ownership": "☆**並行セッション ABC3b の領分**（`Skeleton/GenEll/DeligneHeight.lean` の段 1〜4）。★本セッション（ABC3）は重複を避けて着手していない。"
       }
     },
     "ideal-comap-on-affine-opens": {
