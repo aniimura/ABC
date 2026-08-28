@@ -511,6 +511,8 @@ import ABC3.Found.GenEll.KillX0
 import ABC3.Found.GenEll.AwayEvalGen
 import ABC3.Found.GenEll.AwayEvalGenMk
 import ABC3.Found.GenEll.AwaySquare
+import ABC3.Found.GenEll.AwayKerGen
+import ABC3.Found.GenEll.KerHyperplaneChart
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
