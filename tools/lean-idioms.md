@@ -1705,3 +1705,22 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
     rw [← Int.cast_abs, Int.abs_eq_natAbs]; simp   -- ○
 
 ★先に `ℝ` の絶対値を `ℤ` の絶対値へ戻してから `Int.abs_eq_natAbs` を当てる。
+
+## `aeval g (X j) = g j` は `rfl` ではない —— 依存型の輸送が要る（2026-08-28）
+
+    hyperGen N R (Fin.succ i') = X i'                    -- ○ rfl
+    hyperplaneHom N R (X (Fin.succ i')) = X i'           -- ✗ rfl でない
+
+★`hyperplaneHom = aeval (hyperGen …)` で、`aeval_X` は `rfl` ではないからである
+（`eval₂` は `Finsupp.sum` を通る）。
+
+★★これが効くのは **`Away ℬ f` のように `f` が型に現れるとき**である:
+
+    Away ℬ (hyperplaneHom N R (X i))   と   Away ℬ (X i')
+
+は**定義的に等しくない**ので、`rw [hyperplaneHom_X_succ]` で
+**型ごと書き換える**（motive は型検査を通る）か、`Eq.mpr` で運ぶ必要がある。
+
+★★★添字の型にも注意: `awayEval N R i` は `i : Fin (N+1)` で
+`MvPolynomial (Fin (N+1)) R` の上の写像である。
+**終域側（`MvPolynomial (Fin N) R`）に使うには `N = M+1` の分解が要る。**
