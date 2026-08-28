@@ -545,6 +545,7 @@ import ABC3.Found.GenEll.NorthcottLocal
 import ABC3.Found.GenEll.NorthcottLocalAmple
 import ABC3.Found.GenEll.InjOfComplexPoints
 import ABC3.Found.GenEll.NorthcottGeom
+import ABC3.Found.GenEll.NorthcottFinal
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
