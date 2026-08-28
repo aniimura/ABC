@@ -225,8 +225,28 @@ structure EllModuliData extends TorsionGaloisRepData where
   mod `l` 像は `α = (1 1 / 0 1)` を含む。
   ★★`l`-巡回部分群スキームを持たなければ、mod `l` 像は**非上三角**行列を含む。
   ★★★その 2 つから **`Lemma 3.1, (iv)`** で `GL₂(ℤ_l)` の像は `SL₂(ℤ_l)` を含む。
-  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**実装済み**であるが、
-  **Galois 表現そのものが未構築**なので、その適用をここで受ける。
+  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**4 条すべて実装済み**である。
+
+  ## ★★★★★★★★★★ 2026-08-29 の再実測——**前の記述は古かった**
+
+  ★以前ここには「**Galois 表現そのものが未構築**なので」と書いてあったが、
+  ★★**それはもう当てはまらない**——`Found/GaloisRep/GalRep.lean` に
+
+      `galRep : Gal(L/K) →* GL₂(ℤ_l)`（`exists_galRep` もある）
+
+  が構成されている。★`Found/GaloisRep/` は 325 ファイルあり、
+  Tate 加群・Weil 対・行列式＝円分指標まで入っている。
+
+  ★★★**したがってこのフィールドが本当に受けているのは次の 2 つだけ**である:
+
+  1. 局所理論の行列表示——`0 → F_l(1) → M_l(E) → F_l → 0` に合わせた基底で
+     `l ∤ v(q)` なら mod `l` 像が `α = (1 1 / 0 1)` を含むこと。
+     ★Tate 一意化と `Lemma 3.2, (i)` は**閉じている**（`Lemma32Tate.lean`）。
+  2. `l`-巡回部分群スキームを持たないこと ⟹ mod `l` 像が**非上三角**行列を含むこと
+     （`l`-巡回 ⟷ Galois 安定な直線の対応）。
+
+  ★★★★★★★**`Theorem 3.8` に Serre の開像定理は要らない**——群論の核は
+  `Lemma 3.1, (iv)` だけであり、それは済んでいる。
   ★★★★★結論が `E`(`L` 上)についてなのは、
   `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。 -/
   imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →

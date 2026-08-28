@@ -1969,3 +1969,30 @@ NG  lean\ABC3\Found\GenEll\Thm21Chain.lean:84
 **★コミット前に必ず `node tools/check.mjs` を見る。**
 `lake build` が通っても引用照合は落ちる——2026-08-29 に NG 2 件のまま
 コミットしてしまった（次のコミットで修復）。
+
+## Python ヒアドキュメントの `\uXXXX` サロゲート —— **書きかけでファイルを壊す**
+
+**失敗形**（2026-08-29、2 度目）
+
+```
+UnicodeEncodeError: 'utf-8' codec can't encode characters in position ...: surrogates not allowed
+→ その直後の lake build で
+error: ABC3/Skeleton/GenEll/Section3.lean:196:22: Unknown identifier `EllModuliData`
+```
+
+**原因** `𝔽`（`𝔽` = アストラル面 U+1D53D）のような**サロゲートペアの
+エスケープ**を Python 文字列に書くと、`str` としては不正なまま作られ、
+`io.open(...).write()` の時点で例外になる。
+★**例外は書き込みの途中で起きうる**ので、**ファイルが壊れた状態で残る**。
+
+**直し方**
+
+* **`Edit` ツールを使う。** Lean ファイルの内容は Write/Edit で書く（CLAUDE.md の規則）。
+  アストラル面の文字を Python 経由で流し込まない。
+* どうしても Python を使うなら、`𝔽` ではなく**文字そのもの**（`𝔽`）を
+  ソースに直接書く。エスケープに割らない。
+* ★**壊れたら `git checkout -- <path>` で即座に戻す。** `git status` で
+  他に触っていないことを確かめてから続ける。
+
+★★CLAUDE.md の「配管」にも同じ形が登記されている（アストラル面エスケープ）。
+**2 度目なのでここに失敗の"結末"（ファイルが壊れる）まで書いた。**
