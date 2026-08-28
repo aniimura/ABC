@@ -31064,3 +31064,106 @@ Green 関数の連続性は利用者が与えること。
 
 ★★`Proposition 1.7` が閉じたことで、`Theorem 2.1` の (ii)⇒(i) が要求する
 3 本の入力のうち**1 本が手に入った**。
+
+---
+
+## 2026-08-29（第 512-517 ブロック、§9-976〜980）—— `Theorem 2.1` は幾何の 2 点だけになった
+
+### ★指標は動かない（`16 / 24`）が、**残りの形が変わった**
+
+★★本節の 5 ブロックは**すべて条つき `.src`** である——指標には数えない。
+★それでも記録するのは、`Theorem 2.1` と `Proposition 3.4` の**残りが特定できた**からである。
+
+### `§9-976` —— `Theorem 2.1` の算術の鎖 2 本（`Found/GenEll/Thm21Chain.lean`）
+
+原文 p.12–p.13 の `(ii) ⟹ (i)` は**2 段の帰着**でできており、どちらも中身は
+**不等式の鎖の計算**である。
+
+| 段 | 原文 | `Found` |
+|---|---|---|
+| A（`D = ∅` への帰着） | `ht_{ω_X(D)} ≲ (1+ϵ′)ht_{ω_Y} ≲ (1+ϵ′)²log-diff_Y ≲ …` | `thm_2_1_stepA` |
+| B（`D = ∅` の背理法） | `ht_{ω_X} ≈ ht_{ω_X(E)} − ht_E ≈ …` | `thm_2_1_stepB` |
+| (i) ⟹ (ii) | 「immediate from the definitions」 | `bdge_restrict` |
+
+★段 B の結論は `(1 − ϵ′·r)·ht_{ω_X} ≲ (1+ϵ′)·log-diff_X`（`r ≔ deg(E)/deg(ω_X)`）で、
+原文の `ϵ′` の選び方（`1 + ϵ′ ≤ (1+ϵ)(1 − ϵ′·r)`）がそのまま仮定になる。
+
+### `§9-977` —— コンパクト性の段（`Found/GenEll/Thm21Extract.lean`）
+
+原文 p.12 の
+
+> it follows immediately from the compactness of the set of rational points of X over
+> any finite extension of Qv for v ∈V that there exists a subset Ξ ⊆X(Q)=d, …
+
+★★★**測定: この段は 2 つに尽きる**。
+
+1. `¬ BDge α β`（`= ∀ C, ∃ x, C < α x − β x`）から選択公理で
+   `α(x_n) − β(x_n) > n` なる列を作る
+2. 有限個のコンパクト第一可算空間の**積**で収束部分列を取る
+   （`isCompact_univ` ＋ `IsCompact.tendsto_subseq` ＋ `tendsto_pi_nhds`）
+
+★原文の `Ξ_v` は `X(ℚ_v)` の**順序なし `d`-組**であり、`M i` にその空間を、
+`emb i` に共役の組へ送る写像を入れれば原文そのものになる。
+
+### `§9-978` —— 次数の段（`Found/GenEll/Thm21DegRatio.lean`）
+
+原文 p.12 の「`by choosing e to be sufficiently large, we may assume that
+deg(ω_X(D)|_Y) = deg(ω_Y(E)) ≤ (1+ϵ′)·deg(ω_Y)`」。
+
+★★**Riemann–Hurwitz を認めれば純粋に算術**である:
+
+    `#E = n·Dg/e`  ⟹  `deg(ω_Y) = n·(A + (1−1/e)·Dg)`,  `deg(ω_Y(E)) = n·(A + Dg)`
+
+——★**`e` が消える**（これが原文の等式）。あとは `S − Dg/e → S`（`S ≔ A + Dg > 0`）だけ。
+★同時に `A + (1−1/e)Dg > 0`、すなわち **`U_Y` も双曲的**である。
+
+### ★★★★★★`Theorem 2.1` に残るのは**幾何の 2 点だけ**
+
+| 入力 | 状態 |
+|---|---|
+| 原文 p.12/p.13 の鎖 | ★`§9-976` |
+| コンパクト性から `Ξ`・`Ξ_v` | ★`§9-977` |
+| 次数の比 | ★`§9-978` |
+| `Proposition 1.7, (i)` | ★`§9-975`（本日閉じた） |
+| `Proposition 1.6`・`Proposition 1.4, (i)(iii)(iv)` | ★手元にある |
+| ☆(a) 分岐指数がちょうど `e` の連結有限エタール Galois 被覆 | ☆folklore／[Stacks] 58.6 |
+| ☆(b) noncritical Belyi 写像 | ☆[NCBelyi] `Theorem 2.5` |
+
+★★**残る 2 つはどちらも本論文の外の結果である。**
+
+### `§9-980` —— `Proposition 3.4` の残りも特定した（`Found/GaloisRep/Prop34Chain.lean`）
+
+`§9-670`（第 357）で `htFaltOf` は**構成されている**:
+
+    `12·ht^Falt(E) = deg∞(E) − (1/d)·Σ_σ log((2π)¹²·‖Δ‖_arch(E^σ))`
+
+★したがって 3 本の `≲` は**アルキメデス和 `archSum` の評価だけ**の問題になる。
+
+| 段 | 必要なもの | 状態 |
+|---|---|---|
+| `deg∞ ≲ 12(1+ϵ)·ht^Falt`（第 1・第 2 の合成） | `archSum` の**上界**だけ | ★`§9-980` |
+| `12(1+ϵ)ht^Falt ≲ (1+ϵ)ht∞`（第 3） | `archSum` の**下界** | ☆残る（[Silv2] Prop 2.1） |
+| 有限性 | 上の不等式 ＋ `Proposition 1.4, (iv)` | ★半分 |
+
+★★★**`archNorm` に一様な正の下界は無い**（`Im τ → ∞` で `‖Δ‖ ~ e^{−2π Im τ} → 0`）。
+だから第 3 の `≲` は `archSum` 単独では出ず、**`ht∞` との相殺**が要る
+——これが [Silv2] Prop 2.1／[FC] V.4.5 の「無限遠での対数的特異性」の意味である。
+
+★★逸脱（明示・自己訂正あり）: `§9-980` は **`ht∞` そのものを扱っていない**。
+原文の `ht∞` は `M̄_ell` の無限遠因子の高さ（実質 `h(j)`）であり `deg∞` とは別物である。
+取ったのは合成した形であって第 2 の `≲` そのものではない（第 517 で訂正した）。
+
+### ★次に着手する候補（更新）
+
+| 項目 | 残っているもの | 性質 |
+|---|---|---|
+| `Theorem 2.1` | (a) 分岐指数 `e` の被覆、(b) noncritical Belyi | ★**本論文の外** |
+| `Proposition 3.4` | 第 3 の `≲`（[Silv2] Prop 2.1）、`ht∞` の同定 | ★**本論文の外**＋モジュライ |
+| `Lemma 3.2` | Tate 曲線（`Interface/GenEll/TateLocal.lean`） | mathlib に無い |
+| `Lemma 3.5`・`Lemma 3.7` | `Proposition 3.4` に依る | 上に従属 |
+| `Theorem 3.8` | Serre の開像定理 | mathlib に無い |
+| `Corollary 4.3`・`4.4` | 上の全部 | 上に従属 |
+
+★★§3・§4 は `EllModuliData`（`Interface/GenEll/EllModuli.lean`、witness 無し）に
+乗っている。★`FaltingsHeightData` の方は `Found/GaloisRep/FaltingsWitness.lean` に
+**witness がある**——そこが足がかりである。
