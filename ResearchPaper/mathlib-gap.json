@@ -574,6 +574,12 @@
             "why": "★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/HeightGlobalChart.lean`）: `htArith_comap_globalChart`——`htArith F ( (hyperplaneArith N)^* (globalChartToProj i) ) x = log H( (s_k/s_i)(x) )/[F:ℚ]`。★これが「**豊富な直線束の高さは、切断で作った射影座標の素朴高さである**」ことの中身である。★★機構は 3 本の合成だけであった: `§9-879`（高さの関手性）で `ℙᴺ` の点の高さに移し、`globalChart_factor`（チャート射に沿った点は `Spec.map ρ ≫ chartA i` に分解する）で潰し、`§9-871`（`ℙᴺ` での等式）を当てる。★★★仮定 `hw`（点の同次座標が整数表示である）は `§9-854`（`exists_integral_repr`）から作る。これで `northcott_comap`（`§9-881`）へ渡せば **`X` の点についての Northcott** になる。"
           },
           {
+            "stage": "E3h",
+            "status": "closed",
+            "title": "X のチャートの上での Northcott（Prop 1.4 (iv) のチャート版）",
+            "why": "★★★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottGlobalChart.lean`）: `northcott_globalChart`——「切断の非零開 `X_{s_i}` の点について Northcott が出る」。★`§9-881`（射に沿った移送）と `§9-887`（チャート射の分解）の合成である。★★**計量については仮定が要らない**——`hyperplaneArith N` の Green 関数は `greenFS` そのものなので、差は `0`（定数関数）で連続だからである。★★★残っている仮定は 3 つで、いずれも出どころが判っている: `hdeg`（原文の `X(ℚ)_{≤d}`）・`hw`/`hx`/`h0`（`§9-854` の整数表示）・`hinj`（`§9-849`・`§9-851` の点の分離）。★★★★これが `Proposition 1.4, (iv)` の**チャート版**である。`X` 全体へ広げるには `X = ⋃ X_{s_i}`（段 E2）で有限和を取ればよい。"
+          },
+          {
             "stage": "F1",
             "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
             "status": "closed",
