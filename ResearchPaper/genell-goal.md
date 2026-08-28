@@ -31167,3 +31167,68 @@ deg(ω_X(D)|_Y) = deg(ω_Y(E)) ≤ (1+ϵ′)·deg(ω_Y)`」。
 ★★§3・§4 は `EllModuliData`（`Interface/GenEll/EllModuli.lean`、witness 無し）に
 乗っている。★`FaltingsHeightData` の方は `Found/GaloisRep/FaltingsWitness.lean` に
 **witness がある**——そこが足がかりである。
+
+---
+
+## 2026-08-29（第 519-521 ブロック、§9-981〜983）—— `Theorem 2.1` の門が 1 枚薄くなった
+
+### ★`Theorem 2.1` に残る 2 点のうち、(b) の中身が動いた
+
+`§9-978` までで `[GenEll] Theorem 2.1` に残るのは
+**(a) 分岐指数がちょうど `e` の連結有限エタール Galois 被覆**と
+**(b) noncritical Belyi 写像（[NCBelyi] `Theorem 2.5`）**の 2 点だけになった。
+★本節はその **(b)** に手を入れた。
+
+### `§9-981` —— `Theorem 2.5` の段 3（`Found/NCBelyi/Thm25Step3.lean`）
+
+原文 [NCBelyi] p.7:
+
+> Finally, by applying an automorphism as in Lemma 2.3 [for, say, C = 4], followed by
+> a suitable automorphism of the form x ↦ν · x + μ, where ν ∈{±1} and μ ∈Q,
+> gives rise to a situation in which the hypotheses of Lemma 2.2 are valid.
+
+★★**この 1 文を型にして証明した**。★`C = 4` でちょうど足りる理由:
+
+    `b ≔ 1/(β−λ)`、`ν ≔ sign(b)`、`B ≔ |b|`
+    `T ≔ {0} ∪ {ν/(α−λ)}` は `|x| ≤ B/4`（`0` は `∞` の像）
+    `μ ≔ −min T ∈ [0, B/4]`、`S₀ ≔ T + μ` は `0 ≤ x ≤ B/2`、`β₀ ≔ B + μ ≥ B`
+    ⟹ `2x ≤ B ≤ β₀`   ★`μ ≥ 0` が効く
+
+★★★`theorem_2_5_p1_rat` は `X = ℙ¹_ℚ`、`S ⊆ ℙ¹(ℚ)`、`T = {β}` の場合を閉じた。
+
+### `§9-982` —— `Lemma 2.4` の (a)(c)（`Found/NCBelyi/Lemma24Package.lean`）
+
+★測定: (a)(c) は `exists_poly_image_rat_crit`（第 417-418）の**言い換え**である
+——`S_φ ≔ h(S) ∪ (臨界値)` と置くだけ。
+★★(c)「`ℙ¹∖S_φ` 上不分岐」は「**臨界値が `S_φ` に入っている**」ことそのものである。
+
+★★★残るのは **(b)（分離）だけ**:
+
+    `∀ x ∈ S,  h(x) ≠ h(β)`   かつ   `∀ w, h′(w) = 0 → h(w) ≠ h(β)`
+
+`lemma_2_4_of_separation` がこれを仮定として受け、(a)(b)(c) をすべて出す
+——★**残る仕事が型で 1 つに絞られた**。
+
+### `§9-983` —— `ℚ`-Möbius は測度を変えない（`Found/NCBelyi/MobiusRedDeg.lean`）
+
+原文 p.5 の『applying an automorphism (**with rational coefficients!**) as in Lemma 2.3』
+——★★**感嘆符の意味はこれである**: `ℚ` 係数の自己同型を挟むので、
+入れ子帰納法の測度（`redDeg`／`maxRedDeg`）が動かないことが要る。
+
+    **`ℚ⟮ν/(x−λ) + μ⟯ = ℚ⟮x⟯`**
+
+★`⊇` は**逆写像 `x = ν/(y−μ) + λ` が同じ形**であることから出る。
+
+### ★★★`Theorem 2.5` の 4 段の現況
+
+| 段 | 中身 | 状態 |
+|---|---|---|
+| 1 | Riemann–Roch / Serre 双対性 | ☆残る（[Stacks] 53.4 / 53.5 / 48.27、第 419 で手元にあることを実測） |
+| 2 | `Lemma 2.4` | △ (a)(c) は閉じた。残るのは (b)（分離）だけ |
+| ★3 | `Lemma 2.3`(C=4) ＋ `x ↦ νx+μ` | ★★**閉じた**（`§9-981`） |
+| 4 | `Lemma 2.2` | ✅ 済（第 398-404） |
+
+★★(b) に要る部品はそろっている:
+正規化（`exists_rat_normalization`、第 409）／係数の限界（`CoeffBound.lean`、第 405）／
+入れ子帰納法（第 408・416）／★測度の Möbius 不変性（`§9-983`）。
+★★★**残る仕事は `nested_induction_descend'` を `β` を運ぶ形に書き直すこと**である。

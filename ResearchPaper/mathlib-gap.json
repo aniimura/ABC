@@ -298,6 +298,29 @@
         ],
         "inputsInHand": "★[GenEll] 内の入力はすべて手元にある: Proposition 1.7, (i) = Found/GenEll/Prop17.lean の prop_1_7(★2026-08-29 に閉じた、§9-975)、Proposition 1.6 = prop_1_6、Proposition 1.4, (i)(iii)(iv) = Found/GenEll/Prop14.lean。",
         "verdict": "★★★Theorem 2.1 に残るのは**幾何の 2 点だけ**であり、どちらも**本論文の外**の結果である。算術・解析の段はすべて閉じた。"
+      },
+      "progress20260829": {
+        "measuredAt": "2026-08-29",
+        "note": "★★★★★★[NCBelyi] Theorem 2.5 の証明 4 段のうち**段 3 が閉じ、段 2(Lemma 2.4)は (a)(c) が閉じた**(第 519-521、§9-981〜983)。",
+        "thm25Stages": [
+          "段 1 Riemann–Roch / Serre 双対性で ψ : X → ℙ¹ を作り T = {β} に帰着 — ☆残る([Stacks] 53.4 / 53.5 / 48.27、第 419 で手元にあることを実測)。",
+          "段 2 Lemma 2.4 で S ⊆ ℙ¹(ℚ) に帰着 — △ (a)(c) は閉じた(Found/NCBelyi/Lemma24Package.lean の lemma_2_4_ac)。残るのは (b)(分離)だけ。",
+          "★段 3 Lemma 2.3(C = 4)＋ x ↦ ν·x + μ で Lemma 2.2 の仮定を作る — ★★**閉じた**(Found/NCBelyi/Thm25Step3.lean の exists_lemma22_setup / theorem_2_5_p1_rat)。",
+          "段 4 Lemma 2.2 — ✅ 済(第 398-404)。"
+        ],
+        "step3Note": "★★C = 4 でちょうど足りる: b ≔ 1/(β−λ)、ν ≔ sign(b)、B ≔ |b| として T ≔ {0} ∪ {ν/(α−λ)} は |x| ≤ B/4、μ ≔ −min T ∈ [0, B/4]、S₀ ≔ T + μ は 0 ≤ x ≤ B/2、β₀ ≔ B + μ ≥ B。★2x ≤ B ≤ β₀ になる(μ ≥ 0 が効く)。",
+        "lemma24Remaining": {
+          "what": "★(b) φ(β) ∈ ℙ¹(ℚ)∖S_φ、すなわち **分離**: ∀ x ∈ S, h(x) ≠ h(β) かつ ∀ w, h′(w) = 0 → h(w) ≠ h(β)。",
+          "packaged": "★★Found/NCBelyi/Lemma24Package.lean の lemma_2_4_of_separation がこれを仮定として受け、(a)(b)(c) をすべて出す——**残る仕事が型で 1 つに絞られている**。",
+          "designNote": "★原文 p.5 の設計図: Lemma 2.3 の自己同型と正の有理数倍で |α| ≤ 1(∀ α ∈ S)かつ |β| ≥ C に正規化 ⟹ 最小多項式 f₀(次数 d₀)の係数は ≤ d₀^{d₀} ⟹ |f₀(α)|・|f₀(S₀)| は d₀ だけで決まる量で有界、|f₀(β)| は C^{d₀} 程度 ⟹ C を十分大きく取れば f₀(β) ∉ S′。",
+          "partsInHand": [
+            "正規化(|α| ≤ 1、|β| ≥ C) — Found/NCBelyi/RatSeparation.lean の exists_rat_normalization(第 409)",
+            "係数の限界 ≤ d₀^{d₀} — Found/NCBelyi/CoeffBound.lean(第 405)",
+            "入れ子帰納法 — Found/NCBelyi/NestedInduction.lean／DescendData.lean(第 408・416)",
+            "★測度の Möbius 不変性 — Found/NCBelyi/MobiusRedDeg.lean(★第 521、本日)。★★原文が『with rational coefficients!』と感嘆符つきで書く理由がこれである——ℚ⟮ν/(x−λ)+μ⟯ = ℚ⟮x⟯ なので redDeg も maxRedDeg も動かない。"
+          ],
+          "todo": "★★★残る仕事は nested_induction_descend′ を **β を運ぶ形**に書き直すこと(exists_descend_data が返す g に「g β ∉ S′」を足す)だけである。"
+        }
       }
     },
     "riemann-roch-curves": {
