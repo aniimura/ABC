@@ -111,6 +111,10 @@ def theorem_2_1.src : Source :=
 def theorem_2_1.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★**本 statement は (i) ⇒ (ii) だけを取っている**。原文の Theorem 2.1 は同値(⇔)であり、**実質は (ii) ⇒ (i) の側**(原文 p.11-p.13 の 3 ページ、noncritical Belyi maps と Proposition 1.7 を使う)である。★そちらは取っていない——sorry が消えたことを『Theorem 2.1 を形式化した』と読んではならない" 11,
+    .implicitStep
+      "★★★★★★★★2026-08-29 の測定(第 512-514、§9-976〜978): (ii) ⇒ (i) は**4 つの段**に分かれ、そのうち**3 つが Found/ で取れた**。(1) 原文 p.12 の鎖(D = ∅ への帰着)と p.13 の鎖(背理法)= Found/GenEll/Thm21Chain.lean の thm_2_1_stepA / thm_2_1_stepB。(2) p.12 のコンパクト性の段(Ξ・Ξ_v を取る)= Found/GenEll/Thm21Extract.lean の exists_bad_seq_tendsto——有限個のコンパクト第一可算空間の積で収束部分列を取ることに尽きる。(3) p.12 の次数の段(e を大きく取れば deg(ω_Y(E)) ≤ (1+ϵ′)deg(ω_Y))= Found/GenEll/Thm21DegRatio.lean——Riemann-Hurwitz を認めれば純粋に算術である。★★★残るのは**幾何の 2 点だけ**: (a) 分岐指数がちょうど e の連結有限エタール Galois 被覆(folklore／[Stacks] 58.6)、(b) noncritical Belyi 写像([NCBelyi] Theorem 2.5)。★どちらも**本論文の外**の結果である" 9,
+    .implicitStep
+      "★★★★★★入力のうち [GenEll] 内のものは**すべて手元にある**(2026-08-29): Proposition 1.7, (i) = Found/GenEll/Prop17.lean の prop_1_7(★本日 §9-975 で閉じた)、Proposition 1.6 = prop_1_6、Proposition 1.4, (i)(iii)(iv) = Found/GenEll/Prop14.lean" 7,
     .otherPaper "[NCBelyi]"
       "Theorem 2.5(Belyi Maps Noncritical at Prescribed Points)——★原文 [GenEll] p.11 の『[Mzk1]』がこれである。★★(ii) ⇒ (i) の中核であり、2026-08-27 の第 425 で構成へ載せ替えたが、一般の曲線への帰着(Riemann-Roch)は未了である" 5,
     .otherPaper "[GenEll]" "Proposition 1.7(導手と log-different)——★第 423 で構成へ載せ替えたが、局所から大域への組み立ては未了である" 9,

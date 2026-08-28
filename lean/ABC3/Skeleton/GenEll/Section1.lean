@@ -584,6 +584,8 @@ def prop_1_7.src : Source :=
 Arakelov も Galois 表現も要らず、**局所体の分岐理論と Kummer 理論だけ**である。 -/
 def prop_1_7.needs : List ProofObligation :=
   [ .implicitStep
+      "★★★★★★★★★★2026-08-29 に **Found/GenEll/Prop17.lean の prop_1_7 が項目まるごとを取った**(§9-975、第 511 ブロック)。本 statement が仮定として受けていた hlow / hup は、そこでは**算術から作られている**(§9-954〜§9-974 の 21 ブロック)。★slack は Σ ではなく **0**、左の ≲ は**等式(BDeq)**である。★★受けているのは原文の条件 (b)(D_ℚ = φ_ℚ^{-1}(E_ℚ)_red)を**台の対応に翻訳した形**だけである。★★★また Check/GenEll/Prop17Direction.lean が『右の ≲ を印字どおりの向き(BDle)で読むと偽になる』ことを機械検証した——Gap/GenEll/BDDirection.lean が待っていた falsifier である" 10,
+    .implicitStep
       "★★★本 statement は原文の証明のうち**後半だけ**を証明している。prime-to-Σ の厳密な不等式(hlow / hup)は仮定として受けている。★空虚でないことは Check/GenEll/Prop17Witness.lean で確かめてある" 10,
     .folklore "原文が『the elementary theory of differents』と呼ぶもの。★局所の核は 2026-08-26〜27 の第 374-411 で実装した(馴分岐 6/6)。★★残っているのは**局所から大域への組み立て**である" 10,
     .implicitStep
