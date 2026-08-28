@@ -556,6 +556,12 @@
             "why": "★`Spec` の側では「環準同型が全射 ⟺ 閉埋め込み」（mathlib: `Spec.map` と `IsClosedImmersion`）。★★あとは `X_{s_i}` が `X` を覆い（段 E2）、像が `D₊(x_i)` に入る（`range_chartToProj_le`、`§9-821`）ことから局所的に閉埋め込み、すなわち immersion である。 ★★★★★★★**2026-08-28 夜——段 E3d が閉じた**(`Found/GenEll/ChartImmersion.lean`): `isClosedImmersion_of_projCharts` / `isImmersion_of_projCharts`。★橋は 2 本しかなかった: (1) `IsClosedImmersion.of_surjective_of_isAffine`(アフィン＋全射 ⟹ チャートで閉埋め込み、mathlib)、(2) `IsZariskiLocalAtTarget @IsClosedImmersion`(チャートで閉埋め込み ⟹ 大域で閉埋め込み、mathlib)。★★あとは「D₊(x_i) が ℙᴺ を覆う」だけで、それは段 C2a の `exists_X_notMem` から出た(`Proj.basicOpen` の側へ言い直す `iSup_projBasicOpen_X_eq_top` を足した)。★★★測定: **閉埋め込みが得られる**(immersion より強い)——D₊(x_i) が ℙᴺ **全体**を覆うからである。原典が「embedding」としか書かないのは、X_ℚ の側で生成ファイバーへ落とすと閉性が落ちうるため(段 F2c)であろう。"
           },
           {
+            "stage": "E3e",
+            "status": "closed",
+            "title": "チャートの上で超平面の引き戻しは比の切断である",
+            "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/HyperplanePullbackChart.lean`）: `map_globalAwayHom_ker_hyperplane`——`(globalAwayHom i)_* ( ker (Away.map hyperplaneHom (x_i)) ) = ( s_0/s_i )`。★これが「**非常に豊富**」であることの中身である——超平面を引き戻すと、切断 `s_0` の零点因子（`s_i` で自明化して測ったもの）になる。★★機構は `§9-863`（段 C2c-1：`ker (Away.map hyperplaneHom (x_i)) = (x_0/x_i)`）と `§9-842`（`globalAwayHom_projCoord`：`x_j/x_i ↦ s_j/s_i`）の合成だけであった。★★★これを `Scheme.IdealSheafData` の水準へ持ち上げると `(globalChartToProj i)^* (超平面) = div(s_0)|_{X_{s_i}}` になり、`§9-884`（`X_{s_i}` の上では `M` は自明なので `div(s)` は等号）が受ける。★★★★それが `§9-882` の仮定 `hDn` の `n = 1` の場合（＝非常に豊富）である。"
+          },
+          {
             "stage": "F1",
             "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
             "status": "closed",
