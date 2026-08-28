@@ -569,6 +569,7 @@ import ABC3.Found.GenEll.NorthcottCoords
 import ABC3.Found.GenEll.NorthcottCoordsImage
 import ABC3.Found.GenEll.Prop14
 import ABC3.Found.GenEll.ZModelOfProjective
+import ABC3.Found.GenEll.Remark141Full
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
