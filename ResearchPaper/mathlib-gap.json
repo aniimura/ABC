@@ -382,8 +382,8 @@
           {
             "stage": "E3b",
             "claim": "`Γ(X, X_{s_i})` が `A` 上有限生成な代数であること（`f` が有限型・`X_{s_i}` がアフィン）",
-            "status": "open",
-            "why": "★`f : X ⟶ Spec A` が有限型で `X_{s_i}` がアフィン開なら `Γ(X_{s_i})` は `A`-代数として有限生成である。★★mathlib に `Algebra.FiniteType` と `LocallyOfFiniteType` はあるので、アフィン開への制限を取る配管が主である。"
+            "status": "closed",
+            "why": "★`f : X ⟶ Spec A` が有限型で `X_{s_i}` がアフィン開なら `Γ(X_{s_i})` は `A`-代数として有限生成である。★★mathlib に `Algebra.FiniteType` と `LocallyOfFiniteType` はあるので、アフィン開への制限を取る配管が主である。 ★★★★★★**2026-08-28 夜——段 E3b が閉じた**(`Found/GenEll/ChartFiniteType.lean`): `finiteType_appLE_top` と `exists_finset_generating`。★機構は mathlib の `Scheme.Hom.finiteType_appLE` に `U = ⊤` を入れるだけであった——1 行である。★★そのあと `Algebra.FiniteType.out` で**具体の有限生成集合**を取り出した(段 E3c が使う形)。★★★測定: 底は `A` ではなく **`Γ(Spec A, ⊤)`** である(`ΓSpecIso` で移り合うが定義的には等しくない)。同型を挟むと式が読めなくなるので `Γ` の側のまま述べた。"
           },
           {
             "stage": "E3c",
@@ -422,8 +422,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "★完全に閉じた 19 / 26（部分的 3、未着手 4）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
-        "remaining": "C2c(partial), E0(partial), E1d(partial), E3b(open), E3c(open), E3d(open), F2c(open)",
+        "done": "★完全に閉じた 20 / 26（部分的 3、未着手 3）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
+        "remaining": "C2c(partial), E0(partial), E1d(partial), E3c(open), E3d(open), F2c(open)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
