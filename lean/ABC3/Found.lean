@@ -1359,6 +1359,7 @@ import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma21
 import ABC3.Found.NCBelyi.BelyiComp
 import ABC3.Found.NCBelyi.Lemma22
+import ABC3.Found.NCBelyi.Thm25Step3
 import ABC3.Found.NCBelyi.Normalize
 import ABC3.Found.NCBelyi.CoeffBound
 import ABC3.Found.NCBelyi.ReducedDegree
