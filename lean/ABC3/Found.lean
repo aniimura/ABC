@@ -498,6 +498,7 @@ import ABC3.Found.GenEll.BasicOpenRatio
 import ABC3.Found.GenEll.OverlapAwayHom
 import ABC3.Found.GenEll.OverlapAwayHomSymm
 import ABC3.Found.GenEll.GlobalToProj
+import ABC3.Found.GenEll.ImmersionGlobalToProj
 import ABC3.Found.GenEll.GlobalChartSurjective
 import ABC3.Found.GenEll.GlobalRatioCover
 import ABC3.Found.GenEll.GluedGlobalRatio
