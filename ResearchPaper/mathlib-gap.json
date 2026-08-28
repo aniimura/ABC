@@ -58,7 +58,50 @@
         "lean/ABC3/Found/GenEll/DifferentKummer.lean",
         "lean/ABC3/Found/GenEll/PGroupTower.lean",
         "lean/ABC3/Found/GenEll/TotallyRamified.lean"
-      ]
+      ],
+      "decomposition": {
+        "measuredAt": "2026-08-28",
+        "target": "[GenEll] Proposition 1.7 の \"elementary claim\"（原文 物理 p.10）: 「素数 p と正整数 d を固定する。すると正整数 n が存在して、[L:K] ≤ d なる Q_p の有限拡大の有限 Galois 拡大 L/K について different イデアル 𝔡_{L/K} は p^n·O_L を含む」。★これが prop_1_7 の仮定 hlow / hup を discharge するための局所の核である。",
+        "note": "★★原文の証明を 260 dpi で読み直して段に割った（2026-08-28）。局所の道具（馴分岐 6/6・Kummer・塔）はすべて手元にあり、**残っているのは群論的な還元と組み立てだけ**である。",
+        "stages": [
+          {
+            "stage": "EC1",
+            "status": "closed",
+            "title": "馴なら n = 1 で足りる",
+            "why": "原文「if we restrict to tamely ramified L/K, then it suffices to take n = 1」。★`Found/GenEll/DifferentKummer.lean` の `mem_differentIdeal_of_isUnit_natCast` と `Found/GenEll/TameRamification.lean` の `isUnit_natCast_iff_isTameDegree` で取れている。"
+          },
+          {
+            "stage": "EC2",
+            "status": "closed",
+            "title": "Kummer の場合（[L:K] = p、ζ_p ∈ K）で p^p·O_L ⊆ 𝔡",
+            "why": "原文「one computes easily that the different ideal of L/K contains p · π^{p−1} · O_L ⊇ p^{1+(p−1)} · O_L = p^p · O_L」。★`Found/GenEll/DifferentKummer.lean` の `pow_mem_differentIdeal_of_kummer`（第 374–411）。"
+          },
+          {
+            "stage": "EC3",
+            "status": "closed",
+            "title": "塔で継ぐ",
+            "why": "★`Found/GenEll/DifferentKummer.lean` の `pow_mem_differentIdeal_tower`。中間体を経由するとき指数が足し算になる形。"
+          },
+          {
+            "stage": "EC4",
+            "status": "open",
+            "title": "群論的な還元——可解 p-群を次数 p の塔に割る",
+            "why": "原文「since Gal(L/K) is a [necessarily solvable!] p-group of order ≤ d, it suffices to consider the case where [L:K] = p」。★中身は「有限 p-群は次数 p の部分群の増大列を持つ」——mathlib の `IsPGroup` の理論（`IsPGroup.exists_le_subgroup_card_eq` など）で出るはずである。★★これを `EC3` の塔と繋ぐと、指数は `p · (段数)` 以下で抑えられ、段数は `log_p d` 以下なので **`d` だけで決まる `n`** が取れる。 ★★★**mathlib の在庫を測った（2026-08-28）**: `IsPGroup.exists_le_subgroup_card_eq` も `IsPGroup.exists_normal_subgroup_card_eq` も**無い**。あるのは `Sylow.exists_subgroup_card_pow_prime`（`p^n ∣ |G|` なら位数 `p^n` の部分群が存在する）である。★これを**入れ子に使う**と鎖が出る: 位数 `p^k` の群に位数 `p^{k−1}` の部分群を取り、その中で `p^{k−2}` を取り……と帰納すればよい（各段の指数はちょうど `p`）。★★正規性は要らない——欲しいのは**中間体の塔**なので、部分群の鎖で足りる。"
+          },
+          {
+            "stage": "EC5",
+            "status": "open",
+            "title": "ζ_p を添加する段（L[ζ]/K を野生と馴に分ける）",
+            "why": "原文「By separating the extension L[ζ]/K, where ζ is a primitive p-th root of unity, into a composite of wildly ramified and tamely ramified extensions」。★`K(ζ_p)/K` は**馴**（次数が p−1 を割るから）なので `EC1` が効き、その上で野生部を `EC4`＋`EC2` で処理する。★★`EC3`（塔）で繋ぐ。"
+          },
+          {
+            "stage": "EC6",
+            "status": "open",
+            "title": "局所から大域へ——素点ごとの評価を deg に足し上げる",
+            "why": "★`Found/GenEll/LogDiffTower.lean` の `logDiffOfField_tower` が `log-diff_K − log-diff_F = log N(𝔡_{K/F})/[K:ℚ]` を与えている（**等式**）。★★`EC1`–`EC5` は各素点での `𝔡` の下界なので、`log N` を素点の和に分解して足し上げる。★★★Σ の外（馴）では `𝔡` の指数がちょうど `e−1` になり、原文の「`=` と `≤` であって `≲` ではない」がそこで出る。Σ の上は `EC5` の `n` が**点にも定義体にも依らない**ので一様に有界になる。"
+          }
+        ]
+      }
     },
     "spreading-out-over-base": {
       "what": "生成ファイバー上の同型が、ある有限素数集合 Σ の上で ℤ[Σ^{-1}] へ延びること(EGA IV, 8.8.2 の極限論)。",
