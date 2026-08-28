@@ -426,6 +426,7 @@ import ABC3.Found.GenEll.DifferentGlobalBoundUpper
 import ABC3.Found.GenEll.DifferentDivides
 import ABC3.Found.GenEll.DifferentRamified
 import ABC3.Found.GenEll.DifferentRamIdx
+import ABC3.Found.GenEll.DifferentCondBound
 import ABC3.Found.GenEll.DifferentTameExact
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
