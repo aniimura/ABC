@@ -1571,3 +1571,39 @@ JS 文字列の中の **バッククォート付き Markdown**（``` `X` ```）�
 ★★直し方: **スクリプトを `.mjs` ファイルに書いて `node file.mjs` で走らせる**
 （`$CLAUDE_JOB_DIR/tmp` に置く）。ヒアドキュメント（`<<'EOF'`、クォート付き）でもよい。
 ★★★同じ理由で `git commit -m "…`X`…"` も禁物である——`-F -` とヒアドキュメントを使う。
+
+## 配管——Serre への道で踏んだ穴（2026-08-28、§9-808〜822）
+
+### 1. `HomogeneousLocalization.NumDenSameDeg.num_add` / `deg_add` は `x` が明示引数
+
+    num_add c1 c2   -- ✗ c1 が x(分母の submonoid)に食われる
+    num_add (Submonoid.powers f) c1 c2   -- ○
+
+★`{𝒜}` は暗黙、`x` は**明示**である。
+
+### 2. `(c1 + c2).deg` は `num` の**型に現れる**
+
+`rw [hdeg]` を先にすると motive が通らない。★**`num` を先に書き換える**こと。
+同じ形は `exists_pow_of_numDenSameDeg`（`c.deg = k` を `c.num` の前で `rw` できない）でも出た。
+
+### 3. `x_i^k ≠ 0` に `pow_ne_zero` は使えない
+
+`R` 一般では `MvPolynomial` に零因子がありうるので `IsReduced` を要求される。
+★`rw [MvPolynomial.X_pow_eq_monomial]; simp`（係数が `1` の単項式）で落ちる。
+
+### 4. `def` で包んだスキームは `.Opens` が合わない
+
+    (projSpace N R).Opens   -- ✗ Proj.basicOpen と構文的に合わない
+    (Proj (…)).Opens        -- ○
+
+★`projSpace` は `def`（semireducible）だからである。`Proj (…)` の綴りで書く。
+
+### 5. 指数の等式は `▸` ではなく `subst`
+
+`c.n ∣ L` から `L = c.n * k` を取り出したら **`subst`** する。
+★`M^{⊗L}` と `M^{⊗(c.n·k)}` の型の食い違いはそれで消える（`▸` で運ぶ必要はない）。
+
+### 6. `whiskerLeftIso` を使う（`◁` は射用）
+
+    M ◁ (iso)              -- ✗ `◁` は射を取る
+    whiskerLeftIso M (iso) -- ○
