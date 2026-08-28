@@ -474,6 +474,7 @@ import ABC3.Found.GenEll.TensorPowCoherence
 import ABC3.Found.GenEll.CommonDegree
 import ABC3.Found.GenEll.ClearDenominator
 import ABC3.Found.Arakelov.SheafifyTrivValue
+import ABC3.Found.GenEll.TensorPowTriv
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm

@@ -1618,3 +1618,26 @@ JS 文字列の中の **バッククォート付き Markdown**（``` `X` ```）�
 ★原因は「証明の中を読んだだけで在庫を引かなかった」ことである。
 ★★CLAUDE.md の在庫の規律どおり、**まず `node tools/decl-index.mjs` を作って
 `.cache/decl-index.txt` を grep する**。木を読むのは在庫を引いた後でよい。
+
+## 同型の向き——`≅` は「どちらから」を必ず確かめる（2026-08-28）
+
+    restrictPresheafUnit : 𝟙_ ≅ (restrictPresheafFunctor X U).obj (𝟙_)
+                           ^^^^  ここが左
+
+`(restrict).obj (𝟙_) ≅ 𝟙_` **ではない**。`tensorPowTriv` の基点を
+`restrictPresheafUnit` と書いたため、`trivValue … = 1` が `rfl` でも `simp` でも
+落ちず（残ゴールは `ε.app _ ((𝟙_).map _ 1) = 1` の形）、半日詰まった。
+★正解は **`.symm`** を付けるだけであった。
+
+★★合図は在庫にあった——`trivValue_unit_top`（`AmpleDef.lean`）が
+`restrictPresheafUnit.symm` を使っている。**在庫の使用例を 1 つ読めば向きは分かる**。
+
+★★★教訓を一般化すると: `≅` を引数に取る補題が `rfl` で落ちないときは、
+**証明の中身を疑う前に同型の向きを `#check` する**。0.07 秒で分かる。
+
+### ついでに——`V = ⊤` 限定の在庫は一般化できることが多い
+
+`trivValue_unit_top` は `V = ⊤` 用だったが、証明（`simp [trivValue, secOn,
+restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の `V`** で通り、
+右辺が `s` から `s|_V` に変わるだけであった（`trivValue_unit'`）。
+★「⊤ でしか無いから使えない」と諦める前に、証明をコピーして一般形を試す。
