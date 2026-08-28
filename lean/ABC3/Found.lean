@@ -1215,6 +1215,7 @@ import ABC3.Found.Arakelov.ContMetric
 import ABC3.Found.Arakelov.Def11Complete
 import ABC3.Found.Arakelov.Def12Complete
 import ABC3.Found.Arakelov.Prop14ii
+import ABC3.Found.Arakelov.MetricRatio
 /-!
 # Found — 実装済みの基礎
 
