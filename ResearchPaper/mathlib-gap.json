@@ -586,6 +586,12 @@
             "why": "★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottChartUnion.lean`）: `finite_of_finite_charts` と `finite_of_finite_charts_subset`。★`§9-888` は**チャート 1 枚分**の Northcott だったので、`X = ⋃_i X_{s_i}`（段 E2）で全体へ広げる形を与えた。★★機構は集合論の 1 行——**有限個の有限集合の和は有限**（`Set.finite_iUnion`）——だけである。添字が `Fin (N+1)`（有限）なので効く。★★★残るのは「各点をどのチャートに割り当てるか」の配管で、`§9-C2b`（`exists_chart_range`——体値の点はどれかのチャートに入る）が与える。"
           },
           {
+            "stage": "E3j",
+            "status": "closed",
+            "title": "チャートを跨いだ Northcott（Serre の道の組み立て）",
+            "why": "★★★★★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/NorthcottAssembled.lean`）: `finite_sigma_of_finite_fibers` と `northcott_globalChart_sigma`。★`§9-888`（チャート 1 枚分）と `§9-889`（有限個の和）を**実際に組んだ**もので、点の集合を `Σ i, P i`（`P i` ＝ チャート `i` を通る点）の形で受ける。★★★★**測定——なぜ `Σ` 型か**: 点ごとにチャートが違うと `xF p : Spec 𝓞 ⟶ X_{s_{chart p}}` の**型が点に依存する**ので、`chart p = i` に沿った輸送（`▸`）を仮定の中で書くことになり読めなくなる。`Σ i, P i` で受けると各 `i` の成分は**型が固定**され、`§9-888` をそのまま当てられる。★★残る仮定は `§9-888` と同じ 3 つ（`hdeg`・整数表示・点の分離）で、いずれも出どころが判っている（`§9-854`・`§9-849`・`§9-851`）。"
+          },
+          {
             "stage": "F1",
             "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
             "status": "closed",
