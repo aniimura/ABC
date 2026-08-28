@@ -277,6 +277,36 @@
             ]
           },
           {
+            "stage": "C2c-1",
+            "status": "open",
+            "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。段 C2c 前半（超平面因子の高さ ＝ 素朴高さ）を`northcott_of_projModel` の `hcmp`（`Height.mulHeight (crd p) ≤ exp(ht p + const)`）へ繋ぐには 3 段が要る。★本段はその 1 段目——点 `xF : Spec 𝓞_F ⟶ ℙᴺ_ℤ` に沿った超平面因子の引き戻しが**座標の生成するイデアル**になること。★★道具は在庫にある: `pullbackIdealOf_eq_extension`（`Found/GenEll/PullbackLocalization.lean`——任意の環準同型に沿って拡大イデアルになる）と `hyperplaneIdeal`（`§9-Hyperplane`）。★★★機構は「`D₊(x_i)` へ落として `hyperplaneι` の核を読む」であり、`§9-C2b`（点をチャートに落として `A⁰_{x_i} → F` を取る配管）が使える。",
+            "sources": [
+              "ABC3: Found/GenEll/Hyperplane.lean",
+              "ABC3: Found/GenEll/PullbackLocalization.lean"
+            ]
+          },
+          {
+            "stage": "C2c-2",
+            "status": "open",
+            "claim": "★★有限素点側 —— `log #(𝓞_F/(x_0,…,x_N))` と `∏ᶠ_{v 非アルキメデス} sup_i v(x_i)` の関係",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。mathlib の `Height.mulHeight` は`(∏_{v arch} sup_i v(x_i)) · (∏ᶠ_{v nonarch} sup_i v(x_i))` である（`Height/Basic.lean:232` 実測）。★座標が `𝓞_F` に入るとき、非アルキメデス側の積は生成イデアルのノルムの逆数になる——これが `degFinPre`（`log #(𝓞_F/I)`）とちょうど符号違いで対応する。★★在庫: `Found/GenEll/DenominatorBound.lean` の `absNorm_denIdeal_le_mulHeight₁` が**同じ型の議論**をすでに持っている（1 成分の場合）。★★★それを組に持ち上げるのが本段である。",
+            "sources": [
+              "mathlib: Mathlib/NumberTheory/Height/Basic.lean",
+              "ABC3: Found/GenEll/DenominatorBound.lean"
+            ]
+          },
+          {
+            "stage": "C2c-3",
+            "status": "open",
+            "claim": "★★★アルキメデス側 —— 与えられた計量と `sup_i |σ(x_i)|` の差が**一様に有界**であること",
+            "why": "★★★★★★**2026-08-28 夜に分解した**。`archDeg` は与えられた計量 `|·|_L` で測るが、素朴高さが使うのは `sup_i |σ(x_i)|`（Fubini–Study 型）である。★2 つは**同じ因子の別の計量**なので、差は一様に有界である——それが Prop 1.4 (iii) そのものであり、本プロジェクトは `§9-806`（`MetricRatio.lean`）で`htMetricAlg_sub_abs_le` としてすでに持っている。★★したがって本段は「Fubini–Study 型の計量が `Definition 1.1` の意味の計量である」（連続・ι_X 両立・局所有界）ことを言えばよい。★★★`§9-802`（`ContMetric.lean`）の `AMetric.continuous_norm` が要求を型で持っている。",
+            "sources": [
+              "ABC3: Found/Arakelov/MetricRatio.lean",
+              "ABC3: Found/Arakelov/ContMetric.lean"
+            ]
+          },
+          {
             "stage": "D1",
             "claim": "**X_s（切断の非消失軌跡）** と **ample の定義**",
             "status": "closed",
@@ -432,8 +462,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。 ★★★★★★★★**2026-08-28 夜——アフィンでの核が入った**(`Found/GenEll/GenericFiber.lean`): `ker_locMap`(局所化は核と可換)と `quotKerMapEquiv` / `ratQuotKerEquiv`。★アフィンで読むと閉包のイデアルは `ker φ`(φ : A → B、A = Γ(U ⊆ ℙᴺ_ℤ)、B = Γ(Y, f⁻¹U))であり、生成ファイバーへ移るのは A を ℤ∖{0} で局所化すること。**B はすでに ℚ-代数なので局所化で変わらない**。★★したがって要るのは `ker (A_ℚ → B) = (ker φ)·A_ℚ`(mathlib の `IsLocalization.ker_map`)だけで、A_ℚ → B が全射なら `A_ℚ / (ker φ)·A_ℚ ≅ B`——**閉包の生成ファイバーは Y そのもの**である。★★★測定: mathlib に「単元の部分モノイドによる局所化は恒等」の instance が無かったので`isLocalization_self_of_isUnit` を自前で置いた(3 行)。`IsLocalization.atUnits` は『局所化が与えられているとき同型になる』形で、instance を**作る**形ではない。★残るのは `Scheme.IdealSheafData` の水準へ持ち上げる配管だけで、**新しい数学は要らない**(`Scheme.Hom.ker_apply` を各チャートに当てて貼る)。"
           }
         ],
-        "done": "★完全に閉じた 23 / 27（部分的 4、未着手 0）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2（「⊓ V」を外す）を新たに発見して挿入したので分母が 1 増えた。",
-        "remaining": "C2c(partial), E0(partial), E1d(partial), F2c(partial)",
+        "done": "★完全に閉じた 23 / 30（部分的 4、未着手 3）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2（「⊓ V」を外す）と段 C2c-1〜C2c-3（超平面因子の高さの分解）を新たに挿入したので分母が増えた。",
+        "remaining": "C2c(partial), C2c-1(open), C2c-2(open), C2c-3(open), E0(partial), E1d(partial), F2c(partial)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
@@ -451,7 +481,8 @@
         "measured20260828p": "★★★★★★★★★★**2026-08-28 夜——段 E3c の数学がすべて型になった**。`§9-838`（有限個の座標条件に還元）→`§9-841`（`⊓ V` の欠陥を測定）→`§9-842`（大域のチャート写像）→`§9-843`（大域版の全射判定）→`§9-844`（被覆で大域の比を同定）→`§9-845`（`X_s` の関数は大域の比である）。★残るのは「座標族に並べる帳簿」だけである。★★この区切りで見つかった一番大きいものは**分解の欠陥**（`§9-841`）であった——段 E1c・E3c は `⊓ V` 付きで書かれていて段 E3d と噛み合っていなかった。★★★「次の葉は何か」を追わなければ、積み上げても繋がらないまま person-years を投じるところであった。",
         "measured20260828q": "★★★★★★★★★★**2026-08-28 夜——段 E3c・E3c-2 が閉じた**。段 E の残りは **E1d**（チャートの射を貼って `ψ : X ⟶ ℙᴺ_R` を作る）だけである——`§9-836` に貼り合わせの機構はあるが「`chartToProj i` が重なりで一致する」ことが未着手。★この区切りで一番大きかったのは `§9-841` の**分解の欠陥の発見**（`⊓ V` が外れていない）であった。",
         "measured20260828r": "★★★★★★★★★★**2026-08-28 夜——迂回路が見つかった**。段 E1d（チャートの射を貼って `ψ : X ⟶ ℙᴺ_R` を作る）は Prop 1.4 (iv) の**必須路ではない**——消費側 `northcott_of_projModel` は**座標と単射性**しか受け取らないからである。★代わりに要るのは「座標が点を分ける」ことで、それは `§9-847` の全射性＋`ext_of_isAffine` から出る（`§9-849`）。★★残る穴は「`A⁰_{x_i}` は `R` 上 `x_j/x_i` で生成される」という**純代数の 1 本**に縮んだ。★★★これは「消費側が何を要求しているか」を読み直したから出た測定である。",
-        "measured20260828s": "★★★★★★★★★★**2026-08-28 夜——Northcott 路の幾何側が塞がった**。`ample` ⟹ 有限被覆（`§9-817`）→ 分母を払って大域化（`§9-822`〜`§9-831`）→ チャートの座標環は有限生成（`§9-832`）→ `A⁰_{x_i} → Γ(X, X_{s_i})` が全射（`§9-847`）→ **正規化座標が点を分ける**（`§9-849`＋`§9-850`＋`§9-851`）。★★残っているのは**高さの側**である——C2c 前半（超平面因子の高さ ＝ 素朴高さ）と `northcott_of_projModel` の `hcmp`（`mulHeight ≤ exp(ht + const)`）を繋ぐ段。"
+        "measured20260828s": "★★★★★★★★★★**2026-08-28 夜——Northcott 路の幾何側が塞がった**。`ample` ⟹ 有限被覆（`§9-817`）→ 分母を払って大域化（`§9-822`〜`§9-831`）→ チャートの座標環は有限生成（`§9-832`）→ `A⁰_{x_i} → Γ(X, X_{s_i})` が全射（`§9-847`）→ **正規化座標が点を分ける**（`§9-849`＋`§9-850`＋`§9-851`）。★★残っているのは**高さの側**である——C2c 前半（超平面因子の高さ ＝ 素朴高さ）と `northcott_of_projModel` の `hcmp`（`mulHeight ≤ exp(ht + const)`）を繋ぐ段。",
+        "measured20260828t": "★★★★★★★★**2026-08-28 夜——段 C2c 前半を 3 つに分解した**。`northcott_of_projModel` の `hcmp`（`Height.mulHeight (crd p) ≤ exp(ht p + const)`）へ繋ぐには（1）超平面因子の引き戻しが座標の生成するイデアルであること（C2c-1）、（2）有限素点側の `log #(𝓞_F/I)` と非アルキメデス積の対応（C2c-2）、（3）アルキメデス側で与えられた計量と Fubini–Study 型の差が一様に有界であること（C2c-3）、の 3 段が要る。★（3）は Prop 1.4 (iii)（`§9-806` の `htMetricAlg_sub_abs_le`）で**すでに持っている**ので、実質は（1）（2）である。★★（2）は `DenominatorBound.lean` の 1 成分版を組に持ち上げるだけである。"
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
