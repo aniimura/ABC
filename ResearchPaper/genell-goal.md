@@ -31561,3 +31561,51 @@ Möbius と多項式の交互合成である（`Separation.lean` の `P1C` が�
 `§9-994` に誤記し、`§9-995` で訂正した。
 ★★`absent` を書く前に **`Mathlib` 全体を import した REPL で `#check` を並べる**（0.02 秒で 10 個）。
 ★★★探索範囲は「grep したディレクトリ」ではなく「`#check` した名前の一覧」で書く。
+
+---
+
+## 2026-08-29（第 547 ブロック）—— ★★★★★★★★残りは **`h(j) ≤ 12(1+ϵ)·ht^Falt + C`** 1 本
+
+### 発見 1 —— mathlib に `NumberTheory/Height/` がある
+
+`Basic`（`Height.mulHeight₁` / `logHeight₁`）・`NumberField`（**数体の `AdmissibleAbsValues` インスタンス**）・
+`Northcott`（枠組み）・`Projectivization`・`MvPolynomial`・`EllipticCurve`（WIP）。
+☆ただし `Northcott (Height.mulHeight₁)` の**インスタンスはまだ無い**（`infer_instance` で確認）。
+
+### ★★発見 2 —— 本プロジェクトの Northcott は**すでに mathlib の `Height` で書かれている**
+
+`Found/GenEll/NorthcottImage.lean` の
+
+    `northcott_of_log_mulHeight_image`
+      —— `ht p = log (Height.mulHeight (x p)) / [F_p : ℚ]` かつ次数が `≤ d` なら
+         `{p | ht p ≤ C}` の座標比の像は**有限**
+
+★これは `Prop 3.4` の有限性が要求する Northcott **そのもの**である（`ht∞` の側）。
+
+### ★★★★★★★★したがって残るのは 1 本だけ
+
+`Prop 3.4` の有限性は `Found/GenEll/FiniteFromNorthcott.lean` の
+
+    `finite_of_le_of_northcott (hle : ∀ p, ht∞ p ≤ a · ht^Falt p + C′) (hN : {ht∞ ≤ B} 有限)`
+
+で出る。★`hN` は上の `northcott_of_log_mulHeight_image`（**手元にある**）。
+★★したがって残るのは **`hle`**、すなわち
+
+    **`h(j) ≤ 12(1+ϵ)·ht^Falt + C`**
+
+——`j` 不変量の高さが Faltings 高さで抑えられること（古典的な `h(j) = 12·ht^Falt + O(log)`）。
+★★★これが [Silv2] `Proposition 2.1` の**本プロジェクトにとっての実体**である。
+
+### ★整理 —— 依存の最終形
+
+| 項目 | 残っているもの |
+|---|---|
+| `Prop 3.4` | ★`h(j) ≤ 12(1+ϵ)ht^Falt + C` **1 本**（Northcott は手元） |
+| `Lemma 3.5` | 上記 ＋ `Lemma 3.2, (ii)`（一意化側は済）＋ [FC] I.2.7 |
+| `Lemma 3.7` | ★(a) は**済**（`§9-997`）。(b)(c) は上記の有限性 |
+| `Theorem 3.8` | 上記 ＋ `torsionExt` の半安定性（群論・`α`・次数は**済**） |
+| `Cor 4.3`・`4.4` | 上記だけ（帳簿は `§9-989`／`§9-990` で**済**） |
+| `Theorem 2.1` | Riemann–Roch（[NCBelyi] `Thm 2.5` 段 1）＋ 副有限基本群 |
+
+★★★★**§3・§4 の 7 項目は、`h(j) ≤ 12(1+ϵ)ht^Falt + C` と
+`torsionExt` の半安定性と [FC] I.2.7 の 3 本に収束した。**
