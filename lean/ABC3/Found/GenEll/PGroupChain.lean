@@ -163,6 +163,46 @@ def exists_normal_subgroup_card_prime.src : ABC3.Meta.Source :=
     item := "Proposition 1.7(elementary claim——p-群は位数 p の正規部分群を持つ)",
     sectionId := "genell-prop-1-7" }
 
+/-! ## ★★★★★★★★★★Galois な中間体の存在 -/
+
+open IntermediateField in
+/-- ★★★★★★★★★★**次数 `p^{k+1}` の Galois 拡大は、`[L:M] = p` かつ `M/K` も Galois な中間体を持つ**。
+
+原文 (GenEll p.10):
+> integer n such that for any finite Galois extension L/K of finite extensions
+
+★位数 `p` の**正規**部分群 `N`（`exists_normal_subgroup_card_prime`）を取り、
+`M ≔ L^N` とすると `[L:M] = |N| = p`、`[K:M] = p^k`で、
+`N` が正規なので `M/K` も Galois である。
+★★**これで different の塔を帰納で回せる形になった**
+——`EC2`（次数 `p` の段）を `L/M` に、帰納法の仮定を `M/K` に当て、
+`EC3`（塔）で継ぐ。 -/
+theorem exists_intermediateField_galois (p : ℕ) [Fact p.Prime]
+    (K L : Type) [Field K] [Field L] [Algebra K L] [FiniteDimensional K L] [IsGalois K L]
+    {k : ℕ} (h : Module.finrank K L = p ^ (k + 1)) :
+    ∃ M : IntermediateField K L, Module.finrank M L = p ∧ Module.finrank K M = p ^ k
+      ∧ IsGalois K M := by
+  have hcard : Nat.card (L ≃ₐ[K] L) = p ^ (k + 1) := by
+    rw [IsGalois.card_aut_eq_finrank, h]
+  haveI : Fintype (L ≃ₐ[K] L) := Fintype.ofFinite _
+  haveI : Nontrivial (L ≃ₐ[K] L) := by
+    refine Finite.one_lt_card_iff_nontrivial.mp ?_
+    rw [hcard]
+    exact Nat.one_lt_pow (Nat.succ_ne_zero k) (Fact.out : p.Prime).one_lt
+  obtain ⟨N, hN, hcardN⟩ := exists_normal_subgroup_card_prime p (IsPGroup.of_card hcard)
+  haveI := hN
+  refine ⟨fixedField N, ?_, ?_, IsGalois.of_fixedField_normal_subgroup N⟩
+  · rw [finrank_fixedField_eq_card N, hcardN]
+  · have hmul := Module.finrank_mul_finrank K (fixedField N) L
+    rw [finrank_fixedField_eq_card N, hcardN, h, pow_succ] at hmul
+    have hp : 0 < p := (Fact.out : p.Prime).pos
+    exact Nat.eq_of_mul_eq_mul_right hp hmul
+
+def exists_intermediateField_galois.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——Galois な中間体の存在)",
+    sectionId := "genell-prop-1-7" }
+
 /-! ## ★★★★★★★★指数の一様化 -/
 
 /-- ★**指数を上げても入ったまま** —— `x^m ∈ I` かつ `m ≤ n` なら `x^n ∈ I`。 -/
