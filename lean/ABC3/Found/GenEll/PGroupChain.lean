@@ -112,6 +112,57 @@ theorem exponent_le_log (p d k : ℕ) (hp : 2 ≤ p) (hd : d ≠ 0) (h : p ^ k �
     k ≤ Nat.log p d :=
   (Nat.le_log_iff_pow_le hp hd).mpr h
 
+/-! ## ★★★★★正規な位数 `p` の部分群 -/
+
+/-- ★**中心に含まれる部分群は正規である**。 -/
+theorem normal_of_le_center {G : Type*} [Group G] (H : Subgroup G)
+    (h : H ≤ Subgroup.center G) : H.Normal := by
+  constructor
+  intro n hn g
+  have hc : ∀ x : G, x * n = n * x := (Subgroup.mem_center_iff).1 (h hn)
+  rw [hc g, mul_assoc, mul_inv_cancel, mul_one]
+  exact hn
+
+/-- ★★**自明でない有限 `p`-群は位数 `p` の元を持つ**。 -/
+theorem exists_orderOf_eq_prime (p : ℕ) [Fact p.Prime] {G : Type} [Group G]
+    [Fintype G] [Nontrivial G] (hp : IsPGroup p G) : ∃ x : G, orderOf x = p := by
+  obtain ⟨n, hn⟩ := (IsPGroup.iff_card).1 hp
+  rw [Nat.card_eq_fintype_card] at hn
+  have h1 : 1 < Fintype.card G := Fintype.one_lt_card
+  have hn0 : n ≠ 0 := by rintro rfl; simp at hn; omega
+  refine exists_prime_orderOf_dvd_card p ?_
+  rw [hn]
+  exact dvd_pow_self p hn0
+
+/-- ★★★★★**自明でない有限 `p`-群は位数 `p` の**正規**部分群を持つ**。
+
+原文 (GenEll p.10):
+> integer n such that for any finite Galois extension L/K of finite extensions
+
+★中心が自明でない（`IsPGroup.center_nontrivial`）ので、
+中心の中に位数 `p` の元を取り、その生成する部分群を取ればよい。
+★★**正規性が要るのは、塔の各段を Galois にしたいから**である
+——`§9-894` の `exists_intermediateField_finrank` は部分群だけでよかったが、
+different の塔を帰納で回すには中間体も Galois でなければならない。 -/
+theorem exists_normal_subgroup_card_prime (p : ℕ) [Fact p.Prime] {G : Type} [Group G]
+    [Fintype G] [Nontrivial G] (hp : IsPGroup p G) :
+    ∃ H : Subgroup G, H.Normal ∧ Nat.card H = p := by
+  haveI : Fintype (Subgroup.center G) := Fintype.ofFinite _
+  haveI : Nontrivial (Subgroup.center G) := hp.center_nontrivial
+  obtain ⟨z, hz⟩ := exists_orderOf_eq_prime p (hp.to_subgroup (Subgroup.center G))
+  refine ⟨(Subgroup.zpowers ((Subgroup.center G).subtype z)), ?_, ?_⟩
+  · refine normal_of_le_center _ ?_
+    rw [Subgroup.zpowers_le]
+    exact z.2
+  · rw [Nat.card_zpowers,
+      orderOf_injective (Subgroup.center G).subtype (Subgroup.subtype_injective _) z]
+    exact hz
+
+def exists_normal_subgroup_card_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 10,
+    item := "Proposition 1.7(elementary claim——p-群は位数 p の正規部分群を持つ)",
+    sectionId := "genell-prop-1-7" }
+
 /-! ## ★★★★★★★★指数の一様化 -/
 
 /-- ★**指数を上げても入ったまま** —— `x^m ∈ I` かつ `m ≤ n` なら `x^n ∈ I`。 -/
