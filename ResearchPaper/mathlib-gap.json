@@ -317,11 +317,12 @@
           {
             "stage": "E1a",
             "claim": "**斉次多項式を切断で評価する** —— `a ∈ 𝒜 n`（`MvPolynomial (Fin (N+1)) R` の `n` 次斉次元）と `s : Fin (N+1) → Γ(X, M)` から `a(s) ∈ Γ(X, M^{⊗n})` を作る",
-            "status": "open",
-            "why": "★★★★**これが E1 の入口である**（2026-08-28 夜の測定）。`Away.mk_surjective`（mathlib）が `A⁰_{x_i}` の元を `a / x_i^n`（`a` は `n` 次斉次）の形に落とすので、環準同型 `A⁰_{x_i} → Γ(X, X_{s_i})` を作るには「`a` を `s` で評価する」段が要る。★次数が合うのが要点——`n` 次単項式 `∏ X_k^{d_k}` は `∏ s_k^{⊗d_k} ∈ Γ(X, M^{⊗n})` に行く。★★材料は `presheafTensorPow`（段 A1/D1）である。",
+            "status": "closed",
+            "why": "★★★★**これが E1 の入口である**（2026-08-28 夜の測定）。`Away.mk_surjective`（mathlib）が `A⁰_{x_i}` の元を `a / x_i^n`（`a` は `n` 次斉次）の形に落とすので、環準同型 `A⁰_{x_i} → Γ(X, X_{s_i})` を作るには「`a` を `s` で評価する」段が要る。★次数が合うのが要点——`n` 次単項式 `∏ X_k^{d_k}` は `∏ s_k^{⊗d_k} ∈ Γ(X, M^{⊗n})` に行く。★★材料は `presheafTensorPow`（段 A1/D1）である。 ★★★★★★**2026-08-28 夜に閉じた**（`§9-810`）。★要点は「自明化を替えるとすべての `t_j` が**同じ**単元 `u` 倍される」（`trivValue_congr'`、段 D1）ので、`n` 次斉次式の値は `u^n` 倍になること。★★mathlib に「斉次式の評価のスカラー則」は**無かった**（実測——`IsHomogeneous.eval₂` は次数の合成であって値の則ではない）ので本ファイルで入れた。★★★これで比 `a(s)/s_i^n` の自明化独立性の根拠が揃った（分子も分母も `u^n` 倍）。",
             "sources": [
               "[Stacks] 01NE Morphisms into projective space"
-            ]
+            ],
+            "where": "Found/GenEll/HomogValue.lean の eval₂_mul_const_of_isHomogeneous / homogValue / homogValue_congr / homogValue_X"
           },
           {
             "stage": "E1b",
@@ -385,7 +386,7 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "13.5/21",
+        "done": "14.5/21",
         "remaining": "★★**残るのは C2c（半分）・E・F2c** である。★★★2026-08-28 夕の再測定で**優先順位が確定した**——消費側（`northcott_of_projModel`）が要求するのは (a) 同次座標 `crd`、(b) 正規化座標の**単射性**、(c) 高さの比較 `ht_L = ht_{O(1)}∘φ + const` の 3 つである。★(a) は段 C2a/C2b で揃った。★★(b) は**閉埋め込み**からしか来ないので段 E が要る。★★★(c) は C2c の残り「超平面因子の高さ = 素朴高さ `log max|x_i|`」である。★★★★したがって **(iv) を段 E 抜きで取ることはできない**——単射性がそこからしか出ない。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
