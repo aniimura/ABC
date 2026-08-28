@@ -308,9 +308,9 @@
           },
           {
             "stage": "C2a-2",
-            "status": "open",
+            "status": "closed",
             "claim": "★★`A⁰_{x_i}` は `R` 上 `x_j/x_i` を変数とする**多項式環である**（自由性の側）",
-            "why": "★★★★★★**2026-08-28 夜に切り出した**。`§9-850`（`Found/GenEll/AwayGenerated.lean`）は「`A⁰_{x_i}` からの環準同型は定数と `x_j/x_i` での値で決まる」＝**生成**の半分を取った。★しかし段 C2c-1 の逆向き（`ker ≤ span {x_0/x_i}`）には**自由性**（関係が無いこと）が要る。★★これは `Proj` の標準チャート `D₊(x_i) ≅ 𝔸ᴺ` という古典的事実の残り半分で、mathlib に無い（2026-08-28 実測）。★★★機構の見当: `A⁰_{x_i} → R[t_0,…,t_N]/(t_i − 1)` の逆写像を `a/x_i^k ↦ a(t)/t_i^k` で作り、`val` の水準（`Localization.Away`）で両側合成が恒等であることを見る。★純粋に代数の主張であり、段 E1d（射の貼り合わせ）より扱いやすい。",
+            "why": "★★★★★★**2026-08-28 夜に切り出した**。`§9-850`（`Found/GenEll/AwayGenerated.lean`）は「`A⁰_{x_i}` からの環準同型は定数と `x_j/x_i` での値で決まる」＝**生成**の半分を取った。★しかし段 C2c-1 の逆向き（`ker ≤ span {x_0/x_i}`）には**自由性**（関係が無いこと）が要る。★★これは `Proj` の標準チャート `D₊(x_i) ≅ 𝔸ᴺ` という古典的事実の残り半分で、mathlib に無い（2026-08-28 実測）。★★★機構の見当: `A⁰_{x_i} → R[t_0,…,t_N]/(t_i − 1)` の逆写像を `a/x_i^k ↦ a(t)/t_i^k` で作り、`val` の水準（`Localization.Away`）で両側合成が恒等であることを見る。★純粋に代数の主張であり、段 E1d（射の貼り合わせ）より扱いやすい。 ★★★★★★★★★**2026-08-28 夜——閉じた**（`Found/GenEll/AwayPolynomial.lean`）: `ker_awayEval`——「`ker (awayEval) = (x_i − 1)`」、すなわち `A⁰_{x_i} ≅ R[x_0,…,x_N]/(x_i − 1) ≅ R[x_j/x_i : j ≠ i]`。★これは **`D₊(x_i) ≅ 𝔸ᴺ`** の代数側の言い方であり、mathlib に無かった。★★機構は両向きの写像を作って合成を見るだけ: `awayEval`（`x_j ↦ x_j/x_i`、`eval₂Hom`）と `awayQuotHom`（`a/x_i^k ↦ [a]`、分母は `[x_i] = 1` で消える）。★`awayEval` の全射性は `awayEval_mk`（`a` が `k` 次斉次なら `awayEval a = a/x_i^k`）から出て、その証明は `§9-850` の単項式分解をそのまま使う。★★`awayQuotHom ∘ awayEval = [·]` は `MvPolynomial.ringHom_ext`（`C` と `X` で見る）で出る。★★★これで段 C2c-1 の逆向き（`ker ≤ span {x_0/x_i}`）に要る**自由性**が揃った。",
             "sources": [
               "ABC3: Found/GenEll/AwayGenerated.lean",
               "ABC3: Found/GenEll/HyperplaneChart.lean"
@@ -472,8 +472,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。 ★★★★★★★★**2026-08-28 夜——アフィンでの核が入った**(`Found/GenEll/GenericFiber.lean`): `ker_locMap`(局所化は核と可換)と `quotKerMapEquiv` / `ratQuotKerEquiv`。★アフィンで読むと閉包のイデアルは `ker φ`(φ : A → B、A = Γ(U ⊆ ℙᴺ_ℤ)、B = Γ(Y, f⁻¹U))であり、生成ファイバーへ移るのは A を ℤ∖{0} で局所化すること。**B はすでに ℚ-代数なので局所化で変わらない**。★★したがって要るのは `ker (A_ℚ → B) = (ker φ)·A_ℚ`(mathlib の `IsLocalization.ker_map`)だけで、A_ℚ → B が全射なら `A_ℚ / (ker φ)·A_ℚ ≅ B`——**閉包の生成ファイバーは Y そのもの**である。★★★測定: mathlib に「単元の部分モノイドによる局所化は恒等」の instance が無かったので`isLocalization_self_of_isUnit` を自前で置いた(3 行)。`IsLocalization.atUnits` は『局所化が与えられているとき同型になる』形で、instance を**作る**形ではない。★残るのは `Scheme.IdealSheafData` の水準へ持ち上げる配管だけで、**新しい数学は要らない**(`Scheme.Hom.ker_apply` を各チャートに当てて貼る)。"
           }
         ],
-        "done": "★完全に閉じた 24 / 31（部分的 5、未着手 2）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2・C2c-1〜C2c-3・C2a-2 を新たに発見して挿入したので分母が増えた（後退ではない）。",
-        "remaining": "C2c(partial), C2c-1(partial), C2c-3(open), C2a-2(open), E0(partial), E1d(partial), F2c(partial)",
+        "done": "★完全に閉じた 25 / 31（部分的 5、未着手 1）。★★2026-08-28 に数え方を厳密にした——partial は閉じていないので分けて印字する。★★★同日、段 E3c-2・C2c-1〜C2c-3・C2a-2 を新たに発見して挿入したので分母が増えた（後退ではない）。",
+        "remaining": "C2c(partial), C2c-1(partial), C2c-3(open), E0(partial), E1d(partial), F2c(partial)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
