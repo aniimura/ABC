@@ -105,6 +105,12 @@
             "status": "closed",
             "title": "塔を組む帰納（elementary claim の p-群の側）",
             "why": "★★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/DifferentTowerInduction.lean`）: `pow_mem_differentIdeal_of_pow_finrank`（次数 `p^k` の Galois 拡大では `p^{k·p} ∈ 𝔡`）と `pow_mem_uniform_of_finrank_le`（`[L:K] ≤ d` なら `N ≔ p·log_p d` で一様に `p^N ∈ 𝔡`）。★`§9-900` の Galois な中間体で 1 段ずつ降り、`§9-DifferentKummer` の塔公式と mathlib の `differentIdeal_eq_differentIdeal_mul_differentIdeal` で継ぐ帰納である。★★右辺の `N` は **`K` にも `L` にも依らない**——原文の `Fix a prime number p and a positive integer d. Then there exists a positive integer n` の 「there exists」の中身がこれで型になった。★★★★★**測定**: `base`（`[L:K] = 1` なら `𝔡 = ⊤`）は仮定として受けている——mathlib に `differentIdeal … = ⊤` の判定が**見当たらなかった**（`Algebra.isUnramified_iff_differentIdeal_eq_top`・`differentIdeal_eq_top_iff`・`differentIdeal_self` いずれも無し、2026-08-28 実測）。★★★残るのは `step`（次数 `p` の Galois 拡大で `p^p ∈ 𝔡`）を `EC1`/`EC2` から作る配管と、`ζ_p` の添加（`§9-895`・`§9-896`）を塔の一段として挟む配管である。"
+          },
+          {
+            "stage": "EC8",
+            "status": "open",
+            "title": "イデアルの降下（(I·C) ∩ B = I）",
+            "why": "★`§9-902`（`ζ_p` の還元の前半）が `p^n ∈ (𝔡_{K,L})·O_{L(ζ)}` まで来たので、残るのは **`(I·C) ∩ B = I`**（`Ideal.comap f (Ideal.map f I) = I`）である。★★★★**mathlib の在庫を測った（2026-08-28）**: `Module.FaithfullyFlat.comap_map_eq` も `Ideal.comap_map_of_faithfullyFlat` も**無い**。あるのは `Ideal.comap_map_of_surjective`（全射の場合、`I ⊔ ker`）だけで、これは `B → C` が全射でないので使えない。★`exact?` は 200000 heartbeats で timeout した（つまり近い形も見つからない）。★★したがってこの段は**自作が要る**。道は 2 つ:(1) 忠実平坦性から一般に出す（`Module.FaithfullyFlat` の API を調べる）、(2) Dedekind 環の素イデアル分解と分岐指数で素点ごとに比べる（`v_𝔮(I·C) = e(𝔮/𝔭)·v_𝔭(I)`）。★★★消費側（`§9-897`）は `p^n ∈ 𝔡` の形だけを使うので、(2) の素点ごとの比較で十分である。"
           }
         ]
       }
