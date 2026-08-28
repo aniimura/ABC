@@ -515,6 +515,7 @@ import ABC3.Found.GenEll.AwayKerGen
 import ABC3.Found.GenEll.KerHyperplaneChart
 import ABC3.Found.GenEll.HyperplaneChartSection
 import ABC3.Found.GenEll.HyperplanePullback
+import ABC3.Found.GenEll.HeightArithDegree
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
