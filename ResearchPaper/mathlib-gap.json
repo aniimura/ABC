@@ -249,16 +249,16 @@
       "minimalForm": "Theorem 2.5 そのもの。",
       "nodes": 5,
       "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
-      "done": 3,
-      "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
+      "done": 4,
+      "doneNote": "★★★★★2026-08-29 更新: Lemma 2.1(Found/NCBelyi/Lemma21.lean)・Lemma 2.3(Separation.lean)・Lemma 2.2(Lemma22.lean、第 398-404)に加え、★★**Lemma 2.4 が閉じた**(Found/NCBelyi/Lemma24Chain.lean の lemma_2_4_chain、第 526)。残るのは Theorem 2.5 本体の**段 1(Riemann–Roch / Serre 双対性)だけ**である。",
       "missingSkeleton": [
-        "[NCBelyi] Lemma 2.4"
+        "[NCBelyi] Theorem 2.5 の段 1(Riemann–Roch / Serre 双対性)"
       ],
       "lemma24Progress": {
         "measuredAt": "2026-08-27",
         "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
         "nodes": 9,
-        "done": 8,
+        "done": 9,
         "doneList": [
           "係数の限界(norm_coeff_le_choose、第 405)",
           "値の上界・下界と suitable choice of C(第 405)",
@@ -269,10 +269,17 @@
           "★Galois 安定性(IsConjStable / conjClosure、第 410)",
           "★★帰納の本体(nested_induction / nested_induction_descend、第 416)"
         ],
-        "todoList": [
-          "★残りは 1 つだけ: ℙ¹ 上の有理関数としての組み立て(不分岐性の帳簿)。★★多項式の段は 2026-08-27 の第 417 ブロックで端から端まで閉じた(exists_poly_image_rat: 代数的数の有限集合は ℚ[x] の非定数多項式 1 つで ℚ の中へ写せる)。残るのは、その写像が ℙ¹ の射として S_φ の外で不分岐であることの帳簿だけである。"
-        ],
-        "extraDone": "★★第 417: exists_descend_data(帰納段のデータを実際に作る段)と nested_induction_descend′(不変量付き)を経て、exists_poly_image_rat を得た。★原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis, and composing the resulting morphisms』がこれで Lean の中にある。"
+        "todoList": [],
+        "extraDone": "★★第 417: exists_descend_data(帰納段のデータを実際に作る段)と nested_induction_descend′(不変量付き)を経て、exists_poly_image_rat を得た。★原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis, and composing the resulting morphisms』がこれで Lean の中にある。",
+        "closedAt": "2026-08-29",
+        "closingNote": "★★★★★★★★★★2026-08-29(第 519-526、§9-981〜988)で閉じた。★残っていた「ℙ¹ 上の有理関数としての組み立て」は、**Chain**(Möbius x ↦ c/(x−λ) と多項式の交互合成)というデータ型で表し、その評価 Chain.eval と臨界点 Chain.IsCrit を定義して片づけた。★★臨界点からは**極 x = λ を除いてある**——極は ∞ へ写り、原文の S_φ ⊆ ℙ¹(ℚ) の ∞ が受ける(原文が 𝔸¹ ではなく ℙ¹ と書く理由がこれである)。",
+        "newParts20260829": [
+          "§9-984 separation_step / separation_step_not_mem — 原文の「for a suitable choice of C, f0(β) ∉ S′」。部品 3 つ(Gal-安定性 ⟹ f₀ の根が単位円板／Gauss–Lucas ⟹ f₀′ の根も／‖β‖ > 3 ⟹ 値が分かれる)を繋ぐだけであった。",
+          "§9-985 conjSet_mobius_subset / isConjStable_mobius — ★原文の『with rational coefficients!』の帰結その 2(Gal-安定性が壊れない)。変換多項式 q(Y) ≔ ∑ p_k (ν+λ(Y−μ))^k (Y−μ)^{d−k} を使う。",
+          "§9-986 nested_induction_descend_beta — 原文の『replacing S by S′, β by f₀(β)』。P′ S ≔ ∀ β, Q S β → P S β と置けば既存の nested_induction が回る。",
+          "§9-987 conjSet_aeval_subset ほか — ★Gal-安定性が**多項式の像**でも壊れないこと。機構は埋め込みの値域(mathlib の Algebra.IsAlgebraic.range_eval_eq_rootSet_minpoly)。降下段 exists_descend_data_beta もここ。",
+          "§9-988 Chain / lemma_2_4_chain — ★★★★Lemma 2.4 本体。"
+        ]
       },
       "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
       "where": [
@@ -321,6 +328,17 @@
           ],
           "todo": "★★★残る仕事は nested_induction_descend′ を **β を運ぶ形**に書き直すこと(exists_descend_data が返す g に「g β ∉ S′」を足す)だけである。"
         }
+      },
+      "thm25RemainderMeasured20260829": {
+        "measuredAt": "2026-08-29",
+        "note": "★★★★★[NCBelyi] Theorem 2.5 の証明 4 段のうち、**3 段が閉じた**。",
+        "stages": [
+          "段 1 Riemann–Roch / Serre 双対性で ψ : X → ℙ¹ を作り T = {β} に帰着 — ☆**残る唯一の段**。[Stacks] 53.4 / 53.5 / 48.27 に原典があり第 419 で手元にあることを実測済み。★mathlib には曲線の直線束・Serre 双対性・基点自由な線型系がほぼ無い(LineBundle 0 件、2026-08-16 実測)。",
+          "段 2 Lemma 2.4 — ★★**閉じた**(§9-988、Found/NCBelyi/Lemma24Chain.lean)。",
+          "段 3 Lemma 2.3(C = 4) ＋ x ↦ νx + μ — ★★閉じた(§9-981、Found/NCBelyi/Thm25Step3.lean)。",
+          "段 4 Lemma 2.2 — ✅ 済(第 398-404)。"
+        ],
+        "verdict": "★★★[GenEll] Theorem 2.1 の (b)(noncritical Belyi)に残るのは**段 1 だけ**である。★(a)(分岐指数 e の連結有限エタール Galois 被覆、folklore／[Stacks] 58.6)と合わせて、Theorem 2.1 に残るのは**代数幾何の 2 点**——どちらも mathlib に無い理論を要する。"
       }
     },
     "riemann-roch-curves": {
