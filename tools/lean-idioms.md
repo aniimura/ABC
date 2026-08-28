@@ -1790,3 +1790,22 @@ set_option backward.isDefEq.respectTransparency false in
 `Hom.ker_apply` などで同じことをしている。
 `simp only [CommRingCat.hom_comp]` でも駄目（「unused」と言われる）なので、
 option を置くのが正解である。
+
+## `rw [← f_hom]` が通らないのは結合の向きのせい（透明度の警告は副次的）
+
+`a ≫ b ≫ c` は **`a ≫ (b ≫ c)`**（`≫` は右結合）なので、`a ≫ b` は**部分項ではない**。
+`rw [← lemma]` で `a ≫ b` を畳もうとすると
+
+> Did not find an occurrence of the pattern …
+> Note: The target expression is not type-correct under the `instances` transparency level
+
+が出る。**2 行目は副次的な症状**で、原因は 1 行目——結合の向きである。
+
+**直し方**: 先に括り直す。
+
+```lean
+rw [← Category.assoc a, ← Scheme.Hom.appIso_hom f U]
+```
+
+`← Category.assoc` に**最初の射を明示的に渡す**と、どの箇所を括り直すかが決まる。
+（2026-08-28、`Γ(Proj 𝒜, D₊(x_i)) ≅ A⁰_{x_i}` の打ち消しで実測）
