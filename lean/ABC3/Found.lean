@@ -428,6 +428,7 @@ import ABC3.Found.GenEll.DifferentRamified
 import ABC3.Found.GenEll.DifferentRamIdx
 import ABC3.Found.GenEll.DifferentCondBound
 import ABC3.Found.GenEll.Prop17Hup
+import ABC3.Found.GenEll.LogCondSupport
 import ABC3.Found.GenEll.DifferentTameExact
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
