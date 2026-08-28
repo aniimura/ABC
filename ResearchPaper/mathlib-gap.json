@@ -96,9 +96,9 @@
           },
           {
             "stage": "EC6",
-            "status": "open",
+            "status": "partial",
             "title": "局所から大域へ——素点ごとの評価を deg に足し上げる",
-            "why": "★`Found/GenEll/LogDiffTower.lean` の `logDiffOfField_tower` が `log-diff_K − log-diff_F = log N(𝔡_{K/F})/[K:ℚ]` を与えている（**等式**）。★★`EC1`–`EC5` は各素点での `𝔡` の下界なので、`log N` を素点の和に分解して足し上げる。★★★Σ の外（馴）では `𝔡` の指数がちょうど `e−1` になり、原文の「`=` と `≤` であって `≲` ではない」がそこで出る。Σ の上は `EC5` の `n` が**点にも定義体にも依らない**ので一様に有界になる。"
+            "why": "★`Found/GenEll/LogDiffTower.lean` の `logDiffOfField_tower` が `log-diff_K − log-diff_F = log N(𝔡_{K/F})/[K:ℚ]` を与えている（**等式**）。★★`EC1`–`EC5` は各素点での `𝔡` の下界なので、`log N` を素点の和に分解して足し上げる。★★★Σ の外（馴）では `𝔡` の指数がちょうど `e−1` になり、原文の「`=` と `≤` であって `≲` ではない」がそこで出る。Σ の上は `EC5` の `n` が**点にも定義体にも依らない**ので一様に有界になる。 ★★★★★★★★★★**2026-08-28 夜——消費側が入った**（`Found/GenEll/LogDiffBoundEC6.lean`）: `logDiffOfField_sub_le_log`（`m ∈ 𝔡` なら `log-diff` の差は `log m` 以下）と `logDiffOfField_sub_le_of_pow_mem`（`p^n ∈ 𝔡` なら差は `n·log p` 以下）。★これが原文の「the portion over Σ … is bounded」の中身である——右辺は **`K` にも `F` にも依らない**。★★★★**測定**: `degNormalized_idealADiv_le_log_of_natCast_mem`（`§9-VerticalBound`）は既に手元にあった——「2 つの `ℤ`-モデルの高さの差」のために作ったものが、**そのまま elementary claim の消費側になった**。CLAUDE.md の在庫の規律（木を grep する前にまず引く）がまた当たった。★★残るのは elementary claim 本体（`p^n ∈ 𝔡` の `n` を `p` と `d` だけから作る）で、`EC1`–`EC5` の部品を塔で組めば出る。"
           }
         ]
       }
