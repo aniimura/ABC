@@ -204,7 +204,7 @@
         "absentPart": "★**層のテンソル積**（前層のテンソル積の層化）——これが無いので Pic(X)（スキーム）が作れない。 ★★可逆層（階数 1 の局所自由層）という**定義**。 ★★★Proj 上の O(1)、P^n_S の点の関子（座標表示）。 ★★★★ample / very ample の定義と Serre の定理（ample のある冪が very ample）。 ★吹き上げ（Blowing up）。"
       },
       "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
-      "impact": "★★★★**2026-08-27 に訂正**: 直前に「残り 13 項目のうち 11 項目」と書いたのは**過大**であった。 ★実際にこの塡がりが門であるのは**§1 の 5 項目**（Definition 1.1・Definition 1.2・Proposition 1.4・Remark 1.4.1・Proposition 1.7）である。 ★★§3・§4 の 6 項目は **ample を経由しない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と 粗モジュライ ℙ¹_j の明示モデルで出る（台帳の minimalForm の通り）。 ★★★§3・§4 の実質的な塡がりは faltings-height-vs-degree-at-infinity と galois-equivariant-tate-uniformization の 2 つである。",
+      "impact": "★★★★★★**2026-08-28 の再測定**: [GenEll] §1 のうち **`Definition 1.1`・`Definition 1.2` は本塡がりを経由せずに閉じた**（`§9-800`〜`§9-804`）。★したがってこの塡がりが門であるのは **`Proposition 1.4` の (iv) だけ**であり、そこから `Remark 1.4.1`・`Proposition 1.7` と、§3 の `Proposition 3.4`／`Lemma 3.7`（有限例外集合）が従属する。★★§3・§4 のもう一つの門は `faltings-height-vs-degree-at-infinity`（複素解析、並行セッションの領分）である。",
       "primarySource": {
         "measuredAt": "2026-08-27",
         "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
@@ -341,7 +341,8 @@
           }
         ],
         "done": "12.5/15",
-        "remaining": "★★**残るのは C2c（半分）・E・F2c** である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★**超平面因子も 2026-08-28 に入った**（hyperplaneι / hyperplaneIdeal）ので、C2c の残りは「超平面因子の高さ = 素朴高さ」と very ample の定義だけである。 ★★★残る本体は **E（Serre の定理）**であり、F2c（生成ファイバーが Y に戻る）は小さい。"
+        "remaining": "★★**残るのは C2c（半分）・E・F2c** である。★★★2026-08-28 夕の再測定で**優先順位が確定した**——消費側（`northcott_of_projModel`）が要求するのは (a) 同次座標 `crd`、(b) 正規化座標の**単射性**、(c) 高さの比較 `ht_L = ht_{O(1)}∘φ + const` の 3 つである。★(a) は段 C2a/C2b で揃った。★★(b) は**閉埋め込み**からしか来ないので段 E が要る。★★★(c) は C2c の残り「超平面因子の高さ = 素朴高さ `log max|x_i|`」である。★★★★したがって **(iv) を段 E 抜きで取ることはできない**——単射性がそこからしか出ない。",
+        "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。"
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
@@ -943,6 +944,21 @@
       "minimalForm": "★AMetric を書き換えずに述語 AMetric.IsConjCompatible を足し、1・⊗・引き戻し・等長で閉じることを示せばよい。★★そうすれば APicM の共役両立な部分群の上で deg_F / ht がそのまま使える。",
       "impact": "★★★★★2026-08-28 に閉じた(§9-800/§9-801)。LocalMetric.IsConjCompatible を足し、1・⊗・逆元・引き戻し・等長で閉じることを示した。★★さらに同日 §9-802 で**連続性**(LocalMetric.IsContinuous)も足した——原文の hermitian 計量が要求するもう一つの条項である。★★★これで APicA X = APicC X ⊓ APicK X が APicM X の部分群になり、Definition 1.1 の項目全体が取れた。",
       "nextStep": "★閉じた。",
+      "blockedBy": ""
+    },
+    "cohomology-base-change-sections": {
+      "what": "★`X` が `ℤ`-固有・`ℤ`-平坦のとき `Γ(X_ℚ, L_ℚ) = Γ(X, L) ⊗_ℤ ℚ`（大域切断の平坦底変換）。",
+      "whereUsed": [
+        "[GenEll] Proposition 1.4, (ii) の証明——「`L_ℚ` のある正冪が大域切断で生成される」という**生成ファイバーの**仮定から、**`X` 上の**大域切断を得る段（分母を払う）"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "2026-08-28 実測。mathlib に scheme の連接層コホモロジーの底変換は無い（前提の `Ample` すら 0 件、`Mathlib/AlgebraicGeometry/` 配下）。",
+        "absentPart": "★平坦底変換 `H^0(X_S, L_S) = H^0(X, L) ⊗_R S`（`R → S` 平坦）。"
+      },
+      "minimalForm": "★★**消費側では回避できる**——`§9-805` の `exists_htMetricU_ge` は「`X` 上の大域切断 `s` が 1 つある」ことだけを要求し、そこから下界を出す。★原文の仮定（生成ファイバーでの生成）を「`X` 上の切断の存在」に読み替えれば (ii) はすでに閉じている。★★読み替えの記録は `Found/Arakelov/Prop14ii.lean` の docstring にある。",
+      "impact": "★これは (ii) の**仮定の変換**のためだけに要る。結論そのものは `§9-805`＋`§9-807` で閉じている。",
+      "nextStep": "★消費側が困らないので後回しでよい。要るとすれば `Remark 1.4.1` の第 2 文（ℚ-スキームから ℤ-モデルを作る段）と合わせてになる。",
       "blockedBy": ""
     }
   },
