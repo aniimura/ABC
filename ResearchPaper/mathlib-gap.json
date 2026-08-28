@@ -277,6 +277,12 @@
             ]
           },
           {
+            "stage": "C2d",
+            "status": "closed",
+            "title": "正規化の橋（htArith は絶対、mulHeight は相対）",
+            "why": "★★★★★★★★★★★**2026-08-28 夜——測定と橋**（`Found/GenEll/HeightNormalizationBridge.lean`）。★★★★**測定**: `northcott_of_projModel` の仮定 `hcmp` は `Height.mulHeight (crd p) ≤ exp(ht p + const)` だが、`Height.mulHeight` は**相対高さ** `H_K`（`[K:ℚ]` 乗根を取らない）であり、`htArith` は `[F:ℚ]` で割った**絶対高さ**である。`log H_K = [F:ℚ]·ht` なので **`ht` をそのまま入れると次数の分だけ足りない**。★★**橋**: 次数の上界 `d` を使って `log H_K ≤ d·(ht + C)`。`ht + C ≥ 0` は `log H_K ≥ 0` から**自動で出る**（仮定に置く必要がない）。★★★したがって `hcmp` は「`d` 倍した高さ」の形で満たされ、「高さ `≤ C` の点の集合」は「`d` 倍した高さ `≤ d·C` の点の集合」に含まれるので、Northcott の結論は変わらない。★★★★`mulHeight_le_exp_htArith` としてその形を取った。"
+          },
+          {
             "stage": "C2c-1",
             "status": "closed",
             "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",
