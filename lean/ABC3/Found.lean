@@ -541,6 +541,7 @@ import ABC3.Found.GenEll.HeightArithDegreeGen
 import ABC3.Found.GenEll.HeightArithLocalization
 import ABC3.Found.GenEll.HeightLocalCharts
 import ABC3.Found.GenEll.HeightLocalArch
+import ABC3.Found.GenEll.NorthcottLocal
 import ABC3.Found.GenEll.HyperplaneHeight
 import ABC3.Found.GenEll.GreenFubiniStudy
 import ABC3.Found.GenEll.GreenChartIndep
