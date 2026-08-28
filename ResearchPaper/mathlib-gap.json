@@ -341,8 +341,9 @@
           {
             "stage": "E1d",
             "claim": "**貼り合わせて `X ⟶ ℙᴺ_R`** —— 各チャート `X_{s_i} ⟶ Spec A⁰_{x_i} ≅ D₊(x_i)` を貼る",
-            "status": "open",
-            "why": "★`Proj.awayι`（mathlib、`Spec (A⁰_f) ⟶ Proj 𝒜` の開埋め込み）と `Scheme.homSpecIso`（環準同型 ⟷ `Spec` への射）で各チャートの射が出る。★★貼り合わせは `X_{s_i}` が `X` を覆うこと（段 E2）と、重なりでの一致（`sectionRatio_agree`、段 D3）から。"
+            "status": "partial",
+            "why": "★`Proj.awayι`（mathlib、`Spec (A⁰_f) ⟶ Proj 𝒜` の開埋め込み）と `Scheme.homSpecIso`（環準同型 ⟷ `Spec` への射）で各チャートの射が出る。★★貼り合わせは `X_{s_i}` が `X` を覆うこと（段 E2）と、重なりでの一致（`sectionRatio_agree`、段 D3）から。 ★★★★★**2026-08-28 夜: チャートごとの射が入った**（`§9-816`）——`X_{s_i} ⊓ V ⟶ Spec A⁰_{x_i} ⟶ ℙᴺ_R`。道具は `Scheme.toSpecΓ`・`Scheme.Opens.topIso`・`Proj.awayι`（いずれも mathlib）を繋ぐだけであった。★★**残るのは貼り合わせの 2 条件**: (1) 重なり `X_{s_i} ⊓ X_{s_j}` での一致（機構は `sectionRatio_agree`（段 D3）と同じ「比の比は比」）、(2) 被覆 `⋃_i X_{s_i} = X`（段 E2 の前半）。",
+            "where": "Found/GenEll/ChartToProj.lean の chartMorphism / chartToProj"
           },
           {
             "stage": "E2",
@@ -388,7 +389,7 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "18/21",
+        "done": "18.5/21",
         "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせ）・E2（有限化と次数揃え）・E3（immersion 性）・C2c 前半（超平面因子の高さ = 素朴高さ）・F2c** である。★★★E1 の 4 段のうち **E1a・E1b・E1c が閉じ、残るのは E1d だけ**になった（2026-08-28 夜）——材料は `Scheme.homSpecIso`（環準同型 ⟷ `Spec` への射）と `Proj.awayι`（mathlib）である。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
