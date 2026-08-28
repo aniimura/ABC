@@ -394,8 +394,8 @@
           {
             "stage": "E3d",
             "claim": "各チャートで閉埋め込み ⟹ 全体で immersion",
-            "status": "open",
-            "why": "★`Spec` の側では「環準同型が全射 ⟺ 閉埋め込み」（mathlib: `Spec.map` と `IsClosedImmersion`）。★★あとは `X_{s_i}` が `X` を覆い（段 E2）、像が `D₊(x_i)` に入る（`range_chartToProj_le`、`§9-821`）ことから局所的に閉埋め込み、すなわち immersion である。"
+            "status": "closed",
+            "why": "★`Spec` の側では「環準同型が全射 ⟺ 閉埋め込み」（mathlib: `Spec.map` と `IsClosedImmersion`）。★★あとは `X_{s_i}` が `X` を覆い（段 E2）、像が `D₊(x_i)` に入る（`range_chartToProj_le`、`§9-821`）ことから局所的に閉埋め込み、すなわち immersion である。 ★★★★★★★**2026-08-28 夜——段 E3d が閉じた**(`Found/GenEll/ChartImmersion.lean`): `isClosedImmersion_of_projCharts` / `isImmersion_of_projCharts`。★橋は 2 本しかなかった: (1) `IsClosedImmersion.of_surjective_of_isAffine`(アフィン＋全射 ⟹ チャートで閉埋め込み、mathlib)、(2) `IsZariskiLocalAtTarget @IsClosedImmersion`(チャートで閉埋め込み ⟹ 大域で閉埋め込み、mathlib)。★★あとは「D₊(x_i) が ℙᴺ を覆う」だけで、それは段 C2a の `exists_X_notMem` から出た(`Proj.basicOpen` の側へ言い直す `iSup_projBasicOpen_X_eq_top` を足した)。★★★測定: **閉埋め込みが得られる**(immersion より強い)——D₊(x_i) が ℙᴺ **全体**を覆うからである。原典が「embedding」としか書かないのは、X_ℚ の側で生成ファイバーへ落とすと閉性が落ちうるため(段 F2c)であろう。"
           },
           {
             "stage": "F1",
@@ -422,8 +422,8 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "★完全に閉じた 20 / 26（部分的 4、未着手 2）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
-        "remaining": "C2c(partial), E0(partial), E1d(partial), E3c(partial), E3d(open), F2c(open)",
+        "done": "★完全に閉じた 21 / 26（部分的 4、未着手 1）。★★2026-08-28 に数え方を厳密にした——以前の「22/26」は partial を数に入れていた。**partial は閉じていない**ので分けて印字する。",
+        "remaining": "C2c(partial), E0(partial), E1d(partial), E3c(partial), F2c(open)",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",

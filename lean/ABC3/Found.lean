@@ -483,6 +483,7 @@ import ABC3.Found.GenEll.GlobalizeOverlap
 import ABC3.Found.GenEll.Globalize
 import ABC3.Found.GenEll.ChartFiniteType
 import ABC3.Found.GenEll.ChartSurjective
+import ABC3.Found.GenEll.ChartImmersion
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
