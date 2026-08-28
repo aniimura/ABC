@@ -921,13 +921,13 @@
         "★その下流: ht_M̄ : X(ℚ̄) → ℝ が well-defined であること"
       ],
       "mathlibStatus": {
-        "verdict": "absent",
+        "verdict": "worked-around",
         "searched": "2026-08-28 実測。mathlib の PresheafOfModules.pullback は pushforward の**左随伴として抽象的にのみ定義**されている（Mathlib/Algebra/Category/ModuleCat/Presheaf/Pullback.lean）。各開集合ごとの値を与える式（左 Kan 拡大の colimit 公式）は無い。ファイル内にあるのは pullbackPushforwardAdjunction / pullbackId / pullbackComp / pullback_assoc だけである。",
         "absentPart": "★(f^*M)(U) = colim_{U ⊆ f⁻¹V} M(V) ⊗_{O_Y(V)} O_X(U) という**objectwise の式**。★★これが無いと Γ(f^*L) を計算できない。"
       },
       "minimalForm": "★消費側が要るのは「f が全射なら Γ(f^*L) ≅ Γ(L) ⊗_{O_Y(⊤)} O_X(⊤)、しかも pullSec が s ↦ s ⊗ 1 に対応する」ことだけである。★★f が全射のとき U = ⊤ に対する colimit は V = ⊤ に潰れるので、これは colimit 公式の**最も易しい場合**である。",
-      "impact": "★★★これが Definition 1.1 (ii) の**最後の塞がり**である（2026-08-28 時点）。deg_F : APic(Spec 𝓞_F) → ℝ は §9-782 で無条件に入り、高さの加法性も §9-783 で無条件になった。底変換のアルキメデス側は §9-784 で入った。残るのは有限側だけであり、それが本 gap である。",
-      "nextStep": "★案 1: 全射な f について Γ(f^*L) の普遍性を随伴から直接使って Γ(L) ⊗ O_X(⊤) と比較する。★★案 2: μ : Γ(L) ⊗_{𝓞_F} 𝓞_K → Γ(f^*L)（pullSec の係数拡大）が**全射**であることを示す——両者とも可逆 𝓞_K-加群なので、mathlib の Module.Invertible.bijective_of_surjective で同型に上がる。★★★案 3: 層の側（tilde）に移してから比較する（PicQCoh の tildeGammaIsoOfTrivial と PicTildeTensorIso が在庫）。",
+      "impact": "★★★2026-08-28 に閉じた。得られた形は Γ(f^*L) = Γ(X,⊤)-span { pullSec f L ⊤ s }(任意の f、任意の算術直線束 L)。★残るのは (a) これを μ の全単射性に上げ、(b) #(𝓞_K/𝔞𝓞_K) = #(𝓞_F/𝔞)^{[K:F]} と埋め込みの数え上げで底変換を組み立てること。",
+      "nextStep": "★2026-08-28 に**塞がった**(§9-790、span_pullSecT_of_inv)。Γ(f^*L) を計算せずに、テンソルで回した: 単位束(pullbackUnitPreIso)→ A ⊗ A⁻¹ ≅ Ō で持ち上げ → delta_pullSec(§9-743)＋isIso_pullbackDelta → surjective_of_map_surjective(§9-785)で因子を落とす。★★f の全射性は要らなかった。",
       "blockedBy": ""
     }
   },
