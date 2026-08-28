@@ -381,6 +381,7 @@ import ABC3.Found.GenEll.Thm38Bridge
 import ABC3.Found.GenEll.Thm38Alpha
 import ABC3.Found.GenEll.Thm38Kummer
 import ABC3.Found.GenEll.Thm38KummerExists
+import ABC3.Found.GenEll.Thm38Degree
 import ABC3.Found.GenEll.Elementary
 import ABC3.Found.GenEll.DeligneElementary
 import ABC3.Found.GenEll.PrimesOfSize
