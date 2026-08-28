@@ -480,6 +480,7 @@ import ABC3.Found.GenEll.SheafifyGlue
 import ABC3.Found.GenEll.OverlapCriterion
 import ABC3.Found.GenEll.GlobalizeStep
 import ABC3.Found.GenEll.GlobalizeOverlap
+import ABC3.Found.GenEll.Globalize
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
