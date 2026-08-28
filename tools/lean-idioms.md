@@ -1748,3 +1748,45 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
 `Away.map g f ∘ awayEvalOf f = awayEvalOf (g f) ∘ g` に
 「`g (C r) = C r`」の仮定は**要らない**——`awayEvalOf_mk` が**次数だけ**で
 右辺を `Away.mk` に潰すからである。一般化した方が証明が短くなる例。
+
+## `f.app U` は `f` に依存した型を持つ —— でも `ker` は持たない
+
+`Scheme.Hom.app f U : Γ(Y,U) ⟶ Γ(X, f ⁻¹ᵁ U)` は**終域が `f` に依る**ので、
+`h : f = g` があっても `f.app U = g.app U` とは**書けない**（型が違う）。
+`congrArg (fun m => m.app U) h` は型エラーになる。
+
+**直し方**: 核を取ってから比べる。`RingHom.ker (f.app U).hom : Ideal Γ(Y,U)` の型は
+**`f` に依らない**ので、変数に対して `subst` できる:
+
+```lean
+theorem ker_app_congr {X Y : Scheme} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens) :
+    RingHom.ker (Scheme.Hom.app f U).hom = RingHom.ker (Scheme.Hom.app g U).hom := by
+  subst h; rfl
+```
+
+同じ手が「開集合が型に現れる」場合にも効く——`chartA ⁻¹ᵁ (chartA ''ᵁ ⊤) = ⊤` は
+`rw` では動かせないが、**開集合を変数として受け取り** `subst` すれば消える:
+
+```lean
+theorem ker_specMap_app_eqToHom (φ : B ⟶ B') (V : (Spec B).Opens) (h : (⊤ : _) = V) : … := by
+  subst h; …
+```
+
+## `CommRingCat.hom_comp` の `rw` が「型が instances 透明度で正しくない」で通らない
+
+`Γ(X, U)` を含む式で `rw [CommRingCat.hom_comp]` が
+
+> Note: The target expression is not type-correct under the `instances` transparency level
+
+で失敗することがある（`presheaf.obj` の型が `TopCat.Presheaf` と関手型の間で合わない）。
+
+**直し方**: 宣言の直前に
+
+```lean
+set_option backward.isDefEq.respectTransparency false in
+```
+
+を置く。mathlib 自身が `Mathlib/AlgebraicGeometry/IdealSheaf/Basic.lean` の
+`Hom.ker_apply` などで同じことをしている。
+`simp only [CommRingCat.hom_comp]` でも駄目（「unused」と言われる）なので、
+option を置くのが正解である。
