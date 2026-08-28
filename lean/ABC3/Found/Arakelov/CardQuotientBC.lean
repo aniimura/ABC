@@ -62,6 +62,38 @@ theorem card_quotient_map_algebraMap (F K : Type) [Field F] [NumberField F]
         ^ (Module.finrank (FractionRing (𝓞 F)) (FractionRing (𝓞 K))) :=
   Ideal.absNorm_algebraMap (R := 𝓞 F) (S := 𝓞 K) a
 
+attribute [local instance] FractionRing.liftAlgebra FractionRing.isScalarTower_liftAlgebra in
+/-- ★★★★★**`FractionRing` の次数は体の次数である**。
+
+★`FractionRing (𝓞 F) ≃ₐ F`（`FractionRing.algEquiv`）を 2 つ使って
+`Algebra.finrank_eq_of_equiv_equiv` に渡す。
+★★互換性は局所化の一意性（`IsLocalization.ringHom_ext`）で出る。 -/
+theorem finrank_fractionRing_ringOfIntegers (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] :
+    Module.finrank (FractionRing (𝓞 F)) (FractionRing (𝓞 K)) = Module.finrank F K := by
+  refine Algebra.finrank_eq_of_equiv_equiv
+    (FractionRing.algEquiv (𝓞 F) F).toRingEquiv
+    (FractionRing.algEquiv (𝓞 K) K).toRingEquiv ?_
+  apply IsLocalization.ringHom_ext (nonZeroDivisors (𝓞 F))
+  ext x
+  simp only [RingHom.coe_comp, Function.comp_apply, RingEquiv.toRingHom_eq_coe,
+    RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv, AlgEquiv.commutes]
+  rw [← IsScalarTower.algebraMap_apply (𝓞 F) (FractionRing (𝓞 F)) (FractionRing (𝓞 K)),
+    IsScalarTower.algebraMap_apply (𝓞 F) (𝓞 K) (FractionRing (𝓞 K)),
+    AlgEquiv.commutes,
+    ← IsScalarTower.algebraMap_apply (𝓞 F) F K,
+    IsScalarTower.algebraMap_apply (𝓞 F) (𝓞 K) K]
+
+attribute [local instance] FractionRing.liftAlgebra in
+/-- ★★★★★★★**イデアルを延長したときの商の位数**（`[K:F]` で書いた形）。
+
+    `#(𝓞_K / 𝓞·𝓞_K) = #(𝓞_F / 𝓞) ^ [K:F]` -/
+theorem card_quotient_map_algebraMap' (F K : Type) [Field F] [NumberField F]
+    [Field K] [NumberField K] [Algebra F K] (a : Ideal (𝓞 F)) :
+    Nat.card ((𝓞 K) ⧸ (a.map (algebraMap (𝓞 F) (𝓞 K))))
+      = (Nat.card ((𝓞 F) ⧸ a)) ^ (Module.finrank F K) := by
+  rw [card_quotient_map_algebraMap F K a, finrank_fractionRing_ringOfIntegers F K]
+
 /-! ### ★出典の紐付け(`.src`) -/
 
 def card_quotient_map_algebraMap.src : ABC3.Meta.Source :=
