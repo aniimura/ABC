@@ -494,6 +494,7 @@ import ABC3.Found.GenEll.GlobalRatio
 import ABC3.Found.GenEll.GlobalAwayHom
 import ABC3.Found.GenEll.GlobalChartSurjective
 import ABC3.Found.GenEll.GlobalRatioCover
+import ABC3.Found.GenEll.GluedGlobalRatio
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
