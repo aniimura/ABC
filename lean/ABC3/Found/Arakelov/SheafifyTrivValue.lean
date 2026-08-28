@@ -98,7 +98,50 @@ theorem basicOpen_trivValue_sheafifyTriv {X : Scheme.{0}} (P : X.PresheafOfModul
       = X.basicOpen (trivValue P V e s) := by
   rw [trivValue_sheafifyTriv]
 
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★★**非消失軌跡は層化で変わらない** —— 段 E3a-2 が閉じた。
+
+原文 (GenEll p.7):
+> that [some positive tensor power of] the ample line bundle LQ yields an embedding
+
+    `X_{unit s}` （層化の側） `= X_s` （前層の側）
+
+★★これで `§9-817`〜`§9-820`（被覆・次数揃え）と `§9-822`（分母を払う）が
+**層化の側へそのまま移る**。
+
+★★★機構は `§9-818` の `nonVanishing_tensor` と同じ型である
+——「各点で `P` が自明化する開 `W` を取り、`V ⊓ W` の上で両辺を `basicOpen` に直す」。 -/
+theorem nonVanishing_sheafify {X : Scheme.{0}} (P : X.PresheafOfModules)
+    (hP : IsLocallyTrivial X P) (s : (P.obj (op ⊤) : Type)) :
+    nonVanishing ((sheafifyFunctor X).obj P).val
+        (((sheafifyUnit X P).app (op ⊤)).hom s)
+      = nonVanishing P s := by
+  apply le_antisymm
+  · intro x hx
+    obtain ⟨V, e', hxe⟩ := (mem_nonVanishing_iff _ _ x).1 hx
+    obtain ⟨S, hS, htriv⟩ := hP ⊤
+    obtain ⟨W, i, hi, hxW⟩ := hS x trivial
+    obtain ⟨e⟩ := htriv i hi
+    have hxV : x ∈ V := X.basicOpen_le _ hxe
+    have hmem : x ∈ nonVanishing ((sheafifyFunctor X).obj P).val
+        (((sheafifyUnit X P).app (op ⊤)).hom s) ⊓ (V ⊓ W) := ⟨hx, hxV, hxW⟩
+    rw [nonVanishing_inf _ (V ⊓ W)
+      (sheafifyTriv P (trivialOfLe P (inf_le_right : V ⊓ W ≤ W) e)) _,
+      trivValue_sheafifyTriv,
+      ← nonVanishing_inf P (V ⊓ W) (trivialOfLe P (inf_le_right : V ⊓ W ≤ W) e) s] at hmem
+    exact hmem.1
+  · intro x hx
+    obtain ⟨W, e, hxe⟩ := (mem_nonVanishing_iff P s x).1 hx
+    refine basicOpen_trivValue_le ((sheafifyFunctor X).obj P).val W (sheafifyTriv P e) _ ?_
+    rw [trivValue_sheafifyTriv]
+    exact hxe
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def nonVanishing_sheafify.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 7,
+    item := "Proposition 1.4, (iv)(非消失軌跡は層化で変わらない)",
+    sectionId := "genell-prop-1-4" }
 
 def trivValue_sheafifyTriv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 7,
