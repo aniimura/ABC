@@ -99,23 +99,27 @@ set_option maxHeartbeats 1000000 in
 theorem exists_common_degree_cover (M : X.PresheafOfModules) (hM : IsLocallyTrivial X M)
     (h : IsAmple M) :
     ∃ L : ℕ, 0 < L ∧ ∃ S : Set ((presheafTensorPow M L).obj (op ⊤) : Type), S.Finite ∧
-      (⨆ u ∈ S, (nonVanishing (presheafTensorPow M L) u : Set X)) = Set.univ := by
+      (⨆ u ∈ S, (nonVanishing (presheafTensorPow M L) u : Set X)) = Set.univ ∧
+      ∀ u ∈ S, IsAffineOpen (nonVanishing (presheafTensorPow M L) u) := by
   obtain ⟨T, hTfin, hTcov⟩ := exists_finite_cover_of_isAmple M h
   set F := hTfin.toFinset with hF
   set L := ∏ c ∈ F, c.n with hLdef
   have hLpos : 0 < L := Finset.prod_pos (fun c _ => c.hn)
   choose t ht using fun (c : F) => exists_section_of_degree M hM c.1 L
     (Finset.dvd_prod_of_mem _ c.2) hLpos
-  refine ⟨L, hLpos, Set.range t, Set.finite_range t, ?_⟩
-  refine Set.eq_univ_of_univ_subset ?_
-  rw [← hTcov]
-  intro x hx
-  simp only [Set.iSup_eq_iUnion, Set.mem_iUnion, exists_prop] at hx ⊢
-  obtain ⟨c, hcT, hxc⟩ := hx
-  have hcF : c ∈ F := hTfin.mem_toFinset.2 hcT
-  refine ⟨t ⟨c, hcF⟩, ⟨⟨c, hcF⟩, rfl⟩, ?_⟩
-  rw [ht ⟨c, hcF⟩]
-  exact hxc
+  refine ⟨L, hLpos, Set.range t, Set.finite_range t, ?_, ?_⟩
+  · refine Set.eq_univ_of_univ_subset ?_
+    rw [← hTcov]
+    intro x hx
+    simp only [Set.iSup_eq_iUnion, Set.mem_iUnion, exists_prop] at hx ⊢
+    obtain ⟨c, hcT, hxc⟩ := hx
+    have hcF : c ∈ F := hTfin.mem_toFinset.2 hcT
+    refine ⟨t ⟨c, hcF⟩, ⟨⟨c, hcF⟩, rfl⟩, ?_⟩
+    rw [ht ⟨c, hcF⟩]
+    exact hxc
+  · rintro u ⟨c, rfl⟩
+    rw [ht c]
+    exact c.1.isAffineOpen_open'
 
 /-! ## ★出典の紐付け(`.src`) -/
 

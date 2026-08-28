@@ -36,6 +36,14 @@ import ABC3.Meta.Claim
 ★★`|S| = 0` を避けるために `X` が**空でない**ことを使う
 ——`S = ∅` なら `⨆ = ∅` で被覆にならないからである。
 
+## ★★★★★アフィン性も一緒に運ぶ（2026-08-28、`§9-915`）
+
+`IsAmple` の定義は**チャートのアフィン性を含んでいる**（`IsAffineOpen (nonVanishing …)`）のに、
+`AmpleChart` はそれを捨てていた。★構造体に `haff` を足して運ぶと、
+`§9-913` の `isImmersion_globalToProj` が要求する **`haff` がそのまま出る**。
+★★`exists_fin_cover` は述語 `P` を一般に運ぶ形にしてある
+——`Fin (N+1)` への並べ直しは `S` の元しか使わないので、`P` は自動で保たれる。
+
 ## ★これで何が繋がったか
 
 ★★★`IsAmple M` と `X` の点 1 つから
@@ -58,18 +66,26 @@ variable {X : Scheme.{0}}
 
 ★全単射は要らない——`Fin (N+1) → S` が**全射**でありさえすればよい。
 `N ≔ |S|` と取り、範囲外の添字には `S` の任意の元を割り当てる。 -/
-theorem exists_fin_cover (M : X.PresheafOfModules)
+theorem exists_fin_cover (M : X.PresheafOfModules) (P : ((M.obj (op ⊤)) : Type) → Prop)
     (S : Set ((M.obj (op ⊤)) : Type)) (hfin : S.Finite) (hne : S.Nonempty)
-    (hcov : (⨆ u ∈ S, (nonVanishing M u : Set X)) = Set.univ) :
+    (hcov : (⨆ u ∈ S, (nonVanishing M u : Set X)) = Set.univ)
+    (hP : ∀ u ∈ S, P u) :
     ∃ (N : ℕ) (s : Fin (N + 1) → ((M.obj (op ⊤)) : Type)),
-      (⨆ i, nonVanishing M (s i)) = ⊤ := by
+      (⨆ i, nonVanishing M (s i)) = ⊤ ∧ ∀ i, P (s i) := by
   classical
   obtain ⟨u₀, hu₀⟩ := hne
   set F := hfin.toFinset with hF
   set n := F.card with hn
   set e := (Finset.equivFin F).symm with he
   refine ⟨n, fun k =>
-    if h : (k : ℕ) < n then (e ⟨(k : ℕ), h⟩ : ((M.obj (op ⊤)) : Type)) else u₀, ?_⟩
+    if h : (k : ℕ) < n then (e ⟨(k : ℕ), h⟩ : ((M.obj (op ⊤)) : Type)) else u₀, ?_, ?_⟩
+  swap
+  · intro k
+    by_cases h : (k : ℕ) < n
+    · simp only [h, dif_pos]
+      exact hP _ (hfin.mem_toFinset.1 (e ⟨(k : ℕ), h⟩).2)
+    · simp only [h, dif_neg, not_false_iff]
+      exact hP _ hu₀
   refine eq_top_iff.2 (fun x _ => ?_)
   have hx : x ∈ (⨆ u ∈ S, (nonVanishing M u : Set X)) := by rw [hcov]; trivial
   simp only [Set.iSup_eq_iUnion, Set.mem_iUnion, exists_prop] at hx
@@ -100,8 +116,9 @@ theorem exists_fin_cover_of_isAmple (M : X.PresheafOfModules) (hM : IsLocallyTri
     (h : IsAmple M) (x₀ : (X : Type)) :
     ∃ L : ℕ, 0 < L ∧ ∃ (N : ℕ)
       (s : Fin (N + 1) → ((presheafTensorPow M L).obj (op ⊤) : Type)),
-      (⨆ i, nonVanishing (presheafTensorPow M L) (s i)) = ⊤ := by
-  obtain ⟨L, hL, S, hSfin, hScov⟩ := exists_common_degree_cover M hM h
+      (⨆ i, nonVanishing (presheafTensorPow M L) (s i)) = ⊤ ∧
+      ∀ i, IsAffineOpen (nonVanishing (presheafTensorPow M L) (s i)) := by
+  obtain ⟨L, hL, S, hSfin, hScov, hSaff⟩ := exists_common_degree_cover M hM h
   refine ⟨L, hL, ?_⟩
   have hne : S.Nonempty := by
     by_contra hemp
@@ -110,7 +127,7 @@ theorem exists_fin_cover_of_isAmple (M : X.PresheafOfModules) (hM : IsLocallyTri
     simp only [Set.mem_empty_iff_false, iSup_false, iSup_bot] at hScov
     have hcontra : x₀ ∈ (⊥ : Set X) := by rw [hScov]; trivial
     simp at hcontra
-  exact exists_fin_cover _ S hSfin hne hScov
+  exact exists_fin_cover _ _ S hSfin hne hScov hSaff
 
 /-! ## ★出典の紐付け(`.src`) -/
 
