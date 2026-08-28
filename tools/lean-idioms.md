@@ -1663,3 +1663,17 @@ restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の
 `restrictScalars` を挟むので `M.map g.op ≫ M.map f.op` が型検査を通らない。
 ★`show M.presheaf.map … ` で **`Ab` 値の前層に降りてから** `map_comp` を使う
 （`Found/GenEll/SheafifyGlue.lean` の `map_map_apply`）。
+
+## `haveI` で置いたインスタンスを解決が拾わないことがある（2026-08-28）
+
+    haveI hspec : IsClosedImmersion (Spec.map …) := …
+    exact IsClosedImmersion.comp _ _        -- ✗ failed to synthesize
+
+`hspec` の型は目標と字面が一致しているのに instance 解決が拾わなかった。
+★**明示的に渡す**と通る:
+
+    exact @IsClosedImmersion.comp _ _ _ f g inferInstance hspec
+
+★★`def` で包んだ射（ここでは `globalChartMorphism`）が絡むと起きやすい
+——`show` で展開しても解決器は元の形を探しに行くことがある。
+★★★「instance が見つからない」と言われたら、**まず `@` で手渡してみる**。
