@@ -29998,3 +29998,57 @@ theorem exists_immersion_of_isAmple … (hample : IsAmple M) … :
 
 ★これが済めば `divisorOfSection M s₀ = ψ^*超平面` が出て、
 `§9-922` の `hht` が埋まり **`Proposition 1.4, (iv)` が閉じる**。
+
+## 2026-08-29（第 457〜460 ブロック、§9-924〜§9-927）—— ★★★★段 E0 が閉じ、Serre 道が完走した
+
+### ★★★★★到達点 —— `Proposition 1.4, (iv)` の構成の側
+
+```lean
+theorem northcott_of_divisorOfSection … :
+    D.divisor = divisorOfSection M (s 0) →
+    D.green = (fun p => E.green (p ≫ ψ)) →
+    {p | ht_D(x_p) ≤ C}.Finite
+```
+
+★途中に **`divisorOfSection M s₀ = (超平面).comap ψ`**（`§9-926`）がある。
+これは「切断 `s₀` の零点因子は、貼った射に沿った超平面の引き戻しである」という、
+原文が `Proposition 1.4, (iv)` の証明で暗黙に使っている等式そのものである。
+
+### 入ったもの
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 457 | アフィンな始域からの引き戻しは `pullbackIdealOf` である | `ComapChartIdeal.lean` |
+| 458 | `ψ^*超平面` をアフィン開 `W ≤ X_{s_i}` の上で読む | `ComapOnAffineOpen.lean` |
+| 459 | ★★★**段 E0 —— `div(s₀) = ψ^*超平面`** | `DivisorOfSectionComap.lean` |
+| 460 | ★★★★到達 —— 切断の零点因子についての Northcott | `NorthcottDivisorOfSection.lean` |
+
+### ★★★★★測定 —— `divIdeal` の `⊤` は障害ではなく助けだった
+
+段 E0 の長年の見立ては「`divIdeal` が自明化の無いアフィン開で `⊤` になるのが障害」
+「`X_{s_i}` 上の自明化を**作る**必要がある（＝前層の同型の貼り合わせ、枠組みに無い）」であった。
+
+★★★**どちらも外れていた**:
+
+1. `trivValue(s₀)` と `sectionRatio(s₀,t)` は**単元倍しか違わない**ので、
+   `t` で正規化した自明化を作る必要が無い（`§9-923`）。
+2. `divisorOfSection = ofIdeals divIdeal` は「`divIdeal` 以下の**最大**」なので、
+   `ψ^*超平面 ≤ divisorOfSection` を出すには `≤ divIdeal` さえ言えばよく、
+   `⊤` の所ではそれが**ただ**である（`§9-926`）。
+
+★もう 1 つの鍵は mathlib の `Scheme.Opens.ι_appIso : U.ι.appIso V = Iso.refl _`
+——開部分スキームの `ι` に沿った `comap` は**素通し**である（`§9-925`）。
+
+### Serre 道（`ample-and-projective-embedding`、全 56 段）
+
+★★★★★★**未閉は `A2`（そもそも塡がりでない）だけ**になった。
+
+### 残っている仮定（`Proposition 1.4, (iv)` について、明示）
+
+* 幾何の側は「**有限アフィン自明化被覆**」（`U`・`hU`・`eU`）に集約
+  ——`X` が分離的・準コンパクトで `M` が可逆なら出るはずのもの
+* 点の側は 2 つだけ:
+  1. 点がどれかのチャートを通ること（`X` が固有なら自動のはず）
+  2. 座標が点を分けること（`hinj`——`ψ` が埋め込み（`§9-920`）であることの点版）
+
+★原文もこの 2 つを `X(ℚ̄)^{≤d}` という書き方の中に暗黙に含んでいる。
