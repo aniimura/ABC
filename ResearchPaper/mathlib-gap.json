@@ -308,10 +308,11 @@
             "stage": "E0",
             "claim": "**加群層 ⟷ 因子**の橋——可逆前層 `M` と `X.IdealSheafData` の対応（`O(D)` の構成、または `D = div(s)` の構成）",
             "status": "open",
-            "why": "★`Found/GenEll/AmpleDef.lean` の `IsAmple` は**加群層**の述語、`Found/GenEll/VeryAmpleDef.lean` の `IsVeryAmpleDiv` は**因子**の述語である。★★段 E を述べるにはこの 2 つを繋ぐ必要がある。★★★因子表示（§1 が採っている表示）を主にするなら、要るのは「切断 `s` の零点因子 `div(s) : X.IdealSheafData`」の構成だけでよい——`nonVanishing M s` の補集合がその台である。",
+            "why": "★`Found/GenEll/AmpleDef.lean` の `IsAmple` は**加群層**の述語、`Found/GenEll/VeryAmpleDef.lean` の `IsVeryAmpleDiv` は**因子**の述語である。★★段 E を述べるにはこの 2 つを繋ぐ必要がある。★★★因子表示（§1 が採っている表示）を主にするなら、要るのは「切断 `s` の零点因子 `div(s) : X.IdealSheafData`」の構成だけでよい——`nonVanishing M s` の補集合がその台である。 ★★★★**2026-08-28 夜の実測——入口が判った**。mathlib の `Scheme.IdealSheafData` は「**すべての**アフィン開 `U` に対する `Ideal Γ(X,U)`」を要求するので、局所自明化しか持たない `M` から直には作れない。★しかし `IdealSheafData.ofIdeals`（族に含まれる最大のイデアル層）と `IdealSheafData.gci`（`ideal` と `ofIdeals` の Galois coinsertion）があり、`gci.choice_eq` は「族が既に `map_ideal_basicOpen` を満たすなら `ofIdeals` はその族そのもの」を与える。★★したがって `div(s).ideal U ≝ (trivValue M U e s)`（自明化が無い `U` では `⊤`）と置き、**`map_ideal_basicOpen`（`I(D(f)) = I(U)_f`）だけを示せばよい**——それは `trivValue_restrict`（段 D2、既存）から出る。★★★これが E0 の具体的な入口である。",
             "sources": [
               "[Stacks] 01X0 Effective Cartier divisors and invertible sheaves"
-            ]
+            ],
+            "where": "mathlib: Scheme.IdealSheafData.ofIdeals / IdealSheafData.gci / gci.choice_eq ／ ABC3: Found/GenEll/AmpleDef.lean の trivValue / trivValue_restrict / nonVanishing_inf"
           },
           {
             "stage": "E1",
@@ -370,7 +371,8 @@
         "done": "13/18",
         "remaining": "★★**残るのは C2c（半分）・E・F2c** である。★★★2026-08-28 夕の再測定で**優先順位が確定した**——消費側（`northcott_of_projModel`）が要求するのは (a) 同次座標 `crd`、(b) 正規化座標の**単射性**、(c) 高さの比較 `ht_L = ht_{O(1)}∘φ + const` の 3 つである。★(a) は段 C2a/C2b で揃った。★★(b) は**閉埋め込み**からしか来ないので段 E が要る。★★★(c) は C2c の残り「超平面因子の高さ = 素朴高さ `log max|x_i|`」である。★★★★したがって **(iv) を段 E 抜きで取ることはできない**——単射性がそこからしか出ない。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
-        "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。"
+        "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
+        "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。"
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
