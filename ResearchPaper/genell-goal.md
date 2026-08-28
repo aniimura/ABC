@@ -29962,3 +29962,39 @@ theorem exists_immersion_of_isAmple … (hample : IsAmple M) … :
 2. **点がどれかのチャートを通ること** —— `X` が固有なら自動のはず。
 3. **`hinj`（座標が点を分けること）** —— `ψ` が埋め込み（`§9-920`）であることの点版。
    ★これは点の族 `P` についての仮定なので、一般には仮定のまま残る。
+
+## 2026-08-29（第 456 ブロック、§9-923）—— ★★★★段 E0 の壁が消えた
+
+### 測定 —— 見立てが外れた方向
+
+| これまでの見立て | 実際 |
+|---|---|
+| 段 E0 の障害は「`divIdeal` が自明化の無いアフィン開で `⊤` になる」ことで、一般の局所自明な `M` については `X_{s_i}` 上の自明化を**作る**必要がある（＝前層の同型の貼り合わせ、枠組みに無い） | ★★★**それは要らなかった** |
+
+★`trivValue(s₀)` と `sectionRatio(s₀, t)` は**単元 `trivValue(t)⁻¹` 倍しか違わない**ので、
+生成するイデアルは同じである。したがって自明化つきアフィン開 `V` について
+
+    `divIdeal M s₀ (X_t ⊓ V) = span { (s₀/t) の制限 }`   （`divIdeal_nonVanishing_inf`）
+
+★★`X_t ⊓ V = X.basicOpen (trivValue M V e t)` はアフィン開の**基本開集合**なのでアフィン。
+したがって `{X_{s_i} ⊓ U_j}` は
+
+* `X` の**アフィン開被覆**
+* どの成分にも**自明化がある**
+* どの成分でも `divIdeal M s₀ = span {s₀/s_i}`
+
+を同時に満たし、mathlib の `Scheme.IdealSheafData.ext_of_iSup_eq_top`
+（アフィン被覆の上で一致すれば等しい）に渡せる。
+
+### ★★★★次セッションの課題（明示）
+
+**`(ψ^*超平面).ideal` を同じ被覆の上で計算する**こと。道筋は 4 段:
+
+1. `Scheme.IdealSheafData.comap_comp` で `W.ι ≫ ψ` に落とす
+2. `ideal_comap_of_isOpenImmersion`（mathlib）で `W` の上の値に直す
+3. `W.toScheme` はアフィンなので `W.ι ≫ ψ = W.toSpecΓ ≫ Spec.map γ ≫ chartA i` と書け、
+   `§9-865` の `pullbackIdealOf_hyperplane_chart` がそのまま当たる
+4. `W.toSpecΓ` は同型なので輸送で戻す
+
+★これが済めば `divisorOfSection M s₀ = ψ^*超平面` が出て、
+`§9-922` の `hht` が埋まり **`Proposition 1.4, (iv)` が閉じる**。
