@@ -150,7 +150,46 @@ theorem divIdeal_unit (s : ((𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens))
     trivValue_restrict _ (le_top : U.1 ≤ ⊤) restrictPresheafUnit.symm s,
     trivValue_unit_top]
 
+/-! ## ★★★★★(5) `div(s)` の台は `X_s` の補集合である -/
+
+/-- ★アフィン開の上では「`basicOpen` が全体」と「単元」は同値である。
+
+★機構は `IsAffineOpen.iSup_basicOpen_eq_self_iff`（mathlib）＋ `Ideal.span_singleton_eq_top`。 -/
+theorem isUnit_of_basicOpen_eq (U : X.affineOpens) (f : Γ(X, U.1))
+    (h : X.basicOpen f = U.1) : IsUnit f := by
+  have h2 : (⨆ g : ({f} : Set (Γ(X, U.1) : Type)), X.basicOpen (g : Γ(X, U.1))) = U.1 := by
+    rw [iSup_unique]
+    exact h
+  have h3 := (U.2.iSup_basicOpen_eq_self_iff (s := ({f} : Set (Γ(X, U.1) : Type)))).1 h2
+  rw [Ideal.span_singleton_eq_top] at h3
+  exact h3
+
+/-- ★★★★★**因子の欄が `⊤` ⟺ `U` が非消失軌跡 `X_s` に含まれる**。
+
+★★これが「`div(s)` の台は `X_s` の補集合である」の中身であり、
+`div(s)` が**意味のある因子**であることの保証である。
+★★★機構は `nonVanishing_inf`（段 D2）＋ `Scheme.basicOpen_of_isUnit` だけである。 -/
+theorem divIdeal_eq_top_iff_le_nonVanishing (M : X.PresheafOfModules) (s : M.obj (op ⊤))
+    (U : X.affineOpens)
+    (e : (restrictPresheafFunctor X U.1).obj M ≅ 𝟙_ (PresheafModulesOn X U.1)) :
+    divIdeal M s U = ⊤ ↔ U.1 ≤ nonVanishing M s := by
+  rw [divIdeal_eq M s U e, Ideal.span_singleton_eq_top]
+  have hinf := nonVanishing_inf M U.1 e s
+  constructor
+  · intro h
+    rw [X.basicOpen_of_isUnit h] at hinf
+    exact inf_eq_right.1 hinf
+  · intro h
+    refine isUnit_of_basicOpen_eq U _ ?_
+    rw [← hinf]
+    exact inf_eq_right.2 h
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def divIdeal_eq_top_iff_le_nonVanishing.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 6,
+    item := "Proposition 1.4, (iv)(div(s) の台は X_s の補集合である)",
+    sectionId := "genell-prop-1-4" }
 
 def span_trivValue_congr.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 6,
