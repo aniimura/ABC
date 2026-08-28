@@ -1,990 +1,991 @@
 {
- "_comment": [
-  "★『mathlib に無い標準数学』の登録簿。2026-08-27 に新設。",
-  "★★なぜ要るか: Skeleton/ は原典の statement 専用、Interface/ は posit 専用、Found/ は実装専用であり、",
-  "   『これから作るべき標準数学』を節点として数える場所がどこにも無かった。",
-  "   従来は .needs の .citation(.absent …) だけで、節点数を持てなかった。",
-  "★★★書き方の規則:",
-  "   - mathlibStatus には **探索範囲** を必ず書く(absent は範囲を伴わなければ主張として無効。lean-ecosystem.json の _absentPolicy と同じ)。",
-  "   - nodes は『フルの理論』ではなく **原文が実際に使う 1 本に必要な最小構成** で数える。",
-  "   - 測っていないものは nodes を \"unmeasured\" にし、howToMeasure に測り方を書く。嘘の数字を置かない。",
-  "   - measuredAt を必ず書く。測定は古くなる。"
- ],
- "measuredAt": "2026-08-27",
- "gaps": {
-  "tame-ramification": {
-   "what": "馴分岐の理論。全分岐の構造定理(馴なら不分岐部を除けば Eisenstein な生成元 λ^e = π を持つ)と、馴なら different の指数がちょうど e−1 であること。",
-   "whereUsed": [
-    "[GenEll] Proposition 1.7, (i) の証明が畳んでいる \"elementary claim\" の段 1(野生/馴の分離)と段 2(ζ_p への帰着)"
-   ],
-   "mathlibStatus": {
-    "verdict": "absent",
-    "searched": "REPL で名前解決を試した(2026-08-27): IsTamelyRamified / Algebra.IsTamelyRamified / Ideal.IsTamelyRamified / IsTame はいずれも未定義。Algebra.IsUnramifiedAt はある。",
-    "partial": [
-     "pow_sub_one_dvd_differentIdeal —— P^{e−1} ∣ 𝔡(下界のみ)",
-     "not_dvd_differentIdeal_iff / dvd_differentIdeal_iff —— 不分岐 ⇔ P ∤ 𝔡(e = 1 の場合のみ)",
-     "conductor_mul_differentIdeal —— 単生成なら 𝔡 = (f′(x))(上界への入口)",
-     "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt —— Eisenstein なら p·z ∈ A[λ] ⇒ z ∈ A[λ]"
-    ],
-    "absentPart": "馴分岐の概念そのもの、および馴での different の**上界**(¬ P^e ∣ 𝔡)。Serre の評価 d_P ≤ e − 1 + v_P(e) も無い。"
-   },
-   "minimalForm": "『全分岐かつ馴なら p·O_L ⊆ 𝔡』。フルの分岐理論は要らない。",
-   "nodes": 6,
-   "nodesNote": "原文の 6 段(野生/馴の分離・ζ_p への帰着・p-群の可解性・Kummer・λ ∣ p・different の下界)を節点とする。hedge-index の実測でも Proposition 1.7 の合図は 7 件(immediately×5 one verifies×1 easily×1)。",
-   "done": 6,
-   "doneNote": "★2026-08-27 の第 411 ブロックで 6/6 になった。第 374-395 で段 2〜6 を実装し野生・馴の両枝を結線し、第 411 で段 1 の全分岐の構造定理(B = A[λ] と deg minpoly = e)を Nakayama で自作して閉じた(Found/GenEll/TotallyRamified.lean)。★★ただしこれは『局所の馴分岐の道具が揃った』ということであって、Proposition 1.7 の sorry が消えたということではない——prop_1_7 の .needs には Remark 1.5.1 と一様性の項が残っている。",
-   "lastStepMeasurement": {
-    "measuredAt": "2026-08-27",
-    "what": "段 1 の最終組み立て(B = A[λ] と (minpoly A λ).natDegree = e)に何が要るかを mathlib 全体を探して測った。",
-    "present": [
-     "Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing —— e·f = [L:K] の局所版(Mathlib/NumberTheory/RamificationInertia/Basic.lean:650)。★これで e = [L:K] から f = 1 が出る",
-     "Ideal.inertiaDeg_algebraMap / inertiaDeg_pos / inertiaDeg_ne_zero(RamificationInertia/Inertia.lean)",
-     "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt(RingTheory/Polynomial/Eisenstein/IsIntegral.lean:227)——Eisenstein から p を割って降りる道具",
-     "Polynomial.Monic.isEisensteinAt_of_mem_of_notMem(Eisenstein/Basic.lean:206)",
-     "Nakayama の道具: Submodule.le_of_le_smul_of_le_jacobson_bot(RingTheory/Nakayama.lean:146)、IsLocalRing.maximalIdeal_le_jacobson"
-    ],
-    "absent": [
-     "★★『totally ramified』という語が mathlib に 1 件も無い(大文字小文字を無視した全文検索で 0 件、2026-08-27)。IsTotallyRamified も無い",
-     "分岐の仮説から Algebra.adjoin A {λ} = ⊤ を出す定理。唯一の adjoin = ⊤ は IsLocalRing.exists_adjoin_eq_top(RingTheory/LocalRing/Etale.lean:93)で、FormallyUnramified すなわち**逆の場合**である",
-     "(minpoly A λ).IsEisensteinAt (maximalIdeal A) や (minpoly A λ).natDegree = e。IsEisensteinAt は mathlib の 3 ファイルにしか現れず、そのどれも ramificationIdx・DVR・素元に触れていない",
-     "『Eisenstein ⇒ 全分岐』の向き。AdjoinRoot は Eisenstein/ のどのファイルにも現れない",
-     "剰余体が一致すれば素元で生成される、という Nakayama の帰結。IsLocalRing.adjoin_residue_eq_top_iff_adjoin_eq_top(Etale.lean:63)はまさにその論法だが、Algebra.FormallyUnramified.map_maximalIdeal を消費する——全分岐では偽(そこでは maximalIdeal S ^ e)なのでそのままは使えない"
-    ],
-    "template": "円分体の具体例が NumberField/Cyclotomic/Ideal.lean に手で書き下してある(inertiaDeg_span_zeta_sub_one:92 / ramificationIdx_span_zeta_sub_one:116)。★mathlib で『素元もどきの minpoly が Eisenstein ⇒ adjoin が全体』を実際に通しているのは NumberField/Cyclotomic/Basic.lean:108-119 の 1 箇所だけで、ζ−1 の ℤ 上に特殊化され判別式を使っている。一般の全分岐仮説では書かれていない。",
-    "estimate": "★残り 1 段は『既知数学だが mathlib に無い』——Nakayama を自分で回す必要がある。e·f = [L:K] から f = 1 は既存。B = A[λ] は Nakayama を λ で回して自作する。"
-   },
-   "where": [
-    "lean/ABC3/Found/GenEll/TameRamification.lean",
-    "lean/ABC3/Found/GenEll/DifferentKummer.lean",
-    "lean/ABC3/Found/GenEll/PGroupTower.lean",
-    "lean/ABC3/Found/GenEll/TotallyRamified.lean"
-   ]
-  },
-  "spreading-out-over-base": {
-   "what": "生成ファイバー上の同型が、ある有限素数集合 Σ の上で ℤ[Σ^{-1}] へ延びること(EGA IV, 8.8.2 の極限論)。",
-   "whereUsed": [
-    "[GenEll] Remark 1.5.1 の後半(log-cond_D の BD-class が (X_ℚ, D_ℚ) だけに依ること)",
-    "[GenEll] Proposition 1.7, (i) の証明が『Σ 上の log-cond の寄与は ≈ 0』として引く"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-minor",
-    "searched": "Glob で Mathlib/**/*{SpreadingOut,Spread}*.lean を検索し、REPL で主定理を #check(2026-08-27)。★★2026-08-27 の再測(第 365 ブロック)——検索語を「ファイル名」から「主張の形(スキームの余フィルター極限)」に変えたら **Mathlib/AlgebraicGeometry/AffineTransitionLimit.lean が出た**。1288 行、EGA IV 8 と Stacks 01YT に従うと明記されている。",
-    "partial": [
-     "Mathlib/AlgebraicGeometry/SpreadingOut.lean は**存在するが別物**(茎 → 近傍の spreading out。基底の極限ではない)",
-     "★★★Mathlib/AlgebraicGeometry/AffineTransitionLimit.lean —— **これが EGA IV §8 である**(2026-08-27 に発見)",
-     "Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation —— **lim D_i ⟶ X は有限段 D_j ⟶ X を経由する**(spreading out の全射側そのもの)",
-     "Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType / exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType —— 単射側(Stacks 01ZC)",
-     "Scheme.exists_isAffine_of_isLimit / exists_isOpenCover_and_isAffine / compactSpace_of_isLimit / nonempty_of_isLimit —— 極限の性質(Stacks 01Z2/01Z3/01Z5/01Z6)",
-     "exists_map_preimage_eq_map_preimage / exists_preimage_eq / isBasis_preimage_isAffineOpen —— 開集合の降下(Stacks 01Z4)"
-    ],
-    "absentPart": "★★★★★**2026-08-27 に解消した。**ここには「同型であることの降下（Stacks 01ZM / EGA IV 8.10.5）が mathlib に無い」と書いていたが、**01ZM は要らなかった**——単射側（01ZC）と引き戻しの普遍性だけで組み立てられる。★図式の組み立て（ℚ = colim ℤ[1/n!] → Spec ℚ = lim Spec ℤ[1/n!] → X_ℚ = lim (X ×_ℤ ℤ[1/n!])）も自前で終わっている。★★**因子の降下も閉じた**——因子を**閉部分スキーム**で書けば、mathlib に無い ideal_comap（ideal-comap-on-affine-opens を見よ）を経由せずに可換正方形の降下として出る。★★★**残るのは Σ の外での conductor の一致だけであり、これは mathlib の欠落ではなく我々の作業である。**",
-    "correction": "★2026-08-16 の remark_1_5_1.needs は『mathlib に scheme の spreading out は無い』としていた。2026-08-27 に一度『SpreadingOut.lean はあるが別物』と訂正したが、**それも不完全だった**——同日の再測で AffineTransitionLimit.lean(EGA IV §8 そのもの)が見つかった。★★★教訓: 在庫の判定を**ファイル名**で行うと外す。**主張の形**(ここでは「スキームの余フィルター極限」)で引くこと。tools/lean-idioms.md と ResearchMethod にも同じ規則がある。"
-   },
-   "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
-   "nodes": 5,
-   "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。 ★★2026-08-27 の再測(第 365)——段 1(生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる)の**射の部分**は mathlib の Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation で足りる。残るのは「同型であることの降下」と図式の組み立て。",
-   "done": 5,
-   "doneNote": "★★★★★**2026-08-27、5 段すべてが Found/ に載った（sorry 0）。**\n段 1 生成ファイバーの同型が延びる —— IsoDescent.lean exists_iso_of_generic_iso\n段 2 因子も一緒に延びる —— DivisorDescent.lean exists_pair_descent\n段 3 Σ の外で conductor が一致 —— ConductorDescent / LocalizationBridge / PullbackLocalization / Remark151Chain / RatTowerLocalization / Remark151Sigma\n段 4 Σ 上の寄与の一様な上界 —— LogCondSigma.lean（既存）\n段 5 log-diff は X_ℚ だけに依る —— LogDiff.lean（既存）\n★到達点は remark_1_5_1_bdeq（Remark151Sigma.lean）で、定数は ∑_{q ∣ n!} log q——原文の ∑_{q ∈ Σ} log q そのもの。",
-   "resolvedNode": {
-    "resolvedAt": "2026-08-27",
-    "what": "★段 4 を log-cond へ繋ぐ橋が渡った(第 414 ブロック、Found/GenEll/LogCondSigma.lean)。",
-    "statement": "Dedekind 環では根基イデアルの分解の重複度は ≤ 1。これを経由して logCond_le_sum_log が出た。",
-    "howItWentThrough": "★mathlib の Ideal.radical_isRadical はイデアル論の IsRadical(r^n ∈ I → r ∈ I)であって、Squarefree へ渡すにはモノイドの IsRadical(x ∣ y^n → x ∣ y)が要る。★★両者を繋ぐ道は短かった——Ideal.dvd_iff_le で包含に直せば radical_pow と radical_idem だけで出る。あとは IsRadical.squarefree と Associates.prime_pow_dvd_iff_le。",
-    "absentInMathlib": "『Dedekind 環の根基イデアルは squarefree』そのものは mathlib に無い(exact? で見つからず、IsRadical↔Squarefree はモノイド版しか無い)。イデアルへの橋を自作した。"
-   },
-   "criticalFinding": {
-    "measuredAt": "2026-08-27",
-    "what": "★★★Skeleton の remark_1_5_1 は現在の形では**偽**である(Check/GenEll/RemarkAxiomGap.lean の remark_1_5_1_false で機械検証済み)。∀ D D′ : HeightTheoryData の形で、HeightTheoryData は公理を 1 つも持たないので、点の全単射だけでは logDiff を何も縛らない(logDiff を 0 と x に取れば反例)。",
-    "consequence": "★この sorry は『spreading out 待ち』ではない——**そのままでは決して閉じられない**。spreading out を実装しても statement が偽のままである。",
-    "fix": "prop_1_4 / remark_1_4_1 と同じ方法で**構成に載せ替える**(Found/GenEll/HeightConstruction.lean 系の語彙で書き直し、逸脱を記録する)。★★段 4 と 5 は構成の側ではすでに真なので、載せ替えれば残るのは段 1-3 だけになる。"
-   },
-   "where": [
-    "lean/ABC3/Found/GenEll/SigmaBound.lean",
-    "lean/ABC3/Found/GenEll/LogDiff.lean",
-    "lean/ABC3/Check/GenEll/RemarkAxiomGap.lean"
-   ],
-   "skeletonStatus": {
-    "at": "2026-08-27(第 420 ブロック)",
-    "what": "★Skeleton の remark_1_5_1 を構成へ載せ替え、sorry を外した。Skeleton/GenEll + Skeleton/NCBelyi の sorry は 4 → 3。",
-    "honest": "★★これは『原文の Remark 1.5.1 を証明した』ではない。旧 statement は**偽**であった(Check/GenEll/RemarkAxiomGap.lean で機械検証済み)ので、そのままでは決して閉じられなかった。prop_1_4 / remark_1_4_1 と同じ治療(構成への載せ替え)を施し、原文の証明の**後半だけ**を証明して前半(spreading out)を仮定 hagree に置いた。",
-    "nonVacuous": "★★★仮定が空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で機械検証した(D = D′, Σ = ∅ で hagree が成り立ち、結論 BDeq が実際に得られる)。",
-    "stillNeeded": "★★★★Σ ≠ ∅ の場合に hagree を供給する幾何(= spreading out、段 1-3)。.needs に [Stacks] 32.22 として登記した。"
-   },
-   "remaining": "★★★★★**残っているのは「点の対応 `ePt` を固有性から作る」1 本だけである。**\n★原文の定義域は U_X(ℚ̄) であり、これは X_ℚ だけで決まるので 2 つのモデルで**同じ集合**である（ePt は恒等）。\n★★形式化では定義域を Spec 𝒪_F ⟶ X としているのでモデルに依り、ePt がデータとして現れる。両者を繋ぐのが固有性（付値判定法）である。\n★★★mathlib には ValuativeCriterion.lean があり、付値環に対する存在・一意性は揃っている。残るのは「Dedekind 環 𝒪_F への貼り合わせ」（各 (𝒪_F)_v で延び、分離性で一致させる）であり、**mathlib の欠落ではなく我々の作業**である。"
-  },
-  "belyi-noncritical": {
-   "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
-   "whereUsed": [
-    "[GenEll] Theorem 2.1 の証明(原文 p.11 の『[Mzk1]』)"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-major",
-    "searched": "2026-08-16 に mathlib 全宣言名を Belyi で検索して 0 件。",
-    "absentPart": "Belyi 写像そのもの。"
-   },
-   "hasSourceNode": true,
-   "sourceNodeNote": "★これだけは**原典に節点がある**([NCBelyi]、9 ページ、0_Source にあり)。したがって Skeleton トラックに載る。",
-   "minimalForm": "Theorem 2.5 そのもの。",
-   "nodes": 5,
-   "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
-   "done": 3,
-   "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
-   "missingSkeleton": [
-    "[NCBelyi] Lemma 2.4"
-   ],
-   "lemma24Progress": {
-    "measuredAt": "2026-08-27",
-    "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
-    "nodes": 9,
-    "done": 8,
-    "doneList": [
-     "係数の限界(norm_coeff_le_choose、第 405)",
-     "値の上界・下界と suitable choice of C(第 405)",
-     "f₀′ の根の位置(Gauss–Lucas、第 406)",
-     "次数の降下と reduced degree(第 407)",
-     "入れ子帰納法の測度が 1 段下がること(第 408)",
-     "★正規化(lemma_2_3_rat / exists_rat_normalization、第 409)",
-     "★Galois 安定性(IsConjStable / conjClosure、第 410)",
-     "★★帰納の本体(nested_induction / nested_induction_descend、第 416)"
-    ],
-    "todoList": [
-     "★残りは 1 つだけ: ℙ¹ 上の有理関数としての組み立て(不分岐性の帳簿)。★★多項式の段は 2026-08-27 の第 417 ブロックで端から端まで閉じた(exists_poly_image_rat: 代数的数の有限集合は ℚ[x] の非定数多項式 1 つで ℚ の中へ写せる)。残るのは、その写像が ℙ¹ の射として S_φ の外で不分岐であることの帳簿だけである。"
-    ],
-    "extraDone": "★★第 417: exists_descend_data(帰納段のデータを実際に作る段)と nested_induction_descend′(不変量付き)を経て、exists_poly_image_rat を得た。★原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis, and composing the resulting morphisms』がこれで Lean の中にある。"
-   },
-   "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
-   "where": [
-    "lean/ABC3/Skeleton/NCBelyi/Theorem25.lean",
-    "lean/ABC3/Found/NCBelyi/Lemma21.lean",
-    "lean/ABC3/Found/NCBelyi/Separation.lean",
-    "lean/ABC3/Found/NCBelyi/Lemma22.lean",
-    "lean/ABC3/Found/NCBelyi/Normalize.lean",
-    "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
-   ],
-   "impact": "★§2 の 1 項目（Theorem 2.1）の門。 ★★**未分割ではない**（2026-08-27 確認）——5 節点中 3 が実装済みで、残る Lemma 2.4 も 9 節点中 8 が閉じている。 ★★★残るは「ℙ¹ 上の有理関数としての組み立て（不分岐性の帳簿）」1 つと Theorem 2.5 本体である。"
-  },
-  "riemann-roch-curves": {
-   "what": "曲線上の因子・連接コホモロジー・Riemann–Roch・Serre 双対性。",
-   "whereUsed": [
-    "[NCBelyi] Theorem 2.5 の証明が使う 1 本: deg(ω_X ⊗ L^{-1}(x)) ≤ −2 ⇒ H¹(X, L(−x)) = 0 ⇒ Γ(X,L) ↠ L ⊗ k(x)"
-   ],
-   "mathlibStatus": {
-    "verdict": "absent",
-    "searched": "Glob で Mathlib/AlgebraicGeometry/**/*{Divisor,Cohomolog,Curve,Genus,Sheaf}*.lean を検索(2026-08-27)。出たのは Sites/ConstantSheaf・Sites/ElladicCohomology・Sites/SheafQuasiCompact・Modules/Sheaf・ProjectiveSpectrum/StructureSheaf・StructureSheaf のみ。",
-    "absentPart": "曲線の因子・連接コホモロジー・Riemann–Roch・Serre 双対性のいずれも無い。ElladicCohomology は étale であって連接ではない。"
-   },
-   "minimalForm": "★フルの Riemann–Roch は要らない。原文が使うのは『次数が十分負なら H¹ が消え、大域切断が点で全射になる』の 1 本だけである。まずこの 1 本に必要な最小構成を測ること。",
-   "nodes": "unmeasured",
-   "howToMeasure": "[NCBelyi] Theorem 2.5 の証明(物理 p.6)の該当 3 行を 1_Structured に起こし、(1) 曲線上の直線束の次数 (2) H¹ の消滅判定 (3) 大域切断の点での全射性 の 3 段に分けて、各段の前提を数える。外部プロジェクト(lean-ecosystem.json)の在庫調査も同時に行う。",
-   "done": 0,
-   "where": []
-  },
-  "ample-and-projective-embedding": {
-   "what": "豊富(ample)な直線束の理論。とくに (a) ample ⟹ ある正のテンソル冪が very ample(Serre)、(b) very ample から射影空間への閉埋め込み、(c) 原文が使う吹き上げ(X から正規・ℤ-固有・ℤ-平坦な Y を作り φ:Y→X が生成ファイバーで同型、ψ:Y→ℙⁿ_ℤ)。",
-   "whereUsed": [
-    "[GenEll] Proposition 1.4, (iv) の**文面**（「L_ℚ が ample なら」——mathlib に ample が無いので**述べられない**）",
-    "[GenEll] Remark 1.4.1 の第 2 文（any normal, projective scheme Y over ℚ から ℤ-モデルを作る段）",
-    "[GenEll] Definition 1.1 / Definition 1.2（算術直線束 = 可逆層 + 計量。★arc-metric-not-attached-to-bundle と対をなす）",
-    "[GenEll] Proposition 1.7, (ii)（Riemann-Hurwitz は直線束の次数を要求する）"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-major",
-    "searched": "★★★**2026-08-27 に再測定して訂正した。**前回の「スキーム上の可逆層そのものが無い」は**誤り**であった——Ample|VeryAmple を grep しただけで、土台を見ていなかった。実際には以下が**すでにある**。",
-    "partial": [
-     "★Mathlib/RingTheory/PicardGroup.lean: **Module.Invertible / CommRing.Pic**（環の水準の可逆加群と Picard 群。Module.Invertible.exists_linearEquiv_ideal まである）",
-     "★★Mathlib/AlgebraicGeometry/Modules/Sheaf.lean: **Scheme.Modules = SheafOfModules X.ringCatSheaf**、pushforward / pullback とその随伴（pullbackPushforwardAdjunction）",
-     "★★★Mathlib/Algebra/Category/ModuleCat/Sheaf/LocallyFree.lean: **SheafOfModules.IsLocallyFree**（局所自由層）",
-     "Mathlib/Algebra/Category/ModuleCat/Sheaf/Quasicoherent.lean: 準一貫層",
-     "Mathlib/Algebra/Category/ModuleCat/Presheaf/Monoidal.lean: **前層のテンソル積**（層の側は未組立）",
-     "Mathlib/AlgebraicGeometry/ProjectiveSpectrum/: Proj と**Proj の固有性**（Proper.lean）",
-     "Mathlib/AlgebraicGeometry/AffineSpace.lean: アフィン空間",
-     "Mathlib/NumberTheory/Height/Northcott.lean: ℙⁿ 上の Northcott 性",
-     "ABC3: Found/GenEll/NorthcottCoord.lean の northcott_of_projModel（座標のデータを受け取れば Northcott）"
-    ],
-    "absentPart": "★**層のテンソル積**（前層のテンソル積の層化）——これが無いので Pic(X)（スキーム）が作れない。 ★★可逆層（階数 1 の局所自由層）という**定義**。 ★★★Proj 上の O(1)、P^n_S の点の関子（座標表示）。 ★★★★ample / very ample の定義と Serre の定理（ample のある冪が very ample）。 ★吹き上げ（Blowing up）。"
-   },
-   "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
-   "impact": "★★★★**2026-08-27 に訂正**: 直前に「残り 13 項目のうち 11 項目」と書いたのは**過大**であった。 ★実際にこの塡がりが門であるのは**§1 の 5 項目**（Definition 1.1・Definition 1.2・Proposition 1.4・Remark 1.4.1・Proposition 1.7）である。 ★★§3・§4 の 6 項目は **ample を経由しない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と 粗モジュライ ℙ¹_j の明示モデルで出る（台帳の minimalForm の通り）。 ★★★§3・§4 の実質的な塡がりは faltings-height-vs-degree-at-infinity と galois-equivariant-tate-uniformization の 2 つである。",
-   "primarySource": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
-    "sources": [
-     "[Stacks] 28.27 Ample invertible sheaves（Definition 28.27.1、Lemma 01PU / 01Q1 ほか）",
-     "[Stacks] 29.39-29.41 relatively (very) ample。★**Lemma 29.40.5（f が有限型なら L^n が f-very ample＝Serre）**が鍵。Lemma 29.39.2 は逆向き。",
-     "[EGA2] §4.4 Immersions dans les fibrés projectifs. Faisceaux très amples（Définition 4.4.2）",
-     "[Stacks] Blowing up（原文の吹き上げ Y の段）"
-    ],
-    "howToProceed": "★プロジェクトの方法論どおり、**スケルトンを作って依存グラフを拡張する**のが正攻法である。★★葉（層番号が少ないもの）から形式化すれば、person-years の山を壁として見なくて済む。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）はすべてある**。 ★★残るのは上層だけである。",
-    "stages": [
-     {
-      "stage": "A1",
-      "claim": "層のテンソル積の**対象**と L^{⊗n}（回避経路）",
-      "status": "closed",
-      "where": "Found/GenEll/InvertibleSheaf.lean の **schemeTensorObj** / schemeTensorPow / IsInvertibleModule",
-      "why": "★前層のテンソル積（PresheafOfModules.Monoidal.tensorObj）を**層化する**だけ。 ★★X.ringCatSheaf.obj = X.presheaf ⋙ forget₂ CommRingCat RingCat が **rfl** なので型はそのまま合う（2026-08-27 実測）。 ★★★層化は PresheafOfModules.sheafification (𝟙 _)——構造前層は既に層なので α = 𝟙 が局所全単射。 ★可逆層は [Stacks] 01CR の定義（逆元を持つ）で入れた。"
-     },
-     {
-      "stage": "A2",
-      "claim": "monoidal 構造の**全体**（結合子・単位子・五角形・三角形）",
-      "status": "not-a-blocker",
-      "why": "★★★★**2026-08-27 再測定：塡がりではない。** プロジェクトは前層の水準（X.PresheafOfModules）で作業しており、そこでは mathlib の monoidal 構造が**完成している**。 ★層の水準の monoidal 構造は確かに PR 規模だが、**本プロジェクトはそれを使わない**。"
-     },
-     {
-      "stage": "B",
-      "claim": "可逆層（階数 1 の局所自由層）と Pic(X)",
-      "status": "closed",
-      "why": "★★★**2026-08-27 の在庫確認で既にあると判った**。 IsLocallyTrivial が可逆層の定義であり、IsLocallyTrivial.tensor が Pic の乗法が閉じていることである。 ★さらに有限の基本開集合で自明化できる（exists_finite_basicOpen_trivial）。",
-      "sources": [
-       "[Stacks] 01CR Invertible modules",
-       "[Stacks] 0B8L The Picard group of a scheme"
+  "_comment": [
+    "★『mathlib に無い標準数学』の登録簿。2026-08-27 に新設。",
+    "★★なぜ要るか: Skeleton/ は原典の statement 専用、Interface/ は posit 専用、Found/ は実装専用であり、",
+    "   『これから作るべき標準数学』を節点として数える場所がどこにも無かった。",
+    "   従来は .needs の .citation(.absent …) だけで、節点数を持てなかった。",
+    "★★★書き方の規則:",
+    "   - mathlibStatus には **探索範囲** を必ず書く(absent は範囲を伴わなければ主張として無効。lean-ecosystem.json の _absentPolicy と同じ)。",
+    "   - nodes は『フルの理論』ではなく **原文が実際に使う 1 本に必要な最小構成** で数える。",
+    "   - 測っていないものは nodes を \"unmeasured\" にし、howToMeasure に測り方を書く。嘘の数字を置かない。",
+    "   - measuredAt を必ず書く。測定は古くなる。"
+  ],
+  "measuredAt": "2026-08-27",
+  "gaps": {
+    "tame-ramification": {
+      "what": "馴分岐の理論。全分岐の構造定理(馴なら不分岐部を除けば Eisenstein な生成元 λ^e = π を持つ)と、馴なら different の指数がちょうど e−1 であること。",
+      "whereUsed": [
+        "[GenEll] Proposition 1.7, (i) の証明が畳んでいる \"elementary claim\" の段 1(野生/馴の分離)と段 2(ζ_p への帰着)"
       ],
-      "where": "Found/Arakelov/PicLocalTrivial.lean の **IsLocallyTrivial** / **IsLocallyTrivial.tensor**、Found/Arakelov/APicWitness.lean の **aPicGroup**"
-     },
-     {
-      "stage": "C1",
-      "claim": "ℙⁿ_R と、その Spec R 上の**固有性**",
-      "status": "closed",
-      "where": "Found/GenEll/ProjectiveSpace.lean の projSpace / projSpaceOverSpec / **projSpaceOverSpec_isProper**",
-      "why": "★★★★**2026-08-27 の実測で道が短くなった**。mathlib には AlgebraicGeometry.Proj、MvPolynomial.gradedAlgebra、Proj.toSpecZero、そして **instance [Algebra.FiniteType (𝒜 0) A] : IsProper (Proj.toSpecZero 𝒜)**（[Stacks] 01MF）がある。 ★埋めた隙間は 2 つだけ: （1）Algebra.FiniteType (𝒜 0) (MvPolynomial …) は instance でないので変数が生成することを書いた、（2）𝒜 0 は R そのものではないので homogeneousSubmodule_zero から R ≅+* 𝒜 0 を作った。"
-     },
-     {
-      "stage": "C2a",
-      "claim": "ℙⁿ の**標準アフィン被覆** D₊(x_i) と**正規化座標** x_j/x_i",
-      "status": "closed",
-      "where": "Found/GenEll/ProjSpaceCover.lean の **iSup_basicOpen_X_eq_top** / **projCoord** / projCoord_self",
-      "why": "★★★★**消費側（northcott_of_projModel）が要るのは**同次座標**であって O(1) そのものではない**。 ★正規化座標 x_j/x_i は ℙⁿ の標準アフィンチャートから直に取れる——D₊(x_i) ≅ Spec (A⁰_{x_i}) であり、A⁰_{x_i} は x_j/x_i たちで生成される。 ★★被覆の中身は「無関係イデアルは変数で生成される」である。"
-     },
-     {
-      "stage": "C2b",
-      "claim": "点 Spec F ⟶ ℙⁿ をチャートに落として環準同型 A⁰_{x_i} → F を取る配管",
-      "status": "closed",
-      "why": "★mathlib の **Proj.awayι**（Spec (A⁰_f) ⟶ Proj 、開埋め込み）と **Proj.opensRange_awayι** があったので、IsOpenImmersion.lift と Spec.preimage を繋ぐだけで出た。 ★★Spec F は 1 点なので、どのチャートに入るかは exists_X_notMem が決める。 ★★★**これで northcott_of_projModel の crd に渡す座標が実際に作れる**。",
-      "where": "Found/GenEll/ProjSpaceCover.lean の exists_chart_range / projChartHom / **projPointCoord** / projPointCoord_self"
-     },
-     {
-      "stage": "C2c",
-      "claim": "O(1)（twisting sheaf）——★因子表示では**超平面因子**",
-      "status": "partial",
-      "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28：因子表示なら O(1) の層は要らない**。本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★★★★★**超平面は本日入った**——hyperplaneι : Proj 𝒜(Fin N) ⟶ Proj 𝒜(Fin (N+1))（x₀ ↦ 0、x_{j+1} ↦ y_j の次数付き環準同型を mathlib の Proj.map に渡す）と、そのイデアル層 hyperplaneIdeal ≝ (hyperplaneι).ker。 ★埋めた隙間は 2 つだけであった——（1）aeval が斉次性を保つこと（mathlib に IsHomogeneous.bind₁ は無いので単項式に分けた）、（2）無関係イデアルの条件（rename Fin.succ が aeval の**切断**であることから出る）。 ★★**残るのは「超平面因子の高さが素朴高さ log max|x_i| であること」と、very ample（n·D が閉埋め込みによる超平面の引き戻し）の定義である。",
-      "where": "Found/GenEll/Hyperplane.lean の hyperplaneHom / **hyperplaneι** / **hyperplaneIdeal**",
-      "sources": [
-       "[Stacks] 01MX Proj and graded ring maps",
-       "[EGA2] §4.4"
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "REPL で名前解決を試した(2026-08-27): IsTamelyRamified / Algebra.IsTamelyRamified / Ideal.IsTamelyRamified / IsTame はいずれも未定義。Algebra.IsUnramifiedAt はある。",
+        "partial": [
+          "pow_sub_one_dvd_differentIdeal —— P^{e−1} ∣ 𝔡(下界のみ)",
+          "not_dvd_differentIdeal_iff / dvd_differentIdeal_iff —— 不分岐 ⇔ P ∤ 𝔡(e = 1 の場合のみ)",
+          "conductor_mul_differentIdeal —— 単生成なら 𝔡 = (f′(x))(上界への入口)",
+          "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt —— Eisenstein なら p·z ∈ A[λ] ⇒ z ∈ A[λ]"
+        ],
+        "absentPart": "馴分岐の概念そのもの、および馴での different の**上界**(¬ P^e ∣ 𝔡)。Serre の評価 d_P ≤ e − 1 + v_P(e) も無い。"
+      },
+      "minimalForm": "『全分岐かつ馴なら p·O_L ⊆ 𝔡』。フルの分岐理論は要らない。",
+      "nodes": 6,
+      "nodesNote": "原文の 6 段(野生/馴の分離・ζ_p への帰着・p-群の可解性・Kummer・λ ∣ p・different の下界)を節点とする。hedge-index の実測でも Proposition 1.7 の合図は 7 件(immediately×5 one verifies×1 easily×1)。",
+      "done": 6,
+      "doneNote": "★2026-08-27 の第 411 ブロックで 6/6 になった。第 374-395 で段 2〜6 を実装し野生・馴の両枝を結線し、第 411 で段 1 の全分岐の構造定理(B = A[λ] と deg minpoly = e)を Nakayama で自作して閉じた(Found/GenEll/TotallyRamified.lean)。★★ただしこれは『局所の馴分岐の道具が揃った』ということであって、Proposition 1.7 の sorry が消えたということではない——prop_1_7 の .needs には Remark 1.5.1 と一様性の項が残っている。",
+      "lastStepMeasurement": {
+        "measuredAt": "2026-08-27",
+        "what": "段 1 の最終組み立て(B = A[λ] と (minpoly A λ).natDegree = e)に何が要るかを mathlib 全体を探して測った。",
+        "present": [
+          "Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing —— e·f = [L:K] の局所版(Mathlib/NumberTheory/RamificationInertia/Basic.lean:650)。★これで e = [L:K] から f = 1 が出る",
+          "Ideal.inertiaDeg_algebraMap / inertiaDeg_pos / inertiaDeg_ne_zero(RamificationInertia/Inertia.lean)",
+          "mem_adjoin_of_smul_prime_smul_of_minpoly_isEisensteinAt(RingTheory/Polynomial/Eisenstein/IsIntegral.lean:227)——Eisenstein から p を割って降りる道具",
+          "Polynomial.Monic.isEisensteinAt_of_mem_of_notMem(Eisenstein/Basic.lean:206)",
+          "Nakayama の道具: Submodule.le_of_le_smul_of_le_jacobson_bot(RingTheory/Nakayama.lean:146)、IsLocalRing.maximalIdeal_le_jacobson"
+        ],
+        "absent": [
+          "★★『totally ramified』という語が mathlib に 1 件も無い(大文字小文字を無視した全文検索で 0 件、2026-08-27)。IsTotallyRamified も無い",
+          "分岐の仮説から Algebra.adjoin A {λ} = ⊤ を出す定理。唯一の adjoin = ⊤ は IsLocalRing.exists_adjoin_eq_top(RingTheory/LocalRing/Etale.lean:93)で、FormallyUnramified すなわち**逆の場合**である",
+          "(minpoly A λ).IsEisensteinAt (maximalIdeal A) や (minpoly A λ).natDegree = e。IsEisensteinAt は mathlib の 3 ファイルにしか現れず、そのどれも ramificationIdx・DVR・素元に触れていない",
+          "『Eisenstein ⇒ 全分岐』の向き。AdjoinRoot は Eisenstein/ のどのファイルにも現れない",
+          "剰余体が一致すれば素元で生成される、という Nakayama の帰結。IsLocalRing.adjoin_residue_eq_top_iff_adjoin_eq_top(Etale.lean:63)はまさにその論法だが、Algebra.FormallyUnramified.map_maximalIdeal を消費する——全分岐では偽(そこでは maximalIdeal S ^ e)なのでそのままは使えない"
+        ],
+        "template": "円分体の具体例が NumberField/Cyclotomic/Ideal.lean に手で書き下してある(inertiaDeg_span_zeta_sub_one:92 / ramificationIdx_span_zeta_sub_one:116)。★mathlib で『素元もどきの minpoly が Eisenstein ⇒ adjoin が全体』を実際に通しているのは NumberField/Cyclotomic/Basic.lean:108-119 の 1 箇所だけで、ζ−1 の ℤ 上に特殊化され判別式を使っている。一般の全分岐仮説では書かれていない。",
+        "estimate": "★残り 1 段は『既知数学だが mathlib に無い』——Nakayama を自分で回す必要がある。e·f = [L:K] から f = 1 は既存。B = A[λ] は Nakayama を λ で回して自作する。"
+      },
+      "where": [
+        "lean/ABC3/Found/GenEll/TameRamification.lean",
+        "lean/ABC3/Found/GenEll/DifferentKummer.lean",
+        "lean/ABC3/Found/GenEll/PGroupTower.lean",
+        "lean/ABC3/Found/GenEll/TotallyRamified.lean"
       ]
-     },
-     {
-      "stage": "D1",
-      "claim": "**X_s（切断の非消失軌跡）** と **ample の定義**",
-      "status": "closed",
-      "where": "Found/GenEll/AmpleDef.lean の trivValue / **nonVanishing** / presheafTensorPow / **IsAmple**",
-      "why": "★mathlib に加群層の**茂**は 1 件も無い（2026-08-27 実測）ので、教科書の定義（茂で s_x ∉ 𝔪_x M_x）は書けない。 ★★代わりに **IsLocallyTrivial が与える局所自明化 e : M|_V ≅ 𝟙 ごとに basicOpen を取って合併した**。 ★★★開であることが自動になり、自明化を選ばないので選択公理も要らない。 ★同じ V の上の自明化の取り方に依らないことも閉じた（basicOpen_trivValue_congr。機構は「環 R を自分自身の上の加群と見たときの線型同型は θ 1 倍で、θ 1 は単元」という純代数）。"
-     },
-     {
-      "stage": "D2",
-      "claim": "X_s の**異なる V, W にまたがる独立性**と定義の健全性",
-      "status": "closed",
-      "why": "★X_s ⊓ V = X.basicOpen (trivValue M V e s) を閉じた。 ★★機構は「自明化の制限と trivValue が可換」（trivValue_restrict）だけで、それは e.hom の**自然性**（PresheafOfModules.naturality_apply）から出る。 ★★★trivialOfLe は 2 つの rfl 等式を rw して作られているので**評価すると計算する**。 ★★★★**健全性も取れた**——構造層なら X_s = Scheme.basicOpen s（nonVanishing_unit）。",
-      "where": "Found/GenEll/AmpleDef.lean の trivValue_restrict / **nonVanishing_inf** / mem_nonVanishing_iff_of_mem / **nonVanishing_unit**"
-     },
-     {
-      "stage": "D3",
-      "claim": "**切断の比 s/t**（同次座標の入口）と、自明化に依らないこと",
-      "status": "closed",
-      "where": "Found/GenEll/AmpleDef.lean の sectionRatio / **sectionRatio_congr** / sectionRatio_restrict / sectionRatio_agree",
-      "why": "★northcott_of_projModel が要求するのは**同次座標 crd とその比が単射であること**であり、原文の「射影埋め込み」の座標は s_i / s_j に他ならない。 ★★型が e を含まないのが要点である——nonVanishing_inf で X.basicOpen (trivValue M V e t) を X_t ⊓ V と書き換えられるので、「自明化に依らない」が**転送（HEq や ▸）なしの等式**として言える。 ★★★独立性の機構は trivValue_congr′——分子と分母が**同じ単元 u 倍**されるので比では消える。"
-     },
-     {
-      "stage": "D4",
-      "claim": "比を X_t の上の**大域な**正則関数へ貼り合わせる",
-      "status": "closed",
-      "why": "★貼り合わせ条件（sectionRatio_agree）はすでにあったので、TopCat.Sheaf.existsUnique_gluing に渡す配管だけであった。 ★★Opens は poset なので平行な射は等しく、homOfLE h₁ = homOfLE hA ≫ homOfLE hB が **rfl** で出る。 ★★★被覆は IsLocallyTrivial の被覆篩から（iSup_trivIndex）。",
-      "where": "Found/GenEll/AmpleDef.lean の TrivIndex / iSup_trivIndex / ratioFamily_compatible / **exists_glued_ratio**"
-     },
-     {
-      "stage": "E",
-      "claim": "Serre の定理: ample のある冪が very ample",
-      "status": "open",
-      "where": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み（tag 01VT、物理 p.2516）",
-      "why": "★**原典は手元にあり、構造化も済んでいる**。 ★★段 A-D が揃えば着手できる。",
-      "sources": [
-       "[Stacks] Lemma 29.40.4 (tag 01VT)",
-       "[Stacks] Lemma 29.40.5"
-      ]
-     },
-     {
-      "stage": "F1",
-      "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
-      "status": "closed",
-      "where": "Found/GenEll/FlatModel.lean の flat_int_subschemeObj",
-      "why": "★道具は 3 本だけだった:\n  Scheme.Hom.ker_apply（mathlib）——核をアフィンで読む\n  Module.Flat.flat_iff_torsion_eq_bot_of_isBezout（mathlib）——**ℤ が Bezout だから平坦 ⇔ ねじれ無し**\n  Module.Flat.trans（ℚ が ℤ 上平坦・体上の加群は自由）\n★★**吹き上げも Proj も要らなかった**。",
-      "sources": [
-       "[GenEll] p.8 Remark 1.4.1 の括弧",
-       "mathlib: Scheme.Hom.ker_apply / Flat.flat_iff_torsion_eq_bot_of_isBezout"
-      ]
-     },
-     {
-      "stage": "F2ab",
-      "claim": "閉包が **ℤ-射影**（ℙᴺ_ℤ への閉埋め込み）かつ **ℤ-固有**",
-      "status": "closed",
-      "where": "Found/GenEll/ProjectiveModel.lean の isProper_subscheme_projSpace / **projective_flat_model**",
-      "why": "★段 C1（ℙⁿ_R の固有性）が入ったので 2 行で出た。 ★★閉埋め込みは固有であり、固有射の合成は固有。 ★★★**射影性は別に示す必要がない**——subschemeι は mathlib の instance ですでに閉埋め込みであり、「ℤ-射影」とは ℙᴺ_ℤ の閉部分スキームであることだからである。"
-     },
-     {
-      "stage": "F2c",
-      "claim": "閉包の**生成ファイバーが元の Y に戻る**こと",
-      "status": "open",
-      "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
-     }
-    ],
-    "done": "12.5/15",
-    "remaining": "★★**残るのは C2c（半分）・E・F2c** である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★**超平面因子も 2026-08-28 に入った**（hyperplaneι / hyperplaneIdeal）ので、C2c の残りは「超平面因子の高さ = 素朴高さ」と very ample の定義だけである。 ★★★残る本体は **E（Serre の定理）**であり、F2c（生成ファイバーが Y に戻る）は小さい。"
-   },
-   "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
-   "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
+    },
+    "spreading-out-over-base": {
+      "what": "生成ファイバー上の同型が、ある有限素数集合 Σ の上で ℤ[Σ^{-1}] へ延びること(EGA IV, 8.8.2 の極限論)。",
+      "whereUsed": [
+        "[GenEll] Remark 1.5.1 の後半(log-cond_D の BD-class が (X_ℚ, D_ℚ) だけに依ること)",
+        "[GenEll] Proposition 1.7, (i) の証明が『Σ 上の log-cond の寄与は ≈ 0』として引く"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-minor",
+        "searched": "Glob で Mathlib/**/*{SpreadingOut,Spread}*.lean を検索し、REPL で主定理を #check(2026-08-27)。★★2026-08-27 の再測(第 365 ブロック)——検索語を「ファイル名」から「主張の形(スキームの余フィルター極限)」に変えたら **Mathlib/AlgebraicGeometry/AffineTransitionLimit.lean が出た**。1288 行、EGA IV 8 と Stacks 01YT に従うと明記されている。",
+        "partial": [
+          "Mathlib/AlgebraicGeometry/SpreadingOut.lean は**存在するが別物**(茎 → 近傍の spreading out。基底の極限ではない)",
+          "★★★Mathlib/AlgebraicGeometry/AffineTransitionLimit.lean —— **これが EGA IV §8 である**(2026-08-27 に発見)",
+          "Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation —— **lim D_i ⟶ X は有限段 D_j ⟶ X を経由する**(spreading out の全射側そのもの)",
+          "Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType / exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType —— 単射側(Stacks 01ZC)",
+          "Scheme.exists_isAffine_of_isLimit / exists_isOpenCover_and_isAffine / compactSpace_of_isLimit / nonempty_of_isLimit —— 極限の性質(Stacks 01Z2/01Z3/01Z5/01Z6)",
+          "exists_map_preimage_eq_map_preimage / exists_preimage_eq / isBasis_preimage_isAffineOpen —— 開集合の降下(Stacks 01Z4)"
+        ],
+        "absentPart": "★★★★★**2026-08-27 に解消した。**ここには「同型であることの降下（Stacks 01ZM / EGA IV 8.10.5）が mathlib に無い」と書いていたが、**01ZM は要らなかった**——単射側（01ZC）と引き戻しの普遍性だけで組み立てられる。★図式の組み立て（ℚ = colim ℤ[1/n!] → Spec ℚ = lim Spec ℤ[1/n!] → X_ℚ = lim (X ×_ℤ ℤ[1/n!])）も自前で終わっている。★★**因子の降下も閉じた**——因子を**閉部分スキーム**で書けば、mathlib に無い ideal_comap（ideal-comap-on-affine-opens を見よ）を経由せずに可換正方形の降下として出る。★★★**残るのは Σ の外での conductor の一致だけであり、これは mathlib の欠落ではなく我々の作業である。**",
+        "correction": "★2026-08-16 の remark_1_5_1.needs は『mathlib に scheme の spreading out は無い』としていた。2026-08-27 に一度『SpreadingOut.lean はあるが別物』と訂正したが、**それも不完全だった**——同日の再測で AffineTransitionLimit.lean(EGA IV §8 そのもの)が見つかった。★★★教訓: 在庫の判定を**ファイル名**で行うと外す。**主張の形**(ここでは「スキームの余フィルター極限」)で引くこと。tools/lean-idioms.md と ResearchMethod にも同じ規則がある。"
+      },
+      "minimalForm": "『(X, D) と (X′, D′) の ℚ-ファイバーが同型なら、ある有限 Σ の外で log-cond が一致する』。フルの EGA IV §8 は要らない。",
+      "nodes": 5,
+      "nodesNote": "★2026-08-27 に測定。原文 p.8-9 の Remark 1.5.1 の本文と証明を段に分けた: (1) 生成ファイバーの同型が ℤ[Σ^{-1}] へ延びる(EGA IV 8.8.2)、(2) 因子 D も一緒に延びる、(3) Σ の外では conductor が一致する、(4) Σ の上の寄与が Σ_{q∈Σ} log q で一様に抑えられる、(5) log-diff は X_ℚ だけに依る。hedge-index の合図は 3 件(one verifies×1 immediately×2)。 ★★2026-08-27 の再測(第 365)——段 1(生成ファイバーの同型が ℤ[Σ⁻¹] へ延びる)の**射の部分**は mathlib の Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation で足りる。残るのは「同型であることの降下」と図式の組み立て。",
+      "done": 5,
+      "doneNote": "★★★★★**2026-08-27、5 段すべてが Found/ に載った（sorry 0）。**\n段 1 生成ファイバーの同型が延びる —— IsoDescent.lean exists_iso_of_generic_iso\n段 2 因子も一緒に延びる —— DivisorDescent.lean exists_pair_descent\n段 3 Σ の外で conductor が一致 —— ConductorDescent / LocalizationBridge / PullbackLocalization / Remark151Chain / RatTowerLocalization / Remark151Sigma\n段 4 Σ 上の寄与の一様な上界 —— LogCondSigma.lean（既存）\n段 5 log-diff は X_ℚ だけに依る —— LogDiff.lean（既存）\n★到達点は remark_1_5_1_bdeq（Remark151Sigma.lean）で、定数は ∑_{q ∣ n!} log q——原文の ∑_{q ∈ Σ} log q そのもの。",
+      "resolvedNode": {
+        "resolvedAt": "2026-08-27",
+        "what": "★段 4 を log-cond へ繋ぐ橋が渡った(第 414 ブロック、Found/GenEll/LogCondSigma.lean)。",
+        "statement": "Dedekind 環では根基イデアルの分解の重複度は ≤ 1。これを経由して logCond_le_sum_log が出た。",
+        "howItWentThrough": "★mathlib の Ideal.radical_isRadical はイデアル論の IsRadical(r^n ∈ I → r ∈ I)であって、Squarefree へ渡すにはモノイドの IsRadical(x ∣ y^n → x ∣ y)が要る。★★両者を繋ぐ道は短かった——Ideal.dvd_iff_le で包含に直せば radical_pow と radical_idem だけで出る。あとは IsRadical.squarefree と Associates.prime_pow_dvd_iff_le。",
+        "absentInMathlib": "『Dedekind 環の根基イデアルは squarefree』そのものは mathlib に無い(exact? で見つからず、IsRadical↔Squarefree はモノイド版しか無い)。イデアルへの橋を自作した。"
+      },
+      "criticalFinding": {
+        "measuredAt": "2026-08-27",
+        "what": "★★★Skeleton の remark_1_5_1 は現在の形では**偽**である(Check/GenEll/RemarkAxiomGap.lean の remark_1_5_1_false で機械検証済み)。∀ D D′ : HeightTheoryData の形で、HeightTheoryData は公理を 1 つも持たないので、点の全単射だけでは logDiff を何も縛らない(logDiff を 0 と x に取れば反例)。",
+        "consequence": "★この sorry は『spreading out 待ち』ではない——**そのままでは決して閉じられない**。spreading out を実装しても statement が偽のままである。",
+        "fix": "prop_1_4 / remark_1_4_1 と同じ方法で**構成に載せ替える**(Found/GenEll/HeightConstruction.lean 系の語彙で書き直し、逸脱を記録する)。★★段 4 と 5 は構成の側ではすでに真なので、載せ替えれば残るのは段 1-3 だけになる。"
+      },
+      "where": [
+        "lean/ABC3/Found/GenEll/SigmaBound.lean",
+        "lean/ABC3/Found/GenEll/LogDiff.lean",
+        "lean/ABC3/Check/GenEll/RemarkAxiomGap.lean"
+      ],
+      "skeletonStatus": {
+        "at": "2026-08-27(第 420 ブロック)",
+        "what": "★Skeleton の remark_1_5_1 を構成へ載せ替え、sorry を外した。Skeleton/GenEll + Skeleton/NCBelyi の sorry は 4 → 3。",
+        "honest": "★★これは『原文の Remark 1.5.1 を証明した』ではない。旧 statement は**偽**であった(Check/GenEll/RemarkAxiomGap.lean で機械検証済み)ので、そのままでは決して閉じられなかった。prop_1_4 / remark_1_4_1 と同じ治療(構成への載せ替え)を施し、原文の証明の**後半だけ**を証明して前半(spreading out)を仮定 hagree に置いた。",
+        "nonVacuous": "★★★仮定が空虚でないことは Check/GenEll/RemarkSigmaWitness.lean で機械検証した(D = D′, Σ = ∅ で hagree が成り立ち、結論 BDeq が実際に得られる)。",
+        "stillNeeded": "★★★★Σ ≠ ∅ の場合に hagree を供給する幾何(= spreading out、段 1-3)。.needs に [Stacks] 32.22 として登記した。"
+      },
+      "remaining": "★★★★★**残っているのは「点の対応 `ePt` を固有性から作る」1 本だけである。**\n★原文の定義域は U_X(ℚ̄) であり、これは X_ℚ だけで決まるので 2 つのモデルで**同じ集合**である（ePt は恒等）。\n★★形式化では定義域を Spec 𝒪_F ⟶ X としているのでモデルに依り、ePt がデータとして現れる。両者を繋ぐのが固有性（付値判定法）である。\n★★★mathlib には ValuativeCriterion.lean があり、付値環に対する存在・一意性は揃っている。残るのは「Dedekind 環 𝒪_F への貼り合わせ」（各 (𝒪_F)_v で延び、分離性で一致させる）であり、**mathlib の欠落ではなく我々の作業**である。"
+    },
+    "belyi-noncritical": {
+      "what": "指定した点で非臨界な Belyi 写像([NCBelyi] Theorem 2.5)。",
+      "whereUsed": [
+        "[GenEll] Theorem 2.1 の証明(原文 p.11 の『[Mzk1]』)"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-major",
+        "searched": "2026-08-16 に mathlib 全宣言名を Belyi で検索して 0 件。",
+        "absentPart": "Belyi 写像そのもの。"
+      },
+      "hasSourceNode": true,
+      "sourceNodeNote": "★これだけは**原典に節点がある**([NCBelyi]、9 ページ、0_Source にあり)。したがって Skeleton トラックに載る。",
+      "minimalForm": "Theorem 2.5 そのもの。",
+      "nodes": 5,
+      "nodesNote": "intra-graph で root=Theorem 2.5 から到達 5 節点 / 辺 5 / 深さ 2(Theorem 2.5 → Lemma 2.4 / Lemma 2.3 / Lemma 2.2 → Lemma 2.1)。",
+      "done": 3,
+      "doneNote": "Lemma 2.1(Found/NCBelyi/Lemma21.lean、608 行)・Lemma 2.3(Found/NCBelyi/Separation.lean)・★Lemma 2.2(Found/NCBelyi/Lemma22.lean、2026-08-27 の第 398-404 ブロックで完成)は実装済み。★★Lemma 2.2 は Skeleton にも sorry なしで載った(Skeleton/NCBelyi/Theorem25.lean)。残るのは Lemma 2.4 と Theorem 2.5 本体。",
+      "missingSkeleton": [
+        "[NCBelyi] Lemma 2.4"
+      ],
+      "lemma24Progress": {
+        "measuredAt": "2026-08-27",
+        "note": "★Lemma 2.4 は Lemma 2.2 より大きい。Found 側の節点を 9 と見積もり、うち 5 を実装した。",
+        "nodes": 9,
+        "done": 8,
+        "doneList": [
+          "係数の限界(norm_coeff_le_choose、第 405)",
+          "値の上界・下界と suitable choice of C(第 405)",
+          "f₀′ の根の位置(Gauss–Lucas、第 406)",
+          "次数の降下と reduced degree(第 407)",
+          "入れ子帰納法の測度が 1 段下がること(第 408)",
+          "★正規化(lemma_2_3_rat / exists_rat_normalization、第 409)",
+          "★Galois 安定性(IsConjStable / conjClosure、第 410)",
+          "★★帰納の本体(nested_induction / nested_induction_descend、第 416)"
+        ],
+        "todoList": [
+          "★残りは 1 つだけ: ℙ¹ 上の有理関数としての組み立て(不分岐性の帳簿)。★★多項式の段は 2026-08-27 の第 417 ブロックで端から端まで閉じた(exists_poly_image_rat: 代数的数の有限集合は ℚ[x] の非定数多項式 1 つで ℚ の中へ写せる)。残るのは、その写像が ℙ¹ の射として S_φ の外で不分岐であることの帳簿だけである。"
+        ],
+        "extraDone": "★★第 417: exists_descend_data(帰納段のデータを実際に作る段)と nested_induction_descend′(不変量付き)を経て、exists_poly_image_rat を得た。★原文の『replacing S by S′, β by f₀(β), applying the induction hypothesis, and composing the resulting morphisms』がこれで Lean の中にある。"
+      },
+      "missingSkeletonNote": "★★Skeleton が無いのは Lemma 2.4 だけになった(2026-08-27)。未実装の合図も Lemma 2.4 の 2 件(immediately×1 one verifies×1)のみ。★★★Lemma 2.2 は Found を先に完成させてから Skeleton へ載せたので、途中で sorry を増やさずに済んだ——この順序は以後も使える。",
+      "where": [
+        "lean/ABC3/Skeleton/NCBelyi/Theorem25.lean",
+        "lean/ABC3/Found/NCBelyi/Lemma21.lean",
+        "lean/ABC3/Found/NCBelyi/Separation.lean",
+        "lean/ABC3/Found/NCBelyi/Lemma22.lean",
+        "lean/ABC3/Found/NCBelyi/Normalize.lean",
+        "lean/ABC3/Found/NCBelyi/BelyiComp.lean"
+      ],
+      "impact": "★§2 の 1 項目（Theorem 2.1）の門。 ★★**未分割ではない**（2026-08-27 確認）——5 節点中 3 が実装済みで、残る Lemma 2.4 も 9 節点中 8 が閉じている。 ★★★残るは「ℙ¹ 上の有理関数としての組み立て（不分岐性の帳簿）」1 つと Theorem 2.5 本体である。"
+    },
+    "riemann-roch-curves": {
+      "what": "曲線上の因子・連接コホモロジー・Riemann–Roch・Serre 双対性。",
+      "whereUsed": [
+        "[NCBelyi] Theorem 2.5 の証明が使う 1 本: deg(ω_X ⊗ L^{-1}(x)) ≤ −2 ⇒ H¹(X, L(−x)) = 0 ⇒ Γ(X,L) ↠ L ⊗ k(x)"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "Glob で Mathlib/AlgebraicGeometry/**/*{Divisor,Cohomolog,Curve,Genus,Sheaf}*.lean を検索(2026-08-27)。出たのは Sites/ConstantSheaf・Sites/ElladicCohomology・Sites/SheafQuasiCompact・Modules/Sheaf・ProjectiveSpectrum/StructureSheaf・StructureSheaf のみ。",
+        "absentPart": "曲線の因子・連接コホモロジー・Riemann–Roch・Serre 双対性のいずれも無い。ElladicCohomology は étale であって連接ではない。"
+      },
+      "minimalForm": "★フルの Riemann–Roch は要らない。原文が使うのは『次数が十分負なら H¹ が消え、大域切断が点で全射になる』の 1 本だけである。まずこの 1 本に必要な最小構成を測ること。",
+      "nodes": "unmeasured",
+      "howToMeasure": "[NCBelyi] Theorem 2.5 の証明(物理 p.6)の該当 3 行を 1_Structured に起こし、(1) 曲線上の直線束の次数 (2) H¹ の消滅判定 (3) 大域切断の点での全射性 の 3 段に分けて、各段の前提を数える。外部プロジェクト(lean-ecosystem.json)の在庫調査も同時に行う。",
+      "done": 0,
+      "where": []
+    },
+    "ample-and-projective-embedding": {
+      "what": "豊富(ample)な直線束の理論。とくに (a) ample ⟹ ある正のテンソル冪が very ample(Serre)、(b) very ample から射影空間への閉埋め込み、(c) 原文が使う吹き上げ(X から正規・ℤ-固有・ℤ-平坦な Y を作り φ:Y→X が生成ファイバーで同型、ψ:Y→ℙⁿ_ℤ)。",
+      "whereUsed": [
+        "[GenEll] Proposition 1.4, (iv) の**文面**（「L_ℚ が ample なら」——mathlib に ample が無いので**述べられない**）",
+        "[GenEll] Remark 1.4.1 の第 2 文（any normal, projective scheme Y over ℚ から ℤ-モデルを作る段）",
+        "[GenEll] Definition 1.1 / Definition 1.2（算術直線束 = 可逆層 + 計量。★arc-metric-not-attached-to-bundle と対をなす）",
+        "[GenEll] Proposition 1.7, (ii)（Riemann-Hurwitz は直線束の次数を要求する）"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-major",
+        "searched": "★★★**2026-08-27 に再測定して訂正した。**前回の「スキーム上の可逆層そのものが無い」は**誤り**であった——Ample|VeryAmple を grep しただけで、土台を見ていなかった。実際には以下が**すでにある**。",
+        "partial": [
+          "★Mathlib/RingTheory/PicardGroup.lean: **Module.Invertible / CommRing.Pic**（環の水準の可逆加群と Picard 群。Module.Invertible.exists_linearEquiv_ideal まである）",
+          "★★Mathlib/AlgebraicGeometry/Modules/Sheaf.lean: **Scheme.Modules = SheafOfModules X.ringCatSheaf**、pushforward / pullback とその随伴（pullbackPushforwardAdjunction）",
+          "★★★Mathlib/Algebra/Category/ModuleCat/Sheaf/LocallyFree.lean: **SheafOfModules.IsLocallyFree**（局所自由層）",
+          "Mathlib/Algebra/Category/ModuleCat/Sheaf/Quasicoherent.lean: 準一貫層",
+          "Mathlib/Algebra/Category/ModuleCat/Presheaf/Monoidal.lean: **前層のテンソル積**（層の側は未組立）",
+          "Mathlib/AlgebraicGeometry/ProjectiveSpectrum/: Proj と**Proj の固有性**（Proper.lean）",
+          "Mathlib/AlgebraicGeometry/AffineSpace.lean: アフィン空間",
+          "Mathlib/NumberTheory/Height/Northcott.lean: ℙⁿ 上の Northcott 性",
+          "ABC3: Found/GenEll/NorthcottCoord.lean の northcott_of_projModel（座標のデータを受け取れば Northcott）"
+        ],
+        "absentPart": "★**層のテンソル積**（前層のテンソル積の層化）——これが無いので Pic(X)（スキーム）が作れない。 ★★可逆層（階数 1 の局所自由層）という**定義**。 ★★★Proj 上の O(1)、P^n_S の点の関子（座標表示）。 ★★★★ample / very ample の定義と Serre の定理（ample のある冪が very ample）。 ★吹き上げ（Blowing up）。"
+      },
+      "minimalForm": "★原文の仮定「L_ℚ は ample」を「L は ℤ 上の射影埋め込みを与える」と読み替えれば northcott_of_projModel が直に当たる。★★消費者(Proposition 3.4)は M_ell に適用するので、その粗モジュライ ℙ¹_j は ℤ 上の射影モデルを明示的に持つ——**逸脱は消費者に影響しない**。",
+      "impact": "★★★★**2026-08-27 に訂正**: 直前に「残り 13 項目のうち 11 項目」と書いたのは**過大**であった。 ★実際にこの塡がりが門であるのは**§1 の 5 項目**（Definition 1.1・Definition 1.2・Proposition 1.4・Remark 1.4.1・Proposition 1.7）である。 ★★§3・§4 の 6 項目は **ample を経由しない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と 粗モジュライ ℙ¹_j の明示モデルで出る（台帳の minimalForm の通り）。 ★★★§3・§4 の実質的な塡がりは faltings-height-vs-degree-at-infinity と galois-equivariant-tate-uniformization の 2 つである。",
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★**原典は手元にある。** 「mathlib に無い」と「原典が無い」を混同していた。",
+        "sources": [
+          "[Stacks] 28.27 Ample invertible sheaves（Definition 28.27.1、Lemma 01PU / 01Q1 ほか）",
+          "[Stacks] 29.39-29.41 relatively (very) ample。★**Lemma 29.40.5（f が有限型なら L^n が f-very ample＝Serre）**が鍵。Lemma 29.39.2 は逆向き。",
+          "[EGA2] §4.4 Immersions dans les fibrés projectifs. Faisceaux très amples（Définition 4.4.2）",
+          "[Stacks] Blowing up（原文の吹き上げ Y の段）"
+        ],
+        "howToProceed": "★プロジェクトの方法論どおり、**スケルトンを作って依存グラフを拡張する**のが正攻法である。★★葉（層番号が少ないもの）から形式化すれば、person-years の山を壁として見なくて済む。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★**土台を実測して 6 段に割った（2026-08-27）。** ★前回の「可逆層が無い」という測定は誤りで、**土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）はすべてある**。 ★★残るのは上層だけである。",
+        "stages": [
+          {
+            "stage": "A1",
+            "claim": "層のテンソル積の**対象**と L^{⊗n}（回避経路）",
+            "status": "closed",
+            "where": "Found/GenEll/InvertibleSheaf.lean の **schemeTensorObj** / schemeTensorPow / IsInvertibleModule",
+            "why": "★前層のテンソル積（PresheafOfModules.Monoidal.tensorObj）を**層化する**だけ。 ★★X.ringCatSheaf.obj = X.presheaf ⋙ forget₂ CommRingCat RingCat が **rfl** なので型はそのまま合う（2026-08-27 実測）。 ★★★層化は PresheafOfModules.sheafification (𝟙 _)——構造前層は既に層なので α = 𝟙 が局所全単射。 ★可逆層は [Stacks] 01CR の定義（逆元を持つ）で入れた。"
+          },
+          {
+            "stage": "A2",
+            "claim": "monoidal 構造の**全体**（結合子・単位子・五角形・三角形）",
+            "status": "not-a-blocker",
+            "why": "★★★★**2026-08-27 再測定：塡がりではない。** プロジェクトは前層の水準（X.PresheafOfModules）で作業しており、そこでは mathlib の monoidal 構造が**完成している**。 ★層の水準の monoidal 構造は確かに PR 規模だが、**本プロジェクトはそれを使わない**。"
+          },
+          {
+            "stage": "B",
+            "claim": "可逆層（階数 1 の局所自由層）と Pic(X)",
+            "status": "closed",
+            "why": "★★★**2026-08-27 の在庫確認で既にあると判った**。 IsLocallyTrivial が可逆層の定義であり、IsLocallyTrivial.tensor が Pic の乗法が閉じていることである。 ★さらに有限の基本開集合で自明化できる（exists_finite_basicOpen_trivial）。",
+            "sources": [
+              "[Stacks] 01CR Invertible modules",
+              "[Stacks] 0B8L The Picard group of a scheme"
+            ],
+            "where": "Found/Arakelov/PicLocalTrivial.lean の **IsLocallyTrivial** / **IsLocallyTrivial.tensor**、Found/Arakelov/APicWitness.lean の **aPicGroup**"
+          },
+          {
+            "stage": "C1",
+            "claim": "ℙⁿ_R と、その Spec R 上の**固有性**",
+            "status": "closed",
+            "where": "Found/GenEll/ProjectiveSpace.lean の projSpace / projSpaceOverSpec / **projSpaceOverSpec_isProper**",
+            "why": "★★★★**2026-08-27 の実測で道が短くなった**。mathlib には AlgebraicGeometry.Proj、MvPolynomial.gradedAlgebra、Proj.toSpecZero、そして **instance [Algebra.FiniteType (𝒜 0) A] : IsProper (Proj.toSpecZero 𝒜)**（[Stacks] 01MF）がある。 ★埋めた隙間は 2 つだけ: （1）Algebra.FiniteType (𝒜 0) (MvPolynomial …) は instance でないので変数が生成することを書いた、（2）𝒜 0 は R そのものではないので homogeneousSubmodule_zero から R ≅+* 𝒜 0 を作った。"
+          },
+          {
+            "stage": "C2a",
+            "claim": "ℙⁿ の**標準アフィン被覆** D₊(x_i) と**正規化座標** x_j/x_i",
+            "status": "closed",
+            "where": "Found/GenEll/ProjSpaceCover.lean の **iSup_basicOpen_X_eq_top** / **projCoord** / projCoord_self",
+            "why": "★★★★**消費側（northcott_of_projModel）が要るのは**同次座標**であって O(1) そのものではない**。 ★正規化座標 x_j/x_i は ℙⁿ の標準アフィンチャートから直に取れる——D₊(x_i) ≅ Spec (A⁰_{x_i}) であり、A⁰_{x_i} は x_j/x_i たちで生成される。 ★★被覆の中身は「無関係イデアルは変数で生成される」である。"
+          },
+          {
+            "stage": "C2b",
+            "claim": "点 Spec F ⟶ ℙⁿ をチャートに落として環準同型 A⁰_{x_i} → F を取る配管",
+            "status": "closed",
+            "why": "★mathlib の **Proj.awayι**（Spec (A⁰_f) ⟶ Proj 、開埋め込み）と **Proj.opensRange_awayι** があったので、IsOpenImmersion.lift と Spec.preimage を繋ぐだけで出た。 ★★Spec F は 1 点なので、どのチャートに入るかは exists_X_notMem が決める。 ★★★**これで northcott_of_projModel の crd に渡す座標が実際に作れる**。",
+            "where": "Found/GenEll/ProjSpaceCover.lean の exists_chart_range / projChartHom / **projPointCoord** / projPointCoord_self"
+          },
+          {
+            "stage": "C2c",
+            "claim": "O(1)（twisting sheaf）——★因子表示では**超平面因子**",
+            "status": "partial",
+            "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28：因子表示なら O(1) の層は要らない**。本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★★★★★**超平面は本日入った**——hyperplaneι : Proj 𝒜(Fin N) ⟶ Proj 𝒜(Fin (N+1))（x₀ ↦ 0、x_{j+1} ↦ y_j の次数付き環準同型を mathlib の Proj.map に渡す）と、そのイデアル層 hyperplaneIdeal ≝ (hyperplaneι).ker。 ★埋めた隙間は 2 つだけであった——（1）aeval が斉次性を保つこと（mathlib に IsHomogeneous.bind₁ は無いので単項式に分けた）、（2）無関係イデアルの条件（rename Fin.succ が aeval の**切断**であることから出る）。 ★★**残るのは「超平面因子の高さが素朴高さ log max|x_i| であること」と、very ample（n·D が閉埋め込みによる超平面の引き戻し）の定義である。",
+            "where": "Found/GenEll/Hyperplane.lean の hyperplaneHom / **hyperplaneι** / **hyperplaneIdeal**",
+            "sources": [
+              "[Stacks] 01MX Proj and graded ring maps",
+              "[EGA2] §4.4"
+            ]
+          },
+          {
+            "stage": "D1",
+            "claim": "**X_s（切断の非消失軌跡）** と **ample の定義**",
+            "status": "closed",
+            "where": "Found/GenEll/AmpleDef.lean の trivValue / **nonVanishing** / presheafTensorPow / **IsAmple**",
+            "why": "★mathlib に加群層の**茂**は 1 件も無い（2026-08-27 実測）ので、教科書の定義（茂で s_x ∉ 𝔪_x M_x）は書けない。 ★★代わりに **IsLocallyTrivial が与える局所自明化 e : M|_V ≅ 𝟙 ごとに basicOpen を取って合併した**。 ★★★開であることが自動になり、自明化を選ばないので選択公理も要らない。 ★同じ V の上の自明化の取り方に依らないことも閉じた（basicOpen_trivValue_congr。機構は「環 R を自分自身の上の加群と見たときの線型同型は θ 1 倍で、θ 1 は単元」という純代数）。"
+          },
+          {
+            "stage": "D2",
+            "claim": "X_s の**異なる V, W にまたがる独立性**と定義の健全性",
+            "status": "closed",
+            "why": "★X_s ⊓ V = X.basicOpen (trivValue M V e s) を閉じた。 ★★機構は「自明化の制限と trivValue が可換」（trivValue_restrict）だけで、それは e.hom の**自然性**（PresheafOfModules.naturality_apply）から出る。 ★★★trivialOfLe は 2 つの rfl 等式を rw して作られているので**評価すると計算する**。 ★★★★**健全性も取れた**——構造層なら X_s = Scheme.basicOpen s（nonVanishing_unit）。",
+            "where": "Found/GenEll/AmpleDef.lean の trivValue_restrict / **nonVanishing_inf** / mem_nonVanishing_iff_of_mem / **nonVanishing_unit**"
+          },
+          {
+            "stage": "D3",
+            "claim": "**切断の比 s/t**（同次座標の入口）と、自明化に依らないこと",
+            "status": "closed",
+            "where": "Found/GenEll/AmpleDef.lean の sectionRatio / **sectionRatio_congr** / sectionRatio_restrict / sectionRatio_agree",
+            "why": "★northcott_of_projModel が要求するのは**同次座標 crd とその比が単射であること**であり、原文の「射影埋め込み」の座標は s_i / s_j に他ならない。 ★★型が e を含まないのが要点である——nonVanishing_inf で X.basicOpen (trivValue M V e t) を X_t ⊓ V と書き換えられるので、「自明化に依らない」が**転送（HEq や ▸）なしの等式**として言える。 ★★★独立性の機構は trivValue_congr′——分子と分母が**同じ単元 u 倍**されるので比では消える。"
+          },
+          {
+            "stage": "D4",
+            "claim": "比を X_t の上の**大域な**正則関数へ貼り合わせる",
+            "status": "closed",
+            "why": "★貼り合わせ条件（sectionRatio_agree）はすでにあったので、TopCat.Sheaf.existsUnique_gluing に渡す配管だけであった。 ★★Opens は poset なので平行な射は等しく、homOfLE h₁ = homOfLE hA ≫ homOfLE hB が **rfl** で出る。 ★★★被覆は IsLocallyTrivial の被覆篩から（iSup_trivIndex）。",
+            "where": "Found/GenEll/AmpleDef.lean の TrivIndex / iSup_trivIndex / ratioFamily_compatible / **exists_glued_ratio**"
+          },
+          {
+            "stage": "E",
+            "claim": "Serre の定理: ample のある冪が very ample",
+            "status": "open",
+            "where": "ResearchPaper/1_Structured/The Stacks Project/lemma-29-40-4.html に構造化済み（tag 01VT、物理 p.2516）",
+            "why": "★**原典は手元にあり、構造化も済んでいる**。 ★★段 A-D が揃えば着手できる。",
+            "sources": [
+              "[Stacks] Lemma 29.40.4 (tag 01VT)",
+              "[Stacks] Lemma 29.40.5"
+            ]
+          },
+          {
+            "stage": "F1",
+            "claim": "ℚ-スキームの閉包（スキーム論的像）が **ℤ-平坦**であること",
+            "status": "closed",
+            "where": "Found/GenEll/FlatModel.lean の flat_int_subschemeObj",
+            "why": "★道具は 3 本だけだった:\n  Scheme.Hom.ker_apply（mathlib）——核をアフィンで読む\n  Module.Flat.flat_iff_torsion_eq_bot_of_isBezout（mathlib）——**ℤ が Bezout だから平坦 ⇔ ねじれ無し**\n  Module.Flat.trans（ℚ が ℤ 上平坦・体上の加群は自由）\n★★**吹き上げも Proj も要らなかった**。",
+            "sources": [
+              "[GenEll] p.8 Remark 1.4.1 の括弧",
+              "mathlib: Scheme.Hom.ker_apply / Flat.flat_iff_torsion_eq_bot_of_isBezout"
+            ]
+          },
+          {
+            "stage": "F2ab",
+            "claim": "閉包が **ℤ-射影**（ℙᴺ_ℤ への閉埋め込み）かつ **ℤ-固有**",
+            "status": "closed",
+            "where": "Found/GenEll/ProjectiveModel.lean の isProper_subscheme_projSpace / **projective_flat_model**",
+            "why": "★段 C1（ℙⁿ_R の固有性）が入ったので 2 行で出た。 ★★閉埋め込みは固有であり、固有射の合成は固有。 ★★★**射影性は別に示す必要がない**——subschemeι は mathlib の instance ですでに閉埋め込みであり、「ℤ-射影」とは ℙᴺ_ℤ の閉部分スキームであることだからである。"
+          },
+          {
+            "stage": "F2c",
+            "claim": "閉包の**生成ファイバーが元の Y に戻る**こと",
+            "status": "open",
+            "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
+          }
+        ],
+        "done": "12.5/15",
+        "remaining": "★★**残るのは C2c（半分）・E・F2c** である。 ★座標の側は揃った——ℙⁿ の被覆・チャート・点の正規化座標 x_j/x_i ∈ F まで入った。 ★★**超平面因子も 2026-08-28 に入った**（hyperplaneι / hyperplaneIdeal）ので、C2c の残りは「超平面因子の高さ = 素朴高さ」と very ample の定義だけである。 ★★★残る本体は **E（Serre の定理）**であり、F2c（生成ファイバーが Y に戻る）は小さい。"
+      },
+      "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
+      "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
+    },
+    "arc-metric-not-attached-to-bundle": {
+      "what": "★これは mathlib の欠落ではなく**我々の設計の穴**である(2026-08-27 に発見、Check/GenEll/Def12Degenerate.lean で機械検証)。arcCM X = C(X^arc, ℝ) は点上の関数であって L^arc 上のエルミート計量ではないので、束と計量の対応が失われている。その結果 deg_F が Pic 類を見ず、ht も見ない。",
+      "whereUsed": [
+        "[GenEll] Definition 1.1(算術直線束 = 可逆層 + ι_X-両立な計量)",
+        "[GenEll] Definition 1.2, (i)(高さ ht_M̄)"
+      ],
+      "mathlibStatus": {
+        "verdict": "not-a-mathlib-gap",
+        "searched": "Pic(Spec 𝓞_F) ≃ ClassGroup は Found/Arakelov/PicSpecWitness.lean の picSpecEquiv に**既にある**(mathlib の ClassGroup.equivPic 経由)。足りないのは類群の側ではない。",
+        "absentPart": "★★arcCM を「L に付いた計量」に変える設計変更(APicData の ofMetric / forgetMetric の水準)。★APicSpecData に「deg_F を有限素点と結ぶ欄」を足すだけでは**現在の APic では満たせない**。"
+      },
+      "minimalForm": "★Spec 𝓞_F で言うと: 原文は L の生成元 s に対し |s|_σ を持ち deg_F = log #(L/s𝓞_F) − ∑_σ log|s|_σ(s の取り替えで両項が動き和は不変、積公式)。実装は −log|s|_σ を s を記録せずに持つ。",
+      "note": "★★★因子表示(Found/GenEll/HeightConstruction.lean の htArith)は健全である——有限素点を見ている。Proposition 1.6 / Definition 1.5 / Proposition 1.4,(ii)(iii) の .src はそちらに乗っているので影響しない。**混同しない。**"
+    },
+    "galois-equivariant-tate-uniformization": {
+      "what": "M_l(E) = E[l] への G_K 作用と、Tate 一意化 E(K̄) ≅ K̄ˣ/q^ℤ がそれと同変であること。",
+      "whereUsed": [
+        "[GenEll] Lemma 3.2, (i)(ii)をスキームの水準で閉じるため"
+      ],
+      "mathlibStatus": {
+        "verdict": "closed-in-ABC3",
+        "searched": "★★★**2026-08-27 に再測定して訂正した。** mathlib に Tate 曲線は無いが、**ABC3 側には選ばれた同型がすでにある**——前回の記録は uniformization_of_split だけを見ており、tatePhiAddEquivAll（**Nonempty ではなく選ばれた ≃+**）を見ていなかった。",
+        "partial": [
+          "★★★ABC3: Found/GaloisRep/TateDoubling.lean の **tatePhiAddEquivAll**（Additive (Kˣ/q^ℤ) ≃+ E_q(K)、**選ばれた同型**。倒化の仮定なし）",
+          "★ABC3: Found/GaloisRep/TatePhi.lean の tatePhi / tateAOf / tateWOf（写像の中身。ただし tateAOf は .choose なので**公式ではなく選択**である——tateAOf_spec が特徴づける）",
+          "★★ABC3: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（TateCurveData の非空虚性、G6）",
+          "★★★ABC3: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean——**消費側（K̄ˣ/q^ℤ の上での Lemma 3.2 (i)(ii)）は閉じている**"
+        ],
+        "absentPart": "★**2026-08-27 に埋まった。** ★★ただし Lemma 3.2 を**項目として**閉じるには (ii)（E/μ_l を**スキームとして**作る段、有限平坦群スキームによる商）が別に要る——それは mathlib にも ABC3 にも無い。"
+      },
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★原文は [FC]（Faltings–Chai）Ch. III に帰すが、**[FC] は 0_Source に無い**。★★しかし**同じ内容の別原典が手元にある**。",
+        "sources": [
+          "[RaySB427] Raynaud - Construction analytique de courbes en géométrie non archimédienne（Bourbaki 427）——Tate / Mumford の一意化そのもの",
+          "[Stacks] étale 基本群と Galois 作用の側"
+        ],
+        "howToProceed": "★[RaySB427] を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★★★★★**10 段に割り、9 段を閉じた（2026-08-27 の 1 日）。** ★朝の時点では**absent・未分割**であった。 ★★★発見 1: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。「一意 ⇒ 自然」で 5 段が機械的に閉じた。 ★★★発見 2: **帰納極限は要らなかった**——l-捩れは有限拡大に載る。",
+        "stages": [
+          {
+            "stage": "1",
+            "claim": "固定した完備離散付値体 K での**選ばれた**同型 Kˣ/q^ℤ ≃+ E_q(K)",
+            "status": "closed",
+            "where": "Found/GaloisRep/TateDoubling.lean の tatePhiAddEquivAll",
+            "why": "★**Nonempty ではなく選ばれた ≃+ である**。 ★★tate_uniformization_dvr はこれを Nonempty で包んだだけなので、自然性を問うには tatePhiAddEquivAll を直接使えばよい。"
+          },
+          {
+            "stage": "2a",
+            "claim": "**正規化代表 normRep の自然性**（付値を保つ群準同型に沿って）",
+            "status": "closed",
+            "where": "Found/GaloisRep/NormRepNatural.lean の normRep_map / normRep_map_self",
+            "why": "★**一意なものは自動的に自然である**。 normRep は .choose だが eq_normRep（一意性）があるので、σ (normRep c) が条件 [0, v q) を満たすことを見れば済む。 ★★証明は 3 行。"
+          },
+          {
+            "stage": "2b",
+            "claim": "tateAOf / tateWOf の自然性（tateAOf_spec 経由）",
+            "status": "closed",
+            "why": "★**.choose で定義されたものでも、特徴づけがあれば自然性は出る**。 tateAOf_spec（algebraMap R K (tateAOf S c) = normRep …）と 段 2a、それに TateSetup の hinj（単射性）を繋ぐだけ。 ★★tateWOf は tateAOf · tateWOf = q から**消去**で出る。 ★★★σR S.q = S.q は**仮説ではなく導出される**。",
+            "where": "Found/GaloisRep/TatePhiNatural.lean の tateAOf_map / tateWOf_map"
+          },
+          {
+            "stage": "2c-1",
+            "claim": "**冪級数の adic 値の自然性**（σ (evalAdic f q) = evalAdic f (σ q)、σ I ⊆ I）",
+            "status": "closed",
+            "where": "Found/GaloisRep/AdicEvalNatural.lean の evalAdic_map / evalAdic_fixed",
+            "why": "★またしても**「一意 ⇒ 自然」**である。 evalAdic は Classical.choose だが evalAdic_unique がある。 ★★機構は 3 段: (a) partialEval は多項式なので σ と可換、(b) σ I ⊆ I から SModEq が移る、(c) evalAdic_unique。 ★★★σ q = q の場合は**級数の値が σ で固定される**（evalAdic_fixed）——これが同変性の核である。"
+          },
+          {
+            "stage": "2c-2",
+            "claim": "tateXtail / tateXterm / tateXpairE / tateXK の自然性",
+            "status": "closed",
+            "why": "★adicSum も Classical.choose だが **adicSum_unique** があるので、同じ「一意 ⇒ 自然」。 ★★Ring.inverse は一般には環準同型と可換でないが、**単元の上では可換**（1-t は t ∈ I なら単元）。 ★★★K の水準へは map_inv₀（体準同型は逆元と可換）で上がる。 ★★★★**これで tatePtPair の座標そのものが自然である**。",
+            "where": "Found/GaloisRep/TateSeriesNatural.lean（adicSum_map / tateXtail_map / tateYtail_map）と Found/GaloisRep/TateCoordNatural.lean（tateXpairE_map / **tateXK_map** / tateYK_map）"
+          },
+          {
+            "stage": "2c-3",
+            "claim": "tatePtPair の自然性（Point.some の合同）",
+            "status": "closed",
+            "why": "★座標の自然性（段 2c-2）があれば Point.some の合同だけである。 ★★母数を固定する場合（σ q = q）に絞った——Point.some の合同は**同じ曲線の上**でなければ取れない。 ★★★G_K は q ∈ K を固定するので、これが実際の場合である。 ★★★★**これで同変性の本体（段 2c）が閉じた。**",
+            "where": "Found/GaloisRep/TatePointNatural.lean の tateXK_map_fixed / nonsingular_tateK_map / **tatePtPair_map**"
+          },
+          {
+            "stage": "3a",
+            "claim": "有限拡大 K ⊆ L に対する**座標の**自然性",
+            "status": "closed",
+            "where": "Found/GaloisRep/AdicEvalNatural.lean / TateSeriesNatural.lean / TateCoordNatural.lean（すべて σ : R →+* R′、σ_K : K →+* L の形で一般化済み）",
+            "why": "★段 2a〜2c の補題はすべて**行き先が別の環・別の体でも通る**——2026-08-27 に一般化した。 ★★normRep の一意性から normRep_L(c の像) = normRep_K(c) が出る——付値が e 倍になっても基本領域 [0, v(q)) の条件は保たれる。"
+          },
+          {
+            "stage": "3b",
+            "claim": "それを**点の水準**で述べる（別の体の上の曲線の間の Point.map）",
+            "status": "closed",
+            "why": "★座標の自然性（段 3a）⬛ Point.some の合同だけ。 ★★逸脱の記録: mathlib の Point.map は**ある**が、tatePtPair は (tateCurveAt q).map (algebraMap R K) の上にあり Point.map は W.baseChange F の上にある。両者は定義上等しいが instances 透明度では合わず、rw も simp も当たらない（2026-08-27 実測）。 ★★★そこで Point.map を経由せず結論を直接述べた——「L-点は K-点の像である」そのものであり、数学的内容は同じである。",
+            "where": "Found/GaloisRep/TateBaseChange.lean の nonsingular_tateK_baseChange / **tatePtPair_baseChange**"
+          },
+          {
+            "stage": "4",
+            "claim": "Φ の G_K-同変性（当初は「K̄ への帰納極限」と書いていた）",
+            "status": "closed",
+            "where": "Found/GaloisRep/TateUniformizationEquivariant.lean の **tatePhi_map** / tatePhi_map_one",
+            "why": "★★★★**帰納極限は要らなかった**——M_l(E) の l-捩れは**有限拡大 L = K(E[l]) の中に載る**ので、L（完備離散付値体）で段 1 がそのまま使え、G_K は Gal(L/K) を通して作用する。 ★q ∈ K なので σ q = q は自動である。 ★★到達点: Φ(σ_* c) = Point.some (σ_K X) (σ_K Y)、すなわち **Φ は同変**である。"
+          },
+          {
+            "stage": "5",
+            "claim": "M_l(E) を (Kˣ/q^ℤ)[l] と同定し、Lemma 3.2, (i) を出す",
+            "status": "closed",
+            "where": "Found/GenEll/Lemma32Uniformized.lean の exists_lift_pow / **lemma_3_2_i_of_uniformization**",
+            "why": "★同変な一意化 Φ を**入力として受ける形**で、M_l(E) の G_K-安定な直線から lemma_3_2_i の仮説を作る。 ★★機構は Φ が**同変かつ単射**であることだけ: (1) c ≙ Φ⁻¹(P) は l-捩れ、(2) x へ持ち上げて x^l = Q^k、(3) 安定性に Φ⁻¹ を当てると σx = x^{c′}·Q^n。 ★★★これで Lemma32StableLine.lean の逸脱「G_K 同変な一意化は含まない」が**消えた**。"
+          }
+        ],
+        "done": "10/10",
+        "remaining": "★★★**なし。** 到達点は Found/GenEll/Lemma32Uniformized.lean の lemma_3_2_i_of_uniformization： 同変な一意化を入力として Lemma 3.2, (i) が出る。 ★その一意化は Found/GaloisRep/ の 8 段で構成済みである。"
+      },
+      "impact": "★★★★**2026-08-27 に閉じた（10/10）。** ★朝の時点では absent・未分割であった。 ★★§3 の 5 項目に残るのはこの塡がりではなく、**Lemma 3.2, (ii) の E/μ_l をスキームとして作る段**と faltings-height-vs-degree-at-infinity である。"
+    },
+    "faltings-height-vs-degree-at-infinity": {
+      "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",
+      "whereUsed": [
+        "[GenEll] Proposition 3.4 の不等式の側",
+        "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-minor",
+        "searched": "mathlib に Faltings 高さは無い。",
+        "partial": [
+          "ABC3: Found/GenEll/Covolume.lean ほか（並行セッションが構築中）",
+          "★★ABC3: Found/GenEll/DeligneElementary.lean（2026-08-27）——**段 5・6（初等評価）を sorry 0 で閉じた**",
+          "★mathlib: JFunction の tendsto_norm_jFun_atImInfty（段 4 の支え）",
+          "★ABC3: Found/GenEll/FiniteFromNorthcott.lean の finite_of_le_of_northcott（Proposition 3.4 の**有限性の主張**はこれで出る）"
+        ],
+        "absentPart": "比較不等式そのもの。"
+      },
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★原文は [Silv2]（Silverman, Advanced Topics）Prop 2.1 に帰すが、**[Silv2] は 0_Source に無い**。★★しかし**同じ内容の別原典が 2 つ手元にある**。",
+        "sources": [
+          "[DelSB616] Deligne - Preuve des conjectures de Tate et de Shafarevitch（Bourbaki 616）§1 HAUTEURS。★本人が「C’est la partie la plus technique, et la plus longue, de la preuve」と書いている。定義 1.1, 1.2 と 1.3。",
+          "[Elkik] Elkik - Fonctions de Green, volumes de Faltings（Astérisque 127）",
+          "[RayHt] Raynaud - Hauteurs et isogénies（Astérisque 127）——等因子写像での高さの変化（Lemma 3.5 が使う）"
+        ],
+        "howToProceed": "★[DelSB616] §1 を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★**Skeleton/GenEll/DeligneHeight.lean が 260 dpi 目視で測った 6 段**。 ★うち**段 5・6（初等）を 2026-08-27 に閉じた**。 ★★残る 1〜4 は複素解析の側で、並行セッションの領分である。",
+        "stages": [
+          {
+            "stage": "1",
+            "claim": "(E,ω) ≅ (ℂ/Λ, dz)、Λ = ℤω₁ ⊕ ℤω₂、τ = ω₂/ω₁、q = exp(2πiτ)",
+            "status": "open",
+            "why": "複素解析。並行セッションが LatticeCurve.lean 等で構築中。"
+          },
+          {
+            "stage": "2",
+            "claim": "H(E) = (1/|ω₁|)·|Im τ/π|^{-1/2}（|ω₁| 最小の基底で）",
+            "status": "open",
+            "why": "同上。Covolume.lean がここを担当する。"
+          },
+          {
+            "stage": "3",
+            "claim": "H*(E) ≤ C₀·H(E)·Im(τ)^{1/2}",
+            "status": "open",
+            "why": "同上。"
+          },
+          {
+            "stage": "4",
+            "claim": "j = q⁻¹ + 744 + …、Im(τ) ∼ sup(1, log|j|)/2π",
+            "status": "open",
+            "why": "★mathlib の JFunction.lean に tendsto_norm_jFun_atImInfty が**ある**。 ★★漸近を不等式に直す段が残る。"
+          },
+          {
+            "stage": "5",
+            "claim": "|j| ≤ H*^{12} から H* ≤ C₁·H·√(max 1 (log H*))",
+            "status": "closed",
+            "where": "Found/GenEll/DeligneElementary.lean の sqrt_bound_of_j_bound",
+            "why": "★log を取って 12 を外に出すだけ。 ★★|j| ≤ H*^{12} は「Δ が整数」から出るが、それ自体は仮説として受けている（段 1〜4 の側）。"
+          },
+          {
+            "stage": "6",
+            "claim": "★**H* ≤ C₂·H·√(max 1 (log H))**（自己参照を消す）",
+            "status": "closed",
+            "where": "Found/GenEll/DeligneElementary.lean の exists_bound_of_self_referential_sqrt_log / naive_bound_of_chain",
+            "why": "★★★**要は「自己参照的な評価を右辺から消す」こと**である。 log を取ると log(log A) ≤ log A（Real.log_le_sub_one_of_pos）で (1/2)log A が吸収され、log A ≤ 2 log C₁ + 2 log B になる。 ★定数は C₁·√(2 log C₁ + 2)。"
+          }
+        ],
+        "done": "2/6",
+        "remaining": "★★残るは段 1〜4（複素解析）であり、**並行セッションの領分**である。 ★段 4 は mathlib の JFunction が支える。"
+      },
+      "impact": "★★★**§3・§4 の 6 項目の実質的な塡がりの 1 つ**である（もう 1 つは galois-equivariant-tate-uniformization）。 ★**ample ではない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と ℙ¹_j の明示モデルで出る。"
+    },
+    "ideal-comap-on-affine-opens": {
+      "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
+      "whereUsed": [
+        "[GenEll] Remark 1.5.1 の段 2（因子 D の降下をアフィン被覆で貼る段）",
+        "★Found/GenEll/SectionDescent.lean の切断の降下を IdealSheafData の水準へ上げるところ",
+        "★★★vertical-divisors-generate-pic-kernel の段 3b（チャートごとの m を点に引き戻す段）——**2 つの塡がりが同じ 1 本に帰着する**（2026-08-27 に判明）"
+      ],
+      "mathlibStatus": {
+        "verdict": "not-a-blocker",
+        "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean を grep。ideal_comap_of_isOpenImmersion（開埋め込みの場合）はあるが、一般の射に対する ideal_comap は**無い**。",
+        "partial": [
+          "★mathlib: Scheme.IdealSheafData.comap / comap_comp / comap_id / comap_mono / ideal_comap_of_isOpenImmersion / ext_of_iSup_eq_top / le_of_iSup_eq_top はある",
+          "★★mathlib: comap_mul は**無い**（2026-08-27 再確認）",
+          "★★★**ABC3 側では既に閉じている**（2026-08-17、平行セッション）:\n  Found/GenEll/ComapAffine.lean の ideal_comap_eq_map_of_isAffine（アフィンで comap = Ideal.map。Galois 接続だけで出る）\n  Found/GenEll/ComapMul.lean の comap_mul（**一般の射**。公式を経由せず、アフィンの対を取って貼る）"
+        ],
+        "absentPart": "★**公式 (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) そのもの**はまだ無い。★★しかし**消費側はこれを要らない**——ComapMul.lean が示した通り、comap_comp の往復と被覆で貼れば済む。"
+      },
+      "minimalForm": "★消費者が要るのは「2 つのイデアル層が各アフィン開で一致すれば等しい」だけであり、ext_of_iSup_eq_top で済む。★★したがって必要なのは (I.comap f).ideal U を**生成切断で書く**ことだけであり、完全な ideal_comap ではない。",
+      "impact": "★★★**塡がりではなくなった**（2026-08-27 再測定）。★comap_mul は ABC3 にあり、Remark 1.5.1 の段 2 も Remark 1.4.1 の段 3b もこれを待っていない。",
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★**原典は手元にある**——[Stacks] 01Z4 / 01ZC 系と EGA IV §8。★★これは「原典が無い」型の塞がりではなく、**mathlib に補題が 1 本足りない**型である。",
+        "sources": [
+          "[Stacks] 01Z4 / 01ZC（極限での降下）",
+          "[EGA2] / EGA IV §8"
+        ],
+        "howToProceed": "★自分で 1 本書く。Scheme.Hom.ker_apply（準コンパクト）から入り、pullback.fst のアフィン局所記述（環のテンソル積）に降りる。★★mathlib へ PR できる形の補題である。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★★**2026-08-27 の訂正**: この塡がりは**2026-08-17 に平行セッションが既に閉じていた**。★本セッションは在庫確認を漏らして同じものを書き直してしまった（削除済み）。★★教訓: `node tools/decl-index.mjs` を**新しい名前すべてについて**引くこと。",
+        "parts": [
+          {
+            "name": "ideal_comap_eq_map_of_isAffine",
+            "status": "in-ABC3",
+            "what": "アフィンで comap = Ideal.map。Found/GenEll/ComapAffine.lean（2026-08-17）。★Galois 接続（comap ⊣ map）だけで出る——テンソル積も pullbackSpecIso も要らない"
+          },
+          {
+            "name": "comap_mul",
+            "status": "in-ABC3",
+            "what": "一般の射で comap が積を保つ。Found/GenEll/ComapMul.lean（2026-08-17）。★mathlib には無いが ABC3 にはある"
+          },
+          {
+            "name": "ideal_comap",
+            "status": "ABSENT-but-unneeded",
+            "what": "公式 (I.comap f).ideal U = (I.ideal V).map (f.appLE V U)。★まだ無いが、**消費側は要らない**"
+          }
+        ],
+        "remaining": "★★**実質的には閉じている**。公式自体は mathlib への PR の候補として残るだけである。",
+        "done": "2/3"
+      }
+    },
+    "dedekind-point-extension": {
+      "what": "X が ℤ 上固有なら、分数体の点 Spec F ⟶ X は Dedekind 環の点 Spec 𝒪_F ⟶ X へ一意に延びること。",
+      "whereUsed": [
+        "[GenEll] Definition 1.5, (iii)(iv)——原文が「where we recall that X is proper!」と叫ぶ箇所",
+        "★[GenEll] Remark 1.5.1——点の対応 ePt を ℚ-同型から作る段",
+        "★★Found/GenEll/Remark151Sigma.lean の remark_1_5_1_bdeq が ePt をデータとして受けている理由"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-major",
+        "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/ValuativeCriterion.lean に IsProper.eq_valuativeCriterion（Stacks 0BX5）がある。Dedekind 環への拡張は無い。",
+        "partial": [
+          "★mathlib: ValuativeCriterion（付値環に対する存在・一意性）は揃っている",
+          "★★ABC3: Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper（付値環の場合を sorry 0 で閉じた。2026-08-27）",
+          "★★★Spec ℤ が終対象なので、付値可換四角形の底での可換性は自動"
+        ],
+        "absentPart": "★各 (𝒪_F)_v での延長を Dedekind 環 𝒪_F の上へ**貼り合わせる**段。★★Spec (𝒪_F)_v は Zariski 開ではないので素朴には貼れない。Spec 𝒪_F[1/m] へ延ばしてから残りの有限個の素点を処理する道になり、ZMT／正規化の水準の作業である。"
+      },
+      "minimalForm": "★消費者が要るのは「ℚ-同型から点の対応 ePt を作る」だけである。★★原文の定義域 U_X(ℚ̄) は X_ℚ だけで決まるので ePt は**恒等**であり、形式化で Spec 𝒪_F ⟶ X を定義域にしたことから生じた橋である。",
+      "impact": "★Remark 1.5.1 を項目として閉じるのに必要な最後の 1 本。★★★**2026-08-27 に大域延長の一意性が付いたので、点の対応 ePt は「与えられたデータ」ではなく「存在すれば一意に決まるもの」になった。**",
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★**原典は手元にある**——[Stacks] 0BX5（付値判定法）と正規化の章。",
+        "sources": [
+          "[Stacks] 0BX5 Valuative criterion for properness",
+          "[Stacks] Normalization / ZMT",
+          "[EGA2]"
+        ],
+        "howToProceed": "★mathlib の ValuativeCriterion を入口にし、Spec 𝒪_F[1/m] への延長（有限型性から）と残りの有限個の素点での局所延長を貼る。★★分離性から一意性は出るので、貼ること自体はできるはずである。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★**2026-08-27 に 3 つに割り、2 つを閉じた。**",
+        "stages": [
+          {
+            "stage": "1",
+            "claim": "付値環なら分数体の点が一意に延びる",
+            "status": "closed",
+            "where": "Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper",
+            "why": "★mathlib の IsProper.eq_valuativeCriterion（Stacks 0BX5）に Spec ℤ が終対象であることを合わせるだけ"
+          },
+          {
+            "stage": "2a",
+            "claim": "各素点 v で (O_F)_v-点へ一意に延びる",
+            "status": "closed",
+            "where": "Found/GenEll/DedekindExtend.lean の exists_unique_extend_atPrime",
+            "why": "★(O_F)_v は離散付値環で分数体が F。algLocAtPrime / towerLocAtPrime / fracLocAtPrime を自前で立てた"
+          },
+          {
+            "stage": "2b",
+            "claim": "大域延長は一意",
+            "status": "closed",
+            "where": "Found/GenEll/DedekindExtend.lean の extend_unique",
+            "why": "★mathlib の ext_of_isDominant_of_isSeparated。★★生成点の稠密性（isDominant_specMap_fractionRing）は 3 行で出た——像は生成点 ⟨⊥⟩ を含み、その閉包は zeroLocus ⊥ = univ"
+          },
+          {
+            "stage": "2c-1",
+            "claim": "局所延長を開近傍へ広げる",
+            "status": "closed",
+            "where": "Found/GenEll/OpenExtend.lean の exists_open_extend",
+            "why": "★mathlib の spread_out_of_isGermInjective′（SpreadingOut.lean、Stacks 0BX6）をそのまま使った。★★Spec O_F は整なので IsGermInjective は自動、底が Spec Z（終対象）なので S-射条件も自動。★★★茎と AtPrime 局所化を繋ぐのは mathlib の Spec.stalkIso。"
+          },
+          {
+            "stage": "2c-2",
+            "claim": "開近傍 {U_v} から開被覆を作って貼り合わせる",
+            "status": "closed",
+            "why": "★Scheme.Opens.iSupOpenCover で開被覆を作り、Scheme.Cover.glueMorphisms で貼った。★★整合条件は生成点で一致すること（ext_of_isDominant_of_isSeparated）から。★★★結果は X′(F) ≃ X′(𝒪_F)である",
+            "where": "Found/GenEll/GlobalExtend.lean の exists_global_extend / existsUnique_global_extend"
+          }
+        ],
+        "remaining": "★★★★★★**2026-08-27、全 5 段が閉じた。**★この穴は埋まっている——Remark 1.5.1 は項目として閉じた",
+        "done": "5/5"
+      }
+    },
+    "vertical-divisors-generate-pic-kernel": {
+      "what": "正規で ℤ 上平坦なモデル X について、Pic(X) → Pic(X_ℚ) の核が**垂直因子**（ファイバーの成分の ℤ-結合）で生成されること。",
+      "whereUsed": [
+        "★[GenEll] Remark 1.4.1——「BD-class の理論が X_ℚ だけに依る」を**2 つの ℤ-モデルにまたがる形**で無条件に出す段",
+        "★★Found/GenEll/Remark141.lean の remark_1_4_1_of_descent_twist が「差が Spec ℤ から来る」を**仮説に置いている**理由",
+        "[GenEll] Proposition 1.4, (ii)の証明中の ht_{L⊗M} ≈ ht_L の消費側"
+      ],
+      "mathlibStatus": {
+        "verdict": "closed-in-ABC3",
+        "searched": "2026-08-27 実測。mathlib の ClassGroup は Dedekind 環専用で、一般のスキーム上の Weil 因子類群・局所化完全列（Cl(X) → Cl(U) → 0）は無い。",
+        "partial": [
+          "★mathlib: Scheme.IdealSheafData の束構造と comap はある",
+          "★★ABC3: Found/GenEll/VerticalTwist.lean で「差が Spec ℤ から来るなら高さの差は定数 deg_ℚ(N)」は sorry 0 で閉じた（2026-08-27）"
+        ],
+        "absentPart": "★**当初の見立て（Weil 因子類群が要る）は過大であった**（2026-08-27 に訂正）。★★実際に要るのは Scheme.IdealSheafData の水準で有限アフィン被覆を取って m を揃える配管だけである。"
+      },
+      "minimalForm": "★消費側が要るのは**一様有界性だけ**である。★★垂直因子 V は V ≤ m·X_q を満たすので deg_F(x^*V) ≤ m·log q となり、**交点数は要らない**——引き戻しの単調性と x^*(f^*(q)) = (q) だけで出る。★★★したがって minimalForm は「2 つのモデルの差がある m, q で m·X_q に押さえられる」であり、類群全体は要らない。",
+      "impact": "★★★★**2026-08-27 に閉じた**。★Remark 1.4.1 に残るのは原文第 2 文（any normal, projective scheme Y over ℚ）の側だけであり、それは ample-and-projective-embedding の在庫不足である。",
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★**原典は手元にある**——[Stacks] の Weil divisor の章。",
+        "sources": [
+          "[Stacks] 0BE0 Weil divisors",
+          "[Stacks] 02SE Divisors / 0BE9 The Weil divisor class group",
+          "[Hartshorne] II.6.5 (Cl(X) → Cl(U) の完全列)"
+        ],
+        "howToProceed": "★まず minimalForm（一様有界性）を取る。★★必要なのは (a) pullbackIdeal の単調性、(b) x^*(f^*(q)) = (q)·𝒪_F、(c) degNormalized(idealADiv((q^m)𝒪_F)) = m·log q（= degNormalized_baseChange）の 3 本である。"
+      },
+      "decomposition": {
+        "measuredAt": "2026-08-27",
+        "note": "★★★★★★★**2026-08-27、全 5 段が閉じた。**\n★当初「Pic(X) → Pic(X_ℚ) の核 = 垂直因子」としてWeil 因子類群を要求していたが、割ってみると**類群も交点数も要らなかった**。\n★★実際に使ったのは: 有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であることだけである。",
+        "stages": [
+          {
+            "stage": "1",
+            "claim": "差が Spec ℤ 上の因子の底変換なら高さの差は定数 deg_ℚ(N)",
+            "status": "closed",
+            "where": "Found/GenEll/VerticalTwist.lean の htArith_bdeq_of_baseChange′",
+            "why": "★degNormalized_baseChange（正規化次数の底変換不変性）1 本。★★原文の ≈ は実際には**等式**であった"
+          },
+          {
+            "stage": "2",
+            "claim": "差のイデアルが有理整数 n を含めば高さの差は log n 以下（一様）",
+            "status": "closed",
+            "where": "Found/GenEll/VerticalBound.lean の degNormalized_idealADiv_le_log_of_natCast_mem / htArith_bdeq_of_idealADiv_diff",
+            "why": "★deg(idealADiv I) = log(absNorm I) と Ideal.absNorm_dvd_absNorm_of_le（包含でノルムが割り切れる）。★★absNorm(n·𝒪_F) = n^{[F:ℚ]} なので正規化で [F:ℚ] が約分され、**定義体に依らない**。★★★これで**交点数は不要**になった"
+          },
+          {
+            "stage": "3a",
+            "claim": "ネーター環で「N を反転すれば一致」ならある m で N^m·I ⊆ J",
+            "status": "closed",
+            "where": "Found/GenEll/IdealComparable.lean の exists_pow_mul_le_of_map_le",
+            "why": "★I が有限生成であることだけを使う——各生成元 a について N^{k_a}·a ∈ J が出るのでm = max k_a を取る。★★**交点数も類群も要らない**ことがここで確定した。★★★機構は IsLocalization.mem_map_algebraMap_iff と eq_iff_exists の 2 本だけ"
+          },
+          {
+            "stage": "3b-1",
+            "claim": "層の水準の n·D ≤ E を**点の水準へ降ろす**",
+            "status": "closed",
+            "where": "Found/GenEll/VerticalDescent.lean の span_natCast_mul_pullbackIdeal_le / htArith_bdeq_of_sheaf_comparable",
+            "why": "★道具は 3 本だけだった:\n  pullbackIdealOf_mul（ComapMul.lean の comap_mul を環へ落とす）\n  pullbackIdealOf_mono（mathlib の comap_mono）\n  pullbackIdealOf_comap_intSpan（**Spec ℤ が終対象**）\n★★★最後の 1 本が本質である——x ≫ f は Spec ℤ への**唯一の**射なので、定数 n が点にも定義体にも依らない。\n★★結果: **高さの BD-同値の仮定が「層の不等式 2 本」になった**（htArith_bdeq_of_sheaf_comparable）"
+          },
+          {
+            "stage": "3b-2",
+            "claim": "その n を**アフィン被覆から取る**（D と E が ℤ[1/N] の上で一致するところから）",
+            "status": "closed",
+            "why": "★道具は 4 本だけだった:\n  exists_pow_mul_le_of_map_le（各チャートの m_i。有限生成性のみ）\n  Finset.univ.sup（**被覆が有限**だから最大が取れる）\n  IdealSheafData.le_of_iSup_eq_top（mathlib。被覆の上で見れば足りる）\n  RingHom.ext_int（ℤ からの環準同型は 1 つ——specIdealSheaf_comap_ideal_top の要）\n★★★**交点数も Weil 因子類群も使っていない**。",
+            "where": "Found/GenEll/ChartwiseUniform.lean の exists_uniform_sheaf_le_of_localization / htArith_bdeq_of_chartwise_localization"
+          }
+        ],
+        "done": "5/5",
+        "remaining": "★★★**なし**。到達点は htArith_bdeq_of_chartwise_localization：\n  X が有限個のネーターなアフィンチャートで覆われ、各チャートで D と E が N を反転して一致するなら ht_D ≈ ht_E。"
+      }
+    },
+    "finite-flat-group-scheme-quotient": {
+      "what": "有限平坦群スキームによる商。とくに [GenEll] Lemma 3.2, (ii) の μ_l ⊆ E （𝒪_K 上の有限平坦部分群スキーム）と E′ = E/μ_l。",
+      "whereUsed": [
+        "[GenEll] Lemma 3.2, (ii) の (a)(b)（μ_l が有限平坦部分群スキームであること、E′ が 1 次元半アーベルスキームであること）",
+        "★その下流: Lemma 3.5（E_H = E/H_F）"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent",
+        "searched": "2026-08-27 実測。mathlib に群スキームによる商は無い。AlgebraicGeometry/Group/ はあるが、有限平坦部分群スキームによる商の存在定理（SGA3 / Raynaud）は無い。",
+        "partial": [
+          "★★★ABC3: Found/GenEll/Lemma32QuotMu.lean——**一意化の側では閉じている**（ker_pow_mk_eq・vAdd_pow・mu_inj）。Kˣ/q^ℤ の上では x ↦ x^l が Kˣ/q^ℤ → Kˣ/q^{lℤ} を与え、核が μ_l である。",
+          "★ABC3: 2026-08-27 に galois-equivariant-tate-uniformization が閉じたので、「一意化の側で述べる」ことの正当化は取れている。"
+        ],
+        "absentPart": "★μ_l を 𝒪_K 上の**有限平坦部分群スキーム**として作る段。 ★★その商 E/μ_l を**スキームとして**作る段。 ★★★商が再び 1 次元半アーベルスキームになること。"
+      },
+      "minimalForm": "★消費側が実際に使うのは **q_{E′} = q_E^l と deg_∞(E′) = l·deg_∞(E) だけ**であり、両方とも Lemma32QuotMu.lean にある。 ★★したがって Lemma 3.5 以降は**商をスキームとして作らなくても進める**。 ★★★作らなければならないのは **Lemma 3.2 の (ii) を項目として閉じるときだけ**である。",
+      "impact": "★**Lemma 3.2 を項目として閉じるのに必要な最後の 1 本**。 ★★(i) は 2026-08-27 に**完全に**閉じた——Found/GenEll/Lemma32Tate.lean の lemma_3_2_i_tate_all は**一意化も Galois 作用も posit していない**（Φ = tatePhiAddEquivAll、act = mathlib の Point.map）。 ★★★ただし minimalForm の通り、**下流（Lemma 3.5 以降）はこれを待たない**。",
+      "primarySource": {
+        "measuredAt": "2026-08-27",
+        "note": "★原文は [FC] Chapter III に帰すが **[FC] は 0_Source に無い**。 ★★群スキームの商の一般論は [SGA3] / Raynaud であり、これも手元に無い。",
+        "sources": [
+          "[FC] Faltings-Chai, Degenerations of Abelian Varieties, Chapter III",
+          "[SGA3] Schémas en groupes",
+          "[Stacks] Groupoid schemes / quotients"
+        ],
+        "howToProceed": "★まず **minimalForm で進む**——商をスキームとして作らず、q_{E′} = q_E^l を持つ Tate 曲線として特徴づける。 ★★項目として閉じるには群スキームの商が要るが、それは person-years 規模の別項目である。"
+      }
+    },
+    "arakelov-degF-finite-places": {
+      "what": "APic(Spec 𝒪_F) 上の正規化次数 deg_F の**有限素点側**。台帳の D2（APic(Spec 𝒪_F) ≅ ADiv(F)/APrc(F)）と同じもの。",
+      "whereUsed": [
+        "[GenEll] Definition 1.2（ht_M̄(x) ≔ deg_F(x_F^* M̄)）",
+        "★その下流: Proposition 1.4 の線束表示側"
+      ],
+      "mathlibStatus": {
+        "verdict": "partial-major",
+        "searched": "2026-08-28 実測。ADiv(F) / APrc(F) / deg / degNormalized / degAPic は Found/GenEll/ArithDiv.lean と ProductFormula.lean に**実装済み**。★欠けているのは橋だけである。",
+        "absentPart": "★Found/Arakelov/ADegEmb.lean の degFOf は**アルキメデス側しか見ていない**（Pic 類が式に現れない、Def12Height.lean の訂正）。 ★★捻れ集合表示 (L, g) から有限素点側の**式が書けない**——TorsorMetric.base が Classical.choice だからである。 ★★★古典的な定義 deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v なら書けるが、s の取り方に依らないこと（積公式）が要る。"
+      },
+      "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
+      "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
+      "nextStep": "★段 E(加法性)だけが残っている。アルキメデス側は archDeg_mul(在庫)、有限側は Γ(L⊗M)/(s⊗t) の指数が積になること。",
+      "blockedBy": "",
+      "decomposition": {
+        "measuredAt": "2026-08-28",
+        "note": "★★★★★**`APicM`（`AMetricPic.lean`）が入ったので、古典的な定義で書ける**。`deg_F(L̄) = (1/[F:ℚ])·( log #(Γ(L)/𝒪_F·s) − Σ_σ log‖s‖_σ )`（`s ≠ 0` は任意）。★在庫の `degFOf`（`Interface/Arakelov/ADegEmb.lean`）は**アルキメデス側だけ**で、しかも `Interface`（posit）にある。本 gap はそれを `Found` の側で作り直す段である。",
+        "stages": [
+          {
+            "stage": "A",
+            "status": "closed",
+            "claim": "★アフィンの橋——`Spec R` 上の局所自明な前層加群 `L` から**可逆 `R`-加群 `Γ(L,⊤)`** を得る",
+            "why": "★★★★★2026-08-28 に閉じた。中身は「層化に沿って計量を移す」であり、A1(層化は局所自明性を保つ)は在庫、A2(自明化・遷移単元の輸送)は §9-748、A3(APicM X →* PicSheaf X が群準同型)は §9-750 で入った。★最後の claim(可逆 R-加群 Γ(L,⊤))は在庫の invertible_gammaCarrier に渡すだけであった。",
+            "where": "Found/Arakelov/SheafifyTriv.lean(A2) / Found/Arakelov/APicToSheaf.lean(A3 と invertible_gamma_toInvSheaf)"
+          },
+          {
+            "stage": "B",
+            "status": "closed",
+            "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
+            "why": "★2026-08-28 に閉じた。s ≠ 0 なら Γ(L)/(R·s) は有限である(finite_quotient_gamma_of)。★★機構: 分数体上で rank 1 → 商は捻れ → 共通の消滅元 r → N は R/(r)-加群 → R/(r) は有限 → Module.finite_iff_finite。",
+            "nextStep": "",
+            "where": "Found/Arakelov/APicToSheaf.lean（finite_gamma / projective_gamma / exists_ne_zero_gamma / finrank_fractionRing_gamma / gamma_toFractionRing_injective / exists_smul_mem_span_gamma / finite_of_finite_isTorsion_int）"
+          },
+          {
+            "stage": "C",
+            "status": "closed",
+            "claim": "★★★アルキメデス部分 `Σ_σ log‖s‖_σ`",
+            "why": "★複素点は埋め込み `σ : F ↪ ℂ` に対応する。ノルムは `AMetric.norm`（チャート独立、`AMetricNorm.lean`）で取れる。★★加法性は `AMetric.norm_mul`（`|s ⊗ t| = |s|·|t|`）と `Real.log_mul` で出る（`s`, `t` の非消失を仮定した形）。★★★退化を殺す欄（ノルムを一律 `r` 倍すると `archDeg` が `log r` 下がる）も入れた——`Fintype.card (F →+* ℂ) = [F:ℚ]` がちょうど分母を消す。",
+            "where": "Found/Arakelov/ArchDeg.lean の embSpecPoint / archDeg / archDeg_mul / archDeg_of_norm_smul"
+          },
+          {
+            "stage": "D",
+            "status": "closed",
+            "claim": "★★★★**`s` の取り方に依らないこと**（積公式）",
+            "why": "★2026-08-28 に閉じた。有限側 degFin_smul_norm(§9-774)は + log |N(c)|、アルキメデス側 archDeg_smul(§9-775)は − log |N(c)|/[F:ℚ] 動き、正規化を揃えると打ち消す(degArith_smul、§9-776)。★★任意の二つの非零切断についての独立性(degArith_congr、§9-777)は、norm_congr_of_sheafify_eq(アルキメデスのノルムは層化した切断だけで決まる)＋段 B の exists_smul_mem_span_gamma で出た。",
+            "where": "Found/Arakelov/ArchDegSmul.lean(§9-775) / Found/Arakelov/DegArith.lean(§9-776) / Found/Arakelov/DegArithIndep.lean(§9-777)"
+          },
+          {
+            "stage": "E",
+            "status": "open",
+            "claim": "★★★★★**加法性**（`deg_F` が `APicM (Spec 𝒪_F) →+ ℝ`）",
+            "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
+          }
+        ],
+        "done": "4/5",
+        "remaining": "★段 A・B・C・D が閉じた(2026-08-28)。★★残るのは段 E(加法性)だけである。★★★段 E のアルキメデス側は在庫の archDeg_mul、有限側は Γ(L⊗M)/(s⊗t) の指数が積になること——イデアルノルムの乗法性(Ideal.absNorm は MonoidHom)に落ちるはずである。"
+      }
+    },
+    "arakelov-coherent-base-metric": {
+      "what": "算術直線束の**基準計量を整合的に選ぶ**こと。 すなわち base_{[L·M]} = base_{[L]} ⊗ base_{[M]}。",
+      "whereUsed": [
+        "[GenEll] Definition 1.1（「テンソル積で同型類が群 APic(X) をなす」）",
+        "★[GenEll] Definition 1.2（deg_F の加法性）",
+        "★★Interface/Arakelov/APic.lean の APicData の穴と同種"
+      ],
+      "mathlibStatus": {
+        "verdict": "closed-in-project",
+        "searched": "2026-08-28 実測。mathlib に Arakelov の計量は無い。",
+        "absentPart": "★Found/Arakelov/ArcTorsorMetric.lean の TorsorMetric.base は **Classical.choice** であり、対象ごとに獨立に選ばれている。 ★★TorsorMetric.tensor は **Green を足すだけ**なので、群法則が表す計量は base_{G⊗H} · e^{-(g+h)}、真のテンソル積は (base_G ⊗ base_H) · e^{-(g+h)} で一致しない。 ★★★差は 2-コサイクル c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]})) である。"
+      },
+      "minimalForm": "★2026-08-28 に**道（b）で閉じた**——捻れ集合表示をやめ、**自明化の側で書いた計量**（`LocalMetric`）を作った。★★基準計量を整合的に選ぶ必要は消えた（`Classical.choice` を使わない）。",
+      "impact": "★**2026-08-28 に閉じた**。`APicM X` が `CommGroup` になり、積が本物のテンソル積であることが `normOf_mul` で言える。★★したがって §1 の 2 項目の共通の根としての障害はもう無い。★★★`Definition 1.1` の項目全体を閉じるには (ii) の `deg_F` だけが残る。",
+      "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。",
+      "resolution": {
+        "measuredAt": "2026-08-28",
+        "verdict": "★★★★★★★★★★**閉じた（2026-08-28）**。`APicM X`（算術直線束の同型類）に **`CommGroup` のインスタンス**が入り、積は**本物のテンソル積**である（`normOf_mul : |s ⊗ t| = |s| · |t|`）。",
+        "stages": [
+          {
+            "stage": "1",
+            "where": "Found/Arakelov/TrivTensor.lean",
+            "claim": "trivValue がテンソル積で掛け算になる",
+            "why": "★rfl である。制限の μIso は Iso.refl、tensorHom_app も leftUnitor_hom_app も rfl（mathlib）。set_option backward.isDefEq.respectTransparency false が要る。"
+          },
+          {
+            "stage": "2",
+            "where": "Found/Arakelov/TrivSecNorm.lean",
+            "claim": "切断のノルムが掛け算になる（ファイバーの橋を迂回）",
+            "why": "★‖s‖_{V,e}(p) ≝ ‖evalOn p V hp (trivValue F V e s)‖ と書けば arcFiber を経由しない。★★在庫の genNorm_arcEvalOnTop が「ファイバーで測っても同じ値」を保証している。★★★これで mathlib の SheafOfModules のモノイダル構造（PR 規模、2026-08-28 実測で不在）が要らなくなった。"
+          },
+          {
+            "stage": "3",
+            "where": "Found/Arakelov/LocalMetric.lean",
+            "claim": "基準ノルム h_{V,e} を担ぐ構造体・自明化独立性・チャート独立性",
+            "why": "★compat（自明化を遷移単元 u 倍すると h は |u| で割られる）と restrict（小さい開集合へ降りても変わらない）の 2 欄。★★normOf_chart_indep で normOf は (p,s) だけの関数になる。★★★空虚でないことは structLocalMetric（Ō_X の標準計量）が目撃する。"
+          },
+          {
+            "stage": "4",
+            "where": "Found/Arakelov/TensorMetric.lean",
+            "claim": "★テンソル計量の**存在**と ‖s ⊗ t‖ = ‖s‖ · ‖t‖",
+            "why": "★構成の要は「(A⊗B)|_V は自明だが A|_V は自明でない V」の扱いである（連結スキーム上でも A ⊗ B ≅ 𝒪 は A ≅ 𝒪 を含意しない）。局所自明性から p を含む W ≤ V で両方が自明になるものを取り、そこで h_A · h_B と置いて遷移単元で V の自明化へ運ぶ。★★値がチャートに依らないことは chartH_indep（共通の細分へ降りて transUnit_tensorTriv と compat）。★★★構造の恒等式は 4 つとも rfl であった。"
+          },
+          {
+            "stage": "5",
+            "where": "Found/Arakelov/AMetricMonoid.lean / AMetricIso.lean / AMetricGroup.lean",
+            "claim": "★原文の L̄ = (L, |−|_L) の型と、同型類の群 APicM X",
+            "why": "★`AMetric X`（可逆層＋局所自明性＋計量）と `1 = Ō_X`・`L * M`（本物のテンソル積）。★★等長同型は**基準ノルム `h` の等式**として書いた——切断のノルムで書くと「純テンソルでしか確かめられないがノルムは加法的でない」という穴が開くからである。★★★積が同値類に降りること（`isIsometry_mul`）・結合律（`isIsometry_mul_assoc`）・単位律（`isIsometry_mul_one`）まで入った。★★★★自明化の側の恒等式 `pullTriv (α_ …) (tensorTriv eA (tensorTriv eB eC)) = tensorTriv (tensorTriv eA eB) eC` は `rfl` ではなく、`oplax_associativity` ＋ `associator_naturality` ＋ `triangle` ＋ `unitors_equal` の 4 段である。"
+          },
+          {
+            "stage": "6",
+            "where": "Found/Arakelov/AMetricPic.lean",
+            "claim": "★★★★★**APic(X) は可換群である**",
+            "why": "★逆元は双対 `F^∨` を構成する代わりに**データとして担いだ**（本プロジェクトの `InvSheaf` と同じ形）。★★`mul` の逆は並べ替え `(A⊗B)⊗(A'⊗B') ≅ (A⊗A')⊗(B⊗B')` で作り、その並べ替えは結合律・交換律の等長版を繋いだものである。★★★商で `⁻¹` を定義するには「逆元は等長同型を除いて一意」（`AInv.inv_isometric`）が要った。★★★★交換律の自明化版 `pullTriv (β_ A B) V (tensorTriv eB eA) = tensorTriv eA eB` は `restrict_map_braiding`（`rfl`）＋ `braiding_naturality` ＋ `braiding_leftUnitor` ＋ `unitors_equal`。"
+          }
+        ],
+        "remaining": "★**(i) の側は閉じた**。★★残るのは `Definition 1.1` (ii) の `deg_F`（別 gap: `arakelov-degF-finite-places`）と、`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段である。",
+        "deviation": "★★★★★★**逸脱の明示（2026-08-28）**: 本構成は**前層の水準**であり、原文の `APic(X)`（可逆**層**の同型類）とは違う。★局所自明でも層とは限らない（`𝟙_` と proper open で一致し `⊤` で `0` の前層が反例）。★★前層のテンソルは層でない（だから本プロジェクトの `tensorModules` は層化を挟む）。★★★したがって「テンソル積が**厳密**である」と「対象が層である」は**同時には取れず**、本ファイル群は前者を取った——それが `trivValue_tensor` が `rfl` になり、`normOf_mul` が構成つきで出た理由である。★★★★層の水準への橋（`A ⊗ B → (A ⊗ B)^sh` は局所同型なので自明化も計量も移る）は**別の段**であり、`deg_F` の段 A がまさにそれである。"
+      }
+    },
+    "arakelov-pullback-monoidal": {
+      "what": "前層加群の**引き戻し関手のモノイダル性**（`f^* : Y.PresheafOfModules ⥤ X.PresheafOfModules`）。★本 gap は 2026-08-28 に**訂正した**——下の `correction` を見よ。",
+      "whereUsed": [
+        "[GenEll] Definition 1.1, (ii)（算術直線束の**引き戻し** `φ^*L̄`）",
+        "★その下流: `ht_M̄(x) ≝ deg_F(x_F^* M̄)`（ただし本プロジェクトは因子表示で別に持っている）"
+      ],
+      "mathlibStatus": {
+        "verdict": "absent-in-mathlib-but-built-in-project",
+        "searched": "2026-08-28 実測（REPL）。`PresheafOfModules.pullback` は**ある**。スキームの射に対しては `Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)` を渡せばよく、必要な `(PresheafOfModules.pushforward φ).IsRightAdjoint` も **instance で解決する**。",
+        "absentPart": "★mathlib には `(PresheafOfModules.pullback φ).Monoidal` の instance が無い（`infer_instance` が失敗、2026-08-28 実測）。★★**しかし本プロジェクトはそれを既に建てている**——`pullbackPreOplax`（`Found/Arakelov/PicSchemeDelta.lean`）が `(pullbackPre f).OplaxMonoidal` を与える。"
+      },
+      "minimalForm": "★計量を運ぶのに要るのは (1) `f^*(𝟙_) ≅ 𝟙_` と (2) `f^*` が自明化を自明化へ送ること、の 2 つだけである。★★完全なモノイダル性（結合子・単位子の整合）までは要らない。",
+      "impact": "★**訂正後**: `Definition 1.1, (ii)` の引き戻しは、台の側は**すべて在庫**であり、残るのは**計量を運ぶ段だけ**である（1〜2 ブロック）。★★高さの理論はこれを待たない——因子表示で `pullbackAPic` / `htArith` は在庫である。",
+      "measuredAt": "2026-08-28",
+      "correction": {
+        "measuredAt": "2026-08-28",
+        "note": "★★★★★★**本 gap を立てたのは在庫確認の怠りであった**。「mathlib に無い」は正しいが、「本プロジェクトに無い」は**誤り**である。★以下はすべて `Found/Arakelov/` に **`sorry` 無しで在庫**（2026-08-28 実測）:",
+        "inStock": [
+          "`pullbackPre f`（`PicSchemeDelta.lean`）—— スキームの射に沿った**前層**加群の引き戻し",
+          "★`pullbackPreOplax` —— **`(pullbackPre f).OplaxMonoidal`**",
+          "`pullbackDelta` / `pullbackEta` —— 比較射 `f^*(P⊗Q) ⟶ f^*P ⊗ f^*Q` と `f^*𝒪 ⟶ 𝒪`",
+          "★★`isLocallyTrivial_pullbackPre`（`PicLTPull.lean`）—— **局所自明性は引き戻しで保たれる**。証明の中に自明化の輸送が**明示的に**書かれている（`bcIso`＝Beck–Chevalley、`pullbackOnUnitIso`、`restrictOnFunctor`）",
+          "`pullbackFreeYonedaIso`（`PicPullFree.lean`）/ `pullbackTensorFreeIso`（`PicPullTensorFree.lean`）",
+          "★★★層の段: `pullbackUnitIso`（`f^*𝒪_Y ≅ 𝒪_X`）・`pullbackSheafTensorIso'`（`f^*(L⊗M) ≅ f^*L ⊗ f^*M`、局所自明性だけを仮定）・`picPullback`＋`picPullback_mul`・`InvSheaf.pullback`"
+        ],
+        "remaining": "★したがって `Definition 1.1, (ii)` の引き戻しに残るのは**計量を運ぶ段だけ**である——`bcIso` と `pullbackOnUnitIso` が自明化を運ぶので、`LocalMetric.tensor` と同じチャートの型で `h` を運べばよい。★★見積もり: 1〜2 ブロック。"
+      }
+    }
   },
-  "arc-metric-not-attached-to-bundle": {
-   "what": "★これは mathlib の欠落ではなく**我々の設計の穴**である(2026-08-27 に発見、Check/GenEll/Def12Degenerate.lean で機械検証)。arcCM X = C(X^arc, ℝ) は点上の関数であって L^arc 上のエルミート計量ではないので、束と計量の対応が失われている。その結果 deg_F が Pic 類を見ず、ht も見ない。",
-   "whereUsed": [
-    "[GenEll] Definition 1.1(算術直線束 = 可逆層 + ι_X-両立な計量)",
-    "[GenEll] Definition 1.2, (i)(高さ ht_M̄)"
-   ],
-   "mathlibStatus": {
-    "verdict": "not-a-mathlib-gap",
-    "searched": "Pic(Spec 𝓞_F) ≃ ClassGroup は Found/Arakelov/PicSpecWitness.lean の picSpecEquiv に**既にある**(mathlib の ClassGroup.equivPic 経由)。足りないのは類群の側ではない。",
-    "absentPart": "★★arcCM を「L に付いた計量」に変える設計変更(APicData の ofMetric / forgetMetric の水準)。★APicSpecData に「deg_F を有限素点と結ぶ欄」を足すだけでは**現在の APic では満たせない**。"
-   },
-   "minimalForm": "★Spec 𝓞_F で言うと: 原文は L の生成元 s に対し |s|_σ を持ち deg_F = log #(L/s𝓞_F) − ∑_σ log|s|_σ(s の取り替えで両項が動き和は不変、積公式)。実装は −log|s|_σ を s を記録せずに持つ。",
-   "note": "★★★因子表示(Found/GenEll/HeightConstruction.lean の htArith)は健全である——有限素点を見ている。Proposition 1.6 / Definition 1.5 / Proposition 1.4,(ii)(iii) の .src はそちらに乗っているので影響しない。**混同しない。**"
-  },
-  "galois-equivariant-tate-uniformization": {
-   "what": "M_l(E) = E[l] への G_K 作用と、Tate 一意化 E(K̄) ≅ K̄ˣ/q^ℤ がそれと同変であること。",
-   "whereUsed": [
-    "[GenEll] Lemma 3.2, (i)(ii)をスキームの水準で閉じるため"
-   ],
-   "mathlibStatus": {
-    "verdict": "closed-in-ABC3",
-    "searched": "★★★**2026-08-27 に再測定して訂正した。** mathlib に Tate 曲線は無いが、**ABC3 側には選ばれた同型がすでにある**——前回の記録は uniformization_of_split だけを見ており、tatePhiAddEquivAll（**Nonempty ではなく選ばれた ≃+**）を見ていなかった。",
-    "partial": [
-     "★★★ABC3: Found/GaloisRep/TateDoubling.lean の **tatePhiAddEquivAll**（Additive (Kˣ/q^ℤ) ≃+ E_q(K)、**選ばれた同型**。倒化の仮定なし）",
-     "★ABC3: Found/GaloisRep/TatePhi.lean の tatePhi / tateAOf / tateWOf（写像の中身。ただし tateAOf は .choose なので**公式ではなく選択**である——tateAOf_spec が特徴づける）",
-     "★★ABC3: Found/GaloisRep/TateCurveWitness.lean の uniformization_of_split（TateCurveData の非空虚性、G6）",
-     "★★★ABC3: Found/GenEll/Lemma32StableLine.lean / Lemma32QuotMu.lean——**消費側（K̄ˣ/q^ℤ の上での Lemma 3.2 (i)(ii)）は閉じている**"
-    ],
-    "absentPart": "★**2026-08-27 に埋まった。** ★★ただし Lemma 3.2 を**項目として**閉じるには (ii)（E/μ_l を**スキームとして**作る段、有限平坦群スキームによる商）が別に要る——それは mathlib にも ABC3 にも無い。"
-   },
-   "primarySource": {
+  "summary": {
     "measuredAt": "2026-08-27",
-    "note": "★原文は [FC]（Faltings–Chai）Ch. III に帰すが、**[FC] は 0_Source に無い**。★★しかし**同じ内容の別原典が手元にある**。",
-    "sources": [
-     "[RaySB427] Raynaud - Construction analytique de courbes en géométrie non archimédienne（Bourbaki 427）——Tate / Mumford の一意化そのもの",
-     "[Stacks] étale 基本群と Galois 作用の側"
+    "note": "★★★★★**2026-08-27 に全面的に測り直した。** この日 2 つの塡がりを absent から**全段閉じた**。",
+    "closedToday": [
+      "vertical-divisors-generate-pic-kernel (5/5)——交点数も Weil 因子類群も要らなかった。有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であること の 4 つだけ。",
+      "galois-equivariant-tate-uniformization (10/10)——ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いていた（eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique）。**一意 ⇒ 自然** で 8 段が機械的に閉じた。"
     ],
-    "howToProceed": "★[RaySB427] を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★★★★★**10 段に割り、9 段を閉じた（2026-08-27 の 1 日）。** ★朝の時点では**absent・未分割**であった。 ★★★発見 1: **ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いている**——eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique。「一意 ⇒ 自然」で 5 段が機械的に閉じた。 ★★★発見 2: **帰納極限は要らなかった**——l-捩れは有限拡大に載る。",
-    "stages": [
-     {
-      "stage": "1",
-      "claim": "固定した完備離散付値体 K での**選ばれた**同型 Kˣ/q^ℤ ≃+ E_q(K)",
-      "status": "closed",
-      "where": "Found/GaloisRep/TateDoubling.lean の tatePhiAddEquivAll",
-      "why": "★**Nonempty ではなく選ばれた ≃+ である**。 ★★tate_uniformization_dvr はこれを Nonempty で包んだだけなので、自然性を問うには tatePhiAddEquivAll を直接使えばよい。"
-     },
-     {
-      "stage": "2a",
-      "claim": "**正規化代表 normRep の自然性**（付値を保つ群準同型に沿って）",
-      "status": "closed",
-      "where": "Found/GaloisRep/NormRepNatural.lean の normRep_map / normRep_map_self",
-      "why": "★**一意なものは自動的に自然である**。 normRep は .choose だが eq_normRep（一意性）があるので、σ (normRep c) が条件 [0, v q) を満たすことを見れば済む。 ★★証明は 3 行。"
-     },
-     {
-      "stage": "2b",
-      "claim": "tateAOf / tateWOf の自然性（tateAOf_spec 経由）",
-      "status": "closed",
-      "why": "★**.choose で定義されたものでも、特徴づけがあれば自然性は出る**。 tateAOf_spec（algebraMap R K (tateAOf S c) = normRep …）と 段 2a、それに TateSetup の hinj（単射性）を繋ぐだけ。 ★★tateWOf は tateAOf · tateWOf = q から**消去**で出る。 ★★★σR S.q = S.q は**仮説ではなく導出される**。",
-      "where": "Found/GaloisRep/TatePhiNatural.lean の tateAOf_map / tateWOf_map"
-     },
-     {
-      "stage": "2c-1",
-      "claim": "**冪級数の adic 値の自然性**（σ (evalAdic f q) = evalAdic f (σ q)、σ I ⊆ I）",
-      "status": "closed",
-      "where": "Found/GaloisRep/AdicEvalNatural.lean の evalAdic_map / evalAdic_fixed",
-      "why": "★またしても**「一意 ⇒ 自然」**である。 evalAdic は Classical.choose だが evalAdic_unique がある。 ★★機構は 3 段: (a) partialEval は多項式なので σ と可換、(b) σ I ⊆ I から SModEq が移る、(c) evalAdic_unique。 ★★★σ q = q の場合は**級数の値が σ で固定される**（evalAdic_fixed）——これが同変性の核である。"
-     },
-     {
-      "stage": "2c-2",
-      "claim": "tateXtail / tateXterm / tateXpairE / tateXK の自然性",
-      "status": "closed",
-      "why": "★adicSum も Classical.choose だが **adicSum_unique** があるので、同じ「一意 ⇒ 自然」。 ★★Ring.inverse は一般には環準同型と可換でないが、**単元の上では可換**（1-t は t ∈ I なら単元）。 ★★★K の水準へは map_inv₀（体準同型は逆元と可換）で上がる。 ★★★★**これで tatePtPair の座標そのものが自然である**。",
-      "where": "Found/GaloisRep/TateSeriesNatural.lean（adicSum_map / tateXtail_map / tateYtail_map）と Found/GaloisRep/TateCoordNatural.lean（tateXpairE_map / **tateXK_map** / tateYK_map）"
-     },
-     {
-      "stage": "2c-3",
-      "claim": "tatePtPair の自然性（Point.some の合同）",
-      "status": "closed",
-      "why": "★座標の自然性（段 2c-2）があれば Point.some の合同だけである。 ★★母数を固定する場合（σ q = q）に絞った——Point.some の合同は**同じ曲線の上**でなければ取れない。 ★★★G_K は q ∈ K を固定するので、これが実際の場合である。 ★★★★**これで同変性の本体（段 2c）が閉じた。**",
-      "where": "Found/GaloisRep/TatePointNatural.lean の tateXK_map_fixed / nonsingular_tateK_map / **tatePtPair_map**"
-     },
-     {
-      "stage": "3a",
-      "claim": "有限拡大 K ⊆ L に対する**座標の**自然性",
-      "status": "closed",
-      "where": "Found/GaloisRep/AdicEvalNatural.lean / TateSeriesNatural.lean / TateCoordNatural.lean（すべて σ : R →+* R′、σ_K : K →+* L の形で一般化済み）",
-      "why": "★段 2a〜2c の補題はすべて**行き先が別の環・別の体でも通る**——2026-08-27 に一般化した。 ★★normRep の一意性から normRep_L(c の像) = normRep_K(c) が出る——付値が e 倍になっても基本領域 [0, v(q)) の条件は保たれる。"
-     },
-     {
-      "stage": "3b",
-      "claim": "それを**点の水準**で述べる（別の体の上の曲線の間の Point.map）",
-      "status": "closed",
-      "why": "★座標の自然性（段 3a）⬛ Point.some の合同だけ。 ★★逸脱の記録: mathlib の Point.map は**ある**が、tatePtPair は (tateCurveAt q).map (algebraMap R K) の上にあり Point.map は W.baseChange F の上にある。両者は定義上等しいが instances 透明度では合わず、rw も simp も当たらない（2026-08-27 実測）。 ★★★そこで Point.map を経由せず結論を直接述べた——「L-点は K-点の像である」そのものであり、数学的内容は同じである。",
-      "where": "Found/GaloisRep/TateBaseChange.lean の nonsingular_tateK_baseChange / **tatePtPair_baseChange**"
-     },
-     {
-      "stage": "4",
-      "claim": "Φ の G_K-同変性（当初は「K̄ への帰納極限」と書いていた）",
-      "status": "closed",
-      "where": "Found/GaloisRep/TateUniformizationEquivariant.lean の **tatePhi_map** / tatePhi_map_one",
-      "why": "★★★★**帰納極限は要らなかった**——M_l(E) の l-捩れは**有限拡大 L = K(E[l]) の中に載る**ので、L（完備離散付値体）で段 1 がそのまま使え、G_K は Gal(L/K) を通して作用する。 ★q ∈ K なので σ q = q は自動である。 ★★到達点: Φ(σ_* c) = Point.some (σ_K X) (σ_K Y)、すなわち **Φ は同変**である。"
-     },
-     {
-      "stage": "5",
-      "claim": "M_l(E) を (Kˣ/q^ℤ)[l] と同定し、Lemma 3.2, (i) を出す",
-      "status": "closed",
-      "where": "Found/GenEll/Lemma32Uniformized.lean の exists_lift_pow / **lemma_3_2_i_of_uniformization**",
-      "why": "★同変な一意化 Φ を**入力として受ける形**で、M_l(E) の G_K-安定な直線から lemma_3_2_i の仮説を作る。 ★★機構は Φ が**同変かつ単射**であることだけ: (1) c ≙ Φ⁻¹(P) は l-捩れ、(2) x へ持ち上げて x^l = Q^k、(3) 安定性に Φ⁻¹ を当てると σx = x^{c′}·Q^n。 ★★★これで Lemma32StableLine.lean の逸脱「G_K 同変な一意化は含まない」が**消えた**。"
-     }
+    "funnel": {
+      "note": "★★**残り 13 項目がどの塡がりで止まっているか**（2026-08-27 実測）。",
+      "sec1": "§1 の 5 項目（Definition 1.1 / Definition 1.2 / Proposition 1.4 / Remark 1.4.1 / Proposition 1.7） → **ample-and-projective-embedding (1/7)**。 ★土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）は mathlib にある。 ★★最初の葉は段 A（層のテンソル積）である。",
+      "sec2": "§2 の 1 項目（Theorem 2.1） → **belyi-noncritical**。 ★未分割ではなく、5 節点中 3、残る Lemma 2.4 も 9 節点中 8 が閉じている。",
+      "sec3": "§3 の 5 項目（Lemma 3.2 / Proposition 3.4 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8）: Lemma 3.2 → **finite-flat-group-scheme-quotient**（(ii) の E/μ_l）、残り 4 項目 → **faltings-height-vs-degree-at-infinity (2/6)**。 ★段 5・6（初等）は閉じた。残る 1〜4 は複素解析であり、並行セッションが Lattice*.lean / Covolume.lean / JFunction.lean で構築中。",
+      "sec4": "§4 の 2 項目（Corollary 4.3 / 4.4） → Theorem 3.8 の下流、すなわち §3 と同じ塡がり。",
+      "conclusion": "★★★**実質的な塡がりは 4 つ**である: ample-and-projective-embedding・faltings-height-vs-degree-at-infinity・belyi-noncritical・finite-flat-group-scheme-quotient。 ★うち 2 つ（faltings の段 1〜4、belyi の Lemma 2.4）は**並行セッションが現在進めている**。"
+    },
+    "nextActions": [
+      "1. ample の段 A1（層のテンソル積の対象と L^{⊗n}）は 2026-08-27 に閉じた（InvertibleSheaf.lean）。★次の葉は段 C（ℙ^n_S と O(1)）または段 D（ample の定義——X_s が要る）。★★mathlib に twisting sheaf も Serre の定理も無い（2026-08-27 実測）。",
+      "2. Lemma 3.2, (i) は 2026-08-27 に posit を全部消した（Lemma32Tate.lean）。残るのは (ii) の**商をスキームとして作る段**だけである。",
+      "3. faltings の段 1〜4 と belyi の Lemma 2.4 は並行セッションの領分——**重複を避けること**。★belyi は Lemma 2.4 が 9 節点中 8、残るのは「ℙ¹ 上の有理関数としての組み立て」1 つである。"
     ],
-    "done": "10/10",
-    "remaining": "★★★**なし。** 到達点は Found/GenEll/Lemma32Uniformized.lean の lemma_3_2_i_of_uniformization： 同変な一意化を入力として Lemma 3.2, (i) が出る。 ★その一意化は Found/GaloisRep/ の 8 段で構成済みである。"
-   },
-   "impact": "★★★★**2026-08-27 に閉じた（10/10）。** ★朝の時点では absent・未分割であった。 ★★§3 の 5 項目に残るのはこの塡がりではなく、**Lemma 3.2, (ii) の E/μ_l をスキームとして作る段**と faltings-height-vs-degree-at-infinity である。"
+    "definition11": "★★★★★★**2026-08-28——[GenEll] Definition 1.1 が閉じた**（Found/Arakelov/Definition11.lean の definition_1_1.src）。GenEll の必要分は **11/24 → 12/24**、§1 は **4/9 → 5/9**。\n★最後の 1 本は「正規化した自明な算術直線束 Ō_X（|1| = 1）」で、TorsorMetric の base が Classical.choice なので**GreenMetric（base をフィールドに持つ）で基準計量そのものを作った**。\n★★さらに APicQuot.lean で **APic(X) を同型類の群**にした（単元の作用で商を取る）。鍵は evalGlobal の共役両立で、Scheme.ΓSpecIso_naturality を starRingEnd ℂ に当てるだけで出た。",
+    "correction20260828": "★★★★★★**2026-08-28 の訂正**: Definition 1.1 の項目全体の .src を下げた（12/24 → 11/24）。TorsorMetric.base が Classical.choice なので群法則が計量のテンソル積を表さない。 ★新しい塡がり **arakelov-coherent-base-metric** を登録した——これが §1 の 2 項目（Definition 1.1 と Definition 1.2）の**共通の根**である。 ★★失われていないもの: 対の群・同型類への商・引き戻し・射と Γ(L̄)・Ō_X・Pic ≃ Cl・分数イデアル ≃ 因子。"
   },
-  "faltings-height-vs-degree-at-infinity": {
-   "what": "Faltings 高さ ht_Falt と無限素点での高さ ht_∞ の比較：deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt ≾ (1+ε)·ht_∞。",
-   "whereUsed": [
-    "[GenEll] Proposition 3.4 の不等式の側",
-    "★その下流: Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / Corollary 4.4"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-minor",
-    "searched": "mathlib に Faltings 高さは無い。",
-    "partial": [
-     "ABC3: Found/GenEll/Covolume.lean ほか（並行セッションが構築中）",
-     "★★ABC3: Found/GenEll/DeligneElementary.lean（2026-08-27）——**段 5・6（初等評価）を sorry 0 で閉じた**",
-     "★mathlib: JFunction の tendsto_norm_jFun_atImInfty（段 4 の支え）",
-     "★ABC3: Found/GenEll/FiniteFromNorthcott.lean の finite_of_le_of_northcott（Proposition 3.4 の**有限性の主張**はこれで出る）"
-    ],
-    "absentPart": "比較不等式そのもの。"
-   },
-   "primarySource": {
+  "sourceNodesFound": {
     "measuredAt": "2026-08-27",
-    "note": "★原文は [Silv2]（Silverman, Advanced Topics）Prop 2.1 に帰すが、**[Silv2] は 0_Source に無い**。★★しかし**同じ内容の別原典が 2 つ手元にある**。",
-    "sources": [
-     "[DelSB616] Deligne - Preuve des conjectures de Tate et de Shafarevitch（Bourbaki 616）§1 HAUTEURS。★本人が「C’est la partie la plus technique, et la plus longue, de la preuve」と書いている。定義 1.1, 1.2 と 1.3。",
-     "[Elkik] Elkik - Fonctions de Green, volumes de Faltings（Astérisque 127）",
-     "[RayHt] Raynaud - Hauteurs et isogénies（Astérisque 127）——等因子写像での高さの変化（Lemma 3.5 が使う）"
+    "question": "★「mathlib に無い標準数学」に節点が作れないのは、スケルトンを作るための原典が無いからか。落とせば節点を作れるのか。",
+    "answer": "★★原典はすでに `0_Source` にあり `papers.json` に登記済みだった——**The Stacks Project(7654 ページ)**である。新しく落とす必要は無い。実測で 4 つのギャップすべてに対応する章が見つかった(2026-08-27)。",
+    "sections": {
+      "spreading-out-over-base": {
+        "stacks": [
+          "32.6 Limits and morphisms of finite presentation",
+          "32.8 Descending properties of morphisms",
+          "32.10 Descending relative objects",
+          "32.22 Descending finite type schemes(tag 0CNL/0CNM/0CNN)"
+        ],
+        "note": "★これが EGA IV §8 にあたる。Situation 32.22.1 が『Noetherian スキームの有向系の極限』で、Lemma 32.22.2 が『有限型のものは有限段で降りる』。原文 Remark 1.5.1 の『ℤ[Σ^{-1}] へ延びる』はこの形である。"
+      },
+      "riemann-roch-curves": {
+        "stacks": [
+          "53.4 Duality(曲線の双対性)",
+          "53.5 Riemann-Roch(tag 0BRX/0BRY)",
+          "53.12 Riemann-Hurwitz",
+          "48.27 Duality for proper schemes over fields(Serre 双対性の一般形)"
+        ],
+        "note": "★★[NCBelyi] Theorem 2.5 が要求する deg(ω_X ⊗ L^{-1}(x)) の計算と Serre 双対性は 53.4/53.5 にある。★★★おまけに 53.12 Riemann-Hurwitz は [GenEll] Proposition 1.7, (ii) が要求するものである——『HeightTheoryData の語彙の外』として範囲外にしていたが、原典側の節点は取れる。"
+      },
+      "etale-fundamental-group": {
+        "stacks": [
+          "58.6 Fundamental groups"
+        ],
+        "note": "★[GenEll] Theorem 2.1 の folklore『well-known structure of étale fundamental groups of hyperbolic curves』の原典側。★★ただし『標数 0 の代数閉体上の双曲曲線の位相的生成』の部分が Stacks にあるかは未確認。"
+      },
+      "p1-ramification": {
+        "stacks": [
+          "53.12 Riemann-Hurwitz",
+          "Morphisms: 不分岐・エタール"
+        ],
+        "note": "★[NCBelyi] Lemma 2.4 の (b) が要求する ℙ¹ 上の有理関数の分岐。多項式の段(第 417-418)は臨界値の条件として自前で書けたので、残るのは正規化(Möbius)を通した形だけである。"
+      }
+    },
+    "whatThisChanges": [
+      "★節点が作れる: papers.json に [Stacks] が登記済みなので `.otherPaper \"[Stacks]\"` の辺が引ける(check.mjs の G6 を通る)。",
+      "★★逐語照合も効く: 0_Source に PDF と txt があるので check.mjs の引用検査が使える。ただし notationRisk は unmeasured——目視していない。",
+      "★★★依存グラフを広げられる: 1_Structured に該当節を起こせば intra-graph で節点数と深さが機械的に出る。「未測定」が消える。"
     ],
-    "howToProceed": "★[DelSB616] §1 を原典としてスケルトン化できる。papers.json に登記済みで PDF も 0_Source にある。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★**Skeleton/GenEll/DeligneHeight.lean が 260 dpi 目視で測った 6 段**。 ★うち**段 5・6（初等）を 2026-08-27 に閉じた**。 ★★残る 1〜4 は複素解析の側で、並行セッションの領分である。",
-    "stages": [
-     {
-      "stage": "1",
-      "claim": "(E,ω) ≅ (ℂ/Λ, dz)、Λ = ℤω₁ ⊕ ℤω₂、τ = ω₂/ω₁、q = exp(2πiτ)",
-      "status": "open",
-      "why": "複素解析。並行セッションが LatticeCurve.lean 等で構築中。"
-     },
-     {
-      "stage": "2",
-      "claim": "H(E) = (1/|ω₁|)·|Im τ/π|^{-1/2}（|ω₁| 最小の基底で）",
-      "status": "open",
-      "why": "同上。Covolume.lean がここを担当する。"
-     },
-     {
-      "stage": "3",
-      "claim": "H*(E) ≤ C₀·H(E)·Im(τ)^{1/2}",
-      "status": "open",
-      "why": "同上。"
-     },
-     {
-      "stage": "4",
-      "claim": "j = q⁻¹ + 744 + …、Im(τ) ∼ sup(1, log|j|)/2π",
-      "status": "open",
-      "why": "★mathlib の JFunction.lean に tendsto_norm_jFun_atImInfty が**ある**。 ★★漸近を不等式に直す段が残る。"
-     },
-     {
-      "stage": "5",
-      "claim": "|j| ≤ H*^{12} から H* ≤ C₁·H·√(max 1 (log H*))",
-      "status": "closed",
-      "where": "Found/GenEll/DeligneElementary.lean の sqrt_bound_of_j_bound",
-      "why": "★log を取って 12 を外に出すだけ。 ★★|j| ≤ H*^{12} は「Δ が整数」から出るが、それ自体は仮説として受けている（段 1〜4 の側）。"
-     },
-     {
-      "stage": "6",
-      "claim": "★**H* ≤ C₂·H·√(max 1 (log H))**（自己参照を消す）",
-      "status": "closed",
-      "where": "Found/GenEll/DeligneElementary.lean の exists_bound_of_self_referential_sqrt_log / naive_bound_of_chain",
-      "why": "★★★**要は「自己参照的な評価を右辺から消す」こと**である。 log を取ると log(log A) ≤ log A（Real.log_le_sub_one_of_pos）で (1/2)log A が吸収され、log A ≤ 2 log C₁ + 2 log B になる。 ★定数は C₁·√(2 log C₁ + 2)。"
-     }
+    "whatThisDoesNotChange": [
+      "★★★★工数は減らない。節点が作れる = 測れる、であって実装の person-years は変わらない。",
+      "★★★★★在庫確認が先。lean-ecosystem.json に作業中の公開プロジェクトが 1 件ある。曲線の Riemann-Roch や scheme cohomology は他所で進行中の可能性があり、重複投資を避けるべきである。"
     ],
-    "done": "2/6",
-    "remaining": "★★残るは段 1〜4（複素解析）であり、**並行セッションの領分**である。 ★段 4 は mathlib の JFunction が支える。"
-   },
-   "impact": "★★★**§3・§4 の 6 項目の実質的な塡がりの 1 つ**である（もう 1 つは galois-equivariant-tate-uniformization）。 ★**ample ではない**——Proposition 3.4 の有限性は finite_of_le_of_northcott と ℙ¹_j の明示モデルで出る。"
+    "notInSource": [
+      "EGA III / EGA IV は 0_Source に無い(EGA I と II はある)。★ただし EGA IV 8.8.2 に相当するものは Stacks 32.22 にあるので、必須ではない。",
+      "★Numdam(numdam.org)で EGA は全巻無料公開されている——必要になれば正規に入手できる。"
+    ]
   },
-  "ideal-comap-on-affine-opens": {
-   "what": "一般の射 f : X ⟶ Y とイデアル層 I に対し、アフィン開 U ⊆ f⁻¹(V) の上で (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) と書く補題。",
-   "whereUsed": [
-    "[GenEll] Remark 1.5.1 の段 2（因子 D の降下をアフィン被覆で貼る段）",
-    "★Found/GenEll/SectionDescent.lean の切断の降下を IdealSheafData の水準へ上げるところ",
-    "★★★vertical-divisors-generate-pic-kernel の段 3b（チャートごとの m を点に引き戻す段）——**2 つの塡がりが同じ 1 本に帰着する**（2026-08-27 に判明）"
-   ],
-   "mathlibStatus": {
-    "verdict": "not-a-blocker",
-    "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/IdealSheaf/Functorial.lean を grep。ideal_comap_of_isOpenImmersion（開埋め込みの場合）はあるが、一般の射に対する ideal_comap は**無い**。",
-    "partial": [
-     "★mathlib: Scheme.IdealSheafData.comap / comap_comp / comap_id / comap_mono / ideal_comap_of_isOpenImmersion / ext_of_iSup_eq_top / le_of_iSup_eq_top はある",
-     "★★mathlib: comap_mul は**無い**（2026-08-27 再確認）",
-     "★★★**ABC3 側では既に閉じている**（2026-08-17、平行セッション）:\n  Found/GenEll/ComapAffine.lean の ideal_comap_eq_map_of_isAffine（アフィンで comap = Ideal.map。Galois 接続だけで出る）\n  Found/GenEll/ComapMul.lean の comap_mul（**一般の射**。公式を経由せず、アフィンの対を取って貼る）"
-    ],
-    "absentPart": "★**公式 (I.comap f).ideal U = (I.ideal V).map (f.appLE V U) そのもの**はまだ無い。★★しかし**消費側はこれを要らない**——ComapMul.lean が示した通り、comap_comp の往復と被覆で貼れば済む。"
-   },
-   "minimalForm": "★消費者が要るのは「2 つのイデアル層が各アフィン開で一致すれば等しい」だけであり、ext_of_iSup_eq_top で済む。★★したがって必要なのは (I.comap f).ideal U を**生成切断で書く**ことだけであり、完全な ideal_comap ではない。",
-   "impact": "★★★**塡がりではなくなった**（2026-08-27 再測定）。★comap_mul は ABC3 にあり、Remark 1.5.1 の段 2 も Remark 1.4.1 の段 3b もこれを待っていない。",
-   "primarySource": {
-    "measuredAt": "2026-08-27",
-    "note": "★**原典は手元にある**——[Stacks] 01Z4 / 01ZC 系と EGA IV §8。★★これは「原典が無い」型の塞がりではなく、**mathlib に補題が 1 本足りない**型である。",
-    "sources": [
-     "[Stacks] 01Z4 / 01ZC（極限での降下）",
-     "[EGA2] / EGA IV §8"
-    ],
-    "howToProceed": "★自分で 1 本書く。Scheme.Hom.ker_apply（準コンパクト）から入り、pullback.fst のアフィン局所記述（環のテンソル積）に降りる。★★mathlib へ PR できる形の補題である。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★★**2026-08-27 の訂正**: この塡がりは**2026-08-17 に平行セッションが既に閉じていた**。★本セッションは在庫確認を漏らして同じものを書き直してしまった（削除済み）。★★教訓: `node tools/decl-index.mjs` を**新しい名前すべてについて**引くこと。",
-    "parts": [
-     {
-      "name": "ideal_comap_eq_map_of_isAffine",
-      "status": "in-ABC3",
-      "what": "アフィンで comap = Ideal.map。Found/GenEll/ComapAffine.lean（2026-08-17）。★Galois 接続（comap ⊣ map）だけで出る——テンソル積も pullbackSpecIso も要らない"
-     },
-     {
-      "name": "comap_mul",
-      "status": "in-ABC3",
-      "what": "一般の射で comap が積を保つ。Found/GenEll/ComapMul.lean（2026-08-17）。★mathlib には無いが ABC3 にはある"
-     },
-     {
-      "name": "ideal_comap",
-      "status": "ABSENT-but-unneeded",
-      "what": "公式 (I.comap f).ideal U = (I.ideal V).map (f.appLE V U)。★まだ無いが、**消費側は要らない**"
-     }
-    ],
-    "remaining": "★★**実質的には閉じている**。公式自体は mathlib への PR の候補として残るだけである。",
-    "done": "2/3"
-   }
-  },
-  "dedekind-point-extension": {
-   "what": "X が ℤ 上固有なら、分数体の点 Spec F ⟶ X は Dedekind 環の点 Spec 𝒪_F ⟶ X へ一意に延びること。",
-   "whereUsed": [
-    "[GenEll] Definition 1.5, (iii)(iv)——原文が「where we recall that X is proper!」と叫ぶ箇所",
-    "★[GenEll] Remark 1.5.1——点の対応 ePt を ℚ-同型から作る段",
-    "★★Found/GenEll/Remark151Sigma.lean の remark_1_5_1_bdeq が ePt をデータとして受けている理由"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-major",
-    "searched": "2026-08-27 実測。Mathlib/AlgebraicGeometry/ValuativeCriterion.lean に IsProper.eq_valuativeCriterion（Stacks 0BX5）がある。Dedekind 環への拡張は無い。",
-    "partial": [
-     "★mathlib: ValuativeCriterion（付値環に対する存在・一意性）は揃っている",
-     "★★ABC3: Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper（付値環の場合を sorry 0 で閉じた。2026-08-27）",
-     "★★★Spec ℤ が終対象なので、付値可換四角形の底での可換性は自動"
-    ],
-    "absentPart": "★各 (𝒪_F)_v での延長を Dedekind 環 𝒪_F の上へ**貼り合わせる**段。★★Spec (𝒪_F)_v は Zariski 開ではないので素朴には貼れない。Spec 𝒪_F[1/m] へ延ばしてから残りの有限個の素点を処理する道になり、ZMT／正規化の水準の作業である。"
-   },
-   "minimalForm": "★消費者が要るのは「ℚ-同型から点の対応 ePt を作る」だけである。★★原文の定義域 U_X(ℚ̄) は X_ℚ だけで決まるので ePt は**恒等**であり、形式化で Spec 𝒪_F ⟶ X を定義域にしたことから生じた橋である。",
-   "impact": "★Remark 1.5.1 を項目として閉じるのに必要な最後の 1 本。★★★**2026-08-27 に大域延長の一意性が付いたので、点の対応 ePt は「与えられたデータ」ではなく「存在すれば一意に決まるもの」になった。**",
-   "primarySource": {
-    "measuredAt": "2026-08-27",
-    "note": "★**原典は手元にある**——[Stacks] 0BX5（付値判定法）と正規化の章。",
-    "sources": [
-     "[Stacks] 0BX5 Valuative criterion for properness",
-     "[Stacks] Normalization / ZMT",
-     "[EGA2]"
-    ],
-    "howToProceed": "★mathlib の ValuativeCriterion を入口にし、Spec 𝒪_F[1/m] への延長（有限型性から）と残りの有限個の素点での局所延長を貼る。★★分離性から一意性は出るので、貼ること自体はできるはずである。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★**2026-08-27 に 3 つに割り、2 つを閉じた。**",
-    "stages": [
-     {
-      "stage": "1",
-      "claim": "付値環なら分数体の点が一意に延びる",
-      "status": "closed",
-      "where": "Found/GenEll/ProperExtend.lean の exists_unique_extend_of_isProper",
-      "why": "★mathlib の IsProper.eq_valuativeCriterion（Stacks 0BX5）に Spec ℤ が終対象であることを合わせるだけ"
-     },
-     {
-      "stage": "2a",
-      "claim": "各素点 v で (O_F)_v-点へ一意に延びる",
-      "status": "closed",
-      "where": "Found/GenEll/DedekindExtend.lean の exists_unique_extend_atPrime",
-      "why": "★(O_F)_v は離散付値環で分数体が F。algLocAtPrime / towerLocAtPrime / fracLocAtPrime を自前で立てた"
-     },
-     {
-      "stage": "2b",
-      "claim": "大域延長は一意",
-      "status": "closed",
-      "where": "Found/GenEll/DedekindExtend.lean の extend_unique",
-      "why": "★mathlib の ext_of_isDominant_of_isSeparated。★★生成点の稠密性（isDominant_specMap_fractionRing）は 3 行で出た——像は生成点 ⟨⊥⟩ を含み、その閉包は zeroLocus ⊥ = univ"
-     },
-     {
-      "stage": "2c-1",
-      "claim": "局所延長を開近傍へ広げる",
-      "status": "closed",
-      "where": "Found/GenEll/OpenExtend.lean の exists_open_extend",
-      "why": "★mathlib の spread_out_of_isGermInjective′（SpreadingOut.lean、Stacks 0BX6）をそのまま使った。★★Spec O_F は整なので IsGermInjective は自動、底が Spec Z（終対象）なので S-射条件も自動。★★★茎と AtPrime 局所化を繋ぐのは mathlib の Spec.stalkIso。"
-     },
-     {
-      "stage": "2c-2",
-      "claim": "開近傍 {U_v} から開被覆を作って貼り合わせる",
-      "status": "closed",
-      "why": "★Scheme.Opens.iSupOpenCover で開被覆を作り、Scheme.Cover.glueMorphisms で貼った。★★整合条件は生成点で一致すること（ext_of_isDominant_of_isSeparated）から。★★★結果は X′(F) ≃ X′(𝒪_F)である",
-      "where": "Found/GenEll/GlobalExtend.lean の exists_global_extend / existsUnique_global_extend"
-     }
-    ],
-    "remaining": "★★★★★★**2026-08-27、全 5 段が閉じた。**★この穴は埋まっている——Remark 1.5.1 は項目として閉じた",
-    "done": "5/5"
-   }
-  },
-  "vertical-divisors-generate-pic-kernel": {
-   "what": "正規で ℤ 上平坦なモデル X について、Pic(X) → Pic(X_ℚ) の核が**垂直因子**（ファイバーの成分の ℤ-結合）で生成されること。",
-   "whereUsed": [
-    "★[GenEll] Remark 1.4.1——「BD-class の理論が X_ℚ だけに依る」を**2 つの ℤ-モデルにまたがる形**で無条件に出す段",
-    "★★Found/GenEll/Remark141.lean の remark_1_4_1_of_descent_twist が「差が Spec ℤ から来る」を**仮説に置いている**理由",
-    "[GenEll] Proposition 1.4, (ii)の証明中の ht_{L⊗M} ≈ ht_L の消費側"
-   ],
-   "mathlibStatus": {
-    "verdict": "closed-in-ABC3",
-    "searched": "2026-08-27 実測。mathlib の ClassGroup は Dedekind 環専用で、一般のスキーム上の Weil 因子類群・局所化完全列（Cl(X) → Cl(U) → 0）は無い。",
-    "partial": [
-     "★mathlib: Scheme.IdealSheafData の束構造と comap はある",
-     "★★ABC3: Found/GenEll/VerticalTwist.lean で「差が Spec ℤ から来るなら高さの差は定数 deg_ℚ(N)」は sorry 0 で閉じた（2026-08-27）"
-    ],
-    "absentPart": "★**当初の見立て（Weil 因子類群が要る）は過大であった**（2026-08-27 に訂正）。★★実際に要るのは Scheme.IdealSheafData の水準で有限アフィン被覆を取って m を揃える配管だけである。"
-   },
-   "minimalForm": "★消費側が要るのは**一様有界性だけ**である。★★垂直因子 V は V ≤ m·X_q を満たすので deg_F(x^*V) ≤ m·log q となり、**交点数は要らない**——引き戻しの単調性と x^*(f^*(q)) = (q) だけで出る。★★★したがって minimalForm は「2 つのモデルの差がある m, q で m·X_q に押さえられる」であり、類群全体は要らない。",
-   "impact": "★★★★**2026-08-27 に閉じた**。★Remark 1.4.1 に残るのは原文第 2 文（any normal, projective scheme Y over ℚ）の側だけであり、それは ample-and-projective-embedding の在庫不足である。",
-   "primarySource": {
-    "measuredAt": "2026-08-27",
-    "note": "★**原典は手元にある**——[Stacks] の Weil divisor の章。",
-    "sources": [
-     "[Stacks] 0BE0 Weil divisors",
-     "[Stacks] 02SE Divisors / 0BE9 The Weil divisor class group",
-     "[Hartshorne] II.6.5 (Cl(X) → Cl(U) の完全列)"
-    ],
-    "howToProceed": "★まず minimalForm（一様有界性）を取る。★★必要なのは (a) pullbackIdeal の単調性、(b) x^*(f^*(q)) = (q)·𝒪_F、(c) degNormalized(idealADiv((q^m)𝒪_F)) = m·log q（= degNormalized_baseChange）の 3 本である。"
-   },
-   "decomposition": {
-    "measuredAt": "2026-08-27",
-    "note": "★★★★★★★**2026-08-27、全 5 段が閉じた。**\n★当初「Pic(X) → Pic(X_ℚ) の核 = 垂直因子」としてWeil 因子類群を要求していたが、割ってみると**類群も交点数も要らなかった**。\n★★実際に使ったのは: 有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であることだけである。",
-    "stages": [
-     {
-      "stage": "1",
-      "claim": "差が Spec ℤ 上の因子の底変換なら高さの差は定数 deg_ℚ(N)",
-      "status": "closed",
-      "where": "Found/GenEll/VerticalTwist.lean の htArith_bdeq_of_baseChange′",
-      "why": "★degNormalized_baseChange（正規化次数の底変換不変性）1 本。★★原文の ≈ は実際には**等式**であった"
-     },
-     {
-      "stage": "2",
-      "claim": "差のイデアルが有理整数 n を含めば高さの差は log n 以下（一様）",
-      "status": "closed",
-      "where": "Found/GenEll/VerticalBound.lean の degNormalized_idealADiv_le_log_of_natCast_mem / htArith_bdeq_of_idealADiv_diff",
-      "why": "★deg(idealADiv I) = log(absNorm I) と Ideal.absNorm_dvd_absNorm_of_le（包含でノルムが割り切れる）。★★absNorm(n·𝒪_F) = n^{[F:ℚ]} なので正規化で [F:ℚ] が約分され、**定義体に依らない**。★★★これで**交点数は不要**になった"
-     },
-     {
-      "stage": "3a",
-      "claim": "ネーター環で「N を反転すれば一致」ならある m で N^m·I ⊆ J",
-      "status": "closed",
-      "where": "Found/GenEll/IdealComparable.lean の exists_pow_mul_le_of_map_le",
-      "why": "★I が有限生成であることだけを使う——各生成元 a について N^{k_a}·a ∈ J が出るのでm = max k_a を取る。★★**交点数も類群も要らない**ことがここで確定した。★★★機構は IsLocalization.mem_map_algebraMap_iff と eq_iff_exists の 2 本だけ"
-     },
-     {
-      "stage": "3b-1",
-      "claim": "層の水準の n·D ≤ E を**点の水準へ降ろす**",
-      "status": "closed",
-      "where": "Found/GenEll/VerticalDescent.lean の span_natCast_mul_pullbackIdeal_le / htArith_bdeq_of_sheaf_comparable",
-      "why": "★道具は 3 本だけだった:\n  pullbackIdealOf_mul（ComapMul.lean の comap_mul を環へ落とす）\n  pullbackIdealOf_mono（mathlib の comap_mono）\n  pullbackIdealOf_comap_intSpan（**Spec ℤ が終対象**）\n★★★最後の 1 本が本質である——x ≫ f は Spec ℤ への**唯一の**射なので、定数 n が点にも定義体にも依らない。\n★★結果: **高さの BD-同値の仮定が「層の不等式 2 本」になった**（htArith_bdeq_of_sheaf_comparable）"
-     },
-     {
-      "stage": "3b-2",
-      "claim": "その n を**アフィン被覆から取る**（D と E が ℤ[1/N] の上で一致するところから）",
-      "status": "closed",
-      "why": "★道具は 4 本だけだった:\n  exists_pow_mul_le_of_map_le（各チャートの m_i。有限生成性のみ）\n  Finset.univ.sup（**被覆が有限**だから最大が取れる）\n  IdealSheafData.le_of_iSup_eq_top（mathlib。被覆の上で見れば足りる）\n  RingHom.ext_int（ℤ からの環準同型は 1 つ——specIdealSheaf_comap_ideal_top の要）\n★★★**交点数も Weil 因子類群も使っていない**。",
-      "where": "Found/GenEll/ChartwiseUniform.lean の exists_uniform_sheaf_le_of_localization / htArith_bdeq_of_chartwise_localization"
-     }
-    ],
-    "done": "5/5",
-    "remaining": "★★★**なし**。到達点は htArith_bdeq_of_chartwise_localization：\n  X が有限個のネーターなアフィンチャートで覆われ、各チャートで D と E が N を反転して一致するなら ht_D ≈ ht_E。"
-   }
-  },
-  "finite-flat-group-scheme-quotient": {
-   "what": "有限平坦群スキームによる商。とくに [GenEll] Lemma 3.2, (ii) の μ_l ⊆ E （𝒪_K 上の有限平坦部分群スキーム）と E′ = E/μ_l。",
-   "whereUsed": [
-    "[GenEll] Lemma 3.2, (ii) の (a)(b)（μ_l が有限平坦部分群スキームであること、E′ が 1 次元半アーベルスキームであること）",
-    "★その下流: Lemma 3.5（E_H = E/H_F）"
-   ],
-   "mathlibStatus": {
-    "verdict": "absent",
-    "searched": "2026-08-27 実測。mathlib に群スキームによる商は無い。AlgebraicGeometry/Group/ はあるが、有限平坦部分群スキームによる商の存在定理（SGA3 / Raynaud）は無い。",
-    "partial": [
-     "★★★ABC3: Found/GenEll/Lemma32QuotMu.lean——**一意化の側では閉じている**（ker_pow_mk_eq・vAdd_pow・mu_inj）。Kˣ/q^ℤ の上では x ↦ x^l が Kˣ/q^ℤ → Kˣ/q^{lℤ} を与え、核が μ_l である。",
-     "★ABC3: 2026-08-27 に galois-equivariant-tate-uniformization が閉じたので、「一意化の側で述べる」ことの正当化は取れている。"
-    ],
-    "absentPart": "★μ_l を 𝒪_K 上の**有限平坦部分群スキーム**として作る段。 ★★その商 E/μ_l を**スキームとして**作る段。 ★★★商が再び 1 次元半アーベルスキームになること。"
-   },
-   "minimalForm": "★消費側が実際に使うのは **q_{E′} = q_E^l と deg_∞(E′) = l·deg_∞(E) だけ**であり、両方とも Lemma32QuotMu.lean にある。 ★★したがって Lemma 3.5 以降は**商をスキームとして作らなくても進める**。 ★★★作らなければならないのは **Lemma 3.2 の (ii) を項目として閉じるときだけ**である。",
-   "impact": "★**Lemma 3.2 を項目として閉じるのに必要な最後の 1 本**。 ★★(i) は 2026-08-27 に**完全に**閉じた——Found/GenEll/Lemma32Tate.lean の lemma_3_2_i_tate_all は**一意化も Galois 作用も posit していない**（Φ = tatePhiAddEquivAll、act = mathlib の Point.map）。 ★★★ただし minimalForm の通り、**下流（Lemma 3.5 以降）はこれを待たない**。",
-   "primarySource": {
-    "measuredAt": "2026-08-27",
-    "note": "★原文は [FC] Chapter III に帰すが **[FC] は 0_Source に無い**。 ★★群スキームの商の一般論は [SGA3] / Raynaud であり、これも手元に無い。",
-    "sources": [
-     "[FC] Faltings-Chai, Degenerations of Abelian Varieties, Chapter III",
-     "[SGA3] Schémas en groupes",
-     "[Stacks] Groupoid schemes / quotients"
-    ],
-    "howToProceed": "★まず **minimalForm で進む**——商をスキームとして作らず、q_{E′} = q_E^l を持つ Tate 曲線として特徴づける。 ★★項目として閉じるには群スキームの商が要るが、それは person-years 規模の別項目である。"
-   }
-  },
-  "arakelov-degF-finite-places": {
-   "what": "APic(Spec 𝒪_F) 上の正規化次数 deg_F の**有限素点側**。台帳の D2（APic(Spec 𝒪_F) ≅ ADiv(F)/APrc(F)）と同じもの。",
-   "whereUsed": [
-    "[GenEll] Definition 1.2（ht_M̄(x) ≔ deg_F(x_F^* M̄)）",
-    "★その下流: Proposition 1.4 の線束表示側"
-   ],
-   "mathlibStatus": {
-    "verdict": "partial-major",
-    "searched": "2026-08-28 実測。ADiv(F) / APrc(F) / deg / degNormalized / degAPic は Found/GenEll/ArithDiv.lean と ProductFormula.lean に**実装済み**。★欠けているのは橋だけである。",
-    "absentPart": "★Found/Arakelov/ADegEmb.lean の degFOf は**アルキメデス側しか見ていない**（Pic 類が式に現れない、Def12Height.lean の訂正）。 ★★捻れ集合表示 (L, g) から有限素点側の**式が書けない**——TorsorMetric.base が Classical.choice だからである。 ★★★古典的な定義 deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v なら書けるが、s の取り方に依らないこと（積公式）が要る。"
-   },
-   "minimalForm": "★消費側（Definition 1.2）が要るのは **deg_F が準同型で、底変換で不変で、単元の作用で不変**であることだけである。",
-   "impact": "★**Definition 1.2 の唟一の塞がり**である。 ★★Definition 1.2 は Definition 1.1 の上に直に立つので、ここが開けば §1 は 5/9 → 6/9 になる。",
-   "nextStep": "★第 1・2 段は 2026-08-28 に入った:\n  第 1 段 Pic(Spec 𝒪_F) ≃* Cl(F) —— Found/Arakelov/PicClassGroup.lean\n  第 2 段 分数イデアルの群 ≃+ 有限素点の自由アーベル群 —— Found/GenEll/FractionalIdealDivisor.lean\n★★**塞がりだった arakelov-coherent-base-metric は同日に閉じた**（`APicM` が `CommGroup` になり、積が本物のテンソル積になった）ので、第 3 段（`ADiv(F)/APrc(F) ≃* APicM (Spec 𝒪_F)`、`deg_F` の転送）に着手できる。\n★★★古典的な定義 `deg(L̄) = log #(Γ(L)/𝒪_F s) − Σ_v log‖s‖_v` を使うなら、`s` の取り方に依らないこと（積公式、`Found/GenEll/ProductFormula.lean` に在庫）が鍵である。",
-   "blockedBy": "",
-   "decomposition": {
-    "measuredAt": "2026-08-28",
-    "note": "★★★★★**`APicM`（`AMetricPic.lean`）が入ったので、古典的な定義で書ける**。`deg_F(L̄) = (1/[F:ℚ])·( log #(Γ(L)/𝒪_F·s) − Σ_σ log‖s‖_σ )`（`s ≠ 0` は任意）。★在庫の `degFOf`（`Interface/Arakelov/ADegEmb.lean`）は**アルキメデス側だけ**で、しかも `Interface`（posit）にある。本 gap はそれを `Found` の側で作り直す段である。",
-    "stages": [
-     {
-      "stage": "A",
-      "status": "closed",
-      "claim": "★アフィンの橋——`Spec R` 上の局所自明な前層加群 `L` から**可逆 `R`-加群 `Γ(L,⊤)`** を得る",
-      "why": "★★★★★2026-08-28 に閉じた。中身は「層化に沿って計量を移す」であり、A1(層化は局所自明性を保つ)は在庫、A2(自明化・遷移単元の輸送)は §9-748、A3(APicM X →* PicSheaf X が群準同型)は §9-750 で入った。★最後の claim(可逆 R-加群 Γ(L,⊤))は在庫の invertible_gammaCarrier に渡すだけであった。",
-      "where": "Found/Arakelov/SheafifyTriv.lean(A2) / Found/Arakelov/APicToSheaf.lean(A3 と invertible_gamma_toInvSheaf)"
-     },
-     {
-      "stage": "B",
-      "status": "closed",
-      "claim": "★★有限部分 `log #(Γ(L)/𝒪_F·s)`",
-      "why": "★2026-08-28 に閉じた。s ≠ 0 なら Γ(L)/(R·s) は有限である(finite_quotient_gamma_of)。★★機構: 分数体上で rank 1 → 商は捻れ → 共通の消滅元 r → N は R/(r)-加群 → R/(r) は有限 → Module.finite_iff_finite。",
-      "nextStep": "",
-      "where": "Found/Arakelov/APicToSheaf.lean（finite_gamma / projective_gamma / exists_ne_zero_gamma / finrank_fractionRing_gamma / gamma_toFractionRing_injective / exists_smul_mem_span_gamma / finite_of_finite_isTorsion_int）"
-     },
-     {
-      "stage": "C",
-      "status": "closed",
-      "claim": "★★★アルキメデス部分 `Σ_σ log‖s‖_σ`",
-      "why": "★複素点は埋め込み `σ : F ↪ ℂ` に対応する。ノルムは `AMetric.norm`（チャート独立、`AMetricNorm.lean`）で取れる。★★加法性は `AMetric.norm_mul`（`|s ⊗ t| = |s|·|t|`）と `Real.log_mul` で出る（`s`, `t` の非消失を仮定した形）。★★★退化を殺す欄（ノルムを一律 `r` 倍すると `archDeg` が `log r` 下がる）も入れた——`Fintype.card (F →+* ℂ) = [F:ℚ]` がちょうど分母を消す。",
-      "where": "Found/Arakelov/ArchDeg.lean の embSpecPoint / archDeg / archDeg_mul / archDeg_of_norm_smul"
-     },
-     {
-      "stage": "D",
-      "status": "open",
-      "claim": "★★★★**`s` の取り方に依らないこと**（積公式）",
-      "why": "★`s' = u·s`（`u ∈ F^×`）と取り替えると、有限側が `−Σ_v ord_v(u)·log(Nv)` 動き、アルキメデス側が `−Σ_σ log|σ(u)|` 動く。★★その和が `0` になるのが積公式で、`Found/GenEll/ProductFormula.lean` に在庫がある。"
-     },
-     {
-      "stage": "E",
-      "status": "open",
-      "claim": "★★★★★**加法性**（`deg_F` が `APicM (Spec 𝒪_F) →+ ℝ`）",
-      "why": "★`|s ⊗ t| = |s|·|t|`（`normOf_mul`、2026-08-28 に入った）でアルキメデス側が足し算になる。★★有限側は `Γ(L⊗M)/(s⊗t) ` の指数が積になること。"
-     }
-    ],
-    "done": "3/5",
-    "remaining": "★段 A・B・C が閉じた(2026-08-28)。★★残るのは D・E。★★★段 D(s の取り方に依らないこと＝積公式)は Found/GenEll/ProductFormula.lean の在庫が効く。★★★★段 E(加法性)は §9-743(引き戻しの乗法性)と §9-750(APicM →* PicSheaf が群準同型)が効く。"
-   }
-  },
-  "arakelov-coherent-base-metric": {
-   "what": "算術直線束の**基準計量を整合的に選ぶ**こと。 すなわち base_{[L·M]} = base_{[L]} ⊗ base_{[M]}。",
-   "whereUsed": [
-    "[GenEll] Definition 1.1（「テンソル積で同型類が群 APic(X) をなす」）",
-    "★[GenEll] Definition 1.2（deg_F の加法性）",
-    "★★Interface/Arakelov/APic.lean の APicData の穴と同種"
-   ],
-   "mathlibStatus": {
-    "verdict": "closed-in-project",
-    "searched": "2026-08-28 実測。mathlib に Arakelov の計量は無い。",
-    "absentPart": "★Found/Arakelov/ArcTorsorMetric.lean の TorsorMetric.base は **Classical.choice** であり、対象ごとに獨立に選ばれている。 ★★TorsorMetric.tensor は **Green を足すだけ**なので、群法則が表す計量は base_{G⊗H} · e^{-(g+h)}、真のテンソル積は (base_G ⊗ base_H) · e^{-(g+h)} で一致しない。 ★★★差は 2-コサイクル c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]})) である。"
-   },
-   "minimalForm": "★2026-08-28 に**道（b）で閉じた**——捻れ集合表示をやめ、**自明化の側で書いた計量**（`LocalMetric`）を作った。★★基準計量を整合的に選ぶ必要は消えた（`Classical.choice` を使わない）。",
-   "impact": "★**2026-08-28 に閉じた**。`APicM X` が `CommGroup` になり、積が本物のテンソル積であることが `normOf_mul` で言える。★★したがって §1 の 2 項目の共通の根としての障害はもう無い。★★★`Definition 1.1` の項目全体を閉じるには (ii) の `deg_F` だけが残る。",
-   "doneNote": "★失われていないもの（2026-08-28）: 対の群（ArithPic）・同型類への商（APicOf）・引き戻し（APicOfPullback）・射と Γ(L̄)（ArithHom / arithGamma）・Ō_X（|1| = 1）はすべて**真のまま**である。",
-   "resolution": {
-    "measuredAt": "2026-08-28",
-    "verdict": "★★★★★★★★★★**閉じた（2026-08-28）**。`APicM X`（算術直線束の同型類）に **`CommGroup` のインスタンス**が入り、積は**本物のテンソル積**である（`normOf_mul : |s ⊗ t| = |s| · |t|`）。",
-    "stages": [
-     {
-      "stage": "1",
-      "where": "Found/Arakelov/TrivTensor.lean",
-      "claim": "trivValue がテンソル積で掛け算になる",
-      "why": "★rfl である。制限の μIso は Iso.refl、tensorHom_app も leftUnitor_hom_app も rfl（mathlib）。set_option backward.isDefEq.respectTransparency false が要る。"
-     },
-     {
-      "stage": "2",
-      "where": "Found/Arakelov/TrivSecNorm.lean",
-      "claim": "切断のノルムが掛け算になる（ファイバーの橋を迂回）",
-      "why": "★‖s‖_{V,e}(p) ≝ ‖evalOn p V hp (trivValue F V e s)‖ と書けば arcFiber を経由しない。★★在庫の genNorm_arcEvalOnTop が「ファイバーで測っても同じ値」を保証している。★★★これで mathlib の SheafOfModules のモノイダル構造（PR 規模、2026-08-28 実測で不在）が要らなくなった。"
-     },
-     {
-      "stage": "3",
-      "where": "Found/Arakelov/LocalMetric.lean",
-      "claim": "基準ノルム h_{V,e} を担ぐ構造体・自明化独立性・チャート独立性",
-      "why": "★compat（自明化を遷移単元 u 倍すると h は |u| で割られる）と restrict（小さい開集合へ降りても変わらない）の 2 欄。★★normOf_chart_indep で normOf は (p,s) だけの関数になる。★★★空虚でないことは structLocalMetric（Ō_X の標準計量）が目撃する。"
-     },
-     {
-      "stage": "4",
-      "where": "Found/Arakelov/TensorMetric.lean",
-      "claim": "★テンソル計量の**存在**と ‖s ⊗ t‖ = ‖s‖ · ‖t‖",
-      "why": "★構成の要は「(A⊗B)|_V は自明だが A|_V は自明でない V」の扱いである（連結スキーム上でも A ⊗ B ≅ 𝒪 は A ≅ 𝒪 を含意しない）。局所自明性から p を含む W ≤ V で両方が自明になるものを取り、そこで h_A · h_B と置いて遷移単元で V の自明化へ運ぶ。★★値がチャートに依らないことは chartH_indep（共通の細分へ降りて transUnit_tensorTriv と compat）。★★★構造の恒等式は 4 つとも rfl であった。"
-     },
-     {
-      "stage": "5",
-      "where": "Found/Arakelov/AMetricMonoid.lean / AMetricIso.lean / AMetricGroup.lean",
-      "claim": "★原文の L̄ = (L, |−|_L) の型と、同型類の群 APicM X",
-      "why": "★`AMetric X`（可逆層＋局所自明性＋計量）と `1 = Ō_X`・`L * M`（本物のテンソル積）。★★等長同型は**基準ノルム `h` の等式**として書いた——切断のノルムで書くと「純テンソルでしか確かめられないがノルムは加法的でない」という穴が開くからである。★★★積が同値類に降りること（`isIsometry_mul`）・結合律（`isIsometry_mul_assoc`）・単位律（`isIsometry_mul_one`）まで入った。★★★★自明化の側の恒等式 `pullTriv (α_ …) (tensorTriv eA (tensorTriv eB eC)) = tensorTriv (tensorTriv eA eB) eC` は `rfl` ではなく、`oplax_associativity` ＋ `associator_naturality` ＋ `triangle` ＋ `unitors_equal` の 4 段である。"
-     },
-     {
-      "stage": "6",
-      "where": "Found/Arakelov/AMetricPic.lean",
-      "claim": "★★★★★**APic(X) は可換群である**",
-      "why": "★逆元は双対 `F^∨` を構成する代わりに**データとして担いだ**（本プロジェクトの `InvSheaf` と同じ形）。★★`mul` の逆は並べ替え `(A⊗B)⊗(A'⊗B') ≅ (A⊗A')⊗(B⊗B')` で作り、その並べ替えは結合律・交換律の等長版を繋いだものである。★★★商で `⁻¹` を定義するには「逆元は等長同型を除いて一意」（`AInv.inv_isometric`）が要った。★★★★交換律の自明化版 `pullTriv (β_ A B) V (tensorTriv eB eA) = tensorTriv eA eB` は `restrict_map_braiding`（`rfl`）＋ `braiding_naturality` ＋ `braiding_leftUnitor` ＋ `unitors_equal`。"
-     }
-    ],
-    "remaining": "★**(i) の側は閉じた**。★★残るのは `Definition 1.1` (ii) の `deg_F`（別 gap: `arakelov-degF-finite-places`）と、`APicM` と既存の `APicOf`（捻れ集合表示の商）を繋ぐ段である。",
-    "deviation": "★★★★★★**逸脱の明示（2026-08-28）**: 本構成は**前層の水準**であり、原文の `APic(X)`（可逆**層**の同型類）とは違う。★局所自明でも層とは限らない（`𝟙_` と proper open で一致し `⊤` で `0` の前層が反例）。★★前層のテンソルは層でない（だから本プロジェクトの `tensorModules` は層化を挟む）。★★★したがって「テンソル積が**厳密**である」と「対象が層である」は**同時には取れず**、本ファイル群は前者を取った——それが `trivValue_tensor` が `rfl` になり、`normOf_mul` が構成つきで出た理由である。★★★★層の水準への橋（`A ⊗ B → (A ⊗ B)^sh` は局所同型なので自明化も計量も移る）は**別の段**であり、`deg_F` の段 A がまさにそれである。"
-   }
-  },
-  "arakelov-pullback-monoidal": {
-   "what": "前層加群の**引き戻し関手のモノイダル性**（`f^* : Y.PresheafOfModules ⥤ X.PresheafOfModules`）。★本 gap は 2026-08-28 に**訂正した**——下の `correction` を見よ。",
-   "whereUsed": [
-    "[GenEll] Definition 1.1, (ii)（算術直線束の**引き戻し** `φ^*L̄`）",
-    "★その下流: `ht_M̄(x) ≝ deg_F(x_F^* M̄)`（ただし本プロジェクトは因子表示で別に持っている）"
-   ],
-   "mathlibStatus": {
-    "verdict": "absent-in-mathlib-but-built-in-project",
-    "searched": "2026-08-28 実測（REPL）。`PresheafOfModules.pullback` は**ある**。スキームの射に対しては `Functor.whiskerRight f.c (forget₂ CommRingCat RingCat)` を渡せばよく、必要な `(PresheafOfModules.pushforward φ).IsRightAdjoint` も **instance で解決する**。",
-    "absentPart": "★mathlib には `(PresheafOfModules.pullback φ).Monoidal` の instance が無い（`infer_instance` が失敗、2026-08-28 実測）。★★**しかし本プロジェクトはそれを既に建てている**——`pullbackPreOplax`（`Found/Arakelov/PicSchemeDelta.lean`）が `(pullbackPre f).OplaxMonoidal` を与える。"
-   },
-   "minimalForm": "★計量を運ぶのに要るのは (1) `f^*(𝟙_) ≅ 𝟙_` と (2) `f^*` が自明化を自明化へ送ること、の 2 つだけである。★★完全なモノイダル性（結合子・単位子の整合）までは要らない。",
-   "impact": "★**訂正後**: `Definition 1.1, (ii)` の引き戻しは、台の側は**すべて在庫**であり、残るのは**計量を運ぶ段だけ**である（1〜2 ブロック）。★★高さの理論はこれを待たない——因子表示で `pullbackAPic` / `htArith` は在庫である。",
-   "measuredAt": "2026-08-28",
-   "correction": {
-    "measuredAt": "2026-08-28",
-    "note": "★★★★★★**本 gap を立てたのは在庫確認の怠りであった**。「mathlib に無い」は正しいが、「本プロジェクトに無い」は**誤り**である。★以下はすべて `Found/Arakelov/` に **`sorry` 無しで在庫**（2026-08-28 実測）:",
-    "inStock": [
-     "`pullbackPre f`（`PicSchemeDelta.lean`）—— スキームの射に沿った**前層**加群の引き戻し",
-     "★`pullbackPreOplax` —— **`(pullbackPre f).OplaxMonoidal`**",
-     "`pullbackDelta` / `pullbackEta` —— 比較射 `f^*(P⊗Q) ⟶ f^*P ⊗ f^*Q` と `f^*𝒪 ⟶ 𝒪`",
-     "★★`isLocallyTrivial_pullbackPre`（`PicLTPull.lean`）—— **局所自明性は引き戻しで保たれる**。証明の中に自明化の輸送が**明示的に**書かれている（`bcIso`＝Beck–Chevalley、`pullbackOnUnitIso`、`restrictOnFunctor`）",
-     "`pullbackFreeYonedaIso`（`PicPullFree.lean`）/ `pullbackTensorFreeIso`（`PicPullTensorFree.lean`）",
-     "★★★層の段: `pullbackUnitIso`（`f^*𝒪_Y ≅ 𝒪_X`）・`pullbackSheafTensorIso'`（`f^*(L⊗M) ≅ f^*L ⊗ f^*M`、局所自明性だけを仮定）・`picPullback`＋`picPullback_mul`・`InvSheaf.pullback`"
-    ],
-    "remaining": "★したがって `Definition 1.1, (ii)` の引き戻しに残るのは**計量を運ぶ段だけ**である——`bcIso` と `pullbackOnUnitIso` が自明化を運ぶので、`LocalMetric.tensor` と同じチャートの型で `h` を運べばよい。★★見積もり: 1〜2 ブロック。"
-   }
-  }
- },
- "summary": {
-  "measuredAt": "2026-08-27",
-  "note": "★★★★★**2026-08-27 に全面的に測り直した。** この日 2 つの塡がりを absent から**全段閉じた**。",
-  "closedToday": [
-   "vertical-divisors-generate-pic-kernel (5/5)——交点数も Weil 因子類群も要らなかった。有限生成性・準コンパクト性・absNorm の単調性・Spec ℤ が終対象であること の 4 つだけ。",
-   "galois-equivariant-tate-uniformization (10/10)——ABC3 の Tate 構成は .choose だらけだが、どれにも一意性補題が付いていた（eq_normRep・tateAOf_spec・evalAdic_unique・adicSum_unique）。**一意 ⇒ 自然** で 8 段が機械的に閉じた。"
-  ],
-  "funnel": {
-   "note": "★★**残り 13 項目がどの塡がりで止まっているか**（2026-08-27 実測）。",
-   "sec1": "§1 の 5 項目（Definition 1.1 / Definition 1.2 / Proposition 1.4 / Remark 1.4.1 / Proposition 1.7） → **ample-and-projective-embedding (1/7)**。 ★土台（SheafOfModules・IsLocallyFree・Module.Invertible・Proj・PresheafOfModules.monoidalCategory）は mathlib にある。 ★★最初の葉は段 A（層のテンソル積）である。",
-   "sec2": "§2 の 1 項目（Theorem 2.1） → **belyi-noncritical**。 ★未分割ではなく、5 節点中 3、残る Lemma 2.4 も 9 節点中 8 が閉じている。",
-   "sec3": "§3 の 5 項目（Lemma 3.2 / Proposition 3.4 / Lemma 3.5 / Lemma 3.7 / Theorem 3.8）: Lemma 3.2 → **finite-flat-group-scheme-quotient**（(ii) の E/μ_l）、残り 4 項目 → **faltings-height-vs-degree-at-infinity (2/6)**。 ★段 5・6（初等）は閉じた。残る 1〜4 は複素解析であり、並行セッションが Lattice*.lean / Covolume.lean / JFunction.lean で構築中。",
-   "sec4": "§4 の 2 項目（Corollary 4.3 / 4.4） → Theorem 3.8 の下流、すなわち §3 と同じ塡がり。",
-   "conclusion": "★★★**実質的な塡がりは 4 つ**である: ample-and-projective-embedding・faltings-height-vs-degree-at-infinity・belyi-noncritical・finite-flat-group-scheme-quotient。 ★うち 2 つ（faltings の段 1〜4、belyi の Lemma 2.4）は**並行セッションが現在進めている**。"
-  },
-  "nextActions": [
-   "1. ample の段 A1（層のテンソル積の対象と L^{⊗n}）は 2026-08-27 に閉じた（InvertibleSheaf.lean）。★次の葉は段 C（ℙ^n_S と O(1)）または段 D（ample の定義——X_s が要る）。★★mathlib に twisting sheaf も Serre の定理も無い（2026-08-27 実測）。",
-   "2. Lemma 3.2, (i) は 2026-08-27 に posit を全部消した（Lemma32Tate.lean）。残るのは (ii) の**商をスキームとして作る段**だけである。",
-   "3. faltings の段 1〜4 と belyi の Lemma 2.4 は並行セッションの領分——**重複を避けること**。★belyi は Lemma 2.4 が 9 節点中 8、残るのは「ℙ¹ 上の有理関数としての組み立て」1 つである。"
-  ],
-  "definition11": "★★★★★★**2026-08-28——[GenEll] Definition 1.1 が閉じた**（Found/Arakelov/Definition11.lean の definition_1_1.src）。GenEll の必要分は **11/24 → 12/24**、§1 は **4/9 → 5/9**。\n★最後の 1 本は「正規化した自明な算術直線束 Ō_X（|1| = 1）」で、TorsorMetric の base が Classical.choice なので**GreenMetric（base をフィールドに持つ）で基準計量そのものを作った**。\n★★さらに APicQuot.lean で **APic(X) を同型類の群**にした（単元の作用で商を取る）。鍵は evalGlobal の共役両立で、Scheme.ΓSpecIso_naturality を starRingEnd ℂ に当てるだけで出た。",
-  "correction20260828": "★★★★★★**2026-08-28 の訂正**: Definition 1.1 の項目全体の .src を下げた（12/24 → 11/24）。TorsorMetric.base が Classical.choice なので群法則が計量のテンソル積を表さない。 ★新しい塡がり **arakelov-coherent-base-metric** を登録した——これが §1 の 2 項目（Definition 1.1 と Definition 1.2）の**共通の根**である。 ★★失われていないもの: 対の群・同型類への商・引き戻し・射と Γ(L̄)・Ō_X・Pic ≃ Cl・分数イデアル ≃ 因子。"
- },
- "sourceNodesFound": {
-  "measuredAt": "2026-08-27",
-  "question": "★「mathlib に無い標準数学」に節点が作れないのは、スケルトンを作るための原典が無いからか。落とせば節点を作れるのか。",
-  "answer": "★★原典はすでに `0_Source` にあり `papers.json` に登記済みだった——**The Stacks Project(7654 ページ)**である。新しく落とす必要は無い。実測で 4 つのギャップすべてに対応する章が見つかった(2026-08-27)。",
-  "sections": {
-   "spreading-out-over-base": {
-    "stacks": [
-     "32.6 Limits and morphisms of finite presentation",
-     "32.8 Descending properties of morphisms",
-     "32.10 Descending relative objects",
-     "32.22 Descending finite type schemes(tag 0CNL/0CNM/0CNN)"
-    ],
-    "note": "★これが EGA IV §8 にあたる。Situation 32.22.1 が『Noetherian スキームの有向系の極限』で、Lemma 32.22.2 が『有限型のものは有限段で降りる』。原文 Remark 1.5.1 の『ℤ[Σ^{-1}] へ延びる』はこの形である。"
-   },
-   "riemann-roch-curves": {
-    "stacks": [
-     "53.4 Duality(曲線の双対性)",
-     "53.5 Riemann-Roch(tag 0BRX/0BRY)",
-     "53.12 Riemann-Hurwitz",
-     "48.27 Duality for proper schemes over fields(Serre 双対性の一般形)"
-    ],
-    "note": "★★[NCBelyi] Theorem 2.5 が要求する deg(ω_X ⊗ L^{-1}(x)) の計算と Serre 双対性は 53.4/53.5 にある。★★★おまけに 53.12 Riemann-Hurwitz は [GenEll] Proposition 1.7, (ii) が要求するものである——『HeightTheoryData の語彙の外』として範囲外にしていたが、原典側の節点は取れる。"
-   },
-   "etale-fundamental-group": {
-    "stacks": [
-     "58.6 Fundamental groups"
-    ],
-    "note": "★[GenEll] Theorem 2.1 の folklore『well-known structure of étale fundamental groups of hyperbolic curves』の原典側。★★ただし『標数 0 の代数閉体上の双曲曲線の位相的生成』の部分が Stacks にあるかは未確認。"
-   },
-   "p1-ramification": {
-    "stacks": [
-     "53.12 Riemann-Hurwitz",
-     "Morphisms: 不分岐・エタール"
-    ],
-    "note": "★[NCBelyi] Lemma 2.4 の (b) が要求する ℙ¹ 上の有理関数の分岐。多項式の段(第 417-418)は臨界値の条件として自前で書けたので、残るのは正規化(Möbius)を通した形だけである。"
-   }
-  },
-  "whatThisChanges": [
-   "★節点が作れる: papers.json に [Stacks] が登記済みなので `.otherPaper \"[Stacks]\"` の辺が引ける(check.mjs の G6 を通る)。",
-   "★★逐語照合も効く: 0_Source に PDF と txt があるので check.mjs の引用検査が使える。ただし notationRisk は unmeasured——目視していない。",
-   "★★★依存グラフを広げられる: 1_Structured に該当節を起こせば intra-graph で節点数と深さが機械的に出る。「未測定」が消える。"
-  ],
-  "whatThisDoesNotChange": [
-   "★★★★工数は減らない。節点が作れる = 測れる、であって実装の person-years は変わらない。",
-   "★★★★★在庫確認が先。lean-ecosystem.json に作業中の公開プロジェクトが 1 件ある。曲線の Riemann-Roch や scheme cohomology は他所で進行中の可能性があり、重複投資を避けるべきである。"
-  ],
-  "notInSource": [
-   "EGA III / EGA IV は 0_Source に無い(EGA I と II はある)。★ただし EGA IV 8.8.2 に相当するものは Stacks 32.22 にあるので、必須ではない。",
-   "★Numdam(numdam.org)で EGA は全巻無料公開されている——必要になれば正規に入手できる。"
-  ]
- },
- "_methodologyNote": "★★★★★2026-08-27 の重要な訂正。「person-years 規模の既知数学」を壁と呼んでいたが、**4 本の塞がりのうち 3 本は原典が 0_Source にあり、papers.json に登記済みである**。★したがって CLAUDE.md の進め方（スケルトンで依存グラフを作成後、葉から Lean 形式化）が**そのまま適用できる**。★★「壁」ではなく「まだグラフに載せていない道」である。★★★例外は arc-metric-not-attached-to-bundle だけで、これは原典の問題ではなく**我々の設計**である。"
+  "_methodologyNote": "★★★★★2026-08-27 の重要な訂正。「person-years 規模の既知数学」を壁と呼んでいたが、**4 本の塞がりのうち 3 本は原典が 0_Source にあり、papers.json に登記済みである**。★したがって CLAUDE.md の進め方（スケルトンで依存グラフを作成後、葉から Lean 形式化）が**そのまま適用できる**。★★「壁」ではなく「まだグラフに載せていない道」である。★★★例外は arc-metric-not-attached-to-bundle だけで、これは原典の問題ではなく**我々の設計**である。"
 }
