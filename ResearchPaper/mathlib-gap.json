@@ -269,8 +269,8 @@
             "stage": "C2c",
             "claim": "O(1)（twisting sheaf）——★因子表示では**超平面因子**",
             "status": "partial",
-            "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28：因子表示なら O(1) の層は要らない**。本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★★★★★**超平面は本日入った**——hyperplaneι : Proj 𝒜(Fin N) ⟶ Proj 𝒜(Fin (N+1))（x₀ ↦ 0、x_{j+1} ↦ y_j の次数付き環準同型を mathlib の Proj.map に渡す）と、そのイデアル層 hyperplaneIdeal ≝ (hyperplaneι).ker。 ★埋めた隙間は 2 つだけであった——（1）aeval が斉次性を保つこと（mathlib に IsHomogeneous.bind₁ は無いので単項式に分けた）、（2）無関係イデアルの条件（rename Fin.succ が aeval の**切断**であることから出る）。 ★★**残るのは「超平面因子の高さが素朴高さ log max|x_i| であること」と、very ample（n·D が閉埋め込みによる超平面の引き戻し）の定義である。",
-            "where": "Found/GenEll/Hyperplane.lean の hyperplaneHom / **hyperplaneι** / **hyperplaneIdeal**",
+            "why": "★mathlib には次数 0 の斉次局所化（HomogeneousLocalization）しか無く、**次数 n の分数**の層は無い（2026-08-28 実測）。 ★★★**これが要るのは very ample を述べるためだけ**であり、座標自体には要らない——段 C2a で確認した。 ★★★★**2026-08-28：因子表示なら O(1) の層は要らない**。本プロジェクトは §1 を通して**因子表示**（ArithCartier）で作業しており、そこでは **O(1) = 超平面因子の類**である。 ★★★★★**超平面は本日入った**——hyperplaneι : Proj 𝒜(Fin N) ⟶ Proj 𝒜(Fin (N+1))（x₀ ↦ 0、x_{j+1} ↦ y_j の次数付き環準同型を mathlib の Proj.map に渡す）と、そのイデアル層 hyperplaneIdeal ≝ (hyperplaneι).ker。 ★埋めた隙間は 2 つだけであった——（1）aeval が斉次性を保つこと（mathlib に IsHomogeneous.bind₁ は無いので単項式に分けた）、（2）無関係イデアルの条件（rename Fin.succ が aeval の**切断**であることから出る）。 ★★**残るのは「超平面因子の高さが素朴高さ log max|x_i| であること」と、very ample（n·D が閉埋め込みによる超平面の引き戻し）の定義である。 ★★★★★★**2026-08-28 夕: very ample の定義が入った**——`Found/GenEll/VeryAmpleDef.lean` の `IsVeryAmpleDiv`。因子表示なので `O(1)` の層を作らずに済み、`D = i^*(超平面因子)`（`Scheme.IdealSheafData.comap`）で書けた。★空虚封じ（超平面因子そのものは very ample）と、immersion による引き戻しで閉じることも入れた。★★**残るのは C2c 前半（超平面因子の高さ = 素朴高さ `log max|x_i|`）だけ**である。",
+            "where": "Found/GenEll/Hyperplane.lean の hyperplaneHom / **hyperplaneι** / **hyperplaneIdeal** ／ Found/GenEll/VeryAmpleDef.lean の **IsVeryAmpleDiv** / isVeryAmpleDiv_hyperplaneIdeal / IsVeryAmpleDiv.comap",
             "sources": [
               "[Stacks] 01MX Proj and graded ring maps",
               "[EGA2] §4.4"
@@ -340,7 +340,7 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "12.5/15",
+        "done": "13/15",
         "remaining": "★★**残るのは C2c（半分）・E・F2c** である。★★★2026-08-28 夕の再測定で**優先順位が確定した**——消費側（`northcott_of_projModel`）が要求するのは (a) 同次座標 `crd`、(b) 正規化座標の**単射性**、(c) 高さの比較 `ht_L = ht_{O(1)}∘φ + const` の 3 つである。★(a) は段 C2a/C2b で揃った。★★(b) は**閉埋め込み**からしか来ないので段 E が要る。★★★(c) は C2c の残り「超平面因子の高さ = 素朴高さ `log max|x_i|`」である。★★★★したがって **(iv) を段 E 抜きで取ることはできない**——単射性がそこからしか出ない。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。"
       },

@@ -460,6 +460,7 @@ import ABC3.Found.GenEll.ProjectiveSpace
 import ABC3.Found.GenEll.ProjectiveModel
 import ABC3.Found.GenEll.ProjSpaceCover
 import ABC3.Found.GenEll.Hyperplane
+import ABC3.Found.GenEll.VeryAmpleDef
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
