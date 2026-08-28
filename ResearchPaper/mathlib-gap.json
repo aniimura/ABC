@@ -337,6 +337,12 @@
             "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/GreenFubiniStudy.lean`）: `greenChartOf`（チャートを固定した Fubini–Study の Green 関数）と `greenChartOf_archRingHom`——`§9-867` の仮定 `hgreen` の**中身**。★素点と複素点の対応は 2 行であった: `archPoint xF v = archSpecMap v ≫ xF` で、`xF = Spec ψ ≫ chartA i₀` なら `Spec` の反変性で `archPoint xF v = Spec (ψ ≫ archRingHom v) ≫ chartA i₀`——**同じチャートを通り、環の射が `archRingHom v ∘ ψ` になるだけ**である。★★あとは `‖archRingHom F v a‖ = v(a)`（`InfinitePlace.norm_embedding_eq`）と `v(w_k) = v(x_k)/v(x_{i₀})` で `v(x_{i₀})` が**約分される**——これが「Fubini–Study は射影的に不変」ということである。★★★結果として `htArith_hyperplane_eq_log_mulHeight` の仮定は `hdiv`（因子は超平面）と `hgreenChart`（`D.green` はチャートの上で Fubini–Study）の 2 本だけになった。"
           },
           {
+            "stage": "C2c-7",
+            "status": "closed",
+            "title": "Fubini–Study はチャートに依らない(代数の側)",
+            "why": "★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/GreenChartIndep.lean`）: `toOverlap_eq_mul`（重なり `A⁰_{x_i x_{i^prime}}` の上で `x_k/x_i = (x_k/x_{i^prime})·(x_{i^prime}/x_i)`）と `greenChartOf_overlap`（**Fubini–Study はチャートに依らない**）。★機構は「遷移単元 `t = x_{i^prime}/x_i` が **k に依らない**」ことだけである——`sup_k` からも比の分母からも同じだけ出て**約分される**。★★これは `§9-868` の `log_iSup_norm_eq`（`v(x_{i_0})` が約分される）と**同じ形**であり、射影空間の高さの話が一貫して「共通因子の約分」で動いていることの現れである。★★★残るのは (1)「同じ複素点が 2 つのチャートに入るなら**重なりのチャートを通る**」というスキームの側の段（`Proj.SpecMap_awayMap_awayι` と開埋め込みの持ち上げ）と、(2) 得られた `green` の**連続性**である。"
+          },
+          {
             "stage": "C2a-2",
             "status": "closed",
             "claim": "★★`A⁰_{x_i}` は `R` 上 `x_j/x_i` を変数とする**多項式環である**（自由性の側）",
