@@ -356,15 +356,27 @@
             "where": "Found/GenEll/AmpleCover.lean の AmpleChart / exists_finite_cover_of_isAmple ／ Found/GenEll/SecPow.lean の exists_common_triv / nonVanishing_tensor / secPow / nonVanishing_secPow ／ Found/GenEll/TensorPowCoherence.lean の presheafTensorPowAdd / presheafTensorPowMul ／ Found/GenEll/CommonDegree.lean の secPowAligned / exists_section_of_degree / **exists_common_degree_cover**"
           },
           {
-            "stage": "E3a",
-            "claim": "★**ample の核** —— `g ∈ Γ(X, X_s)` なら、ある `n` で `g·s^n` が `Γ(X, L^{⊗(d(n+1))})` の切断の制限になる",
-            "status": "partial",
-            "why": "★★★★**これが段 E3 の葉であり、[Stacks] Lemma 01PW（tag 01PW / 01Q3）そのもの**である（2026-08-28 の測定）。★`X_s` がアフィンで `X` が準コンパクトなことから、`X` を有限個の `X_{s_i}` で覆い、各々で `g` の分母を `s` の冪で払う。★★`M` が可逆であることと `X_s ⊓ X_{s_i}` の上で `s` が単元であることが効く。★★★プロジェクトには材料がある——`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2、`§9-820`）。 ★★★★★**2026-08-28 夜: 局所版が入った**（`§9-822`）——アフィン開 `U` の上では `g ∈ Γ(X, X_s ⊓ U)` の分母を `trivValue s` の冪で払える。★機構は mathlib の `IsAffineOpen.isLocalization_basicOpen`（`Γ(X, D(f))` は `Γ(X,U)` の `f` による局所化）＋ `IsLocalization.Away.surj` そのものであった。★★**残るのは大域化**——(1) 自明化するアフィン開で有限被覆、(2) 指数を最大値で揃える、(3) 貼り合わせ。★★★(3) が本体で、重なりでの一致に `trivValue` の遷移単元（段 D1）が効く。",
+            "stage": "E3a-1",
+            "claim": "局所版 —— アフィン開 `U` の上で `g ∈ Γ(X, X_s ⊓ U)` の分母を `trivValue s` の冪で払える",
+            "status": "closed",
+            "where": "Found/GenEll/ClearDenominator.lean の exists_pow_mul_eq_res / exists_pow_mul_eq_res_nonVanishing",
+            "why": "★mathlib の `IsAffineOpen.isLocalization_basicOpen` ＋ `IsLocalization.Away.surj` そのものであった（`§9-822`）。"
+          },
+          {
+            "stage": "E3a-2",
+            "claim": "★**局所自明な前層加群は層である**（層化の単位 `P → sheafify P` が同型）",
+            "status": "open",
+            "why": "★★★★**2026-08-28 夜の測定——これが E3a の大域化の門である**。プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるには `M^{⊗n}` が層であることが要る。★**材料は在庫にある**: `isSheaf_restrict_of_triv`（自明化があれば制限は層、`SheafifyTriv.lean`）と `isIso_restrict_sheafifyUnit`（層化の単位は局所自明な開の上で同型、`PicSheafifyTrivial.lean`）。★★残るのは「同型性は局所的」で大域へ上げる段だけである。",
             "sources": [
-              "[Stacks] Lemma 01PW（ample な可逆層の切断の延長）",
-              "[Stacks] 28.27 Ample invertible sheaves"
-            ],
-            "where": "Found/GenEll/ClearDenominator.lean の exists_pow_mul_eq_res / exists_pow_mul_eq_res_nonVanishing"
+              "ABC3: Found/Arakelov/PicSheafifyTrivial.lean",
+              "ABC3: Found/Arakelov/SheafifyTriv.lean"
+            ]
+          },
+          {
+            "stage": "E3a-3",
+            "claim": "大域化 —— 有限被覆で指数を最大値に揃え、`a_j` を貼り合わせて `Γ(X, M^{⊗n})` の大域切断にする",
+            "status": "open",
+            "why": "★E3a-1（各チャートで分母が払える）＋ E3a-2（貼り合わせが使える）＋ 段 E2（有限被覆）から組み立てる。★★重なりでの一致には `trivValue` の遷移単元（段 D1）が効く——`g·s^n` は自明化に依らないからである。"
           },
           {
             "stage": "E3b",
@@ -409,13 +421,14 @@
             "why": "★Y ⟶ image の ℚ への底変換が同型であることに帰着する。 ★★段 F の残りはこれだけである。"
           }
         ],
-        "done": "20.5/24",
-        "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせの重なり一致）・E3a〜E3d・C2c 前半・F2c** である。★★★**葉は E3a**（[Stacks] Lemma 01PW）——ample な可逆層の切断が `s` の冪を掛ければ延びること。ここが `Proposition 1.4, (iv)` の、ひいては §1 の残り 3 項目と §3 の 2 項目の門である。",
+        "done": "21/26",
+        "remaining": "★★**残るのは E0（等号 1 本）・E1d（貼り合わせの重なり一致）・E3a-2・E3a-3・E3b・E3c・E3d・C2c 前半・F2c** である。★★★**次の葉は E3a-2**（局所自明な前層加群は層である）——材料は在庫にあり、「同型性は局所的」で大域へ上げるだけである。",
         "measured20260828b": "★★★★★★★★★★**2026-08-28 夕の測定——`Proposition 1.4` の (i)(ii)(iii) は本塡がりを要らなかった**。★(i) は `htMetricAlg_mul`（`§9-803`、**等号**）。★★(ii) は `exists_htMetricU_ge`（`§9-805`）——`X^arc` のコンパクト性と**計量の連続性**（`§9-802`）で下界が出る。捻りの段も `htMetricU_pullback_const`（`§9-807`）で閉じた。★★★(iii) は `heightBDClass_ofMetric_eq`（`§9-806`）——**計量の側**は比 `h′/h` がチャートに依らないことから出る。★★★★**残るのは (iv)（Northcott）と (iii) の「`L_ℚ ≅ M_ℚ`」の側だけ**であり、前者が段 E（Serre）を要求する。",
         "measured20260828c": "★★★★★★★★★★**2026-08-28 夜: 段 E を 4 つに割った**（E0 加群層⟷因子の橋・E1 切断が定める射・E2 有限化と次数揃え・E3 immersion 性）。★測定の要点は 2 つ——(1) mathlib に **`Proj` の普遍性（`X ⟶ Proj 𝒜` を作る側）は無い**（`Proj.map` と `Proj.awayι` はあるが逆向き）、(2) しかし**貼り合わせの材料は段 D3・D4 で揃っている**（`sectionRatio` と `exists_glued_ratio`）。★★したがって **E1 が次の葉**である。",
         "measured20260828d": "★★★★★**E0 の入口を実測した（2026-08-28 夜）**——`IdealSheafData.ofIdeals` ＋ `IdealSheafData.gci.choice_eq`。要るのは `map_ideal_basicOpen` の 1 本だけで、材料（`trivValue_restrict`、段 D2）は揃っている。★E1 と E0 のどちらからでも入れるが、**E0 の方が小さい**。",
         "measured20260828e": "★★★★★★**2026-08-28 夜: 段 E1 を 4 つに割った**（E1a 斉次多項式を切断で評価・E1b 次数 n の比・E1c 環準同型の well-defined 性・E1d 貼り合わせ）。★測定の要点——mathlib の `HomogeneousLocalization.Away.mk_surjective` が `A⁰_{x_i}` の元を `a / x_i^n`（`a` は `n` 次斉次）に落とすので、**要るのは「`a` を切断 `s` で評価して `Γ(X, M^{⊗n})` に入れる」段（E1a）である**。★★段 D3・D4 の `sectionRatio` は**次数 1** の比しか扱えないので、E1b でそれを広げる必要がある——「材料は揃っている」という 8/28 夜の早い時点の判定は**やや楽観であった**。",
-        "measured20260828f": "★★★★★★★★**2026-08-28 夜: 段 E3 を 4 つに割った**（E3a ample の核・E3b 有限生成・E3c 全射性・E3d immersion）。★測定の要点——**葉は E3a**（[Stacks] Lemma 01PW「`g ∈ Γ(X_s)` なら `g·s^n` が大域切断の制限になる」）である。★★プロジェクトにはその材料がある（`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2））。★★★E3c・E3d は E3a・E3b からの組み立てであって、新しい数学は入らない。"
+        "measured20260828f": "★★★★★★★★**2026-08-28 夜: 段 E3 を 4 つに割った**（E3a ample の核・E3b 有限生成・E3c 全射性・E3d immersion）。★測定の要点——**葉は E3a**（[Stacks] Lemma 01PW「`g ∈ Γ(X_s)` なら `g·s^n` が大域切断の制限になる」）である。★★プロジェクトにはその材料がある（`isUnit_res_of_le_basicOpen`（段 D3）・`nonVanishing_inf`（段 D2）・`exists_common_degree_cover`（段 E2））。★★★E3c・E3d は E3a・E3b からの組み立てであって、新しい数学は入らない。",
+        "measured20260828g": "★★★★★★★★**2026-08-28 夜: E3a の大域化の門を特定した**——**「局所自明な前層加群は層である」**（段 E3a-2）。★プロジェクトは**前層**の水準で作業しているので、`M^{⊗n}` の切断を貼り合わせるにはこれが要る。★★**材料は在庫にある**: `isSheaf_restrict_of_triv` と `isIso_restrict_sheafifyUnit`（どちらも `Found/Arakelov/` に既にある）。残るのは「同型性は局所的」で大域へ上げる段だけである。★★★これが分かったのは `§9-822`（E3a の局所版）を書いて、次に何が要るかを追ったからである。"
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
       "measured20260828": "★★★★★**mathlib に VeryAmple / globally generated は 1 件も無い**（2026-08-28 実測）。 ★Scheme.Hom.ker には**因数分解（Y ⟶ 像）の API も無い**ので、段 F2c（生成ファイバー）も一からである。 ★★したがって残る 3 段（C2c・E・F2c）はいずれも**mathlib への PR 規模**である。 ★★★一方で**座標の側は完全に揃った**（ℙⁿの固有性・被覆・チャート・点の正規化座標）。"
