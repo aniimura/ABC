@@ -3,6 +3,8 @@ import ABC3.Interface.NCBelyi.BelyiSetup
 import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.BelyiPoly
+import ABC3.Found.NCBelyi.Lemma24Chain
+import ABC3.Found.NCBelyi.Thm25Step3
 
 /-!
 # [NCBelyi] Theorem 2.5 —— Belyi Maps Noncritical at Prescribed Points(`Skeleton`)
@@ -123,11 +125,13 @@ def theorem_2_5.src : Source :=
 def theorem_2_5.needs : List ProofObligation :=
   [ .implicitStep
       "★★★本 statement は原文の証明の 4 段のうち**段 4(Lemma 2.2)と ℙ¹ の場合の (a)(b)** を取っている。段 1(Riemann–Roch で T = {β} へ帰着)と段 3(Lemma 2.3 + アフィンで正規化)は未了である。★空虚でないことは Check/NCBelyi/Thm25Witness.lean で確かめてある" 6,
+    .implicitStep
+      "★★★★★★★★★★2026-08-29 の到達点(第 519-526、§9-981〜988): 原文の証明 4 段のうち**3 段が閉じた**。段 2(Lemma 2.4)は Found/NCBelyi/Lemma24Chain.lean の lemma_2_4_chain、段 3(Lemma 2.3(C=4) ＋ x ↦ νx+μ)は Found/NCBelyi/Thm25Step3.lean の exists_lemma22_setup / theorem_2_5_p1_rat、段 4(Lemma 2.2)は第 398-404。★★★**残るのは段 1(Riemann–Roch / Serre 双対性で ψ : X → ℙ¹ を作り T = {β} に帰着させる段)だけ**である——[Stacks] 53.4 / 53.5 / 48.27 に原典があるが、mathlib には曲線の直線束・Serre 双対性・基点自由な線型系がほぼ無い(LineBundle 0 件、2026-08-16 実測)" 9,
     .otherPaper "[Stacks]" "53.5 Riemann-Roch / 53.4 Duality / 48.27 Duality for proper schemes over fields(段 1 の原典側——第 419 で手元にあることを実測した)" 4441,
     .folklore
       "曲線上の直線束の次数と Riemann–Roch(deg(ω_X ⊗ L^{-1}(x)) ≤ (2g_X−2)−(2g_X+1)+1 = −2 の計算)。★これが段 1 であり、ℙ¹ への帰着を与える" 6,
-    .otherPaper "[NCBelyi]" "Lemma 2.4(S ⊆ ℙ¹(ℚ) の場合への帰着)——★多項式の段は第 417-418 で閉じた(exists_poly_image_rat_crit)。残るのは (b) の有理関数の段" 5,
-    .otherPaper "[NCBelyi]" "Lemma 2.3(有理係数の自己同型による正規化)——★有理版は第 409 で取った(lemma_2_3_rat)。残るのは x ↦ ν·x + μ との組み合わせ" 4,
+    .otherPaper "[NCBelyi]" "Lemma 2.4(S ⊆ ℙ¹(ℚ) の場合への帰着)——★★★★★2026-08-29 に**閉じた**(Found/NCBelyi/Lemma24Chain.lean の lemma_2_4_chain、第 526)。有理関数は Chain(Möbius と多項式の交互合成)として表し、極は ∞ へ写るので臨界点から除いてある" 5,
+    .otherPaper "[NCBelyi]" "Lemma 2.3(有理係数の自己同型による正規化)——★有理版は第 409 で取った(lemma_2_3_rat)。★★x ↦ ν·x + μ との組み合わせ(段 3)も 2026-08-29 に**閉じた**(Found/NCBelyi/Thm25Step3.lean、第 519)" 4,
     .otherPaper "[NCBelyi]" "Lemma 2.2(入れ子帰納法の受け皿)——★第 398-404 で完成し、sorry 無しで本ファイルにある" 3,
     .implicitStep
       "★★旧 statement(∀ B : BelyiSetup, …)は**偽**であった——Check/NCBelyi/Thm25AxiomGap.lean の theorem_2_5_false で機械検証済み。Mor : Curve → Type を Empty に取れば存在主張は必ず偽になる。2026-08-27 に構成へ載せ替えた(第 425 ブロック)" 5,
