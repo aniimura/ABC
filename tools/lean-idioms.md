@@ -1912,3 +1912,27 @@ theorem foo : True := trivial
 ——パーサのエラー回復が先の 2 つを飲み込んでいる。
 ★「1 件だけ直せば通る」と思って直すと、次のビルドで次の 1 件が出る。
 **同じ形が他にもないか、その場でまとめて grep すること。**
+
+## `f ∣_ U` を含むゴールで `rw [f = g]` は motive が型付かない
+
+`morphismRestrict`（`f ∣_ U : f ⁻¹ᵁ U ⟶ U`）は**始域が `f` に依存する**ので、
+
+```lean
+have hfac : ψ' ≫ V.ι = ψ
+rw [hfac]   -- motive is not type correct
+```
+
+は通らない（`fun _a => IsImmersion (_a ∣_ U)` の型が合わない）。
+
+**直し方**: 汎化してから `rintro rfl`。
+
+```lean
+have hgen : ∀ χ, χ = ψ → IsImmersion (χ ∣_ U) := by
+  rintro χ rfl
+  …  -- ここでは χ が ψ に置き換わっている
+exact hgen _ hfac
+```
+
+同じ形は `f ⁻¹ᵁ U`・`f.app U`・`Scheme.Opens.ι` を含むゴールでも起きる
+（`§9-864` の `ker_app_congr` は同じ病に対する別の処方）。
+（2026-08-28、`§9-916` で実測）
