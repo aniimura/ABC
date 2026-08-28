@@ -1370,6 +1370,7 @@ import ABC3.Found.NCBelyi.MobiusRedDeg
 import ABC3.Found.NCBelyi.MobiusConj
 import ABC3.Found.NCBelyi.NestedInductionBeta
 import ABC3.Found.NCBelyi.DescendBeta
+import ABC3.Found.NCBelyi.Lemma24Chain
 import ABC3.Found.NCBelyi.SeparationStep
 import ABC3.Found.NCBelyi.BelyiPoly
 import ABC3.Found.NCBelyi.RatSeparation
