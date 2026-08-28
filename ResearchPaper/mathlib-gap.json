@@ -289,6 +289,12 @@
             "why": "★★★★★★★★★★★★★★★★**2026-08-28 夜——到着**（`Found/GenEll/NorthcottHyperplane.lean`）: `northcott_hyperplane` / `northcott_hyperplane` の絶対高さ版。★`§9-876`（段 C2c：`|ht_E − log H/[F:ℚ]| ≤ C`）＋ `§9-877`（段 C2d：正規化の橋）＋ `northcott_of_projModel` を繋いだもので、**`ℙᴺ_ℤ` の超平面因子については Northcott 性が（計量の連続性以外の仮定なしで）出る**。★★仮定は 4 つ: `hdiv`・`hcont`（`E` は超平面因子で計量は Fubini–Study に対して連続＝ `Definition 1.1`）、`hdeg`（次数 `d` 以下＝原文の `X(ℚ)_{≤d}`）、`hht`（各点が整な同次座標を持つ＝`§9-854` ＋ `§9-C2b`）、`hinj`（正規化座標が点を分ける＝`§9-849`・`§9-851`）。★★★これは **ℙᴺ の超平面因子**についての Northcott であり、原文の「`X` が ℤ-固有で `L_ℚ` が豊富」の場合そのものではない——一般の `X` への還元は段 E3（ample ⟹ 射影埋め込み）が担う。"
           },
           {
+            "stage": "C2f",
+            "status": "closed",
+            "title": "高さは射に沿って関手的である（一般の X へ渡る土台）",
+            "why": "★★★★★★★★★★★★**2026-08-28 夜——入った**（`Found/GenEll/ArithCartierComap.lean`）: `ArithCartier.comap`（算術因子の引き戻し）と `htArith_comap`——`ht_{ψ^*E}(x) = ht_E(ψ ∘ x)`。★`§9-878` は `ℙᴺ_ℤ` の超平面因子についての Northcott だが、一般の `X`（`L_ℚ` が豊富）へ渡すには射影埋め込み `ψ : X ⟶ ℙᴺ` に沿った関手性が要る。★★機構は 2 行であった: 有限側は `IdealSheafData.comap_comp`、アルキメデス側は `archPoint (xF ≫ ψ) v = archPoint xF v ≫ ψ`（結合則）。★★★一般の `X` への還元に残るのは (1) `L^n` が**非常に豊富**（`ψ^*O(1) ≅ L^n`）——段 E3、(2) `ht_{L^n} = n·ht_L + O(1)`——`htArith_tensor_unconditional` の反復、の 2 つである。"
+          },
+          {
             "stage": "C2c-1",
             "status": "closed",
             "claim": "★超平面因子の**引き戻しは座標の生成するイデアル**である —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_0, …, x_N)`",
