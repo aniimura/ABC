@@ -1884,3 +1884,31 @@ Ideal.absNorm_eq_one_iff                                           -- N(I) = 1 �
 **測定 (2026-08-28)**: 大域版は**条件付き定理としては通る**（仮定 `step` を持つ形）ので、
 `lake build` では何も出ない。仮定を充足しようとして初めて露見した
 ——`§9-872`（Green 関数の連続性）と**同じ形の失敗**である。
+
+## `set_option … in` は**ドキュメンテーション文字列より前**に置く
+
+```lean
+/-- doc -/
+set_option maxHeartbeats 400000 in
+theorem foo : True := trivial
+```
+
+は **パースエラー**である:
+
+```
+unexpected token 'set_option'; expected 'lemma'
+```
+
+正しい順序は逆:
+
+```lean
+set_option maxHeartbeats 400000 in
+/-- doc -/
+theorem foo : True := trivial
+```
+
+**測定 (2026-08-28)**: 同じファイルに 3 箇所同じ誤りがあったが、
+`lake build` が報告したのは **3 番目だけ**だった
+——パーサのエラー回復が先の 2 つを飲み込んでいる。
+★「1 件だけ直せば通る」と思って直すと、次のビルドで次の 1 件が出る。
+**同じ形が他にもないか、その場でまとめて grep すること。**
