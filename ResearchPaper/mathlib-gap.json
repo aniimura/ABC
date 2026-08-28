@@ -756,6 +756,38 @@
             "点の側——hinj（座標が点を分けること）。ψ が埋め込み（§9-920）であることの点版で、P := AlgPointAnyClass X（Example 1.3 で実装済み）に取れば projEmb_injective（§9-875）から出るはずである。"
           ],
           "supersedes": "measured20260828 系の『chart はイデアル類が自明でないと通らない』という測定（§9-928）——障害そのものは正しいが、素点ごとのチャートで回避できることが分かった。"
+        },
+        "measured20260829b": {
+          "date": "2026-08-29",
+          "blocks": "§9-936〜938（第 469-471 ブロック）",
+          "headline": "★★★★★★Proposition 1.4, (iv) の仮定が 5 つになった",
+          "chain": [
+            {
+              "id": "§9-936",
+              "file": "Found/GenEll/InjOfComplexPoints.lean",
+              "what": "hinj は複素点の単射性であった",
+              "measurement": "hinj（正規化座標が点を分けること）は「p ↦ 点 p の定める ℙᴺ の複素点」の単射性に翻訳できる。機構は §9-874（座標はチャートを変えると定数倍）と §9-875（座標ベクトルが定数倍なら点は等しい）。"
+            },
+            {
+              "id": "§9-937",
+              "file": "Found/GenEll/NorthcottGeom.lean",
+              "what": "点の側の仮定が全部翻訳された",
+              "measurement": "大域チャート → 素点ごとのチャート（§9-930〜935）、hinj → 複素点の単射性（§9-936）。点の側に算術的な仮定はもうない。"
+            },
+            {
+              "id": "§9-938",
+              "file": "Found/GenEll/NorthcottFinal.lean",
+              "what": "幾何の仮定も外れた",
+              "measurement": "「M を自明化するアフィン開被覆」は IsLocallyTrivial X M からそのまま出る。篩は前合成で閉じているので、被覆篩の元に含まれるアフィン開も篩の元であり、アフィン開は位相の基底（Scheme.isBasis_affineOpens）だからである。有限性は要らない——添字型に有限性の要求がない。"
+            }
+          ],
+          "reachedForm": "northcott_of_isAmple_final (M) (hM : IsLocallyTrivial X M) (hample : IsAmple M) (x₀ : X) (φ : ℤ →+* Γ(X, ⊤)) (d : ℕ) ——仮定はこれだけである。",
+          "nextStage": [
+            "結論の側にはまだ「点ごとの局所データ」（chartOf・y・hspan・hw・archChart・ρ・hfac・hcv・hiv・v₀・hemb・hpt）が ∀ … → として並んでいる。これを構成するのが次の段。",
+            "Spec (𝓞_F)_Q ⟶ X はどれかの X_{s_i} を通る（開集合は生成化で閉じているので、閉点の像を含む開集合が全体の像を含む）——IsOpenImmersion.lift で y が作れる。",
+            "★難所はチャートの選び方と座標の整合である——hspan（𝔞_Q = (x_i)）と hy（像がチャートに入る）が同じ i で成り立つこと。x_k = (s_k/s_i)(点)·x_i の関係から出るはずである。",
+            "そもそも座標 x p を点から構成する段もまだ仮定である。"
+          ]
         }
       },
       "levelCorrection": "★★★★★★**2026-08-27——段 A・B の枚数は「層」と「前層」を取り違えていた。**\n本日の在庫確認で、ABC3 はすでに **X.PresheafOfModules の上で**次を持っていると判った:\n  Found/Arakelov/PicRestrictTensor.lean——PresheafModulesOn / restrictPresheafFunctor、**制限がモノイダル関手**であること、restrictPresheafTensor。\n  Found/Arakelov/PicLocalTrivial.lean——**IsLocallyTrivial（可逆層）**と **IsLocallyTrivial.tensor（テンソル積で閉じる＝Pic の乗法）**。\n  Found/Arakelov/APicWitness.lean——aPicGroup（算術 Picard 群の目撃者）。\n★mathlib の PresheafOfModules.monoidalCategory は**結合子・単位子も含めて完成している**ので、前層の水準では**段 A2 はそもそも要らない**。\n★★★したがって「段 A は mathlib への PR 規模」という本日早い時間の判定は、**層の水準では正しいがプロジェクトの作業水準では規模の誤り**であった。\n★★★★残る実質は **X_s（切断の非消失軌跡）→ ample の定義 → Serre の定理 → ℙᴺ への閉埋め込みと座標 → 座標の高さと htArith の比較** である。",
