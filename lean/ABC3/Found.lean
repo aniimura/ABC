@@ -500,6 +500,7 @@ import ABC3.Found.Arakelov.SpanPullSec
 import ABC3.Found.Arakelov.SpanPullSecInv
 import ABC3.Found.Arakelov.BaseChangeIso
 import ABC3.Found.Arakelov.CardQuotientBC
+import ABC3.Found.Arakelov.EmbeddingCount
 import ABC3.Found.GenEll.FlatModel
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.PullbackBase
