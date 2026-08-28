@@ -38,11 +38,17 @@ import ABC3.Meta.Claim
 ★したがって「`L(ζ)/K` について claim が言えれば、`L/K` については
 **イデアルの拡大を降ろす段だけ**が残る」という形になる。
 
-## ★残っている段（明示）
+## ★★★★★★後日の追記（2026-08-28、`§9-904`）—— 後半は**要らなかった**
 
-★★★★降下（`(I·C) ∩ B = I`）は、`B → C` が忠実平坦であることから出る
-——数体の整数環の間では `Module.Flat` と `Ideal.comap_map_of_...` の組合せになる。
-★mathlib での正確な形はまだ測っていない（2026-08-28）。
+★降下（`(I·C) ∩ B = I`）を `EC8` として立て、mathlib に無いことまで測った（`§9-903`）。
+★★★★**しかし消費側は降下を要求しない**——`Proposition 1.7` が `𝔡_{K,L}` を使うのは
+`log-diff` を通してだけであり、`log-diff` は単調（`logDiffOfField_le`）なので
+
+    `log-diff(L) − log-diff(K) ≤ log-diff(M) − log-diff(K) ≤ n·log p`
+
+で `M = L(ζ)` での主張がそのまま `L` での主張を含む。
+★詳細は `Found/GenEll/LogDiffDescent.lean`。
+★★本ファイルの前半はイデアルの段としては正しく、参照として残す。
 -/
 
 namespace ABC3.Found.GenEll

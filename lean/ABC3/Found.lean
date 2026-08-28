@@ -545,6 +545,7 @@ import ABC3.Found.GenEll.CyclotomicTame
 import ABC3.Found.GenEll.LogDiffBoundEC6
 import ABC3.Found.GenEll.DifferentTowerInduction
 import ABC3.Found.GenEll.DifferentDescent
+import ABC3.Found.GenEll.LogDiffDescent
 import ABC3.Found.GenEll.AmpleDef
 import ABC3.Found.Arakelov.TrivTensor
 import ABC3.Found.Arakelov.TrivSecNorm
