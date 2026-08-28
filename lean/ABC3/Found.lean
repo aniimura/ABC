@@ -492,6 +492,7 @@ import ABC3.Found.GenEll.GluedTrivValue
 import ABC3.Found.GenEll.GlueBump
 import ABC3.Found.GenEll.GlobalRatio
 import ABC3.Found.GenEll.GlobalAwayHom
+import ABC3.Found.GenEll.GlobalRatioUnit
 import ABC3.Found.GenEll.GlobalChartSurjective
 import ABC3.Found.GenEll.GlobalRatioCover
 import ABC3.Found.GenEll.GluedGlobalRatio
