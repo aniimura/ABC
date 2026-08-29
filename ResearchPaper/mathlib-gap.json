@@ -1918,5 +1918,24 @@
       "consequence": "★★★★**目標はむしろ鮮明になった**。同種写像評価は`12(htFaltOf(E′) − htFaltOf(E)) = −(12/d)Σ_p [neronExp_p(E′) − neronExp_p(E)]·log N(p) − (6/d)Σ_σ log(covol(Λ_{E′^σ})/covol(Λ_{E^σ}))` になり、★アルキメデス側（第 2 項）は**取れている**（`§9-1017`・`§9-1019`、`covol` は `1/l` 倍）。☆★★★残るのは**第 1 項、すなわち `neronExp` の差**だけである。",
       "localizedTarget": "★★★★★**目標は完全に局所化した**: 各素点 `p` で `neronExp_p(E/H) − neronExp_p(E)` が `log(l)` の程度で抑えられること。★これがまさに `[DelSB616]` の段 2（`w(H)/𝒪` は `#H` で消える）であり、「`ω_{E′} ⊆ ω_E` で余核が `l` で消える」の付値による言い換えである。☆Néron モデルの理論（mathlib に無い）を要するが、**述語の側は本プロジェクトに既にある**——`neronExp` は `Found/GaloisRep/NeronWitness.lean` で構成済みである。"
     }
+  },
+  "noFurtherAlgebraicReduction20260829": {
+    "measuredAt": "2026-08-29",
+    "what": "☆★★★★★★★★**`hloc`（`§9-1024` の残り 1 本）はこれ以上代数的に還元できない**。実際、`hloc` は本セッション冒頭で立てた形と**同値**である（一周した）。",
+    "theEquivalence": [
+      "`§9-1024` の `hloc`: `(Σ_σ log‖u′_σ‖ − Σ_σ log‖u_σ‖) − (Σᶠ_p Δneron_p·log N(p)) ≤ (3/2)·d·log(l)`。",
+      "`§9-1022` の分解 `12·log‖u_σ‖ = log‖σΔ_E‖ + 6·log covol(P_σ) − log curveArchInv(E^σ)` を代入し、",
+      "対数版の積公式（`§9-1021`）で `Σ_σ log‖σΔ_E‖ = Σᶠ_p v_p(Δ_E)·log N(p)` に直し、",
+      "`minDeltaExp = v_p(Δ) − 12·neronExp`（`§9-319`）でまとめ、",
+      "`Σ_σ log covol(P′) − Σ_σ log covol(P) = −d·log(l)`（`§9-1019`）を使うと、",
+      "**`hloc ⟺ (l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)`**に戻る——これは本セッション冒頭で「アルキメデスの量と有限素点の量を混ぜる主張」として書いたものそのものである。"
+    ],
+    "conclusion": "★★★**したがって、この線でのさらなる代数的な言い換えは情報を増やさない。**☆残っているのは本当に**整モデルの理論**（Néron モデル・不変微分 `ω`・Vélu の公式）であり、mathlib に無い。★次のセッションは**同じ道を再導出せず**、`Skeleton/GenEll/IsogenyHeight.lean` の段 1・段 2 の建設に直接入るのがよい。",
+    "whatIsMachineChecked": "★本セッションで機械検証できた鎖（すべて `Found/`、sorry なし）:(1) `12·d·ht^Falt = −12Σᶠ neronExp·logN − 12d·log(2π) + 12Σ_σ log‖u‖ − 6Σ_σ log covol`（`§9-1023`）、(2) その差から `hloc` へ（`§9-1024`）、(3) `covol` の指数則（`§9-1017`・`§9-1019`）、(4) 対数版の積公式（`§9-1021`）、(5) `archNorm` の共体積分解（`§9-1022`）。",
+    "buildOrderForNextSession": [
+      "★★葉 (1) **Vélu の公式**——`E/H` を Weierstrass 曲線として作る。mathlib に `WeierstrassCurve.Isogeny` は無い。本プロジェクトには群法則（`WeierstrassCurve.Affine.Point`）と分点多項式があり、`Theorem 3.8` 向けに Weil 対の機構が 245 項目ぶん積んである。",
+      "★★葉 (2) **Néron モデル／不変微分**——`ω_{E′} ⊆ ω_E` で余核が `#H` で消えること。`neronExp` は `Found/GaloisRep/NeronWitness.lean` に既にあるので、**述語の側は用意されている**。",
+      "☆`Theorem 2.1`（§2）は独立で、エタール `π₁`（mathlib に抽象 Galois 圏の枠組みはある）と Riemann–Roch を待つ。"
+    ]
   }
 }
