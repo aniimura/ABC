@@ -1967,5 +1967,19 @@
     "whatIsMissing": "☆**スキーム側のインスタンスが無い**——`PreGaloisCategory` / `GaloisCategory` を`CategoryTheory/Galois/` の外で使っているファイルは mathlib に**1 つも無い**（2026-08-29 に grep で確認）。★すなわち「連結スキーム上の有限エタール被覆の圏が Galois 圏である」が抜けている。",
     "whyItMatters": "★★[GenEll] `Theorem 2.1` の (ii) ⟹ (i) が要る 2 本のうち 1 本は「任意の正整数 `e` に対し、分岐指数がちょうど `e` の連結有限エタール Galois 被覆が存在する」（原文 p.12 が「well-known structure of étale fundamental groups of hyperbolic curves」に委ねる段、[Stacks] 58.6）。★★★**抽象論は揃っているので、残るのは「有限エタール被覆の圏が Galois 圏である」という 1 つの定理**である——ここが取りつく島である。",
     "caveat": "☆ただしその 1 つの定理自体が大きい（有限エタール射の圏論的性質・ファイバー関手の構成・有限性）。★また `Theorem 2.1` にはもう 1 本、Riemann–Roch（[NCBelyi] `Theorem 2.5` の一般曲線への帰着）も要る。"
+  },
+  "veluNormalization20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★**なぜ次の一手が Vélu なのか**——Vélu の正規化は `hArch` の**アルキメデス部分を消す**。",
+    "reasoning": [
+      "Vélu の公式は `E/H` を Weierstrass 形で与えるが、その正規化は **`φ^*(ω_{E′}) = ω_E`**（不変微分が引き戻しで一致する）ようになっている。",
+      "★ℂ 上では `E = ℂ/Λ`（`ω = dz`）、`E′ = ℂ/Λ′`（`ω′ = dz`）で `φ` は ℂ 上の恒等写像から誘導される。したがって周期格子は**そのまま** `Λ ⊆ Λ′`。",
+      "★★すなわち `Found/GaloisRep/IsogenyReduction.lean` の `htFalt_isogeny_le` で `(P_σ, C_σ)` と `(P′_σ, C′_σ)` を Vélu の正規化に合わせて取れば **`u′_σ = u_σ`** にできる。",
+      "★★★このとき `hloc` の第 1 項 `Σ_σ log‖u′_σ‖ − Σ_σ log‖u_σ‖` は **`0`** になり、",
+      "`hloc` は **`Σᶠ_p [neronExp_p(E) − neronExp_p(E′)]·log N(p) ≤ (3/2)·d·log(l)`** ——**純粋に有限素点の主張**に落ちる。"
+    ],
+    "meaning": "★★★★**これがまさに [DelSB616] の段 2（`w(H)/𝒪` は `#H` で消える）である**。`neronExp` は「与えられたモデルが極小からどれだけ離れているか」を測るので、上の不等式は「Vélu モデルの `E/H` は極小から `log(l)` 程度しか離れない」と言っている。☆それが [FC] Ch. I, Prop 2.7 の内容である。",
+    "nextStep": "★次のセッションの入口は **Vélu の公式**である:(1) 有限部分群 `H`（点の有限集合、Galois 安定）に対し `t`・`w` を定義し、`E/H : Y² + a₁XY + a₃Y = X³ + a₂X² + (a₄ − 5t)X + (a₆ − b₂t − 7w)` を作る。(2) その正規化が `φ^*ω′ = ω` であることを使う。☆mathlib に `WeierstrassCurve.velu` は無い（2026-08-29 に `#check` で確認）が、★**群法則（`WeierstrassCurve.Affine.Point`）と分点多項式は mathlib にあり、本プロジェクトには `Theorem 3.8` 向けの Weil 対の機構が 245 項目ぶん積んである**。",
+    "caution": "☆本項は**紙の上の見立て**である（Lean で確認していない）。★Vélu の正規化 `φ^*ω′ = ω` は標準的だが、形式化するときはまずそこを確かめること。"
   }
 }
