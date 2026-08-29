@@ -3785,6 +3785,90 @@ def smul_preimageSubgroup_le.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(l·Λ′ ⊆ Λ——Λ′ は Λ と (1/l)Λ に挟まれる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★指数 `[Λ′ : Λ] = |H|` -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★`Φ` を `Λ′ → H` に制限したもの。 -/
+noncomputable def preimageToH (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) :
+    preimageSubgroup P hΔ H →+ H where
+  toFun z := ⟨uniformMap P hΔ z.1, (mem_preimageSubgroup P hΔ H z.1).1 z.2⟩
+  map_zero' := Subtype.ext (by simpa using uniformMap_zero P hΔ)
+  map_add' := fun x y => Subtype.ext (by simpa using uniformMap_add P hΔ x.1 y.1)
+
+open scoped Classical in
+@[simp] theorem preimageToH_coe (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) (z : preimageSubgroup P hΔ H) :
+    (preimageToH P hΔ H z : (latticeCurve P).toAffine.Point) = uniformMap P hΔ z.1 := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★`Λ′ → H` は全射——`Φ` が全射（第 663）だから。 -/
+theorem preimageToH_surjective (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) :
+    Function.Surjective (preimageToH P hΔ H) := by
+  rintro ⟨Q, hQ⟩
+  obtain ⟨z, hz⟩ := uniformMap_surjective P hΔ Q
+  refine ⟨⟨z, ?_⟩, Subtype.ext ?_⟩
+  · rw [mem_preimageSubgroup, hz]; exact hQ
+  · exact hz
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★`Λ′ → H` の核は `Λ`（`Λ′` の中で見たもの）。 -/
+theorem ker_preimageToH (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) :
+    (preimageToH P hΔ H).ker
+      = P.lattice.toAddSubgroup.addSubgroupOf (preimageSubgroup P hΔ H) := by
+  ext z
+  simp only [AddMonoidHom.mem_ker, AddSubgroup.mem_addSubgroupOf, Submodule.mem_toAddSubgroup]
+  constructor
+  · intro h
+    exact (uniformMap_eq_zero_iff P hΔ _).1 (congrArg Subtype.val h)
+  · intro h
+    exact Subtype.ext (by simpa using uniformMap_of_mem P hΔ h)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Λ′/Λ ≅ H`**——原像の商はもとの部分群と同型。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★全射（第 663）＋核 `= Λ`（本ブロック）＋第一同型定理。 -/
+noncomputable def preimageQuotEquiv (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) :
+    (preimageSubgroup P hΔ H
+        ⧸ P.lattice.toAddSubgroup.addSubgroupOf (preimageSubgroup P hΔ H)) ≃+ H :=
+  (QuotientAddGroup.quotientAddEquivOfEq (ker_preimageToH P hΔ H).symm).trans
+    (QuotientAddGroup.quotientKerEquivOfSurjective (preimageToH P hΔ H)
+      (preimageToH_surjective P hΔ H))
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`[Λ′ : Λ] = |H|`**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★☆**これで `Lemma 3.5` の「位数 `l` の部分群 ↔ 指数 `l` の格子」の
+指数の部分が塞がった**——`H` が位数 `l` なら `Λ ⊆ Λ′` は指数 `l`。
+☆残るのは `Λ′` の基底を取り出して行列式 `= l` を書くこと
+（`Λ ⊆ Λ′ ⊆ (1/l)Λ` は第 664 で押さえてある）。 -/
+theorem relIndex_preimageSubgroup (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) :
+    P.lattice.toAddSubgroup.relIndex (preimageSubgroup P hΔ H) = Nat.card H := by
+  rw [AddSubgroup.relIndex, AddSubgroup.index]
+  exact Nat.card_congr (preimageQuotEquiv P hΔ H).toEquiv
+
+def preimageQuotEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Λ′/Λ ≅ H——原像の商はもとの部分群と同型。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def relIndex_preimageSubgroup.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5([Λ′ : Λ] = |H|——指数は部分群の位数。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
