@@ -1035,6 +1035,7 @@ import ABC3.Found.GaloisRep.AdicContraction
 import ABC3.Found.GaloisRep.QTorsion
 import ABC3.Found.GenEll.Lemma32StableLine
 import ABC3.Found.GenEll.Lemma32Uniformized
+import ABC3.Found.GenEll.Lemma32
 import ABC3.Found.GenEll.Lemma32Tate
 import ABC3.Found.GenEll.Lemma32QuotMu
 import ABC3.Found.GaloisRep.AdicSeries
