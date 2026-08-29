@@ -1838,14 +1838,17 @@ theorem analyticOrderAt_shiftU (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
 /-- ★★★★★★★★**`u = t·û`（`û` は解析的、`û(0) ≠ 0`）**。 -/
 theorem exists_shiftU_factor (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
     (h2w : 2 * w ∉ P.lattice) :
-    ∃ û : ℂ → ℂ, AnalyticAt ℂ û 0 ∧
-      ∀ᶠ t in nhds (0:ℂ), P.weierstrassP (t - w) - P.weierstrassP w = t ^ 1 • û t := by
-  have h1 : ((1 : ℕ) : ℕ∞)
-      ≤ analyticOrderAt (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w) 0 := by
+    ∃ û : ℂ → ℂ, AnalyticAt ℂ û 0 ∧ û 0 ≠ 0 ∧
+      ∀ᶠ t in nhds (0:ℂ), P.weierstrassP (t - w) - P.weierstrassP w = t * û t := by
+  have hord : analyticOrderAt (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w) 0
+      = ((1 : ℕ) : ℕ∞) := by
     rw [analyticOrderAt_shiftU P w hw h2w]
     norm_num
-  obtain ⟨g, hg, hgeq⟩ := (natCast_le_analyticOrderAt (analyticAt_shiftU P w hw)).1 h1
-  exact ⟨g, hg, by simpa using hgeq⟩
+  obtain ⟨g, hg, hg0, hgeq⟩ :=
+    (AnalyticAt.analyticOrderAt_eq_natCast (analyticAt_shiftU P w hw)).1 hord
+  refine ⟨g, hg, hg0, ?_⟩
+  filter_upwards [hgeq] with t ht
+  simpa using ht
 
 /-- ★★★★★★★★★★**`q = t³·g`（`g` は解析的）**——第 614 の位数 `≥ 3` から。
 
