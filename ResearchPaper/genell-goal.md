@@ -31945,3 +31945,49 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 `C σ • ((veluQuotientFull E S).map σ) = latticeCurve (P′ σ)` を出して
 第 678（`htFalt_isogeny_le_of_velu`）に渡す。
 
+
+## 2026-08-29（第 690-704）——`Lemma 3.5` 解析側の**到達点**
+
+    ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log(l)
+
+が `L` 上の位数 `l` の点 `Q` から出た（`Found/GaloisRep/VeluNormalized.lean` の
+`htFalt_veluQuotientFull_le`、第 704）。★★★かつて **[FC] Ch. I, Prop 2.7 ＋
+アルキメデスの (1,1)-形式**として外部引用していた `hArch` が、
+**完全に幾何と解析だけから出た**。残る仮定は `hmin`（`E` が極小）・
+`hint`（`E′` が整）だけである。
+
+### 鎖
+
+    S ≔ ⟨Q⟩∖{O} の座標（L × L の有限集合）、E′ ≔ veluQuotientFull E S
+     ↓ 696  rhPoint（環準同型による点の写像、位数保存）
+     ↓ 703  S_σ = σ(S)
+     ↓ 700  C σ • (E.map σ) = latticeCurve (P σ) を挟む輸送
+     ↓ 702  latticeCurve P′ = C σ • veluQuotientFull (E.map σ) (σS)
+     ↓ 679  veluQuotientFull は底変換と可換 → = C σ • (E′.map σ)   ★α = 1
+     ↓ 678  ht^Falt(E′) ≤ ht^Falt(E) + 2 log l
+
+### 途中の道具（第 690-703）
+
+    690  Σ_{w∈T∖0} f(℘(w))·℘′(w) = 0（任意の f、第 670 の一般化）
+    691  Σ_S B = 0、Σ_S B·x = 0（latticeCurve では B = 2y = ℘′）
+    692  vcInvPair、点集合の引き戻し
+    693  veluQuotientFull_eq_vc_pullback
+    694  ℂ 側最終形（変数変換を外した形）
+    695  pointCoords（点の座標）
+    696  rhPoint（環準同型による点の写像）
+    697  embPoint（合成）
+    698  代表系の具体形 T∖{0} = {k z₀ : 0 < k < l}
+    699  点集合を Q で決めた形
+    700  曲線が等しいときの点の輸送
+    701  image_vcInvPair_vcPair
+    702  exists_periodPair_veluQuotientFull
+    703  S_σ = σ(S)
+    704  ★htFalt_veluQuotientFull_le
+
+### 次の一手
+
+第 704 を `Interface/GenEll/EllModuli.lean` の posit `faltingsHeight_quotLCyclic` に
+接続する（`quotLCyclic` を `veluQuotientFull` で実装し、`hmin`・`hint` を
+極小モデルの選択で満たす）。これが済むと `Skeleton/GenEll/Section3.lean` の
+`lemma_3_5`（すでに `sorry` なし）が `Found/` に降りてくる。
+

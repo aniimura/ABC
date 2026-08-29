@@ -2240,5 +2240,21 @@
       "noTransversal": "veluQuotientFull（H∖{O} 全体で書いた商）を使うと ± 代表系（横断集合）を作らずに済む"
     },
     "remaining": "各 σ で vcEquiv により位数 l を確かめ、第 679 と第 688 で C σ • ((veluQuotientFull E S).map σ) = latticeCurve (P′ σ) を出して第 678 に渡す"
+  },
+  "hArchClosed20260829": {
+    "date": "2026-08-29",
+    "block": 704,
+    "what": "ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log(l) が L 上の位数 l の点 Q から出た。かつて [FC] Ch. I, Prop 2.7 ＋ アルキメデスの (1,1)-形式として外部引用していた hArch が、完全に幾何と解析だけから出た",
+    "where": "lean/ABC3/Found/GaloisRep/VeluNormalized.lean htFalt_veluQuotientFull_le",
+    "chain": [
+      "第 696 rhPoint（環準同型による点の写像、位数保存）",
+      "第 703 S_σ = σ(S)",
+      "第 700 C σ • (E.map σ) = latticeCurve (P σ) を挟む輸送",
+      "第 702 latticeCurve P′ = C σ • veluQuotientFull (E.map σ) (σS)",
+      "第 679 veluQuotientFull は底変換と可換 → = C σ • (E′.map σ)（α = 1）",
+      "第 678 htFalt_isogeny_le_of_velu"
+    ],
+    "remainingHypotheses": "hmin（E が極小）・hint（E′ が整）だけ",
+    "next": "Interface/GenEll/EllModuli.lean の posit faltingsHeight_quotLCyclic に接続する（quotLCyclic を veluQuotientFull で実装し、hmin・hint を極小モデルの選択で満たす）"
   }
 }
