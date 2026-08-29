@@ -186,6 +186,28 @@ def weierstrassP_add.needs : List ProofObligation :=
        "一方 Σ_{|z|<R} ord_z·log(R/|z|) は基本領域あたりの零点数を N とすると " ++
        "(N−2)·(πR²/covol) の程度で伸びる。★★したがって N = 2。" ++
        "☆こちらは mathlib の在庫にそのまま乗るが、評価の詰めが要る") 21,
+    .implicitStep
+      ("★★★★★★★★2026-08-29(第 622-627)で**極はすべて塞がった**。" ++
+       "☆★訂正: 第 615 で「零点勘定(偏角の原理)が要る」と書いたが、" ++
+       "**線型 2 階 ODE の一意性で迂回できた**:" ++
+       "h ≔ ℘(·+a) − ℘ は h″ = 6(℘(·+a) + ℘)·h を満たし(第 622)、" ++
+       "h(z₀) = h′(z₀) = 0 なら解析的位数の算術で近傍で 0(第 623)、" ++
+       "一致の定理と ℘ の極から a ∈ Λ(第 624)——★一様化は単射") 17,
+    .implicitStep
+      ("★★★F_w の極の一覧(2026-08-29 時点、すべて Found/GenEll/Uniformization.lean):" ++
+       "Λ —— 第 610(laurent_cancel で z² が約される、addDefect_eq_near)。" ++
+       "z ≡ w —— ℘′(w) ≠ 0 なら比が有界(第 625 の derivWeierstrassP_eq_zero_iff)。" ++
+       "z ≡ −w —— 第 627(addDefect_eq_nearNeg、u = tû と q = t³g で t² が約される)。" ++
+       "その他 —— 第 624-625 の単射性で存在しない" ++
+       "(℘(z₀)=℘(w) なら ℘′(z₀)=±℘′(w) で、いずれの場合も z₀ ≡ ±w)") 15,
+    .implicitStep
+      ("☆残るのは Lean 上の手当てだけである: mathlib の ℘ は格子点で" ++
+       "**junk value**(正則部分の値)を取るので addDefect はそこで連続でない。" ++
+       "★したがって Liouville(第 598、Differentiable を要求)に当てるには" ++
+       "極を埋めた整関数 Ext を明示的に作る必要がある" ++
+       "(Λ ∪ (±w+Λ) は可算閉離散なので、各点で Riemann の除去可能特異点" ++
+       "——第 603 の wp_inv_differentiableAt_of_mem と同じ型——を当てる)。" ++
+       "☆MeromorphicAt.analyticAt は ContinuousAt を要求するので直接は使えない") 8,
     .otherPaper "GenEll" "Lemma 3.5(l-捩れの大域的な階数 1 の部分群)" 15 ]
 
 end ABC3.Skeleton.GenEll
