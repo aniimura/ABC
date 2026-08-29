@@ -2162,6 +2162,34 @@ def analyticAt_addDefectExt_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Ext は原点で解析的——組み立ての場合 (b)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★`q(t) ≔ 2(℘(t−w) − ℘(w)) − t(℘′(t−w) − ℘′(w))` は `t = 0` で解析的。 -/
+theorem analyticAt_addQ (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    AnalyticAt ℂ (addQ P w) 0 := by
+  have hnw : (0 : ℂ) - w ∉ P.lattice := by
+    intro hc; exact hw (by simpa using neg_mem hc)
+  have hf : AnalyticAt ℂ (fun t : ℂ => t - w) 0 := analyticAt_id.sub analyticAt_const
+  have hp : AnalyticAt ℂ (fun t : ℂ => P.weierstrassP (t - w)) 0 :=
+    AnalyticAt.comp (f := fun t : ℂ => t - w) (x := 0)
+      (P.analyticOnNhd_weierstrassP _ hnw) hf
+  have hpd : AnalyticAt ℂ (fun t : ℂ => P.derivWeierstrassP (t - w)) 0 :=
+    AnalyticAt.comp (f := fun t : ℂ => t - w) (x := 0)
+      (P.analyticOnNhd_derivWeierstrassP _ hnw) hf
+  show AnalyticAt ℂ (fun t : ℂ => 2 * (P.weierstrassP (t - w) - P.weierstrassP w)
+      - t * (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)) 0
+  exact (analyticAt_const.mul (hp.sub analyticAt_const)).sub
+    (analyticAt_id.mul (hpd.sub analyticAt_const))
+
+/-- ★★★★★★★★**`q = t³·g`**（`w ∉ Λ` だけから）——第 626 の仮説を外した形。 -/
+theorem exists_addQ_factor' (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    ∃ g : ℂ → ℂ, AnalyticAt ℂ g 0 ∧
+      ∀ᶠ t in nhds (0:ℂ), addQ P w t = t ^ 3 * g t :=
+  exists_addQ_factor P w hw (analyticAt_addQ P w hw)
+
+def analyticAt_addQ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(q は t = 0 で解析的。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
