@@ -31733,3 +31733,61 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 
 ☆Néron モデルの理論（mathlib に無い）を要するが、**述語の側は本プロジェクトに既にある**
 ——`neronExp` は `Found/GaloisRep/NeronWitness.lean` で構成済みである。
+
+---
+
+## ★★★★★★★★★★2026-08-29（第 586-620、35 ブロック）—— `Lemma 3.5` から外部引用が消えた
+
+### ★到達点
+
+セッション開始時、`Lemma 3.5` は
+
+    `hArch : (l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)`
+
+を **[FC] Ch. I, Prop 2.7 ＋ アルキメデスの (1,1)-形式**という**未証明の外部引用**として
+受けていた。★★いまは
+
+    `Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`
+    `ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)`
+
+が**幾何のデータだけ**から出る——一様化（第 348 で無条件）、同種写像のスケーリング
+`u′_σ = α_σ·u_σ`、`α_σΛ_σ ⊆ Λ′_σ` の指数が `l`、`E` が大域極小・`E′` が整。
+☆**証明されていない外部定理は含まない。**
+
+### ★★どう解けたか
+
+| 側 | 到達点 | ブロック |
+|---|---|---|
+| アルキメデス | ★`archDefect(E) ≔ Σ_σ [log‖σΔ‖ − log archNorm]` は**一様化の取り方に依らない**。`12·d·ht^Falt = archDefect − 12Σᶠ neronExp·logN − 12d·log(2π)`（無条件） | 594 |
+| アルキメデス | ★★★**`α` が打ち消し合う**——`κ_σ(E′) − κ_σ(E) = 12log‖α‖ − 6log(‖α‖²/l) = 6log l`。☆**正規化は要らなかった** | 596 |
+| 有限素点 | ★★**`neronExp ≥ 0`**（整モデル）——極小化変換のスケーリングは整。`E` が大域極小なら有限側は自動 | 595 |
+| Vélu 代数側 | 定義・不変量（`c₄ ↦ c₄+240v`）・`l=2,3` の商・正規化 `φ^*ω′=ω`（一般の `l`）・代表系不変 | 586-593 |
+| Vélu 解析側 | ★★`℘_{Λ′}(z) = Σ_{w∈T} ℘_Λ(z+w) − c` が「`T` が `Λ′/Λ` の代表系」だけから従う | 597-602 |
+| 一様化 | ★★★**全射性**（`℘` は全射・`(℘, ℘′/2)` は曲線を覆う） | 603-604 |
+
+### ★★★本プロジェクトが建てた道具（mathlib に無い）
+
+* `elliptic_liouville`（第 598）——★整で二重周期的なら定数。**本日 5 度効いた**
+  （極の打ち消し・正規化・`℘` の全射性・一様化の全射性・加法定理）
+* `neronExp_nonneg`（第 595）・`archDefect`（第 594）
+* `weierstrassP_surjective`・`latticePoint_surjective`（第 603-604）
+* `elliptic_boundary_integral_zero`（第 618）——周期平行四辺形の境界積分は消える
+* `weierstrassP_shift_eq_of_two_add_mem`・`mem_lattice_of_weierstrassP_periodic`（第 620）
+
+### ☆★残り 1 本 —— 楕円関数の零点勘定
+
+★`Skeleton/GenEll/AdditionTheorem.lean` の `weierstrassP_add`（`℘` の加法定理）が
+唯一の `sorry` である。☆それには
+
+    **`℘(z) = ℘(w) ⟹ z ≡ ±w (mod Λ)`**（`℘` は各値をちょうど 2 回取る）
+
+が要る（第 615 の訂正）。★★加法定理と一様化の単射性は**同じ 1 つの事実**に帰着する。
+
+☆材料は揃っている: `G(z) ≔ ℘(z+a) − ℘(z)` は `z ↦ −a−z` について奇で、
+不動点（`2f ≡ −a`、`Λ/2Λ` の分だけ 4 個）で消える（第 620）。
+`G` の極は `Λ` と `−a+Λ` に 2 位ずつ＝計 4。
+★もし単射性が破れれば零点が 8 個以上になり、`#零点 = #極` と矛盾する。
+
+★次の一手の候補（`Skeleton/GenEll/AdditionTheorem.lean` の `.needs` に詳細）:
+(A) 留数定理経路（平行四辺形の輪郭変形が要る。mathlib の Cauchy は軸平行な長方形版）、
+(B) Jensen 経路（`MeromorphicOn.circleAverage_log_norm` に乗る。評価の詰めが要る）。
