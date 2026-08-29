@@ -3113,6 +3113,54 @@ def weierstrassP_addition_general.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘ の加法定理・一般形——2-捩れの仮定なし。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**`y` 座標の加法公式（一般形）**
+——2-捩れの仮定なし。
+
+    `℘′(z+w) = −R·(℘(z+w) − ℘(z)) − ℘′(z)`,  `R = (℘′(z) − ℘′(w))/(℘(z) − ℘(w))`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★3 つの場合:
+
+* `2w ∉ Λ` —— 第 645
+* `2w ∈ Λ` かつ `2z ∉ Λ` —— 役を入れ替えた第 645 と `R(℘z − ℘w) = ℘′z`（`℘′w = 0`）
+* 両方 2-捩れ —— `℘′(z+w) = ℘′z = ℘′w = 0` で両辺 `0`
+
+★★★☆**これで一様化の群準同型が 2-捩れも込めて書ける**。 -/
+theorem derivWeierstrassP_addition_general (P : PeriodPair) {z w : ℂ}
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    P.derivWeierstrassP (z + w)
+      = -((P.derivWeierstrassP z - P.derivWeierstrassP w)
+            / (P.weierstrassP z - P.weierstrassP w))
+          * (P.weierstrassP (z + w) - P.weierstrassP z)
+        - P.derivWeierstrassP z := by
+  by_cases h2w : 2 * w ∈ P.lattice
+  · by_cases h2z : 2 * z ∈ P.lattice
+    · have h2zw : 2 * (z + w) ∈ P.lattice := by
+        have he : 2 * (z + w) = 2 * z + 2 * w := by ring
+        rw [he]
+        exact P.lattice.add_mem h2z h2w
+      rw [derivWeierstrassP_eq_zero_of_two_mem P (z + w) h2zw,
+        derivWeierstrassP_eq_zero_of_two_mem P z h2z,
+        derivWeierstrassP_eq_zero_of_two_mem P w h2w]
+      simp
+    · have hne' : P.weierstrassP w - P.weierstrassP z ≠ 0 := fun hc =>
+        hne (by linear_combination -hc)
+      have hwz : w + z ∉ P.lattice := by rw [add_comm]; exact hzw
+      have h := derivWeierstrassP_addition P z hz h2z hw hwz hne'
+      rw [add_comm w z] at h
+      rw [h, slopeRatio_symm, derivWeierstrassP_eq_zero_of_two_mem P w h2w]
+      field_simp
+      ring
+  · exact derivWeierstrassP_addition P w hw h2w hz hzw hne
+
+def derivWeierstrassP_addition_general.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(y 座標の加法公式・一般形——2-捩れの仮定なし。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
