@@ -1859,5 +1859,56 @@
       "whyLocalAnalysisIsNotEnough": "★本プロジェクトの `12·ht^Falt = deg∞ − archSum/d` で書くと、`deg∞(E/H) = l·deg∞(E)` と合わせて示すべきは `(l−1)·deg∞(E) ≤ (1/d)Σ_σ log(‖Δ‖_Pet(E′^σ)/‖Δ‖_Pet(E^σ)) + 24·log(l)` である。★★**有限素点の量を左辺に、アルキメデスの量を右辺に持つ**ので、`peterssonDelta` 単独の評価（一様上界・カスプでの減衰・下からの評価）からは出ない。★★★古典的な証明が Néron 微分 `ω` と `deg(ω)`（Hodge 束の算術次数）を経由するのはこのためである。",
       "plan": "★建設は 3 段: (1) 同種写像（Vélu の公式で `E/H` を Weierstrass 曲線として作る）、(2) 極小モデルと Néron 微分の同種写像の下でのふるまい（`ω_{E′} ⊆ ω_E`、余核が `l` で消える）、(3) アルキメデスの周期格子の共体積の比較。☆どれも既知数学であり、道である。"
     }
+  },
+  "isogenyLeaves20260829": {
+    "measuredAt": "2026-08-29",
+    "node": "`Skeleton/GenEll/IsogenyHeight.lean`（`[DelSB616] Théorème 2.4`、§9-1016、第 571）",
+    "leaves": [
+      {
+        "id": 3,
+        "what": "★段 3（原文 `2.2 (a)`）: アルキメデスのエルミート構造は `#H` 倍",
+        "status": "★★★★★**閉じた**（`Found/GenEll/IsogenyCovolume.lean`、§9-1017、第 572）",
+        "how": "`Λ ⊆ Λ′` が指数 `l` なら `covol(Λ) = l·covol(Λ′)`——★mathlib の **`ZLattice.covolume_div_covolume_eq_relIndex'`** そのものだった。☆台帳はこれを「残っている葉」に数えていたが、**既にあった**。★★高さに効く形（`−(1/2)log covol` がちょうど `(1/2)log(l)` 増える）まで取った。"
+      },
+      {
+        "id": 1,
+        "what": "★段 1（原文 `2.1`）: 完全列に付随する `ω` の自然な同型（エルミート構造と両立）",
+        "status": "☆未"
+      },
+      {
+        "id": 2,
+        "what": "★段 2（原文 `2.2 (b)(c)`）: `w(H)/𝒪` は `#H` で消える（有限素点側）",
+        "status": "☆未"
+      }
+    ],
+    "keyStructuralFinding": {
+      "title": "★★★★★★★★★★**`htFaltOf` は Faltings 高さそのものである（加法定数 `log(2π)` を除いて）**",
+      "derivation": [
+        "`12·htFaltOf = deg∞ − archSum/d`（定義、§9-670）。",
+        "`archSum = Σ_σ log((2π)¹²·curveArchInv(E^σ))`、`curveArchInv = (2π)¹²·‖Δ‖_Pet`（§9-354）。",
+        "★古典的な恒等式 `(2π)¹²·‖Δ‖_Pet = |Δ_E^σ|·covol_σ⁶`——両辺ともモデルの取り替え（`Δ → u⁻¹²Δ`、`covol → |u|²covol`）で不変である。",
+        "★★**積公式**（mathlib の `NumberField.prod_abs_eq_one`）: `Σ_σ log|Δ_min^σ| = Σ_p v_p(Δ_min)·log N(p) = d·deg∞`。",
+        "★★★代入すると `deg∞` が**打ち消し合って**`12·htFaltOf = −12·log(2π) − (6/d)·Σ_σ log covol_min(E^σ)` になる。",
+        "☆右辺は古典的な Faltings 高さの定義 `h_Falt = −(1/(2d))Σ_σ log covol` の 12 倍そのもの。"
+      ],
+      "consequence": "★★★★★★★★したがって**同種写像評価は「極小モデルの周期格子の共体積の比較」に完全に還元される**:`12·(htFaltOf(E′) − htFaltOf(E)) = −(6/d)·Σ_σ log( covol_min(E′^σ) / covol_min(E^σ) )`。★解析的な格子は指数 `l` で `covol` が `1/l` 倍（葉 3、済）。★★残るのは**極小モデルへのスケーリング `u_σ` の制御**であり、それがまさに葉 (1)(2)（`ω_{E′} ⊆ ω_E`、余核が `#H` で消える）である。"
+    },
+    "correctedEarlierNote": "☆本セッションの初期に「アルキメデス解析だけでは出ない、有限素点の量を左辺に持つ」と書いたが、★それは `archSum` を `‖Δ‖_Pet` のまま扱っていたためである。★★積公式を通すと `deg∞` は打ち消え、**純粋に共体積の比較**になる。★★★見通しはむしろ良い——残るのは整モデルの理論だけである。",
+    "mathlibSupport": {
+      "present": [
+        "`ZLattice.covolume` / `ZLattice.covolume_div_covolume_eq_relIndex'`（葉 3、使った）",
+        "`NumberField.prod_abs_eq_one`（積公式）",
+        "`NumberField.FinitePlace.prod_eq_inv_abs_norm`",
+        "`WeierstrassCurve.IsMinimal` / `VariableChange` / `integralModel`",
+        "`KaehlerDifferential`（一般論）"
+      ],
+      "absent": [
+        "`WeierstrassCurve.velu` / `WeierstrassCurve.quotient`（Vélu の公式・部分群による商）",
+        "`WeierstrassCurve.neronModel` / `AlgebraicGeometry.Neron`",
+        "`WeierstrassCurve.invariantDifferential`（不変微分 `ω`）"
+      ],
+      "checkedOn": "2026-08-29、Mathlib 全体を import した REPL で `#check`"
+    },
+    "nextConcreteStep": "★次の一手は **`PeriodPair`（本プロジェクト）と `ZLattice.covolume`（mathlib）を繋ぐこと**、そして `(2π)¹²·‖Δ‖_Pet = |Δ|·covol⁶` を証明することである。★★それができれば `12·htFaltOf = −12log(2π) − (6/d)Σ log covol` が取れ、同種写像評価は葉 (1)(2)（極小モデルのスケーリング）だけになる。★★★本プロジェクトには `Found/GenEll/Covolume.lean`・`LatticeFromInvariants.lean`・`CurveArchInv.lean` があり、受け皿は揃っている。"
   }
 }
