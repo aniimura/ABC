@@ -1059,6 +1059,45 @@ def addOrderOf_embPoint.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(合成は点の位数を保つ——Galois 降下の核。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★曲線が等しいときの点の輸送 -/
+
+section Transport
+
+variable {F : Type*} [Field F]
+
+open scoped Classical in
+/-- ★★★★★★★★**曲線が等しければ点の位数は輸送される**。
+
+★`C σ • (E.map σ) = latticeCurve (P σ)` のような等式を挟むときに要る。
+☆`subst` で片づく——`addOrderOf` は曲線の値に依らない。 -/
+theorem addOrderOf_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
+    (Q : W₁.toAffine.Point) :
+    addOrderOf (h ▸ Q : W₂.toAffine.Point) = addOrderOf Q := by
+  subst h
+  rfl
+
+/-- ★★★★★★座標も輸送される。 -/
+theorem pointCoords_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
+    (Q : W₁.toAffine.Point) :
+    pointCoords (h ▸ Q : W₂.toAffine.Point) = pointCoords Q := by
+  subst h
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★★輸送は `n • ` と可換。 -/
+theorem nsmul_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
+    (Q : W₁.toAffine.Point) (n : ℕ) :
+    (h ▸ (n • Q) : W₂.toAffine.Point) = n • (h ▸ Q : W₂.toAffine.Point) := by
+  subst h
+  rfl
+
+end Transport
+
+def addOrderOf_congr_curve.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線が等しければ点の位数は輸送される。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
