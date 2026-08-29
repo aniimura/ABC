@@ -2216,5 +2216,29 @@
       "numbersMatch": "a₄: g₂′ = g₂ + 20v ⟺ −g₂′/4 = −g₂/4 − 5v / a₆: g₃′ = g₃ + 28w ⟺ −g₃′/4 = −g₃/4 − 7w（b₂ = 0）"
     },
     "remaining": "★Lemma 3.5 原文の主張（数体上で global rank one の l-捻れ部分群が取れること）には Theorem 3.8（Galois 像が SL₂ を含む）が要る"
+  },
+  "pointVariableChangeAbsent20260829": {
+    "date": "2026-08-29",
+    "blocks": "682-689",
+    "measured": "mathlib には VariableChange の点への作用がまるごと無い。Affine/Point.lean の Point.map は環準同型 F →ₐ[S] K に対するものだけで、equation_iff_variableChange は (1,x,0,y) で原点へ移す特別形しかない",
+    "built": {
+      "file": "lean/ABC3/Found/GenEll/PointVariableChange.lean",
+      "items": [
+        "682 equation_variableChange（F_{C•W}(x′,y′) = u⁻⁶·F_W(x,y)）",
+        "683 negY・addX・negAddY・addY の変換則",
+        "684 slope の変換則（x₁ ≠ x₂ の場合と接線の場合）",
+        "685 nonsingular_variableChange（A′ = u⁻⁴(A + sB)、B′ = u⁻³B）",
+        "686 vcPoint_add・vcPoint_injective・addOrderOf_vcPoint",
+        "687 veluV2_variableChange・veluB_add_negY",
+        "688 veluQuotientFull_variableChange",
+        "689 vcEquiv : W.Point ≃+ (C • W).Point"
+      ]
+    },
+    "keys": {
+      "weights": "一般の変数変換では v ↦ u⁻⁴v、w ↦ u⁻⁶(w − r·v)（b₂(C•W) = u⁻²(b₂+12r) が効く）",
+      "correction": "g^x には −s·B の補正が付くが、S が ± で閉じていれば Σ_S B = 0・Σ_S B·x = 0 なので和では消える——解析側の Σ ℘′(w) = 0（第 670）の代数版",
+      "noTransversal": "veluQuotientFull（H∖{O} 全体で書いた商）を使うと ± 代表系（横断集合）を作らずに済む"
+    },
+    "remaining": "各 σ で vcEquiv により位数 l を確かめ、第 679 と第 688 で C σ • ((veluQuotientFull E S).map σ) = latticeCurve (P′ σ) を出して第 678 に渡す"
   }
 }

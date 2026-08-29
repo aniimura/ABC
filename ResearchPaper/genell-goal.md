@@ -31896,3 +31896,52 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 ☆残るのは、`Lemma 3.5` 原文の主張（**数体上で** global rank one の `l`-捻れ部分群が
 取れること）で、これには `Theorem 3.8`（Galois 像が `SL₂` を含む）が要る。
 
+
+## 2026-08-29（第 677-689）——`L` 上と ℂ 上を結ぶ橋
+
+`α = 1`（第 676）のあと、**`L` 上の `E/H` と ℂ 上の `latticeCurve Λ′` を結ぶ**
+ための道具を建てた。
+
+### `Found/GenEll/Velu.lean`（追加分）
+
+    677  veluQuotient_map            商は底変換と可換
+    679  veluVFull / veluWFull / veluQuotientFull
+         ★★H∖{O} 全体で書いた商——± 代表系（横断集合）を作らずに済む
+    681  veluQuotientFull_scale      スケーリングと両立（重さ 4 と 6）
+
+★通常の Vélu は `S = (H∖{O})/±` の代表系にわたって `v_Q = 2g^x_Q` を足すが、
+`g^x_Q` が `±` で不変なので **`H∖{O}` 全体で `g^x_Q` を足すのと同じ**である。
+これで有限集合の対合の横断集合を構成する手間がまるごと消えた。
+
+### `Found/GenEll/PointVariableChange.lean`（新規）
+
+★★★**mathlib には `VariableChange` の点への作用がまるごと無い**（2026-08-29 実測）。
+`Affine/Point.lean` の `Point.map` は環準同型 `F →ₐ[S] K` に対するものだけで、
+`equation_iff_variableChange` は `(1,x,0,y)` で原点へ移す特別形しかない。
+
+    682  Equation が保たれる         F_{C•W}(x′,y′) = u⁻⁶·F_W(x,y)
+    685  Nonsingular も保たれる      A′ = u⁻⁴(A + sB)、B′ = u⁻³B
+    683  negY・addX・negAddY・addY の変換則
+    684  slope の変換則（x₁ ≠ x₂ の場合と接線の場合）
+    686  vcPoint_add・vcPoint_injective・addOrderOf_vcPoint（★位数を保つ）
+    687  Vélu の量の変換則、B = 2y + a₁x + a₃ の ± 相殺
+    688  ★veluQuotientFull_variableChange（商は一般の変数変換と両立）
+    689  ★★vcEquiv : W.Point ≃+ (C • W).Point
+
+### 第 688 の要点
+
+一般の変数変換では
+
+    v ↦ u⁻⁴·v,   w ↦ u⁻⁶·(w − r·v)
+
+とずれる（`b₂(C•W) = u⁻²(b₂ + 12r)` が効く）。また `g^x` には `−s·B` の補正が付くが、
+`S` が `±` で閉じていれば `Σ_S B = 0`・`Σ_S B·x = 0` なので**和では消える**。
+★★これは解析側の `Σ_{w∈T∖{0}} ℘′(w) = 0`（第 670）の代数版である。
+
+### 残り
+
+各 `σ` について `C σ • (σ Q)` を第 689 の `vcEquiv` で送り、第 686 で位数 `l` を確かめ、
+第 679（`exists_veluQuotientFull_of_torsion`）と第 688 で
+`C σ • ((veluQuotientFull E S).map σ) = latticeCurve (P′ σ)` を出して
+第 678（`htFalt_isogeny_le_of_velu`）に渡す。
+

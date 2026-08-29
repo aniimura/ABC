@@ -2216,3 +2216,27 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 ★目標 `∑ = -∑` の**両辺に**同じ部分項があると `rw` は両方を書き換える。
 `h1.trans h2` と項で書くか、`conv_lhs => rw [...]` で片側に閉じ込める。
 
+
+## `Point` の群構造は `[DecidableEq F]` を要求する（2026-08-29、第 686）
+
+    failed to synthesize instance of type class
+      AddMonoid W.toAffine.Point
+
+★mathlib の `WeierstrassCurve.Affine.Point.instAddCommGroup` は
+`variable [DecidableEq F]` の節にある。`+` だけなら `instance : Add W.Point`
+（`DecidableEq` 不要）で足りるが、**`n • ` や `addOrderOf` を使うと `AddMonoid` が要り、
+そこで詰まる**。`open scoped Classical in` を定理の直前に置けば通る。
+☆`[W.IsElliptic]` を足しても直らない——足りないのは `DecidableEq` のほうである。
+
+## `u⁻¹` の掛け算は `ring` では消えない（2026-08-29、第 689）
+
+`Units` の `u` と `u⁻¹` は `ring` にとって別々の不定元なので、
+`u⁻²·u² · x = x` は `ring` で閉じない。`hu : (u:F) * (u⁻¹:F) = 1`（`C.u.mul_inv`）を
+**係数つきで** `linear_combination` に渡す:
+
+    linear_combination (x' * ((C.u : F) * (C.u⁻¹ : F) + 1)) * hu
+
+★`(uu⁻¹)² − 1 = (uu⁻¹ − 1)(uu⁻¹ + 1)` の因数分解が係数の形を決める。
+3 乗なら `(uu⁻¹)² + uu⁻¹ + 1` が係数になる。
+☆逆に `variableChange_a*` は `u⁻¹` **だけ**で書かれているので、そこは素の `ring` で閉じる。
+
