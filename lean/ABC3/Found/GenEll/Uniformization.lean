@@ -881,6 +881,50 @@ def latticePoint_surjective.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(一様化は全射——ℂ/Λ → E(ℂ) の全射性。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★2-捩れ点 -/
+
+/-- ★★★★★★★★★★★★**2-捩れ点では `℘′` が消える**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★証明は 3 行: `℘′` は奇であり、`2z ∈ Λ` なら `−z ≡ z (mod Λ)` なので
+`℘′(z) = ℘′(−z) = −℘′(z)`。
+
+★★`Found/GenEll/Velu.lean` の `veluV2`（2-捩れの場合分け）と
+`velu2_omega` の仮定 `2y₀ + a₁x₀ + a₃ = 0` は、`latticeCurve` では
+`a₁ = a₃ = 0` なので `2·(℘′(z)/2) = ℘′(z) = 0`——**本定理そのもの**である。 -/
+theorem derivWeierstrassP_eq_zero_of_two_mem (P : PeriodPair) (z : ℂ)
+    (h2 : 2 * z ∈ P.lattice) : P.derivWeierstrassP z = 0 := by
+  have hneg : P.derivWeierstrassP (-z) = -P.derivWeierstrassP z := P.derivWeierstrassP_neg z
+  have hper : P.derivWeierstrassP (z + (-(2 * z))) = P.derivWeierstrassP z :=
+    P.derivWeierstrassP_add_coe z ⟨-(2 * z), neg_mem h2⟩
+  have hz : z + (-(2 * z)) = -z := by ring
+  rw [hz, hneg] at hper
+  linear_combination -hper / 2
+
+/-- ★★★★★★★★★★**2-捩れ点の `y` 座標は `0`**——`Velu.lean` の 2-捩れの場合分けの中身。 -/
+theorem latticePointY_eq_zero_of_two_mem (P : PeriodPair) (z : ℂ)
+    (h2 : 2 * z ∈ P.lattice) : latticePointY P z = 0 := by
+  simp [latticePointY, derivWeierstrassP_eq_zero_of_two_mem P z h2]
+
+/-- ★★★★★★★★★★★★**2-捩れ点の `x` 座標は `4x³ − g₂x − g₃` の根**。
+
+★`℘′² = 4℘³ − g₂℘ − g₃` の左辺が `0` になるから。
+☆`latticeCurve P = ⟨0,0,0,−g₂/4,−g₃/4⟩` の 2-捩れ点はちょうどここである。 -/
+theorem cubic_eq_zero_of_two_mem (P : PeriodPair) (z : ℂ) (hz : z ∉ P.lattice)
+    (h2 : 2 * z ∈ P.lattice) :
+    4 * (latticePointX P z) ^ 3 - P.g₂ * (latticePointX P z) - P.g₃ = 0 := by
+  have hsq := P.derivWeierstrassP_sq z hz
+  rw [derivWeierstrassP_eq_zero_of_two_mem P z h2] at hsq
+  simp only [latticePointX]
+  linear_combination -hsq
+
+def derivWeierstrassP_eq_zero_of_two_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2-捩れ点では ℘′ が消える——℘′ は奇だから。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
