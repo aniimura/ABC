@@ -1729,5 +1729,71 @@
     },
     "whatWeMustNotDo": "☆**同種写像評価を仮定として受けてはならない。** `Lemma 3.5` の 3 つの入力のうち 2 つは証明済みだが、残る 1 つは**本プロジェクトのどこにも証明が無い外部引用**である。★受ければ `Lemma 3.5` の `.src` から括弧は外れるが、実際に残っている仕事は減らない——`check.mjs` の B6 が名指しする危険そのものである。★★`Proposition 1.7`（計上済み）が受けている `hcondF`・`hdiff` 等は**すべてプロジェクト内で証明済み**（§9-966・§9-973）であり、性質が違う。",
     "nextStep": "★次に着手すべきは **`ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)`** ただ 1 本である。★★これが取れれば `Lemma 3.5` は直ちに閉じ（組み立ては済んでいる）、`Lemma 3.7` の例外集合（`lcyclicExc`）も Northcott（§9-1005）と繋がって出る見込みがある。"
+  },
+  "genEllThreeInputs20260829": {
+    "measuredAt": "2026-08-29",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "summary": "★★★★★★★★★★**残り 6 項目はすべて、[GenEll] の外にある 3 つの入力を待っている**。どれも本プロジェクトのどこにも証明が無く、mathlib にも無い。★受けて済ませてはならない（`check.mjs` B6）——受ければ `.src` から括弧は外れても、実際に残っている仕事は減らない。",
+    "inputs": [
+      {
+        "id": "faltings-isogeny-estimate",
+        "statement": "**`ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)`**（`l`-巡回部分群による商）",
+        "blocks": "`Lemma 3.5` → `Lemma 3.7` → `Theorem 3.8` → `Corollary 4.3` / `Corollary 4.4`（5 項目）",
+        "sourceCitation": "[GenEll] p.17 が [FC] Chapter I, Proposition 2.7（次数 `l` の被覆射が半アーベルスキームへ延びること）＋「integrating a (1,1)-form over `E_v` differs … by a factor of `l`」の 1 文で済ませている段。",
+        "whyNotDerivableHere": "☆本プロジェクトの `12·ht^Falt = deg∞ − archSum/d`（§9-670）で書くと、`deg∞(E/H) = l·deg∞(E)`（`Lemma 3.2`、済）と合わせて `12(ht^Falt(E/H) − ht^Falt(E)) = (l−1)·deg∞(E) − (1/d)Σ_σ log(‖Δ‖_Pet(E′^σ)/‖Δ‖_Pet(E^σ))` になる。★これが `≤ 24 log l` であることは、有限素点の量 `deg∞` とアルキメデスの量 `‖Δ‖_Pet` を**混ぜて**押さえる主張であり、`‖Δ‖_Pet` 単独の評価（一様上界・カスプでの減衰・下からの評価）からは出ない。★★古典的な証明は Néron 微分 `ω` と `deg(ω)`（Hodge 束の算術次数）を経由する。",
+        "mathlibAbsent": {
+          "checkedNames": [
+            "WeierstrassCurve.Isogeny",
+            "EllipticCurve.Isogeny",
+            "WeierstrassCurve.isogeny",
+            "AlgebraicGeometry.NeronModel",
+            "WeierstrassCurve.NeronModel",
+            "WeierstrassCurve.Affine.Point.mul",
+            "EllipticCurve.Point"
+          ],
+          "verdict": "☆すべて不在（2026-08-29、Mathlib 全体を import した REPL で `#check`）。★楕円曲線の**同種写像**そのものが mathlib に無い。"
+        }
+      },
+      {
+        "id": "etale-cover-prescribed-ramification",
+        "statement": "任意の正整数 `e` に対し、`E ≙ (D ×_X Y)_red` の各点で**分岐指数がちょうど `e`** となる連結有限エタール Galois 被覆 `U_Y → U_X` が存在する",
+        "blocks": "`Theorem 2.1`（§2、1 項目）——(ii) ⟹ (i) の側",
+        "sourceCitation": "[GenEll] p.12「it follows immediately from the well-known structure of étale fundamental groups of hyperbolic curves over algebraically closed fields of characteristic zero」。原典側は [Stacks] 58.6 Fundamental groups。",
+        "mathlibAbsent": {
+          "checkedNames": [
+            "AlgebraicGeometry.EtaleFundamentalGroup",
+            "AlgebraicGeometry.Scheme.etaleFundamentalGroup",
+            "AlgebraicGeometry.FiniteEtale",
+            "AlgebraicGeometry.IsFiniteEtale",
+            "AlgebraicGeometry.Scheme.FiniteEtaleCover"
+          ],
+          "present": [
+            "`AlgebraicGeometry.Etale`（エタール射）",
+            "`CategoryTheory.PreGaloisCategory` / `CategoryTheory.GaloisCategory` / `CategoryTheory.PreGaloisCategory.FiberFunctor`（★**抽象 Galois 圏の枠組みはある**）"
+          ],
+          "verdict": "☆スキームのエタール基本群は不在。★ただし**抽象 Galois 圏の枠組みは mathlib にある**ので、「有限エタール被覆の圏が Galois 圏である」を建てれば `π₁` は載る——★★ここが取りつく島である（2026-08-29 の新しい測定）。"
+        }
+      },
+      {
+        "id": "noncritical-belyi-general-curve",
+        "statement": "[NCBelyi] `Theorem 2.5`（Belyi Maps Noncritical at Prescribed Points）の**一般の曲線への帰着**（Riemann–Roch を使う段）",
+        "blocks": "`Theorem 2.1`（§2、1 項目）——(ii) ⟹ (i) の中核",
+        "note": "★`ℙ¹` の場合は §9-999（第 550）で取れている（`Found/NCBelyi/Thm25P1.lean`）。☆一般の曲線へ降ろすのに Riemann–Roch が要る。",
+        "mathlibAbsent": {
+          "checkedNames": [
+            "AlgebraicGeometry.RiemannRoch",
+            "RiemannRoch",
+            "AlgebraicGeometry.Divisor",
+            "AlgebraicGeometry.genus",
+            "AlgebraicGeometry.Scheme.Divisors",
+            "AlgebraicGeometry.WeilDivisor",
+            "AlgebraicGeometry.CartierDivisor"
+          ],
+          "verdict": "☆すべて不在（2026-08-29）。曲線上の因子・種数・Riemann–Roch が無い。"
+        }
+      }
+    ],
+    "whatIsAlreadyDone": "★これら 3 つ**以外**の入力は、§3・§4 についてはすべて手元にある: `Lemma 3.2`（§9-1011）・`Proposition 3.4`（§9-1009）・`Lemma 3.5` の組み立て（`Lemma35Combine.lean`）・`Lemma 3.7, (a)` の 3 欄（§9-1010）・`Lemma 3.6`・`Lemma 4.1`・`Lemma 4.2`・`Remark 4.1.1`。★★`Theorem 2.1` も (ii) ⟹ (i) の 4 段のうち 3 段が `Found/` にある（`Thm21Chain`・`Thm21Extract`・`Thm21DegRatio`）。",
+    "honestBottomLine": "★★★★★**「あと 6 項目」は「あと 3 つの定理」である。** どれも既知数学であり、道であって壁ではない。☆ただし 3 つとも mathlib に土台が無く、それぞれが独立した建設である（同種写像と Néron 微分／スキームのエタール π₁／曲線の Riemann–Roch）。"
   }
 }
