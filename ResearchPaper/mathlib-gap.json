@@ -1145,6 +1145,29 @@
         ],
         "whyNoEpsilonZero": "★ϵ = 0 では**成り立たない**: ‖j‖·pD = ‖E₄‖³·(Im τ)⁶ はカスプで y⁶ のように増える。★★これが原文の 12(1+ϵ) の ϵ の出どころである（[DelSB616] Exemple 1.4 では sup(1, log H)^{1/2} の対数補正として現れる同じもの）。",
         "nextGap": "☆次に残るのは **ht∞ の同定**である: `Interface/GenEll/EllModuli.lean` の htInf を 本セッションが構成した `htJ`（＝ j の素朴 Weil 高さ）と同定し、`htInf_bdeq_faltings`・`northcott` を証明すること。★mathlib の `NumberTheory/Height/`（`logHeight₁`・`Northcott`）が受け皿になる。★★htJ の定義（(1/d)(Σ_p log⁺|j|_p·log N(p) + Σ_σ log⁺|σ j|)）は数体上の絶対対数 Weil 高さの標準形そのものなので、同定は書ける形をしている。"
+      },
+      "prop34State20260829": {
+        "measuredAt": "2026-08-29",
+        "what": "★★★★★★★★★★★★★★★★**`Proposition 3.4` の内容が `Found/` の具体的な量で出そろった**。`ht∞ ≔ htJ`（`j` の Weil 高さ ＝ `Height.logHeight₁(j)/[L:ℚ]`）として、3 本の `≲` と「In particular」の有限性がすべて取れている。",
+        "chain": {
+          "first": "`deg∞ ≤ htJ` —— `Found/GaloisRep/SemistableFin.lean` の `degInfOf_le_htFinJ`＋`htArchJ_nonneg`。☆素点ごとの半安定性（`SemistableAt`）を仮定。",
+          "second": "★**`htJ ≤ 12(1+ϵ)·ht^Falt + C`（無条件）** —— `Found/GaloisRep/HtJBound.lean` の `exists_htJ_le_htFalt'`（§9-1000〜1003）。",
+          "third": "`12(1+ϵ)·ht^Falt ≤ (1+ϵ)·htJ + C` —— `Found/GaloisRep/HtJLower.lean` の `exists_htFalt_le_htJ`（§9-1006〜1007）。☆半安定性を仮定。",
+          "inParticular": "★**`ht^Falt` が有界な曲線の `j` は有限個（無条件）** —— `Found/GaloisRep/NorthcottHtJ.lean` の `finite_j_of_htFalt_le`（§9-1005）。",
+          "packaged": "`Found/GaloisRep/SemistableFin.lean` の `prop_3_4_chain_semistable`（§9-1008）——★仮定は**素点ごとの半安定性だけ**である。"
+        },
+        "keyMechanisms": [
+          "上から（第 2 の `≲`）: `‖j(τ)‖·pD(τ)^{1+ϵ} ≤ M`。`j = E₄³/Δ` で `‖E₄‖³·(Im τ)⁶·pD^ϵ` に分かれ、`E₄` はカスプで有界、`pD = O(e^{−2πy}y⁶)`。★`ϵ > 0` が要る。",
+          "下から（第 3 の `≲`）: `max(‖j(τ)‖,1)·pD(τ) ≥ m > 0`。カスプで `E₄ → 1`（正規化 Eisenstein 級数の定数項が `1`）なので `‖j‖·pD = ‖E₄‖³y⁶ ≥ 1/8`。★`ϵ` は要らない。",
+          "☆この**非対称性**が原文の `12(1+ϵ)` の `ϵ` の出どころである。",
+          "有限素点: 極小モデルで `j·Δ′ = c₄′³`。`v_p(c₄′) ≥ 0` から `h_fin(j) ≤ deg∞`（無条件）、乗法還元の `v_p(c₄′) = 0` から逆向き——半安定なら**等号**。",
+          "`htJ` は mathlib の Weil 高さそのもの（`Found/GaloisRep/HtJWeil.lean` の `htJ_eq_logHeight`）——`Northcott` へはここでつながる。"
+        ],
+        "remaining": [
+          "☆**`EllClass` の構成**: `Interface/GenEll/EllModuli.lean` の `M_ell(ℚ̄)` を実体にし、`htInf = htJ`・`degInf = degInfOf`・`faltingsHeight = htFaltOf` と置くこと。★4 つの公理（`degInf_le_htInf`・`htInf_bdeq_faltings`・`faltingsHeight_bddBelow`・`northcott`）の**中身はすべて用意された**。",
+          "☆**mathlib の還元の言葉との橋**: `primeSubring p` の DVR 付値と `p.valuation L` を繋ぐ。これがあれば `SemistableAt ⟺ ∀ p, HasSemistableReduction` が言える。",
+          "☆`htInf_bdeq_faltings` は**両側**（`ϵ` 無し）を要求している。本セッションが取ったのは `ϵ` つきの片側と `ϵ` 無しの逆側なので、界面の欄の形を見直す余地がある（`ϵ = 0` の上からの評価は**成り立たない**——`‖j‖·pD = ‖E₄‖³y⁶` はカスプで `y⁶` のように増える）。"
+        ]
       }
     },
     "ideal-comap-on-affine-opens": {

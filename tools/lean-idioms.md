@@ -2021,3 +2021,65 @@ mcp__abc3-lean__lean_check  #check @Foo / #check @Bar -- 0.02 秒で 10 個
 ★★★`mathlib-gap.json` の `_absentPolicy`（「absent は探索範囲を伴わなければならない」）
 の運用として、**探索範囲は「grep したディレクトリ」ではなく
 「`#check` した名前の一覧」で書く**のがよい。
+
+## 整数の cast の不等式 —— `exact_mod_cast` が通らないとき
+
+**失敗形**（2026-08-29、`Found/GaloisRep/HtFinJ.lean`）
+
+```lean
+-- h : max 0 (-jExp p W) ≤ minDeltaExp p W   (ℤ の不等式)
+-- ⊢ ((max 0 (-jExp p W) : ℤ) : ℝ) ≤ ((minDeltaExp p W : ℤ) : ℝ)
+exact_mod_cast h
+-- mod_cast has type  max 0 (-jExp p W) ≤ minDeltaExp p W
+-- but is expected to have type  ↑(max 0 (-jExp p W)) ≤ ↑(minDeltaExp p W)
+```
+
+★`max` が挟まると `push_cast` の正規化が両辺で食い違い、`exact_mod_cast` が
+「同じものだ」と言えなくなる。
+
+**直し方**
+
+**`Int.cast_le.2 h` を直接使う。** `@[simp, norm_cast] Int.cast_le : (↑m ≤ ↑n) ↔ (m ≤ n)`
+なので、cast の向きを手で指定すれば一発で通る。
+
+```lean
+exact Int.cast_le.2 (maxJ_le_minDeltaExp p W)
+```
+
+★同型の失敗は `Nat.cast_le` / `Rat.cast_le` でも起きる。
+
+## 名前が変わったもの（2026-08-29 に当たったぶん）
+
+| 使えない名前 | 今の名前 |
+|---|---|
+| `pow_le_pow_left` | **`pow_le_pow_left₀`**（`0 ≤ a → a ≤ b → a^n ≤ b^n`） |
+| `div_le_div_iff` | `div_le_div_iff₀` |
+| `finsum_le_finsum` | **`finsum_le_finsum'`**（引数は `hf hg h` の順——**台の有限性が先**） |
+
+★`₀` が付く一群は「零因子のない可換モノイド」への一般化で名前が動いたもの。
+`exact?` は当たるが遅いので、**まず `₀` を足して試す**。
+
+## `positivity` が `≠ 0` を出せないとき
+
+**失敗形**（2026-08-29、`Found/GenEll/JArchBound.lean`）
+
+```lean
+rw [Real.log_mul (by positivity) (by positivity), ...]
+-- failed to prove nonzeroness, but it would be possible to prove nonnegativity if desired
+```
+
+★`‖jFun τ‖ ≠ 0` は `positivity` には出せない——ノルムは `0` になりうるからである。
+
+**直し方**
+
+**正値性を先に `have` で出しておき、`ne_of_gt` を渡す。**
+
+```lean
+have hjpos : (0:ℝ) < ‖jFun τ‖ := by
+  rcases (norm_nonneg (jFun τ)).lt_or_eq with h | h
+  · exact h
+  · rw [hjn, ← h] at hj; simp [Real.log_zero] at hj
+rw [Real.log_mul (ne_of_gt hjpos) (by positivity), ...]
+```
+
+★`positivity` は「式の形」から出すので、**仮定に隠れている非零性は見えない**。
