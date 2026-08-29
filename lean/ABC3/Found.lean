@@ -1148,6 +1148,7 @@ import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.Prop34
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.Lemma37A
 import ABC3.Found.GaloisRep.Prop34Chain
 import ABC3.Found.GaloisRep.Lemma37Constructed
 import ABC3.Found.GaloisRep.Semistable

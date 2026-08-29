@@ -2083,3 +2083,26 @@ rw [Real.log_mul (ne_of_gt hjpos) (by positivity), ...]
 ```
 
 ★`positivity` は「式の形」から出すので、**仮定に隠れている非零性は見えない**。
+
+## `Real.log_two_gt_d9` が「無い」と言われたら —— import が足りないだけ
+
+**失敗形**（2026-08-29、`Found/GaloisRep/Lemma37A.lean`）
+
+Mathlib 全体を import した REPL では通るのに、`lake build` で
+
+```
+error: Unknown constant `Real.log_two_gt_d9`
+```
+
+★これは**存在しない**のではなく、**そのファイルの import に入っていない**だけである。
+
+**直し方**
+
+`import Mathlib.Analysis.Complex.ExponentialBounds` を足す。
+`Real.log_two_gt_d9` / `Real.log_two_lt_d9` / `Real.exp_one_gt_d9` はここにある。
+
+★★**教訓**: REPL（`Mathlib` 全体）で通ったコードをファイルへ移すときは、
+**REPL の import とファイルの import の差**を疑う。
+「無い」と決めて仮説に逃がす（`hlog : 0.69 ≤ Real.log 2` を受ける）前に、
+`grep -rln "<名前>" .lake/packages/mathlib/Mathlib/` で**どのファイルにあるか**を見ること。
+★過去に同じ形で仮説へ逃がした記録がある（本ファイルの上のほうの「名前が変わったもの」の節）。
