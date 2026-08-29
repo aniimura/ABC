@@ -2771,6 +2771,119 @@ def latticePoint_add.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(一様化は群準同型——mathlib の Point の加法と一致する。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★倍加公式 -/
+
+open Filter Topology in
+/-- ★★★★★★`℘(y) ≠ ℘(z)` は `z` の除いた近傍で成り立つ（`2z ∉ Λ`）。
+
+★第 629 の「`℘ − ℘(z)` は `z` で 1 位の零点」から、零点が孤立するので従う。 -/
+theorem eventually_weierstrassP_ne_self (P : PeriodPair) {z : ℂ} (hz : z ∉ P.lattice)
+    (h2z : 2 * z ∉ P.lattice) :
+    ∀ᶠ y in 𝓝[≠] z, P.weierstrassP y - P.weierstrassP z ≠ 0 := by
+  have hana : AnalyticAt ℂ (fun y : ℂ => P.weierstrassP y - P.weierstrassP z) z :=
+    (P.analyticOnNhd_weierstrassP z hz).sub analyticAt_const
+  have ho : analyticOrderAt (fun y : ℂ => P.weierstrassP y - P.weierstrassP z) z ≠ ⊤ := by
+    rw [analyticOrderAt_weierstrassP_sub_self P z hz h2z]
+    decide
+  rcases hana.eventually_eq_zero_or_eventually_ne_zero with h1 | h2
+  · exact absurd (analyticOrderAt_eq_top.2 h1) ho
+  · exact h2
+
+open Filter Topology in
+/-- ★★★★★★★★★★`w → z` で `R(z,w) → ℘″(z)/℘′(z)`。 -/
+theorem tendsto_slopeRatio (P : PeriodPair) {z : ℂ} (hz : z ∉ P.lattice)
+    (h2z : 2 * z ∉ P.lattice) :
+    Tendsto (fun w : ℂ => (P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w)) (𝓝[≠] z)
+      (nhds ((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) / P.derivWeierstrassP z)) := by
+  have hpne : P.derivWeierstrassP z ≠ 0 := fun hc =>
+    h2z ((derivWeierstrassP_eq_zero_iff P z hz).1 hc)
+  have hnum : Tendsto (slope P.derivWeierstrassP z) (𝓝[≠] z)
+      (nhds (6 * P.weierstrassP z ^ 2 - P.g₂ / 2)) := by
+    have h := hasDerivAt_derivWeierstrassP P hz
+    rw [deriv_derivWeierstrassP P hz] at h
+    exact hasDerivAt_iff_tendsto_slope.1 h
+  have hden : Tendsto (slope P.weierstrassP z) (𝓝[≠] z) (nhds (P.derivWeierstrassP z)) :=
+    hasDerivAt_iff_tendsto_slope.1 (hasDerivAt_weierstrassP P hz)
+  refine (hnum.div hden hpne).congr' ?_
+  filter_upwards [self_mem_nhdsWithin, eventually_weierstrassP_ne_self P hz h2z]
+    with w hw hne2
+  have hwz : w - z ≠ 0 := sub_ne_zero.2 (by simpa using hw)
+  have hne3 : P.weierstrassP z - P.weierstrassP w ≠ 0 := fun hc =>
+    hne2 (by linear_combination -hc)
+  simp only [Pi.div_apply, slope_def_field]
+  rw [div_div_div_eq, div_eq_div_iff (mul_ne_zero hwz hne2) hne3]
+  ring
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★**倍加公式**
+
+    `℘(z+z) = (℘″(z)/℘′(z))²/4 − 2℘(z)`,  `℘″ = 6℘² − g₂/2`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★加法定理（第 641）で `w → z` の極限を取る。
+☆`R(z,w) → ℘″(z)/℘′(z)`・`℘(z+w) → ℘(z+z)`・`℘(w) → ℘(z)`。
+
+★★★これで mathlib の `slope`（`x₁ = x₂` の枝、`(3℘z² − g₂/4)/℘′z = ℘″/(2℘′)`）と
+一致し、`Φ : ℂ → E(ℂ)` の群準同型が**倍加の場合**でも書ける。 -/
+theorem weierstrassP_duplication (P : PeriodPair) {z : ℂ} (hz : z ∉ P.lattice)
+    (h2z : 2 * z ∉ P.lattice) :
+    P.weierstrassP (z + z)
+      = ((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) / P.derivWeierstrassP z) ^ 2 / 4
+        - P.weierstrassP z - P.weierstrassP z := by
+  have hzz : z + z ∉ P.lattice := by
+    intro hc; exact h2z (by simpa [two_mul] using hc)
+  have hL : Tendsto (fun w : ℂ => P.weierstrassP (z + w)) (𝓝[≠] z)
+      (nhds (P.weierstrassP (z + z))) := by
+    have hf : Tendsto (fun w : ℂ => z + w) (𝓝[≠] z) (nhds (z + z)) := by
+      have ht : Tendsto (fun w : ℂ => z + w) (nhds z) (nhds (z + z)) :=
+        (continuous_const.add continuous_id).tendsto _
+      exact ht.mono_left nhdsWithin_le_nhds
+    exact ((P.analyticOnNhd_weierstrassP (z + z) hzz).continuousAt).tendsto.comp hf
+  have hp : Tendsto P.weierstrassP (𝓝[≠] z) (nhds (P.weierstrassP z)) :=
+    ((P.analyticOnNhd_weierstrassP z hz).continuousAt).continuousWithinAt.tendsto
+  have hR : Tendsto (fun w : ℂ => ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+      - P.weierstrassP z - P.weierstrassP w) (𝓝[≠] z)
+      (nhds (((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) / P.derivWeierstrassP z) ^ 2 / 4
+        - P.weierstrassP z - P.weierstrassP z)) :=
+    ((((tendsto_slopeRatio P hz h2z).pow 2).div_const 4).sub_const
+      (P.weierstrassP z)).sub hp
+  have hEq : (fun w : ℂ => P.weierstrassP (z + w)) =ᶠ[𝓝[≠] z]
+      fun w : ℂ => ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+      - P.weierstrassP z - P.weierstrassP w := by
+    have hL1 : ∀ᶠ w in 𝓝[≠] z, w ∉ P.lattice :=
+      mem_nhdsWithin_of_mem_nhds ((P.isClosed_lattice.isOpen_compl).mem_nhds hz)
+    have hL2 : ∀ᶠ w in 𝓝[≠] z, z + w ∉ P.lattice := by
+      have hopen : IsOpen {w : ℂ | z + w ∉ P.lattice} := by
+        have he : {w : ℂ | z + w ∉ P.lattice}
+            = (fun w : ℂ => z + w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+        rw [he]
+        exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+      exact mem_nhdsWithin_of_mem_nhds (hopen.mem_nhds hzz)
+    have hL3 : ∀ᶠ w in 𝓝[≠] z, P.weierstrassP z - P.weierstrassP w ≠ 0 := by
+      filter_upwards [eventually_weierstrassP_ne_self P hz h2z] with y hy
+      intro hc
+      exact hy (by linear_combination -hc)
+    have hL4 : ∀ᶠ w in 𝓝[≠] z, 2 * w ∉ P.lattice := by
+      have hopen : IsOpen {w : ℂ | 2 * w ∉ P.lattice} := by
+        have he : {w : ℂ | 2 * w ∉ P.lattice}
+            = (fun w : ℂ => 2 * w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+        rw [he]
+        exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+      exact mem_nhdsWithin_of_mem_nhds (hopen.mem_nhds h2z)
+    filter_upwards [hL1, hL2, hL3, hL4] with w hw1 hw2 hw3 hw4
+    exact weierstrassP_addition P w hw1 hw4 hz hw2 hw3
+  exact tendsto_nhds_unique (hL.congr' hEq) hR
+
+def weierstrassP_duplication.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(倍加公式——加法定理の w → z 極限。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
