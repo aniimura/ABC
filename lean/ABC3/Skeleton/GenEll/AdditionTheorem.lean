@@ -116,10 +116,24 @@ def weierstrassP_add.needs : List ProofObligation :=
        "(℘(t−w) − ℘(w) が t = 0 で 1 位の零点であることと、その 2 階係数)。" ++
        "☆mathlib の AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff が使える") 13,
     .implicitStep
-      ("★(2) の見積もり: N(t) ≔ 4d(t)² − num(t)² が t = 0 で 2 位の零点である" ++
-       "(d(0) = −℘′(w)、num(0) = −2℘′(w) から N(0) = 0、" ++
-       "d′(0) = ℘″(−w)/2、num′(0) = ℘″(−w) から N′(0) = 0)。" ++
-       "☆紙の上では確かめた。Lean では 2 階の Taylor 係数を取り出す段が要る") 8,
+      ("★★★★★(1) は 2026-08-29(第 610)で塞がった: " ++
+       "Found/GenEll/Uniformization.lean の addDefect・addDefectNear・" ++
+       "addDefect_eq_near(z ≠ 0 で一致)・addDefectNear_zero(原点で 0)・" ++
+       "analyticAt_addDefectNear。☆すなわち F_w の解析接続は原点で消える" ++
+       "——加法定理が原点で成り立つことは Lean 上で確かめられた。" ++
+       "★周期性から格子の全点で従う") 13,
+    .implicitStep
+      ("★(2) の最小形(2026-08-29 に紙の上で詰めた): t ≔ z + w と置き、" ++
+       "u(t) ≔ ℘(t−w) − ℘(w)、v(t) ≔ ℘′(t−w) − ℘′(w)、û ≔ u/t とすると" ++
+       "F_w(t−w) = (4û² − v²)/(4t²û²) + e(t) + ℘(t−w) + ℘(w) であり、" ++
+       "★4û² − v² = (2û − v)(2û + v) なので 2û − v が 2 位の零点であればよい") 8,
+    .implicitStep
+      ("★★(2) をさらに落とすと: q(t) ≔ 2u(t) − t·u′(t) + t·℘′(w) と置けば " ++
+       "2û − v = q/t であり、q は t = 0 で 3 位の零点である。" ++
+       "★q(0) = 0(u(0) = 0)、q′(0) = u′(0) + ℘′(w) = ℘′(−w) + ℘′(w) = 0(℘′ は奇)、" ++
+       "★★q″(t) = −t·u‴(t) なので q″(0) = 0 —— **自動的に消える**。" ++
+       "☆Lean では mathlib の natCast_le_analyticOrderAt" ++
+       "(n ≤ analyticOrderAt f z₀ ↔ ∃ g, f = (z−z₀)^n • g)で因数分解できる") 8,
     .implicitStep
       ("★なぜ要るか(2 か所): (1) 解析側の ℘_{Λ′}(z) = Σ_{w∈T} ℘_Λ(z+w) − c(第 601-602)を" ++
        "代数側の veluXGen(第 591)へ翻訳するとき、" ++
