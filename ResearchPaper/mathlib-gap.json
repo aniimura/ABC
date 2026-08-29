@@ -2167,5 +2167,32 @@
     ],
     "status": "★★☆**必要な材料はすべて Lean 上にある**。☆残るのは (a) 対称性の場合の書き換え、(b) 両方 2-捩れの場合の根の和の議論、(c) 5 ケースの場合分けの組み立てである。",
     "note": "☆`Lemma 3.5` の応用では `H` は位数 `l`（大きな素数）の巡回群なので2-捩れは現れない。★しかし群準同型を無条件の定理として書くには上の 3 つが要る。"
+  },
+  "uniformizationIsoClosed20260829": {
+    "date": "2026-08-29",
+    "block": 663,
+    "what": "一様化定理 ℂ/Λ ≅ E(ℂ)（加法群の同型）が Found に入った",
+    "where": "lean/ABC3/Found/GenEll/Uniformization.lean uniformEquiv",
+    "parts": {
+      "surjective": "第 603 weierstrassP_surjective ＋ 第 604 latticePoint_surjective",
+      "injective": "第 624 mem_lattice_of_shift_eq ＋ 第 662 sub_mem_lattice_of_uniformMap_eq",
+      "hom": "第 661 uniformMap_add"
+    },
+    "mathlib": "いずれも mathlib に無い（§9-1039 の測定通り）"
+  },
+  "isogenyLatticeClosed20260829": {
+    "date": "2026-08-29",
+    "block": 667,
+    "what": "Lemma 3.5 の格子側が閉じた——位数 l の点 Q から指数 l の格子 Λ′ と基底・行列式",
+    "where": "lean/ABC3/Found/GenEll/Uniformization.lean exists_isogeny_lattice_basis",
+    "chain": [
+      "第 662 preimageSubgroup（H ⊆ E(ℂ) の原像は ℂ の部分群、Λ ⊆ Λ′）",
+      "第 664 preimageSubgroup_zmultiples（巡回部分群の原像は Λ + ℤz₀）",
+      "第 665 relIndex_preimageSubgroup（[Λ′ : Λ] = |H|）",
+      "第 666 exists_lattice_basis_of_cyclic（Hermite 標準形で基底と |AD − BC| = l）",
+      "第 667 gcd_eq_one_of_addOrderOf ＋ exists_isogeny_lattice_basis"
+    ],
+    "feeds": "htFalt_isogeny_le_of_analytic_minimal（第 617）の h₁・h₂・hdet",
+    "remaining": "★残るのは (1) ω₁′, ω₂′ から PeriodPair を作る（LinearIndependent ℝ）、(2) 代数的な同種写像 E → E/H と Λ′ の対応（Vélu）、(3) 各 σ について束ねて α・hu を作る"
   }
 }

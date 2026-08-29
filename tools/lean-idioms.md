@@ -2153,3 +2153,36 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 ☆本セッションで 2 度目（第 595 の `valAdd_nonneg_iff`）。
 ★★★このエラーは `lake build` の import 段で出るので、
 **単一ファイルのビルドでは気づけない**——`lake build ABC3` を必ず通すこと。
+
+
+## `set` で入れた局所定義を `ring` が展開してしまう（2026-08-29、第 666）
+
+`set ω₁' := η₁ / (l : ℂ) with hω₁'` としたあと `linear_combination` を書いたら
+
+    ring failed, ring expressions not equal
+    ⊢ P.ω₁ * 2 - P.ω₁ * ↑p * ↑a₁ * ↑l * (↑l)⁻¹ * 2 - … = 0
+
+★**`set` は `let` 束縛を作るので `ring` / `linear_combination` が中身まで
+展開する**（`(↑l)⁻¹` が出てきたのがその証拠）。抽象的な等式
+（`(l : ℂ) * ω₁' = η₁`）を先に `have` で取ってから
+
+    clear_value ω₁'
+
+で本体を落とすと、以降 `ω₁'` は不透明な局所定数として扱われ、
+`linear_combination (係数) * hlω'` が期待通り効く。
+
+☆同じ理由で **`rintro w (rfl | rfl)` は `set` 変数を消してしまう**ことがある
+（`w = ω₁'` の `rfl` が `ω₁'` の側を除去して `Unknown identifier ω₁'`）。
+`intro w hw` → `simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hw`
+→ `rcases hw with h1 | h1` → `rw [h1]` と書けば向きを固定できる。
+
+## `Nat.mul_le_mul_right` の引数順（2026-08-29、第 667）
+
+    calc n = 1 * n := (Nat.one_mul n).symm
+      _ ≤ g * n := Nat.mul_le_mul_right n hgpos   -- ← 期待と違う辺が出る
+      _ = l := hn.symm                            -- Type mismatch: g * n = n
+
+★`Nat.mul_le_mul_right` は版によって明示引数の位置が違う。
+不等式は **`Nat.le_mul_of_pos_left n hgpos : n ≤ g * n`** を使うほうが安全。
+☆`l = g * l` から `g = 1` を出すのも `rw [← hnl]` だと `l` を全部書き換えて
+しまうので、`conv_lhs => rw [hn]` で片側だけ触ってから `rw [hnl]` とする。
