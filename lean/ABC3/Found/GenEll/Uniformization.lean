@@ -3513,6 +3513,98 @@ def uniformMap_add.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ は群準同型——一様化は群同型。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★部分群の原像 -/
+
+open scoped Classical in
+/-- ★★★★★★`Φ(0) = 0`。 -/
+@[simp] theorem uniformMap_zero (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) :
+    uniformMap P hΔ 0 = 0 :=
+  uniformMap_of_mem P hΔ P.lattice.zero_mem
+
+open scoped Classical in
+/-- ★★★★★★★★`Φ(−z) = −Φ(z)`。 -/
+theorem uniformMap_neg (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) :
+    uniformMap P hΔ (-z) = -uniformMap P hΔ z := by
+  have h := uniformMap_add P hΔ z (-z)
+  rw [add_neg_cancel, uniformMap_zero] at h
+  exact (neg_eq_of_add_eq_zero_right h.symm).symm
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★**部分群 `H ⊆ E(ℂ)` の原像は ℂ の部分群**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★`Φ` が群準同型（第 661）だから。☆これが `Lemma 3.5` の `Λ′` である。 -/
+noncomputable def preimageSubgroup (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) : AddSubgroup ℂ where
+  carrier := {z : ℂ | uniformMap P hΔ z ∈ H}
+  add_mem' := by
+    intro a b ha hb
+    simp only [Set.mem_setOf_eq, uniformMap_add] at *
+    exact H.add_mem ha hb
+  zero_mem' := by
+    simp only [Set.mem_setOf_eq, uniformMap_zero]
+    exact H.zero_mem
+  neg_mem' := by
+    intro a ha
+    simp only [Set.mem_setOf_eq, uniformMap_neg] at *
+    exact H.neg_mem ha
+
+open scoped Classical in
+@[simp] theorem mem_preimageSubgroup (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) (z : ℂ) :
+    z ∈ preimageSubgroup P hΔ H ↔ uniformMap P hΔ z ∈ H := Iff.rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ ⊆ Λ′`**——格子は `Φ` で `0` に落ちるから。 -/
+theorem lattice_le_preimageSubgroup (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    (H : AddSubgroup (latticeCurve P).toAffine.Point) {z : ℂ} (hz : z ∈ P.lattice) :
+    z ∈ preimageSubgroup P hΔ H := by
+  simp only [mem_preimageSubgroup, uniformMap_of_mem P hΔ hz]
+  exact H.zero_mem
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★**`Φ` は `Λ` を法として単射**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 624 の単射性を `Φ` の言葉に直したもの。☆`Λ′/Λ → H` の単射性に要る。 -/
+theorem sub_mem_lattice_of_uniformMap_eq (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {z w : ℂ} (h : uniformMap P hΔ z = uniformMap P hΔ w) : z - w ∈ P.lattice := by
+  by_cases hz : z ∈ P.lattice
+  · by_cases hw : w ∈ P.lattice
+    · exact P.lattice.sub_mem hz hw
+    · rw [uniformMap_of_mem P hΔ hz, uniformMap_of_notMem P hΔ hw] at h
+      exact absurd h.symm (by simp)
+  · by_cases hw : w ∈ P.lattice
+    · rw [uniformMap_of_notMem P hΔ hz, uniformMap_of_mem P hΔ hw] at h
+      exact absurd h (by simp)
+    · rw [uniformMap_of_notMem P hΔ hz, uniformMap_of_notMem P hΔ hw] at h
+      have hx : latticePointX P z = latticePointX P w := by
+        injection h with hx hy
+      have hy : latticePointY P z = latticePointY P w := by
+        injection h with hx hy
+      have hpx : P.weierstrassP z = P.weierstrassP w := hx
+      have hpy : P.derivWeierstrassP z = P.derivWeierstrassP w := by
+        simp only [latticePointY] at hy
+        linear_combination 2 * hy
+      refine mem_lattice_of_shift_eq P (z - w) hw ?_ ?_ ?_
+      · rw [show w + (z - w) = z by ring]; exact hz
+      · rw [show w + (z - w) = z by ring]; exact hpx
+      · rw [show w + (z - w) = z by ring]; exact hpy
+
+def preimageSubgroup.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(部分群 H ⊆ E(ℂ) の原像は ℂ の部分群——これが Λ′ である)",
+    sectionId := "genell-lemma-3-5" }
+
+def sub_mem_lattice_of_uniformMap_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ は Λ を法として単射。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
