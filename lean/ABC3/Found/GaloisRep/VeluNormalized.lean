@@ -502,6 +502,50 @@ theorem htFalt_isogeny_le_of_analytic_minimal (E E' : WeierstrassCurve L)
   htFalt_isogeny_le_of_archDefect_minimal E E' l hl hmin hint
     (archDefect_isogeny E E' l hl P P' C C' hPC hPC' α hα hu a b c d h₁ h₂ hdet)
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**同種写像の高さ評価——`α = 1`（同じ変数変換）の形**
+
+    `ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★`Found/GenEll/Uniformization.lean` の `exists_velu_model_of_torsion`（第 676）は
+
+    latticeCurve Λ′ = veluCurve (latticeCurve Λ) v w
+
+を与える。すなわち `E′ = E/H` の一意化は **`E` と同じ変数変換 `C`** で
+`latticeCurve Λ′` に一致する——`u′ = u`、つまり `α = 1`。
+★`Found/GenEll/Velu.lean` の `veluQuotient_map`（第 677）が
+「`L` 上で商を取ってから `σ` で送る」＝「`σ` で送ってから商を取る」を保証する。
+
+★★★★☆**これが `Lemma 3.5` が要求する形そのものである**——
+残るのは `L`-有理な位数 `l` の巡回部分群から `S`（代表点の集合）を作り、
+各 `σ` について `h₁`・`h₂`・`hdet` を第 676 から読み取る段だけ。 -/
+theorem htFalt_isogeny_le_of_velu (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) (hl : 0 < l)
+    (P P' : (L →+* ℂ) → PeriodPair) (C : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hPC' : ∀ σ, C σ • (E'.map σ) = latticeCurve (P' σ))
+    (a b c d : (L →+* ℂ) → ℤ)
+    (h₁ : ∀ σ, (P σ).ω₁ = (a σ : ℂ) * (P' σ).ω₁ + (b σ : ℂ) * (P' σ).ω₂)
+    (h₂ : ∀ σ, (P σ).ω₂ = (c σ : ℂ) * (P' σ).ω₁ + (d σ : ℂ) * (P' σ).ω₂)
+    (hdet : ∀ σ, (a σ * d σ - b σ * c σ).natAbs = l)
+    (hmin : ∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0)
+    (hint : ∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l :=
+  htFalt_isogeny_le_of_analytic_minimal E E' l hl P P' C C hPC hPC'
+    (fun _ => 1) (fun _ => one_ne_zero) (fun _ => by ring)
+    a b c d
+    (fun σ => by rw [one_mul]; exact h₁ σ)
+    (fun σ => by rw [one_mul]; exact h₂ σ)
+    hdet hmin hint
+
+def htFalt_isogeny_le_of_velu.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(同種写像の高さ評価——α = 1（同じ変数変換）の形。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 def htFalt_isogeny_le_of_analytic_minimal.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(同種写像の高さ評価——外部引用なしで幾何のデータだけから)",
