@@ -31791,3 +31791,62 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 ★次の一手の候補（`Skeleton/GenEll/AdditionTheorem.lean` の `.needs` に詳細）:
 (A) 留数定理経路（平行四辺形の輪郭変形が要る。mathlib の Cauchy は軸平行な長方形版）、
 (B) Jensen 経路（`MeromorphicOn.circleAverage_log_norm` に乗る。評価の詰めが要る）。
+
+
+---
+
+## 2026-08-29（第 663-668）——`Lemma 3.5` の**格子側が完全に閉じた**
+
+★上の「(A) 留数定理経路 / (B) Jensen 経路」は**どちらも不要だった**（第 622-625 の訂正）。
+`h ≔ ℘(·+a) − ℘` が線型 2 階 ODE `h″ = 6(℘(·+a)+℘)·h` を満たすことから、
+`h(z₀) = h′(z₀) = 0` なら**解析的位数の算術だけ**で `h ≡ 0` が出る
+（`order(h″) = m` と `order(c·h) ≥ m+2` が矛盾する）。零点勘定は要らない。
+
+### 一様化定理 `ℂ/Λ ≅ E(ℂ)`（第 663、`Found/GenEll/Uniformization.lean`）
+
+| 部品 | ブロック | mathlib |
+|---|---|---|
+| 全射 `weierstrassP_surjective` / `latticePoint_surjective` | 603-604 | 無い |
+| 単射 `mem_lattice_of_shift_eq` / `sub_mem_lattice_of_uniformMap_eq` | 624・662 | 無い |
+| 準同型 `uniformMap_add` | 661 | 無い |
+| **同型 `uniformEquiv`** | **663** | **無い** |
+
+### `Lemma 3.5` の格子側（第 662-668）
+
+    662  preimageSubgroup            H ⊆ E(ℂ) の原像は ℂ の部分群、Λ ⊆ Λ′
+    664  preimageSubgroup_zmultiples 巡回部分群の原像は Λ′ = Λ + ℤz₀（「階数 1」の内容）
+    664  smul_preimageSubgroup_le    l·Λ′ ⊆ Λ（Λ ⊆ Λ′ ⊆ (1/l)Λ）
+    665  relIndex_preimageSubgroup   [Λ′ : Λ] = |H|
+    666  exists_lattice_basis_of_cyclic  Hermite 標準形で基底と |AD − BC| = l
+    667  gcd_eq_one_of_addOrderOf    位数がちょうど l なら gcd(a, b, l) = 1
+    667  exists_isogeny_lattice_basis
+    668  linearIndependent_of_basis_change
+    668  exists_isogeny_periodPair   ★★★★★位数 l の点 Q ↦ 周期対 P′ と A, B, C, D
+
+第 666 の構成は初等的である。`h = gcd(a,b)`・`a = h a₁`・`b = h b₁`・`a₁p + b₁q = 1` として
+
+    η₁ ≔ a₁ω₁ + b₁ω₂,   η₂ ≔ −qω₁ + pω₂
+
+とすると `(η₁, η₂)` は `Λ` の基底（行列式 1）で `l z₀ = h η₁`。`gcd(h, l) = 1` なので
+`xh + yl = 1` が取れ、`ω₁′ ≔ η₁/l`・`ω₂′ ≔ η₂` とすれば `z₀ = h ω₁′`・`ω₁′ = x z₀ + y η₁`
+となって `Λ′ = ℤω₁′ + ℤω₂′`。行列式は `(pl)a₁ − (−b₁)(ql) = l(pa₁ + b₁q) = l`。
+
+### 第 617 `htFalt_isogeny_le_of_analytic_minimal` の仮説の現状
+
+| 仮説 | 状態 |
+|---|---|
+| `P`・`hPC`（`E` の一様化） | ★第 348 `exists_periodPair_of_isElliptic` で無条件 |
+| `P′`・`h₁`・`h₂`・`hdet` | ★★★**第 668 で無条件に取れた** |
+| `hmin`・`hint` | ★極小モデル・整モデルの仮定（第 595） |
+| `α`・`hu`（`u′ = α·u`） | ☆**残っているのはこれだけ** |
+
+☆`α` は「代数的な同種写像 `E → E/H`（Vélu、`Found/GenEll/Velu.lean`）が
+`ℂ` 上で `Λ ⊆ Λ′` に対応する」ことを言えば出る。すなわち
+
+* `latticeCurve P′` と Vélu の商 `E/H` を突き合わせる（`veluQuotient`、第 586-593）、
+* その変数変換の `u` が `α` である。
+
+★★これが次の一手である。`Lemma 3.5` 全体（原文の主張——数体上で位数 `l` の
+**global rank one** 部分群が取れること）にはさらに `Theorem 3.8`（Galois 像）が要るので、
+指標 `GenEll 24/24` の `Lemma 3.5` が数に入るのはその後になる。
+
