@@ -5200,6 +5200,60 @@ def exists_veluQuotientFull_of_torsion.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(解析側・代数語彙——位数 l の点から E/H まで。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★代表系の像は `⟨Q⟩` -/
+
+open scoped Classical in
+/-- ★★★★★★★★`Φ(k·z) = k • Φ(z)`（`k : ℕ`）。 -/
+theorem uniformMap_natCast_mul (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ)
+    (k : ℕ) : uniformMap P hΔ ((k : ℂ) * z) = k • uniformMap P hΔ z := by
+  rw [show ((k : ℂ) * z) = k • z by simp [nsmul_eq_mul], ← uniformHom_apply,
+    map_nsmul, uniformHom_apply]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**代表系 `T = {0, z₀, …, (l−1)z₀}` の像は `⟨Q⟩ = {0, Q, …, (l−1)Q}`**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★☆**これが Galois 降下の鍵である**——解析側で選んだ代表系 `T` の像は
+`Q` が生成する巡回部分群そのものなので、`veluQuotientFull` に渡す点集合 `S` は
+**`Q` だけで決まる**（`z₀` の選び方に依らない）。
+したがって `Q` が `L`-有理なら `S` も `L`-有理である。 -/
+theorem image_uniformMap_veluRep (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z₀ : ℂ)
+    (l : ℕ) :
+    ((Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀)).image (uniformMap P hΔ)
+      = (Finset.range l).image (fun k : ℕ => k • uniformMap P hΔ z₀) := by
+  rw [Finset.image_image]
+  refine Finset.image_congr ?_
+  intro k _
+  exact uniformMap_natCast_mul P hΔ z₀ k
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`T∖{0}` の像は `⟨Q⟩∖{O}`**。
+
+★`0 < k < l` で `k • Q ≠ 0`（`Q` の位数がちょうど `l` だから）。 -/
+theorem uniformMap_ne_zero_of_mem_erase (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hQ : addOrderOf Q = l)
+    {z₀ : ℂ} (hz₀ : uniformMap P hΔ z₀ = Q) {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
+    uniformMap P hΔ ((k : ℂ) * z₀) ≠ 0 := by
+  rw [uniformMap_natCast_mul, hz₀]
+  intro hc
+  have hdvd : addOrderOf Q ∣ k := addOrderOf_dvd_of_nsmul_eq_zero hc
+  rw [hQ] at hdvd
+  have := Nat.le_of_dvd (Nat.pos_of_ne_zero hk0) hdvd
+  omega
+
+def image_uniformMap_veluRep.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(代表系 T の像は ⟨Q⟩——Galois 降下の鍵。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def uniformMap_ne_zero_of_mem_erase.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(0 < k < l なら k·z₀ の像は O でない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
