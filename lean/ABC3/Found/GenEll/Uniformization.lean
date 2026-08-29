@@ -5656,6 +5656,61 @@ def exists_veluQuotientFull_zmultiples.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(ℂ 側・点集合を ⟨Q⟩∖{O} の座標に固定した形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（`ℂ` 側・一意化の変数変換を外した最終形）**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`C • W = latticeCurve P`（`W = E.map σ`、`C` は一意化の変数変換）で
+`W` 上の位数 `l` の点 `Q` があれば
+
+    latticeCurve P′ = C • veluQuotientFull W (⟨Q⟩∖{O} の座標)
+
+★★★★★★☆**これが `htFalt_isogeny_le_of_velu`（第 678）に渡す形そのものである。**
+`E′ ≔ veluQuotientFull E S` と取れば、`veluQuotientFull` は底変換と可換（第 679）
+なので各 `σ` で `C σ • (E′.map σ) = latticeCurve (P′ σ)` になる——
+すなわち `α = 1`。 -/
+theorem exists_periodPair_veluQuotientFull (W : WeierstrassCurve ℂ) [W.IsElliptic]
+    (C : VariableChange ℂ) [(C • W).IsElliptic]
+    (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (hCW : C • W = latticeCurve P)
+    {Q : W.toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (P' : PeriodPair) (A B Cc D : ℤ),
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (Cc : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * Cc).natAbs = l ∧
+      latticeCurve P' = C • veluQuotientFull W
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) := by
+  have hQ₂ : addOrderOf
+      (hCW ▸ vcPoint C W Q : (latticeCurve P).toAffine.Point) = l := by
+    rw [addOrderOf_congr_curve, addOrderOf_vcPoint]
+    exact hQ
+  obtain ⟨P', A, B, Cc, D, h1, h2, hdet, hB, hBx, hEq⟩ :=
+    exists_veluQuotientFull_zmultiples P hΔ hl hQ₂
+  have hS₂ : ((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords
+          (k • (hCW ▸ vcPoint C W Q : (latticeCurve P).toAffine.Point)))
+      = (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))).image
+          (fun q : ℂ × ℂ => (vcX C q.1, vcY C q.1 q.2)) := by
+    rw [Finset.image_image]
+    refine Finset.image_congr ?_
+    intro k hk
+    rw [Finset.mem_coe, Finset.mem_erase, Finset.mem_range] at hk
+    have hkne : k • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hk.1 hk.2
+    simp only [Function.comp_apply]
+    rw [← nsmul_congr_curve hCW, pointCoords_congr_curve, ← vcPoint_nsmul,
+      pointCoords_vcPoint_of_ne C W hkne]
+  rw [hS₂] at hB hBx hEq
+  rw [← hCW] at hB hBx hEq
+  refine ⟨P', A, B, Cc, D, h1, h2, hdet, ?_⟩
+  rw [hEq, veluQuotientFull_eq_vc_pullback C W _ hB hBx, image_vcInvPair_vcPair]
+
+def exists_periodPair_veluQuotientFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(ℂ 側・一意化の変数変換を外した最終形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=

@@ -1130,6 +1130,38 @@ def addOrderOf_congr_curve.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(曲線が等しければ点の位数は輸送される。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★座標と `vcPoint` -/
+
+section CoordsVc
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★★**`O` でなければ座標は `vcPair` で移る**。 -/
+theorem pointCoords_vcPoint_of_ne (C : VariableChange F) (W : WeierstrassCurve F)
+    {R : W.toAffine.Point} (hR : R ≠ 0) :
+    pointCoords (vcPoint C W R)
+      = (vcX C (pointCoords R).1, vcY C (pointCoords R).1 (pointCoords R).2) := by
+  rcases R with _ | ⟨x, y, h⟩
+  · exact absurd rfl hR
+  · rfl
+
+open scoped Classical in
+/-- ★★★★★★**`0 < k < l` なら `k·Q ≠ O`**（`Q` の位数がちょうど `l`）。 -/
+theorem nsmul_ne_zero_of_lt_addOrderOf {G : Type*} [AddGroup G] {Q : G} {l k : ℕ}
+    (hQ : addOrderOf Q = l) (hk0 : k ≠ 0) (hkl : k < l) : k • Q ≠ 0 := by
+  intro hc
+  have hdvd : addOrderOf Q ∣ k := addOrderOf_dvd_of_nsmul_eq_zero hc
+  rw [hQ] at hdvd
+  have := Nat.le_of_dvd (Nat.pos_of_ne_zero hk0) hdvd
+  omega
+
+end CoordsVc
+
+def pointCoords_vcPoint_of_ne.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(O でなければ座標は vcPair で移る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
