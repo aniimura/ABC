@@ -101,9 +101,25 @@ def weierstrassP_add.needs : List ProofObligation :=
        "★加法定理も同じ型の議論で、F(z) ≔ ℘(z+w) + ℘(z) + ℘(w) − (1/4)((℘′(z)−℘′(w))/(℘(z)−℘(w)))²" ++
        "が整で二重周期的であることを示せばよい") 13,
     .implicitStep
-      ("☆残る手間は Laurent 展開(℘(t) = t⁻² + O(t²)、℘′(t) = −2t⁻³ + O(t))を" ++
-       "mathlib の weierstrassPExcept・weierstrassPSeries から取り出すところである。" ++
-       "★mathlib は G n(Eisenstein 級数)を持っているので係数は書ける") 13,
+      ("★★★★★★2026-08-29(第 607-608)で証明の核が取れた。" ++
+       "Found/GenEll/Uniformization.lean の laurentB(= z²℘(z) の解析接続、原点で 1)・" ++
+       "laurentA(= z³℘′(z) の解析接続、原点で −2)と、laurent_cancel:" ++
+       "4·B·(B − z²x)² − (A − z³y)² = z²·M(z) —— ★ring 一発の恒等式。" ++
+       "☆打ち消しの正体は B(0) = 1・A(0) = −2 から 4·1·1 − (−2)² = 0 である") 13,
+    .implicitStep
+      ("☆残る手順は 2 つだけである:" ++
+       "(1) laurent_cancel から「F は原点を除いた近傍で解析関数と一致する」を出す" ++
+       "(z² が約されるので有界、Riemann の除去可能特異点。" ++
+       "★第 603 の wp_inv_differentiableAt_of_mem と同じ型の議論)。" ++
+       "★周期性から格子の全点で従う。" ++
+       "(2) z ≡ −w での極の打ち消し。★そちらは ℘ の 2 階 Taylor が要る" ++
+       "(℘(t−w) − ℘(w) が t = 0 で 1 位の零点であることと、その 2 階係数)。" ++
+       "☆mathlib の AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff が使える") 13,
+    .implicitStep
+      ("★(2) の見積もり: N(t) ≔ 4d(t)² − num(t)² が t = 0 で 2 位の零点である" ++
+       "(d(0) = −℘′(w)、num(0) = −2℘′(w) から N(0) = 0、" ++
+       "d′(0) = ℘″(−w)/2、num′(0) = ℘″(−w) から N′(0) = 0)。" ++
+       "☆紙の上では確かめた。Lean では 2 階の Taylor 係数を取り出す段が要る") 8,
     .implicitStep
       ("★なぜ要るか(2 か所): (1) 解析側の ℘_{Λ′}(z) = Σ_{w∈T} ℘_Λ(z+w) − c(第 601-602)を" ++
        "代数側の veluXGen(第 591)へ翻訳するとき、" ++
