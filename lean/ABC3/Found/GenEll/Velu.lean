@@ -400,6 +400,116 @@ theorem velu3_omega (W : WeierstrassCurve F) (xQ yQ x y : F) (hx : x ≠ xQ) :
 
 end ThreeIsogeny
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★底変換との両立 -/
+
+section Map
+
+variable {A : Type*} [CommRing A]
+
+/-- ★★★★★`g^x_Q` は環準同型と可換。 -/
+@[simp] theorem veluGx_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluGx W x y) = veluGx (W.map f) (f x) (f y) := by
+  simp only [veluGx, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₄,
+    WeierstrassCurve.map_a₁, map_add, map_sub, map_mul, map_pow, map_ofNat]
+
+/-- ★★★★★`g^y_Q` は環準同型と可換。 -/
+@[simp] theorem veluGy_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluGy W x y) = veluGy (W.map f) (f x) (f y) := by
+  simp only [veluGy, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃,
+    map_sub, map_mul, map_neg, map_ofNat]
+
+/-- ★★★★★`v_Q` は環準同型と可換。 -/
+@[simp] theorem veluV_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluV W x y) = veluV (W.map f) (f x) (f y) := by
+  simp only [veluV, ← veluGx_map, ← veluGy_map, WeierstrassCurve.map_a₁,
+    map_sub, map_mul, map_ofNat]
+
+/-- ★★★★★`v_Q`（2-捩れの側）は環準同型と可換。 -/
+@[simp] theorem veluV2_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluV2 W x y) = veluV2 (W.map f) (f x) (f y) := veluGx_map f W x y
+
+/-- ★★★★★`u_Q` は環準同型と可換。 -/
+@[simp] theorem veluU_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluU W x y) = veluU (W.map f) (f x) (f y) := by
+  simp only [veluU, ← veluGy_map, map_pow]
+
+/-- ★★★★★`w_Q` は環準同型と可換。 -/
+@[simp] theorem veluW_map (f : R →+* A) (W : WeierstrassCurve R) (x y : R) :
+    f (veluW W x y) = veluW (W.map f) (f x) (f y) := by
+  simp only [veluW, ← veluU_map, ← veluV_map, map_add, map_mul]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**Vélu の商曲線は底変換と可換**
+
+    (veluCurve W v w).map f = veluCurve (W.map f) (f v) (f w)
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★☆**これが `L` 上の商 `E/H` と ℂ 上の解析的な `Λ′` を結ぶ橋である**——
+`Found/GenEll/Uniformization.lean` の `latticeCurve_eq_veluCurve`（第 676）は
+`ℂ` 上の等式なので、`L` 上で `E/H` を作ってから各 `σ : L →+* ℂ` で送っても
+同じものになることが要る。 -/
+theorem veluCurve_map (f : R →+* A) (W : WeierstrassCurve R) (v w : R) :
+    (veluCurve W v w).map f = veluCurve (W.map f) (f v) (f w) := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · rfl
+  · rfl
+  · rfl
+  · show f (W.a₄ - 5 * v) = f W.a₄ - 5 * f v
+    simp only [map_sub, map_mul, map_ofNat]
+  · show f (W.a₆ - W.b₂ * v - 7 * w)
+      = f W.a₆ - (W.map f).b₂ * f v - 7 * f w
+    rw [WeierstrassCurve.map_b₂]
+    simp only [map_sub, map_mul, map_ofNat]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**代表点の和も底変換と可換**（像の集合で数えて）。 -/
+theorem veluVSum_map (f : R →+* A) (W : WeierstrassCurve R) (S : Finset (R × R))
+    (hf : Function.Injective f) :
+    f (veluVSum W S) = veluVSum (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  classical
+  rw [veluVSum, veluVSum, map_sum,
+    Finset.sum_image (fun a _ b _ hab => by
+      have h1 : f a.1 = f b.1 := congrArg Prod.fst hab
+      have h2 : f a.2 = f b.2 := congrArg Prod.snd hab
+      exact Prod.ext (hf h1) (hf h2))]
+  exact Finset.sum_congr rfl (fun Q _ => veluV_map f W Q.1 Q.2)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★同上、`w` の側。 -/
+theorem veluWSum_map (f : R →+* A) (W : WeierstrassCurve R) (S : Finset (R × R))
+    (hf : Function.Injective f) :
+    f (veluWSum W S) = veluWSum (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  classical
+  rw [veluWSum, veluWSum, map_sum,
+    Finset.sum_image (fun a _ b _ hab => by
+      have h1 : f a.1 = f b.1 := congrArg Prod.fst hab
+      have h2 : f a.2 = f b.2 := congrArg Prod.snd hab
+      exact Prod.ext (hf h1) (hf h2))]
+  exact Finset.sum_congr rfl (fun Q _ => veluW_map f W Q.1 Q.2)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★**Vélu の商は底変換と可換**。 -/
+theorem veluQuotient_map (f : R →+* A) (W : WeierstrassCurve R) (S : Finset (R × R))
+    (hf : Function.Injective f) :
+    (veluQuotient W S).map f
+      = veluQuotient (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  rw [veluQuotient, veluQuotient, veluCurve_map, veluVSum_map f W S hf,
+    veluWSum_map f W S hf]
+
+end Map
+
+def veluCurve_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商曲線は底変換と可換。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotient_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商は底変換と可換——L 上の E/H と ℂ 上の Λ′ を結ぶ橋。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
 
 def velu2_equation.src : ABC3.Meta.Source :=
