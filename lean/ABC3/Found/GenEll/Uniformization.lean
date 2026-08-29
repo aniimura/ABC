@@ -2361,6 +2361,81 @@ def analyticAt_addDefectExt_atW.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Ext は w で解析的——組み立ての場合 (c)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★`𝓝[≠]` は平行移動で移る。 -/
+theorem map_add_nhdsNE (z l : ℂ) :
+    Filter.map (fun y : ℂ => y + l) (𝓝[≠] z) = 𝓝[≠] (z + l) := by
+  have h1 : Filter.map (fun y : ℂ => y + l) (nhds z) = nhds (z + l) :=
+    (Homeomorph.addRight l).map_nhds_eq z
+  rw [nhdsWithin, nhdsWithin, Filter.map_inf (add_left_injective l), h1]
+  congr 1
+  rw [Filter.map_principal]
+  congr 1
+  ext y
+  simp only [Set.mem_image, Set.mem_compl_iff, Set.mem_singleton_iff]
+  constructor
+  · rintro ⟨x, hx, rfl⟩
+    intro hc
+    exact hx (by linear_combination hc)
+  · intro hy
+    exact ⟨y - l, fun hc => hy (by linear_combination hc), by ring⟩
+
+/-- ★★★★★★★★**`F_w` は `Λ`-周期的**。 -/
+theorem addDefect_periodic (P : PeriodPair) (w : ℂ) (z : ℂ) (l : ℂ) (hl : l ∈ P.lattice) :
+    addDefect P w (z + l) = addDefect P w z := by
+  simp only [addDefect]
+  rw [show z + l + w = (z + w) + l by ring, P.weierstrassP_add_coe (z + w) ⟨l, hl⟩,
+    P.weierstrassP_add_coe z ⟨l, hl⟩, P.derivWeierstrassP_add_coe z ⟨l, hl⟩]
+
+open Filter Topology in
+/-- ★★★★★★★★★★**`Ext` も `Λ`-周期的**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`limUnder` は `map` で書けるので、`𝓝[≠]` の平行移動と `F_w` の周期性から従う。
+☆これで第 634（原点）の解析性が**格子の全点**へ延びる。 -/
+theorem addDefectExt_periodic (P : PeriodPair) (w : ℂ) (z : ℂ) (l : ℂ)
+    (hl : l ∈ P.lattice) :
+    addDefectExt P w (z + l) = addDefectExt P w z := by
+  simp only [addDefectExt, Filter.limUnder]
+  congr 1
+  rw [← map_add_nhdsNE z l, Filter.map_map]
+  refine Filter.map_congr ?_
+  filter_upwards with y
+  simp only [Function.comp_apply]
+  exact addDefect_periodic P w y l hl
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★**`Ext` は格子の全点で解析的**——周期性で原点から延ばす。 -/
+theorem analyticAt_addDefectExt_lattice (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    {p : ℂ} (hp : p ∈ P.lattice) :
+    AnalyticAt ℂ (addDefectExt P w) p := by
+  have h0 := analyticAt_addDefectExt_zero P w hw
+  have hshift : AnalyticAt ℂ (fun z : ℂ => addDefectExt P w (z - p + p)) p := by
+    have hf : AnalyticAt ℂ (fun z : ℂ => z - p) p := analyticAt_id.sub analyticAt_const
+    have hg : AnalyticAt ℂ (addDefectExt P w) ((fun z : ℂ => z - p) p) := by
+      simpa using h0
+    have hcomp := AnalyticAt.comp (g := addDefectExt P w) (f := fun z : ℂ => z - p)
+      (x := p) hg hf
+    refine hcomp.congr ?_
+    filter_upwards with z
+    simp only [Function.comp_apply]
+    exact (addDefectExt_periodic P w (z - p) p hp).symm
+  refine hshift.congr ?_
+  filter_upwards with z
+  ring_nf
+
+def addDefectExt_periodic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は Λ-周期的。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def analyticAt_addDefectExt_lattice.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は格子の全点で解析的——周期性で原点から延ばす。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
