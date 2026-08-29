@@ -1209,6 +1209,97 @@ def deriv_addQ_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(q′(0) = 0——℘′ が奇であることが効く。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★**`q` の 1 階導関数（閉じた形）**——`Found/GenEll/WeierstrassODE.lean` の
+`deriv_derivWeierstrassP`（`deriv ℘′ = 6℘² − g₂/2`）を入れた形。 -/
+noncomputable def addQ' (P : PeriodPair) (w t : ℂ) : ℂ :=
+  P.derivWeierstrassP (t - w) + P.derivWeierstrassP w
+    - t * (6 * P.weierstrassP (t - w) ^ 2 - P.g₂ / 2)
+
+theorem hasDerivAt_addQ_closed (P : PeriodPair) (w t : ℂ) (ht : t - w ∉ P.lattice) :
+    HasDerivAt (addQ P w) (addQ' P w t) t := by
+  have h := hasDerivAt_addQ P w t ht
+  rw [deriv_derivWeierstrassP P ht] at h
+  exact h
+
+/-- ★★★★★★★★★★★★**`q″(t) = −12·t·℘(t−w)·℘′(t−w)`**——★**`t` の因子が残る**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`deriv ℘′ = 6℘² − g₂/2` の項がちょうど打ち消し合うので `t` の因子だけが残る。
+☆これが第 611 で「自動的に消える」と書いた段である。 -/
+theorem hasDerivAt_addQ' (P : PeriodPair) (w t : ℂ) (ht : t - w ∉ P.lattice) :
+    HasDerivAt (addQ' P w)
+      (-(12 * t * P.weierstrassP (t - w) * P.derivWeierstrassP (t - w))) t := by
+  have hp : HasDerivAt (fun s : ℂ => P.weierstrassP (s - w))
+      (P.derivWeierstrassP (t - w)) t :=
+    HasDerivAt.comp_sub_const t w (hasDerivAt_weierstrassP P ht)
+  have h2 : HasDerivAt (fun s : ℂ => P.derivWeierstrassP (s - w))
+      (6 * P.weierstrassP (t - w) ^ 2 - P.g₂ / 2) t := by
+    have h := HasDerivAt.comp_sub_const t w (hasDerivAt_derivWeierstrassP P ht)
+    rwa [deriv_derivWeierstrassP P ht] at h
+  have hsq : HasDerivAt (fun s : ℂ => 6 * P.weierstrassP (s - w) ^ 2 - P.g₂ / 2)
+      (6 * (2 * P.weierstrassP (t - w) ^ 1 * P.derivWeierstrassP (t - w))) t :=
+    ((hp.pow 2).const_mul 6).sub_const _
+  have hmul : HasDerivAt (fun s : ℂ => s * (6 * P.weierstrassP (s - w) ^ 2 - P.g₂ / 2))
+      (1 * (6 * P.weierstrassP (t - w) ^ 2 - P.g₂ / 2)
+        + t * (6 * (2 * P.weierstrassP (t - w) ^ 1 * P.derivWeierstrassP (t - w)))) t :=
+    (hasDerivAt_id t).mul hsq
+  have h4 := (h2.add_const (P.derivWeierstrassP w)).sub hmul
+  have hval : (6 * P.weierstrassP (t - w) ^ 2 - P.g₂ / 2)
+      - (1 * (6 * P.weierstrassP (t - w) ^ 2 - P.g₂ / 2)
+        + t * (6 * (2 * P.weierstrassP (t - w) ^ 1 * P.derivWeierstrassP (t - w))))
+      = -(12 * t * P.weierstrassP (t - w) * P.derivWeierstrassP (t - w)) := by
+    ring
+  rw [← hval]
+  exact h4
+
+/-- ★★★★★★★★★★★★**`q″(0) = 0`**。 -/
+theorem iteratedDeriv_two_addQ_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    iteratedDeriv 2 (addQ P w) 0 = 0 := by
+  have hnw : (0 : ℂ) - w ∉ P.lattice := fun hc => hw (by simpa using neg_mem hc)
+  have hopen : IsOpen {t : ℂ | t - w ∉ P.lattice} := by
+    have : {t : ℂ | t - w ∉ P.lattice} = (fun t : ℂ => t - w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+    rw [this]
+    exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+  have hnhds : {t : ℂ | t - w ∉ P.lattice} ∈ nhds (0 : ℂ) := hopen.mem_nhds hnw
+  have heq : deriv (addQ P w) =ᶠ[nhds (0:ℂ)] addQ' P w := by
+    filter_upwards [hnhds] with t ht
+    exact (hasDerivAt_addQ_closed P w t ht).deriv
+  rw [iteratedDeriv_succ, iteratedDeriv_one, heq.deriv_eq,
+    (hasDerivAt_addQ' P w 0 hnw).deriv]
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★**`q` は `t = 0` で 3 位の零点**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★`q(0) = q′(0) = q″(0) = 0`（第 612・第 614）から、mathlib の
+`natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero` で位数が `≥ 3` と分かる。
+
+☆これで `2û − v = q/t` が `2` 位の零点になり、
+`4û² − v² = (2û−v)(2û+v)` が `2` 位で消えて **`z ≡ −w` の極が打ち消される**。 -/
+theorem three_le_analyticOrderAt_addQ (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (hana : AnalyticAt ℂ (addQ P w) 0) :
+    (3 : ℕ) ≤ analyticOrderAt (addQ P w) 0 := by
+  rw [natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero hana]
+  intro i hi
+  interval_cases i
+  · simpa using addQ_zero P w
+  · rw [iteratedDeriv_one]; exact deriv_addQ_zero P w hw
+  · exact iteratedDeriv_two_addQ_zero P w hw
+
+def hasDerivAt_addQ'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(q″(t) = −12t·℘(t−w)·℘′(t−w)——t の因子が残る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def three_le_analyticOrderAt_addQ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(q は t = 0 で 3 位の零点——z ≡ −w の極が打ち消される)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
