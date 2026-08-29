@@ -1711,5 +1711,23 @@
     "gapNow": "☆**`Northcott (Height.mulHeight₁ (K := K))` のインスタンスは（数体でも）まだ無い**——2026-08-29 に `infer_instance` で確認（failed to synthesize）。★したがって残っているのは「Northcott の定理そのもの」であって「高さの理論」ではない。",
     "whyItMatters": "★★★[GenEll] `Proposition 3.4` の有限性は `Found/GenEll/FiniteFromNorthcott.lean` の `finite_of_le_of_northcott` により **`{ht∞ ≤ B}` の有限性**に落ちる。★`ht∞ = h(j)` と同定すれば、それは **`Height.logHeight₁ (j E)` の Northcott** である。★★つまり残っているのは「`ht∞` の同定」＋「Northcott の定理」であり、どちらも mathlib の Height ライブラリの上で述べられる。★★★本プロジェクトには `northcott_of_isAmple_final`（§9-938）／`northcott_of_isAmple_coords_image`（§9-961）があり、**そちらから供給できる可能性がある**（未接続）。",
     "todo": "★次に測るべきは (1) 本プロジェクトの Northcott（§9-938／§9-961）が `Height.mulHeight₁` の Northcott インスタンスを与えられるか、(2) `ht∞` を `Height.logHeight₁ ∘ j` と定義したとき `Prop 3.4` の 3 本の `≲` がどう見えるか。"
+  },
+  "genEllChainBottleneck20260829": {
+    "measuredAt": "2026-08-29",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisSession": [
+      "★`Proposition 3.4`（§9-1009、第 560）——半安定曲線の族にわたる 3 本の `≲` ＋ 有限性。定数はすべて `ϵ` にしか依らない。",
+      "★`Lemma 3.2`（§9-1011、第 562）——(i) 安定な直線は `𝔽_l(1)` か `l ∣ v_K(q_E)`、(ii) `E/μ_l` は母数 `q^l` の Tate 曲線。"
+    ],
+    "chain": "★★§3・§4 の残り 6 項目は**1 本の鎖**である: `Lemma 3.5` → `Lemma 3.7` → `Theorem 3.8` → `Corollary 4.3` / `Corollary 4.4`。（`Theorem 2.1`（§2）だけが独立で、Riemann–Roch とエタール `π₁` を待つ。）",
+    "bottleneck": {
+      "what": "★★★★★★★★★★**Faltings 高さの同種写像評価**: `l`-巡回部分群 `H ⊆ E` に対し **`ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)`**。",
+      "whyItIsTheOnlyOne": "★`Lemma 3.5` の証明は 3 つの入力を `Proposition 3.4` に流すだけである（`Found/GenEll/Lemma35Combine.lean` の `lemma_3_5_combine` が組み立て済み）。★★そのうち **2 つが本セッションで揃った**: (1) `deg∞(E_H) = l·deg∞(E)` は `Lemma 3.2, (ii)`（§9-1011）、(3) `Proposition 3.4` を `E_H` に当てる段は §9-1009。★★★**残るのは (2) の同種写像評価だけ**である。",
+      "sourceCitation": "原文 p.17:「the degree `l` covering morphism `E_F → (E_H)_F` extends [cf. [FC], Chapter I, Proposition 2.7] to a morphism `E → E_H`. Thus, we have a natural inclusion `ω_{E_H} ⊆ ω_E` whose cokernel is annihilated by `l`. Moreover, since integrating a (1,1)-form over `E_v` differs from integrating over `(E_H)_v` by a factor of `l`, we conclude that `ht^Falt(E_H) = deg(ω_{E_H}) ≤ deg(ω_E) + 2·log(l)`」。★原文は 1 文で済ませているが、**[FC] I.2.7 とアルキメデスの (1,1)-形式の段**の 2 つを抱えている（`tools\\hedge-index.mjs` の「合図」に当たる）。",
+      "howItLooksInOurVocabulary": "★本プロジェクトの `htFaltOf L E`（`12·ht^Falt = deg∞ − archSum/d`、§9-670）で書くと、有限素点側は `deg∞(E_H) = l·deg∞(E)`（済）なので、★★残るのは**アルキメデス側** `archSum(E_H)` と `archSum(E)` の比較である。★★★`archNorm` は `‖Δ‖_Pet` であり（§9-354）、`Λ ⊆ Λ′` が指数 `l` なら `j(E_H) = jFun(l·τ)` になるので、**`peterssonDelta (l·τ) ≤ peterssonDelta τ` 型の評価**に落ちる見込みがある（カスプ側は `|Δ(lτ)/Δ(τ)| ≈ |q|^{l−1} → 0`、コンパクト側は `l⁶·|Δ(lτ)|/|Δ(τ)|`）。☆ただし解析的な同種写像（`ℂ/Λ → ℂ/Λ′`）を形式化する段が要る。",
+      "materialsAlreadyBuilt": "★本セッションで積んだ解析（`peterssonDelta` の一様上界・カスプでの減衰 `O(e^{−2πy}y⁶)`・下からの評価 `max(‖j‖,1)·pD ≥ m > 0`・`E₄ → 1`）は、そのまま使える道具である。"
+    },
+    "whatWeMustNotDo": "☆**同種写像評価を仮定として受けてはならない。** `Lemma 3.5` の 3 つの入力のうち 2 つは証明済みだが、残る 1 つは**本プロジェクトのどこにも証明が無い外部引用**である。★受ければ `Lemma 3.5` の `.src` から括弧は外れるが、実際に残っている仕事は減らない——`check.mjs` の B6 が名指しする危険そのものである。★★`Proposition 1.7`（計上済み）が受けている `hcondF`・`hdiff` 等は**すべてプロジェクト内で証明済み**（§9-966・§9-973）であり、性質が違う。",
+    "nextStep": "★次に着手すべきは **`ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)`** ただ 1 本である。★★これが取れれば `Lemma 3.5` は直ちに閉じ（組み立ては済んでいる）、`Lemma 3.7` の例外集合（`lcyclicExc`）も Northcott（§9-1005）と繋がって出る見込みがある。"
   }
 }

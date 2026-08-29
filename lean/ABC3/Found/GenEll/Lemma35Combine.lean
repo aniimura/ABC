@@ -17,9 +17,27 @@ import ABC3.Found.GenEll.FiniteFromNorthcott
 
 | 入力 | 出どころ | 状態 |
 |---|---|---|
-| `deg(E_H) = l·deg(E)` | ★`Lemma 3.2, (ii)` | ★★**済**（`Lemma32QuotMu.lean` の `vAdd_pow`） |
-| `ht_Falt(E_H) = ht_Falt(E) + 2·log(l)` | 原文「integrating a (1,1)-form … differs … by a factor of `l`」 | 未（アルキメデス解析） |
-| `κ·deg(E_H) ≤ ht_Falt(E_H) + C` | `Proposition 3.4` を `E_H` に当てる | 未（`[Silv2]`） |
+| `deg(E_H) = l·deg(E)` | ★`Lemma 3.2, (ii)` | ★★★**済**（`Found/GenEll/Lemma32.lean` の `lemma_3_2`、§9-1011） |
+| `ht_Falt(E_H) = ht_Falt(E) + 2·log(l)` | [FC] Ch. I, Prop 2.7 ＋ 原文「integrating a (1,1)-form … differs … by a factor of `l`」 | ☆**未**——★★これが**唯一残っている入力**である |
+| `κ·deg(E_H) ≤ ht_Falt(E_H) + C` | `Proposition 3.4` を `E_H` に当てる | ★★★**済**（`Found/GaloisRep/Prop34.lean` の `prop_3_4`、§9-1009） |
+
+## ★★★★★★★★★★2026-08-29 —— 3 つのうち 2 つが揃った
+
+★`Lemma 3.2` と `Proposition 3.4` が**項目まるごと**取れた（第 560・第 562）ので、
+★★★残るのは **Faltings 高さの同種写像評価** `ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)`
+**ただ 1 本**である。
+
+☆**それを仮定として受けてはならない**——本プロジェクトのどこにも証明が無い外部引用であり、
+受ければ `.src` から括弧は外れても実際に残っている仕事は減らない（`check.mjs` B6）。
+★`Proposition 1.7`（計上済み）が受けている `hcondF`・`hdiff` 等は
+**すべてプロジェクト内で証明済み**（§9-966・§9-973）であり、性質が違う。
+
+★★★★見込み: `12·ht^Falt = deg∞ − archSum/d`（§9-670）で書くと有限素点側は済なので、
+残るのは**アルキメデス側**（`archNorm = ‖Δ‖_Pet`、§9-354）の比較であり、
+`Λ ⊆ Λ′` が指数 `l` なら `j(E_H) = jFun(l·τ)` なので
+**`peterssonDelta (l·τ)` と `peterssonDelta τ` の比較**に落ちる見込みがある。
+★`§9-1000`〜`§9-1008` で積んだ解析（一様上界・カスプでの減衰・下からの評価・`E₄ → 1`）が
+そのまま道具になる。
 
 ★★**本ファイルはその組み立てだけを取る**——代入 2 回である。
 
@@ -77,8 +95,9 @@ theorem l_le_of_lemma_3_5 (degE htFalt : ℝ) (l : ℕ) (κ C : ℝ)
 /-! ### ★出典の紐付け(`.src`)
 
 ★★**項目全体の `.src` は置かない。** `Lemma 3.5` には
-`ht_Falt(E_H) = ht_Falt(E) + 2log l`（アルキメデス解析）と
-`Proposition 3.4`（`[Silv2]`）が残っている。 -/
+**`ht^Falt(E_H) ≤ ht^Falt(E) + 2log l`（Faltings 高さの同種写像評価）が残っている**。
+★2026-08-29 に他の 2 入力（`Lemma 3.2`・`Proposition 3.4`）が閉じたので、
+**残りはこの 1 本だけ**である。 -/
 
 def lemma_3_5_combine.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -87,13 +106,24 @@ def lemma_3_5_combine.src : ABC3.Meta.Source :=
 
 def lemma_3_5_combine.needs : List ABC3.Meta.ProofObligation :=
   [ .otherPaper "[GenEll]"
-      ("Lemma 3.2, (ii)(deg(E_H) = l·deg(E))——★済。Lemma32QuotMu.lean の vAdd_pow " ++
-       "(v_K(q^l) = l·v_K(q))がそれである") 15,
-    .implicitStep
-      ("原文「since integrating a (1,1)-form over Ev differs from integrating over " ++
-       "(EH)v by a factor of l」——ht_Falt(E_H) = ht_Falt(E) + 2·log(l)。" ++
-       "★アルキメデス解析であり未実装(並行セッションが Covolume.lean 等で構築中)") 17,
-    .otherPaper "[GenEll]" "Proposition 3.4 を E_H に当てる——★[Silv2] に依るので未" 17,
+      ("Lemma 3.2, (ii)(deg(E_H) = l·deg(E))——★★★**済**(2026-08-29、§9-1011)。" ++
+       "Found/GenEll/Lemma32.lean の lemma_3_2 が項目まるごと取れている") 15,
+    .otherPaper "[FC]"
+      ("Chapter I, Proposition 2.7(次数 l の被覆射が半アーベルスキームへ延びること)" ++
+       "＋原文「since integrating a (1,1)-form over Ev differs from integrating over " ++
+       "(EH)v by a factor of l」——**ht^Falt(E_H) ≤ ht^Falt(E) + 2·log(l)**。" ++
+       "☆★★★★★★★★★★**これが Lemma 3.5 に残っている唯一の入力である**" ++
+       "(2026-08-29 の測定)。★受けて済ませてはならない——" ++
+       "本プロジェクトのどこにも証明が無い外部引用であり、" ++
+       "受ければ .src から括弧は外れても実際に残っている仕事は減らない(check.mjs B6)。" ++
+       "★★見込み: 12·ht^Falt = deg∞ − archSum/d(§9-670)で書くと有限素点側は済なので、" ++
+       "残るのはアルキメデス側(archNorm = ‖Δ‖_Pet、§9-354)の比較であり、" ++
+       "Λ ⊆ Λ′ が指数 l なら j(E_H) = jFun(l·τ) なので " ++
+       "peterssonDelta(l·τ) と peterssonDelta(τ) の比較に落ちる見込みがある") 17,
+    .otherPaper "[GenEll]"
+      ("Proposition 3.4 を E_H に当てる——★★★**済**(2026-08-29、§9-1009)。" ++
+       "Found/GaloisRep/Prop34.lean の prop_3_4 が項目まるごと取れている。" ++
+       "★E_H は E と同種なので半安定であり、仮定 SemistableAt を満たす") 17,
     .implicitStep
       ("★原文が「Thus, … follows from …」と書いた段は、入力が揃ったときに何が出るかを" ++
        "型で固定することに意味がある。入力の 1 つは既に手元にあるので、" ++
