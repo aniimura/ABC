@@ -1300,6 +1300,69 @@ def three_le_analyticOrderAt_addQ.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(q は t = 0 で 3 位の零点——z ≡ −w の極が打ち消される)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★零点勘定への第一の煉瓦 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★**楕円関数の周期平行四辺形の境界積分は消える**。
+
+    `∮_{∂D} f dz = 0`（`D` は `a` を頂点とする周期平行四辺形）
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★機構は**周期性だけ**——Cauchy の定理は要らない:
+
+* `f(a + ω₂ + tω₁) = f(a + tω₁)`（`ω₂ ∈ Λ`）なので上辺と下辺が打ち消し合う
+* `f(a + ω₁ + tω₂) = f(a + tω₂)`（`ω₁ ∈ Λ`）なので左辺と右辺が打ち消し合う
+
+★★★★☆**これが楕円関数の零点勘定の第一の煉瓦である**。
+残る半分は**留数定理**（`∮ f = 2πi·Σ res`）であり、それと合わせて
+
+    `Σ_{D} res(f) = 0`
+
+が出る。`f = g′/g` に当てると **`#零点 = #極`**（偏角の原理）になり、
+`g = ℘ − c` なら「`℘` は各値をちょうど 2 回取る」が従う
+——それが `Skeleton/GenEll/AdditionTheorem.lean`（第 615）で同定した唯一の入口である。
+
+☆mathlib は軸平行な長方形での Cauchy（`integral_boundary_rect_eq_zero_of_...`）を持つが、
+一般の格子の平行四辺形には当たらない（2026-08-29 に測定）。 -/
+theorem elliptic_boundary_integral_zero (P : PeriodPair) (f : ℂ → ℂ)
+    (hper : ∀ (z : ℂ), ∀ l ∈ P.lattice, f (z + l) = f z) (a : ℂ) :
+    (∫ t in (0:ℝ)..1, f (a + (t : ℂ) * P.ω₁) * P.ω₁)
+      + (∫ t in (0:ℝ)..1, f (a + P.ω₁ + (t : ℂ) * P.ω₂) * P.ω₂)
+      - (∫ t in (0:ℝ)..1, f (a + P.ω₂ + (t : ℂ) * P.ω₁) * P.ω₁)
+      - (∫ t in (0:ℝ)..1, f (a + (t : ℂ) * P.ω₂) * P.ω₂) = 0 := by
+  have hω₁ : P.ω₁ ∈ P.lattice := Submodule.subset_span (by simp)
+  have hω₂ : P.ω₂ ∈ P.lattice := Submodule.subset_span (by simp)
+  have h1 : ∀ t : ℝ, f (a + P.ω₂ + (t : ℂ) * P.ω₁) = f (a + (t : ℂ) * P.ω₁) := by
+    intro t
+    have hz : a + P.ω₂ + (t : ℂ) * P.ω₁ = (a + (t : ℂ) * P.ω₁) + P.ω₂ := by ring
+    rw [hz, hper _ _ hω₂]
+  have h2 : ∀ t : ℝ, f (a + P.ω₁ + (t : ℂ) * P.ω₂) = f (a + (t : ℂ) * P.ω₂) := by
+    intro t
+    have hz : a + P.ω₁ + (t : ℂ) * P.ω₂ = (a + (t : ℂ) * P.ω₂) + P.ω₁ := by ring
+    rw [hz, hper _ _ hω₁]
+  simp only [h1, h2]
+  ring
+
+def elliptic_boundary_integral_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(楕円関数の境界積分は消える——周期性だけから。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def elliptic_boundary_integral_zero.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆残る半分は留数定理(∮ f = 2πi·Σ res)である。" ++
+       "★合わせて Σ_D res(f) = 0 が出て、f = g′/g に当てると #零点 = #極(偏角の原理)、" ++
+       "g = ℘ − c なら「℘ は各値をちょうど 2 回取る」が従う" ++
+       "——Skeleton/GenEll/AdditionTheorem.lean(第 615)で同定した唯一の入口である") 21,
+    .implicitStep
+      ("☆mathlib の在庫(2026-08-29): 軸平行な長方形での Cauchy" ++
+       "(Complex.integral_boundary_rect_eq_zero_of_differentiable_on_off_countable)・" ++
+       "Jensen の公式・Nevanlinna 理論(ValueDistribution/)・MeromorphicOn.divisor はある。" ++
+       "☆偏角の原理と楕円関数の零点和 = 極和は無い。" ++
+       "★一般の格子の平行四辺形には長方形版の Cauchy は当たらない" ++
+       "(変数変換が ℝ-線型で正則性を壊す)") 13 ]
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
