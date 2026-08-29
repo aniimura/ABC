@@ -2106,6 +2106,59 @@ def analyticAt_addDefectExt_of_good.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(良い点では Ext は解析的——組み立ての場合 (a)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology Bornology in
+/-- ★★★★★★原点の近く（除いた）では `℘ z ≠ ℘ w`——`℘ z → ∞` だから。 -/
+theorem eventually_weierstrassP_ne (P : PeriodPair) (c : ℂ) :
+    ∀ᶠ z in 𝓝[≠] (0:ℂ), P.weierstrassP z ≠ c := by
+  have hord : meromorphicOrderAt P.weierstrassP 0 < 0 := by
+    rw [P.order_weierstrassP 0 P.lattice.zero_mem]; decide
+  have h1 : Tendsto P.weierstrassP (𝓝[≠] (0:ℂ)) (cobounded ℂ) :=
+    tendsto_cobounded_of_meromorphicOrderAt_neg hord
+  exact h1.eventually (eventually_ne_cobounded c)
+
+open Filter Topology in
+/-- ★★★★★★★★原点の近く（除いた）はすべて「良い点」（`w ∉ Λ`）。 -/
+theorem eventually_good_near_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    ∀ᶠ z in 𝓝[≠] (0:ℂ), z ∉ P.lattice ∧ z + w ∉ P.lattice
+      ∧ P.weierstrassP z - P.weierstrassP w ≠ 0 := by
+  have h1 : ∀ᶠ z in 𝓝[≠] (0:ℂ), z ∈ ((P.lattice : Set ℂ) \ {0})ᶜ :=
+    mem_nhdsWithin_of_mem_nhds (P.isOpen_compl_lattice_sdiff.mem_nhds (by simp))
+  have h2 : ∀ᶠ z in 𝓝[≠] (0:ℂ), z + w ∉ P.lattice := by
+    have hopen : IsOpen {z : ℂ | z + w ∉ P.lattice} := by
+      have he : {z : ℂ | z + w ∉ P.lattice}
+          = (fun z : ℂ => z + w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+      rw [he]
+      exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+    exact mem_nhdsWithin_of_mem_nhds (hopen.mem_nhds (by simpa using hw))
+  filter_upwards [h1, h2, eventually_weierstrassP_ne P (P.weierstrassP w),
+    self_mem_nhdsWithin] with z hz1 hz2 hz3 hz4
+  refine ⟨fun hc => hz1 ⟨hc, by simpa using hz4⟩, hz2, ?_⟩
+  intro hc
+  exact hz3 (by linear_combination hc)
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★**`Ext` は原点で解析的**（場合 (b)）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 610 の `addDefect_eq_near`（`z ≠ 0` で `F_w = addDefectNear`）と
+`analyticAt_addDefectNear` に、第 630 の道具を当てる。 -/
+theorem analyticAt_addDefectExt_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    AnalyticAt ℂ (addDefectExt P w) 0 := by
+  refine analyticAt_limUnder_of_eventuallyEq _ (addDefectNear P w) 0
+    (analyticAt_addDefectNear P w hw) ?_ ?_
+  · filter_upwards [eventually_good_near_zero P w hw] with z hz
+    exact (analyticAt_addDefect P w hz.1 hz.2.1 hz.2.2).continuousAt
+  · filter_upwards [eventually_good_near_zero P w hw, self_mem_nhdsWithin] with z hz hz0
+    refine addDefect_eq_near P w z ?_ hz.2.2
+    simpa using hz0
+
+def analyticAt_addDefectExt_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は原点で解析的——組み立ての場合 (b)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
