@@ -5537,6 +5537,67 @@ def uniformMap_coords.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ(z) の座標は (℘(z), ℘′(z)/2)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★代表系の具体形 -/
+
+open scoped Classical in
+/-- ★★★★★★★★**`T∖{0}` は `{k·z₀ : 0 < k < l}`**。
+
+★`k·z₀ = 0` は `k = 0` のときだけ（`k·z₀ ∈ Λ ⟺ l ∣ k`）。 -/
+theorem velu_rep_erase_eq (P : PeriodPair) (z₀ : ℂ) (l : ℕ) (hl : 0 < l)
+    (hord : ∀ k : ℤ, (k : ℂ) * z₀ ∈ P.lattice ↔ (l : ℤ) ∣ k) :
+    ((Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀)).erase 0
+      = ((Finset.range l).erase 0).image (fun k : ℕ => (k : ℂ) * z₀) := by
+  have hne : ∀ k : ℕ, k ≠ 0 → k < l → ((k : ℂ) * z₀) ≠ 0 := by
+    intro k hk0 hkl hc
+    have hmem : ((k : ℤ) : ℂ) * z₀ ∈ P.lattice := by
+      have : ((k : ℤ) : ℂ) * z₀ = (k : ℂ) * z₀ := by push_cast; ring
+      rw [this, hc]
+      exact P.lattice.zero_mem
+    have hdvd := (hord _).1 hmem
+    have hdvdN : l ∣ k := by exact_mod_cast hdvd
+    have := Nat.le_of_dvd (Nat.pos_of_ne_zero hk0) hdvdN
+    omega
+  ext x
+  simp only [Finset.mem_erase, Finset.mem_image, Finset.mem_range]
+  constructor
+  · rintro ⟨hx0, k, hk, rfl⟩
+    refine ⟨k, ⟨?_, hk⟩, rfl⟩
+    rintro rfl
+    exact hx0 (by simp)
+  · rintro ⟨k, ⟨hk0, hkl⟩, rfl⟩
+    exact ⟨hne k hk0 hkl, k, hkl, rfl⟩
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**`k·Q` の座標は `(℘(k z₀), ℘′(k z₀)/2)`**（`0 < k < l`）。
+
+★★☆これで解析側の代表点集合が `⟨Q⟩∖{O}` の座標そのものだと分かる。 -/
+theorem pointCoords_nsmul_eq (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hQ : addOrderOf Q = l)
+    {z₀ : ℂ} (hz₀ : uniformMap P hΔ z₀ = Q) {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
+    pointCoords (k • Q)
+      = (latticePointX P ((k : ℂ) * z₀), latticePointY P ((k : ℂ) * z₀)) := by
+  have hnot : ((k : ℂ) * z₀) ∉ P.lattice := by
+    intro hc
+    have hmem : ((k : ℤ) : ℂ) * z₀ ∈ P.lattice := by
+      have he : ((k : ℤ) : ℂ) * z₀ = (k : ℂ) * z₀ := by push_cast; ring
+      rw [he]; exact hc
+    have hdvd := (intCast_mul_mem_lattice_iff P hΔ hQ hz₀ (k : ℤ)).1 hmem
+    have hdvdN : l ∣ k := by exact_mod_cast hdvd
+    have := Nat.le_of_dvd (Nat.pos_of_ne_zero hk0) hdvdN
+    omega
+  rw [← hz₀, ← uniformMap_natCast_mul]
+  exact uniformMap_coords P hΔ hnot
+
+def velu_rep_erase_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(T∖{0} は {k·z₀ : 0 < k < l}。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def pointCoords_nsmul_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(k·Q の座標は (℘(k z₀), ℘′(k z₀)/2)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
