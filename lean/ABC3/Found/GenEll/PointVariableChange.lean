@@ -1162,6 +1162,50 @@ def pointCoords_vcPoint_of_ne.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(O でなければ座標は vcPair で移る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★座標と `rhPoint` -/
+
+section CoordsRh
+
+variable {F K : Type*} [Field F] [Field K]
+
+/-- ★★★★★★**`O` でなければ座標は成分ごとに `f` で移る**。 -/
+theorem pointCoords_rhPoint_of_ne (f : F →+* K) (W : WeierstrassCurve F)
+    {R : W.toAffine.Point} (hR : R ≠ 0) :
+    pointCoords (rhPoint f W R) = (f (pointCoords R).1, f (pointCoords R).2) := by
+  rcases R with _ | ⟨x, y, h⟩
+  · exact absurd rfl hR
+  · rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`⟨f(Q)⟩∖{O}` の座標は `⟨Q⟩∖{O}` の座標の `f` による像**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★☆**これが `L`-有理な部分群が各 `σ` でどう見えるかである**——
+`S_σ = σ(S)`。 -/
+theorem image_pointCoords_rhPoint_nsmul (f : F →+* K) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(W.map f).IsElliptic]
+    {Q : W.toAffine.Point} {l : ℕ} (hQ : addOrderOf Q = l) :
+    ((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • rhPoint f W Q))
+      = (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))).image
+          (fun q : F × F => (f q.1, f q.2)) := by
+  rw [Finset.image_image]
+  refine Finset.image_congr ?_
+  intro k hk
+  rw [Finset.mem_coe, Finset.mem_erase, Finset.mem_range] at hk
+  have hkne : k • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hk.1 hk.2
+  simp only [Function.comp_apply]
+  rw [← rhPoint_nsmul, pointCoords_rhPoint_of_ne f W hkne]
+
+end CoordsRh
+
+def image_pointCoords_rhPoint_nsmul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(⟨f(Q)⟩∖{O} の座標は ⟨Q⟩∖{O} の座標の f による像——S_σ = σ(S)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
