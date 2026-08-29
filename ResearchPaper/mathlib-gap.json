@@ -1132,7 +1132,19 @@
           "★★★コンパクト側: `log⁺|j|` は有界、`‖Δ‖` は下に有界（`Δ` は非零・連続）なので両辺とも有界。★`ρ = e^{2πi/3}` では `E₄(ρ) = 0` だが、そこでは `j = 0` なので `log⁺|j| = 0` であり破綻しない。"
         ],
         "mathlibSupport": "★mathlib の `NumberTheory/ModularForms/`（`Delta`・`Discriminant`・`Petersson`・`DedekindEta`・`EisensteinSeries`・`QExpansion`・`BoundedAtCusp`・`Bounds`）と `NumberTheory/Modular.lean`（基本領域）が支える。★★`NumberTheory/Height/`（`mulHeight₁`・`logHeight₁`・数体のインスタンス）が `h(j)` の側を支える。",
-        "ownership": "☆**並行セッション ABC3b の領分**（`Skeleton/GenEll/DeligneHeight.lean` の段 1〜4）。★本セッション（ABC3）は重複を避けて着手していない。"
+        "ownership": "☆**並行セッション ABC3b の領分**（`Skeleton/GenEll/DeligneHeight.lean` の段 1〜4）。★本セッション（ABC3）は重複を避けて着手していない。",
+        "closedAt": "2026-08-29",
+        "closedBy": "★★★★★★★★★★★★★★**閉じた**（第 551-554、§9-1000〜1003）。`Found/GaloisRep/HtJBound.lean` の `exists_htJ_le_htFalt'`: ∀ ϵ > 0, ∃ C, ∀ L E, htJ L E ≤ 12(1+ϵ)·htFaltOf L E + C。★**無条件**。★★C は L にも E にも依らない普遍定数である。",
+        "chain": [
+          "段 1 `Found/GenEll/JPeterssonBound.lean`（§9-1000、第 551）: `exists_bound_jFun_peterssonDelta` —— ‖j(τ)‖·peterssonDelta(τ)^{1+ϵ} は有界。★機構: j = E₄³/Δ を代入すると ‖E₄‖³·(Im τ)⁶·pD^ϵ に分かれ、E₄ は保型形式なのでカスプで有界（`ModularFormClass.bdd_at_infty`）、Δ はカスプ形式なので pD = O(e^{−2πy}y⁶)（`CuspFormClass.exp_decay_atImInfty`）、よって y⁶·pD^ϵ ≤ C^ϵ y^{6+6ϵ} e^{−2πϵy} → 0。★★あとは §9-355 と同じ型（切り詰めた基本領域のコンパクト性と SL(2,ℤ) 不変性）。",
+          "段 2 `Found/GenEll/JArchBound.lean`（§9-1001、第 552）: `exists_logPlus_j_bound` —— log⁺‖j(W)‖ + (1+ϵ)·log((2π)¹²·curveArchInv W) ≤ C。★curveArchInv W = 4096π¹²·peterssonDelta τ（jFun τ = W.j なる τ、§9-354）で τ を消した。",
+          "段 3 `Found/GaloisRep/HtJBound.lean`（§9-1002、第 553）: `htArchJ_add_archSum_le` —— σ : L →+* ℂ について足して [L:ℚ] で割る。",
+          "段 4 同上 `htArchJ_le` —— 12·ht^Falt = deg∞ − archSum/d（§9-670）を代入して h∞(j) ≤ C + 12(1+ϵ)·ht^Falt − (1+ϵ)·deg∞。★**無条件**。",
+          "段 5 `Found/GaloisRep/HtFinJ.lean`（§9-1003、第 554）: `htFinJ_le_degInfOf` —— h_fin(j) ≤ deg∞。★**無条件**（半安定を仮定しない）。★機構: p で極小なモデル W′ を取ると j は不変で j·Δ′ = c₄′³、すなわち v_p(j) = 3v_p(c₄′) − v_p(Δ_min)。極小モデルは整なので v_p(c₄′) ≥ 0。☆半安定なら v_p(c₄′) = 0 で等号になる（原文が念頭に置く場合）。",
+          "段 6 同上 `exists_htJ_le_htFalt'` —— 足して仕上げる。★段 4 の −(1+ϵ)deg∞ と段 5 の +deg∞ で −ϵ·deg∞ が残り、deg∞ ≥ 0 なので落とせる。"
+        ],
+        "whyNoEpsilonZero": "★ϵ = 0 では**成り立たない**: ‖j‖·pD = ‖E₄‖³·(Im τ)⁶ はカスプで y⁶ のように増える。★★これが原文の 12(1+ϵ) の ϵ の出どころである（[DelSB616] Exemple 1.4 では sup(1, log H)^{1/2} の対数補正として現れる同じもの）。",
+        "nextGap": "☆次に残るのは **ht∞ の同定**である: `Interface/GenEll/EllModuli.lean` の htInf を 本セッションが構成した `htJ`（＝ j の素朴 Weil 高さ）と同定し、`htInf_bdeq_faltings`・`northcott` を証明すること。★mathlib の `NumberTheory/Height/`（`logHeight₁`・`Northcott`）が受け皿になる。★★htJ の定義（(1/d)(Σ_p log⁺|j|_p·log N(p) + Σ_σ log⁺|σ j|)）は数体上の絶対対数 Weil 高さの標準形そのものなので、同定は書ける形をしている。"
       }
     },
     "ideal-comap-on-affine-opens": {
