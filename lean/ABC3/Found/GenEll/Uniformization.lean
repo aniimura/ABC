@@ -4269,7 +4269,8 @@ theorem exists_velu_rep (P P' : PeriodPair) (z₀ : ℂ) (l : ℕ) (hl : 0 < l)
     (hord : ∀ k : ℤ, (k : ℂ) * z₀ ∈ P.lattice ↔ (l : ℤ) ∣ k) :
     ∃ T : Finset ℂ, (0 : ℂ) ∈ T ∧ T.card = l ∧ (∀ w ∈ T, w ∈ P'.lattice) ∧
       (∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
-        ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) := by
+        ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+      ∧ T = (Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀) := by
   have hlZ : (0 : ℤ) < (l : ℤ) := by exact_mod_cast hl
   have hinj : ∀ k ∈ Finset.range l, ∀ k' ∈ Finset.range l,
       (k : ℂ) * z₀ = (k' : ℂ) * z₀ → k = k' := by
@@ -4284,7 +4285,7 @@ theorem exists_velu_rep (P P' : PeriodPair) (z₀ : ℂ) (l : ℕ) (hl : 0 < l)
     have hd := (hord _).1 h0
     have hzero := eq_zero_of_dvd_of_abs_lt hlZ hd (by omega) (by omega)
     omega
-  refine ⟨(Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀), ?_, ?_, ?_, ?_⟩
+  refine ⟨(Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀), ?_, ?_, ?_, ?_, rfl⟩
   · exact Finset.mem_image.2 ⟨0, Finset.mem_range.2 hl, by simp⟩
   · have hio : Set.InjOn (fun k : ℕ => (k : ℂ) * z₀) ↑(Finset.range l) := by
       intro k hk k' hk' he
@@ -4378,7 +4379,7 @@ theorem exists_velu_formula_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠
       (∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) := by
   obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
     exists_isogeny_periodPair P hΔ hl hQ
-  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
     exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
   have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
   exact ⟨z₀, P', A, B, C, D, T, hz₀, h1, h2, hdet, hP', h0T, hcard,
@@ -4837,7 +4838,7 @@ theorem exists_isogeny_data_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠
         (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃) := by
   obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
     exists_isogeny_periodPair P hΔ hl hQ
-  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
     exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
   have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
   have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
@@ -5071,7 +5072,7 @@ theorem exists_velu_model_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0
               * latticePointX P w)) := by
   obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
     exists_isogeny_periodPair P hΔ hl hQ
-  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
     exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
   have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
   have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
@@ -5167,7 +5168,7 @@ theorem exists_veluQuotientFull_of_torsion (P : PeriodPair) (hΔ : latticeDisc P
       latticeCurve P' = veluQuotientFull (latticeCurve P) S := by
   obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
     exists_isogeny_periodPair P hΔ hl hQ
-  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
     exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
   have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
   have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
@@ -5440,7 +5441,7 @@ theorem exists_veluQuotientFull_data_of_torsion (P : PeriodPair)
       latticeCurve P' = veluQuotientFull (latticeCurve P) S := by
   obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
     exists_isogeny_periodPair P hΔ hl hQ
-  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
     exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
   have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
   have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
@@ -5596,6 +5597,63 @@ def velu_rep_erase_eq.src : ABC3.Meta.Source :=
 def pointCoords_nsmul_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(k·Q の座標は (℘(k z₀), ℘′(k z₀)/2)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（`ℂ` 側・点集合を `Q` で決めた形）**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+位数 `l` の点 `Q` に対し、**点集合を `⟨Q⟩∖{O}` の座標に固定した形**で
+
+    latticeCurve P′ = veluQuotientFull (latticeCurve P)
+      (((range l).erase 0).image (fun k => coords(k·Q)))
+
+★★★★★☆**これで `S` が `Q` だけで決まる**——`z₀` の選び方にも代表系 `T` の
+取り方にも依らない。☆したがって `Q` が `L`-有理なら `S ⊆ L × L` であり、
+第 697 の `embPoint` で各 `σ` へ送ったものと一致する。 -/
+theorem exists_veluQuotientFull_zmultiples (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l)
+    (hQ : addOrderOf Q = l) :
+    ∃ (P' : PeriodPair) (A B C D : ℤ),
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      (∑ q ∈ ((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)),
+        (2 * q.2 + (latticeCurve P).a₁ * q.1 + (latticeCurve P).a₃) = 0) ∧
+      (∑ q ∈ ((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)),
+        (2 * q.2 + (latticeCurve P).a₁ * q.1 + (latticeCurve P).a₃) * q.1 = 0) ∧
+      latticeCurve P'
+        = veluQuotientFull (latticeCurve P)
+            (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  have hord := intCast_mul_mem_lattice_iff P hΔ hQ hz₀
+  obtain ⟨T, h0T, hcard, hT, hrep, hTdef⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' hord
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z
+  -- ★点集合が `⟨Q⟩∖{O}` の座標に等しいこと
+  have hS : (T.erase 0).image (fun w => (latticePointX P w, latticePointY P w))
+      = ((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)) := by
+    rw [hTdef, velu_rep_erase_eq P z₀ l hl hord, Finset.image_image]
+    refine Finset.image_congr ?_
+    intro k hk
+    rw [Finset.mem_coe, Finset.mem_erase, Finset.mem_range] at hk
+    exact (pointCoords_nsmul_eq P hΔ hQ hz₀ hk.1 hk.2).symm
+  refine ⟨P', A, B, C, D, h1, h2, hdet, ?_, ?_, ?_⟩
+  · rw [← hS]; exact sum_veluB_image_eq_zero P P' T h0T hT hrep
+  · rw [← hS]; exact sum_veluBx_image_eq_zero P P' T h0T hT hrep
+  · rw [← hS]
+    exact latticeCurve_eq_veluQuotientFull P P' T h0T hT hrep
+      (g₂_isogeny P P' T h0T hT hrep hvelu) (g₃_isogeny P P' T h0T hT hrep hvelu)
+
+def exists_veluQuotientFull_zmultiples.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(ℂ 側・点集合を ⟨Q⟩∖{O} の座標に固定した形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
