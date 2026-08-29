@@ -1794,6 +1794,85 @@ def derivWeierstrassP_eq_zero_iff.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(2-捩れの完全な特徴づけ ℘′(w) = 0 ⟺ 2w ∈ Λ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★`z ≡ −w` の側——因数分解 -/
+
+/-- ★★★★★`u(t) ≔ ℘(t−w) − ℘(w)` は `t = 0` で解析的。 -/
+theorem analyticAt_shiftU (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    AnalyticAt ℂ (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w) 0 := by
+  have hnw : (0 : ℂ) - w ∉ P.lattice := by
+    intro hc; exact hw (by simpa using neg_mem hc)
+  have hf : AnalyticAt ℂ (fun t : ℂ => t - w) 0 := analyticAt_id.sub analyticAt_const
+  have hg : AnalyticAt ℂ P.weierstrassP ((fun t : ℂ => t - w) 0) :=
+    P.analyticOnNhd_weierstrassP _ hnw
+  exact (AnalyticAt.comp (f := fun t : ℂ => t - w) (x := 0) hg hf).sub analyticAt_const
+
+/-- ★★★★★★★★★★★★★★**`u(t) ≔ ℘(t−w) − ℘(w)` は `t = 0` でちょうど 1 位の零点**
+（`2w ∉ Λ` のとき）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`u(0) = ℘(−w) − ℘(w) = 0`（偶）、`u′(0) = ℘′(−w) = −℘′(w) ≠ 0`
+（第 625 の `derivWeierstrassP_eq_zero_iff` で `2w ∉ Λ` から `℘′(w) ≠ 0`）。
+
+☆これが `z ≡ −w` での極の打ち消しに要る `û ≔ u/t` の可逆性を与える。 -/
+theorem analyticOrderAt_shiftU (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    analyticOrderAt (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w) 0 = 1 := by
+  have hnw : (0 : ℂ) - w ∉ P.lattice := by
+    intro hc; exact hw (by simpa using neg_mem hc)
+  have hana := analyticAt_shiftU P w hw
+  refine hana.analyticOrderAt_eq_one_of_zero_deriv_ne_zero ?_ ?_
+  · simp only [zero_sub, P.weierstrassP_neg]
+    ring
+  · have hder : HasDerivAt (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w)
+        (P.derivWeierstrassP ((0:ℂ) - w)) 0 :=
+      (HasDerivAt.comp_sub_const 0 w (hasDerivAt_weierstrassP P hnw)).sub_const _
+    rw [hder.deriv]
+    have hne : P.derivWeierstrassP w ≠ 0 := by
+      intro hcc
+      exact h2w ((derivWeierstrassP_eq_zero_iff P w hw).1 hcc)
+    simp only [zero_sub, P.derivWeierstrassP_neg]
+    exact neg_ne_zero.2 hne
+
+/-- ★★★★★★★★**`u = t·û`（`û` は解析的、`û(0) ≠ 0`）**。 -/
+theorem exists_shiftU_factor (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    ∃ û : ℂ → ℂ, AnalyticAt ℂ û 0 ∧
+      ∀ᶠ t in nhds (0:ℂ), P.weierstrassP (t - w) - P.weierstrassP w = t ^ 1 • û t := by
+  have h1 : ((1 : ℕ) : ℕ∞)
+      ≤ analyticOrderAt (fun t : ℂ => P.weierstrassP (t - w) - P.weierstrassP w) 0 := by
+    rw [analyticOrderAt_shiftU P w hw h2w]
+    norm_num
+  obtain ⟨g, hg, hgeq⟩ := (natCast_le_analyticOrderAt (analyticAt_shiftU P w hw)).1 h1
+  exact ⟨g, hg, by simpa using hgeq⟩
+
+/-- ★★★★★★★★★★**`q = t³·g`（`g` は解析的）**——第 614 の位数 `≥ 3` から。
+
+☆これと `u = t·û` を合わせると
+
+    `F_w(t−w) = g·(2û+v)/(4û²) + e(t) + ℘(t−w) + ℘(w)`
+
+となり、★`û(0) = −℘′(w) ≠ 0` なので**右辺は `t = 0` で解析的**
+——`z ≡ −w` の極が消える。 -/
+theorem exists_addQ_factor (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (hana : AnalyticAt ℂ (addQ P w) 0) :
+    ∃ g : ℂ → ℂ, AnalyticAt ℂ g 0 ∧
+      ∀ᶠ t in nhds (0:ℂ), addQ P w t = t ^ 3 • g t := by
+  obtain ⟨g, hg, hgeq⟩ :=
+    (natCast_le_analyticOrderAt hana).1 (three_le_analyticOrderAt_addQ P w hw hana)
+  exact ⟨g, hg, by simpa using hgeq⟩
+
+def analyticOrderAt_shiftU.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘(t−w) − ℘(w) は t = 0 でちょうど 1 位の零点。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_addQ_factor.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(q = t³·g——z ≡ −w の極が消える理由)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
