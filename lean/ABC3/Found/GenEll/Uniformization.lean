@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import ABC3.Found.GenEll.LatticeCurve
+import ABC3.Found.GenEll.WeierstrassODE
 import ABC3.Meta.Claim
 
 /-!
@@ -1142,20 +1143,6 @@ def addDefect_eq_near.src : ABC3.Meta.Source :=
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★`z ≡ −w` の側——`q` の零点の位数 -/
 
-/-- ★★★★★`℘` の微分は `℘′`（格子の外で）。 -/
-theorem hasDerivAt_weierstrassP (P : PeriodPair) (x : ℂ) (hx : x ∉ P.lattice) :
-    HasDerivAt P.weierstrassP (P.derivWeierstrassP x) x := by
-  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
-  have h := ((P.differentiableOn_weierstrassP).differentiableAt (hopen.mem_nhds hx)).hasDerivAt
-  rwa [P.deriv_weierstrassP] at h
-
-/-- ★★★★★`℘′` も格子の外で微分可能。 -/
-theorem hasDerivAt_derivWeierstrassP (P : PeriodPair) (x : ℂ) (hx : x ∉ P.lattice) :
-    HasDerivAt P.derivWeierstrassP (deriv P.derivWeierstrassP x) x := by
-  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
-  exact ((P.differentiableOn_derivWeierstrassP).differentiableAt
-    (hopen.mem_nhds hx)).hasDerivAt
-
 /-- ★★★★★★★★**`z ≡ −w` の側の鍵となる関数**
 
     `q(t) ≔ 2·(℘(t−w) − ℘(w)) − t·(℘′(t−w) − ℘′(w))`
@@ -1182,10 +1169,10 @@ theorem hasDerivAt_addQ (P : PeriodPair) (w t : ℂ) (ht : t - w ∉ P.lattice) 
         - t * deriv P.derivWeierstrassP (t - w)) t := by
   have h1 : HasDerivAt (fun s : ℂ => P.weierstrassP (s - w))
       (P.derivWeierstrassP (t - w)) t :=
-    HasDerivAt.comp_sub_const t w (hasDerivAt_weierstrassP P (t - w) ht)
+    HasDerivAt.comp_sub_const t w (hasDerivAt_weierstrassP P ht)
   have h2 : HasDerivAt (fun s : ℂ => P.derivWeierstrassP (s - w))
       (deriv P.derivWeierstrassP (t - w)) t :=
-    HasDerivAt.comp_sub_const t w (hasDerivAt_derivWeierstrassP P (t - w) ht)
+    HasDerivAt.comp_sub_const t w (hasDerivAt_derivWeierstrassP P ht)
   have h3 : HasDerivAt (fun s : ℂ => s * (P.derivWeierstrassP (s - w) - P.derivWeierstrassP w))
       (1 * (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)
         + t * deriv P.derivWeierstrassP (t - w)) t :=

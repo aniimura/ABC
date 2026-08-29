@@ -2135,3 +2135,21 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 ★★下流のファイルに既にある補題は、上流で書き直すと衝突する
 （下流で使われている参照は上流の定義に解決されるので、直し方は
 「上流の重複を消す」か「新しい定理を下流へ移す」）。
+
+## 三たび——在庫を引かずに書いて名前衝突（2026-08-29、第 612-613）
+
+`Found/GenEll/Uniformization.lean` に `hasDerivAt_weierstrassP` /
+`hasDerivAt_derivWeierstrassP` を書いたら
+
+    error: import ABC3.Found.GenEll.WeierstrassODE failed, environment already
+    contains 'ABC3.Found.GenEll.hasDerivAt_weierstrassP' from ...Uniformization
+
+★★**同じ名前空間の別ファイルに既にあった**（`Found/GenEll/WeierstrassODE.lean:62`）。
+しかも同ファイルには **`deriv_derivWeierstrassP : deriv ℘′ z = 6·℘(z)² − g₂/2`**
+（`℘` の 2 階微分）まであり、これは今まさに必要としていたものだった。
+
+★CLAUDE.md の「在庫」を守ること——**書く前に `node tools/decl-index.mjs` →
+`.cache/decl-index.txt` を grep する**。名前だけでなく**周辺の定理**も見る。
+☆本セッションで 2 度目（第 595 の `valAdd_nonneg_iff`）。
+★★★このエラーは `lake build` の import 段で出るので、
+**単一ファイルのビルドでは気づけない**——`lake build ABC3` を必ず通すこと。
