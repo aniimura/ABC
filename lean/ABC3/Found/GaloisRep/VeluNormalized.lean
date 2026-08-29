@@ -455,6 +455,75 @@ def htFalt_isogeny_le_of_omega_lattice.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(hcov は格子の指数から従う——残るアルキメデスの仮定は hu だけ)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★本日の到達点をまとめた形 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**同種写像の高さ評価
+——外部引用なしで、幾何のデータだけから**。
+
+    `ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★仮定はすべて**幾何のデータ**であり、証明されていない外部定理は含まない:
+
+| 仮定 | 内容 |
+|---|---|
+| `hPC`・`hPC'` | 一様化（`E ⊗ σ ≅ ℂ/Λ_σ`・`E′ ⊗ σ ≅ ℂ/Λ′_σ`） |
+| `α`・`hα`・`hu` | 解析的な同種写像のスケーリング `u′_σ = α_σ·u_σ` |
+| `h₁`・`h₂`・`hdet` | `α_σ·Λ_σ ⊆ Λ′_σ` の指数が `l` |
+| `hmin` | `E` は大域極小 |
+| `hint` | `E′` は各素点で整 |
+
+☆この形が本セッション（第 586-616）の到達点である。★かつては
+
+    `hArch : (l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)`
+
+という**アルキメデスと有限が混ざった不等式**を外部引用として受けていた
+（[FC] Ch. I, Prop 2.7 ＋ アルキメデスの (1,1)-形式）。
+
+★★★★**それが「次数 `l` の同種写像が ℂ 上で何をするか」だけになった**——
+アルキメデス項は `α` が打ち消し合って消え（`§9-1038`、第 596）、
+有限素点項は `neronExp` の非負性で自動になる（`§9-1037`、第 595）。 -/
+theorem htFalt_isogeny_le_of_analytic_minimal (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) (hl : 0 < l)
+    (P P' : (L →+* ℂ) → PeriodPair) (C C' : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hPC' : ∀ σ, C' σ • (E'.map σ) = latticeCurve (P' σ))
+    (α : (L →+* ℂ) → ℂ) (hα : ∀ σ, α σ ≠ 0)
+    (hu : ∀ σ, ((C' σ).u : ℂ) = α σ * ((C σ).u : ℂ))
+    (a b c d : (L →+* ℂ) → ℤ)
+    (h₁ : ∀ σ, α σ * (P σ).ω₁ = (a σ : ℂ) * (P' σ).ω₁ + (b σ : ℂ) * (P' σ).ω₂)
+    (h₂ : ∀ σ, α σ * (P σ).ω₂ = (c σ : ℂ) * (P' σ).ω₁ + (d σ : ℂ) * (P' σ).ω₂)
+    (hdet : ∀ σ, (a σ * d σ - b σ * c σ).natAbs = l)
+    (hmin : ∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0)
+    (hint : ∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l :=
+  htFalt_isogeny_le_of_archDefect_minimal E E' l hl hmin hint
+    (archDefect_isogeny E E' l hl P P' C C' hPC hPC' α hα hu a b c d h₁ h₂ hdet)
+
+def htFalt_isogeny_le_of_analytic_minimal.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(同種写像の高さ評価——外部引用なしで幾何のデータだけから)",
+    sectionId := "genell-prop-3-4" }
+
+def htFalt_isogeny_le_of_analytic_minimal.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆仮定 hPC・hPC′(一様化)は Found/GenEll/JSurjective.lean の " ++
+       "exists_periodPair_of_isElliptic(2026-08-26、第 348)で無条件に取れている。" ++
+       "★残るのは α・hu・h₁・h₂・hdet(解析的な同種写像のデータ)を" ++
+       "代数的な同種写像 E → E/H から作ることである") 13,
+    .implicitStep
+      ("★★★★到達点(2026-08-29、第 617): かつて外部引用として受けていた " ++
+       "hArch((l−1)d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24d·log l)が、" ++
+       "「次数 l の同種写像が ℂ 上で何をするか」だけになった。" ++
+       "★アルキメデス項は α が打ち消し合って消え(第 596)、" ++
+       "有限素点項は neronExp の非負性で自動になる(第 595)") 15,
+    .implicitStep
+      ("☆解析的な同種写像のデータを作るには ℘ の加法定理が要り、" ++
+       "それには「℘ は各値をちょうど 2 回取る」(楕円関数の零点勘定)が要る" ++
+       "——Skeleton/GenEll/AdditionTheorem.lean(第 606・第 615)") 21 ]
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（`hu`・`hcov`・`hfin` が残っている） -/
 
 def htFalt_isogeny_le_of_omega.src : ABC3.Meta.Source :=
