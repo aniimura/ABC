@@ -3605,6 +3605,99 @@ def sub_mem_lattice_of_uniformMap_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ は Λ を法として単射。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★群同型 `ℂ/Λ ≅ E(ℂ)` -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★`Φ(z) = 0 ⟺ z ∈ Λ`——`Φ` の核はちょうど `Λ`。 -/
+theorem uniformMap_eq_zero_iff (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) :
+    uniformMap P hΔ z = 0 ↔ z ∈ P.lattice := by
+  refine ⟨fun h => ?_, fun h => uniformMap_of_mem P hΔ h⟩
+  by_contra hz
+  rw [uniformMap_of_notMem P hΔ hz] at h
+  exact absurd h (by simp)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**一様化写像を加法群準同型として束ねたもの**。
+
+★中身は第 661 の `uniformMap_add`。 -/
+noncomputable def uniformHom (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) :
+    ℂ →+ (latticeCurve P).toAffine.Point :=
+  AddMonoidHom.mk' (uniformMap P hΔ) (uniformMap_add P hΔ)
+
+open scoped Classical in
+@[simp] theorem uniformHom_apply (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) :
+    uniformHom P hΔ z = uniformMap P hΔ z := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★`Φ` の核は `Λ`。 -/
+theorem ker_uniformHom (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) :
+    (uniformHom P hΔ).ker = P.lattice.toAddSubgroup := by
+  ext z
+  simp only [AddMonoidHom.mem_ker, uniformHom_apply, uniformMap_eq_zero_iff,
+    Submodule.mem_toAddSubgroup]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★**`Φ` は全射**——第 604 の `latticePoint_surjective` を
+`Point` の言葉に直したもの。 -/
+theorem uniformMap_surjective (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) :
+    Function.Surjective (uniformMap P hΔ) := by
+  intro Q
+  cases Q with
+  | zero => exact ⟨0, uniformMap_zero P hΔ⟩
+  | some x y h =>
+      obtain ⟨z, hz, hx, hy⟩ := latticePoint_surjective P x y h.left
+      refine ⟨z, ?_⟩
+      rw [uniformMap_of_notMem P hΔ hz]
+      exact point_some_congr hx hy
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**一様化定理——`ℂ/Λ ≅ E(ℂ)` は加法群の同型**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★三つの部品がすべて揃った:
+
+* **全射** —— 第 603（`weierstrassP_surjective`）＋ 第 604
+* **単射** —— 第 624（`mem_lattice_of_shift_eq`）＋ 第 662
+* **準同型** —— 第 661（`uniformMap_add`）
+
+★★★★★☆**どの部品も mathlib に無い**（`§9-1039` で測った通り）。
+☆これで `Lemma 3.5` の「`l`-捻れの部分群 ↔ `Λ` を含む指数 `l` の格子」が
+純粋に群論の言葉で書けるようになる。 -/
+noncomputable def uniformEquiv (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) :
+    (ℂ ⧸ P.lattice.toAddSubgroup) ≃+ (latticeCurve P).toAffine.Point :=
+  AddEquiv.ofBijective
+    (QuotientAddGroup.lift P.lattice.toAddSubgroup (uniformHom P hΔ)
+      (fun z hz => uniformMap_of_mem P hΔ hz))
+    ⟨by
+      intro a b hab
+      obtain ⟨z, rfl⟩ := QuotientAddGroup.mk_surjective a
+      obtain ⟨w, rfl⟩ := QuotientAddGroup.mk_surjective b
+      simp only [QuotientAddGroup.lift_mk, uniformHom_apply] at hab
+      rw [QuotientAddGroup.eq, Submodule.mem_toAddSubgroup,
+        show -z + w = -(z - w) by ring]
+      exact P.lattice.neg_mem (sub_mem_lattice_of_uniformMap_eq P hΔ hab),
+     by
+      intro Q
+      obtain ⟨z, hz⟩ := uniformMap_surjective P hΔ Q
+      exact ⟨(z : ℂ ⧸ P.lattice.toAddSubgroup), by simpa using hz⟩⟩
+
+open scoped Classical in
+@[simp] theorem uniformEquiv_mk (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) :
+    uniformEquiv P hΔ (z : ℂ ⧸ P.lattice.toAddSubgroup) = uniformMap P hΔ z := rfl
+
+def uniformEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一様化定理——ℂ/Λ ≅ E(ℂ) は加法群の同型。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def uniformMap_surjective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ は全射。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
