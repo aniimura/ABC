@@ -250,6 +250,121 @@ def elliptic_liouville.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(楕円関数の Liouville——整で二重周期的なら定数。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★Vélu の公式の解析側 -/
+
+/-- ★★★★★★**Vélu の `X` の解析側**
+
+    `X(z) = Σ_{w ∈ T} ℘_Λ(z + w) − c`
+
+★`T` は `Λ′/Λ` の代表系（`0` を含む）、`c = Σ_{w ∈ T∖{0}} ℘_Λ(w)` のつもりである。
+原文の形 `℘(z) + Σ_{w≠0}[℘(z+w) − ℘(w)]` を、和をひとまとめにして書いたものである。 -/
+noncomputable def veluAnalyticX (P : PeriodPair) (T : Finset ℂ) (c : ℂ) (z : ℂ) : ℂ :=
+  (∑ w ∈ T, P.weierstrassP (z + w)) - c
+
+/-- ★★★★★★★★★★★★**代表系は平行移動で置換される**——`℘` 側。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`σ` は「`w ↦ w + w₀` が `Λ′/Λ` に誘導する置換」を代表系の上に持ち上げたものである
+（`hshift`: `w + w₀ − σ(w) ∈ Λ`）。 -/
+theorem veluAnalyticSum_shift (P : PeriodPair) (T : Finset ℂ) (w₀ : ℂ) (σ : ℂ → ℂ)
+    (hmem : ∀ w ∈ T, σ w ∈ T)
+    (hinj : ∀ w ∈ T, ∀ w' ∈ T, σ w = σ w' → w = w')
+    (hsurj : ∀ v ∈ T, ∃ w, ∃ _ : w ∈ T, σ w = v)
+    (hshift : ∀ w ∈ T, w + w₀ - σ w ∈ P.lattice) (z : ℂ) :
+    ∑ w ∈ T, P.weierstrassP (z + w + w₀) = ∑ w ∈ T, P.weierstrassP (z + w) := by
+  refine Finset.sum_bij (fun w _ => σ w) (fun w hw => hmem w hw)
+    (fun w hw w' hw' h => hinj w hw w' hw' h) hsurj ?_
+  intro w hw
+  have hz : z + w + w₀ = (z + σ w) + (w + w₀ - σ w) := by ring
+  rw [hz]
+  exact P.weierstrassP_add_coe _ ⟨_, hshift w hw⟩
+
+/-- ★★★★★★★★★★★★**代表系は平行移動で置換される**——`℘′` 側。 -/
+theorem derivVeluAnalyticSum_shift (P : PeriodPair) (T : Finset ℂ) (w₀ : ℂ) (σ : ℂ → ℂ)
+    (hmem : ∀ w ∈ T, σ w ∈ T)
+    (hinj : ∀ w ∈ T, ∀ w' ∈ T, σ w = σ w' → w = w')
+    (hsurj : ∀ v ∈ T, ∃ w, ∃ _ : w ∈ T, σ w = v)
+    (hshift : ∀ w ∈ T, w + w₀ - σ w ∈ P.lattice) (z : ℂ) :
+    ∑ w ∈ T, P.derivWeierstrassP (z + w + w₀) = ∑ w ∈ T, P.derivWeierstrassP (z + w) := by
+  refine Finset.sum_bij (fun w _ => σ w) (fun w hw => hmem w hw)
+    (fun w hw w' hw' h => hinj w hw w' hw' h) hsurj ?_
+  intro w hw
+  have hz : z + w + w₀ = (z + σ w) + (w + w₀ - σ w) := by ring
+  rw [hz]
+  exact P.derivWeierstrassP_add_coe _ ⟨_, hshift w hw⟩
+
+/-- ★★★★★★★★★★★★★★★★**Vélu の `X` は `Λ′`-周期的**。
+
+★これが「`X` が `E/H` の座標である」ことの中身である。 -/
+theorem veluAnalyticX_shift (P : PeriodPair) (T : Finset ℂ) (c w₀ : ℂ) (σ : ℂ → ℂ)
+    (hmem : ∀ w ∈ T, σ w ∈ T)
+    (hinj : ∀ w ∈ T, ∀ w' ∈ T, σ w = σ w' → w = w')
+    (hsurj : ∀ v ∈ T, ∃ w, ∃ _ : w ∈ T, σ w = v)
+    (hshift : ∀ w ∈ T, w + w₀ - σ w ∈ P.lattice) (z : ℂ) :
+    veluAnalyticX P T c (z + w₀) = veluAnalyticX P T c z := by
+  simp only [veluAnalyticX]
+  congr 1
+  rw [← veluAnalyticSum_shift P T w₀ σ hmem hinj hsurj hshift z]
+  exact Finset.sum_congr rfl fun w _ => by ring_nf
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**Vélu の公式の解析側——Liouville で閉じる形**。
+
+    `℘_{Λ′}(z) = Σ_{w ∈ T} ℘_Λ(z + w) − c`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★仮定は 3 つ:
+
+* `hper`  : 右辺が `Λ′`-周期的（★`veluAnalyticX_shift` で取れる——**代表系の置換だけ**）
+* `hdiff` : ☆**差が整である**（極が打ち消し合うこと——極の解析が残る）
+* `h0`    : ☆差が原点で `0`
+
+★★★`hper` は本ファイルで無条件に取れており、残るのは `hdiff`（極の打ち消し）と `h0`。
+☆すなわち **Vélu の公式の解析側は「極の解析」1 点に絞られた**。
+
+★★★★これが `Found/GenEll/Velu.lean`（第 586-593）の代数側と対になる。
+両者を繋げば `Found/GaloisRep/VeluNormalized.lean` の
+`htFalt_isogeny_le_of_analytic`（第 596）の入力が揃う。 -/
+theorem weierstrassP_eq_of_liouville (P P' : PeriodPair) (T : Finset ℂ) (c : ℂ)
+    (hper : ∀ z : ℂ, ∀ l ∈ P'.lattice, veluAnalyticX P T c (z + l) = veluAnalyticX P T c z)
+    (hdiff : Differentiable ℂ (fun z => P'.weierstrassP z - veluAnalyticX P T c z))
+    (h0 : P'.weierstrassP 0 - veluAnalyticX P T c 0 = 0) (z : ℂ) :
+    P'.weierstrassP z = veluAnalyticX P T c z := by
+  have hkey : ∀ (y : ℂ), ∀ l ∈ P'.lattice,
+      (fun z => P'.weierstrassP z - veluAnalyticX P T c z) (y + l)
+        = (fun z => P'.weierstrassP z - veluAnalyticX P T c z) y := by
+    intro y l hl
+    simp only
+    rw [P'.weierstrassP_add_coe y ⟨l, hl⟩, hper y l hl]
+  have h := elliptic_liouville_eq_zero P' _ hdiff hkey h0 z
+  simpa [sub_eq_zero] using h
+
+def veluAnalyticX_shift.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の X は Λ′-周期的——代表系は平行移動で置換される。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_eq_of_liouville.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の公式の解析側——Liouville で閉じる形。残るのは極の解析)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_eq_of_liouville.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆仮定 hdiff: ℘_{Λ′}(z) − Σ_{w∈T} ℘_Λ(z+w) + c が整であること。" ++
+       "★両辺とも Λ′ の各点で 2 位の極をもち、主要部が一致するので差は整になる。" ++
+       "★★mathlib は order_weierstrassP(各格子点で 2 位の極)を持っているので" ++
+       "道具はある(2026-08-29 に測定)") 8,
+    .implicitStep
+      ("☆仮定 h0: 差が原点で 0 であること。★c の取り方(c = Σ_{w≠0} ℘_Λ(w))で決まる") 6,
+    .implicitStep
+      ("★★★到達点(2026-08-29、第 599): Vélu の公式の解析側が" ++
+       "「代表系の置換」(無条件で取れた)と「極の解析」(残り)に分離した。" ++
+       "★代数側は Found/GenEll/Velu.lean が持っている(第 586-593)") 8 ]
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
