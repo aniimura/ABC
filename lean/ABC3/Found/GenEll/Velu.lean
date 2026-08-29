@@ -288,6 +288,30 @@ theorem velu2_equation (W : WeierstrassCurve F) (x₀ y₀ x y : F)
   field_simp
   linear_combination ((3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄ - W.a₁ * y₀) - (x - x₀) ^ 2) ^ 2 * h
 
+/-- ★★★★★★★★★★★★★★★★★★★★**`l = 2`: `φ^*(ω′) = ω`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+不変微分は `ω = dx/(2y + a₁x + a₃)` なので、`φ^*(ω′) = ω` は
+
+    `(dX/dx)·(2y + a₁x + a₃) = 2Y + a₁X + a₃`
+
+と同じことである（`dX/dx = 1 − v_Q/(x−x₀)²`）。
+
+★★★**これが Vélu の正規化**であり、`§9-1027`（第 585）の見立て
+「アルキメデス項が消える」の中身である
+——ℂ 上で `ω = dz` なら周期格子がそのまま `Λ ⊆ Λ′` になる。
+★2-捩れ条件がちょうど効く（残差は `(2y₀+a₁x₀+a₃)·(−v_Q)`）。 -/
+theorem velu2_omega (W : WeierstrassCurve F) (x₀ y₀ x y : F)
+    (h2 : 2 * y₀ + W.a₁ * x₀ + W.a₃ = 0) (hx : x ≠ x₀) :
+    (1 - veluV2 W x₀ y₀ / (x - x₀) ^ 2) * (2 * y + W.a₁ * x + W.a₃)
+      = 2 * velu2Y W x₀ y₀ x y + W.a₁ * velu2X W x₀ y₀ x + W.a₃ := by
+  have hne : x - x₀ ≠ 0 := sub_ne_zero.2 hx
+  simp only [velu2X, velu2Y, veluV2, veluGx]
+  field_simp
+  linear_combination (-(3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄ - W.a₁ * y₀)) * h2
+
 end TwoIsogeny
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★`l = 3` の場合 -/
@@ -351,6 +375,28 @@ theorem velu3_equation (W : WeierstrassCurve F) (xQ yQ x y : F)
       - 12*W.a₁*xQ*yQ - 8*W.a₂*x*xQ + 8*W.a₂*xQ^2 - 3*W.a₃^2 - 12*W.a₃*yQ - 4*W.a₄*x
       + 4*W.a₄*xQ + 6*x^3 - 18*x^2*xQ + 6*x*xQ^2 + 6*xQ^3 - 12*yQ^2)) * hpsi
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`l = 3`: `φ^*(ω′) = ω`——★仮定なし**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+    `(dX/dx)·(2y + a₁x + a₃) = 2Y + a₁X + a₃`
+
+（`dX/dx = 1 − v_Q/(x−xQ)² − 2u_Q/(x−xQ)³`）。
+
+★★★**`l = 3` では位数の条件すら要らず、恒等式として成り立つ**
+——Vélu の写像は最初から `ω` を保つように書かれている。
+★★これが `§9-1027`（第 585）の見立ての中核であり、
+ℂ 上で周期格子が `Λ ⊆ Λ′` になる（スケーリングが入らない）ことを意味する。 -/
+theorem velu3_omega (W : WeierstrassCurve F) (xQ yQ x y : F) (hx : x ≠ xQ) :
+    (1 - veluV W xQ yQ / (x - xQ) ^ 2 - 2 * veluU W xQ yQ / (x - xQ) ^ 3)
+        * (2 * y + W.a₁ * x + W.a₃)
+      = 2 * velu3Y W xQ yQ x y + W.a₁ * velu3X W xQ yQ x + W.a₃ := by
+  have hne : x - xQ ≠ 0 := sub_ne_zero.2 hx
+  simp only [velu3X, velu3Y, veluV, veluU, veluGx, veluGy]
+  field_simp
+  ring
+
 end ThreeIsogeny
 
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
@@ -363,6 +409,11 @@ def velu2_equation.src : ABC3.Meta.Source :=
 def velu3_equation.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の 3-同種写像は本当に商へ落ちる——u_Q ≠ 0 の一般形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def velu3_omega.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の正規化 φ^*(ω′) = ω——l = 3 では仮定なし。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluCurve_scale.src : ABC3.Meta.Source :=
