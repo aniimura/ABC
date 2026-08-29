@@ -2611,6 +2611,84 @@ def y_addition_algebraic.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(y 座標の加法公式の代数の核——2 つの ODE だけから。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`y` 座標の加法公式**
+
+    `℘′(z+w) = −R·(℘(z+w) − ℘(z)) − ℘′(z)`,  `R = (℘′(z) − ℘′(w))/(℘(z) − ℘(w))`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★☆**これで一様化 `(℘, ℘′/2) : ℂ/Λ → E(ℂ)` は群準同型である**
+——`latticeCurve` の群法則（`a₁ = a₂ = a₃ = 0`）は
+`x₃ = λ² − x₁ − x₂`・`y₃ = −λ(x₃ − x₁) − y₁`（`λ = R/2`）だから。
+
+★機構: 加法定理（第 641）を `z` で微分すると `℘′(z+w) = R·R′/2 − ℘′(z)`。
+第 644 の代数の核から `R′ = −R²/2 + 4℘(z) + 2℘(w) = −2(℘(z+w) − ℘(z))`。 -/
+theorem derivWeierstrassP_addition (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    P.derivWeierstrassP (z + w)
+      = -((P.derivWeierstrassP z - P.derivWeierstrassP w)
+            / (P.weierstrassP z - P.weierstrassP w))
+          * (P.weierstrassP (z + w) - P.weierstrassP z)
+        - P.derivWeierstrassP z := by
+  set D : ℂ := P.weierstrassP z - P.weierstrassP w with hD
+  set N : ℂ := P.derivWeierstrassP z - P.derivWeierstrassP w with hN
+  -- 左辺の微分
+  have hL : HasDerivAt (fun s : ℂ => P.weierstrassP (s + w))
+      (P.derivWeierstrassP (z + w)) z :=
+    HasDerivAt.comp_add_const z w (hasDerivAt_weierstrassP P hzw)
+  -- 右辺の微分
+  have hnum : HasDerivAt (fun s : ℂ => P.derivWeierstrassP s - P.derivWeierstrassP w)
+      (6 * P.weierstrassP z ^ 2 - P.g₂ / 2) z := by
+    have h := (hasDerivAt_derivWeierstrassP P hz).sub_const (P.derivWeierstrassP w)
+    rwa [deriv_derivWeierstrassP P hz] at h
+  have hden : HasDerivAt (fun s : ℂ => P.weierstrassP s - P.weierstrassP w)
+      (P.derivWeierstrassP z) z :=
+    (hasDerivAt_weierstrassP P hz).sub_const _
+  have hR : HasDerivAt (fun s : ℂ => (P.derivWeierstrassP s - P.derivWeierstrassP w)
+        / (P.weierstrassP s - P.weierstrassP w))
+      (((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) * D - N * P.derivWeierstrassP z) / D ^ 2) z :=
+    hnum.div hden hne
+  have hRHS : HasDerivAt (fun s : ℂ => ((P.derivWeierstrassP s - P.derivWeierstrassP w)
+        / (P.weierstrassP s - P.weierstrassP w)) ^ 2 / 4
+      - P.weierstrassP s - P.weierstrassP w)
+      (2 * (N / D) * (((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) * D
+          - N * P.derivWeierstrassP z) / D ^ 2) / 4 - P.derivWeierstrassP z) z := by
+    have h1 : HasDerivAt (fun s : ℂ => ((P.derivWeierstrassP s - P.derivWeierstrassP w)
+          / (P.weierstrassP s - P.weierstrassP w)) ^ 2 / 4)
+        (2 * (N / D) * (((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) * D
+          - N * P.derivWeierstrassP z) / D ^ 2) / 4) z := by
+      have h2 := (hR.pow 2).div_const 4
+      simpa using h2
+    simpa using (h1.sub (hasDerivAt_weierstrassP P hz)).sub_const (P.weierstrassP w)
+  -- 加法定理は開集合で成り立つ
+  have hEq : (fun s : ℂ => P.weierstrassP (s + w))
+      =ᶠ[nhds z] fun s : ℂ => ((P.derivWeierstrassP s - P.derivWeierstrassP w)
+        / (P.weierstrassP s - P.weierstrassP w)) ^ 2 / 4
+      - P.weierstrassP s - P.weierstrassP w := by
+    filter_upwards [(isOpen_goodSet P w).mem_nhds ⟨hz, hzw, hne⟩] with s hs
+    exact weierstrassP_addition P w hw h2w hs.1 hs.2.1 hs.2.2
+  have hderiv : P.derivWeierstrassP (z + w)
+      = 2 * (N / D) * (((6 * P.weierstrassP z ^ 2 - P.g₂ / 2) * D
+          - N * P.derivWeierstrassP z) / D ^ 2) / 4 - P.derivWeierstrassP z := by
+    rw [← hL.deriv, hEq.deriv_eq, hRHS.deriv]
+  -- 代数の核（第 644）を入れる
+  have halg := y_addition_algebraic P z w hz hw
+  rw [← hD, ← hN] at halg
+  have hadd := weierstrassP_addition P w hw h2w hz hzw hne
+  rw [← hD, ← hN] at hadd
+  rw [hderiv, hadd, halg]
+  field_simp
+  ring
+
+def derivWeierstrassP_addition.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(y 座標の加法公式——一様化は群準同型。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
