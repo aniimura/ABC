@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.FaltingsWitness
+import ABC3.Found.GaloisRep.HtFinJ
 import ABC3.Found.GenEll.JArchBound
 import ABC3.Meta.Claim
 
@@ -30,7 +31,8 @@ import ABC3.Meta.Claim
 | 2 | 曲線の言葉に翻訳（`τ` を消す） | `Found/GenEll/JArchBound.lean`（§9-1001） |
 | 3 | 埋め込みについて足して `[L:ℚ]` で割る | ★本ファイル `htArchJ_add_archSum_le` |
 | 4 | `12·ht^Falt = deg∞ − archSum/d` を代入 | ★本ファイル `htArchJ_le` |
-| 5 | 有限素点側を足す | ★本ファイル `htJ_le_htFalt` |
+| 5 | 有限素点側 `h_fin(j) ≤ deg∞` | `Found/GaloisRep/HtFinJ.lean`（§9-1003） |
+| 6 | 足して仕上げる | ★本ファイル `exists_htJ_le_htFalt'` |
 
 ★段 4 の結論は
 
@@ -42,13 +44,14 @@ import ABC3.Meta.Claim
 
 （`deg∞ ≥ 0` と `ϵ > 0`）。★★★**`ϵ·deg∞` の余裕まで残る。**
 
-## ☆残っているのは有限素点側の 1 本だけ
+## ★★★★★★★★★★★★有限素点側も閉じた（2026-08-29、第 554）
 
-☆`h_fin(j) ≤ deg∞`——半安定なら `v(j) = v(c₄³) − v(Δ_min)` で
-乗法還元では `v(c₄) = 0` なので `v(j) = −v(Δ_min) ≤ 0`、
-したがって `log⁺|j|_v = v(Δ_min)·log q_v` で**等号**になる。
-★本ファイルではこれを仮定 `hfin : htFinJ ≤ degInfOf L E` として受ける
-——★★**受けた仮定は実装ではない**（`check.mjs` B6）。`.src` は条つきにする。
+`h_fin(j) ≤ deg∞` は `Found/GaloisRep/HtFinJ.lean` の
+**`htFinJ_le_degInfOf`** で**無条件に**証明された
+（極小モデルの `c₄` が整であること `v_p(c₄') ≥ 0` だけで出る。
+☆半安定なら `v_p(c₄') = 0` で等号になる——原文が念頭に置く場合）。
+
+★★★したがって **`exists_htJ_le_htFalt'` は無条件**である。
 -/
 
 namespace ABC3.Found.GaloisRep
@@ -156,6 +159,29 @@ theorem exists_htJ_le_htFalt (eps : ℝ) (heps : 0 < eps) :
   obtain ⟨C, hC⟩ := exists_logPlus_j_bound eps heps
   exact ⟨C, fun L _ _ E _ htFinJ hfin => htJ_le_htFalt eps heps C hC L E htFinJ hfin⟩
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★仕上げ——**無条件**の形 -/
+
+/-- ★★★★★★**`j` の（naive Weil）高さ** `h(j) = h_fin(j) + h∞(j)`。 -/
+noncomputable def htJ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
+    [E.IsElliptic] : ℝ :=
+  htFinJ L E + htArchJ L E
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**`h(j) ≤ 12(1+ϵ)·ht^Falt + C`——★無条件**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`Found/GaloisRep/HtFinJ.lean` の `htFinJ_le_degInfOf`（`§9-1003`）が
+仮定 `hfin` を**無条件で**与えるので、`htJ_le_htFalt` の仮定が外れる。
+
+★★★★`C` は `L` にも `E` にも依らない普遍定数である。 -/
+theorem exists_htJ_le_htFalt' (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic],
+      htJ L E ≤ 12 * (1 + eps) * htFaltOf L E + C := by
+  obtain ⟨C, hC⟩ := exists_logPlus_j_bound eps heps
+  exact ⟨C, fun L _ _ E _ =>
+    htJ_le_htFalt eps heps C hC L E (htFinJ L E) (htFinJ_le_degInfOf E)⟩
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つきである。指標には数えない** -/
 
 def htArchJ.src : ABC3.Meta.Source :=
@@ -173,15 +199,15 @@ def exists_htJ_le_htFalt.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(h(j) ≤ 12(1+ϵ)ht^Falt + C——★有限素点側 h_fin(j) ≤ deg∞ を仮定)",
     sectionId := "genell-prop-3-4" }
 
+def exists_htJ_le_htFalt'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(h(j) ≤ 12(1+ϵ)ht^Falt + C——★★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 def exists_htJ_le_htFalt.needs : List ABC3.Meta.ProofObligation :=
   [ .otherPaper "[Silv2]"
       ("Proposition 2.1——★原文が Prop 3.4 の根拠として引く。" ++
        "★★★**アルキメデス側は §9-1000〜1002 で閉じた**") 3,
-    .folklore
-      ("☆**有限素点側**: `h_fin(j) ≤ deg∞`。半安定なら " ++
-       "v(j) = v(c₄³) − v(Δ_min) で、乗法還元では v(c₄) = 0 なので " ++
-       "v(j) = −v(Δ_min) ≤ 0、したがって log⁺|j|_v = v(Δ_min)·log q_v で**等号**。" ++
-       "★本ファイルは仮定 hfin として受けている——**受けた仮定は実装ではない**") 7,
     .implicitStep
       ("★★★★★★★★★★到達点(2026-08-29、第 553): " ++
        "ResearchPaper/mathlib-gap.json の finalTarget20260829 が" ++
@@ -191,6 +217,10 @@ def exists_htJ_le_htFalt.needs : List ABC3.Meta.ProofObligation :=
        "(2) 曲線の言葉へ(§9-1001)、(3) 埋め込みについて和、" ++
        "(4) 12·ht^Falt = deg∞ − archSum/d を代入、(5) 有限素点側を足す。" ++
        "★★段 4 の htArchJ_le は**無条件**である") 9,
+    .implicitStep
+      ("★★★★★★★★★★★★2026-08-29(第 554): 有限素点側 h_fin(j) ≤ deg∞ も" ++
+       "Found/GaloisRep/HtFinJ.lean で**証明された**(半安定を仮定せずに)。" ++
+       "★★これで exists_htJ_le_htFalt' は**無条件**である") 9,
     .implicitStep
       ("★次の接続先: Found/GenEll/FiniteFromNorthcott.lean の " ++
        "finite_of_le_of_northcott の仮定 hle は本ファイルが与える。" ++
