@@ -3343,6 +3343,100 @@ def derivWeierstrassP_duplication.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(倍加の y 座標の公式——第 657 の z → w 極限。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`Point` の倍加との一致**。
+
+★mathlib の `slope` は `x₁ = x₂`・`y₁ ≠ negY` のとき
+`(3x₁² + 2a₂x₁ + a₄ − a₁y₁)/(y₁ − negY x₁ y₁)`、`latticeCurve` では
+`(3℘w² − g₂/4)/℘′w = ℘″(w)/(2℘′w)`。
+☆`addX` は第 650、`addY` は第 659 と一致する。 -/
+theorem latticePoint_double (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {w : ℂ}
+    (hw : w ∉ P.lattice) (h2w : 2 * w ∉ P.lattice)
+    (hww : w + w ∉ P.lattice) :
+    (WeierstrassCurve.Affine.Point.some (latticePointX P w) (latticePointY P w)
+        (nonsingular_latticePoint P hΔ w hw)
+      + WeierstrassCurve.Affine.Point.some (latticePointX P w) (latticePointY P w)
+        (nonsingular_latticePoint P hΔ w hw) : (latticeCurve P).toAffine.Point)
+      = WeierstrassCurve.Affine.Point.some (latticePointX P (w + w))
+          (latticePointY P (w + w)) (nonsingular_latticePoint P hΔ (w + w) hww) := by
+  have hpne : P.derivWeierstrassP w ≠ 0 := fun hc =>
+    h2w ((derivWeierstrassP_eq_zero_iff P w hw).1 hc)
+  have hnegY : (latticeCurve P).toAffine.negY (latticePointX P w) (latticePointY P w)
+      = -latticePointY P w := by
+    simp [WeierstrassCurve.Affine.negY, latticeCurve]
+  have hyne : latticePointY P w
+      ≠ (latticeCurve P).toAffine.negY (latticePointX P w) (latticePointY P w) := by
+    rw [hnegY]
+    intro hc
+    refine hpne ?_
+    simp only [latticePointY] at hc
+    linear_combination hc
+  have hxy : ¬(latticePointX P w = latticePointX P w
+      ∧ latticePointY P w
+        = (latticeCurve P).toAffine.negY (latticePointX P w) (latticePointY P w)) :=
+    fun h => hyne h.2
+  have hslope : (latticeCurve P).toAffine.slope (latticePointX P w) (latticePointX P w)
+      (latticePointY P w) (latticePointY P w)
+      = (3 * P.weierstrassP w ^ 2 - P.g₂ / 4) / P.derivWeierstrassP w := by
+    rw [WeierstrassCurve.Affine.slope, if_pos rfl, if_neg hyne]
+    simp only [latticeCurve, latticePointX, latticePointY, WeierstrassCurve.Affine.negY]
+    congr 1
+    · ring
+    · ring
+  have hadd := weierstrassP_duplication P hw h2w
+  have hadd' := derivWeierstrassP_duplication P hw h2w
+  have hX : (latticeCurve P).toAffine.addX (latticePointX P w) (latticePointX P w)
+      ((latticeCurve P).toAffine.slope (latticePointX P w) (latticePointX P w)
+        (latticePointY P w) (latticePointY P w))
+      = latticePointX P (w + w) := by
+    rw [hslope, WeierstrassCurve.Affine.addX]
+    simp only [latticeCurve, latticePointX]
+    rw [hadd]
+    field_simp
+    ring
+  have hY : (latticeCurve P).toAffine.addY (latticePointX P w) (latticePointX P w)
+      (latticePointY P w)
+      ((latticeCurve P).toAffine.slope (latticePointX P w) (latticePointX P w)
+        (latticePointY P w) (latticePointY P w))
+      = latticePointY P (w + w) := by
+    rw [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY, hX, hslope]
+    simp only [WeierstrassCurve.Affine.negY, latticeCurve, latticePointX, latticePointY]
+    rw [hadd']
+    field_simp
+    ring
+  rw [WeierstrassCurve.Affine.Point.add_some hxy]
+  congr 1
+
+/-- ★★★★★★★★★★★★**`℘z = ℘w` なら `z ≡ ±w`**——第 624 の言い換え。 -/
+theorem sub_or_add_mem_of_weierstrassP_eq (P : PeriodPair) {z w : ℂ}
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice)
+    (hpz : P.weierstrassP z = P.weierstrassP w) :
+    z - w ∈ P.lattice ∨ z + w ∈ P.lattice := by
+  have hnw : -w ∉ P.lattice := fun hm => hw (by simpa using neg_mem hm)
+  have hsq : P.derivWeierstrassP z ^ 2 = P.derivWeierstrassP w ^ 2 := by
+    rw [P.derivWeierstrassP_sq z hz, P.derivWeierstrassP_sq w hw, hpz]
+  rcases sq_eq_sq_iff_eq_or_eq_neg.1 hsq with hcase | hcase
+  · left
+    refine mem_lattice_of_shift_eq P (z - w) hw ?_ ?_ ?_
+    · rw [show w + (z - w) = z by ring]; exact hz
+    · rw [show w + (z - w) = z by ring]; exact hpz
+    · rw [show w + (z - w) = z by ring]; exact hcase
+  · right
+    refine mem_lattice_of_shift_eq P (z + w) hnw ?_ ?_ ?_
+    · rw [show -w + (z + w) = z by ring]; exact hz
+    · rw [show -w + (z + w) = z by ring, P.weierstrassP_neg]; exact hpz
+    · rw [show -w + (z + w) = z by ring, P.derivWeierstrassP_neg, hcase]
+
+def latticePoint_double.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Point の倍加との一致。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sub_or_add_mem_of_weierstrassP_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘z = ℘w なら z ≡ ±w——単射性の言い換え。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
