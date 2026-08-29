@@ -3071,6 +3071,48 @@ def weierstrassP_addition_two_torsion.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(両方 2-捩れの場合の加法定理。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**加法定理（一般形）**
+——2-捩れの仮定なし。
+
+    `℘(z+w) = (1/4)·((℘′(z) − ℘′(w))/(℘(z) − ℘(w)))² − ℘(z) − ℘(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★3 つの場合に分ける（第 653 の記録）:
+
+* `2w ∉ Λ` —— 第 641
+* `2w ∈ Λ` かつ `2z ∉ Λ` —— 第 654（`R` の対称性）
+* 両方 2-捩れ —— 第 655（`R = 0` になり `℘(z+w) = −℘z − ℘w`）
+
+★★★☆**これで `℘` の加法定理が無条件（`z, w, z+w ∉ Λ` と `℘z ≠ ℘w` のみ）になった**。 -/
+theorem weierstrassP_addition_general (P : PeriodPair) {z w : ℂ}
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    P.weierstrassP (z + w)
+      = ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+          / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+        - P.weierstrassP z - P.weierstrassP w := by
+  by_cases h2w : 2 * w ∈ P.lattice
+  · by_cases h2z : 2 * z ∈ P.lattice
+    · -- 両方 2-捩れ
+      have hpz : P.derivWeierstrassP z = 0 :=
+        derivWeierstrassP_eq_zero_of_two_mem P z h2z
+      have hpw : P.derivWeierstrassP w = 0 :=
+        derivWeierstrassP_eq_zero_of_two_mem P w h2w
+      have hxne : P.weierstrassP z ≠ P.weierstrassP w := fun hc =>
+        hne (by linear_combination hc)
+      rw [weierstrassP_addition_two_torsion P hz hw hzw h2z h2w hxne, hpz, hpw]
+      simp
+    · -- 2z ∉ Λ
+      exact weierstrassP_addition' P z hz h2z hw hzw hne
+  · exact weierstrassP_addition P w hw h2w hz hzw hne
+
+def weierstrassP_addition_general.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘ の加法定理・一般形——2-捩れの仮定なし。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
