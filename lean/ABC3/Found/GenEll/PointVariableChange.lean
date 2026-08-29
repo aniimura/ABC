@@ -884,6 +884,115 @@ def pointCoords.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(点の座標——Vélu の商に渡す点集合を Finset (F × F) で書くため)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★体の準同型による点の写像 -/
+
+section RingHomPoint
+
+variable {F K : Type*} [Field F] [Field K]
+
+/-- ★★★★★★**体の準同型による点の写像**。
+
+★mathlib の `Affine.Point.map` は `F →ₐ[S] K`（代数準同型）に対するもので、
+`Algebra` インスタンスの設定が要る。ここでは素の環準同型で書く。 -/
+noncomputable def rhPoint (f : F →+* K) (W : WeierstrassCurve F) :
+    W.toAffine.Point → (W.map f).toAffine.Point
+  | .zero => 0
+  | .some x y h =>
+      .some (f x) (f y) ((W.toAffine.map_nonsingular (f := f) f.injective x y).2 h)
+
+@[simp] theorem rhPoint_zero (f : F →+* K) (W : WeierstrassCurve F) :
+    rhPoint f W 0 = 0 := rfl
+
+@[simp] theorem rhPoint_some (f : F →+* K) (W : WeierstrassCurve F) {x y : F}
+    (h : W.toAffine.Nonsingular x y) :
+    rhPoint f W (.some x y h)
+      = .some (f x) (f y) ((W.toAffine.map_nonsingular (f := f) f.injective x y).2 h) := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★**体の準同型による点の写像は加法を保つ**。
+
+★mathlib の `map_negY`・`map_addX`・`map_addY`・`map_slope` がそのまま効く
+——変数変換（第 684）と違い `slope` に例外がない。 -/
+theorem rhPoint_add (f : F →+* K) (W : WeierstrassCurve F)
+    (Pt Qt : W.toAffine.Point) :
+    rhPoint f W (Pt + Qt) = rhPoint f W Pt + rhPoint f W Qt := by
+  rcases Pt with _ | ⟨x₁, y₁, h₁⟩
+  · change rhPoint f W (0 + Qt) = rhPoint f W 0 + rhPoint f W Qt
+    rw [zero_add, rhPoint_zero, zero_add]
+  rcases Qt with _ | ⟨x₂, y₂, h₂⟩
+  · change rhPoint f W (_ + 0) = rhPoint f W _ + rhPoint f W 0
+    rw [add_zero, rhPoint_zero, add_zero]
+  by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
+  · have hx' : f x₁ = f x₂ := by rw [hxy.1]
+    have hy' : f y₁ = (W.map f).toAffine.negY (f x₂) (f y₂) := by
+      rw [WeierstrassCurve.Affine.map_negY, hxy.2]
+    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, rhPoint_zero,
+      rhPoint_some, rhPoint_some,
+      WeierstrassCurve.Affine.Point.add_of_Y_eq hx' hy']
+  · have hxy' : ¬(f x₁ = f x₂
+        ∧ f y₁ = (W.map f).toAffine.negY (f x₂) (f y₂)) := by
+      rintro ⟨ha, hb⟩
+      rw [WeierstrassCurve.Affine.map_negY] at hb
+      exact hxy ⟨f.injective ha, f.injective hb⟩
+    rw [WeierstrassCurve.Affine.Point.add_some hxy, rhPoint_some, rhPoint_some,
+      rhPoint_some, WeierstrassCurve.Affine.Point.add_some hxy']
+    refine point_some_congr' ?_ ?_
+    · rw [WeierstrassCurve.Affine.map_slope, WeierstrassCurve.Affine.map_addX]
+    · rw [WeierstrassCurve.Affine.map_slope, WeierstrassCurve.Affine.map_addY]
+
+/-- ★★★★★★**体の準同型による点の写像は単射**。 -/
+theorem rhPoint_injective (f : F →+* K) (W : WeierstrassCurve F) :
+    Function.Injective (rhPoint f W) := by
+  rintro (_ | ⟨x₁, y₁, h₁⟩) (_ | ⟨x₂, y₂, h₂⟩) hab
+  · rfl
+  · exact absurd hab (by simp [rhPoint])
+  · exact absurd hab (by simp [rhPoint])
+  · simp only [rhPoint_some] at hab
+    have hx : f x₁ = f x₂ := by injection hab with hx hy
+    have hy : f y₁ = f y₂ := by injection hab with hx hy
+    exact point_some_congr' (f.injective hx) (f.injective hy)
+
+open scoped Classical in
+/-- ★★★★★★★★`n • ` と可換。 -/
+theorem rhPoint_nsmul (f : F →+* K) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(W.map f).IsElliptic] (Pt : W.toAffine.Point) (n : ℕ) :
+    rhPoint f W (n • Pt) = n • rhPoint f W Pt := by
+  induction n with
+  | zero => simp only [zero_nsmul, rhPoint_zero]
+  | succ k ih => rw [succ_nsmul, succ_nsmul, rhPoint_add, ih]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**体の準同型は点の位数を保つ**。
+
+★☆第 686（変数変換）と合わせて、`L` 上の位数 `l` の点が
+各 `σ` で `latticeCurve (P σ)` の位数 `l` の点に対応する。 -/
+theorem addOrderOf_rhPoint (f : F →+* K) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(W.map f).IsElliptic] (Pt : W.toAffine.Point) :
+    addOrderOf (rhPoint f W Pt) = addOrderOf Pt := by
+  refine Nat.dvd_antisymm ?_ ?_
+  · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    rw [← rhPoint_nsmul, addOrderOf_nsmul_eq_zero, rhPoint_zero]
+  · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    refine rhPoint_injective f W ?_
+    rw [rhPoint_nsmul, rhPoint_zero, addOrderOf_nsmul_eq_zero]
+
+/-- ★★★★★★座標の上では `f` の成分ごとの適用。 -/
+theorem pointCoords_rhPoint (f : F →+* K) (W : WeierstrassCurve F) {x y : F}
+    (h : W.toAffine.Nonsingular x y) :
+    pointCoords (rhPoint f W (.some x y h)) = (f x, f y) := rfl
+
+end RingHomPoint
+
+def rhPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(体の準同型による点の写像——素の環準同型で書いた形)",
+    sectionId := "genell-lemma-3-5" }
+
+def addOrderOf_rhPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(体の準同型は点の位数を保つ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
