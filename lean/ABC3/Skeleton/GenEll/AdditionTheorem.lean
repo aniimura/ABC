@@ -170,6 +170,22 @@ def weierstrassP_add.needs : List ProofObligation :=
        "★**次の入口はそこ**——楕円関数の零点勘定である。" ++
        "☆道具の Liouville(第 598)・除去可能特異点(第 603)・" ++
        "解析的位数(mathlib の natCast_le_analyticOrderAt)はすべて揃っている") 21,
+    .implicitStep
+      ("★★2026-08-29(第 618)で零点勘定の第一の煉瓦が置けた: " ++
+       "Found/GenEll/Uniformization.lean の elliptic_boundary_integral_zero" ++
+       "(周期平行四辺形の境界積分は消える)。★機構は周期性だけで Cauchy は要らない" ++
+       "——向かい合う辺が打ち消し合う") 13,
+    .implicitStep
+      ("★★★次の一手の候補は 2 つある。" ++
+       "(A) 留数定理経路: ∮ f = 2πi·Σ res を平行四辺形で建て、第 618 と合わせて " ++
+       "Σ res = 0、f = g′/g で偏角の原理。☆平行四辺形の輪郭変形(ホモトピー)が要り、" ++
+       "mathlib の Cauchy は軸平行な長方形版なので直接は当たらない。" ++
+       "(B) Jensen 経路: mathlib の MeromorphicOn.circleAverage_log_norm" ++
+       "(Analysis/Complex/JensenFormula.lean)を大きな円に当てる。" ++
+       "★℘ は格子の近傍を除いて有界なので circleAverage log‖℘−c‖ は O(1)、" ++
+       "一方 Σ_{|z|<R} ord_z·log(R/|z|) は基本領域あたりの零点数を N とすると " ++
+       "(N−2)·(πR²/covol) の程度で伸びる。★★したがって N = 2。" ++
+       "☆こちらは mathlib の在庫にそのまま乗るが、評価の詰めが要る") 21,
     .otherPaper "GenEll" "Lemma 3.5(l-捩れの大域的な階数 1 の部分群)" 15 ]
 
 end ABC3.Skeleton.GenEll
