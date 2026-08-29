@@ -2268,6 +2268,8 @@
     ],
     "remaining": "∀ p ∈ S（悪い還元の素点）, v_p(Δ_min(E′)) = l·v_p(Δ_min(E))。これは Tate 曲線の Δ = q·∏(1−qⁿ)²⁴ から v(Δ_min) = v(q_E) を出し、Lemma 3.2, (ii)（vAdd v (q^l) = l·vAdd v q、Found/GenEll/Lemma32.lean で証明済み）に繋ぐことである",
     "mathlibGap": "Tate 曲線そのもの（Δ = q·∏(1−qⁿ)²⁴）が mathlib に無い。Interface/GenEll/TateLocal.lean は vq（= v_K(q_E)）を posit しているが、それと minDeltaExp の一致は posit していない——ここが最後の接続",
-    "measuredAt": "2026-08-29"
+    "measuredAt": "2026-08-29",
+    "correction20260829": "★訂正: 「Tate 曲線が mathlib に無いので遠い」と書いたが、**本プロジェクトは Tate 曲線を既に建てている**（Found/GaloisRep に Tate*.lean が 97 ファイル、tateCurveAt・tateA4・tateA6・tateParamR_spec・tateCurveAt_Delta_eq_mul_unit など）。とくに Found/GaloisRep/LocalHeightDelta.lean の localHeight_eq_vAdd_Delta（第 320）が **localHeightOf W h = v(Δ_min)** を完全に証明している——これが探していた橋そのものである",
+    "realRemaining": "残るのは (1) minDeltaExp p E（L 上、HeightOneSpectrum で定義）を p での完備化 R = 𝓞_p の上の vAdd (tateDvrVal R K) に合わせる段（完備化の配管）と、(2) localHeightOf E′ = l · localHeightOf E すなわち q_{E′} = q_E^l（Lemma 3.2, (ii) の vAdd v (q^l) = l·vAdd v q、証明済み）を繋ぐ段。★どちらも本プロジェクト内の接続であり、新しい数学は要らない"
   }
 }
