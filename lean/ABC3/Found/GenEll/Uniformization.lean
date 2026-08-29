@@ -4041,6 +4041,114 @@ def exists_lattice_basis_of_cyclic.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(指数 l の格子 Λ′ = Λ + ℤz₀ の基底と行列式 = l。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★**位数がちょうど `l` なら `gcd(a, b, l) = 1`**。
+
+`l z₀ = a ω₁ + b ω₂` のとき、`g ≔ gcd(a, b, l)` とすると
+`(l/g)·z₀ = (a/g)ω₁ + (b/g)ω₂ ∈ Λ`、すなわち `(l/g)·Q = 0`。
+`Q` の位数が `l` なら `l ∣ l/g` なので `g = 1`。 -/
+theorem gcd_eq_one_of_addOrderOf (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l)
+    {z₀ : ℂ} (hz₀ : uniformMap P hΔ z₀ = Q) {a b : ℤ}
+    (hz : (l : ℂ) * z₀ = (a : ℂ) * P.ω₁ + (b : ℂ) * P.ω₂) :
+    Nat.gcd (Int.gcd a b) l = 1 := by
+  set g : ℕ := Nat.gcd (Int.gcd a b) l with hg
+  have hgpos : 0 < g := Nat.gcd_pos_of_pos_right _ hl
+  have hgC : (g : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hgpos.ne'
+  obtain ⟨n, hn⟩ := (Nat.gcd_dvd_right (Int.gcd a b) l : g ∣ l)
+  have hnpos : 0 < n := by
+    rcases Nat.eq_zero_or_pos n with hc | hc
+    · rw [hc, Nat.mul_zero] at hn; omega
+    · exact hc
+  have hga : (g : ℤ) ∣ a :=
+    dvd_trans (Int.natCast_dvd_natCast.2 (Nat.gcd_dvd_left _ _)) (Int.gcd_dvd_left a b)
+  have hgb : (g : ℤ) ∣ b :=
+    dvd_trans (Int.natCast_dvd_natCast.2 (Nat.gcd_dvd_left _ _)) (Int.gcd_dvd_right a b)
+  have hA : ((a / (g : ℤ) : ℤ) : ℂ) * (g : ℂ) = (a : ℂ) := by
+    exact_mod_cast congrArg (fun t : ℤ => (t : ℂ)) (Int.ediv_mul_cancel hga)
+  have hB : ((b / (g : ℤ) : ℤ) : ℂ) * (g : ℂ) = (b : ℂ) := by
+    exact_mod_cast congrArg (fun t : ℤ => (t : ℂ)) (Int.ediv_mul_cancel hgb)
+  have hnz : (n : ℂ) * z₀
+      = ((a / (g : ℤ) : ℤ) : ℂ) * P.ω₁ + ((b / (g : ℤ) : ℤ) : ℂ) * P.ω₂ := by
+    refine mul_left_cancel₀ hgC ?_
+    calc (g : ℂ) * ((n : ℂ) * z₀) = (l : ℂ) * z₀ := by
+          rw [hn]; push_cast; ring
+      _ = (a : ℂ) * P.ω₁ + (b : ℂ) * P.ω₂ := hz
+      _ = (g : ℂ) * (((a / (g : ℤ) : ℤ) : ℂ) * P.ω₁
+            + ((b / (g : ℤ) : ℤ) : ℂ) * P.ω₂) := by
+          rw [← hA, ← hB]; ring
+  have hnzmem : (n : ℂ) * z₀ ∈ P.lattice :=
+    PeriodPair.mem_lattice.2 ⟨a / (g : ℤ), b / (g : ℤ), hnz.symm⟩
+  have hnQ : n • Q = 0 := by
+    have hzero : uniformMap P hΔ ((n : ℂ) * z₀) = 0 := uniformMap_of_mem P hΔ hnzmem
+    rw [show ((n : ℂ) * z₀) = n • z₀ by simp [nsmul_eq_mul], ← uniformHom_apply,
+      map_nsmul, uniformHom_apply, hz₀] at hzero
+    exact hzero
+  have hdvd : l ∣ n := hQ ▸ addOrderOf_dvd_of_nsmul_eq_zero hnQ
+  have hle : l ≤ n := Nat.le_of_dvd hnpos hdvd
+  have hne : n ≤ l := by
+    rw [hn]
+    exact Nat.le_mul_of_pos_left n hgpos
+  have hnl : n = l := le_antisymm hne hle
+  have hn' : l = g * l := by
+    conv_lhs => rw [hn]
+    rw [hnl]
+  refine Nat.eq_of_mul_eq_mul_right hl ?_
+  rw [← hn', Nat.one_mul]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（格子側）——位数 `l` の点から指数 `l` の格子を作る**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ)` の位数ちょうど `l` の点 `Q` に対し、`z₀`（`Φ(z₀) = Q`）と
+`Λ′ = Λ + ℤz₀` の基底 `ω₁′, ω₂′` と整数 `A, B, C, D` が取れて
+
+    ω₁ = A·ω₁′ + B·ω₂′,  ω₂ = C·ω₁′ + D·ω₂′,  |AD − BC| = l
+
+★★★★★☆**これが `htFalt_isogeny_le_of_analytic_minimal`（第 617）の
+`h₁`・`h₂`・`hdet` そのものである。**
+
+★部品:
+
+* 全射（第 663）で `z₀` を取る
+* `l·Q = 0` と核 `= Λ`（第 663）で `l z₀ ∈ Λ`、すなわち `l z₀ = aω₁ + bω₂`
+* 位数がちょうど `l` だから `gcd(a, b, l) = 1`（本ブロック）
+* Hermite 標準形（第 666）で基底と行列式 -/
+theorem exists_isogeny_lattice_basis (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ ω₁' ω₂' : ℂ) (A B C D : ℤ),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * ω₁' + (B : ℂ) * ω₂' ∧
+      P.ω₂ = (C : ℂ) * ω₁' + (D : ℂ) * ω₂' ∧
+      (A * D - B * C).natAbs = l ∧
+      Submodule.span ℤ ({ω₁', ω₂'} : Set ℂ)
+        = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) := by
+  obtain ⟨z₀, hz₀⟩ := uniformMap_surjective P hΔ Q
+  have hlQ : l • Q = 0 := hQ ▸ addOrderOf_nsmul_eq_zero Q
+  have hlz : ((l : ℂ) * z₀) ∈ P.lattice := by
+    refine (uniformMap_eq_zero_iff P hΔ _).1 ?_
+    rw [show ((l : ℂ) * z₀) = l • z₀ by simp [nsmul_eq_mul], ← uniformHom_apply,
+      map_nsmul, uniformHom_apply, hz₀, hlQ]
+  obtain ⟨a, b, hab⟩ := PeriodPair.mem_lattice.1 hlz
+  have hz : (l : ℂ) * z₀ = (a : ℂ) * P.ω₁ + (b : ℂ) * P.ω₂ := hab.symm
+  obtain ⟨ω₁', ω₂', A, B, C, D, h1, h2, hdet, hspan⟩ :=
+    exists_lattice_basis_of_cyclic P z₀ l hl a b hz
+      (gcd_eq_one_of_addOrderOf P hΔ hl hQ hz₀ hz)
+  exact ⟨z₀, ω₁', ω₂', A, B, C, D, hz₀, h1, h2, hdet, hspan⟩
+
+def gcd_eq_one_of_addOrderOf.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(位数がちょうど l なら gcd(a, b, l) = 1。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_isogeny_lattice_basis.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(格子側——位数 l の点から指数 l の格子を作る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
