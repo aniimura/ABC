@@ -2103,5 +2103,19 @@
     ],
     "whyItMatters": "★★これが出れば一様化 `(℘, ℘′/2) : ℂ/Λ → E(ℂ)` が**群準同型**になり、第 603-604・624 の全単射性と合わせて**群同型**になる。★★★すると位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃う——すなわち **`Lemma 3.5` が閉じる**。",
     "leanNotes": "☆Lean では (1) 加法定理が開集合で成り立つこと（仮定はすべて開条件）、(2) 両辺の微分（商の微分則と `hasDerivAt_weierstrassP`・`hasDerivAt_derivWeierstrassP`・`deriv_derivWeierstrassP`）、(3) 上の代数恒等式（`linear_combination`）の 3 段である。"
+  },
+  "uniformizationGroupIso20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★★★★★★★**一様化 `ℂ/Λ → E(ℂ)` は群同型**（第 645）。",
+    "pieces": [
+      "★全射: `weierstrassP_surjective`・`latticePoint_surjective`（第 603-604）",
+      "★単射: `mem_lattice_of_shift_eq`（第 624）——★★零点勘定を使わず、線型 2 階 ODE `h″ = 6(℘(·+a)+℘)·h` の一意性から",
+      "★準同型（`x` 座標）: `weierstrassP_addition`（第 641）——`℘` の加法定理",
+      "★準同型（`y` 座標）: `derivWeierstrassP_addition`（第 645）"
+    ],
+    "allAbsentFromMathlib": "☆★**上の 4 つはいずれも mathlib に無い**（`Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` は `℘` の理論を1080 行ぶん持つが、一様化の全単射性も加法定理も無い、2026-08-29 に測定）。",
+    "groupLawMatch": "★`latticeCurve P = ⟨0,0,0,−g₂/4,−g₃/4⟩` の群法則は `a₁ = a₂ = a₃ = 0` なので`x₃ = λ² − x₁ − x₂`・`y₃ = −λ(x₃ − x₁) − y₁`、`λ = (y₂−y₁)/(x₂−x₁)`。`x = ℘`・`y = ℘′/2` を入れると `λ = R/2`（`R = (℘′z − ℘′w)/(℘z − ℘w)`）で、★★第 641 が `x₃`、第 645 が `y₃` にちょうど対応する。",
+    "nextStep": "★**次の一手**: 群同型を mathlib の `WeierstrassCurve.Affine.Point` の言葉にパッケージする（`Nonsingular` の証明と `Point.add` の場合分けの照合）。☆それができれば、位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力（`α`・`u′ = α·u`・`α·Λ ⊆ Λ′` の指数 `l`）が揃う。★★★すなわち **`Lemma 3.5` が閉じる**。",
+    "sessionArc": "☆本セッション（第 586-645、60 ブロック）の骨格: (1) `Lemma 3.5` から未証明の外部引用が消えた（`α` が打ち消し合う＋`neronExp ≥ 0`）、(2) Vélu の代数側と解析側を両方 Lean 上に置いた、(3) 一様化を全単射・群同型にした。★★★第 615 で「零点勘定（偏角の原理）が要る」と見立てたが、ODE の一意性で迂回できた（第 622-625）のが最大の転換点である。"
   }
 }
