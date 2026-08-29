@@ -1140,6 +1140,88 @@ def addDefect_eq_near.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(原点の極が消える——z² が約される。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`z ≡ −w` の側——`q` の零点の位数 -/
+
+/-- ★★★★★`℘` の微分は `℘′`（格子の外で）。 -/
+theorem hasDerivAt_weierstrassP (P : PeriodPair) (x : ℂ) (hx : x ∉ P.lattice) :
+    HasDerivAt P.weierstrassP (P.derivWeierstrassP x) x := by
+  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
+  have h := ((P.differentiableOn_weierstrassP).differentiableAt (hopen.mem_nhds hx)).hasDerivAt
+  rwa [P.deriv_weierstrassP] at h
+
+/-- ★★★★★`℘′` も格子の外で微分可能。 -/
+theorem hasDerivAt_derivWeierstrassP (P : PeriodPair) (x : ℂ) (hx : x ∉ P.lattice) :
+    HasDerivAt P.derivWeierstrassP (deriv P.derivWeierstrassP x) x := by
+  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
+  exact ((P.differentiableOn_derivWeierstrassP).differentiableAt
+    (hopen.mem_nhds hx)).hasDerivAt
+
+/-- ★★★★★★★★**`z ≡ −w` の側の鍵となる関数**
+
+    `q(t) ≔ 2·(℘(t−w) − ℘(w)) − t·(℘′(t−w) − ℘′(w))`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`t ≔ z + w` と置くと `F_w(t−w)` の極は `q` が `t = 0` で 3 位の零点を持つことで消える
+（`u ≔ ℘(t−w) − ℘(w)`・`v ≔ ℘′(t−w) − ℘′(w)`・`û ≔ u/t` として `2û − v = q/t`、
+`4û² − v² = (2û−v)(2û+v)`）。 -/
+noncomputable def addQ (P : PeriodPair) (w t : ℂ) : ℂ :=
+  2 * (P.weierstrassP (t - w) - P.weierstrassP w)
+    - t * (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)
+
+/-- ★★★★★★**`q(0) = 0`**——`℘` は偶だから `℘(−w) = ℘(w)`。 -/
+@[simp] theorem addQ_zero (P : PeriodPair) (w : ℂ) : addQ P w 0 = 0 := by
+  simp only [addQ, zero_sub, zero_mul, sub_zero, P.weierstrassP_neg]
+  ring
+
+/-- ★★★★★★★★**`q` の 1 階導関数** `q′(t) = ℘′(t−w) + ℘′(w) − t·℘″(t−w)`。 -/
+theorem hasDerivAt_addQ (P : PeriodPair) (w t : ℂ) (ht : t - w ∉ P.lattice) :
+    HasDerivAt (addQ P w)
+      (P.derivWeierstrassP (t - w) + P.derivWeierstrassP w
+        - t * deriv P.derivWeierstrassP (t - w)) t := by
+  have h1 : HasDerivAt (fun s : ℂ => P.weierstrassP (s - w))
+      (P.derivWeierstrassP (t - w)) t :=
+    HasDerivAt.comp_sub_const t w (hasDerivAt_weierstrassP P (t - w) ht)
+  have h2 : HasDerivAt (fun s : ℂ => P.derivWeierstrassP (s - w))
+      (deriv P.derivWeierstrassP (t - w)) t :=
+    HasDerivAt.comp_sub_const t w (hasDerivAt_derivWeierstrassP P (t - w) ht)
+  have h3 : HasDerivAt (fun s : ℂ => s * (P.derivWeierstrassP (s - w) - P.derivWeierstrassP w))
+      (1 * (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)
+        + t * deriv P.derivWeierstrassP (t - w)) t :=
+    (hasDerivAt_id t).mul (h2.sub_const _)
+  have h4 := ((h1.sub_const (P.weierstrassP w)).const_mul (2:ℂ)).sub h3
+  have hval : (2:ℂ) * P.derivWeierstrassP (t - w)
+      - (1 * (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)
+        + t * deriv P.derivWeierstrassP (t - w))
+      = P.derivWeierstrassP (t - w) + P.derivWeierstrassP w
+        - t * deriv P.derivWeierstrassP (t - w) := by ring
+  rw [← hval]
+  exact h4
+
+/-- ★★★★★★★★★★**`q′(0) = 0`**——`℘′` が奇であることがちょうど効く。
+
+    `q′(0) = ℘′(−w) + ℘′(w) − 0 = −℘′(w) + ℘′(w) = 0` -/
+theorem deriv_addQ_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    deriv (addQ P w) 0 = 0 := by
+  have hnw : (0 : ℂ) - w ∉ P.lattice := by
+    intro hc
+    exact hw (by simpa using neg_mem hc)
+  have h := hasDerivAt_addQ P w 0 hnw
+  rw [h.deriv]
+  simp only [zero_sub, zero_mul, sub_zero, P.derivWeierstrassP_neg]
+  ring
+
+def addQ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(z ≡ −w の側の鍵——q は t = 0 で 3 位の零点)",
+    sectionId := "genell-lemma-3-5" }
+
+def deriv_addQ_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(q′(0) = 0——℘′ が奇であることが効く。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
