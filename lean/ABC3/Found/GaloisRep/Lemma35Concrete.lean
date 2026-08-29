@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.HtFaltBounds
+import ABC3.Found.GaloisRep.VeluNormalized
 import ABC3.Meta.Claim
 
 /-!
@@ -136,6 +137,71 @@ theorem lemma_3_5_of_isogeny_estimate (eps : ℝ) (heps : 0 < eps) :
     div_le_iff₀ hpos]
   have hC' : C / (12 * (1 + eps)) * (12 * (1 + eps)) = C := by field_simp
   nlinarith [hstep, hC']
+
+/-! ## ★★★★★★★★★★★★★★★★★★残っていた入力 `hfalt` を埋める -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.5 —— `hfalt` を外した形**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+    `(1/(12(1+ϵ)))·l·deg_∞(E) ≤ ht^Falt(E) + 2·log(l) + C`
+
+★★★★★★★☆**かつて「残る唯一の入力」だった `hfalt`
+（`ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)`、[FC] Ch. I, Prop 2.7 ＋
+アルキメデスの (1,1)-形式）が、`htFalt_veluQuotientFull_le`（`§9-1146`、第 704）で
+埋まった。** これで本主張の入力から**未証明の外部引用が消えた**。
+
+★受けている仮説はすべて**幾何のデータ**である:
+
+| 仮説 | 意味 | 出どころ |
+|---|---|---|
+| `hQ` | `Q` は位数ちょうど `l` | 原文の `l`-捻れ部分群 |
+| `hE'` | `E′ = E/⟨Q⟩`（Vélu） | 定義 |
+| `P`・`hΔ`・`hPC` | 各 `σ` での一意化 | `exists_periodPair_of_isElliptic`（第 348、無条件） |
+| `hmin`・`hint` | `E` が極小・`E′` が整 | モデルの取り方 |
+| `hss` | `E′` は半安定 | 原文の設定 |
+| `hdeg` | `deg∞(E′) = l·deg∞(E)` | `Lemma 3.2, (ii)` ＋ `degInfOf_eq_of_local` |
+
+☆`hdeg` はまだ仮説である（`Lemma 3.2, (ii)` の大域化に還元済み）ので、
+**項目全体の `.src` はまだ置かない**（`check.mjs` B6）。 -/
+theorem lemma_3_5_velu (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), 0 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((Finset.range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E') →
+      degInfOf L E' = (l : ℝ) * degInfOf L E →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_of_isogeny_estimate eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint
+    hss hdeg => ?_⟩
+  exact hC L E E' l hss hdeg
+    (htFalt_veluQuotientFull_le E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint)
+
+def lemma_3_5_velu.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(hfalt を外した形——未証明の外部引用が消えた。残るは hdeg のみ)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "htFalt_veluQuotientFull_le(hfalt を埋めた段、§9-1146)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le") 4,
+    .citation "[ABC3]" "lemma_3_5_of_isogeny_estimate(組み立て)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_of_isogeny_estimate") 3,
+    .implicitStep
+      ("☆残るのは hdeg(deg∞(E′) = l·deg∞(E))を Lemma 3.2, (ii) の局所版から " ++
+       "degInfOf_eq_of_local で大域化して外すことである") 3 ]
 
 /-! ## ★出典の紐付け(`.src`)——★★**すべて条つき。項目全体の `.src` は置かない** -/
 
