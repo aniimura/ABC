@@ -3273,6 +3273,76 @@ def uniformMap_add_of_ne.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ は群準同型——倍加以外の場合)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★**倍加の `y` 座標の公式**
+
+    `℘′(w+w) = −(℘″(w)/℘′(w))·(℘(w+w) − ℘(w)) − ℘′(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 657（`y` 座標の一般形）で `z → w` の極限を取る。
+☆`R(z,w) = R(w,z) → ℘″(w)/℘′(w)`（第 649・第 654）、
+`℘′(z+w) → ℘′(w+w)`・`℘(z+w) → ℘(w+w)`・`℘z → ℘w`・`℘′z → ℘′w`。
+
+★★★これで mathlib の `addY`（`x₁ = x₂` の枝、`slope = ℘″/(2℘′)`）と一致し、
+`Φ` の群準同型が**倍加の場合**でも書ける。 -/
+theorem derivWeierstrassP_duplication (P : PeriodPair) {w : ℂ} (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    P.derivWeierstrassP (w + w)
+      = -((6 * P.weierstrassP w ^ 2 - P.g₂ / 2) / P.derivWeierstrassP w)
+          * (P.weierstrassP (w + w) - P.weierstrassP w)
+        - P.derivWeierstrassP w := by
+  have hww : w + w ∉ P.lattice := by
+    intro hc; exact h2w (by simpa [two_mul] using hc)
+  have hshift : Tendsto (fun z : ℂ => z + w) (𝓝[≠] w) (nhds (w + w)) := by
+    have ht : Tendsto (fun z : ℂ => z + w) (nhds w) (nhds (w + w)) :=
+      (continuous_id.add continuous_const).tendsto _
+    exact ht.mono_left nhdsWithin_le_nhds
+  have hLd : Tendsto (fun z : ℂ => P.derivWeierstrassP (z + w)) (𝓝[≠] w)
+      (nhds (P.derivWeierstrassP (w + w))) :=
+    ((P.analyticOnNhd_derivWeierstrassP (w + w) hww).continuousAt).tendsto.comp hshift
+  have hLp : Tendsto (fun z : ℂ => P.weierstrassP (z + w)) (𝓝[≠] w)
+      (nhds (P.weierstrassP (w + w))) :=
+    ((P.analyticOnNhd_weierstrassP (w + w) hww).continuousAt).tendsto.comp hshift
+  have hp : Tendsto P.weierstrassP (𝓝[≠] w) (nhds (P.weierstrassP w)) :=
+    ((P.analyticOnNhd_weierstrassP w hw).continuousAt).continuousWithinAt.tendsto
+  have hpd : Tendsto P.derivWeierstrassP (𝓝[≠] w) (nhds (P.derivWeierstrassP w)) :=
+    ((P.analyticOnNhd_derivWeierstrassP w hw).continuousAt).continuousWithinAt.tendsto
+  have hRatio : Tendsto (fun z : ℂ => (P.derivWeierstrassP z - P.derivWeierstrassP w)
+      / (P.weierstrassP z - P.weierstrassP w)) (𝓝[≠] w)
+      (nhds ((6 * P.weierstrassP w ^ 2 - P.g₂ / 2) / P.derivWeierstrassP w)) := by
+    refine (tendsto_slopeRatio P hw h2w).congr ?_
+    intro z
+    exact (slopeRatio_symm P w z).symm
+  have hR : Tendsto (fun z : ℂ => -((P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w))
+        * (P.weierstrassP (z + w) - P.weierstrassP z) - P.derivWeierstrassP z) (𝓝[≠] w)
+      (nhds (-((6 * P.weierstrassP w ^ 2 - P.g₂ / 2) / P.derivWeierstrassP w)
+        * (P.weierstrassP (w + w) - P.weierstrassP w) - P.derivWeierstrassP w)) :=
+    ((hRatio.neg).mul (hLp.sub hp)).sub hpd
+  have hEq : (fun z : ℂ => P.derivWeierstrassP (z + w)) =ᶠ[𝓝[≠] w]
+      fun z : ℂ => -((P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w))
+        * (P.weierstrassP (z + w) - P.weierstrassP z) - P.derivWeierstrassP z := by
+    have hL1 : ∀ᶠ z in 𝓝[≠] w, z ∉ P.lattice :=
+      mem_nhdsWithin_of_mem_nhds ((P.isClosed_lattice.isOpen_compl).mem_nhds hw)
+    have hL2 : ∀ᶠ z in 𝓝[≠] w, z + w ∉ P.lattice := by
+      have hopen : IsOpen {z : ℂ | z + w ∉ P.lattice} := by
+        have he : {z : ℂ | z + w ∉ P.lattice}
+            = (fun z : ℂ => z + w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+        rw [he]
+        exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+      exact mem_nhdsWithin_of_mem_nhds (hopen.mem_nhds hww)
+    filter_upwards [hL1, hL2, eventually_weierstrassP_ne_self P hw h2w] with z hz1 hz2 hz3
+    exact derivWeierstrassP_addition_general P hz1 hw hz2 hz3
+  exact tendsto_nhds_unique (hLd.congr' hEq) hR
+
+def derivWeierstrassP_duplication.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(倍加の y 座標の公式——第 657 の z → w 極限。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
