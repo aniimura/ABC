@@ -5,6 +5,7 @@ import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import ABC3.Found.GenEll.LatticeCurve
 import ABC3.Found.GenEll.WeierstrassODE
+import ABC3.Found.GenEll.Velu
 import ABC3.Meta.Claim
 
 /-!
@@ -4848,6 +4849,100 @@ theorem exists_isogeny_data_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠
 def exists_isogeny_data_of_torsion.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(解析側・完全形——位数 l の点から E/H の係数まで。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★代数側との突き合わせ -/
+
+/-- ★★★★★★★★★★**Vélu の `v_Q` は `℘″(w)`**。
+
+`latticeCurve` では `a₁ = a₂ = a₃ = 0`・`a₄ = −g₂/4` なので
+
+    v_Q = 2·g^x_Q = 2(3℘(w)² − g₂/4) = 6℘(w)² − g₂/2 = ℘″(w) -/
+theorem veluV_latticePoint (P : PeriodPair) (w : ℂ) :
+    veluV (latticeCurve P) (latticePointX P w) (latticePointY P w)
+      = 6 * P.weierstrassP w ^ 2 - P.g₂ / 2 := by
+  simp only [veluV, veluGx, veluGy, latticeCurve, latticePointX, latticePointY]
+  ring
+
+/-- ★★★★★★★★★★**Vélu の `w_Q`**——`u_Q = ℘′(w)²` と微分方程式から
+
+    w_Q = ℘′(w)² + ℘″(w)·℘(w) = 10℘(w)³ − (3/2)g₂℘(w) − g₃ -/
+theorem veluW_latticePoint (P : PeriodPair) {w : ℂ} (hw : w ∉ P.lattice) :
+    veluW (latticeCurve P) (latticePointX P w) (latticePointY P w)
+      = 10 * P.weierstrassP w ^ 3 - (3 / 2) * P.g₂ * P.weierstrassP w - P.g₃ := by
+  have hsq := P.derivWeierstrassP_sq w hw
+  simp only [veluW, veluU, veluV, veluGx, veluGy, latticeCurve, latticePointX,
+    latticePointY]
+  linear_combination hsq
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**解析側の `Λ′` と代数側の Vélu の商が一致する**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`S` が `(H∖{O})/±` の代表系であること（＝仮説 `hvS`・`hwS`：`T∖{0}` にわたる和が
+`S` にわたる和の 2 倍であること）を認めれば
+
+    latticeCurve Λ′ = veluQuotient (latticeCurve Λ) S
+
+★★★数値の照合:
+
+* `a₄`: `g₂′ = g₂ + 10·Σ_{T∖0}(6℘²−g₂/2) = g₂ + 20v` ⟺ `−g₂′/4 = −g₂/4 − 5v` ✓
+* `a₆`: `g₃′ = g₃ + (7/6)·Σ_{T∖0}(120℘³−18g₂℘−12g₃) = g₃ + 28w`
+  ⟺ `−g₃′/4 = −g₃/4 − 7w` ✓（`b₂ = 0`）
+
+★★★★★★☆**これで `latticeCurve P′` が `E/H` の Weierstrass モデルそのもので
+あることが確定した**——変数変換は要らない、すなわち `α = 1`。 -/
+theorem latticeCurve_eq_veluQuotient (P P' : PeriodPair) (T : Finset ℂ)
+    (S : Finset (ℂ × ℂ))
+    (hg₂ : P'.g₂ = P.g₂ + 10 * ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))
+    (hg₃ : P'.g₃ = P.g₃ + (7 / 6) * ∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃))
+    (hvS : (2 : ℂ) * veluVSum (latticeCurve P) S
+      = ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))
+    (hwS : (2 : ℂ) * veluWSum (latticeCurve P) S
+      = ∑ w ∈ T.erase 0,
+        (10 * P.weierstrassP w ^ 3 - (3 / 2) * P.g₂ * P.weierstrassP w - P.g₃)) :
+    latticeCurve P' = veluQuotient (latticeCurve P) S := by
+  have hsum : (∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃))
+      = 12 * ∑ w ∈ T.erase 0,
+        (10 * P.weierstrassP w ^ 3 - (3 / 2) * P.g₂ * P.weierstrassP w - P.g₃) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun w _ => by ring)
+  have hb₂ : (latticeCurve P).b₂ = 0 := by
+    simp [latticeCurve, WeierstrassCurve.b₂]
+  have ha₄ : -P'.g₂ / 4 = (latticeCurve P).a₄ - 5 * veluVSum (latticeCurve P) S := by
+    show -P'.g₂ / 4 = -P.g₂ / 4 - 5 * veluVSum (latticeCurve P) S
+    rw [hg₂]
+    linear_combination (5 / 2 : ℂ) * hvS
+  have ha₆ : -P'.g₃ / 4
+      = (latticeCurve P).a₆ - (latticeCurve P).b₂ * veluVSum (latticeCurve P) S
+        - 7 * veluWSum (latticeCurve P) S := by
+    rw [hb₂]
+    show -P'.g₃ / 4
+      = -P.g₃ / 4 - 0 * veluVSum (latticeCurve P) S - 7 * veluWSum (latticeCurve P) S
+    rw [hg₃, hsum]
+    linear_combination (7 / 2 : ℂ) * hwS
+  have hP'eq : latticeCurve P' = ⟨0, 0, 0, -P'.g₂ / 4, -P'.g₃ / 4⟩ := rfl
+  simp only [veluQuotient, veluCurve]
+  rw [hP'eq, WeierstrassCurve.mk.injEq]
+  exact ⟨rfl, rfl, rfl, ha₄, ha₆⟩
+
+def veluV_latticePoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の v_Q は ℘″(w)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluW_latticePoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の w_Q = 10℘³ − (3/2)g₂℘ − g₃。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def latticeCurve_eq_veluQuotient.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側の Λ′ と代数側の Vélu の商が一致する——α = 1)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
