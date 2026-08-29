@@ -2436,6 +2436,46 @@ def analyticAt_addDefectExt_lattice.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Ext は格子の全点で解析的——周期性で原点から延ばす。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★★★★**解析性は `Λ` の平行移動で移る**。 -/
+theorem analyticAt_addDefectExt_of_shift (P : PeriodPair) (w : ℂ) {p q : ℂ}
+    (hpq : q - p ∈ P.lattice) (h : AnalyticAt ℂ (addDefectExt P w) p) :
+    AnalyticAt ℂ (addDefectExt P w) q := by
+  have hf : AnalyticAt ℂ (fun z : ℂ => z - (q - p)) q := analyticAt_id.sub analyticAt_const
+  have hg : AnalyticAt ℂ (addDefectExt P w) ((fun z : ℂ => z - (q - p)) q) := by
+    simpa using h
+  have hcomp := AnalyticAt.comp (g := addDefectExt P w)
+    (f := fun z : ℂ => z - (q - p)) (x := q) hg hf
+  refine hcomp.congr ?_
+  filter_upwards with z
+  simp only [Function.comp_apply]
+  have := addDefectExt_periodic P w (z - (q - p)) (q - p) hpq
+  rw [show z - (q - p) + (q - p) = z by ring] at this
+  exact this.symm
+
+open Filter Topology in
+/-- ★★★★★★★★★★**`Ext 0 = 0`**——第 610 の `addDefectNear_zero` から。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★☆**これが「加法定理が原点で成り立つ」ことであり、Liouville の定数を決める**。 -/
+theorem addDefectExt_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    addDefectExt P w 0 = 0 := by
+  have heq : addDefect P w =ᶠ[𝓝[≠] (0:ℂ)] addDefectNear P w := by
+    filter_upwards [eventually_good_near_zero P w hw, self_mem_nhdsWithin] with z hz hz0
+    exact addDefect_eq_near P w z (by simpa using hz0) hz.2.2
+  have h1 : Tendsto (addDefectNear P w) (𝓝[≠] (0:ℂ)) (nhds (addDefectNear P w 0)) :=
+    (analyticAt_addDefectNear P w hw).continuousAt.continuousWithinAt.tendsto
+  have h2 : addDefectExt P w 0 = addDefectNear P w 0 :=
+    (h1.congr' heq.symm).limUnder_eq
+  rw [h2, addDefectNear_zero]
+
+def addDefectExt_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext 0 = 0——Liouville の定数を決める。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
