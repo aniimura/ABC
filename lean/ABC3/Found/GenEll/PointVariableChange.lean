@@ -835,11 +835,43 @@ theorem veluQuotientFull_eq_vc_pullback (C : VariableChange F) (W : WeierstrassC
   exact veluQuotientFull_variableChange C W (S.image (vcInvPair C))
     (sum_veluB_vcInvPair C W S hB) (sum_veluBx_vcInvPair C W S hB hBx)
 
+/-- ★★★★★★**`vcInvPair ∘ vcPair = id`**（もう一方の向き）。 -/
+theorem vcInvPair_vcPair (C : VariableChange F) (x y : F) :
+    vcInvPair C (vcX C x, vcY C x y) = (x, y) := by
+  have hu : ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) = 1 := C.u.mul_inv
+  refine Prod.ext ?_ ?_
+  · simp only [vcInvPair, vcX]
+    linear_combination ((x - C.r) * (((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)) * hu
+  · simp only [vcInvPair, vcX, vcY]
+    linear_combination ((y - C.s * (x - C.r) - C.t)
+        * ((((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F)) ^ 2
+          + ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)
+      + C.s * (x - C.r) * (((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)) * hu
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**像を引き戻すともとに戻る**
+
+    `(S.image (vcPair C)).image (vcInvPair C) = S`
+
+★★☆これで第 693（`veluQuotientFull_eq_vc_pullback`）を `S.image (vcPair C)` に
+当てると、ちょうど `C • veluQuotientFull W S` が出る。 -/
+theorem image_vcInvPair_vcPair (C : VariableChange F) (S : Finset (F × F)) :
+    (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2))).image (vcInvPair C) = S := by
+  rw [Finset.image_image,
+    show (vcInvPair C ∘ fun Q : F × F => (vcX C Q.1, vcY C Q.1 Q.2)) = id from
+      funext (fun Q => vcInvPair_vcPair C Q.1 Q.2)]
+  exact Finset.image_id
+
 end Pullback
 
 def veluQuotientFull_eq_vc_pullback.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(商は引き戻した点集合で書ける——L 上で E/H を作る形)",
+    sectionId := "genell-lemma-3-5" }
+
+def image_vcInvPair_vcPair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(像を引き戻すともとに戻る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def image_vcPair_vcInvPair.src : ABC3.Meta.Source :=
