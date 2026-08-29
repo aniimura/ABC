@@ -30,12 +30,30 @@ import ABC3.Meta.Claim
 | `Proposition 3.4` を `E′` に当てる | ★★**済**（§9-1009、`prop_3_4_chain_semistable`） |
 | `ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)` | ☆**残る唯一の入力**——仮説 `hfalt` として型で固定した |
 
-## ☆残る入力を受けたままにしてはならない
+## ★★★★★★★★★★ 2026-08-29——`hfalt` が埋まった（第 704-710）
 
-☆`hfalt` は**本プロジェクトのどこにも証明が無い外部引用**である
-（[FC] Chapter I, Proposition 2.7 ＋ 原文のアルキメデスの (1,1)-形式の 1 文）。
-★したがって本ファイルは `Lemma 3.5` の**項目全体の `.src` を置かない**——
-`.src` はすべて条つきである（`check.mjs` B6）。
+★★★★★★★★☆**`hfalt` はもう外部引用ではない。**
+`Found/GaloisRep/VeluNormalized.lean` の `htFalt_veluQuotientFull_le`（`§9-1146`、第 704）が
+`L` 上の位数 `l` の点 `Q` から `ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log(l)` を
+**幾何と解析だけで**証明する。その鎖は
+
+* 一様化 `ℂ/Λ ≅ E(ℂ)`（第 663、mathlib に無い）
+* `Λ′ = Λ + ℤz₀`、`[Λ′:Λ] = l`、Hermite 標準形で `|AD − BC| = l`（第 662-668）
+* Laurent 係数の比較で `g₂′ = g₂ + 20v`・`g₃′ = g₃ + 28w` ⟹ **`α = 1`**（第 669-676）
+* 変数変換・環準同型の点への作用（第 682-703、mathlib に無い）
+
+★本ファイルの `lemma_3_5_velu`（第 705）・`lemma_3_5_velu_local`（第 706）・
+`lemma_3_5_velu_bad`（第 707）が順に `hfalt`・`hdeg` を外し、
+残る入力を**悪い還元の素点での `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`** ただ 1 つにした。
+
+★★さらに `Found/GaloisRep/DegInfLocal.lean` の
+`localHeight_eq_minDeltaExp`（第 709）と `minDeltaExp_eq_mul_of_tateParam`（第 710）が
+それを **`q_{E′} = q_E^l`**（`Lemma 3.2, (ii)`、本プロジェクトで証明済み）に帰着させる。
+
+☆項目全体の `.src` はまだ置かない——`hdeg`／`hbad` が仮説のままだからである
+（`check.mjs` B6）。★次にやることは `Lemma 3.2, (ii)` の
+`(Lˣ/q^ℤ)/(...) ≃* Lˣ/(q^l)^ℤ` から `tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l` を
+出す段（Tate 一意化の台帳の段 3・段 4）である。
 
 ★★★**しかし型で固定する意味はある**: 次に何を証明すればよいかが
 `hfalt` という 1 つの仮説として `Found/` に見えるからである。
