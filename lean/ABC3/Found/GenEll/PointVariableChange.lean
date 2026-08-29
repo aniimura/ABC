@@ -5,6 +5,7 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import ABC3.Found.GenEll.Velu
 import ABC3.Meta.Claim
 
 /-!
@@ -473,6 +474,65 @@ def addOrderOf_vcPoint.src : ABC3.Meta.Source :=
 def vcPoint_add.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(変数変換による点の写像は加法を保つ——mathlib に無い。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★Vélu の量の変換則 -/
+
+section VeluVC
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★★`B ≔ 2y + a₁x + a₃`（`= y − negY(x,y)`）は `±` で打ち消し合う。
+
+★★☆これが `Σ_{w ∈ T∖{0}} ℘′(w) = 0`（第 670）の代数版である。 -/
+theorem veluB_add_negY (W : WeierstrassCurve F) (x y : F) :
+    (2 * y + W.a₁ * x + W.a₃) + (2 * (W.toAffine.negY x y) + W.a₁ * x + W.a₃) = 0 := by
+  simp only [WeierstrassCurve.Affine.negY]
+  ring
+
+/-- ★★★★★★★★★★★★★★**`g^x_Q` の一般の変数変換による変換則**
+
+    `g^x_{C•W}(x′, y′) = u⁻⁴·(g^x_W(x, y) − s·B)`,  `B = 2y + a₁x + a₃`
+
+★純粋なスケーリング（`veluGx_scale`）と違い、`s ≠ 0` のときは `−s·B` の補正が付く。
+☆だが `S` が `±` で閉じていれば `Σ_S B = 0`（`veluB_add_negY`）なので、
+**和を取れば補正は消える**。 -/
+theorem veluV2_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (x y : F) :
+    veluV2 (C • W) (vcX C x) (vcY C x y)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 4
+        * (veluV2 W x y - C.s * (2 * y + W.a₁ * x + W.a₃)) := by
+  simp only [veluV2, veluGx, vcX, vcY, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₄]
+  ring
+
+/-- ★★★★★★★★★★★★**`g^y_Q` の変換則**——`g^y = −B` は重さ 3。 -/
+theorem veluGy_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (x y : F) :
+    veluGy (C • W) (vcX C x) (vcY C x y)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 3 * veluGy W x y := by
+  simp only [veluGy, vcX, vcY, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₃]
+  ring
+
+/-- ★★★★★★★★★★★★**`u_Q` の変換則**——重さ 6（補正なし）。 -/
+theorem veluU_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (x y : F) :
+    veluU (C • W) (vcX C x) (vcY C x y)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 6 * veluU W x y := by
+  rw [veluU, veluGy_variableChange, veluU]
+  ring
+
+end VeluVC
+
+def veluV2_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(g^x_Q の一般の変数変換による変換則。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluB_add_negY.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(B = 2y + a₁x + a₃ は ± で打ち消し合う——Σ℘′(w) = 0 の代数版。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def equation_variableChange.src : ABC3.Meta.Source :=
