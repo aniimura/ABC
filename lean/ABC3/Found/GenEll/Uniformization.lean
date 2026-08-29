@@ -4387,6 +4387,111 @@ def exists_velu_formula_of_torsion.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(解析側・完成形——位数 l の点から Vélu の公式まで。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★代表系の対称性 -/
+
+/-- ★★★★★★★★★★★★**代表系の元は `Λ` を法として相異なる**。 -/
+theorem rep_sub_mem_lattice_imp_eq (P P' : PeriodPair) (T : Finset ℂ)
+    (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    {w v : ℂ} (hw : w ∈ T) (hv : v ∈ T) (hd : w - v ∈ P.lattice) : w = v := by
+  obtain ⟨w₀, hw₀T, hw₀Λ, hw₀u⟩ := hrep (-v) (neg_mem (hT v hv))
+  have hv0 : v = w₀ := by
+    by_contra hc
+    exact hw₀u v hv hc (by simpa using P.lattice.zero_mem)
+  have hw0 : w = w₀ := by
+    by_contra hc
+    exact hw₀u w hw hc (by rw [show -v + w = w - v by ring]; exact hd)
+  rw [hw0, hv0]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**代表系の上での `℘′` の和は消える**
+
+    `Σ_{w ∈ T∖{0}} ℘′_Λ(w) = 0`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★`w ↦ ν(w)`（`w + ν w ∈ Λ` を満たす唯一の代表元、つまり `ν w ≡ −w`）は
+`T∖{0}` の対合であり、`℘′(ν w) = ℘′(−w) = −℘′(w)`。
+したがって `S = Σ ℘′(ν w) = −S`、すなわち `S = 0`。
+
+★★☆これが Vélu の `ω`-正規化（第 586-593 の代数側 `velu_omega_gen`）の解析版である。 -/
+theorem sum_derivWeierstrassP_rep_eq_zero (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) :
+    ∑ w ∈ T.erase 0, P.derivWeierstrassP w = 0 := by
+  classical
+  have huniq : ∀ {w v : ℂ}, w ∈ T → v ∈ T → w - v ∈ P.lattice → w = v :=
+    fun hw hv hd => rep_sub_mem_lattice_imp_eq P P' T hT hrep hw hv hd
+  have hex : ∀ w ∈ T, ∃ v, v ∈ T ∧ w + v ∈ P.lattice := by
+    intro w hw
+    obtain ⟨v, hv, hv2, -⟩ := hrep w (hT w hw)
+    exact ⟨v, hv, hv2⟩
+  choose! ν hνT hνΛ using hex
+  have hνe : ∀ w ∈ T.erase 0, ν w ∈ T.erase 0 := by
+    intro w hw
+    have hw' : w ∈ T := Finset.mem_of_mem_erase hw
+    have hw0 : w ≠ 0 := Finset.ne_of_mem_erase hw
+    refine Finset.mem_erase.2 ⟨?_, hνT w hw'⟩
+    intro hc
+    refine hw0 (huniq hw' h0T ?_)
+    have hz := hνΛ w hw'
+    rw [hc, add_zero] at hz
+    simpa using hz
+  have hinvol : ∀ w ∈ T.erase 0, ν (ν w) = w := by
+    intro w hw
+    have hw' : w ∈ T := Finset.mem_of_mem_erase hw
+    have h1 := hνΛ w hw'
+    have h2 := hνΛ (ν w) (hνT w hw')
+    refine huniq (hνT (ν w) (hνT w hw')) hw' ?_
+    have hd := P.lattice.sub_mem h2 h1
+    rw [show ν w + ν (ν w) - (w + ν w) = ν (ν w) - w by ring] at hd
+    exact hd
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0, ν w = ν v → w = v := by
+    intro w hw v hv he
+    rw [← hinvol w hw, ← hinvol v hv, he]
+  have hodd : ∀ w ∈ T, P.derivWeierstrassP (ν w) = -P.derivWeierstrassP w := by
+    intro w hw
+    have hl : w + ν w ∈ P.lattice := hνΛ w hw
+    have he : ν w = -w + (w + ν w) := by ring
+    rw [he, P.derivWeierstrassP_add_coe (-w) ⟨w + ν w, hl⟩, P.derivWeierstrassP_neg]
+  have hinjOn : Set.InjOn ν ↑(T.erase 0) := fun w hw v hv he =>
+    hinj w (Finset.mem_coe.1 hw) v (Finset.mem_coe.1 hv) he
+  have himg : (T.erase 0).image ν = T.erase 0 :=
+    Finset.eq_of_subset_of_card_le
+      (fun v hv => by
+        obtain ⟨w, hw, rfl⟩ := Finset.mem_image.1 hv
+        exact hνe w hw)
+      (le_of_eq (Finset.card_image_of_injOn hinjOn).symm)
+  have h1 : ∑ v ∈ T.erase 0, P.derivWeierstrassP v
+      = ∑ w ∈ T.erase 0, P.derivWeierstrassP (ν w) := by
+    conv_lhs => rw [← himg]
+    exact Finset.sum_image (fun w hw v hv he => hinj w hw v hv he)
+  have h2 : ∑ w ∈ T.erase 0, P.derivWeierstrassP (ν w)
+      = -∑ w ∈ T.erase 0, P.derivWeierstrassP w := by
+    have hc : ∑ w ∈ T.erase 0, P.derivWeierstrassP (ν w)
+        = ∑ w ∈ T.erase 0, (-P.derivWeierstrassP w) :=
+      Finset.sum_congr rfl (fun w hw => hodd w (Finset.mem_of_mem_erase hw))
+    rw [hc, Finset.sum_neg_distrib]
+  have hSS : ∑ w ∈ T.erase 0, P.derivWeierstrassP w
+      = -∑ w ∈ T.erase 0, P.derivWeierstrassP w := h1.trans h2
+  have h3 : (2 : ℂ) * ∑ w ∈ T.erase 0, P.derivWeierstrassP w = 0 := by
+    linear_combination hSS
+  simpa using h3
+
+def rep_sub_mem_lattice_imp_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(代表系の元は Λ を法として相異なる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_derivWeierstrassP_rep_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(代表系の上での ℘′ の和は消える——Vélu の ω-正規化の解析版。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
