@@ -4492,6 +4492,90 @@ def sum_derivWeierstrassP_rep_eq_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(代表系の上での ℘′ の和は消える——Vélu の ω-正規化の解析版。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★Laurent 比較の入口 -/
+
+/-- ★★★★★★★★★★**代表系の `0` 以外の元は格子の外**——`w ≡ 0` なら `w = 0` だから。 -/
+theorem rep_notMem_lattice (P P' : PeriodPair) (T : Finset ℂ) (h0T : (0 : ℂ) ∈ T)
+    (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    {w : ℂ} (hw : w ∈ T.erase 0) : w ∉ P.lattice := by
+  intro hc
+  refine Finset.ne_of_mem_erase hw ?_
+  refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw) h0T ?_
+  simpa using hc
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`℘_{Λ′} − ℘_Λ` は `Λ` の `℘` の平行移動の和**
+
+    `℘_{Λ′}(z) − ℘_Λ(z) = Σ_{w ∈ T∖{0}} (℘_Λ(z + w) − ℘_Λ(w))`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 669 の Vélu の公式から `w = 0` の項を分離しただけ。
+☆左辺は原点の `z⁻²` の極が打ち消し合っており、右辺は原点で解析的
+（`T∖{0}` の元は格子の外）。**これが Laurent 係数の比較の入口である**——
+`z²` の係数から `g₂′ − g₂`、`z⁴` の係数から `g₃′ − g₃` が出る。 -/
+theorem weierstrassP_sub_eq_sum (P P' : PeriodPair) (T : Finset ℂ) (h0T : (0 : ℂ) ∈ T)
+    (hvelu : ∀ z, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) (z : ℂ) :
+    P'.weierstrassP z - P.weierstrassP z
+      = ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w) := by
+  rw [hvelu z]
+  simp only [veluAnalyticX, veluAnalyticC]
+  rw [← Finset.add_sum_erase T (fun w => P.weierstrassP (z + w)) h0T]
+  simp only [add_zero]
+  rw [Finset.sum_sub_distrib]
+  ring
+
+/-- ★★★★★★★★★★★★**平行移動の和は原点で解析的**。 -/
+theorem analyticAt_veluShiftSum (P P' : PeriodPair) (T : Finset ℂ) (h0T : (0 : ℂ) ∈ T)
+    (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) :
+    AnalyticAt ℂ (fun z => ∑ w ∈ T.erase 0,
+      (P.weierstrassP (z + w) - P.weierstrassP w)) 0 := by
+  have h : AnalyticAt ℂ (∑ w ∈ T.erase 0,
+      fun z : ℂ => P.weierstrassP (z + w) - P.weierstrassP w) 0 := by
+    refine Finset.analyticAt_sum _ ?_
+    intro w hw
+    refine AnalyticAt.sub ?_ analyticAt_const
+    refine shifted_analyticAt P 0 w ?_
+    rw [zero_add]
+    exact rep_notMem_lattice P P' T h0T hT hrep hw
+  refine h.congr ?_
+  filter_upwards with z
+  simp [Finset.sum_apply]
+
+/-- ★★★★★★★★★★★★★★★★
+**`℘[Λ′ − 0] − ℘[Λ − 0]` は平行移動の和に等しい**——`z⁻²` が消える形。
+
+☆左辺は mathlib の `iteratedDeriv_weierstrassPExcept_self` で Taylor 係数が
+`sumInvPow`（＝`G n`、したがって `g₂`・`g₃`）で書けている。 -/
+theorem weierstrassPExcept_sub_eq_sum (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T)
+    (hvelu : ∀ z, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) (z : ℂ) :
+    P'.weierstrassPExcept 0 z - P.weierstrassPExcept 0 z
+      = ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w) := by
+  rw [← weierstrassP_sub_invSq P' z, ← weierstrassP_sub_invSq P z,
+    ← weierstrassP_sub_eq_sum P P' T h0T hvelu z]
+  ring
+
+def weierstrassP_sub_eq_sum.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘_{Λ′} − ℘_Λ は ℘_Λ の平行移動の和——Laurent 比較の入口。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassPExcept_sub_eq_sum.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘[Λ′−0] − ℘[Λ−0] は平行移動の和——z⁻² が消える形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def rep_notMem_lattice.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(代表系の 0 以外の元は格子の外。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
