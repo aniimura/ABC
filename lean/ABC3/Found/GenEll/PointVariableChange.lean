@@ -535,6 +535,132 @@ def veluB_add_negY.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(B = 2y + a₁x + a₃ は ± で打ち消し合う——Σ℘′(w) = 0 の代数版。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★商曲線の一般変数変換 -/
+
+section VeluFullVC
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**Vélu の商曲線の一般の変数変換による変換則**
+
+    `veluCurve (C•W) (u⁻⁴v) (u⁻⁶(w − r·v)) = C • veluCurve W v w`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★純粋なスケーリング（`veluCurve_scale`）では `w ↦ u⁻⁶w` だったが、
+一般には `r` の分だけ `w ↦ u⁻⁶(w − r·v)` とずれる。
+☆`b₂(C•W) = u⁻²(b₂ + 12r)` が効く。 -/
+theorem veluCurve_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (v w : F) :
+    veluCurve (C • W) (((C.u⁻¹ : Fˣ) : F) ^ 4 * v)
+        (((C.u⁻¹ : Fˣ) : F) ^ 6 * (w - C.r * v))
+      = C • veluCurve W v w := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · simp only [veluCurve, WeierstrassCurve.variableChange_a₁]
+  · simp only [veluCurve, WeierstrassCurve.variableChange_a₂]
+  · simp only [veluCurve, WeierstrassCurve.variableChange_a₃]
+  · simp only [veluCurve, WeierstrassCurve.variableChange_a₁,
+      WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₃,
+      WeierstrassCurve.variableChange_a₄]
+    ring
+  · simp only [veluCurve, WeierstrassCurve.variableChange_a₁,
+      WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₃,
+      WeierstrassCurve.variableChange_a₄, WeierstrassCurve.variableChange_a₆,
+      WeierstrassCurve.b₂]
+    ring
+
+/-- ★★★★点の対の変数変換は単射。 -/
+theorem vcPair_injective (C : VariableChange F) :
+    Function.Injective (fun Q : F × F => (vcX C Q.1, vcY C Q.1 Q.2)) := by
+  intro a b hab
+  have h1 : vcX C a.1 = vcX C b.1 := congrArg Prod.fst hab
+  have ha : a.1 = b.1 := vcX_injective C h1
+  have h2 : vcY C a.1 a.2 = vcY C b.1 b.2 := congrArg Prod.snd hab
+  rw [ha] at h2
+  exact Prod.ext ha (vcY_injective C b.1 h2)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★`veluVFull` の一般変数変換——`Σ_S B = 0` なら補正は消える。 -/
+theorem veluVFull_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) = 0) :
+    veluVFull (C • W) (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)))
+      = ((C.u⁻¹ : Fˣ) : F) ^ 4 * veluVFull W S := by
+  rw [veluVFull, veluVFull, Finset.sum_image (fun a _ b _ hab => vcPair_injective C hab)]
+  have hstep : ∀ Q ∈ S, veluV2 (C • W) (vcX C Q.1) (vcY C Q.1 Q.2)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 4
+        * (veluV2 W Q.1 Q.2 - C.s * (2 * Q.2 + W.a₁ * Q.1 + W.a₃)) :=
+    fun Q _ => veluV2_variableChange C W Q.1 Q.2
+  rw [Finset.sum_congr rfl hstep, ← Finset.mul_sum, Finset.sum_sub_distrib,
+    ← Finset.mul_sum, hB, mul_zero, sub_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★`veluWFull` の一般変数変換
+
+    `veluWFull (C•W) (vc S) = u⁻⁶·(veluWFull W S − r·veluVFull W S)`
+
+★`Σ_S B = 0` と `Σ_S B·x = 0` が要る——どちらも `S` が `±` で閉じていれば従う。 -/
+theorem veluWFull_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) = 0)
+    (hBx : ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) * Q.1 = 0) :
+    veluWFull (C • W) (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)))
+      = ((C.u⁻¹ : Fˣ) : F) ^ 6
+        * (veluWFull W S - C.r * veluVFull W S) := by
+  rw [veluWFull, veluWFull, veluVFull,
+    Finset.sum_image (fun a _ b _ hab => vcPair_injective C hab)]
+  have hstep : ∀ Q ∈ S,
+      veluU (C • W) (vcX C Q.1) (vcY C Q.1 Q.2) / 2
+        + veluV2 (C • W) (vcX C Q.1) (vcY C Q.1 Q.2) * vcX C Q.1
+      = ((C.u⁻¹ : Fˣ) : F) ^ 6
+        * ((veluU W Q.1 Q.2 / 2 + veluV2 W Q.1 Q.2 * Q.1)
+          - C.r * veluV2 W Q.1 Q.2
+          - C.s * ((2 * Q.2 + W.a₁ * Q.1 + W.a₃) * Q.1)
+          + C.s * C.r * (2 * Q.2 + W.a₁ * Q.1 + W.a₃)) := by
+    intro Q _
+    rw [veluU_variableChange, veluV2_variableChange, vcX]
+    ring
+  rw [Finset.sum_congr rfl hstep, ← Finset.mul_sum]
+  congr 1
+  rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_sub_distrib,
+    ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum, hB, hBx,
+    mul_zero, mul_zero, sub_zero, add_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`H∖{O}` 全体で書いた Vélu の商は一般の変数変換と両立する**
+
+    `veluQuotientFull (C•W) (vc S) = C • veluQuotientFull W S`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★★☆**これで `L` 上の `E/H` と `ℂ` 上の `latticeCurve Λ′` が
+一意化の変数変換を挟んで結びつく**——`Lemma 3.5` の最後の橋である。 -/
+theorem veluQuotientFull_variableChange (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) = 0)
+    (hBx : ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) * Q.1 = 0) :
+    veluQuotientFull (C • W) (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)))
+      = C • veluQuotientFull W S := by
+  rw [veluQuotientFull, veluVFull_variableChange C W S hB,
+    veluWFull_variableChange C W S hB hBx, veluQuotientFull,
+    veluCurve_variableChange]
+
+end VeluFullVC
+
+def veluCurve_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商曲線の一般の変数変換による変換則。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(H∖{O} 全体で書いた商は一般の変数変換と両立する——最後の橋)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
