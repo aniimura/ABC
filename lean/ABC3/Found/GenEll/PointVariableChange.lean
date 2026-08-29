@@ -459,11 +459,76 @@ theorem addOrderOf_vcPoint (C : VariableChange F) (W : WeierstrassCurve F)
     refine vcPoint_injective C W ?_
     rw [vcPoint_nsmul, vcPoint_zero, addOrderOf_nsmul_eq_zero]
 
+/-- ★★★★★★逆向きの座標 `x = u²x′ + r`。 -/
+theorem vcX_inv (C : VariableChange F) (x' : F) :
+    vcX C (((C.u : Fˣ) : F) ^ 2 * x' + C.r) = x' := by
+  have hu : ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) = 1 := C.u.mul_inv
+  simp only [vcX]
+  linear_combination (x' * (((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)) * hu
+
+/-- ★★★★★★逆向きの座標 `y = u³y′ + u²s·x′ + t`。 -/
+theorem vcY_inv (C : VariableChange F) (x' y' : F) :
+    vcY C (((C.u : Fˣ) : F) ^ 2 * x' + C.r)
+        (((C.u : Fˣ) : F) ^ 3 * y' + ((C.u : Fˣ) : F) ^ 2 * C.s * x' + C.t) = y' := by
+  have hu : ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) = 1 := C.u.mul_inv
+  simp only [vcY]
+  linear_combination (y' * ((((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F)) ^ 2
+      + ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)
+    + ((C.u : Fˣ) : F) ^ 2 * C.s * x' * ((C.u⁻¹ : Fˣ) : F) ^ 3
+      * (((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1) * 0) * hu
+
+/-- ★★★★★★★★★★**点の写像は全射**——逆向きの変数変換で戻せる。 -/
+theorem vcPoint_surjective (C : VariableChange F) (W : WeierstrassCurve F) :
+    Function.Surjective (vcPoint C W) := by
+  rintro (_ | ⟨x', y', h'⟩)
+  · exact ⟨0, rfl⟩
+  · refine ⟨.some (((C.u : Fˣ) : F) ^ 2 * x' + C.r)
+      (((C.u : Fˣ) : F) ^ 3 * y' + ((C.u : Fˣ) : F) ^ 2 * C.s * x' + C.t) ?_, ?_⟩
+    · refine (nonsingular_variableChange C W _ _).1 ?_
+      rw [vcX_inv, vcY_inv]
+      exact h'
+    · rw [vcPoint_some]
+      exact point_some_congr' (vcX_inv C x') (vcY_inv C x' y')
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**変数変換は点の加法群の同型を与える**
+
+    `W.Point ≃+ (C • W).Point`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★★☆**mathlib にはこれが無い**（`Point.map` は環準同型に対するものだけ）。
+☆位数が保たれる（第 686）ので、`latticeCurve (P σ) = C σ • (E.map σ)` の
+両側で「位数 `l` の点」と「その生成する部分群」が 1 対 1 に対応する。 -/
+noncomputable def vcEquiv (C : VariableChange F) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(C • W).IsElliptic] :
+    W.toAffine.Point ≃+ (C • W).toAffine.Point :=
+  AddEquiv.mk'
+    (Equiv.ofBijective (vcPoint C W) ⟨vcPoint_injective C W, vcPoint_surjective C W⟩)
+    (vcPoint_add C W)
+
+open scoped Classical in
+@[simp] theorem vcEquiv_apply (C : VariableChange F) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(C • W).IsElliptic] (Pt : W.toAffine.Point) :
+    vcEquiv C W Pt = vcPoint C W Pt := rfl
+
 end Point
 
 def vcPoint.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(変数変換による点の写像——mathlib に無い)",
+    sectionId := "genell-lemma-3-5" }
+
+def vcEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(変数変換は点の加法群の同型を与える——mathlib に無い)",
+    sectionId := "genell-lemma-3-5" }
+
+def vcPoint_surjective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(点の写像は全射——逆向きの変数変換で戻せる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def addOrderOf_vcPoint.src : ABC3.Meta.Source :=
