@@ -2577,6 +2577,40 @@ def weierstrassP_addition.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘ の加法定理。★無条件——mathlib に無い)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★`y` 座標の加法公式へ -/
+
+/-- ★★★★★★★★★★★★★★**`y` 座標の加法公式の代数の核**——2 つの ODE だけから。
+
+    `℘″(z)·D − N·℘′(z) = −N²/2 + (4℘(z) + 2℘(w))·D²`
+
+（`N = ℘′(z) − ℘′(w)`、`D = ℘(z) − ℘(w)`、`℘″ = 6℘² − g₂/2`）
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`℘′² = 4℘³ − g₂℘ − g₃` を `z` と `w` の両方に当てると**両辺とも**
+
+    `2℘z³ − 6℘z²℘w + (g₂/2)℘z + (g₂/2)℘w + g₃ + ℘′z·℘′w`
+
+になる。☆これが `R′ = −R²/2 + 4℘(z) + 2℘(w)` の中身であり、
+加法定理を微分して得られる `℘′(z+w) = R·R′/2 − ℘′(z)` を
+群法則の形 `℘′(z+w) = −R·(℘(z+w) − ℘(z)) − ℘′(z)` に直す鍵である。 -/
+theorem y_addition_algebraic (P : PeriodPair) (z w : ℂ)
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) :
+    (6 * P.weierstrassP z ^ 2 - P.g₂ / 2) * (P.weierstrassP z - P.weierstrassP w)
+        - (P.derivWeierstrassP z - P.derivWeierstrassP w) * P.derivWeierstrassP z
+      = -(P.derivWeierstrassP z - P.derivWeierstrassP w) ^ 2 / 2
+        + (4 * P.weierstrassP z + 2 * P.weierstrassP w)
+          * (P.weierstrassP z - P.weierstrassP w) ^ 2 := by
+  have h1 := P.derivWeierstrassP_sq z hz
+  have h2 := P.derivWeierstrassP_sq w hw
+  linear_combination (-1/2 : ℂ) * h1 + (1/2 : ℂ) * h2
+
+def y_addition_algebraic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(y 座標の加法公式の代数の核——2 つの ODE だけから。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
