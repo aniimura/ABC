@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import ABC3.Meta.Claim
 
 /-!
@@ -175,7 +176,72 @@ noncomputable def veluQuotient (W : WeierstrassCurve R) (S : Finset (R × R)) :
 theorem veluQuotient_empty (W : WeierstrassCurve R) : veluQuotient W ∅ = W := by
   rw [veluQuotient, veluVSum, veluWSum, Finset.sum_empty, Finset.sum_empty, veluCurve_zero]
 
+/-! ## ★★★★★★★★★★モデルの取り替えとの両立 -/
+
+/-- ★スケーリングだけの変数変換 `(u, 0, 0, 0)`。 -/
+def scaleChange (u : Rˣ) : VariableChange R := ⟨u, 0, 0, 0⟩
+
+/-- ★★★★★**`g^x_Q` は重さ 4**。 -/
+theorem veluGx_scale (W : WeierstrassCurve R) (x y : R) (u : Rˣ) :
+    veluGx (scaleChange u • W) (((u⁻¹ : Rˣ) : R) ^ 2 * x) (((u⁻¹ : Rˣ) : R) ^ 3 * y)
+      = ((u⁻¹ : Rˣ) : R) ^ 4 * veluGx W x y := by
+  simp [veluGx, scaleChange, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₄]
+  ring
+
+/-- ★★★★★**`g^y_Q` は重さ 3**。 -/
+theorem veluGy_scale (W : WeierstrassCurve R) (x y : R) (u : Rˣ) :
+    veluGy (scaleChange u • W) (((u⁻¹ : Rˣ) : R) ^ 2 * x) (((u⁻¹ : Rˣ) : R) ^ 3 * y)
+      = ((u⁻¹ : Rˣ) : R) ^ 3 * veluGy W x y := by
+  simp [veluGy, scaleChange, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₃]
+  ring
+
+/-- ★★★★★★**`v_Q` は重さ 4**——`a₄` と同じ。 -/
+theorem veluV_scale (W : WeierstrassCurve R) (x y : R) (u : Rˣ) :
+    veluV (scaleChange u • W) (((u⁻¹ : Rˣ) : R) ^ 2 * x) (((u⁻¹ : Rˣ) : R) ^ 3 * y)
+      = ((u⁻¹ : Rˣ) : R) ^ 4 * veluV W x y := by
+  rw [veluV, veluGx_scale, veluGy_scale, veluV,
+    WeierstrassCurve.variableChange_a₁, scaleChange]
+  ring
+
+/-- ★★★★★★**`w_Q` は重さ 6**——`a₆` と同じ。 -/
+theorem veluW_scale (W : WeierstrassCurve R) (x y : R) (u : Rˣ) :
+    veluW (scaleChange u • W) (((u⁻¹ : Rˣ) : R) ^ 2 * x) (((u⁻¹ : Rˣ) : R) ^ 3 * y)
+      = ((u⁻¹ : Rˣ) : R) ^ 6 * veluW W x y := by
+  rw [veluW, veluU, veluGy_scale, veluV_scale, veluW, veluU]
+  ring
+
+/-- ★★★★★★★★★★**Vélu の商はスケーリングと両立する**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+    `veluCurve (u • W) (u⁻⁴v) (u⁻⁶w) = u • veluCurve W v w`
+
+★★これが `neronExp` の帳簿に効く——`Found/GaloisRep/IsogenyReduction.lean` の
+`hArch` は与えられたモデルに依るので、**モデルを取り替えたときの挙動**が要る。
+★`veluV_scale`・`veluW_scale` と重さが揃っている（4 と 6）のが要点である。 -/
+theorem veluCurve_scale (W : WeierstrassCurve R) (v w : R) (u : Rˣ) :
+    veluCurve (scaleChange u • W) (((u⁻¹ : Rˣ) : R) ^ 4 * v) (((u⁻¹ : Rˣ) : R) ^ 6 * w)
+      = scaleChange u • veluCurve W v w := by
+  ext
+  · simp [veluCurve, scaleChange, WeierstrassCurve.variableChange_a₁]
+  · simp [veluCurve, scaleChange, WeierstrassCurve.variableChange_a₂]
+  · simp [veluCurve, scaleChange, WeierstrassCurve.variableChange_a₃]
+  · simp [veluCurve, scaleChange, WeierstrassCurve.variableChange_a₄]
+    ring
+  · simp [veluCurve, scaleChange, WeierstrassCurve.variableChange_a₆,
+      WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂,
+      WeierstrassCurve.b₂]
+    ring
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
+
+def veluCurve_scale.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商はスケーリングと両立する——v は重さ 4、w は重さ 6)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluCurve.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
