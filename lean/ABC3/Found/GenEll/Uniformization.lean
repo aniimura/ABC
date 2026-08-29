@@ -5254,6 +5254,95 @@ def uniformMap_ne_zero_of_mem_erase.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(0 < k < l なら k·z₀ の像は O でない。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**代表系の上で `f(℘)·℘′` の和は消える**
+
+    `Σ_{w ∈ T∖{0}} f(℘_Λ(w))·℘′_Λ(w) = 0`   （任意の `f : ℂ → ℂ`）
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★第 670 の一般化。`ν w ≡ −w` は `T∖{0}` の対合で、
+`℘` は偶（`℘(ν w) = ℘(w)`）・`℘′` は奇（`℘′(ν w) = −℘′(w)`）だから
+`S = Σ f(℘(ν w))·℘′(ν w) = −S`。
+
+★★☆`f = 1` なら第 670（`Σ ℘′ = 0`）、`f = id` なら `Σ ℘·℘′ = 0`。
+後者は Vélu の `Σ B·x = 0`（第 688 の仮説）に要る。 -/
+theorem sum_mul_derivWeierstrassP_rep_eq_zero (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) (f : ℂ → ℂ) :
+    ∑ w ∈ T.erase 0, f (P.weierstrassP w) * P.derivWeierstrassP w = 0 := by
+  classical
+  have huniq : ∀ {w v : ℂ}, w ∈ T → v ∈ T → w - v ∈ P.lattice → w = v :=
+    fun hw hv hd => rep_sub_mem_lattice_imp_eq P P' T hT hrep hw hv hd
+  have hex : ∀ w ∈ T, ∃ v, v ∈ T ∧ w + v ∈ P.lattice := by
+    intro w hw
+    obtain ⟨v, hv, hv2, -⟩ := hrep w (hT w hw)
+    exact ⟨v, hv, hv2⟩
+  choose! ν hνT hνΛ using hex
+  have hνe : ∀ w ∈ T.erase 0, ν w ∈ T.erase 0 := by
+    intro w hw
+    have hw' : w ∈ T := Finset.mem_of_mem_erase hw
+    have hw0 : w ≠ 0 := Finset.ne_of_mem_erase hw
+    refine Finset.mem_erase.2 ⟨?_, hνT w hw'⟩
+    intro hc
+    refine hw0 (huniq hw' h0T ?_)
+    have hz := hνΛ w hw'
+    rw [hc, add_zero] at hz
+    simpa using hz
+  have hinvol : ∀ w ∈ T.erase 0, ν (ν w) = w := by
+    intro w hw
+    have hw' : w ∈ T := Finset.mem_of_mem_erase hw
+    have h1 := hνΛ w hw'
+    have h2 := hνΛ (ν w) (hνT w hw')
+    refine huniq (hνT (ν w) (hνT w hw')) hw' ?_
+    have hd := P.lattice.sub_mem h2 h1
+    rw [show ν w + ν (ν w) - (w + ν w) = ν (ν w) - w by ring] at hd
+    exact hd
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0, ν w = ν v → w = v := by
+    intro w hw v hv he
+    rw [← hinvol w hw, ← hinvol v hv, he]
+  have hodd : ∀ w ∈ T, f (P.weierstrassP (ν w)) * P.derivWeierstrassP (ν w)
+      = -(f (P.weierstrassP w) * P.derivWeierstrassP w) := by
+    intro w hw
+    have hl : w + ν w ∈ P.lattice := hνΛ w hw
+    have he : ν w = -w + (w + ν w) := by ring
+    have hp : P.weierstrassP (ν w) = P.weierstrassP w := by
+      rw [he, P.weierstrassP_add_coe (-w) ⟨w + ν w, hl⟩, P.weierstrassP_neg]
+    have hpd : P.derivWeierstrassP (ν w) = -P.derivWeierstrassP w := by
+      rw [he, P.derivWeierstrassP_add_coe (-w) ⟨w + ν w, hl⟩, P.derivWeierstrassP_neg]
+    rw [hp, hpd]
+    ring
+  have hinjOn : Set.InjOn ν ↑(T.erase 0) := fun w hw v hv he =>
+    hinj w (Finset.mem_coe.1 hw) v (Finset.mem_coe.1 hv) he
+  have himg : (T.erase 0).image ν = T.erase 0 :=
+    Finset.eq_of_subset_of_card_le
+      (fun v hv => by
+        obtain ⟨w, hw, rfl⟩ := Finset.mem_image.1 hv
+        exact hνe w hw)
+      (le_of_eq (Finset.card_image_of_injOn hinjOn).symm)
+  have h1 : ∑ v ∈ T.erase 0, f (P.weierstrassP v) * P.derivWeierstrassP v
+      = ∑ w ∈ T.erase 0, f (P.weierstrassP (ν w)) * P.derivWeierstrassP (ν w) := by
+    conv_lhs => rw [← himg]
+    exact Finset.sum_image (fun w hw v hv he => hinj w hw v hv he)
+  have h2 : ∑ w ∈ T.erase 0, f (P.weierstrassP (ν w)) * P.derivWeierstrassP (ν w)
+      = -∑ w ∈ T.erase 0, f (P.weierstrassP w) * P.derivWeierstrassP w := by
+    have hc : ∑ w ∈ T.erase 0, f (P.weierstrassP (ν w)) * P.derivWeierstrassP (ν w)
+        = ∑ w ∈ T.erase 0, (-(f (P.weierstrassP w) * P.derivWeierstrassP w)) :=
+      Finset.sum_congr rfl (fun w hw => hodd w (Finset.mem_of_mem_erase hw))
+    rw [hc, Finset.sum_neg_distrib]
+  have h3 : (2 : ℂ) * ∑ w ∈ T.erase 0,
+      f (P.weierstrassP w) * P.derivWeierstrassP w = 0 := by
+    linear_combination h1.trans h2
+  simpa using h3
+
+def sum_mul_derivWeierstrassP_rep_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(代表系の上で f(℘)·℘′ の和は消える——第 670 の一般化。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
