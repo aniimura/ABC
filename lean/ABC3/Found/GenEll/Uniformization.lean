@@ -1925,6 +1925,31 @@ def addDefect_eq_nearNeg.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(z ≡ −w の極が消える——u = tû と q = t³g で t² が約される。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★**`℘ − ℘(w)` は `w` でちょうど 1 位の零点**（`2w ∉ Λ`）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`℘′(w) ≠ 0`（第 625 の `derivWeierstrassP_eq_zero_iff` で `2w ∉ Λ` から）だから。
+
+☆★これが `F_w` の `z ≡ w` での極が立たない理由である——
+分母 `℘(z) − ℘(w)` が 1 位、分子 `℘′(z) − ℘′(w)` も `w` で消えるので比は有界。 -/
+theorem analyticOrderAt_weierstrassP_sub_self (P : PeriodPair) (w : ℂ)
+    (hw : w ∉ P.lattice) (h2w : 2 * w ∉ P.lattice) :
+    analyticOrderAt (fun z : ℂ => P.weierstrassP z - P.weierstrassP w) w = 1 := by
+  have hana : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP z - P.weierstrassP w) w :=
+    (P.analyticOnNhd_weierstrassP w hw).sub analyticAt_const
+  refine hana.analyticOrderAt_eq_one_of_zero_deriv_ne_zero (by simp) ?_
+  have hd : deriv (fun z : ℂ => P.weierstrassP z - P.weierstrassP w) w
+      = P.derivWeierstrassP w := ((hasDerivAt_weierstrassP P hw).sub_const _).deriv
+  rw [hd]
+  exact fun hcc => h2w ((derivWeierstrassP_eq_zero_iff P w hw).1 hcc)
+
+def analyticOrderAt_weierstrassP_sub_self.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘ − ℘(w) は w で 1 位の零点——2w ∉ Λ のとき。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
