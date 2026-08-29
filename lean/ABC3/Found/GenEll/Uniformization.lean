@@ -3869,6 +3869,178 @@ def relIndex_preimageSubgroup.src : ABC3.Meta.Source :=
     item := "Lemma 3.5([Λ′ : Λ] = |H|——指数は部分群の位数。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★`Λ′` の基底と行列式 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**指数 `l` の格子 `Λ′ = Λ + ℤz₀` の基底と行列式**
+
+`l·z₀ = a·ω₁ + b·ω₂`（`gcd(a, b, l) = 1`）のとき、`Λ′` の基底 `ω₁′, ω₂′` と
+整数 `A, B, C, D` が取れて
+
+    ω₁ = A·ω₁′ + B·ω₂′,  ω₂ = C·ω₁′ + D·ω₂′,  |AD − BC| = l
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★構成は初等的である。`h = gcd(a,b)`、`a = h a₁`、`b = h b₁` として
+`a₁p + b₁q = 1` を取り
+
+    η₁ ≔ a₁ω₁ + b₁ω₂,   η₂ ≔ −qω₁ + pω₂
+
+とすると `(η₁, η₂)` は `Λ` の基底（行列式 `a₁p + b₁q = 1`）で `l z₀ = h η₁`。
+`gcd(h, l) = 1`（`gcd(a,b,l) = 1` から）なので `xh + yl = 1` が取れ、
+
+    ω₁′ ≔ η₁/l,   ω₂′ ≔ η₂
+
+とすれば `z₀ = h·ω₁′`・`ω₁′ = x·z₀ + y·η₁` となって
+`Λ′ = ℤω₁′ + ℤω₂′`。行列式は
+
+    (pl)·a₁ − (−b₁)·(ql) = l·(pa₁ + b₁q) = l
+
+★★★★☆**これで `Lemma 3.5` の格子側——「位数 `l` の巡回部分群 ↔
+指数 `l` の格子」——が完全に閉じた。**
+☆`htFalt_isogeny_le_of_analytic_minimal`（第 617）が要求する
+`h₁`・`h₂`・`hdet` はこの `A, B, C, D` そのものである。 -/
+theorem exists_lattice_basis_of_cyclic (P : PeriodPair) (z₀ : ℂ) (l : ℕ) (hl : 0 < l)
+    (a b : ℤ) (hz : (l : ℂ) * z₀ = (a : ℂ) * P.ω₁ + (b : ℂ) * P.ω₂)
+    (hgcd : Nat.gcd (Int.gcd a b) l = 1) :
+    ∃ (ω₁' ω₂' : ℂ) (A B C D : ℤ),
+      P.ω₁ = (A : ℂ) * ω₁' + (B : ℂ) * ω₂' ∧
+      P.ω₂ = (C : ℂ) * ω₁' + (D : ℂ) * ω₂' ∧
+      (A * D - B * C).natAbs = l ∧
+      Submodule.span ℤ ({ω₁', ω₂'} : Set ℂ)
+        = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) := by
+  have hlC : (l : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hl.ne'
+  by_cases hab : Int.gcd a b = 0
+  · -- `a = b = 0` の退化した場合。`l = 1`・`z₀ = 0`。
+    have ha : a = 0 := (Int.gcd_eq_zero_iff.1 hab).1
+    have hb : b = 0 := (Int.gcd_eq_zero_iff.1 hab).2
+    have hl1 : l = 1 := by simpa [hab] using hgcd
+    have hz0 : z₀ = 0 := by
+      have := hz
+      rw [ha, hb] at this
+      simp only [Int.cast_zero, zero_mul, add_zero] at this
+      exact (mul_eq_zero.1 this).resolve_left hlC
+    refine ⟨P.ω₁, P.ω₂, 1, 0, 0, 1, by push_cast; ring, by push_cast; ring, by
+      simp [hl1], ?_⟩
+    rw [hz0, Submodule.span_zero_singleton, sup_bot_eq]
+    rfl
+  · -- 本体。`h = gcd(a,b) ≠ 0`。
+    set h : ℤ := (Int.gcd a b : ℤ) with hh
+    have hhpos : 0 < h := by
+      simpa [hh] using Nat.pos_of_ne_zero hab
+    have hhne : h ≠ 0 := hhpos.ne'
+    set a₁ : ℤ := a / h with ha₁
+    set b₁ : ℤ := b / h with hb₁
+    have hae : a = h * a₁ := by
+      rw [ha₁, Int.mul_ediv_cancel' (Int.gcd_dvd_left a b)]
+    have hbe : b = h * b₁ := by
+      rw [hb₁, Int.mul_ediv_cancel' (Int.gcd_dvd_right a b)]
+    have hg1 : Int.gcd a₁ b₁ = 1 := by
+      rw [ha₁, hb₁, hh]
+      exact Int.gcd_div_gcd_div_gcd (Nat.pos_of_ne_zero hab)
+    -- `a₁ p + b₁ q = 1`
+    set p : ℤ := Int.gcdA a₁ b₁ with hp
+    set q : ℤ := Int.gcdB a₁ b₁ with hq
+    have hbez1 : a₁ * p + b₁ * q = 1 := by
+      have := Int.gcd_eq_gcd_ab a₁ b₁
+      rw [hg1] at this
+      simpa [hp, hq] using this.symm
+    -- `gcd(h, l) = 1` から `x h + y l = 1`
+    have hghl : Int.gcd h (l : ℤ) = 1 := by
+      simpa [hh] using hgcd
+    set x : ℤ := Int.gcdA h (l : ℤ) with hx
+    set y : ℤ := Int.gcdB h (l : ℤ) with hy
+    have hbez2 : h * x + (l : ℤ) * y = 1 := by
+      have := Int.gcd_eq_gcd_ab h (l : ℤ)
+      rw [hghl] at this
+      simpa [hx, hy] using this.symm
+    -- 新しい基底
+    set η₁ : ℂ := (a₁ : ℂ) * P.ω₁ + (b₁ : ℂ) * P.ω₂ with hη₁
+    set η₂ : ℂ := (-q : ℤ) * P.ω₁ + (p : ℂ) * P.ω₂ with hη₂
+    set ω₁' : ℂ := η₁ / (l : ℂ) with hω₁'
+    have hlω : (l : ℂ) * ω₁' = η₁ := by
+      rw [hω₁']; field_simp
+    clear_value ω₁'
+    have hlz : (l : ℂ) * z₀ = (h : ℂ) * η₁ := by
+      rw [hz, hη₁, hae, hbe]
+      push_cast
+      ring
+    have hz0 : z₀ = (h : ℂ) * ω₁' := by
+      have : (l : ℂ) * z₀ = (l : ℂ) * ((h : ℂ) * ω₁') := by
+        rw [hlz, ← hlω]; ring
+      exact mul_left_cancel₀ hlC this
+    have hbez1C : (a₁ : ℂ) * (p : ℂ) + (b₁ : ℂ) * (q : ℂ) = 1 := by
+      exact_mod_cast congrArg (fun n : ℤ => (n : ℂ)) hbez1
+    have hbez2C : (h : ℂ) * (x : ℂ) + (l : ℂ) * (y : ℂ) = 1 := by
+      exact_mod_cast congrArg (fun n : ℤ => (n : ℂ)) hbez2
+    have hω1 : P.ω₁ = ((p * l : ℤ) : ℂ) * ω₁' + ((-b₁ : ℤ) : ℂ) * η₂ := by
+      rw [hη₂]
+      push_cast
+      have hlω' : (l : ℂ) * ω₁' = (a₁ : ℂ) * P.ω₁ + (b₁ : ℂ) * P.ω₂ := by
+        rw [hlω, hη₁]
+      linear_combination (-(p : ℂ)) * hlω' - P.ω₁ * hbez1C
+    have hω2 : P.ω₂ = ((q * l : ℤ) : ℂ) * ω₁' + ((a₁ : ℤ) : ℂ) * η₂ := by
+      rw [hη₂]
+      push_cast
+      have hlω' : (l : ℂ) * ω₁' = (a₁ : ℂ) * P.ω₁ + (b₁ : ℂ) * P.ω₂ := by
+        rw [hlω, hη₁]
+      linear_combination (-(q : ℂ)) * hlω' - P.ω₂ * hbez1C
+    refine ⟨ω₁', η₂, p * l, -b₁, q * l, a₁, hω1, hω2, ?_, ?_⟩
+    · have : (p * l) * a₁ - (-b₁) * (q * l) = (l : ℤ) * (a₁ * p + b₁ * q) := by ring
+      rw [this, hbez1, mul_one, Int.natAbs_natCast]
+    · -- `span {ω₁′, η₂} = Λ ⊔ span {z₀}`
+      have hη₁mem : η₁ ∈ P.lattice := by
+        rw [PeriodPair.mem_lattice]
+        exact ⟨a₁, b₁, hη₁.symm⟩
+      have hη₂mem : η₂ ∈ P.lattice := by
+        rw [PeriodPair.mem_lattice]
+        exact ⟨-q, p, hη₂.symm⟩
+      refine le_antisymm ?_ ?_
+      · -- `ω₁′ = x·z₀ + y·η₁`
+        have hval : ω₁' = (x : ℂ) * z₀ + (y : ℂ) * η₁ := by
+          rw [hz0, ← hlω]
+          linear_combination (-ω₁') * hbez2C
+        have hm1 : ω₁' ∈ P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) := by
+          rw [hval]
+          refine Submodule.add_mem _ ?_ ?_
+          · exact Submodule.mem_sup_right (by
+              rw [show (x : ℂ) * z₀ = x • z₀ by simp [zsmul_eq_mul]]
+              exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self z₀))
+          · exact Submodule.mem_sup_left (by
+              rw [show (y : ℂ) * η₁ = y • η₁ by simp [zsmul_eq_mul]]
+              exact Submodule.smul_mem _ _ hη₁mem)
+        have hm2 : η₂ ∈ P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) :=
+          Submodule.mem_sup_left hη₂mem
+        refine Submodule.span_le.2 ?_
+        intro w hw
+        simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hw
+        rcases hw with h1 | h1
+        · rw [SetLike.mem_coe, h1]; exact hm1
+        · rw [SetLike.mem_coe, h1]; exact hm2
+      · refine sup_le ?_ ?_
+        · intro w hw
+          obtain ⟨m, n, rfl⟩ := PeriodPair.mem_lattice.1 hw
+          have h1 : P.ω₁ ∈ Submodule.span ℤ ({ω₁', η₂} : Set ℂ) := by
+            rw [Submodule.mem_span_pair]
+            exact ⟨p * l, -b₁, by rw [hω1]; push_cast; simp [zsmul_eq_mul]⟩
+          have h2 : P.ω₂ ∈ Submodule.span ℤ ({ω₁', η₂} : Set ℂ) := by
+            rw [Submodule.mem_span_pair]
+            exact ⟨q * l, a₁, by rw [hω2]; push_cast; simp [zsmul_eq_mul]⟩
+          refine Submodule.add_mem _ ?_ ?_
+          · rw [show (m : ℂ) * P.ω₁ = m • P.ω₁ by simp [zsmul_eq_mul]]
+            exact Submodule.smul_mem _ _ h1
+          · rw [show (n : ℂ) * P.ω₂ = n • P.ω₂ by simp [zsmul_eq_mul]]
+            exact Submodule.smul_mem _ _ h2
+        · rw [Submodule.span_le, Set.singleton_subset_iff, SetLike.mem_coe, hz0]
+          rw [show (h : ℂ) * ω₁' = h • ω₁' by simp [zsmul_eq_mul]]
+          exact Submodule.smul_mem _ _ (Submodule.subset_span (by simp))
+
+def exists_lattice_basis_of_cyclic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(指数 l の格子 Λ′ = Λ + ℤz₀ の基底と行列式 = l。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
