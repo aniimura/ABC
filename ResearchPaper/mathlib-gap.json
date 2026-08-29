@@ -1981,5 +1981,29 @@
     "meaning": "★★★★**これがまさに [DelSB616] の段 2（`w(H)/𝒪` は `#H` で消える）である**。`neronExp` は「与えられたモデルが極小からどれだけ離れているか」を測るので、上の不等式は「Vélu モデルの `E/H` は極小から `log(l)` 程度しか離れない」と言っている。☆それが [FC] Ch. I, Prop 2.7 の内容である。",
     "nextStep": "★次のセッションの入口は **Vélu の公式**である:(1) 有限部分群 `H`（点の有限集合、Galois 安定）に対し `t`・`w` を定義し、`E/H : Y² + a₁XY + a₃Y = X³ + a₂X² + (a₄ − 5t)X + (a₆ − b₂t − 7w)` を作る。(2) その正規化が `φ^*ω′ = ω` であることを使う。☆mathlib に `WeierstrassCurve.velu` は無い（2026-08-29 に `#check` で確認）が、★**群法則（`WeierstrassCurve.Affine.Point`）と分点多項式は mathlib にあり、本プロジェクトには `Theorem 3.8` 向けの Weil 対の機構が 245 項目ぶん積んである**。",
     "caution": "☆本項は**紙の上の見立て**である（Lean で確認していない）。★Vélu の正規化 `φ^*ω′ = ω` は標準的だが、形式化するときはまずそこを確かめること。"
+  },
+  "weierstrassPInMathlib20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★**mathlib は Weierstrass `℘` の理論を丸ごと持っている**（`Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.lean`、1080 行）。",
+    "has": [
+      "`PeriodPair`——★本プロジェクトが既に使っている構造そのもの（mathlib 由来）",
+      "`weierstrassP` `℘[L]` / `derivWeierstrassP` `℘′[L]`——定義・局所一様収束・微分可能性",
+      "`weierstrassP_add_coe` / `derivWeierstrassP_add_coe`——★周期性",
+      "`weierstrassP_neg`（偶）/ `derivWeierstrassP_neg`（奇）",
+      "`deriv_weierstrassP`——`deriv ℘ = ℘′`",
+      "`meromorphic_weierstrassP` / `order_weierstrassP`——各格子点で 2 位の極",
+      "`G n` / `g₂` / `g₃`——Eisenstein 級数",
+      "★★★`derivWeierstrassP_sq`——**`℘′(z)² = 4℘(z)³ − g₂℘(z) − g₃`**"
+    ],
+    "lacks": [
+      "☆一様化写像 `ℂ/Λ → E(ℂ)` が全単射であること（全射性）",
+      "☆群法則との両立（`℘` の加法定理）",
+      "☆`℘_{Λ′}` を `℘_Λ` の有理式で書くこと（＝Vélu の公式の解析側）",
+      "☆「極を持たない楕円関数は定数」（Liouville）——上の 2 つを繋ぐ道具",
+      "☆ファイル冒頭の TODO:「`ModularForm` ライブラリとの接続」"
+    ],
+    "whatWeBuilt": "★`Found/GenEll/Uniformization.lean`（第 597）を置いた: `latticeCurve_equation`（`(℘(z), ℘′(z)/2)` は `latticeCurve P` の上にある）、`deriv_latticePointX`（★★**一様化は自動で `ω`-正規化されている**——`dx/(2y) = dz`）、`latticePoint_isogeny`（`Λ ⊆ Λ′` なら `z ↦ z` が同種写像を誘導する）。",
+    "whyItMatters": "★★`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic`（第 596）に残った入力は「次数 `l` の解析的同種写像のデータ」だけである。★★★`deriv_latticePointX` により **`α_σ = 1` になる仕組みが Lean 上に載った**——`latticeCurve P` の不変微分 `dx/(2y)` が `dz` に等しいからである。☆残るのは全射性と「`℘_{Λ′}` は `℘_Λ` の有理式」の 2 つ。",
+    "revision": "☆★**訂正**: 本セッション前半で「同種写像の高さ評価は mathlib に無い 4 本の 1 本」と書いたとき、解析側の在庫を測っていなかった。★`℘` が丸ごとあることは、その 1 本の中身がかなり近いことを意味する。"
   }
 }
