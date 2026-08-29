@@ -2004,6 +2004,66 @@ def analyticAt_limUnder_of_eventuallyEq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(除去可能特異点を埋める一般の道具——limUnder で整関数を作る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★**`addDefect` は「良い点」で解析的**
+
+    `z ∉ Λ`・`z + w ∉ Λ`・`℘(z) ≠ ℘(w)` なら `F_w` は `z` で解析的
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが `℘` の加法定理の組み立ての場合 (a) である。
+☆残る 3 か所（`Λ`・`z ≡ w`・`z ≡ −w`）は第 610・629・627 で局所形が取れており、
+それ以外の点は第 624-625 の単射性で存在しない。 -/
+theorem analyticAt_addDefect (P : PeriodPair) (w : ℂ) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    AnalyticAt ℂ (addDefect P w) z := by
+  have hshift : AnalyticAt ℂ (fun s : ℂ => P.weierstrassP (s + w)) z := by
+    have hf : AnalyticAt ℂ (fun s : ℂ => s + w) z := analyticAt_id.add analyticAt_const
+    have hg : AnalyticAt ℂ P.weierstrassP ((fun s : ℂ => s + w) z) :=
+      P.analyticOnNhd_weierstrassP (z + w) hzw
+    exact AnalyticAt.comp (f := fun s : ℂ => s + w) (x := z) hg hf
+  have hp : AnalyticAt ℂ P.weierstrassP z := P.analyticOnNhd_weierstrassP z hz
+  have hpd : AnalyticAt ℂ P.derivWeierstrassP z := P.analyticOnNhd_derivWeierstrassP z hz
+  have hratio : AnalyticAt ℂ
+      (fun s : ℂ => (P.derivWeierstrassP s - P.derivWeierstrassP w)
+        / (P.weierstrassP s - P.weierstrassP w)) z :=
+    (hpd.sub analyticAt_const).div (hp.sub analyticAt_const) hne
+  show AnalyticAt ℂ (fun s : ℂ => P.weierstrassP (s + w) + P.weierstrassP s
+      + P.weierstrassP w
+      - ((P.derivWeierstrassP s - P.derivWeierstrassP w)
+          / (P.weierstrassP s - P.weierstrassP w)) ^ 2 / 4) z
+  exact ((hshift.add hp).add analyticAt_const).sub
+    ((hratio.pow 2).div analyticAt_const (by norm_num))
+
+open Filter Topology in
+/-- ★★★★★★「良い点」の集合は開——`℘` は格子の外で連続だから。 -/
+theorem isOpen_goodSet (P : PeriodPair) (w : ℂ) :
+    IsOpen {z : ℂ | z ∉ P.lattice ∧ z + w ∉ P.lattice
+      ∧ P.weierstrassP z - P.weierstrassP w ≠ 0} := by
+  rw [isOpen_iff_mem_nhds]
+  intro z hz
+  have h1 : {y : ℂ | y ∉ P.lattice} ∈ nhds z :=
+    (P.isClosed_lattice.isOpen_compl).mem_nhds hz.1
+  have h2 : {y : ℂ | y + w ∉ P.lattice} ∈ nhds z := by
+    have hopen : IsOpen {y : ℂ | y + w ∉ P.lattice} := by
+      have he : {y : ℂ | y + w ∉ P.lattice}
+          = (fun y : ℂ => y + w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+      rw [he]
+      exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+    exact hopen.mem_nhds hz.2.1
+  have hcont : ContinuousAt (fun y : ℂ => P.weierstrassP y - P.weierstrassP w) z :=
+    ((P.analyticOnNhd_weierstrassP z hz.1).sub analyticAt_const).continuousAt
+  have h3 : ∀ᶠ y in nhds z, P.weierstrassP y - P.weierstrassP w ≠ 0 :=
+    hcont.eventually_ne hz.2.2
+  filter_upwards [h1, h2, h3] with y hy1 hy2 hy3
+  exact ⟨hy1, hy2, hy3⟩
+
+def analyticAt_addDefect.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(F_w は良い点で解析的——加法定理の組み立ての場合 (a)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
