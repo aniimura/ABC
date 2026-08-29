@@ -2129,5 +2129,17 @@
     ],
     "match": "★★`latticeCurve P = ⟨0,0,0,−g₂/4,−g₃/4⟩` は `a₁ = a₂ = a₃ = 0` なので`addX = ℓ² − x₁ − x₂`・`addY = −ℓ(addX − x₁) − y₁`。`x = ℘`・`y = ℘′/2` を入れると `ℓ = slope = R/2` で、★★★`addX = R²/4 − ℘z − ℘w = ℘(z+w)`（第 641 の加法定理）、`addY = −(R/2)(℘(z+w) − ℘z) − ℘′z/2 = ℘′(z+w)/2`（第 645 の `y` 座標の公式）——**ちょうど一致する**。",
     "remaining": "☆残るのは Lean 上の照合だけである: `Nonsingular` の証明を 3 点ぶん作り、`add_of_Y_ne` を使って `some + some = some` を書き、`addX`・`addY`・`slope` を展開して第 641・645 を当てる。★★これができれば `Φ : ℂ → E(ℂ)` が群準同型として型に載り、位数 `l` の部分群 `H` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の格子になる——`htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃い、★★★**`Lemma 3.5` が閉じる**。"
+  },
+  "duplicationRemaining20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "☆★**群準同型を全ケースで書くには倍加公式が要る**（第 649 の測定）。",
+    "done": "★`latticePoint_add`（第 648）は `℘(z) ≠ ℘(w)` の場合を mathlib の `Point.add_some` と照合して閉じている——`slope`・`addX`・`addY` が第 641（加法定理）・第 645（`y` 座標）とちょうど一致する。",
+    "remainingCases": [
+      "☆`z ∈ Λ` または `w ∈ Λ`——`Φ = 0` の側。周期性（第 639 の `addDefect_periodic` と同型の議論）で片づく。★易しい。",
+      "☆`z, w ∉ Λ` かつ `z + w ∈ Λ`——`w ≡ −z` なので `Φw = −Φz`、和は `0 = Φ(z+w)`。★mathlib の `Point.add_of_Y_eq` を使う。易しい。",
+      "☆★`z ≡ w (mod Λ)`（`℘z = ℘w` かつ `z + w ∉ Λ`）——**倍加の場合**。mathlib の `slope` は `x₁ = x₂` のとき `(3x₁² + 2a₂x₁ + a₄ − a₁y₁)/(y₁ − negY x₁ y₁)` で、`latticeCurve` では `(3℘z² − g₂/4)/℘′z = ℘″(z)/(2℘′z)`（`℘″ = 6℘² − g₂/2`、第 613）。★★これで `℘(2z) = (℘″/(2℘′))² − 2℘z` を示す必要がある——**倍加公式**。"
+    ],
+    "howToGetDuplication": "★倍加公式は加法定理（第 641）から `w → z` の極限で出る:`R = (℘′z − ℘′w)/(℘z − ℘w) → ℘″(z)/℘′(z)`（`w → z`、l’Hôpital ないし`HasDerivAt` の商）。☆`℘(z+w) → ℘(2z)` は連続性。★★あるいは第 644 の代数の核と同じ型の `linear_combination` で直接出るかもしれない——`℘(2z)` を含む恒等式は代数だけでは決まらないので、極限か別の Liouville が要る。",
+    "whyItMatters": "★★これが揃うと `Φ : ℂ → E(ℂ)` が**全ケースで群準同型**になり、位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′ ≔ Φ⁻¹(H)` が ℂ の**部分群**になる。☆`Λ ⊆ Λ′` は `Φ(Λ) = 0 ∈ H` から、`[Λ′ : Λ] = l` は全単射（第 603-604・624）から。★★★すると `Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃い、**`Lemma 3.5` が閉じる**。"
   }
 }
