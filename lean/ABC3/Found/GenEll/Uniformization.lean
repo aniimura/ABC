@@ -4945,6 +4945,147 @@ def latticeCurve_eq_veluQuotient.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(解析側の Λ′ と代数側の Vélu の商が一致する——α = 1)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**解析側の `Λ′` は代数側の Vélu の商そのもの——`±` 代表系を使わない形**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★Vélu の `v = Σ_S v_Q`（`S` は `(H∖{O})/±` の代表系、`v_Q = 2g^x_Q`）は、
+`℘` が偶なので `H∖{O}` 全体にわたる `g^x_Q` の和に等しい:
+
+    v = Σ_S 2g^x_Q = Σ_{H∖{O}} g^x_Q
+
+同様に `w = Σ_S (u_Q + v_Q x_Q) = Σ_{H∖{O}} (u_Q/2 + g^x_Q·x_Q)`。
+★★★★☆**これで代表系を選ぶ必要がなくなり、仮説なしで**
+
+    latticeCurve Λ′ = veluCurve (latticeCurve Λ) v w
+
+**が書ける。すなわち `α = 1`。** -/
+theorem latticeCurve_eq_veluCurve (P P' : PeriodPair) (T : Finset ℂ)
+    (hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice)
+    (hg₂ : P'.g₂ = P.g₂ + 10 * ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))
+    (hg₃ : P'.g₃ = P.g₃ + (7 / 6) * ∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃)) :
+    latticeCurve P' = veluCurve (latticeCurve P)
+      (∑ w ∈ T.erase 0,
+        veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w))
+      (∑ w ∈ T.erase 0,
+        (veluU (latticeCurve P) (latticePointX P w) (latticePointY P w) / 2
+          + veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w)
+            * latticePointX P w)) := by
+  have hVsum : (∑ w ∈ T.erase 0,
+      veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w))
+      = ∑ w ∈ T.erase 0, (3 * P.weierstrassP w ^ 2 - P.g₂ / 4) :=
+    Finset.sum_congr rfl (fun w _ => by
+      simp only [veluV2, veluGx, latticeCurve, latticePointX, latticePointY]
+      ring)
+  have hWsum : (∑ w ∈ T.erase 0,
+      (veluU (latticeCurve P) (latticePointX P w) (latticePointY P w) / 2
+        + veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w)
+          * latticePointX P w))
+      = ∑ w ∈ T.erase 0,
+        (5 * P.weierstrassP w ^ 3 - (3 / 4) * P.g₂ * P.weierstrassP w - P.g₃ / 2) :=
+    Finset.sum_congr rfl (fun w hw => by
+      have hsq := P.derivWeierstrassP_sq w (hnot w hw)
+      simp only [veluU, veluV2, veluGx, veluGy, latticeCurve, latticePointX,
+        latticePointY]
+      linear_combination hsq / 2)
+  have hsum₂ : (∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))
+      = 2 * ∑ w ∈ T.erase 0, (3 * P.weierstrassP w ^ 2 - P.g₂ / 4) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun w _ => by ring)
+  have hsum₃ : (∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃))
+      = 24 * ∑ w ∈ T.erase 0,
+        (5 * P.weierstrassP w ^ 3 - (3 / 4) * P.g₂ * P.weierstrassP w - P.g₃ / 2) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun w _ => by ring)
+  have hb₂ : (latticeCurve P).b₂ = 0 := by
+    simp [latticeCurve, WeierstrassCurve.b₂]
+  have ha₄ : -P'.g₂ / 4 = (latticeCurve P).a₄ - 5 * ∑ w ∈ T.erase 0,
+      veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w) := by
+    rw [hVsum]
+    show -P'.g₂ / 4
+      = -P.g₂ / 4 - 5 * ∑ w ∈ T.erase 0, (3 * P.weierstrassP w ^ 2 - P.g₂ / 4)
+    rw [hg₂, hsum₂]
+    ring
+  have ha₆ : -P'.g₃ / 4
+      = (latticeCurve P).a₆ - (latticeCurve P).b₂ * (∑ w ∈ T.erase 0,
+          veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w))
+        - 7 * ∑ w ∈ T.erase 0,
+          (veluU (latticeCurve P) (latticePointX P w) (latticePointY P w) / 2
+            + veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w)
+              * latticePointX P w) := by
+    rw [hb₂, hWsum]
+    show -P'.g₃ / 4
+      = -P.g₃ / 4 - 0 * _ - 7 * ∑ w ∈ T.erase 0,
+        (5 * P.weierstrassP w ^ 3 - (3 / 4) * P.g₂ * P.weierstrassP w - P.g₃ / 2)
+    rw [hg₃, hsum₃]
+    ring
+  have hP'eq : latticeCurve P' = ⟨0, 0, 0, -P'.g₂ / 4, -P'.g₃ / 4⟩ := rfl
+  simp only [veluCurve]
+  rw [hP'eq, WeierstrassCurve.mk.injEq]
+  exact ⟨rfl, rfl, rfl, ha₄, ha₆⟩
+
+def latticeCurve_eq_veluCurve.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側の Λ′ は代数側の Vélu の商そのもの——± 代表系なし。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（解析側・最終形）——位数 `l` の点から `E/H` の Weierstrass モデルまで**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ) = latticeCurve Λ` の位数ちょうど `l` の点 `Q` に対し、次が**仮説なしで**取れる:
+
+* `z₀`（`Φ(z₀) = Q`）と周期対 `P′`（格子は `Λ′ = Λ + ℤz₀`）
+* 整数 `A, B, C, D` で `ω₁ = Aω₁′ + Bω₂′`・`ω₂ = Cω₁′ + Dω₂′`・`|AD − BC| = l`
+* 代表系 `T`（`|T| = l`）と、**`latticeCurve Λ′` が Vélu の商そのものであること**:
+
+      latticeCurve Λ′ = veluCurve (latticeCurve Λ) v w
+      v = Σ_{w ∈ T∖{0}} g^x_{Φ(w)},   w = Σ_{w ∈ T∖{0}} (u_{Φ(w)}/2 + g^x_{Φ(w)}·x_{Φ(w)})
+
+★★★★★★★☆**変数変換は要らない。すなわち `α = 1`。**
+☆`htFalt_isogeny_le_of_analytic_minimal`（第 617）の残る仮説 `α`・`hu` は
+これで `α = 1`・`u′ = u` として満たせる。 -/
+theorem exists_velu_model_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ : ℂ) (P' : PeriodPair) (A B C D : ℤ) (T : Finset ℂ),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) ∧
+      (0 : ℂ) ∈ T ∧ T.card = l ∧
+      latticeCurve P' = veluCurve (latticeCurve P)
+        (∑ w ∈ T.erase 0,
+          veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w))
+        (∑ w ∈ T.erase 0,
+          (veluU (latticeCurve P) (latticePointX P w) (latticePointY P w) / 2
+            + veluV2 (latticeCurve P) (latticePointX P w) (latticePointY P w)
+              * latticePointX P w)) := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z
+  refine ⟨z₀, P', A, B, C, D, T, hz₀, h1, h2, hdet, hP', h0T, hcard, ?_⟩
+  exact latticeCurve_eq_veluCurve P P' T
+    (fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw)
+    (g₂_isogeny P P' T h0T hT hrep hvelu)
+    (g₃_isogeny P P' T h0T hT hrep hvelu)
+
+def exists_velu_model_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側・最終形——位数 l の点から E/H の Weierstrass モデルまで。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
