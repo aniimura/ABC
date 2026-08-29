@@ -1744,6 +1744,56 @@ def mem_lattice_of_shift_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(一様化の単射性——零点勘定を使わずに出た。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★**`℘′(w) = 0` なら `w` は 2-捩れ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★第 624 の単射性の系である: `℘′(w) = 0` なら `℘(−w) = ℘(w)`（偶）かつ
+`℘′(−w) = −℘′(w) = 0 = ℘′(w)`（奇）なので、`a = −2w` に単射性を当てて `−2w ∈ Λ`。
+
+☆古典的には「`℘′` はちょうど 3 つの零点（非自明な 2-捩れ点）を持つ」という
+**零点勘定**から出る事実であるが、★**ODE の一意性から零点勘定なしで出た**。 -/
+theorem two_mem_lattice_of_derivWeierstrassP_eq_zero (P : PeriodPair) (w : ℂ)
+    (hw : w ∉ P.lattice) (h : P.derivWeierstrassP w = 0) : 2 * w ∈ P.lattice := by
+  have hnw : w + (-2 * w) ∉ P.lattice := by
+    have he : w + (-2 * w) = -w := by ring
+    rw [he]
+    exact fun hm => hw (by simpa using neg_mem hm)
+  have h0 : P.weierstrassP (w + (-2 * w)) = P.weierstrassP w := by
+    have he : w + (-2 * w) = -w := by ring
+    rw [he, P.weierstrassP_neg]
+  have h1 : P.derivWeierstrassP (w + (-2 * w)) = P.derivWeierstrassP w := by
+    have he : w + (-2 * w) = -w := by ring
+    rw [he, P.derivWeierstrassP_neg, h]
+    ring
+  have hm := mem_lattice_of_shift_eq P (-2 * w) hw hnw h0 h1
+  have he : (2 : ℂ) * w = -(-2 * w) := by ring
+  rw [he]
+  exact neg_mem hm
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★**2-捩れの完全な特徴づけ**
+
+    `℘′(w) = 0  ⟺  2w ∈ Λ`（`w ∉ Λ`）
+
+★`⟸` は第 605（`℘′` が奇であることから 3 行）、`⟹` は第 624 の単射性の系。
+☆★**mathlib に無い**（`Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` は
+`℘′` の零点を同定していない、2026-08-29 に測定）。 -/
+theorem derivWeierstrassP_eq_zero_iff (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    P.derivWeierstrassP w = 0 ↔ 2 * w ∈ P.lattice :=
+  ⟨two_mem_lattice_of_derivWeierstrassP_eq_zero P w hw,
+   derivWeierstrassP_eq_zero_of_two_mem P w⟩
+
+def two_mem_lattice_of_derivWeierstrassP_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘′(w) = 0 なら w は 2-捩れ——単射性の系。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def derivWeierstrassP_eq_zero_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2-捩れの完全な特徴づけ ℘′(w) = 0 ⟺ 2w ∈ Λ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
