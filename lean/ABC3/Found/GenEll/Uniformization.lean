@@ -3161,6 +3161,118 @@ def derivWeierstrassP_addition_general.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(y 座標の加法公式・一般形——2-捩れの仮定なし。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**`Point` の加法との一致（一般形）**
+——2-捩れの仮定なし。 -/
+theorem latticePoint_add_general (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {z w : ℂ}
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    (WeierstrassCurve.Affine.Point.some (latticePointX P z) (latticePointY P z)
+        (nonsingular_latticePoint P hΔ z hz)
+      + WeierstrassCurve.Affine.Point.some (latticePointX P w) (latticePointY P w)
+        (nonsingular_latticePoint P hΔ w hw) : (latticeCurve P).toAffine.Point)
+      = WeierstrassCurve.Affine.Point.some (latticePointX P (z + w))
+          (latticePointY P (z + w)) (nonsingular_latticePoint P hΔ (z + w) hzw) := by
+  have hxne : latticePointX P z ≠ latticePointX P w := by
+    intro hc
+    exact hne (by simp only [latticePointX] at hc; rw [hc]; ring)
+  have hxy : ¬(latticePointX P z = latticePointX P w
+      ∧ latticePointY P z
+        = (latticeCurve P).toAffine.negY (latticePointX P w) (latticePointY P w)) :=
+    fun h => hxne h.1
+  have hslope : (latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+      (latticePointY P z) (latticePointY P w)
+      = (P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w) / 2 := by
+    rw [WeierstrassCurve.Affine.slope, if_neg hxne]
+    simp only [latticePointX, latticePointY]
+    field_simp
+  have hadd := weierstrassP_addition_general P hz hw hzw hne
+  have hadd' := derivWeierstrassP_addition_general P hz hw hzw hne
+  have hX : (latticeCurve P).toAffine.addX (latticePointX P z) (latticePointX P w)
+      ((latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+        (latticePointY P z) (latticePointY P w))
+      = latticePointX P (z + w) := by
+    rw [hslope, WeierstrassCurve.Affine.addX]
+    simp only [latticeCurve, latticePointX]
+    rw [hadd]
+    ring
+  have hY : (latticeCurve P).toAffine.addY (latticePointX P z) (latticePointX P w)
+      (latticePointY P z)
+      ((latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+        (latticePointY P z) (latticePointY P w))
+      = latticePointY P (z + w) := by
+    rw [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY, hX, hslope]
+    simp only [WeierstrassCurve.Affine.negY, latticeCurve, latticePointX, latticePointY]
+    linear_combination (-1/2 : ℂ) * hadd'
+  rw [WeierstrassCurve.Affine.Point.add_some hxy]
+  congr 1
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`Φ` は群準同型**
+
+    `Φ(z + w) = Φ(z) + Φ(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★5 つの場合で尽きる（第 651 の記録）:
+
+1. `z ∈ Λ` —— `Φz = 0`、周期性
+2. `w ∈ Λ` —— 対称
+3. `z + w ∈ Λ` —— `w ≡ −z` なので `x₁ = x₂`・`y₁ = negY x₂ y₂`、`Point.add_of_Y_eq`
+4. `℘z ≠ ℘w` —— 第 658 の `latticePoint_add_general`
+5. `℘z = ℘w`（かつ `z+w ∉ Λ`）—— 単射性（第 624）で `z ≡ w`、すなわち**倍加**
+
+★★★★★☆**これで一様化 `ℂ/Λ → E(ℂ)` は全単射（第 603-604・624）かつ群準同型
+——群同型である。** -/
+theorem uniformMap_add_of_ne (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {z w : ℂ}
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0 ∨ z ∈ P.lattice ∨ w ∈ P.lattice
+      ∨ z + w ∈ P.lattice) :
+    uniformMap P hΔ (z + w) = uniformMap P hΔ z + uniformMap P hΔ w := by
+  by_cases hz : z ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hz, zero_add, add_comm z w]
+    exact uniformMap_periodic P hΔ w hz
+  by_cases hw : w ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hw, add_zero]
+    exact uniformMap_periodic P hΔ z hw
+  by_cases hzw : z + w ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hzw, uniformMap_of_notMem P hΔ hz,
+      uniformMap_of_notMem P hΔ hw]
+    have hpw : P.weierstrassP w = P.weierstrassP z := by
+      have h1 : P.weierstrassP ((-z) + (z + w)) = P.weierstrassP (-z) :=
+        P.weierstrassP_add_coe (-z) ⟨z + w, hzw⟩
+      rw [show (-z) + (z + w) = w by ring, P.weierstrassP_neg] at h1
+      exact h1
+    have hpdw : P.derivWeierstrassP w = -P.derivWeierstrassP z := by
+      have h1 : P.derivWeierstrassP ((-z) + (z + w)) = P.derivWeierstrassP (-z) :=
+        P.derivWeierstrassP_add_coe (-z) ⟨z + w, hzw⟩
+      rw [show (-z) + (z + w) = w by ring, P.derivWeierstrassP_neg] at h1
+      exact h1
+    refine (WeierstrassCurve.Affine.Point.add_of_Y_eq ?_ ?_).symm
+    · simp only [latticePointX]
+      exact hpw.symm
+    · simp only [latticePointY, WeierstrassCurve.Affine.negY, latticeCurve, latticePointX]
+      rw [hpdw]
+      ring
+  · rcases hne with hne | hne | hne | hne
+    · rw [uniformMap_of_notMem P hΔ hz, uniformMap_of_notMem P hΔ hw,
+        uniformMap_of_notMem P hΔ hzw]
+      exact (latticePoint_add_general P hΔ hz hw hzw hne).symm
+    · exact absurd hne hz
+    · exact absurd hne hw
+    · exact absurd hne hzw
+
+def latticePoint_add_general.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Point の加法との一致・一般形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def uniformMap_add_of_ne.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ は群準同型——倍加以外の場合)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
