@@ -3698,6 +3698,93 @@ def uniformMap_surjective.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ は全射。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★階数 1 の部分群（`Lemma 3.5`） -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**位数 `l` の点 `Q` を生む `z₀`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`Φ` は全射（第 663）だから `Φ(z₀) = Q` なる `z₀` が取れ、`Q ≠ 0` だから
+`z₀ ∉ Λ`、`l·Q = 0` だから `Φ(l z₀) = 0`、すなわち `l z₀ ∈ Λ`。
+☆この `z₀` が「`Λ` に `1/l` の分母で足す元」である。 -/
+theorem exists_generator_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} (hQ : Q ≠ 0) {l : ℕ} (hl : l • Q = 0) :
+    ∃ z₀ : ℂ, z₀ ∉ P.lattice ∧ uniformMap P hΔ z₀ = Q ∧ (l : ℂ) * z₀ ∈ P.lattice := by
+  obtain ⟨z₀, hz₀⟩ := uniformMap_surjective P hΔ Q
+  refine ⟨z₀, fun hc => hQ ?_, hz₀, ?_⟩
+  · rw [← hz₀, uniformMap_of_mem P hΔ hc]
+  · have hzero : uniformMap P hΔ ((l : ℂ) * z₀) = 0 := by
+      have h1 : ((l : ℂ) * z₀) = l • z₀ := by simp [nsmul_eq_mul]
+      rw [h1, ← uniformHom_apply, map_nsmul, uniformHom_apply, hz₀, hl]
+    exact (uniformMap_eq_zero_iff P hΔ _).1 hzero
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
+**巡回部分群の原像は `Λ′ = Λ + ℤ z₀`**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★`⊇` は準同型性（第 661）から、`⊆` は単射性（第 662）から:
+`Φ(z) = k·Φ(z₀) = Φ(k z₀)` なら `z − k z₀ ∈ Λ`。
+
+★★★★☆**これが `Lemma 3.5` の「階数 1」の内容である**——`E(ℂ)` の巡回部分群
+`⟨Q⟩` は `Λ` に元を 1 つ添加した格子に対応する。 -/
+theorem preimageSubgroup_zmultiples (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z₀ : ℂ) :
+    preimageSubgroup P hΔ (AddSubgroup.zmultiples (uniformMap P hΔ z₀))
+      = P.lattice.toAddSubgroup ⊔ AddSubgroup.zmultiples z₀ := by
+  ext z
+  simp only [mem_preimageSubgroup, AddSubgroup.mem_zmultiples_iff, AddSubgroup.mem_sup,
+    Submodule.mem_toAddSubgroup]
+  constructor
+  · rintro ⟨k, hk⟩
+    have hzk : uniformMap P hΔ (k • z₀) = uniformMap P hΔ z := by
+      rw [← uniformHom_apply, map_zsmul, uniformHom_apply, hk]
+    exact ⟨z - k • z₀, sub_mem_lattice_of_uniformMap_eq P hΔ hzk.symm, k • z₀,
+      ⟨k, rfl⟩, by abel⟩
+  · rintro ⟨y, hy, w, ⟨k, rfl⟩, rfl⟩
+    refine ⟨k, ?_⟩
+    have h2 : uniformMap P hΔ (y + k • z₀) = k • uniformMap P hΔ z₀ := by
+      rw [← uniformHom_apply, map_add, map_zsmul, uniformHom_apply, uniformHom_apply,
+        uniformMap_of_mem P hΔ hy, zero_add]
+    exact h2.symm
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`Λ ⊆ Λ′` かつ `l·Λ′ ⊆ Λ`**——`Λ′` が `Λ` の「`1/l` 倍の中」にある。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆これで `Λ′` は `Λ` と `(1/l)Λ` に挟まれ、有限指数の格子であることが確定する
+（`Λ ⊆ Λ′ ⊆ (1/l)Λ`、`[(1/l)Λ : Λ] = l²`）。 -/
+theorem smul_preimageSubgroup_le (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {H : AddSubgroup (latticeCurve P).toAffine.Point} {l : ℕ}
+    (hH : ∀ Q ∈ H, l • Q = 0) {z : ℂ} (hz : z ∈ preimageSubgroup P hΔ H) :
+    (l : ℂ) * z ∈ P.lattice := by
+  have hzero : uniformMap P hΔ ((l : ℂ) * z) = 0 := by
+    have h1 : ((l : ℂ) * z) = l • z := by simp [nsmul_eq_mul]
+    rw [h1, ← uniformHom_apply, map_nsmul, uniformHom_apply]
+    exact hH _ ((mem_preimageSubgroup P hΔ H z).1 hz)
+  exact (uniformMap_eq_zero_iff P hΔ _).1 hzero
+
+def exists_generator_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(位数 l の点 Q を生む z₀ の存在。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def preimageSubgroup_zmultiples.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(巡回部分群の原像は Λ′ = Λ + ℤz₀——階数 1 の内容。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def smul_preimageSubgroup_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(l·Λ′ ⊆ Λ——Λ′ は Λ と (1/l)Λ に挟まれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
