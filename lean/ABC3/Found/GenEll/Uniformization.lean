@@ -3437,6 +3437,82 @@ def sub_or_add_mem_of_weierstrassP_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘z = ℘w なら z ≡ ±w——単射性の言い換え。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`Φ` は群準同型**
+
+    `Φ(z + w) = Φ(z) + Φ(w)`（すべての `z, w`）
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★5 つの場合で尽きる:
+
+1. `z ∈ Λ`・2. `w ∈ Λ` —— 周期性（第 652）
+3. `z + w ∈ Λ` —— `w ≡ −z` なので `Point.add_of_Y_eq`
+4. `℘z ≠ ℘w` —— 第 658 の `latticePoint_add_general`
+5. `℘z = ℘w`（かつ `z+w ∉ Λ`）—— 単射性（第 660 の
+   `sub_or_add_mem_of_weierstrassP_eq`）で `z ≡ w`、
+   すなわち**倍加**（第 660 の `latticePoint_double`）
+
+★★★★★☆**これで一様化 `ℂ/Λ → E(ℂ)` は全単射（第 603-604・624）かつ群準同型
+——群同型である。** ☆どの部品も mathlib に無い。 -/
+theorem uniformMap_add (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z w : ℂ) :
+    uniformMap P hΔ (z + w) = uniformMap P hΔ z + uniformMap P hΔ w := by
+  by_cases hz : z ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hz, zero_add, add_comm z w]
+    exact uniformMap_periodic P hΔ w hz
+  by_cases hw : w ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hw, add_zero]
+    exact uniformMap_periodic P hΔ z hw
+  by_cases hzw : z + w ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ hzw, uniformMap_of_notMem P hΔ hz,
+      uniformMap_of_notMem P hΔ hw]
+    have hpw : P.weierstrassP w = P.weierstrassP z := by
+      have h1 : P.weierstrassP ((-z) + (z + w)) = P.weierstrassP (-z) :=
+        P.weierstrassP_add_coe (-z) ⟨z + w, hzw⟩
+      rw [show (-z) + (z + w) = w by ring, P.weierstrassP_neg] at h1
+      exact h1
+    have hpdw : P.derivWeierstrassP w = -P.derivWeierstrassP z := by
+      have h1 : P.derivWeierstrassP ((-z) + (z + w)) = P.derivWeierstrassP (-z) :=
+        P.derivWeierstrassP_add_coe (-z) ⟨z + w, hzw⟩
+      rw [show (-z) + (z + w) = w by ring, P.derivWeierstrassP_neg] at h1
+      exact h1
+    refine (WeierstrassCurve.Affine.Point.add_of_Y_eq ?_ ?_).symm
+    · simp only [latticePointX]
+      exact hpw.symm
+    · simp only [latticePointY, WeierstrassCurve.Affine.negY, latticeCurve, latticePointX]
+      rw [hpdw]
+      ring
+  by_cases hne : P.weierstrassP z - P.weierstrassP w = 0
+  · have hpz : P.weierstrassP z = P.weierstrassP w := by linear_combination hne
+    rcases sub_or_add_mem_of_weierstrassP_eq P hz hw hpz with hsub | hadd
+    · have hzeq : uniformMap P hΔ z = uniformMap P hΔ w := by
+        have h1 := uniformMap_periodic P hΔ w hsub
+        rw [show w + (z - w) = z by ring] at h1
+        exact h1
+      have h2w : 2 * w ∉ P.lattice := by
+        intro hc
+        refine hzw ?_
+        have he : z + w = (w + w) + (z - w) := by ring
+        rw [he]
+        exact P.lattice.add_mem (by simpa [two_mul] using hc) hsub
+      have hww : w + w ∉ P.lattice := fun hc => h2w (by simpa [two_mul] using hc)
+      have hzw' : uniformMap P hΔ (z + w) = uniformMap P hΔ (w + w) := by
+        have h1 := uniformMap_periodic P hΔ (w + w) hsub
+        rw [show w + w + (z - w) = z + w by ring] at h1
+        exact h1
+      rw [hzw', hzeq, uniformMap_of_notMem P hΔ hw, uniformMap_of_notMem P hΔ hww]
+      exact (latticePoint_double P hΔ hw h2w hww).symm
+    · exact absurd hadd hzw
+  · rw [uniformMap_of_notMem P hΔ hz, uniformMap_of_notMem P hΔ hw,
+      uniformMap_of_notMem P hΔ hzw]
+    exact (latticePoint_add_general P hΔ hz hw hzw hne).symm
+
+def uniformMap_add.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ は群準同型——一様化は群同型。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
