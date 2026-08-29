@@ -6,6 +6,7 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import ABC3.Found.GenEll.LatticeCurve
 import ABC3.Found.GenEll.WeierstrassODE
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.PointVariableChange
 import ABC3.Meta.Claim
 
 /-!
@@ -5413,6 +5414,95 @@ def sum_veluB_image_eq_zero.src : ABC3.Meta.Source :=
 def sum_veluBx_image_eq_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Σ_S B·x = 0——第 690 で f = id。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★組み立て -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**位数 `l` の点から、`Vélu` の商に要るデータをすべて出す**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+第 679 に `Σ_S B = 0`・`Σ_S B·x = 0`（第 691）を足した形。
+★☆この 2 つが `veluQuotientFull` を変数変換で移すのに要る（第 688・第 693）。 -/
+theorem exists_veluQuotientFull_data_of_torsion (P : PeriodPair)
+    (hΔ : latticeDisc P ≠ 0) {Q : (latticeCurve P).toAffine.Point} {l : ℕ}
+    (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (P' : PeriodPair) (A B C D : ℤ) (S : Finset (ℂ × ℂ)),
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      S.card = l - 1 ∧
+      (∑ q ∈ S, (2 * q.2 + (latticeCurve P).a₁ * q.1 + (latticeCurve P).a₃) = 0) ∧
+      (∑ q ∈ S, (2 * q.2 + (latticeCurve P).a₁ * q.1 + (latticeCurve P).a₃) * q.1 = 0) ∧
+      latticeCurve P' = veluQuotientFull (latticeCurve P) S := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z
+  have hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice :=
+    fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0,
+      (latticePointX P w, latticePointY P w)
+        = (latticePointX P v, latticePointY P v) → w = v := by
+    intro w hw v hv he
+    refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw)
+      (Finset.mem_of_mem_erase hv) ?_
+    exact sub_mem_lattice_of_point_eq P (hnot w hw) (hnot v hv)
+      (congrArg Prod.fst he) (congrArg Prod.snd he)
+  refine ⟨P', A, B, C, D,
+    (T.erase 0).image (fun w => (latticePointX P w, latticePointY P w)),
+    h1, h2, hdet, ?_,
+    sum_veluB_image_eq_zero P P' T h0T hT hrep,
+    sum_veluBx_image_eq_zero P P' T h0T hT hrep, ?_⟩
+  · rw [Finset.card_image_of_injOn (fun w hw v hv he =>
+      hinj w (Finset.mem_coe.1 hw) v (Finset.mem_coe.1 hv) he),
+      Finset.card_erase_of_mem h0T, hcard]
+  · exact latticeCurve_eq_veluQuotientFull P P' T h0T hT hrep
+      (g₂_isogeny P P' T h0T hT hrep hvelu) (g₃_isogeny P P' T h0T hT hrep hvelu)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**一意化の変数変換を外した形——`Lemma 3.5` の `ℂ` 側の最終形**
+
+`C • W = latticeCurve P`（`W` は `E.map σ`、`C` は一意化の変数変換）のとき、
+位数 `l` の点 `Q` から
+
+    latticeCurve P′ = C • veluQuotientFull W S_W
+
+★★★★★★☆**これが `htFalt_isogeny_le_of_velu`（第 678）に渡す形そのものである**
+——`E′ ≔ veluQuotientFull W S_W` と取れば `C` は両側で同じ、すなわち `α = 1`。 -/
+theorem exists_vc_veluQuotientFull_of_torsion (P : PeriodPair)
+    (hΔ : latticeDisc P ≠ 0) (W : WeierstrassCurve ℂ) (C : VariableChange ℂ)
+    (hCW : C • W = latticeCurve P)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l)
+    (hQ : addOrderOf Q = l) :
+    ∃ (P' : PeriodPair) (A B Cc D : ℤ) (SW : Finset (ℂ × ℂ)),
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (Cc : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * Cc).natAbs = l ∧
+      latticeCurve P' = C • veluQuotientFull W SW := by
+  obtain ⟨P', A, B, Cc, D, S, h1, h2, hdet, hcard, hB, hBx, hEq⟩ :=
+    exists_veluQuotientFull_data_of_torsion P hΔ hl hQ
+  refine ⟨P', A, B, Cc, D, S.image (vcInvPair C), h1, h2, hdet, ?_⟩
+  rw [hEq, ← hCW]
+  refine veluQuotientFull_eq_vc_pullback C W S ?_ ?_
+  · rw [hCW]; exact hB
+  · rw [hCW]; exact hBx
+
+def exists_veluQuotientFull_data_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(位数 l の点から Vélu の商に要るデータをすべて出す。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_vc_veluQuotientFull_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一意化の変数変換を外した形——ℂ 側の最終形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
