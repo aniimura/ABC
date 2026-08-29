@@ -503,6 +503,86 @@ def weierstrassP_eq_veluAnalyticX.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Vélu の公式の解析側——代表系と正規化だけから)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★正規化定数と最終形 -/
+
+/-- ★★★★★**`℘(0) = 0`**——mathlib の定義（`∑' l, (1/(z−l)² − 1/l²)`）では
+`z = 0` の各項が `1/l² − 1/l² = 0` になる（`l = 0` の項も junk value で `0`）。
+
+★これは「極での値」ではなく**除去可能特異点を埋めた関数の値**として整合している
+（`weierstrassPExcept_add` が `z = l₀` でも成り立つのはそのためである）。 -/
+theorem weierstrassP_zero (P : PeriodPair) : P.weierstrassP 0 = 0 := by
+  simp [PeriodPair.weierstrassP]
+
+/-- ★★★★★★**Vélu の正規化定数** `c = Σ_{w ∈ T∖{0}} ℘_Λ(w)`。
+
+★原文の形 `℘(z) + Σ_{w≠0}[℘(z+w) − ℘(w)]` の第 2 項の定数部分である。 -/
+noncomputable def veluAnalyticC (P : PeriodPair) (T : Finset ℂ) : ℂ :=
+  ∑ w ∈ T.erase 0, P.weierstrassP w
+
+/-- ★★★★★★★★**正規化定数を入れると原点で `0`**。 -/
+theorem veluAnalyticX_zero (P : PeriodPair) (T : Finset ℂ) (h0T : (0:ℂ) ∈ T) :
+    veluAnalyticX P T (veluAnalyticC P T) 0 = 0 := by
+  simp only [veluAnalyticX, veluAnalyticC]
+  rw [← Finset.add_sum_erase T (fun w => P.weierstrassP (0 + w)) h0T]
+  simp
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**Vélu の公式の解析側（最終形）**
+
+    `℘_{Λ′}(z) = Σ_{w ∈ T} ℘_Λ(z + w) − Σ_{w ∈ T∖{0}} ℘_Λ(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★**仮定は `T` が `Λ′/Λ` の代表系であることだけ**である:
+
+| 仮定 | 内容 |
+|---|---|
+| `hle` | `Λ ⊆ Λ′` |
+| `h0T` | `0 ∈ T`（自明な剰余類の代表） |
+| `hT` | `T ⊆ Λ′` |
+| `hrep` | `p ∈ Λ′` ならちょうど 1 つの `w₀ ∈ T` が `p + w₀ ∈ Λ` |
+| `hper` | 平行移動が代表系を置換する（★`veluAnalyticX_shift` で取れる） |
+
+★★★★**極の解析も正規化も済んだ**——第 598（Liouville）・第 599（周期性）・
+第 600（極の打ち消し）・第 601（正規化定数）で塞いだ。
+
+☆残るのは `hper` を代表系の定義から出すこと（`veluAnalyticX_shift` に `σ` を与えること）と、
+この `℘` の等式を `Found/GenEll/Velu.lean` の**代数側の `veluXGen`** に翻訳することである
+——後者には `℘` の加法定理（mathlib に無い）が要る。 -/
+theorem weierstrassP_eq_velu (P P' : PeriodPair) (hle : P.lattice ≤ P'.lattice)
+    (T : Finset ℂ) (h0T : (0:ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    (hper : ∀ z : ℂ, ∀ l ∈ P'.lattice,
+      veluAnalyticX P T (veluAnalyticC P T) (z + l)
+        = veluAnalyticX P T (veluAnalyticC P T) z)
+    (z : ℂ) :
+    P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+  weierstrassP_eq_veluAnalyticX P P' hle T _ hT hrep hper
+    (by rw [weierstrassP_zero, veluAnalyticX_zero P T h0T]; ring) z
+
+def weierstrassP_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘(0) = 0——除去可能特異点を埋めた値。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_eq_velu.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の公式の解析側・最終形——仮定は代表系であることだけ)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_eq_velu.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆仮定 hper は veluAnalyticX_shift(第 599)で取れるが、" ++
+       "代表系の定義から σ(平行移動が誘導する置換)を作る段が残る") 5,
+    .implicitStep
+      ("☆この ℘ の等式を Found/GenEll/Velu.lean の代数側 veluXGen(第 591)に" ++
+       "翻訳すること。★℘ の加法定理が要る(mathlib に無い、2026-08-29 に測定)") 8,
+    .implicitStep
+      ("★★★到達点(2026-08-29、第 601): Vélu の公式の解析側が" ++
+       "「T が Λ′/Λ の代表系である」だけから従う形になった。" ++
+       "★極の解析(第 600)・Liouville(第 598)・周期性(第 599)・正規化(第 601)で塞いだ") 9 ]
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
