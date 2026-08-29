@@ -769,7 +769,78 @@ theorem veluB_vcInvPair (C : VariableChange F) (W : WeierstrassCurve F) (Q : F �
       * ((((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F)) ^ 2
         + ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)) * hu
 
+/-- ★★★★★`vcInvPair` は単射（`vcPair` が左逆写像だから）。 -/
+theorem vcInvPair_injective (C : VariableChange F) :
+    Function.Injective (vcInvPair C) :=
+  Function.LeftInverse.injective (g := fun Q : F × F => (vcX C Q.1, vcY C Q.1 Q.2))
+    (vcPair_vcInvPair C)
+
+/-- ★★★★★★`x` も逆向きの変換で書ける。 -/
+theorem vcInvPair_fst (C : VariableChange F) (Q : F × F) :
+    (vcInvPair C Q).1 = ((C.u : Fˣ) : F) ^ 2 * Q.1 + C.r := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**`Σ B = 0` は引き戻しても保たれる**。 -/
+theorem sum_veluB_vcInvPair (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) = 0) :
+    ∑ Q ∈ S.image (vcInvPair C), (2 * Q.2 + W.a₁ * Q.1 + W.a₃) = 0 := by
+  rw [Finset.sum_image (fun a _ b _ hab => vcInvPair_injective C hab)]
+  have hstep : ∀ Q ∈ S,
+      2 * (vcInvPair C Q).2 + W.a₁ * (vcInvPair C Q).1 + W.a₃
+        = ((C.u : Fˣ) : F) ^ 3 * (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) :=
+    fun Q _ => veluB_vcInvPair C W Q
+  rw [Finset.sum_congr rfl hstep, ← Finset.mul_sum, hB, mul_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**`Σ B·x = 0` も引き戻しても保たれる**。
+
+★`Σ_{S_W} B_W·x_W = u⁵·Σ_S B′·x′ + u³·r·Σ_S B′ = 0`。 -/
+theorem sum_veluBx_vcInvPair (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) = 0)
+    (hBx : ∑ Q ∈ S, (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) * Q.1 = 0) :
+    ∑ Q ∈ S.image (vcInvPair C), (2 * Q.2 + W.a₁ * Q.1 + W.a₃) * Q.1 = 0 := by
+  rw [Finset.sum_image (fun a _ b _ hab => vcInvPair_injective C hab)]
+  have hstep : ∀ Q ∈ S,
+      (2 * (vcInvPair C Q).2 + W.a₁ * (vcInvPair C Q).1 + W.a₃) * (vcInvPair C Q).1
+        = ((C.u : Fˣ) : F) ^ 5
+            * ((2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) * Q.1)
+          + ((C.u : Fˣ) : F) ^ 3 * C.r
+            * (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) := by
+    intro Q _
+    rw [veluB_vcInvPair, vcInvPair_fst]
+    ring
+  rw [Finset.sum_congr rfl hstep, Finset.sum_add_distrib, ← Finset.mul_sum,
+    ← Finset.mul_sum, hB, hBx, mul_zero, mul_zero, add_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**商は引き戻した点集合で書ける**
+
+    `veluQuotientFull (C•W) S = C • veluQuotientFull W (S.image (vcInvPair C))`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★★☆**これが `L` 上で `E/H` を作るための形である**——
+`ℂ` 上で得た `S` を `W` の側へ引き戻せば、`C` を外した曲線の商になる。 -/
+theorem veluQuotientFull_eq_vc_pullback (C : VariableChange F) (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hB : ∑ Q ∈ S, (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) = 0)
+    (hBx : ∑ Q ∈ S, (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) * Q.1 = 0) :
+    veluQuotientFull (C • W) S
+      = C • veluQuotientFull W (S.image (vcInvPair C)) := by
+  conv_lhs => rw [← image_vcPair_vcInvPair C S]
+  exact veluQuotientFull_variableChange C W (S.image (vcInvPair C))
+    (sum_veluB_vcInvPair C W S hB) (sum_veluBx_vcInvPair C W S hB hBx)
+
 end Pullback
+
+def veluQuotientFull_eq_vc_pullback.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(商は引き戻した点集合で書ける——L 上で E/H を作る形)",
+    sectionId := "genell-lemma-3-5" }
 
 def image_vcPair_vcInvPair.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
