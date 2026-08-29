@@ -13,6 +13,7 @@ import ABC3.Skeleton.GenEll.IsogenyHeight
 import ABC3.Skeleton.GenEll.Section2
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.Uniformization
+import ABC3.Skeleton.GenEll.AdditionTheorem
 import ABC3.Skeleton.GenEll.LatticeFromInvariants
 import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.NCBelyi.Theorem25
