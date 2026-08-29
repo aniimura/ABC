@@ -2689,6 +2689,88 @@ def derivWeierstrassP_addition.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(y 座標の加法公式——一様化は群準同型。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★mathlib の `Point` へのパッケージ -/
+
+/-- ★★★★★★`(℘(z), ℘′(z)/2)` は非特異——`Δ ≠ 0` だから。 -/
+theorem nonsingular_latticePoint (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ)
+    (hz : z ∉ P.lattice) :
+    (latticeCurve P).toAffine.Nonsingular (latticePointX P z) (latticePointY P z) := by
+  refine ((latticeCurve P).toAffine.equation_iff_nonsingular_of_Δ_ne_zero ?_).1
+    (latticeCurve_equation P z hz)
+  rw [latticeCurve_Δ]
+  exact hΔ
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**一様化は群準同型**
+——mathlib の `Affine.Point` の加法と一致する。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★`latticeCurve P` は `a₁ = a₂ = a₃ = 0` なので
+
+* `slope = (y₁ − y₂)/(x₁ − x₂) = R/2`
+* `addX = ℓ² − x₁ − x₂ = R²/4 − ℘z − ℘w = ℘(z+w)`（第 641 の加法定理）
+* `addY = −ℓ(addX − x₁) − y₁ = −(R/2)(℘(z+w) − ℘z) − ℘′z/2 = ℘′(z+w)/2`
+  （第 645 の `y` 座標の公式）
+
+★★★★☆**これで `Φ : ℂ → E(ℂ)` は群準同型であり、
+第 603-604・624 の全単射性と合わせて群同型である。** -/
+theorem latticePoint_add (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (w z : ℂ)
+    (hw : w ∉ P.lattice) (h2w : 2 * w ∉ P.lattice) (hz : z ∉ P.lattice)
+    (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    (WeierstrassCurve.Affine.Point.some (latticePointX P z) (latticePointY P z)
+        (nonsingular_latticePoint P hΔ z hz)
+      + WeierstrassCurve.Affine.Point.some (latticePointX P w) (latticePointY P w)
+        (nonsingular_latticePoint P hΔ w hw) : (latticeCurve P).toAffine.Point)
+      = WeierstrassCurve.Affine.Point.some (latticePointX P (z + w))
+          (latticePointY P (z + w)) (nonsingular_latticePoint P hΔ (z + w) hzw) := by
+  have hxne : latticePointX P z ≠ latticePointX P w := by
+    intro hc
+    exact hne (by simp only [latticePointX] at hc; rw [hc]; ring)
+  have hxy : ¬(latticePointX P z = latticePointX P w
+      ∧ latticePointY P z
+        = (latticeCurve P).toAffine.negY (latticePointX P w) (latticePointY P w)) :=
+    fun h => hxne h.1
+  have hslope : (latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+      (latticePointY P z) (latticePointY P w)
+      = (P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w) / 2 := by
+    rw [WeierstrassCurve.Affine.slope, if_neg hxne]
+    simp only [latticePointX, latticePointY]
+    field_simp
+  have hadd := weierstrassP_addition P w hw h2w hz hzw hne
+  have hadd' := derivWeierstrassP_addition P w hw h2w hz hzw hne
+  have hX : (latticeCurve P).toAffine.addX (latticePointX P z) (latticePointX P w)
+      ((latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+        (latticePointY P z) (latticePointY P w))
+      = latticePointX P (z + w) := by
+    rw [hslope, WeierstrassCurve.Affine.addX]
+    simp only [latticeCurve, latticePointX]
+    rw [hadd]
+    ring
+  have hY : (latticeCurve P).toAffine.addY (latticePointX P z) (latticePointX P w)
+      (latticePointY P z)
+      ((latticeCurve P).toAffine.slope (latticePointX P z) (latticePointX P w)
+        (latticePointY P z) (latticePointY P w))
+      = latticePointY P (z + w) := by
+    rw [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY, hX, hslope]
+    simp only [WeierstrassCurve.Affine.negY, latticeCurve, latticePointX, latticePointY]
+    linear_combination (-1/2 : ℂ) * hadd'
+  rw [WeierstrassCurve.Affine.Point.add_some hxy]
+  congr 1
+
+def nonsingular_latticePoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5((℘(z), ℘′(z)/2) は非特異——Δ ≠ 0 から。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def latticePoint_add.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一様化は群準同型——mathlib の Point の加法と一致する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
