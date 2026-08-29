@@ -113,7 +113,59 @@ theorem htFalt_isogeny_le (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsEllip
   have h12 : (0:ℝ) < 12 * (Module.finrank ℚ L : ℝ) := by linarith
   nlinarith [hkey, h12]
 
-/-! ## ★出典の紐付け(`.src`)——★★**条つき（`hloc` が残っている）** -/
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★正準形——選択に依らない形 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**残り 1 本の正準形**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+    **`(l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)`**
+
+★上の `htFalt_isogeny_le` は周期対の選択 `(P_σ, C_σ)` に依る形だったが、
+**こちらは本プロジェクトが定義した量 `degInfOf`・`archSum` だけで書ける**
+——選択に依らない。
+
+★★★`§9-1025`（第 581）の測定どおり、`htFalt_isogeny_le` の `hloc` は
+`§9-1021`〜`§9-1023` の道具を通すとこの形に**戻る**（一周する）。
+したがって**これが残り 1 本の正準形**である。
+
+☆`hdeg` は `Lemma 3.2, (ii)`（`§9-1011`）＋その大域化（`§9-1012`）が与える。
+☆`hArch` が残っているすべてであり、`[DelSB616] Théorème 2.4` の段 1・段 2 に当たる。 -/
+theorem htFalt_isogeny_le_canonical (E E' : WeierstrassCurve L) (l : ℕ)
+    (hdeg : degInfOf L E' = (l : ℝ) * degInfOf L E)
+    (hArch : ((l : ℝ) - 1) * (Module.finrank ℚ L : ℝ) * degInfOf L E
+        - (archSum L E' - archSum L E)
+      ≤ 24 * (Module.finrank ℚ L : ℝ) * Real.log l) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l := by
+  have hd : (0:ℝ) < (Module.finrank ℚ L : ℝ) := by exact_mod_cast Module.finrank_pos
+  have h1 : 12 * htFaltOf L E' = degInfOf L E' - archSum L E' / (Module.finrank ℚ L : ℝ) := by
+    rw [htFaltOf]; field_simp
+  have h2 : 12 * htFaltOf L E = degInfOf L E - archSum L E / (Module.finrank ℚ L : ℝ) := by
+    rw [htFaltOf]; field_simp
+  have hdiff : 12 * htFaltOf L E' - 12 * htFaltOf L E
+      = ((l : ℝ) - 1) * degInfOf L E
+        - (archSum L E' - archSum L E) / (Module.finrank ℚ L : ℝ) := by
+    rw [h1, h2, hdeg]; ring
+  have hmul : (((l : ℝ) - 1) * degInfOf L E
+      - (archSum L E' - archSum L E) / (Module.finrank ℚ L : ℝ))
+      * (Module.finrank ℚ L : ℝ)
+      = ((l : ℝ) - 1) * (Module.finrank ℚ L : ℝ) * degInfOf L E
+        - (archSum L E' - archSum L E) := by
+    field_simp
+  have hkey : ((l : ℝ) - 1) * degInfOf L E
+      - (archSum L E' - archSum L E) / (Module.finrank ℚ L : ℝ) ≤ 24 * Real.log l := by
+    refine le_of_mul_le_mul_right ?_ hd
+    rw [hmul]
+    nlinarith [hArch]
+  linarith [hdiff, hkey]
+
+/-! ## ★出典の紐付け(`.src`)——★★**条つき（`hloc`／`hArch` が残っている）** -/
+
+def htFalt_isogeny_le_canonical.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(残り 1 本の正準形——deg∞ と archSum だけで書ける)",
+    sectionId := "genell-prop-3-4" }
 
 def htFalt_isogeny_le.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
