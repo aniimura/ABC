@@ -2945,6 +2945,46 @@ def uniformMap_periodic.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Φ は Λ-周期的。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★**比 `R` は `z` と `w` の入れ替えで不変**——分子・分母がともに符号を変えるから。 -/
+theorem slopeRatio_symm (P : PeriodPair) (z w : ℂ) :
+    (P.derivWeierstrassP w - P.derivWeierstrassP z)
+        / (P.weierstrassP w - P.weierstrassP z)
+      = (P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w) := by
+  rw [show P.derivWeierstrassP w - P.derivWeierstrassP z
+      = -(P.derivWeierstrassP z - P.derivWeierstrassP w) by ring,
+    show P.weierstrassP w - P.weierstrassP z
+      = -(P.weierstrassP z - P.weierstrassP w) by ring, neg_div_neg_eq]
+
+/-- ★★★★★★★★★★★★★★★★**加法定理の対称版**——`2z ∉ Λ` から。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 641 は `2w ∉ Λ` を仮定するが、`℘(z+w) = ℘(w+z)` と `R` の対称性
+（`slopeRatio_symm`）で `2z ∉ Λ` からも同じ結論が出る。
+☆これで「`z` か `w` のどちらかが 2-捩れでない」場合が尽きる（第 653 の記録）。 -/
+theorem weierstrassP_addition' (P : PeriodPair) (z : ℂ) (hz : z ∉ P.lattice)
+    (h2z : 2 * z ∉ P.lattice) {w : ℂ}
+    (hw : w ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    P.weierstrassP (z + w)
+      = ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+          / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+        - P.weierstrassP z - P.weierstrassP w := by
+  have hne' : P.weierstrassP w - P.weierstrassP z ≠ 0 := fun hc =>
+    hne (by linear_combination -hc)
+  have hwz : w + z ∉ P.lattice := by rw [add_comm]; exact hzw
+  have h := weierstrassP_addition P z hz h2z hw hwz hne'
+  rw [add_comm w z] at h
+  rw [h, slopeRatio_symm]
+  ring
+
+def weierstrassP_addition'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(加法定理の対称版——2z ∉ Λ から。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
