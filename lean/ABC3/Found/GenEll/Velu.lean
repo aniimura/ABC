@@ -290,11 +290,79 @@ theorem velu2_equation (W : WeierstrassCurve F) (x₀ y₀ x y : F)
 
 end TwoIsogeny
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`l = 3` の場合 -/
+
+section ThreeIsogeny
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★**3-同種写像の Vélu 写像（`X` 座標）**。
+
+★位数 3 の点 `Q` では `H = {O, Q, −Q}` で代表系は `S = {Q}` である。 -/
+noncomputable def velu3X (W : WeierstrassCurve F) (xQ yQ x : F) : F :=
+  x + veluV W xQ yQ / (x - xQ) + veluU W xQ yQ / (x - xQ) ^ 2
+
+/-- ★★★★★**3-同種写像の Vélu 写像（`Y` 座標）**。 -/
+noncomputable def velu3Y (W : WeierstrassCurve F) (xQ yQ x y : F) : F :=
+  y - veluU W xQ yQ * (2 * y + W.a₁ * x + W.a₃) / (x - xQ) ^ 3
+    - veluV W xQ yQ * (W.a₁ * (x - xQ) + y - yQ) / (x - xQ) ^ 2
+    - (W.a₁ * veluU W xQ yQ - veluGx W xQ yQ * veluGy W xQ yQ) / (x - xQ) ^ 2
+
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 2000000 in
+/-- ★★★★★★★★★★★★★★★★★★★★**Vélu の 3-同種写像は本当に商へ落ちる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`Q = (xQ,yQ)` を**位数 3** の点（3-分点多項式
+`ψ₃ = 3x⁴ + b₂x³ + 3b₄x² + 3b₆x + b₈` が `xQ` で消える）、
+`P = (x,y)` を `x ≠ xQ` なる点とすると、
+**`(velu3X, velu3Y)` は商曲線 `veluCurve W v_Q w_Q` 上にある**。
+
+★★★これで Vélu の構成は `#H = 2` と `#H = 3` の両方で実証された
+——★`l = 2` は `u_Q = 0` で退化した場合、`l = 3` は `u_Q ≠ 0` の**一般形**である。
+
+★★係数（`h` と `hpsi` にかける多項式）は sympy の `reduced` で求めた
+——`field_simp` 後の多項式は手に負えない大きさである。
+
+☆一般の `l` については代表系 `S` の取り方と群法則が要る。 -/
+theorem velu3_equation (W : WeierstrassCurve F) (xQ yQ x y : F)
+    (hq : W.toAffine.Equation xQ yQ)
+    (hpsi : 3 * xQ ^ 4 + W.b₂ * xQ ^ 3 + 3 * W.b₄ * xQ ^ 2 + 3 * W.b₆ * xQ + W.b₈ = 0)
+    (h : W.toAffine.Equation x y) (hx : x ≠ xQ) :
+    (veluCurve W (veluV W xQ yQ) (veluW W xQ yQ)).toAffine.Equation
+      (velu3X W xQ yQ x) (velu3Y W xQ yQ x y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at hq h ⊢
+  have hne : x - xQ ≠ 0 := sub_ne_zero.2 hx
+  have ha6 : W.a₆ = yQ ^ 2 + W.a₁ * xQ * yQ + W.a₃ * yQ
+      - xQ ^ 3 - W.a₂ * xQ ^ 2 - W.a₄ * xQ := by linear_combination -hq
+  simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+    WeierstrassCurve.b₈] at hpsi
+  simp only [velu3X, velu3Y, veluCurve, veluV, veluU, veluW, veluGx, veluGy,
+    WeierstrassCurve.b₂]
+  rw [ha6] at hpsi h ⊢
+  field_simp
+  linear_combination
+    (-W.a₁^2*x*xQ - W.a₁^2*xQ^2 - W.a₁*W.a₃*x - 3*W.a₁*W.a₃*xQ - 8*W.a₁*xQ*yQ - 4*W.a₂*x*xQ
+      + 4*W.a₂*xQ^2 - 2*W.a₃^2 - 8*W.a₃*yQ - 2*W.a₄*x + 2*W.a₄*xQ + x^3 - 3*x^2*xQ
+      - 3*x*xQ^2 + 5*xQ^3 - 8*yQ^2) ^ 2 * h
+    + (-(x - xQ) ^ 2 * (-2*W.a₁^2*x*xQ - W.a₁^2*xQ^2 - 2*W.a₁*W.a₃*x - 4*W.a₁*W.a₃*xQ
+      - 12*W.a₁*xQ*yQ - 8*W.a₂*x*xQ + 8*W.a₂*xQ^2 - 3*W.a₃^2 - 12*W.a₃*yQ - 4*W.a₄*x
+      + 4*W.a₄*xQ + 6*x^3 - 18*x^2*xQ + 6*x*xQ^2 + 6*xQ^3 - 12*yQ^2)) * hpsi
+
+end ThreeIsogeny
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
 
 def velu2_equation.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の 2-同種写像は本当に商へ落ちる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def velu3_equation.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の 3-同種写像は本当に商へ落ちる——u_Q ≠ 0 の一般形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluCurve_scale.src : ABC3.Meta.Source :=
