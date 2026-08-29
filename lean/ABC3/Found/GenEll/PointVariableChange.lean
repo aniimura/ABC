@@ -993,6 +993,72 @@ def addOrderOf_rhPoint.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(体の準同型は点の位数を保つ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★合成——`L` の点を `ℂ` の一意化へ -/
+
+section Embed
+
+variable {F K : Type*} [Field F] [Field K]
+
+/-- ★★★★★★★★★★★★**`L` 上の点を `σ` で送り、さらに一意化の変数変換で移す**
+
+    `W.Point → (C • (W.map f)).Point`
+
+★`C • (W.map σ) = latticeCurve (P σ)` なので、これが
+「`L` 上の点 ↦ `latticeCurve (P σ)` の点」である。 -/
+noncomputable def embPoint (f : F →+* K) (W : WeierstrassCurve F)
+    (C : VariableChange K) : W.toAffine.Point → (C • (W.map f)).toAffine.Point :=
+  fun Pt => vcPoint C (W.map f) (rhPoint f W Pt)
+
+@[simp] theorem embPoint_zero (f : F →+* K) (W : WeierstrassCurve F)
+    (C : VariableChange K) : embPoint f W C 0 = 0 := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★合成も加法を保つ。 -/
+theorem embPoint_add (f : F →+* K) (W : WeierstrassCurve F) (C : VariableChange K)
+    (Pt Qt : W.toAffine.Point) :
+    embPoint f W C (Pt + Qt) = embPoint f W C Pt + embPoint f W C Qt := by
+  simp only [embPoint, rhPoint_add, vcPoint_add]
+
+/-- ★★★★★★★★合成も単射。 -/
+theorem embPoint_injective (f : F →+* K) (W : WeierstrassCurve F)
+    (C : VariableChange K) : Function.Injective (embPoint f W C) :=
+  (vcPoint_injective C (W.map f)).comp (rhPoint_injective f W)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**合成は点の位数を保つ**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★☆**これが `Lemma 3.5` の Galois 降下の核である**——
+`L` 上の位数 `l` の点 `Q` は、各 `σ` で `latticeCurve (P σ)` の位数 `l` の点になる。
+したがって解析側（第 694）が使えて、得られる代表点集合は
+`⟨Q⟩∖{O}` の座標を `σ` と `vc` で送ったものである。 -/
+theorem addOrderOf_embPoint (f : F →+* K) (W : WeierstrassCurve F)
+    (C : VariableChange K) [W.IsElliptic] [(W.map f).IsElliptic]
+    [(C • (W.map f)).IsElliptic] (Pt : W.toAffine.Point) :
+    addOrderOf (embPoint f W C Pt) = addOrderOf Pt := by
+  rw [embPoint, addOrderOf_vcPoint, addOrderOf_rhPoint]
+
+/-- ★★★★★★★★合成の座標は `(u⁻²(σx − r), u⁻³(σy − s(σx − r) − t))`。 -/
+theorem pointCoords_embPoint (f : F →+* K) (W : WeierstrassCurve F)
+    (C : VariableChange K) {x y : F} (h : W.toAffine.Nonsingular x y) :
+    pointCoords (embPoint f W C (.some x y h))
+      = (vcX C (f x), vcY C (f x) (f y)) := rfl
+
+end Embed
+
+def embPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(L 上の点を σ で送り一意化の変数変換で移す合成)",
+    sectionId := "genell-lemma-3-5" }
+
+def addOrderOf_embPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(合成は点の位数を保つ——Galois 降下の核。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
