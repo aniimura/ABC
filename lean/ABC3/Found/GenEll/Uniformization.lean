@@ -1950,6 +1950,60 @@ def analyticOrderAt_weierstrassP_sub_self.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘ − ℘(w) は w で 1 位の零点——2w ∉ Λ のとき。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★極を埋めた関数を作る道具 -/
+
+open Filter Topology in
+/-- ★★★★★★連続な点では `limUnder` は値そのもの。 -/
+theorem limUnder_eq_self_of_continuousAt (f : ℂ → ℂ) (z : ℂ) (h : ContinuousAt f z) :
+    limUnder (𝓝[≠] z) f = f z :=
+  h.continuousWithinAt.tendsto.limUnder_eq
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★**除去可能特異点を埋める一般の道具**。
+
+`f` が `z` の除いた近傍で解析関数 `A` と一致し、その近傍の各点で連続なら、
+
+    `Ext ≔ fun y => limUnder (𝓝[≠] y) f`
+
+は `z` で解析的（そして `Ext = A` が `z` の近傍で成り立つ）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★☆**これが `℘` の加法定理を Liouville に繋ぐのに要る道具である**——
+mathlib の `℘` は格子点で junk value を取るので `addDefect` はそこで連続でなく、
+`elliptic_liouville`（`Differentiable` を要求）に直接は当てられない。
+☆`MeromorphicAt.analyticAt` は `ContinuousAt` を要求するので使えない。 -/
+theorem analyticAt_limUnder_of_eventuallyEq (f A : ℂ → ℂ) (z : ℂ)
+    (hA : AnalyticAt ℂ A z)
+    (hpunct : ∀ᶠ y in 𝓝[≠] z, ContinuousAt f y)
+    (heq : f =ᶠ[𝓝[≠] z] A) :
+    AnalyticAt ℂ (fun y => limUnder (𝓝[≠] y) f) z := by
+  refine hA.congr ?_
+  have hz : limUnder (𝓝[≠] z) f = A z := by
+    have h1 : Tendsto A (𝓝[≠] z) (𝓝 (A z)) := hA.continuousAt.continuousWithinAt.tendsto
+    exact (h1.congr' heq.symm).limUnder_eq
+  have hpt : ∀ᶠ y in 𝓝[≠] z, A y = limUnder (𝓝[≠] y) f := by
+    filter_upwards [hpunct, heq] with y hy hyeq
+    exact (hy.continuousWithinAt.tendsto.limUnder_eq.trans hyeq).symm
+  rw [Filter.EventuallyEq, ← nhdsNE_sup_pure z, Filter.eventually_sup]
+  exact ⟨hpt, by simpa using hz.symm⟩
+
+open Filter Topology in
+/-- ★★★★★★★★★★解析的な点では `Ext` は `f` と一致し、そこで解析的。 -/
+theorem analyticAt_limUnder_of_analyticAt (f : ℂ → ℂ) (z : ℂ)
+    (hana : ∀ᶠ y in 𝓝 z, AnalyticAt ℂ f y) :
+    AnalyticAt ℂ (fun y => limUnder (𝓝[≠] y) f) z := by
+  have hz : AnalyticAt ℂ f z := hana.self_of_nhds
+  refine analyticAt_limUnder_of_eventuallyEq f f z hz ?_ (by rfl)
+  filter_upwards [mem_nhdsWithin_of_mem_nhds hana] with y hy
+  exact hy.continuousAt
+
+def analyticAt_limUnder_of_eventuallyEq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(除去可能特異点を埋める一般の道具——limUnder で整関数を作る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
