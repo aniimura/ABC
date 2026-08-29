@@ -1950,5 +1950,22 @@
     "soTheCountIs": "★★したがって §3・§4 に残るのは**2 本**である: (A) 同種写像の高さ評価（`hArch`）、(B) 半安定還元の判定定理（`torsionExt`）。☆`Theorem 2.1`（§2）は独立で、(C) エタール `π₁` と (D) Riemann–Roch を待つ。★★★**合計 4 本**——本セッション冒頭の `genEllThreeInputs20260829` は (B) を数え落としていた（(A)(C)(D) の 3 本と書いていた）。",
     "whatIsStillTrue": "★`Lemma 3.5` と `Lemma 3.7` については「1 本」は正しい。★★また (A) の正準形は `Found/GaloisRep/IsogenyReduction.lean` の `htFalt_isogeny_le_canonical` の仮説 `hArch` として、本プロジェクトの量（`degInfOf`・`archSum`）だけで型に固定されている。",
     "notesOnB": "☆(B) の受け皿は既にある: `Found/GaloisRep/Semistable.lean` が `HasSemistableReduction` を mathlib の `Reduction.lean` の上で定義し、**半安定 ⟺ 加法的でない**まで取っている。★残るのは判定定理そのもの。★★`Found/GaloisRep/SemistableFin.lean` の `SemistableAt`（本セッション、§9-1008）は本プロジェクトの `valAdd` の言葉での版であり、両者を繋ぐ橋も残っている（`primeSubring p` の DVR 付値と `p.valuation L`）。"
+  },
+  "galoisCategoryFoothold20260829": {
+    "measuredAt": "2026-08-29",
+    "what": "★★★★★★**mathlib は抽象 Galois 圏の理論を約 2800 行ぶん持っている**（`Mathlib/CategoryTheory/Galois/`、11 ファイル）。",
+    "contents": [
+      "`Basic.lean`（459 行）—— `PreGaloisCategory` / `GaloisCategory` / `FiberFunctor`",
+      "`GaloisObjects.lean`（216 行）—— Galois 対象",
+      "`Decomposition.lean`（331 行）—— 連結成分への分解",
+      "`Prorepresentability.lean`（476 行）—— 副表現可能性（`π₁` の構成の核）",
+      "`IsFundamentalgroup.lean`（295 行）—— ★**基本群であることの定式化**",
+      "`Full.lean` / `EssSurj.lean` / `Equivalence.lean` —— 基本定理（`C ≃ Action FintypeCat π₁`）",
+      "`Topology.lean`（227 行）—— `π₁` の副有限位相",
+      "`Examples.lean`（177 行）—— `Action FintypeCat G` が Galois 圏である例"
+    ],
+    "whatIsMissing": "☆**スキーム側のインスタンスが無い**——`PreGaloisCategory` / `GaloisCategory` を`CategoryTheory/Galois/` の外で使っているファイルは mathlib に**1 つも無い**（2026-08-29 に grep で確認）。★すなわち「連結スキーム上の有限エタール被覆の圏が Galois 圏である」が抜けている。",
+    "whyItMatters": "★★[GenEll] `Theorem 2.1` の (ii) ⟹ (i) が要る 2 本のうち 1 本は「任意の正整数 `e` に対し、分岐指数がちょうど `e` の連結有限エタール Galois 被覆が存在する」（原文 p.12 が「well-known structure of étale fundamental groups of hyperbolic curves」に委ねる段、[Stacks] 58.6）。★★★**抽象論は揃っているので、残るのは「有限エタール被覆の圏が Galois 圏である」という 1 つの定理**である——ここが取りつく島である。",
+    "caveat": "☆ただしその 1 つの定理自体が大きい（有限エタール射の圏論的性質・ファイバー関手の構成・有限性）。★また `Theorem 2.1` にはもう 1 本、Riemann–Roch（[NCBelyi] `Theorem 2.5` の一般曲線への帰着）も要る。"
   }
 }
