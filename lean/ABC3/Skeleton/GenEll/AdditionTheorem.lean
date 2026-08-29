@@ -146,6 +146,30 @@ def weierstrassP_add.needs : List ProofObligation :=
        "(★本プロジェクトが第 598 で建てた)") 13,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, VI.3.6(℘ の加法定理)"
       (.absent "mathlib の Analysis/SpecialFunctions/Elliptic/Weierstrass.lean は ℘ の理論を 1080 行ぶん持つが加法定理は無い(2026-08-29 に全宣言名を確認)") 13,
+    .implicitStep
+      ("★★★★★★2026-08-29(第 612-614)で z ≡ −w の側の核も取れた: " ++
+       "Found/GenEll/Uniformization.lean の addQ(= 2(℘(t−w)−℘(w)) − t(℘′(t−w)−℘′(w)))が " ++
+       "t = 0 で 3 位の零点であること(three_le_analyticOrderAt_addQ)。" ++
+       "★q(0) = 0(℘ は偶)、q′(0) = 0(℘′ は奇)、" ++
+       "q″(t) = −12t·℘(t−w)·℘′(t−w) なので q″(0) = 0" ++
+       "——既存の deriv_derivWeierstrassP(deriv ℘′ = 6℘² − g₂/2、" ++
+       "Found/GenEll/WeierstrassODE.lean)がそのまま効いた") 13,
+    .implicitStep
+      ("☆★**訂正(2026-08-29、第 615)**: 第 606・第 611 で「残るのは Λ と −w+Λ の " ++
+       "2 か所の極だけ」と書いたが、**それは足りない**。" ++
+       "★F_w は {z : ℘(z) = ℘(w)} の点でも極を持ちうるので、" ++
+       "Liouville を当てるには **℘(z) = ℘(w) ⟹ z ≡ ±w (mod Λ)** が要る。" ++
+       "☆これは「℘ は各値をちょうど 2 回取る」(位数 2 の楕円関数)であり、" ++
+       "★★古典的には**零点と極の個数の一致**(偏角の原理・留数定理)から出る。" ++
+       "☆mathlib は Meromorphic/Divisor.lean(MeromorphicOn.divisor)を持つが、" ++
+       "楕円関数の零点和 = 極和は無い(2026-08-29 に測定)") 21,
+    .implicitStep
+      ("★★これで加法定理と一様化の単射性が**同じ 1 つの事実**に帰着することが分かった: " ++
+       "「℘ は各値をちょうど 2 回取る」。☆両者は絡み合っており、" ++
+       "どちらか一方を先に取ることはできない。" ++
+       "★**次の入口はそこ**——楕円関数の零点勘定である。" ++
+       "☆道具の Liouville(第 598)・除去可能特異点(第 603)・" ++
+       "解析的位数(mathlib の natCast_le_analyticOrderAt)はすべて揃っている") 21,
     .otherPaper "GenEll" "Lemma 3.5(l-捩れの大域的な階数 1 の部分群)" 15 ]
 
 end ABC3.Skeleton.GenEll
