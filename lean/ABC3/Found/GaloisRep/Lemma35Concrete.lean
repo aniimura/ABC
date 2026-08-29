@@ -250,6 +250,56 @@ def lemma_3_5_velu_local.needs : List ABC3.Meta.ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.degInfOf_eq_of_local") 2,
     .otherPaper "[GenEll]" "Lemma 3.2, (ii)(vAdd v (q^l) = l·vAdd v q——局所の Δ_min の関係)" 15 ]
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.5 —— 残る入力は**悪い還元の素点だけ**の `Δ_min` の関係**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★良い還元の素点では `v_p(Δ_min) = 0`（両方）なので関係は自動である。
+★★★★★★★★★☆したがって残っているのは
+
+    `∀ p ∈ S, v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`（`S` は悪い還元の素点）
+
+だけ——これは `Lemma 3.2, (ii)`（Tate 曲線の母数 `q_{E′} = q_E^l`）そのものである。 -/
+theorem lemma_3_5_velu_bad (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), 0 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((Finset.range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E') →
+      ∀ S : Set (HeightOneSpectrum (𝓞 L)),
+      (∀ p ∈ S, minDeltaExp p E' = l * minDeltaExp p E) →
+      (∀ p ∉ S, minDeltaExp p E = 0) →
+      (∀ p ∉ S, minDeltaExp p E' = 0) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_velu eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint
+    hss S hbad hgoodE hgoodE' => ?_⟩
+  exact hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hss
+    (degInfOf_eq_of_local' E E' l S hbad hgoodE hgoodE')
+
+def lemma_3_5_velu_bad.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る入力は悪い還元の素点だけの Δ_min の関係)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_bad.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "lemma_3_5_velu(hfalt を外した形、§9-1147)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_velu") 2,
+    .citation "[ABC3]" "degInfOf_eq_of_local'(悪い素点だけで確かめれば足りる形)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.degInfOf_eq_of_local'") 1,
+    .otherPaper "[GenEll]" "Lemma 3.2, (ii)(q_{E′} = q_E^l——悪い素点での Δ_min の関係)" 15 ]
+
 /-! ## ★出典の紐付け(`.src`)——★★**すべて条つき。項目全体の `.src` は置かない** -/
 
 def degInfOf_eq_of_local.src : ABC3.Meta.Source :=
