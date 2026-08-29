@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[DelSB616] Théorème 2.4 — 同種写像による Faltings 高さの変化</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[DelSB616] Théorème 2.4 — 同種写像による Faltings 高さの変化</h1>
+
+<p>P. Deligne, <em>Preuve des conjectures de Tate et de Shafarevitch (d'après G. Faltings)</em>,
+Séminaire Bourbaki 616 (1983/84)（全 18 ページ）。物理 p.14。</p>
+
+<h2>★★★★★★★★★★なぜこの節点を張るのか — 2026-08-29 の発見</h2>
+
+<p><code>[GenEll] Lemma 3.5</code> は、証明の 3 つの入力のうち 2 つが
+2026-08-29 に取れた（<code>Lemma 3.2</code> と <code>Proposition 3.4</code> が
+<strong>項目まるごと</strong>）。残るのは 1 本だけである:</p>
+
+<p><code>ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)</code></p>
+
+<p class="open">★台帳（<code>mathlib-gap.json</code>）はこの原典を
+<code>[FC] Chapter I, Proposition 2.7</code>（<code>0_Source</code> に<strong>無い</strong>）
+と書いていた。★★★<strong>それは足りない見立てだった。</strong></p>
+
+<p><code>[DelSB616]</code> の <strong>§2「ISOGÉNIES」</strong>が、まさにこの段を扱う。
+冒頭にこう書かれている——「この節では、半安定還元をもつ <code>A</code> について、
+同種写像による高さ <code>h(A)</code> の変化を調べ、そこから Tate 予想を導く」。
+★そして <code>[DelSB616]</code> は <code>0_Source</code> にあり
+<code>papers.json</code> に登記済みである。</p>
+
+<p>★★したがって <code>CLAUDE.md</code> の進め方（スケルトンで依存グラフを作成後、
+葉から Lean 形式化）が<strong>そのまま適用できる</strong>
+——「原典が無い」ではなく<strong>「まだグラフに載せていない道」</strong>である。</p>
+
+<h2>★★記法の実測（この論文に固有）</h2>
+
+<p class="open">★<code>pdftotext</code> のテキスト層は<strong>数式をほぼ落とす</strong>。
+本節点の周辺では <code>Théorème 2.4</code> の<strong>結論の式そのものが落ちている</strong>
+（画像として組まれているため）。★★逐語に使えるのは数式を含まない行だけである。
+★★★<code>data-notation-checked="none"</code>——本節点は
+<strong>260 dpi の目視確認をまだ行っていない</strong>。テキスト層のみで読んだ。
+結論の式を逐語で確定するには目視が要る。</p>
+
+<h2>★★★★★★★★到達点 — Deligne の 3 段</h2>
+
+<section class="statement theorem"
+         id="delsb616-thm-2-4"
+         data-paper="DelSB616"
+         data-pdf-page="14"
+         data-item="Théorème 2.4"
+         data-notation-checked="none">
+<div class="verbatim">F de nombres premiers tels que, pour u : A - B une</div>
+<div class="reading">★テキスト層から読める範囲（数式は落ちているので日本語で書く）。
+
+<p><code>A</code> を数体 <code>k</code> 上のアーベル多様体で<strong>半安定還元</strong>をもつものとする。
+このとき<strong>有限個の素数の集合 <code>F</code></strong> が存在して、
+<code>l′ ∈ F</code> と素な次数の同種写像 <code>u : A → B</code> について、
+<code>h(A)</code> と <code>h(B)</code> は明示の差で結ばれる。</p>
+
+<p>★原文はさらに「<code>F</code> は <code>A</code> の<strong>同種類</strong>だけに依るように取れる」
+と述べ、証明を「核 <code>H</code> が素数 <code>ℓ</code> で消える場合」に帰着させている。</p>
+
+<h3>証明の 3 段（物理 p.13–14）</h3>
+<table>
+<tr><th>段</th><th>内容</th><th>原文の位置</th></tr>
+<tr><td>1</td><td>完全列 <code>0 → A′ → A → A″ → 0</code> に付随する <code>ω</code> の自然な同型。
+数体の整数環上では<strong>エルミート構造とも両立する</strong></td><td><code>2.1</code></td></tr>
+<tr><td>2</td><td><code>w(H)</code> の計算。<code>H</code> が <code>S = Spec(𝒪)</code> 上の平坦準有限可換群スキームなら、
+逆差積 <code>𝒱⁻¹</code> を用いて <code>w(H) = ρ⁻¹</code>。
+<code>w(H)/𝒪</code> は <code>#H</code> で消える</td><td><code>2.2 (b)(c)</code></td></tr>
+<tr><td>3</td><td>★<strong><code>w(H) ⊗ ℂ</code> のエルミート構造は標準のものの <code>#H</code> 倍</strong></td><td><code>2.2 (a)</code></td></tr>
+</table>
+
+<p>★★<code>[GenEll] Lemma 3.5</code> が要るのは <code>l</code>-巡回部分群の場合、
+すなわち <code>#H = l</code> である。段 2 と段 3 がそれぞれ <code>log(l)</code> を出し、
+合わせて <code>2·log(l)</code> になる。</p>
+</div>
+</section>
+
+<h2>☆残っている葉（Lean 形式化の側）</h2>
+
+<table>
+<tr><th>葉</th><th>内容</th><th>mathlib</th></tr>
+<tr><td>(1)</td><td>楕円曲線の<strong>同種写像</strong>そのもの（<code>E/H</code> を Weierstrass 曲線として作る＝Vélu の公式）</td>
+<td class="open">☆<strong>不在</strong>（2026-08-29 に <code>#check</code> で確認:
+<code>WeierstrassCurve.Isogeny</code>・<code>EllipticCurve.Isogeny</code> いずれも無い）</td></tr>
+<tr><td>(2)</td><td><strong>Néron モデル</strong>と Néron 微分の同種写像の下でのふるまい
+（<code>ω_B ⊆ ω_A</code>、余核が <code>#H</code> で消える）</td>
+<td class="open">☆<strong>不在</strong>（<code>AlgebraicGeometry.NeronModel</code> 無し）</td></tr>
+<tr><td>(3)</td><td>アルキメデスの<strong>周期格子の共体積</strong>の比較（<code>#H</code> 倍）</td>
+<td>★本プロジェクトの <code>Found/GenEll/Covolume.lean</code>・
+<code>Found/GenEll/CurveArchInv.lean</code> が受け皿になる</td></tr>
+</table>
+
+<h2>★★★これがどこに入るか</h2>
+
+<p><code>[DelSB616] Théorème 2.4</code> ⟶ <code>[GenEll] Lemma 3.5</code>
+⟶ <code>Lemma 3.7</code> ⟶ <code>Theorem 3.8</code> ⟶ <code>Corollary 4.3 / 4.4</code>。</p>
+
+<p>★<code>Lemma 3.5</code> の組み立ては
+<code>Found/GaloisRep/Lemma35Concrete.lean</code> に<strong>型で固定してある</strong>
+（仮説 <code>hfalt</code> が本節点の結論そのものである）。
+★★<code>Lemma 3.7</code> は第 1・第 2 の主張が<strong>無条件で取れており</strong>
+（<code>Found/GaloisRep/Lemma37A.lean</code>・<code>NoMultRedExc.lean</code>）、
+第 3 の主張も条件 (a) の側は <code>Found/GaloisRep/Lemma37C.lean</code> が
+「finite exceptional set」まで取っている——受けているのは
+<code>(†)</code>＝<code>Lemma 3.5</code> の結論だけである。</p>
+
+<p class="open">★★★<strong>すなわち §3・§4 の残り 5 項目は、本節点 1 本に還元されている。</strong></p>
+
+</body>
+</html>

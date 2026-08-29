@@ -9,6 +9,7 @@ import ABC3.Skeleton.GenEll.Heights
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section1
 import ABC3.Skeleton.GenEll.DeligneHeight
+import ABC3.Skeleton.GenEll.IsogenyHeight
 import ABC3.Skeleton.GenEll.Section2
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.Uniformization
