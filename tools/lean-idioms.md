@@ -2122,3 +2122,16 @@ REPL（全 Mathlib）では `W.toAffine.negY` が通るのに、ファイルで�
 `Affine` 名前空間を見つけられず `WeierstrassCurve` に落ちるため。
 ★★**「不在の定数」ではなく「未 import」を先に疑う**——同じ穴は
 `Real.log_two_gt_d9`（`Analysis.Complex.ExponentialBounds`）でも踏んだ。
+
+## 在庫を先に引く——`valAdd_nonneg_iff` を二度書いた（2026-08-29、第 595）
+
+`NeronValuation.lean` に `valAdd_nonneg_iff` を新しく書いたら
+
+    error: `ABC3.Found.GaloisRep.valAdd_nonneg_iff` has already been declared
+
+`DegInf.lean:78` に同名・同 statement が既にあった。
+★CLAUDE.md の「在庫」どおり **`node tools/decl-index.mjs` → `.cache/decl-index.txt` を
+grep してから書く**。今回は `neronExp` だけ grep して周辺の補題を見ていなかった。
+★★下流のファイルに既にある補題は、上流で書き直すと衝突する
+（下流で使われている参照は上流の定義に解決されるので、直し方は
+「上流の重複を消す」か「新しい定理を下流へ移す」）。

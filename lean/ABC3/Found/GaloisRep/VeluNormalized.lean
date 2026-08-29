@@ -255,6 +255,55 @@ def htFalt_isogeny_le_of_archDefect.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(残るアルキメデスの穴はただ 1 つ archDefect(E′) = archDefect(E) + 6d·log l)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`E` が大域極小なら有限側は自動 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`E` が大域極小・`E′` が整なら `hfin` は要らない**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`Found/GaloisRep/NeronValuation.lean` の `neronExp_nonneg`（第 595）により、
+整なモデルの Néron 指数は非負である。したがって
+
+* `E` が大域極小 ⟹ `Σᶠ_p neronExp_p(E)·log N(p) = 0`
+* `E′` が整     ⟹ `Σᶠ_p neronExp_p(E′)·log N(p) ≥ 0`
+
+なので `hfin` の左辺は `≤ 0` であり、右辺 `(3/2)·d·log(l) ≥ 0` 以下である。
+
+★★★☆**したがって残る穴は `harch` ただ 1 つになる**——ただし `E′` は Vélu の
+モデルであって極小とは限らないので、非極小性の分は `harch` の側が背負う
+（`archDefect` と `Σᶠ neronExp` は変数変換でちょうど打ち消し合う）。 -/
+theorem htFalt_isogeny_le_of_archDefect_minimal (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) (hl : 0 < l)
+    (hmin : ∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0)
+    (hint : ∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p))
+    (harch : archDefect L E'
+      = archDefect L E + 6 * (Module.finrank ℚ L : ℝ) * Real.log l) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l := by
+  have hd : (0:ℝ) < (Module.finrank ℚ L : ℝ) := by exact_mod_cast Module.finrank_pos
+  have hl1 : (1:ℝ) ≤ (l:ℝ) := by exact_mod_cast hl
+  have hlog : 0 ≤ Real.log l := Real.log_nonneg hl1
+  have hΔ' : E'.Δ ≠ 0 := (inferInstance : E'.IsElliptic).isUnit.ne_zero
+  refine htFalt_isogeny_le_of_archDefect E E' l harch ?_
+  have hzero : (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+      (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal)) = 0 := by
+    have : ∀ p : HeightOneSpectrum (𝓞 L),
+        ((neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal)) = 0 := by
+      intro p; rw [hmin p]; simp
+    rw [finsum_congr this, finsum_zero]
+  have hnn : 0 ≤ ∑ᶠ p : HeightOneSpectrum (𝓞 L),
+      (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal) := by
+    refine finsum_nonneg fun p => ?_
+    refine mul_nonneg ?_ (Real.log_natCast_nonneg _)
+    exact_mod_cast neronExp_nonneg p E' hΔ' (hint p)
+  rw [hzero]
+  nlinarith [hnn, hlog, hd]
+
+def htFalt_isogeny_le_of_archDefect_minimal.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(E が大域極小・E′ が整なら有限素点側は自動——残る穴は harch だけ)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★★★★★★★★★★★格子の言葉に落とした版 -/
 
 /-- ★★★★★★★★★★★★★★★★★★**`hcov` を基底変換の言葉に落とした版**。
