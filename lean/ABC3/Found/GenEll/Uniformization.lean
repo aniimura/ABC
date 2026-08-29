@@ -1873,6 +1873,58 @@ def exists_addQ_factor.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(q = t³·g——z ≡ −w の極が消える理由)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`z ≡ −w` の極が消える（等式）**
+
+    `F_w(t−w) = g·(2û + v)/(4û²) + e(t) + ℘(t−w) + ℘(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★導出は 4 行:
+
+    `F_w(t−w) = 1/t² + e + ℘(t−w) + ℘(w) − v²/(4t²û²)`   （`u = tû`）
+    `         = [4û² − v²]/(4t²û²) + e + ℘(t−w) + ℘(w)`
+    `4û² − v² = (2û−v)(2û+v)`,  `2û − v = q/t = t²g`      （`q = t³g`）
+    `         = g(2û+v)/(4û²) + e + ℘(t−w) + ℘(w)`
+
+☆右辺は `û(0) ≠ 0`（第 626）なので `t = 0` で解析的——**極が消える**。 -/
+theorem addDefect_eq_nearNeg (P : PeriodPair) (w : ℂ) (û g e : ℂ → ℂ) (t : ℂ)
+    (ht : t ≠ 0) (hû : û t ≠ 0)
+    (hu : P.weierstrassP (t - w) - P.weierstrassP w = t * û t)
+    (hq : addQ P w t = t ^ 3 * g t)
+    (he : P.weierstrassP t = 1 / t ^ 2 + e t) :
+    addDefect P w (t - w)
+      = g t * (2 * û t + (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w))
+          / (4 * û t ^ 2)
+        + e t + P.weierstrassP (t - w) + P.weierstrassP w := by
+  have ht2 : t ^ 2 ≠ 0 := pow_ne_zero _ ht
+  have hune : P.weierstrassP (t - w) - P.weierstrassP w ≠ 0 := by
+    rw [hu]; exact mul_ne_zero ht hû
+  -- `2û − v = t²g`
+  have hkey : 2 * û t - (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)
+      = t ^ 2 * g t := by
+    have h1 : t * (2 * û t - (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w))
+        = t * (t ^ 2 * g t) := by
+      have h2 : addQ P w t
+          = t * (2 * û t - (P.derivWeierstrassP (t - w) - P.derivWeierstrassP w)) := by
+        simp only [addQ]
+        linear_combination 2 * hu
+      rw [← h2, hq]
+      ring
+    exact mul_left_cancel₀ ht h1
+  have hV : P.derivWeierstrassP (t - w) - P.derivWeierstrassP w
+      = 2 * û t - t ^ 2 * g t := by linear_combination -hkey
+  simp only [addDefect]
+  have hzw : t - w + w = t := by ring
+  rw [hzw, he, hu, hV]
+  field_simp
+  ring
+
+def addDefect_eq_nearNeg.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(z ≡ −w の極が消える——u = tû と q = t³g で t² が約される。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
