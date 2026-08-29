@@ -852,6 +852,38 @@ def veluB_vcInvPair.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(B は逆向きの変換で u³ 倍になる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★点の座標 -/
+
+section Coords
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★**点の座標**（`O` では `(0,0)` という junk 値）。
+
+☆Vélu の商に渡す点集合を `Finset (F × F)` として書くために要る。 -/
+noncomputable def pointCoords {W : WeierstrassCurve F} : W.toAffine.Point → F × F
+  | .zero => (0, 0)
+  | .some x y _ => (x, y)
+
+@[simp] theorem pointCoords_zero {W : WeierstrassCurve F} :
+    (pointCoords (W := W) 0) = (0, 0) := rfl
+
+@[simp] theorem pointCoords_some {W : WeierstrassCurve F} {x y : F}
+    (h : W.toAffine.Nonsingular x y) :
+    pointCoords (.some x y h) = (x, y) := rfl
+
+/-- ★★★★★★`vcPoint` は座標の上では `vcPair` である。 -/
+theorem pointCoords_vcPoint (C : VariableChange F) (W : WeierstrassCurve F)
+    {x y : F} (h : W.toAffine.Nonsingular x y) :
+    pointCoords (vcPoint C W (.some x y h)) = (vcX C x, vcY C x y) := rfl
+
+end Coords
+
+def pointCoords.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(点の座標——Vélu の商に渡す点集合を Finset (F × F) で書くため)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",

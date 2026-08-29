@@ -5505,6 +5505,38 @@ def exists_vc_veluQuotientFull_of_torsion.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(一意化の変数変換を外した形——ℂ 側の最終形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★**`Φ(z)` の座標は `(℘(z), ℘′(z)/2)`**（`z ∉ Λ`）。
+
+★★☆これで解析側の代表点集合が「`Φ` の像の座標」として書ける——
+`Q` が生成する部分群（第 680）の座標そのものである。 -/
+theorem uniformMap_coords (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {z : ℂ}
+    (hz : z ∉ P.lattice) :
+    pointCoords (uniformMap P hΔ z) = (latticePointX P z, latticePointY P z) := by
+  rw [uniformMap_of_notMem P hΔ hz]
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**解析側の代表点集合は `⟨Q⟩∖{O}` の座標**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これで `S` が `Q` だけで決まることが**座標の言葉で**書けた——
+`z₀` の選び方にも代表系 `T` の取り方にも依らない。
+☆したがって `Q` が `L`-有理なら `S ⊆ L × L` である。 -/
+theorem pointCoords_uniformMap_natCast_mul (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {z₀ : ℂ} {k : ℕ} (hk : ((k : ℂ) * z₀) ∉ P.lattice) :
+    pointCoords (uniformMap P hΔ ((k : ℂ) * z₀))
+      = (latticePointX P ((k : ℂ) * z₀), latticePointY P ((k : ℂ) * z₀)) :=
+  uniformMap_coords P hΔ hk
+
+def uniformMap_coords.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ(z) の座標は (℘(z), ℘′(z)/2)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
