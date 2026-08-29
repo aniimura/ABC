@@ -2190,6 +2190,96 @@ def analyticAt_addQ.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(q は t = 0 で解析的。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★**`Ext` は `−w` で解析的**（場合 (d)）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 627 の `addDefect_eq_nearNeg`（局所形）と第 635・636 の因数分解
+（`u = t·û` で `û(0) ≠ 0`、`q = t³·g`）に、第 630 の道具を当てる。 -/
+theorem analyticAt_addDefectExt_negW (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    AnalyticAt ℂ (addDefectExt P w) (-w) := by
+  obtain ⟨û, hûana, hû0, hûeq⟩ := exists_shiftU_factor P w hw h2w
+  obtain ⟨g, hgana, hgeq⟩ := exists_addQ_factor' P w hw
+  have hnw : -w ∉ P.lattice := fun hm => hw (by simpa using neg_mem hm)
+  have hshift : Tendsto (fun z : ℂ => z + w) (nhds (-w)) (nhds (0:ℂ)) := by
+    have ht : Tendsto (fun z : ℂ => z + w) (nhds (-w)) (nhds ((-w) + w)) :=
+      (continuous_id.add continuous_const).tendsto _
+    simpa using ht
+  have hcompA : AnalyticAt ℂ (fun z : ℂ => z + w) (-w) := analyticAt_id.add analyticAt_const
+  have hz0 : ((fun z : ℂ => z + w) (-w)) = 0 := by ring
+  -- 局所解析関数 A
+  have hgA : AnalyticAt ℂ (fun z : ℂ => g (z + w)) (-w) :=
+    AnalyticAt.comp (f := fun z : ℂ => z + w) (x := -w) (by simpa using hgana) hcompA
+  have hûA : AnalyticAt ℂ (fun z : ℂ => û (z + w)) (-w) :=
+    AnalyticAt.comp (f := fun z : ℂ => z + w) (x := -w) (by simpa using hûana) hcompA
+  have heA : AnalyticAt ℂ (fun z : ℂ => P.weierstrassPExcept 0 (z + w)) (-w) := by
+    refine AnalyticAt.comp (g := P.weierstrassPExcept 0) (f := fun z : ℂ => z + w)
+      (x := -w) ?_ hcompA
+    have he0 : AnalyticAt ℂ (P.weierstrassPExcept 0) 0 :=
+      ((P.differentiableOn_weierstrassPExcept 0).analyticOnNhd
+        P.isOpen_compl_lattice_sdiff) 0 (by simp)
+    simpa using he0
+  have hpA : AnalyticAt ℂ P.weierstrassP (-w) := P.analyticOnNhd_weierstrassP _ hnw
+  have hpdA : AnalyticAt ℂ P.derivWeierstrassP (-w) := P.analyticOnNhd_derivWeierstrassP _ hnw
+  have hdenne : (fun z : ℂ => 4 * û (z + w) ^ 2) (-w) ≠ 0 := by
+    simp only [neg_add_cancel]
+    exact mul_ne_zero (by norm_num) (pow_ne_zero _ hû0)
+  have hAana : AnalyticAt ℂ (fun z : ℂ =>
+      g (z + w) * (2 * û (z + w) + (P.derivWeierstrassP z - P.derivWeierstrassP w))
+        / (4 * û (z + w) ^ 2)
+      + P.weierstrassPExcept 0 (z + w) + P.weierstrassP z + P.weierstrassP w) (-w) :=
+    (((hgA.mul ((analyticAt_const.mul hûA).add (hpdA.sub analyticAt_const))).div
+      (analyticAt_const.mul (hûA.pow 2)) hdenne).add heA).add hpA |>.add analyticAt_const
+  -- 良い点であることと局所形
+  have hgood : ∀ᶠ z in 𝓝[≠] (-w), z ∉ P.lattice ∧ z + w ∉ P.lattice
+      ∧ P.weierstrassP z - P.weierstrassP w ≠ 0 := by
+    have hL : ∀ᶠ z in 𝓝[≠] (-w), z ∉ P.lattice :=
+      mem_nhdsWithin_of_mem_nhds ((P.isClosed_lattice.isOpen_compl).mem_nhds hnw)
+    have hM : ∀ᶠ z in 𝓝[≠] (-w), z + w ∈ ((P.lattice : Set ℂ) \ {0})ᶜ := by
+      refine mem_nhdsWithin_of_mem_nhds (hshift.eventually ?_)
+      exact P.isOpen_compl_lattice_sdiff.mem_nhds (by simp)
+    have hU : ∀ᶠ z in 𝓝[≠] (-w),
+        P.weierstrassP (z + w - w) - P.weierstrassP w = (z + w) * û (z + w) :=
+      mem_nhdsWithin_of_mem_nhds (hshift.eventually hûeq)
+    have hUne : ∀ᶠ z in 𝓝[≠] (-w), û (z + w) ≠ 0 :=
+      mem_nhdsWithin_of_mem_nhds (hshift.eventually (hûana.continuousAt.eventually_ne hû0))
+    filter_upwards [hL, hM, hU, hUne, self_mem_nhdsWithin] with z hz1 hz2 hz3 hz4 hz5
+    have hzne : z + w ≠ 0 := by
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz5
+      intro hc; exact hz5 (by linear_combination hc)
+    refine ⟨hz1, fun hc => hz2 ⟨hc, by simpa using hzne⟩, ?_⟩
+    have hzz : z + w - w = z := by ring
+    rw [hzz] at hz3
+    rw [hz3]
+    exact mul_ne_zero hzne hz4
+  refine analyticAt_limUnder_of_eventuallyEq _ _ (-w) hAana ?_ ?_
+  · filter_upwards [hgood] with z hz
+    exact (analyticAt_addDefect P w hz.1 hz.2.1 hz.2.2).continuousAt
+  · have hU : ∀ᶠ z in 𝓝[≠] (-w),
+        P.weierstrassP (z + w - w) - P.weierstrassP w = (z + w) * û (z + w) :=
+      mem_nhdsWithin_of_mem_nhds (hshift.eventually hûeq)
+    have hG : ∀ᶠ z in 𝓝[≠] (-w), addQ P w (z + w) = (z + w) ^ 3 * g (z + w) :=
+      mem_nhdsWithin_of_mem_nhds (hshift.eventually hgeq)
+    have hUne : ∀ᶠ z in 𝓝[≠] (-w), û (z + w) ≠ 0 :=
+      mem_nhdsWithin_of_mem_nhds (hshift.eventually (hûana.continuousAt.eventually_ne hû0))
+    filter_upwards [hU, hG, hUne, self_mem_nhdsWithin] with z hz1 hz2 hz3 hz5
+    have hzne : z + w ≠ 0 := by
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz5
+      intro hc; exact hz5 (by linear_combination hc)
+    have hkey := addDefect_eq_nearNeg P w û g (P.weierstrassPExcept 0) (z + w) hzne hz3
+      hz1 hz2 (by rw [← weierstrassP_sub_invSq]; ring)
+    have hzz : z + w - w = z := by ring
+    rw [hzz] at hkey
+    exact hkey
+
+def analyticAt_addDefectExt_negW.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は −w で解析的——組み立ての場合 (d)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
