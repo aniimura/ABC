@@ -2186,3 +2186,33 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 不等式は **`Nat.le_mul_of_pos_left n hgpos : n ≤ g * n`** を使うほうが安全。
 ☆`l = g * l` から `g = 1` を出すのも `rw [← hnl]` だと `l` を全部書き換えて
 しまうので、`conv_lhs => rw [hn]` で片側だけ触ってから `rw [hnl]` とする。
+
+
+## `HasDerivAt` の合成補題は Pi 形の関数を作る（2026-08-29、第 673）
+
+    have hb := ((h1.pow 2).const_mul (6 : ℂ)).sub_const (P.g₂ / 2)
+    rw [hb.deriv]   -- ← 失敗
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+      deriv (fun x ↦ 6 * (℘[P] ^ 2) x - P.g₂ / 2) w
+    in the target expression
+      deriv (fun z ↦ 6 * ℘[P] z ^ 2 - P.g₂ / 2) w
+
+★`HasDerivAt.pow` は `℘ ^ 2`（`Pi.pow`）を、`HasDerivAt.mul` は `℘ * ℘'`
+（`Pi.mul`）を作る。ラムダ形の目標とは**構文が違う**。直し方:
+
+    have h2 : HasDerivAt (fun z : ℂ => 6 * P.weierstrassP z ^ 2 - P.g₂ / 2) _ w :=
+      hb.congr_of_eventuallyEq (by filter_upwards with z; simp only [Pi.pow_apply])
+
+☆導関数の値は `_` にしておけば `hb` から推論される。
+☆`Finset.analyticAt_sum` も同じ罠で、結論は `AnalyticAt 𝕜 (∑ n ∈ N, f n) c`
+（Pi 和）なので `fun z => ∑ ...` には `.congr` ＋ `simp [Finset.sum_apply]` が要る。
+
+## 対称な目標で `rw [h1, h2]` が両辺を書き換える（2026-08-29、第 670）
+
+    have hSS : S = -S := by rw [h1, h2]
+    -- ⊢ -∑ ... = - -∑ ...
+
+★目標 `∑ = -∑` の**両辺に**同じ部分項があると `rw` は両方を書き換える。
+`h1.trans h2` と項で書くか、`conv_lhs => rw [...]` で片側に閉じ込める。
+

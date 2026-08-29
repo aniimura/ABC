@@ -2194,5 +2194,27 @@
     ],
     "feeds": "htFalt_isogeny_le_of_analytic_minimal（第 617）の h₁・h₂・hdet",
     "remaining": "★残るのは (1) ω₁′, ω₂′ から PeriodPair を作る（LinearIndependent ℝ）、(2) 代数的な同種写像 E → E/H と Λ′ の対応（Vélu）、(3) 各 σ について束ねて α・hu を作る"
+  },
+  "alphaClosed20260829": {
+    "date": "2026-08-29",
+    "block": 676,
+    "what": "Lemma 3.5 の解析側が最終形——第 617 の残る仮説 α・hu が α = 1 として閉じた",
+    "where": "lean/ABC3/Found/GenEll/Uniformization.lean exists_velu_model_of_torsion",
+    "chain": [
+      "第 669 exists_velu_formula_of_torsion（代表系 T と Vélu の公式）",
+      "第 670 sum_derivWeierstrassP_rep_eq_zero（Σ ℘′(w) = 0）",
+      "第 671 weierstrassP_sub_eq_sum（Laurent 比較の入口）",
+      "第 672 g₂_isogeny（Taylor 2 階）",
+      "第 673 g₃_isogeny（Taylor 4 階、℘⁗ = 120℘³ − 18g₂℘ − 12g₃）",
+      "第 674 exists_isogeny_data_of_torsion",
+      "第 675 latticeCurve_eq_veluQuotient（± 代表系つき）",
+      "第 676 latticeCurve_eq_veluCurve / exists_velu_model_of_torsion（仮説なし）"
+    ],
+    "keys": {
+      "mathlibHadTaylor": "iteratedDeriv_weierstrassPExcept_self ＋ sumInvPow_zero ＋ g₂ = 60G₄・g₃ = 140G₆ で iteratedDeriv 2 ℘[Λ−0] 0 = g₂/10、iteratedDeriv 4 ℘[Λ−0] 0 = 6g₃/7",
+      "noTransversal": "℘ が偶なので v = Σ_S 2g^x_Q = Σ_{H∖{O}} g^x_Q。有限集合の対合の横断集合を作る必要がなくなった",
+      "numbersMatch": "a₄: g₂′ = g₂ + 20v ⟺ −g₂′/4 = −g₂/4 − 5v / a₆: g₃′ = g₃ + 28w ⟺ −g₃′/4 = −g₃/4 − 7w（b₂ = 0）"
+    },
+    "remaining": "★Lemma 3.5 原文の主張（数体上で global rank one の l-捻れ部分群が取れること）には Theorem 3.8（Galois 像が SL₂ を含む）が要る"
   }
 }

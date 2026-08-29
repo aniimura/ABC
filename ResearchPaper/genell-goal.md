@@ -31850,3 +31850,49 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 **global rank one** 部分群が取れること）にはさらに `Theorem 3.8`（Galois 像）が要るので、
 指標 `GenEll 24/24` の `Lemma 3.5` が数に入るのはその後になる。
 
+
+## 2026-08-29（第 669-676）——`Lemma 3.5` の**解析側が最終形になった**
+
+`α` の問題（第 617 の残る仮説 `hu : u′ = α·u`）が**閉じた**。答えは `α = 1` である。
+
+### 鎖
+
+    669  exists_velu_formula_of_torsion  位数 l の点 → 代表系 T と Vélu の公式
+    670  sum_derivWeierstrassP_rep_eq_zero  Σ_{T∖0} ℘′(w) = 0（ω-正規化の解析版）
+    671  weierstrassP_sub_eq_sum  ℘_{Λ′} − ℘_Λ = Σ_{T∖0}(℘_Λ(·+w) − ℘_Λ(w))
+    672  g₂_isogeny  g₂′ = g₂ + 10·Σ(6℘²−g₂/2)          ← Taylor 2 階
+    673  g₃_isogeny  g₃′ = g₃ + (7/6)·Σ(120℘³−18g₂℘−12g₃) ← Taylor 4 階
+    674  exists_isogeny_data_of_torsion  上を 1 本に束ねた形
+    675  latticeCurve_eq_veluQuotient  代数側 veluQuotient との照合（± 代表系つき）
+    676  latticeCurve_eq_veluCurve / exists_velu_model_of_torsion
+         ★★★latticeCurve Λ′ = veluCurve (latticeCurve Λ) v w（仮説なし）
+
+### 鍵
+
+1. **mathlib が `℘[Λ−0]` の Taylor 係数を持っていた**——
+   `iteratedDeriv_weierstrassPExcept_self : iteratedDeriv n ℘[L−l] l = (n+1)!·sumInvPow l (n+2)`
+   と `sumInvPow_zero : sumInvPow 0 = G`、`g₂ = 60G₄`・`g₃ = 140G₆`。
+   したがって `iteratedDeriv 2 ℘[Λ−0] 0 = g₂/10`、`iteratedDeriv 4 ℘[Λ−0] 0 = 6g₃/7`。
+
+2. **`±` 代表系を選ばずに済む**——Vélu の `v = Σ_S 2g^x_Q`（`S` は `(H∖{O})/±`）は
+   `℘` が偶なので `H∖{O}` 全体の `g^x_Q` の和に等しい:
+
+       v = Σ_{H∖{O}} g^x_Q,   w = Σ_{H∖{O}} (u_Q/2 + g^x_Q·x_Q)
+
+   これで有限集合の対合の横断集合を作る手間がまるごと消えた。
+
+3. **数値が合った**——`a₄`: `g₂′ = g₂ + 20v ⟺ −g₂′/4 = −g₂/4 − 5v`、
+   `a₆`: `g₃′ = g₃ + 28w ⟺ −g₃′/4 = −g₃/4 − 7w`（`b₂ = 0`）。
+
+### 第 617 の仮説の現状（更新）
+
+| 仮説 | 状態 |
+|---|---|
+| `P`・`hPC` | ★第 348 で無条件 |
+| `P′`・`h₁`・`h₂`・`hdet` | ★★第 668 で無条件 |
+| `α`・`hu` | ★★★**第 676 で `α = 1` として閉じた** |
+| `hmin`・`hint` | ★極小モデル・整モデルの仮定（これは仮定のままでよい） |
+
+☆残るのは、`Lemma 3.5` 原文の主張（**数体上で** global rank one の `l`-捻れ部分群が
+取れること）で、これには `Theorem 3.8`（Galois 像が `SL₂` を含む）が要る。
+
