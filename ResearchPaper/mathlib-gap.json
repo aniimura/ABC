@@ -2045,5 +2045,33 @@
     },
     "whatRemains": "★★★★★★**残るのは `℘` の加法定理 1 本**——解析側の `℘` の等式を代数側の `veluXGen`（第 591）に翻訳するのに要る。具体的には`℘(z+w) + ℘(z−w) − 2℘(w) = v_w/(℘(z)−℘(w)) + u_w/(℘(z)−℘(w))²`。☆mathlib に無い（2026-08-29 に測定）。☆★教科書の証明は「楕円関数の零点の和 = 極の和」（留数定理）を使うので、その段が別に要る——**次のセッションの入口はそこである**。★★道具の Liouville は第 598 で取れているので、必要なのは零点勘定の側である。",
     "alsoRemaining": "☆一様化写像 `ℂ/Λ → E(ℂ)` の全射性も未（mathlib に無い）。★ただし `Found/GaloisRep/*` は一様化の存在を仮説 `hPC` として受ける形で書いてあるので、`Lemma 3.5` の鎖には全射性は要らない。"
+  },
+  "ellipticCountingGap20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★**次の入口は「`℘` は各値をちょうど 2 回取る」**——加法定理と一様化の単射性が**同じ 1 つの事実**に帰着した（`§9-1057`、第 615）。",
+    "whyItIsTheGate": [
+      "★加法定理を Liouville（`§9-1040`、第 598）で出すには `F_w` が整である必要がある。",
+      "★`Λ` の極は塞がった（第 610）、`−w+Λ` の極も核は塞がった（第 612-614）。",
+      "☆しかし `{z : ℘(z) = ℘(w)}` に `±w+Λ` 以外の点があると、そこで真の 2 位の極が残る（`℘(z₀)=℘(w)` なら `℘′(z₀)=±℘′(w)`、`℘′(z₀)=−℘′(w)` かつ `z₀≢−w` の場合）。",
+      "★★したがって **`℘(z)=℘(w) ⟹ z ≡ ±w (mod Λ)`** が要る。",
+      "★★★一様化の単射性も同じ事実である——両者は絡み合っており、どちらか一方を先に取ることはできない。"
+    ],
+    "mathlibStock": {
+      "has": [
+        "★`Complex.integral_boundary_rect_eq_zero_of_differentiable_on_off_countable`——★**軸平行な長方形での Cauchy の定理**（可算個の例外つき）",
+        "`Mathlib/Analysis/Complex/JensenFormula.lean`——★`MeromorphicOn.circleAverage_log_norm`（Jensen の公式）・`AnalyticOnNhd.sum_divisor_le`",
+        "`Mathlib/Analysis/Complex/ValueDistribution/`——Nevanlinna 理論（`CharacteristicFunction`・`FirstMainTheorem`・`LogCounting`・`Proximity`・`Cartan`）",
+        "`Mathlib/Analysis/Meromorphic/Divisor.lean`——`MeromorphicOn.divisor`（因子）",
+        "`Mathlib/Analysis/Analytic/Order.lean`——`analyticOrderAt`・`natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero`"
+      ],
+      "lacks": [
+        "☆**偏角の原理**（`(1/2πi)∮ f′/f = #零点 − #極`）",
+        "☆**楕円関数の零点和 = 極和**（平行四辺形の境界での積分が周期性で相殺する議論）",
+        "☆`℘` が位数 2 であること／一様化の単射性／`℘` の加法定理"
+      ],
+      "caveat": "☆mathlib の Cauchy は**軸平行な長方形**なので、一般の格子の平行四辺形にはそのままは当たらない（変数変換は ℝ-線型で、正則性を壊す）。★Jensen の公式（円周）を使う経路のほうが近いかもしれない。"
+    },
+    "whatWeHaveForIt": "★★道具はかなり揃っている: `elliptic_liouville`（第 598、整で二重周期的なら定数）、`exists_mem_box`（第 598、`Int.fract` で基本平行四辺形へ）、`wp_inv_differentiableAt_of_mem`（第 603、除去可能特異点の型）、`weierstrassP_surjective`・`latticePoint_surjective`（第 603-604、全射性）、`addQ` まわり（第 612-614、`℘` の 2 階・3 階の消滅）。",
+    "nextEntry": "★**次のセッションの入口**: 楕円関数の零点勘定。☆最小形は「`℘(z) = ℘(w) ⟹ z ≡ ±w (mod Λ)`」であり、これが取れれば加法定理（`Skeleton/GenEll/AdditionTheorem.lean`）が閉じ、★★Vélu の代数側（第 586-593）と解析側（第 597-602）が繋がり、★★★`Lemma 3.5` の同種写像データ（`archDefect_isogeny` の入力）が揃う。"
   }
 }
