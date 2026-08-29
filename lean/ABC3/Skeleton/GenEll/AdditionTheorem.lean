@@ -208,6 +208,16 @@ def weierstrassP_add.needs : List ProofObligation :=
        "(Λ ∪ (±w+Λ) は可算閉離散なので、各点で Riemann の除去可能特異点" ++
        "——第 603 の wp_inv_differentiableAt_of_mem と同じ型——を当てる)。" ++
        "☆MeromorphicAt.analyticAt は ContinuousAt を要求するので直接は使えない") 8,
+    .implicitStep
+      ("★★★★★★2026-08-29(第 629-630)で**道具もすべて揃った**:" ++
+       "analyticOrderAt_weierstrassP_sub_self(℘ − ℘(w) は w で 1 位の零点)、" ++
+       "analyticAt_limUnder_of_eventuallyEq(除去可能特異点を埋めて整関数 Ext を作る)、" ++
+       "analyticAt_limUnder_of_analyticAt。" ++
+       "☆残るのは組み立てだけである: Ext ≔ fun z => limUnder (𝓝[≠] z) (addDefect P w) が" ++
+       "各点で解析的であることを 4 通りに場合分けして示し" ++
+       "(Λ は第 610、z ≡ w は第 629、z ≡ −w は第 627、その他は第 624-625 で解析的)、" ++
+       "Λ-周期性(addDefect の定義から)と Ext 0 = 0(第 610 の addDefectNear_zero)を足して" ++
+       "elliptic_liouville(第 598)に当てる") 8,
     .otherPaper "GenEll" "Lemma 3.5(l-捩れの大域的な階数 1 の部分群)" 15 ]
 
 end ABC3.Skeleton.GenEll
