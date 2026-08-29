@@ -726,6 +726,61 @@ def veluQuotientFull_variableChange.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(H∖{O} 全体で書いた商は一般の変数変換と両立する——最後の橋)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★点集合の引き戻し -/
+
+section Pullback
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★★逆向きの座標変換 `(x′, y′) ↦ (u²x′ + r, u³y′ + u²s·x′ + t)`。 -/
+def vcInvPair (C : VariableChange F) (Q : F × F) : F × F :=
+  (((C.u : Fˣ) : F) ^ 2 * Q.1 + C.r,
+    ((C.u : Fˣ) : F) ^ 3 * Q.2 + ((C.u : Fˣ) : F) ^ 2 * C.s * Q.1 + C.t)
+
+/-- ★★★★★★`vcPair ∘ vcInvPair = id`。 -/
+@[simp] theorem vcPair_vcInvPair (C : VariableChange F) (Q : F × F) :
+    (vcX C (vcInvPair C Q).1, vcY C (vcInvPair C Q).1 (vcInvPair C Q).2) = Q :=
+  Prod.ext (vcX_inv C Q.1) (vcY_inv C Q.1 Q.2)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★**点集合は引き戻せる**
+
+    `(S.image (vcInvPair C)).image (vcPair C) = S`
+
+★★☆これで「`ℂ` 上で得た代表点集合 `S` は、`C` を外した曲線 `W` の上の
+点集合の像である」と言える——`L` 上の `E/H` を作るための引き戻しである。 -/
+theorem image_vcPair_vcInvPair (C : VariableChange F) (S : Finset (F × F)) :
+    (S.image (vcInvPair C)).image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)) = S := by
+  rw [Finset.image_image,
+    show ((fun Q : F × F => (vcX C Q.1, vcY C Q.1 Q.2)) ∘ vcInvPair C) = id from
+      funext (vcPair_vcInvPair C)]
+  exact Finset.image_id
+
+/-- ★★★★★★★★`B` は逆向きの変換で `u³` 倍になる。 -/
+theorem veluB_vcInvPair (C : VariableChange F) (W : WeierstrassCurve F) (Q : F × F) :
+    2 * (vcInvPair C Q).2 + W.a₁ * (vcInvPair C Q).1 + W.a₃
+      = ((C.u : Fˣ) : F) ^ 3
+        * (2 * Q.2 + (C • W).a₁ * Q.1 + (C • W).a₃) := by
+  have hu : ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) = 1 := C.u.mul_inv
+  simp only [vcInvPair, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₃]
+  linear_combination (-((W.a₁ + 2 * C.s) * Q.1 * ((C.u : Fˣ) : F) ^ 2)
+    - (W.a₃ + C.r * W.a₁ + 2 * C.t)
+      * ((((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F)) ^ 2
+        + ((C.u : Fˣ) : F) * ((C.u⁻¹ : Fˣ) : F) + 1)) * hu
+
+end Pullback
+
+def image_vcPair_vcInvPair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(点集合は引き戻せる——L 上の E/H を作るため。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluB_vcInvPair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(B は逆向きの変換で u³ 倍になる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
