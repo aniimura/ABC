@@ -2271,5 +2271,14 @@
     "measuredAt": "2026-08-29",
     "correction20260829": "★訂正: 「Tate 曲線が mathlib に無いので遠い」と書いたが、**本プロジェクトは Tate 曲線を既に建てている**（Found/GaloisRep に Tate*.lean が 97 ファイル、tateCurveAt・tateA4・tateA6・tateParamR_spec・tateCurveAt_Delta_eq_mul_unit など）。とくに Found/GaloisRep/LocalHeightDelta.lean の localHeight_eq_vAdd_Delta（第 320）が **localHeightOf W h = v(Δ_min)** を完全に証明している——これが探していた橋そのものである",
     "realRemaining": "残るのは (1) minDeltaExp p E（L 上、HeightOneSpectrum で定義）を p での完備化 R = 𝓞_p の上の vAdd (tateDvrVal R K) に合わせる段（完備化の配管）と、(2) localHeightOf E′ = l · localHeightOf E すなわち q_{E′} = q_E^l（Lemma 3.2, (ii) の vAdd v (q^l) = l·vAdd v q、証明済み）を繋ぐ段。★どちらも本プロジェクト内の接続であり、新しい数学は要らない"
+  },
+  "section3Status20260829": {
+    "date": "2026-08-29",
+    "block": 713,
+    "what": "§3 の残り 3 件（Lemma 3.5・Lemma 3.7・Theorem 3.8）の状態を実測",
+    "lemma35": "★未証明の外部引用ゼロ。残るは ∀ p ∈ S, tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l ただ 1 本（Lemma 3.2, (ii) の内容、Tate 一意化の台帳の段 3・段 4）",
+    "lemma37": "★第 1・第 2 の主張は無条件で済み。第 3 の主張が受けている hdag も hdag_of_velu（第 713）で Lemma 3.5 から出た——外部引用ゼロ。残るのは Lemma 3.5 と同じ 1 本",
+    "theorem38": "☆Galois 表現論の 8 件のうち G1-G7 は Found/GaloisRep に建設済み（FullImageWitness.lean の FullImageData.nonvacuous、第 328）。Found/ に Theorem 3.8 に紐づくファイルが 197、条つき .src が 245 個。★残るのは Interface/GenEll/GaloisRep.lean の TorsionGaloisRepData の witness を組むこと（nonvacuous がまだ無い）——半安定還元の判定と Lemma 3.7 の第 3 の主張を要する",
+    "order": "★次のセッションの順序: (1) Tate 台帳の段 3・4 → Lemma 3.5 の .src、(2) Lemma 3.7 の .src、(3) TorsionGaloisRepData の witness → Theorem 3.8、(4) Cor 4.3・4.4（新しい基盤理論は要らない）、(5) Theorem 2.1（最も遠い）"
   }
 }
