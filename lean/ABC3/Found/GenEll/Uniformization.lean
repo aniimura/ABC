@@ -2985,6 +2985,92 @@ def weierstrassP_addition'.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(加法定理の対称版——2z ∉ Λ から。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★**`4x³ − g₂x − g₃` の 3 つの相異なる根の和は `0`**（Vieta）。
+
+★2 つの方程式を引くと `(e₁−e₂)(4(e₁²+e₁e₂+e₂²) − g₂) = 0`、
+さらに 2 つの関係を引くと `(e₂−e₃)(e₁+e₂+e₃) = 0` になる。 -/
+theorem sum_roots_eq_zero (g₂ g₃ e₁ e₂ e₃ : ℂ)
+    (h1 : 4 * e₁ ^ 3 - g₂ * e₁ - g₃ = 0) (h2 : 4 * e₂ ^ 3 - g₂ * e₂ - g₃ = 0)
+    (h3 : 4 * e₃ ^ 3 - g₂ * e₃ - g₃ = 0)
+    (h12 : e₁ ≠ e₂) (h13 : e₁ ≠ e₃) (h23 : e₂ ≠ e₃) :
+    e₁ + e₂ + e₃ = 0 := by
+  have d12 : e₁ - e₂ ≠ 0 := sub_ne_zero.2 h12
+  have d13 : e₁ - e₃ ≠ 0 := sub_ne_zero.2 h13
+  have d23 : e₂ - e₃ ≠ 0 := sub_ne_zero.2 h23
+  have k1 : 4 * (e₁ ^ 2 + e₁ * e₂ + e₂ ^ 2) - g₂ = 0 := by
+    refine mul_left_cancel₀ d12 ?_
+    rw [mul_zero]
+    linear_combination h1 - h2
+  have k2 : 4 * (e₁ ^ 2 + e₁ * e₃ + e₃ ^ 2) - g₂ = 0 := by
+    refine mul_left_cancel₀ d13 ?_
+    rw [mul_zero]
+    linear_combination h1 - h3
+  refine mul_left_cancel₀ d23 ?_
+  rw [mul_zero]
+  linear_combination (k1 - k2) / 4
+
+/-- ★★★★★★★★★★★★★★★★★★**両方 2-捩れの場合の加法定理**
+
+    `2z, 2w ∈ Λ`・`℘z ≠ ℘w` なら `℘(z+w) = −℘z − ℘w`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★このとき `℘′z = ℘′w = 0`（第 605）なので群法則の `slope` は `0`、
+すなわち `x₃ = −x₁ − x₂` である。
+☆`℘z`・`℘w`・`℘(z+w)` は `4x³ − g₂x − gₙ` の**相異なる 3 根**なので
+（第 605 の `cubic_eq_zero_of_two_mem` と第 624 の単射性）、Vieta で和が `0`。
+
+★★これで第 653 に記録した 3 つの場合がすべて済んだ。 -/
+theorem weierstrassP_addition_two_torsion (P : PeriodPair) {z w : ℂ}
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (h2z : 2 * z ∈ P.lattice) (h2w : 2 * w ∈ P.lattice)
+    (hne : P.weierstrassP z ≠ P.weierstrassP w) :
+    P.weierstrassP (z + w) = -P.weierstrassP z - P.weierstrassP w := by
+  have h2zw : 2 * (z + w) ∈ P.lattice := by
+    have : 2 * (z + w) = 2 * z + 2 * w := by ring
+    rw [this]
+    exact P.lattice.add_mem h2z h2w
+  have e1 := cubic_eq_zero_of_two_mem P z hz h2z
+  have e2 := cubic_eq_zero_of_two_mem P w hw h2w
+  have e3 := cubic_eq_zero_of_two_mem P (z + w) hzw h2zw
+  simp only [latticePointX] at e1 e2 e3
+  -- 3 つの値は相異なる
+  have hd13 : P.weierstrassP z ≠ P.weierstrassP (z + w) := by
+    intro hc
+    refine hw ?_
+    have hmem := mem_lattice_of_shift_eq P w hz (by simpa using hzw) (by simpa using hc.symm)
+      (by
+        rw [show z + w = z + w from rfl,
+          derivWeierstrassP_eq_zero_of_two_mem P (z + w) h2zw,
+          derivWeierstrassP_eq_zero_of_two_mem P z h2z])
+    exact hmem
+  have hd23 : P.weierstrassP w ≠ P.weierstrassP (z + w) := by
+    intro hc
+    refine hz ?_
+    have hwzc : w + z ∉ P.lattice := by rw [add_comm]; exact hzw
+    have hmem := mem_lattice_of_shift_eq P z hw (by simpa using hwzc)
+      (by rw [show w + z = z + w by ring]; exact hc.symm)
+      (by
+        rw [show w + z = z + w by ring,
+          derivWeierstrassP_eq_zero_of_two_mem P (z + w) h2zw,
+          derivWeierstrassP_eq_zero_of_two_mem P w h2w])
+    exact hmem
+  have := sum_roots_eq_zero P.g₂ P.g₃ (P.weierstrassP z) (P.weierstrassP w)
+    (P.weierstrassP (z + w)) (by linear_combination e1) (by linear_combination e2)
+    (by linear_combination e3) hne hd13 hd23
+  linear_combination this
+
+def sum_roots_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(4x³ − g₂x − g₃ の 3 根の和は 0——Vieta。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_addition_two_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(両方 2-捩れの場合の加法定理。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
