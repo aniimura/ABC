@@ -2064,6 +2064,48 @@ def analyticAt_addDefect.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(F_w は良い点で解析的——加法定理の組み立ての場合 (a)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★極を埋めた `F_w` -/
+
+open Filter Topology in
+/-- ★★★★★★★★**極を埋めた `F_w`**——`Ext(z) ≔ limUnder (𝓝[≠] z) F_w`。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★mathlib の `℘` は格子点で junk value を取るので `addDefect` はそこで連続でない。
+`elliptic_liouville`（第 598）は `Differentiable` を要求するので、
+★★**除去可能特異点を埋めた関数**を作る必要がある（道具は第 630）。 -/
+noncomputable def addDefectExt (P : PeriodPair) (w : ℂ) : ℂ → ℂ :=
+  fun z => limUnder (𝓝[≠] z) (addDefect P w)
+
+open Filter Topology in
+/-- ★★★★★★★★★★**良い点では `Ext` は解析的**（場合 (a)）。 -/
+theorem analyticAt_addDefectExt_of_good (P : PeriodPair) (w : ℂ) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    AnalyticAt ℂ (addDefectExt P w) z := by
+  refine analyticAt_limUnder_of_analyticAt _ z ?_
+  filter_upwards [(isOpen_goodSet P w).mem_nhds ⟨hz, hzw, hne⟩] with y hy
+  exact analyticAt_addDefect P w hy.1 hy.2.1 hy.2.2
+
+open Filter Topology in
+/-- ★★★★★★★★**良い点では `Ext` は `F_w` そのもの**。 -/
+theorem addDefectExt_eq_of_good (P : PeriodPair) (w : ℂ) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    addDefectExt P w z = addDefect P w z :=
+  limUnder_eq_self_of_continuousAt _ z (analyticAt_addDefect P w hz hzw hne).continuousAt
+
+def addDefectExt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(極を埋めた F_w——Liouville に当てるための整関数)",
+    sectionId := "genell-lemma-3-5" }
+
+def analyticAt_addDefectExt_of_good.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(良い点では Ext は解析的——組み立ての場合 (a)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
