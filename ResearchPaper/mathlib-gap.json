@@ -1937,5 +1937,18 @@
       "★★葉 (2) **Néron モデル／不変微分**——`ω_{E′} ⊆ ω_E` で余核が `#H` で消えること。`neronExp` は `Found/GaloisRep/NeronWitness.lean` に既にあるので、**述語の側は用意されている**。",
       "☆`Theorem 2.1`（§2）は独立で、エタール `π₁`（mathlib に抽象 Galois 圏の枠組みはある）と Riemann–Roch を待つ。"
     ]
+  },
+  "chainDependencyCorrection20260829": {
+    "measuredAt": "2026-08-29",
+    "correction": "☆★**訂正**: 本セッションで繰り返し「§3・§4 の残り 5 項目は 1 本の定理を待っている」と書いたが、**それは強すぎる**。★正しくは:",
+    "actual": [
+      "`Lemma 3.5` —— ☆**`hArch` 1 本**（同種写像の高さ評価）。他の 2 入力は済（`Lemma 3.2`＝§9-1011、`Proposition 3.4`＝§9-1009）。",
+      "`Lemma 3.7` —— ☆**同じく `hArch` 1 本**。第 1・第 2 の主張は無条件で済（§9-1013・§9-1014）、第 3 は `Lemma 3.5` を経由（§9-1015）。",
+      "`Theorem 3.8` —— ☆`hArch` に**加えて** `torsionExt` の欄が要る: `semiStable_torsionExt`・`degOfDefinition_torsionExt`（`d′ ≤ 23040·d`）・`hasMultRed_torsionExt`・`primeToLocalHeights_torsionExt`・`imageContainsSL2_of_torsionExt`。★中身は**半安定還元の判定定理**「`E[m]` が有理的な `m ≥ 3` があれば半安定」（Néron モデル／Néron–Ogg–Shafarevich）であり、mathlib に無い（`Found/GaloisRep/Semistable.lean` に既に記録済み）。",
+      "`Corollary 4.3` / `Corollary 4.4` —— ☆`Theorem 3.8` を経由するので上の 2 本。"
+    ],
+    "soTheCountIs": "★★したがって §3・§4 に残るのは**2 本**である: (A) 同種写像の高さ評価（`hArch`）、(B) 半安定還元の判定定理（`torsionExt`）。☆`Theorem 2.1`（§2）は独立で、(C) エタール `π₁` と (D) Riemann–Roch を待つ。★★★**合計 4 本**——本セッション冒頭の `genEllThreeInputs20260829` は (B) を数え落としていた（(A)(C)(D) の 3 本と書いていた）。",
+    "whatIsStillTrue": "★`Lemma 3.5` と `Lemma 3.7` については「1 本」は正しい。★★また (A) の正準形は `Found/GaloisRep/IsogenyReduction.lean` の `htFalt_isogeny_le_canonical` の仮説 `hArch` として、本プロジェクトの量（`degInfOf`・`archSum`）だけで型に固定されている。",
+    "notesOnB": "☆(B) の受け皿は既にある: `Found/GaloisRep/Semistable.lean` が `HasSemistableReduction` を mathlib の `Reduction.lean` の上で定義し、**半安定 ⟺ 加法的でない**まで取っている。★残るのは判定定理そのもの。★★`Found/GaloisRep/SemistableFin.lean` の `SemistableAt`（本セッション、§9-1008）は本プロジェクトの `valAdd` の言葉での版であり、両者を繋ぐ橋も残っている（`primeSubring p` の DVR 付値と `p.valuation L`）。"
   }
 }
