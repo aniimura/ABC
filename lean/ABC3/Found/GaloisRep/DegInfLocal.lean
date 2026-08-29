@@ -217,6 +217,95 @@ theorem localHeight_le_minDeltaExp [IsAdicComplete (IsLocalRing.maximalIdeal R) 
   rw [h320, hmde]
   exact hle
 
+/-! ## ★★★★★★★★局所高さ = `v_p(Δ_min)`（半安定な場合） -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**半安定なら局所高さは `v_p(Δ_min)` に等しい**
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★★不等式（`localHeight_le_minDeltaExp`）は「`Lv` の側の極小性が強い」から出るが、
+**乗法還元では `v(c₄) = 0` が極小性を決める**（`isMinimal_of_c4_vAdd_eq_zero`）ので、
+`p`-極小なモデルはそのまま `R`-極小でもある。したがって等号になる。
+
+★★★★☆**これが `Lemma 3.5` の最後の入力
+（`v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`）を局所高さの言葉へ移す環である**——
+局所高さの側は `Lemma 3.2, (ii)`（`q_{E′} = q_E^l`）が与える。 -/
+theorem localHeight_eq_minDeltaExp [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E : WeierstrassCurve L) [hell : (E.baseChange Lv).IsElliptic]
+    [hmin : (E.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0)
+    (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0) :
+    (localHeightOf (E.baseChange Lv) h : ℤ) = minDeltaExp p E := by
+  have hΔv : (E.baseChange Lv).Δ ≠ 0 := hell.isUnit.ne_zero
+  have hmapΔ : (E.baseChange Lv).Δ = algebraMap L Lv E.Δ := WeierstrassCurve.map_Δ _ _
+  have hΔL : E.Δ ≠ 0 := by
+    intro h0
+    exact hΔv (by rw [hmapΔ, h0, map_zero])
+  have hCΔ : (C • E).Δ ≠ 0 := variableChange_Delta_ne_zero E hΔL C
+  have hmde := minDeltaExp_eq p E hΔL C hC
+  have hsm : (C.map (algebraMap L Lv)) • (E.baseChange Lv) = (C • E).baseChange Lv :=
+    WeierstrassCurve.map_variableChange E C (algebraMap L Lv)
+  haveI hCint : WeierstrassCurve.IsIntegral (primeSubring p) (C • E) := inferInstance
+  haveI hint : WeierstrassCurve.IsIntegral R
+      ((C.map (algebraMap L Lv)) • (E.baseChange Lv)) := by
+    rw [hsm]
+    exact isIntegral_baseChange_of_isIntegral p hp (C • E)
+  -- ★`c₄` の付値が `0` であること（`Lv` の側）
+  have hc4eq : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄
+      = algebraMap L Lv ((C • E).c₄) := by
+    rw [hsm]
+    exact WeierstrassCurve.map_c₄ _ _
+  have hne2 : algebraMap L Lv ((C • E).c₄) ≠ 0 :=
+    (map_ne_zero_iff _ (algebraMap L Lv).injective).2 hc4ne
+  have hc4ne' : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄ ≠ 0 := by
+    rw [hc4eq]; exact hne2
+  have hc4v : vAdd (tateDvrVal R Lv)
+      (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄) hc4ne') = 0 := by
+    have hu : (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄) hc4ne')
+        = Units.mk0 (algebraMap L Lv ((C • E).c₄)) hne2 := Units.ext hc4eq
+    rw [hu, vAdd_algebraMap_eq_valAdd (R := R) p hp ((C • E).c₄) hc4ne hne2]
+    exact hc4
+  have hΔne' : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ ≠ 0 :=
+    variableChange_Delta_ne_zero (E.baseChange Lv) hΔv _
+  -- ★★★`v(c₄) = 0` なので `R`-極小
+  have hRmin : IsMinimal R ((C.map (algebraMap L Lv)) • (E.baseChange Lv)) :=
+    isMinimal_of_c4_vAdd_eq_zero _ hΔne' hc4ne' hc4v
+  have hmin1 : IsMinimal R ((1 : VariableChange Lv) • (E.baseChange Lv)) := by
+    rw [one_smul]
+    infer_instance
+  have hu0 := minimal_u_vAdd_eq (E.baseChange Lv) hΔv (1 : VariableChange Lv)
+    (C.map (algebraMap L Lv)) hmin1 hRmin
+  have hone : vAdd (tateDvrVal R Lv) ((1 : VariableChange Lv).u) = 0 := by
+    show vAdd (tateDvrVal R Lv) 1 = 0
+    rw [vAdd, map_one]
+    rfl
+  have hΔchg := vAdd_Delta_variableChange (R := R) (E.baseChange Lv) hΔv
+    (C.map (algebraMap L Lv))
+  rw [← hu0, hone, mul_zero, sub_zero] at hΔchg
+  -- ★`v(Δ)` を `p` の側へ
+  have hΔeq : (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ)
+      = algebraMap L Lv ((C • E).Δ) := by
+    rw [hsm]; exact WeierstrassCurve.map_Δ _ _
+  have hne3 : algebraMap L Lv ((C • E).Δ) ≠ 0 := by rw [← hΔeq]; exact hΔne'
+  have hΔu : (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ) hΔne')
+      = Units.mk0 (algebraMap L Lv ((C • E).Δ)) hne3 := Units.ext hΔeq
+  have h320 := localHeight_eq_vAdd_Delta (R := R) (E.baseChange Lv) h
+  rw [h320, hmde, ← hΔchg, hΔu,
+    vAdd_algebraMap_eq_valAdd (R := R) p hp ((C • E).Δ) hCΔ hne3]
+
+def localHeight_eq_minDeltaExp.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Proposition 3.4(半安定なら局所高さ = v_p(Δ_min)。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★素イデアルのノルムは `2` 以上 -/
 
 /-- ★★`N(p) ≥ 2`——`p` は `⊥` でも `⊤` でもないから。 -/
