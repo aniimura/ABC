@@ -1513,6 +1513,102 @@ def deriv_deriv_shiftDiff.needs : List ABC3.Meta.ProofObligation :=
        "★★一致の定理で ℂ ∖ (Λ ∪ (−a+Λ)) 全体へ延ばし、" ++
        "mem_lattice_of_weierstrassP_periodic(第 620)で a ∈ Λ、すなわち単射性") 13 ]
 
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★**線型 2 階 ODE の一意性（解析的位数版）**。
+
+`h(z₀) = h′(z₀) = 0` かつ `h″ = c·h`（`c` は `z₀` で解析的）なら `h` は `z₀` の近傍で `0`。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★機構は**解析的位数の算術だけ**——留数定理も偏角の原理も要らない:
+
+* `h(z₀) = h′(z₀) = 0` から位数は `≥ 2`
+* 位数が有限 `= m + 2` なら `h″` の位数は `m`（`analyticOrderAt_deriv_of_pos` を 2 回）
+* 一方 `c·h` の位数は `order(c) + (m+2) ≥ m + 2`（`analyticOrderAt_smul`）
+* `m ≥ m + 2` は偽——★したがって位数は `⊤`、すなわち `h` は近傍で `0` -/
+theorem eventually_eq_zero_of_linear_ode (h c : ℂ → ℂ) (z₀ : ℂ)
+    (hana : AnalyticAt ℂ h z₀) (hc : AnalyticAt ℂ c z₀)
+    (h0 : h z₀ = 0) (h1 : deriv h z₀ = 0)
+    (hode : deriv (deriv h) =ᶠ[nhds z₀] c • h) :
+    ∀ᶠ s in nhds z₀, h s = 0 := by
+  rw [← analyticOrderAt_eq_top]
+  by_contra hfin
+  obtain ⟨n, hn0⟩ := Option.ne_none_iff_exists'.1 hfin
+  have hn : analyticOrderAt h z₀ = (n : ℕ∞) := hn0
+  have h2le : ((2 : ℕ) : ℕ∞) ≤ analyticOrderAt h z₀ := by
+    rw [natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero hana]
+    intro i hi
+    interval_cases i
+    · simpa using h0
+    · rw [iteratedDeriv_one]; exact h1
+  rw [hn] at h2le
+  have h2n : 2 ≤ n := by exact_mod_cast h2le
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
+  have hd1 : analyticOrderAt (deriv h) z₀ = ((m + 1 : ℕ) : ℕ∞) := by
+    refine analyticOrderAt_deriv_of_pos hana ?_
+    rw [hn]; push_cast; ring
+  have hd2 : analyticOrderAt (deriv (deriv h)) z₀ = ((m : ℕ) : ℕ∞) := by
+    refine analyticOrderAt_deriv_of_pos hana.deriv ?_
+    rw [hd1]; push_cast; ring
+  rw [analyticOrderAt_congr hode, analyticOrderAt_smul hc hana, hn] at hd2
+  have hfinal : (((m + 2 : ℕ)) : ℕ∞) ≤ ((m : ℕ) : ℕ∞) := by
+    calc (((m + 2 : ℕ)) : ℕ∞) ≤ analyticOrderAt c z₀ + (((m + 2 : ℕ)) : ℕ∞) := le_add_self
+    _ = ((m : ℕ) : ℕ∞) := hd2
+  have hle : (m + 2 : ℕ) ≤ m := by exact_mod_cast hfinal
+  omega
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**`℘(z₀+a) = ℘(z₀)` かつ
+`℘′(z₀+a) = ℘′(z₀)` なら `℘(·+a) = ℘` は `z₀` の近傍で一致する**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★☆**これが一様化の単射性の核である**——第 622 の線型 2 階 ODE
+`h″ = 6(℘(·+a) + ℘)·h` に上の `eventually_eq_zero_of_linear_ode` を当てる。
+
+☆残るのは (1) 一致の定理で `ℂ ∖ (Λ ∪ (−a+Λ))` 全体へ延ばすこと、
+(2) 第 620 の `mem_lattice_of_weierstrassP_periodic` で `a ∈ Λ` を出すこと。 -/
+theorem weierstrassP_shift_eventually_eq (P : PeriodPair) (a : ℂ) {z₀ : ℂ}
+    (hz : z₀ ∉ P.lattice) (hza : z₀ + a ∉ P.lattice)
+    (h0 : P.weierstrassP (z₀ + a) = P.weierstrassP z₀)
+    (h1 : P.derivWeierstrassP (z₀ + a) = P.derivWeierstrassP z₀) :
+    ∀ᶠ s in nhds z₀, P.weierstrassP (s + a) - P.weierstrassP s = 0 := by
+  set h : ℂ → ℂ := fun s => P.weierstrassP (s + a) - P.weierstrassP s with hh
+  set c : ℂ → ℂ := fun s => 6 * (P.weierstrassP (s + a) + P.weierstrassP s) with hcdef
+  have hshiftAna : AnalyticAt ℂ (fun s : ℂ => P.weierstrassP (s + a)) z₀ := by
+    have hf : AnalyticAt ℂ (fun s : ℂ => s + a) z₀ := analyticAt_id.add analyticAt_const
+    have hg : AnalyticAt ℂ P.weierstrassP ((fun s : ℂ => s + a) z₀) :=
+      P.analyticOnNhd_weierstrassP (z₀ + a) hza
+    exact AnalyticAt.comp (f := fun s : ℂ => s + a) (x := z₀) hg hf
+  have hpAna : AnalyticAt ℂ P.weierstrassP z₀ := P.analyticOnNhd_weierstrassP z₀ hz
+  have hana : AnalyticAt ℂ h z₀ := hshiftAna.sub hpAna
+  have hcAna : AnalyticAt ℂ c z₀ := analyticAt_const.mul (hshiftAna.add hpAna)
+  have hh0 : h z₀ = 0 := by simp only [hh]; rw [h0]; ring
+  have hh1 : deriv h z₀ = 0 := by
+    rw [(hasDerivAt_shiftDiff P a hz hza).deriv, h1]
+    ring
+  have hnhds : {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} ∈ nhds z₀ :=
+    (isOpen_shiftDomain P a).mem_nhds ⟨hz, hza⟩
+  have hode : deriv (deriv h) =ᶠ[nhds z₀] c • h := by
+    filter_upwards [hnhds] with s hs
+    show deriv (deriv (fun t : ℂ => P.weierstrassP (t + a) - P.weierstrassP t)) s
+        = 6 * (P.weierstrassP (s + a) + P.weierstrassP s)
+          * (P.weierstrassP (s + a) - P.weierstrassP s)
+    exact deriv_deriv_shiftDiff P a hs.1 hs.2
+  exact eventually_eq_zero_of_linear_ode h c z₀ hana hcAna hh0 hh1 hode
+
+def eventually_eq_zero_of_linear_ode.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(線型 2 階 ODE の一意性——解析的位数の算術だけ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_shift_eventually_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一様化の単射性の核——℘ と ℘′ が一致すれば近傍で一致。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
