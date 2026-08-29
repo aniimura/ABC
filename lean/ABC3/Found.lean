@@ -374,6 +374,7 @@ import ABC3.Found.GenEll.JArchLower
 import ABC3.Found.GenEll.IsogenyCovolume
 import ABC3.Found.GenEll.IsogenyPeriodPair
 import ABC3.Found.GenEll.ArchInvCovolume
+import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass
