@@ -462,4 +462,112 @@ def veluQuotient.needs : List ABC3.Meta.ProofObligation :=
        "どちらを使うかは S の取り方(代表系)に委ねている。" ++
        "★同種写像を構成するときに確定する") 7 ]
 
+section GeneralL
+
+variable {F : Type*} [Field F]
+
+/-! ## ★★★★★★★★★★★★★★一般の `l`——代表系 `S` にわたる和 -/
+
+/-- ★★★★★点 `Q` ごとの `X` 補正 `v_Q/(x−x_Q) + u_Q/(x−x_Q)²`。 -/
+noncomputable def veluXterm (W : WeierstrassCurve F) (xQ yQ x : F) : F :=
+  veluV W xQ yQ / (x - xQ) + veluU W xQ yQ / (x - xQ) ^ 2
+
+/-- ★★★★★点 `Q` ごとの `Y` 補正。 -/
+noncomputable def veluYterm (W : WeierstrassCurve F) (xQ yQ x y : F) : F :=
+  veluU W xQ yQ * (2 * y + W.a₁ * x + W.a₃) / (x - xQ) ^ 3
+    + veluV W xQ yQ * (W.a₁ * (x - xQ) + y - yQ) / (x - xQ) ^ 2
+    + (W.a₁ * veluU W xQ yQ - veluGx W xQ yQ * veluGy W xQ yQ) / (x - xQ) ^ 2
+
+/-- ★★★★★点 `Q` ごとの `dX/dx` 補正 `v_Q/(x−x_Q)² + 2u_Q/(x−x_Q)³`。 -/
+noncomputable def veluDterm (W : WeierstrassCurve F) (xQ yQ x : F) : F :=
+  veluV W xQ yQ / (x - xQ) ^ 2 + 2 * veluU W xQ yQ / (x - xQ) ^ 3
+
+/-- ★★★★★★★★**正規化は点ごとに成り立つ**——仮定なし。
+
+    `(dX/dx)_Q · (2y + a₁x + a₃) = 2·Y_Q − a₁·X_Q`
+
+★これが `velu3_omega`（第 590）の中身であり、★★**和を取ればそのまま一般の `l` になる**。 -/
+theorem velu_omega_term (W : WeierstrassCurve F) (xQ yQ x y : F) (hx : x ≠ xQ) :
+    veluDterm W xQ yQ x * (2 * y + W.a₁ * x + W.a₃)
+      = 2 * veluYterm W xQ yQ x y - W.a₁ * veluXterm W xQ yQ x := by
+  have hne : x - xQ ≠ 0 := sub_ne_zero.2 hx
+  simp only [veluDterm, veluYterm, veluXterm, veluV, veluU, veluGx, veluGy]
+  field_simp
+  ring
+
+/-- ★★★★★★**Vélu の `X`**——代表系 `S` にわたる和。 -/
+noncomputable def veluXGen (W : WeierstrassCurve F) (S : Finset (F × F)) (x : F) : F :=
+  x + ∑ Q ∈ S, veluXterm W Q.1 Q.2 x
+
+/-- ★★★★★★**Vélu の `Y`**——代表系 `S` にわたる和。 -/
+noncomputable def veluYGen (W : WeierstrassCurve F) (S : Finset (F × F)) (x y : F) : F :=
+  y - ∑ Q ∈ S, veluYterm W Q.1 Q.2 x y
+
+/-- ★★★★★★**Vélu の `dX/dx`**——代表系 `S` にわたる和。 -/
+noncomputable def veluDGen (W : WeierstrassCurve F) (S : Finset (F × F)) (x : F) : F :=
+  1 - ∑ Q ∈ S, veluDterm W Q.1 Q.2 x
+
+/-- ★★★★★★★★★★★★★★**一般の `l` での正規化 `φ^*(ω′) = ω`**。
+
+不変微分は `ω = dx/(2y + a₁x + a₃)` なので、
+
+    `(dX/dx)·(2y + a₁x + a₃) = 2Y + a₁X + a₃`
+
+は `φ^*(ω_{E′}) = ω_E` と同じことである。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★**仮定は `x ∉ S の x 座標` だけ**——群法則も `S` が部分群の代表系であることも要らない。
+★★Vélu の写像は**最初から `ω` を保つように書かれている**。
+
+★★★★★これが `§9-1027`（第 585 の測定）の見立て
+「アルキメデス項が消える」の中身である——ℂ 上で `ω = dz` なら
+周期格子がそのまま `Λ ⊆ Λ′` になり、スケーリングが入らない。 -/
+theorem velu_omega_gen (W : WeierstrassCurve F) (S : Finset (F × F)) (x y : F)
+    (hS : ∀ Q ∈ S, x ≠ Q.1) :
+    veluDGen W S x * (2 * y + W.a₁ * x + W.a₃)
+      = 2 * veluYGen W S x y + W.a₁ * veluXGen W S x + W.a₃ := by
+  have key : (∑ Q ∈ S, veluDterm W Q.1 Q.2 x) * (2 * y + W.a₁ * x + W.a₃)
+      = 2 * (∑ Q ∈ S, veluYterm W Q.1 Q.2 x y)
+        - W.a₁ * (∑ Q ∈ S, veluXterm W Q.1 Q.2 x) := by
+    rw [Finset.sum_mul, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl fun Q hQ => velu_omega_term W Q.1 Q.2 x y (hS Q hQ)
+  simp only [veluDGen, veluXGen, veluYGen]
+  rw [sub_mul, one_mul, key]
+  ring
+
+def velu_omega_gen.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の正規化を一般の l へ——代表系 S にわたる和。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-- ★★★`S = ∅` なら写像は恒等。 -/
+@[simp] theorem veluXGen_empty (W : WeierstrassCurve F) (x : F) : veluXGen W ∅ x = x := by
+  simp [veluXGen]
+
+/-- ★★★`S = ∅` なら写像は恒等。 -/
+@[simp] theorem veluYGen_empty (W : WeierstrassCurve F) (x y : F) : veluYGen W ∅ x y = y := by
+  simp [veluYGen]
+
+/-- ★★★`S = ∅` なら `dX/dx = 1`。 -/
+@[simp] theorem veluDGen_empty (W : WeierstrassCurve F) (x : F) : veluDGen W ∅ x = 1 := by
+  simp [veluDGen]
+
+/-- ★★★★★**`S` が 1 点なら `velu3X`・`velu3Y` に一致**。
+
+★これで第 589（`l = 3`）が一般形の特別な場合であることが確かめられる。 -/
+theorem veluXGen_singleton (W : WeierstrassCurve F) (xQ yQ x : F) :
+    veluXGen W {(xQ, yQ)} x = velu3X W xQ yQ x := by
+  simp only [veluXGen, veluXterm, velu3X, Finset.sum_singleton]
+  ring
+
+/-- ★★★★★**`S` が 1 点なら `velu3Y` に一致**。 -/
+theorem veluYGen_singleton (W : WeierstrassCurve F) (xQ yQ x y : F) :
+    veluYGen W {(xQ, yQ)} x y = velu3Y W xQ yQ x y := by
+  simp only [veluYGen, veluYterm, velu3Y, Finset.sum_singleton]
+  ring
+
+end GeneralL
+
 end ABC3.Found.GenEll
