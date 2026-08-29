@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import ABC3.Meta.Claim
 
 /-!
@@ -236,7 +237,65 @@ theorem veluCurve_scale (W : WeierstrassCurve R) (v w : R) (u : Rˣ) :
       WeierstrassCurve.b₂]
     ring
 
+/-! ## ★★★★★★★★★★★★★★★★★★`l = 2` の場合——写像が本当に商へ落ちる -/
+
+section TwoIsogeny
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★**2-同種写像の Vélu 写像（`X` 座標）**。
+
+★2-捩れ点 `Q = (x₀,y₀)` では `g^y_Q = 0`（したがって `u_Q = 0`）なので、
+`X = x + v_Q/(x − x₀)` と簡単になる。 -/
+noncomputable def velu2X (W : WeierstrassCurve F) (x₀ y₀ x : F) : F :=
+  x + veluV2 W x₀ y₀ / (x - x₀)
+
+/-- ★★★★★**2-同種写像の Vélu 写像（`Y` 座標）**。 -/
+noncomputable def velu2Y (W : WeierstrassCurve F) (x₀ y₀ x y : F) : F :=
+  y - veluV2 W x₀ y₀ * (W.a₁ * (x - x₀) + y - y₀) / (x - x₀) ^ 2
+
+set_option maxRecDepth 40000 in
+set_option maxHeartbeats 1000000 in
+/-- ★★★★★★★★★★★★★★★★★★**Vélu の 2-同種写像は本当に商へ落ちる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`Q = (x₀,y₀)` を `E` 上の 2-捩れ点、`P = (x,y)` を `x ≠ x₀` なる点とすると、
+**`(velu2X, velu2Y)` は商曲線 `veluCurve W v_Q (v_Q·x₀)` 上にある**。
+
+★★★これが「Vélu の構成が本当に `E/H` を与える」ことの、`#H = 2` での実証である。
+★恒等式は
+
+    `Quot-eq(X,Y)·(x−x₀)⁴ = (v_Q − (x−x₀)²)²·E-eq(x,y)`
+
+——★★余因子が `(v_Q − (x−x₀)²)²` と**平方**になるのが要点である
+（sympy で係数を求めてから `linear_combination` に渡した）。
+
+☆一般の `l` については、代表系の取り方と群法則が要る。 -/
+theorem velu2_equation (W : WeierstrassCurve F) (x₀ y₀ x y : F)
+    (h0 : W.toAffine.Equation x₀ y₀) (h2 : 2 * y₀ + W.a₁ * x₀ + W.a₃ = 0)
+    (h : W.toAffine.Equation x y) (hx : x ≠ x₀) :
+    (veluCurve W (veluV2 W x₀ y₀) (veluV2 W x₀ y₀ * x₀)).toAffine.Equation
+      (velu2X W x₀ y₀ x) (velu2Y W x₀ y₀ x y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at h0 h ⊢
+  have hne : x - x₀ ≠ 0 := sub_ne_zero.2 hx
+  have ha3 : W.a₃ = -(2 * y₀ + W.a₁ * x₀) := by linear_combination h2
+  have ha6 : W.a₆ = y₀ ^ 2 + W.a₁ * x₀ * y₀ + W.a₃ * y₀
+      - x₀ ^ 3 - W.a₂ * x₀ ^ 2 - W.a₄ * x₀ := by linear_combination -h0
+  simp only [velu2X, velu2Y, veluCurve, veluV2, veluGx, WeierstrassCurve.b₂]
+  rw [ha6, ha3] at h ⊢
+  field_simp
+  linear_combination ((3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄ - W.a₁ * y₀) - (x - x₀) ^ 2) ^ 2 * h
+
+end TwoIsogeny
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
+
+def velu2_equation.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の 2-同種写像は本当に商へ落ちる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluCurve_scale.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
