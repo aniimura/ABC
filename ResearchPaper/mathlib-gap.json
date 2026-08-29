@@ -2005,5 +2005,45 @@
     "whatWeBuilt": "★`Found/GenEll/Uniformization.lean`（第 597）を置いた: `latticeCurve_equation`（`(℘(z), ℘′(z)/2)` は `latticeCurve P` の上にある）、`deriv_latticePointX`（★★**一様化は自動で `ω`-正規化されている**——`dx/(2y) = dz`）、`latticePoint_isogeny`（`Λ ⊆ Λ′` なら `z ↦ z` が同種写像を誘導する）。",
     "whyItMatters": "★★`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic`（第 596）に残った入力は「次数 `l` の解析的同種写像のデータ」だけである。★★★`deriv_latticePointX` により **`α_σ = 1` になる仕組みが Lean 上に載った**——`latticeCurve P` の不変微分 `dx/(2y)` が `dz` に等しいからである。☆残るのは全射性と「`℘_{Λ′}` は `℘_Λ` の有理式」の 2 つ。",
     "revision": "☆★**訂正**: 本セッション前半で「同種写像の高さ評価は mathlib に無い 4 本の 1 本」と書いたとき、解析側の在庫を測っていなかった。★`℘` が丸ごとあることは、その 1 本の中身がかなり近いことを意味する。"
+  },
+  "lemma35State20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★★★**`Lemma 3.5` の残りは 1 本になった**——`℘` の加法定理である。",
+    "sessionArc": "☆セッション開始時、`Lemma 3.5` に残る入力は `hArch`——`(l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)` というアルキメデスと有限が混ざった不等式 1 本であった。★第 586-602 でそれが分解・縮約された。",
+    "archimedeanSide": {
+      "result": "★★★★**「次数 `l` の同種写像がある」だけから従う**（第 596 `archDefect_isogeny`）。",
+      "how": [
+        "第 594: `archDefect(E) ≔ Σ_σ [log‖σΔ_E‖ − log archNorm(E,σ)]` が `Σ_σ [12log‖u_σ‖ − 6log covol(P_σ)]` に等しく、**一様化の取り方に依らない**。",
+        "★`12·d·ht^Falt(E) = archDefect(E) − 12·Σᶠ_p neronExp_p·log N(p) − 12·d·log(2π)`（無条件）。",
+        "第 596: `κ_σ(E′) − κ_σ(E) = 12log‖α‖ − 6log(‖α‖²/l) = 6log l`——★★**`α`（一様化の自由度）が打ち消し合うので正規化は要らない**。"
+      ]
+    },
+    "finiteSide": {
+      "result": "★★★**`E` が大域極小・`E′` が整なら自動**（第 595 `neronExp_nonneg`）。",
+      "how": "`IsMinimal R (C•W)` は「`C•W` が整なモデルの中で `v(Δ)` を最大にする」ことなので、`W` 自身が整なら `C⁻¹` も候補であり `v(Δ_W) ≤ v(u)⁻¹¹²·v(Δ_W)`、すなわち `v(u) ≤ 1`、すなわち `neronExp ≥ 0`。"
+    },
+    "veluAlgebraic": {
+      "where": "Found/GenEll/Velu.lean（第 586-593）",
+      "has": [
+        "`veluCurve`・不変量の帳簿（`c₄ ↦ c₄+240v`、`c₆ ↦ c₆+504b₂v+6048w`）",
+        "`velu2_equation`・`velu3_equation`——`l = 2`・`l = 3` で商へ落ちる",
+        "`velu_omega_gen`——★正規化 `φ^*(ω′) = ω`（一般の `l`、点ごとの恒等式の和）",
+        "`veluQuotient_congr_negPt`——★代表系の取り方に依らない（`v_Q`・`w_Q` は `±` 不変）"
+      ]
+    },
+    "veluAnalytic": {
+      "where": "Found/GenEll/Uniformization.lean（第 597-602）",
+      "result": "★★★★**`℘_{Λ′}(z) = Σ_{w∈T} ℘_Λ(z+w) − Σ_{w∈T∖{0}} ℘_Λ(w)` が「`T` が `Λ′/Λ` の代表系である」だけから従う**（`weierstrassP_eq_velu_of_rep`）。",
+      "blocks": [
+        "第 597: mathlib の `℘` を発見（1080 行）。`(℘, ℘′/2)` が `latticeCurve` に載る。★`deriv_latticePointX`——**一様化は自動で `ω`-正規化されている**（`dx/(2y) = dz`）",
+        "第 598: `elliptic_liouville`——整で二重周期的なら定数（`Int.fract` + コンパクト性 + Liouville）",
+        "第 599: `veluAnalyticX_shift`——代表系は平行移動で置換される",
+        "第 600: `veluDiff_differentiable`——極が打ち消し合う（`weierstrassPExcept` を使う）",
+        "第 601: `veluAnalyticC`・`weierstrassP_zero`——正規化定数（`℘(0) = 0` は junk value で整合）",
+        "第 602: `exists_veluShiftPerm`——置換 `σ` は代表系の定義から作れる"
+      ]
+    },
+    "whatRemains": "★★★★★★**残るのは `℘` の加法定理 1 本**——解析側の `℘` の等式を代数側の `veluXGen`（第 591）に翻訳するのに要る。具体的には`℘(z+w) + ℘(z−w) − 2℘(w) = v_w/(℘(z)−℘(w)) + u_w/(℘(z)−℘(w))²`。☆mathlib に無い（2026-08-29 に測定）。☆★教科書の証明は「楕円関数の零点の和 = 極の和」（留数定理）を使うので、その段が別に要る——**次のセッションの入口はそこである**。★★道具の Liouville は第 598 で取れているので、必要なのは零点勘定の側である。",
+    "alsoRemaining": "☆一様化写像 `ℂ/Λ → E(ℂ)` の全射性も未（mathlib に無い）。★ただし `Found/GaloisRep/*` は一様化の存在を仮説 `hPC` として受ける形で書いてあるので、`Lemma 3.5` の鎖には全射性は要らない。"
   }
 }
