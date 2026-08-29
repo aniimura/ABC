@@ -371,6 +371,7 @@ import ABC3.Found.GenEll.PeterssonBound
 import ABC3.Found.GenEll.JPeterssonBound
 import ABC3.Found.GenEll.JArchBound
 import ABC3.Found.GenEll.JArchLower
+import ABC3.Found.GenEll.IsogenyCovolume
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass
