@@ -576,11 +576,80 @@ theorem veluQuotientFull_map {A : Type*} [Field A] (f : F →+* A)
       = veluQuotientFull (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
   rw [veluQuotientFull, veluQuotientFull, veluCurve_map, veluVFull_map, veluWFull_map]
 
+/-- ★★★★★`v_Q`（2-捩れ側 `= g^x_Q`）は重さ 4。 -/
+theorem veluV2_scale (W : WeierstrassCurve F) (x y : F) (u : Fˣ) :
+    veluV2 (scaleChange u • W) (((u⁻¹ : Fˣ) : F) ^ 2 * x) (((u⁻¹ : Fˣ) : F) ^ 3 * y)
+      = ((u⁻¹ : Fˣ) : F) ^ 4 * veluV2 W x y := veluGx_scale W x y u
+
+/-- ★★★★★`u_Q` は重さ 6——`g^y_Q` が重さ 3 だから。 -/
+theorem veluU_scale (W : WeierstrassCurve F) (x y : F) (u : Fˣ) :
+    veluU (scaleChange u • W) (((u⁻¹ : Fˣ) : F) ^ 2 * x) (((u⁻¹ : Fˣ) : F) ^ 3 * y)
+      = ((u⁻¹ : Fˣ) : F) ^ 6 * veluU W x y := by
+  rw [veluU, veluGy_scale, veluU]
+  ring
+
+/-- ★★★スケーリングは点の対の上で単射。 -/
+theorem scalePair_injective (u : Fˣ) :
+    Function.Injective
+      (fun Q : F × F => (((u⁻¹ : Fˣ) : F) ^ 2 * Q.1, ((u⁻¹ : Fˣ) : F) ^ 3 * Q.2)) := by
+  intro a b hab
+  have hu : ((u⁻¹ : Fˣ) : F) ≠ 0 := Units.ne_zero _
+  have h1 : ((u⁻¹ : Fˣ) : F) ^ 2 * a.1 = ((u⁻¹ : Fˣ) : F) ^ 2 * b.1 := congrArg Prod.fst hab
+  have h2 : ((u⁻¹ : Fˣ) : F) ^ 3 * a.2 = ((u⁻¹ : Fˣ) : F) ^ 3 * b.2 := congrArg Prod.snd hab
+  exact Prod.ext (mul_left_cancel₀ (pow_ne_zero 2 hu) h1)
+    (mul_left_cancel₀ (pow_ne_zero 3 hu) h2)
+
+open scoped Classical in
+/-- ★★★★★★`veluVFull` は重さ 4。 -/
+theorem veluVFull_scale (W : WeierstrassCurve F) (S : Finset (F × F)) (u : Fˣ) :
+    veluVFull (scaleChange u • W)
+        (S.image (fun Q => (((u⁻¹ : Fˣ) : F) ^ 2 * Q.1, ((u⁻¹ : Fˣ) : F) ^ 3 * Q.2)))
+      = ((u⁻¹ : Fˣ) : F) ^ 4 * veluVFull W S := by
+  rw [veluVFull, veluVFull, Finset.mul_sum,
+    Finset.sum_image (fun a _ b _ hab => scalePair_injective u hab)]
+  exact Finset.sum_congr rfl (fun Q _ => veluV2_scale W Q.1 Q.2 u)
+
+open scoped Classical in
+/-- ★★★★★★`veluWFull` は重さ 6。 -/
+theorem veluWFull_scale (W : WeierstrassCurve F) (S : Finset (F × F)) (u : Fˣ) :
+    veluWFull (scaleChange u • W)
+        (S.image (fun Q => (((u⁻¹ : Fˣ) : F) ^ 2 * Q.1, ((u⁻¹ : Fˣ) : F) ^ 3 * Q.2)))
+      = ((u⁻¹ : Fˣ) : F) ^ 6 * veluWFull W S := by
+  rw [veluWFull, veluWFull, Finset.mul_sum,
+    Finset.sum_image (fun a _ b _ hab => scalePair_injective u hab)]
+  refine Finset.sum_congr rfl (fun Q _ => ?_)
+  rw [veluU_scale, veluV2_scale]
+  ring
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★
+**`H∖{O}` 全体で書いた Vélu の商もスケーリングと両立する**
+
+    `veluQuotientFull (u • W) (u⁻¹ • S) = u • veluQuotientFull W S`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★☆**これで一意化の変数変換 `C` を挟んでも商が保たれる**——
+`latticeCurve (P σ) = C σ • (E.map σ)` なので、`ℂ` 上で取った商を
+`E.map σ` の側へ戻せる。 -/
+theorem veluQuotientFull_scale (W : WeierstrassCurve F) (S : Finset (F × F)) (u : Fˣ) :
+    veluQuotientFull (scaleChange u • W)
+        (S.image (fun Q => (((u⁻¹ : Fˣ) : F) ^ 2 * Q.1, ((u⁻¹ : Fˣ) : F) ^ 3 * Q.2)))
+      = scaleChange u • veluQuotientFull W S := by
+  rw [veluQuotientFull, veluQuotientFull, veluVFull_scale, veluWFull_scale,
+    veluCurve_scale]
+
 end Full
 
 def veluQuotientFull.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H∖{O} 全体で書いた Vélu の商——± 代表系を取らない形)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_scale.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(H∖{O} 全体で書いた商もスケーリングと両立する。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluQuotientFull_map.src : ABC3.Meta.Source :=
