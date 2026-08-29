@@ -4799,6 +4799,57 @@ def g₃_isogeny.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(g₃ の同種写像公式——Vélu の商の a₆ の解析版。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（解析側・完全形）——位数 `l` の点から `E/H` の係数まで**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ)` の位数ちょうど `l` の点 `Q` に対し、次がすべて同時に取れる:
+
+* `z₀`（`Φ(z₀) = Q`）と周期対 `P′`（格子は `Λ′ = Λ + ℤz₀`）
+* 整数 `A, B, C, D` で `ω₁ = Aω₁′ + Bω₂′`・`ω₂ = Cω₁′ + Dω₂′`・`|AD − BC| = l`
+* 代表系 `T`（`|T| = l`、`0 ∈ T`）と Vélu の公式
+* **`E/H` の係数**:
+
+      g₂(Λ′) = g₂(Λ) + 10·Σ_{w∈T∖0} (6℘(w)² − g₂/2)
+      g₃(Λ′) = g₃(Λ) + (7/6)·Σ_{w∈T∖0} (120℘(w)³ − 18g₂℘(w) − 12g₃)
+
+★★★★★★☆**`latticeCurve P′` の係数が `latticeCurve P` と代表系だけで決まった。**
+☆残るのは、これを代数側の Vélu の商（`Found/GenEll/Velu.lean` の `veluQuotient`）
+と突き合わせて `α = 1`（`u′ = u`）を出すことである。 -/
+theorem exists_isogeny_data_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ : ℂ) (P' : PeriodPair) (A B C D : ℤ) (T : Finset ℂ),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) ∧
+      (0 : ℂ) ∈ T ∧ T.card = l ∧
+      (∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) ∧
+      (∑ w ∈ T.erase 0, P.derivWeierstrassP w = 0) ∧
+      P'.g₂ = P.g₂ + 10 * ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2) ∧
+      P'.g₃ = P.g₃ + (7 / 6) * ∑ w ∈ T.erase 0,
+        (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃) := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z
+  exact ⟨z₀, P', A, B, C, D, T, hz₀, h1, h2, hdet, hP', h0T, hcard, hvelu,
+    sum_derivWeierstrassP_rep_eq_zero P P' T h0T hT hrep,
+    g₂_isogeny P P' T h0T hT hrep hvelu,
+    g₃_isogeny P P' T h0T hT hrep hvelu⟩
+
+def exists_isogeny_data_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側・完全形——位数 l の点から E/H の係数まで。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
