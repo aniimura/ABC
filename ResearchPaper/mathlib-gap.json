@@ -2256,5 +2256,18 @@
     ],
     "remainingHypotheses": "hmin（E が極小）・hint（E′ が整）だけ",
     "next": "Interface/GenEll/EllModuli.lean の posit faltingsHeight_quotLCyclic に接続する（quotLCyclic を veluQuotientFull で実装し、hmin・hint を極小モデルの選択で満たす）"
+  },
+  "lemma35LastInput20260829": {
+    "date": "2026-08-29",
+    "blocks": "705-707",
+    "what": "Lemma 3.5 に残る入力が 1 本になった",
+    "chain": [
+      "第 705 lemma_3_5_velu —— hfalt（[FC] Ch. I, Prop 2.7 ＋ アルキメデスの (1,1)-形式）が消えた",
+      "第 706 lemma_3_5_velu_local —— hdeg を局所の v_p(Δ_min) の関係に還元",
+      "第 707 lemma_3_5_velu_bad —— 良い還元の素点は自動なので、悪い素点だけに絞られた"
+    ],
+    "remaining": "∀ p ∈ S（悪い還元の素点）, v_p(Δ_min(E′)) = l·v_p(Δ_min(E))。これは Tate 曲線の Δ = q·∏(1−qⁿ)²⁴ から v(Δ_min) = v(q_E) を出し、Lemma 3.2, (ii)（vAdd v (q^l) = l·vAdd v q、Found/GenEll/Lemma32.lean で証明済み）に繋ぐことである",
+    "mathlibGap": "Tate 曲線そのもの（Δ = q·∏(1−qⁿ)²⁴）が mathlib に無い。Interface/GenEll/TateLocal.lean は vq（= v_K(q_E)）を posit しているが、それと minDeltaExp の一致は posit していない——ここが最後の接続",
+    "measuredAt": "2026-08-29"
   }
 }
