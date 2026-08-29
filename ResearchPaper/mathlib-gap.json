@@ -2117,5 +2117,17 @@
     "groupLawMatch": "★`latticeCurve P = ⟨0,0,0,−g₂/4,−g₃/4⟩` の群法則は `a₁ = a₂ = a₃ = 0` なので`x₃ = λ² − x₁ − x₂`・`y₃ = −λ(x₃ − x₁) − y₁`、`λ = (y₂−y₁)/(x₂−x₁)`。`x = ℘`・`y = ℘′/2` を入れると `λ = R/2`（`R = (℘′z − ℘′w)/(℘z − ℘w)`）で、★★第 641 が `x₃`、第 645 が `y₃` にちょうど対応する。",
     "nextStep": "★**次の一手**: 群同型を mathlib の `WeierstrassCurve.Affine.Point` の言葉にパッケージする（`Nonsingular` の証明と `Point.add` の場合分けの照合）。☆それができれば、位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力（`α`・`u′ = α·u`・`α·Λ ⊆ Λ′` の指数 `l`）が揃う。★★★すなわち **`Lemma 3.5` が閉じる**。",
     "sessionArc": "☆本セッション（第 586-645、60 ブロック）の骨格: (1) `Lemma 3.5` から未証明の外部引用が消えた（`α` が打ち消し合う＋`neronExp ≥ 0`）、(2) Vélu の代数側と解析側を両方 Lean 上に置いた、(3) 一様化を全単射・群同型にした。★★★第 615 で「零点勘定（偏角の原理）が要る」と見立てたが、ODE の一意性で迂回できた（第 622-625）のが最大の転換点である。"
+  },
+  "pointPackagingPlan20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★**次の一手の測定**——群同型を mathlib の `WeierstrassCurve.Affine.Point` にパッケージする段は**そのまま乗る**。",
+    "mathlibStock": [
+      "★`WeierstrassCurve.Affine.equation_iff_nonsingular_of_Δ_ne_zero`（`Δ ≠ 0` なら方程式を満たす点は非特異）——本プロジェクトの `latticeDisc_ne_zero` と`latticeCurve_equation`（第 597）で `Nonsingular` が出る。",
+      "★`Affine.Point.add_of_Y_ne`・`add_some`（退化しない場合の加法の形）",
+      "★`Affine.slope`——`x₁ ≠ x₂` なら `(y₁ − y₂)/(x₁ − x₂)`",
+      "★`Affine.addX x₁ x₂ ℓ = ℓ² + a₁ℓ − a₂ − x₁ − x₂`、`Affine.addY = negY (addX) (negAddY)`、`negAddY = ℓ(addX − x₁) + y₁`"
+    ],
+    "match": "★★`latticeCurve P = ⟨0,0,0,−g₂/4,−g₃/4⟩` は `a₁ = a₂ = a₃ = 0` なので`addX = ℓ² − x₁ − x₂`・`addY = −ℓ(addX − x₁) − y₁`。`x = ℘`・`y = ℘′/2` を入れると `ℓ = slope = R/2` で、★★★`addX = R²/4 − ℘z − ℘w = ℘(z+w)`（第 641 の加法定理）、`addY = −(R/2)(℘(z+w) − ℘z) − ℘′z/2 = ℘′(z+w)/2`（第 645 の `y` 座標の公式）——**ちょうど一致する**。",
+    "remaining": "☆残るのは Lean 上の照合だけである: `Nonsingular` の証明を 3 点ぶん作り、`add_of_Y_ne` を使って `some + some = some` を書き、`addX`・`addY`・`slope` を展開して第 641・645 を当てる。★★これができれば `Φ : ℂ → E(ℂ)` が群準同型として型に載り、位数 `l` の部分群 `H` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の格子になる——`htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃い、★★★**`Lemma 3.5` が閉じる**。"
   }
 }
