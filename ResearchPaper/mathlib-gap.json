@@ -2089,5 +2089,19 @@
       "★一様化 `ℂ/Λ → E(ℂ)` は全単射（全射は第 603-604、単射は第 624）"
     ],
     "nextStep": "★**次の一手**: 一様化が**群準同型**であることを出す。☆`x` 座標は加法定理そのもの（`latticeCurve` の群法則は `a₁=a₂=a₃=0` なので `x₃ = λ² − x₁ − x₂`、`λ = (℘′(w)−℘′(z))/(2(℘(w)−℘(z)))`）。☆残るのは `y` 座標 `℘′(z+w) = −2λ(℘(z+w) − ℘(z)) − ℘′(z)` である。★★これが出れば、位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が`Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃う——すなわち `Lemma 3.5` が閉じる。"
+  },
+  "yCoordAdditionPlan20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★**`y` 座標の加法公式**——次の一手の導出を紙の上で検算した。",
+    "target": "`℘′(z+w) = −R·(℘(z+w) − ℘(z)) − ℘′(z)`、ここで `R ≔ (℘′(z) − ℘′(w))/(℘(z) − ℘(w))`。☆`latticeCurve` の群法則（`a₁=a₂=a₃=0`）で `λ = R/2`、`y₃ = −λ(x₃−x₁) − y₁` の形である。",
+    "derivation": [
+      "★加法定理（第 641）`℘(z+w) = R²/4 − ℘(z) − ℘(w)` を `z` で微分すると`℘′(z+w) = R·R′/2 − ℘′(z)`。",
+      "★★したがって目標は `R′/2 = −(℘(z+w) − ℘(z))`、すなわち`R′ = −R²/2 + 4℘(z) + 2℘(w)` に帰着する。",
+      "`R = N/D`（`N = ℘′(z) − ℘′(w)`、`D = ℘(z) − ℘(w)`）なので`R′ = (℘″(z)·D − N·℘′(z))/D²`。",
+      "★★★`D²` を掛けた形 `℘″(z)D − N℘′(z) = −N²/2 + (4℘(z)+2℘(w))D²` は、`℘″ = 6℘² − g₂/2`（`Found/GenEll/WeierstrassODE.lean` の `deriv_derivWeierstrassP`）と`℘′² = 4℘³ − g₂℘ − g₃`（mathlib の `derivWeierstrassP_sq`、`z` と `w` の両方）を入れると**両辺とも** `2℘z³ − 6℘z²℘w + (g₂/2)℘z + (g₂/2)℘w + g₃ + ℘′z℘′w` になる。",
+      "☆2026-08-29 に紙の上で両辺を展開して一致を確認した。★Lean では `linear_combination` で閉じるはずである。"
+    ],
+    "whyItMatters": "★★これが出れば一様化 `(℘, ℘′/2) : ℂ/Λ → E(ℂ)` が**群準同型**になり、第 603-604・624 の全単射性と合わせて**群同型**になる。★★★すると位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が `Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃う——すなわち **`Lemma 3.5` が閉じる**。",
+    "leanNotes": "☆Lean では (1) 加法定理が開集合で成り立つこと（仮定はすべて開条件）、(2) 両辺の微分（商の微分則と `hasDerivAt_weierstrassP`・`hasDerivAt_derivWeierstrassP`・`deriv_derivWeierstrassP`）、(3) 上の代数恒等式（`linear_combination`）の 3 段である。"
   }
 }
