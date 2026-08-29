@@ -997,6 +997,52 @@ def laurentA.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(z³℘′(z) の解析接続——加法定理の Laurent の入口。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★**加法定理の極の打ち消し（原点）**——★純粋な恒等式。
+
+    `4·B·(B − z²·x) − (A − z³·y)² = z² · M(z)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これが `Skeleton/GenEll/AdditionTheorem.lean`（第 606）の証明の核である。
+`x = ℘(w)`・`y = ℘′(w)` と置くと、`z ≠ 0` では `B = z²℘(z)`・`A = z³℘′(z)` なので
+
+    `℘(z) + ℘(w) + ℘(z+w) − (1/4)·((℘′(z)−℘′(w))/(℘(z)−℘(w)))²`
+      `= ℘(z+w) + ℘(w) + [4·B·(B − z²℘(w))² − (A − z³℘′(w))²] / (4·z²·(B − z²℘(w))²)`
+
+であり、★**分子が `z²` でくくれる**（本定理）ので `z²` が約されて原点で有界になる。
+
+☆`B(0) = 1`・`A(0) = −2` なので `4·1·1 − 4 = 0`——**それが打ち消しの正体**である。
+
+☆残るのは (1) この式から「`F` は原点の除いた近傍で解析関数と一致する」を出すこと、
+(2) `z ≡ −w` での極の打ち消し（そちらは `℘` の 2 階の Taylor が要る）。 -/
+theorem laurent_cancel (P : PeriodPair) (z x y : ℂ) :
+    4 * laurentB P z * (laurentB P z - z ^ 2 * x) ^ 2
+        - (laurentA P z - z ^ 3 * y) ^ 2
+      = z ^ 2 * (
+          4 * P.weierstrassPExcept 0 z + 8 * (P.weierstrassPExcept 0 z - x)
+          + 4 * z ^ 2 * (P.weierstrassPExcept 0 z - x) ^ 2
+          + 8 * z ^ 2 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x)
+          + 4 * z ^ 4 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x) ^ 2
+          + 4 * z * (P.derivWeierstrassPExcept 0 z - y)
+          - z ^ 4 * (P.derivWeierstrassPExcept 0 z - y) ^ 2) := by
+  simp only [laurentA, laurentB]
+  ring
+
+/-- ★★★★★★★★★★★★**打ち消しの正体**——`z = 0` での値。
+
+`4·B(0)·B(0)² − A(0)² = 4·1·1 − (−2)² = 0`。 -/
+theorem laurent_cancel_zero (P : PeriodPair) (x y : ℂ) :
+    4 * laurentB P 0 * (laurentB P 0 - (0:ℂ) ^ 2 * x) ^ 2
+      - (laurentA P 0 - (0:ℂ) ^ 3 * y) ^ 2 = 0 := by
+  simp
+  norm_num
+
+def laurent_cancel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(加法定理の極の打ち消し——分子が z² でくくれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
