@@ -4149,6 +4149,85 @@ def exists_isogeny_lattice_basis.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(格子側——位数 l の点から指数 l の格子を作る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★★★★★★★**基底変換は ℝ-線型独立性を保つ**。
+
+`ω₁ = Aω₁′ + Bω₂′`・`ω₂ = Cω₁′ + Dω₂′`・`AD − BC ≠ 0` なら
+`ω₁′, ω₂′` も ℝ 上独立。
+
+★逆行列は `Δω₁′ = Dω₁ − Bω₂`・`Δω₂′ = −Cω₁ + Aω₂`（`Δ = AD − BC`）。
+`rω₁′ + tω₂′ = 0` に `Δ` を掛けて `ω₁, ω₂` の独立性に帰着させる。 -/
+theorem linearIndependent_of_basis_change (P : PeriodPair) {ω₁' ω₂' : ℂ} {A B C D : ℤ}
+    (h1 : P.ω₁ = (A : ℂ) * ω₁' + (B : ℂ) * ω₂')
+    (h2 : P.ω₂ = (C : ℂ) * ω₁' + (D : ℂ) * ω₂')
+    (hdet : A * D - B * C ≠ 0) :
+    LinearIndependent ℝ ![ω₁', ω₂'] := by
+  have hP := LinearIndependent.pair_iff.1 P.indep
+  have hΔR : ((A : ℝ) * D - B * C) ≠ 0 := by
+    have : ((A * D - B * C : ℤ) : ℝ) ≠ 0 := Int.cast_ne_zero.2 hdet
+    push_cast at this
+    exact this
+  refine LinearIndependent.pair_iff.2 ?_
+  intro r t hrt
+  have hrt' : (r : ℂ) * ω₁' + (t : ℂ) * ω₂' = 0 := by
+    simpa [Complex.real_smul] using hrt
+  have hkey : (r * D - t * C : ℝ) • P.ω₁ + (-(r * B) + t * A : ℝ) • P.ω₂ = 0 := by
+    simp only [Complex.real_smul]
+    push_cast
+    rw [h1, h2]
+    linear_combination ((A : ℂ) * (D : ℂ) - (B : ℂ) * (C : ℂ)) * hrt'
+  obtain ⟨e1, e2⟩ := hP _ _ hkey
+  constructor
+  · have hr : r * ((A : ℝ) * D - B * C) = 0 := by
+      linear_combination (A : ℝ) * e1 + (C : ℝ) * e2
+    exact (mul_eq_zero.1 hr).resolve_right hΔR
+  · have ht : t * ((A : ℝ) * D - B * C) = 0 := by
+      linear_combination (B : ℝ) * e1 + (D : ℝ) * e2
+    exact (mul_eq_zero.1 ht).resolve_right hΔR
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（格子側・完成形）——位数 `l` の点から `PeriodPair` `P′` を作る**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ)` の位数ちょうど `l` の点 `Q` に対し、`z₀`（`Φ(z₀) = Q`）と
+**周期対** `P′`（格子は `Λ′ = Λ + ℤz₀`）と整数 `A, B, C, D` が取れて
+
+    ω₁ = A·ω₁′ + B·ω₂′,  ω₂ = C·ω₁′ + D·ω₂′,  |AD − BC| = l
+
+★★★★★☆**これで `htFalt_isogeny_le_of_analytic_minimal`（第 617）が要求する
+`P′`・`h₁`・`h₂`・`hdet` がすべて揃った。**
+☆残るのは `α`（`u′ = α·u`）——代数的な同種写像 `E → E/H` と
+この解析的な `Λ ⊆ Λ′` を突き合わせることである。 -/
+theorem exists_isogeny_periodPair (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ : ℂ) (P' : PeriodPair) (A B C D : ℤ),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) := by
+  obtain ⟨z₀, ω₁', ω₂', A, B, C, D, hz₀, h1, h2, hdet, hspan⟩ :=
+    exists_isogeny_lattice_basis P hΔ hl hQ
+  have hdet0 : A * D - B * C ≠ 0 := by
+    intro hc
+    rw [hc] at hdet
+    simp at hdet
+    omega
+  exact ⟨z₀, ⟨ω₁', ω₂', linearIndependent_of_basis_change P h1 h2 hdet0⟩,
+    A, B, C, D, hz₀, h1, h2, hdet, hspan⟩
+
+def linearIndependent_of_basis_change.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(基底変換は ℝ-線型独立性を保つ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_isogeny_periodPair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(格子側・完成形——位数 l の点から PeriodPair P′ を作る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
