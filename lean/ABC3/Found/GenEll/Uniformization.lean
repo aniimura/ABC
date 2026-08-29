@@ -1363,6 +1363,75 @@ def elliptic_boundary_integral_zero.needs : List ABC3.Meta.ProofObligation :=
        "★一般の格子の平行四辺形には長方形版の Cauchy は当たらない" ++
        "(変数変換が ℝ-線型で正則性を壊す)") 13 ]
 
+/-- ★★★★★★★★**`2f + a ∈ Λ` なら `℘(f+a) = ℘(f)`**——`℘` が偶であることから。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★`G(z) ≔ ℘(z+a) − ℘(z)` は `z ↦ −a−z` について奇であり、その**不動点**
+（`2f ≡ −a (mod Λ)` を満たす `f`——`Λ/2Λ` の分だけ **4 個**ある）で消える。
+☆これが「`℘(z+a) = ℘(z)` の解は `a ∉ Λ` でも 4 個ある」という事実であり、
+★★★零点勘定（`#零点 = #極`）と組み合わせると
+**`℘` が各値を 2 回しか取らない**ことの矛盾を作る材料になる
+（`G` の極は `Λ` と `−a+Λ` に 2 位ずつ＝計 4）。 -/
+theorem weierstrassP_shift_eq_of_two_add_mem (P : PeriodPair) (f a : ℂ)
+    (h : 2 * f + a ∈ P.lattice) :
+    P.weierstrassP (f + a) = P.weierstrassP f := by
+  have h1 : P.weierstrassP (f + a) = P.weierstrassP (-(f + a)) := (P.weierstrassP_neg _).symm
+  have h2 : -(f + a) = f + (-(2 * f + a)) := by ring
+  rw [h1, h2, P.weierstrassP_add_coe f ⟨-(2 * f + a), neg_mem h⟩]
+
+open Filter Topology Bornology Metric in
+/-- ★★★★★★★★★★★★**`℘` の周期群はちょうど `Λ`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★機構: `℘(z+a) = ℘(z)` が恒等的に成り立つなら、`℘` は `−a` でも極を持つ
+（`℘(z+a)` が `z = −a` で極だから）。★★しかし `−a ∉ Λ` なら `℘` は `−a` で解析的
+——連続なので有界な極限を持ち、`cobounded` へ発散することと両立しない。
+
+☆これで `G(z) ≔ ℘(z+a) − ℘(z)` が `a ∉ Λ` のとき恒等的に `0` でないことが分かる
+——零点勘定の議論で「`G ≢ 0`」を言うのに要る。 -/
+theorem mem_lattice_of_weierstrassP_periodic (P : PeriodPair) (a : ℂ)
+    (h : ∀ z, P.weierstrassP (z + a) = P.weierstrassP z) : a ∈ P.lattice := by
+  by_contra hc
+  have hna : -a ∉ P.lattice := fun hm => hc (by simpa using neg_mem hm)
+  have hcont : ContinuousAt P.weierstrassP (-a) :=
+    (P.analyticOnNhd_weierstrassP (-a) hna).continuousAt
+  have hord : meromorphicOrderAt P.weierstrassP 0 < 0 := by
+    rw [P.order_weierstrassP 0 P.lattice.zero_mem]; decide
+  have h1 : Tendsto P.weierstrassP (𝓝[≠] (0:ℂ)) (cobounded ℂ) :=
+    tendsto_cobounded_of_meromorphicOrderAt_neg hord
+  have hshift : Tendsto (fun z : ℂ => z + a) (𝓝[≠] (-a)) (𝓝[≠] (0:ℂ)) := by
+    rw [tendsto_nhdsWithin_iff]
+    refine ⟨?_, ?_⟩
+    · have ht : Tendsto (fun z : ℂ => z + a) (𝓝 (-a)) (𝓝 ((-a) + a)) :=
+        (continuous_id.add continuous_const).tendsto _
+      simpa using ht.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with z hz
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz ⊢
+      intro hcc
+      exact hz (by linear_combination hcc)
+  have h3 : Tendsto P.weierstrassP (𝓝[≠] (-a)) (cobounded ℂ) := by
+    have h2 := h1.comp hshift
+    have hfun : (P.weierstrassP ∘ fun z : ℂ => z + a) = P.weierstrassP := by
+      funext z; exact h z
+    rwa [hfun] at h2
+  have h4 : Tendsto P.weierstrassP (𝓝[≠] (-a)) (𝓝 (P.weierstrassP (-a))) :=
+    hcont.continuousWithinAt
+  exact (h4.not_tendsto (disjoint_nhds_cobounded _)) h3
+
+def weierstrassP_shift_eq_of_two_add_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2f + a ∈ Λ なら ℘(f+a) = ℘(f)——℘ が偶だから。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def mem_lattice_of_weierstrassP_periodic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘ の周期群はちょうど Λ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
