@@ -370,6 +370,7 @@ import ABC3.Found.GenEll.CurveArchInv
 import ABC3.Found.GenEll.PeterssonBound
 import ABC3.Found.GenEll.JPeterssonBound
 import ABC3.Found.GenEll.JArchBound
+import ABC3.Found.GenEll.JArchLower
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass
@@ -1141,6 +1142,7 @@ import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Found.GaloisRep.HtJWeil
 import ABC3.Found.GaloisRep.NorthcottHtJ
+import ABC3.Found.GaloisRep.HtJLower
 import ABC3.Found.GaloisRep.Prop34Chain
 import ABC3.Found.GaloisRep.Lemma37Constructed
 import ABC3.Found.GaloisRep.Semistable
