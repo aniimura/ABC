@@ -2280,6 +2280,87 @@ def analyticAt_addDefectExt_negW.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Ext は −w で解析的——組み立ての場合 (d)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★`℘′ − ℘′(w)` は `w` で `1` 位以上の零点。 -/
+theorem one_le_analyticOrderAt_derivSub (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    ((1 : ℕ) : ℕ∞)
+      ≤ analyticOrderAt (fun z : ℂ => P.derivWeierstrassP z - P.derivWeierstrassP w) w := by
+  refine (natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero
+    ((P.analyticOnNhd_derivWeierstrassP w hw).sub analyticAt_const)).2 ?_
+  intro i hi
+  interval_cases i
+  simp
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★**`Ext` は `w` で解析的**（場合 (c)）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★分母 `℘ − ℘(w)` は `w` でちょうど 1 位の零点（第 629）、
+分子 `℘′ − ℘′(w)` も `w` で消えるので、比 `n/d` は解析的。 -/
+theorem analyticAt_addDefectExt_atW (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    AnalyticAt ℂ (addDefectExt P w) w := by
+  have hsubana : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP z - P.weierstrassP w) w :=
+    (P.analyticOnNhd_weierstrassP w hw).sub analyticAt_const
+  have hdsubana : AnalyticAt ℂ
+      (fun z : ℂ => P.derivWeierstrassP z - P.derivWeierstrassP w) w :=
+    (P.analyticOnNhd_derivWeierstrassP w hw).sub analyticAt_const
+  obtain ⟨d, hd, hd0, hdeq⟩ := (AnalyticAt.analyticOrderAt_eq_natCast hsubana (n := 1)).1
+      (by rw [analyticOrderAt_weierstrassP_sub_self P w hw h2w]; norm_num)
+  obtain ⟨n, hn, hneq⟩ := (natCast_le_analyticOrderAt hdsubana (n := 1)).1
+      (one_le_analyticOrderAt_derivSub P w hw)
+  have hww : w + w ∉ P.lattice := by
+    intro hc; exact h2w (by simpa [two_mul] using hc)
+  have hshiftA : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) w := by
+    have hf : AnalyticAt ℂ (fun z : ℂ => z + w) w := analyticAt_id.add analyticAt_const
+    exact AnalyticAt.comp (g := P.weierstrassP) (f := fun z : ℂ => z + w) (x := w)
+      (P.analyticOnNhd_weierstrassP _ hww) hf
+  have hAana : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w) + P.weierstrassP z
+      + P.weierstrassP w - (n z / d z) ^ 2 / 4) w :=
+    ((hshiftA.add (P.analyticOnNhd_weierstrassP w hw)).add analyticAt_const).sub
+      (((hn.div hd hd0).pow 2).div analyticAt_const (by norm_num))
+  have hdne : ∀ᶠ z in 𝓝[≠] w, d z ≠ 0 :=
+    mem_nhdsWithin_of_mem_nhds (hd.continuousAt.eventually_ne hd0)
+  have hLat : ∀ᶠ z in 𝓝[≠] w, z ∉ P.lattice :=
+    mem_nhdsWithin_of_mem_nhds ((P.isClosed_lattice.isOpen_compl).mem_nhds hw)
+  have hLat2 : ∀ᶠ z in 𝓝[≠] w, z + w ∉ P.lattice := by
+    have hopen : IsOpen {z : ℂ | z + w ∉ P.lattice} := by
+      have he : {z : ℂ | z + w ∉ P.lattice}
+          = (fun z : ℂ => z + w) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+      rw [he]
+      exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+    exact mem_nhdsWithin_of_mem_nhds (hopen.mem_nhds hww)
+  have hdE : ∀ᶠ z in 𝓝[≠] w, P.weierstrassP z - P.weierstrassP w = (z - w) * d z := by
+    filter_upwards [mem_nhdsWithin_of_mem_nhds hdeq] with z hz
+    simpa using hz
+  have hnE : ∀ᶠ z in 𝓝[≠] w,
+      P.derivWeierstrassP z - P.derivWeierstrassP w = (z - w) * n z := by
+    filter_upwards [mem_nhdsWithin_of_mem_nhds hneq] with z hz
+    simpa using hz
+  have hgood : ∀ᶠ z in 𝓝[≠] w, z ∉ P.lattice ∧ z + w ∉ P.lattice
+      ∧ P.weierstrassP z - P.weierstrassP w ≠ 0 := by
+    filter_upwards [hLat, hLat2, hdE, hdne, self_mem_nhdsWithin] with z h1 h2 h3 h4 h5
+    refine ⟨h1, h2, ?_⟩
+    rw [h3]
+    exact mul_ne_zero (sub_ne_zero.2 (by simpa using h5)) h4
+  refine analyticAt_limUnder_of_eventuallyEq _ _ w hAana ?_ ?_
+  · filter_upwards [hgood] with z hz
+    exact (analyticAt_addDefect P w hz.1 hz.2.1 hz.2.2).continuousAt
+  · filter_upwards [hdE, hnE, hdne, self_mem_nhdsWithin] with z h3 h4 h5 h6
+    have hzw : z - w ≠ 0 := sub_ne_zero.2 (by simpa using h6)
+    show addDefect P w z = _
+    simp only [addDefect]
+    rw [h3, h4]
+    have : (z - w) * n z / ((z - w) * d z) = n z / d z := by
+      field_simp
+    rw [this]
+
+def analyticAt_addDefectExt_atW.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は w で解析的——組み立ての場合 (c)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
