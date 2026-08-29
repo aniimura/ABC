@@ -4576,6 +4576,108 @@ def rep_notMem_lattice.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(代表系の 0 以外の元は格子の外。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★`g₂` の比較 -/
+
+/-- ★★★★★★★★`℘[Λ − 0]` の原点での 2 階微分は `g₂/10`。
+
+★mathlib の `iteratedDeriv_weierstrassPExcept_self`（`= 3!·sumInvPow 0 4 = 6·G₄`）
+と `g₂ = 60 G₄` から。 -/
+theorem iteratedDeriv_two_weierstrassPExcept (P : PeriodPair) :
+    iteratedDeriv 2 (P.weierstrassPExcept 0) 0 = P.g₂ / 10 := by
+  rw [P.iteratedDeriv_weierstrassPExcept_self 0 (n := 2)]
+  have hG : P.sumInvPow 0 4 = P.G 4 := by rw [PeriodPair.sumInvPow_zero]
+  simp only [if_neg (by decide : ¬(2 : ℕ) = 0), hG, PeriodPair.g₂]
+  norm_num
+  ring
+
+/-- ★★★★★★★★`℘[Λ − 0]` の原点での 4 階微分は `6g₃/7`。
+
+★`= 5!·sumInvPow 0 6 = 120·G₆` と `g₃ = 140 G₆` から。 -/
+theorem iteratedDeriv_four_weierstrassPExcept (P : PeriodPair) :
+    iteratedDeriv 4 (P.weierstrassPExcept 0) 0 = 6 * P.g₃ / 7 := by
+  rw [P.iteratedDeriv_weierstrassPExcept_self 0 (n := 4)]
+  have hG : P.sumInvPow 0 6 = P.G 6 := by rw [PeriodPair.sumInvPow_zero]
+  simp only [if_neg (by decide : ¬(4 : ℕ) = 0), hG, PeriodPair.g₃]
+  norm_num
+  ring
+
+/-- ★★★★★★★★`℘″ = 6℘² − g₂/2`——`iteratedDeriv` の言葉で。 -/
+theorem iteratedDeriv_two_weierstrassP (P : PeriodPair) {w : ℂ} (hw : w ∉ P.lattice) :
+    iteratedDeriv 2 P.weierstrassP w = 6 * P.weierstrassP w ^ 2 - P.g₂ / 2 := by
+  rw [iteratedDeriv_succ, iteratedDeriv_one, PeriodPair.deriv_weierstrassP]
+  exact deriv_derivWeierstrassP P hw
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`g₂` の同種写像公式**
+
+    `g₂(Λ′) = g₂(Λ) + 10·Σ_{w ∈ T∖{0}} (6·℘_Λ(w)² − g₂(Λ)/2)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★第 671 の等式
+
+    `℘[Λ′−0](z) − ℘[Λ−0](z) = Σ_{w ∈ T∖{0}} (℘_Λ(z+w) − ℘_Λ(w))`
+
+の両辺を原点で 2 回微分する。左辺は `g₂′/10 − g₂/10`（mathlib の Taylor 係数）、
+右辺は `Σ ℘_Λ″(w) = Σ (6℘_Λ(w)² − g₂/2)`。
+
+★★★★☆**これが Vélu の商 `E/H` の `a₄` の解析版である**——代数側
+（`Found/GenEll/Velu.lean` の `veluQuotient`：`a₄ ↦ a₄ − 5v`）と突き合わせれば
+`latticeCurve P′ = veluQuotient (latticeCurve P) H`、すなわち `α = 1` が出る。 -/
+theorem g₂_isogeny (P P' : PeriodPair) (T : Finset ℂ) (h0T : (0 : ℂ) ∈ T)
+    (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    (hvelu : ∀ z, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) :
+    P'.g₂ = P.g₂ + 10 * ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2) := by
+  have hfun : (fun z => P'.weierstrassPExcept 0 z - P.weierstrassPExcept 0 z)
+      = fun z => ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w) :=
+    funext (weierstrassPExcept_sub_eq_sum P P' T h0T hvelu)
+  have hL : iteratedDeriv 2
+      (fun z => P'.weierstrassPExcept 0 z - P.weierstrassPExcept 0 z) 0
+      = P'.g₂ / 10 - P.g₂ / 10 := by
+    rw [iteratedDeriv_fun_sub (P'.analyticAt_weierstrassPExcept 0).contDiffAt
+      (P.analyticAt_weierstrassPExcept 0).contDiffAt,
+      iteratedDeriv_two_weierstrassPExcept, iteratedDeriv_two_weierstrassPExcept]
+  have hterm : ∀ w ∈ T.erase 0,
+      iteratedDeriv 2 (fun z : ℂ => P.weierstrassP (z + w) - P.weierstrassP w) 0
+        = 6 * P.weierstrassP w ^ 2 - P.g₂ / 2 := by
+    intro w hw
+    have hwn : w ∉ P.lattice := rep_notMem_lattice P P' T h0T hT hrep hw
+    have hshift : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) 0 :=
+      shifted_analyticAt P 0 w (by rw [zero_add]; exact hwn)
+    rw [iteratedDeriv_fun_sub hshift.contDiffAt contDiffAt_const]
+    have h1 : iteratedDeriv 2 (fun z : ℂ => P.weierstrassP (z + w)) 0
+        = iteratedDeriv 2 P.weierstrassP w := by
+      rw [iteratedDeriv_comp_add_const]
+      simp
+    rw [h1, iteratedDeriv_two_weierstrassP P hwn,
+      show iteratedDeriv 2 (fun _ : ℂ => P.weierstrassP w) 0 = 0 by
+        rw [iteratedDeriv_succ, iteratedDeriv_one]
+        simp, sub_zero]
+  have hR : iteratedDeriv 2
+      (fun z => ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w)) 0
+      = ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2) := by
+    rw [iteratedDeriv_fun_sum (fun w hw => by
+      have hwn : w ∉ P.lattice := rep_notMem_lattice P P' T h0T hT hrep hw
+      have hshift : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) 0 :=
+        shifted_analyticAt P 0 w (by rw [zero_add]; exact hwn)
+      exact hshift.contDiffAt.sub contDiffAt_const)]
+    exact Finset.sum_congr rfl hterm
+  rw [hfun, hR] at hL
+  linear_combination (-10 : ℂ) * hL
+
+def g₂_isogeny.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(g₂ の同種写像公式——Vélu の商の a₄ の解析版。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def iteratedDeriv_two_weierstrassPExcept.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘[Λ−0] の原点での 2 階微分は g₂/10。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
