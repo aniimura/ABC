@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 import ABC3.Meta.Claim
 
 /-!
@@ -111,6 +112,72 @@ theorem equation_variableChange (C : VariableChange R) (W : WeierstrassCurve R)
     have hkey := variableChange_equation_poly C W x y
     rw [h, mul_zero] at hkey
     exact hkey
+
+/-! ## ★★★★★★★★群法則の部品の変換則 -/
+
+/-- ★★★★★変数変換による傾きの移動 `L′ = u⁻¹·(L − s)`。 -/
+def vcSlope (C : VariableChange R) (L : R) : R := ((C.u⁻¹ : Rˣ) : R) * (L - C.s)
+
+/-- ★★★★★★★★★★★★**`negY` は変数変換と両立する**
+
+    `negY_{C•W}(x′, y′) = vcY C x (negY_W(x, y))` -/
+theorem negY_variableChange (C : VariableChange R) (W : WeierstrassCurve R) (x y : R) :
+    (C • W).toAffine.negY (vcX C x) (vcY C x y)
+      = vcY C x (W.toAffine.negY x y) := by
+  simp only [WeierstrassCurve.Affine.negY, vcX, vcY,
+    WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₃]
+  ring
+
+/-- ★★★★★★★★★★★★**`addX` は変数変換と両立する**
+
+    `addX_{C•W}(x₁′, x₂′, L′) = vcX C (addX_W(x₁, x₂, L))` -/
+theorem addX_variableChange (C : VariableChange R) (W : WeierstrassCurve R)
+    (x₁ x₂ L : R) :
+    (C • W).toAffine.addX (vcX C x₁) (vcX C x₂) (vcSlope C L)
+      = vcX C (W.toAffine.addX x₁ x₂ L) := by
+  simp only [WeierstrassCurve.Affine.addX, vcX, vcSlope,
+    WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂]
+  ring
+
+/-- ★★★★★★★★★★★★**`negAddY` は変数変換と両立する**
+
+    `negAddY_{C•W}(x₁′, x₂′, y₁′, L′) = vcY C (addX_W) (negAddY_W)` -/
+theorem negAddY_variableChange (C : VariableChange R) (W : WeierstrassCurve R)
+    (x₁ x₂ y₁ L : R) :
+    (C • W).toAffine.negAddY (vcX C x₁) (vcX C x₂) (vcY C x₁ y₁) (vcSlope C L)
+      = vcY C (W.toAffine.addX x₁ x₂ L) (W.toAffine.negAddY x₁ x₂ y₁ L) := by
+  simp only [WeierstrassCurve.Affine.negAddY, addX_variableChange, vcX, vcY, vcSlope,
+    WeierstrassCurve.Affine.addX, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂]
+  ring
+
+/-- ★★★★★★★★★★★★★★★★**`addY` は変数変換と両立する**
+
+    `addY_{C•W}(x₁′, x₂′, y₁′, L′) = vcY C (addX_W) (addY_W)`
+
+★`addY = negY(addX, negAddY)` なので `negY` と `negAddY` の変換則から出る。 -/
+theorem addY_variableChange (C : VariableChange R) (W : WeierstrassCurve R)
+    (x₁ x₂ y₁ L : R) :
+    (C • W).toAffine.addY (vcX C x₁) (vcX C x₂) (vcY C x₁ y₁) (vcSlope C L)
+      = vcY C (W.toAffine.addX x₁ x₂ L) (W.toAffine.addY x₁ x₂ y₁ L) := by
+  rw [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.addY,
+    ← negY_variableChange C W (W.toAffine.addX x₁ x₂ L),
+    ← negAddY_variableChange, addX_variableChange]
+
+def negY_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(negY は変数変換と両立する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def addX_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(addX は変数変換と両立する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def addY_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(addY は変数変換と両立する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
