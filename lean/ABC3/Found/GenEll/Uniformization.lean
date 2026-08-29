@@ -1609,6 +1609,141 @@ def weierstrassP_shift_eventually_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(一様化の単射性の核——℘ と ℘′ が一致すれば近傍で一致。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★`{s | s ∉ Λ ∧ s + a ∉ Λ}` は連結——2 つの可算集合の補集合だから。 -/
+theorem isPreconnected_shiftDomain (P : PeriodPair) (a : ℂ) :
+    IsPreconnected {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} := by
+  have hcount : ((P.lattice : Set ℂ) ∪ ((fun w : ℂ => w - a) '' (P.lattice : Set ℂ))).Countable := by
+    refine Set.Countable.union ?_ (Set.Countable.image ?_ _) <;>
+      exact countable_of_Lindelof_of_discrete (X := P.lattice)
+  have hset : {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice}
+      = ((P.lattice : Set ℂ) ∪ ((fun w : ℂ => w - a) '' (P.lattice : Set ℂ)))ᶜ := by
+    ext s
+    simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_union, Set.mem_image,
+      not_or, not_exists, not_and]
+    constructor
+    · rintro ⟨h1, h2⟩
+      refine ⟨h1, ?_⟩
+      rintro w hw rfl
+      exact h2 (by simpa using hw)
+    · rintro ⟨h1, h2⟩
+      refine ⟨h1, fun hc => ?_⟩
+      exact h2 (s + a) hc (by ring)
+  rw [hset]
+  exact (Set.Countable.isConnected_compl_of_one_lt_rank (by simp) hcount).2
+
+open Filter Topology Bornology Metric in
+/-- ★★★★★★★★★★**`℘` の周期群はちょうど `Λ`（局所版）**——`−a` の近くで
+`℘(z+a) = ℘(z)` が成り立てば `a ∈ Λ`。
+
+★第 620 の `mem_lattice_of_weierstrassP_periodic` を「`−a` の除いた近傍で」に弱めた形。
+☆一致の定理から出てくるのはこちらの形である。 -/
+theorem mem_lattice_of_eventually_shift_eq (P : PeriodPair) (a : ℂ)
+    (h : ∀ᶠ z in 𝓝[≠] (-a), P.weierstrassP (z + a) = P.weierstrassP z) :
+    a ∈ P.lattice := by
+  by_contra hc
+  have hna : -a ∉ P.lattice := fun hm => hc (by simpa using neg_mem hm)
+  have hcont : ContinuousAt P.weierstrassP (-a) :=
+    (P.analyticOnNhd_weierstrassP (-a) hna).continuousAt
+  have hord : meromorphicOrderAt P.weierstrassP 0 < 0 := by
+    rw [P.order_weierstrassP 0 P.lattice.zero_mem]; decide
+  have h1 : Tendsto P.weierstrassP (𝓝[≠] (0:ℂ)) (cobounded ℂ) :=
+    tendsto_cobounded_of_meromorphicOrderAt_neg hord
+  have hshift : Tendsto (fun z : ℂ => z + a) (𝓝[≠] (-a)) (𝓝[≠] (0:ℂ)) := by
+    rw [tendsto_nhdsWithin_iff]
+    refine ⟨?_, ?_⟩
+    · have ht : Tendsto (fun z : ℂ => z + a) (𝓝 (-a)) (𝓝 ((-a) + a)) :=
+        (continuous_id.add continuous_const).tendsto _
+      simpa using ht.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with z hz
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz ⊢
+      intro hcc
+      exact hz (by linear_combination hcc)
+  have h2 : Tendsto (fun z : ℂ => P.weierstrassP (z + a)) (𝓝[≠] (-a)) (cobounded ℂ) :=
+    h1.comp hshift
+  have h3 : Tendsto P.weierstrassP (𝓝[≠] (-a)) (cobounded ℂ) := h2.congr' h
+  have h4 : Tendsto P.weierstrassP (𝓝[≠] (-a)) (𝓝 (P.weierstrassP (-a))) :=
+    hcont.continuousWithinAt
+  exact (h4.not_tendsto (disjoint_nhds_cobounded _)) h3
+
+def isPreconnected_shiftDomain.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5({s | s ∉ Λ ∧ s + a ∉ Λ} は連結。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def mem_lattice_of_eventually_shift_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘ の周期群はちょうど Λ——局所版。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**一様化の単射性**
+
+    `℘(z₀+a) = ℘(z₀)` かつ `℘′(z₀+a) = ℘′(z₀)` なら `a ∈ Λ`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★☆**零点勘定（偏角の原理）を使わずに出た**。機構は 3 段:
+
+1. `h ≔ ℘(·+a) − ℘` は線型 2 階 ODE `h″ = 6(℘(·+a) + ℘)·h` を満たす（第 622）
+2. `h(z₀) = h′(z₀) = 0` なので解析的位数の算術で `h` は `z₀` の近傍で `0`（第 623）
+3. 一致の定理で `{s | s ∉ Λ ∧ s+a ∉ Λ}`（連結）全体へ延ばし、
+   `−a` の近くで `℘(z+a) = ℘(z)`。★`℘` は `−a` で解析的なのに
+   `℘(z+a)` は `z → −a` で発散する——`a ∉ Λ` なら矛盾
+
+★★★★これで **`(℘, ℘′/2) : ℂ/Λ → E(ℂ)` は単射**であり、
+第 603-604 の全射性と合わせて**一様化は全単射**である。 -/
+theorem mem_lattice_of_shift_eq (P : PeriodPair) (a : ℂ) {z₀ : ℂ}
+    (hz : z₀ ∉ P.lattice) (hza : z₀ + a ∉ P.lattice)
+    (h0 : P.weierstrassP (z₀ + a) = P.weierstrassP z₀)
+    (h1 : P.derivWeierstrassP (z₀ + a) = P.derivWeierstrassP z₀) :
+    a ∈ P.lattice := by
+  by_contra hc
+  have hna : -a ∉ P.lattice := fun hm => hc (by simpa using neg_mem hm)
+  have hana : AnalyticOnNhd ℂ (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s)
+      {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} := by
+    intro s hs
+    have hf : AnalyticAt ℂ (fun t : ℂ => t + a) s := analyticAt_id.add analyticAt_const
+    have hg : AnalyticAt ℂ P.weierstrassP ((fun t : ℂ => t + a) s) :=
+      P.analyticOnNhd_weierstrassP (s + a) hs.2
+    exact (AnalyticAt.comp (f := fun t : ℂ => t + a) (x := s) hg hf).sub
+      (P.analyticOnNhd_weierstrassP s hs.1)
+  have hloc : (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s) =ᶠ[nhds z₀] 0 :=
+    weierstrassP_shift_eventually_eq P a hz hza h0 h1
+  have hEq : Set.EqOn (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s) 0
+      {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} :=
+    hana.eqOn_zero_of_preconnected_of_eventuallyEq_zero
+      (isPreconnected_shiftDomain P a) ⟨hz, hza⟩ hloc
+  have hVopen : IsOpen ({s : ℂ | s ∉ P.lattice}
+      ∩ {s : ℂ | s + a ∉ (P.lattice : Set ℂ) \ {0}}) := by
+    refine IsOpen.inter (P.isClosed_lattice.isOpen_compl) ?_
+    have he : {s : ℂ | s + a ∉ (P.lattice : Set ℂ) \ {0}}
+        = (fun s : ℂ => s + a) ⁻¹' (((P.lattice : Set ℂ) \ {0})ᶜ) := rfl
+    rw [he]
+    exact P.isOpen_compl_lattice_sdiff.preimage (by fun_prop)
+  have hVmem : (-a) ∈ ({s : ℂ | s ∉ P.lattice}
+      ∩ {s : ℂ | s + a ∉ (P.lattice : Set ℂ) \ {0}}) := by
+    refine ⟨hna, ?_⟩
+    simp
+  have hev : ∀ᶠ z in 𝓝[≠] (-a), P.weierstrassP (z + a) = P.weierstrassP z := by
+    filter_upwards [mem_nhdsWithin_of_mem_nhds (hVopen.mem_nhds hVmem), self_mem_nhdsWithin]
+      with z hzV hzne
+    have hzne' : z + a ≠ 0 := by
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hzne
+      intro hcc
+      exact hzne (by linear_combination hcc)
+    have hzU : z ∈ {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} :=
+      ⟨hzV.1, fun hcc => hzV.2 ⟨hcc, by simpa using hzne'⟩⟩
+    have hh := hEq hzU
+    simp only [Pi.zero_apply] at hh
+    linear_combination hh
+  exact hc (mem_lattice_of_eventually_shift_eq P a hev)
+
+def mem_lattice_of_shift_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一様化の単射性——零点勘定を使わずに出た。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
