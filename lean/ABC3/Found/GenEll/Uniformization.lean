@@ -2476,6 +2476,107 @@ def addDefectExt_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Ext 0 = 0——Liouville の定数を決める。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**`Ext` は整関数**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★任意の点が次の 4 通りのいずれかである:
+`Λ`（第 639）・`z ≡ −w`（第 637）・`z ≡ w`（第 638）・良い点（第 633）。
+☆`℘(z) = ℘(w)` なら `℘′(z)² = ℘′(w)²` なので `℘′(z) = ±℘′(w)`、
+どちらの場合も第 624 の単射性で `z ≡ ±w` になる。 -/
+theorem differentiable_addDefectExt (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) :
+    Differentiable ℂ (addDefectExt P w) := by
+  intro z
+  refine AnalyticAt.differentiableAt ?_
+  by_cases hzl : z ∈ P.lattice
+  · exact analyticAt_addDefectExt_lattice P w hw hzl
+  by_cases hzw : z + w ∈ P.lattice
+  · refine analyticAt_addDefectExt_of_shift P w (p := -w) ?_
+      (analyticAt_addDefectExt_negW P w hw h2w)
+    simpa using hzw
+  by_cases hne : P.weierstrassP z - P.weierstrassP w = 0
+  · have hpz : P.weierstrassP z = P.weierstrassP w := by linear_combination hne
+    have hsq : P.derivWeierstrassP z ^ 2 = P.derivWeierstrassP w ^ 2 := by
+      rw [P.derivWeierstrassP_sq z hzl, P.derivWeierstrassP_sq w hw, hpz]
+    have hnw : -w ∉ P.lattice := fun hm => hw (by simpa using neg_mem hm)
+    rcases sq_eq_sq_iff_eq_or_eq_neg.1 hsq with hcase | hcase
+    · have hmem : z - w ∈ P.lattice := by
+        refine mem_lattice_of_shift_eq P (z - w) hw ?_ ?_ ?_
+        · rw [show w + (z - w) = z by ring]; exact hzl
+        · rw [show w + (z - w) = z by ring]; exact hpz
+        · rw [show w + (z - w) = z by ring]; exact hcase
+      exact analyticAt_addDefectExt_of_shift P w (p := w) hmem
+        (analyticAt_addDefectExt_atW P w hw h2w)
+    · exfalso
+      refine hzw ?_
+      have hmem := mem_lattice_of_shift_eq P (z + w) (z₀ := -w) hnw
+        (by rw [show -w + (z + w) = z by ring]; exact hzl)
+        (by rw [show -w + (z + w) = z by ring, P.weierstrassP_neg]; exact hpz)
+        (by rw [show -w + (z + w) = z by ring, P.derivWeierstrassP_neg, hcase])
+      exact hmem
+  · exact analyticAt_addDefectExt_of_good P w hzl hzw hne
+
+open Filter Topology in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`F_w ≡ 0`**——Liouville で閉じる。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`Ext` は整で `Λ`-周期的（第 639）なので `elliptic_liouville`（第 598）で定数、
+その値は `Ext 0 = 0`（第 640）。★★良い点では `Ext = F_w`（第 633）である。 -/
+theorem addDefect_eq_zero (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    addDefect P w z = 0 := by
+  have hper : ∀ (y : ℂ), ∀ l ∈ P.lattice, addDefectExt P w (y + l) = addDefectExt P w y :=
+    fun y l hl => addDefectExt_periodic P w y l hl
+  have hconst := elliptic_liouville P (addDefectExt P w)
+    (differentiable_addDefectExt P w hw h2w) hper z 0
+  rw [addDefectExt_zero P w hw] at hconst
+  rw [← addDefectExt_eq_of_good P w hz hzw hne]
+  exact hconst
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`℘` の加法定理**
+
+    `℘(z+w) = (1/4)·((℘′(z) − ℘′(w))/(℘(z) − ℘(w)))² − ℘(z) − ℘(w)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★★☆**mathlib に無い**（`Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` は
+`℘` の理論を 1080 行ぶん持つが加法定理は無い、2026-08-29 に測定）。
+
+★★機構は Liouville（第 598）で、極は 4 か所とも塞がっている:
+`Λ`（第 610・639）・`z ≡ w`（第 638）・`z ≡ −w`（第 637）・
+その他は単射性（第 624-625）で存在しない。
+☆★単射性は**零点勘定を使わず**、線型 2 階 ODE `h″ = 6(℘(·+a)+℘)h` の
+一意性（第 622-624）から出ている。 -/
+theorem weierstrassP_addition (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice)
+    (h2w : 2 * w ∉ P.lattice) {z : ℂ}
+    (hz : z ∉ P.lattice) (hzw : z + w ∉ P.lattice)
+    (hne : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    P.weierstrassP (z + w)
+      = ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+          / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+        - P.weierstrassP z - P.weierstrassP w := by
+  have h := addDefect_eq_zero P w hw h2w hz hzw hne
+  simp only [addDefect] at h
+  linear_combination h
+
+def differentiable_addDefectExt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Ext は整関数——4 通りの場合分けが尽きる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassP_addition.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘ の加法定理。★無条件——mathlib に無い)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=

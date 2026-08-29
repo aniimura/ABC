@@ -1,7 +1,7 @@
 import ABC3.Found.GenEll.Uniformization
 
 /-!
-# スケルトン —— **`℘` の加法定理**（`Skeleton`）☆★★★★★★★★**残り 1 本**
+# スケルトン —— **`℘` の加法定理**（`Skeleton`）★★★★★★★★★★**閉じた**
 
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.17。
 
@@ -71,13 +71,14 @@ open ABC3.Meta ABC3.Found.GenEll
 
 ☆**まだ証明していない**——これが `Lemma 3.5` に残る最後の一本である。 -/
 theorem weierstrassP_add (P : PeriodPair) (z w : ℂ)
-    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice)
+    (hz : z ∉ P.lattice) (hw : w ∉ P.lattice) (h2w : 2 * w ∉ P.lattice)
+    (hzw : z + w ∉ P.lattice)
     (hne : P.weierstrassP z ≠ P.weierstrassP w) :
     P.weierstrassP (z + w)
       = ((P.derivWeierstrassP z - P.derivWeierstrassP w)
           / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
-        - P.weierstrassP z - P.weierstrassP w := by
-  sorry
+        - P.weierstrassP z - P.weierstrassP w :=
+  ABC3.Found.GenEll.weierstrassP_addition P w hw h2w hz hzw (sub_ne_zero.2 hne)
 
 /-! ## ★出典の紐付け（`.src`）と、証明が要求するもの（`.needs`） -/
 
@@ -218,6 +219,16 @@ def weierstrassP_add.needs : List ProofObligation :=
        "(Λ は第 610、z ≡ w は第 629、z ≡ −w は第 627、その他は第 624-625 で解析的)、" ++
        "Λ-周期性(addDefect の定義から)と Ext 0 = 0(第 610 の addDefectNear_zero)を足して" ++
        "elliptic_liouville(第 598)に当てる") 8,
+    .implicitStep
+      ("★★★★★★★★★★2026-08-29(第 638-641)で**閉じた**。" ++
+       "Found/GenEll/Uniformization.lean の weierstrassP_addition が実物である。" ++
+       "★機構: Ext ≔ fun z => limUnder (𝓝[≠] z) (addDefect P w) は整で Λ-周期的" ++
+       "(第 639)、Ext 0 = 0(第 640)、良い点で Ext = F_w(第 633)。" ++
+       "★★極は 4 か所とも塞がっている: Λ(第 610・639)・z ≡ w(第 638)・" ++
+       "z ≡ −w(第 637)・その他は単射性(第 624-625)で存在しない。" ++
+       "☆★単射性は零点勘定(偏角の原理)を使わず、線型 2 階 ODE " ++
+       "h″ = 6(℘(·+a)+℘)h の一意性(第 622-624)から出た" ++
+       "——第 615 の見立て(「零点勘定が要る」)は迂回できた") 21,
     .otherPaper "GenEll" "Lemma 3.5(l-捩れの大域的な階数 1 の部分群)" 15 ]
 
 end ABC3.Skeleton.GenEll
