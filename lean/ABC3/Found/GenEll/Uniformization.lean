@@ -997,6 +997,15 @@ def laurentA.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(z³℘′(z) の解析接続——加法定理の Laurent の入口。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★`M(z)`——`laurent_cancel` の右辺の因子。 -/
+noncomputable def laurentM (P : PeriodPair) (x y z : ℂ) : ℂ :=
+  4 * P.weierstrassPExcept 0 z + 8 * (P.weierstrassPExcept 0 z - x)
+  + 4 * z ^ 2 * (P.weierstrassPExcept 0 z - x) ^ 2
+  + 8 * z ^ 2 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x)
+  + 4 * z ^ 4 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x) ^ 2
+  + 4 * z * (P.derivWeierstrassPExcept 0 z - y)
+  - z ^ 4 * (P.derivWeierstrassPExcept 0 z - y) ^ 2
+
 /-- ★★★★★★★★★★★★★★★★★★★★★★**加法定理の極の打ち消し（原点）**——★純粋な恒等式。
 
     `4·B·(B − z²·x) − (A − z³·y)² = z² · M(z)`
@@ -1016,18 +1025,17 @@ def laurentA.src : ABC3.Meta.Source :=
 
 ☆残るのは (1) この式から「`F` は原点の除いた近傍で解析関数と一致する」を出すこと、
 (2) `z ≡ −w` での極の打ち消し（そちらは `℘` の 2 階の Taylor が要る）。 -/
+
 theorem laurent_cancel (P : PeriodPair) (z x y : ℂ) :
     4 * laurentB P z * (laurentB P z - z ^ 2 * x) ^ 2
         - (laurentA P z - z ^ 3 * y) ^ 2
-      = z ^ 2 * (
-          4 * P.weierstrassPExcept 0 z + 8 * (P.weierstrassPExcept 0 z - x)
-          + 4 * z ^ 2 * (P.weierstrassPExcept 0 z - x) ^ 2
-          + 8 * z ^ 2 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x)
-          + 4 * z ^ 4 * P.weierstrassPExcept 0 z * (P.weierstrassPExcept 0 z - x) ^ 2
-          + 4 * z * (P.derivWeierstrassPExcept 0 z - y)
-          - z ^ 4 * (P.derivWeierstrassPExcept 0 z - y) ^ 2) := by
-  simp only [laurentA, laurentB]
+      = z ^ 2 * laurentM P x y z := by
+  simp only [laurentA, laurentB, laurentM]
   ring
+
+/-- ★★★★★`M(0) = −8·x`——これが原点での値を `0` にする。 -/
+@[simp] theorem laurentM_zero (P : PeriodPair) (x y : ℂ) : laurentM P x y 0 = -8 * x := by
+  simp [laurentM]
 
 /-- ★★★★★★★★★★★★**打ち消しの正体**——`z = 0` での値。
 
@@ -1041,6 +1049,95 @@ theorem laurent_cancel_zero (P : PeriodPair) (x y : ℂ) :
 def laurent_cancel.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(加法定理の極の打ち消し——分子が z² でくくれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★加法定理の欠損関数 -/
+
+/-- ★★★★★★★★**加法定理の欠損** `F_w(z)`。
+
+    `F_w(z) ≔ ℘(z+w) + ℘(z) + ℘(w) − (1/4)·((℘′(z)−℘′(w))/(℘(z)−℘(w)))²`
+
+★`Skeleton/GenEll/AdditionTheorem.lean`（第 606）の `weierstrassP_add` は
+**`F_w ≡ 0`** と同値である。 -/
+noncomputable def addDefect (P : PeriodPair) (w z : ℂ) : ℂ :=
+  P.weierstrassP (z + w) + P.weierstrassP z + P.weierstrassP w
+    - ((P.derivWeierstrassP z - P.derivWeierstrassP w)
+        / (P.weierstrassP z - P.weierstrassP w)) ^ 2 / 4
+
+/-- ★★★★★★★★**原点の近くでの解析的な姿**——`z²` が約された形。 -/
+noncomputable def addDefectNear (P : PeriodPair) (w z : ℂ) : ℂ :=
+  P.weierstrassP (z + w) + P.weierstrassP w
+    + laurentM P (P.weierstrassP w) (P.derivWeierstrassP w) z
+      / (4 * (laurentB P z - z ^ 2 * P.weierstrassP w) ^ 2)
+
+/-- ★★★★★★★★★★★★★★★★★★**`z ≠ 0` では両者は一致する**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`℘(z) = B/z²`・`℘′(z) = A/z³` を入れると分母の `z²` が `laurent_cancel` の
+`z²` と約されるからである。☆**これが「原点の極が消える」ことの中身**である。 -/
+theorem addDefect_eq_near (P : PeriodPair) (w z : ℂ) (hz : z ≠ 0)
+    (hpz : P.weierstrassP z - P.weierstrassP w ≠ 0) :
+    addDefect P w z = addDefectNear P w z := by
+  have hB := laurentB_eq P z hz
+  have hA := laurentA_eq P z hz
+  have hcan := laurent_cancel P z (P.weierstrassP w) (P.derivWeierstrassP w)
+  rw [hB, hA] at hcan
+  have hz2 : z ^ 2 ≠ 0 := pow_ne_zero _ hz
+  have hkey : z ^ 4 * (4 * P.weierstrassP z
+        * (P.weierstrassP z - P.weierstrassP w) ^ 2
+      - (P.derivWeierstrassP z - P.derivWeierstrassP w) ^ 2)
+      = laurentM P (P.weierstrassP w) (P.derivWeierstrassP w) z := by
+    refine mul_left_cancel₀ hz2 ?_
+    linear_combination hcan
+  simp only [addDefect, addDefectNear, hB]
+  field_simp
+  linear_combination hkey
+
+/-- ★★★★★★★★★★★★★★★★**原点での値は `0`**——`M(0) = −8℘(w)`・`B(0) = 1` から
+
+    `℘(w) + ℘(w) + (−8℘(w))/4 = 2℘(w) − 2℘(w) = 0`。
+
+★★☆**これが「加法定理が原点で成り立つ」ことである**——`F_w` の解析接続は原点で消える。 -/
+@[simp] theorem addDefectNear_zero (P : PeriodPair) (w : ℂ) :
+    addDefectNear P w 0 = 0 := by
+  simp only [addDefectNear, laurentM_zero, laurentB_zero, zero_add]
+  norm_num
+  ring
+
+/-- ★★★★★★★★★★★★**`addDefectNear` は原点で解析的**（`w ∉ Λ` のとき）。 -/
+theorem analyticAt_addDefectNear (P : PeriodPair) (w : ℂ) (hw : w ∉ P.lattice) :
+    AnalyticAt ℂ (addDefectNear P w) 0 := by
+  have hpw : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) 0 := by
+    have hf : AnalyticAt ℂ (fun z : ℂ => z + w) 0 := analyticAt_id.add analyticAt_const
+    have hg : AnalyticAt ℂ P.weierstrassP ((fun z : ℂ => z + w) 0) := by
+      simpa using P.analyticOnNhd_weierstrassP w hw
+    exact AnalyticAt.comp (f := fun z : ℂ => z + w) (x := 0) hg hf
+  have he : AnalyticAt ℂ (P.weierstrassPExcept 0) 0 :=
+    ((P.differentiableOn_weierstrassPExcept 0).analyticOnNhd
+      P.isOpen_compl_lattice_sdiff) 0 (by simp)
+  have hf' : AnalyticAt ℂ (P.derivWeierstrassPExcept 0) 0 :=
+    ((P.differentiableOn_derivWeierstrassPExcept 0).analyticOnNhd
+      P.isOpen_compl_lattice_sdiff) 0 (by simp)
+  have hM : AnalyticAt ℂ (laurentM P (P.weierstrassP w) (P.derivWeierstrassP w)) 0 := by
+    unfold laurentM
+    fun_prop (disch := assumption)
+  have hD : AnalyticAt ℂ (fun z : ℂ => 4 * (laurentB P z - z ^ 2 * P.weierstrassP w) ^ 2) 0 := by
+    unfold laurentB
+    fun_prop (disch := assumption)
+  have hDne : (fun z : ℂ => 4 * (laurentB P z - z ^ 2 * P.weierstrassP w) ^ 2) 0 ≠ 0 := by
+    simp
+  exact (hpw.add analyticAt_const).add (hM.div hD hDne)
+
+def addDefect.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(加法定理の欠損 F_w——F_w ≡ 0 が加法定理そのもの)",
+    sectionId := "genell-lemma-3-5" }
+
+def addDefect_eq_near.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(原点の極が消える——z² が約される。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
