@@ -2884,6 +2884,67 @@ def weierstrassP_duplication.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(倍加公式——加法定理の w → z 極限。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★一様化写像 `Φ : ℂ → E(ℂ)` -/
+
+/-- ★★★★★`Point.some` の合同——`Nonsingular` は `Prop` だから。 -/
+theorem point_some_congr {P : PeriodPair} {x₁ y₁ x₂ y₂ : ℂ}
+    {h₁ : (latticeCurve P).toAffine.Nonsingular x₁ y₁}
+    {h₂ : (latticeCurve P).toAffine.Nonsingular x₂ y₂}
+    (hx : x₁ = x₂) (hy : y₁ = y₂) :
+    (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ : (latticeCurve P).toAffine.Point)
+      = WeierstrassCurve.Affine.Point.some x₂ y₂ h₂ := by
+  subst hx; subst hy; rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**一様化写像**
+`Φ(z) = (℘(z), ℘′(z)/2)`（格子点では `O`）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★☆これが `ℂ/Λ ≅ E(ℂ)` の実体である——全射（第 603-604）・単射（第 624）・
+群準同型（第 648・650）。 -/
+noncomputable def uniformMap (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) :
+    (latticeCurve P).toAffine.Point :=
+  if h : z ∈ P.lattice then 0
+  else WeierstrassCurve.Affine.Point.some (latticePointX P z) (latticePointY P z)
+    (nonsingular_latticePoint P hΔ z h)
+
+open scoped Classical in
+@[simp] theorem uniformMap_of_mem (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {z : ℂ}
+    (h : z ∈ P.lattice) : uniformMap P hΔ z = 0 := by
+  simp [uniformMap, h]
+
+open scoped Classical in
+theorem uniformMap_of_notMem (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) {z : ℂ}
+    (h : z ∉ P.lattice) :
+    uniformMap P hΔ z = WeierstrassCurve.Affine.Point.some (latticePointX P z)
+      (latticePointY P z) (nonsingular_latticePoint P hΔ z h) := by
+  simp [uniformMap, h]
+
+/-- ★★★★★★★★**`Φ` は `Λ`-周期的**。 -/
+theorem uniformMap_periodic (P : PeriodPair) (hΔ : latticeDisc P ≠ 0) (z : ℂ) {l : ℂ}
+    (hl : l ∈ P.lattice) : uniformMap P hΔ (z + l) = uniformMap P hΔ z := by
+  by_cases hz : z ∈ P.lattice
+  · rw [uniformMap_of_mem P hΔ (P.lattice.add_mem hz hl), uniformMap_of_mem P hΔ hz]
+  · have hzl : z + l ∉ P.lattice := fun hc => hz (by simpa using P.lattice.sub_mem hc hl)
+    rw [uniformMap_of_notMem P hΔ hzl, uniformMap_of_notMem P hΔ hz]
+    refine point_some_congr ?_ ?_
+    · simp only [latticePointX]
+      exact P.weierstrassP_add_coe z ⟨l, hl⟩
+    · simp only [latticePointY]
+      rw [P.derivWeierstrassP_add_coe z ⟨l, hl⟩]
+
+def uniformMap.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(一様化写像 Φ(z) = (℘(z), ℘′(z)/2))",
+    sectionId := "genell-lemma-3-5" }
+
+def uniformMap_periodic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Φ は Λ-周期的。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
