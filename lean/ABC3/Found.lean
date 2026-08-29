@@ -1148,6 +1148,7 @@ import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Found.GaloisRep.HtJWeil
 import ABC3.Found.GaloisRep.LogProductFormula
 import ABC3.Found.GaloisRep.HtFaltCovolume
+import ABC3.Found.GaloisRep.VeluNormalized
 import ABC3.Found.GaloisRep.IsogenyReduction
 import ABC3.Found.GaloisRep.NorthcottHtJ
 import ABC3.Found.GaloisRep.HtJLower
