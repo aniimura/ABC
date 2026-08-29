@@ -2279,6 +2279,7 @@
     "lemma35": "★未証明の外部引用ゼロ。残るは ∀ p ∈ S, tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l ただ 1 本（Lemma 3.2, (ii) の内容、Tate 一意化の台帳の段 3・段 4）",
     "lemma37": "★第 1・第 2 の主張は無条件で済み。第 3 の主張が受けている hdag も hdag_of_velu（第 713）で Lemma 3.5 から出た——外部引用ゼロ。残るのは Lemma 3.5 と同じ 1 本",
     "theorem38": "☆Galois 表現論の 8 件のうち G1-G7 は Found/GaloisRep に建設済み（FullImageWitness.lean の FullImageData.nonvacuous、第 328）。Found/ に Theorem 3.8 に紐づくファイルが 197、条つき .src が 245 個。★残るのは Interface/GenEll/GaloisRep.lean の TorsionGaloisRepData の witness を組むこと（nonvacuous がまだ無い）——半安定還元の判定と Lemma 3.7 の第 3 の主張を要する",
-    "order": "★次のセッションの順序: (1) Tate 台帳の段 3・4 → Lemma 3.5 の .src、(2) Lemma 3.7 の .src、(3) TorsionGaloisRepData の witness → Theorem 3.8、(4) Cor 4.3・4.4（新しい基盤理論は要らない）、(5) Theorem 2.1（最も遠い）"
+    "order": "★次のセッションの順序: (1) Tate 台帳の段 3・4 → Lemma 3.5 の .src、(2) Lemma 3.7 の .src、(3) TorsionGaloisRepData の witness → Theorem 3.8、(4) Cor 4.3・4.4（新しい基盤理論は要らない）、(5) Theorem 2.1（最も遠い）",
+    "sharpestForm20260829": "★残る 1 本の最も鋭い形（第 715 の実測）: v(Δ_min) は曲線の不変量なので（localHeight_eq_vAdd_Delta、第 320）、tateParamK の選択（choose）に依らない。したがって示すべきは **veluQuotientFull (tateCurveAt q) (μ_l の点) が tateCurveAt (q^l) と変数変換で一致すること** である——これは冪級数の恒等式（tateA4 = −5·sigmaSeries 3、tateA6 と Vélu の v = Σ g^x、w = Σ(u/2 + g^x·x) を μ_l の点で足したもの）であり、本プロジェクトの Tate 冪級数の在庫（Found/GaloisRep/Tate*.lean が 97 ファイル）で計算できる。★新しい数学は要らない"
   }
 }
