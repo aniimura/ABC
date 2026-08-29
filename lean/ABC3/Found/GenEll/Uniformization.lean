@@ -5343,6 +5343,78 @@ def sum_mul_derivWeierstrassP_rep_eq_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(代表系の上で f(℘)·℘′ の和は消える——第 670 の一般化。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★Vélu の `B` の和が消えること -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`Σ_S B = 0`**（`S` は解析側の代表点集合）。
+
+`latticeCurve` では `a₁ = a₃ = 0` なので `B(Q) = 2·y_Q = ℘′(w)`。
+第 670（`Σ ℘′(w) = 0`）そのものである。 -/
+theorem sum_veluB_image_eq_zero (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) :
+    ∑ Q ∈ (T.erase 0).image (fun w => (latticePointX P w, latticePointY P w)),
+        (2 * Q.2 + (latticeCurve P).a₁ * Q.1 + (latticeCurve P).a₃) = 0 := by
+  have hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice :=
+    fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0,
+      (latticePointX P w, latticePointY P w)
+        = (latticePointX P v, latticePointY P v) → w = v := by
+    intro w hw v hv he
+    refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw)
+      (Finset.mem_of_mem_erase hv) ?_
+    exact sub_mem_lattice_of_point_eq P (hnot w hw) (hnot v hv)
+      (congrArg Prod.fst he) (congrArg Prod.snd he)
+  rw [Finset.sum_image hinj]
+  have hstep : ∀ w ∈ T.erase 0,
+      (2 * latticePointY P w + (latticeCurve P).a₁ * latticePointX P w
+        + (latticeCurve P).a₃) = P.derivWeierstrassP w := by
+    intro w _
+    simp only [latticePointY, latticePointX, latticeCurve]
+    ring
+  rw [Finset.sum_congr rfl hstep]
+  exact sum_derivWeierstrassP_rep_eq_zero P P' T h0T hT hrep
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`Σ_S B·x = 0`**——第 690 で `f = id`。 -/
+theorem sum_veluBx_image_eq_zero (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) :
+    ∑ Q ∈ (T.erase 0).image (fun w => (latticePointX P w, latticePointY P w)),
+        (2 * Q.2 + (latticeCurve P).a₁ * Q.1 + (latticeCurve P).a₃) * Q.1 = 0 := by
+  have hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice :=
+    fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0,
+      (latticePointX P w, latticePointY P w)
+        = (latticePointX P v, latticePointY P v) → w = v := by
+    intro w hw v hv he
+    refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw)
+      (Finset.mem_of_mem_erase hv) ?_
+    exact sub_mem_lattice_of_point_eq P (hnot w hw) (hnot v hv)
+      (congrArg Prod.fst he) (congrArg Prod.snd he)
+  rw [Finset.sum_image hinj]
+  have hstep : ∀ w ∈ T.erase 0,
+      (2 * latticePointY P w + (latticeCurve P).a₁ * latticePointX P w
+          + (latticeCurve P).a₃) * latticePointX P w
+        = (fun z : ℂ => z) (P.weierstrassP w) * P.derivWeierstrassP w := by
+    intro w _
+    simp only [latticePointY, latticePointX, latticeCurve]
+    ring
+  rw [Finset.sum_congr rfl hstep]
+  exact sum_mul_derivWeierstrassP_rep_eq_zero P P' T h0T hT hrep (fun z => z)
+
+def sum_veluB_image_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Σ_S B = 0——解析側の代表点集合で。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_veluBx_image_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Σ_S B·x = 0——第 690 で f = id。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
