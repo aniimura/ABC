@@ -925,6 +925,78 @@ def derivWeierstrassP_eq_zero_of_two_mem.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(2-捩れ点では ℘′ が消える——℘′ は奇だから。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★Laurent の入口——加法定理へ -/
+
+/-- ★★★★★**`℘(z) − 1/z²` は mathlib の `℘[Λ − 0]` そのもの**（原点で解析的）。 -/
+theorem weierstrassP_sub_invSq (P : PeriodPair) (z : ℂ) :
+    P.weierstrassP z - 1 / z ^ 2 = P.weierstrassPExcept 0 z := by
+  have h := P.weierstrassPExcept_add ⟨0, P.lattice.zero_mem⟩ z
+  simp only [sub_zero] at h
+  rw [← h]
+  simp
+
+/-- ★★★★★**`℘′(z) + 2/z³` は `℘′[Λ − 0]`**。 -/
+theorem derivWeierstrassP_add_invCube (P : PeriodPair) (z : ℂ) :
+    P.derivWeierstrassP z + 2 / z ^ 3 = P.derivWeierstrassPExcept 0 z := by
+  have h := P.derivWeierstrassPExcept_sub ⟨0, P.lattice.zero_mem⟩ z
+  simp only [sub_zero] at h
+  rw [← h]
+  ring
+
+/-- ★★★★★★**`z²·℘(z)` の解析接続**——原点で `1`。
+
+★これが `℘(z) = z⁻² + O(z²)` の Lean 上の姿である
+（`weierstrassPExcept` は原点で解析的で値 `0`）。 -/
+noncomputable def laurentB (P : PeriodPair) (z : ℂ) : ℂ :=
+  1 + z ^ 2 * P.weierstrassPExcept 0 z
+
+/-- ★★★★★★**`z³·℘′(z)` の解析接続**——原点で `−2`。 -/
+noncomputable def laurentA (P : PeriodPair) (z : ℂ) : ℂ :=
+  -2 + z ^ 3 * P.derivWeierstrassPExcept 0 z
+
+@[simp] theorem laurentB_zero (P : PeriodPair) : laurentB P 0 = 1 := by simp [laurentB]
+
+@[simp] theorem laurentA_zero (P : PeriodPair) : laurentA P 0 = -2 := by simp [laurentA]
+
+/-- ★★★★★★`z ≠ 0` では `laurentB P z = z²·℘(z)`。 -/
+theorem laurentB_eq (P : PeriodPair) (z : ℂ) (hz : z ≠ 0) :
+    laurentB P z = z ^ 2 * P.weierstrassP z := by
+  have h := P.weierstrassPExcept_add ⟨0, P.lattice.zero_mem⟩ z
+  simp only [sub_zero] at h
+  simp only [laurentB, ← h]
+  have h0 : (1 : ℂ) / 0 ^ 2 = 0 := by norm_num
+  rw [h0]
+  field_simp
+  ring
+
+/-- ★★★★★★`z ≠ 0` では `laurentA P z = z³·℘′(z)`。 -/
+theorem laurentA_eq (P : PeriodPair) (z : ℂ) (hz : z ≠ 0) :
+    laurentA P z = z ^ 3 * P.derivWeierstrassP z := by
+  simp only [laurentA, ← derivWeierstrassP_add_invCube]
+  field_simp
+  ring
+
+/-- ★★★★★★★★`laurentA`・`laurentB` は原点で解析的。 -/
+theorem analyticAt_laurentB (P : PeriodPair) : AnalyticAt ℂ (laurentB P) 0 := by
+  refine analyticAt_const.add (((analyticAt_id).pow 2).mul ?_)
+  exact ((P.differentiableOn_weierstrassPExcept 0).analyticOnNhd
+    P.isOpen_compl_lattice_sdiff) 0 (by simp)
+
+theorem analyticAt_laurentA (P : PeriodPair) : AnalyticAt ℂ (laurentA P) 0 := by
+  refine analyticAt_const.add (((analyticAt_id).pow 3).mul ?_)
+  exact ((P.differentiableOn_derivWeierstrassPExcept 0).analyticOnNhd
+    P.isOpen_compl_lattice_sdiff) 0 (by simp)
+
+def laurentB.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(z²℘(z) の解析接続——加法定理の Laurent の入口。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def laurentA.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(z³℘′(z) の解析接続——加法定理の Laurent の入口。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
