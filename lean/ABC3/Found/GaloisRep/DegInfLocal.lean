@@ -306,6 +306,53 @@ def localHeight_eq_minDeltaExp.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(半安定なら局所高さ = v_p(Δ_min)。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★`q_{E′} = q_E^l` から `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))` -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`q_{E′} = q_E^l` なら `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`**
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★★★☆**これが `Lemma 3.5` の最後の入力である**——
+`Lemma 3.2, (ii)`（`Found/GenEll/Lemma32.lean`、`vAdd v (q^l) = l·vAdd v q`）が
+与える `q_{E′} = q_E^l` を、`deg∞` の材料 `minDeltaExp` に翻訳する。
+
+★半安定なら局所高さ ＝ `v_p(Δ_min)`（第 709）なので、`q` の側の関係が
+そのまま `Δ_min` の側の関係になる。 -/
+theorem minDeltaExp_eq_mul_of_tateParam [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) (l : ℕ)
+    [hell : (E.baseChange Lv).IsElliptic] [hmin : (E.baseChange Lv).IsMinimal R]
+    [hell' : (E'.baseChange Lv).IsElliptic] [hmin' : (E'.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (h' : (E'.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (C' : VariableChange L) (hC' : IsMinimal (primeSubring p) (C' • E'))
+    (hc4ne' : (C' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C' • E').c₄) hc4ne') = 0)
+    (hq : tateParamK (E'.baseChange Lv) h' = (tateParamK (E.baseChange Lv) h) ^ l) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hE := localHeight_eq_minDeltaExp (R := R) E h p hp C hC hc4ne hc4
+  have hE' := localHeight_eq_minDeltaExp (R := R) E' h' p hp C' hC' hc4ne' hc4'
+  have hpos := vAdd_tateParamK_pos (R := R) (E.baseChange Lv) h
+  have hpos' := vAdd_tateParamK_pos (R := R) (E'.baseChange Lv) h'
+  have hlh : (localHeightOf (E.baseChange Lv) h : ℤ)
+      = vAdd (tateDvrVal R Lv) (tateParamK (E.baseChange Lv) h) := by
+    rw [localHeightOf]; omega
+  have hlh' : (localHeightOf (E'.baseChange Lv) h' : ℤ)
+      = vAdd (tateDvrVal R Lv) (tateParamK (E'.baseChange Lv) h') := by
+    rw [localHeightOf]; omega
+  rw [← hE, ← hE', hlh, hlh', hq, vAdd_pow]
+
+def minDeltaExp_eq_mul_of_tateParam.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(q_{E′} = q_E^l から v_p(Δ_min(E′)) = l·v_p(Δ_min(E))。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 /-! ## ★★素イデアルのノルムは `2` 以上 -/
 
 /-- ★★`N(p) ≥ 2`——`p` は `⊥` でも `⊤` でもないから。 -/
