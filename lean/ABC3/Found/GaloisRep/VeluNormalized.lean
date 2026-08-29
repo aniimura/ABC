@@ -123,6 +123,138 @@ theorem htFalt_isogeny_le_of_omega (E E' : WeierstrassCurve L) [E.IsElliptic] [E
   rw [hU, hV] at h'
   nlinarith [h, h', hfin, hd]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★選択によらない形——`archDefect` -/
+
+/-- ★★★★★★★★★★★★★★★★**アルキメデスの欠損** `Σ_σ [log‖σΔ_E‖ − log archNorm(E,σ)]`。
+
+★`Found/GenEll/ArchInvCovolume.lean` の `log_archNorm_eq` により、これは
+`Σ_σ [12·log‖u_σ‖ − 6·log covol(P σ)]` に等しい（`archDefect_eq`）。
+★★すなわち **`u` と `covol` は個別には一様化の取り方に依るが、この組み合わせは依らない**。 -/
+noncomputable def archDefect (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) : ℝ :=
+  ∑ σ : (L →+* ℂ), (Real.log ‖σ E.Δ‖ - Real.log (archNorm E σ))
+
+/-- ★★★★★★★★★★★★★★★★★★**`ht^Falt` の `archDefect` 表示**——★**無条件**。
+
+    `12·d·ht^Falt(E) = archDefect(E) − 12·Σᶠ_p neronExp_p·log N(p) − 12·d·log(2π)`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`§9-1023`（第 579）の共体積表示から**周期対 `P` と変数変換 `C` を消した形**である
+——`12·Σ_σ log‖u_σ‖ − 6·Σ_σ log(covol P_σ)` がちょうど `archDefect(E)` だから。
+★★★これで残るアルキメデスの穴が**一様化の取り方に依らない 1 つの量**になった。 -/
+theorem twelve_finrank_htFaltOf_eq_archDefect (E : WeierstrassCurve L) [E.IsElliptic] :
+    12 * (Module.finrank ℚ L : ℝ) * htFaltOf L E
+      = archDefect L E
+        - 12 * (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+            (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+        - 12 * (Module.finrank ℚ L : ℝ) * Real.log (2 * Real.pi) := by
+  have hd : (0:ℝ) < (Module.finrank ℚ L : ℝ) := by exact_mod_cast Module.finrank_pos
+  have hΔ : E.Δ ≠ 0 := (inferInstance : E.IsElliptic).isUnit.ne_zero
+  have hpi : (0:ℝ) < (2 * Real.pi) ^ 12 := by positivity
+  have hprod := sum_arch_log_eq_finsum_valAdd E.Δ hΔ
+  have hdeg := finrank_degInfOf_eq E hΔ
+  have hht : 12 * (Module.finrank ℚ L : ℝ) * htFaltOf L E
+      = (Module.finrank ℚ L : ℝ) * degInfOf L E - archSum L E := by
+    rw [htFaltOf]
+    field_simp
+  have harchS : archSum L E
+      = 12 * (Module.finrank ℚ L : ℝ) * Real.log (2 * Real.pi)
+        + ∑ σ : (L →+* ℂ), Real.log (archNorm E σ) := by
+    have hterm : ∀ σ : (L →+* ℂ),
+        Real.log ((2 * Real.pi) ^ 12 * archNorm E σ)
+          = 12 * Real.log (2 * Real.pi) + Real.log (archNorm E σ) := by
+      intro σ
+      rw [Real.log_mul (ne_of_gt hpi) (ne_of_gt (archNorm_pos E σ)), Real.log_pow]
+      push_cast
+      ring
+    rw [archSum, Finset.sum_congr rfl fun σ _ => hterm σ, Finset.sum_add_distrib,
+      Finset.sum_const, Finset.card_univ, NumberField.Embeddings.card L ℂ, nsmul_eq_mul]
+    ring
+  rw [hht, hdeg, ← hprod, harchS, archDefect, Finset.sum_sub_distrib]
+  ring
+
+/-- ★★★★★★★★★★★★★★**`archDefect` は一様化の取り方に依らない**。
+
+    `archDefect(E) = Σ_σ [12·log‖u_σ‖ − 6·log(covol P_σ)]`
+
+★右辺は `(P, C)` の取り方に依るように見えるが、左辺は依らない。 -/
+theorem archDefect_eq (E : WeierstrassCurve L) [E.IsElliptic]
+    (P : (L →+* ℂ) → PeriodPair) (C : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ)) :
+    archDefect L E
+      = ∑ σ : (L →+* ℂ), (12 * Real.log ‖((C σ).u : ℂ)‖ - 6 * Real.log (covol (P σ))) := by
+  refine Finset.sum_congr rfl fun σ _ => ?_
+  rw [log_archNorm_eq E σ (hPC σ)]
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`ω`-正規化された同種写像の高さ評価
+（選択によらない形）**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★**アルキメデスの仮定はただ 1 つ** `harch`:
+
+    `archDefect(E′) = archDefect(E) + 6·d·log(l)`
+
+★★これは `Found/GenEll/Velu.lean` の `velu_omega_gen`（第 591）が与える
+`φ^*(ω′) = ω` の帰結である——`‖u′_σ‖ = ‖u_σ‖` かつ `covol P′_σ = covol P_σ/l` なら
+`archDefect(E′) − archDefect(E) = 12·0 − 6·(−d·log l) = 6·d·log l`。
+
+★★★☆**周期対も変数変換も statement に現れない**——これが残るアルキメデスの穴の
+もっとも小さい形である。 -/
+theorem htFalt_isogeny_le_of_archDefect (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ)
+    (harch : archDefect L E'
+      = archDefect L E + 6 * (Module.finrank ℚ L : ℝ) * Real.log l)
+    (hfin : (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+          - (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+        ≤ (3 / 2) * (Module.finrank ℚ L : ℝ) * Real.log l) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l := by
+  have hd : (0:ℝ) < (Module.finrank ℚ L : ℝ) := by exact_mod_cast Module.finrank_pos
+  have h := twelve_finrank_htFaltOf_eq_archDefect E
+  have h' := twelve_finrank_htFaltOf_eq_archDefect E'
+  rw [harch] at h'
+  nlinarith [h, h', hfin, hd]
+
+/-- ★★★★★★★★★★★★**`hu` と `hcov` から `harch` が出る**。
+
+★これで `htFalt_isogeny_le_of_omega`（第 592）は
+`htFalt_isogeny_le_of_archDefect` の系である。 -/
+theorem archDefect_isogeny_of_omega (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (l : ℕ) (hl : 0 < l)
+    (P P' : (L →+* ℂ) → PeriodPair) (C C' : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hPC' : ∀ σ, C' σ • (E'.map σ) = latticeCurve (P' σ))
+    (hu : ∀ σ, ‖((C' σ).u : ℂ)‖ = ‖((C σ).u : ℂ)‖)
+    (hcov : ∀ σ, covol (P' σ) = covol (P σ) / l) :
+    archDefect L E' = archDefect L E + 6 * (Module.finrank ℚ L : ℝ) * Real.log l := by
+  have hl0 : (0:ℝ) < (l:ℝ) := by exact_mod_cast hl
+  rw [archDefect_eq E P C hPC, archDefect_eq E' P' C' hPC']
+  have hterm : ∀ σ : (L →+* ℂ),
+      12 * Real.log ‖((C' σ).u : ℂ)‖ - 6 * Real.log (covol (P' σ))
+        = (12 * Real.log ‖((C σ).u : ℂ)‖ - 6 * Real.log (covol (P σ)))
+          + 6 * Real.log l := by
+    intro σ
+    rw [hu σ, hcov σ, Real.log_div (ne_of_gt (covol_pos (P σ))) (ne_of_gt hl0)]
+    ring
+  rw [Finset.sum_congr rfl fun σ _ => hterm σ, Finset.sum_add_distrib,
+    Finset.sum_const, Finset.card_univ, NumberField.Embeddings.card L ℂ, nsmul_eq_mul]
+  ring
+
+def twelve_finrank_htFaltOf_eq_archDefect.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(ht^Falt の archDefect 表示——周期対も変数変換も現れない。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+def htFalt_isogeny_le_of_archDefect.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(残るアルキメデスの穴はただ 1 つ archDefect(E′) = archDefect(E) + 6d·log l)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★★★★★★★★★★★格子の言葉に落とした版 -/
 
 /-- ★★★★★★★★★★★★★★★★★★**`hcov` を基底変換の言葉に落とした版**。
