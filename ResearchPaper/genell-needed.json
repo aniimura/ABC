@@ -43,14 +43,14 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 1.4.1",
    "page": 8,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Definition 1.5",
@@ -80,7 +80,7 @@
    "page": 9,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 2.1",
@@ -134,7 +134,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 3.5",
@@ -213,5 +213,5 @@
   }
  ],
  "total": 24,
- "done": 13
+ "done": 17
 }
