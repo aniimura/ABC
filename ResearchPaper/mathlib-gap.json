@@ -1795,5 +1795,43 @@
     ],
     "whatIsAlreadyDone": "★これら 3 つ**以外**の入力は、§3・§4 についてはすべて手元にある: `Lemma 3.2`（§9-1011）・`Proposition 3.4`（§9-1009）・`Lemma 3.5` の組み立て（`Lemma35Combine.lean`）・`Lemma 3.7, (a)` の 3 欄（§9-1010）・`Lemma 3.6`・`Lemma 4.1`・`Lemma 4.2`・`Remark 4.1.1`。★★`Theorem 2.1` も (ii) ⟹ (i) の 4 段のうち 3 段が `Found/` にある（`Thm21Chain`・`Thm21Extract`・`Thm21DegRatio`）。",
     "honestBottomLine": "★★★★★**「あと 6 項目」は「あと 3 つの定理」である。** どれも既知数学であり、道であって壁ではない。☆ただし 3 つとも mathlib に土台が無く、それぞれが独立した建設である（同種写像と Néron 微分／スキームのエタール π₁／曲線の Riemann–Roch）。"
+  },
+  "lemma35and37State20260829": {
+    "measuredAt": "2026-08-29",
+    "lemma35": {
+      "state": "☆**入力 3 つのうち 2 つが証明済み。残り 1 つを型で固定した。**",
+      "file": "Found/GaloisRep/Lemma35Concrete.lean（§9-1012、第 565）",
+      "inputs": [
+        "★`deg∞(E′) = l·deg∞(E)` —— 局所は `Lemma 3.2, (ii)`（§9-1011、**項目まるごと済**）、大域化は `degInfOf_eq_of_local`（本ファイル）。",
+        "★★`Proposition 3.4` を `E′` に当てる段 —— §9-1009（**項目まるごと済**）。",
+        "☆`ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)` —— **残る唯一の入力**。仮説 `hfalt` として `Found/` に型で固定してある。"
+      ]
+    },
+    "lemma37": {
+      "state": "★**3 つの主張のうち 2 つが無条件で取れた。**",
+      "assertions": [
+        {
+          "which": "第 1",
+          "text": "条件 (a) なら `l` は乗法還元の全素点の局所高さより大きい（かつ素）",
+          "status": "★★★**無条件で証明済み**",
+          "file": "Found/GaloisRep/Lemma37A.lean（§9-1013、第 566）",
+          "how": "原文の証明の最初の 2 段——`d·deg∞ ≥ v·log 2`（`minDeltaExp_log_two_le`）と `deg∞ ≤ 14(ht^Falt + C)`（`exists_degInfOf_le_htFalt`、**12 で取れている**）——がどちらも §9-1010 で済んでいた。定数は `C = |A| + |B| + 1`（`ht^Falt < 0` の超過分を下界 `|B|` で吸収する）。"
+        },
+        {
+          "which": "第 2",
+          "text": "条件 (b) かつ `[E] ∉ Exc` なら乗法還元の素点を持つ（＝乗法還元を持たない類は有限）",
+          "status": "★★★**核が無条件で証明済み**",
+          "file": "Found/GaloisRep/NoMultRedExc.lean（§9-1014、第 567）",
+          "how": "`ht∞ ≔ h(j)` の読み替え（§9-1009 の逸脱）の下で、原文の「`ht∞` is bounded」は (1) `deg∞ = 0` ⟹ 有限素点側が `0`（`htFinJ ≤ deg∞` は §9-1003、無条件）＋ (2) `‖σ(j)‖ ≤ M` ⟹ アルキメデス側が有界、になり、(3) Northcott（§9-1005）で有限性が出る。"
+        },
+        {
+          "which": "第 3",
+          "text": "`(a) ∨ (b)` かつ l-cyclic なら `[E] ∈ Exc`",
+          "status": "☆**未**——`lcyclicExc` が要る",
+          "how": "☆`Lemma 3.5` を経由する（原文 p.18 の (†)→(‡)→`ht^Falt ≤ C′`→Northcott）。★その `Lemma 3.5` に残る唯一の入力が Faltings 高さの同種写像評価である。★★他の材料（`Lemma 3.6`・`log 2 ≤ d·deg∞`・Northcott）は**すべて手元にある**。"
+        }
+      ]
+    },
+    "whyTheMetricDoesNotMove": "★指標（`tools/genell-progress.mjs`）は**項目まるごと**でしか動かない。`Lemma 3.5`・`Lemma 3.7` はどちらも部分が揃っただけなので 18/24 のままである。☆ここで残りを仮定として受ければ括弧は外れるが、実際に残っている仕事は減らない（`check.mjs` B6）。★**受けずに型で固定する**ほうが、次に何を証明すればよいかが`Found/` に見えるぶん役に立つ。"
   }
 }
