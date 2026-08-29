@@ -5086,6 +5086,120 @@ def exists_velu_model_of_torsion.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(解析側・最終形——位数 l の点から E/H の Weierstrass モデルまで。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★**点が一致すれば `Λ` を法として一致**——第 624 の言い換え。 -/
+theorem sub_mem_lattice_of_point_eq (P : PeriodPair) {w v : ℂ} (hw : w ∉ P.lattice)
+    (hv : v ∉ P.lattice) (hx : latticePointX P w = latticePointX P v)
+    (hy : latticePointY P w = latticePointY P v) : w - v ∈ P.lattice := by
+  refine mem_lattice_of_shift_eq P (w - v) hv ?_ ?_ ?_
+  · rw [show v + (w - v) = w by ring]; exact hw
+  · rw [show v + (w - v) = w by ring]; exact hx
+  · rw [show v + (w - v) = w by ring]
+    simp only [latticePointY] at hy
+    linear_combination 2 * hy
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`latticeCurve Λ′` は `H∖{O}` 全体で書いた Vélu の商そのもの**
+
+    latticeCurve Λ′ = veluQuotientFull (latticeCurve Λ) S,
+    S = { (℘(w), ℘′(w)/2) : w ∈ T∖{0} }
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★`w ↦ (℘(w), ℘′(w)/2)` は `T∖{0}` 上で単射（第 624 の単射性 ＋
+代表系の元が `Λ` を法として相異なること）なので、`T∖{0}` にわたる和は
+`S` にわたる和に等しい。
+
+★★★★☆**これで解析側の結論が代数側の語彙（`veluQuotientFull`）で書けた**——
+`Found/GenEll/Velu.lean` の `veluQuotientFull_map`（第 679）と合わせれば
+`L` 上の `E/H` と各 `σ` での一意化が結びつく。 -/
+theorem latticeCurve_eq_veluQuotientFull (P P' : PeriodPair) (T : Finset ℂ)
+    (h0T : (0 : ℂ) ∈ T) (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    (hg₂ : P'.g₂ = P.g₂ + 10 * ∑ w ∈ T.erase 0, (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))
+    (hg₃ : P'.g₃ = P.g₃ + (7 / 6) * ∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃)) :
+    latticeCurve P' = veluQuotientFull (latticeCurve P)
+      ((T.erase 0).image (fun w => (latticePointX P w, latticePointY P w))) := by
+  have hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice :=
+    fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0,
+      (latticePointX P w, latticePointY P w)
+        = (latticePointX P v, latticePointY P v) → w = v := by
+    intro w hw v hv he
+    refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw)
+      (Finset.mem_of_mem_erase hv) ?_
+    exact sub_mem_lattice_of_point_eq P (hnot w hw) (hnot v hv)
+      (congrArg Prod.fst he) (congrArg Prod.snd he)
+  rw [veluQuotientFull, veluVFull, veluWFull,
+    Finset.sum_image hinj, Finset.sum_image hinj]
+  exact latticeCurve_eq_veluCurve P P' T hnot hg₂ hg₃
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（解析側・代数語彙）——位数 `l` の点から `E/H` まで**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ) = latticeCurve Λ` の位数ちょうど `l` の点 `Q` に対し、**仮説なしで**
+
+* `z₀`（`Φ(z₀) = Q`）と周期対 `P′`（格子は `Λ′ = Λ + ℤz₀`）
+* 整数 `A, B, C, D` で `ω₁ = Aω₁′ + Bω₂′`・`ω₂ = Cω₁′ + Dω₂′`・`|AD − BC| = l`
+* 点の集合 `S`（`|S| = l − 1`）で
+
+      latticeCurve Λ′ = veluQuotientFull (latticeCurve Λ) S
+
+★★★★★★★☆**変数変換は要らない（`α = 1`）。これが
+`htFalt_isogeny_le_of_velu`（第 678）に渡す形である。** -/
+theorem exists_veluQuotientFull_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ : ℂ) (P' : PeriodPair) (A B C D : ℤ) (S : Finset (ℂ × ℂ)),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) ∧
+      S.card = l - 1 ∧
+      latticeCurve P' = veluQuotientFull (latticeCurve P) S := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  have hvelu : ∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z :=
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z
+  have hnot : ∀ w ∈ T.erase 0, w ∉ P.lattice :=
+    fun w hw => rep_notMem_lattice P P' T h0T hT hrep hw
+  have hinj : ∀ w ∈ T.erase 0, ∀ v ∈ T.erase 0,
+      (latticePointX P w, latticePointY P w)
+        = (latticePointX P v, latticePointY P v) → w = v := by
+    intro w hw v hv he
+    refine rep_sub_mem_lattice_imp_eq P P' T hT hrep (Finset.mem_of_mem_erase hw)
+      (Finset.mem_of_mem_erase hv) ?_
+    exact sub_mem_lattice_of_point_eq P (hnot w hw) (hnot v hv)
+      (congrArg Prod.fst he) (congrArg Prod.snd he)
+  refine ⟨z₀, P', A, B, C, D,
+    (T.erase 0).image (fun w => (latticePointX P w, latticePointY P w)),
+    hz₀, h1, h2, hdet, hP', ?_, ?_⟩
+  · rw [Finset.card_image_of_injOn (fun w hw v hv he =>
+      hinj w (Finset.mem_coe.1 hw) v (Finset.mem_coe.1 hv) he),
+      Finset.card_erase_of_mem h0T, hcard]
+  · exact latticeCurve_eq_veluQuotientFull P P' T h0T hT hrep
+      (g₂_isogeny P P' T h0T hT hrep hvelu) (g₃_isogeny P P' T h0T hT hrep hvelu)
+
+def latticeCurve_eq_veluQuotientFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(latticeCurve Λ′ は H∖{O} 全体で書いた Vélu の商そのもの。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_veluQuotientFull_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側・代数語彙——位数 l の点から E/H まで。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=

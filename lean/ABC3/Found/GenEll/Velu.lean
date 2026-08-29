@@ -510,6 +510,84 @@ def veluQuotient_map.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Vélu の商は底変換と可換——L 上の E/H と ℂ 上の Λ′ を結ぶ橋。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★`H∖{O}` 全体にわたる形 -/
+
+section Full
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★★★★★★★★**`v` を `H∖{O}` 全体で書いた形**
+
+    `v = Σ_{Q ∈ H∖{O}} g^x_Q`
+
+★通常の Vélu は `S = (H∖{O})/±` の代表系にわたって `v_Q = 2g^x_Q` を足すが、
+`g^x_Q` が `±` で不変（`a₁ = 0` のとき）なら**全体で `g^x_Q` を足すのと同じ**である。
+☆こう書くと有限集合の対合の横断集合を構成する手間が要らない。 -/
+noncomputable def veluVFull (W : WeierstrassCurve F) (S : Finset (F × F)) : F :=
+  ∑ Q ∈ S, veluV2 W Q.1 Q.2
+
+/-- ★★★★★★★★★★★★**`w` を `H∖{O}` 全体で書いた形**
+
+    `w = Σ_{Q ∈ H∖{O}} (u_Q/2 + g^x_Q·x_Q)` -/
+noncomputable def veluWFull (W : WeierstrassCurve F) (S : Finset (F × F)) : F :=
+  ∑ Q ∈ S, (veluU W Q.1 Q.2 / 2 + veluV2 W Q.1 Q.2 * Q.1)
+
+/-- ★★★★★★★★★★★★★★**`H∖{O}` 全体で書いた Vélu の商**。 -/
+noncomputable def veluQuotientFull (W : WeierstrassCurve F) (S : Finset (F × F)) :
+    WeierstrassCurve F :=
+  veluCurve W (veluVFull W S) (veluWFull W S)
+
+@[simp] theorem veluQuotientFull_empty (W : WeierstrassCurve F) :
+    veluQuotientFull W ∅ = W := by
+  rw [veluQuotientFull, veluVFull, veluWFull, Finset.sum_empty, Finset.sum_empty,
+    veluCurve_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★`veluVFull` は体の準同型と可換。 -/
+theorem veluVFull_map {A : Type*} [Field A] (f : F →+* A) (W : WeierstrassCurve F)
+    (S : Finset (F × F)) :
+    f (veluVFull W S) = veluVFull (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  have hf : Function.Injective f := f.injective
+  rw [veluVFull, veluVFull, map_sum,
+    Finset.sum_image (fun a _ b _ hab =>
+      Prod.ext (hf (congrArg Prod.fst hab)) (hf (congrArg Prod.snd hab)))]
+  exact Finset.sum_congr rfl (fun Q _ => veluV2_map f W Q.1 Q.2)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★`veluWFull` は体の準同型と可換。 -/
+theorem veluWFull_map {A : Type*} [Field A] (f : F →+* A) (W : WeierstrassCurve F)
+    (S : Finset (F × F)) :
+    f (veluWFull W S) = veluWFull (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  have hf : Function.Injective f := f.injective
+  rw [veluWFull, veluWFull, map_sum,
+    Finset.sum_image (fun a _ b _ hab =>
+      Prod.ext (hf (congrArg Prod.fst hab)) (hf (congrArg Prod.snd hab)))]
+  refine Finset.sum_congr rfl (fun Q _ => ?_)
+  rw [map_add, map_div₀, map_mul, veluU_map, veluV2_map, map_ofNat]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`H∖{O}` 全体で書いた商も底変換と可換**。
+
+★★☆これで「`L` 上で `E/H` を作ってから `σ : L →+* ℂ` で送る」と
+「`σ` で送ってから商を取る」が一致する。 -/
+theorem veluQuotientFull_map {A : Type*} [Field A] (f : F →+* A)
+    (W : WeierstrassCurve F) (S : Finset (F × F)) :
+    (veluQuotientFull W S).map f
+      = veluQuotientFull (W.map f) (S.image (fun Q => (f Q.1, f Q.2))) := by
+  rw [veluQuotientFull, veluQuotientFull, veluCurve_map, veluVFull_map, veluWFull_map]
+
+end Full
+
+def veluQuotientFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(H∖{O} 全体で書いた Vélu の商——± 代表系を取らない形)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(H∖{O} 全体で書いた商も底変換と可換。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`)——★★**条つき。定義と帳簿だけである** -/
 
 def velu2_equation.src : ABC3.Meta.Source :=
