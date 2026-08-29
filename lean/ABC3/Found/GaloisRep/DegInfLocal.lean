@@ -353,6 +353,71 @@ def minDeltaExp_eq_mul_of_tateParam.src : ABC3.Meta.Source :=
     item := "Lemma 3.2, (ii)(q_{E′} = q_E^l から v_p(Δ_min(E′)) = l·v_p(Δ_min(E))。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
+/-! ## ★★★★★★★★★★Tate モデルの母数から `Δ_min` の関係へ -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`E` の Tate モデルの母数が `q`、`E′` の母数が `q^l` なら
+`v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`**
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★★★★☆**これが `Lemma 3.5` に残る唯一の入力の、最も鋭い形である。**
+仮説は「`E′` が母数 `q^l` の Tate モデルを持つ」——`Lemma 3.2, (ii)` の
+`E/μ_l` は母数 `q^l` の Tate 曲線である、という主張そのものである。
+
+★機構は 3 段:
+
+1. 半安定なら `v_p(Δ_min) = 局所高さ`（第 709）
+2. 局所高さ `= v(Δ)`（第 320）
+3. Tate モデルの母数の付値は一意（`vAdd_Delta_eq_of_tateModel`）——
+   したがって `v(Δ) = v(q)`、`v(Δ′) = v(q^l) = l·v(q)` -/
+theorem minDeltaExp_eq_mul_of_tateModel [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) (l : ℕ)
+    [hell : (E.baseChange Lv).IsElliptic] [hmin : (E.baseChange Lv).IsMinimal R]
+    [hell' : (E'.baseChange Lv).IsElliptic] [hmin' : (E'.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (h' : (E'.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C₀ : VariableChange L) (hC₀ : IsMinimal (primeSubring p) (C₀ • E))
+    (hc4ne : (C₀ • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C₀ • E).c₄) hc4ne) = 0)
+    (C₀' : VariableChange L) (hC₀' : IsMinimal (primeSubring p) (C₀' • E'))
+    (hc4ne' : (C₀' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C₀' • E').c₄) hc4ne') = 0)
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R) (hql0 : q ^ l ≠ 0)
+    (D : VariableChange R)
+    (hD : D • integralModel R (E.baseChange Lv) = tateCurveAt q hq)
+    (D' : VariableChange R)
+    (hD' : D' • integralModel R (E'.baseChange Lv) = tateCurveAt (q ^ l) hql) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hqK : algebraMap R Lv q ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hq0
+  have hqlK : algebraMap R Lv (q ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hql0
+  have hE := localHeight_eq_minDeltaExp (R := R) E h p hp C₀ hC₀ hc4ne hc4
+  have hE' := localHeight_eq_minDeltaExp (R := R) E' h' p hp C₀' hC₀' hc4ne' hc4'
+  have h320 := localHeight_eq_vAdd_Delta (R := R) (E.baseChange Lv) h
+  have h320' := localHeight_eq_vAdd_Delta (R := R) (E'.baseChange Lv) h'
+  have hq1 := vAdd_Delta_eq_of_tateModel (R := R) (E.baseChange Lv) q hq hq0 D hD hqK
+  have hq2 := vAdd_Delta_eq_of_tateModel (R := R) (E'.baseChange Lv) (q ^ l) hql hql0
+    D' hD' hqlK
+  have hpow : vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv (q ^ l)) hqlK)
+      = l * vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv q) hqK) := by
+    have hu : Units.mk0 (algebraMap R Lv (q ^ l)) hqlK
+        = (Units.mk0 (algebraMap R Lv q) hqK) ^ l := by
+      refine Units.ext ?_
+      simp [map_pow]
+    rw [hu, vAdd_pow]
+  rw [← hE', h320', hq2, hpow, ← hq1, ← h320, hE]
+
+def minDeltaExp_eq_mul_of_tateModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate モデルの母数 q・q^l から Δ_min の関係へ。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 /-! ## ★★素イデアルのノルムは `2` 以上 -/
 
 /-- ★★`N(p) ≥ 2`——`p` は `⊥` でも `⊤` でもないから。 -/

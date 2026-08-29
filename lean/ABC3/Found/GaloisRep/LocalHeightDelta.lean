@@ -221,6 +221,90 @@ theorem localHeight_eq_vAdd_Delta [IsAdicComplete (IsLocalRing.maximalIdeal R) R
   rw [hveq2, vAdd_mul, tateDvrVal_eq_zero_of_isUnit _ hv] at hΔchg
   omega
 
+/-! ## ★★★★★★★★`v(q)` の一意性 -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**Tate モデルの母数の付値は一意**
+
+    `C • (整モデル) = tateCurveAt q` なら `v(Δ_W) = v(q)`
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+★★第 320 の `localHeight_eq_vAdd_Delta` は**選んだ** `tateParamR W h` について
+述べていたが、本補題は**任意の** Tate モデルについて述べる。
+したがって `v(q)` は `choose` の取り方に依らない。
+
+★★★★☆**これで `Lemma 3.5` の最後の入力が最も鋭い形になる**——
+`E′` が母数 `q^l` の Tate モデルを持つことさえ言えれば
+`v(Δ_min(E′)) = v(q^l) = l·v(q) = l·v(Δ_min(E))` が出る。 -/
+theorem vAdd_Delta_eq_of_tateModel [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (W : WeierstrassCurve K) [hell : W.IsElliptic] [W.IsMinimal R]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (C : VariableChange R) (hC : C • integralModel R W = tateCurveAt q hq)
+    (hqK : algebraMap R K q ≠ 0) :
+    vAdd (tateDvrVal R K) (Units.mk0 W.Δ hell.isUnit.ne_zero)
+      = vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K q) hqK) := by
+  have hΔ : W.Δ ≠ 0 := hell.isUnit.ne_zero
+  have hWmap : (integralModel R W).map (algebraMap R K) = W :=
+    WeierstrassCurve.baseChange_integralModel_eq R W
+  have hkey : (C.map (algebraMap R K)) • W
+      = (tateCurveAt q hq).map (algebraMap R K) := by
+    conv_lhs => rw [← hWmap]
+    rw [WeierstrassCurve.map_variableChange, hC]
+  have hTΔ : ((tateCurveAt q hq).map (algebraMap R K)).Δ ≠ 0 := by
+    rw [WeierstrassCurve.map_Δ]
+    exact (map_ne_zero_iff _ (IsFractionRing.injective R K)).2
+      (tateCurveAt_Delta_ne_zero hq hq0)
+  have hTc4ne : ((tateCurveAt q hq).map (algebraMap R K)).c₄ ≠ 0 := by
+    rw [WeierstrassCurve.map_c₄]
+    exact (map_ne_zero_iff _ (IsFractionRing.injective R K)).2
+      (tateCurveAt_c4_isUnit _ hq).ne_zero
+  have hTc4 : vAdd (tateDvrVal R K)
+      (Units.mk0 (((tateCurveAt q hq).map (algebraMap R K)).c₄) hTc4ne) = 0 := by
+    have hveq : (Units.mk0 (((tateCurveAt q hq).map (algebraMap R K)).c₄) hTc4ne)
+        = Units.mk0 (algebraMap R K ((tateCurveAt q hq).c₄))
+          (by rw [← WeierstrassCurve.map_c₄]; exact hTc4ne) := by
+      refine Units.ext ?_
+      exact WeierstrassCurve.map_c₄ _ _
+    rw [hveq]
+    exact tateDvrVal_eq_zero_of_isUnit _ (tateCurveAt_c4_isUnit _ hq) _
+  haveI hTint : WeierstrassCurve.IsIntegral R
+      ((tateCurveAt q hq).map (algebraMap R K)) := isIntegral_baseChange _
+  have hTmin : IsMinimal R ((tateCurveAt q hq).map (algebraMap R K)) :=
+    isMinimal_of_c4_vAdd_eq_zero _ hTΔ hTc4ne hTc4
+  have hmin1 : IsMinimal R ((1 : VariableChange K) • W) := by
+    rw [one_smul]
+    infer_instance
+  have hmin2 : IsMinimal R ((C.map (algebraMap R K)) • W) := by
+    rw [hkey]
+    exact hTmin
+  have hu0 := minimal_u_vAdd_eq W hΔ (1 : VariableChange K) (C.map (algebraMap R K))
+    hmin1 hmin2
+  have hone : vAdd (tateDvrVal R K) ((1 : VariableChange K).u) = 0 := by
+    show vAdd (tateDvrVal R K) 1 = 0
+    rw [vAdd, map_one]
+    rfl
+  have hΔchg := vAdd_Delta_variableChange (R := R) W hΔ (C.map (algebraMap R K))
+  obtain ⟨v, hv, hΔq⟩ := tateCurveAt_Delta_eq_mul_unit q hq
+  have hveq2 : (Units.mk0 (((C.map (algebraMap R K)) • W).Δ)
+      (variableChange_Delta_ne_zero W hΔ (C.map (algebraMap R K))))
+      = Units.mk0 (algebraMap R K q) hqK * Units.mk0 (algebraMap R K v)
+        ((map_ne_zero_iff _ (IsFractionRing.injective R K)).2 hv.ne_zero) := by
+    refine Units.ext ?_
+    show ((C.map (algebraMap R K)) • W).Δ = _
+    rw [hkey, WeierstrassCurve.map_Δ, hΔq, map_mul]
+    rfl
+  rw [← hu0, hone, mul_zero, sub_zero] at hΔchg
+  rw [hveq2, vAdd_mul, tateDvrVal_eq_zero_of_isUnit _ hv, add_zero] at hΔchg
+  omega
+
+def vAdd_Delta_eq_of_tateModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Tate モデルの母数の付値は一意。★無条件)",
+    sectionId := "genell-def-3-3" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def localHeight_eq_vAdd_Delta.src : ABC3.Meta.Source :=
