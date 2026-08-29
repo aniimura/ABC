@@ -31692,3 +31692,44 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 ★★★代わりに**型で固定した**——次に何を証明すればよいかが
 `Found/GaloisRep/Lemma35Concrete.lean` の仮説 `hfalt` と
 `Skeleton/GenEll/IsogenyHeight.lean` の仮説 `hwfin`・`hsplit` として見える。
+
+### ☆★訂正（同日、第 576）—— 上の共体積の式には `neronExp` の項が要る
+
+☆上で
+
+    `12·htFaltOf = −12·log(2π) − (6/d)·Σ_σ log covol_min(E^σ)`
+
+と書いたが、**極小モデルが大域的に取れる場合の式**である。★一般には
+`Δ_min` は `L` の元ではなく**局所データの集まり**なので、`minDeltaExp` の定義
+`minDeltaExp p W = v_p(Δ_W) − 12·neronExp p W` を素直に通すと
+
+    `deg∞ = (1/d)·Σ_σ log|σ(Δ_E)| − (12/d)·Σ_p neronExp_p · log N(p)`   （積公式）
+    `archSum/d = 12·log(2π) + (1/d)·Σ_σ [ log|σ(Δ_E)| + 6·log covol(Λ_{E^σ}) ]`
+
+となり、`Σ_σ log|σ(Δ_E)|` が打ち消し合って
+
+    **`12·htFaltOf = −12·log(2π) − (12/d)·Σ_p neronExp_p·log N(p) − (6/d)·Σ_σ log covol(Λ_{E^σ})`**
+
+★`Λ_{E^σ}` は**モデル `E` の**周期格子（極小モデルのではない）。
+★★`neronExp ≡ 0`（大域的に極小）なら上の簡単な式に戻る。
+
+### ★★これは何を意味するか —— 目標がむしろ鮮明になった
+
+★同種写像評価 `ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)` は、上の式で
+
+    `12(htFaltOf(E′) − htFaltOf(E))`
+      `= −(12/d)Σ_p [neronExp_p(E′) − neronExp_p(E)]·log N(p)`
+        `− (6/d)Σ_σ log( covol(Λ_{E′^σ}) / covol(Λ_{E^σ}) )`
+
+となる。★★アルキメデス側（第 2 項）は**取れている**——解析的な同種写像で
+`covol` は `1/l` 倍（`§9-1017`・`§9-1019`）。
+☆★★★**残るのは第 1 項、すなわち `neronExp` の差**である
+——これがまさに `[DelSB616]` の段 2（`w(H)/𝒪` は `#H` で消える）であり、
+「`ω_{E′} ⊆ ω_E` で余核が `l` で消える」の付値による言い換えである。
+
+★★★★**目標はこれで完全に局所化した**: 各素点 `p` で
+
+    `neronExp_p(E/H) − neronExp_p(E)` が `log(l)` の程度で抑えられること。
+
+☆Néron モデルの理論（mathlib に無い）を要するが、**述語の側は本プロジェクトに既にある**
+——`neronExp` は `Found/GaloisRep/NeronWitness.lean` で構成済みである。

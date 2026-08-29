@@ -1909,6 +1909,14 @@
       ],
       "checkedOn": "2026-08-29、Mathlib 全体を import した REPL で `#check`"
     },
-    "nextConcreteStep": "★次の一手は **`PeriodPair`（本プロジェクト）と `ZLattice.covolume`（mathlib）を繋ぐこと**、そして `(2π)¹²·‖Δ‖_Pet = |Δ|·covol⁶` を証明することである。★★それができれば `12·htFaltOf = −12log(2π) − (6/d)Σ log covol` が取れ、同種写像評価は葉 (1)(2)（極小モデルのスケーリング）だけになる。★★★本プロジェクトには `Found/GenEll/Covolume.lean`・`LatticeFromInvariants.lean`・`CurveArchInv.lean` があり、受け皿は揃っている。"
+    "nextConcreteStep": "★次の一手は **`PeriodPair`（本プロジェクト）と `ZLattice.covolume`（mathlib）を繋ぐこと**、そして `(2π)¹²·‖Δ‖_Pet = |Δ|·covol⁶` を証明することである。★★それができれば `12·htFaltOf = −12log(2π) − (6/d)Σ log covol` が取れ、同種写像評価は葉 (1)(2)（極小モデルのスケーリング）だけになる。★★★本プロジェクトには `Found/GenEll/Covolume.lean`・`LatticeFromInvariants.lean`・`CurveArchInv.lean` があり、受け皿は揃っている。",
+    "correction20260829": {
+      "measuredAt": "2026-08-29",
+      "what": "☆★**自分の導出の訂正**: 上の `keyStructuralFinding` に書いた `12·htFaltOf = −12log(2π) − (6/d)Σ_σ log covol_min` は、**大域的に極小なモデルが取れる場合の式**である。",
+      "why": "★`Δ_min` は `L` の元ではなく**局所データの集まり**である（`minDeltaExp p W = v_p(Δ_W) − 12·neronExp p W`）。★★素直に積公式を通すと `Σ_σ log|σ(Δ_E)|` が打ち消し合って",
+      "correctFormula": "**`12·htFaltOf = −12·log(2π) − (12/d)·Σ_p neronExp_p·log N(p) − (6/d)·Σ_σ log covol(Λ_{E^σ})`**（`Λ_{E^σ}` は**モデル `E` の**周期格子。`neronExp ≡ 0` なら簡単な式に戻る）。",
+      "consequence": "★★★★**目標はむしろ鮮明になった**。同種写像評価は`12(htFaltOf(E′) − htFaltOf(E)) = −(12/d)Σ_p [neronExp_p(E′) − neronExp_p(E)]·log N(p) − (6/d)Σ_σ log(covol(Λ_{E′^σ})/covol(Λ_{E^σ}))` になり、★アルキメデス側（第 2 項）は**取れている**（`§9-1017`・`§9-1019`、`covol` は `1/l` 倍）。☆★★★残るのは**第 1 項、すなわち `neronExp` の差**だけである。",
+      "localizedTarget": "★★★★★**目標は完全に局所化した**: 各素点 `p` で `neronExp_p(E/H) − neronExp_p(E)` が `log(l)` の程度で抑えられること。★これがまさに `[DelSB616]` の段 2（`w(H)/𝒪` は `#H` で消える）であり、「`ω_{E′} ⊆ ω_E` で余核が `l` で消える」の付値による言い換えである。☆Néron モデルの理論（mathlib に無い）を要するが、**述語の側は本プロジェクトに既にある**——`neronExp` は `Found/GaloisRep/NeronWitness.lean` で構成済みである。"
+    }
   }
 }
