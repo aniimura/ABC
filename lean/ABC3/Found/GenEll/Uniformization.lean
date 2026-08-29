@@ -745,12 +745,12 @@ theorem half_omega1_notMem (P : PeriodPair) : (P.ω₁ / 2) ∉ P.lattice := by
 open Classical Filter Topology Bornology in
 /-- ★★★★★★格子の外では `(℘ − x₀)⁻¹` は微分可能。 -/
 theorem wp_inv_differentiableAt_of_notMem (P : PeriodPair) (x₀ : ℂ)
-    (hcon : ∀ z, P.weierstrassP z ≠ x₀) (p : ℂ) (hp : p ∉ P.lattice) :
+    (hcon : ∀ z ∉ P.lattice, P.weierstrassP z ≠ x₀) (p : ℂ) (hp : p ∉ P.lattice) :
     DifferentiableAt ℂ (fun z => if z ∈ P.lattice then (0:ℂ)
       else (P.weierstrassP z - x₀)⁻¹) p := by
   have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
   have hA : AnalyticAt ℂ (fun z => (P.weierstrassP z - x₀)⁻¹) p :=
-    ((P.analyticOnNhd_weierstrassP p hp).sub analyticAt_const).inv (sub_ne_zero.2 (hcon p))
+    ((P.analyticOnNhd_weierstrassP p hp).sub analyticAt_const).inv (sub_ne_zero.2 (hcon p hp))
   refine hA.differentiableAt.congr_of_eventuallyEq ?_
   filter_upwards [hopen.mem_nhds hp] with z hz
   simp only [Set.mem_compl_iff, SetLike.mem_coe] at hz
@@ -763,7 +763,7 @@ open Classical Filter Topology Bornology in
 Riemann の除去可能特異点定理（mathlib の
 `Complex.differentiableOn_compl_singleton_and_continuousAt_iff`）で微分可能になる。 -/
 theorem wp_inv_differentiableAt_of_mem (P : PeriodPair) (x₀ : ℂ)
-    (hcon : ∀ z, P.weierstrassP z ≠ x₀) (p : ℂ) (hp : p ∈ P.lattice) :
+    (hcon : ∀ z ∉ P.lattice, P.weierstrassP z ≠ x₀) (p : ℂ) (hp : p ∈ P.lattice) :
     DifferentiableAt ℂ (fun z => if z ∈ P.lattice then (0:ℂ)
       else (P.weierstrassP z - x₀)⁻¹) p := by
   set g : ℂ → ℂ := fun z => if z ∈ P.lattice then (0:ℂ) else (P.weierstrassP z - x₀)⁻¹ with hg
@@ -811,7 +811,8 @@ open Classical in
 ★★★★☆**これが一様化 `ℂ/Λ → E(ℂ)` の全射性の `x` 座標の段である**
 （`§9-1039`（第 597）で「mathlib に無い」と測ったもの）。
 ☆残るのは `y` 座標（`℘′` の符号の選択）と単射性である。 -/
-theorem weierstrassP_surjective (P : PeriodPair) (x₀ : ℂ) : ∃ z, P.weierstrassP z = x₀ := by
+theorem weierstrassP_surjective (P : PeriodPair) (x₀ : ℂ) :
+    ∃ z, z ∉ P.lattice ∧ P.weierstrassP z = x₀ := by
   by_contra hcon0
   push_neg at hcon0
   set g : ℂ → ℂ := fun z => if z ∈ P.lattice then (0:ℂ) else (P.weierstrassP z - x₀)⁻¹ with hg
@@ -831,15 +832,53 @@ theorem weierstrassP_surjective (P : PeriodPair) (x₀ : ℂ) : ∃ z, P.weierst
   have hconst := elliptic_liouville P g hdiff hper (P.ω₁ / 2) 0
   have h0 : g 0 = 0 := by simp [hg, P.lattice.zero_mem]
   have hval : (P.weierstrassP (P.ω₁ / 2) - x₀)⁻¹ = 0 := by
-    have : g (P.ω₁ / 2) = 0 := by rw [hconst, h0]
-    simpa [hg, hhalf] using this
-  exact hcon0 (P.ω₁ / 2) (by
-    have := inv_eq_zero.1 hval
-    linear_combination this)
+    have hgz : g (P.ω₁ / 2) = 0 := by rw [hconst, h0]
+    simpa [hg, hhalf] using hgz
+  exact hcon0 (P.ω₁ / 2) hhalf (by
+    have hz := inv_eq_zero.1 hval
+    linear_combination hz)
 
 def weierstrassP_surjective.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(℘ は全射——一様化の全射性の x 座標の段。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**一様化は全射**。
+
+    `latticeCurve P` の上の任意の点 `(x₀, y₀)` は `(℘(z), ℘′(z)/2)` の形である
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★機構は 2 段:
+
+1. `℘` は全射（第 603）なので `℘(z₀) = x₀` となる `z₀ ∉ Λ` がある
+2. `℘′(z₀)² = 4x₀³ − g₂x₀ − g₃ = (2y₀)²` なので `℘′(z₀) = ±2y₀`。
+   ★符号が合わなければ `−z₀` を取る（`℘` は偶・`℘′` は奇）
+
+★★★★☆**これが `§9-1039`（第 597）で「mathlib に無い」と測った
+一様化 `ℂ/Λ → E(ℂ)` の全射性である**——第 603 と合わせて塞がった。
+
+☆残るのは単射性（`℘(z) = ℘(w)` かつ `℘′(z) = ℘′(w)` なら `z ≡ w mod Λ`）。 -/
+theorem latticePoint_surjective (P : PeriodPair) (x₀ y₀ : ℂ)
+    (h : (latticeCurve P).toAffine.Equation x₀ y₀) :
+    ∃ z, z ∉ P.lattice ∧ latticePointX P z = x₀ ∧ latticePointY P z = y₀ := by
+  obtain ⟨z₀, hz₀, hx⟩ := weierstrassP_surjective P x₀
+  have hsq := P.derivWeierstrassP_sq z₀ hz₀
+  rw [WeierstrassCurve.Affine.equation_iff] at h
+  simp only [latticeCurve] at h
+  have hy : (P.derivWeierstrassP z₀) ^ 2 = (2 * y₀) ^ 2 := by
+    rw [hsq, hx]
+    linear_combination -4 * h
+  rcases sq_eq_sq_iff_eq_or_eq_neg.1 hy with hcase | hcase
+  · exact ⟨z₀, hz₀, hx, by simp only [latticePointY, hcase]; ring⟩
+  · refine ⟨-z₀, fun hc => hz₀ (by simpa using neg_mem hc), ?_, ?_⟩
+    · simp only [latticePointX, P.weierstrassP_neg z₀]; exact hx
+    · simp only [latticePointY, P.derivWeierstrassP_neg z₀, hcase]; ring
+
+def latticePoint_surjective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(一様化は全射——ℂ/Λ → E(ℂ) の全射性。★無条件)",
     sectionId := "genell-prop-3-4" }
 
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
