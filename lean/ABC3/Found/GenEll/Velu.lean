@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
 import ABC3.Meta.Claim
 
 /-!
@@ -465,6 +466,121 @@ def veluQuotient.needs : List ABC3.Meta.ProofObligation :=
 section GeneralL
 
 variable {F : Type*} [Field F]
+
+/-! ## ★★★★★★★★★★★★★★★★★★`±` の不変性——「代表系」という言葉が正しい理由 -/
+
+/-- ★★★★★点の `±`——`−Q = (x_Q, negY(x_Q, y_Q))`。
+
+★mathlib の `WeierstrassCurve.Affine.negY x y = −y − a₁x − a₃` をそのまま使う。 -/
+def negPt (W : WeierstrassCurve R) (Q : R × R) : R × R := (Q.1, W.toAffine.negY Q.1 Q.2)
+
+/-- ★★★`−(−Q) = Q`。 -/
+theorem negPt_involutive (W : WeierstrassCurve R) : Function.Involutive (negPt W) := by
+  intro Q
+  simp only [negPt, WeierstrassCurve.Affine.negY_negY]
+
+/-- ★★★★★**`g^y` は `±` で符号が変わる**——`g^y_{−Q} = −g^y_Q`。 -/
+theorem veluGy_negY (W : WeierstrassCurve R) (x y : R) :
+    veluGy W x (W.toAffine.negY x y) = -veluGy W x y := by
+  simp only [veluGy, WeierstrassCurve.Affine.negY]; ring
+
+/-- ★★★★★**`g^x_{−Q} = g^x_Q − a₁·g^y_Q`**。 -/
+theorem veluGx_negY (W : WeierstrassCurve R) (x y : R) :
+    veluGx W x (W.toAffine.negY x y) = veluGx W x y - W.a₁ * veluGy W x y := by
+  simp only [veluGx, veluGy, WeierstrassCurve.Affine.negY]; ring
+
+/-- ★★★★★★**`u_Q` は `±` で不変**——`(g^y)²` だから。 -/
+theorem veluU_negY (W : WeierstrassCurve R) (x y : R) :
+    veluU W x (W.toAffine.negY x y) = veluU W x y := by
+  simp only [veluU, veluGy_negY]; ring
+
+/-- ★★★★★★★★★★**`v_Q` は `±` で不変**。
+
+`v_{−Q} = 2g^x_{−Q} − a₁g^y_{−Q} = 2(g^x − a₁g^y) − a₁(−g^y) = 2g^x − a₁g^y = v_Q`。
+
+★★★**これが「`(H∖{O})/±` の代表系にわたる和」という言い方が正しい理由である。** -/
+theorem veluV_negY (W : WeierstrassCurve R) (x y : R) :
+    veluV W x (W.toAffine.negY x y) = veluV W x y := by
+  simp only [veluV, veluGx_negY, veluGy_negY]; ring
+
+/-- ★★★★★★★★★★**`w_Q` は `±` で不変**——`x_{−Q} = x_Q` だから。 -/
+theorem veluW_negY (W : WeierstrassCurve R) (x y : R) :
+    veluW W x (W.toAffine.negY x y) = veluW W x y := by
+  simp only [veluW, veluU_negY, veluV_negY]
+
+theorem veluV_negPt (W : WeierstrassCurve R) (Q : R × R) :
+    veluV W (negPt W Q).1 (negPt W Q).2 = veluV W Q.1 Q.2 := veluV_negY W Q.1 Q.2
+
+theorem veluW_negPt (W : WeierstrassCurve R) (Q : R × R) :
+    veluW W (negPt W Q).1 (negPt W Q).2 = veluW W Q.1 Q.2 := veluW_negY W Q.1 Q.2
+
+/-- ★★★★★★★★★★★★**代表系を取り替えても `v` の和は変わらない**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`e` は「各代表 `Q` を `Q` か `−Q` に送る全単射」である。 -/
+theorem veluVSum_congr_negPt (W : WeierstrassCurve R) (S T : Finset (R × R))
+    (e : R × R → R × R)
+    (hmem : ∀ Q ∈ S, e Q ∈ T)
+    (hinj : ∀ Q ∈ S, ∀ Q' ∈ S, e Q = e Q' → Q = Q')
+    (hsurj : ∀ P ∈ T, ∃ Q, ∃ _ : Q ∈ S, e Q = P)
+    (he : ∀ Q ∈ S, e Q = Q ∨ e Q = negPt W Q) :
+    veluVSum W S = veluVSum W T := by
+  refine Finset.sum_bij (fun Q _ => e Q) (fun Q hQ => hmem Q hQ)
+    (fun Q hQ Q' hQ' h => hinj Q hQ Q' hQ' h) hsurj ?_
+  intro Q hQ
+  rcases he Q hQ with h | h
+  · rw [h]
+  · rw [h, veluV_negPt]
+
+/-- ★★★★★★★★★★★★**代表系を取り替えても `w` の和は変わらない**。 -/
+theorem veluWSum_congr_negPt (W : WeierstrassCurve R) (S T : Finset (R × R))
+    (e : R × R → R × R)
+    (hmem : ∀ Q ∈ S, e Q ∈ T)
+    (hinj : ∀ Q ∈ S, ∀ Q' ∈ S, e Q = e Q' → Q = Q')
+    (hsurj : ∀ P ∈ T, ∃ Q, ∃ _ : Q ∈ S, e Q = P)
+    (he : ∀ Q ∈ S, e Q = Q ∨ e Q = negPt W Q) :
+    veluWSum W S = veluWSum W T := by
+  refine Finset.sum_bij (fun Q _ => e Q) (fun Q hQ => hmem Q hQ)
+    (fun Q hQ Q' hQ' h => hinj Q hQ Q' hQ' h) hsurj ?_
+  intro Q hQ
+  rcases he Q hQ with h | h
+  · rw [h]
+  · rw [h, veluW_negPt]
+
+/-- ★★★★★★★★★★★★★★★★★★**Vélu の商は代表系の取り方に依らない**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これで `veluQuotient W S` の `S` は本当に `(H∖{O})/±` の**代表系**であってよい
+——どの代表を選んでも同じ曲線が出る。☆本ファイルの散文の主張が定理になった。 -/
+theorem veluQuotient_congr_negPt (W : WeierstrassCurve R) (S T : Finset (R × R))
+    (e : R × R → R × R)
+    (hmem : ∀ Q ∈ S, e Q ∈ T)
+    (hinj : ∀ Q ∈ S, ∀ Q' ∈ S, e Q = e Q' → Q = Q')
+    (hsurj : ∀ P ∈ T, ∃ Q, ∃ _ : Q ∈ S, e Q = P)
+    (he : ∀ Q ∈ S, e Q = Q ∨ e Q = negPt W Q) :
+    veluQuotient W S = veluQuotient W T := by
+  rw [veluQuotient, veluQuotient,
+    veluVSum_congr_negPt W S T e hmem hinj hsurj he,
+    veluWSum_congr_negPt W S T e hmem hinj hsurj he]
+
+/-- ★★★★★★★★★★**全部の代表を `−` に取り替えても商は同じ**——`e = negPt W` の場合。 -/
+theorem veluQuotient_image_negPt (W : WeierstrassCurve R) (S : Finset (R × R))
+    [DecidableEq (R × R)] :
+    veluQuotient W S = veluQuotient W (S.image (negPt W)) := by
+  refine veluQuotient_congr_negPt W S _ (negPt W) (fun Q hQ => Finset.mem_image_of_mem _ hQ)
+    (fun Q _ Q' _ h => (negPt_involutive W).injective h) ?_ (fun Q _ => Or.inr rfl)
+  intro P hP
+  obtain ⟨Q, hQ, rfl⟩ := Finset.mem_image.1 hP
+  exact ⟨Q, hQ, rfl⟩
+
+def veluQuotient_congr_negPt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商は代表系の取り方に依らない——v_Q・u_Q は ± で不変。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 /-! ## ★★★★★★★★★★★★★★一般の `l`——代表系 `S` にわたる和 -/
 

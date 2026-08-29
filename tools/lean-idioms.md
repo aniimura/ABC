@@ -2106,3 +2106,19 @@ error: Unknown constant `Real.log_two_gt_d9`
 「無い」と決めて仮説に逃がす（`hlog : 0.69 ≤ Real.log 2` を受ける）前に、
 `grep -rln "<名前>" .lake/packages/mathlib/Mathlib/` で**どのファイルにあるか**を見ること。
 ★過去に同じ形で仮説へ逃がした記録がある（本ファイルの上のほうの「名前が変わったもの」の節）。
+
+## `WeierstrassCurve.Affine.negY` が Unknown constant になる（2026-08-29、第 593）
+
+REPL（全 Mathlib）では `W.toAffine.negY` が通るのに、ファイルでは
+
+    Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`
+    Unknown constant `WeierstrassCurve.Affine.negY`
+
+になる。`negY` は `Affine/Basic.lean` ではなく **`Affine/Formula.lean`** にある。
+`import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula` を足す。
+
+★エラーの第 1 行が「`WeierstrassCurve.negY` が無い」と言うのは、
+`Affine R := WeierstrassCurve R` が透明なのでドット記法が
+`Affine` 名前空間を見つけられず `WeierstrassCurve` に落ちるため。
+★★**「不在の定数」ではなく「未 import」を先に疑う**——同じ穴は
+`Real.log_two_gt_d9`（`Analysis.Complex.ExponentialBounds`）でも踏んだ。
