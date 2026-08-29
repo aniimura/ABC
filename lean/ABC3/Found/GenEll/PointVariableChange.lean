@@ -264,6 +264,67 @@ def slope_variableChange_of_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(slope の変換則——接線の場合。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★`Nonsingular` も保たれる -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Nonsingular` は変数変換で保たれる**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★2 つの偏微分は
+
+    `A′ = u⁻⁴·(A + s·B)`,   `B′ = u⁻³·B`
+    （`A = a₁y − (3x² + 2a₂x + a₄)`、`B = 2y + a₁x + a₃`）
+
+と変換される。`B = 0` なら `A′ = u⁻⁴A` なので、
+`(A′ ≠ 0 ∨ B′ ≠ 0) ⟺ (A ≠ 0 ∨ B ≠ 0)`。
+
+★★★☆**`Equation`（第 682）と合わせて、点が点へ移ることが取れた。** -/
+theorem nonsingular_variableChange {F : Type*} [Field F] (C : VariableChange F)
+    (W : WeierstrassCurve F) (x y : F) :
+    (C • W).toAffine.Nonsingular (vcX C x) (vcY C x y) ↔ W.toAffine.Nonsingular x y := by
+  have hu : ((C.u⁻¹ : Fˣ) : F) ≠ 0 := Units.ne_zero _
+  have hA : (C • W).a₁ * (vcY C x y)
+        - (3 * (vcX C x) ^ 2 + 2 * (C • W).a₂ * (vcX C x) + (C • W).a₄)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 4
+        * ((W.a₁ * y - (3 * x ^ 2 + 2 * W.a₂ * x + W.a₄))
+          + C.s * (2 * y + W.a₁ * x + W.a₃)) := by
+    simp only [vcX, vcY, WeierstrassCurve.variableChange_a₁,
+      WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₄]
+    ring
+  have hB : 2 * (vcY C x y) + (C • W).a₁ * (vcX C x) + (C • W).a₃
+      = ((C.u⁻¹ : Fˣ) : F) ^ 3 * (2 * y + W.a₁ * x + W.a₃) := by
+    simp only [vcX, vcY, WeierstrassCurve.variableChange_a₁,
+      WeierstrassCurve.variableChange_a₃]
+    ring
+  have key : ∀ a b : F,
+      (((C.u⁻¹ : Fˣ) : F) ^ 4 * (a + C.s * b) ≠ 0 ∨ ((C.u⁻¹ : Fˣ) : F) ^ 3 * b ≠ 0)
+        ↔ (a ≠ 0 ∨ b ≠ 0) := by
+    intro a b
+    have h4 : ((C.u⁻¹ : Fˣ) : F) ^ 4 ≠ 0 := pow_ne_zero 4 hu
+    have h3 : ((C.u⁻¹ : Fˣ) : F) ^ 3 ≠ 0 := pow_ne_zero 3 hu
+    rw [mul_ne_zero_iff, mul_ne_zero_iff]
+    simp only [h4, h3, true_and, ne_eq, not_false_eq_true]
+    constructor
+    · rintro (h | h)
+      · rcases eq_or_ne b 0 with hb | hb
+        · left; simpa [hb] using h
+        · right; exact hb
+      · right; exact h
+    · rintro (h | h)
+      · rcases eq_or_ne b 0 with hb | hb
+        · left; simpa [hb] using h
+        · right; exact hb
+      · right; exact h
+  rw [WeierstrassCurve.Affine.nonsingular_iff', WeierstrassCurve.Affine.nonsingular_iff',
+    hA, hB, equation_variableChange, key]
+
+def nonsingular_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Nonsingular も変数変換で保たれる——mathlib に無い。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
