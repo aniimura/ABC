@@ -31991,3 +31991,46 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 極小モデルの選択で満たす）。これが済むと `Skeleton/GenEll/Section3.lean` の
 `lemma_3_5`（すでに `sorry` なし）が `Found/` に降りてくる。
 
+
+## 2026-08-29（第 704-711）——`Lemma 3.5` の残りは**プロジェクト内の 1 本**
+
+### いま `Lemma 3.5` に残っている入力
+
+    ∀ p ∈ S（悪い還元の素点）, tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l
+
+これだけである。★★★**未証明の外部引用はもう無い。**
+
+### そこへ至る鎖（すべて `Found/`、`sorry` なし）
+
+| ブロック | 定理 | 内容 |
+|---|---|---|
+| 704 | `htFalt_veluQuotientFull_le` | `ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log l` |
+| 705 | `lemma_3_5_velu` | `hfalt` を外した（**外部引用ゼロ**） |
+| 706 | `lemma_3_5_velu_local` | `hdeg` を局所の `Δ_min` へ |
+| 707 | `lemma_3_5_velu_bad` | 悪い素点だけへ |
+| 709 | `localHeight_eq_minDeltaExp` | 半安定なら局所高さ ＝ `v_p(Δ_min)` |
+| 710 | `minDeltaExp_eq_mul_of_tateParam` | `q_{E′} = q_E^l` ⟹ `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))` |
+
+### 第 704 の内側（本セッションの解析）
+
+* 一様化 `ℂ/Λ ≅ E(ℂ)`（第 663）——全射（603-604）・単射（624）・準同型（661）
+* `Λ′ = Λ + ℤz₀`、`[Λ′:Λ] = l`、Hermite 標準形で `|AD − BC| = l`（662-668）
+* Laurent 係数の比較で `g₂′ = g₂ + 20v`・`g₃′ = g₃ + 28w` ⟹ **`α = 1`**（669-676）
+* `veluQuotientFull`（`±` 代表系を取らない商）（679）
+* 変数変換・環準同型の点への作用（682-703）——`Equation`・`Nonsingular`・
+  `negY`/`addX`/`addY`/`slope`・加法保存・位数保存・群同型・合成・輸送・引き戻し
+
+★★★**このうち mathlib にあるものは 1 つも無い。**
+
+### 次にやること（順に）
+
+1. `Lemma 3.2, (ii)` の群同型 `(Lˣ/q^ℤ)/(μ_l の像) ≃* Lˣ/(q^l)^ℤ` と
+   `TateCurveWitness.lean:139`（`W.Point ≃+ Additive (Kˣ ⧸ zpowers (tateParamK W h))`）を
+   突き合わせて `tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l` を出す
+   ——Tate 一意化の台帳の**段 3（有限拡大）・段 4（帰納極限）**
+2. それを第 710 に渡して `hbad` を外し、`Lemma 3.5` の**項目全体の `.src`** を置く
+3. `Lemma 3.7`（第 1・第 2 の主張は無条件で済み、第 3 が `Lemma 3.5` 待ち）
+4. `Theorem 3.8`（Weil 対は `Found/` に 197 ファイル建設済み。残るのは半安定還元の判定）
+5. `Corollary 4.3`・`4.4`（新しい基盤理論は要らない——数値の帳簿）
+6. `Theorem 2.1`（§2）——étale 基本群 ＋ Riemann–Roch（Belyi）。最も遠い
+
