@@ -4678,6 +4678,127 @@ def iteratedDeriv_two_weierstrassPExcept.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘[Λ−0] の原点での 2 階微分は g₂/10。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★`g₃` の比較 -/
+
+/-- ★★★★★★`℘‴ = 12·℘·℘′`。 -/
+theorem iteratedDeriv_three_weierstrassP (P : PeriodPair) {w : ℂ} (hw : w ∉ P.lattice) :
+    iteratedDeriv 3 P.weierstrassP w
+      = 12 * P.weierstrassP w * P.derivWeierstrassP w := by
+  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
+  have hiter2 : iteratedDeriv 2 P.weierstrassP = deriv P.derivWeierstrassP := by
+    rw [iteratedDeriv_succ, iteratedDeriv_one, PeriodPair.deriv_weierstrassP]
+  have heq : deriv P.derivWeierstrassP
+      =ᶠ[nhds w] fun z => 6 * P.weierstrassP z ^ 2 - P.g₂ / 2 := by
+    filter_upwards [hopen.mem_nhds hw] with z hz
+    exact deriv_derivWeierstrassP P hz
+  rw [iteratedDeriv_succ, hiter2, heq.deriv_eq]
+  have h1 := hasDerivAt_weierstrassP P hw
+  have hb := ((h1.pow 2).const_mul (6 : ℂ)).sub_const (P.g₂ / 2)
+  have h2 : HasDerivAt (fun z : ℂ => 6 * P.weierstrassP z ^ 2 - P.g₂ / 2) _ w :=
+    hb.congr_of_eventuallyEq (by filter_upwards with z; simp only [Pi.pow_apply])
+  rw [h2.deriv]
+  push_cast
+  ring
+
+/-- ★★★★★★★★`℘⁗ = 120℘³ − 18g₂℘ − 12g₃`。
+
+★`℘⁗ = 12(℘′² + ℘·℘″) = 12(4℘³ − g₂℘ − g₃ + 6℘³ − g₂℘/2)`。 -/
+theorem iteratedDeriv_four_weierstrassP (P : PeriodPair) {w : ℂ} (hw : w ∉ P.lattice) :
+    iteratedDeriv 4 P.weierstrassP w
+      = 120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃ := by
+  have hopen : IsOpen ((P.lattice : Set ℂ)ᶜ) := P.isClosed_lattice.isOpen_compl
+  have heq : iteratedDeriv 3 P.weierstrassP
+      =ᶠ[nhds w] fun z => 12 * P.weierstrassP z * P.derivWeierstrassP z := by
+    filter_upwards [hopen.mem_nhds hw] with z hz
+    exact iteratedDeriv_three_weierstrassP P hz
+  rw [iteratedDeriv_succ, heq.deriv_eq]
+  have h1 := hasDerivAt_weierstrassP P hw
+  have h2 : HasDerivAt P.derivWeierstrassP (6 * P.weierstrassP w ^ 2 - P.g₂ / 2) w := by
+    have h := hasDerivAt_derivWeierstrassP P hw
+    rwa [deriv_derivWeierstrassP P hw] at h
+  have h3 := ((h1.mul h2).const_mul (12 : ℂ))
+  have h4 : HasDerivAt (fun z => 12 * P.weierstrassP z * P.derivWeierstrassP z)
+      (12 * (P.derivWeierstrassP w * P.derivWeierstrassP w
+        + P.weierstrassP w * (6 * P.weierstrassP w ^ 2 - P.g₂ / 2))) w := by
+    refine h3.congr_of_eventuallyEq ?_
+    filter_upwards with z
+    simp only [Pi.mul_apply]
+    ring
+  rw [h4.deriv]
+  have hsq := P.derivWeierstrassP_sq w hw
+  linear_combination 12 * hsq
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`g₃` の同種写像公式**
+
+    `g₃(Λ′) = g₃(Λ) + (7/6)·Σ_{w ∈ T∖{0}} (120℘_Λ(w)³ − 18g₂℘_Λ(w) − 12g₃)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★第 671 の等式の両辺を原点で 4 回微分する。左辺は `6g₃′/7 − 6g₃/7`
+（mathlib の Taylor 係数 `5!·sumInvPow 0 6 = 120 G₆`、`g₃ = 140 G₆`）、
+右辺は `Σ ℘_Λ⁗(w)`。
+
+★★★★☆**第 672 の `g₂` と合わせて、`latticeCurve P′` の係数が
+`latticeCurve P` と代表系だけで決まった**——これを代数側の `veluQuotient`
+（`Found/GenEll/Velu.lean`）と突き合わせれば `α = 1` が出る。 -/
+theorem g₃_isogeny (P P' : PeriodPair) (T : Finset ℂ) (h0T : (0 : ℂ) ∈ T)
+    (hT : ∀ w ∈ T, w ∈ P'.lattice)
+    (hrep : ∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+      ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice)
+    (hvelu : ∀ z, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) :
+    P'.g₃ = P.g₃ + (7 / 6) * ∑ w ∈ T.erase 0,
+      (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃) := by
+  have hfun : (fun z => P'.weierstrassPExcept 0 z - P.weierstrassPExcept 0 z)
+      = fun z => ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w) :=
+    funext (weierstrassPExcept_sub_eq_sum P P' T h0T hvelu)
+  have hconst : ∀ c : ℂ, iteratedDeriv 4 (fun _ : ℂ => c) 0 = 0 := by
+    intro c
+    rw [iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_one]
+    simp
+  have hL : iteratedDeriv 4
+      (fun z => P'.weierstrassPExcept 0 z - P.weierstrassPExcept 0 z) 0
+      = 6 * P'.g₃ / 7 - 6 * P.g₃ / 7 := by
+    rw [iteratedDeriv_fun_sub (P'.analyticAt_weierstrassPExcept 0).contDiffAt
+      (P.analyticAt_weierstrassPExcept 0).contDiffAt,
+      iteratedDeriv_four_weierstrassPExcept, iteratedDeriv_four_weierstrassPExcept]
+  have hterm : ∀ w ∈ T.erase 0,
+      iteratedDeriv 4 (fun z : ℂ => P.weierstrassP (z + w) - P.weierstrassP w) 0
+        = 120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃ := by
+    intro w hw
+    have hwn : w ∉ P.lattice := rep_notMem_lattice P P' T h0T hT hrep hw
+    have hshift : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) 0 :=
+      shifted_analyticAt P 0 w (by rw [zero_add]; exact hwn)
+    rw [iteratedDeriv_fun_sub hshift.contDiffAt contDiffAt_const]
+    have h1 : iteratedDeriv 4 (fun z : ℂ => P.weierstrassP (z + w)) 0
+        = iteratedDeriv 4 P.weierstrassP w := by
+      rw [iteratedDeriv_comp_add_const]
+      simp
+    rw [h1, iteratedDeriv_four_weierstrassP P hwn, hconst, sub_zero]
+  have hR : iteratedDeriv 4
+      (fun z => ∑ w ∈ T.erase 0, (P.weierstrassP (z + w) - P.weierstrassP w)) 0
+      = ∑ w ∈ T.erase 0,
+        (120 * P.weierstrassP w ^ 3 - 18 * P.g₂ * P.weierstrassP w - 12 * P.g₃) := by
+    rw [iteratedDeriv_fun_sum (fun w hw => by
+      have hwn : w ∉ P.lattice := rep_notMem_lattice P P' T h0T hT hrep hw
+      have hshift : AnalyticAt ℂ (fun z : ℂ => P.weierstrassP (z + w)) 0 :=
+        shifted_analyticAt P 0 w (by rw [zero_add]; exact hwn)
+      exact hshift.contDiffAt.sub contDiffAt_const)]
+    exact Finset.sum_congr rfl hterm
+  rw [hfun, hR] at hL
+  linear_combination (-7 / 6 : ℂ) * hL
+
+def iteratedDeriv_four_weierstrassP.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘⁗ = 120℘³ − 18g₂℘ − 12g₃。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def g₃_isogeny.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(g₃ の同種写像公式——Vélu の商の a₆ の解析版。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
