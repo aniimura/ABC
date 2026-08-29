@@ -1432,6 +1432,87 @@ def mem_lattice_of_weierstrassP_periodic.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(℘ の周期群はちょうど Λ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★ODE の一意性で零点勘定を回避する -/
+
+/-- ★★★★★平行移動した `℘` の微分。 -/
+theorem hasDerivAt_weierstrassP_shift (P : PeriodPair) (a : ℂ) {z : ℂ}
+    (hz : z + a ∉ P.lattice) :
+    HasDerivAt (fun s : ℂ => P.weierstrassP (s + a)) (P.derivWeierstrassP (z + a)) z :=
+  HasDerivAt.comp_add_const z a (hasDerivAt_weierstrassP P hz)
+
+/-- ★★★★★平行移動した `℘′` の微分。 -/
+theorem hasDerivAt_derivWeierstrassP_shift (P : PeriodPair) (a : ℂ) {z : ℂ}
+    (hz : z + a ∉ P.lattice) :
+    HasDerivAt (fun s : ℂ => P.derivWeierstrassP (s + a))
+      (deriv P.derivWeierstrassP (z + a)) z :=
+  HasDerivAt.comp_add_const z a (hasDerivAt_derivWeierstrassP P hz)
+
+/-- ★★★★`{s | s ∉ Λ ∧ s + a ∉ Λ}` は開集合。 -/
+theorem isOpen_shiftDomain (P : PeriodPair) (a : ℂ) :
+    IsOpen {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} := by
+  have h1 : IsOpen {s : ℂ | s ∉ P.lattice} := P.isClosed_lattice.isOpen_compl
+  have h2 : IsOpen {s : ℂ | s + a ∉ P.lattice} := by
+    have he : {s : ℂ | s + a ∉ P.lattice}
+        = (fun s : ℂ => s + a) ⁻¹' ((P.lattice : Set ℂ)ᶜ) := rfl
+    rw [he]
+    exact (P.isClosed_lattice.isOpen_compl).preimage (by fun_prop)
+  exact h1.inter h2
+
+/-- ★★★★★★**差 `h(z) ≔ ℘(z+a) − ℘(z)` の 1 階導関数**。 -/
+theorem hasDerivAt_shiftDiff (P : PeriodPair) (a : ℂ) {z : ℂ}
+    (hz : z ∉ P.lattice) (hza : z + a ∉ P.lattice) :
+    HasDerivAt (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s)
+      (P.derivWeierstrassP (z + a) - P.derivWeierstrassP z) z :=
+  (hasDerivAt_weierstrassP_shift P a hza).sub (hasDerivAt_weierstrassP P hz)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★**差は線型の 2 階 ODE を満たす**
+
+    `h″(z) = 6·(℘(z+a) + ℘(z))·h(z)`
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`Found/GenEll/WeierstrassODE.lean` の `deriv_derivWeierstrassP`
+（`℘″ = 6℘² − g₂/2`）を `℘(·+a)` と `℘` の両方に当てて引き算するだけである
+——`g₂/2` が消えて `6(u² − v²) = 6(u+v)(u−v)` になる。
+
+★★★☆**これが零点勘定を回避する鍵である**。`h(z₂) = h′(z₂) = 0` なら、
+解析的位数の算術で `h` は `z₂` の近傍で恒等的に `0` になる:
+位数を `n`（有限、`≥ 2`）とすると `h″` の位数は `n − 2`、
+一方 `6(u+v)·h` の位数は `≥ n`——矛盾。 -/
+theorem deriv_deriv_shiftDiff (P : PeriodPair) (a : ℂ) {z : ℂ}
+    (hz : z ∉ P.lattice) (hza : z + a ∉ P.lattice) :
+    deriv (deriv (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s)) z
+      = 6 * (P.weierstrassP (z + a) + P.weierstrassP z)
+          * (P.weierstrassP (z + a) - P.weierstrassP z) := by
+  have hnhds : {s : ℂ | s ∉ P.lattice ∧ s + a ∉ P.lattice} ∈ nhds z :=
+    (isOpen_shiftDomain P a).mem_nhds ⟨hz, hza⟩
+  have heq : deriv (fun s : ℂ => P.weierstrassP (s + a) - P.weierstrassP s)
+      =ᶠ[nhds z] fun s : ℂ => P.derivWeierstrassP (s + a) - P.derivWeierstrassP s := by
+    filter_upwards [hnhds] with s hs
+    exact (hasDerivAt_shiftDiff P a hs.1 hs.2).deriv
+  rw [heq.deriv_eq]
+  have h2 : HasDerivAt (fun s : ℂ => P.derivWeierstrassP (s + a) - P.derivWeierstrassP s)
+      (deriv P.derivWeierstrassP (z + a) - deriv P.derivWeierstrassP z) z :=
+    (hasDerivAt_derivWeierstrassP_shift P a hza).sub (hasDerivAt_derivWeierstrassP P hz)
+  rw [h2.deriv, deriv_derivWeierstrassP P hza, deriv_derivWeierstrassP P hz]
+  ring
+
+def deriv_deriv_shiftDiff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(℘(z+a) − ℘(z) は線型の 2 階 ODE h″ = 6(u+v)h を満たす。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def deriv_deriv_shiftDiff.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★到達点(2026-08-29、第 622): これで零点勘定を回避できる見込みが立った。" ++
+       "☆h(z₂) = h′(z₂) = 0 なら解析的位数の算術で h は z₂ の近傍で恒等的に 0:" ++
+       "位数を n(有限、≥ 2)とすると h″ の位数は n − 2(analyticOrderAt_deriv_of_pos を 2 回)、" ++
+       "一方 6(u+v)·h の位数は ≥ n(analyticOrderAt_smul)——矛盾。" ++
+       "★したがって位数は ⊤ で h は近傍で 0。" ++
+       "★★一致の定理で ℂ ∖ (Λ ∪ (−a+Λ)) 全体へ延ばし、" ++
+       "mem_lattice_of_weierstrassP_periodic(第 620)で a ∈ Λ、すなわち単射性") 13 ]
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
