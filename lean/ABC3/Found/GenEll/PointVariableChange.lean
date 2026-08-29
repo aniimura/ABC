@@ -179,6 +179,91 @@ def addY_variableChange.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(addY は変数変換と両立する。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★`slope` の変換則 -/
+
+section Field
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★`vcX C` は単射。 -/
+theorem vcX_injective (C : VariableChange F) : Function.Injective (vcX C) := by
+  intro a b hab
+  have hu : ((C.u⁻¹ : Fˣ) : F) ^ 2 ≠ 0 := pow_ne_zero 2 (Units.ne_zero _)
+  have h := mul_left_cancel₀ hu hab
+  linear_combination h
+
+/-- ★★★★`vcY C x` は単射。 -/
+theorem vcY_injective (C : VariableChange F) (x : F) : Function.Injective (vcY C x) := by
+  intro a b hab
+  have hu : ((C.u⁻¹ : Fˣ) : F) ^ 3 ≠ 0 := pow_ne_zero 3 (Units.ne_zero _)
+  have h := mul_left_cancel₀ hu hab
+  linear_combination h
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`slope` の変換則——`x₁ ≠ x₂` の場合**
+
+    `slope_{C•W}(x₁′, x₂′, y₁′, y₂′) = u⁻¹·(slope_W(x₁,x₂,y₁,y₂) − s)` -/
+theorem slope_variableChange_of_ne (C : VariableChange F) (W : WeierstrassCurve F)
+    {x₁ x₂ : F} (y₁ y₂ : F) (hx : x₁ ≠ x₂) :
+    (C • W).toAffine.slope (vcX C x₁) (vcX C x₂) (vcY C x₁ y₁) (vcY C x₂ y₂)
+      = vcSlope C (W.toAffine.slope x₁ x₂ y₁ y₂) := by
+  have hx' : vcX C x₁ ≠ vcX C x₂ := fun hc => hx (vcX_injective C hc)
+  rw [WeierstrassCurve.Affine.slope, if_neg hx', WeierstrassCurve.Affine.slope, if_neg hx]
+  have hu : ((C.u⁻¹ : Fˣ) : F) ≠ 0 := Units.ne_zero _
+  have hd : x₁ - x₂ ≠ 0 := sub_ne_zero.2 hx
+  have hnum : vcY C x₁ y₁ - vcY C x₂ y₂
+      = ((C.u⁻¹ : Fˣ) : F) ^ 3 * ((y₁ - y₂) - C.s * (x₁ - x₂)) := by
+    simp only [vcY]; ring
+  have hden : vcX C x₁ - vcX C x₂ = ((C.u⁻¹ : Fˣ) : F) ^ 2 * (x₁ - x₂) := by
+    simp only [vcX]; ring
+  rw [hnum, hden, vcSlope, div_eq_iff (mul_ne_zero (pow_ne_zero 2 hu) hd)]
+  field_simp
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★**`slope` の変換則——接線の場合**
+
+★`x₁ = x₂` かつ `y₁ ≠ negY(x, y₂)` かつ `y₁ ≠ negY(x, y₁)`（＝接線が定義される）。 -/
+theorem slope_variableChange_of_eq (C : VariableChange F) (W : WeierstrassCurve F)
+    (x y₁ y₂ : F) (hy : y₁ ≠ W.toAffine.negY x y₂)
+    (hy' : y₁ ≠ W.toAffine.negY x y₁) :
+    (C • W).toAffine.slope (vcX C x) (vcX C x) (vcY C x y₁) (vcY C x y₂)
+      = vcSlope C (W.toAffine.slope x x y₁ y₂) := by
+  have hy2 : vcY C x y₁ ≠ (C • W).toAffine.negY (vcX C x) (vcY C x y₂) := by
+    rw [negY_variableChange]
+    exact fun hc => hy (vcY_injective C x hc)
+  rw [WeierstrassCurve.Affine.slope, if_pos rfl, if_neg hy2,
+    WeierstrassCurve.Affine.slope, if_pos rfl, if_neg hy]
+  have hu : ((C.u⁻¹ : Fˣ) : F) ≠ 0 := Units.ne_zero _
+  have hd : y₁ - W.toAffine.negY x y₁ ≠ 0 := sub_ne_zero.2 hy'
+  have hd2 : vcY C x y₁ - (C • W).toAffine.negY (vcX C x) (vcY C x y₁)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 3 * (y₁ - W.toAffine.negY x y₁) := by
+    rw [negY_variableChange]
+    simp only [vcY, WeierstrassCurve.Affine.negY]
+    ring
+  have hnum : 3 * (vcX C x) ^ 2 + 2 * (C • W).a₂ * (vcX C x) + (C • W).a₄
+        - (C • W).a₁ * (vcY C x y₁)
+      = ((C.u⁻¹ : Fˣ) : F) ^ 4
+        * ((3 * x ^ 2 + 2 * W.a₂ * x + W.a₄ - W.a₁ * y₁)
+          - C.s * (y₁ - W.toAffine.negY x y₁)) := by
+    simp only [vcX, vcY, WeierstrassCurve.Affine.negY,
+      WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂,
+      WeierstrassCurve.variableChange_a₄]
+    ring
+  rw [hd2, hnum, vcSlope, div_eq_iff (mul_ne_zero (pow_ne_zero 3 hu) hd)]
+  field_simp
+
+end Field
+
+def slope_variableChange_of_ne.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(slope の変換則——x₁ ≠ x₂ の場合。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def slope_variableChange_of_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(slope の変換則——接線の場合。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 def equation_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Equation は変数変換で保たれる——mathlib に無い。★無条件)",
