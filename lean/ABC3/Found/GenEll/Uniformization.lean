@@ -4228,6 +4228,165 @@ def exists_isogeny_periodPair.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(格子側・完成形——位数 l の点から PeriodPair P′ を作る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★巡回の場合の代表系 -/
+
+/-- ★`|k| < l` で `l ∣ k` なら `k = 0`。 -/
+theorem eq_zero_of_dvd_of_abs_lt {l k : ℤ} (hl : 0 < l) (h : l ∣ k)
+    (h1 : -l < k) (h2 : k < l) : k = 0 := by
+  obtain ⟨c, rfl⟩ := h
+  rcases lt_trichotomy c 0 with hc | hc | hc
+  · nlinarith
+  · simp [hc]
+  · nlinarith
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★`k·z₀ ∈ Λ ⟺ l ∣ k`——`Q` の位数がちょうど `l` のとき。 -/
+theorem intCast_mul_mem_lattice_iff (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hQ : addOrderOf Q = l)
+    {z₀ : ℂ} (hz₀ : uniformMap P hΔ z₀ = Q) (k : ℤ) :
+    (k : ℂ) * z₀ ∈ P.lattice ↔ (l : ℤ) ∣ k := by
+  rw [← uniformMap_eq_zero_iff P hΔ,
+    show ((k : ℂ) * z₀) = k • z₀ by simp [zsmul_eq_mul],
+    ← uniformHom_apply, map_zsmul, uniformHom_apply, hz₀, ← hQ,
+    addOrderOf_dvd_iff_zsmul_eq_zero]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**巡回の場合の代表系 `T = {0, z₀, 2z₀, …, (l−1)z₀}`**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`Λ′ = Λ + ℤz₀` で `z₀` の `Λ` を法とした位数がちょうど `l` のとき、
+`T` は `Λ′/Λ` の代表系である（第 601 `weierstrassP_eq_velu_of_rep` の仮説）。
+
+★★★`p = y + n z₀ ∈ Λ′` に対し `w₀ ≔ ((−n) mod l)·z₀` を取れば
+`p + w₀ ∈ Λ`。一意性は `|k − m| < l` かつ `l ∣ k − m` から。 -/
+theorem exists_velu_rep (P P' : PeriodPair) (z₀ : ℂ) (l : ℕ) (hl : 0 < l)
+    (hP' : P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ))
+    (hord : ∀ k : ℤ, (k : ℂ) * z₀ ∈ P.lattice ↔ (l : ℤ) ∣ k) :
+    ∃ T : Finset ℂ, (0 : ℂ) ∈ T ∧ T.card = l ∧ (∀ w ∈ T, w ∈ P'.lattice) ∧
+      (∀ p ∈ P'.lattice, ∃ w₀ ∈ T, p + w₀ ∈ P.lattice
+        ∧ ∀ w ∈ T, w ≠ w₀ → p + w ∉ P.lattice) := by
+  have hlZ : (0 : ℤ) < (l : ℤ) := by exact_mod_cast hl
+  have hinj : ∀ k ∈ Finset.range l, ∀ k' ∈ Finset.range l,
+      (k : ℂ) * z₀ = (k' : ℂ) * z₀ → k = k' := by
+    intro k hk k' hk' he
+    simp only [Finset.mem_range] at hk hk'
+    have h0 : (((k : ℤ) - (k' : ℤ) : ℤ) : ℂ) * z₀ ∈ P.lattice := by
+      have hz : (((k : ℤ) - (k' : ℤ) : ℤ) : ℂ) * z₀ = 0 := by
+        push_cast
+        linear_combination he
+      rw [hz]
+      exact P.lattice.zero_mem
+    have hd := (hord _).1 h0
+    have hzero := eq_zero_of_dvd_of_abs_lt hlZ hd (by omega) (by omega)
+    omega
+  refine ⟨(Finset.range l).image (fun k : ℕ => (k : ℂ) * z₀), ?_, ?_, ?_, ?_⟩
+  · exact Finset.mem_image.2 ⟨0, Finset.mem_range.2 hl, by simp⟩
+  · have hio : Set.InjOn (fun k : ℕ => (k : ℂ) * z₀) ↑(Finset.range l) := by
+      intro k hk k' hk' he
+      exact hinj k (by simpa using hk) k' (by simpa using hk') he
+    rw [Finset.card_image_of_injOn hio, Finset.card_range]
+  · intro w hw
+    obtain ⟨k, -, rfl⟩ := Finset.mem_image.1 hw
+    rw [hP']
+    refine Submodule.mem_sup_right ?_
+    rw [show ((k : ℂ) * z₀) = (k : ℤ) • z₀ by simp [zsmul_eq_mul]]
+    exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self z₀)
+  · intro p hp
+    rw [hP', Submodule.mem_sup] at hp
+    obtain ⟨y, hy, w, hw, rfl⟩ := hp
+    obtain ⟨n, rfl⟩ := Submodule.mem_span_singleton.1 hw
+    set r : ℤ := (-n) % (l : ℤ) with hrdef
+    have hr0 : 0 ≤ r := Int.emod_nonneg _ hlZ.ne'
+    have hrl : r < (l : ℤ) := Int.emod_lt_of_pos _ hlZ
+    set m : ℕ := r.toNat with hmdef
+    have hmr : (m : ℤ) = r := Int.toNat_of_nonneg hr0
+    have hml : m < l := by omega
+    have hdvd : (l : ℤ) ∣ (n + (m : ℤ)) := by
+      rw [hmr]
+      refine ⟨-((-n) / (l : ℤ)), ?_⟩
+      have hq := Int.emod_add_ediv (-n) (l : ℤ)
+      linear_combination hq
+    refine ⟨(m : ℂ) * z₀, Finset.mem_image.2 ⟨m, Finset.mem_range.2 hml, rfl⟩, ?_, ?_⟩
+    · have he : y + (n • z₀) + (m : ℂ) * z₀ = y + ((n + (m : ℤ) : ℤ) : ℂ) * z₀ := by
+        push_cast [zsmul_eq_mul]
+        ring
+      rw [he]
+      exact P.lattice.add_mem hy ((hord _).2 hdvd)
+    · intro v hv hvne hmem
+      obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hv
+      rw [Finset.mem_range] at hk
+      have he : y + (n • z₀) + (k : ℂ) * z₀ = y + ((n + (k : ℤ) : ℤ) : ℂ) * z₀ := by
+        push_cast [zsmul_eq_mul]
+        ring
+      rw [he] at hmem
+      have hk2 : ((n + (k : ℤ) : ℤ) : ℂ) * z₀ ∈ P.lattice := by
+        have hd2 := P.lattice.sub_mem hmem hy
+        simpa using hd2
+      have hsub : (l : ℤ) ∣ ((k : ℤ) - (m : ℤ)) := by
+        have h2 := (hord (n + (k : ℤ))).1 hk2
+        have h3 : (l : ℤ) ∣ ((n + (k : ℤ)) - (n + (m : ℤ))) := dvd_sub h2 hdvd
+        have h4 : (n + (k : ℤ)) - (n + (m : ℤ)) = (k : ℤ) - (m : ℤ) := by ring
+        rwa [h4] at h3
+      have hzero : ((k : ℤ) - (m : ℤ)) = 0 :=
+        eq_zero_of_dvd_of_abs_lt hlZ hsub (by omega) (by omega)
+      exact hvne (by rw [show k = m by omega])
+
+def exists_velu_rep.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(巡回の場合の代表系 T = {0, z₀, …, (l−1)z₀}。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def intCast_mul_mem_lattice_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(k·z₀ ∈ Λ ⟺ l ∣ k——位数がちょうど l のとき。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`（解析側・完成形）——位数 `l` の点から Vélu の公式まで**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+`E(ℂ)` の位数ちょうど `l` の点 `Q` に対し、`z₀`・周期対 `P′`・整数 `A, B, C, D`・
+代表系 `T`（`|T| = l`）が取れて
+
+    ω₁ = A·ω₁′ + B·ω₂′,  ω₂ = C·ω₁′ + D·ω₂′,  |AD − BC| = l
+
+    ℘_{Λ′}(z) = Σ_{w ∈ T} ℘_Λ(z + w) − Σ_{w ∈ T∖{0}} ℘_Λ(w)
+
+★★★★★★☆**これで「位数 `l` の点 → 指数 `l` の格子 → その `℘` は
+`Λ` の `℘` の Vélu 和で書ける」が一本につながった。**
+
+☆残るのは、この解析的な等式を代数的な Vélu の商
+（`Found/GenEll/Velu.lean` の `veluQuotient`）と突き合わせて
+`α`（`u′ = α·u`）を作ることである。 -/
+theorem exists_velu_formula_of_torsion (P : PeriodPair) (hΔ : latticeDisc P ≠ 0)
+    {Q : (latticeCurve P).toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
+    ∃ (z₀ : ℂ) (P' : PeriodPair) (A B C D : ℤ) (T : Finset ℂ),
+      uniformMap P hΔ z₀ = Q ∧
+      P.ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      P.ω₂ = (C : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * C).natAbs = l ∧
+      P'.lattice = P.lattice ⊔ Submodule.span ℤ ({z₀} : Set ℂ) ∧
+      (0 : ℂ) ∈ T ∧ T.card = l ∧
+      (∀ z : ℂ, P'.weierstrassP z = veluAnalyticX P T (veluAnalyticC P T) z) := by
+  obtain ⟨z₀, P', A, B, C, D, hz₀, h1, h2, hdet, hP'⟩ :=
+    exists_isogeny_periodPair P hΔ hl hQ
+  obtain ⟨T, h0T, hcard, hT, hrep⟩ :=
+    exists_velu_rep P P' z₀ l hl hP' (intCast_mul_mem_lattice_iff P hΔ hQ hz₀)
+  have hle : P.lattice ≤ P'.lattice := by rw [hP']; exact le_sup_left
+  exact ⟨z₀, P', A, B, C, D, T, hz₀, h1, h2, hdet, hP', h0T, hcard,
+    fun z => weierstrassP_eq_velu_of_rep P P' hle T h0T hT hrep z⟩
+
+def exists_velu_formula_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(解析側・完成形——位数 l の点から Vélu の公式まで。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け（`.src`）——★★条つき（一様化の全射性は含まない） -/
 
 def latticeCurve_equation.src : ABC3.Meta.Source :=
