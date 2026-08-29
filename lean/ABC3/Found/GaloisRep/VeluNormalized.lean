@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.GaloisRep.HtFaltCovolume
 import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.IsogenyPeriodPair
+import ABC3.Found.GenEll.LatticeScale
 import ABC3.Meta.Claim
 
 /-!
@@ -253,6 +254,112 @@ def twelve_finrank_htFaltOf_eq_archDefect.src : ABC3.Meta.Source :=
 def htFalt_isogeny_le_of_archDefect.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(残るアルキメデスの穴はただ 1 つ archDefect(E′) = archDefect(E) + 6d·log l)",
+    sectionId := "genell-prop-3-4" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★正規化は要らない——`α` は打ち消し合う -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**次数 `l` の解析的同種写像があれば
+`harch` は自動**——★**正規化 `‖u′‖ = ‖u‖` は要らない**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★同種写像 `φ : E → E′` は ℂ 上で `z ↦ α_σ·z` を誘導し、`α_σ·Λ_σ ⊆ Λ′_σ` の指数が `l` になる。
+モデルのスケーリングは `u′_σ = α_σ·u_σ` で結ばれる（`φ^*(ω′)` と `ω` の比が `α_σ`）。
+
+★★★このとき
+
+    `κ_σ(E′) − κ_σ(E) = 12·log‖α‖ − 6·log(‖α‖²/l) = 12log‖α‖ − 12log‖α‖ + 6log l = 6·log l`
+
+——★★★★**`α` が打ち消し合う**。すなわち `archDefect(E′) = archDefect(E) + 6·d·log(l)` は
+**一様化の取り方にも `α` の大きさにも依らず**、ただ「次数 `l` の同種写像がある」ことだけから従う。
+
+☆第 592・第 594 では `‖u′_σ‖ = ‖u_σ‖`（`φ^*(ω′) = ω` による正規化）を仮定していたが、
+★**それは要らなかった**。Vélu の正規化（`Found/GenEll/Velu.lean` の `velu_omega_gen`）は
+`α_σ = 1` を与えるが、`archDefect` の等式にはその情報は使われない。 -/
+theorem archDefect_isogeny (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (l : ℕ) (hl : 0 < l)
+    (P P' : (L →+* ℂ) → PeriodPair) (C C' : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hPC' : ∀ σ, C' σ • (E'.map σ) = latticeCurve (P' σ))
+    (α : (L →+* ℂ) → ℂ) (hα : ∀ σ, α σ ≠ 0)
+    (hu : ∀ σ, ((C' σ).u : ℂ) = α σ * ((C σ).u : ℂ))
+    (a b c d : (L →+* ℂ) → ℤ)
+    (h₁ : ∀ σ, α σ * (P σ).ω₁ = (a σ : ℂ) * (P' σ).ω₁ + (b σ : ℂ) * (P' σ).ω₂)
+    (h₂ : ∀ σ, α σ * (P σ).ω₂ = (c σ : ℂ) * (P' σ).ω₁ + (d σ : ℂ) * (P' σ).ω₂)
+    (hdet : ∀ σ, (a σ * d σ - b σ * c σ).natAbs = l) :
+    archDefect L E' = archDefect L E + 6 * (Module.finrank ℚ L : ℝ) * Real.log l := by
+  have hl0 : (0:ℝ) < (l:ℝ) := by exact_mod_cast hl
+  rw [archDefect_eq E P C hPC, archDefect_eq E' P' C' hPC']
+  have hterm : ∀ σ : (L →+* ℂ),
+      12 * Real.log ‖((C' σ).u : ℂ)‖ - 6 * Real.log (covol (P' σ))
+        = (12 * Real.log ‖((C σ).u : ℂ)‖ - 6 * Real.log (covol (P σ)))
+          + 6 * Real.log l := by
+    intro σ
+    have hna : ‖α σ‖ ≠ 0 := norm_ne_zero_iff.2 (hα σ)
+    have hnu : ‖((C σ).u : ℂ)‖ ≠ 0 := norm_ne_zero_iff.2 (C σ).u.ne_zero
+    have hcovP : (0:ℝ) < covol (P σ) := covol_pos (P σ)
+    -- ★`α·Λ ⊆ Λ′` が指数 `l` ⟹ `‖α‖²·covol(Λ) = l·covol(Λ′)`
+    have hidx := covol_eq_index_mul_pair (scalePair (P σ) (α σ) (hα σ)) (P' σ)
+      (a σ) (b σ) (c σ) (d σ) l (h₁ σ) (h₂ σ) (hdet σ)
+    rw [covol_scalePair (P σ) (α σ) (hα σ)] at hidx
+    have hnsq : Complex.normSq (α σ) = ‖α σ‖ ^ 2 := Complex.normSq_eq_norm_sq (α σ)
+    rw [hnsq] at hidx
+    -- ★`covol(Λ′) = ‖α‖²·covol(Λ)/l`
+    have hcov' : covol (P' σ) = ‖α σ‖ ^ 2 * covol (P σ) / l := by
+      rw [eq_div_iff (ne_of_gt hl0)]; linear_combination -hidx
+    have hpos : (0:ℝ) < ‖α σ‖ ^ 2 * covol (P σ) :=
+      mul_pos (pow_pos (lt_of_le_of_ne (norm_nonneg _) (Ne.symm hna)) 2) hcovP
+    rw [hu σ, norm_mul, Real.log_mul hna hnu, hcov',
+      Real.log_div (ne_of_gt hpos) (ne_of_gt hl0),
+      Real.log_mul (by positivity) (ne_of_gt hcovP), Real.log_pow]
+    push_cast
+    ring
+  rw [Finset.sum_congr rfl fun σ _ => hterm σ, Finset.sum_add_distrib,
+    Finset.sum_const, Finset.card_univ, NumberField.Embeddings.card L ℂ, nsmul_eq_mul]
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**同種写像の高さ評価
+——アルキメデス側は完全に済んだ形**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★仮定は 2 つだけであり、**どちらも正規化を含まない**:
+
+* 解析的な同種写像のデータ（`α`・`u′ = α·u`・`α·Λ ⊆ Λ′` の指数が `l`）
+* 有限素点側 `hfin`
+
+☆すなわち **`Lemma 3.5` の残りは「次数 `l` の同種写像が ℂ 上で何をするか」と
+`[FC] Ch. I, Prop 2.7` の 2 つに完全に分離した**。 -/
+theorem htFalt_isogeny_le_of_analytic (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) (hl : 0 < l)
+    (P P' : (L →+* ℂ) → PeriodPair) (C C' : (L →+* ℂ) → VariableChange ℂ)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hPC' : ∀ σ, C' σ • (E'.map σ) = latticeCurve (P' σ))
+    (α : (L →+* ℂ) → ℂ) (hα : ∀ σ, α σ ≠ 0)
+    (hu : ∀ σ, ((C' σ).u : ℂ) = α σ * ((C σ).u : ℂ))
+    (a b c d : (L →+* ℂ) → ℤ)
+    (h₁ : ∀ σ, α σ * (P σ).ω₁ = (a σ : ℂ) * (P' σ).ω₁ + (b σ : ℂ) * (P' σ).ω₂)
+    (h₂ : ∀ σ, α σ * (P σ).ω₂ = (c σ : ℂ) * (P' σ).ω₁ + (d σ : ℂ) * (P' σ).ω₂)
+    (hdet : ∀ σ, (a σ * d σ - b σ * c σ).natAbs = l)
+    (hfin : (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+          - (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+        ≤ (3 / 2) * (Module.finrank ℚ L : ℝ) * Real.log l) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l :=
+  htFalt_isogeny_le_of_archDefect E E' l
+    (archDefect_isogeny E E' l hl P P' C C' hPC hPC' α hα hu a b c d h₁ h₂ hdet) hfin
+
+def archDefect_isogeny.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(次数 l の解析的同種写像があれば harch は自動——α は打ち消し合う)",
+    sectionId := "genell-prop-3-4" }
+
+def htFalt_isogeny_le_of_analytic.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(アルキメデス側は完全に済んだ形——残りは同種写像のデータと hfin)",
     sectionId := "genell-prop-3-4" }
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★`E` が大域極小なら有限側は自動 -/
