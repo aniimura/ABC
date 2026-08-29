@@ -2073,5 +2073,21 @@
     },
     "whatWeHaveForIt": "★★道具はかなり揃っている: `elliptic_liouville`（第 598、整で二重周期的なら定数）、`exists_mem_box`（第 598、`Int.fract` で基本平行四辺形へ）、`wp_inv_differentiableAt_of_mem`（第 603、除去可能特異点の型）、`weierstrassP_surjective`・`latticePoint_surjective`（第 603-604、全射性）、`addQ` まわり（第 612-614、`℘` の 2 階・3 階の消滅）。",
     "nextEntry": "★**次のセッションの入口**: 楕円関数の零点勘定。☆最小形は「`℘(z) = ℘(w) ⟹ z ≡ ±w (mod Λ)`」であり、これが取れれば加法定理（`Skeleton/GenEll/AdditionTheorem.lean`）が閉じ、★★Vélu の代数側（第 586-593）と解析側（第 597-602）が繋がり、★★★`Lemma 3.5` の同種写像データ（`archDefect_isogeny` の入力）が揃う。"
+  },
+  "additionTheoremClosed20260829": {
+    "measuredAt": "2026-08-29",
+    "headline": "★★★★★★★★★★★★**`℘` の加法定理が閉じた**（第 641）——mathlib に無い定理である。",
+    "statement": "`Found/GenEll/Uniformization.lean` の `weierstrassP_addition`: `℘(z+w) = (1/4)·((℘′(z) − ℘′(w))/(℘(z) − ℘(w)))² − ℘(z) − ℘(w)`（`w ∉ Λ`・`2w ∉ Λ`・`z ∉ Λ`・`z+w ∉ Λ`・`℘(z) ≠ ℘(w)`）。",
+    "mechanism": [
+      "★Liouville（第 598 `elliptic_liouville`、整で二重周期的なら定数）で閉じる。",
+      "★★極は 4 か所とも塞がっている: `Λ`（第 610 ＋ 第 639 の周期性）・`z ≡ w`（第 638）・`z ≡ −w`（第 637）・その他は単射性（第 624-625）で存在しない。",
+      "★★★`Ext ≔ fun z => limUnder (𝓝[≠] z) (addDefect P w)` は、mathlib の `℘` が格子点で junk value を取ることへの手当てである（第 630 の道具）。"
+    ],
+    "keyInsight": "☆★**第 615 の見立て「零点勘定（偏角の原理）が要る」は迂回できた**。★一様化の単射性は、線型 2 階 ODE `h″ = 6(℘(·+a)+℘)·h`（第 622）の一意性を**解析的位数の算術**で出すことで得た（第 623-624）——`h(z₀) = h′(z₀) = 0` かつ位数が有限 `= m+2` なら `h″` の位数は `m`、一方 `c·h` の位数は `≥ m+2` で矛盾。☆★★留数定理も偏角の原理も要らない。",
+    "corollaries": [
+      "★`℘′(w) = 0 ⟺ 2w ∈ Λ`（第 625、mathlib に無い）",
+      "★一様化 `ℂ/Λ → E(ℂ)` は全単射（全射は第 603-604、単射は第 624）"
+    ],
+    "nextStep": "★**次の一手**: 一様化が**群準同型**であることを出す。☆`x` 座標は加法定理そのもの（`latticeCurve` の群法則は `a₁=a₂=a₃=0` なので `x₃ = λ² − x₁ − x₂`、`λ = (℘′(w)−℘′(z))/(2(℘(w)−℘(z)))`）。☆残るのは `y` 座標 `℘′(z+w) = −2λ(℘(z+w) − ℘(z)) − ℘′(z)` である。★★これが出れば、位数 `l` の部分群 `H ⊆ E(ℂ)` の原像 `Λ′` が`Λ ⊆ Λ′` 指数 `l` の**格子**になり、`Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`（第 617）の入力が揃う——すなわち `Lemma 3.5` が閉じる。"
   }
 }
