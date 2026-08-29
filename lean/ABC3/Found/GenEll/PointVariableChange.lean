@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import ABC3.Meta.Claim
 
 /-!
@@ -323,6 +324,155 @@ theorem nonsingular_variableChange {F : Type*} [Field F] (C : VariableChange F)
 def nonsingular_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Nonsingular も変数変換で保たれる——mathlib に無い。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★点の写像 -/
+
+section Point
+
+variable {F : Type*} [Field F]
+
+/-- ★★★★★`Point.some` の合同。 -/
+theorem point_some_congr' {W : WeierstrassCurve F} {x₁ y₁ x₂ y₂ : F}
+    {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
+    (hx : x₁ = x₂) (hy : y₁ = y₂) :
+    (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ : W.toAffine.Point)
+      = WeierstrassCurve.Affine.Point.some x₂ y₂ h₂ := by
+  subst hx; subst hy; rfl
+
+/-- ★★★★★★★★★★★★★★★★**変数変換による点の写像**
+
+    `O ↦ O`,  `(x, y) ↦ (u⁻²(x − r), u⁻³(y − s(x − r) − t))`
+
+★`Nonsingular` が保たれる（第 685）ので well-defined。 -/
+noncomputable def vcPoint (C : VariableChange F) (W : WeierstrassCurve F) :
+    W.toAffine.Point → (C • W).toAffine.Point
+  | .zero => 0
+  | .some x y h => .some (vcX C x) (vcY C x y) ((nonsingular_variableChange C W x y).2 h)
+
+@[simp] theorem vcPoint_zero (C : VariableChange F) (W : WeierstrassCurve F) :
+    vcPoint C W 0 = 0 := rfl
+
+@[simp] theorem vcPoint_some (C : VariableChange F) (W : WeierstrassCurve F)
+    {x y : F} (h : W.toAffine.Nonsingular x y) :
+    vcPoint C W (.some x y h)
+      = .some (vcX C x) (vcY C x y) ((nonsingular_variableChange C W x y).2 h) := rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**変数変換による点の写像は加法を保つ**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★☆**これで `W.Point ≃+ (C • W).Point` が取れる**——mathlib には
+`VariableChange` の点への作用が無いので、これは新しく建てたものである。
+☆位数が保たれるので、`latticeCurve (P σ) = C σ • (E.map σ)` の両側で
+「位数 `l` の点」が対応する。
+
+★場合分けは 2 つだけ:
+
+* 垂直（`x₁ = x₂` かつ `y₁ = negY(x₂,y₂)`）—— 両側とも `O`（`add_of_Y_eq`）
+* それ以外 —— `add_some` で座標が出るので、
+  `slope`（第 684）・`addX`・`addY`（第 683）の変換則で一致する -/
+theorem vcPoint_add (C : VariableChange F) (W : WeierstrassCurve F)
+    (Pt Qt : W.toAffine.Point) :
+    vcPoint C W (Pt + Qt) = vcPoint C W Pt + vcPoint C W Qt := by
+  rcases Pt with _ | ⟨x₁, y₁, h₁⟩
+  · change vcPoint C W (0 + Qt) = vcPoint C W 0 + vcPoint C W Qt
+    rw [zero_add, vcPoint_zero, zero_add]
+  rcases Qt with _ | ⟨x₂, y₂, h₂⟩
+  · change vcPoint C W (_ + 0) = vcPoint C W _ + vcPoint C W 0
+    rw [add_zero, vcPoint_zero, add_zero]
+  by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
+  · have hx' : vcX C x₁ = vcX C x₂ := by rw [hxy.1]
+    have hy' : vcY C x₁ y₁ = (C • W).toAffine.negY (vcX C x₂) (vcY C x₂ y₂) := by
+      rw [negY_variableChange, hxy.1, hxy.2]
+    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.1 hxy.2, vcPoint_zero,
+      vcPoint_some, vcPoint_some,
+      WeierstrassCurve.Affine.Point.add_of_Y_eq hx' hy']
+  · have hxy' : ¬(vcX C x₁ = vcX C x₂
+        ∧ vcY C x₁ y₁ = (C • W).toAffine.negY (vcX C x₂) (vcY C x₂ y₂)) := by
+      rintro ⟨ha, hb⟩
+      have hx12 : x₁ = x₂ := vcX_injective C ha
+      subst hx12
+      rw [negY_variableChange] at hb
+      exact hxy ⟨rfl, vcY_injective C x₁ hb⟩
+    have hslope : (C • W).toAffine.slope (vcX C x₁) (vcX C x₂) (vcY C x₁ y₁)
+        (vcY C x₂ y₂) = vcSlope C (W.toAffine.slope x₁ x₂ y₁ y₂) := by
+      by_cases hx : x₁ = x₂
+      · subst hx
+        have hy : y₁ ≠ W.toAffine.negY x₁ y₂ := fun hc => hxy ⟨rfl, hc⟩
+        have hy2 : y₁ = y₂ :=
+          WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁.left h₂.left rfl hy
+        subst hy2
+        exact slope_variableChange_of_eq C W x₁ y₁ y₁ hy hy
+      · exact slope_variableChange_of_ne C W y₁ y₂ hx
+    rw [WeierstrassCurve.Affine.Point.add_some hxy, vcPoint_some, vcPoint_some,
+      vcPoint_some, WeierstrassCurve.Affine.Point.add_some hxy']
+    refine point_some_congr' ?_ ?_
+    · rw [hslope, addX_variableChange]
+    · rw [hslope, addY_variableChange]
+
+/-- ★★★★★★★★★★**点の写像は単射**——`vcX`・`vcY` が単射だから。 -/
+theorem vcPoint_injective (C : VariableChange F) (W : WeierstrassCurve F) :
+    Function.Injective (vcPoint C W) := by
+  rintro (_ | ⟨x₁, y₁, h₁⟩) (_ | ⟨x₂, y₂, h₂⟩) hab
+  · rfl
+  · exact absurd hab (by simp [vcPoint])
+  · exact absurd hab (by simp [vcPoint])
+  · simp only [vcPoint_some] at hab
+    have hx : vcX C x₁ = vcX C x₂ := by
+      injection hab with hx hy
+    have hy : vcY C x₁ y₁ = vcY C x₂ y₂ := by
+      injection hab with hx hy
+    have hx12 : x₁ = x₂ := vcX_injective C hx
+    subst hx12
+    exact point_some_congr' rfl (vcY_injective C x₁ hy)
+
+open scoped Classical in
+/-- ★★★★★★★★`n • ` と可換。 -/
+theorem vcPoint_nsmul (C : VariableChange F) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(C • W).IsElliptic] (Pt : W.toAffine.Point) (n : ℕ) :
+    vcPoint C W (n • Pt) = n • vcPoint C W Pt := by
+  induction n with
+  | zero => simp only [zero_nsmul, vcPoint_zero]
+  | succ k ih => rw [succ_nsmul, succ_nsmul, vcPoint_add, ih]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**変数変換は点の位数を保つ**
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★☆**これが Galois 降下に要るものである**——
+`latticeCurve (P σ) = C σ • (E.map σ)` の両側で「位数 `l` の点」が対応する。 -/
+theorem addOrderOf_vcPoint (C : VariableChange F) (W : WeierstrassCurve F)
+    [W.IsElliptic] [(C • W).IsElliptic] (Pt : W.toAffine.Point) :
+    addOrderOf (vcPoint C W Pt) = addOrderOf Pt := by
+  refine Nat.dvd_antisymm ?_ ?_
+  · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    rw [← vcPoint_nsmul, addOrderOf_nsmul_eq_zero, vcPoint_zero]
+  · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    refine vcPoint_injective C W ?_
+    rw [vcPoint_nsmul, vcPoint_zero, addOrderOf_nsmul_eq_zero]
+
+end Point
+
+def vcPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(変数変換による点の写像——mathlib に無い)",
+    sectionId := "genell-lemma-3-5" }
+
+def addOrderOf_vcPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(変数変換は点の位数を保つ——Galois 降下の要。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def vcPoint_add.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(変数変換による点の写像は加法を保つ——mathlib に無い。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def equation_variableChange.src : ABC3.Meta.Source :=
