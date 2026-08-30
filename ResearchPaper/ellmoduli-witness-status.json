@@ -94,5 +94,16 @@
       "quotLCyclic": "veluQuotientFull E S（S は ⟨Q⟩∖{O} の座標、第 679・699）"
     },
     "firstStep": "★faltingsHeight の well-defined 性（ht^Falt が ℚ̄ 上の同型で不変）を Found/ に建てること。これが無いと EllClass := ℂ が使えない"
+  },
+  "semistableRestriction": {
+    "_comment": "★★★★★第 723 の測定——半安定に制限すると mathlib に無い部分が消える",
+    "finding": "Curve を「半安定な楕円曲線」だけに制限すると、torsionExt 群（torsionExt / cls_torsionExt / degOfDefinition_torsionExt / semiStable_torsionExt / hasMultRed_torsionExt / primeToLocalHeights_torsionExt）が torsionExt := id で**すべて自明に埋まる**。★これが唯一の mathlib 欠落（Néron–Ogg–Shafarevich、半安定還元の判定）だったので、半安定に制限した witness は**到達可能**である",
+    "caveat": "☆ただしそれは「半安定な曲線に対する Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / 4.4」であって、原文の主張そのものではない。原文は torsionExt（L(E[3],E[5]) への基底変換）で一般の場合を半安定に帰着させる。★したがって .src は条つきにし、項目全体の .src は半安定還元の判定が入るまで置かない（check.mjs の B5・B6）",
+    "value": "★★それでも価値は大きい: (1) 残り 5 件の**数学の中身**がすべて Found に降りる、(2) 残る欠落が「半安定還元の判定」ただ 1 つに絞られる、(3) EllClass := ℂ の well-defined 性も半安定なら ht^Falt が安定 Faltings 高さに一致するので楽になる",
+    "nextConcreteSteps": [
+      "(1) Curve := Σ (L : IntermediateField ℚ ℂ), {W : WeierstrassCurve L // W.IsElliptic ∧ ∀ p, SemistableAt p W}",
+      "(2) EllClass := ℂ、cls := j。faltingsHeight の well-defined 性は htFaltOf_variableChange（第 722）＋ 基底変換不変性（半安定なら minDeltaExp が 分岐指数倍、archSum が拡大次数倍で、正規化で相殺）",
+      "(3) 残り 5 件の Skeleton をこの witness に当てる"
+    ]
   }
 }
