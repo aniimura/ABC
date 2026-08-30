@@ -2281,5 +2281,13 @@
     "theorem38": "☆Galois 表現論の 8 件のうち G1-G7 は Found/GaloisRep に建設済み（FullImageWitness.lean の FullImageData.nonvacuous、第 328）。Found/ に Theorem 3.8 に紐づくファイルが 197、条つき .src が 245 個。★残るのは Interface/GenEll/GaloisRep.lean の TorsionGaloisRepData の witness を組むこと（nonvacuous がまだ無い）——半安定還元の判定と Lemma 3.7 の第 3 の主張を要する",
     "order": "★次のセッションの順序: (1) Tate 台帳の段 3・4 → Lemma 3.5 の .src、(2) Lemma 3.7 の .src、(3) TorsionGaloisRepData の witness → Theorem 3.8、(4) Cor 4.3・4.4（新しい基盤理論は要らない）、(5) Theorem 2.1（最も遠い）",
     "sharpestForm20260829": "★残る 1 本の最も鋭い形（第 715 の実測）: v(Δ_min) は曲線の不変量なので（localHeight_eq_vAdd_Delta、第 320）、tateParamK の選択（choose）に依らない。したがって示すべきは **veluQuotientFull (tateCurveAt q) (μ_l の点) が tateCurveAt (q^l) と変数変換で一致すること** である——これは冪級数の恒等式（tateA4 = −5·sigmaSeries 3、tateA6 と Vélu の v = Σ g^x、w = Σ(u/2 + g^x·x) を μ_l の点で足したもの）であり、本プロジェクトの Tate 冪級数の在庫（Found/GaloisRep/Tate*.lean が 97 ファイル）で計算できる。★新しい数学は要らない"
+  },
+  "ellModuliWitnessIsTheBottleneck20260830": {
+    "date": "2026-08-30",
+    "block": 719,
+    "measured": "★★★§3・§4 の残り 5 件（Lemma 3.5・Lemma 3.7・Theorem 3.8・Cor 4.3・Cor 4.4）は**すべて Interface/GenEll/EllModuli.lean の EllModuliData を経由する**。Skeleton の lemma_3_5・lemma_3_7・theorem_3_8・cor_4_3・cor_4_4 はいずれも sorry なしで証明済みだが、EllModuliData を引数に取っている。★EllModuliData のフィールドは 50 個で、witness（nonvacuous）はまだ無い（2026-08-30 実測）",
+    "comparison": "☆同じ形の FaltingsHeightData は Found/GaloisRep/FaltingsWitness.lean で witness が組めている。TorsionGaloisRepData（Theorem 3.8 の語彙）は型と述語だけで証明義務が無いので容易だが、Skeleton の theorem_3_8 は EllModuliData の上で述べられている",
+    "reachableFields": "★本セッションで導出可能になったもの: faltingsHeight_quotLCyclic（第 704-713 の鎖）、degInf_quotLCyclic（第 709-716 ＋ Skeleton/GenEll/TateIsogeny.lean の穴 1 つ）。☆degInf_le_htInf・faltingsHeight_bddBelow・northcott は Found/GaloisRep/Prop34.lean と HtFaltBounds.lean に素材がある",
+    "plan": "★次のセッションの本筋: (1) Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本（Found/GaloisRep/TateVelu.lean の veluCurve_tateCurveAt_eq が受け皿）、(2) EllModuliData の witness を 50 フィールド順に組む——これが §3・§4 の 5 件を一度に動かす唯一の道である"
   }
 }
