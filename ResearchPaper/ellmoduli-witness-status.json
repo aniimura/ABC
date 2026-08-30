@@ -145,6 +145,13 @@
         }
       },
       "(c) ねじれ": "☆未 —— 同じ j でも L 上で同型とは限らない。共通の拡大へ上げる"
+    },
+    "simplification20260830": {
+      "_comment": "★★★★★第 730 の発見——難所は「finsum の scaling 補題」1 本だけ",
+      "finding": "Found/GaloisRep/HtFaltCovolume.lean の twelve_finrank_htFaltOf_eq（共体積表示）12·d·ht^Falt(E) = −12·Σᶠ_p neronExp_p·log N(p) − 12·d·log(2π) + 12·Σ_σ log‖u_σ‖ − 6·Σ_σ log(covol P_σ) を使うと、アルキメデス側（Σ_σ の 2 項と d·log(2π)）は 第 725 の繊維の議論でそのまま [L′:L] 倍になる。★したがって残るのは **Σᶠ_p の項 1 つ**である",
+      "keyLemma": "★★**Σᶠ_P f′(P)·log N(P) = [L′:L]·Σᶠ_p f(p)·log N(p)**（f′(P) = e(P|p)·f(P の下の p) のとき）。☆これ 1 本で minDeltaExp（deg∞）にも neronExp（共体積表示）にも効く",
+      "proof": "1. finsum を p ごとに束ねる（primesOverFinset p で有限和）2. log N(P) = f(P|p)·log N(p)（Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver）3. Σ_{P|p} e·f = [L′:L]（Ideal.sum_ramification_inertia）",
+      "verdict": "★★★これで ht^Falt の基底変換不変性は **1 本の scaling 補題**に集約された。★次のセッションはここから始めればよい"
     }
   }
 }
