@@ -152,7 +152,9 @@
       "keyLemma": "★★**Σᶠ_P f′(P)·log N(P) = [L′:L]·Σᶠ_p f(p)·log N(p)**（f′(P) = e(P|p)·f(P の下の p) のとき）。☆これ 1 本で minDeltaExp（deg∞）にも neronExp（共体積表示）にも効く",
       "proof": "1. finsum を p ごとに束ねる（primesOverFinset p で有限和）2. log N(P) = f(P|p)·log N(p)（Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver）3. Σ_{P|p} e·f = [L′:L]（Ideal.sum_ramification_inertia）",
       "verdict": "★★★これで ht^Falt の基底変換不変性は **1 本の scaling 補題**に集約された。★次のセッションはここから始めればよい",
-      "apiNote20260830": "☆finsum の繊維分解について（第 731 の実測）: mathlib の Mathlib/Algebra/BigOperators/Finprod.lean には finprod_curry（α × β 用）と finprod_mem_finset_eq_prod / finprod_mem_coe_finset はあるが、**任意の写像 π : ι′ → ι の繊維で分解する補題は無い**。★したがって P ↦ ⟨P.under, P⟩ で ι′ ≃ Σ p, {P // P.under = p} の同値を作り、finsum_comp_equiv とシグマ型版の curry を自分で書く必要がある。☆degInfOf の台は有限（hasFiniteSupport_degInf）なので、finsum を Finset の和に落としてから分解するほうが早いかもしれない"
+      "apiNote20260830": "☆finsum の繊維分解について（第 731 の実測）: mathlib の Mathlib/Algebra/BigOperators/Finprod.lean には finprod_curry（α × β 用）と finprod_mem_finset_eq_prod / finprod_mem_coe_finset はあるが、**任意の写像 π : ι′ → ι の繊維で分解する補題は無い**。★したがって P ↦ ⟨P.under, P⟩ で ι′ ≃ Σ p, {P // P.under = p} の同値を作り、finsum_comp_equiv とシグマ型版の curry を自分で書く必要がある。☆degInfOf の台は有限（hasFiniteSupport_degInf）なので、finsum を Finset の和に落としてから分解するほうが早いかもしれない",
+      "underMapNote20260830": "☆第 732 の実測: mathlib の IsDedekindDomain.HeightOneSpectrum.comap は **全射**な環準同型に対するものなので（Ideal/Lemmas.lean:588）、𝓞L → 𝓞L′（単射だが全射でない）には使えない。★したがって『P の下の p』を自分で作る必要がある: P.asIdeal.comap (algebraMap (𝓞 L) (𝓞 L′)) が 𝓞 L の高さ 1 の素点であること（素性は comap で保たれ、非零性は整拡大の単射性から）を示す。☆Ideal.LiesOver / Ideal.primesOver の API がその周辺にある",
+      "estimate20260830": "★次のセッションの見積り: under 写像の構成（2-3 ブロック）→ finsum を Finset へ落として繊維分解（3-5 ブロック）→ e·f と absNorm の書き換え（2-3 ブロック）→ scaling 補題（1-2 ブロック）。合わせて 10 前後。★そのあと ht^Falt の基底変換不変性、ねじれの処理、faltingsHeight : ℂ → ℝ の定義、witness の 50 フィールドと続く"
     }
   }
 }
