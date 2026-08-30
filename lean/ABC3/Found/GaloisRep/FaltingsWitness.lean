@@ -148,6 +148,24 @@ theorem archSum_le (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
 noncomputable def htFaltOf (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) : ℝ :=
   degInfOf L E / 12 - archSum L E / (12 * (Module.finrank ℚ L : ℝ))
 
+/-- ★★★★★★★★**`ht^Falt` は変数変換で不変**（単独の形）。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`deg∞` も `archSum` も変数変換で不変（第 329 周辺）だから。
+★★☆**`EllModuliData` の witness で `EllClass := ℂ`（`j` 不変量）を取るために要る**
+——`cls E = j(E)` が同じなら `L` 上で同型なので、`ht^Falt` が一致することを言う第一歩である
+（`ResearchPaper/ellmoduli-witness-status.json` の `designChoice`）。 -/
+theorem htFaltOf_variableChange (E : WeierstrassCurve L) (C : VariableChange L) :
+    htFaltOf L (C • E) = htFaltOf L E := by
+  rw [htFaltOf, htFaltOf, degInfOf_variableChange, archSum_variableChange]
+
+def htFaltOf_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(ht^Falt は変数変換で不変。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★G8 の witness -/
 
 set_option maxHeartbeats 1600000 in
