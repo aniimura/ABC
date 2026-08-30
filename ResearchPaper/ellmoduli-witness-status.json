@@ -80,5 +80,19 @@
     "(3) 証明義務を上の表の順（済 → 素材あり → 未）に埋める",
     "(4) 最後に残るのが torsionExt 群（半安定還元の判定、mathlib に無い）",
     "★(4) が済めば §3・§4 の 5 件が一度に動く"
-  ]
+  ],
+  "designChoice": {
+    "_comment": "★★★witness を組む前に決めるべき設計（第 721 の測定）",
+    "problem": "EllModuliData は単一の型 Curve・EllClass を要求するが、Found/GaloisRep/Prop34.lean の prop_3_4 は族の形（fld : P → IntermediateField ℚ ℂ、E : ∀ p, WeierstrassCurve (fld p)）で述べられている。★この差を埋める設計が witness の最初の一歩である",
+    "recommendation": {
+      "Curve": "Σ (L : IntermediateField ℚ ℂ), {W : WeierstrassCurve L // W.IsElliptic} ——シグマ型で族を 1 つの型にまとめる。★prop_3_4 は P := Curve、fld := Sigma.fst、E := Sigma.snd で当たる",
+      "EllClass": "ℂ（j 不変量）——cls E := j(E) を ℂ へ送る。★prop_3_4 の finite_j_of_htFalt_le が「j の像が有限」の形なのでそのまま合う。☆faltingsHeight : ℂ → ℝ は「その j を持つ曲線の ht^Falt」だが、well-defined 性（同じ j なら同じ ht^Falt）が要る——ℚ̄ 上の同型類は j で決まるので、ht^Falt が ℚ̄ 同型不変であることを言えばよい",
+      "degInf": "degInfOf L E（Found/GaloisRep/DegInf.lean）を Curve から拾う",
+      "faltingsHeight": "htFaltOf L E（Found/GaloisRep）",
+      "SemiStable": "∀ p, SemistableAt p E（Found/GaloisRep/SemistableFin.lean）",
+      "HasLCyclic": "位数 l の点 Q が存在して、その生成する部分群が各悪い素点で μ_l に対応する——本セッションの exists_veluQuotientFull_zmultiples（第 699）がこの形の入力を消費する",
+      "quotLCyclic": "veluQuotientFull E S（S は ⟨Q⟩∖{O} の座標、第 679・699）"
+    },
+    "firstStep": "★faltingsHeight の well-defined 性（ht^Falt が ℚ̄ 上の同型で不変）を Found/ に建てること。これが無いと EllClass := ℂ が使えない"
+  }
 }
