@@ -105,5 +105,16 @@
       "(2) EllClass := ℂ、cls := j。faltingsHeight の well-defined 性は htFaltOf_variableChange（第 722）＋ 基底変換不変性（半安定なら minDeltaExp が 分岐指数倍、archSum が拡大次数倍で、正規化で相殺）",
       "(3) 残り 5 件の Skeleton をこの witness に当てる"
     ]
+  },
+  "firstRealTheorem": {
+    "_comment": "★★★★★第 724 の測定——witness で最初に証明すべき定理",
+    "why": "EllClass は本物の商でなければならない。EllClass := Curve（cls := id）にすると northcott（高さと次数で抑えた類の有限性）が偽になる——同型な Weierstrass モデルが無限にあるからである。★したがって EllClass := ℂ（j 不変量）が必然であり、faltingsHeight : ℂ → ℝ の well-defined 性が要る",
+    "theorem": "★★**同じ j を持つ 2 つの半安定楕円曲線（数体上、体は異なってよい）は htFaltOf が等しい**",
+    "ingredients": [
+      "(a) 同じ体の上での変数変換不変性 —— ★済（htFaltOf_variableChange、第 722）",
+      "(b) 基底変換不変性 —— ☆未。半安定なら minDeltaExp は分岐指数倍、archSum は拡大次数倍になり、finrank での正規化で相殺する。mathlib の Ideal.sum_ramification_inertia が要る",
+      "(c) ねじれ（twist）の処理 —— ☆未。同じ j でも L 上では同型でないことがあるが、共通の拡大へ上げれば同型になる。半安定性がねじれを制限する"
+    ],
+    "note": "☆(b)(c) が済めば faltingsHeight : ℂ → ℝ が定義でき、残り 5 件の witness が半安定の範囲で組める"
   }
 }
