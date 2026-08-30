@@ -264,6 +264,47 @@ def archSum_baseChange.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(archSum は基底変換で [L′ : L] 倍。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`ht^Falt` の基底変換不変性は `deg∞` のそれに帰着する**
+
+    `deg∞` が基底変換で不変なら `ht^Falt` も不変
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★アルキメデス側は `archSum_baseChange`（第 725）で `[L′:L]` 倍になり、
+分母の `12·[L′:ℚ] = 12·[L′:L]·[L:ℚ]` で相殺する。
+
+★★★☆**残るのは有限素点側だけ**——半安定なら `minDeltaExp` は分岐指数倍、
+`log N(P) = f·log N(p)` なので `Σ_{P|p} e·f = [L′:L]` で相殺する
+（`Ideal.sum_ramification_inertia`）。 -/
+theorem htFaltOf_baseChange_of_degInf (L L' : Type) [Field L] [NumberField L]
+    [Field L'] [NumberField L'] [Algebra L L'] [IsScalarTower ℚ L L']
+    (E : WeierstrassCurve L)
+    (hdeg : degInfOf L' (E.baseChange L') = degInfOf L E) :
+    htFaltOf L' (E.baseChange L') = htFaltOf L E := by
+  have hLL' : (0 : ℝ) < (Module.finrank L L' : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  have hL : (0 : ℝ) < (Module.finrank ℚ L : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  have htower : (Module.finrank ℚ L' : ℝ)
+      = (Module.finrank ℚ L : ℝ) * (Module.finrank L L' : ℝ) := by
+    have := Module.finrank_mul_finrank ℚ L L'
+    exact_mod_cast this.symm
+  have hL' : (0 : ℝ) < (Module.finrank ℚ L' : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  rw [htFaltOf, htFaltOf, hdeg, archSum_baseChange L L' E]
+  congr 1
+  have hne1 : (12 : ℝ) * (Module.finrank ℚ L' : ℝ) ≠ 0 := by positivity
+  have hne2 : (12 : ℝ) * (Module.finrank ℚ L : ℝ) ≠ 0 := by positivity
+  rw [div_eq_div_iff hne1 hne2]
+  linear_combination (-12 * archSum L E) * htower
+
+def htFaltOf_baseChange_of_degInf.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(ht^Falt の基底変換不変性は deg∞ のそれに帰着する。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★G8 の witness -/
 
 set_option maxHeartbeats 1600000 in
