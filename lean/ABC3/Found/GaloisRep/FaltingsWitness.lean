@@ -166,6 +166,104 @@ def htFaltOf_variableChange.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(ht^Falt は変数変換で不変。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★`archSum` の基底変換 -/
+
+open scoped Classical in
+/-- ★★★★★★**埋め込みの制限の繊維は `L′ →ₐ[L] ℂ` と同じ大きさ**。
+
+★`σ′ : L′ →+* ℂ` が `σ′ ∘ (algebraMap L L′) = σ` を満たすことは、
+`ℂ` に `σ` で `L`-代数の構造を入れたとき `σ′` が `L`-代数準同型であることと同じである。
+★★したがって繊維の大きさは `AlgHom.card` により `[L′ : L]`。 -/
+theorem card_fiber_ringHom (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] (σ : L →+* ℂ) :
+    (Finset.univ.filter
+        (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L') = σ)).card
+      = Module.finrank L L' := by
+  letI : Algebra L ℂ := σ.toAlgebra
+  haveI : FiniteDimensional L L' := Module.Finite.of_restrictScalars_finite ℚ L L'
+  haveI : Algebra.IsSeparable L L' := Algebra.IsSeparable.of_integral L L'
+  have hequiv : {σ' : L' →+* ℂ // σ'.comp (algebraMap L L') = σ} ≃ (L' →ₐ[L] ℂ) :=
+    { toFun := fun p =>
+        { toRingHom := p.1
+          commutes' := fun x => by
+            have := congrArg (fun f : L →+* ℂ => f x) p.2
+            simpa [RingHom.algebraMap_toAlgebra] using this }
+      invFun := fun f => ⟨f.toRingHom, by
+        ext x
+        show f (algebraMap L L' x) = σ x
+        rw [f.commutes]
+        rfl⟩
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+  rw [← Fintype.card_subtype, Fintype.card_congr hequiv, AlgHom.card]
+
+def card_fiber_ringHom.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(埋め込みの制限の繊維の大きさは [L′ : L]。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+open scoped Classical in
+/-- ★★★★★**埋め込みの制限は全射**——`ℂ` が代数閉だから。 -/
+theorem image_restrict_eq_univ (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] :
+    Finset.univ.image (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L'))
+      = (Finset.univ : Finset (L →+* ℂ)) := by
+  refine Finset.eq_univ_of_forall (fun σ => ?_)
+  letI : Algebra L ℂ := σ.toAlgebra
+  haveI : FiniteDimensional L L' := Module.Finite.of_restrictScalars_finite ℚ L L'
+  haveI : Algebra.IsSeparable L L' := Algebra.IsSeparable.of_integral L L'
+  have hpos : 0 < Fintype.card (L' →ₐ[L] ℂ) := by
+    rw [AlgHom.card]
+    exact Module.finrank_pos
+  obtain ⟨f⟩ := Fintype.card_pos_iff.1 hpos
+  refine Finset.mem_image.2 ⟨f.toRingHom, Finset.mem_univ _, ?_⟩
+  ext x
+  show f (algebraMap L L' x) = σ x
+  rw [f.commutes]
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`archSum` は基底変換で `[L′ : L]` 倍になる**
+
+    `archSum L′ (E ⁄ L′) = [L′ : L] · archSum L E`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`archNorm` は係数の押し出しと可換（`archNorm_map`）なので、
+`L′` の埋め込みを `L` へ制限した繊維ごとにまとめればよい。
+★★繊維の大きさは `[L′ : L]`（`card_fiber_ringHom`）、制限は全射（`image_restrict_eq_univ`）。
+
+★★★☆**`ht^Falt` の基底変換不変性のアルキメデス側である**——
+`archSum` は `12·[L:ℚ]` で割られるので、`[L′:ℚ] = [L′:L]·[L:ℚ]` により相殺する。 -/
+theorem archSum_baseChange (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] (E : WeierstrassCurve L) :
+    archSum L' (E.baseChange L') = (Module.finrank L L' : ℝ) * archSum L E := by
+  have hterm : ∀ σ' : L' →+* ℂ,
+      Real.log ((2 * Real.pi) ^ 12
+          * ABC3.Found.GenEll.archNorm (E.baseChange L') σ')
+        = (fun σ : L →+* ℂ =>
+            Real.log ((2 * Real.pi) ^ 12 * ABC3.Found.GenEll.archNorm E σ))
+          (σ'.comp (algebraMap L L')) := by
+    intro σ'
+    show _ = Real.log ((2 * Real.pi) ^ 12
+      * ABC3.Found.GenEll.archNorm E (σ'.comp (algebraMap L L')))
+    rw [WeierstrassCurve.baseChange, ABC3.Found.GenEll.archNorm_map]
+  rw [archSum, archSum, Finset.sum_congr rfl (fun σ' _ => hterm σ'),
+    Finset.sum_comp (fun σ : L →+* ℂ =>
+        Real.log ((2 * Real.pi) ^ 12 * ABC3.Found.GenEll.archNorm E σ))
+      (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L')),
+    image_restrict_eq_univ L L']
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun σ _ => ?_)
+  rw [card_fiber_ringHom L L' σ, nsmul_eq_mul]
+
+def archSum_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(archSum は基底変換で [L′ : L] 倍。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★G8 の witness -/
 
 set_option maxHeartbeats 1600000 in
