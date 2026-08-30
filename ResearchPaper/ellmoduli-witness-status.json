@@ -128,7 +128,21 @@
           "3. absNorm P = (absNorm p)^{f(P|p)}",
           "4. Σ_{P|p} e·f = [L′ : L] —— mathlib の Ideal.sum_ramification_inertia"
         ],
-        "note": "★1 と 4 が mathlib API の navigation、2 が本プロジェクトの道具、3 は標準"
+        "note": "★1 と 4 が mathlib API の navigation、2 が本プロジェクトの道具、3 は標準",
+        "mathlibApiConfirmed20260830": {
+          "3. absNorm P = (absNorm p)^f": "★mathlib にある —— Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver (Mathlib/NumberTheory/RamificationInertia/Inertia.lean:140)、および Ideal.absNorm_eq_pow_inertiaDeg / _′",
+          "4. Σ_{P|p} e·f = [L′:L]": "★mathlib にある —— Ideal.sum_ramification_inertia (Mathlib/NumberTheory/RamificationInertia/Basic.lean:596)。和は IsDedekindDomain.primesOverFinset p S の上で取る",
+          "1. finsum の繊維分解": "☆primesOverFinset を使えば有限和になるので、degInfOf の finsum を「p ごとの内側の有限和」に分解する配管を書けばよい",
+          "2. minDeltaExp P = e · minDeltaExp p（半安定）": {
+            "note": "☆本プロジェクトの仕事。筋は明確",
+            "proof": "半安定なら p-極小モデルは v_p(c₄) = 0 を満たす。基底変換すると v_P(c₄) = e·v_p(c₄) = 0 なので P-極小のまま。したがって minDeltaExp P (E⁄L′) = v_P(Δ) = e·v_p(Δ) = e·minDeltaExp p E",
+            "needs": [
+              "(i) primeSubring p（局所化）の上での c₄ による極小性の判定——完備 DVR 版 isMinimal_of_c4_vAdd_eq_zero（第 320）の局所化版",
+              "(ii) 付値の分岐関係 v_P(algebraMap x) = e(P|p)·v_p(x)"
+            ]
+          },
+          "verdict": "★★★材料 3・4 は mathlib にあり、1 は配管、2 だけが本プロジェクトの数学。実行可能である"
+        }
       },
       "(c) ねじれ": "☆未 —— 同じ j でも L 上で同型とは限らない。共通の拡大へ上げる"
     }
