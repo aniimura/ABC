@@ -376,6 +376,7 @@ import ABC3.Found.GenEll.IsogenyCovolume
 import ABC3.Found.GenEll.IsogenyPeriodPair
 import ABC3.Found.GenEll.ArchInvCovolume
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.PointVariableChange
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
