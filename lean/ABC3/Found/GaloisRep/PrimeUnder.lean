@@ -59,6 +59,55 @@ instance liesOver_under [Algebra.IsIntegral A B]
     P.asIdeal.LiesOver (HeightOneSpectrumUnder (A := A) P).asIdeal :=
   ⟨rfl⟩
 
+/-! ## ★★★★★★★★★★素点の上での和 -/
+
+section NumberField
+
+open scoped Classical
+
+variable (L L' : Type) [Field L] [NumberField L] [Field L'] [NumberField L']
+  [Algebra L L'] [Algebra (𝓞 L) L'] [IsScalarTower (𝓞 L) L L']
+  [IsScalarTower (𝓞 L) (𝓞 L') L'] [Module.Finite (𝓞 L) (𝓞 L')]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`p` の上の素点にわたる `e·log N(P)` の和は `[L′ : L]·log N(p)`**
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★これが「`finsum` の scaling 補題」（`§9-1152`、第 730）の**数学の核**である。
+
+★機構は 2 つの mathlib 補題:
+
+* `log N(P) = f(P|p)·log N(p)`（`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`）
+* `Σ_{P|p} e·f = [L′ : L]`（`Ideal.sum_ramification_inertia`） -/
+theorem sum_primesOver_ramificationIdx_log (p : HeightOneSpectrum (𝓞 L)) :
+    ∑ P ∈ IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L'),
+        (p.asIdeal.ramificationIdx P : ℝ) * Real.log (Ideal.absNorm P)
+      = (Module.finrank L L' : ℝ) * Real.log (Ideal.absNorm p.asIdeal) := by
+  haveI hmax : p.asIdeal.IsMaximal := p.isPrime.isMaximal p.ne_bot
+  have hlog : ∀ P ∈ IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L'),
+      (p.asIdeal.ramificationIdx P : ℝ) * Real.log (Ideal.absNorm P)
+        = ((p.asIdeal.ramificationIdx P * p.asIdeal.inertiaDeg P : ℕ) : ℝ)
+          * Real.log (Ideal.absNorm p.asIdeal) := by
+    intro P hP
+    haveI : P.LiesOver p.asIdeal :=
+      ((IsDedekindDomain.mem_primesOverFinset_iff p.ne_bot (𝓞 L')).1 hP).2
+    rw [Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver P p.asIdeal p.isPrime p.ne_bot]
+    push_cast
+    rw [Real.log_pow]
+    ring
+  rw [Finset.sum_congr rfl hlog, ← Finset.sum_mul, ← Nat.cast_sum,
+    Ideal.sum_ramification_inertia (R := 𝓞 L) (S := 𝓞 L') L L' p.ne_bot]
+
+def sum_primesOver_ramificationIdx_log.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(p の上の素点にわたる e·log N(P) の和は [L′:L]·log N(p)。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+end NumberField
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def HeightOneSpectrumUnder.src : ABC3.Meta.Source :=
