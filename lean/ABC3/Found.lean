@@ -1032,6 +1032,7 @@ import ABC3.Found.GaloisRep.TateSeries
 import ABC3.Found.GaloisRep.AdicEval
 import ABC3.Found.GaloisRep.AdicEvalNatural
 import ABC3.Found.GaloisRep.TateSpecialize
+import ABC3.Found.GaloisRep.TateVelu
 import ABC3.Found.GaloisRep.TateDelta
 import ABC3.Found.GaloisRep.TateUnit
 import ABC3.Found.GaloisRep.TateJ
