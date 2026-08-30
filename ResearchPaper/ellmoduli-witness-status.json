@@ -1,0 +1,84 @@
+{
+  "_comment": "★★★EllModuliData（Interface/GenEll/EllModuli.lean、50 フィールド）の witness を組むための フィールド別の状態表。★§3・§4 の残り 5 件（Lemma 3.5・Lemma 3.7・Theorem 3.8・Corollary 4.3・Corollary 4.4）は Skeleton では sorry なしで証明済みであり、すべてこの witness 1 つに律速される（2026-08-30 実測、第 720）。",
+  "measuredAt": "2026-08-30",
+  "measuredBy": "第 720 ブロック",
+  "totalFields": 50,
+  "vocabulary": {
+    "_comment": "★型と写像だけ——証明義務が無いので、対象を決めれば埋まる",
+    "fields": [
+      "EllClass / Curve / cls / degOfDefinition / faltingsHeight（TorsionGaloisRepData より）",
+      "HasPotMultRed / PrimeToLocalHeights / CompactlyBounded / GaloisFinite / ImageContainsSL2",
+      "degInf / htInf / logDiffMell / degLe / SemiStable / HasLCyclic / MinimalField",
+      "ImageSurjective / PrimeToRamification / HasMultRed / PrimeToMultPrimes",
+      "quotLCyclic / lcyclicExc / noMultRedExc / torsionExt / multCard / multPrime / localHt"
+    ],
+    "note": "★対象の候補は Found/GaloisRep が既に持っている: degInfOf・htFaltOf・minDeltaExp・SemistableAt・neronExp・localHeightOf。EllClass は j 不変量の像、Curve は {L : IntermediateField ℚ ℂ} × WeierstrassCurve L の族で取るのが自然（Prop34.lean の形）"
+  },
+  "proofObligations": {
+    "degInf_le_htInf": {
+      "status": "★素材あり",
+      "where": "Found/GaloisRep/Prop34.lean の degInfOf_le_htFinJ（第 1 の ≲、§9-1008）"
+    },
+    "htInf_bdeq_faltings": {
+      "status": "★素材あり",
+      "where": "Found/GaloisRep の exists_htJ_le_htFalt′（§9-1003）と exists_htFalt_le_htJ（§9-1007）——両向きが揃っているので |·| の形にできる"
+    },
+    "faltingsHeight_bddBelow": {
+      "status": "★済",
+      "where": "Found/GaloisRep/HtFaltBounds.lean の exists_htFalt_bddBelow（§9-1010）"
+    },
+    "northcott": {
+      "status": "★済",
+      "where": "Found/GaloisRep/Prop34.lean の finite_j_of_htFalt_le（§9-1005、無条件）"
+    },
+    "degInf_quotLCyclic": {
+      "status": "☆残り 1 本",
+      "where": "Found/GaloisRep/DegInfLocal.lean の minDeltaExp_eq_mul_of_tateModel（第 716）＋ degInfOf_eq_of_local（Lemma35Concrete.lean）。★残るのは Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本"
+    },
+    "faltingsHeight_quotLCyclic": {
+      "status": "★★★本セッションで導出可能になった（外部引用ゼロ）",
+      "where": "Found/GaloisRep/VeluNormalized.lean の htFalt_veluQuotientFull_le（第 704）。その内側は Found/GenEll/Uniformization.lean（一様化・Laurent 比較で α = 1）と Found/GenEll/PointVariableChange.lean（点への作用）"
+    },
+    "degOfDefinition_pos": {
+      "status": "★自明",
+      "where": "finrank の正値性"
+    },
+    "primeToLocalHeights_of_lt": {
+      "status": "★済",
+      "where": "Found/GaloisRep/SemistableFin.lean・DegInfLocal.lean の degInfOf_ge_localHeight"
+    },
+    "lcyclicExc_group": {
+      "status": "☆未",
+      "where": "lcyclicExc / galoisFinite_lcyclicExc / mem_lcyclicExc —— Lemma 3.7 の (b) の例外集合。Found/GaloisRep/Lemma37A.lean・NoMultRedExc.lean に素材"
+    },
+    "noMultRedExc_group": {
+      "status": "☆未",
+      "where": "Found/GaloisRep/NoMultRedExc.lean に素材"
+    },
+    "galoisFinite_union": {
+      "status": "★自明に近い",
+      "where": "Example 1.3, (i)"
+    },
+    "torsionExt_group": {
+      "status": "★★mathlib に無い理論を要する",
+      "what": "torsionExt / cls_torsionExt / degOfDefinition_torsionExt（≤ 23040 倍）/ semiStable_torsionExt / hasMultRed_torsionExt / primeToLocalHeights_torsionExt",
+      "gap": "★semiStable_torsionExt は「E は L(E[3], E[5]) 上で半安定還元になる」——Néron–Ogg–Shafarevich（半安定還元の判定）であり mathlib に無い。☆degOfDefinition_torsionExt の 23040 = (3²−1)(3²−3)(5²−1)(5²−5) は Found/GaloisRep に条つき .src が既にある"
+    },
+    "compactlyBounded_empty": {
+      "status": "★自明",
+      "where": "Example 1.3, (ii)"
+    },
+    "mult_group": {
+      "status": "☆未",
+      "what": "multCard / multCard_pos / multPrime / multPrime_prime / localHt / localHt_pos",
+      "where": "局所高さは Found/GaloisRep/TateCurveWitness.lean の localHeightOf がそのまま使える"
+    }
+  },
+  "plan": [
+    "(1) Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本を証明する（受け皿は Found/GaloisRep/TateVelu.lean の veluCurve_tateCurveAt_eq、第 718）",
+    "(2) 語彙のフィールドを Found/GaloisRep の既存の対象で埋める",
+    "(3) 証明義務を上の表の順（済 → 素材あり → 未）に埋める",
+    "(4) 最後に残るのが torsionExt 群（半安定還元の判定、mathlib に無い）",
+    "★(4) が済めば §3・§4 の 5 件が一度に動く"
+  ]
+}
