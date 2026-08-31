@@ -142,10 +142,10 @@ def tateParam_quot_mu.needs : List ProofObligation :=
        "(原文の global rank one subgroup)を型に書く段") 5,
     .citation "[ABC3]" "evalAdic_injective_of_coeff_one(f(q) = q + O(q²) なら単射、第 875、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.evalAdic_injective_of_coeff_one") 1,
-    .citation "[ABC3]" "tateJinv_injective(q ↦ (1/j)(q) は単射、第 877、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateJinv_injective") 1,
+    .citation "[ABC3]" "tateParam_injective(Δ·c₄′³ = Δ′·c₄³ なら q = q′、第 878、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParam_injective") 1,
     .implicitStep
-      ("☆残るは `evalAdic tateJinvSeries q = 1/j(E_q)`（K の中で）を繋ぐ段だけ") 2 ]
+      ("☆残るは `j(E′) = j(E_{q^l})`（K の中）を分母を払った形に直す段だけ") 2 ]
 
 def tateModel_of_quot_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,

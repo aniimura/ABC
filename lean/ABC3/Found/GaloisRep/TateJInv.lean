@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateJ
+import ABC3.Found.GaloisRep.TateMultRed
 import ABC3.Found.GaloisRep.TateLinearQ
 
 /-!
@@ -94,6 +95,41 @@ theorem tateJinv_injective [IsAdicComplete I R] {a b : R} (ha : a ∈ I) (hb : b
   refine evalAdic_injective_of_coeff_one tateJinvSeries ?_ coeff_one_tateJinvSeries ha hb h
   rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
   exact constantCoeff_tateJinvSeries
+
+/-- ★★★★**`(1/j)(q)·c₄(E_q)³ = Δ(E_q)`**——べき級数の恒等式を評価しただけ。 -/
+theorem evalAdic_tateJinvSeries_mul_c4 [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    evalAdic tateJinvSeries q hq * (tateCurveAt q hq).c₄ ^ 3 = (tateCurveAt q hq).Δ := by
+  rw [tateCurveAt_c4, tateCurveAt_Delta]
+  show evalAdicHom q hq tateJinvSeries * _ = _
+  rw [← map_pow, ← map_mul, tateJinvSeries_mul_c4]
+
+/-- ★★★★★★★★★★**Tate 母数は `j` で決まる**——分母を払った形。
+
+`j = c₄³/Δ` なので `j(E_q) = j(E_{q′})` は
+`Δ(E_q)·c₄(E_{q′})³ = Δ(E_{q′})·c₄(E_q)³` と同じことである。
+
+★これが `Lemma 3.5` の残る義務「`q ↦ j(E_q)` の単射性」そのものである。 -/
+theorem tateParam_injective [IsAdicComplete I R] {q q' : R} (hq : q ∈ I) (hq' : q' ∈ I)
+    (h : (tateCurveAt q hq).Δ * (tateCurveAt q' hq').c₄ ^ 3
+       = (tateCurveAt q' hq').Δ * (tateCurveAt q hq).c₄ ^ 3) : q = q' := by
+  have e1 := evalAdic_tateJinvSeries_mul_c4 q hq
+  have e2 := evalAdic_tateJinvSeries_mul_c4 q' hq'
+  have hu : IsUnit ((tateCurveAt q hq).c₄ ^ 3 * (tateCurveAt q' hq').c₄ ^ 3) :=
+    ((tateCurveAt_c4_isUnit q hq).pow 3).mul ((tateCurveAt_c4_isUnit q' hq').pow 3)
+  refine tateJinv_injective hq hq' ?_
+  refine hu.mul_left_cancel ?_
+  have hlhs : ((tateCurveAt q hq).c₄ ^ 3 * (tateCurveAt q' hq').c₄ ^ 3)
+      * evalAdic tateJinvSeries q hq
+      = (tateCurveAt q hq).Δ * (tateCurveAt q' hq').c₄ ^ 3 := by
+    rw [← e1]
+    ring
+  have hrhs : ((tateCurveAt q hq).c₄ ^ 3 * (tateCurveAt q' hq').c₄ ^ 3)
+      * evalAdic tateJinvSeries q' hq'
+      = (tateCurveAt q' hq').Δ * (tateCurveAt q hq).c₄ ^ 3 := by
+    rw [← e2]
+    ring
+  rw [hlhs, hrhs]
+  exact h
 
 /-! ## ★出典の紐付け(`.src`) -/
 
