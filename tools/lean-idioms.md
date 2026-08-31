@@ -2392,3 +2392,36 @@ os.replace(tmp, p)          # ○ 途中で落ちても原本は無事
 ☆似た形の字に注意——本プロジェクトの整数環は `𝓞`（\U0001D4DE）であり、`𝒪`（\U0001D4AA）ではない。
 ☆大きな書き換えの前に commit しておけば、万一のとき `git checkout -- <path>` で戻せる。
 ☆在庫の確認を先に——`jExp_congr_j` は既に `Found/GaloisRep/HtFaltJ.lean` にあった。
+
+## Python の「次の `def` まで消す」スプライスが定理を巻き込む（2026-08-31、第 873→881）
+
+不要になった `def foo.needs_old` を消そうとして、こう書いた:
+
+```python
+i = s.index("def tateModel_of_quot_mu.needs_old")
+j = s.index("\ndef ", i + 10)          # ★次の def まで
+out = s[:i] + s[j+1:]
+```
+
+`needs_old` ブロックの直後に `def` が来ない（`theorem` が 3 つ挟まる）と、
+`s.index("\ndef ", ...)` は**それらを飛び越えた先**を指す。結果
+`theorem c4_velu_tate`・`c6_velu_tate`・`j_velu_tate_mu` が丸ごと消えた。
+
+★**気付けなかった理由**——消えた 3 つを名前で参照している所が無く
+（`.needs` の中の**文字列**でしか引かれていない）、`lake build` も
+`check.mjs` も通ってしまった。8 ブロック後に `j_velu_tate_mu_map` を
+書いて初めて `Unknown identifier 'c4_velu_tate'` で露見した。
+
+☆直し方は 2 つ:
+
+1. 終端を**次の `def` ではなく `\n\n`**（空行）にする
+2. もっと良いのは、削る範囲を**両端の文字列で挟んで指定**する:
+
+```python
+i = s.index("def foo.needs_old")
+j = s.index("def bar.src", i)          # ★次に残したいものを名指しする
+out = s[:i] + s[j:]
+```
+
+★そして**削った後に必ず** `grep -c "^theorem " file` の前後を比べる。
+行数が減っているのは当たり前なので、**宣言の数**を見ること。

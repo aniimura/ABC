@@ -156,6 +156,41 @@ theorem j_velu_tate_eq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
     rw [mul_one]
     exact h6
 
+/-- ★★★★★★★★★★**`K` に基底変換した形**の `j_velu_tate_eq`。
+
+★★★★**2026-08-31 の測定（第 881）**——`j_velu_tate_eq` は `R` の上の曲線に
+`[IsElliptic]` を仮定しているが、Tate 曲線は `Δ = q·(単元)` なので
+**`R` の上では `IsElliptic` ではない**——つまりその形は空虚である。
+★正しくは**分数体 `K` に落としてから** `j` を取る。 -/
+theorem j_velu_tate_eq_map {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {K : Type} [Field K] [CharZero K] [Algebra R K]
+    (q : R) (hq : q ∈ I) (l : ℕ) (hql : q ^ l ∈ I) (v w : R)
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
+    (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆) :
+    ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).j := by
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : K)) ?_ ?_
+  · rw [WeierstrassCurve.map_c₄, WeierstrassCurve.map_c₄, veluCurve_c₄]
+    have h := congrArg (algebraMap R K) h4
+    rw [map_add, map_mul, map_mul, map_pow, map_natCast, map_ofNat] at h
+    rw [map_add, map_mul, map_ofNat]
+    exact h
+  · rw [WeierstrassCurve.map_c₆, WeierstrassCurve.map_c₆, veluCurve_c₆, tateCurveAt_b₂,
+      mul_one]
+    have h := congrArg (algebraMap R K) h6
+    rw [map_add, map_add, map_mul, map_mul, map_mul, map_pow, map_natCast,
+      map_ofNat, map_ofNat] at h
+    rw [map_add, map_add, map_mul, map_mul, map_ofNat, map_ofNat]
+    exact h
+
+def j_velu_tate_eq_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(K に落とした形の j の一致)",
+    sectionId := "genell-lemma-3-2" }
+
 def j_velu_tate_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(c₄・c₆ の尺度関係から j の一致。★無条件)",

@@ -152,6 +152,227 @@ def tateModel_of_quot_mu.src : Source :=
     item := "Lemma 3.2, (ii)(曲線の水準——E_q/μ_l は母数 q^l の Tate 曲線)",
     sectionId := "genell-lemma-3-2" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★訂正後の目標（`c₄`・`c₆`） -/
+
+open Finset in
+/-- **[GenEll] 葉 1 の訂正後の目標 (1)**——`c₄` は `l⁴` 倍。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★第 834-835 の数値測定により、**係数 `a₄` の恒等式は偽**であり、
+`c₄` で書いたこの形が真である（`l = 5, 7` で `q^21` まで全係数一致）。
+
+☆`c₄(veluCurve W v w) = c₄ W + 240v`（`Found/GenEll/Velu.lean` の `veluCurve_c₄`）なので
+左辺は Vélu の商の `c₄` そのものである。 -/
+theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    (tateCurveAt q hq).c₄
+        + 240 * (∑ i ∈ (range l).erase 0,
+            veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+      = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄ := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hsum1 := sum_veluV2_eq_sum_tateDYpair hl.pos hζl hu q hq hDX
+  have hstep : ∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = 2 * (∑ i ∈ (range l).erase 0, tateDYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    exact tateD2Xpair_eq _ _ q hq (hu i hi)
+      (isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq))
+  have hzero := sum_mu_dxpair_zero hl hζ hu q hq h2
+  have hd2 := sum_mu_d2xpair hl hζ hu q hq hql
+  rw [hstep, hzero, add_zero] at hd2
+  rw [hsum1, tateCurveAt_c4_eq, tateCurveAt_c4_eq]
+  linear_combination hd2
+
+open Finset in
+/-- **[GenEll] 葉 1 の訂正後の目標 (2)**——`c₆` は `l⁶` 倍。
+
+★★★★**2026-08-31 の再訂正（第 867）**——以前の statement
+`2c₆ + 1008∑v + 3024∑(u+2vX) = −2l⁶c₆(q^l)` は**偽**である（数値で落ちた）。
+正しいのは
+
+    `c₆ + 504∑v + 3024∑(u + 2vX) = l⁶·c₆(q^l)`
+
+である（`l = 5, 7` で数値確認）。☆Vélu の和は代表元の集合 `R` の上で取るので
+`v_Vélu = ∑_{i≠0} g^x`、`w_Vélu = (1/2)∑_{i≠0} u + ∑_{i≠0} x·g^x` となる。
+☆`g^x_Q + g^x_{-Q} = v_Q` が `∑_{i≠0} veluV2 = v_Vélu` の理由である。 -/
+theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    (tateCurveAt q hq).c₆
+        + 504 * (∑ i ∈ (range l).erase 0,
+            veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        + 3024 * (∑ i ∈ (range l).erase 0,
+            (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              + 2 * (veluV2 (tateCurveAt q hq)
+                      (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                      (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆ := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hawi : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q := by
+    intro i hi
+    have hpow : (ζ ^ i) * (ζ ^ i) ^ (l - 1) = 1 := by
+      rw [← pow_succ']
+      rw [Nat.sub_add_cancel hl.pos, ← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    calc (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q * ((ζ ^ i) * (ζ ^ i) ^ (l - 1)) := by ring
+      _ = q := by rw [hpow, mul_one]
+  have hwu : ∀ i : ℕ, IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) := fun i =>
+    isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
+  -- 項ごとの恒等式
+  have hterm : ∀ i ∈ (range l).erase 0,
+      12 * (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        = tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          + tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    intro i hi
+    have hd4 := tate_d4x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hd3 := tate_d3x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hd2 := tate_d2x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hdx := tateDXpair_eq (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hu i hi) (hwu i)
+    rw [veluU_tateCurveAt, veluV2_tateCurveAt, hd4, hd3, hd2, hdx]
+    ring
+  -- 和に直す
+  have hsum12 : 12 * (∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+      = (∑ i ∈ (range l).erase 0, tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0, tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + (∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq) := by
+    rw [Finset.mul_sum, Finset.sum_congr rfl hterm, Finset.sum_add_distrib,
+      Finset.sum_sub_distrib, Finset.sum_sub_distrib]
+  -- ∑DX = 0、∑D³X = 0
+  have hz1 := sum_mu_dxpair_zero hl hζ hu q hq h2
+  have hz3 := sum_mu_d3xpair_zero hl hζ hu q hq h2
+  -- ∑v = ∑DY と ∑D²X = 2∑DY + ∑DX
+  have hsum1 := sum_veluV2_eq_sum_tateDYpair hl.pos hζl hu q hq hDX
+  have hstep : ∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = 2 * (∑ i ∈ (range l).erase 0, tateDYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    exact tateD2Xpair_eq _ _ q hq (hu i hi) (hwu i)
+  have hd4sum := sum_mu_d4xpair hl hζ hu q hq hql
+  rw [hz1, add_zero] at hstep
+  rw [hz1, hz3, sub_zero, add_zero] at hsum12
+  rw [hsum1, tateCurveAt_c6_eq, tateCurveAt_c6_eq]
+  linear_combination (252 : R) * hsum12 + hd4sum - (252 : R) * hstep
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**Vélu の商の `j` は `j(E_{q^l})` に等しい**。
+
+★葉 1 の目標 (1)(2) を `j` の言葉にしたもの。`v`・`w` は
+`veluVFull`・`veluWFull`（`w = ∑(u/2 + g^x·x)`、すなわち `2w = ∑(u + 2vx)`）の形で与える。
+
+☆`c₄ + 240v = l⁴c₄(q^l)` と `c₆ + 504v + 6048w = l⁶c₆(q^l)` から
+`x ↦ l²x + r` の変換で `j` が保たれる（`j_eq_of_c4_c6_scale_pos`）。 -/
+theorem j_velu_tate_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq)
+                (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    [(veluCurve (tateCurveAt q hq) v w).IsElliptic]
+    [(tateCurveAt (q ^ l) hql).IsElliptic] :
+    (veluCurve (tateCurveAt q hq) v w).j = (tateCurveAt (q ^ l) hql).j := by
+  have h4 := c4_velu_tate hl hζ hlu hu q hq hql h2 hDX
+  have h6 := c6_velu_tate hl hζ hu q hq hql h2 hDX
+  refine j_velu_tate_eq q hq l hql v w ?_ ?_
+  · rw [hv]
+    exact h4
+  · rw [hv]
+    linear_combination h6 + (3024 : R) * hw
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**`K` に落とした形**の `j_velu_tate_mu`。
+
+★★★★**2026-08-31 の測定（第 881）**——`j_velu_tate_mu` は `R` の上の曲線に
+`[IsElliptic]` を仮定しているが、Tate 曲線は `Δ = q·(単元)` なので
+**`R` の上では `IsElliptic` ではない**——つまりその形は空虚である。
+★本節点が**実際に使える形**である。 -/
+theorem j_velu_tate_mu_map {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {K : Type} [Field K] [CharZero K] [Algebra R K]
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq)
+                (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic] :
+    ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).j := by
+  have h4 := c4_velu_tate hl hζ hlu hu q hq hql h2 hDX
+  have h6 := c6_velu_tate hl hζ hu q hq hql h2 hDX
+  refine j_velu_tate_eq_map q hq l hql v w ?_ ?_
+  · rw [hv]
+    exact h4
+  · rw [hv]
+    linear_combination h6 + (3024 : R) * hw
+
+def j_velu_tate_mu_map.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(K に落とした形の Vélu の商の j)",
+    sectionId := "genell-lemma-3-2" }
+
+def j_velu_tate_mu_map.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "c4_velu_tate(第 853、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.c4_velu_tate") 1,
+    .citation "[ABC3]" "c6_velu_tate(第 867、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.c6_velu_tate") 1,
+    .citation "[ABC3]" "j_velu_tate_eq_map(第 881、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.j_velu_tate_eq_map") 1 ]
+
 def j_velu_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Vélu の商の j は j(E_{q^l}) に等しい)",
