@@ -241,6 +241,92 @@ theorem sum_mu_d2xpair {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
   have hconst := sum_mu_d2xterm hl hζ hu
   linear_combination hconst
 
+/-! ## ★★★★★★★★`D²X` と `D³X`——c₆ 側へ -/
+
+/-- ★★★★★★**`D²X = 6X² + X + 2a₄`**——ODE の書き換え。 -/
+theorem tate_d2x {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} [IsAdicComplete I R]
+    (a w q : R) (hq : q ∈ I) (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w))
+    (hDX : tateDXpair a w q hq ≠ 0) :
+    tateD2Xpair a w q hq
+      = 6 * tateXpair a w q hq ^ 2 + tateXpair a w q hq
+        + 2 * (tateCurveAt q hq).a₄ := by
+  have h := tate_d2x_mul a w q hq haw ha hw
+  rcases mul_eq_zero.1 h with h1 | h2
+  · exact absurd h1 hDX
+  · exact sub_eq_zero.1 h2
+
+/-- ★★★★★★★★**`D³X = 12X·DX + DX = 24XY + 12X² + 2Y + X`**。 -/
+theorem tate_d3x {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} [IsAdicComplete I R]
+    (a w q : R) (hq : q ∈ I) (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w))
+    (hDX : tateDXpair a w q hq ≠ 0) :
+    tateD3Xpair a w q hq
+      = 12 * tateXpair a w q hq * tateDXpair a w q hq + tateDXpair a w q hq := by
+  have h := tate_d3x_mul a w q hq haw ha hw
+  have h2 := tate_d2x a w q hq haw ha hw hDX
+  have hzero : tateD2Xpair a w q hq
+      * (tateD2Xpair a w q hq - 6 * tateXpair a w q hq ^ 2 - tateXpair a w q hq
+        - 2 * (tateCurveAt q hq).a₄) = 0 := by
+    rw [h2]
+    ring
+  rw [hzero, add_zero] at h
+  rcases mul_eq_zero.1 h with h1 | h3
+  · exact absurd h1 hDX
+  · linear_combination h3
+
+/-- ★★★★★★**`∑_{i≠0} D³X(ζ^i) = 0`**——`DX` と同じ理由（奇数回の微分）。 -/
+theorem sum_mu_d3xpair_zero {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (h2 : (2 : R) ≠ 0) :
+    ∑ i ∈ (range l).erase 0, tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq = 0 := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hpow : ∀ i ∈ (range l).erase 0, (ζ ^ i) ^ (l - 1) = ζ ^ (l - i) := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hl1 : 1 ≤ l := hl.one_lt.le
+    have hi1 : 1 ≤ i := Nat.one_le_iff_ne_zero.2 hi0
+    have e1 : i * (l - 1) + i = i * l := by
+      calc i * (l - 1) + i = i * ((l - 1) + 1) := by ring
+        _ = i * l := by rw [Nat.sub_add_cancel hl1]
+    have e2 : (i - 1) * l + l = i * l := by
+      calc (i - 1) * l + l = ((i - 1) + 1) * l := by ring
+        _ = i * l := by rw [Nat.sub_add_cancel hi1]
+    have hidx : i * (l - 1) = (i - 1) * l + (l - i) := by omega
+    rw [← pow_mul, hidx, pow_add, mul_comm (i - 1) l, pow_mul, hζl, one_pow, one_mul]
+  have hterm : ∀ i ∈ (range l).erase 0,
+      tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+        = tateD3Xterm (ζ ^ i) + tateD3Xtail (ζ ^ i) q hq
+          - tateD3Xtail (ζ ^ (l - i)) q hq := by
+    intro i hi
+    rw [tateD3Xpair, hpow i hi, ← tateD3Xtail_rec]
+  have hswap : ∑ i ∈ (range l).erase 0, tateD3Xtail (ζ ^ (l - i)) q hq
+      = ∑ i ∈ (range l).erase 0, tateD3Xtail (ζ ^ i) q hq :=
+    sum_erase_reflect (fun j => tateD3Xtail (ζ ^ j) q hq)
+  rw [Finset.sum_congr rfl hterm, Finset.sum_sub_distrib, Finset.sum_add_distrib, hswap]
+  have hS : ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ i) = 0 := by
+    have hanti : ∀ i ∈ (range l).erase 0,
+        tateD3Xterm (ζ ^ (l - i)) = - tateD3Xterm (ζ ^ i) := by
+      intro i hi
+      have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+      have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+      have hmem' : l - i ∈ (range l).erase 0 :=
+        Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+      have huv : ζ ^ i * ζ ^ (l - i) = 1 := by
+        rw [← pow_add, show i + (l - i) = l by omega, hζl]
+      exact tateD3Xterm_inv huv (hu i hi) (hu (l - i) hmem')
+    have hr1 : ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ (l - i))
+        = ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ i) :=
+      sum_erase_reflect (fun j => tateD3Xterm (ζ ^ j))
+    have hr2 : ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ (l - i))
+        = - ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ i) := by
+      rw [Finset.sum_congr rfl hanti, Finset.sum_neg_distrib]
+    have hzero : (2 : R) * ∑ i ∈ (range l).erase 0, tateD3Xterm (ζ ^ i) = 0 := by
+      linear_combination hr2 - hr1
+    exact (mul_eq_zero.1 hzero).resolve_left h2
+  rw [hS]
+  ring
+
 /-! ## ★出典の紐付け(`.src`)と証明義務(`.needs`) -/
 
 def tate_ode.src : Source :=
@@ -308,5 +394,32 @@ def sum_mu_d2xpair.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xtail_sigma") 1,
     .citation "[ABC3]" "tateD2Xtail_rec(尾の漸化式、第 855、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.tateD2Xtail_rec") 1 ]
+
+def tate_d2x.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D²X = 6X² + X + 2a₄)",
+    sectionId := "genell-lemma-3-2" }
+
+def tate_d2x.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tate_d2x_mul(掛けた形、第 861、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tate_d2x_mul") 1 ]
+
+def tate_d3x.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D³X = 12X·DX + DX)",
+    sectionId := "genell-lemma-3-2" }
+
+def tate_d3x.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tate_d3x_mul(双対数で tate_d2x_mul を微分したもの、第 861)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tate_d3x_mul") 1 ]
+
+def sum_mu_d3xpair_zero.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{i≠0} D³X(ζ^i) = 0)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_d3xpair_zero.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tateD3Xterm_inv(D³f(1/t) = −D³f(t)、第 860、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateD3Xterm_inv") 1 ]
 
 end ABC3.Skeleton.GenEll

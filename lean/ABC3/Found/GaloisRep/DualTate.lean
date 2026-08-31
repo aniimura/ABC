@@ -630,6 +630,93 @@ theorem tateD2Xpair_dual {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q 
   · simp [tateD3Xpair, tateD3Xterm]
     ring
 
+/-! ## ★★★★★★★★`DX` を微分して `D²X` -/
+
+/-- ★★★★**`Df(t + εs) = Df(t) + ε·s(1+4t+t²)/(1−t)⁴`**（一般の `s`）。 -/
+theorem tateDXterm_dual' {t s : R} (hu : IsUnit (1 - t)) :
+    tateDXterm (DualNum.mk t s)
+      = DualNum.mk (tateDXterm t)
+          (s * (1 + 4 * t + t ^ 2) * Ring.inverse (1 - t) ^ 4) := by
+  have hr : (1 - t) * Ring.inverse (1 - t) = 1 := Ring.mul_inverse_cancel _ hu
+  rw [tateDXterm_eq (isUnit_one_sub_dual hu), tateXterm_dual hu, tateYterm_dual hu]
+  ext
+  · simp [tateDXterm_eq hu]
+  · simp only [DualNum.eps_add, DualNum.eps_mul, DualNum.eps_mk, DualNum.re_mk,
+      DualNum.re_two, DualNum.eps_two]
+    linear_combination (-(s * (1 + t) * Ring.inverse (1 - t) ^ 3)) * hr
+
+theorem tateDXtail_dual_neg {I : Ideal R} [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateDXtail (DualNum.mk u (-u)) (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+      = DualNum.mk (tateDXtail u q hq) (-tateD2Xtail u q hq) := by
+  have hmem : ∀ n : ℕ, (-1 : R) * tateD2Xterm (q ^ (n + 1) * u) ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (tateD2Xtail_aux hq n)
+  have hterm : ∀ n : ℕ,
+      tateDXterm ((DualNum.mk q 0) ^ (n + 1) * DualNum.mk u (-u))
+        = DualNum.mk (tateDXterm (q ^ (n + 1) * u))
+            ((-1 : R) * tateD2Xterm (q ^ (n + 1) * u)) := by
+    intro n
+    rw [DualNum.mk_pow, DualNum.mk_zero_mul,
+      tateDXterm_dual' (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), tateD2Xterm]
+    ext <;> simp <;> try ring
+  rw [tateDXtail, tateDXtail, tateD2Xtail,
+    adicSum_congr (tateDXtail_aux (mk_mem_dualIdeal hq))
+      (dual_mem_pow (tateDXtail_aux hq) hmem) hterm,
+    adicSum_dual _ _ (tateDXtail_aux hq) hmem,
+    adicSum_smul (-1 : R) _ (tateD2Xtail_aux hq)]
+  ext <;> simp
+
+/-- ★★★★★★★★**`DX(a+εa, w−εw) = DX + ε·D²X`**。 -/
+theorem tateDXpair_dual {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateDXpair (DualNum.mk a a) (DualNum.mk w (-w)) (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+      = DualNum.mk (tateDXpair a w q hq) (tateD2Xpair a w q hq) := by
+  rw [tateDXpair, tateDXterm_dual' ha, tateDXterm_dual' hw,
+    tateDXtail_dual_pos a q hq, tateDXtail_dual_neg w q hq]
+  ext
+  · simp [tateDXpair, tateDXterm]
+  · simp [tateD2Xpair, tateD2Xterm]
+    ring
+
+/-! ## ★★★★★★★★★★`D²X` と `D³X` の掛けた形 -/
+
+/-- ★★★★★★**`DX·(D²X − (6X² + X + 2a₄)) = 0`**——`tate_ode_mul` の書き換え。 -/
+theorem tate_d2x_mul {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateDXpair a w q hq
+        * (tateD2Xpair a w q hq
+            - (6 * tateXpair a w q hq ^ 2 + tateXpair a w q hq
+                + 2 * (tateCurveAt q hq).a₄)) = 0 := by
+  have h := tate_ode_mul a w q hq haw ha hw
+  rw [tateDXpair_eq a w q hq ha hw] at h
+  rw [tateD2Xpair_eq a w q hq ha hw, tateDXpair_eq a w q hq ha hw]
+  linear_combination 2 * h
+
+/-- ★★★★★★★★**`DX·(D³X − 12X·DX − DX) + D²X·(D²X − 6X² − X − 2a₄) = 0`**。
+
+★`tate_d2x_mul` を双対数の点で評価し、`ε` 成分を取ったもの。 -/
+theorem tate_d3x_mul {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateDXpair a w q hq
+        * (tateD3Xpair a w q hq - 12 * tateXpair a w q hq * tateDXpair a w q hq
+            - tateDXpair a w q hq)
+      + tateD2Xpair a w q hq
+        * (tateD2Xpair a w q hq - 6 * tateXpair a w q hq ^ 2 - tateXpair a w q hq
+            - 2 * (tateCurveAt q hq).a₄) = 0 := by
+  have haw' : DualNum.mk a a * DualNum.mk w (-w) = DualNum.mk q 0 := dualA_mul_dualW a w q haw
+  have h := tate_d2x_mul (I := dualIdeal I) (DualNum.mk a a) (DualNum.mk w (-w))
+    (DualNum.mk q 0) (mk_mem_dualIdeal hq) haw'
+    (isUnit_one_sub_dualA ha) (isUnit_one_sub_dualW hw)
+  have hn6 : (6 : DualNum R) = DualNum.mk 6 0 := by
+    have hh : DualNum.inlHom (6 : R) = (6 : DualNum R) := map_ofNat _ 6
+    rw [← hh, DualNum.inlHom_apply]
+  rw [tateDXpair_dual a w q hq ha hw, tateD2Xpair_dual a w q hq ha hw,
+    tateXpair_dual a w q hq ha hw, tateCurveAt_a4_dual q hq, hn6] at h
+  have heps := congrArg DualNum.eps h
+  simp only [DualNum.eps_mul, DualNum.eps_sub, DualNum.eps_add, DualNum.eps_mk,
+    DualNum.re_mk, DualNum.re_mul, DualNum.re_sub, DualNum.re_add, DualNum.eps_sq,
+    DualNum.re_pow, DualNum.eps_zero, DualNum.re_two, DualNum.eps_two] at heps
+  linear_combination heps
+
 /-! ## ★★★★`c₄ = 1 + 240·s₃` -/
 
 /-- ★★**べき級数の水準で `c₄ = 1 + 240·σ₃`**。
