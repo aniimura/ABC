@@ -5,6 +5,7 @@ import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.GLSurjective
+import ABC3.Found.GenEll.Thm38Bridge
 import ABC3.Meta.Claim
 
 /-!
@@ -68,11 +69,11 @@ abbrev SSCurve.tate (E : SSCurve) (l : ℕ) : Type :=
 ★標数 0 では `l`-巡回部分群スキームと `Gal`-安定な直線は同じことである
 （`Interface/GenEll/EllModuli.lean` の `HasLCyclic` の docstring の測定）。 -/
 def HasLCyclicJ (E : SSCurve) (l : ℕ) : Prop :=
-  ∀ (_ : Fact l.Prime) (e : E.tate l ≃+ (Fin 2 → ℤ_[l])),
+  ∀ (_ : Fact l.Prime), ∃ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
     ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
-      ∀ σ : E.alg ≃ₐ[E.fld] E.alg, ∃ c : ZMod l,
-        ((glRedPadic l (galRep E.W l e σ) : GL (Fin 2) (ZMod l)) :
-          Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v
+      ∀ M ∈ (↑(((galRep E.W l e).range).map (glRedPadic l)) :
+          Set (GL (Fin 2) (ZMod l))),
+        ∃ c : ZMod l, (M : Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v
 
 /-! ## ★★★★★★`ImageContainsSL2` 欄・`ImageSurjective` 欄 -/
 
@@ -123,6 +124,60 @@ def imageSurjectiveJ_of_containsSL2.needs : List ABC3.Meta.ProofObligation :=
       ("☆残るのは「l が L で不分岐なら円分指標 Gal(L̄/L) → ℤ_l^× が全射」だけである。" ++
        "原文の括弧『ℚ(ζ_{l^∞})/ℚ は l で完全分岐するので L/ℚ と線型無関連』。" ++
        "★det ρ(σ) が円分指標であること自体は det_cyclotomic_full で済んでいる") 8 ]
+
+/-! ## ★★★★★★★★★★★★`imageContainsSL2_of_torsionExt` 欄の帰着 -/
+
+/-- ★★★★★★★★★★★★★★
+**`α` が mod `l` 像に入り、安定直線が無ければ `SL₂(ℤ_l)` を含む**——★**無条件**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★これが `imageContainsSL2_of_torsionExt` 欄の**群論の側の全体**である。
+中身は `Found/GenEll/Thm38Bridge.lean` の `sl2_of_alpha_of_no_stable_line`
+（＝ `Lemma 3.1, (iv)` ＋ `exists_nonUpper_of_no_stable_line`）。
+
+☆残るのは仮説 `halpha`——**乗法還元の素点で局所高さが `l` で割れなければ
+mod `l` 像が `α = (1 1 / 0 1)` を含む**——だけである。
+★原文の『by the local theory (cf. the discussion preceding Lemma 3.2)』の中身であり、
+`Found/GaloisRep/Lemma32Tate.lean`（Tate 一意化と `Lemma 3.2, (i)`）が素材である。
+
+☆仮説 `hclosed` は像が閉部分群であること（profinite 群の連続像）。 -/
+theorem imageContainsSL2J_of_alpha (E : SSCurve) (l : ℕ) [hlp : Fact l.Prime] (hl5 : 5 ≤ l)
+    (hclosed : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      IsClosed (((galRep E.W l e).range : Subgroup (GL (Fin 2) ℤ_[l])) :
+        Set (GL (Fin 2) ℤ_[l])))
+    (halpha : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
+        ∈ ((galRep E.W l e).range).map (glRedPadic l))
+    (hno : ¬ HasLCyclicJ E l) :
+    ImageContainsSL2J E l := by
+  intro _ e g
+  have hnoe : ¬ ∃ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
+        ∀ M ∈ (↑(((galRep E.W l e).range).map (glRedPadic l)) :
+            Set (GL (Fin 2) (ZMod l))),
+          ∃ c : ZMod l, (M : Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v :=
+    fun h => hno (fun _ => h)
+  have hno' : ¬ ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
+      ∀ M ∈ (↑(((galRep E.W l e).range).map (glRedPadic l)) :
+          Set (GL (Fin 2) (ZMod l))),
+        ∃ c : ZMod l, (M : Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v :=
+    fun h => hnoe ⟨e, h⟩
+  exact sl2_of_alpha_of_no_stable_line l hl5 _ (hclosed e) (halpha e) hno' g
+
+def imageContainsSL2J_of_alpha.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(imageContainsSL2_of_torsionExt 欄の群論の側——α と安定直線から SL₂)",
+    sectionId := "genell-thm-3-8" }
+
+def imageContainsSL2J_of_alpha.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆残るのは局所理論の行列表示——乗法還元の素点で局所高さが l で割れなければ " ++
+       "mod l 像が α = (1 1 / 0 1) を含むこと。" ++
+       "原文の『by the local theory (cf. the discussion preceding Lemma 3.2)』であり、" ++
+       "Found/GaloisRep/Lemma32Tate.lean(Tate 一意化と Lemma 3.2, (i))が素材である") 10,
+    .implicitStep "☆像が閉部分群であること(profinite 群の連続像)" 3 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
