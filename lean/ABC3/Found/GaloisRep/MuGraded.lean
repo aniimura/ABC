@@ -481,6 +481,45 @@ theorem tateYterm_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
   · intro h
     exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
 
+/-! ## ★★★★★★★★係数の合同と差 -/
+
+theorem muEval_congr [IsAdicComplete I R] {l : ℕ} (A B : ℕ → ℕ → R)
+    (hA : ∀ n a, A n a ∈ I ^ n) (hB : ∀ n a, B n a ∈ I ^ n)
+    (h : ∀ n a, A n a = B n a) (z : R) :
+    muEval l A hA z = muEval l B hB z := by
+  simp only [muEval]
+  exact adicSum_congr _ _ (fun n => Finset.sum_congr rfl (fun a _ => by rw [h n a]))
+
+theorem muEval_sub [IsAdicComplete I R] {l : ℕ} (A B : ℕ → ℕ → R)
+    (hA : ∀ n a, A n a ∈ I ^ n) (hB : ∀ n a, B n a ∈ I ^ n) (z : R) :
+    muEval l A hA z - muEval l B hB z
+      = muEval l (fun n a => A n a - B n a)
+          (fun n a => Submodule.sub_mem _ (hA n a) (hB n a)) z := by
+  classical
+  simp only [muEval]
+  rw [← adicSum_sub]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl (fun a _ => by ring)
+
+/-- ★★★★★★★★★★★★**`s₁(q)` は `ζ`-free な μ-等級付き**。 -/
+theorem sigmaOne_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) (q : R) (hq : q ∈ I) :
+    evalAdic (sigmaSeries 1) q hq
+      = muEval (I := I) l
+          (fun n a => if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
+          (fun n a => by
+            by_cases h : a = 0
+            · simpa [h] using Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+            · simpa [h] using Submodule.zero_mem (I ^ n)) q := by
+  classical
+  rw [← tateXtail_one q hq, tateXtail_eq_divisorSum 1 q hq]
+  rw [adicSum_eq_muEval (l := l) hl (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) * (1 : R) ^ d)
+    (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) q]
+  refine muEval_congr _ _ _ _ (fun n a => ?_) q
+  by_cases h : a = 0
+  · simp [h]
+  · simp [h]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -566,6 +605,21 @@ def tateYtail_qz_eq_muEval.src : ABC3.Meta.Source :=
 def tateYterm_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(tateYterm(q·z^m) は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def muEval_congr.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(係数が等しければ値も等しい。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def muEval_sub.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(μ-等級付き級数の差。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sigmaOne_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(s₁(q) は ζ-free な μ-等級付き。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
