@@ -262,6 +262,78 @@ theorem sum_mu_frac [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
   field_simp
   ring
 
+/-! ## ★★★★★★★★★★★★多項式を `μ_l∖{1}` 上で足す -/
+
+/-- ★★★★★★★★★★★★★★★★**一般形**——多項式 `∑_j c_j X^j` を
+`μ_l∖{1}` 上で足すと、係数に `l·[l ∣ j] − 1` を掛けた和になる。
+
+★これが `tateModel_of_quot_mu` の手順 2 を**任意の係数列に対して**書いた形である。 -/
+theorem sum_mu_poly {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (c : ℕ → F) (N : ℕ) :
+    ∑ i ∈ (range l).erase 0, ∑ j ∈ range N, c j * ζ ^ (i * j)
+      = ∑ j ∈ range N, c j * ((if l ∣ j then (l : F) else 0) - 1) := by
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [← Finset.mul_sum, sum_mu_pow_erase_zero hl hζ j]
+
+/-- ★`k ∈ range l` のとき `l ∣ k ⇔ k = 0`。 -/
+theorem dvd_iff_eq_zero_of_mem_range {l k : ℕ} (hl : 0 < l) (hk : k ∈ range l) :
+    l ∣ k ↔ k = 0 := by
+  constructor
+  · intro h
+    exact Nat.eq_zero_of_dvd_of_lt h (Finset.mem_range.1 hk)
+  · rintro rfl
+    exact dvd_zero l
+
+/-- ★★★★★★★★★★★★**`∑_{ζ≠1} 1/(1−ζ) = (l−1)/2`**。 -/
+theorem sum_mu_inv_one_sub [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹ = ((l : F) - 1) / 2 := by
+  have hlF : (l : F) ≠ 0 := Nat.cast_ne_zero.2 hl.ne_zero
+  have hterm : ∀ i ∈ (range l).erase 0,
+      (1 - ζ ^ i)⁻¹ = -(l : F)⁻¹ * ∑ k ∈ range l, (k : F) * ζ ^ (i * k) := by
+    intro i hi
+    obtain ⟨hpow, hsum⟩ := zeta_pow_facts hl hζ hi
+    rw [inv_one_sub_eq hlF hpow hsum]
+    congr 1
+    exact Finset.sum_congr rfl (fun k _ => by rw [← pow_mul])
+  rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum,
+    sum_mu_poly hl hζ (fun k => (k : F)) l]
+  have hval : ∑ k ∈ range l, (k : F) * ((if l ∣ k then (l : F) else 0) - 1)
+      = -((l : F) * ((l : F) - 1) / 2) := by
+    have h1 : ∀ k ∈ range l, (k : F) * ((if l ∣ k then (l : F) else 0) - 1) = -(k : F) := by
+      intro k hk
+      by_cases hk0 : k = 0
+      · subst hk0; simp
+      · rw [if_neg (fun h => hk0 ((dvd_iff_eq_zero_of_mem_range hl.pos hk).1 h))]
+        ring
+    rw [Finset.sum_congr rfl h1, Finset.sum_neg_distrib, sum_range_cast]
+  rw [hval]
+  field_simp
+
+/-- ★★★★★★★★★★★★**`∑_{ζ≠1} 1/(1−ζ)² = (l−1)(5−l)/12`**。
+
+`ζ/(1−ζ)² = 1/(1−ζ)² − 1/(1−ζ)` なので `sum_mu_frac` と
+`sum_mu_inv_one_sub` から出る。 -/
+theorem sum_mu_inv_one_sub_sq [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, ((1 - ζ ^ i)⁻¹) ^ 2 = ((l : F) - 1) * (5 - (l : F)) / 12 := by
+  have hsplit : ∀ i ∈ (range l).erase 0,
+      ((1 - ζ ^ i)⁻¹) ^ 2 = ζ ^ i * ((1 - ζ ^ i)⁻¹) ^ 2 + (1 - ζ ^ i)⁻¹ := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    have hne : (1 : F) - ζ ^ i ≠ 0 := by
+      refine sub_ne_zero.2 (Ne.symm ?_)
+      intro h
+      exact (isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt h
+    field_simp
+    ring
+  rw [Finset.sum_congr rfl hsplit, Finset.sum_add_distrib, sum_mu_frac hl hζ,
+    sum_mu_inv_one_sub hl hζ]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -302,6 +374,26 @@ def sum_range_cast_sq.src : ABC3.Meta.Source :=
 def sum_indicator_inner.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(l ∣ k+m+1 なる m は l−1−k だけ。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_poly.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(多項式を μ_l∖{1} 上で足す一般形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_one_sub.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} 1/(1−ζ) = (l−1)/2。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_one_sub_sq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} 1/(1−ζ)² = (l−1)(5−l)/12。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def dvd_iff_eq_zero_of_mem_range.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(range l の中で l ∣ k ⇔ k = 0。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
