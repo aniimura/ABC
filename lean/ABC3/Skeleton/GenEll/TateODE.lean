@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateDSeries
 import ABC3.Found.GaloisRep.MuDYSum
+import ABC3.Found.GaloisRep.DualTate
 import ABC3.Found.GaloisRep.TateVelu
 import ABC3.Meta.Claim
 
@@ -60,35 +61,45 @@ namespace ABC3.Skeleton.GenEll
 
 open ABC3.Meta ABC3.Found.GaloisRep ABC3.Found.GenEll Finset
 
-/-- **[GenEll] 葉 1 の中核**——**Tate 曲線の ODE**。
+/-- ★★★★★★★★★★**Tate 曲線の ODE**——第 850-851 で**証明済み**になった。
 
 原文 (GenEll p.15):
 > parameter qE of E satisfies the relation qE = qEl ; in particular, we have
 
-★`tate_equation`（証明済み）と `tateDXpair_eq`（第 846、証明済み）から、
-万有な環の上で `D` により微分して `2DX` で割ると出る。 -/
+★`tate_ode_mul`（`Found/GaloisRep/DualTate.lean`）は双対数 `R[ε]` の中で
+`tate_equation` を `(a+εa, w−εw, q)` に適用し、`ε` 成分を取って
+
+    `DX · (DY − (3X² − Y + a₄)) = 0`
+
+を与える。☆あとは `DX ≠ 0` で割るだけである（`R` は整域）。 -/
 theorem tate_ode {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} [IsAdicComplete I R]
-    (a w q : R) (hq : q ∈ I) (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    (a w q : R) (hq : q ∈ I) (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w))
+    (hDX : tateDXpair a w q hq ≠ 0) :
     tateDYpair a w q hq
       = 3 * tateXpair a w q hq ^ 2 - tateYpair a w q hq + (tateCurveAt q hq).a₄ := by
-  sorry
+  have h := tate_ode_mul a w q hq haw ha hw
+  rcases mul_eq_zero.1 h with h1 | h2
+  · exact absurd h1 hDX
+  · exact sub_eq_zero.1 h2
 
 /-- ★★★★★★★★★★**`veluV2` は `DY` そのものである**——★ODE から**直ちに**出る。
 
 これが第 846 の発見「`v = ∑_ζ DY`」の中身であり、`X²` が消える理由である。 -/
 theorem veluV2_eq_tateDYpair {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) (haw : a * w = q)
-    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) (hDX : tateDXpair a w q hq ≠ 0) :
     veluV2 (tateCurveAt q hq) (tateXpair a w q hq) (tateYpair a w q hq)
       = tateDYpair a w q hq := by
-  rw [veluV2_tateCurveAt, tate_ode a w q hq haw ha hw]
+  rw [veluV2_tateCurveAt, tate_ode a w q hq haw ha hw hDX]
   ring
 
 /-- ★★★★★★★★**`v = ∑_{i≠0} DY(ζ^i)`**——`c4_velu_tate` の左辺の `v` を置き換える形。 -/
 theorem sum_veluV2_eq_sum_tateDYpair {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) {ζ : R} (hζl : ζ ^ l = 1)
     (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
-    (q : R) (hq : q ∈ I) :
+    (q : R) (hq : q ∈ I)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
     (∑ i ∈ (range l).erase 0,
         veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
           (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
@@ -102,7 +113,7 @@ theorem sum_veluV2_eq_sum_tateDYpair {R : Type} [CommRing R] [IsDomain R] {I : I
       _ = q := by rw [hpow, mul_one]
   have hwu : IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) :=
     isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
-  exact veluV2_eq_tateDYpair _ _ q hq haw (hu i hi) hwu
+  exact veluV2_eq_tateDYpair _ _ q hq haw (hu i hi) hwu (hDX i hi)
 
 /-- ★★★★★★★★★★**葉 1 の定数項は閉じた**——
 `240·∑_{ζ≠1} ζ²(2+ζ)/(1−ζ)⁴ = l⁴ − 1`。
@@ -127,18 +138,9 @@ def tate_ode.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def tate_ode.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "tate_equation((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tate_equation") 1,
-    .citation "[ABC3]" "tateDXpair_eq(DX = 2Y + X、第 846、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateDXpair_eq") 1,
-    .citation "[ABC3]" "univD(万有な環の上の微分、第 845、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.univD") 1,
-    .implicitStep
-      ("★★級数は TateUniv に無く完備化の中にあるので、q^N で切り詰めて " ++
-       "TateUniv の中で整除性を見る(tate_equation を通した道・第 222–229 と同じ形)") 8,
-    .implicitStep
-      ("★★2DX で割る段——TateUniv は UFD ℤ[A,W] の局所化なので整域であり、" ++
-       "2DX は q = AW と互いに素(mod q で DX ≡ A(1+A)/(1−A)³ ≠ 0)") 5 ]
+  [ .citation "[ABC3]" "tate_ode_mul(双対数による ODE、第 851、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tate_ode_mul") 1,
+    .implicitStep "☆DX ≠ 0 で割る段(R は整域)" 1 ]
 
 def veluV2_eq_tateDYpair.src : Source :=
   { paper := "GenEll", pdfPage := 15,
