@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.VeluMuSum
+import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
 
 /-!
@@ -118,6 +120,82 @@ def tateModel_of_quot_mu.needs : List ProofObligation :=
        ++ "古典的な Tate/Vélu の q 展開恒等式そのものである") 8,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel（この結論の消費側、§9-1153）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★訂正後の目標（`c₄`・`c₆`） -/
+
+open Finset in
+/-- **[GenEll] 葉 1 の訂正後の目標 (1)**——`c₄` は `l⁴` 倍。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★第 834-835 の数値測定により、**係数 `a₄` の恒等式は偽**であり、
+`c₄` で書いたこの形が真である（`l = 5, 7` で `q^21` まで全係数一致）。
+
+☆`c₄(veluCurve W v w) = c₄ W + 240v`（`Found/GenEll/Velu.lean` の `veluCurve_c₄`）なので
+左辺は Vélu の商の `c₄` そのものである。 -/
+theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    (tateCurveAt q hq).c₄
+        + 240 * (∑ i ∈ (range l).erase 0,
+            veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+      = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄ := by
+  sorry
+
+open Finset in
+/-- **[GenEll] 葉 1 の訂正後の目標 (2)**——`c₆` は `−l⁶` 倍（分母を払った形）。
+
+☆`c₆(veluCurve W v w) = c₆ W + 504 b₂ v + 6048 w`であり、Tate 曲線では `b₂ = 1`。
+★`w` には `1/2` が入るので、**2 倍した形**で述べる。 -/
+theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    2 * (tateCurveAt q hq).c₆
+        + 1008 * (∑ i ∈ (range l).erase 0,
+            veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        + 3024 * (∑ i ∈ (range l).erase 0,
+            (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              + 2 * (veluV2 (tateCurveAt q hq)
+                      (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                      (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+      = 2 * (-((l : R) ^ 6) * (tateCurveAt (q ^ l) hql).c₆) := by
+  sorry
+
+def c4_velu_tate.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(訂正後の目標 (1)——c₄ は l⁴ 倍)",
+    sectionId := "genell-lemma-3-2" }
+
+def c4_velu_tate.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_veluV2（v は有限個の係数の計算、第 810）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluV2") 1,
+    .citation "[ABC3]" "veluV_coeff_of_ne_zero（係数の具体形、第 833）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV_coeff_of_ne_zero") 1,
+    .citation "[ABC3]" "sigma_one_convolution（ラマヌジャンの恒等式、第 822）"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sigma_one_convolution") 8,
+    .implicitStep
+      ("★★数値確認済み（l = 5, 7 で q^21 まで全係数一致、第 835）。"
+       ++ "☆第 718 の a₄ の形は**偽**である（Check/GenEll/VeluTateNeedsChange.lean）") 6 ]
+
+def c6_velu_tate.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(訂正後の目標 (2)——c₆ は −l⁶ 倍)",
+    sectionId := "genell-lemma-3-2" }
+
+def c6_velu_tate.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_veluW（2w は有限個の係数の計算、第 811）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluW") 1,
+    .citation "[ABC3]" "sigma_one_convolution（ラマヌジャンの恒等式、第 822）"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sigma_one_convolution") 8,
+    .implicitStep
+      ("★★数値確認済み（l = 5, 7 で q^21 まで全係数一致、第 835）") 6 ]
 
 /-! ## ★★★★★★★★★★★★★★★★`Lemma 3.5` が直接消費する形（`j` の付値） -/
 
