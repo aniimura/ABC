@@ -287,8 +287,18 @@ structure EllModuliData extends TorsionGaloisRepData where
   ★★★★★★★**`Theorem 3.8` に Serre の開像定理は要らない**——群論の核は
   `Lemma 3.1, (iv)` だけであり、それは済んでいる。
   ★★★★★結論が `E`(`L` 上)についてなのは、
-  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。 -/
-  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。
+
+  ## ★★★★★★★★2026-08-31 の訂正(第 776)——`5 ≤ l` が要る
+
+  ☆以前ここに `5 ≤ l` は無かった。★★**群論の核 `Lemma 3.1, (iv)` が `5 ≤ l` を
+  要求する**(`Found/GenEll/Sl2Padic.lean` の `lemma_3_1_iv`)ので、
+  `l ∈ {2, 3}` では witness が作れない。
+  ★`Check/GenEll/ImageSL2NeedsL5.lean` の測定を参照。
+
+  ★★★`Theorem 3.8` の側では両方の条件から `5 ≤ l` が出るので、statement は変わらない:
+  条件 (a) では `l ≥ 23040·100 ≥ 5`、条件 (b) では `l` は `30` と素な素数だから `l ≥ 7`。 -/
+  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l → 5 ≤ l →
     HasMultRed (torsionExt E) → PrimeToLocalHeights (torsionExt E) l →
     ¬ HasLCyclic (torsionExt E) l → ImageContainsSL2 E l
   /-- ★★★★★**`SL₂` を含むことと全射性は、`l` が `L` で不分岐なら同じこと**である。

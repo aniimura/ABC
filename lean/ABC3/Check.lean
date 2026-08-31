@@ -14,6 +14,7 @@ import ABC3.Check.NCBelyi.Thm25AxiomGap
 import ABC3.Check.NCBelyi.Thm25Witness
 import ABC3.Check.GenEll.HeightInterfaceNondegenerate
 import ABC3.Check.GenEll.EllModuliDegInfPos
+import ABC3.Check.GenEll.ImageSL2NeedsL5
 import ABC3.Check.GenEll.LcyclicExcTooStrong
 import ABC3.Check.GenEll.Section3NotProvable
 import ABC3.Check.AbsTopIII.LogShellLanding

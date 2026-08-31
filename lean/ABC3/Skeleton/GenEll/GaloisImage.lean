@@ -188,7 +188,35 @@ theorem theorem_3_8 (D : EllModuliData)
         refine ⟨?_, hpl'⟩
         rw [hcls]; exact hKVE
       exact ⟨hb hcB hExcE', hpl', fun hcyc => hExcE' (hc (Or.inr hcB) hcyc)⟩
-  exact D.imageContainsSL2_of_torsionExt E l hl hmain.1 hmain.2.1 hmain.2.2
+  -- ★`Lemma 3.1, (iv)` が要求する `5 ≤ l` は、どちらの条件からも出る
+  have hl5 : 5 ≤ l := by
+    have h2 := hl.two_le
+    rcases hcond with ⟨hnum, -⟩ | ⟨-, -, hcop⟩
+    · set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
+      set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
+      have hd1 : (1:ℝ) ≤ d := by
+        rw [hddef]; exact_mod_cast D.degOfDefinition_pos E
+      have hP1 : (1:ℝ) ≤ d ^ ε := Real.one_le_rpow hd1 hε.le
+      have hFB : -|B| ≤ F := le_trans (neg_abs_le B) (hB (D.cls E))
+      have hBnn : (0:ℝ) ≤ |B| := abs_nonneg B
+      have hC7 : (0:ℝ) < C₇ * (23040:ℝ) ^ ε := mul_pos hC₇pos hKpos
+      have hCnn : (0:ℝ) ≤ C₇ * (23040:ℝ) ^ ε + |B| + 1 := by positivity
+      have hCP : (C₇ * (23040:ℝ) ^ ε + |B| + 1)
+          ≤ (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by nlinarith [hP1, hCnn]
+      have hsum : (1:ℝ) ≤ F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by linarith
+      have hprod : (2304000:ℝ)
+          ≤ 23040 * 100 * d * (F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε) := by
+        nlinarith [hd1, hsum]
+      have hkey : (2304000 : ℝ) ≤ (l : ℝ) := le_trans hprod hnum
+      have hnat : (2304000 : ℕ) ≤ l := by exact_mod_cast hkey
+      omega
+    · by_contra hlt
+      push_neg at hlt
+      interval_cases l
+      · exact absurd hcop (by decide)
+      · exact absurd hcop (by decide)
+      · rcases hl.eq_one_or_self_of_dvd 2 (by norm_num) with h | h <;> omega
+  exact D.imageContainsSL2_of_torsionExt E l hl hl5 hmain.1 hmain.2.1 hmain.2.2
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
