@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.AdicFinsetSum
+import ABC3.Found.GaloisRep.TateInversion
 import ABC3.Meta.Claim
 
 /-!
@@ -969,6 +970,77 @@ theorem tateYC_zero {l : ℕ} (q : R) (n : ℕ) :
         + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
   rfl
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`q` 次数に揃えた形（古典形） -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`X(z, q)` の古典形**——`w` 側の 2 項が 1 つにまとまる。
+
+    `X(z,q) = z/(1−z)² + T(z) + T(z^{l−1}) − 2 s₁(q)`
+
+★★`TateInversion.lean` の `tateXtail_shift`（`T(u) = f(qu) + T(qu)`）を
+`u = z^{l−1}` で使うだけである。
+
+★★★これで **adic 添字と `q` 次数が揃う**（第 818 の測定の解消）。 -/
+theorem tateXpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
+    tateXpair z (q * z ^ (l - 1)) q hq
+      = tateXterm z + tateXtail z q hq + tateXtail (z ^ (l - 1)) q hq
+        - 2 * evalAdic (sigmaSeries 1) q hq := by
+  rw [tateXpair, tateXtail_shift (z ^ (l - 1)) q hq]
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`Y(z, q)` の古典形**。 -/
+theorem tateYpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
+    tateYpair z (q * z ^ (l - 1)) q hq
+      = tateYterm z + tateYtail z q hq - tateXtail (z ^ (l - 1)) q hq
+        - tateYtail (z ^ (l - 1)) q hq + evalAdic (sigmaSeries 1) q hq := by
+  rw [tateYpair, tateXtail_shift (z ^ (l - 1)) q hq, tateYtail_shift (z ^ (l - 1)) q hq]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateXtail(z^m, q)` の μ-等級付き形**。 -/
+theorem tateXtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateXtail (z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a), (d : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateXtail_eq_divisorSum (z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        (d : R) * (z ^ m) ^ d
+      = ∑ d ∈ n.divisors, (d : R) * (z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYtail(z^m, q)` も同じ**。 -/
+theorem tateYtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateYtail (z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+            ((d.choose 2 : ℕ) : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateYtail_eq_divisorSum (z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d
+      = ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -1194,6 +1266,26 @@ def sum_tateYC.src : ABC3.Meta.Source :=
 def tateYC_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(tateYC の 0 次係数。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXpair_eq_aligned.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(X(z,q) の古典形——q 次数に揃う。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def tateYpair_eq_aligned.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Y(z,q) の古典形。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def tateXtail_pow_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXtail(z^m,q) の μ-等級付き形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYtail_pow_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYtail(z^m,q) の μ-等級付き形。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
