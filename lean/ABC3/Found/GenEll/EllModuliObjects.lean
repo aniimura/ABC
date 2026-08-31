@@ -235,6 +235,82 @@ theorem northcottJ_of_northcott_htJ
   have h2 := (hC₀ E.fld E.W E.ss).2.1
   linarith
 
+/-! ## ★★★★★★★★★★★★述語の欄と `torsionExt` 群 -/
+
+namespace SSCurve
+
+/-- ★★★**素点 `p` での局所高さ**——半安定なので `v_p(Δ_min) = v_p(q)` である。 -/
+noncomputable def localHeightAt (E : SSCurve) (p : HeightOneSpectrum (𝓞 E.fld)) : ℤ :=
+  minDeltaExp p E.W
+
+theorem localHeightAt_nonneg (E : SSCurve) (p : HeightOneSpectrum (𝓞 E.fld)) :
+    0 ≤ E.localHeightAt p := minDeltaExp_nonneg p E.W
+
+/-- ★★★★**`SemiStable` 欄**——`SSCurve` は構成上つねに半安定である。 -/
+def SemiStable (E : SSCurve) : Prop := ∀ p : HeightOneSpectrum (𝓞 E.fld), SemistableAt p E.W
+
+/-- ★★`SemiStable` 欄は無条件に成り立つ。 -/
+theorem semiStable_all (E : SSCurve) : E.SemiStable := E.ss
+
+/-- ★★★★**`HasMultRed` 欄**——半安定な曲線では「悪い還元」＝「乗法還元」である。 -/
+def HasMultRed (E : SSCurve) : Prop := ∃ p : HeightOneSpectrum (𝓞 E.fld), E.localHeightAt p ≠ 0
+
+/-- ★★★**`HasPotMultRed` 欄**——半安定な曲線では潜在的乗法還元は乗法還元と一致する
+（変数変換で還元型は変わらず、半安定なら加法還元は起きない）。 -/
+def HasPotMultRed (E : SSCurve) : Prop := E.HasMultRed
+
+/-- ★★★★**`PrimeToLocalHeights` 欄**——`l` はどの局所高さとも素。 -/
+def PrimeToLocalHeights (E : SSCurve) (l : ℕ) : Prop :=
+  ∀ p : HeightOneSpectrum (𝓞 E.fld), E.localHeightAt p ≠ 0 →
+    Nat.Coprime l (E.localHeightAt p).toNat
+
+/-- ★★★★★★★★★★★★★★**`primeToLocalHeights_of_lt` 欄**——★**無条件**。
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★中身は `HtFaltBounds.lean` の `coprime_minDeltaExp`（`§9-1052`）。 -/
+theorem primeToLocalHeights_of_lt (E : SSCurve) (l : ℕ) (hl : Nat.Prime l)
+    (h : (E.deg : ℝ) * degInfJ E.j < (l : ℝ) * Real.log 2) :
+    E.PrimeToLocalHeights l := by
+  rw [degInfJ_eq] at h
+  exact fun p hp => coprime_minDeltaExp E.W E.W.isUnit_Δ.ne_zero l hl h p hp
+
+end SSCurve
+
+/-! ## ★★★★★★★★★★★★★★★★`torsionExt` 群——半安定に制限したので自明に埋まる -/
+
+/-- ★★★★★★**`torsionExt` 欄**——`SSCurve` はすでに半安定なので**恒等写像**でよい。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★原文 p.20 の `L′`（3･5 捧れを有理化する次数 `23040` の拡大）は
+「`E_{L′}` が全ての有限素点で半安定になるように」取るためのものである。
+★★`Curve := SSCurve`（半安定なものだけ）と決めた時点で、この段は不要になる
+——それが `ResearchPaper/ellmoduli-witness-status.json` の `semistableRestriction` の内容である。
+☆代償として結論は「半安定な曲線について」に限定される。 -/
+def torsionExt (E : SSCurve) : SSCurve := E
+
+@[simp] theorem torsionExt_eq (E : SSCurve) : torsionExt E = E := rfl
+
+theorem cls_torsionExt (E : SSCurve) : (torsionExt E).j = E.j := rfl
+
+theorem degOfDefinition_torsionExt (E : SSCurve) :
+    (torsionExt E).deg ≤ 23040 * E.deg := by
+  show E.deg ≤ 23040 * E.deg
+  have h := E.deg_pos
+  omega
+
+theorem semiStable_torsionExt (E : SSCurve) : (torsionExt E).SemiStable := E.semiStable_all
+
+theorem hasMultRed_torsionExt (E : SSCurve) (h : E.HasPotMultRed) :
+    (torsionExt E).HasMultRed := h
+
+theorem primeToLocalHeights_torsionExt (E : SSCurve) (l : ℕ)
+    (h : E.PrimeToLocalHeights l) (_ : Nat.Coprime l 30) :
+    (torsionExt E).PrimeToLocalHeights l := h
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -251,6 +327,27 @@ def faltingsHeightJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(EllModuliData の faltingsHeight 欄——j の函数として)",
     sectionId := "genell-prop-3-4" }
+
+def SSCurve.localHeightAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(素点ごとの局所高さ——半安定なので v_p(Δ_min))",
+    sectionId := "genell-lemma-3-7" }
+
+def SSCurve.primeToLocalHeights_of_lt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(primeToLocalHeights_of_lt 欄——SSCurve の言葉で。★無条件)",
+    sectionId := "genell-lemma-3-7" }
+
+def torsionExt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(torsionExt 欄——半安定に制限したので恒等写像でよい)",
+    sectionId := "genell-thm-3-8" }
+
+def torsionExt.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
+       "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
+       "結論は「半安定な曲線について」に限定される") 3 ]
 
 def degLeJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
