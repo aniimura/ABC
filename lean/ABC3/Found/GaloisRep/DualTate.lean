@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.DualAdic
 import ABC3.Found.GaloisRep.TateDSeries
 import ABC3.Found.GaloisRep.TateVelu
+import ABC3.Found.GaloisRep.TateMultRed
 
 /-!
 # Galois (G6) 第 851 ブロック —— **★★★★★★★★★★双対数で Tate 級数を微分する**（`Found`）
@@ -360,5 +361,26 @@ theorem tate_ode_mul {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ 
     DualNum.eps_zero, mul_zero, add_zero, zero_add] at heps
   have hDX := tateDXpair_eq a w q hq ha hw
   linear_combination heps + tateDYpair a w q hq * hDX
+
+/-! ## ★★★★`c₄ = 1 + 240·s₃` -/
+
+/-- ★★**べき級数の水準で `c₄ = 1 + 240·σ₃`**。
+
+`b₂ = a₁² + 4a₂ = 1`、`b₄ = 2a₄ + a₁a₃ = 2a₄` なので
+`c₄ = b₂² − 24b₄ = 1 − 48a₄ = 1 + 240 s₃`（`a₄ = −5s₃`）。 -/
+theorem tateCurve_c4 : tateCurve.c₄ = 1 + 240 * sigmaSeries 3 := by
+  rw [WeierstrassCurve.c₄, WeierstrassCurve.b₂, WeierstrassCurve.b₄]
+  simp only [tateCurve, tateA4]
+  have hC : (PowerSeries.C (-5 : ℤ)) = (-5 : PowerSeries ℤ) := by
+    rw [show (-5 : ℤ) = -(5 : ℤ) from rfl, map_neg, map_ofNat]
+  rw [hC]
+  ring
+
+/-- ★★★★**`c₄(E_q) = 1 + 240·s₃(q)`**。 -/
+theorem tateCurveAt_c4_eq {I : Ideal R} [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₄ = 1 + 240 * evalAdic (sigmaSeries 3) q hq := by
+  rw [tateCurveAt_c4, tateCurve_c4, map_add, map_mul, map_one,
+    map_ofNat (evalAdicHom q hq) 240]
+  rfl
 
 end ABC3.Found.GaloisRep

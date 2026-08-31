@@ -130,6 +130,43 @@ theorem sum_mu_dyterm {F : Type} [Field F] [CharZero F] {l : ℕ} (hl : l.Prime)
     240 * (∑ i ∈ (range l).erase 0, tateDYterm (ζ ^ i)) = (l : F) ^ 4 - 1 :=
   sum_mu_dyterm_field hl hζ
 
+/-! ## ★★★★★★★★`∑_ζ D²X` への還元 -/
+
+/-- **[GenEll] 葉 1 の残り (1)**——`∑_{i≠0} DX(ζ^i) = 0`。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★理由: `∑_ζ X(ζ)` は `q` だけの関数であり、`D` （`u∂_u`）で消える。
+☆定数項は `sum_mu_dxterm_field`（第 852、証明済み）であり、
+`q^N` 係数は `∑_{d∣N}d²∑_{i≠0}(ζ^{id} − ζ^{-id}) = 0`（`i ↦ l−i` の対称性）。 -/
+theorem sum_mu_dxpair_zero {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq = 0 := by
+  sorry
+
+/-- **[GenEll] 葉 1 の残り (2)**——`∑_{i≠0} D²X(ζ^i)` の閉じた式。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★`D²X` の `q^N` 係数は `∑_{d∣N}d³(u^d + u^{-d})` なので
+
+    `∑_{i≠0} D²X|_{q^N} = ∑_{d∣N} d³·2(l[l∣d] − 1) = 2(l⁴σ₃(N/l)[l∣N] − σ₃(N))`
+
+☆定数項は `sum_mu_d2xterm_field`（第 852、証明済み）で `120·∑ = l⁴ − 1`。 -/
+theorem sum_mu_d2xpair {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    120 * ∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = ((l : R) ^ 4 - 1)
+        + 240 * ((l : R) ^ 4 * evalAdic (sigmaSeries 3) (q ^ l) hql
+            - evalAdic (sigmaSeries 3) q hq) := by
+  sorry
+
 /-! ## ★出典の紐付け(`.src`)と証明義務(`.needs`) -/
 
 def tate_ode.src : Source :=
@@ -171,5 +208,31 @@ def sum_mu_dyterm.src : Source :=
 def sum_mu_dyterm.needs : List ProofObligation :=
   [ .citation "[ABC3]" "sum_mu_dyterm_field(第 849、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dyterm_field") 1 ]
+
+def sum_mu_dxpair_zero.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{i≠0} DX(ζ^i) = 0)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_dxpair_zero.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_dxterm_field(定数項、第 852、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dxterm_field") 1,
+    .implicitStep
+      ("☆q^N 係数は ∑_{d∣N}d²∑_{i≠0}(ζ^{id} − ζ^{-id}) = 0。" ++
+       "MuGraded/AdicFinsetSum の muEval 機械で扱える") 4 ]
+
+def sum_mu_d2xpair.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{i≠0} D²X(ζ^i) の閉じた式)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_d2xpair.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_d2xterm_field(定数項 120·∑ = l⁴−1、第 852、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xterm_field") 1,
+    .citation "[ABC3]" "sum_mu_adicSum_mul(尾の指標和、第 811)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_adicSum_mul") 1,
+    .implicitStep
+      ("☆q^N 係数は ∑_{d∣N}d³·2(l[l∣d]−1) = 2(l⁴σ₃(N/l)[l∣N] − σ₃(N))。" ++
+       "MuGraded/AdicFinsetSum の muEval 機械で扱える") 6 ]
 
 end ABC3.Skeleton.GenEll

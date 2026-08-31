@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.Lemma35Concrete
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
+import ABC3.Skeleton.GenEll.TateODE
 
 /-!
 # `Lemma 3.2, (ii)` の曲線の水準 —— **`E_q/μ_l` は母数 `q^l` の Tate 曲線**（`Skeleton`）
@@ -137,13 +138,28 @@ open Finset in
 theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
     (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
-    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
     (tateCurveAt q hq).c₄
         + 240 * (∑ i ∈ (range l).erase 0,
             veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
               (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
       = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄ := by
-  sorry
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hsum1 := sum_veluV2_eq_sum_tateDYpair hl.pos hζl hu q hq hDX
+  have hstep : ∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = 2 * (∑ i ∈ (range l).erase 0, tateDYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    exact tateD2Xpair_eq _ _ q hq (hu i hi)
+      (isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq))
+  have hzero := sum_mu_dxpair_zero hl hζ hlu hu q hq
+  have hd2 := sum_mu_d2xpair hl hζ hlu hu q hq hql
+  rw [hstep, hzero, add_zero] at hd2
+  rw [hsum1, tateCurveAt_c4_eq, tateCurveAt_c4_eq]
+  linear_combination hd2
 
 open Finset in
 /-- **[GenEll] 葉 1 の訂正後の目標 (2)**——`c₆` は `−l⁶` 倍（分母を払った形）。
@@ -174,15 +190,16 @@ def c4_velu_tate.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def c4_velu_tate.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "sum_mu_veluV2（v は有限個の係数の計算、第 810）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluV2") 1,
-    .citation "[ABC3]" "veluV_coeff_of_ne_zero（係数の具体形、第 833）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV_coeff_of_ne_zero") 1,
-    .citation "[ABC3]" "sigma_one_convolution（ラマヌジャンの恒等式、第 822）"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sigma_one_convolution") 8,
-    .implicitStep
-      ("★★数値確認済み（l = 5, 7 で q^21 まで全係数一致、第 835）。"
-       ++ "☆第 718 の a₄ の形は**偽**である（Check/GenEll/VeluTateNeedsChange.lean）") 6 ]
+  [ .citation "[ABC3]" "sum_veluV2_eq_sum_tateDYpair(v = ∑ DY、第 846、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_veluV2_eq_sum_tateDYpair") 1,
+    .citation "[ABC3]" "tateD2Xpair_eq(D²X = 2DY + DX、第 852、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateD2Xpair_eq") 1,
+    .citation "[ABC3]" "sum_mu_dxpair_zero(∑ DX = 0、第 853)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_dxpair_zero") 1,
+    .citation "[ABC3]" "sum_mu_d2xpair(∑ D²X の閉じた式、第 853)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_d2xpair") 1,
+    .citation "[ABC3]" "tateCurveAt_c4_eq(c₄ = 1 + 240 s₃、第 853、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateCurveAt_c4_eq") 1 ]
 
 def c6_velu_tate.src : Source :=
   { paper := "GenEll", pdfPage := 15,
