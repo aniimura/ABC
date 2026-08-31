@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.VeluNormalized
+import ABC3.Found.GaloisRep.DegInfBaseChange
 import ABC3.Meta.Claim
 
 /-!
@@ -373,6 +374,78 @@ def hdag_of_velu.src : ABC3.Meta.Source :=
 def hdag_of_velu.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "lemma_3_5_velu_bad(Lemma 3.5、外部引用なし、§9-1149)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_velu_bad") 2 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★残る入力は **`j` の付値だけ**である -/
+
+/-- ★★★★★★★★★★★★**半安定なら `v_p(Δ_min)` の関係は `v_p(j)` の関係から出る**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★半安定なら `v_p(Δ_min) = max(0, −v_p(j))`（`§9-1165`、第 738）なので、
+`v_p(j′) = l·v_p(j)` から直ちに `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))` が出る。 -/
+theorem minDeltaExp_of_jExp_mul {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hss : SemistableAt p E) (hss' : SemistableAt p E') (l : ℕ)
+    (hj : jExp p E' = (l : ℤ) * jExp p E) :
+    minDeltaExp p E' = (l : ℤ) * minDeltaExp p E := by
+  rw [minDeltaExp_eq_maxJ_of_semistable p E' hss', minDeltaExp_eq_maxJ_of_semistable p E hss,
+    hj, ← mul_neg, max_zero_mul _ (by positivity)]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`Lemma 3.5`——残る入力は `v_p(j′) = l·v_p(j)` **だけ**である**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これが本項目の**最終形**である。`hfalt`（Faltings 高さの評価）は
+`§9-1164`、第 704 で内製し、`hdeg`（`deg∞(E′) = l·deg∞(E)`）は
+半安定性と合わせて**`j` の付値の関係 1 本**に落ちた。
+
+☆残る 1 本は `Skeleton/GenEll/TateIsogeny.lean` の `tateModel_of_quot_mu`
+（`E_q/μ_l` は母数 `q^l` の Tate 曲線）である
+——Tate 曲線では `v_p(j) = −v_p(q)` なので、それがそのまま `v_p(j′) = l·v_p(j)` を与える。 -/
+theorem lemma_3_5_velu_j (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), 0 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((Finset.range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E' = (l : ℤ) * jExp p E) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_velu eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint
+    hssE hssE' hj => ?_⟩
+  refine hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hssE'
+    (degInfOf_eq_of_local E E' l (fun p => ?_))
+  exact minDeltaExp_of_jExp_mul p E E' (hssE p) (hssE' p) l (hj p)
+
+def minDeltaExp_of_jExp_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定なら Δ_min の関係は j の付値の関係から出る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_j.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る入力は v_p(j′) = l·v_p(j) だけ——最終形)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_j.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "tateModel_of_quot_mu(E_q/μ_l は母数 q^l の Tate 曲線)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateModel_of_quot_mu") 15,
+    .implicitStep
+      ("☆Tate 曲線では v_p(j) = −v_p(q) なので、母数が q^l であることが" ++
+       "そのまま v_p(j′) = l·v_p(j) を与える") 3 ]
 
 /-! ## ★出典の紐付け(`.src`)——★★**すべて条つき。項目全体の `.src` は置かない** -/
 
