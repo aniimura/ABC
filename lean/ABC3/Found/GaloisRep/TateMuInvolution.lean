@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateVeluMu
 import ABC3.Found.GenEll.VeluPointSet
+import ABC3.Found.GenEll.SymmSum
 
 /-!
 # 第 959 ブロック —— **★★★★★★★★★★★★★★★★添字 `i ↦ l-i` は点の反転**（`Found`）
@@ -162,6 +163,45 @@ theorem tateXpair_mu_inv
   rw [← map_negY_algebraMap]
   exact hY.symm
 
+/-- ★★★★★★★★★★★★★★★★★★★★**`μ_l` の Vélu の `w` は環の中で作れる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 961）**——これが (D3) の (d4) である。
+`tateParam_quot_velu_of_torsion`（第 948）の `hvw` の `hw` の部分がこれで出る。
+
+☆`exists_veluW_of_inv`（第 960）に `tateXpair_mu_inv`（第 959）を当てるだけである。
+★`l` を `2m+1` の形で受ける——奇数であることが対分けの本質だから。 -/
+theorem exists_veluW_mu
+    (Φ : Additive (Kˣ ⧸ Subgroup.zpowers S.Q)
+      ≃+ ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Point)
+    (hΦ : ∀ c, Φ (Additive.ofMul c) = tatePhi S hΔ c)
+    (m : ℕ) (ζ : R) (uζ : Kˣ)
+    (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ (2 * m + 1) = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < 2 * m + 1 → uζ ^ n ≠ 1)
+    (hu : ∀ i ∈ (range (2 * m + 1)).erase 0, IsUnit (1 - ζ ^ i)) :
+    ∃ w : R, 2 * w = ∑ i ∈ (range (2 * m + 1)).erase 0,
+      (veluU (tateCurveAt S.q S.hq)
+          (tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)
+          (tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)
+        + 2 * (veluV2 (tateCurveAt S.q S.hq)
+                (tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)
+                (tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)
+              * tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)) := by
+  have hmem : ∀ i ∈ Finset.Icc 1 m, i ∈ (range (2 * m + 1)).erase 0 := by
+    intro i hi
+    rw [Finset.mem_Icc] at hi
+    rw [Finset.mem_erase, Finset.mem_range]
+    omega
+  refine ABC3.Found.GenEll.exists_veluW_of_inv (tateCurveAt S.q S.hq) m
+    (fun i => tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq)
+    (fun i => tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (2 * m + 1 - 1)) S.q S.hq) ?_ ?_
+  · intro i hi
+    exact (tateXpair_mu_inv S hΔ Φ hΦ (Nat.succ_pos _) ζ uζ hζu hζl hord hu i (hmem i hi)).1
+  · intro i hi
+    exact (tateXpair_mu_inv S hΔ Φ hΦ (Nat.succ_pos _) ζ uζ hζu hζl hord hu i (hmem i hi)).2
+
 end MuInv
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -174,6 +214,12 @@ def tateMu_pointCoords.src : ABC3.Meta.Source :=
 def tateXpair_mu_inv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(添字 i ↦ l-i は点の反転である。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+
+def exists_veluW_mu.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(μ_l の Vélu の w は環の中で作れる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 end ABC3.Found.GaloisRep
