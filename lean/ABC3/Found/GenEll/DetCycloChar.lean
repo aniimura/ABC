@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GaloisRep.FullImageWitness
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+import Mathlib.FieldTheory.Galois.Profinite
 import ABC3.Meta.Claim
 
 /-!
@@ -105,6 +106,69 @@ def imageSurjectiveJ_of_cyclotomic.needs : List ABC3.Meta.ProofObligation :=
        "★★これは**楕円曲線を含まない**言明であり、mathlib の " ++
        "IsCyclotomicExtension.autEquivPow と「l が L で不分岐なら cyclotomic (l^n) は " ++
        "L 上既約」から出る") 8 ]
+
+/-! ## ★★★★★★★★★★★★★★円分指標の全射性は `mod l^n` の全射性に帰着する -/
+
+/-- ★★★★★★★★★★★★★★★★★★
+**円分指標の全射性は、各 `mod l^n` での全射性に帰着する**——★**無条件**。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★★機構は葉 5（連続性）と同じ道具である:
+
+* `Gal(L̄/L)` はコンパクト（`Mathlib/FieldTheory/Galois/Profinite.lean`）
+* 円分指標は連続（mathlib の `cyclotomicCharacter.continuous`）
+* ゆえに像は**閉**であり、`mod l^n` で稠密なら全体である
+
+☆残るのは `mod l^n` の全射性——`l` が `L` で不分岐なら
+`cyclotomic (l^n)` が `L` 上既約であること（古典的）——だけである。 -/
+theorem cyclotomicCharacter_surjective_of_mod (E : SSCurve) (l : ℕ) [Fact l.Prime]
+    (hcont : Continuous fun σ : E.alg ≃ₐ[E.fld] E.alg =>
+      ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l]))
+    (hmod : ∀ (n : ℕ) (u : ℤ_[l]ˣ), ∃ σ : E.alg ≃ₐ[E.fld] E.alg,
+      PadicInt.toZModPow n ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l])
+        = PadicInt.toZModPow n ((u : ℤ_[l])))
+    (u : ℤ_[l]ˣ) :
+    ∃ σ : E.alg ≃ₐ[E.fld] E.alg, cyclotomicCharacter E.alg l σ.toRingEquiv = u := by
+  classical
+  set g : (E.alg ≃ₐ[E.fld] E.alg) → ℤ_[l] :=
+    fun σ => ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l]) with hg
+  have hclosed : IsClosed (Set.range g) := (isCompact_range hcont).isClosed
+  have hl2 : (2 : ℝ) ≤ (l : ℝ) := by exact_mod_cast (Fact.out (p := l.Prime)).two_le
+  have hl1 : (1 : ℝ) < (l : ℝ) := by linarith
+  have hlinv : (l : ℝ)⁻¹ < 1 := inv_lt_one_of_one_lt₀ hl1
+  have hmem : (u : ℤ_[l]) ∈ Set.range g := by
+    rw [← hclosed.closure_eq, Metric.mem_closure_iff]
+    intro ε hε
+    obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one hε hlinv
+    obtain ⟨σ, hσ⟩ := hmod n u
+    refine ⟨g σ, ⟨σ, rfl⟩, ?_⟩
+    have hker : PadicInt.toZModPow n ((u : ℤ_[l]) - g σ) = 0 := by
+      rw [map_sub, hσ, sub_self]
+    have hspan : ((u : ℤ_[l]) - g σ) ∈ (Ideal.span {(l : ℤ_[l]) ^ n} : Ideal ℤ_[l]) := by
+      rw [← PadicInt.ker_toZModPow]
+      exact hker
+    rw [dist_eq_norm]
+    calc ‖(u : ℤ_[l]) - g σ‖ ≤ ((l : ℝ)) ^ (-n : ℤ) :=
+          (PadicInt.norm_le_pow_iff_mem_span_pow _ n).2 hspan
+      _ = ((l : ℝ)⁻¹) ^ n := by rw [_root_.zpow_neg, zpow_natCast, inv_pow]
+      _ < ε := hn
+  obtain ⟨σ, hσ⟩ := hmem
+  exact ⟨σ, Units.ext hσ⟩
+
+def cyclotomicCharacter_surjective_of_mod.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(円分指標の全射性は各 mod l^n での全射性に帰着する。★無条件)",
+    sectionId := "genell-cor-4-3" }
+
+def cyclotomicCharacter_surjective_of_mod.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆残るのは mod l^n の全射性——l が L で不分岐なら cyclotomic (l^n) が L 上既約" ++
+       "(mathlib の IsCyclotomicExtension.autEquivPow が受け皿)") 8,
+    .implicitStep
+      ("☆仮説 hcont(円分指標の連続性)は mathlib の cyclotomicCharacter.continuous に" ++
+       "あるが、MulSemiringAction.toRingAut と AlgEquiv.toRingEquiv の橋が要る") 2 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
