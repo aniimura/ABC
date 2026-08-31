@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateJ
 import ABC3.Found.GaloisRep.TateMultRed
+import ABC3.Found.GenEll.JScale
 import ABC3.Found.GaloisRep.TateLinearQ
 
 /-!
@@ -130,6 +131,31 @@ theorem tateParam_injective [IsAdicComplete I R] {q q' : R} (hq : q ∈ I) (hq' 
     ring
   rw [hlhs, hrhs]
   exact h
+
+/-- ★★★★★★★★★★**`j` が同じなら Tate 母数も同じ**（`K` の中での `j` で述べた形）。
+
+★道は 3 段だけである:
+
+1. `c4_cube_mul_Delta_of_j_eq`（第 879）で分母を払う
+2. `map_c₄`・`map_Δ` で `K` の等式を `R` の等式に戻す（`algebraMap` は単射）
+3. `tateParam_injective`（第 878） -/
+theorem tateParam_injective_of_j {K : Type} [Field K] [CharZero K] [Algebra R K]
+    [IsFractionRing R K]
+    [IsAdicComplete I R] [IsDomain R] {q q' : R} (hq : q ∈ I) (hq' : q' ∈ I)
+    [((tateCurveAt q hq).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt q' hq').map (algebraMap R K)).IsElliptic]
+    (hj : ((tateCurveAt q hq).map (algebraMap R K)).j
+        = ((tateCurveAt q' hq').map (algebraMap R K)).j) : q = q' := by
+  have hK := ABC3.Found.GenEll.c4_cube_mul_Delta_of_j_eq _ _ hj
+  rw [WeierstrassCurve.map_c₄, WeierstrassCurve.map_c₄, WeierstrassCurve.map_Δ,
+    WeierstrassCurve.map_Δ] at hK
+  have hR : (tateCurveAt q hq).c₄ ^ 3 * (tateCurveAt q' hq').Δ
+      = (tateCurveAt q' hq').c₄ ^ 3 * (tateCurveAt q hq).Δ := by
+    refine IsFractionRing.injective R K ?_
+    rw [map_mul, map_mul, map_pow, map_pow]
+    exact hK
+  refine tateParam_injective hq hq' ?_
+  linear_combination -hR
 
 /-! ## ★出典の紐付け(`.src`) -/
 
