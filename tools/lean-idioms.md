@@ -2521,3 +2521,14 @@ theorem foo : ... := ...
 `motive is not type correct`（`j` が `X.IsElliptic` を暗黙に取るため）。
 ★`ABC3.Found.GenEll.j_congr_curve hEq : X.j = Y.j` を **simp 補題として渡す**。
 `rw` だと後続の `map_j` の出現位置がずれるので `simp only [...]` が安全。
+
+## 「全称で受けたデータ」は充足不能になりうる
+
+第 948 で `hv : ∀ ζ, IsPrimitiveRoot ζ l → v = ∑ …(ζ)` と書いたが、これは
+**1 つの `v` が全ての原始根について成り立つ**ことを要求しており、和が `ζ`
+に依らないことを別に証明しない限り満たせない。★正しくは
+
+    `hvw : ∀ ζ, IsPrimitiveRoot ζ l → ∃ v w, … ∧ … ∧ …`
+
+と**存在量化を内側に入れる**（第 952 で直した）。
+☆補助データ（ここでは `v`・`w`）が結論に現れないなら、必ず内側の ∃ にする。

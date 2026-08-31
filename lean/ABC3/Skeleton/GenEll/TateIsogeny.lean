@@ -982,35 +982,35 @@ theorem tateParam_quot_velu_of_torsion {R : Type} [CommRing R] [IsDomain R] [Cha
     (hlu : IsUnit ((l : R)))
     (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
     (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
-    (v w : R)
-    (hv : ∀ ζ : R, IsPrimitiveRoot ζ l →
+    (hvw : ∀ ζ : R, IsPrimitiveRoot ζ l → ∃ v w : R,
       v = ∑ i ∈ (range l).erase 0,
-        veluV2 (tateCurveAt q hq)
-          (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
-          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
-    (hw : ∀ ζ : R, IsPrimitiveRoot ζ l →
-      2 * w = ∑ i ∈ (range l).erase 0,
-        (veluU (tateCurveAt q hq)
+          veluV2 (tateCurveAt q hq)
             (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
             (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
-          + 2 * (veluV2 (tateCurveAt q hq)
-                  (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
-                  (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
-                * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+        ∧ 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU (tateCurveAt q hq)
+              (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        ∧ ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic)
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
     (P : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Point)
     (hP : l • P = 0) (hP0 : P ≠ 0)
     (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
     (hsplit : W'.HasSplitMultiplicativeReduction R)
-    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
-    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
     (hW' : W' = veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))) :
     tateParamR W' hsplit = q ^ l := by
   obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
     exists_primitiveRoot_of_torsion_point q hq hq0 hΔ hl hcop P hP hP0
+  obtain ⟨v, w, hv, hw, hell⟩ := hvw ζ hζ
+  haveI := hell
   refine tateParam_quot_velu_dvr q hq hq0 hΔ hl hζ hlu
-    (ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu) uζ hζu hζl hord hql
-    h2 h2K hodd v w (hv ζ hζ) (hw ζ hζ) W' hsplit ?_
+    (ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu)
+    uζ hζu hζl hord hql h2 h2K hodd v w hv hw W' hsplit ?_
   rw [hW', hPz]
   rfl
 
