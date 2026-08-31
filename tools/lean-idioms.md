@@ -2309,3 +2309,14 @@ mathlib の以下がそのまま噛み合う。分岐理論の API を探す必�
 * `le_sup_right` を包含として使うときは型注釈が要る: `(le_sup_right : Z ≤ M) hζZ`。
 * `NumberField` のインスタンスは `⟨⟩`（明示欄が無い）。`Module.Finite.trans (R := ℚ) (A := B) (M := M)`
   は引数を取らない（`inferInstance` を渡すと "Function expected"）。
+
+## 配管：新規ファイルの登録先（2026-08-31、第 800）
+
+`lean/ABC3.lean` は **アグリゲータだけ**を import する（`ABC3.Meta.Claim` /
+`ABC3.Interface` / `ABC3.Skeleton` / `ABC3.Found` / `ABC3.Gap` / `ABC3.Check`）。
+★新しい `.lean` を作ったら **`lean/ABC3/Found.lean`（等）に `import` を足す**こと。
+`ABC3.lean` に足しても行が一致せず sed が黙って何もしない。
+
+☆症状: 個別ビルド（`lake build ABC3.Found.GaloisRep.Foo`）は通り、
+`node tools/check.mjs` も PASS するのに、`lake build ABC3` がそのファイルを
+一度もコンパイルしていない（他のファイルから import されていなければ）。
