@@ -1013,6 +1013,29 @@ theorem tateYC_zero {l : ℕ} (q : R) (n : ℕ) :
         + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
   simp [tateYC]
 
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`l` が素数のときの `tateXC n 0`**（`n ≥ 1`）。
+
+    `tateXC n 0 = 2·q^n·(l·σ₁(n/l)·[l∣n] − σ₁(n))`
+
+★★★右辺に `σ₁(n/l)` が現れる——これが
+**`q` 展開を `q^l` 展開に付け替える**機構である。 -/
+theorem tateXC_zero_prime {l : ℕ} (hl : l.Prime) (q : R) (n : ℕ) (hn : n ≠ 0) :
+    tateXC l q n 0
+      = 2 * (q ^ n * ((if l ∣ n then (l : R) * ((∑ e ∈ (n / l).divisors, e : ℕ) : R) else 0)
+          - ((∑ d ∈ n.divisors, d : ℕ) : R))) := by
+  classical
+  rw [tateXC_zero, if_neg hn, filter_mod_eq_filter_dvd hl,
+    filter_mul_pred_mod_eq_filter_dvd hl]
+  have hfil : (∑ d ∈ n.divisors.filter (fun d => l ∣ d), (d : R))
+      = if l ∣ n then (l : R) * ((∑ e ∈ (n / l).divisors, e : ℕ) : R) else 0 := by
+    rw [← Nat.cast_sum, sum_divisors_dvd l n hl hn]
+    by_cases h : l ∣ n <;> simp [h]
+  rw [hfil, Nat.cast_sum]
+  push_cast
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -1258,6 +1281,11 @@ def tateXtail_pow_eq_muEval.src : ABC3.Meta.Source :=
 def tateYtail_pow_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(tateYtail(z^m,q) の μ-等級付き形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXC_zero_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l が素数のときの tateXC n 0。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=

@@ -272,6 +272,47 @@ theorem veluWC_zero {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
   classical
   simp only [veluWC, muConv_zero hl]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`∑_ζ X(ζ)` の閉じた形 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ∈μ_l∖{1}} X(ζ, q)` の閉じた形**。
+
+★古典形の作用で全係数和が `n ≥ 1` で消えるので、
+`sum_mu_muEval'` の右辺は **`l·A n 0` だけ**になる。 -/
+theorem sum_mu_X_closed [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    (hlu : IsUnit ((l : R))) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = adicSum (I := I)
+          (fun n => (l : R) * tateXC l q n 0
+            - (if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
+                ((∑ k ∈ range l, (k : R)) * ∑ m ∈ range l, (m : R)) else 0))
+          (fun n => Submodule.sub_mem _
+            (Ideal.mul_mem_left _ _ (tateXC_mem hq n 0))
+            (by
+              by_cases h : n = 0
+              · simpa [h] using Submodule.mem_top
+                  (x := (Ring.inverse ((l : R))) ^ 2 *
+                    ((∑ k ∈ range l, (k : R)) * ∑ m ∈ range l, (m : R)))
+              · simpa [h] using Submodule.zero_mem (I ^ n))) := by
+  classical
+  have hterm : ∀ i ∈ (range l).erase 0,
+      tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+        = muEval (I := I) l (tateXC l q) (tateXC_mem hq) (ζ ^ i) := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    have hpow : (ζ ^ i) ^ l = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul, hζ.pow_eq_one, one_pow]
+    have hsum : ∑ k ∈ range l, (ζ ^ i) ^ k = 0 :=
+      (isPrimitiveRoot_pow_of_not_dvd (R := R) hl hζ hnd).geom_sum_eq_zero hl.one_lt
+    exact tateXpair_eq_muEval hl.pos hlu (hu i hi) hpow hsum q hq
+  rw [Finset.sum_congr rfl hterm, sum_mu_muEval' hl hζ (tateXC l q) (tateXC_mem hq)]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [sum_tateXC hl.pos]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def twoYplusXC.src : ABC3.Meta.Source :=
@@ -338,6 +379,11 @@ def veluWC_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(veluWC の 0 次係数。★無条件)",
     sectionId := "genell-lemma-3-5" }
+
+def sum_mu_X_closed.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_ζ X(ζ,q) の閉じた形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def a4C.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
