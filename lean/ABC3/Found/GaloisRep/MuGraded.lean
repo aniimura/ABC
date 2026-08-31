@@ -503,22 +503,123 @@ theorem muEval_sub [IsAdicComplete I R] {l : ℕ} (A B : ℕ → ℕ → R)
   exact Finset.sum_congr rfl (fun a _ => by ring)
 
 /-- ★★★★★★★★★★★★**`s₁(q)` は `ζ`-free な μ-等級付き**。 -/
-theorem sigmaOne_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) (q : R) (hq : q ∈ I) :
+theorem sigmaOne_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) (q : R) (hq : q ∈ I)
+    (z : R) :
     evalAdic (sigmaSeries 1) q hq
       = muEval (I := I) l
           (fun n a => if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
           (fun n a => by
             by_cases h : a = 0
             · simpa [h] using Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
-            · simpa [h] using Submodule.zero_mem (I ^ n)) q := by
+            · simpa [h] using Submodule.zero_mem (I ^ n)) z := by
   classical
   rw [← tateXtail_one q hq, tateXtail_eq_divisorSum 1 q hq]
   rw [adicSum_eq_muEval (l := l) hl (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) * (1 : R) ^ d)
-    (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) q]
-  refine muEval_congr _ _ _ _ (fun n a => ?_) q
+    (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z]
+  refine muEval_congr _ _ _ _ (fun n a => ?_) z
   by_cases h : a = 0
   · simp [h]
   · simp [h]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★`X(ζ)` を 1 つの μ-等級付き級数に -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**Tate の `X` の μ-等級付き係数**。 -/
+noncomputable def tateXC (l : ℕ) (q : R) (n a : ℕ) : R :=
+  (if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
+      ∑ k ∈ range l, ∑ m ∈ range l, (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)
+   else 0)
+  + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), (d : R)
+  + ((if (n * (l - 1)) % l = a then (n : R) * q ^ n else 0)
+     + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R) * q ^ d)
+  - 2 * (if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
+
+theorem tateXC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateXC l q n a ∈ I ^ n := by
+  classical
+  refine Submodule.sub_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_)
+    (Submodule.add_mem _ ?_ ?_)) ?_
+  · by_cases h : n = 0
+    · simpa [h] using Submodule.mem_top
+        (x := (Ring.inverse ((l : R))) ^ 2 *
+          ∑ k ∈ range l, ∑ m ∈ range l,
+            (if (k + m + 1) % l = a then (k : R) * (m : R) else 0))
+    · simpa [h] using Submodule.zero_mem (I ^ n)
+  · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  · by_cases h : (n * (l - 1)) % l = a
+    · simpa [h] using Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)
+    · simpa [h] using Submodule.zero_mem (I ^ n)
+  · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  · refine Ideal.mul_mem_left _ _ ?_
+    by_cases h : a = 0
+    · simpa [h] using Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+    · simpa [h] using Submodule.zero_mem (I ^ n)
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`X(ζ, q)` は 1 つの μ-等級付き級数である**。
+
+★★★これで `X(ζ)²` も `muEval_mul` で同じ枠に留まる。 -/
+theorem tateXpair_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hz : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) (q : R) (hq : q ∈ I) :
+    tateXpair z (q * z ^ (l - 1)) q hq
+      = muEval (I := I) l (tateXC l q) (tateXC_mem hq) z := by
+  classical
+  rw [tateXpair, tateXterm_zeta_eq_poly hl hlu hu hz hsum,
+    muEval_const (I := I) (l := l) _ z,
+    tateXtail_eq_muEval hl hz q hq,
+    tateXterm_eq_muEval hl hz q hq (l - 1),
+    tateXtail_qz_eq_muEval hl hz q hq (l - 1),
+    sigmaOne_eq_muEval hl q hq z,
+    muEval_smul, muEval_add, muEval_add, muEval_add, muEval_sub]
+  refine muEval_congr _ _ _ _ (fun n a => ?_) z
+  simp only [tateXC]
+
+/-! ## ★★★★★★★★★★★★★★★★`tateYterm(ζ)` を `tateXterm(ζ)` から -/
+
+/-- ★★★★★★**`z·inv(1−z) = inv(1−z) − 1`**。 -/
+theorem zeta_mul_ringInverse {z : R} (hu : IsUnit (1 - z)) :
+    z * Ring.inverse (1 - z) = Ring.inverse (1 - z) - 1 := by
+  have h : (1 - z) * Ring.inverse (1 - z) = 1 := Ring.mul_inverse_cancel _ hu
+  have hz : z = 1 - (1 - z) := by ring
+  calc z * Ring.inverse (1 - z)
+      = (1 - (1 - z)) * Ring.inverse (1 - z) := by rw [← hz]
+    _ = Ring.inverse (1 - z) - (1 - z) * Ring.inverse (1 - z) := by ring
+    _ = Ring.inverse (1 - z) - 1 := by rw [h]
+
+/-- ★★★★★★★★★★★★**`tateYterm(z) = tateXterm(z)·(inv(1−z) − 1)`**。
+
+★★これで `Y` の定数項も**三重和を経由せずに**多項式になる。 -/
+theorem tateYterm_eq_tateXterm_mul {z : R} (hu : IsUnit (1 - z)) :
+    tateYterm z = tateXterm z * (Ring.inverse (1 - z) - 1) := by
+  rw [tateYterm, tateXterm, ← zeta_mul_ringInverse hu]
+  ring
+
+open Finset in
+/-- ★★★★★★★★★★★★**`inv(1−z) − 1` は `z` の多項式**。 -/
+theorem ringInverse_sub_one_eq_poly [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hpow : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) :
+    Ring.inverse (1 - z) - 1
+      = ∑ a ∈ range l,
+          (-(Ring.inverse ((l : R))) * (a : R) - (if a = 0 then (1 : R) else 0)) * z ^ a := by
+  classical
+  rw [ringInverse_one_sub_eq hlu hu hpow hsum]
+  have hone : (1 : R) = ∑ a ∈ range l, ((if a = 0 then (1 : R) else 0)) * z ^ a := by
+    rw [Finset.sum_eq_single 0]
+    · simp
+    · intro a _ ha
+      simp [ha]
+    · intro h
+      exact absurd (Finset.mem_range.2 hl) h
+  rw [hone, Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  by_cases h : a = 0
+  · subst h
+    simp
+    exact hl.ne'
+  · simp [h]
+    ring
 
 /-! ## ★出典の紐付け(`.src`) -/
 
@@ -620,6 +721,36 @@ def muEval_sub.src : ABC3.Meta.Source :=
 def sigmaOne_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(s₁(q) は ζ-free な μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate の X の μ-等級付き係数)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXC_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(係数は I^n に入る。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXpair_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(X(ζ,q) は 1 つの μ-等級付き級数。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def zeta_mul_ringInverse.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(z·inv(1−z) = inv(1−z) − 1。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYterm_eq_tateXterm_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYterm = tateXterm·(inv − 1)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def ringInverse_sub_one_eq_poly.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(inv(1−z) − 1 は z の多項式。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
