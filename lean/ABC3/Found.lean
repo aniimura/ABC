@@ -379,6 +379,7 @@ import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar
+import ABC3.Found.GenEll.GalRepClosed
 import ABC3.Found.GenEll.PointVariableChange
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified

@@ -30,7 +30,7 @@ import ABC3.Meta.Claim
 |---|---|---|
 | 3 | `α = (1 1 / 0 1)` が mod `l` 像に入る | 『by the local theory (cf. the discussion preceding Lemma 3.2)』 |
 | 4 | 円分指標 `Gal(L̄/L) → ℤ_l^×` が全射 | 『`ℚ(ζ_{l^∞})/ℚ` は `l` で完全分岐するので `L/ℚ` と線型無関連』 |
-| 5 | 像は閉部分群 | （原文は位相を明示しない。profinite 群の連続像である） |
+| 5 | `galRep` は連続 | （原文は位相を明示しない。★像が閉であることは連続性に帰着済み——第 765） |
 
 ☆どれも**群論ではない**——群論の核（`Lemma 3.1, (iv)`）は
 `Found/GenEll/Sl2Padic.lean`・`Thm38Bridge.lean` に**実装済み**である。
@@ -120,22 +120,24 @@ def cyclotomic_det_surjective.needs : List ProofObligation :=
 
 ☆`Lemma 3.1, (iv)`（`Found/GenEll/Sl2Padic.lean`）が閉部分群を要求するので要る。
 ★`Gal(L̄/L)` は Krull 位相で profinite（コンパクト）であり、`galRep` は連続なので像は閉。 -/
-theorem galRep_range_isClosed (E : SSCurve) (l : ℕ) [Fact l.Prime]
+theorem galRep_continuous (E : SSCurve) (l : ℕ) [Fact l.Prime]
     (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) :
-    IsClosed (((galRep E.W l e).range : Subgroup (GL (Fin 2) ℤ_[l])) :
-      Set (GL (Fin 2) ℤ_[l])) := by
+    Continuous (galRep E.W l e) := by
   sorry
 
-def galRep_range_isClosed.src : Source :=
+def galRep_continuous.src : Source :=
   { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(galRep の像は閉部分群——profinite 群の連続像)",
+    item := "Theorem 3.8(galRep は連続——E[l^n] への作用が有限拡大を経由する)",
     sectionId := "genell-thm-3-8" }
 
-def galRep_range_isClosed.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "KrullTopology(Gal(L̄/L) の位相)"
-      (.inMathlib "krullTopology") 2,
+def galRep_continuous.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★E[l^n] は有限集合であり、その座標が生成する L の有限拡大 L(E[l^n]) を固定する" ++
+       "部分群は Krull 位相で開である。したがって galRep は連続。" ++
+       "☆mathlib の KrullTopology は開部分群を有限中間体の fixingSubgroup で定めている") 6,
     .implicitStep
-      ("★Gal(L̄/L) は Krull 位相で profinite(コンパクト)であり、galRep は連続。" ++
-       "☆連続性は galRep が有限レベル(E[l^n] への作用)の逆極限であることから出る") 6 ]
+      ("★★測定(2026-08-31、第 765): 像が閉であることは連続性だけに帰着した" ++
+       "——CompactSpace (Gal) も T2Space (GL₂(ℤ_l)) も mathlib の instance で出る" ++
+       "(Found/GenEll/GalRepClosed.lean)") 1 ]
 
 end ABC3.Skeleton.GenEll
