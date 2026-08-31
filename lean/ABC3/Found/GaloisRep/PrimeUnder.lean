@@ -106,6 +106,43 @@ def sum_primesOver_ramificationIdx_log.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(p の上の素点にわたる e·log N(P) の和は [L′:L]·log N(p)。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★`HeightOneSpectrum` としての繊維 -/
+
+open scoped Classical in
+/-- ★★★★★★**`p` の上の素点を `HeightOneSpectrum` の `Finset` として**。
+
+☆mathlib の `IsDedekindDomain.primesOverFinset` は `Finset (Ideal B)` なので、
+`degInfOf` の添字（`HeightOneSpectrum`）に合わせるために像を取る。 -/
+noncomputable def primesOverH (p : HeightOneSpectrum (𝓞 L)) :
+    Finset (HeightOneSpectrum (𝓞 L')) :=
+  haveI hmax : p.asIdeal.IsMaximal := p.isPrime.isMaximal p.ne_bot
+  (IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L')).attach.image
+    (fun P : {x : Ideal (𝓞 L') //
+        x ∈ IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L')} =>
+      { asIdeal := P.1
+        isPrime :=
+          ((IsDedekindDomain.mem_primesOverFinset_iff p.ne_bot (𝓞 L')).1 P.2).1
+        ne_bot := by
+          haveI : P.1.IsPrime :=
+            ((IsDedekindDomain.mem_primesOverFinset_iff p.ne_bot (𝓞 L')).1 P.2).1
+          haveI : P.1.LiesOver p.asIdeal :=
+            ((IsDedekindDomain.mem_primesOverFinset_iff p.ne_bot (𝓞 L')).1 P.2).2
+          exact Ideal.ne_bot_of_liesOver_of_ne_bot p.ne_bot P.1 })
+
+open scoped Classical in
+/-- ★★★★★`primesOverH` の元は `p` の上にある。 -/
+theorem mem_primesOverH (p : HeightOneSpectrum (𝓞 L))
+    {P : HeightOneSpectrum (𝓞 L')} (hP : P ∈ primesOverH L L' p) :
+    P.asIdeal ∈ IsDedekindDomain.primesOverFinset p.asIdeal (𝓞 L') := by
+  obtain ⟨Q, -, hQ⟩ := Finset.mem_image.1 hP
+  rw [← hQ]
+  exact Q.2
+
+def primesOverH.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(p の上の素点を HeightOneSpectrum の Finset として)",
+    sectionId := "genell-prop-3-4" }
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
