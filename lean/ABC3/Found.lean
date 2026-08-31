@@ -1209,6 +1209,7 @@ import ABC3.Found.GaloisRep.TateEquationAnalytic
 import ABC3.Found.GaloisRep.TateFunctorial
 import ABC3.Found.GaloisRep.TateTruncate
 import ABC3.Found.GaloisRep.TateUniversal
+import ABC3.Found.GaloisRep.TateDeriv
 import ABC3.Found.GaloisRep.TateDivisibility
 import ABC3.Found.GaloisRep.TateComplexSpec
 import ABC3.Found.GaloisRep.TateSplitNat

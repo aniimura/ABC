@@ -2333,3 +2333,39 @@ mathlib の以下がそのまま噛み合う。分岐理論の API を探す必�
 
 ★道具は `AdicFubini.lean` の `adicSum_reindex_mul`・`adicSum_fubini`、
 `AdicMul.lean` の `adicSum_mul`。
+
+## IsLocalization.lift が通らない——インスタンスの菱形（2026-08-31、第 845）
+
+```
+univDual has type @RingHom TateBase (TrivSqZeroExt ..) AddMonoidAlgebra.nonAssocSemiring
+                                                       nonAssocSemiring
+but is expected  @RingHom TateBase ?P  AddMonoidAlgebra.commSemiring.toNonAssocSemiring
+                                                       CommSemiring.toSemiring.toNonAssocSemiring
+```
+
+`TrivSqZeroExt` も `AddMonoidAlgebra` も `nonAssocSemiring` を**独立に**宣言しており、
+`CommSemiring` 経由の道と構文的に一致しない。`by exact` も `(g := ..)` も効かない。
+
+**直し方（両方使う）**
+
+* **標的側**——`def MyType := TrivSqZeroExt R M`（`abbrev` ではなく `def`）で包み、
+  `noncomputable instance : CommRing MyType := inferInstanceAs (CommRing (TrivSqZeroExt R M))`
+  を 1 つだけ与える。`def` は reducible でないので探索は唯一の道を通る。
+* **始域側**——準同型を `MvPolynomial.eval₂Hom` で作る。
+  戻り値の型が `[CommSemiring R]` 由来になるので `IsLocalization.lift` と揃う。
+
+包んだ型の上で `TrivSqZeroExt.snd_mul` などを使うには、まず
+`theorem mul_eq (x y) : (show TrivSqZeroExt R M from x * y) = (show .. from x) * (show .. from y) := rfl`
+を置き、`simp only [eps, re, mul_eq, TrivSqZeroExt.snd_mul]` の順で展開する。
+☆`simpa … using h` は `h` を `True` にしてしまうことがあるので `simp only` で順に展開する。
+
+☆付随して見えた失敗形:
+
+* `Int.induction_on` の case 名は `zero` / `succ` / `pred`（`hz`/`hp`/`hn` ではない）
+* `MvPolynomial.induction_on` の case 名は `C` / `add` / `mul_X`（`h_C` 等ではない）
+* `Fin 2` の `fin_cases i` は `X ((fun i ↦ i) ⟨0, ⋯⟩)` を作り `rw [… X 0]` が失敗する。
+  `theorem foo : ∀ i : Fin 2, … | 0 => … | 1 => …` の**等式コンパイラ**で書く。
+* `IsLocalization.induction_on` は無い。`IsLocalization.surj` を使い
+  `obtain ⟨⟨a, s⟩, hz⟩ := IsLocalization.surj (M := …) x`（`hz : x * ι s = ι a`）とする。
+* 局所化への**微分の延長**は mathlib に無い（`Mathlib/RingTheory/Derivation/` を
+  `Localization` で grep して 0 件）。双対数 + `IsLocalization.lift` で自分で作る。
