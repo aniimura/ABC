@@ -1288,6 +1288,7 @@ import ABC3.Found.GaloisRep.TateCurveNatural
 import ABC3.Found.GaloisRep.TateClassPt
 import ABC3.Found.GaloisRep.TatePhi
 import ABC3.Found.GaloisRep.TateMuPoint
+import ABC3.Found.GaloisRep.TateVeluPoints
 import ABC3.Found.GaloisRep.TatePhiInj
 import ABC3.Found.GaloisRep.TateSurjInt
 import ABC3.Found.GaloisRep.TateFormalParam
