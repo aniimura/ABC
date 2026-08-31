@@ -328,12 +328,12 @@ def c6_velu_tate.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def c6_velu_tate.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "sum_mu_veluW（2w は有限個の係数の計算、第 811）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluW") 1,
-    .citation "[ABC3]" "sigma_one_convolution（ラマヌジャンの恒等式、第 822）"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sigma_one_convolution") 8,
-    .implicitStep
-      ("★★数値確認済み（l = 5, 7 で q^21 まで全係数一致、第 835）") 6 ]
+  [ .citation "[ABC3]" "tate_d4x(D⁴X = 12X·D²X + 12(DX)² + D²X、第 866、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tate_d4x") 1,
+    .citation "[ABC3]" "sum_mu_d4xpair(252·∑D⁴X の閉じた式、第 866、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_d4xpair") 1,
+    .citation "[ABC3]" "tateCurveAt_c6_eq(c₆ = −1 + 504s₅、第 867、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateCurveAt_c6_eq") 1 ]
 
 /-! ## ★★★★★★★★★★★★★★★★`Lemma 3.5` が直接消費する形（`j` の付値） -/
 
