@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateSpecialize
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
 
 /-!
@@ -131,6 +132,33 @@ theorem tateCurveAt_a₆ [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
     veluU (tateCurveAt q hq) x y = (2 * y + x) ^ 2 := by
   rw [veluU, veluGy_tateCurveAt]
   ring
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★`j` の一致へ -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`c₄`・`c₆` の尺度関係から `j` の一致を出す**。
+
+★★★これが葉 1（`jExp_velu_bad`）が実際に消費する形である。
+☆仮説の 2 本は `Skeleton/GenEll/TateIsogeny.lean` の
+`c4_velu_tate`・`c6_velu_tate`（第 837、数値確認済み）である。 -/
+theorem j_velu_tate_eq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] (q : R) (hq : q ∈ I) (l : ℕ) (hql : q ^ l ∈ I) (v w : R)
+    [(veluCurve (tateCurveAt q hq) v w).IsElliptic] [(tateCurveAt (q ^ l) hql).IsElliptic]
+    (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
+    (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+      = -((l : R) ^ 6) * (tateCurveAt (q ^ l) hql).c₆) :
+    (veluCurve (tateCurveAt q hq) v w).j = (tateCurveAt (q ^ l) hql).j := by
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale _ _ ((l : R)) ?_ ?_
+  · rw [veluCurve_c₄]
+    exact h4
+  · rw [veluCurve_c₆, tateCurveAt_b₂]
+    rw [mul_one]
+    exact h6
+
+def j_velu_tate_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(c₄・c₆ の尺度関係から j の一致。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 
