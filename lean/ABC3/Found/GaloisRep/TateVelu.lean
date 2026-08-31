@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.TateSpecialize
 import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.JScale
+import ABC3.Found.GaloisRep.TateEquation
 import ABC3.Meta.Claim
 
 /-!
@@ -159,6 +160,32 @@ def j_velu_tate_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(c₄・c₆ の尺度関係から j の一致。★無条件)",
     sectionId := "genell-lemma-3-2" }
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★Weierstrass の ODE の形 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`(2Y + X)² = 4X³ + X² + 4a₄X + 4a₆`**——Tate 曲線の方程式の書き換え。
+
+★★★`veluU (tateCurveAt q) X Y = (2Y+X)²` （第 810）なので、
+**Vélu の `u_Q` が `X` の三次式で書ける**。
+
+☆さらに `D = u∂_u` と置くと `DX = 2Y + X` なので、
+これは Weierstrass の ODE `(DX)² = 4X³ + X² + 4a₄X + 4a₆` であり、
+微分すると `D²X = 6X² + X + 2a₄` が出る——
+★★これが `∑_ζ X²` を**畳み込みを経由せずに**与える道である
+（`Skeleton/GenEll/SigmaConvolution.lean` の第 842 の記述）。 -/
+theorem two_y_add_x_sq [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) (haw : a * w = q)
+    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    (2 * tateYpair a w q hq + tateXpair a w q hq) ^ 2
+      = 4 * tateXpair a w q hq ^ 3 + tateXpair a w q hq ^ 2
+        + 4 * (tateCurveAt q hq).a₄ * tateXpair a w q hq + 4 * (tateCurveAt q hq).a₆ := by
+  have h := tate_equation a w q hq haw ha hw
+  linear_combination 4 * h
+
+def two_y_add_x_sq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆。★無条件)",
+    sectionId := "genell-def-3-3" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 
