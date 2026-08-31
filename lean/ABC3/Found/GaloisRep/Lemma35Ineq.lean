@@ -246,7 +246,64 @@ theorem lemma_3_5_velu_bad_only (eps : ℝ) (heps : 0 < eps) :
   exact hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hssE'
     (fun p => minDeltaExp_le_of_jExp_bad p E E' (hssE p) (hssE' p) l (hbad p))
 
+/-! ## ★★★★★★★★★★★★`Δ_min` の言葉で直接受ける形 -/
+
+/-- ★★**悪い素点だけの `Δ_min` の関係から不等式へ**。
+
+☆良い素点（`v_p(j) ≥ 0`）では半安定性から `v_p(Δ_min(E)) = 0` なので自動的。 -/
+theorem minDeltaExp_le_of_bad_delta (p : HeightOneSpectrum (𝓞 L))
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hss : SemistableAt p E) (l : ℕ)
+    (hbad : jExp p E < 0 → minDeltaExp p E' = l * minDeltaExp p E) :
+    (l : ℤ) * minDeltaExp p E ≤ minDeltaExp p E' := by
+  rcases lt_or_ge (jExp p E) 0 with h | h
+  · rw [hbad h]
+  · have h2 : minDeltaExp p E = 0 := by
+      rw [minDeltaExp_eq_maxJ_of_semistable p E hss]
+      exact max_eq_left (by omega)
+    rw [h2, mul_zero]
+    exact minDeltaExp_nonneg p E'
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.5 —— 残る入力は**悪い素点だけ**の
+`v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`minDeltaExp_eq_mul_of_tateParamR`（第 892）が**そのまま与える形**である。
+☆`jExp` を往復する必要がないので、局所の連鎖と直接繋がる。 -/
+theorem lemma_3_5_velu_bad_delta (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), 0 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((Finset.range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L),
+        jExp p E < 0 → minDeltaExp p E' = l * minDeltaExp p E) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_velu_local_le eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint
+    hssE hssE' hbad => ?_⟩
+  exact hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hssE'
+    (fun p => minDeltaExp_le_of_bad_delta p E E' (hssE p) l (hbad p))
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def lemma_3_5_velu_bad_delta.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る入力は悪い素点だけの Δ_min の関係——局所の連鎖と直接繋がる)",
+    sectionId := "genell-lemma-3-5" }
 
 def lemma_3_5_velu_le.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
