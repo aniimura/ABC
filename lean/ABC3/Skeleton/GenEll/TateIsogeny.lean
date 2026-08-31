@@ -255,6 +255,56 @@ theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Idea
   rw [hsum1, tateCurveAt_c6_eq, tateCurveAt_c6_eq]
   linear_combination (252 : R) * hsum12 + hd4sum - (252 : R) * hstep
 
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**Vélu の商の `j` は `j(E_{q^l})` に等しい**。
+
+★葉 1 の目標 (1)(2) を `j` の言葉にしたもの。`v`・`w` は
+`veluVFull`・`veluWFull`（`w = ∑(u/2 + g^x·x)`、すなわち `2w = ∑(u + 2vx)`）の形で与える。
+
+☆`c₄ + 240v = l⁴c₄(q^l)` と `c₆ + 504v + 6048w = l⁶c₆(q^l)` から
+`x ↦ l²x + r` の変換で `j` が保たれる（`j_eq_of_c4_c6_scale_pos`）。 -/
+theorem j_velu_tate_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq)
+                (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    [(veluCurve (tateCurveAt q hq) v w).IsElliptic]
+    [(tateCurveAt (q ^ l) hql).IsElliptic] :
+    (veluCurve (tateCurveAt q hq) v w).j = (tateCurveAt (q ^ l) hql).j := by
+  have h4 := c4_velu_tate hl hζ hlu hu q hq hql h2 hDX
+  have h6 := c6_velu_tate hl hζ hu q hq hql h2 hDX
+  refine j_velu_tate_eq q hq l hql v w ?_ ?_
+  · rw [hv]
+    exact h4
+  · rw [hv]
+    linear_combination h6 + (3024 : R) * hw
+
+def j_velu_tate_mu.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Vélu の商の j は j(E_{q^l}) に等しい)",
+    sectionId := "genell-lemma-3-2" }
+
+def j_velu_tate_mu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "c4_velu_tate(目標 (1)、第 853、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.c4_velu_tate") 1,
+    .citation "[ABC3]" "c6_velu_tate(目標 (2)、第 867、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.c6_velu_tate") 1,
+    .citation "[ABC3]" "j_velu_tate_eq(c₄・c₆ から j へ、第 838、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.j_velu_tate_eq") 1 ]
+
 def c4_velu_tate.src : Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(訂正後の目標 (1)——c₄ は l⁴ 倍)",

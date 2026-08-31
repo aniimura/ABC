@@ -69,6 +69,42 @@ theorem j_eq_of_c4_c6_scale (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsEll
       = ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12) * W'.c₄ ^ 3 := by ring
     _ = (((W'.Δ')⁻¹ : Rˣ) : R) * W'.c₄ ^ 3 := by rw [hkey]
 
+/-- ★★★★★★**符号が `+` の版**——`c₆ = n⁶c₆'` でも `j` は一致する
+（`c₆` は 2 乗でしか入らないから）。 -/
+theorem j_eq_of_c4_c6_scale_pos (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsElliptic]
+    (n : R) (h4 : W.c₄ = n ^ 4 * W'.c₄) (h6 : W.c₆ = n ^ 6 * W'.c₆) :
+    W.j = W'.j := by
+  have h1728 : (1728 : R) ≠ 0 := by
+    have : ((1728 : ℕ) : R) ≠ 0 := Nat.cast_ne_zero.2 (by norm_num)
+    simpa using this
+  have hΔ : W.Δ = n ^ 12 * W'.Δ := by
+    refine mul_left_cancel₀ h1728 ?_
+    have e1 : (1728 : R) * W.Δ = W.c₄ ^ 3 - W.c₆ ^ 2 := W.c_relation
+    have e2 : (1728 : R) * W'.Δ = W'.c₄ ^ 3 - W'.c₆ ^ 2 := W'.c_relation
+    rw [e1, h4, h6, show (1728 : R) * (n ^ 12 * W'.Δ) = n ^ 12 * ((1728 : R) * W'.Δ) from by ring,
+      e2]
+    ring
+  have hcoe : ((W.Δ' : Rˣ) : R) = n ^ 12 * ((W'.Δ' : Rˣ) : R) := by
+    rw [coe_Δ', coe_Δ', hΔ]
+  have hUne : ((W.Δ' : Rˣ) : R) ≠ 0 := (W.Δ').ne_zero
+  have hU'ne : ((W'.Δ' : Rˣ) : R) ≠ 0 := (W'.Δ').ne_zero
+  have hinvW : ((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hinvW' : ((W'.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hkey : (((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12 = (((W'.Δ')⁻¹ : Rˣ) : R) := by
+    refine mul_left_cancel₀ hUne ?_
+    calc ((W.Δ' : Rˣ) : R) * ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12)
+        = (((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R)) * n ^ 12 := by ring
+      _ = n ^ 12 := by rw [hinvW, one_mul]
+      _ = (n ^ 12 * ((W'.Δ' : Rˣ) : R)) * (((W'.Δ')⁻¹ : Rˣ) : R) := by
+          rw [mul_assoc, hinvW', mul_one]
+      _ = ((W.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) := by rw [← hcoe]
+  rw [j, j, h4]
+  calc (((W.Δ')⁻¹ : Rˣ) : R) * (n ^ 4 * W'.c₄) ^ 3
+      = ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12) * W'.c₄ ^ 3 := by ring
+    _ = (((W'.Δ')⁻¹ : Rˣ) : R) * W'.c₄ ^ 3 := by rw [hkey]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def j_eq_of_c4_c6_scale.src : ABC3.Meta.Source :=

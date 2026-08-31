@@ -147,9 +147,9 @@ theorem j_velu_tate_eq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
     [(veluCurve (tateCurveAt q hq) v w).IsElliptic] [(tateCurveAt (q ^ l) hql).IsElliptic]
     (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
     (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
-      = -((l : R) ^ 6) * (tateCurveAt (q ^ l) hql).c₆) :
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆) :
     (veluCurve (tateCurveAt q hq) v w).j = (tateCurveAt (q ^ l) hql).j := by
-  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale _ _ ((l : R)) ?_ ?_
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : R)) ?_ ?_
   · rw [veluCurve_c₄]
     exact h4
   · rw [veluCurve_c₆, tateCurveAt_b₂]
