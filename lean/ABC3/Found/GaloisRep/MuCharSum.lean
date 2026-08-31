@@ -530,6 +530,29 @@ theorem inv_zeta_pow_eq_pow {l : ℕ} (hl : 0 < l) {ζ : F} (hζ : IsPrimitiveRo
     | succ n => simp only [Nat.add_sub_cancel]; ring
   rw [hkey, pow_mul, hζ.pow_eq_one, one_pow]
 
+/-- ★★★**`l ∣ (l−1)d ⇔ l ∣ d`**——`l` と `l−1` は互いに素だから。 -/
+theorem dvd_mul_pred_iff {l d : ℕ} (hl : l.Prime) : l ∣ (l - 1) * d ↔ l ∣ d := by
+  constructor
+  · intro h
+    have hl2 : 2 ≤ l := hl.two_le
+    rcases (Nat.Prime.dvd_mul hl).1 h with h1 | h2
+    · exact absurd (Nat.le_of_dvd (by omega) h1) (by omega)
+    · exact h2
+  · intro h
+    exact Dvd.dvd.mul_left h _
+
+/-- ★★★★★★★★★★**逆向きの指標和**——`∑_{i≠0} (ζ^{−i})^d`。 -/
+theorem sum_mu_neg_pow {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l) (d : ℕ) :
+    ∑ i ∈ (range l).erase 0, (ζ ^ (i * (l - 1))) ^ d
+      = (if l ∣ d then (l : R) else 0) - 1 := by
+  have hrw : ∀ i : ℕ, (ζ ^ (i * (l - 1))) ^ d = ζ ^ (i * ((l - 1) * d)) := by
+    intro i
+    rw [← pow_mul, mul_assoc]
+  rw [Finset.sum_congr rfl (fun i _ => hrw i), sum_mu_pow_erase_zero hl hζ ((l - 1) * d)]
+  by_cases h : l ∣ d
+  · rw [if_pos h, if_pos ((dvd_mul_pred_iff hl).2 h)]
+  · rw [if_neg h, if_neg (fun hh => h ((dvd_mul_pred_iff hl).1 hh))]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -625,6 +648,16 @@ def sum_mu_poly_mul.src : ABC3.Meta.Source :=
 def inv_zeta_pow_eq_pow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(ζ^{−i} を正の冪に直す。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def dvd_mul_pred_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l ∣ (l−1)d ⇔ l ∣ d。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_neg_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(逆向きの指標和。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=

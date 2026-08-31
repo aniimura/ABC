@@ -105,6 +105,81 @@ theorem sum_mu_tateYtail [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Pri
   rw [← sum_mu_pow_erase_zero hl hζ d]
   exact Finset.sum_congr rfl (fun i _ => by rw [← pow_mul])
 
+/-! ## ★★★★★★★★★★★★★★★★`w = qζ⁻¹` 側の和 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`∑_ζ tateXterm(qζ⁻¹)` も `ζ` を含まない**。
+
+`tateXpair ζ (qζ⁻¹) q` の `w` 側の項である。 -/
+theorem sum_mu_tateXterm_w [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateXterm (q * ζ ^ (i * (l - 1)))
+      = adicSum (I := I)
+          (fun n => (n : R) * q ^ n * ((if l ∣ n then (l : R) else 0) - 1))
+          (fun n => Ideal.mul_mem_right _ _
+            (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n))) := by
+  classical
+  have hmem : ∀ i : ℕ, q * ζ ^ (i * (l - 1)) ∈ I := fun i => Ideal.mul_mem_right _ _ hq
+  rw [Finset.sum_congr rfl (fun i _ => tateXterm_eq_adicSum (hmem i))]
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => (n : R) * (q * ζ ^ (i * (l - 1))) ^ n)
+      (fun i n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow (hmem i) n))]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hexp : ∀ i : ℕ, (n : R) * (q * ζ ^ (i * (l - 1))) ^ n
+      = ((n : R) * q ^ n) * (ζ ^ (i * (l - 1))) ^ n := by
+    intro i; rw [mul_pow]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
+    sum_mu_neg_pow hl hζ n, mul_assoc]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**`Y` 側の `w` の項**。 -/
+theorem sum_mu_tateYterm_w [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateYterm (q * ζ ^ (i * (l - 1)))
+      = adicSum (I := I)
+          (fun n => ((n.choose 2 : ℕ) : R) * q ^ n * ((if l ∣ n then (l : R) else 0) - 1))
+          (fun n => Ideal.mul_mem_right _ _
+            (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n))) := by
+  classical
+  have hmem : ∀ i : ℕ, q * ζ ^ (i * (l - 1)) ∈ I := fun i => Ideal.mul_mem_right _ _ hq
+  rw [Finset.sum_congr rfl (fun i _ => tateYterm_eq_adicSum (hmem i))]
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => ((n.choose 2 : ℕ) : R) * (q * ζ ^ (i * (l - 1))) ^ n)
+      (fun i n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow (hmem i) n))]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hexp : ∀ i : ℕ, ((n.choose 2 : ℕ) : R) * (q * ζ ^ (i * (l - 1))) ^ n
+      = (((n.choose 2 : ℕ) : R) * q ^ n) * (ζ ^ (i * (l - 1))) ^ n := by
+    intro i; rw [mul_pow]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
+    sum_mu_neg_pow hl hζ n, mul_assoc]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**`w` 側の尾**。 -/
+theorem sum_mu_tateXtail_w [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateXtail (q * ζ ^ (i * (l - 1))) q hq
+      = adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+            (d : R) * (q ^ d * ((if l ∣ d then (l : R) else 0) - 1)))
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) := by
+  classical
+  rw [Finset.sum_congr rfl
+    (fun i _ => tateXtail_eq_divisorSum (q * ζ ^ (i * (l - 1))) q hq)]
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => q ^ n * ∑ d ∈ n.divisors,
+        (d : R) * (q * ζ ^ (i * (l - 1))) ^ d)
+      (fun i n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [← Finset.mul_sum]
+  congr 1
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun d _ => ?_)
+  have hexp : ∀ i : ℕ, (d : R) * (q * ζ ^ (i * (l - 1))) ^ d
+      = ((d : R) * q ^ d) * (ζ ^ (i * (l - 1))) ^ d := by
+    intro i; rw [mul_pow]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
+    sum_mu_neg_pow hl hζ d, mul_assoc]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mu_tateXtail.src : ABC3.Meta.Source :=
@@ -115,6 +190,21 @@ def sum_mu_tateXtail.src : ABC3.Meta.Source :=
 def sum_mu_tateYtail.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(μ_l にわたる Tate の Y の尾の和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateXterm_w.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(w = qζ⁻¹ 側の X の項の μ_l 和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateYterm_w.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(w 側の Y の項の μ_l 和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateXtail_w.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(w 側の尾の μ_l 和。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def adicSum_zero.src : ABC3.Meta.Source :=
