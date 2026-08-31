@@ -522,6 +522,77 @@ theorem sigmaOne_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) (q : R) (
   · simp [h]
   · simp [h]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`q` 次数に揃えた形（古典形） -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`X(z, q)` の古典形**——`w` 側の 2 項が 1 つにまとまる。
+
+    `X(z,q) = z/(1−z)² + T(z) + T(z^{l−1}) − 2 s₁(q)`
+
+★★`TateInversion.lean` の `tateXtail_shift`（`T(u) = f(qu) + T(qu)`）を
+`u = z^{l−1}` で使うだけである。
+
+★★★これで **adic 添字と `q` 次数が揃う**（第 818 の測定の解消）。 -/
+theorem tateXpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
+    tateXpair z (q * z ^ (l - 1)) q hq
+      = tateXterm z + tateXtail z q hq + tateXtail (z ^ (l - 1)) q hq
+        - 2 * evalAdic (sigmaSeries 1) q hq := by
+  rw [tateXpair, tateXtail_shift (z ^ (l - 1)) q hq]
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`Y(z, q)` の古典形**。 -/
+theorem tateYpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
+    tateYpair z (q * z ^ (l - 1)) q hq
+      = tateYterm z + tateYtail z q hq - tateXtail (z ^ (l - 1)) q hq
+        - tateYtail (z ^ (l - 1)) q hq + evalAdic (sigmaSeries 1) q hq := by
+  rw [tateYpair, tateXtail_shift (z ^ (l - 1)) q hq, tateYtail_shift (z ^ (l - 1)) q hq]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateXtail(z^m, q)` の μ-等級付き形**。 -/
+theorem tateXtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateXtail (z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a), (d : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateXtail_eq_divisorSum (z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        (d : R) * (z ^ m) ^ d
+      = ∑ d ∈ n.divisors, (d : R) * (z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYtail(z^m, q)` も同じ**。 -/
+theorem tateYtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateYtail (z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+            ((d.choose 2 : ℕ) : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateYtail_eq_divisorSum (z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d
+      = ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
+
 /-! ## ★★★★★★★★★★★★★★★★★★★★★★★★`X(ζ)` を 1 つの μ-等級付き級数に -/
 
 open Finset in
@@ -531,14 +602,12 @@ noncomputable def tateXC (l : ℕ) (q : R) (n a : ℕ) : R :=
       ∑ k ∈ range l, ∑ m ∈ range l, (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)
    else 0)
   + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), (d : R)
-  + ((if (n * (l - 1)) % l = a then (n : R) * q ^ n else 0)
-     + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R) * q ^ d)
+  + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R)
   - 2 * (if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
 
 theorem tateXC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateXC l q n a ∈ I ^ n := by
   classical
-  refine Submodule.sub_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_)
-    (Submodule.add_mem _ ?_ ?_)) ?_
+  refine Submodule.sub_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_) ?_) ?_
   · by_cases h : n = 0
     · simpa [h] using Submodule.mem_top
         (x := (Ring.inverse ((l : R))) ^ 2 *
@@ -546,9 +615,6 @@ theorem tateXC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateXC l q n a
             (if (k + m + 1) % l = a then (k : R) * (m : R) else 0))
     · simpa [h] using Submodule.zero_mem (I ^ n)
   · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
-  · by_cases h : (n * (l - 1)) % l = a
-    · simpa [h] using Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)
-    · simpa [h] using Submodule.zero_mem (I ^ n)
   · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
   · refine Ideal.mul_mem_left _ _ ?_
     by_cases h : a = 0
@@ -557,22 +623,19 @@ theorem tateXC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateXC l q n a
 
 open Finset in
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
-**`X(ζ, q)` は 1 つの μ-等級付き級数である**。
-
-★★★これで `X(ζ)²` も `muEval_mul` で同じ枠に留まる。 -/
+**`X(ζ, q)` は 1 つの μ-等級付き級数である**（`q` 次数に揃えた古典形）。 -/
 theorem tateXpair_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
     (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hz : z ^ l = 1)
     (hsum : ∑ k ∈ range l, z ^ k = 0) (q : R) (hq : q ∈ I) :
     tateXpair z (q * z ^ (l - 1)) q hq
       = muEval (I := I) l (tateXC l q) (tateXC_mem hq) z := by
   classical
-  rw [tateXpair, tateXterm_zeta_eq_poly hl hlu hu hz hsum,
+  rw [tateXpair_eq_aligned, tateXterm_zeta_eq_poly hl hlu hu hz hsum,
     muEval_const (I := I) (l := l) _ z,
     tateXtail_eq_muEval hl hz q hq,
-    tateXterm_eq_muEval hl hz q hq (l - 1),
-    tateXtail_qz_eq_muEval hl hz q hq (l - 1),
+    tateXtail_pow_eq_muEval hl hz q hq (l - 1),
     sigmaOne_eq_muEval hl q hq z,
-    muEval_smul, muEval_add, muEval_add, muEval_add, muEval_sub]
+    muEval_smul, muEval_add, muEval_add, muEval_sub]
   refine muEval_congr _ _ _ _ (fun n a => ?_) z
   simp only [tateXC]
 
@@ -688,27 +751,16 @@ theorem tateYterm_zeta_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl
 open Finset in
 /-- ★★★★★★★★★★★★★★★★**Tate の `Y` の μ-等級付き係数**。 -/
 noncomputable def tateYC (l : ℕ) (q : R) (n a : ℕ) : R :=
-  (muConv l (tateXtermC l) (invSubOneC l) n a
-    + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), ((d.choose 2 : ℕ) : R))
-  - ((if (n * (l - 1)) % l = a then (n : R) * q ^ n else 0)
-     + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R) * q ^ d)
-  - ((if (n * (l - 1)) % l = a then ((n.choose 2 : ℕ) : R) * q ^ n else 0)
-     + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a),
-         ((d.choose 2 : ℕ) : R) * q ^ d)
+  muConv l (tateXtermC l) (invSubOneC l) n a
+  + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), ((d.choose 2 : ℕ) : R)
+  - q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R)
+  - q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), ((d.choose 2 : ℕ) : R)
   + (if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
 
 theorem tateYC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateYC l q n a ∈ I ^ n := by
   classical
-  have hif : ∀ (c : R), c ∈ I ^ n →
-      (if (n * (l - 1)) % l = a then c else 0) ∈ I ^ n := by
-    intro c hc
-    by_cases h : (n * (l - 1)) % l = a
-    · simpa [h] using hc
-    · simpa [h] using Submodule.zero_mem (I ^ n)
   refine Submodule.add_mem _ (Submodule.sub_mem _ (Submodule.sub_mem _
-    (Submodule.add_mem _ (muConv_mem tateXtermC_mem invSubOneC_mem n a) ?_)
-    (Submodule.add_mem _ (hif _ (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n))) ?_))
-    (Submodule.add_mem _ (hif _ (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n))) ?_)) ?_
+    (Submodule.add_mem _ (muConv_mem tateXtermC_mem invSubOneC_mem n a) ?_) ?_) ?_) ?_
   · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
   · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
   · exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
@@ -718,21 +770,19 @@ theorem tateYC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : tateYC l q n a
 
 open Finset in
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
-**`Y(ζ, q)` も 1 つの μ-等級付き級数である**。 -/
+**`Y(ζ, q)` も 1 つの μ-等級付き級数（古典形）**。 -/
 theorem tateYpair_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
     (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hz : z ^ l = 1)
     (hsum : ∑ k ∈ range l, z ^ k = 0) (q : R) (hq : q ∈ I) :
     tateYpair z (q * z ^ (l - 1)) q hq
       = muEval (I := I) l (tateYC l q) (tateYC_mem hq) z := by
   classical
-  rw [tateYpair, tateYterm_zeta_eq_muEval (I := I) hl hlu hu hz hsum,
+  rw [tateYpair_eq_aligned, tateYterm_zeta_eq_muEval (I := I) hl hlu hu hz hsum,
     tateYtail_eq_muEval hl hz q hq,
-    tateXterm_eq_muEval hl hz q hq (l - 1),
-    tateXtail_qz_eq_muEval hl hz q hq (l - 1),
-    tateYterm_eq_muEval hl hz q hq (l - 1),
-    tateYtail_qz_eq_muEval hl hz q hq (l - 1),
+    tateXtail_pow_eq_muEval hl hz q hq (l - 1),
+    tateYtail_pow_eq_muEval hl hz q hq (l - 1),
     sigmaOne_eq_muEval hl q hq z,
-    muEval_add, muEval_add, muEval_add, muEval_sub, muEval_sub, muEval_add]
+    muEval_add, muEval_sub, muEval_sub, muEval_add]
   refine muEval_congr _ _ _ _ (fun n a => ?_) z
   simp only [tateYC]
 
@@ -825,44 +875,43 @@ open Finset in
 theorem sum_tateXC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
     ∑ a ∈ range l, tateXC l q n a
       = (if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
-            ((∑ k ∈ range l, (k : R)) * ∑ m ∈ range l, (m : R)) else 0)
-        + q ^ n * ∑ d ∈ n.divisors, (d : R)
-        + ((n : R) * q ^ n + q ^ n * ∑ d ∈ n.divisors, (d : R) * q ^ d)
-        - 2 * (q ^ n * ∑ d ∈ n.divisors, (d : R)) := by
+            ((∑ k ∈ range l, (k : R)) * ∑ m ∈ range l, (m : R)) else 0) := by
   classical
   simp only [tateXC]
-  rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib,
-    Finset.sum_add_distrib]
-  congr 1
-  · congr 1
-    · congr 1
-      -- ★部分 1: 定数項
-      · by_cases hn : n = 0
-        · subst hn
-          simp only [eq_self_iff_true, if_true]
-          rw [← Finset.mul_sum, Finset.sum_comm]
-          congr 1
-          rw [Finset.sum_mul_sum]
-          refine Finset.sum_congr rfl (fun k _ => ?_)
-          rw [Finset.sum_comm]
-          refine Finset.sum_congr rfl (fun m _ => ?_)
-          exact sum_range_ite_eq (Nat.mod_lt _ hl) _
-        · simp [hn]
-      -- ★部分 2: 尾
-      · rw [← Finset.mul_sum]
-        congr 1
-        exact Finset.sum_fiberwise_of_maps_to
-          (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-    · congr 1
-      -- ★部分 3: w 側の項
-      · exact sum_range_ite_eq (Nat.mod_lt _ hl) _
-      -- ★部分 4: w 側の尾
-      · rw [← Finset.mul_sum]
-        congr 1
-        exact Finset.sum_fiberwise_of_maps_to
-          (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-  -- ★部分 5: −2 s₁
-  · rw [← Finset.mul_sum]
+  rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
+  have h1 : ∑ a ∈ range l,
+      (if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
+        ∑ k ∈ range l, ∑ m ∈ range l,
+          (if (k + m + 1) % l = a then (k : R) * (m : R) else 0) else 0)
+      = (if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
+            ((∑ k ∈ range l, (k : R)) * ∑ m ∈ range l, (m : R)) else 0) := by
+    by_cases hn : n = 0
+    · subst hn
+      simp only [eq_self_iff_true, if_true]
+      rw [← Finset.mul_sum, Finset.sum_comm]
+      congr 1
+      rw [Finset.sum_mul_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      exact sum_range_ite_eq (Nat.mod_lt _ hl) _
+    · simp [hn]
+  have h2 : ∑ a ∈ range l, q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), (d : R)
+      = q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+    rw [← Finset.mul_sum]
+    congr 1
+    exact Finset.sum_fiberwise_of_maps_to
+      (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  have h3 : ∑ a ∈ range l,
+      q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R)
+      = q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+    rw [← Finset.mul_sum]
+    congr 1
+    exact Finset.sum_fiberwise_of_maps_to
+      (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  have h4 : ∑ a ∈ range l, 2 * (if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
+      = 2 * (q ^ n * ∑ d ∈ n.divisors, (d : R)) := by
+    rw [← Finset.mul_sum]
     congr 1
     rw [Finset.sum_eq_single 0]
     · simp
@@ -870,6 +919,8 @@ theorem sum_tateXC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
       simp [hb]
     · intro h
       exact absurd (Finset.mem_range.2 hl) h
+  rw [h1, h2, h3, h4]
+  ring
 
 open Finset in
 /-- ★★★★★★★★★★★★★★★★**`tateXC` の 0 次係数**（定義を展開した形）。 -/
@@ -879,10 +930,9 @@ theorem tateXC_zero {l : ℕ} (q : R) (n : ℕ) :
             ∑ k ∈ range l, ∑ m ∈ range l,
               (if (k + m + 1) % l = 0 then (k : R) * (m : R) else 0) else 0)
         + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = 0), (d : R)
-        + ((if (n * (l - 1)) % l = 0 then (n : R) * q ^ n else 0)
-           + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0), (d : R) * q ^ d)
+        + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0), (d : R)
         - 2 * (q ^ n * ∑ d ∈ n.divisors, (d : R)) := by
-  rfl
+  simp [tateXC]
 
 open Finset in
 /-- ★★★★★★★★★★★★**`l` が素数ならフィルタはすべて「`l ∣ d`」**。 -/
@@ -910,136 +960,58 @@ open Finset in
 /-- ★★★★★★★★★★★★★★★★**`tateYC` の全係数和**（`z = 1` での値）。 -/
 theorem sum_tateYC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
     ∑ a ∈ range l, tateYC l q n a
-      = ((∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXtermC (R := R) l k a)
-              * ∑ b ∈ range l, invSubOneC (R := R) l (n - k) b)
-          + q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R))
-        - ((n : R) * q ^ n + q ^ n * ∑ d ∈ n.divisors, (d : R) * q ^ d)
-        - (((n.choose 2 : ℕ) : R) * q ^ n
-           + q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * q ^ d)
-        + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+      = ∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXtermC (R := R) l k a)
+          * ∑ b ∈ range l, invSubOneC (R := R) l (n - k) b := by
   classical
   simp only [tateYC]
   rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_sub_distrib,
-    Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
-  congr 1
-  · congr 1
-    · congr 1
-      · congr 1
-        -- ★畳み込みの部分
-        · exact sum_muConv hl _ _ n
-        -- ★Y の尾
-        · rw [← Finset.mul_sum]
-          congr 1
-          exact Finset.sum_fiberwise_of_maps_to
-            (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-      · congr 1
-        -- ★w 側の X の項
-        · exact sum_range_ite_eq (Nat.mod_lt _ hl) _
-        -- ★w 側の X の尾
-        · rw [← Finset.mul_sum]
-          congr 1
-          exact Finset.sum_fiberwise_of_maps_to
-            (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-    · congr 1
-      -- ★w 側の Y の項
-      · exact sum_range_ite_eq (Nat.mod_lt _ hl) _
-      -- ★w 側の Y の尾
-      · rw [← Finset.mul_sum]
-        congr 1
-        exact Finset.sum_fiberwise_of_maps_to
-          (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-  -- ★s₁ の項
-  · rw [Finset.sum_eq_single 0]
+    Finset.sum_add_distrib]
+  have hA : ∑ a ∈ range l, muConv l (tateXtermC (R := R) l) (invSubOneC (R := R) l) n a
+      = ∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXtermC (R := R) l k a)
+          * ∑ b ∈ range l, invSubOneC (R := R) l (n - k) b := sum_muConv hl _ _ n
+  have hB : ∑ a ∈ range l,
+      q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), ((d.choose 2 : ℕ) : R)
+      = q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) := by
+    rw [← Finset.mul_sum]
+    congr 1
+    exact Finset.sum_fiberwise_of_maps_to
+      (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  have hC : ∑ a ∈ range l,
+      q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), (d : R)
+      = q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+    rw [← Finset.mul_sum]
+    congr 1
+    exact Finset.sum_fiberwise_of_maps_to
+      (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  have hD : ∑ a ∈ range l,
+      q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = a), ((d.choose 2 : ℕ) : R)
+      = q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) := by
+    rw [← Finset.mul_sum]
+    congr 1
+    exact Finset.sum_fiberwise_of_maps_to
+      (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  have hE : ∑ a ∈ range l, (if a = 0 then q ^ n * ∑ d ∈ n.divisors, (d : R) else 0)
+      = q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+    rw [Finset.sum_eq_single 0]
     · simp
     · intro b _ hb
       simp [hb]
     · intro h
       exact absurd (Finset.mem_range.2 hl) h
+  rw [hA, hB, hC, hD, hE]
+  ring
 
 open Finset in
-/-- ★★★★★★★★★★★★★★★★**`tateYC` の 0 次係数**（定義の展開形）。 -/
+/-- ★★★★★★★★★★★★★★★★**`tateYC` の 0 次係数**。 -/
 theorem tateYC_zero {l : ℕ} (q : R) (n : ℕ) :
     tateYC l q n 0
-      = (muConv l (tateXtermC l) (invSubOneC l) n 0
-          + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = 0), ((d.choose 2 : ℕ) : R))
-        - ((if (n * (l - 1)) % l = 0 then (n : R) * q ^ n else 0)
-           + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0), (d : R) * q ^ d)
-        - ((if (n * (l - 1)) % l = 0 then ((n.choose 2 : ℕ) : R) * q ^ n else 0)
-           + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0),
-               ((d.choose 2 : ℕ) : R) * q ^ d)
+      = muConv l (tateXtermC l) (invSubOneC l) n 0
+        + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = 0), ((d.choose 2 : ℕ) : R)
+        - q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0), (d : R)
+        - q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0),
+            ((d.choose 2 : ℕ) : R)
         + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
-  rfl
-
-/-! ## ★★★★★★★★★★★★★★★★★★★★`q` 次数に揃えた形（古典形） -/
-
-/-- ★★★★★★★★★★★★★★★★★★★★★★★★
-**`X(z, q)` の古典形**——`w` 側の 2 項が 1 つにまとまる。
-
-    `X(z,q) = z/(1−z)² + T(z) + T(z^{l−1}) − 2 s₁(q)`
-
-★★`TateInversion.lean` の `tateXtail_shift`（`T(u) = f(qu) + T(qu)`）を
-`u = z^{l−1}` で使うだけである。
-
-★★★これで **adic 添字と `q` 次数が揃う**（第 818 の測定の解消）。 -/
-theorem tateXpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
-    tateXpair z (q * z ^ (l - 1)) q hq
-      = tateXterm z + tateXtail z q hq + tateXtail (z ^ (l - 1)) q hq
-        - 2 * evalAdic (sigmaSeries 1) q hq := by
-  rw [tateXpair, tateXtail_shift (z ^ (l - 1)) q hq]
-
-/-- ★★★★★★★★★★★★★★★★★★★★**`Y(z, q)` の古典形**。 -/
-theorem tateYpair_eq_aligned [IsAdicComplete I R] {l : ℕ} (z q : R) (hq : q ∈ I) :
-    tateYpair z (q * z ^ (l - 1)) q hq
-      = tateYterm z + tateYtail z q hq - tateXtail (z ^ (l - 1)) q hq
-        - tateYtail (z ^ (l - 1)) q hq + evalAdic (sigmaSeries 1) q hq := by
-  rw [tateYpair, tateXtail_shift (z ^ (l - 1)) q hq, tateYtail_shift (z ^ (l - 1)) q hq]
-
-open Finset in
-/-- ★★★★★★★★★★★★★★★★**`tateXtail(z^m, q)` の μ-等級付き形**。 -/
-theorem tateXtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
-    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
-    tateXtail (z ^ m) q hq
-      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a), (d : R))
-          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
-  classical
-  rw [tateXtail_eq_divisorSum (z ^ m) q hq]
-  simp only [muEval]
-  refine adicSum_congr _ _ (fun n => ?_)
-  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
-        (d : R) * (z ^ m) ^ d
-      = ∑ d ∈ n.divisors, (d : R) * (z ^ m) ^ d :=
-    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-  rw [← hfib, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
-  rw [mul_assoc, Finset.sum_mul]
-  congr 1
-  refine Finset.sum_congr rfl (fun d hd => ?_)
-  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
-  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
-
-open Finset in
-/-- ★★★★★★★★★★★★★★★★**`tateYtail(z^m, q)` も同じ**。 -/
-theorem tateYtail_pow_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
-    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
-    tateYtail (z ^ m) q hq
-      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
-            ((d.choose 2 : ℕ) : R))
-          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
-  classical
-  rw [tateYtail_eq_divisorSum (z ^ m) q hq]
-  simp only [muEval]
-  refine adicSum_congr _ _ (fun n => ?_)
-  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
-        ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d
-      = ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * (z ^ m) ^ d :=
-    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
-  rw [← hfib, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
-  rw [mul_assoc, Finset.sum_mul]
-  congr 1
-  refine Finset.sum_congr rfl (fun d hd => ?_)
-  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
-  rw [← pow_mul, pow_mod_eq hl hz (m * d), hda]
+  simp [tateYC]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
