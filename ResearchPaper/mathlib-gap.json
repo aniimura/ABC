@@ -2801,5 +2801,22 @@
       "☆(D3) の残りは **(b1) `hp`（完備化の付値の橋）だけ**である。★mathlib の `valuedAdicCompletion_eq_valuation` は `Valued.v` の言葉、本プロジェクトの `hp` は `HeightOneSpectrum.valuation Lv 𝔪_R` の言葉。☆道筋の測定: 両者は同じ単位球 `R` を持つ全射な ℤᵐ⁰-付値なので等しい。`Valuation.isEquiv_of_val_le_one` で同値までは出るが、「同値かつ両方全射 ⇒ 等しい」を ℤᵐ⁰ で言う補題が mathlib に見当たらない。具体的には「一意化元 π で `w₁ π = w₂ π = ofAdd(-1)`、`x = u·π^n`（`u` は `R` の単元）」で押すことになる。"
     ],
     "note": "★944-963 の 20 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35ValuationBridge20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 964",
+    "supersedes": "lemma35SplitDichotomy20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★`le_exp_neg_one_of_lt_one` / `exp_neg_one_zpow`（964）——`ℤᵐ⁰` の小道具。",
+      "★★★★★★★★★★★★`eq_of_isEquiv_of_surjective`（964）——同値で両方全射な `ℤᵐ⁰`-付値は等しい。☆mathlib に見当たらなかったので内製した。一意化元 `π`（`v π = exp(-1)`）と `ρ`（`w ρ = exp(-1)`）を取り、`w π = exp(-1)` を挿んでから任意の `x` を `π^{-n}` と比べる。",
+      "★★★★★★★★★★★★★★★★`valuation_maximalIdeal_adicCompletion_eq`（964）——`𝔪_R` の付値と `Valued.v` は一致する。両方の単位球が `adicCompletionIntegers`、両方全射だから。",
+      "★★★★★★★★★★★★★★★★★★★★`valuation_algebraMap_adicCompletion`（964）——**局所の定理群の仮説 `hp` そのもの**。"
+    ],
+    "allLocalDataDone": "★★★★(D3) が要求していた 3 つの局所データはすべて揃った: (a) 分裂性 → 963、(b1) 付値の橋 → 964、(d) Vélu の係数 → 956-962。☆`hlu` は 953、`hu` は 951、極小モデルは 954 が与える。",
+    "remainingLayers": [
+      "☆残るのは `isMuAtBadPrimes_of_veluQuotient` の本体——各悪い素点で 954/953/951/963/964/961/962 を並べ、950 →(955)→ 904 → 903 と流す長い呼び出しだけである。"
+    ],
+    "note": "★944-964 の 21 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
