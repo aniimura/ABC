@@ -6,7 +6,7 @@ import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Meta.Claim
 
 /-!
-# `Theorem 3.8`・`Corollary 4.3` に残る Galois 側の 3 つの葉（`Skeleton`）
+# `Theorem 3.8` に残る Galois 側の葉（`Skeleton`）
 
 原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.19–p.22。
 
@@ -24,7 +24,7 @@ import ABC3.Meta.Claim
 `imageSurjective_of_containsSL2` 欄を**それぞれ 1 本の仮説に帰着**した。
 本ファイルはその仮説を**依存グラフの節点として固定する**。
 
-## ★★★3 つの葉
+## ★★★残る葉
 
 | # | 命題 | 原文の言い方 |
 |---|---|---|
@@ -82,59 +82,23 @@ def alpha_in_modl_image.needs : List ProofObligation :=
        "q の l 乗根の抽出が非自明なので α が像に入る。" ++
        "☆材料は Found/GaloisRep/Lemma32Tate.lean(Tate 一意化と Lemma 3.2, (i))") 10 ]
 
-/-- **[GenEll] `Corollary 4.3` の円分指標の側**——`l` が `L` で不分岐なら全射。
-
-原文 (GenEll p.22):
-> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
-
-★★★★★`Found/GenEll/EllModuliGalois.lean` の `imageSurjectiveJ_of_containsSL2` が
-**そのまま消費する形**である。
-
-☆`det ρ(σ)` が mathlib の円分指標そのものであることは
-`Found/GenEll/DetCycloChar.lean` の `det_galRep_eq_cyclotomicCharacter`（`§9-1190`、第 764、
-★無条件）で済んでいる。★★したがって本命題には**楕円曲線が現れない**。 -/
-theorem cyclotomic_det_surjective (E : SSCurve) (l : ℕ) [Fact l.Prime]
-    (hunram : True) (n : ℕ) (u : ℤ_[l]ˣ) :
-    ∃ σ : E.alg ≃ₐ[E.fld] E.alg,
-      PadicInt.toZModPow n
-          ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l])
-        = PadicInt.toZModPow n ((u : ℤ_[l])) := by
-  sorry
-
-def cyclotomic_det_surjective.src : Source :=
-  { paper := "GenEll", pdfPage := 22,
-    item := "Corollary 4.3(円分指標 Gal(L̄/L) → ℤ_l^× の全射性——l が L で不分岐のとき)",
-    sectionId := "genell-cor-4-3" }
-
-def cyclotomic_det_surjective.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "IsCyclotomicExtension.autEquivPow(Irreducible (cyclotomic n K) から Gal ≃* (ZMod n)ˣ)"
-      (.inMathlib "IsCyclotomicExtension.autEquivPow") 2,
-    .implicitStep
-      ("★★L の上で cyclotomic (l^n) が既約であること。" ++
-       "l が L で不分岐かつ ℚ(ζ_{l^n})/ℚ が l で完全分岐なので L ∩ ℚ(ζ_{l^n}) = ℚ") 8,
-    .citation "[mathlib]" "IsCyclotomicExtension.discr_prime_pow_eq_unit_mul_pow(disc ℚ(ζ_{p^k}) = 単元 × p^m)"
-      (.inMathlib "IsCyclotomicExtension.discr_prime_pow_eq_unit_mul_pow") 2,
-    .citation "[mathlib]" "NumberField.finrank_eq_one_of_unramified(至る所不分岐な数体は ℚ)"
-      (.inMathlib "NumberField.finrank_eq_one_of_unramified") 2,
-    .citation "[mathlib]" "NumberField.not_dvd_discr_iff_forall_mem(q ∤ disc ⇔ q の上で不分岐)"
-      (.inMathlib "NumberField.not_dvd_discr_iff_forall_mem") 2,
-    .implicitStep
-      ("★★測定(2026-08-31、第 779): 葉 4 の議論は mathlib の 3 つで組める。" ++
-       "F ≔ L ∩ ℚ(ζ_{l^n}) と置くと、q ≠ l が F で分岐すれば ℚ(ζ) でも分岐し disc が l 冪なので矛盾、" ++
-       "q = l が F で分岐すれば L でも分岐し仮説に矛盾。" ++
-       "ゆえに F は至る所不分岐で F = ℚ。" ++
-       "☆要る配管は (i) 分岐の塔の乗法性(F ⊆ M で不分岐は降りる)と " ++
-       "(ii) Galois 拡大の線型無関連 [L(ζ):L] = [ℚ(ζ):F]") 6,
-    .implicitStep
-      ("★★★逆極限の段は**済んだ**(2026-08-31、第 773): " ++
-       "Found/GenEll/DetCycloChar.lean の cyclotomicCharacter_surjective_of_mod が " ++
-       "Gal のコンパクト性と円分指標の連続性から「mod l^n で全射 ⟹ 全射」を出す") 1 ]
-
 /-! ## ★★★★★★★★★★葉 5 は閉じた（2026-08-31、第 766-774）
 
 ★`galRep` の連続性と像の閉性は `Found/GenEll/GalRepContinuity.lean`・
 `Found/GenEll/GalRepClosed.lean` で**無条件に証明された**ので、
 本ファイルからは削除した。
+-/
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★葉 4 も閉じた（2026-08-31、第 780-784）
+
+★円分指標の全射性は `Found/GenEll/CycloDisjoint.lean`・
+`Found/GenEll/DetCycloChar.lean` の `cyclotomic_det_surjective` で
+**代数的な仮説 `¬ (l : ℤ) ∣ disc L`（= `l` が `L` で不分岐）だけから
+証明された**ので、本ファイルからは削除した。
+
+☆道筋は「完全分岐」を一度も使わない:
+`disc ℚ(ζ_{l^k}) = ±l^m` と `l ∤ disc L` から判別式が互いに素で、
+`NumberField.linearDisjoint_of_isGalois_isCoprime_discr` が線型無関連を出す。
 -/
 
 end ABC3.Skeleton.GenEll

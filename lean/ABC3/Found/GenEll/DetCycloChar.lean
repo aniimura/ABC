@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Found.GenEll.CycloDisjoint
 import ABC3.Found.GaloisRep.FullImageWitness
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
 import Mathlib.FieldTheory.Galois.Profinite
@@ -156,6 +157,40 @@ theorem cyclotomicCharacter_surjective_of_mod (E : SSCurve) (l : ℕ) [Fact l.Pr
       _ < ε := hn
   obtain ⟨σ, hσ⟩ := hmem
   exact ⟨σ, Units.ext hσ⟩
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**葉 4 が閉じた**——
+`l` が `L` で不分岐なら円分指標は `mod l^n` で全射。
+
+`Found/GenEll/CycloDisjoint.lean` の `cyclotomicCharacter_toZModPow_surjective`
+をそのまま `SSCurve` の言葉にしたもの。 -/
+theorem cyclotomic_det_surjective_mod (E : SSCurve) (l : ℕ) [Fact l.Prime]
+    (hunram : ¬ (l : ℤ) ∣ NumberField.discr E.fld) (n : ℕ) (u : ℤ_[l]ˣ) :
+    ∃ σ : E.alg ≃ₐ[E.fld] E.alg,
+      PadicInt.toZModPow n ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l])
+        = PadicInt.toZModPow n ((u : ℤ_[l])) :=
+  cyclotomicCharacter_toZModPow_surjective E.fld l n hunram E.alg u
+
+def cyclotomic_det_surjective_mod.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(円分指標は mod l^n で全射——l が L で不分岐のとき)",
+    sectionId := "genell-cor-4-3" }
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**葉 4 完了**——
+`l` が `L` で不分岐なら円分指標 `Gal(L̄/L) → ℤ_l^×` は**全射**。
+
+★★★★★これで `Corollary 4.3` の「`det` が全射」の段が閉じた。 -/
+theorem cyclotomic_det_surjective (E : SSCurve) (l : ℕ) [Fact l.Prime]
+    (hunram : ¬ (l : ℤ) ∣ NumberField.discr E.fld) (u : ℤ_[l]ˣ) :
+    ∃ σ : E.alg ≃ₐ[E.fld] E.alg, cyclotomicCharacter E.alg l σ.toRingEquiv = u := by
+  refine cyclotomicCharacter_surjective_of_mod E l ?_
+    (fun n u' => cyclotomic_det_surjective_mod E l hunram n u') u
+  have h := cyclotomicCharacter.continuous l E.fld E.alg
+  exact Units.continuous_val.comp h
+
+def cyclotomic_det_surjective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(円分指標 Gal(L̄/L) → ℤ_l^× の全射性——l が L で不分岐のとき)",
+    sectionId := "genell-cor-4-3" }
 
 def cyclotomicCharacter_surjective_of_mod.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,

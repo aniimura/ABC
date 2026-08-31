@@ -3,6 +3,9 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 import ABC3.Meta.Claim
 
 /-!
@@ -237,6 +240,64 @@ theorem cyclotomic_irreducible_of_not_dvd_discr' (B : Type*) [Field B] [NumberFi
 
 end BaseFree
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★**代数閉包の中で `ζ ↦ ζ^c`**。
+
+★★★★これが葉 4 の到達点である。`L(ζ)` の自己同型を `AlgEquiv.liftNormal` で
+代数閉包へ延長する。 -/
+theorem exists_algEquiv_zeta_pow_alg (B : Type*) [Field B] [NumberField B]
+    (l k : ℕ) [Fact l.Prime] [NeZero (l ^ k)]
+    (hL : ¬ (l : ℤ) ∣ NumberField.discr B)
+    (Ω : Type*) [Field Ω] [Algebra B Ω] [IsAlgClosed Ω] [Algebra.IsAlgebraic B Ω]
+    {ζ : Ω} (hζ : IsPrimitiveRoot ζ (l ^ k)) (c : (ZMod (l ^ k))ˣ) :
+    ∃ σ : Ω ≃ₐ[B] Ω, σ ζ = ζ ^ ((c : ZMod (l ^ k))).val := by
+  set N : IntermediateField B Ω := IntermediateField.adjoin B ({ζ} : Set Ω) with hN
+  have hmem : ζ ∈ N := IntermediateField.subset_adjoin _ _ rfl
+  haveI : IsCyclotomicExtension {l ^ k} B N :=
+    hζ.intermediateField_adjoin_isCyclotomicExtension B
+  have hζN : IsPrimitiveRoot (⟨ζ, hmem⟩ : N) (l ^ k) := by
+    refine IsPrimitiveRoot.of_map_of_injective (f := N.val.toMonoidHom) ?_ N.val.injective
+    exact hζ
+  haveI : NeZero ((l ^ k : ℕ) : B) := ⟨by
+    simpa using (Nat.cast_ne_zero (R := B)).2 (NeZero.ne (l ^ k))⟩
+  obtain ⟨τ, hτ⟩ := exists_algEquiv_pow (K := B) (N := N) (l ^ k)
+    (cyclotomic_irreducible_of_not_dvd_discr' B l k hL) hζN c
+  haveI : IsAlgClosure B Ω := ⟨inferInstance, inferInstance⟩
+  haveI : Normal B Ω := IsAlgClosure.normal B Ω
+  refine ⟨τ.liftNormal Ω, ?_⟩
+  have hcom : τ.liftNormal Ω (algebraMap (↥N) Ω ⟨ζ, hmem⟩)
+      = algebraMap (↥N) Ω (τ ⟨ζ, hmem⟩) := AlgEquiv.liftNormal_commutes τ Ω _
+  simpa [hτ] using hcom
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**円分指標は `mod l^n` で全射**。
+
+★★★★★これが葉 4 そのものである。 -/
+theorem cyclotomicCharacter_toZModPow_surjective (B : Type*) [Field B] [NumberField B]
+    (l : ℕ) [Fact l.Prime] (n : ℕ) (hL : ¬ (l : ℤ) ∣ NumberField.discr B)
+    (Ω : Type*) [Field Ω] [Algebra B Ω] [IsAlgClosed Ω] [Algebra.IsAlgebraic B Ω]
+    (u : ℤ_[l]ˣ) :
+    ∃ σ : Ω ≃ₐ[B] Ω,
+      PadicInt.toZModPow n ((cyclotomicCharacter Ω l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l])
+        = PadicInt.toZModPow n ((u : ℤ_[l])) := by
+  classical
+  haveI : CharZero Ω := charZero_of_injective_algebraMap (algebraMap B Ω).injective
+  haveI : NeZero ((l : ℕ) : Ω) :=
+    ⟨(Nat.cast_ne_zero (R := Ω)).2 (Fact.out : l.Prime).ne_zero⟩
+  haveI hen : ∀ i, HasEnoughRootsOfUnity Ω (l ^ i) := fun _ => inferInstance
+  haveI : NeZero (l ^ n) := ⟨pow_ne_zero _ (Fact.out : l.Prime).ne_zero⟩
+  obtain ⟨ζ, hζ⟩ := (hen n).prim
+  set c : (ZMod (l ^ n))ˣ :=
+    Units.map (PadicInt.toZModPow (p := l) n : ℤ_[l] →+* ZMod (l ^ n)).toMonoidHom u with hc
+  obtain ⟨σ, hσ⟩ := exists_algEquiv_zeta_pow_alg B l n hL Ω hζ c
+  refine ⟨σ, ?_⟩
+  have hspec := cyclotomicCharacter.spec (L := Ω) l (n := n) σ.toRingEquiv ζ hζ.pow_eq_one
+  have hσζ : σ.toRingEquiv ζ = ζ ^ ((c : ZMod (l ^ n))).val := hσ
+  rw [hσζ] at hspec
+  have hval := hζ.pow_inj (ZMod.val_lt _) (ZMod.val_lt _) hspec
+  have : ((c : ZMod (l ^ n))) = (cyclotomicCharacter Ω l σ.toRingEquiv).val.toZModPow n :=
+    ZMod.val_injective _ hval
+  rw [← this, hc]
+  simp
+
 def isCoprime_of_isUnit_left.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(配管——単元は何とでも互いに素)",
@@ -276,6 +337,16 @@ def cyclotomic_irreducible_of_not_dvd_discr'.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(cyclotomic (l^k) は L 上既約——周囲体を要らない形)",
     sectionId := "genell-thm-3-8" }
+
+def exists_algEquiv_zeta_pow_alg.src : Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(代数閉包の中で ζ ↦ ζ^c)",
+    sectionId := "genell-cor-4-3" }
+
+def cyclotomicCharacter_toZModPow_surjective.src : Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(円分指標は mod l^n で全射)",
+    sectionId := "genell-cor-4-3" }
 
 def cyclo_linearDisjoint.src : Source :=
   { paper := "GenEll", pdfPage := 20,

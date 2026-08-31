@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.GaloisImage
@@ -79,11 +80,25 @@ theorem imageContainsSL2J_torsionExt (x : RealizedClass) (l : ℕ) (hl : Nat.Pri
     (hc : ¬ HasLCyclicJ x.rep.toSSCurve l) : ImageContainsSL2J x.rep.toSSCurve l := by
   sorry
 
-/-- ★★★円分指標の全射性（葉 4）を受ける。 -/
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**葉 4 が閉じたので、これは `sorry` ではなくなった**（2026-08-31、第 784）。
+
+`hram : l ∉ ramPrimes` は「`l` は `disc L` を割らない」を含む——
+`ramPrimes` の定義に `(disc L).natAbs.primeFactors` が入っているからである。 -/
 theorem imageSurjectiveJ_of_containsSL2' (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     (hram : x.PrimeToRamification l) (h : ImageContainsSL2J x.rep.toSSCurve l) :
     ImageSurjectiveJ x.rep.toSSCurve l := by
-  sorry
+  haveI : Fact l.Prime := ⟨hl⟩
+  have hunram : ¬ (l : ℤ) ∣ NumberField.discr x.rep.toSSCurve.fld := by
+    intro hdvd
+    refine hram (Finset.mem_union.2 (Or.inl (Finset.mem_union.2 (Or.inr ?_))))
+    refine Nat.mem_primeFactors.2 ⟨hl, ?_, ?_⟩
+    · have := Int.natAbs_dvd_natAbs.2 hdvd
+      simpa using this
+    · exact Int.natAbs_ne_zero.2 (NumberField.discr_ne_zero (K := x.rep.toSSCurve.fld))
+  exact imageSurjectiveJ_of_cyclotomic x.rep.toSSCurve l
+    (fun u => cyclotomic_det_surjective x.rep.toSSCurve l hunram u) h
 
 open scoped Classical in
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -294,7 +309,7 @@ def imageSurjectiveJ_of_containsSL2'.src : Source :=
 
 def imageSurjectiveJ_of_containsSL2'.needs : List ProofObligation :=
   [ .citation "[ABC3]" "cyclotomic_det_surjective(Skeleton/GenEll/GaloisLocal.lean、円分指標の全射性)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.cyclotomic_det_surjective") 8,
+      (.inProject "ABC3" "ABC3.Found.GenEll.cyclotomic_det_surjective") 1,
     .implicitStep
       ("★群論と逆極限の段は済んでいる" ++
        "——imageSurjectiveJ_of_cyclotomic(第 765)と " ++
