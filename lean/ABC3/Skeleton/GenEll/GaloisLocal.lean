@@ -113,31 +113,11 @@ def cyclotomic_det_surjective.needs : List ProofObligation :=
        "——古典的だが mathlib に直接の形は無い") 8,
     .implicitStep "★各 n での全射性から ℤ_l^× への全射性を出す逆極限の段" 4 ]
 
-/-- **[GenEll] `Theorem 3.8` の位相の側**——`galRep` の像は閉部分群。
+/-! ## ★★★★★★★★★★葉 5 は閉じた（2026-08-31、第 766-774）
 
-原文 (GenEll p.19):
-> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
-
-☆`Lemma 3.1, (iv)`（`Found/GenEll/Sl2Padic.lean`）が閉部分群を要求するので要る。
-★`Gal(L̄/L)` は Krull 位相で profinite（コンパクト）であり、`galRep` は連続なので像は閉。 -/
-theorem galRep_continuous (E : SSCurve) (l : ℕ) [Fact l.Prime]
-    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) :
-    Continuous (galRep E.W l e) := by
-  sorry
-
-def galRep_continuous.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(galRep は連続——E[l^n] への作用が有限拡大を経由する)",
-    sectionId := "genell-thm-3-8" }
-
-def galRep_continuous.needs : List ProofObligation :=
-  [ .implicitStep
-      ("★★E[l^n] は有限集合であり、その座標が生成する L の有限拡大 L(E[l^n]) を固定する" ++
-       "部分群は Krull 位相で開である。したがって galRep は連続。" ++
-       "☆mathlib の KrullTopology は開部分群を有限中間体の fixingSubgroup で定めている") 6,
-    .implicitStep
-      ("★★測定(2026-08-31、第 765): 像が閉であることは連続性だけに帰着した" ++
-       "——CompactSpace (Gal) も T2Space (GL₂(ℤ_l)) も mathlib の instance で出る" ++
-       "(Found/GenEll/GalRepClosed.lean)") 1 ]
+★`galRep` の連続性と像の閉性は `Found/GenEll/GalRepContinuity.lean`・
+`Found/GenEll/GalRepClosed.lean` で**無条件に証明された**ので、
+本ファイルからは削除した。
+-/
 
 end ABC3.Skeleton.GenEll

@@ -9,6 +9,7 @@ import Mathlib.Topology.Instances.Matrix
 import Mathlib.Topology.Algebra.Group.Matrix
 import ABC3.Found.GaloisRep.TateLevel
 import ABC3.Found.GaloisRep.PadicLinear
+import ABC3.Found.GaloisRep.TorsionAll
 import ABC3.Meta.Claim
 
 /-!
@@ -299,7 +300,38 @@ theorem galRep_continuous [Algebra.IsAlgebraic K L]
   · exact galMat_continuous W l e hfin
   · exact (galMat_continuous W l e hfin).comp continuous_inv
 
+/-! ## ★★★★★★捩れの有限性（仮説を外す） -/
+
+/-- ★★★★**標数 `0` なら `l^n`-捩れは有限**——本プロジェクトの `finite_torsion` から。 -/
+theorem finite_torsionPoints [CharZero L] (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (n : ℕ) :
+    (torsionPoints (W.baseChange L) (l ^ n) :
+      Set ((W.baseChange L).toAffine.Point)).Finite := by
+  have h1 : 1 ≤ l ^ n := Nat.one_le_pow _ _ (Fact.out (p := l.Prime)).pos
+  have hchar : ((l ^ n : ℕ) : L) ≠ 0 := by
+    rw [Nat.cast_ne_zero]
+    omega
+  exact finite_torsion (W.baseChange L) (l ^ n) h1 hchar
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`galRep` は連続**——★**完全に無条件**（標数 `0`・代数的の下で）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★★これで `Theorem 3.8` の**位相の側（葉 5）が完全に閉じた**。 -/
+theorem galRep_continuous' [Algebra.IsAlgebraic K L] [CharZero L]
+    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l])) :
+    Continuous (galRep W l e) :=
+  galRep_continuous W l e (fun n => finite_torsionPoints W l n)
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def galRep_continuous'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(galRep は連続。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def galRep_continuous.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Found.GenEll.GalRepContinuity
 import Mathlib.FieldTheory.Galois.Profinite
 import ABC3.Meta.Claim
 
@@ -72,7 +73,37 @@ theorem imageContainsSL2J_of_alpha_of_continuous (E : SSCurve) (l : ℕ) [Fact l
   imageContainsSL2J_of_alpha E l hl5
     (fun e => galRep_range_isClosed_of_continuous E l e (hcont e)) halpha hno
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★到達点——仮説は `α` だけ -/
+
+/-- ★★★★★★★★★★★★★★**`galRep` の像は閉部分群**——★**無条件**。 -/
+theorem galRep_range_isClosed (E : SSCurve) (l : ℕ) [Fact l.Prime]
+    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) :
+    IsClosed (((galRep E.W l e).range : Subgroup (GL (Fin 2) ℤ_[l])) :
+      Set (GL (Fin 2) ℤ_[l])) :=
+  galRep_range_isClosed_of_continuous E l e (galRep_continuous' E.W l e)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`imageContainsSL2_of_torsionExt` 欄——残る仮説は `α` だけ**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★★位相の側（像の閉性）は `§9-1198`（第 772）で閉じたので、
+残るのは**局所理論の行列表示**——`α = (1 1 / 0 1)` が mod `l` 像に入ること——だけである。 -/
+theorem imageContainsSL2J_of_alpha' (E : SSCurve) (l : ℕ) [Fact l.Prime] (hl5 : 5 ≤ l)
+    (halpha : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      (Matrix.SpecialLinearGroup.toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
+        ∈ ((galRep E.W l e).range).map (glRedPadic l))
+    (hno : ¬ HasLCyclicJ E l) :
+    ImageContainsSL2J E l :=
+  imageContainsSL2J_of_alpha E l hl5 (fun e => galRep_range_isClosed E l e) halpha hno
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def imageContainsSL2J_of_alpha'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(imageContainsSL2 欄——残る仮説は α だけ)",
+    sectionId := "genell-thm-3-8" }
 
 def galRep_range_isClosed_of_continuous.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
