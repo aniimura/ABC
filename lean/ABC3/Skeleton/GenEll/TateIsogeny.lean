@@ -1025,4 +1025,80 @@ def tateParam_quot_velu_of_torsion.needs : List ProofObligation :=
     .citation "[ABC3]" "tateParam_quot_velu_dvr(Vélu の商の Tate 母数、第 927、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_dvr") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`j` で受ける形の捉れ点版 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 有理な `l`-捉れ点と `j` の一致だけで
+`q_{E′} = q_E^l`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 955）**——第 948 は `W′` が Vélu の商に**等しい**ことを
+要求していたが、実際に得られるのは変数変換を除いた `j` の一致である。
+☆`j_veluQuotientFull_nsmul_variableChange`（第 950）がその `j` を与えるので、
+本定理が**そのままの形で受けられる**。
+
+★`ζ` は引数に現れない——`exists_primitiveRoot_of_torsion_point`（第 947）が作る。 -/
+theorem tateParam_quot_velu_j_of_torsion {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hΔ : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := K) q hq hq0).v
+      (mkTateSetup (K := K) q hq hq0).Q))
+    (hlu : IsUnit ((l : R)))
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
+    (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
+    (hvw : ∀ ζ : R, IsPrimitiveRoot ζ l → ∃ v w : R,
+      v = ∑ i ∈ (range l).erase 0,
+          veluV2 (tateCurveAt q hq)
+            (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        ∧ 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU (tateCurveAt q hq)
+              (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        ∧ ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic)
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (P : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Point)
+    (hP : l • P = 0) (hP0 : P ≠ 0)
+    (hellQ : (veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
+        (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))).IsElliptic)
+    (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
+    (hsplit : W'.HasSplitMultiplicativeReduction R)
+    (hW'j : W'.j = (veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))).j) :
+    tateParamR W' hsplit = q ^ l := by
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    exists_primitiveRoot_of_torsion_point q hq hq0 hΔ hl hcop P hP hP0
+  subst hPz
+  haveI hQell : (veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords
+        (k • tatePhi (mkTateSetup (K := K) q hq hq0) hΔ
+          (QuotientGroup.mk uζ))))).IsElliptic := hellQ
+  obtain ⟨v, w, hv, hw, hell⟩ := hvw ζ hζ
+  haveI := hell
+  exact tateParam_quot_velu_j_dvr q hq hq0 hΔ hl hζ hlu
+    (ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu)
+    uζ hζu hζl hord hql h2 h2K hodd v w hv hw W' hsplit hW'j
+
+def tateParam_quot_velu_j_of_torsion.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(有理な l-捉れ点と j の一致だけで q_{E′} = q_E^l)",
+    sectionId := "genell-lemma-3-5" }
+
+def tateParam_quot_velu_j_of_torsion.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_primitiveRoot_of_torsion_point(ζ を作る、第 947、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point") 1,
+    .citation "[ABC3]" "tateParam_quot_velu_j_dvr(j で受ける形、第 914、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_j_dvr") 1,
+    .citation "[ABC3]" "isUnit_one_sub_pow_of_isUnit_natCast(hu は hlu から、第 951、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast") 1 ]
+
 end ABC3.Skeleton.GenEll

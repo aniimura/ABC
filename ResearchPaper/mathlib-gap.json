@@ -2661,5 +2661,28 @@
       "☆(D3) の残り: (a) `E ⊗ Lv` の分裂性（`hasMultiplicativeReduction_baseChange`(909) が乗法還元まで与えるので、残るのは剰余体で 2 次式が分裂すること）、(b1) `hp`（完備化の付値の両立）——mathlib の `valuedAdicCompletion_eq_valuation` は `Valued.v` の言葉で述べており、本プロジェクトの `hp` は `HeightOneSpectrum.valuation Lv 𝔪_R` の言葉である。その 2 つを同一視する橋が要る。(d) 各 `ζ` に対する `v`・`w` と `veluCurve` の楕円性。"
     ],
     "note": "★944-954 の 11 ブロックで、(c) と `hu` と (b) の極小モデル側が閉じた。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35JForm20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 955",
+    "supersedes": "lemma35BadPrimeData20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★`tateParam_quot_velu_j_of_torsion`（955）——第 948 は `W′` が Vélu の商に**等しい**ことを要求していたが、実際に得られるのは変数変換を除いた `j` の一致である。☆第 950 がその `j` を与えるので、本定理がそのままの形で受けられる。",
+      "★`ζ` は引数に現れない（947 が作る）。`hu` も現れない（951 が作る）。"
+    ],
+    "scale": {
+      "note": "★`Lemma 3.5` の規模の実測（2026-09-01）",
+      "lemma35Decls": 256,
+      "lemma32Decls": 213,
+      "def33Decls": 293,
+      "files": 194,
+      "lines": 53811,
+      "comment": "原文では半ページだが、Tate 一意化（Definition 3.3）と Lemma 3.2 を土台として抱えている。3 つ合わせて 762 宣言・194 ファイル・53,811 行。"
+    },
+    "remainingLayers": [
+      "☆(D3) の残り: (a) `E ⊗ Lv` の分裂性、(b1) `hp`（完備化の付値の橋）、(d) 各 `ζ` に対する `v`・`w` と `veluCurve` の楕円性。"
+    ],
+    "note": "★944-955 の 12 ブロックで節点の界面は 3 つの局所データに絞られた。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
