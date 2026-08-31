@@ -137,6 +137,48 @@ theorem cyclotomic_irreducible_of_not_dvd_discr (B : IntermediateField ℚ M) (l
   rw [← heq]
   exact minpoly.irreducible hint
 
+/-- ★★★★★★★★★★★★★★★★★★★★**`ζ ↦ ζ^c` を実現する `K`-自己同型が存在する**。
+
+`cyclotomic n K` が既約なら、`ζ` と `ζ^c`（`c` は単元）は同じ最小多項式を持つので、
+冪基底の間の同型がそのまま体の自己同型になる。 -/
+theorem exists_algEquiv_pow {K N : Type*} [Field K] [Field N] [Algebra K N] (n : ℕ) [NeZero n]
+    [NeZero ((n : ℕ) : K)]
+    [IsCyclotomicExtension {n} K N] (h : Irreducible (Polynomial.cyclotomic n K))
+    {ζ : N} (hζ : IsPrimitiveRoot ζ n) (c : (ZMod n)ˣ) :
+    ∃ σ : N ≃ₐ[K] N, σ ζ = ζ ^ ((c : ZMod n)).val := by
+  have hcop : ((c : ZMod n)).val.Coprime n := ZMod.val_coe_unit_coprime c
+  have hμ : IsPrimitiveRoot (ζ ^ ((c : ZMod n)).val) n := hζ.pow_of_coprime _ hcop
+  have hmin : minpoly K (hζ.powerBasis K).gen = minpoly K (hμ.powerBasis K).gen := by
+    rw [IsPrimitiveRoot.powerBasis_gen, IsPrimitiveRoot.powerBasis_gen]
+    exact (hζ.minpoly_eq_cyclotomic_of_irreducible h).symm.trans
+      (hμ.minpoly_eq_cyclotomic_of_irreducible h)
+  refine ⟨(hζ.powerBasis K).equivOfMinpoly (hμ.powerBasis K) hmin, ?_⟩
+  have := (hζ.powerBasis K).equivOfMinpoly_gen (hμ.powerBasis K) hmin
+  simpa [IsPrimitiveRoot.powerBasis_gen] using this
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`l` が `L` で不分岐なら `ζ ↦ ζ^c` が `L` 上実現できる**。
+
+★★★これが葉 4 の到達点である。`L(ζ)` の自己同型として得られる。 -/
+theorem exists_algEquiv_pow_adjoin (B : IntermediateField ℚ M) (l k : ℕ) [Fact l.Prime]
+    [NeZero (l ^ k)] {ζ : M} (hζ : IsPrimitiveRoot ζ (l ^ k))
+    (hL : ¬ (l : ℤ) ∣ NumberField.discr B) (c : (ZMod (l ^ k))ˣ) :
+    ∃ σ : (IntermediateField.adjoin (↥B) ({ζ} : Set M))
+            ≃ₐ[↥B] (IntermediateField.adjoin (↥B) ({ζ} : Set M)),
+      ((σ ⟨ζ, IntermediateField.subset_adjoin _ _ rfl⟩ : _) : M)
+        = ζ ^ ((c : ZMod (l ^ k))).val := by
+  set N : IntermediateField (↥B) M := IntermediateField.adjoin (↥B) ({ζ} : Set M) with hN
+  have hmem : ζ ∈ N := IntermediateField.subset_adjoin _ _ rfl
+  haveI : IsCyclotomicExtension {l ^ k} (↥B) N :=
+    hζ.intermediateField_adjoin_isCyclotomicExtension (↥B)
+  have hζN : IsPrimitiveRoot (⟨ζ, hmem⟩ : N) (l ^ k) := by
+    refine IsPrimitiveRoot.of_map_of_injective (f := N.val.toMonoidHom) ?_ N.val.injective
+    exact hζ
+  haveI : NeZero (((l ^ k : ℕ) : ℕ) : ↥B) := ⟨by
+    simpa using (Nat.cast_ne_zero (R := ↥B)).2 (NeZero.ne (l ^ k))⟩
+  obtain ⟨σ, hσ⟩ := exists_algEquiv_pow (K := ↥B) (N := N) (l ^ k)
+    (cyclotomic_irreducible_of_not_dvd_discr B l k hζ hL) hζN c
+  exact ⟨σ, by simpa using congrArg (fun x : N => (x : M)) hσ⟩
+
 def isCoprime_of_isUnit_left.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(配管——単元は何とでも互いに素)",
@@ -160,6 +202,16 @@ def finrank_adjoin_zeta.src : Source :=
 def cyclotomic_irreducible_of_not_dvd_discr.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(cyclotomic (l^k) は L 上既約)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_algEquiv_pow.src : Source :=
+  { paper := "GenEll", pdfPage := 20,
+    item := "Theorem 3.8(ζ ↦ ζ^c を実現する K-自己同型)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_algEquiv_pow_adjoin.src : Source :=
+  { paper := "GenEll", pdfPage := 20,
+    item := "Theorem 3.8(l が L で不分岐なら ζ ↦ ζ^c が L 上実現できる)",
     sectionId := "genell-thm-3-8" }
 
 def cyclo_linearDisjoint.src : Source :=
