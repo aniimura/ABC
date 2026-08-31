@@ -765,6 +765,26 @@ theorem veluW_negY (W : WeierstrassCurve R) (x y : R) :
     veluW W x (W.toAffine.negY x y) = veluW W x y := by
   simp only [veluW, veluU_negY, veluV_negY]
 
+/-- ★★★★★★★★★★★★**Vélu の項の対の和は偶である**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 958）**——`hw : 2 * w = ∑ (u_Q + 2·v_Q·x_Q)` を満たす
+`w` を**環の中で**作るための形である。
+
+☆`u_Q` は反転で不変（`veluU_negY`）なので対で `2u_Q`、
+`2·v_Q·x_Q` の方ははじめから `2` 倍である。
+★第 957 の `two_mul_sum_eq_of_pair_even` がこの形を消費する。 -/
+theorem veluTerm_pair_even (W : WeierstrassCurve R) (x y : R) :
+    (veluU W x y + 2 * (veluV2 W x y * x))
+      + (veluU W x (W.toAffine.negY x y)
+          + 2 * (veluV2 W x (W.toAffine.negY x y) * x))
+      = 2 * (veluU W x y
+          + x * (veluV2 W x y + veluV2 W x (W.toAffine.negY x y))) := by
+  rw [veluU_negY]
+  ring
+
 theorem veluV_negPt (W : WeierstrassCurve R) (Q : R × R) :
     veluV W (negPt W Q).1 (negPt W Q).2 = veluV W Q.1 Q.2 := veluV_negY W Q.1 Q.2
 

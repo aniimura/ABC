@@ -2532,3 +2532,10 @@ theorem foo : ... := ...
 
 と**存在量化を内側に入れる**（第 952 で直した）。
 ☆補助データ（ここでは `v`・`w`）が結論に現れないなら、必ず内側の ∃ にする。
+
+## 在庫を引く前に書き始めない（第 958 で再発）
+
+`veluU_negY`・`veluGy_negY` を新規に書こうとしたら
+`has already been declared` で落ちた——`Found/GenEll/Velu.lean:740` に既にあった。
+★CLAUDE.md の「在庫」の通り、**書く前に `node tools/decl-index.mjs` →
+`.cache/decl-index.txt` を grep する**。名前が思いつく補題ほど既にある。
