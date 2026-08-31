@@ -2369,3 +2369,26 @@ but is expected  @RingHom TateBase ?P  AddMonoidAlgebra.commSemiring.toNonAssocS
   `obtain ⟨⟨a, s⟩, hz⟩ := IsLocalization.surj (M := …) x`（`hz : x * ι s = ι a`）とする。
 * 局所化への**微分の延長**は mathlib に無い（`Mathlib/RingTheory/Derivation/` を
   `Localization` で grep して 0 件）。双対数 + `IsLocalization.lift` で自分で作る。
+
+## Python で Lean ファイルを書き換えるときは一時ファイル経由で（2026-08-31、第 872）
+
+```python
+io.open(p, "w", encoding="utf-8").write(s)   # ✕ 危険
+```
+
+`io.open(..., "w")` は**開いた瞬間に切り詰める**ので、`write` が例外で落ちると
+**原本が空になる**。実際にサロゲート対を書こうとして
+`UnicodeEncodeError: surrogates not allowed` で落ち、204 行のファイルが 0 行になった。
+
+```python
+tmp = p + ".tmp"
+with io.open(tmp, "w", encoding="utf-8", newline="\n") as f:
+    f.write(out)
+os.replace(tmp, p)          # ○ 途中で落ちても原本は無事
+```
+
+☆アストラル面の文字は **8 桁の** `\U0001D4DE` のように書く。
+6 桁の `\ud835` + `\udcde` のようなサロゲート対は Python 3 では書けない。
+☆似た形の字に注意——本プロジェクトの整数環は `𝓞`（\U0001D4DE）であり、`𝒪`（\U0001D4AA）ではない。
+☆大きな書き換えの前に commit しておけば、万一のとき `git checkout -- <path>` で戻せる。
+☆在庫の確認を先に——`jExp_congr_j` は既に `Found/GaloisRep/HtFaltJ.lean` にあった。
