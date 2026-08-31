@@ -33,6 +33,7 @@ import ABC3.Meta.Claim
 namespace ABC3.Found.GenEll
 
 open ABC3.Found.GaloisRep ABC3.Interface.GaloisRep WeierstrassCurve WeierstrassCurve.Affine
+open scoped Pointwise
 
 variable {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L] [Algebra K L]
 
@@ -217,7 +218,60 @@ theorem galMat_sub_dvd_of_fix (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] 
   rw [hN k j]
   ring
 
+/-! ## ★★★★★★★★★★★★★★`galMat` の各成分は連続 -/
+
+/-- ★★★★★★★★★★★★★★★★
+**`galMat` の各成分は連続**——★**無条件**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★機構: `ε > 0` に対し `l^{-n} < ε` なる `n` を取り、
+`E[l^n]` の座標が生成する有限次中間体 `F` の `fixingSubgroup` の左剰余類 `σ₀·V`
+（Krull 位相で開）を近傍に取る。`§9-1196`（第 770）により
+`σ ∈ σ₀·V` なら `l^n ∣ galMat σ − galMat σ₀`、すなわち距離は `l^{-n} < ε`。 -/
+theorem galMat_entry_continuous [Algebra.IsAlgebraic K L]
+    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l])) (i j : Fin 2)
+    (hfin : ∀ n : ℕ,
+      (torsionPoints (W.baseChange L) (l ^ n) : Set ((W.baseChange L).toAffine.Point)).Finite) :
+    Continuous (fun σ : L ≃ₐ[K] L => galMat W l e σ i j) := by
+  rw [continuous_iff_continuousAt]
+  intro σ₀
+  rw [ContinuousAt, Metric.tendsto_nhds]
+  intro ε hε
+  -- `l^{-n} < ε` なる `n`
+  have hl2 : (2 : ℝ) ≤ (l : ℝ) := by exact_mod_cast (Fact.out (p := l.Prime)).two_le
+  have hl1 : (1 : ℝ) < (l : ℝ) := by linarith
+  have hlinv : (l : ℝ)⁻¹ < 1 := inv_lt_one_of_one_lt₀ hl1
+  have hlinv0 : (0 : ℝ) ≤ (l : ℝ)⁻¹ := by positivity
+  obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one hε hlinv
+  -- 有限次中間体を取る
+  obtain ⟨F, hFfin, hFfix⟩ :=
+    exists_finiteDimensional_fixing_torsion (K := K) (L := L) W (l ^ n) (hfin n)
+  haveI := hFfin
+  have hopen : IsOpen ((σ₀ : L ≃ₐ[K] L) • (F.fixingSubgroup : Set (L ≃ₐ[K] L))) :=
+    (IntermediateField.fixingSubgroup_isOpen F).leftCoset σ₀
+  have hmem : σ₀ ∈ (σ₀ : L ≃ₐ[K] L) • (F.fixingSubgroup : Set (L ≃ₐ[K] L)) := by
+    refine ⟨1, ?_, by simp⟩
+    exact Subgroup.one_mem _
+  filter_upwards [hopen.mem_nhds hmem] with σ hσ
+  obtain ⟨τ, hτ, hστ⟩ := hσ
+  have hdvd := galMat_sub_dvd_of_fix W l n e σ₀ τ (hFfix τ hτ) i j
+  have hσeq : σ = σ₀ * τ := hστ.symm
+  rw [dist_eq_norm, hσeq]
+  calc ‖galMat W l e (σ₀ * τ) i j - galMat W l e σ₀ i j‖
+      ≤ ((l : ℝ)) ^ (-n : ℤ) :=
+        (PadicInt.norm_le_pow_iff_mem_span_pow _ n).2 (Ideal.mem_span_singleton.2 hdvd)
+    _ = ((l : ℝ)⁻¹) ^ n := by rw [zpow_neg, zpow_natCast, inv_pow]
+    _ < ε := hn
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def galMat_entry_continuous.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(galMat の各成分は連続。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def galMat_sub_dvd_of_fix.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
