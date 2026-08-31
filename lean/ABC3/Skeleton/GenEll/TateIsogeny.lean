@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.DegInfLocal
+import ABC3.Found.GaloisRep.Lemma35Concrete
 import ABC3.Meta.Claim
 
 /-!
@@ -61,7 +62,8 @@ import ABC3.Meta.Claim
 
 namespace ABC3.Skeleton.GenEll
 
-open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve IsDedekindDomain
+open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve IsDedekindDomain NumberField ABC3.Found.GenEll
+open scoped Classical
 
 /-- **[GenEll] `Lemma 3.2, (ii)` の曲線の水準**——`E_q/μ_l` は母数 `q^l` の Tate 曲線。
 
@@ -106,5 +108,74 @@ def tateModel_of_quot_mu.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2,
     .citation "[ABC3]" "tateXpair・tateYpair(μ_l の点の座標)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.tateXpair") 4 ]
+
+/-! ## ★★★★★★★★★★★★★★★★`Lemma 3.5` が直接消費する形（`j` の付値） -/
+
+/-- **[GenEll] `Lemma 3.5` の残る入力 (1)**——悪い還元の素点での `v_p(j′) = l·v_p(j)`。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★★`Found/GaloisRep/Lemma35Concrete.lean` の `lemma_3_5_velu_j`（`§9-1177`、第 751）が
+**そのまま消費する形**である。
+
+☆機構: 悪い還元の素点では `E` は Tate 曲線 `E_q` であり `v_p(j) = −v_p(q)`。
+`H` が `μ_l` に対応するとき `E′ = E_q/μ_l = E_{q^l}` なので
+`v_p(j′) = −l·v_p(q) = l·v_p(j)`。★これが `tateModel_of_quot_mu` の内容である。
+
+☆仮説 `hmu` は「`H` は各悪い素点で `μ_l` に対応する」という `Lemma 3.5` の設定
+（原文の *global rank one subgroup*）を型にしたものである。 -/
+theorem jExp_velu_bad {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (l : ℕ) (hl : Nat.Prime l) (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((Finset.range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hmu : True)
+    (p : HeightOneSpectrum (𝓞 L)) (hss : SemistableAt p E) (hbad : jExp p E < 0) :
+    jExp p E' = (l : ℤ) * jExp p E := by
+  sorry
+
+/-- **[GenEll] `Lemma 3.5` の残る入力 (2)**——良い還元は同種写像で保たれる。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`v_p(j) ≥ 0` かつ半安定なら `E` は `p` で良い還元をもつ。★★同種な曲線は
+同じ還元型をもつ（Néron–Ogg–Shafarevich、あるいは Tate 加群の不分岐性）ので
+`E′` も良い還元をもち、`v_p(j′) ≥ 0` である。
+
+☆こちらは `v_p(j′) = l·v_p(j)` **より弱く**てよい——半安定なら
+`v_p(Δ_min) = max(0, −v_p(j))` なので、良い還元の素点では両辺とも `0` になる。 -/
+theorem jExp_velu_good {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (l : ℕ) (hl : Nat.Prime l) (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((Finset.range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (p : HeightOneSpectrum (𝓞 L)) (hss : SemistableAt p E) (hss' : SemistableAt p E')
+    (hgood : 0 ≤ jExp p E) :
+    0 ≤ jExp p E' := by
+  sorry
+
+def jExp_velu_bad.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る入力 (1)——悪い素点での v_p(j′) = l·v_p(j))",
+    sectionId := "genell-lemma-3-5" }
+
+def jExp_velu_bad.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tateModel_of_quot_mu(E_q/μ_l は母数 q^l の Tate 曲線)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateModel_of_quot_mu") 15,
+    .implicitStep
+      ("★Tate 曲線では v_p(j) = −v_p(q)(TateJ.lean)。母数が q^l なら " ++
+       "v_p(j′) = −l·v_p(q) = l·v_p(j)") 4 ]
+
+def jExp_velu_good.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る入力 (2)——良い還元は同種写像で保たれる)",
+    sectionId := "genell-lemma-3-5" }
+
+def jExp_velu_good.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★同種な楕円曲線は同じ還元型をもつ(Néron-Ogg-Shafarevich、" ++
+       "あるいは Tate 加群の不分岐性)。mathlib には無い") 8 ]
 
 end ABC3.Skeleton.GenEll
