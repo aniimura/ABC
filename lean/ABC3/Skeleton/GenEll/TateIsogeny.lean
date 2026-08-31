@@ -99,21 +99,27 @@ def tateModel_of_quot_mu.needs : List ProofObligation :=
   [ .implicitStep
       ("★★★`q`-展開の恒等式: tateA4(q^l) = tateA4(q) − 5v、" ++
        "tateA6(q^l) = tateA6(q) − v − 7w（b₂ = 1）。" ++
-       "v・w は μ_l の点にわたる Vélu の和であり、" ++
-       "点の座標は tateXpair ζ (qζ⁻¹) q（Found/GaloisRep/TateOrigin.lean）") 15,
-    .citation "[ABC3]" "sum_mu_pow（μ_l 上の指標和——手順 2 は済んだ、2026-08-31、第 786）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_pow") 1,
+       "v・w は μ_l の点にわたる Vélu の和である") 8,
+    .citation "[ABC3]" "sum_mu_tateXpair_eq（∑_ζ X(ζ,q) は定数項を除いて ζ-free、第 795）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_tateXpair_eq") 1,
+    .citation "[ABC3]" "sum_mu_tateYpair_eq（∑_ζ Y(ζ,q) も同じ、第 796）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_tateYpair_eq") 1,
+    .citation "[ABC3]" "twelve_mul_sum_mu_ringInverse（12·∑ ζ/(1−ζ)² = −(l²−1)、第 794）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.twelve_mul_sum_mu_ringInverse") 1,
+    .citation "[ABC3]" "sum_mu_frac_cube（∑ ζ²/(1−ζ)³ = (l²−1)/24、第 797）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_frac_cube") 1,
+    .citation "[ABC3]" "sum_mu_adicSum_mul（積を μ_l 上で足す道具、第 798）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_adicSum_mul") 1,
     .implicitStep
-      ("★★手順 3 の具体形（2026-08-31、第 786 で展開）: " ++
-       "Tate 曲線は a₁ = 1, a₂ = a₃ = 0 なので veluV2 = 3x² + a₄ − y、" ++
-       "veluU = (2y + x)²。ゆえに a₄ の式は " ++
-       "∑_{ζ≠1}(3x_ζ² − y_ζ) = s₃(q^l) − s₃(q) + 5(l−1)s₃(q) に同値であり、" ++
-       "a₆ の式は w = ∑_{ζ≠1}((2y_ζ+x_ζ)²/2 + (3x_ζ²+a₄−y_ζ)x_ζ) の式。" ++
-       "☆定数項には ∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)/12 が現れる") 12,
+      ("★★★進捗（2026-08-31、第 786-798）: 手順 1・2は**済んだ**。" ++
+       "μ_l 上の指標和（MuCharSum.lean、24 本）と " ++
+       "I 進和と有限和の可換性（AdicFinsetSum.lean）により、" ++
+       "∑_ζ X(ζ,q)・∑_ζ Y(ζ,q) はどちらも `[l ∣ d]·l − 1` を係数に持つ " ++
+       "adicSum になった。定数項も両方計算済み。" ++
+       "☆残るのは手順 3——v = ∑(3x² + a₄ − y)・w の組み立てと a₄・a₆ の照合。" ++
+       "★そのためには ζ-次数を mod l で揃えた「μ-等級付き I 進級数」の枠が要る") 8,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel（この結論の消費側、§9-1153）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2,
-    .citation "[ABC3]" "tateXpair・tateYpair（μ_l の点の座標）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateXpair") 4 ]
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2 ]
 
 /-! ## ★★★★★★★★★★★★★★★★`Lemma 3.5` が直接消費する形（`j` の付値） -/
 
