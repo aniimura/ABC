@@ -179,6 +179,64 @@ theorem exists_algEquiv_pow_adjoin (B : IntermediateField ℚ M) (l k : ℕ) [Fa
     (cyclotomic_irreducible_of_not_dvd_discr B l k hζ hL) hζN c
   exact ⟨σ, by simpa using congrArg (fun x : N => (x : M)) hσ⟩
 
+section BaseFree
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**周囲体を要らない形**——
+`L` が数体で `l ∤ disc L` なら `cyclotomic (l^k)` は `L` 上既約。
+
+★★★★これが葉 4 で実際に使う形である。周囲の数体は証明の中で
+`L ⊔ ℚ(ζ)` として作る。 -/
+theorem cyclotomic_irreducible_of_not_dvd_discr' (B : Type*) [Field B] [NumberField B]
+    (l k : ℕ) [Fact l.Prime] [NeZero (l ^ k)]
+    (hL : ¬ (l : ℤ) ∣ NumberField.discr B) :
+    Irreducible (Polynomial.cyclotomic (l ^ k) B) := by
+  classical
+  set Ω := AlgebraicClosure B with hΩ
+  haveI : NeZero ((l ^ k : ℕ) : Ω) := ⟨by
+    simpa using (Nat.cast_ne_zero (R := Ω)).2 (NeZero.ne (l ^ k))⟩
+  -- ★原始 `l^k` 乗根を取る
+  obtain ⟨ζ, hζ0⟩ : ∃ ζ : Ω, (Polynomial.cyclotomic (l ^ k) Ω).IsRoot ζ := by
+    refine IsAlgClosed.exists_root _ ?_
+    rw [Polynomial.degree_cyclotomic]
+    exact_mod_cast (Nat.totient_pos.2 (NeZero.pos _)).ne'
+  have hζ : IsPrimitiveRoot ζ (l ^ k) :=
+    (Polynomial.isRoot_cyclotomic_iff (n := l ^ k) (R := Ω)).1 hζ0
+  -- ★`B` の像と `ℚ(ζ)` を `Ω` の中で取り、その合成体を周囲の数体にする
+  set Bim : IntermediateField ℚ Ω := (IsScalarTower.toAlgHom ℚ B Ω).fieldRange with hBim
+  set Z : IntermediateField ℚ Ω := IntermediateField.adjoin ℚ ({ζ} : Set Ω) with hZ
+  set M : IntermediateField ℚ Ω := Bim ⊔ Z with hMdef
+  have eB : B ≃ₐ[ℚ] ↥Bim := AlgEquiv.ofInjectiveField (IsScalarTower.toAlgHom ℚ B Ω)
+  haveI : FiniteDimensional ℚ ↥Bim := eB.toLinearEquiv.finiteDimensional
+  haveI : Algebra.IsIntegral ℚ Ω := Algebra.IsIntegral.trans B
+  haveI : FiniteDimensional ℚ ↥Z :=
+    IntermediateField.finiteDimensional_adjoin
+      (fun x _ => Algebra.IsIntegral.isIntegral (R := ℚ) x)
+  haveI : FiniteDimensional ℚ ↥M := IntermediateField.finiteDimensional_sup Bim Z
+  haveI : NumberField ↥M := ⟨⟩
+  -- ★`M` の中で見た `B` と `ζ`
+  set B'' : IntermediateField ℚ ↥M := Bim.restrict le_sup_left with hB''
+  have eB'' : ↥Bim ≃ₐ[ℚ] ↥B'' := IntermediateField.restrict_algEquiv _
+  have hζZ : ζ ∈ Z := IntermediateField.subset_adjoin ℚ _ rfl
+  have hζM : ζ ∈ M := (le_sup_right : Z ≤ M) hζZ
+  have hζ' : IsPrimitiveRoot (⟨ζ, hζM⟩ : ↥M) (l ^ k) := by
+    refine IsPrimitiveRoot.of_map_of_injective (f := M.val.toMonoidHom) ?_ M.val.injective
+    exact hζ
+  have hdiscr : NumberField.discr ↥B'' = NumberField.discr B :=
+    (NumberField.discr_eq_discr_of_algEquiv B (eB.trans eB'')).symm
+  have hirr : Irreducible (Polynomial.cyclotomic (l ^ k) ↥B'') :=
+    cyclotomic_irreducible_of_not_dvd_discr B'' l k hζ' (by rw [hdiscr]; exact hL)
+  -- ★`B ≃ₐ[ℚ] B''` で既約性を移す
+  have e : B ≃+* ↥B'' := (eB.trans eB'').toRingEquiv
+  have hmap : Polynomial.map (e : B →+* ↥B'') (Polynomial.cyclotomic (l ^ k) B)
+      = Polynomial.cyclotomic (l ^ k) ↥B'' := Polynomial.map_cyclotomic _ _
+  have hiff := MulEquiv.irreducible_iff (M := Polynomial B) (N := Polynomial ↥B'')
+    (Polynomial.mapEquiv e) (x := Polynomial.cyclotomic (l ^ k) B)
+  rw [show (Polynomial.mapEquiv e) (Polynomial.cyclotomic (l ^ k) B)
+      = Polynomial.cyclotomic (l ^ k) ↥B'' from hmap] at hiff
+  exact hiff.1 hirr
+
+end BaseFree
+
 def isCoprime_of_isUnit_left.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(配管——単元は何とでも互いに素)",
@@ -212,6 +270,11 @@ def exists_algEquiv_pow.src : Source :=
 def exists_algEquiv_pow_adjoin.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(l が L で不分岐なら ζ ↦ ζ^c が L 上実現できる)",
+    sectionId := "genell-thm-3-8" }
+
+def cyclotomic_irreducible_of_not_dvd_discr'.src : Source :=
+  { paper := "GenEll", pdfPage := 20,
+    item := "Theorem 3.8(cyclotomic (l^k) は L 上既約——周囲体を要らない形)",
     sectionId := "genell-thm-3-8" }
 
 def cyclo_linearDisjoint.src : Source :=
