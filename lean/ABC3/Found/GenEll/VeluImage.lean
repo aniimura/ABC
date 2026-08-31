@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.PointVariableChange
+import ABC3.Found.GenEll.JScale
 
 /-!
 # 第 885 ブロック —— **★★★★★★★★★★番号で書いた部分群の Vélu の商**（`Found`）
@@ -185,7 +186,37 @@ theorem sum_negY_mul_x_eq_zero {F : Type} [Field F] (W : WeierstrassCurve F)
       = -((2 * z.2 + W.a₁ * z.1 + W.a₃) * z.1)
     ring
 
+/-! ## ★★★★★★★★★★Vélu の商を変数変換先のモデルへ移す -/
+
+/-- ★★★★★★★★★★**Vélu の商の `j` は変数変換先で計算しても同じ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが「`E ⊗ Lv` の Vélu の商を Tate モデルへ移す」段である。
+☆`veluQuotientFull_variableChange`（証明済み）の仮説 `hB`・`hBx` は、
+点集合が反転で安定なら `sum_negY_eq_zero`・`sum_negY_mul_x_eq_zero`（第 912）が与える。 -/
+theorem j_veluQuotientFull_variableChange {F : Type} [Field F]
+    (C : WeierstrassCurve.VariableChange F) (W E' : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hS : ∀ z ∈ S, ((z.1, W.toAffine.negY z.1 z.2) : F × F) ∈ S) (h2 : (2 : F) ≠ 0)
+    (hE' : E' = veluQuotientFull W S) [E'.IsElliptic]
+    [(veluQuotientFull (C • W)
+      (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)))).IsElliptic] :
+    E'.j = (veluQuotientFull (C • W)
+      (S.image (fun Q => (vcX C Q.1, vcY C Q.1 Q.2)))).j := by
+  have hVC := veluQuotientFull_variableChange C W S
+    (sum_negY_eq_zero W S hS h2) (sum_negY_mul_x_eq_zero W S hS h2)
+  refine ABC3.Found.GenEll.j_eq_of_smul_eq C E' _ ?_
+  rw [hE']
+  exact hVC.symm
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def j_veluQuotientFull_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の j は変数変換先で計算しても同じ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def sum_negY_eq_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
