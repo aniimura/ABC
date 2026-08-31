@@ -2320,3 +2320,16 @@ mathlib の以下がそのまま噛み合う。分岐理論の API を探す必�
 ☆症状: 個別ビルド（`lake build ABC3.Found.GaloisRep.Foo`）は通り、
 `node tools/check.mjs` も PASS するのに、`lake build ABC3` がそのファイルを
 一度もコンパイルしていない（他のファイルから import されていなければ）。
+
+## Tate の `I` 進級数：adic 添字と `q` 次数はずれる（2026-08-31、第 818）
+
+`tateXtail (w, q) = adicSum (n ↦ q^n · ∑_{d∣n} d·w^d)` である。
+★`w = ζ` のときは `q` 次数 = adic 添字 `n` だが、
+**`w = q·ζ^{-1}` のときは `w^d = q^d ζ^{-d}` なので `q` 次数は `n + d`** になる。
+
+☆したがって「adic 添字ごとに係数を比べる」形の照合は、
+先に **`q` 次数に揃えた形**（古典形 `X(u) = u/(1−u)² + ∑_N (∑_{d∣N} d(u^d + u^{−d} − 2)) q^N`）
+へ直してからでないとできない。
+
+★道具は `AdicFubini.lean` の `adicSum_reindex_mul`・`adicSum_fubini`、
+`AdicMul.lean` の `adicSum_mul`。

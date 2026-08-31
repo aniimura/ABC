@@ -100,20 +100,22 @@ def tateModel_of_quot_mu.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluV2") 1,
     .citation "[ABC3]" "sum_mu_veluW（2w も同じ、第 811）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluW") 1,
+    .citation "[ABC3]" "sum_veluVC / veluVC_zero（係数 2 量の明示式、第 817）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_veluVC") 1,
     .citation "[ABC3]" "veluCurve_tateCurveAt_eq（変数変換は要らない、第 718）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.veluCurve_tateCurveAt_eq") 1,
     .implicitStep
-      ("★★★残るのは**手順 4（係数の照合）だけ**である（2026-08-31、第 786-811 で 1・2・3 を完了）。"
-       ++ "tateA4 = −5s₃ なので tateA4(q^l) = tateA4(q) − 5v は次と同値:"
-       ++ "★**l·veluVC n 0 − ∑_{a<l} veluVC n a = (σ₃(n) − [l∣n]·σ₃(n/l))·q^n**。"
-       ++ "同様に a₆ の式は veluWC についての式になる。"
-       ++ "☆これは古典的な Tate/Vélu の q 展開恒等式そのものであり、"
-       ++ "muConv（畳み込み）の中で約数和の積を展開する計算になる") 10,
+      ("★★★測定（2026-08-31、第 818）——**adic 添字と q 次数がずれている**。"
+       ++ "tateXtail(q·z^m, q) の adic 第 n 項は q^n·∑_{d∣n} d·q^d·z^{md} であり、"
+       ++ "q 次数は n ではなく n+d である。★ゆえに最終の照合を"
+       ++ "「adic 添字ごとの係数の一致」でやるには、先に**q 次数に揃えた形**へ"
+       ++ "直す必要がある（古典形 X(u) = u/(1−u)² + ∑_N (∑_{d∣N} d(u^d + u^{−d} − 2)) q^N）。"
+       ++ "☆道具は揃っている: AdicFubini.lean の adicSum_reindex_mul・adicSum_fubini、"
+       ++ "AdicMul.lean の adicSum_mul。これが残る最後の配管である") 6,
     .implicitStep
-      ("☆別道（測定済み、第 812）: ℂ 解析側に落とす道もある。"
-       ++ "Found/GenEll/Uniformization.lean の latticeCurve_eq_veluQuotientFull（sorry なし）は"
-       ++ "格子曲線の Vélu の商を与えるが、**g₂・g₃ の変換式を仮説に持っている**ので"
-       ++ "係数の照合を回避できない。★現時点では q 展開の道の方が短い") 2,
+      ("★★手順 4 の本体: q 次数に揃えた後、"
+       ++ "★**l·veluVC N 0 − ∑_{a<l} veluVC N a = (σ₃(N) − [l∣N]·σ₃(N/l))·q^N**。"
+       ++ "古典的な Tate/Vélu の q 展開恒等式そのものである") 8,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel（この結論の消費側、§9-1153）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2 ]
 
