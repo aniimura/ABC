@@ -1054,6 +1054,7 @@ import ABC3.Found.GenEll.Lemma32
 import ABC3.Found.GenEll.Lemma32Tate
 import ABC3.Found.GenEll.Lemma32QuotMu
 import ABC3.Found.GaloisRep.AdicSeries
+import ABC3.Found.GaloisRep.DualAdic
 import ABC3.Found.GaloisRep.TateXY
 import ABC3.Found.GaloisRep.TateSeriesNatural
 import ABC3.Found.GaloisRep.QDomain
