@@ -205,7 +205,42 @@ theorem mk_pow_injOn (v : Kˣ →* Multiplicative ℤ) (Q : Kˣ) (hQ : 0 < vAdd 
   · exact key hi hji h
   · exact (key hj hij h.symm).symm
 
+/-! ## ★★★★★★★★`l ∣ k` なら類は 1 の冪根の類である -/
+
+/-- ★★★★★★★★**`x^l = Q^k` で `l ∣ k` なら、`[x]` は `μ_l` の元の類である**。
+
+原文 (GenEll p.15):
+> be a one-dimensional Fl-subspace which is stabilized by GK . Then either vK (qE ) ∈
+
+★これが `Lemma 3.2, (i)` の**結論側**である——
+`lemma_3_2_i_tate_all`（証明済み）の対偶を取ると、
+`l` が局所高さ `v_K(q_E)` と互いに素なら `l ∣ k` であり、
+したがって安定な直線は `𝔽_l(1) = μ_l` に対応する。
+
+☆機構は 1 行である: `k = l·m` なら `(x·Q^{-m})^l = 1`。 -/
+theorem exists_rootOfUnity_mk_eq (Q : Kˣ) {l : ℕ} (hl : 0 < l)
+    (x : Kˣ) (k : ℤ) (hxk : x ^ l = Q ^ k) (hdvd : (l : ℤ) ∣ k) :
+    ∃ ζ : Kˣ, ζ ^ l = 1 ∧
+      (QuotientGroup.mk x : Kˣ ⧸ Subgroup.zpowers Q) = QuotientGroup.mk ζ := by
+  obtain ⟨m, rfl⟩ := hdvd
+  refine ⟨x * (Q ^ m)⁻¹, ?_, ?_⟩
+  · -- ★`(x·Q^{-m})^l = x^l·Q^{-lm} = 1`
+    have hQ : ((Q ^ m)⁻¹ : Kˣ) ^ l = (Q ^ ((l : ℤ) * m))⁻¹ := by
+      rw [inv_pow, ← zpow_natCast (Q ^ m) l, ← zpow_mul, mul_comm]
+    rw [mul_pow, hxk, hQ, mul_inv_cancel]
+  · -- ★両者の比は `Q^m` なので同じ類
+    refine (QuotientGroup.eq (s := Subgroup.zpowers Q)).2 ?_
+    have hval : x⁻¹ * (x * (Q ^ m)⁻¹) = (Q ^ m)⁻¹ := by
+      rw [← mul_assoc, inv_mul_cancel, one_mul]
+    rw [hval]
+    exact Subgroup.inv_mem _ (Subgroup.zpow_mem _ (Subgroup.mem_zpowers Q) m)
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_rootOfUnity_mk_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (i)(l ∣ k なら類は μ_l の元の類である。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def mk_pow_injOn.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
