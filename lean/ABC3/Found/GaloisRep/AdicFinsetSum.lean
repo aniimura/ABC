@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.AdicSeries
 import ABC3.Found.GaloisRep.TateSigma
 import ABC3.Found.GaloisRep.TatePair
+import ABC3.Found.GaloisRep.AdicMul
 import ABC3.Found.GaloisRep.MuCharSum
 import ABC3.Meta.Claim
 
@@ -321,6 +322,59 @@ theorem sum_mu_tateYpair_eq [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.
     sum_mu_tateYterm_w hl hζ q hq, sum_mu_tateYtail_w hl hζ q hq, hcard]
   ring
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★積を `μ_l` にわたって足す -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★
+**`ζ`-次数付きの `I` 進級数の積を `μ_l∖{1}` 上で足す**。
+
+★★Tate の `X(ζ)`・`Y(ζ)` はどの項も
+`A n · ζ^{i·α(n)}` の形をしている。その**積**を `ζ` について足すと
+
+    `∑_ζ (∑_n A_n ζ^{iα(n)} q…)(∑_n B_n ζ^{iβ(n)} q…)`
+      `= adicSum (n ↦ ∑_{k≤n} A_k B_{n−k}·([l ∣ α(k)+β(n−k)]·l − 1))`
+
+★★★これが `veluV2 = 3x² + a₄ − y` の `x²` を扱う道具である。 -/
+theorem sum_mu_adicSum_mul [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (A B : ℕ → R) (α β : ℕ → ℕ) (hA : ∀ n, A n ∈ I ^ n) (hB : ∀ n, B n ∈ I ^ n) :
+    ∑ i ∈ (range l).erase 0,
+        (adicSum (fun n => A n * ζ ^ (i * α n))
+            (fun n => Ideal.mul_mem_right _ _ (hA n)))
+        * (adicSum (fun n => B n * ζ ^ (i * β n))
+            (fun n => Ideal.mul_mem_right _ _ (hB n)))
+      = adicSum (I := I)
+          (fun n => ∑ k ∈ Finset.range (n + 1), A k * B (n - k)
+            * ((if l ∣ α k + β (n - k) then (l : R) else 0) - 1))
+          (fun n => Submodule.sum_mem _ (fun k hk => by
+            have hle : k ≤ n := Nat.lt_succ_iff.1 (Finset.mem_range.1 hk)
+            have hmem : A k * B (n - k) ∈ I ^ k * I ^ (n - k) :=
+              Ideal.mul_mem_mul (hA k) (hB (n - k))
+            have he : k + (n - k) = n := by omega
+            rw [← pow_add, he] at hmem
+            exact Ideal.mul_mem_right _ _ hmem)) := by
+  classical
+  rw [Finset.sum_congr rfl (fun i _ => adicSum_mul
+    (fun n => A n * ζ ^ (i * α n)) (fun n => B n * ζ ^ (i * β n))
+    (fun n => Ideal.mul_mem_right _ _ (hA n)) (fun n => Ideal.mul_mem_right _ _ (hB n)))]
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => ∑ k ∈ Finset.range (n + 1),
+        (A k * ζ ^ (i * α k)) * (B (n - k) * ζ ^ (i * β (n - k))))
+      (fun i n => cauchy_mem (I := I) (a := fun m => A m * ζ ^ (i * α m))
+        (b := fun m => B m * ζ ^ (i * β m))
+        (fun m => Ideal.mul_mem_right _ _ (hA m))
+        (fun m => Ideal.mul_mem_right _ _ (hB m)) n)]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  have hexp : ∀ i : ℕ, (A k * ζ ^ (i * α k)) * (B (n - k) * ζ ^ (i * β (n - k)))
+      = (A k * B (n - k)) * ζ ^ (i * (α k + β (n - k))) := by
+    intro i
+    rw [Nat.mul_add, pow_add]
+    ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
+    sum_mu_pow_erase_zero hl hζ (α k + β (n - k)), mul_assoc]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mu_tateXtail.src : ABC3.Meta.Source :=
@@ -376,6 +430,11 @@ def sum_mu_tateYtail_w.src : ABC3.Meta.Source :=
 def sum_mu_tateYpair_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(∑_ζ Y(ζ,q) は定数項を除いて ζ-free。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_adicSum_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ-次数付き I 進級数の積を μ_l 上で足す。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def adicSum_zero.src : ABC3.Meta.Source :=
