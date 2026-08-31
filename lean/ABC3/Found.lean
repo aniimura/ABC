@@ -1063,6 +1063,10 @@ import ABC3.Found.GaloisRep.AdicFubini
 import ABC3.Found.GaloisRep.TateQExp
 import ABC3.Found.GaloisRep.TateSigma
 import ABC3.Found.GaloisRep.AdicMul
+import ABC3.Found.GaloisRep.MuCharSum
+import ABC3.Found.GaloisRep.AdicFinsetSum
+import ABC3.Found.GaloisRep.MuGraded
+import ABC3.Found.GenEll.CycloDisjoint
 import ABC3.Found.GaloisRep.TorsionIdeal
 import ABC3.Found.GaloisRep.GenericPoint
 import ABC3.Found.GaloisRep.Translate
