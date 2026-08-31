@@ -2272,3 +2272,40 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 **副産物**: この測定で `SSCurve.fld : Type` ＋ 埋め込みという設計が
 `finite_j_of_htFalt_le`（族の定義体を `IntermediateField ℚ ℂ` で受ける）と
 噛み合わないことも分かり、`SSCurve.K : IntermediateField ℚ ℂ` に直した（第 753）。
+
+## 数体の判別式・円分体（2026-08-31、第 780-784 で使った mathlib の在庫）
+
+「`l` が `L` で不分岐」を **`¬ (l : ℤ) ∣ NumberField.discr L`** として持つと、
+mathlib の以下がそのまま噛み合う。分岐理論の API を探す必要はない。
+
+* `NumberField.discr_dvd_discr : discr K ∣ discr L`（`K ⊆ L`）
+* `NumberField.not_dvd_discr_iff_forall_mem : ¬ p ∣ discr K ↔ ∀ P ∋ p, IsUnramifiedAt`
+* `NumberField.abs_discr_gt_two : 1 < finrank ℚ K → 2 < |discr K|`
+* `NumberField.finrank_eq_one_of_unramified`（至る所不分岐な数体は `ℚ`）
+* `NumberField.linearDisjoint_of_isGalois_isCoprime_discr`
+  —— **`K₁/ℚ` が Galois で `disc` が互いに素なら線型無関連**（これが要）
+* `IsCyclotomicExtension.Rat.discr_prime_pow : NumberField.discr K = ±p^m`
+* `IsCyclotomicExtension.Rat.finrank : finrank ℚ ℚ(ζ_n) = n.totient`
+* `IntermediateField.LinearDisjoint.adjoin_rank_eq_rank_left_of_isAlgebraic`
+  —— `[L(A):L] = [A:F]`
+
+### 失敗形と直し方
+
+* `Int.coe_nat_prime` / `Int.natCast_prime` は**無い**。
+  `Prime (l : ℤ)` は `rw [Int.prime_iff_natAbs_prime]; simpa using (Fact.out : l.Prime)`。
+* `IsCyclotomicExtension.isGalois` の第 1 引数は **`Set ℕ`**。`{l ^ k}` と書く（`(l ^ k)` は型エラー）。
+* `IsPrimitiveRoot.powerBasis K` は **`[NeZero ((n : ℕ) : K)]`** を要る。
+  `⟨(Nat.cast_ne_zero (R := K)).2 (NeZero.ne n)⟩` で供給する。
+* `IsPrimitiveRoot.minpoly_eq_cyclotomic_of_irreducible` の向きは
+  **`cyclotomic n K = minpoly K μ`**（左右が直感と逆）。`.symm.trans` で使う。
+* `IsPrimitiveRoot.minpoly_dvd_cyclotomic` は `μ` が **`K` 自身**にある場合のみ。
+  拡大体の `μ` には `minpoly.dvd K μ (aeval μ (cyclotomic n K) = 0)` を使い、
+  根であることは `rw [aeval_def, ← eval_map, map_cyclotomic]` で `isRoot_cyclotomic` に落とす。
+* `Normal.of_isAlgClosed` は**無い**。`IsAlgClosure.normal B Ω`（`IsAlgClosure` を
+  `⟨inferInstance, inferInstance⟩` で作ってから）。
+* 既約性を環同型で移すのは `MulEquiv.irreducible_iff (Polynomial.mapEquiv e)`
+  （`f` は**明示引数**なので `.irreducible_iff` のドット記法は効かない）。
+* `IntermediateField.restrict_algEquiv` の向きは `↥E ≃ₐ[F] ↥(E.restrict h)`。
+* `le_sup_right` を包含として使うときは型注釈が要る: `(le_sup_right : Z ≤ M) hζZ`。
+* `NumberField` のインスタンスは `⟨⟩`（明示欄が無い）。`Module.Finite.trans (R := ℚ) (A := B) (M := M)`
+  は引数を取らない（`inferInstance` を渡すと "Function expected"）。
