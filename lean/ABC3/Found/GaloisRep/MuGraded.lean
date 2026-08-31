@@ -903,6 +903,72 @@ theorem filter_mul_pred_mod_eq_filter_dvd {l : ℕ} (hl : l.Prime) (n : ℕ) :
   · intro h
     exact Nat.mod_eq_zero_of_dvd ((dvd_mul_pred_iff hl).2 h)
 
+/-! ## ★★★★★★★★★★★★★★★★`tateYC` の 2 つの量 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYC` の全係数和**（`z = 1` での値）。 -/
+theorem sum_tateYC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
+    ∑ a ∈ range l, tateYC l q n a
+      = ((∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXtermC (R := R) l k a)
+              * ∑ b ∈ range l, invSubOneC (R := R) l (n - k) b)
+          + q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R))
+        - ((n : R) * q ^ n + q ^ n * ∑ d ∈ n.divisors, (d : R) * q ^ d)
+        - (((n.choose 2 : ℕ) : R) * q ^ n
+           + q ^ n * ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * q ^ d)
+        + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+  classical
+  simp only [tateYC]
+  rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_sub_distrib,
+    Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib]
+  congr 1
+  · congr 1
+    · congr 1
+      · congr 1
+        -- ★畳み込みの部分
+        · exact sum_muConv hl _ _ n
+        -- ★Y の尾
+        · rw [← Finset.mul_sum]
+          congr 1
+          exact Finset.sum_fiberwise_of_maps_to
+            (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+      · congr 1
+        -- ★w 側の X の項
+        · exact sum_range_ite_eq (Nat.mod_lt _ hl) _
+        -- ★w 側の X の尾
+        · rw [← Finset.mul_sum]
+          congr 1
+          exact Finset.sum_fiberwise_of_maps_to
+            (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+    · congr 1
+      -- ★w 側の Y の項
+      · exact sum_range_ite_eq (Nat.mod_lt _ hl) _
+      -- ★w 側の Y の尾
+      · rw [← Finset.mul_sum]
+        congr 1
+        exact Finset.sum_fiberwise_of_maps_to
+          (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  -- ★s₁ の項
+  · rw [Finset.sum_eq_single 0]
+    · simp
+    · intro b _ hb
+      simp [hb]
+    · intro h
+      exact absurd (Finset.mem_range.2 hl) h
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYC` の 0 次係数**（定義の展開形）。 -/
+theorem tateYC_zero {l : ℕ} (q : R) (n : ℕ) :
+    tateYC l q n 0
+      = (muConv l (tateXtermC l) (invSubOneC l) n 0
+          + q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = 0), ((d.choose 2 : ℕ) : R))
+        - ((if (n * (l - 1)) % l = 0 then (n : R) * q ^ n else 0)
+           + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0), (d : R) * q ^ d)
+        - ((if (n * (l - 1)) % l = 0 then ((n.choose 2 : ℕ) : R) * q ^ n else 0)
+           + q ^ n * ∑ d ∈ n.divisors.filter (fun d => ((l - 1) * d) % l = 0),
+               ((d.choose 2 : ℕ) : R) * q ^ d)
+        + q ^ n * ∑ d ∈ n.divisors, (d : R) := by
+  rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -1118,6 +1184,16 @@ def filter_mod_eq_filter_dvd.src : ABC3.Meta.Source :=
 def filter_mul_pred_mod_eq_filter_dvd.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)((l−1)d % l = 0 のフィルタも l ∣ d。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_tateYC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYC の全係数和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYC_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYC の 0 次係数。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
