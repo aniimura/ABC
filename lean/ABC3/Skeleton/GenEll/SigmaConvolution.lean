@@ -75,22 +75,20 @@ def sigma_one_convolution.needs : List ProofObligation :=
     .citation "[mathlib]" "EisensteinSeries.E_qExpansion_coeff（E_k の q 展開係数は σ_{k−1}）"
       (.inMathlib "EisensteinSeries.E_qExpansion_coeff") 2,
     .implicitStep
-      ("☆道 A（モジュラー形式）: E₄ = E₂² − 12·q dE₂/dq。"
-       ++ "mathlib には E₂ の定義と S 変換則、E_k の q 展開、レベル 1 の次元公式があるが、"
-       ++ "★E₂ の q 展開（EisensteinSeries/E2/ に QExpansion.lean は無い）と"
-       ++ "準モジュラー形式の微分の理論が要る") 8,
+      ("★★★消費側の正確な形（2026-08-31、第 839、l = 5,7,11 ・n < 20 で数値確認）:"
+       ++ "★ 3·[∑_{ζ∈μ_l∖{1}} X(ζ,q)²]_n"
+       ++ " = l⁴σ₃(n/l)[l∣n] − σ₃(n) + 5(l−1)σ₃(n) + lσ₁(n) − l²σ₁(n/l)[l∣n]。"
+       ++ "☆左辺は σ₁ の畳み込みを含み、右辺は σ₃ で書かれている——"
+       ++ "この穋ぎにラマヌジャンの恒等式が要る") 2,
     .implicitStep
-      ("★★道 B（本プロジェクトの在庫）: Tate 曲線の方程式"
-       ++ "Found/GaloisRep/TateEquation.lean の tate_equation（証明済み）は"
-       ++ "**2 変数 (u, q) の恒等式**である。u の冪ごとに係数を比べると"
-       ++ "σ の恒等式が出る。☆モジュラー形式の理論を要らない") 6,
+      ("★★道 B（本プロジェクトの在庫）: Tate 曲線の方程式 tate_equation（証明済み）は"
+       ++ "2 変数 (u, q) の恒等式である。u の冪ごとに係数を比べると σ の恒等式が出る") 6,
     .implicitStep
-      ("★★★再定式化（2026-08-31、第 829、n < 30 で数値確認）——"
-       ++ "右辺は**1 つの約数和**になる:"
-       ++ "★ 12·∑_{m<n} σ₁(m)σ₁(n−m) = ∑_{d∣n} (5d³ + d − 6d²·(n/d))。"
-       ++ "☆また左辺は四つ組 (a,b,c,d) with ab+cd = n にわたる ∑ ac であり、"
-       ++ "(a,b)↔(b,a) と (c,d)↔(d,c) の対称性から ∑ac = ∑ad = ∑bc = ∑bd が出る") 2,
-    .citation "[ABC3]" "veluVC_zero(この結論の消費側、§9-1241)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluVC_zero") 2 ]
+      ("☆再定式化（第 829、n < 30 で数値確認）: 右辺は 1 つの約数和になる:"
+       ++ "12·∑_{m<n} σ₁(m)σ₁(n−m) = ∑_{d∣n} (5d³ + d − 6d²·(n/d))。"
+       ++ "☆左辺は ab+cd = n なる四つ組にわたる ∑ ac であり、対称性から"
+       ++ "∑ac = ∑ad = ∑bc = ∑bd が出る") 2,
+    .citation "[ABC3]" "veluV_coeff_of_ne_zero(この結論の消費側、§9-1254)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV_coeff_of_ne_zero") 2 ]
 
 end ABC3.Skeleton.GenEll
