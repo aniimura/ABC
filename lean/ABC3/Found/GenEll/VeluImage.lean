@@ -119,7 +119,78 @@ theorem veluQuotientFull_baseChange {F A : Type} [Field F] [Field A] (f : F →+
         (fun k : ℕ => pointCoords (k • rhPoint f E Q))) := by
   rw [hE', veluQuotientFull_map, image_pointCoords_rhPoint_nsmul f E hQ]
 
+/-! ## ★★★★★★★★反転で安定な点集合の上では奇関数の和は消える -/
+
+/-- ★★**反転で安定な集合の上での奇関数の和は `0`**。
+
+☆`∑ g = ∑ g∘σ = −∑ g` なので `2∑g = 0`、体で `2 ≠ 0` なら `∑g = 0`。 -/
+theorem sum_eq_zero_of_neg_involution {F : Type} [Field F] (S : Finset (F × F))
+    (σ : F × F → F × F) (hσS : ∀ z ∈ S, σ z ∈ S) (hσσ : ∀ z ∈ S, σ (σ z) = z)
+    (g : F × F → F) (hg : ∀ z ∈ S, g (σ z) = - g z) (h2 : (2 : F) ≠ 0) :
+    ∑ z ∈ S, g z = 0 := by
+  have hswap : ∑ z ∈ S, g z = ∑ z ∈ S, g (σ z) := by
+    refine Finset.sum_nbij' (i := fun z => σ z) (j := fun z => σ z) ?_ ?_ ?_ ?_ ?_
+    · exact fun a ha => hσS a ha
+    · exact fun a ha => hσS a ha
+    · exact fun a ha => hσσ a ha
+    · exact fun a ha => hσσ a ha
+    · intro a ha
+      exact congrArg g (hσσ a ha).symm
+  have hneg : ∑ z ∈ S, g (σ z) = - ∑ z ∈ S, g z := by
+    rw [← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl hg
+  have h0 : (2 : F) * ∑ z ∈ S, g z = 0 := by
+    have hself := hswap.trans hneg
+    linear_combination hself
+  exact (mul_eq_zero.1 h0).resolve_left h2
+
+/-- ★★★★★★**`veluQuotientFull_variableChange` の仮説 `hB`**——
+反転で安定な点集合なら自動的に成り立つ。
+
+☆`2y + a₁x + a₃` は `y ↦ negY x y` で符号が反転する。 -/
+theorem sum_negY_eq_zero {F : Type} [Field F] (W : WeierstrassCurve F) (S : Finset (F × F))
+    (hS : ∀ z ∈ S, ((z.1, W.toAffine.negY z.1 z.2) : F × F) ∈ S) (h2 : (2 : F) ≠ 0) :
+    ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) = 0 := by
+  refine sum_eq_zero_of_neg_involution S (fun z => (z.1, W.toAffine.negY z.1 z.2)) hS ?_ _ ?_ h2
+  · intro z _
+    have hnn : W.toAffine.negY z.1 (W.toAffine.negY z.1 z.2) = z.2 := by
+      simp only [WeierstrassCurve.Affine.negY]; ring
+    show ((z.1, W.toAffine.negY z.1 (W.toAffine.negY z.1 z.2)) : F × F) = z
+    rw [hnn]
+  · intro z _
+    show 2 * (W.toAffine.negY z.1 z.2) + W.a₁ * z.1 + W.a₃ = -(2 * z.2 + W.a₁ * z.1 + W.a₃)
+    rw [WeierstrassCurve.Affine.negY]
+    show 2 * (-z.2 - W.toAffine.a₁ * z.1 - W.toAffine.a₃) + W.a₁ * z.1 + W.a₃
+      = -(2 * z.2 + W.a₁ * z.1 + W.a₃)
+    ring
+
+/-- ★★★★★★**`veluQuotientFull_variableChange` の仮説 `hBx`**——同じ理由。
+
+☆`x` は `σ` で不変なので、奇関数に偶関数を掛けても奇のままである。 -/
+theorem sum_negY_mul_x_eq_zero {F : Type} [Field F] (W : WeierstrassCurve F)
+    (S : Finset (F × F))
+    (hS : ∀ z ∈ S, ((z.1, W.toAffine.negY z.1 z.2) : F × F) ∈ S) (h2 : (2 : F) ≠ 0) :
+    ∑ Q ∈ S, (2 * Q.2 + W.a₁ * Q.1 + W.a₃) * Q.1 = 0 := by
+  refine sum_eq_zero_of_neg_involution S (fun z => (z.1, W.toAffine.negY z.1 z.2)) hS ?_ _ ?_ h2
+  · intro z _
+    have hnn : W.toAffine.negY z.1 (W.toAffine.negY z.1 z.2) = z.2 := by
+      simp only [WeierstrassCurve.Affine.negY]; ring
+    show ((z.1, W.toAffine.negY z.1 (W.toAffine.negY z.1 z.2)) : F × F) = z
+    rw [hnn]
+  · intro z _
+    show (2 * (W.toAffine.negY z.1 z.2) + W.a₁ * z.1 + W.a₃) * z.1
+      = -((2 * z.2 + W.a₁ * z.1 + W.a₃) * z.1)
+    rw [WeierstrassCurve.Affine.negY]
+    show (2 * (-z.2 - W.toAffine.a₁ * z.1 - W.toAffine.a₃) + W.a₁ * z.1 + W.a₃) * z.1
+      = -((2 * z.2 + W.a₁ * z.1 + W.a₃) * z.1)
+    ring
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def sum_negY_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(反転で安定な点集合なら ∑(2y + a₁x + a₃) = 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluQuotientFull_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
