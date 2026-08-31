@@ -105,6 +105,26 @@ theorem j_eq_of_c4_c6_scale_pos (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.I
       = ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12) * W'.c₄ ^ 3 := by ring
     _ = (((W'.Δ')⁻¹ : Rˣ) : R) * W'.c₄ ^ 3 := by rw [hkey]
 
+/-- ★★★★★★**`j` の一致を分母を払った形に直す**。
+
+`j = Δ′⁻¹·c₄³` なので、両辺に `Δ·Δ′` を掛ければ
+
+    `c₄³·Δ′ = c₄′³·Δ`
+
+★これが `tateParam_injective`（第 878）に渡す形である。 -/
+theorem c4_cube_mul_Delta_of_j_eq (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsElliptic]
+    (h : W.j = W'.j) : W.c₄ ^ 3 * W'.Δ = W'.c₄ ^ 3 * W.Δ := by
+  have hinvW : ((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hinvW' : ((W'.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  rw [WeierstrassCurve.j, WeierstrassCurve.j] at h
+  rw [← coe_Δ', ← coe_Δ']
+  linear_combination
+    (((W.Δ' : Rˣ) : R) * ((W'.Δ' : Rˣ) : R)) * h
+      - (((W'.Δ' : Rˣ) : R) * W.c₄ ^ 3) * hinvW
+      + (((W.Δ' : Rˣ) : R) * W'.c₄ ^ 3) * hinvW'
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def j_eq_of_c4_c6_scale.src : ABC3.Meta.Source :=
