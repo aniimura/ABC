@@ -102,7 +102,40 @@ theorem quadTwist_j (W : WeierstrassCurve F) [W.IsCharNeTwoNF] [W.IsElliptic]
   have hΔ : W.Δ ≠ 0 := W.isUnit_Δ.ne_zero
   field_simp
 
+/-! ## ★★★★★★★★分裂性は「剰余体に根がある」だけ -/
+
+open Polynomial in
+/-- ★★**2 次式は根があれば分裂する**——mathlib の `Splits.of_degree_eq_two` を
+`HasSplitMultiplicativeReduction` のフィールの形に合わせたもの。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これで「分裂乗法還元」の残る中身は
+**剰余体の中で 2 次式の根を 1 つ見つける**ことだけになる。 -/
+theorem splits_quadratic_of_root {k : Type} [Field k] (A B C₀ : k) (hA : A ≠ 0)
+    (x : k) (hx : A * x ^ 2 + B * x - C₀ = 0) :
+    Polynomial.Splits (Polynomial.C A * Polynomial.X ^ 2
+      + Polynomial.C B * Polynomial.X - Polynomial.C C₀) := by
+  refine Polynomial.Splits.of_degree_eq_two (x := x) ?_ ?_
+  · have : (Polynomial.C A * Polynomial.X ^ 2 + Polynomial.C B * Polynomial.X
+        - Polynomial.C C₀)
+        = Polynomial.C A * Polynomial.X ^ 2 + Polynomial.C B * Polynomial.X
+          + Polynomial.C (-C₀) := by
+      rw [map_neg]
+      ring
+    rw [this]
+    exact Polynomial.degree_quadratic hA
+  · simp only [Polynomial.eval_sub, Polynomial.eval_add, Polynomial.eval_mul,
+      Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X]
+    exact hx
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def splits_quadratic_of_root.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2 次式は根があれば分裂する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
