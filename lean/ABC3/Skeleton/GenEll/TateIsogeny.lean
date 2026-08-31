@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.TateParamJ
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
@@ -97,34 +98,6 @@ theorem tateModel_of_quot_mu {R : Type} [CommRing R] [IsDomain R]
   rw [hC]
   congr 1
 
-/-- **[GenEll] 葉 1 の残る中身**——`E′` の Tate 母数は `q^l` である。
-
-原文 (GenEll p.15):
-> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
-
-★★★★**2026-08-31 の分割（第 873）**——以前 `tateModel_of_quot_mu` は
-`hquot : True` という**空欄**を持っており、`W′` が任意になるので証明不能だった
-（`Check/GenEll/QuotMuNeedsHypothesis.lean`、第 869）。
-
-★そこで**中身をこの節点に移した**。`tateModel_of_quot_mu` の方は
-`tateParamR_spec` だけで**証明済み**になった。
-
-☆道: `j(E′) = j(E_{q^l})`（第 868 の `j_velu_tate_mu`）と
-`q ↦ j(E_q)` の単射性から `q_{E′} = q^l` が出る。
-★単射性は `j(E_q) = 1/q + 744 + …` の主要項から出るが、mathlib にも本プロジェクトにもまだ無い。 -/
-theorem tateParam_quot_mu {R : Type} [CommRing R] [IsDomain R]
-    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
-    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
-    (W W' : WeierstrassCurve K) [W.IsElliptic] [W.IsMinimal R]
-    [W'.IsElliptic] [W'.IsMinimal R]
-    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (l : ℕ) (hl : 0 < l)
-    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
-    (D : VariableChange R) (hD : D • integralModel R W = tateCurveAt q hq)
-    (hsplit : W'.HasSplitMultiplicativeReduction R)
-    (hquot : True) :
-    tateParamR W' hsplit = q ^ l := by
-  sorry
-
 def tateModel_of_quot_mu.needs : List ProofObligation :=
   [ .citation "[ABC3]" "tateParamR_spec(Tate モデルの存在、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParamR_spec") 1 ]
@@ -135,17 +108,16 @@ def tateParam_quot_mu.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def tateParam_quot_mu.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "j_velu_tate_mu(j(E_q/μ_l) = j(E_{q^l})、第 868、証明済み)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.j_velu_tate_mu") 1,
+  [ .citation "[ABC3]" "j_velu_tate_mu_map(j(E_q/μ_l) = j(E_{q^l})、K の中、第 881、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.j_velu_tate_mu_map") 1,
+    .citation "[ABC3]" "tateParamR_eq_of_j_tateCurveAt(j が E_{q₀} の j なら母数は q₀、第 882、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParamR_eq_of_j_tateCurveAt") 1,
     .implicitStep
-      ("★★hquot : True はまだ空欄である——「H が各悪い素点で μ_l に対応する」" ++
-       "(原文の global rank one subgroup)を型に書く段") 5,
-    .citation "[ABC3]" "evalAdic_injective_of_coeff_one(f(q) = q + O(q²) なら単射、第 875、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.evalAdic_injective_of_coeff_one") 1,
-    .citation "[ABC3]" "tateParam_injective(Δ·c₄′³ = Δ′·c₄³ なら q = q′、第 878、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParam_injective") 1,
-    .implicitStep
-      ("☆残るは `j(E′) = j(E_{q^l})`（K の中）を分母を払った形に直す段だけ") 2 ]
+      ("★★★到達点(2026-08-31、第 883): hquot はもはや True ではなく" ++
+       "「W′ の j が Vélu の商の j に等しい」という**型のついた仮説**であり、" ++
+       "定理自体は**証明済み**である。" ++
+       "☆残るのは「H が各悪い素点で μ_l に対応する」から hquot を導く段、" ++
+       "すなわち**大域の Vélu の商と局所の Vélu の商を繋ぐ配管**だけである") 5 ]
 
 def tateModel_of_quot_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
@@ -372,6 +344,57 @@ def j_velu_tate_mu_map.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.c6_velu_tate") 1,
     .citation "[ABC3]" "j_velu_tate_eq_map(第 881、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.j_velu_tate_eq_map") 1 ]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 葉 1 の残る中身**——
+`E′` の Tate 母数は `q^l` である。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-08-31 の空欄の埋め戻し（第 883）**——第 873 では
+`hquot : True` という**空欄**だった。★本ブロックでそれを
+
+    `hquot : W′.j = j((E_q/μ_l) ⊗ K)`
+
+という**型のついた仮説**に置き換え、定理を**証明した**。
+☆これが原文の「H が各悪い素点で μ_l に対応する」
+（global rank one subgroup）の、曲線の水準での内容である。
+
+☆道は 2 段だけである:
+
+1. `j_velu_tate_mu_map`（第 881）で `j(E_q/μ_l) = j(E_{q^l})`
+2. `tateParamR_eq_of_j_tateCurveAt`（第 882）で `q_{E′} = q^l` -/
+theorem tateParam_quot_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq)
+                (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
+    (hsplit : W'.HasSplitMultiplicativeReduction R)
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (hquot : W'.j = ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).j) :
+    tateParamR W' hsplit = q ^ l := by
+  refine tateParamR_eq_of_j_tateCurveAt W' hsplit (q ^ l) hql ?_
+  rw [hquot]
+  exact j_velu_tate_mu_map hl hζ hlu hu q hq hql h2 hDX v w hv hw
 
 def j_velu_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
