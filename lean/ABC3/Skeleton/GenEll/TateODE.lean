@@ -450,6 +450,116 @@ theorem sum_mu_X_sq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal
   have hd2sum := sum_mu_d2xpair hl hζ hu q hq hql
   linear_combination (120 : R) * hsum + hd2sum
 
+/-- ★★★★★★★★**`∑_{i≠0} X(ζ^i)·Y(ζ^i)`**——`∑D³X = 0` から出る。
+
+`D³X = 24XY + 12X² + 2Y + X` と `∑D³X = 0` で
+
+    `24·∑XY = −12·∑X² − 2·∑Y − ∑X`
+
+☆**`∑D³X` の値を知らなくても出る**のがここの味味である。 -/
+theorem sum_mu_XY {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    24 * ∑ i ∈ (range l).erase 0,
+        (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          * tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+      = -(12 * ∑ i ∈ (range l).erase 0,
+            tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2)
+        - 2 * (∑ i ∈ (range l).erase 0,
+            tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0,
+            tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq) := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hawi : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q := by
+    intro i hi
+    have hpow : (ζ ^ i) * (ζ ^ i) ^ (l - 1) = 1 := by
+      rw [← pow_succ']
+      rw [Nat.sub_add_cancel hl.pos, ← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    calc (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q * ((ζ ^ i) * (ζ ^ i) ^ (l - 1)) := by ring
+      _ = q := by rw [hpow, mul_one]
+  have hwu : ∀ i : ℕ, IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) := fun i =>
+    isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
+  have hterm : ∀ i ∈ (range l).erase 0,
+      24 * (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+              * tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        = tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - 12 * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2
+          - 2 * tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    intro i hi
+    have hd3 := tate_d3x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hdx := tateDXpair_eq (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hu i hi) (hwu i)
+    rw [hd3, hdx]
+    ring
+  have hz3 := sum_mu_d3xpair_zero hl hζ hu q hq h2
+  rw [Finset.mul_sum, Finset.sum_congr rfl hterm, Finset.sum_sub_distrib,
+    Finset.sum_sub_distrib, Finset.sum_sub_distrib, hz3, ← Finset.mul_sum,
+    ← Finset.mul_sum]
+  ring
+
+/-- ★★★★★★★★**`∑_{i≠0} X(ζ^i)³`**——`D⁴X` から出る。
+
+`D⁴X = 120X³ + 30X² + 72a₄X + X + 48a₆ + 2a₄`（`tate_d4x` と `tate_equation` から）
+なので
+
+    `120·∑X³ = ∑D⁴X − 30∑X² − (72a₄ + 1)∑X − (l−1)(48a₆ + 2a₄)`
+
+☆`∑D⁴X` は `sum_mu_d4xpair`（第 866）で閉じた式になっている。 -/
+theorem sum_mu_X_cube {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    120 * ∑ i ∈ (range l).erase 0,
+        tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 3
+      = (∑ i ∈ (range l).erase 0, tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - 30 * (∑ i ∈ (range l).erase 0,
+            tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2)
+        - (72 * (tateCurveAt q hq).a₄ + 1)
+          * (∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - ((l : R) - 1) * (48 * (tateCurveAt q hq).a₆ + 2 * (tateCurveAt q hq).a₄) := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hawi : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q := by
+    intro i hi
+    have hpow : (ζ ^ i) * (ζ ^ i) ^ (l - 1) = 1 := by
+      rw [← pow_succ']
+      rw [Nat.sub_add_cancel hl.pos, ← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    calc (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q * ((ζ ^ i) * (ζ ^ i) ^ (l - 1)) := by ring
+      _ = q := by rw [hpow, mul_one]
+  have hwu : ∀ i : ℕ, IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) := fun i =>
+    isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
+  have hterm : ∀ i ∈ (range l).erase 0,
+      120 * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 3
+        = tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - 30 * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2
+          - (72 * (tateCurveAt q hq).a₄ + 1)
+            * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - (48 * (tateCurveAt q hq).a₆ + 2 * (tateCurveAt q hq).a₄) := by
+    intro i hi
+    have hd4 := tate_d4x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hd2 := tate_d2x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hdx := tateDXpair_eq (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hu i hi) (hwu i)
+    have heq := tate_equation (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi)
+      (hu i hi) (hwu i)
+    rw [hd4, hd2, hdx]
+    linear_combination (-48 : R) * heq
+  rw [Finset.mul_sum, Finset.sum_congr rfl hterm, Finset.sum_sub_distrib,
+    Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_const,
+    Finset.card_erase_of_mem (Finset.mem_range.2 hl.pos), Finset.card_range,
+    nsmul_eq_mul, ← Finset.mul_sum, ← Finset.mul_sum]
+  have hcard : ((l - 1 : ℕ) : R) = (l : R) - 1 := by
+    rw [Nat.cast_sub hl.one_lt.le, Nat.cast_one]
+  rw [hcard]
+
 /-! ## ★出典の紐付け(`.src`)と証明義務(`.needs`) -/
 
 def tate_ode.src : Source :=
@@ -575,5 +685,27 @@ def sum_mu_X_sq.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.tate_d2x") 1,
     .citation "[ABC3]" "sum_mu_d2xpair(120·∑D²X の閉じた式、第 859、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_d2xpair") 1 ]
+
+def sum_mu_XY.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(24·∑XY = −12∑X² − 2∑Y − ∑X)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_XY.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tate_d3x(D³X = 12X·DX + DX、第 861、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tate_d3x") 1,
+    .citation "[ABC3]" "sum_mu_d3xpair_zero(∑D³X = 0、第 861、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_d3xpair_zero") 1 ]
+
+def sum_mu_X_cube.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(120·∑X³ の閉じた式)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_X_cube.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tate_d4x(D⁴X = 12X·D²X + 12(DX)² + D²X、第 866、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tate_d4x") 1,
+    .citation "[ABC3]" "tate_equation(Y² + XY = X³ + a₄X + a₆、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tate_equation") 1 ]
 
 end ABC3.Skeleton.GenEll
