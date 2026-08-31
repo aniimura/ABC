@@ -112,7 +112,131 @@ theorem sum_mu_veluV2 [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
     exact veluV2_tate_eq_muEval hl.pos hlu (hu i hi) hpow hsum q hq
   rw [Finset.sum_congr rfl hterm, sum_mu_muEval' hl hζ (veluVC l q) (veluVC_mem hq)]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`w` の側 -/
+
+/-- ★`2Y + X` の μ-等級付き係数。 -/
+noncomputable def twoYplusXC (l : ℕ) (q : R) (n a : ℕ) : R :=
+  2 * tateYC l q n a + tateXC l q n a
+
+theorem twoYplusXC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) :
+    twoYplusXC l q n a ∈ I ^ n :=
+  Submodule.add_mem _ (Ideal.mul_mem_left _ _ (tateYC_mem hq n a)) (tateXC_mem hq n a)
+
+theorem twoYplusX_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hz : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) (q : R) (hq : q ∈ I) :
+    2 * tateYpair z (q * z ^ (l - 1)) q hq + tateXpair z (q * z ^ (l - 1)) q hq
+      = muEval (I := I) l (twoYplusXC l q) (twoYplusXC_mem hq) z := by
+  classical
+  rw [tateXpair_eq_muEval hl hlu hu hz hsum q hq,
+    tateYpair_eq_muEval hl hlu hu hz hsum q hq, muEval_smul, muEval_add]
+  exact muEval_congr _ _ _ _ (fun n a => rfl) z
+
+/-- ★★★★★★★★★★★★★★★★**`2w` の被加数の μ-等級付き係数**。
+
+☆Vélu の `w_Q = u_Q/2 + g^x_Q·x_Q` は体の中の式だが、
+**2 倍すれば環の中の式**になる:
+`2w_Q = u_Q + 2·g^x_Q·x_Q = (2Y+X)² + 2(3X²+a₄−Y)X` -/
+noncomputable def veluWC (l : ℕ) (q : R) (n a : ℕ) : R :=
+  muConv l (twoYplusXC l q) (twoYplusXC l q) n a
+  + 2 * muConv l (veluVC l q) (tateXC l q) n a
+
+theorem veluWC_mem {l : ℕ} {q : R} (hq : q ∈ I) (n a : ℕ) : veluWC l q n a ∈ I ^ n :=
+  Submodule.add_mem _
+    (muConv_mem (twoYplusXC_mem hq) (twoYplusXC_mem hq) n a)
+    (Ideal.mul_mem_left _ _ (muConv_mem (veluVC_mem hq) (tateXC_mem hq) n a))
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`2w` の被加数も単一の μ-等級付き級数**。 -/
+theorem veluW_tate_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hz : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) (q : R) (hq : q ∈ I) :
+    veluU (tateCurveAt q hq) (tateXpair z (q * z ^ (l - 1)) q hq)
+        (tateYpair z (q * z ^ (l - 1)) q hq)
+      + 2 * (veluV2 (tateCurveAt q hq) (tateXpair z (q * z ^ (l - 1)) q hq)
+              (tateYpair z (q * z ^ (l - 1)) q hq)
+            * tateXpair z (q * z ^ (l - 1)) q hq)
+      = muEval (I := I) l (veluWC l q) (veluWC_mem hq) z := by
+  classical
+  rw [veluU_tateCurveAt, twoYplusX_eq_muEval hl hlu hu hz hsum q hq,
+    veluV2_tate_eq_muEval hl hlu hu hz hsum q hq,
+    tateXpair_eq_muEval hl hlu hu hz hsum q hq,
+    pow_two, muEval_mul hl _ _ (twoYplusXC_mem hq) (twoYplusXC_mem hq) hz,
+    muEval_mul hl _ _ (veluVC_mem hq) (tateXC_mem hq) hz,
+    muEval_smul, muEval_add]
+  exact muEval_congr _ _ _ _ (fun n a => rfl) z
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`2w` も有限個の係数の計算に落ちる**。 -/
+theorem sum_mu_veluW [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    (hlu : IsUnit ((l : R))) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0,
+        (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          + 2 * (veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+      = adicSum (I := I)
+          (fun n => (l : R) * veluWC l q n 0 - ∑ a ∈ range l, veluWC l q n a)
+          (fun n => Submodule.sub_mem _
+            (Ideal.mul_mem_left _ _ (veluWC_mem hq n 0))
+            (Submodule.sum_mem _ (fun a _ => veluWC_mem hq n a))) := by
+  classical
+  have hterm : ∀ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        = muEval (I := I) l (veluWC l q) (veluWC_mem hq) (ζ ^ i) := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    have hpow : (ζ ^ i) ^ l = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul, hζ.pow_eq_one, one_pow]
+    have hsum : ∑ k ∈ range l, (ζ ^ i) ^ k = 0 :=
+      (isPrimitiveRoot_pow_of_not_dvd (R := R) hl hζ hnd).geom_sum_eq_zero hl.one_lt
+    exact veluW_tate_eq_muEval hl.pos hlu (hu i hi) hpow hsum q hq
+  rw [Finset.sum_congr rfl hterm, sum_mu_muEval' hl hζ (veluWC l q) (veluWC_mem hq)]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def twoYplusXC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2Y + X の μ-等級付き係数)",
+    sectionId := "genell-lemma-3-5" }
+
+def twoYplusXC_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(twoYplusXC の所属。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def twoYplusX_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2Y + X の μ-等級付き形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluWC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2w の被加数の μ-等級付き係数)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluWC_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluWC の所属。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluW_tate_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2w の被加数も単一の μ-等級付き級数。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_mu_veluW.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2w も有限個の係数の計算に落ちる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def a4C.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
