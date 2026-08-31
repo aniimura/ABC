@@ -139,9 +139,39 @@ theorem nsmul_tatePhi (S : TateSetup R I K)
   rw [hmk, ← hΦ, ← hΦ, ← map_nsmul]
   congr 1
 
+/-! ## ★★★★★★★★位数 `l` の点は `x^l = q^k` を満たす -/
+
+/-- ★★★★★★★★**`l • Φ([x]) = 0` なら `x^l = Q^k`**。
+
+原文 (GenEll p.15):
+> be a one-dimensional Fl-subspace which is stabilized by GK . Then either vK (qE ) ∈
+
+★これが `lemma_3_2_i_tate_all`（証明済み）の仮説 `hxk` を
+**点の位数から作る**段である。
+
+☆道は 2 行: `l • Φ([x]) = Φ([x^l])`（第 888）で、
+`Φ` が原点に行くのは単位類だけ（`tatePhi_ne_zero`、証明済み）。 -/
+theorem exists_zpow_of_nsmul_tatePhi_eq_zero (S : TateSetup R I K)
+    (hΔ : ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    (Φ : Additive (Kˣ ⧸ Subgroup.zpowers S.Q)
+      ≃+ ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Point)
+    (hΦ : ∀ c, Φ (Additive.ofMul c) = tatePhi S hΔ c) (x : Kˣ) (l : ℕ)
+    (h : l • tatePhi S hΔ (QuotientGroup.mk x) = 0) :
+    ∃ k : ℤ, S.Q ^ k = x ^ l := by
+  rw [nsmul_tatePhi S hΔ Φ hΦ x l] at h
+  have hc : (QuotientGroup.mk (x ^ l) : Kˣ ⧸ Subgroup.zpowers S.Q) = 1 := by
+    by_contra hne
+    exact tatePhi_ne_zero S hΔ hne h
+  exact (QuotientGroup.eq_one_iff (x ^ l)).1 hc
+
 end Phi
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_zpow_of_nsmul_tatePhi_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (i)(l • Φ([x]) = 0 なら x^l = Q^k。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def nsmul_tatePhi.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
