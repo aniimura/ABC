@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.TateDSeries
 import ABC3.Found.GaloisRep.TateVelu
 import ABC3.Found.GaloisRep.TateMultRed
 import ABC3.Found.GaloisRep.TateSigma
+import ABC3.Found.GaloisRep.TateCoeffTail
 
 /-!
 # Galois (G6) 第 851 ブロック —— **★★★★★★★★★★双対数で Tate 級数を微分する**（`Found`）
@@ -964,6 +965,37 @@ theorem tateCurveAt_c4_eq {I : Ideal R} [IsAdicComplete I R] (q : R) (hq : q ∈
     (tateCurveAt q hq).c₄ = 1 + 240 * evalAdic (sigmaSeries 3) q hq := by
   rw [tateCurveAt_c4, tateCurve_c4, map_add, map_mul, map_one,
     map_ofNat (evalAdicHom q hq) 240]
+  rfl
+
+
+theorem tateCurveAt_c6 {I : Ideal R} [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆ = evalAdicHom q hq tateCurve.c₆ := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₆]
+
+/-- ★★**べき級数の水準で `c₆ = −1 + 504·σ₅`**。
+
+`b₂ = 1`、`b₄ = 2a₄`、`b₆ = 4a₆` なので `c₆ = −1 + 72a₄ − 864a₆` であり、
+`864a₆ = 72·(12a₆) = −72(5s₃ + 7s₅)`（`twelve_mul_tateA6`）を入れると
+`c₆ = −1 − 360s₃ + 360s₃ + 504s₅ = −1 + 504s₅`。★**割り算は一切要らない**。 -/
+theorem tateCurve_c6 : tateCurve.c₆ = -1 + 504 * sigmaSeries 5 := by
+  rw [WeierstrassCurve.c₆, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    WeierstrassCurve.b₆]
+  simp only [tateCurve, tateA4]
+  have hC : (PowerSeries.C (-5 : ℤ)) = (-5 : PowerSeries ℤ) := by
+    rw [show (-5 : ℤ) = -(5 : ℤ) from rfl, map_neg, map_ofNat]
+  have hC12 : (PowerSeries.C (12 : ℤ)) = (12 : PowerSeries ℤ) := map_ofNat _ 12
+  have hC5 : (PowerSeries.C (5 : ℤ)) = (5 : PowerSeries ℤ) := map_ofNat _ 5
+  have hC7 : (PowerSeries.C (7 : ℤ)) = (7 : PowerSeries ℤ) := map_ofNat _ 7
+  have h12 := twelve_mul_tateA6
+  rw [hC12, hC5, hC7] at h12
+  rw [hC]
+  linear_combination (-72 : PowerSeries ℤ) * h12
+
+/-- ★★★★**`c₆(E_q) = −1 + 504·s₅(q)`**。 -/
+theorem tateCurveAt_c6_eq {I : Ideal R} [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆ = -1 + 504 * evalAdic (sigmaSeries 5) q hq := by
+  rw [tateCurveAt_c6, tateCurve_c6, map_add, map_mul, map_neg, map_one,
+    map_ofNat (evalAdicHom q hq) 504]
   rfl
 
 end ABC3.Found.GaloisRep

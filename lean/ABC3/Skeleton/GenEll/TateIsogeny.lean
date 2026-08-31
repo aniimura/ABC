@@ -162,16 +162,25 @@ theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Idea
   linear_combination hd2
 
 open Finset in
-/-- **[GenEll] 葉 1 の訂正後の目標 (2)**——`c₆` は `−l⁶` 倍（分母を払った形）。
+/-- **[GenEll] 葉 1 の訂正後の目標 (2)**——`c₆` は `l⁶` 倍。
 
-☆`c₆(veluCurve W v w) = c₆ W + 504 b₂ v + 6048 w`であり、Tate 曲線では `b₂ = 1`。
-★`w` には `1/2` が入るので、**2 倍した形**で述べる。 -/
-theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+★★★★**2026-08-31 の再訂正（第 867）**——以前の statement
+`2c₆ + 1008∑v + 3024∑(u+2vX) = −2l⁶c₆(q^l)` は**偽**である（数値で落ちた）。
+正しいのは
+
+    `c₆ + 504∑v + 3024∑(u + 2vX) = l⁶·c₆(q^l)`
+
+である（`l = 5, 7` で数値確認）。☆Vélu の和は代表元の集合 `R` の上で取るので
+`v_Vélu = ∑_{i≠0} g^x`、`w_Vélu = (1/2)∑_{i≠0} u + ∑_{i≠0} x·g^x` となる。
+☆`g^x_Q + g^x_{-Q} = v_Q` が `∑_{i≠0} veluV2 = v_Vélu` の理由である。 -/
+theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
     [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
-    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
-    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
-    2 * (tateCurveAt q hq).c₆
-        + 1008 * (∑ i ∈ (range l).erase 0,
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    (tateCurveAt q hq).c₆
+        + 504 * (∑ i ∈ (range l).erase 0,
             veluV2 (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
               (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
         + 3024 * (∑ i ∈ (range l).erase 0,
@@ -181,8 +190,70 @@ theorem c6_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
                       (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
                       (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
                     * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
-      = 2 * (-((l : R) ^ 6) * (tateCurveAt (q ^ l) hql).c₆) := by
-  sorry
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆ := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hawi : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q := by
+    intro i hi
+    have hpow : (ζ ^ i) * (ζ ^ i) ^ (l - 1) = 1 := by
+      rw [← pow_succ']
+      rw [Nat.sub_add_cancel hl.pos, ← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    calc (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q * ((ζ ^ i) * (ζ ^ i) ^ (l - 1)) := by ring
+      _ = q := by rw [hpow, mul_one]
+  have hwu : ∀ i : ℕ, IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) := fun i =>
+    isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
+  -- 項ごとの恒等式
+  have hterm : ∀ i ∈ (range l).erase 0,
+      12 * (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        = tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          + tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    intro i hi
+    have hd4 := tate_d4x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hd3 := tate_d3x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hd2 := tate_d2x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    have hdx := tateDXpair_eq (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hu i hi) (hwu i)
+    rw [veluU_tateCurveAt, veluV2_tateCurveAt, hd4, hd3, hd2, hdx]
+    ring
+  -- 和に直す
+  have hsum12 : 12 * (∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq) (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+      = (∑ i ∈ (range l).erase 0, tateD4Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0, tateD3Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + (∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq) := by
+    rw [Finset.mul_sum, Finset.sum_congr rfl hterm, Finset.sum_add_distrib,
+      Finset.sum_sub_distrib, Finset.sum_sub_distrib]
+  -- ∑DX = 0、∑D³X = 0
+  have hz1 := sum_mu_dxpair_zero hl hζ hu q hq h2
+  have hz3 := sum_mu_d3xpair_zero hl hζ hu q hq h2
+  -- ∑v = ∑DY と ∑D²X = 2∑DY + ∑DX
+  have hsum1 := sum_veluV2_eq_sum_tateDYpair hl.pos hζl hu q hq hDX
+  have hstep : ∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = 2 * (∑ i ∈ (range l).erase 0, tateDYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    exact tateD2Xpair_eq _ _ q hq (hu i hi) (hwu i)
+  have hd4sum := sum_mu_d4xpair hl hζ hu q hq hql
+  rw [hz1, add_zero] at hstep
+  rw [hz1, hz3, sub_zero, add_zero] at hsum12
+  rw [hsum1, tateCurveAt_c6_eq, tateCurveAt_c6_eq]
+  linear_combination (252 : R) * hsum12 + hd4sum - (252 : R) * hstep
 
 def c4_velu_tate.src : Source :=
   { paper := "GenEll", pdfPage := 15,
