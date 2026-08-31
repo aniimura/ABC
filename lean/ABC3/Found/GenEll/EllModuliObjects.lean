@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.Compositum
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.HtJBound
+import ABC3.Found.GaloisRep.ResChar
 import ABC3.Meta.Claim
 
 /-!
@@ -348,6 +349,130 @@ theorem deg_pos (E : DegCurve) : 0 < E.deg := E.toSSCurve.deg_pos
 
 end DegCurve
 
+/-! ## ★★★★★★★★★★★★★★★★§4 の帳簿 -/
+
+namespace SSCurve
+
+open scoped Classical in
+/-- ★★★**悪い還元の素点の有限集合**。 -/
+noncomputable def badFinset (E : SSCurve) : Finset (HeightOneSpectrum (𝓞 E.fld)) :=
+  (minDeltaExp_finite E.W E.W.isUnit_Δ.ne_zero).toFinset
+
+open scoped Classical in
+theorem mem_badFinset (E : SSCurve) (p : HeightOneSpectrum (𝓞 E.fld)) :
+    p ∈ E.badFinset ↔ minDeltaExp p E.W ≠ 0 := by
+  rw [badFinset, Set.Finite.mem_toFinset]
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★**帳簿の主等式**——`∑_{p bad} v_p(Δ_min)·log N(p) = d·deg∞`。 -/
+theorem sum_badFinset_eq (E : SSCurve) :
+    ∑ p ∈ E.badFinset, (minDeltaExp p E.W : ℝ) * Real.log (Ideal.absNorm p.asIdeal)
+      = (E.deg : ℝ) * degInfJ E.j := by
+  rw [degInfJ_eq]
+  show _ = (Module.finrank ℚ E.fld : ℝ) * degInfOf E.fld E.W
+  rw [finrank_mul_degInfOf]
+  refine (finsum_eq_finset_sum_of_support_subset _ ?_).symm
+  intro q hq
+  simp only [Function.mem_support, ne_eq, mul_eq_zero, not_or] at hq
+  refine Finset.mem_coe.2 ((mem_badFinset E q).2 ?_)
+  exact_mod_cast hq.1
+
+end SSCurve
+
+namespace DegCurve
+
+open scoped Classical in
+/-- ★★★**`multCard` 欄**——悪い還元の素点の個数。 -/
+noncomputable def multCard (E : DegCurve) : ℕ := E.toSSCurve.badFinset.card
+
+open scoped Classical in
+/-- ★★★★**`multCard_pos` 欄**——乗法還元を持つので空でない。 -/
+theorem multCard_pos (E : DegCurve) : 0 < E.multCard := by
+  obtain ⟨p, hp⟩ := E.multRed
+  exact Finset.card_pos.2 ⟨p, (SSCurve.mem_badFinset _ p).2 hp⟩
+
+open scoped Classical in
+/-- ★★悪い素点の番号付け。 -/
+noncomputable def multIdx (E : DegCurve) (j : Fin E.multCard) :
+    HeightOneSpectrum (𝓞 E.toSSCurve.fld) :=
+  (E.toSSCurve.badFinset.equivFin.symm j : _)
+
+open scoped Classical in
+theorem multIdx_mem (E : DegCurve) (j : Fin E.multCard) :
+    E.multIdx j ∈ E.toSSCurve.badFinset := (E.toSSCurve.badFinset.equivFin.symm j).2
+
+open scoped Classical in
+/-- ★★★**`multPrime` 欄**——その素点の剰余標数。 -/
+noncomputable def multPrime (E : DegCurve) (j : Fin E.multCard) : ℕ :=
+  resChar (E.multIdx j)
+
+open scoped Classical in
+theorem multPrime_prime (E : DegCurve) (j : Fin E.multCard) : Nat.Prime (E.multPrime j) :=
+  resChar_prime _
+
+open scoped Classical in
+/-- ★★★★**`localHt` 欄**——`23040·v_p(Δ_min)·f_p`。
+
+★係数 `23040` は原文 p.23 の『the “`h`” of Lemma 4.2 corresponds to
+`23040d · deg∞([E_L])`』から来る。 -/
+noncomputable def localHt (E : DegCurve) (j : Fin E.multCard) : ℕ :=
+  23040 * (minDeltaExp (E.multIdx j) E.toSSCurve.W).toNat
+    * ((Ideal.span {(resChar (E.multIdx j) : ℤ)}).inertiaDeg (E.multIdx j).asIdeal)
+
+open scoped Classical in
+theorem localHt_pos (E : DegCurve) (j : Fin E.multCard) : 0 < E.localHt j := by
+  have h1 : minDeltaExp (E.multIdx j) E.toSSCurve.W ≠ 0 :=
+    (SSCurve.mem_badFinset _ _).1 (E.multIdx_mem j)
+  have h2 : 0 < (minDeltaExp (E.multIdx j) E.toSSCurve.W).toNat := by
+    have := minDeltaExp_nonneg (E.multIdx j) E.toSSCurve.W
+    omega
+  have h3 := inertiaDeg_pos (E.multIdx j)
+  rw [localHt]
+  positivity
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`sum_localHt_eq` 欄**——`∑ h_j·log(p_j) = 23040·d·deg∞([E_L])`（原文 p.23）。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★機構は `log N(p) = f_p·log(剰余標数)`（`ResChar.lean`、`§9-1173`）と
+`∑_{p bad} v_p·log N(p) = d·deg∞`（`sum_badFinset_eq`）。 -/
+theorem sum_localHt_eq (E : DegCurve) :
+    (∑ j : Fin E.multCard, (E.localHt j : ℝ) * Real.log (E.multPrime j))
+      = 23040 * (E.deg : ℝ) * degInfJ E.j := by
+  have hterm : ∀ j : Fin E.multCard, (E.localHt j : ℝ) * Real.log (E.multPrime j)
+      = 23040 * ((minDeltaExp (E.multIdx j) E.toSSCurve.W : ℝ)
+          * Real.log (Ideal.absNorm (E.multIdx j).asIdeal)) := by
+    intro j
+    have hnn := minDeltaExp_nonneg (E.multIdx j) E.toSSCurve.W
+    have hcast : (((minDeltaExp (E.multIdx j) E.toSSCurve.W).toNat : ℕ) : ℝ)
+        = (minDeltaExp (E.multIdx j) E.toSSCurve.W : ℝ) := by
+      exact_mod_cast congrArg (fun z : ℤ => (z : ℝ)) (Int.toNat_of_nonneg hnn)
+    rw [localHt, multPrime, log_absNorm_eq (E.multIdx j)]
+    push_cast
+    rw [hcast]
+    ring
+  rw [Finset.sum_congr rfl (fun j _ => hterm j), ← Finset.mul_sum]
+  have hsum : (∑ j : Fin E.multCard, (minDeltaExp (E.multIdx j) E.toSSCurve.W : ℝ)
+      * Real.log (Ideal.absNorm (E.multIdx j).asIdeal))
+      = ∑ p ∈ E.toSSCurve.badFinset,
+          (minDeltaExp p E.toSSCurve.W : ℝ) * Real.log (Ideal.absNorm p.asIdeal) := by
+    rw [← Finset.sum_coe_sort E.toSSCurve.badFinset
+      (fun p => (minDeltaExp p E.toSSCurve.W : ℝ) * Real.log (Ideal.absNorm p.asIdeal))]
+    exact Equiv.sum_comp E.toSSCurve.badFinset.equivFin.symm
+      (fun p : {x // x ∈ E.toSSCurve.badFinset} =>
+        (minDeltaExp (p : HeightOneSpectrum (𝓞 E.toSSCurve.fld)) E.toSSCurve.W : ℝ)
+          * Real.log (Ideal.absNorm (p : HeightOneSpectrum (𝓞 E.toSSCurve.fld)).asIdeal))
+  rw [hsum, SSCurve.sum_badFinset_eq]
+  show 23040 * ((E.toSSCurve.deg : ℝ) * degInfJ E.toSSCurve.j) = _
+  rw [DegCurve.deg, DegCurve.j]
+  ring
+
+end DegCurve
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -385,6 +510,11 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def DegCurve.sum_localHt_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(sum_localHt_eq 欄——∑ h_j·log(p_j) = 23040·d·deg∞。★無条件)",
+    sectionId := "genell-cor-4-3" }
 
 def DegCurve.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,
