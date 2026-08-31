@@ -4,6 +4,9 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Interface.GenEll.EllModuli
+import ABC3.Skeleton.GenEll.Section3
+import ABC3.Skeleton.GenEll.GaloisImage
+import ABC3.Skeleton.GenEll.Section4
 import ABC3.Meta.Claim
 
 /-!
@@ -171,6 +174,66 @@ noncomputable def ellModuliWitness : EllModuliData where
     have h := E.sum_log_ramPrimes_le
     rw [logDiffMellJ_eq]
     exact h
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★witness へ流し込む -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`Lemma 3.7` を witness で**。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★★これで `Lemma 3.7` が**具体的な楕円曲線の言葉**になった。
+☆残る `sorry` は witness の 5 本だけである。 -/
+theorem lemma_3_7_witness (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
+      ∀ (E : RealizedClass) (l : ℕ), Nat.Prime l → E.rep.toSSCurve.SemiStable →
+        ∀ (condA condB : Prop),
+          (condA ↔ (100 * (E.degOfDefinition : ℝ)
+                      * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ eps)
+                        ≤ (l : ℝ) ∧ E.rep.toSSCurve.HasMultRed)) →
+          (condB ↔ (E.cls ∈ KV ∧ E.rep.toSSCurve.PrimeToLocalHeights l)) →
+          (condA → E.rep.toSSCurve.PrimeToLocalHeights l)
+        ∧ (condB → E.cls ∉ Exc → E.rep.toSSCurve.HasMultRed)
+        ∧ ((condA ∨ condB) → HasLCyclicJ E.rep.toSSCurve l → E.cls ∈ Exc) :=
+  lemma_3_7 ellModuliWitness KV hKV eps heps
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`Theorem 3.8` を witness で**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to -/
+theorem theorem_3_8_witness (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) (ε : ℝ) (hε : 0 < ε) :
+    ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
+      ∀ (E : RealizedClass) (l : ℕ), Nat.Prime l → E.cls ∉ Exc →
+        ((23040 * 100 * (E.degOfDefinition : ℝ)
+              * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ ε) ≤ (l : ℝ)
+            ∧ E.rep.toSSCurve.HasPotMultRed)
+          ∨ (E.cls ∈ KV ∧ E.rep.toSSCurve.PrimeToLocalHeights l ∧ Nat.Coprime l 30)) →
+        ImageContainsSL2J E.rep.toSSCurve l :=
+  theorem_3_8 ellModuliWitness KV hKV ε hε
+
+/-- ★★★★`Corollary 4.3` も witness で通ることの確認（型検査のみ）。 -/
+example (eps : ℝ) (heps : 0 < eps) := cor_4_3 ellModuliWitness eps heps
+
+/-- ★★★★`Corollary 4.4` も witness で通ることの確認（型検査のみ）。 -/
+example (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) := cor_4_4 ellModuliWitness KV hKV
+
+def lemma_3_7_witness.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(witness へ流し込んだ形——具体的な楕円曲線の言葉で)",
+    sectionId := "genell-lemma-3-7" }
+
+def lemma_3_7_witness.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "ellModuliWitness(残る sorry は 5 本の葉)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1 ]
+
+def theorem_3_8_witness.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(witness へ流し込んだ形——具体的な楕円曲線の言葉で)",
+    sectionId := "genell-thm-3-8" }
+
+def theorem_3_8_witness.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "ellModuliWitness(残る sorry は 5 本の葉)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
