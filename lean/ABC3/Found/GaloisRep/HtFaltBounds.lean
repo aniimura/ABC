@@ -153,7 +153,41 @@ theorem coprime_minDeltaExp (E : WeierstrassCurve L) (hΔ : E.Δ ≠ 0) (l : ℕ
   have := Nat.le_of_dvd hpos hdvd
   omega
 
+/-! ## ★★★★★★★★悪い還元の素点が 1 つでもあれば `deg∞ > 0` -/
+
+/-- ★★★★★★★★**`v_p(Δ_min) ≠ 0` なる `p` があれば `deg∞ > 0`**——★**無条件**。
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★★`Check/GenEll/EllModuliDegInfPos.lean` の測定（界面は `deg∞ > 0` を強制する）に
+応えるために要る。★`Curve` 欄を「乗法還元を持つ半安定曲線」に取る根拠である。 -/
+theorem degInfOf_pos_of_minDeltaExp_ne_zero (E : WeierstrassCurve L) (hΔ : E.Δ ≠ 0)
+    (p : HeightOneSpectrum (𝓞 L)) (hp : minDeltaExp p E ≠ 0) : 0 < degInfOf L E := by
+  have hle : (minDeltaExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal)
+      ≤ ∑ᶠ q : HeightOneSpectrum (𝓞 L),
+          (minDeltaExp q E : ℝ) * Real.log (Ideal.absNorm q.asIdeal) := by
+    refine single_le_finsum p (hasFiniteSupport_degInf E hΔ) (fun q => ?_)
+    exact mul_nonneg (by exact_mod_cast minDeltaExp_nonneg q E) (log_absNorm_nonneg q)
+  have hn : (0:ℝ) < (minDeltaExp p E : ℝ) := by
+    have := lt_of_le_of_ne (minDeltaExp_nonneg p E) (Ne.symm hp)
+    exact_mod_cast this
+  have hl : (0:ℝ) < Real.log (Ideal.absNorm p.asIdeal) :=
+    lt_of_lt_of_le (Real.log_pos (by norm_num)) (log_two_le_log_absNorm p)
+  have hterm : (0:ℝ) < (minDeltaExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal) :=
+    mul_pos hn hl
+  rw [← finrank_mul_degInfOf] at hle
+  have hd : (0:ℝ) < (Module.finrank ℚ L : ℝ) := by exact_mod_cast Module.finrank_pos
+  by_contra hc
+  push_neg at hc
+  nlinarith
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def degInfOf_pos_of_minDeltaExp_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(悪い還元の素点が 1 つでもあれば deg∞ > 0。★無条件)",
+    sectionId := "genell-lemma-3-7" }
 
 def exists_degInfOf_le_htFalt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,

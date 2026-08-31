@@ -13,6 +13,7 @@ import ABC3.Check.GenEll.Thm21Witness
 import ABC3.Check.NCBelyi.Thm25AxiomGap
 import ABC3.Check.NCBelyi.Thm25Witness
 import ABC3.Check.GenEll.HeightInterfaceNondegenerate
+import ABC3.Check.GenEll.EllModuliDegInfPos
 import ABC3.Check.GenEll.Section3NotProvable
 import ABC3.Check.AbsTopIII.LogShellLanding
 import ABC3.Check.PGC.Section1Discriminating

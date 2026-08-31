@@ -311,6 +311,43 @@ theorem primeToLocalHeights_torsionExt (E : SSCurve) (l : ℕ)
     (h : E.PrimeToLocalHeights l) (_ : Nat.Coprime l 30) :
     (torsionExt E).PrimeToLocalHeights l := h
 
+/-! ## ★★★★★★★★★★★★★★★★`Curve` 欄は乗法還元を持つものに限る -/
+
+/-- ★★★★★★★★★★**乗法還元を持つ半安定曲線**。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★★★`Check/GenEll/EllModuliDegInfPos.lean` の測定（2026-08-31、第 745）:
+`EllModuliData` の `multCard_pos`・`localHt_pos`・`multPrime_prime`・`sum_localHt_eq` は
+**どの `E : Curve` に対しても `deg∞(cls E) > 0` を強制する**。
+★したがって `Curve` 欄は「至る所良還元」の曲線を含めない——原文の
+*Degenerating* Elliptic Curves という題そのものである。 -/
+structure DegCurve where
+  /-- 半安定な楕円曲線。 -/
+  toSSCurve : SSCurve
+  /-- ★少なくとも 1 つの素点で乗法還元。 -/
+  multRed : toSSCurve.HasMultRed
+
+namespace DegCurve
+
+/-- `j` 不変量。 -/
+noncomputable def j (E : DegCurve) : ℂ := E.toSSCurve.j
+
+/-- 定義体の次数。 -/
+noncomputable def deg (E : DegCurve) : ℕ := E.toSSCurve.deg
+
+/-- ★★★★★★**`deg∞ > 0`**——界面が強制する条件を満たす。 -/
+theorem degInf_pos (E : DegCurve) : 0 < degInfJ E.j := by
+  obtain ⟨p, hp⟩ := E.multRed
+  rw [DegCurve.j, degInfJ_eq]
+  exact degInfOf_pos_of_minDeltaExp_ne_zero E.toSSCurve.W
+    E.toSSCurve.W.isUnit_Δ.ne_zero p hp
+
+theorem deg_pos (E : DegCurve) : 0 < E.deg := E.toSSCurve.deg_pos
+
+end DegCurve
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -348,6 +385,18 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def DegCurve.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(Curve 欄——乗法還元を持つ半安定曲線)",
+    sectionId := "genell-cor-4-3" }
+
+def DegCurve.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★測定(2026-08-31、第 745): EllModuliData の multCard_pos・localHt_pos・" ++
+       "multPrime_prime・sum_localHt_eq は、どの E : Curve に対しても deg∞(cls E) > 0 を" ++
+       "強制する(Check/GenEll/EllModuliDegInfPos.lean)。" ++
+       "したがって Curve 欄は「至る所良還元」の曲線を含めない") 3 ]
 
 def degLeJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
