@@ -1308,6 +1308,7 @@ import ABC3.Found.GaloisRep.TatePhiOne
 import ABC3.Found.GaloisRep.TateAddEquiv
 import ABC3.Found.GaloisRep.TateAux
 import ABC3.Found.GaloisRep.TateDoubling
+import ABC3.Found.GaloisRep.TateSetupDvr
 import ABC3.Found.GaloisRep.TateDvrSetup
 import ABC3.Found.GaloisRep.TateVarChange
 import ABC3.Found.GaloisRep.TateMultRed
