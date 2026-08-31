@@ -157,7 +157,60 @@ theorem tateParam_injective_of_j {K : Type} [Field K] [CharZero K] [Algebra R K]
   refine tateParam_injective hq hq' ?_
   linear_combination -hR
 
+/-! ## ★★★★★★★★`1/j = q·(単元)` -/
+
+/-- ★定数項を引けば `I` の元である。 -/
+theorem evalAdic_sub_constantCoeff_mem [IsAdicComplete I R] (f : PowerSeries ℤ)
+    (q : R) (hq : q ∈ I) :
+    evalAdic f q hq - ((PowerSeries.coeff 0 f : ℤ) : R) ∈ I := by
+  have hc : PowerSeries.coeff 0 (f - PowerSeries.C (PowerSeries.coeff 0 f)) = 0 := by
+    simp
+  have hmem := evalAdic_mem (I := I) _ hc q hq
+  have heq : evalAdic (f - PowerSeries.C (PowerSeries.coeff 0 f)) q hq
+      = evalAdic f q hq - ((PowerSeries.coeff 0 f : ℤ) : R) := by
+    show evalAdicHom q hq (f - PowerSeries.C (PowerSeries.coeff 0 f)) = _
+    rw [map_sub]
+    congr 1
+    exact evalAdic_C _ q hq
+  rwa [heq] at hmem
+
+/-- ★★★★★★★★**`1/j` の評価は `q` × 単元**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`tateJinvSeries = X·h` で `h` の定数項は `1`（第 877）なので、
+`evalAdic h q` は `1 + I` の元、すなわち単元である。
+
+★これが「`v(1/j) = v(q)`」、つまり `v_p(j) = −v_p(q)` の中身である。 -/
+theorem evalAdic_tateJinvSeries_eq_mul_unit [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    ∃ u : R, IsUnit u ∧ evalAdic tateJinvSeries q hq = q * u := by
+  obtain ⟨h, hh⟩ : (PowerSeries.X : PowerSeries ℤ) ∣ tateJinvSeries := by
+    rw [PowerSeries.X_dvd_iff]
+    exact constantCoeff_tateJinvSeries
+  have hc0 : PowerSeries.coeff 0 h = 1 := by
+    have h1 : PowerSeries.coeff 1 tateJinvSeries = 1 := coeff_one_tateJinvSeries
+    rw [hh, PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk,
+      Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero] at h1
+    simpa using h1
+  refine ⟨evalAdic h q hq, ?_, ?_⟩
+  · have hmem := evalAdic_sub_constantCoeff_mem (I := I) h q hq
+    rw [hc0] at hmem
+    have : evalAdic h q hq = 1 - (-(evalAdic h q hq - 1)) := by ring
+    rw [this]
+    refine isUnit_one_sub (I := I) ?_
+    simpa using neg_mem (by simpa using hmem : evalAdic h q hq - 1 ∈ I)
+  · show evalAdicHom q hq tateJinvSeries = q * evalAdicHom q hq h
+    rw [hh, map_mul]
+    congr 1
+    exact evalAdic_X q hq
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def evalAdic_tateJinvSeries_eq_mul_unit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/j の評価は q × 単元。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def tateJinvSeries.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,

@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateJInv
 import ABC3.Found.GaloisRep.TateCurveWitness
+import ABC3.Found.GaloisRep.LocalHeightDelta
 
 /-!
 # Galois (G6) 第 882 ブロック —— **★★★★★★★★★★曲線の水準で「Tate 母数は `j` で決まる」**（`Found`）
@@ -140,7 +141,45 @@ theorem tateParamR_eq_of_j_tateCurveAt (W : WeierstrassCurve K)
   rw [hc4, hd]
   linear_combination (-(((C.u⁻¹ : Rˣ) : R) ^ 12)) * hR
 
+/-! ## ★★★★★★★★`v(1/j) = v(q)` -/
+
+/-- ★★★★★★★★**`1/j` の付値は `q` の付値に等しい**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆第 930 の `evalAdic tateJinvSeries q hq = q·u`（`u` は `R` の単元）と、
+単元の付値が `0` であること（`tateDvrVal_eq_zero_of_isUnit`、証明済み）から即座である。
+
+★これが `v_p(j) = −v_p(q)` の中身であり、
+`Lemma 3.5` の連鎖の結論（`j` の一致）を `jExp` に繋ぐ橋である。 -/
+theorem vAdd_evalAdic_tateJinvSeries (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    (hq0 : q ≠ 0)
+    (hne : algebraMap R K (evalAdic tateJinvSeries q hq) ≠ 0)
+    (hqne : algebraMap R K q ≠ 0) :
+    vAdd (tateDvrVal R K)
+        (Units.mk0 (algebraMap R K (evalAdic tateJinvSeries q hq)) hne)
+      = vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K q) hqne) := by
+  obtain ⟨u, hu, hqu⟩ := evalAdic_tateJinvSeries_eq_mul_unit (I := IsLocalRing.maximalIdeal R)
+    q hq
+  have hune : algebraMap R K u ≠ 0 := by
+    intro h0
+    apply hne
+    rw [hqu, map_mul, h0, mul_zero]
+  have hsplit : Units.mk0 (algebraMap R K (evalAdic tateJinvSeries q hq)) hne
+      = Units.mk0 (algebraMap R K q) hqne * Units.mk0 (algebraMap R K u) hune := by
+    refine Units.ext ?_
+    show algebraMap R K (evalAdic tateJinvSeries q hq)
+      = algebraMap R K q * algebraMap R K u
+    rw [hqu, map_mul]
+  rw [hsplit, vAdd_mul, tateDvrVal_eq_zero_of_isUnit (K := K) u hu hune, add_zero]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def vAdd_evalAdic_tateJinvSeries.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/j の付値は q の付値に等しい。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def integralModel_c4_cube_mul_Delta.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
