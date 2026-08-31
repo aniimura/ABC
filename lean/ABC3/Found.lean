@@ -1039,6 +1039,7 @@ import ABC3.Found.GaloisRep.ModLWitness
 import ABC3.Found.GaloisRep.TateSeries
 import ABC3.Found.GaloisRep.AdicEval
 import ABC3.Found.GaloisRep.AdicCompleteIntegers
+import ABC3.Found.GaloisRep.AdicCompleteValued
 import ABC3.Found.GaloisRep.AdicEvalNatural
 import ABC3.Found.GaloisRep.TateSpecialize
 import ABC3.Found.GaloisRep.TateVelu
