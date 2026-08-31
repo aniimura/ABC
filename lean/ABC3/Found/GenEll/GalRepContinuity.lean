@@ -179,7 +179,50 @@ theorem galMat_sub_one_dvd (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (n 
   push_cast
   ring
 
+/-! ## ★★★★★★★★★★★★局所定数性 -/
+
+/-- ★★★★★★★★★★★★
+**`galMat` は開部分群の剰余類の上で `mod l^n` 一定である**——★**無条件**。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★`galMat (σ₀·τ) = galMat σ₀ · galMat τ` と `galMat τ ≡ 1 (mod l^n)`（`§9-1195`、第 769）から
+
+    galMat (σ₀·τ) − galMat σ₀ = galMat σ₀ · (galMat τ − 1) ≡ 0  (mod l^n)
+
+★★これが `galRep` の連続性の**位相の側の核**である
+——`galMat` は局所定数（`mod l^n` の意味で）である。 -/
+theorem galMat_sub_dvd_of_fix (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime] (n : ℕ)
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l])) (σ₀ τ : L ≃ₐ[K] L)
+    (hfix : ∀ P ∈ torsionPoints (W.baseChange L) (l ^ n), galPoint W τ P = P) (i j : Fin 2) :
+    ((l : ℤ_[l]) ^ n) ∣ (galMat W l e (σ₀ * τ) i j - galMat W l e σ₀ i j) := by
+  classical
+  -- `galMat τ − 1` の各成分は `l^n` で割れる
+  have hdvd := galMat_sub_one_dvd W l n e τ hfix
+  choose N hN using hdvd
+  have hmul : galMat W l e (σ₀ * τ) = galMat W l e σ₀ * galMat W l e τ :=
+    galMat_mul W l e σ₀ τ
+  have hexp : galMat W l e (σ₀ * τ) i j - galMat W l e σ₀ i j
+      = ∑ k : Fin 2, galMat W l e σ₀ i k
+          * (galMat W l e τ k j - (1 : Matrix (Fin 2) (Fin 2) ℤ_[l]) k j) := by
+    rw [hmul]
+    simp only [Matrix.mul_apply, mul_sub, Finset.sum_sub_distrib]
+    congr 1
+    rw [← Matrix.mul_apply]
+    simp
+  refine ⟨∑ k : Fin 2, galMat W l e σ₀ i k * N k j, ?_⟩
+  rw [hexp, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [hN k j]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def galMat_sub_dvd_of_fix.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(galMat は開部分群の剰余類の上で mod l^n 一定。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def galMat_sub_one_dvd.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
