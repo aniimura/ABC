@@ -29,7 +29,7 @@ import ABC3.Meta.Claim
 | # | 命題 | 原文の言い方 |
 |---|---|---|
 | 3 | `α = (1 1 / 0 1)` が mod `l` 像に入る | 『by the local theory (cf. the discussion preceding Lemma 3.2)』 |
-| 4 | 円分指標 `Gal(L̄/L) → ℤ_l^×` が全射 | 『`ℚ(ζ_{l^∞})/ℚ` は `l` で完全分岐するので `L/ℚ` と線型無関連』 |
+| 4 | 円分指標が **`mod l^n` で**全射 | 『`ℚ(ζ_{l^∞})/ℚ` は `l` で完全分岐するので `L/ℚ` と線型無関連』（★逆極限の段は第 773 で済んだ） |
 | 5 | `galRep` は連続 | （原文は位相を明示しない。★像が閉であることは連続性に帰着済み——第 765） |
 
 ☆どれも**群論ではない**——群論の核（`Lemma 3.1, (iv)`）は
@@ -94,9 +94,11 @@ def alpha_in_modl_image.needs : List ProofObligation :=
 `Found/GenEll/DetCycloChar.lean` の `det_galRep_eq_cyclotomicCharacter`（`§9-1190`、第 764、
 ★無条件）で済んでいる。★★したがって本命題には**楕円曲線が現れない**。 -/
 theorem cyclotomic_det_surjective (E : SSCurve) (l : ℕ) [Fact l.Prime]
-    (hunram : True) (u : ℤ_[l]ˣ) :
+    (hunram : True) (n : ℕ) (u : ℤ_[l]ˣ) :
     ∃ σ : E.alg ≃ₐ[E.fld] E.alg,
-      cyclotomicCharacter E.alg l σ.toRingEquiv = u := by
+      PadicInt.toZModPow n
+          ((cyclotomicCharacter E.alg l σ.toRingEquiv : ℤ_[l]ˣ) : ℤ_[l])
+        = PadicInt.toZModPow n ((u : ℤ_[l])) := by
   sorry
 
 def cyclotomic_det_surjective.src : Source :=
@@ -109,9 +111,13 @@ def cyclotomic_det_surjective.needs : List ProofObligation :=
       (.inMathlib "IsCyclotomicExtension.autEquivPow") 2,
     .implicitStep
       ("★★L の上で cyclotomic (l^n) が既約であること。" ++
-       "l が L で不分岐かつ ℚ(ζ_{l^n})/ℚ が l で完全分岐なので L ∩ ℚ(ζ_{l^n}) = ℚ" ++
-       "——古典的だが mathlib に直接の形は無い") 8,
-    .implicitStep "★各 n での全射性から ℤ_l^× への全射性を出す逆極限の段" 4 ]
+       "l が L で不分岐かつ ℚ(ζ_{l^n})/ℚ が l で完全分岐なので L ∩ ℚ(ζ_{l^n}) = ℚ") 8,
+    .citation "[mathlib]" "「p は ℚ(ζ_{p^n}) で完全分岐する」——円分体の分岐理論"
+      (.absent "mathlib/NumberTheory を 'totally ramified|IsTotallyRamified|totallyRamified' で grep して 0 件(2026-08-31)") 6,
+    .implicitStep
+      ("★★★逆極限の段は**済んだ**(2026-08-31、第 773): " ++
+       "Found/GenEll/DetCycloChar.lean の cyclotomicCharacter_surjective_of_mod が " ++
+       "Gal のコンパクト性と円分指標の連続性から「mod l^n で全射 ⟹ 全射」を出す") 1 ]
 
 /-! ## ★★★★★★★★★★葉 5 は閉じた（2026-08-31、第 766-774）
 

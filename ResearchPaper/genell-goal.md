@@ -32120,3 +32120,41 @@ Skeleton の `lemma_3_7`・`theorem_3_8`・`corollary_4_3/4_4` はすべて `∀
 * `IsDedekindDomain.HeightOneSpectrum.under` は mathlib にあった
 * **Northcott は本プロジェクトが既に無条件で持っていた**（`finite_j_of_htFalt_le`）
   —— 立てた節点を削除した
+
+## 2026-08-31（第 763-775）—— 葉 5 が閉じ、残りは **4 本**
+
+### ✅ 葉 5（`galRep` の連続性・像の閉性）—— **完全に無条件**
+
+| 第 | 定理 | 内容 |
+|---|---|---|
+| 766 | `galPoint_eq_of_fixed` | 座標を固定する σ は点を動かさない |
+| 767 | `exists_finiteDimensional_fixing_torsion` | 捩れの座標が生成する有限次中間体（Krull 位相の開部分群） |
+| 768 | `exists_smul_of_proj_zero` | `ker(proj_n) = l^n·T_l` |
+| 769 | `galMat_sub_one_dvd` | `galMat ≡ 1 (mod l^n)` |
+| 770 | `galMat_sub_dvd_of_fix` | 剰余類の上で `mod l^n` 一定 |
+| 771 | `galMat_entry_continuous` | 各成分は連続 |
+| 772 | `galRep_continuous` | `Units.continuous_iff` で組み立て |
+| 774 | `galRep_range_isClosed` / `imageContainsSL2J_of_alpha'` | 捩れの有限性も discharge して**無条件**に |
+
+★★mathlib の測定: `IsGalois`・`CompactSpace (Gal)`・`T2Space (GL₂(ℤ_l))`・
+`IntermediateField.fixingSubgroup_isOpen`・`PadicInt.norm_le_pow_iff_mem_span_pow` は
+**すべて揃っていた**。自作したのは `ker(proj_n) = l^n·T_l` と局所定数性だけである。
+
+### ★葉 4 も同じ道具で簡約（第 764・773）
+
+* 第 764 `det ρ = cyclotomicCharacter`（mathlib の円分指標そのもの）——楕円曲線が消えた
+* 第 773 `cyclotomicCharacter_surjective_of_mod`——`Gal` のコンパクト性＋連続性で
+  「`mod l^n` で全射 ⟹ 全射」（**逆極限の段が済んだ**）
+
+☆残るのは「`l` が `L` で不分岐なら `cyclotomic (l^n)` は `L` 上既約」。
+★mathlib 測定: `NumberTheory` を `totally ramified|IsTotallyRamified|totallyRamified` で
+grep して **0 件**——円分体の分岐理論は mathlib に無い。
+
+### 残る 4 本の葉
+
+| # | 葉 | 消費する側 |
+|---|---|---|
+| 1 | `v_p(j′) = l·v_p(j)`（悪い素点、Tate の q-展開） | `Lemma 3.5` → `Lemma 3.7` |
+| 2 | `0 ≤ v_p(j′)`（同種は良還元を保つ） | 同上 |
+| 3 | 局所理論の行列表示（`α` が mod `l` 像に） | `Theorem 3.8` |
+| 4 | `cyclotomic (l^n)` の `L` 上既約性 | `Corollary 4.3/4.4` |
