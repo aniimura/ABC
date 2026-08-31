@@ -70,9 +70,21 @@ def sigma_one_convolution.src : Source :=
 def sigma_one_convolution.needs : List ProofObligation :=
   [ .citation "[mathlib]" "ArithmeticFunction.sigma の畳み込みの明示式"
       (.absent "mathlib を 'sigma.*convolution|sigma_one_mul_sigma_one' で grep して 0 件(2026-08-31)") 8,
+    .citation "[mathlib]" "EisensteinSeries.G2_S_transform（E₂ の準モジュラー変換則）"
+      (.inMathlib "EisensteinSeries.G2_S_transform") 2,
+    .citation "[mathlib]" "EisensteinSeries.E_qExpansion_coeff（E_k の q 展開係数は σ_{k−1}）"
+      (.inMathlib "EisensteinSeries.E_qExpansion_coeff") 2,
     .implicitStep
-      ("★古典的には Eisenstein 級数の関係式 E₄ = E₂² − 12·q d/dq E₂ に対応する。" ++
-       "初等的な証明（Liouville の方法、あるいは ℘ 関数の Laurent 展開の比較）もある") 8,
+      ("☆道 A（モジュラー形式）: E₄ = E₂² − 12·q dE₂/dq を使う。"
+       ++ "mathlib には E₂ の S 変換則（G2_S_transform）と E_k の q 展開があるが、"
+       ++ "★E₂ の q 展開（EisensteinSeries/E2/ に QExpansion.lean は無い）と"
+       ++ "準モジュラー形式の微分の理論が要る") 8,
+    .implicitStep
+      ("★★道 B（本プロジェクトの在庫）: Tate 曲線の方程式"
+       ++ "Found/GaloisRep/TateEquation.lean の tate_equation（Y² + XY = X³ + a₄X + a₆、証明済み）は"
+       ++ "**2 変数 (u, q) の恒等式**である。u の冪ごとに係数を比べると"
+       ++ "σ の恒等式が出る——ラマヌジャンの式もその 1 つのはずである。"
+       ++ "☆こちらはモジュラー形式の理論を要らない") 6,
     .citation "[ABC3]" "veluVC_zero(この結論の消費側、§9-1241)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.veluVC_zero") 2 ]
 
