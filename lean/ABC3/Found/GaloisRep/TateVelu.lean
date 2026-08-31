@@ -97,7 +97,72 @@ theorem veluCurve_tateCurveAt_eq' [IsAdicComplete I R] (q : R) (hq : q ∈ I)
     veluCurve (tateCurveAt q hq) v w = tateCurveAt (q ^ l) hql :=
   veluCurve_tateCurveAt_eq q hq (q ^ l) hql v w h4 h6
 
+/-- ★★★★★★**`a₄(q) = evalAdic tateA4 q`**。 -/
+theorem tateCurveAt_a₄ [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).a₄ = evalAdic tateA4 q hq := by
+  simp [tateCurveAt, tateCurve, WeierstrassCurve.map, evalAdicHom]
+
+/-- ★★★★★★**`a₆(q) = evalAdic tateA6 q`**。 -/
+theorem tateCurveAt_a₆ [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).a₆ = evalAdic tateA6 q hq := by
+  simp [tateCurveAt, tateCurve, WeierstrassCurve.map, evalAdicHom]
+
+/-! ## ★★★★★★★★★★★★Tate 曲線上の Vélu の量 -/
+
+/-- ★★★★★★★★**Tate 曲線では `g^x_Q = 3x² + a₄ − y`**（`a₁ = 1`, `a₂ = 0`）。 -/
+@[simp] theorem veluGx_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) (x y : R) :
+    veluGx (tateCurveAt q hq) x y = 3 * x ^ 2 + (tateCurveAt q hq).a₄ - y := by
+  rw [veluGx, tateCurveAt_a₁, tateCurveAt_a₂]
+  ring
+
+/-- ★★★★★★★★**`v_Q = g^x_Q`**（`veluV2` の形）。 -/
+@[simp] theorem veluV2_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) (x y : R) :
+    veluV2 (tateCurveAt q hq) x y = 3 * x ^ 2 + (tateCurveAt q hq).a₄ - y := by
+  rw [veluV2, veluGx_tateCurveAt]
+
+/-- ★★★★★★★★**Tate 曲線では `g^y_Q = −2y − x`**。 -/
+@[simp] theorem veluGy_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) (x y : R) :
+    veluGy (tateCurveAt q hq) x y = -2 * y - x := by
+  rw [veluGy, tateCurveAt_a₁, tateCurveAt_a₃]
+  ring
+
+/-- ★★★★★★★★**`u_Q = (2y + x)²`**。 -/
+@[simp] theorem veluU_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) (x y : R) :
+    veluU (tateCurveAt q hq) x y = (2 * y + x) ^ 2 := by
+  rw [veluU, veluGy_tateCurveAt]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def tateCurveAt_a₄.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(a₄(q) = evalAdic tateA4 q。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def tateCurveAt_a₆.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(a₆(q) = evalAdic tateA6 q。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def veluGx_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Tate 曲線では g^x_Q = 3x² + a₄ − y。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluV2_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(v_Q = g^x_Q の Tate 形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluGy_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Tate 曲線では g^y_Q = −2y − x。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluU_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(u_Q = (2y + x)² の Tate 形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluCurve_tateCurveAt_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
