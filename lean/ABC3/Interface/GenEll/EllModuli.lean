@@ -185,11 +185,34 @@ structure EllModuliData extends TorsionGaloisRepData where
 
   ★これが Galois-finite であることは **`Lemma 3.5`**(高さの不等式)と
   **`Lemma 3.6`**(初等的な評価)から `ht^Falt` が有界になり、
-  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。 -/
-  lcyclicExc : Set EllClass
-  galoisFinite_lcyclicExc : GaloisFinite lcyclicExc
-  mem_lcyclicExc : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
-    HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。
+
+  ## ★★★★★★★★2026-08-31 の訂正(第 755)——`l` の下界が要る
+
+  ☆以前ここは
+
+      lcyclicExc : Set EllClass
+      mem_lcyclicExc : ∀ E l, Prime l → SemiStable E →
+        HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+
+  であった。★★**これは強すぎて witness が作れない**
+  (`Check/GenEll/LcyclicExcTooStrong.lean` の測定):
+  `Lemma 3.5` が与えるのは `(l/14)·deg∞ ≤ ht^Falt + 2·log(l) + C′` であり、
+  `ht^Falt` の**上界**を出すには `l` が `ht^Falt` に比べて大きいこと
+  ——原文の**条件 (a)**——が要る。`l = 2` を取れば対象は無限個になる。
+
+  ★★★`Skeleton/GenEll/Section3.lean` の `lemma_3_7` は `mem_lcyclicExc` を呼ぶ時点で
+  `condA ∨ condB` を持っているので、**それを仮説として渡す**形に直した。
+  ☆`lemma_3_7`・`theorem_3_8`・`Corollary 4.3/4.4` の**statement は変わらない**。 -/
+  lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass
+  galoisFinite_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass), CompactlyBounded KV →
+    GaloisFinite (lcyclicExc C eps KV)
+  mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
+    Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
+    ((100 * (degOfDefinition E : ℝ)
+        * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+      ∨ cls E ∈ KV) →
+    cls E ∈ lcyclicExc C eps KV
   /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。
 
   原文 (GenEll p.18):
