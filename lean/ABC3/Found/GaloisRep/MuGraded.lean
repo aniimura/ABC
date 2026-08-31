@@ -216,6 +216,82 @@ theorem adicSum_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l) (f : ℕ �
   · intro h
     exact absurd (Finset.mem_range.2 hl) h
 
+/-! ## ★★★★★★★★★★★★★★★★★★Tate の尾を μ-等級付きに直す -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`tateXtail(z, q)` は μ-等級付き級数である**（`z^l = 1` のとき）。
+
+★係数は `A n a = q^n · ∑_{d ∣ n, d ≡ a (mod l)} d`。 -/
+theorem tateXtail_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) :
+    tateXtail z q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a), (d : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateXtail_eq_divisorSum z q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => d % l = a),
+        (d : R) * z ^ d
+      = ∑ d ∈ n.divisors, (d : R) * z ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : d % l = a := (Finset.mem_filter.1 hd).2
+  rw [pow_mod_eq hl hz d, hda]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★**`Y` 側の尾も同じ**。 -/
+theorem tateYtail_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) :
+    tateYtail z q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => d % l = a),
+            ((d.choose 2 : ℕ) : R))
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateYtail_eq_divisorSum z q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => d % l = a),
+        ((d.choose 2 : ℕ) : R) * z ^ d
+      = ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * z ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : d % l = a := (Finset.mem_filter.1 hd).2
+  rw [pow_mod_eq hl hz d, hda]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateXterm(t)`（`t ∈ I`）も μ-等級付き**。
+
+`t = q·z^{m}` の形のときに使う。 -/
+theorem tateXterm_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateXterm (q * z ^ m)
+      = muEval l (fun n a => if (n * m) % l = a then (n : R) * q ^ n else 0)
+          (fun n a => by
+            by_cases h : (n * m) % l = a
+            · simpa [h] using Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)
+            · simpa [h] using Submodule.zero_mem (I ^ n)) z := by
+  classical
+  rw [tateXterm_eq_adicSum (Ideal.mul_mem_right _ _ hq)]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [Finset.sum_eq_single ((n * m) % l)]
+  · rw [if_pos rfl, mul_pow, ← pow_mul, ← pow_mod_eq hl hz (n * m)]
+    ring
+  · intro a _ hne
+    rw [if_neg (fun h => hne h.symm), zero_mul]
+  · intro h
+    exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -251,6 +327,21 @@ def muEval_smul.src : ABC3.Meta.Source :=
 def adicSum_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(ζ-free な I 進和も μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXtail_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXtail は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYtail_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYtail は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXterm_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXterm(q·z^m) は μ-等級付き。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
