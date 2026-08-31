@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.AdicSeries
 import ABC3.Found.GaloisRep.TateSigma
+import ABC3.Found.GaloisRep.TatePair
 import ABC3.Found.GaloisRep.MuCharSum
 import ABC3.Meta.Claim
 
@@ -180,6 +181,87 @@ theorem sum_mu_tateXtail_w [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.P
   rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
     sum_mu_neg_pow hl hζ d, mul_assoc]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`tateXpair` を `μ_l` にわたって足す -/
+
+open Finset in
+/-- ★`ζ^i` と `qζ^{−i}` の積は `q`——`tateXpair` の対の条件。 -/
+theorem mu_pair_mul {l : ℕ} (hl : 0 < l) {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (i : ℕ) :
+    ζ ^ i * (q * ζ ^ (i * (l - 1))) = q := by
+  rw [← mul_assoc, mul_comm (ζ ^ i) q, mul_assoc, ← pow_add]
+  have hkey : i + i * (l - 1) = l * i := by
+    cases l with
+    | zero => omega
+    | succ n => simp only [Nat.add_sub_cancel]; ring
+  rw [hkey, pow_mul, hζ.pow_eq_one, one_pow, mul_one]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ∈μ_l∖{1}} X(ζ, q)` を 4 つの部分に分ける**。
+
+★`tateXpair a w q = (term a + tail a) + (term w + tail w) − 2 s₁(q)` なので、
+有限和を分配するだけである。★★右辺の 4 つはすべて
+本ファイル・`MuCharSum.lean` で **`ζ`-free に計算済み**である。 -/
+theorem sum_mu_tateXpair [IsAdicComplete I R] {l : ℕ} {ζ : R} (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * ζ ^ (i * (l - 1))) q hq
+      = ((∑ i ∈ (range l).erase 0, tateXterm (ζ ^ i))
+          + (∑ i ∈ (range l).erase 0, tateXtail (ζ ^ i) q hq))
+        + ((∑ i ∈ (range l).erase 0, tateXterm (q * ζ ^ (i * (l - 1))))
+          + (∑ i ∈ (range l).erase 0, tateXtail (q * ζ ^ (i * (l - 1))) q hq))
+        - (((range l).erase 0).card : R) * (2 * evalAdic (sigmaSeries 1) q hq) := by
+  classical
+  simp only [tateXpair]
+  rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib,
+    Finset.sum_add_distrib, Finset.sum_const, nsmul_eq_mul]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★**`Y` 側も同じ分配**。 -/
+theorem sum_mu_tateYpair [IsAdicComplete I R] {l : ℕ} {ζ : R} (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateYpair (ζ ^ i) (q * ζ ^ (i * (l - 1))) q hq
+      = ((∑ i ∈ (range l).erase 0, tateYterm (ζ ^ i))
+          + (∑ i ∈ (range l).erase 0, tateYtail (ζ ^ i) q hq))
+        - ((∑ i ∈ (range l).erase 0, tateXterm (q * ζ ^ (i * (l - 1))))
+          + (∑ i ∈ (range l).erase 0, tateXtail (q * ζ ^ (i * (l - 1))) q hq))
+        - ((∑ i ∈ (range l).erase 0, tateYterm (q * ζ ^ (i * (l - 1))))
+          + (∑ i ∈ (range l).erase 0, tateYtail (q * ζ ^ (i * (l - 1))) q hq))
+        + (((range l).erase 0).card : R) * evalAdic (sigmaSeries 1) q hq := by
+  classical
+  simp only [tateYpair]
+  rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_sub_distrib,
+    Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib,
+    Finset.sum_const, nsmul_eq_mul]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ∈μ_l∖{1}} X(ζ, q)` は定数項を除いて `ζ` を含まない**。
+
+★★★これが `tateModel_of_quot_mu`（葉 1）の手順 1・2 の到達点である。
+右辺の 3 つの `adicSum` はどれも係数に `[l ∣ d]·l − 1` を持ち、
+`l ∣ d` の項だけが残る——これが `q` 展開を `q^l` 展開に付け替える。
+
+☆定数項 `∑_ζ tateXterm(ζ)` は `MuCharSum.lean` の
+`twelve_mul_sum_mu_ringInverse` で `12·(それ) = −(l²−1)` と定まっている。 -/
+theorem sum_mu_tateXpair_eq [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * ζ ^ (i * (l - 1))) q hq
+      = (∑ i ∈ (range l).erase 0, tateXterm (ζ ^ i))
+        + adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+              (d : R) * ((if l ∣ d then (l : R) else 0) - 1))
+            (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+        + adicSum (I := I)
+            (fun n => (n : R) * q ^ n * ((if l ∣ n then (l : R) else 0) - 1))
+            (fun n => Ideal.mul_mem_right _ _
+              (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)))
+        + adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+              (d : R) * (q ^ d * ((if l ∣ d then (l : R) else 0) - 1)))
+            (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+        - ((l - 1 : ℕ) : R) * (2 * evalAdic (sigmaSeries 1) q hq) := by
+  classical
+  have hcard : ((range l).erase 0).card = l - 1 := by
+    rw [Finset.card_erase_of_mem (Finset.mem_range.2 hl.pos), Finset.card_range]
+  rw [sum_mu_tateXpair q hq, sum_mu_tateXtail hl hζ q hq,
+    sum_mu_tateXterm_w hl hζ q hq, sum_mu_tateXtail_w hl hζ q hq, hcard]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mu_tateXtail.src : ABC3.Meta.Source :=
@@ -205,6 +287,26 @@ def sum_mu_tateYterm_w.src : ABC3.Meta.Source :=
 def sum_mu_tateXtail_w.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(w 側の尾の μ_l 和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def mu_pair_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^i と qζ^{−i} の積は q。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateXpair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_ζ X(ζ,q) を 4 つの部分に分ける。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateYpair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_ζ Y(ζ,q) の分配。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateXpair_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_ζ X(ζ,q) は定数項を除いて ζ-free。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def adicSum_zero.src : ABC3.Meta.Source :=
