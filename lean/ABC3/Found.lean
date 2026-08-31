@@ -386,6 +386,7 @@ import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Found.GenEll.GalRepClosed
 import ABC3.Found.GenEll.GalRepContinuity
 import ABC3.Found.GenEll.PointVariableChange
+import ABC3.Found.GenEll.PointTransport
 import ABC3.Found.GenEll.ArchNormTotal
 import ABC3.Found.GenEll.LocalHeightRamified
 import ABC3.Found.GenEll.BDClass

@@ -2539,3 +2539,11 @@ theorem foo : ... := ...
 `has already been declared` で落ちた——`Found/GenEll/Velu.lean:740` に既にあった。
 ★CLAUDE.md の「在庫」の通り、**書く前に `node tools/decl-index.mjs` →
 `.cache/decl-index.txt` を grep する**。名前が思いつく補題ほど既にある。
+
+## `Point` の `•` は `open scoped Classical` の側で取れている（第 966）
+
+`rhPoint_nsmul` などの `n • Pt` は、宣言側のファイルが `open scoped Classical`
+なので **Classical の `DecidableEq` から来る加法群**の `SMul` を使っている。
+★呼ぶ側で `[DecidableEq F]` を束縛すると別インスタンスになり、`rw` が
+「パターンが見つからない」で落ちる。
+☆呼ぶ側も `open scoped Classical in` にして `DecidableEq` は束縛しないこと。
