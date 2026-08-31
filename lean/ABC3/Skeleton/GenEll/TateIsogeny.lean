@@ -140,9 +140,11 @@ def tateParam_quot_mu.needs : List ProofObligation :=
     .implicitStep
       ("★★hquot : True はまだ空欄である——「H が各悪い素点で μ_l に対応する」" ++
        "(原文の global rank one subgroup)を型に書く段") 5,
+    .citation "[ABC3]" "evalAdic_injective_of_coeff_one(f(q) = q + O(q²) なら単射、第 875、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.evalAdic_injective_of_coeff_one") 1,
     .implicitStep
-      ("★q ↦ j(E_q) の単射性——j(E_q) = 1/q + 744 + … の主要項から出るが、" ++
-       "mathlib にも本プロジェクトにも無い") 4 ]
+      ("☆残るは `1/j = Δ/c₄³` をべき級数として書き、その 1 次の係数が 1 である" ++
+       "ことを見る段（Δ = q + O(q²)、c₄ = 1 + O(q)）") 3 ]
 
 def tateModel_of_quot_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,

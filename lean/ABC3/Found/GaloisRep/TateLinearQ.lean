@@ -155,6 +155,38 @@ theorem tateCurveAt_a4_sub_mem [IsAdicComplete I R] {q q' : R} (hq : q ∈ I) (h
   rw [tateCurveAt_a4_eq, tateCurveAt_a4_eq]
   exact evalAdic_sub_mem tateA4 hq hq' k hqq
 
+/-! ## ★★★★★★★★形式逆関数定理（`I` 進版） -/
+
+/-- ★★★★★★★★**`f(q) = q + O(q²)` なら `q ↦ f(q)` は `I` の上で単射**。
+
+★道は `evalAdic_sub_linear_mem` だけである: `a − b ∈ I^k` なら
+
+    `f(a) − f(b) − 1·(a − b) ∈ I^{k+1}`
+
+なので `f(a) = f(b)` なら `a − b ∈ I^{k+1}`。帰納してすべての `k` で成り立ち、
+Hausdorff で `a = b` 。
+
+☆これが `Lemma 3.5` の残る義務のひとつ
+「`q ↦ j(E_q)` の単射性」の中身である——`1/j = Δ/c₄³ = q + O(q²)`。 -/
+theorem evalAdic_injective_of_coeff_one [IsAdicComplete I R] (f : PowerSeries ℤ)
+    (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = 1)
+    {a b : R} (ha : a ∈ I) (hb : b ∈ I)
+    (h : evalAdic f a ha = evalAdic f b hb) : a = b := by
+  have key : ∀ k : ℕ, a - b ∈ I ^ k := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ n ih =>
+        have hm := evalAdic_sub_linear_mem f hf0 ha hb n ih
+        rw [h, sub_self, hf1] at hm
+        simp only [Int.cast_one, one_mul, zero_sub] at hm
+        exact neg_mem_iff.1 hm
+  have hz : a - b = 0 := by
+    refine IsHausdorff.haus' (I := I) (a - b) (fun n => ?_)
+    rw [SModEq.sub_mem, sub_zero]
+    simpa using key n
+  exact sub_eq_zero.1 hz
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def evalAdic_sub_linear_mem.src : ABC3.Meta.Source :=
