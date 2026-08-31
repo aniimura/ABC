@@ -1079,6 +1079,7 @@ import ABC3.Found.GaloisRep.GalRepBasis
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.CycloDisjoint
 import ABC3.Found.GenEll.JScale
+import ABC3.Found.GenEll.QuadTwist
 import ABC3.Found.GaloisRep.TorsionIdeal
 import ABC3.Found.GaloisRep.GenericPoint
 import ABC3.Found.GaloisRep.Translate
