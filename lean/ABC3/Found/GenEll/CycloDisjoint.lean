@@ -88,6 +88,55 @@ theorem finrank_adjoin_cyclo (A B : IntermediateField ℚ M) (l k : ℕ) [Fact l
   rw [this]
   exact IsCyclotomicExtension.Rat.finrank (l ^ k) A
 
+/-- ★★★★★★★★★★★★★★**`[L(ζ) : L] = φ(l^k)`**（原始根の形）。 -/
+theorem finrank_adjoin_zeta (B : IntermediateField ℚ M) (l k : ℕ) [Fact l.Prime]
+    [NeZero (l ^ k)] {ζ : M} (hζ : IsPrimitiveRoot ζ (l ^ k))
+    (hL : ¬ (l : ℤ) ∣ NumberField.discr B) :
+    Module.finrank B (IntermediateField.adjoin B ({ζ} : Set M)) = (l ^ k).totient := by
+  set A : IntermediateField ℚ M := IntermediateField.adjoin ℚ {ζ} with hA
+  haveI : IsCyclotomicExtension {l ^ k} ℚ A := hζ.intermediateField_adjoin_isCyclotomicExtension ℚ
+  have hset : IntermediateField.adjoin B (A : Set M)
+      = IntermediateField.adjoin B ({ζ} : Set M) := by
+    apply le_antisymm
+    · rw [IntermediateField.adjoin_le_iff]
+      intro x hx
+      have : A ≤ (IntermediateField.adjoin B ({ζ} : Set M)).restrictScalars ℚ := by
+        rw [hA, IntermediateField.adjoin_le_iff]
+        rintro y rfl
+        exact IntermediateField.subset_adjoin B _ rfl
+      exact this hx
+    · rw [IntermediateField.adjoin_le_iff]
+      rintro y rfl
+      exact IntermediateField.subset_adjoin B _ (IntermediateField.subset_adjoin ℚ _ rfl)
+  rw [← hset]
+  exact finrank_adjoin_cyclo A B l k hL
+
+/-- ★★★★★★★★★★★★★★★★★★**`cyclotomic (l^k)` は `L` 上既約**。
+
+★★これが葉 4 の目標である。`IsCyclotomicExtension.autEquivPow` の仮説がこれ。 -/
+theorem cyclotomic_irreducible_of_not_dvd_discr (B : IntermediateField ℚ M) (l k : ℕ)
+    [Fact l.Prime] [NeZero (l ^ k)] {ζ : M} (hζ : IsPrimitiveRoot ζ (l ^ k))
+    (hL : ¬ (l : ℤ) ∣ NumberField.discr B) :
+    Irreducible (Polynomial.cyclotomic (l ^ k) B) := by
+  have hint : IsIntegral B ζ := IsIntegral.tower_top (Algebra.IsIntegral.isIntegral (R := ℚ) ζ)
+  have hroot : Polynomial.aeval ζ (Polynomial.cyclotomic (l ^ k) (↥B)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map, Polynomial.map_cyclotomic]
+    exact hζ.isRoot_cyclotomic (NeZero.pos _)
+  have hdvd : minpoly (↥B) ζ ∣ Polynomial.cyclotomic (l ^ k) (↥B) :=
+    minpoly.dvd (↥B) ζ hroot
+  have hdeg : (minpoly (↥B) ζ).natDegree = (l ^ k).totient := by
+    rw [← IntermediateField.adjoin.finrank hint]
+    exact finrank_adjoin_zeta B l k hζ hL
+  have hcyc : (Polynomial.cyclotomic (l ^ k) (↥B)).natDegree = (l ^ k).totient :=
+    Polynomial.natDegree_cyclotomic _ _
+  have heq : minpoly (↥B) ζ = Polynomial.cyclotomic (l ^ k) (↥B) := by
+    refine Polynomial.eq_of_monic_of_associated (minpoly.monic hint)
+      (Polynomial.cyclotomic.monic _ _) ?_
+    exact (Polynomial.associated_of_dvd_of_natDegree_le hdvd
+      (Polynomial.cyclotomic_ne_zero _ _) (by rw [hdeg, hcyc]))
+  rw [← heq]
+  exact minpoly.irreducible hint
+
 def isCoprime_of_isUnit_left.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8(配管——単元は何とでも互いに素)",
@@ -101,6 +150,16 @@ def discr_cyclo_isCoprime.src : Source :=
 def finrank_adjoin_cyclo.src : Source :=
   { paper := "GenEll", pdfPage := 20,
     item := "Theorem 3.8([L(ζ_{l^k}) : L] = φ(l^k))",
+    sectionId := "genell-thm-3-8" }
+
+def finrank_adjoin_zeta.src : Source :=
+  { paper := "GenEll", pdfPage := 20,
+    item := "Theorem 3.8([L(ζ) : L] = φ(l^k)——原始根の形)",
+    sectionId := "genell-thm-3-8" }
+
+def cyclotomic_irreducible_of_not_dvd_discr.src : Source :=
+  { paper := "GenEll", pdfPage := 20,
+    item := "Theorem 3.8(cyclotomic (l^k) は L 上既約)",
     sectionId := "genell-thm-3-8" }
 
 def cyclo_linearDisjoint.src : Source :=
