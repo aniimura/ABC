@@ -96,28 +96,24 @@ def tateModel_of_quot_mu.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def tateModel_of_quot_mu.needs : List ProofObligation :=
-  [ .implicitStep
-      ("★★★`q`-展開の恒等式: tateA4(q^l) = tateA4(q) − 5v、" ++
-       "tateA6(q^l) = tateA6(q) − v − 7w（b₂ = 1）。" ++
-       "v・w は μ_l の点にわたる Vélu の和である") 8,
-    .citation "[ABC3]" "sum_mu_tateXpair_eq（∑_ζ X(ζ,q) は定数項を除いて ζ-free、第 795）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_tateXpair_eq") 1,
-    .citation "[ABC3]" "sum_mu_tateYpair_eq（∑_ζ Y(ζ,q) も同じ、第 796）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_tateYpair_eq") 1,
-    .citation "[ABC3]" "twelve_mul_sum_mu_ringInverse（12·∑ ζ/(1−ζ)² = −(l²−1)、第 794）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.twelve_mul_sum_mu_ringInverse") 1,
-    .citation "[ABC3]" "sum_mu_frac_cube（∑ ζ²/(1−ζ)³ = (l²−1)/24、第 797）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_frac_cube") 1,
-    .citation "[ABC3]" "sum_mu_adicSum_mul（積を μ_l 上で足す道具、第 798）"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_adicSum_mul") 1,
+  [ .citation "[ABC3]" "sum_mu_veluV2（v = ∑_ζ(3X² + a₄ − Y) は有限個の係数の計算、第 810）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluV2") 1,
+    .citation "[ABC3]" "sum_mu_veluW（2w も同じ、第 811）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_veluW") 1,
+    .citation "[ABC3]" "veluCurve_tateCurveAt_eq（変数変換は要らない、第 718）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluCurve_tateCurveAt_eq") 1,
     .implicitStep
-      ("★★★進捗（2026-08-31、第 786-798）: 手順 1・2は**済んだ**。" ++
-       "μ_l 上の指標和（MuCharSum.lean、24 本）と " ++
-       "I 進和と有限和の可換性（AdicFinsetSum.lean）により、" ++
-       "∑_ζ X(ζ,q)・∑_ζ Y(ζ,q) はどちらも `[l ∣ d]·l − 1` を係数に持つ " ++
-       "adicSum になった。定数項も両方計算済み。" ++
-       "☆残るのは手順 3——v = ∑(3x² + a₄ − y)・w の組み立てと a₄・a₆ の照合。" ++
-       "★そのためには ζ-次数を mod l で揃えた「μ-等級付き I 進級数」の枠が要る") 8,
+      ("★★★残るのは**手順 4（係数の照合）だけ**である（2026-08-31、第 786-811 で 1・2・3 を完了）。"
+       ++ "tateA4 = −5s₃ なので tateA4(q^l) = tateA4(q) − 5v は次と同値:"
+       ++ "★**l·veluVC n 0 − ∑_{a<l} veluVC n a = (σ₃(n) − [l∣n]·σ₃(n/l))·q^n**。"
+       ++ "同様に a₆ の式は veluWC についての式になる。"
+       ++ "☆これは古典的な Tate/Vélu の q 展開恒等式そのものであり、"
+       ++ "muConv（畳み込み）の中で約数和の積を展開する計算になる") 10,
+    .implicitStep
+      ("☆別道（測定済み、第 812）: ℂ 解析側に落とす道もある。"
+       ++ "Found/GenEll/Uniformization.lean の latticeCurve_eq_veluQuotientFull（sorry なし）は"
+       ++ "格子曲線の Vélu の商を与えるが、**g₂・g₃ の変換式を仮説に持っている**ので"
+       ++ "係数の照合を回避できない。★現時点では q 展開の道の方が短い") 2,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel（この結論の消費側、§9-1153）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2 ]
 
