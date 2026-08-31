@@ -9,6 +9,7 @@ import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Found.GaloisRep.ResChar
 import ABC3.Found.GaloisRep.ThetaDiscr
 import ABC3.Found.GaloisRep.NorthcottHtJ
+import ABC3.Found.GenEll.Velu
 import ABC3.Meta.Claim
 
 /-!
@@ -951,6 +952,45 @@ theorem sum_log_ramPrimes_le (x : RealizedClass) :
 
 end RealizedClass
 
+/-! ## ★★★★★★★★★★★★★★`quotLCyclic` 欄 -/
+
+/-- ★★★★**Vélu の商を `SSCurve` として**——定義体は変えない。 -/
+noncomputable def quotSSCurve (E : SSCurve) (S : Finset (E.fld × E.fld))
+    (hell : (veluQuotientFull E.W S).IsElliptic)
+    (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld), SemistableAt p (veluQuotientFull E.W S)) :
+    SSCurve :=
+  { K := E.K, W := veluQuotientFull E.W S, isEll := hell, ss := hss }
+
+@[simp] theorem quotSSCurve_fld (E : SSCurve) (S : Finset (E.fld × E.fld)) (hell) (hss) :
+    (quotSSCurve E S hell hss).fld = E.fld := rfl
+
+/-- ★★★★★**`y` は `x` の `l`-巡回部分群による Vélu の商の類である**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`S` は `H∖{O}` の座標の集合であり、`|S| + 1 = l` が「位数 `l` の巡回群」の内容である。
+☆`S` が実際に部分群の座標集合であることは、ここでは要求していない
+——`degInf_quotLCyclic` 欄がそれを要求する側である。 -/
+def IsQuotClassJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
+  ∃ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld))
+    (hell : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic)
+    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)),
+    S.card + 1 = l ∧ (quotSSCurve x.rep.toSSCurve S hell hss).j = y
+
+open scoped Classical in
+/-- ★★★★★**`quotLCyclic` 欄**——商の類（無ければ自分自身）。 -/
+noncomputable def quotLCyclicJ (x : RealizedClass) (l : ℕ) : RealizedClass :=
+  if h : ∃ y : RealizedClass, IsQuotClassJ x l y.1 then h.choose else x
+
+open scoped Classical in
+theorem quotLCyclicJ_spec (x : RealizedClass) (l : ℕ)
+    (h : ∃ y : RealizedClass, IsQuotClassJ x l y.1) :
+    IsQuotClassJ x l (quotLCyclicJ x l).1 := by
+  rw [quotLCyclicJ, dif_pos h]
+  exact h.choose_spec
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -988,6 +1028,16 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def quotSSCurve.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商を SSCurve として——定義体は変えない)",
+    sectionId := "genell-lemma-3-5" }
+
+def quotLCyclicJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(quotLCyclic 欄——l-巡回部分群による商の類)",
+    sectionId := "genell-lemma-3-5" }
 
 def RealizedClass.logDiffMell.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,
