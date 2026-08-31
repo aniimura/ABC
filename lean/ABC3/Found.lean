@@ -388,6 +388,7 @@ import ABC3.Found.GenEll.Sl2Adjoint
 import ABC3.Found.GenEll.Sl2Congruence
 import ABC3.Found.GenEll.Sl2Level
 import ABC3.Found.GenEll.Sl2Padic
+import ABC3.Found.GenEll.GLSurjective
 import ABC3.Found.GenEll.Thm38Bridge
 import ABC3.Found.GenEll.Thm38Alpha
 import ABC3.Found.GenEll.Thm38Kummer
