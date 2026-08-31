@@ -181,5 +181,39 @@
         "☆別筋: Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式（Lemma 3.5 の hdeg）。"
       ]
     }
+  },
+  "fieldStatus20260831": {
+    "_comment": "★★★★★★★★★★第 741-750 の実装で埋まった欄と残る欄。Curve := RealizedClass（実現される類、代表元は定義体の次数が最小のもの）、EllClass := ℂ。",
+    "設計": {
+      "EllClass": "ℂ（j 不変量）",
+      "Curve": "RealizedClass = {x : ℂ // ∃ E : DegCurve, E.j = x}。DegCurve = 半安定＋乗法還元をもつ楕円曲線。各類に定義体の次数が最小の代表元 rep を取る。",
+      "cls": "Subtype.val",
+      "htInf": "12 · faltingsHeight（これで htInf_bdeq_faltings が C = 0 で自明になる）",
+      "GaloisFinite": "Set.Finite（原文より弱い——結論側なので安全）",
+      "CompactlyBounded": "Bornology.IsBounded"
+    },
+    "埋まった欄": [
+      "EllClass / Curve / cls / degOfDefinition / faltingsHeight / degInf / htInf / degLe",
+      "SemiStable / HasMultRed / HasPotMultRed / PrimeToLocalHeights / PrimeToMultPrimes / MinimalField",
+      "PrimeToRamification / CompactlyBounded / GaloisFinite / logDiffMell",
+      "torsionExt 群 5 本（cls_ / degOfDefinition_ / semiStable_ / hasMultRed_ / primeToLocalHeights_）",
+      "degOfDefinition_pos / degInf_nonneg / faltingsHeight_bddBelow",
+      "degInf_le_htInf / htInf_bdeq_faltings / primeToLocalHeights_of_lt",
+      "multCard / multCard_pos / multPrime / multPrime_prime / localHt / localHt_pos / sum_localHt_eq",
+      "badPrimes / badPrimes_prime / primeTo_badPrimes / sum_log_badPrimes_le",
+      "ramPrimes / ramPrimes_prime / badPrimes_subset_ramPrimes / primeTo_ramPrimes / sum_log_ramPrimes_le",
+      "noMultRedExc 群 3 本 / galoisFinite_union / compactlyBounded_empty"
+    ],
+    "残る欄": {
+      "northcott": "☆`Skeleton/GenEll/NorthcottJ.lean` の `northcott_htJ` 1 本に帰着済み（§9-1170、第 743）。mathlib に `Northcott` の instance が具体的な体に対して 1 つも無いことを測定済み。",
+      "HasLCyclic / quotLCyclic 群": "☆`Lemma 3.5` の内容。`degInf_quotLCyclic` は Tate の q-展開（`Skeleton/GenEll/TateIsogeny.lean` の `tateModel_of_quot_mu`）に帰着する。`faltingsHeight_quotLCyclic` は `htFalt_veluQuotientFull_le`（第 704）が受け皿。",
+      "lcyclicExc 群": "☆`Lemma 3.5` ＋ Northcott。",
+      "ImageContainsSL2 群": "☆`Theorem 3.8` の核。`Found/GaloisRep/GalRep.lean` の `galRep` と `Found/GenEll/Lemma31.lean` の `Lemma 3.1, (iv)` が素材。"
+    },
+    "測定して分かったこと": [
+      "★★界面は `deg∞ > 0` を強制する（`Check/GenEll/EllModuliDegInfPos.lean`、第 745）——§4 の帳簿 4 本から出る。したがって Curve に「至る所良還元」の曲線は入れられない。",
+      "★★`logDiffMell` は類の函数でなければならないので、Curve は定義体が類で決まるものに限らねばならない（第 749）——原文 Corollary 4.3 の仮説 MinimalField そのもの。",
+      "★★`sum_log_ramPrimes_le` の係数 3 の内訳は 1（分岐素数）＋2（d 以下の素数、Chebyshev ＋ Hermite–Minkowski）である（第 750）。"
+    ]
   }
 }
