@@ -1036,6 +1036,72 @@ theorem tateXC_zero_prime {l : ℕ} (hl : l.Prime) (q : R) (n : ℕ) (hn : n ≠
   push_cast
   ring
 
+open Finset in
+/-- ★`tateXtermC` は `n ≠ 0` で消える。 -/
+theorem tateXtermC_of_ne_zero {l : ℕ} {n : ℕ} (hn : n ≠ 0) (a : ℕ) :
+    tateXtermC (R := R) l n a = 0 := by
+  simp [tateXtermC, hn]
+
+/-- ★`invSubOneC` も `n ≠ 0` で消える。 -/
+theorem invSubOneC_of_ne_zero {l : ℕ} {n : ℕ} (hn : n ≠ 0) (a : ℕ) :
+    invSubOneC (R := R) l n a = 0 := by
+  simp [invSubOneC, hn]
+
+open Finset in
+/-- ★★★★★★**`muConv (tateXtermC) (invSubOneC)` は `n ≠ 0` で消える**。 -/
+theorem muConv_termC_of_ne_zero {l : ℕ} {n : ℕ} (hn : n ≠ 0) (c : ℕ) :
+    muConv l (tateXtermC (R := R) l) (invSubOneC (R := R) l) n c = 0 := by
+  classical
+  simp only [muConv]
+  refine Finset.sum_eq_zero (fun k hk => Finset.sum_eq_zero (fun a _ =>
+    Finset.sum_eq_zero (fun b _ => ?_)))
+  by_cases h : (a + b) % l = c
+  · rw [if_pos h]
+    by_cases hk0 : k = 0
+    · subst hk0
+      rw [invSubOneC_of_ne_zero (by simpa using hn), mul_zero]
+    · rw [tateXtermC_of_ne_zero hk0, zero_mul]
+  · rw [if_neg h]
+
+open Finset in
+/-- ★★★★★★★★★★★★**`tateYC` の全係数和は `n ≠ 0` で `0`**。 -/
+theorem sum_tateYC_of_ne_zero {l : ℕ} (hl : 0 < l) (q : R) {n : ℕ} (hn : n ≠ 0) :
+    ∑ a ∈ range l, tateYC l q n a = 0 := by
+  classical
+  rw [sum_tateYC hl]
+  refine Finset.sum_eq_zero (fun k hk => ?_)
+  by_cases hk0 : k = 0
+  · subst hk0
+    have : ∑ b ∈ range l, invSubOneC (R := R) l (n - 0) b = 0 := by
+      refine Finset.sum_eq_zero (fun b _ => invSubOneC_of_ne_zero (by simpa using hn) b)
+    rw [this, mul_zero]
+  · have : ∑ a ∈ range l, tateXtermC (R := R) l k a = 0 :=
+      Finset.sum_eq_zero (fun a _ => tateXtermC_of_ne_zero hk0 a)
+    rw [this, zero_mul]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`l` が素数のときの `tateYC n 0`**（`n ≥ 1`）。
+
+    `tateYC n 0 = q^n·(σ₁(n) − l·σ₁(n/l)·[l∣n])`
+
+★★`C(d,2)` の項は**打ち消し合う**——`Y` の尾と `w` 側の `Y` の尾が
+同じフィルタになるからである。 -/
+theorem tateYC_zero_prime {l : ℕ} (hl : l.Prime) (q : R) (n : ℕ) (hn : n ≠ 0) :
+    tateYC l q n 0
+      = q ^ n * (((∑ d ∈ n.divisors, d : ℕ) : R)
+          - (if l ∣ n then (l : R) * ((∑ e ∈ (n / l).divisors, e : ℕ) : R) else 0)) := by
+  classical
+  rw [tateYC_zero, muConv_termC_of_ne_zero hn, filter_mod_eq_filter_dvd hl,
+    filter_mul_pred_mod_eq_filter_dvd hl]
+  have hfil : (∑ d ∈ n.divisors.filter (fun d => l ∣ d), (d : R))
+      = if l ∣ n then (l : R) * ((∑ e ∈ (n / l).divisors, e : ℕ) : R) else 0 := by
+    rw [← Nat.cast_sum, sum_divisors_dvd l n hl hn]
+    by_cases h : l ∣ n <;> simp [h]
+  rw [hfil, Nat.cast_sum]
+  push_cast
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -1286,6 +1352,31 @@ def tateYtail_pow_eq_muEval.src : ABC3.Meta.Source :=
 def tateXC_zero_prime.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(l が素数のときの tateXC n 0。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXtermC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXtermC は n ≠ 0 で消える。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def invSubOneC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(invSubOneC も n ≠ 0 で消える。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def muConv_termC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(定数項の畳み込みも n ≠ 0 で消える。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_tateYC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYC の全係数和は n ≠ 0 で 0。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYC_zero_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l が素数のときの tateYC n 0。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
