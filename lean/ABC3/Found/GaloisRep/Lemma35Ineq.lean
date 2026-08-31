@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.Lemma35Concrete
 import ABC3.Found.GaloisRep.HtFaltJ
+import ABC3.Found.GenEll.QuadTwist
 
 /-!
 # 第 901 ブロック —— **★★★★★★★★★★★★★★★★★★★★`Lemma 3.5` に等号は要らない
@@ -338,7 +339,36 @@ theorem minDeltaExp_eq_mul_of_twist (p : HeightOneSpectrum (𝓞 L))
   rw [minDeltaExp_eq_of_j_eq p E' F' hE' hF' hj', h,
     minDeltaExp_eq_of_j_eq p E F hE hF hj]
 
+/-! ## ★★★★★★捧りと `jExp`・`minDeltaExp` -/
+
+/-- ★★**捧りで `v_p(j)` は変わらない**。
+
+☆`quadTwist_j`（第 920）と `jExp_congr_j`（証明済み）を並べるだけである。 -/
+theorem jExp_quadTwist (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    [W.IsCharNeTwoNF] [W.IsElliptic] {d : L} (hd : d ≠ 0)
+    [(ABC3.Found.GenEll.quadTwist W d).IsElliptic] :
+    jExp p (ABC3.Found.GenEll.quadTwist W d) = jExp p W :=
+  jExp_congr_j p _ W (ABC3.Found.GenEll.quadTwist_j W hd)
+
+/-- ★★★★**捧りで `v_p(Δ_min)` も変わらない**（両方半安定なら）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが非分裂の降下で実際に使う形である。 -/
+theorem minDeltaExp_quadTwist (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    [W.IsCharNeTwoNF] [W.IsElliptic] {d : L} (hd : d ≠ 0)
+    [(ABC3.Found.GenEll.quadTwist W d).IsElliptic]
+    (hW : SemistableAt p W) (hT : SemistableAt p (ABC3.Found.GenEll.quadTwist W d)) :
+    minDeltaExp p (ABC3.Found.GenEll.quadTwist W d) = minDeltaExp p W :=
+  minDeltaExp_eq_of_j_eq p _ W hT hW (ABC3.Found.GenEll.quadTwist_j W hd)
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_quadTwist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(捧りで v_p(Δ_min) は変わらない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_eq_of_j_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
