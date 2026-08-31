@@ -32077,3 +32077,46 @@ htFaltOf_congr_j_of_emb :
 * `EllModuliData` の残る大物: `northcott`・`degInf_le_htInf`・`htInf_bdeq_faltings`・
   `logDiffMell`・`degLe`・`GaloisFinite`・`CompactlyBounded`
 * 別筋: `Skeleton/GenEll/TateIsogeny.lean` の `q`-展開の恒等式（`Lemma 3.5` の `hdeg`）
+
+## 2026-08-31（第 742-762）—— `EllModuliData` witness の残りが **5 本の葉**になった
+
+Skeleton の `lemma_3_7`・`theorem_3_8`・`corollary_4_3/4_4` はすべて `∀ D : EllModuliData`
+の下で**証明済み**なので、§3・§4 の残り 5 件は「witness を 1 つ作れば同時に動く」。
+第 742-762 でその欄を集中的に埋めた。
+
+### 埋まったもの
+
+* **データ欄 29 本すべて**（`EllClass := ℂ`、`Curve := RealizedClass`＝実現される類、
+  代表元は定義体の次数が最小のもの）
+* **証明欄 20 本以上**（`northcott`・`sum_localHt_eq`・`sum_log_badPrimes_le`・
+  `sum_log_ramPrimes_le`・`degInf_le_htInf`・`htInf_bdeq_faltings`・
+  `faltingsHeight_bddBelow`・`primeToLocalHeights_of_lt`・`torsionExt` 群 5 本・
+  `noMultRedExc` 群 3 本 ほか）——すべて**無条件**
+
+### 残る 5 本の葉
+
+| # | 命題 | どこ | 消費する側 |
+|---|---|---|---|
+| 1 | `v_p(j′) = l·v_p(j)`（悪い素点） | `Skeleton/GenEll/TateIsogeny.lean` の `jExp_velu_bad` | `Lemma 3.5` |
+| 2 | `0 ≤ v_p(j′)`（同種は良還元を保つ） | 同 `jExp_velu_good` | `Lemma 3.5` |
+| 3 | 局所理論の行列表示（`α` が mod `l` 像に入る） | `imageContainsSL2J_of_alpha` の仮説 | `Theorem 3.8` |
+| 4 | 円分指標の全射性（`l` が `L` で不分岐） | `imageSurjectiveJ_of_containsSL2` の仮説 | `Corollary 4.3` |
+| 5 | 像が閉部分群（profinite 群の連続像） | 同 `hclosed` | `Theorem 3.8` |
+
+★1 と 2 が済めば `Lemma 3.5` が閉じ、`lcyclicExc` 群も閉じる
+（(a)(b) 両側の高さ評価は第 757 で、`northcott` は第 753 で済んでいる）。
+
+### 界面の欠陥 4 件（witness を作って初めて見えた）
+
+1. **界面は `deg∞ > 0` を強制する**（`Check/GenEll/EllModuliDegInfPos.lean`）
+   —— §4 の帳簿 4 本から出る。`Curve` に「至る所良還元」は入れられない。
+2. **`mem_lcyclicExc` が `l` の下界を落としていた**（`Check/GenEll/LcyclicExcTooStrong.lean`）
+   —— `l = 2` で反例が無限個。★下流の statement を 1 文字も変えずに訂正できた。
+3. **`GaloisFinite` は「各次数で有限」でなければならない**（原文の `Exc_d` の形）。
+4. **`CompactlyBounded` は `h∞(j)` の有界性**（`j` 自身の有界性では共役が抑えられない）。
+
+### 在庫の反省 2 件
+
+* `IsDedekindDomain.HeightOneSpectrum.under` は mathlib にあった
+* **Northcott は本プロジェクトが既に無条件で持っていた**（`finite_j_of_htFalt_le`）
+  —— 立てた節点を削除した
