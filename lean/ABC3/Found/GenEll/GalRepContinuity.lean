@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GaloisRep.TranslateEquiv
+import ABC3.Interface.GaloisRep.Torsion
+import Mathlib.FieldTheory.KrullTopology
 import ABC3.Meta.Claim
 
 /-!
@@ -58,7 +60,71 @@ theorem galPoint_eq_id_of_fixed (W : WeierstrassCurve K) (σ : L ≃ₐ[K] L)
     ∀ P ∈ S, galPoint W σ P = P :=
   fun P hP => galPoint_eq_of_fixed W σ P (h P hP)
 
+/-! ## ★★★★★★★★捩れ点の座標が生成する有限拡大 -/
+
+/-- ★点の座標の集合（`0` では空）。 -/
+def ptCoordSet (W : WeierstrassCurve K) : (W.baseChange L).toAffine.Point → Set L
+  | .zero => ∅
+  | .some x y _ => {x, y}
+
+theorem finite_ptCoordSet (W : WeierstrassCurve K) (P : (W.baseChange L).toAffine.Point) :
+    (ptCoordSet W P).Finite := by
+  cases P with
+  | zero => exact Set.finite_empty
+  | some x y _ => exact (Set.finite_singleton y).insert x
+
+/-- ★★`σ` が座標集合を固定するなら点を動かさない。 -/
+theorem galPoint_eq_of_fixed_coordSet (W : WeierstrassCurve K) (σ : L ≃ₐ[K] L)
+    (P : (W.baseChange L).toAffine.Point) (h : ∀ z ∈ ptCoordSet W P, σ z = z) :
+    galPoint W σ P = P := by
+  refine galPoint_eq_of_fixed W σ P ?_
+  intro x y hns hP
+  subst hP
+  refine ⟨h x ?_, h y ?_⟩
+  · exact Or.inl rfl
+  · exact Or.inr rfl
+
+/-- ★★★**`n`-捩れ点の座標全体**。 -/
+def torsionCoordSet (W : WeierstrassCurve K) (n : ℕ) : Set L :=
+  ⋃ P ∈ (torsionPoints (W.baseChange L) n : Set ((W.baseChange L).toAffine.Point)),
+    ptCoordSet W P
+
+theorem finite_torsionCoordSet (W : WeierstrassCurve K) (n : ℕ)
+    (hfin : (torsionPoints (W.baseChange L) n : Set ((W.baseChange L).toAffine.Point)).Finite) :
+    (torsionCoordSet W (L := L) n).Finite :=
+  hfin.biUnion (fun P _ => finite_ptCoordSet (L := L) W P)
+
+/-- ★★★★★★★★★★**捩れ点の座標が生成する有限拡大**——その固定部分群は
+`n`-捩れに自明に作用する。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★これが `galRep` の連続性の**第 2 段**である
+（Krull 位相の開部分群は有限次中間体の `fixingSubgroup` だから）。 -/
+theorem exists_finiteDimensional_fixing_torsion [Algebra.IsAlgebraic K L]
+    (W : WeierstrassCurve K) (n : ℕ)
+    (hfin : (torsionPoints (W.baseChange L) n : Set ((W.baseChange L).toAffine.Point)).Finite) :
+    ∃ F : IntermediateField K L, FiniteDimensional K F ∧
+      ∀ σ ∈ F.fixingSubgroup, ∀ P ∈ torsionPoints (W.baseChange L) n,
+        galPoint W σ P = P := by
+  haveI : Finite (torsionCoordSet W (L := L) n) := (finite_torsionCoordSet W n hfin).to_subtype
+  refine ⟨IntermediateField.adjoin K (torsionCoordSet W (L := L) n), ?_, ?_⟩
+  · exact IntermediateField.finiteDimensional_adjoin
+      (fun x _ => Algebra.IsIntegral.isIntegral x)
+  · intro σ hσ P hP
+    refine galPoint_eq_of_fixed_coordSet W σ P (fun z hz => ?_)
+    have hmem : z ∈ IntermediateField.adjoin K (torsionCoordSet W (L := L) n) := by
+      refine IntermediateField.subset_adjoin _ _ ?_
+      exact Set.mem_biUnion hP hz
+    exact (IntermediateField.mem_fixingSubgroup_iff _ _).1 hσ z hmem
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_finiteDimensional_fixing_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(捩れ点の座標が生成する有限拡大——その固定部分群は捩れに自明に作用)",
+    sectionId := "genell-thm-3-8" }
 
 def galPoint_eq_of_fixed.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
