@@ -392,6 +392,64 @@ theorem sum_mu_d4xpair {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
   have hconst := sum_mu_d4xterm hl hζ hu
   linear_combination hconst
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`∑_ζ X²` の閉じた式——Besge の壁は無い -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`∑_{i≠0} X(ζ^i)²` の閉じた式**。
+
+★★★これが第 822 以来「**Besge の畳み込み恒等式が要る**」と思われていた量である。
+`tate_d2x`（`D²X = 6X² + X + 2a₄`）を足すだけで出る:
+
+    `6·∑X² = ∑D²X − ∑X − 2(l−1)a₄`
+
+であり、`120·∑D²X = (l⁴−1) + 240(l⁴s₃(q^l) − s₃(q))`（第 859）を入れれば良い。
+☆**畳み込みは一切現れない**。 -/
+theorem sum_mu_X_sq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
+    720 * ∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2
+      = ((l : R) ^ 4 - 1)
+        + 240 * ((l : R) ^ 4 * evalAdic (sigmaSeries 3) (q ^ l) hql
+            - evalAdic (sigmaSeries 3) q hq)
+        - 120 * (∑ i ∈ (range l).erase 0,
+            tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - 240 * ((l : R) - 1) * (tateCurveAt q hq).a₄ := by
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hawi : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q := by
+    intro i hi
+    have hpow : (ζ ^ i) * (ζ ^ i) ^ (l - 1) = 1 := by
+      rw [← pow_succ']
+      rw [Nat.sub_add_cancel hl.pos, ← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    calc (ζ ^ i) * (q * (ζ ^ i) ^ (l - 1)) = q * ((ζ ^ i) * (ζ ^ i) ^ (l - 1)) := by ring
+      _ = q := by rw [hpow, mul_one]
+  have hwu : ∀ i : ℕ, IsUnit (1 - q * (ζ ^ i) ^ (l - 1)) := fun i =>
+    isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
+  have hterm : ∀ i ∈ (range l).erase 0,
+      6 * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2
+        = tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+          - 2 * (tateCurveAt q hq).a₄ := by
+    intro i hi
+    have hd2 := tate_d2x (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq (hawi i hi) (hu i hi)
+      (hwu i) (hDX i hi)
+    linear_combination -hd2
+  have hsum : 6 * ∑ i ∈ (range l).erase 0,
+      tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ^ 2
+      = (∑ i ∈ (range l).erase 0, tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - (∑ i ∈ (range l).erase 0, tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        - ((l : R) - 1) * (2 * (tateCurveAt q hq).a₄) := by
+    rw [Finset.mul_sum, Finset.sum_congr rfl hterm, Finset.sum_sub_distrib,
+      Finset.sum_sub_distrib, Finset.sum_const, Finset.card_erase_of_mem
+        (Finset.mem_range.2 hl.pos), Finset.card_range, nsmul_eq_mul]
+    have hcard : ((l - 1 : ℕ) : R) = (l : R) - 1 := by
+      rw [Nat.cast_sub hl.one_lt.le, Nat.cast_one]
+    rw [hcard]
+  have hd2sum := sum_mu_d2xpair hl hζ hu q hq hql
+  linear_combination (120 : R) * hsum + hd2sum
+
 /-! ## ★出典の紐付け(`.src`)と証明義務(`.needs`) -/
 
 def tate_ode.src : Source :=
@@ -506,5 +564,16 @@ def sum_mu_d4xpair.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d4xterm") 1,
     .citation "[ABC3]" "sum_mu_d4xtail_sigma(尾 = l⁶s₅(q^l) − s₅(q)、第 864、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d4xtail_sigma") 1 ]
+
+def sum_mu_X_sq.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{i≠0} X(ζ^i)² の閉じた式——Besge は要らない)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_X_sq.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tate_d2x(D²X = 6X² + X + 2a₄、第 861、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tate_d2x") 1,
+    .citation "[ABC3]" "sum_mu_d2xpair(120·∑D²X の閉じた式、第 859、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.sum_mu_d2xpair") 1 ]
 
 end ABC3.Skeleton.GenEll
