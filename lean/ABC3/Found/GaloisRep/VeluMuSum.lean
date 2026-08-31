@@ -313,6 +313,57 @@ theorem sum_mu_X_closed [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prim
   refine adicSum_congr _ _ (fun n => ?_)
   rw [sum_tateXC hl.pos]
 
+/-! ## ★★★★★★★★★★★★★★★★`v` の係数の具体形（`n ≥ 1`） -/
+
+open Finset in
+/-- ★★★★★★★★★★★★**`X²` の全係数和も `n ≠ 0` で `0`**。
+
+★古典形の係数は `z = 1` で消えるので、Cauchy 積も `n ≥ 1` で消える。 -/
+theorem sum_muConv_tateXC_of_ne_zero {l : ℕ} (hl : 0 < l) (q : R) {n : ℕ} (hn : n ≠ 0) :
+    ∑ c ∈ range l, muConv l (tateXC l q) (tateXC l q) n c = 0 := by
+  classical
+  rw [sum_muConv hl]
+  refine Finset.sum_eq_zero (fun k hk => ?_)
+  rw [sum_tateXC hl, sum_tateXC hl]
+  by_cases hk0 : k = 0
+  · subst hk0
+    simp [hn]
+  · simp [hk0]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★
+**`veluVC` の全係数和は `a₄` の係数だけ**（`n ≥ 1`）。 -/
+theorem sum_veluVC_of_ne_zero {l : ℕ} (hl : 0 < l) (q : R) {n : ℕ} (hn : n ≠ 0) :
+    ∑ a ∈ range l, veluVC l q n a = ((PowerSeries.coeff n tateA4 : ℤ) : R) * q ^ n := by
+  classical
+  rw [sum_veluVC hl]
+  have h1 : ∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXC l q k a)
+      * ∑ b ∈ range l, tateXC l q (n - k) b = 0 := by
+    have := sum_muConv_tateXC_of_ne_zero (R := R) hl q hn
+    rwa [sum_muConv hl] at this
+  rw [h1, sum_tateYC_of_ne_zero hl q hn]
+  ring
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`v` の `n` 番目の係数**（`n ≥ 1`、`l` 素数）。
+
+    `l·veluVC n 0 − ∑_a veluVC n a`
+      `= 3l·(X² のねじれ畳み込み) + (l−1)·a₄の係数·q^n − l·tateYC n 0`
+
+★★★右辺のうち `a₄` の項と `tateYC n 0` は**閉じた形が出ている**（第 831-832）。
+☆残る未知は **`X²` のねじれ畳み込み `muConv(tateXC, tateXC) n 0`** だけであり、
+そこにラマヌジャンの恒等式（`Skeleton/GenEll/SigmaConvolution.lean`）が要る。 -/
+theorem veluV_coeff_of_ne_zero {l : ℕ} (hl : 0 < l) (q : R) {n : ℕ} (hn : n ≠ 0) :
+    (l : R) * veluVC l q n 0 - ∑ a ∈ range l, veluVC l q n a
+      = 3 * (l : R) * (∑ k ∈ range (n + 1), ∑ a ∈ range l,
+            tateXC l q k a * tateXC l q (n - k) ((l - a) % l))
+        + ((l : R) - 1) * (((PowerSeries.coeff n tateA4 : ℤ) : R) * q ^ n)
+        - (l : R) * tateYC l q n 0 := by
+  classical
+  rw [veluVC_zero hl, sum_veluVC_of_ne_zero hl q hn]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def twoYplusXC.src : ABC3.Meta.Source :=
@@ -384,6 +435,21 @@ def sum_mu_X_closed.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(∑_ζ X(ζ,q) の閉じた形。★無条件)",
     sectionId := "genell-lemma-3-2" }
+
+def sum_muConv_tateXC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(X² の全係数和も n ≠ 0 で 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_veluVC_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluVC の全係数和は a₄ の係数だけ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluV_coeff_of_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(v の n 番目の係数の具体形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def a4C.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
