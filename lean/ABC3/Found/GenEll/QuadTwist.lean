@@ -311,6 +311,34 @@ theorem exists_sq_of_twist_of_not_isSquare {k : Type} [Field k] [Fintype k] [Dec
   rw [this]
   field_simp
 
+/-! ## ★★★★★★`Splits` の 2 次式の係数は `d²`・`d³` 倍 -/
+
+/-- ★★★★★★**分裂性の 2 次式の定数項は `d³` 倍**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆mathlib の `HasSplitMultiplicativeReduction` のフィールに現れる
+`54b₆ − 3b₂b₄ + a₂c₄` が、捧りでちょうど `d³` 倍になる。
+★`c₄` は `d²` 倍（第 920）なので、判定量は `d` 倍される——第 936 の形である。 -/
+theorem quadTwist_splitConst {A : Type} [CommRing A] (V : WeierstrassCurve A)
+    [V.IsCharNeTwoNF] (d : A) :
+    54 * (quadTwist V d).b₆ - 3 * (quadTwist V d).b₂ * (quadTwist V d).b₄
+        + (quadTwist V d).a₂ * (quadTwist V d).c₄
+      = d ^ 3 * (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄) := by
+  rw [WeierstrassCurve.b₆_of_isCharNeTwoNF, WeierstrassCurve.b₆_of_isCharNeTwoNF,
+    WeierstrassCurve.b₂_of_isCharNeTwoNF, WeierstrassCurve.b₂_of_isCharNeTwoNF,
+    WeierstrassCurve.b₄_of_isCharNeTwoNF, WeierstrassCurve.b₄_of_isCharNeTwoNF,
+    WeierstrassCurve.c₄_of_isCharNeTwoNF, WeierstrassCurve.c₄_of_isCharNeTwoNF,
+    quadTwist_a₂, quadTwist_a₄, quadTwist_a₆]
+  ring
+
+/-- ★★**分裂性の 2 次式の `X` の係数は消える**（`a₁ = 0` だから）。 -/
+@[simp] theorem quadTwist_splitLin {A : Type} [CommRing A] (V : WeierstrassCurve A) (d : A) :
+    (quadTwist V d).a₁ * (quadTwist V d).c₄ = 0 := by
+  show (0 : A) * _ = 0
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
@@ -336,6 +364,11 @@ def quadTwist_map.src : ABC3.Meta.Source :=
 def veluCurve_quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の商は捧りと可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def quadTwist_splitConst.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(分裂性の 2 次式の定数項は d³ 倍。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def exists_sq_of_twist_of_not_isSquare.src : ABC3.Meta.Source :=
