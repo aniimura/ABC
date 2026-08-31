@@ -2253,3 +2253,22 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 **直し方**: `decl-index.txt` を `HeightOneSpectrum` で grep するとき、`comap` だけでなく
 `under`・`over`・`liesOver` も見る。イデアルの contraction は mathlib では `Ideal.under`
 という名前である(`comap` ではない)。
+
+## 在庫: `finite_j_of_htFalt_le` は既にある（Northcott は済んでいた）
+
+**失敗形**: 「`ht^Falt` が有界な類は有限」（Northcott）が無いと思い込み、
+`Skeleton/GenEll/NorthcottJ.lean` に節点を立てた（第 743）。
+
+**実際**: `Found/GaloisRep/NorthcottHtJ.lean` の `finite_j_of_htFalt_le`（`§9-1005`）が
+**無条件で証明済み**だった。`Found/GenEll/NorthcottImage.lean`（`§9-950`）が
+`htJ` の Northcott 性を与えている。★mathlib に instance が無いことは正しかったが、
+**本プロジェクトが自前で作っていた**。
+
+**直し方**: 新しい節点を立てる前に、まず `node tools/decl-index.mjs` で
+`.cache/decl-index.txt` を作り、`finite`・`Northcott`・`Finite` で grep する。
+★★特に「§n-xxxx で済んでいる」と他のファイルの docstring が書いていないか、
+`grep -rn "無条件" ABC3/Found/` で見る。
+
+**副産物**: この測定で `SSCurve.fld : Type` ＋ 埋め込みという設計が
+`finite_j_of_htFalt_le`（族の定義体を `IntermediateField ℚ ℂ` で受ける）と
+噛み合わないことも分かり、`SSCurve.K : IntermediateField ℚ ℂ` に直した（第 753）。

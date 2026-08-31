@@ -8,6 +8,7 @@ import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Found.GaloisRep.ResChar
 import ABC3.Found.GaloisRep.ThetaDiscr
+import ABC3.Found.GaloisRep.NorthcottHtJ
 import ABC3.Meta.Claim
 
 /-!
@@ -65,21 +66,31 @@ open ABC3.Found.GaloisRep WeierstrassCurve IsDedekindDomain NumberField
 
 ★`EllModuliData` の `Curve` 欄に渡す対象である。 -/
 structure SSCurve where
-  /-- 定義体（`ℂ` の部分体として取る——`Prop34.lean` の族の形に合わせる）。 -/
-  fld : Type
-  [isField : Field fld]
-  [isNF : NumberField fld]
+  /-- ★定義体——**`ℂ` の中間体として取る**。
+
+  ☆`Found/GaloisRep/NorthcottHtJ.lean` の `finite_j_of_htFalt_le`（`§9-1005`、★無条件）や
+  `Found/GaloisRep/Lemma37C.lean` の `finite_j_of_condA` は、族の定義体を
+  `fld : P → IntermediateField ℚ ℂ` の形で受け取る。★★ここを抽象的な `Type` ＋ 埋め込みに
+  すると**それらが使えなくなる**（2026-08-31 の在庫の測定、第 753）。 -/
+  K : IntermediateField ℚ ℂ
+  [isNF : NumberField K]
   /-- 曲線。 -/
-  W : WeierstrassCurve fld
+  W : WeierstrassCurve K
   [isEll : W.IsElliptic]
   /-- ★全ての有限素点で半安定。 -/
-  ss : ∀ p : HeightOneSpectrum (𝓞 fld), SemistableAt p W
-  /-- `j` を `ℂ` へ送る埋め込み。 -/
-  emb : fld →+* ℂ
+  ss : ∀ p : HeightOneSpectrum (𝓞 K), SemistableAt p W
 
-attribute [instance] SSCurve.isField SSCurve.isNF SSCurve.isEll
+attribute [instance] SSCurve.isNF SSCurve.isEll
 
 namespace SSCurve
+
+/-- 定義体（型として）。 -/
+abbrev fld (E : SSCurve) : Type := E.K
+
+/-- `j` を `ℂ` へ送る埋め込み（中間体の包含）。 -/
+noncomputable def emb (E : SSCurve) : E.fld →+* ℂ := E.K.val.toRingHom
+
+@[simp] theorem emb_apply (E : SSCurve) (x : E.fld) : E.emb x = (x : ℂ) := rfl
 
 /-- ★★★★`j` 不変量（`ℂ` の元として）——`cls` 欄。 -/
 noncomputable def j (E : SSCurve) : ℂ := E.emb (E.W.j)
@@ -105,7 +116,7 @@ theorem degInf_nonneg (E : SSCurve) : 0 ≤ E.degInf := degInfOf_nonneg E.W
 theorem htFalt_variableChange (E : SSCurve) (C : VariableChange E.fld)
     (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld), SemistableAt p (C • E.W))
     (hell : (C • E.W).IsElliptic) :
-    htFalt { fld := E.fld, W := C • E.W, isEll := hell, ss := hss, emb := E.emb }
+    htFalt { K := E.K, W := C • E.W, isEll := hell, ss := hss }
       = E.htFalt := by
   show htFaltOf E.fld (C • E.W) = htFaltOf E.fld E.W
   exact htFaltOf_variableChange E.W C
@@ -208,34 +219,6 @@ theorem degInfJ_sub_htInfJ_le :
 def degLeJ (d : ℕ) : Set ℂ := {x : ℂ | ∃ E : SSCurve, E.j = x ∧ E.deg ≤ d}
 
 theorem mem_degLeJ (E : SSCurve) : E.j ∈ degLeJ E.deg := ⟨E, rfl, le_rfl⟩
-
-/-- ★★★★★★★★★★★★★★★★★★★★
-**`northcott` 欄は `j` の高さの Northcott 性ひとつに帰着する**。
-
-原文 (GenEll p.17):
-> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
-
-★仮説 `hN` は `Skeleton/GenEll/NorthcottJ.lean` の `northcott_htJ` そのもの
-（原文の `Proposition 1.4, (iv)`、実質は古典的 Northcott の定理）。
-
-★★機構は `prop_3_4_chain_semistable`（`§9-1004`）の 2 本目の `≲`:
-
-    ht^Falt(E) ≤ C  ⟹  h(j) ≤ 12(1+ϵ)·C + C₀
-
-——高さが抑えられた類は `j` の高さも抑えられる。 -/
-theorem northcottJ_of_northcott_htJ
-    (hN : ∀ (B : ℝ) (d : ℕ),
-      {x : ℂ | ∃ E : SSCurve, E.j = x ∧ E.deg ≤ d ∧ htJ E.fld E.W ≤ B}.Finite)
-    (C : ℝ) (d : ℕ) : {x ∈ degLeJ d | faltingsHeightJ x ≤ C}.Finite := by
-  obtain ⟨C₀, hC₀⟩ := prop_3_4_chain_semistable 1 one_pos
-  refine (hN (12 * (1 + 1) * C + C₀) d).subset ?_
-  rintro x ⟨⟨E, hEj, hEd⟩, hC⟩
-  refine ⟨E, hEj, hEd, ?_⟩
-  have hfe : faltingsHeightJ x = htFaltOf E.fld E.W := by
-    rw [← hEj]; exact faltingsHeightJ_eq E
-  have h1 : htFaltOf E.fld E.W ≤ C := by rw [← hfe]; exact hC
-  have h2 := (hC₀ E.fld E.W E.ss).2.1
-  linarith
 
 /-! ## ★★★★★★★★★★★★述語の欄と `torsionExt` 群 -/
 
@@ -677,6 +660,36 @@ theorem mem_noMultRedExcJ (KV : Set ℂ) (E : DegCurve) (_ : E.j ∈ KV)
 `Corollary 4.3` の証明はこの仮説を**使っていない**。 -/
 def MinimalFieldJ (E : DegCurve) : Prop := ∀ E' : DegCurve, E'.j = E.j → E.deg ≤ E'.deg
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`northcott` 欄**——★**無条件**。
+
+原文 (GenEll p.17):
+> on Mell(Q). In particular, if C ∈R, then the set of points [E] ∈Mell(Q)≤d such
+
+★★★在庫の測定（2026-08-31、第 753）: `Found/GaloisRep/NorthcottHtJ.lean` の
+`finite_j_of_htFalt_le`（`§9-1005`）が**すでに無条件で証明されている**。
+☆それに気づかず `Skeleton/GenEll/NorthcottJ.lean` に節点を立てていた（第 743）が、
+**不要だった**——本定理がその節点を消す。
+
+☆`finite_j_of_htFalt_le` は族の定義体を `fld : P → IntermediateField ℚ ℂ` の形で受ける。
+★これが `SSCurve` の `K : IntermediateField ℚ ℂ` という設計の理由である。 -/
+theorem northcottJ (C : ℝ) (d : ℕ) :
+    {x ∈ degLeJ d | faltingsHeightJ x ≤ C}.Finite := by
+  classical
+  refine Set.Finite.subset
+    (ABC3.Found.GaloisRep.finite_j_of_htFalt_le (P := {E : SSCurve // E.deg ≤ d}) d
+      (fun E => E.1.K) (fun E => E.1.isNF) (fun E => E.2)
+      (fun E => E.1.W) (fun E => E.1.isEll)
+      (fun E => E.1.htFalt) (fun _ => rfl) C) ?_
+  rintro x ⟨⟨E, hEj, hEd⟩, hC⟩
+  refine ⟨⟨E, hEd⟩, ?_, ?_⟩
+  · show E.htFalt ≤ C
+    rw [← faltingsHeightJ_eq E, hEj]
+    exact hC
+  · show ((E.W.j : E.K) : ℂ) = x
+    rw [← hEj]
+    rfl
+
 /-! ## ★★★★★★★★★★★★★★★★★★★★★★`Curve` 欄は「実現される類」である -/
 
 open scoped Classical in
@@ -1026,19 +1039,15 @@ def DegCurve.needs : List ABC3.Meta.ProofObligation :=
        "強制する(Check/GenEll/EllModuliDegInfPos.lean)。" ++
        "したがって Curve 欄は「至る所良還元」の曲線を含めない") 3 ]
 
+def northcottJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(northcott 欄。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 def degLeJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(EllModuliData の degLe 欄——M_ell(ℚ̄)^{≤d})",
     sectionId := "genell-prop-3-4" }
-
-def northcottJ_of_northcott_htJ.src : ABC3.Meta.Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Proposition 3.4(northcott 欄は j の高さの Northcott 性ひとつに帰着する)",
-    sectionId := "genell-prop-3-4" }
-
-def northcottJ_of_northcott_htJ.needs : List ABC3.Meta.ProofObligation :=
-  [ .citation "[ABC3]" "northcott_htJ(Skeleton/GenEll/NorthcottJ.lean、古典的 Northcott)"
-      (.absent "mathlib: Northcott の instance は具体的な体に対して 1 つも無い(2026-08-31 測定)") 12 ]
 
 def degInfJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
