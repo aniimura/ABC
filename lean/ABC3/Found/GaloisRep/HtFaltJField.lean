@@ -82,6 +82,29 @@ theorem htFaltOf_congr_j_of_common (E₁ : WeierstrassCurve L₁) [E₁.IsEllipt
       (HeightOneSpectrumUnder (A := 𝓞 L₂) P) P E₂ (h₂ _)) hjj
   rw [← e1, ← e2, key]
 
+/-- ★★★★★★★★★★★★★★**`deg∞` も同じ**——共通の体へ上げられるなら `j` だけで決まる。 -/
+theorem degInfOf_congr_j_of_common (E₁ : WeierstrassCurve L₁) [E₁.IsElliptic]
+    (E₂ : WeierstrassCurve L₂) [E₂.IsElliptic]
+    (h₁ : ∀ p : HeightOneSpectrum (𝓞 L₁), SemistableAt p E₁)
+    (h₂ : ∀ p : HeightOneSpectrum (𝓞 L₂), SemistableAt p E₂)
+    (hj : algebraMap L₁ L₃ E₁.j = algebraMap L₂ L₃ E₂.j) :
+    degInfOf L₁ E₁ = degInfOf L₂ E₂ := by
+  have e1 : degInfOf L₃ (E₁.baseChange L₃) = degInfOf L₁ E₁ :=
+    degInfOf_baseChange_of_semistable L₁ L₃ E₁ h₁
+  have e2 : degInfOf L₃ (E₂.baseChange L₃) = degInfOf L₂ E₂ :=
+    degInfOf_baseChange_of_semistable L₂ L₃ E₂ h₂
+  have hj1 : (E₁.baseChange L₃).j = algebraMap L₁ L₃ E₁.j :=
+    WeierstrassCurve.map_j (W := E₁) (f := algebraMap L₁ L₃)
+  have hj2 : (E₂.baseChange L₃).j = algebraMap L₂ L₃ E₂.j :=
+    WeierstrassCurve.map_j (W := E₂) (f := algebraMap L₂ L₃)
+  have hjj : (E₁.baseChange L₃).j = (E₂.baseChange L₃).j := by rw [hj1, hj2, hj]
+  have key := degInfOf_congr_j_of_maxJ (E₁.baseChange L₃) (E₂.baseChange L₃)
+    (fun P => minDeltaExp_eq_maxJ_baseChange L₁ L₃
+      (HeightOneSpectrumUnder (A := 𝓞 L₁) P) P E₁ (h₁ _))
+    (fun P => minDeltaExp_eq_maxJ_baseChange L₂ L₃
+      (HeightOneSpectrumUnder (A := 𝓞 L₂) P) P E₂ (h₂ _)) hjj
+  rw [← e1, ← e2, key]
+
 end Common
 
 /-! ## ★出典の紐付け(`.src`) -/

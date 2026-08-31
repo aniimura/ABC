@@ -150,6 +150,18 @@ theorem htFaltOf_congr_j_of_emb (E₁ : WeierstrassCurve L₁) [E₁.IsElliptic]
   refine Subtype.ext ?_
   rw [algebraMap_compositum₁, algebraMap_compositum₂, hj]
 
+/-- ★★★★★★★★★★★★★★★★★★★★
+**半安定な楕円曲線の `deg∞` は `ℂ` の中の `j` だけで決まる**——★**無条件**。 -/
+theorem degInfOf_congr_j_of_emb (E₁ : WeierstrassCurve L₁) [E₁.IsElliptic]
+    (E₂ : WeierstrassCurve L₂) [E₂.IsElliptic]
+    (h₁ : ∀ p : HeightOneSpectrum (𝓞 L₁), SemistableAt p E₁)
+    (h₂ : ∀ p : HeightOneSpectrum (𝓞 L₂), SemistableAt p E₂)
+    (hj : e₁ E₁.j = e₂ E₂.j) :
+    degInfOf L₁ E₁ = degInfOf L₂ E₂ := by
+  refine degInfOf_congr_j_of_common L₁ L₂ ↥(compositum L₁ L₂ e₁ e₂) E₁ E₂ h₁ h₂ ?_
+  refine Subtype.ext ?_
+  rw [algebraMap_compositum₁, algebraMap_compositum₂, hj]
+
 end Two
 
 /-! ## ★出典の紐付け(`.src`) -/

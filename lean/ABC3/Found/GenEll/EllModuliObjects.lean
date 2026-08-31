@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.Compositum
+import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Meta.Claim
 
 /-!
@@ -135,6 +136,69 @@ theorem faltingsHeightJ_eq (E : SSCurve) : faltingsHeightJ E.j = E.htFalt := by
   rw [faltingsHeightJ, dif_pos h]
   exact htFalt_congr_j h.choose E h.choose_spec
 
+/-! ## ★★★★★★★★★★★★★★★★★★`deg∞` も `j` だけで決まる -/
+
+/-- ★★★★★★★★★★★★★★**`j` が同じ `SSCurve` は `deg∞` も同じ**——★**無条件**。 -/
+theorem degInf_congr_j (E E' : SSCurve) (hj : E.j = E'.j) : E.degInf = E'.degInf :=
+  ABC3.Found.GaloisRep.degInfOf_congr_j_of_emb E.fld E'.fld E.emb E'.emb E.W E'.W E.ss E'.ss hj
+
+open scoped Classical in
+/-- ★★★★★★★★★★**`EllModuliData` の `degInf` 欄**——`j` の函数として。 -/
+noncomputable def degInfJ (j : ℂ) : ℝ :=
+  if h : ∃ E : SSCurve, E.j = j then h.choose.degInf else 0
+
+/-- ★★★★★★★★★★★★**欄の値は曲線の `deg∞` に一致する**。 -/
+theorem degInfJ_eq (E : SSCurve) : degInfJ E.j = E.degInf := by
+  classical
+  have h : ∃ E' : SSCurve, E'.j = E.j := ⟨E, rfl⟩
+  rw [degInfJ, dif_pos h]
+  exact degInf_congr_j h.choose E h.choose_spec
+
+/-- ★★★★`deg∞ ≥ 0`——`degInf_nonneg` 欄。 -/
+theorem degInfJ_nonneg (j : ℂ) : 0 ≤ degInfJ j := by
+  classical
+  by_cases h : ∃ E : SSCurve, E.j = j
+  · rw [degInfJ, dif_pos h]
+    exact h.choose.degInf_nonneg
+  · rw [degInfJ, dif_neg h]
+
+/-! ## ★★★★★★★★★★★★★★★★界面の 3 つの評価（類の水準で） -/
+
+/-- ★★★★★★★★★★**`faltingsHeight` は下に有界**——`faltingsHeight_bddBelow` 欄。 -/
+theorem faltingsHeightJ_bddBelow : ∃ B : ℝ, ∀ j : ℂ, B ≤ faltingsHeightJ j := by
+  classical
+  obtain ⟨B, hB⟩ := ABC3.Found.GaloisRep.exists_htFalt_bddBelow
+  refine ⟨min B 0, fun j => ?_⟩
+  by_cases h : ∃ E : SSCurve, E.j = j
+  · rw [faltingsHeightJ, dif_pos h]
+    exact le_trans (min_le_left _ _) (hB h.choose.fld h.choose.W)
+  · rw [faltingsHeightJ, dif_neg h]
+    exact min_le_right _ _
+
+/-- ★★★★★★★★★★★★★★★★**`deg∞ ≤ 12·ht^Falt + A`**（類の水準で）——★**無条件**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★`htInf := 12·faltingsHeight` と取れば、これがそのまま `degInf_le_htInf` 欄である
+（そして `htInf_bdeq_faltings` 欄は `C = 0` で自明になる）。 -/
+theorem degInfJ_le_faltingsHeightJ :
+    ∃ A : ℝ, 0 ≤ A ∧ ∀ j : ℂ, degInfJ j ≤ 12 * faltingsHeightJ j + A := by
+  classical
+  obtain ⟨A, hA0, hA⟩ := ABC3.Found.GaloisRep.exists_degInfOf_le_htFalt
+  refine ⟨A, hA0, fun j => ?_⟩
+  by_cases h : ∃ E : SSCurve, E.j = j
+  · rw [degInfJ, dif_pos h, faltingsHeightJ, dif_pos h]
+    exact hA h.choose.fld h.choose.W
+  · rw [degInfJ, dif_neg h, faltingsHeightJ, dif_neg h]
+    linarith
+
+/-- ★★★★★★★★**`degInf_le_htInf` 欄の形**（`htInf := 12·faltingsHeight`）。 -/
+theorem degInfJ_sub_htInfJ_le :
+    ∃ C : ℝ, ∀ j : ℂ, degInfJ j - 12 * faltingsHeightJ j ≤ C := by
+  obtain ⟨A, _, hA⟩ := degInfJ_le_faltingsHeightJ
+  exact ⟨A, fun j => by linarith [hA j]⟩
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -150,6 +214,16 @@ def htFalt_congr_j.src : ABC3.Meta.Source :=
 def faltingsHeightJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(EllModuliData の faltingsHeight 欄——j の函数として)",
+    sectionId := "genell-prop-3-4" }
+
+def degInfJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(EllModuliData の degInf 欄——j の函数として)",
+    sectionId := "genell-prop-3-4" }
+
+def degInfJ_le_faltingsHeightJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(類の水準で deg∞ ≤ 12·ht^Falt + A。★無条件)",
     sectionId := "genell-prop-3-4" }
 
 def SSCurve.htFalt_variableChange.src : ABC3.Meta.Source :=
