@@ -138,7 +138,7 @@ open Finset in
 theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
     (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
-    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I)
+    (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (h2 : (2 : R) ≠ 0)
     (hDX : ∀ i ∈ (range l).erase 0,
       tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq ≠ 0) :
     (tateCurveAt q hq).c₄
@@ -155,7 +155,7 @@ theorem c4_velu_tate {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     refine Finset.sum_congr rfl (fun i hi => ?_)
     exact tateD2Xpair_eq _ _ q hq (hu i hi)
       (isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq))
-  have hzero := sum_mu_dxpair_zero hl hζ hlu hu q hq
+  have hzero := sum_mu_dxpair_zero hl hζ hu q hq h2
   have hd2 := sum_mu_d2xpair hl hζ hlu hu q hq hql
   rw [hstep, hzero, add_zero] at hd2
   rw [hsum1, tateCurveAt_c4_eq, tateCurveAt_c4_eq]

@@ -74,13 +74,6 @@ end DualNum
 
 /-! ## ★★★★★逆元 -/
 
-theorem ring_inverse_eq_of_mul_eq_one {A : Type} [CommRing A] {x y : A} (hu : IsUnit x)
-    (h : x * y = 1) : Ring.inverse x = y := by
-  have h1 : Ring.inverse x * x = 1 := Ring.inverse_mul_cancel x hu
-  calc Ring.inverse x = Ring.inverse x * (x * y) := by rw [h, mul_one]
-    _ = Ring.inverse x * x * y := by ring
-    _ = y := by rw [h1, one_mul]
-
 theorem DualNum.re_one_sub_mk (t s : R) : (1 - DualNum.mk t s).re = 1 - t := by simp
 
 theorem DualNum.eps_one_sub_mk (t s : R) : (1 - DualNum.mk t s).eps = -s := by simp

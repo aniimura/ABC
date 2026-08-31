@@ -147,6 +147,38 @@ theorem tateDXpair_eq [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
     tateDXtail_eq, tateDXtail_eq]
   ring
 
+/-! ## ★★★★★尾の漸化式と `Df` の反対称性 -/
+
+theorem ring_inverse_eq_of_mul_eq_one {A : Type} [CommRing A] {x y : A} (hu : IsUnit x)
+    (h : x * y = 1) : Ring.inverse x = y := by
+  have h1 : Ring.inverse x * x = 1 := Ring.inverse_mul_cancel x hu
+  calc Ring.inverse x = Ring.inverse x * (x * y) := by rw [h, mul_one]
+    _ = Ring.inverse x * x * y := by ring
+    _ = y := by rw [h1, one_mul]
+
+/-- ★★**尾の漸化式** `T(u) = Df(qu) + T(qu)`。 -/
+theorem tateDXtail_rec [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateDXtail u q hq = tateDXterm (q * u) + tateDXtail (q * u) q hq := by
+  rw [tateDXtail, adicSum_shift]
+  congr 1
+  · norm_num
+  · exact adicSum_congr _ _
+      (fun n => by rw [show q ^ (n + 1 + 1) * u = q ^ (n + 1) * (q * u) by ring])
+
+/-- ★★★★★★**`Df(1/t) = −Df(t)`**——`X(q/u) = X(u)` を微分したものの項版。
+
+`1 − v = −(1−u)v`（`uv = 1`）なので `inv(1−v) = −u·inv(1−u)` であり、
+`Df(v) = v(1+v)(−u·r)³ = −u³(v+v²)r³ = −(u²+u)r³ = −Df(u)`。 -/
+theorem tateDXterm_inv {u v : R} (huv : u * v = 1) (hu : IsUnit (1 - u))
+    (hv : IsUnit (1 - v)) : tateDXterm v = - tateDXterm u := by
+  have hru : (1 - u) * Ring.inverse (1 - u) = 1 := Ring.mul_inverse_cancel _ hu
+  have hkey : Ring.inverse (1 - v) = -u * Ring.inverse (1 - u) := by
+    refine ring_inverse_eq_of_mul_eq_one hv ?_
+    linear_combination hru + Ring.inverse (1 - u) * huv
+  rw [tateDXterm, tateDXterm, hkey]
+  linear_combination
+    (-(Ring.inverse (1 - u) ^ 3) * (u ^ 2 + u * (u * v + 1))) * huv
+
 /-! ## ★★★★★★★★★★`D²X`——σ₃ の母関数 -/
 
 /-- ★★★★**`D²f(t) = t(1+4t+t²)/(1−t)⁴`**——`∑_{n≥1} n³t^n` の閉じた式。 -/

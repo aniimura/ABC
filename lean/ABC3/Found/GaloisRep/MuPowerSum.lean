@@ -163,6 +163,29 @@ theorem muPow_zero_rec {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot 
     sum_range_sum_range_lt] at h0
   linear_combination h0
 
+/-- ★`i ↦ l − i` は `(range l).erase 0` の全単射である。 -/
+theorem sum_erase_reflect {M : Type*} [AddCommMonoid M] {l : ℕ} (f : ℕ → M) :
+    ∑ i ∈ (range l).erase 0, f (l - i) = ∑ i ∈ (range l).erase 0, f i := by
+  refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a _
+    rfl
+
 /-! ## ★★★★★★★★重み付きの和 `M_m^{(k)}` -/
 
 /-- ★ホッケースティック `∑_{t<l} C(t,m) = C(l,m+1)`。 -/

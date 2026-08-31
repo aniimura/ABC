@@ -142,10 +142,56 @@ theorem sum_mu_dyterm {F : Type} [Field F] [CharZero F] {l : ℕ} (hl : l.Prime)
 `q^N` 係数は `∑_{d∣N}d²∑_{i≠0}(ζ^{id} − ζ^{-id}) = 0`（`i ↦ l−i` の対称性）。 -/
 theorem sum_mu_dxpair_zero {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
-    (hlu : IsUnit ((l : R))) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
-    (q : R) (hq : q ∈ I) :
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (q : R) (hq : q ∈ I) (h2 : (2 : R) ≠ 0) :
     ∑ i ∈ (range l).erase 0, tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq = 0 := by
-  sorry
+  have hζl : ζ ^ l = 1 := hζ.pow_eq_one
+  have hpow : ∀ i ∈ (range l).erase 0, (ζ ^ i) ^ (l - 1) = ζ ^ (l - i) := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hl1 : 1 ≤ l := hl.one_lt.le
+    have hi1 : 1 ≤ i := Nat.one_le_iff_ne_zero.2 hi0
+    have e1 : i * (l - 1) + i = i * l := by
+      calc i * (l - 1) + i = i * ((l - 1) + 1) := by ring
+        _ = i * l := by rw [Nat.sub_add_cancel hl1]
+    have e2 : (i - 1) * l + l = i * l := by
+      calc (i - 1) * l + l = ((i - 1) + 1) * l := by ring
+        _ = i * l := by rw [Nat.sub_add_cancel hi1]
+    have hidx : i * (l - 1) = (i - 1) * l + (l - i) := by omega
+    rw [← pow_mul, hidx, pow_add, mul_comm (i - 1) l, pow_mul, hζl, one_pow, one_mul]
+  have hterm : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+        = tateDXterm (ζ ^ i) + tateDXtail (ζ ^ i) q hq
+          - tateDXtail (ζ ^ (l - i)) q hq := by
+    intro i hi
+    rw [tateDXpair, hpow i hi, ← tateDXtail_rec]
+  have hswap : ∑ i ∈ (range l).erase 0, tateDXtail (ζ ^ (l - i)) q hq
+      = ∑ i ∈ (range l).erase 0, tateDXtail (ζ ^ i) q hq :=
+    sum_erase_reflect (fun j => tateDXtail (ζ ^ j) q hq)
+  rw [Finset.sum_congr rfl hterm, Finset.sum_sub_distrib, Finset.sum_add_distrib, hswap]
+  have hS : ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) = 0 := by
+    have hanti : ∀ i ∈ (range l).erase 0,
+        tateDXterm (ζ ^ (l - i)) = - tateDXterm (ζ ^ i) := by
+      intro i hi
+      have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+      have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+      have hmem' : l - i ∈ (range l).erase 0 :=
+        Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+      have huv : ζ ^ i * ζ ^ (l - i) = 1 := by
+        rw [← pow_add, show i + (l - i) = l by omega, hζl]
+      exact tateDXterm_inv huv (hu i hi) (hu (l - i) hmem')
+    have hr1 : ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ (l - i))
+        = ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) :=
+      sum_erase_reflect (fun j => tateDXterm (ζ ^ j))
+    have hr2 : ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ (l - i))
+        = - ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) := by
+      rw [Finset.sum_congr rfl hanti, Finset.sum_neg_distrib]
+    have hzero : (2 : R) * ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) = 0 := by
+      linear_combination hr2 - hr1
+    exact (mul_eq_zero.1 hzero).resolve_left h2
+  rw [hS]
+  ring
 
 /-- **[GenEll] 葉 1 の残り (2)**——`∑_{i≠0} D²X(ζ^i)` の閉じた式。
 
@@ -215,11 +261,12 @@ def sum_mu_dxpair_zero.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_dxpair_zero.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "sum_mu_dxterm_field(定数項、第 852、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dxterm_field") 1,
-    .implicitStep
-      ("☆q^N 係数は ∑_{d∣N}d²∑_{i≠0}(ζ^{id} − ζ^{-id}) = 0。" ++
-       "MuGraded/AdicFinsetSum の muEval 機械で扱える") 4 ]
+  [ .citation "[ABC3]" "tateDXterm_inv(Df(1/t) = −Df(t)、第 854、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateDXterm_inv") 1,
+    .citation "[ABC3]" "tateDXtail_rec(尾の漸化式、第 854、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateDXtail_rec") 1,
+    .citation "[ABC3]" "sum_erase_reflect(i ↦ l−i の全単射性、第 854、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_erase_reflect") 1 ]
 
 def sum_mu_d2xpair.src : Source :=
   { paper := "GenEll", pdfPage := 15,
