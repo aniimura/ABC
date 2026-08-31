@@ -430,6 +430,24 @@ theorem veluU_quadTwist {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCh
   rw [h1, h3, h2, h4]
   linear_combination (4 : A) * hy
 
+open scoped Classical in
+/-- ★★★★★★★★**捧った点集合の `v` の和は `d²` 倍**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v_Q` が `y` に依らない（第 939）ので、捧った点の `y` 座標 `g z`
+（`√d` を含む）は**何でもよい**。単射性だけを受ける。 -/
+theorem veluVFull_quadTwist (W : WeierstrassCurve F) [W.IsCharNeTwoNF]
+    (S : Finset (F × F)) (d : F) (g : F × F → F)
+    (hinj : ∀ z ∈ S, ∀ z' ∈ S,
+      ((d * z.1, g z) : F × F) = ((d * z'.1, g z') : F × F) → z = z') :
+    veluVFull (quadTwist W d) (S.image (fun z => ((d * z.1, g z) : F × F)))
+      = d ^ 2 * veluVFull W S := by
+  rw [veluVFull, Finset.sum_image hinj, veluVFull, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun z _ => ?_)
+  exact veluV2_quadTwist W z.1 z.2 (g z) d
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
@@ -450,6 +468,11 @@ def quadTwist_veluQuotientFull.src : ABC3.Meta.Source :=
 def quadTwist_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(捧りは底変換と可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluVFull_quadTwist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(捧った点集合の v の和は d² 倍。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluV2_quadTwist.src : ABC3.Meta.Source :=
