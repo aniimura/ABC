@@ -701,6 +701,29 @@ theorem sum_mu_frac_cube [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
   rw [← hfin]
   ring
 
+/-! ## ★★★★★★★★★★★★★★★★`1/(1−ζ)` は `y^l = (y−1)^l` の根 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`u = 1/(1−ζ)` は `y^l − (y−1)^l = 0` を満たす**。
+
+★★`y − 1 = ζ/(1−ζ)` なので
+`y^l − (y−1)^l = (1 − ζ^l)/(1−ζ)^l = 0`。
+
+☆この多項式は次数 `l−1`、先頭係数 `l` であり、
+根はちょうど `1/(1−ζ^i)`（`i = 1,…,l−1`）の `l−1` 個である。
+★★ゆえに Vieta で基本対称式 `e_k = C(l, k+1)/l` が出、
+Newton の公式で冪和 `p_k = ∑ 1/(1−ζ^i)^k` が出る。
+☆`p₄` は反射（第 797）では出ないので、この道が要る。 -/
+theorem inv_one_sub_isRoot {l : ℕ} {ζ : F} (hpow : ζ ^ l = 1) (hne : (1 : F) - ζ ≠ 0) :
+    ((1 - ζ)⁻¹) ^ l - ((1 - ζ)⁻¹ - 1) ^ l = 0 := by
+  have h1 : (1 - ζ)⁻¹ - 1 = ζ * (1 - ζ)⁻¹ := (zeta_mul_inv_one_sub hne).symm
+  rw [h1, mul_pow, hpow, one_mul, sub_self]
+
+/-- ★★★★★★★★**別の書き方**——`(1−ζ)^l` を払った形。 -/
+theorem one_sub_pow_eq_of_root {l : ℕ} {ζ : F} (hpow : ζ ^ l = 1) :
+    (1 : F) ^ l - ζ ^ l = 0 := by
+  rw [one_pow, hpow, sub_self]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -826,6 +849,16 @@ def zeta_mul_inv_one_sub.src : ABC3.Meta.Source :=
 def sum_mu_frac_cube.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(∑_{ζ≠1} ζ²/(1−ζ)³ = (l²−1)/24。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_one_sub_isRoot.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/(1−ζ) は y^l = (y−1)^l の根。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def one_sub_pow_eq_of_root.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^l = 1 の別の書き方。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
