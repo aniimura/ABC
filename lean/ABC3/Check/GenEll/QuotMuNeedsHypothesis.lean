@@ -53,6 +53,25 @@ import ABC3.Skeleton.GenEll.TateIsogeny
 ☆捻りの段: `j` が同じでも二次捻りは区別されるので、
 「`E` が `p` で**分裂**乗法的還元をもつ」ことを使う必要がある
 （Tate 曲線は分裂乗法的還元をもつ曲線そのものである）。
+
+## ★★★★★★★★後日談（第 873）——節点を割って一方は閉じた
+
+`tateModel_of_quot_mu` は仮説を
+
+    `hsplit : W′.HasSplitMultiplicativeReduction R`
+    `hparam : tateParamR W′ hsplit = q^l`
+
+に入れ替えたことで **`tateParamR_spec` だけで証明済み**になった。
+★中身は新しい節点 **`tateParam_quot_mu`**（「`E′` の Tate 母数は `q^l`」）に移した。
+
+☆そこに残る義務は 2 つだけである:
+
+1. `hquot : True` を埋める——「`H` が各悪い素点で `μ_l` に対応する」を型に書く
+2. `q ↦ j(E_q)` の単射性——`Δ = q·(単元)`（`tateCurveAt_Delta_eq_mul_unit`、既存）と
+   `c₄` が単元（`tateCurveAt_c4_isUnit`、既存）なので `1/j = q·(単元)` であり、
+   完備局所環で `q ↦ q·u(q)`（`u(0)` が単元）は単射
+
+★`j(E_q/μ_l) = j(E_{q^l})` の方は第 868 で**証明済み**である。
 -/
 
 namespace ABC3.Check.GenEll
