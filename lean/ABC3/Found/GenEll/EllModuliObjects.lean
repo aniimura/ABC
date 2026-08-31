@@ -7,6 +7,7 @@ import ABC3.Found.GaloisRep.Compositum
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Found.GaloisRep.ResChar
+import ABC3.Found.GaloisRep.ThetaDiscr
 import ABC3.Meta.Claim
 
 /-!
@@ -676,6 +677,237 @@ theorem mem_noMultRedExcJ (KV : Set ℂ) (E : DegCurve) (_ : E.j ∈ KV)
 `Corollary 4.3` の証明はこの仮説を**使っていない**。 -/
 def MinimalFieldJ (E : DegCurve) : Prop := ∀ E' : DegCurve, E'.j = E.j → E.deg ≤ E'.deg
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★`Curve` 欄は「実現される類」である -/
+
+open scoped Classical in
+/-- ★★★★★**`j` を実現する `DegCurve` のうち定義体の次数が最小のもの**。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★★原文 `Corollary 4.3` の仮説『`L` is a **minimal field of definition** of the point
+`[E_L]`』そのものである。 -/
+noncomputable def repCurve {x : ℂ} (h : ∃ E : DegCurve, E.j = x) : DegCurve :=
+  (Nat.find_spec (p := fun n => ∃ E : DegCurve, E.j = x ∧ E.deg = n)
+    ⟨h.choose.deg, h.choose, h.choose_spec, rfl⟩).choose
+
+open scoped Classical in
+theorem repCurve_j {x : ℂ} (h : ∃ E : DegCurve, E.j = x) : (repCurve h).j = x :=
+  (Nat.find_spec (p := fun n => ∃ E : DegCurve, E.j = x ∧ E.deg = n)
+    ⟨h.choose.deg, h.choose, h.choose_spec, rfl⟩).choose_spec.1
+
+open scoped Classical in
+theorem repCurve_deg {x : ℂ} (h : ∃ E : DegCurve, E.j = x) :
+    (repCurve h).deg
+      = Nat.find (p := fun n => ∃ E : DegCurve, E.j = x ∧ E.deg = n)
+          ⟨h.choose.deg, h.choose, h.choose_spec, rfl⟩ :=
+  (Nat.find_spec (p := fun n => ∃ E : DegCurve, E.j = x ∧ E.deg = n)
+    ⟨h.choose.deg, h.choose, h.choose_spec, rfl⟩).choose_spec.2
+
+open scoped Classical in
+/-- ★★★★★**代表元の定義体の次数は最小である**。 -/
+theorem repCurve_deg_le {x : ℂ} (h : ∃ E : DegCurve, E.j = x) (E : DegCurve) (hE : E.j = x) :
+    (repCurve h).deg ≤ E.deg := by
+  rw [repCurve_deg h]
+  exact Nat.find_le ⟨E, hE, rfl⟩
+
+/-- ★★★★★★★★★★★★★★★★**`EllModuliData` の `Curve` 欄**——実現される類。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+## ★★★★★なぜ「曲線」ではなく「類」を `Curve` に取るか
+
+`EllModuliData` の `logDiffMell : EllClass → ℝ` は**類の函数**でなければならないが、
+`log-diff` は**定義体の分岐**で決まる量である。★同じ `j` を持つ曲線でも定義体は
+いくらでも大きく取れるので、`sum_log_ramPrimes_le` 欄（`∑_{ramPrimes} log p ≤
+∑_{badPrimes} log p + 3d·log-diff`）は「勝手な定義体の曲線」に対しては**破れる**。
+
+★★そこで `Curve` を**実現される類**とし、各類に**定義体の次数が最小の代表元**を
+取ることにする。これで `degOfDefinition`・`logDiffMell` などがすべて類の函数になる。
+
+★★★これは原文に忠実である——`Corollary 4.3` の仮説はまさに
+『`L` is a **minimal field of definition** of the point `[E_L]`』である。 -/
+def RealizedClass : Type := {x : ℂ // ∃ E : DegCurve, E.j = x}
+
+namespace RealizedClass
+
+/-- ★★★★代表元。 -/
+noncomputable def rep (x : RealizedClass) : DegCurve := repCurve x.2
+
+theorem rep_j (x : RealizedClass) : x.rep.j = x.1 := repCurve_j x.2
+
+theorem rep_deg_le (x : RealizedClass) (E : DegCurve) (hE : E.j = x.1) :
+    x.rep.deg ≤ E.deg := repCurve_deg_le x.2 E hE
+
+/-- ★★**`cls` 欄**。 -/
+def cls (x : RealizedClass) : ℂ := x.1
+
+/-- ★★**`degOfDefinition` 欄**。 -/
+noncomputable def degOfDefinition (x : RealizedClass) : ℕ := x.rep.deg
+
+/-- ★**`degOfDefinition_pos` 欄**。 -/
+theorem degOfDefinition_pos (x : RealizedClass) : 0 < x.degOfDefinition := x.rep.deg_pos
+
+/-- ★★★**`MinimalField` 欄**——代表元は最小なので**つねに成り立つ**。 -/
+theorem minimalField (x : RealizedClass) : MinimalFieldJ x.rep :=
+  fun E' hE' => x.rep_deg_le E' (by rw [hE', x.rep_j])
+
+/-- ★★★★**`deg∞` は代表元で測っても同じ**。 -/
+theorem degInfJ_rep (x : RealizedClass) : degInfJ x.rep.j = degInfJ x.cls := by
+  rw [x.rep_j]; rfl
+
+/-- ★★★★★★★★★★**`sum_localHt_eq` 欄**（類の水準で）。 -/
+theorem sum_localHt_eq (x : RealizedClass) :
+    (∑ j : Fin x.rep.multCard, (x.rep.localHt j : ℝ) * Real.log (x.rep.multPrime j))
+      = 23040 * (x.degOfDefinition : ℝ) * degInfJ x.cls := by
+  rw [DegCurve.sum_localHt_eq x.rep, degOfDefinition, degInfJ_rep]
+
+/-- ★★★★**`degInf` は正**（`Curve` の制限から）。 -/
+theorem degInf_pos (x : RealizedClass) : 0 < degInfJ x.cls := by
+  rw [← degInfJ_rep]
+  exact x.rep.degInf_pos
+
+end RealizedClass
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★`logDiffMell` と `ramPrimes` 群 -/
+
+/-- ★★★素因数の対数の和は本体の対数以下（根基は本体を割るから）。 -/
+theorem sum_log_primeFactors_le (n : ℕ) (hn : 0 < n) :
+    (∑ q ∈ n.primeFactors, Real.log q) ≤ Real.log n := by
+  have hprod : ∏ q ∈ n.primeFactors, q ∣ n := Nat.prod_primeFactors_dvd _
+  have hle : (∏ q ∈ n.primeFactors, q) ≤ n := Nat.le_of_dvd hn hprod
+  have hpos : 0 < ∏ q ∈ n.primeFactors, q :=
+    Finset.prod_pos (fun q hq => (Nat.prime_of_mem_primeFactors hq).pos)
+  have hlog : (∑ q ∈ n.primeFactors, Real.log q)
+      = Real.log ((∏ q ∈ n.primeFactors, q : ℕ) : ℝ) := by
+    push_cast
+    rw [Real.log_prod]
+    intro q hq
+    exact_mod_cast (Nat.prime_of_mem_primeFactors hq).ne_zero
+  rw [hlog]
+  refine Real.log_le_log (by exact_mod_cast hpos) ?_
+  exact_mod_cast hle
+
+namespace RealizedClass
+
+/-- ★★★★★★**`logDiffMell` 欄**——`log-diff = log|disc L| / d`。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★`Definition 1.5, (iii)` を `M̄_ell` に適用したもの。
+★★`Curve` を**実現される類**に取った（`RealizedClass`）ので、
+定義体は類ごとに一意に決まり、これは**類の函数**になる。 -/
+noncomputable def logDiffMell (x : RealizedClass) : ℝ :=
+  Real.log ((|NumberField.discr x.rep.toSSCurve.fld| : ℤ) : ℝ) / (x.degOfDefinition : ℝ)
+
+theorem logDiffMell_nonneg (x : RealizedClass) : 0 ≤ x.logDiffMell := by
+  refine div_nonneg ?_ (by positivity)
+  refine Real.log_nonneg ?_
+  have : (1:ℤ) ≤ |NumberField.discr x.rep.toSSCurve.fld| :=
+    Int.one_le_abs (NumberField.discr_ne_zero (K := x.rep.toSSCurve.fld))
+  exact_mod_cast this
+
+open scoped Classical in
+/-- ★★★★★**`ramPrimes` 欄**——`badPrimes` に、`L` で分岐する素数
+（`disc L` を割る素数）と、分岐指数を割りうる素数（`d` 以下の素数）を加えたもの。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★原文 p.22:『write `S•` for the union of `S∘`, the primes of `ℚ` that **ramify in `L`**,
+and the primes that divide the **ramification indices** of primes of `ℚ` in `L`』。
+☆分岐指数は `≤ d` なので、それを割る素数は `d` 以下である。 -/
+noncomputable def ramPrimes (x : RealizedClass) : Finset ℕ :=
+  x.rep.badPrimes ∪ (NumberField.discr x.rep.toSSCurve.fld).natAbs.primeFactors
+    ∪ ((Finset.range (x.degOfDefinition + 1)).filter Nat.Prime)
+
+open scoped Classical in
+theorem ramPrimes_prime (x : RealizedClass) : ∀ q ∈ x.ramPrimes, Nat.Prime q := by
+  intro q hq
+  rcases Finset.mem_union.1 hq with h | h
+  · rcases Finset.mem_union.1 h with h' | h'
+    · exact x.rep.badPrimes_prime q h'
+    · exact Nat.prime_of_mem_primeFactors h'
+  · exact (Finset.mem_filter.1 h).2
+
+open scoped Classical in
+theorem badPrimes_subset_ramPrimes (x : RealizedClass) : x.rep.badPrimes ⊆ x.ramPrimes :=
+  fun _ hq => Finset.mem_union.2 (Or.inl (Finset.mem_union.2 (Or.inl hq)))
+
+open scoped Classical in
+/-- ★★★★**`PrimeToRamification` 欄**。 -/
+def PrimeToRamification (x : RealizedClass) (l : ℕ) : Prop := l ∉ x.ramPrimes
+
+open scoped Classical in
+theorem primeTo_ramPrimes (x : RealizedClass) (l : ℕ) (_ : Nat.Prime l)
+    (h : l ∉ x.ramPrimes) : x.PrimeToRamification l := h
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`sum_log_ramPrimes_le` 欄**——★**無条件**。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★★係数 `3` の内訳:
+
+* 分岐する素数の分 `∑_{p ∣ disc} log p ≤ log|disc|` —— **1 単位**
+* `d` 以下の素数の分 `θ(d) ≤ 2·log|disc|`（`ThetaDiscr.lean`、`§9-1176`）—— **2 単位**
+
+☆原文『since [as is easily verified, by considering the **trace** of an extension of
+number fields] the primes appearing in the arithmetic divisor that gives rise to
+“`log-diff_Mell`” appear with **multiplicity ≥ one less than the ramification indices**』
+に対応する段を、Hermite–Minkowski と Chebyshev で置き換えた形である。 -/
+theorem sum_log_ramPrimes_le (x : RealizedClass) :
+    (∑ q ∈ x.ramPrimes, Real.log q)
+      ≤ (∑ q ∈ x.rep.badPrimes, Real.log q)
+        + 3 * (x.degOfDefinition : ℝ) * x.logDiffMell := by
+  have hnn : ∀ q : ℕ, 0 ≤ Real.log q := by
+    intro q
+    rcases Nat.eq_zero_or_pos q with h | h
+    · rw [h]; simp
+    · exact Real.log_nonneg (by exact_mod_cast h)
+  have hd : (x.degOfDefinition : ℝ) ≠ 0 := by
+    have := x.degOfDefinition_pos
+    positivity
+  set D : ℝ := Real.log ((|NumberField.discr x.rep.toSSCurve.fld| : ℤ) : ℝ) with hD
+  have hrhs : 3 * (x.degOfDefinition : ℝ) * x.logDiffMell = 3 * D := by
+    rw [logDiffMell, ← hD]
+    field_simp
+  -- 分岐する素数の分
+  have hdisc : (∑ q ∈ (NumberField.discr x.rep.toSSCurve.fld).natAbs.primeFactors, Real.log q)
+      ≤ D := by
+    have hpos : 0 < (NumberField.discr x.rep.toSSCurve.fld).natAbs :=
+      Int.natAbs_pos.2 (NumberField.discr_ne_zero (K := x.rep.toSSCurve.fld))
+    refine le_trans (sum_log_primeFactors_le _ hpos) (le_of_eq ?_)
+    have hcast : ((|NumberField.discr x.rep.toSSCurve.fld| : ℤ) : ℝ)
+        = (((NumberField.discr x.rep.toSSCurve.fld).natAbs : ℕ) : ℝ) := by
+      rw [← Int.natCast_natAbs, Int.cast_natCast]
+    rw [hD, hcast]
+  -- `d` 以下の素数の分
+  have htheta : (∑ q ∈ (Finset.range (x.degOfDefinition + 1)).filter Nat.Prime, Real.log q)
+      ≤ 2 * D := by
+    have hlog : (∑ q ∈ (Finset.range (x.degOfDefinition + 1)).filter Nat.Prime, Real.log q)
+        = Real.log (primorial x.degOfDefinition) := by
+      rw [primorial]
+      push_cast
+      rw [Real.log_prod]
+      intro q hq
+      exact_mod_cast (Finset.mem_filter.1 hq).2.ne_zero
+    rw [hlog, hD]
+    exact ABC3.Found.GaloisRep.log_primorial_le_two_log_discr x.rep.toSSCurve.fld
+  have hu1 := sum_union_le_of_nonneg
+    (x.rep.badPrimes ∪ (NumberField.discr x.rep.toSSCurve.fld).natAbs.primeFactors)
+    ((Finset.range (x.degOfDefinition + 1)).filter Nat.Prime) (fun q : ℕ => Real.log q) hnn
+  have hu2 := sum_union_le_of_nonneg x.rep.badPrimes
+    ((NumberField.discr x.rep.toSSCurve.fld).natAbs.primeFactors) (fun q : ℕ => Real.log q) hnn
+  rw [hrhs, ramPrimes]
+  linarith
+
+end RealizedClass
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -713,6 +945,37 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def RealizedClass.logDiffMell.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(logDiffMell 欄——log|disc L| / d)",
+    sectionId := "genell-cor-4-3" }
+
+def RealizedClass.sum_log_ramPrimes_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(sum_log_ramPrimes_le 欄。★無条件)",
+    sectionId := "genell-cor-4-3" }
+
+def RealizedClass.sum_log_ramPrimes_le.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆原文は『by considering the trace of an extension of number fields』" ++
+       "(分岐指数より 1 小さい重複度)で済ませているが、本形式化は" ++
+       "Hermite-Minkowski(NumberField.abs_discr_ge)と Chebyshev(primorial_le_four_pow)で" ++
+       "置き換えた。係数 3 の内訳は 1 単位(分岐する素数)＋2 単位(d 以下の素数)である") 4 ]
+
+def RealizedClass.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(Curve 欄——実現される類と、次数最小の代表元)",
+    sectionId := "genell-cor-4-3" }
+
+def RealizedClass.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★測定: EllModuliData の logDiffMell は類の函数でなければならないが、" ++
+       "log-diff は定義体の分岐で決まる量である。同じ j を持つ曲線でも定義体は" ++
+       "いくらでも大きく取れるので、sum_log_ramPrimes_le 欄は「勝手な定義体の曲線」に" ++
+       "対しては破れる。そこで Curve を実現される類とし、各類に定義体の次数が" ++
+       "最小の代表元を取る——原文 Corollary 4.3 の仮説" ++
+       "『L is a minimal field of definition of the point [E_L]』そのものである") 4 ]
 
 def GaloisFiniteJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,

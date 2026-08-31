@@ -1299,6 +1299,7 @@ import ABC3.Found.GaloisRep.HtFinJ
 import ABC3.Found.GaloisRep.LocalHeightDelta
 import ABC3.Found.GenEll.Rem331PotLocalHeight
 import ABC3.Found.GaloisRep.ResChar
+import ABC3.Found.GaloisRep.ThetaDiscr
 import ABC3.Found.GaloisRep.DegInfBaseChange
 import ABC3.Found.GaloisRep.HtFaltJ
 import ABC3.Found.GaloisRep.HtFaltJField
