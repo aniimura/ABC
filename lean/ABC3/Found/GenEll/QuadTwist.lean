@@ -396,6 +396,40 @@ theorem splits_quadTwist_of_not_isSquare {k : Type} [Field k] [Fintype k] [Decid
 
 end SplitTwist
 
+/-! ## ★★★★★★★★Vélu の `v` は `x` だけで決まる——捧りで `d²` 倍 -/
+
+/-- ★★★★★★**`v_Q` は捧りで `d²` 倍**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★**`a₁ = 0` の形では `v_Q = 3x² + 2a₂x + a₄` であり、`y` に依らない**。
+☆したがって捧りの `y` 座標（`√d` を含む）を一切見ずに済む——
+これが「捧りのために体を拡大しなくてよい」理由の一つである。 -/
+theorem veluV2_quadTwist {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCharNeTwoNF]
+    (x y y' d : A) : veluV2 (quadTwist W d) (d * x) y' = d ^ 2 * veluV2 W x y := by
+  show veluGx (quadTwist W d) (d * x) y' = d ^ 2 * veluGx W x y
+  rw [veluGx, veluGx, quadTwist_a₂, quadTwist_a₄]
+  have h1 : (quadTwist W d).a₁ = 0 := rfl
+  have h2 : W.a₁ = 0 := WeierstrassCurve.a₁_of_isCharNeTwoNF W
+  rw [h1, h2]
+  ring
+
+/-- ★★★★**`u_Q` は捧りで `d³` 倍**（`y` の側の関係式を受けて）。
+
+☆`a₁ = a₃ = 0` の形では `u_Q = 4y²` である。 -/
+theorem veluU_quadTwist {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCharNeTwoNF]
+    (x y y' d : A) (hy : y' ^ 2 = d ^ 3 * y ^ 2) :
+    veluU (quadTwist W d) (d * x) y' = d ^ 3 * veluU W x y := by
+  show (veluGy (quadTwist W d) (d * x) y') ^ 2 = d ^ 3 * (veluGy W x y) ^ 2
+  rw [veluGy, veluGy]
+  have h1 : (quadTwist W d).a₁ = 0 := rfl
+  have h3 : (quadTwist W d).a₃ = 0 := rfl
+  have h2 : W.a₁ = 0 := WeierstrassCurve.a₁_of_isCharNeTwoNF W
+  have h4 : W.a₃ = 0 := WeierstrassCurve.a₃_of_isCharNeTwoNF W
+  rw [h1, h3, h2, h4]
+  linear_combination (4 : A) * hy
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
@@ -416,6 +450,11 @@ def quadTwist_veluQuotientFull.src : ABC3.Meta.Source :=
 def quadTwist_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(捧りは底変換と可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluV2_quadTwist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(v_Q は捧りで d² 倍——y に依らない。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluCurve_quadTwist.src : ABC3.Meta.Source :=
