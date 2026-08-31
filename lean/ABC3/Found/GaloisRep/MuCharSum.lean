@@ -334,6 +334,81 @@ theorem sum_mu_inv_one_sub_sq [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
     sum_mu_inv_one_sub hl hζ]
   ring
 
+/-! ## ★★★★★★★★★★★★★★逆元側の指標和と Tate 係数 -/
+
+/-- ★`ζ^i` の逆元は `ζ^(l−i)`。 -/
+theorem inv_zeta_pow {l : ℕ} {ζ : F} (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : i ≤ l) :
+    (ζ ^ i)⁻¹ = ζ ^ (l - i) := by
+  have hne : ζ ^ i ≠ 0 := by
+    intro h
+    have : (1 : F) = 0 := by
+      rw [← hζ.pow_eq_one, ← Nat.sub_add_cancel hi, pow_add, h, mul_zero]
+    exact one_ne_zero this
+  refine inv_eq_of_mul_eq_one_right ?_
+  rw [← pow_add, Nat.add_sub_cancel' hi, hζ.pow_eq_one]
+
+/-- ★★★★★★★★★★★★**逆元側の指標和**——`∑_{ζ≠1} ζ^{−d}` も同じ値。 -/
+theorem sum_mu_inv_pow {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) (d : ℕ) :
+    ∑ i ∈ (range l).erase 0, ((ζ ^ i)⁻¹) ^ d = (if l ∣ d then (l : F) else 0) - 1 := by
+  have hrw : ∀ i ∈ (range l).erase 0, ((ζ ^ i)⁻¹) ^ d = ζ ^ ((l - i) * d) := by
+    intro i hi
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    rw [inv_zeta_pow hζ hil.le, ← pow_mul]
+  rw [Finset.sum_congr rfl hrw]
+  rw [← sum_mu_pow_erase_zero (R := F) hl hζ d]
+  refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a _
+    rfl
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**Tate の `X` の `q^N` 係数を `μ_l∖{1}` 上で足す**。
+
+古典的な `q` 展開 `X(u) = u/(1−u)² + ∑_{N≥1} c_N(u) q^N`、
+`c_N(u) = ∑_{d ∣ N} d(u^d + u^{−d} − 2)` の係数を、
+`μ_l∖{1}` 上で足すと
+
+    `∑_ζ c_N(ζ) = 2l·∑_{d ∣ N} d([l ∣ d] − 1)`
+
+になる。★★右辺は `ζ` を含まない——これが
+`σ₁(q) → σ₁(q^l)` を生む機構である。 -/
+theorem sum_mu_coeff {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (D : Finset ℕ) :
+    ∑ i ∈ (range l).erase 0, ∑ d ∈ D, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = 2 * (l : F) * ∑ d ∈ D, (d : F) * ((if l ∣ d then (1 : F) else 0) - 1) := by
+  rw [Finset.sum_comm]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun d _ => ?_)
+  have hexp : ∀ i, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = (d : F) * (ζ ^ (i * d)) + (d : F) * (((ζ ^ i)⁻¹) ^ d) - (d : F) * 2 := by
+    intro i; rw [← pow_mul]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), Finset.sum_sub_distrib,
+    Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.sum_mul,
+    sum_mu_pow_erase_zero hl hζ d, sum_mu_inv_pow hl hζ d]
+  have hcard : ((range l).erase 0).card = l - 1 := by
+    rw [Finset.card_erase_of_mem (Finset.mem_range.2 hl.pos), Finset.card_range]
+  rw [Finset.sum_const, hcard, nsmul_eq_mul]
+  have hlc : ((l - 1 : ℕ) : F) = (l : F) - 1 := by
+    have h1 : (1 : ℕ) ≤ l := hl.pos
+    rw [Nat.cast_sub h1, Nat.cast_one]
+  rw [hlc]
+  by_cases h : l ∣ d <;> simp [h] <;> ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -394,6 +469,21 @@ def sum_mu_inv_one_sub_sq.src : ABC3.Meta.Source :=
 def dvd_iff_eq_zero_of_mem_range.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(range l の中で l ∣ k ⇔ k = 0。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_zeta_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^i の逆元は ζ^(l−i)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(逆元側の指標和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_coeff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate の X の q^N 係数を μ_l∖{1} 上で足す。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
