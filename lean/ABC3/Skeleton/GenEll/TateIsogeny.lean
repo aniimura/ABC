@@ -10,6 +10,7 @@ import ABC3.Found.GaloisRep.TateSetupDvr
 import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GenEll.MuPrimitiveRoot
+import ABC3.Found.GenEll.CyclotomicUnits
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
@@ -982,7 +983,6 @@ theorem tateParam_quot_velu_of_torsion {R : Type} [CommRing R] [IsDomain R] [Cha
     (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
     (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
     (v w : R)
-    (hu : ∀ ζ : R, IsPrimitiveRoot ζ l → ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
     (hv : ∀ ζ : R, IsPrimitiveRoot ζ l →
       v = ∑ i ∈ (range l).erase 0,
         veluV2 (tateCurveAt q hq)
@@ -1008,7 +1008,8 @@ theorem tateParam_quot_velu_of_torsion {R : Type} [CommRing R] [IsDomain R] [Cha
     tateParamR W' hsplit = q ^ l := by
   obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
     exists_primitiveRoot_of_torsion_point q hq hq0 hΔ hl hcop P hP hP0
-  refine tateParam_quot_velu_dvr q hq hq0 hΔ hl hζ hlu (hu ζ hζ) uζ hζu hζl hord hql
+  refine tateParam_quot_velu_dvr q hq hq0 hΔ hl hζ hlu
+    (ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu) uζ hζu hζl hord hql
     h2 h2K hodd v w (hv ζ hζ) (hw ζ hζ) W' hsplit ?_
   rw [hW', hPz]
   rfl
