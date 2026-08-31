@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import Mathlib.Algebra.BigOperators.Intervals
+import Mathlib.Algebra.BigOperators.Ring.Finset
 import ABC3.Meta.Claim
 
 /-!
@@ -97,6 +98,45 @@ theorem exists_two_mul_of_symm {A : Type} [CommRing A] (m : ℕ) (f : ℕ → A)
   rw [sum_eq_two_nsmul_of_symm m f hf, two_nsmul]
   exact two_mul _
 
+/-- ★★★★★★★★★★★★★★★★**対ごとに偶なら和も偶**——
+`sum_eq_two_nsmul_of_symm` の一般形。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 957）の訂正**——Vélu の和の項は
+**反転で不変ではない**。Tate 曲線は `a₁ = 1` なので
+
+    `veluV2 = 3x² + a₄ - y`
+
+であり、`y ↦ -y-x` で変わる。☆変わらないのは `veluU = (2y+x)²` の方だけである。
+
+★だが**対の和は偶である**:
+
+    `g(i) + g(l-i) = 2·veluU_i + 2·x_i·(veluV2_i + veluV2_{l-i})`
+
+なので、対称性ではなく**対ごとの偶性**を受けるのが正しい。
+☆証人 `c` を関数として受けるので選択公理も要らない。 -/
+theorem two_mul_sum_eq_of_pair_even {A : Type} [CommRing A] (m : ℕ) (g c : ℕ → A)
+    (h : ∀ i ∈ Icc 1 m, g i + g (2 * m + 1 - i) = 2 * c i) :
+    2 * (∑ i ∈ Icc 1 m, c i) = ∑ i ∈ (range (2 * m + 1)).erase 0, g i := by
+  have hinj : ∀ a ∈ (Icc 1 m : Finset ℕ), ∀ b ∈ (Icc 1 m : Finset ℕ),
+      2 * m + 1 - a = 2 * m + 1 - b → a = b := by
+    intro a ha b hb hab
+    simp only [mem_Icc] at ha hb
+    omega
+  rw [erase_zero_range_eq_union m, Finset.sum_union (disjoint_Icc_image_sub m),
+    Finset.sum_image hinj, ← Finset.sum_add_distrib, Finset.sum_congr rfl h,
+    Finset.mul_sum]
+
+/-- ★★★★★★★★★★★★**対ごとに偶なら `w` が作れる**。
+
+★これが Vélu の `hw : 2 * w = ∑ (…)` を満たす `w` の作り方である。 -/
+theorem exists_two_mul_of_pair_even {A : Type} [CommRing A] (m : ℕ) (g c : ℕ → A)
+    (h : ∀ i ∈ Icc 1 m, g i + g (2 * m + 1 - i) = 2 * c i) :
+    ∃ w : A, 2 * w = ∑ i ∈ (range (2 * m + 1)).erase 0, g i :=
+  ⟨∑ i ∈ Icc 1 m, c i, two_mul_sum_eq_of_pair_even m g c h⟩
+
 end SymmSum
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -109,6 +149,17 @@ def sum_eq_two_nsmul_of_symm.src : ABC3.Meta.Source :=
 def exists_two_mul_of_symm.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の w は和が対称なら作れる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+
+def two_mul_sum_eq_of_pair_even.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(対ごとに偶なら和も偶。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_two_mul_of_pair_even.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(対ごとに偶なら Vélu の w が作れる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 end ABC3.Found.GenEll
