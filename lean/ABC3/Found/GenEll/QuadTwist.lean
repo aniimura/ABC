@@ -64,22 +64,22 @@ instance quadTwist_isCharNeTwoNF {A : Type} [CommRing A] (W : WeierstrassCurve A
     (quadTwist W d).a₆ = d ^ 3 * W.a₆ := rfl
 
 /-- ★★`c₄` は `d²` 倍。 -/
-theorem quadTwist_c₄ (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (d : F) :
-    (quadTwist W d).c₄ = d ^ 2 * W.c₄ := by
+theorem quadTwist_c₄ {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCharNeTwoNF]
+    (d : A) : (quadTwist W d).c₄ = d ^ 2 * W.c₄ := by
   rw [WeierstrassCurve.c₄_of_isCharNeTwoNF, WeierstrassCurve.c₄_of_isCharNeTwoNF,
     quadTwist_a₂, quadTwist_a₄]
   ring
 
 /-- ★★`c₆` は `d³` 倍。 -/
-theorem quadTwist_c₆ (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (d : F) :
-    (quadTwist W d).c₆ = d ^ 3 * W.c₆ := by
+theorem quadTwist_c₆ {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCharNeTwoNF]
+    (d : A) : (quadTwist W d).c₆ = d ^ 3 * W.c₆ := by
   rw [WeierstrassCurve.c₆_of_isCharNeTwoNF, WeierstrassCurve.c₆_of_isCharNeTwoNF,
     quadTwist_a₂, quadTwist_a₄, quadTwist_a₆]
   ring
 
 /-- ★★`Δ` は `d⁶` 倍。 -/
-theorem quadTwist_Δ (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (d : F) :
-    (quadTwist W d).Δ = d ^ 6 * W.Δ := by
+theorem quadTwist_Δ {A : Type} [CommRing A] (W : WeierstrassCurve A) [W.IsCharNeTwoNF]
+    (d : A) : (quadTwist W d).Δ = d ^ 6 * W.Δ := by
   rw [WeierstrassCurve.Δ_of_isCharNeTwoNF, WeierstrassCurve.Δ_of_isCharNeTwoNF,
     quadTwist_a₂, quadTwist_a₄, quadTwist_a₆]
   ring
@@ -339,6 +339,63 @@ theorem quadTwist_splitConst {A : Type} [CommRing A] (V : WeierstrassCurve A)
   show (0 : A) * _ = 0
   ring
 
+/-! ## ★★★★★★★★★★★★非分裂の曲線は非平方で捧ると分裂になる -/
+
+section SplitTwist
+
+open Polynomial
+
+variable {R : Type} [CommRing R] {K : Type} [Field K] [Algebra R K]
+
+/-- ★★★★★★★★★★★★**非分裂の曲線を非平方単数で捧ると分裂になる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが `Lemma 3.5` の非分裂の降下の残る中身である。
+`HasSplitMultiplicativeReduction` の `Splits` フィールそのものを、
+捧った整モデルについて出す。
+
+☆部品はすべて揃っている:
+`quadTwist_c₄`（920）・`splits_quadratic_of_root`（921）・
+`exists_sq_of_twist_of_not_isSquare`（936）・`quadTwist_splitConst`（937）。 -/
+theorem splits_quadTwist_of_not_isSquare {k : Type} [Field k] [Fintype k] [DecidableEq k]
+    (φ : R →+* k) (V : WeierstrassCurve R) [V.IsCharNeTwoNF] (d : R)
+    (hc : φ V.c₄ ≠ 0) (hd0 : φ d ≠ 0)
+    (hK : φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄) ≠ 0)
+    (hns : ¬ ∃ x : k, φ V.c₄ * x ^ 2 = φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄))
+    (hnd : ¬ IsSquare (φ d)) :
+    Polynomial.Splits (Polynomial.map φ
+      (Polynomial.C (quadTwist V d).c₄ * Polynomial.X ^ 2
+        + Polynomial.C ((quadTwist V d).a₁ * (quadTwist V d).c₄) * Polynomial.X
+        - Polynomial.C (54 * (quadTwist V d).b₆
+            - 3 * (quadTwist V d).b₂ * (quadTwist V d).b₄
+            + (quadTwist V d).a₂ * (quadTwist V d).c₄))) := by
+  obtain ⟨x, hx⟩ := exists_sq_of_twist_of_not_isSquare (φ V.c₄) (φ d)
+    (φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄)) hc hd0 hK hns hnd
+  have hmap : Polynomial.map φ
+      (Polynomial.C (quadTwist V d).c₄ * Polynomial.X ^ 2
+        + Polynomial.C ((quadTwist V d).a₁ * (quadTwist V d).c₄) * Polynomial.X
+        - Polynomial.C (54 * (quadTwist V d).b₆
+            - 3 * (quadTwist V d).b₂ * (quadTwist V d).b₄
+            + (quadTwist V d).a₂ * (quadTwist V d).c₄))
+      = Polynomial.C (φ d ^ 2 * φ V.c₄) * Polynomial.X ^ 2
+        + Polynomial.C (0 : k) * Polynomial.X
+        - Polynomial.C (φ d ^ 3
+            * φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄)) := by
+    rw [quadTwist_splitConst, quadTwist_splitLin, quadTwist_c₄]
+    simp only [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul,
+      Polynomial.map_pow, Polynomial.map_C, Polynomial.map_X, Polynomial.map_zero,
+      map_mul, map_pow, map_zero]
+  rw [hmap]
+  refine splits_quadratic_of_root _ _ _ ?_ x ?_
+  · exact mul_ne_zero (pow_ne_zero 2 hd0) hc
+  · have : φ d ^ 2 * φ V.c₄ * x ^ 2
+        = φ d ^ 3 * φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄) := hx
+    linear_combination this
+
+end SplitTwist
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
@@ -364,6 +421,11 @@ def quadTwist_map.src : ABC3.Meta.Source :=
 def veluCurve_quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の商は捧りと可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def splits_quadTwist_of_not_isSquare.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂の曲線を非平方で捧ると分裂になる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def quadTwist_splitConst.src : ABC3.Meta.Source :=
