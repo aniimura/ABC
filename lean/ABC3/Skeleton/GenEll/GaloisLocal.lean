@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Meta.Claim
 
 /-!
@@ -89,12 +90,13 @@ def alpha_in_modl_image.needs : List ProofObligation :=
 ★★★★★`Found/GenEll/EllModuliGalois.lean` の `imageSurjectiveJ_of_containsSL2` が
 **そのまま消費する形**である。
 
-☆`det ρ(σ)` が円分指標であること自体は `det_cyclotomic_full`（★無条件）で済んでいる。 -/
+☆`det ρ(σ)` が mathlib の円分指標そのものであることは
+`Found/GenEll/DetCycloChar.lean` の `det_galRep_eq_cyclotomicCharacter`（`§9-1190`、第 764、
+★無条件）で済んでいる。★★したがって本命題には**楕円曲線が現れない**。 -/
 theorem cyclotomic_det_surjective (E : SSCurve) (l : ℕ) [Fact l.Prime]
-    (hunram : True)
-    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) (u : ℤ_[l]ˣ) :
+    (hunram : True) (u : ℤ_[l]ˣ) :
     ∃ σ : E.alg ≃ₐ[E.fld] E.alg,
-      Matrix.GeneralLinearGroup.det (galRep E.W l e σ) = u := by
+      cyclotomicCharacter E.alg l σ.toRingEquiv = u := by
   sorry
 
 def cyclotomic_det_surjective.src : Source :=
