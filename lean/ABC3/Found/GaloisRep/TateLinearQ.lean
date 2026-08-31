@@ -187,7 +187,127 @@ theorem evalAdic_injective_of_coeff_one [IsAdicComplete I R] (f : PowerSeries �
     simpa using key n
   exact sub_eq_zero.1 hz
 
+/-! ## ★★★★★★★★★★形式逆関数定理——存在の側 -/
+
+/-- ★★★★★★★★★★**`f(q) = t` は解ける**（`f = X + 高次`、`t ∈ I`）。
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+★第 875 の `evalAdic_injective_of_coeff_one` の**対**である——
+形式逆関数定理の「全射」の側。
+
+☆道は逐次近似である。`q₀ = 0`、`q_{n+1} = q_n + (t − f(q_n))` とおくと
+
+    `f(q_n) − t ∈ Iⁿ`
+
+が帰納的に成り立つ（`evalAdic_sub_linear_mem` を 1 回使うだけ）。
+`IsPrecomplete` で極限 `L` を取り、`IsHausdorff` で `f(L) = t` を結ぶ。
+
+★これがあれば、`v_p(j) < 0` なる任意の `j` に対して
+**Tate 母数 `q` が作れる**——分裂性を問わずに。 -/
+theorem evalAdic_surjective_of_coeff_one [IsAdicComplete I R] (f : PowerSeries ℤ)
+    (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = 1)
+    {t : R} (ht : t ∈ I) :
+    ∃ (q : R) (hq : q ∈ I), evalAdic f q hq = t := by
+  classical
+  -- ★逐次近似の列（`I` の元であることを抱えたまま）
+  set step : {x : R // x ∈ I} → {x : R // x ∈ I} := fun x =>
+    ⟨x.1 + (t - evalAdic f x.1 x.2),
+      add_mem x.2 (sub_mem ht (evalAdic_mem f hf0 x.1 x.2))⟩ with hstep
+  set g : ℕ → {x : R // x ∈ I} := fun n => step^[n] ⟨0, I.zero_mem⟩ with hg
+  have hgsucc : ∀ n, g (n + 1) = step (g n) := by
+    intro n
+    rw [hg]
+    exact Function.iterate_succ_apply' step n _
+  -- ★不変量: `f(q_n) − t ∈ Iⁿ`
+  have hinv : ∀ n, evalAdic f (g n).1 (g n).2 - t ∈ I ^ n := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        have hdiff : (g (n + 1)).1 - (g n).1 ∈ I ^ n := by
+          rw [hgsucc n, hstep]
+          simpa using neg_mem ih
+        have hlin := evalAdic_sub_linear_mem f hf0 (g (n + 1)).2 (g n).2 n hdiff
+        rw [hf1] at hlin
+        simp only [Int.cast_one, one_mul] at hlin
+        have hval : (g (n + 1)).1 - (g n).1 = t - evalAdic f (g n).1 (g n).2 := by
+          rw [hgsucc n, hstep]
+          ring
+        rw [hval] at hlin
+        have : evalAdic f (g (n + 1)).1 (g (n + 1)).2 - t
+            = evalAdic f (g (n + 1)).1 (g (n + 1)).2 - evalAdic f (g n).1 (g n).2
+              - (t - evalAdic f (g n).1 (g n).2) := by ring
+        rw [this]
+        exact hlin
+  -- ★Cauchy
+  have hstepdiff : ∀ n, (g (n + 1)).1 - (g n).1 ∈ I ^ n := by
+    intro n
+    rw [hgsucc n, hstep]
+    simpa using neg_mem (hinv n)
+  have hcauchy : ∀ {m n : ℕ}, m ≤ n → (g n).1 - (g m).1 ∈ I ^ m := by
+    intro m n hmn
+    induction n with
+    | zero =>
+        have : m = 0 := Nat.le_zero.1 hmn
+        subst this
+        simp
+    | succ k ih =>
+        rcases Nat.lt_or_ge m (k + 1) with h | h
+        · have hmk : m ≤ k := Nat.lt_succ_iff.1 h
+          have h1 := ih hmk
+          have h2 : (g (k + 1)).1 - (g k).1 ∈ I ^ m :=
+            Ideal.pow_le_pow_right hmk (hstepdiff k)
+          have : (g (k + 1)).1 - (g m).1
+              = ((g (k + 1)).1 - (g k).1) + ((g k).1 - (g m).1) := by ring
+          rw [this]
+          exact add_mem h2 h1
+        · have : m = k + 1 := le_antisymm hmn h
+          subst this
+          simp
+  -- ★極限
+  obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) (M := R) (fun n => (g n).1) (by
+    intro m n hmn
+    rw [SModEq.sub_mem]
+    simpa using neg_mem (hcauchy hmn))
+  have hLmem : L ∈ I := by
+    have h1 := hL 1
+    rw [SModEq.sub_mem] at h1
+    have h2 : (g 1).1 - L ∈ I := by simpa using h1
+    have : L = (g 1).1 - ((g 1).1 - L) := by ring
+    rw [this]
+    exact sub_mem (g 1).2 h2
+  refine ⟨L, hLmem, ?_⟩
+  -- ★`f(L) − t ∈ Iⁿ` すべての `n` で
+  have hall : ∀ n : ℕ, evalAdic f L hLmem - t ∈ I ^ n := by
+    intro n
+    have hLn : L - (g n).1 ∈ I ^ n := by
+      have := hL n
+      rw [SModEq.sub_mem] at this
+      simpa using neg_mem (by simpa using this : (g n).1 - L ∈ I ^ n)
+    have hlin := evalAdic_sub_linear_mem f hf0 hLmem (g n).2 n hLn
+    rw [hf1] at hlin
+    simp only [Int.cast_one, one_mul] at hlin
+    have hup : evalAdic f L hLmem - evalAdic f (g n).1 (g n).2 - (L - (g n).1) ∈ I ^ n :=
+      Ideal.pow_le_pow_right (by omega) hlin
+    have : evalAdic f L hLmem - t
+        = (evalAdic f L hLmem - evalAdic f (g n).1 (g n).2 - (L - (g n).1))
+          + (L - (g n).1) + (evalAdic f (g n).1 (g n).2 - t) := by ring
+    rw [this]
+    exact add_mem (add_mem hup hLn) (hinv n)
+  have hz : evalAdic f L hLmem - t = 0 := by
+    refine IsHausdorff.haus' (I := I) _ (fun n => ?_)
+    rw [SModEq.sub_mem, sub_zero]
+    simpa using hall n
+  exact sub_eq_zero.1 hz
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def evalAdic_surjective_of_coeff_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Tate 一意化—形式逆関数定理の存在の側。★無条件)",
+    sectionId := "genell-def-3-3" }
 
 def evalAdic_sub_linear_mem.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
