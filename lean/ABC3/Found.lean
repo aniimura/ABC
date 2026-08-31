@@ -1300,6 +1300,7 @@ import ABC3.Found.GaloisRep.LocalHeightDelta
 import ABC3.Found.GenEll.Rem331PotLocalHeight
 import ABC3.Found.GaloisRep.DegInfBaseChange
 import ABC3.Found.GaloisRep.HtFaltJ
+import ABC3.Found.GaloisRep.HtFaltJField
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.EDSThreeTerm
 import ABC3.Found.Arakelov.PicUnfoldLE

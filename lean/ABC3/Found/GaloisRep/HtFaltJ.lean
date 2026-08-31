@@ -82,24 +82,46 @@ theorem jExp_congr_j (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L
     congr 1
     exact Units.ext hj
 
+/-- ★★★★★★**`v_p(Δ_min) = log⁺|j|_p` が成り立つなら `v_p(Δ_min)` は `j` だけで決まる**。
+
+★★半安定性そのものではなく**`maxJ` の等式**を仮説にするのが要点である
+——基底変換した曲線では `SemistableAt` を持ち上げられないが、
+この等式は持ち上げられる（`minDeltaExp_eq_maxJ_baseChange`、`§9-1167`、第 740）。 -/
+theorem minDeltaExp_congr_j_of_maxJ (p : HeightOneSpectrum (𝓞 L))
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hE : minDeltaExp p E = max 0 (-jExp p E))
+    (hE' : minDeltaExp p E' = max 0 (-jExp p E')) (hj : E.j = E'.j) :
+    minDeltaExp p E = minDeltaExp p E' := by
+  rw [hE, hE', jExp_congr_j p E E' hj]
+
 /-- ★★★★★★**半安定なら `v_p(Δ_min)` は `j` だけで決まる**。 -/
 theorem minDeltaExp_congr_j_of_semistable (p : HeightOneSpectrum (𝓞 L))
     (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
     (hss : SemistableAt p E) (hss' : SemistableAt p E') (hj : E.j = E'.j) :
-    minDeltaExp p E = minDeltaExp p E' := by
-  rw [minDeltaExp_eq_maxJ_of_semistable p E hss, minDeltaExp_eq_maxJ_of_semistable p E' hss',
-    jExp_congr_j p E E' hj]
+    minDeltaExp p E = minDeltaExp p E' :=
+  minDeltaExp_congr_j_of_maxJ p E E' (minDeltaExp_eq_maxJ_of_semistable p E hss)
+    (minDeltaExp_eq_maxJ_of_semistable p E' hss') hj
+
+/-- ★★★★★★★**`maxJ` の等式が成り立つなら `deg∞` は `j` だけで決まる**。 -/
+theorem degInfOf_congr_j_of_maxJ (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    (hE : ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E = max 0 (-jExp p E))
+    (hE' : ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E' = max 0 (-jExp p E'))
+    (hj : E.j = E'.j) :
+    degInfOf L E = degInfOf L E' := by
+  rw [degInfOf, degInfOf]
+  congr 1
+  exact finsum_congr (fun p => by
+    rw [minDeltaExp_congr_j_of_maxJ p E E' (hE p) (hE' p) hj])
 
 /-- ★★★★★★★**半安定なら `deg∞` は `j` だけで決まる**。 -/
 theorem degInfOf_congr_j_of_semistable (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
     (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
     (hss' : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E') (hj : E.j = E'.j) :
-    degInfOf L E = degInfOf L E' := by
-  rw [degInfOf, degInfOf]
-  congr 1
-  exact finsum_congr (fun p => by
-    rw [minDeltaExp_congr_j_of_semistable p E E' (hss p) (hss' p) hj])
+    degInfOf L E = degInfOf L E' :=
+  degInfOf_congr_j_of_maxJ E E' (fun p => minDeltaExp_eq_maxJ_of_semistable p E (hss p))
+    (fun p => minDeltaExp_eq_maxJ_of_semistable p E' (hss' p)) hj
 
 /-! ## ★★★★★★★★★★★★★★★★到達点 -/
 
@@ -115,13 +137,22 @@ theorem degInfOf_congr_j_of_semistable (E E' : WeierstrassCurve L)
 
 ☆残るのは**体が違う場合**——`emb₁(j₁) = emb₂(j₂)` の 2 つの `SSCurve` を
 共通の体へ上げる段である（`htFaltOf_baseChange_of_semistable`、`§9-1165`、第 738 が受け皿）。 -/
+theorem htFaltOf_congr_j_of_maxJ (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    (hE : ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E = max 0 (-jExp p E))
+    (hE' : ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E' = max 0 (-jExp p E'))
+    (hj : E.j = E'.j) :
+    htFaltOf L E = htFaltOf L E' := by
+  rw [htFaltOf, htFaltOf, degInfOf_congr_j_of_maxJ E E' hE hE' hj, archSum_congr_j E E' hj]
+
+/-- ★★★★★★★★★★★★半安定な場合（`SemistableAt` から `maxJ` の等式を作る）。 -/
 theorem htFaltOf_congr_j_of_semistable (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
     (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
     (hss' : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E') (hj : E.j = E'.j) :
-    htFaltOf L E = htFaltOf L E' := by
-  rw [htFaltOf, htFaltOf, degInfOf_congr_j_of_semistable E E' hss hss' hj,
-    archSum_congr_j E E' hj]
+    htFaltOf L E = htFaltOf L E' :=
+  htFaltOf_congr_j_of_maxJ E E' (fun p => minDeltaExp_eq_maxJ_of_semistable p E (hss p))
+    (fun p => minDeltaExp_eq_maxJ_of_semistable p E' (hss' p)) hj
 
 /-! ## ★出典の紐付け(`.src`) -/
 

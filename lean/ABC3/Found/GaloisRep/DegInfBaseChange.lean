@@ -78,6 +78,53 @@ theorem minDeltaExp_eq_maxJ_of_semistable (p : HeightOneSpectrum (𝓞 L))
     minDeltaExp p W = max 0 (-jExp p W) :=
   le_antisymm (minDeltaExp_le_maxJ p W hss) (maxJ_le_minDeltaExp p W)
 
+/-- ★★`valAdd` の順序は乗法的付値の逆順序。 -/
+theorem valAdd_le_iff (p : HeightOneSpectrum (𝓞 L)) (x y : Lˣ) :
+    valAdd p x ≤ valAdd p y ↔ (p.valuation L) (y : L) ≤ (p.valuation L) (x : L) := by
+  rw [valAdd, valAdd, neg_le_neg_iff, Multiplicative.toAdd_le, ← WithZero.coe_le_coe,
+    WithZero.coe_unzero, WithZero.coe_unzero]
+
+/-- ★★★★★★**極小判別式の指数は、どの整モデルの `v_p(Δ)` よりも小さい**。
+
+★`minimal_vAdd_Delta_le`（`DegInfLocal.lean:66`）を `valAdd` の言葉に直したもの。 -/
+theorem minDeltaExp_le_of_isIntegral (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    (hΔ : W.Δ ≠ 0) (C : WeierstrassCurve.VariableChange L)
+    (hint : WeierstrassCurve.IsIntegral (primeSubring p) (C • W)) :
+    minDeltaExp p W
+      ≤ valAdd p (Units.mk0 ((C • W).Δ) (variableChange_Delta_ne_zero W hΔ C)) := by
+  obtain ⟨C₀, hC₀⟩ := WeierstrassCurve.exists_isMinimal (primeSubring p) W
+  haveI := hC₀
+  have hΔ₀ : (C₀ • W).Δ ≠ 0 := variableChange_Delta_ne_zero W hΔ C₀
+  have hsm : (C * C₀⁻¹) • (C₀ • W) = C • W := by rw [mul_smul, inv_smul_smul]
+  have hkey := minimal_vAdd_Delta_le (R := primeSubring p) (C₀ • W) hΔ₀ (C * C₀⁻¹)
+    (by rw [hsm]; exact hint)
+  have hv : (IsDiscreteValuationRing.maximalIdeal (primeSubring p)).valuation L ((C • W).Δ)
+      ≤ (IsDiscreteValuationRing.maximalIdeal (primeSubring p)).valuation L ((C₀ • W).Δ) := by
+    have h1 := (valuation_le_iff_vAdd_le (R := primeSubring p) _ _).2 hkey
+    have h2 : ((C * C₀⁻¹) • (C₀ • W)).Δ = (C • W).Δ := by rw [hsm]
+    rw [show (((Units.mk0 (((C * C₀⁻¹) • (C₀ • W)).Δ)
+        (variableChange_Delta_ne_zero (C₀ • W) hΔ₀ (C * C₀⁻¹))) : L)) = (C • W).Δ from h2] at h1
+    exact h1
+  rw [minDeltaExp_eq p W hΔ C₀ hC₀, valAdd_le_iff]
+  exact (valuation_isEquiv p _ _).1 hv
+
+/-- ★★★整モデルの係数は付値環に入っている。 -/
+theorem mem_primeSubring_of_isIntegral (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    [WeierstrassCurve.IsIntegral (primeSubring p) W] :
+    W.a₁ ∈ primeSubring p ∧ W.a₂ ∈ primeSubring p ∧ W.a₃ ∈ primeSubring p ∧
+      W.a₄ ∈ primeSubring p ∧ W.a₆ ∈ primeSubring p := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [← WeierstrassCurve.integralModel_a₁_eq (primeSubring p) W]
+    exact ((integralModel (primeSubring p) W).a₁).2
+  · rw [← WeierstrassCurve.integralModel_a₂_eq (primeSubring p) W]
+    exact ((integralModel (primeSubring p) W).a₂).2
+  · rw [← WeierstrassCurve.integralModel_a₃_eq (primeSubring p) W]
+    exact ((integralModel (primeSubring p) W).a₃).2
+  · rw [← WeierstrassCurve.integralModel_a₄_eq (primeSubring p) W]
+    exact ((integralModel (primeSubring p) W).a₄).2
+  · rw [← WeierstrassCurve.integralModel_a₆_eq (primeSubring p) W]
+    exact ((integralModel (primeSubring p) W).a₆).2
+
 def minDeltaExp_eq_maxJ_of_semistable.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,
     item := "Proposition 3.4(半安定なら v_p(Δ_min) = log⁺|j|_p——等号)",
@@ -175,6 +222,61 @@ theorem htFaltOf_baseChange_of_minDeltaExp (E : WeierstrassCurve L) (hΔ : E.Δ 
   htFaltOf_baseChange_of_degInf L L' E
     (degInfOf_baseChange_of_minDeltaExp L L' E hΔ hloc)
 
+/-! ## ★★★★★★★★★★★★整性と極小性の基底変換 -/
+
+/-- ★★★★★★**整なモデルは基底変換しても整**。
+
+★`v_P(f x) = v_p(x)^e` なので `v_p(x) ≤ 1` から `v_P(f x) ≤ 1`。 -/
+theorem isIntegral_baseChange_primeSubring (p : HeightOneSpectrum (𝓞 L)) (P : HeightOneSpectrum (𝓞 L'))
+    [P.asIdeal.LiesOver p.asIdeal] (W : WeierstrassCurve L)
+    [WeierstrassCurve.IsIntegral (primeSubring p) W] :
+    WeierstrassCurve.IsIntegral (primeSubring P) (W.baseChange L') := by
+  have key : ∀ x : L, x ∈ primeSubring p → algebraMap L L' x ∈ primeSubring P := by
+    intro x hx
+    rw [mem_primeSubring_iff] at hx ⊢
+    rw [← HeightOneSpectrum.valuation_liesOver L' p P x]
+    exact pow_le_one₀ zero_le' hx
+  obtain ⟨h1, h2, h3, h4, h6⟩ := mem_primeSubring_of_isIntegral p W
+  exact isIntegral_of_mem (primeSubring P) (W.baseChange L')
+    (key _ h1) (key _ h2) (key _ h3) (key _ h4) (key _ h6)
+
+/-- ★★★★★★★★★★★★★★**`v_P(Δ_min(E×L′)) ≤ e(P|p)·v_p(Δ_min(E))`**——★**無条件**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`p` で極小なモデルを基底変換すると `P` で**整**なモデルになる。極小判別式は
+どの整モデルの `v(Δ)` よりも小さいので、この向きの不等式は半安定性なしで出る。 -/
+theorem minDeltaExp_baseChange_le (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) (hΔ : E.Δ ≠ 0) :
+    minDeltaExp P (E.baseChange L')
+      ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * minDeltaExp p E := by
+  obtain ⟨C₀, hC₀⟩ := WeierstrassCurve.exists_isMinimal (primeSubring p) E
+  haveI := hC₀
+  haveI hint : WeierstrassCurve.IsIntegral (primeSubring p) (C₀ • E) := inferInstance
+  have hΔ₀ : (C₀ • E).Δ ≠ 0 := variableChange_Delta_ne_zero E hΔ C₀
+  have hΔ' : (E.baseChange L').Δ ≠ 0 := by
+    rw [show (E.baseChange L').Δ = algebraMap L L' E.Δ from WeierstrassCurve.map_Δ _ _]
+    exact fun h => hΔ ((map_eq_zero_iff _ (RingHom.injective (algebraMap L L'))).1 h)
+  have hsm : (C₀.map (algebraMap L L')) • (E.baseChange L') = (C₀ • E).baseChange L' :=
+    WeierstrassCurve.map_variableChange E C₀ (algebraMap L L')
+  haveI hintP : WeierstrassCurve.IsIntegral (primeSubring P)
+      ((C₀.map (algebraMap L L')) • (E.baseChange L')) := by
+    rw [hsm]
+    exact isIntegral_baseChange_primeSubring L L' p P (C₀ • E)
+  have hle := minDeltaExp_le_of_isIntegral P (E.baseChange L') hΔ' _ hintP
+  have heq : valAdd P (Units.mk0 (((C₀.map (algebraMap L L')) • (E.baseChange L')).Δ)
+        (variableChange_Delta_ne_zero (E.baseChange L') hΔ' (C₀.map (algebraMap L L'))))
+      = valAdd P (Units.map (algebraMap L L' : L →* L') (Units.mk0 ((C₀ • E).Δ) hΔ₀)) := by
+    refine valAdd_eq_of_valuation_eq P _ _ ?_
+    congr 1
+    show ((C₀.map (algebraMap L L')) • (E.baseChange L')).Δ = algebraMap L L' ((C₀ • E).Δ)
+    rw [hsm]
+    exact WeierstrassCurve.map_Δ _ _
+  rw [heq, valAdd_algebraMap L L' p P, ← minDeltaExp_eq p E hΔ C₀ hC₀] at hle
+  exact hle
+
 /-! ## ★★★★★★★★★★★★半安定なら局所の仮説は自動である -/
 
 /-- ★★★★★★★★**`v_P(j) = e(P|p)·v_p(j)`**。 -/
@@ -194,6 +296,37 @@ theorem jExp_baseChange (p : HeightOneSpectrum (𝓞 L)) (P : HeightOneSpectrum 
         = Units.map (algebraMap L L' : L →* L') (Units.mk0 E.j h0) := Units.ext hj
     rw [hunit, valAdd_algebraMap L L' p P]
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`v_P(Δ_min(E×L′)) = e(P|p)·v_p(Δ_min(E))`**——★`E` が `p` で半安定なだけでよい。
+
+★★「上でも半安定」を仮定しなくてよいのが要点である:
+
+* `≤` は `minDeltaExp_baseChange_le`（整モデルの比較、★無条件）
+* `≥` は `maxJ_le_minDeltaExp`（★無条件）と、下での半安定性 -/
+theorem minDeltaExp_baseChange_of_semistableAt (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] (hp : SemistableAt p E) :
+    minDeltaExp P (E.baseChange L')
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * minDeltaExp p E := by
+  refine le_antisymm (minDeltaExp_baseChange_le L L' p P E E.isUnit_Δ.ne_zero) ?_
+  rw [minDeltaExp_eq_maxJ_of_semistable p E hp,
+    ← max_zero_mul _ (by positivity : (0:ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ)),
+    mul_neg, ← jExp_baseChange L L' p P E]
+  exact maxJ_le_minDeltaExp P (E.baseChange L')
+
+/-- ★★★★★★★★★★★★★★★★★★
+**下で半安定なら、上でも `v_P(Δ_min) = max(0, −v_P(j))` が成り立つ**。
+
+★これが `HtFaltJ.lean` の `j`-合同の議論へ渡す形である
+——`SemistableAt` そのものではなく、**`maxJ` の等式**だけを持ち上げる。 -/
+theorem minDeltaExp_eq_maxJ_baseChange (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] (hp : SemistableAt p E) :
+    minDeltaExp P (E.baseChange L') = max 0 (-jExp P (E.baseChange L')) := by
+  rw [minDeltaExp_baseChange_of_semistableAt L L' p P E hp,
+    minDeltaExp_eq_maxJ_of_semistable p E hp, jExp_baseChange L L' p P E, ← mul_neg,
+    max_zero_mul _ (by positivity : (0:ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ))]
+
 /-- ★★★★★★★★★★★★★★★★★★★★
 **半安定なら `v_P(Δ_min(E×L′)) = e(P|p)·v_p(Δ_min(E))`**。
 
@@ -210,12 +343,10 @@ theorem jExp_baseChange (p : HeightOneSpectrum (𝓞 L)) (P : HeightOneSpectrum 
 theorem minDeltaExp_baseChange_of_semistable (p : HeightOneSpectrum (𝓞 L))
     (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
     (E : WeierstrassCurve L) [E.IsElliptic]
-    (hp : SemistableAt p E) (hP : SemistableAt P (E.baseChange L')) :
+    (hp : SemistableAt p E) :
     minDeltaExp P (E.baseChange L')
-      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * minDeltaExp p E := by
-  rw [minDeltaExp_eq_maxJ_of_semistable P _ hP, minDeltaExp_eq_maxJ_of_semistable p E hp,
-    jExp_baseChange L L' p P E, ← mul_neg,
-    max_zero_mul _ (by positivity : (0:ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ))]
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * minDeltaExp p E :=
+  minDeltaExp_baseChange_of_semistableAt L L' p P E hp
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★到達点 -/
 
@@ -223,12 +354,11 @@ theorem minDeltaExp_baseChange_of_semistable (p : HeightOneSpectrum (𝓞 L))
 **半安定な楕円曲線の `deg∞` は基底変換で変わらない**——★**無条件**。 -/
 theorem degInfOf_baseChange_of_semistable (E : WeierstrassCurve L) [E.IsElliptic]
     (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
-    (hss' : ∀ P : HeightOneSpectrum (𝓞 L'), SemistableAt P (E.baseChange L'))
     [IsScalarTower ℚ L L'] :
     degInfOf L' (E.baseChange L') = degInfOf L E := by
   refine degInfOf_baseChange_of_minDeltaExp L L' E E.isUnit_Δ.ne_zero (fun P => ?_)
   exact_mod_cast congrArg (fun n : ℤ => (n : ℝ))
-    (minDeltaExp_baseChange_of_semistable L L' _ P E (hss _) (hss' P))
+    (minDeltaExp_baseChange_of_semistableAt L L' _ P E (hss _))
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 **半安定な楕円曲線の `ht^Falt` は基底変換で変わらない**——★**無条件**。
@@ -240,11 +370,10 @@ theorem degInfOf_baseChange_of_semistable (E : WeierstrassCurve L) [E.IsElliptic
 **体を大きくする向きが完全に通った**（残るのは捻り＝同じ `j` の別の曲線の扱いである）。 -/
 theorem htFaltOf_baseChange_of_semistable (E : WeierstrassCurve L) [E.IsElliptic]
     (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
-    (hss' : ∀ P : HeightOneSpectrum (𝓞 L'), SemistableAt P (E.baseChange L'))
     [IsScalarTower ℚ L L'] :
     htFaltOf L' (E.baseChange L') = htFaltOf L E :=
   htFaltOf_baseChange_of_degInf L L' E
-    (degInfOf_baseChange_of_semistable L L' E hss hss')
+    (degInfOf_baseChange_of_semistable L L' E hss)
 
 def htFaltOf_baseChange_of_semistable.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
