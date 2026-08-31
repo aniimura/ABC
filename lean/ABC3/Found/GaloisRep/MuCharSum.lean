@@ -553,6 +553,50 @@ theorem sum_mu_neg_pow {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot 
   · rw [if_pos h, if_pos ((dvd_mul_pred_iff hl).2 h)]
   · rw [if_neg h, if_neg (fun hh => h ((dvd_mul_pred_iff hl).1 hh))]
 
+/-! ## ★★★★★★★★★★★★★★★★定数項の環版（`Ring.inverse`） -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`12·∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)`**——環の中で、分母を払った形。
+
+★★Tate の機構は `CommRing R` の上にあるので、
+`Found/GaloisRep/MuCharSum.lean` の体版（`sum_mu_frac`）を
+**商体へ移して戻す**ことで環版にする。
+
+☆`12` で割らないのが要である——`tateA6` も `12 a₆ = −(5s₃ + 7s₅)` の形で持っている。 -/
+theorem twelve_mul_sum_mu_ringInverse {R : Type*} [CommRing R] [IsDomain R] [CharZero R]
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
+    (12 : R) * ∑ i ∈ (range l).erase 0, ζ ^ i * (Ring.inverse (1 - ζ ^ i)) ^ 2
+      = -((l : R) ^ 2 - 1) := by
+  classical
+  set K := FractionRing R with hK
+  let f : R →+* K := algebraMap R K
+  have hinj : Function.Injective f := IsFractionRing.injective R K
+  haveI : CharZero K := ⟨fun a b hab => by
+    have h2 : f (a : R) = f (b : R) := by rw [map_natCast, map_natCast]; exact hab
+    exact Nat.cast_injective (hinj h2)⟩
+  refine hinj ?_
+  have hζK : IsPrimitiveRoot (f ζ) l := hζ.map_of_injective hinj
+  have hmap : ∀ i ∈ (range l).erase 0,
+      f (ζ ^ i * (Ring.inverse (1 - ζ ^ i)) ^ 2)
+        = (f ζ) ^ i * ((1 - (f ζ) ^ i)⁻¹) ^ 2 := by
+    intro i hi
+    obtain ⟨u, hu'⟩ := hu i hi
+    have hru : Ring.inverse (1 - ζ ^ i) = ((u⁻¹ : Rˣ) : R) := by
+      rw [← hu', Ring.inverse_unit]
+    have hfu2 : f ((u : Rˣ) : R) = 1 - (f ζ) ^ i := by
+      rw [hu', map_sub, map_one, map_pow]
+    have hval : f (((u⁻¹ : Rˣ) : R)) = (f ((u : Rˣ) : R))⁻¹ := by
+      refine eq_inv_of_mul_eq_one_left ?_
+      rw [← map_mul]
+      simp
+    rw [map_mul, map_pow, map_pow, hru, hval, hfu2]
+  have h12 : f (12 : R) = (12 : K) := map_ofNat f 12
+  have hRHS : f (-((l : R) ^ 2 - 1)) = -((l : K) ^ 2 - 1) := by
+    rw [map_neg, map_sub, map_pow, map_natCast, map_one]
+  rw [map_mul, map_sum, Finset.sum_congr rfl hmap, sum_mu_frac hl hζK, h12, hRHS]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -658,6 +702,11 @@ def dvd_mul_pred_iff.src : ABC3.Meta.Source :=
 def sum_mu_neg_pow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(逆向きの指標和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def twelve_mul_sum_mu_ringInverse.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(12·∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)——環版。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
