@@ -260,8 +260,21 @@ def isMuAtBadPrimes_of_veluQuotient.needs : List ProofObligation :=
     .citation "[ABC3]" "isAdicComplete_adicCompletionIntegers(完備化の台、第 897、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adicCompletionIntegers") 1,
     .implicitStep
-      ("★★★★**2026-09-01（第 941）の測定**——数学の部品はすべて揃っている。" ++
-       "残るのは各悪い素点で局所データを並べる**長いが機械的な組み立て**だけである。" ++
-       "☆hcop : True は「l が局所高さと互いに素」（原文の仮定）を型に書く段") 6 ]
+      ("★★★★**2026-09-01（第 941-942）の測定**——" ++
+       "局所の数学の部品はすべて揃っているが、" ++
+       "組み立てには**もう 1 層**が要る。" ++
+       "☆`lemma_3_2_i_tate_all`（第 906 が使う）は `K ⊆ L`（`IsGalois K L`）を受けている" ++
+       "——`μ_l` や `l`-捉れ点は完備化 `Lv` の中にとは限らないからである。" ++
+       "★したがって `Lv` の有限 Galois 拡大 `L′` とその整数環を立て、" ++
+       "そこで `IsAdicComplete`（第 897 と同じ 3 段）を取り、" ++
+       "`Δ_min` が拡大でどう変わるか（分岐指数）を扱う層が別に要る") 8,
+    .implicitStep
+      ("☆hcop : True は「l が局所高さと互いに素」（原文の仮定）を型に書く段") 3,
+    .implicitStep
+      ("☆逆差の記録: 本プロジェクトの `lemma_3_5_velu` 系は " ++
+       "`Q : E.toAffine.Point`（`L`-有理な点）で `H` を与えているが、" ++
+       "原文の `H_F` は部分群スキームであり点が有理とは限らない。" ++
+       "★Vélu の商の式は対称式なので係数は `L` に落ちるが、" ++
+       "その降下を型で書く段が別に要る") 5 ]
 
 end ABC3.Skeleton.GenEll
