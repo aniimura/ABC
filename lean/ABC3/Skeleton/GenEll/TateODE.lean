@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateDSeries
+import ABC3.Found.GaloisRep.MuDYSum
 import ABC3.Found.GaloisRep.TateVelu
 import ABC3.Meta.Claim
 
@@ -49,7 +50,7 @@ import ABC3.Meta.Claim
 
 `q = 0` では `DY(u,0) = u²(2+u)/(1−u)⁴` なので、`v` の定数項は
 
-    `240 · ∑_{ζ≠1} ζ²(2+ζ)/(1−ζ)⁴ = l⁴ − 1`     …… `sum_mu_dyterm`（本ファイル）
+    `240 · ∑_{ζ≠1} ζ²(2+ζ)/(1−ζ)⁴ = l⁴ − 1`     …… ★★**第 849 で証明済み**
 
 ★`l = 2, 3, 5, 7, 11, 13` で厳密一致（2026-08-31）。
 ☆第 835 が測った `v(0) = (l⁴−1)/240` と同じ値である。
@@ -103,17 +104,20 @@ theorem sum_veluV2_eq_sum_tateDYpair {R : Type} [CommRing R] [IsDomain R] {I : I
     isUnit_one_sub (I := I) (Ideal.mul_mem_right _ _ hq)
   exact veluV2_eq_tateDYpair _ _ q hq haw (hu i hi) hwu
 
-/-- **[GenEll] 葉 1 の定数項**——`240·∑_{ζ≠1} ζ²(2+ζ)/(1−ζ)⁴ = l⁴ − 1`。
+/-- ★★★★★★★★★★**葉 1 の定数項は閉じた**——
+`240·∑_{ζ≠1} ζ²(2+ζ)/(1−ζ)⁴ = l⁴ − 1`。
 
 原文 (GenEll p.15):
 > parameter qE of E satisfies the relation qE = qEl ; in particular, we have
 
-★`l = 2, 3, 5, 7, 11, 13` で厳密一致（2026-08-31、第 846）。
-☆`MuCharSum.lean` の道具（`P(y) = y^l − (y−1)^l` の Vieta と Newton）で出る。 -/
-theorem sum_mu_dyterm {R : Type} [CommRing R] [IsDomain R] {l : ℕ} (hl : l.Prime) {ζ : R}
-    (hζ : IsPrimitiveRoot ζ l) (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
-    240 * (∑ i ∈ (range l).erase 0, tateDYterm (ζ ^ i)) = (l : R) ^ 4 - 1 := by
-  sorry
+★第 847-849 で**証明済み**になった（`Found/GaloisRep/MuDYSum.lean`）。
+道は `muPow`/`muM` の機械だけであり、`p₄` に新しい種は要らなかった。
+
+☆`l = 2, 3, 5, 7, 11, 13, 17` で厳密一致（2026-08-31、第 846）。 -/
+theorem sum_mu_dyterm {F : Type} [Field F] [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    240 * (∑ i ∈ (range l).erase 0, tateDYterm (ζ ^ i)) = (l : F) ^ 4 - 1 :=
+  sum_mu_dyterm_field hl hζ
 
 /-! ## ★出典の紐付け(`.src`)と証明義務(`.needs`) -/
 
@@ -163,14 +167,7 @@ def sum_mu_dyterm.src : Source :=
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_dyterm.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "inv_one_sub_isRoot(1/(1−ζ) は y^l = (y−1)^l の根、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.inv_one_sub_isRoot") 1,
-    .citation "[ABC3]" "sum_mu_frac(∑ ζ/(1−ζ)² = −(l²−1)/12、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_frac") 1,
-    .citation "[ABC3]" "sum_mu_frac_cube(∑ ζ²/(1−ζ)³ = (l²−1)/24、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_frac_cube") 1,
-    .implicitStep
-      ("★p₄ = ∑ 1/(1−ζ)⁴ を Newton の公式で出す段——" ++
-       "P(y) = y^l − (y−1)^l の Vieta は e_k = C(l, k+1)/l") 5 ]
+  [ .citation "[ABC3]" "sum_mu_dyterm_field(第 849、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dyterm_field") 1 ]
 
 end ABC3.Skeleton.GenEll

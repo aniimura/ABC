@@ -1065,6 +1065,7 @@ import ABC3.Found.GaloisRep.TateSigma
 import ABC3.Found.GaloisRep.AdicMul
 import ABC3.Found.GaloisRep.MuCharSum
 import ABC3.Found.GaloisRep.MuPowerSum
+import ABC3.Found.GaloisRep.MuDYSum
 import ABC3.Found.GaloisRep.AdicFinsetSum
 import ABC3.Found.GaloisRep.MuGraded
 import ABC3.Found.GaloisRep.GalRepBasis
