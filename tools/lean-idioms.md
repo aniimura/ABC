@@ -2425,3 +2425,31 @@ out = s[:i] + s[j:]
 
 ★そして**削った後に必ず** `grep -c "^theorem " file` の前後を比べる。
 行数が減っているのは当たり前なので、**宣言の数**を見ること。
+
+## `IsElliptic` のインスタンスが `rw` の motive を壊す（2026-08-31、第 882・890）
+
+`W.j` は `[W.IsElliptic]` を要求する。したがって `h : A = B`（曲線の等式）で
+`rw [h]` すると motive が `fun x => x.j = …` になり、`x` に対して
+`IsElliptic` が合成できず **motive is not type correct** で落ちる。
+同じことが `tatePtPair a w q hq (haw : a*w=q) …`（証明を引数に取る）でも起きる。
+
+☆逃げ道は 3 つある:
+
+1. **`j` を経由しない**。`c4_cube_mul_Delta_of_j_eq` で分母を払い、
+   `Δ ↦ u⁻¹¹²Δ`・`c₄ ↦ u⁻¹⁴c₄` を使って**積の形**で計算する
+   （`Found/GaloisRep/TateParamJ.lean`）。変数変換の `u` は両辺で同じ重みを拾って消える。
+2. **`subst` で潰す**。等式の片側が**局所変数**なら `subst` は motive を作らないので通る。
+   `tateParam_quot_velu`（第 891）は `hW' : W' = …` を `subst` してから `rfl` で済ませている。
+3. **`_congr` 補題を作る**。`tatePtPair_congr`（第 884）は値の引数だけを
+   `subst` で潰し、証明の引数は暗黙にしてある。
+
+## `open scoped Classical` と `[DecidableEq K]` を同時に置くと `Finset.image` が食い違う（2026-08-31、第 890）
+
+`Finset.image` は `DecidableEq` をデータとして持つ。ファイル A で
+`open scoped Classical` だけ、ファイル B で `[DecidableEq K]` も宣言していると、
+B の目標の `image` は `inst✝` を、A の補題は `Classical.propDecidable` を持ち、
+`exact` が **Type mismatch** で落ちる（型は「同じに見える」ので原因が分かりにくい）。
+
+☆直し方は**どちらかに揃える**こと。本プロジェクトは `open scoped Classical` 側に
+揃えた（`[DecidableEq K]` を variable から外す）。
+★`tatePhi` のように `[DecidableEq K]` を要求する定義も、Classical があれば通る。
