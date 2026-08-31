@@ -242,6 +242,50 @@ theorem tateD2Xpair_eq [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
     tateD2Xtail_eq, tateD2Xtail_eq]
   ring
 
+/-! ## ★★★★★★★★`D³X`——c₆ 側へ -/
+
+/-- ★★**`D³f(t) = t(1+11t+11t²+t³)/(1−t)⁵`**——`∑_{n≥1} n⁴t^n` の閉じた式。 -/
+noncomputable def tateD3Xterm (t : R) : R :=
+  t * (1 + 11 * t + 11 * t ^ 2 + t ^ 3) * Ring.inverse (1 - t) ^ 5
+
+theorem tateD3Xterm_mem_pow {k : ℕ} {t : R} (ht : t ∈ I ^ k) : tateD3Xterm t ∈ I ^ k :=
+  Ideal.mul_mem_right _ _ (Ideal.mul_mem_right _ _ ht)
+
+theorem tateD3Xtail_aux {u q : R} (hq : q ∈ I) (n : ℕ) :
+    tateD3Xterm (q ^ (n + 1) * u) ∈ I ^ n :=
+  Ideal.pow_le_pow_right (Nat.le_succ n)
+    (tateD3Xterm_mem_pow (Ideal.mul_mem_right u _ (Ideal.pow_mem_pow hq (n + 1))))
+
+/-- ★`∑_{m≥1} D³f(qᵐu)`。 -/
+noncomputable def tateD3Xtail [IsAdicComplete I R] (u q : R) (hq : q ∈ I) : R :=
+  adicSum (fun n => tateD3Xterm (q ^ (n + 1) * u)) (tateD3Xtail_aux hq)
+
+theorem tateD3Xtail_rec [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD3Xtail u q hq = tateD3Xterm (q * u) + tateD3Xtail (q * u) q hq := by
+  rw [tateD3Xtail, adicSum_shift]
+  congr 1
+  · norm_num
+  · exact adicSum_congr _ _
+      (fun n => by rw [show q ^ (n + 1 + 1) * u = q ^ (n + 1) * (q * u) by ring])
+
+/-- ★★★★**`D³X(u,q)`**——奇数回の微分なので `w` 側は**引き算**。 -/
+noncomputable def tateD3Xpair [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) : R :=
+  (tateD3Xterm a + tateD3Xtail a q hq) - (tateD3Xterm w + tateD3Xtail w q hq)
+
+/-- ★★★★★★**`D³f(1/t) = −D³f(t)`**——`Df` と同じ反対称性。 -/
+theorem tateD3Xterm_inv {u v : R} (huv : u * v = 1) (hu : IsUnit (1 - u))
+    (hv : IsUnit (1 - v)) : tateD3Xterm v = - tateD3Xterm u := by
+  have hru : (1 - u) * Ring.inverse (1 - u) = 1 := Ring.mul_inverse_cancel _ hu
+  have hkey : Ring.inverse (1 - v) = -u * Ring.inverse (1 - u) := by
+    refine ring_inverse_eq_of_mul_eq_one hv ?_
+    linear_combination hru + Ring.inverse (1 - u) * huv
+  rw [tateD3Xterm, tateD3Xterm, hkey]
+  linear_combination
+    (-(Ring.inverse (1 - u) ^ 5)
+      * (u ^ 4 + 11 * u ^ 3 * (u * v + 1)
+        + 11 * u ^ 2 * ((u * v) ^ 2 + u * v + 1)
+        + u * ((u * v) ^ 3 + (u * v) ^ 2 + u * v + 1))) * huv
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDXterm.src : ABC3.Meta.Source :=
