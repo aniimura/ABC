@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.HtFaltJ
 
 /-!
 # 第 901 ブロック —— **★★★★★★★★★★★★★★★★★★★★`Lemma 3.5` に等号は要らない
@@ -298,7 +299,56 @@ theorem lemma_3_5_velu_bad_delta (eps : ℝ) (heps : 0 < eps) :
   exact hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hssE'
     (fun p => minDeltaExp_le_of_bad_delta p E E' (hssE p) l (hbad p))
 
+/-! ## ★★★★★★★★★★半安定なら `Δ_min` は `j` だけで決まる -/
+
+/-- ★★★★★★**半安定なら `v_p(Δ_min)` は `j` だけで決まる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`minDeltaExp p W = max(0, −v_p(j))`（証明済み）なので即座である。
+★これが**捧り（quadratic twist）で変わらない**理由であり、
+非分裂乗法還元の降下の鍵である。 -/
+theorem minDeltaExp_eq_of_j_eq (p : HeightOneSpectrum (𝓞 L))
+    (E F : WeierstrassCurve L) [E.IsElliptic] [F.IsElliptic]
+    (hE : SemistableAt p E) (hF : SemistableAt p F) (hj : E.j = F.j) :
+    minDeltaExp p E = minDeltaExp p F := by
+  rw [minDeltaExp_eq_maxJ_of_semistable p E hE, minDeltaExp_eq_maxJ_of_semistable p F hF,
+    jExp_congr_j p E F hj]
+
+/-- ★★★★★★★★★★★★**非分裂の降下**——`j` が同じ半安定な対で
+関係が成り立てば、もとの対でも成り立つ。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 919）**——原文は semi-stable としか言わないので
+乗法還元は非分裂でもよいが、Tate 一意化は分裂を要求する。
+☆しかし `minDeltaExp` は（半安定なら）`j` だけで決まるので、
+**`j` が同じ分裂の対を 1 つ見つければ降りる**。
+★捧り（不分岐な 2 次の twist）がそれを与える。 -/
+theorem minDeltaExp_eq_mul_of_twist (p : HeightOneSpectrum (𝓞 L))
+    (E E' F F' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] [F.IsElliptic] [F'.IsElliptic] (l : ℕ)
+    (hE : SemistableAt p E) (hE' : SemistableAt p E')
+    (hF : SemistableAt p F) (hF' : SemistableAt p F')
+    (hj : E.j = F.j) (hj' : E'.j = F'.j)
+    (h : minDeltaExp p F' = l * minDeltaExp p F) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  rw [minDeltaExp_eq_of_j_eq p E' F' hE' hF' hj', h,
+    minDeltaExp_eq_of_j_eq p E F hE hF hj]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_eq_of_j_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定なら v_p(Δ_min) は j だけで決まる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_of_twist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂の降下——j が同じ分裂の対があればよい。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def lemma_3_5_velu_bad_delta.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
