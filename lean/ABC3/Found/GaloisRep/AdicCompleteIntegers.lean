@@ -177,4 +177,16 @@ instance isAdicComplete_adicCompletionIntegers (K : Type) [Field K] [NumberField
   (isAdic_maximalIdeal_adicCompletionIntegers K v).isAdicComplete_iff.2
     ⟨completeSpace_adicCompletionIntegers K v, inferInstance⟩
 
+/-! ## ★標数は 0 である（インスタンスが mathlib に無い） -/
+
+/-- ★数体の完備化は標数 `0`。 -/
+instance charZero_adicCompletion (K : Type) [Field K] [NumberField K]
+    (v : HeightOneSpectrum (𝓞 K)) : CharZero (v.adicCompletion K) :=
+  charZero_of_injective_algebraMap (algebraMap K (v.adicCompletion K)).injective
+
+/-- ★その整数環も標数 `0`。 -/
+instance charZero_adicCompletionIntegers (K : Type) [Field K] [NumberField K]
+    (v : HeightOneSpectrum (𝓞 K)) : CharZero (v.adicCompletionIntegers K) :=
+  (algebraMap (v.adicCompletionIntegers K) (v.adicCompletion K)).charZero
+
 end ABC3.Found.GaloisRep

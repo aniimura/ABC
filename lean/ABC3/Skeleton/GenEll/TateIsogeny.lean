@@ -7,6 +7,9 @@ import ABC3.Found.GaloisRep.TateParamJ
 import ABC3.Found.GaloisRep.TateDXNeZero
 import ABC3.Found.GaloisRep.TateVeluMu
 import ABC3.Found.GaloisRep.TateSetupDvr
+import ABC3.Found.GaloisRep.AdicCompleteIntegers
+import ABC3.Found.GaloisRep.DegInfTateParam
+import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
@@ -551,6 +554,132 @@ def tateParam_quot_velu_dvr.needs : List ProofObligation :=
     .implicitStep
       ("☆残るのは 2 つだけである: (1) E ⊗ Lv が分裂乗法還元をもつこと、" ++
        "(2) H の像が ⟨Φ(ζ)⟩ になること（Lemma 3.2, (i) の対偶）") 4 ]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**[GenEll] 葉 1 の終点——数体の素点での `Δ_min` の関係**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-08-31（第 904）**——局所の連鎖を**数体の素点の完備化に当てた**形である。
+
+    `R := p.adicCompletionIntegers L`   `Lv := p.adicCompletion L`
+
+☆道は 2 段だけ:
+
+1. `tateParam_quot_velu_dvr`（第 900）で `q_{E′} = q_E^l`
+2. `minDeltaExp_eq_mul_of_tateParamR`（第 892）で `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`
+
+★これが `lemma_3_5_velu_bad_delta`（第 903）の入力そのものである。 -/
+theorem minDeltaExp_eq_mul_of_veluMu {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [(E.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    [(E'.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E'.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    (h : (E.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    (h' : (E'.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation (p.adicCompletion L)
+        (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)))
+        (algebraMap L (p.adicCompletion L) x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (C' : VariableChange L) (hC' : IsMinimal (primeSubring p) (C' • E'))
+    (hc4ne' : (C' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C' • E').c₄) hc4ne') = 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hΔ : ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+      (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).toAffine.Δ ≠ 0)
+    {ζ : (p.adicCompletionIntegers L)} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (uζ : (p.adicCompletion L)ˣ)
+    (hζu : algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L) ζ = (uζ : _))
+    (hζl : uζ ^ l = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
+    (hql : (tateParamR (E.baseChange (p.adicCompletion L)) h) ^ l
+      ∈ IsLocalRing.maximalIdeal (p.adicCompletionIntegers L))
+    (h2 : (2 : (p.adicCompletionIntegers L)) ≠ 0)
+    (h2K : (2 : (p.adicCompletion L)) ≠ 0)
+    (v w : (p.adicCompletionIntegers L))
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        (tateXpair (ζ ^ i)
+          ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+          (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        (tateYpair (ζ ^ i)
+          ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+          (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        (tateXpair (ζ ^ i)
+          ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+          (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        (tateYpair (ζ ^ i)
+          ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+          (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        + 2 * (veluV2 (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+              (tateXpair (ζ ^ i)
+                ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+              (tateYpair (ζ ^ i)
+                ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+            * tateXpair (ζ ^ i)
+                ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))))
+    [((veluCurve (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)) v w).map
+      (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic]
+    [((tateCurveAt ((tateParamR (E.baseChange (p.adicCompletion L)) h) ^ l) hql).map
+      (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic]
+    (hW' : E'.baseChange (p.adicCompletion L)
+      = veluQuotientFull ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+          (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+            (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L)))
+        (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • tatePhi
+            (mkTateSetup (K := p.adicCompletion L)
+              (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h))
+            hΔ (QuotientGroup.mk uζ))))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hqpow := tateParam_quot_velu_dvr
+    (tateParamR (E.baseChange (p.adicCompletion L)) h)
+    (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+    (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h)
+    hΔ hl hζ hlu hu uζ hζu hζl hord hql h2 h2K hodd v w hv hw
+    (E'.baseChange (p.adicCompletion L)) h' hW'
+  exact minDeltaExp_eq_mul_of_tateParamR (R := p.adicCompletionIntegers L) E E' l h h' p hp
+    C hC hc4ne hc4 C' hC' hc4ne' hc4' hqpow
+
+def minDeltaExp_eq_mul_of_veluMu.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(数体の素点での Δ_min の関係——局所の連鎖の終点)",
+    sectionId := "genell-lemma-3-2" }
+
+def minDeltaExp_eq_mul_of_veluMu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tateParam_quot_velu_dvr(q_{E′} = q_E^l、第 900、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_dvr") 1,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateParamR(Δ_min へ、第 892、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateParamR") 1,
+    .implicitStep
+      ("☆残るのは局所の幾何データを大域の仮説から作る段だけである: " ++
+       "分裂乗法還元、極小モデルの完備化への移行、そして H の像が ⟨Φ(ζ)⟩ になること") 4 ]
 
 def j_velu_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
