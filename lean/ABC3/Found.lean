@@ -1183,6 +1183,7 @@ import ABC3.Found.GaloisRep.Lemma37CondB
 import ABC3.Found.GaloisRep.Prop34
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.Lemma35Ineq
 import ABC3.Found.GaloisRep.Lemma37A
 import ABC3.Found.GaloisRep.NoMultRedExc
 import ABC3.Found.GaloisRep.Lemma37C
