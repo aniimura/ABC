@@ -486,6 +486,50 @@ theorem sum_mu_coeff_sigma {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveR
   push_cast
   ring
 
+/-- ★★★★★★★★★★★★★★★★★★
+**積の形の指標和**——`∑_ζ (∑_a c_a ζ^a)(∑_b c'_b ζ^b)`。
+
+★★`X(ζ)²` のような**積**を `μ_l∖{1}` 上で足すときの形である。
+右辺は `ζ` を含まない。 -/
+theorem sum_mu_poly_mul {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (c c' : ℕ → F) (M N : ℕ) :
+    ∑ i ∈ (range l).erase 0,
+        (∑ a ∈ range M, c a * ζ ^ (i * a)) * (∑ b ∈ range N, c' b * ζ ^ (i * b))
+      = ∑ a ∈ range M, ∑ b ∈ range N,
+          c a * c' b * ((if l ∣ a + b then (l : F) else 0) - 1) := by
+  have hexpand : ∀ i : ℕ,
+      (∑ a ∈ range M, c a * ζ ^ (i * a)) * (∑ b ∈ range N, c' b * ζ ^ (i * b))
+        = ∑ a ∈ range M, ∑ b ∈ range N, c a * c' b * ζ ^ (i * (a + b)) := by
+    intro i
+    rw [Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    have : ζ ^ (i * (a + b)) = ζ ^ (i * a) * ζ ^ (i * b) := by
+      rw [← pow_add]
+      congr 1
+      ring
+    rw [this]
+    ring
+  rw [Finset.sum_congr rfl (fun i _ => hexpand i), Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [← Finset.mul_sum, sum_mu_pow_erase_zero hl hζ (a + b)]
+
+/-- ★★★★★★★★★★★★**`ζ^{−i}` を正の冪に直す**——`(ζ^i)⁻¹ = ζ^{i(l−1)}`。
+
+★★Tate の `X`・`Y` の尾には `u^{−d}` が現れるが、これで
+**すべて正の冪に直せる**ので、上の指標和の道具がそのまま使える。 -/
+theorem inv_zeta_pow_eq_pow {l : ℕ} (hl : 0 < l) {ζ : F} (hζ : IsPrimitiveRoot ζ l) (i : ℕ) :
+    (ζ ^ i)⁻¹ = ζ ^ (i * (l - 1)) := by
+  refine inv_eq_of_mul_eq_one_right ?_
+  rw [← pow_add]
+  have hkey : i + i * (l - 1) = l * i := by
+    cases l with
+    | zero => omega
+    | succ n => simp only [Nat.add_sub_cancel]; ring
+  rw [hkey, pow_mul, hζ.pow_eq_one, one_pow]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -571,6 +615,16 @@ def sum_divisors_dvd.src : ABC3.Meta.Source :=
 def sum_mu_coeff_sigma.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Tate の X の q^N 係数の μ_l 和を σ₁ で書く。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_poly_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(積の形の指標和——X(ζ)² のため。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_zeta_pow_eq_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^{−i} を正の冪に直す。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
