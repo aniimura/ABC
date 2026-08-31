@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.JScale
 import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
 import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
@@ -42,23 +43,24 @@ open WeierstrassCurve
 variable {F : Type} [Field F]
 
 /-- ★**二次の捧り**（`a₁ = a₃ = 0` の形で）。 -/
-def quadTwist (W : WeierstrassCurve F) (d : F) : WeierstrassCurve F where
+def quadTwist {A : Type} [CommRing A] (W : WeierstrassCurve A) (d : A) :
+    WeierstrassCurve A where
   a₁ := 0
   a₂ := d * W.a₂
   a₃ := 0
   a₄ := d ^ 2 * W.a₄
   a₆ := d ^ 3 * W.a₆
 
-instance quadTwist_isCharNeTwoNF (W : WeierstrassCurve F) (d : F) :
+instance quadTwist_isCharNeTwoNF {A : Type} [CommRing A] (W : WeierstrassCurve A) (d : A) :
     (quadTwist W d).IsCharNeTwoNF := ⟨rfl, rfl⟩
 
-@[simp] theorem quadTwist_a₂ (W : WeierstrassCurve F) (d : F) :
+@[simp] theorem quadTwist_a₂ {A : Type} [CommRing A] (W : WeierstrassCurve A) (d : A) :
     (quadTwist W d).a₂ = d * W.a₂ := rfl
 
-@[simp] theorem quadTwist_a₄ (W : WeierstrassCurve F) (d : F) :
+@[simp] theorem quadTwist_a₄ {A : Type} [CommRing A] (W : WeierstrassCurve A) (d : A) :
     (quadTwist W d).a₄ = d ^ 2 * W.a₄ := rfl
 
-@[simp] theorem quadTwist_a₆ (W : WeierstrassCurve F) (d : F) :
+@[simp] theorem quadTwist_a₆ {A : Type} [CommRing A] (W : WeierstrassCurve A) (d : A) :
     (quadTwist W d).a₆ = d ^ 3 * W.a₆ := rfl
 
 /-- ★★`c₄` は `d²` 倍。 -/
@@ -165,7 +167,8 @@ theorem isSquare_mul_of_not_isSquare {k : Type} [Field k] [Fintype k] [Decidable
 
 ★これが「`E′^d = (E^d)/H^d`」の曲線の水準での中身であり、
 非分裂の降下に要る最後の道具である。 -/
-theorem veluCurve_quadTwist (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (v w d : F) :
+theorem veluCurve_quadTwist {A : Type} [CommRing A] (W : WeierstrassCurve A)
+    [W.IsCharNeTwoNF] (v w d : A) :
     veluCurve (quadTwist W d) (d ^ 2 * v) (d ^ 3 * w)
       = quadTwist (veluCurve W v w) d := by
   have hb₂ : (quadTwist W d).b₂ = d * W.b₂ := by
@@ -189,14 +192,15 @@ theorem veluCurve_quadTwist (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (v w d : 
 /-- ★★**捧りは底変換と可換する**。
 
 ☆定義が係数の多項式なので `ext` と `map_mul`・`map_pow` だけである。 -/
-theorem quadTwist_map {A : Type} [Field A] (f : F →+* A) (W : WeierstrassCurve F) (d : F) :
+theorem quadTwist_map {A B : Type} [CommRing A] [CommRing B] (f : A →+* B)
+    (W : WeierstrassCurve A) (d : A) :
     (quadTwist W d).map f = quadTwist (W.map f) (f d) := by
   refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
-  · show f (0 : F) = 0
+  · show f (0 : A) = 0
     exact map_zero f
   · show f (d * W.a₂) = f d * f W.a₂
     exact map_mul f d W.a₂
-  · show f (0 : F) = 0
+  · show f (0 : A) = 0
     exact map_zero f
   · show f (d ^ 2 * W.a₄) = f d ^ 2 * f W.a₄
     rw [map_mul, map_pow]
@@ -227,7 +231,71 @@ theorem quadTwist_eq_veluCurve (W E' : WeierstrassCurve F) [W.IsCharNeTwoNF]
       = veluCurve (quadTwist W d) (d ^ 2 * veluVFull W S) (d ^ 3 * veluWFull W S) := by
   rw [hE', quadTwist_veluQuotientFull]
 
+/-! ## ★★★★★★★★整モデルは一意である -/
+
+section IntegralModel
+
+variable {R : Type} [CommRing R] {K : Type} [Field K] [Algebra R K]
+
+/-- ★★★★★★**整モデルは一意である**——`algebraMap R K` が単射なら。
+
+☆mathlib の `integralModel` は `.choose` で定義されているが、
+底変換が一致する `R` 上の曲線は係数ごとに一意に決まる。
+★これで「`integralModel R (W^d)` は何か」を手で指定できる。 -/
+theorem integralModel_eq_of_map_eq (hinj : Function.Injective (algebraMap R K))
+    (W : WeierstrassCurve K) [WeierstrassCurve.IsIntegral R W] (V : WeierstrassCurve R)
+    (h : V.map (algebraMap R K) = W) :
+    WeierstrassCurve.integralModel R W = V := by
+  have h1 : (WeierstrassCurve.integralModel R W).map (algebraMap R K) = W :=
+    WeierstrassCurve.baseChange_integralModel_eq R W
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_ <;>
+    refine hinj ?_
+  · show ((WeierstrassCurve.integralModel R W).map (algebraMap R K)).a₁
+      = (V.map (algebraMap R K)).a₁
+    rw [h1, h]
+  · show ((WeierstrassCurve.integralModel R W).map (algebraMap R K)).a₂
+      = (V.map (algebraMap R K)).a₂
+    rw [h1, h]
+  · show ((WeierstrassCurve.integralModel R W).map (algebraMap R K)).a₃
+      = (V.map (algebraMap R K)).a₃
+    rw [h1, h]
+  · show ((WeierstrassCurve.integralModel R W).map (algebraMap R K)).a₄
+      = (V.map (algebraMap R K)).a₄
+    rw [h1, h]
+  · show ((WeierstrassCurve.integralModel R W).map (algebraMap R K)).a₆
+      = (V.map (algebraMap R K)).a₆
+    rw [h1, h]
+
+/-- ★★★★★★★★**捧りの整モデルは整モデルの捧り**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが `HasSplitMultiplicativeReduction` の `Splits` 条件を
+捧りの側へ送るための配管である。 -/
+theorem integralModel_quadTwist (hinj : Function.Injective (algebraMap R K))
+    (W : WeierstrassCurve K) [WeierstrassCurve.IsIntegral R W] (d : R)
+    [WeierstrassCurve.IsIntegral R (quadTwist W (algebraMap R K d))] :
+    WeierstrassCurve.integralModel R (quadTwist W (algebraMap R K d))
+      = quadTwist (WeierstrassCurve.integralModel R W) d := by
+  refine integralModel_eq_of_map_eq hinj _ _ ?_
+  rw [quadTwist_map]
+  congr 1
+  exact WeierstrassCurve.baseChange_integralModel_eq R W
+
+end IntegralModel
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(整モデルは一意である。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def integralModel_quadTwist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(捧りの整モデルは整モデルの捧り。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def quadTwist_veluQuotientFull.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
