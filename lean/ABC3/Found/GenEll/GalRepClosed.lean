@@ -65,9 +65,9 @@ theorem galRep_range_isClosed_of_continuous (E : SSCurve) (l : ℕ) [Fact l.Prim
 theorem imageContainsSL2J_of_alpha_of_continuous (E : SSCurve) (l : ℕ) [Fact l.Prime]
     (hl5 : 5 ≤ l)
     (hcont : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]), Continuous (galRep E.W l e))
-    (halpha : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+    (halpha : ∃ e₀ : E.tate l ≃+ (Fin 2 → ℤ_[l]),
       (Matrix.SpecialLinearGroup.toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
-        ∈ ((galRep E.W l e).range).map (glRedPadic l))
+        ∈ ((galRep E.W l e₀).range).map (glRedPadic l))
     (hno : ¬ HasLCyclicJ E l) :
     ImageContainsSL2J E l :=
   imageContainsSL2J_of_alpha E l hl5
@@ -91,9 +91,9 @@ theorem galRep_range_isClosed (E : SSCurve) (l : ℕ) [Fact l.Prime]
 ★★★位相の側（像の閉性）は `§9-1198`（第 772）で閉じたので、
 残るのは**局所理論の行列表示**——`α = (1 1 / 0 1)` が mod `l` 像に入ること——だけである。 -/
 theorem imageContainsSL2J_of_alpha' (E : SSCurve) (l : ℕ) [Fact l.Prime] (hl5 : 5 ≤ l)
-    (halpha : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+    (halpha : ∃ e₀ : E.tate l ≃+ (Fin 2 → ℤ_[l]),
       (Matrix.SpecialLinearGroup.toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
-        ∈ ((galRep E.W l e).range).map (glRedPadic l))
+        ∈ ((galRep E.W l e₀).range).map (glRedPadic l))
     (hno : ¬ HasLCyclicJ E l) :
     ImageContainsSL2J E l :=
   imageContainsSL2J_of_alpha E l hl5 (fun e => galRep_range_isClosed E l e) halpha hno

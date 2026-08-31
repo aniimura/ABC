@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliObjects
+import ABC3.Found.GaloisRep.GalRepBasis
 import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Found.GenEll.GLSurjective
@@ -147,24 +148,29 @@ theorem imageContainsSL2J_of_alpha (E : SSCurve) (l : ℕ) [hlp : Fact l.Prime] 
     (hclosed : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
       IsClosed (((galRep E.W l e).range : Subgroup (GL (Fin 2) ℤ_[l])) :
         Set (GL (Fin 2) ℤ_[l])))
-    (halpha : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+    (halpha : ∃ e₀ : E.tate l ≃+ (Fin 2 → ℤ_[l]),
       (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
-        ∈ ((galRep E.W l e).range).map (glRedPadic l))
+        ∈ ((galRep E.W l e₀).range).map (glRedPadic l))
     (hno : ¬ HasLCyclicJ E l) :
     ImageContainsSL2J E l := by
   intro _ e g
+  obtain ⟨e₀, halpha₀⟩ := halpha
   have hnoe : ¬ ∃ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
       ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
         ∀ M ∈ (↑(((galRep E.W l e).range).map (glRedPadic l)) :
             Set (GL (Fin 2) (ZMod l))),
           ∃ c : ZMod l, (M : Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v :=
     fun h => hno (fun _ => h)
-  have hno' : ¬ ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
-      ∀ M ∈ (↑(((galRep E.W l e).range).map (glRedPadic l)) :
+  have hno₀ : ¬ ∃ v : Fin 2 → ZMod l, v ≠ 0 ∧
+      ∀ M ∈ (↑(((galRep E.W l e₀).range).map (glRedPadic l)) :
           Set (GL (Fin 2) (ZMod l))),
         ∃ c : ZMod l, (M : Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec v = c • v :=
-    fun h => hnoe ⟨e, h⟩
-  exact sl2_of_alpha_of_no_stable_line l hl5 _ (hclosed e) (halpha e) hno' g
+    fun h => hnoe ⟨e₀, h⟩
+  -- ★基底 `e₀` で `SL₂ ⊆ 像` を出し、共役ですべての基底へ移す
+  have hsl0 : ∀ g : SL(2, ℤ_[l]),
+      (Matrix.SpecialLinearGroup.toGL g : GL (Fin 2) ℤ_[l]) ∈ (galRep E.W l e₀).range :=
+    fun g => sl2_of_alpha_of_no_stable_line l hl5 _ (hclosed e₀) halpha₀ hno₀ g
+  exact sl2_range_basis_transfer E.W l e₀ hsl0 e g
 
 def imageContainsSL2J_of_alpha.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

@@ -63,10 +63,10 @@ open scoped MatrixGroups Classical
 `0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0` に合わせた基底で mod `l` 像は上三角になる。
 `l ∤ v(q)` なら `q` の `l` 乗根の抽出が非自明で、`α = (1 1 / 0 1)` が像に入る。 -/
 theorem alpha_in_modl_image (E : SSCurve) (l : ℕ) [Fact l.Prime]
-    (hmult : E.HasMultRed) (hpr : E.PrimeToLocalHeights l)
-    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) :
-    (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
-      ∈ ((galRep E.W l e).range).map (glRedPadic l) := by
+    (hmult : E.HasMultRed) (hpr : E.PrimeToLocalHeights l) :
+    ∃ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      (toGL (upper (1 : ZMod l)) : GL (Fin 2) (ZMod l))
+        ∈ ((galRep E.W l e).range).map (glRedPadic l) := by
   sorry
 
 def alpha_in_modl_image.src : Source :=
@@ -80,7 +80,14 @@ def alpha_in_modl_image.needs : List ProofObligation :=
     .implicitStep
       ("★完全列に合わせた基底で mod l 像は上三角になり、l ∤ v(q) なら " ++
        "q の l 乗根の抽出が非自明なので α が像に入る。" ++
-       "☆材料は Found/GaloisRep/Lemma32Tate.lean(Tate 一意化と Lemma 3.2, (i))") 10 ]
+       "☆材料は Found/GaloisRep/Lemma32Tate.lean(Tate 一意化と Lemma 3.2, (i))") 10,
+    .citation "[ABC3]" "sl2_range_basis_transfer（SL₂ ⊆ 像 は基底に依らない、第 825）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sl2_range_basis_transfer") 1,
+    .implicitStep
+      ("★★★訂正（2026-08-31、第 826）: 以前は基底 `e` を**任意に与えられた**形であったが、"
+       ++ "それでは**循環する**——α がすべての共役に入ることは SL₂ ⊆ 像 を既に"
+       ++ "知っていないと言えない。★Tate 一意化に適合した基底 (ζ_l, q^{1/l}) を取るのだから"
+       ++ "**`∃ e`** が正しい形である。SL₂ は正規部分群なのでこれで十分である") 1 ]
 
 /-! ## ★★★★★★★★★★葉 5 は閉じた（2026-08-31、第 766-774）
 
