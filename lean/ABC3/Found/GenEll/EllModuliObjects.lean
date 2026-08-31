@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.SemistableFin
+import ABC3.Found.GaloisRep.Compositum
 import ABC3.Meta.Claim
 
 /-!
@@ -107,11 +108,48 @@ theorem htFalt_variableChange (E : SSCurve) (C : VariableChange E.fld)
 
 end SSCurve
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★`ht^Falt` は `j` だけで決まる -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`j` が同じ `SSCurve` は `ht^Falt` も同じ**——★**無条件**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★これが `EllModuliData` の `faltingsHeight : EllClass → ℝ` の well-defined 性である
+（`§9-1168`、第 741 の `htFaltOf_congr_j_of_emb` をそのまま `SSCurve` の言葉で）。 -/
+theorem htFalt_congr_j (E E' : SSCurve) (hj : E.j = E'.j) : E.htFalt = E'.htFalt :=
+  ABC3.Found.GaloisRep.htFaltOf_congr_j_of_emb E.fld E'.fld E.emb E'.emb E.W E'.W E.ss E'.ss hj
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★**`EllModuliData` の `faltingsHeight` 欄**——`j` の函数として。
+
+★`j` を持つ半安定曲線が無い `j` では `0` と定める（界面はそこでは何も要求しない）。 -/
+noncomputable def faltingsHeightJ (j : ℂ) : ℝ :=
+  if h : ∃ E : SSCurve, E.j = j then h.choose.htFalt else 0
+
+/-- ★★★★★★★★★★★★★★★★★★**欄の値は曲線の `ht^Falt` に一致する**。 -/
+theorem faltingsHeightJ_eq (E : SSCurve) : faltingsHeightJ E.j = E.htFalt := by
+  classical
+  have h : ∃ E' : SSCurve, E'.j = E.j := ⟨E, rfl⟩
+  rw [faltingsHeightJ, dif_pos h]
+  exact htFalt_congr_j h.choose E h.choose_spec
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(EllModuliData の Curve 欄——半安定な楕円曲線の族)",
+    sectionId := "genell-prop-3-4" }
+
+def htFalt_congr_j.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(j が同じ SSCurve は ht^Falt も同じ。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+def faltingsHeightJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(EllModuliData の faltingsHeight 欄——j の函数として)",
     sectionId := "genell-prop-3-4" }
 
 def SSCurve.htFalt_variableChange.src : ABC3.Meta.Source :=
