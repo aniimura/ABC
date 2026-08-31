@@ -2,6 +2,8 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.DegInfLocal
+import ABC3.Found.GaloisRep.TateParamJ
+import ABC3.Found.GaloisRep.HtFinJ
 
 /-!
 # Galois (G6) 第 892 ブロック —— **★★★★★★★★`R` の側の母数で述べた `Δ_min` の関係**（`Found`）
@@ -166,7 +168,82 @@ theorem hasMultiplicativeReduction_baseChange (p : HeightOneSpectrum (𝓞 L))
       (Units.mk0 ((W.baseChange Lv).c₄) hc4ne') hv
     simpa using this
 
+/-! ## ★★★★★★★★★★`v_p(j) = −v(q)`——分裂性を要求しない橋 -/
+
+/-- ★★**Tate 曲線の `j` の逆は `1/j` の評価そのもの**。 -/
+theorem j_tateCurveAt_inv [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    [((tateCurveAt q hq).map (algebraMap R Lv)).IsElliptic]
+    (hc4 : algebraMap R Lv (tateCurveAt q hq).c₄ ≠ 0) :
+    ((tateCurveAt q hq).map (algebraMap R Lv)).j
+      = (algebraMap R Lv (evalAdic tateJinvSeries q hq))⁻¹ := by
+  have hkey := evalAdic_tateJinvSeries_mul_c4 (I := IsLocalRing.maximalIdeal R) q hq
+  have hΔ : ((tateCurveAt q hq).map (algebraMap R Lv)).Δ
+      = algebraMap R Lv (evalAdic tateJinvSeries q hq)
+        * (algebraMap R Lv (tateCurveAt q hq).c₄) ^ 3 := by
+    rw [WeierstrassCurve.map_Δ, ← hkey, map_mul, map_pow]
+  rw [ABC3.Found.GenEll.j_eq_inv_Delta_mul, hΔ, WeierstrassCurve.map_c₄]
+  field_simp
+
+/-- ★★★★★★★★★★**`v_p(j(E)) = −v(q)`**——`E` の `j` が Tate 曲線 `E_q` の `j` なら。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 932）**——この橋は**分裂性を要求しない**。
+`j` の一致だけを受けて `jExp` を出すので、非分裂の場合にもそのまま使える。
+
+☆道は 3 段:
+
+1. `j(E ⊗ Lv) = φ(j(E))`（`j = Δ⁻¹c₄³` なので体準同型と可換）
+2. `j(E_q ⊗ Lv) = (φ(1/j の評価))⁻¹`（第 932 前半）
+3. `v(1/j の評価) = v(q)`（第 931） -/
+theorem jExp_eq_neg_vAdd_of_j_tateCurveAt [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (E : WeierstrassCurve L) [E.IsElliptic] [(E.baseChange Lv).IsElliptic]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    [((tateCurveAt q hq).map (algebraMap R Lv)).IsElliptic]
+    (hc4 : algebraMap R Lv (tateCurveAt q hq).c₄ ≠ 0)
+    (hev : algebraMap R Lv (evalAdic tateJinvSeries q hq) ≠ 0)
+    (hqne : algebraMap R Lv q ≠ 0)
+    (hjne : E.j ≠ 0)
+    (hj : (E.baseChange Lv).j = ((tateCurveAt q hq).map (algebraMap R Lv)).j) :
+    jExp p E = - vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv q) hqne) := by
+  -- ★段 1
+  have hΔbc : (E.baseChange Lv).Δ = algebraMap L Lv E.Δ := WeierstrassCurve.map_Δ _ _
+  have hcbc : (E.baseChange Lv).c₄ = algebraMap L Lv E.c₄ := WeierstrassCurve.map_c₄ _ _
+  have hjmap : (E.baseChange Lv).j = algebraMap L Lv E.j := by
+    rw [ABC3.Found.GenEll.j_eq_inv_Delta_mul, ABC3.Found.GenEll.j_eq_inv_Delta_mul,
+      hΔbc, hcbc, map_mul, map_inv₀, map_pow]
+  -- ★段 2
+  have hjT := j_tateCurveAt_inv (R := R) (Lv := Lv) q hq hc4
+  have hjE : algebraMap L Lv E.j
+      = (algebraMap R Lv (evalAdic tateJinvSeries q hq))⁻¹ := by
+    rw [← hjmap, hj, hjT]
+  -- ★段 3
+  have hmapne : algebraMap L Lv E.j ≠ 0 := by
+    rw [hjE]
+    exact inv_ne_zero hev
+  have hval := vAdd_algebraMap_eq_valAdd (R := R) p hp E.j hjne hmapne
+  rw [jExp, dif_neg hjne, ← hval]
+  have hu : Units.mk0 (algebraMap L Lv E.j) hmapne
+      = (Units.mk0 (algebraMap R Lv (evalAdic tateJinvSeries q hq)) hev)⁻¹ := by
+    refine Units.ext ?_
+    rw [Units.val_inv_eq_inv_val, Units.val_mk0, Units.val_mk0]
+    exact hjE
+  rw [hu, vAdd_inv,
+    vAdd_evalAdic_tateJinvSeries (R := R) (K := Lv) q hq (by
+      intro h0
+      exact hqne (by rw [h0, map_zero])) hev hqne]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def jExp_eq_neg_vAdd_of_j_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(v_p(j) = −v(q)——分裂性を要求しない橋。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def hasMultiplicativeReduction_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

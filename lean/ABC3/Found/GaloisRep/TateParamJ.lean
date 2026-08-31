@@ -143,6 +143,7 @@ theorem tateParamR_eq_of_j_tateCurveAt (W : WeierstrassCurve K)
 
 /-! ## ★★★★★★★★`v(1/j) = v(q)` -/
 
+omit [CharZero K] in
 /-- ★★★★★★★★**`1/j` の付値は `q` の付値に等しい**。
 
 原文 (GenEll p.15):
