@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import ABC3.Meta.Claim
+import ABC3.Found.GenEll.Velu
 
 /-!
 # 第 956 ブロック —— **★★★★★★★★★★★★`i ↦ l-i` で対称な和は 2 で割れる**（`Found`）
@@ -137,6 +138,37 @@ theorem exists_two_mul_of_pair_even {A : Type} [CommRing A] (m : ℕ) (g c : ℕ
     ∃ w : A, 2 * w = ∑ i ∈ (range (2 * m + 1)).erase 0, g i :=
   ⟨∑ i ∈ Icc 1 m, c i, two_mul_sum_eq_of_pair_even m g c h⟩
 
+/-! ## ★★★★★★★★★★★★★★★★(d3)——Vélu の `w` を作る -/
+
+open WeierstrassCurve in
+/-- ★★★★★★★★★★★★★★★★**添字の反転が点の反転なら、Vélu の `w` は環の中で作れる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 960）**——これが (D3) の (d3) である。
+☆三つを並べるだけである:
+
+1. `two_mul_sum_eq_of_pair_even`（第 957）——対ごとに偶なら和も偶
+2. `veluTerm_pair_even`（第 958）——Vélu の項の対の和は偶
+3. 仮説 `hX`・`hY`——添字の反転が点の反転（`tateXpair_mu_inv`、第 959）
+
+★`l = 2m+1`（奇数）であることが本質である——不動点がないから対になる。 -/
+theorem exists_veluW_of_inv {A : Type} [CommRing A] (W : WeierstrassCurve A) (m : ℕ)
+    (X Y : ℕ → A)
+    (hX : ∀ i ∈ Icc 1 m, X (2 * m + 1 - i) = X i)
+    (hY : ∀ i ∈ Icc 1 m, Y (2 * m + 1 - i) = W.toAffine.negY (X i) (Y i)) :
+    ∃ w : A, 2 * w = ∑ i ∈ (range (2 * m + 1)).erase 0,
+      (veluU W (X i) (Y i) + 2 * (veluV2 W (X i) (Y i) * X i)) := by
+  refine exists_two_mul_of_pair_even m
+    (fun i => veluU W (X i) (Y i) + 2 * (veluV2 W (X i) (Y i) * X i))
+    (fun i => veluU W (X i) (Y i)
+      + X i * (veluV2 W (X i) (Y i)
+          + veluV2 W (X i) (W.toAffine.negY (X i) (Y i)))) ?_
+  intro i hi
+  rw [hX i hi, hY i hi]
+  exact veluTerm_pair_even W (X i) (Y i)
+
 end SymmSum
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -160,6 +192,12 @@ def two_mul_sum_eq_of_pair_even.src : ABC3.Meta.Source :=
 def exists_two_mul_of_pair_even.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(対ごとに偶なら Vélu の w が作れる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+
+def exists_veluW_of_inv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(添字の反転が点の反転なら Vélu の w は環の中で作れる。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 end ABC3.Found.GenEll
