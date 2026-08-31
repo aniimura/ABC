@@ -334,6 +334,79 @@ theorem muEval_const [IsAdicComplete I R] {l : ℕ} (c : ℕ → R) (z : R) :
   · simp [h]
   · simp [h]
 
+/-! ## ★★★★★★★★★★★★★★★★`1/(1−ζ)` の環版と `tateXterm(ζ)` -/
+
+/-- ★★★★★★★★★★★★**`Ring.inverse (1−η) = −(1/l)·∑_{k<l} kη^k`**（環版）。 -/
+theorem ringInverse_one_sub_eq [IsDomain R] {l : ℕ} (hlu : IsUnit ((l : R))) {η : R}
+    (hu : IsUnit (1 - η)) (hpow : η ^ l = 1) (hsum : ∑ k ∈ range l, η ^ k = 0) :
+    Ring.inverse (1 - η) = -(Ring.inverse ((l : R))) * ∑ k ∈ range l, (k : R) * η ^ k := by
+  have hcore : (1 - η) * ∑ k ∈ range l, (k : R) * η ^ k = -(l : R) :=
+    one_sub_mul_sum_nsmul (R := R) hpow hsum
+  have hmul : (1 - η) * (-(Ring.inverse ((l : R))) * ∑ k ∈ range l, (k : R) * η ^ k) = 1 := by
+    rw [show (1 - η) * (-(Ring.inverse ((l : R))) * ∑ k ∈ range l, (k : R) * η ^ k)
+        = -(Ring.inverse ((l : R))) * ((1 - η) * ∑ k ∈ range l, (k : R) * η ^ k) from by ring,
+      hcore, neg_mul_neg, Ring.inverse_mul_cancel _ hlu]
+  obtain ⟨u, hu'⟩ := hu
+  rw [← hu', Ring.inverse_unit]
+  refine Units.inv_eq_of_mul_eq_one_right ?_
+  rw [hu']
+  exact hmul
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`tateXterm(ζ) = ζ/(1−ζ)²` は `ζ` の多項式**（`l` が単元のとき）。
+
+★係数は `(1/l)²·∑_{k,m<l, k+m+1 ≡ a (mod l)} k·m`。
+★★これで**定数項も μ-等級付きの枠に乗る**。 -/
+theorem tateXterm_zeta_eq_poly [IsDomain R] {l : ℕ} (hl : 0 < l) (hlu : IsUnit ((l : R)))
+    {z : R} (hu : IsUnit (1 - z)) (hpow : z ^ l = 1) (hsum : ∑ k ∈ range l, z ^ k = 0) :
+    tateXterm z
+      = ∑ a ∈ range l, ((Ring.inverse ((l : R))) ^ 2 *
+          ∑ k ∈ range l, ∑ m ∈ range l,
+            (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)) * z ^ a := by
+  classical
+  have hcore : ∑ a ∈ range l, (∑ k ∈ range l, ∑ m ∈ range l,
+          (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)) * z ^ a
+      = ∑ k ∈ range l, ∑ m ∈ range l, ((k : R) * (m : R)) * z ^ ((k + m + 1) % l) := by
+    have h1 : ∀ a ∈ range l, (∑ k ∈ range l, ∑ m ∈ range l,
+            (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)) * z ^ a
+        = ∑ k ∈ range l, ∑ m ∈ range l,
+            (if (k + m + 1) % l = a then ((k : R) * (m : R)) * z ^ a else 0) := by
+      intro a _
+      rw [Finset.sum_mul]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [Finset.sum_mul]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      by_cases h : (k + m + 1) % l = a <;> simp [h]
+    rw [Finset.sum_congr rfl h1, Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [Finset.sum_eq_single ((k + m + 1) % l)]
+    · rw [if_pos rfl]
+    · intro c _ hne
+      rw [if_neg (Ne.symm hne)]
+    · intro h
+      exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
+  rw [tateXterm, ringInverse_one_sub_eq hlu hu hpow hsum]
+  have hLHS : z * (-(Ring.inverse ((l : R))) * ∑ k ∈ range l, (k : R) * z ^ k) ^ 2
+      = (Ring.inverse ((l : R))) ^ 2 *
+          ∑ k ∈ range l, ∑ m ∈ range l, ((k : R) * (m : R)) * z ^ ((k + m + 1) % l) := by
+    have h2 : z * (-(Ring.inverse ((l : R))) * ∑ k ∈ range l, (k : R) * z ^ k) ^ 2
+        = (Ring.inverse ((l : R))) ^ 2 *
+          (((∑ k ∈ range l, (k : R) * z ^ k) * ∑ m ∈ range l, (m : R) * z ^ m) * z) := by
+      ring
+    rw [h2, Finset.sum_mul_sum, Finset.sum_mul]
+    congr 1
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [← pow_mod_eq hl hpow (k + m + 1)]
+    rw [pow_add, pow_add, pow_one]
+    ring
+  rw [hLHS, ← hcore, Finset.mul_sum]
+  exact Finset.sum_congr rfl (fun a _ => by ring)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -394,6 +467,16 @@ def adicSum_concentrated.src : ABC3.Meta.Source :=
 def muEval_const.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(ζ の多項式は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def ringInverse_one_sub_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Ring.inverse(1−η) を η の多項式で書く。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXterm_zeta_eq_poly.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXterm(ζ) は ζ の多項式。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
