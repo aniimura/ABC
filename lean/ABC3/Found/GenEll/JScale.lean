@@ -125,7 +125,50 @@ theorem c4_cube_mul_Delta_of_j_eq (W W' : WeierstrassCurve R) [W.IsElliptic] [W'
       - (((W'.Δ' : Rˣ) : R) * W.c₄ ^ 3) * hinvW
       + (((W.Δ' : Rˣ) : R) * W'.c₄ ^ 3) * hinvW'
 
+/-! ## ★★★★★★`j` を式で書く（`rw` の motive を避けるため） -/
+
+section JField
+
+variable {F : Type} [Field F]
+
+/-- ★★**`j = Δ⁻¹·c₄³`**——`Δ'` を外して式で書いた形。
+
+☆`IsElliptic` のインスタンスが `rw` の motive を壊す問題（`lean-idioms.md`）は、
+**`j` をこの形に直してから計算する**と避けられる。 -/
+theorem j_eq_inv_Delta_mul (W : WeierstrassCurve F) [W.IsElliptic] :
+    W.j = (W.Δ)⁻¹ * W.c₄ ^ 3 := by
+  rw [WeierstrassCurve.j, Units.val_inv_eq_inv_val, WeierstrassCurve.coe_Δ']
+
+/-- ★★**曲線が等しければ `j` も等しい**。
+
+☆`rw [h]` を `j` の上で直接やると motive が壊れるので、
+先に `j = Δ⁻¹c₄³` に直してから書き換える。 -/
+theorem j_congr_curve {W X : WeierstrassCurve F} [W.IsElliptic] [X.IsElliptic]
+    (h : W = X) : W.j = X.j := by
+  rw [j_eq_inv_Delta_mul, j_eq_inv_Delta_mul, h]
+
+/-- ★★★★★★**変数変換で等しい曲線は `j` が等しい**（等式の形で）。
+
+☆mathlib の `variableChange_j` は `(C • W).j = W.j` であるが、
+`h : C • W = X` から `W.j = X.j` を出すには `rw [← h]` が必要で、
+`X` が変数でないと motive が壊れる。
+★本補題は `j = Δ⁻¹c₄³` に直してから体の計算で済ませる。 -/
+theorem j_eq_of_smul_eq (C : WeierstrassCurve.VariableChange F) (W X : WeierstrassCurve F)
+    [W.IsElliptic] [X.IsElliptic] (h : C • W = X) : W.j = X.j := by
+  have hΔ : W.Δ ≠ 0 := W.isUnit_Δ.ne_zero
+  have hu : ((C.u⁻¹ : Fˣ) : F) ≠ 0 := (C.u⁻¹).ne_zero
+  rw [j_eq_inv_Delta_mul, j_eq_inv_Delta_mul, ← h,
+    WeierstrassCurve.variableChange_Δ, WeierstrassCurve.variableChange_c₄]
+  field_simp
+
+end JField
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def j_eq_of_smul_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(変数変換で等しい曲線は j が等しい——等式の形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def j_eq_of_c4_c6_scale.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
