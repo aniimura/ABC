@@ -6,6 +6,7 @@ import ABC3.Skeleton.AbsTopIII.LogShell
 import ABC3.Skeleton.IUTchI.InitialThetaData
 import ABC3.Skeleton.IUTchIII.Cor312
 import ABC3.Skeleton.GenEll.Heights
+import ABC3.Skeleton.GenEll.GaloisLocal
 import ABC3.Skeleton.GenEll.TateIsogeny
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section1
