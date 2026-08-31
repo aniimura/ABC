@@ -991,6 +991,32 @@ theorem quotLCyclicJ_spec (x : RealizedClass) (l : ℕ)
   rw [quotLCyclicJ, dif_pos h]
   exact h.choose_spec
 
+open scoped Classical in
+/-- ★★★★★★**`logDiffMell` 欄**——**類の函数**として。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+☆界面の `logDiffMell : EllClass → ℝ` は `ℂ → ℝ` である。
+★`RealizedClass` は `ℂ` の部分型なので、実現される類ではその値を、
+そうでない `j` では `0` を取る。 -/
+noncomputable def logDiffMellJ (x : ℂ) : ℝ :=
+  if h : ∃ E : DegCurve, E.j = x then RealizedClass.logDiffMell ⟨x, h⟩ else 0
+
+theorem logDiffMellJ_eq (x : RealizedClass) : logDiffMellJ x.cls = x.logDiffMell := by
+  classical
+  have h : ∃ E : DegCurve, E.j = x.cls := x.2
+  rw [logDiffMellJ, dif_pos h]
+  have hx : (⟨x.cls, h⟩ : RealizedClass) = x := Subtype.ext rfl
+  rw [hx]
+
+theorem logDiffMellJ_nonneg (x : ℂ) : 0 ≤ logDiffMellJ x := by
+  classical
+  by_cases h : ∃ E : DegCurve, E.j = x
+  · rw [logDiffMellJ, dif_pos h]
+    exact RealizedClass.logDiffMell_nonneg _
+  · rw [logDiffMellJ, dif_neg h]
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -1038,6 +1064,11 @@ def quotLCyclicJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(quotLCyclic 欄——l-巡回部分群による商の類)",
     sectionId := "genell-lemma-3-5" }
+
+def logDiffMellJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(logDiffMell 欄——類の函数として)",
+    sectionId := "genell-cor-4-3" }
 
 def RealizedClass.logDiffMell.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,
