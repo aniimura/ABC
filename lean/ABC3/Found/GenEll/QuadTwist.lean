@@ -150,7 +150,46 @@ theorem isSquare_mul_of_not_isSquare {k : Type} [Field k] [Fintype k] [Decidable
     norm_num
   exact (quadraticChar_one_iff_isSquare (mul_ne_zero hd ha)).1 h3
 
+/-! ## ★★★★★★★★★★Vélu の商は捧りと可換 -/
+
+/-- ★★★★★★★★★★**Vélu の商は捧りと可換する**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+    `veluCurve (W^d) (d²v) (d³w) = (veluCurve W v w)^d`
+
+☆`v` は重み 4、`w` は重み 6 なので、捧り（`c₄ ↦ d²c₄`）では
+`v ↦ d²v`・`w ↦ d³w` となる。
+★`b₂(W^d) = d·b₂(W)`（`a₁ = a₃ = 0` の形）が鍵である。
+
+★これが「`E′^d = (E^d)/H^d`」の曲線の水準での中身であり、
+非分裂の降下に要る最後の道具である。 -/
+theorem veluCurve_quadTwist (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (v w d : F) :
+    veluCurve (quadTwist W d) (d ^ 2 * v) (d ^ 3 * w)
+      = quadTwist (veluCurve W v w) d := by
+  have hb₂ : (quadTwist W d).b₂ = d * W.b₂ := by
+    rw [WeierstrassCurve.b₂_of_isCharNeTwoNF, WeierstrassCurve.b₂_of_isCharNeTwoNF,
+      quadTwist_a₂]
+    ring
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · rfl
+  · rfl
+  · rfl
+  · show (quadTwist W d).a₄ - 5 * (d ^ 2 * v) = d ^ 2 * (W.a₄ - 5 * v)
+    rw [quadTwist_a₄]
+    ring
+  · show (quadTwist W d).a₆ - (quadTwist W d).b₂ * (d ^ 2 * v) - 7 * (d ^ 3 * w)
+      = d ^ 3 * (W.a₆ - W.b₂ * v - 7 * w)
+    rw [quadTwist_a₆, hb₂]
+    ring
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def veluCurve_quadTwist.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商は捧りと可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def isSquare_mul_of_not_isSquare.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
