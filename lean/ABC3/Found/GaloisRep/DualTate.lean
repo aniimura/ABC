@@ -717,6 +717,234 @@ theorem tate_d3x_mul {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ 
     DualNum.re_pow, DualNum.eps_zero, DualNum.re_two, DualNum.eps_two] at heps
   linear_combination heps
 
+/-! ## ★★★★★★★★`D³X` を微分して `D⁴X` -/
+
+/-- ★★★★★★**`D³f(t+εs) = D³f(t) + ε·s(1+26t+66t²+26t³+t⁴)/(1−t)⁶`**。 -/
+theorem tateD3Xterm_dual {t s : R} (hu : IsUnit (1 - t)) :
+    tateD3Xterm (DualNum.mk t s)
+      = DualNum.mk (tateD3Xterm t)
+          (s * (1 + 26 * t + 66 * t ^ 2 + 26 * t ^ 3 + t ^ 4)
+            * Ring.inverse (1 - t) ^ 6) := by
+  have hr : (1 - t) * Ring.inverse (1 - t) = 1 := Ring.mul_inverse_cancel _ hu
+  have hn11 : (11 : DualNum R) = DualNum.mk 11 0 := by
+    have hh : DualNum.inlHom (11 : R) = (11 : DualNum R) := map_ofNat _ 11
+    rw [← hh, DualNum.inlHom_apply]
+  rw [tateD3Xterm, ringInverse_one_sub_dual hu, hn11]
+  ext
+  · simp [tateD3Xterm]
+  · simp only [DualNum.eps_mul, DualNum.re_mul, DualNum.re_mk, DualNum.eps_mk,
+      DualNum.re_pow, DualNum.eps_sq, DualNum.eps_cube, DualNum.re_add, DualNum.eps_add,
+      DualNum.re_one, DualNum.eps_one]
+    have h5 : ((DualNum.mk (Ring.inverse (1 - t)) (s * Ring.inverse (1 - t) ^ 2)) ^ 5).eps
+        = 5 * Ring.inverse (1 - t) ^ 4 * (s * Ring.inverse (1 - t) ^ 2) := by
+      have e := DualNum.eps_pow
+        (DualNum.mk (Ring.inverse (1 - t)) (s * Ring.inverse (1 - t) ^ 2)) 4
+      simp only [DualNum.re_mk, DualNum.eps_mk] at e
+      rw [e]
+      push_cast
+      ring
+    rw [h5]
+    linear_combination
+      (-(s * (1 + 22 * t + 33 * t ^ 2 + 4 * t ^ 3) * Ring.inverse (1 - t) ^ 5)) * hr
+
+theorem tateD3Xtail_dual_pos {I : Ideal R} [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD3Xtail (DualNum.mk u u) (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+      = DualNum.mk (tateD3Xtail u q hq) (tateD4Xtail u q hq) := by
+  have hterm : ∀ n : ℕ,
+      tateD3Xterm ((DualNum.mk q 0) ^ (n + 1) * DualNum.mk u u)
+        = DualNum.mk (tateD3Xterm (q ^ (n + 1) * u)) (tateD4Xterm (q ^ (n + 1) * u)) := by
+    intro n
+    rw [DualNum.mk_pow, DualNum.mk_zero_mul,
+      tateD3Xterm_dual (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), tateD4Xterm]
+  rw [tateD3Xtail, tateD3Xtail, tateD4Xtail,
+    adicSum_congr (tateD3Xtail_aux (mk_mem_dualIdeal hq))
+      (dual_mem_pow (tateD3Xtail_aux hq) (tateD4Xtail_aux hq)) hterm,
+    adicSum_dual]
+
+theorem tateD3Xtail_dual_neg {I : Ideal R} [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD3Xtail (DualNum.mk u (-u)) (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+      = DualNum.mk (tateD3Xtail u q hq) (-tateD4Xtail u q hq) := by
+  have hmem : ∀ n : ℕ, (-1 : R) * tateD4Xterm (q ^ (n + 1) * u) ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (tateD4Xtail_aux hq n)
+  have hterm : ∀ n : ℕ,
+      tateD3Xterm ((DualNum.mk q 0) ^ (n + 1) * DualNum.mk u (-u))
+        = DualNum.mk (tateD3Xterm (q ^ (n + 1) * u))
+            ((-1 : R) * tateD4Xterm (q ^ (n + 1) * u)) := by
+    intro n
+    rw [DualNum.mk_pow, DualNum.mk_zero_mul,
+      tateD3Xterm_dual (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), tateD4Xterm]
+    ext <;> simp <;> try ring
+  rw [tateD3Xtail, tateD3Xtail, tateD4Xtail,
+    adicSum_congr (tateD3Xtail_aux (mk_mem_dualIdeal hq))
+      (dual_mem_pow (tateD3Xtail_aux hq) hmem) hterm,
+    adicSum_dual _ _ (tateD3Xtail_aux hq) hmem,
+    adicSum_smul (-1 : R) _ (tateD4Xtail_aux hq)]
+  ext <;> simp
+
+/-- ★★★★★★★★**`D³X(a+εa, w−εw) = D³X + ε·D⁴X`**。 -/
+theorem tateD3Xpair_dual {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateD3Xpair (DualNum.mk a a) (DualNum.mk w (-w)) (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+      = DualNum.mk (tateD3Xpair a w q hq) (tateD4Xpair a w q hq) := by
+  rw [tateD3Xpair, tateD3Xterm_dual ha, tateD3Xterm_dual hw,
+    tateD3Xtail_dual_pos a q hq, tateD3Xtail_dual_neg w q hq]
+  ext
+  · simp [tateD3Xpair, tateD3Xterm]
+  · simp [tateD4Xpair, tateD4Xterm]
+    ring
+
+/-- ★★★★★★★★**`tate_d3x_mul` をもう一度微分した形**。
+
+★`tate_d2x` と `tate_d3x` を入れると第 2・第 3 項が消え、
+`DX ≠ 0` で割ると **`D⁴X = 12X·D²X + 12(DX)² + D²X`** が出る。 -/
+theorem tate_d4x_mul {I : Ideal R} [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (haw : a * w = q) (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateDXpair a w q hq
+        * (tateD4Xpair a w q hq - 12 * tateXpair a w q hq * tateD2Xpair a w q hq
+            - 12 * tateDXpair a w q hq ^ 2 - tateD2Xpair a w q hq)
+      + 2 * tateD2Xpair a w q hq
+        * (tateD3Xpair a w q hq - 12 * tateXpair a w q hq * tateDXpair a w q hq
+            - tateDXpair a w q hq)
+      + tateD3Xpair a w q hq
+        * (tateD2Xpair a w q hq - 6 * tateXpair a w q hq ^ 2 - tateXpair a w q hq
+            - 2 * (tateCurveAt q hq).a₄) = 0 := by
+  have haw' : DualNum.mk a a * DualNum.mk w (-w) = DualNum.mk q 0 := dualA_mul_dualW a w q haw
+  have h := tate_d3x_mul (I := dualIdeal I) (DualNum.mk a a) (DualNum.mk w (-w))
+    (DualNum.mk q 0) (mk_mem_dualIdeal hq) haw'
+    (isUnit_one_sub_dualA ha) (isUnit_one_sub_dualW hw)
+  have hn6 : (6 : DualNum R) = DualNum.mk 6 0 := by
+    have hh : DualNum.inlHom (6 : R) = (6 : DualNum R) := map_ofNat _ 6
+    rw [← hh, DualNum.inlHom_apply]
+  have hn12 : (12 : DualNum R) = DualNum.mk 12 0 := by
+    have hh : DualNum.inlHom (12 : R) = (12 : DualNum R) := map_ofNat _ 12
+    rw [← hh, DualNum.inlHom_apply]
+  rw [tateDXpair_dual a w q hq ha hw, tateD2Xpair_dual a w q hq ha hw,
+    tateD3Xpair_dual a w q hq ha hw, tateXpair_dual a w q hq ha hw,
+    tateCurveAt_a4_dual q hq, hn6, hn12] at h
+  have heps := congrArg DualNum.eps h
+  simp only [DualNum.eps_mul, DualNum.eps_sub, DualNum.eps_add, DualNum.eps_mk,
+    DualNum.re_mk, DualNum.re_mul, DualNum.re_sub, DualNum.re_add, DualNum.eps_sq,
+    DualNum.re_pow, DualNum.eps_zero, DualNum.re_two, DualNum.eps_two] at heps
+  linear_combination heps
+
+/-! ## ★★★★★★`D³f`・`D⁴f` のべき級数展開 -/
+
+/-- ★★★★**`D³f(t) = ∑_{n≥1} n⁴ t^n`**。 -/
+theorem tateD3Xterm_eq_adicSum {I : Ideal R} [IsAdicComplete I R] {t : R} (ht : t ∈ I) :
+    tateD3Xterm t
+      = adicSum (fun n => (n : R) ^ 4 * t ^ n)
+          (fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)) := by
+  have hut : IsUnit (1 - t) := isUnit_one_sub (I := I) ht
+  have hmem3 : ∀ n : ℕ, (n : R) ^ 3 * t ^ n ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)
+  have hmem4 : ∀ n : ℕ, (n : R) ^ 4 * t ^ n ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)
+  have htd' : DualNum.mk t t ∈ dualIdeal I := ⟨by simpa using ht, by simpa using ht⟩
+  have h1 := tateD2Xterm_eq_adicSum (I := dualIdeal I) htd'
+  have hterm : ∀ n : ℕ, ((n : ℕ) : DualNum R) ^ 3 * (DualNum.mk t t) ^ n
+      = DualNum.mk ((n : R) ^ 3 * t ^ n) ((n : R) ^ 4 * t ^ n) := by
+    intro n
+    rw [DualNum.natCast_eq, DualNum.mk_pow, DualNum.mk_pow_self, DualNum.mk_zero_mul]
+    ext
+    · simp
+    · simp
+      ring
+  rw [adicSum_congr _ (dual_mem_pow hmem3 hmem4) hterm,
+    adicSum_dual _ _ hmem3 hmem4] at h1
+  rw [tateD2Xterm_dual hut] at h1
+  have h2 := congrArg DualNum.eps h1
+  simp only [DualNum.eps_mk] at h2
+  rw [← h2, tateD3Xterm]
+
+/-- ★★★★**`D⁴f(t) = ∑_{n≥1} n⁵ t^n`**。 -/
+theorem tateD4Xterm_eq_adicSum {I : Ideal R} [IsAdicComplete I R] {t : R} (ht : t ∈ I) :
+    tateD4Xterm t
+      = adicSum (fun n => (n : R) ^ 5 * t ^ n)
+          (fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)) := by
+  have hut : IsUnit (1 - t) := isUnit_one_sub (I := I) ht
+  have hmem4 : ∀ n : ℕ, (n : R) ^ 4 * t ^ n ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)
+  have hmem5 : ∀ n : ℕ, (n : R) ^ 5 * t ^ n ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow ht n)
+  have htd' : DualNum.mk t t ∈ dualIdeal I := ⟨by simpa using ht, by simpa using ht⟩
+  have h1 := tateD3Xterm_eq_adicSum (I := dualIdeal I) htd'
+  have hterm : ∀ n : ℕ, ((n : ℕ) : DualNum R) ^ 4 * (DualNum.mk t t) ^ n
+      = DualNum.mk ((n : R) ^ 4 * t ^ n) ((n : R) ^ 5 * t ^ n) := by
+    intro n
+    rw [DualNum.natCast_eq, DualNum.mk_pow, DualNum.mk_pow_self, DualNum.mk_zero_mul]
+    ext
+    · simp
+    · simp
+      ring
+  rw [adicSum_congr _ (dual_mem_pow hmem4 hmem5) hterm,
+    adicSum_dual _ _ hmem4 hmem5] at h1
+  rw [tateD3Xterm_dual hut] at h1
+  have h2 := congrArg DualNum.eps h1
+  simp only [DualNum.eps_mk] at h2
+  rw [← h2, tateD4Xterm]
+
+/-- ★★★★**`T_{D³f}(u) = ∑_n q^n ∑_{d∣n} d⁴ u^d`**。 -/
+theorem tateD3Xtail_eq_divisorSum {I : Ideal R} [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD3Xtail u q hq
+      = adicSum (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 4 * u ^ d)
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) := by
+  classical
+  have hmem3 : ∀ n : ℕ, q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 3 * u ^ d ∈ I ^ n :=
+    fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  have hmem4 : ∀ n : ℕ, q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 4 * u ^ d ∈ I ^ n :=
+    fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  have h1 := tateD2Xtail_eq_divisorSum (I := dualIdeal I) (DualNum.mk u u)
+    (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+  have hterm : ∀ n : ℕ,
+      (DualNum.mk q 0) ^ n * ∑ d ∈ n.divisors,
+          ((d : ℕ) : DualNum R) ^ 3 * (DualNum.mk u u) ^ d
+        = DualNum.mk (q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 3 * u ^ d)
+            (q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 4 * u ^ d) := by
+    intro n
+    have hin : ∀ d ∈ n.divisors, ((d : ℕ) : DualNum R) ^ 3 * (DualNum.mk u u) ^ d
+        = DualNum.mk ((d : R) ^ 3 * u ^ d) ((d : R) ^ 4 * u ^ d) := by
+      intro d _
+      rw [DualNum.natCast_eq, DualNum.mk_pow, DualNum.mk_pow_self, DualNum.mk_zero_mul]
+      ext
+      · simp
+      · simp
+        ring
+    rw [Finset.sum_congr rfl hin, DualNum.mk_pow, DualNum.mk_sum, DualNum.mk_zero_mul]
+  rw [adicSum_congr _ (dual_mem_pow hmem3 hmem4) hterm, adicSum_dual _ _ hmem3 hmem4,
+    tateD2Xtail_dual_pos u q hq] at h1
+  simpa using congrArg DualNum.eps h1
+
+/-- ★★★★★★**`T_{D⁴f}(u) = ∑_n q^n ∑_{d∣n} d⁵ u^d`**——σ₅ が直に出る形。 -/
+theorem tateD4Xtail_eq_divisorSum {I : Ideal R} [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD4Xtail u q hq
+      = adicSum (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 5 * u ^ d)
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) := by
+  classical
+  have hmem4 : ∀ n : ℕ, q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 4 * u ^ d ∈ I ^ n :=
+    fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  have hmem5 : ∀ n : ℕ, q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 5 * u ^ d ∈ I ^ n :=
+    fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  have h1 := tateD3Xtail_eq_divisorSum (I := dualIdeal I) (DualNum.mk u u)
+    (DualNum.mk q 0) (mk_mem_dualIdeal hq)
+  have hterm : ∀ n : ℕ,
+      (DualNum.mk q 0) ^ n * ∑ d ∈ n.divisors,
+          ((d : ℕ) : DualNum R) ^ 4 * (DualNum.mk u u) ^ d
+        = DualNum.mk (q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 4 * u ^ d)
+            (q ^ n * ∑ d ∈ n.divisors, (d : R) ^ 5 * u ^ d) := by
+    intro n
+    have hin : ∀ d ∈ n.divisors, ((d : ℕ) : DualNum R) ^ 4 * (DualNum.mk u u) ^ d
+        = DualNum.mk ((d : R) ^ 4 * u ^ d) ((d : R) ^ 5 * u ^ d) := by
+      intro d _
+      rw [DualNum.natCast_eq, DualNum.mk_pow, DualNum.mk_pow_self, DualNum.mk_zero_mul]
+      ext
+      · simp
+      · simp
+        ring
+    rw [Finset.sum_congr rfl hin, DualNum.mk_pow, DualNum.mk_sum, DualNum.mk_zero_mul]
+  rw [adicSum_congr _ (dual_mem_pow hmem4 hmem5) hterm, adicSum_dual _ _ hmem4 hmem5,
+    tateD3Xtail_dual_pos u q hq] at h1
+  simpa using congrArg DualNum.eps h1
+
 /-! ## ★★★★`c₄ = 1 + 240·s₃` -/
 
 /-- ★★**べき級数の水準で `c₄ = 1 + 240·σ₃`**。

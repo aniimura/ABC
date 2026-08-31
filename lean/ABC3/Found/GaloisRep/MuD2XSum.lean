@@ -165,6 +165,151 @@ theorem sum_mu_d2xtail_sigma [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l
       push_cast
       ring
 
+/-! ## ★★★★★★★★一般の `k` での形 -/
+
+open Finset in
+/-- ★★★★**一般の `k`**: `∑_{i≠0} ∑_n q^n ∑_{d∣n} d^k ζ^{id}` の指標和。 -/
+theorem sum_mu_divisorSum [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (k : ℕ) :
+    ∑ i ∈ (range l).erase 0,
+        adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) ^ k * (ζ ^ i) ^ d)
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+      = adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+            (d : R) ^ k * ((if l ∣ d then (l : R) else 0) - 1))
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) := by
+  classical
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => q ^ n * ∑ d ∈ n.divisors, (d : R) ^ k * (ζ ^ i) ^ d)
+      (fun i n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [← Finset.mul_sum]
+  congr 1
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun d _ => ?_)
+  rw [← Finset.mul_sum]
+  congr 1
+  rw [← sum_mu_pow_erase_zero hl hζ d]
+  exact Finset.sum_congr rfl (fun i _ => by rw [← pow_mul])
+
+/-- ★★★**一般の `k`**: 係数を `σ_k` の言葉に直す。 -/
+theorem dx_coeff_sigma {l : ℕ} (hl : l.Prime) (k n : ℕ) :
+    ∑ d ∈ n.divisors, (d : R) ^ k * ((if l ∣ d then (l : R) else 0) - 1)
+      = (l : R) ^ (k + 1) * (if l ∣ n then ((∑ e ∈ (n / l).divisors, e ^ k : ℕ) : R) else 0)
+        - ((∑ d ∈ n.divisors, d ^ k : ℕ) : R) := by
+  classical
+  have hsplit : ∑ d ∈ n.divisors, (d : R) ^ k * ((if l ∣ d then (l : R) else 0) - 1)
+      = (l : R) * (∑ d ∈ n.divisors.filter (fun d => l ∣ d), (d : R) ^ k)
+        - ∑ d ∈ n.divisors, (d : R) ^ k := by
+    rw [Finset.mul_sum, Finset.sum_filter, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun d _ => ?_)
+    by_cases hd : l ∣ d
+    · rw [if_pos hd, if_pos hd]
+      ring
+    · rw [if_neg hd, if_neg hd]
+      ring
+  rw [hsplit]
+  congr 1
+  · by_cases hn : n = 0
+    · subst hn
+      simp
+    · have h := sum_divisors_dvd_pow k l n hl hn
+      have hcast : (∑ d ∈ n.divisors.filter (fun d => l ∣ d), (d : R) ^ k)
+          = ((∑ d ∈ n.divisors.filter (fun d => l ∣ d), d ^ k : ℕ) : R) := by
+        push_cast
+        rfl
+      rw [hcast, h]
+      by_cases hln : l ∣ n
+      · rw [if_pos hln, if_pos hln]
+        push_cast
+        ring
+      · rw [if_neg hln, if_neg hln]
+        simp
+  · push_cast
+    rfl
+
+open Finset in
+/-- ★★★★★★★★**一般の `k`**:
+`∑_{i≠0} ∑_n q^n ∑_{d∣n} d^k ζ^{id} = l^{k+1}·s_k(q^l) − s_k(q)`。 -/
+theorem sum_mu_divisorSum_sigma [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (k : ℕ) :
+    ∑ i ∈ (range l).erase 0,
+        adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors, (d : R) ^ k * (ζ ^ i) ^ d)
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+      = (l : R) ^ (k + 1) * evalAdic (sigmaSeries k) (q ^ l) hql
+        - evalAdic (sigmaSeries k) q hq := by
+  classical
+  set A : ℕ → R := fun n => q ^ n *
+    ((l : R) ^ (k + 1)
+      * (if l ∣ n then ((∑ e ∈ (n / l).divisors, e ^ k : ℕ) : R) else 0)) with hA
+  set B : ℕ → R := fun n => q ^ n * ((∑ d ∈ n.divisors, d ^ k : ℕ) : R) with hB
+  have hAmem : ∀ n, A n ∈ I ^ n := fun n =>
+    Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  have hBmem : ∀ n, B n ∈ I ^ n := fun n =>
+    Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)
+  rw [sum_mu_divisorSum hl hζ q hq k]
+  have hstep : adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+        (d : R) ^ k * ((if l ∣ d then (l : R) else 0) - 1))
+        (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+      = adicSum (fun n => A n - B n) (fun n => Submodule.sub_mem _ (hAmem n) (hBmem n)) := by
+    refine adicSum_congr _ _ (fun n => ?_)
+    rw [dx_coeff_sigma hl k n, hA, hB]
+    ring
+  rw [hstep, adicSum_sub A B hAmem hBmem]
+  congr 1
+  · have hb : ∀ m : ℕ, (l : R) ^ (k + 1)
+        * ((q ^ l) ^ m * ((∑ e ∈ m.divisors, e ^ k : ℕ) : R)) ∈ I ^ m := by
+      intro m
+      refine Ideal.mul_mem_left _ _ (Ideal.mul_mem_right _ _ ?_)
+      rw [← pow_mul]
+      exact Ideal.pow_le_pow_right (Nat.le_mul_of_pos_left m hl.pos)
+        (Ideal.pow_mem_pow hq (l * m))
+    have hzero : ∀ n, ¬ l ∣ n → A n = 0 := by
+      intro n hn
+      rw [hA]
+      simp [if_neg hn]
+    have hshift : ∀ m : ℕ, A (l * m)
+        = (l : R) ^ (k + 1) * ((q ^ l) ^ m * ((∑ e ∈ m.divisors, e ^ k : ℕ) : R)) := by
+      intro m
+      rw [hA]
+      have hdvd : l ∣ l * m := Dvd.intro m rfl
+      have hdiv : l * m / l = m := Nat.mul_div_cancel_left _ hl.pos
+      simp only [if_pos hdvd, hdiv]
+      rw [← pow_mul]
+      ring
+    rw [adicSum_sparse l hl.pos A _ hAmem hb hzero hshift,
+      adicSum_smul ((l : R) ^ (k + 1)) _ (fun m => Ideal.mul_mem_right _ _
+        (Ideal.pow_le_pow_right (Nat.le_mul_of_pos_left m hl.pos)
+          (by rw [← pow_mul]; exact Ideal.pow_mem_pow hq (l * m))))]
+    congr 1
+    rw [evalAdic_eq_adicSum]
+    refine adicSum_congr _ _ (fun n => ?_)
+    rw [coeff_sigmaSeries]
+    by_cases hn : n = 0
+    · subst hn
+      simp
+    · rw [if_neg hn, ArithmeticFunction.sigma_apply]
+      push_cast
+      ring
+  · rw [evalAdic_eq_adicSum]
+    refine adicSum_congr _ _ (fun n => ?_)
+    rw [hB, coeff_sigmaSeries]
+    by_cases hn : n = 0
+    · subst hn
+      simp
+    · rw [if_neg hn, ArithmeticFunction.sigma_apply]
+      push_cast
+      ring
+
+open Finset in
+/-- ★★★★★★★★**`∑_{i≠0} T_{D⁴f}(ζ^i) = l⁶·s₅(q^l) − s₅(q)`**。 -/
+theorem sum_mu_d4xtail_sigma [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateD4Xtail (ζ ^ i) q hq
+      = (l : R) ^ 6 * evalAdic (sigmaSeries 5) (q ^ l) hql
+        - evalAdic (sigmaSeries 5) q hq := by
+  rw [Finset.sum_congr rfl (fun i _ => tateD4Xtail_eq_divisorSum (ζ ^ i) q hq)]
+  exact sum_mu_divisorSum_sigma hl hζ q hq hql 5
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mu_d2xtail.src : ABC3.Meta.Source :=

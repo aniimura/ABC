@@ -286,6 +286,36 @@ theorem tateD3Xterm_inv {u v : R} (huv : u * v = 1) (hu : IsUnit (1 - u))
         + 11 * u ^ 2 * ((u * v) ^ 2 + u * v + 1)
         + u * ((u * v) ^ 3 + (u * v) ^ 2 + u * v + 1))) * huv
 
+/-! ## ★★★★★★★★`D⁴X`——σ₅ の母関数 -/
+
+/-- ★★**`D⁴f(t) = t(1+26t+66t²+26t³+t⁴)/(1−t)⁶`**——`∑_{n≥1} n⁵t^n`。 -/
+noncomputable def tateD4Xterm (t : R) : R :=
+  t * (1 + 26 * t + 66 * t ^ 2 + 26 * t ^ 3 + t ^ 4) * Ring.inverse (1 - t) ^ 6
+
+theorem tateD4Xterm_mem_pow {k : ℕ} {t : R} (ht : t ∈ I ^ k) : tateD4Xterm t ∈ I ^ k :=
+  Ideal.mul_mem_right _ _ (Ideal.mul_mem_right _ _ ht)
+
+theorem tateD4Xtail_aux {u q : R} (hq : q ∈ I) (n : ℕ) :
+    tateD4Xterm (q ^ (n + 1) * u) ∈ I ^ n :=
+  Ideal.pow_le_pow_right (Nat.le_succ n)
+    (tateD4Xterm_mem_pow (Ideal.mul_mem_right u _ (Ideal.pow_mem_pow hq (n + 1))))
+
+/-- ★`∑_{m≥1} D⁴f(qᵐu)`。 -/
+noncomputable def tateD4Xtail [IsAdicComplete I R] (u q : R) (hq : q ∈ I) : R :=
+  adicSum (fun n => tateD4Xterm (q ^ (n + 1) * u)) (tateD4Xtail_aux hq)
+
+theorem tateD4Xtail_rec [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD4Xtail u q hq = tateD4Xterm (q * u) + tateD4Xtail (q * u) q hq := by
+  rw [tateD4Xtail, adicSum_shift]
+  congr 1
+  · norm_num
+  · exact adicSum_congr _ _
+      (fun n => by rw [show q ^ (n + 1 + 1) * u = q ^ (n + 1) * (q * u) by ring])
+
+/-- ★★★★**`D⁴X(u,q)`**——偶数回なので `w` 側は**足し算**。 -/
+noncomputable def tateD4Xpair [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) : R :=
+  (tateD4Xterm a + tateD4Xtail a q hq) + (tateD4Xterm w + tateD4Xtail w q hq)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDXterm.src : ABC3.Meta.Source :=
