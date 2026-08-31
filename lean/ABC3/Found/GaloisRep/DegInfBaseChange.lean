@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.PrimeUnder
 import ABC3.Found.GaloisRep.FaltingsWitness
+import ABC3.Found.GaloisRep.SemistableFin
 import Mathlib.NumberTheory.RamificationInertia.Valuation
 import ABC3.Meta.Claim
 
@@ -38,6 +39,51 @@ import ABC3.Meta.Claim
 namespace ABC3.Found.GaloisRep
 
 open IsDedekindDomain NumberField WeierstrassCurve
+
+/-! ## ★配管 -/
+
+section Plumbing
+
+variable {R A : Type*} [CommRing R] [CommRing A] [Algebra R A]
+
+/-- ★★底変換した曲線も楕円曲線である（mathlib は `map` の形でしか持っていない）。 -/
+instance isElliptic_baseChange (W : WeierstrassCurve R) [W.IsElliptic] :
+    (W.baseChange A).IsElliptic :=
+  inferInstanceAs ((W.map (algebraMap R A)).IsElliptic)
+
+end Plumbing
+
+/-- ★`e ≥ 0` なら `max 0 (e·x) = e·max 0 x`。 -/
+theorem max_zero_mul (e : ℤ) (he : 0 ≤ e) (x : ℤ) : max 0 (e * x) = e * max 0 x := by
+  rcases le_total 0 x with h | h
+  · rw [max_eq_right h, max_eq_right (mul_nonneg he h)]
+  · rw [max_eq_left h, max_eq_left (by nlinarith : e * x ≤ 0), mul_zero]
+
+/-! ## ★★★★★★★★★★半安定なら `v_p(Δ_min) = log⁺|j|_p` -/
+
+section OneField
+
+variable {L : Type} [Field L] [NumberField L]
+
+/-- ★★★★★★★★★★★★**半安定なら `v_p(Δ_min) = max(0, −v_p(j))`**。
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★`≤` は半安定から（`minDeltaExp_le_maxJ`、`§9-1003`）、
+`≥` は**無条件**（`maxJ_le_minDeltaExp`、極小モデルの `c₄` が整だから）。
+★★★これで `minDeltaExp` が **`j` だけで書けた**——基底変換の議論はここから出る。 -/
+theorem minDeltaExp_eq_maxJ_of_semistable (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [W.IsElliptic] (hss : SemistableAt p W) :
+    minDeltaExp p W = max 0 (-jExp p W) :=
+  le_antisymm (minDeltaExp_le_maxJ p W hss) (maxJ_le_minDeltaExp p W)
+
+def minDeltaExp_eq_maxJ_of_semistable.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Proposition 3.4(半安定なら v_p(Δ_min) = log⁺|j|_p——等号)",
+    sectionId := "genell-prop-3-4" }
+
+end OneField
 
 section NumberField
 
@@ -128,6 +174,82 @@ theorem htFaltOf_baseChange_of_minDeltaExp (E : WeierstrassCurve L) (hΔ : E.Δ 
     htFaltOf L' (E.baseChange L') = htFaltOf L E :=
   htFaltOf_baseChange_of_degInf L L' E
     (degInfOf_baseChange_of_minDeltaExp L L' E hΔ hloc)
+
+/-! ## ★★★★★★★★★★★★半安定なら局所の仮説は自動である -/
+
+/-- ★★★★★★★★**`v_P(j) = e(P|p)·v_p(j)`**。 -/
+theorem jExp_baseChange (p : HeightOneSpectrum (𝓞 L)) (P : HeightOneSpectrum (𝓞 L'))
+    [P.asIdeal.LiesOver p.asIdeal] (E : WeierstrassCurve L) [E.IsElliptic] :
+    jExp P (E.baseChange L') = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * jExp p E := by
+  have hj : (E.baseChange L').j = algebraMap L L' E.j :=
+    WeierstrassCurve.map_j (W := E) (f := algebraMap L L')
+  by_cases h0 : E.j = 0
+  · have hz : (E.baseChange L').j = 0 := by rw [hj, h0, map_zero]
+    rw [jExp, dif_pos hz, jExp, dif_pos h0, mul_zero]
+  · have hne : (E.baseChange L').j ≠ 0 := by
+      rw [hj]
+      exact fun h => h0 ((map_eq_zero_iff _ (RingHom.injective (algebraMap L L'))).1 h)
+    rw [jExp, dif_neg hne, jExp, dif_neg h0]
+    have hunit : Units.mk0 ((E.baseChange L').j) hne
+        = Units.map (algebraMap L L' : L →* L') (Units.mk0 E.j h0) := Units.ext hj
+    rw [hunit, valAdd_algebraMap L L' p P]
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**半安定なら `v_P(Δ_min(E×L′)) = e(P|p)·v_p(Δ_min(E))`**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★これが `degInfOf_baseChange_of_minDeltaExp`（`§9-1164`、第 737）が受けていた
+局所の仮説そのものである。**半安定性だけから出る**——Tate 曲線の議論は要らない。
+
+★機構は 2 行:
+
+* 半安定なら `v(Δ_min) = max(0, −v(j))`（`minDeltaExp_eq_maxJ_of_semistable`）
+* `v_P(j) = e·v_p(j)`（`jExp_baseChange`）、そして `e ≥ 0` だから `max` は `e` 倍で通る -/
+theorem minDeltaExp_baseChange_of_semistable (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (hp : SemistableAt p E) (hP : SemistableAt P (E.baseChange L')) :
+    minDeltaExp P (E.baseChange L')
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * minDeltaExp p E := by
+  rw [minDeltaExp_eq_maxJ_of_semistable P _ hP, minDeltaExp_eq_maxJ_of_semistable p E hp,
+    jExp_baseChange L L' p P E, ← mul_neg,
+    max_zero_mul _ (by positivity : (0:ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ))]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★到達点 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**半安定な楕円曲線の `deg∞` は基底変換で変わらない**——★**無条件**。 -/
+theorem degInfOf_baseChange_of_semistable (E : WeierstrassCurve L) [E.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    (hss' : ∀ P : HeightOneSpectrum (𝓞 L'), SemistableAt P (E.baseChange L'))
+    [IsScalarTower ℚ L L'] :
+    degInfOf L' (E.baseChange L') = degInfOf L E := by
+  refine degInfOf_baseChange_of_minDeltaExp L L' E E.isUnit_Δ.ne_zero (fun P => ?_)
+  exact_mod_cast congrArg (fun n : ℤ => (n : ℝ))
+    (minDeltaExp_baseChange_of_semistable L L' _ P E (hss _) (hss' P))
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**半安定な楕円曲線の `ht^Falt` は基底変換で変わらない**——★**無条件**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★★★これで `EllModuliData` の `faltingsHeight : EllClass → ℝ` を作る道の
+**体を大きくする向きが完全に通った**（残るのは捻り＝同じ `j` の別の曲線の扱いである）。 -/
+theorem htFaltOf_baseChange_of_semistable (E : WeierstrassCurve L) [E.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    (hss' : ∀ P : HeightOneSpectrum (𝓞 L'), SemistableAt P (E.baseChange L'))
+    [IsScalarTower ℚ L L'] :
+    htFaltOf L' (E.baseChange L') = htFaltOf L E :=
+  htFaltOf_baseChange_of_degInf L L' E
+    (degInfOf_baseChange_of_semistable L L' E hss hss')
+
+def htFaltOf_baseChange_of_semistable.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(半安定な曲線の ht^Falt は基底変換で不変。★無条件)",
+    sectionId := "genell-prop-3-4" }
 
 end NumberField
 
