@@ -363,7 +363,35 @@ theorem minDeltaExp_quadTwist (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassC
     minDeltaExp p (ABC3.Found.GenEll.quadTwist W d) = minDeltaExp p W :=
   minDeltaExp_eq_of_j_eq p _ W hT hW (ABC3.Found.GenEll.quadTwist_j W hd)
 
+/-- ★★★★★★★★★★★★★★★★**非分裂の降下の要石**——
+捧った対で関係が成り立てば、もとの対でも成り立つ。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 929）**——これで `Lemma 3.5` の非分裂の場合は
+**「捧った対に分裂の連鎖を当てる」だけ**になった。
+
+☆捧りは `j` を変えず（第 920）、半安定なら `v_p(Δ_min)` は `j` だけで決まる（第 919）。 -/
+theorem minDeltaExp_eq_mul_of_nonsplit (p : HeightOneSpectrum (𝓞 L))
+    (E E' : WeierstrassCurve L) [E.IsCharNeTwoNF] [E'.IsCharNeTwoNF]
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) {d : L} (hd : d ≠ 0)
+    [(ABC3.Found.GenEll.quadTwist E d).IsElliptic]
+    [(ABC3.Found.GenEll.quadTwist E' d).IsElliptic]
+    (hE : SemistableAt p E) (hE' : SemistableAt p E')
+    (hT : SemistableAt p (ABC3.Found.GenEll.quadTwist E d))
+    (hT' : SemistableAt p (ABC3.Found.GenEll.quadTwist E' d))
+    (h : minDeltaExp p (ABC3.Found.GenEll.quadTwist E' d)
+      = l * minDeltaExp p (ABC3.Found.GenEll.quadTwist E d)) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  rw [← minDeltaExp_quadTwist p E' hd hE' hT', h, minDeltaExp_quadTwist p E hd hE hT]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_eq_mul_of_nonsplit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂の降下の要石——捧った対に分裂の連鎖を当てればよい。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
