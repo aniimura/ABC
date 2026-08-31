@@ -172,11 +172,14 @@ def minDeltaExp_descend_of_nonsplit.src : Source :=
     sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_descend_of_nonsplit.needs : List ProofObligation :=
-  [ .implicitStep
-      ("★★不分岐 2 次拡大 Lv′/Lv を作り、その整数環が " ++
-       "IsAdicComplete であることを見る（第 897 と同じ 3 段）") 4,
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_of_twist(★★★★降下自体は埋まった、第 919)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_twist") 1,
     .implicitStep
-      ("★★不分岐なら v_p(Δ_min) は変わらないこと（付値群も極小モデルも変わらない）") 3,
+      ("★★★★**2026-09-01（第 919）——降下の部分は埋まった**。" ++
+       "半安定なら `v_p(Δ_min) = max(0, −v_p(j))` なので " ++
+       "`minDeltaExp` は `j` だけで決まり、捧りで変わらない。" ++
+       "☆したがって残るのは**`j` が同じ分裂乗法還元の対を 1 つ作る**ことだけである" ++
+       "（不分岐な 2 次の捧り。`c₄ ↦ d²c₄`・`c₆ ↦ d³c₆` なので `j` は変わらない）") 4,
     .implicitStep
       ("☆分裂の場合はすでに閉じている——" ++
        "stableLine_is_mu_of_coprime(906) → tateParam_quot_velu_j_dvr(914) " ++
