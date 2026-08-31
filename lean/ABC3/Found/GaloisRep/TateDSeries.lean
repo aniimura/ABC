@@ -147,6 +147,60 @@ theorem tateDXpair_eq [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
     tateDXtail_eq, tateDXtail_eq]
   ring
 
+/-! ## ★★★★★★★★★★`D²X`——σ₃ の母関数 -/
+
+/-- ★★★★**`D²f(t) = t(1+4t+t²)/(1−t)⁴`**——`∑_{n≥1} n³t^n` の閉じた式。 -/
+noncomputable def tateD2Xterm (t : R) : R :=
+  t * (1 + 4 * t + t ^ 2) * Ring.inverse (1 - t) ^ 4
+
+/-- ★★★★★★**`D²f = Df + 2Dg`**——`Df = f + 2g` と同じ形の恒等式。 -/
+theorem tateD2Xterm_eq {t : R} (hu : IsUnit (1 - t)) :
+    tateD2Xterm t = 2 * tateDYterm t + tateDXterm t := by
+  have h : (1 - t) * Ring.inverse (1 - t) = 1 := Ring.mul_inverse_cancel _ hu
+  rw [tateD2Xterm, tateDYterm, tateDXterm]
+  linear_combination (t * (1 + t) * Ring.inverse (1 - t) ^ 3) * h
+
+theorem tateD2Xterm_mem_pow {k : ℕ} {t : R} (ht : t ∈ I ^ k) : tateD2Xterm t ∈ I ^ k :=
+  Ideal.mul_mem_right _ _ (Ideal.mul_mem_right _ _ ht)
+
+theorem tateD2Xtail_aux {u q : R} (hq : q ∈ I) (n : ℕ) :
+    tateD2Xterm (q ^ (n + 1) * u) ∈ I ^ n :=
+  Ideal.pow_le_pow_right (Nat.le_succ n)
+    (tateD2Xterm_mem_pow (Ideal.mul_mem_right u _ (Ideal.pow_mem_pow hq (n + 1))))
+
+/-- ★`∑_{m≥1} D²f(qᵐu)`。 -/
+noncomputable def tateD2Xtail [IsAdicComplete I R] (u q : R) (hq : q ∈ I) : R :=
+  adicSum (fun n => tateD2Xterm (q ^ (n + 1) * u)) (tateD2Xtail_aux hq)
+
+theorem tateD2Xtail_eq [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD2Xtail u q hq = 2 * tateDYtail u q hq + tateDXtail u q hq := by
+  have h2 : ∀ n : ℕ, (2 : R) * tateDYterm (q ^ (n + 1) * u) ∈ I ^ n :=
+    fun n => Ideal.mul_mem_left _ _ (tateDYtail_aux hq n)
+  have hpt : ∀ n : ℕ, tateD2Xterm (q ^ (n + 1) * u)
+      = 2 * tateDYterm (q ^ (n + 1) * u) + tateDXterm (q ^ (n + 1) * u) :=
+    fun n => tateD2Xterm_eq (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n))
+  have key : adicSum (fun n => tateD2Xterm (q ^ (n + 1) * u)) (tateD2Xtail_aux hq)
+      = adicSum (fun n => 2 * tateDYterm (q ^ (n + 1) * u) + tateDXterm (q ^ (n + 1) * u))
+          (fun n => Submodule.add_mem _ (h2 n) (tateDXtail_aux hq n)) :=
+    adicSum_congr _ _ hpt
+  rw [tateD2Xtail, key, adicSum_add _ _ h2 (tateDXtail_aux hq), adicSum_smul]
+  rfl
+
+/-- ★★★★★★**`D²X(u,q)`**——`w` 側の符号は 2 回反転して戻るので**足し算**である。 -/
+noncomputable def tateD2Xpair [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) : R :=
+  (tateD2Xterm a + tateD2Xtail a q hq) + (tateD2Xterm w + tateD2Xtail w q hq)
+
+/-- ★★★★★★★★★★**`D²X = 2DY + DX`**。
+
+☆これと `∑_ζ DX = 0` を合わせると **`v = ∑_ζ DY = (1/2)∑_ζ D²X`** となり、
+`D²X` の `q^N` 係数が `∑_{d∣N} d³(u^d + u^{-d})` なので、★★**σ₃ が直に出る**。 -/
+theorem tateD2Xpair_eq [IsAdicComplete I R] (a w q : R) (hq : q ∈ I)
+    (ha : IsUnit (1 - a)) (hw : IsUnit (1 - w)) :
+    tateD2Xpair a w q hq = 2 * tateDYpair a w q hq + tateDXpair a w q hq := by
+  rw [tateD2Xpair, tateDYpair, tateDXpair, tateD2Xterm_eq ha, tateD2Xterm_eq hw,
+    tateD2Xtail_eq, tateD2Xtail_eq]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDXterm.src : ABC3.Meta.Source :=
@@ -177,6 +231,26 @@ def tateDYpair.src : ABC3.Meta.Source :=
 def tateDXpair_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(DX = 2Y + X。★1−a と 1−w が単元)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateD2Xterm.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D²f(t) = t(1+4t+t²)/(1−t)⁴。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateD2Xterm_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D²f = Df + 2Dg。★1−t が単元)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateD2Xpair.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D²X の級数。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateD2Xpair_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(D²X = 2DY + DX。★1−a と 1−w が単元)",
     sectionId := "genell-lemma-3-2" }
 
 end ABC3.Found.GaloisRep

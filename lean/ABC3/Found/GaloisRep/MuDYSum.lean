@@ -68,6 +68,54 @@ theorem sum_mu_dyterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
     muPow_two_zero hl hζ, muPow_one_zero hl hζ]
   ring
 
+/-! ## ★★★★★★`D²f` と `Df` の指標和 -/
+
+/-- ★★**`D²f(t) = 6x⁴ − 12x³ + 7x² − x`**（`x = 1/(1−t)`）。 -/
+theorem tateD2Xterm_eq_powers {t : F} (hne : (1 : F) - t ≠ 0) :
+    tateD2Xterm t
+      = 6 * ((1 - t)⁻¹) ^ 4 - 12 * ((1 - t)⁻¹) ^ 3 + 7 * ((1 - t)⁻¹) ^ 2
+        - (1 - t)⁻¹ := by
+  rw [tateD2Xterm, Ring.inverse_eq_inv']
+  field_simp
+  ring
+
+/-- ★★**`Df(t) = 2x³ − 3x² + x`**（`x = 1/(1−t)`）。 -/
+theorem tateDXterm_eq_powers {t : F} (hne : (1 : F) - t ≠ 0) :
+    tateDXterm t = 2 * ((1 - t)⁻¹) ^ 3 - 3 * ((1 - t)⁻¹) ^ 2 + (1 - t)⁻¹ := by
+  rw [tateDXterm, Ring.inverse_eq_inv']
+  field_simp
+  ring
+
+/-- ★★★★★★★★**`120·∑_{ζ≠1} D²f(ζ) = l⁴ − 1`**。 -/
+theorem sum_mu_d2xterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    120 * (∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)) = (l : F) ^ 4 - 1 := by
+  have hsplit : ∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)
+      = 6 * muPow l ζ 4 0 - 12 * muPow l ζ 3 0 + 7 * muPow l ζ 2 0 - muPow l ζ 1 0 := by
+    simp only [muPow, pow_zero, one_mul, Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [tateD2Xterm_eq_powers (one_sub_zeta_ne_zero hζ hi)]
+    ring
+  rw [hsplit, muPow_four_zero hl hζ, muPow_three_zero hl hζ,
+    muPow_two_zero hl hζ, muPow_one_zero hl hζ]
+  ring
+
+/-- ★★★★★★**`∑_{ζ≠1} Df(ζ) = 0`**——`∑_ζ X(ζ)` は `q` だけの関数なので
+微分で消える、という事実の定数項。 -/
+theorem sum_mu_dxterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) = 0 := by
+  have hsplit : ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i)
+      = 2 * muPow l ζ 3 0 - 3 * muPow l ζ 2 0 + muPow l ζ 1 0 := by
+    simp only [muPow, pow_zero, one_mul, Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [tateDXterm_eq_powers (one_sub_zeta_ne_zero hζ hi)]
+    ring
+  rw [hsplit, muPow_three_zero hl hζ, muPow_two_zero hl hζ, muPow_one_zero hl hζ]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDYterm_eq_powers.src : ABC3.Meta.Source :=
