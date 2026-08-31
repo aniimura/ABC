@@ -2647,5 +2647,19 @@
       "☆(D3) の残り: (a) `E ⊗ Lv` の分裂乗法還元と極小性、(b) `hp`（付値の両立）と `C`・`hC`・`hc4`、(d) 各 `ζ` に対する `v`・`w` と `veluCurve` の楕円性。★(c) は 953 で、`hu` は 951 で閉じた。"
     ],
     "note": "★944-953 の 10 ブロックで節点の界面は局所データ 3 つに絞られた。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35BadPrimeData20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 954",
+    "supersedes": "lemma35UnitAtPrime20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★`minDeltaExp_pos_of_jExp_neg`（954）——半安定で `jExp < 0` なら `Δ_min > 0`。",
+      "★★★★★★★★★★★★★★★★`exists_minimal_c4_unit_of_jExp_neg`（954）——悪い素点では `SemistableAt` の左の選択肢（`Δ_min = 0`）が落ちるので、`C`・`hC`・`hc4ne`・`hc4` の 4 つがそのまま出る。☆これが `minDeltaExp_eq_mul_of_veluMu`（904）の極小モデル引数の出どころである。"
+    ],
+    "remainingLayers": [
+      "☆(D3) の残り: (a) `E ⊗ Lv` の分裂性（`hasMultiplicativeReduction_baseChange`(909) が乗法還元まで与えるので、残るのは剰余体で 2 次式が分裂すること）、(b1) `hp`（完備化の付値の両立）——mathlib の `valuedAdicCompletion_eq_valuation` は `Valued.v` の言葉で述べており、本プロジェクトの `hp` は `HeightOneSpectrum.valuation Lv 𝔪_R` の言葉である。その 2 つを同一視する橋が要る。(d) 各 `ζ` に対する `v`・`w` と `veluCurve` の楕円性。"
+    ],
+    "note": "★944-954 の 11 ブロックで、(c) と `hu` と (b) の極小モデル側が閉じた。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

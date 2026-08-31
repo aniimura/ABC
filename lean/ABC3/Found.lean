@@ -1347,6 +1347,7 @@ import ABC3.Found.GaloisRep.HtFaltJField
 import ABC3.Found.GaloisRep.Compositum
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.UnitAtPrime
+import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GaloisRep.EDSThreeTerm
 import ABC3.Found.Arakelov.PicUnfoldLE
