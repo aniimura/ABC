@@ -238,7 +238,62 @@ theorem jExp_eq_neg_vAdd_of_j_tateCurveAt [IsAdicComplete (IsLocalRing.maximalId
       intro h0
       exact hqne (by rw [h0, map_zero])) hev hqne]
 
+/-! ## ★★★★★★★★★★★★`v_p(j) < 0` なら Tate 母数が作れる -/
+
+/-- ★★Tate 曲線の底変換が楼円である十分条件。 -/
+theorem tateCurveAt_map_isElliptic [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    (hne : algebraMap R Lv (evalAdic tateJinvSeries q hq) ≠ 0)
+    (hc4 : algebraMap R Lv (tateCurveAt q hq).c₄ ≠ 0) :
+    ((tateCurveAt q hq).map (algebraMap R Lv)).IsElliptic := by
+  refine ⟨?_⟩
+  have hkey := evalAdic_tateJinvSeries_mul_c4 (I := IsLocalRing.maximalIdeal R) q hq
+  have hΔ : ((tateCurveAt q hq).map (algebraMap R Lv)).Δ
+      = algebraMap R Lv (evalAdic tateJinvSeries q hq)
+        * (algebraMap R Lv (tateCurveAt q hq).c₄) ^ 3 := by
+    rw [WeierstrassCurve.map_Δ, ← hkey, map_mul, map_pow]
+  rw [hΔ, isUnit_iff_ne_zero]
+  exact mul_ne_zero hne (pow_ne_zero 3 hc4)
+
+/-- ★★★★★★★★★★★★**`1/j` が `𝔪` の元なら Tate 母数が作れる**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 934）**——**分裂性を問わない**。
+`v_p(j) < 0` なら `1/j ∈ 𝔪` なので、形式逆関数定理（第 933）が
+`j(E_q) = j(W)` なる `q` を与える。
+
+☆これと第 932（`jExp = −v(q)`、分裂性不要）を並べると、
+非分裂乗法還元の場合も**捧りを経由せずに**扱える。 -/
+theorem exists_tateParam_of_inv_j [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (W : WeierstrassCurve Lv) [W.IsElliptic] (hjne : W.j ≠ 0)
+    (t : R) (ht : t ∈ IsLocalRing.maximalIdeal R)
+    (hjt : algebraMap R Lv t = (W.j)⁻¹)
+    (hc4 : ∀ (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R),
+      algebraMap R Lv (tateCurveAt q hq).c₄ ≠ 0) :
+    ∃ (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+      (_ : ((tateCurveAt q hq).map (algebraMap R Lv)).IsElliptic),
+      W.j = ((tateCurveAt q hq).map (algebraMap R Lv)).j := by
+  have hc0 : PowerSeries.coeff 0 tateJinvSeries = 0 := by
+    rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
+    exact constantCoeff_tateJinvSeries
+  obtain ⟨q, hq, hqt⟩ := evalAdic_surjective_of_coeff_one
+    (I := IsLocalRing.maximalIdeal R) tateJinvSeries hc0
+    coeff_one_tateJinvSeries ht
+  have hne : algebraMap R Lv (evalAdic tateJinvSeries q hq) ≠ 0 := by
+    rw [hqt, hjt]
+    exact inv_ne_zero hjne
+  haveI hell := tateCurveAt_map_isElliptic (R := R) (Lv := Lv) q hq hne (hc4 q hq)
+  refine ⟨q, hq, hell, ?_⟩
+  rw [j_tateCurveAt_inv (R := R) (Lv := Lv) q hq (hc4 q hq), hqt, hjt, inv_inv]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_tateParam_of_inv_j.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/j が 𝔪 の元なら Tate 母数が作れる。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def jExp_eq_neg_vAdd_of_j_tateCurveAt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
