@@ -790,6 +790,12 @@ def jExp_velu_good.src : Source :=
 
 def jExp_velu_good.needs : List ProofObligation :=
   [ .implicitStep
+      ("★★★★★★★★**後日談（2026-08-31、第 902）——この節点はもう要らない**。" ++
+       "`Lemma 3.5` の証明が使うのは `l·deg∞(E) ≤ deg∞(E′)` の片側だけであり、" ++
+       "良い素点では左辺が 0 なので `minDeltaExp_nonneg` だけで自動的に成り立つ" ++
+       "（`Found/GaloisRep/Lemma35Ineq.lean` の `minDeltaExp_le_of_jExp_bad`）。" ++
+       "★★★★したがって Néron–Ogg–Shafarevich の義務は**消えた**") 1,
+    .implicitStep
       ("★★同種な楼円曲線は同じ還元型をもつ（Neron-Ogg-Shafarevich、"
        ++ "あるいは Tate 加群の不分岐性）。mathlib には無い") 8,
     .implicitStep
