@@ -621,6 +621,67 @@ theorem ringInverse_sub_one_eq_poly [IsDomain R] {l : ℕ} (hl : 0 < l)
   · simp [h]
     ring
 
+/-! ## ★★★★★★★★★★★★★★★★★★`Y` の定数項を μ-等級付きで -/
+
+open Finset in
+/-- ★`tateXterm(ζ)` の μ-等級付き係数（`q`-次数 0）。 -/
+noncomputable def tateXtermC (l : ℕ) (n a : ℕ) : R :=
+  if n = 0 then (Ring.inverse ((l : R))) ^ 2 *
+      ∑ k ∈ range l, ∑ m ∈ range l, (if (k + m + 1) % l = a then (k : R) * (m : R) else 0)
+  else 0
+
+theorem tateXtermC_mem {l : ℕ} (n a : ℕ) : (tateXtermC (R := R) l n a) ∈ I ^ n := by
+  classical
+  by_cases h : n = 0
+  · simpa [tateXtermC, h] using Submodule.mem_top
+      (x := (Ring.inverse ((l : R))) ^ 2 *
+        ∑ k ∈ range l, ∑ m ∈ range l,
+          (if (k + m + 1) % l = a then (k : R) * (m : R) else 0))
+  · simpa [tateXtermC, h] using Submodule.zero_mem (I ^ n)
+
+/-- ★`inv(1−ζ) − 1` の μ-等級付き係数。 -/
+noncomputable def invSubOneC (l : ℕ) (n a : ℕ) : R :=
+  if n = 0 then -(Ring.inverse ((l : R))) * (a : R) - (if a = 0 then (1 : R) else 0) else 0
+
+theorem invSubOneC_mem {l : ℕ} (n a : ℕ) : (invSubOneC (R := R) l n a) ∈ I ^ n := by
+  classical
+  by_cases h : n = 0
+  · simpa [invSubOneC, h] using Submodule.mem_top
+      (x := -(Ring.inverse ((l : R))) * (a : R) - (if a = 0 then (1 : R) else 0))
+  · simpa [invSubOneC, h] using Submodule.zero_mem (I ^ n)
+
+open Finset in
+theorem tateXterm_zeta_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hpow : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) :
+    tateXterm z = muEval (I := I) l (tateXtermC l) tateXtermC_mem z := by
+  classical
+  rw [tateXterm_zeta_eq_poly hl hlu hu hpow hsum, muEval_const (I := I) (l := l) _ z]
+  exact muEval_congr _ _ _ _ (fun n a => by by_cases h : n = 0 <;> simp [tateXtermC, h]) z
+
+open Finset in
+theorem ringInverse_sub_one_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hpow : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) :
+    Ring.inverse (1 - z) - 1 = muEval (I := I) l (invSubOneC l) invSubOneC_mem z := by
+  classical
+  rw [ringInverse_sub_one_eq_poly hl hlu hu hpow hsum, muEval_const (I := I) (l := l) _ z]
+  exact muEval_congr _ _ _ _ (fun n a => by by_cases h : n = 0 <;> simp [invSubOneC, h]) z
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`tateYterm(ζ)` も μ-等級付き**——係数は 2 つの多項式の畳み込み。 -/
+theorem tateYterm_zeta_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 < l)
+    (hlu : IsUnit ((l : R))) {z : R} (hu : IsUnit (1 - z)) (hpow : z ^ l = 1)
+    (hsum : ∑ k ∈ range l, z ^ k = 0) :
+    tateYterm z
+      = muEval (I := I) l (muConv l (tateXtermC l) (invSubOneC l))
+          (muConv_mem tateXtermC_mem invSubOneC_mem) z := by
+  classical
+  rw [tateYterm_eq_tateXterm_mul hu, tateXterm_zeta_eq_muEval (I := I) hl hlu hu hpow hsum,
+    ringInverse_sub_one_eq_muEval (I := I) hl hlu hu hpow hsum,
+    muEval_mul hl _ _ tateXtermC_mem invSubOneC_mem hpow]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -751,6 +812,41 @@ def tateYterm_eq_tateXterm_mul.src : ABC3.Meta.Source :=
 def ringInverse_sub_one_eq_poly.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(inv(1−z) − 1 は z の多項式。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXtermC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXterm(ζ) の μ-等級付き係数)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXtermC_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXtermC の所属。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def invSubOneC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(inv(1−ζ) − 1 の μ-等級付き係数)",
+    sectionId := "genell-lemma-3-2" }
+
+def invSubOneC_mem.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(invSubOneC の所属。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXterm_zeta_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXterm(ζ) の μ-等級付き形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def ringInverse_sub_one_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(inv(1−ζ) − 1 の μ-等級付き形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYterm_zeta_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYterm(ζ) も μ-等級付き。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
