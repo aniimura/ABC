@@ -597,6 +597,110 @@ theorem twelve_mul_sum_mu_ringInverse {R : Type*} [CommRing R] [IsDomain R] [Cha
   rw [map_mul, map_sum, Finset.sum_congr rfl hmap, sum_mu_frac hl hζK, h12, hRHS]
   ring
 
+/-! ## ★★★★★★★★★★★★★★★★`Y` 側の定数項 -/
+
+/-- ★★★★★★**反射**——`1/(1−ζ) + 1/(1−ζ⁻¹) = 1`。 -/
+theorem inv_one_sub_add_inv_one_sub_inv {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : i ∈ (range l).erase 0) :
+    (1 - ζ ^ (l - i))⁻¹ = 1 - (1 - ζ ^ i)⁻¹ := by
+  have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+  have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+  have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+  have hz1 : ζ ^ i ≠ 1 :=
+    (isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt
+  have hne : (1 : F) - ζ ^ i ≠ 0 := sub_ne_zero.2 (Ne.symm hz1)
+  have hz0 : ζ ^ i ≠ 0 := by
+    intro h
+    have h1 : (1 : F) = 0 := by
+      rw [← hζ.pow_eq_one, ← Nat.sub_add_cancel hil.le, pow_add, h, mul_zero]
+    exact one_ne_zero h1
+  rw [(inv_zeta_pow hζ hil.le).symm]
+  refine inv_eq_of_mul_eq_one_right ?_
+  field_simp
+  ring
+
+/-- ★★★★★★★★**`ζ·u = u − 1`**（`u = 1/(1−ζ)`）。 -/
+theorem zeta_mul_inv_one_sub {ζ : F} (hne : (1 : F) - ζ ≠ 0) :
+    ζ * (1 - ζ)⁻¹ = (1 - ζ)⁻¹ - 1 := by
+  field_simp
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ≠1} ζ²/(1−ζ)³ = (l²−1)/24`**——`Y` 側の定数項。
+
+☆証明は反射 `u_{l−i} = 1 − u_i` だけである:
+`u = 1/(1−ζ)` と置くと `ζ²/(1−ζ)³ = u(u−1)²` であり、
+`i ↦ l−i` で置き換えると `(1−u)u²` になる。
+★足すと `u(u−1)² + (1−u)u² = u − u²` なので
+`2·∑ = p₁ − p₂`——**三重和を計算せずに済む**。 -/
+theorem sum_mu_frac_cube [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+      = ((l : F) ^ 2 - 1) / 24 := by
+  classical
+  have hne : ∀ i ∈ (range l).erase 0, (1 : F) - ζ ^ i ≠ 0 := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    exact sub_ne_zero.2 (Ne.symm
+      ((isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt))
+  have hterm : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+        = (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2 := by
+    intro i hi
+    have h := zeta_mul_inv_one_sub (hne i hi)
+    calc (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+        = (ζ ^ i * (1 - ζ ^ i)⁻¹) ^ 2 * (1 - ζ ^ i)⁻¹ := by ring
+      _ = ((1 - ζ ^ i)⁻¹ - 1) ^ 2 * (1 - ζ ^ i)⁻¹ := by rw [h]
+      _ = (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2 := by ring
+  rw [Finset.sum_congr rfl hterm]
+  have hrefl : ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = ∑ i ∈ (range l).erase 0,
+        (1 - (1 - ζ ^ i)⁻¹) * ((1 - ζ ^ i)⁻¹) ^ 2 := by
+    refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      omega
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      omega
+    · intro a ha
+      rw [inv_one_sub_add_inv_one_sub_inv hl hζ ha]
+      ring
+  have hdouble : (2 : F) * ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = (∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹)
+        - ∑ i ∈ (range l).erase 0, ((1 - ζ ^ i)⁻¹) ^ 2 := by
+    have h2 : (2 : F) * ∑ i ∈ (range l).erase 0,
+          (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+        = (∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2)
+          + ∑ i ∈ (range l).erase 0,
+            (1 - (1 - ζ ^ i)⁻¹) * ((1 - ζ ^ i)⁻¹) ^ 2 := by
+      rw [← hrefl]; ring
+    rw [h2, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i _ => by ring)
+  rw [sum_mu_inv_one_sub hl hζ, sum_mu_inv_one_sub_sq hl hζ] at hdouble
+  have hfin : (2 : F) * ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = ((l : F) ^ 2 - 1) / 12 := by
+    rw [hdouble]; ring
+  rw [eq_div_iff (by norm_num : (24 : F) ≠ 0)]
+  rw [eq_div_iff (by norm_num : (12 : F) ≠ 0)] at hfin
+  rw [← hfin]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -707,6 +811,21 @@ def sum_mu_neg_pow.src : ABC3.Meta.Source :=
 def twelve_mul_sum_mu_ringInverse.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(12·∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)——環版。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_one_sub_add_inv_one_sub_inv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(反射 1/(1−ζ) + 1/(1−ζ⁻¹) = 1。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def zeta_mul_inv_one_sub.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ·u = u − 1。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_frac_cube.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} ζ²/(1−ζ)³ = (l²−1)/24。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
