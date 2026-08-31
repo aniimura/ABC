@@ -5,6 +5,7 @@ import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.HtFinJ
 import ABC3.Found.GaloisRep.SemistableFin
+import ABC3.Found.GenEll.VeluImage
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 
@@ -36,7 +37,7 @@ import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 
 namespace ABC3.Skeleton.GenEll
 
-open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve IsDedekindDomain NumberField
+open ABC3.Meta ABC3.Found.GaloisRep WeierstrassCurve IsDedekindDomain NumberField ABC3.Found.GenEll
 open scoped Classical
 
 /-- **[GenEll] 残る 2 つの (1)**——**極小モデルは完備化でも極小**。
@@ -186,5 +187,81 @@ def minDeltaExp_descend_of_nonsplit.needs : List ProofObligation :=
        "→ minDeltaExp_eq_mul_of_veluMu(904) → lemma_3_5_velu_bad_delta(903)") 1,
     .citation "[ABC3]" "hasSplitMultiplicativeReduction_baseChange(分裂の場合、第 910、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.hasSplitMultiplicativeReduction_baseChange") 1 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★`Lemma 3.5` に残る**ただ 1 つ**の節点 -/
+
+/-- ★**原文の「H は乗法還元の各素点で `μ_l` に対応する」の帰結**を型にしたもの。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`lemma_3_5_velu_bad_delta`（第 903、証明済み）が**そのまま消費する形**である。 -/
+def IsMuAtBadPrimes {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic] (l : ℕ) : Prop :=
+  ∀ p : HeightOneSpectrum (𝓞 L),
+    jExp p E < 0 → minDeltaExp p E' = l * minDeltaExp p E
+
+/-- **[GenEll] `Lemma 3.5` に残るただ 1 つの節点**——
+`l` が局所高さと互いに素なら、Vélu の商は悪い素点で `Δ_min` を `l` 倍する。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 941）の測定**——**部品はすべて Lean にある**。
+本節点はそれらを並べる（長いが機械的な）組み立てである。
+
+☆分裂の場合の連鎖:
+
+    `stableLine_is_mu_of_coprime`(906) → `tateParam_quot_veluCurve_dvr`(927)
+      → `minDeltaExp_eq_mul_of_veluMu`(904)
+
+☆非分裂の場合:
+
+    `splits_quadTwist_of_not_isSquare`(938) で捧りを分裂にし、
+    `quadTwist_veluQuotientFull`(925) ➕ `veluVFull_quadTwist`(940) で `v`・`w` を送り、
+    `j_veluCurve_variableChange`(926) で Tate モデルへ移し、
+    上の分裂の連鎖を当ててから `minDeltaExp_eq_mul_of_nonsplit`(929) で降りる。
+
+☆完備化の台: `isAdicComplete_adicCompletionIntegers`(897)、
+`isMinimal_baseChange_of_c4`(908)、`hasMultiplicativeReduction_baseChange`(909)、
+`dvrTatePhiAddEquiv`(899)。
+
+★これが閉じれば `lemma_3_5_velu_bad_delta`(903) に流せて `Lemma 3.5` が終わる。 -/
+theorem isMuAtBadPrimes_of_veluQuotient {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((Finset.range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
+    (hcop : True) :
+    IsMuAtBadPrimes E E' l := by
+  sorry
+
+def IsMuAtBadPrimes.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMuAtBadPrimes_of_veluQuotient.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残るただ 1 つの節点——部品はすべて揃っている)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMuAtBadPrimes_of_veluQuotient.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_of_veluMu(分裂の連鎖の終点、第 904、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_of_veluMu") 1,
+    .citation "[ABC3]" "stableLine_is_mu_of_coprime(H ↦ μ_l、第 906、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.stableLine_is_mu_of_coprime") 1,
+    .citation "[ABC3]" "splits_quadTwist_of_not_isSquare(非分裂を捧りで分裂に、第 938、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.splits_quadTwist_of_not_isSquare") 1,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_nonsplit(捧った対から降りる、第 929、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_nonsplit") 1,
+    .citation "[ABC3]" "isAdicComplete_adicCompletionIntegers(完備化の台、第 897、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adicCompletionIntegers") 1,
+    .implicitStep
+      ("★★★★**2026-09-01（第 941）の測定**——数学の部品はすべて揃っている。" ++
+       "残るのは各悪い素点で局所データを並べる**長いが機械的な組み立て**だけである。" ++
+       "☆hcop : True は「l が局所高さと互いに素」（原文の仮定）を型に書く段") 6 ]
 
 end ABC3.Skeleton.GenEll
