@@ -116,6 +116,46 @@ theorem sum_mu_dxterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
   rw [hsplit, muPow_three_zero hl hζ, muPow_two_zero hl hζ, muPow_one_zero hl hζ]
   ring
 
+/-! ## ★★★★★★★★整域への転送（分数体に埋め込む） -/
+
+section Domain
+
+variable {A : Type} [CommRing A] [IsDomain A] [CharZero A]
+
+theorem map_ringInverse {B : Type} [CommRing B] (f : A →+* B) {x : A} (hx : IsUnit x) :
+    f (Ring.inverse x) = Ring.inverse (f x) := by
+  refine (ring_inverse_eq_of_mul_eq_one (hx.map f) ?_).symm
+  rw [← map_mul, Ring.mul_inverse_cancel x hx, map_one]
+
+theorem map_tateD2Xterm {B : Type} [CommRing B] (f : A →+* B) {t : A}
+    (ht : IsUnit (1 - t)) : f (tateD2Xterm t) = tateD2Xterm (f t) := by
+  rw [tateD2Xterm, tateD2Xterm, map_mul, map_mul, map_pow, map_ringInverse f ht]
+  simp [map_ofNat]
+
+/-- ★★★★★★★★**整域版**: `120·∑_{ζ≠1} D²f(ζ) = l⁴ − 1`。
+
+★分数体に埋め込んで体版（`sum_mu_d2xterm_field`）を使い、単射性で戻す。 -/
+theorem sum_mu_d2xterm {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
+    120 * (∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)) = (l : A) ^ 4 - 1 := by
+  have hinj : Function.Injective (algebraMap A (FractionRing A)) :=
+    IsFractionRing.injective A (FractionRing A)
+  haveI : CharZero (FractionRing A) := charZero_of_injective_algebraMap hinj
+  refine hinj ?_
+  have hmap : (algebraMap A (FractionRing A))
+      (120 * ∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i))
+      = 120 * ∑ i ∈ (range l).erase 0,
+          tateD2Xterm ((algebraMap A (FractionRing A)) ζ ^ i) := by
+    rw [map_mul, map_sum]
+    congr 1
+    · exact map_ofNat _ 120
+    · refine Finset.sum_congr rfl (fun i hi => ?_)
+      rw [map_tateD2Xterm _ (hu i hi), map_pow]
+  rw [hmap, map_sub, map_pow, map_natCast, map_one]
+  exact sum_mu_d2xterm_field hl (hζ.map_of_injective hinj)
+
+end Domain
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDYterm_eq_powers.src : ABC3.Meta.Source :=

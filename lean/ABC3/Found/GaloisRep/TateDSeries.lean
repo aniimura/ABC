@@ -218,6 +218,15 @@ theorem tateD2Xtail_eq [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
   rw [tateD2Xtail, key, adicSum_add _ _ h2 (tateDXtail_aux hq), adicSum_smul]
   rfl
 
+/-- ★★**`D²X` の尾の漸化式** `T(u) = D²f(qu) + T(qu)`。 -/
+theorem tateD2Xtail_rec [IsAdicComplete I R] (u q : R) (hq : q ∈ I) :
+    tateD2Xtail u q hq = tateD2Xterm (q * u) + tateD2Xtail (q * u) q hq := by
+  rw [tateD2Xtail, adicSum_shift]
+  congr 1
+  · norm_num
+  · exact adicSum_congr _ _
+      (fun n => by rw [show q ^ (n + 1 + 1) * u = q ^ (n + 1) * (q * u) by ring])
+
 /-- ★★★★★★**`D²X(u,q)`**——`w` 側の符号は 2 回反転して戻るので**足し算**である。 -/
 noncomputable def tateD2Xpair [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) : R :=
   (tateD2Xterm a + tateD2Xtail a q hq) + (tateD2Xterm w + tateD2Xtail w q hq)
