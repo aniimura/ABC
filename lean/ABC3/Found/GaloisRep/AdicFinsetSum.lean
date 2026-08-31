@@ -262,6 +262,65 @@ theorem sum_mu_tateXpair_eq [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.
     sum_mu_tateXterm_w hl hζ q hq, sum_mu_tateXtail_w hl hζ q hq, hcard]
   ring
 
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**`Y` 側の `w` の尾**。 -/
+theorem sum_mu_tateYtail_w [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateYtail (q * ζ ^ (i * (l - 1))) q hq
+      = adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+            ((d.choose 2 : ℕ) : R) * (q ^ d * ((if l ∣ d then (l : R) else 0) - 1)))
+          (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) := by
+  classical
+  rw [Finset.sum_congr rfl
+    (fun i _ => tateYtail_eq_divisorSum (q * ζ ^ (i * (l - 1))) q hq)]
+  rw [← adicSum_finsetSum ((range l).erase 0)
+      (fun i n => q ^ n * ∑ d ∈ n.divisors,
+        ((d.choose 2 : ℕ) : R) * (q * ζ ^ (i * (l - 1))) ^ d)
+      (fun i n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [← Finset.mul_sum]
+  congr 1
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun d _ => ?_)
+  have hexp : ∀ i : ℕ, ((d.choose 2 : ℕ) : R) * (q * ζ ^ (i * (l - 1))) ^ d
+      = (((d.choose 2 : ℕ) : R) * q ^ d) * (ζ ^ (i * (l - 1))) ^ d := by
+    intro i; rw [mul_pow]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), ← Finset.mul_sum,
+    sum_mu_neg_pow hl hζ d, mul_assoc]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ∈μ_l∖{1}} Y(ζ, q)` も定数項を除いて `ζ`-free**。 -/
+theorem sum_mu_tateYpair_eq [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
+    {ζ : R} (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0, tateYpair (ζ ^ i) (q * ζ ^ (i * (l - 1))) q hq
+      = (∑ i ∈ (range l).erase 0, tateYterm (ζ ^ i))
+        + adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+              ((d.choose 2 : ℕ) : R) * ((if l ∣ d then (l : R) else 0) - 1))
+            (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+        - adicSum (I := I)
+            (fun n => (n : R) * q ^ n * ((if l ∣ n then (l : R) else 0) - 1))
+            (fun n => Ideal.mul_mem_right _ _
+              (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)))
+        - adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+              (d : R) * (q ^ d * ((if l ∣ d then (l : R) else 0) - 1)))
+            (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+        - adicSum (I := I)
+            (fun n => ((n.choose 2 : ℕ) : R) * q ^ n * ((if l ∣ n then (l : R) else 0) - 1))
+            (fun n => Ideal.mul_mem_right _ _
+              (Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)))
+        - adicSum (I := I) (fun n => q ^ n * ∑ d ∈ n.divisors,
+              ((d.choose 2 : ℕ) : R) * (q ^ d * ((if l ∣ d then (l : R) else 0) - 1)))
+            (fun n => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n))
+        + ((l - 1 : ℕ) : R) * evalAdic (sigmaSeries 1) q hq := by
+  classical
+  have hcard : ((range l).erase 0).card = l - 1 := by
+    rw [Finset.card_erase_of_mem (Finset.mem_range.2 hl.pos), Finset.card_range]
+  rw [sum_mu_tateYpair q hq, sum_mu_tateYtail hl hζ q hq,
+    sum_mu_tateXterm_w hl hζ q hq, sum_mu_tateXtail_w hl hζ q hq,
+    sum_mu_tateYterm_w hl hζ q hq, sum_mu_tateYtail_w hl hζ q hq, hcard]
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def sum_mu_tateXtail.src : ABC3.Meta.Source :=
@@ -307,6 +366,16 @@ def sum_mu_tateYpair.src : ABC3.Meta.Source :=
 def sum_mu_tateXpair_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(∑_ζ X(ζ,q) は定数項を除いて ζ-free。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateYtail_w.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(w 側の Y の尾の μ_l 和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_tateYpair_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_ζ Y(ζ,q) は定数項を除いて ζ-free。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def adicSum_zero.src : ABC3.Meta.Source :=
