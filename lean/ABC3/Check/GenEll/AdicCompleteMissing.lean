@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Found.GaloisRep.DegInfTateParam
+import ABC3.Found.GaloisRep.AdicCompleteIntegers
 
 /-!
 # 界面の測定 —— **完備化の橋に欠けているのは `IsPrecomplete` 1 つだけ**（`Check`）
@@ -28,8 +29,8 @@ import ABC3.Found.GaloisRep.DegInfTateParam
 | `IsFractionRing R Lv` | ★ある |
 | `Algebra K Lv`・`CompleteSpace Lv` | ★ある |
 | `IsHausdorff (maximalIdeal R) R` | ★**ある** |
-| **`IsPrecomplete (maximalIdeal R) R`** | ☆☆☆**無い** |
-| `IsAdicComplete (maximalIdeal R) R` | ☆無い（上の 1 つが欠けているためだけ） |
+| **`IsPrecomplete (maximalIdeal R) R`** | ☆☆☆**無かった——★第 897 で作った** |
+| `IsAdicComplete (maximalIdeal R) R` | ☆無かった——★第 897 で作った |
 | `CompactSpace R`・`CompleteSpace R` | ☆無い |
 | `LocallyCompactSpace Lv`・`ValuativeRel Lv` | ☆無い（`IsNonarchimedeanLocalField` 経由は使えない） |
 
@@ -38,7 +39,17 @@ import ABC3.Found.GaloisRep.DegInfTateParam
     `IsPrecomplete (IsLocalRing.maximalIdeal (v.adicCompletionIntegers K))`
     `              (v.adicCompletionIntegers K)`
 
-## ☆道筋
+
+## ★★★★★★★★★★後日談（第 897）——**埋めた**
+
+`Found/GaloisRep/AdicCompleteIntegers.lean` で
+
+    `IsAdicComplete (maximalIdeal (v.adicCompletionIntegers K)) (v.adicCompletionIntegers K)`
+
+を**インスタンスとして作った**。上に書いた 3 段の道筋そのままである。
+★したがってこの測定は**閉じた**——本ファイルは記録として残す。
+
+## ☆道筋（第 896 時点の見立て。第 897 でそのとおりに進んだ）
 
 mathlib には `IsNonarchimedeanLocalField K` の下で `IsAdicComplete 𝓂[K] 𝒪[K]` がある
 （`NumberTheory/LocalField/Basic.lean`）が、`v.adicCompletion K` をそのクラスに
@@ -80,5 +91,11 @@ example (K : Type) [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) :
 /-- ★体の側は完備である（部分環の側が無いだけ）。 -/
 example (K : Type) [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) :
     CompleteSpace (v.adicCompletion K) := inferInstance
+
+
+/-- ★★★★★★★★★★**第 897 で埋めた**——今は合成できる。 -/
+example (K : Type) [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) :
+    IsAdicComplete (maximalIdeal (v.adicCompletionIntegers K))
+      (v.adicCompletionIntegers K) := inferInstance
 
 end ABC3.Check.GenEll
