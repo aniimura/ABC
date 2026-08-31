@@ -201,6 +201,77 @@ theorem sum_mu_veluW [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : l.Prime)
     exact veluW_tate_eq_muEval hl.pos hlu (hu i hi) hpow hsum q hq
   rw [Finset.sum_congr rfl hterm, sum_mu_muEval' hl hζ (veluWC l q) (veluWC_mem hq)]
 
+/-! ## ★★★★★★★★★★★★★★★★`veluVC`・`veluWC` の 2 つの量 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`veluVC` の全係数和**。 -/
+theorem sum_veluVC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
+    ∑ a ∈ range l, veluVC l q n a
+      = 3 * (∑ k ∈ range (n + 1), (∑ a ∈ range l, tateXC l q k a)
+              * ∑ b ∈ range l, tateXC l q (n - k) b)
+        + ((PowerSeries.coeff n tateA4 : ℤ) : R) * q ^ n
+        - ∑ a ∈ range l, tateYC l q n a := by
+  classical
+  simp only [veluVC]
+  rw [Finset.sum_sub_distrib, Finset.sum_add_distrib]
+  congr 1
+  congr 1
+  · rw [← Finset.mul_sum, sum_muConv hl]
+  · simp only [a4C]
+    rw [Finset.sum_eq_single 0]
+    · simp
+    · intro b _ hb
+      simp [hb]
+    · intro h
+      exact absurd (Finset.mem_range.2 hl) h
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`veluVC` の 0 次係数**。 -/
+theorem veluVC_zero {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
+    veluVC l q n 0
+      = 3 * (∑ k ∈ range (n + 1), ∑ a ∈ range l,
+              tateXC l q k a * tateXC l q (n - k) ((l - a) % l))
+        + ((PowerSeries.coeff n tateA4 : ℤ) : R) * q ^ n
+        - tateYC l q n 0 := by
+  classical
+  simp only [veluVC, a4C, muConv_zero hl]
+  norm_num
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`twoYplusXC` の 2 つの量**。 -/
+theorem sum_twoYplusXC {l : ℕ} (q : R) (n : ℕ) :
+    ∑ a ∈ range l, twoYplusXC l q n a
+      = 2 * (∑ a ∈ range l, tateYC l q n a) + ∑ a ∈ range l, tateXC l q n a := by
+  classical
+  simp only [twoYplusXC]
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum]
+
+theorem twoYplusXC_zero {l : ℕ} (q : R) (n : ℕ) :
+    twoYplusXC l q n 0 = 2 * tateYC l q n 0 + tateXC l q n 0 := rfl
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`veluWC` の全係数和**。 -/
+theorem sum_veluWC {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
+    ∑ a ∈ range l, veluWC l q n a
+      = (∑ k ∈ range (n + 1), (∑ a ∈ range l, twoYplusXC l q k a)
+            * ∑ b ∈ range l, twoYplusXC l q (n - k) b)
+        + 2 * (∑ k ∈ range (n + 1), (∑ a ∈ range l, veluVC l q k a)
+            * ∑ b ∈ range l, tateXC l q (n - k) b) := by
+  classical
+  simp only [veluWC]
+  rw [Finset.sum_add_distrib, sum_muConv hl, ← Finset.mul_sum, sum_muConv hl]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`veluWC` の 0 次係数**。 -/
+theorem veluWC_zero {l : ℕ} (hl : 0 < l) (q : R) (n : ℕ) :
+    veluWC l q n 0
+      = (∑ k ∈ range (n + 1), ∑ a ∈ range l,
+            twoYplusXC l q k a * twoYplusXC l q (n - k) ((l - a) % l))
+        + 2 * (∑ k ∈ range (n + 1), ∑ a ∈ range l,
+            veluVC l q k a * tateXC l q (n - k) ((l - a) % l)) := by
+  classical
+  simp only [veluWC, muConv_zero hl]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def twoYplusXC.src : ABC3.Meta.Source :=
@@ -236,6 +307,36 @@ def veluW_tate_eq_muEval.src : ABC3.Meta.Source :=
 def sum_mu_veluW.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(2w も有限個の係数の計算に落ちる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_veluVC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluVC の全係数和。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluVC_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluVC の 0 次係数。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_twoYplusXC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(twoYplusXC の全係数和。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def twoYplusXC_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(twoYplusXC の 0 次係数。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_veluWC.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluWC の全係数和。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluWC_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluWC の 0 次係数。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def a4C.src : ABC3.Meta.Source :=
