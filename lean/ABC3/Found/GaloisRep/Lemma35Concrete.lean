@@ -387,13 +387,19 @@ def hdag_of_velu.needs : List ABC3.Meta.ProofObligation :=
 theorem minDeltaExp_of_jExp_mul {L : Type} [Field L] [NumberField L]
     (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
     (hss : SemistableAt p E) (hss' : SemistableAt p E') (l : ℕ)
-    (hj : jExp p E' = (l : ℤ) * jExp p E) :
+    (hbad : jExp p E < 0 → jExp p E' = (l : ℤ) * jExp p E)
+    (hgood : 0 ≤ jExp p E → 0 ≤ jExp p E') :
     minDeltaExp p E' = (l : ℤ) * minDeltaExp p E := by
-  rw [minDeltaExp_eq_maxJ_of_semistable p E' hss', minDeltaExp_eq_maxJ_of_semistable p E hss,
-    hj, ← mul_neg, max_zero_mul _ (by positivity)]
+  rw [minDeltaExp_eq_maxJ_of_semistable p E' hss', minDeltaExp_eq_maxJ_of_semistable p E hss]
+  rcases lt_or_ge (jExp p E) 0 with h | h
+  · rw [hbad h, ← mul_neg, max_zero_mul _ (by positivity)]
+  · have hg := hgood h
+    have h1 : max 0 (-jExp p E') = 0 := max_eq_left (by omega)
+    have h2 : max 0 (-jExp p E) = 0 := max_eq_left (by omega)
+    rw [h1, h2, mul_zero]
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-**`Lemma 3.5`——残る入力は `v_p(j′) = l·v_p(j)` **だけ**である**。
+**`Lemma 3.5`——残る入力は**悪い素点での** `v_p(j′) = l·v_p(j)` **だけ**である**。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
@@ -404,7 +410,11 @@ theorem minDeltaExp_of_jExp_mul {L : Type} [Field L] [NumberField L]
 
 ☆残る 1 本は `Skeleton/GenEll/TateIsogeny.lean` の `tateModel_of_quot_mu`
 （`E_q/μ_l` は母数 `q^l` の Tate 曲線）である
-——Tate 曲線では `v_p(j) = −v_p(q)` なので、それがそのまま `v_p(j′) = l·v_p(j)` を与える。 -/
+——Tate 曲線では `v_p(j) = −v_p(q)` なので、それがそのまま `v_p(j′) = l·v_p(j)` を与える。
+
+☆良い還元の素点（`v_p(j) ≥ 0`）では `v_p(j′) ≥ 0` だけでよい
+——半安定なら `v_p(Δ_min) = max(0, −v_p(j))` なので両辺とも `0` になる。
+★ここを `v_p(j′) = l·v_p(j)` と書くのは**強すぎ**である（`v_p(j) > 0` のとき假になりうる）。 -/
 theorem lemma_3_5_velu_j (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
       [E.IsElliptic] [E'.IsElliptic] (l : ℕ), 0 < l →
@@ -420,15 +430,16 @@ theorem lemma_3_5_velu_j (eps : ℝ) (heps : 0 < eps) :
       (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
       (∀ p, SemistableAt p E) →
       (∀ p, SemistableAt p E') →
-      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E' = (l : ℤ) * jExp p E) →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → jExp p E' = (l : ℤ) * jExp p E) →
+      (∀ p : HeightOneSpectrum (𝓞 L), 0 ≤ jExp p E → 0 ≤ jExp p E') →
       (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
         ≤ htFaltOf L E + 2 * Real.log l + C := by
   obtain ⟨C, hC⟩ := lemma_3_5_velu eps heps
   refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint
-    hssE hssE' hj => ?_⟩
+    hssE hssE' hbad hgood => ?_⟩
   refine hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin hint hssE'
     (degInfOf_eq_of_local E E' l (fun p => ?_))
-  exact minDeltaExp_of_jExp_mul p E E' (hssE p) (hssE' p) l (hj p)
+  exact minDeltaExp_of_jExp_mul p E E' (hssE p) (hssE' p) l (hbad p) (hgood p)
 
 def minDeltaExp_of_jExp_mul.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -437,7 +448,7 @@ def minDeltaExp_of_jExp_mul.src : ABC3.Meta.Source :=
 
 def lemma_3_5_velu_j.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(残る入力は v_p(j′) = l·v_p(j) だけ——最終形)",
+    item := "Lemma 3.5(残る入力は悪い素点での v_p(j′) = l·v_p(j) だけ——最終形)",
     sectionId := "genell-lemma-3-5" }
 
 def lemma_3_5_velu_j.needs : List ABC3.Meta.ProofObligation :=
