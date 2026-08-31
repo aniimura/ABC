@@ -1046,6 +1046,7 @@ import ABC3.Found.GaloisRep.AdicCompleteValued
 import ABC3.Found.GaloisRep.AdicEvalNatural
 import ABC3.Found.GaloisRep.TateSpecialize
 import ABC3.Found.GaloisRep.TateVelu
+import ABC3.Found.GaloisRep.VeluTateDelta
 import ABC3.Found.GaloisRep.PrimeUnder
 import ABC3.Found.GaloisRep.TateDelta
 import ABC3.Found.GaloisRep.TateUnit
