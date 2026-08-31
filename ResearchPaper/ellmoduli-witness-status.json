@@ -215,5 +215,32 @@
       "★★`logDiffMell` は類の函数でなければならないので、Curve は定義体が類で決まるものに限らねばならない（第 749）——原文 Corollary 4.3 の仮説 MinimalField そのもの。",
       "★★`sum_log_ramPrimes_le` の係数 3 の内訳は 1（分岐素数）＋2（d 以下の素数、Chebyshev ＋ Hermite–Minkowski）である（第 750）。"
     ]
+  },
+  "interfaceFixes20260831": {
+    "_comment": "★★★★★★★★witness を実際に作ろうとして見つかった界面の欠陥と、その訂正（第 745・754-756）。",
+    "(1) deg∞ > 0 の強制": {
+      "測定": "Check/GenEll/EllModuliDegInfPos.lean（第 745）",
+      "内容": "§4 の帳簿 4 本（multCard_pos・multPrime_prime・localHt_pos・sum_localHt_eq）から、どの E : Curve に対しても deg∞(cls E) > 0 が出る。",
+      "対応": "Curve を DegCurve（半安定＋乗法還元）に制限した。原文の題 *Degenerating* そのもの。"
+    },
+    "(2) mem_lcyclicExc が l の下界を落としていた": {
+      "測定": "Check/GenEll/LcyclicExcTooStrong.lean（第 754）",
+      "内容": "l = 2 を取れば「2-同種をもち局所高さがすべて奇数の半安定曲線」が対象になり、無限個ある。Lemma 3.5 の (†) から ht^Falt の上界を出すには原文の条件 (a) が要る。",
+      "対応": "界面を lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass にし、mem_lcyclicExc に (condA ∨ cls E ∈ KV) を渡す（第 755）。★lemma_3_7・theorem_3_8・Corollary 4.3/4.4 の statement は 1 文字も変わっていない。"
+    },
+    "(3) GaloisFinite は「各次数で有限」": {
+      "内容": "GaloisFiniteJ := Set.Finite では lcyclicExc（ht^Falt が有界な類の集合）が作れない——次数を止めなければ無限集合である。原文の例外集合は Exc_d（次数 d を止めた形）。",
+      "対応": "GaloisFiniteJ S := ∀ d, (S ∩ degLeJ d).Finite（第 756）。"
+    },
+    "(4) CompactlyBounded は h∞(j) の有界性": {
+      "内容": "Bornology.IsBounded では足りない——アルキメデス素点の条件は「j のすべての共役が有界」であり、j 自身の有界性では共役が抑えられない。",
+      "対応": "CompactlyBoundedJ S := ∃ M, ∀ E : SSCurve, E.j ∈ S → htArchJ ≤ M（第 756）。"
+    }
+  },
+  "lemma37Progress20260831": {
+    "条件a": "★済 —— Found/GaloisRep/Lemma37C.lean の htFalt_le_of_condA（(†) を受ける）",
+    "条件b": "★済 —— Found/GaloisRep/Lemma37CondB.lean の htFalt_le_of_condB（§9-1183、第 757、(†) を受ける）。l ≥ 2 で 12l/14 − 1 ≥ 5l/14 を使い、l に依らない上界 |m|/5 + 28/5 + 1.4C′ を出す。",
+    "有限性": "★済 —— northcottJ（§9-1179、第 753、★無条件）と galoisFiniteJ_htFalt_le（第 756）",
+    "残り": "☆lcyclicExc 群に残るのは (a) Lemma 3.5 の (†)（葉 2 つ：jExp_velu_bad / jExp_velu_good）と (b) HasLCyclic の定義（Galois 表現の mod l 像の安定直線）である。"
   }
 }
