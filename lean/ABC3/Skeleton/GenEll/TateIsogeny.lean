@@ -101,12 +101,18 @@ def tateModel_of_quot_mu.needs : List ProofObligation :=
        "tateA6(q^l) = tateA6(q) − v − 7w（b₂ = 1）。" ++
        "v・w は μ_l の点にわたる Vélu の和であり、" ++
        "点の座標は tateXpair ζ (qζ⁻¹) q（Found/GaloisRep/TateOrigin.lean）") 15,
+    .citation "[ABC3]" "sum_mu_pow（μ_l 上の指標和——手順 2 は済んだ、2026-08-31、第 786）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_pow") 1,
     .implicitStep
-      ("★ζ について足すと ζ の指数が l の倍数の項だけ残る" ++
-       "——これが σₖ(q) → σₖ(q^l) を生む機構である") 15,
-    .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel(この結論の消費側、§9-1153)"
+      ("★★手順 3 の具体形（2026-08-31、第 786 で展開）: " ++
+       "Tate 曲線は a₁ = 1, a₂ = a₃ = 0 なので veluV2 = 3x² + a₄ − y、" ++
+       "veluU = (2y + x)²。ゆえに a₄ の式は " ++
+       "∑_{ζ≠1}(3x_ζ² − y_ζ) = s₃(q^l) − s₃(q) + 5(l−1)s₃(q) に同値であり、" ++
+       "a₆ の式は w = ∑_{ζ≠1}((2y_ζ+x_ζ)²/2 + (3x_ζ²+a₄−y_ζ)x_ζ) の式。" ++
+       "☆定数項には ∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)/12 が現れる") 12,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateModel（この結論の消費側、§9-1153）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateModel") 2,
-    .citation "[ABC3]" "tateXpair・tateYpair(μ_l の点の座標)"
+    .citation "[ABC3]" "tateXpair・tateYpair（μ_l の点の座標）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.tateXpair") 4 ]
 
 /-! ## ★★★★★★★★★★★★★★★★`Lemma 3.5` が直接消費する形（`j` の付値） -/
