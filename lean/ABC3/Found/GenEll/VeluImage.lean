@@ -211,7 +211,35 @@ theorem j_veluQuotientFull_variableChange {F : Type} [Field F]
   rw [hE']
   exact hVC.symm
 
+/-! ## ★★★★★★★★★★`veluCurve` の形での移行 -/
+
+/-- ★★★★★★★★★★**`veluCurve` の `j` は変数変換先で計算しても同じ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 915 は `veluQuotientFull`（点集合の形）だったが、
+捧りを使うと商は `veluCurve` の形で出てくる（第 925）。
+☆こちらが**非分裂の場合に使える形**である。
+
+☆`v` は重み 4、`w` は重み 6（ただし `r` の分だけ `w − r·v` にずれる）。 -/
+theorem j_veluCurve_variableChange {F : Type} [Field F]
+    (C : WeierstrassCurve.VariableChange F) (W E' : WeierstrassCurve F) (v w : F)
+    (hE' : E' = veluCurve W v w) [E'.IsElliptic]
+    [(veluCurve (C • W) (((C.u⁻¹ : Fˣ) : F) ^ 4 * v)
+      (((C.u⁻¹ : Fˣ) : F) ^ 6 * (w - C.r * v))).IsElliptic] :
+    E'.j = (veluCurve (C • W) (((C.u⁻¹ : Fˣ) : F) ^ 4 * v)
+      (((C.u⁻¹ : Fˣ) : F) ^ 6 * (w - C.r * v))).j := by
+  refine ABC3.Found.GenEll.j_eq_of_smul_eq C E' _ ?_
+  rw [hE']
+  exact (veluCurve_variableChange C W v w).symm
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def j_veluCurve_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(veluCurve の j は変数変換先で計算しても同じ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def j_veluQuotientFull_variableChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
