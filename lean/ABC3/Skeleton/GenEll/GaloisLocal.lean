@@ -112,8 +112,19 @@ def cyclotomic_det_surjective.needs : List ProofObligation :=
     .implicitStep
       ("★★L の上で cyclotomic (l^n) が既約であること。" ++
        "l が L で不分岐かつ ℚ(ζ_{l^n})/ℚ が l で完全分岐なので L ∩ ℚ(ζ_{l^n}) = ℚ") 8,
-    .citation "[mathlib]" "「p は ℚ(ζ_{p^n}) で完全分岐する」——円分体の分岐理論"
-      (.absent "mathlib/NumberTheory を 'totally ramified|IsTotallyRamified|totallyRamified' で grep して 0 件(2026-08-31)") 6,
+    .citation "[mathlib]" "IsCyclotomicExtension.discr_prime_pow_eq_unit_mul_pow(disc ℚ(ζ_{p^k}) = 単元 × p^m)"
+      (.inMathlib "IsCyclotomicExtension.discr_prime_pow_eq_unit_mul_pow") 2,
+    .citation "[mathlib]" "NumberField.finrank_eq_one_of_unramified(至る所不分岐な数体は ℚ)"
+      (.inMathlib "NumberField.finrank_eq_one_of_unramified") 2,
+    .citation "[mathlib]" "NumberField.not_dvd_discr_iff_forall_mem(q ∤ disc ⇔ q の上で不分岐)"
+      (.inMathlib "NumberField.not_dvd_discr_iff_forall_mem") 2,
+    .implicitStep
+      ("★★測定(2026-08-31、第 779): 葉 4 の議論は mathlib の 3 つで組める。" ++
+       "F ≔ L ∩ ℚ(ζ_{l^n}) と置くと、q ≠ l が F で分岐すれば ℚ(ζ) でも分岐し disc が l 冪なので矛盾、" ++
+       "q = l が F で分岐すれば L でも分岐し仮説に矛盾。" ++
+       "ゆえに F は至る所不分岐で F = ℚ。" ++
+       "☆要る配管は (i) 分岐の塔の乗法性(F ⊆ M で不分岐は降りる)と " ++
+       "(ii) Galois 拡大の線型無関連 [L(ζ):L] = [ℚ(ζ):F]") 6,
     .implicitStep
       ("★★★逆極限の段は**済んだ**(2026-08-31、第 773): " ++
        "Found/GenEll/DetCycloChar.lean の cyclotomicCharacter_surjective_of_mod が " ++
