@@ -377,6 +377,7 @@ import ABC3.Found.GenEll.IsogenyPeriodPair
 import ABC3.Found.GenEll.ArchInvCovolume
 import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.VeluImage
+import ABC3.Found.GenEll.VeluPointSet
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar
