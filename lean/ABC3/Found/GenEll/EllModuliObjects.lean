@@ -603,29 +603,48 @@ end DegCurve
 原文 (GenEll p.18):
 > Lemma 3.7. (Finite Exceptional Sets) Let
 
-★原文の Galois-finite（`Example 1.3, (i)`）は「有限個の Galois 軌道の合併」であり、
-代数的数の Galois 軌道は有限なので**集合として有限**である。
-☆逆は成り立たない（有限集合が Galois 安定とは限らない）ので、
-これは原文より**弱い**述語である——`GaloisFinite` は結論の側に現れるので、
-弱い方を取ると主張が強くなる。 -/
-def GaloisFiniteJ (S : Set ℂ) : Prop := S.Finite
+## ★★★★★2026-08-31 の訂正（第 756）
+
+☆以前ここは `GaloisFiniteJ S := S.Finite` としていたが、**それでは `lcyclicExc` が作れない**。
+`lcyclicExc` は「`ht^Falt` が有界な類の集合」であり、**次数を止めなければ無限集合**である。
+
+★原文の `Lemma 3.7` の例外集合は `Exc_d`——**次数 `d` を止めた形**である
+（`Found/GaloisRep/Lemma37C.lean` の `finite_j_of_condA` も `d` を受け取る）。
+★★そこで「各 `d` について `S ∩ M_ell(ℚ̄)^{≤d}` が有限」を `GaloisFinite` の内容とする。
+
+☆原文の Galois-finite（有限個の Galois 軌道の合併）はこれより**強い**——逸脱として記録する。 -/
+def GaloisFiniteJ (S : Set ℂ) : Prop := ∀ d : ℕ, (S ∩ degLeJ d).Finite
 
 /-- ★★**`galoisFinite_union` 欄**。 -/
 theorem galoisFiniteJ_union (S T : Set ℂ) (hS : GaloisFiniteJ S) (hT : GaloisFiniteJ T) :
-    GaloisFiniteJ (S ∪ T) := hS.union hT
+    GaloisFiniteJ (S ∪ T) := by
+  intro d
+  rw [Set.union_inter_distrib_right]
+  exact (hS d).union (hT d)
 
-/-- ★★★**`CompactlyBounded` 欄**——アルキメデス素点での有界性。
+theorem galoisFiniteJ_empty : GaloisFiniteJ (∅ : Set ℂ) := by
+  intro d
+  simp
+
+/-- ★★★★**`CompactlyBounded` 欄**——アルキメデス側の高さが有界であること。
 
 原文 (GenEll p.18):
 > Lemma 3.7. (Finite Exceptional Sets) Let
 
 ★原文の compactly bounded（`Example 1.3, (ii)`）は有限個の素点 `V` と
-そこでのコンパクト集合 `K_v` で押さえることだが、`EllClass := ℂ` の下では
-アルキメデス素点の条件が `j` の有界性である。 -/
-def CompactlyBoundedJ (S : Set ℂ) : Prop := Bornology.IsBounded S
+そこでのコンパクト集合 `K_v` で押さえることである。
+★★`EllClass := ℂ` の下でアルキメデス素点の条件が言っているのは
+「`j` の**すべての共役**が有界」——すなわち `h_∞(j)` が有界——ということなので、
+それを直接述語にする。
+
+☆`j` そのものの有界性（`Bornology.IsBounded`）では**足りない**
+——共役は有界にならないからである。 -/
+def CompactlyBoundedJ (S : Set ℂ) : Prop :=
+  ∃ M : ℝ, ∀ E : SSCurve, E.j ∈ S → htArchJ E.fld E.W ≤ M
 
 /-- ★**`compactlyBounded_empty` 欄**。 -/
-theorem compactlyBoundedJ_empty : CompactlyBoundedJ (∅ : Set ℂ) := Bornology.isBounded_empty
+theorem compactlyBoundedJ_empty : CompactlyBoundedJ (∅ : Set ℂ) :=
+  ⟨0, fun _ h => absurd h (Set.notMem_empty _)⟩
 
 /-! ## ★★★★★★★★★★★★★★`noMultRedExc` 群——`DegCurve` なら自明 -/
 
@@ -642,7 +661,7 @@ theorem compactlyBoundedJ_empty : CompactlyBoundedJ (∅ : Set ℂ) := Bornology
 def noMultRedExcJ (_ : Set ℂ) : Set ℂ := ∅
 
 theorem galoisFiniteJ_noMultRedExcJ (KV : Set ℂ) (_ : CompactlyBoundedJ KV) :
-    GaloisFiniteJ (noMultRedExcJ KV) := Set.finite_empty
+    GaloisFiniteJ (noMultRedExcJ KV) := galoisFiniteJ_empty
 
 theorem mem_noMultRedExcJ (KV : Set ℂ) (E : DegCurve) (_ : E.j ∈ KV)
     (h : ¬ E.toSSCurve.HasMultRed) : E.j ∈ noMultRedExcJ KV :=
@@ -689,6 +708,17 @@ theorem northcottJ (C : ℝ) (d : ℕ) :
   · show ((E.W.j : E.K) : ℂ) = x
     rw [← hEj]
     rfl
+
+
+/-- ★★★★★★★★**`ht^Falt` が有界な集合は `GaloisFinite`**——★**無条件**。
+
+★`northcottJ`（`§9-1179`、第 753）そのものである。
+★★これが `galoisFinite_lcyclicExc` 欄の中身になる。 -/
+theorem galoisFiniteJ_htFalt_le (B : ℝ) : GaloisFiniteJ {x : ℂ | faltingsHeightJ x ≤ B} := by
+  intro d
+  refine (northcottJ B d).subset ?_
+  rintro x ⟨hB, hd⟩
+  exact ⟨hd, hB⟩
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★★★`Curve` 欄は「実現される類」である -/
 
