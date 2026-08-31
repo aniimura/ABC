@@ -5,6 +5,8 @@ import ABC3.Found.GaloisRep.GalRep
 import ABC3.Found.GaloisRep.TranslateEquiv
 import ABC3.Interface.GaloisRep.Torsion
 import Mathlib.FieldTheory.KrullTopology
+import Mathlib.Topology.Instances.Matrix
+import Mathlib.Topology.Algebra.Group.Matrix
 import ABC3.Found.GaloisRep.TateLevel
 import ABC3.Found.GaloisRep.PadicLinear
 import ABC3.Meta.Claim
@@ -266,7 +268,43 @@ theorem galMat_entry_continuous [Algebra.IsAlgebraic K L]
     _ = ((l : ℝ)⁻¹) ^ n := by rw [zpow_neg, zpow_natCast, inv_pow]
     _ < ε := hn
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★到達点——`galRep` は連続 -/
+
+/-- ★★★★★★★★★★★★`galMat` は連続。 -/
+theorem galMat_continuous [Algebra.IsAlgebraic K L]
+    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l]))
+    (hfin : ∀ n : ℕ,
+      (torsionPoints (W.baseChange L) (l ^ n) : Set ((W.baseChange L).toAffine.Point)).Finite) :
+    Continuous (fun σ : L ≃ₐ[K] L => galMat W l e σ) :=
+  continuous_matrix (fun i j => galMat_entry_continuous W l e i j hfin)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`galRep` は連続**——★**無条件**（捩れの有限性を仮説として受けた形）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★★これで `Theorem 3.8` の**位相の側（葉 5）が閉じた**。
+`Found/GenEll/GalRepClosed.lean` の `galRep_range_isClosed_of_continuous`（`§9-1191`、第 765）
+に渡せば像が閉部分群であることが出る。 -/
+theorem galRep_continuous [Algebra.IsAlgebraic K L]
+    (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l]))
+    (hfin : ∀ n : ℕ,
+      (torsionPoints (W.baseChange L) (l ^ n) : Set ((W.baseChange L).toAffine.Point)).Finite) :
+    Continuous (galRep W l e) := by
+  rw [Units.continuous_iff]
+  constructor
+  · exact galMat_continuous W l e hfin
+  · exact (galMat_continuous W l e hfin).comp continuous_inv
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def galRep_continuous.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(galRep は連続——捩れの有限性を受けた形)",
+    sectionId := "genell-thm-3-8" }
 
 def galMat_entry_continuous.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
