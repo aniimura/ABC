@@ -234,7 +234,7 @@ theorem isMuAtBadPrimes_of_veluQuotient {L : Type} [Field L] [NumberField L]
     (hE' : E' = veluQuotientFull E (((Finset.range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q))))
     (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
-    (hcop : True) :
+    (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
     IsMuAtBadPrimes E E' l := by
   sorry
 
@@ -259,22 +259,23 @@ def isMuAtBadPrimes_of_veluQuotient.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_nonsplit") 1,
     .citation "[ABC3]" "isAdicComplete_adicCompletionIntegers(完備化の台、第 897、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adicCompletionIntegers") 1,
+    .citation "[ABC3]" "tateParam_quot_velu_of_torsion(局所の段そのもの、第 948、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_of_torsion") 1,
+    .citation "[ABC3]" "tateParamR_map(Tate 母数は拡大で変わらない、第 944、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParamR_map") 1,
+    .citation "[ABC3]" "exists_mu_point_dvr(有理点なら Galois は不要、第 946、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_mu_point_dvr") 1,
     .implicitStep
-      ("★★★★**2026-09-01（第 941-942）の測定**——" ++
-       "局所の数学の部品はすべて揃っているが、" ++
-       "組み立てには**もう 1 層**が要る。" ++
-       "☆`lemma_3_2_i_tate_all`（第 906 が使う）は `K ⊆ L`（`IsGalois K L`）を受けている" ++
-       "——`μ_l` や `l`-捉れ点は完備化 `Lv` の中にとは限らないからである。" ++
-       "★したがって `Lv` の有限 Galois 拡大 `L′` とその整数環を立て、" ++
-       "そこで `IsAdicComplete`（第 897 と同じ 3 段）を取り、" ++
-       "`Δ_min` が拡大でどう変わるか（分岐指数）を扱う層が別に要る") 8,
+      ("★★★★**2026-09-01（第 944-948）の測定**——**体論的な障害はすべて落ちた**。" ++
+       "☆第 943 で挙げた 3 層は、(A) 拡大を立てる→第 945（Q が有理なので ζ は降りる）、" ++
+       "(B) 分岐指数→第 944（Tate 母数の段で降ろす）、" ++
+       "(C) Vélu の降下→第 945（H の点ははじめから有理）で消えた。" ++
+       "★Galois そのものも第 946 で消え、第 948 が局所の段を 1 つの定理にまとめた。") 2,
     .implicitStep
-      ("☆hcop : True は「l が局所高さと互いに素」（原文の仮定）を型に書く段") 3,
+      ("☆(D2) H = ⟨Q⟩ の点集合を pointCoords の水準で Tate モデルの側に揃える段。" ++
+       "変数変換分は j_veluCurve_variableChange（第 926）で移す") 3,
     .implicitStep
-      ("☆逆差の記録: 本プロジェクトの `lemma_3_5_velu` 系は " ++
-       "`Q : E.toAffine.Point`（`L`-有理な点）で `H` を与えているが、" ++
-       "原文の `H_F` は部分群スキームであり点が有理とは限らない。" ++
-       "★Vélu の商の式は対称式なので係数は `L` に落ちるが、" ++
-       "その降下を型で書く段が別に要る") 5 ]
+      ("☆(D3) 各悪い素点で 948 → 904 → 903 と流す段。" ++
+       "非分裂は 938/925/940/926/929 で捧りに移してから同じ連鎖を当てる") 3 ]
 
 end ABC3.Skeleton.GenEll

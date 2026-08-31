@@ -9,6 +9,7 @@ import ABC3.Found.GaloisRep.TateVeluMu
 import ABC3.Found.GaloisRep.TateSetupDvr
 import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.DegInfTateParam
+import ABC3.Found.GenEll.MuPrimitiveRoot
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
@@ -949,5 +950,78 @@ def jExp_velu_good.needs : List ProofObligation :=
        ++ "☆(b) p ∣ l のときは有限平坦群スキームか Tate 曲線が要る") 4,
     .citation "[ABC3]" "jExp_velu_bad（対偶側へ適用する、第 827 の帰着）"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.jExp_velu_bad") 1 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 947 と 927 を繋ぐ——`ζ` を消す -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 有理な `l`-捉れ点だけで
+`q_{E′} = q_E^l`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 948）**——`tateParam_quot_velu_dvr`（第 927）は
+`ζ`・`uζ`・`hζ`・`hζu`・`hζl`・`hord` の 6 つを受けていた。
+☆本定理はそれを `exists_primitiveRoot_of_torsion_point`（第 947）で埋め、
+
+    **`P` が位数 `l` の点で、`l ∤ v(q)`**
+
+だけに置き換える。★`ζ` はもはや引数に現れない——
+Vélu の帳簿（`hu`・`hv`・`hw`）だけが `ζ` について全称で残る。
+
+☆これが `isMuAtBadPrimes_of_veluQuotient` の局所の段そのものである。 -/
+theorem tateParam_quot_velu_of_torsion {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hΔ : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := K) q hq hq0).v
+      (mkTateSetup (K := K) q hq hq0).Q))
+    (hlu : IsUnit ((l : R)))
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
+    (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
+    (v w : R)
+    (hu : ∀ ζ : R, IsPrimitiveRoot ζ l → ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (hv : ∀ ζ : R, IsPrimitiveRoot ζ l →
+      v = ∑ i ∈ (range l).erase 0,
+        veluV2 (tateCurveAt q hq)
+          (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : ∀ ζ : R, IsPrimitiveRoot ζ l →
+      2 * w = ∑ i ∈ (range l).erase 0,
+        (veluU (tateCurveAt q hq)
+            (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          + 2 * (veluV2 (tateCurveAt q hq)
+                  (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    (P : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Point)
+    (hP : l • P = 0) (hP0 : P ≠ 0)
+    (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
+    (hsplit : W'.HasSplitMultiplicativeReduction R)
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (hW' : W' = veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))) :
+    tateParamR W' hsplit = q ^ l := by
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    exists_primitiveRoot_of_torsion_point q hq hq0 hΔ hl hcop P hP hP0
+  refine tateParam_quot_velu_dvr q hq hq0 hΔ hl hζ hlu (hu ζ hζ) uζ hζu hζl hord hql
+    h2 h2K hodd v w (hv ζ hζ) (hw ζ hζ) W' hsplit ?_
+  rw [hW', hPz]
+  rfl
+
+def tateParam_quot_velu_of_torsion.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(有理な l-捉れ点だけで q_{E′} = q_E^l)",
+    sectionId := "genell-lemma-3-5" }
+
+def tateParam_quot_velu_of_torsion.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_primitiveRoot_of_torsion_point(ζ を作る、第 947、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point") 1,
+    .citation "[ABC3]" "tateParam_quot_velu_dvr(Vélu の商の Tate 母数、第 927、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_dvr") 1 ]
 
 end ABC3.Skeleton.GenEll

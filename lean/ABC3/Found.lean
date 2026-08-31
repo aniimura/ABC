@@ -1058,6 +1058,7 @@ import ABC3.Found.GenEll.Lemma32Tate
 import ABC3.Found.GenEll.Lemma32MuLine
 import ABC3.Found.GenEll.MuDescend
 import ABC3.Found.GenEll.MuRational
+import ABC3.Found.GenEll.MuPrimitiveRoot
 import ABC3.Found.GenEll.Lemma32QuotMu
 import ABC3.Found.GaloisRep.AdicSeries
 import ABC3.Found.GaloisRep.DualAdic
