@@ -292,6 +292,48 @@ theorem tateXterm_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
   · intro h
     exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
 
+/-! ## ★★★★★★★★★★★★定数（`q`-次数 0）の項 -/
+
+/-- ★★★★★★**0 次に集中した `I` 進和はその項そのもの**。 -/
+theorem adicSum_concentrated [IsAdicComplete I R] (c : R) :
+    adicSum (I := I) (fun n => if n = 0 then c else 0)
+        (fun n => by
+          by_cases h : n = 0
+          · simpa [h] using Submodule.mem_top (x := c)
+          · simpa [h] using Submodule.zero_mem (I ^ n)) = c := by
+  refine adicSum_unique _ _ _ (fun n => ?_)
+  cases n with
+  | zero =>
+      simp only [partialSum, Finset.range_zero, Finset.sum_empty]
+      rw [SModEq.sub_mem]
+      simpa using Submodule.mem_top (x := (0 : R) - c)
+  | succ m =>
+      have hps : partialSum (fun n => if n = 0 then c else 0) (m + 1) = c := by
+        simp only [partialSum]
+        rw [Finset.sum_eq_single 0]
+        · simp
+        · intro b _ hb
+          simp [hb]
+        · intro h
+          exact absurd (Finset.mem_range.2 (Nat.succ_pos m)) h
+      rw [hps]
+
+/-- ★★★★★★★★★★★★★★**`ζ` の多項式は μ-等級付き（`q`-次数 0）**。 -/
+theorem muEval_const [IsAdicComplete I R] {l : ℕ} (c : ℕ → R) (z : R) :
+    ∑ a ∈ range l, c a * z ^ a
+      = muEval (I := I) l (fun n a => if n = 0 then c a else 0)
+          (fun n a => by
+            by_cases h : n = 0
+            · simpa [h] using Submodule.mem_top (x := c a)
+            · simpa [h] using Submodule.zero_mem (I ^ n)) z := by
+  classical
+  simp only [muEval]
+  rw [← adicSum_concentrated (I := I) (∑ a ∈ range l, c a * z ^ a)]
+  refine adicSum_congr _ _ (fun n => ?_)
+  by_cases h : n = 0
+  · simp [h]
+  · simp [h]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -342,6 +384,16 @@ def tateYtail_eq_muEval.src : ABC3.Meta.Source :=
 def tateXterm_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(tateXterm(q·z^m) は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def adicSum_concentrated.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(0 次に集中した I 進和はその項。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def muEval_const.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ の多項式は μ-等級付き。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
