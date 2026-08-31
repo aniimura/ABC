@@ -2482,3 +2482,29 @@ example ... : IsFractionRing (p.adicCompletionIntegers L) (p.adicCompletion L) :
 
 ★`Algebra` のようにデータを持つクラスは `noncomputable example` にすること
 （`UniformSpace.Completion.instField` 等が noncomputable なので）。
+
+## `omit` / `open ... in` は docstring の**前**に置く（2026-09-01、第 932・940）
+
+宣言修飾子（`omit [C] in`、`open scoped Classical in`、`set_option ... in`）を
+docstring と宣言のあいだに挟むと
+
+```
+error: unexpected token 'omit'; expected 'lemma'
+```
+
+になる。docstring は宣言の**直前**でなければならない。
+
+```lean
+-- ★正しい
+omit [CharZero K] in
+/-- ★説明 -/
+theorem foo : ... := ...
+
+-- ✗ 落ちる
+/-- ★説明 -/
+omit [CharZero K] in
+theorem foo : ... := ...
+```
+
+☆`section variable` に入れた不要なインスタンスは、この `omit` で個別に外す。
+★`variable` を分けるより、`omit` 1 行のほうが差分が小さい。
