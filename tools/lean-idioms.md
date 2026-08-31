@@ -2240,3 +2240,16 @@ grep してから書く**。今回は `neronExp` だけ grep して周辺の補�
 3 乗なら `(uu⁻¹)² + uu⁻¹ + 1` が係数になる。
 ☆逆に `variableChange_a*` は `u⁻¹` **だけ**で書かれているので、そこは素の `ring` で閉じる。
 
+
+## 在庫: `IsDedekindDomain.HeightOneSpectrum.under` は mathlib にある
+
+**失敗形**: `P ∩ 𝓞L` を `HeightOneSpectrum` として作る定義を自分で書いた。
+
+**実際**: `Mathlib/RingTheory/DedekindDomain/Ideal/Lemmas.lean` に
+`IsDedekindDomain.HeightOneSpectrum.under (A) (w : HeightOneSpectrum B) : HeightOneSpectrum A`
+がある(`@[simps]` 付き)。`HeightOneSpectrum.comap` が全射環準同型限定なのに気を取られて
+`under` を見落とした。
+
+**直し方**: `decl-index.txt` を `HeightOneSpectrum` で grep するとき、`comap` だけでなく
+`under`・`over`・`liesOver` も見る。イデアルの contraction は mathlib では `Ideal.under`
+という名前である(`comap` ではない)。
