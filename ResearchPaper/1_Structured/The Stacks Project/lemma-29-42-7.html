@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[Stacks] Lemma 29.42.7 — 底の上で固有な射は分離的な相手への閉埋め込み</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .scr { font-style: italic; }
+ .bb { font-weight: bold; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[Stacks] Lemma 29.42.7（tag <code>01W6</code>）</h1>
+
+<p>The Stacks Project、Chapter 29 Morphisms of Schemes、§29.42 Proper morphisms。
+物理 p.2520。<strong>150 dpi 目視確認 2026-08-27</strong>。</p>
+
+<section class="statement lemma"
+         id="stacks-lemma-29-42-7"
+         data-paper="Stacks"
+         data-pdf-page="2520"
+         data-item="Lemma 29.42.7"
+         data-notation-checked="2026-08-27">
+<div class="verbatim">(2) If X is proper over S, then the morphism X &rarr; Y is proper. In particular, in both cases the image of X in Y is closed.</div>
+<div class="reading">
+<p>可換三角形 <code>X → Y → S</code>（<code>X → S</code> が合成）で <code>Y</code> が <code>S</code> 上分離的なとき:</p>
+<ul>
+<li>(1) <code>X → S</code> が普遍閉なら <code>X → Y</code> も普遍閉。</li>
+<li>(2) <code>X</code> が <code>S</code> 上固有なら <code>X → Y</code> も固有。</li>
+<li>いずれの場合も <code>X</code> の <code>Y</code> における像は<strong>閉</strong>。</li>
+</ul>
+
+<p>★原文の証明は <code>X → X ×<sub>S</sub> Y → Y</code> と分解する。
+第 1 射はグラフだから閉埋め込み（Schemes, Lemma 26.21.10）、
+第 2 射は普遍閉（resp. 固有）の底変換（Lemma 29.42.5）。</p>
+
+<p>★★★<strong>これが [GenEll] Proposition 1.4, (iv) の「埋め込み」の段の後半である</strong>
+——<code>X<sub>ℚ</sub></code> が <code>ℚ</code> 上固有で <code>ℙⁿ<sub>ℚ</sub></code> が <code>ℚ</code> 上分離的だから、
+<code>i : X<sub>ℚ</sub> → ℙⁿ<sub>ℚ</sub></code>（Lemma 29.40.4 が与える immersion）は
+<strong>閉</strong>埋め込みになる。</p>
+
+<p class="open">★★★★<strong>この段は mathlib で完全に書ける</strong>（2026-08-27 実測）。
+<code>IsProper.of_comp</code>（<code>Mathlib/AlgebraicGeometry/Morphisms/Proper.lean</code>）が
+本補題 (2) そのものであり、<code>UniversallyClosed.of_comp_of_isSeparated</code> が (1) である。
+★あとは <code>IsImmersion</code> ＋ 普遍閉 ⟹ <code>IsClosedImmersion</code> を
+<code>IsClosedImmersion.of_isPreimmersion</code> ＋ <code>Scheme.Hom.isClosedMap</code> で結ぶだけ。
+★★<code>Found/Stacks/ProperImmersion.lean</code> に <code>sorry</code> 無しで置いた。</p>
+</div>
+</section>
+
+<h2>★★★★★記法の実測——ここで実害が出た（2026-08-27）</h2>
+
+<p class="open">★★★★★<strong><code>0_Source/Stacks Project (book, complete).txt</code> は
+<code>-enc UTF-8</code> なしで作られており、<code>&rarr;</code> ・ <code>&ge;</code> ・ <code>&gt;&gt;</code>（<code>\gg</code>）・
+<code>&otimes;</code> がすべて空白に落ちている。</strong>
+そのため Lemma 29.40.4 の (3)（<code>d &ge; 1</code>）と (4)（<code>d &gt;&gt; 1</code>）が
+どちらも「<code>d  1</code>」に見え、
+★★<strong>「ある <code>d</code>」と「十分大きい全ての <code>d</code>」を実際に読み違えた</strong>。</p>
+
+<p class="open">★★★<strong>しかしこれは <code>pdftotext</code> の限界ではなかった。</strong>
+<code>tools/check.mjs</code> が実際に引く <code>pdftotext -enc UTF-8 -f N -l N</code> は
+<code>&rarr;</code> ・ <code>&ge;</code> ・ <code>&gt;&gt;</code> ・ <code>&otimes;</code> を<strong>そのまま出力する</strong>（実測済み）。
+★落ちていたのは<strong>既存の <code>.txt</code> の側</strong>である。</p>
+
+<p class="open">★★★★★<strong>規約として引き出すこと:
+<code>0_Source/*.txt</code> は<strong>探索にだけ</strong>使い、
+逐語は必ず <code>pdftotext -enc UTF-8 -f N -l N</code> で取り直す。</strong>
+★★目視（150 dpi）はそれとは別の検査であり、どちらも他方を代替しない
+——README §4 の「S4 が通っても装飾の正しさは目視だけが担保する」と同じ構造である。</p>
+
+<p>★実際に確認した導出（150 dpi 目視 p.2516 / p.2517 / p.2520）:
+スクリプト体 <code>&#8466;</code> は <code>L</code>、<code>&#119978;<sub>X</sub></code> は <code>OX</code>、
+<code>P<sup>n</sup><sub>S</sub></code> は <code>PnS</code>（添字が並ぶ）となる。
+★★可換図式は <code>X</code> / <code>GY</code> / <code>1 S</code> のような無意味な断片になるので、
+<strong>図式を含む行は逐語に使えない</strong>。</p>
+
+<h2>★★★★★★これが依存グラフのどこに入るか</h2>
+
+<pre>
+[Stacks] Lemma 29.40.4  (ample ⟹ ℙⁿ_S への immersion)   ← まだ塞がり(可逆層が mathlib に無い)
+        ⟶ [Stacks] Lemma 29.42.7  (固有 ⟹ 閉埋め込み)   ← ★本節点。Found で閉じた
+        ⟶ 閉埋め込みは mono ⟹ T-点が単射
+        ⟶ [ABC3] northcott_of_projModel の hinj
+        ⟶ [GenEll] Proposition 1.4, (iv)
+</pre>
+
+</body>
+</html>

@@ -15,7 +15,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Definition 1.2",
@@ -25,7 +25,7 @@
     "IUTchI",
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Example 1.3",
@@ -34,7 +34,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 1.4",
@@ -43,14 +43,14 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 1.4.1",
    "page": 8,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Definition 1.5",
@@ -59,28 +59,28 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 1.5.1",
    "page": 8,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 1.6",
    "page": 9,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 1.7",
    "page": 9,
    "section": "1",
    "citedBy": [],
-   "done": false
+   "done": true
   },
   {
    "item": "Theorem 2.1",
@@ -116,7 +116,7 @@
     "IUTchI",
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Remark 3.3.1",
@@ -125,7 +125,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Proposition 3.4",
@@ -134,7 +134,7 @@
    "citedBy": [
     "IUTchIV"
    ],
-   "done": false
+   "done": true
   },
   {
    "item": "Lemma 3.5",
@@ -213,5 +213,5 @@
   }
  ],
  "total": 24,
- "done": 5
+ "done": 17
 }

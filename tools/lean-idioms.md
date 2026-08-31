@@ -792,6 +792,54 @@ exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
 ★Python 3 の str はサロゲート対を結合しないので、UTF-8 への書き出しで必ず失敗する。
 ★★別の道: その文字を変数に入れて連結する(`D = u"\U0001D49F"` を `+` で繋ぐ)。
 
+★★★2026-08-28 追記: **8 桁形式でも「どの O か」を間違える**。
+本プロジェクトの整数環は U+1D4DE(𝓞 = MATHEMATICAL BOLD SCRIPT CAPITAL O)であって
+U+1D4AA(𝒪 = MATHEMATICAL SCRIPT CAPITAL O)ではない。
+★見た目がほぼ同じなので、書いた直後の目視では気づかない。
+★★**エスケープを書かず、ファイルから既存の行をコピーする**のが確実。
+やむを得ず書いたら書いた後に grep で誤った方の字を数え、0 を確認する
+(ビルドは「Unknown identifier」で捕まえてくれるが、docstring に混ざると気づかない)。
+
+
+## `Module.IsTorsionBySet.module` の SMul は diamond を作る(2026-08-28)
+
+失敗形: `M` が `I` で消えることから `Module (R ⧸ I) M` を作り
+(`htor.module`)、`Module.Finite.of_restrictScalars_finite` に渡そうとしたら
+
+    failed to synthesize IsScalarTower R (R ⧸ I) M
+
+文脈に `IsScalarTower` が**あるのに**拾わない。
+
+原因: `Module.IsTorsionBySet` が作る `SMul` に 2 つの経路がある。
+
+  ・`htor.hasSMul`                            ← `mk_smul` 補題が使う形
+  ・`DistribMulAction.toDistribSMul.toSMul`    ← `htor.module` を instance にした後に
+                                                 `•` が解決される形
+
+★ defeq だが**形が違う**ので、`rw [htor.mk_smul]` が
+「Did not find an occurrence」で落ちる。
+同じ理由で `htor.isScalarTower` が作るインスタンスも
+(`Submodule.Quotient.instSMul'` ベース)、`of_restrictScalars_finite` が要求する
+(`instSMul` ベース)と別物になる。
+
+★★見分け方: エラー本文に `@instHSMul … htor.hasSMul` と
+`@instHSMul … DistribMulAction.toDistribSMul.toSMul` が**並んで出る**。
+
+★★★**直し方(2026-08-28 解決): `haveI` ではなく `letI` を使う**。
+
+    letI := htor.module
+    letI := htor.isScalarTower (S := R)
+
+`Module` インスタンスは **data を持つ**ので、`haveI` だと中身が失われる
+(`haveI` は proof-irrelevant に扱う)。すると `isScalarTower` が
+`htor.module` の中身を参照できず、別のインスタンスとして扱われる。
+
+★★★★見つけ方: mathlib の `Algebra/Module/Torsion/Basic.lean:597` が
+`(hM : Module.IsTorsionBySet R M I) : letI := hM.module` と書いている。
+**定義側が `letI` を使っているなら、使う側も `letI`** である。
+
+★★★★★一般化: **instance が data を持つなら `letI`**。
+`Module` / `Algebra` / `SMul` は data、`Finite` / `IsDomain` は Prop なので `haveI` でよい。
 
 ## structure の中に `/-! … -/` を書くと、そこで structure が終わる
 
@@ -871,3 +919,1453 @@ mathlib の olean が 1 つ途中で切れて `failed to read file … incompati
 直し方: **落ちたら、その塊全部を作り直して送る**。
 ★★塊が大きいなら、そもそもファイルに書いて `lake build` したほうが速い
 (REPL は 1 定理ずつの探りに使う)。
+
+## `Subring.closure` を台にした型を圏論の構造に載せると核が発散する
+
+失敗形(2026-08-27、第 368-369 ブロックで 2 回落ちた):
+
+1. `def D : ℕ ⥤ CommRingCat where obj n := CommRingCat.of (ratTower n); ...`
+   と**素朴に `Functor` の構造体を書き**、`map_id` / `map_comp` を `ext; rfl` で埋める
+   —— エラボレーションは通るが **核判定が 100 秒を超えて落ちない**。
+2. `def towerMk (n) (q) (hq) : D.obj n := ⟨q, hq⟩` という**補助定義を挟む**
+   —— これも核判定が 95 秒。
+
+原因: `ratTower n = Subring.closure {...}` なので `CommRingCat.of (ratTower n)` の
+`CommRing` インスタンスの経路が長く、核での defeq が重い。
+
+直し方:
+
+* `Functor.ofSequence` / `NatTrans.ofSequence`(`Mathlib/CategoryTheory/Functor/OfSequence.lean`)
+  に寄せる —— `n ⟶ n+1` の射だけ与えれば `map_id` / `map_comp` は mathlib が持つ。**0.07 秒**。
+* 補助定義を挟まず `show ratTower n from ⟨q, hq⟩` と**直に書く** —— **0.05 秒**。
+
+★根本的に直すなら `closure` でなく**明示的な `carrier`** で部分環を定義する。
+★★同じ穴: 「エラボレーションが速い」ことは「核が速い」ことを意味しない。
+`lean_check` が 120 秒で背景に落ちたら、まずこの形を疑う。
+
+## 関手の合成で作った対象は `rw`/`simp` を止める（`pullback` と `Over.forget`）
+
+失敗形(2026-08-27、第 374-375 ブロック):
+
+`D f := overRatTowerDiagram ⋙ Over.pullback f ⋙ Over.forget X` と定義すると
+`(D f).obj i` は **`pullback (over.obj i).hom f` と defeq だが構文的に違う**。
+その結果:
+
+* `pullback.hom_ext` を当てると、生成される目標の項が
+  「外側は関手合成の型・内側は生の `pullback` の型」という**混在**になる
+* `Category.assoc` すら「pattern が見つからない」で落ちる
+  （エラー末尾に `Note: The target expression is not type-correct under the
+  instances transparency level` が出るのが目印）
+* `simp only [..., pullback.lift_fst]` も同じ理由で発火しない
+
+★型注釈を足して目標の**外側**を生の `pullback` に固定すると `Category.assoc` は通る:
+
+    ((a ≫ b : (D f).obj m ⟶ pullback (over.obj i).hom f') = (c ≫ d : ...))
+
+★★しかし**内側**（`pullback.lift` の引数の型）は依然として混在なので、
+`pullback.lift_fst` はまだ発火しない。
+
+直し方: **関手を合成で作らず、`obj` を生の形で直接書く**。
+
+    noncomputable def D (f) : ℕᵒᵖ ⥤ Scheme where
+      obj i := pullback (overRatTowerDiagram.obj i).hom f
+      map h := pullback.map _ _ _ _ (over.map h).left (𝟙 _) (𝟙 _) _ _
+
+★極限は合成版で取り、`Iso` で生版へ移す（`IsLimit.ofIsoLimit`）。
+★★★教訓は「配管」の一般則と同じ: **defeq は `rw`/`simp` を助けない。**
+構文をそろえるのは設計の仕事である。
+
+## `Scheme.Spec.obj (op R)` と `Spec R` は別物として扱われる
+
+★**2026-08-27、第 371-380 ブロックで 5 ブロックぶんの摩擦の正体がこれだった。**
+
+mathlib の `AlgebraicGeometry.Spec (R : CommRingCat) : Scheme` は
+`Scheme.Spec.obj (op R)` の `def` である。★**defeq だが構文的に別物**なので:
+
+* `specZIsTerminal.from X : X ⟶ Spec (CommRingCat.of ℤ)`（`Spec` の形）
+* 自分で `f : X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))` と書くと（関手の形）
+
+この 2 つを混ぜた瞬間、`rw`/`simp` が**すべて**落ちる。出るエラーは
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+
+で、`Category.assoc` すら「pattern が見つからない」と言われる。
+★★真の原因は最後の `Full error:` に出る:
+
+    f has type X ⟶ Scheme.Spec.obj (Opposite.op (CommRingCat.of ℤ))
+    but is expected to have type X ⟶ Spec (CommRingCat.of ℤ)
+
+直し方: **`Spec R` の形に統一する**。`Scheme.Spec` を明示的に書くのは
+関手性（`Scheme.Spec.map`、随伴、`mapCone`）が要るときだけにし、
+対象は `Spec R` で書く。
+
+★★★同じ穴の一般形は前節と同じ——**defeq は `rw`/`simp` を助けない**。
+ただし今回のように**エラーの表面（`Category.assoc` が効かない）と原因（対象の書き方）が
+遠い**ことがあるので、`Full error:` の末尾まで読むこと。
+
+---
+
+## `0_Source/*.txt` は逐語に使えない——`-enc UTF-8` の有無で記号が消える
+
+2026-08-27、[Stacks] Lemma 29.40.4 で実際に読み違えた。
+
+`0_Source/<論文>.txt` は `pdftotext` の**古い引き方**（`-enc UTF-8` なし）で作られており、
+`→` `≥` `≫` `⊗` `≅` がすべて**空白に落ちている**。そのため
+
+    (3) Ld is f -very ample for some d  1,
+    (4) Ld is f -very ample for all  d  1,
+
+の (3) が `d ≥ 1`、(4) が `d ≫ 1` であることが**テキスト層からは分からない**。
+★「ある `d`」と「十分大きい全ての `d`」は主張の強さが違うので、これは実害である。
+
+★★しかしこれは `pdftotext` の限界ではない。`tools/check.mjs` が実際に引く
+
+    pdftotext -enc UTF-8 -f N -l N <pdf> -
+
+は `→ ≥ ≫ ⊗ ≅` を**そのまま出力する**。落ちていたのは `.txt` の側だけだった。
+
+**規約として引き出すこと:**
+
+| 用途 | 使うもの |
+|---|---|
+| どのページに何があるか探す | `0_Source/*.txt`（速い。7654 ページを 1 秒で走査できる） |
+| `.verbatim` / `原文 (...)` に写す | ★**必ず `pdftotext -enc UTF-8 -f N -l N` を引き直す** |
+| 装飾（下線・書体・ハット）の確認 | ★★`pdftoppm -r 150` で目視。上の 2 つは代替しない |
+
+★★★症状: ゲートが `S4 逐語が物理 p.N に見つからない(先頭 19/124 文字まで一致)` と言い、
+`一致した末尾` が**ちょうど記号の直前で切れている**。
+そこで止まったら、まず `.txt` から写していないかを疑うこと。
+
+---
+
+## `Scheme` を扱うファイルには `universe u` が要る
+
+`variable {X Y S : Scheme.{u}}` と書くと
+
+    error: unknown universe level `u`
+
+`Scheme.{0}` で固定しないなら、`open` の後に `universe u` を 1 行入れる。
+★mathlib の `AlgebraicGeometry` 側のファイルは全部そうしている。
+
+---
+
+## Python: アストラル面のエスケープと、台帳を壊す書き込み
+
+2026-08-27 に **`ResearchPaper/mathlib-gap.json` を 2 回空にした**。
+
+### 症状
+
+    UnicodeEncodeError: 'utf-8' codec can't encode characters
+    in position 15025-15026: surrogates not allowed
+
+原因は `𝒪`（𝒪 を**サロゲート対を 2 つの `\u` で**書いたもの）。
+Python 3 はこれを 1 文字に合成せず、**孤立サロゲート 2 個**として保持する。
+`json.dumps(..., ensure_ascii=False)` は通るが、UTF-8 への符号化で落ちる。
+
+★直し方: BMP 外は `\U0001D4AA` の 8 桁形で書く。`\uXXXX` を 2 つ並べない。
+
+### ★★★本当に痛いのはここ
+
+    io.open(p, 'w', encoding='utf-8').write(<エンコードで落ちる文字列>)
+
+`open(p, 'w')` は**書く前にファイルを 0 バイトに切り詰める**。
+`.write()` で例外が出た時点で、**元の内容は既に消えている**。
+
+★★規約: 台帳を書き換えるときは**エンコードしてから開く**。
+
+```python
+out = (json.dumps(j, ensure_ascii=False, indent=1) + '\n').encode('utf-8')
+io.open(p, 'wb').write(out)          # ここまで来れば必ず書ける
+```
+
+★★★落ちたら `git checkout -- <file>` で戻る。
+**台帳を触る前にコミットしておくこと**が唯一の保険である。
+
+### ★★★★2026-08-28 に **3 回目**をやった
+
+規約を書いた翌日に `io.open(p,'w').write(json.dumps(...))` と書いて
+また 0 バイトにした。★**「文字列を作る」と「ファイルを開く」を同じ行に書かない**。
+コミット済みだったので `git checkout --` で戻った。
+
+### ★★★★★2026-08-28 に **4 回目**をやった——今度は **Lean ファイル**
+
+規約を自分で書いて、同じ日にまた 0 バイトにした。今回の違いは 2 つ:
+
+1. ★壊したのは台帳ではなく **`Found/Arakelov/APicToSheaf.lean`**。
+   規約を「台帳を書き換えるときは」と読んでしまい、Lean ファイルに適用しなかった。
+   ★★**規約はすべてのファイル書き込みに適用する**。
+2. ★`out = s` で**文字列は先に作った**のに `io.open(p,'w').write(out)` と書いた。
+   ★★★**エンコードは `write` 時に起きる**ので、文字列を先に作っても意味がない。
+   規約の正しい読み方は「**`.encode('utf-8')` を先に実行し、`'wb'` で開く**」である。
+
+```python
+data = s.encode('utf-8')     # ★ここで落ちてもファイルは無傷
+f = io.open(p, 'wb'); f.write(data); f.close()
+```
+
+★★★★**もっと良い道: 非 BMP 文字をそもそも書かない**。
+docstring や `.needs` の文字列なら `O_F` のように ASCII で代用できる。
+Lean の識別子で必要なら**既存の行をコピーする**。
+
+### ★docstring と宣言の間に `open ... in` を挟めない
+
+失敗形: `/-- doc -/` の直後に `open scoped TensorProduct in` を置いたら
+
+    unexpected token 'open'; expected 'lemma'
+
+直し方: **`open ... in` を docstring の前に置く**。
+
+```lean
+open scoped TensorProduct in
+/-- doc -/
+theorem foo ...
+```
+
+### ★台帳を書き戻すときは `indent` を**元に合わせる**
+
+`mathlib-gap.json` は **`indent=1`** である。`indent=2` で書き戻すと
+全行が差分になり(864/859)、実際の変更 11 行が読めなくなる。
+★書き戻したら必ず `git diff --numstat` を見て、行数が変更の大きさと合うか確かめる。
+
+★★`len(out)` は**文字数**であってバイト数ではない。
+日本語の台帳では `len` が減っても内容は減っていない(87515 バイト = 61495 文字)。
+
+---
+
+## 図式・錐が絡む `pullback.hom_ext` は「生の形」に**全部**揃える
+
+2026-08-27、同型の spreading out（`Found/GenEll/IsoDescent.lean`）で 4 回落ちた。
+
+`(baseChangeRatTowerDiagram f).obj n` と `pullback (overRatTowerDiagram.obj n).hom f` は
+**defeq だが構文が違う**。`pullback.hom_ext` が作る目標では後者の形が現れるので、
+前者の形の射を混ぜると `Category.assoc` すら発火せず、毎回
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+
+が出る。`Full error:` を読むと `Quiver.Hom A ((D f').obj n)` と
+`Quiver.Hom A (pullback ... f')` の食い違いだと分かる。
+
+### ★★片方だけ揃えても駄目
+
+最初は自作の射の**余域**だけを `pullback ...` にした。すると今度は
+**域**（`(D f).map h'` の余域）が合わなくなり、同じエラーが場所を変えて出た。
+
+### 直し方: 対象・射・錐の脚に別名を置いて 1 つの形に揃える
+
+```lean
+noncomputable abbrev bcObj (f) (n) : Scheme := pullback (overRatTowerDiagram.obj n).hom f
+noncomputable abbrev bcPt  (f)     : Scheme := pullback (overRatTowerCone.pt).hom f
+noncomputable def bcMap (f) (h : m ⟶ n) : bcObj f m ⟶ bcObj f n := (D f).map h
+noncomputable def bcLeg (f) (n)         : bcPt f  ⟶ bcObj f n := (C f).π.app n
+```
+
+そのうえで `bcMap_fst` / `bcMap_snd` / `bcLeg_fst` / `bcLeg_snd` を `@[simp]` で置く。
+★`bcLeg_*` の証明は `show (C f).π.app n ≫ _ = _` で**関手の形へ戻してから** `simp only` する
+——補題の中では戻し、外では生、と役割を分ける。
+
+★★★これで `rw [Category.assoc, bcDescHom_fst, …]` が普通に通るようになる。
+**別名は中身を変えるためではなく、構文を 1 つに揃えて `rw` を通すために置く。**
+
+### 付随して覚えたこと
+
+* `reassoc_of% h` は `∀ {Z} (k : … ⟶ Z), …` を返す。**引数を 1 つ与える**必要がある:
+  `(reassoc_of% keyAB) (pullback.snd _ f)`。
+* `ℕᵒᵖ` は前順序の圏なので `Subsingleton (m ⟶ i)` が通る。
+  余フィルターの `min` で 2 回落とした後、**2 本の道は自動的に等しい**
+  （`Subsingleton.elim` → `rw` で片方に寄せる）。
+* `have hki : IsCofiltered.min i j ⟶ i := IsCofiltered.minToLeft i j` のように
+  `have` は Type 値にも使える。`obtain ⟨k, hki, hkj⟩ : ∃ … ` は
+  `Prop` に潰れるので**射の取り出しには使えない**。
+
+---
+
+## `Γ(X, U)` の上では `ConcreteCategory.comp_apply` の `rw` が落ちる
+
+2026-08-27、切断の降下（`Found/GenEll/SectionDescent.lean`）で踏んだ。
+
+`Γ(X, U)` は `X.presheaf.obj (op U)` で、`X.presheaf` の型は
+`TopCat.Presheaf CommRingCat X.toPresheafedSpace`
+——これは `(Opens X)ᵒᵖ ⥤ CommRingCat` の **`def`** である。
+そのため `rw [ConcreteCategory.comp_apply]` が
+
+    Note: The target expression is not type-correct under the `instances` transparency level
+    Full error: ... (D.obj l).presheaf has type TopCat.Presheaf CommRingCat ...
+                but is expected to have type (Opens ...)ᵒᵖ ⥤ CommRingCat
+
+で落ちる。`CommRingCat.hom_comp` / `RingHom.coe_comp` / `Function.comp_apply` は
+**そもそも当たらない**（linter が「unused」と言う）。
+
+★直し方: `rw` をやめて **`congrArg` で合成の外側を直接当てる**。
+
+```lean
+theorem app_map_comp_eq {D : ℕᵒᵖ ⥤ Scheme.{0}} {i j l : ℕᵒᵖ} (g : j ⟶ i) (k : l ⟶ j)
+    {U : (D.obj i).Opens} {s t : Γ(D.obj i, U)}
+    (h : (D.map g).app U s = (D.map g).app U t) :
+    (D.map (k ≫ g)).app U s = (D.map (k ≫ g)).app U t := by
+  rw [Functor.map_comp, Scheme.Hom.comp_app]
+  exact congrArg (ConcreteCategory.hom (Scheme.Hom.app (D.map k) (D.map g ⁻¹ᵁ U))) h
+```
+
+`hom (A ≫ B) x` と `hom B (hom A x)` は**defeq なので `congrArg` は通る**。
+`rw` はパターン照合なので通らない。★★「defeq は `rw` を助けないが `exact` は助ける」。
+
+★★★もう 1 つ効いたこと: **図式 `D` を変数のままにする**。
+`baseChangeRatTowerDiagram f` を直接書くと `D.obj l` が展開されて
+同じエラーが別の場所で出る。**補題は一般の図式で書き、具体の図式は呼ぶ側で入れる。**
+
+
+---
+
+## `hz ▸` は「向きが合わない」と落ちる——`⊥` と `0` は同じ項ではない
+
+2026-08-27、`Found/GenEll/VerticalBound.lean` で踏んだ。
+
+```lean
+have hJ : J ≠ 0 := fun hz => hI (le_bot_iff.mp (hz ▸ h))   -- ✕
+```
+
+    invalid `▸` notation, expected result type of cast is  I ≤ ⊥
+    however, the equality hz of type J = 0 does not contain the expected result type
+
+★`Ideal` では `0` と `⊥` が**同じ値だが同じ項ではない**ので、
+`▸` も `rw [← hz]` もパターンが見つからない。
+
+★★直し方: 書き換えをやめて**順序の推移で繋ぐ**。
+
+```lean
+have hJ : J ≠ 0 := fun hz => hI (le_bot_iff.mp (le_trans h hz.le))   -- ○
+```
+
+`hz.le : J ≤ 0` は `Eq.le` で取れ、`0` と `⊥` は順序の側では同一視される。
+
+## `div_le_div_of_nonneg_right` は `0 ≤ c` を取る（`0 < c` ではない）
+
+同じブロック。名前から `0 < c` を渡すと
+
+    Application type mismatch: hd has type 0 < ↑(Module.finrank ℚ F)
+    but is expected to have type 0 ≤ ↑(Module.finrank ℚ F)
+
+★`c = 0` でも `a/0 = 0 ≤ 0 = b/0` で成立するので仮定が弱い。
+★★`positivity` で `0 ≤ ↑(finrank …)` を出すのが一番短い。
+
+## `Found/GenEll/` で `pullback.snd` を使うなら `open … Limits`
+
+`open AlgebraicGeometry CategoryTheory` だけだと
+
+    Unknown identifier `pullback.snd`
+
+★`pullback` は `CategoryTheory.Limits` にある。ファイル先頭の `open` に
+`Limits` を入れること——**型に `pullback` が出なくても、
+`bcObj` のような `abbrev` を展開した先で必要になる**。
+
+---
+
+## 在庫確認は **新しい名前すべて**について引く
+
+2026-08-27、`Found/GenEll/ComapMul.lean` を**二度書き**した。
+
+平行セッションが 2026-08-17 に既に取っていた
+`ideal_comap_eq_map_of_isAffine`（`ComapAffine.lean`）と
+`comap_mul`（`ComapMul.lean`、**一般の射**）を知らずに、
+`pullbackSpecIso` 経由で同じものを書き直し、
+あまつさえ `Write` で相手のファイルを上書きした（`git checkout --` で復元）。
+
+★原因は**在庫確認の部分実施**である。
+新しい補題名を 5 つ確認したところで満足し、
+後から足した `comap_mul_of_isAffine` / `ideal_comap_of_isAffine` を引かなかった。
+
+★★手順（CLAUDE.md の「在庫」）:
+
+```bash
+node tools/decl-index.mjs                     # .cache/decl-index.txt を作る
+for n in <新しい名前を全部>; do grep -c "\.$n\b" .cache/decl-index.txt; done
+```
+
+★★★**ファイル名でも引くこと**。`ComapMul.lean` が既にあることは
+`ls lean/ABC3/Found/GenEll/ | grep -i comap` で 1 秒で分かった。
+
+★★★★`Write` が「updated」と言ったら**既存ファイルである**。
+「created」でなければ手を止めて `git log -- <path>` を見ること。
+
+---
+
+## `Point.map` は `rw` では当たらないが `refine … .trans` なら通る
+
+2026-08-27、Tate 一意化の体拡大との両立（`Found/GaloisRep/TateCurveNatural.lean`）で踏んだ。
+
+`tatePtPair` は `((tateCurveAt q hq).map (algebraMap R K)).toAffine.Point` の上にあり、
+mathlib の `WeierstrassCurve.Affine.Point.map` は `(W'.baseChange F).Point` の上にある。
+★`baseChange F = map (algebraMap R F)` は **`rfl`** だが、
+
+```lean
+rw [Point.map_some]     -- ✕
+simp only [Point.map_some]  -- ✕（simp made no progress）
+```
+
+    Application type mismatch: … has type @Point K … ((tateCurveAt q hq).map (algebraMap R K)).toAffine
+    but is expected to have type @Point K … (tateCurveAt q hq)⁄K
+
+★★直し方: **`refine`/`exact` に載せる**。
+
+```lean
+refine (Point.map_some (S := R) φ (nonsingular_tateK a w q hq haw hwu hne hΔ)).trans ?_  -- ○
+unfold tatePtPair
+congr 1
+```
+
+★★★理由: **`rw` はパターン照合（`instances` 透明度）、`refine`/`exact` は
+既定透明度の `isDefEq`** である。定義上等しいだけの型は `rw` を助けないが
+`exact` は助ける——`Γ(X,U)` の項（本ファイル上方）と**同じ型の失敗形**である。
+
+★「defeq なのに `rw` が落ちた」と思ったら、まず `refine (…).trans ?_` を試すこと。
+
+## `unfold` の後はインスタンスが合流しない —— `show` で形を合わせる
+
+**失敗形**（2026-08-27、`ProjectiveSpace.lean`）:
+
+```lean
+instance : IsProper (projSpaceOverSpec n R) := by
+  unfold projSpaceOverSpec
+  exact IsProper.mk
+-- failed to synthesize IsSeparated (Proj.toSpecZero … ≫ Spec.map …)
+```
+
+ところが**同じ式を直に書けば通る**:
+
+```lean
+example : IsSeparated (Proj.toSpecZero … ≫ Spec.map …) := by infer_instance  -- OK
+```
+
+★`unfold` が展開した後の項は、インスタンス探索から見ると元の項と別物になる
+（`letI` が残る・簡約段階が違う）。★★**直す形は `show`**:
+
+```lean
+instance : IsProper (projSpaceOverSpec n R) := by
+  show IsProper (Proj.toSpecZero (MvPolynomial.homogeneousSubmodule (Fin (n + 1)) R)
+      ≫ Spec.map (CommRingCat.ofHom (gradeZeroEquiv n R).toRingHom))
+  exact IsProper.mk
+```
+
+★★★同じ理由で、定義の中で `letI : GradedAlgebra … := MvPolynomial.gradedAlgebra` と
+書くより、ファイル冒頭で `attribute [local instance] MvPolynomial.gradedAlgebra` と
+宣言するほうがよい——`letI` は展開後に項として残ってインスタンス探索を邪魔する。
+
+## `IsProper` は合成の instance を持たない —— `IsProper.mk` を明示する
+
+`IsSeparated`・`UniversallyClosed`・`LocallyOfFiniteType` はそれぞれ合成の instance を
+持つが、**`IsProper (f ≫ g)` の instance は無い**（2026-08-27 実測）。
+★`exact IsProper.mk` と書けば 3 つの親を instance 探索させられる。
+
+## モノイダル関手の `ε`/`η` が `Iso.refl` なのに `rfl` が通らない —— `respectTransparency false`
+
+**失敗形**（2026-08-27、`AmpleDef.lean`）:
+
+```lean
+example (s : (𝟙_ X.PresheafOfModules).obj (op (⊤ : X.Opens))) :
+    trivValue (𝟙_ X.PresheafOfModules) ⊤ restrictPresheafUnit.symm s = s := rfl
+-- Type mismatch: ?m = ?m vs …
+```
+
+`simp [trivValue, secOn, restrictPresheafUnit, Functor.Monoidal.εIso]` まで進めると
+残る目標は `(Functor.OplaxMonoidal.η F).app o s = s` である。
+★mathlib の `PresheafOfModules.pushforward₀OfCommRingCat` は
+`εIso := Iso.refl _` / `μIso _ _ := Iso.refl _` で定義されているので**本当に恒等**だが、
+既定の透明度では `rfl` が届かない。
+
+★★**直す形**——mathlib 自身がその instance に付けているのと同じ option を付ける:
+
+```lean
+set_option backward.isDefEq.respectTransparency false in
+theorem trivValue_unit_top (s : …) : trivValue … s = s := by
+  simp [trivValue, secOn, restrictPresheafUnit, Functor.Monoidal.εIso]
+  rfl
+```
+
+★★★一般に「mathlib 側の定義に `set_option backward.…` が付いていたら、
+それを消費する側にも要る」と思ってよい。
+
+## 前層加群の射の自然性は `PresheafOfModules.naturality_apply`
+
+`e.hom.naturality` ではなく **`PresheafOfModules.naturality_apply`**（元の水準）である:
+
+```lean
+PresheafOfModules.naturality_apply (f : M₁ ⟶ M₂) (g : X ⟶ Y) (x : M₁.obj X) :
+  f.app Y (M₁.map g x) = M₂.map g (f.app X x)
+```
+
+★`Over U` の site では `g` は `(Over.homMk (homOfLE h) : Over.mk (homOfLE h) ⟶ Over.mk (𝟙 U)).op`
+と書く。★★`X` / `Y` は名前付き引数で明示しないと合わないことが多い。
+★★★`exact hnat` か `exact hnat.symm` かはエラーメッセージの左右を見て決める
+——`Eq.symm hnat` の表示が期待と**同じ向き**なら `exact hnat` が正しい。
+
+## `Scheme.Modules.smul_Spec_def` は `rfl` だが `rw` も `#synth` も通らない
+
+**測定**（2026-08-28、`Definition 1.1` の最後の 1 本を追ったとき）:
+
+mathlib の `Mathlib/AlgebraicGeometry/Modules/Tilde.lean` には
+
+```lean
+instance : Module R Γ(M, U) :=
+  inferInstanceAs <| Module R ((modulesSpecToSheaf.obj M).obj.obj (.op U))
+
+lemma smul_Spec_def (r : R) (x : Γ(M, U)) :
+    r • x = ((Spec R).presheaf.map U.leTop.op) ((Scheme.ΓSpecIso R).inv r) • x := rfl
+```
+
+があり、これが「`Γ(Spec ℂ, ⊤)` の `ℂ`-加群構造は `ΓSpecIso` 経由である」を与える。
+
+★**ところが具体化すると instance が出ない**:
+
+```lean
+#synth Module ((CommRingCat.of ℂ) : Type)
+  (Γ(unitModules (Spec (CommRingCat.of ℂ)), (⊤ : (Spec (CommRingCat.of ℂ)).Opens)) : Type)
+-- failed to synthesize
+```
+
+★★したがって `rw [Scheme.Modules.smul_Spec_def]` も通らない
+（`HSMul ↑(CommRingCat.of ℂ) ↑Γ(…) ?m` が出ない）。
+`c : ℂ` を `c : ((CommRingCat.of ℂ) : Type)` に書き換えても同じ。
+
+★★★**回避の方向**（未検証）: `moduleSpecΓFunctor` 側の項
+（`(moduleSpecΓFunctor.obj M : Type)`）で書くと `•` は出る——
+`arcFiber` はそちらの綴りなので、`ArcFiber.lean` の側から降りるほうが近い。
+
+---
+
+## `rw` は「同じ項の別の綴り」を見ない —— `have` で綴りを固定してから書き換える
+
+2026-08-28、算術直線束の等長同型（`Found/Arakelov/AMetricIso.lean`）で 4 回落ちた。
+
+### 症状
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+      transUnit ?m.375 ?V (pullTriv ?φ ?V ?e) (pullTriv ?φ ?V ?e')
+    in the target expression
+      … transUnit (L * M).sheaf c.W (pullTriv (φ ⊗ᵢ ψ) c.W …) (pullTriv (φ ⊗ᵢ ψ) c.W …) …
+
+★**パターンは目で見て一致している。** 落ちる理由は、補題の暗黙引数
+`?L` が `?φ : ?L ≅ ?M` から決まり、`φ ⊗ᵢ ψ` の域は `L.sheaf ⊗ M.sheaf` と綴られるのに、
+ゴールの項は `(L * M).sheaf` と綴られているからである。
+★★`(L * M).sheaf = L.sheaf ⊗ M.sheaf` は **`rfl`** だが、`rw` は構文で照合する。
+
+同じ落ち方が `metric` の欄でも出る:
+
+    Application type mismatch: The argument tensorTriv … has type
+      … ((restrictPresheafFunctor X c.W).obj (L.sheaf ⊗ M.sheaf)) …
+    but is expected to have type
+      … ((restrictPresheafFunctor X c.W).obj (L * M).sheaf) …
+
+### ★★★直し方: `have` で**ゴールの綴り**に固定してから `rw`
+
+```lean
+have e1 : transUnit (L * M).sheaf c.W (pullTriv (φ ⊗ᵢ ψ) c.W (tensorTriv c.eA c.eB))
+      (pullTriv (φ ⊗ᵢ ψ) c.W g)
+    = transUnit (L' * M').sheaf c.W (tensorTriv c.eA c.eB) g :=
+  transUnit_pullTriv (φ ⊗ᵢ ψ) c.W (tensorTriv c.eA c.eB) _   -- ← ここは defeq で通る
+rw [e1] at e2
+```
+
+`have` の型注釈は `exact` と同じく**定義的等価まで**見るので、
+補題の綴りとゴールの綴りの橋渡しはここで済む。
+
+★最後の `rw [h1, h2, …]` も同じ理由で落ちることがある。
+そのときは `Eq.trans` の連鎖（`exact h1.trans (h3.trans (hkey.trans h2.symm))`）に替える。
+★★項の同一性だけを使う書き換えは `congrArg (fun t => f … t …) lemma` で作れる。
+
+---
+
+## 在庫確認を飛ばすと**同名で衝突してビルドが落ちる**（2026-08-28、1 日に 2 回）
+
+`Found/` は 1 つの名前空間 `ABC3.Found.Arakelov` に 300 ファイル以上が入っている。
+★新しい補題を書く前に**必ず**在庫を引くこと（CLAUDE.md 在庫）。
+
+    node tools/decl-index.mjs        # .cache/decl-index.txt を作る
+    grep -n "^\(theorem\|def\) *<名前>" .cache/decl-index.txt
+
+★★`decl-index.txt` は**作った時点のスナップショット**なので、
+同じセッションで足した宣言は載らない。**木も引くこと**:
+
+    grep -rn "theorem <名前>\|def <名前>" lean/ABC3/
+
+### 落ち方
+
+1 回目（`evalOn_one`）——同じ import 木に無かったので**単体ビルドは通り**、
+`Found.lean` に足した時点で衝突が出た。
+
+2 回目（`arithGamma`）——`lake build <その 1 ファイル>` は通ったが、
+
+    error: import ABC3.Found.Arakelov.Definition11 failed,
+      environment already contains 'ABC3.Found.Arakelov.arithGamma.src'
+      from ABC3.Found.Arakelov.AMetricHom
+
+が `Found.lean` で出た。★**`.src` の名前も衝突する**——本体の名前だけ見ても足りない。
+
+★★★**単体ビルドが通っただけで commit しないこと**。
+`Found.lean` に import を足して `lake build`（全体）まで通してから commit する。
+
+### ★★★★★3 回目は**台帳に嘘を書きかけた**（2026-08-28）
+
+`PresheafOfModules.pullback` の `Monoidal` インスタンスが mathlib に無いのを見て、
+台帳に `arakelov-pullback-monoidal` を新設した。★**在庫を引いていなかった**。
+
+実際には `Found/Arakelov/PicSchemeDelta.lean` に
+
+    instance pullbackPreOplax : (pullbackPre f).OplaxMonoidal
+
+が `sorry` 無しで在り、さらに `isLocallyTrivial_pullbackPre`（`PicLTPull.lean`）の
+証明の中に**自明化の輸送が明示的に書かれていた**（`bcIso`・`pullbackOnUnitIso`）。
+
+★★同じ回に `schemeRingHom` / `schemePullback` / `pullbackFreeYonedaIso` を
+書き下ろしたが、これらも `pullbackPhi` / `pullbackPre` / `pullbackFreeYonedaIso`
+として**すべて在庫**であった（`pullbackFreeYonedaIso` は**名前まで同じ**）。
+
+★★★**教訓**: 「mathlib に無い」を測ったら、**必ず続けて木を引く**。
+
+    grep -rn "def <名前>\|theorem <名前>" lean/ABC3/
+    grep -rn "<概念の日本語>" lean/ABC3/Found/*/*.lean | head
+
+★★★★台帳に gap を新設する前は**とくに**引くこと——
+台帳の嘘は Lean のビルドが捕まえてくれない。
+
+## `def` はインスタンス探索を塞ぐ（`abbrev` の後付けはできない、2026-08-28）
+
+`gammaModPre R L := (ModuleCat.restrictScalars ρ).obj (L.obj (op ⊤))` と `def` で置くと、
+
+    Module ↑Γ(Spec R, ⊤) ↑(gammaModPre R L)
+
+が **見つからない**。書き下した形
+
+    Module ↑Γ(Spec R, ⊤) ↑((ModuleCat.restrictScalars ρ).obj (L.obj (op ⊤)))
+
+なら `ModuleCat.instModuleCarrierObjRestrictScalars` で **見つかる**。
+★インスタンス探索は `def` の中身を見ない（`instances` 透明度）。
+
+★★**後付けの `attribute [local reducible] foo` は拒否される**：
+
+    failed to set `[local reducible]` for `foo`, recall that `[reducible]` affects
+    the term indexing datastructures used by `simp` and type class resolution
+
+★★★直し方は 2 つ：
+1. 最初から `abbrev`（＝ `@[reducible] def`）で置く。
+2. **書き下した形で定理を証明し、`def` 版は `rfl` 相当で受け直す**
+   （`invertible_gammaRestrict` → `invertible_gammaModPre`、§9-788）。
+
+★同じ穴が「戻り値の型」でも起きる：`pullSec f L ⊤` の行き先は
+`op ((Opens.map f.base).obj ⊤)` の成分で、`op ⊤` とは `rfl` だがインスタンスは見つからない。
+→ `pullSecTop` / `psiU` のように **戻り値・引数の型を `op ⊤` で宣言し直す**（§9-786、§9-787）。
+`gammaSheafifyM`（§9-780）が最初の例である。
+
+## 配管——`node -e "…"` の中のバッククォートは bash に食われる（2026-08-28）
+
+台帳（`ResearchPaper/*.json`）を `node -e "…"` で書き換えたとき、
+JS 文字列の中の **バッククォート付き Markdown**（``` `X` ```）が
+**bash のコマンド置換**として実行され、その部分が**空文字に置き換わって**書き込まれた。
+
+    $ node -e "… what: '★`X` が `ℤ`-固有 …' …"
+    bash: X: command not found
+    → 書き込まれたのは 「★ が -固有…」
+
+★`node tools/check.mjs` は PASS する（Lean も JSON も壊れていない）ので、
+**ゲートでは捕まらない**。書いた内容を読み返して初めて分かる。
+
+★★直し方: **スクリプトを `.mjs` ファイルに書いて `node file.mjs` で走らせる**
+（`$CLAUDE_JOB_DIR/tmp` に置く）。ヒアドキュメント（`<<'EOF'`、クォート付き）でもよい。
+★★★同じ理由で `git commit -m "…`X`…"` も禁物である——`-F -` とヒアドキュメントを使う。
+
+## 配管——Serre への道で踏んだ穴（2026-08-28、§9-808〜822）
+
+### 1. `HomogeneousLocalization.NumDenSameDeg.num_add` / `deg_add` は `x` が明示引数
+
+    num_add c1 c2   -- ✗ c1 が x(分母の submonoid)に食われる
+    num_add (Submonoid.powers f) c1 c2   -- ○
+
+★`{𝒜}` は暗黙、`x` は**明示**である。
+
+### 2. `(c1 + c2).deg` は `num` の**型に現れる**
+
+`rw [hdeg]` を先にすると motive が通らない。★**`num` を先に書き換える**こと。
+同じ形は `exists_pow_of_numDenSameDeg`（`c.deg = k` を `c.num` の前で `rw` できない）でも出た。
+
+### 3. `x_i^k ≠ 0` に `pow_ne_zero` は使えない
+
+`R` 一般では `MvPolynomial` に零因子がありうるので `IsReduced` を要求される。
+★`rw [MvPolynomial.X_pow_eq_monomial]; simp`（係数が `1` の単項式）で落ちる。
+
+### 4. `def` で包んだスキームは `.Opens` が合わない
+
+    (projSpace N R).Opens   -- ✗ Proj.basicOpen と構文的に合わない
+    (Proj (…)).Opens        -- ○
+
+★`projSpace` は `def`（semireducible）だからである。`Proj (…)` の綴りで書く。
+
+### 5. 指数の等式は `▸` ではなく `subst`
+
+`c.n ∣ L` から `L = c.n * k` を取り出したら **`subst`** する。
+★`M^{⊗L}` と `M^{⊗(c.n·k)}` の型の食い違いはそれで消える（`▸` で運ぶ必要はない）。
+
+### 6. `whiskerLeftIso` を使う（`◁` は射用）
+
+    M ◁ (iso)              -- ✗ `◁` は射を取る
+    whiskerLeftIso M (iso) -- ○
+
+## 在庫——「無い」と書く前に `decl-index` を引く（2026-08-28）
+
+`isLocallyTrivial_sheafify` の証明を読んで「層化した側の自明化には**名前が付いていない**」
+と台帳に書いたが、**誤りだった**——`Found/Arakelov/SheafifyTriv.lean` に
+`sheafifyTriv` / `sheafifyTrivOf` が既にあり、`transUnit_sheafifyTriv`・
+`sheafifyTriv_restrict` まで揃っていた。
+
+★原因は「証明の中を読んだだけで在庫を引かなかった」ことである。
+★★CLAUDE.md の在庫の規律どおり、**まず `node tools/decl-index.mjs` を作って
+`.cache/decl-index.txt` を grep する**。木を読むのは在庫を引いた後でよい。
+
+## 同型の向き——`≅` は「どちらから」を必ず確かめる（2026-08-28）
+
+    restrictPresheafUnit : 𝟙_ ≅ (restrictPresheafFunctor X U).obj (𝟙_)
+                           ^^^^  ここが左
+
+`(restrict).obj (𝟙_) ≅ 𝟙_` **ではない**。`tensorPowTriv` の基点を
+`restrictPresheafUnit` と書いたため、`trivValue … = 1` が `rfl` でも `simp` でも
+落ちず（残ゴールは `ε.app _ ((𝟙_).map _ 1) = 1` の形）、半日詰まった。
+★正解は **`.symm`** を付けるだけであった。
+
+★★合図は在庫にあった——`trivValue_unit_top`（`AmpleDef.lean`）が
+`restrictPresheafUnit.symm` を使っている。**在庫の使用例を 1 つ読めば向きは分かる**。
+
+★★★教訓を一般化すると: `≅` を引数に取る補題が `rfl` で落ちないときは、
+**証明の中身を疑う前に同型の向きを `#check` する**。0.07 秒で分かる。
+
+### ついでに——`V = ⊤` 限定の在庫は一般化できることが多い
+
+`trivValue_unit_top` は `V = ⊤` 用だったが、証明（`simp [trivValue, secOn,
+restrictPresheafUnit, Functor.Monoidal.εIso]; rfl`）は**そのまま任意の `V`** で通り、
+右辺が `s` から `s|_V` に変わるだけであった（`trivValue_unit'`）。
+★「⊤ でしか無いから使えない」と諦める前に、証明をコピーして一般形を試す。
+
+## `⨆ U i = ⊤` を `rw` で入れると motive が壊れる（2026-08-28）
+
+    rw [← hcov]   -- ✗ motive is not type correct
+
+目標に `le_iSup U i : U i ≤ ⨆ U i` という**証明項が現れる**からである
+（`homOfLE (le_iSup U i)` の引数）。`⨆ U i` を `⊤` に書き換えると、
+その証明項の型が合わなくなる。
+
+★**直し方は「同型で運ぶ」**である:
+
+    have hup : (⊤ : X.Opens) ≤ ⨆ i, U i := le_of_eq hcov.symm
+    -- 両向きの制限射 map (homOfLE hup).op / map (homOfLE le_top).op が互いに逆
+
+★★`Opens` の射は `Subsingleton` なので、合成した射は `Subsingleton.elim` で
+好きな射に取り替えられ、`A ⟶ A` は `𝟙 A` に潰れる（`map_id_apply`）。
+
+### 付随——`PresheafOfModules.map` は `map_comp` が直接使えない
+
+`restrictScalars` を挟むので `M.map g.op ≫ M.map f.op` が型検査を通らない。
+★`show M.presheaf.map … ` で **`Ab` 値の前層に降りてから** `map_comp` を使う
+（`Found/GenEll/SheafifyGlue.lean` の `map_map_apply`）。
+
+## `haveI` で置いたインスタンスを解決が拾わないことがある（2026-08-28）
+
+    haveI hspec : IsClosedImmersion (Spec.map …) := …
+    exact IsClosedImmersion.comp _ _        -- ✗ failed to synthesize
+
+`hspec` の型は目標と字面が一致しているのに instance 解決が拾わなかった。
+★**明示的に渡す**と通る:
+
+    exact @IsClosedImmersion.comp _ _ _ f g inferInstance hspec
+
+★★`def` で包んだ射（ここでは `globalChartMorphism`）が絡むと起きやすい
+——`show` で展開しても解決器は元の形を探しに行くことがある。
+★★★「instance が見つからない」と言われたら、**まず `@` で手渡してみる**。
+
+## 名前の衝突——プロジェクト側の `FinitePlace` が mathlib の同名を隠す（2026-08-28）
+
+    namespace ABC3.Found.GenEll
+    open NumberField
+    …  ∏ᶠ v : FinitePlace K, ⨆ i, v (x i)   -- ✗ Function expected at v
+
+`ABC3.Found.GenEll.FinitePlace ≝ IsDedekindDomain.HeightOneSpectrum (𝓞 F)`
+（`Found/GenEll/ArithDiv.lean:65`）が **`NumberField.FinitePlace` を隠す**。
+名前空間の中では自分の `abbrev` が優先されるからである。
+
+★**直し方**: `NumberField.FinitePlace K` と**完全修飾で書く**。
+
+★★合図は「`h` の側は `NumberField.FinitePlace` と表示されるのに、
+目標の側は `FinitePlace` と表示される」ことである
+——**表示が食い違ったら名前解決を疑う**。
+
+★★★REPL では `open … in example` の形で書いていて通ったのに
+ファイルでは通らなかった。名前空間の中かどうかで解決が変わるので、
+**REPL の断片が通ってもファイルでもう一度ビルドする**。
+
+## `|(n:ℝ)| = (n.natAbs : ℝ)` は `Int.cast_natAbs` では通らない（2026-08-28）
+
+    rw [Int.cast_natAbs]        -- ✗ Unknown constant
+    push_cast [Int.abs_eq_natAbs]  -- ✗ does nothing
+    rw [← Int.cast_abs, Int.abs_eq_natAbs]; simp   -- ○
+
+★先に `ℝ` の絶対値を `ℤ` の絶対値へ戻してから `Int.abs_eq_natAbs` を当てる。
+
+## `aeval g (X j) = g j` は `rfl` ではない —— 依存型の輸送が要る（2026-08-28）
+
+    hyperGen N R (Fin.succ i') = X i'                    -- ○ rfl
+    hyperplaneHom N R (X (Fin.succ i')) = X i'           -- ✗ rfl でない
+
+★`hyperplaneHom = aeval (hyperGen …)` で、`aeval_X` は `rfl` ではないからである
+（`eval₂` は `Finsupp.sum` を通る）。
+
+★★これが効くのは **`Away ℬ f` のように `f` が型に現れるとき**である:
+
+    Away ℬ (hyperplaneHom N R (X i))   と   Away ℬ (X i')
+
+は**定義的に等しくない**ので、`rw [hyperplaneHom_X_succ]` で
+**型ごと書き換える**（motive は型検査を通る）か、`Eq.mpr` で運ぶ必要がある。
+
+★★★添字の型にも注意: `awayEval N R i` は `i : Fin (N+1)` で
+`MvPolynomial (Fin (N+1)) R` の上の写像である。
+**終域側（`MvPolynomial (Fin N) R`）に使うには `N = M+1` の分解が要る。**
+
+## `Away ℬ f` の `f` が型に現れる —— 変数に特殊化した補題は使えない
+
+`HomogeneousLocalization.Away ℬ f` は **`f` を型の引数に持つ**。したがって
+
+* `awayEval N R i`（`f = x_i` に特殊化）を作っておいても、
+* 終域が `Away ℬ (hyperplaneHom (x_i))` の場面では**そのままでは使えない**
+
+——`hyperplaneHom (x_{i+1}) = y_i` は**命題としては成り立つが `rfl` ではない**ので、
+型が合わない。`rw`-in-type や `Eq.mpr` で運ぶのは苦しい。
+
+**直し方**: 最初から `f` を**任意の次数 1 の斉次元**にしておく
+（`awayCoordOf R f hf j`、`awayEvalOf R f hf`；`ABC3.Found.GenEll.AwayEvalGen`）。
+
+**測定 (2026-08-28)**: 一般化しても証明は**一字も変わらなかった**
+——`x_i` であることを使っていたのは「分母が単項式であること」ではなく
+「**次数が 1 であること**」だけだったから。
+`awayCoordOf R (X i) _ j = projCoord N R i j` は **`rfl`** なので、
+既存の特殊形は一般形の定義的な場合として残る。
+
+**系**: 次数付き環準同型 `g` についての四角
+`Away.map g f ∘ awayEvalOf f = awayEvalOf (g f) ∘ g` に
+「`g (C r) = C r`」の仮定は**要らない**——`awayEvalOf_mk` が**次数だけ**で
+右辺を `Away.mk` に潰すからである。一般化した方が証明が短くなる例。
+
+## `f.app U` は `f` に依存した型を持つ —— でも `ker` は持たない
+
+`Scheme.Hom.app f U : Γ(Y,U) ⟶ Γ(X, f ⁻¹ᵁ U)` は**終域が `f` に依る**ので、
+`h : f = g` があっても `f.app U = g.app U` とは**書けない**（型が違う）。
+`congrArg (fun m => m.app U) h` は型エラーになる。
+
+**直し方**: 核を取ってから比べる。`RingHom.ker (f.app U).hom : Ideal Γ(Y,U)` の型は
+**`f` に依らない**ので、変数に対して `subst` できる:
+
+```lean
+theorem ker_app_congr {X Y : Scheme} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens) :
+    RingHom.ker (Scheme.Hom.app f U).hom = RingHom.ker (Scheme.Hom.app g U).hom := by
+  subst h; rfl
+```
+
+同じ手が「開集合が型に現れる」場合にも効く——`chartA ⁻¹ᵁ (chartA ''ᵁ ⊤) = ⊤` は
+`rw` では動かせないが、**開集合を変数として受け取り** `subst` すれば消える:
+
+```lean
+theorem ker_specMap_app_eqToHom (φ : B ⟶ B') (V : (Spec B).Opens) (h : (⊤ : _) = V) : … := by
+  subst h; …
+```
+
+## `CommRingCat.hom_comp` の `rw` が「型が instances 透明度で正しくない」で通らない
+
+`Γ(X, U)` を含む式で `rw [CommRingCat.hom_comp]` が
+
+> Note: The target expression is not type-correct under the `instances` transparency level
+
+で失敗することがある（`presheaf.obj` の型が `TopCat.Presheaf` と関手型の間で合わない）。
+
+**直し方**: 宣言の直前に
+
+```lean
+set_option backward.isDefEq.respectTransparency false in
+```
+
+を置く。mathlib 自身が `Mathlib/AlgebraicGeometry/IdealSheaf/Basic.lean` の
+`Hom.ker_apply` などで同じことをしている。
+`simp only [CommRingCat.hom_comp]` でも駄目（「unused」と言われる）なので、
+option を置くのが正解である。
+
+## `rw [← f_hom]` が通らないのは結合の向きのせい（透明度の警告は副次的）
+
+`a ≫ b ≫ c` は **`a ≫ (b ≫ c)`**（`≫` は右結合）なので、`a ≫ b` は**部分項ではない**。
+`rw [← lemma]` で `a ≫ b` を畳もうとすると
+
+> Did not find an occurrence of the pattern …
+> Note: The target expression is not type-correct under the `instances` transparency level
+
+が出る。**2 行目は副次的な症状**で、原因は 1 行目——結合の向きである。
+
+**直し方**: 先に括り直す。
+
+```lean
+rw [← Category.assoc a, ← Scheme.Hom.appIso_hom f U]
+```
+
+`← Category.assoc` に**最初の射を明示的に渡す**と、どの箇所を括り直すかが決まる。
+（2026-08-28、`Γ(Proj 𝒜, D₊(x_i)) ≅ A⁰_{x_i}` の打ち消しで実測）
+
+## 因子の Green 関数は連続でない —— 仮定は「差の連続性」で置く
+
+算術因子 `D̄ = (D, g)` の Green 関数 `g(p) = −log‖s(p)‖` は
+**台 `|D|` の上で発散する**ので、`Continuous g` を仮定に置くと
+**本物の因子には当たらない補題**ができる（空虚ではないが使えない）。
+
+原典が言うのは「同じ直線束の**2 つの計量**の比が有界」であり、
+そこで連続なのは**差** `D.green − E.green` の方である（特異性が打ち消し合う）。
+
+**直し方**: 比較の補題は
+
+```lean
+(hcont : Continuous (fun p => D.green p - E.green p))
+```
+
+で書く（`ABC3.Found.GenEll.htArith_sub_abs_le_of_diff`）。
+`D.divisor = E.divisor` なら有限側は打ち消し合い、`archADiv` は Green 関数について
+線型なので、既存の一様評価がそのまま効く。
+
+**測定 (2026-08-28)**: この形の「強すぎる仮定」は**証明が通るので気づきにくい**。
+消費側で実際の対象（ここでは Fubini–Study 計量）を当てようとして初めて露見した。
+
+## 在庫が「無い」と出たら、**主語を変えて引き直す**
+
+`differentIdeal … = ⊤` の判定を探して
+
+```
+Algebra.isUnramified_iff_differentIdeal_eq_top   無い
+differentIdeal_eq_top_iff                        無い
+differentIdeal_self                              無い
+```
+
+で「mathlib に無い」と結論し、仮定として受けた（`§9-901`）。
+**しかしそれは「その名前で無い」でしかなかった。**
+
+`differentIdeal` を主語にした判定は確かに無いが、
+**判別式を主語にすれば全部あった**（2026-08-28 実測）:
+
+```lean
+Algebra.finrank_eq_one_iff_bijective_algebraMap                    -- [L:K] = 1 ⟺ 全単射
+NumberField.discr_eq_discr_of_algEquiv                             -- K ≃ₐ[ℚ] L ⟹ disc 一致
+NumberField.natAbs_discr_eq_absNorm_differentIdeal_mul_natAbs_discr_pow
+Ideal.absNorm_eq_one_iff                                           -- N(I) = 1 ⟺ I = ⊤
+```
+
+これで `[L:K] = 1 ⟹ 𝔡 = ⊤` が 10 行で出る（`differentIdeal_eq_top_of_finrank_eq_one`）。
+
+**直し方**: 求めている命題を**同値な別の量で言い換えてから**引き直す。
+`𝔡` なら `disc`・`absNorm`・`ramificationIdx`、
+`高さ` なら `deg`・`absNorm`、`連結` なら `IsPreconnected`・`Irreducible` など。
+`exact?` が timeout するのは「近い形も無い」ではなく「主語が違う」の合図でもある。
+
+## 原文が「by working locally」と書いた段を大域へ持ち上げない
+
+`[GenEll] Proposition 1.7` の elementary claim は
+**`ℚ_p` の有限次拡大**についての主張であり、原文はその直前に
+「Moreover, **by working locally**, we reduce immediately to …」と書いている。
+
+これを数体（`NumberField.ringOfIntegers`）へ持ち上げると**偽**になる:
+
+- `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3`
+- `2` の上の素点 `𝔮` は `e = 3`・剰余標数 `2`（`2 ∤ 3` なので**馴**）→ `v_𝔮(𝔡) = 2`
+- `𝔮 ∤ 3` なので `v_𝔮(3^3) = 0` → `3^3 ∉ 𝔡`
+
+局所体（剰余標数 `p`）なら `v(p) ≥ e(L/K)` なので馴の場合も `e−1 < v(p)` で通る。
+**`p` と無関係な素点で馴分岐が起こり得るのが大域だけの現象**である。
+
+**直し方**: 原文の「locally」「at a prime」「in a neighborhood」は
+**形式化でも局所環・付値環のまま置く**。大域へ上げるのは、
+上げても成り立つことを**素点ごとの不等式で確かめてから**にする。
+
+**測定 (2026-08-28)**: 大域版は**条件付き定理としては通る**（仮定 `step` を持つ形）ので、
+`lake build` では何も出ない。仮定を充足しようとして初めて露見した
+——`§9-872`（Green 関数の連続性）と**同じ形の失敗**である。
+
+## `set_option … in` は**ドキュメンテーション文字列より前**に置く
+
+```lean
+/-- doc -/
+set_option maxHeartbeats 400000 in
+theorem foo : True := trivial
+```
+
+は **パースエラー**である:
+
+```
+unexpected token 'set_option'; expected 'lemma'
+```
+
+正しい順序は逆:
+
+```lean
+set_option maxHeartbeats 400000 in
+/-- doc -/
+theorem foo : True := trivial
+```
+
+**測定 (2026-08-28)**: 同じファイルに 3 箇所同じ誤りがあったが、
+`lake build` が報告したのは **3 番目だけ**だった
+——パーサのエラー回復が先の 2 つを飲み込んでいる。
+★「1 件だけ直せば通る」と思って直すと、次のビルドで次の 1 件が出る。
+**同じ形が他にもないか、その場でまとめて grep すること。**
+
+## `f ∣_ U` を含むゴールで `rw [f = g]` は motive が型付かない
+
+`morphismRestrict`（`f ∣_ U : f ⁻¹ᵁ U ⟶ U`）は**始域が `f` に依存する**ので、
+
+```lean
+have hfac : ψ' ≫ V.ι = ψ
+rw [hfac]   -- motive is not type correct
+```
+
+は通らない（`fun _a => IsImmersion (_a ∣_ U)` の型が合わない）。
+
+**直し方**: 汎化してから `rintro rfl`。
+
+```lean
+have hgen : ∀ χ, χ = ψ → IsImmersion (χ ∣_ U) := by
+  rintro χ rfl
+  …  -- ここでは χ が ψ に置き換わっている
+exact hgen _ hfac
+```
+
+同じ形は `f ⁻¹ᵁ U`・`f.app U`・`Scheme.Opens.ι` を含むゴールでも起きる
+（`§9-864` の `ker_app_congr` は同じ病に対する別の処方）。
+（2026-08-28、`§9-916` で実測）
+
+## 引用照合(`check.mjs`)—— 本文からコピーした逐語が落ちることがある
+
+**失敗形**
+
+```
+NG  lean\ABC3\Found\GenEll\Thm21Chain.lean:84
+    引用照合: 逐語が GenEll 物理 p.12 に見つからない(layout で 3/65 文字まで一致)
+    次に来るはず: "factthat(i)=⇒(ii)isimmediatefromthedefinitions.Thus,itsuffic"
+```
+
+**原因** `.txt`(`ResearchPaper/0_Source/*.txt`)から目で写した逐語と、
+`check.mjs` が `pdftotext -layout` で取り直した文字列が**別の字**になることがある。
+数式記号（`⇒` `≲` `ϵ′` `ω`）や合字の周りで起きる。
+★「次に来るはず」に出るのは**PDF 側の実物**なので、それを見ると自分の写しの
+どこが違うかが分かる（上の例では見た目が同じでも一致しない＝不可視の差）。
+
+**直し方** その項目で**すでに通っている逐語**（多くは見出し行）に差し替える。
+落とした逐語の内容は地の文に `` ` `` で括って残せばよい。
+
+```lean
+原文 (GenEll p.11):
+> Theorem 2.1. (Compactly Bounded Subsets and the ABC Conjecture) Let Σ be a finite set of prime numbers.
+
+★原文 p.12 は「`The fact that (i) ⟹ (ii) is immediate from the definitions.`」と書く。
+```
+
+★ページ番号は**その docstring の `原文 (Tag p.NN):` 行**から取られる（`.src` の
+`pdfPage` ではない）。差し替えるときは両方を見ること。
+
+**★コミット前に必ず `node tools/check.mjs` を見る。**
+`lake build` が通っても引用照合は落ちる——2026-08-29 に NG 2 件のまま
+コミットしてしまった（次のコミットで修復）。
+
+## Python ヒアドキュメントの `\uXXXX` サロゲート —— **書きかけでファイルを壊す**
+
+**失敗形**（2026-08-29、2 度目）
+
+```
+UnicodeEncodeError: 'utf-8' codec can't encode characters in position ...: surrogates not allowed
+→ その直後の lake build で
+error: ABC3/Skeleton/GenEll/Section3.lean:196:22: Unknown identifier `EllModuliData`
+```
+
+**原因** `𝔽`（`𝔽` = アストラル面 U+1D53D）のような**サロゲートペアの
+エスケープ**を Python 文字列に書くと、`str` としては不正なまま作られ、
+`io.open(...).write()` の時点で例外になる。
+★**例外は書き込みの途中で起きうる**ので、**ファイルが壊れた状態で残る**。
+
+**直し方**
+
+* **`Edit` ツールを使う。** Lean ファイルの内容は Write/Edit で書く（CLAUDE.md の規則）。
+  アストラル面の文字を Python 経由で流し込まない。
+* どうしても Python を使うなら、`𝔽` ではなく**文字そのもの**（`𝔽`）を
+  ソースに直接書く。エスケープに割らない。
+* ★**壊れたら `git checkout -- <path>` で即座に戻す。** `git status` で
+  他に触っていないことを確かめてから続ける。
+
+★★CLAUDE.md の「配管」にも同じ形が登記されている（アストラル面エスケープ）。
+**2 度目なのでここに失敗の"結末"（ファイルが壊れる）まで書いた。**
+
+## 在庫の測り方 —— **grep だけの「無い」は弱い**
+
+**失敗形**（2026-08-29）
+
+`Mathlib/AlgebraicGeometry/` と `Mathlib/NumberTheory/` を grep して
+「mathlib に Kummer 対応は無い」と `.needs` に書いた。
+★**`Mathlib/FieldTheory/KummerExtension.lean` を見ていなかった**——
+`autAdjoinRootXPowSubCEquiv_root : σ_η(root) = η • root` が
+まさに探していたものだった（次のブロックで訂正）。
+
+**直し方**
+
+`absent` を書く前に、**Mathlib 全体を import した REPL で `#check` を並べる**。
+
+```
+mcp__abc3-lean__lean_start  imports: ["Mathlib"]      -- 約 136 秒（1 回だけ）
+mcp__abc3-lean__lean_check  #check @Foo / #check @Bar -- 0.02 秒で 10 個
+```
+
+★`grep -r` は分単位でかかるうえ、**ディレクトリの見当が外れると空振りする**。
+★★`#check` は名前が合っていれば必ず当たり、型まで出る。
+★★★`mathlib-gap.json` の `_absentPolicy`（「absent は探索範囲を伴わなければならない」）
+の運用として、**探索範囲は「grep したディレクトリ」ではなく
+「`#check` した名前の一覧」で書く**のがよい。
+
+## 整数の cast の不等式 —— `exact_mod_cast` が通らないとき
+
+**失敗形**（2026-08-29、`Found/GaloisRep/HtFinJ.lean`）
+
+```lean
+-- h : max 0 (-jExp p W) ≤ minDeltaExp p W   (ℤ の不等式)
+-- ⊢ ((max 0 (-jExp p W) : ℤ) : ℝ) ≤ ((minDeltaExp p W : ℤ) : ℝ)
+exact_mod_cast h
+-- mod_cast has type  max 0 (-jExp p W) ≤ minDeltaExp p W
+-- but is expected to have type  ↑(max 0 (-jExp p W)) ≤ ↑(minDeltaExp p W)
+```
+
+★`max` が挟まると `push_cast` の正規化が両辺で食い違い、`exact_mod_cast` が
+「同じものだ」と言えなくなる。
+
+**直し方**
+
+**`Int.cast_le.2 h` を直接使う。** `@[simp, norm_cast] Int.cast_le : (↑m ≤ ↑n) ↔ (m ≤ n)`
+なので、cast の向きを手で指定すれば一発で通る。
+
+```lean
+exact Int.cast_le.2 (maxJ_le_minDeltaExp p W)
+```
+
+★同型の失敗は `Nat.cast_le` / `Rat.cast_le` でも起きる。
+
+## 名前が変わったもの（2026-08-29 に当たったぶん）
+
+| 使えない名前 | 今の名前 |
+|---|---|
+| `pow_le_pow_left` | **`pow_le_pow_left₀`**（`0 ≤ a → a ≤ b → a^n ≤ b^n`） |
+| `div_le_div_iff` | `div_le_div_iff₀` |
+| `finsum_le_finsum` | **`finsum_le_finsum'`**（引数は `hf hg h` の順——**台の有限性が先**） |
+
+★`₀` が付く一群は「零因子のない可換モノイド」への一般化で名前が動いたもの。
+`exact?` は当たるが遅いので、**まず `₀` を足して試す**。
+
+## `positivity` が `≠ 0` を出せないとき
+
+**失敗形**（2026-08-29、`Found/GenEll/JArchBound.lean`）
+
+```lean
+rw [Real.log_mul (by positivity) (by positivity), ...]
+-- failed to prove nonzeroness, but it would be possible to prove nonnegativity if desired
+```
+
+★`‖jFun τ‖ ≠ 0` は `positivity` には出せない——ノルムは `0` になりうるからである。
+
+**直し方**
+
+**正値性を先に `have` で出しておき、`ne_of_gt` を渡す。**
+
+```lean
+have hjpos : (0:ℝ) < ‖jFun τ‖ := by
+  rcases (norm_nonneg (jFun τ)).lt_or_eq with h | h
+  · exact h
+  · rw [hjn, ← h] at hj; simp [Real.log_zero] at hj
+rw [Real.log_mul (ne_of_gt hjpos) (by positivity), ...]
+```
+
+★`positivity` は「式の形」から出すので、**仮定に隠れている非零性は見えない**。
+
+## `Real.log_two_gt_d9` が「無い」と言われたら —— import が足りないだけ
+
+**失敗形**（2026-08-29、`Found/GaloisRep/Lemma37A.lean`）
+
+Mathlib 全体を import した REPL では通るのに、`lake build` で
+
+```
+error: Unknown constant `Real.log_two_gt_d9`
+```
+
+★これは**存在しない**のではなく、**そのファイルの import に入っていない**だけである。
+
+**直し方**
+
+`import Mathlib.Analysis.Complex.ExponentialBounds` を足す。
+`Real.log_two_gt_d9` / `Real.log_two_lt_d9` / `Real.exp_one_gt_d9` はここにある。
+
+★★**教訓**: REPL（`Mathlib` 全体）で通ったコードをファイルへ移すときは、
+**REPL の import とファイルの import の差**を疑う。
+「無い」と決めて仮説に逃がす（`hlog : 0.69 ≤ Real.log 2` を受ける）前に、
+`grep -rln "<名前>" .lake/packages/mathlib/Mathlib/` で**どのファイルにあるか**を見ること。
+★過去に同じ形で仮説へ逃がした記録がある（本ファイルの上のほうの「名前が変わったもの」の節）。
+
+## `WeierstrassCurve.Affine.negY` が Unknown constant になる（2026-08-29、第 593）
+
+REPL（全 Mathlib）では `W.toAffine.negY` が通るのに、ファイルでは
+
+    Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`
+    Unknown constant `WeierstrassCurve.Affine.negY`
+
+になる。`negY` は `Affine/Basic.lean` ではなく **`Affine/Formula.lean`** にある。
+`import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula` を足す。
+
+★エラーの第 1 行が「`WeierstrassCurve.negY` が無い」と言うのは、
+`Affine R := WeierstrassCurve R` が透明なのでドット記法が
+`Affine` 名前空間を見つけられず `WeierstrassCurve` に落ちるため。
+★★**「不在の定数」ではなく「未 import」を先に疑う**——同じ穴は
+`Real.log_two_gt_d9`（`Analysis.Complex.ExponentialBounds`）でも踏んだ。
+
+## 在庫を先に引く——`valAdd_nonneg_iff` を二度書いた（2026-08-29、第 595）
+
+`NeronValuation.lean` に `valAdd_nonneg_iff` を新しく書いたら
+
+    error: `ABC3.Found.GaloisRep.valAdd_nonneg_iff` has already been declared
+
+`DegInf.lean:78` に同名・同 statement が既にあった。
+★CLAUDE.md の「在庫」どおり **`node tools/decl-index.mjs` → `.cache/decl-index.txt` を
+grep してから書く**。今回は `neronExp` だけ grep して周辺の補題を見ていなかった。
+★★下流のファイルに既にある補題は、上流で書き直すと衝突する
+（下流で使われている参照は上流の定義に解決されるので、直し方は
+「上流の重複を消す」か「新しい定理を下流へ移す」）。
+
+## 三たび——在庫を引かずに書いて名前衝突（2026-08-29、第 612-613）
+
+`Found/GenEll/Uniformization.lean` に `hasDerivAt_weierstrassP` /
+`hasDerivAt_derivWeierstrassP` を書いたら
+
+    error: import ABC3.Found.GenEll.WeierstrassODE failed, environment already
+    contains 'ABC3.Found.GenEll.hasDerivAt_weierstrassP' from ...Uniformization
+
+★★**同じ名前空間の別ファイルに既にあった**（`Found/GenEll/WeierstrassODE.lean:62`）。
+しかも同ファイルには **`deriv_derivWeierstrassP : deriv ℘′ z = 6·℘(z)² − g₂/2`**
+（`℘` の 2 階微分）まであり、これは今まさに必要としていたものだった。
+
+★CLAUDE.md の「在庫」を守ること——**書く前に `node tools/decl-index.mjs` →
+`.cache/decl-index.txt` を grep する**。名前だけでなく**周辺の定理**も見る。
+☆本セッションで 2 度目（第 595 の `valAdd_nonneg_iff`）。
+★★★このエラーは `lake build` の import 段で出るので、
+**単一ファイルのビルドでは気づけない**——`lake build ABC3` を必ず通すこと。
+
+
+## `set` で入れた局所定義を `ring` が展開してしまう（2026-08-29、第 666）
+
+`set ω₁' := η₁ / (l : ℂ) with hω₁'` としたあと `linear_combination` を書いたら
+
+    ring failed, ring expressions not equal
+    ⊢ P.ω₁ * 2 - P.ω₁ * ↑p * ↑a₁ * ↑l * (↑l)⁻¹ * 2 - … = 0
+
+★**`set` は `let` 束縛を作るので `ring` / `linear_combination` が中身まで
+展開する**（`(↑l)⁻¹` が出てきたのがその証拠）。抽象的な等式
+（`(l : ℂ) * ω₁' = η₁`）を先に `have` で取ってから
+
+    clear_value ω₁'
+
+で本体を落とすと、以降 `ω₁'` は不透明な局所定数として扱われ、
+`linear_combination (係数) * hlω'` が期待通り効く。
+
+☆同じ理由で **`rintro w (rfl | rfl)` は `set` 変数を消してしまう**ことがある
+（`w = ω₁'` の `rfl` が `ω₁'` の側を除去して `Unknown identifier ω₁'`）。
+`intro w hw` → `simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hw`
+→ `rcases hw with h1 | h1` → `rw [h1]` と書けば向きを固定できる。
+
+## `Nat.mul_le_mul_right` の引数順（2026-08-29、第 667）
+
+    calc n = 1 * n := (Nat.one_mul n).symm
+      _ ≤ g * n := Nat.mul_le_mul_right n hgpos   -- ← 期待と違う辺が出る
+      _ = l := hn.symm                            -- Type mismatch: g * n = n
+
+★`Nat.mul_le_mul_right` は版によって明示引数の位置が違う。
+不等式は **`Nat.le_mul_of_pos_left n hgpos : n ≤ g * n`** を使うほうが安全。
+☆`l = g * l` から `g = 1` を出すのも `rw [← hnl]` だと `l` を全部書き換えて
+しまうので、`conv_lhs => rw [hn]` で片側だけ触ってから `rw [hnl]` とする。
+
+
+## `HasDerivAt` の合成補題は Pi 形の関数を作る（2026-08-29、第 673）
+
+    have hb := ((h1.pow 2).const_mul (6 : ℂ)).sub_const (P.g₂ / 2)
+    rw [hb.deriv]   -- ← 失敗
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+      deriv (fun x ↦ 6 * (℘[P] ^ 2) x - P.g₂ / 2) w
+    in the target expression
+      deriv (fun z ↦ 6 * ℘[P] z ^ 2 - P.g₂ / 2) w
+
+★`HasDerivAt.pow` は `℘ ^ 2`（`Pi.pow`）を、`HasDerivAt.mul` は `℘ * ℘'`
+（`Pi.mul`）を作る。ラムダ形の目標とは**構文が違う**。直し方:
+
+    have h2 : HasDerivAt (fun z : ℂ => 6 * P.weierstrassP z ^ 2 - P.g₂ / 2) _ w :=
+      hb.congr_of_eventuallyEq (by filter_upwards with z; simp only [Pi.pow_apply])
+
+☆導関数の値は `_` にしておけば `hb` から推論される。
+☆`Finset.analyticAt_sum` も同じ罠で、結論は `AnalyticAt 𝕜 (∑ n ∈ N, f n) c`
+（Pi 和）なので `fun z => ∑ ...` には `.congr` ＋ `simp [Finset.sum_apply]` が要る。
+
+## 対称な目標で `rw [h1, h2]` が両辺を書き換える（2026-08-29、第 670）
+
+    have hSS : S = -S := by rw [h1, h2]
+    -- ⊢ -∑ ... = - -∑ ...
+
+★目標 `∑ = -∑` の**両辺に**同じ部分項があると `rw` は両方を書き換える。
+`h1.trans h2` と項で書くか、`conv_lhs => rw [...]` で片側に閉じ込める。
+
+
+## `Point` の群構造は `[DecidableEq F]` を要求する（2026-08-29、第 686）
+
+    failed to synthesize instance of type class
+      AddMonoid W.toAffine.Point
+
+★mathlib の `WeierstrassCurve.Affine.Point.instAddCommGroup` は
+`variable [DecidableEq F]` の節にある。`+` だけなら `instance : Add W.Point`
+（`DecidableEq` 不要）で足りるが、**`n • ` や `addOrderOf` を使うと `AddMonoid` が要り、
+そこで詰まる**。`open scoped Classical in` を定理の直前に置けば通る。
+☆`[W.IsElliptic]` を足しても直らない——足りないのは `DecidableEq` のほうである。
+
+## `u⁻¹` の掛け算は `ring` では消えない（2026-08-29、第 689）
+
+`Units` の `u` と `u⁻¹` は `ring` にとって別々の不定元なので、
+`u⁻²·u² · x = x` は `ring` で閉じない。`hu : (u:F) * (u⁻¹:F) = 1`（`C.u.mul_inv`）を
+**係数つきで** `linear_combination` に渡す:
+
+    linear_combination (x' * ((C.u : F) * (C.u⁻¹ : F) + 1)) * hu
+
+★`(uu⁻¹)² − 1 = (uu⁻¹ − 1)(uu⁻¹ + 1)` の因数分解が係数の形を決める。
+3 乗なら `(uu⁻¹)² + uu⁻¹ + 1` が係数になる。
+☆逆に `variableChange_a*` は `u⁻¹` **だけ**で書かれているので、そこは素の `ring` で閉じる。
+
+
+## 在庫: `IsDedekindDomain.HeightOneSpectrum.under` は mathlib にある
+
+**失敗形**: `P ∩ 𝓞L` を `HeightOneSpectrum` として作る定義を自分で書いた。
+
+**実際**: `Mathlib/RingTheory/DedekindDomain/Ideal/Lemmas.lean` に
+`IsDedekindDomain.HeightOneSpectrum.under (A) (w : HeightOneSpectrum B) : HeightOneSpectrum A`
+がある(`@[simps]` 付き)。`HeightOneSpectrum.comap` が全射環準同型限定なのに気を取られて
+`under` を見落とした。
+
+**直し方**: `decl-index.txt` を `HeightOneSpectrum` で grep するとき、`comap` だけでなく
+`under`・`over`・`liesOver` も見る。イデアルの contraction は mathlib では `Ideal.under`
+という名前である(`comap` ではない)。
+
+## 在庫: `finite_j_of_htFalt_le` は既にある（Northcott は済んでいた）
+
+**失敗形**: 「`ht^Falt` が有界な類は有限」（Northcott）が無いと思い込み、
+`Skeleton/GenEll/NorthcottJ.lean` に節点を立てた（第 743）。
+
+**実際**: `Found/GaloisRep/NorthcottHtJ.lean` の `finite_j_of_htFalt_le`（`§9-1005`）が
+**無条件で証明済み**だった。`Found/GenEll/NorthcottImage.lean`（`§9-950`）が
+`htJ` の Northcott 性を与えている。★mathlib に instance が無いことは正しかったが、
+**本プロジェクトが自前で作っていた**。
+
+**直し方**: 新しい節点を立てる前に、まず `node tools/decl-index.mjs` で
+`.cache/decl-index.txt` を作り、`finite`・`Northcott`・`Finite` で grep する。
+★★特に「§n-xxxx で済んでいる」と他のファイルの docstring が書いていないか、
+`grep -rn "無条件" ABC3/Found/` で見る。
+
+**副産物**: この測定で `SSCurve.fld : Type` ＋ 埋め込みという設計が
+`finite_j_of_htFalt_le`（族の定義体を `IntermediateField ℚ ℂ` で受ける）と
+噛み合わないことも分かり、`SSCurve.K : IntermediateField ℚ ℂ` に直した（第 753）。
+
+## 数体の判別式・円分体（2026-08-31、第 780-784 で使った mathlib の在庫）
+
+「`l` が `L` で不分岐」を **`¬ (l : ℤ) ∣ NumberField.discr L`** として持つと、
+mathlib の以下がそのまま噛み合う。分岐理論の API を探す必要はない。
+
+* `NumberField.discr_dvd_discr : discr K ∣ discr L`（`K ⊆ L`）
+* `NumberField.not_dvd_discr_iff_forall_mem : ¬ p ∣ discr K ↔ ∀ P ∋ p, IsUnramifiedAt`
+* `NumberField.abs_discr_gt_two : 1 < finrank ℚ K → 2 < |discr K|`
+* `NumberField.finrank_eq_one_of_unramified`（至る所不分岐な数体は `ℚ`）
+* `NumberField.linearDisjoint_of_isGalois_isCoprime_discr`
+  —— **`K₁/ℚ` が Galois で `disc` が互いに素なら線型無関連**（これが要）
+* `IsCyclotomicExtension.Rat.discr_prime_pow : NumberField.discr K = ±p^m`
+* `IsCyclotomicExtension.Rat.finrank : finrank ℚ ℚ(ζ_n) = n.totient`
+* `IntermediateField.LinearDisjoint.adjoin_rank_eq_rank_left_of_isAlgebraic`
+  —— `[L(A):L] = [A:F]`
+
+### 失敗形と直し方
+
+* `Int.coe_nat_prime` / `Int.natCast_prime` は**無い**。
+  `Prime (l : ℤ)` は `rw [Int.prime_iff_natAbs_prime]; simpa using (Fact.out : l.Prime)`。
+* `IsCyclotomicExtension.isGalois` の第 1 引数は **`Set ℕ`**。`{l ^ k}` と書く（`(l ^ k)` は型エラー）。
+* `IsPrimitiveRoot.powerBasis K` は **`[NeZero ((n : ℕ) : K)]`** を要る。
+  `⟨(Nat.cast_ne_zero (R := K)).2 (NeZero.ne n)⟩` で供給する。
+* `IsPrimitiveRoot.minpoly_eq_cyclotomic_of_irreducible` の向きは
+  **`cyclotomic n K = minpoly K μ`**（左右が直感と逆）。`.symm.trans` で使う。
+* `IsPrimitiveRoot.minpoly_dvd_cyclotomic` は `μ` が **`K` 自身**にある場合のみ。
+  拡大体の `μ` には `minpoly.dvd K μ (aeval μ (cyclotomic n K) = 0)` を使い、
+  根であることは `rw [aeval_def, ← eval_map, map_cyclotomic]` で `isRoot_cyclotomic` に落とす。
+* `Normal.of_isAlgClosed` は**無い**。`IsAlgClosure.normal B Ω`（`IsAlgClosure` を
+  `⟨inferInstance, inferInstance⟩` で作ってから）。
+* 既約性を環同型で移すのは `MulEquiv.irreducible_iff (Polynomial.mapEquiv e)`
+  （`f` は**明示引数**なので `.irreducible_iff` のドット記法は効かない）。
+* `IntermediateField.restrict_algEquiv` の向きは `↥E ≃ₐ[F] ↥(E.restrict h)`。
+* `le_sup_right` を包含として使うときは型注釈が要る: `(le_sup_right : Z ≤ M) hζZ`。
+* `NumberField` のインスタンスは `⟨⟩`（明示欄が無い）。`Module.Finite.trans (R := ℚ) (A := B) (M := M)`
+  は引数を取らない（`inferInstance` を渡すと "Function expected"）。
+
+## 配管：新規ファイルの登録先（2026-08-31、第 800）
+
+`lean/ABC3.lean` は **アグリゲータだけ**を import する（`ABC3.Meta.Claim` /
+`ABC3.Interface` / `ABC3.Skeleton` / `ABC3.Found` / `ABC3.Gap` / `ABC3.Check`）。
+★新しい `.lean` を作ったら **`lean/ABC3/Found.lean`（等）に `import` を足す**こと。
+`ABC3.lean` に足しても行が一致せず sed が黙って何もしない。
+
+☆症状: 個別ビルド（`lake build ABC3.Found.GaloisRep.Foo`）は通り、
+`node tools/check.mjs` も PASS するのに、`lake build ABC3` がそのファイルを
+一度もコンパイルしていない（他のファイルから import されていなければ）。
+
+## Tate の `I` 進級数：adic 添字と `q` 次数はずれる（2026-08-31、第 818）
+
+`tateXtail (w, q) = adicSum (n ↦ q^n · ∑_{d∣n} d·w^d)` である。
+★`w = ζ` のときは `q` 次数 = adic 添字 `n` だが、
+**`w = q·ζ^{-1}` のときは `w^d = q^d ζ^{-d}` なので `q` 次数は `n + d`** になる。
+
+☆したがって「adic 添字ごとに係数を比べる」形の照合は、
+先に **`q` 次数に揃えた形**（古典形 `X(u) = u/(1−u)² + ∑_N (∑_{d∣N} d(u^d + u^{−d} − 2)) q^N`）
+へ直してからでないとできない。
+
+★道具は `AdicFubini.lean` の `adicSum_reindex_mul`・`adicSum_fubini`、
+`AdicMul.lean` の `adicSum_mul`。
+
+## IsLocalization.lift が通らない——インスタンスの菱形（2026-08-31、第 845）
+
+```
+univDual has type @RingHom TateBase (TrivSqZeroExt ..) AddMonoidAlgebra.nonAssocSemiring
+                                                       nonAssocSemiring
+but is expected  @RingHom TateBase ?P  AddMonoidAlgebra.commSemiring.toNonAssocSemiring
+                                                       CommSemiring.toSemiring.toNonAssocSemiring
+```
+
+`TrivSqZeroExt` も `AddMonoidAlgebra` も `nonAssocSemiring` を**独立に**宣言しており、
+`CommSemiring` 経由の道と構文的に一致しない。`by exact` も `(g := ..)` も効かない。
+
+**直し方（両方使う）**
+
+* **標的側**——`def MyType := TrivSqZeroExt R M`（`abbrev` ではなく `def`）で包み、
+  `noncomputable instance : CommRing MyType := inferInstanceAs (CommRing (TrivSqZeroExt R M))`
+  を 1 つだけ与える。`def` は reducible でないので探索は唯一の道を通る。
+* **始域側**——準同型を `MvPolynomial.eval₂Hom` で作る。
+  戻り値の型が `[CommSemiring R]` 由来になるので `IsLocalization.lift` と揃う。
+
+包んだ型の上で `TrivSqZeroExt.snd_mul` などを使うには、まず
+`theorem mul_eq (x y) : (show TrivSqZeroExt R M from x * y) = (show .. from x) * (show .. from y) := rfl`
+を置き、`simp only [eps, re, mul_eq, TrivSqZeroExt.snd_mul]` の順で展開する。
+☆`simpa … using h` は `h` を `True` にしてしまうことがあるので `simp only` で順に展開する。
+
+☆付随して見えた失敗形:
+
+* `Int.induction_on` の case 名は `zero` / `succ` / `pred`（`hz`/`hp`/`hn` ではない）
+* `MvPolynomial.induction_on` の case 名は `C` / `add` / `mul_X`（`h_C` 等ではない）
+* `Fin 2` の `fin_cases i` は `X ((fun i ↦ i) ⟨0, ⋯⟩)` を作り `rw [… X 0]` が失敗する。
+  `theorem foo : ∀ i : Fin 2, … | 0 => … | 1 => …` の**等式コンパイラ**で書く。
+* `IsLocalization.induction_on` は無い。`IsLocalization.surj` を使い
+  `obtain ⟨⟨a, s⟩, hz⟩ := IsLocalization.surj (M := …) x`（`hz : x * ι s = ι a`）とする。
+* 局所化への**微分の延長**は mathlib に無い（`Mathlib/RingTheory/Derivation/` を
+  `Localization` で grep して 0 件）。双対数 + `IsLocalization.lift` で自分で作る。

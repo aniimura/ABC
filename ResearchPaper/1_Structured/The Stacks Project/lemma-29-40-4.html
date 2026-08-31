@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>[Stacks] Lemma 29.40.4 / 29.40.5 — ample から射影空間への immersion（Serre）</title>
+<style>
+ body { font-family: Georgia, serif; max-width: 46em; margin: 2em auto; line-height: 1.6; color: #1a1a1a; }
+ section { border-left: 3px solid #999; padding: .2em 0 .2em 1em; margin: 2em 0; }
+ .verbatim { background: #f6f6f2; padding: .8em; }
+ .reading { color: #333; font-size: .95em; }
+ .reading::before { content: "読み: "; font-weight: bold; }
+ .open { color: #8a2f00; }
+ .open::before { content: "測定: "; font-weight: bold; }
+ h1, h2 { font-size: 1.1em; }
+ code { background: #eee; }
+ .scr { font-style: italic; }
+ table { border-collapse: collapse; margin: 1em 0; }
+ td, th { border: 1px solid #ccc; padding: .3em .6em; font-size: .95em; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1>[Stacks] Lemma 29.40.4（tag <code>01VT</code>）・Lemma 29.40.5（tag <code>01VU</code>）</h1>
+
+<p>The Stacks Project、Chapter 29 Morphisms of Schemes、
+§29.40 Ample and very ample sheaves relative to finite type morphisms。
+物理 p.2516 / p.2517。<strong>150 dpi 目視確認 2026-08-27</strong>。</p>
+
+<section class="statement lemma"
+         id="stacks-lemma-29-40-4"
+         data-paper="Stacks"
+         data-pdf-page="2516"
+         data-item="Lemma 29.40.4"
+         data-notation-checked="2026-08-27">
+<div class="verbatim">Lemma 29.40.4. Let f : X &rarr; S be a morphism of schemes. Let <span class="scr">L</span> be an invertible <span class="scr">O</span><sub>X</sub> -module. Assume S affine and f of finite type. The following are equivalent</div>
+<div class="reading">
+<p>★<code>S</code> が<strong>アフィン</strong>で <code>f</code> が有限型のとき、次は同値:</p>
+<table>
+<tr><th>条</th><th>内容</th></tr>
+<tr><td>(1)</td><td><code>ℒ</code> は <code>X</code> 上 ample</td></tr>
+<tr><td>(2)</td><td><code>ℒ</code> は <code>f</code>-ample</td></tr>
+<tr><td>(3)</td><td><code>ℒ<sup>⊗d</sup></code> が <code>f</code>-very ample となる <strong><code>d ≥ 1</code> が存在する</strong></td></tr>
+<tr><td>(4)</td><td><strong>十分大きい全ての <code>d ≫ 1</code></strong> で <code>ℒ<sup>⊗d</sup></code> が <code>f</code>-very ample</td></tr>
+<tr><td>(5)</td><td>★<strong>ある <code>d ≥ 1</code> と <code>n ≥ 1</code> と immersion <code>i : X → ℙⁿ<sub>S</sub></code> があって <code>ℒ<sup>⊗d</sup> ≅ i*𝒪(1)</code></strong></td></tr>
+<tr><td>(6)</td><td>十分大きい全ての <code>d ≫ 1</code> について同様</td></tr>
+</table>
+
+<p>★★★<strong>(1) ⟹ (5) が [GenEll] Proposition 1.4, (iv) の「埋め込み」の段の前半である</strong>
+——原文 p.7 の「[some positive tensor power of] the ample line bundle L<sub>ℚ</sub>
+yields an embedding ϵ<sub>ℚ</sub> : X<sub>ℚ</sub> ⊆ P<sub>ℚ</sub>」がこれ。
+<code>S = Spec ℚ</code> はアフィンなので本補題がそのまま当たる。</p>
+
+<p class="open">★★★★<strong>この段は mathlib に無い。</strong>実測（2026-08-27）——
+<code>Mathlib/AlgebraicGeometry/</code> 配下に <code>Ample</code> / <code>VeryAmple</code> は 1 件も無く、
+<strong>スキーム上の可逆層（invertible sheaf）そのものが無い</strong>
+（<code>Modules/</code> にあるのは <code>Presheaf</code> / <code>Sheaf</code> / <code>Tilde</code> の 3 本だけ）。
+★<code>Proj</code> は <code>ProjectiveSpectrum/</code> にあるが、
+<strong><code>ℙⁿ<sub>S</sub></code> の点の関手（座標表示）は無い</strong>。
+★★これが person-years の道の入口であり、<strong>ここが葉になる</strong>。</p>
+</div>
+</section>
+
+<section class="statement lemma"
+         id="stacks-lemma-29-40-5"
+         data-paper="Stacks"
+         data-pdf-page="2517"
+         data-item="Lemma 29.40.5"
+         data-notation-checked="2026-08-27">
+<div class="verbatim">Lemma 29.40.5. Let f : X &rarr; S be a morphism of schemes. Let <span class="scr">L</span> be an invertible <span class="scr">O</span><sub>X</sub> -module. Assume S quasi-compact and f of finite type. The following are equivalent</div>
+<div class="reading">
+<p>★<code>S</code> の仮定が<strong>アフィン → 擬コンパクト</strong>に緩む代わりに、
+<code>X</code> 上の ample 性（29.40.4 の (1)）が落ちる:</p>
+<ul>
+<li>(1) <code>ℒ</code> は <code>f</code>-ample</li>
+<li>(2) <code>ℒ<sup>⊗d</sup></code> が <code>f</code>-very ample となる <code>d ≥ 1</code> が存在する</li>
+<li>(3) 十分大きい全ての <code>d ≫ 1</code> で <code>ℒ<sup>⊗d</sup></code> が <code>f</code>-very ample</li>
+</ul>
+<p>★★これが<strong>Serre の定理</strong>（ample の十分大きい冪は very ample）である。
+証明は <code>S</code> の有限アフィン開被覆を取って 29.40.4 に帰着する。</p>
+</div>
+</section>
+
+<h2>★★★★★記法の実測——ここで実害が出た（2026-08-27）</h2>
+
+<p class="open">★★★★★<strong><code>0_Source/Stacks Project (book, complete).txt</code> は
+<code>-enc UTF-8</code> なしで作られており、<code>&rarr;</code> ・ <code>&ge;</code> ・ <code>&gt;&gt;</code>（<code>\gg</code>）・
+<code>&otimes;</code> がすべて空白に落ちている。</strong>
+そのため Lemma 29.40.4 の (3)（<code>d &ge; 1</code>）と (4)（<code>d &gt;&gt; 1</code>）が
+どちらも「<code>d  1</code>」に見え、
+★★<strong>「ある <code>d</code>」と「十分大きい全ての <code>d</code>」を実際に読み違えた</strong>。</p>
+
+<p class="open">★★★<strong>しかしこれは <code>pdftotext</code> の限界ではなかった。</strong>
+<code>tools/check.mjs</code> が実際に引く <code>pdftotext -enc UTF-8 -f N -l N</code> は
+<code>&rarr;</code> ・ <code>&ge;</code> ・ <code>&gt;&gt;</code> ・ <code>&otimes;</code> を<strong>そのまま出力する</strong>（実測済み）。
+★落ちていたのは<strong>既存の <code>.txt</code> の側</strong>である。</p>
+
+<p class="open">★★★★★<strong>規約として引き出すこと:
+<code>0_Source/*.txt</code> は<strong>探索にだけ</strong>使い、
+逐語は必ず <code>pdftotext -enc UTF-8 -f N -l N</code> で取り直す。</strong>
+★★目視（150 dpi）はそれとは別の検査であり、どちらも他方を代替しない
+——README §4 の「S4 が通っても装飾の正しさは目視だけが担保する」と同じ構造である。</p>
+
+<p>★実際に確認した導出（150 dpi 目視 p.2516 / p.2517 / p.2520）:
+スクリプト体 <code>&#8466;</code> は <code>L</code>、<code>&#119978;<sub>X</sub></code> は <code>OX</code>、
+<code>P<sup>n</sup><sub>S</sub></code> は <code>PnS</code>（添字が並ぶ）となる。
+★★可換図式は <code>X</code> / <code>GY</code> / <code>1 S</code> のような無意味な断片になるので、
+<strong>図式を含む行は逐語に使えない</strong>。</p>
+
+</body>
+</html>

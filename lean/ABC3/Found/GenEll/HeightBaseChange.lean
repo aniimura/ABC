@@ -105,7 +105,7 @@ theorem htArith_baseChange {X : Scheme.{0}} (D : ArithCartier X)
 
 def htArith_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 5,
-    item := "Definition 1.2, (i)(高さの底変換不変性——X(ℚ̄) の型の構成は含まない)",
+    item := "Definition 1.2, (i)(高さの底変換不変性——型は AlgPointClass.lean)",
     sectionId := "genell-def-1-2-i" }
 
 end ABC3.Found.GenEll

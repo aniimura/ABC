@@ -9,6 +9,8 @@ import ABC3.Found.GenEll.HeightMetric
 import ABC3.Found.GenEll.HeightAdditive
 import ABC3.Found.GenEll.HeightClass
 import ABC3.Found.GenEll.LogCondSigma
+import ABC3.Found.GenEll.BDSlack
+import ABC3.Found.GenEll.LogDiffTower
 
 /-!
 # [GenEll] §1 Generalities on Heights —— 必要 9 件の statement(`Skeleton`)
@@ -408,33 +410,86 @@ theorem prop_1_6 {X : AlgebraicGeometry.Scheme.{0}} {V : Type}
 
 (i) `U_Y(ℚ̄)` 上で
 `log-cond_E − log-cond_D ≲ log-diff_Y − log-diff_Z ≲ (1 − 1/e)·log-cond_E`。
-(ii) 分岐指数が各点で `e` に**等しい**なら Riemann–Hurwitz の関係式。
 
-★★**この論文で `≲` と `≤` の差が主張になる場所である。**
-原文 p.10 の証明は本文中で明示的に区別している(目視確認 2026-08-16):
-- prime-to-`Σ` 部分の不等式は「**`=` と `≤` であって `≲` ではない**」
-- `Σ` の上の `log-diff_Y − log-diff_Z` は「**`≥ 0` であって `≳` ではない**」
+## ★★★★★★★★★★★ 2026-08-27——**構成に載せ替えた**(第 423 ブロック)
 
-★`pdftotext` は `≲` を**出力に何も残さない**ので、この区別は
-**`.txt` からは原理的に復元できない**。ゆえに目視必須であり、そう写した。
+★**旧 statement(`∀ S : CoveringSetup, S.hyp → …`)は偽であった**
+——`Check/GenEll/Prop17AxiomGap.lean` の `prop_1_7_false` で機械検証済み。
+`hyp : Prop` は `CoveringSetup` の**不透明なフィールド**であって
+`logDiff` や `logCond` を**何も縛らない**。`hyp := True` と置けば結論は破れる。
 
-★★**条件 (a)–(d) は落としていない** —— `CoveringSetup.hyp` として仮定に置いてある。
-落とせば主張が強くなり、**偽の skeleton** になるからである。
-展開できていないことは `.needs` に `.implicitStep` として明記した。
+★★**落とさずに持つことと、制約になることは別である**——これが実測でわかったことである。
 
-★(ii) は Riemann–Hurwitz であり、`deg` は `Y_ℚ`・`Z_ℚ` 上の直線束の次数
-——`HeightTheoryData` の語彙の外なので、本 statement では (i) だけを固定する。
-(ii) は `prop_1_7_ii_pending` で「まだ書けない」ことを型で明示する。 -/
-theorem prop_1_7 (S : CoveringSetup) (h : S.hyp) :
-    BDle (fun x : ↥(S.DY.compl S.divY) =>
-            S.DZ.logCond S.divZ (S.toPoint x.1) - S.DY.logCond S.divY x.1)
-         (fun x : ↥(S.DY.compl S.divY) =>
-            S.DY.logDiff x.1 - S.DZ.logDiff (S.toPoint x.1))
-  ∧ BDle (fun x : ↥(S.DY.compl S.divY) =>
-            S.DY.logDiff x.1 - S.DZ.logDiff (S.toPoint x.1))
-         (fun x : ↥(S.DY.compl S.divY) =>
-            (1 - 1 / (S.e : ℝ)) * S.DZ.logCond S.divZ (S.toPoint x.1)) := by
-  sorry
+## ★★原文の証明の構造をそのまま型にした
+
+原文 p.10 の証明は**明示的に 2 つに分けている**(2026-08-16 の 260 dpi 目視で確認):
+
+| 部分 | 原文の言い方 |
+|---|---|
+| prime-to-`Σ` | 「**`=` と `≤` であって `≲` ではない**」 |
+| `Σ` の上 | 「**`≥ 0` であって `≳` ではない**」 |
+
+★すなわち**厳密な不等式が `Σ` の外で成り立ち、`Σ` の上の食い違いが一様に有界**であり、
+その 2 つから `≲` が出る。★★本 statement はその**後半**を証明する
+(`Found/GenEll/BDSlack.lean` の `bdle_of_bounded_slack`)。
+
+★★★`Σ` の上の食い違いが `Σ_{q∈Σ} log q` で一様に抑えられることは
+`Found/GenEll/SigmaBound.lean` / `LogCondSigma.lean` で取ってある(第 412–415)。
+**点にも定義体にも依らない定数**であることが要点である。
+
+## ★★★★`log-diff_Y − log-diff_Z` が何であるかは分かっている
+
+`Found/GenEll/LogDiffTower.lean` の `logDiffOfField_tower` は**等式**である:
+
+> `log-diff(K) − log-diff(F) = log N(𝔡_{K/F}) / [K:ℚ]`
+
+★したがって (i) の中辺は**相対 different の対数ノルム**そのものである。
+`hlow` / `hup` はその上下からの評価であり、原文が
+『the elementary theory of differents』と呼ぶものにあたる
+——その**局所の核**は `TameRamification.lean` / `DifferentKummer.lean` /
+`TotallyRamified.lean` で取ってある(第 374–411、馴分岐 6/6)。
+★★残っているのは**局所から大域への組み立て**であり、`.needs` に明記した。
+
+## ★★★★★逸脱(明示)
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 量化する対象 | `∀ S : CoveringSetup` | **点の型 `P` と実数値関数** | 前者では偽だから |
+| elementary claim | 証明の中で使う | **仮定 `hlow` / `hup` として受ける** | 局所から大域への段が未了 |
+| (ii) Riemann–Hurwitz | 述べる | **含めない** | `deg` が語彙の外(`.needs` に記録) |
+
+★★★★★★**空虚ではない**——`Check/GenEll/Prop17Witness.lean` に
+仮定が実際に満たされる場合を置いてある。 -/
+theorem prop_1_7 {P : Type}
+    (condE condD diffY diffZ slackLow slackUp : P → ℝ) (e : ℕ) (he : 0 < e)
+    (Sig : Finset ℕ)
+    -- prime-to-`Σ` の部分(原文が `=` と `≤` と明示している段)
+    (hlow : ∀ x, diffY x - diffZ x ≤ (condE x - condD x) + slackLow x)
+    (hup : ∀ x, (1 - 1 / (e : ℝ)) * condE x ≤ (diffY x - diffZ x) + slackUp x)
+    -- `Σ` の上の食い違いは `Σ_{q∈Σ} log q` で一様に抑えられる
+    (hsl : ∀ x, slackLow x ≤ ∑ q ∈ Sig, Real.log q)
+    (hsu : ∀ x, slackUp x ≤ ∑ q ∈ Sig, Real.log q) :
+    BDle (fun x => condE x - condD x) (fun x => diffY x - diffZ x)
+  ∧ BDle (fun x => diffY x - diffZ x) (fun x => (1 - 1 / (e : ℝ)) * condE x) :=
+  ⟨ABC3.Found.GenEll.bdle_of_bounded_slack _ _ slackLow _ hlow hsl,
+   ABC3.Found.GenEll.bdle_of_bounded_slack _ _ slackUp _ hup hsu⟩
+
+/-- ★★★★**(i) の中辺の正体** —— `log-diff_Y − log-diff_Z` は相対 different の対数ノルム。
+
+原文 (GenEll p.9):
+> Proposition 1.7. (Conductors and Log Differents) Let
+
+★`Found/GenEll/LogDiffTower.lean` の `logDiffOfField_tower` を並べ替えただけである。
+★★**不等式ではなく等式**なので、(i) の両側は `𝔡_{K/F}` の上下からの評価に**帰着する**。 -/
+theorem prop_1_7_middle (F K : Type) [Field F] [NumberField F] [Field K] [NumberField K]
+    [Algebra F K] :
+    ABC3.Found.GenEll.logDiffOfField K - ABC3.Found.GenEll.logDiffOfField F
+      = Real.log (Ideal.absNorm
+          (differentIdeal (NumberField.RingOfIntegers F) (NumberField.RingOfIntegers K)))
+        / (Module.finrank ℚ K : ℝ) := by
+  rw [ABC3.Found.GenEll.logDiffOfField_tower F K]
+  ring
+
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -510,6 +565,13 @@ def prop_1_6.needs : List ProofObligation :=
     .implicitStep
       "★★表題 'Conductor Bounded by the Height' と、p.5 の ≲ の定義が示す向きが逆である。Gap/GenEll/BDDirection.lean に記録した。**本 statement は印字どおりに写してある**" 9 ]
 
+def prop_1_7_middle.src : Source :=
+  { paper := "GenEll", pdfPage := 9, item := "Proposition 1.7((i) の中辺は相対 different の対数ノルム)",
+    sectionId := "genell-prop-1-7" }
+
+/-- ★**依存は無い** —— mathlib の差積の tower 公式を並べ替えただけである。 -/
+def prop_1_7_middle.needs : List ProofObligation := []
+
 def prop_1_7.src : Source :=
   { paper := "GenEll", pdfPage := 9, item := "Proposition 1.7",
     sectionId := "genell-prop-1-7" }
@@ -522,14 +584,19 @@ def prop_1_7.src : Source :=
 Arakelov も Galois 表現も要らず、**局所体の分岐理論と Kummer 理論だけ**である。 -/
 def prop_1_7.needs : List ProofObligation :=
   [ .implicitStep
-      "★★条件 (a)(b)(c)(d)(reduced / D_ℚ = φ_ℚ^{-1}(E_ℚ)_red / 有限エタール / 分岐指数が e を割る)を CoveringSetup.hyp という **1 つの不透明な Prop** として持っている。**落としてはいない**が、展開もしていない" 9,
-    .folklore "原文が『the elementary theory of differents』と呼ぶもの。prime-to-Σ 部分の等式・不等式はここから出る" 10,
+      "★★★★★★★★★★2026-08-29 に **Found/GenEll/Prop17.lean の prop_1_7 が項目まるごとを取った**(§9-975、第 511 ブロック)。本 statement が仮定として受けていた hlow / hup は、そこでは**算術から作られている**(§9-954〜§9-974 の 21 ブロック)。★slack は Σ ではなく **0**、左の ≲ は**等式(BDeq)**である。★★受けているのは原文の条件 (b)(D_ℚ = φ_ℚ^{-1}(E_ℚ)_red)を**台の対応に翻訳した形**だけである。★★★また Check/GenEll/Prop17Direction.lean が『右の ≲ を印字どおりの向き(BDle)で読むと偽になる』ことを機械検証した——Gap/GenEll/BDDirection.lean が待っていた falsifier である" 10,
     .implicitStep
-      "★原文は prime-to-Σ 部分について『with \"=\" and \"≤\", not \"≲\"!』、Σ 上について『with \"≥\", not \"≳\"!』と**明示的に区別している**。pdftotext は ≲ を出力に残さないので、この区別は .txt からは復元できない(2026-08-16 実測)" 10,
+      "★★★本 statement は原文の証明のうち**後半だけ**を証明している。prime-to-Σ の厳密な不等式(hlow / hup)は仮定として受けている。★空虚でないことは Check/GenEll/Prop17Witness.lean で確かめてある" 10,
+    .folklore "原文が『the elementary theory of differents』と呼ぶもの。★局所の核は 2026-08-26〜27 の第 374-411 で実装した(馴分岐 6/6)。★★残っているのは**局所から大域への組み立て**である" 10,
+    .implicitStep
+      "★原文は prime-to-Σ 部分について『with \"=\" and \"≤\", not \"≲\"!』、Σ 上について『with \"≥\", not \"≳\"!』と**明示的に区別している**。★★本 statement はその区別を型にした——厳密な不等式(hlow/hup)と一様な有界性(hsl/hsu)から ≲ が出る(Found/GenEll/BDSlack.lean)" 10,
     .citation "[GenEll]" "局所体の分岐理論と Kummer 理論(証明の核となる initial claim)"
-      (.inMathlib "IsDedekindDomain.differentIdeal / Polynomial.IsSplittingField / IsCyclic — ただし『[L:K] ≤ d なる全ての L/K に一様な n』という**一様性**の部分は mathlib に無い(2026-08-16 実測)") 10,
+      (.inMathlib "IsDedekindDomain.differentIdeal / Polynomial.IsSplittingField / IsCyclic —— ただし『[L:K] ≤ d なる全ての L/K に一様な n』という**一様性**の部分は mathlib に無い(2026-08-16 実測)") 10,
     .otherPaper "[GenEll]" "Remark 1.5.1(Σ 上の log-cond の寄与が ≈ 0 であること)" 8,
+    .otherPaper "[Stacks]" "53.12 Riemann-Hurwitz((ii) の原典側の節点——第 419 で手元にあることを実測した)" 4441,
     .implicitStep
-      "(ii) の Riemann–Hurwitz は Y_ℚ・Z_ℚ 上の直線束の次数 deg(−) を要求する。HeightTheoryData の語彙の外なので、本ファイルでは (i) だけを固定した" 10 ]
+      "★★旧 statement(∀ S : CoveringSetup, S.hyp → …)は**偽**であった——Check/GenEll/Prop17AxiomGap.lean の prop_1_7_false で機械検証済み。hyp : Prop は不透明なフィールドであって logDiff や logCond を何も縛らない。2026-08-27 に構成へ載せ替えた(第 423 ブロック)" 9,
+    .implicitStep
+      "(ii) の Riemann–Hurwitz は Y_ℚ・Z_ℚ 上の直線束の次数 deg(−) を要求する。本ファイルでは (i) だけを固定した" 10 ]
 
 end ABC3.Skeleton.GenEll

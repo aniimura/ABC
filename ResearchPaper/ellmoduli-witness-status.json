@@ -1,0 +1,246 @@
+{
+  "_comment": "★★★EllModuliData（Interface/GenEll/EllModuli.lean、50 フィールド）の witness を組むための フィールド別の状態表。★§3・§4 の残り 5 件（Lemma 3.5・Lemma 3.7・Theorem 3.8・Corollary 4.3・Corollary 4.4）は Skeleton では sorry なしで証明済みであり、すべてこの witness 1 つに律速される（2026-08-30 実測、第 720）。",
+  "measuredAt": "2026-08-31",
+  "measuredBy": "第 720 ブロック",
+  "totalFields": 50,
+  "vocabulary": {
+    "_comment": "★型と写像だけ——証明義務が無いので、対象を決めれば埋まる",
+    "fields": [
+      "EllClass / Curve / cls / degOfDefinition / faltingsHeight（TorsionGaloisRepData より）",
+      "HasPotMultRed / PrimeToLocalHeights / CompactlyBounded / GaloisFinite / ImageContainsSL2",
+      "degInf / htInf / logDiffMell / degLe / SemiStable / HasLCyclic / MinimalField",
+      "ImageSurjective / PrimeToRamification / HasMultRed / PrimeToMultPrimes",
+      "quotLCyclic / lcyclicExc / noMultRedExc / torsionExt / multCard / multPrime / localHt"
+    ],
+    "note": "★対象の候補は Found/GaloisRep が既に持っている: degInfOf・htFaltOf・minDeltaExp・SemistableAt・neronExp・localHeightOf。EllClass は j 不変量の像、Curve は {L : IntermediateField ℚ ℂ} × WeierstrassCurve L の族で取るのが自然（Prop34.lean の形）"
+  },
+  "proofObligations": {
+    "degInf_le_htInf": {
+      "status": "★素材あり",
+      "where": "Found/GaloisRep/Prop34.lean の degInfOf_le_htFinJ（第 1 の ≲、§9-1008）"
+    },
+    "htInf_bdeq_faltings": {
+      "status": "★素材あり",
+      "where": "Found/GaloisRep の exists_htJ_le_htFalt′（§9-1003）と exists_htFalt_le_htJ（§9-1007）——両向きが揃っているので |·| の形にできる"
+    },
+    "faltingsHeight_bddBelow": {
+      "status": "★済",
+      "where": "Found/GaloisRep/HtFaltBounds.lean の exists_htFalt_bddBelow（§9-1010）"
+    },
+    "northcott": {
+      "status": "★済",
+      "where": "Found/GaloisRep/Prop34.lean の finite_j_of_htFalt_le（§9-1005、無条件）"
+    },
+    "degInf_quotLCyclic": {
+      "status": "☆残り 1 本",
+      "where": "Found/GaloisRep/DegInfLocal.lean の minDeltaExp_eq_mul_of_tateModel（第 716）＋ degInfOf_eq_of_local（Lemma35Concrete.lean）。★残るのは Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本"
+    },
+    "faltingsHeight_quotLCyclic": {
+      "status": "★★★本セッションで導出可能になった（外部引用ゼロ）",
+      "where": "Found/GaloisRep/VeluNormalized.lean の htFalt_veluQuotientFull_le（第 704）。その内側は Found/GenEll/Uniformization.lean（一様化・Laurent 比較で α = 1）と Found/GenEll/PointVariableChange.lean（点への作用）"
+    },
+    "degOfDefinition_pos": {
+      "status": "★自明",
+      "where": "finrank の正値性"
+    },
+    "primeToLocalHeights_of_lt": {
+      "status": "★済",
+      "where": "Found/GaloisRep/SemistableFin.lean・DegInfLocal.lean の degInfOf_ge_localHeight"
+    },
+    "lcyclicExc_group": {
+      "status": "☆未",
+      "where": "lcyclicExc / galoisFinite_lcyclicExc / mem_lcyclicExc —— Lemma 3.7 の (b) の例外集合。Found/GaloisRep/Lemma37A.lean・NoMultRedExc.lean に素材"
+    },
+    "noMultRedExc_group": {
+      "status": "☆未",
+      "where": "Found/GaloisRep/NoMultRedExc.lean に素材"
+    },
+    "galoisFinite_union": {
+      "status": "★自明に近い",
+      "where": "Example 1.3, (i)"
+    },
+    "torsionExt_group": {
+      "status": "★★mathlib に無い理論を要する",
+      "what": "torsionExt / cls_torsionExt / degOfDefinition_torsionExt（≤ 23040 倍）/ semiStable_torsionExt / hasMultRed_torsionExt / primeToLocalHeights_torsionExt",
+      "gap": "★semiStable_torsionExt は「E は L(E[3], E[5]) 上で半安定還元になる」——Néron–Ogg–Shafarevich（半安定還元の判定）であり mathlib に無い。☆degOfDefinition_torsionExt の 23040 = (3²−1)(3²−3)(5²−1)(5²−5) は Found/GaloisRep に条つき .src が既にある"
+    },
+    "compactlyBounded_empty": {
+      "status": "★自明",
+      "where": "Example 1.3, (ii)"
+    },
+    "mult_group": {
+      "status": "☆未",
+      "what": "multCard / multCard_pos / multPrime / multPrime_prime / localHt / localHt_pos",
+      "where": "局所高さは Found/GaloisRep/TateCurveWitness.lean の localHeightOf がそのまま使える"
+    }
+  },
+  "plan": [
+    "(1) Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本を証明する（受け皿は Found/GaloisRep/TateVelu.lean の veluCurve_tateCurveAt_eq、第 718）",
+    "(2) 語彙のフィールドを Found/GaloisRep の既存の対象で埋める",
+    "(3) 証明義務を上の表の順（済 → 素材あり → 未）に埋める",
+    "(4) 最後に残るのが torsionExt 群（半安定還元の判定、mathlib に無い）",
+    "★(4) が済めば §3・§4 の 5 件が一度に動く"
+  ],
+  "designChoice": {
+    "_comment": "★★★witness を組む前に決めるべき設計（第 721 の測定）",
+    "problem": "EllModuliData は単一の型 Curve・EllClass を要求するが、Found/GaloisRep/Prop34.lean の prop_3_4 は族の形（fld : P → IntermediateField ℚ ℂ、E : ∀ p, WeierstrassCurve (fld p)）で述べられている。★この差を埋める設計が witness の最初の一歩である",
+    "recommendation": {
+      "Curve": "Σ (L : IntermediateField ℚ ℂ), {W : WeierstrassCurve L // W.IsElliptic} ——シグマ型で族を 1 つの型にまとめる。★prop_3_4 は P := Curve、fld := Sigma.fst、E := Sigma.snd で当たる",
+      "EllClass": "ℂ（j 不変量）——cls E := j(E) を ℂ へ送る。★prop_3_4 の finite_j_of_htFalt_le が「j の像が有限」の形なのでそのまま合う。☆faltingsHeight : ℂ → ℝ は「その j を持つ曲線の ht^Falt」だが、well-defined 性（同じ j なら同じ ht^Falt）が要る——ℚ̄ 上の同型類は j で決まるので、ht^Falt が ℚ̄ 同型不変であることを言えばよい",
+      "degInf": "degInfOf L E（Found/GaloisRep/DegInf.lean）を Curve から拾う",
+      "faltingsHeight": "htFaltOf L E（Found/GaloisRep）",
+      "SemiStable": "∀ p, SemistableAt p E（Found/GaloisRep/SemistableFin.lean）",
+      "HasLCyclic": "位数 l の点 Q が存在して、その生成する部分群が各悪い素点で μ_l に対応する——本セッションの exists_veluQuotientFull_zmultiples（第 699）がこの形の入力を消費する",
+      "quotLCyclic": "veluQuotientFull E S（S は ⟨Q⟩∖{O} の座標、第 679・699）"
+    },
+    "firstStep": "★faltingsHeight の well-defined 性（ht^Falt が ℚ̄ 上の同型で不変）を Found/ に建てること。これが無いと EllClass := ℂ が使えない"
+  },
+  "semistableRestriction": {
+    "_comment": "★★★★★第 723 の測定——半安定に制限すると mathlib に無い部分が消える",
+    "finding": "Curve を「半安定な楕円曲線」だけに制限すると、torsionExt 群（torsionExt / cls_torsionExt / degOfDefinition_torsionExt / semiStable_torsionExt / hasMultRed_torsionExt / primeToLocalHeights_torsionExt）が torsionExt := id で**すべて自明に埋まる**。★これが唯一の mathlib 欠落（Néron–Ogg–Shafarevich、半安定還元の判定）だったので、半安定に制限した witness は**到達可能**である",
+    "caveat": "☆ただしそれは「半安定な曲線に対する Lemma 3.5 / Lemma 3.7 / Theorem 3.8 / Corollary 4.3 / 4.4」であって、原文の主張そのものではない。原文は torsionExt（L(E[3],E[5]) への基底変換）で一般の場合を半安定に帰着させる。★したがって .src は条つきにし、項目全体の .src は半安定還元の判定が入るまで置かない（check.mjs の B5・B6）",
+    "value": "★★それでも価値は大きい: (1) 残り 5 件の**数学の中身**がすべて Found に降りる、(2) 残る欠落が「半安定還元の判定」ただ 1 つに絞られる、(3) EllClass := ℂ の well-defined 性も半安定なら ht^Falt が安定 Faltings 高さに一致するので楽になる",
+    "nextConcreteSteps": [
+      "(1) Curve := Σ (L : IntermediateField ℚ ℂ), {W : WeierstrassCurve L // W.IsElliptic ∧ ∀ p, SemistableAt p W}",
+      "(2) EllClass := ℂ、cls := j。faltingsHeight の well-defined 性は htFaltOf_variableChange（第 722）＋ 基底変換不変性（半安定なら minDeltaExp が 分岐指数倍、archSum が拡大次数倍で、正規化で相殺）",
+      "(3) 残り 5 件の Skeleton をこの witness に当てる"
+    ]
+  },
+  "firstRealTheorem": {
+    "_comment": "★★★★★第 724 の測定——witness で最初に証明すべき定理",
+    "why": "EllClass は本物の商でなければならない。EllClass := Curve（cls := id）にすると northcott（高さと次数で抑えた類の有限性）が偽になる——同型な Weierstrass モデルが無限にあるからである。★したがって EllClass := ℂ（j 不変量）が必然であり、faltingsHeight : ℂ → ℝ の well-defined 性が要る",
+    "theorem": "★★**同じ j を持つ 2 つの半安定楕円曲線（数体上、体は異なってよい）は htFaltOf が等しい**",
+    "ingredients": [
+      "(a) 同じ体の上での変数変換不変性 —— ★済（htFaltOf_variableChange、第 722）",
+      "(b) 基底変換不変性 —— ☆未。半安定なら minDeltaExp は分岐指数倍、archSum は拡大次数倍になり、finrank での正規化で相殺する。mathlib の Ideal.sum_ramification_inertia が要る",
+      "(c) ねじれ（twist）の処理 —— ☆未。同じ j でも L 上では同型でないことがあるが、共通の拡大へ上げれば同型になる。半安定性がねじれを制限する"
+    ],
+    "note": "☆(b)(c) が済めば faltingsHeight : ℂ → ℝ が定義でき、残り 5 件の witness が半安定の範囲で組める",
+    "progress20260830": {
+      "(a)": "★済 —— htFaltOf_variableChange（第 722）",
+      "(b-1) アルキメデス側": "★済 —— archNorm_map（第 725、CurveArchInv.lean）、card_fiber_ringHom・image_restrict_eq_univ・archSum_baseChange（第 725）、htFaltOf_baseChange_of_degInf（第 726）。★これで ht^Falt の基底変換不変性は deg∞ のそれ**だけ**に帰着した",
+      "(b-2) 有限素点側": {
+        "status": "☆次の目標",
+        "goal": "degInfOf L′ (E ⁄ L′) = degInfOf L E（E が半安定のとき）",
+        "ingredients": [
+          "1. L′ の素点を L の素点の上で束ねる（Ideal.primesOver / HeightOneSpectrum）——finsum の繊維分解が要る",
+          "2. minDeltaExp P (E ⁄ L′) = e(P|p) · minDeltaExp p E（半安定のとき）——極小モデルが基底変換でも極小なのは v(c₄) = 0 が保たれるから（isMinimal_of_c4_vAdd_eq_zero、第 320 の道具）",
+          "3. absNorm P = (absNorm p)^{f(P|p)}",
+          "4. Σ_{P|p} e·f = [L′ : L] —— mathlib の Ideal.sum_ramification_inertia"
+        ],
+        "note": "★1 と 4 が mathlib API の navigation、2 が本プロジェクトの道具、3 は標準",
+        "mathlibApiConfirmed20260830": {
+          "3. absNorm P = (absNorm p)^f": "★mathlib にある —— Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver (Mathlib/NumberTheory/RamificationInertia/Inertia.lean:140)、および Ideal.absNorm_eq_pow_inertiaDeg / _′",
+          "4. Σ_{P|p} e·f = [L′:L]": "★mathlib にある —— Ideal.sum_ramification_inertia (Mathlib/NumberTheory/RamificationInertia/Basic.lean:596)。和は IsDedekindDomain.primesOverFinset p S の上で取る",
+          "1. finsum の繊維分解": "☆primesOverFinset を使えば有限和になるので、degInfOf の finsum を「p ごとの内側の有限和」に分解する配管を書けばよい",
+          "2. minDeltaExp P = e · minDeltaExp p（半安定）": {
+            "note": "☆本プロジェクトの仕事。筋は明確",
+            "proof": "半安定なら p-極小モデルは v_p(c₄) = 0 を満たす。基底変換すると v_P(c₄) = e·v_p(c₄) = 0 なので P-極小のまま。したがって minDeltaExp P (E⁄L′) = v_P(Δ) = e·v_p(Δ) = e·minDeltaExp p E",
+            "needs": [
+              "(i) primeSubring p（局所化）の上での c₄ による極小性の判定——完備 DVR 版 isMinimal_of_c4_vAdd_eq_zero（第 320）の局所化版",
+              "(ii) 付値の分岐関係 v_P(algebraMap x) = e(P|p)·v_p(x)"
+            ]
+          },
+          "verdict": "★★★材料 3・4 は mathlib にあり、1 は配管、2 だけが本プロジェクトの数学。実行可能である"
+        }
+      },
+      "(c) ねじれ": "☆未 —— 同じ j でも L 上で同型とは限らない。共通の拡大へ上げる"
+    },
+    "simplification20260830": {
+      "_comment": "★★★★★第 730 の発見——難所は「finsum の scaling 補題」1 本だけ",
+      "finding": "Found/GaloisRep/HtFaltCovolume.lean の twelve_finrank_htFaltOf_eq（共体積表示）12·d·ht^Falt(E) = −12·Σᶠ_p neronExp_p·log N(p) − 12·d·log(2π) + 12·Σ_σ log‖u_σ‖ − 6·Σ_σ log(covol P_σ) を使うと、アルキメデス側（Σ_σ の 2 項と d·log(2π)）は 第 725 の繊維の議論でそのまま [L′:L] 倍になる。★したがって残るのは **Σᶠ_p の項 1 つ**である",
+      "keyLemma": "★★**Σᶠ_P f′(P)·log N(P) = [L′:L]·Σᶠ_p f(p)·log N(p)**（f′(P) = e(P|p)·f(P の下の p) のとき）。☆これ 1 本で minDeltaExp（deg∞）にも neronExp（共体積表示）にも効く",
+      "proof": "1. finsum を p ごとに束ねる（primesOverFinset p で有限和）2. log N(P) = f(P|p)·log N(p)（Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver）3. Σ_{P|p} e·f = [L′:L]（Ideal.sum_ramification_inertia）",
+      "verdict": "★★★これで ht^Falt の基底変換不変性は **1 本の scaling 補題**に集約された。★次のセッションはここから始めればよい",
+      "apiNote20260830": "☆finsum の繊維分解について（第 731 の実測）: mathlib の Mathlib/Algebra/BigOperators/Finprod.lean には finprod_curry（α × β 用）と finprod_mem_finset_eq_prod / finprod_mem_coe_finset はあるが、**任意の写像 π : ι′ → ι の繊維で分解する補題は無い**。★したがって P ↦ ⟨P.under, P⟩ で ι′ ≃ Σ p, {P // P.under = p} の同値を作り、finsum_comp_equiv とシグマ型版の curry を自分で書く必要がある。☆degInfOf の台は有限（hasFiniteSupport_degInf）なので、finsum を Finset の和に落としてから分解するほうが早いかもしれない",
+      "underMapNote20260830": "☆第 732 の実測: mathlib の IsDedekindDomain.HeightOneSpectrum.comap は **全射**な環準同型に対するものなので（Ideal/Lemmas.lean:588）、𝓞L → 𝓞L′（単射だが全射でない）には使えない。★したがって『P の下の p』を自分で作る必要がある: P.asIdeal.comap (algebraMap (𝓞 L) (𝓞 L′)) が 𝓞 L の高さ 1 の素点であること（素性は comap で保たれ、非零性は整拡大の単射性から）を示す。☆Ideal.LiesOver / Ideal.primesOver の API がその周辺にある",
+      "estimate20260830": "★次のセッションの見積り: under 写像の構成（2-3 ブロック）→ finsum を Finset へ落として繊維分解（3-5 ブロック）→ e·f と absNorm の書き換え（2-3 ブロック）→ scaling 補題（1-2 ブロック）。合わせて 10 前後。★そのあと ht^Falt の基底変換不変性、ねじれの処理、faltingsHeight : ℂ → ℝ の定義、witness の 50 フィールドと続く"
+    },
+    "progress20260831": {
+      "_comment": "★★★★★★★★★★第 735-741 の到達点 —— **firstRealTheorem は証明された**",
+      "result": "★★★`Found/GaloisRep/Compositum.lean` の `htFaltOf_congr_j_of_emb`（§9-1168、第 741）: E₁/L₁ と E₂/L₂ が半安定で、ℂ の中で j が一致するなら ht^Falt(E₁) = ht^Falt(E₂)。★無条件。",
+      "(a) 変数変換不変性": "★済 —— htFaltOf_variableChange（第 722）",
+      "(b) 基底変換不変性": [
+        "★済 —— htFaltOf_baseChange_of_semistable（§9-1165、第 738、仮説は第 740 で「下での半安定性だけ」に弱めた）",
+        "アルキメデス側: archSum_baseChange（第 725）",
+        "有限素点側: finsum_scaling（§9-1163、第 736）＋ minDeltaExp_baseChange_of_semistableAt（§9-1167、第 740）",
+        "★繊維分解は primesOverH（§9-1162、第 735）で HeightOneSpectrum の Finset として作った"
+      ],
+      "(c) ねじれの処理": [
+        "★★☆**要らなかった**。着手前は「同じ j の 2 曲線は捻りだから √d を添加した体へ上げて同型にする」という筋を見込んでいたが、実際には両側とも j だけで書ける（§9-1166、第 739）:",
+        "アルキメデス: curveArchInv_congr_j（在庫、CurveArchInv.lean:154）——ℂ 上の曲線のアルキメデス不変量は同型不変量",
+        "有限素点: minDeltaExp_eq_maxJ_of_semistable（第 738）——半安定なら v_p(Δ_min) = max(0, −v_p(j))"
+      ],
+      "(d) 共通の体の構成": [
+        "★済 —— compositum（§9-1168、第 741）。ℂ の中で 2 つの像が生成する中間体を取る。",
+        "☆測定: Algebra (𝓞 L₁) L₃・IsScalarTower (𝓞 L₁) L₁ L₃・IsScalarTower (𝓞 L₁) (𝓞 L₃) L₃・Module.Finite (𝓞 L₁) (𝓞 L₃) は mathlib がすべて自動で出す。作るのは Algebra L₁ L₃ と IsScalarTower ℚ L₁ L₃ だけ。"
+      ],
+      "欄の完成": "★`Found/GenEll/EllModuliObjects.lean` の `faltingsHeightJ : ℂ → ℝ` と `faltingsHeightJ_eq : faltingsHeightJ E.j = E.htFalt`（第 741）。★★これで EllModuliData の faltingsHeight 欄が仮説なしで埋まる。",
+      "次": [
+        "☆残る大物は northcott（ht^Falt が有界な類は有限）・degInf_le_htInf・htInf_bdeq_faltings・logDiffMell・degLe・GaloisFinite・CompactlyBounded である。",
+        "☆別筋: Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式（Lemma 3.5 の hdeg）。"
+      ]
+    }
+  },
+  "fieldStatus20260831": {
+    "_comment": "★★★★★★★★★★第 741-750 の実装で埋まった欄と残る欄。Curve := RealizedClass（実現される類、代表元は定義体の次数が最小のもの）、EllClass := ℂ。",
+    "設計": {
+      "EllClass": "ℂ（j 不変量）",
+      "Curve": "RealizedClass = {x : ℂ // ∃ E : DegCurve, E.j = x}。DegCurve = 半安定＋乗法還元をもつ楕円曲線。各類に定義体の次数が最小の代表元 rep を取る。",
+      "cls": "Subtype.val",
+      "htInf": "12 · faltingsHeight（これで htInf_bdeq_faltings が C = 0 で自明になる）",
+      "GaloisFinite": "Set.Finite（原文より弱い——結論側なので安全）",
+      "CompactlyBounded": "Bornology.IsBounded"
+    },
+    "埋まった欄": [
+      "EllClass / Curve / cls / degOfDefinition / faltingsHeight / degInf / htInf / degLe",
+      "SemiStable / HasMultRed / HasPotMultRed / PrimeToLocalHeights / PrimeToMultPrimes / MinimalField",
+      "PrimeToRamification / CompactlyBounded / GaloisFinite / logDiffMell",
+      "torsionExt 群 5 本（cls_ / degOfDefinition_ / semiStable_ / hasMultRed_ / primeToLocalHeights_）",
+      "degOfDefinition_pos / degInf_nonneg / faltingsHeight_bddBelow",
+      "degInf_le_htInf / htInf_bdeq_faltings / primeToLocalHeights_of_lt",
+      "multCard / multCard_pos / multPrime / multPrime_prime / localHt / localHt_pos / sum_localHt_eq",
+      "badPrimes / badPrimes_prime / primeTo_badPrimes / sum_log_badPrimes_le",
+      "ramPrimes / ramPrimes_prime / badPrimes_subset_ramPrimes / primeTo_ramPrimes / sum_log_ramPrimes_le",
+      "noMultRedExc 群 3 本 / galoisFinite_union / compactlyBounded_empty"
+    ],
+    "残る欄": {
+      "northcott": "☆`Skeleton/GenEll/NorthcottJ.lean` の `northcott_htJ` 1 本に帰着済み（§9-1170、第 743）。mathlib に `Northcott` の instance が具体的な体に対して 1 つも無いことを測定済み。",
+      "HasLCyclic / quotLCyclic 群": "☆`Lemma 3.5` の内容。`degInf_quotLCyclic` は Tate の q-展開（`Skeleton/GenEll/TateIsogeny.lean` の `tateModel_of_quot_mu`）に帰着する。`faltingsHeight_quotLCyclic` は `htFalt_veluQuotientFull_le`（第 704）が受け皿。",
+      "lcyclicExc 群": "☆`Lemma 3.5` ＋ Northcott。",
+      "ImageContainsSL2 群": "☆`Theorem 3.8` の核。`Found/GaloisRep/GalRep.lean` の `galRep` と `Found/GenEll/Lemma31.lean` の `Lemma 3.1, (iv)` が素材。"
+    },
+    "測定して分かったこと": [
+      "★★界面は `deg∞ > 0` を強制する（`Check/GenEll/EllModuliDegInfPos.lean`、第 745）——§4 の帳簿 4 本から出る。したがって Curve に「至る所良還元」の曲線は入れられない。",
+      "★★`logDiffMell` は類の函数でなければならないので、Curve は定義体が類で決まるものに限らねばならない（第 749）——原文 Corollary 4.3 の仮説 MinimalField そのもの。",
+      "★★`sum_log_ramPrimes_le` の係数 3 の内訳は 1（分岐素数）＋2（d 以下の素数、Chebyshev ＋ Hermite–Minkowski）である（第 750）。"
+    ]
+  },
+  "interfaceFixes20260831": {
+    "_comment": "★★★★★★★★witness を実際に作ろうとして見つかった界面の欠陥と、その訂正（第 745・754-756）。",
+    "(1) deg∞ > 0 の強制": {
+      "測定": "Check/GenEll/EllModuliDegInfPos.lean（第 745）",
+      "内容": "§4 の帳簿 4 本（multCard_pos・multPrime_prime・localHt_pos・sum_localHt_eq）から、どの E : Curve に対しても deg∞(cls E) > 0 が出る。",
+      "対応": "Curve を DegCurve（半安定＋乗法還元）に制限した。原文の題 *Degenerating* そのもの。"
+    },
+    "(2) mem_lcyclicExc が l の下界を落としていた": {
+      "測定": "Check/GenEll/LcyclicExcTooStrong.lean（第 754）",
+      "内容": "l = 2 を取れば「2-同種をもち局所高さがすべて奇数の半安定曲線」が対象になり、無限個ある。Lemma 3.5 の (†) から ht^Falt の上界を出すには原文の条件 (a) が要る。",
+      "対応": "界面を lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass にし、mem_lcyclicExc に (condA ∨ cls E ∈ KV) を渡す（第 755）。★lemma_3_7・theorem_3_8・Corollary 4.3/4.4 の statement は 1 文字も変わっていない。"
+    },
+    "(3) GaloisFinite は「各次数で有限」": {
+      "内容": "GaloisFiniteJ := Set.Finite では lcyclicExc（ht^Falt が有界な類の集合）が作れない——次数を止めなければ無限集合である。原文の例外集合は Exc_d（次数 d を止めた形）。",
+      "対応": "GaloisFiniteJ S := ∀ d, (S ∩ degLeJ d).Finite（第 756）。"
+    },
+    "(4) CompactlyBounded は h∞(j) の有界性": {
+      "内容": "Bornology.IsBounded では足りない——アルキメデス素点の条件は「j のすべての共役が有界」であり、j 自身の有界性では共役が抑えられない。",
+      "対応": "CompactlyBoundedJ S := ∃ M, ∀ E : SSCurve, E.j ∈ S → htArchJ ≤ M（第 756）。"
+    }
+  },
+  "lemma37Progress20260831": {
+    "条件a": "★済 —— Found/GaloisRep/Lemma37C.lean の htFalt_le_of_condA（(†) を受ける）",
+    "条件b": "★済 —— Found/GaloisRep/Lemma37CondB.lean の htFalt_le_of_condB（§9-1183、第 757、(†) を受ける）。l ≥ 2 で 12l/14 − 1 ≥ 5l/14 を使い、l に依らない上界 |m|/5 + 28/5 + 1.4C′ を出す。",
+    "有限性": "★済 —— northcottJ（§9-1179、第 753、★無条件）と galoisFiniteJ_htFalt_le（第 756）",
+    "残り": "☆lcyclicExc 群に残るのは (a) Lemma 3.5 の (†)（葉 2 つ：jExp_velu_bad / jExp_velu_good）と (b) HasLCyclic の定義（Galois 表現の mod l 像の安定直線）である。"
+  }
+}

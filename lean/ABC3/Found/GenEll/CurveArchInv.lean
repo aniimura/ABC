@@ -207,6 +207,28 @@ def archInv_eq_of_variableChange.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(Faltings Heights and the Divisor at Infinity)",
     sectionId := "genell-prop-3-4" }
 
+/-- ★★★★★★**`archNorm` は係数の押し出しと可換**
+
+    `archNorm (E.map f) σ′ = archNorm E (σ′ ∘ f)`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`archNorm E σ = curveArchInv (E.map σ)` なので `WeierstrassCurve.map_map` だけで出る。
+★★☆**`ht^Falt` の基底変換不変性の第一歩である**——
+`L → L′` で送った曲線のアルキメデス不変量は、`L′` の埋め込みを `L` へ制限したものに
+沿った不変量に等しい（`ResearchPaper/ellmoduli-witness-status.json` の
+`firstRealTheorem` の材料 (b)）。 -/
+theorem archNorm_map {L L' : Type*} [Field L] [Field L'] (E : WeierstrassCurve L)
+    (f : L →+* L') (σ' : L' →+* ℂ) :
+    archNorm (E.map f) σ' = archNorm E (σ'.comp f) := by
+  rw [archNorm, archNorm, WeierstrassCurve.map_map]
+
+def archNorm_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(archNorm は係数の押し出しと可換。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 def archNorm.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(Faltings Heights and the Divisor at Infinity)",

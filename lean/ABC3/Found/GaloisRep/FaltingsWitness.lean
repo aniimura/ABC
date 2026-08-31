@@ -148,6 +148,163 @@ theorem archSum_le (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L)
 noncomputable def htFaltOf (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) : ℝ :=
   degInfOf L E / 12 - archSum L E / (12 * (Module.finrank ℚ L : ℝ))
 
+/-- ★★★★★★★★**`ht^Falt` は変数変換で不変**（単独の形）。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`deg∞` も `archSum` も変数変換で不変（第 329 周辺）だから。
+★★☆**`EllModuliData` の witness で `EllClass := ℂ`（`j` 不変量）を取るために要る**
+——`cls E = j(E)` が同じなら `L` 上で同型なので、`ht^Falt` が一致することを言う第一歩である
+（`ResearchPaper/ellmoduli-witness-status.json` の `designChoice`）。 -/
+theorem htFaltOf_variableChange (E : WeierstrassCurve L) (C : VariableChange L) :
+    htFaltOf L (C • E) = htFaltOf L E := by
+  rw [htFaltOf, htFaltOf, degInfOf_variableChange, archSum_variableChange]
+
+def htFaltOf_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(ht^Falt は変数変換で不変。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+/-! ## ★★★★★★★★`archSum` の基底変換 -/
+
+open scoped Classical in
+/-- ★★★★★★**埋め込みの制限の繊維は `L′ →ₐ[L] ℂ` と同じ大きさ**。
+
+★`σ′ : L′ →+* ℂ` が `σ′ ∘ (algebraMap L L′) = σ` を満たすことは、
+`ℂ` に `σ` で `L`-代数の構造を入れたとき `σ′` が `L`-代数準同型であることと同じである。
+★★したがって繊維の大きさは `AlgHom.card` により `[L′ : L]`。 -/
+theorem card_fiber_ringHom (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] (σ : L →+* ℂ) :
+    (Finset.univ.filter
+        (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L') = σ)).card
+      = Module.finrank L L' := by
+  letI : Algebra L ℂ := σ.toAlgebra
+  haveI : FiniteDimensional L L' := Module.Finite.of_restrictScalars_finite ℚ L L'
+  haveI : Algebra.IsSeparable L L' := Algebra.IsSeparable.of_integral L L'
+  have hequiv : {σ' : L' →+* ℂ // σ'.comp (algebraMap L L') = σ} ≃ (L' →ₐ[L] ℂ) :=
+    { toFun := fun p =>
+        { toRingHom := p.1
+          commutes' := fun x => by
+            have := congrArg (fun f : L →+* ℂ => f x) p.2
+            simpa [RingHom.algebraMap_toAlgebra] using this }
+      invFun := fun f => ⟨f.toRingHom, by
+        ext x
+        show f (algebraMap L L' x) = σ x
+        rw [f.commutes]
+        rfl⟩
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+  rw [← Fintype.card_subtype, Fintype.card_congr hequiv, AlgHom.card]
+
+def card_fiber_ringHom.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(埋め込みの制限の繊維の大きさは [L′ : L]。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+open scoped Classical in
+/-- ★★★★★**埋め込みの制限は全射**——`ℂ` が代数閉だから。 -/
+theorem image_restrict_eq_univ (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] :
+    Finset.univ.image (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L'))
+      = (Finset.univ : Finset (L →+* ℂ)) := by
+  refine Finset.eq_univ_of_forall (fun σ => ?_)
+  letI : Algebra L ℂ := σ.toAlgebra
+  haveI : FiniteDimensional L L' := Module.Finite.of_restrictScalars_finite ℚ L L'
+  haveI : Algebra.IsSeparable L L' := Algebra.IsSeparable.of_integral L L'
+  have hpos : 0 < Fintype.card (L' →ₐ[L] ℂ) := by
+    rw [AlgHom.card]
+    exact Module.finrank_pos
+  obtain ⟨f⟩ := Fintype.card_pos_iff.1 hpos
+  refine Finset.mem_image.2 ⟨f.toRingHom, Finset.mem_univ _, ?_⟩
+  ext x
+  show f (algebraMap L L' x) = σ x
+  rw [f.commutes]
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`archSum` は基底変換で `[L′ : L]` 倍になる**
+
+    `archSum L′ (E ⁄ L′) = [L′ : L] · archSum L E`
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★`archNorm` は係数の押し出しと可換（`archNorm_map`）なので、
+`L′` の埋め込みを `L` へ制限した繊維ごとにまとめればよい。
+★★繊維の大きさは `[L′ : L]`（`card_fiber_ringHom`）、制限は全射（`image_restrict_eq_univ`）。
+
+★★★☆**`ht^Falt` の基底変換不変性のアルキメデス側である**——
+`archSum` は `12·[L:ℚ]` で割られるので、`[L′:ℚ] = [L′:L]·[L:ℚ]` により相殺する。 -/
+theorem archSum_baseChange (L L' : Type) [Field L] [NumberField L] [Field L']
+    [NumberField L'] [Algebra L L'] (E : WeierstrassCurve L) :
+    archSum L' (E.baseChange L') = (Module.finrank L L' : ℝ) * archSum L E := by
+  have hterm : ∀ σ' : L' →+* ℂ,
+      Real.log ((2 * Real.pi) ^ 12
+          * ABC3.Found.GenEll.archNorm (E.baseChange L') σ')
+        = (fun σ : L →+* ℂ =>
+            Real.log ((2 * Real.pi) ^ 12 * ABC3.Found.GenEll.archNorm E σ))
+          (σ'.comp (algebraMap L L')) := by
+    intro σ'
+    show _ = Real.log ((2 * Real.pi) ^ 12
+      * ABC3.Found.GenEll.archNorm E (σ'.comp (algebraMap L L')))
+    rw [WeierstrassCurve.baseChange, ABC3.Found.GenEll.archNorm_map]
+  rw [archSum, archSum, Finset.sum_congr rfl (fun σ' _ => hterm σ'),
+    Finset.sum_comp (fun σ : L →+* ℂ =>
+        Real.log ((2 * Real.pi) ^ 12 * ABC3.Found.GenEll.archNorm E σ))
+      (fun σ' : L' →+* ℂ => σ'.comp (algebraMap L L')),
+    image_restrict_eq_univ L L']
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun σ _ => ?_)
+  rw [card_fiber_ringHom L L' σ, nsmul_eq_mul]
+
+def archSum_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(archSum は基底変換で [L′ : L] 倍。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`ht^Falt` の基底変換不変性は `deg∞` のそれに帰着する**
+
+    `deg∞` が基底変換で不変なら `ht^Falt` も不変
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★アルキメデス側は `archSum_baseChange`（第 725）で `[L′:L]` 倍になり、
+分母の `12·[L′:ℚ] = 12·[L′:L]·[L:ℚ]` で相殺する。
+
+★★★☆**残るのは有限素点側だけ**——半安定なら `minDeltaExp` は分岐指数倍、
+`log N(P) = f·log N(p)` なので `Σ_{P|p} e·f = [L′:L]` で相殺する
+（`Ideal.sum_ramification_inertia`）。 -/
+theorem htFaltOf_baseChange_of_degInf (L L' : Type) [Field L] [NumberField L]
+    [Field L'] [NumberField L'] [Algebra L L'] [IsScalarTower ℚ L L']
+    (E : WeierstrassCurve L)
+    (hdeg : degInfOf L' (E.baseChange L') = degInfOf L E) :
+    htFaltOf L' (E.baseChange L') = htFaltOf L E := by
+  have hLL' : (0 : ℝ) < (Module.finrank L L' : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  have hL : (0 : ℝ) < (Module.finrank ℚ L : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  have htower : (Module.finrank ℚ L' : ℝ)
+      = (Module.finrank ℚ L : ℝ) * (Module.finrank L L' : ℝ) := by
+    have := Module.finrank_mul_finrank ℚ L L'
+    exact_mod_cast this.symm
+  have hL' : (0 : ℝ) < (Module.finrank ℚ L' : ℝ) := by
+    exact_mod_cast Module.finrank_pos
+  rw [htFaltOf, htFaltOf, hdeg, archSum_baseChange L L' E]
+  congr 1
+  have hne1 : (12 : ℝ) * (Module.finrank ℚ L' : ℝ) ≠ 0 := by positivity
+  have hne2 : (12 : ℝ) * (Module.finrank ℚ L : ℝ) ≠ 0 := by positivity
+  rw [div_eq_div_iff hne1 hne2]
+  linear_combination (-12 * archSum L E) * htower
+
+def htFaltOf_baseChange_of_degInf.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(ht^Falt の基底変換不変性は deg∞ のそれに帰着する。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
 /-! ## ★★★★★★★★G8 の witness -/
 
 set_option maxHeartbeats 1600000 in

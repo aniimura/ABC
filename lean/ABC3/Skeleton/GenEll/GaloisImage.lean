@@ -188,7 +188,35 @@ theorem theorem_3_8 (D : EllModuliData)
         refine ⟨?_, hpl'⟩
         rw [hcls]; exact hKVE
       exact ⟨hb hcB hExcE', hpl', fun hcyc => hExcE' (hc (Or.inr hcB) hcyc)⟩
-  exact D.imageContainsSL2_of_torsionExt E l hl hmain.1 hmain.2.1 hmain.2.2
+  -- ★`Lemma 3.1, (iv)` が要求する `5 ≤ l` は、どちらの条件からも出る
+  have hl5 : 5 ≤ l := by
+    have h2 := hl.two_le
+    rcases hcond with ⟨hnum, -⟩ | ⟨-, -, hcop⟩
+    · set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
+      set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
+      have hd1 : (1:ℝ) ≤ d := by
+        rw [hddef]; exact_mod_cast D.degOfDefinition_pos E
+      have hP1 : (1:ℝ) ≤ d ^ ε := Real.one_le_rpow hd1 hε.le
+      have hFB : -|B| ≤ F := le_trans (neg_abs_le B) (hB (D.cls E))
+      have hBnn : (0:ℝ) ≤ |B| := abs_nonneg B
+      have hC7 : (0:ℝ) < C₇ * (23040:ℝ) ^ ε := mul_pos hC₇pos hKpos
+      have hCnn : (0:ℝ) ≤ C₇ * (23040:ℝ) ^ ε + |B| + 1 := by positivity
+      have hCP : (C₇ * (23040:ℝ) ^ ε + |B| + 1)
+          ≤ (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by nlinarith [hP1, hCnn]
+      have hsum : (1:ℝ) ≤ F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by linarith
+      have hprod : (2304000:ℝ)
+          ≤ 23040 * 100 * d * (F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε) := by
+        nlinarith [hd1, hsum]
+      have hkey : (2304000 : ℝ) ≤ (l : ℝ) := le_trans hprod hnum
+      have hnat : (2304000 : ℕ) ≤ l := by exact_mod_cast hkey
+      omega
+    · by_contra hlt
+      push_neg at hlt
+      interval_cases l
+      · exact absurd hcop (by decide)
+      · exact absurd hcop (by decide)
+      · rcases hl.eq_one_or_self_of_dvd 2 (by norm_num) with h | h <;> omega
+  exact D.imageContainsSL2_of_torsionExt E l hl hl5 hmain.1 hmain.2.1 hmain.2.2
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -201,7 +229,7 @@ def theorem_3_8.src : Source :=
 ★**群論は `Lemma 3.1, (iv)` ただ 1 つ**で、そのうち (i)(ii)(iii) は実装済みである。
 残りはすべて算術側で、そこが `Interface` に載っている。 -/
 def theorem_3_8.needs : List ProofObligation :=
-  [ .otherPaper "[GenEll]" "Lemma 3.1, (iv)(SL₂(ℤ_l) の持ち上げ)——★原文の証明が使う群論はこれだけ。(i)(ii)(iii) は Found/GenEll/Lemma31.lean に実装済み" 14,
+  [ .otherPaper "[GenEll]" "Lemma 3.1, (iv)(SL₂(ℤ_l) の持ち上げ)——★原文の証明が使う群論はこれだけであり、★★★★★**4 条すべてが実装済み**である(2026-08-29 確認): (i)(ii)(iii) は Found/GenEll/Lemma31.lean、**(iv) は Found/GenEll/Sl2Padic.lean の lemma_3_1_iv**。★原文は [Serre] Chapter IV §3.4 Lemma 3 を引くが 0_Source に無いため、本プロジェクトが自分で証明している。★★★★★★**したがって Theorem 3.8 に「Serre の開像定理」は要らない**——障壁は Tate 曲線(下の 2 行)だけである" 14,
     .otherPaper "[GenEll]" "Lemma 3.7(局所高さと l-巡回部分群スキーム)" 18,
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さによる例外集合の有限性)" 17,
     .otherPaper "[GenEll]" "Lemma 3.2 の直前の局所理論(Tate 曲線)" 15,

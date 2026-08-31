@@ -324,8 +324,9 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
   have hLlo : (0.69 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
   have hLhi : Real.log 2 ≤ (0.70 : ℝ) := by linarith [Real.log_two_lt_d9]
   refine ⟨|A| + 100 * |B| + 1, by positivity,
-    D.lcyclicExc ∪ D.noMultRedExc KV,
-    D.galoisFinite_union _ _ D.galoisFinite_lcyclicExc (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
+    D.lcyclicExc (|A| + 100 * |B| + 1) eps KV ∪ D.noMultRedExc KV,
+    D.galoisFinite_union _ _ (D.galoisFinite_lcyclicExc _ _ _ hKV)
+      (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
   intro E l hl hss condA condB hcA hcB
   have hAimp : condA → D.PrimeToLocalHeights E l := by
     intro hc
@@ -391,7 +392,12 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
       · exact hAimp h
       · rw [hcB] at h
         exact h.2
-    exact Or.inl (D.mem_lcyclicExc E l hl hss hcyc hpr)
+    refine Or.inl (D.mem_lcyclicExc _ eps KV E l hl hss hcyc hpr ?_)
+    rcases hor with h | h
+    · rw [hcA] at h
+      exact Or.inl h.1
+    · rw [hcB] at h
+      exact Or.inr h.1
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 

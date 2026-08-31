@@ -217,6 +217,207 @@ theorem localHeight_le_minDeltaExp [IsAdicComplete (IsLocalRing.maximalIdeal R) 
   rw [h320, hmde]
   exact hle
 
+/-! ## ★★★★★★★★局所高さ = `v_p(Δ_min)`（半安定な場合） -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**半安定なら局所高さは `v_p(Δ_min)` に等しい**
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★★不等式（`localHeight_le_minDeltaExp`）は「`Lv` の側の極小性が強い」から出るが、
+**乗法還元では `v(c₄) = 0` が極小性を決める**（`isMinimal_of_c4_vAdd_eq_zero`）ので、
+`p`-極小なモデルはそのまま `R`-極小でもある。したがって等号になる。
+
+★★★★☆**これが `Lemma 3.5` の最後の入力
+（`v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`）を局所高さの言葉へ移す環である**——
+局所高さの側は `Lemma 3.2, (ii)`（`q_{E′} = q_E^l`）が与える。 -/
+theorem localHeight_eq_minDeltaExp [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E : WeierstrassCurve L) [hell : (E.baseChange Lv).IsElliptic]
+    [hmin : (E.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0)
+    (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0) :
+    (localHeightOf (E.baseChange Lv) h : ℤ) = minDeltaExp p E := by
+  have hΔv : (E.baseChange Lv).Δ ≠ 0 := hell.isUnit.ne_zero
+  have hmapΔ : (E.baseChange Lv).Δ = algebraMap L Lv E.Δ := WeierstrassCurve.map_Δ _ _
+  have hΔL : E.Δ ≠ 0 := by
+    intro h0
+    exact hΔv (by rw [hmapΔ, h0, map_zero])
+  have hCΔ : (C • E).Δ ≠ 0 := variableChange_Delta_ne_zero E hΔL C
+  have hmde := minDeltaExp_eq p E hΔL C hC
+  have hsm : (C.map (algebraMap L Lv)) • (E.baseChange Lv) = (C • E).baseChange Lv :=
+    WeierstrassCurve.map_variableChange E C (algebraMap L Lv)
+  haveI hCint : WeierstrassCurve.IsIntegral (primeSubring p) (C • E) := inferInstance
+  haveI hint : WeierstrassCurve.IsIntegral R
+      ((C.map (algebraMap L Lv)) • (E.baseChange Lv)) := by
+    rw [hsm]
+    exact isIntegral_baseChange_of_isIntegral p hp (C • E)
+  -- ★`c₄` の付値が `0` であること（`Lv` の側）
+  have hc4eq : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄
+      = algebraMap L Lv ((C • E).c₄) := by
+    rw [hsm]
+    exact WeierstrassCurve.map_c₄ _ _
+  have hne2 : algebraMap L Lv ((C • E).c₄) ≠ 0 :=
+    (map_ne_zero_iff _ (algebraMap L Lv).injective).2 hc4ne
+  have hc4ne' : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄ ≠ 0 := by
+    rw [hc4eq]; exact hne2
+  have hc4v : vAdd (tateDvrVal R Lv)
+      (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄) hc4ne') = 0 := by
+    have hu : (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).c₄) hc4ne')
+        = Units.mk0 (algebraMap L Lv ((C • E).c₄)) hne2 := Units.ext hc4eq
+    rw [hu, vAdd_algebraMap_eq_valAdd (R := R) p hp ((C • E).c₄) hc4ne hne2]
+    exact hc4
+  have hΔne' : ((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ ≠ 0 :=
+    variableChange_Delta_ne_zero (E.baseChange Lv) hΔv _
+  -- ★★★`v(c₄) = 0` なので `R`-極小
+  have hRmin : IsMinimal R ((C.map (algebraMap L Lv)) • (E.baseChange Lv)) :=
+    isMinimal_of_c4_vAdd_eq_zero _ hΔne' hc4ne' hc4v
+  have hmin1 : IsMinimal R ((1 : VariableChange Lv) • (E.baseChange Lv)) := by
+    rw [one_smul]
+    infer_instance
+  have hu0 := minimal_u_vAdd_eq (E.baseChange Lv) hΔv (1 : VariableChange Lv)
+    (C.map (algebraMap L Lv)) hmin1 hRmin
+  have hone : vAdd (tateDvrVal R Lv) ((1 : VariableChange Lv).u) = 0 := by
+    show vAdd (tateDvrVal R Lv) 1 = 0
+    rw [vAdd, map_one]
+    rfl
+  have hΔchg := vAdd_Delta_variableChange (R := R) (E.baseChange Lv) hΔv
+    (C.map (algebraMap L Lv))
+  rw [← hu0, hone, mul_zero, sub_zero] at hΔchg
+  -- ★`v(Δ)` を `p` の側へ
+  have hΔeq : (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ)
+      = algebraMap L Lv ((C • E).Δ) := by
+    rw [hsm]; exact WeierstrassCurve.map_Δ _ _
+  have hne3 : algebraMap L Lv ((C • E).Δ) ≠ 0 := by rw [← hΔeq]; exact hΔne'
+  have hΔu : (Units.mk0 (((C.map (algebraMap L Lv)) • (E.baseChange Lv)).Δ) hΔne')
+      = Units.mk0 (algebraMap L Lv ((C • E).Δ)) hne3 := Units.ext hΔeq
+  have h320 := localHeight_eq_vAdd_Delta (R := R) (E.baseChange Lv) h
+  rw [h320, hmde, ← hΔchg, hΔu,
+    vAdd_algebraMap_eq_valAdd (R := R) p hp ((C • E).Δ) hCΔ hne3]
+
+def localHeight_eq_minDeltaExp.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Proposition 3.4(半安定なら局所高さ = v_p(Δ_min)。★無条件)",
+    sectionId := "genell-prop-3-4" }
+
+/-! ## ★★★★★★★★`q_{E′} = q_E^l` から `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))` -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`q_{E′} = q_E^l` なら `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`**
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★★★☆**これが `Lemma 3.5` の最後の入力である**——
+`Lemma 3.2, (ii)`（`Found/GenEll/Lemma32.lean`、`vAdd v (q^l) = l·vAdd v q`）が
+与える `q_{E′} = q_E^l` を、`deg∞` の材料 `minDeltaExp` に翻訳する。
+
+★半安定なら局所高さ ＝ `v_p(Δ_min)`（第 709）なので、`q` の側の関係が
+そのまま `Δ_min` の側の関係になる。 -/
+theorem minDeltaExp_eq_mul_of_tateParam [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) (l : ℕ)
+    [hell : (E.baseChange Lv).IsElliptic] [hmin : (E.baseChange Lv).IsMinimal R]
+    [hell' : (E'.baseChange Lv).IsElliptic] [hmin' : (E'.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (h' : (E'.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (C' : VariableChange L) (hC' : IsMinimal (primeSubring p) (C' • E'))
+    (hc4ne' : (C' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C' • E').c₄) hc4ne') = 0)
+    (hq : tateParamK (E'.baseChange Lv) h' = (tateParamK (E.baseChange Lv) h) ^ l) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hE := localHeight_eq_minDeltaExp (R := R) E h p hp C hC hc4ne hc4
+  have hE' := localHeight_eq_minDeltaExp (R := R) E' h' p hp C' hC' hc4ne' hc4'
+  have hpos := vAdd_tateParamK_pos (R := R) (E.baseChange Lv) h
+  have hpos' := vAdd_tateParamK_pos (R := R) (E'.baseChange Lv) h'
+  have hlh : (localHeightOf (E.baseChange Lv) h : ℤ)
+      = vAdd (tateDvrVal R Lv) (tateParamK (E.baseChange Lv) h) := by
+    rw [localHeightOf]; omega
+  have hlh' : (localHeightOf (E'.baseChange Lv) h' : ℤ)
+      = vAdd (tateDvrVal R Lv) (tateParamK (E'.baseChange Lv) h') := by
+    rw [localHeightOf]; omega
+  rw [← hE, ← hE', hlh, hlh', hq, vAdd_pow]
+
+def minDeltaExp_eq_mul_of_tateParam.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(q_{E′} = q_E^l から v_p(Δ_min(E′)) = l·v_p(Δ_min(E))。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+/-! ## ★★★★★★★★★★Tate モデルの母数から `Δ_min` の関係へ -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`E` の Tate モデルの母数が `q`、`E′` の母数が `q^l` なら
+`v_p(Δ_min(E′)) = l·v_p(Δ_min(E))`**
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★★★★☆**これが `Lemma 3.5` に残る唯一の入力の、最も鋭い形である。**
+仮説は「`E′` が母数 `q^l` の Tate モデルを持つ」——`Lemma 3.2, (ii)` の
+`E/μ_l` は母数 `q^l` の Tate 曲線である、という主張そのものである。
+
+★機構は 3 段:
+
+1. 半安定なら `v_p(Δ_min) = 局所高さ`（第 709）
+2. 局所高さ `= v(Δ)`（第 320）
+3. Tate モデルの母数の付値は一意（`vAdd_Delta_eq_of_tateModel`）——
+   したがって `v(Δ) = v(q)`、`v(Δ′) = v(q^l) = l·v(q)` -/
+theorem minDeltaExp_eq_mul_of_tateModel [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) (l : ℕ)
+    [hell : (E.baseChange Lv).IsElliptic] [hmin : (E.baseChange Lv).IsMinimal R]
+    [hell' : (E'.baseChange Lv).IsElliptic] [hmin' : (E'.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (h' : (E'.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv (IsDiscreteValuationRing.maximalIdeal R))
+        (algebraMap L Lv x) = (HeightOneSpectrum.valuation L p) x)
+    (C₀ : VariableChange L) (hC₀ : IsMinimal (primeSubring p) (C₀ • E))
+    (hc4ne : (C₀ • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C₀ • E).c₄) hc4ne) = 0)
+    (C₀' : VariableChange L) (hC₀' : IsMinimal (primeSubring p) (C₀' • E'))
+    (hc4ne' : (C₀' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C₀' • E').c₄) hc4ne') = 0)
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R) (hql0 : q ^ l ≠ 0)
+    (D : VariableChange R)
+    (hD : D • integralModel R (E.baseChange Lv) = tateCurveAt q hq)
+    (D' : VariableChange R)
+    (hD' : D' • integralModel R (E'.baseChange Lv) = tateCurveAt (q ^ l) hql) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hqK : algebraMap R Lv q ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hq0
+  have hqlK : algebraMap R Lv (q ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hql0
+  have hE := localHeight_eq_minDeltaExp (R := R) E h p hp C₀ hC₀ hc4ne hc4
+  have hE' := localHeight_eq_minDeltaExp (R := R) E' h' p hp C₀' hC₀' hc4ne' hc4'
+  have h320 := localHeight_eq_vAdd_Delta (R := R) (E.baseChange Lv) h
+  have h320' := localHeight_eq_vAdd_Delta (R := R) (E'.baseChange Lv) h'
+  have hq1 := vAdd_Delta_eq_of_tateModel (R := R) (E.baseChange Lv) q hq hq0 D hD hqK
+  have hq2 := vAdd_Delta_eq_of_tateModel (R := R) (E'.baseChange Lv) (q ^ l) hql hql0
+    D' hD' hqlK
+  have hpow : vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv (q ^ l)) hqlK)
+      = l * vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv q) hqK) := by
+    have hu : Units.mk0 (algebraMap R Lv (q ^ l)) hqlK
+        = (Units.mk0 (algebraMap R Lv q) hqK) ^ l := by
+      refine Units.ext ?_
+      simp [map_pow]
+    rw [hu, vAdd_pow]
+  rw [← hE', h320', hq2, hpow, ← hq1, ← h320, hE]
+
+def minDeltaExp_eq_mul_of_tateModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate モデルの母数 q・q^l から Δ_min の関係へ。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 /-! ## ★★素イデアルのノルムは `2` 以上 -/
 
 /-- ★★`N(p) ≥ 2`——`p` は `⊥` でも `⊤` でもないから。 -/

@@ -97,8 +97,8 @@ structure HeightTheoryData where
 ★`waiting` を書く(非空虚 witness ではなく)。本構造体は公理を 1 つも持たないので
 「無矛盾です」と言っても情報がない——**言うべきなのは「まだ作っていない」の中身**である。 -/
 def HeightTheoryData.waiting : WaitingFor :=
-  { what := "算術直線束 APic(X) とエルミート計量、複素解析空間 X^arc(= X(ℂ) と複素共役 ι_X)、および高さ関数 ht_L̄ の構成。mathlib に Arakelov / arithmetic line bundle / LineBundle / Scheme…Picard / analytification / GAGA / complex analytic space はいずれも 0 件(2026-08-16、ディレクトリ全宣言を確認)"
-    trackB := "Found/GenEll — ★実装済み: ADiv(F) と正規化次数 deg(ArithDiv.lean)、および **差積イデアル → ADiv(F)**(LogDiff.lean、2026-08-17。mathlib の IsDedekindDomain.differentIdeal と Associates.finite_factors の上に載った)。★残るのは (a) X^arc の複素解析側、(b) Cartier 因子の Spec(O_F) への引き戻し。★★律速は (a) である——複素解析空間の理論そのものが mathlib に無く、着手の形跡も無い(2026-08-16 実測)" }
+  { what := "算術直線束 APic(X) とエルミート計量、複素解析空間 X^arc(= X(ℂ) と複素共役 ι_X)、および高さ関数 ht_L̄ の構成。★着手時点(2026-08-16)では mathlib に Arakelov / arithmetic line bundle / LineBundle / Scheme…Picard / analytification / GAGA / complex analytic space はいずれも 0 件だった"
+    trackB := "★★★★2026-08-27 に更新 —— **律速だった X^arc は建った**。Found/Arakelov(317 ファイル・約 3.1 万行、Arc* が X^arc の層 C・評価・連続性・ι_X 対合・1 の分割)と Found/GaloisRep(314 ファイル・約 5.3 万行)がそれで、.src は 874 件すべて GenEll タグ、Found/ は sorry 0。★Definition 1.1 には条つき .src が 384 個ある。★★したがって残るのは (a) ではなく **条なし .src への組み上げ**である。★旧記述『律速は X^arc の複素解析側であり、着手の形跡も無い』は 2026-08-16 の実測であって、いまは当たらない" }
 
 /-- **`Proposition 1.7` の被覆の設定**を受ける `Interface`。
 
@@ -140,7 +140,7 @@ structure CoveringSetup where
 /-- ★Track B は何を作らねばならないか。 -/
 def CoveringSetup.waiting : WaitingFor :=
   { what := "次元 2 の正規・ℤ-固有・ℤ-平坦スキームの生成的有限射と、その分岐指数・エタール性・(−)_red。★`hyp` を不透明な Prop のままにしているのは『展開できないが落とさない』ためであり、展開が Track B の仕事である"
-    trackB := "Found/GenEll — mathlib は `IsEtale` / `Ideal.ramificationIdx` / `IsDedekindDomain.differentIdeal` を持つので、**scheme の言葉に持ち上げる前に環の言葉で書ける可能性がある**。原文 p.10 の証明の核も局所体の分岐理論と Kummer 理論だけである(2026-08-16 目視)" }
+    trackB := "★★2026-08-27 に更新 —— **2026-08-16 の見立て『scheme の言葉に持ち上げる前に環の言葉で書ける』は当たった**。Found/GenEll/DifferentKummer.lean(差積イデアルと Kummer 理論)と BDSlack.lean で Proposition 1.7 の (i)-(iv) を構成へ載せ替えた(第 423 ブロック)。★残るのは **局所から大域への組み立て**であって、scheme 論の持ち上げではない" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 

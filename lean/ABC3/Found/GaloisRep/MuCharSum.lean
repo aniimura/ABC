@@ -1,0 +1,879 @@
+/-
+Copyright (c) 2026 ABC3 Project. All rights reserved.
+-/
+import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import ABC3.Meta.Claim
+
+/-!
+# `μ_l` 上の指標和（`Found`）
+
+原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.15。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+## ★★★★★★★★これは何か
+
+`Skeleton/GenEll/TateIsogeny.lean` の `tateModel_of_quot_mu`（葉 1）の
+**手順 2**——「`ζ` について足すと `ζ` の指数が `l` の倍数の項だけ残る」——である。
+
+    `∑_{ζ ∈ μ_l} ζ^k = l`  （`l ∣ k`）
+    `∑_{ζ ∈ μ_l} ζ^k = 0`  （`l ∤ k`）
+
+★これが `σ_k(q) → σ_k(q^l)` を生む機構であり、Tate 曲線の `q` 展開恒等式
+`a₄(q^l) = a₄(q) − 5v`・`a₆(q^l) = a₆(q) − v − 7w` の核である。
+
+☆材料は mathlib の `IsPrimitiveRoot.geom_sum_eq_zero` だけである。
+-/
+
+namespace ABC3.Found.GaloisRep
+
+open Finset
+
+variable {R : Type*} [CommRing R] [IsDomain R]
+
+/-- ★★★★★★★★★★★★**`μ_l` 上の指標和**——`∑_{i<l} ζ^{ik} = l` か `0`。
+
+`ζ` が原始 `l` 乗根で `l` が素数なら、`ζ^k` は `l ∣ k` のとき `1`、
+そうでないとき再び原始 `l` 乗根である。 -/
+theorem sum_mu_pow {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l) (k : ℕ) :
+    ∑ i ∈ range l, ζ ^ (i * k) = if l ∣ k then (l : R) else 0 := by
+  have hkey : ∑ i ∈ range l, ζ ^ (i * k) = ∑ i ∈ range l, (ζ ^ k) ^ i := by
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [← pow_mul, mul_comm k i]
+  rw [hkey]
+  by_cases hdvd : l ∣ k
+  · obtain ⟨m, rfl⟩ := hdvd
+    have hone : ζ ^ (l * m) = 1 := by
+      rw [pow_mul, hζ.pow_eq_one, one_pow]
+    rw [if_pos (dvd_mul_right l m), hone]
+    simp
+  · rw [if_neg hdvd]
+    have hcop : Nat.Coprime k l := ((Nat.Prime.coprime_iff_not_dvd hl).2 hdvd).symm
+    have hprim : IsPrimitiveRoot (ζ ^ k) l := hζ.pow_of_coprime k hcop
+    exact hprim.geom_sum_eq_zero hl.one_lt
+
+/-- ★★★★★★★★**非自明な `l` 乗根にわたる和**——`∑_{i≠0} ζ^{ik}`。
+
+`veluVFull`・`veluWFull` は `H∖{O}` 全体にわたる和なので、こちらの形で使う。 -/
+theorem sum_mu_pow_erase_zero {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l) (k : ℕ) :
+    ∑ i ∈ (range l).erase 0, ζ ^ (i * k) = (if l ∣ k then (l : R) else 0) - 1 := by
+  have hmem : (0 : ℕ) ∈ range l := mem_range.2 hl.pos
+  have hsplit : ∑ i ∈ range l, ζ ^ (i * k)
+      = ζ ^ (0 * k) + ∑ i ∈ (range l).erase 0, ζ ^ (i * k) :=
+    (Finset.add_sum_erase _ _ hmem).symm
+  rw [sum_mu_pow hl hζ k] at hsplit
+  simp only [zero_mul, pow_zero] at hsplit
+  rw [hsplit]
+  ring
+
+/-- ★★★★★★`ζ^i`（`i` が `l` を割らない）は再び原始 `l` 乗根。 -/
+theorem isPrimitiveRoot_pow_of_not_dvd {l : ℕ} (hl : l.Prime) {ζ : R}
+    (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : ¬ l ∣ i) : IsPrimitiveRoot (ζ ^ i) l :=
+  hζ.pow_of_coprime i (((Nat.Prime.coprime_iff_not_dvd hl).2 hi).symm)
+
+/-! ## ★★★★★★★★`1/(1−ζ)` を `ζ` の多項式で書く -/
+
+/-- ★★★★★★★★★★★★**`(1−η)·∑_{k<l} kη^k = −l`**。
+
+`η^l = 1` と `∑_{k<l} η^k = 0` だけから出る。
+
+☆機構: `T = ∑_{k<l} kη^k` と置くと
+`∑_{k<l}(k+1)η^{k+1} = ηT + η·∑η^k = ηT` であり、
+同じ和を左へずらすと `T + lη^l = T + l` になる。 -/
+theorem one_sub_mul_sum_nsmul {l : ℕ} {η : R} (hpow : η ^ l = 1)
+    (hsum : ∑ k ∈ range l, η ^ k = 0) :
+    (1 - η) * ∑ k ∈ range l, (k : R) * η ^ k = -(l : R) := by
+  set T : R := ∑ k ∈ range l, (k : R) * η ^ k with hT
+  have hshift : ∑ k ∈ range l, ((k : R) + 1) * η ^ (k + 1) = η * T := by
+    have hpt : ∀ k : ℕ, ((k : R) + 1) * η ^ (k + 1)
+        = η * ((k : R) * η ^ k) + η * η ^ k := by
+      intro k; rw [pow_succ]; ring
+    rw [Finset.sum_congr rfl (fun k _ => hpt k), Finset.sum_add_distrib,
+      ← Finset.mul_sum, ← Finset.mul_sum, hsum, mul_zero, add_zero, hT]
+  have hsplit : ∑ k ∈ range l, ((k : R) + 1) * η ^ (k + 1) = T + (l : R) := by
+    have h1 := Finset.sum_range_succ' (fun j => (j : R) * η ^ j) l
+    have h2 := Finset.sum_range_succ (fun j => (j : R) * η ^ j) l
+    rw [h2, hpow, mul_one] at h1
+    push_cast at h1
+    simpa using h1.symm
+  have hkey : η * T = T + (l : R) := by rw [← hshift, hsplit]
+  rw [sub_mul, one_mul, hkey]
+  ring
+
+/-- ★★★★★★★★★★**`1/(1−η) = −(1/l)·∑_{k<l} kη^k`**。 -/
+theorem inv_one_sub_eq {F : Type*} [Field F] {l : ℕ} (hl : (l : F) ≠ 0)
+    {η : F} (hpow : η ^ l = 1) (hsum : ∑ k ∈ range l, η ^ k = 0) :
+    (1 - η)⁻¹ = -(l : F)⁻¹ * ∑ k ∈ range l, (k : F) * η ^ k := by
+  have hcore : (1 - η) * ∑ k ∈ range l, (k : F) * η ^ k = -(l : F) := by
+    set T : F := ∑ k ∈ range l, (k : F) * η ^ k with hT
+    have hshift : ∑ k ∈ range l, ((k : F) + 1) * η ^ (k + 1) = η * T := by
+      have hpt : ∀ k : ℕ, ((k : F) + 1) * η ^ (k + 1)
+          = η * ((k : F) * η ^ k) + η * η ^ k := by
+        intro k; rw [pow_succ]; ring
+      rw [Finset.sum_congr rfl (fun k _ => hpt k), Finset.sum_add_distrib,
+        ← Finset.mul_sum, ← Finset.mul_sum, hsum, mul_zero, add_zero, hT]
+    have hsplit : ∑ k ∈ range l, ((k : F) + 1) * η ^ (k + 1) = T + (l : F) := by
+      have h1 := Finset.sum_range_succ' (fun j => (j : F) * η ^ j) l
+      have h2 := Finset.sum_range_succ (fun j => (j : F) * η ^ j) l
+      rw [h2, hpow, mul_one] at h1
+      push_cast at h1
+      simpa using h1.symm
+    have hkey : η * T = T + (l : F) := by rw [← hshift, hsplit]
+    rw [sub_mul, one_mul, hkey]
+    ring
+  refine inv_eq_of_mul_eq_one_right ?_
+  rw [show (1 - η) * (-(l : F)⁻¹ * ∑ k ∈ range l, (k : F) * η ^ k)
+      = -(l : F)⁻¹ * ((1 - η) * ∑ k ∈ range l, (k : F) * η ^ k) from by ring, hcore]
+  field_simp
+
+/-! ## ★★★★★★★★★★★★定数項 `∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)/12` -/
+
+variable {F : Type*} [Field F]
+
+/-- ★非自明な `l` 乗根の周りの事実をまとめて取る。 -/
+theorem zeta_pow_facts {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    {i : ℕ} (hi : i ∈ (range l).erase 0) :
+    (ζ ^ i) ^ l = 1 ∧ ∑ k ∈ range l, (ζ ^ i) ^ k = 0 := by
+  have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+  have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+  have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+  refine ⟨?_, ?_⟩
+  · rw [← pow_mul, mul_comm, pow_mul, hζ.pow_eq_one, one_pow]
+  · exact (isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).geom_sum_eq_zero hl.one_lt
+
+/-- ★★★★★★★★★★★★★★**各項を二重和に直す**。 -/
+theorem term_eq_double_sum {l : ℕ} (hl : l.Prime) (hlF : (l : F) ≠ 0) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : i ∈ (range l).erase 0) :
+    ζ ^ i * ((1 - ζ ^ i)⁻¹) ^ 2
+      = ((l : F)⁻¹) ^ 2 * ∑ k ∈ range l, ∑ m ∈ range l,
+          (k : F) * (m : F) * ζ ^ (i * (k + m + 1)) := by
+  obtain ⟨hpow, hsum⟩ := zeta_pow_facts hl hζ hi
+  have hRHS : ∑ k ∈ range l, ∑ m ∈ range l, (k : F) * (m : F) * ζ ^ (i * (k + m + 1))
+      = ζ ^ i * ((∑ k ∈ range l, (k : F) * (ζ ^ i) ^ k)
+          * ∑ m ∈ range l, (m : F) * (ζ ^ i) ^ m) := by
+    rw [Finset.sum_mul_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    have hexp : ζ ^ (i * (k + m + 1)) = ζ ^ i * ((ζ ^ i) ^ k * (ζ ^ i) ^ m) := by
+      rw [← pow_mul, ← pow_mul, ← pow_add, ← pow_add]
+      congr 1
+      ring
+    rw [hexp]
+    ring
+  rw [inv_one_sub_eq hlF hpow hsum, hRHS]
+  ring
+
+/-! ## ★★★★★★初等な和の公式 -/
+
+theorem sum_range_cast [CharZero F] (n : ℕ) :
+    ∑ k ∈ range n, (k : F) = (n : F) * ((n : F) - 1) / 2 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Finset.sum_range_succ, ih]
+      push_cast
+      field_simp
+      ring
+
+theorem sum_range_cast_sq [CharZero F] (n : ℕ) :
+    ∑ k ∈ range n, (k : F) ^ 2 = (n : F) * ((n : F) - 1) * (2 * (n : F) - 1) / 6 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Finset.sum_range_succ, ih]
+      push_cast
+      field_simp
+      ring
+
+/-! ## ★★★★★★★★★★★★★★★★定数項の値 -/
+
+/-- ★★★★★★**内側の和**——`l ∣ k+m+1` なる `m` は `l−1−k` だけ。 -/
+theorem sum_indicator_inner {l : ℕ} (hl : 0 < l) {k : ℕ} (hk : k ∈ range l) :
+    ∑ m ∈ range l, (m : F) * (if l ∣ k + m + 1 then (1 : F) else 0)
+      = ((l : F) - 1 - (k : F)) := by
+  have hkl : k < l := Finset.mem_range.1 hk
+  have hmem : l - 1 - k ∈ range l := Finset.mem_range.2 (by omega)
+  have hunique : ∀ m ∈ range l, m ≠ l - 1 - k →
+      (m : F) * (if l ∣ k + m + 1 then (1 : F) else 0) = 0 := by
+    intro m hm hne
+    have hml : m < l := Finset.mem_range.1 hm
+    have hnd : ¬ (l ∣ k + m + 1) := by
+      intro hdvd
+      have heq : k + m + 1 = l :=
+        Nat.eq_of_dvd_of_lt_two_mul (by omega) hdvd (by omega)
+      omega
+    rw [if_neg hnd, mul_zero]
+  rw [Finset.sum_eq_single (l - 1 - k) hunique (fun h => absurd hmem h)]
+  have hdvd : l ∣ k + (l - 1 - k) + 1 := ⟨1, by omega⟩
+  rw [if_pos hdvd, mul_one]
+  have h2 : k ≤ l - 1 := by omega
+  have h1 : (1 : ℕ) ≤ l := hl
+  rw [Nat.cast_sub h2, Nat.cast_sub h1]
+  push_cast
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ ∈ μ_l, ζ≠1} ζ/(1−ζ)² = −(l²−1)/12`**。
+
+★★Tate 曲線の Vélu の和の**定数項**である。
+
+☆証明は `1/(1−ζ) = −(1/l)∑ kζ^k`（`inv_one_sub_eq`）で多項式に直し、
+`μ_l` 上の指標和（`sum_mu_pow_erase_zero`）を使うだけ。
+**微分も対称式も要らない。** -/
+theorem sum_mu_frac [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, ζ ^ i * ((1 - ζ ^ i)⁻¹) ^ 2
+      = -((l : F) ^ 2 - 1) / 12 := by
+  have hlF : (l : F) ≠ 0 := Nat.cast_ne_zero.2 hl.ne_zero
+  rw [Finset.sum_congr rfl (fun i hi => term_eq_double_sum hl hlF hζ hi), ← Finset.mul_sum]
+  have hswap : ∑ i ∈ (range l).erase 0, ∑ k ∈ range l, ∑ m ∈ range l,
+        (k : F) * (m : F) * ζ ^ (i * (k + m + 1))
+      = ∑ k ∈ range l, ∑ m ∈ range l,
+        (k : F) * (m : F) * ((if l ∣ k + m + 1 then (l : F) else 0) - 1) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [← Finset.mul_sum, sum_mu_pow_erase_zero hl hζ (k + m + 1)]
+  rw [hswap]
+  have hval : ∀ k ∈ range l, ∑ m ∈ range l,
+        (k : F) * (m : F) * ((if l ∣ k + m + 1 then (l : F) else 0) - 1)
+      = (l : F) * ((k : F) * ((l : F) - 1 - (k : F)))
+        - (k : F) * ((l : F) * ((l : F) - 1) / 2) := by
+    intro k hk
+    have h1 : ∀ m : ℕ, (k : F) * (m : F) * ((if l ∣ k + m + 1 then (l : F) else 0) - 1)
+        = (l : F) * ((k : F) * ((m : F) * (if l ∣ k + m + 1 then (1 : F) else 0)))
+          - (k : F) * (m : F) := by
+      intro m
+      by_cases h : l ∣ k + m + 1 <;> simp [h] <;> ring
+    rw [Finset.sum_congr rfl (fun m _ => h1 m), Finset.sum_sub_distrib,
+      ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum,
+      sum_indicator_inner hl.pos hk, sum_range_cast]
+  rw [Finset.sum_congr rfl hval]
+  have hexp : ∑ k ∈ range l, ((l : F) * ((k : F) * ((l : F) - 1 - (k : F)))
+        - (k : F) * ((l : F) * ((l : F) - 1) / 2))
+      = ((l : F) * ((l : F) - 1) - (l : F) * ((l : F) - 1) / 2) * (∑ k ∈ range l, (k : F))
+        - (l : F) * ∑ k ∈ range l, (k : F) ^ 2 := by
+    rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun k _ => by ring)
+  rw [hexp, sum_range_cast, sum_range_cast_sq]
+  field_simp
+  ring
+
+/-! ## ★★★★★★★★★★★★多項式を `μ_l∖{1}` 上で足す -/
+
+/-- ★★★★★★★★★★★★★★★★**一般形**——多項式 `∑_j c_j X^j` を
+`μ_l∖{1}` 上で足すと、係数に `l·[l ∣ j] − 1` を掛けた和になる。
+
+★これが `tateModel_of_quot_mu` の手順 2 を**任意の係数列に対して**書いた形である。 -/
+theorem sum_mu_poly {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (c : ℕ → F) (N : ℕ) :
+    ∑ i ∈ (range l).erase 0, ∑ j ∈ range N, c j * ζ ^ (i * j)
+      = ∑ j ∈ range N, c j * ((if l ∣ j then (l : F) else 0) - 1) := by
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [← Finset.mul_sum, sum_mu_pow_erase_zero hl hζ j]
+
+/-- ★`k ∈ range l` のとき `l ∣ k ⇔ k = 0`。 -/
+theorem dvd_iff_eq_zero_of_mem_range {l k : ℕ} (hl : 0 < l) (hk : k ∈ range l) :
+    l ∣ k ↔ k = 0 := by
+  constructor
+  · intro h
+    exact Nat.eq_zero_of_dvd_of_lt h (Finset.mem_range.1 hk)
+  · rintro rfl
+    exact dvd_zero l
+
+/-- ★★★★★★★★★★★★**`∑_{ζ≠1} 1/(1−ζ) = (l−1)/2`**。 -/
+theorem sum_mu_inv_one_sub [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹ = ((l : F) - 1) / 2 := by
+  have hlF : (l : F) ≠ 0 := Nat.cast_ne_zero.2 hl.ne_zero
+  have hterm : ∀ i ∈ (range l).erase 0,
+      (1 - ζ ^ i)⁻¹ = -(l : F)⁻¹ * ∑ k ∈ range l, (k : F) * ζ ^ (i * k) := by
+    intro i hi
+    obtain ⟨hpow, hsum⟩ := zeta_pow_facts hl hζ hi
+    rw [inv_one_sub_eq hlF hpow hsum]
+    congr 1
+    exact Finset.sum_congr rfl (fun k _ => by rw [← pow_mul])
+  rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum,
+    sum_mu_poly hl hζ (fun k => (k : F)) l]
+  have hval : ∑ k ∈ range l, (k : F) * ((if l ∣ k then (l : F) else 0) - 1)
+      = -((l : F) * ((l : F) - 1) / 2) := by
+    have h1 : ∀ k ∈ range l, (k : F) * ((if l ∣ k then (l : F) else 0) - 1) = -(k : F) := by
+      intro k hk
+      by_cases hk0 : k = 0
+      · subst hk0; simp
+      · rw [if_neg (fun h => hk0 ((dvd_iff_eq_zero_of_mem_range hl.pos hk).1 h))]
+        ring
+    rw [Finset.sum_congr rfl h1, Finset.sum_neg_distrib, sum_range_cast]
+  rw [hval]
+  field_simp
+
+/-- ★★★★★★★★★★★★**`∑_{ζ≠1} 1/(1−ζ)² = (l−1)(5−l)/12`**。
+
+`ζ/(1−ζ)² = 1/(1−ζ)² − 1/(1−ζ)` なので `sum_mu_frac` と
+`sum_mu_inv_one_sub` から出る。 -/
+theorem sum_mu_inv_one_sub_sq [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, ((1 - ζ ^ i)⁻¹) ^ 2 = ((l : F) - 1) * (5 - (l : F)) / 12 := by
+  have hsplit : ∀ i ∈ (range l).erase 0,
+      ((1 - ζ ^ i)⁻¹) ^ 2 = ζ ^ i * ((1 - ζ ^ i)⁻¹) ^ 2 + (1 - ζ ^ i)⁻¹ := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    have hne : (1 : F) - ζ ^ i ≠ 0 := by
+      refine sub_ne_zero.2 (Ne.symm ?_)
+      intro h
+      exact (isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt h
+    field_simp
+    ring
+  rw [Finset.sum_congr rfl hsplit, Finset.sum_add_distrib, sum_mu_frac hl hζ,
+    sum_mu_inv_one_sub hl hζ]
+  ring
+
+/-! ## ★★★★★★★★★★★★★★逆元側の指標和と Tate 係数 -/
+
+/-- ★`ζ^i` の逆元は `ζ^(l−i)`。 -/
+theorem inv_zeta_pow {l : ℕ} {ζ : F} (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : i ≤ l) :
+    (ζ ^ i)⁻¹ = ζ ^ (l - i) := by
+  have hne : ζ ^ i ≠ 0 := by
+    intro h
+    have : (1 : F) = 0 := by
+      rw [← hζ.pow_eq_one, ← Nat.sub_add_cancel hi, pow_add, h, mul_zero]
+    exact one_ne_zero this
+  refine inv_eq_of_mul_eq_one_right ?_
+  rw [← pow_add, Nat.add_sub_cancel' hi, hζ.pow_eq_one]
+
+/-- ★★★★★★★★★★★★**逆元側の指標和**——`∑_{ζ≠1} ζ^{−d}` も同じ値。 -/
+theorem sum_mu_inv_pow {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) (d : ℕ) :
+    ∑ i ∈ (range l).erase 0, ((ζ ^ i)⁻¹) ^ d = (if l ∣ d then (l : F) else 0) - 1 := by
+  have hrw : ∀ i ∈ (range l).erase 0, ((ζ ^ i)⁻¹) ^ d = ζ ^ ((l - i) * d) := by
+    intro i hi
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    rw [inv_zeta_pow hζ hil.le, ← pow_mul]
+  rw [Finset.sum_congr rfl hrw]
+  rw [← sum_mu_pow_erase_zero (R := F) hl hζ d]
+  refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a _
+    rfl
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**Tate の `X` の `q^N` 係数を `μ_l∖{1}` 上で足す**。
+
+古典的な `q` 展開 `X(u) = u/(1−u)² + ∑_{N≥1} c_N(u) q^N`、
+`c_N(u) = ∑_{d ∣ N} d(u^d + u^{−d} − 2)` の係数を、
+`μ_l∖{1}` 上で足すと
+
+    `∑_ζ c_N(ζ) = 2l·∑_{d ∣ N} d([l ∣ d] − 1)`
+
+になる。★★右辺は `ζ` を含まない——これが
+`σ₁(q) → σ₁(q^l)` を生む機構である。 -/
+theorem sum_mu_coeff {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (D : Finset ℕ) :
+    ∑ i ∈ (range l).erase 0, ∑ d ∈ D, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = 2 * (l : F) * ∑ d ∈ D, (d : F) * ((if l ∣ d then (1 : F) else 0) - 1) := by
+  rw [Finset.sum_comm]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun d _ => ?_)
+  have hexp : ∀ i, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = (d : F) * (ζ ^ (i * d)) + (d : F) * (((ζ ^ i)⁻¹) ^ d) - (d : F) * 2 := by
+    intro i; rw [← pow_mul]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hexp i), Finset.sum_sub_distrib,
+    Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.sum_mul,
+    sum_mu_pow_erase_zero hl hζ d, sum_mu_inv_pow hl hζ d]
+  have hcard : ((range l).erase 0).card = l - 1 := by
+    rw [Finset.card_erase_of_mem (Finset.mem_range.2 hl.pos), Finset.card_range]
+  rw [Finset.sum_const, hcard, nsmul_eq_mul]
+  have hlc : ((l - 1 : ℕ) : F) = (l : F) - 1 := by
+    have h1 : (1 : ℕ) ≤ l := hl.pos
+    rw [Nat.cast_sub h1, Nat.cast_one]
+  rw [hlc]
+  by_cases h : l ∣ d <;> simp [h] <;> ring
+
+/-! ## ★★★★★★★★★★★★約数和の側 -/
+
+/-- ★★★★★★★★★★★★★★★★**`l` で割り切れる約数の和**。
+
+    `∑_{d ∣ N, l ∣ d} d = l·σ₁(N/l)`   (`l ∣ N`)
+    `∑_{d ∣ N, l ∣ d} d = 0`          (`l ∤ N`)
+
+★★これが `σ₁(q) → σ₁(q^l)` の数論側である。 -/
+theorem sum_divisors_dvd (l N : ℕ) (hl : l.Prime) (hN : N ≠ 0) :
+    ∑ d ∈ N.divisors.filter (fun d => l ∣ d), d
+      = if l ∣ N then l * ∑ e ∈ (N / l).divisors, e else 0 := by
+  by_cases hlN : l ∣ N
+  · rw [if_pos hlN]
+    obtain ⟨M, hM⟩ := hlN
+    have hM0 : M ≠ 0 := by rintro rfl; exact hN (by simp [hM])
+    have hNl : N / l = M := by rw [hM, Nat.mul_div_cancel_left _ hl.pos]
+    rw [hNl, Finset.mul_sum]
+    refine Finset.sum_nbij' (fun d => d / l) (fun e => l * e) ?_ ?_ ?_ ?_ ?_
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      obtain ⟨hdN, hld⟩ := hd
+      obtain ⟨c, hc⟩ := hld
+      have hdvd : d ∣ N := (Nat.mem_divisors.1 hdN).1
+      refine Nat.mem_divisors.2 ⟨?_, hM0⟩
+      refine ⟨N / d, ?_⟩
+      have hdl : d / l = c := by rw [hc, Nat.mul_div_cancel_left _ hl.pos]
+      rw [hdl]
+      have : l * (c * (N / d)) = l * M := by
+        rw [← hM, ← mul_assoc, ← hc, Nat.mul_div_cancel' hdvd]
+      exact Nat.eq_of_mul_eq_mul_left hl.pos this.symm
+    · intro e he
+      have heM : e ∣ M := (Nat.mem_divisors.1 he).1
+      refine Finset.mem_filter.2 ⟨Nat.mem_divisors.2 ⟨?_, hN⟩, Dvd.intro e rfl⟩
+      rw [hM]
+      exact mul_dvd_mul_left l heM
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      exact Nat.mul_div_cancel' hd.2
+    · intro e _
+      exact Nat.mul_div_cancel_left _ hl.pos
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      exact (Nat.mul_div_cancel' hd.2).symm
+  · rw [if_neg hlN]
+    have hempty : N.divisors.filter (fun d => l ∣ d) = ∅ := by
+      refine Finset.filter_eq_empty_iff.2 (fun {d} hd hld => ?_)
+      exact hlN (hld.trans (Nat.mem_divisors.1 hd).1)
+    rw [hempty, Finset.sum_empty]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**Tate の `X` の `q^N` 係数を `μ_l∖{1}` 上で足した値**——`σ₁` の言葉で。
+
+    `∑_{ζ≠1} c_N(ζ) = 2l·(l·σ₁(N/l)·[l ∣ N] − σ₁(N))`
+
+★★★右辺に `σ₁(N/l)` が現れる——これが
+**`q` 展開を `q^l` 展開に付け替える機構**である。 -/
+theorem sum_mu_coeff_sigma {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (N : ℕ) (hN : N ≠ 0) :
+    ∑ i ∈ (range l).erase 0, ∑ d ∈ N.divisors, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = 2 * (l : F) * ((if l ∣ N then (l : F) * ((∑ e ∈ (N / l).divisors, e : ℕ) : F) else 0)
+          - ((∑ d ∈ N.divisors, d : ℕ) : F)) := by
+  rw [sum_mu_coeff hl hζ]
+  congr 1
+  have h1 : ∑ d ∈ N.divisors, (d : F) * ((if l ∣ d then (1 : F) else 0) - 1)
+      = (∑ d ∈ N.divisors.filter (fun d => l ∣ d), (d : F))
+        - ∑ d ∈ N.divisors, (d : F) := by
+    rw [Finset.sum_filter, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun d _ => ?_)
+    by_cases h : l ∣ d <;> simp [h] <;> ring
+  have h2 : (∑ d ∈ N.divisors.filter (fun d => l ∣ d), (d : F))
+      = if l ∣ N then (l : F) * ((∑ e ∈ (N / l).divisors, e : ℕ) : F) else 0 := by
+    rw [← Nat.cast_sum, sum_divisors_dvd l N hl hN]
+    by_cases h : l ∣ N <;> simp [h]
+  rw [h1, h2]
+  push_cast
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★
+**積の形の指標和**——`∑_ζ (∑_a c_a ζ^a)(∑_b c'_b ζ^b)`。
+
+★★`X(ζ)²` のような**積**を `μ_l∖{1}` 上で足すときの形である。
+右辺は `ζ` を含まない。 -/
+theorem sum_mu_poly_mul {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (c c' : ℕ → F) (M N : ℕ) :
+    ∑ i ∈ (range l).erase 0,
+        (∑ a ∈ range M, c a * ζ ^ (i * a)) * (∑ b ∈ range N, c' b * ζ ^ (i * b))
+      = ∑ a ∈ range M, ∑ b ∈ range N,
+          c a * c' b * ((if l ∣ a + b then (l : F) else 0) - 1) := by
+  have hexpand : ∀ i : ℕ,
+      (∑ a ∈ range M, c a * ζ ^ (i * a)) * (∑ b ∈ range N, c' b * ζ ^ (i * b))
+        = ∑ a ∈ range M, ∑ b ∈ range N, c a * c' b * ζ ^ (i * (a + b)) := by
+    intro i
+    rw [Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    have : ζ ^ (i * (a + b)) = ζ ^ (i * a) * ζ ^ (i * b) := by
+      rw [← pow_add]
+      congr 1
+      ring
+    rw [this]
+    ring
+  rw [Finset.sum_congr rfl (fun i _ => hexpand i), Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [← Finset.mul_sum, sum_mu_pow_erase_zero hl hζ (a + b)]
+
+/-- ★★★★★★★★★★★★**`ζ^{−i}` を正の冪に直す**——`(ζ^i)⁻¹ = ζ^{i(l−1)}`。
+
+★★Tate の `X`・`Y` の尾には `u^{−d}` が現れるが、これで
+**すべて正の冪に直せる**ので、上の指標和の道具がそのまま使える。 -/
+theorem inv_zeta_pow_eq_pow {l : ℕ} (hl : 0 < l) {ζ : F} (hζ : IsPrimitiveRoot ζ l) (i : ℕ) :
+    (ζ ^ i)⁻¹ = ζ ^ (i * (l - 1)) := by
+  refine inv_eq_of_mul_eq_one_right ?_
+  rw [← pow_add]
+  have hkey : i + i * (l - 1) = l * i := by
+    cases l with
+    | zero => omega
+    | succ n => simp only [Nat.add_sub_cancel]; ring
+  rw [hkey, pow_mul, hζ.pow_eq_one, one_pow]
+
+/-- ★★★**`l ∣ (l−1)d ⇔ l ∣ d`**——`l` と `l−1` は互いに素だから。 -/
+theorem dvd_mul_pred_iff {l d : ℕ} (hl : l.Prime) : l ∣ (l - 1) * d ↔ l ∣ d := by
+  constructor
+  · intro h
+    have hl2 : 2 ≤ l := hl.two_le
+    rcases (Nat.Prime.dvd_mul hl).1 h with h1 | h2
+    · exact absurd (Nat.le_of_dvd (by omega) h1) (by omega)
+    · exact h2
+  · intro h
+    exact Dvd.dvd.mul_left h _
+
+/-- ★★★★★★★★★★**逆向きの指標和**——`∑_{i≠0} (ζ^{−i})^d`。 -/
+theorem sum_mu_neg_pow {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l) (d : ℕ) :
+    ∑ i ∈ (range l).erase 0, (ζ ^ (i * (l - 1))) ^ d
+      = (if l ∣ d then (l : R) else 0) - 1 := by
+  have hrw : ∀ i : ℕ, (ζ ^ (i * (l - 1))) ^ d = ζ ^ (i * ((l - 1) * d)) := by
+    intro i
+    rw [← pow_mul, mul_assoc]
+  rw [Finset.sum_congr rfl (fun i _ => hrw i), sum_mu_pow_erase_zero hl hζ ((l - 1) * d)]
+  by_cases h : l ∣ d
+  · rw [if_pos h, if_pos ((dvd_mul_pred_iff hl).2 h)]
+  · rw [if_neg h, if_neg (fun hh => h ((dvd_mul_pred_iff hl).1 hh))]
+
+/-! ## ★★★★★★★★★★★★★★★★定数項の環版（`Ring.inverse`） -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**`12·∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)`**——環の中で、分母を払った形。
+
+★★Tate の機構は `CommRing R` の上にあるので、
+`Found/GaloisRep/MuCharSum.lean` の体版（`sum_mu_frac`）を
+**商体へ移して戻す**ことで環版にする。
+
+☆`12` で割らないのが要である——`tateA6` も `12 a₆ = −(5s₃ + 7s₅)` の形で持っている。 -/
+theorem twelve_mul_sum_mu_ringInverse {R : Type*} [CommRing R] [IsDomain R] [CharZero R]
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
+    (12 : R) * ∑ i ∈ (range l).erase 0, ζ ^ i * (Ring.inverse (1 - ζ ^ i)) ^ 2
+      = -((l : R) ^ 2 - 1) := by
+  classical
+  set K := FractionRing R with hK
+  let f : R →+* K := algebraMap R K
+  have hinj : Function.Injective f := IsFractionRing.injective R K
+  haveI : CharZero K := ⟨fun a b hab => by
+    have h2 : f (a : R) = f (b : R) := by rw [map_natCast, map_natCast]; exact hab
+    exact Nat.cast_injective (hinj h2)⟩
+  refine hinj ?_
+  have hζK : IsPrimitiveRoot (f ζ) l := hζ.map_of_injective hinj
+  have hmap : ∀ i ∈ (range l).erase 0,
+      f (ζ ^ i * (Ring.inverse (1 - ζ ^ i)) ^ 2)
+        = (f ζ) ^ i * ((1 - (f ζ) ^ i)⁻¹) ^ 2 := by
+    intro i hi
+    obtain ⟨u, hu'⟩ := hu i hi
+    have hru : Ring.inverse (1 - ζ ^ i) = ((u⁻¹ : Rˣ) : R) := by
+      rw [← hu', Ring.inverse_unit]
+    have hfu2 : f ((u : Rˣ) : R) = 1 - (f ζ) ^ i := by
+      rw [hu', map_sub, map_one, map_pow]
+    have hval : f (((u⁻¹ : Rˣ) : R)) = (f ((u : Rˣ) : R))⁻¹ := by
+      refine eq_inv_of_mul_eq_one_left ?_
+      rw [← map_mul]
+      simp
+    rw [map_mul, map_pow, map_pow, hru, hval, hfu2]
+  have h12 : f (12 : R) = (12 : K) := map_ofNat f 12
+  have hRHS : f (-((l : R) ^ 2 - 1)) = -((l : K) ^ 2 - 1) := by
+    rw [map_neg, map_sub, map_pow, map_natCast, map_one]
+  rw [map_mul, map_sum, Finset.sum_congr rfl hmap, sum_mu_frac hl hζK, h12, hRHS]
+  ring
+
+/-! ## ★★★★★★★★★★★★★★★★`Y` 側の定数項 -/
+
+/-- ★★★★★★**反射**——`1/(1−ζ) + 1/(1−ζ⁻¹) = 1`。 -/
+theorem inv_one_sub_add_inv_one_sub_inv {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) {i : ℕ} (hi : i ∈ (range l).erase 0) :
+    (1 - ζ ^ (l - i))⁻¹ = 1 - (1 - ζ ^ i)⁻¹ := by
+  have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+  have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+  have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+  have hz1 : ζ ^ i ≠ 1 :=
+    (isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt
+  have hne : (1 : F) - ζ ^ i ≠ 0 := sub_ne_zero.2 (Ne.symm hz1)
+  have hz0 : ζ ^ i ≠ 0 := by
+    intro h
+    have h1 : (1 : F) = 0 := by
+      rw [← hζ.pow_eq_one, ← Nat.sub_add_cancel hil.le, pow_add, h, mul_zero]
+    exact one_ne_zero h1
+  rw [(inv_zeta_pow hζ hil.le).symm]
+  refine inv_eq_of_mul_eq_one_right ?_
+  field_simp
+  ring
+
+/-- ★★★★★★★★**`ζ·u = u − 1`**（`u = 1/(1−ζ)`）。 -/
+theorem zeta_mul_inv_one_sub {ζ : F} (hne : (1 : F) - ζ ≠ 0) :
+    ζ * (1 - ζ)⁻¹ = (1 - ζ)⁻¹ - 1 := by
+  field_simp
+  ring
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`∑_{ζ≠1} ζ²/(1−ζ)³ = (l²−1)/24`**——`Y` 側の定数項。
+
+☆証明は反射 `u_{l−i} = 1 − u_i` だけである:
+`u = 1/(1−ζ)` と置くと `ζ²/(1−ζ)³ = u(u−1)²` であり、
+`i ↦ l−i` で置き換えると `(1−u)u²` になる。
+★足すと `u(u−1)² + (1−u)u² = u − u²` なので
+`2·∑ = p₁ − p₂`——**三重和を計算せずに済む**。 -/
+theorem sum_mu_frac_cube [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+      = ((l : F) ^ 2 - 1) / 24 := by
+  classical
+  have hne : ∀ i ∈ (range l).erase 0, (1 : F) - ζ ^ i ≠ 0 := by
+    intro i hi
+    have hi0 : i ≠ 0 := (Finset.mem_erase.1 hi).1
+    have hil : i < l := Finset.mem_range.1 (Finset.mem_erase.1 hi).2
+    have hnd : ¬ l ∣ i := fun h => hi0 (Nat.eq_zero_of_dvd_of_lt h hil)
+    exact sub_ne_zero.2 (Ne.symm
+      ((isPrimitiveRoot_pow_of_not_dvd (R := F) hl hζ hnd).ne_one hl.one_lt))
+  have hterm : ∀ i ∈ (range l).erase 0,
+      (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+        = (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2 := by
+    intro i hi
+    have h := zeta_mul_inv_one_sub (hne i hi)
+    calc (ζ ^ i) ^ 2 * ((1 - ζ ^ i)⁻¹) ^ 3
+        = (ζ ^ i * (1 - ζ ^ i)⁻¹) ^ 2 * (1 - ζ ^ i)⁻¹ := by ring
+      _ = ((1 - ζ ^ i)⁻¹ - 1) ^ 2 * (1 - ζ ^ i)⁻¹ := by rw [h]
+      _ = (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2 := by ring
+  rw [Finset.sum_congr rfl hterm]
+  have hrefl : ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = ∑ i ∈ (range l).erase 0,
+        (1 - (1 - ζ ^ i)⁻¹) * ((1 - ζ ^ i)⁻¹) ^ 2 := by
+    refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      omega
+    · intro a ha
+      have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+      have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+      omega
+    · intro a ha
+      rw [inv_one_sub_add_inv_one_sub_inv hl hζ ha]
+      ring
+  have hdouble : (2 : F) * ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = (∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹)
+        - ∑ i ∈ (range l).erase 0, ((1 - ζ ^ i)⁻¹) ^ 2 := by
+    have h2 : (2 : F) * ∑ i ∈ (range l).erase 0,
+          (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+        = (∑ i ∈ (range l).erase 0, (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2)
+          + ∑ i ∈ (range l).erase 0,
+            (1 - (1 - ζ ^ i)⁻¹) * ((1 - ζ ^ i)⁻¹) ^ 2 := by
+      rw [← hrefl]; ring
+    rw [h2, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i _ => by ring)
+  rw [sum_mu_inv_one_sub hl hζ, sum_mu_inv_one_sub_sq hl hζ] at hdouble
+  have hfin : (2 : F) * ∑ i ∈ (range l).erase 0,
+        (1 - ζ ^ i)⁻¹ * ((1 - ζ ^ i)⁻¹ - 1) ^ 2
+      = ((l : F) ^ 2 - 1) / 12 := by
+    rw [hdouble]; ring
+  rw [eq_div_iff (by norm_num : (24 : F) ≠ 0)]
+  rw [eq_div_iff (by norm_num : (12 : F) ≠ 0)] at hfin
+  rw [← hfin]
+  ring
+
+/-! ## ★★★★★★★★★★★★★★★★`1/(1−ζ)` は `y^l = (y−1)^l` の根 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`u = 1/(1−ζ)` は `y^l − (y−1)^l = 0` を満たす**。
+
+★★`y − 1 = ζ/(1−ζ)` なので
+`y^l − (y−1)^l = (1 − ζ^l)/(1−ζ)^l = 0`。
+
+☆この多項式は次数 `l−1`、先頭係数 `l` であり、
+根はちょうど `1/(1−ζ^i)`（`i = 1,…,l−1`）の `l−1` 個である。
+★★ゆえに Vieta で基本対称式 `e_k = C(l, k+1)/l` が出、
+Newton の公式で冪和 `p_k = ∑ 1/(1−ζ^i)^k` が出る。
+☆`p₄` は反射（第 797）では出ないので、この道が要る。 -/
+theorem inv_one_sub_isRoot {l : ℕ} {ζ : F} (hpow : ζ ^ l = 1) (hne : (1 : F) - ζ ≠ 0) :
+    ((1 - ζ)⁻¹) ^ l - ((1 - ζ)⁻¹ - 1) ^ l = 0 := by
+  have h1 : (1 - ζ)⁻¹ - 1 = ζ * (1 - ζ)⁻¹ := (zeta_mul_inv_one_sub hne).symm
+  rw [h1, mul_pow, hpow, one_mul, sub_self]
+
+/-- ★★★★★★★★**別の書き方**——`(1−ζ)^l` を払った形。 -/
+theorem one_sub_pow_eq_of_root {l : ℕ} {ζ : F} (hpow : ζ ^ l = 1) :
+    (1 : F) ^ l - ζ ^ l = 0 := by
+  rw [one_pow, hpow, sub_self]
+
+/-! ## ★出典の紐付け(`.src`) -/
+
+def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)((1−η)·∑ kη^k = −l。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_one_sub_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/(1−η) を η の多項式で書く。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def zeta_pow_facts.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(非自明な l 乗根の事実。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def term_eq_double_sum.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ/(1−ζ)² を二重和に直す。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_frac.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)/12。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_range_cast.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{k<n} k = n(n−1)/2。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_range_cast_sq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{k<n} k² = n(n−1)(2n−1)/6。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_indicator_inner.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l ∣ k+m+1 なる m は l−1−k だけ。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_poly.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(多項式を μ_l∖{1} 上で足す一般形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_one_sub.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} 1/(1−ζ) = (l−1)/2。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_one_sub_sq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} 1/(1−ζ)² = (l−1)(5−l)/12。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def dvd_iff_eq_zero_of_mem_range.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(range l の中で l ∣ k ⇔ k = 0。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_zeta_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^i の逆元は ζ^(l−i)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_inv_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(逆元側の指標和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_coeff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate の X の q^N 係数を μ_l∖{1} 上で足す。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_divisors_dvd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l で割り切れる約数の和 = l·σ₁(N/l)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_coeff_sigma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate の X の q^N 係数の μ_l 和を σ₁ で書く。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_poly_mul.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(積の形の指標和——X(ζ)² のため。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_zeta_pow_eq_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^{−i} を正の冪に直す。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def dvd_mul_pred_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l ∣ (l−1)d ⇔ l ∣ d。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_neg_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(逆向きの指標和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def twelve_mul_sum_mu_ringInverse.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(12·∑_{ζ≠1} ζ/(1−ζ)² = −(l²−1)——環版。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_one_sub_add_inv_one_sub_inv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(反射 1/(1−ζ) + 1/(1−ζ⁻¹) = 1。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def zeta_mul_inv_one_sub.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ·u = u − 1。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_frac_cube.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(∑_{ζ≠1} ζ²/(1−ζ)³ = (l²−1)/24。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def inv_one_sub_isRoot.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(1/(1−ζ) は y^l = (y−1)^l の根。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def one_sub_pow_eq_of_root.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^l = 1 の別の書き方。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(μ_l 上の指標和——∑ ζ^{ik} は l か 0。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_pow_erase_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(非自明な l 乗根にわたる指標和。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def isPrimitiveRoot_pow_of_not_dvd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(ζ^i は再び原始 l 乗根。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+end ABC3.Found.GaloisRep

@@ -86,6 +86,31 @@ theorem valAdd_nonneg_iff (p : HeightOneSpectrum (𝓞 L)) (x : Lˣ) :
     rw [← WithZero.coe_unzero (valuationP_ne_zero p x), WithZero.coe_le_one] at h
     simpa using Multiplicative.toAdd_le.2 h
 
+/-- ★★★★★★★★★★★★★★**Néron 指数は非負**（モデルが `p` で整なら）。
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+★`neronExp p W` は「与えられたモデルが極小からどれだけ離れているか」なので、
+モデルが `p` で整である限り**離れる向きは 1 方向しかない**。
+
+★★★これが `Lemma 3.5` の有限素点側の不等式
+
+    `Σᶠ_p [neronExp_p(E) − neronExp_p(E′)]·log N(p) ≤ (3/2)·d·log(l)`
+
+で **`E` が大域極小なら左辺が `≤ 0` になる**理由である
+（`Found/GaloisRep/VeluNormalized.lean`）。 -/
+theorem neronExp_nonneg (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    (hΔ : W.Δ ≠ 0) (hint : W.IsIntegral (primeSubring p)) :
+    0 ≤ neronExp p W := by
+  rw [neronExp, valAdd_nonneg_iff]
+  have hC := (WeierstrassCurve.exists_isMinimal (primeSubring p) W).choose_spec
+  have hle := minimal_u_valuation_le_one W hΔ hint _ hC
+  have heq := valuation_isEquiv p
+      ((((WeierstrassCurve.exists_isMinimal (primeSubring p) W).choose.u) : L)) 1
+  rw [map_one, map_one] at heq
+  exact heq.1 hle
+
 /-! ## ★★★★★極小判別式の指数 -/
 
 /-- ★★★★★**極小判別式の指数** `v_p(Δ_min)`。 -/

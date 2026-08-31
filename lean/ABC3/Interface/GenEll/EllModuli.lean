@@ -71,7 +71,23 @@ structure EllModuliData extends TorsionGaloisRepData where
   degLe : ℕ → Set EllClass
   /-- 原文「`E_L` … with **semi-stable reduction** at all the finite primes of `L`」。 -/
   SemiStable : Curve → Prop
-  /-- 原文「`E_L` admits an **l-cyclic** subgroup scheme `H_L ⊆ E_L`」。 -/
+  /-- 原文「`E_L` admits an **l-cyclic** subgroup scheme `H_L ⊆ E_L`」。
+
+  ## ★★★★★★2026-08-29 の測定 —— **標数 0 では「Galois 安定な直線」と同じ**
+
+  ★原文の `H_F ⊆ E_F` は**生成ファイバー**（数体 `F` の上）の部分群スキームである。
+  ★★標数 0 では有限群スキームはすべてエタール（Cartier）であり、
+  エタール有限群スキームは**有限 Galois 加群**と圏同値である。
+  ★★★したがって
+
+      「`l`-巡回部分群スキーム `H_F ⊆ E_F`」 ⟺ 「`E[l]` の中の `Gal(ℚ̄/F)`-安定な直線」
+
+  である。**有限平坦群スキームの一般論は要らない**
+  （それが要るのは `Lemma 3.2, (ii)` の `E/μ_l` を `𝒪_K` 上で作る段だけである）。
+
+  ★★★★これで `Theorem 3.8` の側では、`¬ HasLCyclic` は
+  「安定な直線が無い」と読め、`Found/GenEll/Thm38Bridge.lean` の
+  `exists_nonUpper_of_no_stable_line` がそのまま効く。 -/
   HasLCyclic : Curve → ℕ → Prop
   /-- 原文「`L` is a **minimal field of definition** of the point `[E_L]`」。 -/
   MinimalField : Curve → Prop
@@ -169,11 +185,34 @@ structure EllModuliData extends TorsionGaloisRepData where
 
   ★これが Galois-finite であることは **`Lemma 3.5`**(高さの不等式)と
   **`Lemma 3.6`**(初等的な評価)から `ht^Falt` が有界になり、
-  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。 -/
-  lcyclicExc : Set EllClass
-  galoisFinite_lcyclicExc : GaloisFinite lcyclicExc
-  mem_lcyclicExc : ∀ (E : Curve) (l : ℕ), Nat.Prime l → SemiStable E →
-    HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+  **`Proposition 1.4, (iv)`**(Northcott)と **`Example 1.3, (i)`** で出る。
+
+  ## ★★★★★★★★2026-08-31 の訂正(第 755)——`l` の下界が要る
+
+  ☆以前ここは
+
+      lcyclicExc : Set EllClass
+      mem_lcyclicExc : ∀ E l, Prime l → SemiStable E →
+        HasLCyclic E l → PrimeToLocalHeights E l → cls E ∈ lcyclicExc
+
+  であった。★★**これは強すぎて witness が作れない**
+  (`Check/GenEll/LcyclicExcTooStrong.lean` の測定):
+  `Lemma 3.5` が与えるのは `(l/14)·deg∞ ≤ ht^Falt + 2·log(l) + C′` であり、
+  `ht^Falt` の**上界**を出すには `l` が `ht^Falt` に比べて大きいこと
+  ——原文の**条件 (a)**——が要る。`l = 2` を取れば対象は無限個になる。
+
+  ★★★`Skeleton/GenEll/Section3.lean` の `lemma_3_7` は `mem_lcyclicExc` を呼ぶ時点で
+  `condA ∨ condB` を持っているので、**それを仮説として渡す**形に直した。
+  ☆`lemma_3_7`・`theorem_3_8`・`Corollary 4.3/4.4` の**statement は変わらない**。 -/
+  lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass
+  galoisFinite_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass), CompactlyBounded KV →
+    GaloisFinite (lcyclicExc C eps KV)
+  mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
+    Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
+    ((100 * (degOfDefinition E : ℝ)
+        * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+      ∨ cls E ∈ KV) →
+    cls E ∈ lcyclicExc C eps KV
   /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。
 
   原文 (GenEll p.18):
@@ -225,11 +264,41 @@ structure EllModuliData extends TorsionGaloisRepData where
   mod `l` 像は `α = (1 1 / 0 1)` を含む。
   ★★`l`-巡回部分群スキームを持たなければ、mod `l` 像は**非上三角**行列を含む。
   ★★★その 2 つから **`Lemma 3.1, (iv)`** で `GL₂(ℤ_l)` の像は `SL₂(ℤ_l)` を含む。
-  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**実装済み**であるが、
-  **Galois 表現そのものが未構築**なので、その適用をここで受ける。
+  ★★★★`Lemma 3.1` は `Found/GenEll/Lemma31.lean`･`Sl2Padic.lean` に**4 条すべて実装済み**である。
+
+  ## ★★★★★★★★★★ 2026-08-29 の再実測——**前の記述は古かった**
+
+  ★以前ここには「**Galois 表現そのものが未構築**なので」と書いてあったが、
+  ★★**それはもう当てはまらない**——`Found/GaloisRep/GalRep.lean` に
+
+      `galRep : Gal(L/K) →* GL₂(ℤ_l)`（`exists_galRep` もある）
+
+  が構成されている。★`Found/GaloisRep/` は 325 ファイルあり、
+  Tate 加群・Weil 対・行列式＝円分指標まで入っている。
+
+  ★★★**したがってこのフィールドが本当に受けているのは次の 2 つだけ**である:
+
+  1. 局所理論の行列表示——`0 → F_l(1) → M_l(E) → F_l → 0` に合わせた基底で
+     `l ∤ v(q)` なら mod `l` 像が `α = (1 1 / 0 1)` を含むこと。
+     ★Tate 一意化と `Lemma 3.2, (i)` は**閉じている**（`Lemma32Tate.lean`）。
+  2. `l`-巡回部分群スキームを持たないこと ⟹ mod `l` 像が**非上三角**行列を含むこと
+     （`l`-巡回 ⟷ Galois 安定な直線の対応）。
+
+  ★★★★★★★**`Theorem 3.8` に Serre の開像定理は要らない**——群論の核は
+  `Lemma 3.1, (iv)` だけであり、それは済んでいる。
   ★★★★★結論が `E`(`L` 上)についてなのは、
-  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。 -/
-  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l →
+  `Im(Gal_{L′}) ⊆ Im(Gal_L)` だからである。
+
+  ## ★★★★★★★★2026-08-31 の訂正(第 776)——`5 ≤ l` が要る
+
+  ☆以前ここに `5 ≤ l` は無かった。★★**群論の核 `Lemma 3.1, (iv)` が `5 ≤ l` を
+  要求する**(`Found/GenEll/Sl2Padic.lean` の `lemma_3_1_iv`)ので、
+  `l ∈ {2, 3}` では witness が作れない。
+  ★`Check/GenEll/ImageSL2NeedsL5.lean` の測定を参照。
+
+  ★★★`Theorem 3.8` の側では両方の条件から `5 ≤ l` が出るので、statement は変わらない:
+  条件 (a) では `l ≥ 23040·100 ≥ 5`、条件 (b) では `l` は `30` と素な素数だから `l ≥ 7`。 -/
+  imageContainsSL2_of_torsionExt : ∀ (E : Curve) (l : ℕ), Nat.Prime l → 5 ≤ l →
     HasMultRed (torsionExt E) → PrimeToLocalHeights (torsionExt E) l →
     ¬ HasLCyclic (torsionExt E) l → ImageContainsSL2 E l
   /-- ★★★★★**`SL₂` を含むことと全射性は、`l` が `L` で不分岐なら同じこと**である。

@@ -191,6 +191,51 @@ theorem neronExp_eq_zero_iff (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCu
   rw [neronExp, minimalExp, valAdd_eq_zero_iff, vAdd_eq_zero_iff]
   exact ((valuation_isEquiv p).eq_one_iff_eq_one).symm
 
+/-- ★★★★★★★★**極小化変換のスケーリングは整である**（mathlib 側の核）。
+
+`IsMinimal R (C • W)` は「`C • W` が整なモデルの中で `v(Δ)` を最大にする」ことなので、
+`W` 自身が整なら `C⁻¹` も候補であり、`v(Δ_W) ≤ v(Δ_{C•W}) = v(u)⁻¹¹²·v(Δ_W)`。
+★`v(Δ_W) ≠ 0` で割ると `v(u)¹² ≤ 1`、すなわち `v(u) ≤ 1`。 -/
+theorem minimal_u_valuation_le_one {R : Type*} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type*} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) (hΔ : W.Δ ≠ 0) (hint : W.IsIntegral R)
+    (C : VariableChange K) (hC : WeierstrassCurve.IsMinimal R (C • W)) :
+    (IsDiscreteValuationRing.maximalIdeal R).valuation K ((C.u : K)) ≤ 1 := by
+  have hmax := hC.val_Δ_maximal
+  have hint' : WeierstrassCurve.IsIntegral R (C • W) := by simpa using hmax.1
+  have hW : (C⁻¹ • (C • W)) = W := inv_smul_smul C W
+  have h1 : WeierstrassCurve.IsIntegral R (C⁻¹ • (C • W)) := by rw [hW]; exact hint
+  have key : WeierstrassCurve.valuation_Δ_aux R (C⁻¹ • (C • W))
+      ≤ WeierstrassCurve.valuation_Δ_aux R ((1 : VariableChange K) • (C • W)) := by
+    rcases le_total (WeierstrassCurve.valuation_Δ_aux R (C⁻¹ • (C • W)))
+      (WeierstrassCurve.valuation_Δ_aux R ((1 : VariableChange K) • (C • W))) with h | h
+    · exact h
+    · exact hmax.2 h1 h
+  rw [hW, one_smul] at key
+  rw [WeierstrassCurve.valuation_Δ_aux, WeierstrassCurve.valuation_Δ_aux,
+    dif_pos hint, dif_pos hint', Subtype.mk_le_mk, WeierstrassCurve.variableChange_Δ] at key
+  set v := (IsDiscreteValuationRing.maximalIdeal R).valuation K with hv
+  have hu0 : v ((C.u : K)) ≠ 0 := by
+    simp only [hv, ne_eq, Valuation.zero_iff]
+    exact C.u.ne_zero
+  have hΔ0 : v W.Δ ≠ 0 := by
+    simp only [hv, ne_eq, Valuation.zero_iff]
+    exact hΔ
+  rw [Units.val_inv_eq_inv_val, map_mul, map_pow, map_inv₀] at key
+  have h2 : v W.Δ * (v ((C.u : K))) ^ 12
+      ≤ ((v ((C.u : K)))⁻¹ ^ 12 * v W.Δ) * (v ((C.u : K))) ^ 12 :=
+    mul_le_mul_right' key _
+  have h3 : ((v ((C.u : K)))⁻¹ ^ 12 * v W.Δ) * (v ((C.u : K))) ^ 12 = v W.Δ := by
+    field_simp
+  rw [h3] at h2
+  have h5 := mul_le_mul_right' h2 (v W.Δ)⁻¹
+  have h6 : v W.Δ * (v ((C.u : K))) ^ 12 * (v W.Δ)⁻¹ = (v ((C.u : K))) ^ 12 := by field_simp
+  have h7 : v W.Δ * (v W.Δ)⁻¹ = 1 := by field_simp
+  rw [h6, h7] at h5
+  by_contra hcon
+  push_neg at hcon
+  exact absurd h5 (not_le.2 (one_lt_pow₀ hcon (by norm_num)))
+
 /-- ★★★★★★**変数変換則**——界面 `omegaFrac_variableChange` の局所版。 -/
 theorem neronExp_variableChange (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
     (hΔ : W.Δ ≠ 0) (C₀ : VariableChange L) :

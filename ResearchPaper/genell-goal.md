@@ -29036,3 +29036,3125 @@ Skeleton には載らない。
 - `lake build` 全体通過、`node tools/check.mjs` **PASS**、`sorry` **40 件**(変化なし)
 - `Skeleton/GenEll` + `Skeleton/NCBelyi` の `sorry` は **4 件**のまま
   ——★**今回は減らないのが正しい**。`Lemma 2.2` は新しい `sorry` を作らずに足した
+
+## §9-710 ★★★★★★★★★★**ample の道が 3 段進んだ——そして段 A・B の見積もりは「層」と「前層」の取り違えだった**(第 418-423 ブロック、2026-08-27)
+
+`ample-and-projective-embedding` は §1 の 5 項目すべての門である。本日そこを 6 回叩いた。
+台帳(`ResearchPaper/mathlib-gap.json`)の内訳は **3/9 → 7/10** になった。
+
+### ★★★★★★★★★まず訂正——段 A・B は最初から**要らなかった**
+
+朝の測定は「段 A(層のテンソル積)は mathlib への PR 規模」と判定した。
+`Localization.Monoidal` / `Monoidal.Reflective` / `Adjunction.monoidal` が
+いずれも無いので、**層の水準**では正しい。
+
+★しかし CLAUDE.md の在庫の手順どおり `.cache/decl-index.txt` を引いたら、
+ABC3 は**前層の水準**で既に全部持っていた:
+
+| 宣言 | 場所 | 中身 |
+|---|---|---|
+| `PresheafModulesOn` / `restrictPresheafFunctor` | `Found/Arakelov/PicRestrictTensor.lean` | ★制限が**モノイダル関手**であること |
+| `restrictPresheafTensor` | 同上 | `P|_U ⊗ Q|_U ≅ (P ⊗ Q)|_U` |
+| `IsLocallyTrivial` | `Found/Arakelov/PicLocalTrivial.lean` | ★★**可逆層の定義**(強い局所自明性) |
+| `IsLocallyTrivial.tensor` | 同上 | ★★★テンソル積で閉じる = **Pic の乗法** |
+| `aPicGroup` | `Found/Arakelov/APicWitness.lean` | 算術 Picard 群 |
+
+★★mathlib の `PresheafOfModules.monoidalCategory` は**結合子・単位子まで完成している**。
+したがって前層の水準では段 A2 はそもそも要らず、段 B は既に閉じていた。
+
+★★★**教訓は「規模の判定は作業水準を固定してから行う」**である。
+同じ数学が層の水準では person-years、前層の水準では在庫、ということが起きる。
+
+### ★★★★★★★★段 C1——`ℙⁿ_R` は mathlib の部品だけで建った
+
+台帳は段 C を absent としていたが、実測すると
+
+    AlgebraicGeometry.Proj                             ある
+    MvPolynomial.gradedAlgebra                         ある(instance ではない)
+    Proj.toSpecZero                                    ある
+    IsProper (Proj.toSpecZero 𝒜)  ([Stacks] 01MF)      ★ある
+
+`Found/GenEll/ProjectiveSpace.lean` で埋めた隙間は **2 つだけ**:
+
+1. `Algebra.FiniteType (𝒜 0) (MvPolynomial …)` は instance になっていない
+   —— 変数 `X i` が生成することを書いた
+2. `𝒜 0` は `R` そのものではない —— `homogeneousSubmodule_zero : 𝒜 0 = 1` から
+   環同型 `R ≃+* 𝒜 0` を作り、構造射を `Spec R` へ向けた
+
+★これで **`ℙⁿ_R` は `Spec R` 上固有**である。
+
+### ★★★★★★★★★★段 D1・D2——`X_s` を茎なしで作る
+
+`ample` の定義([Stacks] 28.27.1)の核は `X_s`(切断の非消失軌跡)である。
+教科書の定義は茎 `M_x` の中で `s_x ∉ 𝔪_x M_x` だが、
+★**mathlib に加群層の茎は 1 件も無い**(本日実測)。
+
+★★そこで **`IsLocallyTrivial` が与える自明化を使った**:
+
+    X_s ≝ ⨆_V ⨆_{e : M|_V ≅ 𝟙} X.basicOpen (trivValue M V e s)
+
+★★★合併なので**開であることが自動**で、自明化を**選ばない**ので選択公理も要らない。
+
+そして `Found/GenEll/AmpleDef.lean` で 2 段:
+
+| 段 | 定理 | 機構 |
+|---|---|---|
+| D1 | `basicOpen_trivValue_congr` | ★同じ `V` の上の自明化は単元倍で違う。**純代数**——`R` を `R`-加群と見た線型同型は `θ 1` 倍で `θ 1` は単元 |
+| D2 | `nonVanishing_inf` | ★★`X_s ⊓ V = X.basicOpen (trivValue M V e s)`。機構は `trivValue_restrict`(`e.hom` の**自然性**)だけ |
+
+★★★★**健全性**も取れた: 構造層なら `X_s = Scheme.basicOpen s`(`nonVanishing_unit`)。
+これで `nonVanishing` が「知っている `basicOpen` の一般化」だと型で言える——**空虚ではない**。
+
+★★★★★`trivialOfLe`(`Found/Arakelov/PicBasicTrivial.lean`)は 2 つの `rfl` 等式を
+`rw` して作られているので、**評価すると計算する**——`trivValue_restrict` の証明中の
+`h1`・`h2` はどちらも `rfl` で通った。**7 か月前の設計が、そのまま嵌まった**。
+
+### ★★★★★★★★★★★もう 1 つ——`Lemma 3.2, (i)` から一意化の posit が消えた
+
+`Lemma32Uniformized.lean` は「同変な一意化 `(Φ, act, hequiv)`」を**入力として**受けていた。
+本日 `galois-equivariant-tate-uniformization` を閉じたので、その入力を構成したもので埋められる:
+
+| 入力 | 何で埋めたか |
+|---|---|
+| `Φ` | `tatePhiAddEquivAll`(仮定なしの加法同型) |
+| `act σ` | ★**mathlib の `Point.map`**(`(σ : L →ₐ[K] L).restrictScalars R` に沿って) |
+| `hequiv` | `tatePhi_pointMap`(`Found/GaloisRep/TateGaloisStab.lean`) |
+
+★`act` が mathlib の**加法群準同型** `WeierstrassCurve.Affine.Point.map` になったので、
+「`Φ` は `G_K`-加群の同型」が**定理として**言える。
+
+★★`σ` が `R` を固定することは**自動**である——`σ ∈ Gal(L/K)` は `K` を固定し `R → K → L` なので
+`(σ : L →ₐ[K] L).restrictScalars R` がそのまま使え、`tatePhi_map` の `σ : R →+* R` は
+`RingHom.id R` でよい。同じ理由で `σ_U S.Q = S.Q` も仮説ではなく定理になる。
+
+★★★これで `Lemma32StableLine.lean` の逸脱「`G_K` 同変な一意化は含まない」が**消えた**。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**(変化なし)——★**残り 13 項目はどれも「塞がりを丸ごと閉じる」ことを要求する**ので、段が進んでも数は動かない
+- `ample` の内訳 **7/10**。残るのは **C2(`O(1)` —— mathlib に twisting sheaf は 1 件も無い)**、
+  **E(Serre の定理 —— Stacks 側は構造化済み)**、**F2(ℤ-射影性)**、
+  そして台帳の外の**座標の高さと `htArith` の比較**である
+- `finite-flat-group-scheme-quotient` は `Lemma 3.2` を項目として閉じる最後の 1 本だが、
+  minimalForm の通り**下流(`Lemma 3.5` 以降)はこれを待たない**
+
+## §9-711 ★★★★★★★★★★**`Definition 1.1` の残りが「1 本」まで縮んだ**(第 424-430 ブロック、2026-08-28)
+
+`§9-710` の続き。ample の道を進めたあと、**`Definition 1.1` に持ち替えた**。
+理由は funnel を読み直した結果である——★**§1 の 5 項目のうち `Definition 1.1` だけが
+ample を経由しない**。
+
+### ★★★★★★★★まず在庫を引いた——残っていたのは 2 語だけ
+
+`Interface/GenEll/HeightTheory.lean` の `waiting.trackB` は 2026-08-27 に
+「律速だった `X^arc` は建った。残るのは条なし `.src` への**組み上げ**である」と
+更新されていた。★そこで `Definition 1.1, (i)` の語を 1 つずつ在庫と突き合わせた:
+
+| 原文の語 | 在庫 |
+|---|---|
+| `X^arc` はコンパクト、`ι_X` つき | ★あり(`arcTopology` / `conjPoint` / `compactSpace_arc`) |
+| 直線束 `L` | ★あり(`picardDataWitness.Pic`) |
+| `ι_X` 両立な hermitian 計量 | ★あり(`TorsorMetric` / `IsConjCompatible`) |
+| テンソル積で群 `APic(X)` | ★あり(`aPicDataWitness`) |
+| (ii) 引き戻し `φ^*L̄` | ★あり |
+| **射**（`≤ 1` の切断が `≤ 1` へ） | ★★**無い** |
+| **`Γ(L̄)`** | ★★**無い** |
+
+★★317 ファイル・3.1 万行の `Found/Arakelov` に、**この 2 語だけが無かった**。
+
+### ★★★★★★埋めた 2 語(`Found/Arakelov/ArithSections.lean`)
+
+* `GreenMetric.arithSections` —— `|s|_L ≤ 1` なる大域切断の集合
+* `ArithHom` —— **ノルムを増やさない**層の射
+
+★**逸脱を記録した**。原文の射の条件は「**局所的に** `≤ 1` が `≤ 1` へ」だが、
+本ファイルは `|φ(s)|_M ≤ |s|_L`（作用素ノルム `≤ 1`）を要求する。
+★★前者を**含意する**（`mapsTo_arithSections`）ので下流は弱くならない。
+
+★★★おまけで `exists_scale_mem_arithSections` が出た——`X^arc` がコンパクトなら
+どんな切断も計量を `c ≝ log(C+1)` だけずらせば `Γ` に入る。
+これは `Proposition 1.4, (ii)` の証明が
+『to a section of `L ⊗ M` over `X` such that `|t| ≤ 1` on `X^arc`』と書く段の根拠である。
+
+### ★★★★★★★★`APic(X)` に `ι_X` 両立を型で入れた(`Found/Arakelov/ArithPic.lean`)
+
+`aPicDataWitness` は `APic(X) = Pic(X) × Multiplicative C(X^arc, ℝ)` を作るが、
+`Interface` の `APicData` に「計量は `ι_X` と両立する」欄が無いので**型に入っていない**。
+
+    ArithPic X ≝ Pic(X) × Multiplicative (共役不変な連続関数のなす部分群)
+
+★引き戻しが共役不変性を保つ根拠は `conjPoint (p ≫ f) = conjPoint p ≫ f`
+（`ι_X` の射に沿った自然性）だけである。
+
+★★★**`arithPicOfMetric_mul` は `rfl` で出た**——`TorsorMetric.tensor` の Green 関数が
+和だからで、原文の「thus determine a group `APic(X)`」がそのまま型になった。
+
+### ★★★★★★★★★★残りは**ちょうど 1 本**
+
+`Γ(L̄)` を原文どおり `Hom(Ō_X, L̄)` と読むには、**正規化した自明束 `Ō_X`（`|1| = 1`）**が要る。
+その内訳を測ると 3 つで、**2 つはもう手にある**:
+
+| 段 | 状態 |
+|---|---|
+| 計量の `𝒪_X`-乗法性 `|c·s| = ‖c(p)‖·|s|` | ★**閉じた**(`TorsorMetric.norm_smul`) |
+| 正性 `u(p) ≠ 0` | ★**閉じた**(`arcEval_unit_one_ne_zero`) |
+| 連続性 | ★**ある**(`continuous_evalGlobal`) |
+| ファイバーの**正規な `ℂ`-ノルム** | ★★**残っている** |
+
+★★四つ目の中身は 1 行で書ける:
+
+    `(ΓSpecIso ℂ).hom (c • y) = c · (ΓSpecIso ℂ).hom y`
+
+——`Scheme.ΓSpecIso` と `moduleSpecΓFunctor` が `Γ(Spec ℂ, ⊤)` に入れる `ℂ`-加群構造の**両立**である。
+★mathlib にこの補題は無い（2026-08-28 実測、`exact?` も `simp` も `rfl` も失敗）。
+
+★★★**これが `Definition 1.1` を条なしで閉じるための最後の 1 本である。**
+`Definition 1.2` は `Definition 1.1` の上に立つので、ここが開けば §1 は 2 つ動く。
+
+### ★★★配管——`TorsorMetric.base` は `Classical.choice` なので `|1|` を直接は選べない
+
+★これが「正規化」が要る理由である。`TorsorMetric` は `(green, green_cont, triv)` の
+3 つ組で、`base` は `HasContMetrics X` の下で `Classical.choice` に落ちる。
+★★したがって `|1| = 1` は `green p ≝ log(base.nrm p (arcEval p 1))` と取ることで**しか**
+作れない——だから正性と連続性が要る。
+★★★一方 `GreenMetric` は `base` を**フィールドに持つ**ので、
+正規な `ℂ`-ノルムさえ作れれば `Ō_X` はそちらで直に組める。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**(変化なし)
+- `ample` の内訳 **8/12**——段 D は実質閉じた(定義・健全性・空虚封じ・切断の比)
+- `Definition 1.1` は**あと 1 本**
+
+## §9-712 ★★★★★★★★★★★**[GenEll] Definition 1.1 が閉じた——11/24 → 12/24**(第 431-434 ブロック、2026-08-28)
+
+`§9-711` で「あと 1 本」と測った最後の 1 本が落ちた。
+
+### ★★★★★★★★★落ちた 1 本 —— `ΓSpecIso` と `ℂ`-作用の両立
+
+mathlib の `Mathlib/AlgebraicGeometry/Modules/Tilde.lean` に
+
+```lean
+lemma Scheme.Modules.smul_Spec_def (r : R) (x : Γ(M, U)) :
+    r • x = ((Spec R).presheaf.map U.leTop.op) ((Scheme.ΓSpecIso R).inv r) • x := rfl
+```
+
+が**あった**。★ただし `R := CommRingCat.of ℂ` と具体化すると `Module R Γ(M, U)` の
+instance が出ず、`rw` も `#synth` も通らない（`§9-711` の測定）。
+
+★★**直し方は「前層の綴りで補題を立てて `exact` で当てる」**であった:
+
+```lean
+have key : ∀ (z : ((Spec (CommRingCat.of ℂ)).presheaf.obj (op ⊤) : Type)),
+    (ΓSpecIso ℂ).hom.hom ((ΓSpecIso ℂ).inv.hom c * z) = c * (ΓSpecIso ℂ).hom.hom z := …
+exact key y
+```
+
+★★★`rfl` は通らないのに `exact` は通る——**`Eq` の両辺を先に確定させれば defeq に届く**。
+
+### ★★★★★★★★`Ō_X`（`|1| = 1`）が建った
+
+| 段 | 根拠 |
+|---|---|
+| `eq_zero_iff` | 同型は単射（`hom_inv_id`） |
+| `smul` | ★上の 1 本 |
+| `cont` | `continuous_evalGlobal`（在庫） |
+| `|1| = 1` | `evalGlobal p 1 = 1`（環準同型） |
+
+★`TorsorMetric` の `base` は `Classical.choice` なので `|1|` を選べない。
+**`GreenMetric`（`base` をフィールドに持つ）で基準計量そのものを正規に作る**のが鍵だった。
+
+★★これで原文の `Γ(L̄) ≝ Hom(Ō_X, L̄)` が**そのままの形で**定義できた（`arithGamma`）。
+
+### ★★★★★★★★★★★項目 `Definition 1.1` の `.src`（条なし）を置いた
+
+`Found/Arakelov/Definition11.lean` の `definition_1_1.src`。
+逸脱は 3 つ、いずれも記録した。
+
+| # | 逸脱 | 下流への影響 |
+|---|---|---|
+| 1 | 射の条件を**強い側**（作用素ノルム `≤ 1`）で取った | ★無い（強い側） |
+| 2 | `X` に §1 の標準仮定（正規・`ℤ`-固有・`ℤ`-平坦）を課していない | ★無い（定義には要らない） |
+| 3 | ★★`APic(X)` は**対の群**であって同型類の群ではない | ★★無い（`deg_F` は単数の作用で不変） |
+
+### ★★★★★★★★★★逸脱 3 と `Definition 1.2` の塞がりは**同じもの**である
+
+★これが本ブロック最大の発見である。
+
+`Definition 1.2` は 2026-08-27 に「`deg_F` が `Pic` 類を見ていない」という理由で
+項目全体の `.src` を**下げてある**（`Def12Height.lean`）。その中身を測り直すと:
+
+* `deg_F` の有限素点側は、**捻れ集合表示 `(L, g)` からは式が書けない**
+  ——`TorsorMetric.base` が `Classical.choice` なので `deg(L, 0)` に公式が無い
+* 正しい対象は `ADiv(F)/APrc(F)`（＝**同型類**の群）であり、
+  `Pic(X) × arcCM X`（＝**対**の群）ではない
+
+★★すなわち **`APic(Spec 𝓞_F) ≅ ADiv(F)/APrc(F)`（台帳の D2、「橋が無い」）を作ることが、
+逸脱 3 を消すことと同じ仕事である**。
+
+### ★★★その橋に要るもの（測定）
+
+1. `u ↦ log‖u‖` が `conjArcCM` に入ること
+   * 連続性 —— ★`continuous_evalGlobal` ＋ `Real.log`（単元は非消失）で出る
+   * **共役不変性** —— ★★`evalGlobal (ι_X p) u = conj (evalGlobal p u)` が要る。
+     アフィン版 `evalAffine_conjPoint` は**あり**、大域版は**無い**（2026-08-28 実測）。
+     `continuous_evalGlobal` と同じ**チャート論法**が 1 本要る
+2. 商 `ArithPic X ⧸ (単数の像)` を取ること
+3. `Spec 𝓞_F` でそれが `ADiv(F)/APrc(F)` と一致すること（Dedekind・類群）
+
+★★★1 は 1 ブロック、2 は小さい、3 が本体である。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）** ——★`Definition 1.1` が入った
+- `ample` の内訳 8/12
+- 次の葉: **`evalGlobal` の共役両立**（チャート論法 1 本）——それが逸脱 3 と
+  `Definition 1.2` の両方を開ける
+
+## §9-713 ★★★★★★★★★**逸脱 3 が消えた——`APic(X)` は同型類の群になった**(第 435-437 ブロック、2026-08-28)
+
+`§9-712` で `Definition 1.1` を閉じたあと、読み直して 1 つ気づいた:
+
+★**`ArithPic X = Pic(X) × Multiplicative (共役不変な連続関数)` は「対の群」であって、
+原文の言う「同型類の群」ではない。** 差は `Γ(X, 𝓞_X^×)` の作用である——
+単元 `u` による自己同型は計量を `|u|` 倍するので `(L, g)` と `(L, g + log‖u‖)` は同型。
+
+### ★★★★★★見積もりは 1 ブロック外していた
+
+`§9-712` では「商を作るには `evalGlobal` の共役両立が要り、
+`continuous_evalGlobal` と同じ**チャート論法**が 1 本要る」と測った。★**それは要らなかった**:
+
+```lean
+theorem evalGlobal_conjPoint (p) (g) :
+    evalGlobal (conjPoint p) g = starRingEnd ℂ (evalGlobal p g) := by
+  have hnat := Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (starRingEnd ℂ))
+  …
+  exact congrArg (fun m => (CommRingCat.Hom.hom m) _) hnat
+```
+
+★★`conjSpec = Spec.map (ofHom (starRingEnd ℂ))` なので、
+**`ΓSpecIso` の自然性がそのまま共役両立になる**。
+`continuous_evalGlobal` がチャート論法を要したのは**位相**のためであって、
+代数的な等式には要らない。
+
+★★★教訓: 「同じ関数についての性質だから同じ道具が要る」とは限らない。
+
+### ★★★本ブロックで入ったもの(`Found/Arakelov/APicQuot.lean`)
+
+| 宣言 | 内容 |
+|---|---|
+| `evalGlobal_one` / `_mul` / `_comp` / `_unit_ne_zero` | 環としての性質 |
+| `evalGlobal_conjPoint` | ★`ι_X` 両立 |
+| `unitLogGreen` ほか 4 本 | ★★単元が定める Green 関数 `log‖u‖` |
+| `unitToArithPic` / `isometrySubgroup` | 単元の像の部分群 |
+| **`APicOf`** | ★★★**同型類の群 `APic(X)`** |
+| **`APicOfPullback`** | ★★★★(ii) 引き戻しも降りる |
+| `APicOf.ofMetric` / `_surjective` | 余計な元が無いこと |
+
+★これで `Definition 1.1` の逸脱は **2 つ**（射の条件を強い側で取った、
+`X` に §1 の標準仮定を課していない）になり、どちらも下流に影響しない。
+
+### ★★★★★★★★次の塞がりを台帳に登録した —— `arakelov-degF-finite-places`
+
+`Definition 1.2` の唯一の塞がりを測って登録した。
+
+* `Found/Arakelov/ADegEmb.lean` の `degFOf` は**アルキメデス側しか見ていない**
+  （`Pic` 類が式に現れない——`Def12Height.lean` の 2026-08-27 の訂正）
+* ★捻れ集合表示 `(L, g)` からは有限素点側の**式が書けない**
+  ——`TorsorMetric.base` が `Classical.choice` だからである
+* ★★古典的な定義 `deg(L̄) = log #(Γ(L)/𝓞_F s) − Σ_v log‖s‖_v` なら書けるが、
+  `s` の取り方に依らないこと（**積公式**）が要る
+
+★★★`ADiv(F)` / `APrc(F)` / `deg` / `degNormalized` / `degAPic` は
+`Found/GenEll/ArithDiv.lean` と `ProductFormula.lean` に**実装済み**である。
+**欠けているのは橋だけ**であり、その第 1 歩（同型類の側）が本ブロックで入った。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）**
+- 次の葉: **`deg_F` の有限素点側**——`Γ(L)` を分数イデアルと見て
+  `Ideal.absNorm` で書き、積公式で `s` の取り方に依らないことを示す。
+  ★開けば §1 は 5/9 → 6/9（`Definition 1.2`）になる
+
+## §9-714 ★★★★★★**`deg_F` の橋の有限素点側と、設計の測定**(第 438 ブロック、2026-08-28)
+
+`§9-713` で登録した `arakelov-degF-finite-places` の第 1 歩。
+
+### ★★★★★★有限素点側は 2 つの同型を継ぐだけだった
+
+    `PicSheaf (Spec R) ≃* CommRing.Pic R`   —— 本プロジェクト（`PicEquivRing.lean`）
+    `ClassGroup R ≃* CommRing.Pic R`        —— ★**mathlib にある**（`ClassGroup.equivPic`）
+
+`Found/Arakelov/PicClassGroup.lean` の `picSheafEquivClassGroupOF` で
+**`Pic(Spec 𝓞_F) ≃* Cl(F)`** が出た。
+
+### ★★★★★★★★★測定 —— `deg_F` は捻れ集合表示では**作れない**（設計の問題）
+
+`APicOf X = (Pic X × Multiplicative (共役不変な連続関数)) / Γ(X,𝓞^×)` は
+原文どおりの同型類の群である（`§9-713`）。★そこに `deg_F` を載せようとすると
+
+    `deg(L, g) = deg(L₀, base_{[L]}) + (アルキメデス側の g の寄与)`
+
+となるが、`base_{[L]}` は `TorsorMetric.base` の **`Classical.choice`** である。
+
+★★**すると加法性が落ちる**——`base_{[L·M]}` と `base_{[L]} ⊗ base_{[M]}` は
+一致しないからである。★★★`deg` は関数としては定義できるが、
+`deg(L·M) = deg(L) + deg(M)` が**言えない**。
+
+★★★★したがって道は「基準計量を**整合的に**選ぶ」ことであり、それは
+**分数イデアル `𝔞 ⊂ F` を標準の計量つきで代表に取る**こと、すなわち
+`ADiv(F)` の側から作ることに他ならない。
+
+### ★★これで `Definition 1.2` の道は 3 段に確定した
+
+| 段 | 状態 |
+|---|---|
+| `Pic(Spec 𝓞_F) ≃* Cl(F)` | ★**閉じた**（本ブロック） |
+| `ADiv(F)` の有限部分 ≅ 分数イデアル | ★★開（mathlib に `finprod_heightOneSpectrum_factorization` / `count_finsuppProd` はあるが**群同型として束ねられていない**、2026-08-28 実測） |
+| `ADiv(F)/APrc(F) ≃* APicOf (Spec 𝓞_F)` と `deg_F` の転送 | ★★★開（本体） |
+
+★`degNormalizedAPic`（`ProductFormula.lean`）と `htArith_eq_degNormalizedAPic`
+（`HeightClass.lean`、**`ht = deg_APic ∘ 類`**）は**在庫**なので、
+橋がつながれば `Definition 1.2` はそのまま落ちる。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 12/24（§1 は 5/9）**
+- 次の葉: **`ADiv(F)` の有限部分 ≅ 分数イデアル**（Dedekind の一意分解を群同型に束ねる）
+
+## §9-715 ★★★★★★★★★**訂正——`Definition 1.1` の項目全体の `.src` を下げた**(第 439-440 ブロック、2026-08-28)
+
+`§9-712` で `item := "Definition 1.1"`（条なし）を置いた。★**過剰な主張であった。**
+
+### ★★★★★★★★何を見落としたか
+
+原文は「**テンソル積で**同型類が群 `APic(X)` をなす」と書く。ところが `TorsorMetric` の設計では
+
+* 計量は `base_F · exp(-green)` で表され、`base_F` は **`Classical.choice`**（対象ごとに独立）
+* `TorsorMetric.tensor` は **`green` を足すだけ**
+
+なので、群法則が表す計量は `base_{G⊗H} · e^{-(g+h)}` であり、
+真のテンソル積 `(base_G ⊗ base_H) · e^{-(g+h)}` と**一致しない**。
+
+★★差は 2-コサイクル
+
+    `c(L,M) = log(base_{[LM]} / (base_{[L]} ⊗ base_{[M]}))`
+
+である。★★★したがって `ArithPic` / `APicOf` は `APic(X)` と**集合としては対応するが、
+群としては基準計量を整合的に選ばない限り一致しない**。
+
+### ★★★失われていないもの
+
+| もの | 状態 |
+|---|---|
+| 対の群 `ArithPic` | ★真 |
+| 同型類への商 `APicOf` | ★真 |
+| 引き戻し `APicOfPullback` | ★真 |
+| 射 `ArithHom` と `Γ(L̄) ≝ Hom(Ō_X, L̄)` | ★真 |
+| `Ō_X`（`|1| = 1`） | ★真 |
+
+★**欠けているのは「群法則がテンソル積である」の 1 本だけ**である。
+
+### ★★★★★これは `APicData` の穴と同じ根である
+
+`Interface/Arakelov/APic.lean` の `logMetric_tensor` は **Green の和しか要求しない**。
+★`Def12Height.lean` が 2026-08-27 に `Definition 1.2` を下げたのも同じ根であり、
+★★台帳に `arakelov-coherent-base-metric` として登録した——
+**§1 の 2 項目（`Definition 1.1` と `Definition 1.2`）の共通の根**である。
+
+### ★★★★道は 2 つ（測定）
+
+| 道 | 中身 | 見積もり |
+|---|---|---|
+| (a) | **整合的な基準計量の族をデータとして持つ**（`CoherentBase` 構造体、存在は別途） | ★小 + 存在定理 |
+| (b) | 捻れ集合表示をやめ、同型類を「可逆層＋本物の連続計量」の商として直に作る | ★★§9-335 の見積もりで 10〜15 ブロック |
+
+★存在定理の側は、`Pic(Spec 𝓞_F) = Cl(F)` が**有限群**で
+`C(X^arc,ℝ)` が**可除**なので `H²` が消えることから出るはずである（未検証）。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 11/24（§1 は 4/9）** ——★正直な数である
+- 本日入った真の資産: `ArithSections` / `ArithPic` / `APicQuot` / `Definition11` /
+  `PicClassGroup` / `FractionalIdealDivisor`、および ample の段 A1・C1・D1-D3
+
+## §9-716 ★★★★★★★★★**ample の段 D と段 F がほぼ閉じた**(第 441-442 ブロック、2026-08-28)
+
+`§9-715` の訂正のあと、**確実に閉じられる段**を 2 つ取った。
+
+### ★★★★★★★★段 F2ab —— 閉包は `ℤ`-射影かつ `ℤ`-固有
+
+段 C1（`ℙⁿ_R` が `Spec R` 上固有）が入っていたので、**2 行**で出た:
+
+```lean
+theorem isProper_subscheme_projSpace (N : ℕ) {Y : Scheme.{0}}
+    (f : Y ⟶ projSpace N ℤ) [QuasiCompact f] :
+    IsProper ((Scheme.Hom.ker f).subschemeι ≫ projSpaceOverSpec N ℤ) :=
+  IsProper.mk
+```
+
+★機構は「閉埋め込みは固有」＋「`ℙᴺ_ℤ` は固有」＋「固有射の合成は固有」。
+
+★★★**射影性は別に示す必要がなかった**——`subschemeι` は mathlib の instance で
+すでに閉埋め込みであり、「`ℤ`-射影」とは `ℙᴺ_ℤ` の閉部分スキームであることだからである。
+
+★★これで原文 `Remark 1.4.1` 第 2 文の括弧「`ℤ`-flat, `ℤ`-projective model」のうち
+**平坦性（F1）・射影性・固有性**が揃った。残るのは
+「生成ファイバーが元の `Y` に戻ること」（F2c）だけである。
+
+### ★★★★★★★★★段 D4 —— 切断の比が `X_t` の上へ貼り合った
+
+`sectionRatio_agree`（`§9-710` で入れた貼り合わせ条件）はすでにあったので、
+`TopCat.Sheaf.existsUnique_gluing` に渡す**配管だけ**であった。
+
+★配管を短くしたのは **`Opens` が poset であること**である——平行な射は等しいので
+
+    `homOfLE h₁ = homOfLE hA ≫ homOfLE hB`
+
+が **`rfl`** で出る。★★被覆は `IsLocallyTrivial` の被覆篩から取れる（`iSup_trivIndex`）。
+
+### ★★★これで `ample` の内訳は 10/13
+
+| 段 | 状態 |
+|---|---|
+| A1 | ★閉 |
+| A2 | ★not-a-blocker（前層の水準では要らない） |
+| B | ★閉（`IsLocallyTrivial` / `IsLocallyTrivial.tensor` は在庫だった） |
+| C1 | ★閉（`ℙⁿ_R` と固有性） |
+| **C2** | ★★**開**——`O(1)`。mathlib に twisting sheaf は 1 件も無い |
+| D1–D4 | ★**すべて閉**（定義・健全性・空虚封じ・切断の比・貼り合わせ） |
+| **E** | ★★**開**——Serre の定理 |
+| F1, F2ab | ★閉 |
+| F2c | ★小さい（生成ファイバー） |
+
+★★**残る本体は C2 と E の 2 つだけ**である。どちらも mathlib への PR 規模だが、
+**`ℙⁿ` の固有性という土台はもう建っている**。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**
+- `ample` **10/13**
+
+## §9-717 ★★★★★★★★**`ℙⁿ` の座標が端から端まで取れた**(第 443-444 ブロック、2026-08-28)
+
+`§9-716` で「残る本体は C2（`O(1)`）と E（Serre）」と測ったが、
+★**消費側を読み直すと `O(1)` は要らなかった**。
+
+### ★★★★★★★★★測定 —— 消費側が要るのは**座標**である
+
+`Found/GenEll/NorthcottCoord.lean` の `northcott_of_projModel` が受けるのは
+
+| 受けるもの | 中身 |
+|---|---|
+| `crd p : ι → fld p` | ★**同次座標** |
+| `idx : ι` | 割る成分 |
+| `hinj` | 正規化座標 `crd p j / crd p idx` が単射 |
+| `hcmp` | `H(crd p) ≤ exp(ht p + const)` |
+
+であって、**`O(1)` そのものではない**。
+★★正規化座標 `x_j/x_i` は `ℙⁿ` の**標準アフィンチャート**から直に取れる。
+
+### ★★★★★★★★取れたもの（`Found/GenEll/ProjSpaceCover.lean`）
+
+| 宣言 | 内容 |
+|---|---|
+| `homogeneous_mem_span_X` | 正の次数の斉次多項式は変数の生成するイデアルに入る |
+| `irrelevant_le_span_X` | 無関係イデアルは変数で生成される |
+| `exists_X_notMem` | どの点でもある変数が消えない |
+| **`iSup_basicOpen_X_eq_top`** | ★**`ℙⁿ` の標準アフィン被覆** |
+| **`projCoord`** | ★★`x_j/x_i ∈ A⁰_{x_i}` |
+| `exists_chart_range` | 体値の点はどれかのチャートに入る（`Spec F` は 1 点） |
+| `projChartHom` | 点をチャートに落とす環準同型 `A⁰_{x_i} → F` |
+| **`projPointCoord`** | ★★★**点の正規化座標 `x_j/x_i ∈ F`** |
+
+★mathlib の **`Proj.awayι`**（`Spec (A⁰_f) ⟶ Proj`、開埋め込み）と
+**`Proj.opensRange_awayι`** があったので、
+`IsOpenImmersion.lift` と `Spec.preimage` を繋ぐだけで出た。
+
+★★被覆の中身は「無関係イデアルは変数で生成される」で、
+`𝒜ₙ = (𝒜₁)ⁿ` と `𝒜₁ = span_R{x_i}` から出る。
+
+### ★★★★★残る 3 段はいずれも mathlib への PR 規模（実測）
+
+2026-08-28 の実測:
+
+* mathlib に **`VeryAmple` / globally generated は 1 件も無い**（段 E）
+* mathlib に **次数 `n` の斉次分数の層は無い**（`HomogeneousLocalization` は次数 0 だけ）（段 C2c）
+* `Scheme.Hom.ker` に**因数分解（`Y ⟶ 像`）の API も無い**（段 F2c）
+
+★★★★ただし **`O(1)` は因子表示なら要らないかもしれない**（本ブロックの測定）:
+本プロジェクトは §1 を通して**因子表示**（`ArithCartier`）で作業しており、
+そこでは `O(1)` は**超平面因子の類**である。very ample は
+「`n·D` が閉埋め込みによる超平面の引き戻しである」と因子の言葉だけで述べられ、
+高さの比較も `ht_{n·D}(x) = ht_{超平面}(i(x)) + O(1)` になる。
+★超平面因子を `IdealSheafData` として作る段は別に要る。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**
+- **`ample` 12/15** ——★**座標の側は完全に揃った**。残るのは C2c・E・F2c
+
+
+## §9-718〜734 —— **`Definition 1.1` の (i) が閉じた**（2026-08-28）
+
+### ★★★★★★★★★★何が起きたか
+
+2026-08-27/28 に `Definition 1.1` の項目全体の `.src` を下げた。理由は
+
+> `TorsorMetric.base` は対象ごとの `Classical.choice` なので
+> `base_{[L·M]} ≠ base_{[L]} ⊗ base_{[M]}` となり、
+> **群法則が計量のテンソル積を表さない**
+
+であった。★**捻れ集合表示をやめる**ことでこれを塞いだ。
+
+### ★★★★★★★★段（`Found/Arakelov/`）
+
+| 段 | ファイル | 内容 |
+|---|---|---|
+| 1 | `TrivTensor.lean` | `trivValue` がテンソル積で掛け算になる（**`rfl`**） |
+| 2 | `TrivSecNorm.lean` | 切断のノルムが掛け算になる（**ファイバーの橋を迂回**） |
+| 3 | `LocalMetric.lean` | `LocalMetric`（基準ノルム `h_{V,e}`）・チャート独立性・`Ō_X` |
+| 4 | `TensorMetric.lean` | **テンソル計量の存在**と `‖s ⊗ t‖ = ‖s‖·‖t‖` |
+| 5 | `AMetricMonoid/Iso/Group/Pic.lean` | `AMetric` = `(L, |−|_L)`、等長同型、結合・単位・交換律、**`CommGroup (APicM X)`** |
+| 6 | `AMetricNorm.lean` | 大域ノルム `|s|_L̄ : X^arc → ℝ` |
+| 7 | `AMetricHom.lean` | 射・`Γ(L̄)`・**`Γ(L̄) = Hom(Ō_X, L̄)`** |
+| — | `ArchDeg.lean` | `deg_F` の**アルキメデス部分**（台帳の段 C） |
+
+### ★★★★★★★段 2 の迂回が効いた
+
+`arcFiber p (A ⊗ B) ≅ arcFiber p A ⊗_ℂ arcFiber p B` は mathlib に無く
+（`SheafOfModules` にモノイダル構造が無い、2026-08-28 実測）作るのは PR 規模である。
+★しかし切断のノルムは
+
+    `‖s‖_{V,e}(p) ≝ ‖evalOn p V hp (trivValue F V e s)‖`
+
+と書けばファイバーを経由しない。★★在庫の `genNorm_arcEvalOnTop` が
+「ファイバーで測っても同じ値」を保証している。
+
+### ★★★★★★逸脱の明示 —— **前層の水準である**
+
+原文の `APic(X)` は可逆**層**の同型類だが、`APicM X` は局所自明な**前層**加群の
+同型類である。★局所自明でも層とは限らず（`𝟙_` と proper open で一致し `⊤` で `0`
+の前層が反例）、前層のテンソルは層でない（だから本プロジェクトの `tensorModules` は
+層化を挟む）。★★「テンソル積が**厳密**」と「対象が層」は**同時には取れず**、
+本ファイル群は前者を取った——それが `trivValue_tensor` が `rfl` になった理由である。
+
+### ★★★★★`Definition 1.1` の残り（明示）
+
+| 欄 | 状態 |
+|---|---|
+| (i) 算術直線束・射・`Γ(L̄)`・テンソル・`APic` | ★**閉じた**（前層の水準） |
+| (i) `unitHomEquiv` が `φ ↦ φ(1)` であること | ★小さい配管（`rfl` ではない、実測） |
+| (i) 層の水準への橋 | ★★別の段（`deg_F` の段 A と同じもの） |
+| (ii) 引き戻し `φ^*L̄` | ★★★`AMetric` の側は開。★因子表示（`pullbackAPic`）では**在庫** |
+| (ii) `V(F)`・`ord_v`・`q_v`・`ADiv`・`APrc` | ★**在庫**（`ArithDiv.lean`） |
+| (ii) `deg_F`・正規化・**底変換不変性** | ★**在庫**（`deg` / `degNormalized` / `degNormalized_baseChange`） |
+| (ii) `ADiv(F)/APrc(F) ≅ APic(Spec 𝒪_F)` | ★原文が **[Szp] Prop 1.1 に引用**（Mochizuki は証明していない） |
+| (ii) `ht_M̄(x)` | ★**在庫**（`htArith`） |
+
+★★★★したがって `Definition 1.1` の残りは
+**(a) 層の水準への橋**と **(b) `AMetric` の引き戻し**の 2 つである。
+★(b) には mathlib の `(PresheafOfModules.pullback φ).Monoidal` が無い
+（台帳 `arakelov-pullback-monoidal`、2026-08-28 実測）。
+
+### 現在地
+
+- `lake build` 全体通過、`node tools/check.mjs` **PASS**
+- `GenEll` の必要分 **11/24**（`Definition 1.1` は (ii) の 2 段が残るので**まだ数えない**）
+- `Found/` の `.src` つき実装 **2305 件超**
+
+---
+
+## ★★★★★★★★★★ 2026-08-28 —— Serre の道（`Proposition 1.4, (iv)`）の全体像
+
+第 358–388 ブロック（`§9-825`〜`§9-855`）でこの道を一気に詰めた。ここに地図を残す。
+
+### ★何を作っているのか
+
+`Proposition 1.4, (iv)` は「`L_ℚ` が ample なら高さ `≤ C` の点は有限個」である。
+★その証明は **ample ⟹ 射影埋め込み（Serre）⟹ Northcott** という 2 段だが、
+mathlib に `ample` は 1 件も無い（2026-08-28 実測）ので**全部作っている**。
+
+### ★★幾何の側 —— 塞がった
+
+| 段 | 内容 | 場所 |
+|---|---|---|
+| E2 | `ample` ⟹ 有限個の切断で覆える | `AmpleCover.lean` |
+| E3a-1 | アフィン開の上で分母を払う | `ClearDenominator.lean`（`§9-822`） |
+| E3a-2 | 非消失軌跡は層化で変わらない | `SheafifyTrivValue.lean`（`§9-824`） |
+| E3a-3 | **大域化** —— 貼り合わせて大域切断にする | `Globalize.lean`（`§9-831`） |
+| E3b | チャートの座標環は有限生成 | `ChartFiniteType.lean`（`§9-832`） |
+| E3c | `A⁰_{x_i} → Γ(X, X_{s_i})` が**全射** | `CoordsSurjective.lean`（`§9-847`） |
+| E3c-2 | 「`⊓ V`」を外す —— 大域のチャート写像 | `GlobalAwayHom.lean`（`§9-842`） |
+| E3d | チャートごとの閉埋め込み ⟹ 大域 | `ChartImmersion.lean`（`§9-834`） |
+| — | **正規化座標が点を分ける** | `ChartCoordsSeparate.lean`（`§9-851`） |
+
+### ★★★この道で見つかった 3 つの測定
+
+1. **「局所自明な前層加群は層である」は偽**（`§9-824`）
+   反例: `X = {p,q}` 離散、`F({p}) = F({q}) = ℤ`、`F(X) = 0`。
+   ★大域切断は**層化の側**で取る。誤った葉のまま person-years を投じずに済んだ。
+
+2. **原典の「[some positive tensor power of]」には冪が 3 回畳まれている**（`§9-829`）
+   (a) 分母を払う冪、(b) 重なりを合わせる冪、(c) 遷移函数の `N` 乗。
+   ★合図 1 つを節点 1 つに対応させる規律で数えると、この括弧は**節点 3 個**であった。
+
+3. **分解の欠陥**（`§9-841`）
+   段 E1c・E3c は `A⁰_{x_i} → Γ(X, X_{s_i} **⊓ V**)` と `⊓ V` 付きで書かれていたが、
+   段 E3d が要るのは `⊓ V` なしであった。★**段を積むだけでは繋がらない。**
+   正しい道は「貼り合わせた比」（`globalRatio`）を使うことで、
+   `trivValue` を `globalRatio` に替えると `⊓ V` が消え、しかも**証明はむしろ簡単になった**。
+
+4. **段 E1d は Prop 1.4 (iv) の必須路ではない**（`§9-849`）
+   `northcott_of_projModel` が受け取るのは**同次座標と単射性**であって、
+   スキームの射 `ψ : X ⟶ ℙᴺ_R` ではない。★消費側を読み直したから出た測定である。
+
+### ★★★★高さの側 —— C2c-2 が閉じ、C2c-1 が残る
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| C2c-1 | 超平面因子の引き戻しが**座標の生成するイデアル**であること | ★開（材料は `§9-855`） |
+| C2c-2 | `H(x)·N(I) = ∏_{v 無限素点} (sup_i v(x_i))^{mult}` | ★**閉じた**（`§9-853`・`§9-854`） |
+| C2c-3 | 計量の差が一様に有界 | ★Prop 1.4 (iii)（`§9-806`）が本体を持つ |
+
+★C2c-2 は**在庫を引いたら書く必要がほとんど無かった**
+——mathlib の `NumberField.absNorm_mul_finprod_finitePlace_eq_one` がそのまま効いた。
+★★CLAUDE.md の在庫の規律（木を grep する前にまず引く）が 2 ブロック続けて当たった。
+
+### 現在地（2026-08-28 深夜）
+
+- `lake build ABC3` 全体通過、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 13/24**（§1 6/9、§2 0/1、§3 4/9、§4 3/5）
+- Serre の道（台帳 `ample-and-projective-embedding`）: **完全に閉じた 24/30**
+  （残り: C2c-1・C2c-3・E0・E1d・F2c）
+- ★★分母が 26 → 30 に増えているのは、段 E3c-2 と C2c-1〜C2c-3 を
+  **新たに発見して挿入した**ためであり、後退ではない。
+
+### ★★★★★次に何をするか（引き継ぎ）
+
+1. **C2c-1** —— `pullbackIdeal F (hyperplaneIdeal N ℤ) xF = (x_{i₀}) : (x_0,…,x_N)`。
+   ★チャート `D₊(x_i)` の上で「超平面は `x_0/x_i` で切られる」ことから始める。
+2. **E0** —— `divIdeal` の定義を変える。★現行の族は自明化しない開で
+   `map_ideal_basicOpen` が破れるので、`ofIdeals` が `≤` しか与えない。
+3. **Prop 1.7 の `hlow`/`hup`** —— 局所の馴分岐（6/6 済み）を大域へ組み上げる段。
+   ★これが取れれば `Proposition 1.7` は項目として閉じる。
+
+---
+
+## ★★★★★★★★★★★★★★★★★ 2026-08-28（続き）—— Serre の道が出発点から組み立てまで通った（第 394〜423 ブロック、§9-861〜§9-890）
+
+### ★到達点
+
+朝の出発点は「**超平面をチャートで切る式は何か**」であった。
+一日の終わりに、その式は「**`X` 上の Northcott の組み立て**」として戻ってきた。
+
+```
+ker σ = (x₀)  →  可換な四角  →  ker Φ = (x₀/x_i)  →  切断環へ翻訳  →  点への引き戻し
+ →  deg_fin + deg_arch = log H  →  htArith = log H/[F:ℚ]
+ →  Fubini–Study（素点対応・チャート独立・大域化）  →  ℙᴺ の射影モデル
+ →  |ht_E − log H/[F:ℚ]| ≤ C  →  正規化の橋  →  ℙᴺ の Northcott
+ →  高さの関手性  →  ht_{D^n} = n·ht_D  →  射に沿った移送
+ →  非常に豊富な因子の Northcott
+ →  X の点の高さの明示公式  →  X のチャート上の Northcott
+ →  チャートの和  →  チャートを跨いだ組み立て
+```
+
+### ★★主な到達物（`Found/GenEll/`）
+
+| ブロック | 中身 |
+|---|---|
+| `§9-861`〜`§9-863` | 段 C2c-1 の (a)(b)(c)——`ker (Away.map hyperplaneHom (x_i)) = (x₀/x_i)` |
+| `§9-864`・`§9-865` | 切断環への翻訳と、**点に沿った引き戻し** |
+| `§9-866`・`§9-867` | `deg_fin + deg_arch = log H` と `htArith = log H/[F:ℚ]` |
+| `§9-868`〜`§9-871` | Fubini–Study の構成（素点対応・チャート独立・大域化）と**仮定なしの等式** |
+| `§9-872` | Prop 1.4 (iii) は**差の連続性**で足りる（測定と修正） |
+| `§9-873`〜`§9-875` | 射影モデル `projArcModel N : ArcModel (ℙᴺ_ℤ) (ℂ^{N+1})` の**構成** |
+| `§9-876`〜`§9-878` | 段 C2c 完了と `ℙᴺ` の Northcott |
+| `§9-879`〜`§9-882` | 関手性・冪・移送・非常に豊富な因子の Northcott |
+| `§9-883`・`§9-884` | 段 F2c 完了、段 E0 の大域自明版 |
+| `§9-885`〜`§9-890` | 幾何側と数論側の合流、`X` の高さの公式、チャート上と跨ぎの Northcott |
+
+### ★★★測定（後で効くもの）
+
+1. **`O(1)` の層は要らなかった** —— 因子表示（`ArithCartier` ＝ イデアル層 ＋ Green 関数）で全部通った。
+   `GreenFn X` が `complexPoints X → ℝ` というただの実関数だったのが効いた。
+2. **因子の Green 関数は連続でない** —— 台の上で発散する。
+   比較補題の仮定は「**差**の連続性」で書くのが正しい（`htArith_sub_abs_le_of_diff`）。
+   強すぎる仮定は**証明が通るので気づきにくい**——消費側で実物を当てて初めて露見した。
+3. **`Height.mulHeight` は相対、`htArith` は絶対** —— `hcmp` に入れるには次数の上界 `d` で橋を掛ける。
+4. **段 E0 の障害は `ofIdeals` ではなかった** —— `divIdeal` が自明化の無い開で `⊤` になることだった。
+   大域自明ならその場合が消える（消費側の `X_{s_i}` はまさにそれ）。
+5. **`Away ℬ f` の `f` は型に現れる** —— 変数に特殊化した補題は使えない。
+   一般化しても証明は一字も変わらなかった（使っていたのは「次数が 1」だけ）。
+6. **`Σ` 型で受けると依存型の輸送が消える** —— 点ごとにチャートが違う場合の組み立て。
+
+### ★★★★現在地（2026-08-28 深夜・続き）
+
+- `lake build ABC3` 全体通過（6009 jobs）、`node tools/check.mjs` **PASS**
+- **`GenEll` の必要分 13/24**（§1 6/9、§2 0/1、§3 4/9、§4 3/5）——指標は動いていない
+- Serre の道: **完全に閉じた 52/55**（残り: A2〔not-a-blocker〕・E0 の一般版・E1d）
+
+### ★★★★★次に何をするか（引き継ぎ）
+
+1. **E1d** —— `globalChartToProj i` が重なりで一致すること。
+   ★機構は `sectionRatio` の推移性（「比の比は比」）。`§9-874` の `Proj` 版が手本になる。
+2. **E0 の一般版** —— 自明化の無い開でも正しい値を与える `divIdeal`。
+   ★`⨅_{V ⊆ U 自明化する}` の形で、`map_ideal_basicOpen` の `⊆` 向きに
+   **分母を払う議論**（`§9-826`・`§9-831`）が要る。
+3. **Prop 1.7 の `hlow`/`hup`** —— 局所の馴分岐（6/6 済み）を大域へ組み上げる段。
+   ★これが取れれば `Proposition 1.7` は項目として閉じる（§1 が 7/9 になる）。
+
+## 2026-08-28（第 436〜447 ブロック、§9-903〜§9-914）—— Serre 道の埋め込みが通った日
+
+### 入ったもの（時系列）
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 436 | 測定——イデアルの降下は mathlib に無い | 台帳 `EC8` |
+| 437 | ★★★降下は要らなかった——消費側は単調性で足りる | `LogDiffDescent.lean` |
+| 438 | ★★★`base`（`[L:K]=1 ⟹ 𝔡 = ⊤`）を仮定から外した | `DifferentTrivialDegree.lean` |
+| 439 | ★★★訂正——`step` の大域版は**偽**だった（反例つき） | 台帳 `EC9` |
+| 440 | 重なりの上で比は単元である | `GlobalRatioUnit.lean` |
+| 441 | 比のコサイクル則 `s/u = (s/t)·(t/u)` | `GlobalRatioCocycle.lean` |
+| 442 | 重なりの環準同型 `A⁰_{x_i x_j} →+* Γ(X, W)` | `OverlapAwayHom.lean` |
+| 443 | ★★それが `i`・`j` について対称であること | `OverlapAwayHomSymm.lean` |
+| 444 | ★★★★**段 E1d が閉じた——`ψ : X ⟶ ℙᴺ_R`** | `GlobalToProj.lean` |
+| 445 | 比が消えない所は `X_s ∩ X_t` である | `BasicOpenRatio.lean` |
+| 446 | ★★★★**`ψ` は埋め込みである**（原文の "embedding"） | `ImmersionGlobalToProj.lean` |
+| 447 | 被覆を `Fin (N+1)` で並べ直す（`IsAmple` から `hcov` が出る） | `FinCover.lean` |
+
+### ★★★★★到達点 —— 原文 p.7 の "yields an embedding" が型になった
+
+```
+IsAmple M ⟹ ∃ L > 0, ∃ N, ∃ s : Fin (N+1) → Γ(X, M^{⊗L}), ⨆_i X_{s_i} = ⊤   （§9-914）
+       ⟹ ψ ≔ globalToProj … : X ⟶ ℙᴺ_R                                    （§9-911）
+       ⟹ ψ⁻¹(D₊(x_i)) = X_{s_i}                                            （§9-913）
+       ⟹ IsImmersion ψ                                                      （§9-913）
+```
+
+★残る仮定は `haff`（チャートがアフィン）と `hsurj`（チャート写像が全射）の 2 つだけで、
+どちらも**段 E3 の内容**である（`§9-833`・`§9-847` が道具を与えている）。
+
+### 測定 6 件
+
+1. ★★★★**「イデアルで降ろす」から「量で挟む」への読み替え**（`§9-904`）——
+   `Proposition 1.7` が `𝔡` を使うのは `log-diff` を通してだけで、`log-diff` は単調だから、
+   `L(ζ)` での主張が `L` での主張を**含む**。降下は要らなかった。
+2. ★★★★★**在庫が「無い」と出たら主語を変えて引き直す**（`§9-905`）——
+   `differentIdeal … = ⊤` の判定は無いが、**判別式を主語にすれば全部あった**。
+3. ★★★★★★**原文が "by working locally" と書いた段を大域へ持ち上げると偽になる**（`§9-906`）——
+   `K = ℚ(ζ_3)`、`L = K(∛2)`、`p = 3` が反例。
+   ★大域版は**条件付き定理としては通る**ので `lake build` では何も出ない。
+4. ★★★★`topIso` は `eqToHom` の言い換えである（`§9-911`）——
+   両辺とも `X.presheaf.map` の合成になるので `congr 1` だけで閉じる。
+5. ★★★★`set_option … in` は**ドキュメンテーション文字列より前**に置く（`§9-911`）——
+   同じ誤りが 3 箇所あっても `lake build` は 1 箇所しか報告しない。
+6. ★★★★束の等式は `ext x; simp; tauto` が速い（`§9-912`）——
+   `le_antisymm` で手で書くと 10 行、集合に落として `tauto` なら 3 行。
+
+### 現在位置
+
+* ゴール指標: **13 / 24**（§1 6/9、§2 0/1、§3 4/9、§4 3/5）——本日の変化なし。
+  ★条つき `.src` は増えたが、**命題全体の `.src`** はまだ立たない。
+* Serre 道（`ample-and-projective-embedding`、全 55 段）: 未閉は **`A2`（そもそも塡がりでない）と
+  `E0`（部分）の 2 つだけ**。★`E1d` が本日閉じた。
+* `tame-ramification`（`Proposition 1.7` の elementary claim）: `EC1`–`EC5`・`EC7`・`EC8` が閉、
+  `EC6` 部分、`EC9` は**大域では成り立たない**と判明（局所体で組み直すのが本筋）。
+
+### 次の一手
+
+1. **段 E3**（`haff`・`hsurj`）を `IsAmple` から出す——これで `IsImmersion ψ` が無条件になる。
+2. **高さの側**——`D^{⊗n} = ψ^*(超平面)`（`northcott_of_veryAmple` の `hDn`）。
+3. `Proposition 1.7` を**局所体**で組み直す（`§9-DifferentKummer` の部品はむしろ局所向き）。
+
+## 2026-08-29（第 448〜453 ブロック、§9-915〜§9-920）—— ★★★★Serre の道が繋がった
+
+### ★★★★★到達点 —— 原文 p.7 の "yields an embedding" が定理になった
+
+```lean
+theorem exists_immersion_of_isAmple … (hample : IsAmple M) … :
+    ∃ (L n N' : ℕ) (s' : …) (hcov' : …),
+      IsImmersion (globalToProj … φ s' hcov')
+```
+
+原文が `Proposition 1.4, (iv)`（Northcott）の証明で
+
+> that [some positive tensor power of] the ample line bundle `L_ℚ` **yields an embedding**
+
+と 1 行で引く Serre の定理の**射の側**である。
+★`L` は「共通次数」、`n` は「分母を払う指数」であり、
+どちらも原文の「some positive tensor power」の中身である。
+
+### 入ったもの
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 448 | アフィン性を `IsAmple` から捨てずに運ぶ | `AmpleCover`・`CommonDegree`・`FinCover` |
+| 449 | ★埋め込み性は**部分族**で確かめれば足りる | `ImmersionSubfamily.lean` |
+| 450 | 分母が複数でも単一の指数が取れる | `CommonGluedRatioMulti.lean` |
+| 451 | 族を拡大して試験元を比にする | `EnlargedFamily.lean` |
+| 452 | ★★段 E3——チャート写像は全射である | `EnlargedSurjective.lean` |
+| 453 | ★★★★到達——ample なら射影空間へ埋め込める | `AmpleImmersion.lean` |
+
+### ★★測定 3 件
+
+1. ★★★★**`§9-913` の形には穴があった**（`§9-916`）——段 E3 の全射性を出すには
+   **分子の切断を族に足す**必要があるが、分母の非消失軌跡は `IsAmple` からアフィンでも、
+   **分子の非消失軌跡はアフィンとは限らない**。
+   ★直し方は「像が入る開 `V ≔ ⨆_{i∈I₀} D₊(x_i)` へ落とす」ことで、
+   `IsOpenImmersion.lift` と `IsZariskiLocalAtTarget` で通る。
+2. ★★★★**`IsAmple` の定義はアフィン性を含んでいた**（`§9-915`）——
+   `AmpleChart` がそれを捨てていただけで、構造体に 1 フィールド足すだけで `haff` が出た。
+3. ★★★★**証明無関係が効く**（`§9-919`）——`homOfLE p` と `homOfLE q` は定義上等しいので、
+   `≤` の証明の食い違いは気にしなくてよい。食い違うのは**開集合そのもの**の方であり、
+   そちらは `∀ u, s' (ρ i) = u → …` と汎化してから `rintro rfl` で潰す。
+
+### Serre 道（`ample-and-projective-embedding`、全 56 段）
+
+未閉は **`A2`（そもそも塡がりでない）と `E0`（部分）の 2 つだけ**。
+★★残る仮定は「有限アフィン自明化被覆」（`U`・`hU`・`hUij`・`e`）と
+`f : X ⟶ Spec A` の `LocallyOfFiniteType`・`hφ` だけであり、
+いずれも Arakelov 理論ではなく**スキーム論の一般論**である。
+
+### 次の一手
+
+★★★★**高さの側**——`D^{⊗n} = ψ^*(超平面)` を言えば
+`northcott_of_veryAmple`（`§9-882`）に繋がり、`Proposition 1.4, (iv)` が閉じる。
+★材料は揃っている: `§9-885`・`§9-886`（チャートの上で超平面の引き戻しは `s_0/s_i`）と
+`§9-913`（`ψ⁻¹(D₊(x_i)) = X_{s_i}`）。
+
+## 2026-08-29（第 454〜455 ブロック、§9-921〜§9-922）—— 高さの側が繋がった
+
+### 入ったもの
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 454 | ★★`ht_{ψ^*Ē}(x) = log H(座標)/[F:ℚ]`／貼った射に沿った Northcott | `NorthcottGlobalToProj.lean` |
+| 455 | ★与えられた因子への移送——**高さの比較だけでよい** | `NorthcottHeightComparison.lean` |
+
+### ★★★何が起きたか
+
+1. **`hcomp` が自動で埋まった**（`§9-921`）——`northcott_comap`（`§9-881`）が要求する
+   「点が `Spec ρ ≫ chartA i₀` の形に分解する」は、`ι_globalToProj`（`§9-911`）から
+   **`ψ` の構成そのものが与える**（`chart_factorization`）。
+2. **幾何と高さが出会った**（`§9-921`）——
+   `ht_{ψ^*Ē}(x) = log H(x の射影座標)/[F:ℚ]`。
+   これで `§9-878`（`ℙᴺ` の Northcott）が `X` の点に効く。
+3. **Northcott と段 E0 が分離した**（`§9-922`）——
+   `§9-882` は仮定に**算術因子の等式** `D^{⊗n} = ψ^*Ē` を持っていたが、
+   Northcott が実際に使うのは**点ごとの高さの等式**だけである。
+   ★弱めた版（`northcott_globalToProj_of_height`）を取ったので、
+   段 E0 を通さずに Northcott の機構が完成した。
+
+### ★★★★`Proposition 1.4, (iv)` に残っているもの（3 つだけ）
+
+1. **`hht`（＝段 E0）** —— `D^{⊗n}` と `ψ^*Ē` の高さが点ごとに一致すること。
+   ★材料: `§9-921` 段 1（`ψ` に沿った超平面の引き戻しは `(s_0/s_i)(x)` が生成する）と
+   `§9-884`（証人があれば `div(s)` は等号）。
+2. **点がどれかのチャートを通ること** —— `X` が固有なら自動のはず。
+3. **`hinj`（座標が点を分けること）** —— `ψ` が埋め込み（`§9-920`）であることの点版。
+   ★これは点の族 `P` についての仮定なので、一般には仮定のまま残る。
+
+## 2026-08-29（第 456 ブロック、§9-923）—— ★★★★段 E0 の壁が消えた
+
+### 測定 —— 見立てが外れた方向
+
+| これまでの見立て | 実際 |
+|---|---|
+| 段 E0 の障害は「`divIdeal` が自明化の無いアフィン開で `⊤` になる」ことで、一般の局所自明な `M` については `X_{s_i}` 上の自明化を**作る**必要がある（＝前層の同型の貼り合わせ、枠組みに無い） | ★★★**それは要らなかった** |
+
+★`trivValue(s₀)` と `sectionRatio(s₀, t)` は**単元 `trivValue(t)⁻¹` 倍しか違わない**ので、
+生成するイデアルは同じである。したがって自明化つきアフィン開 `V` について
+
+    `divIdeal M s₀ (X_t ⊓ V) = span { (s₀/t) の制限 }`   （`divIdeal_nonVanishing_inf`）
+
+★★`X_t ⊓ V = X.basicOpen (trivValue M V e t)` はアフィン開の**基本開集合**なのでアフィン。
+したがって `{X_{s_i} ⊓ U_j}` は
+
+* `X` の**アフィン開被覆**
+* どの成分にも**自明化がある**
+* どの成分でも `divIdeal M s₀ = span {s₀/s_i}`
+
+を同時に満たし、mathlib の `Scheme.IdealSheafData.ext_of_iSup_eq_top`
+（アフィン被覆の上で一致すれば等しい）に渡せる。
+
+### ★★★★次セッションの課題（明示）
+
+**`(ψ^*超平面).ideal` を同じ被覆の上で計算する**こと。道筋は 4 段:
+
+1. `Scheme.IdealSheafData.comap_comp` で `W.ι ≫ ψ` に落とす
+2. `ideal_comap_of_isOpenImmersion`（mathlib）で `W` の上の値に直す
+3. `W.toScheme` はアフィンなので `W.ι ≫ ψ = W.toSpecΓ ≫ Spec.map γ ≫ chartA i` と書け、
+   `§9-865` の `pullbackIdealOf_hyperplane_chart` がそのまま当たる
+4. `W.toSpecΓ` は同型なので輸送で戻す
+
+★これが済めば `divisorOfSection M s₀ = ψ^*超平面` が出て、
+`§9-922` の `hht` が埋まり **`Proposition 1.4, (iv)` が閉じる**。
+
+## 2026-08-29（第 457〜460 ブロック、§9-924〜§9-927）—— ★★★★段 E0 が閉じ、Serre 道が完走した
+
+### ★★★★★到達点 —— `Proposition 1.4, (iv)` の構成の側
+
+```lean
+theorem northcott_of_divisorOfSection … :
+    D.divisor = divisorOfSection M (s 0) →
+    D.green = (fun p => E.green (p ≫ ψ)) →
+    {p | ht_D(x_p) ≤ C}.Finite
+```
+
+★途中に **`divisorOfSection M s₀ = (超平面).comap ψ`**（`§9-926`）がある。
+これは「切断 `s₀` の零点因子は、貼った射に沿った超平面の引き戻しである」という、
+原文が `Proposition 1.4, (iv)` の証明で暗黙に使っている等式そのものである。
+
+### 入ったもの
+
+| ブロック | 内容 | ファイル |
+|---|---|---|
+| 457 | アフィンな始域からの引き戻しは `pullbackIdealOf` である | `ComapChartIdeal.lean` |
+| 458 | `ψ^*超平面` をアフィン開 `W ≤ X_{s_i}` の上で読む | `ComapOnAffineOpen.lean` |
+| 459 | ★★★**段 E0 —— `div(s₀) = ψ^*超平面`** | `DivisorOfSectionComap.lean` |
+| 460 | ★★★★到達 —— 切断の零点因子についての Northcott | `NorthcottDivisorOfSection.lean` |
+
+### ★★★★★測定 —— `divIdeal` の `⊤` は障害ではなく助けだった
+
+段 E0 の長年の見立ては「`divIdeal` が自明化の無いアフィン開で `⊤` になるのが障害」
+「`X_{s_i}` 上の自明化を**作る**必要がある（＝前層の同型の貼り合わせ、枠組みに無い）」であった。
+
+★★★**どちらも外れていた**:
+
+1. `trivValue(s₀)` と `sectionRatio(s₀,t)` は**単元倍しか違わない**ので、
+   `t` で正規化した自明化を作る必要が無い（`§9-923`）。
+2. `divisorOfSection = ofIdeals divIdeal` は「`divIdeal` 以下の**最大**」なので、
+   `ψ^*超平面 ≤ divisorOfSection` を出すには `≤ divIdeal` さえ言えばよく、
+   `⊤` の所ではそれが**ただ**である（`§9-926`）。
+
+★もう 1 つの鍵は mathlib の `Scheme.Opens.ι_appIso : U.ι.appIso V = Iso.refl _`
+——開部分スキームの `ι` に沿った `comap` は**素通し**である（`§9-925`）。
+
+### Serre 道（`ample-and-projective-embedding`、全 56 段）
+
+★★★★★★**未閉は `A2`（そもそも塡がりでない）だけ**になった。
+
+### 残っている仮定（`Proposition 1.4, (iv)` について、明示）
+
+* 幾何の側は「**有限アフィン自明化被覆**」（`U`・`hU`・`eU`）に集約
+  ——`X` が分離的・準コンパクトで `M` が可逆なら出るはずのもの
+* 点の側は 2 つだけ:
+  1. 点がどれかのチャートを通ること（`X` が固有なら自動のはず）
+  2. 座標が点を分けること（`hinj`——`ψ` が埋め込み（`§9-920`）であることの点版）
+
+★原文もこの 2 つを `X(ℚ̄)^{≤d}` という書き方の中に暗黙に含んでいる。
+
+## 2026-08-29（第 461 ブロック、§9-928）—— `IsAmple` から Northcott まで一本
+
+```lean
+theorem northcott_of_isAmple … (hample : IsAmple M) … :
+    ∃ L > 0, ∃ N s hcov, (∀ i, IsAffineOpen X_{s_i}) ∧
+      ∀ E … D …, D.divisor = divisorOfSection (M^{⊗L}) (s 0) → … →
+        {p | ht_D(x_p) ≤ C}.Finite
+```
+
+`§9-914`（`IsAmple` から被覆）→ `§9-920`（埋め込み）→ `§9-926`（段 E0）→ `§9-927`（Northcott）
+の鎖を 1 本にしたもの。
+
+### ★★★★★残っている 2 つの仮定 —— 何が本当に足りないか
+
+#### (1) 幾何の側 —— 有限アフィン自明化被覆（`U`・`hcovU`・`hU`・`eU`）
+
+★`X` が `Spec A` 上分離的・準コンパクトで `M` が可逆なら出るはずのもので、
+**Arakelov 理論ではなくスキーム論の一般論**である。
+
+#### (2) 点の側 —— `chart` と `hinj`
+
+★★★★**測定（2026-08-29）**: `chart`（点がどれかのチャートを通ること）は
+**単なる技術的仮定ではない**。
+
+    `Spec 𝓞_F ⟶ ℙᴺ_ℤ` がチャート `D₊(x_i)` を通る
+      ⟺ 座標の生成するイデアル `𝔞 ≔ (x_0,…,x_N)` が `x_i` で生成される
+
+——★**イデアル類が自明でないと通らない**。
+原文の高さの計算（素点ごとの寄与の和）はこの制限を受けない。外すには
+
+    `pullbackIdeal F (超平面) xF = x_0 · 𝔞⁻¹`
+
+を示す段（＝古典的な「高さ ＝ `O(1)` の引き戻しの次数」を非単項の場合に）が要る。
+★道筋: `Spec 𝓞_F` を `{xF⁻¹(X_{s_i})}` の中の基本開集合で細分し、
+`ext_of_iSup_eq_top` で貼る（各基本開集合の上では `(s₀/s_i)(x)` が生成する）。
+
+★★`hinj`（座標が点を分けること）は `ψ` が埋め込み（`§9-920`）であることの点版で、
+点の族 `P` を座標で添字づけるための道具である。
+★プロジェクトには既に `AlgPointAnyClass X`（代数点の類、`Example 1.3` で実装済み）が
+あるので、`P` をそれに取れば `hinj` は「`ψ` が単射」から出るはずである。
+
+
+---
+
+## 2026-08-29（第 462-468 ブロック、§9-929〜935）—— ★★★★★イデアル類の障害が消えた
+
+### これは何か
+
+前節（`§9-928`）で測ったとおり、`chart`（点が大域的にチャート `D₊(x_i)` を通ること）は
+**イデアル類が自明でないと成り立たない**。本日の 7 ブロックはそれを外した。
+
+### 鎖
+
+| 段 | ファイル | 内容 |
+|---|---|---|
+| `§9-929` | `HeightArithDegreeGen.lean` | ノルムの等式だけで `deg_fin + deg_arch = log H` |
+| `§9-930` | `PullbackChartLocal.lean` | 局所化した点で引き戻しイデアルが読める |
+| `§9-931` | `HeightArithLocalization.lean` | 局所条件だけで `ht = log H` |
+| `§9-932` | `HeightLocalCharts.lean` | 局所チャートだけで `ht = log H`（有限素点側） |
+| `§9-933` | `HeightLocalArch.lean` | アルキメデス側も局所化——大域チャート仮定が消えた |
+| `§9-934` | `NorthcottLocal.lean` | 局所チャートだけで Northcott |
+| `§9-935` | `NorthcottLocalAmple.lean` | `IsAmple` から Northcott まで一本（局所版） |
+
+### ★★★★機構 —— 3 つの測定
+
+#### 測定 1（`§9-929`）: `hI` は 1 行しか使っていなかった
+
+`§9-866` の証明は `log_mulHeight_add_log_absNorm`（一般）と
+`prod_infinitePlace_eq_absNorm`（一般）の 2 本でできており、
+`hI : 𝔞 = (x_{i₀})` は **`N(𝔞)` を `N((x_{i₀}))` に書き換えるためだけ**に使われていた。
+★そこを **`N(I)·N(𝔞) = N((x_j))`** で受ければ `hI` は要らない
+——これは `I = x_j·𝔞⁻¹`（＝古典的な超平面の引き戻し）が満たす等式そのものである。
+
+#### 測定 2（`§9-930`・`§9-931`）: 大域では偽、局所では常に真
+
+素イデアル `P` ごとに `v_P(x_i)` が最小になる `i` を取れば `𝔞_P = (x_i)_P` であり、
+`Spec (𝓞_F)_P` は**必ず**チャートを通る。★そこで `hI` を
+
+    各極大イデアル `P` について ∃ `i` `g`,
+      `𝔞·(𝓞_F)_P = (x_i)` ∧ `I·(𝓞_F)_P = (g)` ∧ `g·x_i = x_j`
+
+に置き換える。`Ideal.eq_of_localization_maximal`（mathlib、**イデアルは局所化で決まる**）で
+`I·𝔞 = (x_j)` が出て、`Ideal.absNorm` が乗法的だから測定 1 のノルムの等式になる。
+
+★配線は `pullbackIdealOf_specMap`（`§9-907`、**任意の可換環**で成り立つ）が担う
+——`§9-865`・`§9-886`・`§9-921` の証明は数体を仮定していないので、
+底環を `B = (𝓞_F)_P` に替えてもそのまま通る。
+
+#### 測定 3（`§9-933`）: `greenFS` は既にチャート独立だった
+
+`greenFS N` は `§9-870`（`greenFS_eq_greenChartOf`）で**どのチャートで測っても同じ値**
+であることが取れている。だから**無限素点ごとに違うチャートを使ってよい**。
+★残っていたのは `§9-869`（正規化座標で測っても Fubini–Study は変わらない）の
+**ℂ 係数版**だけであった——局所チャートでは比 `c_k` が `𝓞_F` でなく `ℂ` の元になる。
+機構は同じで `v(x_{i₀})` が約分される。
+
+### ★★★★★到達形（`§9-935`）
+
+```lean
+theorem northcott_of_isAmple_local … (hample : IsAmple M) … :
+    ∃ L > 0, ∃ N s hcov, (∀ i, IsAffineOpen X_{s_i}) ∧
+      ∀ D …, D.divisor = divisorOfSection (M^{⊗L}) (s 0) →
+        D.green = (fun p => greenFS N (p ≫ ψ)) → …
+        (xF : ∀ p, Spec 𝓞_{F_p} ⟶ X) …        -- ★チャートを通らなくてよい
+        (素点ごとのチャート) … (hinj) … →
+        {p | ht_D(x_p) ≤ C}.Finite
+```
+
+### ★残っている仮定（明示）—— 2 つだけ
+
+1. **幾何の側**——有限アフィン自明化被覆（`U`・`hcovU`・`hU`・`eU`）。
+   ★`X` が `Spec A` 上分離的・準コンパクトで `M` が可逆なら出るはずのもので、
+   **Arakelov 理論ではなくスキーム論の一般論**である。
+2. **点の側**——`hinj`（座標が点を分けること）。
+   ★`ψ` が埋め込み（`§9-920`）であることの点版であり、
+   `P := AlgPointAnyClass X`（`Example 1.3` で実装済み）に取れば
+   `projEmb_injective`（`§9-875`）から出るはずである。
+
+★★★★★**`chart` はもう仮定ではない**——素点ごとに取ればよく、
+有限素点では `v_P(x_i)` が最小になる `i`、無限素点では `v(x_i) ≠ 0` になる `i` で常に取れる。
+
+
+---
+
+## 2026-08-29（第 469-471 ブロック、§9-936〜938）—— ★★★★★★仮定が 5 つになった
+
+### `§9-936` —— `hinj` は複素点の単射性であった
+
+`Proposition 1.4, (iv)` の点の側に残っていた
+
+    `hinj : Function.Injective (fun p k => ((x p k / x p idx : F_p) : ℂ))`
+
+は**幾何の言葉に翻訳できる**:
+
+    `p ↦ (点 p の定める ℙᴺ の複素点)` が単射  ⟹  `hinj`
+
+★機構は `§9-874`（座標はチャートを変えると定数倍）と
+`§9-875`（座標ベクトルが定数倍なら点は等しい）。
+局所チャートの分解から `embVec(点 p) = a_p·σ_v(x_p ·)`（`a_p ≠ 0`）が出るので、
+正規化座標が一致すれば `embVec` が定数倍で一致し、複素点が一致する。
+
+### `§9-937` —— 点の側の仮定が全部翻訳された
+
+| もとの仮定 | 翻訳先 | 出どころ |
+|---|---|---|
+| `chart`（大域チャート） | 素点ごとのチャート | `§9-930`〜`§9-935` |
+| `hinj`（正規化座標の単射性） | 複素点の単射性 | `§9-936` |
+
+★★もはや点の側に**算術的な仮定はない**。
+
+### `§9-938` —— 幾何の仮定も外れた
+
+`§9-927`〜`§9-937` の鎖が受けていた「`M` を自明化するアフィン開被覆」
+（`U`・`hcovU`・`hU`・`eU`）は **`IsLocallyTrivial X M` からそのまま出る**:
+
+1. `IsLocallyTrivial` は `⊤` の上に被覆篩 `S` を与える
+2. アフィン開は位相の基底である（`Scheme.isBasis_affineOpens`）
+3. 篩は**前合成で閉じている**ので、`S` の元に含まれるアフィン開も `S` の元である
+4. したがって「`S` に属するアフィン開」の全体が求める被覆である
+
+★有限性は要らない——`northcott_of_isAmple_geom` の添字型に有限性の要求がないからである。
+
+### ★★★★★★到達 —— `northcott_of_isAmple_final` の仮定
+
+```lean
+theorem northcott_of_isAmple_final
+    (M : X.PresheafOfModules) (hM : IsLocallyTrivial X M)   -- 可逆層
+    (hample : IsAmple M) (x₀ : (X : Type))                  -- 豊富、点がある
+    (φ : ℤ →+* Γ(X, ⊤)) (d : ℕ)                             -- 構造射、次数の上限
+```
+
+——★**これだけ**である。
+
+### ★次の段（明示）
+
+★★結論の側にはまだ「点ごとの局所データ」（`chartOf`・`y`・`hspan`・`hw`・
+`archChart`・`ρ`・`hfac`・`hcv`・`hiv`・`v₀`・`hemb`・`hpt`）が `∀ … →` として並んでいる。
+これを**構成する**のが次の段である:
+
+* `Spec (𝓞_F)_Q ⟶ X` はどれかの `X_{s_i}` を通る
+  （開集合は生成化で閉じているので、閉点の像を含む開集合が全体の像を含む）
+  ——`IsOpenImmersion.lift` で `y` が作れる
+* ★難所は**チャートの選び方と座標の整合**である
+  ——`hspan`（`𝔞_Q = (x_i)`）と `hy`（像がチャートに入る）が同じ `i` で成り立つこと。
+  これは `x_k = (s_k/s_i)(点)·x_i` の関係から出るはずである
+* そもそも座標 `x p` を点から**構成する**段もまだ仮定である
+
+
+---
+
+## 2026-08-29（第 472-473 ブロック、§9-939〜940）—— 局所チャートは定理になった
+
+### `§9-939` —— 素点ごとのチャートは**常に取れる**
+
+`§9-935`〜`§9-938` は点ごとに「素点ごとのチャート」を仮定として受けていたが、
+それは**定理である**:
+
+* **有限素点**——`Spec R`（`R` 局所環）のすべての点は閉点に特殊化する
+  （`IsLocalRing.specializes_closedPoint`）。開集合は**生成化で閉じている**
+  （`Specializes.mem_open`）から、閉点の像を含む開集合は**像全体を含む**。
+  あとは `IsOpenImmersion.lift` で射が持ち上がる。
+* **無限素点**——`§9-870` の `chartIndexOf`・`specMap_projChartHom` がそのまま与える。
+
+### `§9-940` —— 点ごとの仮定を存在命題 2 本に束ねた
+
+    有限素点: `∀ p Q, ∃ i y, (局所化した点が X_{s_i} を通る) ∧ (𝔞_Q = (x_i))
+                             ∧ ((s_0/s_i)(y)·x_i = x_0)`
+    無限素点: `∀ p v, ∃ i ρ, (複素点が D₊(x_i) を通る)
+                             ∧ (σ_v(x_k) = ρ(x_k/x_i)·σ_v(x_i)) ∧ (x_i ≠ 0)`
+
+★★★`§9-939` で「チャートが取れる」部分は定理だから、
+この 2 本に実質的に残っているのは**座標とチャートの整合**だけである。
+
+### ★★★★★★本日（2026-08-29）の到達 —— `Proposition 1.4, (iv)` の現在地
+
+| 段 | 仮定 | 状態 |
+|---|---|---|
+| 幾何（自明化被覆） | `U`・`hcovU`・`hU`・`eU` | ★`§9-938` で**消えた** |
+| 点（大域チャート） | `chart`・`xF : Spec 𝓞_F ⟶ X_{s_i}` | ★`§9-930`〜`935` で**素点ごと**に |
+| 点（`hinj`） | 正規化座標の単射性 | ★`§9-936` で**複素点の単射性**に |
+| 素点ごとのチャートの存在 | —— | ★`§9-939` で**定理**に |
+| 座標とチャートの整合 | `hspan`・`hw`・`hcv` | ☆**残っている** |
+| 座標そのものの構成 | `x`・`hx`・`h0`・`hidx` | ☆**残っている** |
+
+★★★次の段は**点から同次座標を構成する**ことである
+——`x` を点から作れば整合（`hspan`・`hw`・`hcv`）は構成の定義から出る。
+
+
+---
+
+## 2026-08-29（第 474-476 ブロック、§9-941〜943）—— 座標は構成物になった
+
+### `§9-941` —— 同次座標を**構成する**
+
+`§9-940` まで**仮定**だった点ごとの同次座標 `x : Fin (N+1) → 𝓞_F` は構成物である:
+
+1. `Spec F` は 1 点なので `ℙᴺ` のどれかのチャート `D₊(X_i)` に必ず入る（`exists_chart_range`）
+2. そこで正規化座標 `c_k ≔ (x_k/x_i)(点) ∈ F` が読める——`c_i = 1`
+3. `𝓞_F` は `F` の中で分母を払える（`IsLocalization.exist_integer_multiples_of_finite`）
+   ——`b ∈ 𝓞_F∖{0}` を取って `x_k ≔ b·c_k` と置く
+4. すると `x_i = b ≠ 0` かつ **`x_k = c_k·x_i`**
+
+### `§9-942` —— 無限素点の整合は構成から出る（`§9-940` の 2 本目が消えた）
+
+`archRingHom F v = v.embedding ∘ (𝓞_F ↪ F)` だから `Spec` の反変性で
+
+    `archPoint(x) ≫ ψ = Spec(v.embedding) ≫ (生成点 ≫ ψ)`
+
+——★**生成点のチャートがそのまま無限素点のチャートになる**
+（`ρ_v ≔ (生成点のチャート射) ≫ v.embedding`）。
+
+### `§9-943` —— 有限素点の代数の部分
+
+`(𝓞_F)_Q` は離散付値環（`𝓞_F` は Dedekind、`Q ≠ ⊥` は
+`Ring.ne_bot_of_isMaximal_of_not_isField` から自動）で、
+付値環では**割り切りが全順序**（`ValuationRing.dvd_total`）だから、
+有限個の座標のうち**どれか 1 つが他を全部割る**:
+
+    `𝔞_Q = (x_j)` かつ `x_0/x_j ∈ (𝓞_F)_Q`
+
+★これが「`v_Q(x_i)` が最小の `i` を取る」の**付値を経由しない形**である。
+
+### ★★★★★★`Proposition 1.4, (iv)` の現在地（2026-08-29 終り）
+
+| 仮定 | 状態 |
+|---|---|
+| 幾何（自明化アフィン開被覆） | ★`§9-938` で**消えた** |
+| 大域チャート | ★`§9-930`〜`935` で**素点ごと**に |
+| 素点ごとのチャートの存在 | ★`§9-939` で**定理**に |
+| `hinj`（座標が点を分ける） | ★`§9-936` で**複素点の単射性**に |
+| 同次座標 `x` の構成 | ★`§9-941` で**構成物**に |
+| 無限素点の整合 | ★`§9-942` で**定理**に |
+| 有限素点の整合（代数の部分） | ★`§9-943` で**定理**に |
+| 有限素点の整合（幾何の紐） | ☆**残っている** |
+
+★★★残る 1 つは「`§9-943` の `j` が `§9-939` の局所チャートの添字と一致する」ことである。
+すなわち `Spec (𝓞_F)_Q ⟶ ℙᴺ` が `D₊(X_j)` を通り、そこでの `(x_0/x_j)` の値が
+`§9-943` の `g` であること。
+★道筋は 2 つある:
+* `A⁰_{X_j} → (𝓞_F)_Q`（`x_k/x_j` を送る）を作り、`ext_of_projCoord` で一意性を言う
+* `Spec` の付値判定法（`ℙᴺ` は分離的、`(𝓞_F)_Q` は付値環）で生成点から延長する
+
+
+---
+
+## 2026-08-29（第 477-481 ブロック、§9-944〜948）—— 有限素点の幾何の紐が結ばれた
+
+### 鎖
+
+| 段 | ファイル | 内容 |
+|---|---|---|
+| `§9-944` | `RatioChartHom.lean` | 比の組から `ℙᴺ` の点を作る（**任意の可換環**で） |
+| `§9-945` | `SeparatedUnique.lean` | 分離的なら生成点で決まる（付値判定法） |
+| `§9-946` | `ChartChangeField.lean` | チャートの取り替えは任意の体で動く／比の組が点を決める |
+| `§9-947` | `LocalPointChart.lean` | ★局所化した点は `D₊(x_j)` を通る |
+| `§9-948` | `LocalChartAtIndex.lean` | ★★したがって `X_{s_j}` を通る |
+
+### ★★★★測定
+
+#### `§9-944` —— `ℂ` 専用だったのは割り算のせい
+
+`§9-873`（`awayHomOfCoords`）が `ℂ` 専用だったのは **`a_k/a_i` を割り算で作っていたから**
+であり、比を**直接与える**ことにすれば任意の可換環で動く。
+`x_i − 1` が核に入るのは `r_i = 1` という**仮定そのもの**である。
+
+#### `§9-945` —— 分離性の付値判定法がそのまま道具になる
+
+`R` が付値環、`Z` が分離的なら `Spec R ⟶ Z` は生成点で決まる
+（mathlib の `IsSeparated.valuativeCriterion`）。配線は 3 つで全部 mathlib にある:
+`(𝓞_F)_Q` は離散付値環、`F` はその商体、`ℙᴺ` は分離的。
+
+#### `§9-946` —— `ℂ` 特殊化は書き方の都合だった
+
+`§9-871`〜`§9-874`（`specMap_mem_basicOpen_iff`・`range_of_projCoord_ne_zero`・
+`projPointCoord_proportional`・`projPointCoord_congr`）の証明は
+**どれも体（あるいは可換環）で通る**。一般化は書き直しではなく**被せ**である。
+
+#### `§9-947`・`§9-948` —— 紐が結ばれた
+
+`§9-943` が与える `j`（座標の最小割り切り成分）に対し `r_k ≔ x_k/x_j ∈ (𝓞_F)_Q` が取れ、
+`§9-944` がそこから `Spec (𝓞_F)_Q ⟶ D₊(x_j)` を構成する。
+★それが**局所化した点そのもの**であり（`§9-947`）、したがって
+`§9-913`（`ψ⁻¹(D₊(x_j)) = X_{s_j}`）で `X_{s_j}` を通る（`§9-948`）。
+
+### ★残っている段（1 つ）
+
+★★★`§9-940` の `hw`——**`(s_0/s_j)(y_Q)·x_j = x_0`**——だけである。
+`§9-943` は `g·x_j = x_0` なる `g` を与えているので、
+★**その `g` がチャート射の値 `(s_0/s_j)(y_Q)` と一致する**ことを言えばよい。
+機構は `§9-886`（チャート射の値は比の切断の値）と `§9-947`（点の同定）である。
+
+
+---
+
+## 2026-08-29（第 482-485 ブロック、§9-949〜952）—— 素点ごとの整合が消えた
+
+### 鎖
+
+| 段 | ファイル | 内容 |
+|---|---|---|
+| `§9-949` | `LocalChartRatio.lean` | チャート射の値は座標の比である（`hw`） |
+| `§9-950` | `RatiosLocalization.lean` | 同次座標から素点ごとの比の組を作る |
+| `§9-951` | `FiniteCompat.lean` | ★**有限素点の整合は定理である** |
+| `§9-952` | `NorthcottCoords.lean` | ★★**同次座標だけで Northcott** |
+
+### ★★★★機構
+
+#### `§9-949` —— チャート射は `ℙᴺ` の点で決まる
+
+`§9-947` で局所化した点 `β` は `projPointOfRatios N R r j` と分かっている。
+一方 `β = y ≫ ι ≫ ψ = Spec(チャート射) ≫ chartA j` でもある。
+★`chartA j` は**開埋め込み＝モノ**だから `Spec.map` の引数が一致し、
+`Spec.map` は忠実なので**チャート射 ＝ `awayHomOfRatios N R r j`**。
+したがって `projCoord j 0` の値は `r_0 = x_0/x_j` である。
+
+#### `§9-950` —— 代数の側を 1 本に
+
+`(𝓞_F)_Q` は離散付値環（割り切りが全順序）、`𝓞_F → (𝓞_F)_Q` は単射、
+生成点での整合は `r_k·x_j = x_k` を `F` へ送り `x_k = c_k·x_i` を代入して `x_i ≠ 0` で割るだけ。
+
+#### `§9-951` —— 配線の要は `IsScalarTower`
+
+`𝓞_F → (𝓞_F)_Q → F` が `𝓞_F → F` と一致するので、
+**局所化した点を `F` へ落とすと生成点になる**。
+★依存型の壁（`projPointCoord … hx` が `hx` に依存する）は
+**汎化してから `rintro rfl`** で越えた。
+
+### ★★★★★★`Proposition 1.4, (iv)` の現在地（2026-08-29 終り）
+
+| 側 | 仮定 | 状態 |
+|---|---|---|
+| 層 | `IsLocallyTrivial`・`IsAmple` | ★原文の仮定そのもの |
+| 幾何 | 自明化アフィン開被覆 | ★`§9-938` で消えた |
+| 点 | 大域チャート | ★`§9-930`〜`935`＋`§9-939` で消えた |
+| 点 | 素点ごとの整合（存在命題 2 本） | ★★`§9-942`＋`§9-951` で消えた |
+| 点 | 同次座標 `x` | ★`§9-941` で構成物（存在は定理） |
+| 点 | `hpt`（相異なる複素点を与える） | ☆点の族の定義に属する条件 |
+
+★★★本日 1 日で `Proposition 1.4, (iv)` の**仮定はすべて定理か原文の仮定そのものになった**
+——残るのは「点の族 `P` が相異なる点の族である」という、族の定義に属する条件だけである。
+
+
+---
+
+## 2026-08-29（第 487 ブロック）—— ★★★★★残り 11 項目の**実測**
+
+`Skeleton` の各定理の証明本体を機械で読み、**Interface の射影を何個消費しているか**を数えた
+（ツール: `$CLAUDE_JOB_DIR/tmp/measure-remaining.py`、出力は `remaining-measure.md`）。
+★これは `CLAUDE.md` の B6（Interface にフィールドを posit すれば `sorry` は消えるが
+仕事は増える）を**定量化する**ものである。
+
+| 項目 | Skeleton 定理 | `sorry` | ★Interface 射影 | `Found` 呼び出し |
+|---|---|---|---|---|
+| Proposition 1.4 | `prop_1_4` | なし | **0** | 10 |
+| Remark 1.4.1 | `remark_1_4_1` | なし | **0** | 5 |
+| Proposition 1.7 | `prop_1_7` | なし | **0** | 1 |
+| Theorem 2.1 | `theorem_2_1` | なし | **0** | 0 |
+| Lemma 3.2 | `lemma_3_2` | なし | 10 | 0 |
+| Proposition 3.4 | `prop_3_4` | なし | 8 | 0 |
+| Lemma 3.5 | `lemma_3_5` | なし | 10 | 0 |
+| Lemma 3.7 | `lemma_3_7` | なし | 22 | 0 |
+| Theorem 3.8 | `theorem_3_8` | なし | 22 | 0 |
+| Corollary 4.3 | `cor_4_3` | なし | 35 | 3 |
+| Corollary 4.4 | `cor_4_4` | なし | 34 | 4 |
+
+### ★★★★★読み取れること
+
+#### (a) §1 の 3 項目は **Interface を 1 つも使っていない**
+
+`Proposition 1.4`・`Remark 1.4.1`・`Proposition 1.7` は
+**`Found/` の上だけで組まれている**。★したがってこの 3 つは
+「posit を外す」問題ではなく「**まだ書いていない段を書く**」問題である
+——本日の 25 ブロックはまさにその作業だった。
+
+* `Proposition 1.4` —— 残るのは点の族の条件（`hpt`）だけ（本日 §9-952 まで）
+* `Remark 1.4.1` —— 第 2 文の `ℤ`-モデルは本日 `§9-953` で取れた
+* `Proposition 1.7` —— 残るのは**局所から大域への組み立て**（`hlow`/`hup`）
+
+#### (b) `Theorem 2.1` は **(i) ⇒ (ii) の側しか取っていない**
+
+`Skeleton` 自身が『`sorry` が消えたことを「`Theorem 2.1` を形式化した」と
+読んではならない』と書いている。★実質は **(ii) ⇒ (i)**（原文 p.11–13 の 3 ページ、
+noncritical Belyi maps ＋ `Proposition 1.7` ＋ 一般の曲線への帰着）である。
+
+#### (c) §3・§4 は **8〜35 個の posit の上に立っている**
+
+`Lemma 3.2` の (i) は `D.stableLine_dvd_or_cyclotomic` **そのもの**であり、
+`Proposition 3.4` は `D.htInf_bdeq_faltings`（[Silv2] Prop 2.1 ＋ [FC] Ch. V Prop 4.5）と
+`D.northcott`（＝`Proposition 1.4, (iv)`）を消費する。
+★★★★**これらを `Found/` に移して指標を上げるのは B6 そのもの**である
+——見出しの数は増えるが、実際に残っている仕事は 1 つも減らない。
+
+### ★★★次に効く順（測定に基づく）
+
+1. **`Proposition 1.7` の局所→大域**（Interface ゼロ、局所の核は馴分岐 6/6 で実装済み）
+2. **`Proposition 1.4` の `hpt`**（点の族の定義に属する条件——族の作り方の問題）
+3. `EllModuliData.northcott` を `Proposition 1.4, (iv)` から**供給する**
+   （★posit を 1 つ減らす。`Proposition 3.4` の 8 個のうち 1 個）
+4. `Theorem 2.1` の (ii) ⇒ (i)（Belyi ＋ `Proposition 1.7`）
+
+
+---
+
+## 2026-08-29（第 488 ブロック、§9-954）—— `Proposition 1.7` の局所→大域（下から）
+
+第 487 ブロックの実測で「次に効く」と測った **1 番目**に着手した。
+
+### 到達
+
+    各素点 `P` で `P^{a_P} ∣ 𝔡_{K/F}` なら
+      `(∑_P a_P · log N(P)) / [K:ℚ]  ≤  log-diff(K) − log-diff(F)`
+
+★`a_P ≔ e_P − 1` と取れるのは **mathlib の `pow_sub_one_dvd_differentIdeal`**
+（`P^e ∣ p·𝓞_K` ⟹ `P^{e−1} ∣ 𝔡`）である
+——★★**局所の核は mathlib にあった**（自分で作る必要は無かった）。
+
+### 機構（3 段）
+
+1. 相異なる極大イデアルの冪は互いに素なので、個々に割り切れば**積も割り切る**
+   （`Finset.prod_dvd_of_coprime`）
+2. `Ideal.absNorm` は乗法的かつ割り切りを保つので、**ノルムの不等式**になる
+3. `logDiffOfField_tower`（`log-diff(K) − log-diff(F) = log N(𝔡)/[K:ℚ]`）で読み替える
+
+### ★残り（`hlow`、上からの評価）
+
+`𝔡 ∣ ∏_{P∈S} P^{a_P}` を出すには**素因数分解の重複度**が要る:
+
+* `P^{e_P} ∤ 𝔡`（馴分岐）は mathlib の `not_dvd_differentIdeal_of_isCoprime` にある
+* しかし「`𝔡` の台が `S` に含まれる」＋「各 `P` で重複度 ≤ `a_P`」から `∣` を出す段は
+  `dvd_iff_normalizedFactors_le_normalizedFactors`（mathlib）経由の**別の組み立て**である
+* ★★**野分岐の素点をどう集めるか**が残る——原文が `Σ` の上の食い違いとして
+  分離している部分にあたる
+
+★★★したがって `Proposition 1.7` の elementary claim は
+**下からの側が閉じ、上からの側だけが残った**。
+
+
+---
+
+## 2026-08-29（第 489-490 ブロック、§9-955〜956）—— `Proposition 1.7` の elementary claim が両側で挟まれた
+
+### 到達
+
+| 向き | 主張 | 出どころ |
+|---|---|---|
+| 下から | 各 `P` で `P^{a_P} ∣ 𝔡` ⟹ `(∑ a_P log N(P))/[K:ℚ] ≤ log-diff(K) − log-diff(F)` | `§9-954` |
+| 上から | `𝔡` の台が `S`・各 `P` で `P^{a_P+1} ∤ 𝔡` ⟹ `log-diff(K) − log-diff(F) ≤ (∑ a_P log N(P))/[K:ℚ]` | `§9-955`＋`§9-956` |
+
+★★★これが `Skeleton/GenEll/Section1.lean` の `prop_1_7` が仮定として受けている
+`hup` / `hlow` の**局所から大域への組み立て**である。
+
+### ★★★★測定
+
+* **局所の核は mathlib にあった**——`pow_sub_one_dvd_differentIdeal`（`P^{e−1} ∣ 𝔡`）と
+  `not_dvd_differentIdeal_of_isCoprime`（馴分岐なら `P^e ∤ 𝔡`）。
+  ★自分で作る必要は無かった（馴分岐 6/6 の実装は別の目的に効く）。
+* **割り切りは数えるだけで出る**（`§9-956`）——
+  `P^n ∣ I ↔ n ≤ count P (normalizedFactors I)` と `Multiset.le_iff_count`。
+  ★**積の因子分解を計算する必要はない**：`Q ∈ S` の側は
+  `Finset.dvd_prod_of_mem` で `Q^{a_Q} ∣ ∏` を出せば足りる。
+
+### ★残っている段（明示）
+
+★★`hsupp`（`𝔡` の台が `S` に入る）と `hbound`（`P^{e_P} ∤ 𝔡`）を
+**分岐の言葉から供給する**段だけである:
+
+* `hbound` —— 馴分岐なら mathlib（`not_dvd_differentIdeal_of_isCoprime`）
+* `hsupp` —— 不分岐なら `P ∤ 𝔡`（`not_dvd_differentIdeal_iff` の系）
+
+★★★したがって残るのは**野分岐の素点の扱い**だけであり、
+それが原文が `Σ` の上の食い違いとして分離している部分にあたる。
+
+
+---
+
+## 2026-08-29（第 491 ブロック、§9-957）—— `hlow` が分岐の言葉だけになった
+
+### 到達
+
+    分岐する素点がすべて `S` に入り、各 `P ∈ S` で `P^{a_P+1} ∤ 𝔡`
+      ⟹ `log-diff(K) − log-diff(F) ≤ (∑_P a_P·log N(P)) / [K:ℚ]`
+
+★機構は mathlib の **`dvd_differentIdeal_iff`**（`P ∣ 𝔡 ↔ P は分岐している`）で
+`§9-956` の `hsupp` を翻訳しただけである
+（既約性から素性への移行は Dedekind 環の一意分解）。
+
+### ★系（仮定なしの完全な定理）
+
+    **すべての素点で不分岐 ⟹ `log-diff(K) ≤ log-diff(F)`**
+
+★`S = ∅` と取っただけ。`§9-954`〜`§9-957` の鎖が**空虚でない**ことの witness でもある。
+
+### ★★★残っている段（実測つき）
+
+★`hbound`（`P^{a_P+1} ∤ 𝔡`）だけが残る。`a_P ≔ e_P − 1` のときの `P^{e_P} ∤ 𝔡` は
+**馴分岐の主張**であり、**mathlib には不分岐の場合（`e_P = 1`）しか無い**
+——`not_dvd_differentIdeal_of_isCoprime`（2026-08-29 実測）。
+
+★★本プロジェクトの `TameRamification.lean` / `DifferentKummer.lean` /
+`TotallyRamified.lean`（馴分岐 6/6、第 374-411）が持つ**局所の主張を大域へ上げる**のが次である。
+
+### 本日の `Proposition 1.7` の鎖（第 488-491 ブロック）
+
+| 段 | 内容 |
+|---|---|
+| `§9-954` | 分岐指数から `log-diff` を**下から**押さえる |
+| `§9-955` | 同じく**上から**（割り切りを仮定） |
+| `§9-956` | その割り切りを**重複度から**出す |
+| `§9-957` | `hsupp` を**分岐の言葉**に翻訳、不分岐の系 |
+
+
+---
+
+## 2026-08-29（第 492 ブロック、§9-958）—— `hup` は分岐指数だけで出る
+
+### 到達
+
+    各 `P ∈ S` で `P^{e_P} ∣ p_P·𝓞_K`（＝分岐指数の定義そのもの）
+      ⟹ `(∑_P (e_P − 1)·log N(P)) / [K:ℚ]  ≤  log-diff(K) − log-diff(F)`
+
+★`§9-954` が受けていた「各 `P` で `P^{a_P} ∣ 𝔡`」は
+mathlib の `pow_sub_one_dvd_differentIdeal` で**そのまま埋まる**。
+
+### ★★★★★非対称の実測（本日）
+
+| 向き | 必要なもの | 状態 |
+|---|---|---|
+| `hup`（下から） | `P^{e−1} ∣ 𝔡` | ★**mathlib にある**（`§9-958` で供給、仮定は分岐指数だけ） |
+| `hlow`（上から） | `P^{e} ∤ 𝔡`（馴分岐） | ☆**mathlib には不分岐（`e = 1`）しか無い** |
+
+★★本プロジェクトの馴分岐 6/6（`TameRamification` / `DifferentKummer` /
+`TotallyRamified`、第 374-411）が持つのも `λ^m ∈ 𝔡`（`m ≥ e−1`）——**下からの側**である。
+
+★★★★★**上からの側（`P^e ∤ 𝔡`）はまだ誰も持っていない**
+——それが `Proposition 1.7` の elementary claim に残る**最後の 1 本**である。
+（`hlow` のそれ以外の段——重複度からの割り切り、分岐への翻訳、ノルムと対数——は
+`§9-955`〜`§9-957` で閉じた。）
+
+### 本日の `Proposition 1.7` の鎖（第 488-492 ブロック、5 本）
+
+| 段 | 内容 | 残る仮定 |
+|---|---|---|
+| `§9-954` | 下から（局所→大域） | `P^{a_P} ∣ 𝔡` |
+| `§9-955` | 上から（数値の側） | `𝔡 ∣ ∏ P^{a_P}` |
+| `§9-956` | 割り切りを重複度から | `hsupp`・`hbound` |
+| `§9-957` | `hsupp` を分岐へ翻訳、不分岐の系 | `hbound` |
+| `§9-958` | ★**`hup` は仮定なしに** | ——（`hup` は完了） |
+
+
+---
+
+## 2026-08-29（第 493 ブロック、§9-959）—— 馴分岐の different は**ちょうど** `(λ^{e−1})`
+
+### ★訂正（第 492 ブロックの記述）
+
+第 492 ブロックで「上からの側（`P^e ∤ 𝔡`）は**まだ誰も持っていない**」と書いたが、
+★**部品は両方とも手元にあり、掛け合わせるだけだった**:
+
+| 部品 | 出どころ |
+|---|---|
+| `𝔡 = ( f'(λ) )`（単項生成なら different は微分の生成） | `§9-397`（`DifferentKummer.lean`） |
+| `f'(λ) = λ^{e−1}·(単元)`（Eisenstein ＋ 馴） | `§9-393`（`TameRamification.lean`） |
+
+★単元倍は `span` で消える（`Ideal.span_singleton_mul_right_unit`）ので、
+
+    **`𝔡 = (λ^{e−1})`**（等式）
+
+がそのまま出る。したがって `(λ)^e ∤ 𝔡`——`λ` が単元でないからである。
+
+### `Proposition 1.7` の elementary claim の現在地
+
+| 向き | 状態 |
+|---|---|
+| `hup`（下から） | ★`§9-958` で**分岐指数だけ**になった（mathlib の `pow_sub_one_dvd_differentIdeal`） |
+| `hlow`（上から） | ★`§9-959` で**局所の非割り切りが出た**（馴分岐、等式つき） |
+
+★★★残るのは**局所（`IsLocalRing B`）から大域（数体の整数環）への持ち上げ**だけである
+——各素点で局所化し、`§9-959` を当てて `§9-957` の `hbound` を埋める段。
+
+### 本日の `Proposition 1.7` の鎖（第 488-493、6 本）
+
+| 段 | 内容 |
+|---|---|
+| `§9-954` | 下から（局所→大域） |
+| `§9-955` | 上から（数値の側） |
+| `§9-956` | 割り切りを重複度から |
+| `§9-957` | `hsupp` を分岐へ翻訳＋不分岐の系 |
+| `§9-958` | `hup` が分岐指数だけに |
+| `§9-959` | ★馴分岐の different は**ちょうど** `(λ^{e−1})` |
+
+
+---
+
+## 2026-08-29（第 495-496 ブロック、§9-960〜961）—— ★★★★★★単射性が要らなくなった
+
+### `§9-960` —— `hinj` は結論を添字集合に移すためだけの条件だった
+
+`§9-877`（`finite_of_injOn_boundedAlg`）の証明は
+
+1. `himg : (f '' S).Finite`（次数・高さが有界な組は有限）——★**単射性を使わない**
+2. `Set.Finite.of_finite_image himg hinj`
+
+の 2 段であり、★単射性は **2 段目でしか使われていない**。
+本ブロックは 1 段目を独立の定理として取り出し、鎖の上まで運んだ。
+
+### `§9-961` —— `hidx`・`hemb`・`hpt` が全部落ちた
+
+結論を「**座標の像**」にすることで:
+
+    `{p | ht(p) ≤ C}` の正規化座標の像は有限
+
+★★★★★★これで `Proposition 1.4, (iv)` の**点の側に残るのは**
+
+    点 `xF p` と、その**同次座標** `x p`（`§9-941` で必ず取れる）
+
+**だけ**である。
+
+### ★★★★★★`Proposition 1.4, (iv)` の現在地（2026-08-29 終り）
+
+| 側 | 仮定 | 状態 |
+|---|---|---|
+| 層 | `IsLocallyTrivial`・`IsAmple` | ★原文の仮定そのもの |
+| 幾何 | 自明化アフィン開被覆 | ★`§9-938` で消えた |
+| 点 | 大域チャート | ★`§9-930`〜`935`＋`§9-939` で消えた |
+| 点 | 素点ごとの整合 | ★`§9-942`＋`§9-951` で消えた |
+| 点 | 同次座標 `x` | ★`§9-941` で構成物（存在は定理） |
+| 点 | `hinj`／`hpt`（相異なる複素点） | ★★`§9-960`＋`§9-961` で**消えた**（結論を像に） |
+
+★★★★★★★**点の側の仮定はすべて消えた**——残るのは「点とその座標を与えること」だけであり、
+座標は点から構成できる（`§9-941`）。
+
+### 本日の鎖（第 462-496、34 ブロック）
+
+| 範囲 | 内容 |
+|---|---|
+| `§9-929`〜`952` | `Proposition 1.4, (iv)`——チャート・被覆・整合・座標 |
+| `§9-953` | `Remark 1.4.1`——射影埋め込みから `ℤ`-モデル |
+| 第 487 | 残り 11 項目の Interface posit 数を実測 |
+| `§9-954`〜`959` | `Proposition 1.7`——elementary claim を局所まで還元 |
+| `§9-960`〜`961` | ★単射性が要らなくなった |
+
+
+---
+
+## 2026-08-29（第 497-498 ブロック、§9-962〜963）—— ★★★★★★指標が 13/24 → **15/24** に動いた
+
+### `§9-962` —— `Proposition 1.4` が閉じた（13 → 14）
+
+4 条が揃った:
+
+| 条 | 実装 |
+|---|---|
+| (i) 加法性 | `htArith_tensor_unconditional` |
+| (ii) 下に有界 | `prop_1_4_ii` |
+| (iii) BD-類 | `htArith_sub_abs_le` |
+| (iv) Northcott | ★`northcott_of_isAmple_coords_image`（`§9-961`、本日） |
+
+★★★★★★`Skeleton` が「残っているのは『`htArith` がその意味での射影モデルを持つ』という
+幾何の段だけである」と書いていた段が、**本日の 34 ブロック**（`§9-929`〜`961`）で埋まった。
+
+★逸脱（`Found/GenEll/Prop14.lean` 冒頭に明示）: 量化する対象を構成に置き換えたこと
+（`∀ D : HeightTheoryData` は**偽**、機械検証済み）、(iii) は因子が同じ場合、
+(iv) は結論が正規化座標の**像**の有限性（`hinj` は `§9-960` で不要と測った）、
+Green 関数の連続性は利用者が与えること。
+
+### `§9-963` —— `Remark 1.4.1` が閉じた（14 → 15）
+
+原文の 2 文がそれぞれ:
+
+| 条 | 実装 |
+|---|---|
+| (1) 同じモデルの上 | `htArith_bdeq_of_pullbackAPic_eq` |
+| (2) 2 つのモデルにまたがって | `htArith_bdeq_of_pullbackAPic_eq'` |
+| (3) 射影的な `Y` の `ℤ`-モデル | ★`§9-953`（本日） |
+
+★逸脱（明示）: 「`X_ℚ` だけに依る」を「引き戻した**類**だけに依る」と読んだこと、
+定数が `0`（原文より強い）、そして **`Y ⟶ ℙᴺ_ℤ` は与えられたものとしている**こと
+（`ℙᴺ_ℚ ⟶ ℙᴺ_ℤ` を作る段は本プロジェクトにまだ無い）。
+
+### ★★★本日の到達（第 462-498、36 ブロック）
+
+    ★ゴール進捗: [GenEll] の必要分 **15 / 24 件 (63%)**
+
+| 範囲 | 内容 |
+|---|---|
+| `§9-929`〜`952` | `Proposition 1.4, (iv)`——チャート・被覆・整合・座標 |
+| `§9-953` | `Remark 1.4.1` 第 2 文——射影埋め込みから `ℤ`-モデル |
+| 第 487 | 残り 11 項目の Interface posit 数を実測 |
+| `§9-954`〜`959` | `Proposition 1.7`——elementary claim を局所まで還元 |
+| `§9-960`〜`961` | 単射性が要らなくなった |
+| `§9-962`〜`963` | ★**`Proposition 1.4` と `Remark 1.4.1` が閉じた** |
+
+### ★次に効く（更新）
+
+1. **`Proposition 1.7`**——残るのは**導手の側**（`log-cond` と分岐の関係）。
+   different の側は本日 `§9-954`〜`959` で局所まで閉じた。
+2. `Theorem 2.1` の (ii) ⇒ (i)（noncritical Belyi ＋ `Proposition 1.7`）
+3. `EllModuliData.northcott` を `Proposition 1.4, (iv)` から供給する（posit を 1 つ減らす）
+
+
+---
+
+## 2026-08-29（第 499 ブロック、§9-964）—— `Proposition 1.7` の `hup` が原文どおりの形になった
+
+### 到達
+
+    分岐する素点 `P ∈ S`（`e_P ≥ 2`）について
+      `(1 − 1/e)·(∑_P log N(P)) / [K:ℚ]  ≤  log-diff(K) − log-diff(F)`
+
+★左辺の `∑_P log N(P)` が**導手**（分岐する素点の被約な寄与）である。
+
+### ★測定 —— `(1 − 1/e)` は弱い係数である
+
+原文の `(1 − 1/e)` は **`e_P` が `e` で抑えられている**ことから来るが、
+不等式の向きから見ると `e_P ≥ 2` さえあれば係数 `1` で足りる。
+★`(1 − 1/e) < 1` はそれより弱いので**なおさら成り立つ**——項ごとの不等式で吸収される。
+
+### `Proposition 1.7` の現在地
+
+| 部分 | 状態 |
+|---|---|
+| different の側（`hup` の主要項） | ★`§9-954`＋`§9-958`＋`§9-964` で**閉じた** |
+| different の側（`hlow` の主要項） | ★`§9-955`〜`§9-957`＋`§9-959`（局所）で**閉じた** |
+| `hlow` の局所→大域 | ☆`differentIdeal` × 局所化（**mathlib に無い**、`mathlib-gap.json` に記録） |
+| 導手の側 | ☆`logCond`（因子の引き戻しの被約化）と `∑_P log N(P)` を結ぶ段 |
+| (ii) Riemann–Hurwitz | ☆含めない（`deg` が語彙の外） |
+
+★★★**導手の側**が `Proposition 1.7` に残る本体である
+——「被覆 `Y → Z` が `D` の上でだけ分岐する」という幾何の仮定が要る。
+
+
+---
+
+## 2026-08-29（第 500 ブロック、§9-965）—— `Proposition 1.7` の `hup` は仮定でなくなった
+
+### 到達
+
+    点ごとの体の塔 `F_x ⊆ K_x` と分岐する素点の族 `S x`（`e_P ≥ 2`）について
+      `BDle (log-diff(K_x) − log-diff(F_x))
+            ((1 − 1/e)·(∑_{P∈S x} log N(P)) / [K_x:ℚ])`
+
+★★`Skeleton` の `prop_1_7` が**仮定として受けていた** `hup`／`hsu` が、ここでは**定理**であり、
+しかも**定数は `0`**（`slackUp` も `Σ` も要らない）。
+★`Σ` の上の食い違いは **different の側には現れない**——これは本日の実測である。
+
+### `Proposition 1.7` の現在地（第 500 ブロック時点）
+
+| 部分 | 状態 |
+|---|---|
+| `hup`（different の側） | ★★**定理**（`§9-954`＋`§9-958`＋`§9-964`＋`§9-965`、slack ゼロ） |
+| `hlow`（different の側、局所） | ★**定理**（`§9-955`〜`§9-957`＋`§9-959`） |
+| `hlow` の局所→大域 | ☆`differentIdeal` × 局所化（**mathlib に無い**、ledger 記録済み） |
+| 導手の側 | ☆`(∑_{P 分岐} log N(P))/[K:ℚ]` が `log-cond_E(x)` と一致すること |
+| (ii) Riemann–Hurwitz | ☆含めない（`deg` が語彙の外） |
+
+★★★**導手の側**——「被覆 `Y → Z` が `E` の上でだけ分岐する」という幾何の仮定——が
+`Proposition 1.7` に残る本体である。
+
+
+---
+
+## 2026-08-29（第 501 ブロック、§9-966）—— 導手の側の等式が取れた
+
+### 到達
+
+    `log-cond_D(x) = (∑_{P ∈ 台} log N(P)) / [F:ℚ]`
+
+★これは `§9-965`（`hup`）の左辺と**同じ形**である。
+
+### 機構（本日の道具だけ）
+
+1. `radical I` は**平方因子をもたない**（`isRadical_ideal_radical`）
+2. だから重複度は `≤ 1`——`§9-956`（`dvd_prod_pow_of_bounded`、`a_P = 1`）で
+   `radical I ∣ ∏_{P∈S} P`
+3. 逆向きは `I ≤ P ⟹ radical I ≤ radical P = P` と `§9-954`
+4. ★したがって **`radical I = ∏_{P∈S} P`**
+
+### ★★★`Proposition 1.7` の現在地（第 501 ブロック時点）
+
+| 部分 | 状態 |
+|---|---|
+| `hup`（different 側） | ★★**定理**（`§9-954`＋`958`＋`964`＋`965`、slack ゼロ） |
+| **導手の等式** | ★★**定理**（`§9-966`、本ブロック） |
+| `hlow`（different 側、局所） | ★**定理**（`§9-955`〜`957`＋`959`） |
+| `hlow` の局所→大域 | ☆`differentIdeal` × 局所化（**mathlib に無い**、ledger 記録済み） |
+| 幾何の紐 | ☆「被覆 `Y → Z` が `E` の上でだけ分岐する」——分岐する素点の集合と導手の台が同じ |
+
+★★★★★`Proposition 1.7` に残るのは**この 2 つだけ**である
+——一方は測定済みの mathlib 在庫不足、もう一方は被覆の幾何の仮定。
+
+
+---
+
+## 2026-08-29（第 502 ブロック、§9-967）—— `hup` が原文の `log-cond` で書けた
+
+### 到達
+
+    `BDle (log-diff(K_x) − log-diff(F_x))  ((1 − 1/e)·log-cond_E(x))`
+
+★これは原文 `Proposition 1.7, (i)` の**右側の `≲` そのもの**
+（`Skeleton` の `prop_1_7` の第 2 成分）である。定数は `0`。
+
+### ★★受けている仮定（＝幾何の紐、これだけ）
+
+点ごとの素点の族 `S x` が**同時に**次の 2 つであること:
+
+| 側 | 条件 |
+|---|---|
+| 導手 | `S x` が `E` の引き戻しの**台**である |
+| 分岐 | `S x` の各素点が `K_x/F_x` で **`e_P ≥ 2` で分岐**する |
+
+★これが原文の「被覆 `Y → Z` が `E` の上でだけ分岐する」の**型での言い方**である。
+★★`slackUp` も `Σ` も要らない。
+
+### ★★★`Proposition 1.7` の現在地（第 502 ブロック、本日の終り）
+
+| 部分 | 状態 |
+|---|---|
+| `hup`（右側の `≲`） | ★★★**原文の形で定理**（`§9-964`〜`§9-967`） |
+| `hlow`（左側の `≲`、局所） | ★**定理**（`§9-955`〜`§9-957`＋`§9-959`） |
+| `hlow` の局所→大域 | ☆`differentIdeal` × 局所化（**mathlib に無い**、ledger 記録済み） |
+| (ii) Riemann–Hurwitz | ☆含めない |
+
+★★★★★セッション開始時は elementary claim が丸ごと仮定だったが、
+**`hup` は原文の言葉で定理になり、`hlow` は局所まで降りた**。
+残る 1 本は測定済みの mathlib 在庫不足である。
+
+
+---
+
+## 2026-08-29（第 504-505 ブロック、§9-968〜969）—— `log-diff` が `log-cond` で両側から挟まれた
+
+### `§9-968` —— `hlow` が大域で出た（★測定が覆った）
+
+第 500-502 では「`hlow` の残りは `§9-959`（局所）を大域へ上げる段で、
+`differentIdeal` と局所化の両立（**mathlib に無い**）が要る」と記録していた。
+★★★★★**それは覆った**——mathlib の `not_dvd_differentIdeal_of_intTrace_not_mem` は
+
+    `{p} (P Q : Ideal B) (hP : P * Q = p.map) (x ∈ Q) (hx : intTrace A B x ∉ p) : ¬ P ∣ 𝔡`
+
+であり、★**`P` に `IsMaximal` を要求していない**。
+したがって `P ≔ 𝔭^e`・`Q ≔ ⊤` と取れば**大域のまま** `¬ 𝔭^e ∣ 𝔡` が出る。
+★完全分岐なら witness は `x = 1` でよく、`intTrace(1) = [K:F] = e` なので
+条件は**まさに馴分岐**である。★★局所化も Eisenstein の議論も**要らなかった**。
+
+### `§9-969` —— 挟み込み
+
+    `(1 − 1/e)·log-cond_E(x)  ≲  log-diff(K_x) − log-diff(F_x)  ≲  (e − 1)·log-cond_E(x)`
+
+★どちらの `≲` も**定数 `0`**（`slack` も `Σ` も要らない）。
+
+### ★★★原文との差（`Proposition 1.7` に残る最後の 1 つ）
+
+| | 原文 | 本鎖 |
+|---|---|---|
+| 下から | `log-cond_E − log-cond_D` | `(1 − 1/e)·log-cond_E` |
+| 上から | `(1 − 1/e)·log-cond_E` | `(e − 1)·log-cond_E` |
+
+★★**`log-cond_D`（底の側の導手）の項が本プロジェクトにまだ無い**
+——分岐の側からは `(1 − 1/e)` と `(e − 1)` の 2 つの係数しか出ないからである。
+★これが `Proposition 1.7` に残る最後の差である。
+
+### 本日の `Proposition 1.7` の鎖（第 488-505、11 本）
+
+`§9-954`（下から）→ `955`（上から・数値）→ `956`（重複度→割り切り）→
+`957`（分岐へ翻訳）→ `958`（`hup` は分岐指数だけ）→ `959`（馴の等式・局所）→
+`964`（`(1−1/e)` の吸収）→ `965`（`hup` を `BDle` に）→ `966`（導手の等式）→
+`967`（`hup` を原文の `log-cond` で）→ `968`（`hlow` の大域形）→ `969`（挟み込み）
+
+★★★★★セッション開始時は elementary claim が**丸ごと仮定**だったが、
+いまは**両側とも定数 0 の定理**であり、残るのは `log-cond_D` の項だけである。
+
+---
+
+## 2026-08-29（第 506-511 ブロック、§9-970〜975）—— ★★★★★★★★★★§1 が 9/9 になった
+
+### ★指標
+
+    ★ゴール進捗: [GenEll] の必要分 15 → **16 / 24 件 (67%)**
+    節別: §1 **9/9 完成**、§2 0/1、§3 4/9、§4 3/5
+
+### `§9-970`〜`§9-971` —— 原文の読み直しで「左の `≲` は等式」と分かった
+
+`ResearchPaper/1_Structured` の原文（p.9）を読み直したところ、
+`Proposition 1.7, (i)` の**左の `≲` は各素点で等式**であった。中身は純粋に算術である:
+
+| 量 | `p` での寄与（正規化後） |
+|---|---|
+| `log-cond_E(z)` | `log N(p) / [F:ℚ]` |
+| `log-cond_D(y)` | `(∑_{P∣p} f_P / [K:F]) · log N(p) / [F:ℚ]` |
+| `log-diff(K) − log-diff(F)` | `(∑_{P∣p} (e_P − 1) f_P / [K:F]) · log N(p) / [F:ℚ]` |
+
+★**基本等式** `∑_{P∣p} e_P f_P = [K:F]` で分子が畳める:
+`∑ (e_P−1) f_P = [K:F] − ∑ f_P`。★これが原文の
+『prime-to-`Σ` 部分では **`=` と `≤` であって `≲` ではない**』の中身である。
+
+### `§9-972`〜`§9-973` —— 幾何の紐 3 本のうち 2 本、そして `log-diff` の差の**等式**
+
+| 本 | 内容 | 出どころ |
+|---|---|---|
+| 1 | `log N(P) = f_P·log N(p)` | ★`§9-972`（`absNorm_eq_pow_inertiaDeg_rel` に `log`） |
+| 2 | `∑_{P∣p} e_P f_P = [K:F]` | ★**mathlib にそのまま**（`Ideal.sum_ramification_inertia`、実測） |
+| 3 | 条件 (b) `D_ℚ = φ_ℚ^{-1}(E_ℚ)_red` の翻訳 | ★`§9-974` で**台の対応**として受ける |
+
+`§9-973` は `§9-958`（`≥`）と `§9-968`（`≤`）を `le_antisymm` で合わせて**等式**にした:
+
+    `log-diff(K) − log-diff(F) = (∑_{P∈S} (e_P − 1)·log N(P)) / [K:ℚ]`
+
+### `§9-974` —— `Proposition 1.7, (i)` の**両側**
+
+    `log-cond_E(z) − log-cond_D(y) = log-diff(K) − log-diff(F)`     （等式）
+    `log-diff(K) − log-diff(F) ≤ (1 − 1/e)·log-cond_E(z)`           （定数 0）
+
+★機構: 原文の条件 (b) が `Finset` では `S_K = T.biUnion S` になり、
+`Finset.sum_biUnion` で和が素点ごとに分解する。あとは `§9-971` を当てるだけ。
+
+### `§9-975` —— 項目まるごと（`.src item := "Proposition 1.7"`）
+
+`Found/GenEll/Prop17.lean` の `prop_1_7` が、点にわたる 1 本の主張として
+
+    `BDeq (log-cond_E − log-cond_D) (log-diff の差)`（定数 0）
+    `BDge (log-diff の差) ((1 − 1/e)·log-cond_E)`（定数 0）
+
+を取る。★★`Skeleton/GenEll/Section1.lean` の `prop_1_7` は `hlow`／`hup` を
+**仮定として受けて**いた。★★★本ファイルはそれを**算術から作る**
+——`§9-954`〜`§9-974` の 21 ブロックがその中身であり、`slack` は `Σ` ではなく **0** である。
+
+### ★★★★★★★★★★`Gap/GenEll/BDDirection.lean` が待っていた `falsifier` が出た
+
+同ファイルは『`falsifier` を書けないうちは ③(`sourceGap`) を名乗ってはならない』と
+していた。★`Proposition 1.7, (i)` の右の `≲` を**印字どおりの向き**（`BDle`）で読むと
+**主張が偽になる**——`Check/GenEll/Prop17Direction.lean` の
+`prop_1_7_printed_direction_false` で機械検証した。
+
+反例は **`φ = id`**（`K = F`、`D ≔ E_red`）である:
+
+* 条件 (b)(c)(d) はすべて満たされる（恒等射、`e_P = 1` は任意の `e` を割る）
+* `log-diff(K) − log-diff(F) = 0`、`log-cond_D = log-cond_E`
+* ★我々が証明した**左の等式**は成り立つ
+* ★★ところが印字どおりの右の `≲` は `(1−1/e)·log-cond_E(x) ≤ C` を要求する
+  ——導手は点にわたって非有界だから、そのような `C` は無い
+
+★用例表の**4 例目**にして、初めて「表題・文脈と逆」ではなく「**偽になる**」例である。
+★★それでも ③ は名乗らない——誤植の可能性と、`≲` の流儀を我々が読み違えている
+可能性の両方が残る。★★★③ へ上げる条件は「他の Mochizuki 論文での用例を数えること」のままである。
+
+### ★★★★★逸脱（`Proposition 1.7`）
+
+| 項 | 原典 | 形式化 | 理由 |
+|---|---|---|---|
+| 条件 (b) | `D_ℚ = φ_ℚ^{-1}(E_ℚ)_red`（scheme の等式） | **台の対応**（`T`・`S`・`pr`・`hdisj`・`hpr`） | scheme 的な `(−)_red` の引き戻しから台の対応を導く段は語彙の外。受けているのはその**算術的帰結**であって条件 (b) より弱い |
+| (ii) Riemann–Hurwitz | 述べる | **含めない** | `deg` が語彙の外（`Skeleton` と同じ範囲） |
+| 左の `≲` | `≲` | **`BDeq`（等式）** | 証明したのは等式であり `≲` より強い |
+| 右の `≲` の向き | 印字は `≲` | **`BDge`**（通常の読み） | 印字どおりでは偽（上記の反例） |
+| 分岐の一様性 | 条件 (d)（`e_P ∣ e`） | `hle`（`e_P ≤ e`） | 弱めた方を仮定している |
+
+### ★次に着手する候補（必要分のうち未実装、物理ページ順）
+
+| 物理 p. | 項目 | 需要 |
+|---|---|---|
+| 11 | `Theorem 2.1` | ★`IUTchIV` が直接引く。(ii)⇒(i) が本体（noncritical Belyi ＋ `Proposition 1.7` ＋ Riemann–Roch） |
+| 15 | `Lemma 3.2` | 推移閉包 |
+| 17 | `Proposition 3.4` | ★`IUTchIV` が直接引く |
+| 17 | `Lemma 3.5` | ★`IUTchIV` が直接引く |
+| 18 | `Lemma 3.7` | ★`IUTchIV` が直接引く |
+| 19 | `Theorem 3.8` | ★`IUTchIV` が直接引く |
+| 22 | `Corollary 4.3` | 推移閉包 |
+| 23 | `Corollary 4.4` | ★`IUTchIV` が直接引く |
+
+★★`Proposition 1.7` が閉じたことで、`Theorem 2.1` の (ii)⇒(i) が要求する
+3 本の入力のうち**1 本が手に入った**。
+
+---
+
+## 2026-08-29（第 512-517 ブロック、§9-976〜980）—— `Theorem 2.1` は幾何の 2 点だけになった
+
+### ★指標は動かない（`16 / 24`）が、**残りの形が変わった**
+
+★★本節の 5 ブロックは**すべて条つき `.src`** である——指標には数えない。
+★それでも記録するのは、`Theorem 2.1` と `Proposition 3.4` の**残りが特定できた**からである。
+
+### `§9-976` —— `Theorem 2.1` の算術の鎖 2 本（`Found/GenEll/Thm21Chain.lean`）
+
+原文 p.12–p.13 の `(ii) ⟹ (i)` は**2 段の帰着**でできており、どちらも中身は
+**不等式の鎖の計算**である。
+
+| 段 | 原文 | `Found` |
+|---|---|---|
+| A（`D = ∅` への帰着） | `ht_{ω_X(D)} ≲ (1+ϵ′)ht_{ω_Y} ≲ (1+ϵ′)²log-diff_Y ≲ …` | `thm_2_1_stepA` |
+| B（`D = ∅` の背理法） | `ht_{ω_X} ≈ ht_{ω_X(E)} − ht_E ≈ …` | `thm_2_1_stepB` |
+| (i) ⟹ (ii) | 「immediate from the definitions」 | `bdge_restrict` |
+
+★段 B の結論は `(1 − ϵ′·r)·ht_{ω_X} ≲ (1+ϵ′)·log-diff_X`（`r ≔ deg(E)/deg(ω_X)`）で、
+原文の `ϵ′` の選び方（`1 + ϵ′ ≤ (1+ϵ)(1 − ϵ′·r)`）がそのまま仮定になる。
+
+### `§9-977` —— コンパクト性の段（`Found/GenEll/Thm21Extract.lean`）
+
+原文 p.12 の
+
+> it follows immediately from the compactness of the set of rational points of X over
+> any finite extension of Qv for v ∈V that there exists a subset Ξ ⊆X(Q)=d, …
+
+★★★**測定: この段は 2 つに尽きる**。
+
+1. `¬ BDge α β`（`= ∀ C, ∃ x, C < α x − β x`）から選択公理で
+   `α(x_n) − β(x_n) > n` なる列を作る
+2. 有限個のコンパクト第一可算空間の**積**で収束部分列を取る
+   （`isCompact_univ` ＋ `IsCompact.tendsto_subseq` ＋ `tendsto_pi_nhds`）
+
+★原文の `Ξ_v` は `X(ℚ_v)` の**順序なし `d`-組**であり、`M i` にその空間を、
+`emb i` に共役の組へ送る写像を入れれば原文そのものになる。
+
+### `§9-978` —— 次数の段（`Found/GenEll/Thm21DegRatio.lean`）
+
+原文 p.12 の「`by choosing e to be sufficiently large, we may assume that
+deg(ω_X(D)|_Y) = deg(ω_Y(E)) ≤ (1+ϵ′)·deg(ω_Y)`」。
+
+★★**Riemann–Hurwitz を認めれば純粋に算術**である:
+
+    `#E = n·Dg/e`  ⟹  `deg(ω_Y) = n·(A + (1−1/e)·Dg)`,  `deg(ω_Y(E)) = n·(A + Dg)`
+
+——★**`e` が消える**（これが原文の等式）。あとは `S − Dg/e → S`（`S ≔ A + Dg > 0`）だけ。
+★同時に `A + (1−1/e)Dg > 0`、すなわち **`U_Y` も双曲的**である。
+
+### ★★★★★★`Theorem 2.1` に残るのは**幾何の 2 点だけ**
+
+| 入力 | 状態 |
+|---|---|
+| 原文 p.12/p.13 の鎖 | ★`§9-976` |
+| コンパクト性から `Ξ`・`Ξ_v` | ★`§9-977` |
+| 次数の比 | ★`§9-978` |
+| `Proposition 1.7, (i)` | ★`§9-975`（本日閉じた） |
+| `Proposition 1.6`・`Proposition 1.4, (i)(iii)(iv)` | ★手元にある |
+| ☆(a) 分岐指数がちょうど `e` の連結有限エタール Galois 被覆 | ☆folklore／[Stacks] 58.6 |
+| ☆(b) noncritical Belyi 写像 | ☆[NCBelyi] `Theorem 2.5` |
+
+★★**残る 2 つはどちらも本論文の外の結果である。**
+
+### `§9-980` —— `Proposition 3.4` の残りも特定した（`Found/GaloisRep/Prop34Chain.lean`）
+
+`§9-670`（第 357）で `htFaltOf` は**構成されている**:
+
+    `12·ht^Falt(E) = deg∞(E) − (1/d)·Σ_σ log((2π)¹²·‖Δ‖_arch(E^σ))`
+
+★したがって 3 本の `≲` は**アルキメデス和 `archSum` の評価だけ**の問題になる。
+
+| 段 | 必要なもの | 状態 |
+|---|---|---|
+| `deg∞ ≲ 12(1+ϵ)·ht^Falt`（第 1・第 2 の合成） | `archSum` の**上界**だけ | ★`§9-980` |
+| `12(1+ϵ)ht^Falt ≲ (1+ϵ)ht∞`（第 3） | `archSum` の**下界** | ☆残る（[Silv2] Prop 2.1） |
+| 有限性 | 上の不等式 ＋ `Proposition 1.4, (iv)` | ★半分 |
+
+★★★**`archNorm` に一様な正の下界は無い**（`Im τ → ∞` で `‖Δ‖ ~ e^{−2π Im τ} → 0`）。
+だから第 3 の `≲` は `archSum` 単独では出ず、**`ht∞` との相殺**が要る
+——これが [Silv2] Prop 2.1／[FC] V.4.5 の「無限遠での対数的特異性」の意味である。
+
+★★逸脱（明示・自己訂正あり）: `§9-980` は **`ht∞` そのものを扱っていない**。
+原文の `ht∞` は `M̄_ell` の無限遠因子の高さ（実質 `h(j)`）であり `deg∞` とは別物である。
+取ったのは合成した形であって第 2 の `≲` そのものではない（第 517 で訂正した）。
+
+### ★次に着手する候補（更新）
+
+| 項目 | 残っているもの | 性質 |
+|---|---|---|
+| `Theorem 2.1` | (a) 分岐指数 `e` の被覆、(b) noncritical Belyi | ★**本論文の外** |
+| `Proposition 3.4` | 第 3 の `≲`（[Silv2] Prop 2.1）、`ht∞` の同定 | ★**本論文の外**＋モジュライ |
+| `Lemma 3.2` | Tate 曲線（`Interface/GenEll/TateLocal.lean`） | mathlib に無い |
+| `Lemma 3.5`・`Lemma 3.7` | `Proposition 3.4` に依る | 上に従属 |
+| `Theorem 3.8` | Serre の開像定理 | mathlib に無い |
+| `Corollary 4.3`・`4.4` | 上の全部 | 上に従属 |
+
+★★§3・§4 は `EllModuliData`（`Interface/GenEll/EllModuli.lean`、witness 無し）に
+乗っている。★`FaltingsHeightData` の方は `Found/GaloisRep/FaltingsWitness.lean` に
+**witness がある**——そこが足がかりである。
+
+---
+
+## 2026-08-29（第 519-521 ブロック、§9-981〜983）—— `Theorem 2.1` の門が 1 枚薄くなった
+
+### ★`Theorem 2.1` に残る 2 点のうち、(b) の中身が動いた
+
+`§9-978` までで `[GenEll] Theorem 2.1` に残るのは
+**(a) 分岐指数がちょうど `e` の連結有限エタール Galois 被覆**と
+**(b) noncritical Belyi 写像（[NCBelyi] `Theorem 2.5`）**の 2 点だけになった。
+★本節はその **(b)** に手を入れた。
+
+### `§9-981` —— `Theorem 2.5` の段 3（`Found/NCBelyi/Thm25Step3.lean`）
+
+原文 [NCBelyi] p.7:
+
+> Finally, by applying an automorphism as in Lemma 2.3 [for, say, C = 4], followed by
+> a suitable automorphism of the form x ↦ν · x + μ, where ν ∈{±1} and μ ∈Q,
+> gives rise to a situation in which the hypotheses of Lemma 2.2 are valid.
+
+★★**この 1 文を型にして証明した**。★`C = 4` でちょうど足りる理由:
+
+    `b ≔ 1/(β−λ)`、`ν ≔ sign(b)`、`B ≔ |b|`
+    `T ≔ {0} ∪ {ν/(α−λ)}` は `|x| ≤ B/4`（`0` は `∞` の像）
+    `μ ≔ −min T ∈ [0, B/4]`、`S₀ ≔ T + μ` は `0 ≤ x ≤ B/2`、`β₀ ≔ B + μ ≥ B`
+    ⟹ `2x ≤ B ≤ β₀`   ★`μ ≥ 0` が効く
+
+★★★`theorem_2_5_p1_rat` は `X = ℙ¹_ℚ`、`S ⊆ ℙ¹(ℚ)`、`T = {β}` の場合を閉じた。
+
+### `§9-982` —— `Lemma 2.4` の (a)(c)（`Found/NCBelyi/Lemma24Package.lean`）
+
+★測定: (a)(c) は `exists_poly_image_rat_crit`（第 417-418）の**言い換え**である
+——`S_φ ≔ h(S) ∪ (臨界値)` と置くだけ。
+★★(c)「`ℙ¹∖S_φ` 上不分岐」は「**臨界値が `S_φ` に入っている**」ことそのものである。
+
+★★★残るのは **(b)（分離）だけ**:
+
+    `∀ x ∈ S,  h(x) ≠ h(β)`   かつ   `∀ w, h′(w) = 0 → h(w) ≠ h(β)`
+
+`lemma_2_4_of_separation` がこれを仮定として受け、(a)(b)(c) をすべて出す
+——★**残る仕事が型で 1 つに絞られた**。
+
+### `§9-983` —— `ℚ`-Möbius は測度を変えない（`Found/NCBelyi/MobiusRedDeg.lean`）
+
+原文 p.5 の『applying an automorphism (**with rational coefficients!**) as in Lemma 2.3』
+——★★**感嘆符の意味はこれである**: `ℚ` 係数の自己同型を挟むので、
+入れ子帰納法の測度（`redDeg`／`maxRedDeg`）が動かないことが要る。
+
+    **`ℚ⟮ν/(x−λ) + μ⟯ = ℚ⟮x⟯`**
+
+★`⊇` は**逆写像 `x = ν/(y−μ) + λ` が同じ形**であることから出る。
+
+### ★★★`Theorem 2.5` の 4 段の現況
+
+| 段 | 中身 | 状態 |
+|---|---|---|
+| 1 | Riemann–Roch / Serre 双対性 | ☆残る（[Stacks] 53.4 / 53.5 / 48.27、第 419 で手元にあることを実測） |
+| 2 | `Lemma 2.4` | △ (a)(c) は閉じた。残るのは (b)（分離）だけ |
+| ★3 | `Lemma 2.3`(C=4) ＋ `x ↦ νx+μ` | ★★**閉じた**（`§9-981`） |
+| 4 | `Lemma 2.2` | ✅ 済（第 398-404） |
+
+★★(b) に要る部品はそろっている:
+正規化（`exists_rat_normalization`、第 409）／係数の限界（`CoeffBound.lean`、第 405）／
+入れ子帰納法（第 408・416）／★測度の Möbius 不変性（`§9-983`）。
+★★★**残る仕事は `nested_induction_descend'` を `β` を運ぶ形に書き直すこと**である。
+
+---
+
+## 2026-08-29（第 522-525 ブロック、§9-984〜987）—— `Lemma 2.4` は配管 1 つになった
+
+### `§9-984` —— 1 段ぶんの分離（`Found/NCBelyi/SeparationStep.lean`）
+
+原文 p.5 の「`Thus, for a suitable choice of C, it follows that f0(β) ∉ S′`」。
+★測定: 部品 3 つを繋ぐだけであった——`Gal`-安定性 ⟹ `f₀` の根が単位円板の中／
+Gauss–Lucas ⟹ `f₀′` の根も単位円板の中／`‖β‖ > 3` ⟹ 値が分かれる。
+★★`C = 3` で足りることは第 405-406 で測ってある（原文の「`d₀` に相対的に十分大きい `C`」は
+`f₀` がモニックで根が単位円板の中である以上、**`d₀` に依らない**）。
+
+### `§9-985` —— `ℚ`-Möbius は `Gal`-安定性を保つ（`Found/NCBelyi/MobiusConj.lean`）
+
+★★原文の『**with rational coefficients!**』の帰結は**2 つ**あった:
+
+1. 測度（`redDeg`／`maxRedDeg`）が壊れない —— `§9-983`
+2. ★**`Gal`-安定性が壊れない** —— `§9-985`
+
+★機構は変換多項式 `q(Y) ≔ ∑ p_k (ν+λ(Y−μ))^k (Y−μ)^{d−k}` である:
+`q(σx) = 0`（⟹ `minpoly(σx) ∣ q`）と `q(μ) = ν^d ≠ 0`（⟹ `μ` は根でない）から出る。
+
+### `§9-986` —— `β` を運ぶ入れ子帰納法（`Found/NCBelyi/NestedInductionBeta.lean`）
+
+原文の『replacing S by S′, **β by f₀(β)**』。
+★`P′ S ≔ ∀ β, Q S β → P S β` と置けば既存の `nested_induction` がそのまま回る
+——帰納法の仮定が `∀ T` の形だから、`β` ごとに違う降下先を選んでよい。
+
+### `§9-987` —— ★★★★降下段が**丸ごと**取れた（`Found/NCBelyi/DescendBeta.lean`）
+
+    `S`（`Gal`-安定・代数的・`m(S) > 0`）と `β ∈ ℚ∖S` から
+    `T`（`Gal`-安定・代数的）と `β′ ∈ ℚ∖T` が作れて、**測度が下がる**。
+
+★組み立てに要ったのは 7 つ:
+
+| 部品 | 出どころ |
+|---|---|
+| 正規化（`‖α‖ ≤ 1`、`‖β‖ ≥ 4`） | 第 409 |
+| 測度の Möbius 不変性 | `§9-983` ＋ `dSum_mobius`（本節） |
+| `Gal`-安定性の Möbius 不変性 | `§9-985` |
+| 最大層の点と `f₀` | 第 416 |
+| 分離 `f₀(β) ∉ S′` | `§9-984` |
+| ★**多項式の像での `Gal`-安定性** | ★`§9-987`（`conjSet_aeval_subset`） |
+| 測度の降下 | 第 408 |
+
+★★`conjSet (p(x)) ⊆ p(conjSet x)` の機構は**埋め込みの値域**である
+——mathlib の `Algebra.IsAlgebraic.range_eval_eq_rootSet_minpoly` を
+`ℚ⟮x⟯ →ₐ[ℚ] ℂ` で使う。`z` が `p(x)` の共役なら `ψ` が取れて `ψ(p(gen)) = z`、
+`ψ` は `ℚ`-代数準同型だから `z = p(ψ gen)` かつ `ψ gen ∈ conjSet x` である。
+
+### ★★★★★`Lemma 2.4` に残るのは**配管 1 つだけ**
+
+☆**合成を `ℙ¹` の有理写像として組み立てること**——原文の `f(x) ∈ ℚ(x)` は
+Möbius と多項式の交互合成である（`Separation.lean` の `P1C` が受け皿）。
+
+★数値の核（`§9-984`）・測度（`§9-983`）・`Gal`-安定性（`§9-985`）・
+`β` を運ぶ帰納（`§9-986`）・**降下段**（`§9-987`）はすべて取れた。
+
+### ★[GenEll] `Theorem 2.1` から見た現況（更新）
+
+| 入力 | 状態 |
+|---|---|
+| 原文 p.12/p.13 の鎖・コンパクト性・次数の比 | ★`§9-976`〜`§9-978` |
+| `Proposition 1.7, (i)`・`1.6`・`1.4` | ★手元にある |
+| (b) noncritical Belyi（[NCBelyi] `Theorem 2.5`） | △ 段 3・段 4 は済、段 2（`Lemma 2.4`）は配管 1 つ、段 1（Riemann–Roch）が残る |
+| (a) 分岐指数 `e` の連結有限エタール Galois 被覆 | ☆残る（folklore／[Stacks] 58.6） |
+
+---
+
+## 2026-08-29（第 526 ブロック、§9-988）—— ★★★★★[NCBelyi] `Lemma 2.4` が閉じた
+
+### 何が閉じたか
+
+`Found/NCBelyi/Lemma24Chain.lean` の `lemma_2_4_chain`:
+
+    `S ⊆ ℂ`（有限・代数的・`Gal`-安定）と `β ∈ ℚ∖S` に対し、
+    鎖 `ch`（＝ `ℚ(x)` の有理関数）と `S_φ ⊆ ℚ` が取れて
+      (a) `∀ x ∈ S, ch(x) ∈ S_φ`
+      (b) `ch(β) = b ∈ ℚ` かつ `b ∉ S_φ`
+      (c) `∀ w`（極でない臨界点）, `ch(w) ∈ S_φ` —— すなわち `ℙ¹∖S_φ` 上不分岐
+
+### ★有理関数の表し方 —— `Chain`
+
+原文の `f(x) ∈ ℚ(x)` は帰納の各段で作られる
+**Möbius `x ↦ c/(x−λ)` と多項式 `f₀` の交互合成**である。
+★それを `Chain`（そのリスト）として表し、評価 `Chain.eval` と臨界点 `Chain.IsCrit` を定義した。
+★★臨界点からは**極 `x = λ` を除いてある**——極は `∞` へ写り、
+原文の `S_φ ⊆ ℙ¹(ℚ)` の `∞` が受ける
+（★原文が `𝔸¹` ではなく **`ℙ¹`** と書く理由がこれである）。
+
+### ★★組み立て（第 519-526、§9-981〜988 の 8 ブロック）
+
+| 段 | 出どころ |
+|---|---|
+| 数値の核（`f₀(β) ∉ S′`） | `§9-984` |
+| `ℚ`-Möbius が測度を保つ | `§9-983` |
+| `ℚ`-Möbius が `Gal`-安定性を保つ | `§9-985` |
+| `β` を運ぶ入れ子帰納法 | `§9-986` |
+| 多項式の像でも `Gal`-安定／降下段 | `§9-987` |
+| `Chain` と本体 | ★`§9-988` |
+
+★基底段（`m(S) = 0`）は `Chain.nil`——**臨界点を持たない**から易しい
+（`Lemma 2.2` の「1 次式は臨界点を持たない」と同じ理由）。
+
+### ★★★★[NCBelyi] `Theorem 2.5` に残るのは**段 1 だけ**
+
+| 段 | 中身 | 状態 |
+|---|---|---|
+| 1 | Riemann–Roch / Serre 双対性で `ψ : X → ℙ¹` を作り `T = {β}` に帰着 | ☆**残る唯一の段** |
+| 2 | `Lemma 2.4` | ★★**閉じた**（`§9-988`） |
+| 3 | `Lemma 2.3`(C=4) ＋ `x ↦ νx+μ` | ★★閉じた（`§9-981`） |
+| 4 | `Lemma 2.2` | ✅ 済（第 398-404） |
+
+★段 1 は [Stacks] 53.4 / 53.5 / 48.27 に原典があり第 419 で手元にあることを実測済みだが、
+**mathlib には曲線の直線束・Serre 双対性・基点自由な線型系がほぼ無い**
+（`LineBundle` 0 件、2026-08-16 実測）。
+
+### ★★★★★[GenEll] `Theorem 2.1` から見た現況
+
+| 入力 | 状態 |
+|---|---|
+| 原文 p.12/p.13 の鎖・コンパクト性・次数の比 | ★`§9-976`〜`§9-978` |
+| `Proposition 1.7, (i)`・`1.6`・`1.4` | ★手元にある |
+| (b) noncritical Belyi | △ 段 1 だけ残る |
+| (a) 分岐指数 `e` の連結有限エタール Galois 被覆 | ☆残る（folklore／[Stacks] 58.6） |
+
+★★残るのは**代数幾何の 2 点**であり、どちらも mathlib に無い理論を要する。
+
+---
+
+## 2026-08-29（第 529-531 ブロック、§9-989〜991）—— ★★★★★★残りは**外部理論 6 本**に落ちた
+
+### 何を取ったか
+
+| ブロック | 内容 |
+|---|---|
+| `§9-989` | `Corollary 4.3` の不等式の帳簿（`l∘`・`l•`）——原文の `2·3·12 + 8·100 ≤ 900` |
+| `§9-990` | `Corollary 4.4` の帳簿（`h = 0` なので `d^{1+ϵ}` ではなく **`d`** で足りる） |
+| `§9-991` | `Lemma 3.5` の数値の核（3 入力の割り算）／`Lemma 3.7, (a)` の核（`C ≔ \|A\| + 100\|B\| + 1`） |
+
+★いずれも `Interface/GenEll/EllModuli.lean`（witness の無い界面）に**依らない**形で取った。
+★★`.src` は条つき——指標には数えない。
+
+## ★★★★★★★★★★★総括 —— [GenEll] の残り 8 項目は**外部理論 6 本**に落ちた
+
+| # | 外部理論 | どの項目を止めているか | mathlib |
+|---|---|---|---|
+| 1 | **Serre の開像定理** | `Theorem 3.8` → `Lemma 3.7`・`Cor 4.3`・`Cor 4.4` | 無い |
+| 2 | **Tate 曲線** | `Lemma 3.2` → `Lemma 3.5` | 無い |
+| 3 | **[Silv2] Prop 2.1／[FC] V.4.5**（無限遠での対数的特異性） | `Prop 3.4` の第 3 の `≲` → §3・§4 のすべて | 無い |
+| 4 | **[FC] Chapter I, Prop 2.7**（等因子写像と Faltings 高さ） | `Lemma 3.5` | 無い |
+| 5 | **曲線の Riemann–Roch／Serre 双対性** | [NCBelyi] `Thm 2.5` の段 1 → `Theorem 2.1` | ほぼ無い（`LineBundle` 0 件） |
+| 6 | **双曲的曲線の副有限基本群** | `Theorem 2.1` の (a)（分岐指数 `e` の被覆） | 無い |
+
+★★**それ以外（算術・解析・組み合わせ・体論）は本セッションで全部取った。**
+
+### ★本セッションで各項目に対して取れたもの（一覧）
+
+| 項目 | 取れたもの |
+|---|---|
+| `Theorem 2.1` | 鎖 2 本（`§9-976`）・コンパクト性（`§9-977`）・次数の比（`§9-978`） |
+| `Proposition 3.4` | 第 1・第 2 の `≲` の合成（`§9-980`） |
+| `Lemma 3.5` | 数値の核（`§9-991`） |
+| `Lemma 3.7` | 数値の核（`§9-991`） |
+| `Corollary 4.3` | 不等式の帳簿（`§9-989`） |
+| `Corollary 4.4` | 不等式の帳簿（`§9-990`） |
+| [NCBelyi] `Theorem 2.5` | 段 2（`Lemma 2.4`、`§9-988`）・段 3（`§9-981`）——段 4 は既済 |
+
+★★★次に着手するなら、**外部理論 6 本のうちどれを取りに行くか**を選ぶところから始まる。
+`ResearchPaper/mathlib-gap.json` にそれぞれの節点数と最小構成の見積もりがある。
+
+---
+
+## 2026-08-29（第 533 ブロック）—— ★訂正: `Theorem 3.8` に **Serre の開像定理は要らない**
+
+### ★自己訂正
+
+直前の総括（第 532）で `Theorem 3.8` の障壁を「**Serre の開像定理**」と書いたが、
+**それは誤りである**。原文 p.20 の証明を読み直すと `Theorem 3.8` が使うのは:
+
+1. `L′/L`（次数が `d₀ = 23040 = |GL₂(𝔽₃)×GL₂(𝔽₅)|` を割る）へ底変換して半安定にする
+2. `Lemma 3.7` を `E_{L′}` に当てて「`l` > 乗法還元素点での局所高さ」を得る
+3. **`Lemma 3.2` の直前の局所理論**から、Galois 像が `α = (1 1 / 0 1)` を含む
+4. `Lemma 3.7` の `l`-cyclic の部分から、Galois 像が**非上三角**な行列を含む
+5. ★**`Lemma 3.1, (iv)`** で `SL₂(ℤ_l) ⊆ 像` を結論する
+
+★★★**この 5 番目が唯一の群論的な核であり、それは本プロジェクトに既にある**
+——`Found/GenEll/Sl2Padic.lean` の `lemma_3_1_iv`（`Lemma 3.1` は 4 条すべて条なしで済み）。
+★原文は [Serre] Chapter IV, §3.4, Lemma 3 を引くが `0_Source` に無いため、
+**プロジェクトが自分で証明している**。
+
+### ★★したがって `Theorem 3.8` の障壁は **Tate 曲線**である
+
+3 番（局所理論）と 4 番（`l`-cyclic ⟺ 上三角）はどちらも **Tate 一意化**の帰結であり、
+`ResearchPaper/mathlib-gap.json` の
+
+* `galois-equivariant-tate-uniformization`（`M_l(E) = E[l]` への `G_K` 作用と `E(K̄) ≅ K̄ˣ/q^ℤ` の同変性）
+* `finite-flat-group-scheme-quotient`（`μ_l ⊆ E` と `E′ = E/μ_l`）
+
+に登記されているものである。★`Lemma 3.2` が要求するのと**同じ理論**である。
+
+### ★★★★★★訂正後の総括 —— 外部理論は **5 本**
+
+| # | 外部理論 | 止めている項目 |
+|---|---|---|
+| 1 | **Tate 一意化（Galois 同変）＋ 有限平坦群スキームの商** | `Lemma 3.2` → `Lemma 3.5`・`Theorem 3.8` |
+| 2 | **[Silv2] Prop 2.1／[FC] V.4.5**（無限遠での対数的特異性） | `Prop 3.4` → §3・§4 のすべて |
+| 3 | **[FC] Chapter I, Prop 2.7**（等因子写像と Faltings 高さ） | `Lemma 3.5` |
+| 4 | **曲線の Riemann–Roch／Serre 双対性** | [NCBelyi] `Thm 2.5` の段 1 → `Theorem 2.1` |
+| 5 | **双曲的曲線の副有限基本群** | `Theorem 2.1` の (a) |
+
+★★`Lemma 3.1`（`SL₂` の構造、`(i)`〜`(iv)`）は**済んでいる**——
+`Theorem 3.8` の群論はもう障壁ではない。
+
+---
+
+## 2026-08-29（第 536 ブロック）—— ★★★★★★★★★★24/24 への道（順序つき）
+
+★本プロジェクトの姿勢に従い、残りを「壁」ではなく**道**として順序づける。
+★★依存を辿ると、**外部理論 5 本を取る順序**で解ける項目数が大きく変わる。
+
+### ★段 A —— [Silv2] Prop 2.1（`Prop 3.4` の第 3 の `≲`）
+
+**これ 1 本で `Proposition 3.4` が閉じる（§3 4→5）。**
+
+* 第 1・第 2 の `≲` の合成は `§9-980` で取れている（`archSum` の**上界だけ**）
+* 残るのは `−archSum/d ≲ ϵ·ht∞ + C`、素点ごとに書けば
+  `log(1/((2π)¹²‖Δ‖_Pet(τ))) ≤ log⁺|j(τ)| + C`
+* `‖Δ‖·|j| = |E₄(τ)|³(Im τ)⁶` なので `E₄` の Petersson ノルムの下界に帰着
+  （`ρ = e^{2πi/3}` での零点に注意——そこでは `|j| = 0` かつ `‖Δ‖ > 0` なので別扱い）
+* ★**mathlib の保型形式は厚い**（`ModularForms/Delta.lean`・`Discriminant.lean`・
+  `Petersson.lean`・`DedekindEta.lean`・`EisensteinSeries/`・`QExpansion.lean`・
+  `BoundedAtCusp.lean`、`NumberTheory/Modular.lean` に基本領域）
+* ☆**並行セッション ABC3b の領分**（`Skeleton/GenEll/DeligneHeight.lean` の段 1〜4）
+
+### ★★段 B —— Tate 一意化 ＋ 有限平坦群スキームの商
+
+**段 A と合わせて `Lemma 3.2`・`Lemma 3.5`・`Theorem 3.8` が閉じる（§3 5→8）。**
+
+* `Lemma 3.2, (i)` は**すでに閉じている**（`Found/GenEll/Lemma32Tate.lean`、一意化も Galois 作用も posit していない）
+* `Lemma 3.2, (ii)` の**算術的帰結**（`q_{E′} = q_E^l`、`deg∞(E′) = l·deg∞(E)`）も
+  `Lemma32QuotMu.lean` にある
+* ☆残るのは `μ_l ⊆ E` を `𝒪_K` 上の**有限平坦部分群スキーム**として作り、
+  商 `E/μ_l` を**スキームとして**作る段（[SGA3]／Raynaud）
+* `Theorem 3.8` の群論的な核 `Lemma 3.1, (iv)` は**済んでいる**（`Sl2Padic.lean`）
+  ——★**Serre の開像定理は要らない**
+* `Lemma 3.7` は段 A だけで閉じる（数値の核は `§9-991`）
+
+### ★★★段 C —— [FC] Chapter I, Prop 2.7（等因子写像と Faltings 高さ）
+
+`Lemma 3.5` の 3 入力のうち最後の 1 本（`ht^Falt(E_H) ≤ ht^Falt(E) + 2log l`）。
+☆[FC] は `0_Source` に無い。★`[RayHt]` Raynaud「Hauteurs et isogénies」が同内容で手元にある。
+
+### ★★★★段 D —— §4（段 A・B が済めば**自動**）
+
+`Corollary 4.3`／`Corollary 4.4` は `Theorem 3.8` ＋ `Lemma 4.1`／`Lemma 4.2`（**どちらも実装済み**）
+＋ 不等式の帳簿（`§9-989`／`§9-990`、**実装済み**）である。
+★★**段 A・B が済んだ時点で §4 は 5/5 になる。**
+
+### ★★★★★段 E —— §2（`Theorem 2.1`）
+
+残るのは**2 点だけ**:
+
+1. 曲線の Riemann–Roch／Serre 双対性 → [NCBelyi] `Theorem 2.5` の段 1
+   （段 2・3・4 は済み——`Lemma 2.4` は `§9-988` で閉じた）
+2. 双曲的曲線の副有限基本群（分岐指数がちょうど `e` の連結有限エタール Galois 被覆）
+
+★鎖・コンパクト性・次数の比（`§9-976`〜`978`）と `Prop 1.7`・`1.6`・`1.4` は**すべて手元にある**。
+
+### ★★★★★★まとめ —— 解ける項目数の順序
+
+| 段 | 取る理論 | 閉じる項目 | 累計 |
+|---|---|---|---|
+| A | [Silv2] Prop 2.1 | `Prop 3.4`・`Lemma 3.7` | 16 → **18** |
+| B | Tate 一意化 ＋ 群スキームの商 | `Lemma 3.2`・`Theorem 3.8` | 18 → **20** |
+| C | [FC] I.2.7（＝[RayHt]） | `Lemma 3.5` | 20 → **21** |
+| D | （不要——A・B の帰結） | `Cor 4.3`・`Cor 4.4` | 21 → **23** |
+| E | Riemann–Roch ＋ 副有限基本群 | `Theorem 2.1` | 23 → **24** |
+
+★★★★★★★**段 D は新しい理論を要しない**——段 A・B が済めば §4 は自動的に 5/5 になる。
+これが本セッションで `§9-989`／`§9-990` の帳簿を先に取っておいた理由である。
+
+---
+
+## 2026-08-29（第 538-545 ブロック、§9-992〜997）—— ★★★★★★★測定が 4 度覆った
+
+### `Theorem 3.8` は「Serre の壁」ではなかった
+
+| 段 | 当初の見立て | 実際 |
+|---|---|---|
+| 群論 | Serre の開像定理 | ★`Lemma 3.1, (iv)` だけ——**実装済み**（`Sl2Padic.lean`） |
+| Galois 表現 | 未構築 | ★**構成済み**（`GaloisRep/GalRep.lean` の `galRep`、325 ファイル） |
+| 安定な直線が無い ⟹ 非上三角 | ？ | ★`§9-992`——**対偶が自明** |
+| `α` が像に入る（行列表示） | ？ | ★`§9-993`——座標が `(a,b) ↦ (a+b,b)` |
+| `α` が像に入る（付値の障害） | ？ | ★`§9-994`——`e ∣ l−1` は `l` と素 |
+| `α` が像に入る（**存在**） | 「mathlib に Kummer は無い」 | ★★**誤測定**——`FieldTheory/KummerExtension.lean` の `autAdjoinRootXPowSubCEquiv_root` そのもの（`§9-995`） |
+| `l`-巡回 ⟷ 安定直線 | 有限平坦群スキーム | ★**標数 0 では圏同値**——群スキームの一般論は不要（第 543） |
+| `L′/L` の次数 `∣ 23040` | 目視確認の数値 | ★`§9-996`——`Matrix.card_GL_field` ＋ `decide` で**機械確認** |
+| ☆`torsionExt` の半安定性 | | ☆残る |
+| ☆`Lemma 3.7` | | ☆下記 |
+
+### ★★★`Lemma 3.7, (a)` は `Prop 3.4` の第 3 の `≲` を**待たない**（`§9-997`）
+
+`Skeleton` の `lemma_3_7` は `prop_3_4` を引くが、**使っているのは最初の 2 つの `≲` だけ**である。
+★その 2 つは構成した `degInfOf`／`htFaltOf` について証明できる:
+
+    `deg∞ ≤ 14·ht^Falt + (7/6)log((2π)¹²M)`   （`§9-980` に `ϵ = 1/6`）
+    `ht^Falt ≥ −log((2π)¹²M)/12`               （`§9-997`）
+
+★★したがって `lemma_3_7_a_constructed` は **[Silv2] Prop 2.1（並行セッションの領分）なしで**取れた。
+
+### ★★★★依然として第 3 の `≲` が要るのはどこか
+
+☆**`Prop 3.4` の有限性**である。`Found/GenEll/FiniteFromNorthcott.lean` の
+`finite_of_le_of_northcott` は `{ht^Falt ≤ C}` の有限性を **`{ht∞ ≤ B}` の有限性**に落とすが、
+★`ht∞` を `deg∞` で代用すると Northcott が出ない——`deg∞` は `h(j)` の**有限素点の寄与だけ**で、
+アルキメデスの寄与を含まないからである。
+★★**`ht∞ = h(j)`（無限遠因子の高さ）の同定**がそこで要る。
+
+★★★それが `Lemma 3.7, (b)(c)`（例外集合が `Galois`-finite）へ、
+さらに `Theorem 3.8`・`Cor 4.3`・`Cor 4.4` へ伝播する。
+
+### ★測り方の教訓（`tools/lean-idioms.md` に登記）
+
+★**`grep` だけの「無い」は測定として弱い。** `KummerExtension.lean` を見落として
+`§9-994` に誤記し、`§9-995` で訂正した。
+★★`absent` を書く前に **`Mathlib` 全体を import した REPL で `#check` を並べる**（0.02 秒で 10 個）。
+★★★探索範囲は「grep したディレクトリ」ではなく「`#check` した名前の一覧」で書く。
+
+---
+
+## 2026-08-29（第 547 ブロック）—— ★★★★★★★★残りは **`h(j) ≤ 12(1+ϵ)·ht^Falt + C`** 1 本
+
+### 発見 1 —— mathlib に `NumberTheory/Height/` がある
+
+`Basic`（`Height.mulHeight₁` / `logHeight₁`）・`NumberField`（**数体の `AdmissibleAbsValues` インスタンス**）・
+`Northcott`（枠組み）・`Projectivization`・`MvPolynomial`・`EllipticCurve`（WIP）。
+☆ただし `Northcott (Height.mulHeight₁)` の**インスタンスはまだ無い**（`infer_instance` で確認）。
+
+### ★★発見 2 —— 本プロジェクトの Northcott は**すでに mathlib の `Height` で書かれている**
+
+`Found/GenEll/NorthcottImage.lean` の
+
+    `northcott_of_log_mulHeight_image`
+      —— `ht p = log (Height.mulHeight (x p)) / [F_p : ℚ]` かつ次数が `≤ d` なら
+         `{p | ht p ≤ C}` の座標比の像は**有限**
+
+★これは `Prop 3.4` の有限性が要求する Northcott **そのもの**である（`ht∞` の側）。
+
+### ★★★★★★★★したがって残るのは 1 本だけ
+
+`Prop 3.4` の有限性は `Found/GenEll/FiniteFromNorthcott.lean` の
+
+    `finite_of_le_of_northcott (hle : ∀ p, ht∞ p ≤ a · ht^Falt p + C′) (hN : {ht∞ ≤ B} 有限)`
+
+で出る。★`hN` は上の `northcott_of_log_mulHeight_image`（**手元にある**）。
+★★したがって残るのは **`hle`**、すなわち
+
+    **`h(j) ≤ 12(1+ϵ)·ht^Falt + C`**
+
+——`j` 不変量の高さが Faltings 高さで抑えられること（古典的な `h(j) = 12·ht^Falt + O(log)`）。
+★★★これが [Silv2] `Proposition 2.1` の**本プロジェクトにとっての実体**である。
+
+### ★整理 —— 依存の最終形
+
+| 項目 | 残っているもの |
+|---|---|
+| `Prop 3.4` | ★`h(j) ≤ 12(1+ϵ)ht^Falt + C` **1 本**（Northcott は手元） |
+| `Lemma 3.5` | 上記 ＋ `Lemma 3.2, (ii)`（一意化側は済）＋ [FC] I.2.7 |
+| `Lemma 3.7` | ★(a) は**済**（`§9-997`）。(b)(c) は上記の有限性 |
+| `Theorem 3.8` | 上記 ＋ `torsionExt` の半安定性（群論・`α`・次数は**済**） |
+| `Cor 4.3`・`4.4` | 上記だけ（帳簿は `§9-989`／`§9-990` で**済**） |
+| `Theorem 2.1` | Riemann–Roch（[NCBelyi] `Thm 2.5` 段 1）＋ 副有限基本群 |
+
+★★★★**§3・§4 の 7 項目は、`h(j) ≤ 12(1+ϵ)ht^Falt + C` と
+`torsionExt` の半安定性と [FC] I.2.7 の 3 本に収束した。**
+
+---
+
+## ★★★★★★★★★★★★★★★★★★2026-08-29 の到達点 —— 18/24 と、残り 1 本
+
+### ★閉じた項目（16/24 → 18/24）
+
+| 項目 | ブロック | 中身 |
+|---|---|---|
+| **`Proposition 3.4`** | `§9-1009`（第 560） | 半安定曲線の族にわたる 3 本の `≲` ＋ 有限性。定数は `ϵ` にしか依らない |
+| **`Lemma 3.2`** | `§9-1011`（第 562） | (i) 安定な直線は `𝔽_l(1)` か `l ∣ v_K(q_E)`、(ii) `E/μ_l` は母数 `q^l` の Tate 曲線 |
+
+★上の表が「残っている」としていた **`h(j) ≤ 12(1+ϵ)ht^Falt + C` は無条件で証明された**
+（`§9-1000`〜`§9-1003`、第 551-554）。機構は 6 段:
+
+1. `‖j(τ)‖·‖Δ‖_Pet(τ)^{1+ϵ}` は有界（`j = E₄³/Δ` の分解＋カスプの減衰）
+2. 曲線の言葉へ（`curveArchInv = 4096π¹²·pD` で `τ` を消す）
+3. 埋め込みについて和を取る
+4. `12·ht^Falt = deg∞ − archSum/d` を代入
+5. `h_fin(j) ≤ deg∞`（★**半安定を仮定せずに**——極小モデルの `c₄` が整だから）
+6. 足して仕上げ
+
+★★さらに `htJ = Height.logHeight₁(j)/[L:ℚ]`（mathlib の Weil 高さ）と同定し（`§9-1004`）、
+Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1007`）と
+半安定での `deg∞ = h_fin(j)`（`§9-1008`）も取れている。
+
+### ★★残り 6 項目の姿 —— 1 本の鎖と 1 本の独立項
+
+    Lemma 3.5 → Lemma 3.7 → Theorem 3.8 → Corollary 4.3 / 4.4      （1 本の鎖）
+    Theorem 2.1                                                     （独立）
+
+| 項目 | 残っているもの |
+|---|---|
+| `Lemma 3.5` | ☆**`ht^Falt(E/H) ≤ ht^Falt(E) + 2·log(l)` 1 本だけ**。他の 2 入力は済（`§9-1012` に型で固定） |
+| `Lemma 3.7` | ★第 1（`§9-1013`）・第 2（`§9-1014`）は**無条件で済**。第 3 は `§9-1015` が「finite exceptional set」まで取り、受けているのは `Lemma 3.5` の結論だけ |
+| `Theorem 3.8` | 上記 ＋ `torsionExt` の半安定性 ＋ `ImageContainsSL2` |
+| `Cor 4.3`・`4.4` | 上記だけ（帳簿は済） |
+| `Theorem 2.1` | エタール `π₁`（分岐指数 `e` の被覆）＋ Riemann–Roch |
+
+### ★★★★★★★★★★その 1 本の原典が見つかった（第 571）
+
+☆台帳は `ht^Falt(E/H) ≤ ht^Falt(E) + 2log(l)` の原典を
+`[FC] Ch. I, Prop 2.7`（`0_Source` に**無い**）と書いていた。★それは足りない見立てだった。
+
+★★**`[DelSB616]`（Deligne, Bourbaki 616）の §2「ISOGÉNIES」がまさにこの段を扱い、
+`0_Source` にあり `papers.json` に登記済み**である。
+`Skeleton/GenEll/IsogenyHeight.lean` と
+`ResearchPaper/1_Structured/Preuve.../theoreme-2-4.html` に節点を張った。
+
+| 段 | 内容 | 原文 | 状態 |
+|---|---|---|---|
+| 1 | 完全列に付随する `ω` の自然な同型 | `2.1` | ☆未 |
+| 2 | `w(H)/𝒪` は `#H` で消える | `2.2 (b)(c)` | ☆未 |
+| **3** | アルキメデスのエルミート構造は `#H` 倍 | `2.2 (a)` | ★★**済**（`§9-1017`・`§9-1019`） |
+
+### ★★★★★★★★構造的な発見（第 573）—— `htFaltOf` は Faltings 高さそのもの
+
+積公式（mathlib の `NumberField.prod_abs_eq_one`）を通すと `deg∞` が**打ち消し合い**
+
+    `12·htFaltOf = −12·log(2π) − (6/d)·Σ_σ log covol_min(E^σ)`
+
+★右辺は古典的な `h_Falt = −(1/(2d))Σ_σ log covol` の 12 倍そのものである。
+★★したがって同種写像評価は**極小モデルの周期格子の共体積の比較**に完全に還元される:
+
+    `12(htFaltOf(E′) − htFaltOf(E)) = −(6/d)·Σ_σ log( covol_min(E′^σ) / covol_min(E^σ) )`
+
+★★★解析的な格子は指数 `l` で `covol` が `1/l` 倍（段 3、済）。
+☆残るのは**極小モデルへのスケーリング `u_σ` の制御**——それが段 1・段 2 である。
+
+### ☆次の一手
+
+☆段 1・段 2 は Néron モデルと `w(H)` の理論を要し、mathlib に無い
+（2026-08-29 に `#check` で確認: `WeierstrassCurve.velu`・`WeierstrassCurve.neronModel`・
+`WeierstrassCurve.invariantDifferential` いずれも不在）。
+★建設は 3 段: (1) Vélu の公式で `E/H` を Weierstrass 曲線として作る、
+(2) 極小モデルと Néron 微分の同種写像の下でのふるまい、(3) 共体積の比較（**済**）。
+
+★★**受けて済ませてはならない**——`check.mjs` の B6 が名指しする危険である。
+計上済みの `Proposition 1.7`・`Lemma 3.1` が受けている入力は
+**すべてプロジェクト内で証明済み**であり、性質が違う。
+★★★代わりに**型で固定した**——次に何を証明すればよいかが
+`Found/GaloisRep/Lemma35Concrete.lean` の仮説 `hfalt` と
+`Skeleton/GenEll/IsogenyHeight.lean` の仮説 `hwfin`・`hsplit` として見える。
+
+### ☆★訂正（同日、第 576）—— 上の共体積の式には `neronExp` の項が要る
+
+☆上で
+
+    `12·htFaltOf = −12·log(2π) − (6/d)·Σ_σ log covol_min(E^σ)`
+
+と書いたが、**極小モデルが大域的に取れる場合の式**である。★一般には
+`Δ_min` は `L` の元ではなく**局所データの集まり**なので、`minDeltaExp` の定義
+`minDeltaExp p W = v_p(Δ_W) − 12·neronExp p W` を素直に通すと
+
+    `deg∞ = (1/d)·Σ_σ log|σ(Δ_E)| − (12/d)·Σ_p neronExp_p · log N(p)`   （積公式）
+    `archSum/d = 12·log(2π) + (1/d)·Σ_σ [ log|σ(Δ_E)| + 6·log covol(Λ_{E^σ}) ]`
+
+となり、`Σ_σ log|σ(Δ_E)|` が打ち消し合って
+
+    **`12·htFaltOf = −12·log(2π) − (12/d)·Σ_p neronExp_p·log N(p) − (6/d)·Σ_σ log covol(Λ_{E^σ})`**
+
+★`Λ_{E^σ}` は**モデル `E` の**周期格子（極小モデルのではない）。
+★★`neronExp ≡ 0`（大域的に極小）なら上の簡単な式に戻る。
+
+### ★★これは何を意味するか —— 目標がむしろ鮮明になった
+
+★同種写像評価 `ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)` は、上の式で
+
+    `12(htFaltOf(E′) − htFaltOf(E))`
+      `= −(12/d)Σ_p [neronExp_p(E′) − neronExp_p(E)]·log N(p)`
+        `− (6/d)Σ_σ log( covol(Λ_{E′^σ}) / covol(Λ_{E^σ}) )`
+
+となる。★★アルキメデス側（第 2 項）は**取れている**——解析的な同種写像で
+`covol` は `1/l` 倍（`§9-1017`・`§9-1019`）。
+☆★★★**残るのは第 1 項、すなわち `neronExp` の差**である
+——これがまさに `[DelSB616]` の段 2（`w(H)/𝒪` は `#H` で消える）であり、
+「`ω_{E′} ⊆ ω_E` で余核が `l` で消える」の付値による言い換えである。
+
+★★★★**目標はこれで完全に局所化した**: 各素点 `p` で
+
+    `neronExp_p(E/H) − neronExp_p(E)` が `log(l)` の程度で抑えられること。
+
+☆Néron モデルの理論（mathlib に無い）を要するが、**述語の側は本プロジェクトに既にある**
+——`neronExp` は `Found/GaloisRep/NeronWitness.lean` で構成済みである。
+
+---
+
+## ★★★★★★★★★★2026-08-29（第 586-620、35 ブロック）—— `Lemma 3.5` から外部引用が消えた
+
+### ★到達点
+
+セッション開始時、`Lemma 3.5` は
+
+    `hArch : (l−1)·d·deg∞(E) − (archSum(E′) − archSum(E)) ≤ 24·d·log(l)`
+
+を **[FC] Ch. I, Prop 2.7 ＋ アルキメデスの (1,1)-形式**という**未証明の外部引用**として
+受けていた。★★いまは
+
+    `Found/GaloisRep/VeluNormalized.lean` の `htFalt_isogeny_le_of_analytic_minimal`
+    `ht^Falt(E′) ≤ ht^Falt(E) + 2·log(l)`
+
+が**幾何のデータだけ**から出る——一様化（第 348 で無条件）、同種写像のスケーリング
+`u′_σ = α_σ·u_σ`、`α_σΛ_σ ⊆ Λ′_σ` の指数が `l`、`E` が大域極小・`E′` が整。
+☆**証明されていない外部定理は含まない。**
+
+### ★★どう解けたか
+
+| 側 | 到達点 | ブロック |
+|---|---|---|
+| アルキメデス | ★`archDefect(E) ≔ Σ_σ [log‖σΔ‖ − log archNorm]` は**一様化の取り方に依らない**。`12·d·ht^Falt = archDefect − 12Σᶠ neronExp·logN − 12d·log(2π)`（無条件） | 594 |
+| アルキメデス | ★★★**`α` が打ち消し合う**——`κ_σ(E′) − κ_σ(E) = 12log‖α‖ − 6log(‖α‖²/l) = 6log l`。☆**正規化は要らなかった** | 596 |
+| 有限素点 | ★★**`neronExp ≥ 0`**（整モデル）——極小化変換のスケーリングは整。`E` が大域極小なら有限側は自動 | 595 |
+| Vélu 代数側 | 定義・不変量（`c₄ ↦ c₄+240v`）・`l=2,3` の商・正規化 `φ^*ω′=ω`（一般の `l`）・代表系不変 | 586-593 |
+| Vélu 解析側 | ★★`℘_{Λ′}(z) = Σ_{w∈T} ℘_Λ(z+w) − c` が「`T` が `Λ′/Λ` の代表系」だけから従う | 597-602 |
+| 一様化 | ★★★**全射性**（`℘` は全射・`(℘, ℘′/2)` は曲線を覆う） | 603-604 |
+
+### ★★★本プロジェクトが建てた道具（mathlib に無い）
+
+* `elliptic_liouville`（第 598）——★整で二重周期的なら定数。**本日 5 度効いた**
+  （極の打ち消し・正規化・`℘` の全射性・一様化の全射性・加法定理）
+* `neronExp_nonneg`（第 595）・`archDefect`（第 594）
+* `weierstrassP_surjective`・`latticePoint_surjective`（第 603-604）
+* `elliptic_boundary_integral_zero`（第 618）——周期平行四辺形の境界積分は消える
+* `weierstrassP_shift_eq_of_two_add_mem`・`mem_lattice_of_weierstrassP_periodic`（第 620）
+
+### ☆★残り 1 本 —— 楕円関数の零点勘定
+
+★`Skeleton/GenEll/AdditionTheorem.lean` の `weierstrassP_add`（`℘` の加法定理）が
+唯一の `sorry` である。☆それには
+
+    **`℘(z) = ℘(w) ⟹ z ≡ ±w (mod Λ)`**（`℘` は各値をちょうど 2 回取る）
+
+が要る（第 615 の訂正）。★★加法定理と一様化の単射性は**同じ 1 つの事実**に帰着する。
+
+☆材料は揃っている: `G(z) ≔ ℘(z+a) − ℘(z)` は `z ↦ −a−z` について奇で、
+不動点（`2f ≡ −a`、`Λ/2Λ` の分だけ 4 個）で消える（第 620）。
+`G` の極は `Λ` と `−a+Λ` に 2 位ずつ＝計 4。
+★もし単射性が破れれば零点が 8 個以上になり、`#零点 = #極` と矛盾する。
+
+★次の一手の候補（`Skeleton/GenEll/AdditionTheorem.lean` の `.needs` に詳細）:
+(A) 留数定理経路（平行四辺形の輪郭変形が要る。mathlib の Cauchy は軸平行な長方形版）、
+(B) Jensen 経路（`MeromorphicOn.circleAverage_log_norm` に乗る。評価の詰めが要る）。
+
+
+---
+
+## 2026-08-29（第 663-668）——`Lemma 3.5` の**格子側が完全に閉じた**
+
+★上の「(A) 留数定理経路 / (B) Jensen 経路」は**どちらも不要だった**（第 622-625 の訂正）。
+`h ≔ ℘(·+a) − ℘` が線型 2 階 ODE `h″ = 6(℘(·+a)+℘)·h` を満たすことから、
+`h(z₀) = h′(z₀) = 0` なら**解析的位数の算術だけ**で `h ≡ 0` が出る
+（`order(h″) = m` と `order(c·h) ≥ m+2` が矛盾する）。零点勘定は要らない。
+
+### 一様化定理 `ℂ/Λ ≅ E(ℂ)`（第 663、`Found/GenEll/Uniformization.lean`）
+
+| 部品 | ブロック | mathlib |
+|---|---|---|
+| 全射 `weierstrassP_surjective` / `latticePoint_surjective` | 603-604 | 無い |
+| 単射 `mem_lattice_of_shift_eq` / `sub_mem_lattice_of_uniformMap_eq` | 624・662 | 無い |
+| 準同型 `uniformMap_add` | 661 | 無い |
+| **同型 `uniformEquiv`** | **663** | **無い** |
+
+### `Lemma 3.5` の格子側（第 662-668）
+
+    662  preimageSubgroup            H ⊆ E(ℂ) の原像は ℂ の部分群、Λ ⊆ Λ′
+    664  preimageSubgroup_zmultiples 巡回部分群の原像は Λ′ = Λ + ℤz₀（「階数 1」の内容）
+    664  smul_preimageSubgroup_le    l·Λ′ ⊆ Λ（Λ ⊆ Λ′ ⊆ (1/l)Λ）
+    665  relIndex_preimageSubgroup   [Λ′ : Λ] = |H|
+    666  exists_lattice_basis_of_cyclic  Hermite 標準形で基底と |AD − BC| = l
+    667  gcd_eq_one_of_addOrderOf    位数がちょうど l なら gcd(a, b, l) = 1
+    667  exists_isogeny_lattice_basis
+    668  linearIndependent_of_basis_change
+    668  exists_isogeny_periodPair   ★★★★★位数 l の点 Q ↦ 周期対 P′ と A, B, C, D
+
+第 666 の構成は初等的である。`h = gcd(a,b)`・`a = h a₁`・`b = h b₁`・`a₁p + b₁q = 1` として
+
+    η₁ ≔ a₁ω₁ + b₁ω₂,   η₂ ≔ −qω₁ + pω₂
+
+とすると `(η₁, η₂)` は `Λ` の基底（行列式 1）で `l z₀ = h η₁`。`gcd(h, l) = 1` なので
+`xh + yl = 1` が取れ、`ω₁′ ≔ η₁/l`・`ω₂′ ≔ η₂` とすれば `z₀ = h ω₁′`・`ω₁′ = x z₀ + y η₁`
+となって `Λ′ = ℤω₁′ + ℤω₂′`。行列式は `(pl)a₁ − (−b₁)(ql) = l(pa₁ + b₁q) = l`。
+
+### 第 617 `htFalt_isogeny_le_of_analytic_minimal` の仮説の現状
+
+| 仮説 | 状態 |
+|---|---|
+| `P`・`hPC`（`E` の一様化） | ★第 348 `exists_periodPair_of_isElliptic` で無条件 |
+| `P′`・`h₁`・`h₂`・`hdet` | ★★★**第 668 で無条件に取れた** |
+| `hmin`・`hint` | ★極小モデル・整モデルの仮定（第 595） |
+| `α`・`hu`（`u′ = α·u`） | ☆**残っているのはこれだけ** |
+
+☆`α` は「代数的な同種写像 `E → E/H`（Vélu、`Found/GenEll/Velu.lean`）が
+`ℂ` 上で `Λ ⊆ Λ′` に対応する」ことを言えば出る。すなわち
+
+* `latticeCurve P′` と Vélu の商 `E/H` を突き合わせる（`veluQuotient`、第 586-593）、
+* その変数変換の `u` が `α` である。
+
+★★これが次の一手である。`Lemma 3.5` 全体（原文の主張——数体上で位数 `l` の
+**global rank one** 部分群が取れること）にはさらに `Theorem 3.8`（Galois 像）が要るので、
+指標 `GenEll 24/24` の `Lemma 3.5` が数に入るのはその後になる。
+
+
+## 2026-08-29（第 669-676）——`Lemma 3.5` の**解析側が最終形になった**
+
+`α` の問題（第 617 の残る仮説 `hu : u′ = α·u`）が**閉じた**。答えは `α = 1` である。
+
+### 鎖
+
+    669  exists_velu_formula_of_torsion  位数 l の点 → 代表系 T と Vélu の公式
+    670  sum_derivWeierstrassP_rep_eq_zero  Σ_{T∖0} ℘′(w) = 0（ω-正規化の解析版）
+    671  weierstrassP_sub_eq_sum  ℘_{Λ′} − ℘_Λ = Σ_{T∖0}(℘_Λ(·+w) − ℘_Λ(w))
+    672  g₂_isogeny  g₂′ = g₂ + 10·Σ(6℘²−g₂/2)          ← Taylor 2 階
+    673  g₃_isogeny  g₃′ = g₃ + (7/6)·Σ(120℘³−18g₂℘−12g₃) ← Taylor 4 階
+    674  exists_isogeny_data_of_torsion  上を 1 本に束ねた形
+    675  latticeCurve_eq_veluQuotient  代数側 veluQuotient との照合（± 代表系つき）
+    676  latticeCurve_eq_veluCurve / exists_velu_model_of_torsion
+         ★★★latticeCurve Λ′ = veluCurve (latticeCurve Λ) v w（仮説なし）
+
+### 鍵
+
+1. **mathlib が `℘[Λ−0]` の Taylor 係数を持っていた**——
+   `iteratedDeriv_weierstrassPExcept_self : iteratedDeriv n ℘[L−l] l = (n+1)!·sumInvPow l (n+2)`
+   と `sumInvPow_zero : sumInvPow 0 = G`、`g₂ = 60G₄`・`g₃ = 140G₆`。
+   したがって `iteratedDeriv 2 ℘[Λ−0] 0 = g₂/10`、`iteratedDeriv 4 ℘[Λ−0] 0 = 6g₃/7`。
+
+2. **`±` 代表系を選ばずに済む**——Vélu の `v = Σ_S 2g^x_Q`（`S` は `(H∖{O})/±`）は
+   `℘` が偶なので `H∖{O}` 全体の `g^x_Q` の和に等しい:
+
+       v = Σ_{H∖{O}} g^x_Q,   w = Σ_{H∖{O}} (u_Q/2 + g^x_Q·x_Q)
+
+   これで有限集合の対合の横断集合を作る手間がまるごと消えた。
+
+3. **数値が合った**——`a₄`: `g₂′ = g₂ + 20v ⟺ −g₂′/4 = −g₂/4 − 5v`、
+   `a₆`: `g₃′ = g₃ + 28w ⟺ −g₃′/4 = −g₃/4 − 7w`（`b₂ = 0`）。
+
+### 第 617 の仮説の現状（更新）
+
+| 仮説 | 状態 |
+|---|---|
+| `P`・`hPC` | ★第 348 で無条件 |
+| `P′`・`h₁`・`h₂`・`hdet` | ★★第 668 で無条件 |
+| `α`・`hu` | ★★★**第 676 で `α = 1` として閉じた** |
+| `hmin`・`hint` | ★極小モデル・整モデルの仮定（これは仮定のままでよい） |
+
+☆残るのは、`Lemma 3.5` 原文の主張（**数体上で** global rank one の `l`-捻れ部分群が
+取れること）で、これには `Theorem 3.8`（Galois 像が `SL₂` を含む）が要る。
+
+
+## 2026-08-29（第 677-689）——`L` 上と ℂ 上を結ぶ橋
+
+`α = 1`（第 676）のあと、**`L` 上の `E/H` と ℂ 上の `latticeCurve Λ′` を結ぶ**
+ための道具を建てた。
+
+### `Found/GenEll/Velu.lean`（追加分）
+
+    677  veluQuotient_map            商は底変換と可換
+    679  veluVFull / veluWFull / veluQuotientFull
+         ★★H∖{O} 全体で書いた商——± 代表系（横断集合）を作らずに済む
+    681  veluQuotientFull_scale      スケーリングと両立（重さ 4 と 6）
+
+★通常の Vélu は `S = (H∖{O})/±` の代表系にわたって `v_Q = 2g^x_Q` を足すが、
+`g^x_Q` が `±` で不変なので **`H∖{O}` 全体で `g^x_Q` を足すのと同じ**である。
+これで有限集合の対合の横断集合を構成する手間がまるごと消えた。
+
+### `Found/GenEll/PointVariableChange.lean`（新規）
+
+★★★**mathlib には `VariableChange` の点への作用がまるごと無い**（2026-08-29 実測）。
+`Affine/Point.lean` の `Point.map` は環準同型 `F →ₐ[S] K` に対するものだけで、
+`equation_iff_variableChange` は `(1,x,0,y)` で原点へ移す特別形しかない。
+
+    682  Equation が保たれる         F_{C•W}(x′,y′) = u⁻⁶·F_W(x,y)
+    685  Nonsingular も保たれる      A′ = u⁻⁴(A + sB)、B′ = u⁻³B
+    683  negY・addX・negAddY・addY の変換則
+    684  slope の変換則（x₁ ≠ x₂ の場合と接線の場合）
+    686  vcPoint_add・vcPoint_injective・addOrderOf_vcPoint（★位数を保つ）
+    687  Vélu の量の変換則、B = 2y + a₁x + a₃ の ± 相殺
+    688  ★veluQuotientFull_variableChange（商は一般の変数変換と両立）
+    689  ★★vcEquiv : W.Point ≃+ (C • W).Point
+
+### 第 688 の要点
+
+一般の変数変換では
+
+    v ↦ u⁻⁴·v,   w ↦ u⁻⁶·(w − r·v)
+
+とずれる（`b₂(C•W) = u⁻²(b₂ + 12r)` が効く）。また `g^x` には `−s·B` の補正が付くが、
+`S` が `±` で閉じていれば `Σ_S B = 0`・`Σ_S B·x = 0` なので**和では消える**。
+★★これは解析側の `Σ_{w∈T∖{0}} ℘′(w) = 0`（第 670）の代数版である。
+
+### 残り
+
+各 `σ` について `C σ • (σ Q)` を第 689 の `vcEquiv` で送り、第 686 で位数 `l` を確かめ、
+第 679（`exists_veluQuotientFull_of_torsion`）と第 688 で
+`C σ • ((veluQuotientFull E S).map σ) = latticeCurve (P′ σ)` を出して
+第 678（`htFalt_isogeny_le_of_velu`）に渡す。
+
+
+## 2026-08-29（第 690-704）——`Lemma 3.5` 解析側の**到達点**
+
+    ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log(l)
+
+が `L` 上の位数 `l` の点 `Q` から出た（`Found/GaloisRep/VeluNormalized.lean` の
+`htFalt_veluQuotientFull_le`、第 704）。★★★かつて **[FC] Ch. I, Prop 2.7 ＋
+アルキメデスの (1,1)-形式**として外部引用していた `hArch` が、
+**完全に幾何と解析だけから出た**。残る仮定は `hmin`（`E` が極小）・
+`hint`（`E′` が整）だけである。
+
+### 鎖
+
+    S ≔ ⟨Q⟩∖{O} の座標（L × L の有限集合）、E′ ≔ veluQuotientFull E S
+     ↓ 696  rhPoint（環準同型による点の写像、位数保存）
+     ↓ 703  S_σ = σ(S)
+     ↓ 700  C σ • (E.map σ) = latticeCurve (P σ) を挟む輸送
+     ↓ 702  latticeCurve P′ = C σ • veluQuotientFull (E.map σ) (σS)
+     ↓ 679  veluQuotientFull は底変換と可換 → = C σ • (E′.map σ)   ★α = 1
+     ↓ 678  ht^Falt(E′) ≤ ht^Falt(E) + 2 log l
+
+### 途中の道具（第 690-703）
+
+    690  Σ_{w∈T∖0} f(℘(w))·℘′(w) = 0（任意の f、第 670 の一般化）
+    691  Σ_S B = 0、Σ_S B·x = 0（latticeCurve では B = 2y = ℘′）
+    692  vcInvPair、点集合の引き戻し
+    693  veluQuotientFull_eq_vc_pullback
+    694  ℂ 側最終形（変数変換を外した形）
+    695  pointCoords（点の座標）
+    696  rhPoint（環準同型による点の写像）
+    697  embPoint（合成）
+    698  代表系の具体形 T∖{0} = {k z₀ : 0 < k < l}
+    699  点集合を Q で決めた形
+    700  曲線が等しいときの点の輸送
+    701  image_vcInvPair_vcPair
+    702  exists_periodPair_veluQuotientFull
+    703  S_σ = σ(S)
+    704  ★htFalt_veluQuotientFull_le
+
+### 次の一手
+
+第 704 を `Interface/GenEll/EllModuli.lean` の posit `faltingsHeight_quotLCyclic` に
+接続する（`quotLCyclic` を `veluQuotientFull` で実装し、`hmin`・`hint` を
+極小モデルの選択で満たす）。これが済むと `Skeleton/GenEll/Section3.lean` の
+`lemma_3_5`（すでに `sorry` なし）が `Found/` に降りてくる。
+
+
+## 2026-08-29（第 704-711）——`Lemma 3.5` の残りは**プロジェクト内の 1 本**
+
+### いま `Lemma 3.5` に残っている入力
+
+    ∀ p ∈ S（悪い還元の素点）, tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l
+
+これだけである。★★★**未証明の外部引用はもう無い。**
+
+### そこへ至る鎖（すべて `Found/`、`sorry` なし）
+
+| ブロック | 定理 | 内容 |
+|---|---|---|
+| 704 | `htFalt_veluQuotientFull_le` | `ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2·log l` |
+| 705 | `lemma_3_5_velu` | `hfalt` を外した（**外部引用ゼロ**） |
+| 706 | `lemma_3_5_velu_local` | `hdeg` を局所の `Δ_min` へ |
+| 707 | `lemma_3_5_velu_bad` | 悪い素点だけへ |
+| 709 | `localHeight_eq_minDeltaExp` | 半安定なら局所高さ ＝ `v_p(Δ_min)` |
+| 710 | `minDeltaExp_eq_mul_of_tateParam` | `q_{E′} = q_E^l` ⟹ `v_p(Δ_min(E′)) = l·v_p(Δ_min(E))` |
+
+### 第 704 の内側（本セッションの解析）
+
+* 一様化 `ℂ/Λ ≅ E(ℂ)`（第 663）——全射（603-604）・単射（624）・準同型（661）
+* `Λ′ = Λ + ℤz₀`、`[Λ′:Λ] = l`、Hermite 標準形で `|AD − BC| = l`（662-668）
+* Laurent 係数の比較で `g₂′ = g₂ + 20v`・`g₃′ = g₃ + 28w` ⟹ **`α = 1`**（669-676）
+* `veluQuotientFull`（`±` 代表系を取らない商）（679）
+* 変数変換・環準同型の点への作用（682-703）——`Equation`・`Nonsingular`・
+  `negY`/`addX`/`addY`/`slope`・加法保存・位数保存・群同型・合成・輸送・引き戻し
+
+★★★**このうち mathlib にあるものは 1 つも無い。**
+
+### 次にやること（順に）
+
+1. `Lemma 3.2, (ii)` の群同型 `(Lˣ/q^ℤ)/(μ_l の像) ≃* Lˣ/(q^l)^ℤ` と
+   `TateCurveWitness.lean:139`（`W.Point ≃+ Additive (Kˣ ⧸ zpowers (tateParamK W h))`）を
+   突き合わせて `tateParamK (E′⁄Lv) = (tateParamK (E⁄Lv))^l` を出す
+   ——Tate 一意化の台帳の**段 3（有限拡大）・段 4（帰納極限）**
+2. それを第 710 に渡して `hbad` を外し、`Lemma 3.5` の**項目全体の `.src`** を置く
+3. `Lemma 3.7`（第 1・第 2 の主張は無条件で済み、第 3 が `Lemma 3.5` 待ち）
+4. `Theorem 3.8`（Weil 対は `Found/` に 197 ファイル建設済み。残るのは半安定還元の判定）
+5. `Corollary 4.3`・`4.4`（新しい基盤理論は要らない——数値の帳簿）
+6. `Theorem 2.1`（§2）——étale 基本群 ＋ Riemann–Roch（Belyi）。最も遠い
+
+
+## 2026-08-31（第 735-741）—— `faltingsHeight` の well-defined 性が証明された
+
+`EllModuliData` の witness で最大の設計上の要だった
+
+> **`EllClass := ℂ`（`j` 不変量）に対して `faltingsHeight : ℂ → ℝ` が定義できるか**
+
+に決着がついた。到達点は `Found/GaloisRep/Compositum.lean` の
+
+```
+htFaltOf_congr_j_of_emb :
+  E₁/L₁ 半安定、E₂/L₂ 半安定、e₁(j(E₁)) = e₂(j(E₂)) ⟹ ht^Falt(E₁) = ht^Falt(E₂)
+```
+
+と、`Found/GenEll/EllModuliObjects.lean` の `faltingsHeightJ` / `faltingsHeightJ_eq`。
+
+### 道筋（7 ブロック）
+
+| 第 | 内容 |
+|---|---|
+| 735 | `primesOverH`——`p` の上の素点を `HeightOneSpectrum` の `Finset` として |
+| 736 | `finsum_scaling`——`f′ = e·f` なら和は `[L′:L]` 倍 |
+| 737 | `valAdd_algebraMap`・`degInfOf_baseChange_of_minDeltaExp`・`htFaltOf_baseChange_of_minDeltaExp` |
+| 738 | `minDeltaExp_eq_maxJ_of_semistable`——半安定なら `v_p(Δ_min) = max(0, −v_p(j))` |
+| 739 | `htFaltOf_congr_j_of_semistable`——同じ体の上で `ht^Falt` は `j` だけで決まる |
+| 740 | `minDeltaExp_baseChange_le`（整モデルの比較、★無条件）で「上でも半安定」の仮説を外す |
+| 741 | `compositum`——2 つの埋め込みの像が生成する体を作り、体が違う場合を閉じる |
+
+### 見込みが外れた点（記録）
+
+着手前の見込みは「同じ `j` の 2 曲線は捻りだから、`√d` を添加した体へ上げて同型にする」
+だった。**実際には捻りの議論は要らなかった**——半安定なら
+
+* 有限素点側 `v_p(Δ_min) = max(0, −v_p(j))`
+* アルキメデス側 `archNorm E σ = curveArchInv (E×σℂ)` は `ℂ` 上の同型不変量
+
+で、両側とも `j` だけで書けるからである。
+
+### 次
+
+* `EllModuliData` の残る大物: `northcott`・`degInf_le_htInf`・`htInf_bdeq_faltings`・
+  `logDiffMell`・`degLe`・`GaloisFinite`・`CompactlyBounded`
+* 別筋: `Skeleton/GenEll/TateIsogeny.lean` の `q`-展開の恒等式（`Lemma 3.5` の `hdeg`）
+
+## 2026-08-31（第 742-762）—— `EllModuliData` witness の残りが **5 本の葉**になった
+
+Skeleton の `lemma_3_7`・`theorem_3_8`・`corollary_4_3/4_4` はすべて `∀ D : EllModuliData`
+の下で**証明済み**なので、§3・§4 の残り 5 件は「witness を 1 つ作れば同時に動く」。
+第 742-762 でその欄を集中的に埋めた。
+
+### 埋まったもの
+
+* **データ欄 29 本すべて**（`EllClass := ℂ`、`Curve := RealizedClass`＝実現される類、
+  代表元は定義体の次数が最小のもの）
+* **証明欄 20 本以上**（`northcott`・`sum_localHt_eq`・`sum_log_badPrimes_le`・
+  `sum_log_ramPrimes_le`・`degInf_le_htInf`・`htInf_bdeq_faltings`・
+  `faltingsHeight_bddBelow`・`primeToLocalHeights_of_lt`・`torsionExt` 群 5 本・
+  `noMultRedExc` 群 3 本 ほか）——すべて**無条件**
+
+### 残る 5 本の葉
+
+| # | 命題 | どこ | 消費する側 |
+|---|---|---|---|
+| 1 | `v_p(j′) = l·v_p(j)`（悪い素点） | `Skeleton/GenEll/TateIsogeny.lean` の `jExp_velu_bad` | `Lemma 3.5` |
+| 2 | `0 ≤ v_p(j′)`（同種は良還元を保つ） | 同 `jExp_velu_good` | `Lemma 3.5` |
+| 3 | 局所理論の行列表示（`α` が mod `l` 像に入る） | `imageContainsSL2J_of_alpha` の仮説 | `Theorem 3.8` |
+| 4 | 円分指標の全射性（`l` が `L` で不分岐） | `imageSurjectiveJ_of_containsSL2` の仮説 | `Corollary 4.3` |
+| 5 | 像が閉部分群（profinite 群の連続像） | 同 `hclosed` | `Theorem 3.8` |
+
+★1 と 2 が済めば `Lemma 3.5` が閉じ、`lcyclicExc` 群も閉じる
+（(a)(b) 両側の高さ評価は第 757 で、`northcott` は第 753 で済んでいる）。
+
+### 界面の欠陥 4 件（witness を作って初めて見えた）
+
+1. **界面は `deg∞ > 0` を強制する**（`Check/GenEll/EllModuliDegInfPos.lean`）
+   —— §4 の帳簿 4 本から出る。`Curve` に「至る所良還元」は入れられない。
+2. **`mem_lcyclicExc` が `l` の下界を落としていた**（`Check/GenEll/LcyclicExcTooStrong.lean`）
+   —— `l = 2` で反例が無限個。★下流の statement を 1 文字も変えずに訂正できた。
+3. **`GaloisFinite` は「各次数で有限」でなければならない**（原文の `Exc_d` の形）。
+4. **`CompactlyBounded` は `h∞(j)` の有界性**（`j` 自身の有界性では共役が抑えられない）。
+
+### 在庫の反省 2 件
+
+* `IsDedekindDomain.HeightOneSpectrum.under` は mathlib にあった
+* **Northcott は本プロジェクトが既に無条件で持っていた**（`finite_j_of_htFalt_le`）
+  —— 立てた節点を削除した
+
+## 2026-08-31（第 763-775）—— 葉 5 が閉じ、残りは **4 本**
+
+### ✅ 葉 5（`galRep` の連続性・像の閉性）—— **完全に無条件**
+
+| 第 | 定理 | 内容 |
+|---|---|---|
+| 766 | `galPoint_eq_of_fixed` | 座標を固定する σ は点を動かさない |
+| 767 | `exists_finiteDimensional_fixing_torsion` | 捩れの座標が生成する有限次中間体（Krull 位相の開部分群） |
+| 768 | `exists_smul_of_proj_zero` | `ker(proj_n) = l^n·T_l` |
+| 769 | `galMat_sub_one_dvd` | `galMat ≡ 1 (mod l^n)` |
+| 770 | `galMat_sub_dvd_of_fix` | 剰余類の上で `mod l^n` 一定 |
+| 771 | `galMat_entry_continuous` | 各成分は連続 |
+| 772 | `galRep_continuous` | `Units.continuous_iff` で組み立て |
+| 774 | `galRep_range_isClosed` / `imageContainsSL2J_of_alpha'` | 捩れの有限性も discharge して**無条件**に |
+
+★★mathlib の測定: `IsGalois`・`CompactSpace (Gal)`・`T2Space (GL₂(ℤ_l))`・
+`IntermediateField.fixingSubgroup_isOpen`・`PadicInt.norm_le_pow_iff_mem_span_pow` は
+**すべて揃っていた**。自作したのは `ker(proj_n) = l^n·T_l` と局所定数性だけである。
+
+### ★葉 4 も同じ道具で簡約（第 764・773）
+
+* 第 764 `det ρ = cyclotomicCharacter`（mathlib の円分指標そのもの）——楕円曲線が消えた
+* 第 773 `cyclotomicCharacter_surjective_of_mod`——`Gal` のコンパクト性＋連続性で
+  「`mod l^n` で全射 ⟹ 全射」（**逆極限の段が済んだ**）
+
+☆残るのは「`l` が `L` で不分岐なら `cyclotomic (l^n)` は `L` 上既約」。
+★mathlib 測定: `NumberTheory` を `totally ramified|IsTotallyRamified|totallyRamified` で
+grep して **0 件**——円分体の分岐理論は mathlib に無い。
+
+### 残る 4 本の葉
+
+| # | 葉 | 消費する側 |
+|---|---|---|
+| 1 | `v_p(j′) = l·v_p(j)`（悪い素点、Tate の q-展開） | `Lemma 3.5` → `Lemma 3.7` |
+| 2 | `0 ≤ v_p(j′)`（同種は良還元を保つ） | 同上 |
+| 3 | 局所理論の行列表示（`α` が mod `l` 像に） | `Theorem 3.8` |
+| 4 | `cyclotomic (l^n)` の `L` 上既約性 | `Corollary 4.3/4.4` |
