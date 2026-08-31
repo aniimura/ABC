@@ -473,6 +473,145 @@ theorem sum_localHt_eq (E : DegCurve) :
 
 end DegCurve
 
+/-! ## ★★★★★★★★★★★★★★★★★★`badPrimes` 欄 -/
+
+section SumHelpers
+
+variable {ι α : Type*} [DecidableEq α]
+
+/-- ★非負なら合併の和は和の和以下。 -/
+theorem sum_union_le_of_nonneg (s t : Finset α) (g : α → ℝ) (hg : ∀ a, 0 ≤ g a) :
+    ∑ a ∈ s ∪ t, g a ≤ ∑ a ∈ s, g a + ∑ a ∈ t, g a := by
+  have h := Finset.sum_union_inter (s₁ := s) (s₂ := t) (f := g)
+  have h2 : 0 ≤ ∑ a ∈ s ∩ t, g a := Finset.sum_nonneg (fun a _ => hg a)
+  linarith
+
+/-- ★非負なら `biUnion` の和は和の和以下。 -/
+theorem sum_biUnion_le_of_nonneg (s : Finset ι) (t : ι → Finset α) (g : α → ℝ)
+    (hg : ∀ a, 0 ≤ g a) [DecidableEq ι] :
+    ∑ a ∈ s.biUnion t, g a ≤ ∑ i ∈ s, ∑ a ∈ t i, g a := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert i s hi ih =>
+    rw [Finset.biUnion_insert, Finset.sum_insert hi]
+    have h1 := sum_union_le_of_nonneg (t i) (s.biUnion t) g hg
+    linarith
+
+/-- ★`insert` の和は 1 項＋残りの和以下（非負のとき）。 -/
+theorem sum_insert_le_of_nonneg (a : α) (s : Finset α) (g : α → ℝ) (hg : ∀ x, 0 ≤ g x) :
+    ∑ x ∈ insert a s, g x ≤ g a + ∑ x ∈ s, g x := by
+  classical
+  by_cases h : a ∈ s
+  · rw [Finset.insert_eq_self.2 h]
+    have : 0 ≤ g a := hg a
+    linarith
+  · rw [Finset.sum_insert h]
+
+end SumHelpers
+
+namespace DegCurve
+
+open scoped Classical in
+/-- ★★★★**`badPrimes` 欄**——乗法還元の素点の下の有理素数と、
+局所高さの素因数分解に現れる素数。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★原文 p.22:『write `S∘` for the union of `S`, the primes of `ℚ` that lie under primes of
+potentially multiplicative reduction of `E_L`, and the primes that appear in the
+prime decomposition of the local heights of `E_L`』。 -/
+noncomputable def badPrimes (E : DegCurve) : Finset ℕ :=
+  Finset.univ.biUnion
+    (fun j : Fin E.multCard => insert (E.multPrime j) (E.localHt j).primeFactors)
+
+open scoped Classical in
+theorem badPrimes_prime (E : DegCurve) : ∀ q ∈ E.badPrimes, Nat.Prime q := by
+  intro q hq
+  obtain ⟨j, -, hj⟩ := Finset.mem_biUnion.1 hq
+  rcases Finset.mem_insert.1 hj with h | h
+  · rw [h]; exact E.multPrime_prime j
+  · exact Nat.prime_of_mem_primeFactors h
+
+open scoped Classical in
+/-- ★★★★**`PrimeToMultPrimes` 欄**。 -/
+def PrimeToMultPrimes (E : DegCurve) (l : ℕ) : Prop := ∀ j : Fin E.multCard, l ≠ E.multPrime j
+
+open scoped Classical in
+/-- ★★悪い素点はすべて番号付けに現れる。 -/
+theorem exists_multIdx (E : DegCurve) (p : HeightOneSpectrum (𝓞 E.toSSCurve.fld))
+    (hp : p ∈ E.toSSCurve.badFinset) : ∃ j : Fin E.multCard, E.multIdx j = p := by
+  refine ⟨E.toSSCurve.badFinset.equivFin ⟨p, hp⟩, ?_⟩
+  show ((E.toSSCurve.badFinset.equivFin.symm
+    (E.toSSCurve.badFinset.equivFin ⟨p, hp⟩) : _) : _) = p
+  rw [Equiv.symm_apply_apply]
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**`primeTo_badPrimes` 欄**——★**無条件**。 -/
+theorem primeTo_badPrimes (E : DegCurve) (l : ℕ) (hl : Nat.Prime l) (h : l ∉ E.badPrimes) :
+    E.PrimeToMultPrimes l ∧ E.toSSCurve.PrimeToLocalHeights l := by
+  constructor
+  · intro j hj
+    exact h (Finset.mem_biUnion.2 ⟨j, Finset.mem_univ j,
+      Finset.mem_insert.2 (Or.inl hj)⟩)
+  · intro p hp
+    obtain ⟨j, hj⟩ := exists_multIdx E p ((SSCurve.mem_badFinset _ p).2 hp)
+    have hdvd : (E.toSSCurve.localHeightAt p).toNat ∣ E.localHt j := by
+      rw [localHt, hj]
+      show (minDeltaExp p E.toSSCurve.W).toNat ∣ _
+      exact ⟨23040 * ((Ideal.span {(resChar p : ℤ)}).inertiaDeg p.asIdeal), by ring⟩
+    rw [Nat.Prime.coprime_iff_not_dvd hl]
+    intro hcon
+    exact h (Finset.mem_biUnion.2 ⟨j, Finset.mem_univ j, Finset.mem_insert.2 (Or.inr
+      (Nat.mem_primeFactors.2 ⟨hl, dvd_trans hcon hdvd, (E.localHt_pos j).ne'⟩))⟩)
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★**`sum_log_badPrimes_le` 欄**——★**無条件**。
+
+★`∏_{p ∣ n} p ∣ n`（`Nat.prod_primeFactors_dvd`）から
+`∑_{p ∣ n} log p ≤ log n ≤ log(n+1)`。 -/
+theorem sum_log_badPrimes_le (E : DegCurve) :
+    (∑ q ∈ E.badPrimes, Real.log q)
+      ≤ (∑ j : Fin E.multCard, Real.log (E.multPrime j))
+        + (∑ j : Fin E.multCard, Real.log ((E.localHt j : ℝ) + 1)) := by
+  have hnn : ∀ q : ℕ, 0 ≤ Real.log q := by
+    intro q
+    rcases Nat.eq_zero_or_pos q with h | h
+    · rw [h]; simp
+    · exact Real.log_nonneg (by exact_mod_cast h)
+  have hstep : ∀ j : Fin E.multCard,
+      (∑ q ∈ insert (E.multPrime j) (E.localHt j).primeFactors, Real.log q)
+        ≤ Real.log (E.multPrime j) + Real.log ((E.localHt j : ℝ) + 1) := by
+    intro j
+    refine le_trans (sum_insert_le_of_nonneg _ _ _ hnn) ?_
+    have hpf : (∑ q ∈ (E.localHt j).primeFactors, Real.log q)
+        ≤ Real.log ((E.localHt j : ℝ) + 1) := by
+      have hprod : ∏ q ∈ (E.localHt j).primeFactors, q ∣ E.localHt j :=
+        Nat.prod_primeFactors_dvd _
+      have hle : (∏ q ∈ (E.localHt j).primeFactors, q) ≤ E.localHt j :=
+        Nat.le_of_dvd (E.localHt_pos j) hprod
+      have hlog : (∑ q ∈ (E.localHt j).primeFactors, Real.log q)
+          = Real.log ((∏ q ∈ (E.localHt j).primeFactors, q : ℕ) : ℝ) := by
+        push_cast
+        rw [Real.log_prod]
+        intro q hq
+        exact_mod_cast (Nat.prime_of_mem_primeFactors hq).ne_zero
+      rw [hlog]
+      refine Real.log_le_log ?_ ?_
+      · have : 0 < ∏ q ∈ (E.localHt j).primeFactors, q :=
+          Finset.prod_pos (fun q hq => (Nat.prime_of_mem_primeFactors hq).pos)
+        exact_mod_cast this
+      · have : ((∏ q ∈ (E.localHt j).primeFactors, q : ℕ) : ℝ) ≤ (E.localHt j : ℝ) := by
+          exact_mod_cast hle
+        linarith
+    linarith
+  refine le_trans (sum_biUnion_le_of_nonneg _ _ _ hnn) ?_
+  rw [← Finset.sum_add_distrib]
+  exact Finset.sum_le_sum (fun j _ => hstep j)
+
+end DegCurve
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -510,6 +649,16 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def DegCurve.badPrimes.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(badPrimes 欄——S∘ のうち S 以外の部分)",
+    sectionId := "genell-cor-4-3" }
+
+def DegCurve.sum_log_badPrimes_le.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(sum_log_badPrimes_le 欄。★無条件)",
+    sectionId := "genell-cor-4-3" }
 
 def DegCurve.sum_localHt_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,
