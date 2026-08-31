@@ -285,6 +285,32 @@ theorem integralModel_quadTwist (hinj : Function.Injective (algebraMap R K))
 
 end IntegralModel
 
+/-- ★★★★★★★★**非分裂の 2 次式は非平方で捧ると根をもつ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★捧りで 2 次式の係数は `c ↦ d²c`・`K ↦ d³K` となるので、
+判定量 `K/c` は `d` 倍される。有限体では非平方×非平方 = 平方（第 922）なので、
+`d` を非平方に取れば捧った側は根をもつ。 -/
+theorem exists_sq_of_twist_of_not_isSquare {k : Type} [Field k] [Fintype k] [DecidableEq k]
+    (c d K : k) (hc : c ≠ 0) (hd0 : d ≠ 0) (hK : K ≠ 0)
+    (hnsK : ¬ ∃ x : k, c * x ^ 2 = K) (hnd : ¬ IsSquare d) :
+    ∃ x : k, (d ^ 2 * c) * x ^ 2 = d ^ 3 * K := by
+  have hane : K * c⁻¹ ≠ 0 := mul_ne_zero hK (inv_ne_zero hc)
+  have hna : ¬ IsSquare (K * c⁻¹) := by
+    rintro ⟨y, hy⟩
+    refine hnsK ⟨y, ?_⟩
+    have : K * c⁻¹ = y ^ 2 := by rw [hy]; ring
+    field_simp at this
+    linear_combination -this
+  obtain ⟨x, hx⟩ := isSquare_mul_of_not_isSquare hane hd0 hna hnd
+  refine ⟨x, ?_⟩
+  have hx2 : d * (K * c⁻¹) = x ^ 2 := by rw [hx]; ring
+  have : (d ^ 2 * c) * x ^ 2 = d ^ 2 * c * (d * (K * c⁻¹)) := by rw [hx2]
+  rw [this]
+  field_simp
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def integralModel_eq_of_map_eq.src : ABC3.Meta.Source :=
@@ -310,6 +336,11 @@ def quadTwist_map.src : ABC3.Meta.Source :=
 def veluCurve_quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の商は捧りと可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_sq_of_twist_of_not_isSquare.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂の 2 次式は非平方で捧ると根をもつ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def isSquare_mul_of_not_isSquare.src : ABC3.Meta.Source :=
