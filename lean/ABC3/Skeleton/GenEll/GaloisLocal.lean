@@ -75,19 +75,27 @@ def alpha_in_modl_image.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def alpha_in_modl_image.needs : List ProofObligation :=
-  [ .citation "[FC]" "Degenerations of Abelian Varieties, Ch. III, Cor. 7.3(完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0)"
-      (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16 実測)") 10,
-    .implicitStep
-      ("★完全列に合わせた基底で mod l 像は上三角になり、l ∤ v(q) なら " ++
-       "q の l 乗根の抽出が非自明なので α が像に入る。" ++
-       "☆材料は Found/GaloisRep/Lemma32Tate.lean(Tate 一意化と Lemma 3.2, (i))") 10,
+  [ .citation "[FC]" "Degenerations of Abelian Varieties, Ch. III, Cor. 7.3（完全列 0 → ᴽ_l(1) → M_l(E) → ᴽ_l → 0）"
+      (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16 実測)") 8,
+    .citation "[ABC3]" "tatePhi_map（Tate 一意化 Φ は σ で同変、証明済み）"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tatePhi_map") 1,
     .citation "[ABC3]" "sl2_range_basis_transfer（SL₂ ⊆ 像 は基底に依らない、第 825）"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sl2_range_basis_transfer") 1,
     .implicitStep
       ("★★★訂正（2026-08-31、第 826）: 以前は基底 `e` を**任意に与えられた**形であったが、"
-       ++ "それでは**循環する**——α がすべての共役に入ることは SL₂ ⊆ 像 を既に"
-       ++ "知っていないと言えない。★Tate 一意化に適合した基底 (ζ_l, q^{1/l}) を取るのだから"
-       ++ "**`∃ e`** が正しい形である。SL₂ は正規部分群なのでこれで十分である") 1 ]
+       ++ "それでは**循環する**。★Tate 一意化に適合した基底 (ζ_l, q^{1/l}) を取るのだから"
+       ++ "**`∃ e`** が正しい形である。SL₂ は正規部分群なのでこれで十分である") 1,
+    .implicitStep
+      ("★★機構: 乗法還元の素点で E は Tate 曲線 E_q であり、"
+       ++ "E[l] = ⟨ζ_l, q^{1/l}⟩。σ(ζ) = ζ^χ, σ(q^{1/l}) = ζ^a q^{1/l} なので"
+       ++ "この基底で mod l 像は上三角。★l ∤ v(q) なら q^{1/l} ∉ K(ζ_l) なので"
+       ++ "χ(σ) = 1 かつ a(σ) ≠ 0 なる σ があり、その冪を取れば α = (1 1 / 0 1) が出る") 6,
+    .implicitStep
+      ("★★★測定（2026-08-31、第 828）——**局所→大域の橋が要る**。"
+       ++ "galRep は大域体 E.fld の上の表現であり、上の機構は完備体の上の話である。"
+       ++ "★分解群 Gal(L̄_p/L_p) → Gal(L̄/L) と Tate 加群の互換性が要る。"
+       ++ "☆本プロジェクトにも mathlib にも decompositionGroup の機構は無い（grep で 0 件）。"
+       ++ "★これが葉 3 の**最大の配管**である") 8 ]
 
 /-! ## ★★★★★★★★★★葉 5 は閉じた（2026-08-31、第 766-774）
 
