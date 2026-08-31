@@ -1029,6 +1029,7 @@ import ABC3.Found.GaloisRep.TowerLift
 import ABC3.Found.GaloisRep.IndepTower
 import ABC3.Found.GaloisRep.PadicLimit
 import ABC3.Found.GaloisRep.TateLimit
+import ABC3.Found.GaloisRep.TateLevel
 import ABC3.Found.GaloisRep.TateWitness
 import ABC3.Found.GaloisRep.PadicLinear
 import ABC3.Found.GaloisRep.GalRep
