@@ -2508,3 +2508,16 @@ theorem foo : ... := ...
 
 ☆`section variable` に入れた不要なインスタンスは、この `omit` で個別に外す。
 ★`variable` を分けるより、`omit` 1 行のほうが差分が小さい。
+
+## `′`(U+2032 PRIME) は Lean の識別子に使えない
+
+`variable {R′ : Type}` は `expected token` で落ちる。docstring や文字列の中では
+問題ないので、**識別子だけ ASCII の `'` にする**（`R'`・`h'`・`W'`）。
+第 944 で 79 箇所を一括置換した。
+
+## `IsElliptic` の motive 壊れ、三度目——`X.j` の `X` を書き換えるとき
+
+`rw [hEq]`（`hEq : X = Y`）を `... = X.j` の上でやると
+`motive is not type correct`（`j` が `X.IsElliptic` を暗黙に取るため）。
+★`ABC3.Found.GenEll.j_congr_curve hEq : X.j = Y.j` を **simp 補題として渡す**。
+`rw` だと後続の `map_j` の出現位置がずれるので `simp only [...]` が安全。
