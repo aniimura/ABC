@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.PointVariableChange
 
 /-!
 # 第 885 ブロック —— **★★★★★★★★★★番号で書いた部分群の Vélu の商**（`Found`）
@@ -98,7 +99,32 @@ theorem veluQuotientFull_image_eq (W : WeierstrassCurve R) (s : Finset ℕ) (X Y
     exact mul_left_cancel₀ h2 h
   rw [veluQuotientFull, veluCurve_map, hV, hW]
 
+/-! ## ★★★★★★★★★★大域の Vélu の商は底変換で局所の Vélu の商になる -/
+
+/-- ★★★★★★★★★★**`E′ = E/⟨Q⟩` を底変換すると `E′ ⊗ A = (E ⊗ A)/⟨Q ⊗ A⟩`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが「大域の `E′ = E/H` を各悪い素点で完備化に落とす」段である。
+☆`veluQuotientFull_map`（底変換と可換）と
+`image_pointCoords_rhPoint_nsmul`（点の像の座標）を並べるだけである。 -/
+theorem veluQuotientFull_baseChange {F A : Type} [Field F] [Field A] (f : F →+* A)
+    (E E' : WeierstrassCurve F) [E.IsElliptic] [(E.map f).IsElliptic]
+    {l : ℕ} {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    E'.map f = veluQuotientFull (E.map f)
+      (((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • rhPoint f E Q))) := by
+  rw [hE', veluQuotientFull_map, image_pointCoords_rhPoint_nsmul f E hQ]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def veluQuotientFull_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(大域の E/⟨Q⟩ は底変換で局所の (E ⊗ A)/⟨Q ⊗ A⟩ になる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluVFull_image.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
