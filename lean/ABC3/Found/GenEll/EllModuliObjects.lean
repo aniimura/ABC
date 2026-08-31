@@ -5,6 +5,7 @@ import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GaloisRep.Compositum
 import ABC3.Found.GaloisRep.HtFaltBounds
+import ABC3.Found.GaloisRep.HtJBound
 import ABC3.Meta.Claim
 
 /-!
@@ -199,6 +200,41 @@ theorem degInfJ_sub_htInfJ_le :
   obtain ⟨A, _, hA⟩ := degInfJ_le_faltingsHeightJ
   exact ⟨A, fun j => by linarith [hA j]⟩
 
+/-! ## ★★★★★★★★★★★★`degLe` 欄と Northcott -/
+
+/-- ★★★★**`EllModuliData` の `degLe` 欄**——`M_ell(ℚ̄)^{≤d}`。 -/
+def degLeJ (d : ℕ) : Set ℂ := {x : ℂ | ∃ E : SSCurve, E.j = x ∧ E.deg ≤ d}
+
+theorem mem_degLeJ (E : SSCurve) : E.j ∈ degLeJ E.deg := ⟨E, rfl, le_rfl⟩
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`northcott` 欄は `j` の高さの Northcott 性ひとつに帰着する**。
+
+原文 (GenEll p.17):
+> Proposition 3.4. (Faltings Heights and the Divisor at Infinity) For any
+
+★仮説 `hN` は `Skeleton/GenEll/NorthcottJ.lean` の `northcott_htJ` そのもの
+（原文の `Proposition 1.4, (iv)`、実質は古典的 Northcott の定理）。
+
+★★機構は `prop_3_4_chain_semistable`（`§9-1004`）の 2 本目の `≲`:
+
+    ht^Falt(E) ≤ C  ⟹  h(j) ≤ 12(1+ϵ)·C + C₀
+
+——高さが抑えられた類は `j` の高さも抑えられる。 -/
+theorem northcottJ_of_northcott_htJ
+    (hN : ∀ (B : ℝ) (d : ℕ),
+      {x : ℂ | ∃ E : SSCurve, E.j = x ∧ E.deg ≤ d ∧ htJ E.fld E.W ≤ B}.Finite)
+    (C : ℝ) (d : ℕ) : {x ∈ degLeJ d | faltingsHeightJ x ≤ C}.Finite := by
+  obtain ⟨C₀, hC₀⟩ := prop_3_4_chain_semistable 1 one_pos
+  refine (hN (12 * (1 + 1) * C + C₀) d).subset ?_
+  rintro x ⟨⟨E, hEj, hEd⟩, hC⟩
+  refine ⟨E, hEj, hEd, ?_⟩
+  have hfe : faltingsHeightJ x = htFaltOf E.fld E.W := by
+    rw [← hEj]; exact faltingsHeightJ_eq E
+  have h1 : htFaltOf E.fld E.W ≤ C := by rw [← hfe]; exact hC
+  have h2 := (hC₀ E.fld E.W E.ss).2.1
+  linarith
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -215,6 +251,20 @@ def faltingsHeightJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Proposition 3.4(EllModuliData の faltingsHeight 欄——j の函数として)",
     sectionId := "genell-prop-3-4" }
+
+def degLeJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(EllModuliData の degLe 欄——M_ell(ℚ̄)^{≤d})",
+    sectionId := "genell-prop-3-4" }
+
+def northcottJ_of_northcott_htJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Proposition 3.4(northcott 欄は j の高さの Northcott 性ひとつに帰着する)",
+    sectionId := "genell-prop-3-4" }
+
+def northcottJ_of_northcott_htJ.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "northcott_htJ(Skeleton/GenEll/NorthcottJ.lean、古典的 Northcott)"
+      (.absent "mathlib: Northcott の instance は具体的な体に対して 1 つも無い(2026-08-31 測定)") 12 ]
 
 def degInfJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
