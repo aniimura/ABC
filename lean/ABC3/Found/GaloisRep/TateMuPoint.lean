@@ -149,7 +149,68 @@ theorem tatePhi_of_pow_eq_one (S : TateSetup R I K)
 
 end Phi
 
+/-! ## ★★★★★★類の上でも `μ_l` は潰れない -/
+
+/-- ★★★**1 の冪根の類が単位ならそれ自身が `1`**。
+
+☆`u = Q^n` と書けるなら `0 = v(u) = n·v(Q)` で、`v(Q) > 0` なので `n = 0`。 -/
+theorem eq_one_of_mk_eq_one_of_pow_eq_one (v : Kˣ →* Multiplicative ℤ) (Q : Kˣ)
+    (hQ : 0 < vAdd v Q) {l : ℕ} (hl : 0 < l) (u : Kˣ) (hul : u ^ l = 1)
+    (h : (QuotientGroup.mk u : Kˣ ⧸ Subgroup.zpowers Q) = 1) : u = 1 := by
+  obtain ⟨n, hn⟩ := (QuotientGroup.eq_one_iff u).1 h
+  have hn' : Q ^ n = u := hn
+  have hv : vAdd v u = 0 := vAdd_eq_zero_of_pow_eq_one v hl u hul
+  rw [← hn', vAdd_zpow] at hv
+  have hn0 : n = 0 := by
+    rcases mul_eq_zero.1 hv with h1 | h1
+    · exact h1
+    · omega
+  rw [← hn', hn0, zpow_zero]
+
+/-- ★★★★★★**`μ_l` の元は `Kˣ/Q^ℤ` の中でも区別される**。
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+☆`v(q) > 0` なので `q^ℤ` は 1 の冪根を 1 しか含まない。 -/
+theorem mk_pow_injOn (v : Kˣ →* Multiplicative ℤ) (Q : Kˣ) (hQ : 0 < vAdd v Q)
+    {l : ℕ} (hl : 0 < l) (ζ : Kˣ) (hζl : ζ ^ l = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < l → ζ ^ n ≠ 1)
+    {i j : ℕ} (hi : i < l) (hj : j < l)
+    (h : (QuotientGroup.mk (ζ ^ i) : Kˣ ⧸ Subgroup.zpowers Q)
+       = QuotientGroup.mk (ζ ^ j)) : i = j := by
+  -- ★差の側を見る。`j ≤ i` の場合を補顓にして 2 回使う
+  have key : ∀ {i j : ℕ}, i < l → j ≤ i →
+      (QuotientGroup.mk (ζ ^ i) : Kˣ ⧸ Subgroup.zpowers Q)
+        = QuotientGroup.mk (ζ ^ j) → i = j := by
+    intro i j hi hji h
+    have hsplit : ζ ^ i = ζ ^ (i - j) * ζ ^ j := by
+      rw [← pow_add]
+      congr 1
+      omega
+    have hone : (QuotientGroup.mk (ζ ^ (i - j)) : Kˣ ⧸ Subgroup.zpowers Q) = 1 := by
+      have h3 : (QuotientGroup.mk (ζ ^ (i - j)) : Kˣ ⧸ Subgroup.zpowers Q)
+          = QuotientGroup.mk (ζ ^ i) * (QuotientGroup.mk (ζ ^ j))⁻¹ := by
+        rw [← QuotientGroup.mk_inv, ← QuotientGroup.mk_mul]
+        congr 1
+        rw [hsplit]
+        group
+      rw [h3, h, mul_inv_cancel]
+    have hpow : (ζ ^ (i - j)) ^ l = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul, hζl, one_pow]
+    have hz := eq_one_of_mk_eq_one_of_pow_eq_one v Q hQ hl (ζ ^ (i - j)) hpow hone
+    by_contra hne
+    exact hord (i - j) (by omega) (by omega) hz
+  rcases le_total j i with hji | hij
+  · exact key hi hji h
+  · exact (key hj hij h.symm).symm
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def mk_pow_injOn.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Tate 一意化—μ_l の元は Kˣ/Q^ℤ の中でも区別される。★無条件)",
+    sectionId := "genell-def-3-3" }
 
 def normRep_of_pow_eq_one.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
