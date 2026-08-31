@@ -409,6 +409,83 @@ theorem sum_mu_coeff {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ
   rw [hlc]
   by_cases h : l ∣ d <;> simp [h] <;> ring
 
+/-! ## ★★★★★★★★★★★★約数和の側 -/
+
+/-- ★★★★★★★★★★★★★★★★**`l` で割り切れる約数の和**。
+
+    `∑_{d ∣ N, l ∣ d} d = l·σ₁(N/l)`   (`l ∣ N`)
+    `∑_{d ∣ N, l ∣ d} d = 0`          (`l ∤ N`)
+
+★★これが `σ₁(q) → σ₁(q^l)` の数論側である。 -/
+theorem sum_divisors_dvd (l N : ℕ) (hl : l.Prime) (hN : N ≠ 0) :
+    ∑ d ∈ N.divisors.filter (fun d => l ∣ d), d
+      = if l ∣ N then l * ∑ e ∈ (N / l).divisors, e else 0 := by
+  by_cases hlN : l ∣ N
+  · rw [if_pos hlN]
+    obtain ⟨M, hM⟩ := hlN
+    have hM0 : M ≠ 0 := by rintro rfl; exact hN (by simp [hM])
+    have hNl : N / l = M := by rw [hM, Nat.mul_div_cancel_left _ hl.pos]
+    rw [hNl, Finset.mul_sum]
+    refine Finset.sum_nbij' (fun d => d / l) (fun e => l * e) ?_ ?_ ?_ ?_ ?_
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      obtain ⟨hdN, hld⟩ := hd
+      obtain ⟨c, hc⟩ := hld
+      have hdvd : d ∣ N := (Nat.mem_divisors.1 hdN).1
+      refine Nat.mem_divisors.2 ⟨?_, hM0⟩
+      refine ⟨N / d, ?_⟩
+      have hdl : d / l = c := by rw [hc, Nat.mul_div_cancel_left _ hl.pos]
+      rw [hdl]
+      have : l * (c * (N / d)) = l * M := by
+        rw [← hM, ← mul_assoc, ← hc, Nat.mul_div_cancel' hdvd]
+      exact Nat.eq_of_mul_eq_mul_left hl.pos this.symm
+    · intro e he
+      have heM : e ∣ M := (Nat.mem_divisors.1 he).1
+      refine Finset.mem_filter.2 ⟨Nat.mem_divisors.2 ⟨?_, hN⟩, Dvd.intro e rfl⟩
+      rw [hM]
+      exact mul_dvd_mul_left l heM
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      exact Nat.mul_div_cancel' hd.2
+    · intro e _
+      exact Nat.mul_div_cancel_left _ hl.pos
+    · intro d hd
+      rw [Finset.mem_filter] at hd
+      exact (Nat.mul_div_cancel' hd.2).symm
+  · rw [if_neg hlN]
+    have hempty : N.divisors.filter (fun d => l ∣ d) = ∅ := by
+      refine Finset.filter_eq_empty_iff.2 (fun {d} hd hld => ?_)
+      exact hlN (hld.trans (Nat.mem_divisors.1 hd).1)
+    rw [hempty, Finset.sum_empty]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★
+**Tate の `X` の `q^N` 係数を `μ_l∖{1}` 上で足した値**——`σ₁` の言葉で。
+
+    `∑_{ζ≠1} c_N(ζ) = 2l·(l·σ₁(N/l)·[l ∣ N] − σ₁(N))`
+
+★★★右辺に `σ₁(N/l)` が現れる——これが
+**`q` 展開を `q^l` 展開に付け替える機構**である。 -/
+theorem sum_mu_coeff_sigma {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l)
+    (N : ℕ) (hN : N ≠ 0) :
+    ∑ i ∈ (range l).erase 0, ∑ d ∈ N.divisors, (d : F) * ((ζ ^ i) ^ d + ((ζ ^ i)⁻¹) ^ d - 2)
+      = 2 * (l : F) * ((if l ∣ N then (l : F) * ((∑ e ∈ (N / l).divisors, e : ℕ) : F) else 0)
+          - ((∑ d ∈ N.divisors, d : ℕ) : F)) := by
+  rw [sum_mu_coeff hl hζ]
+  congr 1
+  have h1 : ∑ d ∈ N.divisors, (d : F) * ((if l ∣ d then (1 : F) else 0) - 1)
+      = (∑ d ∈ N.divisors.filter (fun d => l ∣ d), (d : F))
+        - ∑ d ∈ N.divisors, (d : F) := by
+    rw [Finset.sum_filter, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun d _ => ?_)
+    by_cases h : l ∣ d <;> simp [h] <;> ring
+  have h2 : (∑ d ∈ N.divisors.filter (fun d => l ∣ d), (d : F))
+      = if l ∣ N then (l : F) * ((∑ e ∈ (N / l).divisors, e : ℕ) : F) else 0 := by
+    rw [← Nat.cast_sum, sum_divisors_dvd l N hl hN]
+    by_cases h : l ∣ N <;> simp [h]
+  rw [h1, h2]
+  push_cast
+  ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def one_sub_mul_sum_nsmul.src : ABC3.Meta.Source :=
@@ -484,6 +561,16 @@ def sum_mu_inv_pow.src : ABC3.Meta.Source :=
 def sum_mu_coeff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Tate の X の q^N 係数を μ_l∖{1} 上で足す。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_divisors_dvd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(l で割り切れる約数の和 = l·σ₁(N/l)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_mu_coeff_sigma.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate の X の q^N 係数の μ_l 和を σ₁ で書く。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def sum_mu_pow.src : ABC3.Meta.Source :=
