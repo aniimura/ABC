@@ -612,6 +612,70 @@ theorem sum_log_badPrimes_le (E : DegCurve) :
 
 end DegCurve
 
+/-! ## ★★★★★★★★★★★★`GaloisFinite` と `CompactlyBounded` -/
+
+/-- ★★★★**`GaloisFinite` 欄**——類の集合が有限であること。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★原文の Galois-finite（`Example 1.3, (i)`）は「有限個の Galois 軌道の合併」であり、
+代数的数の Galois 軌道は有限なので**集合として有限**である。
+☆逆は成り立たない（有限集合が Galois 安定とは限らない）ので、
+これは原文より**弱い**述語である——`GaloisFinite` は結論の側に現れるので、
+弱い方を取ると主張が強くなる。 -/
+def GaloisFiniteJ (S : Set ℂ) : Prop := S.Finite
+
+/-- ★★**`galoisFinite_union` 欄**。 -/
+theorem galoisFiniteJ_union (S T : Set ℂ) (hS : GaloisFiniteJ S) (hT : GaloisFiniteJ T) :
+    GaloisFiniteJ (S ∪ T) := hS.union hT
+
+/-- ★★★**`CompactlyBounded` 欄**——アルキメデス素点での有界性。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★原文の compactly bounded（`Example 1.3, (ii)`）は有限個の素点 `V` と
+そこでのコンパクト集合 `K_v` で押さえることだが、`EllClass := ℂ` の下では
+アルキメデス素点の条件が `j` の有界性である。 -/
+def CompactlyBoundedJ (S : Set ℂ) : Prop := Bornology.IsBounded S
+
+/-- ★**`compactlyBounded_empty` 欄**。 -/
+theorem compactlyBoundedJ_empty : CompactlyBoundedJ (∅ : Set ℂ) := Bornology.isBounded_empty
+
+/-! ## ★★★★★★★★★★★★★★`noMultRedExc` 群——`DegCurve` なら自明 -/
+
+/-- ★★★★**`noMultRedExc` 欄**——空集合でよい。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★★`Curve := DegCurve`（乗法還元を持つ半安定曲線）と決めたので、
+`¬ HasMultRed E` を満たす `E : Curve` は**存在しない**。
+★したがって `mem_noMultRedExc` 欄は空虚に成り立ち、例外集合は空でよい。
+☆これは `Check/GenEll/EllModuliDegInfPos.lean` の測定（界面が `deg∞ > 0` を強制する）
+から強いられた `Curve` の制限の**副産物**である。 -/
+def noMultRedExcJ (_ : Set ℂ) : Set ℂ := ∅
+
+theorem galoisFiniteJ_noMultRedExcJ (KV : Set ℂ) (_ : CompactlyBoundedJ KV) :
+    GaloisFiniteJ (noMultRedExcJ KV) := Set.finite_empty
+
+theorem mem_noMultRedExcJ (KV : Set ℂ) (E : DegCurve) (_ : E.j ∈ KV)
+    (h : ¬ E.toSSCurve.HasMultRed) : E.j ∈ noMultRedExcJ KV :=
+  absurd E.multRed h
+
+/-! ## ★★★★★★`MinimalField` 欄 -/
+
+/-- ★★★**`MinimalField` 欄**——定義体の次数が最小であること。
+
+原文 (GenEll p.22):
+> Corollary 4.3. (Full Galois Actions for Degenerating Elliptic Curves)
+
+★原文『`L` is a minimal field of definition of the point `[E_L]`』。
+☆`Skeleton/GenEll/Section4.lean` の測定（第 88 行）によれば
+`Corollary 4.3` の証明はこの仮説を**使っていない**。 -/
+def MinimalFieldJ (E : DegCurve) : Prop := ∀ E' : DegCurve, E'.j = E.j → E.deg ≤ E'.deg
+
 /-! ## ★出典の紐付け(`.src`)——★★条つき（半安定に制限した形） -/
 
 def SSCurve.src : ABC3.Meta.Source :=
@@ -649,6 +713,28 @@ def torsionExt.needs : List ABC3.Meta.ProofObligation :=
       ("☆代償の記録: Curve := SSCurve(半安定なものだけ)と決めたので、" ++
        "原文 p.20 の L′(3･5 捧れを有理化する次数 23040 の拡大)の段は不要になるが、" ++
        "結論は「半安定な曲線について」に限定される") 3 ]
+
+def GaloisFiniteJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(GaloisFinite 欄——有限集合として取る)",
+    sectionId := "genell-lemma-3-7" }
+
+def GaloisFiniteJ.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("☆原文の Galois-finite(Example 1.3, (i))は「有限個の Galois 軌道の合併」であり、" ++
+       "代数的数の Galois 軌道は有限なので集合として有限である。" ++
+       "逆は成り立たないので、これは原文より弱い述語である" ++
+       "——GaloisFinite は結論の側に現れるので、弱い方を取ると主張は強くなる") 3 ]
+
+def noMultRedExcJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(noMultRedExc 欄——DegCurve なら空集合でよい)",
+    sectionId := "genell-lemma-3-7" }
+
+def MinimalFieldJ.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 22,
+    item := "Corollary 4.3(MinimalField 欄——定義体の次数が最小)",
+    sectionId := "genell-cor-4-3" }
 
 def DegCurve.badPrimes.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 22,
