@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.JScale
 import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 /-!
 # 第 920 ブロック —— **★★★★★★★★★★★★二次の捧り（quadratic twist）**（`Found`）
@@ -130,7 +131,31 @@ theorem splits_quadratic_of_root {k : Type} [Field k] (A B C₀ : k) (hA : A ≠
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X]
     exact hx
 
+/-! ## ★★★★★★★★有限体では非平方 × 非平方 = 平方 -/
+
+/-- ★★★★★★**有限体（奇標数）では非平方同士の積は平方**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★これが「`d` を非平方単数に取れば捧りは分裂になる」の理由である。
+☆二次指標は乗法的なので `(−1)·(−1) = 1`。 -/
+theorem isSquare_mul_of_not_isSquare {k : Type} [Field k] [Fintype k] [DecidableEq k]
+    {a d : k} (ha : a ≠ 0) (hd : d ≠ 0)
+    (hna : ¬ IsSquare a) (hnd : ¬ IsSquare d) : IsSquare (d * a) := by
+  have h1 : quadraticChar k a = -1 := quadraticChar_neg_one_iff_not_isSquare.2 hna
+  have h2 : quadraticChar k d = -1 := quadraticChar_neg_one_iff_not_isSquare.2 hnd
+  have h3 : quadraticChar k (d * a) = 1 := by
+    rw [map_mul, h1, h2]
+    norm_num
+  exact (quadraticChar_one_iff_isSquare (mul_ne_zero hd ha)).1 h3
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def isSquare_mul_of_not_isSquare.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(有限体では非平方同士の積は平方。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def splits_quadratic_of_root.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
