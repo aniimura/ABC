@@ -407,6 +407,80 @@ theorem tateXterm_zeta_eq_poly [IsDomain R] {l : ℕ} (hl : 0 < l) (hlu : IsUnit
   rw [hLHS, ← hcore, Finset.mul_sum]
   exact Finset.sum_congr rfl (fun a _ => by ring)
 
+/-! ## ★★★★★★★★★★★★`w = q·z^m` 側の尾 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateXtail(q·z^m, q)` も μ-等級付き**。 -/
+theorem tateXtail_qz_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateXtail (q * z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+            (d : R) * q ^ d)
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateXtail_eq_divisorSum (q * z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        (d : R) * (q * z ^ m) ^ d
+      = ∑ d ∈ n.divisors, (d : R) * (q * z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [mul_pow, ← pow_mul, pow_mod_eq hl hz (m * d), hda]
+  ring
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYtail(q·z^m, q)` も μ-等級付き**。 -/
+theorem tateYtail_qz_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateYtail (q * z ^ m) q hq
+      = muEval l (fun n a => q ^ n * ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+            ((d.choose 2 : ℕ) : R) * q ^ d)
+          (fun n a => Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hq n)) z := by
+  classical
+  rw [tateYtail_eq_divisorSum (q * z ^ m) q hq]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  have hfib : ∑ a ∈ range l, ∑ d ∈ n.divisors.filter (fun d => (m * d) % l = a),
+        ((d.choose 2 : ℕ) : R) * (q * z ^ m) ^ d
+      = ∑ d ∈ n.divisors, ((d.choose 2 : ℕ) : R) * (q * z ^ m) ^ d :=
+    Finset.sum_fiberwise_of_maps_to (fun d _ => Finset.mem_range.2 (Nat.mod_lt _ hl)) _
+  rw [← hfib, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [mul_assoc, Finset.sum_mul]
+  congr 1
+  refine Finset.sum_congr rfl (fun d hd => ?_)
+  have hda : (m * d) % l = a := (Finset.mem_filter.1 hd).2
+  rw [mul_pow, ← pow_mul, pow_mod_eq hl hz (m * d), hda]
+  ring
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`tateYterm(q·z^m)` も μ-等級付き**。 -/
+theorem tateYterm_eq_muEval [IsAdicComplete I R] {l : ℕ} (hl : 0 < l)
+    {z : R} (hz : z ^ l = 1) (q : R) (hq : q ∈ I) (m : ℕ) :
+    tateYterm (q * z ^ m)
+      = muEval l (fun n a => if (n * m) % l = a then ((n.choose 2 : ℕ) : R) * q ^ n else 0)
+          (fun n a => by
+            by_cases h : (n * m) % l = a
+            · simpa [h] using Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hq n)
+            · simpa [h] using Submodule.zero_mem (I ^ n)) z := by
+  classical
+  rw [tateYterm_eq_adicSum (Ideal.mul_mem_right _ _ hq)]
+  simp only [muEval]
+  refine adicSum_congr _ _ (fun n => ?_)
+  rw [Finset.sum_eq_single ((n * m) % l)]
+  · rw [if_pos rfl, mul_pow, ← pow_mul, ← pow_mod_eq hl hz (n * m)]
+    ring
+  · intro a _ hne
+    rw [if_neg (fun h => hne h.symm), zero_mul]
+  · intro h
+    exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -477,6 +551,21 @@ def ringInverse_one_sub_eq.src : ABC3.Meta.Source :=
 def tateXterm_zeta_eq_poly.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(tateXterm(ζ) は ζ の多項式。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateXtail_qz_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateXtail(q·z^m,q) は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYtail_qz_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYtail(q·z^m,q) は μ-等級付き。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateYterm_eq_muEval.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(tateYterm(q·z^m) は μ-等級付き。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
