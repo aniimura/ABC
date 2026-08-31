@@ -1158,6 +1158,7 @@ import ABC3.Found.GaloisRep.IsogenyReduction
 import ABC3.Found.GaloisRep.NorthcottHtJ
 import ABC3.Found.GaloisRep.HtJLower
 import ABC3.Found.GaloisRep.SemistableFin
+import ABC3.Found.GaloisRep.Lemma37CondB
 import ABC3.Found.GaloisRep.Prop34
 import ABC3.Found.GaloisRep.HtFaltBounds
 import ABC3.Found.GaloisRep.Lemma35Concrete
