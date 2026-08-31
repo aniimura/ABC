@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.Lemma35Concrete
 import ABC3.Found.GaloisRep.TateParamJ
+import ABC3.Found.GaloisRep.TateVeluMu
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
 import ABC3.Meta.Claim
@@ -395,6 +396,80 @@ theorem tateParam_quot_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
   refine tateParamR_eq_of_j_tateCurveAt W' hsplit (q ^ l) hql ?_
   rw [hquot]
   exact j_velu_tate_mu_map hl hζ hlu hu q hq hql h2 hDX v w hv hw
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] 葉 1 —— `hquot` を
+`⟨Φ(ζ)⟩` で書いた形**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-08-31（第 891）**——第 883 で置いた `hquot`（`j` の一致）をさらに
+**`W′` が `E_q` の `⟨Φ(ζ)⟩` による Vélu の商である**という形に退けた。
+☆これが原文の「`H` は乗法還元の素点で `μ_l` に対応する」の、
+曲線の水準での直訳である。
+
+☆道は 2 段だけである:
+
+1. `veluQuotientFull_tate_mu`（第 890）で商を `veluCurve (E_q) v w` に直す
+2. `tateParam_quot_mu`（第 883） -/
+theorem tateParam_quot_velu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (S : TateSetup R (IsLocalRing.maximalIdeal R) K)
+    (hΔ : ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    (Φ : Additive (Kˣ ⧸ Subgroup.zpowers S.Q)
+      ≃+ ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Point)
+    (hΦ : ∀ c, Φ (Additive.ofMul c) = tatePhi S hΔ c)
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (uζ : Kˣ) (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ l = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
+    (hql : S.q ^ l ∈ IsLocalRing.maximalIdeal R)
+    (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
+    (hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq ≠ 0)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt S.q S.hq)
+        (tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)
+        (tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt S.q S.hq)
+          (tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)
+          (tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)
+        + 2 * (veluV2 (tateCurveAt S.q S.hq)
+                (tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)
+                (tateYpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)
+              * tateXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq)))
+    (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
+    (hsplit : W'.HasSplitMultiplicativeReduction R)
+    [((veluCurve (tateCurveAt S.q S.hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (S.q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (hW' : W' = veluQuotientFull ((tateCurveAt S.q S.hq).map (algebraMap R K))
+      (((range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • tatePhi S hΔ (QuotientGroup.mk uζ))))) :
+    tateParamR W' hsplit = S.q ^ l := by
+  have hquot := veluQuotientFull_tate_mu S hΔ Φ hΦ hl.pos ζ uζ hζu hζl hord hu v w h2K hv hw
+  have hWW : W' = (veluCurve (tateCurveAt S.q S.hq) v w).map (algebraMap R K) :=
+    hW'.trans hquot
+  subst hWW
+  exact tateParam_quot_mu hl hζ hlu hu S.q S.hq hql h2 hDX v w hv hw _ hsplit rfl
+
+def tateParam_quot_velu.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(hquot を ⟨Φ(ζ)⟩ の Vélu の商で書いた形)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateParam_quot_velu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "veluQuotientFull_tate_mu(⟨Φ(ζ)⟩ の Vélu の商、第 890、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluQuotientFull_tate_mu") 1,
+    .citation "[ABC3]" "tateParam_quot_mu(j から母数へ、第 883、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_mu") 1,
+    .implicitStep
+      ("☆残るのは大域の `E′ = E/H` を各悪い素点で完備化に落とし、" ++
+       "H の像が `⟨Φ(ζ)⟩` になることを言う段（Lemma 3.2, (i) の帰結）だけである") 4 ]
 
 def j_velu_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
