@@ -735,6 +735,76 @@ theorem tateYpair_eq_muEval [IsAdicComplete I R] [IsDomain R] {l : ℕ} (hl : 0 
   refine muEval_congr _ _ _ _ (fun n a => ?_) z
   simp only [tateYC]
 
+/-! ## ★★★★★★★★★★★★★★★★畳み込みの 2 つの量 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**畳み込みの全係数和は Cauchy 積**。
+
+`∑_c (A*B) n c = ∑_{k≤n} (∑_a A k a)(∑_b B (n−k) b)`——
+★これは `z = 1` での値の Cauchy 積である。 -/
+theorem sum_muConv {l : ℕ} (hl : 0 < l) (A B : ℕ → ℕ → R) (n : ℕ) :
+    ∑ c ∈ range l, muConv l A B n c
+      = ∑ k ∈ range (n + 1), (∑ a ∈ range l, A k a) * ∑ b ∈ range l, B (n - k) b := by
+  classical
+  simp only [muConv]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [Finset.sum_mul_sum]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [Finset.sum_eq_single ((a + b) % l)]
+  · rw [if_pos rfl]
+  · intro c _ hne
+    rw [if_neg (Ne.symm hne)]
+  · intro h
+    exact absurd (Finset.mem_range.2 (Nat.mod_lt _ hl)) h
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**畳み込みの 0 次係数**。
+
+`(A*B) n 0 = ∑_{k≤n} ∑_{a<l} A k a · B (n−k) ((l−a) % l)`——
+★`(a+b) ≡ 0 (mod l)` なる `b < l` は `(l−a) % l` だけ。 -/
+theorem muConv_zero {l : ℕ} (hl : 0 < l) (A B : ℕ → ℕ → R) (n : ℕ) :
+    muConv l A B n 0
+      = ∑ k ∈ range (n + 1), ∑ a ∈ range l, A k a * B (n - k) ((l - a) % l) := by
+  classical
+  simp only [muConv]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  refine Finset.sum_congr rfl (fun a ha => ?_)
+  have hal : a < l := Finset.mem_range.1 ha
+  have hmem : (l - a) % l ∈ range l := Finset.mem_range.2 (Nat.mod_lt _ hl)
+  rw [Finset.sum_eq_single ((l - a) % l)]
+  · rw [if_pos]
+    have : (a + (l - a) % l) % l = 0 := by
+      rcases Nat.eq_zero_or_pos a with h0 | hpos
+      · subst h0
+        simp [Nat.mod_self]
+      · rw [Nat.mod_eq_of_lt (by omega : l - a < l)]
+        have : a + (l - a) = l := by omega
+        rw [this, Nat.mod_self]
+    exact this
+  · intro b hb hne
+    rw [if_neg]
+    intro hc
+    apply hne
+    have hbl : b < l := Finset.mem_range.1 hb
+    rcases Nat.eq_zero_or_pos a with h0 | hpos
+    · subst h0
+      simp only [Nat.zero_add] at hc
+      rw [Nat.mod_eq_of_lt hbl] at hc
+      simp [hc, Nat.mod_self]
+    · rw [Nat.mod_eq_of_lt (by omega : l - a < l)]
+      have hab : a + b < 2 * l := by omega
+      have hpos2 : 0 < a + b := by omega
+      have : a + b = l := by
+        have := Nat.eq_of_dvd_of_lt_two_mul (by omega) (Nat.dvd_of_mod_eq_zero hc) (by omega)
+        exact this
+      omega
+  · intro h
+    exact absurd hmem h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pow_mod_eq.src : ABC3.Meta.Source :=
@@ -915,6 +985,16 @@ def tateYC_mem.src : ABC3.Meta.Source :=
 def tateYpair_eq_muEval.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Y(ζ,q) も 1 つの μ-等級付き級数。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def sum_muConv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(畳み込みの全係数和は Cauchy 積。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def muConv_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(畳み込みの 0 次係数。★無条件)",
     sectionId := "genell-lemma-3-2" }
 
 def muEval.src : ABC3.Meta.Source :=
