@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.Lemma35Concrete
 import ABC3.Found.GaloisRep.TateParamJ
+import ABC3.Found.GaloisRep.TateDXNeZero
 import ABC3.Found.GaloisRep.TateVeluMu
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
@@ -427,9 +428,7 @@ theorem tateParam_quot_velu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
     (uζ : Kˣ) (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ l = 1)
     (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
     (hql : S.q ^ l ∈ IsLocalRing.maximalIdeal R)
-    (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0)
-    (hDX : ∀ i ∈ (range l).erase 0,
-      tateDXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq ≠ 0)
+    (h2 : (2 : R) ≠ 0) (h2K : (2 : K) ≠ 0) (hodd : l ≠ 2)
     (v w : R)
     (hv : v = ∑ i ∈ (range l).erase 0,
       veluV2 (tateCurveAt S.q S.hq)
@@ -451,6 +450,12 @@ theorem tateParam_quot_velu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
       (((range l).erase 0).image
         (fun k : ℕ => pointCoords (k • tatePhi S hΔ (QuotientGroup.mk uζ))))) :
     tateParamR W' hsplit = S.q ^ l := by
+  -- ★★★★**2026-08-31（第 895）**——侧条件 `hDX` はここでは**定理**である
+  have hDX : ∀ i ∈ (range l).erase 0,
+      tateDXpair (ζ ^ i) (S.q * (ζ ^ i) ^ (l - 1)) S.q S.hq ≠ 0 := by
+    intro i hi
+    exact tateDXpair_ne_zero_of_mu S hΔ Φ hΦ hl hodd ζ uζ hζu hζl hord i
+      (Finset.mem_erase.1 hi).1 (Finset.mem_range.1 (Finset.mem_erase.1 hi).2) (hu i hi)
   have hquot := veluQuotientFull_tate_mu S hΔ Φ hΦ hl.pos ζ uζ hζu hζl hord hu v w h2K hv hw
   have hWW : W' = (veluCurve (tateCurveAt S.q S.hq) v w).map (algebraMap R K) :=
     hW'.trans hquot
@@ -467,6 +472,8 @@ def tateParam_quot_velu.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.veluQuotientFull_tate_mu") 1,
     .citation "[ABC3]" "tateParam_quot_mu(j から母数へ、第 883、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_mu") 1,
+    .citation "[ABC3]" "tateDXpair_ne_zero_of_mu(侧条件 hDX は定理、第 894、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateDXpair_ne_zero_of_mu") 1,
     .implicitStep
       ("☆残るのは大域の `E′ = E/H` を各悪い素点で完備化に落とし、" ++
        "H の像が `⟨Φ(ζ)⟩` になることを言う段（Lemma 3.2, (i) の帰結）だけである") 4 ]
