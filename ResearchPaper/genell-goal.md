@@ -32034,3 +32034,46 @@ Northcott（`§9-1005`）に繋いだ。逆向きの評価（`§9-1006`〜`§9-1
 5. `Corollary 4.3`・`4.4`（新しい基盤理論は要らない——数値の帳簿）
 6. `Theorem 2.1`（§2）——étale 基本群 ＋ Riemann–Roch（Belyi）。最も遠い
 
+
+## 2026-08-31（第 735-741）—— `faltingsHeight` の well-defined 性が証明された
+
+`EllModuliData` の witness で最大の設計上の要だった
+
+> **`EllClass := ℂ`（`j` 不変量）に対して `faltingsHeight : ℂ → ℝ` が定義できるか**
+
+に決着がついた。到達点は `Found/GaloisRep/Compositum.lean` の
+
+```
+htFaltOf_congr_j_of_emb :
+  E₁/L₁ 半安定、E₂/L₂ 半安定、e₁(j(E₁)) = e₂(j(E₂)) ⟹ ht^Falt(E₁) = ht^Falt(E₂)
+```
+
+と、`Found/GenEll/EllModuliObjects.lean` の `faltingsHeightJ` / `faltingsHeightJ_eq`。
+
+### 道筋（7 ブロック）
+
+| 第 | 内容 |
+|---|---|
+| 735 | `primesOverH`——`p` の上の素点を `HeightOneSpectrum` の `Finset` として |
+| 736 | `finsum_scaling`——`f′ = e·f` なら和は `[L′:L]` 倍 |
+| 737 | `valAdd_algebraMap`・`degInfOf_baseChange_of_minDeltaExp`・`htFaltOf_baseChange_of_minDeltaExp` |
+| 738 | `minDeltaExp_eq_maxJ_of_semistable`——半安定なら `v_p(Δ_min) = max(0, −v_p(j))` |
+| 739 | `htFaltOf_congr_j_of_semistable`——同じ体の上で `ht^Falt` は `j` だけで決まる |
+| 740 | `minDeltaExp_baseChange_le`（整モデルの比較、★無条件）で「上でも半安定」の仮説を外す |
+| 741 | `compositum`——2 つの埋め込みの像が生成する体を作り、体が違う場合を閉じる |
+
+### 見込みが外れた点（記録）
+
+着手前の見込みは「同じ `j` の 2 曲線は捻りだから、`√d` を添加した体へ上げて同型にする」
+だった。**実際には捻りの議論は要らなかった**——半安定なら
+
+* 有限素点側 `v_p(Δ_min) = max(0, −v_p(j))`
+* アルキメデス側 `archNorm E σ = curveArchInv (E×σℂ)` は `ℂ` 上の同型不変量
+
+で、両側とも `j` だけで書けるからである。
+
+### 次
+
+* `EllModuliData` の残る大物: `northcott`・`degInf_le_htInf`・`htInf_bdeq_faltings`・
+  `logDiffMell`・`degLe`・`GaloisFinite`・`CompactlyBounded`
+* 別筋: `Skeleton/GenEll/TateIsogeny.lean` の `q`-展開の恒等式（`Lemma 3.5` の `hdeg`）

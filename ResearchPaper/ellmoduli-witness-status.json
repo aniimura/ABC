@@ -1,6 +1,6 @@
 {
   "_comment": "★★★EllModuliData（Interface/GenEll/EllModuli.lean、50 フィールド）の witness を組むための フィールド別の状態表。★§3・§4 の残り 5 件（Lemma 3.5・Lemma 3.7・Theorem 3.8・Corollary 4.3・Corollary 4.4）は Skeleton では sorry なしで証明済みであり、すべてこの witness 1 つに律速される（2026-08-30 実測、第 720）。",
-  "measuredAt": "2026-08-30",
+  "measuredAt": "2026-08-31",
   "measuredBy": "第 720 ブロック",
   "totalFields": 50,
   "vocabulary": {
@@ -155,6 +155,31 @@
       "apiNote20260830": "☆finsum の繊維分解について（第 731 の実測）: mathlib の Mathlib/Algebra/BigOperators/Finprod.lean には finprod_curry（α × β 用）と finprod_mem_finset_eq_prod / finprod_mem_coe_finset はあるが、**任意の写像 π : ι′ → ι の繊維で分解する補題は無い**。★したがって P ↦ ⟨P.under, P⟩ で ι′ ≃ Σ p, {P // P.under = p} の同値を作り、finsum_comp_equiv とシグマ型版の curry を自分で書く必要がある。☆degInfOf の台は有限（hasFiniteSupport_degInf）なので、finsum を Finset の和に落としてから分解するほうが早いかもしれない",
       "underMapNote20260830": "☆第 732 の実測: mathlib の IsDedekindDomain.HeightOneSpectrum.comap は **全射**な環準同型に対するものなので（Ideal/Lemmas.lean:588）、𝓞L → 𝓞L′（単射だが全射でない）には使えない。★したがって『P の下の p』を自分で作る必要がある: P.asIdeal.comap (algebraMap (𝓞 L) (𝓞 L′)) が 𝓞 L の高さ 1 の素点であること（素性は comap で保たれ、非零性は整拡大の単射性から）を示す。☆Ideal.LiesOver / Ideal.primesOver の API がその周辺にある",
       "estimate20260830": "★次のセッションの見積り: under 写像の構成（2-3 ブロック）→ finsum を Finset へ落として繊維分解（3-5 ブロック）→ e·f と absNorm の書き換え（2-3 ブロック）→ scaling 補題（1-2 ブロック）。合わせて 10 前後。★そのあと ht^Falt の基底変換不変性、ねじれの処理、faltingsHeight : ℂ → ℝ の定義、witness の 50 フィールドと続く"
+    },
+    "progress20260831": {
+      "_comment": "★★★★★★★★★★第 735-741 の到達点 —— **firstRealTheorem は証明された**",
+      "result": "★★★`Found/GaloisRep/Compositum.lean` の `htFaltOf_congr_j_of_emb`（§9-1168、第 741）: E₁/L₁ と E₂/L₂ が半安定で、ℂ の中で j が一致するなら ht^Falt(E₁) = ht^Falt(E₂)。★無条件。",
+      "(a) 変数変換不変性": "★済 —— htFaltOf_variableChange（第 722）",
+      "(b) 基底変換不変性": [
+        "★済 —— htFaltOf_baseChange_of_semistable（§9-1165、第 738、仮説は第 740 で「下での半安定性だけ」に弱めた）",
+        "アルキメデス側: archSum_baseChange（第 725）",
+        "有限素点側: finsum_scaling（§9-1163、第 736）＋ minDeltaExp_baseChange_of_semistableAt（§9-1167、第 740）",
+        "★繊維分解は primesOverH（§9-1162、第 735）で HeightOneSpectrum の Finset として作った"
+      ],
+      "(c) ねじれの処理": [
+        "★★☆**要らなかった**。着手前は「同じ j の 2 曲線は捻りだから √d を添加した体へ上げて同型にする」という筋を見込んでいたが、実際には両側とも j だけで書ける（§9-1166、第 739）:",
+        "アルキメデス: curveArchInv_congr_j（在庫、CurveArchInv.lean:154）——ℂ 上の曲線のアルキメデス不変量は同型不変量",
+        "有限素点: minDeltaExp_eq_maxJ_of_semistable（第 738）——半安定なら v_p(Δ_min) = max(0, −v_p(j))"
+      ],
+      "(d) 共通の体の構成": [
+        "★済 —— compositum（§9-1168、第 741）。ℂ の中で 2 つの像が生成する中間体を取る。",
+        "☆測定: Algebra (𝓞 L₁) L₃・IsScalarTower (𝓞 L₁) L₁ L₃・IsScalarTower (𝓞 L₁) (𝓞 L₃) L₃・Module.Finite (𝓞 L₁) (𝓞 L₃) は mathlib がすべて自動で出す。作るのは Algebra L₁ L₃ と IsScalarTower ℚ L₁ L₃ だけ。"
+      ],
+      "欄の完成": "★`Found/GenEll/EllModuliObjects.lean` の `faltingsHeightJ : ℂ → ℝ` と `faltingsHeightJ_eq : faltingsHeightJ E.j = E.htFalt`（第 741）。★★これで EllModuliData の faltingsHeight 欄が仮説なしで埋まる。",
+      "次": [
+        "☆残る大物は northcott（ht^Falt が有界な類は有限）・degInf_le_htInf・htInf_bdeq_faltings・logDiffMell・degLe・GaloisFinite・CompactlyBounded である。",
+        "☆別筋: Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式（Lemma 3.5 の hdeg）。"
+      ]
     }
   }
 }

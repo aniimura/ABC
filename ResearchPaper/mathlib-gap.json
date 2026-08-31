@@ -2289,5 +2289,24 @@
     "comparison": "☆同じ形の FaltingsHeightData は Found/GaloisRep/FaltingsWitness.lean で witness が組めている。TorsionGaloisRepData（Theorem 3.8 の語彙）は型と述語だけで証明義務が無いので容易だが、Skeleton の theorem_3_8 は EllModuliData の上で述べられている",
     "reachableFields": "★本セッションで導出可能になったもの: faltingsHeight_quotLCyclic（第 704-713 の鎖）、degInf_quotLCyclic（第 709-716 ＋ Skeleton/GenEll/TateIsogeny.lean の穴 1 つ）。☆degInf_le_htInf・faltingsHeight_bddBelow・northcott は Found/GaloisRep/Prop34.lean と HtFaltBounds.lean に素材がある",
     "plan": "★次のセッションの本筋: (1) Skeleton/GenEll/TateIsogeny.lean の q-展開の恒等式 2 本（Found/GaloisRep/TateVelu.lean の veluCurve_tateCurveAt_eq が受け皿）、(2) EllModuliData の witness を 50 フィールド順に組む——これが §3・§4 の 5 件を一度に動かす唯一の道である"
+  },
+  "faltingsHeightWellDefined20260831": {
+    "title": "★★★★★★★★ht^Falt は j だけで決まる（半安定曲線、体は違ってよい）",
+    "status": "★閉じた（2026-08-31、第 735-741）",
+    "where": "ABC3.Found.GaloisRep.htFaltOf_congr_j_of_emb（Found/GaloisRep/Compositum.lean）",
+    "mathlibHas": [
+      "IsDedekindDomain.HeightOneSpectrum.valuation_liesOver（v(x)^e = w(f x)）",
+      "Ideal.sum_ramification_inertia（Σ e·f = [L′:L]）",
+      "Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver（N(P) = N(p)^f）",
+      "IsDedekindDomain.HeightOneSpectrum.under（★在庫の見落とし——自作していた）",
+      "IntermediateField.finiteDimensional_sup / AlgEquiv.ofInjectiveField",
+      "NumberField の Algebra (𝓞 K) L・Algebra (𝓞 K) (𝓞 L)・IsScalarTower 一式"
+    ],
+    "mathlibLacks": [
+      "primesOver を HeightOneSpectrum の Finset として取る形（primesOverH で自作）",
+      "finsum の繊維分解と scaling（finsum_scaling で自作）",
+      "整モデルの基底変換（isIntegral_baseChange_primeSubring で自作）"
+    ],
+    "note": "☆捻り（twist）の議論は要らなかった——半安定なら v_p(Δ_min) = max(0, −v_p(j)) で、アルキメデス因子も j の同型不変量なので、両側とも j だけで書ける。"
   }
 }
