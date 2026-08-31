@@ -758,6 +758,66 @@ def tateParam_quot_velu_j_dvr.needs : List ProofObligation :=
     .citation "[ABC3]" "j_congr_curve(曲線が等しければ j も等しい、第 913、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GenEll.j_congr_curve") 1 ]
 
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] 葉 1 ——
+`veluCurve` の形で受ける形**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 927）**——捧りを使うと商は
+`veluQuotientFull`（点集合）ではなく **`veluCurve`**（`v`・`w` の形）で出てくる
+（`quadTwist_veluQuotientFull`、第 925）。
+☆本節点はその形を直接受け、侧条件 `hDX` だけを内部で消す。
+★**非分裂の降下に使える形**である。 -/
+theorem tateParam_quot_veluCurve_dvr {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hΔ : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hlu : IsUnit ((l : R)))
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i))
+    (uζ : Kˣ) (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ l = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
+    (h2 : (2 : R) ≠ 0) (hodd : l ≠ 2)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+      veluV2 (tateCurveAt q hq)
+        (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+      (veluU (tateCurveAt q hq)
+          (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 (tateCurveAt q hq)
+                (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    (W' : WeierstrassCurve K) [W'.IsElliptic] [W'.IsMinimal R]
+    (hsplit : W'.HasSplitMultiplicativeReduction R)
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (hquot : W'.j = ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).j) :
+    tateParamR W' hsplit = q ^ l :=
+  tateParam_quot_mu hl hζ hlu hu q hq hql h2
+    (fun i hi => tateDXpair_ne_zero_of_mu (mkTateSetup q hq hq0) hΔ
+      (dvrTatePhiAddEquiv q hq hq0 hΔ) (fun _ => rfl) hl hodd ζ uζ hζu hζl hord i
+      (Finset.mem_erase.1 hi).1 (Finset.mem_range.1 (Finset.mem_erase.1 hi).2) (hu i hi))
+    v w hv hw W' hsplit hquot
+
+def tateParam_quot_veluCurve_dvr.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(veluCurve の形で受ける形——非分裂の降下に使える)",
+    sectionId := "genell-lemma-3-2" }
+
+def tateParam_quot_veluCurve_dvr.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "tateParam_quot_mu(第 883、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_mu") 1,
+    .citation "[ABC3]" "tateDXpair_ne_zero_of_mu(侧条件は定理、第 894、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateDXpair_ne_zero_of_mu") 1 ]
+
 def j_velu_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Vélu の商の j は j(E_{q^l}) に等しい)",
