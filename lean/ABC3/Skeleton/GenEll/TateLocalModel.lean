@@ -140,4 +140,48 @@ def hasSplitMultiplicativeReduction_baseChange.needs : List ProofObligation :=
        "「非分裂の場合を不分岐 2 次拡大へ上げて降りる」段だけである" ++
        "（局所高さ v(q_E) は変わらない）") 5 ]
 
+/-- **[GenEll] 残る 1 つ**——**非分裂乗法還元の降下**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 918）の測定**——原文は「semi-stable reduction」としか言わないので、
+乗法還元は**非分裂**でもよい。しかし Tate 一意化（`tateParamR`）は
+**分裂**を要求する。
+
+☆古典的な事実: 非分裂の場合、**不分岐 2 次拡大**で分裂になり、
+局所高さ `v(q_E)` も極小判別式の付値 `v_p(Δ_min)` も**変わらない**
+（不分岐なので付値群が変わらず、極小モデルも変わらない）。
+
+★したがって `Lemma 3.5` の結論（`deg∞` と `ht^Falt` の不等式）は
+分裂の場合から降りる。本節点がその降下である。
+
+☆要るもの: 不分岐 2 次拡大 `Lv′/Lv` とその整数環、
+`IsAdicComplete`（第 897 と同じ道）、そして `minDeltaExp` の不変性。 -/
+theorem minDeltaExp_descend_of_nonsplit {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ)
+    (hss : SemistableAt p E) (hbad : jExp p E < 0)
+    (hdescend : True) :
+    (l : ℤ) * minDeltaExp p E ≤ minDeltaExp p E' := by
+  sorry
+
+def minDeltaExp_descend_of_nonsplit.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂乗法還元の降下)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_descend_of_nonsplit.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★不分岐 2 次拡大 Lv′/Lv を作り、その整数環が " ++
+       "IsAdicComplete であることを見る（第 897 と同じ 3 段）") 4,
+    .implicitStep
+      ("★★不分岐なら v_p(Δ_min) は変わらないこと（付値群も極小モデルも変わらない）") 3,
+    .implicitStep
+      ("☆分裂の場合はすでに閉じている——" ++
+       "stableLine_is_mu_of_coprime(906) → tateParam_quot_velu_j_dvr(914) " ++
+       "→ minDeltaExp_eq_mul_of_veluMu(904) → lemma_3_5_velu_bad_delta(903)") 1,
+    .citation "[ABC3]" "hasSplitMultiplicativeReduction_baseChange(分裂の場合、第 910、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.hasSplitMultiplicativeReduction_baseChange") 1 ]
+
 end ABC3.Skeleton.GenEll
