@@ -184,7 +184,60 @@ theorem veluCurve_quadTwist (W : WeierstrassCurve F) [W.IsCharNeTwoNF] (v w d : 
     rw [quadTwist_a₆, hb₂]
     ring
 
+/-! ## ★★捧りは底変換と可換 -/
+
+/-- ★★**捧りは底変換と可換する**。
+
+☆定義が係数の多項式なので `ext` と `map_mul`・`map_pow` だけである。 -/
+theorem quadTwist_map {A : Type} [Field A] (f : F →+* A) (W : WeierstrassCurve F) (d : F) :
+    (quadTwist W d).map f = quadTwist (W.map f) (f d) := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · show f (0 : F) = 0
+    exact map_zero f
+  · show f (d * W.a₂) = f d * f W.a₂
+    exact map_mul f d W.a₂
+  · show f (0 : F) = 0
+    exact map_zero f
+  · show f (d ^ 2 * W.a₄) = f d ^ 2 * f W.a₄
+    rw [map_mul, map_pow]
+  · show f (d ^ 3 * W.a₆) = f d ^ 3 * f W.a₆
+    rw [map_mul, map_pow]
+
+/-! ## ★★★★★★★★★★★★捧った Vélu の商 -/
+
+/-- ★★★★★★★★★★★★**`(E/H)^d = veluCurve (E^d) (d²v) (d³w)`**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**これが非分裂の降下の鍵である**——
+捧った商は、捧った曲線の `veluCurve` として**点集合を介さずに**書ける。
+☆したがって `√d` を体に追加する必要がない——
+`tateParam_quot_mu`（第 883）が消費するのは `veluCurve` の形だからである。 -/
+theorem quadTwist_veluQuotientFull (W : WeierstrassCurve F) [W.IsCharNeTwoNF]
+    (S : Finset (F × F)) (d : F) :
+    quadTwist (veluQuotientFull W S) d
+      = veluCurve (quadTwist W d) (d ^ 2 * veluVFull W S) (d ^ 3 * veluWFull W S) := by
+  rw [veluQuotientFull, veluCurve_quadTwist]
+
+/-- ★★★★捧った商を `veluCurve` の形で取る（仮説を `hE′` で受けた形）。 -/
+theorem quadTwist_eq_veluCurve (W E' : WeierstrassCurve F) [W.IsCharNeTwoNF]
+    (S : Finset (F × F)) (d : F) (hE' : E' = veluQuotientFull W S) :
+    quadTwist E' d
+      = veluCurve (quadTwist W d) (d ^ 2 * veluVFull W S) (d ^ 3 * veluWFull W S) := by
+  rw [hE', quadTwist_veluQuotientFull]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def quadTwist_veluQuotientFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5((E/H)^d = veluCurve (E^d) (d²v) (d³w)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def quadTwist_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(捧りは底変換と可換する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def veluCurve_quadTwist.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
