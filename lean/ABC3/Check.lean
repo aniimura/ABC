@@ -19,6 +19,7 @@ import ABC3.Check.GenEll.AlphaNeedsOneBasis
 import ABC3.Check.GenEll.VeluTateNeedsChange
 import ABC3.Check.GenEll.QuotMuNeedsHypothesis
 import ABC3.Check.GenEll.AdicCompleteMissing
+import ABC3.Check.GenEll.CompletionBridgeWitness
 import ABC3.Check.GenEll.LcyclicExcTooStrong
 import ABC3.Check.GenEll.Section3NotProvable
 import ABC3.Check.AbsTopIII.LogShellLanding

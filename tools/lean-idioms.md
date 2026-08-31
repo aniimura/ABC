@@ -2453,3 +2453,32 @@ B の目標の `image` は `inst✝` を、A の補題は `Classical.propDecidab
 ☆直し方は**どちらかに揃える**こと。本プロジェクトは `open scoped Classical` 側に
 揃えた（`[DecidableEq K]` を variable から外す）。
 ★`tatePhi` のように `[DecidableEq K]` を要求する定義も、Classical があれば通る。
+
+## `have i : C X := inferInstance` を並べるとインスタンスが壊れる（2026-08-31、第 898）
+
+「必要なインスタンスが全部あるか」を 1 つの `example` の中で
+
+```lean
+example ... : True := by
+  have i1 : Field Lv := inferInstance
+  have i2 : Algebra L Lv := inferInstance   -- ★ここで落ちる
+  ...
+```
+
+と並べて確かめてはいけない。`have i1` を置いた瞬間、局所文脈に
+**2 つ目の `Field Lv`** が入る（大域のインスタンスと `i1`）。
+`Algebra L Lv` は `Semiring Lv` を経由するので、どちらの `Field` から
+降りるかで菱形になり **failed to synthesize** で落ちる。
+
+★紛らわしいのは、同じ import・同じ `open` でも
+**`i2` だけを書いたファイルは通る**ことである（原因が import に見える）。
+
+☆直し方: **各インスタンスを別々の `example` で確かめる**。
+
+```lean
+example ... : Algebra L (p.adicCompletion L) := inferInstance
+example ... : IsFractionRing (p.adicCompletionIntegers L) (p.adicCompletion L) := inferInstance
+```
+
+★`Algebra` のようにデータを持つクラスは `noncomputable example` にすること
+（`UniformSpace.Completion.instField` 等が noncomputable なので）。
