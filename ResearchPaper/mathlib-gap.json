@@ -5363,5 +5363,15 @@
     "remaining": "☆残るのは tateProj … 1 の核が l • T_l E であること(T_l E / l ≅ E[l])で、これは l • が E(L̄) の上で全射であることを要る。",
     "idioms": "★addOrderOf_eq_one_iff の真名は AddMonoid.addOrderOf_eq_one_iff。★部分群の membership 証明に rw [pow_one] at h は motive not type correct。★同名の .src が 2 つあると check.mjs は無関係なファイルで NG を出す。★push 前に check.mjs の末尾を読む(第 1184 に続き 2 度目)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "tateLevelOne20260902": {
+    "block": 1202,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★L̄ 上には位数 l の点があり、T_l E の第 1 層に持ち上がる",
+    "goal": "HasLCyclicJ(T_l E の側の安定直線)を Lemma 3.5/3.7 が要る「位数 l の点」へ運ぶ(第 1152 の枠、節点 2)。",
+    "what": "★exists_point_addOrderOf_eq_prime と exists_tateProj_one_eq(Found/GaloisRep/TateLevelOne.lean)。前者は #E[l] = l² ≥ 4 > 1(torsion_card、第 186)から 0 でない l-捩れ点を取り、l 素数なので位数はちょうど l。後者は tateProj_surjective(第 205)の仮説 hstep を exists_smul_step(第 209)で消したもの。",
+    "measured": "★★★これで Lemma 3.5 を有限拡大の上で回す(第 1199)ための**生成元は必ず取れる**ことが言えた —— L̄ に取れば、第 1195(L(H) は有限次)で有限拡大に落ちる。☆在庫を先に引いたので、今回は重複が無かった(第 1201 の訂正の教訓)。",
+    "remaining": "☆残るのは tateProj … 1 の**核**が l • T_l E であること(T_l E / l ≅ E[l])で、これが HasLCyclicJ の**直線**を点の直線へ一意に対応させる段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
