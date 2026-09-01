@@ -93,6 +93,80 @@ theorem natCast_pow_mul_sum_tateD3Xterm (hl : 0 < l) (hζ : IsPrimitiveRoot ζ l
   natCast_pow_mul_sum_inverse hl hζ 5 hu
     (fun i => ζ ^ i * (1 + 11 * ζ ^ i + 11 * (ζ ^ i) ^ 2 + (ζ ^ i) ^ 3))
 
+/-! ## ★★★★★★★★第 1098 —— 「対」の分母払い
+
+☆`tateDXpair`・`tateDYpair`・`tateD2Xpair` はいずれも
+
+    （`ζ^i` での頭項）＋（引数が `I` に入る項だけ）
+
+の形をしている。★後者は `1 − q^n u` が単元なのではじめから問題がない。
+☆したがって `l^k` を掛けると、**頭項の分だけが分母なしの形に化ける**。 -/
+
+section Pair
+
+variable {I : Ideal R} [IsAdicComplete I R]
+
+/-- ★★★★★★★★**`DX` の対の分母払い**（第 1098）。 -/
+theorem natCast_pow_mul_sum_tateDXpair (hl : 0 < l) (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) (q : R) (hq : q ∈ I) :
+    (l : R) ^ 3 * ∑ i ∈ (range l).erase 0,
+        tateDXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = (∑ i ∈ (range l).erase 0,
+          (ζ ^ i * (1 + ζ ^ i)) * ∏ j ∈ ((range l).erase 0).erase i, (1 - ζ ^ j) ^ 3)
+        + (l : R) ^ 3 * ∑ i ∈ (range l).erase 0,
+            (tateDXtail (ζ ^ i) q hq
+              - (tateDXterm (q * (ζ ^ i) ^ (l - 1))
+                  + tateDXtail (q * (ζ ^ i) ^ (l - 1)) q hq)) := by
+  rw [← natCast_pow_mul_sum_tateDXterm hl hζ hu, ← mul_add, ← Finset.sum_add_distrib]
+  refine congrArg _ (Finset.sum_congr rfl (fun i _ => ?_))
+  rw [tateDXpair]
+  ring
+
+/-- ★★★★★★★★**`DY` の対の分母払い**（第 1098）。 -/
+theorem natCast_pow_mul_sum_tateDYpair (hl : 0 < l) (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) (q : R) (hq : q ∈ I) :
+    (l : R) ^ 4 * ∑ i ∈ (range l).erase 0,
+        tateDYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = (∑ i ∈ (range l).erase 0,
+          ((ζ ^ i) ^ 2 * (2 + ζ ^ i))
+            * ∏ j ∈ ((range l).erase 0).erase i, (1 - ζ ^ j) ^ 4)
+        + (l : R) ^ 4 * ∑ i ∈ (range l).erase 0,
+            (tateDYtail (ζ ^ i) q hq
+              + (tateDXterm (q * (ζ ^ i) ^ (l - 1))
+                  + tateDXtail (q * (ζ ^ i) ^ (l - 1)) q hq)
+              + (tateDYterm (q * (ζ ^ i) ^ (l - 1))
+                  + tateDYtail (q * (ζ ^ i) ^ (l - 1)) q hq)) := by
+  rw [← natCast_pow_mul_sum_tateDYterm hl hζ hu, ← mul_add, ← Finset.sum_add_distrib]
+  refine congrArg _ (Finset.sum_congr rfl (fun i _ => ?_))
+  rw [tateDYpair]
+  ring
+
+/-- ★★★★★★★★★★**`D²X` の対の分母払い**（第 1098）。
+
+★`c4_velu_tate` が消費する `sum_mu_d2xpair` の分母なし版の土台である。 -/
+theorem natCast_pow_mul_sum_tateD2Xpair (hl : 0 < l) (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) (q : R) (hq : q ∈ I) :
+    (l : R) ^ 4 * ∑ i ∈ (range l).erase 0,
+        tateD2Xpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq
+      = (∑ i ∈ (range l).erase 0,
+          (ζ ^ i * (1 + 4 * ζ ^ i + (ζ ^ i) ^ 2))
+            * ∏ j ∈ ((range l).erase 0).erase i, (1 - ζ ^ j) ^ 4)
+        + (l : R) ^ 4 * ∑ i ∈ (range l).erase 0,
+            (tateD2Xtail (ζ ^ i) q hq
+              + (tateD2Xterm (q * (ζ ^ i) ^ (l - 1))
+                  + tateD2Xtail (q * (ζ ^ i) ^ (l - 1)) q hq)) := by
+  rw [← natCast_pow_mul_sum_tateD2Xterm hl hζ hu, ← mul_add, ← Finset.sum_add_distrib]
+  refine congrArg _ (Finset.sum_congr rfl (fun i _ => ?_))
+  rw [tateD2Xpair]
+  ring
+
+def natCast_pow_mul_sum_tateD2Xpair.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(D²X ã®å¯¾ã®åæ¯æãââé ­é ã ããåæ¯ãæã¤)",
+    sectionId := "genell-lemma-3-5" }
+
+end Pair
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def natCast_pow_mul_sum_tateXterm.src : Source :=
