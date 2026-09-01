@@ -5702,5 +5702,15 @@
     "measured": "☆M̄ = 1 なら redVec (e (galTate σ x) − e x) = 0 なので redVec_eq_zero_iff(第 1204)で galTate σ x = x + l • u が出る。★Tate の描像では σ π = ζπ で ζ ≠ 1 なので σ は E[l] に自明には作用しない。",
     "consequence": "★★★これで第 1229 の 2 つの仮説(冪単性=第 1234、非自明性=本ブロック)が**どちらも galTate の言葉で**用意できた。☆残るのは Tate 一意化でこの 2 条件を実際に確かめる段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "basisAlpha20260902": {
+    "block": 1236,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★σ が冪単かつ非自明なら、ある基底で行列は α——II 側の到達点",
+    "goal": "α が mod l 像に入る段(第 1160 の枠、II 側)。",
+    "what": "★exists_basis_glRed_eq_alpha(Found/GaloisRep/BasisRealize.lean)—— σ が mod l で冪単かつ非自明に作用するなら、ある基底 e₀ で glRedPadic (galRep e₀ σ) の行列は α。",
+    "measured": "☆繋いだのは 4 段: 冪単性(第 1234)・非自明性(第 1235) → α への共役(第 1229) → Z_l への持ち上げ(第 1230) → 基底の取り替え(第 1231-1232)。",
+    "consequence": "★★★これで α ∈ (galRep の像).map (glRedPadic l) が出る —— AlphaBridge の II 側の**到達点**である。☆残るのは冪単性と非自明性を Tate 一意化(第 1212・1227)で実際に確かめる段だけ。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
