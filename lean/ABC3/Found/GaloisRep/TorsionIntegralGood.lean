@@ -4,6 +4,10 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.MulOrder
 import ABC3.Found.GaloisRep.NonDegen
 import ABC3.Found.GaloisRep.PointValuation
+import ABC3.Found.GenEll.VeluPointSet
+import ABC3.Found.GenEll.SymmSum
+import ABC3.Found.GaloisRep.TateVeluPoints
+import ABC3.Found.GenEll.VeluImage
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 
 /-!
@@ -79,7 +83,8 @@ theorem preΨ_eval_eq_zero_of_addOrderOf_prime {x y : F} (h : W.toAffine.Nonsing
 
 section Integral
 
-open IsDedekindDomain NumberField
+open IsDedekindDomain NumberField ABC3.Found.GenEll
+open scoped Classical
 
 /-- ☆**主係数が単元なら根は整**。 -/
 theorem isIntegral_of_isUnit_leadingCoeff {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
@@ -87,7 +92,7 @@ theorem isIntegral_of_isUnit_leadingCoeff {R S : Type*} [CommRing R] [CommRing S
     (hu : IsUnit q.leadingCoeff) : IsIntegral R x := by
   simpa [smul_smul] using (isIntegral_leadingCoeff_smul _ _ hq).smul ((hu.unit⁻¹ : Rˣ) : R)
 
-variable {L : Type} [Field L] [NumberField L] [DecidableEq L]
+variable {L : Type} [Field L] [NumberField L]
 
 /-- ★★★★★★★★★★★★★★★★★★★★**良い素点では捕れ点の `x` 座標は整**（第 1073）。
 
@@ -197,6 +202,174 @@ theorem mem_primeSubring_y_of_mem_x (p : HeightOneSpectrum (𝓞 L))
   have h0 := hRhs hRne
   rw [← valAdd_congr p hLne hRne heq', hLval] at h0
   omega
+
+
+/-! ## ★★★★★★★★★★★★★★★★第 1074 —— すべての倍点の座標が整 -/
+
+/-- ★★★★★★★★★★★★★★★★**位数 `l` の点のすべての倍点の座標は整**（第 1074）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`l` が素数なので `0 < k < l` なら `k • Q` も位数 `l` である。 -/
+theorem pointCoords_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
+    (pointCoords (k • Q)).1 ∈ primeSubring p ∧ (pointCoords (k • Q)).2 ∈ primeSubring p := by
+  have hkne : k • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hk0 hkl
+  have hlz : l • Q = 0 := by rw [← hQ]; exact addOrderOf_nsmul_eq_zero Q
+  have hdvd : addOrderOf (k • Q) ∣ l := by
+    refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    rw [smul_comm, hlz, smul_zero]
+  have hord : addOrderOf (k • Q) = l := by
+    rcases (Nat.Prime.eq_one_or_self_of_dvd hl _ hdvd) with h1 | h1
+    · exact absurd (AddMonoid.addOrderOf_eq_one_iff.1 h1) hkne
+    · exact h1
+  rcases hkQ : k • Q with _ | ⟨x, y, h⟩
+  · exact absurd hkQ hkne
+  · have hord' : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l := hkQ ▸ hord
+    have hx := mem_primeSubring_x_of_addOrderOf_prime p E hl hodd hlu h hord'
+    refine ⟨?_, ?_⟩
+    · simpa only [hkQ, pointCoords_some] using hx
+    · simpa only [hkQ, pointCoords_some] using mem_primeSubring_y_of_mem_x p E h.1 hx
+
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 良い素点では Vélu の商は整**（第 1074）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆座標が `R` の元（第 1073）、`v` は和そのもの、`w` は `exists_veluW_of_inv`（第 960）。
+★形式群は一度も使っていない。 -/
+theorem isIntegral_veluQuotientFull_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [hE : WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
+    (veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q)))).IsIntegral (primeSubring p) := by
+  classical
+  obtain ⟨Wi, hWi⟩ := hE.integral
+  obtain ⟨m, rfl⟩ : ∃ m, l = 2 * m + 1 := hl.odd_of_ne_two hodd
+  have hlz : (2 * m + 1) • Q = 0 := by rw [← hQ]; exact addOrderOf_nsmul_eq_zero Q
+  have hmem : ∀ k ∈ (range (2 * m + 1)).erase 0,
+      (pointCoords (k • Q)).1 ∈ primeSubring p ∧
+        (pointCoords (k • Q)).2 ∈ primeSubring p := by
+    intro k hk
+    rw [mem_erase, mem_range] at hk
+    exact pointCoords_mem_of_addOrderOf_prime p E hl hodd hlu Q hQ hk.1 hk.2
+  set X : ℕ → primeSubring p := fun i =>
+    if h : (pointCoords (i • Q)).1 ∈ primeSubring p then ⟨(pointCoords (i • Q)).1, h⟩
+    else 0 with hXdef
+  set Y : ℕ → primeSubring p := fun i =>
+    if h : (pointCoords (i • Q)).2 ∈ primeSubring p then ⟨(pointCoords (i • Q)).2, h⟩
+    else 0 with hYdef
+  have hXc : ∀ i ∈ (range (2 * m + 1)).erase 0,
+      algebraMap (primeSubring p) L (X i) = (pointCoords (i • Q)).1 := by
+    intro i hi
+    simp only [hXdef, dif_pos (hmem i hi).1]
+    rfl
+  have hYc : ∀ i ∈ (range (2 * m + 1)).erase 0,
+      algebraMap (primeSubring p) L (Y i) = (pointCoords (i • Q)).2 := by
+    intro i hi
+    simp only [hYdef, dif_pos (hmem i hi).2]
+    rfl
+  have hP : ∀ i ∈ (range (2 * m + 1)).erase 0, pointCoords (i • Q)
+      = ((algebraMap (primeSubring p) L (X i),
+          algebraMap (primeSubring p) L (Y i)) : L × L) := by
+    intro i hi
+    rw [hXc i hi, hYc i hi]
+  -- ☆添字の反転は点の反転
+  have hsub : ∀ i ∈ Icc 1 m, (2 * m + 1 - i) ∈ (range (2 * m + 1)).erase 0 := by
+    intro i hi
+    rw [mem_Icc] at hi
+    rw [mem_erase, mem_range]
+    omega
+  have hin : ∀ i ∈ Icc 1 m, i ∈ (range (2 * m + 1)).erase 0 := by
+    intro i hi
+    rw [mem_Icc] at hi
+    rw [mem_erase, mem_range]
+    omega
+  have hneg : ∀ i ∈ Icc 1 m,
+      pointCoords ((2 * m + 1 - i) • Q)
+        = ((pointCoords (i • Q)).1,
+           (Wi.map (algebraMap (primeSubring p) L)).toAffine.negY
+             (pointCoords (i • Q)).1 (pointCoords (i • Q)).2) := by
+    intro i hi
+    rw [mem_Icc] at hi
+    have hkne : i • Q ≠ 0 :=
+      nsmul_ne_zero_of_lt_addOrderOf hQ (by omega) (by omega)
+    have := nsmul_eq_neg_nsmul_of_addOrderOf hlz (by omega : i ≤ 2 * m + 1)
+    rw [this]
+    have hEq : E = Wi.map (algebraMap (primeSubring p) L) := hWi
+    subst hEq
+    exact pointCoords_neg hkne
+  have hXinv : ∀ i ∈ Icc 1 m, X (2 * m + 1 - i) = X i := by
+    intro i hi
+    have h1 := hXc _ (hsub i hi)
+    have h2 := hXc i (hin i hi)
+    apply Subtype.ext
+    have : algebraMap (primeSubring p) L (X (2 * m + 1 - i))
+        = algebraMap (primeSubring p) L (X i) := by
+      rw [h1, h2, hneg i hi]
+    exact this
+  have hYinv : ∀ i ∈ Icc 1 m, Y (2 * m + 1 - i) = Wi.toAffine.negY (X i) (Y i) := by
+    intro i hi
+    apply Subtype.ext
+    have hL : algebraMap (primeSubring p) L (Y (2 * m + 1 - i))
+        = algebraMap (primeSubring p) L (Wi.toAffine.negY (X i) (Y i)) := by
+      rw [hYc _ (hsub i hi), hneg i hi]
+      rw [← hXc i (hin i hi), ← hYc i (hin i hi)]
+      exact (WeierstrassCurve.Affine.map_negY (W' := Wi)
+        (algebraMap (primeSubring p) L) (X i) (Y i)).symm
+    exact hL
+  obtain ⟨w, hw⟩ := ABC3.Found.GenEll.exists_veluW_of_inv Wi m X Y hXinv hYinv
+  -- ★単射性
+  have hinj : ∀ i ∈ (range (2 * m + 1)).erase 0, ∀ j ∈ (range (2 * m + 1)).erase 0,
+      ((algebraMap (primeSubring p) L (X i), algebraMap (primeSubring p) L (Y i)) : L × L)
+        = ((algebraMap (primeSubring p) L (X j), algebraMap (primeSubring p) L (Y j)) : L × L)
+      → i = j := by
+    intro i hi j hj hij
+    rw [mem_erase, mem_range] at hi hj
+    have hne_i : i • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hi.1 hi.2
+    have hne_j : j • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hj.1 hj.2
+    have hEq : i • Q = j • Q := by
+      refine pointCoords_injective hne_i hne_j ?_
+      rw [hP i (by rw [mem_erase, mem_range]; exact hi),
+        hP j (by rw [mem_erase, mem_range]; exact hj)]
+      exact hij
+    rcases le_total i j with hle | hle
+    · have h1 : (j - i) • Q + i • Q = j • Q := by
+        rw [← add_nsmul, Nat.sub_add_cancel hle]
+      rw [← hEq] at h1
+      have h2 : (j - i) • Q = 0 :=
+        add_right_cancel (b := i • Q) (by rw [h1, zero_add])
+      have h3 : addOrderOf Q ∣ (j - i) := addOrderOf_dvd_of_nsmul_eq_zero h2
+      rw [hQ] at h3
+      have := Nat.eq_zero_of_dvd_of_lt h3
+      omega
+    · have h1 : (i - j) • Q + j • Q = i • Q := by
+        rw [← add_nsmul, Nat.sub_add_cancel hle]
+      rw [hEq] at h1
+      have h2 : (i - j) • Q = 0 :=
+        add_right_cancel (b := j • Q) (by rw [h1, zero_add])
+      have h3 : addOrderOf Q ∣ (i - j) := addOrderOf_dvd_of_nsmul_eq_zero h2
+      rw [hQ] at h3
+      have := Nat.eq_zero_of_dvd_of_lt h3
+      omega
+  -- ★組み立て
+  have hS : ((range (2 * m + 1)).erase 0).image (fun k : ℕ => pointCoords (k • Q))
+      = ((range (2 * m + 1)).erase 0).image
+          (fun i : ℕ => ((algebraMap (primeSubring p) L (X i),
+                          algebraMap (primeSubring p) L (Y i)) : L × L)) :=
+    Finset.image_congr (fun i hi => hP i hi)
+  refine ⟨ABC3.Found.GenEll.veluCurve Wi
+    (∑ i ∈ (range (2 * m + 1)).erase 0, ABC3.Found.GenEll.veluV2 Wi (X i) (Y i)) w, ?_⟩
+  rw [hS, hWi]
+  exact ABC3.Found.GenEll.veluQuotientFull_image_eq Wi ((range (2 * m + 1)).erase 0) X Y hinj
+    _ w (two_ne_zero) rfl hw
 
 end Integral
 
