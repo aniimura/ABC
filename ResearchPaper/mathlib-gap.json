@@ -3308,5 +3308,17 @@
     "bigSimplification": "★★★★**界面が大きく軽くなった**: 第 892／972 は `E′` についても分裂乗法還元・極小モデル・`C′`・`hc4′` を要求していた。☆だが `minDeltaExp = max(0, −jExp)`（在庫）なので、**`jExp p E′ = l · jExp p E` さえ出れば済む**。そして `jExp` は第 932 により **`j` の一致だけ**から出る。★したがって `E′` の側に分裂性も極小モデルも要らない——要るのは「`E′ ⊗ Lv` の `j` が `E_{q^l} ⊗ Lv` の `j` に等しい」ことだけである。",
     "remaining": "☆残るのは (i) `E` の側の局所データを揃える段（954・976・993・994、すべて在庫）、(ii) `j` の一致を 950／967／970 から取り出す段、(iii) 995 に流して `IsMuAtBadPrimes` を閉じる段。",
     "note": "★944-995 の 47 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35JVeluQuot20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 996",
+    "supersedes": "lemma35EprimeJOnly20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★`j_veluQuot_eq_j_tate_pow`（996）——`μ_l` による Vélu の商の `j` は `E_{q^l}` の `j`。☆`veluQuotientFull_tate_mu`（890）で商を `veluCurve` の形にし、`j_velu_tate_mu_map`（886）で `E_{q^l}` に繋ぐだけ。"
+    ],
+    "whyItMatters": "★★★★第 914（`tateParam_quot_velu_j_dvr`）はこの後 `tateParamR_eq_of_j_tateCurveAt` に流して `q_{E′} = q_E^l` を出していたが、そこで **`E′` の分裂性**が要った。☆第 995 で「`E′` の側は `j` だけでよい」と分かったので、**`j` の段で止めれば `E′` の分裂性も極小モデルも要らない**。★本ブロックはその「止めた形」を独立の定理として据えたものである。",
+    "remaining": "☆残るのは (i) 970（`exists_point_j_tateModel′`）から `E′ ⊗ Lv` の `j` を本ブロックの左辺に合わせる段、(ii) それを 995 に流して `IsMuAtBadPrimes` を閉じる段、(iii) `p ∣ 2` の非分裂を不分岐 2 次拡大で処理する段（943＋944 が道具）。",
+    "note": "★944-996 の 48 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
