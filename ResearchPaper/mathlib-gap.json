@@ -5692,5 +5692,15 @@
     "idioms": "★simp に redVec_nsmul を入れると l • が ↑l * に化けて ZMod.natCast_self が当たらなくなる。redVec_nsmul_self(l 倍は mod l で消える)を直接使い、仮説の 2 • は y + y の形で書く。",
     "consequence": "☆残るのは非自明性(σ が E[l] に自明でなく作用すること)を Tate 側から出す段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "glRedNeOne20260902": {
+    "block": 1235,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★σ が mod l で自明でなく作用するなら行列も ≠ 1",
+    "goal": "第 1229(冪単は α に共役)のもう一方の仮説を Tate 側から出す。",
+    "what": "★glRed_ne_one_of_galTate(Found/GenEll/AlphaMatrix.lean)。",
+    "measured": "☆M̄ = 1 なら redVec (e (galTate σ x) − e x) = 0 なので redVec_eq_zero_iff(第 1204)で galTate σ x = x + l • u が出る。★Tate の描像では σ π = ζπ で ζ ≠ 1 なので σ は E[l] に自明には作用しない。",
+    "consequence": "★★★これで第 1229 の 2 つの仮説(冪単性=第 1234、非自明性=本ブロック)が**どちらも galTate の言葉で**用意できた。☆残るのは Tate 一意化でこの 2 条件を実際に確かめる段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

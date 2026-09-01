@@ -141,7 +141,42 @@ theorem glRed_unipotent_of_galTate (l : ℕ) [Fact l.Prime]
   rw [Matrix.zero_mulVec, ← hw, hexp, eq_sub_of_add_eq hkey2]
   abel
 
+/-- ★★★★★★★★★★★★★★★★
+**`σ` が `mod l` で自明でなく作用するなら行列も `≠ 1`**——★**無条件**（第 1235）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆Tate の描像では `σ π = ζπ` で `ζ ≠ 1` なので `σ` は `E[l]` に自明には作用しない。
+★★★これが第 1229（冪単は `α` に共役）のもう一方の仮説を与える。 -/
+theorem glRed_ne_one_of_galTate (l : ℕ) [Fact l.Prime]
+    (W : WeierstrassCurve K) (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l]))
+    (σ : L ≃ₐ[K] L)
+    (h1 : ∃ x : tateModule (W.baseChange L) l,
+      ∀ u : tateModule (W.baseChange L) l, galTate W l σ x ≠ x + l • u) :
+    ((glRedPadic l (galRep W l e σ) : GL (Fin 2) (ZMod l)) :
+      Matrix (Fin 2) (Fin 2) (ZMod l)) ≠ 1 := by
+  obtain ⟨x, hx⟩ := h1
+  intro hone
+  have hact : redVec l (e (galTate W l σ x)) = redVec l (e x) := by
+    rw [redVec_galTate l W e σ, hone, Matrix.one_mulVec]
+  have hzero : redVec l (e (galTate W l σ x) - e x) = 0 := by
+    rw [redVec_sub, hact, sub_self]
+  obtain ⟨u', hu'⟩ := (redVec_eq_zero_iff l _).1 hzero
+  refine hx (e.symm u') ?_
+  have hE : e (galTate W l σ x) = e x + l • e (e.symm u') := by
+    rw [e.apply_symm_apply, ← hu']
+    abel
+  have := congrArg e.symm hE
+  rw [e.symm_apply_apply] at this
+  rw [this, map_add, map_nsmul, e.symm_apply_apply, e.symm_apply_apply]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def glRed_ne_one_of_galTate.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(σ が mod l で自明でなく作用するなら行列も ≠ 1。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def glRed_unipotent_of_galTate.src : Source :=
   { paper := "GenEll", pdfPage := 19,
