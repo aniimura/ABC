@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.BadPrimeData
+import ABC3.Found.GenEll.QuadTwist
 import ABC3.Found.GaloisRep.CompletionValuationBridge
 import Mathlib.FieldTheory.KummerExtension
 import Mathlib.RingTheory.AdicCompletion.Basic
@@ -765,6 +766,57 @@ theorem hasMultiplicativeReduction_ext (p : HeightOneSpectrum (𝓞 L))
     (valuation_algebraMap_ext p hp hf hdeg hirr halg) E C hC hc4ne hc4 hj
 
 end ExtLocalData
+
+/-! ## ★★★★★★★★★★★★第 1030 —— 整モデルは拡大で係数ごとに移る
+
+★`HasSplitMultiplicativeReduction` の `Splits` 条件は
+**整モデルの係数**で書かれている。
+☆したがって `integralModel R′ (W ⊗ Lv′)` が
+`(integralModel R (W ⊗ Lv)).map φ` であることが要る。
+
+★mathlib の `integralModel` は `.choose` で定義されているが、
+第 925 の `integralModel_eq_of_map_eq`（底変換が一致すれば一意）で決まる。 -/
+
+section IntegralModelExt
+
+open Polynomial IsDedekindDomain WeierstrassCurve in
+/-- ★★★★★★★★★★★★**整モデルは拡大で係数ごとに移る**（第 1030）。 -/
+theorem integralModel_ext {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsDomain (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom hf hdeg (algebraMap L Lv x))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral R (W.baseChange Lv)]
+    [WeierstrassCurve.IsIntegral (AdjoinRoot f)
+      (W.baseChange (FractionRing (AdjoinRoot f)))] :
+    WeierstrassCurve.integralModel (AdjoinRoot f)
+        (W.baseChange (FractionRing (AdjoinRoot f)))
+      = (WeierstrassCurve.integralModel R (W.baseChange Lv)).map
+        (algebraMap R (AdjoinRoot f)) := by
+  refine ABC3.Found.GenEll.integralModel_eq_of_map_eq (IsFractionRing.injective _ _) _ _ ?_
+  rw [WeierstrassCurve.map_map]
+  have hcomp : (algebraMap (AdjoinRoot f) (FractionRing (AdjoinRoot f))).comp
+      (algebraMap R (AdjoinRoot f))
+      = (quadFieldHom (K := Lv) hf hdeg).comp (algebraMap R Lv) := by
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    exact (quadFieldHom_algebraMap hf hdeg x).symm
+  rw [hcomp, ← WeierstrassCurve.map_map]
+  have h1 : (WeierstrassCurve.integralModel R (W.baseChange Lv)).map (algebraMap R Lv)
+      = W.baseChange Lv := WeierstrassCurve.baseChange_integralModel_eq R (W.baseChange Lv)
+  rw [h1]
+  show (W.map (algebraMap L Lv)).map (quadFieldHom hf hdeg) = W.map (algebraMap L _)
+  rw [WeierstrassCurve.map_map]
+  congr 1
+  ext x
+  simp only [RingHom.coe_comp, Function.comp_apply]
+  exact (halg x).symm
+
+end IntegralModelExt
 
 /-! ## ★出典の紐付け(`.src`) -/
 
