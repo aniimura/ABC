@@ -11,6 +11,7 @@ import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Skeleton.GenEll.TateIsogeny
 import ABC3.Found.GaloisRep.Lemma35Ineq
+import ABC3.Found.GaloisRep.UnramQuad
 
 /-!
 # `Lemma 3.5` に残る 2 つ —— **局所モデルの完備化への移行**（`Skeleton`）
@@ -390,6 +391,102 @@ def lemma_3_5_velu_mu.needs : List ProofObligation :=
        "(1) `hsplit`（`p ∣ 2` の非分裂＝不分岐 2 次拡大待ち）、(2) `hlu`（`p ∤ l`）。" ++
        "★その他（`P`・`Cv`・`neronExp = 0`・`IsIntegral`）は第 903 が" ++
        "もともと受けていたものである") 2 ]
+
+/-! ## ★★★★★★★★★★★★★★★★第 1009 —— 非分裂を含めた節点
+
+★第 1004／1005 は `hsplit`（完備化で**分裂**乗法還元）を仮説に置いていた。
+☆本節点はそれを**外した形**であり、残る仮説は `hlu`（`p ∤ l`）だけである。
+
+★★分裂の場合は**すでに証明済み**（第 1004）。残るのは非分裂の場合で、
+古典的には**不分岐 2 次拡大**に上げて分裂に帰着する:
+
+| 段 | 状況 |
+|---|---|
+| 捻り `d`（完備化の整数環の単元）を取る | ★第 992／993 で**済** |
+| `d` が平方でなければ `K` でも平方でない | ★第 1007 で**済** |
+| `X² − d` が既約 → `K(√d)` は 2 次拡大 | ★第 1008 で**済** |
+| `R[√d]` が完備離散付値環（`e = 1`） | ☆残 |
+| 付値の橋 `hp′` が `L` 上でそのまま | ☆残（不分岐なので `e = 1`） |
+| そこで分裂するので第 997 が当たる | ☆残 |
+
+☆第 997（`jExp_eq_mul_of_j_tate_pow`）は `Lv`・`R` について**一般**なので、
+上の 3 段が済めばそのまま当たる。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点での `Δ_min` の関係
+（分裂性を仮定しない形）**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1009）**——分裂の場合は第 1004 で証明済み。
+☆非分裂の場合が不分岐 2 次拡大待ちである（葉は第 1007／1008 で 2 つ済んだ）。 -/
+theorem minDeltaExp_eq_mul_at_bad_prime_any {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  sorry
+
+def minDeltaExp_eq_mul_at_bad_prime_any.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点での Δ_min の関係——分裂性を仮定しない形)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_at_bad_prime_any.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_full(分裂の場合、第 1004、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_full") 1,
+    .citation "[ABC3]" "splits_or_twist_at_completion(捻り d を取る、第 992、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.splits_or_twist_at_completion") 1,
+    .citation "[ABC3]" "not_isSquare_in_fractionField(d は K でも平方でない、第 1007、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.not_isSquare_in_fractionField") 1,
+    .citation "[ABC3]"
+      "irreducible_X_sq_sub_C_fractionField(X² − d は既約、第 1008、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.irreducible_X_sq_sub_C_fractionField") 1,
+    .citation "[ABC3]" "jExp_eq_mul_of_j_tate_pow(Lv・R について一般、第 997、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.jExp_eq_mul_of_j_tate_pow") 1,
+    .implicitStep
+      ("☆残る 3 段: (1) `R[√d]` が完備離散付値環であること" ++
+       "（`d` は単元なので不分岐、`𝔪R[√d]` が極大で主。" ++
+       "mathlib は `integralClosure.isDedekindDomain` を持つ）、" ++
+       "(2) 付値の橋 `hp′`（不分岐なので `e = 1`）、" ++
+       "(3) そこで分裂すること（剰余体の 2 次拡大で 2 次式が分裂する）") 3 ]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] `IsMuAtBadPrimes`——
+残る仮説は `p ∤ l` の 1 本だけ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1009）**——第 1005 から `hsplit` を外した形である。 -/
+theorem isMuAtBadPrimes_of_veluQuotient_of_coprime {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
+    (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : ∀ p : HeightOneSpectrum (𝓞 L), IsUnit ((l : (p.adicCompletionIntegers L)))) :
+    IsMuAtBadPrimes E E' l := fun p hbad =>
+  minDeltaExp_eq_mul_at_bad_prime_any p E E' (hssE p) (hssE' p) hbad hl hodd
+    (hcop p hbad) (hlu p) hQ hE'
+
+def isMuAtBadPrimes_of_veluQuotient_of_coprime.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(IsMuAtBadPrimes——残る仮説は p ∤ l の 1 本)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMuAtBadPrimes_of_veluQuotient_of_coprime.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_any(第 1009)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_any") 1 ]
 
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
