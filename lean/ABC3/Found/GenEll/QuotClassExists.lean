@@ -233,12 +233,49 @@ theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) (l : ℕ)
   rw [hx]
   exact hq
 
+/-- ★★★★★★★★★★★★
+**悪い素点の関係を全素点へ束ねる**——★**無条件**（第 1258）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`hbad` は `minDeltaExp_eq_mul_at_bad_prime`
+（`Skeleton/GenEll/TateIsogeny.lean`、証明済み）が与える形である。
+★良い素点（`0 ≤ v_p(j)`）では両辺とも `0`。
+
+★★★これが第 1244（`quotLCyclicJ` の `deg∞`）が要る `hloc` を
+**局所の結果から直接**作る段である。 -/
+theorem minDeltaExp_eq_mul_all {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    (hss' : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E') {l : ℕ}
+    (hbad : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 →
+      minDeltaExp p E' = l * minDeltaExp p E)
+    (hgood : ∀ p : HeightOneSpectrum (𝓞 L), 0 ≤ jExp p E → 0 ≤ jExp p E') :
+    ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E' = l * minDeltaExp p E := by
+  intro p
+  rcases lt_or_ge (jExp p E) 0 with hneg | hnn
+  · exact hbad p hneg
+  · have h1 : minDeltaExp p E = 0 := by
+      rw [minDeltaExp_eq_maxJ_of_semistable p E (hss p)]
+      exact max_eq_left (by omega)
+    have h2 : minDeltaExp p E' = 0 := by
+      rw [minDeltaExp_eq_maxJ_of_semistable p E' (hss' p)]
+      have hg := hgood p hnn
+      exact max_eq_left (by omega)
+    rw [h1, h2, mul_zero]
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
     sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_all.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(悪い素点の関係を全素点へ束ねる。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def minDeltaExp_eq_mul_of_jExp_all.src : Source :=
   { paper := "GenEll", pdfPage := 15,

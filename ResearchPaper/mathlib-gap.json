@@ -5919,5 +5919,15 @@
     "correction": "★第 1250 の地図で (2)(3) の「残る前提」を外部の未証明結果のように書いたのは**不正確**だった。正しくは**どちらも在庫にあり、残るのは幾何のデータを渡す配管**である。",
     "remaining": "☆したがって witness の 4 本に残るのは: (1) VeluQuotOK(商の楕円性・半安定性・乗法還元——原文が括弧で畳む段)、(2) 局所(minDeltaExp_eq_mul_at_bad_prime)を全素点で束ねる配管、(3) htFalt_veluQuotientFull_le に周期対・極小性・整性のデータを渡す配管、(4) σ の mod l の冪単性・非自明性(Tate 一意化から)。★**未証明の外部引用は 1 本も残っていない**。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "minDeltaBundle20260902": {
+    "block": 1258,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★悪い素点の関係を全素点へ束ねる——witness (2) の配管",
+    "goal": "EllModuliWitness の sorry (2) の「局所を全素点で束ねる配管」。",
+    "what": "★minDeltaExp_eq_mul_all(Found/GenEll/QuotClassExists.lean)。",
+    "measured": "☆hbad は minDeltaExp_eq_mul_at_bad_prime(Skeleton/GenEll/TateIsogeny.lean、証明済み)が与える形そのもの。★良い素点(0 ≤ v_p(j))では両辺とも 0。",
+    "consequence": "★★★これで witness の sorry (2) の道は「局所の結果(証明済み)＋良い素点で符号が保たれること」だけになった —— 第 1244 の hloc に直接渡せる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
