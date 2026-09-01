@@ -5123,5 +5123,14 @@
     "why": "★★★これが節点 2d の**中身**である——M を L̄_v と取れば E' ⊗ L_v を局所の Vélu の商と合わせる hcurveEq が出る。☆残るのは L̄ ↪ L̄_v を IsAlgClosed.lift で取り、安定直線の像が μ_l になること(Lemma 3.2, (i))を当てる段だけ。",
     "pitfall": "☆`open scoped Classical in` は `set_option ... in` と同じく**docstring の前**に置かないと「unexpected token 'open'; expected 'lemma'」になる。★lean-idioms.md の set_option の項と同じ穴である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "descentAlgClosed20260902": {
+    "block": 1180,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★Gal-安定な商はどの代数閉体の上でも Vélu の商——2d が hcurveEq の形まで来た",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d)。",
+    "what": "★veluQuotientFull_descends_algClosed —— M が L を含む代数閉体なら IsAlgClosed.lift で L̄ ↪ M が取れるので、第 1154(降下)と第 1179(底変換)を合わせて W'⁄M = veluQuotientFull (W⁄M) (ι(S)) が出る。",
+    "why": "★★★M を L̄_v(L_v の代数閉包)と取れば、これが節点 2d が要求する **hcurveEq の形**である。☆残るのは ι(S) が Tate 一意化の下で μ_l の座標集合になること(Lemma 3.2, (i))を当てる段だけ。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

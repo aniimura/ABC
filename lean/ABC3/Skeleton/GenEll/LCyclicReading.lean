@@ -121,7 +121,7 @@ import ABC3.Meta.Claim
 | 2b | `x` が整なら `y` も整（Weierstrass 方程式が `y` についてモニック） | ★第 1156（`isIntegral_y_of_isIntegral_x`） |
 | 2c | `v` は多項式なので整、かつ `L` の元 ⟹ **属する** | ★第 1157（`isIntegral_veluVFull`・`mem_primeSubring_of_isIntegral_image`） |
 | 2c' | `w` の `/2` | ★第 1158（`isIntegral_veluWFull_of_addOrderOf_prime`）——再添字して既存の対を使った |
-| 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ☆残る。★**使われているのは `hcurveEq` の 1 か所だけ**と実測済（下記） |
+| 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ★**第 1179-1180 で `hcurveEq` の形まで取れた**（`veluQuotientFull_descends_algClosed`）。☆残るのは `ι(S)` が `μ_l` の座標集合になること（`Lemma 3.2, (i)`）を当てる段 |
 
 ★**付値の議論（深さ `m`・`ValAtLeast` の連鎖）がまるごと要らなくなる**のが本計測の利きである。
 

@@ -133,6 +133,42 @@ theorem veluQuotientFull_descends_map (W W' : WeierstrassCurve L)
           (S.image (fun Q => (f Q.1, f Q.2))) := by
   rw [← WeierstrassCurve.map_map, hW', veluQuotientFull_map, ← WeierstrassCurve.map_map]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★任意の代数閉体へ運ぶ -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`Gal`-安定な商はどの代数閉体の上でも Vélu の商**——★**無条件**（第 1180）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`M` が `L` を含む代数閉体なら `IsAlgClosed.lift` で `L̄ ↪ M` が取れるので、
+第 1154（降下）と第 1179（底変換）を合わせて
+
+    `W'⁄M = veluQuotientFull (W⁄M) (ι(S))`
+
+が出る。★★★`M` を `L̄_v`（`L_v` の代数閉包）と取れば、
+これが `LCyclicReading` の節点 2d が要求する `hcurveEq` の形である。
+☆残るのは `ι(S)` が Tate 一意化の下で `μ_l` の座標集合になること
+（`Lemma 3.2, (i)`）を当てる段だけである。 -/
+theorem veluQuotientFull_descends_algClosed (W : WeierstrassCurve L)
+    (S : Finset (Lbar × Lbar))
+    (hS : ∀ σ : Lbar ≃ₐ[L] Lbar, ∀ z ∈ S, semiPair (σ : Lbar ≃+* Lbar) z ∈ S)
+    (M : Type) [Field M] [IsAlgClosed M] [Algebra L M] :
+    ∃ (W' : WeierstrassCurve L) (f : Lbar →+* M),
+      (∀ x : L, f (algebraMap L Lbar x) = algebraMap L M x) ∧
+      W'.map (algebraMap L M)
+        = veluQuotientFull (W.map (algebraMap L M))
+            (S.image (fun Q => (f Q.1, f Q.2))) := by
+  obtain ⟨W', hW'⟩ := veluQuotientFull_descends W S hS
+  letI ι : Lbar →ₐ[L] M := IsAlgClosed.lift
+  refine ⟨W', ι.toRingHom, fun x => ι.commutes x, ?_⟩
+  have hcomp : (ι.toRingHom : Lbar →+* M).comp (algebraMap L Lbar) = algebraMap L M := by
+    ext x
+    exact ι.commutes x
+  have h := veluQuotientFull_descends_map W W' S hW' (ι.toRingHom : Lbar →+* M)
+  rwa [hcomp] at h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_of_fixed.src : ABC3.Meta.Source :=
@@ -148,6 +184,20 @@ def fixesCoeffs_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(底変換した曲線の係数はどの σ でも固定される。★無条件)",
     sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_algClosed.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Gal-安定な商はどの代数閉体の上でも Vélu の商。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_algClosed.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "IsAlgClosed.lift(代数的な体は代数閉体に埋め込める)"
+      (.inMathlib "IsAlgClosed.lift") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1180）**——`M` を `L̄_v`（`L_v` の代数閉包）と取れば、" ++
+       "これが `LCyclicReading` の節点 2d が要求する `hcurveEq` の形である。" ++
+       "☆残るのは `ι(S)` が Tate 一意化の下で `μ_l` の座標集合になること" ++
+       "（`Lemma 3.2, (i)`）を当てる段だけである。") 1 ]
 
 def veluQuotientFull_descends_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
