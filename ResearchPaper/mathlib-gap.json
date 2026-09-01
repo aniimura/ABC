@@ -6236,5 +6236,15 @@
   "route": "★座標では `σ(vcX C x) = vcX C (σ x)`（第 1284）であり、点は座標で決まる（第 1286 と同じ道具）。☆`C` の係数は基礎局所体の整数環にあるので `σ` で固定される。",
   "consequence": "★★`E ⊗ K` と Tate モデルは変数変換で結ばれる（`tateModel_baseChange`、在庫）ので、**両者の間で `σ` の作用が対応する**。☆これで節点 8 の要が揃った。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateGalActUnip20260902": {
+  "block": 1289,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★局所側の完成——Tate モデルの上で Galois 作用は幂単かつ非自明",
+  "goal": "局所側を 1 本にまとめる。",
+  "proved": "☆`galAct_unipotent_ne_of_tate`（`Found/GenEll/TateGalActUnip.lean`、第 1289）——第 1276（`tateSigmaAct` の 2 条件）と第 1286（`tateSigmaAct` ＝ 実際の Galois 作用）を合わせた形。",
+  "inputs": "☆受け取るのは 3 つだけ: `TateSetup`・`Φ`（`mkTateSetup`・`dvrTatePhiAddEquiv`、在庫・無条件）、`ζ`・`π`（第 1279——`E[l]` が載っていればよい）、`σ`（第 1282——`l ∤ v(Q)` と `μ_l ⊆ K₀`）。",
+  "consequence": "★★★**局所側は完成**した。残るのは `E ⊗ K` と Tate モデルを結ぶ段（第 1288、道具は揃った）と大域へ運ぶ段（第 1287・1270、済）を、悪い素点の具体データに当てはめる配管だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
