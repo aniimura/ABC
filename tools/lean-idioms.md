@@ -2957,3 +2957,16 @@ because it depends on 'PadicInt.instCommRing'`。
 
 **直し方**: クラスの定義（`eq_zero_or_eq_zero_of_smul_eq_zero`）から直接作る:
 `⟨fun {c x} hcx => …⟩`（`Algebra.smul_def` ＋ `mul_eq_zero` ＋ 単射性）。
+
+## `io.open(p,'w')` は書き込み前にファイルを空にする（第 1216）
+
+**失敗形**: Python で `io.open(p,'w',encoding='utf-8').write(s)` を使い、
+`s` にサロゲート（`'\ud835\udd3d'`）が混じっていて `UnicodeEncodeError` になった。
+**ファイルは 0 バイトに truncate されていた**（`open` が先に切り詰めるため）。
+
+**直し方**: 必ず一時ファイル経由にする——
+`io.open(p+'.tmp','w',encoding='utf-8').write(s)` → `os.replace(p+'.tmp', p)`。
+★これなら書き込みが失敗しても元のファイルは無傷である。
+☆復旧は `git checkout -- <file>`（コミット済みなら）。
+
+★サロゲート自体の対処は「Python surrogate escapes」の項——`'\U0001D53D'` と書く。

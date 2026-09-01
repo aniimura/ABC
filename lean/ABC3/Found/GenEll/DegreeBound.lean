@@ -83,7 +83,45 @@ theorem exists_algEquiv_extend {L Lbar M : Type*} [Field L] [Field Lbar] [Field 
   rw [AlgHom.liftNormal_commutes]
   rfl
 
+/-! ## ★★★★★★★★★★★★★★★★不変量が生成元の上で決めるなら次数が抑えられる -/
+
+/-- ★★★★★★★★★★★★★★★★
+**不変量が生成元の上で `φ` を決めるなら次数が抑えられる**——★**無条件**（第 1216）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`g` が `φ` を生成集合 `s` の上で決めるなら、`AlgHom.ext_of_adjoin_eq_top` で
+`g` は単射であり、第 1214 で `[M:L] ≤ #t` が出る。
+
+★★★これが `[M:L] ≤ l−1` の**最終形**である
+——`g φ ≔ c(φ)`（`σ Q = c • Q` の `c`、第 1205・第 1215）、
+`t ≔ mod l の 0 でない元` と取ればよい。 -/
+theorem finrank_le_of_determines_on_generators
+    {L M Lbar : Type*} [Field L] [Field M] [Field Lbar]
+    [Algebra L M] [Algebra L Lbar] [IsAlgClosed Lbar]
+    [FiniteDimensional L M] [Algebra.IsSeparable L M]
+    {α : Type*} [DecidableEq α] (s : Set M) (hs : Algebra.adjoin L s = ⊤)
+    (g : (M →ₐ[L] Lbar) → α)
+    (hg : ∀ φ₁ φ₂ : M →ₐ[L] Lbar, g φ₁ = g φ₂ → Set.EqOn φ₁ φ₂ s)
+    (t : Finset α) (ht : ∀ φ, g φ ∈ t) :
+    Module.finrank L M ≤ t.card :=
+  finrank_le_of_algHom_mem_finset g
+    (fun φ₁ φ₂ h => AlgHom.ext_of_adjoin_eq_top hs (hg φ₁ φ₂ h)) t ht
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def finrank_le_of_determines_on_generators.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(不変量が生成元の上で φ を決めるなら次数が抑えられる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def finrank_le_of_determines_on_generators.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1216）**——`[M:L] ≤ l−1` の**最終形**である。" ++
+       "☆`g φ ≔ c(φ)`（`σ Q = c • Q` の `c`、第 1205・第 1215）、" ++
+       "`t ≔ mod l の 0 でない元` と取ればよい。" ++
+       "★残るのは `M` の生成集合を `Algebra.adjoin` の形で用意する段である。") 2 ]
 
 def exists_algEquiv_extend.src : Source :=
   { paper := "GenEll", pdfPage := 17,
