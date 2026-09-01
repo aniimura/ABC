@@ -53,7 +53,14 @@ import ABC3.Meta.Claim
 ☆(2) の道筋: `h4`・`h6`（Vélu の `v, w` と Eisenstein の関係）
 → `j_velu_tate_eq_map`（在庫）→ `jExp_eq_mul_of_j_tate_pow`（第 997）
 → `minDeltaExp_eq_mul_of_jExp_all`（第 1247）→ `degInfJ_quotLCyclicJ_of_jExp`（第 1248）。
-★残るのは **`h4`・`h6`**（Eisenstein の計算）だけである。
+★★☆**訂正（2026-09-02、第 1256-1257）**——`h4`・`h6` は
+`Skeleton/GenEll/TateIsogeny.lean` の `c4_velu_tate`・`c6_velu_tate` として
+**既に証明済み**である（sorry 0）。
+同じく (3) の「同種写像の高さ評価」も
+`htFalt_veluQuotientFull_le`（第 704、証明済み）である。
+
+★★★**したがって 4 本に残るのは配管だけであり、
+未証明の外部引用は 1 本もない**。
 -/
 
 namespace ABC3.Skeleton.GenEll

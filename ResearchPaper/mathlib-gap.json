@@ -5909,5 +5909,15 @@
     "consequence": "★★★したがって witness の sorry (2) に残るのは **h4・h6 ではなく、局所の結果を大域の deg∞ に繋ぐ配管**である —— minDeltaExp_eq_mul_at_bad_prime(局所、証明済み)を全素点で束ね、第 1244/1248 に渡す段。☆第 1247(良い素点で両辺 0)がその半分を与える。",
     "keep": "☆第 1253-1255(c₄ = E₄、c₆ = −E₆、およびその特殊化)は**新しい事実**であり有効である —— 在庫には c₄・c₆ を σ で書いた形は無かった。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "witnessMapFix20260902": {
+    "block": 1257,
+    "date": "2026-09-02",
+    "title": "★★☆再測定——witness の残り 4 本の前提はすべて在庫にある（配管だけが残る）",
+    "goal": "第 1250 の地図の訂正と精密化。",
+    "measured": "★★☆**再測定(2026-09-02)**: (2) の前提 Lemma 3.2, (ii) は Skeleton/GenEll/TateIsogeny.lean に証明済み(第 1256)。(3) の前提「同種写像の高さ評価」は **htFalt_veluQuotientFull_le(Found/GaloisRep/VeluNormalized.lean、第 704、証明済み)** であり、[FC] Ch. I, Prop 2.7 の外部引用は既に消えている(Lemma35Concrete の docstring が明記)。",
+    "correction": "★第 1250 の地図で (2)(3) の「残る前提」を外部の未証明結果のように書いたのは**不正確**だった。正しくは**どちらも在庫にあり、残るのは幾何のデータを渡す配管**である。",
+    "remaining": "☆したがって witness の 4 本に残るのは: (1) VeluQuotOK(商の楕円性・半安定性・乗法還元——原文が括弧で畳む段)、(2) 局所(minDeltaExp_eq_mul_at_bad_prime)を全素点で束ねる配管、(3) htFalt_veluQuotientFull_le に周期対・極小性・整性のデータを渡す配管、(4) σ の mod l の冪単性・非自明性(Tate 一意化から)。★**未証明の外部引用は 1 本も残っていない**。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
