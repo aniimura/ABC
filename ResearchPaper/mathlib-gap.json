@@ -3872,5 +3872,16 @@
     "graphComplete": "★★★★**`Lemma 3.5` の依存グラフが完成した**——残る節点はすべて「何を作れば終わりか」が型で決まっており、材料もすべて特定済みである。☆残る節点は 2 つ: (1) `neronExp_veluQuotient_eq_of_minimal`（第 1054、局所の `Δ` の計算）、(2) `isIntegral_veluQuotientFull_of_coprime`（第 1052、Vélu の商の整性）。★どちらも材料（第 962・978・1044・944・969）はすべて証明済みである。",
     "chainSummary": "☆`lemma_3_5_velu_defect`（第 1050）← `hfin` ← 第 1053（モデル非依存）＋ 第 1054。★`IsMuAtBadPrimes`（第 1044）は完全に `sorry`-free。",
     "note": "★944-1054 の 106 ブロック。"
+  },
+  "vAddDeltaTatePow20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1055",
+    "supersedes": "lemma35GraphComplete20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★`vAdd_Delta_tateCurveAt_pow`（1055）——`v(Δ(E_{q^l})) = l·v(q)`。☆`Δ(E_q) = q · 単元`（在庫 `tateCurveAt_Delta_eq_mul_unit`）を `q^l` に当てるだけ。"
+    ],
+    "remaining": "☆第 1054（局所の `Δ` の計算）に要る 4 段のうち 1 段が済んだ。残り: (a) `C₀ • (E′ ⊗ Lv) = veluCurve (tate q) v w ⊗ Lv`（第 890＋944＋969 の輸送）、(b) 第 962 で `Δ(veluCurve) = l¹²·Δ(tate q^l)`、(c) 極小性から `v_p(C₀.u) = 0`、(d) `minDeltaExp = v_p(Δ) − 12·neronExp` で締める。",
+    "note": "★944-1055 の 107 ブロック。"
   }
 }

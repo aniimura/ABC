@@ -571,6 +571,34 @@ def minDeltaExp_eq_mul_of_j_tate_pow.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(半安定性と j の一致だけで Δ_min が l 倍。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★第 1055 —— `Δ(E_{q^l})` の付値は `l·v(q)`
+
+★第 1054 の節点で要る局所の計算のうち、**Tate 曲線側の一段**である。
+☆`Δ(E_q) = q · 単元`（在庫 `tateCurveAt_Delta_eq_mul_unit`）なので、
+`q^l` に当てれば `v(Δ(E_{q^l})) = l·v(q)` である。 -/
+
+/-- ★★★★★★★★**`Δ(E_{q^l})` の付値は `l·v(q)`**（第 1055）。 -/
+theorem vAdd_Delta_tateCurveAt_pow {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (q : R) {l : ℕ} (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
+    (hΔ : algebraMap R K (tateCurveAt (q ^ l) hql).Δ ≠ 0)
+    (hqne : algebraMap R K q ≠ 0) :
+    vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K (tateCurveAt (q ^ l) hql).Δ) hΔ)
+      = l * vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K q) hqne) := by
+  obtain ⟨u, hu, hΔu⟩ := tateCurveAt_Delta_eq_mul_unit (q ^ l) hql
+  have hune : algebraMap R K u ≠ 0 := (hu.map (algebraMap R K)).ne_zero
+  have hsplit : (Units.mk0 (algebraMap R K (tateCurveAt (q ^ l) hql).Δ) hΔ)
+      = (Units.mk0 (algebraMap R K q) hqne) ^ l * (Units.mk0 (algebraMap R K u) hune) := by
+    ext
+    simp only [Units.val_mk0, Units.val_mul, Units.val_pow_eq_pow_val, hΔu, map_mul, map_pow]
+  rw [hsplit, vAdd_mul, vAdd_pow, tateDvrVal_eq_zero_of_isUnit u hu hune, add_zero]
+
+def vAdd_Delta_tateCurveAt_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Δ(E_{q^l}) の付値は l·v(q)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
