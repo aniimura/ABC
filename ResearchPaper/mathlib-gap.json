@@ -5881,5 +5881,16 @@
     "measured": "☆Tate 曲線は a₁ = 1・a₂ = 0・a₃ = 0 なので b₂ = 1・b₄ = 2a₄・b₆ = 4a₆。★これで h4・h6 は a₄・a₆ の**級数の等式**に落ちる —— c₄・c₆ の定義を展開する手間が消えた。",
     "consequence": "☆残るのは a₄(q)・a₆(q) の q 展開と μ_l の Vélu 和 v, w の関係(古典的な E₄・E₆ の恒等式)だけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "c4c6E4E620260902": {
+    "block": 1254,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★Tate 曲線の c₄ は E₄、c₆ は −E₆",
+    "goal": "h4・h6(Eisenstein の計算)の基礎。",
+    "what": "★c₄_tateCurve(c₄ = 1 + 240σ₃)と c₆_tateCurve(c₆ = −1 + 504σ₅)(Found/GaloisRep/TateSeries.lean)。",
+    "measured": "☆a₄ = −5σ₃(tateA4)と 12a₆ = −(5σ₃ + 7σ₅)(twelve_mul_tateA6、在庫)から、第 1253 の c₄ = 1 − 48a₄・c₆ = −1 + 72a₄ − 864a₆ に代入するだけ。★すなわち **c₄ = E₄、c₆ = −E₆** である。",
+    "idioms": "★PowerSeries.C の数値は map_ofNat で素の数値に直す(C 48 と 48 は ring では同一視されない)。",
+    "consequence": "☆これで h4・h6 は **E₄・E₆ の q 展開と μ_l の Vélu 和の関係**という古典的な恒等式に完全に翻訳された。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

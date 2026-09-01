@@ -3024,3 +3024,23 @@ because it depends on 'PadicInt.instCommRing'`。
 **直し方**: インスタンス束縛にする——
 `∀ S, S.card + 1 = l → ∀ [_inst : (velu S).IsElliptic], (… jExp p (velu S) …)`。
 ★呼ぶ側は `hrel S hcard hss`（インスタンスは自動で埋まる）。
+
+## `PowerSeries.C` の数値は `map_ofNat` で素の数値に直す（第 1254）
+
+**失敗形**: `ring` が `… * 48 = … * PowerSeries.C 48` を閉じられない
+（`C 48` と数値 `48` は `ring` では同一視されない）。
+
+**直し方**: `simp only [map_neg, map_ofNat]` を先に当てて
+`PowerSeries.C (-5)` → `-(5 : PowerSeries ℤ)` の形にしてから `ring`。
+☆在庫の補題が `C 12 * x` の形で述べられているときは
+`simpa [map_ofNat] using h` で数値の形に直す。
+
+## `lake build ABC3` は低層のファイルを触ると 10 分を超える（第 1254）
+
+**失敗形**: `TateSeries.lean`（低層）を編集した後の `lake build ABC3` が
+Bash ツールの上限 10 分で打ち切られた（`timeout` に 30 分を渡しても
+上限は 600000 ms）。
+
+**直し方**: ビルドだけを単独のコマンドで走らせ、
+打ち切られたら**そのまま再実行**する（インクリメンタルに続きから進む）。
+☆ゲートと commit は別のコマンドに分ける。
