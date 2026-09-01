@@ -5478,5 +5478,15 @@
     "measured": "★★★**TateSetup を K へ底変換する段は要らなかった**——sigma_coord_alpha は**任意の可換群**で成り立ち、要るのは「ζ が原始 l 乗根」「πˡ = Q」「Q が無限位数」だけだからである。☆仮説はすべて基礎体 K₀ の側(l ∤ v(q)、q が無限位数、ζ₀ が原始 l 乗根)にある。",
     "consequence": "☆すなわち σ は mod l の座標で α = (1 1 / 0 1) として作用する。★残るのはこれを galRep の行列に読み替える段(第 1167-1169 の制限準同型)である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "veluSetStable20260902": {
+    "block": 1213,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★⟨Q⟩∖{O} は Q ↦ c·Q で保たれる——安定直線が座標集合を保つことの群論の核",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 1 と 2 の共通部品)。",
+    "what": "★nsmul_nsmul_mem_image_of_not_dvd(Found/GenEll/VeluSetStable.lean)—— l 素数、addOrderOf Q = l、l ∤ c なら k • (c • Q) ∈ {j • Q : j ∈ (range l).erase 0}。",
+    "measured": "☆k • (c • Q) = (k·c) • Q = ((k·c) mod l) • Q であり、l が素で l ∤ k・l ∤ c だから (k·c) mod l ≠ 0。★曲線も Galois も出てこない**群論だけ**の命題である。",
+    "consequence": "★★★第 1205 が与える「∀ σ, ∃ k, σ Q = k • Q」から「σ は ⟨Q⟩∖{O} を保つ」を出す核であり、fixesCoeffs_veluQuotientFull(第 1153)が受け取る「∀ z ∈ S, f z ∈ S」の形の中身である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
