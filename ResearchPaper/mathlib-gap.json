@@ -6133,5 +6133,15 @@
   "route": "★`{[ζ^a] : a ∈ ℤ}` は `(range l).image (fun i => [ζ^i])` に含まれるのでたかだか `l` 個。☆**個数の勘定だけ**である。",
   "consequence": "★★★消費側では `E[l]` の個数が `l²`（`torsion_card`、在庫）なので `l ≥ 2` で条件が満たされる。☆すなわち `π` の存在は「`E[l]` が `K` に載っている」ことだけから出る。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "piFromPhi20260902": {
+  "block": 1279,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★E[l] が載っていれば π は作れる（第 1277・1278 の合流）",
+  "goal": "π の存在を「E[l] が K に載っている」だけから出す。",
+  "proved": "☆`exists_pi_of_phi`（`Found/GenEll/Thm38PiFromPhi.lean`、第 1279）——Tate 一意化 `Φ` があり `P` の `l`-捩れが `l` 個より多ければ `Q` は `K` の中で `l` 乗になる。",
+  "route": "★段 1（第 1278）で `μ_l` の像からはみ出す類を取り、段 2（第 1277）でその代表に Bezout を当てる。",
+  "consequence": "★★★**`π` を作るために体を拡げる必要は無い**。☆大域の数体を `L′ ≔ L(ζ_l, E[l], √d)` に取り替えれば `E[l]` は載る。★これが第 1274 の B1（完備 DVR の Eisenstein 拡大）を道から消した理由である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

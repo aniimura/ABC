@@ -1392,6 +1392,7 @@ import ABC3.Found.GenEll.Thm38TatePointUnip
 import ABC3.Found.GenEll.Thm38SigmaAct
 import ABC3.Found.GenEll.Thm38PiExists
 import ABC3.Found.GenEll.Thm38TorsionNotMu
+import ABC3.Found.GenEll.Thm38PiFromPhi
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
