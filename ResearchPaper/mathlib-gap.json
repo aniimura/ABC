@@ -3860,5 +3860,17 @@
     "keyInsight": "★★★★**`hfin` はモデルに依らない**——左辺は `E` と `E′` を**同じ**変数変換で動かしても変わらない。☆`neronExp p (C • W) = neronExp p W − valAdd p C.u` なので、`E` と `E′` の両方から同じ `valAdd p C.u` が引かれるからである。★そして第 969（`veluQuotientFull_vcPoint_eq`）により`C • E′ = veluQuotientFull (C • E) (vcPoint C E Q の集合)` なので、**`E` を各素点で極小なモデルに取り替えてよい**。",
     "consequence": "★★したがって `hmin`（大域極小モデルの存在——類数の障害がある）は**要らない**。☆残るのは局所の計算だけ: `C • E` が `p` で極小なとき`neronExp p (C • E′) = v_p(l)`（第 1051 の分解＋第 962 `Delta_velu_tate_eq`）。",
     "note": "★944-1053 の 105 ブロック。"
+  },
+  "lemma35GraphComplete20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1054",
+    "supersedes": "hfinModelIndependent20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "☆`neronExp_veluQuotient_eq_of_minimal`（1054、節点）——極小な素点では Vélu の商の Néron 指数は `v_p(l)`。"
+    ],
+    "graphComplete": "★★★★**`Lemma 3.5` の依存グラフが完成した**——残る節点はすべて「何を作れば終わりか」が型で決まっており、材料もすべて特定済みである。☆残る節点は 2 つ: (1) `neronExp_veluQuotient_eq_of_minimal`（第 1054、局所の `Δ` の計算）、(2) `isIntegral_veluQuotientFull_of_coprime`（第 1052、Vélu の商の整性）。★どちらも材料（第 962・978・1044・944・969）はすべて証明済みである。",
+    "chainSummary": "☆`lemma_3_5_velu_defect`（第 1050）← `hfin` ← 第 1053（モデル非依存）＋ 第 1054。★`IsMuAtBadPrimes`（第 1044）は完全に `sorry`-free。",
+    "note": "★944-1054 の 106 ブロック。"
   }
 }

@@ -1154,6 +1154,63 @@ def neronExp_sub_variableChange.needs : List ProofObligation :=
   [ .citation "[ABC3]" "neronExp_variableChange(第 319 系、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.neronExp_variableChange") 1 ]
 
+/-! ## ★★★★★★★★★★★★第 1054 —— `hfin` に残る局所の計算
+
+★第 1053 で `hfin` はモデルに依らないと分かったので、
+`E` が `p` で極小な場合だけ見ればよい。
+
+☆そのとき `neronExp p E = 0` であり、残るのは
+
+    `neronExp p E′ = v_p(l)`
+
+である。★中身は次の連鎖である:
+
+| 段 | 出どころ |
+|---|---|
+| `minDeltaExp = v_p(Δ) − 12·neronExp` | `DegInf.lean:117`（定義） |
+| `minDeltaExp p E′ = l·minDeltaExp p E` | ★第 1044（`IsMuAtBadPrimes`、証明済み） |
+| `Δ(veluCurve (tate q) v w) = l¹²·Δ(tate q^l)` | ★第 962（`Delta_velu_tate_eq`、証明済み） |
+| `Δ(tate q) = q · 単元` | ★在庫（`tateCurveAt_Delta_eq_mul_unit`） |
+| `v_p(q) = −jExp p E = minDeltaExp p E` | ★第 978 ＋ `minDeltaExp_eq_maxJ_of_semistable` |
+-/
+
+open Finset in
+/-- ☆**節点**: 極小な素点では Vélu の商の Néron 指数は `v_p(l)`。
+
+★これが `hfin` に残る最後の計算である。 -/
+theorem neronExp_veluQuotient_eq_of_minimal {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hd : Module.finrank ℚ L + 1 < l)
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E')
+    (hbad : jExp p E < 0) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (hmin : neronExp p E = 0)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hlne : ((l : ℕ) : L) ≠ 0) :
+    neronExp p E' = valAdd p (Units.mk0 ((l : ℕ) : L) hlne) := by
+  sorry
+
+def neronExp_veluQuotient_eq_of_minimal.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(極小な素点では Vélu の商の Néron 指数は v_p(l))",
+    sectionId := "genell-lemma-3-5" }
+
+def neronExp_veluQuotient_eq_of_minimal.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_large(第 1044、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_large") 1,
+    .citation "[ABC3]" "Delta_velu_tate_eq(Δ(veluCurve) = l¹²·Δ(tate q^l)、第 962、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.Delta_velu_tate_eq") 1,
+    .citation "[ABC3]" "vAdd_tateParam_eq_neg_jExp(v_p(q) = −jExp、第 978、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_tateParam_eq_neg_jExp") 1,
+    .implicitStep
+      ("☆`Δ` を Tate モデルまで運ぶ段——`tateModel_baseChange`（第 944）と" ++
+       "`veluQuotientFull_vcPoint_eq`（第 969）で" ++
+       "`C₀ • (E′ ⊗ Lv) = veluCurve (tate q) v w ⊗ Lv` にし、" ++
+       "極小性から `v_p(C₀.u) = 0` を使う") 3 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
