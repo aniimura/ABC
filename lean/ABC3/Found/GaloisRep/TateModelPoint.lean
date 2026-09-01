@@ -177,6 +177,66 @@ def isElliptic_veluQuotient_tate_mu.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(μ_l による Vélu の商(Tate モデル側)は楕円。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★第 975 —— `j` が同じ相方に付け替える
+
+★★第 974 の測定: mathlib の `IsMinimal R W` は「`W` 自身が極小」であって
+変数変換で不変ではない。☆`SemistableAt p E′` が与えるのは `C′ • E′` の極小性なので、
+第 972 に渡せるのは `C′ • E′` である。
+★一方 Vélu の関係（第 974）が与えるのは `C • E′` の側である。
+
+☆両者は `j` が同じ（変数変換で `j` は不変）。**そこで結論の `E′` を
+`j` が同じ相方に付け替えられるようにしておく**。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`j` が同じ相方に付け替えた形**の第 970。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 975）**——`E″` が `E′` と同じ `j` を持てば、
+`hW′j` は `E″` についても成り立つ。
+☆これで「Vélu の関係は `C • E′` で、極小性は `C′ • E′` で」という
+食い違いが吸収できる。 -/
+theorem exists_point_j_tateModel' {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' E'' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    [(E'.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E''.baseChange (p.adicCompletion L)).IsElliptic]
+    (h : (E.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    {l : ℕ} (hl : l.Prime) {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (h2K : (2 : (p.adicCompletion L)) ≠ 0)
+    (hE' : E' = ABC3.Found.GenEll.veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • Q))))
+    (hjj : (E''.baseChange (p.adicCompletion L)).j
+      = (E'.baseChange (p.adicCompletion L)).j) :
+    ∃ P : ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+        (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).toAffine.Point,
+      l • P = 0 ∧ P ≠ 0 ∧
+      ∀ _hell : (ABC3.Found.GenEll.veluQuotientFull
+          ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+            (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+            (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L)))
+          (((range l).erase 0).image
+            (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))).IsElliptic,
+        (E''.baseChange (p.adicCompletion L)).j
+          = (ABC3.Found.GenEll.veluQuotientFull
+            ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+              (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L)))
+            (((range l).erase 0).image
+              (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))).j := by
+  obtain ⟨P, hP, hP0, hj⟩ := exists_point_j_tateModel p E E' h hl hQ h2K hE'
+  exact ⟨P, hP, hP0, fun hell => by rw [hjj]; exact hj hell⟩
+
+def exists_point_j_tateModel'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(j が同じ相方に付け替えた形。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_point_j_tateModel.src : ABC3.Meta.Source :=
