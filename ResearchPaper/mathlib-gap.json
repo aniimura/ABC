@@ -4128,5 +4128,16 @@
     "witnessBridge": "★★`EllModuliWitness.lean` の `degInfJ_quotLCyclicJ` の数学はすでにある（`IsMuAtBadPrimes`（第 1044）＋ `degInfOf_eq_of_local`）。☆残るのは**実現の橋**だけ——`quotLCyclicJ x l` と `veluQuotientFull` の同定、`degInfJ` と `degInfOf` の同定。第 1086 で `.needs` をこの形に直した。",
     "deadNodes": "☆`Skeleton/GenEll/{TateIsogeny,TateLocalModel}.lean` に残る 5 つの `sorry`（`isMinimal_baseChange`・`minDeltaExp_descend_of_nonsplit`・`isMuAtBadPrimes_of_veluQuotient`・`jExp_velu_bad`・`jExp_velu_good`）は**すべて死節点**である——コードからの参照は 0 件で、言及はドキュメント文字列と `.needs` の引用だけ。★第 1086 で `EllModuliWitness` の引用を証明済みの節点に差し替えた。",
     "note": "★944-1086 の 137 ブロック。"
+  },
+  "lemma35BareCost20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1089-1090（訂正と実測）",
+    "supersedes": "remainingMap20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "correction": "★★★★**第 1087 の条なし `.src` は誤りだった**。☆「逸脱は消費側で自動的に成り立つ」と述べたが、見ていたのは `Lemma 3.7` 第 3 の主張の**条件 (a) の枝だけ**である。★条件 (b) の枝（`htFalt_le_of_condB`）は **`2 ≤ l` だけ**で `(†)` を消費するので、`d + 1 < l` が成り立たない場合がある。第 1089 で `.src` を条つきに戻した（19/24 → 18/24）。",
+    "whatWasGained": "☆ただし第 1088（`htFalt_le_of_condA_lcyclic`）は残る——条件 (a) の枝では `(†)` が**実際に埋まった**（外部入力なし、`sorry`-free）。★逸脱が吸収される仕組み（`C ≔ C₀ + |B| + 1` から `l ≥ 100·d ≥ 100`）も証明の中にある。",
+    "costOfRemovingDplus1": "★★★★**`d + 1 < l` を外す費用の実測**——☆`hlu : IsUnit ((l : R))` は `hu : ∀ i, IsUnit (1 − ζ^i)` を生み（`isUnit_one_sub_pow_of_isUnit_natCast`、第 951）、`hu` は `c4_velu_tate`・`c6_velu_tate` を通じて `sum_veluV2_eq_sum_tateDYpair`（`TateODE.lean:98`）・`tateD2Xpair_eq`（`TateDSeries.lean:238`）・`sum_mu_dxpair_zero`（`TateODE.lean:144`）・`sum_mu_d2xpair`（`TateODE.lean:207`）に流れる。★★**`IsUnit (1 - …)` はプロジェクト全体で 329 箇所・約 20 ファイル**（`Coll*`・`Mu*`・`Dual*`・`TateODE`・`TateDSeries`・`TateIsogeny`）にある。☆`p ∣ l` でも `ζ_l ∈ L_v` は成り立つ（`L_v` は標数 0 なので `x^l − 1` は分離的）ので数学的な障害は `1 − ζ^i` の**可逆性だけ**であり、商体 `K` に移せば `≠ 0` で足りる。★しかしそれは μ_l の指標和の機械を丸ごと `R` から `K` へ移す改修であり、**40-80 ブロック級**である。☆第 1085 の「20-40」は楽観的すぎた。",
+    "costOfRemovingLne2": "☆`l ≠ 2` を外す費用: `exists_veluW_of_inv`（第 960）の `l = 2m+1` の径数付けが効かない。`l = 2` では `H∖{O}` は 1 点で `veluGy = 0`・`veluU = 0` なので `/2` は無害だが、`preΨ_2 = 1` で捉れ点との橋が `Ψ₂Sq`（主係数 4）に変わる。★Tate 側の μ_2 の連鎖も別径路になる。20-40 ブロック級。",
+    "note": "★944-1090 の 141 ブロック。"
   }
 }
