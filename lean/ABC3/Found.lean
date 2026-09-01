@@ -379,6 +379,7 @@ import ABC3.Found.GenEll.Velu
 import ABC3.Found.GenEll.VeluImage
 import ABC3.Found.GenEll.VeluPointSet
 import ABC3.Found.GenEll.CyclotomicUnits
+import ABC3.Found.GenEll.CyclotomicDenomFree
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
