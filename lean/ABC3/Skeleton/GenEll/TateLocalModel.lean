@@ -10,6 +10,7 @@ import ABC3.Found.GaloisRep.SplitAtCompletion
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Skeleton.GenEll.TateIsogeny
+import ABC3.Found.GaloisRep.Lemma35Ineq
 
 /-!
 # `Lemma 3.5` に残る 2 つ —— **局所モデルの完備化への移行**（`Skeleton`）
@@ -315,6 +316,80 @@ def isMuAtBadPrimes_of_veluQuotient_of_split.needs : List ProofObligation :=
        "☆`hlu` は `p ∤ l`。★`hsplit` は第 976＋993 が" ++
        "「分裂または捻りで分裂」まで詰めており、" ++
        "`p ∣ 2` で非分裂の場合だけが不分岐 2 次拡大（943＋944）待ちである") 2 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★第 1006 —— `Lemma 3.5` の不等式まで通す
+
+★第 1005（`IsMuAtBadPrimes`）を第 903（`lemma_3_5_velu_bad_delta`）に流す。
+☆これで `Lemma 3.5` の不等式
+
+    `(1/(12(1+ϵ)))·l·deg∞(E) ≤ ht^Falt(E) + 2log(l) + C`
+
+が、**残る仮説の全リスト**のもとで通る。★その全リストが本ブロックの型である。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] Lemma 3.5 ——
+Vélu の商で受ける形（残る仮説の全リスト）**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1006）**——残る仮説は次の 3 群である:
+
+| 群 | 仮説 | 状況 |
+|---|---|---|
+| 分裂性 | `hsplit` | 第 976＋993 が「分裂または捻りで分裂」まで。`p ∣ 2` の非分裂が残件 |
+| `l` の位置 | `hlu` | `p ∤ l` |
+| 素点ごとの整性・アルキメデス | `hmin0`・`hint`・`P`・`Cv` | 第 903 がもともと受けていたもの |
+
+☆`hcop`（`l` は局所高さと素）と半安定性は**原文自身の仮定**である。 -/
+theorem lemma_3_5_velu_mu (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
+      (∀ p : HeightOneSpectrum (𝓞 L), IsUnit ((l : (p.adicCompletionIntegers L)))) →
+      (∀ (p : HeightOneSpectrum (𝓞 L)), jExp p E < 0 →
+        ∀ (C : WeierstrassCurve.VariableChange L)
+          (_hmin : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers L)
+            ((C • E).baseChange (p.adicCompletion L))),
+          ((C • E).baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+            (p.adicCompletionIntegers L)) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl hodd Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint
+    hssE hssE' hcop hlu hsplit => ?_⟩
+  exact hC L E E' l hl.pos Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE'
+    (isMuAtBadPrimes_of_veluQuotient_of_split E E' hl hodd Q hQ hE' hssE hssE'
+      hcop hlu hsplit)
+
+def lemma_3_5_velu_mu.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商で受ける形——残る仮説は分裂性と p ∤ l だけ)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_mu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_split(第 1005、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_split") 1,
+    .citation "[ABC3]" "lemma_3_5_velu_bad_delta(不等式の側、第 903、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta") 1,
+    .implicitStep
+      ("★★★★**2026-09-01（第 1006）の測定**——`Lemma 3.5` の不等式は" ++
+       "**残る仮説の全リスト**のもとで通った。☆残るのは 2 群だけである: " ++
+       "(1) `hsplit`（`p ∣ 2` の非分裂＝不分岐 2 次拡大待ち）、(2) `hlu`（`p ∤ l`）。" ++
+       "★その他（`P`・`Cv`・`neronExp = 0`・`IsIntegral`）は第 903 が" ++
+       "もともと受けていたものである") 2 ]
 
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
