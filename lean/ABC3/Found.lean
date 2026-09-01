@@ -1386,6 +1386,7 @@ import ABC3.Found.GaloisRep.JExpCoprime
 import ABC3.Found.GaloisRep.SemistableCriterion
 import ABC3.Found.GaloisRep.TateUnipotent
 import ABC3.Found.GaloisRep.TorsionTransport
+import ABC3.Found.GenEll.Thm38TateUnip
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble

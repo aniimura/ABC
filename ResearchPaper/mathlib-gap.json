@@ -6061,5 +6061,15 @@
   "route": "★★全単射性は**次数の勘定だけ**である——`Point.map` は単射（mathlib）、`E[n]` の個数はどちらの代数閉体でも `n²`（`torsion_card`、証明済み）。☆分体多項式（未着手）も Néron モデルも要らなかった。",
   "consequence": "★★★これで「局所の `σ` が `E[l]` に `α` として作用する」を確かめれば、`restrictLocalHom`（第 1167）＋本ブロック＋第 1270 で `alpha_mem_map_of_galTate`（第 1237）の `h2`・`h1` が出る。☆残るのは Tate 一意化を具体の悪い素点に当てはめる段だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateAlphaUnipotent20260902": {
+  "block": 1272,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★II 側の心臓——Tate 一意化の σ は E[l] に幂単かつ非自明に作用する",
+  "goal": "alpha_mem_map_of_galTate（第 1237）が要る 2 条件の中身を取る。",
+  "proved": "☆`Found/GenEll/Thm38TateUnip.lean`（第 1272）に 3 本。`sigmaU_zeta_pi`（`Kˣ →* Kˣ` 版の `α` の作用）・`tate_unipotent_of_sigma`（`l·p = 0` なら `τ²p + p = 2τp`）・`tate_exists_ne_of_sigma`（証人 `p = Φ[π]`）。",
+  "route": "★形は**完全に抽象**である——`Φ : Additive (Kˣ ⧸ ⟨Q⟩) ≃+ P`、`τ : P →+ P`、同変性 `hτ : τ (Φ [x]) = Φ [σ x]` の 3 つだけを受ける。☆`l`-捩れは `[ζᵃπᵇ]`（第 1174）、`σ` は指数を `(a,b) ↦ (a+b,b)` で動かす。★非自明性の証人は `Φ[π]`——`τ(Φ[π]) = Φ[ζπ] ≠ Φ[π]`（さもなくば `ζ ∈ ⟨Q⟩`、第 1161 に反する）。",
+  "consequence": "★★★これで II 側（`α` が像に入る段）の**数学の中身は尽きた**。☆残るのは 3 つの配管である: (A) `τ ≔ Point.map σ` として当てる（同変性は `tatePhi_pointMap`、在庫）、(B) Tate 曲線を悪い素点の `E` に結ぶ、(C) 局所の `σ` を大域へ運ぶ（第 1271）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
