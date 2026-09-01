@@ -5332,5 +5332,15 @@
     "consequence": "★したがって L'' で得た hfin を [L'':L] で割れば L の hfin になる。★★すなわち **L(H) の道は Lemma 3.5 全体を覚える**——悪い素点の側だけではない。",
     "frame": "☆第 1194 の道の 5 段の部品(第 1195・1197・1192・在庫・1185)＋ 本ブロックの 2 本で、lemma_3_5_height_ineq_stableLine に必要なものはすべて揃った。★残るのは配管である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "lemma35OverExtension20260902": {
+    "block": 1199,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★Lemma 3.5 は有限拡大の上で確かめれば足りる——節点 2 が実質閉じた",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2)。",
+    "what": "★lemma_3_5_height_ineq_over_extension(Found/GaloisRep/Lemma35StableLine.lean)—— E が半安定なら Lemma 3.5 の高さ不等式はどの有限拡大 L'' の上で確かめても同じである。",
+    "measured": "★★★**降ろす段さえ要らなかった**。Lemma 3.5 の不等式に現れる ht^Falt と deg∞ は半安定な曲線では底変換で**変わらない**(htFaltOf_baseChange_of_semistable 第 738、degInfOf_baseChange_of_semistable 第 737)ので、L'' で得た不等式がそのまま L の不等式である。☆第 1185(Δ_min を降ろす)は Δ_min の関係には要るが、**高さの不等式には要らなかった**。",
+    "consequence": "★★★L'' の上で Q が有理でありさえすれば L の上の Lemma 3.5 が出る——**節点 2 はこれで実質閉じた**。☆残るのは HasLCyclicJ(galRep の安定直線)から L(H) 上の有理な生成元を取り出す橋だけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
