@@ -179,6 +179,72 @@ theorem j_veluQuot_eq_j_tate_pow_K (S : TateSetup R I K)
 
 end J
 
+/-! ## ★★★★★★★★★★★★★★`hvw` を無条件に作る -/
+
+section ExistsVW
+
+variable {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R} [IsAdicComplete I R]
+  {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+
+set_option maxHeartbeats 2000000 in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**[GenEll] `μ_l` に対する Vélu の係数は商体に取れて、その商は楕円である**（第 1138）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★**`IsUnit ((l : R))` を仮説に置いていない**——`exists_vw_tate_mu`（第 1003）の
+`hlu` なし版である。
+☆楕円性は `Δ(veluCurve) = l¹²·Δ(E_{q^l})`（第 1131 の `Delta_of_c4_c6`）から出る。 -/
+theorem exists_vw_tate_mu_K {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
+    (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I)
+    (hΔl : ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).Δ ≠ 0) :
+    ∃ v w : K,
+      v = ∑ i ∈ (range l).erase 0,
+          veluV2 ((tateCurveAt q hq).map (algebraMap R K))
+            (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        ∧ 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU ((tateCurveAt q hq).map (algebraMap R K))
+              (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 ((tateCurveAt q hq).map (algebraMap R K))
+                    (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+        ∧ (veluCurve ((tateCurveAt q hq).map (algebraMap R K)) v w).IsElliptic := by
+  haveI : CharZero K := IsFractionRing.charZero_of_isFractionRing R
+  have hinj : Function.Injective (algebraMap R K) := IsFractionRing.injective R K
+  have hlK : (l : K) ≠ 0 := by
+    intro h
+    have hR : ((l : ℕ) : R) = 0 := hinj (by rw [map_natCast, h, map_zero])
+    exact (Nat.cast_ne_zero.2 hl.pos.ne' : ((l : ℕ) : R) ≠ 0) hR
+  have h2K : (2 : K) ≠ 0 := two_ne_zero
+  set SVK : K := ∑ i ∈ (range l).erase 0,
+      veluV2 ((tateCurveAt q hq).map (algebraMap R K))
+        (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq) with hSVK
+  set SWK : K := ∑ i ∈ (range l).erase 0,
+      (veluU ((tateCurveAt q hq).map (algebraMap R K))
+          (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+          (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+        + 2 * (veluV2 ((tateCurveAt q hq).map (algebraMap R K))
+                (tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                (tateYK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              * tateXK (I := I) (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)) with hSWK
+  refine ⟨SVK, SWK / 2, rfl, by field_simp, ?_⟩
+  have hvS : (l : K) ^ 6 * SVK = algebraMap R K (veluSV l ζ q hq) :=
+    sum_natCast_pow_mul_veluV2_K hinj hζ (tateCurveAt q hq) q hq
+  have hwS : (l : K) ^ 8 * (2 * (SWK / 2)) = algebraMap R K (veluSW l ζ q hq) := by
+    rw [show (2 : K) * (SWK / 2) = SWK from by field_simp]
+    exact sum_natCast_pow_mul_veluW_K hinj hζ (tateCurveAt q hq) q hq
+  obtain ⟨h4, h6⟩ := c4_c6_veluCurve_tate_field hl hodd hζ q hq hql SVK (SWK / 2) hvS hwS
+  have hΔeq := Delta_of_c4_c6 _ _ ((l : K)) h4 h6
+  rw [WeierstrassCurve.isElliptic_iff, isUnit_iff_ne_zero, hΔeq]
+  exact mul_ne_zero (pow_ne_zero _ hlK) hΔl
+
+end ExistsVW
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def j_veluQuot_eq_j_tate_pow_K.src : ABC3.Meta.Source :=

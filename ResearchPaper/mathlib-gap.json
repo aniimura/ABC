@@ -4630,5 +4630,20 @@
     },
     "remaining": "☆残るのは (i) hvw_K を無条件に作る段(楕円性は Delta_of_c4_c6 から出る)、(ii) _K 版を minDeltaExp_eq_mul_at_bad_prime(第 1000)・_vc・_full へ持ち上げる段。",
     "gate": "lake build ABC3 成功(6263 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "nodeFiveClosed20260901": {
+    "block": 1138,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★★★★★§3 の枠の節点 5 が閉じた——p ∣ l でも Δ_min は l 倍",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠、進捗 4/5 → 5/5)。",
+    "what": [
+      "★exists_vw_tate_mu_K——hvw を**無条件に**作った。v ≔ ∑ veluV2(K の座標)、w ≔ (∑ …)/2 と取り、楕円性は Δ(veluCurve) = l¹²·Δ(E_{q^l})(第 1131 の Delta_of_c4_c6)と Δ(E_{q^l}) ≠ 0 から出る。",
+      "★★minDeltaExp_eq_mul_at_bad_prime_K / _vc_K / _full_K——原文(第 1000・第 1002・第 1004)を機械的に取り出して _K 化した。",
+      "★★★minDeltaExp_eq_mul_at_bad_prime_full_K が節点 5 の本体である。"
+    ],
+    "frame": "§3 の枠(d + 1 < l を外す道)は 5 節点すべて閉じた: 1115・1116・1128・1129-1130・1131-1138。",
+    "technique": "☆原文をスクリプトで取り出して置換する方法が効いた(第 1137-1138)。★引っかかったのは instance 引数——S.q と qR は defeq だが構文的に違うので haveI で言い直す必要がある(第 971 と同じ穴)。☆WeierstrassCurve.isElliptic_iff は W を明示引数に取るので (isElliptic_iff _).1 と書く。",
+    "remaining": "☆残るのは _full_K を isMuAtBadPrimes_of_veluQuotient_of_split(第 1005)→ lemma_3_5_velu → lemma_3_5_height_ineq に通して d + 1 < l を落とす段である。★これで Lemma 3.5 の逸脱は l ≠ 2 の 1 つだけになる。",
+    "gate": "lake build ABC3 成功(6263 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }

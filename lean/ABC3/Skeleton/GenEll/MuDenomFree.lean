@@ -53,7 +53,7 @@ import ABC3.Meta.Claim
 
 ☆側条件 `hDX ≠ 0` は `A₁` の定数項 `α(1+α)/(1−α)³` を見るだけで出た（第 1128）。
 
-## ★★★★★★★★★★残り 5 節点（進捗枠 **4 / 5**）
+## ★★★★★★★★★★残り 5 節点（進捗枠 **5 / 5**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
@@ -61,9 +61,9 @@ import ABC3.Meta.Claim
 | 2 | `sum_mu_d2xpairE` | `∑ D²X` の `E` 版（`hu` なし）**★第 1116 で証明済み** | 10 |
 | 3 | `veluV2DF_eq_tateDYpairDF` | Vélu の `v` と `DY` の一致の `E` 版 **★第 1128 で証明済み** | 6 |
 | 4 | `c4_velu_tateDF` / `c6_velu_tateDF` | `c₄`・`c₆` の恒等式の `E` 版 **★第 1129-1130 で証明済み** | 10 |
-| 5 | `minDeltaExp_eq_mul_at_bad_prime_dvd` | `p ∣ l` の悪い素点で `Δ_min` が `l` 倍 | 12 |
+| 5 | `minDeltaExp_eq_mul_at_bad_prime_full_K` | `p ∣ l` の悪い素点で `Δ_min` が `l` 倍 **★第 1131-1138 で証明済み** | 12 |
 
-☆総重み 46。★残るのは節点 5（重み 12）だけである。
+☆総重み 46。★★★★**5 節点すべてが閉じた（2026-09-01、第 1138）**。
 
 ### ★★★★★★★★★★★★節点 5 の設計（第 1131 で確定）
 
@@ -92,9 +92,17 @@ import ABC3.Meta.Claim
 | B | `pointCoords_tatePtPair` | `μ_l` の点の座標を書く | ★第 1133 の `natCast_pow_mul_tateXK` |
 | C | `veluQuotientFull_tate_mu` / `isElliptic_veluQuotient_tate_mu` | 商の形と楕円性 | ★第 1134-1135 の `_K` 版 |
 
-☆**3 つとも `hlu` なしの代替が揃った**（第 1132-1135）。
-★残るのは `minDeltaExp_eq_mul_of_globalVelu'`（第 999）と
-`minDeltaExp_eq_mul_at_bad_prime`（第 1000）を `_K` 版で組み直す段だけである。
+☆**3 つとも `hlu` なしの代替が揃い（第 1132-1135）、
+それを使って `minDeltaExp` の連鎖も組み直した**（第 1136-1138）:
+
+| 定理 | `hlu` なし版 | 第 |
+|---|---|---|
+| `j_veluQuot_eq_j_tate_pow` | `j_veluQuot_eq_j_tate_pow_K` | 1136 |
+| `minDeltaExp_eq_mul_of_globalVelu'` | `…_K` | 1137 |
+| `exists_vw_tate_mu` | `exists_vw_tate_mu_K`（★無条件） | 1138 |
+| `minDeltaExp_eq_mul_at_bad_prime` / `_vc` / `_full` | `…_K` | 1138 |
+
+★★**`minDeltaExp_eq_mul_at_bad_prime_full_K` が節点 5 の本体である**。
 
 ★**A は閉じた**——`j = Δ⁻¹·c₄³` なので `c₄ ↦ l⁴c₄`・`Δ ↦ l¹²Δ` では `l¹²` が約分される
 （`j_of_c4_Delta`・`j_eq_of_c4_c6`、第 1132）。
@@ -109,10 +117,6 @@ import ABC3.Meta.Claim
     `l²·tateXK = φ(tateXpairDF)`,   `l³·tateYK = φ(tateYpairDF)`
 
 が `IsUnit` 抜きで成り立つ。
-
-☆残るのは C——`isElliptic_veluQuotient_tate_mu` に B の橋を当て、
-`hvw` の口を「`R` の `v`・`w`」から「`K` の `v`・`w` ＋ `c₄`・`c₆` の関係」に
-付け替える配管である。
 
 ### ★★★降下の道（第 1128 で確定した最終形）
 
