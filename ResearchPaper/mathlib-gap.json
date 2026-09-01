@@ -4246,6 +4246,13 @@
       ],
       "theTailSeries": "☆したがって `tail(u) = ∑_{n≥1} term(q^n·u) = ∑_{n≥1}∑_{m≥1} c_m·q^{nm}·u^m` で、**`q^N` の係数は `∑_{m ∣ N} c_m·u^m`** である。★`u = ζ^i` を代入すれば係数は `ℤ[ζ_l]` の元、すなわち`G_i ≔ ∑_N (∑_{m∣N} c_m·ζ^{im}) X^N ∈ PowerSeries (ℤ[ζ_l])` が**求める万有な冪級数である**。☆これは `σ`-型の係数で、在庫の `sigmaSeries` と同じ形をしている。",
       "remainingWork": "★残るのは 6 種それぞれについて `evalAdicMap φ G_i q hq = tail (ζ^i) q hq` を示す段（幾何級数の展開）。☆在庫の `adicSum_eq_muEval`・`tateXtail_eq_muEval`（`MuGraded.lean`）が同型の作業。★そのうえで第 1107 の降下を当てれば `hu` が消える。見積り 15-35 ブロックのまま。"
+    },
+    "pairAssembly1114": {
+      "block": "第 1114（実測——対の版は機械的な写し）",
+      "finding": "★`sum_mu_d2xpair`（`TateODE.lean:207`）の証明で **`hu` を使うのは最後の 1 行だけ**である:☆`hterm`（項ごとの書き換え、`(ζ^i)^{l-1} = ζ^{l-i}`）と `hswap`（`i ↦ l−i` の入れ替え）と `sum_mu_d2xtail_sigma`（尾）は**いずれも `hu` を取らない**。★`hu` は `have hconst := sum_mu_d2xterm hl hζ hu` の 1 箇所だけ。",
+      "soTheEVersion": "☆したがって `E` 版は**機械的な写し**である——全体に `l⁴` を掛け、最後の `sum_mu_d2xterm hl hζ hu` を `sum_mu_d2xtermE hl hζ`（第 1112、`hu` なし）に差し替えるだけでよい。★`hterm`・`hswap` はそのまま使える。",
+      "sameForDX": "☆`sum_mu_dxpair_zero`（`TateODE.lean:144`）も同型で、`sum_mu_dxterm`（`hu` つき）を `sum_mu_dxtermE`（第 1113、`hu` なし）に差し替える。",
+      "remaining": "★残る段: (1) 対の `E` 版 2 本（機械的）、(2) `c4_velu_tate` の `E` 版、(3) `c6_velu_tate` の `E` 版、(4) 悪い素点の連鎖から `hd : d + 1 < l` を外す。☆見積り 10-20 ブロック（核心が済んだので下方修正）。"
     }
   }
 }
