@@ -405,6 +405,68 @@ def exists_point_tateModel.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Tate モデルの上に位数 l の点がある。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★★★★★**Vélu の商を Tate モデルへ運ぶ（曲線の等式として）**（第 1058）。
+
+☆第 1026 は `j` の一致だけを返していたが、`Δ` の計算には**曲線の等式**が要る。
+★中身は同じで、`veluQuotientFull_vcPoint_eq`（第 969）で
+`C₀ • (E′ ⊗ Lv)` の形に閉じるところまで進める。 -/
+theorem exists_variableChange_veluQuotient_tateModel {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (h2K : (2 : Lv) ≠ 0)
+    (hE' : E' = ABC3.Found.GenEll.veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • Q)))) :
+    ∃ (C₀ : WeierstrassCurve.VariableChange R)
+      (P : ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv)).toAffine.Point),
+      l • P = 0 ∧ P ≠ 0 ∧
+      ABC3.Found.GenEll.veluQuotientFull
+          ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+            (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv))
+          (((range l).erase 0).image
+            (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))
+        = (C₀.map (algebraMap R Lv)) • (E'.baseChange Lv) := by
+  set φL : L →+* Lv := algebraMap L Lv with hφL
+  set φR : R →+* Lv := algebraMap R Lv with hφR
+  obtain ⟨hq, C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
+  have hbase : (tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map φR
+      = (C₀.map φR) • (E.map φL) :=
+    tateModel_baseChange (E.baseChange Lv) h hCE
+  haveI hell1 : (E.map φL).IsElliptic := inferInstanceAs ((E.baseChange Lv).IsElliptic)
+  haveI hell2 : ((C₀.map φR) • (E.map φL)).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact (((C₀.map φR).u⁻¹).isUnit.pow 12).mul (E.map φL).isUnit_Δ
+  haveI hellT : ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+      (tateParamR_mem (E.baseChange Lv) h)).map φR).IsElliptic := by
+    rw [hbase]; exact hell2
+  have hQ1 : addOrderOf (rhPoint φL E Q) = l := by rw [addOrderOf_rhPoint φL E Q, hQ]
+  have hQ2 : addOrderOf (ABC3.Found.GenEll.vcPoint (C₀.map φR) (E.map φL)
+      (rhPoint φL E Q)) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint (C₀.map φR) (E.map φL) (rhPoint φL E Q), hQ1]
+  obtain ⟨P, hP, hP0, himg⟩ := exists_point_image_eq hbase hl _ hQ2
+  refine ⟨C₀, P, hP, hP0, ?_⟩
+  have hE'map : E'.map φL = ABC3.Found.GenEll.veluQuotientFull (E.map φL)
+      (((range l).erase 0).image
+        (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • rhPoint φL E Q))) := by
+    rw [hE', ABC3.Found.GenEll.veluQuotientFull_map, image_pointCoords_rhPoint_nsmul φL E hQ]
+  have h969 := ABC3.Found.GenEll.veluQuotientFull_vcPoint_eq (C₀.map φR) (E.map φL)
+    (E'.map φL) hQ1 h2K hE'map
+  rw [himg, hbase]
+  exact h969.symm
+
+def exists_variableChange_veluQuotient_tateModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商を Tate モデルへ運ぶ——曲線の等式として。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_point_j_tateModel.src : ABC3.Meta.Source :=
