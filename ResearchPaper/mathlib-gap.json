@@ -5373,5 +5373,16 @@
     "measured": "★★★これで Lemma 3.5 を有限拡大の上で回す(第 1199)ための**生成元は必ず取れる**ことが言えた —— L̄ に取れば、第 1195(L(H) は有限次)で有限拡大に落ちる。☆在庫を先に引いたので、今回は重複が無かった(第 1201 の訂正の教訓)。",
     "remaining": "☆残るのは tateProj … 1 の**核**が l • T_l E であること(T_l E / l ≅ E[l])で、これが HasLCyclicJ の**直線**を点の直線へ一意に対応させる段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "tateKerLevel20260902": {
+    "block": 1203,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★tateProj の核はちょうど l^n · T_l E —— T_l E / l ≅ E[l]",
+    "goal": "HasLCyclicJ(mod l の直線)を点の直線へ一意に対応させる(第 1152 の枠、節点 2)。",
+    "what": "★exists_smul_of_tateProj_eq_zero・tateProj_smul_pow_eq_zero・tateProj_eq_zero_iff・tateProj_one_eq_zero_iff(Found/GaloisRep/TateKerLevel.lean)—— (tateProj W l n f : Point) = 0 ↔ ∃ g, (l^n) • g = f。",
+    "measured": "★★☆**tateModule W l は limTors W.toAffine.Point l と定義から同じ**である(mem_ker_nsmulHom が Iff.rfl、2026-09-02 実測)。したがって片方向は在庫の exists_smul_of_proj_zero が変換なしでそのまま当たった。☆新しいのは逆向きと iff の形である。★抽象側で証明した補題を探すときは limTors でも grep すること(配管に記録)。",
+    "consequence": "★★★これで T_l E / lⁿ · T_l E ≅ E[lⁿ] が言えた —— n = 1 が HasLCyclicJ(mod l の直線)を点の直線へ一意に対応させる段である。",
+    "remaining": "☆残るのはこれを使って HasLCyclicJ から「Gal-安定な位数 l の点の直線」を取り出す組み上げだけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

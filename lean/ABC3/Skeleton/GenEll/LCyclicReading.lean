@@ -319,9 +319,23 @@ import ABC3.Meta.Claim
 **生成元は必ず取れる**ことが言えた——`L̄` に取れば、
 第 1195（`L(H)` は有限次）で有限拡大に落ちる。
 
-☆残るのは `tateProj … 1` の**核**が `l • T_l E` であること
-（`T_l E / l ≅ E[l]`）で、これが `HasLCyclicJ` の**直線**を
-点の直線へ一意に対応させる段である。
+##### ★★★★★★★★★★★★★★★★第 1203——**核も取れた**（`T_l E / l ≅ E[l]`）
+
+`tateProj_eq_zero_iff`・`tateProj_one_eq_zero_iff`
+（`Found/GaloisRep/TateKerLevel.lean`）。
+
+    (tateProj W l n f : Point) = 0  ↔  ∃ g, (l^n) • g = f
+
+☆`tateModule W l` は `limTors W.toAffine.Point l` と**定義から同じ**
+（`mem_ker_nsmulHom` が `Iff.rfl`、2026-09-02 実測）なので、
+片方向は在庫の `exists_smul_of_proj_zero` が**そのまま当たる**。
+
+★★★これで `T_l E / lⁿ · T_l E ≅ E[lⁿ]` が言えた——
+`n = 1` が `HasLCyclicJ`（`mod l` の直線）を
+**点の直線**へ一意に対応させる段である。
+
+☆残るのはこれを使って `HasLCyclicJ` から
+「`Gal`-安定な位数 `l` の点の直線」を取り出す組み上げだけである。
 
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・

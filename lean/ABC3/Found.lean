@@ -1381,6 +1381,7 @@ import ABC3.Found.GaloisRep.TorsionIntegralGood
 import ABC3.Found.GaloisRep.Lemma35Unconditional
 import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.TateLevelOne
+import ABC3.Found.GaloisRep.TateKerLevel
 import ABC3.Found.GaloisRep.Lemma35StableLine
 import ABC3.Found.GaloisRep.Lemma37CondBFull
 import ABC3.Found.GenEll.Lemma37Full

@@ -2883,3 +2883,16 @@ CLAUDE.md 在庫の規則そのものである。★同じ穴は第 1191 でも�
 
 **失敗形**: `NG 2 件` のまま commit / push した。二度目である。
 **直し方**: `node tools/check.mjs 2>&1 | tail -3` が `PASS` を出すまで commit しない。
+
+## `tateModule W l` と `limTors W.toAffine.Point l` は定義から同じ（第 1203）
+
+**測ったこと**: `Interface/GaloisRep/Torsion.lean` の `tateModule W l`
+（`torsionPoints W (l^m)` の逆極限）と
+`Found/GaloisRep/TateLimit.lean` の `limTors A l`
+（`(nsmulHom A (l^m)).ker` の逆極限）は、
+membership が `mem_ker_nsmulHom : x ∈ (nsmulHom A m).ker ↔ m • x = 0` で
+`Iff.rfl` なので**定義から等しい**。
+
+**使い方**: `limTors` で書いた在庫の補題が `tateModule` にそのまま当たる。
+実例: `exact exists_smul_of_proj_zero l n f h`（第 1203、変換なしで通った）。
+★抽象側で証明した補題を探すときは `limTors` でも grep すること。
