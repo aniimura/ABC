@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.VeluSetCard
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Meta.Claim
 
 /-!
@@ -163,7 +164,44 @@ theorem faltingsHeightJ_quotLCyclicJ_of_isog (x : RealizedClass) (l : ℕ) (C₀
   rw [hx]
   exact hq
 
+/-! ## ★★★★★★★★★★★★局所の関係を全素点で -/
+
+/-- ★★★★★★★★★★★★
+**`Δ_min` の `l` 倍関係は全素点で成り立つ**——★**無条件**（第 1247）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆悪い素点（`v_p(j) < 0`）では `minDeltaExp_eq_mul_of_jExp_mul`（在庫）、
+良い素点（`0 ≤ v_p(j)`）では両辺とも `0` である。
+
+★★★これが第 1244（`quotLCyclicJ` の `deg∞`）が要る `hloc` の形であり、
+残るのは `Lemma 3.2, (ii)` が与える `v_p(j(E′)) = l·v_p(j(E))` だけである。 -/
+theorem minDeltaExp_eq_mul_of_jExp_all {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    (hss' : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E') {l : ℕ}
+    (hbad : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → jExp p E' = (l : ℤ) * jExp p E)
+    (hgood : ∀ p : HeightOneSpectrum (𝓞 L), 0 ≤ jExp p E → 0 ≤ jExp p E') :
+    ∀ p : HeightOneSpectrum (𝓞 L), minDeltaExp p E' = l * minDeltaExp p E := by
+  intro p
+  rcases lt_or_ge (jExp p E) 0 with hneg | hnn
+  · exact minDeltaExp_eq_mul_of_jExp_mul p E E' (hss p) (hss' p) hneg (hbad p hneg)
+  · have h1 : minDeltaExp p E = 0 := by
+      rw [minDeltaExp_eq_maxJ_of_semistable p E (hss p)]
+      exact max_eq_left (by omega)
+    have h2 : minDeltaExp p E' = 0 := by
+      rw [minDeltaExp_eq_maxJ_of_semistable p E' (hss' p)]
+      have hg := hgood p hnn
+      exact max_eq_left (by omega)
+    rw [h1, h2, mul_zero]
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def minDeltaExp_eq_mul_of_jExp_all.src : Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Δ_min の l 倍関係は全素点で成り立つ。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def faltingsHeightJ_quotLCyclicJ_of_isog.src : Source :=
   { paper := "GenEll", pdfPage := 17,

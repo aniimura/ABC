@@ -5811,5 +5811,15 @@
     "measured": "☆残る仮説は hclosed(galRep の像が閉部分群——連続性の葉)と、σ の mod l の冪単性・非自明性だけ。",
     "consequence": "★★★これで witness の 4 本すべてが**そのものの形**に到達した —— (1) 第 1239、(2) 第 1244、(3) 第 1245、(4) 本ブロック。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "minDeltaAllPrimes20260902": {
+    "block": 1247,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★Δ_min の l 倍関係は全素点で成り立つ——第 1244 の hloc の形",
+    "goal": "EllModuliWitness の sorry (2) の残り前提。",
+    "what": "★minDeltaExp_eq_mul_of_jExp_all(Found/GenEll/QuotClassExists.lean)。",
+    "measured": "☆悪い素点(v_p(j) < 0)では minDeltaExp_eq_mul_of_jExp_mul(在庫)、良い素点(0 ≤ v_p(j))では両辺とも 0。",
+    "consequence": "★★★これで第 1244 が要る hloc は **v_p(j(E′)) = l·v_p(j(E)) だけ**に落ちた —— それが Lemma 3.2, (ii) の内容である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
