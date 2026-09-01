@@ -3764,5 +3764,18 @@
     ],
     "remaining": "☆`Found` に条なし `.src` を置くには、アルキメデスの周期対の供給（複素楕円曲線の一意化——mathlib に無い）と素点ごとの整性の供給が要る。★これが `Lemma 3.5` に残る最後の塊である。",
     "note": "★944-1045 の 98 ブロック。"
+  },
+  "archPeriodSupplied20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1046",
+    "supersedes": "lemma35Reached20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★`exists_periodPair_family`（1046）——アルキメデスの周期対はつねに取れる。☆第 348（`exists_periodPair_of_isElliptic`、**無条件**）を `choose` で束ねるだけ。",
+      "★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★`lemma_3_5_velu_arch`（1046）——`Lemma 3.5` の不等式。**残る仮説は 2 本だけ**。"
+    ],
+    "correction": "★★**旧測定の訂正**: 「アルキメデスの周期対の供給（複素楕円曲線の一意化——mathlib に無い）が要る」と書いたが、**プロジェクト内に第 348 として既にあった**（`Found/GenEll/JSurjective.lean`、`jFun` の全射性から）。☆在庫を引かずに「無い」と書いたのが誤りである。",
+    "remaining": "☆残る仮説は `∀ p, neronExp p E = 0`（`E` が大域的に極小なモデル）と`∀ p, E′.IsIntegral (primeSubring p)`（Vélu の商が各素点で整）の 2 本。",
+    "note": "★944-1046 の 99 ブロック。"
   }
 }

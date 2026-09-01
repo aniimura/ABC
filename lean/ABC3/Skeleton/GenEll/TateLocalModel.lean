@@ -934,6 +934,86 @@ def lemma_3_5_velu_large.needs : List ProofObligation :=
     .citation "[ABC3]" "lemma_3_5_velu_bad_delta(不等式の側、第 903、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★第 1046 —— アルキメデスの周期対は自前で作れる
+
+★第 1045 は `P`・`Cv`・`hΔ`・`hPC`・`hell1`・`hell2` を仮説で受けていた。
+☆しかしこれらは第 348（`exists_periodPair_of_isElliptic`、**無条件**）から
+`choose` で作れる——複素楕円曲線はつねに格子で一意化されるからである。 -/
+
+open ABC3.Found.GenEll in
+/-- ★★★★★★★★★★★★★★★★**アルキメデスの周期対はつねに取れる**（第 1046）。 -/
+theorem exists_periodPair_family {L : Type} [Field L] [NumberField L]
+    (E : WeierstrassCurve L) [E.IsElliptic] :
+    ∃ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → WeierstrassCurve.VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0)
+      ∧ (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ))
+      ∧ (∀ σ : L →+* ℂ, (E.map σ).IsElliptic)
+      ∧ (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) := by
+  have hell1 : ∀ σ : L →+* ℂ, (E.map σ).IsElliptic := by
+    intro σ
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.map_Δ, isUnit_iff_ne_zero]
+    exact (map_ne_zero_iff _ σ.injective).2 E.isUnit_Δ.ne_zero
+  choose P Cv hPC using fun σ : L →+* ℂ => exists_periodPair_of_isElliptic (E.map σ) (hell1 σ)
+  refine ⟨P, Cv, ?_, hPC, hell1, ?_⟩
+  · intro σ
+    haveI := hell1 σ
+    haveI : (latticeCurve (P σ)).IsElliptic := by
+      rw [← hPC σ, WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+      exact (((Cv σ).u⁻¹).isUnit.pow 12).mul (E.map σ).isUnit_Δ
+    exact latticeDisc_ne_zero_of_isElliptic (P σ)
+  · intro σ
+    haveI := hell1 σ
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact (((Cv σ).u⁻¹).isUnit.pow 12).mul (E.map σ).isUnit_Δ
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] Lemma 3.5 の不等式**
+（アルキメデスの周期対も自前、第 1046）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1046）**——残る仮説は
+`neronExp p E = 0` と `E′.IsIntegral (primeSubring p)` の 2 本だけになった。 -/
+theorem lemma_3_5_velu_arch (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      Module.finrank ℚ L + 1 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_velu_large eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl hodd hd Q hQ hE' hmin0 hint hssE hssE' hcop => ?_⟩
+  obtain ⟨P, Cv, hΔ, hPC, hell1, hell2⟩ := exists_periodPair_family E
+  exact hC L E E' l hl hodd hd Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE' hcop
+
+def exists_periodPair_family.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(アルキメデスの周期対はつねに取れる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_periodPair_family.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_periodPair_of_isElliptic(第 348、無条件、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_periodPair_of_isElliptic") 1 ]
+
+def lemma_3_5_velu_arch.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(不等式——残るは neronExp = 0 と E′ の整性の 2 本)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_arch.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "lemma_3_5_velu_large(第 1045、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.lemma_3_5_velu_large") 1,
+    .citation "[ABC3]" "exists_periodPair_family(第 1046、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_periodPair_family") 1 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
