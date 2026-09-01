@@ -1046,6 +1046,7 @@ import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.CompletionValuationBridge
 import ABC3.Found.GaloisRep.IntegerCongr
 import ABC3.Found.GaloisRep.ResidueFieldFinite
+import ABC3.Found.GaloisRep.SplitAtCompletion
 import ABC3.Found.GaloisRep.AdicCompleteValued
 import ABC3.Found.GaloisRep.AdicEvalNatural
 import ABC3.Found.GaloisRep.TateSpecialize
