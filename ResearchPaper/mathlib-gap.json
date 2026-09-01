@@ -5246,5 +5246,14 @@
     "what": "★isMinimal_of_c4_valAdd_eq_zero と vAdd_eq_zero_iff_valAdd_eq_zero(Found/GaloisRep/LocalHeightDelta.lean)。☆primeSubring p は DVR で分数体が L なので第 320 の isMinimal_of_c4_vAdd_eq_zero がそのまま当てはまり、橋は「2 つの加法付値が同時に 0 になる」だけ——valuation_isEquiv(在庫)＋ mathlib の Valuation.isEquiv_iff_val_eq_one。",
     "why": "★★★これで **SemistableAt の底変換の部品はすべて揃った**: 第 1187(良い還元)・第 1188(分岐した valAdd)・第 1190(極小性)・mathlib の map_variableChange。☆残るのは組み立てだけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "primeSubringBaseChange20260902": {
+    "block": 1191,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★付値環は底変換で付値環に入る",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1 の組み立て)。",
+    "what": "★algebraMap_mem_primeSubring(Found/GaloisRep/DegInfBaseChange.lean)—— x ∈ primeSubring p なら algebraMap x ∈ primeSubring P。valAdd P (algebraMap x) = e·valAdd p x ≥ 0(第 1188)だからである。",
+    "why": "☆これが「整モデルを上げると整モデルになる」の中身であり、SemistableAt の底変換の組み立てで isMinimal_of_c4_valAdd_eq_zero(第 1190)が要求する IsIntegral (primeSubring P) を出す段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

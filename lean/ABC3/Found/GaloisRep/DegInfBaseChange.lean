@@ -470,9 +470,45 @@ theorem valAdd_algebraMap_liesOver (p : HeightOneSpectrum (𝓞 L))
       = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p x :=
   ABC3.Found.GenEll.ordAt_liesOver L' p P x
 
+/-- ★★★★★★★★**付値環は底変換で付値環に入る**（第 1191）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`x ∈ primeSubring p` なら `algebraMap x ∈ primeSubring P`——
+`valAdd P (algebraMap x) = e·valAdd p x ≥ 0` だからである（第 1188）。
+★これが「整モデルを上げると整モデルになる」の中身である。 -/
+theorem algebraMap_mem_primeSubring (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    {x : L} (hx : x ∈ primeSubring p) :
+    algebraMap L L' x ∈ primeSubring P := by
+  rcases eq_or_ne x 0 with rfl | hx0
+  · simpa using (primeSubring P).zero_mem
+  · have hx0' : algebraMap L L' x ≠ 0 :=
+      (map_ne_zero_iff _ (algebraMap L L').injective).2 hx0
+    have hge : 0 ≤ valAdd p (Units.mk0 x hx0) :=
+      (valAdd_nonneg_iff p _).2 ((mem_primeSubring_iff p x).1 hx)
+    have heq : valAdd P (Units.map (algebraMap L L').toMonoidHom (Units.mk0 x hx0))
+        = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p (Units.mk0 x hx0) :=
+      valAdd_algebraMap_liesOver L L' p P (Units.mk0 x hx0)
+    have hval : valAdd P (Units.mk0 (algebraMap L L' x) hx0')
+        = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p (Units.mk0 x hx0) := by
+      rw [← heq]
+      exact valAdd_eq_of_valuation_eq P _ _ rfl
+    have hnn : (0 : ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ) := by positivity
+    have : 0 ≤ valAdd P (Units.mk0 (algebraMap L L' x) hx0') := by
+      rw [hval]
+      exact mul_nonneg hnn hge
+    exact (mem_primeSubring_iff P _).2 ((valAdd_nonneg_iff P _).1 this)
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def algebraMap_mem_primeSubring.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(付値環は底変換で付値環に入る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def valAdd_algebraMap_liesOver.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
