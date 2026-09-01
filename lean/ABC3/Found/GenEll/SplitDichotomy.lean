@@ -149,6 +149,34 @@ def splits_or_exists_twist_splits'.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(標数の仮定なしの二者択一。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★第 980 —— 整モデルを `IsCharNeTwoNF` に正規化する
+
+★第 979 の二者択一は `[V.IsCharNeTwoNF]`（`a₁ = a₃ = 0`）を受ける。
+☆`2` が可逆な環では変数変換 1 回でその形にできる
+（mathlib の `exists_variableChange_isCharNeTwoNF`、`[Invertible 2]` を要求）。
+
+★完備化の整数環で `2` が可逆になるのは `v_p(2) = 0`、すなわち `p ∤ 2` のときである
+（第 953 の `isUnit_natCast_of_valAdd_eq_zero` に `n = 2` を入れる）。
+☆`p ∣ 2` では別の手当て（不分岐 2 次拡大）が要る——第 979 の測定を見よ。 -/
+
+/-- ★★★★★★★★★★★★**`2` が単元なら `IsCharNeTwoNF` に正規化できる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆mathlib の `exists_variableChange_isCharNeTwoNF` は `[Invertible 2]` を受けるので、
+`IsUnit (2 : R)` から `Invertible` を作って渡すだけである。 -/
+theorem exists_variableChange_isCharNeTwoNF_of_isUnit_two {R : Type} [CommRing R]
+    (W : WeierstrassCurve R) (h2 : IsUnit (2 : R)) :
+    ∃ C : WeierstrassCurve.VariableChange R, (C • W).IsCharNeTwoNF := by
+  haveI : Invertible (2 : R) := h2.invertible
+  exact W.exists_variableChange_isCharNeTwoNF
+
+def exists_variableChange_isCharNeTwoNF_of_isUnit_two.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2 が単元なら IsCharNeTwoNF に正規化できる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def splits_or_exists_twist_splits.src : ABC3.Meta.Source :=
