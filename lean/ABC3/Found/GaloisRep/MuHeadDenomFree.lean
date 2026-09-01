@@ -161,6 +161,49 @@ theorem natCast_pow_mul_tateD3Xterm (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - �
 
 end Bridge
 
+/-! ## ★★★★★★★★★★★★第 1111 —— `E` 版は環準同型と無条件に可換
+
+★★★★**これが `hu` を外す鍵である。**
+
+☆在庫の `map_tateD2Xterm`（`MuDYSum.lean`）は `IsUnit (1 - t)` を要求する——
+`f (Ring.inverse x) = Ring.inverse (f x)` が単元性を要するからである。
+★`E` 版は **`Ring.inverse` を含まない多項式**なので、
+任意の環準同型と**無条件に**可換である。 -/
+
+section Map
+
+variable {A B : Type} [CommRing A] [CommRing B]
+
+/-- ★☆`muS` は環準同型で写る。 -/
+theorem map_muS (f : A →+* B) (l : ℕ) (t : A) : f (muS l t) = muS l (f t) := by
+  rw [muS, muS, map_sum]
+  exact Finset.sum_congr rfl (fun k _ => by rw [map_mul, map_pow, map_natCast])
+
+/-- ★★★★★★**`tateD2XtermE` は環準同型で写る**——`IsUnit` 不要。 -/
+theorem map_tateD2XtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateD2XtermE l t) = tateD2XtermE l (f t) := by
+  rw [tateD2XtermE, tateD2XtermE, map_mul, map_mul, map_pow, map_muS, map_add, map_add,
+    map_one, map_mul, map_pow]
+  simp [map_ofNat]
+
+/-- ★★★★★★**`tateDXtermE` は環準同型で写る**——`IsUnit` 不要。 -/
+theorem map_tateDXtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateDXtermE l t) = tateDXtermE l (f t) := by
+  rw [tateDXtermE, tateDXtermE, map_neg]
+  congr 1
+  rw [map_mul, map_mul, map_pow, map_muS, map_add, map_one]
+
+/-- ★★★★★★**`tateD3XtermE` は環準同型で写る**——`IsUnit` 不要。 -/
+theorem map_tateD3XtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateD3XtermE l t) = tateD3XtermE l (f t) := by
+  rw [tateD3XtermE, tateD3XtermE, map_neg]
+  congr 1
+  rw [map_mul, map_mul, map_pow, map_muS, map_add, map_add, map_add, map_one,
+    map_mul, map_mul, map_pow, map_pow]
+  simp [map_ofNat]
+
+end Map
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def muS.src : Source :=
