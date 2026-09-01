@@ -6205,5 +6205,16 @@
   "consequence": "★★座標の言葉では `galAct` はただ `σK` を当てるだけ——第 1283（Tate 一意化の同変性、同じ言葉）と**そのまま突き合わせられる**。",
   "idiom": "★★☆`Point` の `+` は `DecidableEq` のインスタンス経路で割れる。在庫の `rhPoint_add` は `open scoped Classical in` の下にあるので、こちらも `[DecidableEq F]` を宣言せず `open scoped Classical` にする（`lean-idioms.md` に記録）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateSigmaGalAct20260902": {
+  "block": 1286,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★tateSigmaAct は実際の Galois 作用である——節点 6 が閉じた",
+  "goal": "第 1276 の τ が本物の Galois 作用であることを言う。",
+  "proved": "☆`Found/GenEll/TateSigmaGalAct.lean`（第 1286）に 2 本。`rhPoint_eq_zero_iff` と `tateSigmaAct_eq_galAct`。",
+  "route": "★両者の座標がどちらも `(σK x, σK y)` になる（第 1283 と第 1285）ので、点の一意性（`pointCoords_injective`、原点以外）から一致する。",
+  "consequence": "★★★これで **`tateSigmaAct` の幂単性・非自明性（第 1276）は本物の Galois 作用の幂単性・非自明性**になった。☆第 1275 で見つけた欠陥の最終的な埋め合わせである。",
+  "remaining": "★II 側に残るのは節点 8（悪い素点での組み立て）だけ:`L′ ≔ L(ζ_l, E[l], √d)` を取り、`P.adicCompletion L′` で `mkTateSetup`・`dvrTatePhiAddEquiv`・`exists_tate_model` を回し、局所から大域へ運ぶ（第 1271・1270）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

@@ -1399,6 +1399,7 @@ import ABC3.Found.GenEll.Thm38SigmaFull
 import ABC3.Found.GaloisRep.TatePhiSigma
 import ABC3.Found.GenEll.PointCoordNatural
 import ABC3.Found.GenEll.GalActPoint
+import ABC3.Found.GenEll.TateSigmaGalAct
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
