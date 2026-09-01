@@ -376,6 +376,48 @@ theorem minDeltaExp_eq_mul_of_jExp_mul (p : HeightOneSpectrum (𝓞 L))
   · rw [max_eq_right (by nlinarith), max_eq_right (by omega)]
     ring
 
+/-! ## ★★★★★★★★★★★★第 998 —— `E′.j ≠ 0` は `j` の一致から出る
+
+★第 997 は `hjE′ : E′.j ≠ 0` を仮説で受けていた。
+☆だが `j(E_{q₀} ⊗ Lv) = (1/j の評価)⁻¹` であり（`j_tateCurveAt_inv`）、
+`1/j` の評価は `q₀ · 単元` だから `q₀ ≠ 0` なら `0` でない。
+★したがって **`j` の一致からそのまま出る**——仮説を 1 本減らせる。 -/
+
+/-- ★★★★★★★★★★★★**`j` が Tate 曲線の `j` に等しければ `j ≠ 0`**。 -/
+theorem j_ne_zero_of_j_tateCurveAt {Lv : Type} [Field Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E' : WeierstrassCurve L) [E'.IsElliptic] [(E'.baseChange Lv).IsElliptic]
+    (q₀ : R) (hq₀ : q₀ ∈ IsLocalRing.maximalIdeal R) (hq₀0 : q₀ ≠ 0)
+    [((tateCurveAt q₀ hq₀).map (algebraMap R Lv)).IsElliptic]
+    (hjj : (E'.baseChange Lv).j = ((tateCurveAt q₀ hq₀).map (algebraMap R Lv)).j) :
+    E'.j ≠ 0 := by
+  have hq₀ne : algebraMap R Lv q₀ ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hq₀0
+  have hc4T : algebraMap R Lv (tateCurveAt q₀ hq₀).c₄ ≠ 0 :=
+    ((tateCurveAt_c4_isUnit q₀ hq₀).map (algebraMap R Lv)).ne_zero
+  obtain ⟨u, hu, hueq⟩ := evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) q₀ hq₀
+  have hev : algebraMap R Lv (evalAdic tateJinvSeries q₀ hq₀) ≠ 0 := by
+    rw [hueq, map_mul]
+    exact mul_ne_zero hq₀ne ((hu.map (algebraMap R Lv)).ne_zero)
+  have hjT : ((tateCurveAt q₀ hq₀).map (algebraMap R Lv)).j ≠ 0 := by
+    rw [j_tateCurveAt_inv q₀ hq₀ hc4T]
+    exact inv_ne_zero hev
+  have hjmap : (E'.baseChange Lv).j = algebraMap L Lv E'.j := by
+    have hΔbc : (E'.baseChange Lv).Δ = algebraMap L Lv E'.Δ := WeierstrassCurve.map_Δ _ _
+    have hcbc : (E'.baseChange Lv).c₄ = algebraMap L Lv E'.c₄ := WeierstrassCurve.map_c₄ _ _
+    rw [ABC3.Found.GenEll.j_eq_inv_Delta_mul, ABC3.Found.GenEll.j_eq_inv_Delta_mul,
+      hΔbc, hcbc, map_mul, map_inv₀, map_pow]
+  intro hc
+  apply hjT
+  rw [← hjj, hjmap, hc, map_zero]
+
+def j_ne_zero_of_j_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(j が Tate 曲線の j なら 0 でない。★無条件)",
+    sectionId := "genell-def-3-3" }
+
 /-! ## ★★★★★★★★★★★★★★★★★★★★第 997 —— `q` を `tateParamR` に固定した形
 
 ★第 995（`jExp_eq_mul_of_tateParam_pow`）は `q`・`hc4`・`hev`・`hqne` を素で受ける。
@@ -409,7 +451,7 @@ theorem jExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [Algebra 
     [(E.baseChange Lv).IsElliptic] [(E'.baseChange Lv).IsElliptic]
     [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
     (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
-    (hj : jExp p E < 0) (hjE' : E'.j ≠ 0)
+    (hj : jExp p E < 0)
     {l : ℕ}
     (hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R)
     [((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
@@ -464,6 +506,8 @@ theorem jExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [Algebra 
       (evalAdic tateJinvSeries ((tateParamR (E.baseChange Lv) h) ^ l) hql) ≠ 0 := by
     rw [hueq', map_mul]
     exact mul_ne_zero hqlne ((hu'.map (algebraMap R Lv)).ne_zero)
+  have hjE' : E'.j ≠ 0 := j_ne_zero_of_j_tateCurveAt E'
+    ((tateParamR (E.baseChange Lv) h) ^ l) hql (pow_ne_zero l hq0) hjj
   exact jExp_eq_mul_of_tateParam_pow p hp E E' (tateParamR (E.baseChange Lv) h) hq hql
     hc4T hev hc4T' hev' hqne hqlne hjne hjE' hjeq hjj
 
@@ -480,7 +524,7 @@ theorem minDeltaExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [A
     [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
     (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
     (hss : SemistableAt p E) (hss' : SemistableAt p E')
-    (hj : jExp p E < 0) (hjE' : E'.j ≠ 0)
+    (hj : jExp p E < 0)
     {l : ℕ}
     (hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R)
     [((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
@@ -490,7 +534,7 @@ theorem minDeltaExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [A
         (algebraMap R Lv)).j) :
     minDeltaExp p E' = l * minDeltaExp p E :=
   minDeltaExp_eq_mul_of_jExp_mul p E E' hss hss' hj
-    (jExp_eq_mul_of_j_tate_pow p hp E E' h hj hjE' hql hjj)
+    (jExp_eq_mul_of_j_tate_pow p hp E E' h hj hql hjj)
 
 def jExp_eq_mul_of_j_tate_pow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,

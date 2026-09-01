@@ -2571,3 +2571,25 @@ GaloisRep 側が選ばれ、`Application type mismatch` になる。
 ★`γ := 1` を渡し、`Valuation.restrict_lt_iff_lt_embedding` で書き換えてから
 `simp only [Units.val_one, map_one]` で `Valued.v (z − x) < 1` に落とす。
 ☆第 897・943 でも同じ場所で止まっている——3 度目。
+
+## `rw` の後に `X = X` が残る(第 999)
+
+**失敗形**: `rw [hPz]` で両辺が同じ形になったのに「unsolved goals」で
+`⊢ X = X`(表示上は完全に同一)が残る。
+
+**なぜ**: `rw` の自動 `rfl` は reducible 透明度で走る。
+`Finset.image` の `DecidableEq` インスタンスや `tateCurveAt` に渡した証明項が
+片側だけ別経路で作られていると、表示は同じでも reducible には合わない。
+
+**直し方**: `rw [hPz]` の直後に **`rfl` を明示的に書く**。
+`rfl` タクティクは default 透明度＋証明無関係性を使うので通る。
+
+```lean
+have hcurveEq : veluQuotientFull W (image (fun k => pointCoords (k • P)) s)
+    = veluQuotientFull W (image (fun k => pointCoords (k • tatePhi S hΔ c)) s) := by
+  rw [hPz]
+  rfl        -- ★これが要る
+```
+
+**併せて**: `j` を跨ぐ書き換えは motive が壊れる(`IsElliptic` が邪魔)。
+**曲線の水準で等式を作ってから** `ABC3.Found.GenEll.j_congr_curve` で `j` に移すと安全。

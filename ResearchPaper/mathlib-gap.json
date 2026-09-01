@@ -3333,5 +3333,18 @@
     "whyItMatters": "★★★★**`E′` の側に残る仮説が 2 本になった**: `E′.j ≠ 0` と`j(E′ ⊗ Lv) = j(E_{q_E^l} ⊗ Lv)` だけである。☆第 972（`minDeltaExp_eq_mul_of_globalVelu`）が要求していた`h′`（`E′` の分裂乗法還元）・`[IsMinimal (E′ ⊗ Lv)]`・`C′`・`hC′`・`hc4ne′`・`hc4′` は**すべて落ちた**。★これで `p ∣ 2` で `E′` の分裂性が作れない問題（第 991 の測定）が`E′` の側では起きなくなった——残るのは `E` の側だけである。",
     "remaining": "☆残るのは (i) 996 と 997 を繋いで大域の Vélu の商で受ける形にする段、(ii) 各悪い素点で `E` の局所データ（976・993・994）を供給する段、(iii) `p ∣ 2` で `E` の非分裂を不分岐 2 次拡大で処理する段（943＋944 が道具）。",
     "note": "★944-997 の 49 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35GlobalVeluLight20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 998-999",
+    "supersedes": "lemma35JTatePow20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★`j_ne_zero_of_j_tateCurveAt`（998）——`j` が Tate 曲線の `j` に等しければ `j ≠ 0`。☆`j(E_{q₀} ⊗ Lv) = (1/j の評価)⁻¹` で、`1/j` は `q₀ · 単元`。★これで第 997 の `hjE′` が落ちた。",
+      "★★★★★★★★★★★★★★★★★★★★`minDeltaExp_eq_mul_of_globalVelu′`（999）——大域の Vélu の商で受ける形の**軽量版**。"
+    ],
+    "interfaceDiff": "★★★★**第 972 から落ちた仮説**: `h′`（`E′` の分裂乗法還元）・`[IsMinimal (E′ ⊗ Lv)]`・`C′`・`hC′`・`hc4ne′`・`hc4′`、さらに `E` 側の `C`・`hC`・`hc4ne`・`hc4` も落ちた（10 本）。☆代わりに入ったのは `SemistableAt p E`・`SemistableAt p E′`・`jExp p E < 0` の 3 本。★これらは `isMuAtBadPrimes_of_veluQuotient` が**すでに仮説として持っている**ものである。",
+    "remaining": "☆残るのは `E` の側の局所データを各悪い素点で供給する段だけ:(a) `h`（完備化での分裂乗法還元）——976＋993＋994、(b) `[IsMinimal (E ⊗ Lv)]`——973、(c) `hΔ`・`hcop`・`hlu`・`hql`・`h2`・`h2K`——977＋978、(d) `hvw`（Vélu の係数が整）——956-960 の対称和。★`p ∣ 2` の非分岐 2 次拡大（943＋944）は (a) のためだけに残る。",
+    "note": "★944-999 の 51 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
