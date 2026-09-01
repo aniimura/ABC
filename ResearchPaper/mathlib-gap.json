@@ -3777,5 +3777,19 @@
     "correction": "★★**旧測定の訂正**: 「アルキメデスの周期対の供給（複素楕円曲線の一意化——mathlib に無い）が要る」と書いたが、**プロジェクト内に第 348 として既にあった**（`Found/GenEll/JSurjective.lean`、`jFun` の全射性から）。☆在庫を引かずに「無い」と書いたのが誤りである。",
     "remaining": "☆残る仮説は `∀ p, neronExp p E = 0`（`E` が大域的に極小なモデル）と`∀ p, E′.IsIntegral (primeSubring p)`（Vélu の商が各素点で整）の 2 本。",
     "note": "★944-1046 の 99 ブロック。"
+  },
+  "lemma35SessionState20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1047（測定）",
+    "supersedes": "archPeriodSupplied20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "reached": "★★★★★★★★**`IsMuAtBadPrimes` は完全に `sorry`-free**（第 1044）。☆`isMuAtBadPrimes_of_veluQuotient_of_large` の `#print axioms` は`propext`・`Classical.choice`・`Quot.sound` の 3 つだけ。★不等式の側は `lemma_3_5_velu_arch`（第 1046）まで来ており、残る仮説は 2 本だけである。",
+    "remainingTwo": [
+      "`∀ p, neronExp p E = 0`——`E` のモデルが各素点で極小であること。☆`neronExp p W = valAdd p C.u`（`C` は極小化変換）なので、`= 0` は「与えられたモデルが極小」を意味する。",
+      "`∀ p, E′.IsIntegral (primeSubring p)`——Vélu の商が各素点で整であること。"
+    ],
+    "whereConsumed": "☆両方とも `htFalt_veluQuotientFull_le`（第 704、`§9-1146`）が消費している——Faltings 高さの比較（`ht^Falt(E′) ≤ ht^Falt(E) + 2log l`）の中である。★したがって次の一手はそこを読み、モデルの取り替えで外せるかを測ることである。",
+    "inventoryLesson": "★★**在庫を引かずに「mathlib に無い」と書いた誤りが 1 件**（第 1046 で訂正）。アルキメデスの周期対は第 348 `exists_periodPair_of_isElliptic` としてプロジェクト内に既にあった。☆CLAUDE.md の「在庫」の指示どおり、`node tools/decl-index.mjs` → grep を先に回すこと。",
+    "sessionSummary": "★944-1046 の 99 ブロック。外したもの: Galois の壁（945/946）、`E′` の局所データ 10 本（995-1004）、mathlib の穴 3 つの内製（897・989・1010-1013）、**不分岐 2 次拡大まるごと**（1007-1033）、連鎖の一般化（1026-1027）、`IsMuAtBadPrimes` の `sorry`（1034-1044）、アルキメデスの周期対（1046）。☆訂正した旧測定 2 件: `p ∣ 2` に Artin–Schreier は不要、分岐の上界は `ramificationIdx` でなくイデアルノルムで出る。"
   }
 }
