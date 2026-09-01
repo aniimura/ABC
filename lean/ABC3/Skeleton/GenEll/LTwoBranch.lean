@@ -53,11 +53,11 @@ import ABC3.Meta.Claim
 ★これは第 1128 と同じ「万有な環を経由する」型であり、道具（`map_*`・`evalAdicMapHom`）は
 すべて第 1125-1127 で建ててある。
 
-## ★★★★★★★★★★残り 4 節点（進捗枠 **0 / 4**）
+## ★★★★★★★★★★残り 4 節点（進捗枠 **1 / 4**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
-| 1 | `veluV2_eq_tateDYpair_generic` | `hDX` を取らない `DY = veluV2`（一般の径数） | 10 |
+| 1 | `veluV2_eq_tateDYpair_any` | `hDX` を取らない `DY = veluV2` **★第 1143-1144 で証明済み** | 10 |
 | 2 | `c4_velu_tate_any` / `c6_velu_tate_any` | `hDX` を取らない `c₄`・`c₆` の恒等式 | 8 |
 | 3 | `exists_veluW_two` | `l = 2` では `veluU = 0` なので `w = v·x` | 6 |
 | 4 | `psi2Sq_eval_eq_zero` | `l = 2` の捩れ点と多項式の橋（`Ψ₂Sq`） | 8 |

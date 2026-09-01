@@ -4725,5 +4725,29 @@
     },
     "remaining": "☆残るのは PowerSeries U の中で hDX ≠ 0 を出し、veluV2_eq_tateDYpair を当てて特殊化する段である。",
     "gate": "lake build ABC3 成功、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "veluODEAny20260901": {
+    "block": 1144,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★DY = veluV2 を DX ≠ 0 なしで——l = 2 の枝の節点 1 が閉じた",
+    "goal": "Lemma 3.5 から l ≠ 2 を外す(l = 2 の枝の枠、進捗 0/4 → 1/4)。",
+    "problem": "★veluV2_eq_tateDYpair は hDX : tateDXpair ≠ 0 を仮説に取る——tate_ode_mul が与えるのは DX·(DY − veluV2) = 0 だから。l = 2 では点が 2-捩れなので DX = 2Y + X = 0 になり使えない。",
+    "route": [
+      "段 1: PowerSeries U(U = ℤ[T] を T(1−T) で局所化、第 1143)で DX の定数項 T(1+T)(1−T)⁻³ ≠ 0",
+      "段 2: 在庫の veluV2_eq_tateDYpair を当てる(hu・hDX とも成り立つ)",
+      "段 3: evalAdicMapHom (genericSpec a) q hq で特殊化(T ↦ a、X ↦ q)"
+    ],
+    "added": {
+      "Found/GaloisRep/VeluODEAny.lean (新規)": [
+        "tateDXpair_C_ne_zero_domain(第 1128 の体版を整域に広げた)",
+        "map_veluV2(★無条件)/ map_tateDYpair",
+        "genericTinv / genericT_mul_inv / genericT_ne_zero",
+        "veluV2_eq_tateDYpair_generic(段 1-2)",
+        "veluV2_eq_tateDYpair_any(★段 3——hDX を取らない。l = 2 でも成り立つ)"
+      ]
+    },
+    "note": "☆代わりに IsUnit a を置いたが、a = ζ^i は 1 の冪根なので自動である。★w は a·w = q で決まるので特殊化の像が w に一致する。",
+    "remaining": "☆残るのは節点 2(c₄・c₆ を hDX なしで)・3(exists_veluW_two)・4(Ψ₂Sq の橋)。",
+    "gate": "lake build ABC3 成功(6267 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }

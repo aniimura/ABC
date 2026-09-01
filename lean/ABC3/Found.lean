@@ -390,6 +390,7 @@ import ABC3.Found.GaloisRep.MuPairFunctorial
 import ABC3.Found.GaloisRep.AdicEvalHom
 import ABC3.Found.GaloisRep.PowerSeriesUniversal
 import ABC3.Found.GaloisRep.GenericParam
+import ABC3.Found.GaloisRep.VeluODEAny
 import ABC3.Found.GaloisRep.VeluDYDenomFree
 import ABC3.Found.GaloisRep.C4DenomFree
 import ABC3.Found.GaloisRep.C6DenomFree
