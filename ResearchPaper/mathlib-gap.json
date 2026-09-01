@@ -5791,5 +5791,15 @@
     "measured": "☆受けているのは(a) 商の類の存在(第 1241 が与える)と(b) 局所の関係 v_p(Δ_min(E′)) = l·v_p(Δ_min(E))(Lemma 3.2, (ii))の 2 つだけ。★x.cls = x.rep.toSSCurve.j は rep_j(在庫)。",
     "consequence": "★★★これで witness の sorry (2) は**そのものの形**になった —— 残るのは Lemma 3.2, (ii) を l-巡回の仮説から出す段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "htFaltQuotLCyclic20260902": {
+    "block": 1245,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★quotLCyclicJ の ht^Falt の評価——witness の sorry (3) そのものの形",
+    "goal": "EllModuliWitness の sorry (3) faltingsHeightJ_quotLCyclicJ。",
+    "what": "★faltingsHeightJ_quotLCyclicJ_of_isog(Found/GenEll/QuotClassExists.lean)—— quotLCyclicJ_spec(在庫)で S を取り出し、第 1243 を当てる。",
+    "measured": "☆受けているのは(a) 商の類の存在(第 1241)と(b) 同種写像の高さ評価の 2 つだけ。",
+    "consequence": "★★★これで witness の sorry (2)(3) が**どちらもそのものの形**になった —— 残るのは Lemma 3.2, (ii) と同種写像の高さ評価を l-巡回の仮説から出す段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
