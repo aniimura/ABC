@@ -196,7 +196,28 @@ import ABC3.Meta.Claim
 
 ★第 1184 で 2d-1 の**入口**も取れた（`dvd_exponent_of_not_dvd_val`）
 ——`l ∤ v(q)` なら安定直線は `μ_l` である。
-☆残るのはそれを受けて既存の `_K` の連鎖を `L_v(ζ_l)` で走らせる組み立てだけである。
+☆残るのはそれを受けて既存の `_K` の連鎖を `L_v(ζ_l)` で走らせる組み立てである。
+
+#### ★★★★第 1186 の実測——**在庫に無い葉が 1 つある**
+
+`_K` の連鎖（`minDeltaExp_eq_mul_at_bad_prime_K` 等）は
+`hssE : SemistableAt p E`・`hssE' : SemistableAt p E'` を受ける。
+★`L'` の上で走らせるには **`SemistableAt P (E.baseChange L')`** が要るが、
+☆**それは在庫に無い**（`grep` で確認。底変換の補題は
+`minDeltaExp_baseChange_of_semistableAt`・`minDeltaExp_eq_maxJ_baseChange` だけで、
+どちらも下の半安定性を**仮説に取っている**）。
+
+★道（測定済み）:
+
+| 場合 | 道 |
+|---|---|
+| `minDeltaExp p E = 0` | `minDeltaExp_baseChange_le` と `minDeltaExp ≥ 0` で `= 0` |
+| 極小モデル `C` で `v_p(c₄) = 0` | 同じ `C` を上げれば `v_P(c₄) = e·v_p(c₄) = 0`、`isMinimal_of_c4_vAdd_eq_zero`（第 320）で極小 |
+
+☆分岐する場合の `valAdd` のスケーリングが要る
+（`vAdd_algebraMap_eq_valAdd` は**不分岐を仮定している**、第 320）。
+★`LocalHeightRamified.lean` の `ordAt_liesOver` がその役をするが、
+`valAdd`（数体に特化）との紐付けが別に要る。
 
 ### ☆別の道（採らない理由）
 

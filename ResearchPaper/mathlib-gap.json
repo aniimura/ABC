@@ -5191,5 +5191,18 @@
     "frame": "☆節点 2d-2 は仮説なしで閉じた。★2d-1 の入口も第 1184 で取れている(dvd_exponent_of_not_dvd_val —— l ∤ v(q) なら安定直線は μ_l)。☆残るのはそれを受けて既存の _K の連鎖を L_v(ζ_l) で走らせる組み立てだけである。",
     "process": "★★第 1184 では check.mjs の NG(逐語引用の不一致)を見落として push した。☆lake build は通るのでビルドだけでは気づかない。★以後コミット前に check.mjs の tail を必ず読む(lean-idioms.md に記録済み)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "semistableBaseChangeLeaf20260902": {
+    "block": 1186,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★節点 2d-1 の実測——在庫に無い葉が 1 つある(SemistableAt の底変換)",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "measured": "★★_K の連鎖(minDeltaExp_eq_mul_at_bad_prime_K 等)は hssE : SemistableAt p E・hssE' を受ける。L' の上で走らせるには **SemistableAt P (E.baseChange L')** が要るが、☆**それは在庫に無い**——底変換の補題は minDeltaExp_baseChange_of_semistableAt と minDeltaExp_eq_maxJ_baseChange だけで、どちらも下の半安定性を**仮説に取っている**。",
+    "route": [
+      "minDeltaExp p E = 0 の場合: minDeltaExp_baseChange_le と minDeltaExp ≥ 0 で = 0。",
+      "極小モデル C で v_p(c₄) = 0 の場合: 同じ C を上げれば v_P(c₄) = e·v_p(c₄) = 0 で、isMinimal_of_c4_vAdd_eq_zero(第 320)から極小。",
+      "☆分岐する場合の valAdd のスケーリングが要る——vAdd_algebraMap_eq_valAdd は**不分岐を仮定している**(第 320)。★LocalHeightRamified.lean の ordAt_liesOver がその役をするが、valAdd(数体に特化)との紐付けが別に要る。"
+    ],
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
