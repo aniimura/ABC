@@ -195,6 +195,60 @@ theorem sigma_coord_alpha {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ
   rw [sigma_zeta_pi σ hζ hπ a b] at h
   exact (zeta_pi_coord_eq_iff hl hζl hζprim hπl hQinf (a + b) b a' b').mp h
 
+/-! ## ★★★★★★★★★★★★全射の側——`l`-捩れは `ζ` と `π` で尽きる -/
+
+/-- ★★★★★★★★★★★★★★★★
+**`xˡ ∈ ⟨Q⟩` なら `x = ζᵃπᵇ`**——★**無条件**（第 1165）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`xˡ = Qᵐ` なら `(x·π^{−m})ˡ = 1` なので `x·π^{−m} ∈ μ_l = ⟨ζ⟩`。
+★★★これが `E[l]` が `([ζ], [π])` で**生成される**ことの中身であり、
+第 1161-1164 の独立性・一意性と合わせて
+**`([ζ], [π])` は `E[l]` の `ℤ/l`-基底である**が完全になる。
+
+☆仮説 `hμ` は「`l` 乗して 1 になる元は `ζ` の冪」——体の中では
+`μ_l` が巡回群であることそのものである。 -/
+theorem zeta_pi_span {G : Type*} [CommGroup G] {l : ℕ} {Q ζ π : G}
+    (hπl : π ^ l = Q)
+    (hμ : ∀ y : G, y ^ l = 1 → ∃ a : ℤ, y = ζ ^ a)
+    (x : G) (m : ℤ) (hx : x ^ l = Q ^ m) :
+    ∃ a : ℤ, x = ζ ^ a * π ^ m := by
+  have hπz : π ^ (l : ℤ) = Q := by rw [zpow_natCast]; exact hπl
+  have hpi : (π ^ m) ^ l = Q ^ m := by
+    rw [← zpow_natCast (π ^ m) l, ← zpow_mul, mul_comm m (l : ℤ), zpow_mul, hπz]
+  have hy : (x * (π ^ m)⁻¹) ^ l = 1 := by
+    rw [mul_pow, inv_pow, hx, hpi]
+    simp
+  obtain ⟨a, ha⟩ := hμ _ hy
+  refine ⟨a, ?_⟩
+  rw [← ha, mul_assoc]
+  simp
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`([ζ], [π])` は `l`-捩れの基底**——★**無条件**（第 1165）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆生成（`zeta_pi_span`）と一意性（`zeta_pi_coord_eq_iff`）を 1 本にまとめた形。
+★★これが `AlphaBridge` の節点 1 の**結論そのもの**である。 -/
+theorem zeta_pi_basis {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π : G}
+    (hζl : ζ ^ l = 1) (hζprim : ∀ n : ℕ, 0 < n → n < l → ζ ^ n ≠ 1)
+    (hπl : π ^ l = Q) (hQinf : ∀ j : ℤ, Q ^ j = 1 → j = 0)
+    (hμ : ∀ y : G, y ^ l = 1 → ∃ a : ℤ, y = ζ ^ a)
+    (x : G) (m : ℤ) (hx : x ^ l = Q ^ m) :
+    (∃ a b : ℤ, x = ζ ^ a * π ^ b)
+      ∧ (∀ a₁ b₁ a₂ b₂ : ℤ, ζ ^ a₁ * π ^ b₁ = ζ ^ a₂ * π ^ b₂ →
+          ((l : ℤ) ∣ (a₁ - a₂) ∧ (l : ℤ) ∣ (b₁ - b₂))) := by
+  refine ⟨?_, ?_⟩
+  · obtain ⟨a, ha⟩ := zeta_pi_span hπl hμ x m hx
+    exact ⟨a, m, ha⟩
+  · intro a₁ b₁ a₂ b₂ heq
+    refine (zeta_pi_coord_eq_iff hl hζl hζprim hπl hQinf a₁ b₁ a₂ b₂).mp ⟨0, ?_⟩
+    rw [heq, zpow_zero, mul_one]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -206,6 +260,22 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def zeta_pi_span.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(xˡ ∈ ⟨Q⟩ なら x = ζᵃπᵇ——全射の側。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def zeta_pi_basis.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(([ζ], [π]) は l-捻れの基底——生成と一意性。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def zeta_pi_basis.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1165）**——`AlphaBridge` の**節点 1 の結論そのもの**である。" ++
+       "☆仮説 `hμ`（`l` 乗して 1 になる元は `ζ` の冪）は体の中で `μ_l` が巡回群である" ++
+       "ことそのもの。★残るのは Tate 一意化で `E[l]` を `Lˣ/qℤ` の `l`-捻れと同定する段だけである。") 3 ]
 
 def sigma_zeta_pi.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
