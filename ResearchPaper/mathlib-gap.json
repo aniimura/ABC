@@ -5032,5 +5032,16 @@
     "why": "★★Tate 一意化 Φ : G ⧸ ⟨Q⟩ ≃+ E.Point は加法同型なので、E[l] の元は Φ [ζᵃπᵇ] の形に書ける。☆これで **AlphaBridge の節点 2 の群論の側が全部揃った**——残るのは Φ を介して E[l] の言葉に直す配管だけである。",
     "frame": "☆AlphaBridge の進捗枠 2.8/3、重み 22 → 2。★Theorem 3.8 の残高 = I(4) ＋ II(2) = 6。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "torsionPhiZetaPi20260902": {
+    "block": 1171,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★AlphaBridge の 3 節点の部品がすべて揃った",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 2)。",
+    "what": "★torsion_eq_phi_zeta_pi —— Φ : Additive (G ⧸ ⟨Q⟩) ≃+ P を Tate 一意化と読めば、l • Φ(c) = 0 なら cˡ = 1、したがって c = [ζᵃπᵇ]。☆すなわち **E[l] の元はすべて Φ [ζᵃπᵇ] の形**である。",
+    "measured": "★★★これで **AlphaBridge の 3 節点の部品がすべて揃った**: 節点 1(第 1161-1165、座標の基底)、節点 2(第 1170-1171、l-捩れの記述)、節点 3(第 1167-1169、局所から大域へ)。☆残るのは具体の TateSetup・galRep に当てはめる配管だけである。",
+    "pitfall": "☆`Additive.ofMul_pow` は存在しない——mathlib では `Additive` 名前空間の外に `ofMul_pow` があり、しかも rfl である。★`Additive.ofMul (c^l) = l • Additive.ofMul c` も `ofMul (c^l) = 0 ↔ c^l = 1` も**定義上等しい**ので、rw を書かずに `exact` でよい。",
+    "frame": "☆AlphaBridge の部品は 3/3、重み 22 → 1(配管)。★Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

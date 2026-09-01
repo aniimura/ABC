@@ -281,6 +281,35 @@ theorem exists_zeta_pi_of_torsion {G : Type*} [CommGroup G] {l : ℕ} {Q ζ π :
   obtain ⟨a, ha⟩ := zeta_pi_span hπl hμ x m hm
   exact ⟨a, m, by rw [ha]⟩
 
+/-! ## ★★★★★★★★★★★★★★★★加法同型で運ぶ（Tate 一意化の側） -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**加法同型の下でも `l`-捩れは `[ζᵃπᵇ]` の像**——★**無条件**（第 1171）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`Φ : Additive (G ⧸ ⟨Q⟩) ≃+ P` を Tate 一意化 `Kˣ/qℤ ≃ E(K)` と読む。
+★`l • Φ(c) = 0` なら `cˡ = 1` なので、第 1170 より `c = [ζᵃπᵇ]`。
+
+★★★これが `AlphaBridge` の節点 2 の**完成形**である
+——`E[l]` の元はすべて `Φ [ζᵃπᵇ]` の形に書ける。 -/
+theorem torsion_eq_phi_zeta_pi {G P : Type*} [CommGroup G] [AddCommGroup P]
+    {Q ζ π : G} {l : ℕ} (hπl : π ^ l = Q)
+    (hμ : ∀ y : G, y ^ l = 1 → ∃ a : ℤ, y = ζ ^ a)
+    (Φ : Additive (G ⧸ Subgroup.zpowers Q) ≃+ P)
+    (x : G) (hx : l • Φ (Additive.ofMul (QuotientGroup.mk x)) = 0) :
+    ∃ a b : ℤ, Φ (Additive.ofMul (QuotientGroup.mk x))
+      = Φ (Additive.ofMul (QuotientGroup.mk (ζ ^ a * π ^ b))) := by
+  have h1 : Φ (l • Additive.ofMul (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q)) = 0 := by
+    rw [map_nsmul]
+    exact hx
+  have h2 : (l • Additive.ofMul (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q)) = 0 :=
+    Φ.injective (by rw [h1, map_zero])
+  have h3 : (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q) ^ l = 1 := h2
+  obtain ⟨a, b, hab⟩ := exists_zeta_pi_of_torsion hπl hμ x h3
+  exact ⟨a, b, by rw [hab]⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -292,6 +321,19 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def torsion_eq_phi_zeta_pi.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(加法同型の下でも l-捻れは [ζᵃπᵇ] の像。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def torsion_eq_phi_zeta_pi.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1171）**——`AlphaBridge` の節点 2 の**完成形**である。" ++
+       "☆`Φ` を Tate 一意化 `Kˣ/qℤ ≃ E(K)` と読めば、" ++
+       "`E[l]` の元はすべて `Φ [ζᵃπᵇ]` の形に書ける。" ++
+       "★これで `AlphaBridge` の 3 節点はすべて揃った——" ++
+       "残るのは具体の `TateSetup`・`galRep` に当てはめる配管だけである。") 1 ]
 
 def quotient_pow_eq_one_iff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
