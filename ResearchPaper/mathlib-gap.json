@@ -6041,5 +6041,15 @@
   "caveat": "☆極小モデルの**存在**（DVR 上）は仮説 `C`・`hC` として受け取る。★本プロジェクトでは使う場所（`minDeltaExp_eq_mul_at_bad_prime` 等）が既に `C` を持っているので、これで足りる。",
   "consequence": "★★★これで `VeluQuotOK` の半安定性の半分が、商の `Δ_min` の関係（`minDeltaExp_eq_mul_at_bad_prime`、証明済み）と `jExp` の関係から出せる。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateUnipotentDescend20260902": {
+  "block": 1270,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★T_l E の 2 条件は E[l] の条件に落ちた（II 側の配管、第 1 段）",
+  "goal": "alpha_mem_map_of_galTate（第 1237）の h2・h1 を E[l] の言葉にする。",
+  "proved": "☆`Found/GaloisRep/TateUnipotent.lean`（第 1270）に 2 本。(1) `galTate_unipotent_of_galPoint`——`E[l]` で `(σ−1)² = 0` なら `T_l E` で `mod l` 幂単。(2) `exists_galTate_ne_of_galPoint`——`E[l]` で `σP ≠ P` なる点があれば `T_l E` で `mod l` 非自明。",
+  "route": "★(1) は `tateProj_one_eq_zero_iff`（第 1203、核はちょうど `l·T_l E`）、(2) は `exists_tateProj_one_eq`（第 1202、`l`-捩れ点は第 1 層に持ち上がる）。☆どちらも `mod l` の条件なので第 1 層で確かめれば足りる、という一点である。",
+  "consequence": "★★★これで **II 側（`α` が像に入る段）に残るのは**「Tate 一意化の `σ` が `E[l]` に `α` として作用する」ことだけになった——`sigma_acts_as_alpha`（第 993）・`tate_torsion_eq_phi_zeta_pi`（第 1174）・`kummer_sigma_coord_alpha`（第 1212）が持っている内容を、具体の悪い素点の局所体に当てはめて大域へ運ぶ配管である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
