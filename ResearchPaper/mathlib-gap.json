@@ -4706,5 +4706,24 @@
       "total": "総重み 32、進捗 0/4"
     },
     "gate": "lake build ABC3 成功(6265 jobs)、node tools/check.mjs PASS。"
+  },
+  "genericParam20260901": {
+    "block": 1143,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★一般の径数 T を載せる環——l = 2 の枝の節点 1 の土台",
+    "goal": "Lemma 3.5 から l ≠ 2 を外す(l = 2 の枝の枠、節点 1)。",
+    "problem": "★veluV2_eq_tateDYpair(TateODE.lean:89)は DX ≠ 0 で割っている。l = 2 では点が 2-捩れなので DX = 2Y + X = 0 になり、この形は使えない。",
+    "idea": "☆DY = veluV2 は **a を径数と見れば恒等式**である。★U ≔ ℤ[T] を T(1−T) で局所化した環では T も 1 − T も単元で、しかも 1 + T ≠ 0(ℤ[T] → U が単射だから)。☆したがって PowerSeries U の中で DX の定数項 T(1+T)(1−T)⁻³ が 0 でなく、在庫の veluV2_eq_tateDYpair がそのまま効く。★あとは T ↦ a で特殊化すればよい(a(1−a) が単元なら IsLocalization.lift が環準同型を与える)。",
+    "added": {
+      "Found/GaloisRep/GenericParam.lean (新規)": [
+        "GenericParamRing(ℤ[T] を T(1−T) で局所化)",
+        "genericParam_ne_zero / IsDomain instance / genericParam_injective",
+        "genericT / isUnit_genericT / isUnit_one_sub_genericT",
+        "one_add_genericT_ne_zero(★a = −1 を径数で迂回できる理由)",
+        "genericSpec / genericSpec_T(★特殊化 T ↦ a)"
+      ]
+    },
+    "remaining": "☆残るのは PowerSeries U の中で hDX ≠ 0 を出し、veluV2_eq_tateDYpair を当てて特殊化する段である。",
+    "gate": "lake build ABC3 成功、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
