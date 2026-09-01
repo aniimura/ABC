@@ -3646,5 +3646,17 @@
     "milestone": "★★★★**不分岐 2 次拡大は完成した**——`f`（整モデルの 2 次式の monic 化）から出発して、`R[X]/(f)` が完備（1012）・局所（1015）・整域（1017）・離散付値環（1018）、商体と埋め込み（1021）、付値の橋 `e = 1`（1022-1024）、剰余体で `f` が分裂（1025）、整モデルの同定（1030）、monic 化（1031）、貼り合わせ（1032）、分裂乗法還元（1033）。☆剰余標数によらず同じ構成で済む（`p ∣ 2` の Artin–Schreier は不要だった）。",
     "remaining": "☆残るのは**呼び出し側の組み立て**である: (a) `Algebra L (Frac (AdjoinRoot f))` の instance を `quadFieldHom` から作り `halg` を示す、(b) `IsUnit (integralModel R (W ⊗ Lv)).c₄`（乗法還元から。在庫 `integralModel_c4_isUnit`）、(c) 非分裂 ⟺ `f̄` 既約 の同定、(d) 第 1029（極小・乗法還元）と第 1033（分裂）を第 1028 に流す。★もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
     "note": "★944-1033 の 85 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "nonsplitBranchClosed20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1034",
+    "supersedes": "unramQuadComplete20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★★★★★`minDeltaExp_eq_mul_at_bad_prime_nonsplit`（1034）——**非分裂でも `Δ_min` は `l` 倍**。不分岐 2 次拡大を通す形。"
+    ],
+    "howItGoes": "☆`f`（整モデルの 2 次式の monic 化）を作り、第 1017／1015／1018 で `AdjoinRoot f` を整域・局所・離散付値環にし、`quadFieldHom` から `Algebra L (Frac (AdjoinRoot f))` を立て、第 1029（極小・乗法還元）と第 1033（分裂）を第 1028 に流す。★点と Vélu の商の輸送は第 1002 と同じ（第 969 ＋ `addOrderOf_vcPoint`）。",
+    "remaining": "☆残るのは**場合分け 1 段**である: (a) `E ⊗ Lv` が分裂するなら第 1027、(b) 分裂しないなら 2 次式は根を持たない ⟹ monic 2 次式は既約 ⟹ 第 1034。★これで `minDeltaExp_eq_mul_at_bad_prime_any`（第 1009 の sorry）が閉じる。☆もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
+    "note": "★944-1034 の 86 ブロック。"
   }
 }

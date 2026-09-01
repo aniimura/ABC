@@ -2218,4 +2218,96 @@ def minDeltaExp_eq_mul_at_bad_prime_ext.needs : List ProofObligation :=
     .citation "[ABC3]" "isAdicComplete_adjoinRoot(完備性、第 1012、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adjoinRoot") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★第 1034 —— 非分裂の枝を閉じる
+
+★第 1033 までで不分岐 2 次拡大の部品はすべて建った。
+☆本ブロックは**呼び出し側**である——`f` を作り、instance を並べ、
+第 1029（極小・乗法還元）と第 1033（分裂）を第 1028 に流す。
+
+★`E` 側の極小化（`C`）と Vélu の商の輸送（第 969）は第 1002 と同じ形である。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] 非分裂でも `Δ_min` は `l` 倍**——
+不分岐 2 次拡大を通す形。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1034）**——`hirr`（拡大が本当に 2 次であること、
+すなわち曲線が非分裂であること）だけを受ければ閉じる。 -/
+theorem minDeltaExp_eq_mul_at_bad_prime_nonsplit {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (C : WeierstrassCurve.VariableChange L)
+    (hC : WeierstrassCurve.IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    [((C • E).baseChange Lv).IsElliptic]
+    [WeierstrassCurve.IsMinimal R ((C • E).baseChange Lv)]
+    (hA : IsUnit (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)).c₄)
+    (hirr : Irreducible
+      ((splitQuadPoly (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA).map
+        (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : IsUnit ((l : R)))
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  haveI hCE : (C • E).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E.isUnit_Δ
+  haveI hCE' : (C • E').IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E'.isUnit_Δ
+  have hfm : (splitQuadPoly
+      (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA).Monic :=
+    monic_splitQuadPoly _ hA
+  have hfd : (splitQuadPoly
+      (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA).natDegree = 2 :=
+    natDegree_splitQuadPoly _ hA
+  haveI hdom := isDomain_adjoinRoot hfm hirr
+  haveI hlocR := isLocalRing_adjoinRoot hfm hfd hirr
+  haveI hdvr := isDiscreteValuationRing_adjoinRoot hfm hfd hirr
+  letI : Algebra L (FractionRing (AdjoinRoot
+      (splitQuadPoly (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA))) :=
+    ((quadFieldHom (K := Lv) hfm hfd).comp (algebraMap L Lv)).toAlgebra
+  have halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot
+      (splitQuadPoly (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA))) x
+      = quadFieldHom hfm hfd (algebraMap L Lv x) := fun _ => rfl
+  haveI hmin' := isMinimal_baseChange_ext p hp hfm hfd hirr halg E C hC hc4ne hc4
+  haveI hmult' := hasMultiplicativeReduction_ext p hp hfm hfd hirr halg E C hC hc4ne hc4 hjneg
+  have h' := hasSplitMultiplicativeReduction_ext (C • E) hA rfl halg
+  -- ★点と Vélu の商を `C • E` に運ぶ（第 1002 と同じ）
+  have h2L : (2 : L) ≠ 0 := two_ne_zero
+  have hQ' : addOrderOf (ABC3.Found.GenEll.vcPoint C E Q) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint C E Q]; exact hQ
+  have hEq := ABC3.Found.GenEll.veluQuotientFull_vcPoint_eq C E E' hQ h2L hE'
+  have hjC : jExp p (C • E) < 0 := by rw [jExp_variableChange p E C]; exact hjneg
+  have hcopC : ¬ ((l : ℤ) ∣ jExp p (C • E)) := by
+    rw [jExp_variableChange p E C]; exact hcop
+  have hkey := minDeltaExp_eq_mul_at_bad_prime_ext p hp hfm hfd hirr halg (C • E) (C • E') h'
+    (semistableAt_variableChange p E C hssE) (semistableAt_variableChange p E' C hssE')
+    hjC hl hodd hcopC hlu hQ' hEq
+  rwa [minDeltaExp_variableChange p E' C, minDeltaExp_variableChange p E C] at hkey
+
+def minDeltaExp_eq_mul_at_bad_prime_nonsplit.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(非分裂でも Δ_min は l 倍——不分岐 2 次拡大を通す形)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_at_bad_prime_nonsplit.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_ext(第 1028、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_ext") 1,
+    .citation "[ABC3]" "hasSplitMultiplicativeReduction_ext(分裂性、第 1033、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.hasSplitMultiplicativeReduction_ext") 1,
+    .citation "[ABC3]" "isMinimal_baseChange_ext・hasMultiplicativeReduction_ext(第 1029)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_baseChange_ext") 1 ]
+
 end ABC3.Skeleton.GenEll
