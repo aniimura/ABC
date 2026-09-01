@@ -215,6 +215,55 @@ def isCharNeTwoNF_integralModel.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(体の側が a₁ = a₃ = 0 なら整モデルもそう。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 982 —— 仮説は `c₄` が単元であることだけ
+
+★第 979 はまだ `hK : φ(54b₆ − 3b₂b₄ + a₂c₄) ≠ 0` を受けていた。
+☆だが **`φK = 0` なら 2 次式は `c₄X²`（`a₁ = 0` だから）で、`X = 0` を根にもつ**——
+やはり分裂する。
+
+★★したがって二者択一に要るのは **`φ c₄ ≠ 0`（＝乗法還元）だけ**である。
+☆これは `HasMultiplicativeReduction` の `multiplicativeReduction` フィールドそのものなので、
+第 976 が与える。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★**二者択一に要るのは `c₄` が単元であることだけ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 982）**——第 963 から `ringChar k ≠ 2`（第 979）が落ち、
+さらに `hK`（本ブロック）も落ちた。
+☆残る仮説は `φ c₄ ≠ 0` と `IsCharNeTwoNF` の 2 つだけである。 -/
+theorem splits_or_exists_twist_splits'' {R k : Type} [CommRing R] [Field k] [Fintype k]
+    [DecidableEq k]
+    (φ : R →+* k) (hφ : Function.Surjective φ) (V : WeierstrassCurve R) [V.IsCharNeTwoNF]
+    (hc : φ V.c₄ ≠ 0) :
+    Splits (Polynomial.map φ
+        (C V.c₄ * X ^ 2 + C (V.a₁ * V.c₄) * X
+          - C (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄)))
+      ∨ ∃ d : R, φ d ≠ 0 ∧ Splits (Polynomial.map φ
+        (C (quadTwist V d).c₄ * X ^ 2
+          + C ((quadTwist V d).a₁ * (quadTwist V d).c₄) * X
+          - C (54 * (quadTwist V d).b₆ - 3 * (quadTwist V d).b₂ * (quadTwist V d).b₄
+              + (quadTwist V d).a₂ * (quadTwist V d).c₄))) := by
+  by_cases hK : φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄) = 0
+  · left
+    have ha1 : V.a₁ = 0 := ‹V.IsCharNeTwoNF›.a₁
+    have hmap : Polynomial.map φ
+        (C V.c₄ * X ^ 2 + C (V.a₁ * V.c₄) * X
+          - C (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄))
+        = C (φ V.c₄) * X ^ 2 + C (0 : k) * X
+          - C (φ (54 * V.b₆ - 3 * V.b₂ * V.b₄ + V.a₂ * V.c₄)) := by
+      rw [ha1]; simp
+    rw [hmap]
+    exact splits_quadratic_of_root _ _ _ hc 0 (by rw [hK]; ring)
+  · exact splits_or_exists_twist_splits' φ hφ V hc hK
+
+def splits_or_exists_twist_splits''.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(二者択一に要るのは c₄ が単元であることだけ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def splits_or_exists_twist_splits.src : ABC3.Meta.Source :=
