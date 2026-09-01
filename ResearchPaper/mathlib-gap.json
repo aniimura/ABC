@@ -5151,5 +5151,16 @@
     "section4": "☆§4(Corollary 4.3・4.4)は Theorem 3.8 の上にしか立たない。数値の帳簿(sum_log_ramPrimes_le・sum_localHt_eq・(c) の評価)は既に Found/ にある。",
     "next": "★最短経路: (1) LCyclicReading 2d の残り——ι(S) が Tate 一意化の下で μ_l になること(Lemma 3.2, (i))。(2) AlphaBridge——exists_kummer_root_unit(第 1178)で作った π を TateSetup の K として使い、exists_sigma_smul_root_of_val(第 994)の σ を tate_sigma_coord_alpha_of_base_root(第 1177)に流す。(3) galRep の mod l 像への載せ替え(射影 T_l E → E[l] の Galois 同変性は在庫にある)。",
     "gate": "第 1148-1180 の全ブロックで lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。genell-progress 20/24。"
+  },
+  "node2dEstimateFix20260902": {
+    "block": 1182,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★節点 2d の見積もりの訂正——ζ ∈ L_v を使っていた",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d)。",
+    "correction": "★★第 1159 で「Q の有理性が使われているのは hcurveEq の 1 か所だけ」と書き、第 1179-1180 でその形まで取ったが、**見積もりが甘かった**。TateIsogenyK.lean の連鎖を読み直すと、hcurveEq の手前で exists_primitiveRoot_of_torsion_point が ζ : p.adicCompletionIntegers L を返しており、☆**ζ が L_v の中にあることを使っている**。これは局所の点 P が L_v 有理(大域の Q が L 有理だから)であることに依る。",
+    "consequence": "☆安定直線の側では ζ ∉ L_v であり得るので、局所の議論を L_v(ζ_l) へ上げ、そこで得た Δ_min の関係を L_v へ降ろす必要がある。★段は 2 つ: (2d-1) 局所の議論を L_v(ζ_l) で回す(既存の _K の連鎖そのもの)、(2d-2) Δ_min の関係を L_v へ降ろす。",
+    "material": "★★★素材はすでに Found/GenEll/Thm38Kummer.lean にある —— coprime_of_dvd_sub_one(K(ζ_l)/K の分岐指数は l と素)と dvd_of_ramification_coprime(e·v(q) = l·w かつ gcd(l,e)=1 なら l ∣ v(q))。☆もともと l ∤ v_K(q) を K(ζ_l) へ上げるために書かれたもので、同じ分岐の帳簿がここでも使える。",
+    "weight": "☆節点 2d の重み: 4 → **8**。★新しい数学はないが「1 か所の配管」ではない。Theorem 3.8 の残高 = I(8) ＋ II(1) = 9。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
