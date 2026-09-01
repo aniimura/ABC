@@ -5204,5 +5204,14 @@
       "☆分岐する場合の valAdd のスケーリングが要る——vAdd_algebraMap_eq_valAdd は**不分岐を仮定している**(第 320)。★LocalHeightRamified.lean の ordAt_liesOver がその役をするが、valAdd(数体に特化)との紐付けが別に要る。"
     ],
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "goodReductionBaseChange20260902": {
+    "block": 1187,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★良い還元は底変換で保たれる——SemistableAt の底変換の第 1 の場合",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "what": "★minDeltaExp_baseChange_eq_zero(Found/GaloisRep/DegInfBaseChange.lean)—— v_p(Δ_min) = 0 なら上でも 0。minDeltaExp_baseChange_le で ≤ e·0 = 0、minDeltaExp_nonneg で ≥ 0。",
+    "why": "☆これが SemistableAt の底変換(第 1186 で特定した在庫に無い葉)の**第 1 の場合**である。★第 2 の場合(極小モデルと v(c₄) = 0)は分岐した valAdd のスケーリングが要る——vAdd_algebraMap_eq_valAdd は不分岐を仮定しており(第 320)、LocalHeightRamified.lean の ordAt_liesOver との紐付けが別に要る。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

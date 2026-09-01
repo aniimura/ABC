@@ -427,9 +427,34 @@ theorem minDeltaExp_descend (p : HeightOneSpectrum (𝓞 L))
   minDeltaExp_descend_of_baseChange L L' p P E E' hp hp'
     (Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P.asIdeal p.ne_bot) h
 
+/-- ★★★★★★★★**良い還元は底変換で保たれる**（第 1187）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v_p(Δ_min) = 0` なら上でも `0` である——`minDeltaExp_baseChange_le` で
+`≤ e·0 = 0`、`minDeltaExp_nonneg` で `≥ 0`。
+
+★★これが `SemistableAt` の底変換の**第 1 の場合**である
+（`Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1、第 1186 の実測）。
+☆第 2 の場合（極小モデルと `v(c₄) = 0`）は分岐した `valAdd` のスケーリングが要る。 -/
+theorem minDeltaExp_baseChange_eq_zero (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] (h : minDeltaExp p E = 0) :
+    minDeltaExp P (E.baseChange L') = 0 := by
+  have hle := minDeltaExp_baseChange_le L L' p P E E.isUnit_Δ.ne_zero
+  rw [h, mul_zero] at hle
+  have hnn := minDeltaExp_nonneg P (E.baseChange L')
+  omega
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_baseChange_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(良い還元は底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_descend.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
