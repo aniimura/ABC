@@ -4836,5 +4836,22 @@
     "frame": "☆Skeleton/GenEll/LCyclicReading.lean(進捗枠 0/3)。節点 1: veluQuotient_of_stableLine——F = L̄ で Vélu の商を作り、和 v・w が Gal 不変なので L に降りること(重み 12)。節点 2: lemma_3_5_height_ineq を安定直線の側で述べ直す(重み 10)。節点 3: lemma_3_7 の第 3 の主張の言い直し(重み 4)。★別の道(L(H) へ上げる)は ht^Falt・deg∞ が体を変えると動くので採らない。",
     "thm38Balance": "☆Theorem 3.8 の残高(第 1152 の実測): (1) α が像に入る段の**橋**——Kummer の σ は AdjoinRoot (X^l − C q) の上で取れている(Thm38KummerExists.lean)が、Tate 曲線の L へ移して galRep の mod l 像に入れる段が要る。(2) 本ブロックの 3 節点。★位相の側(像の閉性)は第 772 で、群論の側は §9-992 と Lemma 3.1, (iv) で済んでいる。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24(変わらず——本ブロックは測定と枠)。"
+  },
+  "veluGaloisInvariant20260901": {
+    "block": 1153,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★Vélu の和は Gal 不変——LCyclicReading の節点 1 の核",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 1)。",
+    "what": "★Found/GenEll/VeluGaloisInvariant.lean。係数を固定する体自己同型 Φ(FixesCoeffs)に対し veluGx・veluGy は係数と座標の多項式なので半線型同変であり、座標の集合 S が Φ で保たれるなら veluVFull・veluWFull は Φ で不変、したがって veluQuotientFull W S の係数はすべて Φ で固定される。☆いずれも無条件。",
+    "decls": [
+      "veluGx_semi / veluGy_semi / veluV2_semi / veluU_semi —— 点ごとの量の半線型同変性。",
+      "semiPair / semiPair_injective —— 座標の対に Φ を当てる写像。",
+      "image_semiPair_eq —— Φ で保たれる有限集合は Φ の像で自分自身(単射＋濃度)。",
+      "veluVFull_semi / veluWFull_semi —— 和の添字を Φ で並べ替えるだけ。/2 は Φ 2 = 2 なので害が無い。",
+      "fixesCoeffs_veluQuotientFull —— ★商曲線の係数はすべて Φ で固定される。a₁・a₂・a₃ は元のまま、a₄ = a₄ − 5v・a₆ = a₆ − b₂v − 7w は v・w の不変性から。"
+    ],
+    "remaining": "☆節点 1 に残る 1 歩は `L̄^{Gal(L̄/L)} = L` を使って「すべての σ で固定 ⟹ L の元」と言う段。★mathlib の無限 Galois 理論の navigation である。枠の重みは 26 → 18 に下がった。",
+    "pitfall": "☆Finset.sum_image の高階単一化は失敗する(g が推論できない)。★`have hsum : (∑ z ∈ S.image f, g z) = ∑ z ∈ S, g (f z) := Finset.sum_image hinj` と**型を明示した have** に置いてから rw で使うと通る。☆`S.image f = S` を仮説に置くと statement 側で DecidableEq (M × M) が要るので、仮説は `∀ z ∈ S, f z ∈ S`(安定性)にして像の等式は proof 内で classical で作る。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24(変わらず——節点の途中)。"
   }
 }

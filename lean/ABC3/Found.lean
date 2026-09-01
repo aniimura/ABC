@@ -1382,6 +1382,7 @@ import ABC3.Found.GaloisRep.Lemma35Unconditional
 import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.Lemma37CondBFull
 import ABC3.Found.GenEll.Lemma37Full
+import ABC3.Found.GenEll.VeluGaloisInvariant
 import ABC3.Found.GaloisRep.UnitAtPrime
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GaloisRep.UnramQuad

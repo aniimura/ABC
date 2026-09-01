@@ -2788,3 +2788,23 @@ letI : DecidableEq E.fld := fun a b => Classical.propDecidable (a = b)
 ★`open scoped Classical` だけでは**具体型に対しては効かない**。
 ☆`set E' := … with h` が仮説を書き換えてくれないのも同じ原因——
 項が構文的に一致していない。`set` をやめて式を直接渡し、`hE' := rfl` で済ませる。
+
+## `Finset.sum_image` は高階単一化に失敗する
+
+**失敗形**: `(Finset.sum_image hinj).symm` を `calc` の一段に直接置くと
+
+    Type mismatch: ∑ x ∈ S, ?m (semiPair Φ x) = ∑ x ∈ Finset.image ..., ?m x
+    but is expected to have type ∑ z ∈ S, veluV2 W (semiPair Φ z).1 ...
+
+——`?m`（和を取る関数）が推論できない。
+
+**直し方**: 型を明示した `have` に置いてから使う。
+
+```lean
+have hsum : (∑ z ∈ S.image f, g z) = ∑ z ∈ S, g (f z) := Finset.sum_image hinj
+rw [himg] at hsum
+```
+
+**もう一つ**: 仮説に `S.image f = S` を置くと **statement 側で `DecidableEq` が要る**
+（`classical` は証明の中だけ）。★仮説は `∀ z ∈ S, f z ∈ S`（安定性）にして、
+像の等式は `Finset.eq_of_subset_of_card_le` で証明内に作る。

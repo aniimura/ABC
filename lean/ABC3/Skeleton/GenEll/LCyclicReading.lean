@@ -44,17 +44,31 @@ import ABC3.Meta.Claim
 ★★★これは `CLAUDE.md` の「逸脱」の規約が名指ししている場合である
 ——『後続の証明に影響が出ないならば読み替えを許容する』。**影響が出た**ので記録する。
 
-## ★★★★★★★★★★★★★★★★節点（進捗枠 **0 / 3**）
+## ★★★★★★★★★★★★★★★★節点（進捗枠 **0.7 / 3**）
 
 `Lemma 3.7` の第 3 の主張を **(J) の側で**言い直すのに要るもの:
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
-| 1 | `veluQuotient_of_stableLine` | ☆`Gal`-安定な位数 `l` の部分群 `H ⊆ E(L̄)` に対し、Vélu の和 `v = Σ veluV2`・`w` は **`Gal` 不変**なので `L` に降りる | 12 |
+| 1 | `veluQuotient_of_stableLine` | ★**核は第 1153 で取れた**（`fixesCoeffs_veluQuotientFull`）。☆残る 1 歩は `L̄^{Gal} = L` で「すべての `σ` で固定 ⟹ `L` の元」と言う段 | 12 → **4** |
 | 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す（`degInf` の関係は `Lemma 3.2, (ii)` から） | 10 |
 | 3 | `lemma_3_7_stableLine` | ☆第 3 の主張を `HasLCyclicJ` の側で述べ直す。★これで `Theorem 3.8` に繋がる | 4 |
 
-☆総重み 26。
+☆総重み 26 → **18**（第 1153 で 8 分進んだ）。
+
+### ★★★★★★★★第 1153 で取れたもの
+
+`Found/GenEll/VeluGaloisInvariant.lean`。★いずれも**無条件**である。
+
+| 定理 | 内容 |
+|---|---|
+| `veluGx_semi` / `veluGy_semi` | 係数を固定する `Φ` に対し `Φ(veluGx(x,y)) = veluGx(Φx,Φy)` |
+| `image_semiPair_eq` | `Φ` で保たれる有限集合は `Φ` の像で自分自身（単射だから） |
+| `veluVFull_semi` / `veluWFull_semi` | 座標の集合が `Φ` で保たれるなら和は `Φ` で不変 |
+| `fixesCoeffs_veluQuotientFull` | ★**商曲線の係数はすべて `Φ` で固定される** |
+
+☆`/2` は `Φ 2 = 2` なので害が無い。★商の `a₁・a₂・a₃` は元のもののまま、
+`a₄ = a₄ − 5v`・`a₆ = a₆ − b₂v − 7w` は `v`・`w` の不変性から出る。
 
 ### ★★★★節点 1 の道（測定）
 
