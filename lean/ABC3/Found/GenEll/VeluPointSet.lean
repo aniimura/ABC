@@ -239,6 +239,46 @@ def isElliptic_veluQuotient_vcPoint.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Vélu の商の楕円性は E′ から来る。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★第 974 —— Vélu の商は変数変換と可換する（点集合の形で）
+
+★第 972 は `E ⊗ Lv` と `E′ ⊗ Lv` が **`R` の上で極小**であることを要求する。
+☆一方 `SemistableAt p E` が与えるのは「ある変数変換 `C` の後で極小」である。
+★したがって組み立ては `E`・`E′` そのものではなく `C • E`・`C • E′` で回すことになる。
+
+☆本補題はその移し替えを与える——`E′ = E/⟨Q⟩` なら `C • E′ = (C • E)/⟨C • Q⟩`。
+`minDeltaExp` は変数変換で不変（`minDeltaExp_variableChange`、在庫）なので、
+結論はそのまま `E`・`E′` に戻る。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**Vélu の商は変数変換と可換する**（点集合の形）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 974）**——`E′ = E/⟨Q⟩` なら `C • E′ = (C • E)/⟨C • Q⟩`。
+☆`image_pointCoords_vcPoint_nsmul`（949）で点集合を捻り、
+`veluQuotientFull_variableChange` を当てるだけである。
+仮説 `hB`・`hBx` は反転安定性（949）から自動的に出る。 -/
+theorem veluQuotientFull_vcPoint_eq {F : Type} [Field F]
+    (C : WeierstrassCurve.VariableChange F)
+    (E E' : WeierstrassCurve F) [E.IsElliptic] [(C • E).IsElliptic]
+    {l : ℕ} {Q : E.toAffine.Point} (hQ : addOrderOf Q = l) (h2 : (2 : F) ≠ 0)
+    (hE' : E' = veluQuotientFull E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    C • E' = veluQuotientFull (C • E)
+      (((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • vcPoint C E Q))) := by
+  have hstab := pointCoords_image_negY_stable (W := E) hQ
+  have hVC := veluQuotientFull_variableChange C E
+    (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))
+    (sum_negY_eq_zero E _ hstab h2) (sum_negY_mul_x_eq_zero E _ hstab h2)
+  rw [image_pointCoords_vcPoint_nsmul C E hQ, hVC, hE']
+
+def veluQuotientFull_vcPoint_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商は変数変換と可換する(点集合の形)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pointCoords_neg.src : ABC3.Meta.Source :=
