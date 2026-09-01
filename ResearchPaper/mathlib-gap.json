@@ -6246,5 +6246,15 @@
   "inputs": "☆受け取るのは 3 つだけ: `TateSetup`・`Φ`（`mkTateSetup`・`dvrTatePhiAddEquiv`、在庫・無条件）、`ζ`・`π`（第 1279——`E[l]` が載っていればよい）、`σ`（第 1282——`l ∤ v(Q)` と `μ_l ⊆ K₀`）。",
   "consequence": "★★★**局所側は完成**した。残るのは `E ⊗ K` と Tate モデルを結ぶ段（第 1288、道具は揃った）と大域へ運ぶ段（第 1287・1270、済）を、悪い素点の具体データに当てはめる配管だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "unipTransfer20260902": {
+  "block": 1290,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★2 条件は加法同型で移る——局所側が E ⊗ K の言葉になった",
+  "goal": "Tate モデルの 2 条件を E ⊗ K に戻す。",
+  "proved": "☆`Found/GenEll/UnipTransfer.lean`（第 1290）に 3 本。`unipotent_ne_transfer`（抽象な形）・`vcPointAddEquiv_apply`（2 つの `vcPoint` は同じもの）・`unipotent_ne_of_variableChange`（変数変換への当てはめ）。",
+  "route": "★絡み合いは第 1288（`galAct` は変数変換と可換）。☆`GaloisRep.vcPoint W C` と `GenEll.vcPoint C W` は引数の順が違うだけで `rfl` で一致する。",
+  "consequence": "★★★これで **α 側の鎖は「局所データを与える」ところまで詰んだ**:第 1289（Tate モデルで幂単・非自明）→ 第 1290（`E ⊗ K` へ）→ 第 1287（大域へ）→ 第 1270（`T_l E` へ）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
