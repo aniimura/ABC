@@ -228,11 +228,53 @@ theorem exists_units_sigma_kummer {K₀ : Type} [Field K₀] {l : ℕ} (hl : Nat
         * (π : AdjoinRoot (X ^ l - C (q : K₀)))
     rw [hπ, hτ, Algebra.smul_def]
 
+/-! ## ★★★★★★★★★★★★第 1274 —— 体自己同型として取り出す -/
+
+/-- ★★★★★★★★★★★★★★★★
+**Kummer の `σ` を体自己同型として取る**——★**無条件**（第 1274）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆第 1211（`exists_units_sigma_kummer`）は単数群の準同型だけを返していたが、
+`tatePhi_pointMap`（在庫）は**体の準同型 `σA : K →ₐ[R] K`** を要求する。
+★そこで元の `AlgEquiv` も一緒に返す形にした——`σU ≔ Units.map τ` と取れば
+`hσU : ↑(σU u) = σA ↑u` は `rfl` である。
+
+★★★これで第 1273（`tate_point_unipotent`）に渡せる形が揃う。 -/
+theorem exists_algEquiv_sigma_kummer {K₀ : Type} [Field K₀] {l : ℕ} (hl : Nat.Prime l)
+    (v : K₀ˣ →* Multiplicative ℤ) (q : K₀ˣ)
+    (hnd : ¬ ((l : ℤ) ∣ Multiplicative.toAdd (v q)))
+    (ζ₀ : K₀ˣ) (hζ₀ : IsPrimitiveRoot ((ζ₀ : K₀)) l) :
+    ∃ (π : (AdjoinRoot (X ^ l - C (q : K₀)))ˣ)
+      (τ : AdjoinRoot (X ^ l - C (q : K₀)) ≃ₐ[K₀] AdjoinRoot (X ^ l - C (q : K₀))),
+      π ^ l = Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) q ∧
+      Units.map τ.toAlgHom.toRingHom.toMonoidHom π
+        = Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) ζ₀ * π := by
+  haveI : NeZero l := ⟨hl.ne_zero⟩
+  have hζne : (primitiveRoots l K₀).Nonempty :=
+    ⟨(ζ₀ : K₀), (mem_primitiveRoots hl.pos).2 hζ₀⟩
+  have hζpow : ζ₀ ^ l = 1 := Units.ext (by simpa using hζ₀.pow_eq_one)
+  let η : rootsOfUnity l K₀ := ⟨ζ₀, (mem_rootsOfUnity l ζ₀).2 hζpow⟩
+  obtain ⟨τ, hτ⟩ := exists_sigma_smul_root_of_val hl hζne v q hnd η
+  obtain ⟨π, hπ, hπl⟩ := exists_kummer_root_unit hl.pos q.ne_zero
+  refine ⟨π, τ, Units.ext (by simpa using hπl), ?_⟩
+  refine Units.ext ?_
+  show τ ((π : AdjoinRoot (X ^ l - C (q : K₀))))
+    = algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) (ζ₀ : K₀)
+      * (π : AdjoinRoot (X ^ l - C (q : K₀)))
+  rw [hπ, hτ, Algebra.smul_def]
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def irreducible_X_pow_sub_C_of_not_pow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(q が l 乗でなければ AdjoinRoot (Xˡ − C q) は体。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_algEquiv_sigma_kummer.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Kummer の σ を体自己同型として取る。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def exists_units_sigma_kummer.src : ABC3.Meta.Source :=

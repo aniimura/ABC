@@ -6081,5 +6081,16 @@
   "route": "★同変性は `tatePhi_pointMap`（在庫、`Φ` は `G_K`-加群の同型）が与える。☆`Point.map` の値の型は `W⁄K` と書かれるので `W.map (algebraMap R K)` と`instances` 透明度で食い違う——`tatePointMap` で一度名前を付けて回避した。",
   "consequence": "★★★これで II 側に残る配管は 2 本である: (B) Tate 曲線と悪い素点の `E` を結ぶ段（完備化と変数変換）、(C) 局所の `σ` を大域へ運ぶ段（第 1271 の道具は揃っている）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "kummerAlgEquiv20260902": {
+  "block": 1274,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★Kummer の σ を体自己同型として取る＋II 側の残りの地図",
+  "goal": "第 1273 に渡せる σA を用意し、残りを測る。",
+  "proved": "☆`exists_algEquiv_sigma_kummer`（`Found/GenEll/Thm38KummerExists.lean`、第 1274）——第 1211 は単数群の準同型だけを返していたが、`tatePhi_pointMap` は体の準同型を要求する。★元の `AlgEquiv` も一緒に返す形にした（`σU ≔ Units.map τ` なら `hσU` は `rfl`）。",
+  "measured": "★★★**II 側（α が像に入る段）の数学の中身は尽きた**。残るのは 3 本の「局所体の建設」である。(B1) `TateSetup` を `K ≔ L_v(ζ_l, q^{1/l})` に建てる——完備 DVR の**完全分岐（Eisenstein）拡大**が再び完備 DVR であること。☆第 1013-1018 は**不分岐 2 次**の場合（`f̄` 既約）なので当たらない。(B2) `hσv`（付値が σ で不変）——完備体の付値の拡大の一意性、B1 に付随。(B3) Tate 曲線と悪い素点の `E` を結ぶ——`tateParamR`・`integralModel` は在庫、組み替えだけ。",
+  "consequence": "☆B1-B3 が済めば `restrictLocalHom`（第 1167）＋第 1271 で大域へ運び、第 1270 で `T_l E` に上げ、`alpha_mem_map_of_galTate`（第 1237）に入る。★これが `EllModuliWitness` の 4 本目（`imageContainsSL2J_torsionExt`）である。",
+  "note": "★B1 は既知数学（mathlib の Henselian ＋ Dedekind から組める）。☆`EllModuliWitness` の他の 3 本は `VeluQuotOK`（Vélu の定理＋同種の半安定不変性）に依る。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

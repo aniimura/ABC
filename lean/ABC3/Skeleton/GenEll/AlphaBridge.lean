@@ -166,6 +166,30 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 ☆残るのはこれらを `L_v(ζ_l, q^{1/l})` で実際に取る段（第 994 の Kummer の `σ`）と、
 `galRep` の行列に読み替える段である。
 
+### ★★★★★★★★★★★★★★★★★★★★第 1270-1274——II 側の残りは「局所体の建設」だけ
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `galTate_unipotent_of_galPoint` | ★★`T_l E` の `mod l` 幂単性は `E[l]` で確かめれば足りる | 1270 |
+| `exists_galTate_ne_of_galPoint` | ★★非自明性も同様 | 1270 |
+| `point_map_galPoint` | ★埋め込みは `galPoint` と可換 | 1271 |
+| `torsionMap_bijective` | ★★★代数閉体の埋め込みは `E[n]` の**全単射**（個数の勘定だけ） | 1271 |
+| `galPoint_unipotent_of_map`・`exists_galPoint_ne_of_map` | ★2 条件が埋め込みで降りる | 1271 |
+| `tate_unipotent_of_sigma`・`tate_exists_ne_of_sigma` | ★★★**`σ` は `E[l]` に幂単・非自明**（抽象な `Φ`・`τ` で） | 1272 |
+| `tate_point_unipotent`・`tate_point_exists_ne` | ★★点の側で読んだ形（同変性は `tatePhi_pointMap`） | 1273 |
+| `exists_algEquiv_sigma_kummer` | ★Kummer の `σ` を**体自己同型**として取る | 1274 |
+
+★★★**数学の中身は尽きた**。残っているのは次の 3 本の「局所体の建設」である:
+
+| # | 残る節点 | 中身 | 見立て |
+|---|---|---|---|
+| B1 | `TateSetup` を `K ≔ L_v(ζ_l, q^{1/l})` に建てる | ★完備 DVR の**完全分岐（Eisenstein）拡大**が再び完備 DVR であること。☆第 1013-1018 は**不分岐 2 次**の場合（`f̄` 既約）で、`X^l − q` は `f̄ = X^l` なので当たらない | 既知数学。mathlib の Henselian ＋ Dedekind から組める |
+| B2 | `hσv`（付値が `σ` で不変） | ☆完備体の付値の拡大は一意。★`tateDvrVal` を整閉包から作れば `τ(R′) = R′` で済む | B1 に付随 |
+| B3 | Tate 曲線と悪い素点の `E` を結ぶ | ☆`E ⊗ L_v` は変数変換で `tateCurveAt q` に写る（`tateParamR`・`integralModel` は在庫） | 在庫の組み替え |
+
+☆B1-B3 が済めば、`restrictLocalHom`（第 1167）と第 1271 で大域へ運び、
+第 1270 で `T_l E` に上げ、`alpha_mem_map_of_galTate`（第 1237）に入る。
+
 ### ★★★★★★★★第 1170 で節点 2 の群論の側が閉じた
 
 `exists_zeta_pi_of_torsion`——`G ⧸ ⟨Q⟩` の `l`-捻れはすべて `[ζᵃπᵇ]` である。
