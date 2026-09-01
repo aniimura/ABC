@@ -6051,5 +6051,15 @@
   "route": "★(1) は `tateProj_one_eq_zero_iff`（第 1203、核はちょうど `l·T_l E`）、(2) は `exists_tateProj_one_eq`（第 1202、`l`-捩れ点は第 1 層に持ち上がる）。☆どちらも `mod l` の条件なので第 1 層で確かめれば足りる、という一点である。",
   "consequence": "★★★これで **II 側（`α` が像に入る段）に残るのは**「Tate 一意化の `σ` が `E[l]` に `α` として作用する」ことだけになった——`sigma_acts_as_alpha`（第 993）・`tate_torsion_eq_phi_zeta_pi`（第 1174）・`kummer_sigma_coord_alpha`（第 1212）が持っている内容を、具体の悪い素点の局所体に当てはめて大域へ運ぶ配管である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "torsionTransport20260902": {
+  "block": 1271,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★代数閉体の埋め込みで E[n] は全単射に移る（II 側の配管、第 2 段）",
+  "goal": "局所で作った σ の条件を大域の E[l] へ運ぶ道具を作る。",
+  "proved": "☆`Found/GaloisRep/TorsionTransport.lean`（第 1271）に 5 本。`point_map_galPoint`（埋め込みは `galPoint` と可換）・`torsionMap`・`torsionMap_bijective`（代数閉体の間では `E[n]` は全単射）・`galPoint_unipotent_of_map`・`exists_galPoint_ne_of_map`。",
+  "route": "★★全単射性は**次数の勘定だけ**である——`Point.map` は単射（mathlib）、`E[n]` の個数はどちらの代数閉体でも `n²`（`torsion_card`、証明済み）。☆分体多項式（未着手）も Néron モデルも要らなかった。",
+  "consequence": "★★★これで「局所の `σ` が `E[l]` に `α` として作用する」を確かめれば、`restrictLocalHom`（第 1167）＋本ブロック＋第 1270 で `alpha_mem_map_of_galTate`（第 1237）の `h2`・`h1` が出る。☆残るのは Tate 一意化を具体の悪い素点に当てはめる段だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
