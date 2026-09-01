@@ -91,6 +91,28 @@ noncomputable def globalOfLocalHom (L Lv M : Type*) [Field L] [Field Lv] [Field 
     IsScalarTower.of_algebraMap_eq (fun x => (ι.commutes x).symm)
   exact restrictLocalHom L Lv M (AlgebraicClosure L)
 
+/-! ## ★★★★★★★★★★★★局所像は大域像に含まれる -/
+
+/-- ☆合成の像は元の像に含まれる。 -/
+theorem range_comp_le {G H K : Type*} [Group G] [Group H] [Group K]
+    (f : H →* K) (g : G →* H) : (f.comp g).range ≤ f.range := by
+  rintro x ⟨y, rfl⟩
+  exact ⟨g y, rfl⟩
+
+/-- ★★★★★★★★★★★★★★★★
+**局所で実現された行列は大域の mod `l` 像にも入る**——★**無条件**（第 1169）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`f` を `galRep`、`g` を `globalOfLocalHom`、`r` を `glRedPadic l` と読む。
+★★★これが `imageContainsSL2J_of_alpha'` の `halpha` を局所から受け取る形であり、
+`AlphaBridge` の節点 3 の**最後の 1 行**である。 -/
+theorem mem_map_of_mem_map_comp {G H K K' : Type*} [Group G] [Group H] [Group K] [Group K']
+    (f : H →* K) (g : G →* H) (r : K →* K') {x : K'}
+    (hx : x ∈ ((f.comp g).range).map r) : x ∈ (f.range).map r :=
+  Subgroup.map_mono (range_comp_le f g) hx
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def restrictLocalHom.src : ABC3.Meta.Source :=
@@ -102,6 +124,19 @@ def restrictLocalHom_commutes.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(制限は埋め込みと可換。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def mem_map_of_mem_map_comp.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(局所で実現された行列は大域の mod l 像にも入る。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def mem_map_of_mem_map_comp.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1169）**——`f` を `galRep`、`g` を `globalOfLocalHom`、" ++
+       "`r` を `glRedPadic l` と読むと、これが " ++
+       "`imageContainsSL2J_of_alpha'` の `halpha` を**局所から受け取る形**である。" ++
+       "☆`AlphaBridge` の節点 3 はこれで完備した——" ++
+       "残るのは節点 2（Tate 一意化で `(ζ, π)` を `E[l]` の基底として実現する段）だけである。") 1 ]
 
 def globalOfLocalHom.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

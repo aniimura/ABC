@@ -5012,5 +5012,15 @@
     "frame": "☆AlphaBridge の進捗枠 2.5/3、重み 22 → 6(Tate 同定 5 ＋ galRep との合成 1)。★Theorem 3.8 の残高 = I(4) ＋ II(6) = 10。",
     "pitfall": "☆bash heredoc は \\\\ を \\ に潰すので、heredoc 内の Python で .replace(\"\\\\uXXXX\", \"\\uXXXX\") と書くと**同じ文字列の置換になって無言で効かない**——Lean ファイルに literal な \\u03b9 が残る。★Write ツールで .py を作るか、chr(92) で組み立てる。☆同じ理由で .mjs の台帳を heredoc で書くときも \\u を含む文字列は避ける(JS が Invalid Unicode escape で落ちる)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "localToGlobalImage20260902": {
+    "block": 1169,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★局所像は大域像に含まれる——AlphaBridge の節点 3 が完備した",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 3)。",
+    "what": "★range_comp_le と mem_map_of_mem_map_comp(Found/GenEll/Thm38Decomposition.lean)。☆f を galRep、g を globalOfLocalHom(第 1168)、r を glRedPadic l と読むと、これが imageContainsSL2J_of_alpha' の halpha を**局所から受け取る形**である。",
+    "measured": "★★これで **AlphaBridge の節点 3 が完備した**。☆残るのは節点 2 だけ——Tate 一意化で (ζ, π) を E[l] の基底として実現する段である。★座標の側(第 1161-1165)と分解群の側(第 1167-1169)は両方とも揃った。",
+    "frame": "☆AlphaBridge の進捗枠 2.6/3、重み 22 → 5。★Theorem 3.8 の残高 = I(4) ＋ II(5) = 9。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
