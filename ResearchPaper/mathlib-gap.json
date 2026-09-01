@@ -4685,5 +4685,26 @@
     },
     "remaining": "☆残る逸脱は l ≠ 2 だけ。★外すには l = 2 の Vélu の分岐が要る——veluU = 0 なので /2 は無害だが、preΨ_2 = 1 なので捩れ点との橋が別物になる(Ψ₂Sq の主係数は 4)。",
     "gate": "lake build ABC3 成功(6264 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "lTwoBranchFrame20260901": {
+    "block": 1142,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★l = 2 の枝を外す枠——Lemma 3.5 に残る唯一の逸脱",
+    "goal": "Lemma 3.5 を原典どおりの仮説だけで証明する(残る逸脱は l ≠ 2 の 1 つだけ)。",
+    "measured": "★★★★**l = 2 で壊れるのは 3 か所だけである(実測)**。l = 2 では (range 2).erase 0 = {1}、ζ = −1、w = −q で、点 Φ(−1) は 2-捩れなので DX = 2Y + X = 0、veluGy = −2Y − X = 0、veluU = veluGy² = 0 になる。",
+    "broken": [
+      "A: veluV2_eq_tateDYpair(TateODE.lean:89)——DX ≠ 0 で割っている",
+      "B: exists_veluW_of_inv(SymmSum.lean:157)——i ↔ l−i の対で偶数にする",
+      "C: preΨ_eval_eq_zero_of_addOrderOf_prime——Odd k を使う"
+    ],
+    "route": "☆B は易しい——l = 2 では veluU = 0 なので w = v·x がそのまま R に取れる。★C は Ψ₂Sq(主係数 4)に取り替える段。★★A が本体で、**一般の径数で通す**のが道である: (1) S ≔ K[T] を T と 1 − T で局所化、(2) PowerSeries S で a ≔ C T・w ≔ C(T⁻¹)·X とすると DX の定数項は T(1+T)/(1−T)³ ≠ 0 なので hDX が出る、(3) 在庫の veluV2_eq_tateDYpair を当てる、(4) T ↦ −1 で特殊化する(1 − (−1) = 2 ≠ 0、−1 ≠ 0 なので像は定義される)。☆第 1128 と同じ「万有な環を経由する」型で、道具は第 1125-1127 で建ててある。",
+    "frame": {
+      "1": "veluV2_eq_tateDYpair_generic —— hDX を取らない DY = veluV2(重み 10)",
+      "2": "c4_velu_tate_any / c6_velu_tate_any —— hDX を取らない c₄・c₆(重み 8)",
+      "3": "exists_veluW_two —— l = 2 では veluU = 0(重み 6)",
+      "4": "psi2Sq_eval_eq_zero —— l = 2 の捩れ点と多項式の橋(重み 8)",
+      "total": "総重み 32、進捗 0/4"
+    },
+    "gate": "lake build ABC3 成功(6265 jobs)、node tools/check.mjs PASS。"
   }
 }

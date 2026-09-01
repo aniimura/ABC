@@ -11,6 +11,7 @@ import ABC3.Skeleton.GenEll.GaloisLocal
 import ABC3.Skeleton.GenEll.TateIsogeny
 import ABC3.Skeleton.GenEll.TateIsogenyK
 import ABC3.Skeleton.GenEll.TateLocalModelK
+import ABC3.Skeleton.GenEll.LTwoBranch
 import ABC3.Skeleton.GenEll.TateLocalModel
 import ABC3.Skeleton.GenEll.TateODE
 import ABC3.Skeleton.GenEll.SigmaConvolution
