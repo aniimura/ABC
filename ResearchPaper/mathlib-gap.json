@@ -5529,5 +5529,15 @@
     "idioms": "★mathlib の map_adjoin は AlgHom 名前空間(AlgHom.map_adjoin)、map_top は Algebra 名前空間(Algebra.map_top)にある。",
     "consequence": "★★★これで [M:L] ≤ l−1 の道具はすべて揃った —— 数え上げ(第 1214)・延長(第 1215)・生成元での決定(第 1216)・生成集合(第 1217)。☆残るのは c(φ) を定義して 4 つを繋ぐ段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "degreeLine20260902": {
+    "block": 1218,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★安定直線の定義体は次数 ≤ l−1——第 1209 の義務が解けた",
+    "goal": "第 1209 が残した唯一の義務 [M:L] < l。",
+    "what": "★finrank_adjoin_ptCoordSet_le(Found/GenEll/DegreeLine.lean)—— 安定直線なら [L(x_Q, y_Q) : L] ≤ l − 1。",
+    "measured": "☆φ : M →ₐ[L] L̄ を Gal(L̄/L) へ延ばし(第 1215)、σ Q = c • Q の c ∈ ZMod l を対応させる。★c が同じなら σ₁ Q = σ₂ Q なので座標の上で σ₁ = σ₂、すなわち φ₁ = φ₂(第 1216・1217)。☆c ≠ 0 は σ Q ≠ 0 から出る。数え上げは第 1214。",
+    "consequence": "★★★**これで第 1209 が残した義務 [M:L] < l は解けた**(l − 1 < l だから)。☆残るのはこれらを lemma_3_5_height_ineq_stableLine に組み上げる配管だけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
