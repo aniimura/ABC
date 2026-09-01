@@ -360,6 +360,60 @@ theorem exists_zpow_of_pow_eq_one {K : Type*} [CommRing K] [IsDomain K] {l : ℕ
   rw [zpow_natCast]
   simpa using hi.symm
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★Tate 設定での組み立て -/
+
+/-- ☆原始 `l` 乗根は単数群でも `l` 乗して 1。 -/
+theorem units_pow_eq_one_of_isPrimitiveRoot {K : Type*} [CommRing K] {l : ℕ} {ζ : Kˣ}
+    (hζ : IsPrimitiveRoot (ζ : K) l) : ζ ^ l = 1 := by
+  apply Units.ext
+  simpa using hζ.pow_eq_one
+
+/-- ☆原始 `l` 乗根は `0 < n < l` で `ζⁿ ≠ 1`（単数群の側）。 -/
+theorem units_pow_ne_one_of_isPrimitiveRoot {K : Type*} [CommRing K] {l : ℕ} {ζ : Kˣ}
+    (hζ : IsPrimitiveRoot (ζ : K) l) (n : ℕ) (hn : 0 < n) (hnl : n < l) : ζ ^ n ≠ 1 := by
+  intro hcon
+  refine hζ.pow_ne_one_of_pos_of_lt hn.ne' hnl ?_
+  have := congrArg (fun u : Kˣ => (u : K)) hcon
+  simpa using this
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**Tate 設定での `α`**——★**無条件**（第 1174）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`TateSetup S` と原始 `l` 乗根 `ζ`、`πˡ = q` なる `π`、そして
+`σ(ζ) = ζ`・`σ(π) = ζπ` なる `σ` があれば、`σ` は座標を `α = (1 1 / 0 1)` で動かす。
+
+★★★**受けている仮説はこれだけ**である——`hQinf` は `TateSetup` から（第 1172）、
+`hζ ^ l = 1` と原始性は `IsPrimitiveRoot` から（本ファイル）出るので、
+`zeta_pi_*` の系列が要求していた仮説は**すべて消えた**。 -/
+theorem tate_sigma_coord_alpha {R : Type} [CommRing R] {I : Ideal R} {K : Type} [Field K]
+    [Algebra R K] (S : ABC3.Found.GaloisRep.TateSetup R I K) {l : ℕ} (hl : 0 < l)
+    {ζ π : Kˣ} (hζ : IsPrimitiveRoot (ζ : K) l) (hπl : π ^ l = S.Q)
+    (σ : Kˣ →* Kˣ) (hσζ : σ ζ = ζ) (hσπ : σ π = ζ * π)
+    (a b a' b' : ℤ)
+    (h : ∃ n : ℤ, σ (ζ ^ a * π ^ b) = ζ ^ a' * π ^ b' * S.Q ^ n) :
+    ((l : ℤ) ∣ (a + b - a')) ∧ ((l : ℤ) ∣ (b - b')) :=
+  sigma_coord_alpha hl (units_pow_eq_one_of_isPrimitiveRoot hζ)
+    (units_pow_ne_one_of_isPrimitiveRoot hζ) hπl
+    (tateSetup_Q_zpow_eq_one S) σ hσζ hσπ a b a' b' h
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**Tate 設定での `l`-捩れの記述**——★**無条件**（第 1174）。
+
+☆`Φ` を Tate 一意化とすると `E[l]` の元はすべて `Φ [ζᵃπᵇ]` の形である。
+★★受けている仮説は「`ζ` が原始 `l` 乗根」「`πˡ = q`」だけである。 -/
+theorem tate_torsion_eq_phi_zeta_pi {R : Type} [CommRing R] {I : Ideal R} {K : Type} [Field K]
+    [Algebra R K] (S : ABC3.Found.GaloisRep.TateSetup R I K) {l : ℕ} [NeZero l]
+    {ζ π : Kˣ} (hζ : IsPrimitiveRoot (ζ : K) l) (hπl : π ^ l = S.Q)
+    {P : Type*} [AddCommGroup P]
+    (Φ : Additive (Kˣ ⧸ Subgroup.zpowers S.Q) ≃+ P)
+    (x : Kˣ) (hx : l • Φ (Additive.ofMul (QuotientGroup.mk x)) = 0) :
+    ∃ a b : ℤ, Φ (Additive.ofMul (QuotientGroup.mk x))
+      = Φ (Additive.ofMul (QuotientGroup.mk (ζ ^ a * π ^ b))) :=
+  torsion_eq_phi_zeta_pi hπl (fun y hy => exists_zpow_of_pow_eq_one hζ y hy) Φ x hx
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -371,6 +425,24 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Tate 設定での α——受けているのは ζ が原始 l 乗根で πˡ = q なことだけ。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def tate_torsion_eq_phi_zeta_pi.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Tate 設定での l-捻れの記述——E[l] はすべて Φ [ζᵃπᵇ]。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1174）**——`zeta_pi_*` の系列が要求していた仮説" ++
+       "（`hζl`・`hζprim`・`hQinf`・`hμ`）は**すべて消えた**——" ++
+       "`TateSetup` と `IsPrimitiveRoot` から出るからである。" ++
+       "☆残るのはこの `ζ`・`π`・`σ` を `L_v(ζ_l, q^{1/l})` で実際に取る段と、" ++
+       "`galRep` の行列に読み替える段である。") 1 ]
 
 def exists_zpow_of_pow_eq_one.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

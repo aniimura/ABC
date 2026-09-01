@@ -5064,5 +5064,17 @@
     "section2": "☆§2(Theorem 2.1)について: Skeleton/GenEll/Section2.lean の theorem_2_1 は **(i) ⟹ (ii) の向きだけ**を取っており、原文の実質は (ii) ⟹ (i)(p.11-p.13)である。★.needs の測定(2026-08-29)によれば (ii) ⟹ (i) の 4 段のうち 3 段は Found/ にあり(Thm21Chain・Thm21Extract・Thm21DegRatio)、残るのは**本論文の外**の 2 つ——分岐指数がちょうど e の連結有限エタール Galois 被覆([Stacks] 58.6)と noncritical Belyi 写像([NCBelyi] Theorem 2.5、一般の曲線への帰着に Riemann-Roch)。★★したがって Found/ に条なしの .src を置くのは**過剰な主張**であり、置かない。",
     "frame": "☆Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "tateAlphaAssembly20260902": {
+    "block": 1174,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★Tate 設定での組み立て——仮説がすべて消えた",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 2 の配管)。",
+    "what": "★tate_sigma_coord_alpha と tate_torsion_eq_phi_zeta_pi(Found/GenEll/Thm38ZetaPi.lean)。☆TateSetup S と原始 l 乗根 ζ、πˡ = q なる π、σ(ζ) = ζ・σ(π) = ζπ なる σ があれば、σ は座標を α = (1 1 / 0 1) で動かし、E[l] の元はすべて Φ [ζᵃπᵇ] の形である。",
+    "measured": "★★★zeta_pi_* の系列が要求していた仮説は**すべて消えた**: hQinf は TateSetup の 0 < v(q) から(第 1172)、hμ は IsPrimitiveRoot(整域)から(第 1173)、hζl・hζprim は IsPrimitiveRoot の単数群への持ち上げから(第 1174、units_pow_eq_one_of_isPrimitiveRoot・units_pow_ne_one_of_isPrimitiveRoot)。☆受けているのは「ζ が原始 l 乗根」「πˡ = q」「σ(ζ) = ζ・σ(π) = ζπ」だけである。",
+    "remaining": "☆残るのは (1) これらを L_v(ζ_l, q^{1/l}) で実際に取る段(第 994 の Kummer の σ がその中身)、(2) galRep の行列に読み替える段。★どちらも配管である。",
+    "pitfall": "☆IsPrimitiveRoot.pow_ne_one_of_pos_of_lt は名前に反して第 1 引数が `l ≠ 0`(0 < l ではない)。★hn.ne' を渡す。",
+    "frame": "☆Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
