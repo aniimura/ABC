@@ -169,6 +169,35 @@ theorem veluQuotientFull_descends_algClosed (W : WeierstrassCurve L)
   have h := veluQuotientFull_descends_map W W' S hW' (ι.toRingHom : Lbar →+* M)
   rwa [hcomp] at h
 
+/-! ## ★★★★★★★★★★★★`L(H)`——座標の定義体を取る -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★
+**有限個の座標は有限次拡大の中に入る**——★**無条件**（第 1195）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`S` の座標で生成する中間体 `L(S)` は `L` 上有限次である
+（`L̄` は `L` 上代数的だから）。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 の
+**`L'' ≔ L(H)` を取る段**である（第 1194 の道の第 1 段）。 -/
+theorem exists_finite_subextension (S : Finset (Lbar × Lbar)) :
+    ∃ M : IntermediateField L Lbar, FiniteDimensional L M ∧
+      ∀ z ∈ S, z.1 ∈ M ∧ z.2 ∈ M := by
+  classical
+  set T : Set Lbar := (↑(S.image Prod.fst) : Set Lbar) ∪ (↑(S.image Prod.snd) : Set Lbar) with hT
+  have hTfin : T.Finite := (S.image Prod.fst).finite_toSet.union (S.image Prod.snd).finite_toSet
+  haveI : Finite T := hTfin
+  have hint : ∀ x ∈ T, IsIntegral L x := fun x _ => Algebra.IsIntegral.isIntegral x
+  refine ⟨IntermediateField.adjoin L T, IntermediateField.finiteDimensional_adjoin hint, ?_⟩
+  intro z hz
+  refine ⟨IntermediateField.subset_adjoin L T (Or.inl ?_),
+    IntermediateField.subset_adjoin L T (Or.inr ?_)⟩
+  · exact Finset.mem_coe.2 (Finset.mem_image.2 ⟨z, hz, rfl⟩)
+  · exact Finset.mem_coe.2 (Finset.mem_image.2 ⟨z, hz, rfl⟩)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_of_fixed.src : ABC3.Meta.Source :=
@@ -183,6 +212,11 @@ def mem_range_of_fixed.needs : List ABC3.Meta.ProofObligation :=
 def fixesCoeffs_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(底変換した曲線の係数はどの σ でも固定される。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_finite_subextension.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(有限個の座標は有限次拡大の中に入る——L(H) を取る段。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def veluQuotientFull_descends_algClosed.src : ABC3.Meta.Source :=
