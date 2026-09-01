@@ -554,7 +554,30 @@ theorem le_finrank_of_natCast_mem_pow {L : Type} [Field L] [NumberField L]
     (p : HeightOneSpectrum (𝓞 L)) {l : ℕ} (hl : l.Prime)
     (hmem : ((l : ℕ) : 𝓞 L) ∈ p.asIdeal ^ (l - 1)) :
     l - 1 ≤ Module.finrank ℚ L := by
-  sorry
+  have hnorm : Ideal.absNorm (Ideal.span {((l : ℕ) : 𝓞 L)}) = l ^ Module.finrank ℚ L := by
+    rw [Ideal.absNorm_span_singleton]
+    have h1 : ((l : ℕ) : 𝓞 L) = algebraMap ℤ (𝓞 L) (l : ℤ) := by push_cast; rfl
+    rw [h1, Algebra.norm_algebraMap, NumberField.RingOfIntegers.rank]
+    simp
+  have hle : Ideal.span {((l : ℕ) : 𝓞 L)} ≤ p.asIdeal ^ (l - 1) := by
+    rw [Ideal.span_le, Set.singleton_subset_iff]; exact hmem
+  have hle2 : Ideal.span {((l : ℕ) : 𝓞 L)} ≤ p.asIdeal :=
+    le_trans hle (Ideal.pow_le_self (by have := hl.two_le; omega))
+  have hdvd2 : Ideal.absNorm p.asIdeal ∣ l ^ Module.finrank ℚ L := by
+    rw [← hnorm]; exact Ideal.absNorm_dvd_absNorm_of_le hle2
+  have hnetop : p.asIdeal ≠ ⊤ := p.isPrime.ne_top
+  have hne1 : Ideal.absNorm p.asIdeal ≠ 1 := by
+    rw [Ne, Ideal.absNorm_eq_one_iff]; exact hnetop
+  have hldvd : l ∣ Ideal.absNorm p.asIdeal := by
+    obtain ⟨k, hk, hkk⟩ := (Nat.dvd_prime_pow hl).1 hdvd2
+    rcases Nat.eq_zero_or_pos k with rfl | hkpos
+    · rw [pow_zero] at hkk; exact absurd hkk hne1
+    · rw [hkk]; exact dvd_pow_self l hkpos.ne'
+  have hdvd1 : Ideal.absNorm (p.asIdeal ^ (l - 1)) ∣ l ^ Module.finrank ℚ L := by
+    rw [← hnorm]; exact Ideal.absNorm_dvd_absNorm_of_le hle
+  rw [map_pow] at hdvd1
+  exact (Nat.pow_dvd_pow_iff_le_right hl.one_lt).1
+    (dvd_trans (pow_dvd_pow_of_dvd hldvd (l - 1)) hdvd1)
 
 def le_finrank_of_natCast_mem_pow.src : Source :=
   { paper := "GenEll", pdfPage := 18,
@@ -562,13 +585,10 @@ def le_finrank_of_natCast_mem_pow.src : Source :=
     sectionId := "genell-lemma-3-7" }
 
 def le_finrank_of_natCast_mem_pow.needs : List ProofObligation :=
-  [ .citation "[mathlib]" "Ideal.sum_ramification_inertia(∑ e f = [L:K])"
-      (.inMathlib "Ideal.sum_ramification_inertia") 1,
-    .implicitStep
-      ("☆`Ideal.ramificationIdx` は `sSup {n | map p ≤ P^n}` なので、" ++
-       "`l ∈ p^{l−1}` から `l − 1 ≤ e_p` を出すには**上に有界**であることが要る" ++
-       "（`p ≠ ⊥` と `l ≠ 0` から出る）。" ++
-       "★そのうえで `e_p · f_p ≤ ∑ = [L:ℚ]` と `f_p ≥ 1`") 2 ]
+  [ .citation "[mathlib]" "Ideal.absNorm_dvd_absNorm_of_le(イデアルノルムは包含で割る)"
+      (.inMathlib "Ideal.absNorm_dvd_absNorm_of_le") 1,
+    .citation "[mathlib]" "Ideal.absNorm_span_singleton(単元生成イデアルのノルム)"
+      (.inMathlib "Ideal.absNorm_span_singleton") 1 ]
 
 /-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点で `l` は単元**——
 `l` が定義体の次数より十分大きければ。
