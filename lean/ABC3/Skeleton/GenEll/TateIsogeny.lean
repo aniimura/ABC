@@ -1902,7 +1902,10 @@ theorem exists_vw_tate_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
                     (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
                     (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
                   * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
-      ∧ ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic := by
+      ∧ ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic
+      ∧ (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄
+      ∧ (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+        = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆ := by
   have hu := ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu
   -- ★`ζ` を `Kˣ` に上げる
   have hζ0 : ζ ≠ 0 := by
@@ -1947,11 +1950,18 @@ theorem exists_vw_tate_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
                 (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (2 * m + 1 - 1)) q hq)
                 (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (2 * m + 1 - 1)) q hq)
               * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (2 * m + 1 - 1)) q hq)) := hw0
-  refine ⟨_, w, rfl, hw, ?_⟩
-  refine ABC3.Found.GaloisRep.isElliptic_veluCurve_tate_map q hq (2 * m + 1) hql _ w hlu
-    h4 ?_ inferInstance
-  rw [← h6]
-  linear_combination (3024 : R) * hw
+  have h6' : (tateCurveAt q hq).c₆
+      + 504 * (∑ i ∈ (range (2 * m + 1)).erase 0,
+          veluV2 (tateCurveAt q hq)
+            (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (2 * m + 1 - 1)) q hq)
+            (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (2 * m + 1 - 1)) q hq))
+      + 6048 * w
+      = ((2 * m + 1 : ℕ) : R) ^ 6 * (tateCurveAt (q ^ (2 * m + 1)) hql).c₆ := by
+    rw [← h6]
+    linear_combination (3024 : R) * hw
+  refine ⟨_, w, rfl, hw, ?_, h4, h6'⟩
+  exact ABC3.Found.GaloisRep.isElliptic_veluCurve_tate_map q hq (2 * m + 1) hql _ w hlu
+    h4 h6' inferInstance
 
 def exists_vw_tate_mu.src : Source :=
   { paper := "GenEll", pdfPage := 15,
@@ -2025,11 +2035,13 @@ theorem minDeltaExp_eq_mul_at_bad_prime_full {L : Type} [Field L] [NumberField L
       (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic :=
     tateCurveAt_map_isElliptic _ hql hev' hc4T'
   exact minDeltaExp_eq_mul_at_bad_prime_vc p E E' hssE hssE' hjneg hl hodd hcop C hmin h hlu
-    (fun ζ hζ => exists_vw_tate_mu _
-      (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h)
-      (tateParamR_ne_zero ((C • E).baseChange (p.adicCompletion L)) h)
-      (tateModel_map_Delta_ne_zero ((C • E).baseChange (p.adicCompletion L)) h)
-      hl hodd hlu hql (two_ne_zero_adicCompletionIntegers L p) ζ hζ)
+    (fun ζ hζ => by
+      obtain ⟨v, w, hv, hw, hell, _, _⟩ := exists_vw_tate_mu _
+        (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h)
+        (tateParamR_ne_zero ((C • E).baseChange (p.adicCompletion L)) h)
+        (tateModel_map_Delta_ne_zero ((C • E).baseChange (p.adicCompletion L)) h)
+        hl hodd hlu hql (two_ne_zero_adicCompletionIntegers L p) ζ hζ
+      exact ⟨v, w, hv, hw, hell⟩)
     hQ hE'
 
 def minDeltaExp_eq_mul_at_bad_prime_full.src : Source :=
@@ -2097,7 +2109,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_gen {L : Type} [Field L] [NumberField L]
   obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
     exists_primitiveRoot_of_torsion_point (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hcop'
       P hP hP0
-  obtain ⟨v, w, hv, hw, hell⟩ :=
+  obtain ⟨v, w, hv, hw, hell, _, _⟩ :=
     exists_vw_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hodd hlu hql h2 ζ hζ
   haveI hellMu := isElliptic_veluQuotient_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ
     hl hlu h2K ζ uζ hζ hζu hζl hord v w hv hw hell
