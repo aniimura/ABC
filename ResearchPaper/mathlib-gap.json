@@ -4796,5 +4796,18 @@
     "what": "★ΨSq_eval_eq_zero_of_addOrderOf_prime と mem_primeSubring_x_of_addOrderOf_prime' を入れた。どちらも hodd を取らない。☆preΨ 版(第 1072-1073)は ΨSq_l = preΨ_l²(l 奇)に落とすために l ≠ 2 を使っていたが、**ΨSq のまま止めれば偶奇は要らない**——mathlib の leadingCoeff_ΨSq は n ≠ 0 なら主係数を n² と言う(偶奇不問)。",
     "measured": "★★節点 4 は 2 つに割れる(実測): (4a) preΨ → ΨSq の取り替え——第 1148 で部品が入った。(4b) veluWFull の /2(valAtLeast_two_inv_of_dvd)——**Bézout 2a + lb = 1 を使うので l = 2 では真に壊れる**。☆しかし l = 2 では点が 2-捩れで veluU = 0 なので veluWFull = ∑(veluU/2 + veluV2·x) = veluV2·x となり /2 が消える。★これが 4b の道である。",
     "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "lemma37CondBFull20260901": {
+    "block": 1150,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★Lemma 3.7 の条件 (b) からも (†) が消えた",
+    "goal": "Lemma 3.7 を Found/ で条なしにする(残り 2 件目、§3)。",
+    "what": "★htFalt_le_of_condB_lcyclic(Found/GaloisRep/Lemma37CondBFull.lean)。☆第 1088 は条件 (a) の側で (†)(＝ Lemma 3.5 の結論)を埋めたが、条件 (b) の側は埋められなかった——条件 (b) が l について言うのは 2 ≤ l だけで、Lemma 3.5 が置いていた l ≠ 2 を吸収できなかったからである。★第 1149 でその仮説が外れたので、条件 (a) と同じ 1 行で埋まった。",
+    "measured": {
+      "残る欄(EllModuliData の witness)": "☆northcott(Skeleton/GenEll/NorthcottJ.lean の northcott_htJ 1 本に帰着済み)、HasLCyclic / quotLCyclic 群、lcyclicExc 群、ImageContainsSL2 群(Theorem 3.8 の核)。",
+      "Found 版 Lemma 3.7 に要るもの": "★第 1 の主張は lemma_3_7_a(無条件)、第 2 の主張は DegCurve が定義から乗法還元をもつので noMultRedExcJ = ∅ で自明、第 3 の主張は htFalt_le_of_condA_lcyclic(第 1088)と htFalt_le_of_condB_lcyclic(第 1150)＋ galoisFiniteJ_htFalt_le(第 756)。☆残るのは HasLCyclic を具体に書き下し、これらを 1 本の命題に束ねる配管である。"
+    },
+    "honesty": "★★lemma_3_5_height_ineq は `∀ p, SemistableAt p E'` を仮説の形で受けている(原典は「同種なので自動」と括弧で述べる)。☆「同種なら半安定」の形式化は未了であり、.needs と冒頭の逸脱表に明記した。★item を条なしにしたのは、本企画がこれを「後回しにした形式化」であって「原典に無い仮説」ではないと従来から分類しているため。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 19/24。"
   }
 }
