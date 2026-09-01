@@ -5,6 +5,7 @@ import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GaloisRep.Lemma37A
 import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.Lemma37CondBFull
+import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Meta.Claim
 
 /-!
@@ -212,6 +213,91 @@ theorem lemma_3_7 (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) (eps : ℝ) (heps 
         (fun k : ℕ => pointCoords (k • Q)))) l hl E.toSSCurve.ss hss' harch Q hQ rfl hcop
     exact le_trans hmain (le_max_right _ _)
 
+/-! ## ★★★★★★★★★★★★安定直線の側で述べ直した形（`(†)` を受ける） -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.7 —— `l`-巡回を `Gal`-安定な直線で読んだ形**（第 1166）。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★★★★**2026-09-02（第 1166）**——`Skeleton/GenEll/LCyclicReading.lean` の
+**節点 3 を、節点 2 を仮説 `hdag` に切り出した形で取る**。
+
+☆`hdag` は `Lemma 3.5` の結論 `(†)` を**安定直線の側で**述べたものであり、
+節点 2（`veluQuotientFull_descends`（第 1154）＋ 良い素点の整性（第 1155-1158）
+＋ 悪い素点の配管（節点 2d））が埋める。
+
+★★**それ以外はすべて揃っている**——第 1・第 2 の主張は `lemma_3_7`（第 1151）と
+同じ材料で、第 3 の主張も `htFalt_le_of_condA`・`htFalt_le_of_condB` の
+数値の核をそのまま使う。☆すなわち**残るギャップは `hdag` ただ 1 つ**である。
+
+★★★これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る。 -/
+theorem lemma_3_7_stableLine (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
+    (eps : ℝ) (heps : 0 < eps) (C₅ : ℝ) (hC₅ : 0 ≤ C₅)
+    (hdag : ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → HasLCyclicJ E.toSSCurve l →
+      ((l : ℝ) / 14) * degInfOf E.toSSCurve.fld E.toSSCurve.W
+        ≤ htFaltOf E.toSSCurve.fld E.toSSCurve.W + 2 * Real.log l + C₅) :
+    ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+        ∀ condA condB : Prop,
+          (condA ↔ (100 * (E.deg : ℝ)
+                      * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
+                    ∧ E.toSSCurve.HasMultRed)) →
+          (condB ↔ (E.j ∈ KV ∧ E.toSSCurve.PrimeToLocalHeights l)) →
+          (condA → E.toSSCurve.PrimeToLocalHeights l)
+        ∧ (condB → E.j ∉ Exc → E.toSSCurve.HasMultRed)
+        ∧ ((condA ∨ condB) → HasLCyclicJ E.toSSCurve l → E.j ∈ Exc) := by
+  obtain ⟨M, hM⟩ := hKV
+  obtain ⟨Ca, hCa0, hCa⟩ := lemma_3_7_a_coprime eps heps
+  obtain ⟨Cc, hCc0, hCc⟩ := htFalt_le_of_condA eps heps
+  obtain ⟨C₂, hCb⟩ := htFalt_le_of_condB
+  refine ⟨max Ca Cc, lt_of_lt_of_le hCa0 (le_max_left _ _),
+    {x : ℂ | faltingsHeightJ x ≤ max C₅ (|M + C₂| / 5 + 28 / 5 + 1.4 * C₅)},
+    galoisFiniteJ_htFalt_le _, ?_⟩
+  intro E l hl condA condB hcA hcB
+  have hFeq : faltingsHeightJ E.j = htFaltOf E.toSSCurve.fld E.toSSCurve.W :=
+    faltingsHeightJ_eq E.toSSCurve
+  have hdeq : (E.deg : ℝ) = (Module.finrank ℚ E.toSSCurve.fld : ℝ) := rfl
+  have hd1 : (1 : ℝ) ≤ (E.deg : ℝ) := by exact_mod_cast E.deg_pos
+  have hp0 : (0 : ℝ) ≤ (E.deg : ℝ) ^ eps := Real.rpow_nonneg (by linarith) eps
+  have hweak : ∀ C₀ : ℝ, C₀ ≤ max Ca Cc →
+      (100 * (E.deg : ℝ) * (faltingsHeightJ E.j + max Ca Cc * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)) →
+      100 * (Module.finrank ℚ E.toSSCurve.fld : ℝ)
+        * (htFaltOf E.toSSCurve.fld E.toSSCurve.W
+            + C₀ * (Module.finrank ℚ E.toSSCurve.fld : ℝ) ^ eps) ≤ (l : ℝ) := by
+    intro C₀ hle hA
+    rw [← hdeq, ← hFeq]
+    refine le_trans ?_ hA
+    have hmul : C₀ * (E.deg : ℝ) ^ eps ≤ max Ca Cc * (E.deg : ℝ) ^ eps :=
+      mul_le_mul_of_nonneg_right hle hp0
+    have h100 : (0 : ℝ) ≤ 100 * (E.deg : ℝ) := by linarith
+    exact mul_le_mul_of_nonneg_left (by linarith) h100
+  have hA1 : condA → E.toSSCurve.PrimeToLocalHeights l := by
+    intro hc
+    rw [hcA] at hc
+    intro p hp
+    exact hCa E.toSSCurve.fld E.toSSCurve.W l p hl (hweak Ca (le_max_left _ _) hc.1) hp
+  refine ⟨hA1, fun _ _ => E.multRed, ?_⟩
+  intro hAB hcyc
+  have hdagE := hdag E l hl hcyc
+  show faltingsHeightJ E.j ≤ max C₅ (|M + C₂| / 5 + 28 / 5 + 1.4 * C₅)
+  rw [hFeq]
+  rcases hAB with hc | hc
+  · -- ☆条件 (a)
+    have hcA' := hcA.1 hc
+    obtain ⟨p, hp⟩ := hcA'.2
+    have hmain := hCc C₅ hC₅ E.toSSCurve.fld E.toSSCurve.W l p hl.one_lt.le hp
+      (hweak Cc (le_max_right _ _) hcA'.1) hdagE
+    exact le_trans hmain (le_max_left _ _)
+  · -- ☆条件 (b)
+    have hcB' := hcB.1 hc
+    have harch : htArchJ E.toSSCurve.fld E.toSSCurve.W ≤ M := hM E.toSSCurve hcB'.1
+    have hmain := hCb M C₅ hC₅ E.toSSCurve.fld E.toSSCurve.W E.toSSCurve.ss harch l
+      hl.two_le hdagE
+    exact le_trans hmain (le_max_right _ _)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def SSCurve.not_dvd_jExp_of_primeToLocalHeights.src : Source :=
@@ -230,6 +316,22 @@ def HasLCyclicVelu.needs : List ProofObligation :=
        "☆本定義は生成元を `L` 有理点に取り、さらに Vélu の商が楕円曲線で半安定であることを" ++
        "一緒に持たせている。★後者は原文が「同種なので自動」と括弧で述べる段であり、" ++
        "「同種なら半安定」の形式化は未了である。") 5 ]
+
+def lemma_3_7_stableLine.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(l-巡回を Gal-安定な直線で読んだ形。☆(†) を受ける)",
+    sectionId := "genell-lemma-3-7" }
+
+def lemma_3_7_stableLine.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "veluQuotientFull_descends(第 1154、節点 1、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.veluQuotientFull_descends") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1166）**——`LCyclicReading` の**節点 3 を、" ++
+       "節点 2 を仮説 `hdag` に切り出した形で取った**。" ++
+       "☆`hdag` は `Lemma 3.5` の結論 `(†)` を安定直線の側で述べたものであり、" ++
+       "節点 2（第 1154 の降下＋第 1155-1158 の良い素点の整性＋節点 2d の配管）が埋める。" ++
+       "★★**それ以外はすべて揃っている**——すなわち**残るギャップは `hdag` ただ 1 つ**である。" ++
+       "★★★これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る。") 4 ]
 
 def lemma_3_7.src : Source :=
   { paper := "GenEll", pdfPage := 18,

@@ -4982,5 +4982,15 @@
     "why": "★★★これで **AlphaBridge の節点 1 が閉じた**。☆第 1161(独立性)→ 1162(核は lℤ × lℤ)→ 1163(座標は (ZMod l)² で一意)→ 1164(σ の行列は α)→ 1165(生成、基底)。★仮説 hμ(l 乗して 1 になる元は ζ の冪)は体の中で μ_l が巡回群であることそのものである。",
     "frame": "☆AlphaBridge の進捗枠 1.5/3、重み 22 → 11。★Theorem 3.8 の残高 = I(5) ＋ II(11) = 16。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "lemma37StableLine20260902": {
+    "block": 1166,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★Lemma 3.7 を安定直線の側で述べ直した——残るギャップは (†) ただ 1 つ",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 3)。",
+    "what": "★Found/GenEll/Lemma37Full.lean の lemma_3_7_stableLine —— Lemma 3.7 の第 3 の主張を **HasLCyclicJ(Gal-安定な直線)の側で**述べた形。☆受けているのは hdag(Lemma 3.5 の結論 (†) を安定直線の側で述べたもの)**だけ**である。",
+    "measured": "★★第 1・第 2 の主張と第 3 の主張の数値の核は lemma_3_7(第 1151)と**同じ材料で通った**——htFalt_le_of_condA・htFalt_le_of_condB をそのまま使える。☆すなわち **Theorem 3.8 に繋げるのに残るのは hdag ただ 1 つ**であり、それを埋めるのが節点 2d(埋め込み L̄ ↪ L̄_v の配管)である。",
+    "frame": "☆LCyclicReading の進捗枠 2.7/3、総重み 26 → 4(2d だけ)。★Theorem 3.8 の残高 = I(4) ＋ II(11) = 15。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
