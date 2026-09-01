@@ -6194,5 +6194,16 @@
   "route": "★`vcX C x = (u⁻¹)²(x − r)`・`vcY C x y = (u⁻¹)³(y − s(x−r) − t)` は**あらわな式**なので、環準同型との可換性はそのまま出る。☆`σ` が `C` を固定する（`C.map σ = C`）なら `σ` は `vcX`・`vcY` と可換になる。",
   "consequence": "★★これで第 1283（Tate 一意化の同変性）と合わせて、「Tate モデルの点」と「`E` の点」の間で `σ` の作用が対応することが座標で言える。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "galActPoint20260902": {
+  "block": 1285,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★σ が固定する曲線の上の点の作用（節点 8 の下ごしらえ 2）",
+  "goal": "σ の点への作用を加法準同型として定め、座標で書く。",
+  "proved": "☆`Found/GenEll/GalActPoint.lean`（第 1285）に 5 本。`rhPointHom`（`rhPoint` を加法準同型に）・`pointEquivOfEq`（曲線の等式で点を運ぶ）・`pointCoords_pointEquivOfEq`・`galAct`・`pointCoords_galAct`。",
+  "route": "★`W.map σK = W` なら `rhPoint σK W` の値を曲線の等式で運べばよい。☆曲線の等式は `subst` できるので `AddEquiv` が作れる。",
+  "consequence": "★★座標の言葉では `galAct` はただ `σK` を当てるだけ——第 1283（Tate 一意化の同変性、同じ言葉）と**そのまま突き合わせられる**。",
+  "idiom": "★★☆`Point` の `+` は `DecidableEq` のインスタンス経路で割れる。在庫の `rhPoint_add` は `open scoped Classical in` の下にあるので、こちらも `[DecidableEq F]` を宣言せず `open scoped Classical` にする（`lean-idioms.md` に記録）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

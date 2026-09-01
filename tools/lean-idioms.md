@@ -3113,3 +3113,15 @@ R-代数準同型は逆元を保つので K 全体で恒等になる(`tateSetup_
 
 **直し方**: 宣言の有無を見るときは `grep -rn "theorem <name>\b"` のように
 **行頭の宣言キーワードごと**当てる。`head` を付けるなら `-20` 以上にする。
+
+## Point の `+` は DecidableEq のインスタンス経路で割れる(2026-09-02、第 1285)
+
+**失敗形**: `[DecidableEq F]` を variable に置いた file で
+`rhPoint_add f W P Q` を `exact` しても
+`Point.instAdd` と `Point.instAddZeroClass.toAdd` の不一致で落ちる。
+mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq F` を使うので、
+**どの DecidableEq を使ったかで `+` が別の項になる**。
+
+**直し方**: 在庫の補題が `open scoped Classical in` の下にあるなら、
+**こちらも `open scoped Classical` にして `[DecidableEq F]` を宣言しない**。
+どちらを使っているかは在庫の補題の直前の行を見ればわかる。
