@@ -4220,6 +4220,12 @@
       "whyItMatters": "★これが第 1099-1103 の降下に要る**万有な環**を与える:☆`A₀ ≔ PowerSeries (ℤ[ζ_l])` —— `IsAdicComplete` は mathlib の instance。`A₁ ≔ PowerSeries (ℚ(ζ_l))` —— 同じ instance で、しかも `l` が可逆なので`1 − ζ^i` も可逆（積が `l`）。★すなわち **`A₁` では `hu` が成り立つ**。☆`A₀ → A₁` は係数ごとに単射（`ℤ[ζ_l] → ℚ(ζ_l)` が単射だから）。★★したがって: `A₁` で既存の `hu` つき補題を使う → 単射性で `A₀` に降ろす → `A₀ → R`（`ζ ↦ ζ`、`q ↦ q`）で特殊化する。**`hu` が消える。**",
       "correction": "☆第 1099 では「万有な環を建てる」と書いたが、**建てる必要はなかった**——mathlib の `PowerSeries` とその完備性 instance で足りる。★第 1091 で「商体 `K` では `IsHausdorff (q) K` が破れる」と測ったが、`PowerSeries` なら `q = X` が形式変数なので破れない。**ここが違いである。**",
       "riskDown": "★★節点 1-2 の risk が大きく下がった。☆残るのは(a) `A₀ → A₁` の単射性、(b) `A₀ → R` の特殊化（`evalAdic` との整合）、(c) 既存の `hu` つき補題を `A₁` に適用する段。★見積り 25-50 → **15-35 ブロック**。"
+    },
+    "specialization1105": {
+      "block": "第 1105（実測）",
+      "finding": "☆プロジェクトの特殊化 `evalAdic`（`AdicEval.lean:76`）は**`PowerSeries ℤ` 専用**である（`evalAdic (f : PowerSeries ℤ) (q : R) (hq : q ∈ I) : R`）。★第 1104 の万有な環 `PowerSeries (ℤ[ζ_l])` を使うには`evalAdic` を `PowerSeries S` ＋ 環準同型 `S → R` へ一般化する必要がある。☆自然性は `AdicEvalNatural.lean` の `evalAdic_map` にあるので下地はある。",
+      "twoRoutes": "★**道は 2 つある**:☆(A) `evalAdic` を `PowerSeries S` へ一般化して第 1104 の降下をそのまま使う。★(B) **係数ごとに降ろす**——`E` 版の恒等式の `q^n` 係数は `ℤ[ζ_l]` の**有限**の等式なので、冪級数を経由せずに `ℤ[ζ_l] → ℚ(ζ_l)` の単射性で降ろせる。☆両辺が `I^n` を法として合同であることを全 `n` で示し、`IsHausdorff` で等式にする。★(B) は新しい一般化を要さないぶん軽い見込み。",
+      "status": "☆§3 の土台（第 1092・1097・1098・1102）は済み、道筋（第 1099-1104）も確定。★残るのは上の (A) か (B) を選んで実装する 15-35 ブロック。"
     }
   }
 }
