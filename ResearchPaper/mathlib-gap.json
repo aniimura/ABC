@@ -4213,6 +4213,13 @@
       "correction": "★**第 1097 の形は「`l^k`×頭項＝分母なし」だが、これは `hu` の下でしか言えない**（`1−η` が単元でなければ `Ring.inverse (1−η) = 0` なので左辺が 0 になる）。☆正しいのは**頭項の定義そのものを `S` で置き換える**ことである。★そうすれば `hu` は statement からも proof からも消える。",
       "nextStep": "☆次の段: `tateXtermE`・`tateYtermE`・`tateDXtermE`・`tateDYtermE`・`tateD2XtermE`・`tateD3XtermE` を `S(η)` で定義し、`hu` の下で `l^k`×もとの項に等しいことを橋として証明する。★そのうえで `sum_mu_*` を `E` 版で述べ直す。",
       "estimate": "☆見積り 25-50 ブロックのまま。★ただし機構が在庫にあったので risk は下がった。"
+    },
+    "universalRingFound1104": {
+      "block": "第 1104（実測）",
+      "finding": "★★★★★★**mathlib は冪級数環の `X`-進完備性を持っている**——`Mathlib/RingTheory/AdicCompletion/Completeness.lean:226`:`instance : IsAdicComplete (.span {X} : Ideal (PowerSeries R)) (PowerSeries R)`。☆`MvPowerSeries` 版（211 行）も同ファイルにある。",
+      "whyItMatters": "★これが第 1099-1103 の降下に要る**万有な環**を与える:☆`A₀ ≔ PowerSeries (ℤ[ζ_l])` —— `IsAdicComplete` は mathlib の instance。`A₁ ≔ PowerSeries (ℚ(ζ_l))` —— 同じ instance で、しかも `l` が可逆なので`1 − ζ^i` も可逆（積が `l`）。★すなわち **`A₁` では `hu` が成り立つ**。☆`A₀ → A₁` は係数ごとに単射（`ℤ[ζ_l] → ℚ(ζ_l)` が単射だから）。★★したがって: `A₁` で既存の `hu` つき補題を使う → 単射性で `A₀` に降ろす → `A₀ → R`（`ζ ↦ ζ`、`q ↦ q`）で特殊化する。**`hu` が消える。**",
+      "correction": "☆第 1099 では「万有な環を建てる」と書いたが、**建てる必要はなかった**——mathlib の `PowerSeries` とその完備性 instance で足りる。★第 1091 で「商体 `K` では `IsHausdorff (q) K` が破れる」と測ったが、`PowerSeries` なら `q = X` が形式変数なので破れない。**ここが違いである。**",
+      "riskDown": "★★節点 1-2 の risk が大きく下がった。☆残るのは(a) `A₀ → A₁` の単射性、(b) `A₀ → R` の特殊化（`evalAdic` との整合）、(c) 既存の `hu` つき補題を `A₁` に適用する段。★見積り 25-50 → **15-35 ブロック**。"
     }
   }
 }
