@@ -97,6 +97,40 @@ theorem vcPoint_ne_zero {F : Type} [Field F]
   refine hQ ((vcPointAddEquiv W C).injective ?_)
   rw [show (vcPointAddEquiv W C) Q = vcPoint C W Q from rfl, hc, map_zero]
 
+/-! ## ★★★★★★★★★★★★★★★★第 968 —— 曲線の等式に沿って点を運ぶ
+
+★第 967 は `hW′j` を **`C • (E ⊗ Lv)` の形**で与える。
+一方 `minDeltaExp_eq_mul_of_torsion`（第 965）が受けるのは
+**Tate モデル `(E_q) ⊗ Lv` の形**である。
+☆両者は `tateModel_baseChange`（第 944）で等しいので、点を運べばよい。
+
+★★点の輸送は `▸` になるが、`veluQuotientFull` の楕円性インスタンスまで
+運ぼうとすると `∧` の中でインスタンスが使えず詰まる。
+☆そこで**インスタンスを含まない形**——「点の座標集合が一致する」——で出す。
+呼ぶ側はそれで `rw` すればインスタンスも `j` も一緒に移る。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**曲線が等しければ、位数 `l` の点とその座標集合を運べる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 968）**——`subst` 一発である。
+☆結論が `IsElliptic` を含まないので、呼ぶ側が `rw` するだけで
+楕円性インスタンスも `j` の等式も一緒に移る。 -/
+theorem exists_point_image_eq {F : Type} [Field F] {W₁ W₂ : WeierstrassCurve F}
+    (h : W₁ = W₂) {l : ℕ} (hl : l.Prime) (x : W₂.toAffine.Point) (hx : addOrderOf x = l) :
+    ∃ P : W₁.toAffine.Point, l • P = 0 ∧ P ≠ 0 ∧
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))
+        = (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • x))) := by
+  subst h
+  exact ⟨x, nsmul_eq_zero_of_addOrderOf hx, ne_zero_of_addOrderOf_prime hl hx, rfl⟩
+
+def exists_point_image_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線が等しければ位数 l の点とその座標集合を運べる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def rhPoint_nsmul_eq_zero.src : ABC3.Meta.Source :=
