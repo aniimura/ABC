@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.TateSigmaGalAct
+import ABC3.Found.GenEll.PointTransport
 import ABC3.Meta.Claim
 
 /-!
@@ -41,16 +42,6 @@ theorem galAct_ne_zero (σK : K →+* K) (W : WeierstrassCurve K) (hW : W.map σ
     have h2 := congrArg (pointEquivOfEq hW).symm hcon
     simpa [galAct, rhPointHom] using h2
   exact (rhPoint_eq_zero_iff σK W P).1 h1
-
-/-- ★★★★**`vcPoint` は原点でない点を原点でない点に送る**——★**無条件**（第 1288）。 -/
-theorem vcPoint_ne_zero (C : VariableChange K) (W : WeierstrassCurve K)
-    {P : W.toAffine.Point} (hP : P ≠ 0) : vcPoint C W P ≠ 0 := by
-  cases P with
-  | zero => exact absurd rfl hP
-  | some x y h =>
-      intro hcon
-      rw [vcPoint_some] at hcon
-      exact absurd hcon (by simp)
 
 /-- ★★★★**原点でなければ `vcPoint` の座標は `vcX`・`vcY`**——★**無条件**（第 1288）。 -/
 theorem pointCoords_vcPoint' (C : VariableChange K) (W : WeierstrassCurve K)
@@ -92,11 +83,6 @@ theorem galAct_vcPoint (σK : K →+* K) (W : WeierstrassCurve K) (C : VariableC
 def galAct_ne_zero.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(galAct は原点でない点を原点でない点に送る。★無条件)",
-    sectionId := "genell-thm-3-8" }
-
-def vcPoint_ne_zero.src : Source :=
-  { paper := "GenEll", pdfPage := 19,
-    item := "Theorem 3.8(vcPoint は原点でない点を原点でない点に送る。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def pointCoords_vcPoint'.src : Source :=

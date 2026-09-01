@@ -3125,3 +3125,15 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 **直し方**: 在庫の補題が `open scoped Classical in` の下にあるなら、
 **こちらも `open scoped Classical` にして `[DecidableEq F]` を宣言しない**。
 どちらを使っているかは在庫の補題の直前の行を見ればわかる。
+
+## 単体ビルドが通っても `lake build ABC3` は落ちる(2026-09-02、第 1288)
+
+**失敗形**: `lake build ABC3.Found.GenEll.GalActVc` が通ったので commit したが、
+`lake build ABC3` は
+`environment already contains 'ABC3.Found.GenEll.vcPoint_ne_zero.src'` で落ちた。
+**同名の宣言が、自分のファイルが import していない別ファイルにあった**ためで、
+単体ビルドでは衝突が見えない。
+
+**直し方**: commit 前に**必ず `lake build ABC3` の tail を読む**。
+新しい名前を付ける前に `grep -rn "theorem <name>\b" --include=*.lean lean/ABC3`
+（`.src` も含めて）当てる。衝突したら在庫の方を import して使う。
