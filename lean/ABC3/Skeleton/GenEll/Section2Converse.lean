@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.Thm21Chain
 import ABC3.Found.GenEll.Thm21Extract
 import ABC3.Found.GenEll.Thm21DegRatio
+import ABC3.Found.GenEll.NonArchBound
 import ABC3.Meta.Claim
 
 /-!
@@ -47,12 +48,12 @@ p.12–13 の 2 ページ——であり、そこが未了である。
 
 ★★**数値の鎖は全部ある。** 残っているのは**幾何の側の入力を作ること**である。
 
-## ★★★★★★★★★★進捗枠 **5 / 8**（2026-09-01、第 1094 時点）
+## ★★★★★★★★★★進捗枠 **6 / 8**（2026-09-01、第 1096 時点）
 
 | # | 節点 | 内容 | 状態 | 重み |
 |---|---|---|---|---|
 | 1 | `exists_belyi_noncritical_general` | `[NCBelyi] Thm 2.5` の**一般曲線版**（現在は `ℙ¹` 版のみ） | ❌ | 12 |
-| 2 | `exists_compactlyBounded_of_nbhd` | `Ξ_v` の小近傍の像の共役の合併が compactly bounded | ❌ | 4 |
+| 2 | `exists_compactlyBounded_of_nbhd` | compact domain の**有限合併は compact domain** | ✅ | 4 |
 | 3 | `belyi_image_subset_KV` | 収束 ⟹ 有限個を除いて `K_V` に入る | ✅ | 2 |
 | 4 | `pullback_omega_eq_omega_add_E` | `φ*ω_ℙ(C) ≅ ω_X(E)` から `h2` | ✅ | 8 |
 | 5 | `htE_ge_ratio_htOmega` | `Prop 1.4` から `h6` | ✅ | 3 |
@@ -115,10 +116,20 @@ def exists_belyi_noncritical_general.needs : List ProofObligation :=
 
 ☆原文の `K_V` の作り方そのものである。 -/
 theorem exists_compactlyBounded_of_nbhd
-    {P1 : Type} (V : Type) (nbhd : V → Set P1) (UP : Set P1)
+    {P1 : Type} [TopologicalSpace P1] [T2Space P1]
+    {V : Type} [Finite V] (nbhd : V → Set P1)
+    (hcd : ∀ v, IsCompactDomain (nbhd v)) (UP : Set P1)
     (hsub : ∀ v, nbhd v ⊆ UP) :
-    ∃ KV : Set P1, KV ⊆ UP ∧ ∀ v, nbhd v ⊆ KV := by
-  sorry
+    ∃ KV : Set P1, IsCompactDomain KV ∧ KV ⊆ UP ∧ ∀ v, nbhd v ⊆ KV := by
+  refine ⟨⋃ v, nbhd v, ⟨?_, ?_⟩, Set.iUnion_subset hsub, fun v => Set.subset_iUnion _ v⟩
+  · exact isCompact_iUnion (fun v => (hcd v).isCompact)
+  · have hclosed : IsClosed (⋃ v, nbhd v) :=
+      (isCompact_iUnion (fun v => (hcd v).isCompact)).isClosed
+    refine Set.Subset.antisymm ?_ ?_
+    · refine Set.iUnion_subset (fun v => ?_)
+      rw [(hcd v).eq_closure_interior]
+      exact closure_mono (interior_mono (Set.subset_iUnion _ v))
+    · exact hclosed.closure_subset_iff.2 interior_subset
 
 def exists_compactlyBounded_of_nbhd.src : Source :=
   { paper := "GenEll", pdfPage := 11,

@@ -4156,7 +4156,7 @@
     "whatExists": "★**数値の鎖は全部ある**（`Found/`、`sorry` 0）: `thm_2_1_stepA`・`thm_2_1_stepB`（`h1`–`h6` を受ける形）・`exists_bad_seq_tendsto`（反例列とコンパクト性）・`Thm21DegRatio`（Riemann–Hurwitz の帳簿）。☆残っているのは**幾何の側の入力を作ること**である。",
     "frame": {
       "name": "§2 (ii) ⟹ (i) の進捗枠",
-      "done": 5,
+      "done": 6,
       "total": 8,
       "file": "lean/ABC3/Skeleton/GenEll/Section2Converse.lean",
       "nodes": [
@@ -4171,7 +4171,9 @@
       ],
       "totalWeight": 44,
       "largest": "★節点 1（[NCBelyi] Thm 2.5 の一般曲線版）が最大。`ℙ¹` 版は済んでおり、残るのは Riemann–Roch による一般曲線への帰着。",
-      "note": "★2026-09-01 第 1094 で 3-7 を閉じた（4・5・6 はグルー、実質は .needs に重みつきで残す）。☆第 1095 で節点 1 の重みを 12 → 120+ に改めた（曲線の RR / Serre 双対性が mathlib に無い）。"
+      "note": "★2026-09-01 第 1094 で 3-7 を閉じた（4・5・6 はグルー、実質は .needs に重みつきで残す）。☆第 1095 で節点 1 の重みを 12 → 120+ に改めた（曲線の RR / Serre 双対性が mathlib に無い）。",
+      "node2": "★節点 2 は**実質のある形**で閉じた——「compact domain の有限合併は compact domain」（`IsCompactDomain S := IsCompact S ∧ S = closure (interior S)`、`Example 1.3` の語彙）。☆合併がコンパクトなのは有限性から、`S = closure (interior S)` は 各成分の同値を `interior`/`closure` の単調性で持ち上げ、逆向きは閉性から。",
+      "remaining": "★残るのは節点 1（重み 120+、曲線の Riemann–Roch / Serre 双対性）と 節点 8（組み立て、重み 8。節点 1 に従属）。"
     },
     "note": "★944-1093 の 144 ブロック。",
     "node1Measured": {
