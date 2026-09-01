@@ -2896,3 +2896,11 @@ membership が `mem_ker_nsmulHom : x ∈ (nsmulHom A m).ker ↔ m • x = 0` で
 **使い方**: `limTors` で書いた在庫の補題が `tateModule` にそのまま当たる。
 実例: `exact exists_smul_of_proj_zero l n f h`（第 1203、変換なしで通った）。
 ★抽象側で証明した補題を探すときは `limTors` でも grep すること。
+
+## `ℤ_[l]` に値を取る `def` は `noncomputable`（第 1204）
+
+**失敗形**: `def redVec (w : Fin 2 → ℤ_[l]) : Fin 2 → ZMod l := fun i => PadicInt.toZMod (w i)`
+→ `failed to compile definition, consider marking it as 'noncomputable'
+because it depends on 'PadicInt.instCommRing'`。
+
+**直し方**: `noncomputable def`。★`ℤ_[l]` が絡む `def` は既定で付けておく。
