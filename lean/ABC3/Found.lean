@@ -1359,6 +1359,7 @@ import ABC3.Found.GaloisRep.DegInfLocal
 import ABC3.Found.GaloisRep.PointValuation
 import ABC3.Found.GaloisRep.TorsionIntegralGood
 import ABC3.Found.GaloisRep.Lemma35Unconditional
+import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.UnitAtPrime
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GaloisRep.UnramQuad
