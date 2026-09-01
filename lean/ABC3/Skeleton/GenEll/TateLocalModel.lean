@@ -879,6 +879,61 @@ def isMuAtBadPrimes_of_veluQuotient_of_large.needs : List ProofObligation :=
     .citation "[ABC3]" "isUnit_natCast_at_bad_prime(hlu の供給、第 1019)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.isUnit_natCast_at_bad_prime") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★第 1045 —— `Lemma 3.5` の不等式（到達形）
+
+★第 1044 で `IsMuAtBadPrimes` が `sorry`-free になったので、
+第 1006 の `hsplit`・`hlu` は**消える**。
+
+☆残る仮説はすべて**原文自身の仮定**か、第 903 がもともと受けていた
+アルキメデスの周期対である。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] Lemma 3.5 の不等式**
+（`IsMuAtBadPrimes` は証明済み、第 1045）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1045）**——`hd : [L:ℚ] + 1 < l` は
+`Lemma 3.7`／`Theorem 3.8` の `l ≥ 100d·(…)` から出る。
+☆したがって残るのは**アルキメデスの周期対**（`P`・`Cv`）と
+素点ごとの整性（`neronExp = 0`・`E′.IsIntegral`）だけである。 -/
+theorem lemma_3_5_velu_large (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      Module.finrank ℚ L + 1 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ∀ (P : (L →+* ℂ) → PeriodPair) (Cv : (L →+* ℂ) → VariableChange ℂ),
+      (∀ σ, latticeDisc (P σ) ≠ 0) →
+      (∀ σ, Cv σ • (E.map σ) = latticeCurve (P σ)) →
+      (∀ σ : L →+* ℂ, (E.map σ).IsElliptic) →
+      (∀ σ : L →+* ℂ, (Cv σ • (E.map σ)).IsElliptic) →
+      (∀ p : HeightOneSpectrum (𝓞 L), neronExp p E = 0) →
+      (∀ p : HeightOneSpectrum (𝓞 L), E'.IsIntegral (primeSubring p)) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl hodd hd Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint
+    hssE hssE' hcop => ?_⟩
+  exact hC L E E' l hl.pos Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE'
+    (isMuAtBadPrimes_of_veluQuotient_of_large E E' hl hodd hd Q hQ hE' hssE hssE' hcop)
+
+def lemma_3_5_velu_large.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(不等式——IsMuAtBadPrimes は証明済み、残るはアルキメデスの周期対)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_large.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_large(第 1044、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_large") 1,
+    .citation "[ABC3]" "lemma_3_5_velu_bad_delta(不等式の側、第 903、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta") 1 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
