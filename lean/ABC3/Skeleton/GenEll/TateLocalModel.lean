@@ -474,10 +474,10 @@ theorem isMuAtBadPrimes_of_veluQuotient_of_coprime {L : Type} [Field L] [NumberF
       (fun k : ℕ => pointCoords (k • Q))))
     (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E))
-    (hlu : ∀ p : HeightOneSpectrum (𝓞 L), IsUnit ((l : (p.adicCompletionIntegers L)))) :
+    (hlu : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → IsUnit ((l : (p.adicCompletionIntegers L)))) :
     IsMuAtBadPrimes E E' l := fun p hbad =>
   minDeltaExp_eq_mul_at_bad_prime_any p E E' (hssE p) (hssE' p) hbad hl hodd
-    (hcop p hbad) (hlu p) hQ hE'
+    (hcop p hbad) (hlu p hbad) hQ hE'
 
 def isMuAtBadPrimes_of_veluQuotient_of_coprime.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -487,6 +487,101 @@ def isMuAtBadPrimes_of_veluQuotient_of_coprime.src : Source :=
 def isMuAtBadPrimes_of_veluQuotient_of_coprime.needs : List ProofObligation :=
   [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_any(第 1009)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_any") 1 ]
+
+/-! ## ★★★★★★★★★★★★★★★★第 1019 —— `hlu`（`p ∤ l`）の出どころ
+
+★第 1009 に残った 2 本目の仮説は `hlu : IsUnit ((l : R_p))` である。
+☆`R_p` は局所環なので、これは **`l` が `p` の剰余標数と異なる**ことに等しい
+（`l` は素数なので `char k_p ∣ l` ⟺ `char k_p = l`）。
+
+★★**なぜ落ちるか**——悪い素点で `l` 捉れ点があると、第 946／947 により
+`μ_l ⊂ Lv` である（`hcop` が効いて `x^l = q^k` の `k` が `l` で割れる）。
+☆ところが `l` が剰余標数なら `μ_l ⊂ Lv` は分岐指数 `e ≥ l − 1` を要求する
+（`ℚ_l(ζ_l)/ℚ_l` は完全分岐で次数 `l − 1`）。
+★したがって `[L:ℚ] ≥ [Lv:ℚ_l] ≥ l − 1` となり、`l` が `[L:ℚ] + 1` より大きければ矛盾する。
+
+☆`Lemma 3.7`／`Theorem 3.8` は `l ≥ 100d·(…)`（`d = [L:ℚ]`）を仮定するので、
+**この条件は原文の仮定から出る**。 -/
+
+/-- ★★★★**局所環では `l` が単元 ⟺ `l` が極大イデアルに入らない**。 -/
+theorem isUnit_natCast_iff_notMem {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (l : ℕ) :
+    IsUnit ((l : (p.adicCompletionIntegers L)))
+      ↔ (l : (p.adicCompletionIntegers L)) ∉
+        IsLocalRing.maximalIdeal (p.adicCompletionIntegers L) :=
+  (IsLocalRing.notMem_maximalIdeal).symm
+
+/-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点で `l` は単元**——
+`l` が定義体の次数より十分大きければ。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+★★★★**2026-09-01（第 1019）の測定**——`hlu` の出どころを型で固定した。
+☆中身は「`l` 捉れ点 ⇒ `μ_l ⊂ Lv`（第 946／947）」と
+「`μ_l ⊂ Lv` かつ `l` が剰余標数 ⇒ `e ≥ l − 1`」の 2 段である。 -/
+theorem isUnit_natCast_at_bad_prime {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E : WeierstrassCurve L) [E.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hd : Module.finrank ℚ L + 1 < l)
+    (hbad : jExp p E < 0) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
+    IsUnit ((l : (p.adicCompletionIntegers L))) := by
+  sorry
+
+def isUnit_natCast_iff_notMem.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(局所環では l が単元 ⟺ l が極大イデアルに入らない。★無条件)",
+    sectionId := "genell-lemma-3-7" }
+
+def isUnit_natCast_iff_notMem.needs : List ProofObligation := []
+
+def isUnit_natCast_at_bad_prime.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(悪い素点で l は単元——l が定義体の次数より大きければ)",
+    sectionId := "genell-lemma-3-7" }
+
+def isUnit_natCast_at_bad_prime.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_mu_point_dvr(l 捉れ点は μ_l に対応する、第 946、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_mu_point_dvr") 1,
+    .implicitStep
+      ("☆`μ_l ⊂ Lv` かつ `l` が剰余標数なら分岐指数は `e ≥ l − 1`" ++
+       "（`ℚ_l(ζ_l)/ℚ_l` は完全分岐で次数 `l − 1`）。" ++
+       "★したがって `[L:ℚ] ≥ [Lv:ℚ_l] ≥ l − 1` で `hd` に矛盾する。" ++
+       "☆mathlib に `ℚ_p(ζ_p)` の分岐は無い（2026-09-01 実測）") 3 ]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] `IsMuAtBadPrimes`——
+残る仮説は原文自身の仮定だけ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1020）**——第 1009 の `hlu` を第 1019 で供給した形。
+☆`hd : [L:ℚ] + 1 < l` は `Lemma 3.7`／`Theorem 3.8` が仮定する
+`l ≥ 100d·(…)` から出るので、**原文にない仮説は無くなった**。 -/
+theorem isMuAtBadPrimes_of_veluQuotient_of_large {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hd : Module.finrank ℚ L + 1 < l)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
+    (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
+    IsMuAtBadPrimes E E' l :=
+  isMuAtBadPrimes_of_veluQuotient_of_coprime E E' hl hodd Q hQ hE' hssE hssE' hcop
+    (fun p hbad => isUnit_natCast_at_bad_prime p E hl hd hbad (hcop p hbad) Q hQ)
+
+def isMuAtBadPrimes_of_veluQuotient_of_large.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(IsMuAtBadPrimes——残る仮説は原文自身の仮定だけ)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMuAtBadPrimes_of_veluQuotient_of_large.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_coprime(第 1009)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_coprime") 1,
+    .citation "[ABC3]" "isUnit_natCast_at_bad_prime(hlu の供給、第 1019)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isUnit_natCast_at_bad_prime") 1 ]
 
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,

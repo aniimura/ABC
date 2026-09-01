@@ -3489,5 +3489,19 @@
       "☆剰余体の 2 次拡大で 2 次式が分裂 —— 残"
     ],
     "note": "★★**不分岐 2 次拡大の「環の側」は建った**——完備・局所・整域・離散付値環。☆残るのは体の側（商体）と付値の橋、それに分裂の判定である。★944-1018 の 70 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35HluMeasured20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1019-1020",
+    "supersedes": "adjoinRootDvr20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "measurement": "★★★★**`hlu` の正体**——`R_p` は局所環なので `IsUnit ((l : R_p))` は**`l` が `p` の剰余標数と異なる**ことに等しい（`l` は素数）。☆そして悪い素点で `l` 捉れ点があると第 946／947 により `μ_l ⊂ Lv` である。★`l` が剰余標数なら `μ_l ⊂ Lv` は分岐指数 `e ≥ l − 1` を要求する（`ℚ_l(ζ_l)/ℚ_l` は完全分岐で次数 `l − 1`）ので、`[L:ℚ] ≥ [Lv:ℚ_l] ≥ l − 1` となり `l > [L:ℚ] + 1` に矛盾する。☆`Lemma 3.7`／`Theorem 3.8` は `l ≥ 100d·(…)`（`d = [L:ℚ]`）を仮定するので、**この条件は原文の仮定から出る**。",
+    "closedThisStretch": [
+      "★★★★`isUnit_natCast_iff_notMem`（1019）——局所環では `l` が単元 ⟺ 極大に入らない。",
+      "☆`isUnit_natCast_at_bad_prime`（1019、節点）——`l > [L:ℚ] + 1` なら悪い素点で `l` は単元。",
+      "★★★★★★★★★★★★★★★★★★★★★★★★`isMuAtBadPrimes_of_veluQuotient_of_large`（1020）——**残る仮説が原文自身の仮定だけになった形**。"
+    ],
+    "interfaceNow": "★★`isMuAtBadPrimes_of_veluQuotient_of_large` の仮説は`hl`（`l` 素数）・`hodd`（`l ≠ 2`）・`hd`（`[L:ℚ] + 1 < l`）・`hQ`（`l` 捉れ点）・`hE′`（Vélu の商）・半安定性 2 本・`hcop`。☆すべて原文が置いている仮定である。★したがって `Lemma 3.5` は**2 つの sorry 節点だけ**に乗っている:(1) `minDeltaExp_eq_mul_at_bad_prime_any` の非分裂の枝（不分岐 2 次拡大）、(2) `isUnit_natCast_at_bad_prime`（`ℚ_l(ζ_l)` の分岐——mathlib に無い）。",
+    "note": "★944-1020 の 72 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
