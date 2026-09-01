@@ -100,6 +100,50 @@ theorem evalAdicMap_int [IsAdicComplete I R] (f : PowerSeries ℤ) (q : R) (hq :
   rw [h]
   exact evalAdic_spec f q hq n
 
+/-! ## ★★★★★★★★第 1107 —— 降下つきの特殊化
+
+☆`Lemma 3.5` の分母払いは次の形で使う:
+
+★両辺を万有な環 `A₀ = PowerSeries ℤ[ζ_l]` の元として書き、
+`A₁ = PowerSeries ℚ(ζ_l)` へ送ってそこで等しさを示す。
+☆`ℚ(ζ_l)` では `l` が可逆なので `1 − ζ^i` も可逆（積が `l`）であり、
+**既存の `hu` つきの補題がそのまま使える**。
+★`PowerSeries.map_injective`（mathlib）で `A₀` に降ろし、
+`evalAdicMap` で `R` に特殊化する。☆これで `hu` が消える。 -/
+
+variable {T : Type} [CommRing T]
+
+/-- ★★★★★★★★★★**降下つきの特殊化**（第 1107）。
+
+原文 (GenEll p.15):
+> Definition 3.3. We shall refer to the positive integer vK (qE ) ∈ Z&gt;0 as the local height of E [or EK ].
+
+☆単射な `ψ` の先で等しければ、特殊化した値も等しい。
+★これが「`ℚ(ζ_l)` で `hu` を使ってから `ℤ[ζ_l]` に降ろす」段の道具である。 -/
+theorem evalAdicMap_eq_of_map_eq [IsPrecomplete I R] (φ : S →+* R) (ψ : S →+* T)
+    (hψ : Function.Injective ψ) {g h : PowerSeries S}
+    (heq : PowerSeries.map ψ g = PowerSeries.map ψ h) (q : R) (hq : q ∈ I) :
+    evalAdicMap φ g q hq = evalAdicMap φ h q hq := by
+  rw [PowerSeries.map_injective ψ hψ heq]
+
+/-- ☆単射な係数写像は冪級数でも単射（mathlib の言い換え）。 -/
+theorem powerSeries_eq_of_map_eq (ψ : S →+* T) (hψ : Function.Injective ψ)
+    {g h : PowerSeries S} (heq : PowerSeries.map ψ g = PowerSeries.map ψ h) : g = h :=
+  PowerSeries.map_injective ψ hψ heq
+
+def evalAdicMap_eq_of_map_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(éä¸ã¤ãã®ç¹æ®åââåå°ãª ψ ã®åã§ç­ãããã°å¤ãç­ãã)",
+    sectionId := "genell-def-3-3" }
+
+def evalAdicMap_eq_of_map_eq.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "PowerSeries.map_injective(åå°ãªä¿æ°ååã¯åªç´æ°ã§ãåå°)"
+      (.inMathlib "PowerSeries.map_injective") 1,
+    .implicitStep
+      ("★★**2026-09-01（第 1107）**——これで `Lemma 3.5` の分母払いの" ++
+       "**道具立てが揃った**。☆残るのは、`sum_mu_*` の両辺を" ++
+       "万有な環の冪級数として書き下し、この道具を当てる実装である。") 15 ]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def evalAdicMap.src : ABC3.Meta.Source :=
