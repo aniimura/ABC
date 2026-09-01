@@ -2818,3 +2818,21 @@ rw [himg] at hsum
 ★`set_option … in` とまったく同じ穴である。
 
 **直し方**: `open scoped Classical in` → `/-- … -/` → `theorem …` の順にする。
+
+## 逆典の逐語引用は**記憶で書かない**
+
+**失敗形**: docstring の `原文 (GenEll p.15):` の行を記憶で書くと
+`check.mjs` が
+
+    引用照合: 逐語が GenEll 物理 p.15 に見つからない(layout で 31/35 文字まで一致)
+    次に来るはず: ")Let"
+
+で NG を出す。★`lake build` は通るので**ビルドだけでは気づかない**。
+
+**直し方**: 同じ項目を引いている**既存のファイルから丸ごと写す**。
+
+```bash
+grep -rn "^> Lemma 3.2" lean/ABC3/ --include=*.lean
+```
+
+★コミット前に必ず `node tools/check.mjs` を通すこと。

@@ -237,7 +237,7 @@ theorem stable_of_mem_mu {K L : Type} [Field K] [Field L] [Algebra K L]
 **`l ∤ v(q)` なら `Gal`-安定な直線は `μ_l` である**——★**無条件**（第 1184）。
 
 原文 (GenEll p.15):
-> Lemma 3.2. (Local Rank One Subgroups) Let
+> Lemma 3.2. (Local Rank One Subgroups of l-Torsion)
 
 ☆`lemma_3_2_i` の**対偶**である。安定な直線の生成元 `x` が `xˡ = Qᵏ` を満たすとき、
 `l ∤ v(q)` なら必ず `l ∣ k`——すなわち `x` は `Q` の冪を除いて `l` 乗根、
