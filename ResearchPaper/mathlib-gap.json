@@ -4467,5 +4467,28 @@
     "measured": "☆CharZero (PowerSeries K) は infer_instance では出ないが algebraRat.charZero _ で出る(実測)。★IsAdicComplete (span {X}) (PowerSeries R) は Mathlib.RingTheory.AdicCompletion.Completeness を import するまで見えない(第 1127 の実測)。",
     "remaining": "☆節点 4 の後半は c₆。veluU の DF 版(l⁶·veluU)と veluV2·X の段(l⁸ を掛ける)が要る。★節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)。",
     "gate": "lake build ABC3 成功(6256 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "c6DenomFree20260901": {
+    "block": 1130,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★c₆ の恒等式の分母なし版——§3 の枠の節点 4 が閉じた",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠、進捗 3/5 → 4/5)。",
+    "weights": "★c₆ の式には veluU と veluV2·x が現れる。l の重みは x が l²、y が l³、veluV2 = 3x²+2a₂x+a₄−a₁y と veluU = (−2y−a₁x−a₃)² が l⁶、veluV2·x が l⁸。☆したがって両辺に l⁸ を掛けると全部が分母なしになる。",
+    "statement": "l⁸·c₆ + 504·l²·∑ veluV2DF + 3024·∑ (l²·veluUDF + 2·veluV2DF·tateXpairDF) = l¹⁴·c₆(E_{q^l})",
+    "added": {
+      "Found/GaloisRep/C6DenomFree.lean (新規)": [
+        "veluGyDF / veluUDF(定義)",
+        "natCast_pow_mul_veluU(★無条件の代数恒等式)",
+        "map_veluGyDF / map_veluUDF(★無条件)",
+        "natCast_pow_mul_veluU_tate(hu つきの橋)",
+        "c6DFlhs(★左辺に名前を付けた)",
+        "map_c6DFlhs(★左辺は環準同型で移る——a 側の単元性は要らない)",
+        "c6_velu_tateDF_field / c6DFlhs_field / c6DFlhs_powerSeries",
+        "c6_velu_tateDF(★段 3——節点 4 の後半)"
+      ]
+    },
+    "technique": "★★式が長いので**左辺に c6DFlhs と名前を付けた**。☆これで「環準同型で移る」が map_c6DFlhs 1 本になり、段 2(整域へ降ろす)と段 3(完備環へ特殊化)がそれぞれ 5 行で書けた。★名前を付けずに rw を並べると map_add / map_mul の個数合わせで壊れる(実測)。",
+    "remaining": "☆残るのは節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)だけである。",
+    "gate": "lake build ABC3 成功(6257 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
