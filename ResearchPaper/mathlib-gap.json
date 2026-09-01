@@ -3801,5 +3801,17 @@
     "realContent": "★★したがって**本当に要るのは 1 本の不等式**である:`∑ᶠ p, neronExp p E′ · log N(p) ≥ ∑ᶠ p, neronExp p E · log N(p)`——すなわち「`E′` のモデルは `E` のモデルより極小から遠くない」。☆`hmin` はその右辺を `0` に、`hint` は左辺を `≥ 0` にしている。",
     "nextStep": "☆次の一手: `htFalt_isogeny_le_of_archDefect`（`hmin`・`hint` をこの 1 本の不等式に置き換えた形）を書き、そのうえで「モデルの取り替えで不等式を出せるか」を測る。★`htFaltOf` がモデル非依存なら、`E` を各素点で極小なモデルに取り替えてよい（大域極小モデルは類数の障害で存在しないことがあるが、`deg∞` と `ht^Falt` は不変量なので必要なのは局所的な取り替えだけかもしれない）。",
     "note": "★944-1048 の 100 ブロック。"
+  },
+  "htFaltDefectForm20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1049",
+    "supersedes": "lemma35LastTwoMeasured20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★`htFalt_veluQuotientFull_le_of_defect`（1049）——第 704 の `hmin`・`hint` を、それらが実際に出していた**1 本の不等式 `hfin`** に置き換えた形。"
+    ],
+    "hfin": "☆`hfin`: `∑ᶠ p, neronExp p E · log N(p) − ∑ᶠ p, neronExp p E′ · log N(p)` `≤ (3/2)·[L:ℚ]·log l`。★これは「`E′` のモデルは `E` のモデルより極小から（`(3/2)d log l` 以上には）遠くない」という主張である。`hmin` は左の和を `0` に、`hint` は右の和を `≥ 0` にしていた。",
+    "remaining": "☆残るのは (a) `hfin` を `Lemma 3.5` の連鎖に通す（`lemma_3_5_velu` から上へ6 段の機械的な言い換え）と、(b) `hfin` 自体を証明する（モデルの取り替え、あるいは `Δ(E′)/Δ(E)` と `Δ_min` の関係から）である。★(b) には `IsMuAtBadPrimes`（第 1044、証明済み）が効く可能性が高い——悪い素点では `Δ_min(E′) = l·Δ_min(E)` が分かっているからである。",
+    "note": "★944-1049 の 101 ブロック。"
   }
 }
