@@ -2855,3 +2855,31 @@ grep -rn "^> Lemma 3.2" lean/ABC3/ --include=*.lean
 
 **直し方**: 求める形を `have h : (l ^ 1) • P = 0 := (f 1).2` と
 **先に書いて**から `simpa using h`。指数の正規化は `simp` に任せる。
+
+## 在庫を引かずに新規ファイルを作ると名前衝突でビルドが落ちる（第 1201）
+
+**失敗形**: `Found/GaloisRep/TateProjOne.lean` に `tateProj` と
+`tateProj_galTate` を新規に書いたら、`ABC3.Found` の import で
+`environment already contains 'ABC3.Found.GaloisRep.tateProj_galTate'
+from ABC3.Found.GaloisRep.TateWiring`。
+
+**理由**: `tateProj` は `Interface/GaloisRep/Torsion.lean` に
+（層 `n` つきの一般形で）、`tateProj_galTate` は
+`Found/GaloisRep/TateWiring.lean` に**すでにあった**。
+
+**直し方**: 新しい補題を書く前に必ず
+`node tools/decl-index.mjs` → `grep .cache/decl-index.txt <名前>`。
+CLAUDE.md 在庫の規則そのものである。★同じ穴は第 1191 でも落ちた。
+
+## 同名の `.src` が 2 つあると check.mjs は無関係なファイルで NG を出す（第 1201）
+
+**失敗形**: `tateProj.src` を重複して定義したら、
+`NG lean\ABC3\Found\SemiAnbd\TemperedGroup.lean:129
+ G1 tateProj.src の中身を読めなかった` という**まったく別のファイル**の NG。
+
+**直し方**: 重複を消せば直る。★NG の行番号を信じて別ファイルを疑わないこと。
+
+## push の前に `check.mjs` の末尾を読む（第 1184・第 1201）
+
+**失敗形**: `NG 2 件` のまま commit / push した。二度目である。
+**直し方**: `node tools/check.mjs 2>&1 | tail -3` が `PASS` を出すまで commit しない。
