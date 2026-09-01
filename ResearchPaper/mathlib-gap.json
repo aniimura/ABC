@@ -5095,5 +5095,14 @@
     "what": "★tate_sigma_coord_alpha_of_algEquiv —— Galois 元は体の自己同型として来るので Units.map で単数群の準同型に直してから第 1174 を当てる。☆受けるのは τ(ζ) = ζ と τ(π) = ζπ だけ。",
     "why": "★★これが AlphaBridge の節点 2 が**外から受け取る形**である。☆τ・ζ・π は第 994 の Kummer の議論が与える(l ∤ v(q) なら σ(π) = ζπ なる σ がある)。★残るのはその σ を AdjoinRoot (Xˡ − C q) から L_v(ζ_l, q^{1/l}) の Tate 設定へ移す段だけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "alphaBaseRoot20260902": {
+    "block": 1177,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★ζ が底の体にあれば τ(ζ) = ζ は自動——節点 2 の仮説が 1 つになった",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 2)。",
+    "what": "★tate_sigma_coord_alpha_of_base_root —— Kummer 拡大 K = K₀(q^{1/l}) を取るとき ζ は底の体 K₀ = L_v(ζ_l) にあるので、τ が K₀-代数同型であることから τ(ζ) = ζ は AlgEquiv.commutes で自動。☆IsPrimitiveRoot も map_of_injective で K に持ち上がる。",
+    "why": "★★★これで AlphaBridge の節点 2 が受ける仮説は **τ(π) = ζπ ただ 1 つ**になった——それが第 994 の Kummer の σ の結論そのものである。☆残るのは σ を AdjoinRoot (Xˡ − C q) から Tate 設定の K へ移す同型を書く段と、galRep の像に載せる段だけ。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

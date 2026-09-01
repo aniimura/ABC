@@ -439,6 +439,36 @@ theorem tate_sigma_coord_alpha_of_algEquiv {R : Type} [CommRing R] {I : Ideal R}
   · apply Units.ext
     exact hτπ
 
+/-! ## ★★★★★★★★底の体に `ζ` があるとき -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`ζ` が底の体 `K₀` にあれば `τ(ζ) = ζ` は自動**——★**無条件**（第 1177）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆Kummer 拡大 `K = K₀(q^{1/l})` を取るとき、`ζ` は**底の体 `K₀` にある**
+（`K₀ = L_v(ζ_l)` と取るから）。★`τ` は `K₀`-代数同型なので `τ(ζ) = ζ` は
+`AlgEquiv.commutes` から自動で出る。
+
+★★★これで `AlphaBridge` の節点 2 が受ける仮説は
+**`τ(π) = ζπ` ただ 1 つ**になった——それが第 994 の Kummer の `σ` の結論である。 -/
+theorem tate_sigma_coord_alpha_of_base_root {R : Type} [CommRing R] {I : Ideal R}
+    {K₀ K : Type} [Field K₀] [Field K] [Algebra K₀ K] [Algebra R K]
+    (S : ABC3.Found.GaloisRep.TateSetup R I K) {l : ℕ} (hl : 0 < l)
+    {ζ₀ : K₀} (hζ₀ : IsPrimitiveRoot ζ₀ l)
+    {ζ π : Kˣ} (hζK : (ζ : K) = algebraMap K₀ K ζ₀) (hπl : π ^ l = S.Q)
+    (τ : K ≃ₐ[K₀] K) (hτπ : τ (π : K) = (ζ : K) * (π : K))
+    (a b a' b' : ℤ)
+    (h : ∃ n : ℤ, Units.map (τ : K →* K) (ζ ^ a * π ^ b) = ζ ^ a' * π ^ b' * S.Q ^ n) :
+    ((l : ℤ) ∣ (a + b - a')) ∧ ((l : ℤ) ∣ (b - b')) := by
+  have hζ : IsPrimitiveRoot (ζ : K) l := by
+    rw [hζK]
+    exact hζ₀.map_of_injective (algebraMap K₀ K).injective
+  refine tate_sigma_coord_alpha_of_algEquiv S hl hζ hπl τ ?_ hτπ a b a' b' h
+  rw [hζK]
+  exact τ.commutes ζ₀
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -450,6 +480,19 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha_of_base_root.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(ζ が底の体にあれば τ(ζ) = ζ は自動。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha_of_base_root.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1177）**——Kummer 拡大 `K = K₀(q^{1/l})` を取るとき " ++
+       "`ζ` は底の体 `K₀ = L_v(ζ_l)` にあるので、`τ(ζ) = ζ` は " ++
+       "`AlgEquiv.commutes` から自動である。" ++
+       "★★これで節点 2 が受ける仮説は **`τ(π) = ζπ` ただ 1 つ**になった" ++
+       "——それが第 994 の Kummer の `σ` の結論である。") 1 ]
 
 def tate_sigma_coord_alpha_of_algEquiv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
