@@ -181,12 +181,75 @@ theorem fact_irreducible_X_pow_sub_C_of_not_pow {K : Type*} [Field K] {l : ℕ} 
     Fact (Irreducible (X ^ l - C q)) :=
   ⟨irreducible_X_pow_sub_C_of_not_pow hl hq⟩
 
+/-! ## ★★★★★★★★★★★★★★★★Kummer の `σ` を単数の準同型として取る -/
+
+open AdjoinRoot in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**Kummer の `σ` を単数の準同型として取る**——★**無条件**（第 1211）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`l ∤ v(q)` なら `K = AdjoinRoot (Xˡ − C q)` の上に `σ(π) = ζ·π` なる
+`K₀`-代数同型がある（第 994）。本定理はそれを
+
+* `π : Kˣ`（`πˡ = q`、第 1178）
+* `σ : Kˣ →* Kˣ`（`σ ζ = ζ`・`σ π = ζ·π`）
+
+の形に**まとめる**——これが `tate_sigma_coord_alpha`（第 1174）が
+受け取る形そのものである。
+
+★★★これで `Skeleton/GenEll/AlphaBridge.lean` の
+「Kummer の `σ` を Tate 設定に載せる」段の**単数の側**が済む。
+☆残るのは `TateSetup` を `K` へ底変換する段である。 -/
+theorem exists_units_sigma_kummer {K₀ : Type} [Field K₀] {l : ℕ} (hl : Nat.Prime l)
+    (v : K₀ˣ →* Multiplicative ℤ) (q : K₀ˣ)
+    (hnd : ¬ ((l : ℤ) ∣ Multiplicative.toAdd (v q)))
+    (ζ₀ : K₀ˣ) (hζ₀ : IsPrimitiveRoot ((ζ₀ : K₀)) l) :
+    ∃ (π : (AdjoinRoot (X ^ l - C (q : K₀)))ˣ)
+      (σ : (AdjoinRoot (X ^ l - C (q : K₀)))ˣ →* (AdjoinRoot (X ^ l - C (q : K₀)))ˣ),
+      π ^ l = Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) q ∧
+      σ (Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) ζ₀)
+        = Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) ζ₀ ∧
+      σ π = Units.map (algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) : K₀ →* _) ζ₀ * π := by
+  haveI : NeZero l := ⟨hl.ne_zero⟩
+  have hζne : (primitiveRoots l K₀).Nonempty :=
+    ⟨(ζ₀ : K₀), (mem_primitiveRoots hl.pos).2 hζ₀⟩
+  have hζpow : ζ₀ ^ l = 1 := Units.ext (by simpa using hζ₀.pow_eq_one)
+  let η : rootsOfUnity l K₀ := ⟨ζ₀, (mem_rootsOfUnity l ζ₀).2 hζpow⟩
+  obtain ⟨τ, hτ⟩ := exists_sigma_smul_root_of_val hl hζne v q hnd η
+  obtain ⟨π, hπ, hπl⟩ := exists_kummer_root_unit hl.pos q.ne_zero
+  refine ⟨π, Units.map τ.toAlgHom.toRingHom.toMonoidHom, ?_, ?_, ?_⟩
+  · exact Units.ext (by simpa using hπl)
+  · exact Units.ext (by simpa using τ.commutes (ζ₀ : K₀))
+  · refine Units.ext ?_
+    show τ ((π : AdjoinRoot (X ^ l - C (q : K₀))))
+      = algebraMap K₀ (AdjoinRoot (X ^ l - C (q : K₀))) (ζ₀ : K₀)
+        * (π : AdjoinRoot (X ^ l - C (q : K₀)))
+    rw [hπ, hτ, Algebra.smul_def]
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def irreducible_X_pow_sub_C_of_not_pow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(q が l 乗でなければ AdjoinRoot (Xˡ − C q) は体。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def exists_units_sigma_kummer.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Kummer の σ を単数の準同型として取る。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_units_sigma_kummer.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_sigma_smul_root_of_val(第 994、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_sigma_smul_root_of_val") 1,
+    .citation "[ABC3]" "exists_kummer_root_unit(第 1178、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_kummer_root_unit") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1211）**——`tate_sigma_coord_alpha`（第 1174）が" ++
+       "受け取る形（`π : Kˣ`で `πˡ = q`、`σ : Kˣ →* Kˣ` で `σ ζ = ζ`・`σ π = ζ·π`）" ++
+       "に**まとめた**ものである。" ++
+       "☆残るのは `TateSetup` を `K` へ底変換する段である。") 3 ]
 
 def exists_kummer_root_unit.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
