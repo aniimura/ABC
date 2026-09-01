@@ -412,6 +412,7 @@ def lemma_3_5_velu_mu.needs : List ProofObligation :=
 ☆第 997（`jExp_eq_mul_of_j_tate_pow`）は `Lv`・`R` について**一般**なので、
 上の 3 段が済めばそのまま当たる。 -/
 
+set_option maxHeartbeats 2000000 in
 open Finset in
 /-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点での `Δ_min` の関係
 （分裂性を仮定しない形）**。
@@ -432,7 +433,31 @@ theorem minDeltaExp_eq_mul_at_bad_prime_any {L : Type} [Field L] [NumberField L]
     (hE' : E' = veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
     minDeltaExp p E' = l * minDeltaExp p E := by
-  sorry
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletion L p
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletionIntegers L p
+  obtain ⟨C, hC, hc4ne, hc4⟩ :=
+    ABC3.Found.GaloisRep.exists_minimal_c4_unit_of_jExp_neg p E hssE hjneg
+  have hp := ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion L p
+  haveI hCE : (C • E).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E.isUnit_Δ
+  haveI hmin :=
+    ABC3.Found.GaloisRep.isMinimal_baseChange_at_bad_prime p hp E C hC hc4ne hc4
+  haveI hmult :=
+    ABC3.Found.GaloisRep.hasMultiplicativeReduction_at_bad_prime p hp E C hC hc4ne hc4 hjneg
+  have hA := ABC3.Found.GaloisRep.integralModel_c4_isUnit
+    (R := p.adicCompletionIntegers L) ((C • E).baseChange (p.adicCompletion L))
+  by_cases hs : WeierstrassCurve.HasSplitMultiplicativeReduction (p.adicCompletionIntegers L)
+      ((C • E).baseChange (p.adicCompletion L))
+  · exact minDeltaExp_eq_mul_at_bad_prime_full p E E' hssE hssE' hjneg hl hodd hcop
+      C hmin hs hlu hQ hE'
+  · -- ★非分裂——不分岐 2 次拡大を通す（第 1034）
+    have hirr := ABC3.Found.GaloisRep.irreducible_map_residue_of_not_splits
+      (ABC3.Found.GaloisRep.monic_splitQuadPoly _ hA)
+      (ABC3.Found.GaloisRep.natDegree_splitQuadPoly _ hA)
+      (fun hsp => hs (ABC3.Found.GaloisRep.hasSplit_of_splits_splitQuadPoly _ hA hsp))
+    exact minDeltaExp_eq_mul_at_bad_prime_nonsplit p hp E E' C hC hc4ne hc4 hA hirr
+      hssE hssE' hjneg hl hodd hcop hlu hQ hE'
 
 def minDeltaExp_eq_mul_at_bad_prime_any.src : Source :=
   { paper := "GenEll", pdfPage := 17,

@@ -2627,3 +2627,22 @@ theorem natDegree_p : p.natDegree = 2 := by rw [p]; compute_degree!
 ```
 
 `!` 付きは残った副目標を `norm_num`/`assumption` で閉じにいく。
+
+## `Ideal.Quotient.mk (maximalIdeal R)` は `Field` 探索が爆発する(第 1036)
+
+**失敗形**: `Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R)))` を
+体上の補題(`[Field k]` を要求)に当てると
+`(deterministic) timeout at whnf` になる。
+`Field (R ⧸ 𝔪)` を見つけるのに `ResidueField R` まで展開する必要があるため。
+
+**直し方**: `show` で **`IsLocalRing.residue R`** の形に言い直してから当てる。
+`residue R : R →+* IsLocalRing.ResidueField R` なので `Field` が即座に見つかる。
+
+```lean
+  show Irreducible (f.map (IsLocalRing.residue R))
+  refine some_lemma (hf.map (IsLocalRing.residue R)) ?_ hns   -- 6.9 秒 → 0.04 秒
+```
+
+**併せて**: `refine g h ?_ ?_` で第 1 引数の暗黙変数がゴールから決まらないときは
+`(q := ...)` で明示する。それでも遅いときは、**大きな項を含む補題を
+小さい文脈(`Found/` の抽象的な補題)に切り出す**と桁で速くなる。

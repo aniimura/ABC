@@ -990,6 +990,77 @@ theorem hasSplitMultiplicativeReduction_ext {L : Type} [Field L] [NumberField L]
 
 end SplitsGlue
 
+/-! ## ★★★★★★★★★★★★第 1035 —— 分裂しない monic 2 次式は既約
+
+★場合分けの「非分裂」側で要るのは
+「2 次式が分裂しない ⟹ その monic 因子は既約」である。
+☆体上の monic 2 次式が可約なら 1 次×1 次で、どちらも分裂するから全体も分裂する。 -/
+
+open Polynomial in
+/-- ★★★★★★★★**分裂しない monic 2 次式は既約**（第 1035）。 -/
+theorem irreducible_of_not_splits_natDegree_two {k : Type} [Field k] {q : Polynomial k}
+    (hm : q.Monic) (hdeg : q.natDegree = 2) (hns : ¬ q.Splits) : Irreducible q := by
+  have hq0 : q ≠ 0 := hm.ne_zero
+  refine ⟨Polynomial.not_isUnit_of_natDegree_pos q (by omega), ?_⟩
+  intro a b hab
+  by_contra hcon
+  rw [not_or] at hcon
+  obtain ⟨ha, hb⟩ := hcon
+  have ha0 : a ≠ 0 := by rintro rfl; simp at hab; exact hq0 hab
+  have hb0 : b ≠ 0 := by rintro rfl; simp at hab; exact hq0 hab
+  have hda : 0 < a.natDegree := by
+    rcases Nat.eq_zero_or_pos a.natDegree with h | h
+    · exact absurd (Polynomial.isUnit_iff_degree_eq_zero.2
+        (by rw [Polynomial.degree_eq_natDegree ha0, h]; rfl)) ha
+    · exact h
+  have hdb : 0 < b.natDegree := by
+    rcases Nat.eq_zero_or_pos b.natDegree with h | h
+    · exact absurd (Polynomial.isUnit_iff_degree_eq_zero.2
+        (by rw [Polynomial.degree_eq_natDegree hb0, h]; rfl)) hb
+    · exact h
+  have hsum : a.natDegree + b.natDegree = 2 := by
+    rw [← hdeg, hab, Polynomial.natDegree_mul ha0 hb0]
+  exact hns (by
+    rw [hab, splits_mul ha0 hb0]
+    exact ⟨Splits.of_natDegree_le_one (by omega), Splits.of_natDegree_le_one (by omega)⟩)
+
+open Polynomial in
+/-- ★★★★**単元倍しても分裂性は変わらない**（片側）。 -/
+theorem splits_unit_mul {k : Type} [Field k] {u : k} (hu : u ≠ 0) {g : Polynomial k}
+    (hg : g ≠ 0) (h : g.Splits) : (C u * g).Splits := by
+  refine (splits_mul (by simpa using hu) hg).2 ⟨Splits.of_natDegree_le_one (by simp), h⟩
+
+open Polynomial WeierstrassCurve in
+/-- ★★★★★★★★★★★★**monic 化した 2 次式が分裂すれば分裂乗法還元**（第 1036）。
+
+☆場合分けの対偶を取るための形——`¬ HasSplit` から `¬ Splits (f̄)` が直ちに出る。 -/
+theorem hasSplit_of_splits_splitQuadPoly {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K)
+    [WeierstrassCurve.HasMultiplicativeReduction R W]
+    (hA : IsUnit (WeierstrassCurve.integralModel R W).c₄)
+    (hsp : ((splitQuadPoly (WeierstrassCurve.integralModel R W) hA).map
+      (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))).Splits) :
+    WeierstrassCurve.HasSplitMultiplicativeReduction R W := by
+  refine ⟨?_⟩
+  rw [quad_eq_c4_mul_splitQuadPoly _ hA, Polynomial.map_mul, Polynomial.map_C]
+  exact splits_unit_mul (hA.map (algebraMap R (IsLocalRing.ResidueField R))).ne_zero
+    (Polynomial.Monic.ne_zero (Polynomial.Monic.map _ (monic_splitQuadPoly _ hA))) hsp
+
+open Polynomial in
+/-- ★★★★★★★★**剰余体で分裂しない monic 2 次式は既約**（第 1036）。
+
+☆配管の注意: `Ideal.Quotient.mk (maximalIdeal R)` のままだと
+`Field (R ⧸ 𝔪)` のインスタンス探索が爆発する。
+★`show` で `IsLocalRing.residue R` の形に言い直してから当てる（0.04 秒になる）。 -/
+theorem irreducible_map_residue_of_not_splits {R : Type} [CommRing R] [IsLocalRing R]
+    {f : Polynomial R} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hns : ¬ (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))).Splits) :
+    Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))) := by
+  show Irreducible (f.map (IsLocalRing.residue R))
+  refine irreducible_of_not_splits_natDegree_two (hf.map (IsLocalRing.residue R)) ?_ hns
+  rw [hf.natDegree_map, hdeg]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
