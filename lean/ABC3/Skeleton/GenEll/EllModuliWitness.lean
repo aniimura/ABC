@@ -91,7 +91,18 @@ def lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) : Set ℂ :=
         * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ eps) ≤ (l : ℝ))
       ∨ E.cls ∈ KV)}
 
-/-- ★★★`lcyclicExc` が `Galois`-finite であること——`Lemma 3.5` の (†) を受ける。 -/
+/-- ★★★`lcyclicExc` が `Galois`-finite であること——`Lemma 3.5` の (†) を受ける。
+
+★★☆**測定（2026-09-02、第 1263）**——上の `lcyclicExcJ` の条件 (a) は
+「`100·d·(ht^Falt + C·d^ε) ≤ l`」だけで **`HasMultRed` を含まない**。
+☆しかし `htFalt_le_of_condA` は乗法還元の素点を取り出して使う。
+★至る所で良い還元の半安定曲線は `deg∞ = 0` なので (†) からは
+`ht^Falt` の上界が出ず、`l` を大きく取れば条件 (a) は必ず満たされる
+——したがって**現状の定義のままでは Galois-有限とは言えない**。
+
+★★★直し方は条件 (a) に `HasMultRed` を足すことであり、
+呼ぶ側（`Section3.lean` の `lemma_3_7`）は `condA` を持っていて
+原文の `condA` には `HasMultRed` が入っているので**波及はない**。 -/
 theorem galoisFiniteJ_lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) :
     GaloisFiniteJ (lcyclicExcJ C eps KV) := by
   sorry
