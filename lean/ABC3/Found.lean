@@ -382,6 +382,7 @@ import ABC3.Found.GenEll.CyclotomicUnits
 import ABC3.Found.GenEll.CyclotomicDenomFree
 import ABC3.Found.GaloisRep.MuSumDenomFree
 import ABC3.Found.GaloisRep.MuHeadDenomFree
+import ABC3.Found.GaloisRep.AdicEvalGen
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois
