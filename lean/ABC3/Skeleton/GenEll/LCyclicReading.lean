@@ -376,7 +376,23 @@ import ABC3.Meta.Claim
 ★原文の道では `L'' = L(H)` の次数が `l−1` を割るので自動である。
 ☆`M` は `{k • Q}` の座標で生成するので `Gal`-安定（第 1205 の直線の安定性）であり、
 標数 0 だから `M/L` は Galois、よって `e ∣ [M:L]` である。
-★そこから `[M:L] ∣ l−1` を出せば `l ∤ e` が従う——**これが次の義務**である。
+##### ★★★★★★★★★★★★第 1209——**Galois は要らなかった**
+
+`not_dvd_ramificationIdx_of_finrank_lt`・`not_dvd_jExp_baseChange_of_finrank_lt`
+（`Found/GaloisRep/JExpCoprime.lean`）。
+
+☆`e ≥ 1`（`ramificationIdx_ne_zero_of_liesOver`）かつ
+`e ≤ [L':L]`（`ramificationIdx_le_finrank`、mathlib にあった）なので、
+**`[L':L] < l` だけで `l ∤ e` が出る**。
+
+★★★したがって `e ∣ [M:L]`（Galois 性）は**要らなかった**
+——不等式 `e ≤ [M:L] < l` で足りる。
+
+##### ★★★★残る義務は **`[M:L] < l`** の 1 つ
+
+☆`M = L(H)` の Galois 群は直線への作用で `𝔽_l^×` に埋まる（第 1205 が
+`σ Q = k • Q` を与える）ので `[M:L] ∣ l−1 < l` である。
+★この埋め込みを取れば、`Lemma 3.5` を安定直線の側で述べ直す道は閉じる。
 
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
