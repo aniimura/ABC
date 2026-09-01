@@ -1386,6 +1386,7 @@ import ABC3.Found.GaloisRep.JExpCoprime
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
+import ABC3.Found.GenEll.Lemma37Hdag
 import ABC3.Found.GenEll.PadicRedVec
 import ABC3.Found.GenEll.LCyclicPoint
 import ABC3.Found.GenEll.PointDescent
