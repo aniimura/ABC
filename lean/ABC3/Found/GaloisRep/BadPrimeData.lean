@@ -305,6 +305,77 @@ def not_dvd_vAdd_tateParam_of_not_dvd_jExp.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(l は局所高さと互いに素——hcop の形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 995 —— `E′` の側は `j` だけでよい
+
+★★★★**測定**: 第 892／972 は `E′` についても
+分裂乗法還元・極小モデル・`C′`・`hc4′` を要求していた。
+☆だが結論 `minDeltaExp p E′ = l · minDeltaExp p E` は、半安定性のもとでは
+
+    `minDeltaExp = max(0, −jExp)`（`minDeltaExp_eq_maxJ_of_semistable`、在庫）
+
+なので **`jExp p E′ = l · jExp p E` さえ出れば済む**。
+
+★そして `jExp` は第 932（`jExp_eq_neg_vAdd_of_j_tateCurveAt`）により
+**`j` の一致だけ**から出る——`E′` の側に分裂性も極小モデルも要らない。
+☆`q^l` の付値は `l · v(q)`（`vAdd_pow`）だから、そのまま `l` 倍になる。 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★**`E′` の `j` が `E_{q^l}` の `j` なら
+`jExp p E′ = l · jExp p E`**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 995）**——`E′` の側に**分裂性も極小モデルも要らない**。
+☆第 932 を `E` と `E′` の両方に当て、`vAdd (q^l) = l · vAdd q` で割るだけである。 -/
+theorem jExp_eq_mul_of_tateParam_pow {Lv : Type} [Field Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E'.baseChange Lv).IsElliptic]
+    {l : ℕ} (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R)
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R)
+    [((tateCurveAt q hq).map (algebraMap R Lv)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R Lv)).IsElliptic]
+    (hc4 : algebraMap R Lv (tateCurveAt q hq).c₄ ≠ 0)
+    (hev : algebraMap R Lv (evalAdic tateJinvSeries q hq) ≠ 0)
+    (hc4' : algebraMap R Lv (tateCurveAt (q ^ l) hql).c₄ ≠ 0)
+    (hev' : algebraMap R Lv (evalAdic tateJinvSeries (q ^ l) hql) ≠ 0)
+    (hqne : algebraMap R Lv q ≠ 0) (hqlne : algebraMap R Lv (q ^ l) ≠ 0)
+    (hjE : E.j ≠ 0) (hjE' : E'.j ≠ 0)
+    (heq : (E.baseChange Lv).j = ((tateCurveAt q hq).map (algebraMap R Lv)).j)
+    (heq' : (E'.baseChange Lv).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R Lv)).j) :
+    jExp p E' = (l : ℤ) * jExp p E := by
+  rw [jExp_eq_neg_vAdd_of_j_tateCurveAt p hp E q hq hc4 hev hqne hjE heq,
+    jExp_eq_neg_vAdd_of_j_tateCurveAt p hp E' (q ^ l) hql hc4' hev' hqlne hjE' heq']
+  have hpow : (Units.mk0 (algebraMap R Lv (q ^ l)) hqlne)
+      = (Units.mk0 (algebraMap R Lv q) hqne) ^ l := by
+    ext
+    simp only [Units.val_mk0, Units.val_pow_eq_pow_val, map_pow]
+  rw [hpow, vAdd_pow]
+  ring
+
+/-- ★★★★★★★★★★★★**`jExp` が `l` 倍なら `Δ_min` も `l` 倍**（半安定・悪い素点で）。
+
+☆`minDeltaExp = max(0, −jExp)`（在庫の `minDeltaExp_eq_maxJ_of_semistable`）だから、
+`jExp p E < 0` なら両辺とも `−jExp` の側が効く。 -/
+theorem minDeltaExp_eq_mul_of_jExp_mul (p : HeightOneSpectrum (𝓞 L))
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hss : SemistableAt p E) (hss' : SemistableAt p E')
+    {l : ℕ} (hj : jExp p E < 0) (hmul : jExp p E' = (l : ℤ) * jExp p E) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  rw [minDeltaExp_eq_maxJ_of_semistable p E hss,
+    minDeltaExp_eq_maxJ_of_semistable p E' hss', hmul]
+  have hl : (0 : ℤ) ≤ (l : ℤ) := Int.natCast_nonneg l
+  rcases eq_or_lt_of_le hl with h0 | hpos
+  · rw [← h0]; simp
+  · rw [max_eq_right (by nlinarith), max_eq_right (by omega)]
+    ring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
