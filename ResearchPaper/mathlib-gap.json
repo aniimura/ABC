@@ -4931,5 +4931,16 @@
     ],
     "balance": "☆Theorem 3.8 の残高 = I(5) ＋ II(22) = **27**。★Corollary 4.3・4.4 は本定理の上にしか立たない。Theorem 2.1(§2)は曲線の Riemann–Roch が mathlib に無いので別筋である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "zetaPiIndep20260901": {
+    "block": 1161,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★ζ と π は Lˣ/⟨Q⟩ の中で独立——AlphaBridge の節点 1 の核",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 1)。",
+    "what": "★Found/GenEll/Thm38ZetaPi.lean の zeta_pi_indep —— ζᵃ·πᵇ ∈ ⟨Q⟩ なら l ∣ a かつ l ∣ b(★無条件)。☆機構: ζᵃπᵇ = Qⁿ を l 乗すると Qᵇ = Q^{ln}、Q は無限位数なので b = ln。すると πᵇ = (πˡ)ⁿ = Qⁿ なので ζᵃ = 1、ζ の位数は l なので l ∣ a。★orderOf_eq_of_primitive(原始 l 乗根の位数はちょうど l)も一緒に取った。",
+    "why": "★★これが E[l] の基底を ([ζ], [π]) に取れることの中身であり、sigma_acts_as_alpha(第 993)の指数の動きを行列 α = (1 1 / 0 1) として読むための土台である。☆具体的な行列を出す道はこれ 1 本しかない。",
+    "frame": "☆AlphaBridge の進捗枠 0.6/3、重み 22 → 17。★Theorem 3.8 の残高 = I(5) ＋ II(17) = 22。",
+    "pitfall": "☆import を絞ったファイルでは `omega`・`ring` が「unknown tactic」になる。★項で書く(sub_eq_zero.mp・mul_comm)か、Mathlib.Tactic を import する。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
