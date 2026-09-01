@@ -4523,5 +4523,26 @@
     },
     "remaining": "☆B・C に残るのは「μ_l の点の座標を K の中で tateXpairDF / l² と同定する」段である。★hvw の口を「R の v・w で v = ∑veluV2」から「K の v・w ＋ c₄・c₆ の関係」に付け替えれば hlu が落ちる(10-20 ブロック)。",
     "gate": "lake build ABC3 成功(6258 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "tateKDenomFree20260901": {
+    "block": 1133,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★K 水準の座標と分母なし版を繋ぐ橋——節点 5 の消費者 B が閉じた",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "measured": "★★**tateXK は最初から分母を払った形で定義されていた**(実測): tateXK a w q hq = φ(tateXpairE a w q hq) · φ(1 − a)⁻²、tateXpairE a w q hq = a + (1 − a)²·(尾)。☆したがって R の単元性は要らず、要るのは φ(1 − a) ≠ 0 だけである。hu を要求していたのは pointCoords_tatePtPair を経由する tateXK_eq(φ(tateXpair) と同定する形)の側であった。",
+    "what": [
+      "★tateXpairDF(第 1118)は同じ尾を l² 倍で持つので、(1 − a)·S(a) = −l(one_sub_mul_muS、IsUnit 不要)から (1 − a)²·tateXpairDF = l²·tateXpairE が R の中で出る。",
+      "★★φ(1 − a) で割れば l²·tateXK = φ(tateXpairDF) が K の中で成り立つ——IsUnit 抜き。Y 側は (1 − a)³ と l³ で同じ形。"
+    ],
+    "added": {
+      "Found/GaloisRep/TateKDenomFree.lean (新規)": [
+        "one_sub_sq_mul_tateXpairDF((1−a)²·tateXpairDF = l²·tateXpairE。★無条件)",
+        "one_sub_cube_mul_tateYpairDF((1−a)³·tateYpairDF = l³·tateYpairE。★無条件)",
+        "natCast_pow_mul_tateXK(★l²·tateXK = φ(tateXpairDF)。IsUnit 不要)",
+        "natCast_pow_mul_tateYK(★l³·tateYK = φ(tateYpairDF)。IsUnit 不要)"
+      ]
+    },
+    "remaining": "☆残るのは消費者 C——isElliptic_veluQuotient_tate_mu に B の橋を当て、hvw の口を「R の v・w」から「K の v・w ＋ c₄・c₆ の関係」に付け替える配管である。",
+    "gate": "lake build ABC3 成功(6259 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }

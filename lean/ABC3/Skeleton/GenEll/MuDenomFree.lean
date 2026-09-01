@@ -89,15 +89,26 @@ import ABC3.Meta.Claim
 | # | 消費者 | 何のために | 状態 |
 |---|---|---|---|
 | A | `j_velu_tate_mu_map` | `j(veluCurve) = j(E_{q^l})` | ★第 1132 の `j_eq_of_c4_c6` が代わりになる |
-| B | `veluQuotientFull_tate_mu` | 商を `veluCurve W v w` の形にする | ☆残り（`v`・`w` を `K` に取る形へ） |
-| C | `isElliptic_veluQuotient_tate_mu` | 商の楕円性 | ☆残り（B と同じ口） |
+| B | `pointCoords_tatePtPair`（`veluQuotientFull_tate_mu` 経由） | `μ_l` の点の座標を書く | ★第 1133 の `natCast_pow_mul_tateXK` が代わりになる |
+| C | `isElliptic_veluQuotient_tate_mu` | 商の楕円性 | ☆残り（B の橋を当てる配管） |
 
 ★**A は閉じた**——`j = Δ⁻¹·c₄³` なので `c₄ ↦ l⁴c₄`・`Δ ↦ l¹²Δ` では `l¹²` が約分される
 （`j_of_c4_Delta`・`j_eq_of_c4_c6`、第 1132）。
 
-☆B・C に残るのは「`μ_l` の点の座標を `K` の中で `tateXpairDF / l²` と同定する」段である。
-★`hvw` の口を「`R` の `v`・`w` で `v = ∑veluV2`」から
-「`K` の `v`・`w` ＋ `c₄`・`c₆` の関係」に付け替えれば `hlu` が落ちる（10-20 ブロック）。
+★**B の核も閉じた**（第 1133）——`K` 水準の座標 `tateXK` は最初から
+
+    `tateXK a w q hq = φ(tateXpairE a w q hq) · φ(1 − a)⁻²`
+
+と**分母を払った形で定義されており、`R` の単元性を要求していない**（要るのは `φ(1−a) ≠ 0`）。
+☆`(1 − a)·S(a) = −l` から `(1 − a)²·tateXpairDF = l²·tateXpairE` が `R` の中で出るので、
+
+    `l²·tateXK = φ(tateXpairDF)`,   `l³·tateYK = φ(tateYpairDF)`
+
+が `IsUnit` 抜きで成り立つ。
+
+☆残るのは C——`isElliptic_veluQuotient_tate_mu` に B の橋を当て、
+`hvw` の口を「`R` の `v`・`w`」から「`K` の `v`・`w` ＋ `c₄`・`c₆` の関係」に
+付け替える配管である。
 
 ### ★★★降下の道（第 1128 で確定した最終形）
 
