@@ -1,0 +1,104 @@
+/-
+Copyright (c) 2026 ABC3 Project. All rights reserved.
+-/
+import ABC3.Found.GenEll.Thm38KummerExists
+import ABC3.Found.GenEll.Thm38Alpha
+import ABC3.Found.GaloisRep.TateGaloisStab
+import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Meta.Claim
+
+/-!
+# 第 1160 ブロック —— **`α` が像に入る段の橋**（`Skeleton`）
+
+原典: S. Mochizuki, *Arithmetic Elliptic Curves in General Position* [GenEll]、物理 p.19–p.20。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+## ★★★★★★★★★★★★★★★★これは何か
+
+`Theorem 3.8` を `Found` で閉じるのに要るものは**ちょうど 2 つ**である。
+
+| # | 中身 | 状態 |
+|---|---|---|
+| I | `l`-巡回の読みの橋（`HasLCyclicVelu` ⟷ `HasLCyclicJ`） | ☆`Skeleton/GenEll/LCyclicReading.lean`（進捗枠 **2 / 3**、残り重み 5） |
+| II | **`α` が mod `l` 像に入ること** | ☆**本ファイル**（進捗枠 **0 / 3**） |
+
+★位相の側（像が閉部分群）は第 772、群論の側（`α` と安定直線から `SL₂`）は
+`§9-992` と `Lemma 3.1, (iv)` で済んでいる（`imageContainsSL2J_of_alpha'`）。
+
+## ★★★★★★★★在庫（すでに `Found` にあるもの）
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `exists_sigma_smul_root_of_val` | `l ∤ v(q)` なら `σ(π) = η·π` なる `σ` が **`AdjoinRoot (Xˡ − C q)` の上に**ある | 994 |
+| `not_lth_power_of_val` | `l ∤ v(q)` なら `q` は `l` 乗でない | 994 |
+| `not_lth_power_of_not_dvd_val` | `l ∤ v_K(q)` なら `q` は `K(ζ_l)` でも `l` 乗でない（分岐指数は `l` と素） | 994 |
+| `sigma_acts_as_alpha` | `σ(ζ)=ζ`・`σ(π)=ζπ` なら `σ(ζᵃπᵇ) = ζ^{a+b}πᵇ` | 993 |
+| `upperM_one_mulVec` | `α = (1 1 / 0 1)` は `(a,b) ↦ (a+b, b)` | 993 |
+| `tatePhi_pointMap` | Tate 一意化は `Point.map` と可換（同変性の群の形） | — |
+| `tate_stab_of_pointStab` | 点の側の安定性を単数の側へ移す段 | — |
+
+☆すなわち**両端は揃っている**——`Lˣ/qℤ` の側の `σ` と、行列 `α` の作用と、
+Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 3 本**である。
+
+## ★★★★★★★★★★★★節点（進捗枠 **0 / 3**）
+
+| # | 節点 | 内容 | 重み |
+|---|---|---|---|
+| 1 | `tateTorsion_basis_zeta_pi` | ☆Tate 一意化の下で `E[l] ⊆ Lˣ/qℤ` は `ζ` と `π`（`πˡ = q`）で生成される。★`Φ` が同型なので、`E[l] = Φ(μ_l · π^ℤ / qℤ)` を書き下す段 | 8 |
+| 2 | `alpha_mem_localImage` | ☆第 994 の `σ` を `L_v` の Tate 設定へ移し、第 993 の行列表示を当てて **局所の mod `l` 像が `α` を含む**ことを出す | 8 |
+| 3 | `alpha_mem_globalImage` | ☆分解群 `D_v ⊆ Gal(L̄/L)` を経由して局所の `σ` を大域の元に持ち上げる。★`galRep` の像は制限で局所像を含む | 6 |
+
+☆総重み 22。★これが閉じれば `imageContainsSL2J_of_alpha'` の `halpha` が埋まる。
+
+### ★★★★節点 3 の道（測定）
+
+`Gal(L̄_v/L_v) → Gal(L̄/L)` は**単射ではない**が、`L̄ ↪ L̄_v` を取れば
+制限写像 `Gal(L̄_v/L_v) → Gal(L̄/L)` が定義され、その像が分解群である。
+★`galRep` は `Gal(L̄/L)` の表現なので、局所の `σ` の像は大域の像に含まれる。
+☆mathlib の `AlgHom.restrictNormal` / `IsAlgClosed.lift` が素材である。
+
+### ☆節点 1 が本体である理由
+
+`E[l]` の `ℤ/l`-基底を `(ζ, π)` に取ることが、`α = (1 1 / 0 1)` という**具体的な行列**を
+出す唯一の道である。★`Lˣ/qℤ` の `l`-捩れは `μ_l · π^ℤ / qℤ` であり、
+`πˡ = q` なので `π` の類は位数 `l`、`ζ` の類も位数 `l`、両者は独立である。
+
+## ★★★★★★何が `Theorem 3.8` に残るか（第 1160 の総括）
+
+    I（`l`-巡回の読み、残り 5） ＋ II（本ファイル、22） ＝ **27**
+
+☆`Theorem 3.8` 以外（`Corollary 4.3`・`4.4`）は本定理の上にしか立たない。
+★`Theorem 2.1`（§2）は曲線の Riemann–Roch が mathlib に無いので別筋である。
+-/
+
+namespace ABC3.Skeleton.GenEll
+
+open ABC3.Meta
+
+/-! ## ★出典の紐付け(`.src`) -/
+
+def alphaBridgeFrame.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(α が mod l 像に入る段の橋——3 節点の枠)",
+    sectionId := "genell-thm-3-8" }
+
+def alphaBridgeFrame.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_sigma_smul_root_of_val(σ の存在、第 994、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_sigma_smul_root_of_val") 1,
+    .citation "[ABC3]" "sigma_acts_as_alpha(行列表示、第 993、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.sigma_acts_as_alpha") 1,
+    .citation "[ABC3]" "imageContainsSL2J_of_alpha'(残る仮説は α だけ、第 772、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.imageContainsSL2J_of_alpha'") 1,
+    .implicitStep
+      ("★★★★**2026-09-01（第 1160）の測定**——`Theorem 3.8` を `Found` で閉じるのに" ++
+       "要るのはちょうど 2 つ: (I) `l`-巡回の読みの橋（`LCyclicReading`、残り重み 5）と " ++
+       "(II) `α` が mod `l` 像に入ること（本ファイル、重み 22）。" ++
+       "☆両端——`Lˣ/qℤ` の側の `σ`（第 994）と行列 `α` の作用（第 993）と " ++
+       "Tate 一意化の同変性（`tatePhi_pointMap`）——はすべて揃っている。" ++
+       "★足りないのは (1) `E[l]` の基底を `(ζ, π)` に取る段、" ++
+       "(2) 局所の mod `l` 像が `α` を含むこと、" ++
+       "(3) 分解群経由で大域の像へ移す段の 3 本である。") 22 ]
+
+end ABC3.Skeleton.GenEll

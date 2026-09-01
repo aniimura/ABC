@@ -4916,5 +4916,20 @@
     "route": "★★安定直線でも同じことが成り立つ——H の点は L̄ にあり、Lv の代数閉包へ埋めれば同じ μ_l になる。☆したがって 2d の中身は**埋め込み L̄ ↪ L̄_v の配管**であり、数学的な新規は無い。★重みは配管の分だけである。",
     "frame": "☆進捗枠 2/3、総重み 5(2d の配管 ＋ 節点 3 の言い直し)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "alphaBridgeFrame20260901": {
+    "block": 1160,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★α が像に入る段の橋——Theorem 3.8 の残高を 2 つに確定",
+    "goal": "Theorem 3.8 を Found/ で閉じる(§3 の残り 1 件)。",
+    "measured": "★★★★**Theorem 3.8 を Found で閉じるのに要るのはちょうど 2 つ**である: (I) l-巡回の読みの橋(Skeleton/GenEll/LCyclicReading.lean、進捗枠 2/3、残り重み 5)、(II) α が mod l 像に入ること(Skeleton/GenEll/AlphaBridge.lean、進捗枠 0/3、重み 22)。☆位相の側(像が閉部分群、第 772)と群論の側(α と安定直線から SL₂、§9-992 と Lemma 3.1, (iv))はすでに済んでいる。",
+    "inventory": "★II の**両端は揃っている**——Lˣ/qℤ の側の σ(exists_sigma_smul_root_of_val、第 994)、行列 α の作用(sigma_acts_as_alpha・upperM_one_mulVec、第 993)、Tate 一意化の同変性(tatePhi_pointMap・tate_stab_of_pointStab)。☆足りないのは繋ぐ 3 本である。",
+    "nodes": [
+      "節点 1 tateTorsion_basis_zeta_pi(重み 8): Tate 一意化の下で E[l] ⊆ Lˣ/qℤ は ζ と π(π^l = q)で生成される。★これが α = (1 1 / 0 1) という具体的な行列を出す唯一の道である。",
+      "節点 2 alpha_mem_localImage(重み 8): 第 994 の σ を L_v の Tate 設定へ移し、第 993 の行列表示を当てて局所の mod l 像が α を含むことを出す。",
+      "節点 3 alpha_mem_globalImage(重み 6): 分解群 D_v ⊆ Gal(L̄/L) を経由して局所の σ を大域の元に持ち上げる。☆mathlib の AlgHom.restrictNormal / IsAlgClosed.lift が素材。"
+    ],
+    "balance": "☆Theorem 3.8 の残高 = I(5) ＋ II(22) = **27**。★Corollary 4.3・4.4 は本定理の上にしか立たない。Theorem 2.1(§2)は曲線の Riemann–Roch が mathlib に無いので別筋である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
