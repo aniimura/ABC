@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.GalRepBasis
+import ABC3.Found.GenEll.Sl2Padic
 import ABC3.Meta.Claim
 
 /-!
@@ -23,7 +24,7 @@ import ABC3.Meta.Claim
 
 namespace ABC3.Found.GaloisRep
 
-open ABC3.Interface.GaloisRep WeierstrassCurve ABC3.Meta
+open ABC3.Interface.GaloisRep ABC3.Found.GenEll WeierstrassCurve ABC3.Meta
 
 variable {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L] [Algebra K L]
 
@@ -67,7 +68,44 @@ theorem basisChange_realize (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
   have h := basisChange_apply W l e₀ (e₀.trans (mulVecAddEquiv l B)) (e₀.symm x)
   simpa [mulVecAddEquiv] using h.symm
 
+/-! ## ★★★★★★★★★★★★★★★★基底を取り替えて共役にする -/
+
+/-- ★★★★★★★★★★★★★★★★
+**基底を取り替えれば `galRep` の像は任意の共役に取れる**——★**無条件**（第 1232）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆第 1231（基底の取り替えで任意の `C` が実現できる）と
+`galRep_basisChange`（在庫）を繋いだもの。
+
+★★★これで「`σ` の `mod l` の行列が `α` に共役」（第 1229）から
+「ある基底で `α` そのもの」が出る——共役行列の持ち上げは第 1230。 -/
+theorem exists_basis_glRed_conj (W : WeierstrassCurve K) (l : ℕ) [Fact l.Prime]
+    (e : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l])) (σ : L ≃ₐ[K] L)
+    (C : GL (Fin 2) ℤ_[l]) :
+    ∃ e₀ : tateModule (W.baseChange L) l ≃+ (Fin 2 → ℤ_[l]),
+      glRedPadic l (galRep W l e₀ σ)
+        = glRedPadic l C * glRedPadic l (galRep W l e σ) * (glRedPadic l C)⁻¹ := by
+  refine ⟨e.trans (mulVecAddEquiv l C), ?_⟩
+  have hb : basisChangeGL W l e (e.trans (mulVecAddEquiv l C)) = C :=
+    Units.ext (basisChange_realize W l e C)
+  rw [galRep_basisChange W l e (e.trans (mulVecAddEquiv l C)) σ, hb, map_mul, map_mul, map_inv]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_basis_glRed_conj.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(基底を取り替えれば galRep の像は任意の共役に取れる。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_basis_glRed_conj.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "galRep_basisChange(証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.galRep_basisChange") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1232）**——「`σ` の `mod l` の行列が `α` に" ++
+       "共役」（第 1229）から「ある基底で `α` そのもの」を出す段である" ++
+       "——共役行列の持ち上げは第 1230。") 2 ]
 
 def mulVecAddEquiv.src : Source :=
   { paper := "GenEll", pdfPage := 19,
