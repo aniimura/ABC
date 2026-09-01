@@ -622,6 +622,62 @@ theorem valuation_quadFieldHom [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
 
 end ValuationBridge
 
+/-! ## ★★★★★★★★★★★★第 1025 —— 剰余体では `f` は分裂する
+
+★`R′ = R[X]/(f)` の剰余体には **`f` の根がある**（`root f` の像）。
+☆2 次式は根を 1 つ持てば分裂するので、`f` は `ResidueField R′` で分裂する。
+
+★★これが「非分裂だった 2 次式が拡大で分裂する」ことの中身である——
+曲線の分裂性を決める 2 次式を（`c₄` で割って）モニックにし、
+その持ち上げを `f` に取れば、この定理がそのまま `hsplit` を与える。 -/
+
+section ResidueSplits
+
+open Polynomial in
+/-- ★★★★★★**根を 1 つ持つ 2 次式は分裂する**。 -/
+theorem splits_of_isRoot_natDegree_two {k : Type} [Field k] {p : k[X]}
+    (hdeg : p.natDegree = 2) {r : k} (hr : p.IsRoot r) : p.Splits := by
+  have hmon : (X - C r).Monic := monic_X_sub_C r
+  have hfac : (X - C r) * (p /ₘ (X - C r)) = p := mul_divByMonic_eq_iff_isRoot.2 hr
+  have hp0 : p ≠ 0 := fun h => by simp [h] at hdeg
+  have hq0 : p /ₘ (X - C r) ≠ 0 := by
+    intro h
+    rw [h, mul_zero] at hfac
+    exact hp0 hfac.symm
+  rw [← hfac, splits_mul hmon.ne_zero hq0]
+  refine ⟨Splits.of_natDegree_le_one (by simp), Splits.of_natDegree_le_one ?_⟩
+  rw [natDegree_divByMonic p hmon, natDegree_X_sub_C, hdeg]
+
+variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+
+open Polynomial in
+/-- ★★★★★★★★**`R[X]/(f)` の剰余体には `f` の根がある**——`root f` の像である。 -/
+theorem exists_isRoot_residueField (f : R[X]) [IsLocalRing (AdjoinRoot f)] :
+    ∃ r : IsLocalRing.ResidueField (AdjoinRoot f),
+      (f.map ((IsLocalRing.residue (AdjoinRoot f)).comp
+        (algebraMap R (AdjoinRoot f)))).IsRoot r := by
+  refine ⟨IsLocalRing.residue (AdjoinRoot f) (AdjoinRoot.root f), ?_⟩
+  show Polynomial.eval _ (f.map _) = 0
+  rw [Polynomial.eval_map,
+    ← Polynomial.hom_eval₂ f (algebraMap R (AdjoinRoot f)) (IsLocalRing.residue _)
+      (AdjoinRoot.root f), AdjoinRoot.algebraMap_eq, AdjoinRoot.eval₂_root, map_zero]
+
+open Polynomial in
+/-- ★★★★★★★★★★★★**`f` は `R[X]/(f)` の剰余体で分裂する**（第 1025）。
+
+★これが不分岐 2 次拡大の最後の段である——
+非分裂だった 2 次式は、拡大の剰余体では根を持つので分裂する。 -/
+theorem splits_map_residueField {f : R[X]} (hdeg : f.natDegree = 2)
+    [IsLocalRing (AdjoinRoot f)]
+    (hmap : (f.map ((IsLocalRing.residue (AdjoinRoot f)).comp
+      (algebraMap R (AdjoinRoot f)))).natDegree = 2) :
+    (f.map ((IsLocalRing.residue (AdjoinRoot f)).comp
+      (algebraMap R (AdjoinRoot f)))).Splits := by
+  obtain ⟨r, hr⟩ := exists_isRoot_residueField f
+  exact splits_of_isRoot_natDegree_two hmap hr
+
+end ResidueSplits
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
