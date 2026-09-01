@@ -4809,5 +4809,21 @@
     },
     "honesty": "★★lemma_3_5_height_ineq は `∀ p, SemistableAt p E'` を仮説の形で受けている(原典は「同種なので自動」と括弧で述べる)。☆「同種なら半安定」の形式化は未了であり、.needs と冒頭の逸脱表に明記した。★item を条なしにしたのは、本企画がこれを「後回しにした形式化」であって「原典に無い仮説」ではないと従来から分類しているため。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 19/24。"
+  },
+  "lemma37Found20260901": {
+    "block": 1151,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★Lemma 3.7 を Found で束ねた——指標 19/24 → 20/24",
+    "goal": "Lemma 3.7 を Found/ の語彙だけで述べて証明する(§3)。",
+    "what": "★Found/GenEll/Lemma37Full.lean の lemma_3_7。☆Skeleton の lemma_3_7 は抽象界面 EllModuliData D の欄を外から受けているが、本定理は Found の具体的な語彙(SSCurve / DegCurve / faltingsHeightJ / GaloisFiniteJ / CompactlyBoundedJ)だけで述べる。★EllModuliData の witness をすべて組み上げる必要は無かった——Lemma 3.7 が使う欄はすでに Found/ に揃っていた。",
+    "parts": [
+      "第 1 の主張(条件 (a) なら l は局所高さと素): lemma_3_7_a_coprime(★無条件)。",
+      "第 2 の主張(条件 (b) かつ ∉ Exc なら乗法還元): ★DegCurve は定義から乗法還元を持つので自明(noMultRedExcJ = ∅ と同じ理由)。",
+      "第 3 の主張((a)∨(b) かつ l-巡回なら ∈ Exc): htFalt_le_of_condA_lcyclic(第 1088)と htFalt_le_of_condB_lcyclic(第 1150)。Exc ≔ {x | faltingsHeightJ x ≤ B}、有限性は galoisFiniteJ_htFalt_le(＝ northcottJ、★無条件)。",
+      "橋: SSCurve.not_dvd_jExp_of_primeToLocalHeights——半安定なら v_p(Δ_min) = max(0, −v_p(j)) なので「局所高さと素」は「l ∤ v_p(j)」と同じ。★Lemma 3.5 が受ける形への翻訳。"
+    ],
+    "pitfall": "★★★配管の穴: `Affine.Point` の加法群構造は `[DecidableEq F]` を取る。Lemma 3.5 側の命題は一般の体 L で `open scoped Classical` により `Classical.propDecidable` を拾っているが、`↥E.K`(ℂ の中間体)では `Subtype.instDecidableEq` の方が拾われる。☆その結果 `addOrderOf Q = l` が別物になり、Application type mismatch と isDefEq/whnf のタイムアウトが出る。★直し方: 定義と証明の両方で `letI : DecidableEq E.fld := fun a b => Classical.propDecidable (a = b)` を置いて固定する。`open scoped Classical` では**具体型に対しては効かない**。",
+    "deviation": "☆逸脱(ファイル冒頭の表に明記): 曲線の族を DegCurve(半安定かつ乗法還元)に制限、H_L を L 有理点の生成元と Vélu の商で書く(商の楕円性・半安定性は仮説)、GaloisFinite は「各次数で有限」と原文より弱く取る(Exc は結論側なので安全)、compactly bounded は h_∞(j) の有界性。★いずれも EllModuliObjects.lean で先に決めた設計であり、本ブロックで増やした逸脱は無い。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress **20/24**(§1 9/9、§2 0/1、§3 8/9、§4 3/5)。"
   }
 }

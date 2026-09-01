@@ -2765,3 +2765,26 @@ node tools/mojibake.mjs --fix  # 復元して書き戻す
 右辺だけを `↑a^2 * ↑x` にまとめて左辺の `↑(Units.mk0 …)` を残し、`ring` が閉じない。
 
 **直し方**: `apply Units.ext; simp only [Units.val_mul, Units.val_mk0]; ring`。
+
+## `Affine.Point` の `DecidableEq` は `open scoped Classical` では揃わない
+
+**失敗形**: `WeierstrassCurve.Affine.Point` の `AddCommGroup` は `[DecidableEq F]` を取る。
+一般の体 `L` を量化した命題（`Lemma35Unconditional` 等）は
+`open scoped Classical` の下で `fun a b => Classical.propDecidable (a = b)` を拾っているが、
+具体型（`↑E.K`、すなわち `ℂ` の中間体）では `Subtype.instDecidableEq` の方が優先される。
+結果、`addOrderOf Q = l` が**別の群構造の上の命題**になり、
+
+    Application type mismatch: ... @Affine.Point.instAddCommGroup ... fun a b ↦ a.instDecidableEq b
+                               ... 期待されるのは ... fun a b ↦ Classical.propDecidable (a = b)
+
+が出る。☆そのあと `isDefEq` / `whnf` のタイムアウトが続くこともある。
+
+**直し方**: 定義と証明の両方で `letI` で固定する。
+
+```lean
+letI : DecidableEq E.fld := fun a b => Classical.propDecidable (a = b)
+```
+
+★`open scoped Classical` だけでは**具体型に対しては効かない**。
+☆`set E' := … with h` が仮説を書き換えてくれないのも同じ原因——
+項が構文的に一致していない。`set` をやめて式を直接渡し、`hE' := rfl` で済ませる。
