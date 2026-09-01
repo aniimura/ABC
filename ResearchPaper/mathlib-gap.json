@@ -6315,5 +6315,14 @@
   "route": "★第 1295（det = 1）＋第 1294（固定ベクトル）→ 第 1292（Cayley–Hamilton）→ 第 1293（`h2`）。",
   "consequence": "★★★**Tate 一意化の同変性も局所体の拡大も要らない**——第 1291 で名指しした節点 (f)（完備化の正規性）は `h2` には不要になった。☆残るのは `h1`（非自明性）と `μ_l ⊂ E(K₀)` の構成である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateMuPoint20260902": {
+  "block": 1297,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★Φ[ζ] は位数ちょうど l の点（μ_l ⊂ E(K₀) の本体）",
+  "proved": "☆`Found/GenEll/TateMuPoint.lean`（第 1297）に 2 本。`vAdd_eq_zero_of_pow_eq_one`（`l` 乗根の付値は `0`）と `addOrderOf_tatePhi_zeta`。",
+  "route": "★`l · Φ[ζ] = Φ[ζˡ] = 0`、`Φ[ζ] ≠ 0`——さもなくば `ζ ∈ ⟨Q⟩` だが `v(ζ) = 0 < v(Q)` なので `ζ = 1` になってしまう。",
+  "consequence": "★★★これで**基礎局所体 `K₀` の上の Tate 一意化だけ**から `μ_l` の点が取れる——第 1296 が要る「`σ` が固定する位数 `l` の点」の出どころである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
