@@ -3056,3 +3056,12 @@ Bash ツールの上限 10 分で打ち切られた（`timeout` に 30 分を渡
 grep する。☆`node tools/decl-index.mjs` の索引を
 「定理が何を言うか」の語で引くこと。
 ★`grep -c sorry <file>` でそのファイルが完成しているかを先に見る。
+
+## `le_or_lt` は無い(2026-09-02、第 1269)
+
+**失敗形**: `rcases le_or_lt 0 (jExp p W) with hnn | hneg` が
+`Unknown identifier 'le_or_lt'` で落ちる(続いて `rcases` が「帰納型でない」と言う)。
+
+**直し方**: `by_cases h : a < b` を使う。分岐の順（`positive` が先）が入れ替わるので、
+`·` の中身も入れ替えること。`le_or_gt` / `lt_or_ge` は在るが、
+`by_cases` なら名前を覚えなくてよい。
