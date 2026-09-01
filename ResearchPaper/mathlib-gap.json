@@ -3320,5 +3320,18 @@
     "whyItMatters": "★★★★第 914（`tateParam_quot_velu_j_dvr`）はこの後 `tateParamR_eq_of_j_tateCurveAt` に流して `q_{E′} = q_E^l` を出していたが、そこで **`E′` の分裂性**が要った。☆第 995 で「`E′` の側は `j` だけでよい」と分かったので、**`j` の段で止めれば `E′` の分裂性も極小モデルも要らない**。★本ブロックはその「止めた形」を独立の定理として据えたものである。",
     "remaining": "☆残るのは (i) 970（`exists_point_j_tateModel′`）から `E′ ⊗ Lv` の `j` を本ブロックの左辺に合わせる段、(ii) それを 995 に流して `IsMuAtBadPrimes` を閉じる段、(iii) `p ∣ 2` の非分裂を不分岐 2 次拡大で処理する段（943＋944 が道具）。",
     "note": "★944-996 の 48 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35JTatePow20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 997",
+    "supersedes": "lemma35JVeluQuot20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★`jExp_eq_mul_of_j_tate_pow`（997）——`q := tateParamR (E ⊗ Lv) h` に固定し、第 995 の仮説（`hc4`・`hev`・`hqne`・`hc4′`・`hev′`・`hqlne`）を**すべて自前で作る**。☆第 978 の準備の再利用。`q^l` 側の `c₄` は `tateCurveAt_c4_isUnit`、`1/j` は `evalAdic_tateJinvSeries_eq_mul_unit` で `q^l · 単元`。",
+      "★★★★★★★★★★★★★★★★`minDeltaExp_eq_mul_of_j_tate_pow`（997）——半安定性 2 本と `j` の一致だけで `Δ_min` が `l` 倍。"
+    ],
+    "whyItMatters": "★★★★**`E′` の側に残る仮説が 2 本になった**: `E′.j ≠ 0` と`j(E′ ⊗ Lv) = j(E_{q_E^l} ⊗ Lv)` だけである。☆第 972（`minDeltaExp_eq_mul_of_globalVelu`）が要求していた`h′`（`E′` の分裂乗法還元）・`[IsMinimal (E′ ⊗ Lv)]`・`C′`・`hC′`・`hc4ne′`・`hc4′` は**すべて落ちた**。★これで `p ∣ 2` で `E′` の分裂性が作れない問題（第 991 の測定）が`E′` の側では起きなくなった——残るのは `E` の側だけである。",
+    "remaining": "☆残るのは (i) 996 と 997 を繋いで大域の Vélu の商で受ける形にする段、(ii) 各悪い素点で `E` の局所データ（976・993・994）を供給する段、(iii) `p ∣ 2` で `E` の非分裂を不分岐 2 次拡大で処理する段（943＋944 が道具）。",
+    "note": "★944-997 の 49 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

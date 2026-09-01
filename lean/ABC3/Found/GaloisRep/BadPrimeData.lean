@@ -376,6 +376,132 @@ theorem minDeltaExp_eq_mul_of_jExp_mul (p : HeightOneSpectrum (𝓞 L))
   · rw [max_eq_right (by nlinarith), max_eq_right (by omega)]
     ring
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 997 —— `q` を `tateParamR` に固定した形
+
+★第 995（`jExp_eq_mul_of_tateParam_pow`）は `q`・`hc4`・`hev`・`hqne` を素で受ける。
+☆本ブロックは `q := tateParamR (E ⊗ Lv) h` に固定して**それらをすべて自前で作る**。
+第 978（`vAdd_tateParam_eq_neg_jExp`）の準備がそのまま使える。
+
+★★結果、`E′` の側に残る仮説は
+
+* `E′.j ≠ 0`
+* `j(E′ ⊗ Lv) = j(E_{q^l} ⊗ Lv)`
+
+の 2 本だけになる——**分裂性も極小モデルも `C′` も要らない**。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★**`E′` の `j` が `E_{q_E^l}` の `j` なら
+`jExp p E′ = l · jExp p E`**（`q` を `tateParamR` に固定した形）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 997）**——第 995 の仮説をすべて `E` の側の
+分裂乗法還元から作る。☆第 978 の準備の再利用である。 -/
+theorem jExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E'.baseChange Lv).IsElliptic]
+    [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
+    (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
+    (hj : jExp p E < 0) (hjE' : E'.j ≠ 0)
+    {l : ℕ}
+    (hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R)
+    [((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).IsElliptic]
+    (hjj : (E'.baseChange Lv).j
+      = ((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+        (algebraMap R Lv)).j) :
+    jExp p E' = (l : ℤ) * jExp p E := by
+  have hq := tateParamR_mem (E.baseChange Lv) h
+  have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
+  obtain ⟨hq', C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
+  have hbase := tateModel_baseChange (E.baseChange Lv) h hCE
+  haveI : ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map
+      (algebraMap R Lv)).IsElliptic := by rw [hbase]; infer_instance
+  -- ★`E` の側（第 978 と同じ）
+  have hjne : E.j ≠ 0 := by
+    intro hc; rw [jExp, dif_pos hc] at hj; omega
+  have hc4E : E.c₄ ≠ 0 := by
+    intro hc; apply hjne; rw [ABC3.Found.GenEll.j_eq_inv_Delta_mul, hc]; ring
+  have hqne : algebraMap R Lv (tateParamR (E.baseChange Lv) h) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hq0
+  obtain ⟨u, hu, hueq⟩ := evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) (tateParamR (E.baseChange Lv) h) hq
+  have hev : algebraMap R Lv
+      (evalAdic tateJinvSeries (tateParamR (E.baseChange Lv) h) hq) ≠ 0 := by
+    rw [hueq, map_mul]
+    exact mul_ne_zero hqne ((hu.map (algebraMap R Lv)).ne_zero)
+  have hc4Lv : (E.baseChange Lv).c₄ ≠ 0 := by
+    show (E.map (algebraMap L Lv)).c₄ ≠ 0
+    rw [WeierstrassCurve.map_c₄]
+    exact (map_ne_zero_iff _ (algebraMap L Lv).injective).2 hc4E
+  have hc4T : algebraMap R Lv
+      (tateCurveAt (tateParamR (E.baseChange Lv) h) hq).c₄ ≠ 0 := by
+    have hmap : algebraMap R Lv (tateCurveAt (tateParamR (E.baseChange Lv) h) hq).c₄
+        = ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv)).c₄ :=
+      (WeierstrassCurve.map_c₄ _ _).symm
+    rw [hmap, hbase, WeierstrassCurve.variableChange_c₄]
+    exact mul_ne_zero (by simp) hc4Lv
+  have hjeq : (E.baseChange Lv).j
+      = ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv)).j := by
+    rw [ABC3.Found.GenEll.j_congr_curve hbase, WeierstrassCurve.variableChange_j]
+  -- ☆`q^l` の側——`c₄` は `1` から始まるので常に単元、`1/j` は `q^l · 単元`
+  have hqlne : algebraMap R Lv ((tateParamR (E.baseChange Lv) h) ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 (pow_ne_zero l hq0)
+  have hc4T' : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).c₄ ≠ 0 :=
+    ((tateCurveAt_c4_isUnit ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).ne_zero
+  obtain ⟨u', hu', hueq'⟩ := evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) ((tateParamR (E.baseChange Lv) h) ^ l) hql
+  have hev' : algebraMap R Lv
+      (evalAdic tateJinvSeries ((tateParamR (E.baseChange Lv) h) ^ l) hql) ≠ 0 := by
+    rw [hueq', map_mul]
+    exact mul_ne_zero hqlne ((hu'.map (algebraMap R Lv)).ne_zero)
+  exact jExp_eq_mul_of_tateParam_pow p hp E E' (tateParamR (E.baseChange Lv) h) hq hql
+    hc4T hev hc4T' hev' hqne hqlne hjne hjE' hjeq hjj
+
+/-- ★★★★★★★★★★★★★★★★**`Δ_min` まで一気に**——半安定性と `j` の一致だけで。 -/
+theorem minDeltaExp_eq_mul_of_j_tate_pow {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E'.baseChange Lv).IsElliptic]
+    [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
+    (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
+    (hss : SemistableAt p E) (hss' : SemistableAt p E')
+    (hj : jExp p E < 0) (hjE' : E'.j ≠ 0)
+    {l : ℕ}
+    (hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R)
+    [((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).IsElliptic]
+    (hjj : (E'.baseChange Lv).j
+      = ((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+        (algebraMap R Lv)).j) :
+    minDeltaExp p E' = l * minDeltaExp p E :=
+  minDeltaExp_eq_mul_of_jExp_mul p E E' hss hss' hj
+    (jExp_eq_mul_of_j_tate_pow p hp E E' h hj hjE' hql hjj)
+
+def jExp_eq_mul_of_j_tate_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(E′ の j が E_{q_E^l} の j なら jExp は l 倍。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def minDeltaExp_eq_mul_of_j_tate_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定性と j の一致だけで Δ_min が l 倍。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
