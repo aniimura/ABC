@@ -6266,5 +6266,15 @@
   "remaining": "★★☆**残るのは (f) だけ**——`σ` を作るには `K ≔ P.adicCompletion L′` が `K₀ ≔ p.adicCompletion L` の上で**正規**であることが要る。☆同値な言い方は「`K` は `K₀` と `L′` の合成体である」であり、数論の標準的な事実だが mathlib にも本プロジェクトにも無い（2026-09-02 実測）。★これが無いと「`π` を動かす `K` の自己同型」が取れない（`K₀(π)/K₀` だけなら分裂体なので正規だが、`TateSetup` を `K₀(π)` に建てるには完備 DVR の Eisenstein 拡大が要り、第 1277 で消したはずの道に戻ってしまう）。",
   "consequence": "☆したがって α 側（`EllModuliWitness` の 4 本目）に残る数学は**この 1 命題**である。★それ以外の鎖（第 1289 → 1290 → 1287 → 1270 → 1237 → 1249）は**すべて証明済み**である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "unipotentDet20260902": {
+  "block": 1292,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★幂単性の別の道——det = 1 で固定ベクトルがあれば (M−1)² = 0",
+  "goal": "第 1291 の節点 (f)（完備化の正規性）を回避する道を探す。",
+  "proved": "☆`sq_sub_one_eq_zero_of_det_one_of_fixed`（`Found/GenEll/UnipotentDet.lean`、第 1292）——`2×2` 行列で `M v = v`（`v ≠ 0`）かつ `det M = 1` なら `(M − 1)² = 0`。",
+  "route": "★`M v = v` から `det (M − 1) = 0`、`det M = 1` と合わせて跡は `2`。☆`2×2` なので Cayley–Hamilton は成分計算（`linear_combination`）で足りる。",
+  "strategy": "★★★**これで幂単性の道が変わる**: `μ_l ⊂ E[l]` は Tate 曲線では**基礎体 `K₀` の上で有理**（`ζ ∈ K₀` だから）なので `σ` は直線を点ごとに固定し、`det`（Galois 表現の行列式）は円分指標で `ζ_l ∈ L` なら `1`。☆したがって **`K₀ = p.adicCompletion L` の上の Tate 一意化だけ**で幂単性が出る——第 1291 で名指しした「完備化の正規性」（節点 (f)）は**要らなくなる**。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
