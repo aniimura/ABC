@@ -5406,5 +5406,16 @@
     "consequence": "★★★これで HasLCyclicJ から Lemma 3.5 が要る addOrderOf Q = l が出る——**節点 2 の橋は架かった**。☆残るのは Q が有理になる有限拡大 L''(第 1195)を取って第 1199 に入れる配管だけである。",
     "idioms": "★rw [e.apply_symm_apply] は最初に当たった項でパターンを固定するので、狙った項に当てるには引数を明示する(e.apply_symm_apply u)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "pointDescent20260902": {
+    "block": 1206,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★座標が部分体に入る点は、その部分体の点から来る",
+    "goal": "第 1205 が作った L̄ 上の位数 l の点を、有限拡大の上で有理にして第 1199 に入れる。",
+    "what": "★exists_rhPoint_eq と baseChange_map_intermediate(Found/GenEll/PointDescent.lean)。前者は「座標が f の像に入る点は rhPoint f の像である」、後者は塔 L → M → L̄ で (W ⊗ M) ⊗ L̄ = W ⊗ L̄。",
+    "measured": "☆O は 0 から来る。(x, y) の場合は x = f a・y = f b を取り、非特異性は map_nonsingular の逆向きで降ろす。★rhPoint は加法を保ち単射なので位数は addOrderOf_rhPoint(在庫)で移る。",
+    "consequence": "★★★これが L̄ の点を有限拡大へ降ろす**原始関数**である —— 第 1195(有限個の座標は有限次拡大に入る)と対で使う。",
+    "remaining": "☆残るのは M を取って cast を潰す組み上げだけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
