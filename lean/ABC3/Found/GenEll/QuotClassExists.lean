@@ -303,11 +303,41 @@ theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) (l : ℕ)
   rw [hx]
   exact hq
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★
+**`quotLCyclicJ` の `ht^Falt`（定数 `0` の形）**——★（第 1260）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆仮説は `htFalt_veluQuotientFull_le`
+（`Found/GaloisRep/VeluNormalized.lean`、第 704、**証明済み**）が与える形そのもの
+——定数は `0` でよい。
+
+★★★これで witness の `faltingsHeightJ_quotLCyclicJ` は
+**在庫の同種写像の高さ評価に幾何のデータを渡すだけ**になった。 -/
+theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) (l : ℕ)
+    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
+    (hfalt : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
+      S.card + 1 = l →
+      htFaltOf x.rep.toSSCurve.fld (veluQuotientFull x.rep.toSSCurve.W S)
+        ≤ htFaltOf x.rep.toSSCurve.fld x.rep.toSSCurve.W + 2 * Real.log l) :
+    faltingsHeightJ (quotLCyclicJ x l).cls
+      ≤ faltingsHeightJ x.cls + 2 * Real.log l := by
+  have h := faltingsHeightJ_quotLCyclicJ_of_isog x l 0 hex
+    (fun S hS => by simpa using hfalt S hS)
+  simpa using h
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
+    sectionId := "genell-lemma-3-5" }
+
+def faltingsHeightJ_quotLCyclicJ_zero.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(quotLCyclicJ の ht^Falt——定数 0 の形)",
     sectionId := "genell-lemma-3-5" }
 
 def degInfJ_quotLCyclicJ_of_bad.src : Source :=
