@@ -217,6 +217,32 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 ☆B1-B3 が済めば、`restrictLocalHom`（第 1167）と第 1271 で大域へ運び、
 第 1270 で `T_l E` に上げ、`alpha_mem_map_of_galTate`（第 1237）に入る。
 
+### ★★★★★★★★★★★★★★★★★★★★第 1276-1282——局所の `σ` は完全に手に入った
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `tateSigmaAct` | ★`τ ≔ Φ ∘ σU の誘導写像 ∘ Φ⁻¹`（同変性は定義から） | 1276 |
+| `tateSigmaAct_unipotent`・`_exists_ne` | ★★★`τ` は `E[l]` で幂単かつ非自明 | 1276 |
+| `exists_pow_eq_of_torsion_not_mu` | ★`μ_l` からはみ出す類があれば `Q` は `l` 乗 | 1277 |
+| `exists_torsion_not_mu` | ★`l`-捩れが `l` 個より多ければはみ出す | 1278 |
+| `exists_pi_of_phi` | ★★★**`E[l]` が載っていれば `π` は作れる**（体を拡げない） | 1279 |
+| `not_mem_range_of_not_dvd_vAdd` | ★`l ∤ v(Q)` なら `π` は基礎体に無い | 1280 |
+| `exists_algEquiv_move` | ★基礎体に無い元はどれかの `σ` が動かす | 1280 |
+| `sigma_pi_eq_zeta_mul` | ★★`σ(π) = ζπ` で `ζ` は原始 `l` 乗根 | 1281 |
+| `exists_sigma_zeta_pi` | ★★★**`σ`・`ζ`・`π` の三つ組**（第 1276 の入力が完成） | 1282 |
+
+☆すなわち **`l ∤ v(Q)` と「基礎体が `μ_l` を含む」と「`E[l]` が載っている」の 3 つから、
+`τ` の幂単性・非自明性が出る**。★どれも局所体の建設を要しない。
+
+### ★★★★★★★★残り 2 本（2026-09-02 時点）
+
+| # | 残る節点 | 中身 | 道具 |
+|---|---|---|---|
+| 6 | `tateSigmaAct` ＝ 実際の Galois 作用 | ☆`tatePhi_map`（`σR`・`σK` の対）を点の言葉に直す。曲線は `σ` で固定される部分環 `R₀` の上に置く | `tateCurveAt_map`・`exists_point_image_eq`（`subst` の技） |
+| 8 | 悪い素点での組み立て | ☆`L′ ≔ L(ζ_l, E[l], √d)` を取り、`P.adicCompletion L′` で `mkTateSetup`・`dvrTatePhiAddEquiv`・`exists_tate_model` | `not_dvd_vAdd_tateParam_of_not_dvd_jExp`（在庫）が `l ∤ v(Q)` を与える |
+
+★（7 大域への輸送は第 1271 で済み、`T_l E` への持ち上げは第 1270 で済み。）
+
 ### ★★★★★★★★第 1170 で節点 2 の群論の側が閉じた
 
 `exists_zeta_pi_of_torsion`——`G ⧸ ⟨Q⟩` の `l`-捻れはすべて `[ζᵃπᵇ]` である。
