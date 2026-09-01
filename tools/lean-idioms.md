@@ -2836,3 +2836,22 @@ grep -rn "^> Lemma 3.2" lean/ABC3/ --include=*.lean
 ```
 
 ★コミット前に必ず `node tools/check.mjs` を通すこと。
+
+## `addOrderOf_eq_one_iff` は `AddMonoid.` 付き（第 1201）
+
+**失敗形**: `exact absurd (addOrderOf_eq_one_iff.mp h1) h` →
+`Unknown identifier 'addOrderOf_eq_one_iff.mp'`。
+
+**理由**: mathlib の `orderOf_eq_one_iff` の `to_additive` 名は
+`AddMonoid.addOrderOf_eq_one_iff` である（名前空間が付く）。
+
+**直し方**: `AddMonoid.addOrderOf_eq_one_iff.mp h1`。
+
+## 部分群の membership 証明に `rw [pow_one] at h` は通らない（第 1201）
+
+**失敗形**: `h := (f 1).2`（型は `↑(f 1) ∈ torsionPoints W (l ^ 1)`）に
+`rw [pow_one] at h` → `motive is not type correct`
+（`l ^ 1` が `f 1` の**型の中**にも現れるため）。
+
+**直し方**: 求める形を `have h : (l ^ 1) • P = 0 := (f 1).2` と
+**先に書いて**から `simpa using h`。指数の正規化は `simp` に任せる。

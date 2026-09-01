@@ -5351,5 +5351,16 @@
     "what": "★irreducible_X_pow_sub_C_of_not_pow と fact_irreducible_X_pow_sub_C_of_not_pow(Found/GenEll/Thm38KummerExists.lean)—— l 素数で q が l 乗でなければ Xˡ − C q は既約(mathlib の X_pow_sub_C_irreducible_of_prime)なので AdjoinRoot は体になる。",
     "why": "☆TateSetup は [Field K] を要求するので、これがないと Kummer 拡大を Tate 設定の体として当てはめられなかった。★q が l 乗でないことは l ∤ v(q) から出る(not_lth_power_of_val、第 994)。☆第 1178 で Units.mk0 が使えなかったのもこの Fact が無かったからである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "tateProjOne20260902": {
+    "block": 1201,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★T_l E から E[l] への射影——HasLCyclicJ を点の言葉へ運ぶ第 1 段",
+    "goal": "HasLCyclicJ(T_l E の側の安定直線)を Lemma 3.5/3.7 が要る「位数 l の点」へ運ぶ。",
+    "what": "★tateProj・nsmul_tateProj・tateProj_galTate・addOrderOf_tateProj(Found/GaloisRep/TateProjOne.lean)。tateModule は「両立する系 f : ∀ n, E[l^n]」として具体的に定義されているので、第 1 層を取る射影 f ↦ f 1 がそのまま書ける。",
+    "measured": "★★galTate は各層で galPoint を当てるだけなので、射影の Gal 同変性は**定義から rfl** である。☆位数がちょうど l になるのは l が素数で ≠ 0 のとき。",
+    "remaining": "☆残るのは tateProj の核が l • T_l E であること(T_l E / l ≅ E[l])で、これは l • が E(L̄) の上で全射であることを要る。",
+    "idioms": "★addOrderOf_eq_one_iff の真名は AddMonoid.addOrderOf_eq_one_iff(to_additive が名前空間を付ける)。★部分群の membership 証明に rw [pow_one] at h は motive not type correct で通らない——求める形を have で先に書いて simpa。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
