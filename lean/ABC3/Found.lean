@@ -1406,6 +1406,7 @@ import ABC3.Found.GenEll.TateGalActUnip
 import ABC3.Found.GenEll.UnipTransfer
 import ABC3.Found.GenEll.UnipotentDet
 import ABC3.Found.GenEll.GalTateMatrixUnip
+import ABC3.Found.GenEll.FixedVecFromPoint
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble

@@ -6286,5 +6286,15 @@
   "route": "★`redVec_galTate`（第 1233）で `mod l` に落とし、`redVec_eq_zero_iff`（第 1204、核はちょうど `l · ℤ_l²`）で戻す。☆第 1234（`σ` 幂単 ⇒ 行列幂単）の**逆向き**である。",
   "consequence": "★★★これで「`det = 1` ＋ 固定ベクトル ⇒ 幂単」（第 1292）が `h2` に繋がった。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "fixedVecFromPoint20260902": {
+  "block": 1294,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★σ が固定する位数 l の点は固定ベクトルを与える（第 1292 のもう一方の入力）",
+  "goal": "第 1292 が要る「固定ベクトル」を点から作る。",
+  "proved": "☆`exists_fixed_vec_of_galPoint_eq`（`Found/GenEll/FixedVecFromPoint.lean`、第 1294）。",
+  "route": "★段 1: 位数 `l` の点は第 1 層に持ち上がる（第 1202）。段 2: 持ち上げの `mod l` 座標は `0` でない（核は `l·T_l E`、第 1203・1204）。段 3: `σ` が点を固定するなら座標も固定される（第 1233）。",
+  "consequence": "★★★これで `μ_l ⊂ E(K₀)` から「行列は直線を点ごとに固定する」が出る。☆残るのは `det = 1`（円分指標、`ζ_l ∈ L` なら）と、`μ_l ⊂ E(K₀)` の構成である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
