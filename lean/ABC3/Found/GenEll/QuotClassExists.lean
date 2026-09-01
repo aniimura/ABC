@@ -196,7 +196,49 @@ theorem minDeltaExp_eq_mul_of_jExp_all {L : Type} [Field L] [NumberField L]
       exact max_eq_left (by omega)
     rw [h1, h2, mul_zero]
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★
+**`quotLCyclicJ` の `deg∞`（`jExp` の言葉で）**——★（第 1248）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1247（`Δ_min` の関係は `jExp` の関係から出る）を第 1244 に流し込んだ形。
+
+★★★これで witness の `degInfJ_quotLCyclicJ` は
+**`v_p(j(E′)) = l·v_p(j(E))`（`Lemma 3.2, (ii)`）ただ 1 つ**に帰着した。 -/
+theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) (l : ℕ)
+    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
+    (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
+      S.card + 1 = l →
+      ∀ [_inst : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic],
+      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+        SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)) →
+      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+          jExp p x.rep.toSSCurve.W < 0 →
+          jExp p (veluQuotientFull x.rep.toSSCurve.W S)
+            = (l : ℤ) * jExp p x.rep.toSSCurve.W)
+        ∧ (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+          0 ≤ jExp p x.rep.toSSCurve.W →
+          0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
+    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
+  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
+  haveI := hell
+  obtain ⟨hbad, hgood⟩ := hrel S hcard hss
+  have hloc := minDeltaExp_eq_mul_of_jExp_all x.rep.toSSCurve.W
+    (veluQuotientFull x.rep.toSSCurve.W S) x.rep.toSSCurve.ss hss hbad hgood
+  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l hloc
+  rw [hj] at hq
+  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
+  rw [hx]
+  exact hq
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_eq_mul_of_jExp_all.src : Source :=
   { paper := "GenEll", pdfPage := 15,

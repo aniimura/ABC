@@ -3013,3 +3013,14 @@ because it depends on 'PadicInt.instCommRing'`。
 **直し方**: `redVec_nsmul` を simp 集合から外し、
 `redVec_nsmul_self : redVec l (l • w) = 0` を直接当てる。
 ★仮説側の `2 • y` は `y + y` の形で書いておくと `nsmul` が出てこない。
+
+## 仮説の中で「その項の `IsElliptic`」を使うには `∀ [_inst : …]`（第 1248）
+
+**失敗形**: 仮説を
+`∀ S, S.card + 1 = l → (velu S).IsElliptic → (… jExp p (velu S) …)`
+と書くと、`jExp` が要求する `(velu S).IsElliptic` を
+**合成できない**（`→` で受けた命題はインスタンスにならない）。
+
+**直し方**: インスタンス束縛にする——
+`∀ S, S.card + 1 = l → ∀ [_inst : (velu S).IsElliptic], (… jExp p (velu S) …)`。
+★呼ぶ側は `hrel S hcard hss`（インスタンスは自動で埋まる）。
