@@ -271,6 +271,201 @@ theorem natCast_mul_x_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
   rw [hsm] at hz
   exact hz ▸ z.2
 
+/-! ## ★★★★★★★★★★★★第 1077 —— `p ∣ l` での深さの上限 -/
+
+/-- ★★★★★★★★★★★★★★★★**捕れ点の深さは `v_p(l)/2` 以下**（第 1077）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1076 で `l·x` が整だから `v(x) ≥ −v_p(l)`、
+第 1070 で `v(x) = −2m`・`v(y) = −3m` なので `2m ≤ v_p(l)`。
+★よって `m ≤ M` で `v(x) ≥ −2M`・`v(y) ≥ −3M`。 -/
+theorem valAtLeast_pointCoords_of_le (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (M : ℤ) (hM0 : 0 ≤ M)
+    (hlne : ((l : L)) ≠ 0) (hM : valAdd p (Units.mk0 ((l : L)) hlne) ≤ 2 * M)
+    {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
+    ValAtLeast p (-2 * M) (pointCoords (k • Q)).1 ∧
+      ValAtLeast p (-3 * M) (pointCoords (k • Q)).2 := by
+  have hkne : k • Q ≠ 0 := nsmul_ne_zero_of_lt_addOrderOf hQ hk0 hkl
+  have hlz : l • Q = 0 := by rw [← hQ]; exact addOrderOf_nsmul_eq_zero Q
+  have hdvd : addOrderOf (k • Q) ∣ l := by
+    refine addOrderOf_dvd_of_nsmul_eq_zero ?_
+    rw [smul_comm, hlz, smul_zero]
+  have hord : addOrderOf (k • Q) = l := by
+    rcases (Nat.Prime.eq_one_or_self_of_dvd hl _ hdvd) with h1 | h1
+    · exact absurd (AddMonoid.addOrderOf_eq_one_iff.1 h1) hkne
+    · exact h1
+  rcases hkQ : k • Q with _ | ⟨x, y, h⟩
+  · exact absurd hkQ hkne
+  · have hord' : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l := hkQ ▸ hord
+    -- ☆`x` が整なら両方整
+    by_cases hxint : x ∈ primeSubring p
+    · have hyint := mem_primeSubring_y_of_mem_x p E h.1 hxint
+      refine ⟨?_, ?_⟩ <;> simp only [hkQ, pointCoords_some]
+      · exact valAtLeast_mono (by omega) (valAtLeast_of_mem hxint)
+      · exact valAtLeast_mono (by omega) (valAtLeast_of_mem hyint)
+    -- ★深い場合
+    · have hx0 : x ≠ 0 := fun hc => hxint (by rw [hc]; exact zero_mem _)
+      have hneg : valAdd p (Units.mk0 x hx0) < 0 := by
+        by_contra hge
+        rw [not_lt] at hge
+        exact hxint ((mem_primeSubring_iff p x).2 ((valAdd_nonneg_iff p _).1 hge))
+      have hy0 : y ≠ 0 := y_ne_zero_of_valAdd_x_neg p E hx0 h.1 hneg
+      obtain ⟨m, hm0, hmx, hmy⟩ := exists_depth_of_valAdd_x_neg p E hx0 hy0 h.1 hneg
+      -- ☆`l·x` は整
+      have hlx := natCast_mul_x_mem_of_addOrderOf_prime p E hl hodd h hord'
+      have hlxne : ((l : L)) * x ≠ 0 := mul_ne_zero hlne hx0
+      have hlxv : 0 ≤ valAdd p (Units.mk0 (((l : L)) * x) hlxne) :=
+        (valAdd_nonneg_iff p _).2 ((mem_primeSubring_iff p _).1 hlx)
+      have hsplit : valAdd p (Units.mk0 (((l : L)) * x) hlxne)
+          = valAdd p (Units.mk0 ((l : L)) hlne) + valAdd p (Units.mk0 x hx0) := by
+        rw [← valAdd_mul p (Units.mk0 ((l : L)) hlne) (Units.mk0 x hx0)]
+        exact valAdd_eq_of_valuation_eq p _ _ (by simp)
+      rw [hsplit] at hlxv
+      have hmle : (m : ℤ) ≤ M := by omega
+      refine ⟨?_, ?_⟩ <;> simp only [hkQ, pointCoords_some]
+      · refine valAtLeast_mono ?_ (valAtLeast_unit p (Units.mk0 x hx0)); omega
+      · refine valAtLeast_mono ?_ (valAtLeast_unit p (Units.mk0 y hy0)); omega
+
+/-! ## ★★★★★★★★★★★★第 1078 —— Vélu の係数の付値評価 -/
+
+/-- ☆有限和も `ValAtLeast` を保つ。 -/
+theorem valAtLeast_sum {ι : Type*} (p : HeightOneSpectrum (𝓞 L)) {s : Finset ι}
+    {f : ι → L} {n : ℤ} (h : ∀ i ∈ s, ValAtLeast p n (f i)) :
+    ValAtLeast p n (∑ i ∈ s, f i) :=
+  Finset.sum_induction f (ValAtLeast p n) (fun _ _ ha hb => valAtLeast_add ha hb)
+    (valAtLeast_zero p n) h
+
+/-- ★★★★★★★★★★★★★★★★**Vélu の `v`・`w` の付値評価**（第 1078）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v(x) ≥ −2M`・`v(y) ≥ −3M` なら `v(v) ≥ −4M`・`v(w) ≥ −6M`。
+★`w` の `/2` は `v_p(2) = 0` のとき無害である（`l` が奇なら `p ∣ l` でそう）。 -/
+theorem valAtLeast_veluVFull_veluWFull (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    (S : Finset (L × L)) (M : ℤ) (hM0 : 0 ≤ M)
+    (hS : ∀ z ∈ S, ValAtLeast p (-2 * M) z.1 ∧ ValAtLeast p (-3 * M) z.2)
+    (h2 : ValAtLeast p 0 ((2 : L)⁻¹)) :
+    ValAtLeast p (-4 * M) (veluVFull E S) ∧ ValAtLeast p (-6 * M) (veluWFull E S) := by
+  obtain ⟨ha1, ha2, ha3, ha4, _⟩ := mem_primeSubring_of_isIntegral p E
+  have h1 : ValAtLeast p 0 E.a₁ := valAtLeast_of_mem ha1
+  have h2' : ValAtLeast p 0 E.a₂ := valAtLeast_of_mem ha2
+  have h3 : ValAtLeast p 0 E.a₃ := valAtLeast_of_mem ha3
+  have h4 : ValAtLeast p 0 E.a₄ := valAtLeast_of_mem ha4
+  have hc3 : ValAtLeast p 0 ((3 : L)) := by
+    refine valAtLeast_of_mem ?_
+    simpa using (3 : primeSubring p).2
+  have hc2 : ValAtLeast p 0 ((2 : L)) := by
+    refine valAtLeast_of_mem ?_
+    simpa using (2 : primeSubring p).2
+  -- ☆各点での `veluV2`・`veluGy`・`veluU`
+  have hV2 : ∀ z ∈ S, ValAtLeast p (-4 * M) (veluV2 E z.1 z.2) := by
+    intro z hz
+    obtain ⟨hx, hy⟩ := hS z hz
+    have hx2 : ValAtLeast p (-4 * M) (z.1 ^ 2) := by
+      have hh := valAtLeast_mul hx hx
+      have hsq : z.1 * z.1 = z.1 ^ 2 := by ring
+      rw [hsq] at hh
+      refine valAtLeast_mono ?_ hh; omega
+    show ValAtLeast p (-4 * M) (veluGx E z.1 z.2)
+    rw [veluGx, sub_eq_add_neg]
+    refine valAtLeast_add (valAtLeast_add (valAtLeast_add ?_ ?_) ?_) ?_
+    · refine valAtLeast_mono ?_ (valAtLeast_mul hc3 hx2); omega
+    · refine valAtLeast_mono ?_ (valAtLeast_mul (valAtLeast_mul hc2 h2') hx); omega
+    · refine valAtLeast_mono ?_ h4; omega
+    · refine valAtLeast_mono ?_ (valAtLeast_neg (valAtLeast_mul h1 hy)); omega
+  have hU : ∀ z ∈ S, ValAtLeast p (-6 * M) (veluU E z.1 z.2) := by
+    intro z hz
+    obtain ⟨hx, hy⟩ := hS z hz
+    have hgy : ValAtLeast p (-3 * M) (veluGy E z.1 z.2) := by
+      rw [veluGy, sub_eq_add_neg, sub_eq_add_neg]
+      refine valAtLeast_add (valAtLeast_add ?_ ?_) ?_
+      · refine valAtLeast_mono ?_ (valAtLeast_mul (valAtLeast_neg hc2) hy); omega
+      · refine valAtLeast_mono ?_ (valAtLeast_neg (valAtLeast_mul h1 hx)); omega
+      · refine valAtLeast_mono ?_ (valAtLeast_neg h3); omega
+    rw [veluU]
+    have hh := valAtLeast_mul hgy hgy
+    have hsq : veluGy E z.1 z.2 * veluGy E z.1 z.2 = veluGy E z.1 z.2 ^ 2 := by ring
+    rw [hsq] at hh
+    refine valAtLeast_mono ?_ hh; omega
+  refine ⟨?_, ?_⟩
+  · rw [veluVFull]
+    refine valAtLeast_sum p (fun z hz => ?_)
+    refine valAtLeast_mono ?_ (hV2 z hz); omega
+  · rw [veluWFull]
+    refine valAtLeast_sum p (fun z hz => ?_)
+    refine valAtLeast_add ?_ ?_
+    · rw [div_eq_mul_inv]
+      refine valAtLeast_mono ?_ (valAtLeast_mul (hU z hz) h2); omega
+    · refine valAtLeast_mono ?_ (valAtLeast_mul (hV2 z hz) (hS z hz).1); omega
+
+/-! ## ★★★★★★★★★★★★第 1079 —— 付値評価から `neronExp` の下限へ -/
+
+/-- ☆`ValAtLeast p 0` なら付値環の元。 -/
+theorem mem_primeSubring_of_valAtLeast {p : HeightOneSpectrum (𝓞 L)} {z : L}
+    (h : ValAtLeast p 0 z) : z ∈ primeSubring p := by
+  rcases eq_or_ne z 0 with rfl | hz
+  · exact zero_mem _
+  · exact (mem_primeSubring_iff p z).2 ((valAdd_nonneg_iff p _).1 (h hz))
+
+/-- ☆整モデルにする変数変換があれば `neronExp ≥ valAdd u`。 -/
+theorem valAdd_u_le_neronExp (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    (hΔ : W.Δ ≠ 0) (C : WeierstrassCurve.VariableChange L)
+    (hint : (C • W).IsIntegral (primeSubring p)) : valAdd p C.u ≤ neronExp p W := by
+  have h := neronExp_nonneg p (C • W) (variableChange_Delta_ne_zero W hΔ C) hint
+  rw [neronExp_variableChange p W hΔ C] at h
+  omega
+
+/-- ★★★★★★★★★★★★★★★★**係数の付値から `neronExp` の下限**（第 1079）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v(a_i) ≥ −i·M` で `v(c) = M` なる `c` があれば、
+`u = c⁻¹` の変数変換で整になるので `neronExp ≥ −M`。 -/
+theorem neronExp_ge_of_valAtLeast (p : HeightOneSpectrum (𝓞 L)) (W : WeierstrassCurve L)
+    (hΔ : W.Δ ≠ 0) {c : L} (hc : c ≠ 0) (M : ℤ)
+    (hcM : valAdd p (Units.mk0 c hc) = M)
+    (h1 : ValAtLeast p (-M) W.a₁) (h2 : ValAtLeast p (-2 * M) W.a₂)
+    (h3 : ValAtLeast p (-3 * M) W.a₃) (h4 : ValAtLeast p (-4 * M) W.a₄)
+    (h6 : ValAtLeast p (-6 * M) W.a₆) :
+    -M ≤ neronExp p W := by
+  set C : WeierstrassCurve.VariableChange L :=
+    { u := (Units.mk0 c hc)⁻¹, r := 0, s := 0, t := 0 } with hCdef
+  have hCu : valAdd p C.u = -M := by
+    rw [hCdef]
+    show valAdd p (Units.mk0 c hc)⁻¹ = -M
+    rw [valAdd_inv, hcM]
+  have hstep : ∀ (i : ℕ) (a : L), ValAtLeast p (-(i : ℤ) * M) a →
+      (c ^ i * a) ∈ primeSubring p := by
+    intro i a ha
+    refine mem_primeSubring_of_valAtLeast ?_
+    have hpow : ValAtLeast p ((i : ℤ) * M) (c ^ i) := by
+      have h0 := valAtLeast_unit p (Units.mk0 c hc ^ i)
+      rw [valAdd_pow, hcM] at h0
+      simpa using h0
+    exact valAtLeast_mono (le_of_eq (by ring)) (valAtLeast_mul hpow ha)
+  have hint : (C • W).IsIntegral (primeSubring p) := by
+    refine isIntegral_of_mem _ _ ?_ ?_ ?_ ?_ ?_
+    · rw [WeierstrassCurve.variableChange_a₁, hCdef]
+      simpa using hstep 1 W.a₁ (valAtLeast_mono (by omega) h1)
+    · rw [WeierstrassCurve.variableChange_a₂, hCdef]
+      simpa using hstep 2 W.a₂ (valAtLeast_mono (by omega) h2)
+    · rw [WeierstrassCurve.variableChange_a₃, hCdef]
+      simpa using hstep 3 W.a₃ (valAtLeast_mono (by omega) h3)
+    · rw [WeierstrassCurve.variableChange_a₄, hCdef]
+      simpa using hstep 4 W.a₄ (valAtLeast_mono (by omega) h4)
+    · rw [WeierstrassCurve.variableChange_a₆, hCdef]
+      simpa using hstep 6 W.a₆ (valAtLeast_mono (by omega) h6)
+  have := valAdd_u_le_neronExp p W hΔ C hint
+  omega
+
 /-! ## ★★★★★★★★★★★★★★★★第 1074 —— すべての倍点の座標が整 -/
 
 /-- ★★★★★★★★★★★★★★★★**位数 `l` の点のすべての倍点の座標は整**（第 1074）。
@@ -437,6 +632,80 @@ theorem isIntegral_veluQuotientFull_of_addOrderOf_prime (p : HeightOneSpectrum (
   rw [hS, hWi]
   exact ABC3.Found.GenEll.veluQuotientFull_image_eq Wi ((range (2 * m + 1)).erase 0) X Y hinj
     _ w (two_ne_zero) rfl hw
+
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] `p ∣ l` でも `neronExp p E′ ≥ −v_p(l)`**（第 1080）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1077（座標の深さ）→ 第 1078（`v`・`w` の付値）→ 第 1079（変数変換）。
+★`h2` は `v_p(2) = 0`。`l` が奇素数で `p ∣ l` なら自動的に成り立つ。 -/
+theorem neronExp_veluQuotientFull_ge (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hlne : ((l : L)) ≠ 0) (h2 : ValAtLeast p 0 ((2 : L)⁻¹))
+    (hΔ : (veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q)))).Δ ≠ 0) :
+    -(valAdd p (Units.mk0 ((l : L)) hlne))
+      ≤ neronExp p (veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q)))) := by
+  classical
+  set M : ℤ := valAdd p (Units.mk0 ((l : L)) hlne) with hMdef
+  have hM0 : 0 ≤ M := by
+    rw [hMdef, valAdd_nonneg_iff]
+    refine (mem_primeSubring_iff p _).1 ?_
+    simpa using ((l : primeSubring p)).2
+  have hS : ∀ z ∈ ((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)),
+      ValAtLeast p (-2 * M) z.1 ∧ ValAtLeast p (-3 * M) z.2 := by
+    intro z hz
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hz
+    rw [mem_erase, mem_range] at hk
+    exact valAtLeast_pointCoords_of_le p E hl hodd Q hQ M hM0 hlne (by omega) hk.1 hk.2
+  obtain ⟨hv, hw⟩ := valAtLeast_veluVFull_veluWFull p E _ M hM0 hS h2
+  obtain ⟨ha1, ha2, ha3, ha4, ha6⟩ := mem_primeSubring_of_isIntegral p E
+  have k1 : ValAtLeast p 0 E.a₁ := valAtLeast_of_mem ha1
+  have k2 : ValAtLeast p 0 E.a₂ := valAtLeast_of_mem ha2
+  have k3 : ValAtLeast p 0 E.a₃ := valAtLeast_of_mem ha3
+  have k4 : ValAtLeast p 0 E.a₄ := valAtLeast_of_mem ha4
+  have k6 : ValAtLeast p 0 E.a₆ := valAtLeast_of_mem ha6
+  have kb2 : ValAtLeast p 0 E.b₂ := by
+    rw [WeierstrassCurve.b₂]
+    refine valAtLeast_add ?_ ?_
+    · have hh := valAtLeast_mul k1 k1
+      have hsq : E.a₁ * E.a₁ = E.a₁ ^ 2 := by ring
+      rw [hsq] at hh
+      exact valAtLeast_mono (by omega) hh
+    · have hc4 : ValAtLeast p 0 ((4 : L)) := by
+        refine valAtLeast_of_mem ?_
+        simpa using (4 : primeSubring p).2
+      exact valAtLeast_mono (by omega) (valAtLeast_mul hc4 k2)
+  have hc5 : ValAtLeast p 0 ((5 : L)) := by
+    refine valAtLeast_of_mem ?_
+    simpa using (5 : primeSubring p).2
+  have hc7 : ValAtLeast p 0 ((7 : L)) := by
+    refine valAtLeast_of_mem ?_
+    simpa using (7 : primeSubring p).2
+  refine neronExp_ge_of_valAtLeast p _ hΔ hlne M hMdef.symm ?_ ?_ ?_ ?_ ?_
+  · show ValAtLeast p (-M) (veluCurve E _ _).a₁
+    rw [veluCurve_a₁]; exact valAtLeast_mono (by omega) k1
+  · show ValAtLeast p (-2 * M) (veluCurve E _ _).a₂
+    rw [veluCurve_a₂]; exact valAtLeast_mono (by omega) k2
+  · show ValAtLeast p (-3 * M) (veluCurve E _ _).a₃
+    rw [veluCurve_a₃]; exact valAtLeast_mono (by omega) k3
+  · show ValAtLeast p (-4 * M) (veluCurve E _ _).a₄
+    rw [veluCurve_a₄, sub_eq_add_neg]
+    refine valAtLeast_add ?_ ?_
+    · exact valAtLeast_mono (by omega) k4
+    · exact valAtLeast_mono (by omega) (valAtLeast_neg (valAtLeast_mul hc5 hv))
+  · show ValAtLeast p (-6 * M) (veluCurve E _ _).a₆
+    rw [veluCurve_a₆, sub_eq_add_neg, sub_eq_add_neg]
+    refine valAtLeast_add (valAtLeast_add ?_ ?_) ?_
+    · exact valAtLeast_mono (by omega) k6
+    · exact valAtLeast_mono (by omega) (valAtLeast_neg (valAtLeast_mul kb2 hv))
+    · exact valAtLeast_mono (by omega) (valAtLeast_neg (valAtLeast_mul hc7 hw))
 
 end Integral
 
