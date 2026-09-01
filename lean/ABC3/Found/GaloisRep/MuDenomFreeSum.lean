@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.MuHeadDenomFree
 import ABC3.Found.GaloisRep.MuDYSum
+import ABC3.Found.GaloisRep.MuPowerSum
 import ABC3.Meta.Claim
 
 /-!
@@ -144,6 +145,43 @@ theorem sum_mu_dxtermE {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot 
     rw [map_tateDXtermE, map_pow]
   rw [hmap, map_zero]
   exact sum_mu_dxtermE_field hl (hζ.map_of_injective hinj)
+
+/-! ## ★★★★★★★★★★第 1115 —— 対の `E` 版
+
+☆第 1114 で測ったとおり、`sum_mu_dxpair_zero` の証明で `hu` を使うのは
+頭項の和（`hS`）だけである。★そこを第 1113 の `sum_mu_dxtermE` に差し替えれば
+`hu` が消える。☆項ごとの書き換え（`hterm`）で
+`tateDXpair (ζ^i) (q·(ζ^i)^{l-1}) = tateDXterm(ζ^i) + tateDXtail(ζ^i) − tateDXtail(ζ^{l-i})`
+となるので、`l³` を掛けた形を直接述べる。 -/
+
+variable {I : Ideal A} [IsAdicComplete I A]
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**対の `E` 版（`hu` を取らない）**（第 1115）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`sum_mu_dxpair_zero` の分母なし版である。☆`p ∣ l` でも成り立つ。 -/
+theorem sum_mu_dxpairE_zero {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l)
+    (q : A) (hq : q ∈ I) :
+    ∑ i ∈ (range l).erase 0,
+        (tateDXtermE l (ζ ^ i)
+          + (l : A) ^ 3 * (tateDXtail (ζ ^ i) q hq - tateDXtail (ζ ^ (l - i)) q hq)) = 0 := by
+  rw [Finset.sum_add_distrib, sum_mu_dxtermE hl hζ, zero_add, ← Finset.mul_sum,
+    Finset.sum_sub_distrib, sum_erase_reflect (fun j => tateDXtail (ζ ^ j) q hq),
+    sub_self, mul_zero]
+
+def sum_mu_dxpairE_zero.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(å¯¾ã® E çââhu ãåããªããp â£ l ã§ãæãç«ã¤)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_mu_dxpairE_zero.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_dxtermE(é ­é ã®åãç¬¬ 1113ãè¨¼ææ¸ã¿)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dxtermE") 1,
+    .citation "[ABC3]" "sum_erase_reflect(i â¦ lâi ã®å¥ãæ¿ããå¨åº«)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_erase_reflect") 1 ]
 
 end Domain
 

@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.MuHeadDenomFree
+import ABC3.Found.GaloisRep.MuDenomFreeSum
 import ABC3.Meta.Claim
 
 /-!
@@ -31,11 +32,11 @@ import ABC3.Meta.Claim
 
 ★機構は在庫の `one_sub_mul_sum_nsmul`——`(1 − η)·S(η) = −l`、`IsUnit` 不要。
 
-## ★★★★★★★★★★残り 5 節点（進捗枠 **0 / 5**）
+## ★★★★★★★★★★残り 5 節点（進捗枠 **1 / 5**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
-| 1 | `sum_mu_dxpairE_zero` | `∑ DX` の `E` 版（`hu` なし） | 8 |
+| 1 | `sum_mu_dxpairE_zero` | `∑ DX` の `E` 版（`hu` なし）**★第 1115 で証明済み** | 8 |
 | 2 | `sum_mu_d2xpairE` | `∑ D²X` の `E` 版（`hu` なし） | 10 |
 | 3 | `sum_veluV2E_eq_sum_tateDYpairE` | Vélu の `v` と `DY` の一致の `E` 版 | 6 |
 | 4 | `c4_c6_velu_tateE` | `c₄`・`c₆` の恒等式の `E` 版 | 10 |
@@ -57,7 +58,7 @@ namespace ABC3.Skeleton.GenEll
 
 open Finset ABC3.Meta ABC3.Found.GaloisRep
 
-variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} [IsAdicComplete I R]
+variable {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R} [IsAdicComplete I R]
 
 /-- ★★★★★★★★**節点 1**——`∑ DX` の `E` 版（`hu` を受けない）。
 
@@ -66,13 +67,11 @@ variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} [IsAdicComplete I R]
 
 ☆`sum_mu_dxpair_zero`（`TateODE.lean:144`）の分母なし版である。 -/
 theorem sum_mu_dxpairE_zero {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
-    (q : R) (hq : q ∈ I) (h2 : (2 : R) ≠ 0) :
+    (q : R) (hq : q ∈ I) :
     ∑ i ∈ (range l).erase 0,
         (tateDXtermE l (ζ ^ i)
-          + (l : R) ^ 3 * (tateDXtail (ζ ^ i) q hq
-              - (tateDXterm (q * (ζ ^ i) ^ (l - 1))
-                  + tateDXtail (q * (ζ ^ i) ^ (l - 1)) q hq))) = 0 := by
-  sorry
+          + (l : R) ^ 3 * (tateDXtail (ζ ^ i) q hq - tateDXtail (ζ ^ (l - i)) q hq)) = 0 :=
+  ABC3.Found.GaloisRep.sum_mu_dxpairE_zero hl hζ q hq
 
 def sum_mu_dxpairE_zero.src : Source :=
   { paper := "GenEll", pdfPage := 17,
