@@ -186,6 +186,11 @@ theorem j_velu_tate_eq_map {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     rw [map_add, map_add, map_mul, map_mul, map_ofNat, map_ofNat]
     exact h
 
+def j_velu_tate_eq_K.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(K の上で v, w を取った形の j_velu_tate_eq。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 def j_velu_tate_eq_map.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(K に落とした形の j の一致)",
@@ -221,6 +226,37 @@ def two_y_add_x_sq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Definition 3.3((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆。★無条件)",
     sectionId := "genell-def-3-3" }
+
+/-- ★★★★★★★★★★★★★★★★
+**`K` の上で `v, w` を取った形の `j_velu_tate_eq`**——★**無条件**（第 1251）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`veluQuotientFull_tate_mu_K`（第 1134 系）が与える `v, w` は
+**`R` ではなく `K` の元**なので、`j_velu_tate_eq_map`（`v w : R`）では受けられない。
+★本定理はそれを `K` の側で述べ直したものである。
+
+★★★これで「Vélu の商の `j` ＝ `q^l` の Tate 曲線の `j`」は
+**`h4`・`h6`（Eisenstein の計算）だけ**に帰着する。 -/
+theorem j_velu_tate_eq_K {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {K : Type} [Field K] [CharZero K] [Algebra R K]
+    (q : R) (hq : q ∈ I) (l : ℕ) (hql : q ^ l ∈ I) (v w : K)
+    [(veluCurve ((tateCurveAt q hq).map (algebraMap R K)) v w).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (h4 : ((tateCurveAt q hq).map (algebraMap R K)).c₄ + 240 * v
+      = (l : K) ^ 4 * ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).c₄)
+    (h6 : ((tateCurveAt q hq).map (algebraMap R K)).c₆ + 504 * v + 6048 * w
+      = (l : K) ^ 6 * ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).c₆) :
+    (veluCurve ((tateCurveAt q hq).map (algebraMap R K)) v w).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).j := by
+  have hb2 : ((tateCurveAt q hq).map (algebraMap R K)).b₂ = 1 := by
+    rw [WeierstrassCurve.map_b₂, tateCurveAt_b₂, map_one]
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : K)) ?_ ?_
+  · rw [ABC3.Found.GenEll.veluCurve_c₄]
+    exact h4
+  · rw [ABC3.Found.GenEll.veluCurve_c₆, hb2, mul_one]
+    exact h6
 
 /-! ## ★出典の紐付け(`.src`) -/
 
