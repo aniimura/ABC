@@ -386,6 +386,7 @@ import ABC3.Found.GaloisRep.AdicEvalGen
 import ABC3.Found.GaloisRep.SigmaTwisted
 import ABC3.Found.GaloisRep.MuDenomFreeSum
 import ABC3.Found.GaloisRep.MuPairDenomFree
+import ABC3.Found.GaloisRep.MuPairFunctorial
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois

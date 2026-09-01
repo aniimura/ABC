@@ -46,6 +46,17 @@ noncomputable def tateYpairDF (l : ℕ) (a w q : R) (hq : q ∈ I) : R :=
     + (l : R) ^ 3 * (tateYtail a q hq - (tateXterm w + tateXtail w q hq)
         - (tateYterm w + tateYtail w q hq) + evalAdic (sigmaSeries 1) q hq)
 
+/-- ★★★★**`l³·DX(a,w,q)` の分母なし版**（第 1125）。 -/
+noncomputable def tateDXpairDF (l : ℕ) (a w q : R) (hq : q ∈ I) : R :=
+  tateDXtermE l a
+    + (l : R) ^ 3 * (tateDXtail a q hq - (tateDXterm w + tateDXtail w q hq))
+
+/-- ★★★★**`l⁴·DY(a,w,q)` の分母なし版**（第 1125）。 -/
+noncomputable def tateDYpairDF (l : ℕ) (a w q : R) (hq : q ∈ I) : R :=
+  tateDYtermE l a
+    + (l : R) ^ 4 * (tateDYtail a q hq + (tateDXterm w + tateDXtail w q hq)
+        + (tateDYterm w + tateDYtail w q hq))
+
 section Bridge
 
 variable [IsDomain R] {l : ℕ} {a : R}
@@ -62,6 +73,20 @@ theorem natCast_pow_mul_tateYpair (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - a))
     (hpow : a ^ l = 1) (hsum : ∑ k ∈ range l, a ^ k = 0) (w q : R) (hq : q ∈ I) :
     (l : R) ^ 3 * tateYpair a w q hq = tateYpairDF l a w q hq := by
   rw [tateYpair, tateYpairDF, ← natCast_pow_mul_tateYterm hlu hu hpow hsum]
+  ring
+
+/-- ★★★★★★**橋**——`hu` の下で `tateDXpairDF = l³·tateDXpair`（第 1125）。 -/
+theorem natCast_pow_mul_tateDXpair (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - a))
+    (hpow : a ^ l = 1) (hsum : ∑ k ∈ range l, a ^ k = 0) (w q : R) (hq : q ∈ I) :
+    (l : R) ^ 3 * tateDXpair a w q hq = tateDXpairDF l a w q hq := by
+  rw [tateDXpair, tateDXpairDF, ← natCast_pow_mul_tateDXterm hlu hu hpow hsum]
+  ring
+
+/-- ★★★★★★**橋**——`hu` の下で `tateDYpairDF = l⁴·tateDYpair`（第 1125）。 -/
+theorem natCast_pow_mul_tateDYpair (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - a))
+    (hpow : a ^ l = 1) (hsum : ∑ k ∈ range l, a ^ k = 0) (w q : R) (hq : q ∈ I) :
+    (l : R) ^ 4 * tateDYpair a w q hq = tateDYpairDF l a w q hq := by
+  rw [tateDYpair, tateDYpairDF, ← natCast_pow_mul_tateDYterm hlu hu hpow hsum]
   ring
 
 end Bridge

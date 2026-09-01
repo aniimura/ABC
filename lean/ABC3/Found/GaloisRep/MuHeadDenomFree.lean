@@ -202,6 +202,24 @@ theorem map_tateD3XtermE (f : A →+* B) (l : ℕ) (t : A) :
     map_mul, map_mul, map_pow, map_pow]
   simp [map_ofNat]
 
+/-- ★★★★★★**`tateXtermE` は環準同型で写る**——`IsUnit` 不要（第 1125）。 -/
+theorem map_tateXtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateXtermE l t) = tateXtermE l (f t) := by
+  rw [tateXtermE, tateXtermE, map_mul, map_pow, map_muS]
+
+/-- ★★★★★★**`tateYtermE` は環準同型で写る**——`IsUnit` 不要（第 1125）。 -/
+theorem map_tateYtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateYtermE l t) = tateYtermE l (f t) := by
+  rw [tateYtermE, tateYtermE, map_neg]
+  congr 1
+  rw [map_mul, map_pow, map_pow, map_muS]
+
+/-- ★★★★★★**`tateDYtermE` は環準同型で写る**——`IsUnit` 不要（第 1125）。 -/
+theorem map_tateDYtermE (f : A →+* B) (l : ℕ) (t : A) :
+    f (tateDYtermE l t) = tateDYtermE l (f t) := by
+  rw [tateDYtermE, tateDYtermE, map_mul, map_mul, map_pow, map_pow, map_muS, map_add]
+  simp [map_ofNat]
+
 end Map
 
 /-! ## ★出典の紐付け(`.src`) -/

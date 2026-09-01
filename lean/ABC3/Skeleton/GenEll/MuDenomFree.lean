@@ -29,8 +29,25 @@ import ABC3.Meta.Claim
 | 1097 | 6 種の頭項を分母なしの和に（橋） |
 | 1098 | `DX`・`DY`・`D²X` の「対」を分母なしの和に（橋） |
 | 1102 | **`E` 版 6 種の定義**（`S(η) = ∑ k·η^k` で無条件）と橋 |
+| 1118-1119 | `tateXpairDF`・`tateYpairDF`・`veluV2DF` と橋 |
+| 1125 | **DF 形は環準同型と可換**（`map_*DF`。★`a` 側の単元性を要らない） |
 
 ★機構は在庫の `one_sub_mul_sum_nsmul`——`(1 − η)·S(η) = −l`、`IsUnit` 不要。
+
+### ★★★★★★★★第 1125 で節点 3 の降下路が通った
+
+節点 3 の降下は `A₀ = PowerSeries ℤ[ζ_l] → A₁ = PowerSeries ℚ(ζ_l)` で行う
+（`A₁` では `l` が可逆なので `1 − ζ^i` も可逆で、既存の `hu` つきの補題が使える）。
+★そこを通すには「DF 形が `PowerSeries.map` を通り抜ける」が要る。
+
+☆第 221（`TateFunctorial.lean`）の `map_tateXpair` は `IsUnit (1 − a)` を要求するが、
+★第 1125 の `map_tateXpairDF`・`map_tateYpairDF`・`map_tateDXpairDF`・`map_tateDYpairDF` は
+**要求しない**——頭項が `Ring.inverse` を含まない多項式だからである。
+☆要るのは `w` 側の単元性だけで、それは `w ∈ I` から自動である。
+
+★残るのは (i) `ℤ[ζ_l] → R` の特殊化（`evalAdicMap`、第 1106）を環準同型として立てる段、
+(ii) `A₁` で `hu` つきの `veluV2_eq_tateDYpair` を当てる段、
+(iii) `PowerSeries.map` の単射性で `A₀` に降ろす段（第 1107 の `powerSeries_eq_of_map_eq`）。
 
 ## ★★★★★★★★★★残り 5 節点（進捗枠 **2 / 5**）
 
