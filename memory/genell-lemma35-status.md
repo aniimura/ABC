@@ -40,3 +40,37 @@ metadata:
 
 詳細は `ResearchPaper/mathlib-gap.json` の `lemma35BareCost20260901`。
 関連: [[genell-track-b]]、[[frdi-split-nonisotropic-not-derivable]]（在庫を先に引く教訓）。
+
+## 2026-09-01 追記（第 1092-1107）——道具立ては揃った
+
+★`d + 1 < l` を外す**部品はすべて揃った**（`Found/`、`sorry` 0）:
+
+| 第 | 部品 | 場所 |
+|---|---|---|
+| 1092 | `natCast_pow_mul_sum_inverse` | `Found/GenEll/CyclotomicDenomFree.lean` |
+| 1097/1098 | 頭項・「対」を分母なしの和に（橋） | `Found/GaloisRep/MuSumDenomFree.lean` |
+| 1102 | **`E` 版 6 種**（`S(η)=∑k·η^k` で無条件）と橋 | `Found/GaloisRep/MuHeadDenomFree.lean` |
+| 1106 | 係数環つき adic 評価 `evalAdicMap` | `Found/GaloisRep/AdicEvalGen.lean` |
+| 1107 | 降下つき特殊化 `evalAdicMap_eq_of_map_eq` | 同上 |
+
+★機構は在庫の `one_sub_mul_sum_nsmul`（`MuCharSum.lean:84`）——
+`(1 − η)·S(η) = −l`、**`IsUnit` を要さない**。
+
+☆**使い方**: 両辺を `A₀ = PowerSeries ℤ[ζ_l]` の元として書き、
+`A₁ = PowerSeries ℚ(ζ_l)` へ送る（`l` 可逆 ⟹ `1 − ζ^i` 可逆 ⟹ 既存の `hu` つき補題が使える）。
+`PowerSeries.map_injective` で `A₀` に降ろし、`evalAdicMap` で `R` に特殊化する。
+
+★残りは `Skeleton/GenEll/MuDenomFree.lean` の**進捗枠 0/5**（総重み 46、15-35 ブロック）。
+節点 1-2 に型を置いてある。
+
+☆潰した逃げ道: 「商体 `K` に移す」（第 1091、`q` の収束が壊れる）、
+「万有な環を建てる」（第 1104、mathlib の `PowerSeries` 完備性 instance で足りる）。
+
+## §2 の状態（第 1093-1096）
+
+★**[NCBelyi] は最初からリポジトリにあった**（`0_Source` に 9 ページ、
+`Found/NCBelyi/` に 21 ファイル・`sorry` 0）。以前「無い」と書いたのは誤り。
+☆欠けているのは `Theorem 2.1` の **(ii) ⟹ (i)**（原典 p.12-13）。
+`Skeleton/GenEll/Section2Converse.lean` に**進捗枠 6/8**。
+★残る節点 1 は曲線の **Riemann–Roch / Serre 双対性**で、mathlib に
+`RiemannRoch` 0 件・`genus` 0 件・`canonicalDivisor` 0 件（重み 120+）。
