@@ -4146,5 +4146,32 @@
       "theRealFix": "☆したがって正しい道は**分母払い**である——第 277（`CollDenomFree.lean`）が共線性で使った技法をそのまま μ-等級付きの計算に当てる:`l^k ×（恒等式）`の形で `R` の中で証明し、**最後に `K` で `l^k` を割る**（`K` は標数 0 なので `l ≠ 0`）。★`∏_{i=1}^{l-1}(1 − ζ^i) = l`（`prod_one_sub_pow_erase`、在庫）が`1 − ζ^i` の側の分母払いを `l` の冪に集約する。☆規模は 40-80 ブロックのまま。",
       "whatIsNotBlocked": "★**群の水準は既に無条件である**——`lemma_3_2`（`Found/GenEll/Lemma32.lean`）の (ii) は `(Lˣ/q^ℤ)/μ_l ≃ Lˣ/(q^l)^ℤ` と `vAdd v (q^l) = l · vAdd v q` を`IsUnit (l)` **なしで**与える。☆止まっているのは「群の商」と「Vélu の曲線」を繋ぐ段だけである。"
     }
+  },
+  "section2Converse20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1093（骨組みと進捗枠）",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "correction": "★★★★**重大な訂正**——本セッションで私は繰り返し「[NCBelyi] がリポジトリに無い」と述べたが、**誤りである**。`ResearchPaper/0_Source/Noncritical Belyi Maps.pdf`（9 ページ、114455 バイト）は最初から置かれており、`.cache/pdf-pages.json` の鍵（サイズ 114455）が私の再取得したファイルと一致した。☆さらに `Found/NCBelyi/` には **21 ファイル・`sorry` 0 件**の実装が既にある（`Lemma 2.1`–`2.4`・`Theorem 2.5` の `ℙ¹` 版）。★`blocked-leaves.json` にも「★**張れないのではない。原典が `0_Source` にある**」と明記されていた。**私が在庫を引かずに断定した。**",
+    "whatIsActuallyMissing": "☆`Skeleton/GenEll/Section2.lean` 自身が明記している——取れているのは **`(i) ⟹ (ii)` だけ**で、原文の実質である `(ii) ⟹ (i)`（p.12–13 の 2 ページ）が未了である。",
+    "whatExists": "★**数値の鎖は全部ある**（`Found/`、`sorry` 0）: `thm_2_1_stepA`・`thm_2_1_stepB`（`h1`–`h6` を受ける形）・`exists_bad_seq_tendsto`（反例列とコンパクト性）・`Thm21DegRatio`（Riemann–Hurwitz の帳簿）。☆残っているのは**幾何の側の入力を作ること**である。",
+    "frame": {
+      "name": "§2 (ii) ⟹ (i) の進捗枠",
+      "done": 0,
+      "total": 8,
+      "file": "lean/ABC3/Skeleton/GenEll/Section2Converse.lean",
+      "nodes": [
+        "1. exists_belyi_noncritical_general —— [NCBelyi] Thm 2.5 の一般曲線版（Riemann–Roch）。重み 12",
+        "2. exists_compactlyBounded_of_nbhd —— K_V を小近傍の像の共役の合併として作る。重み 4",
+        "3. belyi_image_subset_KV —— 収束から φ(Ξ) ⊆ K_V。重み 2",
+        "4. pullback_omega_eq_omega_add_E —— φ*ω_ℙ(C) ≅ ω_X(E) から h2。重み 8",
+        "5. htE_ge_ratio_htOmega —— Prop 1.4 から h6。重み 3",
+        "6. logDiff_pullback_le —— Prop 1.7 (i) を e = 1 で当てて h4。重み 4",
+        "7. exists_lift_of_degLe —— 段 A の点の持ち上げ（d′ = d·deg(Y/X)）。重み 3",
+        "8. theorem_2_1_converse —— 組み立て。★これが実質。重み 8"
+      ],
+      "totalWeight": 44,
+      "largest": "★節点 1（[NCBelyi] Thm 2.5 の一般曲線版）が最大。`ℙ¹` 版は済んでおり、残るのは Riemann–Roch による一般曲線への帰着。"
+    },
+    "note": "★944-1093 の 144 ブロック。"
   }
 }
