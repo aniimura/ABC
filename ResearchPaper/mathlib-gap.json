@@ -5076,5 +5076,15 @@
     "pitfall": "☆IsPrimitiveRoot.pow_ne_one_of_pos_of_lt は名前に反して第 1 引数が `l ≠ 0`(0 < l ではない)。★hn.ne' を渡す。",
     "frame": "☆Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "congruenceToMatrix20260902": {
+    "block": 1175,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★座標の合同はそのまま α の作用",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 2 の配管)。",
+    "what": "★upperM_one_mulVec_of_dvd(Found/GenEll/Thm38Alpha.lean)—— a' ≡ a + b、b' ≡ b (mod l) なら ZMod l の中で α · (a, b) = (a', b')。",
+    "why": "★★これが第 1174 の tate_sigma_coord_alpha の結論(ℤ の合同)を**行列の言葉**に直す最後の 1 行である。☆これで「σ の作用 → 座標の合同 → 行列 α」の鎖が端から端まで繋がった。",
+    "chain": "☆鎖の全体: 第 1161 独立性 → 1162 核 → 1163 座標の一意性 → 1164 σ の行列 → 1165 生成・基底 → 1170-1171 商群と Φ → 1172-1174 仮説の消去(TateSetup・IsPrimitiveRoot)→ 1175 行列の言葉へ。★残るのは ζ・π・σ を L_v(ζ_l, q^{1/l}) で実際に取る段と、galRep の像の言葉に載せる段だけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

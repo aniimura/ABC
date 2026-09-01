@@ -77,7 +77,39 @@ theorem upperM_one_mulVec {l : ℕ} (a b : ZMod l) :
   ext i
   fin_cases i <;> simp [upperM, Matrix.mulVec]
 
+/-! ## ★★★★★★★★★★★★合同から行列の作用へ -/
+
+/-- ★★★★★★★★★★★★★★
+**座標の合同はそのまま `α` の作用**——★**無条件**（第 1175）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`a' ≡ a + b`、`b' ≡ b`（`mod l`）なら `ZMod l` の中で
+`α · (a, b) = (a', b')` である。
+★★★これが第 1174 の `tate_sigma_coord_alpha` の結論（`ℤ` の合同）を
+**行列の言葉**に直す最後の 1 行である。 -/
+theorem upperM_one_mulVec_of_dvd {l : ℕ} [NeZero l] {a b a' b' : ℤ}
+    (ha : (l : ℤ) ∣ (a + b - a')) (hb : (l : ℤ) ∣ (b - b')) :
+    (upperM (1 : ZMod l)).mulVec ![(a : ZMod l), (b : ZMod l)]
+      = ![(a' : ZMod l), (b' : ZMod l)] := by
+  rw [upperM_one_mulVec]
+  have h1 : ((a : ZMod l) + (b : ZMod l)) = (a' : ZMod l) := by
+    have h := (ZMod.intCast_zmod_eq_zero_iff_dvd (a + b - a') l).2 ha
+    push_cast at h
+    exact sub_eq_zero.mp h
+  have h2 : (b : ZMod l) = (b' : ZMod l) := by
+    have h := (ZMod.intCast_zmod_eq_zero_iff_dvd (b - b') l).2 hb
+    push_cast at h
+    exact sub_eq_zero.mp h
+  rw [h1, h2]
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def upperM_one_mulVec_of_dvd.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(座標の合同はそのまま α の作用。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def sigma_acts_as_alpha.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
