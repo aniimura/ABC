@@ -218,6 +218,37 @@ theorem weierstrassCurve_map_injective {R A : Type*} [CommRing R] [CommRing A] (
   · exact hf (congrArg WeierstrassCurve.a₄ h)
   · exact hf (congrArg WeierstrassCurve.a₆ h)
 
+/-! ## ★★★★★★★★★★★★★★★★中間体へ降ろす（第 1194 の道の段 2） -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`L̄` での Vélu の等式は座標を含む中間体へ降りる**——★**無条件**（第 1197）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`W'⁄L̄ = veluQuotientFull (W⁄L̄) S`（第 1154）で、`S` が中間体 `M` の座標から来ているなら、
+同じ等式が `M` の上で成り立つ。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の第 1194 の道の**段 2** である
+——`M ≔ L(H)`（第 1195）と取れば、`L''` の上で `E'` が Vélu の商だと言える。
+☆降ろす一行は第 1196（`map` の単射性）である。 -/
+theorem veluQuotientFull_descends_to_intermediate
+    (W W' : WeierstrassCurve L) (S : Finset (Lbar × Lbar))
+    (hW' : W'.map (algebraMap L Lbar) = veluQuotientFull (W.map (algebraMap L Lbar)) S)
+    (M : IntermediateField L Lbar) (T : Finset (M × M))
+    (hT : T.image (fun z : M × M => (((z.1 : Lbar)), ((z.2 : Lbar)))) = S) :
+    W'.map (algebraMap L M) = veluQuotientFull (W.map (algebraMap L M)) T := by
+  refine weierstrassCurve_map_injective (algebraMap M Lbar)
+    (algebraMap M Lbar).injective ?_
+  have htower : (algebraMap M Lbar).comp (algebraMap L M) = algebraMap L Lbar :=
+    (IsScalarTower.algebraMap_eq L M Lbar).symm
+  rw [WeierstrassCurve.map_map, htower, hW', veluQuotientFull_map,
+    WeierstrassCurve.map_map, htower]
+  congr 1
+  rw [← hT]
+  rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_of_fixed.src : ABC3.Meta.Source :=
@@ -233,6 +264,23 @@ def fixesCoeffs_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(底変換した曲線の係数はどの σ でも固定される。★無条件)",
     sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_to_intermediate.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(L̄ での Vélu の等式は座標を含む中間体へ降りる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_to_intermediate.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "veluQuotientFull_descends(第 1154、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.veluQuotientFull_descends") 1,
+    .citation "[ABC3]" "weierstrassCurve_map_injective(第 1196、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.weierstrassCurve_map_injective") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1197）**——`Skeleton/GenEll/LCyclicReading.lean` の" ++
+       "第 1194 の道の**段 2** である。☆`M ≔ L(H)`（第 1195）と取れば、" ++
+       "`L''` の上で `E'` が Vélu の商だと言える。" ++
+       "★これで道の 5 段はすべて揃った——" ++
+       "段 1 第 1195、段 2 本定理、段 3 第 1192、段 4 在庫、段 5 第 1185。") 2 ]
 
 def weierstrassCurve_map_injective.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
