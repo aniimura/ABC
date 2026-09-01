@@ -4586,5 +4586,28 @@
     "status": "★★節点 5 で hlu を消費する 3 か所すべてに hlu なしの代替が揃った: A = j_eq_of_c4_c6(第 1132)、B = natCast_pow_mul_tateXK(第 1133)、C = veluQuotientFull_tate_mu_K / isElliptic_veluQuotientFull_tate_mu_K(第 1134-1135)。",
     "remaining": "☆残るのは minDeltaExp_eq_mul_of_globalVelu'(第 999)と minDeltaExp_eq_mul_at_bad_prime(第 1000)を _K 版で組み直す段だけである。",
     "gate": "lake build ABC3 成功(6261 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
+  },
+  "jVeluTateMuK20260901": {
+    "block": 1136,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★★★★★j(E_q/μ_l) = j(E_{q^l}) の hlu なし版",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "what": "★j_veluQuot_eq_j_tate_pow(第 996、Skeleton/GenEll/TateIsogeny.lean:1305)は hlu : IsUnit ((l : R)) を要求する。本ブロックでその hlu なし版を組んだ。",
+    "route": [
+      "(1) 商 = veluCurve (E_q ⊗ K) v w(第 1135 の veluQuotientFull_tate_mu_K)",
+      "(2) v・w は SV・SW の像を l⁶・2l⁸ で割ったもの(第 1134)",
+      "(3) c₄ = l⁴c₄′・c₆ = l⁶c₆′(第 1129-1130 を K で割る)",
+      "(4) c₄・c₆ が l⁴・l⁶ 倍なら j は等しい(第 1132 の j_eq_of_c4_c6)"
+    ],
+    "keyPoint": "★★p ∣ l では Vélu のモデルは極小から l¹² 離れるが、**j はその差を見ない**(j = Δ⁻¹·c₄³ で l¹² が約分される)。☆これが「p ∤ l を要求していたのは Vélu の係数を R に取る段だけ」という第 1131 の測定の帰結である。",
+    "added": {
+      "Found/GaloisRep/JVeluTateMuK.lean (新規)": [
+        "veluSV / veluSW(和に名前を付けた)",
+        "c4_c6_veluCurve_tate_field(★v・w を与えられた形の c₄・c₆ の関係)",
+        "j_veluQuot_eq_j_tate_pow_K(★hlu なし)"
+      ]
+    },
+    "remaining": "☆残るのは minDeltaExp_eq_mul_of_globalVelu'(第 999)を本定理で組み直す段だけである。",
+    "gate": "lake build ABC3 成功(6262 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
   }
 }
