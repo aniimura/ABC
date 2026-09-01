@@ -4232,6 +4232,20 @@
       "finding": "☆道具立て（第 1092-1107）は揃ったが、`sum_mu_*` の**尾**は `adicSum (fun n => tateDXterm (q^{n+1}·ζ^i))` という形であって、`evalAdicMap φ G q hq`（万有な冪級数の特殊化）ではない。★第 1107 の降下道具を当てるには、**尾を万有な冪級数として書き直す**必要がある。",
       "whatThatNeeds": "☆`tateDXterm(q^{n+1}ζ^i)` は `t = q^{n+1}ζ^i ∈ I` なので `1 − t` が単元で、`inverse(1−t) = ∑_m t^m`（幾何級数）に展開できる。★したがって尾は `q` の冪級数（係数は `ℤ[ζ_l]`）として書ける。☆在庫の `MuGraded.lean` に同型の作業がある（`tateXtail_eq_muEval`・`adicSum_eq_muEval`）。",
       "soTheRemainingWork": "★**残り 15-35 ブロックの中身はこれである**——6 種の尾それぞれについて「万有な冪級数の `evalAdicMap` に等しい」ことを示し、そのうえで第 1107 の降下を当てる。☆頭項の側は第 1102 で既に万有（`ζ` の多項式）なので追加作業はない。"
+    },
+    "universalTails1109": {
+      "block": "第 1109（尾の万有な冪級数を決定）",
+      "finding": "★★★★**6 種の尾の万有な冪級数を明示的に決めた。** ☆頭項の母関数はすべて `∑_{m≥1} (係数) t^m` の閉じた形である:",
+      "generatingFunctions": [
+        "`tateXterm t = t/(1−t)² = ∑_{m≥1} m·t^m`",
+        "`tateYterm t = t²/(1−t)³ = ∑_{m≥2} C(m,2)·t^m`",
+        "`tateDXterm t = t(1+t)/(1−t)³ = ∑_{m≥1} m²·t^m`",
+        "`tateDYterm t = t²(2+t)/(1−t)⁴ = ∑_{m≥2} m·C(m,2)·t^m`",
+        "`tateD2Xterm t = t(1+4t+t²)/(1−t)⁴ = ∑_{m≥1} m³·t^m`",
+        "`tateD3Xterm t = t(1+11t+11t²+t³)/(1−t)⁵ = ∑_{m≥1} m⁴·t^m`"
+      ],
+      "theTailSeries": "☆したがって `tail(u) = ∑_{n≥1} term(q^n·u) = ∑_{n≥1}∑_{m≥1} c_m·q^{nm}·u^m` で、**`q^N` の係数は `∑_{m ∣ N} c_m·u^m`** である。★`u = ζ^i` を代入すれば係数は `ℤ[ζ_l]` の元、すなわち`G_i ≔ ∑_N (∑_{m∣N} c_m·ζ^{im}) X^N ∈ PowerSeries (ℤ[ζ_l])` が**求める万有な冪級数である**。☆これは `σ`-型の係数で、在庫の `sigmaSeries` と同じ形をしている。",
+      "remainingWork": "★残るのは 6 種それぞれについて `evalAdicMap φ G_i q hq = tail (ζ^i) q hq` を示す段（幾何級数の展開）。☆在庫の `adicSum_eq_muEval`・`tateXtail_eq_muEval`（`MuGraded.lean`）が同型の作業。★そのうえで第 1107 の降下を当てれば `hu` が消える。見積り 15-35 ブロックのまま。"
     }
   }
 }
