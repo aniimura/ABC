@@ -3352,5 +3352,18 @@
     "interfaceDiff": "★★★★**第 972 から落ちた仮説**: `h′`（`E′` の分裂乗法還元）・`[IsMinimal (E′ ⊗ Lv)]`・`C′`・`hC′`・`hc4ne′`・`hc4′`、さらに `E` 側の `C`・`hC`・`hc4ne`・`hc4` も落ちた（10 本）。☆代わりに入ったのは `SemistableAt p E`・`SemistableAt p E′`・`jExp p E < 0` の 3 本。★これらは `isMuAtBadPrimes_of_veluQuotient` が**すでに仮説として持っている**ものである。",
     "remaining": "☆残るのは `E` の側の局所データを各悪い素点で供給する段だけ:(a) `h`（完備化での分裂乗法還元）——976＋993＋994、(b) `[IsMinimal (E ⊗ Lv)]`——973、(c) `hΔ`・`hcop`・`hlu`・`hql`・`h2`・`h2K`——977＋978、(d) `hvw`（Vélu の係数が整）——956-960 の対称和。★`p ∣ 2` の非分岐 2 次拡大（943＋944）は (a) のためだけに残る。",
     "note": "★944-999 の 51 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35VariableChangeTransport20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1001-1002",
+    "supersedes": "lemma35BadPrimeLocal20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★`semistableAt_variableChange`（1001）——`SemistableAt` は変数変換で不変（`C₀` を `C₀ · C⁻¹` に取り替えるだけ）。",
+      "★★★★★★★★★★★★★★★★★★★★`minDeltaExp_eq_mul_at_bad_prime_vc`（1002）——第 1000 を `C • E` に当て、第 969 で Vélu の商を `C • E′` に移し、変数変換の不変性で `E`・`E′` に戻す。"
+    ],
+    "whyItMatters": "★★★★第 973／976 が与えるのは `E` ではなく **`C • E`** の極小性・乗法還元である。☆その落差を埋めるのが本ブロックである——第 969 が`C • E′ = veluQuotientFull (C • E) (vcPoint C E Q の集合)` を**曲線の等式として**与えるので、`j` を跨がずに済む。",
+    "remaining": "☆残るのは 3 本:(a) `hmin`（完備化で極小）——第 973 が `hC`・`hc4ne`・`hc4` から与える（`hvw` の statement が `tateParamR` を含むため仮説に残した）、(b) `h`（完備化で分裂乗法還元）——第 976＋993、`p ∣ 2` の非分裂が残件、(c) `hlu`（`p ∤ l`）と `hvw`（Vélu の係数が整）。",
+    "note": "★944-1002 の 54 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

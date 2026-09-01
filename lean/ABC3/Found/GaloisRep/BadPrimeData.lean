@@ -376,6 +376,31 @@ theorem minDeltaExp_eq_mul_of_jExp_mul (p : HeightOneSpectrum (𝓞 L))
   · rw [max_eq_right (by nlinarith), max_eq_right (by omega)]
     ring
 
+/-! ## ★★★★★★★★★★★★第 1001 —— `SemistableAt` は変数変換で不変
+
+★第 973／976 が与えるのは `E` ではなく **`C • E`** についての
+極小性・乗法還元である（`C` は `p` で極小にする変数変換）。
+☆したがって第 1000 は `C • E` に当てることになる。
+
+★そのとき `SemistableAt p (C • E)` が要るが、`SemistableAt` の定義は
+「`Δ_min = 0`」または「ある `C₀` で極小かつ `c₄` が単元」なので、
+**変数変換で不変**である——`C₀` を `C₀ * C⁻¹` に取り替えるだけ。 -/
+
+/-- ★★★★★★★★★★★★**`SemistableAt` は変数変換で不変**。 -/
+theorem semistableAt_variableChange (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) (C : WeierstrassCurve.VariableChange L)
+    (h : SemistableAt p W) : SemistableAt p (C • W) := by
+  rcases h with h0 | ⟨C₀, hC₀, hc4, hv⟩
+  · exact Or.inl (by rw [minDeltaExp_variableChange p W C]; exact h0)
+  · refine Or.inr ⟨C₀ * C⁻¹, ?_, ?_⟩
+    · rw [mul_smul, inv_smul_smul]; exact hC₀
+    · rw [mul_smul, inv_smul_smul]; exact ⟨hc4, hv⟩
+
+def semistableAt_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.5(SemistableAt は変数変換で不変。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★★★★★★★★★★★★第 998 —— `E′.j ≠ 0` は `j` の一致から出る
 
 ★第 997 は `hjE′ : E′.j ≠ 0` を仮説で受けていた。

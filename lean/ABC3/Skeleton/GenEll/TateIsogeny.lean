@@ -1746,4 +1746,118 @@ def minDeltaExp_eq_mul_at_bad_prime.needs : List ProofObligation :=
     .citation "[ABC3]" "not_dvd_vAdd_tateParam_of_not_dvd_jExp(hcop の言い換え、第 978、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.not_dvd_vAdd_tateParam_of_not_dvd_jExp") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 1001-1002 —— 極小化した対に当てる
+
+★第 973／976 が与えるのは `E` ではなく **`C • E`** についての極小性・乗法還元である
+（`C` は `p` で極小にする変数変換、第 954 が `SemistableAt` から取り出す）。
+☆したがって第 1000 は `C • E` に当てることになる。
+
+★そのとき Vélu の商も `C • E′` に移す必要があるが、
+第 969（`veluQuotientFull_vcPoint_eq`）が**曲線の等式として**それを与える:
+
+    `C • E′ = veluQuotientFull (C • E) (vcPoint C E Q の生成する集合)`
+
+☆`Δ_min` も `jExp` も変数変換で不変（`minDeltaExp_variableChange`・`jExp_variableChange`）、
+`SemistableAt` も不変（第 1001）、点の位数も不変（`addOrderOf_vcPoint`）。
+★★したがって**そのまま `E`・`E′` の主張に戻る**。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 悪い素点での `Δ_min` の関係——
+極小化した対に当てる形**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1002）**——第 1000 を `C • E` に当て、
+第 969 で Vélu の商を `C • E′` に移し、変数変換の不変性で `E`・`E′` に戻す。 -/
+theorem minDeltaExp_eq_mul_at_bad_prime_vc {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (C : WeierstrassCurve.VariableChange L)
+    [((C • E).baseChange (p.adicCompletion L)).IsElliptic]
+    [((C • E').baseChange (p.adicCompletion L)).IsElliptic]
+    (hmin : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers L)
+      ((C • E).baseChange (p.adicCompletion L)))
+    (h : ((C • E).baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    (hvw : ∀ ζ : (p.adicCompletionIntegers L), IsPrimitiveRoot ζ l →
+      ∃ v w : (p.adicCompletionIntegers L),
+      v = ∑ i ∈ (range l).erase 0,
+          veluV2 (tateCurveAt (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+            (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+            (tateXpair (ζ ^ i)
+              ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+              (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+            (tateYpair (ζ ^ i)
+              ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+              (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+        ∧ 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU (tateCurveAt (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+              (tateXpair (ζ ^ i)
+                ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+              (tateYpair (ζ ^ i)
+                ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+            + 2 * (veluV2 (tateCurveAt (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                    (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+                    (tateXpair (ζ ^ i)
+                      ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+                    (tateYpair (ζ ^ i)
+                      ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h))
+                  * tateXpair (ζ ^ i)
+                      ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h)))
+        ∧ ((veluCurve (tateCurveAt (tateParamR ((C • E).baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem ((C • E).baseChange (p.adicCompletion L)) h)) v w).map
+            (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic)
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  haveI hCE : (C • E).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E.isUnit_Δ
+  haveI hCE' : (C • E').IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E'.isUnit_Δ
+  have h2L : (2 : L) ≠ 0 := two_ne_zero
+  have hQ' : addOrderOf (ABC3.Found.GenEll.vcPoint C E Q) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint C E Q]; exact hQ
+  have hEq := ABC3.Found.GenEll.veluQuotientFull_vcPoint_eq C E E' hQ h2L hE'
+  have hjC : jExp p (C • E) < 0 := by rw [jExp_variableChange p E C]; exact hjneg
+  have hcopC : ¬ ((l : ℤ) ∣ jExp p (C • E)) := by
+    rw [jExp_variableChange p E C]; exact hcop
+  have hkey := minDeltaExp_eq_mul_at_bad_prime p (C • E) (C • E')
+    (semistableAt_variableChange p E C hssE) (semistableAt_variableChange p E' C hssE')
+    hjC hl hodd hcopC hmin h hlu hvw hQ' hEq
+  rwa [minDeltaExp_variableChange p E' C, minDeltaExp_variableChange p E C] at hkey
+
+def minDeltaExp_eq_mul_at_bad_prime_vc.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点での Δ_min の関係——極小化した対に当てる形)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_at_bad_prime_vc.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime(第 1000、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime") 1,
+    .citation "[ABC3]" "veluQuotientFull_vcPoint_eq(Vélu の商を変数変換で移す、第 969、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.veluQuotientFull_vcPoint_eq") 1,
+    .citation "[ABC3]" "semistableAt_variableChange(半安定性の不変性、第 1001、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.semistableAt_variableChange") 1 ]
+
 end ABC3.Skeleton.GenEll
