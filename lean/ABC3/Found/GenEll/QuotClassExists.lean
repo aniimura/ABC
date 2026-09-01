@@ -265,11 +265,54 @@ theorem minDeltaExp_eq_mul_all {L : Type} [Field L] [NumberField L]
       exact max_eq_left (by omega)
     rw [h1, h2, mul_zero]
 
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★
+**`quotLCyclicJ` の `deg∞`（局所の `Δ_min` の言葉で）**——★（第 1259）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆仮説 `hbad` は `minDeltaExp_eq_mul_at_bad_prime`
+（`Skeleton/GenEll/TateIsogeny.lean`、**証明済み**）が与える形そのものである。
+
+★★★これで witness の `degInfJ_quotLCyclicJ` は
+**在庫の局所結果 ＋ 良い素点で符号が保たれること**だけになった。 -/
+theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) (l : ℕ)
+    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
+    (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
+      S.card + 1 = l →
+      ∀ [_inst : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic],
+      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+        SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)) →
+      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+          jExp p x.rep.toSSCurve.W < 0 →
+          minDeltaExp p (veluQuotientFull x.rep.toSSCurve.W S)
+            = l * minDeltaExp p x.rep.toSSCurve.W)
+        ∧ (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+          0 ≤ jExp p x.rep.toSSCurve.W →
+          0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
+    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
+  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
+  haveI := hell
+  obtain ⟨hbad, hgood⟩ := hrel S hcard hss
+  have hloc := minDeltaExp_eq_mul_all x.rep.toSSCurve.W
+    (veluQuotientFull x.rep.toSSCurve.W S) x.rep.toSSCurve.ss hss hbad hgood
+  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l hloc
+  rw [hj] at hq
+  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
+  rw [hx]
+  exact hq
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
+    sectionId := "genell-lemma-3-5" }
+
+def degInfJ_quotLCyclicJ_of_bad.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(quotLCyclicJ の deg∞——局所の Δ_min の言葉で)",
     sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_eq_mul_all.src : Source :=
