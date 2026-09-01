@@ -2994,3 +2994,12 @@ because it depends on 'PadicInt.instCommRing'`。
 ——`Algebra (𝓞 L) M` は `𝓞 L ⊆ L → M` の制限だからである。
 ★**数学の穴ではなくインスタンス探索の経路の問題**。
 ☆`Found/GaloisRep/TowerInstances.lean` に補題として置いた。
+
+## `RingHom.map_det` の右辺は `mapMatrix` の形（第 1230）
+
+**失敗形**: `RingHom.map_det f M : f M.det = (f.mapMatrix M).det` なので、
+`(M.map f).det` を期待して `rw [hmap]` すると
+「パターンが見つからない」。
+
+**直し方**: 間に `RingHom.mapMatrix_apply` を挟む
+——`rw [hz, RingHom.mapMatrix_apply, hmap] at hdet`。
