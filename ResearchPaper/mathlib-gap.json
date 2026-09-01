@@ -5831,5 +5831,15 @@
     "measured": "★★★これで witness の degInfJ_quotLCyclicJ は **v_p(j(E′)) = l·v_p(j(E))(Lemma 3.2, (ii))ただ 1 つ**に帰着した。☆在庫の jExp_eq_mul_of_j_tate_pow(第 997)がその局所版を与える。",
     "idioms": "★仮説の中で「その項の IsElliptic」を使うには ∀ [_inst : …] とインスタンス束縛にする(→ で受けた命題はインスタンスにならない)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "imageSL2NoClosed20260902": {
+    "block": 1249,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★★★★★像が SL₂(Z_l) を含む——hclosed も落とした形",
+    "goal": "EllModuliWitness の sorry (4)。",
+    "what": "★imageContainsSL2J_of_galTate'(Found/GenEll/AlphaMemImage.lean)。",
+    "measured": "☆**測定**: imageContainsSL2J_of_alpha'(在庫)は像の閉性を**すでに落としている**——galRep の連続性は galRep_continuous'(第 772、葉 5)で閉じていた。★したがって第 1246 の hclosed 仮説は不要だった。",
+    "consequence": "★★★残る仮説は **σ の mod l の冪単性・非自明性と ¬ HasLCyclicJ だけ** —— witness の imageContainsSL2J_torsionExt に必要なものはこれで尽きる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

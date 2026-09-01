@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.BasisRealize
 import ABC3.Found.GenEll.EllModuliGalois
+import ABC3.Found.GenEll.GalRepClosed
 import ABC3.Meta.Claim
 
 /-!
@@ -80,7 +81,34 @@ theorem imageContainsSL2J_of_galTate (E : SSCurve) (l : ℕ) [Fact l.Prime] (hl5
     ImageContainsSL2J E l :=
   imageContainsSL2J_of_alpha E l hl5 hclosed (alpha_mem_map_of_galTate E l e σ h2 h1) hno
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**像が `SL₂(ℤ_l)` を含む（`hclosed` も落とした形）**——★（第 1249）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`imageContainsSL2J_of_alpha'`（在庫）は像の閉性を**すでに落としている**
+（`galRep` の連続性は `galRep_continuous'`、第 772・葉 5）。
+
+★★★したがって残る仮説は
+**`σ` の `mod l` の冪単性・非自明性と `¬ HasLCyclicJ` だけ**である
+——`EllModuliWitness` の `imageContainsSL2J_torsionExt` に必要なものはこれで尽きる。 -/
+theorem imageContainsSL2J_of_galTate' (E : SSCurve) (l : ℕ) [Fact l.Prime] (hl5 : 5 ≤ l)
+    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) (σ : E.alg ≃ₐ[E.fld] E.alg)
+    (h2 : ∀ x : E.tate l, ∃ u : E.tate l,
+      galTate E.W l σ (galTate E.W l σ x) + x
+        = galTate E.W l σ x + galTate E.W l σ x + l • u)
+    (h1 : ∃ x : E.tate l, ∀ u : E.tate l, galTate E.W l σ x ≠ x + l • u)
+    (hno : ¬ HasLCyclicJ E l) :
+    ImageContainsSL2J E l :=
+  imageContainsSL2J_of_alpha' E l hl5 (alpha_mem_map_of_galTate E l e σ h2 h1) hno
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def imageContainsSL2J_of_galTate'.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(像が SL₂(Z_l) を含む——hclosed も落とした形)",
+    sectionId := "genell-thm-3-8" }
 
 def imageContainsSL2J_of_galTate.src : Source :=
   { paper := "GenEll", pdfPage := 19,
