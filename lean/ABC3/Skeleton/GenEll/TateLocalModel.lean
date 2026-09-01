@@ -635,6 +635,62 @@ def le_finrank_of_natCast_mem_pow.needs : List ProofObligation :=
     .citation "[mathlib]" "Ideal.absNorm_span_singleton(単元生成イデアルのノルム)"
       (.inMathlib "Ideal.absNorm_span_singleton") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★第 1042 —— 分裂の場合の `hlu`
+
+★第 1037（`l ∈ 𝔪_R^{l−1}`）→ 第 1040（`l ∈ p^{l−1}`）→ 第 1039（`l − 1 ≤ [L:ℚ]`）
+の連鎖に、**入口**（`ζ` の生成）を繋ぐ。
+
+☆入口は第 1041（Tate モデルの上の位数 `l` の点）＋第 947（点から原始 `l` 乗根へ）である。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**分裂の場合の `hlu`**（第 1042）。
+
+☆`l` が単元でないとすると `μ_l ⊂ R` から `l ∈ 𝔪^{l−1}`（第 1037）、
+`𝓞 L` に降ろして（第 1040）`l − 1 ≤ [L:ℚ]`（第 1039）——`hd` に矛盾する。 -/
+theorem isUnit_natCast_of_split {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    (h : (E.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    {l : ℕ} (hl : l.Prime) (hd : Module.finrank ℚ L + 1 < l)
+    (hbad : jExp p E < 0) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l) :
+    IsUnit ((l : (p.adicCompletionIntegers L))) := by
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletion L p
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletionIntegers L p
+  by_contra hnu
+  have hp := ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion L p
+  have hΔ := ABC3.Found.GaloisRep.tateModel_map_Delta_ne_zero
+    (E.baseChange (p.adicCompletion L)) h
+  have hcop' :=
+    ABC3.Found.GaloisRep.not_dvd_vAdd_tateParam_of_not_dvd_jExp p hp E h hbad hcop
+  obtain ⟨P, hP, hP0⟩ := ABC3.Found.GaloisRep.exists_point_tateModel E h hl hQ
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point
+      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h) hΔ hl hcop' P hP hP0
+  have hmem :=
+    ABC3.Found.GaloisRep.natCast_mem_maximalIdeal_pow_of_not_isUnit hl hζ hnu
+  have hmem2 := natCast_mem_pow_of_mem_pow_completion p (m := l) (k := l - 1) hmem
+  have hle := le_finrank_of_natCast_mem_pow p hl hmem2
+  omega
+
+def isUnit_natCast_of_split.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(分裂の場合の hlu——l が定義体の次数より大きければ単元)",
+    sectionId := "genell-lemma-3-7" }
+
+def isUnit_natCast_of_split.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "natCast_mem_maximalIdeal_pow_of_not_isUnit(第 1037、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.natCast_mem_maximalIdeal_pow_of_not_isUnit") 1,
+    .citation "[ABC3]" "natCast_mem_pow_of_mem_pow_completion(第 1040、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.natCast_mem_pow_of_mem_pow_completion") 1,
+    .citation "[ABC3]" "le_finrank_of_natCast_mem_pow(第 1039、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.le_finrank_of_natCast_mem_pow") 1 ]
+
 /-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点で `l` は単元**——
 `l` が定義体の次数より十分大きければ。
 

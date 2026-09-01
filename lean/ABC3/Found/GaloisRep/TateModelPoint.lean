@@ -369,6 +369,42 @@ def exists_point_j_tateModel_gen.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(大域の Vélu の商から Tate モデルの上の点と j の一致を作る——一般の局所体で。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★**Tate モデルの上に位数 `l` の点がある**（第 1041）。
+
+☆第 1026 の前半だけを取り出したもの——`E` の上の `l` 捉れ点を
+Tate モデルへ運ぶ段である。 -/
+theorem exists_point_tateModel {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) {Q : E.toAffine.Point} (hQ : addOrderOf Q = l) :
+    ∃ P : ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv)).toAffine.Point,
+      l • P = 0 ∧ P ≠ 0 := by
+  set φL : L →+* Lv := algebraMap L Lv with hφL
+  set φR : R →+* Lv := algebraMap R Lv with hφR
+  obtain ⟨hq, C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
+  have hbase : (tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map φR
+      = (C₀.map φR) • (E.map φL) :=
+    tateModel_baseChange (E.baseChange Lv) h hCE
+  have hQ1 : addOrderOf (rhPoint φL E Q) = l := by rw [addOrderOf_rhPoint φL E Q, hQ]
+  have hQ2 : addOrderOf (ABC3.Found.GenEll.vcPoint (C₀.map φR) (E.map φL)
+      (rhPoint φL E Q)) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint (C₀.map φR) (E.map φL) (rhPoint φL E Q), hQ1]
+  obtain ⟨P, hP, hP0, himg⟩ := exists_point_image_eq hbase hl _ hQ2
+  exact ⟨P, hP, hP0⟩
+
+def exists_point_tateModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Tate モデルの上に位数 l の点がある。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_point_j_tateModel.src : ABC3.Meta.Source :=
