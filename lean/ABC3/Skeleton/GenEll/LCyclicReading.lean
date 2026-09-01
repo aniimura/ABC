@@ -44,17 +44,27 @@ import ABC3.Meta.Claim
 ★★★これは `CLAUDE.md` の「逸脱」の規約が名指ししている場合である
 ——『後続の証明に影響が出ないならば読み替えを許容する』。**影響が出た**ので記録する。
 
-## ★★★★★★★★★★★★★★★★節点（進捗枠 **0.7 / 3**）
+## ★★★★★★★★★★★★★★★★節点（進捗枠 **1 / 3**）
 
 `Lemma 3.7` の第 3 の主張を **(J) の側で**言い直すのに要るもの:
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
-| 1 | `veluQuotient_of_stableLine` | ★**核は第 1153 で取れた**（`fixesCoeffs_veluQuotientFull`）。☆残る 1 歩は `L̄^{Gal} = L` で「すべての `σ` で固定 ⟹ `L` の元」と言う段 | 12 → **4** |
+| 1 | `veluQuotientFull_descends` | ★★**閉じた**（第 1153 の `fixesCoeffs_veluQuotientFull` ＋ 第 1154 の `mem_range_of_fixed`） | 12 → **0** |
 | 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す（`degInf` の関係は `Lemma 3.2, (ii)` から） | 10 |
 | 3 | `lemma_3_7_stableLine` | ☆第 3 の主張を `HasLCyclicJ` の側で述べ直す。★これで `Theorem 3.8` に繋がる | 4 |
 
-☆総重み 26 → **18**（第 1153 で 8 分進んだ）。
+☆総重み 26 → **14**（第 1153-1154 で節点 1 が閉じた）。
+
+### ★★★★★★★★★★★★第 1154 で節点 1 が閉じた
+
+`Found/GenEll/VeluDescent.lean` の **`veluQuotientFull_descends`**——
+`W : WeierstrassCurve L` と `L̄` の座標の有限集合 `S` が**すべての `σ` で保たれる**なら、
+`veluQuotientFull (W⁄L̄) S` は **`L` 上の曲線の底変換**である。
+
+☆鍵は mathlib にそのものがあったことである——
+`InfiniteGalois.mem_range_algebraMap_iff_fixed`（`L̄^{Gal} = L`）。
+★標数 0 なら `IsGalois L L̄` はインスタンスで出る。
 
 ### ★★★★★★★★第 1153 で取れたもの
 
