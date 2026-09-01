@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.BadPrimeData
+import ABC3.Found.GaloisRep.CompletionValuationBridge
 import Mathlib.FieldTheory.KummerExtension
 import Mathlib.RingTheory.AdicCompletion.Basic
 import Mathlib.RingTheory.AdjoinRoot
@@ -476,6 +477,150 @@ theorem quadFieldHom_injective {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2
   (quadFieldHom (K := K) hf hdeg).injective
 
 end QuadField
+
+/-! ## ★★★★★★★★★★★★★★★★第 1022-1024 —— 付値の橋（`e = 1`）
+
+★不分岐 2 次拡大の要点は「`R` の素元 `π` が `R′` でも素元」＝ **`e = 1`** である。
+☆第 1018 の証明で `maximalIdeal R′ = 𝔪R′` を示したので、
+`𝔪 = (π)` なら `maximalIdeal R′ = (φ π)` である（第 1022）。
+
+★★したがって `K` 上の 2 つの付値——`R` の付値と、`R′` の付値を `K` に引き戻したもの——は
+**同値であり、両方全射**なので等しい（第 964 の `eq_of_isEquiv_of_surjective`）。
+
+☆同値性の片側は `IsDiscreteValuationRing.exists_lift_of_le_one`、
+もう片側は「`R′` の元で `K` に入るものは `R` の元」＝ `R` が整閉であること（第 1023）。 -/
+
+section ValuationBridge
+
+variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+variable {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★**`R[X]/(f)` の極大イデアルは `𝔪` の像**（第 1022）。 -/
+theorem maximalIdeal_adjoinRoot_eq_map [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsLocalRing (AdjoinRoot f)] :
+    IsLocalRing.maximalIdeal (AdjoinRoot f)
+      = (IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f)) := by
+  have hmaxI : ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f))).IsMaximal := by
+    rw [AdjoinRoot.algebraMap_eq]
+    exact isMaximal_map_adjoinRoot _ hirr
+  exact (IsLocalRing.eq_maximalIdeal hmaxI).symm
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★**`π` は `R[X]/(f)` でも素元**——これが `e = 1` である（第 1022）。 -/
+theorem maximalIdeal_adjoinRoot_eq_span [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsLocalRing (AdjoinRoot f)] {π : R}
+    (hπ : IsLocalRing.maximalIdeal R = Ideal.span {π}) :
+    IsLocalRing.maximalIdeal (AdjoinRoot f)
+      = Ideal.span {algebraMap R (AdjoinRoot f) π} := by
+  rw [maximalIdeal_adjoinRoot_eq_map hf hdeg hirr, hπ, Ideal.map_span]
+  simp
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★**`R → R[X]/(f)` は単射**（`f` は 2 次のモニック）。 -/
+theorem algebraMap_adjoinRoot_injective {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2) :
+    Function.Injective (algebraMap R (AdjoinRoot f)) := by
+  rw [AdjoinRoot.algebraMap_eq]
+  refine AdjoinRoot.of.injective_of_degree_ne_zero ?_
+  rw [Polynomial.degree_eq_natDegree hf.ne_zero, hdeg]
+  simp
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★★★★★**`R′` の付値で `≤ 1` なら `K` の元は `R` の元**（第 1023）。
+
+☆`R′` は `R` 上有限なので整、`R` は整閉なので降りる。 -/
+theorem exists_lift_of_quadFieldHom_le_one
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)] (y : K)
+    (hy : (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+      (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f))) (quadFieldHom hf hdeg y) ≤ 1) :
+    ∃ a : R, algebraMap R K a = y := by
+  obtain ⟨b, hb⟩ := IsDiscreteValuationRing.exists_lift_of_le_one hy
+  haveI : Module.Finite R (AdjoinRoot f) := Monic.finite_adjoinRoot hf
+  have hbint : IsIntegral R b := IsIntegral.of_finite R b
+  letI : Algebra K (FractionRing (AdjoinRoot f)) := (quadFieldHom hf hdeg).toAlgebra
+  haveI : IsScalarTower R K (FractionRing (AdjoinRoot f)) :=
+    IsScalarTower.of_algebraMap_eq (fun x => (quadFieldHom_algebraMap hf hdeg x).symm)
+  have hint : IsIntegral R (algebraMap K (FractionRing (AdjoinRoot f)) y) := by
+    rw [show algebraMap K (FractionRing (AdjoinRoot f)) y = quadFieldHom hf hdeg y from rfl, ← hb]
+    exact hbint.map (IsScalarTower.toAlgHom R (AdjoinRoot f) (FractionRing (AdjoinRoot f)))
+  exact IsIntegrallyClosed.isIntegral_iff.1 (IsIntegral.tower_bot_of_field hint)
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★**`π` の像の付値は `exp(-1)`**——`e = 1` の付値版（第 1023）。 -/
+theorem valuation_quadFieldHom_uniformizer [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)]
+    {π : R} (hπ : IsLocalRing.maximalIdeal R = Ideal.span {π}) (hπ0 : π ≠ 0) :
+    (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+        (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f)))
+      (quadFieldHom hf hdeg (algebraMap R K π)) = WithZero.exp (-1 : ℤ) := by
+  rw [quadFieldHom_algebraMap hf hdeg, HeightOneSpectrum.valuation_of_algebraMap]
+  refine HeightOneSpectrum.intValuation_singleton _ ?_ ?_
+  · intro hc
+    exact hπ0 (algebraMap_adjoinRoot_injective hf hdeg (by rw [hc, map_zero]))
+  · show IsLocalRing.maximalIdeal (AdjoinRoot f) = _
+    exact maximalIdeal_adjoinRoot_eq_span hf hdeg hirr hπ
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★★★★★★★★★**付値の橋**——`K` の付値は拡大で変わらない（第 1024）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1024）**——これが不分岐（`e = 1`）の中身である。
+☆第 964 の `eq_of_isEquiv_of_surjective` に、
+同値性（第 1023）と全射性（`π` の像が素元）を流す。 -/
+theorem valuation_quadFieldHom [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)] (y : K) :
+    (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+        (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f))) (quadFieldHom hf hdeg y)
+      = (HeightOneSpectrum.valuation K (IsDiscreteValuationRing.maximalIdeal R)) y := by
+  obtain ⟨π, hπ⟩ := (IsPrincipalIdealRing.principal (IsLocalRing.maximalIdeal R))
+  have hπ0 : π ≠ 0 := by
+    intro h
+    rw [h] at hπ
+    have hb : IsLocalRing.maximalIdeal R = ⊥ := by rw [hπ]; simp
+    exact (IsDiscreteValuationRing.not_isField R)
+      (IsLocalRing.isField_iff_maximalIdeal_eq.2 hb)
+  have hkey : (HeightOneSpectrum.valuation K (IsDiscreteValuationRing.maximalIdeal R))
+      = (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+          (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f))).comap
+        (quadFieldHom hf hdeg) := by
+    refine eq_of_isEquiv_of_surjective ?_ ?_ ?_
+    · refine Valuation.isEquiv_of_val_le_one (fun x => ?_)
+      constructor
+      · intro hx
+        obtain ⟨a, ha⟩ := IsDiscreteValuationRing.exists_lift_of_le_one hx
+        show (HeightOneSpectrum.valuation _ _) (quadFieldHom hf hdeg x) ≤ 1
+        rw [← ha, quadFieldHom_algebraMap]
+        exact HeightOneSpectrum.valuation_le_one _ _
+      · intro hx
+        obtain ⟨a, ha⟩ := exists_lift_of_quadFieldHom_le_one hf hdeg x hx
+        rw [← ha]
+        exact HeightOneSpectrum.valuation_le_one _ _
+    · exact HeightOneSpectrum.valuation_surjective _ _
+    · intro t
+      rcases eq_or_ne t 0 with rfl | ht
+      · exact ⟨0, by simp⟩
+      · obtain ⟨n, rfl⟩ : ∃ n : ℤ, t = WithZero.exp n :=
+          ⟨WithZero.log t, (WithZero.exp_log ht).symm⟩
+        refine ⟨(algebraMap R K π) ^ (-n), ?_⟩
+        show (HeightOneSpectrum.valuation _ _)
+          (quadFieldHom hf hdeg ((algebraMap R K π) ^ (-n))) = _
+        rw [map_zpow₀, map_zpow₀, valuation_quadFieldHom_uniformizer hf hdeg hirr hπ hπ0,
+          exp_neg_one_zpow, neg_neg]
+  rw [hkey]
+  rfl
+
+end ValuationBridge
 
 /-! ## ★出典の紐付け(`.src`) -/
 
