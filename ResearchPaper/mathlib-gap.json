@@ -4609,5 +4609,26 @@
     },
     "remaining": "☆残るのは minDeltaExp_eq_mul_of_globalVelu'(第 999)を本定理で組み直す段だけである。",
     "gate": "lake build ABC3 成功(6262 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
+  },
+  "tateIsogenyK20260901": {
+    "block": 1137,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★★★★★悪い素点での Δ_min の関係の hlu なし版",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "what": "★minDeltaExp_eq_mul_of_globalVelu'(第 999)は hlu : IsUnit ((l : R))(= p ∤ l)と「Vélu の係数 v・w が R に取れる」を要求する。本ブロックの _K 版は**どちらも要求しない**——v・w は商体 Lv に取り、座標は tateXK・tateYK(分母を払った形)で受ける。",
+    "route": [
+      "商の楕円性: isElliptic_veluQuotientFull_tate_mu_K(第 1135)",
+      "j の一致: j_veluQuot_eq_j_tate_pow_K(第 1136)",
+      "φ(1 − ζ^i) ≠ 0: zeta_pow_sub_ne_zero_K(第 1134)",
+      "j から Δ_min へ: minDeltaExp_eq_mul_of_j_tate_pow(第 995、在庫)"
+    ],
+    "technique": "☆原文(第 999)を機械的に取り出して _K 化した(スクリプトで置換)。★instance 引数は S.q と qR が defeq だが構文的に違うので haveI で言い直す必要があった(第 971 と同じ穴)。",
+    "added": {
+      "Skeleton/GenEll/TateIsogenyK.lean (新規)": [
+        "minDeltaExp_eq_mul_of_globalVelu'_K(★hlu なし)"
+      ]
+    },
+    "remaining": "☆残るのは (i) hvw_K を無条件に作る段(楕円性は Delta_of_c4_c6 から出る)、(ii) _K 版を minDeltaExp_eq_mul_at_bad_prime(第 1000)・_vc・_full へ持ち上げる段。",
+    "gate": "lake build ABC3 成功(6263 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
