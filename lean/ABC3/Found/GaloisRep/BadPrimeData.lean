@@ -753,6 +753,37 @@ def vAdd_Delta_of_veluCurve_eq.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(曲線の等式から Δ の付値へ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★第 1065 —— `R`-曲線の変数変換は整性を保つ
+
+★第 1052（Vélu の商の整性）の**悪い素点側**はこれで出る。
+☆第 1003 が Vélu の係数 `v`・`w` を **`R` の元として**与えるので
+`veluCurve (tate q) v w` は `R`-曲線であり、
+第 1058 の輸送で `C₀ • (E′ ⊗ Lv)` がその底変換に等しい。
+★`C₀ : VariableChange R` なので逆も `R` 上の変数変換であり、整性が戻る。 -/
+
+/-- ★★★★★★★★★★★★**`R` 上の変数変換で `R`-曲線に移るなら整**（第 1065）。 -/
+theorem isIntegral_of_variableChange_map {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (X : WeierstrassCurve K) (Y : WeierstrassCurve R)
+    (C₀ : WeierstrassCurve.VariableChange R)
+    (hEq : (C₀.map (algebraMap R K)) • X = Y.map (algebraMap R K)) :
+    WeierstrassCurve.IsIntegral R X := by
+  have hinv : (C₀⁻¹).map (algebraMap R K) = (C₀.map (algebraMap R K))⁻¹ := by
+    have h1 : WeierstrassCurve.VariableChange.mapHom (algebraMap R K) C₀
+        = C₀.map (algebraMap R K) := rfl
+    have h2 : WeierstrassCurve.VariableChange.mapHom (algebraMap R K) C₀⁻¹
+        = (C₀⁻¹).map (algebraMap R K) := rfl
+    rw [← h1, ← h2, map_inv]
+  have hX : X = (C₀⁻¹ • Y).map (algebraMap R K) := by
+    rw [← WeierstrassCurve.map_variableChange, hinv, ← hEq, inv_smul_smul]
+  rw [hX]
+  exact isIntegral_baseChange _
+
+def isIntegral_of_variableChange_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(R 上の変数変換で R-曲線に移るなら整。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
