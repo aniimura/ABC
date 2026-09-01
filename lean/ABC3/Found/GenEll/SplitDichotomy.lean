@@ -264,6 +264,48 @@ def splits_or_exists_twist_splits''.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(二者択一に要るのは c₄ が単元であることだけ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★第 983 —— 乗法還元なら剰余体で `c₄ ≠ 0`
+
+★第 982 の二者択一が要求する `φ c₄ ≠ 0` は、
+mathlib の `HasMultiplicativeReduction` の `multiplicativeReduction` フィールド
+（`v(W.c₄) = 1`）そのものである。☆本補題はそれを剰余体の言葉に直す。
+
+★★測定（mathlib の穴）: 第 982 は `[Fintype k]` を要求する（`FiniteField` の補題を使うため）が、
+**`Finite (IsLocalRing.ResidueField (p.adicCompletionIntegers L))` は
+mathlib のインスタンスになっていない**（2026-09-01 実測）。
+☆数体の素点の完備化の剰余体は `𝓞 L / p` に等しく有限だが、その同一視が要る。 -/
+
+/-- ★★★★★★★★★★★★**乗法還元なら整モデルの `c₄` は剰余体で `0` でない**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v(c₄) = 1`（乗法還元）なら `c₄ ∉ 𝔪`、すなわち剰余体で `0` でない。
+★これが第 982 の唯一の実質的な仮説である。 -/
+theorem residue_c4_ne_zero_of_multiplicativeReduction {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [h : WeierstrassCurve.HasMultiplicativeReduction R W] :
+    (algebraMap R (IsLocalRing.ResidueField R))
+      (WeierstrassCurve.integralModel R W).c₄ ≠ 0 := by
+  have hval := h.multiplicativeReduction
+  rw [← WeierstrassCurve.integralModel_c₄_eq R W] at hval
+  intro hzero
+  have hmem : (WeierstrassCurve.integralModel R W).c₄ ∈ IsLocalRing.maximalIdeal R := by
+    rwa [← Ideal.Quotient.eq_zero_iff_mem]
+  have hlt : (IsDedekindDomain.HeightOneSpectrum.valuation K
+      (IsDiscreteValuationRing.maximalIdeal R))
+      (algebraMap R K (WeierstrassCurve.integralModel R W).c₄) < 1 := by
+    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap,
+      IsDedekindDomain.HeightOneSpectrum.intValuation_lt_one_iff_dvd]
+    exact Ideal.dvd_span_singleton.2 hmem
+  rw [hval] at hlt
+  exact lt_irrefl _ hlt
+
+def residue_c4_ne_zero_of_multiplicativeReduction.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(乗法還元なら整モデルの c₄ は剰余体で 0 でない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def splits_or_exists_twist_splits.src : ABC3.Meta.Source :=
