@@ -678,6 +678,94 @@ theorem splits_map_residueField {f : R[X]} (hdeg : f.natDegree = 2)
 
 end ResidueSplits
 
+/-! ## ★★★★★★★★★★★★第 1029 —— 拡大の上での局所データ
+
+★第 1028 が受ける `E ⊗ Lv′` の側の仮説のうち、
+**楕円性は mathlib＋在庫（`isElliptic_baseChange`）で自動**である。
+☆極大性と乗法還元は第 973／976 が `hp` を受ける形で書いてあるので、
+拡大の付値の橋（第 1024）を渡せばそのまま出る。
+
+★★残るのは **`Splits`（分裂性）ただ 1 つ**になる。 -/
+
+section ExtLocalData
+
+variable {L : Type} [Field L] [NumberField L]
+variable {Lv : Type} [Field Lv] [Algebra L Lv]
+variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+variable [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★★★★★**拡大の上でも付値の橋は成り立つ**（第 1029）。
+
+☆`hp`（`Lv` の側）と第 1024（`Lv → Lv′` の側）を合成するだけである。 -/
+theorem valuation_algebraMap_ext (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom hf hdeg (algebraMap L Lv x))
+    (x : L) :
+    (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+        (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f)))
+      (algebraMap L (FractionRing (AdjoinRoot f)) x)
+      = (HeightOneSpectrum.valuation L p) x := by
+  rw [halg, valuation_quadFieldHom hf hdeg hirr, hp]
+
+open Polynomial IsDedekindDomain WeierstrassCurve in
+/-- ★★★★★★★★**極小性は拡大にも移る**（第 1029）。
+
+☆第 973 が `hp` を受ける形なので、第 1029 の橋を渡すだけ。 -/
+theorem isMinimal_baseChange_ext (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom hf hdeg (algebraMap L Lv x))
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (C : WeierstrassCurve.VariableChange L)
+    (hC : WeierstrassCurve.IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0) :
+    WeierstrassCurve.IsMinimal (AdjoinRoot f)
+      ((C • E).baseChange (FractionRing (AdjoinRoot f))) :=
+  isMinimal_baseChange_at_bad_prime p
+    (valuation_algebraMap_ext p hp hf hdeg hirr halg) E C hC hc4ne hc4
+
+open Polynomial IsDedekindDomain WeierstrassCurve in
+/-- ★★★★★★★★**乗法還元も拡大に移る**（第 1029）。
+
+☆第 976 が `hp` を受ける形なので、第 1029 の橋を渡すだけ。 -/
+theorem hasMultiplicativeReduction_ext (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom hf hdeg (algebraMap L Lv x))
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (C : WeierstrassCurve.VariableChange L)
+    (hC : WeierstrassCurve.IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (hj : jExp p E < 0)
+    [WeierstrassCurve.IsMinimal (AdjoinRoot f)
+      ((C • E).baseChange (FractionRing (AdjoinRoot f)))] :
+    WeierstrassCurve.HasMultiplicativeReduction (AdjoinRoot f)
+      ((C • E).baseChange (FractionRing (AdjoinRoot f))) :=
+  hasMultiplicativeReduction_at_bad_prime p
+    (valuation_algebraMap_ext p hp hf hdeg hirr halg) E C hC hc4ne hc4 hj
+
+end ExtLocalData
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=

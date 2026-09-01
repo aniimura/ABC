@@ -3604,5 +3604,19 @@
     ],
     "remaining": "☆残るのは `E ⊗ Lv′` の側の **3 本だけ**である:(a) `[(E ⊗ Lv′).IsElliptic]`・`[(E′ ⊗ Lv′).IsElliptic]`（`Δ ≠ 0` の移送）、(b) `[IsMinimal R′ (E ⊗ Lv′)]`（付値が変わらないので移る）、(c) `h′ : HasSplitMultiplicativeReduction R′ (E ⊗ Lv′)`（曲線の 2 次式を monic 化して `f` に取り、第 1025 を当てる）。★加えて `Algebra L Lv′` の instance と `halg`（合成の一致）は呼び出し側が `quadFieldHom` から作る。☆もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
     "note": "★944-1028 の 80 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "extLocalData20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1029",
+    "supersedes": "extensionPluggedIn20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★`valuation_algebraMap_ext`（1029）——拡大の上でも付値の橋が成り立つ（`hp` と第 1024 の合成）。",
+      "★★★★★★★★`isMinimal_baseChange_ext`（1029）——極小性は拡大にも移る。",
+      "★★★★★★★★`hasMultiplicativeReduction_ext`（1029）——乗法還元も拡大に移る。"
+    ],
+    "inventoryHit": "☆在庫の確認で `isElliptic_baseChange`（`Found/GaloisRep/DegInfBaseChange.lean:50`）が**instance として既にあった**——楕円性の移送は書かずに済んだ。",
+    "remaining": "★★**残るのは `Splits`（分裂性）ただ 1 つ**である。☆その中身: `integralModel R (E ⊗ Lv)` の 2 次式 `A X² + B X − C₀`（`A = c₄` は単元）を`A` で割って monic 化し、その係数を持ち上げて `f` を作る。★すると `f̄` は「曲線が非分裂 ⟺ 既約」であり、第 1025 により `R[X]/(f)` の剰余体で分裂する。☆詰めるべきは `integralModel R′ (E ⊗ Lv′)` と`(integralModel R (E ⊗ Lv)) ⊗ R′` の同定（変数変換の差の吸収）である。",
+    "note": "★944-1029 の 81 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
