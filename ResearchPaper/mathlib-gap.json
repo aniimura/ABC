@@ -3848,5 +3848,17 @@
     ],
     "structure": "★★`hfin` は 2 つから出る: (1) `hmin`（`E` のモデルが各素点で極小）——モデルの取り方の問題、(2) `hint`（`E′` が各素点で整）——第 1052 の節点。☆(2) の中身は「位数が剰余標数と素な捻れ点は極小モデルで整座標をもつ」で、`l ≠ char(k_p)` は**第 1044 で証明済み**である。",
     "note": "★944-1052 の 104 ブロック。☆`Lemma 3.5` の中心（`IsMuAtBadPrimes`）は第 1044 で `sorry`-free。不等式の側は `lemma_3_5_velu_defect`（第 1050）まで来て、残るのは `hfin` の 1 本。"
+  },
+  "hfinModelIndependent20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1053",
+    "supersedes": "hfinSplitIntoNodes20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★`neronExp_sub_variableChange`（1053）——`neronExp p (C•W) − neronExp p (C•W′) = neronExp p W − neronExp p W′`。"
+    ],
+    "keyInsight": "★★★★**`hfin` はモデルに依らない**——左辺は `E` と `E′` を**同じ**変数変換で動かしても変わらない。☆`neronExp p (C • W) = neronExp p W − valAdd p C.u` なので、`E` と `E′` の両方から同じ `valAdd p C.u` が引かれるからである。★そして第 969（`veluQuotientFull_vcPoint_eq`）により`C • E′ = veluQuotientFull (C • E) (vcPoint C E Q の集合)` なので、**`E` を各素点で極小なモデルに取り替えてよい**。",
+    "consequence": "★★したがって `hmin`（大域極小モデルの存在——類数の障害がある）は**要らない**。☆残るのは局所の計算だけ: `C • E` が `p` で極小なとき`neronExp p (C • E′) = v_p(l)`（第 1051 の分解＋第 962 `Delta_velu_tate_eq`）。",
+    "note": "★944-1053 の 105 ブロック。"
   }
 }

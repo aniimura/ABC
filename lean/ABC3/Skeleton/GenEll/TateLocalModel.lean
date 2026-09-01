@@ -1120,6 +1120,40 @@ def isIntegral_veluQuotientFull_of_coprime.needs : List ProofObligation :=
        "（形式群の捻れが自明であることから）。" ++
        "★Vélu の係数 `veluVFull`・`veluWFull` はその座標の多項式なので整になる") 3 ]
 
+/-! ## ★★★★★★★★★★★★★★★★第 1053 —— `hfin` はモデルに依らない
+
+★★★★**測定（2026-09-01、第 1053）**——`hfin` の左辺
+`∑ᶠ p, neronExp p E · log N(p) − ∑ᶠ p, neronExp p E′ · log N(p)` は
+**`E` と `E′` を同じ変数変換で動かしても変わらない**。
+
+☆`neronExp p (C • W) = neronExp p W − valAdd p C.u`（`neronExp_variableChange`）で、
+`E` と `E′` の両方から同じ `valAdd p C.u` が引かれるからである。
+
+★★そして第 969（`veluQuotientFull_vcPoint_eq`）により
+`C • E′ = veluQuotientFull (C • E) (vcPoint C E Q の集合)` なので、
+**`E` を各素点で極小なモデルに取り替えてよい**。
+☆したがって第 1050 の `hfin` に `hmin`（大域極小モデルの存在——類数の障害がある）は要らない。 -/
+
+/-- ★★★★★★★★★★★★★★★★**`neronExp` の差は変数変換で不変**（第 1053）。
+
+☆これが「`hfin` はモデルに依らない」ことの中身である。 -/
+theorem neronExp_sub_variableChange {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (W W' : WeierstrassCurve L)
+    (hΔ : W.Δ ≠ 0) (hΔ' : W'.Δ ≠ 0) (C : WeierstrassCurve.VariableChange L) :
+    neronExp p (C • W) - neronExp p (C • W') = neronExp p W - neronExp p W' := by
+  rw [ABC3.Found.GaloisRep.neronExp_variableChange p W hΔ C,
+    ABC3.Found.GaloisRep.neronExp_variableChange p W' hΔ' C]
+  ring
+
+def neronExp_sub_variableChange.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(neronExp の差は変数変換で不変。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def neronExp_sub_variableChange.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "neronExp_variableChange(第 319 系、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.neronExp_variableChange") 1 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
