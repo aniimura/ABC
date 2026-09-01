@@ -3985,5 +3985,15 @@
     ],
     "remaining": "☆第 1052（Vélu の商の整性）に残るのは**良い素点側だけ**である。★そこでは Tate の機械が使えないので「位数が剰余標数と素な捻れ点は極小モデルで整」（形式群）が要る。",
     "note": "★944-1066 の 117 ブロック。"
+  },
+  "formalGroupGap20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1067（測定）",
+    "supersedes": "isIntegralVeluBadPrime20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "measurement": "★★★★**実測（2026-09-01）**: mathlib は `RingTheory/FormalGroup/Basic.lean` を持つが、`Mathlib/AlgebraicGeometry/` 側に `FormalGroup` の言及は**0 件**である（`grep -rln FormalGroup Mathlib/AlgebraicGeometry/` が空）。☆すなわち「楕円曲線の形式群」と「剰余標数と素な捻れは還元に単射に落ちる」は**mathlib に無い**。★プロジェクト内にも `formalGroup` は 0 件。",
+    "consequence": "☆第 1052（Vélu の商の整性）の**良い素点側**はこの穴に当たる。★悪い素点側は第 1066 で証明済みなので、残るのはこの 1 点だけである。",
+    "alternatives": "☆迂回の候補: (1) 良い素点では `E` の判別式が単元なので、`veluVFull`・`veluWFull` の分母（`tateDXpair` 相当）が単元であることを直接示す。(2) 分点多項式（mathlib `DivisionPolynomial`）で捻れ点の座標が`Δ` の局所化に入ることを示す。★(2) は mathlib に `DivisionPolynomial` があるので現実的かもしれない。",
+    "note": "★944-1066 の 117 ブロック。"
   }
 }
