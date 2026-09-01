@@ -1356,6 +1356,7 @@ import ABC3.Found.GaloisRep.HtFaltJ
 import ABC3.Found.GaloisRep.HtFaltJField
 import ABC3.Found.GaloisRep.Compositum
 import ABC3.Found.GaloisRep.DegInfLocal
+import ABC3.Found.GaloisRep.PointValuation
 import ABC3.Found.GaloisRep.UnitAtPrime
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GaloisRep.UnramQuad

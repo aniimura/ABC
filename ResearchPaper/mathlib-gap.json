@@ -4009,5 +4009,22 @@
     "notAShortcut": "★★検討して**却下**した近道: 「`E′` を整モデルに取り替える」。☆第 1053 が与える不変性は「`W`・`W′` に**同じ** `C` を当てる」形であり、`E′` だけモデルを変えると `hfin` の左辺は `∑_p v_p(u) log N(p) = log|N(u)|` だけ動く。★積公式は非アルキメデスだけでは 0 にならないので、これは無料ではない。",
     "status": "★★`Lemma 3.5` に残るのはこの 1 点（`isIntegral_veluQuotientFull_of_coprime` の良い素点側）だけ。☆悪い素点側は第 1066、`IsMuAtBadPrimes` は第 1044 で `sorry`-free、不等式は第 1046／1050 で証明済み。",
     "note": "★944-1069 の 120 ブロック。"
+  },
+  "pointValuation20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1070",
+    "supersedes": "divisionPolyGap20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisBlock": [
+      "★★★★★★★★★★★★★★★★`two_valAdd_y_eq_three_valAdd_x`——`W` が `p` で整・`(x,y)` がその上の点・`v_p(x) < 0` なら `2 v(y) = 3 v(x)`。☆`#print axioms` は `[propext, Classical.choice, Quot.sound]`。",
+      "★★★★★★★★★★★★`exists_depth_of_valAdd_x_neg`——深さ `m ≥ 1` の取り出し（`v(x) = −2m`・`v(y) = −3m`）。",
+      "★★★★★★★★`valAdd_rhs_eq`——`v(x)<0` なら方程式の右辺の `valAdd` は `3 v(x)`。",
+      "★★★★★★★★`y_ne_zero_of_valAdd_x_neg`——深い点では `y ≠ 0`。",
+      "★★★★`ValAtLeast` の API（`add`・`mul`・`neg`・`mono`・`congr`・`add_ne_zero_of_valAdd_lt`・`valAdd_add_eq_of_lt`）。"
+    ],
+    "whyValAtLeast": "☆`valAdd p` は `Lˣ` の上でしか定義されないので `a₂x² + a₄x + a₆` のように**個々の項が零になりうる和**を扱えない。★`ValAtLeast p n z :⟺ ∀ hz, n ≤ valAdd p ⟨z⟩`（`z = 0` では空虚に真）を置くと和・積・符号で閉じ、超距離の帳簿がそのまま `omega` に載る。",
+    "inventoryCorrection": "★★**在庫を引いて分かった重要な訂正**: プロジェクトには既に`redPoint`・`redHom`（`Found/GaloisRep/RedKernel.lean`）があり、**点の還元が群準同型であること**（`redPoint_add`）と**`n•` と可換であること**（`redPoint_nsmul`）が Theorem 3.8 のために証明済みである。☆`redPoint_eq_zero_iff` は「還元が 0 ⟺ `v(x) > 1`」、まさに還元の核の判定である。★ただし設定は `W.FunctionField`（Weil 対のための生成点）であって数体 `L` と `p` ではないので、一般化が要る。☆また `Psi`・`Phi`・`PSq`・`PsiRec`・`PsiDouble`・`OmegaMulPsi`・`Eds*` など**分点多項式の在庫も大量にある**（第 1069 の測定は mathlib だけを見ていた）。",
+    "remaining": "☆残るのは濾過の核心 2 段である: (a) `E_m = {P : v(x_P) ≤ −2m}` が部分群であること、(b) `v(z(P+Q) − z P − z Q)` の評価（形式群の 1 次項）。★これが出れば「`p ∤ l` なら `l` 捉れは `E_1` に入らない」= 良い素点での整性が出る。",
+    "note": "★944-1070 の 121 ブロック。"
   }
 }
