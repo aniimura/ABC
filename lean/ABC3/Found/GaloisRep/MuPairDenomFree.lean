@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.MuHeadDenomFree
 import ABC3.Found.GaloisRep.TatePair
+import ABC3.Found.GenEll.Velu
 import ABC3.Meta.Claim
 
 /-!
@@ -64,6 +65,52 @@ theorem natCast_pow_mul_tateYpair (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - a))
   ring
 
 end Bridge
+
+/-! ## ★★★★★★★★★★第 1119 —— Vélu の `v` の分母なし版
+
+☆`veluV2 W x y = 3x² + 2a₂x + a₄ − a₁y` は **`x` と `y` で次数が混ざる**。
+★`x` の頭の分母は 2 次、`y` は 3 次なので、`l⁶` を掛ければ両方払える:
+
+    `l⁶·veluV2 = 3l²(l²x)² + 2a₂l⁴(l²x) + a₄l⁶ − a₁l³(l³y)`
+
+☆右辺は `l²x`・`l³y` だけで書けているので、
+第 1118 の `tateXpairDF`・`tateYpairDF` を入れれば**分母が消える**。 -/
+
+/-- ★★★★**Vélu の `v` の分母なし版**——`X`・`Y` には `l²x`・`l³y` を入れる。 -/
+noncomputable def veluV2DF (l : ℕ) (W : WeierstrassCurve R) (X Y : R) : R :=
+  3 * (l : R) ^ 2 * X ^ 2 + 2 * W.a₂ * (l : R) ^ 4 * X + W.a₄ * (l : R) ^ 6
+    - W.a₁ * (l : R) ^ 3 * Y
+
+/-- ★★★★★★★★**無条件の代数恒等式**——`IsUnit` を一切使わない。 -/
+theorem natCast_pow_mul_veluV2 (l : ℕ) (W : WeierstrassCurve R) (x y : R) :
+    (l : R) ^ 6 * ABC3.Found.GenEll.veluV2 W x y
+      = veluV2DF l W ((l : R) ^ 2 * x) ((l : R) ^ 3 * y) := by
+  show (l : R) ^ 6 * ABC3.Found.GenEll.veluGx W x y = _
+  rw [ABC3.Found.GenEll.veluGx, veluV2DF]
+  ring
+
+/-- ★★★★★★★★★★**Tate の座標での形**（`hu` の下で）。
+
+★右辺は `Ring.inverse` を含まないので `p ∣ l` でも意味を持つ。 -/
+theorem natCast_pow_mul_veluV2_tate [IsDomain R] {l : ℕ} {a : R}
+    (hlu : IsUnit ((l : R))) (hu : IsUnit (1 - a))
+    (hpow : a ^ l = 1) (hsum : ∑ k ∈ range l, a ^ k = 0)
+    (W : WeierstrassCurve R) (w q : R) (hq : q ∈ I) :
+    (l : R) ^ 6 * ABC3.Found.GenEll.veluV2 W (tateXpair a w q hq) (tateYpair a w q hq)
+      = veluV2DF l W (tateXpairDF l a w q hq) (tateYpairDF l a w q hq) := by
+  rw [natCast_pow_mul_veluV2, natCast_pow_mul_tateXpair hlu hu hpow hsum,
+    natCast_pow_mul_tateYpair hlu hu hpow hsum]
+
+def veluV2DF.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(VÃ©lu ã® v ã®åæ¯ãªãçââlâ¶ ãæãã¦ xã»y ã®æ¬¡æ°å·®ãå¸åãã)",
+    sectionId := "genell-lemma-3-5" }
+
+def natCast_pow_mul_veluV2.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★**2026-09-01（第 1119）**——`l⁶·veluV2` を `l²x`・`l³y` だけで書いた。" ++
+       "☆これは**無条件の代数恒等式**で、`ring` で閉じる。" ++
+       "★第 1118 の `tateXpairDF`・`tateYpairDF` を入れれば分母が消える。") 5 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
