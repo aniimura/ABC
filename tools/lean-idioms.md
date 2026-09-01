@@ -2563,3 +2563,11 @@ grep する（1 つずつ思い出した順に引くと漏れる）。
 GaloisRep 側が選ばれ、`Application type mismatch` になる。
 ☆MCP の `lean_check` は top-level ＋ `open` で試すので**この衝突が出ない**。
 ファイルに移すときは名前空間を明示すること。
+
+## `Valued.mem_nhds` は `restrict` と `ValueGroup₀` の言葉（第 989）
+
+`s ∈ 𝓝 x` を**作る**とき、`rw [Valued.mem_nhds]` の後の目標は
+`Valued.v.restrict (z − x) < ↑γ` の形になる。
+★`γ := 1` を渡し、`Valuation.restrict_lt_iff_lt_embedding` で書き換えてから
+`simp only [Units.val_one, map_one]` で `Valued.v (z − x) < 1` に落とす。
+☆第 897・943 でも同じ場所で止まっている——3 度目。
