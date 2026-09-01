@@ -4364,5 +4364,29 @@
       "(iii) PowerSeries.map の単射性で A₀ に降ろす段(第 1107 の powerSeries_eq_of_map_eq)"
     ],
     "gate": "lake build ABC3 成功(6252 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "adicEvalHom20260901": {
+    "block": 1126,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★係数環つきの評価も環準同型である——節点 3 の特殊化の段",
+    "goal": "Lemma 3.5 から d + 1 < l を外す(§3 の枠の節点 3)。",
+    "what": [
+      "★第 96(TateSpecialize.lean)は ℤ⟦q⟧ →+* R(evalAdicHom)を与える。第 1106(AdicEvalGen.lean)は係数環つきの評価 evalAdicMap φ を関数としてのみ与えていた。",
+      "★★本ブロックはその 2 つを繋ぎ、S⟦q⟧ →+* R(evalAdicMapHom φ q hq)を立てた。",
+      "☆機構は第 96 とまったく同じ——打ち切り(PowerSeries.trunc)で部分和を多項式の評価に書き換え、trunc_trunc_mul_trunc で法 I^n の乗法性を出す。Int.castRingHom R を φ に差し替えただけである。"
+    ],
+    "added": {
+      "Found/GaloisRep/AdicEvalHom.lean (新規)": [
+        "partialEvalMap_eq_eval_trunc(部分和 = 打ち切りの評価)",
+        "eval_mem_pow_of_coeff_zero_map(低次が消える多項式は I^n に値を取る)",
+        "partialEvalMap_mul_smodEq(部分和の乗法性、法 I^n)",
+        "evalAdicMap_add / evalAdicMap_mul / evalAdicMap_C / evalAdicMap_one",
+        "evalAdicMapHom(★S⟦q⟧ →+* R)",
+        "evalAdicMapHom_apply / evalAdicMapHom_int(S = ℤ なら第 96 に一致)"
+      ]
+    },
+    "effect": "★これで PowerSeries ℤ[ζ_l] →+* R(ζ_l ↦ ζ、X ↦ q)が環準同型として立つ。☆第 1125 の map_*DF が「DF 形は環準同型を通り抜ける」を与えているので、節点 3 の降下路 A₀ = PowerSeries ℤ[ζ_l] → A₁ = PowerSeries ℚ(ζ_l) → (降下) → A₀ → (特殊化) → R が繋がった。",
+    "remaining": "☆残るのは A₁ の中で hu つきの veluV2_eq_tateDYpair を当て、PowerSeries.map の単射性(第 1107 の powerSeries_eq_of_map_eq)で A₀ に降ろす段である。★A₁ = PowerSeries ℚ(ζ_l) が IsAdicComplete (span {X}) を持つことは mathlib のインスタンス(第 1104 で実測)。",
+    "gate": "lake build ABC3 成功(6253 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
   }
 }
