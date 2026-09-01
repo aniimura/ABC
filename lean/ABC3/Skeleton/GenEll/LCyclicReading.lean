@@ -44,17 +44,17 @@ import ABC3.Meta.Claim
 ★★★これは `CLAUDE.md` の「逸脱」の規約が名指ししている場合である
 ——『後続の証明に影響が出ないならば読み替えを許容する』。**影響が出た**ので記録する。
 
-## ★★★★★★★★★★★★★★★★節点（進捗枠 **1.5 / 3**）
+## ★★★★★★★★★★★★★★★★節点（進捗枠 **1.7 / 3**）
 
 `Lemma 3.7` の第 3 の主張を **(J) の側で**言い直すのに要るもの:
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `veluQuotientFull_descends` | ★★**閉じた**（第 1153 の `fixesCoeffs_veluQuotientFull` ＋ 第 1154 の `mem_range_of_fixed`） | 12 → **0** |
-| 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す。★**道は第 1155-1156 で短くなった**（下記） | 10 → **5** |
+| 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す。★**道は第 1155-1157 で短くなった**（下記） | 10 → **3** |
 | 3 | `lemma_3_7_stableLine` | ☆第 3 の主張を `HasLCyclicJ` の側で述べ直す。★これで `Theorem 3.8` に繋がる | 4 |
 
-☆総重み 26 → **9**（第 1153-1154 で節点 1 が閉じ、第 1155-1156 で節点 2 が 5 分進んだ）。
+☆総重み 26 → **7**（第 1153-1154 で節点 1 が閉じ、第 1155-1157 で節点 2 が 7 分進んだ）。
 
 ### ★★★★★★★★★★★★第 1154 で節点 1 が閉じた
 
@@ -108,10 +108,27 @@ import ABC3.Meta.Claim
 |---|---|---|
 | 2a | `L̄` の捻れ点の `x` は `primeSubring p` 上**整** | ★第 1155（`isIntegral_x_of_addOrderOf_prime`） |
 | 2b | `x` が整なら `y` も整（Weierstrass 方程式が `y` についてモニック） | ★第 1156（`isIntegral_y_of_isIntegral_x`） |
-| 2c | `v`・`w` はその多項式なので整、かつ `L` の元。`primeSubring p` は整閉なので**属する** | ☆残る。★`w` の `/2` は `exists_veluW_of_inv` の対（`H∖{O}` は反転で安定）で消える |
+| 2c | `v` は多項式なので整、かつ `L` の元 ⟹ **属する** | ★第 1157（`isIntegral_veluVFull`・`mem_primeSubring_of_isIntegral_image`） |
+| 2c' | `w` の `/2` | ☆残る。★**道は測った**——下記 |
 | 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ☆残る |
 
 ★**付値の議論（深さ `m`・`ValAtLeast` の連鎖）がまるごと要らなくなる**のが本計測の利きである。
+
+### ★★★★★★★★`w` の `/2` の道（第 1157 の測定）
+
+☆`w` だけは割り算があるので多項式の議論では済まない。
+★しかし**再添字すれば既存の道具がそのまま使える**:
+
+`l`-巡回部分群 `H` は `L̄` の中で巡回であるから、生成元 `Q₀ ∈ E(L̄)` が取れて
+
+    `S = ((range l).erase 0).image (fun k => pointCoords (k • Q₀))`
+
+と書ける（`Q₀` は `L` 有理でなくてよい）。★反転は `k ↦ l − k` に対応するので、
+`exists_veluW_of_inv`（第 960）と `exists_veluW_two`（第 1149）が**そのまま効く**。
+
+☆つまり `TorsionIntegralGood.lean` の `isIntegral_veluQuotientFull_of_addOrderOf_prime`
+を `L̄` と `A ≔ integralClosure R L̄` で組み直すだけである。
+★**新しい数学は要らない**——Finset の対を作る道具を新規に書く必要は無い。
 
 ### ☆別の道（採らない理由）
 

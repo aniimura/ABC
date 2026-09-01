@@ -105,6 +105,25 @@ theorem isIntegral_x_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
     exact hroot
   exact isIntegral_of_isUnit_leadingCoeff haeval hu
 
+/-! ## ☆付値環の元の像は整 -/
+
+/-- ☆`primeSubring p` の元の `L̄` での像は `primeSubring p` 上整である。 -/
+theorem isIntegral_algebraMap_of_mem (p : HeightOneSpectrum (𝓞 L)) {z : L}
+    (hz : z ∈ primeSubring p) : IsIntegral (primeSubring p) (algebraMap L Lbar z) := by
+  have h1 : algebraMap (primeSubring p) Lbar ⟨z, hz⟩ = algebraMap L Lbar z := by
+    rw [IsScalarTower.algebraMap_apply (primeSubring p) L Lbar]
+    rfl
+  rw [← h1]
+  exact isIntegral_algebraMap
+
+/-- ☆数は整である。 -/
+theorem isIntegral_ofNat (p : HeightOneSpectrum (𝓞 L)) (n : ℕ) :
+    IsIntegral (primeSubring p) ((n : Lbar)) := by
+  have h1 : ((n : Lbar)) = algebraMap (primeSubring p) Lbar (n : primeSubring p) := by
+    rw [map_natCast]
+  rw [h1]
+  exact isIntegral_algebraMap
+
 /-! ## ★★★★★★★★`x` が整なら `y` も整 -/
 
 /-- ★★★★★★★★★★**`x` が整なら `y` も整**——★**無条件**（第 1156）。
@@ -125,13 +144,8 @@ theorem isIntegral_y_of_isIntegral_x (p : HeightOneSpectrum (𝓞 L))
   set R := primeSubring p with hR
   obtain ⟨ha1, ha2, ha3, ha4, ha6⟩ := mem_primeSubring_of_isIntegral p W
   -- ☆`R` の元の像は整
-  have hint : ∀ z : L, z ∈ R → IsIntegral R (algebraMap L Lbar z) := by
-    intro z hz
-    have h1 : algebraMap R Lbar ⟨z, hz⟩ = algebraMap L Lbar z := by
-      rw [IsScalarTower.algebraMap_apply R L Lbar]
-      rfl
-    rw [← h1]
-    exact isIntegral_algebraMap
+  have hint : ∀ z : L, z ∈ R → IsIntegral R (algebraMap L Lbar z) := fun _ hz =>
+    isIntegral_algebraMap_of_mem p hz
   have h1 : IsIntegral R (algebraMap L Lbar W.a₁) := hint _ ha1
   have h2 : IsIntegral R (algebraMap L Lbar W.a₂) := hint _ ha2
   have h3 : IsIntegral R (algebraMap L Lbar W.a₃) := hint _ ha3
@@ -159,11 +173,72 @@ theorem isIntegral_y_of_isIntegral_x (p : HeightOneSpectrum (𝓞 L))
       WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at heq
     linear_combination heq
 
+/-! ## ★★★★★★★★★★★★`v` の側は整 -/
+
+/-- ★★★★★★★★**座標が整なら `veluV2` も整**——★**無条件**（第 1157）。 -/
+theorem isIntegral_veluV2 (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    {x y : Lbar} (hx : IsIntegral (primeSubring p) x) (hy : IsIntegral (primeSubring p) y) :
+    IsIntegral (primeSubring p) (veluV2 (W.map (algebraMap L Lbar)) x y) := by
+  obtain ⟨ha1, ha2, ha3, ha4, ha6⟩ := mem_primeSubring_of_isIntegral p W
+  have h3 : IsIntegral (primeSubring p) ((3 : Lbar)) := by
+    have := isIntegral_ofNat (L := L) p 3
+    rwa [Nat.cast_ofNat] at this
+  have h2 : IsIntegral (primeSubring p) ((2 : Lbar)) := by
+    have := isIntegral_ofNat (L := L) p 2
+    rwa [Nat.cast_ofNat] at this
+  show IsIntegral (primeSubring p) (veluGx (W.map (algebraMap L Lbar)) x y)
+  rw [veluGx]
+  simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₄]
+  exact (((h3.mul (hx.pow 2)).add
+      ((h2.mul (isIntegral_algebraMap_of_mem p ha2)).mul hx)).add
+      (isIntegral_algebraMap_of_mem p ha4)).sub
+      ((isIntegral_algebraMap_of_mem p ha1).mul hy)
+
+/-- ★★★★★★★★★★**座標がすべて整なら `veluVFull` も整**——★**無条件**（第 1157）。 -/
+theorem isIntegral_veluVFull (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    (S : Finset (Lbar × Lbar))
+    (hS : ∀ z ∈ S, IsIntegral (primeSubring p) z.1 ∧ IsIntegral (primeSubring p) z.2) :
+    IsIntegral (primeSubring p) (veluVFull (W.map (algebraMap L Lbar)) S) := by
+  rw [veluVFull]
+  refine Subalgebra.sum_mem (integralClosure (primeSubring p) Lbar) (fun z hz => ?_)
+  exact isIntegral_veluV2 p W (hS z hz).1 (hS z hz).2
+
+/-! ## ★★★★★★★★★★★★★★★★整で `L` の元なら付値環に属する -/
+
+/-- ★★★★★★★★★★★★★★★★
+**`L` の元がその像で整なら付値環に属する**——★**無条件**（第 1157）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これが節点 2 の要である——`Gal`-安定な部分群の Vélu の和は
+第 1154 で **`L` の元**、本ファイルで **`R` 上整**、そして `R` は `L` で整閉なので
+**`R` に属する**。☆付値の議論はどこにも要らない。 -/
+theorem mem_primeSubring_of_isIntegral_image (p : HeightOneSpectrum (𝓞 L)) {z : L}
+    (hz : IsIntegral (primeSubring p) (algebraMap L Lbar z)) :
+    z ∈ primeSubring p := by
+  have hinj : Function.Injective (algebraMap L Lbar) := (algebraMap L Lbar).injective
+  have hz' : IsIntegral (primeSubring p) z := (isIntegral_algebraMap_iff hinj).mp hz
+  obtain ⟨w, hw⟩ := IsIntegrallyClosed.isIntegral_iff.1 hz'
+  exact hw ▸ w.2
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def isIntegral_x_of_addOrderOf_prime.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(L̄ の位数 l の点の x は primeSubring p 上整。★偶奇不問、付値を使わない)",
+    sectionId := "genell-lemma-3-5" }
+
+def isIntegral_veluVFull.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(座標がすべて整なら veluVFull も整。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def mem_primeSubring_of_isIntegral_image.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(L の元がその像で整なら付値環に属する——整閉だから。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def isIntegral_y_of_isIntegral_x.src : ABC3.Meta.Source :=
