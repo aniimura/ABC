@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.MuHeadDenomFree
 import ABC3.Found.GaloisRep.MuDenomFreeSum
+import ABC3.Found.GaloisRep.VeluDYDenomFree
 import ABC3.Meta.Claim
 
 /-!
@@ -34,41 +35,42 @@ import ABC3.Meta.Claim
 
 ★機構は在庫の `one_sub_mul_sum_nsmul`——`(1 − η)·S(η) = −l`、`IsUnit` 不要。
 
-### ★★★★★★★★第 1125 で節点 3 の降下路が通った
+### ★★★★★★★★★★★★第 1125-1128 で節点 3 が閉じた
 
-節点 3 の降下は `A₀ = PowerSeries ℤ[ζ_l] → A₁ = PowerSeries ℚ(ζ_l)` で行う
-（`A₁` では `l` が可逆なので `1 − ζ^i` も可逆で、既存の `hu` つきの補題が使える）。
-★そこを通すには「DF 形が `PowerSeries.map` を通り抜ける」が要る。
+☆当初は `ℤ[ζ_l] → ℚ(ζ_l)` を万有な環に取る設計だったが、**円分環は要らなかった**。
 
-☆第 221（`TateFunctorial.lean`）の `map_tateXpair` は `IsUnit (1 − a)` を要求するが、
-★第 1125 の `map_tateXpairDF`・`map_tateYpairDF`・`map_tateDXpairDF`・`map_tateDYpairDF` は
-**要求しない**——頭項が `Ring.inverse` を含まない多項式だからである。
-☆要るのは `w` 側の単元性だけで、それは `w ∈ I` から自動である。
+| 段 | 場所 | 何をするか | 第 |
+|---|---|---|---|
+| 1 | `A₁ = PowerSeries K`（`K` は体） | `1 − C α` も `(l)` も単元なので在庫の `hu` つきの補題が効く | 1128 |
+| 2 | `PowerSeries A → PowerSeries (FractionRing A)` | `PowerSeries.map` の単射性で降ろす | 1128 |
+| 3 | `PowerSeries R → R`（`X ↦ q`） | `evalAdicMapHom` で特殊化する | 1126 |
 
-★残るのは (i) `ℤ[ζ_l] → R` の特殊化（`evalAdicMap`、第 1106）を環準同型として立てる段、
-(ii) `A₁` で `hu` つきの `veluV2_eq_tateDYpair` を当てる段、
-(iii) `PowerSeries.map` の単射性で `A₀` に降ろす段（第 1107 の `powerSeries_eq_of_map_eq`）。
+★通り道は第 1125 の `map_*DF`——第 221 の `map_tateXpair` は `IsUnit (1 − a)` を
+要求するが、DF 形は要求しない（頭項が `Ring.inverse` を含まない多項式だから）。
 
-## ★★★★★★★★★★残り 5 節点（進捗枠 **2 / 5**）
+★★**`PowerSeries A` は係数環 `A` を取り替えても `(X)`-adic 完備である**——
+第 1091 で「商体に移すと `q` の収束が壊れる」と測った行き止まりの抜け道がこれであった。
+
+☆側条件 `hDX ≠ 0` は `A₁` の定数項 `α(1+α)/(1−α)³` を見るだけで出た（第 1128）。
+
+## ★★★★★★★★★★残り 5 節点（進捗枠 **3 / 5**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `sum_mu_dxpairE_zero` | `∑ DX` の `E` 版（`hu` なし）**★第 1115 で証明済み** | 8 |
 | 2 | `sum_mu_d2xpairE` | `∑ D²X` の `E` 版（`hu` なし）**★第 1116 で証明済み** | 10 |
-| 3 | `sum_veluV2E_eq_sum_tateDYpairE` | Vélu の `v` と `DY` の一致の `E` 版 | 6 |
+| 3 | `veluV2DF_eq_tateDYpairDF` | Vélu の `v` と `DY` の一致の `E` 版 **★第 1128 で証明済み** | 6 |
 | 4 | `c4_c6_velu_tateE` | `c₄`・`c₆` の恒等式の `E` 版 | 10 |
 | 5 | `minDeltaExp_eq_mul_at_bad_prime_dvd` | `p ∣ l` の悪い素点で `Δ_min` が `l` 倍 | 12 |
 
-☆総重み 46。★**本ファイルに型を置いたのは節点 1-2 だけである**（節点 3-5 は 1-2 が済んでから型を確定させる——`c₄`・`c₆` の `E` 版の形は節点 2 の結論に依存する）。★節点 1-2 が本体（μ_l の指標和を `ℤ[ζ_l]` の中で処理する段）。
+☆総重み 46。★残るのは節点 4-5（重み 22）である。
 
-### ★★★降下の道（第 1099-1100 で確定）
+### ★★★降下の道（第 1128 で確定した最終形）
 
-`E` 版の主張は `ℤ[ζ_l]` の中の恒等式（`q` の各次数ごと）に分かれる。
-`ℤ[ζ_l]` は ℤ-捻れ自由なので `ℤ[ζ_l] → ℚ(ζ_l)` は単射で、
-`ℚ(ζ_l)` では `1 − ζ^i ≠ 0` すなわち可逆だから**既存の `hu` つきの補題が使える**。
-★単射性で降ろせば `hu` が消える。
-☆「商体 `K` に移す」が通らない（第 1091）のは `q` の収束が壊れるからだが、
-`q` の次数ごとに見れば収束は無関係である。
+節点 1-2（和の形）は `ℤ[ζ_l] → ℚ(ζ_l)` の単射性で降ろした（第 1112-1116）。
+節点 3（点ごとの恒等式で尾を含むもの）は `PowerSeries` を経由した（第 1125-1128）。
+★**尾を含む主張は係数環の取り替えでは降りない**——`FractionRing` は
+`I`-adic 完備でないからである。`PowerSeries` はそこを迂回する。
 -/
 
 namespace ABC3.Skeleton.GenEll
@@ -128,5 +130,34 @@ def sum_mu_d2xpairE.needs : List ProofObligation :=
   [ .citation "[ABC3]" "natCast_pow_mul_tateD2Xterm(橋、第 1102、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.natCast_pow_mul_tateD2Xterm") 1,
     .implicitStep "☆節点 1 と同じ降下（`ℤ[ζ_l] → ℚ(ζ_l)` の単射性）。" 10 ]
+
+/-- ★★★★★★★★★★★★**節点 3**——Vélu の `v` と `DY` の一致の `E` 版（第 1128）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`veluV2_eq_tateDYpair`（`TateODE.lean:89`）の分母なし版である。
+★★**`IsUnit (1 − α)` も `IsUnit (l)` も取らない**——`p ∣ l` の悪い素点でも成り立つ。 -/
+theorem veluV2DF_eq_tateDYpairDF {l : ℕ} (hl0 : (l : R) ≠ 0) {α : R}
+    (hα1 : α ≠ 1) (hα0 : α ≠ 0) (hαneg : α + 1 ≠ 0)
+    (hpow : α ^ l = 1) (hsum : ∑ k ∈ range l, α ^ k = 0) (q : R) (hq : q ∈ I) :
+    veluV2DF l (tateCurveAt q hq) (tateXpairDF l α (α ^ (l - 1) * q) q hq)
+        (tateYpairDF l α (α ^ (l - 1) * q) q hq)
+      = (l : R) ^ 2 * tateDYpairDF l α (α ^ (l - 1) * q) q hq :=
+  ABC3.Found.GaloisRep.veluV2DF_eq_tateDYpairDF hl0 hα1 hα0 hαneg hpow hsum q hq
+
+def veluV2DF_eq_tateDYpairDF.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(節点 3——veluV2 = DY の E 版。hu も IsUnit(l) も取らない)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluV2DF_eq_tateDYpairDF.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "veluV2DF_eq_tateDYpairDF(Found の本体、第 1128、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV2DF_eq_tateDYpairDF") 1,
+    .implicitStep
+      ("★★**2026-09-01（第 1128）**——`PowerSeries` を万有な完備環として使った。" ++
+       "☆`PowerSeries A` は係数環 `A` を取り替えても `(X)`-adic 完備なので、" ++
+       "`PowerSeries (FractionRing A)` で `hu` を得て単射性で降ろせる。" ++
+       "★これが第 1091 で測った行き止まり（商体では `q` の収束が壊れる）の抜け道である。") 6 ]
 
 end ABC3.Skeleton.GenEll

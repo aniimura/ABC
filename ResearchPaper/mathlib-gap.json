@@ -4414,5 +4414,36 @@
     },
     "mathlib": "☆使う instance は PowerSeries.instIsAdicCompleteSpanSingletonSetX(Mathlib/RingTheory/AdicCompletion/Completeness.lean:226)。★import を足すまで infer_instance が失敗する(実測)ので Mathlib.RingTheory.AdicCompletion.Completeness を明示 import した。",
     "gate": "lake build ABC3 成功(6254 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "veluDYDenomFree20260901": {
+    "block": 1128,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★veluV2 = DY の分母なし版——§3 の枠の節点 3 が閉じた",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠、進捗 2/5 → 3/5)。",
+    "what": [
+      "★veluV2_eq_tateDYpair(Skeleton/GenEll/TateODE.lean:89)は IsUnit (1 − a) を要求する。X・Y が Ring.inverse (1 − a) で書かれているからである。p ∣ l の悪い素点では 1 − ζ^i が単元でないので使えない。",
+      "★★本ブロックは分母を払った形 veluV2DF l E_q (l²X) (l³Y) = l²·(l⁴·DY) を、IsUnit (1 − a) も IsUnit (l) も要求せずに証明した。"
+    ],
+    "route": [
+      "段 1: A₁ = PowerSeries K(K は体)では 1 − C α も (l) も単元なので在庫の hu つきの補題がそのまま効く(veluV2DF_eq_tateDYpairDF_field)",
+      "段 2: PowerSeries A → PowerSeries (FractionRing A) の単射性(PowerSeries.map_injective)で整域に降ろす(veluV2DF_eq_tateDYpairDF_powerSeries)",
+      "段 3: evalAdicMapHom (RingHom.id R) q hq(第 1126)で完備環 R に特殊化する(veluV2DF_eq_tateDYpairDF)"
+    ],
+    "designNote": "★★★★当初は ℤ[ζ_l] → ℚ(ζ_l) を万有な環に取る設計だった(第 1107 の docstring)が、**円分環は要らなかった**。☆必要だったのは「係数環を取り替えても (X)-adic 完備性が壊れない」ことだけで、FractionRing R で十分である。★AdjoinRoot も cyclotomic の既約性も使わずに済んだ。",
+    "sideCondition": "★側条件 hDX ≠ 0 は A₁ の定数項を見るだけで出た(tateDXpair_C_ne_zero)。定数項は α(1+α)/(1−α)³ で、尾(tateDXtail)も w 側(w ∈ (X))もすべて (X) に入るので効かない。☆TateDXNeZero.lean の tateDXpair_ne_zero_of_mu は TateSetup と Tate 一意化の重装備を要するが、A₁ では要らない。★α ≠ −1 は l が奇素数であることから出る(Lemma 3.5 はすでに l ≠ 2 を置いている)。",
+    "added": {
+      "Found/GaloisRep/VeluDYDenomFree.lean (新規)": [
+        "constantCoeff_of_mem_span_X",
+        "tateDXpair_C_ne_zero(★側条件が定数項で出る)",
+        "veluV2DF_eq_tateDYpairDF_field(段 1)",
+        "veluV2DF_eq_tateDYpairDF_powerSeries(段 2)",
+        "veluV2DF_eq_tateDYpairDF(★段 3——節点 3 の核)"
+      ],
+      "Skeleton/GenEll/MuDenomFree.lean": [
+        "節点 3 の型を置いて Found に委譲、進捗枠 2/5 → 3/5"
+      ]
+    },
+    "remaining": "☆残るのは節点 4(c₄・c₆ の恒等式の E 版、重み 10)と節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)。",
+    "gate": "lake build ABC3 成功(6255 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
