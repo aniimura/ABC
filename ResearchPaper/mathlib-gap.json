@@ -4156,7 +4156,7 @@
     "whatExists": "★**数値の鎖は全部ある**（`Found/`、`sorry` 0）: `thm_2_1_stepA`・`thm_2_1_stepB`（`h1`–`h6` を受ける形）・`exists_bad_seq_tendsto`（反例列とコンパクト性）・`Thm21DegRatio`（Riemann–Hurwitz の帳簿）。☆残っているのは**幾何の側の入力を作ること**である。",
     "frame": {
       "name": "§2 (ii) ⟹ (i) の進捗枠",
-      "done": 0,
+      "done": 5,
       "total": 8,
       "file": "lean/ABC3/Skeleton/GenEll/Section2Converse.lean",
       "nodes": [
@@ -4170,8 +4170,16 @@
         "8. theorem_2_1_converse —— 組み立て。★これが実質。重み 8"
       ],
       "totalWeight": 44,
-      "largest": "★節点 1（[NCBelyi] Thm 2.5 の一般曲線版）が最大。`ℙ¹` 版は済んでおり、残るのは Riemann–Roch による一般曲線への帰着。"
+      "largest": "★節点 1（[NCBelyi] Thm 2.5 の一般曲線版）が最大。`ℙ¹` 版は済んでおり、残るのは Riemann–Roch による一般曲線への帰着。",
+      "note": "★2026-09-01 第 1094 で 3-7 を閉じた（4・5・6 はグルー、実質は .needs に重みつきで残す）。☆第 1095 で節点 1 の重みを 12 → 120+ に改めた（曲線の RR / Serre 双対性が mathlib に無い）。"
     },
-    "note": "★944-1093 の 144 ブロック。"
+    "note": "★944-1093 の 144 ブロック。",
+    "node1Measured": {
+      "block": "第 1095（節点 1 の実測）",
+      "whatTheProofUses": "★原典 [NCBelyi] p.5-6 の `Theorem 2.5` の証明を通読した。使っているのは:☆(a) 曲線の**種数** `g_X`、(b) 有効因子 `D = Σ_{t∈T}[t]` と直線束 `L = O_X(D)`、(c) **標準束** `ω_X`、(d) 次数の帳簿 `deg(ω_X ⊗ L⁻¹(x)) ≤ (2g_X−2)−(2g_X+1)+1 = −2`、(e) **Serre 双対性**（`Γ(X, ω_X ⊗ L⁻¹(x))` が `H¹(X, L(−x))` の双対）。★これで `H¹(X, L(−x)) = 0` を出し、切断で点を分離して `φ : X → ℙ¹` を作る。",
+      "mathlibHasNone": "★★★★**実測: mathlib は 1 つも持っていない**——`RiemannRoch` 0 件（Mathlib 全体）、`Mathlib/AlgebraicGeometry/` に `genus` 0 件・`canonicalDivisor` 0 件・`linearSystem` 0 件。☆`Divisor` を含む 10 ファイルは楕円曲線の分点多項式と `FunctionField`・`Properties`・`SpreadingOut` で、曲線の因子理論ではない。★プロジェクト側の `Found/Divisor/` は Arakelov/Frobenioid の**算術**因子であって幾何の曲線因子ではない。",
+      "revisedWeight": "★★**節点 1 の重み 12 は過小である**。曲線の Riemann–Roch / Serre 双対性のパッケージを Lean で建てることを含むので、**mathlib 規模の独立プロジェクト**である。☆重みを 12 → **120+** に改める。",
+      "cheaperRoute": "☆検討した近道: 「一般曲線から `ℙ¹` への非定数射は関数体が `ℚ̄(t)` の有限拡大であることから出る（RR 不要）」——**しかし原典はそれを使っていない**。原典は `T` の点を `{0,1,∞}` の外に逃がすために `H¹` の消滅を要求しており、そこが Serre 双対性である。★noncritical 性（(c)）が RR を要求する部分である。"
+    }
   }
 }
