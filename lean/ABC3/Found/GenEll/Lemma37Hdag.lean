@@ -80,7 +80,54 @@ theorem hdag_of_stableLine :
   have hle : C ≤ max C 0 := le_max_left _ _
   nlinarith [hmain, hle]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`Lemma 3.7` を安定直線の側で閉じる -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.7 —— 安定直線の側（`hdag` を埋めた形）**（第 1226）。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+☆第 1210 の `hdag` を第 1225 で埋めた。
+★受けている外部の仮定は **`VeluQuotOK` ただ 1 つ**である
+——Vélu の商が楕円かつ半安定であること（原文が「同種なので自動」と括弧で述べる段）。
+
+★★★これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る。 -/
+theorem lemma_3_7_stableLine_full (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
+    (eps : ℝ) (heps : 0 < eps)
+    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l) :
+    ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+        ∀ condA condB : Prop,
+          (condA ↔ (100 * (E.deg : ℝ)
+                      * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
+                    ∧ E.toSSCurve.HasMultRed)) →
+          (condB ↔ (E.j ∈ KV ∧ E.toSSCurve.PrimeToLocalHeights l)) →
+          (condA → E.toSSCurve.PrimeToLocalHeights l)
+        ∧ (condB → E.j ∉ Exc → E.toSSCurve.HasMultRed)
+        ∧ ((condA ∨ condB) → HasLCyclicJ E.toSSCurve l → E.j ∈ Exc) := by
+  obtain ⟨C₅, hC₅, hdag⟩ := hdag_of_stableLine
+  exact lemma_3_7_stableLine_cop KV hKV eps heps C₅ hC₅
+    (fun E l hl hcyc hcop => hdag E l hl hcyc hcop (hquot _ _))
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def lemma_3_7_stableLine_full.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(安定直線の側——hdag を埋めた形。外部の仮定は VeluQuotOK のみ)",
+    sectionId := "genell-lemma-3-7" }
+
+def lemma_3_7_stableLine_full.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "lemma_3_7_stableLine_cop(第 1210、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.lemma_3_7_stableLine_cop") 1,
+    .citation "[ABC3]" "hdag_of_stableLine(第 1225、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.hdag_of_stableLine") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1226）**——受けている外部の仮定は" ++
+       "**`VeluQuotOK` ただ 1 つ**である——Vélu の商が楼円かつ半安定であること" ++
+       "（原文が「同種なので自動」と括弧で述べる段）。" ++
+       "★★★これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る。") 3 ]
 
 def VeluQuotOK.src : Source :=
   { paper := "GenEll", pdfPage := 17,

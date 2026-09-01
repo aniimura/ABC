@@ -437,6 +437,18 @@ import ABC3.Meta.Claim
 
 ★★★**これで節点 1・2・3 がすべて閉じた**。
 
+##### ★★★★★★★★★★★★★★★★★★★★★★★★第 1225-1226——**`Lemma 3.7` が安定直線の側で閉じた**
+
+`hdag_of_stableLine`・`lemma_3_7_stableLine_full`
+（`Found/GenEll/Lemma37Hdag.lean`）。
+
+☆第 1210 の `hdag` を第 1225 で埋め、第 1226 で入れた。
+★受けている外部の仮定は **`VeluQuotOK` ただ 1 つ**である
+——Vélu の商が楼円かつ半安定であること
+（原文が「同種なので自動」と括弧で述べる段）。
+
+★★★**これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る**。
+
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
 mathlib の `map_variableChange`。☆残るのは組み立てだけである。
