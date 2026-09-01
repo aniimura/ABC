@@ -237,6 +237,59 @@ def exists_point_j_tateModel'.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(j が同じ相方に付け替えた形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★第 977 —— 第 972 の残りの小さな仮説
+
+★第 972 は `h2 : (2 : R) ≠ 0`・`h2K : (2 : Lv) ≠ 0`・`hql : q^l ∈ 𝔪`・
+`hΔ : Δ(E_q ⊗ Lv) ≠ 0` を受ける。☆どれも短いのでまとめて取っておく。
+
+* `2 ≠ 0` は標数 0（第 897 の `charZero_adicCompletion(Integers)`）
+* `q^l ∈ 𝔪` は `Ideal.pow_mem_of_mem`
+* `Δ ≠ 0` は `tateModel_baseChange`（第 944）——Tate モデルは `E ⊗ Lv` の変数変換だから -/
+
+/-- ★**完備化の体は標数 0 なので `2 ≠ 0`**。 -/
+theorem two_ne_zero_adicCompletion (L : Type) [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) : (2 : p.adicCompletion L) ≠ 0 := by
+  haveI := charZero_adicCompletion L p
+  norm_num
+
+/-- ★**完備化の整数環も標数 0 なので `2 ≠ 0`**。 -/
+theorem two_ne_zero_adicCompletionIntegers (L : Type) [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) : (2 : p.adicCompletionIntegers L) ≠ 0 := by
+  haveI := charZero_adicCompletionIntegers L p
+  norm_num
+
+/-- ★**`q ∈ I` なら `q^l ∈ I`**（`l > 0`）。 -/
+theorem pow_mem_of_mem_ideal {R : Type} [CommRing R] {I : Ideal R} {q : R} (hq : q ∈ I)
+    {l : ℕ} (hl : 0 < l) : q ^ l ∈ I :=
+  Ideal.pow_mem_of_mem I hq l hl
+
+/-- ★★★★★★★★**Tate モデルを `K` に上げた曲線の `Δ` は `0` でない**。
+
+☆`tateModel_baseChange`（第 944）により Tate モデルは `W` の変数変換なので、
+`W` が楕円なら `Δ ≠ 0` である。★これが第 972 の `hΔ` である。 -/
+theorem tateModel_map_Delta_ne_zero {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [W.IsElliptic] [WeierstrassCurve.IsMinimal R W]
+    (h : WeierstrassCurve.HasSplitMultiplicativeReduction R W) :
+    ((tateCurveAt (tateParamR W h) (tateParamR_mem W h)).map
+      (algebraMap R K)).toAffine.Δ ≠ 0 := by
+  obtain ⟨hq, C₀, hne, hCE⟩ := tateParamR_spec W h
+  have hbase := tateModel_baseChange W h hCE
+  show ((tateCurveAt (tateParamR W h) (tateParamR_mem W h)).map (algebraMap R K)).Δ ≠ 0
+  rw [hbase]
+  exact ((C₀.map (algebraMap R K)) • W).isUnit_Δ.ne_zero
+
+def two_ne_zero_adicCompletion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(完備化の体は標数 0 なので 2 ≠ 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def tateModel_map_Delta_ne_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Tate モデルを K に上げた曲線の Δ は 0 でない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_point_j_tateModel.src : ABC3.Meta.Source :=
