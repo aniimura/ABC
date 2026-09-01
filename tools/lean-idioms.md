@@ -2970,3 +2970,11 @@ because it depends on 'PadicInt.instCommRing'`。
 ☆復旧は `git checkout -- <file>`（コミット済みなら）。
 
 ★サロゲート自体の対処は「Python surrogate escapes」の項——`'\U0001D53D'` と書く。
+
+## `map_adjoin` は `AlgHom`、`map_top` は `Algebra` の名前空間（第 1217）
+
+**失敗形**: `Algebra.map_adjoin` / `Subalgebra.map_top` → `Unknown constant`。
+
+**直し方**: `AlgHom.map_adjoin`（`Mathlib/Algebra/Algebra/Subalgebra/Lattice.lean:865`、
+`namespace AlgHom` の中）と `Algebra.map_top`（同 263、`namespace Algebra` の中）。
+★`grep -n "^namespace\|^end "` で**行番号より前の namespace** を見て決めること。

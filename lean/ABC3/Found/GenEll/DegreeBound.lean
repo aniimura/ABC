@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.FieldTheory.PrimitiveElement
 import Mathlib.FieldTheory.Normal.Basic
+import Mathlib.FieldTheory.IntermediateField.Adjoin.Algebra
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import ABC3.Meta.Claim
 
@@ -109,7 +110,46 @@ theorem finrank_le_of_determines_on_generators
   finrank_le_of_algHom_mem_finset g
     (fun φ₁ φ₂ h => AlgHom.ext_of_adjoin_eq_top hs (hg φ₁ φ₂ h)) t ht
 
+/-! ## ★★★★★★★★★★★★生成集合を `Algebra.adjoin` の形で出す -/
+
+/-- ★★★★★★★★★★★★
+**`L(T)` の中で `T` は `Algebra.adjoin` としても生成する**——★**無条件**（第 1217）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`T` が代数的なら `(IntermediateField.adjoin L T).toSubalgebra = Algebra.adjoin L T`
+（mathlib の `adjoin_toSubalgebra_of_isAlgebraic`）なので、
+`M ≔ L(T)` の中で `T` の引き戻しは `Algebra.adjoin` で `⊤` を生む。
+
+★★★これが第 1216 が受け取る `hs : Algebra.adjoin L s = ⊤` を**実際に取る**段である。 -/
+theorem algebra_adjoin_preimage_eq_top {L Lbar : Type*} [Field L] [Field Lbar]
+    [Algebra L Lbar] (T : Set Lbar) (hT : ∀ x ∈ T, IsAlgebraic L x) :
+    Algebra.adjoin L
+        (((↑) : ↥(IntermediateField.adjoin L T) → Lbar) ⁻¹' T) = ⊤ := by
+  set M := IntermediateField.adjoin L T with hMdef
+  set s : Set M := ((↑) : M → Lbar) ⁻¹' T with hsdef
+  have himg : (M.val : M →ₐ[L] Lbar) '' s = T := by
+    ext y
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      exact hz
+    · intro hy
+      exact ⟨⟨y, IntermediateField.subset_adjoin L T hy⟩, hy, rfl⟩
+  have hmap : Subalgebra.map (M.val : M →ₐ[L] Lbar) (Algebra.adjoin L s)
+      = Algebra.adjoin L T := by
+    rw [AlgHom.map_adjoin, himg]
+  have htop : Subalgebra.map (M.val : M →ₐ[L] Lbar) ⊤ = Algebra.adjoin L T := by
+    rw [Algebra.map_top, IntermediateField.range_val,
+      IntermediateField.adjoin_toSubalgebra_of_isAlgebraic hT]
+  exact Subalgebra.map_injective (M.val).injective (hmap.trans htop.symm)
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def algebra_adjoin_preimage_eq_top.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(L(T) の中で T は Algebra.adjoin としても生成する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def finrank_le_of_determines_on_generators.src : Source :=
   { paper := "GenEll", pdfPage := 17,
