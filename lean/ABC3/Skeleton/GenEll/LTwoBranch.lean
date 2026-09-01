@@ -60,7 +60,7 @@ import ABC3.Meta.Claim
 | 1 | `veluV2_eq_tateDYpair_any` | `hDX` を取らない `DY = veluV2` **★第 1143-1144 で証明済み** | 10 |
 | 2 | `c4_velu_tate_any` / `c6_velu_tate_any` | `hDX` を取らない `c₄`・`c₆` の恒等式 **★第 1145-1146 で証明済み** | 8 |
 | 3 | ~~`exists_veluW_two`~~ | **★不要と実測（第 1147）**——`_K` の連鎖は `exists_veluW` を使わない | 6 |
-| 4 | `psi2Sq_eval_eq_zero` | `l = 2` の捩れ点と多項式の橋（`Ψ₂Sq`） | 8 |
+| 4 | `ΨSq` への取り替え | `preΨ` の連鎖を `ΨSq` で書き直す（★偶奇不要） | 8 |
 
 ☆総重み 32。★これが閉じれば `Lemma 3.5` は**原典どおりの仮説だけ**になる。
 
@@ -72,6 +72,25 @@ import ABC3.Meta.Claim
 ☆`_K` の連鎖（`lemma_3_5_velu_K` まで）で `hodd` を消費するのは
 **`hfin_of_veluQuotientFull` の `preΨ` の連鎖だけ**になった（節点 4）。
 ★`exists_veluW_of_inv` は `_K` の連鎖に現れないので節点 3 は不要である。
+
+### ★★★★★★★★★★★★節点 4 の道（第 1147 の実測）
+
+`preΨ_eval_eq_zero_of_addOrderOf_prime`（第 1072）は `ΨSq_l = preΨ_l²`（`l` 奇）に
+落とすために `hodd` を使っている。☆`l = 2` では `preΨ₂ = 1` なので
+`ΨSq₂ = Ψ₂Sq`（主係数 `4`）になる。
+
+★★**しかし場合分けは要らない**——mathlib は
+
+    `WeierstrassCurve.leadingCoeff_ΨSq`（`n ≠ 0` なら主係数は `n²`）
+    `WeierstrassCurve.natDegree_ΨSq`（次数は `n² − 1`）
+
+を**偶奇を問わず**持っている（`DivisionPolynomial/Degree.lean`）。
+☆したがって `preΨ` ではなく **`ΨSq` で書けば**
+
+* `ΨSq_l(x) = 0`（`exists_divisor_root` → `k = l`、偶奇不要）
+* 主係数は `l²` で、`hlu : IsUnit (l)` から単元
+
+で済み、`TorsionIntegralGood.lean` の 10 本から `hodd` が一撃で落ちる。
 -/
 
 namespace ABC3.Skeleton.GenEll

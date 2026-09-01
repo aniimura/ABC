@@ -4786,6 +4786,7 @@
       "☆exists_veluW_of_inv は _K の連鎖に現れないので、枠の節点 3(exists_veluW_two)は**不要**である。"
     ],
     "frame": "進捗 3/4。節点 1(第 1143-1144)・節点 2(第 1145-1146)・節点 3(不要と実測)。残るのは節点 4(Ψ₂Sq の橋)だけ。",
-    "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+    "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。",
+    "node4Route": "★★★★**節点 4 の道(第 1147 の実測)**——preΨ_eval_eq_zero_of_addOrderOf_prime(第 1072)は ΨSq_l = preΨ_l²(l 奇)に落とすために hodd を使っている。l = 2 では preΨ₂ = 1 なので ΨSq₂ = Ψ₂Sq(主係数 4)。☆**しかし場合分けは要らない**——mathlib は WeierstrassCurve.leadingCoeff_ΨSq(n ≠ 0 なら主係数は n²)と natDegree_ΨSq(次数は n² − 1)を**偶奇を問わず**持っている(DivisionPolynomial/Degree.lean)。★したがって preΨ ではなく ΨSq で書けば、ΨSq_l(x) = 0(exists_divisor_root → k = l、偶奇不要)と「主係数 l² は hlu から単元」で済み、TorsionIntegralGood.lean の 10 本から hodd が一撃で落ちる。"
   }
 }
