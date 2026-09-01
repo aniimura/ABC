@@ -392,6 +392,7 @@ import ABC3.Found.GaloisRep.PowerSeriesUniversal
 import ABC3.Found.GaloisRep.VeluDYDenomFree
 import ABC3.Found.GaloisRep.C4DenomFree
 import ABC3.Found.GaloisRep.C6DenomFree
+import ABC3.Found.GaloisRep.VeluTateMuField
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.EllModuliGalois

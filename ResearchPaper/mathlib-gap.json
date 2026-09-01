@@ -4490,5 +4490,22 @@
     "technique": "★★式が長いので**左辺に c6DFlhs と名前を付けた**。☆これで「環準同型で移る」が map_c6DFlhs 1 本になり、段 2(整域へ降ろす)と段 3(完備環へ特殊化)がそれぞれ 5 行で書けた。★名前を付けずに rw を並べると map_add / map_mul の個数合わせで壊れる(実測)。",
     "remaining": "☆残るのは節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)だけである。",
     "gate": "lake build ABC3 成功(6257 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "veluTateMuField20260901": {
+    "block": 1131,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★p ∣ l でも Vélu の商は商体の上で E_{q^l} になる——節点 5 の設計",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "problem": "★exists_vw_tate_mu(TateIsogeny.lean:1794、第 1003)は hlu : IsUnit ((l : R))(= p ∤ l)と「Vélu の係数 v・w が R に取れる」の 2 つを要求する。p ∣ l ではどちらも成り立たない——v = ∑ veluV2 の分母に l が入るからである。",
+    "keyIdea": "★★★★**それは障害ではない**。第 1129-1130 の分母なし恒等式を商体 K の中で l⁶・l⁸ で割ると c₄(E_q/H) = l⁴·c₄(E_{q^l})、c₆(E_q/H) = l⁶·c₆(E_{q^l})、したがって Δ(E_q/H) = l¹²·Δ(E_{q^l}) になる。☆これは「E_q/H は E_{q^l} を u = 1/l で変数変換したもの」という意味であり、**Δ_min は極小モデルの判別式だからそのずれは消える**。★p ∤ l を要求していたのは Vélu の係数を R に取る段だけで、結論そのものには要らない。",
+    "added": {
+      "Found/GaloisRep/VeluTateMuField.lean (新規)": [
+        "Delta_of_c4_c6(★c₄ ↦ l⁴c₄・c₆ ↦ l⁶c₆ なら Δ ↦ l¹²Δ。mathlib の c_relation から)",
+        "exists_vw_tate_mu_field(★hlu なし。v・w は R ではなく商体 K に取る)",
+        "exists_vw_tate_mu_field_Delta(判別式の形)"
+      ]
+    },
+    "remaining": "☆残るのは minDeltaExp_eq_mul_at_bad_prime(第 1000)の hvw の口を「R の v・w で v = ∑veluV2 かつ 2w = ∑(…)」から「K の v・w ＋ c₄・c₆ の関係」に付け替える配管である(10-20 ブロック)。",
+    "gate": "lake build ABC3 成功(6258 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
