@@ -5740,5 +5740,15 @@
     "what": "★exists_galoisFinite_lcyclic(Found/GenEll/Lemma37Hdag.lean)—— 第 1226 の第 3 の主張を lcyclicExc 欄が要る形に取り出した。",
     "measured": "☆受けている外部の仮定は VeluQuotOK ただ 1 つ(第 1226 と同じ)。★これで witness の sorry (1) は「lcyclicExc を第 1226 の Exc に取り替える」だけになった。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "veluSetCard20260902": {
+    "block": 1240,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★Vélu の座標集合の個数は l − 1——IsQuotClassJ が要る S.card + 1 = l",
+    "goal": "EllModuliWitness の sorry (2)(3)(quotLCyclicJ の存在)。",
+    "what": "★card_image_pointCoords_nsmul(Found/GenEll/VeluSetCard.lean)。",
+    "measured": "☆k ↦ k•Q は 0 < k < l で単射(位数がちょうど l)、pointCoords は原点でない点で単射(pointCoords_injective、在庫)なので、S はちょうど l − 1 個。★これが IsQuotClassJ が要求する S.card + 1 = l である。",
+    "consequence": "☆これで HasLCyclicVelu(有理点の読み)から IsQuotClassJ の存在が出る道具が揃った —— quotLCyclicJ_spec が使えるようになる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
