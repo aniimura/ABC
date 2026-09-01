@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.GroupTheory.QuotientGroup.Basic
 import ABC3.Found.GaloisRep.TatePhi
+import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 import ABC3.Meta.Claim
 
 /-!
@@ -337,6 +338,28 @@ theorem tateSetup_Q_zpow_eq_one {R : Type} [CommRing R] {I : Ideal R} {K : Type}
   · exact hj
   · exact absurd hq S.hQ.ne'
 
+/-! ## ★★★★★★★★★★★★`μ_l = ⟨ζ⟩`（`hμ` の中身） -/
+
+/-- ★★★★★★★★★★★★★★**原始 `l` 乗根なら `μ_l = ⟨ζ⟩`**——★**無条件**（第 1173）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆整域の中では `l` 乗して 1 になる元はちょうど `l` 個で、原始根の冪で尽きる。
+★★これが第 1165・1170・1171 が受けている `hμ` の**中身**である
+——原始 `l` 乗根があれば仮説ではなく**定理**になる。 -/
+theorem exists_zpow_of_pow_eq_one {K : Type*} [CommRing K] [IsDomain K] {l : ℕ} [NeZero l]
+    {ζ : Kˣ} (hζ : IsPrimitiveRoot (ζ : K) l) (y : Kˣ) (hy : y ^ l = 1) :
+    ∃ a : ℤ, y = ζ ^ a := by
+  have hyK : (y : K) ^ l = 1 := by
+    have := congrArg (fun u : Kˣ => (u : K)) hy
+    simpa using this
+  obtain ⟨i, _, hi⟩ := hζ.eq_pow_of_pow_eq_one hyK
+  refine ⟨(i : ℤ), ?_⟩
+  apply Units.ext
+  rw [zpow_natCast]
+  simpa using hi.symm
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -347,6 +370,11 @@ def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
 def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_zpow_of_pow_eq_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(原始 l 乗根なら μ_l = ⟨ζ⟩——hμ の中身。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def tateSetup_Q_zpow_eq_one.src : ABC3.Meta.Source :=
