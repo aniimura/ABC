@@ -1392,6 +1392,7 @@ import ABC3.Found.GenEll.AlphaMatrix
 import ABC3.Found.GenEll.UnipotentConj
 import ABC3.Found.GenEll.GlLift
 import ABC3.Found.GaloisRep.BasisRealize
+import ABC3.Found.GenEll.AlphaMemImage
 import ABC3.Found.GenEll.PadicRedVec
 import ABC3.Found.GenEll.LCyclicPoint
 import ABC3.Found.GenEll.PointDescent
