@@ -5468,5 +5468,15 @@
     "measured": "☆第 994 の K₀-代数同型を Units.map で単数に落とし、第 1178 の根 π と組み合わせた。★σ ζ = ζ は σ が K₀-代数同型だから(AlgEquiv.commutes)。★★これは tate_sigma_coord_alpha(第 1174)が**受け取る形そのもの**である。",
     "remaining": "☆残るのは TateSetup を K へ底変換する段だけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "kummerAlpha20260902": {
+    "block": 1212,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★Kummer 拡大の上で σ は α として作用する——TateSetup の底変換は要らなかった",
+    "goal": "α が mod l 像に入る段(第 1160 の枠、II 側)。",
+    "what": "★kummer_sigma_coord_alpha(Found/GenEll/Thm38KummerAlpha.lean)—— σ (ζᵃ πᵇ) = ζ^{a'} π^{b'} Qⁿ ⟹ l ∣ (a + b − a') かつ l ∣ (b − b')。",
+    "measured": "★★★**TateSetup を K へ底変換する段は要らなかった**——sigma_coord_alpha は**任意の可換群**で成り立ち、要るのは「ζ が原始 l 乗根」「πˡ = Q」「Q が無限位数」だけだからである。☆仮説はすべて基礎体 K₀ の側(l ∤ v(q)、q が無限位数、ζ₀ が原始 l 乗根)にある。",
+    "consequence": "☆すなわち σ は mod l の座標で α = (1 1 / 0 1) として作用する。★残るのはこれを galRep の行列に読み替える段(第 1167-1169 の制限準同型)である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
