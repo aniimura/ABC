@@ -3081,3 +3081,13 @@ grep する。☆`node tools/decl-index.mjs` の索引を
 
 **直し方**: 判定は `grep -E "^error" -A 20 | head -40`（行頭アンカー）で行い、
 かつ**必ず `lake build ABC3` の tail を読む**。warning と error を同じ grep に入れない。
+
+## `Point.map` の値の型は `W⁄K`(2026-09-02、第 1273)
+
+**失敗形**: `Point.map (S := R) σA P` を
+`(W.map (algebraMap R K)).toAffine.Point` の元と足そうとすると
+`failed to synthesize HAdd ((W)⁄K).Point ((W.map (algebraMap R K)).toAffine.Point) ?m`。
+`W⁄K = W.baseChange K = W.map (algebraMap R K)` は defeq だが構文的に違う。
+
+**直し方**: `noncomputable def tatePointMap ... : A →+ A := Point.map (S := R) σA` のように
+**目的の型で一度名前を付ける**。以降はその名前を使えば型は揃う。
