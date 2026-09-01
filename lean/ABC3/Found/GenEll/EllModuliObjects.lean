@@ -616,6 +616,17 @@ end DegCurve
 ☆原文の Galois-finite（有限個の Galois 軌道の合併）はこれより**強い**——逸脱として記録する。 -/
 def GaloisFiniteJ (S : Set ℂ) : Prop := ∀ d : ℕ, (S ∩ degLeJ d).Finite
 
+/-- ★★★**`GaloisFinite` は部分集合で閉じる**——★**無条件**（第 1238）。
+
+☆`GaloisFiniteJ S = ∀ d, (S ∩ degLeJ d).Finite` なので、
+`S ⊆ T` なら `S ∩ degLeJ d ⊆ T ∩ degLeJ d` で `Set.Finite.subset` が効く。
+
+★★これが `EllModuliWitness` の `lcyclicExc` の有限性を
+`Lemma 3.7` の `Exc`（第 1226）から出すのに要る。 -/
+theorem galoisFiniteJ_subset {S T : Set ℂ} (hST : S ⊆ T) (hT : GaloisFiniteJ T) :
+    GaloisFiniteJ S :=
+  fun d => (hT d).subset (Set.inter_subset_inter_left _ hST)
+
 /-- ★★**`galoisFinite_union` 欄**。 -/
 theorem galoisFiniteJ_union (S T : Set ℂ) (hS : GaloisFiniteJ S) (hT : GaloisFiniteJ T) :
     GaloisFiniteJ (S ∪ T) := by
@@ -1100,6 +1111,11 @@ def RealizedClass.needs : List ABC3.Meta.ProofObligation :=
        "対しては破れる。そこで Curve を実現される類とし、各類に定義体の次数が" ++
        "最小の代表元を取る——原文 Corollary 4.3 の仮説" ++
        "『L is a minimal field of definition of the point [E_L]』そのものである") 4 ]
+
+def galoisFiniteJ_subset.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(GaloisFinite は部分集合で閉じる。★無条件)",
+    sectionId := "genell-lemma-3-7" }
 
 def GaloisFiniteJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,
