@@ -2042,4 +2042,94 @@ def minDeltaExp_eq_mul_at_bad_prime_full.needs : List ProofObligation :=
     .citation "[ABC3]" "exists_vw_tate_mu(hvw の中身、第 1003、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_vw_tate_mu") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★第 1027 —— 連鎖を一般の局所体に開く
+
+★第 1004 は `p.adicCompletion L` に固定されていた。
+☆第 1026 で `exists_point_j_tateModel` を一般の `(Lv, R)` に開いたので、
+連鎖全体も開ける——他の部品（996・997・971・1003）はもともと一般である。
+
+★★これで**不分岐 2 次拡大 `Lv′ = Frac (R[X]/(f))`（第 1012-1025）を
+そのまま通せる**ようになった。 -/
+
+open Finset in
+theorem minDeltaExp_eq_mul_at_bad_prime_gen {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    [(E'.baseChange Lv).IsElliptic]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : IsUnit ((l : R))) (h2 : (2 : R) ≠ 0) (h2K : (2 : Lv) ≠ 0)
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  have hq := tateParamR_mem (E.baseChange Lv) h
+  have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
+  have hΔ := tateModel_map_Delta_ne_zero (E.baseChange Lv) h
+  have hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R :=
+    pow_mem_of_mem_ideal hq hl.pos
+  have hqlne : algebraMap R Lv ((tateParamR (E.baseChange Lv) h) ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _ _)).2 (pow_ne_zero l hq0)
+  have hc4T' : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).c₄ ≠ 0 :=
+    ((tateCurveAt_c4_isUnit ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).ne_zero
+  obtain ⟨u', hu', hueq'⟩ := evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) ((tateParamR (E.baseChange Lv) h) ^ l) hql
+  have hev' : algebraMap R Lv
+      (evalAdic tateJinvSeries ((tateParamR (E.baseChange Lv) h) ^ l) hql) ≠ 0 := by
+    rw [hueq', map_mul]
+    exact mul_ne_zero hqlne ((hu'.map (algebraMap R Lv)).ne_zero)
+  haveI : ((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).IsElliptic :=
+    tateCurveAt_map_isElliptic _ hql hev' hc4T'
+  have hcop' := not_dvd_vAdd_tateParam_of_not_dvd_jExp p hp E h hjneg hcop
+  obtain ⟨P, hP, hP0, hj⟩ := exists_point_j_tateModel_gen E E' h hl hQ h2K hE'
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    exists_primitiveRoot_of_torsion_point (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hcop'
+      P hP hP0
+  obtain ⟨v, w, hv, hw, hell⟩ :=
+    exists_vw_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hodd hlu hql h2 ζ hζ
+  haveI hellMu := isElliptic_veluQuotient_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ
+    hl hlu h2K ζ uζ hζ hζu hζl hord v w hv hw hell
+  haveI hellP : (veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))).IsElliptic := by
+    rw [hPz]; exact hellMu
+  have hcurveEq : veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • P)))
+      = veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords
+        (k • tatePhi (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
+          (QuotientGroup.mk uζ)))) := by
+    rw [hPz]
+    rfl
+  have hjtate := j_veluQuot_eq_j_tate_pow (tateParamR (E.baseChange Lv) h) hq hq0 hΔ
+    hl hζ hlu uζ hζu hζl hord hql h2 h2K hodd v w hv hw
+  exact minDeltaExp_eq_mul_of_j_tate_pow p hp E E' h hssE hssE' hjneg hql
+    ((hj hellP).trans ((ABC3.Found.GenEll.j_congr_curve hcurveEq).trans hjtate))
+
+def minDeltaExp_eq_mul_at_bad_prime_gen.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点での Δ_min の関係——一般の局所体で)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_at_bad_prime_gen.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_point_j_tateModel_gen(第 1026、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_point_j_tateModel_gen") 1,
+    .citation "[ABC3]" "exists_vw_tate_mu(hvw の中身、第 1003、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_vw_tate_mu") 1,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_j_tate_pow(終点、第 997、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_j_tate_pow") 1 ]
+
 end ABC3.Skeleton.GenEll

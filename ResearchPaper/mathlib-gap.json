@@ -3573,5 +3573,18 @@
     ],
     "remaining": "★★**不分岐 2 次拡大の部品はすべて建った**。☆残るのは組み立て 1 段だけである: (a) 乗法還元の曲線の 2 次式 `c₄X² + a₁c₄X − (…)` を `c₄`（単元）で割って monic 化し、(b) その係数を `R` に持ち上げて `f` を作り、(c) 非分裂 ⟺ `f̄` 既約 を確認して 1012-1025 を当て、(d) `hp′`（第 1024）と合わせて第 997 に流す。★もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
     "note": "★944-1025 の 77 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "chainGeneralized20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1026-1027",
+    "supersedes": "residueSplits20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★`exists_point_j_tateModel_gen`（1026）——第 970 を `p.adicCompletion L` から**一般の `(Lv, R)`** に開いた。☆証明が使うのは `algebraMap L Lv`・`algebraMap R Lv` と`tateParamR_spec`・`tateModel_baseChange`・`exists_point_image_eq` だけで、**完備化であることは使っていなかった**。",
+      "★★★★★★★★★★★★★★★★★★★★`minDeltaExp_eq_mul_at_bad_prime_gen`（1027）——第 1004 の連鎖全体を一般の `(Lv, R)` に開いた形。☆他の部品（996・997・971・1003）はもともと一般であった。"
+    ],
+    "whyItMatters": "★★★★**これで不分岐 2 次拡大 `Lv′ = Frac (R[X]/(f))`（第 1012-1025）をそのまま通せるようになった**。☆第 1027 は `hp`（付値の橋）を仮説で受けるので、第 1024 がそれを供給する。",
+    "remaining": "☆残る組み立て: (i) `Algebra L Lv′` とスカラー塔 `L → Lv → Lv′`、(ii) `E ⊗ Lv′ = (E ⊗ Lv) ⊗ Lv′` の両立、(iii) `hp′`（第 1024 と `hp` の合成）、(iv) `IsMinimal R′ (E ⊗ Lv′)`、(v) `HasSplitMultiplicativeReduction R′ (E ⊗ Lv′)`（曲線の 2 次式を monic 化して `f` に取り、第 1025 を当てる）。★もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
+    "note": "★944-1027 の 79 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

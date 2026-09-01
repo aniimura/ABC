@@ -290,6 +290,85 @@ def tateModel_map_Delta_ne_zero.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Tate モデルを K に上げた曲線の Δ は 0 でない。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★第 1026 —— 完備化を一般の局所体に開く
+
+★第 970 は `p.adicCompletion L` に固定して書かれていた。
+☆しかし証明が使うのは `algebraMap L Lv`・`algebraMap R Lv` と
+`tateParamR_spec`・`tateModel_baseChange`・`exists_point_image_eq` だけであり、
+**完備化であることは使っていない**。
+
+★★これを一般の `(Lv, R)` に開く。
+☆不分岐 2 次拡大 `Lv′ = Frac (R[X]/(f))`（第 1012-1025）を通すために要る段である。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**[GenEll] 大域の Vélu の商から Tate モデルの上の点と
+`j` の一致を作る（一般の局所体で）**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1026）**——第 970 を `p.adicCompletion L` から
+一般の `(Lv, R)` に開いた形。☆証明は第 970 と同一である。 -/
+theorem exists_point_j_tateModel_gen {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic]
+    [(E.baseChange Lv).IsMinimal R]
+    [(E'.baseChange Lv).IsElliptic]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (h2K : (2 : Lv) ≠ 0)
+    (hE' : E' = ABC3.Found.GenEll.veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • Q)))) :
+    ∃ P : ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv)).toAffine.Point,
+      l • P = 0 ∧ P ≠ 0 ∧
+      ∀ _hell : (ABC3.Found.GenEll.veluQuotientFull
+          ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+            (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv))
+          (((range l).erase 0).image
+            (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))).IsElliptic,
+        (E'.baseChange Lv).j
+          = (ABC3.Found.GenEll.veluQuotientFull
+            ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+              (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv))
+            (((range l).erase 0).image
+              (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))).j := by
+  set φL : L →+* Lv := algebraMap L Lv with hφL
+  set φR : R →+* Lv := algebraMap R Lv with hφR
+  obtain ⟨hq, C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
+  have hbase : (tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map φR
+      = (C₀.map φR) • (E.map φL) :=
+    tateModel_baseChange (E.baseChange Lv) h hCE
+  haveI := isElliptic_veluQuotient_vcPoint φL (C₀.map φR) E E' hQ h2K hE'
+  have hj := j_map_velu_vcPoint φL (C₀.map φR) E E' hQ h2K hE'
+  have hQ1 : addOrderOf (rhPoint φL E Q) = l := by rw [addOrderOf_rhPoint φL E Q, hQ]
+  have hQ2 : addOrderOf (ABC3.Found.GenEll.vcPoint (C₀.map φR) (E.map φL)
+      (rhPoint φL E Q)) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint (C₀.map φR) (E.map φL) (rhPoint φL E Q), hQ1]
+  obtain ⟨P, hP, hP0, himg⟩ := exists_point_image_eq hbase hl _ hQ2
+  refine ⟨P, hP, hP0, fun hell => ?_⟩
+  haveI := hell
+  have hcurve : ABC3.Found.GenEll.veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)).map φR)
+      (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))
+      = ABC3.Found.GenEll.veluQuotientFull ((C₀.map φR) • (E.map φL))
+        (((range l).erase 0).image
+          (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • ABC3.Found.GenEll.vcPoint
+            (C₀.map φR) (E.map φL) (rhPoint φL E Q)))) := by
+    rw [himg, hbase]
+  rw [ABC3.Found.GenEll.j_congr_curve hcurve]
+  exact hj
+
+def exists_point_j_tateModel_gen.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(大域の Vélu の商から Tate モデルの上の点と j の一致を作る——一般の局所体で。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_point_j_tateModel.src : ABC3.Meta.Source :=
