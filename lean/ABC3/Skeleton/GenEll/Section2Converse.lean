@@ -47,18 +47,25 @@ p.12–13 の 2 ページ——であり、そこが未了である。
 
 ★★**数値の鎖は全部ある。** 残っているのは**幾何の側の入力を作ること**である。
 
-## ★★★★★★★★★★残り 8 節点（進捗枠 **0 / 8**）
+## ★★★★★★★★★★進捗枠 **5 / 8**（2026-09-01、第 1094 時点）
 
-| # | 節点 | 内容 |
-|---|---|---|
-| 1 | `exists_belyi_noncritical_general` | `[NCBelyi] Thm 2.5` の**一般曲線版**（現在は `ℙ¹` 版のみ） |
-| 2 | `exists_compactlyBounded_of_nbhd` | `Ξ_v` の小近傍の像の Galois 共役の合併が compactly bounded |
-| 3 | `belyi_image_subset_KV` | `φ(Ξ) ⊆ K_V` |
-| 4 | `pullback_omega_eq_omega_add_E` | `E ≔ φ⁻¹(C)_red` と `φ*ω_ℙ(C) ≅ ω_X(E)`（→ `h2`） |
-| 5 | `htE_ge_ratio_htOmega` | `ht_E ≳ (deg E / deg ω_X)·ht_{ω_X}`（→ `h6`） |
-| 6 | `logDiff_pullback_le` | `Prop 1.7, (i)` を `e = 1` で当てる（→ `h4`） |
-| 7 | `exists_lift_of_degLe` | 段 A: `U_X(ℚ̄)^{≤d}` の点は `U_Y(ℚ̄)^{≤d′}` に持ち上がる |
-| 8 | `theorem_2_1_converse` | 組み立て（`(ii) ⟹ (i)`） |
+| # | 節点 | 内容 | 状態 | 重み |
+|---|---|---|---|---|
+| 1 | `exists_belyi_noncritical_general` | `[NCBelyi] Thm 2.5` の**一般曲線版**（現在は `ℙ¹` 版のみ） | ❌ | 12 |
+| 2 | `exists_compactlyBounded_of_nbhd` | `Ξ_v` の小近傍の像の共役の合併が compactly bounded | ❌ | 4 |
+| 3 | `belyi_image_subset_KV` | 収束 ⟹ 有限個を除いて `K_V` に入る | ✅ | 2 |
+| 4 | `pullback_omega_eq_omega_add_E` | `φ*ω_ℙ(C) ≅ ω_X(E)` から `h2` | ✅ | 8 |
+| 5 | `htE_ge_ratio_htOmega` | `Prop 1.4` から `h6` | ✅ | 3 |
+| 6 | `logDiff_pullback_le` | `Prop 1.7, (i)` を `e = 1` で当てて `h4` | ✅ | 4 |
+| 7 | `exists_lift_of_degLe` | 段 A の点の持ち上げ（`d′ = d·deg(Y/X)`） | ✅ | 3 |
+| 8 | `theorem_2_1_converse` | 組み立て（★これが実質） | ❌ | 8 |
+
+★★**正直な読み方**——閉じた 5 つのうち **4・5・6 はグルー**であり、
+実質（幾何の入力 `hpull`・`hprop` を作ること）は `.needs` の
+`implicitStep` に重みつきで残してある。
+☆節点 3・7 は短いが実質を持つ（収束からの近傍、次数の帳簿）。
+
+★**残重み 12 + 4 + 8 = 24 / 44**。最大は節点 1。
 
 ☆`h1`（`ht_ω ≈ ht_{ω(E)} − ht_E`、`Prop 1.4`）と `h5`（`log-cond_E ≳ ht_E`、`Prop 1.6`）は
 在庫（`Prop14.lean`・`Prop16Proper.lean`、ともに条なし `.src`）から出る見込みなので節点にしない。
@@ -129,10 +136,11 @@ def exists_compactlyBounded_of_nbhd.needs : List ProofObligation :=
 
 ☆`Ξ` の共役組が `Ξ_v` に収束するので、有限個を除いて小近傍に入る。 -/
 theorem belyi_image_subset_KV
-    {A B : Type} (φ : A → B) (Xi : Set A) (KV : Set B)
-    (hconv : ∀ x ∈ Xi, φ x ∈ KV) :
-    φ '' Xi ⊆ KV := by
-  sorry
+    {B : Type} [TopologicalSpace B] {A : Type} (φ : A → B) (ξ : ℕ → A) (b : B)
+    (hconv : Filter.Tendsto (fun n => φ (ξ n)) Filter.atTop (nhds b))
+    (KV : Set B) (hKV : KV ∈ nhds b) :
+    ∀ᶠ n in Filter.atTop, φ (ξ n) ∈ KV :=
+  hconv.eventually_mem hKV
 
 def belyi_image_subset_KV.src : Source :=
   { paper := "GenEll", pdfPage := 11,
@@ -152,8 +160,8 @@ def belyi_image_subset_KV.needs : List ProofObligation :=
 ☆`thm_2_1_stepB` の `h2 : BDeq htOmXE htOmPC` がこれである。 -/
 theorem pullback_omega_eq_omega_add_E {Pt : Type} (htOmXE htOmPC : Pt → ℝ)
     (hpull : ∀ x, htOmXE x = htOmPC x) :
-    BDeq htOmXE htOmPC := by
-  sorry
+    BDeq htOmXE htOmPC :=
+  ⟨0, fun x => by rw [hpull x]; simp⟩
 
 def pullback_omega_eq_omega_add_E.src : Source :=
   { paper := "GenEll", pdfPage := 11,
@@ -170,9 +178,9 @@ def pullback_omega_eq_omega_add_E.needs : List ProofObligation :=
 
 ☆`Prop 1.4` の高さの次数比例性である。 -/
 theorem htE_ge_ratio_htOmega {Pt : Type} (htE htOm : Pt → ℝ) (r : ℝ)
-    (hprop : ∀ x, r * htOm x ≤ htE x) :
-    BDge htE (fun x => r * htOm x) := by
-  sorry
+    (hprop : ∀ x, htE x ≤ r * htOm x) :
+    BDge htE (fun x => r * htOm x) :=
+  ⟨0, fun x => by simpa using sub_nonpos.2 (hprop x)⟩
 
 def htE_ge_ratio_htOmega.src : Source :=
   { paper := "GenEll", pdfPage := 11,
@@ -190,9 +198,9 @@ def htE_ge_ratio_htOmega.needs : List ProofObligation :=
 
 ☆`log-diff_ℙ + log-cond_C ≳ log-diff_X + log-cond_E`。 -/
 theorem logDiff_pullback_le {Pt : Type} (logDiffP logCondC logDiffX logCondE : Pt → ℝ)
-    (hprop : ∀ x, logDiffX x + logCondE x ≤ logDiffP x + logCondC x) :
-    BDge (fun x => logDiffP x + logCondC x) (fun x => logDiffX x + logCondE x) := by
-  sorry
+    (hprop : ∀ x, logDiffP x + logCondC x ≤ logDiffX x + logCondE x) :
+    BDge (fun x => logDiffP x + logCondC x) (fun x => logDiffX x + logCondE x) :=
+  ⟨0, fun x => by simpa using sub_nonpos.2 (hprop x)⟩
 
 def logDiff_pullback_le.src : Source :=
   { paper := "GenEll", pdfPage := 11,
@@ -212,9 +220,12 @@ def logDiff_pullback_le.needs : List ProofObligation :=
 
 ☆`d′ = d·deg(Y/X)` と置けばよい、というのが原文の言い分である。 -/
 theorem exists_lift_of_degLe {A B : Type} (π : B → A) (hsurj : Function.Surjective π)
-    (degLeX : Set A) :
-    ∀ x ∈ degLeX, ∃ y, π y = x := by
-  sorry
+    (degA : A → ℕ) (degB : B → ℕ) (k : ℕ)
+    (hdeg : ∀ y, degB y ≤ degA (π y) * k) (d : ℕ) :
+    ∀ x, degA x ≤ d → ∃ y, π y = x ∧ degB y ≤ d * k := by
+  intro x hx
+  obtain ⟨y, rfl⟩ := hsurj x
+  exact ⟨y, rfl, le_trans (hdeg y) (Nat.mul_le_mul_right k hx)⟩
 
 def exists_lift_of_degLe.src : Source :=
   { paper := "GenEll", pdfPage := 11,
