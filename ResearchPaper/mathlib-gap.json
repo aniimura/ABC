@@ -4267,6 +4267,14 @@
       "whyNode3IsHarder": "☆節点 3（`∑ veluV2 = ∑ DY`）は項ごとの恒等式 `veluV2(X_i,Y_i) = DYpair_i` で、**両辺とも尾を含む**。★したがって降下では落とせない。☆この恒等式は Tate 座標の ODE 関係（`tate_dy` 系）から来ており、その証明が `Ring.inverse` の操作に単元性を使っている。",
       "whatIsNeeded": "★節点 3 に要るのは **ODE 関係そのものの分母なし版**である——`veluV2DF`（第 1119）と `tateDYpairDF`（未定義）の間の恒等式を、`Ring.inverse` を経由せずに `muS` の多項式恒等式として証明する。☆材料（`tateXpairDF`・`tateYpairDF`・`veluV2DF`）は第 1118-1119 で揃っている。",
       "revisedEstimate": "☆節点 3 は 8-15 ブロック（降下が使えないぶん、ODE 関係を手で書き直す）。★節点 4-5 は 10-20。合計 18-35（第 1117 の 15-30 から微増）。"
+    },
+    "node3Design1121": {
+      "block": "第 1121（設計——節点 3 は「K 値の座標」で当てる）",
+      "whereHuEnters": "☆項ごとの恒等式は `veluV2_eq_tateDYpair a w q hq haw (ha : IsUnit (1−a)) hw hDX`（`TateODE.lean:117` で呼ばれる）である。★`hu` はこの `ha` として入る。",
+      "design": "★**道は「ODE 恒等式を商体 `K` の上で当てる」ことである**。☆`K` では `1 − ζ^i ≠ 0` すなわち可逆、`(l:K) ≠ 0` も可逆なので恒等式が使える。★尾は `R` で計算して `algebraMap` で送るだけ（尾に単元の問題は無い）。☆すなわち **`K` 値の座標を「頭（`K` で真の逆元）＋ `algebraMap`(尾)」として手で組む**。★第 1091 の「`K` は adic 完備でない」という障害は、**尾を `R` で計算してから送る**ので回避できる。",
+      "whatMustBeRestated": "☆ただし `veluV2_eq_tateDYpair` は `tateXpair`（adic な対象）について述べられているので、手で組んだ `K` 値座標について**述べ直す**必要がある。★これが節点 3 の実体（8-15 ブロック）。",
+      "cancellation": "☆最後は `R` が標数 0 の整域で `(l:R) ≠ 0` なので、`l⁶` を約せる。★`l⁶·A = l⁶·B ⟹ A = B`。",
+      "status": "★材料（第 1118 `tateXpairDF`・`tateYpairDF`、第 1119 `veluV2DF`）は揃っている。"
     }
   }
 }
