@@ -123,7 +123,46 @@ theorem exists_sigma_smul_root_of_val {K : Type} [Field K] {l : ℕ} (hl : Nat.P
         = ((η : Kˣ) : K) • AdjoinRoot.root (X ^ l - C (q : K)) :=
   exists_sigma_smul_root hl hζ (not_lth_power_of_val hl v q hnd) η
 
+/-! ## ★★★★★★★★★★★★Kummer の根を単数として取る -/
+
+open AdjoinRoot in
+/-- ★★★★★★★★★★★★**Kummer の根は単数で、その `l` 乗は `q`**——★**無条件**（第 1178）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`q ≠ 0` なら `AdjoinRoot (Xˡ − C q)` の根 `π` は `0` でないので単数であり、
+`πˡ = q`（`root_X_pow_sub_C_pow`）である。
+★★★これが `tate_sigma_coord_alpha_of_base_root`（第 1177）が要求する
+`π : Kˣ` と `πˡ = q` を**実際に取る**段である。 -/
+theorem exists_kummer_root_unit {K : Type*} [Field K] {l : ℕ} (hl : 0 < l) {q : K}
+    (hq : q ≠ 0) :
+    ∃ π : (AdjoinRoot (X ^ l - C q))ˣ,
+      (π : AdjoinRoot (X ^ l - C q)) = AdjoinRoot.root (X ^ l - C q) ∧
+      (π : AdjoinRoot (X ^ l - C q)) ^ l = algebraMap K (AdjoinRoot (X ^ l - C q)) q := by
+  have hpow : (AdjoinRoot.root (X ^ l - C q)) ^ l
+      = algebraMap K (AdjoinRoot (X ^ l - C q)) q := root_X_pow_sub_C_pow l q
+  have hqu : IsUnit (algebraMap K (AdjoinRoot (X ^ l - C q)) q) :=
+    (isUnit_iff_ne_zero.2 hq).map (algebraMap K (AdjoinRoot (X ^ l - C q)))
+  have hu : IsUnit (AdjoinRoot.root (X ^ l - C q)) := by
+    obtain ⟨m, rfl⟩ : ∃ m, l = m + 1 := ⟨l - 1, by omega⟩
+    have h1 : IsUnit ((AdjoinRoot.root (X ^ (m + 1) - C q)) ^ (m + 1)) := by
+      rw [hpow]; exact hqu
+    have h2 : (AdjoinRoot.root (X ^ (m + 1) - C q)) ^ (m + 1)
+        = (AdjoinRoot.root (X ^ (m + 1) - C q)) ^ m
+          * (AdjoinRoot.root (X ^ (m + 1) - C q)) := pow_succ _ m
+    rw [h2] at h1
+    exact isUnit_of_mul_isUnit_right h1
+  refine ⟨hu.unit, hu.unit_spec, ?_⟩
+  rw [hu.unit_spec]
+  exact hpow
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def exists_kummer_root_unit.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(Kummer の根は単数で、その l 乗は q。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def not_lth_power_of_val.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
