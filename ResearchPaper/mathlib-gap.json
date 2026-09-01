@@ -5113,5 +5113,15 @@
     "what": "★exists_kummer_root_unit(Found/GenEll/Thm38KummerExists.lean)—— q ≠ 0 なら AdjoinRoot (Xˡ − C q) の根 π は単数であり、πˡ = q。☆これが tate_sigma_coord_alpha_of_base_root(第 1177)が要求する π : Kˣ と πˡ = q を**実際に取る**段である。",
     "pitfall": "☆AdjoinRoot (Xˡ − C q) は既約性の Fact が無いと体ではないので Units.mk0 が使えない。★πˡ = q が単数であることから IsUnit π を出す(pow_succ で分解して isUnit_of_mul_isUnit_right)。☆`rw [pow_succ] at h1` は**多項式の中の X^(m+1) を先に書き換えてしまう**——外側の冪だけを狙うには等式を have で明示して rw する。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "descentBaseChange20260902": {
+    "block": 1179,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★降下した商はどの底変換でも Vélu の商のまま——節点 2d の中身",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d)。",
+    "what": "★veluQuotientFull_descends_map(Found/GenEll/VeluDescent.lean)—— W'⁄L̄ = veluQuotientFull (W⁄L̄) S(第 1154)を f : L̄ →+* M で送ると W'⁄M = veluQuotientFull (W⁄M) (f(S))。☆在庫の veluQuotientFull_map(第 679)をそのまま使う。",
+    "why": "★★★これが節点 2d の**中身**である——M を L̄_v と取れば E' ⊗ L_v を局所の Vélu の商と合わせる hcurveEq が出る。☆残るのは L̄ ↪ L̄_v を IsAlgClosed.lift で取り、安定直線の像が μ_l になること(Lemma 3.2, (i))を当てる段だけ。",
+    "pitfall": "☆`open scoped Classical in` は `set_option ... in` と同じく**docstring の前**に置かないと「unexpected token 'open'; expected 'lemma'」になる。★lean-idioms.md の set_option の項と同じ穴である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

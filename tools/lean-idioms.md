@@ -2808,3 +2808,13 @@ rw [himg] at hsum
 **もう一つ**: 仮説に `S.image f = S` を置くと **statement 側で `DecidableEq` が要る**
 （`classical` は証明の中だけ）。★仮説は `∀ z ∈ S, f z ∈ S`（安定性）にして、
 像の等式は `Finset.eq_of_subset_of_card_le` で証明内に作る。
+
+## `open scoped Classical in` も docstring の**前**に置く
+
+**失敗形**: docstring のあとに `open scoped Classical in` を置くと
+
+    unexpected token 'open'; expected 'lemma'
+
+★`set_option … in` とまったく同じ穴である。
+
+**直し方**: `open scoped Classical in` → `/-- … -/` → `theorem …` の順にする。

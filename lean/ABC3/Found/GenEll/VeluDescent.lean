@@ -109,6 +109,30 @@ theorem veluQuotientFull_descends (W : WeierstrassCurve L)
   · exact ha₄'
   · exact ha₆'
 
+/-! ## ★★★★★★★★★★★★★★★★降下はさらなる底変換で保たれる -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**降下した商はどの底変換でも Vélu の商のまま**——★**無条件**（第 1179）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`W'⁄L̄ = veluQuotientFull (W⁄L̄) S`（第 1154）を `f : L̄ →+* M` で送ると、
+`W'⁄M = veluQuotientFull (W⁄M) (f(S))` になる。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d の中身**である
+——`M` を `L̄_v` と取れば `E' ⊗ L_v` を局所の Vélu の商と合わせる `hcurveEq` が出る。
+☆`veluQuotientFull_map`（第 679、在庫）をそのまま使う。 -/
+theorem veluQuotientFull_descends_map (W W' : WeierstrassCurve L)
+    (S : Finset (Lbar × Lbar))
+    (hW' : W'.map (algebraMap L Lbar) = veluQuotientFull (W.map (algebraMap L Lbar)) S)
+    {M : Type} [Field M] (f : Lbar →+* M) :
+    W'.map (f.comp (algebraMap L Lbar))
+      = veluQuotientFull (W.map (f.comp (algebraMap L Lbar)))
+          (S.image (fun Q => (f Q.1, f Q.2))) := by
+  rw [← WeierstrassCurve.map_map, hW', veluQuotientFull_map, ← WeierstrassCurve.map_map]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_of_fixed.src : ABC3.Meta.Source :=
@@ -124,6 +148,20 @@ def fixesCoeffs_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(底変換した曲線の係数はどの σ でも固定される。★無条件)",
     sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(降下した商はどの底変換でも Vélu の商のまま。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def veluQuotientFull_descends_map.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "veluQuotientFull_map(第 679、在庫)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.veluQuotientFull_map") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1179）**——`LCyclicReading` の**節点 2d の中身**である。" ++
+       "☆`M` を `L̄_v` と取れば、`E' ⊗ L_v` を局所の Vélu の商と合わせる " ++
+       "`hcurveEq` が出る。★残るのは `L̄ ↪ L̄_v` を `IsAlgClosed.lift` で取り、" ++
+       "安定直線の像が `μ_l` になること（`Lemma 3.2, (i)`）を当てる段だけである。") 2 ]
 
 def veluQuotientFull_descends.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
