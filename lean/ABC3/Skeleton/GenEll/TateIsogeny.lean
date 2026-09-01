@@ -11,6 +11,7 @@ import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GenEll.MuPrimitiveRoot
 import ABC3.Found.GenEll.CyclotomicUnits
+import ABC3.Found.GaloisRep.TateModelPoint
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Found.GaloisRep.VeluMuSum
 import ABC3.Found.GenEll.JScale
@@ -1234,5 +1235,134 @@ def minDeltaExp_eq_mul_of_torsion.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_j_of_torsion") 1,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_tateParamR(Δ_min へ、第 892、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_tateParamR") 1 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★大域の Vélu の商で受ける形 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 各悪い素点での `Δ_min` の関係——
+大域の Vélu の商で受ける形**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 972）**——第 965 は Tate モデルの上の点 `P` と
+`j` の一致 `hW′j`、それに商の楕円性 `hellQ` を受けていた。
+☆本定理はその 4 つを**大域のデータ `Q`・`hQ`・`hE′` から作る**:
+
+* `P`・`hP`・`hP0`・`hW′j` ← `exists_point_j_tateModel`（第 970）
+* `ζ`・`uζ` ← `exists_primitiveRoot_of_torsion_point`（第 947）
+* `hellQ` ← `isElliptic_veluQuotient_tate_mu`（第 971）
+
+★残るのは**各悪い素点で局所データを供給する段**だけである。 -/
+theorem minDeltaExp_eq_mul_of_globalVelu {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    [(E'.baseChange (p.adicCompletion L)).IsElliptic]
+    [(E'.baseChange (p.adicCompletion L)).IsMinimal (p.adicCompletionIntegers L)]
+    (h : (E.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    (h' : (E'.baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+      (p.adicCompletionIntegers L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation (p.adicCompletion L)
+        (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)))
+        (algebraMap L (p.adicCompletion L) x) = (HeightOneSpectrum.valuation L p) x)
+    (C : VariableChange L) (hC : IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (C' : VariableChange L) (hC' : IsMinimal (primeSubring p) (C' • E'))
+    (hc4ne' : (C' • E').c₄ ≠ 0) (hc4' : valAdd p (Units.mk0 ((C' • E').c₄) hc4ne') = 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hΔ : ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
+      (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).toAffine.Δ ≠ 0)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := p.adicCompletion L)
+        (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h)).v
+      (mkTateSetup (K := p.adicCompletion L)
+        (tateParamR (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+        (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h)).Q))
+    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    (hql : (tateParamR (E.baseChange (p.adicCompletion L)) h) ^ l
+      ∈ IsLocalRing.maximalIdeal (p.adicCompletionIntegers L))
+    (h2 : (2 : (p.adicCompletionIntegers L)) ≠ 0)
+    (h2K : (2 : (p.adicCompletion L)) ≠ 0)
+    (hvw : ∀ ζ : (p.adicCompletionIntegers L), IsPrimitiveRoot ζ l →
+      ∃ v w : (p.adicCompletionIntegers L),
+      v = ∑ i ∈ (range l).erase 0,
+          veluV2 (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+            (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+            (tateXpair (ζ ^ i)
+              ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+              (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+            (tateYpair (ζ ^ i)
+              ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+              (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+        ∧ 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+              (tateXpair (ζ ^ i)
+                ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+              (tateYpair (ζ ^ i)
+                ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+            + 2 * (veluV2 (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                    (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+                    (tateXpair (ζ ^ i)
+                      ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+                    (tateYpair (ζ ^ i)
+                      ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h))
+                  * tateXpair (ζ ^ i)
+                      ((tateParamR (E.baseChange (p.adicCompletion L)) h) * (ζ ^ i) ^ (l - 1))
+                      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+                      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)))
+        ∧ ((veluCurve (tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
+              (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)) v w).map
+            (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic)
+    [((tateCurveAt ((tateParamR (E.baseChange (p.adicCompletion L)) h) ^ l) hql).map
+      (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic]
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  obtain ⟨P, hP, hP0, hj⟩ := exists_point_j_tateModel p E E' h hl hQ h2K hE'
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    exists_primitiveRoot_of_torsion_point
+      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h) hΔ hl hcop P hP hP0
+  obtain ⟨v, w, hv, hw, hell⟩ := hvw ζ hζ
+  have hellQ := isElliptic_veluQuotient_tate_mu
+      (tateParamR (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)
+      (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h) hΔ hl hlu h2K
+      ζ uζ hζ hζu hζl hord v w hv hw hell
+  rw [← hPz] at hellQ
+  exact minDeltaExp_eq_mul_of_torsion p E E' h h' hp C hC hc4ne hc4 C' hC' hc4ne' hc4'
+    hl hodd hΔ hcop hlu hql h2 h2K hvw P hP hP0 hellQ (hj hellQ)
+
+def minDeltaExp_eq_mul_of_globalVelu.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(各悪い素点での Δ_min の関係——大域の Vélu の商で受ける形)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_of_globalVelu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_point_j_tateModel(P と hW′j、第 970、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_point_j_tateModel") 1,
+    .citation "[ABC3]" "isElliptic_veluQuotient_tate_mu(hellQ、第 971、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isElliptic_veluQuotient_tate_mu") 1,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_torsion(終点、第 965、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_of_torsion") 1 ]
 
 end ABC3.Skeleton.GenEll
