@@ -109,7 +109,40 @@ theorem faltingsHeightJ_quot_le (E : SSCurve) (S : Finset (E.fld × E.fld))
   rw [faltingsHeightJ_eq, faltingsHeightJ_eq]
   exact hfalt
 
+/-! ## ★★★★★★★★★★★★★★★★`quotLCyclicJ` の水準へ -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★
+**`quotLCyclicJ` の `deg∞` は `l` 倍**——★（第 1244）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`quotLCyclicJ_spec`（在庫）で `S` を取り出し、第 1242 を当てる。
+★局所の関係は `Lemma 3.2, (ii)` が与える（仮説として受ける）。
+
+★★★これが `EllModuliWitness` の `degInfJ_quotLCyclicJ` そのものの形である。 -/
+theorem degInfJ_quotLCyclicJ_of_local (x : RealizedClass) (l : ℕ)
+    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
+    (hloc : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
+      S.card + 1 = l →
+      ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+        minDeltaExp p (veluQuotientFull x.rep.toSSCurve.W S)
+          = l * minDeltaExp p x.rep.toSSCurve.W) :
+    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
+  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
+  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l (hloc S hcard)
+  rw [hj] at hq
+  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
+  rw [hx]
+  exact hq
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def degInfJ_quotLCyclicJ_of_local.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(quotLCyclicJ の deg∞ は l 倍——局所の関係は Lemma 3.2, (ii) を仮説で受ける)",
+    sectionId := "genell-lemma-3-5" }
 
 def faltingsHeightJ_quot_le.src : Source :=
   { paper := "GenEll", pdfPage := 17,
