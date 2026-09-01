@@ -238,7 +238,12 @@ import ABC3.Meta.Claim
 橋は「2 つの加法付値が同時に `0` になる」だけである
 （`valuation_isEquiv` ＋ mathlib の `Valuation.isEquiv_iff_val_eq_one`）。
 
-★★★**これで `SemistableAt` の底変換の部品はすべて揃った**——
+★★★★**第 1192 で `SemistableAt` の底変換が閉じた**
+——`semistableAt_baseChange`（`Found/GaloisRep/DegInfBaseChange.lean`）。
+☆これで**節点 2d-1 の葉はすべて埋まった**——
+残るのは既存の `_K` の連鎖を `L_v(ζ_l)` で走らせる組み立てだけである。
+
+☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
 mathlib の `map_variableChange`。☆残るのは組み立てだけである。
 

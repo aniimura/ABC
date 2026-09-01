@@ -472,6 +472,11 @@ theorem valAdd_algebraMap_liesOver (p : HeightOneSpectrum (𝓞 L))
 
 /-- ★★★★★★★★**付値環は底変換で付値環に入る**（第 1191）。
 
+★★☆**訂正（第 1192）**——同じ内容が `isIntegral_baseChange_primeSubring` の中の
+`key` として**すでにあった**（`valuation_liesOver` ＋ `pow_le_one₀` で 2 行）。
+☆本定理は `valAdd` の言葉で述べた版であり、`valAdd` を使う場面では読みやすいが、
+**新しい内容ではない**。
+
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
@@ -501,9 +506,78 @@ theorem algebraMap_mem_primeSubring (p : HeightOneSpectrum (𝓞 L))
       exact mul_nonneg hnn hge
     exact (mem_primeSubring_iff P _).2 ((valAdd_nonneg_iff P _).1 this)
 
+/-! ## ★★★★★★★★★★★★★★★★`SemistableAt` の基底変換 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**半安定性は基底変換で保たれる**——★**無条件**（第 1192）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`SemistableAt` の 2 つの場合をそれぞれ上げる:
+
+| 場合 | 道 | 第 |
+|---|---|---|
+| `v_p(Δ_min) = 0` | `minDeltaExp_baseChange_eq_zero` | 1187 |
+| 極小モデル `C` で `v_p(c₄) = 0` | `C` を上げて `isMinimal_of_c4_valAdd_eq_zero` | 1190 |
+
+★`valAdd` のスケーリングは第 1188、整性の持ち上げは
+`isIntegral_baseChange_primeSubring`（在庫）。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 で
+第 1186 が「在庫に無い」と名指しした葉の**本体**である。 -/
+theorem semistableAt_baseChange (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] [(E.baseChange L').IsElliptic]
+    (h : SemistableAt p E) : SemistableAt P (E.baseChange L') := by
+  rcases h with h0 | ⟨C, hC, hc4, hv⟩
+  · exact Or.inl (minDeltaExp_baseChange_eq_zero L L' p P E h0)
+  · haveI hint : WeierstrassCurve.IsIntegral (primeSubring p) (C • E) := by
+      have hh := ((WeierstrassCurve.isMinimal_iff _ _).1 hC).1
+      simpa using hh
+    haveI hintP : WeierstrassCurve.IsIntegral (primeSubring P) ((C • E).baseChange L') :=
+      isIntegral_baseChange_primeSubring L L' p P (C • E)
+    have hmap : (C.map (algebraMap L L')) • (E.baseChange L') = (C • E).baseChange L' :=
+      WeierstrassCurve.map_variableChange _ _ _
+    have hc4' : (((C • E).baseChange L')).c₄ ≠ 0 := by
+      rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄]
+      exact (map_ne_zero_iff _ (algebraMap L L').injective).2 hc4
+    have hΔ' : (((C • E).baseChange L')).Δ ≠ 0 := by
+      rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_Δ]
+      exact (map_ne_zero_iff _ (algebraMap L L').injective).2
+        (variableChange_Delta_ne_zero E E.isUnit_Δ.ne_zero C)
+    have hval : valAdd P (Units.mk0 (((C • E).baseChange L')).c₄ hc4') = 0 := by
+      have hstep : valAdd P (Units.mk0 (((C • E).baseChange L')).c₄ hc4')
+          = (p.asIdeal.ramificationIdx P.asIdeal : ℤ)
+            * valAdd p (Units.mk0 ((C • E).c₄) hc4) := by
+        rw [← valAdd_algebraMap_liesOver L L' p P (Units.mk0 ((C • E).c₄) hc4)]
+        refine valAdd_eq_of_valuation_eq P _ _ ?_
+        show (P.valuation L') (((C • E).baseChange L')).c₄
+          = (P.valuation L') (algebraMap L L' ((C • E).c₄))
+        rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄]
+      rw [hstep, hv, mul_zero]
+    refine Or.inr ⟨C.map (algebraMap L L'), ?_, ?_⟩
+    · rw [hmap]
+      exact isMinimal_of_c4_valAdd_eq_zero P ((C • E).baseChange L') hΔ' hc4' hval
+    · rw [hmap]
+      exact ⟨hc4', hval⟩
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def semistableAt_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定性は基底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def semistableAt_baseChange.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_baseChange_eq_zero(第 1187、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_baseChange_eq_zero") 1,
+    .citation "[ABC3]" "isMinimal_of_c4_valAdd_eq_zero(第 1190、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_of_c4_valAdd_eq_zero") 1,
+    .citation "[ABC3]" "valAdd_algebraMap_liesOver(第 1188、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.valAdd_algebraMap_liesOver") 1 ]
 
 def algebraMap_mem_primeSubring.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

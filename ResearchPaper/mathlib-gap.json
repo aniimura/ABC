@@ -5255,5 +5255,16 @@
     "what": "★algebraMap_mem_primeSubring(Found/GaloisRep/DegInfBaseChange.lean)—— x ∈ primeSubring p なら algebraMap x ∈ primeSubring P。valAdd P (algebraMap x) = e·valAdd p x ≥ 0(第 1188)だからである。",
     "why": "☆これが「整モデルを上げると整モデルになる」の中身であり、SemistableAt の底変換の組み立てで isMinimal_of_c4_valAdd_eq_zero(第 1190)が要求する IsIntegral (primeSubring P) を出す段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "semistableBaseChange20260902": {
+    "block": 1192,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★半安定性は基底変換で保たれる——節点 2d-1 の葉がすべて埋まった",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "what": "★semistableAt_baseChange(Found/GaloisRep/DegInfBaseChange.lean)—— SemistableAt の 2 つの場合をそれぞれ上げる: v_p(Δ_min) = 0 は第 1187、極小モデル C で v_p(c₄) = 0 は C を上げて第 1190。valAdd のスケーリングは第 1188、整性の持ち上げは isIntegral_baseChange_primeSubring(在庫)。",
+    "correction": "★★第 1191 の algebraMap_mem_primeSubring は**新しい内容ではなかった**——同じ内容が isIntegral_baseChange_primeSubring の中の key として既にあった(valuation_liesOver ＋ pow_le_one₀ で 2 行)。☆valAdd の言葉で述べた版として残すが、docstring に訂正を書いた。",
+    "frame": "☆これで節点 2d-1 の葉はすべて埋まった。★残るのは既存の _K の連鎖を L_v(ζ_l) で走らせる組み立てだけである。",
+    "pitfall": "☆同じ section の variable (L L') は定理の**先頭の明示引数**になる——minDeltaExp_baseChange_eq_zero L L' p P E h0 のように書く。★isMinimal_iff の第 1 成分は `(fun C ↦ …) 1` のベータ簡約前の形で来るので rwa [one_smul] ではなく simpa。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
