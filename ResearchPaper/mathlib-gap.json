@@ -4445,5 +4445,27 @@
     },
     "remaining": "☆残るのは節点 4(c₄・c₆ の恒等式の E 版、重み 10)と節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)。",
     "gate": "lake build ABC3 成功(6255 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "c4DenomFree20260901": {
+    "block": 1129,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★c₄ の恒等式の分母なし版——§3 の枠の節点 4 の前半",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 4)。",
+    "what": [
+      "★c4_velu_tate(Skeleton/GenEll/TateIsogeny.lean:154)は hlu : IsUnit (l)、hu : ∀ i, IsUnit (1 − ζ^i)、hDX の 3 つを仮説に取る。p ∣ l の悪い素点では最初の 2 つが成り立たない。",
+      "★★両辺に l⁶ を掛けた形 l⁶·c₄(E_q) + 240·∑ veluV2DF = l¹⁰·c₄(E_{q^l}) を、どれも仮説に取らずに証明した。"
+    ],
+    "route": "☆第 1128 とまったく同じ 3 段(PowerSeries K → PowerSeries (FractionRing A) の単射性 → evalAdicMapHom で R へ)。★hDX は第 1128 の tateDXpair_C_ne_zero(定数項 α(1+α)/(1−α)³)で出る。そこで α ≠ −1 を使うので l ≠ 2 が要る——Lemma 3.5 はすでにそれを置いている。",
+    "added": {
+      "Found/GaloisRep/C4DenomFree.lean (新規)": [
+        "sum_pow_eq_zero_of_ne_one'(体で η^l = 1・η ≠ 1 から ∑ η^k = 0)",
+        "c4_velu_tateDF_field(段 1)",
+        "c4_velu_tateDF_powerSeries(段 2)",
+        "c4_velu_tateDF(★段 3——節点 4 の前半)"
+      ]
+    },
+    "measured": "☆CharZero (PowerSeries K) は infer_instance では出ないが algebraRat.charZero _ で出る(実測)。★IsAdicComplete (span {X}) (PowerSeries R) は Mathlib.RingTheory.AdicCompletion.Completeness を import するまで見えない(第 1127 の実測)。",
+    "remaining": "☆節点 4 の後半は c₆。veluU の DF 版(l⁶·veluU)と veluV2·X の段(l⁸ を掛ける)が要る。★節点 5(p ∣ l の悪い素点で Δ_min が l 倍、重み 12)。",
+    "gate": "lake build ABC3 成功(6256 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
