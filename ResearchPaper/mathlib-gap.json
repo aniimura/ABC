@@ -4942,5 +4942,15 @@
     "frame": "☆AlphaBridge の進捗枠 0.6/3、重み 22 → 17。★Theorem 3.8 の残高 = I(5) ＋ II(17) = 22。",
     "pitfall": "☆import を絞ったファイルでは `omega`・`ring` が「unknown tactic」になる。★項で書く(sub_eq_zero.mp・mul_comm)か、Mathlib.Tactic を import する。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "zetaPiKernel20260902": {
+    "block": 1162,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★座標の核はちょうど lℤ × lℤ——節点 2 が消費する界面",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 1)。",
+    "what": "★zeta_pi_mem_zpowers_iff —— ζᵃ·πᵇ ∈ ⟨Q⟩ ⟺ l ∣ a かつ l ∣ b(★無条件)。☆第 1161 の zeta_pi_indep が「⟹」、本ブロックの zeta_pi_mem_of_dvd が「⟸」(ζ^{la} π^{lb} = (ζ^l)^a (π^l)^b = Q^b)。",
+    "why": "★★これが「([ζ], [π]) は E[l] の ℤ/l-基底である」ことの**正確な形**であり、AlphaBridge の節点 2 が消費する界面である。☆基底であることを ZMod l の言葉に翻訳する段は節点 2 の側に置く。",
+    "frame": "☆AlphaBridge の進捗枠 0.75/3、重み 22 → 16。★Theorem 3.8 の残高 = I(5) ＋ II(16) = 21。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

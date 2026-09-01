@@ -96,6 +96,40 @@ theorem zeta_pi_indep {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π 
   have := orderOf_dvd_iff_zpow_eq_one.2 hζa
   rwa [hord] at this
 
+/-! ## ★★★★★★★★★★★★核はちょうど `lℤ × lℤ` -/
+
+/-- ☆逆向き——`l ∣ a` かつ `l ∣ b` なら `ζᵃπᵇ ∈ ⟨Q⟩`。 -/
+theorem zeta_pi_mem_of_dvd {G : Type*} [CommGroup G] {l : ℕ} {Q ζ π : G}
+    (hζl : ζ ^ l = 1) (hπl : π ^ l = Q)
+    {a b : ℤ} (ha : (l : ℤ) ∣ a) (hb : (l : ℤ) ∣ b) :
+    ∃ n : ℤ, ζ ^ a * π ^ b = Q ^ n := by
+  obtain ⟨a', rfl⟩ := ha
+  obtain ⟨b', rfl⟩ := hb
+  refine ⟨b', ?_⟩
+  have hζz : ζ ^ (l : ℤ) = 1 := by rw [zpow_natCast]; exact hζl
+  have hπz : π ^ (l : ℤ) = Q := by rw [zpow_natCast]; exact hπl
+  rw [zpow_mul, hζz, one_zpow, one_mul, zpow_mul, hπz]
+
+/-- ★★★★★★★★★★★★★★★★
+**座標の核はちょうど `lℤ × lℤ`**——★**無条件**（第 1162）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`ζᵃ·πᵇ ∈ ⟨Q⟩ ⟺ l ∣ a かつ l ∣ b`。
+★★これが「`([ζ], [π])` は `E[l]` の `ℤ/l`-基底である」ことの正確な形であり、
+`AlphaBridge` の節点 2 が消費する界面である。 -/
+theorem zeta_pi_mem_zpowers_iff {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π : G}
+    (hζl : ζ ^ l = 1) (hζprim : ∀ n : ℕ, 0 < n → n < l → ζ ^ n ≠ 1)
+    (hπl : π ^ l = Q) (hQinf : ∀ j : ℤ, Q ^ j = 1 → j = 0)
+    (a b : ℤ) :
+    (∃ n : ℤ, ζ ^ a * π ^ b = Q ^ n) ↔ ((l : ℤ) ∣ a ∧ (l : ℤ) ∣ b) := by
+  constructor
+  · rintro ⟨n, hn⟩
+    exact zeta_pi_indep hl hζl hζprim hπl hQinf a b n hn
+  · rintro ⟨ha, hb⟩
+    exact zeta_pi_mem_of_dvd hζl hπl ha hb
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -106,6 +140,11 @@ def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
 def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def zeta_pi_mem_zpowers_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(座標の核はちょうど lℤ × lℤ。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def zeta_pi_indep.needs : List ABC3.Meta.ProofObligation :=
