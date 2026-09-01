@@ -4275,6 +4275,12 @@
       "whatMustBeRestated": "☆ただし `veluV2_eq_tateDYpair` は `tateXpair`（adic な対象）について述べられているので、手で組んだ `K` 値座標について**述べ直す**必要がある。★これが節点 3 の実体（8-15 ブロック）。",
       "cancellation": "☆最後は `R` が標数 0 の整域で `(l:R) ≠ 0` なので、`l⁶` を約せる。★`l⁶·A = l⁶·B ⟹ A = B`。",
       "status": "★材料（第 1118 `tateXpairDF`・`tateYpairDF`、第 1119 `veluV2DF`）は揃っている。"
+    },
+    "node3Revised1122": {
+      "block": "第 1122（見積りの訂正）",
+      "correction": "★★**第 1120-1121 の「節点 3 は 8-15 ブロック」は過小である。** ☆`veluV2_eq_tateDYpair` → `tate_ode` → **`tate_ode_mul`**（`Found/GaloisRep/DualTate.lean:360`）まで辿ると、証明は**双対数 `R[ε]` の中の `tate_equation`** を経由しており、`ha : IsUnit (1 − a)` は `isUnit_one_sub_dualA ha` として入る。★分母なし版を作るには**双対数の連鎖ごと書き直す**必要がある。☆見積り 8-15 → **20-40 ブロック**。",
+      "whyMultiplyingDoesNotWork": "☆「`l⁷` を掛ければ `DXpairDF·(bracketDF) = 0` になる」は正しいが、**それを出すには元の `tate_ode_mul`（`ha` が要る）が要る**ので循環する。",
+      "alternativeRoute": "★**別の道**（未検証、要調査）: 悪い素点で要るのは `jExp p E′ = l·jExp p E` だけ（第 995 `minDeltaExp_eq_mul_of_jExp_mul`）。☆`Lemma 3.2, (ii)`（`quotMuEquiv`、`Found/GenEll/Lemma32.lean`、**`hu` 不要**）は`(L̄ˣ/q^ℤ)/μ_l ≃ L̄ˣ/(q^l)^ℤ` を**群として**与える。★もし「一意化群が同型なら `j` が等しい」を繋げれば、Vélu の明示計算（＝ODE の連鎖）を**丸ごと迂回できる**。☆在庫に `tateParamR_eq_of_j_tateCurveAt`（`j` → `q`）はあるので、逆向き（群同型 → `j`）が要る。**これが本当に軽いかは未測定。**"
     }
   }
 }
