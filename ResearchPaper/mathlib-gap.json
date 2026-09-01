@@ -4825,5 +4825,16 @@
     "pitfall": "★★★配管の穴: `Affine.Point` の加法群構造は `[DecidableEq F]` を取る。Lemma 3.5 側の命題は一般の体 L で `open scoped Classical` により `Classical.propDecidable` を拾っているが、`↥E.K`(ℂ の中間体)では `Subtype.instDecidableEq` の方が拾われる。☆その結果 `addOrderOf Q = l` が別物になり、Application type mismatch と isDefEq/whnf のタイムアウトが出る。★直し方: 定義と証明の両方で `letI : DecidableEq E.fld := fun a b => Classical.propDecidable (a = b)` を置いて固定する。`open scoped Classical` では**具体型に対しては効かない**。",
     "deviation": "☆逸脱(ファイル冒頭の表に明記): 曲線の族を DegCurve(半安定かつ乗法還元)に制限、H_L を L 有理点の生成元と Vélu の商で書く(商の楕円性・半安定性は仮説)、GaloisFinite は「各次数で有限」と原文より弱く取る(Exc は結論側なので安全)、compactly bounded は h_∞(j) の有界性。★いずれも EllModuliObjects.lean で先に決めた設計であり、本ブロックで増やした逸脱は無い。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress **20/24**(§1 9/9、§2 0/1、§3 8/9、§4 3/5)。"
+  },
+  "lCyclicReading20260901": {
+    "block": 1152,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★l-巡回部分群の 2 つの読みが繋がっていない——逸脱が消費側に響いた",
+    "goal": "Theorem 3.8 を Found/ で閉じる(§3 の残り 1 件)。",
+    "measured": "★★原文の H_L ⊆ E_L(l-巡回部分群スキーム)を本企画は 2 通りに読んでいた。(V) HasLCyclicVelu = 「L 有理点 Q で addOrderOf Q = l、その Vélu の商が楕円曲線で半安定」——Lemma 3.5 → Lemma 3.7(第 1151)が使う。(J) HasLCyclicJ = 「E[l] の中の Gal-安定な直線」——Theorem 3.8(imageContainsSL2J_of_alpha' の hno)が使う。★含意は (V) ⟹ (J) の片側だけ立つ(有理点 Q は ⟨Q⟩ を点ごとに固定する)。☆(J) ⟹ (V) は偽——安定な直線の点は L 有理とは限らない。",
+    "consequence": "★★Lemma 3.7 の第 3 の主張の対偶は `¬ HasLCyclicVelu` を与えるが、Theorem 3.8 が要るのは `¬ HasLCyclicJ` である。**向きが逆なので届かない**。☆CLAUDE.md の「逸脱」の規約が名指ししている場合(後続の証明に影響が出た)なので記録した。★第 1151 の lemma_3_7 それ自体は正しい——壊れているのは Theorem 3.8 へ繋ぐところだけである。",
+    "frame": "☆Skeleton/GenEll/LCyclicReading.lean(進捗枠 0/3)。節点 1: veluQuotient_of_stableLine——F = L̄ で Vélu の商を作り、和 v・w が Gal 不変なので L に降りること(重み 12)。節点 2: lemma_3_5_height_ineq を安定直線の側で述べ直す(重み 10)。節点 3: lemma_3_7 の第 3 の主張の言い直し(重み 4)。★別の道(L(H) へ上げる)は ht^Falt・deg∞ が体を変えると動くので採らない。",
+    "thm38Balance": "☆Theorem 3.8 の残高(第 1152 の実測): (1) α が像に入る段の**橋**——Kummer の σ は AdjoinRoot (X^l − C q) の上で取れている(Thm38KummerExists.lean)が、Tate 曲線の L へ移して galRep の mod l 像に入れる段が要る。(2) 本ブロックの 3 節点。★位相の側(像の閉性)は第 772 で、群論の側は §9-992 と Lemma 3.1, (iv) で済んでいる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24(変わらず——本ブロックは測定と枠)。"
   }
 }

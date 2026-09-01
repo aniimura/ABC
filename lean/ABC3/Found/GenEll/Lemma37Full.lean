@@ -42,6 +42,15 @@ import ABC3.Meta.Claim
 
 ☆これらはすべて `Found/GenEll/EllModuliObjects.lean` で先に決めた設計であり、
 本ファイルで新たに増やした逸脱は無い。
+
+## ★★★★★★★★★★★★逸脱の代償（第 1152 の測定）
+
+★★**`HasLCyclicVelu`（有理点の読み）は `Theorem 3.8` には届かない**。
+`Theorem 3.8` は `¬ HasLCyclicJ`（`Gal`-安定な直線が無いこと）を要るが、
+本定理の第 3 の主張の対偶が与えるのは `¬ HasLCyclicVelu` であり、
+☆(V) ⟹ (J) なので**向きが逆**である。
+
+★詳細と直す道（3 節点）は `Skeleton/GenEll/LCyclicReading.lean` にある。
 -/
 
 namespace ABC3.Found.GenEll
