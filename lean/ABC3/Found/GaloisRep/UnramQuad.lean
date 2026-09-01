@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GenEll.QuadTwist
+import ABC3.Found.GenEll.CyclotomicUnits
 import ABC3.Found.GaloisRep.CompletionValuationBridge
 import Mathlib.FieldTheory.KummerExtension
 import Mathlib.RingTheory.AdicCompletion.Basic
@@ -1060,6 +1061,74 @@ theorem irreducible_map_residue_of_not_splits {R : Type} [CommRing R] [IsLocalRi
   show Irreducible (f.map (IsLocalRing.residue R))
   refine irreducible_of_not_splits_natDegree_two (hf.map (IsLocalRing.residue R)) ?_ hns
   rw [hf.natDegree_map, hdeg]
+
+/-! ## ★★★★★★★★★★★★★★★★第 1037 —— `l` が単元でなければ `l ∈ 𝔪^{l−1}`
+
+★第 1019 の節点（`hlu` の出どころ）の**心臓**である。
+
+☆`l` が局所環 `R` で単元でないとすると、剰余体の標数は `l` である。
+★標数 `l` では `x^l − 1 = (x − 1)^l` なので、`ζ̄^l = 1` から `ζ̄ = 1`、
+すなわち **`1 − ζ^i` はすべて `𝔪` に入る**。
+
+☆そして `∏_{i=1}^{l−1}(1 − ζ^i) = l`（第 951 の土台）だから、
+**`l ∈ 𝔪^{l−1}`**、すなわち `v_p(l) ≥ l − 1` である。
+
+★あとは `v_p(l) = e_p ≤ [L:ℚ]`（分岐指数の上界）と突き合わせれば
+`l > [L:ℚ] + 1` に矛盾する。 -/
+
+section CyclotomicLocal
+
+open Finset in
+/-- ★★★★★★★★★★★★**`l` が単元でなければ `1 − ζ^i` はすべて `𝔪` に入る**（第 1037）。
+
+☆剰余体の標数が `l` になり、`(ζ̄ − 1)^l = ζ̄^l − 1 = 0` だから `ζ̄ = 1`。 -/
+theorem one_sub_pow_mem_maximalIdeal_of_not_isUnit {R : Type} [CommRing R] [IsDomain R]
+    [IsLocalRing R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hnu : ¬ IsUnit ((l : R))) (i : ℕ) :
+    1 - ζ ^ i ∈ IsLocalRing.maximalIdeal R := by
+  haveI : Fact l.Prime := ⟨hl⟩
+  have hlm : (l : R) ∈ IsLocalRing.maximalIdeal R := by
+    by_contra hc
+    exact hnu (IsLocalRing.notMem_maximalIdeal.1 hc)
+  have hl0 : ((l : ℕ) : IsLocalRing.ResidueField R) = 0 := by
+    rw [← map_natCast (IsLocalRing.residue R) l]
+    exact (IsLocalRing.residue_eq_zero_iff _).2 hlm
+  have hdvd : ringChar (IsLocalRing.ResidueField R) ∣ l := ringChar.dvd hl0
+  have hne1 : ringChar (IsLocalRing.ResidueField R) ≠ 1 := by
+    intro hc
+    exact (one_ne_zero (α := IsLocalRing.ResidueField R))
+      (by simpa using (ringChar.spec (IsLocalRing.ResidueField R) 1).2 (by rw [hc]))
+  have hchar : ringChar (IsLocalRing.ResidueField R) = l :=
+    ((Nat.Prime.eq_one_or_self_of_dvd hl _ hdvd).resolve_left hne1)
+  haveI : CharP (IsLocalRing.ResidueField R) l := by
+    rw [← hchar]; exact ringChar.charP _
+  have hz1 : IsLocalRing.residue R ζ = 1 := by
+    have h1 : (IsLocalRing.residue R ζ - 1) ^ l = 0 := by
+      rw [sub_pow_char, one_pow, ← map_pow, hζ.pow_eq_one, map_one, sub_self]
+    exact sub_eq_zero.1 ((pow_eq_zero_iff (n := l) hl.ne_zero).1 h1)
+  refine (IsLocalRing.residue_eq_zero_iff _).1 ?_
+  rw [map_sub, map_one, map_pow, hz1, one_pow, sub_self]
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**`l` が単元でなければ `l ∈ 𝔪^{l−1}`**（第 1037）。
+
+☆`∏_{i=1}^{l−1}(1 − ζ^i) = l` の各因子が `𝔪` に入るから。
+★これが `v_p(l) ≥ l − 1`、すなわち分岐指数 `e_p ≥ l − 1` の中身である。 -/
+theorem natCast_mem_maximalIdeal_pow_of_not_isUnit {R : Type} [CommRing R] [IsDomain R]
+    [IsLocalRing R] {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    (hnu : ¬ IsUnit ((l : R))) :
+    (l : R) ∈ (IsLocalRing.maximalIdeal R) ^ (l - 1) := by
+  have hprod := ABC3.Found.GenEll.prod_one_sub_pow_erase hl.pos hζ
+  rw [← hprod]
+  have hcard : ((range l).erase 0).card = l - 1 := by
+    rw [Finset.card_erase_of_mem (by simp [hl.pos]), Finset.card_range]
+  have h1 : ∏ i ∈ (range l).erase 0, (1 - ζ ^ i)
+      ∈ ∏ _i ∈ (range l).erase 0, IsLocalRing.maximalIdeal R :=
+    Ideal.prod_mem_prod (fun i _ =>
+      one_sub_pow_mem_maximalIdeal_of_not_isUnit hl hζ hnu i)
+  rwa [Finset.prod_const, hcard] at h1
+
+end CyclotomicLocal
 
 /-! ## ★出典の紐付け(`.src`) -/
 
