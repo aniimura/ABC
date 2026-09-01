@@ -2904,3 +2904,13 @@ membership が `mem_ker_nsmulHom : x ∈ (nsmulHom A m).ker ↔ m • x = 0` で
 because it depends on 'PadicInt.instCommRing'`。
 
 **直し方**: `noncomputable def`。★`ℤ_[l]` が絡む `def` は既定で付けておく。
+
+## `rw [e.apply_symm_apply]` は最初の項でパターンを固定する（第 1205）
+
+**失敗形**: 目標が
+`... e (e.symm w) ... = l • e (e.symm u)` のとき
+`rw [e.apply_symm_apply]` は `?x := w` で固定され、
+右辺の `e (e.symm u)` は**残る**。
+
+**直し方**: 当てたい項を明示する —— `rw [e.apply_symm_apply u]`。
+★`rw` は「最初の一致でメタ変数を決め、その具体形をすべて書き換える」規則である。

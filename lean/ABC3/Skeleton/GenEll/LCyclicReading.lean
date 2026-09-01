@@ -334,8 +334,24 @@ import ABC3.Meta.Claim
 `n = 1` が `HasLCyclicJ`（`mod l` の直線）を
 **点の直線**へ一意に対応させる段である。
 
-☆残るのはこれを使って `HasLCyclicJ` から
-「`Gal`-安定な位数 `l` の点の直線」を取り出す組み上げだけである。
+##### ★★★★★★★★★★★★★★★★★★★★第 1204-1205——**橋が架かった**
+
+`exists_stablePoint_of_hasLCyclicJ`（`Found/GenEll/LCyclicPoint.lean`）:
+
+    HasLCyclicJ E l → ∃ Q, addOrderOf Q = l ∧ ∀ σ, ∃ k, galPoint σ Q = k • Q
+
+| 段 | 材料 | 第 |
+|---|---|---|
+| `v` を `ℤ_l²` へ持ち上げる | `exists_redVec_eq` | 1204 |
+| `Q ≔ tateProj₁ (e⁻¹ w)` が `≠ 0` | `tateProj_one_eq_zero_iff` ＋ `redVec_eq_zero_iff` | 1203・1204 |
+| 位数がちょうど `l` | `addOrderOf_tateProj_one` | 1201 |
+| `σ` の作用が `Q` の直線に入る | `redVec_mulVec_glRed` ＋ 核の記述 | 1204・1203 |
+
+★★★**これで `HasLCyclicJ` から `Lemma 3.5` が要る `addOrderOf Q = l` が出る**
+——節点 2 の橋は架かった。
+
+☆残るのは `Q` が有理になる有限拡大 `L''`（第 1195）を取って
+第 1199 に入れる配管だけである。
 
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・

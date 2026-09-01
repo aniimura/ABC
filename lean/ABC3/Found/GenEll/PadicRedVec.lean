@@ -73,6 +73,20 @@ theorem redVec_mulVec_glRed (g : GL (Fin 2) ℤ_[l]) (w : Fin 2 → ℤ_[l]) :
           Matrix (Fin 2) (Fin 2) (ZMod l)).mulVec (redVec l w) := by
   rw [redVec_mulVec, coe_glRedPadic]
 
+/-- ★★**還元は差と可換**（第 1205）。 -/
+theorem redVec_sub (a b : Fin 2 → ℤ_[l]) :
+    redVec l (a - b) = redVec l a - redVec l b := by
+  funext i
+  show PadicInt.toZMod (a i - b i) = PadicInt.toZMod (a i) - PadicInt.toZMod (b i)
+  exact map_sub _ _ _
+
+/-- ★★**還元は自然数倍と可換**（第 1205）。 -/
+theorem redVec_nsmul (k : ℕ) (w : Fin 2 → ℤ_[l]) :
+    redVec l (k • w) = k • redVec l w := by
+  funext i
+  show PadicInt.toZMod (k • w i) = k • PadicInt.toZMod (w i)
+  exact map_nsmul _ _ _
+
 /-! ## ★★★★★★★★★★核と全射性 -/
 
 /-- ★★★★★★★★★★**還元の核はちょうど `l · ℤ_l²`**——★**無条件**（第 1204）。
@@ -124,6 +138,16 @@ def redVec.src : Source :=
 def redVec_mulVec.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(還元は行列の作用と可換。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def redVec_sub.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(mod l 還元は差と可換。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def redVec_nsmul.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(mod l 還元は自然数倍と可換。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def redVec_mulVec_glRed.src : Source :=
