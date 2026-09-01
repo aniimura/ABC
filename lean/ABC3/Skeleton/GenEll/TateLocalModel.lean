@@ -1014,6 +1014,69 @@ def lemma_3_5_velu_arch.needs : List ProofObligation :=
     .citation "[ABC3]" "exists_periodPair_family(第 1046、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_periodPair_family") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★第 1050 —— `Lemma 3.5` の最終形
+
+★第 1049 で有限素点側が **1 本の不等式 `hfin`** になった。
+☆連鎖は浅い（`lemma_3_5_of_isogeny_estimate_le` が `hfalt` を直接受ける）ので、
+一気に組める。
+
+★★これで `Lemma 3.5` の仮説は
+**原文自身の仮定 ＋ `hfin` の 1 本**だけになる。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] Lemma 3.5**
+——残る仮説は `hfin` の 1 本（第 1050）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+    `(1/(12(1+ϵ)))·l·deg_∞(E) ≤ ht^Falt(E) + 2·log(l) + C`
+
+★★★★**2026-09-01（第 1050）**——`IsMuAtBadPrimes`（第 1044）と
+アルキメデスの周期対（第 1046）と有限素点側の 1 本化（第 1049）を合わせた形。
+☆`hfin` は「`E′` のモデルは `E` のモデルより極小から遠くない」であり、
+第 704 の `hmin`・`hint` はその十分条件にすぎなかった。 -/
+theorem lemma_3_5_velu_defect (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      Module.finrank ℚ L + 1 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      ((∑ᶠ p : HeightOneSpectrum (𝓞 L),
+            (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+          - (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+            (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+        ≤ (3 / 2) * (Module.finrank ℚ L : ℝ) * Real.log l) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := ABC3.Found.GaloisRep.lemma_3_5_of_isogeny_estimate_le eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl hodd hd Q hQ hE' hfin hssE hssE' hcop => ?_⟩
+  obtain ⟨P, Cv, hΔ, hPC, hell1, hell2⟩ := exists_periodPair_family E
+  refine hC L E E' l hssE' ?_
+    (ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_of_defect E E' l hl.pos Q hQ hE'
+      P Cv hΔ hPC hell1 hell2 hfin)
+  refine ABC3.Found.GaloisRep.degInfOf_ge_of_local E E' l (fun p => ?_)
+  exact ABC3.Found.GaloisRep.minDeltaExp_le_of_bad_delta p E E' (hssE p) l
+    (fun hb => isMuAtBadPrimes_of_veluQuotient_of_large E E' hl hodd hd Q hQ hE'
+      hssE hssE' hcop p hb)
+
+def lemma_3_5_velu_defect.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(残る仮説は hfin の 1 本——E′ のモデルは E より極小から遠くない)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu_defect.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_large(第 1044、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_large") 1,
+    .citation "[ABC3]" "htFalt_veluQuotientFull_le_of_defect(第 1049、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_of_defect") 1,
+    .citation "[ABC3]" "exists_periodPair_family(アルキメデス、第 1046、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_periodPair_family") 1 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",

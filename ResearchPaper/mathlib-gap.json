@@ -3813,5 +3813,18 @@
     "hfin": "☆`hfin`: `∑ᶠ p, neronExp p E · log N(p) − ∑ᶠ p, neronExp p E′ · log N(p)` `≤ (3/2)·[L:ℚ]·log l`。★これは「`E′` のモデルは `E` のモデルより極小から（`(3/2)d log l` 以上には）遠くない」という主張である。`hmin` は左の和を `0` に、`hint` は右の和を `≥ 0` にしていた。",
     "remaining": "☆残るのは (a) `hfin` を `Lemma 3.5` の連鎖に通す（`lemma_3_5_velu` から上へ6 段の機械的な言い換え）と、(b) `hfin` 自体を証明する（モデルの取り替え、あるいは `Δ(E′)/Δ(E)` と `Δ_min` の関係から）である。★(b) には `IsMuAtBadPrimes`（第 1044、証明済み）が効く可能性が高い——悪い素点では `Δ_min(E′) = l·Δ_min(E)` が分かっているからである。",
     "note": "★944-1049 の 101 ブロック。"
+  },
+  "lemma35OneHypothesis20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1050",
+    "supersedes": "htFaltDefectForm20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★`lemma_3_5_velu_defect`（1050）——`Lemma 3.5` の不等式。**残る仮説は `hfin` の 1 本だけ**。"
+    ],
+    "statement": "☆`(1/(12(1+ϵ)))·l·deg∞(E) ≤ ht^Falt(E) + 2·log(l) + C`。★仮説は `l` 素数・`l ≠ 2`・`[L:ℚ]+1 < l`・`l` 捉れ点 `Q`・`E′` が Vélu の商・半安定性 2 本・`hcop`（いずれも原文自身の仮定）と、`hfin`（有限素点側の 1 本）。",
+    "hfin": "☆`hfin`: `∑ᶠ p, neronExp p E · log N(p) − ∑ᶠ p, neronExp p E′ · log N(p)` `≤ (3/2)·[L:ℚ]·log l`。",
+    "remaining": "☆残るのは `hfin` の証明だけ。★`neronExp p W = (v_p(Δ(W)) − v_p(Δ_min(W)))/12` の形なので、`IsMuAtBadPrimes`（第 1044、証明済み：悪い素点で `Δ_min(E′) = l·Δ_min(E)`）とVélu の `Δ(E′) = l^12 Δ(E)`（第 962 `Delta_velu_tate_eq` の大域版）を突き合わせれば出るはずである。",
+    "note": "★944-1050 の 102 ブロック。"
   }
 }
