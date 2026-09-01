@@ -5181,5 +5181,15 @@
     "what": "★dvd_exponent_of_not_dvd_val(Found/GenEll/Lemma32StableLine.lean)—— lemma_3_2_i の**対偶**。安定な直線の生成元 x が xˡ = Qᵏ を満たすとき、l ∤ v(q) なら必ず l ∣ k——すなわち x は Q の冪を除いて l 乗根、つまり直線は μ_l である。",
     "why": "★★★これが節点 2d-1 の**入口**である。☆安定直線の局所での姿が μ_l だと分かれば、既存の _K の連鎖が L_v(ζ_l) の上でそのまま走り、そこで得た Δ_min の関係は第 1183 で L_v へ降りる。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "minDeltaDescendUnconditional20260902": {
+    "block": 1185,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★節点 2d-2 が仮説なしになった",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-2)。",
+    "what": "★minDeltaExp_descend(Found/GaloisRep/DegInfBaseChange.lean)—— 第 1183 は e ≠ 0 を仮説に取っていたが、P が p の上にあれば mathlib の ramificationIdx_ne_zero_of_liesOver で出る。",
+    "frame": "☆節点 2d-2 は仮説なしで閉じた。★2d-1 の入口も第 1184 で取れている(dvd_exponent_of_not_dvd_val —— l ∤ v(q) なら安定直線は μ_l)。☆残るのはそれを受けて既存の _K の連鎖を L_v(ζ_l) で走らせる組み立てだけである。",
+    "process": "★★第 1184 では check.mjs の NG(逐語引用の不一致)を見落として push した。☆lake build は通るのでビルドだけでは気づかない。★以後コミット前に check.mjs の tail を必ず読む(lean-idioms.md に記録済み)。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

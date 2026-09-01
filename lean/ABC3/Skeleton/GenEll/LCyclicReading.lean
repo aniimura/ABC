@@ -191,6 +191,13 @@ import ABC3.Meta.Claim
 `e ≠ 0` で割れば下の関係が出る（`minDeltaExp_baseChange_of_semistableAt`、第 740）。
 ★重み 8 → **5**（残るのは 2d-1、局所の議論を `L_v(ζ_l)` で回す段）。
 
+★★第 1185 で 2d-2 は**仮説なし**になった（`minDeltaExp_descend`）
+——`e ≠ 0` は mathlib の `ramificationIdx_ne_zero_of_liesOver` から出る。
+
+★第 1184 で 2d-1 の**入口**も取れた（`dvd_exponent_of_not_dvd_val`）
+——`l ∤ v(q)` なら安定直線は `μ_l` である。
+☆残るのはそれを受けて既存の `_K` の連鎖を `L_v(ζ_l)` で走らせる組み立てだけである。
+
 ### ☆別の道（採らない理由）
 
 `L(H)`（`H` の点を有理化する体、次数は `l−1` を割る）へ上げる道もあるが、

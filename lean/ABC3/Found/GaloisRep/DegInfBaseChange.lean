@@ -410,9 +410,31 @@ theorem minDeltaExp_descend_of_baseChange (p : HeightOneSpectrum (𝓞 L))
   rw [h]
   ring
 
+/-- ★★★★★★★★★★★★★★**上での `Δ_min` の関係は下へ降りる（仮説なし）**（第 1185）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1183 は `e ≠ 0` を仮説に取っていたが、`P` が `p` の上にあれば
+mathlib の `ramificationIdx_ne_zero_of_liesOver` で出る。
+★★これで `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d-2 は仮説なし**になった。 -/
+theorem minDeltaExp_descend (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hp : SemistableAt p E) (hp' : SemistableAt p E') {l : ℕ}
+    (h : minDeltaExp P (E'.baseChange L') = l * minDeltaExp P (E.baseChange L')) :
+    minDeltaExp p E' = l * minDeltaExp p E :=
+  minDeltaExp_descend_of_baseChange L L' p P E E' hp hp'
+    (Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P.asIdeal p.ne_bot) h
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_descend.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(上での Δ_min の関係は下へ降りる——仮説なし。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_descend_of_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
