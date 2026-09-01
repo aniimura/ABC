@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.BadPrimeData
 import Mathlib.FieldTheory.KummerExtension
+import Mathlib.RingTheory.AdicCompletion.Basic
+import Mathlib.RingTheory.AdjoinRoot
 
 /-!
 # 第 1007 ブロック —— **★★★★★★★★不分岐 2 次拡大の葉**（`Found`）
@@ -82,6 +84,168 @@ theorem irreducible_X_sq_sub_C_fractionField {R : Type} [CommRing R] [IsDomain R
   X_pow_sub_C_irreducible_of_prime Nat.prime_two
     (fun b hb => not_isSquare_in_fractionField d hns b (by rw [← hb]; ring))
 
+/-! ## ★★★★★★★★★★★★第 1010-1012 —— `R[√d]` は `I`-進完備
+
+★不分岐 2 次拡大の整数環 `R′ = R[X]/(f)` は `R` 上**階数 2 の自由加群**である。
+☆したがって `R` が `I`-進完備なら `R′` も `I`-進完備である。
+
+★mathlib には**積の `IsAdicComplete` が無い**（2026-09-01 実測）ので、
+`IsHausdorff`／`IsPrecomplete` を成分ごとに作るところから積む。 -/
+
+section AdicProd
+
+variable {R : Type} [CommRing R]
+
+/-- ★★★★**`I • ⊤` は積と可換する**。 -/
+theorem smul_top_prod (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] :
+    (I • (⊤ : Submodule R (M × N)))
+      = (I • (⊤ : Submodule R M)).prod (I • (⊤ : Submodule R N)) := by
+  refine le_antisymm (Submodule.smul_le.2 (fun r hr x _ => ?_)) ?_
+  · exact ⟨Submodule.smul_mem_smul hr trivial, Submodule.smul_mem_smul hr trivial⟩
+  · rintro ⟨x, y⟩ ⟨hx, hy⟩
+    have h1 : ((x, 0) : M × N) ∈ I • (⊤ : Submodule R (M × N)) := by
+      have he := Submodule.map_smul'' I (⊤ : Submodule R M) (LinearMap.inl R M N)
+      have hmem : ((LinearMap.inl R M N) x)
+          ∈ (I • (⊤ : Submodule R M)).map (LinearMap.inl R M N) :=
+        Submodule.mem_map_of_mem hx
+      rw [he] at hmem
+      exact Submodule.smul_mono (fun ⦃_⦄ a => a) le_top hmem
+    have h2 : ((0, y) : M × N) ∈ I • (⊤ : Submodule R (M × N)) := by
+      have he := Submodule.map_smul'' I (⊤ : Submodule R N) (LinearMap.inr R M N)
+      have hmem : ((LinearMap.inr R M N) y)
+          ∈ (I • (⊤ : Submodule R N)).map (LinearMap.inr R M N) :=
+        Submodule.mem_map_of_mem hy
+      rw [he] at hmem
+      exact Submodule.smul_mono (fun ⦃_⦄ a => a) le_top hmem
+    have hxy : ((x, y) : M × N) = (x, 0) + (0, y) := by simp
+    rw [hxy]
+    exact Submodule.add_mem _ h1 h2
+
+/-- ★★★★**`IsHausdorff` は積で保たれる**。 -/
+theorem isHausdorff_prod (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    [IsHausdorff I M] [IsHausdorff I N] : IsHausdorff I (M × N) where
+  haus' := by
+    rintro ⟨x, y⟩ h
+    have hmem : ∀ n : ℕ, x ∈ I ^ n • (⊤ : Submodule R M)
+        ∧ y ∈ I ^ n • (⊤ : Submodule R N) := by
+      intro n
+      have h1 := (SModEq.sub_mem).1 (h n)
+      rw [sub_zero, smul_top_prod] at h1
+      exact h1
+    have hx := IsHausdorff.haus' (I := I) x
+      (fun n => (SModEq.sub_mem).2 (by rw [sub_zero]; exact (hmem n).1))
+    have hy := IsHausdorff.haus' (I := I) y
+      (fun n => (SModEq.sub_mem).2 (by rw [sub_zero]; exact (hmem n).2))
+    rw [hx, hy]
+    rfl
+
+/-- ★★★★**`IsPrecomplete` は積で保たれる**。 -/
+theorem isPrecomplete_prod (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    [IsPrecomplete I M] [IsPrecomplete I N] : IsPrecomplete I (M × N) where
+  prec' := by
+    intro f hf
+    have hsplit : ∀ {m n : ℕ}, m ≤ n →
+        ((f m).1 - (f n).1 ∈ I ^ m • (⊤ : Submodule R M)
+          ∧ (f m).2 - (f n).2 ∈ I ^ m • (⊤ : Submodule R N)) := by
+      intro m n hmn
+      have h1 := (SModEq.sub_mem).1 (hf hmn)
+      rw [smul_top_prod] at h1
+      exact h1
+    obtain ⟨L1, hL1⟩ := IsPrecomplete.prec' (I := I) (fun n => (f n).1)
+      (fun {m n} hmn => (SModEq.sub_mem).2 (hsplit hmn).1)
+    obtain ⟨L2, hL2⟩ := IsPrecomplete.prec' (I := I) (fun n => (f n).2)
+      (fun {m n} hmn => (SModEq.sub_mem).2 (hsplit hmn).2)
+    refine ⟨(L1, L2), fun n => (SModEq.sub_mem).2 ?_⟩
+    rw [smul_top_prod]
+    exact ⟨(SModEq.sub_mem).1 (hL1 n), (SModEq.sub_mem).1 (hL2 n)⟩
+
+/-- ★★★★★★★★**`IsAdicComplete` は積で保たれる**（mathlib に無い、2026-09-01 実測）。 -/
+theorem isAdicComplete_prod (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    [IsAdicComplete I M] [IsAdicComplete I N] : IsAdicComplete I (M × N) :=
+  { toIsHausdorff := isHausdorff_prod I, toIsPrecomplete := isPrecomplete_prod I }
+
+/-- ★★★★**`IsHausdorff` は線型同型で移る**。 -/
+theorem isHausdorff_of_linearEquiv (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (e : M ≃ₗ[R] N) [IsHausdorff I M] : IsHausdorff I N where
+  haus' := by
+    intro y hy
+    have hx : ∀ n : ℕ, (e.symm y) ≡ 0 [SMOD I ^ n • (⊤ : Submodule R M)] := by
+      intro n
+      refine (SModEq.sub_mem).2 ?_
+      rw [sub_zero]
+      have h1 := (SModEq.sub_mem).1 (hy n)
+      rw [sub_zero] at h1
+      have h2 : (I ^ n • (⊤ : Submodule R M)).map (e : M →ₗ[R] N)
+          = I ^ n • (⊤ : Submodule R N) := by
+        rw [Submodule.map_smul'', Submodule.map_top, LinearEquiv.range]
+      have h3 : y ∈ (I ^ n • (⊤ : Submodule R M)).map (e : M →ₗ[R] N) := by
+        rw [h2]; exact h1
+      obtain ⟨x, hxm, hxe⟩ := h3
+      have hxx : e.symm y = x := by rw [← hxe]; simp
+      rw [hxx]; exact hxm
+    have hz := IsHausdorff.haus' (I := I) (e.symm y) hx
+    have hy0 : y = e (e.symm y) := by simp
+    rw [hy0, hz, map_zero]
+
+/-- ★★★★**`IsPrecomplete` は線型同型で移る**。 -/
+theorem isPrecomplete_of_linearEquiv (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (e : M ≃ₗ[R] N) [IsPrecomplete I M] : IsPrecomplete I N where
+  prec' := by
+    intro f hf
+    have hmapN : ∀ n : ℕ, (I ^ n • (⊤ : Submodule R M)).map (e : M →ₗ[R] N)
+        = I ^ n • (⊤ : Submodule R N) := by
+      intro n; rw [Submodule.map_smul'', Submodule.map_top, LinearEquiv.range]
+    have hmapM : ∀ n : ℕ, (I ^ n • (⊤ : Submodule R N)).map (e.symm : N →ₗ[R] M)
+        = I ^ n • (⊤ : Submodule R M) := by
+      intro n; rw [Submodule.map_smul'', Submodule.map_top, LinearEquiv.range]
+    obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) (fun n => e.symm (f n)) (by
+      intro m n hmn
+      refine (SModEq.sub_mem).2 ?_
+      have h1 := (SModEq.sub_mem).1 (hf hmn)
+      have hsub : e.symm (f m) - e.symm (f n) = e.symm (f m - f n) := by simp
+      rw [hsub, ← hmapM m]
+      exact Submodule.mem_map_of_mem h1)
+    refine ⟨e L, fun n => (SModEq.sub_mem).2 ?_⟩
+    have h1 := (SModEq.sub_mem).1 (hL n)
+    have h2 : f n - e L = e (e.symm (f n) - L) := by simp
+    rw [h2, ← hmapN n]
+    exact Submodule.mem_map_of_mem h1
+
+/-- ★★★★★★★★**`IsAdicComplete` は線型同型で移る**。 -/
+theorem isAdicComplete_of_linearEquiv (I : Ideal R) {M N : Type}
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (e : M ≃ₗ[R] N) [IsAdicComplete I M] : IsAdicComplete I N :=
+  { toIsHausdorff := isHausdorff_of_linearEquiv I e,
+    toIsPrecomplete := isPrecomplete_of_linearEquiv I e }
+
+open Polynomial in
+/-- ★★★★★★**2 次のモニック多項式の剰余環は `R × R` と線型同型**。 -/
+noncomputable def adjoinRootEquivProd {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2) :
+    AdjoinRoot f ≃ₗ[R] (R × R) := by
+  have hb := (AdjoinRoot.powerBasis' hf).basis
+  rw [AdjoinRoot.powerBasis'_dim hf, hdeg] at hb
+  exact (hb.repr.trans (Finsupp.linearEquivFunOnFinite R R (Fin 2))).trans
+    (LinearEquiv.finTwoArrow R R)
+
+open Polynomial in
+/-- ★★★★★★★★★★★★**`R[X]/(f)` は `I`-進完備**（`f` は 2 次のモニック）。
+
+★★★★**2026-09-01（第 1012）**——不分岐 2 次拡大の整数環が完備であることの中身。
+☆`R × R` に落として第 1010 を当てるだけである。 -/
+theorem isAdicComplete_adjoinRoot (I : Ideal R) [IsAdicComplete I R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2) :
+    IsAdicComplete I (AdjoinRoot f) :=
+  haveI : IsAdicComplete I (R × R) := isAdicComplete_prod I
+  isAdicComplete_of_linearEquiv I (adjoinRootEquivProd hf hdeg).symm
+
+end AdicProd
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
@@ -92,6 +256,21 @@ def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
 def irreducible_X_sq_sub_C_fractionField.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(d が平方でなければ X² − d は既約。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isAdicComplete_prod.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(IsAdicComplete は積で保たれる——mathlib に無い。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isAdicComplete_of_linearEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(IsAdicComplete は線型同型で移る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isAdicComplete_adjoinRoot.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2 次のモニック多項式の剰余環は I-進完備。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 end ABC3.Found.GaloisRep
