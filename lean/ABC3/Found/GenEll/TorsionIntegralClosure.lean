@@ -105,14 +105,59 @@ theorem isIntegral_x_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
     exact hroot
   exact isIntegral_of_isUnit_leadingCoeff haeval hu
 
-/-! ## ☆次の葉（本ブロックでは取らない）
+/-! ## ★★★★★★★★`x` が整なら `y` も整 -/
 
-☆`x` が整なら `y` も整である——Weierstrass 方程式は `y` についてモニックだからである。
-★正確には `(2y + a₁x + a₃)² = 4x³ + b₂x² + 2b₄x + b₆` の右辺が整なので、
-`t ≔ 2y + a₁x + a₃` は `Z² − u`（`u` は整）の根であり、整の推移律で `t` も整、
-`2` が単元なら `y` も整である。
+/-- ★★★★★★★★★★**`x` が整なら `y` も整**——★**無条件**（第 1156）。
 
-☆mathlib の `IsIntegral.trans` 周辺の navigation が要るので別の葉として置く。 -/
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆Weierstrass 方程式 `y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆` は
+`y` について**モニックな 2 次式**である。★係数は `x` と `aᵢ` の多項式で、
+どれも `R = primeSubring p` 上整なので `A ≔ integralClosure R L̄` の元である。
+☆したがって `y` は `A` 上整であり、`isIntegral_trans` で `R` 上整である。 -/
+theorem isIntegral_y_of_isIntegral_x (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    {x y : Lbar}
+    (heq : (W.map (algebraMap L Lbar)).toAffine.Equation x y)
+    (hx : IsIntegral (primeSubring p) x) :
+    IsIntegral (primeSubring p) y := by
+  set R := primeSubring p with hR
+  obtain ⟨ha1, ha2, ha3, ha4, ha6⟩ := mem_primeSubring_of_isIntegral p W
+  -- ☆`R` の元の像は整
+  have hint : ∀ z : L, z ∈ R → IsIntegral R (algebraMap L Lbar z) := by
+    intro z hz
+    have h1 : algebraMap R Lbar ⟨z, hz⟩ = algebraMap L Lbar z := by
+      rw [IsScalarTower.algebraMap_apply R L Lbar]
+      rfl
+    rw [← h1]
+    exact isIntegral_algebraMap
+  have h1 : IsIntegral R (algebraMap L Lbar W.a₁) := hint _ ha1
+  have h2 : IsIntegral R (algebraMap L Lbar W.a₂) := hint _ ha2
+  have h3 : IsIntegral R (algebraMap L Lbar W.a₃) := hint _ ha3
+  have h4 : IsIntegral R (algebraMap L Lbar W.a₄) := hint _ ha4
+  have h6 : IsIntegral R (algebraMap L Lbar W.a₆) := hint _ ha6
+  -- ★係数を `A = integralClosure R L̄` の元として取る
+  set A := integralClosure R Lbar with hA
+  have hbmem : (algebraMap L Lbar W.a₁ * x + algebraMap L Lbar W.a₃) ∈ A :=
+    (h1.mul hx).add h3
+  have hcmem : (x ^ 3 + algebraMap L Lbar W.a₂ * x ^ 2
+      + algebraMap L Lbar W.a₄ * x + algebraMap L Lbar W.a₆) ∈ A :=
+    (((hx.pow 3).add (h2.mul (hx.pow 2))).add (h4.mul hx)).add h6
+  set b : A := ⟨_, hbmem⟩ with hb
+  set c : A := ⟨_, hcmem⟩ with hc
+  refine isIntegral_trans (A := A) y ?_
+  refine ⟨Polynomial.X ^ 2 + (Polynomial.C b * Polynomial.X - Polynomial.C c), ?_, ?_⟩
+  · monicity!
+  · rw [WeierstrassCurve.Affine.equation_iff] at heq
+    simp only [Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+      Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_C]
+    show y ^ 2 + ((algebraMap L Lbar W.a₁ * x + algebraMap L Lbar W.a₃) * y
+      - (x ^ 3 + algebraMap L Lbar W.a₂ * x ^ 2
+          + algebraMap L Lbar W.a₄ * x + algebraMap L Lbar W.a₆)) = 0
+    simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃,
+      WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at heq
+    linear_combination heq
 
 /-! ## ★出典の紐付け(`.src`) -/
 
@@ -120,6 +165,15 @@ def isIntegral_x_of_addOrderOf_prime.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(L̄ の位数 l の点の x は primeSubring p 上整。★偶奇不問、付値を使わない)",
     sectionId := "genell-lemma-3-5" }
+
+def isIntegral_y_of_isIntegral_x.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(x が整なら y も整——Weierstrass 方程式は y についてモニック。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isIntegral_y_of_isIntegral_x.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "isIntegral_trans(A 上整で A が R 上整なら R 上整)"
+      (.inMathlib "isIntegral_trans") 1 ]
 
 def isIntegral_x_of_addOrderOf_prime.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[ABC3]" "ΨSq_eval_eq_zero_of_addOrderOf_prime(第 1148、証明済み)"
