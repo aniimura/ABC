@@ -6226,5 +6226,15 @@
   "route": "★第 1271（代数閉体の埋め込みで `E[n]` は全単射、2 条件は降りる）を`L̄ ↪ M`（`IsAlgClosed.lift`）と `restrictLocalHom_commutes`（第 1167）に当てるだけ。",
   "consequence": "★★★これで「Tate 一意化で得た局所の `σ`」から `alpha_mem_map_of_galTate`（第 1237）の `h2`・`h1` が出る道が繋がった——残るのは第 1270（`E[l]` → `T_l E`、済）と節点 8（悪い素点での組み立て）だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "galActVc20260902": {
+  "block": 1288,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★σ の作用は変数変換と可換（節点 8 の要）",
+  "goal": "E ⊗ K と Tate モデルの間で σ の作用を対応させる。",
+  "proved": "☆`Found/GenEll/GalActVc.lean`（第 1288）に 4 本。`galAct_ne_zero`・`vcPoint_ne_zero`・`pointCoords_vcPoint′`・`galAct_vcPoint`。",
+  "route": "★座標では `σ(vcX C x) = vcX C (σ x)`（第 1284）であり、点は座標で決まる（第 1286 と同じ道具）。☆`C` の係数は基礎局所体の整数環にあるので `σ` で固定される。",
+  "consequence": "★★`E ⊗ K` と Tate モデルは変数変換で結ばれる（`tateModel_baseChange`、在庫）ので、**両者の間で `σ` の作用が対応する**。☆これで節点 8 の要が揃った。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
