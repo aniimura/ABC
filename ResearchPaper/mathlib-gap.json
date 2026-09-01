@@ -3633,5 +3633,18 @@
     "remaining": "☆残るのは**貼り合わせ 1 段**である: (a) `I′ = I.map φ`（第 1030）で 2 次式の係数を `φ` の像に書き換え、(b) `Polynomial.map_map` で `residue ∘ φ` にまとめ、(c) `quad_eq_c4_mul_splitQuadPoly` ＋ `splits_of_unit_mul_monic`（第 1031）を当てる。★これで `HasSplitMultiplicativeReduction R′ (E ⊗ Lv′)` が出て、第 1028 に流せば非分岐の枝が閉じる。",
     "idiom": "☆`monicity!` / `compute_degree!` を `tools/lean-idioms.md` に記録した——`Monic` と `natDegree` を手で示すと `WithBot ℕ` と `ℕ` の往復で崩れる。",
     "note": "★944-1031 の 83 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "unramQuadComplete20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1032-1033",
+    "supersedes": "splitQuadPoly20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★`splits_integralModel_quad_ext`（1032）——拡大の整モデルの 2 次式は剰余体で分裂する。☆第 1030（整モデルの同定）＋第 1031（monic 化）＋第 1025（根がある）を繋ぐ。",
+      "★★★★★★★★★★★★★★★★★★★★`hasSplitMultiplicativeReduction_ext`（1033）——**拡大の上では分裂乗法還元をもつ**。"
+    ],
+    "milestone": "★★★★**不分岐 2 次拡大は完成した**——`f`（整モデルの 2 次式の monic 化）から出発して、`R[X]/(f)` が完備（1012）・局所（1015）・整域（1017）・離散付値環（1018）、商体と埋め込み（1021）、付値の橋 `e = 1`（1022-1024）、剰余体で `f` が分裂（1025）、整モデルの同定（1030）、monic 化（1031）、貼り合わせ（1032）、分裂乗法還元（1033）。☆剰余標数によらず同じ構成で済む（`p ∣ 2` の Artin–Schreier は不要だった）。",
+    "remaining": "☆残るのは**呼び出し側の組み立て**である: (a) `Algebra L (Frac (AdjoinRoot f))` の instance を `quadFieldHom` から作り `halg` を示す、(b) `IsUnit (integralModel R (W ⊗ Lv)).c₄`（乗法還元から。在庫 `integralModel_c4_isUnit`）、(c) 非分裂 ⟺ `f̄` 既約 の同定、(d) 第 1029（極小・乗法還元）と第 1033（分裂）を第 1028 に流す。★もう 1 つの sorry 節点（`ℚ_l(ζ_l)` の分岐、第 1019）は独立である。",
+    "note": "★944-1033 の 85 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

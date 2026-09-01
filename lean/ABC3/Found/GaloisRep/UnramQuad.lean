@@ -891,6 +891,105 @@ theorem splits_of_unit_mul_monic {R : Type} [CommRing R] [IsDomain R]
 
 end SplitQuad
 
+/-! ## ★★★★★★★★★★★★★★★★第 1032 —— 貼り合わせ
+
+★第 1030（整モデルの同定）＋第 1031（monic 化）＋第 1025（剰余体で分裂）を繋ぐ。
+☆これで **`Splits`（分裂性）が出る**——非分岐 2 次拡大の最後の一手である。 -/
+
+section SplitsGlue
+
+open Polynomial IsDedekindDomain NumberField WeierstrassCurve in
+/-- ★★★★★★★★★★★★★★★★**拡大の整モデルの 2 次式は分裂する**（第 1032）。 -/
+theorem splits_integralModel_quad_ext {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv]
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral R (W.baseChange Lv)]
+    (hA : IsUnit (WeierstrassCurve.integralModel R (W.baseChange Lv)).c₄)
+    {f : Polynomial R}
+    (hfdef : f = splitQuadPoly (WeierstrassCurve.integralModel R (W.baseChange Lv)) hA)
+    [IsDomain (AdjoinRoot f)] [IsLocalRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom (hfdef ▸ monic_splitQuadPoly _ hA)
+        (hfdef ▸ natDegree_splitQuadPoly _ hA) (algebraMap L Lv x))
+    [WeierstrassCurve.IsIntegral (AdjoinRoot f)
+      (W.baseChange (FractionRing (AdjoinRoot f)))] :
+    (Polynomial.map (algebraMap (AdjoinRoot f) (IsLocalRing.ResidueField (AdjoinRoot f)))
+      (C (WeierstrassCurve.integralModel (AdjoinRoot f)
+            (W.baseChange (FractionRing (AdjoinRoot f)))).c₄ * X ^ 2
+        + C ((WeierstrassCurve.integralModel (AdjoinRoot f)
+              (W.baseChange (FractionRing (AdjoinRoot f)))).a₁
+            * (WeierstrassCurve.integralModel (AdjoinRoot f)
+              (W.baseChange (FractionRing (AdjoinRoot f)))).c₄) * X
+        - C (54 * (WeierstrassCurve.integralModel (AdjoinRoot f)
+                (W.baseChange (FractionRing (AdjoinRoot f)))).b₆
+            - 3 * (WeierstrassCurve.integralModel (AdjoinRoot f)
+                  (W.baseChange (FractionRing (AdjoinRoot f)))).b₂
+                * (WeierstrassCurve.integralModel (AdjoinRoot f)
+                  (W.baseChange (FractionRing (AdjoinRoot f)))).b₄
+            + (WeierstrassCurve.integralModel (AdjoinRoot f)
+                  (W.baseChange (FractionRing (AdjoinRoot f)))).a₂
+                * (WeierstrassCurve.integralModel (AdjoinRoot f)
+                  (W.baseChange (FractionRing (AdjoinRoot f)))).c₄))).Splits := by
+  subst hfdef
+  set I := WeierstrassCurve.integralModel R (W.baseChange Lv) with hI
+  have hI' : WeierstrassCurve.integralModel (AdjoinRoot (splitQuadPoly I hA))
+      (W.baseChange (FractionRing (AdjoinRoot (splitQuadPoly I hA))))
+      = I.map (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) :=
+    integralModel_ext (monic_splitQuadPoly I hA) (natDegree_splitQuadPoly I hA) halg W
+  rw [hI']
+  simp only [WeierstrassCurve.map_c₄, WeierstrassCurve.map_a₁, WeierstrassCurve.map_b₂,
+    WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆, WeierstrassCurve.map_a₂]
+  have hpoly : (C ((algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.c₄) * X ^ 2
+      + C ((algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.a₁
+          * (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.c₄) * X
+      - C (54 * (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.b₆
+          - 3 * (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.b₂
+              * (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.b₄
+          + (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.a₂
+              * (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) I.c₄))
+      = (C I.c₄ * X ^ 2 + C (I.a₁ * I.c₄) * X
+        - C (54 * I.b₆ - 3 * I.b₂ * I.b₄ + I.a₂ * I.c₄)).map
+        (algebraMap R (AdjoinRoot (splitQuadPoly I hA))) := by
+    simp [Polynomial.map_add, Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_C,
+      Polynomial.map_X, Polynomial.map_pow, map_ofNat]
+  rw [hpoly, Polynomial.map_map]
+  exact splits_of_unit_mul_monic (monic_splitQuadPoly I hA) (natDegree_splitQuadPoly I hA)
+    I.c₄ hA _ (quad_eq_c4_mul_splitQuadPoly I hA)
+
+open Polynomial IsDedekindDomain NumberField WeierstrassCurve in
+/-- ★★★★★★★★★★★★★★★★★★★★**拡大の上では分裂乗法還元をもつ**（第 1033）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1033）**——不分岐 2 次拡大の**到達点**である。
+☆`f` を「整モデルの 2 次式を monic 化したもの」に取れば、
+`R[X]/(f)` の剰余体には `f` の根があるので 2 次式が分裂する。
+★これで非分裂の枝が閉じる。 -/
+theorem hasSplitMultiplicativeReduction_ext {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv]
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral R (W.baseChange Lv)]
+    (hA : IsUnit (WeierstrassCurve.integralModel R (W.baseChange Lv)).c₄)
+    {f : Polynomial R}
+    (hfdef : f = splitQuadPoly (WeierstrassCurve.integralModel R (W.baseChange Lv)) hA)
+    [IsDomain (AdjoinRoot f)] [IsLocalRing (AdjoinRoot f)]
+    [IsDiscreteValuationRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom (hfdef ▸ monic_splitQuadPoly _ hA)
+        (hfdef ▸ natDegree_splitQuadPoly _ hA) (algebraMap L Lv x))
+    [WeierstrassCurve.HasMultiplicativeReduction (AdjoinRoot f)
+      (W.baseChange (FractionRing (AdjoinRoot f)))] :
+    WeierstrassCurve.HasSplitMultiplicativeReduction (AdjoinRoot f)
+      (W.baseChange (FractionRing (AdjoinRoot f))) :=
+  ⟨splits_integralModel_quad_ext W hA hfdef halg⟩
+
+end SplitsGlue
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
