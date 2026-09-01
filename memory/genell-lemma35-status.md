@@ -74,3 +74,24 @@ metadata:
 `Skeleton/GenEll/Section2Converse.lean` に**進捗枠 6/8**。
 ★残る節点 1 は曲線の **Riemann–Roch / Serre 双対性**で、mathlib に
 `RiemannRoch` 0 件・`genus` 0 件・`canonicalDivisor` 0 件（重み 120+）。
+
+## 2026-09-01 追記2（第 1111-1113）——`hu` 除去の核心が通った
+
+★★★★**鍵は「`E` 版は環準同型と無条件に可換」**（第 1111）。
+☆在庫の `MuDYSum.lean` は既に「分数体に埋め込む → 体版（`hu` 不要）を使う →
+単射性で戻す」転送を実装しており、`hu` が要るのは `map_tateD2Xterm`
+（`f (Ring.inverse x) = Ring.inverse (f x)` に単元性が要る）**ただ 1 箇所**だった。
+★`E` 版（`Ring.inverse` を含まない多項式）に差し替えると `hu` が落ちる。
+
+済んだもの（`Found/GaloisRep/MuDenomFreeSum.lean`、`sorry` 0）:
+
+- `sum_mu_d2xtermE` —— `120·∑ D²X^E = l⁴(l⁴−1)`、**`hu` なし**（第 1112）
+- `sum_mu_dxtermE` —— `∑ DX^E = 0`、**`hu` なし**（第 1113）
+
+☆`map_muS`・`map_tateDXtermE`・`map_tateD2XtermE`・`map_tateD3XtermE` は
+`Found/GaloisRep/MuHeadDenomFree.lean`（第 1111）。
+
+★**残りの段**: 頭項（上記）と尾（在庫の `sum_mu_d2xtail_sigma`、これも `hu` 不要）を
+組み合わせて「対」の版にし、`c4_velu_tate` → 悪い素点の連鎖へ波及させる。
+☆`sum_mu_d2xpair` の証明（`TateODE.lean:207`）を読んで同じ順で組めばよい。
+`w = q·(ζ^i)^{l-1}` 側は `1 − w` が単元なのではじめから問題ない。
